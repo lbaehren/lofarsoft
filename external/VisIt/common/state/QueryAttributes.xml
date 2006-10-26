@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+  <Attribute name="QueryAttributes" purpose="This class contains attributes used for query." persistent="true" exportAPI="STATE_API" exportInclude="state_exports.h" codefile="QueryAttributes.code">
+    <Enum name="ElementType">
+      Zone
+      Node
+    </Enum>
+    <Enum name="VarType">
+      Mesh
+      Scalar
+      Vector
+      Tensor
+      Symmetric_Tensor
+      Array
+      Label
+      Material
+      Species
+      Curve
+      Unknown
+    </Enum>
+    <Enum name="DataType">
+      ActualData
+      OriginalData
+    </Enum>
+    <Field name="name" label="name" type="string">
+    </Field>
+    <Field name="variables" label="variables" type="stringVector">
+      default
+    </Field>
+    <Field name="resultsMessage" label="resultsMessage" type="string">
+    </Field>
+    <Field name="worldPoint" label="worldPoint" type="doubleArray" length="3">
+      0.000000
+      0.000000
+      0.000000
+    </Field>
+    <Field name="domain" label="domain" type="int">
+      -1
+    </Field>
+    <Field name="element" label="element" type="int">
+      -1
+    </Field>
+    <Field name="resultsValue" label="resultsValue" type="doubleVector">
+      0.000000
+    </Field>
+    <Field name="elementType" label="elementType" type="enum" subtype="ElementType">
+      Zone
+    </Field>
+    <Field name="timeStep" label="timeStep" type="int">
+      0
+    </Field>
+    <Field name="varTypes" label="varTypes" type="intVector" internal="true">
+    </Field>
+    <Field name="dataType" label="dataType" type="enum" subtype="DataType" internal="true">
+      ActualData
+    </Field>
+    <Field name="pipeIndex" label="pipeIndex" type="int" internal="true">
+      -1
+    </Field>
+    <Field name="useGlobalId" label="useGlobalId" type="bool">
+      false
+    </Field>
+    <Field name="xUnits" label="xUnits" type="string">
+    </Field>
+    <Field name="yUnits" label="yUnits" type="string">
+    </Field>
+    <Field name="darg1" label="darg1" type="double">
+      0.000000
+    </Field>
+    <Field name="darg2" label="darg2" type="double">
+      0.000000
+    </Field>
+    <Function name="Reset" user="true" member="true">
+    </Function>
+    <Function name="PrintSelf" user="true" member="true">
+    </Function>
+    <Function name="SetResultsValue" user="true" member="true">
+    </Function>
+    <Function name="SetResultsValues" user="true" member="true">
+    </Function>
+    <Include file="source" quoted="false">
+      stdio.h
+    </Include>
+    <Include file="header" quoted="false">
+      visitstream.h
+    </Include>
+  </Attribute>

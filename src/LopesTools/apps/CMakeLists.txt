@@ -1,0 +1,3 @@
+PROJECT (LopesTools)
+
+INCLUDE_DIRECTORIES (. ..)

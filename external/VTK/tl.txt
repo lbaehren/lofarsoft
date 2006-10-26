@@ -1,0 +1,7 @@
+./Rendering/CMakeLists.txt:         TARGET_LINK_LIBRARIES (vtkRenderingPythonTkWidgets
+./Utilities/ftgl/CMakeLists.txt:    TARGET_LINK_LIBRARIES(ftgl_demo2 ${VTKFTGL_EXAMPLES_LIBS})
+./Utilities/kwsys/CMakeLists.txt:    TARGET_LINK_LIBRARIES(${test} ${KWSYS_NAMESPACE})
+./Utilities/vtkexodus2/CMakeLists.txt:TARGET_LINK_LIBRARIES(vtkexoIIc vtkNetCDF)
+./Utilities/OutputWindowProcess/CMakeLists.txt:    TARGET_LINK_LIBRARIES(vtkWin32OutputWindowProcess gdi32)
+./Utilities/vtkpng/CMakeLists.txt:TARGET_LINK_LIBRARIES(vtkpng ${VTK_ZLIB_LIBRARIES})
+./Utilities/vtktiff/CMakeLists.txt:TARGET_LINK_LIBRARIES( vtktiff ${VTK_ZLIB_LIBRARIES} ${VTK_JPEG_LIBRARIES} )

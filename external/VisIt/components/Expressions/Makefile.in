@@ -1,0 +1,359 @@
+#                         Copyright (c) 2000 - 2006
+#                 The Regents of the University of California
+#            Produced at the Lawrence Livermore National Laboratory
+#            Written by Sean Ahern, Kathleen Bonnell, Eric Brugger,
+#           Hank Childs, Jeremy Meredith, Mark Miller, Brad Whitlock
+#                              UCRL-CODE-220908
+#                            All rights reserved.
+#
+# This file is part of VisIt. For details, see http://www.llnl.gov/visit/.
+#
+# Redistribution  and  use  in  source  and  binary  forms,  with  or  without
+# modification, are permitted provided  that the following conditions are met:
+#
+# - Redistributions of  source code  must retain  the above  copyright notice,
+#   this list of conditions and the disclaimer below.
+# - Redistributions in binary form must  reproduce the above copyright notice,
+#   this  list of  conditions  and  the  disclaimer  (as noted below)  in  the
+#   documentation and/or materials provided with the distribution.
+# - Neither the name of the  UC/LLNL nor the names of  its contributors may be
+#   used to endorse  or promote products  derived from  this software  without
+#   specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE  COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR  IMPLIED WARRANTIES,  INCLUDING, BUT NOT  LIMITED TO, THE
+# IMPLIED WARRANTIES  OF MERCHANTABILITY AND FITNESS FOR  A PARTICULAR PURPOSE
+# ARE  DISCLAIMED.  IN  NO  EVENT  SHALL  THE  REGENTS  OF  THE  UNIVERSITY OF
+# CALIFORNIA, THE U.S. DEPARTMENT OF ENERGY  OR CONTRIBUTORS BE LIABLE FOR ANY
+# DIRECT, INDIRECT,  INCIDENTAL, SPECIAL, EXEMPLARY, OR  CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR  BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF  LIABILITY, WHETHER IN CONTRACT, STRICT  LIABILITY, OR TORT
+# (INCLUDING  NEGLIGENCE OR  OTHERWISE) ARISING IN ANY  WAY OUT OF  THE USE OF
+# THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# Additional BSD Notice
+#
+# 1. This notice is required  to be provided under our  contract with the U.S.
+#    Department of Energy  (DOE). This work was produced  at the University of
+#    California,  Lawrence Livermore National  Laboratory  under Contract  No.
+#    W-7405-ENG-48 with the DOE.
+#
+# 2. Neither the  United States Government  nor the  University of  California
+#    nor any of their  employees, makes  any warranty, express  or implied, or
+#    assumes any liability  or responsibility for the  accuracy, completeness,
+#    or  usefulness  of  any  information,   apparatus,  product,  or  process
+#    disclosed, or represents that its  use would not infringe privately-owned
+#    rights.
+#
+# 3. Also, reference herein  to any specific commercial  products, process, or
+#    services by trade  name, trademark,  manufacturer  or otherwise  does not
+#    necessarily  constitute  or imply  its  endorsement,  recommendation,  or
+#    favoring by the United States Government or the University of California.
+#    The views and  opinions of authors  expressed herein  do not  necessarily
+#    state or reflect those of the  United States Government or the University
+#    of  California,  and  shall  not  be  used  for  advertising  or  product
+#    endorsement purposes.
+#
+# Modifications:
+#
+#   Sean Ahern, Thu Nov 21 15:19:34 PST 2002
+#   Added the ExpressionEvaluatorFilter.
+#
+#   Sean Ahern, Fri Mar  7 18:19:38 America/Los_Angeles 2003
+#   Reorganized some of the other filters and names.
+#
+#   Hank Childs, Fri Mar  7 09:21:53 PST 2003 
+#   Added avtRandomFilter.
+#
+#   Hank Childs, Tue Mar 18 21:38:11 PST 2003
+#   Added avtRevolvedSurfaceArea.
+#
+#   Sean Ahern, Wed Jun 11 13:30:23 PDT 2003
+#   Added avtVectorCrossProductFilter.
+#
+#   Hank Childs, Wed Aug 20 10:48:55 PDT 2003
+#   Added Conditional directory.
+#
+#   Hank Childs, Thu Aug 21 10:41:15 PDT 2003
+#   Added NMats.
+#
+#   Hank Childs, Fri Sep 19 16:56:04 PDT 2003
+#   Added matrix operations.
+#
+#   Hank Childs, Tue Dec  9 17:05:14 PST 2003
+#   Added Identity, Recenter filter.
+#
+#   Hank Childs, Thu Feb  5 18:11:46 PST 2004
+#   Added avtSingleInputExpressionFilter and avtComparisonFilter.
+#
+#   Brad Whitlock, Thu Apr 22 17:22:04 PST 2004
+#   Changed the link line for libraries needed so we can do prebinding on
+#   MacOS X.
+#
+#   Kathleen Bonnell, Tue Apr 27 13:29:46 PDT 2004 
+#   Added ExprPipelineState.
+#
+#   Jeremy Meredith, Tue Jun  8 13:26:51 PDT 2004
+#   Added specmf.
+#
+#   Jeremy Meredith, Wed Jul  7 12:12:52 PDT 2004
+#   I changed _ser.o to simply be .o.
+#
+#   Hank Childs, Sat Sep 18 08:51:41 PDT 2004
+#   Added neighbor evaluator filter.
+#
+#   Hank Childs, Thu Sep 23 09:14:00 PDT 2004
+#   Added avtDataIdFilter.
+#
+#   Jeremy Meredith, Wed Nov 24 12:23:14 PST 2004
+#   Moved the old EngineExprNode stuff here and renamed it with "avt".
+#
+#   Hank Childs, Mon Dec 27 10:58:14 PST 2004
+#   Add avtExpressionStreamer and avtMacroExpressionFilter.  Also added
+#   avtCurlFilter, avtRelativeDifferenceFilter, avtMIRvfFilter,
+#   avtMatErrorFilter, avtDivergenceFilter, and avtLaplacianFilter.
+#
+#   Brad Whitlock, Tue Jan 4 18:14:57 PST 2005
+#   Added -lexpr so we can link on MacOS X.
+#
+#   Hank Childs, Thu Jan 20 15:47:25 PST 2005
+#   Added avtSideVolume, avtResradFilter.
+#
+#   Kathleen Bonnell, Thu Mar  3 11:13:22 PST 2005 
+#   Added avtVariableSkewFilter. 
+#
+#   Hank Childs, Thu Jun 30 15:57:08 PDT 2005
+#   Added avtCylindricalFilter, avtExpressionComponentMacro, avtFloorFilter,
+#   avtCeilingFilter, avtModuloFilter, and avtRoundFilter.
+#
+#   Hank Childs, Thu Jul 21 11:24:46 PDT 2005
+#   Added avtArrayCompose/ArrayDecompose Filter.
+#
+#   Hank Childs, Mon Aug 15 14:51:30 PDT 2005
+#   Added ImageProcessing directory.
+#
+#   Hank Childs, Fri Aug 26 07:32:58 PDT 2005
+#   Added CMFE directory.
+#
+#   Hank Childs, Wed Sep 21 17:16:30 PDT 2005
+#   Added avtExternalNodeExpression, avtSurfaceNormalExpression, avtEdgeLength.
+#
+#   Brad Whitlock, Fri Nov 18 15:45:58 PST 2005
+#   Added avtDistanceToBestFitLineFilter.
+#
+#   Brad Whitlock, Wed Nov 23 10:36:57 PDT 2005
+#   Added more libs for Mac linking.
+#
+#   Hank Childs, Thu Jan  5 08:34:43 PST 2006
+#   Add pos_cmfe.
+#
+#   Hank Childs, Sun Jan 22 10:52:01 PST 2006
+#   Add new expressions for symmetry.
+#
+#   Brad Whitlock, Thu Jan 26 15:39:36 PST 2006
+#   Added libs for Mac build.
+#
+#   Hank Childs, Sat Feb 18 10:25:59 PST 2006
+#   Added ApplyDDF.
+#
+#   Hank Childs, Sun Mar  5 16:00:07 PST 2006
+#   Added avtTimeExpression.
+#
+#   Hank Childs, Mon Mar 13 16:43:55 PST 2006
+#   Added avtMinMaxExpression.
+#
+#   Hank Childs, Sat Apr 29 14:40:47 PDT 2006
+#   Added avtLocalizedCompactnessExpression.
+#
+#   Hank Childs, Thu May 11 12:14:51 PDT 2006
+#   Added avtCurvatureExpression.
+#
+##############################################################################
+
+@SET_MAKE@
+@VARIABLES@
+
+SUBDIRS=Abstract CMFE Conditional Derivations General ImageProcessing \
+        Management Math MeshQuality 
+SRC=$(Abstract_src) $(CMFE_src) $(Conditional_src) $(Derivations_src) \
+    $(General_src) $(ImageProcessing_src) $(Management_src) $(Math_src) \
+    $(MeshQuality_src) 
+
+Abstract_src= \
+  Abstract/avtBinaryMathFilter.C \
+  Abstract/avtComparisonFilter.C \
+  Abstract/avtExpressionFilter.C \
+  Abstract/avtExpressionStreamer.C \
+  Abstract/avtMacroExpressionFilter.C \
+  Abstract/avtMultipleInputExpressionFilter.C \
+  Abstract/avtSingleInputExpressionFilter.C \
+  Abstract/avtUnaryMathFilter.C
+
+Conditional_src= \
+  Conditional/avtConditionalFilter.C \
+  Conditional/avtLogicalAndFilter.C \
+  Conditional/avtLogicalOrFilter.C \
+  Conditional/avtLogicalNegationFilter.C \
+  Conditional/avtTestEqualToFilter.C \
+  Conditional/avtTestGreaterThanFilter.C \
+  Conditional/avtTestGreaterThanOrEqualToFilter.C \
+  Conditional/avtTestLessThanFilter.C \
+  Conditional/avtTestLessThanOrEqualToFilter.C \
+  Conditional/avtTestNotEqualToFilter.C
+
+CMFE_src= \
+  CMFE/avtCMFEExpression.C \
+  CMFE/avtConnCMFEExpression.C \
+  CMFE/avtEvalPlaneExpression.C \
+  CMFE/avtEvalTransformExpression.C \
+  CMFE/avtPosCMFEAlgorithm.C \
+  CMFE/avtPosCMFEExpression.C \
+  CMFE/avtSymmEvalExpression.C \
+  CMFE/avtSymmPlaneExpression.C \
+  CMFE/avtSymmTransformExpression.C
+
+
+Derivations_src=\
+  Derivations/avtCurvatureExpression.C \
+  Derivations/avtEffectiveTensorFilter.C \
+  Derivations/avtLocalizedCompactnessExpression.C \
+  Derivations/avtTensorMaximumShearFilter.C \
+  Derivations/avtPrincipalDeviatoricTensorFilter.C \
+  Derivations/avtPrincipalTensorFilter.C 
+
+General_src= \
+  General/avtApplyDDFExpression.C \
+  General/avtArrayComposeFilter.C \
+  General/avtArrayDecomposeFilter.C \
+  General/avtCurlFilter.C \
+  General/avtDataIdFilter.C \
+  General/avtDegreeFilter.C \
+  General/avtDivergenceFilter.C \
+  General/avtDistanceToBestFitLineFilter.C \
+  General/avtExpressionComponentMacro.C \
+  General/avtExternalNodeExpression.C \
+  General/avtGradientFilter.C \
+  General/avtLaplacianFilter.C \
+  General/avtMIRvfFilter.C \
+  General/avtMatvfFilter.C \
+  General/avtMatErrorFilter.C \
+  General/avtMagnitudeFilter.C \
+  General/avtMeshCoordinateFilter.C \
+  General/avtMinMaxExpression.C \
+  General/avtNMatsFilter.C \
+  General/avtNeighborEvaluatorFilter.C \
+  General/avtProcessorIdFilter.C \
+  General/avtRelativeDifferenceFilter.C \
+  General/avtResradFilter.C \
+  General/avtRandomFilter.C \
+  General/avtRecenterFilter.C \
+  General/avtSpecMFFilter.C \
+  General/avtSurfaceNormalExpression.C \
+  General/avtVariableSkewFilter.C \
+  General/avtVectorComposeFilter.C \
+  General/avtVectorDecomposeFilter.C
+
+ImageProcessing_src= \
+  ImageProcessing/avtConservativeSmoothingExpression.C \
+  ImageProcessing/avtMeanFilterExpression.C \
+  ImageProcessing/avtMedianFilterExpression.C
+
+Management_src= \
+  Management/avtExpressionEvaluatorFilter.C \
+  Management/avtConstantCreatorFilter.C \
+  Management/avtExprNode.C \
+  Management/avtExprNodeFactory.C \
+  Management/ExprPipelineState.C \
+  Management/avtTimeExpression.C 
+
+Math_src= \
+  Math/avtAbsValFilter.C \
+  Math/avtArccosFilter.C \
+  Math/avtArcsinFilter.C \
+  Math/avtArctanFilter.C \
+  Math/avtBase10LogFilter.C \
+  Math/avtBinaryAddFilter.C \
+  Math/avtBinaryDivideFilter.C \
+  Math/avtBinaryMultiplyFilter.C \
+  Math/avtBinaryPowerFilter.C \
+  Math/avtBinarySubtractFilter.C \
+  Math/avtCeilingFilter.C \
+  Math/avtCosFilter.C \
+  Math/avtCylindricalCoordinatesFilter.C \
+  Math/avtDegreeToRadianFilter.C \
+  Math/avtDeterminantFilter.C \
+  Math/avtEigenvalueFilter.C \
+  Math/avtEigenvectorFilter.C \
+  Math/avtFloorFilter.C \
+  Math/avtIdentityFilter.C \
+  Math/avtModuloFilter.C \
+  Math/avtInverseFilter.C \
+  Math/avtNaturalLogFilter.C \
+  Math/avtPolarCoordinatesFilter.C \
+  Math/avtRadianToDegreeFilter.C \
+  Math/avtRoundFilter.C \
+  Math/avtSinFilter.C \
+  Math/avtSquareFilter.C \
+  Math/avtSquareRootFilter.C \
+  Math/avtTanFilter.C \
+  Math/avtTraceFilter.C \
+  Math/avtUnaryMinusFilter.C \
+  Math/avtVectorCrossProductFilter.C
+
+MeshQuality_src= \
+  MeshQuality/avtEdgeLength.C \
+  MeshQuality/avtNeighborFilter.C \
+  MeshQuality/avtNodeDegreeFilter.C \
+  MeshQuality/avtRevolvedSurfaceArea.C \
+  MeshQuality/avtRevolvedVolume.C \
+  MeshQuality/avtSideVolume.C \
+  MeshQuality/avtVMetricArea.C \
+  MeshQuality/avtVMetricAspectGamma.C \
+  MeshQuality/avtVMetricAspectRatio.C \
+  MeshQuality/avtVMetricCondition.C \
+  MeshQuality/avtVMetricDiagonal.C \
+  MeshQuality/avtVMetricDimension.C \
+  MeshQuality/avtVMetricJacobian.C \
+  MeshQuality/avtVMetricLargestAngle.C \
+  MeshQuality/avtVMetricOddy.C \
+  MeshQuality/avtVMetricRelativeSize.C \
+  MeshQuality/avtVMetricScaledJacobian.C \
+  MeshQuality/avtVMetricShape.C \
+  MeshQuality/avtVMetricShapeAndSize.C \
+  MeshQuality/avtVMetricShear.C \
+  MeshQuality/avtVMetricSkew.C \
+  MeshQuality/avtVMetricSmallestAngle.C \
+  MeshQuality/avtVMetricStretch.C \
+  MeshQuality/avtVMetricTaper.C \
+  MeshQuality/avtVMetricVolume.C \
+  MeshQuality/avtVMetricWarpage.C \
+  MeshQuality/avtVerdictFilter.C \
+  MeshQuality/verdict.C
+
+
+CPPFLAGS=@COMPONENT_CPPFLAGS@ @CPPFLAGS@
+
+SEROBJ=$(SRC:.C=.o)
+PAROBJ=$(SRC:.C=_par.o)
+LIB=libexpressions
+SERLIBS_FOR_MACOSX_PREBINDING=$(BZIP2_LIBS) -lavtfilters_ser -lavtddf_ser
+PARLIBS_FOR_MACOSX_PREBINDING=$(BZIP2_LIBS) -lavtfilters_par -lavtddf_par
+COMMONLIBS=-ldbatts -lavtexceptions -lstate -lcomm -lmisc -lexpr -lparser -lutility -lplugin -lvisit_vtk -llightweight_visit_vtk -lavtview
+SERLIBS=$(COMMONLIBS) -lpipeline_ser -lavtmath_ser -ldatabase_ser -lmir_ser $(VTK_LIBS) $(SERLIBS_FOR_MACOSX_PREBINDING) $(X_LIBS) @LIBS@
+PARLIBS=$(COMMONLIBS) -lpipeline_par -lavtmath_par -ldatabase_par -lmir_par $(VTK_LIBS) $(PARLIBS_FOR_MACOSX_PREBINDING) $(X_LIBS) @LIBS@ @SHLIB_MPI_LIBS@
+
+##
+## Standard targets...
+##
+all: $(LIBSHAREDSER) @LIBSHAREDPAR@
+
+clean:
+	$(RM) $(LIBSHAREDSER) @LIBSHAREDPAR@
+	$(RM) $(SEROBJ) $(PAROBJ)
+
+##
+## Automatic dependency stuff
+##
+@TARGETS@
+@PARLIBTARGETS@

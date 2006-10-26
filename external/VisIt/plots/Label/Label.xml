@@ -1,0 +1,119 @@
+<?xml version="1.0"?>
+  <Plugin name="Label" type="plot" label="Label" version="1.0" enabled="true" mdspecificcode="false" onlyengine="false" noengine="false" vartype="mesh,scalar,vector,material,subset,tensor,symmetrictensor,label,array" iconFile="Label.xpm">
+    <Files components="V">
+      avtLabelFilter.C
+      avtLabelSubsetsFilter.C
+      avtLabelsMapper.C
+      avtLabelRenderer.C
+      avtMesaLabelRenderer.C
+      avtOpenGLLabelRenderer.C
+    </Files>
+    <Files components="E">
+      avtLabelFilter.C
+      avtLabelSubsetsFilter.C
+      avtLabelsMapper.C
+      avtLabelRenderer.C
+      avtMesaLabelRenderer.C
+      avtOpenGLLabelRenderer.C
+    </Files>
+    <Attribute name="LabelAttributes" purpose="This class contains the fields that we need to set the attributes for the Label plot." persistent="true" exportAPI="" exportInclude="" codefile="LabelAttributes.code">
+      <Enum name="LabelIndexDisplay">
+        Natural
+        LogicalIndex
+        Index
+      </Enum>
+      <Enum name="LabelHorizontalAlignment">
+        HCenter
+        Left
+        Right
+      </Enum>
+      <Enum name="LabelVerticalAlignment">
+        VCenter
+        Top
+        Bottom
+      </Enum>
+      <Enum name="LabelDrawFacing">
+        Front
+        Back
+        FrontAndBack
+      </Enum>
+      <Enum name="VariableType">
+        LABEL_VT_MESH
+        LABEL_VT_SCALAR_VAR
+        LABEL_VT_VECTOR_VAR
+        LABEL_VT_TENSOR_VAR
+        LABEL_VT_SYMMETRIC_TENSOR_VAR
+        LABEL_VT_ARRAY_VAR
+        LABEL_VT_LABEL_VAR
+        LABEL_VT_MATERIAL
+        LABEL_VT_SUBSET
+        LABEL_VT_UNKNOWN_TYPE
+      </Enum>
+      <Enum name="DepthTestMode">
+        LABEL_DT_AUTO
+        LABEL_DT_ALWAYS
+        LABEL_DT_NEVER
+      </Enum>
+      <Field name="varType" label="Variable type" type="enum" subtype="VariableType" internal="true" ignoreeq="true">
+        LABEL_VT_UNKNOWN_TYPE
+      </Field>
+      <Field name="legendFlag" label="Legend" type="bool">
+        true
+      </Field>
+      <Field name="showNodes" label="Show nodes" type="bool">
+        false
+      </Field>
+      <Field name="showCells" label="Show cells" type="bool">
+        true
+      </Field>
+      <Field name="restrictNumberOfLabels" label="Restrict number of labels" type="bool">
+        true
+      </Field>
+      <Field name="drawLabelsFacing" label="Draw labels facing" type="enum" subtype="LabelDrawFacing">
+        Front
+      </Field>
+      <Field name="labelDisplayFormat" label="Label display" type="enum" subtype="LabelIndexDisplay">
+        Natural
+      </Field>
+      <Field name="numberOfLabels" label="numberOfLabels" type="int">
+        200
+      </Field>
+      <Field name="specifyTextColor1" label="Specify text color1" type="bool">
+        false
+      </Field>
+      <Field name="textColor1" label="Text color1" type="color" enabler="specifyTextColor1:true">
+        255
+        0
+        0
+        0
+      </Field>
+      <Field name="textHeight1" label="textHeight1" type="float">
+        0.020000
+      </Field>
+      <Field name="specifyTextColor2" label="Specify text color2" type="bool">
+        false
+      </Field>
+      <Field name="textColor2" label="Text color2" type="color" enabler="specifyTextColor2:true">
+        0
+        0
+        255
+        0
+      </Field>
+      <Field name="textHeight2" label="textHeight2" type="float">
+        0.020000
+      </Field>
+      <Field name="horizontalJustification" label="Horizontal justification" type="enum" subtype="LabelHorizontalAlignment">
+        HCenter
+      </Field>
+      <Field name="verticalJustification" label="Vertical Justification" type="enum" subtype="LabelVerticalAlignment">
+        VCenter
+      </Field>
+      <Field name="depthTestMode" label="Depth test mode" type="enum" subtype="DepthTestMode">
+        LABEL_DT_AUTO
+      </Field>
+      <Function name="ChangesRequireRecalculation" user="true" member="true">
+      </Function>
+      <Function name="VarChangeRequiresReset" user="true" member="true">
+      </Function>
+    </Attribute>
+  </Plugin>

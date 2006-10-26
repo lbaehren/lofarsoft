@@ -1,0 +1,93 @@
+#!/bin/sh
+
+var_basedir=`pwd`
+var_arch=`uname | tr '[A-Z]' '[a-z]'`
+
+case $var_arch in
+	darwin)
+		var_arch=bsd
+		var_dynlib=dylib
+	;;
+	linux)
+		var_dynlib=so
+	;;
+esac
+
+## check the input
+
+if test -z $1 ; then
+	echo "Missing installation prefix variable!"
+	exit 1;
+else
+	var_prefix=$1
+fi
+
+## Package-specific variables ---------------------------------------------------
+
+var_Package=boost
+var_Version=1_33_1
+var_PackageDir=boost_$var_Version
+var_boostArchive=$var_PackageDir.tar.gz
+var_boostSource=http://surfnet.dl.sourceforge.net/sourceforge/$var_Package/$var_boostArchive
+
+echo "[$var_Package] Package information";
+echo " - Version        = $var_Version";
+echo " - Package name   = $var_PackageDir";
+echo " - Source archive = $var_boostArchive";
+echo " - Source URL     = $var_boostSource";
+
+## Fetch the source code
+
+echo "[$var_Package] Fetching the source code ...";
+
+wget -c $var_boostSource
+tar -xvzf $var_boostArchive
+
+## Check for the location of the Python package
+
+var_pythonLib=""
+
+while test -z $var_pythonLib
+{
+	var_pythonLib=`locate libpython2.4.a`
+
+	if test -z $var_pythonLib ; then
+		./python-install $var_prefix
+	fi
+}
+
+## configure the package
+
+echo "[$var_Package] Configuring the package ...";
+
+cd $var_PackageDir
+
+./configure --prefix=$var_prefix
+
+
+## Build and install the package
+
+echo "[$var_Package] Building the package ...";
+
+make
+make install
+
+## Post-installation fixing 
+
+cd $var_prefix/lib
+
+if test -f libboost_python-gcc.a ; then
+	ln -s libboost_python-gcc.a libboost_python.a
+fi
+
+if test -f libboost_python-gcc.$var_dynlib ; then
+	ln -s libboost_python-gcc.$var_dynlib libboost_python.$var_dynlib
+fi
+
+## Post-installation cleanup of the directory
+
+echo "[$var_Package] Post-installation cleanup of the directory ...";
+
+cd $var_basedir
+rm -rf $var_PackageDir
+rm -rf $var_boostArchive

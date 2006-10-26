@@ -1,0 +1,567 @@
+#!/bin/sh
+#-----------------------------------------------------------------------
+#
+# VISIT-BUILD-CLOSED - Build the visit distributions on the closed
+#                      network.
+#
+# Author: Eric Brugger
+# Date:   February 12, 2001
+#
+# Usage:
+#    visit-build-closed -d <distribution>
+#
+#-----------------------------------------------------------------------
+
+test=no
+
+user=`whoami`
+
+#
+# Parse the execute line, providing default values for error checking.
+#
+hitit=true
+sunset=true
+sc=true
+tidalwave=false
+ice=true
+purple=true
+lilac=true
+gauss=true
+
+dist=undefined
+
+#
+# The loop is executed once for each symbol on the execute line.  This means
+# that $1 may be blank for later executions of the loop if any "shift 2"
+# commands are executed.  The variable abc is not used in the loop.  
+#
+for abc
+do
+   case $1 in
+      -none)
+         hitit=false
+         sunset=false
+         sc=false
+         tidalwave=false
+         ice=false
+         purple=false
+         lilac=false
+         gauss=false
+         shift
+         ;;
+      -hitit)
+         hitit=false
+         shift
+         ;;
+      +hitit)
+         hitit=true
+         shift
+         ;;
+      -sunset)
+         sunset=false
+         shift
+         ;;
+      +sunset)
+         sunset=true
+         shift
+         ;;
+      -sc)
+         sc=false
+         shift
+         ;;
+      +sc)
+         sc=true
+         shift
+         ;;
+      -tidalwave)
+         tidalwave=false
+         shift
+         ;;
+      +tidalwave)
+         tidalwave=true
+         shift
+         ;;
+      -ice)
+         ice=false
+         shift
+         ;;
+      +ice)
+         ice=true
+         shift
+         ;;
+      -purple)
+         purple=false
+         shift
+         ;;
+      +purple)
+         purple=true
+         shift
+         ;;
+      -lilac)
+         lilac=false
+         shift
+         ;;
+      +lilac)
+         lilac=true
+         shift
+         ;;
+      -gauss)
+         gauss=false
+         shift
+         ;;
+      +gauss)
+         gauss=true
+         shift
+         ;;
+      -d)
+         dist=$2
+         shift 2
+         ;;
+   esac
+done
+
+#
+# Check that the distribution name was provided.
+#
+if [ $dist = undefined ]
+then
+   echo "Usage: [-none] [-<machine name>] -d <distribution>"
+   exit
+fi
+
+#
+# Check that the distribution exists.
+#
+distfile=$dist.tar.gz
+if [ ! -f $distfile ]
+then
+   echo "Distribution file doesn't exist."
+   exit
+fi
+
+#
+# Build on hitit.
+#
+rm -f hitit
+cat <<EOF > hitit
+#!/bin/sh
+if test ! -e /gscratch/$user ; then
+   mkdir /gscratch/$user
+fi
+if test ! -e /gscratch/$user/hitit ; then
+   mkdir /gscratch/$user/hitit
+fi
+rm -rf /gscratch/$user/hitit/visitbuild
+mkdir /gscratch/$user/hitit/visitbuild
+mv hitit_$dist.tar.gz /gscratch/$user/hitit/visitbuild/$dist.tar.gz
+cd /gscratch/$user/hitit/visitbuild
+gunzip -c $dist.tar.gz | tar xvf - > buildlog 2>&1
+cd $dist
+ver=\`cat VERSION\`
+ver2=\`echo \$ver | tr "." "_"\`
+LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/gapps/visit/gcc/3.2.3/linux_redhat7/lib
+export LD_LIBRARY_PATH
+env CXXFLAGS=-O2 ./configure >> ../buildlog 2>&1
+cp /usr/gapps/visit/gcc/3.2.3/linux_redhat7/lib/libgcc_s.so.1 lib
+cp /usr/gapps/visit/gcc/3.2.3/linux_redhat7/lib/libstdc++.so.5 lib
+cd databases/Fluent
+sed "s/\\\$(CXXFLAGSORIG)/-D_LARGEFILE64_SOURCE/" Makefile > Makefile+;rm Makefile;mv Makefile+ Makefile
+cd ../..
+make -j 4 >> ../buildlog 2>&1
+clearcase_bin/visit-bin-dist >> ../buildlog 2>&1
+mv visit\$ver2.linux.tar.gz ..
+cd ..
+rm -f resultlog
+echo "        build of visit on hitit"        > resultlog 2>&1
+echo "       -------------------------"       >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+ls -l                                         >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+echo "number of database plugins = "\`ls $dist/plugins/databases/libI* | wc -l\` >> resultlog 2>&1
+echo "number of operator plugins = "\`ls $dist/plugins/operators/libI* | wc -l\` >> resultlog 2>&1
+echo "number of plot plugins = "\`ls $dist/plugins/plots/libI* | wc -l\` >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+echo "The database plugins:"                  >> resultlog 2>&1
+ls $dist/plugins/databases/libI* | sed "s/$dist\/plugins\/databases\/libI//" | sed "s/Database.so//" >> resultlog 2>&1
+EOF
+ 
+if [ $hitit = true ]
+then
+   if [ $test = no ]
+   then
+      scp -P 22 hitit hitit:hitit_buildit
+      scp -P 22 $dist.tar.gz hitit:hitit_$dist.tar.gz
+      ssh -p 22 hitit "chmod 750 hitit_buildit;./hitit_buildit" &
+   fi
+fi
+
+#
+# Build on sunset.
+#
+rm -f sunset
+cat <<EOF > sunset
+#!/bin/sh
+if test ! -d /export/scratch/$user ; then
+   mkdir /export/scratch/$user
+fi
+if test ! -d /export/scratch/$user/sunset ; then
+   mkdir /export/scratch/$user/sunset
+fi
+rm -rf /export/scratch/$user/sunset/visitbuild
+mkdir /export/scratch/$user/sunset/visitbuild
+mv sunset_$dist.tar.gz /export/scratch/$user/sunset/visitbuild/$dist.tar.gz
+cd /export/scratch/$user/sunset/visitbuild
+gunzip -c $dist.tar.gz | tar xvf - > buildlog 2>&1
+cd $dist
+ver=\`cat VERSION\`
+ver2=\`echo \$ver | tr "." "_"\`
+LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/gnu/gcc-3.2/lib
+export LD_LIBRARY_PATH
+env CXXFLAGS=-O2 ./configure >> ../buildlog 2>&1
+cp /usr/local/gnu/gcc-3.2/lib/libgcc_s.so.1 lib
+cp /usr/local/gnu/gcc-3.2/lib/libstdc++.so.5 lib
+cd databases/Fluent
+sed "s/\\\$(CXXFLAGSORIG)/-D_LARGEFILE64_SOURCE -Wall -Wno-sign-compare -Wno-deprecated/" Makefile > Makefile+;rm Makefile;mv Makefile+ Makefile
+cd ../..
+make -j 4 >> ../buildlog 2>&1
+clearcase_bin/visit-bin-dist >> ../buildlog 2>&1
+mv visit\$ver2.sunos5.tar.gz ..
+cd ..
+echo "        build of visit on sunset"       > resultlog 2>&1
+echo "       --------------------------"      >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+ls -l                                         >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+echo "number of database plugins = "\`ls $dist/plugins/databases/libI* | wc -l\` >> resultlog 2>&1
+echo "number of operator plugins = "\`ls $dist/plugins/operators/libI* | wc -l\` >> resultlog 2>&1
+echo "number of plot plugins = "\`ls $dist/plugins/plots/libI* | wc -l\` >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+echo "The database plugins:"                  >> resultlog 2>&1
+ls $dist/plugins/databases/libI* | sed "s/$dist\/plugins\/databases\/libI//" | sed "s/Database.so//" >> resultlog 2>&1
+EOF
+
+if [ $sunset = true ]
+then
+   if [ $test = no ]
+   then
+      scp -P 22 sunset sunset:sunset_buildit
+      scp -P 22 $dist.tar.gz sunset:sunset_$dist.tar.gz
+      ssh -p 22 sunset "chmod 750 sunset_buildit;./sunset_buildit" &
+   fi
+fi
+
+#
+# Build on sc.
+#
+rm -f sc
+cat <<EOF > sc
+#!/bin/sh
+if test ! -d /nfs/tmp1/$user ; then
+   mkdir /nfs/tmp1/$user
+fi
+if test ! -d /nfs/tmp1/$user/sc ; then
+   mkdir /nfs/tmp1/$user/sc
+fi
+rm -rf /nfs/tmp1/$user/sc/visitbuild
+mkdir /nfs/tmp1/$user/sc/visitbuild
+mv sc_$dist.tar.gz /nfs/tmp1/$user/sc/visitbuild/$dist.tar.gz
+cd /nfs/tmp1/$user/sc/visitbuild
+gunzip -c $dist.tar.gz | tar xvf - > buildlog 2>&1
+cd $dist
+ver=\`cat VERSION\`
+ver2=\`echo \$ver | tr "." "_"\`
+env CXXFLAGS=-O2 MAKE=gmake ./configure --enable-parallel >> ../buildlog 2>&1
+cp /usr/local/tools/gnu/gcc/3.3.3_tru64_5/lib/libgcc_s.so.1 lib
+cp /usr/local/tools/gnu/gcc/3.3.3_tru64_5/lib/libstdc++.so.5 lib
+cd databases/Fluent
+sed "s/\\\$(CXXFLAGSORIG)/-isystem \\/usr\\/local\\/include -Wno-deprecated/" Makefile > Makefile+;rm Makefile;mv Makefile+ Makefile
+cd ../..
+gmake -j 3 >> ../buildlog 2>&1
+clearcase_bin/visit-bin-dist -make gmake >> ../buildlog 2>&1
+mv visit\$ver2.osf1.tar.gz ..
+cd ..
+echo "        build of visit on sc"           > resultlog 2>&1
+echo "       ----------------------"          >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+ls -l                                         >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+echo "number of database plugins = "\`ls $dist/plugins/databases/libI* | wc -l\` >> resultlog 2>&1
+echo "number of operator plugins = "\`ls $dist/plugins/operators/libI* | wc -l\` >> resultlog 2>&1
+echo "number of plot plugins = "\`ls $dist/plugins/plots/libI* | wc -l\` >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+echo "The database plugins:"                  >> resultlog 2>&1
+ls $dist/plugins/databases/libI* | sed "s/$dist\/plugins\/databases\/libI//" | sed "s/Database.so//" >> resultlog 2>&1
+EOF
+
+if [ $sc = true ]
+then
+   if [ $test = no ]
+   then
+      scp sc sc1:sc_buildit
+      scp $dist.tar.gz sc1:sc_$dist.tar.gz
+      ssh sc1 "chmod 750 sc_buildit;./sc_buildit" &
+   fi
+fi
+
+#
+# Build on tidalwave, both serial and parallel versions.
+#
+rm -f tidalwave
+cat <<EOF > tidalwave
+#!/bin/sh
+if test ! -d /fc/san1/$user ; then
+   mkdir /fc/san1/$user
+fi
+if test ! -d /fc/san1/$user/tidalwave ; then
+   mkdir /fc/san1/$user/tidalwave
+fi
+rm -rf /fc/san1/$user/tidalwave/visitbuild
+mkdir /fc/san1/$user/tidalwave/visitbuild
+mv tidalwave_$dist.tar.gz /fc/san1/$user/tidalwave/visitbuild/$dist.tar.gz
+cd /fc/san1/$user/tidalwave/visitbuild
+gunzip -c $dist.tar.gz | tar xvf - > buildlog 2>&1
+cd $dist
+ver=\`cat VERSION\`
+ver2=\`echo \$ver | tr "." "_"\`
+env CXXFLAGS=-O2 ./configure --enable-parallel >> ../buildlog 2>&1
+env PARALLEL=20 make -P >> ../buildlog 2>&1
+clearcase_bin/visit-bin-dist >> ../buildlog 2>&1
+mv visit\$ver2.irix6.tar.gz ..
+cd ..
+echo "        build of visit on tidalwave"    > resultlog 2>&1
+echo "       -----------------------------"   >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+ls -l                                         >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+echo "number of database plugins = "\`ls $dist/plugins/databases/libI* | wc -l\` >> resultlog 2>&1
+echo "number of operator plugins = "\`ls $dist/plugins/operators/libI* | wc -l\` >> resultlog 2>&1
+echo "number of plot plugins = "\`ls $dist/plugins/plots/libI* | wc -l\` >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+echo "The database plugins:"                  >> resultlog 2>&1
+ls $dist/plugins/databases/libI* | sed "s/$dist\/plugins\/databases\/libI//" | sed "s/Database.so//" >> resultlog 2>&1
+EOF
+
+if [ $tidalwave = true ]
+then
+   if [ $test = no ]
+   then
+      scp tidalwave tidalwave:tidalwave_buildit
+      scp $dist.tar.gz tidalwave:tidalwave_$dist.tar.gz
+      ssh tidalwave "chmod 750 tidalwave_buildit;./tidalwave_buildit" &
+   fi
+fi
+
+#
+# Build on ice, both serial and parallel versions.
+#
+rm -f ice
+cat <<EOF > ice
+#!/bin/sh
+PATH=/usr/local/bin:\$PATH
+if test ! -d /p/gi1/$user ; then
+   mkdir /p/gi1/$user
+fi
+if test ! -d /p/gi1/$user/ice ; then
+   mkdir /p/gi1/$user/ice
+fi
+rm -rf /p/gi1/$user/ice/visitbuild
+mkdir /p/gi1/$user/ice/visitbuild
+mv ice_$dist.tar.gz /p/gi1/$user/ice/visitbuild/$dist.tar.gz
+cd /p/gi1/$user/ice/visitbuild
+gunzip -c $dist.tar.gz | tar xvf - > buildlog 2>&1
+cd $dist
+cp /usr/gapps/visit/bz2/bzlib.h include
+ver=\`cat VERSION\`
+ver2=\`echo \$ver | tr "." "_"\`
+env CXXFLAGS=-O2 MAKE=gmake ./configure --enable-parallel >> ../buildlog 2>&1
+cp /usr/local/tools/gnu/gcc/3.1_aix_5/lib/libgcc_s.a lib
+cp /usr/local/tools/gnu/gcc/3.1_aix_5/lib/libstdc++.a lib
+cd databases/Fluent
+sed "s/\\\$(CXXFLAGSORIG)/-D_LARGEFILE64_SOURCE -Wall -Wno-sign-compare -Wno-deprecated/" Makefile > Makefile+;rm Makefile;mv Makefile+ Makefile
+cd ../..
+gmake -j 6 >> ../buildlog 2>&1
+clearcase_bin/visit-bin-dist -make gmake >> ../buildlog 2>&1
+mv visit\$ver2.aix.tar.gz ..
+cd ..
+echo "        build of visit on ice"          > resultlog 2>&1
+echo "       -----------------------"         >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+ls -l                                         >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+echo "number of database plugins = "\`ls $dist/plugins/databases/libI* | wc -l\` >> resultlog 2>&1
+echo "number of operator plugins = "\`ls $dist/plugins/operators/libI* | wc -l\` >> resultlog 2>&1
+echo "number of plot plugins = "\`ls $dist/plugins/plots/libI* | wc -l\` >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+echo "The database plugins:"                  >> resultlog 2>&1
+ls $dist/plugins/databases/libI* | sed "s/$dist\/plugins\/databases\/libI//" | sed "s/Database.so//" >> resultlog 2>&1
+EOF
+
+if [ $ice = true ]
+then
+   if [ $test = no ]
+   then
+      scp ice ice:ice_buildit
+      scp $dist.tar.gz ice:ice_$dist.tar.gz
+      ssh ice "chmod 750 ice_buildit;./ice_buildit" &
+   fi
+fi
+
+#
+# Build on purple, both serial and parallel versions.
+#
+rm -f purple
+cat <<EOF > purple
+#!/bin/sh
+PATH=/usr/local/bin:\$PATH
+if test ! -d /p/gscratch3/$user ; then
+   mkdir /p/gscratch3/$user
+fi
+if test ! -d /p/gscratch3/$user/purple ; then
+   mkdir /p/gscratch3/$user/purple
+fi
+rm -rf /p/gscratch3/$user/purple/visitbuild
+mkdir /p/gscratch3/$user/purple/visitbuild
+mv purple_$dist.tar.gz /p/gscratch3/$user/purple/visitbuild/$dist.tar.gz
+cd /p/gscratch3/$user/purple/visitbuild
+gunzip -c $dist.tar.gz | tar xvf - > buildlog 2>&1
+cd $dist
+ver=\`cat VERSION\`
+ver2=\`echo \$ver | tr "." "_"\`
+env CXXFLAGS=-O2 MAKE=gmake ./configure --enable-parallel >> ../buildlog 2>&1
+gmake -j 4 >> ../buildlog 2>&1
+clearcase_bin/visit-bin-dist -compiler xlc -make gmake >> ../buildlog 2>&1
+mv visit\$ver2.aix64-xlc.tar.gz ..
+cd ..
+echo "        build of visit on purple"       > resultlog 2>&1
+echo "       --------------------------"      >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+ls -l                                         >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+echo "number of database plugins = "\`ls $dist/plugins/databases/libI* | wc -l\` >> resultlog 2>&1
+echo "number of operator plugins = "\`ls $dist/plugins/operators/libI* | wc -l\` >> resultlog 2>&1
+echo "number of plot plugins = "\`ls $dist/plugins/plots/libI* | wc -l\` >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+echo "The database plugins:"                  >> resultlog 2>&1
+ls $dist/plugins/databases/libI* | sed "s/$dist\/plugins\/databases\/libI//" | sed "s/Database.so//" >> resultlog 2>&1
+EOF
+
+if [ $purple = true ]
+then
+   if [ $test = no ]
+   then
+      scp purple purple:purple_buildit
+      scp $dist.tar.gz purple:purple_$dist.tar.gz
+      ssh purple "chmod 750 purple_buildit;./purple_buildit" &
+   fi
+fi
+
+#
+# Build on lilac, both serial and parallel versions.
+#
+rm -f lilac
+cat <<EOF > lilac
+#!/bin/sh
+if test ! -d /usr/tmp/$user ; then
+   mkdir /usr/tmp/$user
+fi
+if test ! -d /usr/tmp/$user/lilac ; then
+   mkdir /usr/tmp/$user/lilac
+fi
+rm -rf /usr/tmp/$user/lilac/visitbuild
+mkdir /usr/tmp/$user/lilac/visitbuild
+mv lilac_$dist.tar.gz /usr/tmp/$user/lilac/visitbuild/$dist.tar.gz
+cd /usr/tmp/$user/lilac/visitbuild
+gunzip -c $dist.tar.gz | tar xvf - > buildlog 2>&1
+cd $dist
+ver=\`cat VERSION\`
+ver2=\`echo \$ver | tr "." "_"\`
+env CXXFLAGS=-O2 ./configure --enable-parallel >> ../buildlog 2>&1
+cp /lib/libgcc_s.so.1 lib
+cp /usr/lib/libstdc++.so.5 lib
+make -j 3 >> ../buildlog 2>&1
+clearcase_bin/visit-bin-dist >> ../buildlog 2>&1
+mv visit\$ver2.linux.tar.gz ..
+cd ..
+echo "        build of visit on lilac"        > resultlog 2>&1
+echo "       -------------------------"       >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+ls -l                                         >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+echo "number of database plugins = "\`ls $dist/plugins/databases/libI* | wc -l\` >> resultlog 2>&1
+echo "number of operator plugins = "\`ls $dist/plugins/operators/libI* | wc -l\` >> resultlog 2>&1
+echo "number of plot plugins = "\`ls $dist/plugins/plots/libI* | wc -l\` >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+echo "The database plugins:"                  >> resultlog 2>&1
+ls $dist/plugins/databases/libI* | sed "s/$dist\/plugins\/databases\/libI//" | sed "s/Database.so//" >> resultlog 2>&1
+EOF
+
+if [ $lilac = true ]
+then
+   if [ $test = no ]
+   then
+      scp lilac lilac3:lilac_buildit
+      scp $dist.tar.gz lilac3:lilac_$dist.tar.gz
+      ssh lilac3 "chmod 750 lilac_buildit;./lilac_buildit" &
+   fi
+fi
+
+#
+# Build on gauss.
+#
+rm -f gauss
+cat <<EOF > gauss
+#!/bin/sh
+XLOCALEDIR=/usr/lib/X11/locale
+PATH=/usr/bin/X11:\$PATH
+if test ! -d /usr/tmp/$user ; then
+   mkdir /usr/tmp/$user
+fi
+if test ! -d /usr/tmp/$user/gauss ; then
+   mkdir /usr/tmp/$user/gauss
+fi
+rm -rf /usr/tmp/$user/gauss/visitbuild
+mkdir /usr/tmp/$user/gauss/visitbuild
+mv gauss_$dist.tar.gz /usr/tmp/$user/gauss/visitbuild/$dist.tar.gz
+cd /usr/tmp/$user/gauss/visitbuild
+gunzip -c $dist.tar.gz | tar xvf - > buildlog 2>&1
+cd $dist
+ver=\`cat VERSION\`
+ver2=\`echo \$ver | tr "." "_"\`
+env CXXFLAGS=-O2 ./configure --enable-parallel >> ../buildlog 2>&1
+cp /usr/local/tools/gnu/gcc/3.4.4_RH_chaos_3_x86_64/usr/lib64/libgcc_s.so.1 lib
+cp /usr/local/tools/gnu/gcc/3.4.4_RH_chaos_3_x86_64/usr/lib64/libstdc++.so.6 lib
+make -j 3 >> ../buildlog 2>&1
+clearcase_bin/visit-bin-dist >> ../buildlog 2>&1
+mv visit\$ver2.linux-x86_64.tar.gz ..
+cd ..
+rm -f resultlog
+echo "        build of visit on gauss"        > resultlog 2>&1
+echo "       -------------------------"       >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+ls -l                                         >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+echo "number of database plugins = "\`ls $dist/plugins/databases/libI* | wc -l\` >> resultlog 2>&1
+echo "number of operator plugins = "\`ls $dist/plugins/operators/libI* | wc -l\` >> resultlog 2>&1
+echo "number of plot plugins = "\`ls $dist/plugins/plots/libI* | wc -l\` >> resultlog 2>&1
+echo ""                                       >> resultlog 2>&1
+echo "The database plugins:"                  >> resultlog 2>&1
+ls $dist/plugins/databases/libI* | sed "s/$dist\/plugins\/databases\/libI//" | sed "s/Database.so//" >> resultlog 2>&1
+EOF
+
+if [ $gauss = true ]
+then
+   if [ $test = no ]
+   then
+      scp gauss gauss2:gauss_buildit
+      scp $dist.tar.gz gauss2:gauss_$dist.tar.gz
+      ssh gauss2 "chmod 750 gauss_buildit;./gauss_buildit" &
+   fi
+fi
+
+#
+# Clean up.
+#
+if [ $test = no ]
+then
+   rm -f hitit sunset sc tidalwave ice purple lilac gauss
+fi

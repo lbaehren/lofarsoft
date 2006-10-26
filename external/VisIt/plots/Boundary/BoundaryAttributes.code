@@ -1,0 +1,73 @@
+Function: ChangesRequireRecalculation
+Declaration: bool ChangesRequireRecalculation(const BoundaryAttributes &obj);
+Definition:
+// ****************************************************************************
+// Modifications:
+//    Jeremy Meredith, Mon Dec  9 16:30:54 PST 2002
+//    Added smoothing level.
+//
+//    Kathleen Bonnell, Wed Nov 10 09:37:01 PST 2004
+//    Added needsSecondaryVar. 
+//
+// ****************************************************************************
+bool
+BoundaryAttributes::ChangesRequireRecalculation(const BoundaryAttributes &obj)
+{
+    bool needSecondaryVar = obj.pointSizeVarEnabled &&
+                            pointSizeVar != obj.pointSizeVar &&
+                            obj.pointSizeVar != "default" && 
+                            obj.pointSizeVar != "" &&
+                            obj.pointSizeVar != "\0"; 
+
+    return ((filledFlag != obj.filledFlag) ||
+            (boundaryType != obj.boundaryType) || 
+            (boundaryNames != obj.boundaryNames) ||
+            (wireframe != obj.wireframe) ||
+            (smoothingLevel != obj.smoothingLevel) ||
+            needSecondaryVar);
+}
+
+Function: VarChangeRequiresReset
+Declaration: virtual bool VarChangeRequiresReset(void);
+Definition:
+bool
+BoundaryAttributes::VarChangeRequiresReset()
+{ 
+    return true;
+}
+
+Function: ProcessOldVersions
+Declaration: virtual void ProcessOldVersions(DataNode *parentNode, const char *configVersion);
+Definition:
+// ****************************************************************************
+// Method: BoundaryAttributes::ProcessOldVersions
+//
+// Purpose: 
+//   This method creates modifies a DataNode representation of the object
+//   so it conforms to the newest representation of the object, which can
+//   can be read back in.
+//
+// Programmer: Jeremy Meredith
+// Creation:   June 18, 2003
+//
+// Modifications:
+//
+// ****************************************************************************
+void
+BoundaryAttributes::ProcessOldVersions(DataNode *parentNode,
+                                       const char *configVersion)
+{
+    if(parentNode == 0)
+        return;
+
+    DataNode *searchNode = parentNode->GetNode("BoundaryAttributes");
+    if(searchNode == 0)
+        return;
+
+    DataNode *wfNode = searchNode->GetNode("wireframe");
+    if (wfNode == 0)
+        return;
+
+    if (VersionLessThan(configVersion, "1.1.5"))
+        searchNode->RemoveNode("wireframe");
+}

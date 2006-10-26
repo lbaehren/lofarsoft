@@ -1,0 +1,75 @@
+#!/bin/sh
+
+var_basedir=`pwd`
+
+## check the input
+
+if test -z $1 ; then
+	echo "Missing installation prefix variable!"
+	exit 1;
+else
+	var_prefix=$1
+fi
+
+## Package-specific variables
+
+atlas_version=3.6.0
+atlas_url=http://www.netlib.org/atlas/atlas$atlas_version.tgz
+atlas_src=$var_basedir/atlas
+atlas_libfiles=atlas cblas blas tstatlas
+
+echo "atlas_version = $atlas_version"
+echo "atlas_src     = $atlas_src"
+
+## ------------------------------------------------------------------------
+## Fetch the sources
+
+echo "[ATLAS] Fetching source from FTP server ..." ;
+
+wget -c $atlas_url
+tar -xvzf atlas$atlas_version.tgz
+mv ATLAS atlas
+
+## ------------------------------------------------------------------------
+## Pre-build configuration; when the basic configuration is complete, make
+##  sure that we keep track of the platform for which the library will be 
+##  build
+
+echo "[ATLAS] Configuring and building package ..." ;
+
+cd $atlas_src
+make
+ls | grep Make | grep -v Makefile | grep -v Make.top | sed s/Make.// > $atlas_src/atlas_arch;
+
+## ------------------------------------------------------------------------
+## Start bulding
+
+echo "[ATLAS] Build for architecture `cat $atlas_src/atlas_arch`" ;
+
+cd $atlas_src;
+
+make install arch=`cat atlas_arch`;
+
+echo "[ATLAS] Installing include files ..." ;
+rm -rf  $var_prefix/include/atlas;
+cp -r $atlas_src/include $var_prefix/include/atlas
+
+## ------------------------------------------------------------------------
+## Installing of library files
+
+echo "[ATLAS] Installing library files and creating symlinks..." ;
+cd $var_prefix/lib; \
+	rm -f libf77blas.a libptf77blas.a; \
+	cp $atlas_src/lib/`cat $atlas_src/atlas_arch`/*.a .; \
+	mv libf77blas.a libblas.a; \
+	ln -s libblas.a libf77blas.a; \
+	mv libptf77blas.a libptblas.a; \
+	ln -s libptblas.a libptf77blas.a;
+#	-@ echo "[ATLAS] Creating dynamic libraries ..." ;
+#	cd $var_prefix/lib; \
+#	for FILE in $(atlas_libfiles) ; do \
+#		$(var_bin)/mklib $$FILE $$FILE ;\
+#	done;
+	-@ echo "[ATLAS] Installation completed.";
+	-@ echo "Sleep 2 minutes";
+	sleep 30s

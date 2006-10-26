@@ -1,0 +1,63 @@
+Function: ChangesRequireRecalculation
+Declaration: bool ChangesRequireRecalculation(const HistogramAttributes &) const;
+Definition:
+bool
+HistogramAttributes::ChangesRequireRecalculation(const HistogramAttributes &obj) const
+{
+    if (specifyRange != obj.GetSpecifyRange())
+        return true;
+    if (specifyRange && (min != obj.GetMin()))
+        return true;
+    if (specifyRange && (max != obj.GetMax()))
+        return true;
+    if (outputType != obj.GetOutputType())
+        return true;
+    if (numBins != obj.GetNumBins())
+        return true;
+    if (twoDAmount != obj.GetTwoDAmount())
+        return true;
+    if (zone != obj.GetZone())
+        return true;
+    if (domain != obj.GetDomain())
+        return true;
+ 
+    return false;
+}
+
+Function: VarChangeRequiresReset
+Declaration: virtual bool VarChangeRequiresReset(void);
+Definition:
+bool
+HistogramAttributes::VarChangeRequiresReset()
+{
+    return true;
+}
+
+Function: CopyAttributes
+Declaration: virtual bool CopyAttributes(const AttributeGroup *);
+Definition:
+bool
+HistogramAttributes::CopyAttributes(const AttributeGroup *atts)
+{
+    bool retval = false;
+
+    if(TypeName() == atts->TypeName())
+    {
+        // Call assignment operator.
+        const HistogramAttributes *tmp = (const HistogramAttributes *)atts;
+        *this = *tmp;
+        retval = true;
+    }
+    else if(atts->TypeName() == "PickAttributes")
+    {
+        const PickAttributes *tmp = (const PickAttributes*)atts;
+        int dom = tmp->GetDomain();
+        dom = (dom < 0 ? 0 : dom);  // -1 is val for single domain problems
+        SetDomain(dom);
+        SetZone(tmp->GetElementNumber());
+        retval = true;
+    }
+
+    return retval;
+}
+

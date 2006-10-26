@@ -1,0 +1,52 @@
+#!/bin/sh
+
+var_basedir=`pwd`
+var_arch=`uname | tr '[A-Z]' '[a-z]'`
+
+case $var_arch in
+	darwin)
+		var_dynlib=dylib
+	;;
+	linux)
+		var_dynlib=so
+	;;
+esac
+
+## check the input
+
+if test -z $1 ; then
+	echo "Missing installation prefix variable!"
+	exit 1;
+else
+	var_prefix=$1
+fi
+
+## Package-specific variables
+
+bison_version=2.3
+bison_url=ftp://prep.ai.mit.edu/pub/gnu/bison/bison-$bison_version.tar.gz
+
+## ------------------------------------------------------------------------------
+## Fetching sources from FTP server
+
+wget $bison_url
+tar -xvzf bison-$bison_version.tar.gz
+
+## ------------------------------------------------------------------------------
+## Configure the package
+
+cd bison-$bison_version
+
+./configure --prefix=$var_prefix
+
+## ------------------------------------------------------------------------------
+## Build & install the package
+
+make && make check && make install
+
+## ------------------------------------------------------------------------------
+## Post installation
+
+cd $var_basedir
+rm -rf bison-$bison_version
+rm -rf bison-$bison_version.tar.gz

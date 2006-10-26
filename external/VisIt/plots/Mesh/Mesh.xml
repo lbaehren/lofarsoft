@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+  <Plugin name="Mesh" type="plot" label="Mesh" version="1.0" enabled="true" vartype="mesh" iconFile="Mesh.xpm">
+    <Attribute name="MeshAttributes" purpose="Attributes for the mesh plot" persistent="true" codefile="MeshAttributes.code">
+      <Enum name="PointType">
+        Box
+        Axis
+        Icosahedron
+        Point
+        Sphere
+      </Enum>
+      <Enum name="SmoothingLevel">
+        None
+        Fast
+        High
+      </Enum>
+      <Enum name="OpaqueMode">
+        Auto
+        On
+        Off
+      </Enum>
+      <Field name="legendFlag" label="Legend" type="bool">
+        true
+      </Field>
+      <Field name="lineStyle" label="Line style" type="linestyle">
+        0
+      </Field>
+      <Field name="lineWidth" label="Line width" type="linewidth">
+        0
+      </Field>
+      <Field name="meshColor" label="Color" type="color">
+        0
+        0
+        0
+        255
+      </Field>
+      <Field name="outlineOnlyFlag" label="Outline only" type="bool">
+        false
+      </Field>
+      <Field name="errorTolerance" label="Tolerance" type="double">
+        0.010000
+      </Field>
+      <Field name="opaqueMode" label="Opaque mode" type="enum" subtype="OpaqueMode">
+        Auto
+      </Field>
+      <Field name="pointSize" label="Point size" type="double">
+        0.050000
+      </Field>
+      <Field name="opaqueColor" label="Color" type="color">
+        255
+        255
+        255
+        255
+      </Field>
+      <Field name="backgroundFlag" label="Use Background " type="bool">
+        true
+      </Field>
+      <Field name="foregroundFlag" label="Use Foreground " type="bool">
+        true
+      </Field>
+      <Field name="smoothingLevel" label="Smoothing" type="enum" subtype="SmoothingLevel">
+        None
+      </Field>
+      <Field name="pointSizeVarEnabled" label="Point size by var enabled" type="bool">
+        false
+      </Field>
+      <Field name="pointSizeVar" label="Point size by var" type="variablename" vartypes="01000000000">
+        default
+      </Field>
+      <Field name="pointType" label="Point Type" type="enum" subtype="PointType">
+        Point
+      </Field>
+      <Field name="opaqueMeshIsAppropriate" label="Opaque Mesh Is Appropriate" type="bool" internal="true">
+        true
+      </Field>
+      <Field name="showInternal" label="Show Internal" type="bool">
+        false
+      </Field>
+      <Field name="pointSizePixels" label="Point size pixels" type="int">
+        2
+      </Field>
+      <Function name="ChangesRequireRecalculation" user="true" member="true">
+      </Function>
+    </Attribute>
+  </Plugin>

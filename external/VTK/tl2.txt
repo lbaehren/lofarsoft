@@ -1,0 +1,3 @@
+./CMake/vtkTestExplicitInstantiation.cmake:    "TARGET_LINK_LIBRARIES(B A)\n"
+./CMake/KitCommonBlock.cmake:  TARGET_LINK_LIBRARIES (vtk${KIT}TCL vtk${KIT} ${KIT_TCL_LIBS})
+./vtkMacros.cmake:    TARGET_LINK_LIBRARIES (vtk${KIT}Java${VTK_VERSION} 

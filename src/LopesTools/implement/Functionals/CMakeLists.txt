@@ -1,0 +1,3 @@
+PROJECT (LopesTools)
+
+SUBDIRS (test)

@@ -1,0 +1,46 @@
+#!/bin/sh
+
+var_basedir=`pwd`
+
+## check the input
+
+if test -z $1 ; then
+	echo "Missing installation prefix variable!"
+	exit 1;
+else
+	var_prefix=$1
+fi
+
+## Package-specific variables
+
+cfitsio_url=ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3006.tar.gz
+cfitsio_inc=$var_prefix/include/cfitsio
+
+## Download the source code
+
+echo "[CFITSIO] Fetching source from FTP server ..." ;
+wget -c $cfitsio_url
+
+## Extraction of the code from the source tar ball
+
+echo "[CFITSIO] Extracting tar ball ..." ;
+tar -xvzf cfitsio3006.tar.gz;
+
+## configure and build the package
+
+echo "[CFITSIO] Configuring and building package ..." ;
+cd cfitsio;
+./configure --enable-lfs --prefix=$var_prefix;
+make shared;
+make install;
+
+echo "[CFITSIO] Additional backup of all header files ..." ;
+mkdir -p $cfitsio_inc;
+cp *.h $cfitsio_inc;
+
+## clean up the directory
+
+cd $var_basedir
+rm -rf cfitsio cfitsio3006.tar.gz
+
+echo "[CFITSIO] Installation completed.";

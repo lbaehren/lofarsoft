@@ -1,0 +1,1492 @@
+/*****************************************************************************
+*
+* Copyright (c) 2000 - 2006, The Regents of the University of California
+* Produced at the Lawrence Livermore National Laboratory
+* All rights reserved.
+*
+* This file is part of VisIt. For details, see http://www.llnl.gov/visit/. The
+* full copyright notice is contained in the file COPYRIGHT located at the root
+* of the VisIt distribution or at http://www.llnl.gov/visit/copyright.html.
+*
+* Redistribution  and  use  in  source  and  binary  forms,  with  or  without
+* modification, are permitted provided that the following conditions are met:
+*
+*  - Redistributions of  source code must  retain the above  copyright notice,
+*    this list of conditions and the disclaimer below.
+*  - Redistributions in binary form must reproduce the above copyright notice,
+*    this  list of  conditions  and  the  disclaimer (as noted below)  in  the
+*    documentation and/or materials provided with the distribution.
+*  - Neither the name of the UC/LLNL nor  the names of its contributors may be
+*    used to  endorse or  promote products derived from  this software without
+*    specific prior written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT  HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR  IMPLIED WARRANTIES, INCLUDING,  BUT NOT  LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND  FITNESS FOR A PARTICULAR  PURPOSE
+* ARE  DISCLAIMED.  IN  NO  EVENT  SHALL  THE  REGENTS  OF  THE  UNIVERSITY OF
+* CALIFORNIA, THE U.S.  DEPARTMENT  OF  ENERGY OR CONTRIBUTORS BE  LIABLE  FOR
+* ANY  DIRECT,  INDIRECT,  INCIDENTAL,  SPECIAL,  EXEMPLARY,  OR CONSEQUENTIAL
+* DAMAGES (INCLUDING, BUT NOT  LIMITED TO, PROCUREMENT OF  SUBSTITUTE GOODS OR
+* SERVICES; LOSS OF  USE, DATA, OR PROFITS; OR  BUSINESS INTERRUPTION) HOWEVER
+* CAUSED  AND  ON  ANY  THEORY  OF  LIABILITY,  WHETHER  IN  CONTRACT,  STRICT
+* LIABILITY, OR TORT  (INCLUDING NEGLIGENCE OR OTHERWISE)  ARISING IN ANY  WAY
+* OUT OF THE  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+* DAMAGE.
+*
+*****************************************************************************/
+
+#include <FilledBoundaryAttributes.h>
+#include <DataNode.h>
+
+//
+// Enum conversion methods for FilledBoundaryAttributes::Boundary_Type
+//
+
+static const char *Boundary_Type_strings[] = {
+"Domain", "Group", "Material", 
+"Unknown"};
+
+std::string
+FilledBoundaryAttributes::Boundary_Type_ToString(FilledBoundaryAttributes::Boundary_Type t)
+{
+    int index = int(t);
+    if(index < 0 || index >= 4) index = 0;
+    return Boundary_Type_strings[index];
+}
+
+std::string
+FilledBoundaryAttributes::Boundary_Type_ToString(int t)
+{
+    int index = (t < 0 || t >= 4) ? 0 : t;
+    return Boundary_Type_strings[index];
+}
+
+bool
+FilledBoundaryAttributes::Boundary_Type_FromString(const std::string &s, FilledBoundaryAttributes::Boundary_Type &val)
+{
+    val = FilledBoundaryAttributes::Domain;
+    for(int i = 0; i < 4; ++i)
+    {
+        if(s == Boundary_Type_strings[i])
+        {
+            val = (Boundary_Type)i;
+            return true;
+        }
+    }
+    return false;
+}
+
+//
+// Enum conversion methods for FilledBoundaryAttributes::ColoringMethod
+//
+
+static const char *ColoringMethod_strings[] = {
+"ColorBySingleColor", "ColorByMultipleColors", "ColorByColorTable"
+};
+
+std::string
+FilledBoundaryAttributes::ColoringMethod_ToString(FilledBoundaryAttributes::ColoringMethod t)
+{
+    int index = int(t);
+    if(index < 0 || index >= 3) index = 0;
+    return ColoringMethod_strings[index];
+}
+
+std::string
+FilledBoundaryAttributes::ColoringMethod_ToString(int t)
+{
+    int index = (t < 0 || t >= 3) ? 0 : t;
+    return ColoringMethod_strings[index];
+}
+
+bool
+FilledBoundaryAttributes::ColoringMethod_FromString(const std::string &s, FilledBoundaryAttributes::ColoringMethod &val)
+{
+    val = FilledBoundaryAttributes::ColorBySingleColor;
+    for(int i = 0; i < 3; ++i)
+    {
+        if(s == ColoringMethod_strings[i])
+        {
+            val = (ColoringMethod)i;
+            return true;
+        }
+    }
+    return false;
+}
+
+//
+// Enum conversion methods for FilledBoundaryAttributes::PointType
+//
+
+static const char *PointType_strings[] = {
+"Box", "Axis", "Icosahedron", 
+"Point", "Sphere"};
+
+std::string
+FilledBoundaryAttributes::PointType_ToString(FilledBoundaryAttributes::PointType t)
+{
+    int index = int(t);
+    if(index < 0 || index >= 5) index = 0;
+    return PointType_strings[index];
+}
+
+std::string
+FilledBoundaryAttributes::PointType_ToString(int t)
+{
+    int index = (t < 0 || t >= 5) ? 0 : t;
+    return PointType_strings[index];
+}
+
+bool
+FilledBoundaryAttributes::PointType_FromString(const std::string &s, FilledBoundaryAttributes::PointType &val)
+{
+    val = FilledBoundaryAttributes::Box;
+    for(int i = 0; i < 5; ++i)
+    {
+        if(s == PointType_strings[i])
+        {
+            val = (PointType)i;
+            return true;
+        }
+    }
+    return false;
+}
+
+// ****************************************************************************
+// Method: FilledBoundaryAttributes::FilledBoundaryAttributes
+//
+// Purpose: 
+//   Constructor for the FilledBoundaryAttributes class.
+//
+// Note:       Autogenerated by xml2atts.
+//
+// Programmer: xml2atts
+// Creation:   Thu Aug 25 09:13:18 PDT 2005
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+FilledBoundaryAttributes::FilledBoundaryAttributes() : AttributeSubject("isbbiiaas*idbbibadibsi"),
+    colorTableName("Default"), singleColor(), 
+    mixedColor(255, 255, 255), pointSizeVar("default")
+{
+    colorType = ColorByMultipleColors;
+    filledFlag = true;
+    legendFlag = true;
+    lineStyle = 0;
+    lineWidth = 0;
+    boundaryType = Unknown;
+    opacity = 1;
+    wireframe = false;
+    drawInternal = false;
+    smoothingLevel = 0;
+    cleanZonesOnly = false;
+    pointSize = 0.05;
+    pointType = Point;
+    pointSizeVarEnabled = false;
+    pointSizePixels = 2;
+}
+
+// ****************************************************************************
+// Method: FilledBoundaryAttributes::FilledBoundaryAttributes
+//
+// Purpose: 
+//   Copy constructor for the FilledBoundaryAttributes class.
+//
+// Note:       Autogenerated by xml2atts.
+//
+// Programmer: xml2atts
+// Creation:   Thu Aug 25 09:13:18 PDT 2005
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+FilledBoundaryAttributes::FilledBoundaryAttributes(const FilledBoundaryAttributes &obj) : AttributeSubject("isbbiiaas*idbbibadibsi")
+{
+    colorType = obj.colorType;
+    colorTableName = obj.colorTableName;
+    filledFlag = obj.filledFlag;
+    legendFlag = obj.legendFlag;
+    lineStyle = obj.lineStyle;
+    lineWidth = obj.lineWidth;
+    singleColor = obj.singleColor;
+    multiColor = obj.multiColor;
+    boundaryNames = obj.boundaryNames;
+    boundaryType = obj.boundaryType;
+    opacity = obj.opacity;
+    wireframe = obj.wireframe;
+    drawInternal = obj.drawInternal;
+    smoothingLevel = obj.smoothingLevel;
+    cleanZonesOnly = obj.cleanZonesOnly;
+    mixedColor = obj.mixedColor;
+    pointSize = obj.pointSize;
+    pointType = obj.pointType;
+    pointSizeVarEnabled = obj.pointSizeVarEnabled;
+    pointSizeVar = obj.pointSizeVar;
+    pointSizePixels = obj.pointSizePixels;
+
+    SelectAll();
+}
+
+// ****************************************************************************
+// Method: FilledBoundaryAttributes::~FilledBoundaryAttributes
+//
+// Purpose: 
+//   Destructor for the FilledBoundaryAttributes class.
+//
+// Note:       Autogenerated by xml2atts.
+//
+// Programmer: xml2atts
+// Creation:   Thu Aug 25 09:13:18 PDT 2005
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+FilledBoundaryAttributes::~FilledBoundaryAttributes()
+{
+    // nothing here
+}
+
+// ****************************************************************************
+// Method: FilledBoundaryAttributes::operator = 
+//
+// Purpose: 
+//   Assignment operator for the FilledBoundaryAttributes class.
+//
+// Note:       Autogenerated by xml2atts.
+//
+// Programmer: xml2atts
+// Creation:   Thu Aug 25 09:13:18 PDT 2005
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+FilledBoundaryAttributes& 
+FilledBoundaryAttributes::operator = (const FilledBoundaryAttributes &obj)
+{
+    if (this == &obj) return *this;
+    colorType = obj.colorType;
+    colorTableName = obj.colorTableName;
+    filledFlag = obj.filledFlag;
+    legendFlag = obj.legendFlag;
+    lineStyle = obj.lineStyle;
+    lineWidth = obj.lineWidth;
+    singleColor = obj.singleColor;
+    multiColor = obj.multiColor;
+    boundaryNames = obj.boundaryNames;
+    boundaryType = obj.boundaryType;
+    opacity = obj.opacity;
+    wireframe = obj.wireframe;
+    drawInternal = obj.drawInternal;
+    smoothingLevel = obj.smoothingLevel;
+    cleanZonesOnly = obj.cleanZonesOnly;
+    mixedColor = obj.mixedColor;
+    pointSize = obj.pointSize;
+    pointType = obj.pointType;
+    pointSizeVarEnabled = obj.pointSizeVarEnabled;
+    pointSizeVar = obj.pointSizeVar;
+    pointSizePixels = obj.pointSizePixels;
+
+    SelectAll();
+    return *this;
+}
+
+// ****************************************************************************
+// Method: FilledBoundaryAttributes::operator == 
+//
+// Purpose: 
+//   Comparison operator == for the FilledBoundaryAttributes class.
+//
+// Note:       Autogenerated by xml2atts.
+//
+// Programmer: xml2atts
+// Creation:   Thu Aug 25 09:13:18 PDT 2005
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+bool
+FilledBoundaryAttributes::operator == (const FilledBoundaryAttributes &obj) const
+{
+    // Create the return value
+    return ((colorType == obj.colorType) &&
+            (colorTableName == obj.colorTableName) &&
+            (filledFlag == obj.filledFlag) &&
+            (legendFlag == obj.legendFlag) &&
+            (lineStyle == obj.lineStyle) &&
+            (lineWidth == obj.lineWidth) &&
+            (singleColor == obj.singleColor) &&
+            (multiColor == obj.multiColor) &&
+            (boundaryNames == obj.boundaryNames) &&
+            (boundaryType == obj.boundaryType) &&
+            (opacity == obj.opacity) &&
+            (wireframe == obj.wireframe) &&
+            (drawInternal == obj.drawInternal) &&
+            (smoothingLevel == obj.smoothingLevel) &&
+            (cleanZonesOnly == obj.cleanZonesOnly) &&
+            (mixedColor == obj.mixedColor) &&
+            (pointSize == obj.pointSize) &&
+            (pointType == obj.pointType) &&
+            (pointSizeVarEnabled == obj.pointSizeVarEnabled) &&
+            (pointSizeVar == obj.pointSizeVar) &&
+            (pointSizePixels == obj.pointSizePixels));
+}
+
+// ****************************************************************************
+// Method: FilledBoundaryAttributes::operator != 
+//
+// Purpose: 
+//   Comparison operator != for the FilledBoundaryAttributes class.
+//
+// Note:       Autogenerated by xml2atts.
+//
+// Programmer: xml2atts
+// Creation:   Thu Aug 25 09:13:18 PDT 2005
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+bool
+FilledBoundaryAttributes::operator != (const FilledBoundaryAttributes &obj) const
+{
+    return !(this->operator == (obj));
+}
+
+// ****************************************************************************
+// Method: FilledBoundaryAttributes::TypeName
+//
+// Purpose: 
+//   Type name method for the FilledBoundaryAttributes class.
+//
+// Note:       Autogenerated by xml2atts.
+//
+// Programmer: xml2atts
+// Creation:   Thu Aug 25 09:13:18 PDT 2005
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+const std::string
+FilledBoundaryAttributes::TypeName() const
+{
+    return "FilledBoundaryAttributes";
+}
+
+// ****************************************************************************
+// Method: FilledBoundaryAttributes::CopyAttributes
+//
+// Purpose: 
+//   CopyAttributes method for the FilledBoundaryAttributes class.
+//
+// Note:       Autogenerated by xml2atts.
+//
+// Programmer: xml2atts
+// Creation:   Thu Aug 25 09:13:18 PDT 2005
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+bool
+FilledBoundaryAttributes::CopyAttributes(const AttributeGroup *atts)
+{
+    if(TypeName() != atts->TypeName())
+        return false;
+
+    // Call assignment operator.
+    const FilledBoundaryAttributes *tmp = (const FilledBoundaryAttributes *)atts;
+    *this = *tmp;
+
+    return true;
+}
+
+// ****************************************************************************
+// Method: FilledBoundaryAttributes::CreateCompatible
+//
+// Purpose: 
+//   CreateCompatible method for the FilledBoundaryAttributes class.
+//
+// Note:       Autogenerated by xml2atts.
+//
+// Programmer: xml2atts
+// Creation:   Thu Aug 25 09:13:18 PDT 2005
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+AttributeSubject *
+FilledBoundaryAttributes::CreateCompatible(const std::string &tname) const
+{
+    AttributeSubject *retval = 0;
+    if(TypeName() == tname)
+        retval = new FilledBoundaryAttributes(*this);
+    // Other cases could go here too. 
+
+    return retval;
+}
+
+// ****************************************************************************
+// Method: FilledBoundaryAttributes::NewInstance
+//
+// Purpose: 
+//   NewInstance method for the FilledBoundaryAttributes class.
+//
+// Note:       Autogenerated by xml2atts.
+//
+// Programmer: xml2atts
+// Creation:   Thu Aug 25 09:13:18 PDT 2005
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+AttributeSubject *
+FilledBoundaryAttributes::NewInstance(bool copy) const
+{
+    AttributeSubject *retval = 0;
+    if(copy)
+        retval = new FilledBoundaryAttributes(*this);
+    else
+        retval = new FilledBoundaryAttributes;
+
+    return retval;
+}
+
+// ****************************************************************************
+// Method: FilledBoundaryAttributes::SelectAll
+//
+// Purpose: 
+//   Selects all attributes.
+//
+// Note:       Autogenerated by xml2atts.
+//
+// Programmer: xml2atts
+// Creation:   Thu Aug 25 09:13:18 PDT 2005
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+void
+FilledBoundaryAttributes::SelectAll()
+{
+    Select(0, (void *)&colorType);
+    Select(1, (void *)&colorTableName);
+    Select(2, (void *)&filledFlag);
+    Select(3, (void *)&legendFlag);
+    Select(4, (void *)&lineStyle);
+    Select(5, (void *)&lineWidth);
+    Select(6, (void *)&singleColor);
+    Select(7, (void *)&multiColor);
+    Select(8, (void *)&boundaryNames);
+    Select(9, (void *)&boundaryType);
+    Select(10, (void *)&opacity);
+    Select(11, (void *)&wireframe);
+    Select(12, (void *)&drawInternal);
+    Select(13, (void *)&smoothingLevel);
+    Select(14, (void *)&cleanZonesOnly);
+    Select(15, (void *)&mixedColor);
+    Select(16, (void *)&pointSize);
+    Select(17, (void *)&pointType);
+    Select(18, (void *)&pointSizeVarEnabled);
+    Select(19, (void *)&pointSizeVar);
+    Select(20, (void *)&pointSizePixels);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Persistence methods
+///////////////////////////////////////////////////////////////////////////////
+
+// ****************************************************************************
+// Method: FilledBoundaryAttributes::CreateNode
+//
+// Purpose: 
+//   This method creates a DataNode representation of the object so it can be saved to a config file.
+//
+// Note:       Autogenerated by xml2atts.
+//
+// Programmer: xml2atts
+// Creation:   Thu Aug 25 09:13:18 PDT 2005
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+bool
+FilledBoundaryAttributes::CreateNode(DataNode *parentNode, bool completeSave, bool forceAdd)
+{
+    if(parentNode == 0)
+        return false;
+
+    FilledBoundaryAttributes defaultObject;
+    bool addToParent = false;
+    // Create a node for FilledBoundaryAttributes.
+    DataNode *node = new DataNode("FilledBoundaryAttributes");
+
+    if(completeSave || !FieldsEqual(0, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("colorType", ColoringMethod_ToString(colorType)));
+    }
+
+    if(completeSave || !FieldsEqual(1, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("colorTableName", colorTableName));
+    }
+
+    if(completeSave || !FieldsEqual(2, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("filledFlag", filledFlag));
+    }
+
+    if(completeSave || !FieldsEqual(3, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("legendFlag", legendFlag));
+    }
+
+    if(completeSave || !FieldsEqual(4, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("lineStyle", lineStyle));
+    }
+
+    if(completeSave || !FieldsEqual(5, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("lineWidth", lineWidth));
+    }
+
+        DataNode *singleColorNode = new DataNode("singleColor");
+        if(singleColor.CreateNode(singleColorNode, completeSave, true))
+        {
+            addToParent = true;
+            node->AddNode(singleColorNode);
+        }
+        else
+            delete singleColorNode;
+    if(completeSave || !FieldsEqual(7, &defaultObject))
+    {
+        DataNode *multiColorNode = new DataNode("multiColor");
+        if(multiColor.CreateNode(multiColorNode, completeSave, false))
+        {
+            addToParent = true;
+            node->AddNode(multiColorNode);
+        }
+        else
+            delete multiColorNode;
+    }
+
+    if(completeSave || !FieldsEqual(8, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("boundaryNames", boundaryNames));
+    }
+
+    if(completeSave || !FieldsEqual(9, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("boundaryType", Boundary_Type_ToString(boundaryType)));
+    }
+
+    if(completeSave || !FieldsEqual(10, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("opacity", opacity));
+    }
+
+    if(completeSave || !FieldsEqual(11, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("wireframe", wireframe));
+    }
+
+    if(completeSave || !FieldsEqual(12, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("drawInternal", drawInternal));
+    }
+
+    if(completeSave || !FieldsEqual(13, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("smoothingLevel", smoothingLevel));
+    }
+
+    if(completeSave || !FieldsEqual(14, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("cleanZonesOnly", cleanZonesOnly));
+    }
+
+        DataNode *mixedColorNode = new DataNode("mixedColor");
+        if(mixedColor.CreateNode(mixedColorNode, completeSave, true))
+        {
+            addToParent = true;
+            node->AddNode(mixedColorNode);
+        }
+        else
+            delete mixedColorNode;
+    if(completeSave || !FieldsEqual(16, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("pointSize", pointSize));
+    }
+
+    if(completeSave || !FieldsEqual(17, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("pointType", PointType_ToString(pointType)));
+    }
+
+    if(completeSave || !FieldsEqual(18, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("pointSizeVarEnabled", pointSizeVarEnabled));
+    }
+
+    if(completeSave || !FieldsEqual(19, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("pointSizeVar", pointSizeVar));
+    }
+
+    if(completeSave || !FieldsEqual(20, &defaultObject))
+    {
+        addToParent = true;
+        node->AddNode(new DataNode("pointSizePixels", pointSizePixels));
+    }
+
+
+    // Add the node to the parent node.
+    if(addToParent || forceAdd)
+        parentNode->AddNode(node);
+    else
+        delete node;
+
+    return (addToParent || forceAdd);
+}
+
+// ****************************************************************************
+// Method: FilledBoundaryAttributes::SetFromNode
+//
+// Purpose: 
+//   This method sets attributes in this object from values in a DataNode representation of the object.
+//
+// Note:       Autogenerated by xml2atts.
+//
+// Programmer: xml2atts
+// Creation:   Thu Aug 25 09:13:18 PDT 2005
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+void
+FilledBoundaryAttributes::SetFromNode(DataNode *parentNode)
+{
+    int i;
+    if(parentNode == 0)
+        return;
+
+    DataNode *searchNode = parentNode->GetNode("FilledBoundaryAttributes");
+    if(searchNode == 0)
+        return;
+
+    DataNode *node;
+    if((node = searchNode->GetNode("colorType")) != 0)
+    {
+        // Allow enums to be int or string in the config file
+        if(node->GetNodeType() == INT_NODE)
+        {
+            int ival = node->AsInt();
+            if(ival >= 0 && ival < 3)
+                SetColorType(ColoringMethod(ival));
+        }
+        else if(node->GetNodeType() == STRING_NODE)
+        {
+            ColoringMethod value;
+            if(ColoringMethod_FromString(node->AsString(), value))
+                SetColorType(value);
+        }
+    }
+    if((node = searchNode->GetNode("colorTableName")) != 0)
+        SetColorTableName(node->AsString());
+    if((node = searchNode->GetNode("filledFlag")) != 0)
+        SetFilledFlag(node->AsBool());
+    if((node = searchNode->GetNode("legendFlag")) != 0)
+        SetLegendFlag(node->AsBool());
+    if((node = searchNode->GetNode("lineStyle")) != 0)
+        SetLineStyle(node->AsInt());
+    if((node = searchNode->GetNode("lineWidth")) != 0)
+        SetLineWidth(node->AsInt());
+    if((node = searchNode->GetNode("singleColor")) != 0)
+        singleColor.SetFromNode(node);
+    if((node = searchNode->GetNode("multiColor")) != 0)
+        multiColor.SetFromNode(node);
+    if((node = searchNode->GetNode("boundaryNames")) != 0)
+        SetBoundaryNames(node->AsStringVector());
+    if((node = searchNode->GetNode("boundaryType")) != 0)
+    {
+        // Allow enums to be int or string in the config file
+        if(node->GetNodeType() == INT_NODE)
+        {
+            int ival = node->AsInt();
+            if(ival >= 0 && ival < 4)
+                SetBoundaryType(Boundary_Type(ival));
+        }
+        else if(node->GetNodeType() == STRING_NODE)
+        {
+            Boundary_Type value;
+            if(Boundary_Type_FromString(node->AsString(), value))
+                SetBoundaryType(value);
+        }
+    }
+    if((node = searchNode->GetNode("opacity")) != 0)
+        SetOpacity(node->AsDouble());
+    if((node = searchNode->GetNode("wireframe")) != 0)
+        SetWireframe(node->AsBool());
+    if((node = searchNode->GetNode("drawInternal")) != 0)
+        SetDrawInternal(node->AsBool());
+    if((node = searchNode->GetNode("smoothingLevel")) != 0)
+        SetSmoothingLevel(node->AsInt());
+    if((node = searchNode->GetNode("cleanZonesOnly")) != 0)
+        SetCleanZonesOnly(node->AsBool());
+    if((node = searchNode->GetNode("mixedColor")) != 0)
+        mixedColor.SetFromNode(node);
+    if((node = searchNode->GetNode("pointSize")) != 0)
+        SetPointSize(node->AsDouble());
+    if((node = searchNode->GetNode("pointType")) != 0)
+    {
+        // Allow enums to be int or string in the config file
+        if(node->GetNodeType() == INT_NODE)
+        {
+            int ival = node->AsInt();
+            if(ival >= 0 && ival < 5)
+                SetPointType(PointType(ival));
+        }
+        else if(node->GetNodeType() == STRING_NODE)
+        {
+            PointType value;
+            if(PointType_FromString(node->AsString(), value))
+                SetPointType(value);
+        }
+    }
+    if((node = searchNode->GetNode("pointSizeVarEnabled")) != 0)
+        SetPointSizeVarEnabled(node->AsBool());
+    if((node = searchNode->GetNode("pointSizeVar")) != 0)
+        SetPointSizeVar(node->AsString());
+    if((node = searchNode->GetNode("pointSizePixels")) != 0)
+        SetPointSizePixels(node->AsInt());
+
+    // We are no longer using MultiColor as the source for the "mixed"
+    // color (in clean zones only), but someone may have saved their
+    // settings with the "mixed" color in the list.  Remove it if it's
+    // in there.
+    //
+    // NOTE: This code can be removed in a few months, as soon as
+    // 1.3 is at least a few versions old, since it represents a little
+    // bit of a hack.
+    bool done = false;
+    while (!done)
+    {
+        done = true;
+        int index;
+        for (index=0; index<boundaryNames.size(); index++)
+        {
+            if (boundaryNames[index] == "mixed")
+            {
+                done = false;
+                break;
+            }
+        }
+        if (!done)
+        {
+            multiColor.RemoveColorAttribute(index);
+            for (int i=index+1; i<boundaryNames.size(); i++)
+                boundaryNames[i-1] = boundaryNames[i];
+            boundaryNames.resize(boundaryNames.size() - 1);
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Set property methods
+///////////////////////////////////////////////////////////////////////////////
+
+void
+FilledBoundaryAttributes::SetColorType(FilledBoundaryAttributes::ColoringMethod colorType_)
+{
+    colorType = colorType_;
+    Select(0, (void *)&colorType);
+}
+
+void
+FilledBoundaryAttributes::SetColorTableName(const std::string &colorTableName_)
+{
+    colorTableName = colorTableName_;
+    Select(1, (void *)&colorTableName);
+}
+
+void
+FilledBoundaryAttributes::SetFilledFlag(bool filledFlag_)
+{
+    filledFlag = filledFlag_;
+    Select(2, (void *)&filledFlag);
+}
+
+void
+FilledBoundaryAttributes::SetLegendFlag(bool legendFlag_)
+{
+    legendFlag = legendFlag_;
+    Select(3, (void *)&legendFlag);
+}
+
+void
+FilledBoundaryAttributes::SetLineStyle(int lineStyle_)
+{
+    lineStyle = lineStyle_;
+    Select(4, (void *)&lineStyle);
+}
+
+void
+FilledBoundaryAttributes::SetLineWidth(int lineWidth_)
+{
+    lineWidth = lineWidth_;
+    Select(5, (void *)&lineWidth);
+}
+
+void
+FilledBoundaryAttributes::SetSingleColor(const ColorAttribute &singleColor_)
+{
+    singleColor = singleColor_;
+    Select(6, (void *)&singleColor);
+}
+
+void
+FilledBoundaryAttributes::SetMultiColor(const ColorAttributeList &multiColor_)
+{
+    multiColor = multiColor_;
+    Select(7, (void *)&multiColor);
+}
+
+void
+FilledBoundaryAttributes::SetBoundaryNames(const stringVector &boundaryNames_)
+{
+    boundaryNames = boundaryNames_;
+    Select(8, (void *)&boundaryNames);
+}
+
+void
+FilledBoundaryAttributes::SetBoundaryType(FilledBoundaryAttributes::Boundary_Type boundaryType_)
+{
+    boundaryType = boundaryType_;
+    Select(9, (void *)&boundaryType);
+}
+
+void
+FilledBoundaryAttributes::SetOpacity(double opacity_)
+{
+    opacity = opacity_;
+    Select(10, (void *)&opacity);
+}
+
+void
+FilledBoundaryAttributes::SetWireframe(bool wireframe_)
+{
+    wireframe = wireframe_;
+    Select(11, (void *)&wireframe);
+}
+
+void
+FilledBoundaryAttributes::SetDrawInternal(bool drawInternal_)
+{
+    drawInternal = drawInternal_;
+    Select(12, (void *)&drawInternal);
+}
+
+void
+FilledBoundaryAttributes::SetSmoothingLevel(int smoothingLevel_)
+{
+    smoothingLevel = smoothingLevel_;
+    Select(13, (void *)&smoothingLevel);
+}
+
+void
+FilledBoundaryAttributes::SetCleanZonesOnly(bool cleanZonesOnly_)
+{
+    cleanZonesOnly = cleanZonesOnly_;
+    Select(14, (void *)&cleanZonesOnly);
+}
+
+void
+FilledBoundaryAttributes::SetMixedColor(const ColorAttribute &mixedColor_)
+{
+    mixedColor = mixedColor_;
+    Select(15, (void *)&mixedColor);
+}
+
+void
+FilledBoundaryAttributes::SetPointSize(double pointSize_)
+{
+    pointSize = pointSize_;
+    Select(16, (void *)&pointSize);
+}
+
+void
+FilledBoundaryAttributes::SetPointType(FilledBoundaryAttributes::PointType pointType_)
+{
+    pointType = pointType_;
+    Select(17, (void *)&pointType);
+}
+
+void
+FilledBoundaryAttributes::SetPointSizeVarEnabled(bool pointSizeVarEnabled_)
+{
+    pointSizeVarEnabled = pointSizeVarEnabled_;
+    Select(18, (void *)&pointSizeVarEnabled);
+}
+
+void
+FilledBoundaryAttributes::SetPointSizeVar(const std::string &pointSizeVar_)
+{
+    pointSizeVar = pointSizeVar_;
+    Select(19, (void *)&pointSizeVar);
+}
+
+void
+FilledBoundaryAttributes::SetPointSizePixels(int pointSizePixels_)
+{
+    pointSizePixels = pointSizePixels_;
+    Select(20, (void *)&pointSizePixels);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Get property methods
+///////////////////////////////////////////////////////////////////////////////
+
+FilledBoundaryAttributes::ColoringMethod
+FilledBoundaryAttributes::GetColorType() const
+{
+    return ColoringMethod(colorType);
+}
+
+const std::string &
+FilledBoundaryAttributes::GetColorTableName() const
+{
+    return colorTableName;
+}
+
+std::string &
+FilledBoundaryAttributes::GetColorTableName()
+{
+    return colorTableName;
+}
+
+bool
+FilledBoundaryAttributes::GetFilledFlag() const
+{
+    return filledFlag;
+}
+
+bool
+FilledBoundaryAttributes::GetLegendFlag() const
+{
+    return legendFlag;
+}
+
+int
+FilledBoundaryAttributes::GetLineStyle() const
+{
+    return lineStyle;
+}
+
+int
+FilledBoundaryAttributes::GetLineWidth() const
+{
+    return lineWidth;
+}
+
+const ColorAttribute &
+FilledBoundaryAttributes::GetSingleColor() const
+{
+    return singleColor;
+}
+
+ColorAttribute &
+FilledBoundaryAttributes::GetSingleColor()
+{
+    return singleColor;
+}
+
+const ColorAttributeList &
+FilledBoundaryAttributes::GetMultiColor() const
+{
+    return multiColor;
+}
+
+ColorAttributeList &
+FilledBoundaryAttributes::GetMultiColor()
+{
+    return multiColor;
+}
+
+const stringVector &
+FilledBoundaryAttributes::GetBoundaryNames() const
+{
+    return boundaryNames;
+}
+
+stringVector &
+FilledBoundaryAttributes::GetBoundaryNames()
+{
+    return boundaryNames;
+}
+
+FilledBoundaryAttributes::Boundary_Type
+FilledBoundaryAttributes::GetBoundaryType() const
+{
+    return Boundary_Type(boundaryType);
+}
+
+double
+FilledBoundaryAttributes::GetOpacity() const
+{
+    return opacity;
+}
+
+bool
+FilledBoundaryAttributes::GetWireframe() const
+{
+    return wireframe;
+}
+
+bool
+FilledBoundaryAttributes::GetDrawInternal() const
+{
+    return drawInternal;
+}
+
+int
+FilledBoundaryAttributes::GetSmoothingLevel() const
+{
+    return smoothingLevel;
+}
+
+bool
+FilledBoundaryAttributes::GetCleanZonesOnly() const
+{
+    return cleanZonesOnly;
+}
+
+const ColorAttribute &
+FilledBoundaryAttributes::GetMixedColor() const
+{
+    return mixedColor;
+}
+
+ColorAttribute &
+FilledBoundaryAttributes::GetMixedColor()
+{
+    return mixedColor;
+}
+
+double
+FilledBoundaryAttributes::GetPointSize() const
+{
+    return pointSize;
+}
+
+FilledBoundaryAttributes::PointType
+FilledBoundaryAttributes::GetPointType() const
+{
+    return PointType(pointType);
+}
+
+bool
+FilledBoundaryAttributes::GetPointSizeVarEnabled() const
+{
+    return pointSizeVarEnabled;
+}
+
+const std::string &
+FilledBoundaryAttributes::GetPointSizeVar() const
+{
+    return pointSizeVar;
+}
+
+std::string &
+FilledBoundaryAttributes::GetPointSizeVar()
+{
+    return pointSizeVar;
+}
+
+int
+FilledBoundaryAttributes::GetPointSizePixels() const
+{
+    return pointSizePixels;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Select property methods
+///////////////////////////////////////////////////////////////////////////////
+
+void
+FilledBoundaryAttributes::SelectColorTableName()
+{
+    Select(1, (void *)&colorTableName);
+}
+
+void
+FilledBoundaryAttributes::SelectSingleColor()
+{
+    Select(6, (void *)&singleColor);
+}
+
+void
+FilledBoundaryAttributes::SelectMultiColor()
+{
+    Select(7, (void *)&multiColor);
+}
+
+void
+FilledBoundaryAttributes::SelectBoundaryNames()
+{
+    Select(8, (void *)&boundaryNames);
+}
+
+void
+FilledBoundaryAttributes::SelectMixedColor()
+{
+    Select(15, (void *)&mixedColor);
+}
+
+void
+FilledBoundaryAttributes::SelectPointSizeVar()
+{
+    Select(19, (void *)&pointSizeVar);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Keyframing methods
+///////////////////////////////////////////////////////////////////////////////
+
+// ****************************************************************************
+// Method: FilledBoundaryAttributes::GetFieldName
+//
+// Purpose: 
+//   This method returns the name of a field given its index.
+//
+// Note:       Autogenerated by xml2atts.
+//
+// Programmer: xml2atts
+// Creation:   Thu Aug 25 09:13:18 PDT 2005
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+std::string
+FilledBoundaryAttributes::GetFieldName(int index) const
+{
+    switch (index)
+    {
+        case 0:  return "colorType";
+        case 1:  return "Color table";
+        case 2:  return "filledFlag";
+        case 3:  return "legendFlag";
+        case 4:  return "lineStyle";
+        case 5:  return "lineWidth";
+        case 6:  return "singleColor";
+        case 7:  return "multiColor";
+        case 8:  return "boundaryNames";
+        case 9:  return "boundaryType";
+        case 10:  return "opacity";
+        case 11:  return "wireframe";
+        case 12:  return "drawInternal";
+        case 13:  return "Smoothing level";
+        case 14:  return "cleanZonesOnly";
+        case 15:  return "mixedColor";
+        case 16:  return "Point size";
+        case 17:  return "Point Type";
+        case 18:  return "Point size by var enabled";
+        case 19:  return "Point size by var";
+        case 20:  return "Point size pixels";
+        default:  return "invalid index";
+    }
+}
+
+// ****************************************************************************
+// Method: FilledBoundaryAttributes::GetFieldType
+//
+// Purpose: 
+//   This method returns the type of a field given its index.
+//
+// Note:       Autogenerated by xml2atts.
+//
+// Programmer: xml2atts
+// Creation:   Thu Aug 25 09:13:18 PDT 2005
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+AttributeGroup::FieldType
+FilledBoundaryAttributes::GetFieldType(int index) const
+{
+    switch (index)
+    {
+        case 0:  return FieldType_enum;
+        case 1:  return FieldType_colortable;
+        case 2:  return FieldType_bool;
+        case 3:  return FieldType_bool;
+        case 4:  return FieldType_linestyle;
+        case 5:  return FieldType_linewidth;
+        case 6:  return FieldType_color;
+        case 7:  return FieldType_att;
+        case 8:  return FieldType_stringVector;
+        case 9:  return FieldType_enum;
+        case 10:  return FieldType_opacity;
+        case 11:  return FieldType_bool;
+        case 12:  return FieldType_bool;
+        case 13:  return FieldType_int;
+        case 14:  return FieldType_bool;
+        case 15:  return FieldType_color;
+        case 16:  return FieldType_double;
+        case 17:  return FieldType_enum;
+        case 18:  return FieldType_bool;
+        case 19:  return FieldType_variablename;
+        case 20:  return FieldType_int;
+        default:  return FieldType_unknown;
+    }
+}
+
+// ****************************************************************************
+// Method: FilledBoundaryAttributes::GetFieldTypeName
+//
+// Purpose: 
+//   This method returns the name of a field type given its index.
+//
+// Note:       Autogenerated by xml2atts.
+//
+// Programmer: xml2atts
+// Creation:   Thu Aug 25 09:13:18 PDT 2005
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+std::string
+FilledBoundaryAttributes::GetFieldTypeName(int index) const
+{
+    switch (index)
+    {
+        case 0:  return "enum";
+        case 1:  return "colortable";
+        case 2:  return "bool";
+        case 3:  return "bool";
+        case 4:  return "linestyle";
+        case 5:  return "linewidth";
+        case 6:  return "color";
+        case 7:  return "att";
+        case 8:  return "stringVector";
+        case 9:  return "enum";
+        case 10:  return "opacity";
+        case 11:  return "bool";
+        case 12:  return "bool";
+        case 13:  return "int";
+        case 14:  return "bool";
+        case 15:  return "color";
+        case 16:  return "double";
+        case 17:  return "enum";
+        case 18:  return "bool";
+        case 19:  return "variablename";
+        case 20:  return "int";
+        default:  return "invalid index";
+    }
+}
+
+// ****************************************************************************
+// Method: FilledBoundaryAttributes::FieldsEqual
+//
+// Purpose: 
+//   This method compares two fields and return true if they are equal.
+//
+// Note:       Autogenerated by xml2atts.
+//
+// Programmer: xml2atts
+// Creation:   Thu Aug 25 09:13:18 PDT 2005
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+bool
+FilledBoundaryAttributes::FieldsEqual(int index_, const AttributeGroup *rhs) const
+{
+    const FilledBoundaryAttributes &obj = *((const FilledBoundaryAttributes*)rhs);
+    bool retval = false;
+    switch (index_)
+    {
+    case 0:
+        {  // new scope
+        retval = (colorType == obj.colorType);
+        }
+        break;
+    case 1:
+        {  // new scope
+        retval = (colorTableName == obj.colorTableName);
+        }
+        break;
+    case 2:
+        {  // new scope
+        retval = (filledFlag == obj.filledFlag);
+        }
+        break;
+    case 3:
+        {  // new scope
+        retval = (legendFlag == obj.legendFlag);
+        }
+        break;
+    case 4:
+        {  // new scope
+        retval = (lineStyle == obj.lineStyle);
+        }
+        break;
+    case 5:
+        {  // new scope
+        retval = (lineWidth == obj.lineWidth);
+        }
+        break;
+    case 6:
+        {  // new scope
+        retval = (singleColor == obj.singleColor);
+        }
+        break;
+    case 7:
+        {  // new scope
+        retval = (multiColor == obj.multiColor);
+        }
+        break;
+    case 8:
+        {  // new scope
+        retval = (boundaryNames == obj.boundaryNames);
+        }
+        break;
+    case 9:
+        {  // new scope
+        retval = (boundaryType == obj.boundaryType);
+        }
+        break;
+    case 10:
+        {  // new scope
+        retval = (opacity == obj.opacity);
+        }
+        break;
+    case 11:
+        {  // new scope
+        retval = (wireframe == obj.wireframe);
+        }
+        break;
+    case 12:
+        {  // new scope
+        retval = (drawInternal == obj.drawInternal);
+        }
+        break;
+    case 13:
+        {  // new scope
+        retval = (smoothingLevel == obj.smoothingLevel);
+        }
+        break;
+    case 14:
+        {  // new scope
+        retval = (cleanZonesOnly == obj.cleanZonesOnly);
+        }
+        break;
+    case 15:
+        {  // new scope
+        retval = (mixedColor == obj.mixedColor);
+        }
+        break;
+    case 16:
+        {  // new scope
+        retval = (pointSize == obj.pointSize);
+        }
+        break;
+    case 17:
+        {  // new scope
+        retval = (pointType == obj.pointType);
+        }
+        break;
+    case 18:
+        {  // new scope
+        retval = (pointSizeVarEnabled == obj.pointSizeVarEnabled);
+        }
+        break;
+    case 19:
+        {  // new scope
+        retval = (pointSizeVar == obj.pointSizeVar);
+        }
+        break;
+    case 20:
+        {  // new scope
+        retval = (pointSizePixels == obj.pointSizePixels);
+        }
+        break;
+    default: retval = false;
+    }
+
+    return retval;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// User-defined methods.
+///////////////////////////////////////////////////////////////////////////////
+
+// ****************************************************************************
+// Modifications:
+//    Jeremy Meredith, Mon Dec  9 16:30:54 PST 2002
+//    Added smoothing level.
+//
+//    Jeremy Meredith, Fri Jun 13 16:58:16 PDT 2003
+//    Added cleanZonesOnly.
+//
+//    Kathleen Bonnell, Wed Nov 10 09:22:35 PST 2004 
+//    Added needSecondaryVar.
+//
+// ****************************************************************************
+bool
+FilledBoundaryAttributes::ChangesRequireRecalculation(const FilledBoundaryAttributes &obj)
+{
+    bool needSecondaryVar = obj.pointSizeVarEnabled &&
+                            pointSizeVar != obj.pointSizeVar &&
+                            obj.pointSizeVar != "default" && 
+                            obj.pointSizeVar != "" &&
+                            obj.pointSizeVar != "\0"; 
+
+    return ((filledFlag != obj.filledFlag) ||
+            (boundaryType != obj.boundaryType) || 
+            (boundaryNames != obj.boundaryNames) ||
+            (wireframe != obj.wireframe) ||
+            (drawInternal != obj.drawInternal) ||
+            (smoothingLevel != obj.smoothingLevel) ||
+            (cleanZonesOnly != obj.cleanZonesOnly) ||
+            needSecondaryVar);
+}
+
+bool
+FilledBoundaryAttributes::VarChangeRequiresReset()
+{ 
+    return true;
+}
+

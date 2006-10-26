@@ -1,0 +1,97 @@
+Function: ChangesRequireRecalculation
+Declaration: bool ChangesRequireRecalculation(const PseudocolorAttributes &) const;
+Definition:
+// ****************************************************************************
+// Modifications:
+//
+//   Kathleen Bonnell, Fri Aug 31 08:50:30 PDT 2001 
+//   Only centering changes require the plot to be recalculated.
+//   Removed scaling, pointsize and skewFactor from test. 
+//
+//   Hank Childs, Sun Jun 23 23:54:56 PDT 2002
+//   Also recalculate if the point size changes.
+//
+//   Jeremy Meredith, Mon Dec  9 16:30:54 PST 2002
+//   Added smoothing level.
+//
+//   Jeremy Meredith, Fri Dec 20 11:33:43 PST 2002
+//   Added point size variable and its enabled flag.
+//
+//   Hank Childs, Thu Aug 21 22:28:25 PDT 2003
+//   Added pointType.
+//
+//   Kathleen Bonnell, Wed Aug 18 18:08:52 PDT 2004 
+//   Removed pointSize, pointType from test.  Added new conditions for
+//   recalculation when pointSizeVar or pointSizeVarEnabled have changed. 
+//
+//   Kathleen Bonnell, Fri Nov 12 11:11:41 PST 2004 
+//   Modified determination of when secondary var requires recalc. 
+//
+// ****************************************************************************
+bool
+PseudocolorAttributes::ChangesRequireRecalculation(const PseudocolorAttributes &obj) const
+{
+   bool needSecondaryVar = obj.pointSizeVarEnabled &&
+                           pointSizeVar != obj.pointSizeVar &&
+                           obj.pointSizeVar != "default" && 
+                           obj.pointSizeVar != "" &&
+                           obj.pointSizeVar != "\0"; 
+
+    return (centering != obj.centering ||
+            needSecondaryVar ||
+            smoothingLevel != obj.smoothingLevel); 
+
+}
+
+Function: Print
+Declaration: void Print(ostream &, bool) const;
+Definition:
+// ****************************************************************************
+// Method: PseudocolorAttributes::Print
+//
+// Purpose: Print the contents
+//   
+// Programmer: Jeremy Meredith
+// Creation:   September 22, 2000
+//
+// Modifications:
+//   Kathleen Bonnell, Wed Dec 13 13:17:26 PST 2000
+//   Added opacity.
+//
+//   Brad Whitlock, Tue Apr 23 12:03:27 PDT 2002
+//   Ported to windows.
+//
+// ****************************************************************************
+
+void
+PseudocolorAttributes::Print(ostream &out, bool selected_only) const
+{
+    out << "{";
+
+    for(int i = 0; i < NumAttributes(); ++i)
+    {
+        if(selected_only && !IsSelected(i))
+            continue;
+
+        switch(i)
+        {
+          case  0: out << "legendFlag=" << GetLegendFlag();    break;
+          case  1: out << "lightingFlag=" << GetLightingFlag();break;
+          case  2: out << "minFlag=" << GetMinFlag();          break;
+          case  3: out << "maxFlag=" << GetMaxFlag();          break;
+          case  4: out << "centering=" << GetCentering();      break;
+          case  5: out << "scaling=" << GetScaling();          break;
+          case  6: out << "limitsMode=" << GetLimitsMode();    break;
+          case  7: out << "min=" << GetMin();                  break;
+          case  8: out << "max=" << GetMax();                  break;
+          case  9: out << "pointSize=" << GetPointSize();      break;
+          case 10: out << "skewFactor=" << GetSkewFactor();    break;
+          case 11: out << "opacity=" << GetOpacity();          break;
+          case 12: out << "colorTableName=" << GetColorTableName().c_str(); break;
+        }
+        out << ",";
+    }
+
+    out << "}";
+}
+

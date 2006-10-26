@@ -1,0 +1,47 @@
+#!/bin/sh
+
+var_startdir=`pwd`
+
+## check the input
+
+if test -z $1 ; then
+	echo "Missing installation prefix variable!"
+	exit 1;
+else
+	var_prefix=$1
+fi
+
+## Package-specific variables
+
+ccfits_url=http://heasarc.gsfc.nasa.gov/fitsio/CCfits/CCfits-1.5.tar.gz
+ccfits_src=CCfits
+
+echo "var_prefix = $var_prefix";
+echo "ccfits_url = $ccfits_url";
+echo "ccfits_src = $ccfits_src";
+
+## Fetch the source code
+
+echo "[CCFits] Fetching source from FTP server ..." ;
+wget -c $ccfits_url
+
+## Extract the tar ball
+
+echo "[CCFits] Extracting tar ball ..." ;
+tar -xzf CCfits*.gz ;
+
+## Configure and build the package
+
+echo "[CCFits] Configuring and building package ..." ;
+
+cd $ccfits_src
+./configure --with-cfitsio=$var_prefix --prefix=$var_prefix
+make
+make install ;
+
+echo "[CCFits] Installation of CCfits completed.";
+
+## clean up directory
+
+cd $var_startdir
+rm -rf CCfits-1.5.tar.gz $ccfits_src

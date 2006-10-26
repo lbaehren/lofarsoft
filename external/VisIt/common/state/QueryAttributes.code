@@ -1,0 +1,79 @@
+Function: Reset
+Declaration: void Reset();
+Definition:
+void
+QueryAttributes::Reset()
+{
+    name    = " ";
+    resultsMessage  = " ";
+    xUnits = "";
+    yUnits = "";
+    if (!variables.empty())
+    {
+        variables.clear();
+        variables.push_back("default");
+    }
+    if (!varTypes.empty())
+    {
+         varTypes.clear();
+    }
+    worldPoint[0] = 0.;
+    worldPoint[1] = 0.;
+    worldPoint[2] = 0.;
+    domain = -1;
+    element = -1;
+    elementType = Zone;
+    if (!resultsValue.empty())
+    {
+        resultsValue.clear();
+        resultsValue.push_back(0.);
+    }
+    pipeIndex = -1;
+ 
+    SelectAll();
+}
+
+Function: PrintSelf
+Declaration: void PrintSelf(ostream &os);
+Definition:
+void
+QueryAttributes::PrintSelf(ostream &os)
+{
+    int i;
+    os << "\n" << name.c_str() << ":  ";
+    os << "selected variables: ";
+    for (i = 0; i < variables.size(); i++)
+        os << variables[i].c_str() << "  ";
+    os << "\n";
+    os << "Results: <" << resultsMessage.c_str() << ">\n";
+    os << "World point: <" << worldPoint[0] << ", " << worldPoint[1] 
+       << ", " << worldPoint[2] << ">\n"; 
+    os << "Domain:      " << domain << "\n";
+    os << "Element:        " << element << ")\n";
+    if (elementType == Zone)
+    os << "Element type is Zone " << endl;
+    else
+    os << "Element type is Node " << endl;
+}
+
+Function: SetResultsValue
+Declaration: void SetResultsValue(const double);
+Definition:
+void
+QueryAttributes::SetResultsValue(const double val)
+{
+    resultsValue[0] = val;    
+}
+
+Function: SetResultsValues
+Declaration: void SetResultsValues(const double*, const int);
+Definition:
+void
+QueryAttributes::SetResultsValues(const double *vals, const int numVals)
+{
+    int i;
+    resultsValue.clear();
+    for (i = 0; i < numVals; ++i)
+        resultsValue.push_back(vals[i]);
+}
+

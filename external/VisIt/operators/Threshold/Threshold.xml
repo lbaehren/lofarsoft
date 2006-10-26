@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+  <Plugin name="Threshold" type="operator" label="Threshold" version="1.0" iconFile="Threshold.xpm">
+    <Attribute name="ThresholdAttributes" purpose="This class contains attributes for the threshold operator." persistent="true">
+      <Enum name="OutputMeshType">
+        InputZones
+        PointMesh
+      </Enum>
+      <Enum name="ZonePortion">
+        EntireZone
+        PartOfZone
+      </Enum>
+      <Field name="outputMeshType" label="outputMeshType" type="int">
+        InputZones
+      </Field>
+      <Field name="listedVarNames" label="listedVarNames" type="stringVector">
+	default
+      </Field>
+      <Field name="shownVarPosition" label="shownVarPosition" type="int">
+        0
+      </Field>
+      <Field name="zonePortions" label="zonePortions" type="intVector">
+	PartOfZone
+      </Field>
+      <Field name="lowerBounds" label="lowerBounds" type="doubleVector">
+        -1e+37
+      </Field>
+      <Field name="upperBounds" label="upperBounds" type="doubleVector">
+	1e+37
+      </Field>
+      <Field name="defaultVarName" label="defaultVarName" type="string">
+	(default)
+      </Field>
+    </Attribute>
+  </Plugin>

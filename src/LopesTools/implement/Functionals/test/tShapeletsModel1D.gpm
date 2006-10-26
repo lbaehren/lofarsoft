@@ -1,0 +1,9 @@
+set grid;
+
+set xlabel 'x'
+set ylabel 'f(x)'
+
+plot 'tModelShapelets1D.data1' u 2:3 w l,\
+	'tModelShapelets1D.data1' u 2:4 w l;
+
+pause -1;

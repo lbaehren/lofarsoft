@@ -1,0 +1,25 @@
+Constant: DEFAULT_SCALABLE_AUTO_THRESHOLD
+Declaration: static const int DEFAULT_SCALABLE_AUTO_THRESHOLD;
+Definition: const int RenderingAttributes::DEFAULT_SCALABLE_AUTO_THRESHOLD = 2000000;
+
+
+Constant: DEFAULT_SCALABLE_ACTIVATION_MODE
+Declaration: static const int DEFAULT_SCALABLE_ACTIVATION_MODE;
+Definition: const int RenderingAttributes::DEFAULT_SCALABLE_ACTIVATION_MODE = Auto;
+
+
+Function: GetEffectiveScalableThreshold
+Declaration: static int GetEffectiveScalableThreshold(TriStateMode mode, int autoThreshold);
+Definition:
+int RenderingAttributes::GetEffectiveScalableThreshold(TriStateMode mode, int autoThreshold)
+{
+    if (mode == Never)
+        return INT_MAX;
+    else if (mode == Always)
+        return 0;
+    else if (mode == Auto)
+        return autoThreshold;
+    else
+        return -1;
+}
+

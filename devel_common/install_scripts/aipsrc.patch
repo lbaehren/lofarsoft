@@ -1,0 +1,29 @@
+--- /sw/share/casa/code/install/darwin/aipsrc.template	2006-09-11 01:41:58.000000000 +0200
++++ /sw/share/casa/darwin/local/aipsrc	2006-09-11 01:50:50.000000000 +0200
+@@ -36,13 +36,21 @@
+ #=============================================================================
+ # AIPS++ user and group account names (in the form "user.group"):
+ #-----------------------------------------------------------------------------
+-# account*manager:		DEFINE_ME
+-# account*programmer:		DEFINE_ME
+-# account*user:			DEFINE_ME
++account*manager: root.wheel
++account*programmer: root.wheel
++account*user: root.wheel
+ 
+ #-----------------------------------------------------------------------------
+ # PostScript printer definitions (recognized paper types are "A4", "A3", and
+ # "letter").
+ #-----------------------------------------------------------------------------
+-# printer*default:		DEFINE_ME
+-# printer*paper:		DEFINE_ME
++# printer*default:		
++# printer*paper:		A4
++
++#----------------------------------------------------------------
++# Configure added the following estimates of required parameters:
++# system memory, number of processors.
++# You must change any that have the word 'define_me' in uppercase
++
++system.resources.memory: 1024
++system.resources.numcpu: 1

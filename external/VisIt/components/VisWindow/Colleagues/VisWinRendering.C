@@ -1,0 +1,1797 @@
+/*****************************************************************************
+*
+* Copyright (c) 2000 - 2006, The Regents of the University of California
+* Produced at the Lawrence Livermore National Laboratory
+* All rights reserved.
+*
+* This file is part of VisIt. For details, see http://www.llnl.gov/visit/. The
+* full copyright notice is contained in the file COPYRIGHT located at the root
+* of the VisIt distribution or at http://www.llnl.gov/visit/copyright.html.
+*
+* Redistribution  and  use  in  source  and  binary  forms,  with  or  without
+* modification, are permitted provided that the following conditions are met:
+*
+*  - Redistributions of  source code must  retain the above  copyright notice,
+*    this list of conditions and the disclaimer below.
+*  - Redistributions in binary form must reproduce the above copyright notice,
+*    this  list of  conditions  and  the  disclaimer (as noted below)  in  the
+*    documentation and/or materials provided with the distribution.
+*  - Neither the name of the UC/LLNL nor  the names of its contributors may be
+*    used to  endorse or  promote products derived from  this software without
+*    specific prior written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT  HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR  IMPLIED WARRANTIES, INCLUDING,  BUT NOT  LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND  FITNESS FOR A PARTICULAR  PURPOSE
+* ARE  DISCLAIMED.  IN  NO  EVENT  SHALL  THE  REGENTS  OF  THE  UNIVERSITY OF
+* CALIFORNIA, THE U.S.  DEPARTMENT  OF  ENERGY OR CONTRIBUTORS BE  LIABLE  FOR
+* ANY  DIRECT,  INDIRECT,  INCIDENTAL,  SPECIAL,  EXEMPLARY,  OR CONSEQUENTIAL
+* DAMAGES (INCLUDING, BUT NOT  LIMITED TO, PROCUREMENT OF  SUBSTITUTE GOODS OR
+* SERVICES; LOSS OF  USE, DATA, OR PROFITS; OR  BUSINESS INTERRUPTION) HOWEVER
+* CAUSED  AND  ON  ANY  THEORY  OF  LIABILITY,  WHETHER  IN  CONTRACT,  STRICT
+* LIABILITY, OR TORT  (INCLUDING NEGLIGENCE OR OTHERWISE)  ARISING IN ANY  WAY
+* OUT OF THE  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+* DAMAGE.
+*
+*****************************************************************************/
+
+// ************************************************************************* //
+//                             VisWinRendering.C                             //
+// ************************************************************************* //
+
+#include <VisWinRendering.h>
+
+#include <vtkCullerCollection.h>
+#include <vtkImageData.h>
+#include <vtkMapper.h>
+#include <vtkPolyData.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkInteractorStyle.h>
+
+#include <RenderingAttributes.h>
+
+#include <VisWindow.h>
+#include <VisWindowColleagueProxy.h>
+
+#include <avtCallback.h>
+#include <avtSourceFromImage.h>
+
+#include <ImproperUseException.h>
+#include <DebugStream.h>
+#include <TimingsManager.h>
+
+// HACK HACK
+#include <GL/gl.h>
+extern "C" {
+#if defined(_WIN32)
+// On Windows, we get these functions from a DLL so we have to have
+// the proper API macros.
+GLAPI void GLAPIENTRY mglDepthMask(GLboolean);
+GLAPI void GLAPIENTRY mglColorMask(GLboolean,GLboolean,GLboolean,GLboolean);
+#else
+void mglDepthMask(GLboolean);
+void mglColorMask(GLboolean,GLboolean,GLboolean,GLboolean);
+#endif
+}
+
+static void RemoveCullers(vtkRenderer *);
+
+bool VisWinRendering::stereoEnabled = false;
+
+// ****************************************************************************
+//  Method: VisWinRendering constructor
+//
+//  Arguments:
+//      p    A proxy that allows this colleague friend access to the VisWindow.
+//      c    The application context that the window should be associated with.
+//
+//  Programmer: Hank Childs
+//  Creation:   May 19, 2000
+//
+//  Modification:
+//
+//    Hank Childs, Thu Jul  6 14:06:15 PDT 2000
+//    Initialized needsUpdate, realized and set size and location.  Cached 
+//    context.  Removed call to SetUpViewport.  Pushed code to create rendering
+//    pipeline up to this function.
+//
+//    Hank Childs, Tue Aug  1 16:24:09 PDT 2000
+//    Added initialization of foreground renderer.  Added code to have 
+//    transparent renderers instead of "sensitive" setup I had before.
+//
+//    Hank Childs, Fri Aug  4 15:00:17 PDT 2000
+//    Removed code to have renderers be set to specific viewports and changed
+//    way the layers were established to meet new interface that doesn't
+//    partition the z-buffer.
+//
+//    Hank Childs, Fri Aug 31 09:18:25 PDT 2001
+//    Removed the cullers to allow for small domains.
+//
+//    Brad Whitlock, Thu Sep 19 14:26:49 PST 2002
+//    Initialized some new data members.
+//
+//    Kathleen Bonnell, Wed Dec  4 17:05:24 PST 2002  
+//    Removed numAntialiasingFrames, no longer required. 
+//
+//    Eric Brugger, Thu Dec 12 13:27:42 PST 2002
+//    Initialized some new data members added to for scalable rendering.
+//
+//    Hank Childs, Fri Oct 17 21:52:51 PDT 2003
+//    Set scalable thresholding to be very high.  Another bug ['3922] allows
+//    for scalable rendering even when never is set.  The threshold it uses
+//    is the one from this module.  So I am setting it to be very high until
+//    '3922 is fixed.
+//
+//    Mark C. Miller, Tue Nov  4 17:01:09 PST 2003
+//    Set scalableThreshold to be default value obtiained from
+//    RenderingAttributes.
+//
+//    Jeremy Meredith, Fri Nov 14 11:29:05 PST 2003
+//    Added specular properties.
+//
+//    Hank Childs, Mon May 10 08:27:32 PDT 2004
+//    Initialize displayListMode.
+//
+//    Mark C. Miller, Tue May 11 20:21:24 PDT 2004
+//    Replaced scalableThreshold member with scalableAutoThreshold
+//    Added scalableActivationMode member
+//
+//    Mark C. Miller, Thu Nov  3 16:59:41 PST 2005
+//    Added initialization for 3 most recent rendering times
+// ****************************************************************************
+
+VisWinRendering::VisWinRendering(VisWindowColleagueProxy &p) 
+    : VisWinColleague(p)
+{
+    needsUpdate                    = false;
+    realized                       = false;
+    antialiasing                   = false;
+    nRenders                       = 0;
+    summedRenderTime               = 0.;
+    maxRenderTime                  = 0.;
+    minRenderTime                  = 1.e6;
+    curRenderTimes[0]              = 0.0;
+    curRenderTimes[1]              = 0.0;
+    curRenderTimes[2]              = 0.0;
+    stereo                         = false;
+    stereoType                     = 2;
+    displayListMode                = 2;  // Auto
+    surfaceRepresentation          = 0;
+    specularFlag                   = false;
+    specularCoeff                  = .6;
+    specularPower                  = 10.0;
+    specularColor                  = ColorAttribute(255,255,255,255);
+    renderInfo                     = 0;
+    renderInfoData                 = 0;
+    notifyForEachRender            = false;
+    inMotion                       = false;
+    scalableRendering              = false;
+    scalableAutoThreshold          = RenderingAttributes::DEFAULT_SCALABLE_AUTO_THRESHOLD;
+    scalableActivationMode         = RenderingAttributes::DEFAULT_SCALABLE_ACTIVATION_MODE;
+
+    canvas       = vtkRenderer::New();
+    canvas->SetInteractive(1);
+    canvas->SetLayer(1);
+
+    background   = vtkRenderer::New();
+    background->SetInteractive(0);
+    background->SetLayer(0);
+
+    foreground   = vtkRenderer::New();
+    foreground->SetInteractive(0);
+    foreground->SetLayer(2);
+
+    RemoveCullers(canvas);
+    RemoveCullers(background);
+    RemoveCullers(foreground);
+}
+
+
+// ****************************************************************************
+//  Method: VisWinRendering destructor
+//
+//  Programmer: Hank Childs
+//  Creation:   May 19, 2000
+//
+//  Modifications:
+//    Hank Childs, Fri Jul  7 09:06:17 PDT 2000
+//    Removed destruction of axis data members.
+//
+//    Eric Brugger, Mon Aug 13 17:00:32 PDT 2001
+//    Moved the deletion of the render window to the end to the end of the
+//    routine to avoid a crash.
+//
+// ****************************************************************************
+
+VisWinRendering::~VisWinRendering()
+{
+    if (canvas != NULL)
+    {
+        canvas->Delete();
+        canvas = NULL;
+    }
+    if (background != NULL)
+    {
+        background->Delete();
+        background = NULL;
+    }
+    if (foreground != NULL)
+    {
+        foreground->Delete();
+        foreground = NULL;
+    }
+}
+
+
+// ****************************************************************************
+//  Method: VisWinRendering::InitializeRenderWindow
+//
+//  Purpose:
+//      Initializes the render window (this cannot be done in the constructor
+//      because we cannot call virtual functions in the constructor).
+//
+//  Programmer: Hank Childs
+//  Creation:   January 29, 2002
+//
+//  Modifications:
+//    Jeremy Meredith, Tue Nov 19 17:12:33 PST 2002
+//    Added check of a flag before forcing stereo.
+//
+// ****************************************************************************
+ 
+void
+VisWinRendering::InitializeRenderWindow(vtkRenderWindow *renWin)
+{
+    renWin->SetNumberOfLayers(3);
+ 
+    renWin->AddRenderer(background);
+    renWin->AddRenderer(canvas);
+    renWin->AddRenderer(foreground);
+
+    if (stereoEnabled)
+    {
+        renWin->SetStereoCapableWindow(1);
+    }
+}
+
+
+// ****************************************************************************
+//  Method: VisWinRendering::GetCanvas
+//
+//  Purpose:
+//      Gets the canvas renderer.
+//
+//  Returns:    The canvas renderer.
+//
+//  Programmer: Hank Childs
+//  Creation:   May 19, 2000
+//
+//  Modifications:
+//
+//    Hank Childs, Tue Aug  1 16:24:09 PDT 2000
+//    Removed logic for which renderer is acting as the canvas.  They are now
+//    all layered in the render window.
+//
+// ****************************************************************************
+
+vtkRenderer *
+VisWinRendering::GetCanvas(void)
+{
+    return canvas;
+}
+       
+
+// ****************************************************************************
+//  Method: VisWinRendering::GetBackground
+//
+//  Purpose:
+//      Gets the background renderer.
+//
+//  Returns:    The background renderer.
+//
+//  Programmer: Hank Childs
+//  Creation:   May 19, 2000
+//
+//  Modifications:
+//
+//    Hank Childs, Tue Aug  1 16:24:09 PDT 2000
+//    Removed logic for which renderer is acting as the background.  They are
+//    now all layered in the render window.
+//
+// ****************************************************************************
+
+vtkRenderer *
+VisWinRendering::GetBackground(void)
+{
+    return background;
+}
+       
+
+// ****************************************************************************
+//  Method: VisWinRendering::GetForeground
+//
+//  Purpose:
+//      Gets the foreground renderer.
+//
+//  Returns:    The foreground renderer.
+//
+//  Programmer: Hank Childs
+//  Creation:   July 26, 2000
+//
+// ****************************************************************************
+
+vtkRenderer *
+VisWinRendering::GetForeground(void)
+{
+    return foreground;
+}
+
+
+// ****************************************************************************
+//  Method: VisWinRendering::SetViewport
+//
+//  Purpose:
+//      Sets the viewport.
+//
+//  Arguments:
+//      vl      The left viewport in normalized device coordinates.
+//      vb      The bottom viewport in normalized device coordinates.
+//      vr      The right viewport in normalized device coordinates.
+//      vt      The top viewport in normalized device coordinates.
+//
+//  Programmer: Hank Childs
+//  Creation:   May 4, 2000
+//
+//  Modifications:
+//    Hank Childs, Fri Aug  4 14:51:20 PDT 2000
+//    Only change the canvas viewport if we are in 2D mode since the canvas is 
+//    also used for 3D mode.
+//
+//    Eric Brugger, Fri Aug 24 09:15:28 PDT 2001
+//    I added a call to compute the aspect ratio after setting the view.
+//
+//    Kathleen Bonnell, Wed May  8 14:06:50 PDT 2002 
+//    Added support for curve mode. 
+//
+// ****************************************************************************
+
+void
+VisWinRendering::SetViewport(double vl, double vb, double vr, double vt)
+{
+    if (mediator.GetMode() == WINMODE_2D || mediator.GetMode() == WINMODE_CURVE)
+    {
+        canvas->SetViewport(vl, vb, vr, vt);
+        canvas->ComputeAspect();
+    }
+}
+
+
+// ****************************************************************************
+//  Method: VisWindowRendering::SetBackgroundColor
+//
+//  Purpose:
+//      Sets the background color for the renderers.
+//
+//  Arguments:
+//      br      The red component (rgb) of the background.
+//      bg      The green component (rgb) of the background.
+//      bb      The blue component (rgb) of the background.
+//
+//  Programmer: Hank Childs
+//  Creation:   May 4, 2000
+//
+//  Modifications:
+//
+//    Hank Childs, Tue Aug  1 16:24:09 PDT 2000
+//    Set the foreground's background color.
+//
+// ****************************************************************************
+
+void
+VisWinRendering::SetBackgroundColor(double br, double bg, double bb)
+{
+    canvas->SetBackground(br, bg, bb);
+    background->SetBackground(br, bg, bb);
+    foreground->SetBackground(br, bg, bb);
+}
+
+
+// ****************************************************************************
+//  Method: VisWinRendering::Start2DMode
+//
+//  Purpose:
+//      Puts the rendering module in 2D mode.  This means that the camera 
+//      should have orthographic projection.
+//
+//  Programmer: Hank Childs
+//  Creation:   July 11, 2000
+//
+//  Modifications:
+//    Hank Childs, Fri Aug  4 14:51:20 PDT 2000
+//    Make the canvas be on a smaller viewport.
+//
+//    Eric Brugger, Fri Aug 24 09:15:28 PDT 2001
+//    I added a call to compute the aspect ratio after setting the view.
+//
+// ****************************************************************************
+
+void
+VisWinRendering::Start2DMode(void)
+{
+    //
+    // The canvas should now be snapped to a smaller viewport.
+    //
+    double vport[4];
+    mediator.GetViewport(vport);
+    canvas->SetViewport(vport);
+    canvas->ComputeAspect();
+}
+
+
+// ****************************************************************************
+//  Method: VisWinRendering::Stop2DMode
+//
+//  Purpose:
+//      Takes the rendering module out of 2D mode.  This means that the camera
+//      should be put in perspective projection mode if it was in that mode
+//      previously.
+//
+//  Programmer: Hank Childs
+//  Creation:   July 11, 2000
+//
+//  Modifications:
+//    Hank Childs, Fri Aug  4 14:51:20 PDT 2000
+//    Restore the size of the canvas' viewport.
+//
+//    Eric Brugger, Fri Aug 24 09:15:28 PDT 2001
+//    I added a call to compute the aspect ratio after setting the view.
+//
+// ****************************************************************************
+
+void
+VisWinRendering::Stop2DMode(void)
+{
+    //
+    // We made the canvas' viewport when we entered 2D mode.  Make it be the
+    // whole screen again.
+    //
+    canvas->SetViewport(0., 0., 1., 1.);
+    canvas->ComputeAspect();
+}
+
+// ****************************************************************************
+//  Method: VisWinRendering::StartCurveMode
+//
+//  Purpose:
+//      Puts the rendering module in Curve mode.  This means that the camera 
+//      should have orthographic projection.
+//
+//  Programmer: Kathleen Bonnell 
+//  Creation:   May 7, 2002 
+//
+// ****************************************************************************
+
+void
+VisWinRendering::StartCurveMode(void)
+{
+    //
+    // The canvas should now be snapped to a smaller viewport.
+    //
+    double vport[4];
+    mediator.GetViewport(vport);
+    canvas->SetViewport(vport);
+    canvas->ComputeAspect();
+}
+
+
+// ****************************************************************************
+//  Method: VisWinRendering::StopCurveMode
+//
+//  Purpose:
+//      Takes the rendering module out of Curve mode.  This means that the camera
+//      should be put in perspective projection mode if it was in that mode
+//      previously.
+//
+//  Programmer: Kathleen Bonnell 
+//  Creation:   May 7, 2002 
+//
+// ****************************************************************************
+
+void
+VisWinRendering::StopCurveMode(void)
+{
+    //
+    // We made the canvas' viewport when we entered Curve mode.  Make it be the
+    // whole screen again.
+    //
+    canvas->SetViewport(0., 0., 1., 1.);
+    canvas->ComputeAspect();
+}
+     
+// ****************************************************************************
+//  Method: VisWinRendering::EnableUpdates
+//
+//  Purpose:
+//      If a render was requested was updating (rendering) was suspended, do
+//      that now.
+//
+//  Programmer: Hank Childs
+//  Creation:   July 6, 2000
+//
+//  Modifications:
+//
+//    Hank Childs, Wed Aug 11 08:08:18 PDT 2004
+//    Add timings code.
+//
+// ****************************************************************************
+
+void
+VisWinRendering::EnableUpdates(void)
+{
+    if (needsUpdate)
+    {
+        int t1 = visitTimer->StartTimer();
+        Render();
+        visitTimer->StopTimer(t1, "Time for first render after adding plots to"
+                                  " this window.");
+        needsUpdate = false;
+    }
+}
+
+
+// ****************************************************************************
+//  Method: VisWinRendering::Render
+//
+//  Purpose:
+//      Causes the render window to render.
+//
+//  Programmer: Hank Childs
+//  Creation:   May 19, 2000
+//
+//  Modifications:
+//
+//    Hank Childs, Thu Jul  6 13:52:19 PDT 2000
+//    Added a check to see if updates are enabled and if the window is 
+//    realized.
+//
+//    Eric Brugger, Mon Nov  5 13:48:48 PST 2001
+//    Modified to always compile the timing code.
+//
+//    Hank Childs, Wed Sep 18 10:17:04 PDT 2002
+//    Do not issue the render if we are in no-win mode.  That only slows things
+//    down.  When are saving an image, it already forces a render.
+//
+//    Brad Whitlock, Thu Sep 19 17:04:58 PST 2002
+//    I added code to send the rendering time back to the client.
+//
+//    Mark C. Miller, Thu Nov  3 16:59:41 PST 2005
+//    Added args to Start/Stop timer to force acquisition of timing information
+//    even if timings were not enabled on the command-line.
+//    Added 3 most recent rendering times to set of times returned
+//
+//    Hank Childs, Wed Mar  1 10:05:25 PST 2006
+//    Look for exceptions that occurred during a Render.
+//
+// ****************************************************************************
+
+void
+VisWinRendering::Render()
+{
+    const bool forceTiming = true;
+    const bool timingEnabled = visitTimer->Enabled(); 
+    const int timingsIndex = visitTimer->StartTimer(forceTiming);
+    double rt = 0.;
+
+    if (realized)
+    {
+        if (mediator.UpdatesEnabled() && !avtCallback::GetNowinMode())
+        {
+            avtCallback::ClearRenderingExceptions();
+            GetRenderWindow()->Render();
+            std::string errorMsg = avtCallback::GetRenderingException();
+            if (errorMsg != "")
+            {
+                EXCEPTION1(VisItException, errorMsg.c_str());
+            }
+        }
+        else
+        {
+            needsUpdate = true;
+        }
+    }
+
+    // Determine the time taken to render the image.
+    rt = (double)visitTimer->StopTimer(timingsIndex, "Render one frame", forceTiming);
+    if(timingEnabled)
+    {
+        // VisIt's timer is going so use its return value.
+        // Dump the timings to the timings file.
+        visitTimer->DumpTimings();
+    }
+
+    // Update the render times and call the renderer information callback
+    // if we need to.
+    summedRenderTime += (rt >= 0.) ? rt : 0.;
+    minRenderTime = (rt < minRenderTime) ? rt : minRenderTime;
+    maxRenderTime = (rt > maxRenderTime) ? rt : maxRenderTime;
+    curRenderTimes[2] = curRenderTimes[1];
+    curRenderTimes[1] = curRenderTimes[0];
+    curRenderTimes[0] = (rt >= 0.) ? rt : 0.;
+    ++nRenders;
+
+    // Call the rendering information callback
+    if(notifyForEachRender && !inMotion && renderInfo != 0)
+    {
+        (*renderInfo)(renderInfoData);
+        ResetCounters();
+    }
+}
+
+// ****************************************************************************
+// Method: VisWinRendering::ResetCounters
+//
+// Purpose: 
+//   Resets counters used by the renderer to keep track of the fps.
+//
+// Programmer: Brad Whitlock
+// Creation:   Mon Sep 23 11:43:14 PDT 2002
+//
+// Modifications:
+//   
+//    Mark C. Miller, Thu Nov  3 16:59:41 PST 2005
+//    Added reseting of 3 most recent rendering times
+// ****************************************************************************
+
+void
+VisWinRendering::ResetCounters()
+{
+    nRenders = 0;
+    summedRenderTime = 0.;
+    maxRenderTime = 0.;
+    minRenderTime = 1.e6;
+    curRenderTimes[0] = 0.0;
+    curRenderTimes[1] = 0.0;
+    curRenderTimes[2] = 0.0;
+}
+
+// ****************************************************************************
+// Method: VisWinRendering::MotionBegin
+//
+// Purpose: 
+//   Resets the rendering time variables.
+//
+// Programmer: Brad Whitlock
+// Creation:   Thu Sep 19 17:07:13 PST 2002
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+void
+VisWinRendering::MotionBegin(void)
+{
+    ResetCounters();
+    inMotion = true;
+}
+
+// ****************************************************************************
+// Method: VisWinRendering::MotionEnd
+//
+// Purpose: 
+//   Calls the rendering information callback.
+//
+// Programmer: Brad Whitlock
+// Creation:   Mon Sep 23 11:46:23 PDT 2002
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+void
+VisWinRendering::MotionEnd(void)
+{
+    inMotion = false;
+    if(renderInfo != 0)
+    {
+        (*renderInfo)(renderInfoData);
+        ResetCounters();
+    }
+}
+
+// ****************************************************************************
+//  Method: VisWinRendering::Realize
+//
+//  Purpose:
+//      Realizes the vis window.
+//
+//  Programmer: Hank Childs
+//  Creation:   July 7, 2000
+//
+//  Modifications:
+//
+//    Hank Childs, Tue Aug  1 16:24:09 PDT 2000
+//    Added check to make sure it hasn't already been realized.
+//
+//    Brad Whitlock, Wed Nov 1 15:22:21 PST 2000
+//    Added code to show the vtkQtRenderWindow.
+//
+//    Jeremy Meredith, Thu Sep 13 15:42:06 PDT 2001
+//    Added a call to wait for the window manager to grab the window.
+//
+// ****************************************************************************
+
+void
+VisWinRendering::Realize(void)
+{
+    if (realized == false)
+    {
+        RealizeRenderWindow();
+        realized = true;
+    }
+}
+
+// ****************************************************************************
+//  Method: VisWinRendering::GetCaptureRegion
+//
+//  Purpose:
+//      Computes the size of the region to capture based in image mode and
+//      request to do the viewport only or not
+//
+//  Programmer: Mark C. Miller
+//  Creation:   July 26, 2004 
+//
+// ****************************************************************************
+void
+VisWinRendering::GetCaptureRegion(int& r0, int& c0, int& w, int& h,
+    bool doViewportOnly)
+{
+    vtkRenderWindow *renWin = GetRenderWindow();
+
+    r0 = 0;
+    c0 = 0;
+    w = renWin->GetSize()[0];
+    h = renWin->GetSize()[1];
+
+    if (doViewportOnly)
+    {
+        bool haveViewport = false;
+        double viewPort[4];
+
+        if (mediator.GetMode() == WINMODE_2D)
+        {
+            VisWindow *vw = mediator;
+            avtView2D v = vw->GetView2D();
+            v.GetActualViewport(viewPort, w, h);
+            haveViewport = true;
+        }
+        else if (mediator.GetMode() == WINMODE_CURVE)
+        {
+            VisWindow *vw = mediator;
+            avtViewCurve v = vw->GetViewCurve();
+            v.GetViewport(viewPort);
+            haveViewport = true;
+        }
+
+        if (haveViewport)
+        {
+            int neww = (int) ((viewPort[1] - viewPort[0]) * w + 0.5);
+            int newh = (int) ((viewPort[3] - viewPort[2]) * h + 0.5);
+
+            c0 = (int) (viewPort[0] * w + 0.5);
+            r0 = (int) (viewPort[2] * h + 0.5);
+            w = neww;
+            h = newh;
+        }
+    }
+}
+
+// ****************************************************************************
+//  Method: VisWinRendering::ScreenCapture
+//
+//  Purpose:
+//      Performs a screen capture and creates an image from the output image.
+//
+//  Returns:    The image on the screen.
+//
+//  Programmer: Hank Childs
+//  Creation:   February 11, 2001
+//
+//  Modifications:
+//
+//    Hank Childs, Wed Jun  6 16:17:17 PDT 2001
+//    Used new specification in Update.
+//
+//    Mark C. Miller, 06May03
+//    Added code to get zbuffer data including setting layers so that
+//    zbuffer data is obtained correctly
+//
+//    Hank Childs, Thu Jun 19 17:28:50 PDT 2003
+//    Stop using window-to-image filter, since it does not play well with
+//    the new camera modifications.
+//
+//    Hank Childs, Wed Jun 25 09:30:59 PDT 2003
+//    Fix memory leak.
+//
+//    Hank Childs, Sun Nov 16 16:04:52 PST 2003
+//    Fix (another) memory leak -- this time with zbuffer.
+//
+//    Mark C. Miller, Tue Feb  3 20:46:20 PST 2004
+//    Moved call to delete [] zb to after Update of SourceFromImage
+//
+//    Mark C. Miller, Wed Mar 31 17:47:20 PST 2004
+//    Added doViewportOnly arg and code to support getting only the viewport
+//
+//    Mark C. Miller, Fri Apr  2 09:54:10 PST 2004
+//    Fixed problem where used 2D view to control region selection for 
+//    window in CURVE mode
+//
+//    Mark C. Miller, Mon Jul 26 15:08:39 PDT 2004
+//    Moved code to compute size and origin of region to capture to
+//    GetCaptureRegion. Also, changed code to instead of swaping canvase
+//    and foreground layer order to just remove foreground layer and re-add
+//    it at the end.
+//
+//    Chris Wojtan, Wed Jul 21 15:17:52 PDT 2004
+//    Created separate passes for opaque and translucent data
+//
+//    Chris Wojtan, Fri Jul 30 14:37:06 PDT 2004
+//    Load data from the first rendering pass in the second rendering pass
+//
+//    Jeremy Meredith, Thu Oct 21 17:14:42 PDT 2004
+//    Fixed the stuffing of rgb/z data into the second pass.  Turned off
+//    erasing if we are in the second pass.  Put in a big hack to allow
+//    this to work even if we are doing two-pass rendering with OpenGL
+//    (which isn't supported right now anyway).
+//
+//    Hank Childs, Wed Mar  1 11:26:15 PST 2006
+//    Add some exception handling.
+//
+// ****************************************************************************
+
+avtImage_p
+VisWinRendering::ScreenCapture(bool doViewportOnly, bool doCanvasZBufferToo, 
+                               bool doOpaque, bool doTranslucent,
+                               avtImage_p input)
+{
+    bool second_pass = (*input != NULL);
+
+    float *zb = NULL;
+    vtkRenderWindow *renWin = GetRenderWindow();
+    bool extRequestMode = false;
+
+    if (doCanvasZBufferToo)
+    {
+        //
+        // If we want zbuffer for the canvas, we need to take care that
+        // the canvas is rendered last. To achieve this, we temporarily
+        // remove the foreground renderer. 
+        //
+        renWin->RemoveRenderer(foreground);
+    }
+
+    // hide the appropriate geometry here
+    if(!doOpaque)
+        mediator.SuspendOpaqueGeometry();
+    if(!doTranslucent)
+        mediator.SuspendTranslucentGeometry();
+
+    //
+    // Set region origin/size to be captured
+    //
+    int r0, c0, w, h;
+    GetCaptureRegion(r0, c0, w, h, doViewportOnly);
+    
+    // if we already finished the first pass, 
+    // then we should load the existing data from the input image
+    if (second_pass)
+    {
+        float         *zbuf = input->GetImage().GetZBuffer();
+        unsigned char *rgbbuf = input->GetImage().GetRGBBuffer();
+
+        // Okay, this is a horrible, horrible, ugly hack, and I know it.
+        // For now, it's perfectly safe -- there's just no good way to 
+        // get the VTK render window to draw both the pixel and Z buffer
+        // data.  Unless I override vtkRenderWindow, vtkOpenGLRenderWindow,
+        // vtkXOpenGLRenderWindow, vtkWin32OpenGLRenderWindow,
+        // vtkMesaRenderWindow, vtkXMesaRenderWindow, and so on....
+        if (renWin->IsA("vtkMesaRenderWindow"))
+        {
+            mglDepthMask(GL_FALSE);
+            renWin->SetPixelData(r0,c0,w-1,h-1,rgbbuf,renWin->GetDoubleBuffer());
+            mglDepthMask(GL_TRUE);
+
+            mglColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
+            renWin->SetZbufferData(r0,c0,w-1,h-1,zbuf);
+            mglColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+        }
+        else
+        {
+            glDepthMask(GL_FALSE);
+            renWin->SetPixelData(r0,c0,w-1,h-1,rgbbuf,renWin->GetDoubleBuffer());
+            glDepthMask(GL_TRUE);
+
+            glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
+            renWin->SetZbufferData(r0,c0,w-1,h-1,zbuf);
+            glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+        }
+    }
+
+    //
+    // Make sure that the window is up-to-date.
+    //
+    avtCallback::ClearRenderingExceptions();
+    if (second_pass)
+    {
+        // We can't erase the rgb/z data we just worked
+        // so hard to put there a second ago!
+        renWin->EraseOff();
+        renWin->Render();
+        renWin->EraseOn();
+    }
+    else
+    {
+        // Okay, this is either the first pass or the only pass, 
+        // so we better darn well allow erasing before drawing.
+        renWin->Render();
+    }
+    std::string errorMsg = avtCallback::GetRenderingException();
+    if (errorMsg != "")
+    {
+        EXCEPTION1(VisItException, errorMsg.c_str());
+    }
+
+    //
+    // Set region origin/size to be captured
+    //
+    GetCaptureRegion(r0, c0, w, h, doViewportOnly);
+    
+
+    if (doCanvasZBufferToo)
+    {
+        // get zbuffer data for the canvas
+        zb = renWin->GetZbufferData(c0,r0,c0+w-1,r0+h-1);
+
+        // temporarily disable external render requests
+        extRequestMode = mediator.DisableExternalRenderRequests();
+    }
+
+    //
+    // Read the pixels from the window and copy them over.  Sadly, it wasn't
+    // very easy to avoid copying the buffer.
+    //
+    int readFrontBuffer = 1;
+    unsigned char *pixels = renWin->GetPixelData(c0,r0,c0+w-1,r0+h-1,readFrontBuffer);
+
+    vtkImageData *image = avtImageRepresentation::NewImage(w, h);
+    unsigned char *img_pix = (unsigned char *)image->GetScalarPointer(0, 0, 0); 
+
+    memcpy(img_pix, pixels, 3*w*h);
+    delete [] pixels;
+
+    //
+    // Force some updates so we can let screenCaptureSource be destructed.
+    // The img->Update forces the window to render, so we explicitly 
+    // disable external render requests
+    //
+    avtSourceFromImage screenCaptureSource(image, zb);
+    avtImage_p img = screenCaptureSource.GetTypedOutput();
+    img->Update(screenCaptureSource.GetGeneralPipelineSpecification());
+    img->SetSource(NULL);
+    delete [] zb;
+    image->Delete();
+
+    //
+    // If we removed the foreground layers to get the canvas' zbuffer,
+    // put it back before we leave
+    //
+    if (doCanvasZBufferToo)
+    {
+       renWin->AddRenderer(foreground);
+       if (extRequestMode)
+          mediator.EnableExternalRenderRequests();
+    }
+
+    // return geometry from hidden status
+    if(!doOpaque)
+        mediator.ResumeOpaqueGeometry();
+    if(!doTranslucent)
+        mediator.ResumeTranslucentGeometry();
+
+    return img;
+}
+
+// ****************************************************************************
+//  Method: VisWinRendering::PostProcessScreenCapture
+//
+//  Purpose:
+//      Does any necessary post-processing on a screen captured image. This
+//      is necessary when the engine is doing ALL rendering as in a
+//      non-"Screen Capture" (GUI terminology) save window that includes any
+//      annotations that are rendered in the foreground layer. Ordinarily,
+//      the engine never renders the foreground layer and it can only do so
+//      correctly after it has done a parallel image composite. 
+//
+//  Programmer: Mark C. Miller
+//  Creation:   July 26, 2004 
+//
+//  Modifications:
+//
+//    Mark C. Miller, Wed Oct  6 17:50:23 PDT 2004
+//    Added args for viewport only and keeping zbuffer
+//
+// ****************************************************************************
+
+avtImage_p
+VisWinRendering::PostProcessScreenCapture(avtImage_p capturedImage,
+    bool doViewportOnly, bool keepZBuffer)
+{
+    unsigned char *pixels;
+
+    int useFrontBuffer = 1;
+    vtkRenderWindow *renWin = GetRenderWindow();
+
+    // compute size of region we'll be writing back to the frame buffer
+    int r0, c0, w, h;
+    GetCaptureRegion(r0, c0, w, h, doViewportOnly);
+
+    // confirm image passed in is the correct size
+    int iw, ih;
+    capturedImage->GetSize(&iw, &ih);
+    if ((iw != w) || (ih != h))
+    {
+        EXCEPTION1(ImproperUseException, "size of image passed for "
+            "PostProcessScreenCapture does not match vtkRenderWindow size");
+    }
+
+    // set pixel data
+    // Note that there appears to be a bug in VTK's implementation of the
+    // vtkRenderWindow::SetPixelData method such that the *first* call to
+    // set pixel data does NOT write to the correct portion of the framebuffer.
+    // However, succeeding calls do. So, as a work-around, we have an additional
+    // dummy call to SetPixelData. 
+    pixels = capturedImage->GetImage().GetRGBBuffer();
+    renWin->SetPixelData(0, 0, 0, 0, pixels, useFrontBuffer); // Why? See above.
+    renWin->SetPixelData(c0, r0, c0+w-1, r0+h-1, pixels, useFrontBuffer);
+
+    // temporarily remove canvas and background renderers
+    renWin->RemoveRenderer(canvas);
+    renWin->RemoveRenderer(background);
+
+    // render (foreground layer only)
+    renWin->Render();
+
+    // capture the whole image now 
+    GetCaptureRegion(r0, c0, w, h, false);
+    pixels = renWin->GetPixelData(c0,r0,c0+w-1,r0+h-1, useFrontBuffer);
+
+    // add canvas and background renderers back in
+    renWin->AddRenderer(background);
+    renWin->AddRenderer(canvas);
+
+    // return new image
+    vtkImageData *image = avtImageRepresentation::NewImage(w, h);
+    unsigned char *img_pix = (unsigned char *)image->GetScalarPointer(0, 0, 0);
+
+    memcpy(img_pix, pixels, 3*w*h);
+    delete [] pixels;
+
+    //
+    // Force some updates so we can let screenCaptureSource be destructed.
+    // The img->Update forces the window to render, so we explicitly
+    // disable external render requests
+    //
+    avtSourceFromImage screenCaptureSource(image, keepZBuffer ? capturedImage->GetImage().GetZBuffer() : 0);
+    avtImage_p img = screenCaptureSource.GetTypedOutput();
+    img->Update(screenCaptureSource.GetGeneralPipelineSpecification());
+    img->SetSource(NULL);
+    image->Delete();
+
+    return img;
+}
+
+// ****************************************************************************
+//  Method: VisWinRendering::SetSize
+//
+//  Purpose:
+//      Sets the size of the window.
+//
+//  Arguments:
+//      w       The desired width (in pixels) of the vis window.
+//      h       The desired height (in pixels) of the vis window.
+//
+//  Programmer: Hank Childs
+//  Creation:   July 6, 2000
+//
+//  Modifications:
+//
+//    Hank Childs, Tue Aug  1 16:24:09 PDT 2000
+//    Added a render to pick up the size change.
+//
+//    Kathleen Bonnell, Tue Aug 26 09:01:33 PDT 2003 
+//    Only set the size if different than what was previously set.  Calling
+//    SetSize all the time in ScalableRendering mode causes the rendering
+//    Context to be destroyed, invalidating any display lists created. 
+//
+// ****************************************************************************
+
+void
+VisWinRendering::SetSize(int w, int h)
+{
+    int *size = GetRenderWindow()->GetSize();
+    if (size[0] != w || size[1] != h)
+    {
+        GetRenderWindow()->SetSize(w, h);
+        Render();
+    }
+}
+
+// ****************************************************************************
+// Method: VisWinRendering::IsDirect
+//
+// Purpose: 
+//   Determines if the vis window is direct connection to the GPU or if it
+//   goes through the X-server.
+//
+// Programmer: Hank Childs
+// Creation:   May 9, 2004
+//
+// ****************************************************************************
+
+bool
+VisWinRendering::IsDirect(void)
+{
+    return (GetRenderWindow()->IsDirect() ? true : false);
+}
+
+// ****************************************************************************
+// Method: VisWinRendering::GetSize
+//
+// Purpose: 
+//   Returns the size of the renderable portion of thewindow.
+//
+// Arguments:
+//   w : A reference to an int that is used to return the window width.
+//   h : A reference to an int that is used to return the window height.
+//
+// Programmer: Brad Whitlock
+// Creation:   Fri Nov 2 11:02:51 PDT 2001
+//
+// ****************************************************************************
+
+void
+VisWinRendering::GetSize(int &w, int &h)
+{
+    int *size = GetRenderWindow()->GetSize();
+    w = size[0];
+    h = size[1];
+}
+
+// ****************************************************************************
+// Method: VisWinRendering::GetWindowSize
+//
+// Purpose: 
+//   Returns the size of the window.
+//
+// Arguments:
+//   w : A reference to an int that is used to return the window width.
+//   h : A reference to an int that is used to return the window height.
+//
+// Programmer: Mark C. Miller
+// Creation:   07Jul03 
+//   
+// ****************************************************************************
+
+void
+VisWinRendering::GetWindowSize(int &w, int &h)
+{
+   GetSize(w,h);
+}
+
+// ****************************************************************************
+//  Method: VisWinRendering::SetLocation
+//
+//  Purpose:
+//      Sets the location of the window.
+//
+//  Arguments:
+//      x       The desired x-coordinate of the vis window.
+//      y       The desired y-coordinate of the vis window.
+//
+//  Programmer: Hank Childs
+//  Creation:   July 6, 2000
+//
+// ****************************************************************************
+
+void
+VisWinRendering::SetLocation(int x, int y)
+{
+    GetRenderWindow()->SetPosition(x, y);
+}
+
+// ****************************************************************************
+// Method: VisWinRendering::GetLocation
+//
+// Purpose: 
+//   Returns the location of the window.
+//
+// Arguments:
+//   x : A reference to an int that is used to return the window x location.
+//   y : A reference to an int that is used to return the window y location.
+//
+// Programmer: Brad Whitlock
+// Creation:   Fri Nov 2 11:02:51 PDT 2001
+//   
+// ****************************************************************************
+
+void
+VisWinRendering::GetLocation(int &x, int &y)
+{
+    vtkRenderWindow *renWin = GetRenderWindow();
+    x = renWin->GetPosition()[0];
+    y = renWin->GetPosition()[1];
+}
+
+
+// ****************************************************************************
+//  Method: VisWinRendering::SetInteractor
+//
+//  Purpose:
+//      Sets the interactor style.
+//
+//  Arguments:
+//      style   The new interactor style.
+//
+//  Programmer: Hank Childs
+//  Creation:   May 19, 2000
+//
+//  Modifications:
+//    Kathleen Bonnell, Tue Aug 13 15:15:37 PDT 2002
+//    Now that there is lighting colleage, light positions will be
+//    managed by vtkRenderer.  Turn off duplicate interactor functionality. 
+//
+//    Kathleen Bonnell, Tue Feb 11 11:28:03 PST 2003  
+//    Test for existence of Interactor before using it. (No interactor
+//    in noWin mode.)
+//
+// ****************************************************************************
+
+void
+VisWinRendering::SetInteractor(vtkInteractorStyle *style)
+{
+    vtkRenderWindowInteractor *iren = GetRenderWindowInteractor();
+    if (iren)
+    {
+        GetRenderWindowInteractor()->SetInteractorStyle(style);
+        GetRenderWindowInteractor()->LightFollowCameraOff();
+    }
+}
+
+
+// ****************************************************************************
+//  Method: VisWinRendering::GetFirstRenderer
+//
+//  Purpose:
+//      Returns the renderer that will render first.  The VisWindow needs to
+//      know this so it can alter some of its plots before they are rendered.
+//      The background is added first, so it is the first renderer.
+//
+//  Returns:    The first renderer.
+//
+//  Programmer: Hank Childs
+//  Creation:   June 9, 2000
+//
+// ****************************************************************************
+
+vtkRenderer *
+VisWinRendering::GetFirstRenderer(void)
+{
+    return background;
+}
+
+
+// ****************************************************************************
+//  Method: VisWinRendering::SetTitle
+//
+//  Purpose:
+//      Sets the title of a vis window.
+//
+//  Arguments:
+//      title      The title of the vis window.
+//
+//  Programmer: Hank Childs
+//  Creation:   September 14, 2000
+//
+// ****************************************************************************
+
+void
+VisWinRendering::SetTitle(const char *title)
+{
+    GetRenderWindow()->SetWindowName((char *)title);
+}
+
+
+// ****************************************************************************
+//  Function: RemoveCullers
+//
+//  Purpose:
+//      Removes the cullers automatically added to vtkRenderers.  The offensive
+//      culler is vtkFrustumCoverageCuller.  It removes domains that are too
+//      small to be seen (this is of course view dependent).
+//
+//  Arguments:
+//      ren     The renderer to remove the cullers from.
+//
+//  Programmer: Hank Childs
+//  Creation:   August 31, 2001
+//
+// ****************************************************************************
+
+static void 
+RemoveCullers(vtkRenderer *ren)
+{
+    vtkCullerCollection *cullers = ren->GetCullers();
+    cullers->InitTraversal();
+    vtkCuller *cull = NULL;
+    do
+    {
+        cull = cullers->GetNextItem();
+        if (cull != NULL)
+        {
+            ren->RemoveCuller(cull);
+        }
+    } while (cull != NULL);
+}
+
+// ****************************************************************************
+//  Method: VisWinRendering::ComputeVectorTextScaleFactor
+//
+//  Purpose:
+//      Computes a scaling factor to be used with vector text.  The scaling
+//      factor is viewport dependednt.
+//
+//  Arguments:
+//      pos     A world-coordinate position to use in the calculation 
+//      vp      An alternate viewport (optional).  Components should
+//              be in the vtk viewport order: min-x, min_y, max_x, max_y.
+//
+//  Programmer: Kathleen Bonnell 
+//  Creation:   May 8, 2002  (Moved and slightly modified from avtPickActor).
+//
+// ****************************************************************************
+
+double
+VisWinRendering::ComputeVectorTextScaleFactor(const double *pos, const double *vp)
+{
+    double currVP[4];
+    if (vp != NULL)
+    {
+        canvas->GetViewport(currVP);
+        //
+        // temporarily set vp to that which user specified 
+        // 
+        canvas->SetViewport(const_cast<double *>(vp));
+    }
+
+    //
+    //  Convert our world-space position to NormalizedDisplay coordinates.
+    //
+    double newX = pos[0], newY = pos[1], newZ = pos[2];
+    canvas->WorldToView(newX, newY, newZ);
+    canvas->ViewToNormalizedViewport(newX, newY, newZ);
+    canvas->NormalizedViewportToViewport(newX, newY);
+    canvas->ViewportToNormalizedDisplay(newX, newY);
+
+    //
+    //  Assuming NormalizedDisplay coordinates run from 0 .. 1 in both
+    //  x and y directions, then the normalized dispaly creates a square, whose
+    //  diagonal length is sqrt(2) or 1.4142134624.  
+    // 
+    const double displayDiag = 1.4142135624; 
+
+    // 
+    //  We want to find a position P2, that creates a diagonal with the 
+    //  original point that is 1/20th of the display diagonal.
+    //
+
+    const double target = displayDiag * 0.0125;
+
+    //
+    //  Since we are dealing with a right-isosceles-triangle the new position
+    //  will be offset in both x and y directions by target * cos(45); 
+    //
+  
+    const double cos45 = 0.7604059656;
+
+    double offset = target * cos45;
+
+    newX += offset;
+    newY += offset;
+
+    //
+    // Now convert our new position from NormalizedDisplay to World Coordinates.
+    //
+ 
+    canvas->NormalizedDisplayToViewport(newX, newY);
+    canvas->ViewportToNormalizedViewport(newX, newY);
+    canvas->NormalizedViewportToView(newX, newY, newZ);
+    canvas->ViewToWorld(newX, newY, newZ);
+
+    //
+    // Experimental results, using vtkVectorText and vtkPolyDataMapper, 
+    // smallest 'diagonal size' is from the letter 'r' at 0.917883
+    // largest  'diagonal size' is from the letter 'W' at 1.78107
+    // thus, the average diagonal size of vtkVectorText is:  1.3494765
+    // (for alpha text only, in world coordinats, with scale factor of 1.0).  
+    // THIS MAY BE A DISPLAY-DEPENDENT RESULT! 
+    // 
+
+    const double avgTextDiag = 1.3494765;
+
+    //
+    //  Calculate our scale factor, by determining the new target and using
+    //  the avgTextDiag to normalize the results across all the pick letters.
+    //
+
+    double dxsqr = (newX - pos[0]) * (newX - pos[0]);
+    double dysqr = (newY - pos[1]) * (newY - pos[1]);
+    double dzsqr = (newZ - pos[2]) * (newZ - pos[2]);
+    double worldTarget = sqrt(dxsqr + dysqr + dzsqr); 
+
+    if (vp != NULL)
+    {
+        //
+        // Reset the vp to what it should be. 
+        //
+        canvas->SetViewport(currVP);
+    }
+    return (worldTarget / avgTextDiag);
+}
+
+// ****************************************************************************
+// Method: VisWinRendering::SetRenderInfoCallback
+//
+// Purpose: 
+//   Sets the callback function used to report information back to the client.
+//
+// Arguments: 
+//   callback : The information callback function.
+//   data     : Data that is passed to the information callback function.
+//
+// Programmer: Brad Whitlock
+// Creation:   Mon Sep 23 14:20:49 PST 2002
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+void
+VisWinRendering::SetRenderInfoCallback(void(*callback)(void *), void *data)
+{
+    renderInfo = callback;
+    renderInfoData = data;
+}
+
+// ****************************************************************************
+// Method: VisWinRendering::SetAntialiasing
+//
+// Purpose: 
+//   Sets the antialiasing mode.
+//
+// Arguments:
+//   enabled : Whether or not antialiasing is enabled.
+//   frames : The number of frames to use.
+//
+// Programmer: Brad Whitlock
+// Creation:   Mon Sep 23 14:21:39 PST 2002
+//
+// Modifications:
+//   Kathleen Bonnell, Wed Dec  4 17:05:24 PST 2002 
+//   Remove frames, perform antialiasing via line-smoothing.
+//   
+// ****************************************************************************
+
+void
+VisWinRendering::SetAntialiasing(bool enabled)
+{
+    if(enabled != antialiasing )
+    {
+        antialiasing = enabled;
+        GetRenderWindow()->SetLineSmoothing(enabled);
+    }
+}
+
+// ****************************************************************************
+// Method: VisWinRendering::GetRenderTimes
+//
+// Purpose: 
+//   Returns the rendering times.
+//
+// Arguments:
+//   times : The return array for the rendering times.
+//
+// Programmer: Brad Whitlock
+// Creation:   Mon Sep 23 14:22:34 PST 2002
+//
+// Modifications:
+//   
+//    Mark C. Miller, Thu Nov  3 16:59:41 PST 2005
+//    Added 3 most recent rendering times to set of times returned
+// ****************************************************************************
+
+void
+VisWinRendering::GetRenderTimes(double times[6]) const
+{
+    times[0] = minRenderTime;
+    times[1] = (nRenders > 0) ? (summedRenderTime / double(nRenders)) : 0.;
+    times[2] = maxRenderTime;
+    times[3] = curRenderTimes[0];
+    times[4] = curRenderTimes[1];
+    times[5] = curRenderTimes[2];
+}
+
+// ****************************************************************************
+// Method: VisWinRendering::SetStereoRendering
+//
+// Purpose: 
+//   Sets the stereo mode.
+//
+// Arguments:
+//   enabled : Whether or not stereo is enabled.
+//   type    : The type of stereo rendering that should be done.
+//
+// Programmer: Brad Whitlock
+// Creation:   Mon Sep 23 14:23:06 PST 2002
+//
+// Modifications:
+//   Kathleen Bonnell, Thu Jun 30 15:29:55 PDT 2005
+//   Support red-green stereo type.
+//   
+//   Hank Childs, Sun Dec  4 18:50:46 PST 2005
+//   Issue a warning if the user tried to start stereo without putting
+//   "-stereo" on the command line ['4432].
+//
+//   Mark C. Miller, Sat Jul 22 17:53:43 PDT 2006
+//   Added left/right overrides to support stereo SR
+//
+// ****************************************************************************
+
+void
+VisWinRendering::SetStereoRendering(bool enabled, int type)
+{
+    if (enabled && !stereoEnabled && (type == 2))
+    {
+        avtCallback::IssueWarning("To use crystal eyes stereo, you need "
+           "to re-start VisIt with the \"-stereo\" flag.  VisIt does not "
+           "automatically have stereo functionality enabled, because enabling "
+           " it can incur severe performance penalties in non-stereo mode.  We"
+           " apologize for any inconvience.");
+        return;
+    }
+    if (enabled != stereo || type != stereoType)
+    {
+        stereo = enabled;
+        stereoType = type;
+        if(stereo)
+        {
+            if(stereoType == 0)
+                GetRenderWindow()->SetStereoType(VTK_STEREO_RED_BLUE);
+            else if(stereoType == 1)
+                GetRenderWindow()->SetStereoType(VTK_STEREO_INTERLACED);
+            else if(stereoType == 2)
+                GetRenderWindow()->SetStereoType(VTK_STEREO_CRYSTAL_EYES);
+            else if(stereoType == 4)
+                GetRenderWindow()->SetStereoType(VTK_STEREO_LEFT);
+            else if(stereoType == 5)
+                GetRenderWindow()->SetStereoType(VTK_STEREO_RIGHT);
+            else 
+            {
+                //GetRenderWindow()->SetStereoType(VTK_STEREO_RED_GREEN);
+                GetRenderWindow()->SetStereoType(7);
+            }
+            GetRenderWindow()->SetStereoRender(1);
+        }
+        else
+        {
+            GetRenderWindow()->SetStereoRender(0);
+        }
+    }
+}
+
+// ****************************************************************************
+// Method: VisWinRendering::SetDisplayListMode
+//
+// Purpose: 
+//    Sets the display list mode.
+//
+// Arguments:
+//   mode : The new display list mode.
+//
+// Programmer: Hank Childs
+// Creation:   May 10, 2004
+//
+// ****************************************************************************
+
+void
+VisWinRendering::SetDisplayListMode(int mode)
+{
+    displayListMode = mode;
+}
+
+// ****************************************************************************
+// Method: VisWinRendering::SetSurfaceRepresentation
+//
+// Purpose: 
+//   Sets the surface representation.
+//
+// Arguments:
+//   rep : The new surface representation.
+//
+// Programmer: Brad Whitlock
+// Creation:   Mon Sep 23 14:26:55 PST 2002
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+void
+VisWinRendering::SetSurfaceRepresentation(int rep)
+{
+    surfaceRepresentation = rep;
+}
+
+// ****************************************************************************
+// Method: VisWinRendering::SetSpecularProperties
+//
+// Purpose: 
+//   Sets the specular properties for all of the actors in the canvas
+//   renderer.
+//
+// Arguments:
+//   coeff:   the new coefficient
+//   power:   the new power
+//   color:   the new color
+//
+// Programmer: Jeremy Meredith
+// Creation:   November 14, 2003
+//
+// Modifications:
+//   
+// ****************************************************************************
+
+void
+VisWinRendering::SetSpecularProperties(bool flag, double coeff, double power,
+                                       const ColorAttribute &color)
+{
+    specularFlag  = flag;
+    specularCoeff = coeff;
+    specularPower = power;
+    specularColor = color;
+}
+
+// ****************************************************************************
+// Method: VisWinRendering::GetNumPrimitives
+//
+// Purpose: 
+//   Counts the number of graphics primitives drawn by the actors in the canvas
+//   renderer.
+//
+// Returns:    A graphics primitive count.
+//
+// Note:       Polygons in a vtkDataSet, if any, can be rendered in several
+//             different ways that affect the actual number of primitives
+//             sent to the GPU. We are not using vtkPolyDataMapper because
+//             it does not provide such information. We instead have to count
+//             cells. I could do a better job at determining a count of the 
+//             number of primitives by checking for number of sides on each cell
+//             but that would probably be too slow so I'm just using the cell
+//             count.
+//
+// Programmer: Brad Whitlock
+// Creation:   Mon Sep 23 14:28:57 PST 2002
+//
+// Modifications:
+//
+//   Mark C. Miller, Thu Mar  3 17:38:36 PST 2005
+//   Modified to count all types of primitives, not just polygons
+//   
+// ****************************************************************************
+
+int
+VisWinRendering::GetNumPrimitives() const
+{
+    int sum = 0;
+
+    // Iterate through each actor in the canvas renderer and determine
+    // the rough number of triangles that are in it.
+    vtkActorCollection *actors = canvas->GetActors();
+    actors->InitTraversal();
+    vtkActor *actor = NULL;
+    do
+    {
+        actor = actors->GetNextItem();
+        if (actor != NULL)
+        {
+            vtkMapper *m = actor->GetMapper();
+            if(m != NULL)
+            {
+                vtkDataSet *data = m->GetInput();
+                if(data != NULL)
+                {
+                    sum += data->GetNumberOfCells();
+                }
+            }
+        }
+    } while (actor != NULL);
+
+    return sum;
+}
+
+// ****************************************************************************
+// Method: VisWinRendering::GetScalableThreshold
+//
+// Programmer: Mark C. Miller 
+// Creation:   May 11, 2004
+//
+// ****************************************************************************
+
+int
+VisWinRendering::GetScalableThreshold() const
+{
+    return RenderingAttributes::GetEffectiveScalableThreshold(
+        (RenderingAttributes::TriStateMode) scalableActivationMode,
+                                            scalableAutoThreshold);
+}
+
+// ****************************************************************************
+// Method: VisWinRendering::SetScalableRendering
+//
+// Programmer: Mark C. Miller 
+// Creation:   February 5, 2003 
+//
+// ****************************************************************************
+
+bool
+VisWinRendering::SetScalableRendering(bool mode)
+{
+    bool oldMode = scalableRendering;
+    scalableRendering = mode;
+    if (scalableRendering)
+        mediator.EnableExternalRenderRequests();
+    else
+        mediator.DisableExternalRenderRequests();
+    return oldMode;
+}
+
+// ****************************************************************************
+// Method: VisWinRendering::SetScalableAutoThreshold
+//
+// Programmer: Mark C. Miller 
+// Creation:   May 11, 2004 
+//
+// ****************************************************************************
+
+int
+VisWinRendering::SetScalableAutoThreshold(int autoThreshold)
+{
+    int oldVal = scalableAutoThreshold;
+    scalableAutoThreshold = autoThreshold;
+    return oldVal;
+}
+
+// ****************************************************************************
+// Method: VisWinRendering::SetScalableActivationMode
+//
+// Programmer: Mark C. Miller 
+// Creation:   May 11, 2004
+//
+// ****************************************************************************
+
+int
+VisWinRendering::SetScalableActivationMode(int mode)
+{
+    int oldVal = scalableActivationMode;
+    scalableActivationMode = mode;
+    return oldVal;
+}

@@ -1,0 +1,1047 @@
+#!/bin/csh -f
+#-----------------------------------------------------------------------
+#
+# VISIT-BIN-DIST - Build a compressed tar file from the visit executable
+#                  built in the dev directory.
+#
+# Author: Eric Brugger
+# Date:   October 26, 2000
+#
+# Usage:
+#    visit-bin-dist [-c] [-g] [-h] [-make <make_command>] [-md <visit_dir>]
+#                   [-nd] [-nmesa] [-npython] [-nqt] [-nstrip] [-nvtk]
+#                   [-os <operating_system>]
+#
+# Modifications:
+#    Jeremy Meredith, Fri May 11 14:15:01 PDT 2001
+#    Added distribution of VTK, shared libraries, and plot plugins.
+#
+#    Jeremy Meredith, Mon Jun 25 21:39:53 PDT 2001
+#    Changed the finding of Qt to be independent of its version.
+#    Made it look for engine_par and engine_ser.
+#    Fixed a couple bugs for solaris.
+#
+#    Jeremy Meredith, Thu Jul 26 09:20:24 PDT 2001
+#    Added distribution of operator plugins.
+#
+#    Eric Brugger, Wed Sep  5 07:49:38 PDT 2001
+#    Added distribution of the splash screen.
+#
+#    Brad Whitlock, Tue Nov 13 10:07:47 PDT 2001
+#    Added python to the package.
+#
+#    Hank Chlids, Fri Dec 21 09:32:45 PST 2001
+#    Add support for the new VTK.
+#
+#    Jeremy Meredith, Wed Jan  9 14:16:26 PST 2002
+#    Removed AIX strangeness.
+#
+#    Eric Brugger, Wed Feb 20 10:39:56 PST 2002
+#    Add support for distributing sample data files.
+#
+#    Eric Brugger, Wed Apr 10 10:01:25 PDT 2002
+#    Add the cli to the list of executables to distribute.  Correct
+#    the distribution of the vtk libraries.
+#
+#    Eric Brugger, Tue Apr 16 10:54:25 PDT 2002
+#    Add support for distributing the mesa libraries.
+#
+#    Jeremy Meredith, Wed Apr 17 12:44:19 PDT 2002
+#    Made it assume the test binaries get put into VisItDir/data
+#    instead of VisItDir/bin.
+#
+#    Eric Brugger, Fri May 10 10:37:52 PDT 2002
+#    Add support for stripping the executables and shared libraries.
+#
+#    Brad Whitlock, Tue Jun 4 11:34:16 PDT 2002
+#    Checked the Qt version when creating the Qt links.
+#
+#    Jeremy Meredith, Mon Jun 17 15:42:28 PDT 2002
+#    Split linux into intel and alpha versions.  Made some repetitive
+#    code use loops.  Accomplished all chmods by a single call to
+#    chmod -R.   Added the python tree to the distribution.
+#
+#    Brad Whitlock, Fri Jun 21 15:42:28 PDT 2002
+#    Added tire and noise databases.
+#
+#    Jeremy Meredith, Fri Jul 12 14:39:37 PDT 2002
+#    Added distribution of our include files, as well as qt's moc.
+#    Added distribution of the plugin creation tools.
+#
+#    Brad Whitlock, Fri Jul 12 18:17:29 PST 2002
+#    Added help files to the distribution.
+#
+#    Jeremy Meredith, Thu Jul 18 16:30:47 PDT 2002
+#    Made the python library in the lib directory be a symlink.
+#    Prevented one error message from the Qt library.
+#
+#    Jeremy Meredith, Mon Jul 22 12:44:16 PDT 2002
+#    Added silex and curv3dprep.
+#
+#    Brad Whitlock, Fri Aug 16 10:09:07 PDT 2002
+#    I added a directory for the Java/VisIt class files.
+#
+#    Jeremy Meredith, Tue Aug 27 21:27:03 PDT 2002
+#    I added datbase plugins.
+#
+#    Jeremy Meredith, Sat Sep 21 08:57:35 PDT 2002
+#    I made the search for Qt library a little more restrictive.
+#    
+#    Jeremy Meredith, Thu Oct 17 16:40:31 PDT 2002
+#    Added xmltest and the xml editor to the distribution.
+#
+#    Eric Brugger, Fri Jan 10 09:02:16 PST 2003
+#    Added libvtkfreetype.so and libvtkftgl.so to the distribution.
+#
+#    Eric Brugger, Mon Mar 10 08:13:17 PST 2003
+#    Added text2polys and time_annotation to the distribution.
+#
+#    Eric Brugger, Thu Mar 13 08:13:29 PST 2003
+#    Added a "current" link to distribution.
+#
+#    Eric Brugger, Wed Apr 16 11:03:53 PDT 2003
+#    Change MangledMesaInclude to MangleMesaInclude.
+#
+#    Jeremy Meredith, Wed May  7 14:36:35 PDT 2003
+#    Split include/visit/*.h into two parts to it doesn't overflow
+#    argument lists.
+#
+#    Eric Brugger, Wed May 14 08:59:59 PDT 2003
+#    Added vcl to the distribution.
+#
+#    Eric Brugger, Thu Jul  3 08:15:29 PDT 2003
+#    Remove the version number option and make it determine the version
+#    number from the version file. Add a help option.
+#
+#    Eric Brugger, Tue Jul 22 08:31:45 PDT 2003
+#    Add visit-config-open and visit-config-closed to the distribution.
+#
+#    Brad Whitlock, Thu Jun 19 13:16:57 PST 2003
+#    Removed splashscreen from the distribution.
+#
+#    Eric Brugger, Tue Jul 29 08:23:32 PDT 2003
+#    Added makemili to the distribution.
+#
+#    Brad Whitlock, Wed Jul 30 13:12:14 PST 2003
+#    Added mpeg_encode and makemovie.py to the distribution.
+#
+#    Eric Brugger, Tue Aug 26 09:04:30 PDT 2003
+#    Added surfcomp to the distribution.
+#
+#    Hank Childs, Fri Sep 12 16:35:02 PDT 2003
+#    Added convert to the distribution.
+#
+#    Eric Brugger, Tue Sep 23 15:36:07 PDT 2003
+#    Added a missing endif.
+#
+#    Jeremy Meredith, Thu Oct  9 15:44:43 PDT 2003
+#    Added ia64 linux machine name.
+#
+#    Brad Whitlock, Wed Oct 8 09:33:44 PDT 2003
+#    Added support for MacOS X. Added darwin-ppc and removed
+#    tflops-intel-ppro since we probably won't ever run there.
+#
+#    Eric Brugger, Fri Oct 17 16:51:29 PDT 2003
+#    I split some copy commands into multiple commands to avoid
+#    argument length problems with some implementations of csh.
+#
+#    Eric Brugger, Thu Nov 13 07:53:25 PST 2003
+#    When I split some copy commands, I introduced a bug where not all
+#    the help files were copied to the distribution.  I corrected this.
+#
+#    Eric Brugger, Thu Nov 20 09:05:18 PST 2003
+#    Modified the script to handle the absence of the help directory.
+#    Added libvtkDICOMParser to the distribution.
+#
+#    Jeremy Meredith, Mon Dec  1 12:40:51 PST 2003
+#    We aren't using the Qt Free version on Mac, so I prevented it from
+#    copying the Qt include files when os==darwin.  I also put the 
+#    Qt license in an obvious spot, and fixed a typo with copying
+#    duplicates.
+#
+#    Brad Whitlock, Thu Jan 29 10:50:56 PDT 2004
+#    I added support for Linux running AMD Opteron 64 (x86_64). I also
+#    changed the name of the distribution file on Linux if the processor
+#    is IA64, Alpha, or x86_64.
+#
+#    Eric Brugger, Fri Jan 30 09:23:45 PST 2004
+#    Modified the script to also distribute libvtk_sl_io.
+#
+#    Eric Brugger, Tue Mar 16 13:30:42 PST 2004
+#    Modified the script to also distribute libqtviswindow.so.
+#
+#    Brad Whitlock, Wed Apr 28 19:55:27 PST 2004
+#    I changed it so we copy the Qt/Mac header files since we're now using
+#    Qt/Mac free edition.
+#
+#    Brad Whitlock, Thu May 27 11:58:01 PDT 2004
+#    I added support for using different Info.plist files so the viewer gets
+#    its own plist file that prevents it from getting its own menu.
+#
+#    Brad Whitlock, Tue Jun 29 12:05:42 PDT 2004
+#    Some help files were not being copied so I added commands to make sure
+#    they get copied.
+#
+#    Jeremy Meredith, Tue Nov  2 09:51:52 PST 2004
+#    Added command to copy private Qt headers.
+#
+#    Jeremy Meredith, Tue Nov  9 14:31:08 PST 2004
+#    Allowed distinction of 64-bit objects on IBM AIX systems.
+#
+#    Jeremy Meredith, Fri Dec 10 13:34:55 PST 2004
+#    Added support for version-specific visit scripts and the ability to
+#    launch tools without passing them as an argument to the visit script.
+#
+#    Jeremy Meredith, Tue Feb 22 18:55:53 PST 2005
+#    Renamed convert to the more unique visitconvert.
+#
+#    Jeremy Meredith, Thu Mar 17 11:31:49 PST 2005
+#    Added xml2plugin back into the distribution.
+#
+#    Jeremy Meredith, Mon Apr 25 10:48:08 PDT 2005
+#    Added some basic multi-compiler support.
+#
+#    Brad Whitlock, Thu May 12 11:30:24 PDT 2005
+#    Added code to copy MacOS X address computation script and address file.
+#
+#    Brad Whitlock, Thu Jun 23 17:11:21 PST 2005
+#    Made it copy makemoviemain.py
+#
+#    Jeremy Meredith, Wed Jul  6 14:46:56 PDT 2005
+#    Added xlc compiler-specific support.
+#
+#    Brad Whitlock, Fri Oct 7 13:16:49 PST 2005
+#    Copy dbA00.pdb and dbB00.pdb to the distribution.
+#
+#    Mark C. Miller, Tue Nov 22 09:42:57 PST 2005
+#    Removed refs to sl_io library
+#
+#    Eric Brugger, Mon Jan 30 14:52:21 PST 2006
+#    I added the -make argument, which allows the user to specify the make
+#    command.
+#
+#    Brad Whitlock, Fri Feb 3 08:30:30 PDT 2006
+#    I added Qt's qui library to the distribution.
+#
+#    Eric Brugger, Mon Feb  6 10:52:03 PST 2006
+#    Make some corrections for libqui.  Split some commands to overcome line
+#    length restrictions on old Irix systems.  Add links for libqt.a and
+#    libqui.a.
+#
+#    Eric Brugger, Fri Mar 10 09:40:34 PST 2006
+#    I added visit-config-nersc and visit-config-ornl to the distrtibution.
+#
+#    Eric Brugger, Fri Mar 17 09:42:22 PST 2006
+#    I corrected an error setting the symbolic link libqui.a.
+#
+#    Eric Brugger, Wed Jun  7 16:26:14 PDT 2006
+#    I modified the script to handle the new vtk library naming conventions.
+#
+#    Hank Childs, Tue Jun 13 14:43:52 PDT 2006
+#    Copy over .txx files from VTK headers.
+#
+#    Eric Brugger, Mon Jul 17 13:01:02 PDT 2006
+#    Copy the include/vtk/{GenericFiltering,Utilities} headers and txx files.
+#
+#    Eric Brugger, Fri Sep 22 12:01:25 PDT 2006
+#    Copy the gcc libraries if they are present.
+#
+#------------------------------------------------------------------------------
+
+set DataFiles = "TRUE"
+set QtLibs = "TRUE"
+set MesaLibs = "TRUE"
+set VTKLibs = "TRUE"
+set PythonExe = "TRUE"
+set Compress = GZIP
+set VisItDir = `pwd`
+set OSGiven = "FALSE"
+set CompilerGiven = "FALSE"
+set compiler = ""
+set Strip = "TRUE"
+set Make = "make"
+set Help = "FALSE"
+
+#
+# Parse the argument list.
+#
+while ($#argv >= 1)
+   switch ($1)
+      case -c:
+               set Compress = COMPRESS
+               breaksw
+
+      case -g:
+               set Compress = GZIP
+               breaksw
+
+      case -h:
+      case -help:
+               set Help = TRUE
+               breaksw
+
+      case -make:
+               shift
+               set Make = $1
+               breaksw
+
+      case -md:
+               shift
+               set VisItDir = $1
+               breaksw
+
+      case -nd:
+               set DataFiles = FALSE
+               breaksw
+
+      case -nmesa:
+      case -nomesa:
+               set MesaLibs = FALSE
+               breaksw
+
+      case -npython:
+      case -nopython:
+               set PythonExe = FALSE
+               breaksw
+
+      case -nqt:
+      case -noqt:
+               set QtLibs = FALSE
+               breaksw
+
+      case -nstrip:
+      case -nostrip:
+               set Strip = FALSE
+               breaksw
+
+      case -nvtk:
+      case -novtk:
+               set VTKLibs = FALSE
+               breaksw
+
+      case -os:
+               shift
+               set os = $1
+               set OSGiven = TRUE
+               breaksw
+
+      case -compiler:
+               shift
+               set compiler = $1
+               set CompilerGiven = TRUE
+               breaksw
+
+      default:
+               echo " "
+               echo ">>>>>>>>>>  Illegal option $1  <<<<<<<<<<"
+               echo " "
+               breaksw
+   endsw
+   shift
+end
+
+if ($Help == TRUE) then
+   echo "Usage: visit-bin-dist [-c] [-g] [-h] [-make <make_command>]"
+   echo "                      [-md <visit_dir>] [-nd] [-nmesa]"
+   echo "                      [-npython] [-nqt] [-nstrip] [-nvtk]"
+   echo "                      [-os <operating_system>]"
+   echo ""
+   echo "       -c             Compress the resultant package."
+   echo "       -g             Gzip the resultant package.  (default)"
+   echo "       -h             Print this message."
+   echo "       -make make     Make command."
+   echo "       -md dir        Set where to find the distribution."
+   echo "       -nd            No data files."
+   echo "       -nmesa         No Mesa libraries."
+   echo "       -npython       No Python executable."
+   echo "       -nqt           No Qt libraries."
+   echo "       -nstrip        Do not strip the execubles and libraries."
+   echo "       -nvtk          No VTK libraries."
+   echo "       -os os         Operating system."
+   echo "       -compiler cc   Compiler."
+   exit (1)
+endif
+
+#
+# Determine the operating system.
+#
+if("$OSGiven" == "FALSE") then
+    if(-e /bin/uname) then 
+        set os = `/bin/uname -s | tr "[A-Z]" "[a-z]" | tr -d "[0-9]"`
+    else if(-e /usr/bin/uname) then
+        set os = `/usr/bin/uname -s | tr "[A-Z]" "[a-z]" | tr -d "[0-9]"`
+    else
+        echo "Can't find uname program!"
+        exit
+    endif
+endif
+
+#
+# Set up the distribution directory and get rid of any old versions
+#
+rm -rf distribution
+mkdir distribution
+
+#
+# Check that the version exists.
+#
+if (! -e $VisItDir/VERSION) then
+   echo " "
+   echo "Error: The file $VisItDir/VERSION does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+#
+# Check that the launch script exists.
+#
+if (! -e $VisItDir/bin/visit) then
+   echo " "
+   echo "Error: The file $VisItDir/bin/visit does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+#
+# Check that the data directory exists so that the data files can be created.
+#
+if (("$DataFiles" == "TRUE") && (! -e $VisItDir/data)) then
+   echo "The directory $VisItDir/data does not exist."
+   echo "Distribution will not contain sample data files."
+   set DataFiles = "FALSE"
+endif
+
+#
+# Deterime the version number.
+#
+set Version = `cat $VisItDir/VERSION`
+
+#
+# Determine the shared library extension
+#
+if("$os" == "darwin") then
+    set SHLIB_SOEXT = "dylib"
+else
+    set SHLIB_SOEXT = "so"
+endif
+
+#
+# Determine the name of the Qt shared library.
+#
+if ("$os" == "darwin") then
+    set QtLibName = `cd $VisItDir/lib && ls libqt.$SHLIB_SOEXT`
+    set QUILibName = `cd $VisItDir/lib && ls libqui.$SHLIB_SOEXT`
+else
+    set QtLibName = `cd $VisItDir/lib && ls libqt.$SHLIB_SOEXT.?.?.?`
+    set QUILibName = `cd $VisItDir/lib && ls libqui.$SHLIB_SOEXT.?.?.?`
+endif
+
+#
+# Check that the Qt libraries exist.
+#
+if (("$QtLibs" == "TRUE") && (! -e $VisItDir/lib/$QtLibName)) then
+   echo " "
+   echo "Error: The file $VisItDir/lib/$QtLibName does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+if (("$QtLibs" == "TRUE") && (! -e $VisItDir/lib/$QUILibName)) then
+   echo " "
+   echo "Error: The file $VisItDir/lib/$QUILibName does not exist. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+#
+# Determine the names of the Mesa shared libraries.
+#
+set MesaOSMesaLibName = "libOSMesa.$SHLIB_SOEXT"
+set MesaMesaGLLibName = "libMesaGL.$SHLIB_SOEXT"
+
+#
+# Check that the Mesa libraries exist.
+#
+if (("$MesaLibs" == "TRUE") && \
+    ((! -e $VisItDir/lib/$MesaOSMesaLibName) || \
+     (! -e $VisItDir/lib/$MesaMesaGLLibName))) then
+   echo " "
+   echo "Error: Missing Mesa libraries in $VisItDir/lib. aborting ..."
+   echo " "
+   exit (1)
+endif
+
+#
+# Set the names of the VTK shared libraries.
+#
+set vtklibs="libvtkCommon libvtkDICOMParser libvtkFiltering libvtkGraphics libvtkHybrid libvtkIO libvtkImaging libvtkMPEG2Encode libvtkNetCDF libvtkRendering libvtkexoIIc libvtkexpat libvtkfreetype libvtkftgl libvtkjpeg libvtkpng libvtksys libvtktiff libvtkzlib"
+
+#
+# Check that the VTK libraries exist.
+#
+if ("$VTKLibs" == "TRUE") then
+    foreach vtklib ($vtklibs)
+       if (! -e $VisItDir/lib/$vtklib.$SHLIB_SOEXT) then
+           echo " "
+           echo "Error: Missing VTK libraries in $VisItDir/lib. aborting ..."
+           echo " "
+           exit (1)
+       endif
+    end
+endif
+
+#
+# Make the directory structure shell.
+#
+mkdir distribution/visit
+mkdir distribution/visit/bin
+if ($DataFiles == "TRUE") then
+   mkdir distribution/visit/data
+endif
+
+mkdir distribution/visit/$Version
+mkdir distribution/visit/$Version/bin
+ln -s $Version distribution/visit/current
+set platforms="hp-hpux-pa sgi-irix6-mips2 sun4-sunos5-sparc ibm-aix-pwr ibm-aix-pwr-xlc ibm-aix-pwr64 ibm-aix-pwr64-xlc dec-osf1-alpha linux-intel linux-intel-icc linux-ia64 linux-alpha linux-x86_64 darwin-ppc"
+foreach platform ($platforms)
+   mkdir distribution/visit/$Version/$platform
+   mkdir distribution/visit/$Version/$platform/bin
+   mkdir distribution/visit/$Version/$platform/lib
+   mkdir distribution/visit/$Version/$platform/include
+   mkdir distribution/visit/$Version/$platform/help
+   mkdir distribution/visit/$Version/$platform/plugins
+   mkdir distribution/visit/$Version/$platform/plugins/plots
+   mkdir distribution/visit/$Version/$platform/plugins/operators
+   mkdir distribution/visit/$Version/$platform/plugins/databases
+   mkdir distribution/visit/$Version/$platform/java
+   mkdir distribution/visit/$Version/$platform/libsim
+   mkdir distribution/visit/$Version/$platform/libsim/V1
+   mkdir distribution/visit/$Version/$platform/libsim/V1/include
+   mkdir distribution/visit/$Version/$platform/libsim/V1/lib
+end
+
+#
+# Create and copy in the sample data files.
+#
+if ($DataFiles == "TRUE") then
+   echo "Creating data generation programs..."
+   set pwd = `pwd`
+   cd $VisItDir/data
+   $Make
+   echo "Generating data files..."
+   ./globe
+   ./multi_test
+   ./testall
+   ./noise
+   ./tire
+   rm multi_point* multi_rect* multi_curv* poly3d.silo
+   cp *.silo $pwd/distribution/visit/data
+   if (-e ./correlationtest) then
+      ./correlationtest
+       cp db{A,B}00.pdb $pwd/distribution/visit/data
+   endif
+   cd $pwd/distribution/visit/data
+   cd $pwd
+endif
+
+#
+# Find the executables built and copy them to the appropriate bin
+# directory.
+#
+
+#
+# Determine the os version string and hardware os string.
+#
+switch ($os)
+   case hp-ux:
+      echo "Found an HP-UX version of visit"
+      set osver = hp
+      set visitbindir = hp-hpux-pa
+      breaksw
+
+   case irix:
+      set version = `/bin/uname -r`
+      set osver = irix`expr $version : '\([456]\).*'`
+      if ($osver == irix6) then
+         echo "Found an IRIX 6 version of visit"
+         set osver = irix6
+         set visitbindir = sgi-irix6-mips2
+      endif
+      breaksw
+
+   case sunos:
+      echo "Found a Solaris version of visit"
+      set version = '/bin/uname -r'
+      set osver = sunos5
+      set visitbindir = sun4-sunos5-sparc
+      breaksw
+
+   case aix:
+      echo "Found an AIX version of visit"
+      if ("${?OBJECT_MODE}") then
+          if ("${OBJECT_MODE}" == "64") then
+              if (("$CompilerGiven" == "TRUE") && ("$compiler" == "xlc")) then
+                  set osver = aix64-xlc
+                  set visitbindir = ibm-aix-pwr64-xlc
+              else
+                  set osver = aix64
+                  set visitbindir = ibm-aix-pwr64
+              endif
+          else
+              if (("$CompilerGiven" == "TRUE") && ("$compiler" == "xlc")) then
+                  set osver = aix-xlc
+                  set visitbindir = ibm-aix-pwr-xlc
+              else
+                  set osver = aix
+                  set visitbindir = ibm-aix-pwr
+              endif
+          endif
+      else
+          set osver = aix
+          set visitbindir = ibm-aix-pwr
+      endif
+      breaksw
+
+   case osf:
+      echo "Found an OSF1 version of visit"
+      set osver = osf1
+      set visitbindir = dec-osf1-alpha
+      breaksw
+
+   case linux:
+      echo "Found a Linux version of visit"
+      set arch = `/bin/uname -m`
+      switch ($arch)
+         case i486:
+         case i586:
+         case i686:
+            if (("$CompilerGiven" == "TRUE") && ("$compiler" == "icc")) then
+                set osver = linux-icc
+                set visitbindir = linux-intel-icc
+            else
+                set osver = linux
+                set visitbindir = linux-intel
+            endif
+            breaksw
+         case ia64:
+            set osver = linux-ia64
+            set visitbindir = linux-ia64
+            breaksw
+         case alpha:
+            set osver = linux-alpha
+            set visitbindir = linux-alpha
+            breaksw
+         case x86_64:
+            set osver = linux-x86_64
+            set visitbindir = linux-x86_64
+            breaksw
+      endsw
+      breaksw
+
+   case darwin:
+      echo "Found a MacOS X version of visit"
+      set visitbindir = darwin-ppc
+      set osver = "darwin"
+      breaksw
+endsw
+
+set verdir = distribution/visit/$Version
+set bindir = distribution/visit/$Version/$visitbindir/bin
+set libdir = distribution/visit/$Version/$visitbindir/lib
+set incdir = distribution/visit/$Version/$visitbindir/include
+set helpdir = distribution/visit/$Version/$visitbindir/help
+set plugindir = distribution/visit/$Version/$visitbindir/plugins
+set javadir = distribution/visit/$Version/$visitbindir/java
+set simv1dir = distribution/visit/$Version/$visitbindir/libsim/V1
+set frameworkdir = distribution/visit/$Version/$visitbindir/Frameworks
+
+#
+# Copy the launch scripts
+#
+cp $VisItDir/bin/legacylauncher    distribution/visit/bin/
+cp $VisItDir/bin/frontendlauncher  distribution/visit/bin/
+
+# copy xml2plugin
+cp $VisItDir/bin/xml2plugin        distribution/visit/bin/
+
+# Copy the version-specific visit script
+cp $VisItDir/bin/internallauncher $verdir/bin/
+
+#
+# Copy the executables to the distribution.
+#
+echo "Copying executables to the distribution..."
+cp $VisItDir/exe/cli           $bindir/cli
+cp $VisItDir/exe/engine_ser    $bindir/engine_ser
+if(-e $VisItDir/exe/engine_par) then
+   cp $VisItDir/exe/engine_par $bindir/engine_par
+endif
+cp $VisItDir/exe/gui           $bindir/gui
+cp $VisItDir/exe/mdserver      $bindir/mdserver
+cp $VisItDir/exe/vcl           $bindir/vcl
+cp $VisItDir/exe/viewer        $bindir/viewer
+# copy qt's moc, too
+cp $VisItDir/bin/moc           $bindir/moc
+# copy the xml plugin creation tools
+cp $VisItDir/exe/xml2*         $bindir
+cp $VisItDir/exe/xmltest       $bindir
+cp $VisItDir/exe/xmledit       $bindir
+# copy silex
+cp $VisItDir/exe/silex         $bindir
+# copy curv3dprep
+cp $VisItDir/exe/curv3dprep    $bindir
+# copy text2polys and time_annotation
+cp $VisItDir/exe/text2polys    $bindir
+cp $VisItDir/exe/time_annotation $bindir
+cp $VisItDir/exe/visitconvert_ser $bindir
+if(-e $VisItDir/exe/visitconvert_par) then
+   cp $VisItDir/exe/visitconvert_par $bindir/visitconvert_par
+endif
+if(-e $VisItDir/exe/makemili_ser) then
+   cp $VisItDir/exe/makemili_ser $bindir/makemili_ser
+endif
+# Copy the MPEG encoder and the makemovie script.
+cp $VisItDir/exe/mpeg_encode   $bindir
+cp $VisItDir/bin/makemovie.py  $bindir
+cp $VisItDir/bin/makemoviemain.py  $bindir
+# copy surfcomp
+cp $VisItDir/exe/surfcomp      $bindir
+# Copy MacOS X address computation script and address file.
+cp $VisItDir/bin/linkedit.py   $bindir
+if(-e $VisItDir/address.txt) then
+   cp $VisItDir/address.txt distribution/visit/$Version/$visitbindir/
+endif
+
+#
+# Make symlinks for the programs
+#
+ln -s frontendlauncher distribution/visit/bin/visitconvert
+ln -s frontendlauncher distribution/visit/bin/curv3dprep
+ln -s frontendlauncher distribution/visit/bin/makemili
+ln -s frontendlauncher distribution/visit/bin/mpeg_encode
+ln -s frontendlauncher distribution/visit/bin/silex
+ln -s frontendlauncher distribution/visit/bin/surfcomp
+ln -s frontendlauncher distribution/visit/bin/text2polys
+ln -s frontendlauncher distribution/visit/bin/time_annotation
+ln -s frontendlauncher distribution/visit/bin/visit
+ln -s frontendlauncher distribution/visit/bin/xml2atts
+ln -s frontendlauncher distribution/visit/bin/xml2avt
+ln -s frontendlauncher distribution/visit/bin/xml2info
+ln -s frontendlauncher distribution/visit/bin/xml2java
+ln -s frontendlauncher distribution/visit/bin/xml2makefile
+ln -s frontendlauncher distribution/visit/bin/xml2projectfile
+ln -s frontendlauncher distribution/visit/bin/xml2python
+ln -s frontendlauncher distribution/visit/bin/xml2window
+ln -s frontendlauncher distribution/visit/bin/xmledit
+ln -s frontendlauncher distribution/visit/bin/xmltest
+
+
+# If we're on Darwin, Make some bundles so VisIt can run when it's unpackaged
+if("$os" == "darwin") then
+    set graphicalApps="gui viewer silex xmledit"
+    set menuNames = ("VisIt" "VisIt Viewer" "Silex" "XmlEdit")
+    set creatorCodes = ("VISI" "VISV" "SILX" "XEDT")
+    set plist = ("Info.plist" "ViewerInfo.plist" "Info.plist" "Info.plist")
+    # change these when there are more icons
+    set iconFiles = ("VisItIcon" "VisItIcon" "VisItIcon" "VisItIcon")
+    @ i = 1
+    set pwd = `pwd`
+    foreach app ($graphicalApps)
+        echo "Making application bundle for $app"
+        mkdir $bindir/$app.app
+        mkdir $bindir/$app.app/Contents
+        mkdir $bindir/$app.app/Contents/MacOS
+        mkdir $bindir/$app.app/Contents/Resources
+        cd $bindir/$app.app/Contents
+        ln -s ../../../lib  lib
+        cd MacOS
+        ln -s ../../../$app  $app
+        ln -s ../../../../../../bin/visit visit
+        cd $pwd
+        cp $VisItDir/common/icons/$iconFiles[$i].icns $bindir/$app.app/Contents/Resources
+        sed "s/PROGRAMNAME/$menuNames[$i]/g" $VisItDir/include/$plist[$i] | sed "s/VERSION/$Version/g" | sed "s/CREATORCODE/$creatorCodes[$i]/g" | sed "s/ICONFILE/$iconFiles[$i]/g" > $bindir/$app.app/Contents/Info.plist
+        echo "APPL$creatorCodes[$i]" > $bindir/$app.app/Contents/PkgInfo
+        @ i++
+    end
+endif
+
+#
+# Copy the gcc libraries to the distribution if present.
+#
+echo "Copying libraries to the distribution..."
+if ((-e $VisItDir/lib/libgcc_s.so.1) || (-e $VisItDir/lib/libgcc_s.a)) then
+    cp $VisItDir/lib/libgcc_s* $libdir
+    cp $VisItDir/lib/libstdc++* $libdir
+endif
+
+#
+# Copy the VisIt libraries to the distribution.
+#
+cp `ls $VisItDir/lib/*.$SHLIB_SOEXT | grep -v libvtk | grep -v libqt | grep -v libqui | grep -v libpython` $libdir
+cp $VisItDir/lib/libvtkqt.$SHLIB_SOEXT $libdir
+cp $VisItDir/lib/libqtviswindow.$SHLIB_SOEXT $libdir
+
+#
+# Copy the Qt libraries to the distribution.
+#
+cp $VisItDir/lib/$QtLibName $libdir/$QtLibName
+set majorVersion = `echo $QtLibName | awk '{printf substr($1, 10, 1)}'`
+set minorVersion = `echo $QtLibName | awk '{printf substr($1, 12, 1)}'`
+if ("$os" != "darwin") then
+    ln -s $QtLibName $libdir/libqt.$SHLIB_SOEXT.$majorVersion.$minorVersion
+    ln -s $QtLibName $libdir/libqt.$SHLIB_SOEXT.$majorVersion
+    ln -s $QtLibName $libdir/libqt.$SHLIB_SOEXT
+    if (-e $VisItDir/lib/libqt.a) then
+        ln -s $QtLibName $libdir/libqt.a
+    endif
+endif
+cp $VisItDir/lib/$QUILibName $libdir/$QUILibName
+set majorVersion = `echo $QUILibName | awk '{printf substr($1, 11, 1)}'`
+set minorVersion = `echo $QUILibName | awk '{printf substr($1, 13, 1)}'`
+if ("$os" != "darwin") then
+    ln -s $QUILibName $libdir/libqui.$SHLIB_SOEXT.$majorVersion.$minorVersion
+    ln -s $QUILibName $libdir/libqui.$SHLIB_SOEXT.$majorVersion
+    ln -s $QUILibName $libdir/libqui.$SHLIB_SOEXT
+    if (-e $VisItDir/lib/libqui.a) then
+        ln -s $QUILibName $libdir/libqui.a
+    endif
+endif
+
+#
+# Copy the Mesa libraries to the distribution.
+#
+cp $VisItDir/lib/$MesaOSMesaLibName $libdir/$MesaOSMesaLibName
+cp $VisItDir/lib/$MesaMesaGLLibName $libdir/$MesaMesaGLLibName
+
+#
+# Copy Python to the distribution
+#
+set pyver = `basename $VisItDir/lib/python/lib/python?.?`;
+mkdir $libdir/python
+mkdir $libdir/python/lib
+mkdir $libdir/python/lib/$pyver
+mkdir $libdir/python/lib/$pyver/config
+mkdir $libdir/python/lib/$pyver/lib-dynload
+#mkdir $libdir/python/lib/$pyver/plat-...?
+mkdir $libdir/python/lib/$pyver/site-packages
+mkdir $libdir/python/lib/$pyver/site-packages/PIL
+cp $VisItDir/lib/python/lib/$pyver/*.txt                $libdir/python/lib/$pyver
+cp $VisItDir/lib/python/lib/$pyver/*.py                 $libdir/python/lib/$pyver
+cp $VisItDir/lib/python/lib/$pyver/*.pyc                $libdir/python/lib/$pyver
+cp $VisItDir/lib/python/lib/$pyver/*.pyo                $libdir/python/lib/$pyver
+cp $VisItDir/lib/python/lib/$pyver/*.$SHLIB_SOEXT       $libdir/python/lib/$pyver
+cp $VisItDir/lib/python/lib/$pyver/config/*             $libdir/python/lib/$pyver/config
+cp $VisItDir/lib/python/lib/$pyver/lib-dynload/*        $libdir/python/lib/$pyver/lib-dynload
+cp $VisItDir/lib/python/lib/$pyver/site-packages/PIL.*  $libdir/python/lib/$pyver/site-packages
+cp $VisItDir/lib/python/lib/$pyver/site-packages/PIL/*  $libdir/python/lib/$pyver/site-packages/PIL
+ln -s "python/lib/$pyver/config/lib${pyver}.$SHLIB_SOEXT" $libdir
+
+#
+# Copy the VTK libraries to the distribution.
+#
+if ("$VTKLibs" == "TRUE") then
+    foreach vtklib ($vtklibs)
+       if ("$SHLIB_SOEXT" == "so") then
+           if ("$os" == "aix" || "$os" == "osf") then
+               cp $VisItDir/lib/$vtklib.so $libdir/$vtklib.so
+           else
+               cp $VisItDir/lib/$vtklib.so.5.0.0 $libdir/$vtklib.so.5.0.0
+               ln -s $vtklib.so.5.0.0 $libdir/$vtklib.so.5.0
+               ln -s $vtklib.so.5.0.0 $libdir/$vtklib.so
+           endif
+       else
+           cp $VisItDir/lib/$vtklib.dylib $libdir/$vtklib.dylib
+       endif
+    end
+endif
+
+#
+# If we're on MacOS X, copy some libraries that are statically linked on
+# other platforms but not on MacOS X
+#
+if("$os" == "darwin") then
+    cp $VisItDir/lib/libmili.$SHLIB_SOEXT $libdir
+    cp $VisItDir/lib/libgahl.$SHLIB_SOEXT $libdir
+    cp $VisItDir/lib/libhdf5.$SHLIB_SOEXT $libdir
+endif
+
+#
+# Copy the plugins to the distribution.
+#
+echo "Copying plugins to the distribution..."
+cp $VisItDir/plugins/plots/*.$SHLIB_SOEXT         $plugindir/plots
+cp $VisItDir/plugins/operators/libE*.$SHLIB_SOEXT $plugindir/operators
+cp $VisItDir/plugins/operators/libG*.$SHLIB_SOEXT $plugindir/operators
+cp $VisItDir/plugins/operators/libI*.$SHLIB_SOEXT $plugindir/operators
+cp $VisItDir/plugins/operators/libS*.$SHLIB_SOEXT $plugindir/operators
+cp $VisItDir/plugins/operators/libV*.$SHLIB_SOEXT $plugindir/operators
+cp $VisItDir/plugins/databases/*.$SHLIB_SOEXT     $plugindir/databases
+
+#
+# Copy includes
+#
+echo "Copying include files to the distribution..."
+mkdir $incdir/visit
+mkdir $incdir/mesa
+mkdir $incdir/mesa/GL
+mkdir $incdir/vtk
+mkdir $incdir/vtk/Common
+mkdir $incdir/vtk/Filtering
+mkdir $incdir/vtk/GenericFiltering
+mkdir $incdir/vtk/Graphics
+mkdir $incdir/vtk/Hybrid
+mkdir $incdir/vtk/IO
+mkdir $incdir/vtk/Imaging
+mkdir $incdir/vtk/MangleMesaInclude
+mkdir $incdir/vtk/Rendering
+mkdir $incdir/vtk/Utilities
+mkdir $incdir/vtk/vtkstd
+mkdir $incdir/python
+mkdir $incdir/qt
+mkdir $incdir/qt/private
+
+cp $VisItDir/include/*.h                        $incdir
+cp $VisItDir/include/make*                      $incdir
+cp $VisItDir/include/visit/[A-M]*.h             $incdir/visit
+cp $VisItDir/include/visit/[N-Q]*.h             $incdir/visit
+cp $VisItDir/include/visit/[R-Z]*.h             $incdir/visit
+cp $VisItDir/include/visit/a[a-uw-zA-Z]*.h      $incdir/visit
+cp $VisItDir/include/visit/av[a-su-zA-Z]*.h     $incdir/visit
+cp $VisItDir/include/visit/avt[a-z]*.h          $incdir/visit
+cp $VisItDir/include/visit/avt[A-M]*.h          $incdir/visit
+cp $VisItDir/include/visit/avt[N-Z]*.h          $incdir/visit
+cp $VisItDir/include/visit/[b-z]*.h             $incdir/visit
+cp $VisItDir/include/mesa/GL/*.h                $incdir/mesa/GL
+cp $VisItDir/include/vtk/*.h                    $incdir/vtk
+cp $VisItDir/include/vtk/*.txx                  $incdir/vtk
+cp $VisItDir/include/vtk/Common/[a-uw-zA-Z]*.h   $incdir/visit
+cp $VisItDir/include/vtk/Common/[a-uw-zA-Z]*.txx $incdir/visit
+cp $VisItDir/include/vtk/Common/v[a-su-zA-Z]*.h  $incdir/visit
+cp $VisItDir/include/vtk/Common/v[a-su-zA-Z]*.txx $incdir/visit
+cp $VisItDir/include/vtk/Common/vt[a-jl-zA-Z]*.h $incdir/vtk/Common
+cp $VisItDir/include/vtk/Common/vt[a-jl-zA-Z]*.txx $incdir/vtk/Common
+cp $VisItDir/include/vtk/Common/vtk[a-zA-J]*.h   $incdir/vtk/Common
+cp $VisItDir/include/vtk/Common/vtk[a-zA-J]*.txx $incdir/vtk/Common
+cp $VisItDir/include/vtk/Common/vtk[K-Z]*.h      $incdir/vtk/Common
+cp $VisItDir/include/vtk/Common/vtk[K-Z]*.txx    $incdir/vtk/Common
+cp $VisItDir/include/vtk/Filtering/*.h          $incdir/vtk/Filtering
+cp $VisItDir/include/vtk/Filtering/*.txx        $incdir/vtk/Filtering
+cp $VisItDir/include/vtk/GenericFiltering/*.h   $incdir/vtk/GenericFiltering
+cp $VisItDir/include/vtk/GenericFiltering/*.txx $incdir/vtk/GenericFiltering
+cp $VisItDir/include/vtk/Graphics/*.h           $incdir/vtk/Graphics
+cp $VisItDir/include/vtk/Graphics/*.txx         $incdir/vtk/Graphics
+cp $VisItDir/include/vtk/Hybrid/*.h             $incdir/vtk/Hybrid
+cp $VisItDir/include/vtk/Hybrid/*.txx           $incdir/vtk/Hybrid
+cp $VisItDir/include/vtk/IO/*.h                 $incdir/vtk/IO
+cp $VisItDir/include/vtk/IO/*.txx               $incdir/vtk/IO
+cp $VisItDir/include/vtk/Imaging/*.h            $incdir/vtk/Imaging
+cp $VisItDir/include/vtk/Imaging/*.txx          $incdir/vtk/Imaging
+cp $VisItDir/include/vtk/MangleMesaInclude/*.h  $incdir/vtk/MangleMesaInclude
+cp $VisItDir/include/vtk/MangleMesaInclude/*.txx $incdir/vtk/MangleMesaInclude
+cp $VisItDir/include/vtk/Rendering/*.h          $incdir/vtk/Rendering
+cp $VisItDir/include/vtk/Rendering/*.txx        $incdir/vtk/Rendering
+cp $VisItDir/include/vtk/Utilities/*.h          $incdir/vtk/Utilities
+cp $VisItDir/include/vtk/Utilities/*.txx        $incdir/vtk/Utilities
+cp $VisItDir/include/vtk/vtkstd/*               $incdir/vtk/vtkstd
+cp $VisItDir/include/python/*.h                 $incdir/python
+
+#
+# Copy the QT headers to the include directory if we are using the
+# Free edition.  Copy the license there as well.
+#
+cp $VisItDir/include/qt/[a-pr-zA-Z]*.h          $incdir/qt
+cp $VisItDir/include/qt/q[a-l]*.h               $incdir/qt
+cp $VisItDir/include/qt/q[m-zA-Z]*.h            $incdir/qt
+cp $VisItDir/clearcase_bin/QTLICENSE.*          $incdir/qt
+cp $VisItDir/include/qt/private/*.h             $incdir/qt/private
+
+#
+# Copy the help files to the distribution.
+#
+if (-e $VisItDir/help) then
+   echo "Copying help files to the distribution..."
+   cp $VisItDir/help/[a-gi-z]*.html    $helpdir
+   cp $VisItDir/help/h[a-df-z]*.html   $helpdir
+   cp $VisItDir/help/he[a-km-z]*.html  $helpdir
+   cp $VisItDir/help/hel[a-oq-z]*.html $helpdir
+   cp $VisItDir/help/help[a-z]*.html   $helpdir
+   cp $VisItDir/help/help0[01]*.html   $helpdir
+   cp $VisItDir/help/help0[23]*.html   $helpdir
+   cp $VisItDir/help/help0[45]*.html   $helpdir
+   cp $VisItDir/help/help0[67]*.html   $helpdir
+   if (-e $VisItDir/help/visit.helpml) then
+      cp $VisItDir/help/visit.helpml $helpdir
+   endif
+endif
+
+#
+# Copy the Java class files to the distribution.
+#
+if (-e $VisItDir/java/llnl/visit/ViewerProxy.class) then
+   cp -R $VisItDir/java/llnl $javadir
+endif
+if (-e $VisItDir/java/RunViewer.class) then
+   cp -R $VisItDir/java/RunViewer.class $javadir
+endif
+
+#
+# Install libsim
+#
+if (-e $VisItDir/archives/libsim.a) then
+    cp $VisItDir/archives/libsim.a $simv1dir/lib
+    cp $VisItDir/sim/lib/VisItControlInterface_V1.h $simv1dir/include
+    cp $VisItDir/sim/lib/visitfortransiminterface.inc $simv1dir/include
+    cp $VisItDir/databases/SimV1/VisItDataInterface_V1.h $simv1dir/include
+endif
+if (-e $VisItDir/archives/libsimf.a) then
+    cp $VisItDir/archives/libsimf.a $simv1dir/lib
+endif
+
+#
+# Copy the configuration files.
+#
+mkdir $verdir/.visit
+cp $VisItDir/clearcase_bin/visit-config-closed $verdir/.visit
+cp $VisItDir/clearcase_bin/visit-config-nersc  $verdir/.visit
+cp $VisItDir/clearcase_bin/visit-config-open   $verdir/.visit
+cp $VisItDir/clearcase_bin/visit-config-ornl   $verdir/.visit
+ln -s visit-config-open $verdir/.visit/config
+
+#
+# Strip the executables and shared libraries.
+#
+if ($Strip == "TRUE") then
+    if("$os" == "darwin") then
+        echo "We don't do library stripping on MacOS X."
+    else
+        strip $bindir/*
+        strip $libdir/*
+        strip $plugindir/plots/*
+        strip $plugindir/operators/*
+        strip $plugindir/databases/*
+    endif
+endif
+
+#
+# Change the permissions so that they are correct.
+#
+chmod -R go+rX distribution
+
+#
+# Build the compressed tar file.
+#
+set fname = visit`echo $Version | tr "." "_"`.$osver.tar
+
+cd distribution
+if ($Compress == "COMPRESS") then
+   tar cvbf 20 $fname visit
+   compress $fname
+   mv $fname.Z ..
+else
+   tar cvbf 20 - visit | gzip > ../$fname.gz
+endif
+cd ..
+
+#
+# Clean up the temporary directories.
+#
+rm -rf distribution

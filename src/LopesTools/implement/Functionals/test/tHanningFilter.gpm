@@ -1,0 +1,29 @@
+
+# -------------------------------------------------------------------------------
+# Gnuplot macro file for plotting the results written by the 'tHanningFilter'
+# test program
+# -------------------------------------------------------------------------------
+# $Id: tHanningFilter.gpm,v 1.1 2005/11/17 10:07:07 bahren Exp $
+
+set grid
+set autoscale
+set xlabel 'x'
+set ylabel 'Filter weights'
+
+set term post color solid
+set output 'tHanningFilter.ps'
+
+set title 'HanningFilter<Float>'
+plot 'tHanningFilter_float.data' u 1:2 t 'alpha=0.40' w l,\
+	'tHanningFilter_float.data' u 1:3 t 'alpha=0.50' w l,\
+	'tHanningFilter_float.data' u 1:4 t 'alpha=0.60' w l
+
+set title 'HanningFilter<Double>'
+plot 'tHanningFilter_double.data' u 1:2 t 'alpha=0.40' w l,\
+	'tHanningFilter_double.data' u 1:3 t 'alpha=0.50' w l,\
+	'tHanningFilter_double.data' u 1:4 t 'alpha=0.60' w l
+
+set title 'HanningFilter<Complex>'
+plot 'tHanningFilter_complex.data' u 1:2 t 'alpha=0.40' w l,\
+	'tHanningFilter_complex.data' u 1:4 t 'alpha=0.50' w l,\
+	'tHanningFilter_complex.data' u 1:6 t 'alpha=0.60' w l

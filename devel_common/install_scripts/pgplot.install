@@ -1,0 +1,88 @@
+#!/bin/sh
+
+var_basedir=`pwd`
+var_arch=`uname | tr '[A-Z]' '[a-z]'`
+
+case $var_arch in
+	darwin)
+		var_arch=bsd
+	;;
+	linux)
+	;;
+esac
+
+## check the input
+
+if test -z $1 ; then
+	echo "Missing installation prefix variable!"
+	exit 1;
+else
+	var_prefix=$1
+	var_prefix_sed=`echo $var_prefix | awk '{ gsub(/\//, "\\\\/"); print }'`
+	var_prefix_inc=$var_prefix/inc
+	var_prefix_inc_sed=`echo $var_prefix_inc | awk '{ gsub(/\//, "\\\\/"); print }'`
+fi
+
+echo "var_prefix         = $var_prefix";
+echo "var_prefix_sed     = $var_prefix_sed";
+echo "var_prefix_inc     = $var_prefix_inc";
+echo "var_prefix_inc_sed = $var_prefix_inc_sed";
+
+## Package-specific variables ---------------------------------------------------
+
+pgplot_file=pgplot5.2.tar.gz
+pgplot_url=ftp://ftp.astro.caltech.edu/pub/pgplot/$pgplot_file
+pgplot_drivers=GIDRIV PGDRIV PSDRIV TKDRIV WDDRIV XWDRIV XMDRIV
+pgplot_src=$var_basedir/pgplot
+pgplot_dest=$var_prefix/bin/pgplot
+
+## Fetch the source code
+
+echo "[PGPlot] Fetching source from FTP server ..." ;
+wget -c $pgplot_url ;
+tar -xvzf $pgplot_file
+
+## Apply the required patches to the source files
+
+echo "[PGPlot] Apply required patches ..." ;
+
+cd $pgplot_src
+patch -p0 <../pgplot.patch
+
+## Adjust the path to the Tcl/Tk library and include files
+cd $pgplot_src/sys_$var_arch
+cat g77_gcc.conf | sed s/"TK_INCL=\"-I\/usr"/"TK_INCL=\"-I$var_prefix_sed"/ > tmp && cp tmp g77_gcc.conf
+cat g77_gcc.conf | sed s/"TK_LIBS=\"-L\/usr"/"TK_LIBS=\"-L$var_prefix_sed"/ > tmp && cp tmp g77_gcc.conf
+cat g77_gcc.conf | sed s/"RV_INCL=\""/"RV_INCL=\"-I$var_prefix_inc_sed"/ > tmp && cp tmp g77_gcc.conf
+
+exit
+
+## Prepare compilation of the source code
+
+mkdir -p $pgplot_dest
+cp $pgplot_src/drivers.list $pgplot_dest
+
+cd $pgplot_dest
+
+echo "[PGPlot] Configuring and building package ..." ;
+
+## Configure the pgplot makefiles
+cd $pgplot_dest && \
+	/usr/local/share/aips++/src/pgplot/makemake /usr/local/share/aips++/src/pgplot/ $(var_arch) g77_gcc && \
+        sed 's/\/lib /\/lib64 /g' /usr/local/share/aips++/local/bin/pgplot/makefile >/usr/local/share/aips++/local/bin/pgplot/make2 &&\
+        sed 's/-@//g' /usr/local/share/aips++/local/bin/pgplot/make2 >/usr/local/share/aips++/local/bin/pgplot/make3 &&\
+        cp /usr/local/share/aips++/local/bin/pgplot/make3 /usr/local/share/aips++/local/bin/pgplot/makefile &&\
+	make &&\
+	make cpg &&\
+	make clean;
+	-@ echo "[PGPlot] Installing include files ..." ;
+	cd $(pgplot_dest) && \
+	mv *.h $var_prefix/include;
+	-@ echo "[PGPlot] Installing library files ..." ;
+	cd $(pgplot_dest) && \
+	mv *.a $(var_lib);\
+	mv *.so $(var_lib);
+	-@ echo "[PGPlot] Creating symbolic links ...";
+	cd $(var_lib);\
+	rm -f libpng.a; \
+	ln -s $(lib_png) libpng.a;
