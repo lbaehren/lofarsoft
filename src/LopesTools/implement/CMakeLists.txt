@@ -22,5 +22,6 @@ ADD_LIBRARY (lopestools
 	Functionals/ShapeletsModel1D.cc
 	IO/DataIO.cc
 	IO/DataIterator.cc
+	Math/ThreeVector.cc
 	Utilities/ProgressBar.cc
 	Utilities/Timestamp.cc)
