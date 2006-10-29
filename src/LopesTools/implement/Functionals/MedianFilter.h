@@ -31,28 +31,30 @@
 
 #include <casa/namespace.h>
 
-/*!
-  \class MedianFilter.h
-
-  \ingroup Functionals
-
-  \brief A Meadian filter
-
-  \author Lars B&auml;hren
-
-  \date 2005/12/21
-
-  \test tMedianFilter.cc
-
-  <h3>Prerequisite</h3>
-
-  <h3>Synopsis</h3>
-
-  This essentially is an re-implementation of the code found in lopestools.cc
-
-  <h3>Example(s)</h3>
-
-  <ol>
+namespace lopestools {
+  
+  /*!
+    \class MedianFilter.h
+    
+    \ingroup Functionals
+    
+    \brief A Meadian filter
+    
+    \author Lars B&auml;hren
+    
+    \date 2005/12/21
+    
+    \test tMedianFilter.cc
+    
+    <h3>Prerequisite</h3>
+    
+    <h3>Synopsis</h3>
+    
+    This essentially is an re-implementation of the code found in lopestools.cc
+    
+    <h3>Example(s)</h3>
+    
+    <ol>
     <li>Working with vector input:
     \code
     MedianFilter<Float> mf (strength);
@@ -68,7 +70,7 @@
     Matrix<Float> output (shape);
     
     for (int n(0); n<shape(1); n++) {
-      output.column(n) = mf.filter(input.column(n));
+    output.column(n) = mf.filter(input.column(n));
     }
     \endcode
     Since this type of processing is supported internally, you also simply might
@@ -78,53 +80,53 @@
     Matrix<Float> input (nofChannels,nofAntennas,1.0);
     Matrix<Float> output (mf.filter(input));
     \endcode
-  </ol>
-
-  Here is a short test script which can be run to compare the result from the new
-  implementation to the output of the original one:
-  \code
-  data.setblock(n=1,blocksize=512);
-  fx := data.get("f(x)");
-  f := cMedFilter (fx, strength=5);
-  \endcode
-
-*/
-
-template <class T> class MedianFilter {
+    </ol>
+    
+    Here is a short test script which can be run to compare the result from the new
+    implementation to the output of the original one:
+    \code
+    data.setblock(n=1,blocksize=512);
+    fx := data.get("f(x)");
+    f := cMedFilter (fx, strength=5);
+    \endcode
+    
+  */
   
-  //! Strength of the filter, i.e. the number of bins over which to average
-  int strength_p;
-  //! Length of a vector of input data
-  int blocksize_p;
-  //! Number of data sets (when working on matrix input)
-  int nofDataSets_p;
-
- public:
-
-  // --------------------------------------------------------------- Construction
-
-  /*!
-    \brief Default constructor
-  */
-  MedianFilter ();
-
-  /*!
-    \brief Argumented constructor
-
-    \param strength -- Strength of the filter, i.e. the number of bins over
-                       which to average
-  */
-  MedianFilter (const int& strength);
-
-  /*!
-    \brief Copy constructor
-
-    \param other -- Another MedianFilter object from which to create this new
-                    one.
-  */
-  MedianFilter (MedianFilter<T> const& other);
-
-  // ---------------------------------------------------------------- Destruction
+  template <class T> class MedianFilter {
+    
+    //! Strength of the filter, i.e. the number of bins over which to average
+    int strength_p;
+    //! Length of a vector of input data
+    int blocksize_p;
+    //! Number of data sets (when working on matrix input)
+    int nofDataSets_p;
+    
+  public:
+    
+    // ------------------------------------------------------------- Construction
+    
+    /*!
+      \brief Default constructor
+    */
+    MedianFilter ();
+    
+    /*!
+      \brief Argumented constructor
+      
+      \param strength -- Strength of the filter, i.e. the number of bins over
+                         which to average
+    */
+    MedianFilter (const int& strength);
+    
+    /*!
+      \brief Copy constructor
+      
+      \param other -- Another MedianFilter object from which to create this new
+                      one.
+    */
+    MedianFilter (MedianFilter<T> const& other);
+    
+    // -------------------------------------------------------------- Destruction
 
   /*!
     \brief Destructor
@@ -200,5 +202,7 @@ template <class T> class MedianFilter {
   Vector<T> applyFilter (const Vector<T>& data);
   
 };
+
+}
 
 #endif /* _MEDIANFILTER_H_ */

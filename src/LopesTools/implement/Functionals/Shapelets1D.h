@@ -24,6 +24,7 @@
 #define SHAPELETS1D_H
 
 #include <complex>
+#include <blitz/array.h>
 
 #include <Functionals/Hermite1D.h>
 

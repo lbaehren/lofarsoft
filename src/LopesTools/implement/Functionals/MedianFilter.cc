@@ -22,6 +22,8 @@
 
 #include <Functionals/MedianFilter.h>
 
+namespace lopestools {
+
 // ==============================================================================
 //
 //  Construction
@@ -169,4 +171,6 @@ Matrix<T> MedianFilter<T>::filter (const Matrix<T>& data)
   }
 
   return result;
+}
+
 }

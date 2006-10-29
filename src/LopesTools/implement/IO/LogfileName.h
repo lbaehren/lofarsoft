@@ -35,6 +35,8 @@
 
 #include <casa/namespace.h>
 
+namespace lopestools {
+
 /*!
   \class LogfileName.h
   
@@ -191,5 +193,7 @@ class LogfileName {
   void setFilename ();
 
 };
+
+}
 
 #endif /* _LOGFILENAME_H_ */

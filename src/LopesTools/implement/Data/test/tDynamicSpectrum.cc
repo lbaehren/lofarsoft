@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006                                                  *
- *   Lars Baehren (<mail>)                                                     *
+ *   Copyright (C) 2006                                                    *
+ *   Lars Baehren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -20,10 +20,8 @@
 
 /* $Id: template-tclass.cc,v 1.6 2006/09/20 09:56:53 bahren Exp $*/
 
-#include <casa/aips.h>
-#include <casa/Exceptions/Error.h>
-
-#include <lopes/Data/DynamicSpectrum.h>
+#include <iostream>
+#include <Data/DynamicSpectrum.h>
 
 /*!
   \file tDynamicSpectrum.cc
@@ -32,10 +30,41 @@
 
   \brief A collection of test routines for DynamicSpectrum
  
-  \author Lars Baehren
+  \author Lars B&auml;hren
  
   \date 2006/10/25
 */
+
+// -----------------------------------------------------------------------------
+
+int test_blitzArrays ()
+{
+  int nofFailedTests (0);
+  int nofAxes (2);
+  int shape[2] = {100,200};
+
+  std::cout << "[1]" <<std::endl;
+  {
+    blitz::Array<int,1> data (shape[0]);
+    //
+    std::cout << " - dimensions    = " << data.dimensions()  << std::endl;
+    std::cout << " - rank          = " << data.rank()        << std::endl;
+    std::cout << " - shape         = " << data.shape()       << std::endl;
+    std::cout << " - nof. elements = " << data.numElements() << std::endl;
+  }
+
+  std::cout << "[2]" <<std::endl;
+  {
+    blitz::Array<int,2> data (shape[0],shape[1]);
+    //
+    std::cout << " - dimensions    = " << data.dimensions()  << std::endl;
+    std::cout << " - rank          = " << data.rank()        << std::endl;
+    std::cout << " - shape         = " << data.shape()       << std::endl;
+    std::cout << " - nof. elements = " << data.numElements() << std::endl;
+  }
+
+  return nofFailedTests;
+}
 
 // -----------------------------------------------------------------------------
 
@@ -49,13 +78,17 @@ int test_DynamicSpectrum ()
   int nofFailedTests (0);
   
   std::cout << "\n[test_DynamicSpectrum]\n" << std::endl;
-
+  
   std::cout << "[1] Testing default constructor ..." << std::endl;
-  try {
-    DynamicSpectrum newObject;
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
-    nofFailedTests++;
+  {
+    lopestools::DynamicSpectrum ds;
+  }
+  
+  std::cout << "[2] Testing argumented constructor ..." << std::endl;
+  {
+    blitz::Array<int,1> shape (2);
+    shape = 100,20;
+    lopestools::DynamicSpectrum ds (shape);
   }
   
   return nofFailedTests;
@@ -66,6 +99,11 @@ int test_DynamicSpectrum ()
 int main ()
 {
   int nofFailedTests (0);
+
+  // Test working with Blitz++ arrays
+  {
+    nofFailedTests += test_blitzArrays ();
+  }
 
   // Test for the constructor(s)
   {

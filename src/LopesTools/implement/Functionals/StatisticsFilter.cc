@@ -22,6 +22,8 @@
 
 #include <Functionals/StatisticsFilter.h>
 
+namespace lopestools {
+
 // ==============================================================================
 //
 //  Construction
@@ -219,4 +221,6 @@ Matrix<T> StatisticsFilter<T>::filter (const Matrix<T>& data)
   }
 
   return result;
+}
+
 }

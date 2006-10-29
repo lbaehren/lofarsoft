@@ -21,6 +21,7 @@
 /* $Id: template-class.cc,v 1.9 2006/04/14 11:34:17 bahren Exp $*/
 
 #include <Data/DynamicSpectrum.h>
+#include <fitsio.h>
 
 namespace lopestools {
   
@@ -35,17 +36,21 @@ namespace lopestools {
     init (defaultShape());
   }
   
-  DynamicSpectrum::DynamicSpectrum (std::vector<int> const &shape)
+  DynamicSpectrum::DynamicSpectrum (blitz::Array<int,1> const &shape)
   {
     init(shape);
   }
   
-  DynamicSpectrum::DynamicSpectrum (std::vector<int> const &shape,
-				    std::vector<double> const &crpix,
-				    std::vector<double> const &crval,
-				    std::vector<double> const &cdelt)
+  DynamicSpectrum::DynamicSpectrum (blitz::Array<int,1> const &shape,
+				    blitz::Array<double,1> const &crpix,
+				    blitz::Array<double,1> const &crval,
+				    blitz::Array<double,1> const &cdelt)
   {
-}
+    setShape (shape);
+    setRefPixel (crpix);
+    setRefValue (crval);
+    setIncrement (cdelt);
+  }
   
   DynamicSpectrum::DynamicSpectrum (DynamicSpectrum const &other)
   {
@@ -82,7 +87,13 @@ namespace lopestools {
   }
   
   void DynamicSpectrum::copy (DynamicSpectrum const &other)
-  {;}
+  {
+    pixels_p = other.pixels_p;
+    shape_p  = other.shape_p;
+    crpix_p  = other.crpix_p;
+    crval_p  = other.crval_p;
+    cdelt_p  = other.cdelt_p;
+  }
   
   // ============================================================================
   //
@@ -90,7 +101,33 @@ namespace lopestools {
   //
   // ============================================================================
   
+  void DynamicSpectrum::setShape (blitz::Array<int,1> const &shape)
+  {
+    shape_p = shape;
+  }
   
+  void DynamicSpectrum::setRefPixel (blitz::Array<double,1> const &crpix)
+  {
+    if (crpix.numElements() == nofAxes) {
+      crpix_p = crpix;
+    } else {
+      std::cerr << "[DynamicSpectrum::setRefPixel] Invalid number of axes!"
+		<< std::endl;
+    }
+  }
+  
+  void DynamicSpectrum::setRefValue (blitz::Array<double,1> const &crval)
+  {
+    if (crval.numElements() == nofAxes) {
+      crval_p = crval;
+    } else {
+      std::cerr << "[DynamicSpectrum::setRefPixel] Invalid number of axes!"
+		<< std::endl;
+    }
+  }
+  
+  void DynamicSpectrum::setIncrement (blitz::Array<double,1> const &cdelt)
+  {}
   
   // ============================================================================
   //
@@ -98,22 +135,119 @@ namespace lopestools {
   //
   // ============================================================================
   
-  void DynamicSpectrum::init (std::vector<int> const &shape)
+  // ----------------------------------------------------------------------- init
+
+  void DynamicSpectrum::init (blitz::Array<int,1> const &shape)
   {
-    uint nelem (shape.size());
+    uint nelem (shape.numElements());
     
+    /* Input array must be of rank 1, containing two entries */
     if (nelem == nofAxes) {
       // copy the pixel map shape
-      shape_p.resize(nofAxes);
       shape_p = shape;
       // Coordinate axes information
-      crpix_p.resize(nofAxes,1.0);
-      crval_p.resize(nofAxes,1.0);
-      cdelt_p.resize(nofAxes,1.0);
+      blitz::Array<double,1> tmp (nofAxes);
+      tmp = 1.0,1.0;
+      crpix_p = tmp;
+      crval_p = tmp;
+      cdelt_p = tmp;
     } else {
       std::cerr << "[DynamicSpectrum::init] Invalid number of axes" << std::endl;
-      init (defaultShape());
+      std::cerr << " - Expected : " << nofAxes << std::endl;
+      std::cerr << " - Detected : " << nelem   << std::endl;
     }
   }
   
+  // ---------------------------------------------------------------- setSpectrum
+
+  void DynamicSpectrum::setSpectrum (blitz::Array<std::complex<double>,2> const &spectra,
+				     int const &timestep)
+  {
+    if (timestep>-1 && timestep<shape_p(1)) {
+      // check the shape of the input data
+//       blitz::TinyVector<int,spectrum.rank()> shape (spectrum.shape());
+    } else {
+      std::cerr << "[DynamicSpectrum::setSpectrum]" << std::endl;
+    }
+  }
+
+  // ---------------------------------------------------------- collapseFrequency
+  
+  blitz::Array<double,1> DynamicSpectrum::collapseFrequency ()
+  {
+    blitz::Array<double,1> timeseries (shape_p(1));
+    int timestep (0);
+    int channel (0);
+    
+    for (timestep=0; timestep<shape_p(1); timestep++) {
+      timeseries(timestep) = 0.0;
+      for (channel=0; channel<shape_p(0); channel++) {
+	timeseries(timestep) += pixels_p(channel,timestep);
+      }
+    }
+    
+    return timeseries;
+  }
+
+  // ------------------------------------------------------------------- spectrum
+
+  blitz::Array<double,1> DynamicSpectrum::spectrum (bool const &normalize)
+  {
+    blitz::Array<double,1> out (shape_p(0));
+    int timestep (0);
+    int channel (0);
+    
+    for (channel=0; channel<shape_p(0); channel++) {
+      out(channel) = 0.0;
+      for (timestep=0; timestep<shape_p(1); timestep++) {
+	out(channel) += pixels_p(channel,timestep);
+      }
+    }
+    
+    /* 
+       Normalize the spectrum? If yes, then divide by the number of timesteps
+    */
+    if (normalize) {
+      out /= shape_p(1);
+    }
+    
+    return out;
+  }
+  
+  // ----------------------------------------------------------------- write2fits
+
+  bool DynamicSpectrum::write2fits (std::string const &filename,
+				    bool const &overwrite)
+  {
+    std::cout << "[DynamicSpectrum::write2fits]" << std::endl;
+    
+    bool ok (true);
+    int status (0);
+    long naxis (2);
+    long naxes[2] = {long(shape_p(0)),
+		     long(shape_p(1))};
+    fitsfile *fptr;
+
+    std::cout << " - Creating new FITS file ... " << std::endl;
+    fits_create_file (&fptr,
+		      filename.c_str(),
+		      &status);
+
+    if (status) {
+      std::cerr << "write2fits : Error creating output file "
+		<< filename
+		<< std::endl;
+      ok = false;
+    }
+    
+    std::cout << " - Creating primary image array ... " << std::endl;
+    fits_create_img (fptr,
+		     DOUBLE_IMG,
+		     naxis,
+		     naxes,
+		     &status);
+    
+    return ok;
+  }
 }
+

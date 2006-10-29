@@ -23,6 +23,8 @@
 #ifndef DATAITERATOR_H
 #define DATAITERATOR_H
 
+namespace lopestools {
+
 /*!
   \class DataIterator.h
 
@@ -341,5 +343,7 @@ class DataIterator {
   void setPosition ();
 
 };
+
+}
 
 #endif /* _DATAITERATOR_H_ */

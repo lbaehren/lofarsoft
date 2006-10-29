@@ -43,7 +43,7 @@ using std::string;
 using std::ifstream;
 using std::vector;
 
-
+namespace lopestools {
 
 /*!
   \class ImportAntenna
@@ -66,14 +66,18 @@ using std::vector;
 
   <h3>Synopsis</h3>
 
-  Reads in and provides access to an individual observer (antenna) simulated with REAS.
+  Reads in and provides access to an individual observer (antenna) simulated
+  with REAS.
 
   <h3>Example(s)</h3>
 
+  \code
   ImportAntenna myAntenna("10101", "/here/raw_10101.dat", 30.0, 180.0)
+  \endcode
   
-  Opens the specified antenna file and interprets it as the result of a simulation with 30 degree
-  zenith and 180 degree azimuth angles (in REAS convention!).
+  Opens the specified antenna file and interprets it as the result of a
+  simulation with 30 degree zenith and 180 degree azimuth angles (in REAS
+  convention!).
 
 */
 
@@ -91,10 +95,14 @@ class ImportAntenna {
     \param parShowerTheta -- shower zenith angle - in REAS convention!
     \param parAzimuthAngle -- shower azimuth angle - in REAS convention!
 
-    Angles are in REAS convention! Zenith angle is angle to the zenith direction. Azimuth angle is specified
-    as the direction into which the shower propagates. 0 degree is to north, 90 degree is to west.
+    Angles are in REAS convention! Zenith angle is angle to the zenith direction.
+    Azimuth angle is specified as the direction into which the shower propagates.
+    0 degree is to north, 90 degree is to west.
   */
-  ImportAntenna (string parID, string parFileName, double parShowerTheta, double parShowerPhi);
+  ImportAntenna (string parID,
+		 string parFileName,
+		 double parShowerTheta,
+		 double parShowerPhi);
 
 
   // ---------------------------------------------------------------- Destruction
@@ -116,12 +124,16 @@ class ImportAntenna {
   /*!
     \brief get the two zero-padded time series arrays containing the efield data.
 
-    \param Eazimuth -- returns time series projected on "azimuth aligned" component (lies in x-y-plane)
-    \param Ezenith -- returns time series projected on "zenith aligned" component (lies in plane defined by shower axis and z-axis)
+    \param Eazimuth -- returns time series projected on "azimuth aligned"
+                       component (lies in x-y-plane)
+    \param Ezenith -- returns time series projected on "zenith aligned"
+           component (lies in plane defined by shower axis and z-axis)
 
-    \result Returns true if energy fraction in projected pulses is essentially 1, false otherwise.
+    \result Returns true if energy fraction in projected pulses is essentially
+            1, false otherwise.
   */
-  Bool getTimeSeries(Vector<Double> &Eazimuth, Vector<Double> &Ezenith) const;
+  Bool getTimeSeries(Vector<Double> &Eazimuth,
+		     Vector<Double> &Ezenith) const;
 
   /*!
     \brief returns if ImportAntenna object has valid data
@@ -137,20 +149,32 @@ class ImportAntenna {
     \brief returns antenna ID string
   */
   String getID() const { return itsID; }
-
+  
  private:
-
+  
   string itsID;
   string itsFileName;
   double itsSamplingTimeScale;
   bool hasData;
+  //! Time-series of electric field vectors
   vector<ThreeVector> itsTimeSeries;
-  ThreeVector itsObservationAxis;	///< vectorial direction into which observer looks - in REAS coordinates!
-  ThreeVector itsAzimuthAxis;		///< vectorial direction of "horizontal-aligned" component of e-field - in REAS coordinates!
-  ThreeVector itsZenithAxis;		///< vectorial direction of "vertical-aligned" component of e-field - in REAS coordinates!
+  //! < vectorial direction into which observer looks - in REAS coordinates!
+  ThreeVector itsObservationAxis;
+  /*!
+    < vectorial direction of "horizontal-aligned" component of e-field - in
+    REAS coordinates!
+  */
+  ThreeVector itsAzimuthAxis;
+  /*!
+    < vectorial direction of "vertical-aligned" component of e-field - in REAS
+    coordinates!
+  */
+  ThreeVector itsZenithAxis;
 
   static const double rad;
   static const double minimumEfficiency;
 };
+
+}
 
 #endif /* IMPORTANTENNA_H */

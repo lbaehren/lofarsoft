@@ -31,6 +31,8 @@
 
 #include <casa/namespace.h>
 
+namespace lopestools {
+
 /*!
   \class FilterType
   
@@ -269,5 +271,7 @@ template <class T> class StatisticsFilter {
 #ifndef AIPS_NO_TEMPLATE_SRC
 #include <lopes/Functionals/StatisticsFilter.cc>
 #endif //# AIPS_NO_TEMPLATE_SRC
+
+}
 
 #endif /* _STATISTICSFILTER_H_ */

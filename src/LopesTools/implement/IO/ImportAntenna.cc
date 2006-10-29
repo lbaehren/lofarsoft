@@ -22,23 +22,31 @@
 
 #include <IO/ImportAntenna.h>
 
-/*!
-  \class ImportAntenna
-*/
-
-const double ImportAntenna::rad = M_PI/180.0;		// degree to radians
-const double ImportAntenna::minimumEfficiency = 0.995;	// warn if energy fraction in projected pulses falls below this limit
-
-
-
+namespace lopestools {
+  
+  /*!
+    \class ImportAntenna
+  */
+  
+  // degree to radians
+  const double ImportAntenna::rad = M_PI/180.0;
+  // warn if energy fraction in projected pulses falls below this limit
+  const double ImportAntenna::minimumEfficiency = 0.995;
+  
 // ==============================================================================
 //
 //  Construction
 //
 // ==============================================================================
 
-ImportAntenna::ImportAntenna (string parID, string parFileName, double parShowerTheta, double parShowerPhi)
-: itsID(parID), itsFileName(parFileName), itsSamplingTimeScale(0.0), hasData(false),
+ImportAntenna::ImportAntenna (string parID,
+			      string parFileName,
+			      double parShowerTheta,
+			      double parShowerPhi)
+: itsID(parID),
+  itsFileName(parFileName),
+  itsSamplingTimeScale(0.0),
+  hasData(false),
   itsObservationAxis(-1.0*ThreeVector(cos(parShowerPhi*rad)*sin(parShowerTheta*rad), sin(parShowerPhi*rad)*sin(parShowerTheta*rad), -cos(parShowerTheta*rad))),
   itsAzimuthAxis((itsObservationAxis.CrossedWith(ThreeVector(-cos(parShowerPhi*rad),-sin(parShowerPhi*rad),0.0))).GetDirection()),
   itsZenithAxis(itsAzimuthAxis.CrossedWith(itsObservationAxis))
@@ -148,7 +156,9 @@ Bool ImportAntenna::getTimeSeries(Vector<Double> &Eazimuth, Vector<Double> &Ezen
     return false;
   }
   else
-  {
-    return true;
-  }
+    {
+      return true;
+    }
+}
+  
 }

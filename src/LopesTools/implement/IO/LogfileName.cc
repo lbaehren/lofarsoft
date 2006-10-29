@@ -20,7 +20,9 @@
 
 /* $Id: LogfileName.cc,v 1.2 2006/01/09 19:23:10 bahren Exp $*/
 
-#include <lopes/IO/LogfileName.h>
+#include <IO/LogfileName.h>
+
+namespace lopestools {
 
 // ==============================================================================
 //
@@ -170,4 +172,6 @@ void LogfileName::setTimestamp ()
 
 void LogfileName::setFilename ()
 {
+}
+
 }
