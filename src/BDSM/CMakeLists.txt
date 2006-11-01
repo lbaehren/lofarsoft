@@ -1,3 +1,3 @@
-PROJECT (BDSM)
+PROJECT (BDSM Fortran)
 
 SUBDIRS (implement)
