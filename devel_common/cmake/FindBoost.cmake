@@ -1,22 +1,40 @@
 # - Check for the presence of the Boost library
 #
 
-SET (Boost_VERSION 1_33_1)
+SET (Boost_VERSION 1_32)
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-FIND_LIBRARY (Boost_LIBRARIES
-  NAMES boost_python-${Boost_VERSION} boost_wave-${Boost_VERSION}
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib
+SET (Boost_LIBRARIES "")
+
+FIND_LIBRARY (Boost_python_LIBRARY
+	NAMES boost_python-${Boost_VERSION}
+	PATHS /usr/local/lib /usr/lib /lib /sw/lib
+	PATH_SUFFIXES boost
 )
+
+IF (Boost_python_LIBRARY)
+	SET (Boost_LIBRARIES "${Boost_LIBRARIES} ${Boost_python_LIBRARY}")
+ENDIF (Boost_python_LIBRARY)
+
+FIND_LIBRARY (Boost_wave_LIBRARY
+	NAMES boost_wave-${Boost_VERSION}
+	PATHS /usr/local/lib /usr/lib /lib /sw/lib
+	PATH_SUFFIXES boost
+)
+
+IF (Boost_wave_LIBRARY)
+	SET (Boost_LIBRARIES "${Boost_LIBRARIES} ${Boost_wave_LIBRARY}")
+ENDIF (Boost_wave_LIBRARY)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
 FIND_PATH (Boost_INCLUDE_DIR
-	boost.h
+	config.hpp
 	PATHS /usr/local/include /usr/include /sw/include
+	PATH_SUFFIXES boost ${Boost_VERSION} ${Boost_VERSION}/boost
 )
 
 ## -----------------------------------------------------------------------------
