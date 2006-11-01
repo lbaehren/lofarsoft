@@ -1,7 +1,7 @@
 
 #include <Utilities/ProgressBar.h>
 
-namespace lopestools {
+namespace LOPES { // Namespace LOPES -- begin
   
   // =============================================================================
   //

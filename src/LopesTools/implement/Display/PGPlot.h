@@ -26,7 +26,7 @@
 #include <sstream>
 #include <Data/Data.h>
 
-namespace lopestools {
+namespace LOPES {
   
   /*!
     \class PGPlot

@@ -23,7 +23,7 @@
 #ifndef DATAITERATOR_H
 #define DATAITERATOR_H
 
-namespace lopestools {
+namespace LOPES {
 
 /*!
   \class DataIterator.h

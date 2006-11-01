@@ -46,7 +46,7 @@
 
 #include <casa/namespace.h>
 
-namespace lopestools {
+namespace LOPES {
 
 /*!
   \class HanningFilter

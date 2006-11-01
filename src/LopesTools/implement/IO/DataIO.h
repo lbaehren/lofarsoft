@@ -13,7 +13,7 @@
 
 using namespace std;
 
-namespace lopestools {
+namespace LOPES {
 
 /*!
   \class DataIO

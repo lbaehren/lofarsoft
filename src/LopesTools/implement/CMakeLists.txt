@@ -1,15 +1,15 @@
-PROJECT (LopesTools)
+PROJECT (LOPES-Tools)
 
 SUBDIRS (Data Functionals IO Utilities)
 
 ## -----------------------------------------------------------------------------
 ## Build the LopesTools library
 
-INCLUDE (${LopesTools_SOURCE_DIR}/../../../devel_common/cmake/FindBlitz.cmake)
-INCLUDE (${LopesTools_SOURCE_DIR}/../../../devel_common/cmake/FindBoost.cmake)
-#INCLUDE (${LopesTools_SOURCE_DIR}/../../../devel_common/cmake/FindCASA.cmake)
-INCLUDE (${LopesTools_SOURCE_DIR}/../../../devel_common/cmake/FindCFITSIO.cmake)
-INCLUDE (${LopesTools_SOURCE_DIR}/../../../devel_common/cmake/FindCPGPLOT.cmake)
+INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindBlitz.cmake)
+INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindBoost.cmake)
+#INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindCASA.cmake)
+INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindCFITSIO.cmake)
+INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindCPGPLOT.cmake)
 
 INCLUDE_DIRECTORIES(
 	.
@@ -23,6 +23,7 @@ INCLUDE_DIRECTORIES(
 ADD_LIBRARY (lopestools
 	Data/Data.cc
 	Data/DynamicSpectrum.cc
+	Data/UnitPrefix.cc
 	Display/PGPlot.cc
 	Functionals/Hermite1D.cc
 	Functionals/Shapelets1D.cc

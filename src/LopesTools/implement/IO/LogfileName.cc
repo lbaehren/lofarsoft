@@ -22,7 +22,7 @@
 
 #include <IO/LogfileName.h>
 
-namespace lopestools {
+namespace LOPES {
 
 // ==============================================================================
 //

@@ -25,7 +25,7 @@
 
 using namespace std;
 
-namespace lopestools {
+namespace LOPES {
   
   Data::Data() {
     data_   = NULL;

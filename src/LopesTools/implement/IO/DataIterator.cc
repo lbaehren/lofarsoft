@@ -24,7 +24,7 @@
 #include <complex>
 #include <IO/DataIterator.h>
 
-namespace lopestools {
+namespace LOPES {
   
   // ============================================================================
   //

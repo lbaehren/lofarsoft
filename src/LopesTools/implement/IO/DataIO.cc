@@ -1,7 +1,7 @@
 
 #include <IO/DataIO.h>
 
-namespace lopestools {
+namespace LOPES {
   
   // --------------------------------------------------------------------- DataIO
   

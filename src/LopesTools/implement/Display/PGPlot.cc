@@ -24,7 +24,7 @@
 #include <Data/Data.h>
 #include <Display/PGPlot.h>
 
-namespace lopestools {
+namespace LOPES {
   
   PGPlot::PGPlot() {
     xAxisMin_ = -409.6;

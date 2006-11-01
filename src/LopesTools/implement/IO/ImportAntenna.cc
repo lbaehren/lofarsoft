@@ -22,7 +22,7 @@
 
 #include <IO/ImportAntenna.h>
 
-namespace lopestools {
+namespace LOPES {
   
   /*!
     \class ImportAntenna

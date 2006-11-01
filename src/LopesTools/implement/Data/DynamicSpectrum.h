@@ -32,7 +32,7 @@
 //! The number of image axes
 const unsigned int nofAxes = 2;
 
-namespace lopestools {
+namespace LOPES {
   
   /*!
     \class DynamicSpectrum

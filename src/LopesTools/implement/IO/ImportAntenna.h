@@ -43,7 +43,7 @@ using std::string;
 using std::ifstream;
 using std::vector;
 
-namespace lopestools {
+namespace LOPES {
 
 /*!
   \class ImportAntenna

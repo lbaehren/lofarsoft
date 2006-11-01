@@ -1,2 +1,3 @@
+PROJECT (LUS)
 
 SUBDIRS (LopesTools VLT)

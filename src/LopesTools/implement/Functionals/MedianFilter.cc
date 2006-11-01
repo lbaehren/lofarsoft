@@ -22,7 +22,7 @@
 
 #include <Functionals/MedianFilter.h>
 
-namespace lopestools {
+namespace LOPES {
 
 // ==============================================================================
 //

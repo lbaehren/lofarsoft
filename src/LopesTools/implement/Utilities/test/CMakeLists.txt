@@ -1,4 +1,4 @@
-PROJECT (LopesTools)
+PROJECT (LOPES-Tools)
 
 INCLUDE_DIRECTORIES (. .. ../..)
 

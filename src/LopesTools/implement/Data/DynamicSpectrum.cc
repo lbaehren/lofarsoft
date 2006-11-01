@@ -23,7 +23,7 @@
 #include <Data/DynamicSpectrum.h>
 #include <fitsio.h>
 
-namespace lopestools {
+namespace LOPES {
   
   // ============================================================================
   //

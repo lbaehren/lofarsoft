@@ -22,7 +22,7 @@
 
 #include <Data/TIM40Header.h>
 
-namespace lopestools {
+namespace LOPES {
 
 // ==============================================================================
 //

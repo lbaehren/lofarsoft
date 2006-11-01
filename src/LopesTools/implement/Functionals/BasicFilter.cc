@@ -22,7 +22,7 @@
 
 #include <Functionals/BasicFilter.h>
 
-namespace lopestools {
+namespace LOPES {
 
 // ==============================================================================
 //

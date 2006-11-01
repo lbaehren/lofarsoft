@@ -23,6 +23,8 @@
 #include <iostream>
 #include <Utilities/Timestamp.h>
 
+namespace LOPES { // Namespace LOPES -- begin
+
 /*!
   \class Timestamp
 */
@@ -322,3 +324,5 @@ std::string Timestamp::nanoblogger ()
 
   return date;
 }
+
+} // Namespace LOPES -- end

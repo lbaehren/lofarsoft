@@ -14,7 +14,7 @@
 #include <time.h>
 using namespace std;
 
-namespace lopestools {
+namespace LOPES { // Namespace LOPES -- begin
   
   /*!
     \class ProgressBar

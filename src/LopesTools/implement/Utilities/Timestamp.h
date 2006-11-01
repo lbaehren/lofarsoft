@@ -27,6 +27,8 @@
 #include <string>
 #include <time.h>
 
+namespace LOPES { // Namespace LOPES -- begin
+
 /*!
   \class Timestamp
 
@@ -317,5 +319,7 @@ class Timestamp {
   void setTime ();
 
 };
+
+} // Namespace LOPES -- end
 
 #endif /* TIMESTAMP_H */
