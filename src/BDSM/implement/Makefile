@@ -64,9 +64,11 @@ simulation_ilse : simulation_ilse.f $(OBJNOISE4)
 bdsm-awe : bdsm-awe.f $(OBJNOISE)
 	$(FC) bdsm-awe.f $(OBJNOISE)   $(CFITS) -o bdsm-awe
 
+# ported to cmake
 srccomp1 : srccomp1.f $(OBJNOISE3)
 	$(FC) srccomp1.f $(OBJNOISE3)   -o srccomp1
 
+# ported to cmake (though no longer existent)
 a : a.f combineimage.o readarray.o writearray.o sub_prog.o check.o
 	$(FC) -o a a.f combineimage.o readarray.o writearray.o sub_prog.o check.o
 
