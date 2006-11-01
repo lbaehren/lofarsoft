@@ -1,0 +1,3 @@
+PROJECT (LOPES-Tools)
+
+SUBDIRS (test)
