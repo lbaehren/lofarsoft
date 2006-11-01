@@ -1,0 +1,6 @@
+fitsdir = '/data/niruj_pers/image/fits/' fits directory
+scratch = '/data/niruj_pers/image/' scratch directory
+srldir = '/data/niruj_pers/image/' source list directory
+fitsname = 'default.fits' name of fits file
+solnname = 'trial' id name for sourcelist
+runcode = 'aq' (a)uto/(m)anual and (q)uiet/(v)erbose

@@ -1,0 +1,12 @@
+   Starting BDSM (ver f1.1.3)                           00
+   Reading /data2/niruj/fits/subim.fits                 01
+   Preprocessing image                                  02
+   Calculating rms image                                07
+   Forming islands                                      02
+   Converting formats                                   00
+   Fitting islands                                      64
+   Making residual image                                02
+   Writing /data2/niruj/fits/subim.try.resid.FITS       03
+   Writing FITS gaussian catalogue /data2/niruj/srl/subim.try.gaul.FITS
+   Finished BDSM
+

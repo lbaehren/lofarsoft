@@ -1,0 +1,27 @@
+#! /bin/bash
+# start
+
+\rm -fr *.f Makefile a data
+cp -R /home/mohan/prog/noise/bdsm/*.f /home/mohan/prog/noise/bdsm/Makefile /home/mohan/prog/noise/bdsm/data /home/mohan/prog/noise/bdsm/makeparadefine .
+
+sed 's/$(PGLIB)/ /g' Makefile > a; mv -f a Makefile
+sed 's/\/usr\/bin\///g' Makefile > a; mv -f a Makefile
+sed 's/\/data\/FITS/\/strw1\/mohan/g' Makefile > a; mv -f a Makefile
+
+#for m in $@
+for m in *.f
+do
+ sed '/call pg/s/^/c/g' ${m} > a; mv -f a ${m}
+done
+
+grep -A 1 -n " call pg" *.f | grep ' \/ ' > a
+sed -e 's/-/ /' -e 's/-[^^]*/  /g' a > b
+awk '{print "sed -e '\''" $2 "d'\'' " $1 " |sed '\''" $2-1"a QWERTY '\'' | sed '\''s/QWERTY//g'\'' $1 > c; mv -f c " $1}' b > d
+chmod 755 d
+source d
+
+# used the following to include definition if opdir in all files which call writearray. 
+# including this for future similar use
+# sed '/call[^^]*opdir/ i \\        opdir="/home/mohan/prog/noise/bdsm/image/" ' nbit.f
+
+

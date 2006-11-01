@@ -1,0 +1,6 @@
+fitsdir  = '/home/mohan/prog/noise/bdsm/image/fits/'   fits directory
+scratch =  '/home/mohan/prog/noise/bdsm/image/'       scratch directory 
+srldir  = '/home/mohan/prog/noise/bdsm/image/'        directory for source list
+fitsname = 'subim.fits'                                  name of fits file 
+solnname = 'try'                                      id name for sourcelist 
+runcode = 'aq'                                          (a)uto/(m)anual and (q)uiet/(v)erbose

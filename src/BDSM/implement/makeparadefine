@@ -1,0 +1,43 @@
+#! /bin/tcsh
+
+echo ' '
+echo 'Setting up paradefine file ... '
+
+switch ($HOSTNAME)
+case "fluor":
+ setenv fitsdir '/data/niruj_pers/image/fits/'
+ setenv scratch '/data/niruj_pers/image/'
+ setenv srldir '/data/niruj_pers/image/' 
+breaksw
+case "para2"
+ setenv fitsdir '/data2/niruj/fits/'
+ setenv scratch '/data2/niruj/image/'
+ setenv srldir '/data2/niruj/srl/' 
+case "para11"
+ setenv fitsdir '/data2/niruj/image/fits/'
+ setenv scratch '/data2/niruj/image/'
+ setenv srldir '/data2/niruj/image/srl/' 
+breaksw
+case "para*"
+ setenv fitsdir '/paras/para11/data2/niruj/image/fits/'
+ setenv scratch '/paras/para11/data2/niruj/image/'
+ setenv srldir '/paras/para11/data2/niruj/image/srl/'
+breaksw
+default:
+ setenv fitsdir '/disks/strw1/mohan/image/fits/'
+ setenv scratch '/disks/strw1/mohan/image/'  
+ setenv srldir '/disks/strw1/mohan/image/srl/'
+endsw
+
+setenv fitsname 'default.fits'
+setenv solnname 'trial'
+setenv runcode 'aq'
+
+rm -fr paradefine
+echo "fitsdir = '$fitsdir' fits directory" > paradefine
+echo "scratch = '$scratch' scratch directory" >> paradefine
+echo "srldir = '$srldir' source list directory" >> paradefine
+echo "fitsname = '$fitsname' name of fits file" >> paradefine
+echo "solnname = '$solnname' id name for sourcelist" >> paradefine
+echo "runcode = '$runcode' (a)uto/(m)anual and (q)uiet/(v)erbose" >> paradefine
+

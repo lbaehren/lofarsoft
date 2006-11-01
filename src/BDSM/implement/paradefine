@@ -1,0 +1,6 @@
+fitsdir = '/data2/niruj/image/fits/' fits directory
+scratch = '/data2/niruj/image/' scratch directory
+srldir = '/data2/niruj/image/srl/' source list directory
+fitsname = 'WN30356H' name of fits file
+solnname = 'trial' id name for sourcelist
+runcode = 'aq' (a)uto/(m)anual and (q)uiet/(v)erbose
