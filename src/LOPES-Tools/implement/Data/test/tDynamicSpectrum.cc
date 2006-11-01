@@ -81,14 +81,14 @@ int test_DynamicSpectrum ()
   
   std::cout << "[1] Testing default constructor ..." << std::endl;
   {
-    lopestools::DynamicSpectrum ds;
+    LOPES::DynamicSpectrum ds;
   }
   
   std::cout << "[2] Testing argumented constructor ..." << std::endl;
   {
     blitz::Array<int,1> shape (2);
     shape = 100,20;
-    lopestools::DynamicSpectrum ds (shape);
+    LOPES::DynamicSpectrum ds (shape);
   }
   
   return nofFailedTests;

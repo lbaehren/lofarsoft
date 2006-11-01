@@ -20,8 +20,8 @@
 
 /* $Id: template-class.h,v 1.15 2006/06/20 09:42:16 bahren Exp $*/
 
-#ifndef LOPESTOOLS_DYNAMICSPECTRUM_H
-#define LOPESTOOLS_DYNAMICSPECTRUM_H
+#ifndef LOPES_DYNAMICSPECTRUM_H
+#define LOPES_DYNAMICSPECTRUM_H
 
 #include <iostream>
 #include <cmath>
@@ -307,5 +307,5 @@ namespace LOPES {
 
 }
   
-#endif /* LOPESTOOLS_DYNAMICSPECTRUM_H */
+#endif /* LOPES_DYNAMICSPECTRUM_H */
   

@@ -37,7 +37,7 @@
 
 // -----------------------------------------------------------------------------
 
-void showTime (Timestamp &nb)
+void showTime (LOPES::Timestamp &nb)
 {
   std::cout << " -- ymd         = " << nb.ymd()         << std::endl;
   std::cout << " -- hms         = " << nb.hms()         << std::endl;
@@ -83,19 +83,19 @@ int test_Timestamp ()
   
   std::cout << "[1] Testing default constructor ..." << std::endl;
   {
-    Timestamp nb;
+	  LOPES::Timestamp nb;
     //
     showTime (nb);
   }
   
   std::cout << "[2] Testing copy constructor ..." << std::endl;
   {
-    Timestamp nb;
+    LOPES::Timestamp nb;
     //
     std::cout << " - Original object:" << std::endl;
     showTime (nb);
     //
-    Timestamp nb2 (nb);
+    LOPES::Timestamp nb2 (nb);
     //
     std::cout << " - Copied object:" << std::endl;
     showTime (nb2);
@@ -112,7 +112,7 @@ int test_setTime ()
 
   int nofFailedTests (0);
   
-  Timestamp nb;
+  LOPES::Timestamp nb;
   //
   std::cout << " - Object from default constructor:" << std::endl;
   showTime (nb);

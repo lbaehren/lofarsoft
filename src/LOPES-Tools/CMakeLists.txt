@@ -2,4 +2,4 @@ PROJECT (LOPES-Tools)
 
 INCLUDE (CPack)
 
-SUBDIRS (apps implement)
+SUBDIRS (implement apps)

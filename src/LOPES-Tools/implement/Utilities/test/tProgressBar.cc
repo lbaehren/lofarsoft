@@ -118,7 +118,7 @@ void testTimer () {
   \param bar             -- A progress bar
   \param nofComputations -- The number of computation loops.
 */
-void drawProgressBar (lopestools::ProgressBar& bar,
+void drawProgressBar (LOPES::ProgressBar& bar,
 		      const int& nofComputations) {
 
   int nofLoops;
@@ -155,7 +155,7 @@ int test_ProgressBar (const int& loops,
 
   cout << "[1] ProgressBar (int)" << endl;
   {
-    lopestools::ProgressBar bar = lopestools::ProgressBar (loops);
+    LOPES::ProgressBar bar = LOPES::ProgressBar (loops);
     bar.showTime (false);
     //
     drawProgressBar (bar,nofComputations);
@@ -163,7 +163,7 @@ int test_ProgressBar (const int& loops,
 
   cout << "[2] ProgressBar (int,int)" << endl;
   {
-    lopestools::ProgressBar bar = lopestools::ProgressBar (loops,length);
+    LOPES::ProgressBar bar = LOPES::ProgressBar (loops,length);
     bar.showTime (false);
     //
     drawProgressBar (bar,nofComputations);
@@ -198,7 +198,7 @@ int main ()
   {
     cout << "\n[tProgressBar] Testing change of bar symbol." << endl;
     //
-    lopestools::ProgressBar bar = lopestools::ProgressBar (loops);
+    LOPES::ProgressBar bar = LOPES::ProgressBar (loops);
     //
     drawProgressBar (bar,nofComputations);
     //
@@ -212,7 +212,7 @@ int main ()
   {
     cout << "\n[tProgressBar] Testing change of bar width." << endl;
     //
-    lopestools::ProgressBar bar = lopestools::ProgressBar (loops);
+    LOPES::ProgressBar bar = LOPES::ProgressBar (loops);
     //
     drawProgressBar (bar,nofComputations);
     //
@@ -226,7 +226,7 @@ int main ()
   {
     cout << "\n[tProgressBar] Testing display of remain time." << endl;
     //
-    lopestools::ProgressBar bar = lopestools::ProgressBar (loops);
+    LOPES::ProgressBar bar = LOPES::ProgressBar (loops);
     //
     drawProgressBar (bar,nofComputations);
     //

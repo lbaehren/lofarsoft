@@ -1,3 +1,5 @@
 PROJECT (LOPES-Tools)
 
+SUBDIRS (timclient)
+
 INCLUDE_DIRECTORIES (. ..)
