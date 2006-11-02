@@ -8,7 +8,7 @@
 
 FIND_LIBRARY (CFITSIO_LIBRARY
   NAMES cfitsio
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib
+  PATHS /lib /usr/lib /usr/local/lib /sw/lib
   PATH_SUFFIXES cfitsio
 )
 
@@ -17,7 +17,7 @@ FIND_LIBRARY (CFITSIO_LIBRARY
 
 FIND_PATH (CFITSIO_INCLUDE_DIR
 	fitsio.h
-	PATHS /usr/local/include /usr/include /sw/include
+	PATHS /usr/include /usr/local/include /sw/include
 )
 
 ## -----------------------------------------------------------------------------
