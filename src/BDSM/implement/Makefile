@@ -50,17 +50,22 @@ OBJNOISE4 = sub_simulation.o conv2_get_wid_fac.o cr8sky_ilse.o sub_cr8sky.o \
 
 all: noise
 
+# ported to cmake
 noise : noise.f noise.o $(OBJNOISE)
 	$(FC) noise.o $(OBJNOISE)   $(CFITS) -o noise
 
+# ported to cmake
 noise.o : noise.f $(OBJNOISE)
 
+# ported to cmake
 simulation : simulation.f $(OBJNOISE2)
 	$(FC) simulation.f $(OBJNOISE2) $(CFITS) -o simulation
 
+# ported to cmake
 simulation_ilse : simulation_ilse.f $(OBJNOISE4)
 	$(FC) simulation_ilse.f $(OBJNOISE4) $(CFITS) -o simulation_ilse
 
+# ported to cmake
 bdsm-awe : bdsm-awe.f $(OBJNOISE)
 	$(FC) bdsm-awe.f $(OBJNOISE)   $(CFITS) -o bdsm-awe
 
@@ -184,11 +189,9 @@ make_src_residim.o : make_src_residim.f sourcelistheaders.o readarray.o sub_prog
    writearray.o get_keyword.o sigclip.o
 nbit.o : nbit.f readarray.o pgsub.o getininp.o readininp.o writearray.o
 nsigmacut.o : nsigmacut.f readarray.o pgsub.o writearray.o sigclip.o
-operateimage.o : operateimage.f getininp.o readininp.o readarray.o sub_prog.o \
-   writearray.o 
+operateimage.o : operateimage.f getininp.o readininp.o readarray.o sub_prog.o writearray.o 
 
-populatesrcs.o : populatesrcs.f populateinparts.o fitcdf.o getcdf.o writeheader.o \
-   fitinparts.o sigclip.o
+populatesrcs.o : populatesrcs.f populateinparts.o fitcdf.o getcdf.o writeheader.o fitinparts.o sigclip.o
 populateinparts.o : populateinparts.f sub_prog.o ran1.o arrstat.o pgsub.o writearray.o 
 primarybeam.o : primarybeam.f readarray.o writearray.o
 putpixel.o : putpixel.f sub_prog.o 
