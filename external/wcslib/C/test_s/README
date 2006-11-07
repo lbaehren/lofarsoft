@@ -1,0 +1,123 @@
+WCSLIB 4.2 scalar test routines
+-------------------------------
+
+WCSLIB 4.2 provides a set of C preprocessor macros for the lin.c, prj.c, and
+sph.c routines which map their vector function interfaces to the scalar
+interfaces of WCSLIB 2.x.  For example, the scalar routine azpfwd() is mapped
+to vector routine azps2x().
+
+There are several provisos to the use of these macros:
+
+   1) In WCSLIB 3.x the prjprm structure is more general in nature and
+      contains additional members which require initialization.  This may be
+      done conveniently by inserting a call to prjini().
+
+   2) The new interface to prjset() differs from that of WCSLIB 2.x and old
+      code which uses it must be changed manually.
+
+   3) (As of WCSLIB 3.3) the error return codes have been changed according
+      to the following translation table
+
+                 old  new  old  new
+                 --------  --------
+         linset   1 -> 2,   2 -> 3
+         linfwd   1 -> 2,   2 -> 3
+         linrev   1 -> 2,   2 -> 3
+         prjset   1 -> 2
+         prjfwd   1 -> 2,   2 -> 4
+         prjrev   1 -> 2,   2 -> 3
+
+Macros are not provided for cel.c or wcs.c (because the relevant celprm and
+wcsprm structs are incompatible), nor for the newer spc.c or spec.c functions.
+
+The scalar test routines provided here may be compared with those of
+WCSLIB 2.9.  tsph_s.c is identical, while the differences for tlin_s.c,
+tprj1_s.c, and tprj2_s.c (from 'diff') are as follows (differences in the
+copyright statement have been excised):
+
+------------------------------------------------------------------------------
+
+grus% diff tlin_s.c ../../../wcslib-2.9/C/tlin.c
+66c66
+<    for (j = 1; j <= 3; j++) {
+---
+>    for (j = 1; j <=2 ; j++) {
+71c71
+<    for (j = 1; j <= 3; j++) {
+---
+>    for (j = 1; j <=2 ; j++) {
+
+------------------------------------------------------------------------------
+
+grus% diff tprj1_s.c ../../../wcslib-2.9/C/tproj1.c
+39c39
+< #include "prj.h"
+---
+> #include "proj.h"
+69,71c69
+<    for (j = 1; j <= 2; j++) {
+<       printf("   %d: %s.\n", j, prjset_errmsg[j]);
+<    }
+---
+>    printf("   %d: %s.\n", 1, prjset_errmsg[1]);
+74c72
+<    for (j = 1; j <= 4; j++) {
+---
+>    for (j = 1; j <=2 ; j++) {
+79c77
+<    for (j = 1; j <= 4; j++) {
+---
+>    for (j = 1; j <=2 ; j++) {
+86c84
+<    prjini(&prj);
+---
+>    for (j = 0; j < 10; prj.p[j++] = 0.0);
+229,230c227
+<    strcpy(prj->code, pcode);
+<    prjset(prj);
+---
+>    prjset(pcode, prj);
+249c246
+<             if (err != 4) {
+---
+>             if (err != 2) {
+331c328
+<    prjini(prj);
+---
+>    for (j = 0; j < 10; prj->p[j++] = 0.0);
+
+------------------------------------------------------------------------------
+
+grus% diff tprj2_s.c ../../../wcslib-2.9/C/tproj2.c
+< #include "prj.h"
+---
+> #include "proj.h"
+57,59c57
+<    for (j = 1; j <= 2; j++) {
+<       printf("   %d: %s.\n", j, prjset_errmsg[j]);
+<    }
+---
+>    printf("   %d: %s.\n", 1, prjset_errmsg[1]);
+62c60
+<    for (j = 1; j <= 4; j++) {
+---
+>    for (j = 1; j <=2 ; j++) {
+67c65
+<    for (j = 1; j <= 4; j++) {
+---
+>    for (j = 1; j <=2 ; j++) {
+92c90
+<    prjini(&prj);
+---
+>    for (j = 0; j < 10; prj.p[j++] = 0.0);
+278,279c276
+<    strcpy(prj->code, pcode);
+<    prjset(prj);
+---
+>    prjset(pcode, prj);
+396c393
+<    prjini(prj);
+---
+>    for (j = 0; j < 10; prj->p[j++] = 0.0);
+
+------------------------------------------------------------------------------

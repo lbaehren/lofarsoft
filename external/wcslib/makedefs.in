@@ -1,0 +1,263 @@
+#-----------------------------------------------------------------------------
+#   GNU makefile definitions for building WCSLIB 4.2.
+#
+#   makedefs is generated from makedefs.in by configure.
+#
+#   Targets defined here
+#   --------------------
+#      show_all:  Print the values of all variables used.
+#
+#   Notes:
+#      1) If you need to make changes then it may be preferable to modify
+#         makedefs.in (not makedefs).  The makefile will detect this and
+#         automatically re-run config.status to regenerate makedefs.
+#
+#      2) There are three choices for trigd functions - cosd(), sind(),
+#         tand(), acosd(), asind(), atand(), and atan2d(), made by setting
+#         WCSTRIG:
+#
+#         1: Use the wrapper functions supplied with WCSLIB (default):
+#            WCSTRIG := WRAPPER
+#
+#         2: Use native trigd functions supplied in a mathematics library such
+#            as libsunmath (also add the library to the LIBS variable):
+#            WCSTRIG := NATIVE
+#
+#         3: Use C preprocessor macro implementations of the trigd functions
+#            (this method is typically 20% faster but may lead to rounding
+#            errors near the poles):
+#            WCSTRIG := MACRO0
+#
+#      3) PGPLOT is Tim Pearson's FORTRAN graphics library with separate C
+#         interface available from astro.caltech.edu.  It is only required by
+#         test programs that plot test grids (tprj2, tcel1, tcel2, tspc,
+#         ttab2, ttab3, twcsmix, and tpih2).  You can skip these by setting
+#         PGPLOTLIB to blank.  
+#
+#         It is difficult for configure to deduce what auxiliary graphics
+#         libraries may be needed for PGPLOT since it depends on which of many
+#         possible graphics drivers were selected when PGPLOT was installed.
+#         Therefore it is quite likely that you will need to add additional
+#         libraries to PGPLOTLIB.
+#
+#      4) CFITSIO is Bill Pence's FITS I/O library written in C with FORTRAN
+#         wrappers, available from http://heasarc.gsfc.nasa.gov/fitsio.
+#
+#         CFITSIO is required to compile getwcstab.c which contains an
+#         implementation of fits_read_wcstab().  However, this function is
+#         included in the latest releases of CFITSIO (post 3.004beta).  It is
+#         required here only for test programs twcstab and twcshdr, and is not
+#         inserted into the WCSLIB object library.
+#
+#         If available, CFITSIO is also optionally used for test programs
+#         tfitshdr, tpih1 and tpih2 by setting preprocessor macro
+#         -DDO_CFITSIO.
+#
+#   Author: Mark Calabretta, Australia Telescope National Facility
+#   http://www.atnf.csiro.au/~mcalabre/index.html
+#   $Id: makedefs.in,v 4.2 2005/09/23 04:55:25 cal103 Exp $
+#-----------------------------------------------------------------------------
+# Version.
+  V := @PACKAGE_VERSION@
+  WCSLIBV  := wcslib-$V
+
+# C preprocessor options.
+  CPPFLAGS := @DEFS@
+  WCSTRIG  := WRAPPER
+
+# C compiler and options.
+  CC      := @CC@
+  CFLAGS  := @CFLAGS@
+
+# FORTRAN compiler and options.
+  FC      := @F77@
+  FFLAGS  := @FFLAGS@
+
+# Object library.
+  LIBWCS  := libwcs-$V.a
+  RANLIB  := @RANLIB@
+
+# Installation utilities and locations.
+  LN_S    := @LN_S@
+  INSTALL := @INSTALL@
+
+  prefix  := @prefix@
+  exec_prefix := @exec_prefix@
+
+  LIBDIR  := @libdir@
+  INCDIR  := @includedir@/$(WCSLIBV)
+  INCLINK := @includedir@/wcslib
+
+# For putting timestamps in the build log.
+  TIMER   := date +"%a %Y/%m/%d %X %z, executing on $$HOST"
+
+
+# The remaining options are only required for building the test suite.
+# --------------------------------------------------------------------
+# Linker options (use CC for linking).
+  LD       = $(CC)
+  LDFLAGS := @LDFLAGS@
+
+# PGPLOT (see note 3 above).
+  PGPLOTINC := @PGPLOTINC@
+  PGPLOTLIB := @PGPLOTLIB@
+
+# CFITSIO (see note 4 above).
+  CFITSIOINC := @CFITSIOINC@
+  CFITSIOLIB := @CFITSIOLIB@
+
+# Libraries required by WCSLIB itself.
+  LIBS := @LIBS@
+
+
+#-----------------------------------------------------------------------------
+# You shouldn't need to change anything below here.
+#-----------------------------------------------------------------------------
+# Flex (generated .c files are distributed); add -d to FLFLAGS for debugging.
+FLEX    := flex
+FLFLAGS :=
+
+SHELL := /bin/sh
+
+#-----------------------------------------------------------------------------
+# Makefile overrides for various combinations of architecture, operating
+# system and compiler (used for WCSLIB development and testing).
+#-----------------------------------------------------------------------------
+
+# The list of FLAVOURs can be set on the command line.
+F := $(shell echo $(FLAVOURS) | tr a-z A-Z)
+ifeq "$F" ""
+  F := ""
+  FLAVOURS := ""
+endif
+
+ifeq "$F" "LINUX"
+  override FLAVOURS := "" Linux Linuxp
+endif
+
+ifeq "$F" "SUN"
+  override FLAVOURS := "" SUN/GNU SUN/GNU3 SUN/GNUp SUN/ANSI
+endif
+
+ifeq "$F" "PURE"
+  override FLAVOURS := SUN/Pure SUN/Quant
+endif
+
+
+ifeq "$(PIC)" "TRUE"
+  GPIC := -fPIC
+  KPIC := -KPIC
+endif
+
+
+# Linux with gcc/g77.
+ifeq "$(FLAVOUR)" "Linux"
+  CC      := gcc -ansi -pedantic
+  CFLAGS  := -g $(GPIC) -Wall -Wno-parentheses -Wno-long-long
+  FFLAGS  := -g $(GPIC) -Wimplicit -Wno-globals -I.
+endif
+
+ifeq "$(FLAVOUR)" "Linuxp"
+  CC      := gcc -ansi -pedantic
+  CFLAGS  := -pg -a -g -O -Wall -Wno-parentheses -Wno-long-long
+  FFLAGS  := -pg -a -g -O -Wimplicit -Wuninitialized -Wno-globals -I.
+  LDFLAGS := -pg -a -g $(filter -L%, $(LDFLAGS))
+  override EXTRA_CLEAN := gmon.out bb.out
+endif
+
+
+# Solaris with gcc/g77.
+ifeq "$(FLAVOUR)" "SUN/GNU"
+  CC      := gcc -ansi -pedantic
+  CFLAGS  := -g $(GPIC) -Wall -Wno-parentheses -Wno-long-long
+  FFLAGS  := -g $(GPIC) -Wimplicit -Wno-globals -I.
+endif
+
+ifeq "$(FLAVOUR)" "SUN/GNU3"
+  CC      := gcc-3.1.1 -ansi
+  CFLAGS  := -g -Wall -Wno-parentheses -Wno-long-long
+  CFLAGS  := -g -Wall -Wno-parentheses -Wno-long-long
+  FC      := g77-3.1.1
+  FFLAGS  := -g -Wimplicit -Wno-globals -I.
+  LD      := gcc-3.1.1
+endif
+
+ifeq "$(FLAVOUR)" "SUN/GNUp"
+  CFLAGS  := -pg -a -g -O -Wall -Wno-parentheses -Wno-long-long
+  FFLAGS  := -pg -a -g -O -Wimplicit -Wuninitialized -Wno-globals -I.
+  LDFLAGS := -pg -a -g $(filter -L%, $(LDFLAGS))
+  override EXTRA_CLEAN := gmon.out bb.out
+endif
+
+
+# Solaris with SUN cc/f77.
+ifeq "$(FLAVOUR)" "SUN/ANSI"
+  WCSTRIG := NATIVE
+  CC      := cc
+  CFLAGS  := -g $(KPIC) -I/usr/local/include
+  FC      := f77 -erroff=WDECL_LOCAL_NOTUSED
+  FFLAGS  := -g $(KPIC) -erroff=WDECL_LOCAL_NOTUSED
+  LD      := f77
+endif
+
+
+# Purify and quantify in Solaris.
+ifeq "$(FLAVOUR)" "SUN/Pure"
+  WCSTRIG := NATIVE
+  CC      := purify gcc
+  CFLAGS  := -g
+  FC      := purify gcc
+  FFLAGS  := -g -Wimplicit -Wno-globals -I.
+  LDFLAGS := $(filter -L%, $(LDFLAGS))
+  override EXTRA_CLEAN := *_pure_p*.[ao] *.pcv .pure ../C/*_pure_p*.[ao]
+endif
+
+ifeq "$(FLAVOUR)" "SUN/Quant"
+  WCSTRIG := NATIVE
+  CC      := quantify gcc
+  CFLAGS  := -g
+  FC      := quantify gcc
+  FFLAGS  := -g -Wimplicit -Wno-globals -I.
+  LDFLAGS := $(filter -L%, $(LDFLAGS))
+  override EXTRA_CLEAN := *_pure_q*.[ao] .pure
+endif
+
+# Common targets.
+
+.PHONY : all show_all
+
+all :
+
+show_all ::
+	-@ echo ''
+	-@ echo 'For building and installing $(WCSLIBV)...'
+	-@ echo '  CPPFLAGS    := $(CPPFLAGS)'
+	-@ echo '  WCSTRIG     := $(WCSTRIG)'
+	-@ echo '  CC          := $(CC)'
+	-@ echo '  CFLAGS      := $(CFLAGS)'
+	-@ echo '  FC          := $(FC)'
+	-@ echo '  FFLAGS      := $(FFLAGS)'
+	-@ echo '  LIBWCS      := $(LIBWCS)'
+	-@ echo '  RANLIB      := $(RANLIB)'
+	-@ echo '  LN_S        := $(LN_S)'
+	-@ echo '  INSTALL     := $(INSTALL)'
+	-@ echo '  LIBDIR      := $(LIBDIR)'
+	-@ echo '  INCDIR      := $(INCDIR)'
+	-@ echo '  INCLINK     := $(INCLINK)'
+	-@ echo '  TIMER       := $(TIMER)'
+	-@ echo ''
+	-@ echo 'For testing only...'
+	-@ echo '  LD          := $(LD)'
+	-@ echo '  LDFLAGS     := $(LDFLAGS)'
+	-@ echo '  PGPLOTINC   := $(PGPLOTINC)'
+	-@ echo '  PGPLOTLIB   := $(PGPLOTLIB)'
+	-@ echo '  CFITSIOINC  := $(CFITSIOINC)'
+	-@ echo '  CFITSIOLIB  := $(CFITSIOLIB)'
+	-@ echo '  LIBS        := $(LIBS)'
+	-@ echo ''
+	-@ echo 'For code development...'
+	-@ echo '  FLEX        := $(FLEX)'
+	-@ echo '  FLFLAGS     := $(FLFLAGS)'
+	-@ echo '  FLAVOUR     := $(FLAVOUR)'
+	-@ echo '  EXTRA_CLEAN := $(EXTRA_CLEAN)'
+	-@ echo ''
