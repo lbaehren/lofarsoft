@@ -16,8 +16,9 @@ FIND_LIBRARY (CFITSIO_LIBRARY
 ## Check for the header files
 
 FIND_PATH (CFITSIO_INCLUDE_DIR
-	fitsio.h
+	fitsio.h longnam.h
 	PATHS /usr/include /usr/local/include /sw/include
+	PATH_SUFFIXES cfitsio
 )
 
 ## -----------------------------------------------------------------------------
