@@ -1,0 +1,26 @@
+/makefile/19.1/Tue Aug 24 21:02:51 2004//
+/tAipsIO.cc/19.5/Thu Nov  3 15:31:06 2005//
+/tAipsIO.out/19.1/Tue Aug 24 21:03:01 2004//
+/tAipsIOCarray.cc/19.4/Tue Nov 30 17:50:16 2004//
+/tAipsIOCarray.h/19.6/Tue Nov 30 17:50:16 2004//
+/tAipsIOCarray.out/19.1/Tue Aug 24 21:03:16 2004//
+/tBucketCache.cc/19.3/Tue Nov 30 17:50:16 2004//
+/tBucketCache.out/19.1/Tue Aug 24 21:03:26 2004//
+/tBucketFile.cc/19.3/Tue Nov 30 17:50:16 2004//
+/tByteIO.cc/19.3/Tue Nov 30 17:50:16 2004//
+/tByteIO.out/19.1/Tue Aug 24 21:03:43 2004//
+/tByteSink.cc/19.3/Tue Nov 30 17:50:16 2004//
+/tByteSink.out/19.1/Tue Aug 24 21:03:53 2004//
+/tByteSinkSource.cc/19.3/Tue Nov 30 17:50:16 2004//
+/tByteSinkSource.out/19.1/Tue Aug 24 21:04:03 2004//
+/tFileIO.cc/19.4/Tue Nov 30 17:50:16 2004//
+/tFilebufIO.cc/19.3/Tue Nov 30 17:50:16 2004//
+/tLargeFileIO.cc/19.4/Tue Nov 30 17:50:16 2004//
+/tLargeFilebufIO.cc/19.3/Tue Nov 30 17:50:16 2004//
+/tLockFile.cc/19.4/Tue Nov 30 17:50:16 2004//
+/tMappedIO.cc/1.3/Mon Nov  7 11:01:58 2005//
+/tTapeIO.cc/19.4/Tue Nov 30 17:50:16 2004//
+/tTapeIO.exec/19.1/Tue Aug 24 21:05:15 2004//
+/tTypeIO.cc/19.3/Tue Nov 30 17:50:17 2004//
+/templates/1.2/Wed Aug 25 05:49:01 2004//
+D

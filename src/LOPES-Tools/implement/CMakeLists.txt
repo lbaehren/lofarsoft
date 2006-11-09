@@ -10,6 +10,9 @@ INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindBoost.cmake)
 #INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindCASA.cmake)
 INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindCFITSIO.cmake)
 INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindCPGPLOT.cmake)
+INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindROOT.cmake)
+
+FIND_FILE (HAVE_BLITZ_H blitz.h)
 
 INCLUDE_DIRECTORIES(
 	.
@@ -33,5 +36,6 @@ ADD_LIBRARY (lopestools
 	IO/DataIterator.cc
 #	IO/LogfileName.cc
 	Math/ThreeVector.cc
+	Math/VectorConversion.cc
 	Utilities/ProgressBar.cc
 	Utilities/Timestamp.cc)

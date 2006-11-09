@@ -1,0 +1,54 @@
+/Arrays.h/19.6/Mon Jul  4 06:04:36 2005//
+/BasicMath.h/1.1/Wed Jun  8 15:41:49 2005//
+/BasicSL.h/1.2/Mon Jul  4 06:03:04 2005//
+/Containers.h/19.5/Tue Nov 30 17:50:13 2004//
+/Exceptions.h/19.5/Tue Nov 30 17:50:13 2004//
+/IO.h/19.5/Tue Nov 30 17:50:13 2004//
+/Inputs.h/19.5/Tue Nov 30 17:50:13 2004//
+/Logging.h/19.7/Tue Nov 30 17:50:13 2004//
+/OS.h/19.4/Tue Nov 30 17:50:13 2004//
+/Quanta.h/19.6/Tue Nov 30 17:50:13 2004//
+/System.h/1.3/Tue Dec  6 20:23:14 2005//
+/Utilities.h/19.5/Tue Nov 30 17:50:13 2004//
+/aips.cc/19.3/Tue Nov 30 17:50:13 2004//
+/aips.h/19.4/Tue Nov 30 17:50:13 2004//
+/aipstype.h/19.3/Tue Nov 30 17:50:13 2004//
+/aipsxtype.h/19.6/Mon Nov 14 18:48:43 2005//
+/fstream.h/19.4/Tue Nov 30 17:50:13 2004//
+/iomanip.h/19.4/Tue Nov 30 17:50:13 2004//
+/iosfwd.h/19.4/Tue Nov 30 17:50:13 2004//
+/iosstrfwd.h/19.5/Tue Nov 30 17:50:13 2004//
+/iostream.h/19.5/Tue Nov 30 17:50:13 2004//
+/istream.h/19.4/Tue Nov 30 17:50:13 2004//
+/makefile/1.1/Tue Aug 24 20:14:36 2004//
+/namespace.h/1.1/Wed Dec  1 21:06:40 2004//
+/ostream.h/19.4/Tue Nov 30 17:50:13 2004//
+/sstream.h/19.4/Tue Nov 30 17:50:13 2004//
+/stdexcept.h/19.3/Tue Nov 30 17:50:13 2004//
+/stdio.h/19.4/Tue Nov 30 17:50:13 2004//
+/stdlib.h/19.4/Tue Nov 30 17:50:13 2004//
+/stdmap.h/19.8/Wed Dec 15 10:20:26 2004//
+/stdvector.h/19.1/Fri Jun 17 13:57:05 2005//
+/string.h/19.4/Tue Nov 30 17:50:13 2004//
+/typeinfo.h/19.4/Tue Nov 30 17:50:13 2004//
+/vector.h/19.9/Wed Dec 15 10:20:26 2004//
+/version.h/19.5/Tue Nov 30 17:50:13 2004//
+/version2.cc/19.3/Tue Nov 30 17:50:13 2004//
+D/Arrays////
+D/BasicMath////
+D/BasicSL////
+D/Containers////
+D/Exceptions////
+D/IO////
+D/Inputs////
+D/Logging////
+D/OS////
+D/Quanta////
+D/System////
+D/Utilities////
+D/_ReposFiller////
+D/test////
+/aipsdef.h/19.5/Fri Oct 13 15:59:06 2006//
+/aipsenv.h/19.8/Fri Oct 13 15:59:06 2006//
+/complex.h/19.5/Fri Oct 13 15:59:06 2006//
+/math.h/19.11/Fri Oct 13 15:59:06 2006//

@@ -15,40 +15,44 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "ThreeVector.h"
+#include <Math/ThreeVector.h>
 
+// ------------------------------------------------------------------ ThreeVector
 
 ThreeVector::~ThreeVector()
 {}
 
-ThreeVector& ThreeVector::Rotate(const double& parAngle, const Axis parAxis)
+// ----------------------------------------------------------------------- Rotate
+
+ThreeVector& ThreeVector::Rotate (const double& parAngle,
+				  const Axis parAxis)
 {
   ThreeVector srcVec(*this);        // needed for upcoming calculations
   double cosAngle = cos(parAngle);  // for performance
   double sinAngle = sin(parAngle);
   switch (parAxis)
-  {
+    {
     case  XAxis:
-          {
-            y=cosAngle*srcVec.GetY()-sinAngle*srcVec.GetZ();
-            z=sinAngle*srcVec.GetY()+cosAngle*srcVec.GetZ();
-          }
-          break;
+      {
+	y=cosAngle*srcVec.GetY()-sinAngle*srcVec.GetZ();
+	z=sinAngle*srcVec.GetY()+cosAngle*srcVec.GetZ();
+      }
+      break;
     case  YAxis:
-          {
-	          x=cosAngle*srcVec.GetX()+sinAngle*srcVec.GetZ();
-          	z=-sinAngle*srcVec.GetX()+cosAngle*srcVec.GetZ();
-          }
-          break;
+      {
+	x=cosAngle*srcVec.GetX()+sinAngle*srcVec.GetZ();
+	z=-sinAngle*srcVec.GetX()+cosAngle*srcVec.GetZ();
+      }
+      break;
     case  ZAxis:
-          {
-          	x=cosAngle*srcVec.GetX()-sinAngle*srcVec.GetY();
-          	y=sinAngle*srcVec.GetX()+cosAngle*srcVec.GetY();
-          }
-          break;
+      {
+	x=cosAngle*srcVec.GetX()-sinAngle*srcVec.GetY();
+	y=sinAngle*srcVec.GetX()+cosAngle*srcVec.GetY();
+      }
+      break;
     default: throw Exception();
-          break;
-  }
-
+      break;
+    }
+  
   return *this;
 }
