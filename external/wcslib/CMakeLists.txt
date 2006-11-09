@@ -2,12 +2,23 @@ PROJECT (WCSLIB)
 
 ## ------------------------------------------------------------------------------
 ## Find required external components
+##
+## AC_CHECK_LIB([z],       [deflate],   [PGPLOTLIB="-lz $PGPLOTLIB"],
+##              [], [$PGPLOTLIB $LIBS])
+## AC_CHECK_LIB([png],     [png_error], [PGPLOTLIB="-lpng $PGPLOTLIB"],
+##              [], [$PGPLOTLIB $LIBS])
+## AC_CHECK_LIB([pgplot],  [pgbeg_],    [PGPLOTLIB="-lpgplot $PGPLOTLIB"],
+##              [], [$PGPLOTLIB $LIBS])
+## AC_CHECK_LIB([cpgplot], [cpgbeg],    [PGPLOTLIB="-lcpgplot $PGPLOTLIB"],
+##              [PGPLOTLIB=], [$PGPLOTLIB $LIBS])
+
 
 INCLUDE (../../devel_common/cmake/FindCFITSIO.cmake)
 INCLUDE (../../devel_common/cmake/FindPGPLOT.cmake)
 INCLUDE (FindPNG)
 INCLUDE (FindMotif)
 
+FIND_LIBRARY (Z_LBRARY z /usr/lib /usr/local/lib)
 FIND_LIBRARY (G2C_LIBRARY g2c /usr/lib /usr/local/lib)
 
 ## ------------------------------------------------------------------------------
@@ -121,5 +132,5 @@ SET (WCSLIB_TEST_PROGRAMS
 
 FOREACH (TEST_PROGRAM ${WCSLIB_TEST_PROGRAMS})
 	ADD_EXECUTABLE (${TEST_PROGRAM} C/test/${TEST_PROGRAM}.c)
-	TARGET_LINK_LIBRARIES (${TEST_PROGRAM} pgsbox wcs XmPgplot cpgplot pgplot ${MOTIF_LIBRARIES})
+	TARGET_LINK_LIBRARIES (${TEST_PROGRAM} pgsbox wcs XmPgplot cpgplot pgplot z ${MOTIF_LIBRARIES})
 ENDFOREACH (TEST_PROGRAM)
