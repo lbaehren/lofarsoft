@@ -41,15 +41,21 @@ tar -xvzf tk$tcl_version-src.tar.gz
 ## Configure and build Tcl
 
 echo "[TCL] Configuring and building package ..." ;
+
 cd $var_basedir/tcl$tcl_version/unix;
+
+make distclean
 ./configure --prefix=$var_prefix
 make && make genstubs && make install
+
+make distclean
 ./configure --prefix=$var_prefix --disable-shared
 make && make genstubs && make install
 
 ## Create symbolic links for generated library
 
 echo "[TCL] Creating symbolic links ..." ;
+
 rm -f $var_prefix/lib/libtcl.a;
 ln -s $var_prefix/lib/libtcl8.4.a $var_prefix/lib/libtcl.a;
 rm -f $var_prefix/lib/libtcl.$var_dynlib;
@@ -60,9 +66,12 @@ ln -s $var_prefix/lib/libtcl8.4.$var_dynlib $var_prefix/lib/libtcl.$var_dynlib;
 echo "[TK] Configuring and building package ..." ;
 
 cd $var_basedir/tk$tcl_version/unix
+
+make distclean
 ./configure --prefix=$var_prefix
 make && make genstubs && make install; \
 
+make distclean
 ./configure --prefix=$var_prefix --disable-shared
 make && make genstubs && make install
 
@@ -73,13 +82,17 @@ ln -s $var_prefix/lib/libtk8.4.a  $var_prefix/lib/libtk.a;
 rm -f $var_prefix/lib/libtk.$var_dynlib;
 ln -s $var_prefix/lib/libtk8.4.$var_dynlib  $var_prefix/lib/libtk.$var_dynlib;
 
+if test -L $var_prefix/lib/libdl.a ; then
+	echo "Symbolic link for libdl.a found"
+fi
+
+#cd $var_prefix/lib;
+#rm -f libdl.a;
+#ln -s $(lib_dl) libdl.a;
+
 echo "[Tcl/Tk] Cleaning up directory ..." ;
 
 cd $var_basedir
 rm -rf tcl$tcl_version* tk$tcl_version* ;
 
 echo "[Tcl/Tk] Installation completed."
-
-#cd $var_prefix/lib; 
-#rm -f libdl.a; 
-#ln -s $(lib_dl) libdl.a;
