@@ -7,7 +7,7 @@ doku_version=2006-11-06
 
 echo "Fetching the source tar ball ..."
 
-wget http://www.splitbrain.org/_media/projects/dokuwiki/dokuwiki-$doku_version.tgz
+#wget http://www.splitbrain.org/_media/projects/dokuwiki/dokuwiki-$doku_version.tgz
 
 ## Unpack the source tar ball and remove it afterwards
 
