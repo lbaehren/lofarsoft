@@ -1,0 +1,191 @@
+Changes in CMake 2.4.3
+
+* fix for 3557 - Under MSVC8 hardcoded TargetEnvironment for MIDL Compiler 
+
+* Fix for Xcode all projects to prevent -fvisibility=hidden flags. This is
+needed to make RTTI work by default.
+
+* better prototype for main in try compile of c programs avoids warnings in
+logs.
+
+* with visual studio do not use incremental linking for release builds by
+default.
+
+* fix bootstrap to use more ansi c main it test compiler
+
+* fix import build settings to do case insensitive match on windows
+
+* fix building in root directory c:/
+
+* Add support for CXX only projects
+
+* Better FindWxWidgets
+
+* Added FindBoose.cmake
+
+* add more fortran file extensions
+
+* Cpack supports multiple packages at the same time
+
+* Fix to FindKDE4 to look for kde4-config first
+
+* Support for env var CMAKE_CONFIG_TYPE in ctest
+
+* Fix for -DVAR=foo on the command line not saving to the cache
+
+* ENH: Added creation of XXX_FIND_COMPONENTS list of all components requested
+  withREQUIRED option.  This addresses the feature request in bug#3494.
+
+* Object files get safe names
+
+* progress is now reported with makefiles
+
+* location of CMakeTmp changed to a varible
+
+* CMAKE_COLOR_MAKEFILE cache variable available to turn off color output
+
+* fixes for FindQt4 on mac.
+
+* Better search paths for finding VTK
+
+* Fix relative path problems in ADD_SUBDIRECTORY
+
+* Fix long link commands on UNIX shells
+
+* Fix depend file names in makefiles for generated headers
+
+* CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS allows for if/endif without variable
+
+* Xcode multiple custom command problem fixed.
+
+* INSTALL_RPATH_USE_LINK_PATH when true will add the link path to the rpath
+
+* Add target/fast rules in the sub directories
+
+* Fix Visual stuido C and C++ targets to not add /TP and /TC
+
+* print a context when cmake errors occur
+
+* add rxvt-unicode, cygwin, and screen terminal support for color output
+
+* Fix crash in CMakeSetup when status line is long
+
+* make sure try compile files have a newline at the end
+
+* fix for hp itanium build
+
+Changes in CMake 2.4.2
+
+* Run symlink command from correct directory for executable versions
+
+* Fix for universal binaries and Xcode depend problem
+
+* Changes to LIST command, see --help-command LIST
+
+* Fix FindQT to be able to use full paths to source files
+
+* Fix CPack ZIP on windows command line problem
+
+* Find executables with no extension on windows mingw
+
+* Fix FindQt3 to use QTDIR over path
+
+* Significant speedup in try-compile for nmake
+
+* CPack improvments including tar bzip2
+
+* FindQt4 windows path fix
+
+* Sunos cc optimize flags are correct
+
+* Fix crash with ${} empty variable
+
+* Increase depend speed on Mac OS.
+
+* install command CONFIGURATIONS option.
+
+* Fix MSVC60, MSVC70, MSVC71, MSVC80 definitions for IDE builds
+
+* Fix for C++ compiler being used for c code in VS IDE
+
+Changes in CMake 2.4.1
+
+* Several ctest and cpack bug fixes
+
+* Many updates and fixes for FindQt4.cmake
+
+* Fix CMAKE_REQUIRED_FLAGS in CheckCXXSourceCompiles.cmake 
+
+* Handle running make from a symlinked build tree
+
+* Automatic color ouput detection for shells building with make
+
+* Kdevelop generator handles CMakeFiles directory better
+
+* add correct depend information for fluid 
+
+* allow the cache to be saved even if a fatal error occurs
+
+* fix bug in relative path subdir and add_subdirectoy commands
+
+* support in vs for two object files with the same name
+
+* short file names used for library paths in visual studio
+
+* package target only shows up when you have cpack config files
+
+* Use dl and not -ldl for adding in the dynamic library
+
+* Fix check c/cxx source compiles macros to not clobber log files
+ 
+* Fix nmake version detection of cl and create correct pdb files
+
+* Fix msys bootstrap
+
+* Change color output to be more readable
+
+* Fix vs6 library naming
+
+Changes in CMake 2.4.0
+
+* CPack beta
+
+* Visual Studio 2005 win64 support
+
+* Improved install support
+
+* Improved FIND_PROGRAM, FIND_LIBRARY, FIND_PATH, FIND_FILE
+
+* Improved support for finding/using OSX Frameworks
+
+* Multiple output support for custom commands
+
+* Color output in make with vt100 terminals CMAKE_COLOR_MAKFILE
+
+* Better variables for MSVC MSVC80 
+
+* Library path order is preserved
+
+* Fix for text file busy in xcodebuild runs
+
+* Better bundle support on OSX
+
+* ctest -S scripts can run in new process with new environment
+
+* OSX universal binary support
+
+* Watcom support
+ 
+* MinGW and MSYS support
+
+* Visual studio 2005 manifest support
+
+* Better handling of RPATH, no longer put rpath in install tree
+
+* Fix OUTPUT_NAME 
+
+* ctest captures output from vcexpress
+
+* cmake --help-module can give help for cmake modules
+
+* Lots of bug fixes

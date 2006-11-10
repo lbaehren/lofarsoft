@@ -86,6 +86,31 @@ FIND_LIBRARY (TASKING_LIBRARY tasking ${AIPSLIBD})
 ##  LINKtasking     := tasking graphics msvis ms images components coordinates
 ##                      lattices fits measures tables scimath casa
 ##
+##  Starting off with the original table by subsequent substitution we get
+##
+##   LINKcasa        := casa
+##   LINKscimath     := scimath LINKcasa
+##   LINKtables      := tables LINKcasa
+##   LINKmeasures    := measures tables LINKscimath
+##   LINKfits        := fits LINKmeasures
+##   LINKlattices    := lattices tables LINKscimath
+##   LINKcoordinates := coordinates LINKfits
+##   LINKcomponents  := components LINKcoordinates
+##   LINKimages      := images components coordinates lattices LINKfits
+##   LINKms          := ms LINKmeasures
+##   LINKmsfits      := msfits ms LINKfits
+##   LINKmsvis       := msvis LINKms
+##   LINKcalibration := calibration LINKmsvis
+##   LINKionosphere  := ionosphere LINKmeasures
+##   LINKflagging    := flagging msvis ms lattices LINKmeasures
+##   LINKdish        := dish ms fits coordinates lattices LINKmeasures
+##   LINKsimulators  := simulators LINKms
+##   LINKsynthesis   := synthesis calibration msvis ms images components
+##                       coordinates lattices LINKfits
+##   LINKgraphics    := graphics LINKcasa
+##   LINKtasking     := tasking graphics msvis ms images components coordinates
+##                       lattices LINKfits
+##
 
 IF (CASA_LIBRARY)
   SET (CASA_LIBRARIES "-lcasa")
