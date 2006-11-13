@@ -1,0 +1,646 @@
+\documentclass[a4paper]{article}
+\usepackage{a4wide}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{footmisc}
+
+\begin{document}
+
+\title{The Sinfoni/PSF C++ software}
+\author{G.M. Loose}
+\maketitle
+
+\newcommand{\ASCII}{{\sc ascii}}
+\newcommand{\FITS}{{\sc fits}}
+\newcommand{\WFS}{{\sc wfs}}
+\newcommand{\registered}{\textsuperscript{\textregistered}}
+\newcommand{\Matlab}{{\sc Matlab}}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+
+
+\section{Introduction}
+The goal of the Sinfoni/PSF project is to implement in C++ an algorithm that
+calculates an estimate of the long exposure point spread function (PSF) using
+the control loop data that were sent to the adaptive optics system of the
+Sinfoni instrument of the VLT telescope. The theory is quite complex and well
+beyond the scope of this document. It was largely developed by Jean-Pierre
+V\'eran as part of his thesis. The starting point that I used was a
+\Matlab\registered\ script that implements the algorithm proposed by V\'eran
+\cite{veran}. 
+
+Section \ref{sec:theory} of this document describes the
+algorithm. Section~\ref{sec:design} describes the design of the C++ library,
+and section~\ref{sec:implementation} describes how the algorithm was
+implemented in C++. Finally, section~\ref{sec:future} presents a number of
+improvements that could be made to the current implementation, if time
+permits.
+
+
+
+\section{Theory}
+\label{sec:theory}
+As mentioned in the introduction, the theory of calculating the point spread
+function of an adaptive optics system is well beyond the scope of this
+document. I will therefore restrict myself to presenting the algorithm
+that V\'eran proposed~\cite{veran}.
+
+
+\subsection{Algorithm}
+\label{subsec:algorithm}
+The algorithm below is a slightly modified version of the algorithm that was
+proposed by V\'eran. Note that it is a one-pass, fully sequential
+algorithm. This notion is important, because it has driven major design
+decisions. The definition of the numerous symbols can be found in
+Table~\ref{tab:symbols}.
+
+\begin{enumerate}
+\item Load the covariance matrix of the \WFS\ measurements
+      $\mathbf{C}_{ww}$.
+\item Load the covariance matrices of the sums and differences of the intra-
+      and extra-focal fluxes on the \WFS\ $\mathbf{C}_{ss}$ and
+      $\mathbf{C}_{dd}$. 
+\item Load the covariance matrix of the potential applied to the deformable
+      mirrors $\mathbf{C}_{pp}$.
+\item Load the modal gains $\mathbf{g}$.
+\item Load the control matrix $\mathbf{D}^+$ \cite[eq.~16]{veran}.
+\item Load the covariance matrix of the remaining (or aliasing) error
+      $\mathbf{C}_{rr}$.%
+      \footnote{This is a normalized version of the matrix for $D/r_0=1$.}
+\item From $\mathbf{g}$ compute $H_n(g_i,f)$. 
+\item From $\mathbf{D}^+$, compute $\mathbf{C}_{mm}$.
+\item From $\mathbf{D}^+$, $\mathbf{C}_{ww}$, $\mathbf{C}_{ss}$ and
+      $\mathbf{C}_{dd}$, compute $\mathbf{C}_{n_w n_w}$, and derive
+      $\mathbf{C}_{nn}$.
+\item From $\mathbf{C}_{mm}$, $\mathbf{C}_{rr}$, $\mathbf{C}_{nn}$ and
+      $H_n(g_i,f)$, compute the value of $D/r_0$ \cite[sect.~3.2.3]{veran}.
+\item From $D/r_0$, scale
+      $\mathbf{D}_{\phi_\perp}(\boldsymbol{\rho})$%
+      \footnote{A normalized version of this matrix for $D/r_0 = 1$ should be
+                loaded from file.}
+      \cite[eq.~45]{veran} and compute 
+      $\mathbf{B}_{\perp}(\boldsymbol{\rho}/\lambda)$ \cite[eq.~33]{veran}.
+\item From $D/r_0$, scale $\mathbf{C}_{rr}$ \cite[eq.~46]{veran}.
+\item From $\mathbf{D}^+$ and $\mathbf{C}_{ww}$, compute
+      $\mathbf{C}_{\hat{\epsilon}\hat{\epsilon}}$ \cite[eq.~41]{veran}.
+\item From $\mathbf{C}_{\hat{\epsilon}\hat{\epsilon}}$, $\mathbf{C}_{nn}$ and
+      $\mathbf{C}_{rr}$, compute $\mathbf{C}_{\epsilon \epsilon}$
+      \cite[eq.~44]{veran}. 
+\item From $\mathbf{C}_{\epsilon\epsilon}$ and $U_{ij}(\boldsymbol{\rho})$%
+      \footnote{The functions of the mirror modes should be read from file.}
+      compute $\mathbf{D}_{\phi_{\epsilon\parallel}}(\boldsymbol{\rho})$
+      \cite[eq.~36]{veran} and
+      $\mathbf{B}_{\epsilon\parallel}(\boldsymbol{\rho}/\lambda)$
+      \cite[eq.~35]{veran}. 
+\item From $\mathbf{B}_{\epsilon\parallel}(\boldsymbol{\rho}/\lambda)$,
+      $\mathbf{B}_{\perp}(\boldsymbol{\rho}/\lambda)$ and
+      $\mathbf{B}_s(\boldsymbol{\rho}/\lambda)$,%
+      \footnote{Currently, we don't have data for the static OTF
+                available, so we will replace them with the OTF of the
+                telescope $\mathbf{B}_{tel}$.}
+      compute $\mathbf{B}(\boldsymbol{\rho}/\lambda)$ \cite[eq.~38]{veran}.
+\item From $\mathbf{B}(\boldsymbol{\rho}/\lambda)$, compute
+      $\mathit{PSF}(\mathbf{u})$ \cite[eq.~28]{veran}.
+\end{enumerate}
+
+\noindent
+\begin{longtable}{p{0.1\linewidth}p{0.84\linewidth}}
+\caption{\label{tab:symbols}List of important symbols} \\
+$\mathbf{B}$                      & Long exposure OTF. \\
+$\mathbf{B}_s$                    & Static OTF. \\
+$\mathbf{B}_{tel}$                & OTF of the telescope. \\
+$\mathbf{B}_{\epsilon\parallel}$  & Contribution of the mirror component of
+                                    the residual phase to the long exposure
+                                    OTF. \\
+$\mathbf{B}_{\perp}$              & Contribution of the high order phase to
+                                    the long exposure OTF. \\
+$\mathbf{C}_{aa}$                 & Covariance matrix of $\mathbf{a}$, the
+                                    mirror mode coefficients. \\
+$\mathbf{C}_{dd}$                 & Covariance matrix of $\mathbf{d}$, the
+                                    differences between the intra- and
+                                    extra-focal fluxes on the \WFS. \\
+$\mathbf{C}_{mm}$                 & Covariance matrix of $\mathbf{m}$, the
+                                    modal commands to the deformable mirror. \\
+$\mathbf{C}_{nn}$                 & Covariance matrix of $\mathbf{n}$, the
+                                    propagation of the \WFS\ measurement
+                                    errors onto the mirror modes. \\
+$\mathbf{C}_{n_w n_w}$            & Covariance matrix of $\mathbf{n}_w$, the
+                                    measurement errors in the \WFS\
+                                    measurements. \\ 
+$\mathbf{C}_{pp}$                 & Covariance matrix of the potential applied
+                                    to the deformable mirrors. \\
+$\mathbf{C}_{rr}$                 & Covariance matrix of $\mathbf{r}$, the
+                                    remaining (or aliasing) error. \\
+$\mathbf{C}_{ss}$                 & Covariance matrix of $\mathbf{s}$, the
+                                    sums of the intra- and extra-focal fluxes
+                                    on the \WFS. \\
+$\mathbf{C}_{ww}$                 & Covariance matrix of $\mathbf{w}$, the
+                                    actual \WFS\ curvature measurements. \\
+$\mathbf{C}_{\epsilon\epsilon}$   & Covariance matrix of
+                                    $\boldsymbol{\epsilon}$, the modal
+                                    coordinates of the residual phase. \\
+$\mathbf{C}_{\hat{\epsilon}\hat{\epsilon}}$ 
+                                  & Covariance matrix of
+                                    $\hat{\boldsymbol{\epsilon}}$, the
+                                    real-time computer (RTC) estimates of 
+                                    $\boldsymbol{\epsilon}$. \\
+$\mathbf{D}$                      & Modal interaction matrix, the \WFS\
+                                    response to the mirror modes. \\
+$\mathbf{D}^+$                    & Generalized inverse of the modal
+                                    interaction matrix $\mathbf{D}$, commonly
+                                    refered to as the control matrix. \\ 
+$\mathbf{D}_{\phi_\perp}$         & Structure function for the high-order
+                                    component of the residual phase
+                                    $\phi_\perp$. \\
+$\mathbf{D}_{\phi_{\epsilon\parallel}}$
+                                  & Structure function for the mirror
+                                    component of the residual phase 
+                                    $\phi_{\epsilon\parallel}$. \\
+$D$                               & Diameter of the telescope aperture. \\
+$H_n$                             & Noise transfer function. \\
+$\mathbf{K}$                      & Covariance matrix of the Zernike 
+                                    coefficients for the Kolmogorov turbulence
+                                    model of the atmosphere, also known as the
+                                    Noll matrix. \\
+$\mathbf{K}'$                     & Covariance matrix of the theoretical
+                                    mirror modes. It is the transformation of
+                                    the Noll matrix from Zernike basis to
+                                    mirror mode basis. It relates $D/r_0$ to
+                                    $\mathbf{C}_{aa}$. \\
+$\mathit{PSF}$                    & Long exposure Point Spread Function
+                                    (PSF). \\
+$U_{ij}$                          & Function of the mirror modes $i$ and
+                                    $j$. \\
+$\mathbf{a}$                      & {\em Modal coordinates\/} or coefficients
+                                    of the turbulent atmosphere. \\ 
+$\mathbf{d}$                      & Differences between the intra- and
+                                    extra-focal fluxes on the \WFS. \\
+$f$                               & Frequency. \\
+$\mathbf{g}$                      & Modal gains for the exposure. \\
+$g_i$                             & $i^\mathrm{th}$ element of the modal gain
+                                    vector $\mathbf{g}$. \\
+$\mathbf{m}$                      & {\em Modal commands\/} to the deformable
+                                    mirror. \\
+$\mathbf{n}$                      & Propagation of the \WFS\ measurement errors
+                                    $\mathbf{n}_w$ onto the mirror modes. \\
+$\mathbf{n}_w$                    & {\em Measurement errors\/} in the
+                                    \WFS\ measurements. \\
+$r_0$                             & Fried parameter of the turbulence. \\
+$\mathbf{r}$                      & {\em Remaining (or aliasing) errors\/},
+                                    originating from the high-order components
+                                    of the turbulent phase, causing non-zero
+                                    measurements on the \WFS. \\
+$\mathbf{s}$                      & Sums of the intra- and extra-focal fluxes
+                                    on the \WFS. \\
+$\mathbf{u}$                      & Spatial separation vector 
+                                    $\boldsymbol{\rho}$ in the Fourier
+                                    domain. \\
+$\mathbf{w}$                      & Actual \WFS\ curvature measurements;
+                                    $\mathbf{w} = \mathbf{d}/\mathbf{s}$
+                                    by definition. \\
+$\boldsymbol{\epsilon}$           & Modal coordinates of the residual phase. \\
+$\hat{\boldsymbol{\epsilon}}$     & Real-time computer (RTC) estimates of
+                                    $\boldsymbol{\epsilon}$. \\
+$\phi_{\epsilon\parallel}$        & Mirror (low-order) component of the
+                                    residual phase. \\
+$\phi_\perp$                      & High-order component of the residual
+                                    phase. \\
+$\lambda$                         & Wavelength. \\
+$\boldsymbol{\rho}$               & Spatial separation vector. \\
+$\boldsymbol{\sigma}^2_d$         & Variances of $\mathbf{d}$, the differences
+                                    between the intra- and extra-focal fluxes
+                                    on the \WFS. \\
+$\boldsymbol{\sigma}^2_s$         & Variances of $\mathbf{s}$, the sums of the
+                                    intra- and extra-focal fluxes on the
+                                    \WFS. \\
+\end{longtable}
+
+
+
+\section{Design}
+\label{sec:design}
+In this section I will give a brief outline of the concepts that were used in
+the design of the C++ PSF library.
+
+
+\subsection{Class Definitions}
+\label{subsec:defclass}
+Although the algorithm described in the section~\ref{subsec:algorithm} is a
+typical example of a data driven application, it is still advisable to define
+a number of classes that represent the different intermediate calculation
+results. As classes can have (private) data members, they can store these
+intermediate results, thereby effectively acting as a cache
+(section~\ref{subsec:caching}). I chose to define classes for each
+intermediate result that will be reused in one of the following steps of the
+algorithm. So, again refering to section~\ref{subsec:algorithm}, the following
+classes were recognized:
+\\[\baselineskip]
+\begin{tabular}{l>{\tt}l}
+$\mathbf{D}^+$                   & ControlMatrix                \\
+$\mathbf{r}$                     & RemainingError               \\
+$\mathbf{n}$                     & PropagatedMeasurementError   \\
+$D/r_0$                          & ApertureToFriedRatio         \\
+$\mathbf{B}_{\perp}$             & OTFHighOrderPhaseContrib     \\
+$\boldsymbol{\epsilon}$          & ModalCoordResidualPhase      \\
+$\mathbf{B}_{\epsilon\parallel}$ & OTFMirrorCompContrib         \\
+$\mathit{PSF}$                   & PointSpreadFunction          \\
+\end{tabular}
+
+
+\subsection{Singleton Classes}
+\label{subsec:singleton}
+The notion that the PSF estimation algorithm is data driven and sequential,
+led to the design choice to make most of the classes
+singletons~\cite{gof95}. A singleton class very much acts like a global
+variable. However, there are several advantages of using a singleton class
+over a plain global variable. For example, you can hide implementation
+details---the way you perform the calculations inside the class---and you
+can postpone initialization until first use.
+
+\paragraph{Why Singletons?}
+One of the main reasons to choose singleton classes over ``normal'' classes
+was the observation that the different steps in the PSF estimation algorithm
+need to have access to earlier calculation results or precalculated data that
+must be loaded from file. Had I chosen to use normal classes, then the classes
+further down in the algorithm would need to have a way to access the class
+instances representing the calculation results of the earlier steps.
+
+One way to accomplish this is to ``register'' the class instances representing
+the earlier calculation results, i.e.\ store a pointer to them. Hence, you
+would need to pass these pointers, for example, to the constructor. Another
+way to deal with this problem is to use global functions instead of member
+functions to do the actual calculations, and pass the pointers to them. But
+then the whole advantage of using a class that wraps the implementation
+details in a member function would evaporate.
+
+So what's the big deal? Well, the number of class instances that need to be
+registered can be quite large. The \verb|ApertureToFriedRatio| class, for
+example, needs access to six other classes. Generally, I dislike method
+calls---be it global functions, member functions, or constructors---that have
+more than four arguments. It clutters the programming interface, which in turn
+can cause more coding errors. This ``explosion'' of arguments can be avoided
+when these class instances are turned into some sort of global variables. And
+that's exactly what the singleton class does.
+
+\paragraph{Construct on First Use}
+There are several ways to implement a singleton class; I chose the so-called
+``Meyers Singleton''~\cite[pp.~130--135]{meyers96}, which is also known as the
+{\em Construct on First Use\/} idiom. The advantage of using this
+implementation is that objects are only constructed when they are actually
+used. Furthermore, the time of object construction is known exactly. The
+disadvantage of this implementation is that it is not thread-safe (see
+section~\ref{subsec:thread_safety}).
+
+\paragraph{Lazy Initialization}
+Throughout the software I chose to use lazy initialization. In fact, lazy
+initialization and singleton classes are intimately related. For example, the
+singleton class \verb|InputData| will only read data from file when the data
+are requested, and it will cache the data, so it will only need to read the
+data once.
+ 
+
+\subsection{Caching Intermediate Results}
+\label{subsec:caching}
+Each singleton class will cache the results of the (sometimes time consuming)
+calculations internally. These calculations are usually performed when the
+object is constructed.\footnotemark\ Hence, they only need to be performed
+once. When the data are requested a second time, they are returned from the
+cache. Obviously, there is one drawback: it is impossible to force a
+recalculation of the cached data. There is a solution to this problem, but it
+has not been implemented (see section~\ref{subsec:future-cacheman}).
+
+\footnotetext{Whether this is good or bad design is an interesting
+topic for discussion. Some people adhere to a programming style that assures
+that object construction is {\em always\/} an inexpensive operation. I tend to
+be less strict on this issue. Singleton classes will only be constructed once,
+so you should not really have to bother about the cost of construction. What's
+more, the heavy work needs to be done anyway, only now it will be done by some
+kind of init() method instead of the constructor.}
+
+
+\subsection{Thread safety}
+\label{subsec:thread_safety}
+In section~\ref{subsec:singleton} we noted that the current implementation of
+the singleton classes is not thread-safe. In my opinion, this is not really a
+problem, because the PSF estimation algorithm does not lend itself for
+parallelization. It is, of course, possible to design a thread-safe singleton
+class. However, the ``Meyers Singleton'' may not be the best choice in that
+case (see section~\ref{subsec:future-threadsafe}).
+
+
+
+\section{Implementation}
+\label{sec:implementation}
+This section will focus on some important implementation details. 
+
+
+\subsection{Type Definitions}
+
+\paragraph{Primitive Types}
+The file \verb|<Sinfoni/Typedefs.h>| contains type definitions for integers,
+reals, and complex numbers. The actual size of these types is determined at
+compile-time by the preprocessor variable \verb|USE_SINGLE_PRECISION|.
+
+\paragraph{Vectors and Matrices}
+C++ has no built-in support for matrices and linear algebra, but there are
+many external libraries availabe to fill in that gap. The one that was chosen
+for the PSF library is Blitz++~\cite{blitz}. I have gone to some extent to
+decouple Blitz++ specifics from the PSF software. However, it is not easy---or
+even desirable from a performance point-of-view---to completely wrap an
+external library. As a result, vector and matrix types, like
+\verb|MatrixReal|, that are used throughout the PSF software, are defined in
+the Blitz++ specific file \verb|<Sinfoni/Blitz/Typedefs.h>|. Consequently, the
+Blitz++ package {\em must\/} be installed in order to compile and/or run the
+PSF software. If this is considered a too restrictive requirement, it is
+possible to make an abstraction of vectors and matrices, mostly independent
+from an external library, but it will require some effort. See
+section~\ref{subsec:future-blitz} for details.
+
+
+\subsection{Configuration Files}
+There are two important configuration files that influence the way the PSF
+library is being compiled.
+
+\begin{trivlist}
+\item{\tt <Sinfoni/Config.h>} contains definitions of preprocessor
+variables that enable or disable debugging and tracing, and the use of double
+precision numeric types.
+\item{\tt <Sinfoni/PSF/PSFConfig.h>} contains definitions of several
+important constants in the PSF software library and the filenames of all
+precalculated datafiles. Note that, as a consequence, you will need to
+recompile the library when one or more datafile names change. If this is
+considered too intrusive, a run-time configuration mechanism should be added
+(see section~\ref{subsec:future-config}).
+\end{trivlist}
+
+\subsection{Mapping of Symbols}
+The symbols in Table~\ref{tab:symbols} can be mapped onto the \Matlab\
+variables in the original \Matlab\ script and onto the C++ methods in the PSF
+software library. Not all symbols have a corresponding variable or method. In
+the case of the \Matlab\ script this is due to the fact that some symbols are
+not needed in the estimation algorithm or are not available. In the case of
+the C++ methods it means that the associated data structure is hidden inside a
+class or local method and cannot be accessed from the public interface.
+
+\begin{table}[ht]
+\caption{\label{tab:mapping}Mapping of symbols}
+\begin{minipage}{\linewidth}
+\renewcommand{\thempfootnote}{\fnsymbol{mpfootnote}}
+\begin{tabular}{p{0.1\linewidth}
+                >{\tt}p{0.2\linewidth} >{\tt}p{0.61\linewidth}}
+                                                                             \\
+Symbol       & {\rm \Matlab\ variable} & {\rm C++ method\mpfootnotemark}     \\
+\hline
+$\mathbf{B}$               & B         & \ldots                              \\
+$\mathbf{B}_s$             & \ldots    & \ldots                              \\
+$\mathbf{B}_{tel}$         & B\_tel    & theOTFTelescope()                   \\
+$\mathbf{B}_{\epsilon\parallel}$  
+                           & B\_e\_par & theOTFMirrorCompContrib()           \\
+$\mathbf{B}_{\perp}$       & B\_perp   & theOTFHighOrderPhaseContrib(d\_r0)  \\
+$\mathbf{C}_{\epsilon\epsilon}$
+                           & Cee
+                           & theModalCoordResidualPhase().covariance()       \\
+$\mathbf{C}_{\hat{\epsilon}\hat{\epsilon}}$
+                           & Ceses     &
+                           theModalCoordResidualPhase().covarianceEstimate() \\
+$\mathbf{C}_{mm}$          & Cmm       & {\em modalCommandsCovariance()}     \\
+$\mathbf{C}_{nn}$          & Cnn        
+                           & thePropagatedMeasurementError().covariance()    \\
+$\mathbf{C}_{n_w n_w}$     & Cnwnw      
+                           & {\em diag(measurementNoiseVariance())}          \\
+$\mathbf{C}_{pp}$          & \ldots    & theInputData().mirrorCovariance()   \\
+$\mathbf{C}_{rr}$          & Crr       
+                           & theRemainingError().covariance(d\_r0)           \\
+$\mathbf{C}_{ww}$          & Cww        
+                           & theInputData().curvatureCovariance()            \\
+$\mathbf{D}^+$             & C         & theControlMatrix()                  \\
+$\mathbf{D}_{\phi_\perp}$  & D\_perp\mpfootnotemark
+                                       & \ldots                              \\
+$\mathbf{D}_{\phi_{\epsilon\parallel}}$
+                           & D\_e\_par & \ldots                              \\
+$D/r_0$                    & D\_r0     & theApertureToFriedRatio()           \\
+$H_n$                      & Hn\_integration 
+                                       & noiseTransfer(gain)                 \\
+$\mathbf{K}'$              & Caa       & theTransformedNollMatrix()          \\
+$\mathit{PSF}$\mpfootnotemark
+                           & PSFnorm   & thePointSpreadFunction()            \\
+$U_{ij}$                   & u         & \ldots                              \\
+$\mathbf{d}$               & \ldots    & theInputData().diffCountsMean()     \\
+$\mathbf{g}$               & gi        & theInputData().gainMean()           \\
+$\mathbf{p}$               & \ldots    & theInputData().mirrorMean()         \\
+$\mathbf{s}$               & N\_s      & theInputData().sumCountsMean()      \\
+$\mathbf{w}$               & \ldots    & theInputData().curvatureMean()      \\
+$\boldsymbol{\sigma}^2_d$  & var\_d    & theInputData().diffCountsVariance() \\
+$\boldsymbol{\sigma}^2_s$  & var\_s    & theInputData().sumCountsVariance()  \\
+\end{tabular}
+\footnotetext[1]{Method names printed in {\tt{\em{italics}\/}} are local
+methods that are not accessible; they are not part of the interface.}
+\footnotetext[2]{The normalized matrix for $D/r_0 = 1$ is loaded into variable
+{\tt Dphi\_perp\_Dr01}.}
+\footnotetext[3]{Here, $\mathit{PSF}$ is in fact the normalized intensity of
+the long term PSF, i.e. $\mathit{PSF} = |\mathit{PSF}(\mathbf{u})| /
+\max\{|\mathit{PSF}(\mathbf{u})|\}$.}
+\end{minipage}
+\end{table}
+
+
+\subsection{Building the Software}
+Details on how to build the PSF software can be found in the \verb|README|
+file in the root directory of the Sinfoni software package. This file also
+contains important information about external libraries that must be installed
+on your system prior to building the PSF software.
+
+
+
+\section{Future Work}
+\label{sec:future}
+In this section I will give a brief overview of future work that could be
+done, if time permits and if the proposed enhancements are really wanted. They
+are more or less ordered in order of importance as I see it.
+
+
+\subsection{Data Files in Binary Format}
+\label{subsec:future-binary}
+Currently, all precomputed data files (e.g.\ the so-called U-files) are stored
+in \ASCII\ format. Although this is the most portable way of storing data, it
+is also the least efficient, both in terms of disk storage space and in terms
+of reading in the data. An experiment showed that changing the format of the
+U-files from \ASCII\ to \Matlab\ binary resulted in a five-fold performance
+gain!
+
+Which binary format will be chosen---currently the most obvious candidates are
+\FITS\ or \Matlab\ binary---is not very important. The gain in performance will
+be significant anyway.
+
+
+\subsection{Add Cache Manager}
+\label{subsec:future-cacheman}
+One of the important ideas in the current design is that intermediate
+calculation results (or the result of loading data from file) should be
+``cached''. Most classes cache these data in one or more private data
+members. The calculation of the point spread function is a sequential process,
+where subsequent steps in the algorithm make use of the results of previous
+steps. If we change intermediate results---for example, we read another input
+file---we must invalidate all results that depend on them. There is, however,
+no way that a class instance can tell whether its private data should be
+invalidated or not. This should be the job of an external ``manager'' class.
+
+\paragraph{Cache Manager}
+One possible solution is to define a cache manager that is responsible for
+flagging cached data as being valid or invalid. Each class that caches data
+should register itself with the cache manager. The cache manager must somehow
+be told how the different caches relate to one another, i.e.\ which cache
+depends on which.
+
+If you don't care about reusability, you can build this knowledge into the
+cache manager class. However, in that case the cache manager can only be used
+with one specific implementation of the PSF library. If someone makes a
+change in the class design and, as a result, changes the dependencies between
+the cached data in these classes, then the application specific cache manager
+also needs to be changed.
+
+It is probably better to keep knowledge about cache dependencies outside the
+cache manager. Of course, the cache manager will still record the
+dependencies, but it must be told about them explicitly.
+
+\paragraph{Will It Pay Off?}
+Another important question to answer is: Will the added complexitiy of managed
+caches pay off? Performance measurements should be made, before this question
+can be answered. These measurements should reveal which parts of the algorithm
+are the most time consuming. If it turns out that the most time consuming part
+is in the early stages, significant gains can be made. If, on the other hand,
+the last steps in the algorithm are the most time consuming, there is little
+to be gained. My feeling is that the PSF calculation algorithm falls into the
+latter category---the calculation of the contribution of the mirror component
+to the residual phase is very time-consuming, especially because we need to
+load 1770 different so-called U-functions.%
+\footnote{You might consider caching the data of all precalculated
+U-functions, which saves you the time of reloading them. However, this
+will increase the memory footprint of the PSF library enormously.}
+
+\paragraph{A Light-Weight Cache Manager}
+Instead of implementing a full-blown cache manager that only invalidates
+caches if they really must be, we could build a light-weight cache manager,
+whose task is to invalidate the caches of {\em all\/} registered classes when
+it is sent a trigger to do so. Although it sounds pretty useless at first
+sight, there is something to be gained by employing a light-weight cache
+manager.
+
+For example, suppose you want to perform another PSF estimation on a different
+input datafile. It is obvious that none of the intermediate calculation
+results remain valid, so they could be flushed using the light-weight cache
+manager.
+
+%In the current design, all classes that cache results are implemented as
+%singeleton classes (see section~\ref{subsec:singleton}). Most classes perform
+%their calculations upon construction and store the results in their private
+%data members. This works like a charm, but there is a problem when it comes to
+%refreshing the cache. Refreshing? Yes, refreshing! Say, for example, that you
+%want to perform another PSF estimation on a different input data file. It is
+%obvious that the intermediate calculation results are no longer valid, so they
+%should be flushed. But how? By using the light-weight cache manager!
+
+%Enters the Light-Weight Cache Manager. The light-weight cache manager can only
+%do one thing: invalidate the cached data of {\em all\/} registered objects. It
+%does not know about cache dependencies, it does not care about them; it treats
+%all registered objects equal. Now, all you have to do is register the
+%singleton class upon construction with the cache manager. When it comes to
+%flushing caches, you send a trigger to the cache manager, which in turn calls
+%a unique method, e.g.\ clear(), to invalidate the caches of all registered objects.
+
+
+\subsection{Decouple from Blitz++}
+\label{subsec:future-blitz}
+The Blitz++ library was chosen to provide support for matrices and linear
+algebra. The problem with an external library is that one day or another
+someone decides that he or she wants to use another library, e.g.\ Boost's
+uBlas~\cite{ublas}. In an ideal world, you would simply ``unplug'' the Blitz
+library, ``plug in'' the new library and you are done. In the real world, it
+is not always that easy. The reason is that different libraries have different
+interfaces. So, when you change libraries, you almost always have to modify
+your source code as well.
+
+In order to alleviate part of this pain, I already introduced {\tt typedef}s
+for vectors and matrices, but that is not enough; a {\tt typedef} is only an
+alias for another type, it does not define a new type. The current design
+lacks its own definition of a generic {\tt Vector} and {\tt Matrix} type. 
+
+Once these generic types are available, most of the code that is currently
+present in the Blitz specific part of the math routines can safely be moved to
+the generic math routines. Furthermore, we can then drastically reduce the
+number of overloaded methods, because we do not have to write separate
+implementations for, e.g., \verb|MatrixReal| and \verb|MatrixInteger|. 
+
+
+\subsection{Run-Time Configuration}
+\label{subsec:future-config}
+In the current design the names of all precalculated data files are defined in
+the configuration file \verb|<Sinfoni/PSF/PSFConfig.h>|, which means they
+cannot be modified at run-time. However, there may be times that you want to
+be able to set these names at run-time. However, the most common situations
+that I can think of do not really require run-time configuration of the PSF
+library. Let me give two examples.
+
+\begin{enumerate}
+\item You want to compare the computational results of the PSF estimate using
+two different versions of a precalculated data file. This can be accomplished
+by using a symbolic link that points to either of the two data files, changing
+it between runs.
+\item You want to compare the computational results of the PSF estimate using
+two differents sets of precalculated data files. If you place these sets in
+two different directories this can be accomplished in two ways:
+\begin{enumerate}
+\item (Re)define the environment variable \verb|PSF_DATA|. This environment
+variable, if defined, is used by the PSF library to search for data files.
+\item Instead of redefining the environment variable \verb|PSF_DATA|, let it
+``point to'' a symbolic link which, in turn, points to either of two
+directories containing the data files.
+\end{enumerate}
+\end{enumerate}
+
+If these solutions do not offer the required flexibility, you will probably
+need support for run-time configuration. This could be implemented using a
+configurator class that reads a configuration file at program startup. This
+class would probably contain a map that relates the internal names for a data
+file to the actual file names. However, I question the surplus value of such a
+run-time configurator.
+
+
+\subsection{Thread-Safe PSF Library }
+\label{subsec:future-threadsafe}
+The current version of the PSF library is not thread-safe. One may wonder if
+it would be useful to have a thread-safe PSF library anyway, because the
+algorithm that is used to calculate the PSF is sequential. Hence, there is
+nothing to be gained in parallelizing the calculations. 
+
+However, if you decide that the PSF library should be made thread-safe, then
+the biggest hurdle to be taken is rewriting the singleton classes. The
+``Meyers Singleton'' cannot easily be made thread-safe, because it uses local
+static data. You cannot use thread local storage for these variables, because
+then you would not create a per-process singleton, but a per-thread singleton,
+and this is definitely something you do {\em not\/} want. There are, of
+course, other implementations of a singleton that can easily be made
+thread-safe. So, it is not impossible to do. But again, in my opinion, it is
+of little use to run the PSF algorithm in mulitple threads due to its
+sequential nature.
+
+
+\begin{thebibliography}{9}
+\bibitem{veran} Jean-Pierre V\'eran e.a., ``Estimation of the Adaptive
+Optics Long Exposure Point Spread Function Using Control Loop
+Data''. Submitted to {\em Journal of the Optical Society of America A\/} on
+January 10, 1997.
+\bibitem{gof95} E.\ Gamma, R.\ Helm, R.\ Johnson, J.\ Vlissides. {\em Design
+Patterns, Elements of Reusable Object-Oriented Software}. Addison-Wesley,
+1995. 
+\bibitem{meyers96} S.\ Meyers, {\em More Effective C++\/}. Addison-Wesley,
+1996. 
+\bibitem{blitz} Blitz++, a C++ class library for scientific
+computing. {\em http://oonumerics.org/blitz}
+\bibitem{ublas} uBLAS, a C++ template class library that provides BLAS level
+1, 2, 3 functionality for dense, packed and sparse matrices. {\em
+http://www.boost.org/libs/numeric/ublas/doc/index.htm}
+\end{thebibliography} 
+
+\end{document}

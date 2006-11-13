@@ -1,0 +1,7 @@
+#!/bin/sh
+export PSF_DATA=$SINFONI_ROOT/data
+\ln -s $PSF_DATA/target3_1.dat .
+$LOFAR_CHECKTOOL tOTFHighOrderPhaseContrib
+STATUS=$?
+\rm -f target3_1.dat
+exit $STATUS

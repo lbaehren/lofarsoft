@@ -1,0 +1,5 @@
+#!/bin/sh
+export PSF_DATA=$SINFONI_ROOT/data
+$LOFAR_CHECKTOOL tControlMatrix
+STATUS=$?
+exit $STATUS

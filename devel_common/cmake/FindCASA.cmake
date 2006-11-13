@@ -96,7 +96,8 @@ FIND_LIBRARY (TASKING_LIBRARY tasking ${AIPSLIBD})
 ##   LINKlattices    := lattices tables LINKscimath
 ##   LINKcoordinates := coordinates LINKfits
 ##   LINKcomponents  := components LINKcoordinates
-##   LINKimages      := images components coordinates lattices LINKfits
+##   TMPcomponents   := components coordinates lattices LINKfits
+##   LINKimages      := images TMPcomponents
 ##   LINKms          := ms LINKmeasures
 ##   LINKmsfits      := msfits ms LINKfits
 ##   LINKmsvis       := msvis LINKms
@@ -105,11 +106,9 @@ FIND_LIBRARY (TASKING_LIBRARY tasking ${AIPSLIBD})
 ##   LINKflagging    := flagging msvis ms lattices LINKmeasures
 ##   LINKdish        := dish ms fits coordinates lattices LINKmeasures
 ##   LINKsimulators  := simulators LINKms
-##   LINKsynthesis   := synthesis calibration msvis ms images components
-##                       coordinates lattices LINKfits
+##   LINKsynthesis   := synthesis calibration msvis ms images TMPcomponents
 ##   LINKgraphics    := graphics LINKcasa
-##   LINKtasking     := tasking graphics msvis ms images components coordinates
-##                       lattices LINKfits
+##   LINKtasking     := tasking graphics msvis ms images TMPcomponents
 ##
 
 IF (CASA_LIBRARY)
