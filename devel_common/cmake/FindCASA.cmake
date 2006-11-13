@@ -7,7 +7,7 @@
 ## installation)
 
 FIND_PATH (CASA_INCLUDE_DIR aips.h
-  PATHS /opt/casa /casa
+  PATHS /casa /opt/casa /sw/share/casa
   PATH_SUFFIXES code/include/casa stable/code/include/casa weekly/code/include/casa
   )
 
@@ -37,10 +37,10 @@ FIND_PATH (AIPSLIBD version.o
 
 STRING (REGEX REPLACE /lib "" AIPSARCH ${AIPSLIBD})
 
-MESSAGE (STATUS "AIPSROOT = ${AIPSROOT}")
-MESSAGE (STATUS "AIPSARCH = ${AIPSARCH}")
-MESSAGE (STATUS "AIPSINCD = ${CASA_INCLUDE_DIR}")
-MESSAGE (STATUS "AIPSLIBD = ${AIPSLIBD}")
+#MESSAGE (STATUS "AIPSROOT = ${AIPSROOT}")
+#MESSAGE (STATUS "AIPSARCH = ${AIPSARCH}")
+#MESSAGE (STATUS "AIPSINCD = ${CASA_INCLUDE_DIR}")
+#MESSAGE (STATUS "AIPSLIBD = ${AIPSLIBD}")
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
