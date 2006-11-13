@@ -11,23 +11,32 @@ else
 	var_prefix=$1
 fi
 
-## Package-specific variables
+## Package-specific variables ---------------------------------------------------
 
-atlas_version=3.6.0
-atlas_url=http://www.netlib.org/atlas/atlas$atlas_version.tgz
-atlas_src=$var_basedir/atlas
-atlas_libfiles=atlas cblas blas tstatlas
+var_Package=atlas
+var_PackageSource=$var_basedir/$var_Package
+var_Version=3.6.0
+var_PackageDir=$var_Package$var_Version
+var_PackageArchive=$var_PackageDir.tgz
+var_PackageURL=http://www.netlib.org/$var_Package/$var_PackageArchive
 
-echo "atlas_version = $atlas_version"
-echo "atlas_src     = $atlas_src"
+atlas_libfiles="atlas cblas blas tstatlas"
+
+echo "[$var_Package] Package information";
+echo " - Package name        = $var_Package";
+echo " - Version             = $var_Version";
+echo " - Package directory   = $var_PackageDir";
+echo " - Source archive      = $var_PackageArchive";
+echo " - Source URL          = $var_PackageURL";
+echo " - Installation prefix = $var_prefix";
 
 ## ------------------------------------------------------------------------
 ## Fetch the sources
 
-echo "[ATLAS] Fetching source from FTP server ..." ;
+echo "[$var_Package] Fetching source from FTP server ..." ;
 
-wget -c $atlas_url
-tar -xvzf atlas$atlas_version.tgz
+wget -c $var_PackageURL
+tar -xvzf $var_PackageArchive
 mv ATLAS atlas
 
 ## ------------------------------------------------------------------------
@@ -35,32 +44,36 @@ mv ATLAS atlas
 ##  sure that we keep track of the platform for which the library will be 
 ##  build
 
-echo "[ATLAS] Configuring and building package ..." ;
+echo "[$var_Package] Configuring and building package ..." ;
 
-cd $atlas_src
+cd $var_basedir/$var_Package
 make
-ls | grep Make | grep -v Makefile | grep -v Make.top | sed s/Make.// > $atlas_src/atlas_arch;
+ls | grep Make | grep -v Makefile | grep -v Make.top | sed s/Make.// > atlas_arch;
 
 ## ------------------------------------------------------------------------
 ## Start bulding
 
-echo "[ATLAS] Build for architecture `cat $atlas_src/atlas_arch`" ;
+echo "[$var_Package] Build for architecture `cat $var_Package/atlas_arch`" ;
 
-cd $atlas_src;
+cd $var_basedir/$var_Package
 
 make install arch=`cat atlas_arch`;
 
-echo "[ATLAS] Installing include files ..." ;
+echo "[$var_Package] Installing include files ..." ;
+
 rm -rf  $var_prefix/include/atlas;
-cp -r $atlas_src/include $var_prefix/include/atlas
+cp -r include $var_prefix/include/atlas
+
+exit
 
 ## ------------------------------------------------------------------------
 ## Installing of library files
 
-echo "[ATLAS] Installing library files and creating symlinks..." ;
+echo "[$var_Package] Installing library files and creating symlinks..."
+
 cd $var_prefix/lib; \
 	rm -f libf77blas.a libptf77blas.a; \
-	cp $atlas_src/lib/`cat $atlas_src/atlas_arch`/*.a .; \
+	cp $var_PackageSource/lib/`cat $var_PackageSource/atlas_arch`/*.a .; \
 	mv libf77blas.a libblas.a; \
 	ln -s libblas.a libf77blas.a; \
 	mv libptf77blas.a libptblas.a; \
@@ -70,6 +83,3 @@ cd $var_prefix/lib; \
 #	for FILE in $(atlas_libfiles) ; do \
 #		$(var_bin)/mklib $$FILE $$FILE ;\
 #	done;
-	-@ echo "[ATLAS] Installation completed.";
-	-@ echo "Sleep 2 minutes";
-	sleep 30s

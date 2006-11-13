@@ -10,7 +10,7 @@ SET (Boost_VERSION 1_32)
 
 FIND_PATH (Boost_INCLUDE_DIR
   config.hpp
-  PATHS /usr/local/include /usr/include /sw/include
+  PATHS /usr/local/include /usr/include /sw/include /opt/casa/local/include
   PATH_SUFFIXES boost ${Boost_VERSION} ${Boost_VERSION}/boost
   )
 
@@ -22,7 +22,7 @@ SET (Boost_LIBRARIES "")
 
 FIND_LIBRARY (Boost_python_LIBRARY
   NAMES boost_python-${Boost_VERSION}
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib
+  PATHS /usr/local/lib /usr/lib /lib /sw/lib /opt/casa/local/lib
   PATH_SUFFIXES boost
   )
 

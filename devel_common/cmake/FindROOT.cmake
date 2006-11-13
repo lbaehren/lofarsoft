@@ -10,7 +10,7 @@
 ## Check for the header files
 
 FIND_PATH (ROOT_INCLUDE_DIR TObject.h TROOT.h
-	PATHS /usr/share /usr/local/share /sw/share
+	PATHS /usr/share /usr/local/share /sw/share /opt
 	PATH_SUFFIXES root/include
 )
 
@@ -18,7 +18,7 @@ FIND_PATH (ROOT_INCLUDE_DIR TObject.h TROOT.h
 ## Check for the library
 
 FIND_LIBRARY (ROOT_LIBRARY Cint MathCore
-	PATHS /usr/share /usr/local/share /sw/share
+	PATHS /usr/share /usr/local/share /sw/share /opt
 	PATH_SUFFIXES root/lib
 )
 

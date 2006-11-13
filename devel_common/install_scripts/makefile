@@ -7,6 +7,9 @@ var_prefix=`pwd`
 
 ## External software required for AIPS++/CASA -----------------------------------
 
+atlas:
+	./atlas.install $(var_prefix)
+
 bison:
 	./bison.install $(var_prefix)
 
@@ -34,7 +37,7 @@ qt:
 tcltk:
 	./tcltk.install $(var_prefix)
 
-all: tcltk ccfits fftw boost
+all: tcltk ccfits fftw boost atlas
 
 ## Code management ------------------------------------------------------------------
 
