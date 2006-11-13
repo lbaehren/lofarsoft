@@ -2,19 +2,27 @@
 #
 
 ## -----------------------------------------------------------------------------
-## Preparation: get additional information about the system
-## AIPS++/CASA uses a number of compiler flags describing the platform, which 
-## need to be detected and assigned.
+## Check for the header files first, as from this we can derive a number of 
+## fundamental CASA variables (such as e.g. the root directory of the
+## installation)
 
-SET (AIPSROOT "/sw/share/casa")
-SET (AIPSCODE "${AIPSROOT}/code")
+FIND_PATH (CASA_INCLUDE_DIR aips.h
+  PATHS /opt/casa /casa
+  PATH_SUFFIXES code/include/casa stable/code/include/casa weekly/code/include/casa
+  )
+
+IF (CASA_INCLUDE_DIR)
+  STRING (REGEX REPLACE include/casa include CASA_INCLUDE_DIR ${CASA_INCLUDE_DIR})
+  STRING (REGEX REPLACE /code/include "" AIPSROOT ${CASA_INCLUDE_DIR})
+ENDIF (CASA_INCLUDE_DIR)
+
+## -----------------------------------------------------------------------------
+## Preparation: get additional information about the system
 
 IF (UNIX)
-  SET (AIPSARCH "${AIPSROOT}/linux")
   SET (AIPS_ARCH "LINUX")
   SET (AIPS_ENDIAN "LITTLE")
   IF (APPLE)
-    SET (AIPSARCH "${AIPSROOT}/darwin")
     SET (AIPS_ARCH "DARWIN")
     IF (${CMAKE_OSX_ARCHITECTURES} MATCHES "ppc")
       SET (AIPS_ENDIAN "BIG")
@@ -22,22 +30,20 @@ IF (UNIX)
   ENDIF (APPLE)
 ENDIF (UNIX)
 
-## -----------------------------------------------------------------------------
-## Check for the header files
-
-FIND_PATH (CASA_INCLUDE_DIR aips.h
-  PATHS ${AIPSCODE} /opt/casa /casa /dop71_0/aips++/weekly/code
-  PATH_SUFFIXES /include/casa
+FIND_PATH (AIPSLIBD version.o
+  PATHS ${AIPSROOT}
+  PATH_SUFFIXES darwin/lib linux/lib linux_gnu/lib
   )
 
-IF (CASA_INCLUDE_DIR)
-  STRING (REGEX REPLACE include/casa include CASA_INCLUDE_DIR ${CASA_INCLUDE_DIR})
-ENDIF (CASA_INCLUDE_DIR)
+STRING (REGEX REPLACE /lib "" AIPSARCH ${AIPSLIBD})
+
+MESSAGE (STATUS "AIPSROOT = ${AIPSROOT}")
+MESSAGE (STATUS "AIPSARCH = ${AIPSARCH}")
+MESSAGE (STATUS "AIPSINCD = ${CASA_INCLUDE_DIR}")
+MESSAGE (STATUS "AIPSLIBD = ${AIPSLIBD}")
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
-
-SET (AIPSLIBD ${AIPSARCH}/lib /opt/casa/lib)
 
 FIND_LIBRARY (CALIBRATION_LIBRARY calibration ${AIPSLIBD})
 FIND_LIBRARY (CASA_LIBRARY casa ${AIPSLIBD})
