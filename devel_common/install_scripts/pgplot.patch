@@ -1,5 +1,5 @@
---- drivers.list	1999-05-04 07:02:15.000000000 +0200
-+++ drivers.list	2006-10-12 17:56:18.000000000 +0200
+--- drivers.list	2006-11-13 18:08:29.660524024 +0100
++++ drivers.list	2006-11-13 18:10:09.459352296 +0100
 @@ -16,8 +16,8 @@
  ! EXDRIV 2 /EXCL      Talaris/EXCL printers, portrait
  ! GCDRIV 0 /GENICOM   Genicom 4410 dot-matrix printer, landscape
@@ -58,7 +58,7 @@
  !
  ! Selection of the XATHENA driver causes a stub driver to be placed in
  ! the main PGPLOT library. The real driver is placed in libXawPgplot.a.
-@@ -107,8 +107,8 @@
+@@ -107,7 +107,7 @@
  ! before the PGPLOT library. This treatment means that only Tcl/Tk
  ! applications have to be linked with the Tcl and Tk libraries.
  !
@@ -67,5 +67,3 @@
  !
  ! The following driver is included solely for use by the aips++ team.
  !
--! RVDRIV 0 /XRV       X-window Rivet/Tk programs with pgplot widgets.   C
-+ RVDRIV 0 /XRV       X-window Rivet/Tk programs with pgplot widgets.   C

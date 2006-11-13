@@ -28,6 +28,12 @@ ccfits: cfitsio
 m4:
 	./m4.install $(var_prefix)
 
+rivet:
+	./rivet.install $(var_prefix)
+
+pgplot:
+	./pgplot.install $(var_prefix)
+
 python:
 	./python.install $(var_prefix)
 

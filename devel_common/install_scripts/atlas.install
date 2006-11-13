@@ -71,15 +71,21 @@ exit
 
 echo "[$var_Package] Installing library files and creating symlinks..."
 
-cd $var_prefix/lib; \
-	rm -f libf77blas.a libptf77blas.a; \
-	cp $var_PackageSource/lib/`cat $var_PackageSource/atlas_arch`/*.a .; \
-	mv libf77blas.a libblas.a; \
-	ln -s libblas.a libf77blas.a; \
-	mv libptf77blas.a libptblas.a; \
-	ln -s libptblas.a libptf77blas.a;
-#	-@ echo "[ATLAS] Creating dynamic libraries ..." ;
-#	cd $var_prefix/lib; \
-#	for FILE in $(atlas_libfiles) ; do \
-#		$(var_bin)/mklib $$FILE $$FILE ;\
-#	done;
+cd $var_prefix/lib
+
+# remove possible old link
+rm -f libf77blas.a libptf77blas.a
+
+# copy all the new library files to $AIPSLOCAL/lib
+cp $var_PackageSource/lib/`cat $var_PackageSource/atlas_arch`/*.a .
+
+if test -f libblas.a ;
+then echo "Found libblas in `pwd`" ;
+else ln -s libf77blas.a libblas.a ;
+fi
+
+## ------------------------------------------------------------------------
+## Post-installation clean-up
+
+rm -rf $var_Package
+rm -rf $var_PackageArchive
