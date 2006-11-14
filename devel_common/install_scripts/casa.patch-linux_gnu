@@ -1,0 +1,12 @@
+--- code/aips/glish/glish/scan.l	2005-10-19 16:44:07.000000000 +0200
++++ code/aips/glish/glish/scan.l	2006-11-14 14:36:33.980086040 +0100
+@@ -188,8 +188,8 @@
+ // terminate with a "return" followed by a "break".
+ #define YY_BREAK
+ 
+-#define yywrap() 1
+ %}
++%option noyywrap
+ 
+ %x QUOTE RECORD_FIELD SCAN_EVENT_NAME UNKNOWN_PRAGMA ATTR ATTR_QUOTE REGEX NO_REGEX END_REGEX
+ 

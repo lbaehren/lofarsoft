@@ -164,7 +164,9 @@ ELSE (CASA_INCLUDE_DIR AND CASA_LIBRARIES)
   ENDIF (NOT CASA_FIND_QUIETLY)
 ENDIF (CASA_INCLUDE_DIR AND CASA_LIBRARIES)
 
-## -----------------------------------------------------------------------------
+## ------------------------------------------------------------------------------
+## Final assembly of the provided variables and flags; once this is done, we
+## provide some extended feedback.
 
 IF (CASA_FOUND)
   SET (CASA_CXX_FLAGS "-DAIPS_${AIPS_ARCH} -DAIPS_${AIPS_ENDIAN}_ENDIAN -DNATIVE_EXCP -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_NO_LEA_MALLOC -D_GLIBCPP_DEPRECATED -DSIGNBIT  -DAIPS_NO_TEMPLATE_SRC -DAIPS_NO_TEMPLATE_SRC -I${CASA_INCLUDE_DIR} -DAIPS_${AIPS_ARCH} -Wno-deprecated -fno-implicit-templates")
@@ -172,6 +174,7 @@ IF (CASA_FOUND)
   IF (NOT CASA_FIND_QUIETLY)
     MESSAGE (STATUS "Found components for CASA.")
     MESSAGE (STATUS "CASA architecture .. : ${AIPS_ARCH}")
+    MESSAGE (STATUS "CASA root dir ...... : ${AIPSROOT}")
     MESSAGE (STATUS "CASA library dir ... : ${CASA_LIBRARIES_DIR}")
     MESSAGE (STATUS "CASA library files . : ${CASA_LIBRARIES}")
     MESSAGE (STATUS "CASA header files .. : ${CASA_INCLUDE_DIR}")
