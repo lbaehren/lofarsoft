@@ -1,5 +1,5 @@
---- code/aips/glish/glish/scan.l	2005-10-19 16:44:07.000000000 +0200
-+++ code/aips/glish/glish/scan.l	2006-11-14 14:36:33.980086040 +0100
+--- aips/glish/glish/scan.l	2005-10-19 16:44:07.000000000 +0200
++++ aips/glish/glish/scan.l	2006-11-14 14:36:33.980086040 +0100
 @@ -188,8 +188,8 @@
  // terminate with a "return" followed by a "break".
  #define YY_BREAK
@@ -9,4 +9,42 @@
 +%option noyywrap
  
  %x QUOTE RECORD_FIELD SCAN_EVENT_NAME UNKNOWN_PRAGMA ATTR ATTR_QUOTE REGEX NO_REGEX END_REGEX
+ 
+--- demo/implement/MeasurementEquations/pSimulator.cc	2006-11-14 16:24:10.386563064 +0100
++++ demo/implement/MeasurementEquations/pSimulator.cc	2006-11-14 16:24:45.921160984 +0100
+@@ -36,9 +36,9 @@
+ #include <tasking/Tasking/Index.h>
+ #include <casa/BasicSL/String.h>
+ #include <tasking/Glish/GlishRecord.h>
+-#include "../../../appsglish/apps/app_image/DOimage.h"
+-#include "../../../appsglish/apps/imager/DOimager.h"
+-#include "../../../appsglish/apps/simulator/DOsimulator.h"
++#include <appsglish/app_image/DOimage.h>
++#include <appsglish/imager/DOimager.h>
++#include <appsglish/simulator/DOsimulator.h>
+ 
+ #include <casa/namespace.h>
+ 
+--- QtAutoGui.cc_orig	2006-11-14 16:30:47.628173160 +0100
++++ QtAutoGui.cc	2006-11-14 16:33:06.621043032 +0100
+@@ -27,14 +27,14 @@
+ //# $Id: QtAutoGui.cc,v 1.4 2006/09/25 17:51:11 hye Exp $
+ 
+ #include <graphics/X11/X_enter.h>
+-#  include <QtGui/QtGui>
+-#  include <QtCore/qdebug.h>
++#include <QtGui/QtGui>
++#include <QtCore/qdebug.h>
+ #include <graphics/X11/X_exit.h>
+ 
+-#include "QtAutoGui.qo.h"
+-#include "QtXmlRecord.h"
+-#include "QtGuiEntry.qo.h"
+-#include "QtLayout.h"
++#include <display/QtAutoGui/QtAutoGui.qo.h>
++#include <display/QtAutoGui/QtXmlRecord.h>
++#include <display/QtAutoGui/QtGuiEntry.qo.h>
++#include <display/QtAutoGui/QtLayout.h>
+ 
+ extern int qInitResources_QtAutoGui();
  
