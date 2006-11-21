@@ -19,15 +19,15 @@
  ***************************************************************************/
 
 /*!
-  \class  MyArray
+  \class  TestArray
 */
 
-#include <Utilities/CMakeTesting.h>
+#include <Utilities/TestArray.h>
 
 #ifdef HAVE_CASA
 
 template <class T>
-MyArray<T>::MyArray ()
+TestArray<T>::TestArray ()
 {
   casa::IPosition shape(1,1);
   vect_p.resize (shape);
@@ -35,16 +35,16 @@ MyArray<T>::MyArray ()
 }
 
 template <class T>
-MyArray<T>::MyArray (casa::Array<T> & vect) {
+TestArray<T>::TestArray (casa::Array<T> & vect) {
   setArray (vect);
 }
 
 template <class T>
-MyArray<T>::~MyArray ()
+TestArray<T>::~TestArray ()
 {}
 
 template <class T>
-void MyArray<T>::setArray (casa::Array<T> & vect)
+void TestArray<T>::setArray (casa::Array<T> & vect)
 {
   vect_p.resize (vect.shape());
   vect_p = vect;
@@ -64,9 +64,9 @@ void MyArray<T>::setArray (casa::Array<T> & vect)
 // template class casa::Array<float>;
 // template class casa::Array<double>;
 
-template class MyArray<int>;
-template class MyArray<unsigned int>;
-template class MyArray<float>;
-template class MyArray<double>;
+template class TestArray<int>;
+template class TestArray<unsigned int>;
+template class TestArray<float>;
+template class TestArray<double>;
 
 #endif

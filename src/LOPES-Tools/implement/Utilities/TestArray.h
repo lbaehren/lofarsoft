@@ -18,13 +18,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef CMAKETESTING_H
-#define CMAKETESTING_H
+#ifndef TESTARRAY_H
+#define TESTARRAY_H
 
 #include <iostream>
 
 /*!
-  \class MyArray
+  \class TestArray
   
   \brief Test compiling a class depending on CASA array classes
   
@@ -38,7 +38,7 @@
 #include <casa/Arrays.h>
 #include <casa/BasicSL/Complex.h>
 
-template <class T> class MyArray {
+template <class T> class TestArray {
   
   // The vector itself
   casa::Array<T> vect_p;
@@ -50,19 +50,19 @@ template <class T> class MyArray {
   /*!
     \brief Default constructor
   */
-  MyArray ();
+  TestArray ();
   
   /*!
     \brief Argumented constructor
     
     \param vect -- The vector to be stored internally
   */
-  MyArray (casa::Array<T> & vect);
+  TestArray (casa::Array<T> & vect);
 
   /*!
     \brief Destructor
   */
-  ~MyArray ();
+  ~TestArray ();
   
   /*!
     \brief Get the stored vector
@@ -100,4 +100,4 @@ template <class T> class MyArray {
 
 #endif
 
-#endif // CMAKETESTING_H
+#endif // TESTARRAY_H
