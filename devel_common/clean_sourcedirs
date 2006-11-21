@@ -1,0 +1,10 @@
+#!/bin/sh
+
+echo "Scanning directories .."
+FILES=`find . -name *~`
+
+for FILE in $FILES
+{
+	echo $FILE
+	rm $FILE
+}
