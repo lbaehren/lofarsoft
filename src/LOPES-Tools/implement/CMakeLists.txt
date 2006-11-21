@@ -49,5 +49,5 @@ ADD_LIBRARY (lopestools
 #  Math/VectorConversion.cc
   Utilities/ProgressBar.cc
   Utilities/Timestamp.cc
-  Utilities/CMakeTesting.cc
+  Utilities/TestArray.cc
   )
