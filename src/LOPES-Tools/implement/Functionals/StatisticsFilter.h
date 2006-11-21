@@ -20,96 +20,102 @@
 
 /* $Id: StatisticsFilter.h,v 1.8 2006/05/19 14:49:10 bahren Exp $*/
 
-#ifndef _STATISTICSFILTER_H_
-#define _STATISTICSFILTER_H_
+#ifndef STATISTICSFILTER_H
+#define STATISTICSFILTER_H
 
+#ifdef HAVE_CASA
 #include <casa/aips.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/ArrayMath.h>
 #include <casa/BasicSL/Complex.h>
 #include <scimath/Mathematics.h>
+#endif
 
-#include <casa/namespace.h>
+namespace LOPES {
+  
+  /*!
+    \class FilterType
+    
+    \ingroup Functionals
+    
+    \author Lars B&auml;hren
+    
+    \brief Enum for the various filter types
+  */
+  class FilterType {
+  public:
+    //! The various filter types implemented in the StatisticsFilter class
+    enum filter {
+      //! Use maximum of the values
+      MAXIMUM,
+      //! Use median of values
+      MEAN,
+      //! Use mean of values
+      MEDIAN,
+      //! Use minimum of the values
+      MINIMUM,
+      //! Root mean square of the values
+      RMS,
+      //! Use standard deviation of values
+      STDDEV
+    };
+  };
+
+}
 
 namespace LOPES {
 
-/*!
-  \class FilterType
-  
-  \ingroup Functionals
-
-  \author Lars B&auml;hren
-
-  \brief Enum for the various filter types
-*/
-class FilterType {
- public:
-  //! The various filter types implemented in the StatisticsFilter class
-  enum filter {
-    //! Use maximum of the values
-    MAXIMUM,
-    //! Use median of values
-    MEAN,
-    //! Use mean of values
-    MEDIAN,
-    //! Use minimum of the values
-    MINIMUM,
-    //! Root mean square of the values
-    RMS,
-    //! Use standard deviation of values
-    STDDEV
-  };
-};
-
-/*!
-  \class StatisticsFilter.h
-
-  \brief A filter based on statistical properties of the data
-
-  \author Lars B&auml;hren
-
-  \date 2005/12/21
-
-  \test tStatisticsfilter.cc
-
-  <h3>Prerequisite</h3>
-
-  <ul type=square>
+  /*!
+    \class StatisticsFilter
+    
+    \ingroup Functionals
+    
+    \brief A filter based on statistical properties of the data
+    
+    \author Lars B&auml;hren
+    
+    \date 2005/12/21
+    
+    \test tStatisticsfilter.cc
+    
+    <h3>Prerequisite</h3>
+    
+    <ul type=square>
     <li>[LOPES-Tools] FilterType
-  </ul>
-
-  <h3>Synopsis</h3>
-
-  This essentially is an re-implementation of the code found in lopestools.cc
-
-  <h3>Example(s)</h3>
-
-  <ol>
-    <li>Working with vector input:
-    \code
-    StatisticsFilter<Float> mf (strength);
-    Vector<Float> input (nofChannels,1.0);
-    Vector<Float> output (mf.filter(input));
-    \endcode
+    </ul>
     
-    <li>Working with matrix input:
-    \code
-    StatisticsFilter<Float> mf (strength);
-    Matrix<Float> input (nofChannels,1.0);
-    IPosition shape (input.shape());
-    Matrix<Float> output (shape);
+    <h3>Synopsis</h3>
     
-    for (int n(0); n<shape(1); n++) {
+    This essentially is an re-implementation of the code found in lopestools.cc
+    
+    <h3>Example(s)</h3>
+    
+    <ol>
+      <li>Working with vector input:
+      \code
+      StatisticsFilter<Float> mf (strength);
+      casa::Vector<Float> input (nofChannels,1.0);
+      casa::Vector<Float> output (mf.filter(input));
+      \endcode
+      
+      <li>Working with matrix input:
+      \code
+      StatisticsFilter<Float> mf (strength);
+      casa::Matrix<Float> input (nofChannels,1.0);
+      IPosition shape (input.shape());
+      casa::Matrix<Float> output (shape);
+      
+      for (int n(0); n<shape(1); n++) {
       output.column(n) = mf.filter(input.column(n));
-    }
-    \endcode
-    Since this type of processing is supported internally, you also simply might
-    say:
-    \code
-    StatisticsFilter<Float> mf (strength);
-    Matrix<Float> input (nofChannels,nofAntennas,1.0);
-    Matrix<Float> output (mf.filter(input));
-    \endcode
+      }
+      \endcode
+      Since this type of processing is supported internally, you also simply might
+      say:
+      \code
+      StatisticsFilter<Float> mf (strength);
+      casa::Matrix<Float> input (nofChannels,nofAntennas,1.0);
+      casa::Matrix<Float> output (mf.filter(input));
+      \endcode
   </ol>
 
   Here is a short test script which can be run to compare the result from the new
@@ -119,159 +125,153 @@ class FilterType {
   fx := data.get("f(x)");
   f := cMedFilter (fx, strength=5);
   \endcode
-
-*/
-
-template <class T> class StatisticsFilter {
-
-  //! Type of the filter
-  FilterType::filter filterType_p;
-  //! Strength of the filter, i.e. the number of bins over which to average
-  unsigned int strength_p;
-  //! Length of a vector of input data
-  unsigned int blocksize_p;
-  //! Number of data sets (when working on matrix input)
-  unsigned int nofDataSets_p;
-
- public:
-
-  // --------------------------------------------------------------- Construction
-
-  /*!
-    \brief Default constructor
   */
-  StatisticsFilter ();
-
-  /*!
-    \brief Argumented constructor
-
-    \param strength -- Strength of the filter, i.e. the number of bins over
-                       which to average
-  */
-  StatisticsFilter (const unsigned int& strength);
-
-  /*!
-    \brief Argumented constructor
-
-    \param strength   -- Strength of the filter, i.e. the number of bins over
+  template <class T> class StatisticsFilter {
+    
+    //! Type of the filter
+    FilterType::filter filterType_p;
+    //! Strength of the filter, i.e. the number of bins over which to average
+    unsigned int strength_p;
+    //! Length of a vector of input data
+    unsigned int blocksize_p;
+    //! Number of data sets (when working on matrix input)
+    unsigned int nofDataSets_p;
+    
+  public:
+    
+    // ------------------------------------------------------------- Construction
+    
+    /*!
+      \brief Default constructor
+    */
+    StatisticsFilter ();
+    
+    /*!
+      \brief Argumented constructor
+      
+      \param strength -- Strength of the filter, i.e. the number of bins over
                          which to average
-    \param filterType -- Which type of filter to use (one of the types in
-                         FilterType)
-  */
-  StatisticsFilter (const unsigned int& strength,
-		    const FilterType::filter filterType);
+    */
+    StatisticsFilter (const unsigned int& strength);
+    
+    /*!
+      \brief Argumented constructor
+      
+      \param strength   -- Strength of the filter, i.e. the number of bins over
+                           which to average
+      \param filterType -- Which type of filter to use (one of the types in
+                           FilterType)
+    */
+    StatisticsFilter (const unsigned int& strength,
+		      const FilterType::filter filterType);
+    
+    /*!
+      \brief Copy constructor
+      
+      \param other -- Another StatisticsFilter object from which to create this
+                      new one.
+    */
+    StatisticsFilter (const StatisticsFilter<T>& other);
+    
+    // -------------------------------------------------------------- Destruction
+    
+    /*!
+      \brief Destructor
+    */
+    ~StatisticsFilter ();
+    
+    // ---------------------------------------------------------------- Operators
+    
+    /*!
+      \brief Overloading of the copy operator
+      
+      \param other -- Another StatisticsFilter object from which to make a copy.
+    */
+    StatisticsFilter &operator= (StatisticsFilter<T> const &other); 
+    
+    // --------------------------------------------------------------- Parameters
+    
+    /*!
+      \brief Strength of the filter
+      
+      \return strength -- Strength of the filter, i.e. the number of bins over
+                          which to average
+    */
+    unsigned int strenght () {
+      return strength_p;
+    }
+    
+    /*!
+      \brief Strength of the filter
+      
+      \param strength -- Strength of the filter, i.e. the number of bins over
+                         which to average
+    */
+    void setStrength (const unsigned int& strength) {
+      strength_p = strength;
+    }
+    
+    /*!
+      \brief Get the filter type
+      
+      \return filterType -- The type of the filter (e.g. MEAN)
+    */
+    FilterType::filter filterType () {
+      return filterType_p;
+    }
+    
+    /*!
+      \brief Set the filter type
+      
+      \param filterType -- The type of the filter (e.g. MEAN)
+    */
+    void setFilterType (const FilterType::filter type) {
+      filterType_p = type;
+    }
 
-  /*!
-    \brief Copy constructor
+    // ------------------------------------------------------------------ Methods
 
-    \param other -- Another StatisticsFilter object from which to create this new
-                    one.
-  */
-  StatisticsFilter (const StatisticsFilter<T>& other);
+#ifdef HAVE_CASA
+    /*!
+      \brief Apply the filter to data, non-destructive.
+      
+      \param data --
+      
+      \return result -- Data after application of the filter
+    */
+    casa::Vector<T> filter (const casa::Vector<T>& data);
+    
+    /*!
+      \brief Apply the filter to data, non-destructive.
+      
+      \param data -- Multiple data sets, [x-axis,antenna].
+      
+      \return result -- Data after application of the filter
+    */
+    casa::Matrix<T> filter (const casa::Matrix<T>& data);
+#endif
+    
+  private:
+    
+    /*!
+      \brief Unconditional copying
+    */
+    void copy (const StatisticsFilter<T>& other);
+    
+    /*!
+      \brief Unconditional deletion 
+    */
+    void destroy(void);
 
-  // ---------------------------------------------------------------- Destruction
-
-  /*!
-    \brief Destructor
-  */
-  ~StatisticsFilter ();
-
-  // ------------------------------------------------------------------ Operators
-
-  /*!
-    \brief Overloading of the copy operator
-
-    \param other -- Another StatisticsFilter object from which to make a copy.
-  */
-  StatisticsFilter &operator= (StatisticsFilter<T> const &other); 
-
-  // ----------------------------------------------------------------- Parameters
-
-  /*!
-    \brief Strength of the filter
-
-    \return strength -- Strength of the filter, i.e. the number of bins over
-                        which to average
-  */
-  unsigned int strenght () {
-    return strength_p;
-  }
-
-  /*!
-    \brief Strength of the filter
-
-    \param strength -- Strength of the filter, i.e. the number of bins over
-                       which to average
-  */
-  void setStrength (const unsigned int& strength) {
-    strength_p = strength;
-  }
-
-  /*!
-    \brief Get the filter type
-
-    \return filterType -- The type of the filter (e.g. MEAN)
-  */
-  FilterType::filter filterType () {
-    return filterType_p;
-  }
-
-  /*!
-    \brief Set the filter type
-
-    \param filterType -- The type of the filter (e.g. MEAN)
-  */
-  void setFilterType (const FilterType::filter type) {
-    filterType_p = type;
-  }
-
-
-  // -------------------------------------------------------------------- Methods
-
-  /*!
-    \brief Apply the filter to data, non-destructive.
-
-    \param data --
-
-    \return result -- Data after application of the filter
-  */
-  Vector<T> filter (const Vector<T>& data);
-
-  /*!
-    \brief Apply the filter to data, non-destructive.
-
-    \param data -- Multiple data sets, [x-axis,antenna].
-
-    \return result -- Data after application of the filter
-  */
-  Matrix<T> filter (const Matrix<T>& data);
-
- private:
-
-  /*!
-    \brief Unconditional copying
-  */
-  void copy (const StatisticsFilter<T>& other);
-
-  /*!
-    \brief Unconditional deletion 
-  */
-  void destroy(void);
-
-  /*!
-    \brief Apply the filter to the data
-   */
-  Vector<T> applyFilter (const Vector<T>& data);
+#ifdef HAVE_CASA    
+    /*!
+      \brief Apply the filter to the data
+    */
+    casa::Vector<T> applyFilter (const casa::Vector<T>& data);
+#endif
+    
+  };
   
-};
-
-#ifndef AIPS_NO_TEMPLATE_SRC
-#include <lopes/Functionals/StatisticsFilter.cc>
-#endif //# AIPS_NO_TEMPLATE_SRC
-#ifndef AIPS_NO_TEMPLATE_SRC
-#include <lopes/Functionals/StatisticsFilter.cc>
-#endif //# AIPS_NO_TEMPLATE_SRC
-
 }
 
 #endif /* _STATISTICSFILTER_H_ */

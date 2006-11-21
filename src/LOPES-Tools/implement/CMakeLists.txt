@@ -42,6 +42,7 @@ ADD_LIBRARY (lopestools
   Functionals/Shapelets1D.cc
   Functionals/Shapelets2D.cc
   Functionals/ShapeletsModel1D.cc
+  Functionals/StatisticsFilter.cc
   IO/DataIO.cc
   IO/DataIterator.cc
 #  IO/LogfileName.cc

@@ -22,13 +22,19 @@
 
 #include <Functionals/StatisticsFilter.h>
 
+using std::cerr;
+using std::cout;
+using std::endl;
+using LOPES::StatisticsFilter;
+using LOPES::FilterType;
+
 /*!
   \file tStatisticsFilter.cc
-
+  
   \brief A collection of test routines for StatisticsFilter
- 
+  
   \author Lars B&auml;hren
- 
+  
   \date 2005/12/21
 */
 
@@ -36,22 +42,22 @@
 
 /*!
   \brief Test constructors for a new StatisticsFilter object
-
+  
   \return nofFailedTests -- The number of failed tests.
 */
-Int test_StatisticsFilter ()
+int test_StatisticsFilter ()
 {
   cout << "\n[test_StatisticsFilter]\n" << endl;
 
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
   unsigned int filterStrength (5);
 
   // Test the default constructor
   cout << "[1] Testing default constructor ..." << endl;
   try {
-    StatisticsFilter<Float> filter_float;
-    StatisticsFilter<Double> filter_double;
-  } catch (AipsError x) {
+    StatisticsFilter<float> filter_float;
+    StatisticsFilter<double> filter_double;
+  } catch (casa::AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
   }
@@ -59,9 +65,9 @@ Int test_StatisticsFilter ()
   // Test the argumented constructor
   cout << "[2] Testing argumented constructor ..." << endl;
   try {
-    StatisticsFilter<Float> filter_float(filterStrength);
-    StatisticsFilter<Double> filter_double(filterStrength);
-  } catch (AipsError x) {
+    StatisticsFilter<float> filter_float(filterStrength);
+    StatisticsFilter<double> filter_double(filterStrength);
+  } catch (casa::AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
   }
@@ -69,8 +75,8 @@ Int test_StatisticsFilter ()
   // Test the argumented constructor
   cout << "[3] Testing argumented constructor ..." << endl;
   try {
-    StatisticsFilter<Float> mf (filterStrength,FilterType::MEAN);
-  } catch (AipsError x) {
+    StatisticsFilter<float> mf (filterStrength,FilterType::MEAN);
+  } catch (casa::AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
   }
@@ -78,9 +84,9 @@ Int test_StatisticsFilter ()
   // Test the copy constructor
   cout << "[4] Testing copy constructor ..." << endl;
   try {
-    StatisticsFilter<Float> mf1 (filterStrength,FilterType::MEAN);
-    StatisticsFilter<Float> mf2 (mf1);
-  } catch (AipsError x) {
+    StatisticsFilter<float> mf1 (filterStrength,FilterType::MEAN);
+    StatisticsFilter<float> mf2 (mf1);
+  } catch (casa::AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
   }
@@ -101,31 +107,31 @@ Int test_StatisticsFilter ()
   
   \return nofFailedTests -- The number of failed tests.
 */
-Int test_filter ()
+int test_filter ()
 {
   cout << "\n[test_filter]\n" << endl;
 
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
   int nofAntennas (10);
   int nofChannels (1024);
   unsigned int strength (8);
 
   cout << "[1] Testing filter with vector input ..." << endl;
   try {
-    StatisticsFilter<Float> mf (strength,FilterType::MEAN);
-    Vector<Float> input (nofChannels,1.0);
-    Vector<Float> output (mf.filter(input));
-  } catch (AipsError x) {
+    StatisticsFilter<float> mf (strength,FilterType::MEAN);
+    casa::Vector<float> input (nofChannels,1.0);
+    casa::Vector<float> output (mf.filter(input));
+  } catch (casa::AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
   }
   
   cout << "[2] Testing filter with Matrix input ..." << endl;
   try {
-    StatisticsFilter<Float> mf (strength,FilterType::MEAN);
-    Matrix<Float> input (nofChannels,nofAntennas,1.0);
-    Matrix<Float> output (mf.filter(input));
-  } catch (AipsError x) {
+    StatisticsFilter<float> mf (strength,FilterType::MEAN);
+    casa::Matrix<float> input (nofChannels,nofAntennas,1.0);
+    casa::Matrix<float> output (mf.filter(input));
+  } catch (casa::AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
   }
@@ -139,7 +145,7 @@ Int test_filter ()
 
 int main ()
 {
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
 
   // Test for the constructor(s)
   {

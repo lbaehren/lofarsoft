@@ -19,7 +19,7 @@
  ***************************************************************************/
 
 /*!
-  \class  TestArray
+  \class TestArray
 */
 
 #include <Utilities/TestArray.h>
@@ -30,8 +30,8 @@ template <class T>
 TestArray<T>::TestArray ()
 {
   casa::IPosition shape(1,1);
-  vect_p.resize (shape);
-  vect_p = 0;
+  array_p.resize (shape);
+  array_p = 0;
 }
 
 template <class T>
@@ -46,12 +46,25 @@ TestArray<T>::~TestArray ()
 template <class T>
 void TestArray<T>::setArray (casa::Array<T> & vect)
 {
-  vect_p.resize (vect.shape());
-  vect_p = vect;
+  array_p.resize (vect.shape());
+  array_p = vect;
   //
   nofElements_p = vect.nelements();
 }
 
+
+// =============================================================================
+//
+//  Summary of the object
+//
+// =============================================================================
+
+template <class T>
+void TestArray<T>::summary ()
+{
+  std::cout << " Shape of the array : " << array_p.shape() << std::endl;
+  std::cout << " Number of elements : " << nofElements_p   << std::endl;
+}
 
 // =============================================================================
 //

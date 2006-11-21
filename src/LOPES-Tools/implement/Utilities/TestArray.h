@@ -23,6 +23,11 @@
 
 #include <iostream>
 
+#ifdef HAVE_CASA
+#include <casa/aips.h>
+#include <casa/Arrays.h>
+#include <casa/BasicSL/Complex.h>
+
 /*!
   \class TestArray
   
@@ -30,32 +35,31 @@
   
   \author Lars B&auml;hren
 
+  \test tTestArray.cc
+
   A simple class making use of the CASA array classes, used for testing how 
   to compile such code using CMake.
 */
-#ifdef HAVE_CASA
-#include <casa/aips.h>
-#include <casa/Arrays.h>
-#include <casa/BasicSL/Complex.h>
-
 template <class T> class TestArray {
   
-  // The vector itself
-  casa::Array<T> vect_p;
-  //! The number of lements in the vector
+  // The array itself
+  casa::Array<T> array_p;
+  //! The number of elements in the array
   uint nofElements_p;
   
  public:
   
   /*!
     \brief Default constructor
+
+    This will simply create an array of shape [1] and contents zero.
   */
   TestArray ();
   
   /*!
     \brief Argumented constructor
     
-    \param vect -- The vector to be stored internally
+    \param vect -- The array to be stored internally
   */
   TestArray (casa::Array<T> & vect);
 
@@ -65,18 +69,18 @@ template <class T> class TestArray {
   ~TestArray ();
   
   /*!
-    \brief Get the stored vector
+    \brief Get the stored array
     
-    \return vect -- The internally stored vector
+    \return vect -- The internally stored array
   */
-  casa::Array<T> vector () {
-    return vect_p;
+  casa::Array<T> array () {
+    return array_p;
   }
 
   /*!
     \brief Set the internally stored array
     
-    \param vect -- The vector to be stored internally
+    \param vect -- The array to be stored internally
   */
   void setArray (casa::Array<T> & vect);
   
@@ -86,15 +90,13 @@ template <class T> class TestArray {
     \return shape -- Shape of the internally stored array
   */
   casa::IPosition shape() {
-    return vect_p.shape();
+    return array_p.shape();
   }
 
   /*!
-    \brief Provide a summary of the stored vector
+    \brief Provide a summary of the stored array
   */
-  void summary () {
-    std::cout << " Number of elements : " << nofElements_p << std::endl;
-  }
+  void summary ();
 
 };
 
