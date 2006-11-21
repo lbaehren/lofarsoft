@@ -53,7 +53,7 @@
 #define Lseek(a,b,c) (int)lseek(a,(off_t)(b),c)
 
 struct dent { char path[MAXPATH];
-		DIR *dir;};
+  DIR *dir;};
 /************************************************************************/
 void ddelete_c(path,iostat)
 char *path;

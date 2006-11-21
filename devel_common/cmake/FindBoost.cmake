@@ -1,6 +1,6 @@
 # - Check for the presence of the Boost library
 #
-# 
+#  HAVE_BOOST
 #
 
 SET (Boost_VERSION 1_32)
@@ -44,7 +44,7 @@ ENDIF (Boost_wave_LIBRARY)
 ## Actions taken when all components have been found
 
 IF (Boost_INCLUDE_DIR AND Boost_LIBRARIES)
-  SET (Boost_FOUND TRUE)
+  SET (HAVE_BOOST TRUE)
 ELSE (Boost_INCLUDE_DIR AND Boost_LIBRARIES)
   IF (NOT Boost_FIND_QUIETLY)
     IF (NOT Boost_INCLUDE_DIR)
@@ -56,22 +56,22 @@ ELSE (Boost_INCLUDE_DIR AND Boost_LIBRARIES)
   ENDIF (NOT Boost_FIND_QUIETLY)
 ENDIF (Boost_INCLUDE_DIR AND Boost_LIBRARIES)
 
-IF (Boost_FOUND)
+IF (HAVE_BOOST)
   IF (NOT Boost_FIND_QUIETLY)
     MESSAGE (STATUS "Found components for Boost")
     MESSAGE (STATUS "Boost library : ${Boost_LIBRARIES}")
     MESSAGE (STATUS "Boost headers : ${Boost_INCLUDE_DIR}")
   ENDIF (NOT Boost_FIND_QUIETLY)
-ELSE (Boost_FOUND)
+ELSE (HAVE_BOOST)
   IF (Boost_FIND_REQUIRED)
     MESSAGE (FATAL_ERROR "Could not find Boost!")
   ENDIF (Boost_FIND_REQUIRED)
-ENDIF (Boost_FOUND)
+ENDIF (HAVE_BOOST)
 
 ## -----------------------------------------------------------------------------
 
 MARK_AS_ADVANCED(
-  Boost_FOUND
+  HAVE_BOOST
   Boost_INCLUDE_DIR
   Boost_LIBRARIES
 )

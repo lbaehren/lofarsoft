@@ -33,7 +33,7 @@
 #endif
 
 // AIPS++/CASA header files
-#ifdef HAVE_AIPS_H
+#ifdef HAVE_CASA
 #include <casa/aips.h>
 #include <casa/Arrays.h>
 #include <casa/Exceptions/Error.h>
@@ -90,7 +90,7 @@ namespace LOPES { // Namespace LOPES -- begin
   //
   // ============================================================================
 
-#ifdef HAVE_AIPS_H
+#ifdef HAVE_CASA
 
   /*!
     \brief Conversion from (AZ,EL) to (x,y,z)

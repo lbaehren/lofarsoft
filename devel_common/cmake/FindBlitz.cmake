@@ -1,8 +1,8 @@
 # - Check for the presence of the Blitz++ library
 #
 # The following variables are set when Blitz++ is found:
-#  Blitz_FOUND       = True when both Blitz++ header and include files are 
-#                      found; if any of them is missing, Blitz_FOUND=false
+#  HAVE_BLITZ        = True when both Blitz++ header and include files are 
+#                      found; if any of them is missing, HAVE_BLITZ=false
 #  Blitz_INCLUDE_DIR = the path to where the boost include files are.
 #  Blitz_LIBRARY     = Link these to use Blitz++
 
@@ -31,7 +31,7 @@ FIND_LIBRARY (Blitz_LIBRARY blitz
 ## Actions taken when all components have been found
 
 IF (Blitz_INCLUDE_DIR AND Blitz_LIBRARY)
-  SET (Blitz_FOUND TRUE)
+  SET (HAVE_BLITZ TRUE)
 ELSE (Blitz_INCLUDE_DIR AND Blitz_LIBRARY)
   IF (NOT Blitz_FIND_QUIETLY)
     IF (NOT Blitz_INCLUDE_DIR)
@@ -43,19 +43,23 @@ ELSE (Blitz_INCLUDE_DIR AND Blitz_LIBRARY)
   ENDIF (NOT Blitz_FIND_QUIETLY)
 ENDIF (Blitz_INCLUDE_DIR AND Blitz_LIBRARY)
 
-IF (Blitz_FOUND)
+IF (HAVE_BLITZ)
   IF (NOT Blitz_FIND_QUIETLY)
     MESSAGE (STATUS "Found components for Blitz")
     MESSAGE (STATUS "Blitz_INCLUDE_DIR = ${Blitz_INCLUDE_DIR}")
     MESSAGE (STATUS "Blitz_LIBRARY     = ${Blitz_LIBRARY}")
   ENDIF (NOT Blitz_FIND_QUIETLY)
-ELSE (Blitz_FOUND)
+ELSE (HAVE_BLITZ)
   IF (Blitz_FIND_REQUIRED)
     MESSAGE (FATAL_ERROR "Could not find Blitz!")
   ENDIF (Blitz_FIND_REQUIRED)
-ENDIF (Blitz_FOUND)
+ENDIF (HAVE_BLITZ)
+
+## ------------------------------------------------------------------------------
+## Mark as advanced ...
 
 MARK_AS_ADVANCED (
+  HAVE_BLITZ
   Blitz_LIBRARY
   Blitz_INCLUDE_DIR
   )

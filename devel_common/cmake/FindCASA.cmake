@@ -1,17 +1,27 @@
 # - Check for the AIPS++/CASA library
 #
+# Variables assigned:
+#  HAVE_CASA
+#
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files first, as from this we can derive a number of 
 ## fundamental CASA variables (such as e.g. the root directory of the
 ## installation)
 
-FIND_PATH (CASA_INCLUDE_DIR aips.h
-  PATHS /casa /opt/casa /sw/share/casa
-  PATH_SUFFIXES code/include/casa stable/code/include/casa weekly/code/include/casa
+find_path (CASA_INCLUDE_DIR aips.h
+  PATHS
+  /casa
+  /opt/casa
+  /sw/share/casa
+  PATH_SUFFIXES
+  code/include/casa
+  stable/code/include/casa
+  weekly/code/include/casa
   )
 
 IF (CASA_INCLUDE_DIR)
+  SET (HAVE_AIPS_H true)
   STRING (REGEX REPLACE include/casa include CASA_INCLUDE_DIR ${CASA_INCLUDE_DIR})
   STRING (REGEX REPLACE /code/include "" AIPSROOT ${CASA_INCLUDE_DIR})
 ENDIF (CASA_INCLUDE_DIR)
@@ -151,7 +161,7 @@ ENDIF (CASA_LIBRARY)
 ## If detection successful, register package as found
 
 IF (CASA_INCLUDE_DIR AND CASA_LIBRARIES)
-  SET(CASA_FOUND TRUE)
+  SET(HAVE_CASA TRUE)
   STRING (REGEX REPLACE lib/libcasa.a lib CASA_LIBRARIES_DIR ${CASA_LIBRARY})
 ELSE (CASA_INCLUDE_DIR AND CASA_LIBRARIES)
   IF (NOT CASA_FIND_QUIETLY)
@@ -168,8 +178,21 @@ ENDIF (CASA_INCLUDE_DIR AND CASA_LIBRARIES)
 ## Final assembly of the provided variables and flags; once this is done, we
 ## provide some extended feedback.
 
-IF (CASA_FOUND)
-  SET (CASA_CXX_FLAGS "-DAIPS_${AIPS_ARCH} -DAIPS_${AIPS_ENDIAN}_ENDIAN -DNATIVE_EXCP -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_NO_LEA_MALLOC -D_GLIBCPP_DEPRECATED -DSIGNBIT  -DAIPS_NO_TEMPLATE_SRC -DAIPS_NO_TEMPLATE_SRC -I${CASA_INCLUDE_DIR} -DAIPS_${AIPS_ARCH} -Wno-deprecated -fno-implicit-templates")
+IF (HAVE_CASA)
+  add_definitions (
+    -DAIPS_${AIPS_ARCH}
+    -DAIPS_${AIPS_ENDIAN}_ENDIAN
+    -DNATIVE_EXCP
+    -DAIPS_STDLIB
+    -DAIPS_AUTO_STL
+    -DAIPS_NO_LEA_MALLOC
+    -D_GLIBCPP_DEPRECATED
+    -DSIGNBIT 
+    -DAIPS_NO_TEMPLATE_SRC
+    -DAIPS_NO_TEMPLATE_SRC
+    -I${CASA_INCLUDE_DIR}
+    -DAIPS_${AIPS_ARCH})
+#  SET (CASA_CXX_FLAGS " -Wno-deprecated -fno-implicit-templates")
   SET (CASA_CXX_LFLAGS "-L${CASA_LIBRARIES_DIR} ${CASA_LIBRARIES_DIR}/version.o ${CASA_LIBRARIES}")
   IF (NOT CASA_FIND_QUIETLY)
     MESSAGE (STATUS "Found components for CASA.")
@@ -182,8 +205,16 @@ IF (CASA_FOUND)
     MESSAGE (STATUS "CASA linker command  : ${CASA_CXX_LFLAGS}")
   ENDIF (NOT CASA_FIND_QUIETLY)
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CASA_CXX_FLAGS}")
-ELSE (CASA_FOUND)
+ELSE (HAVE_CASA)
   IF (CASA_FIND_REQUIRED)
     MESSAGE(FATAL_ERROR "Could not find CASA")
   ENDIF (CASA_FIND_REQUIRED)
-ENDIF (CASA_FOUND)
+ENDIF (HAVE_CASA)
+
+## ------------------------------------------------------------------------------
+## Mark as advanced ...
+
+MARK_AS_ADVANCED (
+  HAVE_CASA
+  CASA_INCLUDE_DIR
+  )

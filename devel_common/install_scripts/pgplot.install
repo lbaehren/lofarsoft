@@ -5,7 +5,7 @@ var_arch=`uname | tr '[A-Z]' '[a-z]'`
 
 case $var_arch in
 	darwin)
-		var_arch=bsd
+		var_arch=mac
 	;;
 	linux)
 	;;

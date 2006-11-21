@@ -7,35 +7,47 @@ SUBDIRS (Data Functionals IO Utilities)
 
 INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindBlitz.cmake)
 INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindBoost.cmake)
-#INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindCASA.cmake)
+INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindCASA.cmake)
 INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindCFITSIO.cmake)
 INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindCPGPLOT.cmake)
 INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindROOT.cmake)
 
-FIND_FILE (HAVE_BLITZ_H blitz.h)
+## Summary of main search results
+
+message (STATUS "HAVE_CASA  = ${HAVE_CASA}")
+message (STATUS "HAVE_BLITZ = ${HAVE_BLITZ}")
+
+## -----------------------------------------------------------------------------
 
 INCLUDE_DIRECTORIES(
-	.
-	${CASA_INCLUDE_DIR}
-	${CFITSIO_INCLUDE_DIR}
-	${CPGPLOT_INCLUDE_DIR}
-	${Blitz_INCLUDE_DIR}
-)
+  .
+  ${CASA_INCLUDE_DIR}
+  ${CFITSIO_INCLUDE_DIR}
+  ${CPGPLOT_INCLUDE_DIR}
+  ${Blitz_INCLUDE_DIR}
+  )
 
+if (HAVE_CASA)
+  add_definitions (-DHAVE_CASA)
+endif (HAVE_CASA)
+
+## -----------------------------------------------------------------------------
 
 ADD_LIBRARY (lopestools
-	Data/Data.cc
-	Data/DynamicSpectrum.cc
-	Data/UnitPrefix.cc
-	Display/PGPlot.cc
-	Functionals/Hermite1D.cc
-	Functionals/Shapelets1D.cc
-	Functionals/Shapelets2D.cc
-	Functionals/ShapeletsModel1D.cc
-	IO/DataIO.cc
-	IO/DataIterator.cc
-#	IO/LogfileName.cc
-	Math/ThreeVector.cc
-	Math/VectorConversion.cc
-	Utilities/ProgressBar.cc
-	Utilities/Timestamp.cc)
+  Data/Data.cc
+  Data/DynamicSpectrum.cc
+  Data/UnitPrefix.cc
+  Display/PGPlot.cc
+  Functionals/Hermite1D.cc
+  Functionals/Shapelets1D.cc
+  Functionals/Shapelets2D.cc
+  Functionals/ShapeletsModel1D.cc
+  IO/DataIO.cc
+  IO/DataIterator.cc
+#  IO/LogfileName.cc
+  Math/ThreeVector.cc
+#  Math/VectorConversion.cc
+  Utilities/ProgressBar.cc
+  Utilities/Timestamp.cc
+  Utilities/CMakeTesting.cc
+  )

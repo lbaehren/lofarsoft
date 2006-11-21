@@ -19,6 +19,8 @@ INCLUDE_DIRECTORIES (
 ## -----------------------------------------------------------------------------
 ## libcasa
 
+add_definitions (-DAIPS_STDLIB -DAIPS_DARWIN -DAIPS_BIG_ENDIAN -DNATIVE_EXCP)
+
 ADD_LIBRARY (casa
   # casa/implement
   aips.cc
