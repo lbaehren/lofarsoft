@@ -1,25 +1,40 @@
+/***************************************************************************
+ *   Copyright (C) 2006                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
-#if !defined(MATHGEOMETRY_H)
+#ifndef MATHGEOMETRY_H
 #define MATHGEOMETRY_H
-
-/* $Id: MathGeometry.h,v 1.5 2006/11/08 17:42:42 bahren Exp $ */
 
 // C++ Standard library
 #include <ostream>
 #include <iostream>
 #include <string>
 #include <fstream>
-using namespace std;
 
 // AIPS++ wrapper classes
-#ifdef HAVE_AIPS_H
 #include <casa/aips.h>
 #include <casa/string.h>
 #include <casa/Arrays.h>
 #include <tasking/Glish.h>
 #include <measures/Measures.h>
-#include <casa/namespace.h>
-#endif
+
+using casa::Vector;
 
 /*!
   \file Math::MathGeometry.h
@@ -58,8 +73,6 @@ namespace LOPES { // Namespace LOPES -- begin
   //! Convert angular positions from radian to degree
   double rad2deg (double const &rad);
 
-#ifdef HAVE_AIPS_H
-  
   //! Convert angular positions from degree to radian
   Vector<double> deg2rad (const Vector<double>& deg);
   
@@ -82,9 +95,7 @@ namespace LOPES { // Namespace LOPES -- begin
   
   Vector<double> zeaz2cartesian (const Vector<double>&);
   
-#endif
-  
 } // Namespace LOPES -- end
-  
+
 #endif
   

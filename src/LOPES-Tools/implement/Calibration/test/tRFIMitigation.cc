@@ -23,28 +23,27 @@
 
 /*!
   \file tRFIMitigation.cc
-
+  
   \ingroup Calibration
   
   \brief A collection of test routines for RFIMitigation
- 
+  
   \author Kalpana Singh
- 
+  
   \date 2006/03/15
 */
 
-//casa header files
+// CASA header files
 #include <casa/Arrays.h>
 #include <casa/BasicSL/Complex.h>
-
-#include <lopes/Calibration/PluginBase.h>
-#include <lopes/Calibration/RFIMitigation.h>
-#include <lopes/Data/ITSCapture.h>
-#include <lopes/Data/LopesEvent.h>
-#include <lopes/IO/DataReader.h>
 #include <scimath/Mathematics/InterpolateArray1D.h>
 
-#include <casa/namespace.h>
+// LOPES-Tools header files
+#include <Calibration/PluginBase.h>
+#include <Calibration/RFIMitigation.h>
+#include <Data/ITSCapture.h>
+#include <Data/LopesEvent.h>
+#include <IO/DataReader.h>
 
 // ------------------------------------------------------------------------------
 //
@@ -52,27 +51,27 @@
 //
 // ------------------------------------------------------------------------------
 
- Int dataBlockSize ( 131072 );
+int dataBlockSize ( 131072 );
 
- Double alpha   ( 0.5 );               //slope parameter of the hanning filter
+Double alpha   ( 0.5 );               //slope parameter of the hanning filter
 
- //Int fft_Length = ( blocksize/2 )+1 ;
+//int fft_Length = ( blocksize/2 )+1 ;
 
 /*int main() {
   
-  Int nofFailedTests (0);*/
- 
-  
-  // Test for the constructor(s)
+int nofFailedTests (0);*/
+
+
+// Test for the constructor(s)
 //   {
 //     nofFailedTests += test_RFIMitigation ();
 //   }
 //   
-  
+
 //------------------------to test RFIMitigation class------------------------
 
-  
-  
+
+
 //  return nofFailedTests;
 
 //}	
@@ -82,7 +81,7 @@
 // 
 // int main ()
 // {
-//   Int nofFailedTests (0);
+//   int nofFailedTests (0);
 // 
 //   // Test for the constructor(s)
 //   {
@@ -98,8 +97,8 @@
 //   \param data     -- Array with the data to be exported
 //  */
 //  
- Int nOfSegments( 25 );
- //Vector<Int> segmentation( nOfSegment-1 );
+ int nOfSegments( 25 );
+ //Vector<int> segmentation( nOfSegment-1 );
 
 // ------------------------------------------------------------------------------
 //
@@ -149,9 +148,9 @@ Vector<String> filenamesVector()
   
   \return nofFailedTests -- The number of failed tests.
 */
- Int test_RFIMitigation ()
+ int test_RFIMitigation ()
  {
-   Int nofFailedTests (0);
+   int nofFailedTests (0);
    
    try {
      RFIMitigation rfim;
@@ -176,7 +175,7 @@ Vector<String> filenamesVector()
  
  try {
  
-  //for ( Int ns=0; ns < (nOfSegment-1) ; ns++ ){
+  //for ( int ns=0; ns < (nOfSegment-1) ; ns++ ){
  
  // segmentation(ns) = (ns+1)*2621   ;
  // }
@@ -200,14 +199,14 @@ Vector<String> filenamesVector()
 
   Matrix<DComplex> fft_filtered (dr->fft());
   
-  //Int rowsfft = fft_filtered.nrow();
- // Int columnsfft = fft_filtered.ncolumn();
+  //int rowsfft = fft_filtered.nrow();
+ // int columnsfft = fft_filtered.ncolumn();
   
   Matrix<Double> absoluteArray(amplitude (fft_filtered));
   
-  uInt Rows = absoluteArray.nrow();
+  unsigned int Rows = absoluteArray.nrow();
  
-  uInt Columns = absoluteArray.ncolumn(); 
+  unsigned int Columns = absoluteArray.ncolumn(); 
   
   cerr << " number of rows :" << Rows<< "\n"
        << "number of columns :" << Columns << endl ;
@@ -221,8 +220,8 @@ Vector<String> filenamesVector()
  
   logfile1.open("rawdata",ios::out);
  
-   for (uInt sample(0); sample< Rows; sample++) {
-     for (uInt antenna(0); antenna< Columns; antenna++) {
+   for (unsigned int sample(0); sample< Rows; sample++) {
+     for (unsigned int antenna(0); antenna< Columns; antenna++) {
        logfile1 << absoluteArray (sample,antenna) 
                 << " \t";
 	}
@@ -251,16 +250,16 @@ Vector<String> filenamesVector()
 							      			      
  Matrix<Double> RFIrejectedSpectra = absoluteArray*optimizedSpectra ;
 
- uInt nOfRows = RFIrejectedSpectra.nrow();
+ unsigned int nOfRows = RFIrejectedSpectra.nrow();
  
- uInt nOfColumns = RFIrejectedSpectra.ncolumn();   
+ unsigned int nOfColumns = RFIrejectedSpectra.ncolumn();   
 
   ofstream logfile2;
 
    logfile2.open("25RFIrejectedSpectra17",ios::out);
 //   	
-    for (uInt sample(0); sample< nOfRows; sample++) {
-      for (uInt antenna(0); antenna< nOfColumns; antenna++) {
+    for (unsigned int sample(0); sample< nOfRows; sample++) {
+      for (unsigned int antenna(0); antenna< nOfColumns; antenna++) {
               logfile2 << RFIrejectedSpectra (sample, antenna) 
   	        << " \t";
       }
@@ -288,7 +287,7 @@ int main()
 {
  
  Bool ok ( True ) ;
- Int retval ( 0 );
+ int retval ( 0 );
  
  if ( ok ){
  

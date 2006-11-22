@@ -1,6 +1,12 @@
 PROJECT (LOPES-Tools)
 
-SUBDIRS (Data Functionals IO Utilities)
+SUBDIRS (
+  Calibration
+  Data
+  Functionals
+  IO
+  Utilities
+  )
 
 ## -----------------------------------------------------------------------------
 ## Build the LopesTools library
@@ -47,6 +53,11 @@ ADD_LIBRARY (lopestools
   IO/DataIO.cc
   IO/DataIterator.cc
   IO/LogfileName.cc
+  Math/Algebra.cc
+  Math/ArrayMath.cc
+  Math/MathAlgebra.cc
+  Math/MathFFT.cc
+  Math/MathGeometry.cc
   Math/ThreeVector.cc
   Math/VectorConversion.cc
   Utilities/ProgressBar.cc
