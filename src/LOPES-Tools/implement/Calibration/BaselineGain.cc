@@ -15,66 +15,63 @@
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the                         *
  *   Free Software Foundation, Inc.,                                       *
-p *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-// Class BaselineGain
-// Implementation of the BaselineGain functions
-// 
+/*!
+  \class BaselineGain
+*/
 
-// include class definition
-#include <lopes/Calibration/BaselineGain.h>
+#include <Calibration/BaselineGain.h>
+#include <Math/MathAlgebra.h>
 
-
-// *****************************************************************************
-// *** PUBLIC FUNCTIONS ********************************************************
-// *****************************************************************************
-
-// ==============================================================================
-//
-//  Construction
-//
-// ==============================================================================
-
-// ----------------------------------------------------------------- BaselineGain
-
-BaselineGain::BaselineGain ()
-{
-  // DComplex Matrix antennaSpectra
-  Int nOfFreq ( 50 );
-  Int nOfAnt ( 10 );
-  IPosition spectraShape ( 2, nOfFreq, nOfAnt );
+namespace LOPES {
   
-  // Defining the bandwidth
-  Double minFreq ( 0.0 );      //  0.0 MHz
-  Double maxFreq ( 40000000 ); // 40.0 MHz
-  
-  Vector<Double> spectraAbscissa ( BaselineGain::makeFreqAbscissa( minFreq,
-								   maxFreq,
-								   nOfFreq ) );
-  
-  Int nOfSubBands ( 10 );
-  
-  // supply default parameters to argumented constructor
-  BaselineGain::reset( spectraShape,
-		       spectraAbscissa,
-		       nOfSubBands );
-}
-
-// ----------------------------------------------------------------- BaselineGain
-
-BaselineGain::BaselineGain( const IPosition& spectraShape,
-			    const Vector<Double>& spectraAbscissa,
-			    const Int& nOfSubBands,
-			    const BaselineGain::Method& whichMethod )
-{
-  whichMethod_p = whichMethod;
+  // ============================================================================
   //
-  BaselineGain::reset( spectraShape,
-		       spectraAbscissa,
-		       nOfSubBands );
-}
-
+  //  Construction
+  //
+  // ============================================================================
+  
+  // --------------------------------------------------------------- BaselineGain
+  
+  BaselineGain::BaselineGain ()
+  {
+    // DComplex Matrix antennaSpectra
+    int nOfFreq ( 50 );
+    int nOfAnt ( 10 );
+    IPosition spectraShape ( 2, nOfFreq, nOfAnt );
+    
+    // Defining the bandwidth
+    double minFreq ( 0.0 );      //  0.0 MHz
+    double maxFreq ( 40000000 ); // 40.0 MHz
+    
+    Vector<double> spectraAbscissa ( BaselineGain::makeFreqAbscissa( minFreq,
+								     maxFreq,
+								     nOfFreq ) );
+    
+    int nofSubBands ( 10 );
+    
+    // supply default parameters to argumented constructor
+    BaselineGain::reset( spectraShape,
+			 spectraAbscissa,
+			 nofSubBands );
+  }
+  
+  // ----------------------------------------------------------------- BaselineGain
+  
+  BaselineGain::BaselineGain( const IPosition& spectraShape,
+			      const Vector<double>& spectraAbscissa,
+			      const int& nofSubBands,
+			      const BaselineGain::Method& whichMethod )
+  {
+    whichMethod_p = whichMethod;
+    //
+    BaselineGain::reset( spectraShape,
+			 spectraAbscissa,
+			 nofSubBands );
+  }
+  
 
 // ==============================================================================
 //
@@ -110,8 +107,8 @@ void BaselineGain::reset()
 // ------------------------------------------------------------------------ reset
 
 void BaselineGain::reset( const IPosition& spectraShape,
-			  const Vector<Double>& spectraAbscissa,
-			  const Int& nOfSubBands )
+			  const Vector<double>& spectraAbscissa,
+			  const int& nofSubBands )
 {
   //   //  --- Debugging output ---------------------------------
   //   cout << "[BaselineGain::reset]" << endl;
@@ -119,14 +116,14 @@ void BaselineGain::reset( const IPosition& spectraShape,
   //   cout << " - (minFreq,maxFreq) : "
   //        << min( spectraAbscissa ) << ", "
   //        << max( spectraAbscissa ) << endl;
-  //   cout << " - nOfSubBands       : " << nOfSubBands << endl;
+  //   cout << " - nofSubBands       : " << nofSubBands << endl;
   //   // -------------------------------------------------------
   // reset the size of the expected spectra blocks
   BaselineGain::setSpectraShape( spectraShape );
   // reset spectral domain
   BaselineGain::setSpectraAbscissa( spectraAbscissa );
   // reset baselineGains_p to specified dimensions
-  baselineGains_p.resize( nOfSubBands, spectraShape( 1 ) );
+  baselineGains_p.resize( nofSubBands, spectraShape( 1 ) );
   // reset baselineGains_p to zero. (Really, this is not needed, because
   //  the setGainValue...(*) functions will reset the gain curves if
   //  nBlocksScanned_p
@@ -137,9 +134,9 @@ void BaselineGain::reset( const IPosition& spectraShape,
   // reset gainAbscissa_p
   gainAbscissa_p = BaselineGain::makeFreqAbscissa( min( spectraAbscissa ),
 						   max( spectraAbscissa ),
-						   nOfSubBands );
+						   nofSubBands );
   BaselineGain::setIntervalEndpoints( spectraShape( 0 ),
-				      nOfSubBands );
+				      nofSubBands );
   // reset number of blocks scanned to zero
   nBlocksScanned_p = 0;
 } // --- end function: reset
@@ -206,7 +203,7 @@ void BaselineGain::extractBaselineGains( const Matrix<DComplex>& spectra )
 // Divide the argument spectra by the baseline gain curves
 void BaselineGain::normalizeSpectra( Matrix<DComplex>& spectra )
 {
-  Vector<Bool> antennas ( spectraShape_p( 1 ), True );
+  Vector<bool> antennas ( spectraShape_p( 1 ), true );
   BaselineGain::normalizeSpectra(spectra,
 				 spectraAbscissa_p,
 				 antennas);
@@ -214,30 +211,30 @@ void BaselineGain::normalizeSpectra( Matrix<DComplex>& spectra )
 
 // Divide the argument spectra by the baseline gain curves
 void BaselineGain::normalizeSpectra( Matrix<DComplex>& spectra,
-				     const Vector<Double>& frequencies,
-				     const Vector<Bool>& antennas )
+				     const Vector<double>& frequencies,
+				     const Vector<bool>& antennas )
 {
   // interpolate gain curves for the spectra
-  Matrix<Double> gainCurves ( BaselineGain::getBaselineGains( frequencies,
+  Matrix<double> gainCurves ( BaselineGain::getBaselineGains( frequencies,
 							     antennas ) );
   // determine dimensions based on the two argument vectors
-  Int nOfChan ( frequencies.nelements() );
-  Int nAnt ( BaselineGain::numRequestedAnt( antennas ) );
-  Bool allDimensionsAreOK ( True );
+  int nOfChan ( frequencies.nelements() );
+  int nAnt ( BaselineGain::numRequestedAnt( antennas ) );
+  bool allDimensionsAreOK ( true );
   if ( nAnt <= 0
        or
        abs( nAnt ) != spectra.ncolumn()
        or
        abs( nOfChan ) != spectra.nrow()
        ) {
-    allDimensionsAreOK = False;
+    allDimensionsAreOK = false;
   }
   // counting flag for division by zero error
-  Int wasDivError ( 0 );
+  int wasDivError ( 0 );
   // normalize the spectra
   if ( allDimensionsAreOK ) {
-    for ( Int ant ( 0 ); ant < nAnt; ant++ ) {
-      for ( Int chan ( 0 ); chan < nOfChan; chan++ ) {
+    for ( int ant ( 0 ); ant < nAnt; ant++ ) {
+      for ( int chan ( 0 ); chan < nOfChan; chan++ ) {
 	// division by zero error flagging
 	if ( gainCurves( chan, ant ) == 0 ) {
 	  wasDivError++;
@@ -267,35 +264,35 @@ void BaselineGain::normalizeSpectra( Matrix<DComplex>& spectra,
 
 void BaselineGain::remRFISpectra ( Matrix<DComplex>& spectra )
 {
-  Double gainValue(0.0);    // to store gain value for a sub band
-  Double temp_sigma (0.0);  // to store the sigma value for a sub band  
-  Double temp_mean (0.0);   // to store the mean value for a sub band
+  double gainValue(0.0);    // to store gain value for a sub band
+  double temp_sigma (0.0);  // to store the sigma value for a sub band  
+  double temp_mean (0.0);   // to store the mean value for a sub band
   
   //vector to hold a single extracted antenna column; initialize to unity
-  Vector<Double> antSpectrum (spectraShape_p(0), 1.0);
+  Vector<double> antSpectrum (spectraShape_p(0), 1.0);
   
   //declare IPositions to be used in identifying freq band to be looked at
   IPosition lc(1, 0);    // left corner
   IPosition rc(1, 0);    // right corner
-  Int band (0); 	 // counter for inner loop
+  int band (0); 	 // counter for inner loop
   
   
   //loop through the antennas (columns)
-  for (Int ant (0); ant <spectraShape_p(1); ant++)
+  for (int ant (0); ant <spectraShape_p(1); ant++)
     {
       //extract spectrum for this antenna
       antSpectrum = amplitude (spectra.column(ant));
       
       //loop through the frequency sub-bands (rows)
-      Int temp = baselineGains_p.nrow();
+      int temp = baselineGains_p.nrow();
       
-      //Double minFreq;
-      // Double maxFreq;
-      // Int nOfFreq;
+      //double minFreq;
+      // double maxFreq;
+      // int nOfFreq;
       
-      Double interval=((maxFreq- minFreq)/(1.0*nOfFreq));
+      double interval=((maxFreq- minFreq)/(1.0*nOfFreq));
       
-      Int freqrange =temp*int(interval);     // fequencyrange for a particular antenna
+      int freqrange =temp*int(interval);     // fequencyrange for a particular antenna
       
       //left corner of the whole frequency range of a single antenna
       lc(0)=intervalEndpoints_p(0, freqrange); //sub bands numbering started from 0
@@ -350,48 +347,48 @@ void BaselineGain::remRFISpectra ( Matrix<DComplex>& spectra )
 // -----------------------------------------------------------------------------
 
 // Default Baseline Gains Retrieval
-Matrix<Double> BaselineGain::getBaselineGains()
+Matrix<double> BaselineGain::getBaselineGains()
 {
-  Vector<Bool> antReturn ( spectraShape_p( 1 ), True );
+  Vector<bool> antReturn ( spectraShape_p( 1 ), true );
   return BaselineGain::getBaselineGains( gainAbscissa_p,
 					 antReturn );
 } // --- end function: getBaselineGains (default)
 
 // Baseline Gains Retrieval (with default frequencies)
-Matrix<Double> BaselineGain::getBaselineGains( const Vector<Bool>& antReturn )
+Matrix<double> BaselineGain::getBaselineGains( const Vector<bool>& antReturn )
 {
   return BaselineGain::getBaselineGains( gainAbscissa_p,
 					 antReturn );
 } // --- end function: getBaselineGains (default frequencies)
 
 // Baseline Gains Retrieval (with default antennas)
-Matrix<Double> BaselineGain::getBaselineGains( const Vector<Double>& freqReturn )
+Matrix<double> BaselineGain::getBaselineGains( const Vector<double>& freqReturn )
 {
-  Vector<Bool> antReturn ( spectraShape_p( 1 ), True );
+  Vector<bool> antReturn ( spectraShape_p( 1 ), true );
   return BaselineGain::getBaselineGains( freqReturn,
 					 antReturn );
 } // --- end function: getBaselineGains (default antennas)
 
 // Base Function: getBaselineGains
 // baseline gains retrieval
-Matrix<Double> BaselineGain::getBaselineGains( const Vector<Double>& freqReturn,
-					      const Vector<Bool>& antReturn )
+Matrix<double> BaselineGain::getBaselineGains( const Vector<double>& freqReturn,
+					      const Vector<bool>& antReturn )
 {
   // determine number of rows needed for return matrix (number of freq bins)
-  Int nRows ( freqReturn.nelements() );
+  int nRows ( freqReturn.nelements() );
   // determine number columns needed for return matrix (number antennas)
-  Int nCols ( BaselineGain::numRequestedAnt( antReturn ) );
-  Bool antReturnVectorOK ( True );
+  int nCols ( BaselineGain::numRequestedAnt( antReturn ) );
+  bool antReturnVectorOK ( true );
   if ( nCols <= 0 ) {
     // reset nCols to a value that will make sense for matrix construction
     nCols = 1;
-    antReturnVectorOK = False;
+    antReturnVectorOK = false;
   }
   // construct return matrix
-  Matrix<Double> baselineGains ( nRows, nCols, 0.0 );
+  Matrix<double> baselineGains ( nRows, nCols, 0.0 );
   if ( antReturnVectorOK ) {
     // Cases are to catch any frequency arguments that require no interpolation.
-    Int whichCase ( BaselineGain::determineCase( freqReturn,
+    int whichCase ( BaselineGain::determineCase( freqReturn,
 						 antReturn ) );
     switch ( whichCase )
       {
@@ -408,8 +405,8 @@ Matrix<Double> BaselineGain::getBaselineGains( const Vector<Double>& freqReturn,
 	//   requested frequencies are identical to stored in gainAbscissa_p
 	//   BUT
 	//   some antennas are not requested
-	Int antCounter ( 0 ); // use for loop
-	for ( Int ant ( 0 ); ant < spectraShape_p( 1 ); ant++ ) {
+	int antCounter ( 0 ); // use for loop
+	for ( int ant ( 0 ); ant < spectraShape_p( 1 ); ant++ ) {
 	  // only return requested antennas
 	  if ( antReturn( ant ) ) {
 	    // return this antenna's column
@@ -449,14 +446,14 @@ Matrix<Double> BaselineGain::getBaselineGains( const Vector<Double>& freqReturn,
 // Default Export Baseline Gains to AIPS++ Data Table
 void BaselineGain::exportBaselineGains( const String& tableName )
 {
-  Vector<Bool> antReturn ( spectraShape_p( 1 ), True );
+  Vector<bool> antReturn ( spectraShape_p( 1 ), true );
   BaselineGain::exportBaselineGains( gainAbscissa_p,
 				     antReturn,
 				     tableName );
 } // --- end function: exportBaselineGains (default)
 
 // Export Baseline Gains to AIPS++ Data Table (with default frequencies)
-void BaselineGain::exportBaselineGains( const Vector<Bool>& antReturn,
+void BaselineGain::exportBaselineGains( const Vector<bool>& antReturn,
 					const String& tableName )
 {
   BaselineGain::exportBaselineGains( gainAbscissa_p,
@@ -465,10 +462,10 @@ void BaselineGain::exportBaselineGains( const Vector<Bool>& antReturn,
 } // --- end function: exportBaselineGains (default frequencies)
 
 // Export Baseline Gains to AIPS++ Data Table (with default antennas)
-void BaselineGain::exportBaselineGains( const Vector<Double>& freqReturn,
+void BaselineGain::exportBaselineGains( const Vector<double>& freqReturn,
 					const String& tableName )
 {
-  Vector<Bool> antReturn ( spectraShape_p( 1 ), True );
+  Vector<bool> antReturn ( spectraShape_p( 1 ), true );
   BaselineGain::exportBaselineGains( freqReturn,
 				     antReturn,
 				     tableName );
@@ -476,12 +473,12 @@ void BaselineGain::exportBaselineGains( const Vector<Double>& freqReturn,
 
 // FUNDAMENTAL: exportBaselineGains
 // Export Baseline Gains to AIPS++ Data Table
-void BaselineGain::exportBaselineGains( const Vector<Double>& freqReturn,
-					const Vector<Bool>& antReturn,
+void BaselineGain::exportBaselineGains( const Vector<double>& freqReturn,
+					const Vector<bool>& antReturn,
 					const String& tableName )
 {
   // get baselineGains matrix
-  Matrix<Double> baselineGains = BaselineGain::getBaselineGains( freqReturn,
+  Matrix<double> baselineGains = BaselineGain::getBaselineGains( freqReturn,
 								antReturn );
   // export the table
   BaselineGain::exportTable( baselineGains,
@@ -508,18 +505,18 @@ void BaselineGain::exportBaselineGains( const Vector<Double>& freqReturn,
 //   internal vector gainAbscissa_p corresponding to each sub band, the
 //   shrinking is overcome because the interpolate function is able to handle
 //   this.
-Vector<Double> BaselineGain::makeFreqAbscissa( const Double& minFreq,
-					      const Double& maxFreq,
-					      const Int& nOfFreqChan )
+Vector<double> BaselineGain::makeFreqAbscissa( const double& minFreq,
+					      const double& maxFreq,
+					      const int& nOfFreqChan )
 {
-  Vector<Double> freqAbscissa ( nOfFreqChan,
+  Vector<double> freqAbscissa ( nOfFreqChan,
 				    0.0 );
   // calculate frequency channel interval
-  Double interval ( ( maxFreq - minFreq ) / ( 1.0 * nOfFreqChan ) );
+  double interval ( ( maxFreq - minFreq ) / ( 1.0 * nOfFreqChan ) );
   // Declare frequency storage double. Set to midpoint of first channel.
-  Double frequency ( minFreq + ( interval / 2.0 ) );
+  double frequency ( minFreq + ( interval / 2.0 ) );
   // loop through each channel and calculate the midpoint frequency
-  for ( Int chan ( 0 ); chan < nOfFreqChan; chan++ ) {
+  for ( int chan ( 0 ); chan < nOfFreqChan; chan++ ) {
     freqAbscissa( chan ) = frequency;
     frequency += interval; // increment frequency by one sub band interval
   } // end for: band
@@ -532,14 +529,14 @@ Vector<Double> BaselineGain::makeFreqAbscissa( const Double& minFreq,
 
 // Count the number of antennas requested
 //   Returns -l on dimensions error
-Int BaselineGain::numRequestedAnt ( const Vector<Bool>& antReturn )
+int BaselineGain::numRequestedAnt ( const Vector<bool>& antReturn )
 {
-  Int antCounter ( 0 );  
+  int antCounter ( 0 );  
   // get the length of the argument vector
-  Int nMembers ( 0 );
+  int nMembers ( 0 );
   antReturn.shape( nMembers );
   if ( nMembers == spectraShape_p( 1 ) ) {
-    for ( Int ant ( 0 ); ant < nMembers; ant++ ) {
+    for ( int ant ( 0 ); ant < nMembers; ant++ ) {
       // increment antCounter if entry is true
       if ( antReturn( ant ) ) {
 	antCounter++;
@@ -579,11 +576,11 @@ Int BaselineGain::numRequestedAnt ( const Vector<Bool>& antReturn )
 //   --request frequencies are different than stored gainAbscissa_p
 //   (THEREFORE, interpolation is needed. No check for antenna requests
 //     because that check is done within the interpolate funtion.)
-Int BaselineGain::determineCase ( const Vector<Double>& freqReturn,
-				  const Vector<Bool>& antReturn )
+int BaselineGain::determineCase ( const Vector<double>& freqReturn,
+				  const Vector<bool>& antReturn )
 {
-  Int whichCase ( 0 ); // Return value. Initialize to Zero
-  Int antennaCounter ( BaselineGain::numRequestedAnt( antReturn ) );
+  int whichCase ( 0 ); // Return value. Initialize to Zero
+  int antennaCounter ( BaselineGain::numRequestedAnt( antReturn ) );
   // error report
   if ( antennaCounter == 0 ) {
     cerr << "[Error: determineCase]"
@@ -638,41 +635,41 @@ Int BaselineGain::determineCase ( const Vector<Double>& freqReturn,
 //   gains -- the gain values across which to construct a spline
 //   gainAbscissa -- the frequency abscissa of the gain values
 //   freqReturn -- the frequencies to be interpolated and returned
-//   antReturn -- True/False entries corresponding to those antennas
+//   antReturn -- True/false entries corresponding to those antennas
 //                to be returned
 // Return value:
 //   interpolatedGains -- the matrix of gains for each antenna requested and for
 //                        each frequency requested.
-Matrix<Double> BaselineGain::interpolateGains ( const Matrix<Double>& gains,
-					       const Vector<Double>& gainAbscissa,
-					       const Vector<Double>& freqReturn,
-					       const Vector<Bool>& antReturn )
+Matrix<double> BaselineGain::interpolateGains ( const Matrix<double>& gains,
+					       const Vector<double>& gainAbscissa,
+					       const Vector<double>& freqReturn,
+					       const Vector<bool>& antReturn )
 {
   // set dimensions of
-  Int nOfFreqChan;
+  int nOfFreqChan;
   freqReturn.shape( nOfFreqChan );
-  Int nOfAnt;
+  int nOfAnt;
   antReturn.shape( nOfAnt );
-  Int nOfReturnColumns ( BaselineGain::numRequestedAnt( antReturn ) );
-  Matrix<Double> interpolatedGains ( nOfFreqChan, nOfReturnColumns, 0.0 );
+  int nOfReturnColumns ( BaselineGain::numRequestedAnt( antReturn ) );
+  Matrix<double> interpolatedGains ( nOfFreqChan, nOfReturnColumns, 0.0 );
   // set the scalar sampled functionals, which Interpolate1D requires
-  ScalarSampledFunctional<Double> fx ( gainAbscissa );
-  ScalarSampledFunctional<Double> fy ( gains.column( 0 ) );
-  Bool sorted ( True ); // vectors are ordered (expected to be so)
-  Interpolate1D<Double,Double> gainValue ( fx, fy, sorted );
+  ScalarSampledFunctional<double> fx ( gainAbscissa );
+  ScalarSampledFunctional<double> fy ( gains.column( 0 ) );
+  bool sorted ( true ); // vectors are ordered (expected to be so)
+  Interpolate1D<double,double> gainValue ( fx, fy, sorted );
   // set the interpolation method to natural cubic spline
-  gainValue.setMethod( Interpolate1D<Double,Double>::spline );
+  gainValue.setMethod( Interpolate1D<double,double>::spline );
   // antenna counter for the returned gains
-  Int returnColumn ( 0 );
+  int returnColumn ( 0 );
   // loop through antennas
-  for ( Int ant ( 0 ); ant < nOfAnt; ant++ ) {
+  for ( int ant ( 0 ); ant < nOfAnt; ant++ ) {
     // only for requested antennas
     if ( antReturn( ant ) ) {
       // reset sampled functional to gain values for this antenna
       fy = gains.column( ant );
       gainValue.setData( fx, fy );
       // loop through the requested frequencies
-      for ( Int chan ( 0 ); chan < nOfFreqChan; chan++ ) {
+      for ( int chan ( 0 ); chan < nOfFreqChan; chan++ ) {
 	// get the interpolated gainValue for the requested frequency
 	interpolatedGains( chan, returnColumn ) = gainValue( freqReturn( chan ) );
       } // end for: chan
@@ -701,9 +698,9 @@ Matrix<Double> BaselineGain::interpolateGains ( const Matrix<Double>& gains,
 //		      Must have vector length equal to number of antennas at
 //		      construction.
 //   tablename     -- Filename for the exported table.
-void BaselineGain::exportTable( const Matrix<Double>& dataValues,
-				const Vector<Double>& freqReturn,
-				const Vector<Bool>& antReturn,
+void BaselineGain::exportTable( const Matrix<double>& dataValues,
+				const Vector<double>& freqReturn,
+				const Vector<bool>& antReturn,
 				const String& tablename )
 {
   // dimensions of the data matrix [ nFreq, nOfAnt ]
@@ -712,13 +709,13 @@ void BaselineGain::exportTable( const Matrix<Double>& dataValues,
   // Set up the labels for the antenna gain columns
   Vector<String> columnLabels ( dataShape( 1 ) ); // labels for the columns
   ostringstream columnLabel; // output string stream object for labels
-  Int origNOfAnt ( antReturn.nelements() ); // original number of antennas
+  int origNOfAnt ( antReturn.nelements() ); // original number of antennas
   // label appropriately (skip over unrequested antennas)
-  for ( Int ant = 0; ant < origNOfAnt; ant++ ) {
+  for ( int ant = 0; ant < origNOfAnt; ant++ ) {
     if ( antReturn( ant ) ) {
       columnLabel << "Antenna" << ( ant + 1 );
       columnLabels( ant ) = columnLabel.str();
-      columnLabel.seekp( 0, ios::beg ); // reset the stream pointer to beginning
+      columnLabel.seekp( 0, std::ios::beg ); // reset the stream pointer to beginning
     } // end if
   } // end for: origAnt
   //
@@ -726,28 +723,28 @@ void BaselineGain::exportTable( const Matrix<Double>& dataValues,
   TableDesc td ( "gaintable", "1", TableDesc::Scratch );
   td.comment() = "A table of gain curves";
   // Frequency column
-  td.addColumn (ScalarColumnDesc<Double> ("Frequency"));
+  td.addColumn (ScalarColumnDesc<double> ("Frequency"));
   // Gain columns
-  for ( Int ant = 0; ant < dataShape( 1 ); ant++ ) {
-    td.addColumn( ScalarColumnDesc<Double>( columnLabels( ant ) ) );
+  for ( int ant = 0; ant < dataShape( 1 ); ant++ ) {
+    td.addColumn( ScalarColumnDesc<double>( columnLabels( ant ) ) );
   }
   SetupNewTable newtab ( tablename, td, Table::New );
   Table tab ( newtab ); // Create new table
   //
   // Put the frequency values into the table
-  ScalarColumn<Double> freq ( tab, "Frequency" );
-  for ( Int index = 0; index < dataShape( 0 ); index++ ) {
+  ScalarColumn<double> freq ( tab, "Frequency" );
+  for ( int index = 0; index < dataShape( 0 ); index++ ) {
     tab.addRow();
     freq.put( index, freqReturn( index ) );
   } // end for: index
   //
   // Put the antenna gain values into the table
-  for ( Int ant = 0; ant < dataShape( 1 ); ant++ ) {
-    ScalarColumn<Double> gain ( tab, columnLabels( ant ) );
-    for ( Int index = 0; index < dataShape( 0 ); index++ ) {
+  for ( int ant = 0; ant < dataShape( 1 ); ant++ ) {
+    ScalarColumn<double> gain ( tab, columnLabels( ant ) );
+    for ( int index = 0; index < dataShape( 0 ); index++ ) {
       gain.put( index, dataValues( index, ant ) );
     }
-    columnLabel.seekp( 0, ios::beg );
+    columnLabel.seekp( 0, std::ios::beg );
   }
 } // --- end function: exportTable
 
@@ -773,15 +770,15 @@ void BaselineGain::setSpectraShape( const IPosition& spectraShape )
 // -----------------------------------------------------------------------------
 
 // set the endpoint indeces vector
-void BaselineGain::setIntervalEndpoints( const Int& nOfFreqChan,
-					 const Int& nOfSubBands )
+void BaselineGain::setIntervalEndpoints( const int& nOfFreqChan,
+					 const int& nofSubBands )
 {
-  Vector<Int> indexRange ( 2, 0 ); // vector that defines the range to be split
+  Vector<int> indexRange ( 2, 0 ); // vector that defines the range to be split
   indexRange( 1 ) = nOfFreqChan - 1; // range = 0 -- (nOfFreqChan - 1)
   //
-  intervalEndpoints_p.resize( 2, nOfSubBands );
+  intervalEndpoints_p.resize( 2, nofSubBands );
   intervalEndpoints_p = LOPES::splitRange( indexRange,
-					   nOfSubBands,
+					   nofSubBands,
 					   "lin" );
 } // --- end function: setIntervalEndpoints
 
@@ -790,7 +787,7 @@ void BaselineGain::setIntervalEndpoints( const Int& nOfFreqChan,
 // -----------------------------------------------------------------------------
 
 // set frequency domain of the spectra being scanned.
-void BaselineGain::setSpectraAbscissa( const Vector<Double>& spectraAbscissa )
+void BaselineGain::setSpectraAbscissa( const Vector<double>& spectraAbscissa )
 {
   spectraAbscissa_p.resize( spectraAbscissa.shape() );
   spectraAbscissa_p = spectraAbscissa;
@@ -818,16 +815,16 @@ void BaselineGain::setSpectraAbscissa( const Vector<Double>& spectraAbscissa )
 void BaselineGain::setGainValueAsMedian( const Matrix<DComplex>& spectra )
 {
   // to store gain value for a sub band
-  Double gainValue ( 0.0 );
+  double gainValue ( 0.0 );
   
   // Vector to hold a single extracted antenna column; initialize to unity
-  Vector<Double> antSpectrum ( spectraShape_p(0), 1.0 );
+  Vector<double> antSpectrum ( spectraShape_p(0), 1.0 );
   // declare IPositions to be used in identifying freq band to be looked at
   IPosition lc ( 1, 0 ); // left corner
   IPosition rc ( 1, 0 ); // right corner
-  Int band ( 0 ); // counter for inner loop
+  int band ( 0 ); // counter for inner loop
   // loop through the antennas (columns)
-  for ( Int ant ( 0 ); ant < spectraShape_p( 1 ); ant++ ) {
+  for ( int ant ( 0 ); ant < spectraShape_p( 1 ); ant++ ) {
     // extract spectrum for this antenna
     antSpectrum = amplitude( spectra.column( ant ) );
     // loop through the frequency sub-bands (rows)
@@ -859,15 +856,15 @@ void BaselineGain::setGainValueAsMedian( const Matrix<DComplex>& spectra )
 void BaselineGain::setGainValueAsMean( const Matrix<DComplex>& spectra )
 {
   // to store gain value for a sub band
-  Double gainValue ( 0.0 );
+  double gainValue ( 0.0 );
   // Vector to hold a single extracted antenna column; initialize to unity
-  Vector<Double> antSpectrum ( spectraShape_p(0), 1.0 );
+  Vector<double> antSpectrum ( spectraShape_p(0), 1.0 );
   // declare IPositions to be used in identifying freq band to be looked at
   IPosition lc ( 1, 0 ); // left corner
   IPosition rc ( 1, 0 ); // right corner
-  Int band ( 0 ); // inner loop
+  int band ( 0 ); // inner loop
   // loop through the antennas (columns)
-  for ( Int ant ( 0 ); ant < spectraShape_p( 1 ); ant++ ) {
+  for ( int ant ( 0 ); ant < spectraShape_p( 1 ); ant++ ) {
     // extract spectrum for this antenna
     antSpectrum = amplitude( spectra.column( ant ) );
     // loop through the frequency sub-bands (rows)
@@ -899,15 +896,15 @@ void BaselineGain::setGainValueAsMean( const Matrix<DComplex>& spectra )
 void BaselineGain::setGainValueAsMinimum( const Matrix<DComplex>& spectra )
 {
   // to store gain value for a sub band
-  Double gainValue ( 0.0 );
+  double gainValue ( 0.0 );
   // Vector to hold a single extracted antenna column; initialize to unity
-  Vector<Double> antSpectrum ( spectraShape_p(0), 1.0 );
+  Vector<double> antSpectrum ( spectraShape_p(0), 1.0 );
   // declare IPositions to be used in identifying freq band to be looked at
   IPosition lc ( 1, 0 ); // left corner
   IPosition rc ( 1, 0 ); // right corner
-  Int band ( 0 ); // inner loop
+  int band ( 0 ); // inner loop
   // loop through the antennas (columns)
-  for ( Int ant ( 0 ); ant < spectraShape_p( 1 ); ant++ ) {
+  for ( int ant ( 0 ); ant < spectraShape_p( 1 ); ant++ ) {
     // extract spectrum for this antenna
     antSpectrum = amplitude( spectra.column( ant ) );
     // loop through the frequency sub-bands (rows)
@@ -929,44 +926,39 @@ void BaselineGain::setGainValueAsMinimum( const Matrix<DComplex>& spectra )
   } // end for: ant
 } // --- end function: setGainValueAsMinimum
 
+// --------------------------------------------------- setGainValueAsStddeviation
 
-//*/ --- setGainValueAsSTDdeviation ---------------------------------------------------//##################################
-// -----------------------------------------------------------------------------//#####################
+void BaselineGain::setGainValueAsStddeviation ( const Matrix<DComplex>& spectra )
+{
+  double gainValue ( 0.0 );
+  // Vector to hold a single extracted antenna column; initialize to unity
+  Vector<double> antSpectrum ( spectraShape_p(0), 1.0 );
+  // declare IPositions to be used in identifying freq band to be looked at
+  IPosition lc ( 1, 0 );   // ... left corner
+  IPosition rc ( 1, 0 );   // ... right corner
+  int band ( 0 );          // ... inner loop
 
-// Compute the baseline gain value for a sub band, and set the gain curve //########################
-//   at this point, if less than already stored value.			//########################
-//   scanning method: STDDEV
-void BaselineGain::setGainValueAsStddeviation ( const Matrix<DComplex>& spectra )	//######################
-{											//#######################
-  // to store gain value for a sub band							//########################
-  Double gainValue ( 0.0 );								//################################
-  // Vector to hold a single extracted antenna column; initialize to unity		//############################
-  Vector<Double> antSpectrum ( spectraShape_p(0), 1.0 );					//#####################
-  // declare IPositions to be used in identifying freq band to be looked at		//###############
-  IPosition lc ( 1, 0 ); // left corner							//###############
-  IPosition rc ( 1, 0 ); // right corner						//#####
-  Int band ( 0 ); // inner loop								//###########
   // loop through the antennas (columns)
-  for ( Int ant ( 0 ); ant < spectraShape_p( 1 ); ant++ ) {				//#############
-      // extract spectrum for this antenna
-    antSpectrum = amplitude( spectra.column( ant ) );					//#########
+  for ( int ant ( 0 ); ant < spectraShape_p( 1 ); ant++ ) {
+    // extract spectrum for this antenna
+    antSpectrum = amplitude( spectra.column( ant ) );
     // loop through the frequency sub-bands (rows)
-    for ( band = 0; abs( band ) < baselineGains_p.nrow(); band++ ) {			//##########
+    for ( band = 0; abs( band ) < baselineGains_p.nrow(); band++ ) {
       // reset lc and rc
-      lc( 0 ) = intervalEndpoints_p( 0, band );						//##########
-      rc( 0 ) = intervalEndpoints_p( 1, band );						//##############
+      lc( 0 ) = intervalEndpoints_p( 0, band );
+      rc( 0 ) = intervalEndpoints_p( 1, band );
       // set gain value for this sub band
-      gainValue = stddev( antSpectrum( lc, rc ) );					//############
+      gainValue = stddev( antSpectrum( lc, rc ) );
       // set baselineGains_p member to gainValue if gainValue is
       //   smaller (or if this is the first block being scanned.)
-      if ( gainValue < baselineGains_p( band, ant )					//###############
-	   or										//###########
-	   nBlocksScanned_p == 0							//#################
-	   ) {										//##############
-	baselineGains_p( band, ant ) = gainValue;					//##########
-      } // end if: gainValue...								//###########
-    } // end for: band									//############
-  } // end for: ant									//###########
- } // --- end function: setGainValueAsMinimum						//###########
+      if ( gainValue < baselineGains_p( band, ant )
+	   or
+	   nBlocksScanned_p == 0
+	   ) {
+	baselineGains_p( band, ant ) = gainValue;
+      } // end if: gainValue...	
+    } // end for: band
+  } // end for: ant
+ } // --- end function: setGainValueAsMinimum
 
-//
+}  // NAmespace LOPES -- END

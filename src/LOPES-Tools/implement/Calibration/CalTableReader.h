@@ -20,9 +20,8 @@
 
 /* $Id: CalTableReader.h,v 1.4 2006/11/10 16:52:45 horneff Exp $*/
 
-#ifndef _CALTABLEREADER_H_
-#define _CALTABLEREADER_H_
-
+#ifndef CALTABLEREADER_H
+#define CALTABLEREADER_H
 
 #include <casa/aips.h>
 #include <casa/iostream.h>
@@ -45,67 +44,85 @@
 #include <tables/Tables/StandardStMan.h>
 #include <tables/Tables/IncrementalStMan.h>
 
+using std::cout;
+using std::cerr;
+using std::endl;
 
-#include <casa/namespace.h>
+using casa::AipsError;
+using casa::Array;
+using casa::ColumnsIndex;
+using casa::Complex;
+using casa::DComplex;
+using casa::RecordFieldPtr;
+using casa::ROScalarColumn;
+using casa::ROTableColumn;
+using casa::String;
+using casa::ScalarColumnDesc;
+using casa::SetupNewTable;
+using casa::Table;
+using casa::TableDesc;
+using casa::Vector;
 
-/*!
-  \class CalTableReader
+namespace LOPES {  // Namespace LOPES -- BEGIN
 
-  \ingroup Calibration
-
-  \brief Class to open a CalTable and access single datasets
-
-  \author Andreas Horneffer
-
-  \date 2006/01/17
-
-  \test tCalTableReader.cc (Not implemented yet.)
-
-  <h3>Prerequisite</h3>
-
-  <ul type="square">
+  /*!
+    \class CalTableReader
+    
+    \ingroup Calibration
+    
+    \brief Class to open a CalTable and access single datasets
+    
+    \author Andreas Horneffer
+    
+    \date 2006/01/17
+    
+    \test tCalTableReader.cc (Not implemented yet.)
+    
+    <h3>Prerequisite</h3>
+    
+    <ul type="square">
     <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/tables/implement/Tables.html">Tables</a> -- Tables are the fundamental storage mechanism for AIPS++
-  </ul>
-
-  <h3>Synopsis</h3>
-
-  This is the class a normal computing task uses. Upon construction the table
-  with the calibration data is opened and then the bits of data can be 
-  extracted.
-
-  <h3>Example(s)</h3>
-
-  \code
-  String tablename;
-  CalTableWriter table;
-  // open the table
-  table.AttachTable(tablename);
-  // define which value we are interested in
-  String fieldName="AntennaPosition";
-  Int AntennaID = 010101; //antenna 1 in LOPES notation
-  uInt date = time(); //get the value that is valid today
-  // get the data
-  Vector<Double> Pos;
-  if (!table.get(date, AntennaID, fieldName, &Pos)) {
+    </ul>
+    
+    <h3>Synopsis</h3>
+    
+    This is the class a normal computing task uses. Upon construction the table
+    with the calibration data is opened and then the bits of data can be 
+    extracted.
+    
+    <h3>Example(s)</h3>
+    
+    \code
+    String tablename;
+    CalTableWriter table;
+    // open the table
+    table.AttachTable(tablename);
+    // define which value we are interested in
+    String fieldName="AntennaPosition";
+    int AntennaID = 010101; //antenna 1 in LOPES notation
+    unsigned int date = time(); //get the value that is valid today
+    // get the data
+    Vector<double> Pos;
+    if (!table.get(date, AntennaID, fieldName, &Pos)) {
     cerr << "Error while retrieving data" << endl;
-  };
-  cout << "The " << fieldName << " of antenna " << AntennaID <<
-       " for the time label " << date << " is: " << Pos << endl;
-   \endcode
-
-*/
-
-class CalTableReader {
-
- protected:
-
+    };
+    cout << "The " << fieldName << " of antenna " << AntennaID <<
+    " for the time label " << date << " is: " << Pos << endl;
+    \endcode
+    
+  */
+  
+  class CalTableReader {
+    
+  protected:
+    
   // The AIPS++ table with the calibration data
   Table *masterTable_p;
   
   // Index over the AntID Column
   ColumnsIndex *AntIDIndex_p;
   // Pointer to the index value
-  RecordFieldPtr<Int> *indexedAnt_p;
+  RecordFieldPtr<int> *indexedAnt_p;
 
   /*!
     \brief Get the column table identified by AntID and FieldName
@@ -117,14 +134,14 @@ class CalTableReader {
     \param *DataType=NULL -- return the data type of the field
     \param *isJunior=NULL -- return whether this field has a senior friend
     
-    \return ok -- Was operation successful? Returns <tt>True</tt> if yes.
+    \return ok -- Was operation successful? Returns <tt>true</tt> if yes.
   */
-  Bool GetColumnTable(Int const AntID,
+  bool GetColumnTable(int const AntID,
 		      String const FieldName,
 		      Table *subtab, 
-		      Int *rowNr,
+		      int *rowNr,
 		      String *DataType=NULL,
-		      Bool *isJunior=NULL);
+		      bool *isJunior=NULL);
 
   /*!
     \brief Get the row in the column table that corresponds to the date
@@ -136,10 +153,10 @@ class CalTableReader {
     
     \return rowNr -- row number or -1 if row not found
   */
-  Int GetDateRow(Int const AntID,
+  int GetDateRow(int const AntID,
 		 Table const colTable,
-		 uInt const date,
-		 const Bool mindEmpty=True);
+		 unsigned int const date,
+		 const bool mindEmpty=true);
 
   /*!
     \brief Get the row in the column table that corresponds to the date for a
@@ -152,9 +169,9 @@ class CalTableReader {
         
     \return rowNr -- row number or -1 if row not found
   */
-  Int GetJuniorDateRow(Int const AntID,
+  int GetJuniorDateRow(int const AntID,
 		       Table const colTable,
-		       uInt const date,
+		       unsigned int const date,
 		       String const MaskField);
   
 public:
@@ -199,16 +216,16 @@ public:
     
     \param tableFilename -- filename of the table to be read.
 
-    \return ok -- Was operation successful? Returns <tt>True</tt> if yes.
+    \return ok -- Was operation successful? Returns <tt>true</tt> if yes.
   */
-  virtual Bool AttachTable(const String& tableFilename);
+  virtual bool AttachTable(const String& tableFilename);
 
  /*!
     \brief Is this reader object attached to a table?
     
-    \return  yes -- <tt>True</tt> if the object is attached.
+    \return  yes -- <tt>true</tt> if the object is attached.
  */
-  virtual Bool isAttached();
+  virtual bool isAttached();
 
 
   /*!
@@ -219,29 +236,29 @@ public:
     \param FieldName -- Name of the field that is requested
     \param *result -- Place where the returned data can be stored
 
-    \return ok -- Was operation successful? Returns <tt>True</tt> if yes.
+    \return ok -- Was operation successful? Returns <tt>true</tt> if yes.
 
     The methods to get the data. I expect this to be called a lot.
 
   */
-  Bool GetData(uInt const date,
-	       Int const AntID,
+  bool GetData(unsigned int const date,
+	       int const AntID,
 	       String const FieldName,
 	       String *result);
-  Bool GetData(uInt const date,
-	       Int const AntID,
+  bool GetData(unsigned int const date,
+	       int const AntID,
 	       String const FieldName,
-	       Double *result);
-  Bool GetData(uInt const date,
-	       Int const AntID,
+	       double *result);
+  bool GetData(unsigned int const date,
+	       int const AntID,
 	       String const FieldName,
 	       DComplex *result);
-  Bool GetData(uInt const date,
-	       Int const AntID,
+  bool GetData(unsigned int const date,
+	       int const AntID,
 	       String const FieldName,
-	       Array<Double> *result);
-  Bool GetData(uInt const date,
-	       Int const AntID,
+	       Array<double> *result);
+  bool GetData(unsigned int const date,
+	       int const AntID,
 	       String const FieldName,
 	       Array<DComplex> *result);
 
@@ -251,17 +268,17 @@ public:
     \param KeywordName -- Name of the field that is requested
     \param *result -- Place where the returned data can be stored
 
-    \return ok -- Was operation successful? Returns <tt>True</tt> if yes.
+    \return ok -- Was operation successful? Returns <tt>true</tt> if yes.
 
     The methods to retrieve the data that was stored in a keyword. If the types 
     mismatch then type promotion of scalars will be done if possible. If not 
     possible, the function returns false.
   */
-  Bool GetKeyword(String const KeywordName, String *result);
-  Bool GetKeyword(String const KeywordName, Double *result);
-  Bool GetKeyword(String const KeywordName, DComplex *result);
-  Bool GetKeyword(String const KeywordName, Array<Double> *result);
-  Bool GetKeyword(String const KeywordName, Array<DComplex> *result);
+  bool GetKeyword(String const KeywordName, String *result);
+  bool GetKeyword(String const KeywordName, double *result);
+  bool GetKeyword(String const KeywordName, DComplex *result);
+  bool GetKeyword(String const KeywordName, Array<double> *result);
+  bool GetKeyword(String const KeywordName, Array<DComplex> *result);
 
   /*!
     \brief Get the name of the data type of the keyword
@@ -280,15 +297,15 @@ public:
     \param AntID -- ID of the antenna for which the data is requested
     \param FieldName -- Name of the field that is requested
 
-    \return yes -- True if both dates point to the same entry, False otherwise 
+    \return yes -- true if both dates point to the same entry, false otherwise 
 
     This method checks whether the two given dates point to the same entry in
     the calibration table. (I.e. to the same row in the column table.) Useful
     e.g. to check whether one has to recompute calibration values.
   */
-  Bool isIdentical(uInt const date1,
-		   uInt const date2,
-		   Int const AntID,
+  bool isIdentical(unsigned int const date1,
+		   unsigned int const date2,
+		   int const AntID,
 		   String const FieldName);
   
   /*!
@@ -304,14 +321,16 @@ public:
   /*!
     \brief Print the summary (number of rows and columns) of the master table
     
-    \return True
+    \return true
   */
-  Bool PrintSummary();
+  bool PrintSummary();
  
 private:
   
-  Bool init();
-  Bool cleanup();
+  bool init();
+  bool cleanup();
 };
+
+}  // Namespace LOPES -- END
 
 #endif /* _CALTABLEREADER_H_ */

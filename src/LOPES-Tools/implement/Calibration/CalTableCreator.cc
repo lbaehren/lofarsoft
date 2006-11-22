@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2006                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -20,75 +20,77 @@
 
 /* $Id: CalTableCreator.cc,v 1.3 2006/10/31 18:23:24 bahren Exp $*/
 
-#include <lopes/Calibration/CalTableCreator.h>
+#include <Calibration/CalTableCreator.h>
 
-// ==============================================================================
-//
-//  Construction
-//
-// ==============================================================================
-
-CalTableCreator::CalTableCreator ()
-{;}
-
-CalTableCreator::CalTableCreator (String filename)
-{
-  Bool status (true);
-
-  status = newTable (filename);
-
-  if (!status) {
-    cerr << "[CalTableCreator] Error when trying to create a new table" << endl;
+namespace LOPES {
+  
+  // ==============================================================================
+  //
+  //  Construction
+  //
+  // ==============================================================================
+  
+  CalTableCreator::CalTableCreator ()
+  {;}
+  
+  CalTableCreator::CalTableCreator (String filename)
+  {
+    bool status (true);
+    
+    status = newTable (filename);
+    
+    if (!status) {
+      cerr << "[CalTableCreator] Error when trying to create a new table" << endl;
+    }
   }
-}
+  
+  // ==============================================================================
+  //
+  //  Destruction
+  //
+  // ==============================================================================
+  
+  CalTableCreator::~CalTableCreator ()
+  {
+    ;
+  }
+  
+  // ==============================================================================
+  //
+  //  Operators
+  //
+  // ==============================================================================
+  
+  
+  // ==============================================================================
+  //
+  //  Parameters
+  //
+  // ==============================================================================
+  
+  
+  
+  // ==============================================================================
+  //
+  //  Methods
+  //
+  // ==============================================================================
+  
 
-// ==============================================================================
-//
-//  Destruction
-//
-// ==============================================================================
-
-CalTableCreator::~CalTableCreator ()
-{
-  ;
-}
-
-// ==============================================================================
-//
-//  Operators
-//
-// ==============================================================================
-
-
-// ==============================================================================
-//
-//  Parameters
-//
-// ==============================================================================
-
-
-
-// ==============================================================================
-//
-//  Methods
-//
-// ==============================================================================
-
-
-Bool CalTableCreator::newTable(String filename)
+bool CalTableCreator::newTable(String filename)
 {
   try {
     //// Create the table description for the empty entries table
     //    TableDesc entryDesc("master",TableDesc::Scratch);
     //
-    //    entryDesc.addColumn(ScalarColumnDesc<Int>("StartDate", "First date when this entry is valid"));
-    //    entryDesc.addColumn(ScalarColumnDesc<Int>("StopDate", "Last date when this entry is valid"));
+    //    entryDesc.addColumn(ScalarColumnDesc<int>("StartDate", "First date when this entry is valid"));
+    //    entryDesc.addColumn(ScalarColumnDesc<int>("StopDate", "Last date when this entry is valid"));
 
        
 // Create the table description for the master table
     TableDesc masterDesc("master",TableDesc::Scratch);
     
-    masterDesc.addColumn(ScalarColumnDesc<Int>("AntID", "ID of the antenna"));
+    masterDesc.addColumn(ScalarColumnDesc<int>("AntID", "ID of the antenna"));
     masterDesc.addColumn(ScalarColumnDesc<String>("AntName", "Name of the Antenna (e.g. the ID as string)"));
     
 //Create the master table
@@ -114,9 +116,10 @@ Bool CalTableCreator::newTable(String filename)
     cout << "endian:" << master.endianFormat() << " type:" << master.tableType() << endl;
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
-    return False;
+    return false;
   };
   
-  return True;
+  return true;
 }
 
+}  // Namespace LOPES -- END

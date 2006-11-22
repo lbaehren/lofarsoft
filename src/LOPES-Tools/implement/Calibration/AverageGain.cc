@@ -24,48 +24,42 @@
 // author: Brett Deaton
 // 8-05
 
+#include <Calibration/AverageGain.h>
 
-// include class definition
-#include <lopes/Calibration/AverageGain.h>
-
-
-
-// *****************************************************************************
-// *** PUBLIC FUNCTIONS ********************************************************
-// *****************************************************************************
-
-// -----------------------------------------------------------------------------
-//
-//  Construction
-//
-// -----------------------------------------------------------------------------
-
-// ------------------------------------------------------------------ AverageGain
-
-AverageGain::AverageGain()
-  : BaselineGain()
-{
-  // default dimensions are 50(frequency channels) * 10(antennas) matrix
-  Int nOfFreq ( 50 );
-  Int nOfAnt ( 10 );
-  IPosition spectraShape ( 2, nOfFreq, nOfAnt );
-  Double minFreq ( 0.0 ); // 0.0 MHz
-  Double maxFreq ( 40000000 ); // 40 MHz
-  Vector<Double> spectraAbscissa ( BaselineGain::makeFreqAbscissa( minFreq,
-								  maxFreq,
-								  nOfFreq ) );
-  // default number of subbands is 10
-  Int nOfSubBands ( 10 );
-  AverageGain::reset( spectraShape,
-		      spectraAbscissa,
-		      nOfSubBands );
-}
+namespace LOPES {  // Namespace LOPES -- BEGIN
+  
+  // ============================================================================
+  //
+  //  Construction
+  //
+  // ============================================================================
+  
+  // ---------------------------------------------------------------- AverageGain
+  
+  AverageGain::AverageGain()
+    : BaselineGain()
+  {
+    // default dimensions are 50(frequency channels) * 10(antennas) matrix
+    int nOfFreq ( 50 );
+    int nOfAnt ( 10 );
+    IPosition spectraShape ( 2, nOfFreq, nOfAnt );
+    double minFreq ( 0.0 ); // 0.0 MHz
+    double maxFreq ( 40000000 ); // 40 MHz
+    Vector<double> spectraAbscissa ( BaselineGain::makeFreqAbscissa( minFreq,
+								     maxFreq,
+								     nOfFreq ) );
+    // default number of subbands is 10
+    int nOfSubBands ( 10 );
+    AverageGain::reset( spectraShape,
+			spectraAbscissa,
+			nOfSubBands );
+  }
 
 // ------------------------------------------------------------------ AverageGain
 
 AverageGain::AverageGain( const IPosition& spectraShape,
-			  const Vector<Double>& spectraAbscissa,
-			  const Int& nOfSubBands,
+			  const Vector<double>& spectraAbscissa,
+			  const int& nOfSubBands,
 			  BaselineGain::Method whichMethod )
   : BaselineGain( spectraShape,
 		  spectraAbscissa,
@@ -80,9 +74,9 @@ AverageGain::AverageGain( const IPosition& spectraShape,
 // ------------------------------------------------------------------ AverageGain
 
 AverageGain::AverageGain (const IPosition& spectraShape,
-			  const Double& freqMin,
-			  const Double& freqMax,
-			  const Int& nOfSubBands)
+			  const double& freqMin,
+			  const double& freqMax,
+			  const int& nOfSubBands)
   : BaselineGain()
 {;}
 
@@ -110,8 +104,8 @@ void AverageGain::reset()
 
 // reset just like at construction (except not the scanning method)
 void AverageGain::reset( const IPosition& spectraShape,
-			 const Vector<Double>& spectraAbscissa,
-			 const Int& nOfSubBands )
+			 const Vector<double>& spectraAbscissa,
+			 const int& nOfSubBands )
 {
   // reset base class members
   BaselineGain::reset( spectraShape,
@@ -141,7 +135,7 @@ void AverageGain::setMethod( const BaselineGain::Method& whichMethod )
 // -----------------------------------------------------------------------------
 
 // Retrieve number of groups averaged so far
-Int AverageGain::getNGroupsAveraged()
+int AverageGain::getNGroupsAveraged()
 {
   return nGroupsAveraged_p;
 }
@@ -152,12 +146,12 @@ Int AverageGain::getNGroupsAveraged()
 
 // Add the current group to be averaged.
 // (i.e. add whatever is stored in baselineGains_p to sumAvgGains_p.)
-void AverageGain::addGroupToAverage( const Bool& alsoResetBaselineGains )
+void AverageGain::addGroupToAverage( const bool& alsoResetBaselineGains )
 {
   // first make sure that at least one baseline has been scanned
   if ( nBlocksScanned_p != 0 ) {
-    for ( Int ant ( 0 ); ant < gainShape_p( 1 ); ant++ ) {
-      for ( Int band = 0; band < gainShape_p( 0 ); band++ ) {
+    for ( int ant ( 0 ); ant < gainShape_p( 1 ); ant++ ) {
+      for ( int band = 0; band < gainShape_p( 0 ); band++ ) {
 	// add the relevant baselineGains_p member to present sum of gain curves
 	sumAvgGains_p( band, ant ) += baselineGains_p( band, ant );
       } // end for: band
@@ -181,7 +175,7 @@ void AverageGain::addGroupToAverage( const Bool& alsoResetBaselineGains )
 // Divide the argument spectra by the average baseline gain curves
 void AverageGain::normalizeSpectra( Matrix<DComplex>& spectra )
 {
-  Vector<Bool> antennas ( spectraShape_p( 1 ), True );
+  Vector<bool> antennas ( spectraShape_p( 1 ), true );
   AverageGain::normalizeSpectra( spectra,
 				 spectraAbscissa_p,
 				 antennas);
@@ -192,30 +186,30 @@ void AverageGain::normalizeSpectra( Matrix<DComplex>& spectra )
 //   BaselineGain class, except that this version, uses the Average gain curve
 //   whereas that version uses the baseline gain curve.
 void AverageGain::normalizeSpectra( Matrix<DComplex>& spectra,
-				    const Vector<Double>& spectraAbscissa,
-				    const Vector<Bool>& antennas )
+				    const Vector<double>& spectraAbscissa,
+				    const Vector<bool>& antennas )
 {
   // get the gain curves for the spectra
-  Matrix<Double> avgGains ( AverageGain::getAverageGains( spectraAbscissa,
+  Matrix<double> avgGains ( AverageGain::getAverageGains( spectraAbscissa,
 							 antennas ) );
   // determine dimensions based on the two argument vectors
-  Int nOfChan ( spectraAbscissa.nelements() );
-  Int nAnt ( BaselineGain::numRequestedAnt( antennas ) );
-  Bool allDimensionsAreOK ( True );
+  int nOfChan ( spectraAbscissa.nelements() );
+  int nAnt ( BaselineGain::numRequestedAnt( antennas ) );
+  bool allDimensionsAreOK ( true );
   if ( nAnt <= 0
        or
        abs( nAnt ) != spectra.ncolumn()
        or
        abs( nOfChan ) != spectra.nrow()
        ) {
-    allDimensionsAreOK = False;
+    allDimensionsAreOK = false;
   }
   // counting flag for division by zero error
-  Int wasDivError ( 0 );
+  int wasDivError ( 0 );
   // normalize the spectra
   if ( allDimensionsAreOK ) {
-    for ( Int ant ( 0 ); ant < nAnt; ant++ ) {
-      for ( Int chan ( 0 ); chan < nOfChan; chan++ ) {
+    for ( int ant ( 0 ); ant < nAnt; ant++ ) {
+      for ( int chan ( 0 ); chan < nOfChan; chan++ ) {
 	// division by zero error flagging
 	if ( avgGains( chan, ant ) == 0 ) {
 	  wasDivError++;
@@ -244,62 +238,62 @@ void AverageGain::normalizeSpectra( Matrix<DComplex>& spectra,
 // --- getAverageGains ---------------------------------------------------------
 // -----------------------------------------------------------------------------
 
-Matrix<Double> AverageGain::getAverageGains()
+Matrix<double> AverageGain::getAverageGains()
 {
-  Vector<Bool> antReturn ( gainShape_p( 1 ), True );
+  Vector<bool> antReturn ( gainShape_p( 1 ), true );
   //
   return AverageGain::getAverageGains( gainAbscissa_p,
 				       antReturn );
 }
 
-Matrix<Double> AverageGain::getAverageGains( const Vector<Bool>& antReturn )
+Matrix<double> AverageGain::getAverageGains( const Vector<bool>& antReturn )
 {
   return AverageGain::getAverageGains( gainAbscissa_p,
 				       antReturn );
 }
 
-Matrix<Double> AverageGain::getAverageGains( const Vector<Double>& freqReturn )
+Matrix<double> AverageGain::getAverageGains( const Vector<double>& freqReturn )
 {
-  Vector<Bool> antReturn ( gainShape_p( 1 ), True );
+  Vector<bool> antReturn ( gainShape_p( 1 ), true );
   return AverageGain::getAverageGains( freqReturn,
 				       antReturn );
 }
 
 // Retrieve average baseline gain curve
-Matrix<Double> AverageGain::getAverageGains( const Vector<Double>& freqReturn,
-					    const Vector<Bool>& antReturn )
+Matrix<double> AverageGain::getAverageGains( const Vector<double>& freqReturn,
+					    const Vector<bool>& antReturn )
 {
   // determine number of rows needed for return matrix (number of freq bins)
-  Int nRows ( freqReturn.nelements() );
+  int nRows ( freqReturn.nelements() );
   // determine number columns needed for return matrix (number antennas)
-  Int nCols ( BaselineGain::numRequestedAnt( antReturn ) );
-  Bool antReturnVectorIsIncorrect ( False );
+  int nCols ( BaselineGain::numRequestedAnt( antReturn ) );
+  bool antReturnVectorIsIncorrect ( false );
   if ( nCols <= 0 ) {
     // reset nCols to a value that will make sense for matrix construction
     nCols = 1;
-    antReturnVectorIsIncorrect = True;
+    antReturnVectorIsIncorrect = true;
   }
   // construct return matrix
-  Matrix<Double> avgGains ( nRows, nCols, 0.0 );
+  Matrix<double> avgGains ( nRows, nCols, 0.0 );
   // flag for fatal errors, exit if true
-  Bool everythingIsAlright ( True );
+  bool everythingIsAlright ( true );
   // error catch for division by zero
   if ( nGroupsAveraged_p == 0 ) {
     cerr << "[Error: getAverageGains]"
 	 << " Exiting to avoid division by zero;"
 	 << " no spectra have been scanned yet."
 	 << endl;
-    everythingIsAlright = False;
+    everythingIsAlright = false;
   } // end if: nGroupsAveraged_p...
   if ( antReturnVectorIsIncorrect ) {
     cerr << "[Error: getAverageGains]"
 	 << " Exiting; antReturn vector is incompatible with expected vector."
 	 << endl;
-    everythingIsAlright = False;
+    everythingIsAlright = false;
   } // end if: antReturnVectorIsIncorrect
   if ( everythingIsAlright ) {
     // Cases are to catch any frequency arguments that require no interpolation.
-    Int whichCase ( BaselineGain::determineCase( freqReturn,
+    int whichCase ( BaselineGain::determineCase( freqReturn,
 						 antReturn ) );
     switch ( whichCase )
       {
@@ -308,7 +302,7 @@ Matrix<Double> AverageGain::getAverageGains( const Vector<Double>& freqReturn,
 	//   requested frequencies are identical to stored in gainAbscissa_p
 	//   AND
 	//   all antennas are requested
-	avgGains = sumAvgGains_p / Double ( nGroupsAveraged_p );
+	avgGains = sumAvgGains_p / double ( nGroupsAveraged_p );
 	break;
       } // end case: 1
       case 2: {
@@ -316,14 +310,14 @@ Matrix<Double> AverageGain::getAverageGains( const Vector<Double>& freqReturn,
 	//   requested frequencies are identical to stored in gainAbscissa_p
 	//   BUT
 	//   some antennas are not requested
-	Int returnAntCounter ( 0 ); // the antenna column in the return matrix
-	for ( Int ant ( 0 ); ant < spectraShape_p( 1 ); ant++ ) {
+	int returnAntCounter ( 0 ); // the antenna column in the return matrix
+	for ( int ant ( 0 ); ant < spectraShape_p( 1 ); ant++ ) {
 	  // only return requested antennas
 	  if ( antReturn( ant ) ) {
 	    // return this antenna's column
 	    avgGains.column( returnAntCounter )
 	      =
-	      sumAvgGains_p.column( ant ) / Double ( nGroupsAveraged_p );
+	      sumAvgGains_p.column( ant ) / double ( nGroupsAveraged_p );
 	    returnAntCounter++; // increment the return counter
 	  } // end if
 	} // end for: ant
@@ -333,7 +327,7 @@ Matrix<Double> AverageGain::getAverageGains( const Vector<Double>& freqReturn,
 	// CASE 3 means:
 	//   requested frequencies different than stored in gainAbscissa_p
 	//   (THEREFORE must interpolate the gains)
-	Matrix<Double> avgGainCurves ( sumAvgGains_p/Double(nGroupsAveraged_p) );
+	Matrix<double> avgGainCurves ( sumAvgGains_p/double(nGroupsAveraged_p) );
 	avgGains = BaselineGain::interpolateGains( avgGainCurves,
 						   gainAbscissa_p,
 						   freqReturn,
@@ -342,7 +336,7 @@ Matrix<Double> AverageGain::getAverageGains( const Vector<Double>& freqReturn,
       } // end case: 3
       default: {
 	// if none of the cases, then interpolate nontheless
-	Matrix<Double> avgGainCurves ( sumAvgGains_p/Double(nGroupsAveraged_p) );
+	Matrix<double> avgGainCurves ( sumAvgGains_p/double(nGroupsAveraged_p) );
 	avgGains = BaselineGain::interpolateGains( avgGainCurves,
 						   gainAbscissa_p,
 						   freqReturn,
@@ -361,14 +355,14 @@ Matrix<Double> AverageGain::getAverageGains( const Vector<Double>& freqReturn,
 // Default Export Average Gains to AIPS++ Data Table
 void AverageGain::exportAverageGains( const String& tableName )
 {
-  Vector<Bool> antReturn ( spectraShape_p( 1 ), True );
+  Vector<bool> antReturn ( spectraShape_p( 1 ), true );
   AverageGain::exportAverageGains( gainAbscissa_p,
 				   antReturn,
 				   tableName );
 } // --- end function: exportAverageGains (default)
 
 // Export Average Gains to AIPS++ Data Table (with default frequencies)
-void AverageGain::exportAverageGains( const Vector<Bool>& antReturn,
+void AverageGain::exportAverageGains( const Vector<bool>& antReturn,
 				      const String& tableName )
 {
   AverageGain::exportAverageGains( gainAbscissa_p,
@@ -377,10 +371,10 @@ void AverageGain::exportAverageGains( const Vector<Bool>& antReturn,
 } // --- end function: exportAverageGains (default frequencies)
 
 // Export Average Gains to AIPS++ Data Table (with default antennas)
-void AverageGain::exportAverageGains( const Vector<Double>& freqReturn,
+void AverageGain::exportAverageGains( const Vector<double>& freqReturn,
 				      const String& tableName )
 {
-  Vector<Bool> antReturn ( spectraShape_p( 1 ), True );
+  Vector<bool> antReturn ( spectraShape_p( 1 ), true );
   AverageGain::exportAverageGains( freqReturn,
 				   antReturn,
 				   tableName );
@@ -393,12 +387,12 @@ void AverageGain::exportAverageGains( const Vector<Double>& freqReturn,
 // freqReturn -- frequencies which client wants to export
 // antReturn  -- antennas which client wants to export (T=export,F=don't export)
 // tableName  -- Filename for the exported table
-void AverageGain::exportAverageGains( const Vector<Double>& freqReturn,
-				      const Vector<Bool>& antReturn,
+void AverageGain::exportAverageGains( const Vector<double>& freqReturn,
+				      const Vector<bool>& antReturn,
 				      const String& tableName )
 {
   // get averageGains matrix
-  Matrix<Double> averageGains ( AverageGain::getAverageGains( freqReturn,
+  Matrix<double> averageGains ( AverageGain::getAverageGains( freqReturn,
 							     antReturn ) );
   // export the table
   BaselineGain::exportTable( averageGains,
@@ -416,11 +410,12 @@ void AverageGain::exportAverageGains( const Vector<Double>& freqReturn,
 // -----------------------------------------------------------------------------
 
 // Set gainShape_p [ nFreq, nAnt ]
-void AverageGain::setGainShape( const Int& nOfSubBands,
-				const Int& nOfAnt )
+void AverageGain::setGainShape( const int& nOfSubBands,
+				const int& nOfAnt )
 {
   gainShape_p.resize( 2 );
   gainShape_p( 0 ) = nOfSubBands;
   gainShape_p( 1 ) = nOfAnt;
 }
 
+}  // Namespace LOPES -- END

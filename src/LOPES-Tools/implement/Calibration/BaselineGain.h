@@ -28,7 +28,7 @@
 #include <casa/iostream.h>
 #include <casa/fstream.h>
 #include <casa/string.h>
-#include <casa/Arrays/Array.h>
+#include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/ArrayMath.h>
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Vector.h>
@@ -46,178 +46,208 @@
 #include <tables/Tables/ArrayColumn.h>
 
 // LOPES-Tools header files
-#include <lopes/Math/Math.h>
 
-#include <casa/namespace.h>
+using std::cout;
+using std::cerr;
+using std::endl;
+using std::ostringstream;
 
-/*!
-  \class BaselineGain
+using casa::Complex;
+using casa::DComplex;
+using casa::Interpolate1D;
+using casa::IPosition;
+using casa::Matrix;
+using casa::ScalarColumn;
+using casa::ScalarColumnDesc;
+using casa::ScalarSampledFunctional;
+using casa::SetupNewTable;
+using casa::String;
+using casa::Table;
+using casa::TableDesc;
+using casa::Vector;
 
-  \ingroup Calibration
-
-  \brief Extract baseline gain curves; also apply spectral normalization
-
-  \test tBaselineGain.cc
-
-  <h3>Synopsis</h3>
-
-  Extract a gain curve from a complex spectra of \f$N_{\rm Ant}\f$ array
-  elements. Also provides the functionality to normalize a complex spectra
-  by the extracted gain curves.
-  What we refer to as the gain curve is simply the background curve of
-  a frequency-domain spectrum. It can be loosely defined in terms of a
-  least-squares condition. However, this is not fully accurate, because
-  we wish to ignore regions of dense RFI (wide spikes in the spectrum), and
-  interpolate a baseline across these. The baseline gain curve is extracted
-  by the following method:
-
-  Given a discrete complex spectrum
-  \f[
-  f[\nu_{k}] = A[\nu_{k}] \exp(i \phi[\nu_{k}])
-  \f]
-  where
-  \f[
-  k=0, 1, 2...(N_{\rm FreqChan}-1)
-  \f]
-  and
-  \f[
-  \nu_{\rm Bandwidth} \equiv \nu_{(N_{\rm FreqChan}-1)}-\nu_{0}
-  \f]
-  we extract the amplitudes of the terms,
-  \f$A[\nu_{k}]\f$, and call these the terms of the absolute spectrum.
-  The absolute spectrum is then divided into
-  \f$N_{\rm SubBands}\f$ intervals, referred to as sub bands. Each sub band
-  consists of \f$M_{\rm FreqChan}\f$ members, where
-  \f[
-  M_{\rm FreqChan} = \frac{N_{\rm FreqChan}}{N_{\rm SubBands}}
-  \f]
-  According to the scanning method (median, mean, minimum) one of these members
-  is chosen as representative of the gain curve on that sub band. The
-  representative gain value is assigned to the frequency in the middle of
-  this sub band. On subsequent scans of new spectra (from the same
-  antenna), the gain value chosen for each sub band is only
-  assigned to the midpoint frequency if it is less than the
-  gain value already stored. This allows us to extract the minimum
-  gain curve across time (which is what we want--RFI is always
-  additive rather than subtractive.)
-
-  A natural cubic spline is used to interpolate the gain curve for any
-  frequency across the original band. Also, median is the default scanning
-  method. It is preferred to mean because it is more robust against outliers.
-  Minimum is a poor measure of the gain curve, but we leave it as a
-  possible scanning method for unforeseen uses.
-
-  It is important to note the subtle difference between the two minimums
-  which we are talking about: a minimum gain curve and a gain curve of minimums.
-  The former (a minimum gain curve) is what we achieve by scanning many
-  spectra from the same antenna, always reducing the curve if the extracted
-  gain value is less than that which is already stored. It has nothing to do
-  with the scanning method. We wish to extract the minimum gain curve
-  whether the scanning method is median, mean, or minimum. The latter
-  (a gain curve of minimums) is what we achieve by setting the scanning method
-  to minimum. The other two scanning methods (median and mean) are preferred
-  to this method.
-
-  Note: although the frequency arguments are expected in the units of Hz,
-  obviously, any unit is adequate--as long as client code is consistent.
-
-  <h3>Terminology</h3>
+namespace LOPES {  // Namespace LOPES -- BEGIN
   
-  In the BaselineGainGain class, we employ specific terminology. To
-  clarify subtle differences, the important terms
-  (and their derivatives) are explained below in logical groups:
-  <ul>
-  <li><em>Frequency domain</em>
-      <ul>
-      <li><b>spectrum</b> -- power spectrum (fourier transform of
-                   a block.)
-      <li><b>gain</b> curve -- the background curve of a spectrum. It is
-                   fundamentally lower-resolution than
-		   the spectrum because it is determined by
-		   subdividing a spectrum into sub bands. However
-		   in the case of the BaselineGain and AverageGain
-		   classes, interpolating across the gain curve
-		   is possible.
-      </ul>
-  <li><em>Gain curves</em>
-      <ul>
-      <li><b>baseline</b> gain curve -- the minimized background curve
-                   of a spectrum. It is achieved by comparing the gain curves
-		   of more than one block.
-      </ul>
-  <li><em>Reference Frequencies</em>
-      <ul>
-      <li><b>abscissa</b> -- the reference values of a function. For a point,
-                   \f$f(x)\f$, in cartesian coordinates,
-		   the \f$x\f$-value is considered the abscissa, and
-		   \f$f\f$ evaluated at \f$x\f$ is the ordinate.
-      </ul>
-  </ul>
-
-  <h3>Motivation</h3>
-  
-  This class was motivated by two needs:
-  <ol>
-  <li>We wish to calibrate antennas. To do this, we need some relative measure
-  of gain.
-  <li>We wish to flag regions of RFI. One method is to normalize a spectrum
-  by dividing it by its underlying gain curve. From this normalized spectrum,
-  we are able to easily identify RFI.
-  </ol>
-*/
-
-class BaselineGain {
-  
- public:
-  
-  // --- Method ----------------------------------------------------------------
- Int nOfFreq;
- Int nOfAnt;
- Double minFreq;
- Double maxFreq;
   /*!
-    \brief Methods possible for scanning the spectra
-  */
-  enum Method {
-    //! median
-    MED,
-    //! average
-    MEAN,
-    //! minimum
-    MIN,
-    //! Standard deviation
-    STDDEV		//###################################
-  };
-  
-  // --- Construction ----------------------------------------------------------
-
-  /*!
-    \brief Default Constructor
-
-    Default Constructor.
-    Initializes the maximum dimensions to
-    \f$[N_{\rm FreqChan},N_{\rm Ant}]=[50,10]\f$
-    and sets the number of sub bands to be sampled to 10. The gain curves for
-    each antenna are initialized to unity. Default frequency domain is 0-40 MHz
-    (LOFAR ITS). And scanning Method is default, 'MED'.
-  */
-  BaselineGain();
+    \class BaselineGain
     
-  /*!
-    \brief Argumented Constructor
-
-    Sets the storage array for the gain curves to the specified dimensions,
-    \f$[N_{\rm SubBands},N_{\rm Ant}]\f$, and initializes it to the maximum value.
-    The arguments are used to set the maximum dimensions and frequency
-    domain of the baseline gains array.
+    \ingroup Calibration
     
+    \brief Extract baseline gain curves; also apply spectral normalization
+    
+    \test tBaselineGain.cc
+    
+    <h3>Synopsis</h3>
+    
+    Extract a gain curve from a complex spectra of \f$N_{\rm Ant}\f$ array
+    elements. Also provides the functionality to normalize a complex spectra
+    by the extracted gain curves.
+    What we refer to as the gain curve is simply the background curve of
+    a frequency-domain spectrum. It can be loosely defined in terms of a
+    least-squares condition. However, this is not fully accurate, because
+    we wish to ignore regions of dense RFI (wide spikes in the spectrum), and
+    interpolate a baseline across these. The baseline gain curve is extracted
+    by the following method:
+    
+    Given a discrete complex spectrum
+    \f[
+    f[\nu_{k}] = A[\nu_{k}] \exp(i \phi[\nu_{k}])
+    \f]
+    where
+    \f[
+    k=0, 1, 2...(N_{\rm FreqChan}-1)
+    \f]
+    and
+    \f[
+    \nu_{\rm Bandwidth} \equiv \nu_{(N_{\rm FreqChan}-1)}-\nu_{0}
+    \f]
+    we extract the amplitudes of the terms,
+    \f$A[\nu_{k}]\f$, and call these the terms of the absolute spectrum.
+    The absolute spectrum is then divided into
+    \f$N_{\rm SubBands}\f$ intervals, referred to as sub bands. Each sub band
+    consists of \f$M_{\rm FreqChan}\f$ members, where
+    \f[
+    M_{\rm FreqChan} = \frac{N_{\rm FreqChan}}{N_{\rm SubBands}}
+    \f]
+    According to the scanning method (median, mean, minimum) one of these members
+    is chosen as representative of the gain curve on that sub band. The
+    representative gain value is assigned to the frequency in the middle of
+    this sub band. On subsequent scans of new spectra (from the same
+    antenna), the gain value chosen for each sub band is only
+    assigned to the midpoint frequency if it is less than the
+    gain value already stored. This allows us to extract the minimum
+    gain curve across time (which is what we want--RFI is always
+    additive rather than subtractive.)
+    
+    A natural cubic spline is used to interpolate the gain curve for any
+    frequency across the original band. Also, median is the default scanning
+    method. It is preferred to mean because it is more robust against outliers.
+    Minimum is a poor measure of the gain curve, but we leave it as a
+    possible scanning method for unforeseen uses.
+    
+    It is important to note the subtle difference between the two minimums
+    which we are talking about: a minimum gain curve and a gain curve of minimums.
+    The former (a minimum gain curve) is what we achieve by scanning many
+    spectra from the same antenna, always reducing the curve if the extracted
+    gain value is less than that which is already stored. It has nothing to do
+    with the scanning method. We wish to extract the minimum gain curve
+    whether the scanning method is median, mean, or minimum. The latter
+    (a gain curve of minimums) is what we achieve by setting the scanning method
+    to minimum. The other two scanning methods (median and mean) are preferred
+    to this method.
+    
+    Note: although the frequency arguments are expected in the units of Hz,
+    obviously, any unit is adequate--as long as client code is consistent.
+    
+    <h3>Terminology</h3>
+    
+    In the BaselineGainGain class, we employ specific terminology. To
+    clarify subtle differences, the important terms
+    (and their derivatives) are explained below in logical groups:
+    <ul>
+    <li><em>Frequency domain</em>
+    <ul>
+    <li><b>spectrum</b> -- power spectrum (fourier transform of
+    a block.)
+    <li><b>gain</b> curve -- the background curve of a spectrum. It is
+    fundamentally lower-resolution than
+    the spectrum because it is determined by
+    subdividing a spectrum into sub bands. However
+    in the case of the BaselineGain and AverageGain
+    classes, interpolating across the gain curve
+    is possible.
+    </ul>
+    <li><em>Gain curves</em>
+    <ul>
+    <li><b>baseline</b> gain curve -- the minimized background curve
+    of a spectrum. It is achieved by comparing the gain curves
+    of more than one block.
+    </ul>
+    <li><em>Reference Frequencies</em>
+    <ul>
+    <li><b>abscissa</b> -- the reference values of a function. For a point,
+    \f$f(x)\f$, in cartesian coordinates,
+    the \f$x\f$-value is considered the abscissa, and
+    \f$f\f$ evaluated at \f$x\f$ is the ordinate.
+    </ul>
+    </ul>
+    
+    <h3>Motivation</h3>
+    
+    This class was motivated by two needs:
+    <ol>
+    <li>We wish to calibrate antennas. To do this, we need some relative measure
+    of gain.
+    <li>We wish to flag regions of RFI. One method is to normalize a spectrum
+    by dividing it by its underlying gain curve. From this normalized spectrum,
+    we are able to easily identify RFI.
+    </ol>
+  */
+  
+  class BaselineGain {
+    
+    /*!
+      Matrix specifying the endpoint indeces of the sub bands to be sampled
+      Its dimensions are [2, nSubBands]. Its entries are as follows:
+      \verbatim
+         _____________________________ ... _____________________________
+      1 | ending index of 1st band,    ... ending index of last band    |
+      0 | beginning index of 1st band, ... beginning index of last band |
+         -------------0--------------- ... ---------------N-------------
+    \endverbatim
+    */
+    Matrix<int> intervalEndpoints_p;
+    
+  public:
+    
+    // --- Method ----------------------------------------------------------------
+    int nOfFreq;
+    int nOfAnt;
+    double minFreq;
+    double maxFreq;
+    /*!
+      \brief Methods possible for scanning the spectra
+    */
+    enum Method {
+      //! median
+      MED,
+      //! average
+      MEAN,
+      //! minimum
+      MIN,
+      //! Standard deviation
+      STDDEV
+    };
+    
+    // --- Construction ----------------------------------------------------------
+    
+    /*!
+      \brief Default Constructor
+      
+      Default Constructor.
+      Initializes the maximum dimensions to
+      \f$[N_{\rm FreqChan},N_{\rm Ant}]=[50,10]\f$
+      and sets the number of sub bands to be sampled to 10. The gain curves for
+      each antenna are initialized to unity. Default frequency domain is 0-40 MHz
+      (LOFAR ITS). And scanning Method is default, 'MED'.
+    */
+    BaselineGain();
+    
+    /*!
+      \brief Argumented Constructor
+      
+      Sets the storage array for the gain curves to the specified dimensions,
+      \f$[N_{\rm SubBands},N_{\rm Ant}]\f$, and initializes it to the maximum value.
+      The arguments are used to set the maximum dimensions and frequency
+      domain of the baseline gains array.
+      
     \param spectraShape    -- two entries: \f$[N_{\rm FreqChan},N_{\rm Ant}]\f$
     \param spectraAbscissa -- \f$[N_{\rm FreqChan}]\f$
                               Vector of the frequency reference values for the
 			      spectra to be scanned (Hz). This is called
 			      'Frequency' in the glish data record for
 			      LOPES-Tools.
-    \param nOfSubBands     -- number of bands to divide the spectra into. Each
+    \param nofSubBands     -- number of bands to divide the spectra into. Each
                               sub band is analyzed for a representative gain
 	      		      according to the scanning Method.
     \param whichMethod     -- method used for determining the gain curve.
@@ -225,8 +255,8 @@ class BaselineGain {
 			      of type BaselineGain::Method.
   */
   BaselineGain( const IPosition& spectraShape,
-		const Vector<Double>& spectraAbscissa,
-		const Int& nOfSubBands,
+		const Vector<double>& spectraAbscissa,
+		const int& nofSubBands,
 		const BaselineGain::Method& whichMethod = MED );
 
   // --- Destruction -----------------------------------------------------------
@@ -265,12 +295,12 @@ class BaselineGain {
                               Vector of the frequency reference values for the
 			      spectra to be scanned (Hz). Called 'Frequency' in
 			      the glish data record for LOPES-Tools.
-    \param nOfSubBands -- number of bands along which to sample the spectra
+    \param nofSubBands -- number of bands along which to sample the spectra
                              for a minimum
   */
   virtual void reset( const IPosition& spectraShape,
-		      const Vector<Double>& spectraAbscissa,
-		      const Int& nOfSubBands );
+		      const Vector<double>& spectraAbscissa,
+		      const int& nofSubBands );
   
   /*!
     \brief Set the scanning method.
@@ -295,11 +325,11 @@ class BaselineGain {
     MED = 0,
     MEAN = 1,
     MIN = 2,
-    STDDEV = 3.				//####################################
+    STDDEV = 3.
     
-    \return whichMethod -- 0, 1, 2 or 3.	//###########################
+    \return whichMethod -- 0, 1, 2 or 3.
   */
-  Int getMethod() {
+  int getMethod() {
     return whichMethod_p;
   }
   
@@ -314,7 +344,7 @@ class BaselineGain {
                                  evaluated. Every member is the frequency
 				 reference for a point on the scanned gain curve.
   */
-  Vector<Double> getGainAbscissa() {
+  Vector<double> getGainAbscissa() {
     return gainAbscissa_p;
   }
   
@@ -323,7 +353,7 @@ class BaselineGain {
     
     \return nBlocksScanned -- The number of blocks scanned so far
   */
-  Int getNBlocksScanned() {
+  int getNBlocksScanned() {
     return nBlocksScanned_p;
   }
 
@@ -389,8 +419,8 @@ class BaselineGain {
 		       vector would be the following: \f$[F,F,T,F,T]\f$.
   */
   virtual void normalizeSpectra( Matrix<DComplex>& spectra,
-				 const Vector<Double>& frequencies,
-				 const Vector<Bool>& antennas );
+				 const Vector<double>& frequencies,
+				 const Vector<bool>& antennas );
 
   /*!
     \brief Default Baseline Gains Retrieval
@@ -402,7 +432,7 @@ class BaselineGain {
                              Matrix of baseline gain values.
   */
   
-  Matrix<Double> getBaselineGains();
+  Matrix<double> getBaselineGains();
 
   /*!
     \brief Baseline Gains Retrieval (with default frequencies)
@@ -423,7 +453,7 @@ class BaselineGain {
                              Matrix of baseline gain values.
   */
   
-  Matrix<Double> getBaselineGains( const Vector<Bool>& antReturn );
+  Matrix<double> getBaselineGains( const Vector<bool>& antReturn );
 
   /*!
     \brief Baseline Gains Retrieval (with default antennas)
@@ -438,7 +468,7 @@ class BaselineGain {
     \return baselineGains -- \f$[N_{\rm FreqRequested},N_{\rm Ant}]\f$
                              Matrix of baseline gain values.
   */
-  Matrix<Double> getBaselineGains( const Vector<Double>& freqReturn );
+  Matrix<double> getBaselineGains( const Vector<double>& freqReturn );
 
   /*!
     \brief Baseline Gains Retrieval
@@ -466,8 +496,8 @@ class BaselineGain {
     \return baselineGains -- \f$[N_{\rm FreqRequested},N_{\rm AntRequested}]\f$
                              Matrix of baseline gain values.
   */
-  Matrix<Double> getBaselineGains( const Vector<Double>& freqReturn,
-				  const Vector<Bool>& antReturn );
+  Matrix<double> getBaselineGains( const Vector<double>& freqReturn,
+				  const Vector<bool>& antReturn );
 
   /*!
     \brief Default Export baseline gains to an AIPS++ table
@@ -495,7 +525,7 @@ class BaselineGain {
 			  vector would be the following: \f$[F,F,T,F,T]\f$.
     \param tableName   -- name of file to be generated
   */
-  void exportBaselineGains( const Vector<Bool>& antReturn,
+  void exportBaselineGains( const Vector<bool>& antReturn,
 			    const String& tableName );
 
   /*!
@@ -509,7 +539,7 @@ class BaselineGain {
 			  gain curves. Must be sorted.
     \param tableName   -- name of file to be generated
   */
-  void exportBaselineGains( const Vector<Double>& freqReturn,
+  void exportBaselineGains( const Vector<double>& freqReturn,
 			    const String& tableName );
 
   /*!
@@ -532,8 +562,8 @@ class BaselineGain {
 			  vector would be the following: \f$[F,F,T,F,T]\f$.
     \param tableName   -- name of file to be generated
   */
-  void exportBaselineGains( const Vector<Double>& freqReturn,
-			    const Vector<Bool>& antReturn,
+  void exportBaselineGains( const Vector<double>& freqReturn,
+			    const Vector<bool>& antReturn,
 			    const String& tableName );
 
  private:
@@ -544,12 +574,12 @@ class BaselineGain {
   void setSpectraShape (const IPosition& spectraShape);
 
   // Set the endpoint indeces vector.
-  void setIntervalEndpoints( const Int& nOfFreqBins,
-			     const Int& nOfSubBands );
+  void setIntervalEndpoints( const int& nOfFreqBins,
+			     const int& nofSubBands );
 
   // Set the frequency domain of the spectra being scanned.
   //   The length of this vector is nFreqChan.
-  void setSpectraAbscissa( const Vector<Double>& spectraAbscissa );
+  void setSpectraAbscissa( const Vector<double>& spectraAbscissa );
 
   // Set the baselineGains_p member to the gain value determined for this
   //   sub band, only if it is less than that already stored. The three
@@ -570,18 +600,7 @@ class BaselineGain {
   */
   void remRFISpectra ( Matrix<DComplex>& spectra );
 
-  // --- Private Variables -----------------------------------------------------
-
-  // Matrix specifying the endpoint indeces of the sub bands to be sampled
-  //   Its dimensions are [2, nSubBands]. Its entries are as follows:
-  //
-  //     _____________________________ ... _____________________________
-  //  1 | ending index of 1st band,    ... ending index of last band    |
-  //  0 | beginning index of 1st band, ... beginning index of last band |
-  //     -------------0--------------- ... ---------------N-------------
-  Matrix <Int> intervalEndpoints_p;
-
- protected:
+  protected:
 
   // --- Protected Functions ---------------------------------------------------
 
@@ -596,10 +615,10 @@ class BaselineGain {
     \param maxFreq -- maximum frequency (Hz)
     \param nOfFreqChan -- number of channels the range is to be divided into
   */
-  Vector<Double> makeFreqAbscissa( const Double& minFreq,
-				  const Double& maxFreq,
-				  const Int& nOfFreqChan );
-
+  Vector<double> makeFreqAbscissa (const double& minFreq,
+				   const double& maxFreq,
+				   const int& nOfFreqChan);
+  
   /*! 
     \brief Count the number of antennas requested
     
@@ -614,7 +633,7 @@ class BaselineGain {
     \return nAnt -- number of True entries in antReturn. Or -1 if length of
                     antReturn is nonconformant with stored baselineGains_p.
   */
-  Int numRequestedAnt ( const Vector<Bool>& antReturn );
+  int numRequestedAnt ( const Vector<bool>& antReturn );
   
   /*!
     \brief Determine one of three cases which require different interpolations
@@ -648,8 +667,8 @@ class BaselineGain {
 			of antennas at construction or at reset.
    \return whichCase -- integer corresponding to case
   */
-  Int determineCase ( const Vector<Double>& freqReturn,
- 		      const Vector<Bool>& antReturn );
+  int determineCase ( const Vector<double>& freqReturn,
+ 		      const Vector<bool>& antReturn );
 
   /*!
     \brief Return the frequencies requested, interpolating across argument
@@ -678,10 +697,10 @@ class BaselineGain {
                                  the matrix of gains for each antenna requested
                                  and for each frequency requested.
   */
-  Matrix<Double> interpolateGains ( const Matrix<Double>& gains,
-				   const Vector<Double>& gainAbscissa,
-				   const Vector<Double>& freqReturn,
-				   const Vector<Bool>& antReturn );
+  Matrix<double> interpolateGains ( const Matrix<double>& gains,
+				   const Vector<double>& gainAbscissa,
+				   const Vector<double>& freqReturn,
+				   const Vector<bool>& antReturn );
   
   /*!
     \brief Export an AIPS++ table of data values and an appended reference vector
@@ -700,9 +719,9 @@ class BaselineGain {
 			 of 'dataValues'.
     \param tablename  -- name of the AIPS++ table to be exported.
   */
-  void exportTable ( const Matrix<Double>& dataValues,
-		     const Vector<Double>& freqReturn,
-		     const Vector<Bool>& antReturn,
+  void exportTable ( const Matrix<double>& dataValues,
+		     const Vector<double>& freqReturn,
+		     const Vector<bool>& antReturn,
 		     const String& tablename);
 
   // --- Protected Variables ---------------------------------------------------
@@ -720,7 +739,7 @@ class BaselineGain {
     nBlocksScanned is reset to zero every time the reset() function is called,
     implicitly or explicitly.
   */
-  Int nBlocksScanned_p;
+  int nBlocksScanned_p;
 
   /*!
     \brief Length and width dimensions of expected spectral block.
@@ -747,7 +766,7 @@ class BaselineGain {
     The two vectors span the same domain, but gainAbscissa_p is at a lower
     resolution than spectraAbscissa_p.
   */
-  Vector<Double> spectraAbscissa_p;
+  Vector<double> spectraAbscissa_p;
 
   /*!
     \brief Frequency abscissa Vector of the stored baseline gains.
@@ -755,7 +774,7 @@ class BaselineGain {
     The dimensions are \f$[N_{\rm SubBands}]\f$. Every row in the
     baselineGains_p matrix corresponds in sequence to a memberr of this
     vector.
-
+    
     For clarity, the difference between spectraAbscissa_p and gainAbscissa_p:
     <ul>
     <li> spectraAbscissa_p -- abscissa of each frequency channel of the
@@ -766,8 +785,8 @@ class BaselineGain {
     The two vectors span the same domain, but gainAbscissa_p is at a lower
     resolution than spectraAbscissa_p.
   */
-  Vector<Double> gainAbscissa_p;
-
+  Vector<double> gainAbscissa_p;
+  
   /*! 
     \brief Array with the baseline gain magnitudes
     
@@ -775,9 +794,11 @@ class BaselineGain {
     curves for each antenna. It is reset upon the function call reset().
     Dimensions are \f$[N_{\rm SubBands},N_{\rm Ant}]\f$.
   */
-  Matrix<Double> baselineGains_p;
-
-};
+  Matrix<double> baselineGains_p;
+  
+  };
+  
+}  // Namespace LOPES -- END
 
 #endif
 

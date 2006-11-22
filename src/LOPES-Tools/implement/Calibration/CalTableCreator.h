@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2006                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -20,8 +20,8 @@
 
 /* $Id: CalTableCreator.h,v 1.3 2006/11/08 16:06:41 bahren Exp $*/
 
-#ifndef _CALTABLECREATOR_H_
-#define _CALTABLECREATOR_H_
+#ifndef CALTABLECREATOR_H
+#define CALTABLECREATOR_H
 
 #include <casa/aips.h>
 #include <casa/iostream.h>
@@ -33,7 +33,6 @@
 #include <tables/Tables/TableRecord.h>
 #include <tables/Tables/StManAipsIO.h>
 #include <tables/Tables/SubTabDesc.h>
-
 /* Don't know yet whether I need them: */
 #include <tables/Tables/ScaColDesc.h>
 #include <tables/Tables/ScaRecordColDesc.h>
@@ -41,7 +40,18 @@
 #include <tables/Tables/StandardStMan.h>
 #include <tables/Tables/IncrementalStMan.h>
 
-#include <casa/namespace.h>
+using std::cout;
+using std::cerr;
+using std::endl;
+
+using casa::AipsError;
+using casa::String;
+using casa::ScalarColumnDesc;
+using casa::SetupNewTable;
+using casa::Table;
+using casa::TableDesc;
+
+namespace LOPES {  // Namespace LOPES -- BEGIN
 
 /*!
   \class CalTableCreator
@@ -69,15 +79,16 @@
 */
 
 class CalTableCreator {
-
+  
  private:
-
+  
 #define minDate 0
-#define maxDate 0xffffffff  // 2106.02.07.06:28:15.000 end of the 32bit unsigned unix epoch...
-
-
+  //! 2106.02.07.06:28:15.000 end of the 32bit unsigned unix epoch...
+#define maxDate 0xffffffff
+  
+  
  public:
-
+  
   // --------------------------------------------------------------- Construction
 
   /*!
@@ -112,9 +123,11 @@ class CalTableCreator {
 
     \param filename -- Name of the new table
 
-    \return  ok -- Was operation successful? Returns \c True if yes.
+    \return  ok -- Was operation successful? Returns \c true if yes.
   */
-  Bool newTable(String filename);
+  bool newTable(String filename);
 };
+
+}  // Namespace LOPES -- END
 
 #endif /* _CALTABLECREATOR_H_ */

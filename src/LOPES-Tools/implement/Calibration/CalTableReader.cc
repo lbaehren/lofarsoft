@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2006                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -20,7 +20,9 @@
 
 /* $Id: CalTableReader.cc,v 1.4 2006/11/10 16:52:45 horneff Exp $*/
 
-#include <lopes/Calibration/CalTableReader.h>
+#include <Calibration/CalTableReader.h>
+
+namespace LOPES {
 
 // ==============================================================================
 //
@@ -64,38 +66,38 @@ CalTableReader::~CalTableReader (){
 //
 // ==============================================================================
 
-Bool CalTableReader::init() {
+bool CalTableReader::init() {
   masterTable_p = NULL;
   AntIDIndex_p = NULL;
   indexedAnt_p = NULL;
-  return True;
+  return true;
 }
 
-Bool CalTableReader::cleanup() {
-  return True;
+bool CalTableReader::cleanup() {
+  return true;
 }
  
-Bool CalTableReader::AttachTable(const String& tableFilename){
+bool CalTableReader::AttachTable(const String& tableFilename){
   try {
     masterTable_p = new Table(tableFilename);
     AntIDIndex_p = new ColumnsIndex(*masterTable_p ,String("AntID"));
-    indexedAnt_p = new RecordFieldPtr<Int>(AntIDIndex_p->accessKey(),"AntID");
+    indexedAnt_p = new RecordFieldPtr<int>(AntIDIndex_p->accessKey(),"AntID");
   } catch (AipsError x) {
     cerr << "CalTableReader::AttachTable: " << x.getMesg() << endl;
-    return False;
+    return false;
   }; 
- return True;
+ return true;
 }
 
-Bool CalTableReader::isAttached(){
-  Bool erg=False;
+bool CalTableReader::isAttached(){
+  bool erg=false;
   try {
     if ((masterTable_p==NULL)||(masterTable_p->isNull())) { 
-      erg = False;
-    } else { erg = True; };
+      erg = false;
+    } else { erg = true; };
   } catch (AipsError x) {
     cerr << "CalTableReader::isAttached: " << x.getMesg() << endl;
-    return False;
+    return false;
   }; 
  return erg;
 }
@@ -105,15 +107,15 @@ Bool CalTableReader::isAttached(){
 // Get the given column table
 // ==============================================================================
 
-Bool  CalTableReader::GetColumnTable(Int const AntID,
+bool  CalTableReader::GetColumnTable(int const AntID,
 				     String const FieldName,
 				     Table *subtab,
-				     Int *rowNr,
+				     int *rowNr,
 				     String *DataType,
-				     Bool *isJunior ){
+				     bool *isJunior ){
   try {  
     // get column
-    ROScalarColumn<String> col(*masterTable_p,FieldName);  
+    casa::ROScalarColumn<String> col(*masterTable_p,FieldName);  
     // ret the data type
     if (DataType != NULL) {
       *DataType = col.keywordSet().asString("DataType");
@@ -122,12 +124,12 @@ Bool  CalTableReader::GetColumnTable(Int const AntID,
       *isJunior = col.keywordSet().asString("FriendField").length() != 0;
     };
     // get the row number
-    Bool found;
+    bool found;
     **indexedAnt_p = AntID;
     *rowNr = AntIDIndex_p->getRowNumber(found);
     if (!found) {
       cerr << "CalTableReader::GetColumnTable: " << "unknown antenna ID!" << endl;
-      return False;
+      return false;
     };
     // get the table
     String TableName;
@@ -135,23 +137,23 @@ Bool  CalTableReader::GetColumnTable(Int const AntID,
     *subtab = col.keywordSet().asTable(TableName);
   } catch (AipsError x) {
     cerr << "CalTableReader::GetColumnTable: " << x.getMesg() << endl;
-    return False;
+    return false;
   }; 
-  return True;
+  return true;
 }
 
 // ==============================================================================
 // Get the row number to the corresponding date
 // ==============================================================================
 
-Int CalTableReader::GetDateRow(Int const AntID,
+int CalTableReader::GetDateRow(int const AntID,
 			       Table const colTable,
-			       uInt const date,
-			       const Bool mindEmpty) {
-  Vector<uInt> rowNrs;
+			       unsigned int const date,
+			       const bool mindEmpty) {
+  Vector<unsigned int> rowNrs;
   try { 
-    rowNrs = colTable(colTable.col("AntID")==AntID && colTable.col("StartDate")<=(Double)date && 
-		      colTable.col("StopDate")>(Double)date).rowNumbers(colTable);
+    rowNrs = colTable(colTable.col("AntID")==AntID && colTable.col("StartDate")<=(double)date && 
+		      colTable.col("StopDate")>(double)date).rowNumbers(colTable);
   } catch (AipsError x) {
     cerr << "CalTableReader::GetDateRow: " << x.getMesg() << endl;
     return -1;
@@ -168,13 +170,13 @@ Int CalTableReader::GetDateRow(Int const AntID,
   return -2;
 }
 
-Int CalTableReader::GetJuniorDateRow(Int const AntID,
+int CalTableReader::GetJuniorDateRow(int const AntID,
 				     Table const colTable,
-				     uInt const date,
+				     unsigned int const date,
 				     String MaskField) {
-   Vector<uInt> rowNrs;
+   Vector<unsigned int> rowNrs;
    try { 
-    rowNrs = colTable(colTable.col("AntID")==AntID && colTable.col("StartDate")<=(Double)date && 
+    rowNrs = colTable(colTable.col("AntID")==AntID && colTable.col("StartDate")<=(double)date && 
 		      colTable.col(MaskField)).sort("StartDate").rowNumbers(colTable);
   } catch (AipsError x) {
     cerr << "CalTableReader::GetDateRow: " << x.getMesg() << endl;
@@ -196,23 +198,23 @@ Int CalTableReader::GetJuniorDateRow(Int const AntID,
 // (Unfortunately every type needs its own implementation)
 // ==============================================================================
 
-Bool CalTableReader::GetData(uInt const date,
-			     Int const AntID,
+bool CalTableReader::GetData(unsigned int const date,
+			     int const AntID,
 			     String const FieldName,
 			     String *result) {
   try {
-    Int rowNr;
+    int rowNr;
     Table subtab;
     String DataType;
-    Bool isJunior;
+    bool isJunior;
     if (!GetColumnTable(AntID, FieldName, &subtab, &rowNr, &DataType, &isJunior)) {
       cerr << "CalTableReader::GetData " << "Failed to get the ColumnTable" << endl;
-      return False;
+      return false;
     };
     // check the data type
     if (DataType != "String") {
       cerr << "CalTableReader::GetData " << "(String)<-->" << FieldName << ":Incompatible data type" << endl;
-      return False;
+      return false;
     };
     if (isJunior) {
       rowNr = GetJuniorDateRow(AntID, subtab, date, (FieldName+"-mask"));
@@ -220,34 +222,34 @@ Bool CalTableReader::GetData(uInt const date,
     rowNr = GetDateRow(AntID, subtab, date);
     };
     if (rowNr >= 0) {
-      *result = ROScalarColumn<String>(subtab,FieldName)(rowNr);
+      *result = casa::ROScalarColumn<String>(subtab,FieldName)(rowNr);
     } else {
       cerr << "CalTableReader::GetData: " << "Date not found!"  << endl;
     };
   } catch (AipsError x) {
     cerr << "CalTableReader::GetData: " << x.getMesg() << endl;
-    return False;
+    return false;
   }; 
-  return True;
+  return true;
 }
 
-Bool CalTableReader::GetData(uInt const date,
-			     Int const AntID,
+bool CalTableReader::GetData(unsigned int const date,
+			     int const AntID,
 			     String const FieldName,
-			     Double *result) {
+			     double *result) {
   try {
-    Int rowNr;
+    int rowNr;
     Table subtab;
     String DataType;
-    Bool isJunior;
+    bool isJunior;
     if (!GetColumnTable(AntID, FieldName, &subtab, &rowNr, &DataType, &isJunior)) {
       cerr << "CalTableReader::GetData " << "Failed to get the ColumnTable" << endl;
-      return False;
+      return false;
     };
     // check the data type
-    if (DataType != "Double") {
-      cerr << "CalTableReader::GetData " << "(Double)<-->" << FieldName << ":Incompatible data type" << endl;
-      return False;
+    if (DataType != "double") {
+      cerr << "CalTableReader::GetData " << "(double)<-->" << FieldName << ":Incompatible data type" << endl;
+      return false;
     };
     if (isJunior) {
       rowNr = GetJuniorDateRow(AntID, subtab, date, (FieldName+"-mask"));
@@ -255,34 +257,34 @@ Bool CalTableReader::GetData(uInt const date,
     rowNr = GetDateRow(AntID, subtab, date);
     };
     if (rowNr >= 0) {
-      *result = ROScalarColumn<Double>(subtab,FieldName)(rowNr);
+      *result = casa::ROScalarColumn<double>(subtab,FieldName)(rowNr);
     } else {
       cerr << "CalTableReader::GetData: " << "Date not found!"  << endl;
     };
   } catch (AipsError x) {
     cerr << "CalTableReader::GetData: " << x.getMesg() << endl;
-    return False;
+    return false;
   }; 
-  return True;
+  return true;
 }
 
-Bool CalTableReader::GetData(uInt const date,
-			     Int const AntID,
+bool CalTableReader::GetData(unsigned int const date,
+			     int const AntID,
 			     String const FieldName,
 			     DComplex *result) {
   try {
-    Int rowNr;
+    int rowNr;
     Table subtab;
     String DataType;
-    Bool isJunior;
+    bool isJunior;
     if (!GetColumnTable(AntID, FieldName, &subtab, &rowNr, &DataType, &isJunior)) {
       cerr << "CalTableReader::GetData " << "Failed to get the ColumnTable" << endl;
-      return False;
+      return false;
     };
     // check the data type
     if (DataType != "DComplex") {
       cerr << "CalTableReader::GetData " << "(DComplex)<-->" << FieldName << ":Incompatible data type" << endl;
-      return False;
+      return false;
     };
     if (isJunior) {
       rowNr = GetJuniorDateRow(AntID, subtab, date, (FieldName+"-mask"));
@@ -290,34 +292,34 @@ Bool CalTableReader::GetData(uInt const date,
     rowNr = GetDateRow(AntID, subtab, date);
     };
     if (rowNr >= 0) {
-      *result = ROScalarColumn<DComplex>(subtab,FieldName)(rowNr);
+      *result = casa::ROScalarColumn<DComplex>(subtab,FieldName)(rowNr);
     } else {
       cerr << "CalTableReader::GetData: " << "Date not found!"  << endl;
     };
   } catch (AipsError x) {
     cerr << "CalTableReader::GetData: " << x.getMesg() << endl;
-    return False;
+    return false;
   }; 
-  return True;
+  return true;
 }
 
-Bool CalTableReader::GetData(uInt const date,
-			     Int const AntID,
+bool CalTableReader::GetData(unsigned int const date,
+			     int const AntID,
 			     String const FieldName,
-			     Array<Double> *result) {
+			     Array<double> *result) {
   try {
-    Int rowNr;
+    int rowNr;
     Table subtab;
     String DataType;
-    Bool isJunior;
+    bool isJunior;
     if (!GetColumnTable(AntID, FieldName, &subtab, &rowNr, &DataType, &isJunior)) {
       cerr << "CalTableReader::GetData " << "Failed to get the ColumnTable" << endl;
-      return False;
+      return false;
     };
     // check the data type
-    if (DataType != "Array<Double>") {
-      cerr << "CalTableReader::GetData " << "(Array<Double>)<-->" << FieldName << ":Incompatible data type" << endl;
-      return False;
+    if (DataType != "Array<double>") {
+      cerr << "CalTableReader::GetData " << "(Array<double>)<-->" << FieldName << ":Incompatible data type" << endl;
+      return false;
     };
     if (isJunior) {
       rowNr = GetJuniorDateRow(AntID, subtab, date, (FieldName+"-mask"));
@@ -325,34 +327,34 @@ Bool CalTableReader::GetData(uInt const date,
       rowNr = GetDateRow(AntID, subtab, date);
     };
     if (rowNr >= 0) {
-      result->reference(ROArrayColumn<Double>(subtab,FieldName)(rowNr));
+      result->reference(casa::ROArrayColumn<double>(subtab,FieldName)(rowNr));
     } else {
       cerr << "CalTableReader::GetData: " << "Date not found!"  << endl;
     };
   } catch (AipsError x) {
     cerr << "CalTableReader::GetData: " << x.getMesg() << endl;
-    return False;
+    return false;
   }; 
-  return True;
+  return true;
 }
 
-Bool CalTableReader::GetData(uInt const date,
-			     Int const AntID,
+bool CalTableReader::GetData(unsigned int const date,
+			     int const AntID,
 			     String const FieldName,
 			     Array<DComplex> *result) {
   try {
-    Int rowNr;
+    int rowNr;
     Table subtab;
     String DataType;
-    Bool isJunior;
+    bool isJunior;
     if (!GetColumnTable(AntID, FieldName, &subtab, &rowNr, &DataType, &isJunior)) {
       cerr << "CalTableReader::GetData " << "Failed to get the ColumnTable" << endl;
-      return False;
+      return false;
     };
     // check the data type
     if (DataType != "Array<DComplex>") {
       cerr << "CalTableReader::GetData " << "(Array<DComplex>)<-->" << FieldName << ":Incompatible data type" << endl;
-      return False;
+      return false;
     };
     if (isJunior) {
       rowNr = GetJuniorDateRow(AntID, subtab, date, (FieldName+"-mask"));
@@ -360,15 +362,15 @@ Bool CalTableReader::GetData(uInt const date,
     rowNr = GetDateRow(AntID, subtab, date);
     };
     if (rowNr >= 0) {
-      result->reference(ROArrayColumn<DComplex>(subtab,FieldName)(rowNr));
+      result->reference(casa::ROArrayColumn<DComplex>(subtab,FieldName)(rowNr));
     } else {
       cerr << "CalTableReader::GetData: " << "Date not found!"  << endl;
     };
   } catch (AipsError x) {
     cerr << "CalTableReader::GetData: " << x.getMesg() << endl;
-    return False;
+    return false;
   }; 
-  return True;
+  return true;
 };
 
 
@@ -376,20 +378,20 @@ Bool CalTableReader::GetData(uInt const date,
 // Has the value of this field changed between the two given dates?
 // ==============================================================================
 
-Bool CalTableReader::isIdentical(uInt const date1,
-				 uInt const date2,
-				 Int const AntID, 
+bool CalTableReader::isIdentical(unsigned int const date1,
+				 unsigned int const date2,
+				 int const AntID, 
 				 String const FieldName) {
   try {  
-    Int rowNr;
+    int rowNr;
     Table subtab;
-    Bool isJunior;
-    //if (date1 == date2) { return True; } // Trivial case. Does not check whether date is valid.
+    bool isJunior;
+    //if (date1 == date2) { return true; } // Trivial case. Does not check whether date is valid.
     if (!GetColumnTable(AntID, FieldName, &subtab, &rowNr, NULL, &isJunior)) {
       cerr << "CalTableReader::isIdentical " << "Failed to get the ColumnTable" << endl;
-      return False;
+      return false;
     };
-    uInt row1,row2;
+    unsigned int row1,row2;
     if (isJunior) {
       row1 = GetJuniorDateRow(AntID, subtab, date1, (FieldName+"-mask"));
       row2 = GetJuniorDateRow(AntID, subtab, date2, (FieldName+"-mask"));
@@ -397,12 +399,12 @@ Bool CalTableReader::isIdentical(uInt const date1,
       row1 = GetDateRow(AntID, subtab, date1);
       row2 = GetDateRow(AntID, subtab, date2);
     };
-    if ( row1==row2 && row1>=0) return True;
+    if ( row1==row2 && row1>=0) return true;
   } catch (AipsError x) {
     cerr << "CalTableReader::isIdentical: " << x.getMesg() << endl;
-    return False;
+    return false;
   }; 
-  return False;
+  return false;
 };
 
 
@@ -423,84 +425,84 @@ String  CalTableReader::GetFieldType(String const FieldName) {
 }
 
 
-Bool CalTableReader::PrintSummary() {
+bool CalTableReader::PrintSummary() {
   cout << *masterTable_p << endl;
-  return True;
+  return true;
 }
 
 // ==============================================================================
 // Implementation of the GetKeyword methods
 // (Unfortunately every type needs its own implementation)
 // ==============================================================================
-Bool CalTableReader::GetKeyword(String const KeywordName, String *result){
+bool CalTableReader::GetKeyword(String const KeywordName, String *result){
   try {  
     if (!masterTable_p->keywordSet().isDefined(KeywordName)) {
       cerr << "CalTableReader::GetKeyword: Keyword named \"" << KeywordName << 
 	"\" does not exist" << endl;
-      return False;
+      return false;
     };
     *result = masterTable_p->keywordSet().asString(KeywordName);
   } catch (AipsError x) {
     cerr << "CalTableReader::GetKeyword: " << x.getMesg() << endl;
-    return False;
+    return false;
   }; 
-  return True;
+  return true;
 }
-Bool CalTableReader::GetKeyword(String const KeywordName, Double *result){
+bool CalTableReader::GetKeyword(String const KeywordName, double *result){
   try {  
     if (!masterTable_p->keywordSet().isDefined(KeywordName)) {
       cerr << "CalTableReader::GetKeyword: Keyword named \"" << KeywordName << 
 	"\" does not exist" << endl;
-      return False;
+      return false;
     };
-    *result = masterTable_p->keywordSet().asDouble(KeywordName);
+    *result = masterTable_p->keywordSet().asdouble(KeywordName);
   } catch (AipsError x) {
     cerr << "CalTableReader::GetKeyword: " << x.getMesg() << endl;
-    return False;
+    return false;
   }; 
-  return True;
+  return true;
 }
-Bool CalTableReader::GetKeyword(String const KeywordName, DComplex *result){
+bool CalTableReader::GetKeyword(String const KeywordName, DComplex *result){
   try {  
     if (!masterTable_p->keywordSet().isDefined(KeywordName)) {
       cerr << "CalTableReader::GetKeyword: Keyword named \"" << KeywordName << 
 	"\" does not exist" << endl;
-      return False;
+      return false;
     };
     *result = masterTable_p->keywordSet().asDComplex(KeywordName);
   } catch (AipsError x) {
     cerr << "CalTableReader::GetKeyword: " << x.getMesg() << endl;
-    return False;
+    return false;
   }; 
-  return True;
+  return true;
 }
-Bool CalTableReader::GetKeyword(String const KeywordName, Array<Double> *result){
+bool CalTableReader::GetKeyword(String const KeywordName, Array<double> *result){
   try {  
     if (!masterTable_p->keywordSet().isDefined(KeywordName)) {
       cerr << "CalTableReader::GetKeyword: Keyword named \"" << KeywordName << 
 	"\" does not exist" << endl;
-      return False;
+      return false;
     };
-    result->reference(masterTable_p->keywordSet().asArrayDouble(KeywordName));
+    result->reference(masterTable_p->keywordSet().asArraydouble(KeywordName));
   } catch (AipsError x) {
     cerr << "CalTableReader::GetKeyword: " << x.getMesg() << endl;
-    return False;
+    return false;
   }; 
-  return True;
+  return true;
 }
-Bool CalTableReader::GetKeyword(String const KeywordName, Array<DComplex> *result){
+bool CalTableReader::GetKeyword(String const KeywordName, Array<DComplex> *result){
   try {  
     if (!masterTable_p->keywordSet().isDefined(KeywordName)) {
       cerr << "CalTableReader::GetKeyword: Keyword named \"" << KeywordName << 
 	"\" does not exist" << endl;
-      return False;
+      return false;
     };
     result->reference(masterTable_p->keywordSet().asArrayDComplex(KeywordName));
   } catch (AipsError x) {
     cerr << "CalTableReader::GetKeyword: " << x.getMesg() << endl;
-    return False;
+    return false;
   }; 
-  return True;
+  return true;
 }
 
 
@@ -514,22 +516,22 @@ String CalTableReader::GetKeywordType(String const KeywordName){
 	"\" does not exist" << endl;
       return "";
     };
-    DataType type = masterTable_p->keywordSet().dataType(KeywordName);
+    casa::DataType type = masterTable_p->keywordSet().dataType(KeywordName);
     switch(type) {
-    case TpString:
+    case casa::TpString:
       return "String";
-    case TpDouble:
-      return "Double";
-    case TpDComplex:
+    case casa::TpDouble:
+      return "double";
+    case casa::TpDComplex:
       return "DComplex";
-    case TpArrayDouble:
-      return "Array<Double>";
-    case TpArrayDComplex:
+    case casa::TpArrayDouble:
+      return "Array<double>";
+    case casa::TpArrayDComplex:
       return "Array<DComplex>";
-    case TpInt:
-      return "Int";
-    case TpUInt:
-      return "uInt";
+    case casa::TpInt:
+      return "int";
+    case casa::TpUInt:
+      return "unsigned int";
     default:
       return "";
     }
@@ -540,3 +542,4 @@ String CalTableReader::GetKeywordType(String const KeywordName){
   return "";
 }
   
+}  // Namespace LOPES -- END

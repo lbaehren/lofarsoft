@@ -20,11 +20,8 @@
 
 /* $Id: AverageGain.h,v 1.14 2006/10/31 18:23:24 bahren Exp $ */
 
-#ifndef _AVERAGEGAIN_H_
-#define _AVERAGEGAIN_H_
-
-// Base class
-#include <lopes/Calibration/BaselineGain.h>
+#ifndef AVERAGEGAIN_H
+#define AVERAGEGAIN_H
 
 // CASA header files
 #include <casa/aips.h>
@@ -33,12 +30,6 @@
 #include <casa/Arrays/Vector.h>
 #include <casa/Arrays/ArrayMath.h>
 #include <casa/Arrays/IPosition.h>
-// #include <casa/iostream.h>
-// #include <casa/fstream.h>
-// #include <casa/string.h>
-// #include <casa/Arrays/Array.h>
-// #include <casa/BasicSL/Complex.h>
-// #include <casa/Quanta.h>
 #include <tables/Tables/Table.h>
 #include <tables/Tables/TableDesc.h>
 #include <tables/Tables/SetupNewTab.h>
@@ -48,11 +39,18 @@
 #include <tables/Tables/ArrColDesc.h>
 #include <tables/Tables/ArrayColumn.h>
 
-
 // LOPES-Tools header files
-#include <lopes/Math/Math.h>
+#include <Calibration/BaselineGain.h>
 
-#include <casa/namespace.h>
+using casa::Complex;
+using casa::DComplex;
+using casa::Interpolate1D;
+using casa::IPosition;
+using casa::Matrix;
+using casa::String;
+using casa::Vector;
+
+namespace LOPES {  // Namespace LOPES -- BEGIN
 
 /*!
   \class AverageGain
@@ -167,18 +165,18 @@
   groups each consisting of 'nOfBlocksPerGroup' blocks:
 
   \verbatim
-  Matrix<Double> makeAverageGains ( IPosition spectraShape,
-                                   Vector<Double> spectraAbscissa,
-				   Int nOfSubBands )
+  Matrix<double> makeAverageGains ( IPosition spectraShape,
+                                   Vector<double> spectraAbscissa,
+				   int nOfSubBands )
   {
     Matrix<DComplex> spectra ( spectraShape );
     AverageGain avgg ( spectraShape,
                        spectraAbscissa,
 		       nOfSubBands );
     // loop across the groups
-    for ( Int group( 0 ); group < nOfGroups; group++ ) {
+    for ( int group( 0 ); group < nOfGroups; group++ ) {
       // loop across the blocks
-      for ( Int block( 0 ); block < nOfBlocksPerGroup; block++ ) {
+      for ( int block( 0 ); block < nOfBlocksPerGroup; block++ ) {
         spectra = someGetSpectraFunction( block );
         avgg.extractBaselineGains( spectra );
       }
@@ -227,8 +225,8 @@ class AverageGain : public BaselineGain {
                           type BaselineGain::Method.
   */
   AverageGain (const IPosition& spectraShape,
-	       const Vector<Double>& spectraAbscissa,
-	       const Int& nOfSubBands,
+	       const Vector<double>& spectraAbscissa,
+	       const int& nOfSubBands,
 	       BaselineGain::Method whichMethod = MED );
   
   /*!
@@ -246,9 +244,9 @@ class AverageGain : public BaselineGain {
                            be subdivided
   */
   AverageGain (const IPosition& spectraShape,
-	       const Double& freqMin,
-	       const Double& freqMax,
-	       const Int& nOfSubBands);
+	       const double& freqMin,
+	       const double& freqMax,
+	       const int& nOfSubBands);
   
   // --- Destruction -----------------------------------------------------------
 
@@ -292,8 +290,8 @@ class AverageGain : public BaselineGain {
                              for a minimum
   */
   void reset( const IPosition& spectraShape,
-	      const Vector<Double>& spectraAbscissa,
-	      const Int& nOfSubBands );
+	      const Vector<double>& spectraAbscissa,
+	      const int& nOfSubBands );
   
   /*!
     \brief Set the scanning method.
@@ -320,7 +318,7 @@ class AverageGain : public BaselineGain {
 			 every time addGroupToAverage() is successfully
 			 executed.
   */
-  Int getNGroupsAveraged();
+  int getNGroupsAveraged();
 
   /*!
     \brief Add the group of baseline gain curves to the set to be averaged
@@ -337,7 +335,7 @@ class AverageGain : public BaselineGain {
     constitute a new group (as long as the flag isn't `False'.)
     
     \param alsoResetBaselineGains -- boolean flag for reset of baseline gains.
-                                     Default = True.
+                                     Default = true.
                                      If true, this function call will not
 				     only add the group of scanned
 				     baseline gain curves to the average,
@@ -349,7 +347,7 @@ class AverageGain : public BaselineGain {
 				     the average several times ( and
 				     thereby weight the average.)
   */
-  void addGroupToAverage( const Bool& alsoResetBaselineGains = True );
+  void addGroupToAverage( const bool& alsoResetBaselineGains = true );
 
   /*!
     \brief Normalize spectra with respect to the averaged baselines
@@ -382,7 +380,7 @@ class AverageGain : public BaselineGain {
 			  entry must correspond to the \f$n\f$-th row of argument
 			  spectra.
     \param antennas -- \f$[N_{\rm Ant}]\f$
-                       True/False entry correponds to each antenna
+                       true/False entry correponds to each antenna
 		       (true = this antenna is included in the spectra,
 		       false = not included) Vector must have
 		       length equal to number of antennas at construction, or
@@ -392,8 +390,8 @@ class AverageGain : public BaselineGain {
 		       vector would be the following: \f$[F,F,T,F,T]\f$.
   */
   void normalizeSpectra( Matrix<DComplex>& spectra,
-			 const Vector<Double>& spectraAbscissa,
-			 const Vector<Bool>& antennas );
+			 const Vector<double>& spectraAbscissa,
+			 const Vector<bool>& antennas );
 
   /*!
     \brief Default Average Gains Retrieval
@@ -404,7 +402,7 @@ class AverageGain : public BaselineGain {
     \return averageGains -- \f$[N_{\rm SubBands},N_{\rm Ant}]\f$
                              Matrix of average gain values.
   */
-  Matrix<Double> getAverageGains();
+  Matrix<double> getAverageGains();
 
   /*!
     \brief Average Gains Retrieval (with default frequencies)
@@ -413,7 +411,7 @@ class AverageGain : public BaselineGain {
     See fully argumented function for more detail.
 
     \param antReturn   -- \f$[N_{\rm Ant}]\f$
-                          True/False entry correponds to each antenna
+                          true/False entry correponds to each antenna
 			  (true = return the gain curve for this antenna
 			  false = do not return this antenna.) Vector must have
 			  length equal to number of antennas at construction.
@@ -424,7 +422,7 @@ class AverageGain : public BaselineGain {
     \return averageGains -- \f$[N_{\rm SubBands},N_{\rm AntRequested}]\f$
                              Matrix of average gain values.
   */
-  Matrix<Double> getAverageGains( const Vector<Bool>& antReturn );
+  Matrix<double> getAverageGains( const Vector<bool>& antReturn );
 
   /*!
     \brief Average Gains Retrieval (with default antennas)
@@ -439,7 +437,7 @@ class AverageGain : public BaselineGain {
     \return averageGains -- \f$[N_{\rm FreqRequested},N_{\rm Ant}]\f$
                              Matrix of average gain values.
   */
-  Matrix<Double> getAverageGains( const Vector<Double>& freqReturn );
+  Matrix<double> getAverageGains( const Vector<double>& freqReturn );
 
   /*!
     \brief Average baseline gains retrieval
@@ -457,7 +455,7 @@ class AverageGain : public BaselineGain {
                           Particular frequencies at which to return the average
 			  baseline gain curves. Must be sorted.
     \param antReturn   -- \f$[N_{\rm Ant}]\f$
-                          True/False entry correponds to each antenna
+                          true/False entry correponds to each antenna
 			  (true = return the average curve for this antenna
 			  false = do not return this antenna.) Vector must have
 			  length equal to number of antennas at construction.
@@ -468,8 +466,8 @@ class AverageGain : public BaselineGain {
     \return averageGains -- \f$[N_{\rm FreqRequested},N_{\rm AntRequested}]\f$
                              Matrix of Average baseline gain values.
   */
-  Matrix<Double> getAverageGains( const Vector<Double>& freqReturn,
-				 const Vector<Bool>& antReturn );
+  Matrix<double> getAverageGains( const Vector<double>& freqReturn,
+				 const Vector<bool>& antReturn );
 
   /*!
     \brief Default export average gains to an AIPS++ table
@@ -488,7 +486,7 @@ class AverageGain : public BaselineGain {
     See fully argumented function for more detail.
 
     \param antReturn   --  \f$[N_{\rm Ant}]\f$
-                          True/False entry correponds to each antenna
+                          true/False entry correponds to each antenna
 			  (true = export the gain curve for this antenna
 			  false = do not export this antenna.) Vector must have
 			  length equal to number of antennas at construction.
@@ -497,7 +495,7 @@ class AverageGain : public BaselineGain {
 			  vector would be the following: \f$[F,F,T,F,T]\f$.
     \param tableName   -- name of file to be generated
   */
-  void exportAverageGains( const Vector<Bool>& antReturn,
+  void exportAverageGains( const Vector<bool>& antReturn,
 			   const String& tableName );
 
   /*!
@@ -511,7 +509,7 @@ class AverageGain : public BaselineGain {
 			  gain curves. Must be sorted.
     \param tableName   -- name of file to be generated
   */
-  void exportAverageGains( const Vector<Double>& freqReturn,
+  void exportAverageGains( const Vector<double>& freqReturn,
 			   const String& tableName );
 
   /*!
@@ -525,7 +523,7 @@ class AverageGain : public BaselineGain {
                           Particular frequencies at which to return the average
 			  gain curves. Must be sorted.
     \param antReturn   -- \f$[N_{\rm Ant}]\f$
-                          True/False entry correponds to each antenna
+                          true/False entry correponds to each antenna
 			  (true = export the gain curve for this antenna
 			  false = do not export this antenna.) Vector must have
 			  length equal to number of antennas at construction.
@@ -534,30 +532,32 @@ class AverageGain : public BaselineGain {
 			  vector would be the following: \f$[F,F,T,F,T]\f$.
     \param tableName   -- name of file to be generated
   */
-  void exportAverageGains( const Vector<Double>& freqReturn,
-			   const Vector<Bool>& antReturn,
+  void exportAverageGains( const Vector<double>& freqReturn,
+			   const Vector<bool>& antReturn,
 			   const String& tableName );
 
  private:
   
   // Set gainShape_p;
   //   dimensions -- [ nSubBands, nAnt ]
-  void setGainShape( const Int& nOfSubBands,
-		     const Int& nOfAnt );
+  void setGainShape( const int& nOfSubBands,
+		     const int& nOfAnt );
 
   // --- Private Variables -----------------------------------------------------
 
   // private member sum of the groups of gain curves. Divide by nGroupsAveraged_p
   //   to get the average gain curve of the groups.
-  Matrix<Double> sumAvgGains_p;
+  Matrix<double> sumAvgGains_p;
 
   // private member counts the groups added
-  Int nGroupsAveraged_p;
+  int nGroupsAveraged_p;
 
   // private member stores dimensions of the groups of gain curves being
   //   averaged. Its two entries are {nOfSubBands, nOfAnt}.
   IPosition gainShape_p;
 
 };
+
+}  //  Namespace LOPES -- END
 
 #endif
