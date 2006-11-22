@@ -33,7 +33,10 @@
 #include <casa/Exceptions/Error.h>
 #include <casa/OS/Time.h>
 
-#include <casa/namespace.h>
+using std::ostringstream;
+
+using casa::String;
+using casa::Time;
 
 namespace LOPES {
 

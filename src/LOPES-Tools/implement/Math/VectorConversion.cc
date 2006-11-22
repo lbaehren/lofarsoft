@@ -55,7 +55,7 @@ namespace LOPES { // Namespace LOPES -- begin
   Vector<T> azel2cartesian (const Vector<T>& azel)
   {
     Vector<T> cartesian(3);
-    uInt shape = azel.nelements();
+    unsigned int shape = azel.nelements();
     T radius = 1.0;
     T az = LOPES::deg2rad(azel(0));
     T el = LOPES::deg2rad(azel(1));
@@ -92,11 +92,11 @@ namespace LOPES { // Namespace LOPES -- begin
     return cartesian;
   }
 
-  template Vector<Float> azel2cartesian (const Vector<Float>& azel);
-  template Vector<Double> azel2cartesian (const Vector<Double>& azel);
+  template Vector<float> azel2cartesian (const Vector<float>& azel);
+  template Vector<double> azel2cartesian (const Vector<double>& azel);
   
-  template Vector<Float> polar2cartesian (Vector<Float> const &polar);
-  template Vector<Double> polar2cartesian (Vector<Double> const &polar);
+  template Vector<float> polar2cartesian (Vector<float> const &polar);
+  template Vector<double> polar2cartesian (Vector<double> const &polar);
 
 #endif
 
@@ -152,11 +152,11 @@ namespace LOPES { // Namespace LOPES -- begin
     return cartesian;
   }
 
-  template blitz::Array<Float,1> azel2cartesian (const blitz::Array<Float,1>& azel);
-  template blitz::Array<Double,1> azel2cartesian (const blitz::Array<Double,1>& azel);
+  template blitz::Array<float,1> azel2cartesian (const blitz::Array<float,1>& azel);
+  template blitz::Array<double,1> azel2cartesian (const blitz::Array<double,1>& azel);
 
-  template blitz::Array<Float,1> polar2cartesian (blitz::Array<Float,1> const &polar);
-  template blitz::Array<Double,1> polar2cartesian (blitz::Array<Double,1> const &polar);
+  template blitz::Array<float,1> polar2cartesian (blitz::Array<float,1> const &polar);
+  template blitz::Array<double,1> polar2cartesian (blitz::Array<double,1> const &polar);
 
 #endif
   

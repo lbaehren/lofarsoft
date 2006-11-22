@@ -34,6 +34,7 @@ endif (HAVE_CASA)
 ## -----------------------------------------------------------------------------
 
 ADD_LIBRARY (lopestools
+  Calibration/RFIMitigation.cc
   Data/Data.cc
   Data/DynamicSpectrum.cc
   Data/UnitPrefix.cc
@@ -45,9 +46,9 @@ ADD_LIBRARY (lopestools
   Functionals/StatisticsFilter.cc
   IO/DataIO.cc
   IO/DataIterator.cc
-#  IO/LogfileName.cc
+  IO/LogfileName.cc
   Math/ThreeVector.cc
-#  Math/VectorConversion.cc
+  Math/VectorConversion.cc
   Utilities/ProgressBar.cc
   Utilities/Timestamp.cc
   Utilities/TestArray.cc
