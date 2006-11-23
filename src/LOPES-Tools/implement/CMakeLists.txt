@@ -44,10 +44,10 @@ ADD_LIBRARY (lopestools
   Calibration/AverageGain.cc
   Calibration/BaselineGain.cc
   Calibration/CalTableCreator.cc
-#  Calibration/CalTableInterpolater.cc
+  Calibration/CalTableInterpolater.cc
   Calibration/CalTableReader.cc
-#  Calibration/CalTableWriter.cc
-#  Calibration/PhaseCalibration.cc
+  Calibration/CalTableWriter.cc
+  Calibration/PhaseCalibration.cc
 #  Calibration/PhaseCalibrationPlugin.cc
 #  Calibration/PluginBase.cc
   Calibration/RFIMitigation.cc

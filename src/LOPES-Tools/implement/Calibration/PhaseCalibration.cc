@@ -20,240 +20,236 @@
 
 /* $Id: PhaseCalibration.cc,v 1.10 2006/11/02 13:39:26 singh Exp $*/
 
-#include <lopes/Calibration/PhaseCalibration.h>
+#include <Calibration/PhaseCalibration.h>
 
 /*!
   \class PhaseCalibration
 */
 
-// ==============================================================================
-//
-//  Construction
-//
-// ==============================================================================
-
-// PhaseCalibration::PhaseCalibration ()
-// {;}
-// 
-// PhaseCalibration::PhaseCalibration (PhaseCalibration const &other)
-// {
-//   copy (other);
-// }
-PhaseCalibration :: PhaseCalibration ()
-{;}   
-
-PhaseCalibration :: ~PhaseCalibration ()
-{;}   
-
-//Argumented Consturctor
-
-
-PhaseCalibration :: PhaseCalibration( const Matrix<DComplex>& spectra,
-  		     		      const Matrix<Double>& frequencyRanges,
-		                      const Matrix<Double>& expectedPhases,
-				      const Matrix<Double>& phaseGradient,
-		                      const Vector<Double>& frequencyValues,
-		                      const Vector<Double>& sampleJumps,
-		                      const Int& referenceAntenna,
-		     		      const Double& sampleRate,
-		                      const Double& badnessWeight )
-				
-{ 
- //Matrix<DComplex> gainValues ;
-}
-
-
-  Vector<Int> PhaseCalibration::getFrequencyIndices( const Matrix<Double>& frequencyRanges,
-						     const Vector<Double>& frequencyValues )
- {
- 
- try {
- 
-  Int nOfRows = frequencyRanges.nrow() ;	// no of rows will depend on how many peaks have to be scanned
+namespace LOPES {  // Namespace LOPES -- BEGIN
   
-  Int nOfColumns = frequencyRanges.ncolumn() ;	// no. of columns will be always 2, i.e., min. and max. 
-  						// frequency values to scan the power peak
+  // ==============================================================================
+  //
+  //  Construction
+  //
+  // ==============================================================================
   
-  Int nOfIndices = nOfColumns*nOfRows ;		// how many indeces have to be scanned in the vector frequencyValues
+  PhaseCalibration::PhaseCalibration ()
+  {;}   
   
-  Vector<Int> frequencyIndices( nOfIndices );   
-  
-  //Int nOfElements = frequencyValues.nelements () ;
-  
-  Int k = 0;
-  
-  Int l = 0;
-
-  Double frequencyValue = 0.0 ;
- 
-  Double frequencyRange = 0.0 ;
-  
-  for(Int i = 0; i< nOfRows; i++)
+  PhaseCalibration::PhaseCalibration (const Matrix<DComplex>& spectra,
+				      const Matrix<double>& frequencyRanges,
+				      const Matrix<double>& expectedPhases,
+				      const Matrix<double>& phaseGradient,
+				      const Vector<double>& frequencyValues,
+				      const Vector<double>& sampleJumps,
+				      const int& referenceAntenna,
+				      const double& sampleRate,
+				      const double& badnessWeight )
     
-    {
-    for(Int j = 0; j< nOfColumns; j++)
-          
-	  {
-	  
-	  do{
-	  
-	    frequencyValue = frequencyValues (k);
-	    // cout<<" Frequency Value" << frequencyValue<< "\t";
-            frequencyRange = frequencyRanges (i,j);
-	    //  cout << " FRequency Range" << frequencyRange << "\t"<<"\t" ;
-	    k = k+1 ;
-
+  { 
+    //Matrix<DComplex> gainValues ;
+  }
+  
+  // ==============================================================================
+  //
+  //  Destruction
+  //
+  // ==============================================================================
+  
+  PhaseCalibration::~PhaseCalibration ()
+  {;}   
+  
+  Vector<int> PhaseCalibration::getFrequencyIndices (const Matrix<double>& frequencyRanges,
+						     const Vector<double>& frequencyValues )
+  {
+    
+    try {
+      
+      int nOfRows = frequencyRanges.nrow() ;	// no of rows will depend on how many peaks have to be scanned
+      
+      int nOfColumns = frequencyRanges.ncolumn() ;	// no. of columns will be always 2, i.e., min. and max. 
+      // frequency values to scan the power peak
+      
+      int nOfIndices = nOfColumns*nOfRows ;		// how many indeces have to be scanned in the vector frequencyValues
+      
+      Vector<int> frequencyIndices( nOfIndices );   
+      
+      //int nOfElements = frequencyValues.nelements () ;
+      
+      int k = 0;
+      
+      int l = 0;
+      
+      double frequencyValue = 0.0 ;
+      
+      double frequencyRange = 0.0 ;
+      
+      for(int i = 0; i< nOfRows; i++)
+	
+	{
+	  for(int j = 0; j< nOfColumns; j++)
+	    
+	    {
+	      
+	      do{
+		
+		frequencyValue = frequencyValues (k);
+		// cout<<" Frequency Value" << frequencyValue<< "\t";
+		frequencyRange = frequencyRanges (i,j);
+		//  cout << " FRequency Range" << frequencyRange << "\t"<<"\t" ;
+		k = k+1 ;
+		
 	      } while ( frequencyValue < frequencyRange ) ;
-	  cout<<endl;
-	        frequencyIndices( l ) = k+1  ;
-	         
-		  l = l+1 ;
-	     }	
+	      cout<<endl;
+	      frequencyIndices( l ) = k+1  ;
+	      
+	      l = l+1 ;
+	    }	
 	}
-	
-   return frequencyIndices ;
-    
+      
+      return frequencyIndices ;
+      
     }
     catch ( AipsError x ) {
-    cerr << " PhaseCalibration::getFrequencyIndices " << x.getMesg () << endl ;
-    return Vector<Int> ();
-   }
- }
- 
-   
-   
-  Matrix<Int> PhaseCalibration::getIndexOfPowerPeaks( const Matrix<DComplex>& spectra,
-  			       		 	      const Vector<Int>& frequencyIndex,
-			       		 	      const Vector<Double>& frequencyValues )
-						 
- {
- 
-  try {
+      cerr << " PhaseCalibration::getFrequencyIndices " << x.getMesg () << endl ;
+      return Vector<int> ();
+    }
+  }
   
-  Matrix<Double> absoluteArray( amplitude( spectra) );
+  // ------------------------------------------------------- getIndexOfPowerPeaks
   
-  Int nOfColumns = spectra.ncolumn() ;	         // no. of columns will be always 2, i.e., min. and max. 
-  						// frequency values to scan the power peak
-  
-  //Int nOfRows = spectra.nrow() ;		// no of rows will depend on how many peaks have to be scanned
-  
-  Int nOfSegments = (frequencyIndex.nelements())/2  ; // No of segments of the input array spectra will depend on
-  						      // the no. of elements in the vector frequencyIndex
+  Matrix<int> PhaseCalibration::getIndexOfPowerPeaks( const Matrix<DComplex>& spectra,
+  			       		 	      const Vector<int>& frequencyIndex,
+			       		 	      const Vector<double>& frequencyValues )
     
-  Matrix<Int> indexOfPowerPeaks( nOfSegments, nOfColumns ) ;
-  
-  Int nOfElements = frequencyIndex.nelements() ;
-  
-  Int n = 0 ;      // Row of the matrix indexOfPowerPeak
-  
-  Int m = 0 ;
-  
-  Int powerPeakIndex = 0 ;
-   
-   for( Int i =0; i< nOfElements ; i = i+2 )
-    {
+  {
     
-     Int segmentInit = frequencyIndex( i ) ;
-     
-     Int segmentFinal = frequencyIndex( i+1 ) ;
+    try {
       
-     Int segmentLength = (segmentFinal-segmentInit + 1) ;
+      Matrix<double> absoluteArray( amplitude( spectra) );
       
-      Matrix<Double> segmentedMatrix( absoluteArray( Slice( segmentInit, segmentLength ), Slice( 0, nOfColumns ) ) ) ;
+      int nOfColumns = spectra.ncolumn() ;	         // no. of columns will be always 2, i.e., min. and max. 
+      // frequency values to scan the power peak
       
-      Int Columns = segmentedMatrix.ncolumn() ;
+      //int nOfRows = spectra.nrow() ;		// no of rows will depend on how many peaks have to be scanned
       
-      Int Rows = segmentedMatrix.nrow() ;
+      int nOfSegments = (frequencyIndex.nelements())/2  ; // No of segments of the input array spectra will depend on
+      // the no. of elements in the vector frequencyIndex
       
-      Double elementValue = 0 ;
+      Matrix<int> indexOfPowerPeaks( nOfSegments, nOfColumns ) ;
       
-   //   cout<< "Index of Power Peaks :"<< endl ;
-
-      for( Int k = 0; k < Columns; k++ )
-        {
-	 for( Int j = 0; j < Rows; j++ )
-	     {
-	      if ( elementValue < segmentedMatrix( j, k) )
-	        {
-	        elementValue = segmentedMatrix( j, k ) ;
+      int nOfElements = frequencyIndex.nelements() ;
+      
+      int n = 0 ;      // Row of the matrix indexOfPowerPeak
+      
+      int m = 0 ;
+      
+      int powerPeakIndex = 0 ;
+      
+      for( int i =0; i< nOfElements ; i = i+2 ) {
+	
+	int segmentInit = frequencyIndex( i ) ;
+	
+	int segmentFinal = frequencyIndex( i+1 ) ;
+	
+	int segmentLength = (segmentFinal-segmentInit + 1) ;
+	
+	Matrix<double> segmentedMatrix( absoluteArray( Slice( segmentInit, segmentLength ), Slice( 0, nOfColumns ) ) ) ;
+	
+	int Columns = segmentedMatrix.ncolumn() ;
+	
+	int Rows = segmentedMatrix.nrow() ;
+	
+	double elementValue = 0 ;
+	
+	//   cout<< "Index of Power Peaks :"<< endl ;
+	
+	for( int k = 0; k < Columns; k++ )
+	  {
+	    for( int j = 0; j < Rows; j++ )
+	      {
+		if ( elementValue < segmentedMatrix( j, k) )
+		  {
+		    elementValue = segmentedMatrix( j, k ) ;
+		    
+		    m = j ;
+		    
+		  }
 		
-		m = j ;
-		
-		}
-		
-	       powerPeakIndex = segmentInit + m ;
-	     }
-	   
-	indexOfPowerPeaks ( n, k ) = powerPeakIndex ;	
-
-	cout<<indexOfPowerPeaks( n,k )<<"\t";
-		
-	}
+		powerPeakIndex = segmentInit + m ;
+	      }
+	    
+	    indexOfPowerPeaks ( n, k ) = powerPeakIndex ;	
+	    
+	    cout<<indexOfPowerPeaks( n,k )<<"\t";
+	    
+	  }
 	n = n+1 ;	
-     }
-   cout<< endl;
-
-    return indexOfPowerPeaks ;
-    
+      }
+      cout<< endl;
+      
+      return indexOfPowerPeaks ;
+      
     }
     catch ( AipsError x ) {
-    cerr << " PhaseCalibration::getIndexOfPowerPeaks " << x.getMesg () << endl ;
-    return Matrix<Int> ();
-   }
- }
-   
- 
- Vector<Double> PhaseCalibration::getPeakFrequencyValues( const Matrix<Int>& powerIndex,
- 					                 const Vector<Double>& frequencyValues )
-
- {
- 
-  try {
-      
-    Int nOfRows = powerIndex.nrow() ;
-    
-    Vector<Double> peakFrequencyValues( nOfRows ) ;
-    
-   // cout<< "Peak Frequency Values :"<< endl;
-    for( Int i = 0; i< nOfRows ; i++ )
-      {
-        Int j = powerIndex( i, 0 );    // peak power frequency index will be same for all antenna so 
-					// calculated here only for one antenna
-					
-	peakFrequencyValues( i ) = frequencyValues( j );
-    
-	cout<<peakFrequencyValues( i )<< "\t" ;
-	
-	}
-    cout<< endl;
-    return peakFrequencyValues ;
-    
+      cerr << " PhaseCalibration::getIndexOfPowerPeaks " << x.getMesg () << endl ;
+      return Matrix<int> ();
     }
-    catch ( AipsError x ) {
-    cerr << " PhaseCalibration::getPeakFrequencyValues " << x.getMesg () << endl ;
-    return Vector<Double> ();
-   }
- }   
-      
- 
- Matrix<Double> PhaseCalibration::getPhaseValues( const Matrix<DComplex>& spectra,
- 					         const Matrix<Int>& powerIndex )
-					  
- {
- 
-  try { 
+  }
   
-      Int nOfColumns = powerIndex.ncolumn() ;
+  
+  Vector<double> PhaseCalibration::getPeakFrequencyValues( const Matrix<int>& powerIndex,
+							   const Vector<double>& frequencyValues )
+    
+  {
+    
+    try {
       
-      Int nOfRows = powerIndex.nrow() ;
+      int nOfRows = powerIndex.nrow() ;
+      
+      Vector<double> peakFrequencyValues( nOfRows ) ;
+      
+      // cout<< "Peak Frequency Values :"<< endl;
+      for( int i = 0; i< nOfRows ; i++ )
+	{
+	  int j = powerIndex( i, 0 );    // peak power frequency index will be same for all antenna so 
+	  // calculated here only for one antenna
+	  
+	  peakFrequencyValues( i ) = frequencyValues( j );
+	  
+	  cout<<peakFrequencyValues( i )<< "\t" ;
+	  
+	}
+      cout<< endl;
+      return peakFrequencyValues ;
+      
+    }
+    catch ( AipsError x ) {
+      cerr << " PhaseCalibration::getPeakFrequencyValues " << x.getMesg () << endl ;
+      return Vector<double> ();
+    }
+  }   
+  
+  
+  Matrix<double> PhaseCalibration::getPhaseValues( const Matrix<DComplex>& spectra,
+						   const Matrix<int>& powerIndex )
+    
+  {
+    
+    try { 
+      
+      int nOfColumns = powerIndex.ncolumn() ;
+      
+      int nOfRows = powerIndex.nrow() ;
       
       Matrix<DComplex> sortedArray ( nOfRows, nOfColumns ) ;
       
-      Int k = 0 ;
+      int k = 0 ;
       
-      	 for( Int i = 0; i< nOfRows ; i++ )
+      	 for( int i = 0; i< nOfRows ; i++ )
 	  {
-	    for( Int r = 0; r < nOfColumns ;  r++ )
+	    for( int r = 0; r < nOfColumns ;  r++ )
              {
 	       k = powerIndex(i, r) ;
 	     	  
@@ -261,7 +257,7 @@ PhaseCalibration :: PhaseCalibration( const Matrix<DComplex>& spectra,
 	  }
 	}
 	     
-	 Matrix<Double> phaseValue( phase(sortedArray));
+	 Matrix<double> phaseValue( phase(sortedArray));
 
 	return phaseValue ;
     
@@ -269,52 +265,52 @@ PhaseCalibration :: PhaseCalibration( const Matrix<DComplex>& spectra,
     
     catch ( AipsError x ) {
     cerr << " PhaseCalibration::getPhaseValues " << x.getMesg () << endl ;
-    return Matrix<Double> ();
+    return Matrix<double> ();
    }
  }
  
  
- Matrix<Double> PhaseCalibration::getPhaseDiffInDegree( const Matrix<Double>& calculatedPhases,
- 					               const Matrix<Double>& expectedPhases,
-						       const Matrix<Double>& phaseGradient,
-						       const Int& referenceAntenna )
+ Matrix<double> PhaseCalibration::getPhaseDiffInDegree( const Matrix<double>& calculatedPhases,
+ 					               const Matrix<double>& expectedPhases,
+						       const Matrix<double>& phaseGradient,
+						       const int& referenceAntenna )
  	
  {
  
    try {	 
       
-      Int nOfColumns = calculatedPhases.ncolumn() ;
+      int nOfColumns = calculatedPhases.ncolumn() ;
       
-      Int nOfRows = calculatedPhases.nrow() ;
+      int nOfRows = calculatedPhases.nrow() ;
       
-      Int columns = expectedPhases.ncolumn() ;
+      int columns = expectedPhases.ncolumn() ;
       
-      Matrix<Double> calculatedPhasesInDegree( nOfRows, nOfColumns ) ;   // Phases from Raw FFT
+      Matrix<double> calculatedPhasesInDegree( nOfRows, nOfColumns ) ;   // Phases from Raw FFT
       
-      Matrix<Double> phaseDiff( nOfRows, nOfColumns ) ; 
+      Matrix<double> phaseDiff( nOfRows, nOfColumns ) ; 
  
-      Matrix<Double> phasesDiff( nOfRows, nOfColumns ) ;
+      Matrix<double> phasesDiff( nOfRows, nOfColumns ) ;
 
-      Matrix<Double> residualPhaseGradient( nOfRows, nOfColumns ) ;
+      Matrix<double> residualPhaseGradient( nOfRows, nOfColumns ) ;
 
-      Matrix<Double> relativePhaseGradient( nOfRows, nOfColumns ) ;
+      Matrix<double> relativePhaseGradient( nOfRows, nOfColumns ) ;
 
-      Matrix<Double> calculatedPhasesDiff( nOfRows, nOfColumns ) ;
+      Matrix<double> calculatedPhasesDiff( nOfRows, nOfColumns ) ;
 
        
       if ( nOfColumns == columns ) {
 	   
-	    Int columnNumber = referenceAntenna ;
+	    int columnNumber = referenceAntenna ;
 	     
 	 
-             Vector<Double> referencePhaseGradient = phaseGradient.column( columnNumber ) ;
+             Vector<double> referencePhaseGradient = phaseGradient.column( columnNumber ) ;
 
-	     Vector<Double> referenceAntennaPhases = calculatedPhasesInDegree.column( columnNumber );
+	     Vector<double> referenceAntennaPhases = calculatedPhasesInDegree.column( columnNumber );
 
 	     
-	     for( Int i = 0; i< nOfColumns ; i++ ) {
+	     for( int i = 0; i< nOfColumns ; i++ ) {
 
-	         for( Int j = 0; j< nOfRows ; j++ ) {
+	         for( int j = 0; j< nOfRows ; j++ ) {
 
 		calculatedPhasesInDegree(j,i) = calculatedPhases( j,i )*(180/3.1416);
 
@@ -355,35 +351,35 @@ PhaseCalibration :: PhaseCalibration( const Matrix<DComplex>& spectra,
     }
     catch ( AipsError x ) {
     cerr << " PhaseCalibration::getResidualPhases " << x.getMesg () << endl ;
-    return Matrix<Double> ();
+    return Matrix<double> ();
    }
  }
       
  
 
  
- Matrix<Double> PhaseCalibration::getRelativeDelay( const Matrix<Double>& phaseDiff,
- 						   const Double& sampleRate,
-						   const Matrix<Int>& powerPeakIndices,
-						   const Vector<Double>& frequencyValues ) 
+ Matrix<double> PhaseCalibration::getRelativeDelay( const Matrix<double>& phaseDiff,
+ 						   const double& sampleRate,
+						   const Matrix<int>& powerPeakIndices,
+						   const Vector<double>& frequencyValues ) 
  
  {
  
   try {
   
-      Int nOfColumns = phaseDiff.ncolumn() ;
+      int nOfColumns = phaseDiff.ncolumn() ;
       
-       Int nOfRows = phaseDiff.nrow() ; 
+       int nOfRows = phaseDiff.nrow() ; 
       
-      Matrix<Double> relativeDelay( nOfRows, nOfColumns );
+      Matrix<double> relativeDelay( nOfRows, nOfColumns );
       
-      Double peakFrequency = 0 ;
+      double peakFrequency = 0 ;
       
-      for( Int i = 0; i< nOfColumns ; i++ ) {
+      for( int i = 0; i< nOfColumns ; i++ ) {
 	         
-        for( Int j = 0; j< nOfRows ; j++ )  {
+        for( int j = 0; j< nOfRows ; j++ )  {
       
-          Int m = powerPeakIndices( j, i );
+          int m = powerPeakIndices( j, i );
 	  
 	  peakFrequency = frequencyValues( m ) ;
 		 
@@ -400,178 +396,175 @@ PhaseCalibration :: PhaseCalibration( const Matrix<DComplex>& spectra,
     
     cerr << "PhaseCalibration::getRelativeDelay " << x.getMesg () << endl; 
     
-    return Matrix<Double> () ;
+    return Matrix<double> () ;
     }
-  }
+ }
+
+  // ----------------------------------------------------------- getAntennaReturn
   
-  
-  Vector<Bool> PhaseCalibration::getAntennaReturn ( const Matrix<DComplex>& spectra,
-  		     				    const Matrix<Double>& frequencyRanges,
-		     				    const Matrix<Double>& expectedPhases,
-						    const Matrix<Double>& phaseGradient,
-		     			  	    const Vector<Double>& frequencyValues,
-		     				    const Vector<Double>& sampleJumps,
-		     				    const Int& referenceAntenna,
-		     				    const Double& sampleRate,
-		     				    const Double& badnessWeight )
-						    
-						    
-						  
- {
-   try {
-   
-      PhaseCalibration phcl ;
-      
-      Vector<Int> frequencyIndex = phcl.getFrequencyIndices( frequencyRanges, 
-      							     frequencyValues );
-      
-      Matrix<Int> powerPeakIndices = phcl.getIndexOfPowerPeaks( spectra, 
+  Vector<bool>
+  PhaseCalibration::getAntennaReturn (const Matrix<DComplex>& spectra,
+				      const Matrix<double>& frequencyRanges,
+				      const Matrix<double>& expectedPhases,
+				      const Matrix<double>& phaseGradient,
+				      const Vector<double>& frequencyValues,
+				      const Vector<double>& sampleJumps,
+				      const int& referenceAntenna,
+				      const double& sampleRate,
+				      const double& badnessWeight)
+  {
+    try {
+      // PhaseCalibration object -> why is this needed here??
+      PhaseCalibration phcl;
+      // indices for the frequency bands segmentation
+      Vector<int> frequencyIndex = phcl.getFrequencyIndices (frequencyRanges, 
+      							     frequencyValues);
+      Matrix<int> powerPeakIndices = phcl.getIndexOfPowerPeaks (spectra, 
       							        frequencyIndex,
-								frequencyValues ) ; 
+								frequencyValues); 
+      Matrix<double> calculatedPhases = phcl.getPhaseValues( spectra,
+							     powerPeakIndices);
+      Matrix<double> phaseDiff = phcl.getPhaseDiffInDegree( calculatedPhases,
+							    expectedPhases,
+							    phaseGradient,
+							    referenceAntenna ) ;
+      Matrix<double> relativeDelay = phcl.getRelativeDelay( phaseDiff, 
+							    sampleRate,
+							    powerPeakIndices,
+							    frequencyValues ) ;
+      Vector<double> peakFrequencyValues = phcl.getPeakFrequencyValues (powerPeakIndices, frequencyValues ) ;
       
-      Matrix<Double> calculatedPhases = phcl.getPhaseValues( spectra,
-      							    powerPeakIndices ) ;
+      // book-keeping for the calculcation below
+      antBoolVector antReturn;
+      int nOfColumns (relativeDelay.ncolumn());
+      int nOfRows (relativeDelay.nrow());
+      Vector<bool> antennaReturn (nOfColumns);
+      Vector<double> newRelativePhases ( nOfRows ) ;
+      Vector<double> newIntRelativePhases (nOfRows);
+      int jumpSteps (sampleJumps.nelements());
+      double maxDelayDifference (0.0);
+      Vector<double> absoluteRelativeDelay (nOfColumns);
+      Vector<double> minRelativePhases (phaseDiff.nrow()); // length of a column
+      Vector<double> calRelativeDelays;
+      double meanValue (0.0);
+      double badness (0.0);
+      double minBadness (0.0);
+      double minRelativePosition (0.0);
+      double stepJump (0.0);
+      double newRelativePhase (0.0);
+      // loop counters
+      int j,k;
       
-      Matrix<Double> phaseDiff = phcl.getPhaseDiffInDegree( calculatedPhases,
-      						            	             expectedPhases,
-									     phaseGradient,
-							                     referenceAntenna ) ;
-      
-      //  Matrix<Double> residualDegree = phcl.getResidualDegree( residualPhases ) ;
-      
-      Matrix<Double> relativeDelay = phcl.getRelativeDelay( phaseDiff, 
-      							   sampleRate,
-							   powerPeakIndices,
-							   frequencyValues ) ;
-		
-     Vector<Double> peakFrequencyValues = phcl.getPeakFrequencyValues( powerPeakIndices, frequencyValues ) ;
-   
-      antBoolVector antReturn ;
-      
-      Int nOfColumns = relativeDelay.ncolumn() ;
-      
-      Vector<Bool> antennaReturn ( nOfColumns ) ;
-
-      Int nOfRows = relativeDelay.nrow() ;
-      
-      Vector<Double> newRelativePhases ( nOfRows ) ;
-      
-      Vector<Double> newIntRelativePhases ( nOfRows ) ;
-      
-      Int jumpSteps = sampleJumps.nelements() ;
-      
-      for ( Int i = 0; i< nOfColumns ; i++ )  {
-      
-       Double maxDelayDifference = max( relativeDelay.column(i) ) - min( relativeDelay.column(i) ) ;
-
-      Vector<Double> absoluteRelativeDelay = abs( relativeDelay.column ( i ) ) ;
-       
-       Double meanValue = mean( absoluteRelativeDelay ) ;
-       
-       Double badness = maxDelayDifference*(1-badnessWeight)+ meanValue*badnessWeight ;
-       
-       if( badness >=0.1) {                               // loop with comparison of maximum delay difference
-       
-       Double minBadness = badness ;
-
-       Vector<Double> minRelativePhases = phaseDiff.column( i ) ;
-
-       Double minRelativePosition = 0 ;
-    
-	   for( Int j = 0; j< jumpSteps; j++ ) {       // for loop with discrete sample jumps
-	   
-	   Double stepJump = sampleJumps( j ) ;
-	   
-	   Vector<Double>  jumpPhase ;
-	   
+      for ( int i = 0; i< nOfColumns ; i++ )  {
+	// maximal difference of delays
+	maxDelayDifference = max(relativeDelay.column(i)) - min(relativeDelay.column(i));
+	absoluteRelativeDelay = abs( relativeDelay.column ( i ) ) ;
+	meanValue = mean (absoluteRelativeDelay);
+	badness = maxDelayDifference*(1-badnessWeight)+ meanValue*badnessWeight ;
+	
+	/*
+	  Loop with comparison of maximum delay difference
+	*/
+	if( badness >=0.1) {
+	  
+	  minBadness          = badness ;
+	  minRelativePosition = 0;
+	  minRelativePhases   = phaseDiff.column(i);
+	  
+	  /*
+	    for loop with discrete sample jumps
+	  */
+	  for(j=0; j< jumpSteps; j++ ) {
+	    
+	    stepJump = sampleJumps(j);
+	    
+	    Vector<double>  jumpPhase ;
+	    
 	    jumpPhase = peakFrequencyValues *360.*stepJump / sampleRate ;
-	   
-	    Vector<Double> phaseDiffColumn = phaseDiff.column(i) ;
+	    
+	    Vector<double> phaseDiffColumn = phaseDiff.column(i) ;
 	    
 	    newRelativePhases = phaseDiffColumn - jumpPhase ;
 	    
-	    Int nOfElements = newRelativePhases.nelements() ;
+	    int nOfElements = newRelativePhases.nelements() ;
 	    
-	    Double newRelativePhase ;
+	    for (k=0; k<nOfElements; k++) {
+	      
+	      int integralPhase = int((newRelativePhases(k))/360 ) ;
+	      
+	      newRelativePhase = newRelativePhases(k) - integralPhase*360 ;
+	      
+	      if( newRelativePhase > 180 ) {
+		
+		newRelativePhase = newRelativePhase - 360 ;
+		
+	      }
+	      
+	      if( newRelativePhase < -180 ) {
+		
+		newRelativePhase = newRelativePhase + 360 ;
+		
+	      }
+	    }  // -- end of for loop of comparison --
 	    
-	    for( Int k=0; k<nOfElements; k++) {
-	    
-	    Int integralPhase = int((newRelativePhases(k))/360 ) ;
-	    
-	    newRelativePhase = newRelativePhases(k) - integralPhase*360 ;
-	    
-	    if( newRelativePhase > 180 ) {
-	    
-	    newRelativePhase = newRelativePhase - 360 ;
-	    
-	    }
-	    
-	    if( newRelativePhase < -180 ) {
-	    
-	    newRelativePhase = newRelativePhase + 360 ;
-	    
-	    }
-	   }						// end of for loop of comaprison
-	    
-	    Vector<Double> calRelativeDelays;
 	    {
-		Double tmpfloat = 1/360.*sampleRate;
-		calRelativeDelays = newRelativePhase/peakFrequencyValues*tmpfloat;
+	      double tmpfloat = 1/360.*sampleRate;
+	      calRelativeDelays = newRelativePhase/peakFrequencyValues*tmpfloat;
 	    }
 	    
-	    Double badness = ( max( calRelativeDelays )- min( calRelativeDelays ))*( 1-badnessWeight )+
-	    				 mean( abs( calRelativeDelays ))*badnessWeight ;
-	   
-	    if( minBadness > badness + 0.01 )  {
+	    double badness = ( max( calRelativeDelays )- min( calRelativeDelays ))*( 1-badnessWeight )+
+	      mean( abs( calRelativeDelays ))*badnessWeight ;
 	    
-	       minBadness = badness ;
-	       
-	       minRelativePhases = newRelativePhases ;
-	       	
-	       minRelativePosition  = stepJump ;
-	       
-	       } 
-	   }					// end of the for loop for discrete sample jumps
-	   
-	   phaseDiff.column(i) = minRelativePhases ;
-           	    
-	   {
-	       Double tmpfloat =1/360*sampleRate;
-	 relativeDelay.column(i)=phaseDiff.column(i)/peakFrequencyValues*tmpfloat+Double(minRelativePosition) ;
-	   }
-	   
+	    if( minBadness > badness + 0.01 )  {
+	      
+	      minBadness = badness ;
+	      
+	      minRelativePhases = newRelativePhases ;
+	      
+	      minRelativePosition  = stepJump ;
+	      
+	    } 
+	  }					// end of the for loop for discrete sample jumps
+	  
+	  phaseDiff.column(i) = minRelativePhases ;
+          
+	  {
+	    double tmpfloat =1/360*sampleRate;
+	    relativeDelay.column(i)=phaseDiff.column(i)/peakFrequencyValues*tmpfloat+double(minRelativePosition) ;
+	  }
+	  
 	  if( minBadness >= 0.15 )  {
-	  
-	  antReturn = F ;
-	  cout<<"Antenna :"<<i<< "is False"<< endl ;
-	 }
+	    
+	    antReturn = F ;
+	    cout << "Antenna :" << i << "is False" << endl ;
+	  }
 	  else {
+	    
+	    antReturn = T ;
+	    cout<<"Antenna :"<<i<< "is True"<< endl ;
+	  }
 	  
-	  antReturn = T ;
-	  cout<<"Antenna :"<<i<< "is True"<< endl ;
-	   }
-
 	}	  
-     }
-	
-    return antennaReturn ;
-     
-  }
+      }
+      
+      return antennaReturn ;
+      
+    }
     catch( AipsError x )  {
-    
-    cerr << "PhaseCalibration::getAntennaReturn " << x.getMesg () << endl; 
-    
-    return Vector<Bool> () ;
+      
+      cerr << "PhaseCalibration::getAntennaReturn " << x.getMesg () << endl; 
+      
+      return Vector<bool> () ;
     }
   }
   
-        
-// ==============================================================================
-//
-//  Destruction
-//
-// ==============================================================================
-
+  
+  // ==============================================================================
+  //
+  //  Destruction
+  //
+  // ==============================================================================
+  
 // PhaseCalibration::~PhaseCalibration ()
 // {
 //   destroy();
@@ -612,3 +605,4 @@ PhaseCalibration :: PhaseCalibration( const Matrix<DComplex>& spectra,
 //
 // ==============================================================================
 
+} // Namespace LOPES -- END
