@@ -40,6 +40,16 @@ endif (HAVE_CASA)
 ## -----------------------------------------------------------------------------
 
 ADD_LIBRARY (lopestools
+## -- Analysis -----------------------------------
+  Analysis/ClippingFraction.cc
+  Analysis/DataBlockStatistics.cc
+#  Analysis/DynamicSpectrum.cc
+#  Analysis/Masking.cc
+  Analysis/Peak.cc
+  Analysis/PeakList.cc
+  Analysis/PeakSearch.cc
+  Analysis/SourceFit.cc
+##  -- Calibration -------------------------------
   Calibration/AntennaGain.cc
   Calibration/AverageGain.cc
   Calibration/BaselineGain.cc
@@ -52,18 +62,23 @@ ADD_LIBRARY (lopestools
 #  Calibration/PluginBase.cc
   Calibration/RFIMitigation.cc
 #  Calibration/RFIMitigationPlugin.cc
+## -- Data ---------------------------------------
   Data/Data.cc
   Data/DynamicSpectrum.cc
   Data/UnitPrefix.cc
+## -- Display ------------------------------------
   Display/PGPlot.cc
+## -- Functionals --------------------------------
   Functionals/Hermite1D.cc
   Functionals/Shapelets1D.cc
   Functionals/Shapelets2D.cc
   Functionals/ShapeletsModel1D.cc
   Functionals/StatisticsFilter.cc
+## -- IO -----------------------------------------
   IO/DataIO.cc
   IO/DataIterator.cc
   IO/LogfileName.cc
+## -- Math ---------------------------------------
   Math/Algebra.cc
   Math/ArrayMath.cc
   Math/MathAlgebra.cc
@@ -71,6 +86,7 @@ ADD_LIBRARY (lopestools
   Math/MathGeometry.cc
   Math/ThreeVector.cc
   Math/VectorConversion.cc
+## -- Utilities ----------------------------------
   Utilities/ProgressBar.cc
   Utilities/Timestamp.cc
   Utilities/TestArray.cc
