@@ -1,6 +1,28 @@
 PROJECT (CASA)
 
 ## -----------------------------------------------------------------------------
+## Check for the header files first, as from this we can derive a number of 
+## fundamental CASA variables (such as e.g. the root directory of the
+## installation)
+
+find_path (CASA_INCLUDE_DIR aips.h
+  PATHS
+  /casa
+  /opt/casa
+  /sw/share/casa
+  PATH_SUFFIXES
+  code/include/casa
+  stable/code/include/casa
+  weekly/code/include/casa
+  )
+
+IF (CASA_INCLUDE_DIR)
+  SET (HAVE_AIPS_H true)
+  STRING (REGEX REPLACE include/casa include CASA_INCLUDE_DIR ${CASA_INCLUDE_DIR})
+  STRING (REGEX REPLACE /code/include "" AIPSROOT ${CASA_INCLUDE_DIR})
+ENDIF (CASA_INCLUDE_DIR)
+
+## -----------------------------------------------------------------------------
 ## Check for the platform
 
 IF (UNIX)

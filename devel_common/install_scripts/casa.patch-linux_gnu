@@ -25,7 +25,7 @@
  
  #include <casa/namespace.h>
  
---- QtAutoGui.cc_orig	2006-11-14 16:30:47.628173160 +0100
+--- QtAutoGui.cc	2006-11-14 16:30:47.628173160 +0100
 +++ QtAutoGui.cc	2006-11-14 16:33:06.621043032 +0100
 @@ -27,14 +27,14 @@
  //# $Id: QtAutoGui.cc,v 1.4 2006/09/25 17:51:11 hye Exp $

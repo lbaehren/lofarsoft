@@ -20,11 +20,13 @@
 
 /* $Id: DynamicSpectrum.cc,v 1.1 2006/02/22 18:53:34 bahren Exp $*/
 
-#include <lopes/Analysis/DynamicSpectrum.h>
+#include <Analysis/DynamicSpectrum.h>
 
 /*!
   \class DynamicSpectrum
 */
+
+namespace LOPES {  // namescape LOPES -- begin
 
 // ==============================================================================
 //
@@ -85,24 +87,24 @@ void DynamicSpectrum::destroy ()
 //
 // ==============================================================================
 
-void DynamicSpectrum::setTimeAxis (const Double& crval,
-				   const Double& cdelt,
+void DynamicSpectrum::setTimeAxis (const double& crval,
+				   const double& cdelt,
 				   const String& unit)
 {
-  Quantum<Double> referenceValue (crval,unit);
-  Quantum<Double> increment (cdelt,unit);
+  Quantum<double> referenceValue (crval,unit);
+  Quantum<double> increment (cdelt,unit);
   
   setTimeAxis (referenceValue,
 	       increment);
 }
 
-void DynamicSpectrum::setTimeAxis (const Quantum<Double>& crval,
-				   const Quantum<Double>& cdelt)
+void DynamicSpectrum::setTimeAxis (const Quantum<double>& crval,
+				   const Quantum<double>& cdelt)
 {
-  Vector<Quantum<Double> > refVal (1);
-  Vector<Quantum<Double> > increment (1);
-  Vector<Double> refPix (1,0.0);
-  Matrix<Double> pc(1,1);
+  Vector<Quantum<double> > refVal (1);
+  Vector<Quantum<double> > increment (1);
+  Vector<double> refPix (1,0.0);
+  Matrix<double> pc(1,1);
   Vector<String> name(1);
 
   // set proper values
@@ -120,24 +122,24 @@ void DynamicSpectrum::setTimeAxis (const Quantum<Double>& crval,
   timeAxis_p = lc;
 }
 
-void DynamicSpectrum::setFrequencyAxis (const Double& crval,
-					const Double& cdelt,
+void DynamicSpectrum::setFrequencyAxis (const double& crval,
+					const double& cdelt,
 					const String& unit)
 {
-  Quantum<Double> referenceValue (crval,unit);
-  Quantum<Double> increment (cdelt,unit);
+  Quantum<double> referenceValue (crval,unit);
+  Quantum<double> increment (cdelt,unit);
   
   setFrequencyAxis (referenceValue,
 		    increment);
 }
 
-void DynamicSpectrum::setFrequencyAxis (const Quantum<Double>& crval,
-					const Quantum<Double>& cdelt)
+void DynamicSpectrum::setFrequencyAxis (const Quantum<double>& crval,
+					const Quantum<double>& cdelt)
 {
-  Double crpix (0.0);
-  Quantum<Double> restfreq (0.0,"Hz");
+  double crpix (0.0);
+  Quantum<double> restfreq (0.0,"Hz");
 
-  SpectralCoordinate sc (MFrequency::TOPO,
+  SpectralCoordinate sc (casa::MFrequency::TOPO,
 			 crval,
 			 cdelt,
 			 crpix,
@@ -163,10 +165,10 @@ CoordinateSystem DynamicSpectrum::coordinateSystem ()
 //
 // ==============================================================================
 
-Vector<Float> DynamicSpectrum::averageSpectrum ()
+Vector<float> DynamicSpectrum::averageSpectrum ()
 {
   IPosition shape (dynamicSpectrum_p.shape());
-  Vector<Float> averageSpectrum (shape(0));
+  Vector<float> averageSpectrum (shape(0));
 
   // do something
   for (int freq(0); freq<shape(0); freq++) {
@@ -178,10 +180,10 @@ Vector<Float> DynamicSpectrum::averageSpectrum ()
   return averageSpectrum;
 }
 
-Vector<Float> DynamicSpectrum::totalPower ()
+Vector<float> DynamicSpectrum::totalPower ()
 {
   IPosition shape (dynamicSpectrum_p.shape());
-  Vector<Float> totalPower (shape(0));
+  Vector<float> totalPower (shape(0));
   
   // compute
   for (int n(0); n<shape(0); n++) {
@@ -192,3 +194,5 @@ Vector<Float> DynamicSpectrum::totalPower ()
   // return the result
   return totalPower;
 }
+
+}  // namespace LOPES -- end

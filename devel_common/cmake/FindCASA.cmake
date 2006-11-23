@@ -2,6 +2,7 @@
 #
 # Variables assigned:
 #  HAVE_CASA
+#  CASA_INCLUDE_DIR  -- Path to the CASA header files
 #
 
 ## -----------------------------------------------------------------------------
@@ -33,7 +34,13 @@ IF (UNIX)
   SET (AIPS_ARCH "LINUX")
   SET (AIPS_ENDIAN "LITTLE")
   IF (APPLE)
+    ## definition passed to the compiler
+    SET (AIPS_DARWIN 1)
+    ## AIPS architecture -- as used for the compiler
     SET (AIPS_ARCH "DARWIN")
+    ## AIPS architecture -- AIPSARCH system variable
+    SET (AIPSARCH "darwin")
+    ## check the processor type
     IF (${CMAKE_OSX_ARCHITECTURES} MATCHES "ppc")
       SET (AIPS_ENDIAN "BIG")
     ENDIF (${CMAKE_OSX_ARCHITECTURES} MATCHES "ppc")

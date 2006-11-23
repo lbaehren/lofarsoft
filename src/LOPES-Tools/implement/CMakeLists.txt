@@ -17,11 +17,7 @@ INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindCASA.cmake)
 INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindCFITSIO.cmake)
 INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindCPGPLOT.cmake)
 INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindROOT.cmake)
-
-## Summary of main search results
-
-message (STATUS "HAVE_CASA  = ${HAVE_CASA}")
-message (STATUS "HAVE_BLITZ = ${HAVE_BLITZ}")
+INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindWCS.cmake)
 
 ## -----------------------------------------------------------------------------
 
@@ -31,6 +27,7 @@ INCLUDE_DIRECTORIES(
   ${CFITSIO_INCLUDE_DIR}
   ${CPGPLOT_INCLUDE_DIR}
   ${Blitz_INCLUDE_DIR}
+  ${WCS_INCLUDE_DIR}
   )
 
 if (HAVE_CASA)
@@ -44,7 +41,7 @@ ADD_LIBRARY (lopestools
   Analysis/ClippingFraction.cc
   Analysis/DataBlockStatistics.cc
 #  Analysis/DynamicSpectrum.cc
-#  Analysis/Masking.cc
+  Analysis/Masking.cc
   Analysis/Peak.cc
   Analysis/PeakList.cc
   Analysis/PeakSearch.cc

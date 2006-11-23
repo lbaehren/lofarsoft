@@ -33,7 +33,18 @@
 #include <coordinates/Coordinates/SpectralCoordinate.h>
 #include <coordinates/Coordinates/CoordinateSystem.h>
 
-#include <casa/namespace.h>
+using casa::Complex;
+using casa::CoordinateSystem;
+using casa::IPosition;
+using casa::LinearCoordinate;
+using casa::Matrix;
+using casa::ObsInfo;
+using casa::Quantum;
+using casa::SpectralCoordinate;
+using casa::String;
+using casa::Vector;
+
+namespace LOPES {  // namespace LOPES -- begin
 
 /*!
   \class DynamicSpectrum
@@ -98,8 +109,8 @@ class DynamicSpectrum {
     \param cdelt -- 
     \param units -- 
   */
-  DynamicSpectrum (const Vector<Double>& crval,
-		   const Vector<Double>& cdelt,
+  DynamicSpectrum (const Vector<double>& crval,
+		   const Vector<double>& cdelt,
 		   const Vector<String>& units);
 
   /*!
@@ -138,8 +149,8 @@ class DynamicSpectrum {
     \param cdelt -- Increment along the time axis.
     \param unit  -- Unit within which the values are given.
   */
-  void setTimeAxis (const Double& crval,
-		    const Double& cdelt,
+  void setTimeAxis (const double& crval,
+		    const double& cdelt,
 		    const String& unit);
 
   /*!
@@ -149,8 +160,8 @@ class DynamicSpectrum {
                     corresponding to the first pixel in the dynamic spectrum.
     \param cdelt -- Increment along the time axis.
    */
-  void setTimeAxis (const Quantum<Double>& crval,
-		    const Quantum<Double>& cdelt);
+  void setTimeAxis (const Quantum<double>& crval,
+		    const Quantum<double>& cdelt);
 
   /*!
     \brief Set the parameters defining the frequency axis
@@ -160,8 +171,8 @@ class DynamicSpectrum {
     \param cdelt -- Increment along the frequency axis.
     \param unit  -- Unit within which the values are given.
   */
-  void setFrequencyAxis (const Double& crval,
-			 const Double& cdelt,
+  void setFrequencyAxis (const double& crval,
+			 const double& cdelt,
 			 const String& unit);
   
   /*!
@@ -171,8 +182,8 @@ class DynamicSpectrum {
                     corresponding to the first pixel in the dynamic spectrum.
     \param cdelt -- Increment along the frequency axis.
    */
-  void setFrequencyAxis (const Quantum<Double>& crval,
-			 const Quantum<Double>& cdelt);
+  void setFrequencyAxis (const Quantum<double>& crval,
+			 const Quantum<double>& cdelt);
   
   /*!
     \brief Retrieve the coordinate system attached to the dynamic spectrum
@@ -190,7 +201,7 @@ class DynamicSpectrum {
                                spectrum by collapsing parallel to the time
 			       axis.
   */
-  Vector<Float> averageSpectrum ();
+  Vector<float> averageSpectrum ();
 
   /*!
     \brief Retrieve the total power as function of time
@@ -199,7 +210,7 @@ class DynamicSpectrum {
                           dynamic spectrum by collapsing parallel to the
 			  frequency axis.
   */
-  Vector<Float> totalPower ();
+  Vector<float> totalPower ();
 
   /*!
     \brief Export the dynamic spectrum to FITS
@@ -221,5 +232,7 @@ class DynamicSpectrum {
   void destroy(void);
 
 };
+
+}  // namespace LOPES -- end
 
 #endif /* _DYNAMICSPECTRUM_H_ */

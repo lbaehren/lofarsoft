@@ -1,5 +1,24 @@
+/***************************************************************************
+ *   Copyright (C) 2005                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
-#if !defined(MASKING_H)
+#ifndef MASKING_H
 #define MASKING_H
 
 /* $Id: Masking.h,v 1.2 2006/04/13 13:54:15 bahren Exp $ */
@@ -15,25 +34,32 @@
 #include <casa/Arrays/MaskedArray.h>
 #include <casa/Arrays/IPosition.h>
 
-#include <casa/namespace.h>
+using std::cout;
+using std::cerr;
+using std::endl;
 
-/*!
-  \class Masking
-  
-  \ingroup Analysis
-  
-  \brief Collection of methods for masking of data arrays.
-  
-  \author Lars B&auml;hren
-  
-  \date 2005/02/03
-  
-  \test tMasking.cc
+using casa::Array;
+using casa::IPosition;
+using casa::String;
+using casa::Vector;
 
-
-  <h3>Prerequisite</h3>
-
-  <ul>
+namespace LOPES {  // Namespace LOPES -- begin
+  
+  /*!
+    \ingroup Analysis
+    
+    \brief Collection of methods for masking of data arrays.
+    
+    \author Lars B&auml;hren
+    
+    \date 2005/02/03
+    
+    \test tMasking.cc
+    
+    
+    <h3>Prerequisite</h3>
+    
+    <ul>
     <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/Array.html">Array</a>
     -- A templated N-D Array class with zero origin. 
     <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/Vector.html">Vector</a>,
@@ -42,18 +68,14 @@
     are one, two, and three dimensional specializations of Array.
     <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/ArrayMath.html">Mathematical
     operations for Arrays</a>.
-
+    
     <li>[AIPS++]
-        <a href="http://aips2.nrao.edu/docs/casa/implement/Arrays/MaskedArray.html">MaskedArray</a>
-	-- Class for masking an Array for operations on that Array
-  </ul>
-
-*/
-
-class Masking {
-
- public:
-
+    <a href="http://aips2.nrao.edu/docs/casa/implement/Arrays/MaskedArray.html">MaskedArray</a>
+    -- Class for masking an Array for operations on that Array
+    </ul>
+    
+  */
+  
   /*!
     \brief Merge two masking arrays.
     
@@ -65,9 +87,9 @@ class Masking {
     - OR
     - NOR
   */
-  static Array<Bool> mergeMasks (const Array<Bool>& array1,
-				 const Array<Bool>& array2,
-				 const String logic);
+  Array<bool> mergeMasks (const Array<bool>& array1,
+			  const Array<bool>& array2,
+			  const String logic);
   
   /*!
     \brief Creat mask from subset of entries of another mask.
@@ -76,15 +98,15 @@ class Masking {
     \f$ M_2 \equiv \{ m_1, m_2, ..., m_{N_2} \} \f$, where \f$ N_1 > N_2 \f$, we
     set the values of \f$ M_2 \f$ by aligning its elements to \f$ M_1 \f$ via a
     position vector \f$ \vec n \f$: \f$ M_2 (k) = M_1 (n_k) \f$
-
+    
     \param outMask - Boolean array \f$ M_2 \f$, to be set up.
     \param inMask  - Boolean array \f$ M_1 \f$.
     \param inIndex - Position vector \f$ \vec n \f$, used to map the values from
                      \f$ M_1 \f$ onto \f$ M_2 \f$.
-   */
-  static void setSubmask (Vector<Bool>&, 
-			  const Vector<Bool>&,
-			  const Vector<Int>&);
+  */
+  void setSubmask (Vector<bool>&, 
+		   const Vector<bool>&,
+		   const Vector<int>&);
 
   /*!
     \brief Create a mask for a range of values in a data vector
@@ -94,10 +116,10 @@ class Masking {
     \param values - Array of values.
 
     \return mask  - Boolean array with the mask
-   */
-  static Vector<Bool> maskFromRange (const Vector<Double>&,
-				     const Vector<Double>&);
-
+  */
+  Vector<bool> maskFromRange (const Vector<double>&,
+			      const Vector<double>&);
+  
   /*!
     \brief Get the number of valid (i.e. selected) elements in a mask.
 
@@ -105,7 +127,7 @@ class Masking {
 
     \return validElements - The number of valid elements in the selection mask.
    */
-  static uInt validElements (const Vector<Bool>&);
+  uint validElements (const Vector<bool>&);
   
   /*!
     \brief Get the number of invalid (i.e. deselected) elements in a mask.
@@ -115,8 +137,8 @@ class Masking {
     \return invalidElements - The number of invalid elements in the selection
                               mask.
    */
-  static uInt invalidElements (const Vector<Bool>&);
-  
-};
+  uint invalidElements (const Vector<bool>&);
+
+}  // Namespace LOPES -- end
 
 #endif
