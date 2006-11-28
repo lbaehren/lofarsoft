@@ -46,12 +46,24 @@ find_package (X11)
 ##
 ## The following command is used when building the CASA library from source,
 ## using the internal build environment:
+##
+## (a) Darwin - Mac OS X
 ## 
 ##  c++  -DAIPS_STDLIB -DAIPS_DARWIN -DAIPS_BIG_ENDIAN -DNATIVE_EXCP
 ##       -DAIPS_NO_TEMPLATE_SRC -DAIPS_NO_TEMPLATE_SRC 
 ##       -I/sw/share/casa/code/include -I. -O2 -fPIC  -fexceptions -pipe -Wall
 ##       -Wno-non-template-friend -Woverloaded-virtual -Wcast-align -Wno-comment
 ##       -pipe -fno-implicit-templates -Wreturn-type -Wimplicit -fPIC -c ???.cc;
+##
+## (b) Debian GNU/Linux
+## 
+##  g++ -Wno-deprecated -DAIPS_LINUX -DAIPS_LITTLE_ENDIAN -DAIPS_STDLIB
+##      -DAIPS_NO_LEA_MALLOC -D_GLIBCPP_DEPRECATED -DAIPS_AUTO_STL
+##      -DAIPS_NO_TEMPLATE_SRC -DAIPS_NO_TEMPLATE_SRC
+##      -I/opt/casa/stable/code/include -I. -O2 -fPIC -pipe -Wall
+##      -Wno-non-template-friend -Woverloaded-virtual -Wmissing-prototypes
+##      -Wcast-align -Wno-comment -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
+##      -c ???.cc;
 ##
 ## The following settings have been extracted from a 'makedefs' file used on an
 ## Intel Mac:
@@ -78,25 +90,39 @@ find_package (X11)
 ##   $(C++ROOT)/bin/g++ -Wno-deprecated -DAIPS_NO_TEMPLATE_SRC -I.
 ##  
 
+## Start with the generic information common to all the platforms
+
+include_directories (
+  ${CASA_SOURCE_DIR}
+  ${CASA_SOURCE_DIR}/implement
+  )
+
+set (CASA_OPTLEVEL "-O3")
+
+## Platform-dependent compiler/linker settings
+
 if (UNIX)
-  include_directories (
-    ${CASA_SOURCE_DIR}
-    ${CASA_SOURCE_DIR}/implement
-    )
   add_definitions (
     -DAIPS_STDLIB
     -DAIPS_NO_TEMPLATE_SRC
     -DAIPS_AUTO_STL
     -DAIPS_NO_LEA_MALLOC
     )
+  set (CASA_CXXSTD "-fPIC -pipe -Wall -Wno-non-template-friend -Woverloaded-virtual -Wno-comment -fexceptions -Wcast-align")
   if (APPLE)
-    set (CASA_OPTLEVEL "-O3")
-    set (CASA_CXXSTD "-fPIC  -fexceptions -pipe -Wall -Wno-non-template-friend -Woverloaded-virtual -Wcast-align -Wno-comment -pipe -fno-implicit-templates -Wreturn-type -Wimplicit -fPIC")
     add_definitions (
       -DAIPS_DARWIN
       -DAIPS_BIG_ENDIAN
       -DNATIVE_EXCP
       )
+    set (CASA_CXXSTD "${CASA_CXXSTD} -fno-implicit-templates -Wreturn-type -Wimplicit -fPIC")
+  else (APPLE)
+    add_definitions (
+      -DAIPS_LINUX
+      -DAIPS_LITTLE_ENDIAN
+      -D_LARGEFILE_SOURCE
+      )
+    set (CASA_CXXSTD "${CASA_CXXSTD} -Wmissing-prototypes")
   endif (APPLE)
 endif (UNIX)
 
