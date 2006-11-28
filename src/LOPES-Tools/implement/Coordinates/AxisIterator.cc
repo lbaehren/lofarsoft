@@ -18,12 +18,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: RFIMitigationPlugin.cc,v 1.3 2006/09/22 14:01:06 bahren Exp $*/
+/* $Id: AxisIterator.cc,v 1.1 2006/07/05 16:01:08 bahren Exp $*/
 
-#include <Calibration/RFIMitigationPlugin.h>
+#include <Coordinates/AxisIterator.h>
 
 /*!
-  \class RFIMitigationPlugin
+  \class AxisIterator
 */
 
 namespace LOPES {  // Namespace LOPES -- begin
@@ -34,12 +34,38 @@ namespace LOPES {  // Namespace LOPES -- begin
 //
 // ==============================================================================
 
-RFIMitigationPlugin::RFIMitigationPlugin ()
-  : PluginBase<Complex> ()
-{;}
+AxisIterator::AxisIterator ()
+{
+  setBlock(1);
+}
 
-RFIMitigationPlugin::RFIMitigationPlugin (RFIMitigationPlugin const &other)
-  : PluginBase<Complex> ()
+AxisIterator::AxisIterator (const int& block)
+{
+  setBlock(block);
+}
+
+AxisIterator::AxisIterator (const int& blocksize,
+			    const int& offset,
+			    const int& presync,
+			    const double& sampleFrequency,
+			    const Vector<double>& frequencyRange)
+  : AxisCoordinates (blocksize,
+		     offset,
+		     presync,
+		     sampleFrequency,
+		     frequencyRange)
+{
+  setBlock(1);
+}
+
+AxisIterator::AxisIterator (const int& block,
+			    AxisCoordinates const& axis)
+  : AxisCoordinates (axis)
+{
+  setBlock(block);
+}
+
+AxisIterator::AxisIterator (AxisIterator const& other)
 {
   copy (other);
 }
@@ -50,13 +76,10 @@ RFIMitigationPlugin::RFIMitigationPlugin (RFIMitigationPlugin const &other)
 //
 // ==============================================================================
 
-RFIMitigationPlugin::~RFIMitigationPlugin ()
+AxisIterator::~AxisIterator ()
 {
   destroy();
 }
-
-void RFIMitigationPlugin::destroy ()
-{;}
 
 // ==============================================================================
 //
@@ -64,7 +87,7 @@ void RFIMitigationPlugin::destroy ()
 //
 // ==============================================================================
 
-RFIMitigationPlugin& RFIMitigationPlugin::operator= (RFIMitigationPlugin const &other)
+AxisIterator& AxisIterator::operator= (AxisIterator const &other)
 {
   if (this != &other) {
     destroy ();
@@ -73,7 +96,12 @@ RFIMitigationPlugin& RFIMitigationPlugin::operator= (RFIMitigationPlugin const &
   return *this;
 }
 
-void RFIMitigationPlugin::copy (RFIMitigationPlugin const &other)
+void AxisIterator::copy (AxisIterator const& other)
+{
+  block_p = other.block_p;
+}
+
+void AxisIterator::destroy ()
 {;}
 
 // ==============================================================================
@@ -82,78 +110,18 @@ void RFIMitigationPlugin::copy (RFIMitigationPlugin const &other)
 //
 // ==============================================================================
 
-// ---------------------------------------------------------------- setParameters
-
-bool RFIMitigationPlugin::setParameters (Record const &param)
+void AxisIterator::setBlock (const int& block)
 {
-  bool status (true);
-  int field (0);
-
-  /*
-    Parse the parameter record; process parameters in inverse order of their
-    dependency, to ensure the complete updating chain is gone through .
-   */
-
-  field = param.fieldNumber ("nofSegments");
-  if (field > -1) {
-    uint nofSegments (1);
-    param.get (field,nofSegments);
-    setNofSegments (nofSegments);
+  // guard against negative offset in file stream
+  if (block<1) {
+    block_p = 1;
+  } else {
+    block_p = block;
   }
-
-  field = param.fieldNumber ("blocksize");
-  if (field > -1) {
-    uint blocksize (1);
-    param.get (field,blocksize);
-    setBlocksize (blocksize);
-  }
-
-  return status;
+  // adjust parameters of the base class
+  AxisCoordinates::setOffset ((block_p-1)*AxisCoordinates::blocksize());
 }
 
-// ----------------------------------------------------------------- setBlocksize
-
-void RFIMitigationPlugin::setBlocksize (uint const &blocksize)
-{
-  // store the provided value
-  blocksize_p = blocksize;
-  // ... and trigger updating of the derived parameters
-  setNofSegments ();
-}
-
-// --------------------------------------------------------------- setNofSegments
-
-void RFIMitigationPlugin::setNofSegments ()
-{
-  uint nofSegments;
-
-  /*
-    recompute the number of segments based on the current value for the
-    blocksize
-  */
-
-  // store the computed value 
-  setNofSegments (nofSegments);
-}
-
-void RFIMitigationPlugin::setNofSegments (uint const &nofSegments)
-{
-  // store the provided value ...
-  nofSegments_p = nofSegments;
-}
-
-void RFIMitigationPlugin::setSegmentationIndices ()
-{
-  Vector<uint> indices;
-
-  // compute the indices ...
-
-  // ... and store the values
-  setSegmentationIndices (indices);
-}
-
-void RFIMitigationPlugin::setSegmentationIndices (Vector<uint> const &indices)
-{}
 
 // ==============================================================================
 //
@@ -161,4 +129,4 @@ void RFIMitigationPlugin::setSegmentationIndices (Vector<uint> const &indices)
 //
 // ==============================================================================
 
-}  // Namespace LOPES -- begin
+}  // Namespace LOPES -- end

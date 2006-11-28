@@ -20,7 +20,7 @@
 
 /* $Id: PhaseCalibrationPlugin.cc,v 1.2 2006/11/08 16:06:41 bahren Exp $*/
 
-#include <lopes/Calibration/PhaseCalibrationPlugin.h>
+#include <Calibration/PhaseCalibrationPlugin.h>
 
 /*!
   \class PhaseCalibrationPlugin

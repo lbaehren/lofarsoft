@@ -20,77 +20,82 @@
 
 /* $Id: PluginBase.cc,v 1.9 2006/11/02 12:40:49 horneff Exp $*/
 
-#include <lopes/Calibration/PluginBase.h>
+#include <Calibration/PluginBase.h>
+
+using std::cerr;
+using std::endl;
 
 /*!
   \class PluginBase
 */
 
-// ==============================================================================
-//
-//  Construction
-//
-// ==============================================================================
-
-template <class T>
-PluginBase<T>::PluginBase ()
-{;}
-
-template <class T>
-PluginBase<T>::PluginBase (const Matrix<T>& weights)
-{
-  Bool status (True);
-  status = setWeights (weights);
-}
-
-template <class T>
-PluginBase<T>::PluginBase (const PluginBase& other)
-{
-  copy (other);
-}
-
-// ==============================================================================
-//
-//  Destruction
-//
-// ==============================================================================
-
-template <class T>
-PluginBase<T>::~PluginBase ()
-{
-  destroy();
-}
-
-// ==============================================================================
-//
-//  Operators
-//
-// ==============================================================================
-
-template <class T>
-PluginBase<T>& PluginBase<T>::operator= (const PluginBase<T>& other)
-{
-  if (this != &other) {
-    destroy ();
+namespace LOPES {  // Namespace LOPES -- begin
+  
+  // ============================================================================
+  //
+  //  Construction
+  //
+  // ============================================================================
+  
+  template <class T>
+  PluginBase<T>::PluginBase ()
+  {;}
+  
+  template <class T>
+  PluginBase<T>::PluginBase (const Matrix<T>& weights)
+  {
+    bool status (true);
+    status = setWeights (weights);
+  }
+  
+  template <class T>
+  PluginBase<T>::PluginBase (const PluginBase& other)
+  {
     copy (other);
   }
-  return *this;
-}
-
-template <class T>
-void PluginBase<T>::copy (const PluginBase<T>& other)
-{
-  // weights
-  weights_p.resize(other.weights_p.shape());
-  weights_p = other.weights_p;
-
-  // misc parameters
-  parameters_p = other.parameters_p;
-}
-
-template <class T>
-void PluginBase<T>::destroy ()
-{;}
+  
+  // ============================================================================
+  //
+  //  Destruction
+  //
+  // ============================================================================
+  
+  template <class T>
+  PluginBase<T>::~PluginBase ()
+  {
+    destroy();
+  }
+  
+  // ============================================================================
+  //
+  //  Operators
+  //
+  // ============================================================================
+  
+  template <class T>
+  PluginBase<T>& PluginBase<T>::operator= (const PluginBase<T>& other)
+  {
+    if (this != &other) {
+      destroy ();
+      copy (other);
+    }
+    return *this;
+  }
+  
+  template <class T>
+  void PluginBase<T>::copy (const PluginBase<T>& other)
+  {
+    // weights
+    weights_p.resize(other.weights_p.shape());
+    weights_p = other.weights_p;
+    
+    // misc parameters
+    parameters_p = other.parameters_p;
+  }
+  
+  template <class T>
+  void PluginBase<T>::destroy ()
+  {;}
 
 // ==============================================================================
 //
@@ -105,63 +110,63 @@ Record&  PluginBase<T>::parameters ()
 }
 
 template <class T>
-Bool  PluginBase<T>::setParameters (Record const &param)
+bool  PluginBase<T>::setParameters (Record const &param)
 {
-  Bool status (True);
+  bool status (true);
   try {
-    uInt i,nFields = param.nfields();
-    DataType type;
+    uint i,nFields = param.nfields();
+    casa::DataType type;
     for (i=0; i<nFields; i++){
       type = param.dataType(i);
       switch (type) {
-      case TpString:
+      case casa::TpString:
 	parameters_p.define(param.name(i),param.asString(i));
-      case TpBool:
+      case casa::TpBool:
 	parameters_p.define(param.name(i),param.asBool(i));
-      case TpInt:
+      case casa::TpInt:
 	parameters_p.define(param.name(i),param.asInt(i));
-      case TpUInt:
+      case casa::TpUInt:
 	parameters_p.define(param.name(i),param.asuInt(i));
-      case TpFloat:
+      case casa::TpFloat:
 	parameters_p.define(param.name(i),param.asFloat(i));
-      case TpDouble:
+      case casa::TpDouble:
 	parameters_p.define(param.name(i),param.asDouble(i));
-      case TpComplex:
+      case casa::TpComplex:
 	parameters_p.define(param.name(i),param.asComplex(i));
-      case TpDComplex:
+      case casa::TpDComplex:
 	parameters_p.define(param.name(i),param.asDComplex(i));
-      case TpArrayBool:
+      case casa::TpArrayBool:
 	parameters_p.define(param.name(i),param.asArrayBool(i));
-      case TpArrayInt:
+      case casa::TpArrayInt:
 	parameters_p.define(param.name(i),param.asArrayInt(i));
-      case TpArrayUInt:
+      case casa::TpArrayUInt:
 	parameters_p.define(param.name(i),param.asArrayuInt(i));
-      case TpArrayFloat:
+      case casa::TpArrayFloat:
 	parameters_p.define(param.name(i),param.asArrayFloat(i));
-      case TpArrayDouble:
+      case casa::TpArrayDouble:
 	parameters_p.define(param.name(i),param.asArrayDouble(i));
-      case TpArrayComplex:
+      case casa::TpArrayComplex:
 	parameters_p.define(param.name(i),param.asArrayComplex(i));
-      case TpArrayDComplex:
+      case casa::TpArrayDComplex:
 	parameters_p.define(param.name(i),param.asArrayDComplex(i));
       default:
 	cerr << "Sorry, setting a parameter of type " << type << 
 	  " not implemented yet." << endl <<
 	  "Please complain to the author!" << endl;
-	status = False;
+	status = false;
       };
     };
   } catch (AipsError x) {
-    status = False;
+    status = false;
   }
   return status;
 }
 
 
 template <class T>
-Bool PluginBase<T>::setWeights (const Matrix<T>& weights)
+bool PluginBase<T>::setWeights (const Matrix<T>& weights)
 {
-  Bool status (True);
+  bool status (true);
 
   weights_p.resize(weights.shape());
   weights_p = weights;
@@ -176,25 +181,25 @@ Bool PluginBase<T>::setWeights (const Matrix<T>& weights)
 // ==============================================================================
 
 template <class T>
-Bool PluginBase<T>::calcWeights (const Matrix<T>& data)
+bool PluginBase<T>::calcWeights (const Matrix<T>& data)
 {
-  Bool status (True);
+  bool status (true);
 
   try {
     weights_p.resize (data.shape());
     weights_p = T(1);
   } catch (AipsError x) {
-    status = False;
+    status = false;
   }
 
   return status;
 }
 
 template <class T>
-Bool PluginBase<T>::apply (Matrix<T>& data,
-			   const Bool& computeWeights)
+bool PluginBase<T>::apply (Matrix<T>& data,
+			   const bool& computeWeights)
 {
-  Bool status (True);
+  bool status (true);
   
   if (computeWeights) {
     status = calcWeights (data);
@@ -203,18 +208,18 @@ Bool PluginBase<T>::apply (Matrix<T>& data,
   try {
 //     data *= weights_p;
   } catch (AipsError x) {
-    status = False;
+    status = false;
   }
 
   return status;
 }
 
 template <class T>
-Bool PluginBase<T>::apply (Matrix<T> &outputData,
+bool PluginBase<T>::apply (Matrix<T> &outputData,
 			   const Matrix<T>& inputData,
-			   const Bool& computeWeights)
+			   const bool& computeWeights)
 {
-  Bool status (True);
+  bool status (true);
   
   if (computeWeights) {
     status = calcWeights (inputData);
@@ -224,7 +229,7 @@ Bool PluginBase<T>::apply (Matrix<T> &outputData,
     outputData.resize(inputData.shape());
 //     outputData = inputData*weights_p;
   } catch (AipsError x) {
-    status = False;
+    status = false;
   }
 
   return status;
@@ -237,10 +242,12 @@ Bool PluginBase<T>::apply (Matrix<T> &outputData,
 //
 // =============================================================================
 
-template class PluginBase<Double>;
+template class PluginBase<double>;
 template class PluginBase<DComplex>;
 
 // These are old versions which should no be used!
-template class PluginBase<Int>;
-template class PluginBase<Float>;
+template class PluginBase<int>;
+template class PluginBase<float>;
 template class PluginBase<Complex>;
+
+}  // Namespace LOPES -- end

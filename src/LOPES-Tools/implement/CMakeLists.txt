@@ -55,13 +55,21 @@ ADD_LIBRARY (lopestools
   Calibration/CalTableReader.cc
   Calibration/CalTableWriter.cc
   Calibration/PhaseCalibration.cc
-#  Calibration/PhaseCalibrationPlugin.cc
-#  Calibration/PluginBase.cc
+  Calibration/PhaseCalibrationPlugin.cc
+  Calibration/PluginBase.cc
   Calibration/RFIMitigation.cc
-#  Calibration/RFIMitigationPlugin.cc
+  Calibration/RFIMitigationPlugin.cc
+## -- Coordinates --------------------------------
+  Coordinates/AxisCoordinates.cc
+  Coordinates/AxisIterator.cc
+  Coordinates/CoordinateGrid.cc
+  Coordinates/GeodeticEllipsoid.cc
+  Coordinates/GridCoordinate.cc
+  Coordinates/PolarCoordinate.cc
 ## -- Data ---------------------------------------
   Data/Data.cc
   Data/DynamicSpectrum.cc
+  Data/TIM40.cc
   Data/UnitPrefix.cc
 ## -- Display ------------------------------------
   Display/PGPlot.cc
@@ -75,6 +83,17 @@ ADD_LIBRARY (lopestools
   IO/DataIO.cc
   IO/DataIterator.cc
   IO/LogfileName.cc
+## -- LopesBase ----------------------------------
+  LopesBase/BasicHeader.cc
+  LopesBase/BasicObject.cc
+  LopesBase/DataConversion.cc
+  LopesBase/DataCoordinfo.cc
+  LopesBase/DataFrequency.cc
+  LopesBase/ExchangeFormat.cc
+  LopesBase/StoredAddObject.cc
+  LopesBase/StoredInputObject.cc
+  LopesBase/StoredMultiplyObject.cc
+  LopesBase/StoredObject.cc
 ## -- Math ---------------------------------------
   Math/Algebra.cc
   Math/ArrayMath.cc

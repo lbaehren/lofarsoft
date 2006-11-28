@@ -27,10 +27,13 @@
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
 
-#include <lopes/Calibration/PluginBase.h>
-#include <lopes/Calibration/RFIMitigation.h>
+#include <Calibration/PluginBase.h>
+#include <Calibration/RFIMitigation.h>
 
-#include <casa/namespace.h>
+using casa::Record;
+using casa::Vector;
+
+namespace LOPES {  // Namespace LOPES -- begin
 
 /*!
   \class RFIMitigationPlugin
@@ -108,7 +111,7 @@ class RFIMitigationPlugin : public PluginBase<Complex> {
   /*!
     \brief Set the internal parameters controlling the behaviour of the plugin
   */
-  virtual Bool setParameters (Record const &param); 
+  virtual bool setParameters (Record const &param); 
 
   /*!
     \brief Get the size of a block of data
@@ -182,5 +185,7 @@ class RFIMitigationPlugin : public PluginBase<Complex> {
   void setSegmentationIndices ();
 
 };
+
+}  // Namespace LOPES -- end
 
 #endif /* RFIMITIGATIONPLUGIN_H */

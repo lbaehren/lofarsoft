@@ -29,9 +29,8 @@
 #include <casa/aips.h>
 #include <casa/BasicSL/Complex.h>
 #include <casa/Exceptions/Error.h>
-#include <lopes/Calibration/PluginBase.h>
 
-#include <casa/namespace.h>
+#include <Calibration/PluginBase.h>
 
 namespace LOPES { // Namespace LOPES -- begin
   
@@ -60,8 +59,6 @@ namespace LOPES { // Namespace LOPES -- begin
     
   */
   class PhaseCalibrationPlugin : public PluginBase<Complex> {
-    
-
     
   public:
     
