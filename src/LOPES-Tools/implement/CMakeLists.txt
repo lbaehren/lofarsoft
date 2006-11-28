@@ -80,7 +80,11 @@ ADD_LIBRARY (lopestools
   Math/ArrayMath.cc
   Math/MathAlgebra.cc
   Math/MathFFT.cc
+  Math/MathFitting.cc
   Math/MathGeometry.cc
+  Math/MatrixEigen.cc
+  Math/NR.cc
+  Math/Statistics.cc
   Math/ThreeVector.cc
   Math/VectorConversion.cc
 ## -- Utilities ----------------------------------
