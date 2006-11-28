@@ -38,19 +38,19 @@
 #include <iosfwd>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
-
-using std::ios;
-using std::istream;
-using std::ostream;
-using std::iostream;
-using std::streambuf;
-using std::filebuf;
-using std::ifstream;
-using std::ofstream;
-using std::fstream;
-using std::fpos;
-using std::streampos;
-
+  
+  using std::ios;
+  using std::istream;
+  using std::ostream;
+  using std::iostream;
+  using std::streambuf;
+  using std::filebuf;
+  using std::ifstream;
+  using std::ofstream;
+  using std::fstream;
+  using std::fpos;
+  using std::streampos;
+  
 } //# NAMESPACE CASA - END
 
 #endif
