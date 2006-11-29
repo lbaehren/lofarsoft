@@ -18,10 +18,16 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <lopes/Skymap/Skymap.h>
-#include <lopes/Math/MathFFT.h>
-
 /* $Id: Skymap.cc,v 1.7 2006/10/31 18:24:08 bahren Exp $ */
+
+#include <Skymap/Skymap.h>
+#include <Math/MathFFT.h>
+
+using std::cerr;
+using std::cout;
+using std::endl;
+
+namespace LOPES {  // namespace LOPES -- begin
 
 // =============================================================================
 //
@@ -43,8 +49,8 @@ Skymap::Skymap (const ObsInfo& obsInfo,
 		const String refcode,
 		const String projection,
 		const IPosition& shape,
-		const Vector<Double>& center,
-		const Vector<Double>& increment)
+		const Vector<double>& center,
+		const Vector<double>& increment)
 {
   Skymap::setSkymapGrid (obsInfo,
 			 refcode,
@@ -58,15 +64,15 @@ Skymap::Skymap (const ObsInfo& obsInfo,
 
 Skymap::~Skymap ()
 {
-  Bool deleteIt = True;
+  bool deleteIt = true;
   // Skymap of complex values
   const DComplex* ptrSkymapComplex = skymapComplex_p.getStorage (deleteIt);
   skymapComplex_p.freeStorage(ptrSkymapComplex,deleteIt);
   // Skymap of real data
-  const Double* ptrSkymapReal = skymapReal_p.getStorage (deleteIt);
+  const double* ptrSkymapReal = skymapReal_p.getStorage (deleteIt);
   skymapReal_p.freeStorage(ptrSkymapReal,deleteIt);
   // Mapping between internal matrix and skymap cube
-  const Int* ptrMappingToCube = matrix2cube_p.getStorage (deleteIt);
+  const int* ptrMappingToCube = matrix2cube_p.getStorage (deleteIt);
   matrix2cube_p.freeStorage(ptrMappingToCube,deleteIt);
 }
 
@@ -81,10 +87,10 @@ Skymap::~Skymap ()
 void Skymap::init ()
 {
   nofAddedBlocks_p    = 0;
-  itsSkymapShapeSet   = False;
-  itsMappingToCubeSet = False;
-  addBaselines_p      = False;
-  crossCorrelation_p  = False;
+  itsSkymapShapeSet   = false;
+  itsMappingToCubeSet = false;
+  addBaselines_p      = false;
+  crossCorrelation_p  = false;
   signalQuantity_p    = "Power";
   signalDomain_p      = "Frequency";
   quantity_p          = SkymapQuantity::FREQ_POWER;
@@ -95,23 +101,23 @@ void Skymap::init ()
 
 // ------------------------------------------------------------- setMappingToCube
 
-void Skymap::setMappingToCube (const Matrix<Int>& matrix2cube)
+void Skymap::setMappingToCube (const Matrix<int>& matrix2cube)
 {  
   matrix2cube_p.resize(matrix2cube.shape());
   //
   matrix2cube_p = matrix2cube;
   // set the flag
-  itsMappingToCubeSet = True;
+  itsMappingToCubeSet = true;
 }
 
 // --------------------------------------------------------------- setSkymapShape
 
 void Skymap::setSkymapShape ()
 {
-  Int nofFrequencies (0);
-  Int nofPixels (0);
-  Int numberAntennas (0);
-  Int thirdAxis (0);
+  int nofFrequencies (0);
+  int nofPixels (0);
+  int numberAntennas (0);
+  int thirdAxis (0);
 
   // extract the shape of the phase gradients data cube
   Beamformer::getGradientsShape (nofFrequencies,nofPixels,numberAntennas);
@@ -148,7 +154,7 @@ void Skymap::setSkymapShape ()
     cerr << "\tUnknown signal domain " << signalDomain_p << endl;
   }
   // set the flag
-  itsSkymapShapeSet = True;
+  itsSkymapShapeSet = true;
 }
 
 // =============================================================================
@@ -162,8 +168,8 @@ void Skymap::setSkymapShape ()
 void Skymap::setSkymap (GlishRecord& record)
 {
   GlishArray gtmp;
-  Int itmp;
-  Double dtmp;
+  int itmp;
+  double dtmp;
   String stmp;
 
   // Set up the base class(es) first
@@ -205,8 +211,8 @@ void Skymap::setSkymapGrid (const ObsInfo& obsInfo,
 			    const String refcode,
 			    const String projection,
 			    const IPosition& shape,
-			    const Vector<Double>& center,
-			    const Vector<Double>& increment)
+			    const Vector<double>& center,
+			    const Vector<double>& increment)
 {
   try {
     SkymapGrid grid (obsInfo,
@@ -231,14 +237,14 @@ void Skymap::setOrientation (const Vector<String>& directions)
 
 // -------------------------------------------------------------- beamformingGrid
 
-Matrix<Double> Skymap::beamformingGrid ()
+Matrix<double> Skymap::beamformingGrid ()
 {
-  Matrix<Double> directions;
+  Matrix<double> directions;
 
   // -----------------------------------------------------------------
   // New implementation.
   
-  Matrix<Double> azel (grid_p.azel(True));
+  Matrix<double> azel (grid_p.azel(true));
   
   // Check if we use the distance information
   if (distance_p > 0) {
@@ -275,15 +281,15 @@ Matrix<Double> Skymap::beamformingGrid ()
 
 // ------------------------------------------------------------------------- mask
 
-Cube<Bool> Skymap::mask (const Int channels)
+Cube<bool> Skymap::mask (const int channels)
 {
   IPosition shape (grid_p.shape());
-  Vector<Bool> mask (grid_p.mask());
-  Int numPixel (0);
-  Int nofValidPixels (0);
+  Vector<bool> mask (grid_p.mask());
+  int numPixel (0);
+  int nofValidPixels (0);
   //
-  Cube<Bool> maskCube (shape(0),shape(1),channels);
-  maskCube = True;
+  Cube<bool> maskCube (shape(0),shape(1),channels);
+  maskCube = true;
   //
   for (int nx=0; nx<shape(0); nx++) {
     for (int ny=0; ny<shape(1); ny++) {
@@ -291,7 +297,7 @@ Cube<Bool> Skymap::mask (const Int channels)
 	nofValidPixels++;
       } else {
 	for (int nfreq=0; nfreq<channels; nfreq++) {
-	  maskCube(nx,ny,nfreq) = False;
+	  maskCube(nx,ny,nfreq) = false;
 	}
       }
       //
@@ -402,10 +408,10 @@ void Skymap::adjustSignalDomain (Matrix<DComplex>& skymap)
 {
   IPosition shape (Skymap::shape());  // [channel,pixel]
   IPosition shapeInput (skymap.shape());
-  const Int fftsize (DataFrequency::FFTSize());
-  Int FFTlen (DataFrequency::FFTlen());
-  Bool verboseON (False);
-  Bool dumpON (False);
+  const int fftsize (DataFrequency::FFTSize());
+  int FFTlen (DataFrequency::FFTlen());
+  bool verboseON (false);
+  bool dumpON (false);
   int sample (0);
   int pixel (0);
   int channel (0);
@@ -461,10 +467,10 @@ void Skymap::adjustSignalDomain (Matrix<DComplex>& skymap)
     for (pixel=0; pixel<shape(1); ++pixel) {
       vectFreq = skymap.column(pixel);
       // Use DComplex-DComplex backwards FFT
-      Vector<Double> vectTime = LOPES::FFT2Fx<Double,DComplex> (vectFreq,
+      Vector<double> vectTime = LOPES::FFT2Fx<double,DComplex> (vectFreq,
 								fftsize,
-								True,
-								False);
+								true,
+								false);
       // store the data vector
       for (sample=0; sample<fftsize; ++sample) {
  	skymapReal_p(sample,pixel) = vectTime(sample);
@@ -486,7 +492,7 @@ void Skymap::adjustSignalDomain (Matrix<DComplex>& skymap)
     if (signalQuantity_p == "Power") {
       for (pixel=0; pixel<shape(1); ++pixel) {
 	for (int freq=0; freq<shape(0); ++freq) {
-	  skymapReal_p(freq,pixel) += fabs(skymap(freq,pixel)*conj(skymap(freq,pixel)));
+	  skymapReal_p(freq,pixel) += casa::fabs(skymap(freq,pixel)*conj(skymap(freq,pixel)));
 	}
       }
     }
@@ -525,10 +531,10 @@ void Skymap::setCoordinateSystem ()
   }
   // Linear coordinates: Distance, Time  
   {
-    Vector<Double> crpix(2,1.0);
-    Vector<Double> crval(2,1.0);
-    Vector<Double> cdelt(2,1.0);
-    Matrix<Double> pc(2,2); pc= 0; pc.diagonal() = 1.0;
+    Vector<double> crpix(2,1.0);
+    Vector<double> crval(2,1.0);
+    Vector<double> cdelt(2,1.0);
+    Matrix<double> pc(2,2); pc= 0; pc.diagonal() = 1.0;
     Vector<String> worldAxisNames(2);
     Vector<String> names(2);
     Vector<String> units(2);
@@ -563,7 +569,7 @@ void Skymap::setCoordinateSystem (CoordinateSystem const &csys)
   if (csys.nCoordinates() == csys_p.nCoordinates()) {
     csys_p = csys;
   } else {
-    Int axis (0);
+    int axis (0);
     // Direction axis
     axis = csys.findCoordinate (Coordinate::DIRECTION,-1);
     DirectionCoordinate direction (csys.directionCoordinate(axis));
@@ -584,8 +590,8 @@ void Skymap::setCoordinateSystem (const GlishRecord& record)
 {
   GlishArray gtmp;
   Vector<String> stmp;
-  Vector<Double> dtmp;
-  uInt naxis (csys_p.nPixelAxes());
+  Vector<double> dtmp;
+  uint naxis (csys_p.nPixelAxes());
 
   if (record.exists("worldAxisNames")) {
     gtmp = record.get("worldAxisNames");
@@ -606,14 +612,14 @@ void Skymap::setCoordinateSystem (const GlishRecord& record)
   }
 }
 
-void Skymap::directionCoordinate (Vector<Double>& referenceValue,
-				  Vector<Double>& increment,
-				  Matrix<Double>& xform,
-				  Vector<Double>& referencePixel,
+void Skymap::directionCoordinate (Vector<double>& referenceValue,
+				  Vector<double>& increment,
+				  Matrix<double>& xform,
+				  Vector<double>& referencePixel,
 				  Vector<String>& worldAxisUnits,
-				  Vector<Double>& projectionParameters)
+				  Vector<double>& projectionParameters)
 {
-  Bool verbose (True);
+  bool verbose (true);
   //
   DirectionCoordinate dc (grid_p.directionCoordinate());
   Projection projection (dc.projection());
@@ -625,8 +631,8 @@ void Skymap::directionCoordinate (Vector<Double>& referenceValue,
   worldAxisUnits       = dc.worldAxisUnits();
   projectionParameters = projection.parameters();
   //
-  Vector<Double> pixel (dc.referencePixel());
-  Vector<Double> world (dc.referenceValue());
+  Vector<double> pixel (dc.referencePixel());
+  Vector<double> world (dc.referenceValue());
   //
   if (verbose) {
     cout << "[Skymap::directionCoordinate]" << endl;
@@ -656,14 +662,14 @@ void Skymap::directionCoordinate (Vector<Double>& referenceValue,
 
 // ---------------------------------------------------------- getRebinningIndices
 
-void Skymap::getRebinningIndices (Matrix<Int>& indexValues,
-				  Int channels) 
+void Skymap::getRebinningIndices (Matrix<int>& indexValues,
+				  int channels) 
 {
-  Int pixels (0);
-  Int nfreq (0);
-  Double bins_per_channel;
-  Double tmp (0.0);
-  Bool verboseON (False);
+  int pixels (0);
+  int nfreq (0);
+  double bins_per_channel;
+  double tmp (0.0);
+  bool verboseON (false);
 
   /* If the skymap hold the electric field the frequency domain, the member data
      stored in a complex valued array; otherwise in a real valued array. */
@@ -687,11 +693,11 @@ void Skymap::getRebinningIndices (Matrix<Int>& indexValues,
 
   bins_per_channel = 1.0*(nfreq-1)/channels;
   
-  for (Int k=0; k<channels; ++k) {
+  for (int k=0; k<channels; ++k) {
     tmp = k*bins_per_channel;
-    indexValues(k,0) = (Int)floor(tmp+0.5);
+    indexValues(k,0) = (int)floor(tmp+0.5);
     tmp = (k+1)*bins_per_channel;
-    indexValues(k,1) = (Int)floor(tmp+0.5);
+    indexValues(k,1) = (int)floor(tmp+0.5);
   }
 
   // control output
@@ -708,16 +714,16 @@ void Skymap::getRebinningIndices (Matrix<Int>& indexValues,
 
 // =============================================================================
 //
-//  Interface with the methods provided by the Beamformer
+//  interface with the methods provided by the Beamformer
 //
 // =============================================================================
 
 // ------------------------------------------------------------ setPhaseGradients
 
-void Skymap::setPhaseGradients (Vector<Double> &frequencies,
-				Matrix<Double> &antennaPositions) 
+void Skymap::setPhaseGradients (Vector<double> &frequencies,
+				Matrix<double> &antennaPositions) 
 {
-  Matrix<Double> directions (Skymap::beamformingGrid());
+  Matrix<double> directions (Skymap::beamformingGrid());
 
 //   cout << "[Skymap::setPhaseGradients]"                         << endl;
 //   cout << " - frequencies       = " << frequencies.shape()      << endl;
@@ -763,7 +769,7 @@ void Skymap::addBaselines (Matrix<DComplex> const &data)
 			      data);
   ++nofAddedBlocks_p;
   // set the beamformer flag
-  addBaselines_p = True;
+  addBaselines_p = true;
 }
 
 // ----------------------------------------------------------------------- ccBeam
@@ -778,28 +784,28 @@ void Skymap::ccBeam (Matrix<DComplex> const &data)
   ++nofAddedBlocks_p;
   
   // set the beamformer flag
-  addBaselines_p = False;
+  addBaselines_p = false;
 }
 
 // --------------------------------------------------------------------- ccMatrix
 
 // void Skymap::ccMatrix (const Cube<DComplex>& ccCube)
 // {
-//   Vector<Double> frequencies = DataFrequency::Frequencies(True);
+//   Vector<double> frequencies = DataFrequency::Frequencies(true);
 //   Skymap::ccMatrix (ccCube, frequencies);
 // }
 
 // --------------------------------------------------------------------- ccMatrix
 
 void Skymap::ccMatrix (const Cube<DComplex>& ccCube,
-		       const Vector<Double>& frequencies,
-		       const Matrix<Double>& antennaPositions)
+		       const Vector<double>& frequencies,
+		       const Matrix<double>& antennaPositions)
 {
-  Int BFmethod (1);
-  Matrix<Double> skymap; 
+  int BFmethod (1);
+  Matrix<double> skymap; 
 
   if (BFmethod == 1) {
-    Matrix<Double> directions (Skymap::beamformingGrid());
+    Matrix<double> directions (Skymap::beamformingGrid());
 
     // Pass the data to the Beamformer
     Beamformer::BFccMatrix (skymap,
@@ -852,7 +858,7 @@ void Skymap::clearSkymap ()
   skymapReal_p    = 0.0;
 
   // reset the beamformer flags
-  addBaselines_p = crossCorrelation_p = False;
+  addBaselines_p = crossCorrelation_p = false;
   // reset the counter for the number of added blocks
   nofAddedBlocks_p = 0;
 }
@@ -874,9 +880,9 @@ Matrix<DComplex> Skymap::getSkymap ()
 // -------------------------------------------------------------------- getSkymap
 
 void Skymap::getSkymap (Matrix<DComplex>& skymap,
-			Int channels)
+			int channels)
 {
-  Int nx,ny;
+  int nx,ny;
   // perform the rebinning of on the third image axis ...
   skymapComplex_p.shape(nx,ny);
   if (nx != channels) {
@@ -889,20 +895,20 @@ void Skymap::getSkymap (Matrix<DComplex>& skymap,
 
 // -------------------------------------------------------------------- getSkymap
 
-void Skymap::getSkymap (Matrix<Double>& skymap)
+void Skymap::getSkymap (Matrix<double>& skymap)
 {
-  Double blocks = 1.0*nofAddedBlocks_p;
+  double blocks = 1.0*nofAddedBlocks_p;
   skymap.resize(skymapReal_p.shape());
   skymap = skymapReal_p/blocks;
 }
 
 // -------------------------------------------------------------------- getSkymap
 
-void Skymap::getSkymap (Matrix<Double>& skymap,
-			Int channels)
+void Skymap::getSkymap (Matrix<double>& skymap,
+			int channels)
 {
   IPosition shape (skymapComplex_p.shape());
-  Double blocks = 1.0*nofAddedBlocks_p;
+  double blocks = 1.0*nofAddedBlocks_p;
 
   // perform the rebinning of on the third image axis ...
   if (shape(0) != channels) {
@@ -918,10 +924,10 @@ void Skymap::getSkymap (Matrix<Double>& skymap,
 // -------------------------------------------------------------------- getSkymap
 
 void Skymap::getSkymap (Cube<DComplex>& skymap,
-			Cube<Bool>& mask)
+			Cube<bool>& mask)
 {
-  Int nfreq(0);
-  Int pixels (0);
+  int nfreq(0);
+  int pixels (0);
   //
   skymapComplex_p.shape(nfreq,pixels);
   Skymap::skymap (skymap,mask,nfreq);
@@ -930,11 +936,11 @@ void Skymap::getSkymap (Cube<DComplex>& skymap,
 // ----------------------------------------------------------------------- skymap
 
 void Skymap::skymap (Cube<DComplex>& skymap,
-		     Cube<Bool>& mask,
-		     Int channels)
+		     Cube<bool>& mask,
+		     int channels)
 {
-  Int nofPixels (0);
-  Int nofChannels (0);
+  int nofPixels (0);
+  int nofChannels (0);
 
   // -----------------------------------------------------------------
   // Get the image mask in the shape matching that of the skymap data
@@ -967,11 +973,11 @@ void Skymap::skymap (Cube<DComplex>& skymap,
 
 // ----------------------------------------------------------------------- skymap
 
-void Skymap::skymap (Cube<Double>& skymap,
-		     Cube<Bool>& mask)
+void Skymap::skymap (Cube<double>& skymap,
+		     Cube<bool>& mask)
 {
-  Int nofChannels (0);
-  Int nofPixels (0);
+  int nofChannels (0);
+  int nofPixels (0);
   //
   skymapComplex_p.shape(nofChannels,
 			nofPixels);
@@ -983,12 +989,12 @@ void Skymap::skymap (Cube<Double>& skymap,
 
 // ----------------------------------------------------------------------- skymap
 
-void Skymap::skymap (Cube<Double>& skymap,
-		     Cube<Bool>& mask,
-		     Int channels)
+void Skymap::skymap (Cube<double>& skymap,
+		     Cube<bool>& mask,
+		     int channels)
 {
-  Int nofPixels (0);
-  Int nofChannels (0);
+  int nofPixels (0);
+  int nofChannels (0);
 
   // -----------------------------------------------------------------
   // Get the image mask in the shape matching that of the skymap data
@@ -1007,7 +1013,7 @@ void Skymap::skymap (Cube<Double>& skymap,
   skymapReal_p.shape(nofChannels,nofPixels);
 
   if (nofChannels != channels) {
-    Matrix<Double> skymapTemp;
+    Matrix<double> skymapTemp;
     //
     Skymap::averageChannels (skymapTemp,
 			     channels);
@@ -1028,21 +1034,21 @@ template <class T>
 void Skymap::skymapMatrix2Cube (Cube<T>& out,
 				const Matrix<T>& skymapIN)
 {
-  Bool verboseON (False);
+  bool verboseON (false);
   IPosition shape (grid_p.shape());
-  Vector<Bool> mask (grid_p.mask());
-  Int nofPixels (0);                  // number of map pixels
-  Int nofChannels (0);                // number of map channels
+  Vector<bool> mask (grid_p.mask());
+  int nofPixels (0);                  // number of map pixels
+  int nofChannels (0);                // number of map channels
 
   // Get the shape of the internal skymap pixel value array
   skymapIN.shape(nofChannels,
 		 nofPixels);
 
   // Check the number of skymap pixels masked as valid.
-  if (nofPixels != grid_p.nelements(True)) {
+  if (nofPixels != grid_p.nelements(true)) {
     cerr << "[Skymap::skymapMatrix2Cube] Mismatch in number of valid pixels" << endl;
     cerr << " - Skymap pixel value array : " << nofPixels                    << endl;
-    cerr << " - Pixel masking array .... : " << grid_p.nelements(True)       << endl;
+    cerr << " - Pixel masking array .... : " << grid_p.nelements(true)       << endl;
   }
 
   /*
@@ -1058,7 +1064,7 @@ void Skymap::skymapMatrix2Cube (Cube<T>& out,
   for (az=0; az<shape(0); az++) {
     for (el=0; el<shape(1); el++) {
       //
-      if (mask(nMask) == True) {
+      if (mask(nMask) == true) {
 	// copy channels
 	for (channel=0; channel<nofChannels; channel++) {
 	  out(az,el,channel) = skymapIN(channel,pixel)/T(nofAddedBlocks_p);
@@ -1076,7 +1082,7 @@ void Skymap::skymapMatrix2Cube (Cube<T>& out,
     cout << "[Skymap::skymapMatrix2Cube]" << endl;
     cout << " - Shape of input array ........ : " << skymapIN.shape() << endl;
     cout << " - Shape of output array ....... : " << out.shape() << endl;
-    cout << " - Fraction of valid pixels .... : " << grid_p.nelements(True)
+    cout << " - Fraction of valid pixels .... : " << grid_p.nelements(true)
 	 << " / " << grid_p.nelements() << endl;
     cout << " - Number of added blocks ...... : " << nofAddedBlocks_p << endl;
   }
@@ -1118,20 +1124,20 @@ void Skymap::dumpSkymap (std::ostream& os = std::cout)
 
 template <class T>
 void Skymap::averageChannels (Vector<T>& channels,
-			      Int nofChannels)
+			      int nofChannels)
 {
-  Int nofBins (0);
+  int nofBins (0);
   T sum (0.0);
-  Matrix<Int> indexValues;
+  Matrix<int> indexValues;
   Vector<T> tmpChannels (nofChannels);
 
   // get the array indices defining the rebinning intervals
   Skymap::getRebinningIndices (indexValues,nofChannels);
 
-  for (Int chan=0; chan<nofChannels; ++chan) {
+  for (int chan=0; chan<nofChannels; ++chan) {
     sum = 0.0;
     nofBins = 0;
-    for (Int freq=indexValues(chan,0); freq<=indexValues(chan,1); ++freq) {
+    for (int freq=indexValues(chan,0); freq<=indexValues(chan,1); ++freq) {
       sum += channels(freq);
       ++nofBins;
     }
@@ -1148,13 +1154,13 @@ void Skymap::averageChannels (Vector<T>& channels,
 
 template <class T>
 void Skymap::averageChannels (Matrix<T>& skymap,
-			      Int const &channels)
+			      int const &channels)
 {
-  Int nofFrequencies (0);
-  Int nofPixels (0);
+  int nofFrequencies (0);
+  int nofPixels (0);
   T nofBins (0);
   T sum (0.0);
-  Matrix<Int> indexValues;
+  Matrix<int> indexValues;
 
   // get the array indices defining the rebinning intervals
   Skymap::getRebinningIndices (indexValues,channels);
@@ -1226,29 +1232,31 @@ void Skymap::printSkymap (std::ostream& s = std::cout)
 //
 // =============================================================================
 
-template void Skymap::averageChannels (Vector<Float>& channels,
-				       Int nofChannels);
-template void Skymap::averageChannels (Vector<Double>& channels,
-				       Int nofChannels);
+template void Skymap::averageChannels (Vector<float>& channels,
+				       int nofChannels);
+template void Skymap::averageChannels (Vector<double>& channels,
+				       int nofChannels);
 template void Skymap::averageChannels (Vector<Complex>& channels,
-				       Int nofChannels);
+				       int nofChannels);
 template void Skymap::averageChannels (Vector<DComplex>& channels,
-				       Int nofChannels);
+				       int nofChannels);
 
-template void Skymap::averageChannels (Matrix<Float> &skymap,
-				       Int const &channels);
-template void Skymap::averageChannels (Matrix<Double> &skymap,
-				       Int const &channels);
+template void Skymap::averageChannels (Matrix<float> &skymap,
+				       int const &channels);
+template void Skymap::averageChannels (Matrix<double> &skymap,
+				       int const &channels);
 template void Skymap::averageChannels (Matrix<Complex> &skymap,
-				       Int const &channels);
+				       int const &channels);
 template void Skymap::averageChannels (Matrix<DComplex> &skymap,
-				       Int const &channels);
+				       int const &channels);
 
-template void Skymap::skymapMatrix2Cube (Cube<Float> &out,
-					 const Matrix<Float>& skymapIN);
-template void Skymap::skymapMatrix2Cube (Cube<Double> &out,
-					 const Matrix<Double>& skymapIN);
+template void Skymap::skymapMatrix2Cube (Cube<float> &out,
+					 const Matrix<float>& skymapIN);
+template void Skymap::skymapMatrix2Cube (Cube<double> &out,
+					 const Matrix<double>& skymapIN);
 template void Skymap::skymapMatrix2Cube (Cube<Complex> &out,
 					 const Matrix<Complex>& skymapIN);
 template void Skymap::skymapMatrix2Cube (Cube<DComplex> &out,
 					 const Matrix<DComplex>& skymapIN);
+
+}  // namespace LOPES -- end

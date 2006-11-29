@@ -45,13 +45,19 @@ using namespace std;
 #include <Glish/Client.h>
 
 // LOPES-Tools header files
-#include <lopes/IO/DataReaderTools.h>
-#include <lopes/Observation/ObservationData.h>
-#include <lopes/Skymap/Skymap.h>
-#include <lopes/Skymap/SkymapQuantity.h>
+#include <IO/DataReaderTools.h>
+#include <Observation/ObservationData.h>
+#include <Skymap/Skymap.h>
+#include <Skymap/SkymapQuantity.h>
 
-// CASA namespace
-#include <casa/namespace.h>
+using casa::CoordinateSystem;
+using casa::DirectionCoordinate;
+using casa::IPosition;
+using casa::LinearCoordinate;
+using casa::SpectralCoordinate;
+using casa::String;
+
+namespace LOPES {  // namespace LOPES -- begin
 
 /*!
   \class Skymapper
@@ -151,8 +157,8 @@ using namespace std;
     IPosition shape (5,20,20,1,1,1);
     String refcode ("J2000");
     String projection ("SIN");
-    Vector<Double> crval (2);
-    Vector<Double> cdelt (2);
+    Vector<double> crval (2);
+    Vector<double> cdelt (2);
     
     crval(0) = 178.0;
     crval(1) =  28.0;
@@ -195,10 +201,10 @@ class Skymapper {
  private:
   
   //! Switch to enable/disable verbose mode
-  Bool verbose_p;
+  bool verbose_p;
   
   //! Track the status of the Skymapper
-  Bool isOperational_p;
+  bool isOperational_p;
 
   //! Name of the image created on disk
   String filename_p;
@@ -274,8 +280,8 @@ class Skymapper {
 	     const IPosition& shape,
 	     const String& refcode,
 	     const String& projection,
-	     const Vector<Double>& crval,
-	     const Vector<Double>& cdelt);
+	     const Vector<double>& crval,
+	     const Vector<double>& cdelt);
 
   /*!
     \brief Copy constructor
@@ -329,7 +335,7 @@ class Skymapper {
     \return status -- Status of the operation; returns <tt>False</tt> if an error
                       occured
    */
-  Bool setDataReader (DataReader *dr);
+  bool setDataReader (DataReader *dr);
 
   /*!
     \brief Set the DataReader used for reading in the data from disk
@@ -340,7 +346,7 @@ class Skymapper {
     \return status -- Status of the operation; returns <tt>False</tt> if an error
                       occured
    */
-  Bool setDataReader (GlishRecord &rec);
+  bool setDataReader (GlishRecord &rec);
 
   /*!
     \brief Get the data describing the observation
@@ -363,7 +369,7 @@ class Skymapper {
                          enclosed in <tt>obsData</tt>
   */
   void setObservationData (ObservationData const &obsData,
-			   Bool const &updateCsys=True);
+			   bool const &updateCsys=True);
   
   /*!
     \brief Shape of the image data array
@@ -386,7 +392,7 @@ class Skymapper {
     passed to the function.
   */
   void setImageShape (IPosition const &shape,
-		      Bool const &updateRefPixel=False);
+		      bool const &updateRefPixel=False);
 
   /*!
     \brief Get the number of data blocks whihc are combined into a timeframe
@@ -422,7 +428,7 @@ class Skymapper {
   /*!
     \brief Set the source (function) for reading the data during the imaging
    */
-  Bool setDataSource ();
+  bool setDataSource ();
 
   /*!
     \brief Process the data and create a skymap
@@ -438,7 +444,7 @@ class Skymapper {
 	  (re-)extracted the information from a Glish record each time the imaging
 	  function was called.
   */
-  Bool createImage ();
+  bool createImage ();
 
   // ---------------------------------------------------------- Coordinate system
 
@@ -476,9 +482,9 @@ class Skymapper {
   bool setCoordinateSystem (const ObsInfo &obsinfo,
 			    const String &refcode,
 			    const String &projection,
-			    const Vector<Double> &crpix,
-			    const Vector<Double> &crval,
-			    const Vector<Double> &cdelt);
+			    const Vector<double> &crpix,
+			    const Vector<double> &crval,
+			    const Vector<double> &cdelt);
   
   /*!
     \brief Set the coordinate system from a Glish record of another one
@@ -497,10 +503,10 @@ class Skymapper {
     \param crval      -- Reverence value at the position of the sky map
     \param cdelt      -- Coordinate increment
   */
-  Bool setDirectionAxis (String const &refcode,
+  bool setDirectionAxis (String const &refcode,
 			 String const &projection,
-			 const Vector<Double> &crval,
-			 const Vector<Double>& cdelt);    
+			 const Vector<double> &crval,
+			 const Vector<double>& cdelt);    
 
   /*!
     \brief Set the time axis of the coordinate system
@@ -521,10 +527,10 @@ class Skymapper {
     // Extraction of the time axis
     LinearCoordinate axis (csys_p.linearCoordinate(axisNumber));
     // storage of the modified time axis
-    Bool replaceCoordinate(const Coordinate &newCoordinate, uInt whichCoordinate)
+    bool replaceCoordinate(const Coordinate &newCoordinate, uInt whichCoordinate)
     \endcode
   */
-  Bool setTimeAxis (const double &referenceValue=0.0,
+  bool setTimeAxis (const double &referenceValue=0.0,
 		    const int &nofTimeframes=1,
 		    const int &blocksPerTimeframe=1);
 
@@ -639,7 +645,7 @@ class Skymapper {
     \f]
     where \f$ N_{\rm b.p.f.} \f$ is the number of blocks added up per timeframe.
   */
-  Double timeAxisIncrement ();
+  double timeAxisIncrement ();
   
   /*!
     \brief Default frequency axis
@@ -661,7 +667,7 @@ class Skymapper {
 			   then <tt>csys_p</tt> is updated based on the data
 			   in <tt>obsData_p</tt>.
   */
-  void syncCoordinateSystem (Bool const &csysIsMaster=False);
+  void syncCoordinateSystem (bool const &csysIsMaster=False);
   
   /*!
     \brief Get the default shape of an image
@@ -678,5 +684,7 @@ class Skymapper {
   bool setSkymapCenter ();
 
 };
+
+}  // namespace LOPES -- end
 
 #endif /* _SKYMAPPER_H_ */

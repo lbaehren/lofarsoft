@@ -9,7 +9,7 @@ SUBDIRS (
   )
 
 ## -----------------------------------------------------------------------------
-## Build the LopesTools library
+## Locate required external components/libraries
 
 INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindBlitz.cmake)
 INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindBoost.cmake)
@@ -19,11 +19,10 @@ INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindCPGPLOT.cmake
 INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindROOT.cmake)
 INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindWCS.cmake)
 
-## -----------------------------------------------------------------------------
-
 INCLUDE_DIRECTORIES(
   .
   ${CASA_INCLUDE_DIR}
+  ${GLISH_INCLUDE_DIR}
   ${CFITSIO_INCLUDE_DIR}
   ${CPGPLOT_INCLUDE_DIR}
   ${Blitz_INCLUDE_DIR}
@@ -35,6 +34,7 @@ if (HAVE_CASA)
 endif (HAVE_CASA)
 
 ## -----------------------------------------------------------------------------
+## Build the LopesTools library
 
 ADD_LIBRARY (lopestools
 ## -- Analysis ---------------------------------------------
@@ -87,8 +87,12 @@ ADD_LIBRARY (lopestools
   Functionals/ShapeletsModel1D.cc
   Functionals/StatisticsFilter.cc
 ## -- IO ---------------------------------------------------
+  IO/DataBlockSettings.cc
   IO/DataIO.cc
   IO/DataIterator.cc
+  IO/DataReader.cc
+  IO/DataReaderTools.cc
+  IO/ImportAntenna.cc
   IO/LogfileName.cc
 ## -- LopesBase --------------------------------------------
   LopesBase/BasicHeader.cc
@@ -115,14 +119,14 @@ ADD_LIBRARY (lopestools
   Math/VectorConversion.cc
 ## -- Observation ------------------------------------------
   Observation/AntennaLayout.cc
-#  Observation/ObservationData.cc
+  Observation/ObservationData.cc
   Observation/ObservationFrame.cc
   Observation/ObservationMeta.cc
 ## -- Skymap -----------------------------------------------
-#  Skymap/Skymap.cc
+  Skymap/Skymap.cc
   Skymap/SkymapGrid.cc
 #  Skymap/Skymapper.cc
-#  Skymap/SkymapperTools.cc
+  Skymap/SkymapperTools.cc
   Skymap/SkymapQuantity.cc
 ## -- Utilities --------------------------------------------
   Utilities/ProgressBar.cc

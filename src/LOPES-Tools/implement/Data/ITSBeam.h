@@ -19,16 +19,22 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: ITSBeam.h,v 1.7 2006/08/11 13:05:23 bahren Exp $*/
+/* $Id: ITSBeam.h,v 1.8 2006/10/31 18:24:08 bahren Exp $*/
 
 #ifndef ITSBEAM_H
 #define ITSBEAM_H
 
 #include <casa/aips.h>
 #include <casa/Arrays.h>
-#include <lopes/Data/ITSMetadata.h>
-#include <lopes/IO/DataReader.h>
-#include <lopes/Utilities/StringTools.h>
+
+#include <Data/ITSMetadata.h>
+#include <IO/DataReader.h>
+#include <Utilities/StringTools.h>
+
+using casa::DComplex;
+using casa::String;
+
+namespace LOPES {  // namespace LOPES -- begin
 
 /*!
   \class ITSBeam
@@ -103,8 +109,8 @@
     
     ITSBeam beam (metafile, blocksize);
     
-    Matrix<Float> fx = beam.fx();
-    Matrix<Complex> fft = beam.fft();
+    Matrix<double> fx = beam.fx();
+    Matrix<DComplex> fft = beam.fft();
     \endcode
     <li>Indirect use via a pointer to a DataReader object:
     \code
@@ -116,8 +122,8 @@
     
     dr = beam;
     
-    Matrix<Float> fx = beam->fx();
-    Matrix<Complex> fft = beam->fft();
+    Matrix<double> fx = beam->fx();
+    Matrix<DComplex> fft = beam->fft();
     \endcode
   </ol>
 */
@@ -167,8 +173,8 @@ class ITSBeam : public DataReader {
   */
   ITSBeam (String const &metafile,
 	   uint const &blocksize,
-	   Vector<Float> const &adc2voltage,
-	   Matrix<Complex> const &fft2calfft);
+	   Vector<double> const &adc2voltage,
+	   Matrix<DComplex> const &fft2calfft);
   /*!
     \brief Copy constructor
 
@@ -255,7 +261,7 @@ class ITSBeam : public DataReader {
     
     \return fx -- Raw ADC time series, [Counts]
   */
-  Matrix<Float> fx ();
+  Matrix<double> fx ();
 
  private:
 
@@ -277,8 +283,10 @@ class ITSBeam : public DataReader {
     \return status -- Status of the operation; returns <i>true</i> if everything
                       went fine.
   */
-  Bool setStreams ();
+  bool setStreams ();
 
 };
+
+}  // namespace LOPES -- end
 
 #endif /* ITSBEAM_H */

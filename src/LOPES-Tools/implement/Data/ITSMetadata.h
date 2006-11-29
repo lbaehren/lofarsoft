@@ -34,7 +34,7 @@
 #include <casa/Exceptions/Error.h>
 
 // LOPES-Tools header files
-#include <lopes/Utilities/StringTools.h>
+#include <Utilities/StringTools.h>
 
 #include <casa/namespace.h>
 
@@ -225,9 +225,9 @@ class ITSMetadata {
   //! Number of the antennas included in the experiment
   Vector<uint> antennas_p;
   //! Use sign extension for the recorded data?
-  Bool signExtension_p;
+  bool signExtension_p;
   //!
-  Bool skipcapture_p;
+  bool skipcapture_p;
   //!
   Int iterations_p;
   //!
@@ -242,14 +242,14 @@ class ITSMetadata {
   //! Name of the datafiles associated with the experiment/observation
   Vector<String> datafiles_p;
   //! Keep track wether or not valid data are associated with an antenna
-  Vector<Bool> antennaHasValidData_p;
+  Vector<bool> antennaHasValidData_p;
 
   // ------------------------------------------------------------- protected data
 
  protected:
 
   //! Status (should be set False, if there is something from with the data)
-  Bool isOk_p;
+  bool isOk_p;
 
  public:
 
@@ -400,7 +400,7 @@ class ITSMetadata {
     \return hasValidData -- Returns <i>false</i> if no valid data file is
             associated with the provided antenna number
   */
-  Bool hasValidData (uint const &antenna) const;
+  bool hasValidData (uint const &antenna) const;
 
   /*!
     \brief Are valid data associated with the antenna?
@@ -408,12 +408,12 @@ class ITSMetadata {
     \return hasValidData -- Returns <i>false</i> if no valid data file is
             associated with the antenna number
   */
-  Vector<Bool> hasValidData () const {
+  Vector<bool> hasValidData () const {
     return antennaHasValidData_p;
   }
   
   //! Use sign extension for the recorded data?
-  Bool signExtension () const {
+  bool signExtension () const {
     return signExtension_p;
   }
 

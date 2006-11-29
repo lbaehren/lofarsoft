@@ -20,22 +20,24 @@
 
 /* $Id: SkymapperTools.cc,v 1.6 2006/08/24 13:55:12 bahren Exp $*/
 
-#include <lopes/Skymap/SkymapperTools.h>
+#include <Skymap/SkymapperTools.h>
 
 /*!
   \class SkymapperTools
 */
 
-// ----------------------------------------------------------------- skymapCenter
-
-Vector<Double> SkymapperTools::skymapCenter (const Quantity epoch,
-					     const String telescope,
-					     const String refcodeSkymap,
-					     const String refcodeInput,
-					     const Vector<Double> &centerInput)
-{
+namespace LOPES {  // namespace LOPES -- begin
+  
+  // ----------------------------------------------------------------- skymapCenter
+  
+  Vector<double> SkymapperTools::skymapCenter (const Quantity epoch,
+					       const String telescope,
+					       const String refcodeSkymap,
+					       const String refcodeInput,
+					       const Vector<double> &centerInput)
+  {
   Bool verbose (True);
-  Vector<Double> centerSkymap(centerInput.shape());
+  Vector<double> centerSkymap(centerInput.shape());
 
   ObservationData obsData (epoch,telescope);
   
@@ -86,10 +88,10 @@ void SkymapperTools::setSkymapGrid (Skymap &skymap,
 				    const String refcodeCenter,
 				    const String projection,
 				    const IPosition& shape,
-				    const Vector<Double>& center,
-				    const Vector<Double>& increment)
+				    const Vector<double>& center,
+				    const Vector<double>& increment)
 {
-  Vector<Double> centerSkymap (center.shape());
+  Vector<double> centerSkymap (center.shape());
 
   // -----------------------------------------------------------------
   // Adjust the world coordiates for the center pixel
@@ -235,9 +237,9 @@ CoordinateSystem SkymapperTools::coordinateSystem(const ObsInfo &obsinfo,
 						  const String &refcode,
 						  const String &projection,
 						  const IPosition &shape,
-						  const Vector<Double> &crpix,
-						  const Vector<Double> &crval,
-						  const Vector<Double> &cdelt)
+						  const Vector<double> &crpix,
+						  const Vector<double> &crval,
+						  const Vector<double> &cdelt)
 {
   bool status (true);
   CoordinateSystem cs;
@@ -247,7 +249,7 @@ CoordinateSystem SkymapperTools::coordinateSystem(const ObsInfo &obsinfo,
 
   // -- set up the DirectionAxis ---------------------------
   try {
-    Matrix<Double> xform(2,2);
+    Matrix<double> xform(2,2);
     
     xform = 0.0;
     xform.diagonal() = 1.0;
@@ -271,10 +273,10 @@ CoordinateSystem SkymapperTools::coordinateSystem(const ObsInfo &obsinfo,
   try {
     Vector<String> names (1,"Distance");
     Vector<String> units (1,"m");
-    Vector<Double> refPix (1,crpix(2));
-    Vector<Double> refVal (1,crval(2));
-    Vector<Double> inc (1,cdelt(2));
-    Matrix<Double> pc (1,1,1.0);
+    Vector<double> refPix (1,crpix(2));
+    Vector<double> refVal (1,crval(2));
+    Vector<double> inc (1,cdelt(2));
+    Matrix<double> pc (1,1,1.0);
     
     LinearCoordinate coord (names,
 			    units,
@@ -294,10 +296,10 @@ CoordinateSystem SkymapperTools::coordinateSystem(const ObsInfo &obsinfo,
   try {
     Vector<String> names  (1,"Time");
     Vector<String> units  (1,"s");
-    Vector<Double> refPix (1,crpix(3));
-    Vector<Double> refVal (1,crval(3));
-    Vector<Double> inc    (1,cdelt(3));
-    Matrix<Double> pc     (1,1,1.0);
+    Vector<double> refPix (1,crpix(3));
+    Vector<double> refVal (1,crval(3));
+    Vector<double> inc    (1,cdelt(3));
+    Matrix<double> pc     (1,1,1.0);
     
     LinearCoordinate coord (names,
 			    units,
@@ -335,3 +337,4 @@ CoordinateSystem SkymapperTools::coordinateSystem(const ObsInfo &obsinfo,
   return cs;
 }
 
+}  // namespace LOPES -- end

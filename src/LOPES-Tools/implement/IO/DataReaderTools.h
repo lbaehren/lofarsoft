@@ -37,13 +37,22 @@
 #include <tasking/Glish.h>
 #include <tasking/Glish/GlishRecord.h>
 
-#include <lopes/Data/LopesEvent.h>
-#include <lopes/Data/ITSBeam.h>
-#include <lopes/Data/ITSCapture.h>
-#include <lopes/Data/NDABeam.h>
-#include <lopes/IO/DataReader.h>
+#include <Data/LopesEvent.h>
+#include <Data/ITSBeam.h>
+#include <Data/ITSCapture.h>
+#include <Data/NDABeam.h>
+#include <IO/DataReader.h>
 
-#include <casa/namespace.h>
+using casa::AipsError;
+using casa::GlishArray;
+using casa::GlishRecord;
+using casa::DComplex;
+using casa::GlishRecord;
+using casa::Matrix;
+using casa::String;
+using casa::Vector;
+
+namespace LOPES {  // namespace LOPES -- begin
 
 /*!
   \class DataReaderTools
@@ -81,7 +90,7 @@
   |
   |- blocksize                = uint
   |
-  |- adc2voltage              = Vector<float>
+  |- adc2voltage              = Vector<double>
   |
   |- fft2calfft               = Matrix<complex>
   |
@@ -123,7 +132,7 @@
     dr = DataReaderTools::assignFromRecord (rec)
 
     // [3] Start working with the DatReader object
-    Matrix<Float> voltage (dr->voltage());
+    Matrix<double> voltage (dr->voltage());
     \endcode
     
   </ul>
@@ -185,7 +194,7 @@ class DataReaderTools {
     \return nyquistZone -- 
   */
   static bool getNyquistZone (uint &nyquistZone,
-			    GlishRecord &rec);
+			      GlishRecord &rec);
   
   /*!
     \brief Extract samplingRate [Hz] from Glish record
@@ -194,7 +203,7 @@ class DataReaderTools {
     
     \return samplingRate -- 
   */
-  static bool getSamplingRate (Float &samplingRate,
+  static bool getSamplingRate (double &samplingRate,
 			       GlishRecord &rec);
   
   /*!
@@ -204,7 +213,7 @@ class DataReaderTools {
     
     \return adc2voltage -- 
   */
-  static bool getAdc2voltage (Vector<Float> &adc2voltage,
+  static bool getAdc2voltage (Vector<double> &adc2voltage,
 			      GlishRecord &rec);
   
   /*!
@@ -214,7 +223,7 @@ class DataReaderTools {
     
     \return fft2calfft -- 
   */
-  static Matrix<Complex> fft2calfft (GlishRecord &rec);
+  static Matrix<DComplex> fft2calfft (GlishRecord &rec);
 
   /*!
     \brief Extract the number of the antennas in the data set
@@ -257,5 +266,7 @@ class DataReaderTools {
 				   GlishRecord &rec);
 
 };
+
+}  // namespace LOPES -- end
   
 #endif /* DATAREADERTOOLS_H */

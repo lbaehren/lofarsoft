@@ -61,6 +61,15 @@
 #include <Beamforming/Beamformer.h>
 #include <Utilities/ProgressBar.h>
 
+using casa::Cube;
+using casa::DComplex;
+using casa::LinearCoordinate;
+using casa::Matrix;
+using casa::SpectralCoordinate;
+using casa::Vector;
+
+namespace LOPES {  // namespace LOPES -- begin
+
 /*!
   \class Skymap
 
@@ -124,36 +133,36 @@ class Skymap : public Beamformer
   String signalDomain_p;
 
   //! Number of samples per datablock
-  Int blocksize_p;
+  int blocksize_p;
 
   //! The map data cube for the electric field (complex values).
   Matrix<DComplex> skymapComplex_p;
 
   //! The map data cube for the electric power (real values).
-  Matrix<Double> skymapReal_p;
+  Matrix<double> skymapReal_p;
 
   //! Mapping of the stored matrix to a cube
-  Matrix<Int> matrix2cube_p;
+  Matrix<int> matrix2cube_p;
 
   //! The number of blocks added up to produce the map
-  Int nofAddedBlocks_p;
+  int nofAddedBlocks_p;
 
   //! SkymapGrid object for the generation of pointing directions
   SkymapGrid grid_p;
 
   //! Distance parameter for the beamforming
-  Double distance_p;
+  double distance_p;
 
   //! CoordinateSystem object fro conversion between pixel and world coordinates
   CoordinateSystem csys_p;
 
   //! Flag to track if the map data cube has been resized.
-  Bool itsMappingToCubeSet;
-  Bool itsSkymapShapeSet;
+  bool itsMappingToCubeSet;
+  bool itsSkymapShapeSet;
 
   //! Flags to track which beamforming methods have been called
-  Bool addBaselines_p;
-  Bool crossCorrelation_p;
+  bool addBaselines_p;
+  bool crossCorrelation_p;
 
   //! Pointer to the function handling the imaging
   void (Skymap::*pFunction) (Matrix<DComplex> const &); 
@@ -184,8 +193,8 @@ class Skymap : public Beamformer
 	  const String refcode,
 	  const String projection,
 	  const IPosition& shape,
-	  const Vector<Double>& center,
-	  const Vector<Double>& increment);
+	  const Vector<double>& center,
+	  const Vector<double>& increment);
   
   ~Skymap ();
 
@@ -215,8 +224,8 @@ class Skymap : public Beamformer
 		      const String refcode,
 		      const String projection,
 		      const IPosition& shape,
-		      const Vector<Double>& center,
-		      const Vector<Double>& increment);
+		      const Vector<double>& center,
+		      const Vector<double>& increment);
   
   /*!
     \brief Set the orientation of the skymap.
@@ -238,7 +247,7 @@ class Skymap : public Beamformer
 
     \return elevationRange -- Limits of the elevation range covered in the map
    */
-  Vector<Double> elevationRange () const {
+  Vector<double> elevationRange () const {
     return grid_p.elevationRange();
   }
   
@@ -250,7 +259,7 @@ class Skymap : public Beamformer
     \param elevation -- Limits of the elevation range in the local reference
                         frame (AZEL).
   */
-  void setElevationRange (const Vector<Double>& elevationRange) {
+  void setElevationRange (const Vector<double>& elevationRange) {
     grid_p.setElevationRange (elevationRange);
   }
   
@@ -261,12 +270,12 @@ class Skymap : public Beamformer
     
     \param blocksize -- Number of samples per block of data.
   */
-  void setBlocksize (Int const &blocksize) {
+  void setBlocksize (int const &blocksize) {
     blocksize_p = blocksize;
   }
   
   //! Get the number of samples per block of data
-  Int blocksize () const {
+  int blocksize () const {
     return blocksize_p;
   };
   
@@ -351,12 +360,12 @@ class Skymap : public Beamformer
     \param worldAxisUnits       -- Physical unit associated with the axes
     \param projectionParameters -- Parameters of the spherial map projection
   */
-  void directionCoordinate (Vector<Double>& crval,
-			    Vector<Double>& cdelt,
-			    Matrix<Double>& xform,
-			    Vector<Double>& crpix,
+  void directionCoordinate (Vector<double>& crval,
+			    Vector<double>& cdelt,
+			    Matrix<double>& xform,
+			    Vector<double>& crpix,
 			    Vector<String>& worldAxisUnits,
-			    Vector<Double>& projectionParameters);
+			    Vector<double>& projectionParameters);
 
   // --- Distance parameter for the beamforming ----------------------
 
@@ -365,7 +374,7 @@ class Skymap : public Beamformer
     
     \return dist -- Distance, in [m].
   */
-  Double distance () const {
+  double distance () const {
     return distance_p;
   }
   
@@ -375,7 +384,7 @@ class Skymap : public Beamformer
     \param dist -- Distance, in [m], use by the Beamformer for beamforming
                    towards a source in the near-field.
   */
-  void setDistance (Double const &dist) {
+  void setDistance (double const &dist) {
     distance_p = dist;
   }
 
@@ -389,7 +398,7 @@ class Skymap : public Beamformer
 			      time resolution is required, this whould be a 
 			      standard way to increase the integration time.
   */
-  Int AddedBlocks () const {
+  int AddedBlocks () const {
     return nofAddedBlocks_p;
   }
   
@@ -405,8 +414,8 @@ class Skymap : public Beamformer
     \todo Make fix for azimuth coordinate obsolete; this is required to compensate
     rotation by 180 deg.
    */
-  void setPhaseGradients (Vector<Double> &frequencies,
-			  Matrix<Double> &antennaPositions);
+  void setPhaseGradients (Vector<double> &frequencies,
+			  Matrix<double> &antennaPositions);
 
   /*!
     \brief Compute skymap from the input antenna data
@@ -462,7 +471,7 @@ class Skymap : public Beamformer
 /*   void ccMatrix (const Cube<DComplex> &ccCube); */
 
   /*!
-    \fn void ccMatrix (const Cube<DComplex>&, const Vector<Double>&)
+    \fn void ccMatrix (const Cube<DComplex>&, const Vector<double>&)
 
     \brief Beamforming by cross-correlation of the antenna signals.
 
@@ -477,8 +486,8 @@ class Skymap : public Beamformer
     \param antennaPositions -- 3-dimensional positions of the antenna elements.
   */
   void ccMatrix (const Cube<DComplex>& ccCube,
-		 const Vector<Double>& frequencies,
-		 const Matrix<Double>& antennaPositions);
+		 const Vector<double>& frequencies,
+		 const Matrix<double>& antennaPositions);
   
   // === Access to the map data cube =================================
   
@@ -511,7 +520,7 @@ class Skymap : public Beamformer
                       of elements along the third image axis.
   */
   void getSkymap (Matrix<DComplex>& skymap,
-		  Int channels);
+		  int channels);
 
    /*!
      \brief Return the skymap matrix.
@@ -521,7 +530,7 @@ class Skymap : public Beamformer
 
     \param skymap -- The skymap data cube.
   */
-  void getSkymap (Matrix<Double>& skymap); 
+  void getSkymap (Matrix<double>& skymap); 
 
   /*!
      \brief Return the skymap matrix.
@@ -534,8 +543,8 @@ class Skymap : public Beamformer
     \param channels -- The number of channels per pixels, i.e. the number
                        of elements along the third image axis.
   */
-  void getSkymap (Matrix<Double>& skymap,
-		  Int channels);
+  void getSkymap (Matrix<double>& skymap,
+		  int channels);
 
   /*!
     \brief Return the skymap as data cube
@@ -547,7 +556,7 @@ class Skymap : public Beamformer
     \param mask   -- The mask for the skymap data cube.
    */
   void getSkymap (Cube<DComplex>& skymap,
-		  Cube<Bool>& mask);
+		  Cube<bool>& mask);
 
   /*!
     \brief Return the skymap as data cube [DComplex]
@@ -564,8 +573,8 @@ class Skymap : public Beamformer
                        of elements along the third image axis.
    */
   void skymap (Cube<DComplex>& skymap,
-	       Cube<Bool>& mask,
-	       Int channels);
+	       Cube<bool>& mask,
+	       int channels);
   
   /*!
     \brief Return the skymap as data cube
@@ -577,11 +586,11 @@ class Skymap : public Beamformer
     \param skymap -- The skymap data cube.
     \param mask   -- The mask for the skymap data cube.
    */
-  void skymap (Cube<Double>& skymap,
-	       Cube<Bool>& mask);
+  void skymap (Cube<double>& skymap,
+	       Cube<bool>& mask);
 
   /*!
-    \brief Return the skymap as data cube [Double]
+    \brief Return the skymap as data cube [double]
 
     Return the skymap as data cube, along with the masking array to flag invalid
     image pixels; this function applies to \f$ E(\vec \rho, t) \f$,
@@ -592,9 +601,9 @@ class Skymap : public Beamformer
     \param channels -- The number of channels per pixels, i.e. the number
                        of elements along the third image axis.
    */
-  void skymap (Cube<Double>& skymap,
-	       Cube<Bool>& mask,
-	       Int channels);
+  void skymap (Cube<double>& skymap,
+	       Cube<bool>& mask,
+	       int channels);
   
   /*!
     \brief Dump the contents of the internal data array to an output stream.
@@ -615,7 +624,7 @@ class Skymap : public Beamformer
 
     \return nofPixels -- The number of pixels in the skymap.
   */
-  Int nofPixels () {
+  int nofPixels () {
     return grid_p.nelements();
   }
 
@@ -627,7 +636,7 @@ class Skymap : public Beamformer
 
     \return nofPixels -- The number of pixels in the skymap.
   */
-  Int nofPixels (const Bool which) {
+  int nofPixels (const bool which) {
     return grid_p.nelements(which);
   }
 
@@ -648,7 +657,7 @@ class Skymap : public Beamformer
   /*!
     \brief Get the array of positions passed to the Beamformer
    */
-  Matrix<Double> beamformingGrid ();
+  Matrix<double> beamformingGrid ();
 
   /*!
     \brief Get the pixel mask as array conformant to the skymap pixel array
@@ -657,7 +666,7 @@ class Skymap : public Beamformer
                        different from the number of stored channels, regridding
 		       will be performed.
   */
-  Cube<Bool> mask (const Int channels);
+  Cube<bool> mask (const int channels);
 
   /*!
     \brief Convert internal skymap array (matrix) to exported skymap array (cube).
@@ -679,7 +688,7 @@ class Skymap : public Beamformer
   void setSkymapShape ();
 
   //! Set the Matrix-to-Cube mapping table
-  void setMappingToCube (const Matrix<Int>& matrix2cube);
+  void setMappingToCube (const Matrix<int>& matrix2cube);
 
   //! Reconstruct data cube from internal matrix
   void mapToCube ();
@@ -691,8 +700,8 @@ class Skymap : public Beamformer
   void adjustSignalDomain (Matrix<DComplex>&);
 
   //! Get the array indices utilized for rebinning the third image axis.
-  void getRebinningIndices (Matrix<Int>& indexValues,
-			    Int channels);
+  void getRebinningIndices (Matrix<int>& indexValues,
+			    int channels);
 
   /*!
     Average the image data along the third axis (frequency/time); the input array
@@ -700,15 +709,17 @@ class Skymap : public Beamformer
   */
   template <class T>
     void averageChannels (Vector<T>& channels,
-			  Int nofChannels);
+			  int nofChannels);
   /*!
     Average the image data along the third axis (frequency/time); the input array
     is overwritten and returned with the rebinned data.
   */
   template <class T>
     void averageChannels (Matrix<T> &channels,
-			  Int const &nofChannels);
+			  int const &nofChannels);
   
 };
+
+}  // namespace LOPES -- end
 
 #endif 

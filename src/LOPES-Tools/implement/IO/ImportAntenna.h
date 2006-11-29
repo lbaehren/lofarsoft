@@ -44,67 +44,67 @@ using std::ifstream;
 using std::vector;
 
 namespace LOPES {
-
-/*!
-  \class ImportAntenna
-
-  \ingroup reas2event
-
-  \brief Brief description for class ImportAntenna
-
-  \author Tim Huege
-
-  \date 2006/10/16
-
-  \test tImportAntenna.cc
-
-  <h3>Prerequisite</h3>
-
-  <ul type="square">
-    <li>none
-  </ul>
-
-  <h3>Synopsis</h3>
-
-  Reads in and provides access to an individual observer (antenna) simulated
-  with REAS.
-
-  <h3>Example(s)</h3>
-
-  \code
-  ImportAntenna myAntenna("10101", "/here/raw_10101.dat", 30.0, 180.0)
-  \endcode
   
-  Opens the specified antenna file and interprets it as the result of a
-  simulation with 30 degree zenith and 180 degree azimuth angles (in REAS
-  convention!).
-
-*/
-
-class ImportAntenna {
-
- public:
-
-  // --------------------------------------------------------------- Construction
-
   /*!
-    \brief Default constructor
+    \class ImportAntenna
     
-    \param parID -- antenna ID
-    \param parFileName -- file name of the simulation file to be read in
-    \param parShowerTheta -- shower zenith angle - in REAS convention!
-    \param parAzimuthAngle -- shower azimuth angle - in REAS convention!
-
-    Angles are in REAS convention! Zenith angle is angle to the zenith direction.
-    Azimuth angle is specified as the direction into which the shower propagates.
-    0 degree is to north, 90 degree is to west.
+    \ingroup reas2event
+    
+    \brief Brief description for class ImportAntenna
+    
+    \author Tim Huege
+    
+    \date 2006/10/16
+    
+    \test tImportAntenna.cc
+    
+    <h3>Prerequisite</h3>
+    
+    <ul type="square">
+      <li>none
+    </ul>
+    
+    <h3>Synopsis</h3>
+    
+    Reads in and provides access to an individual observer (antenna) simulated
+    with REAS.
+    
+    <h3>Example(s)</h3>
+    
+    \code
+    ImportAntenna myAntenna("10101", "/here/raw_10101.dat", 30.0, 180.0)
+    \endcode
+    
+    Opens the specified antenna file and interprets it as the result of a
+    simulation with 30 degree zenith and 180 degree azimuth angles (in REAS
+    convention!).
+    
   */
-  ImportAntenna (string parID,
-		 string parFileName,
-		 double parShowerTheta,
-		 double parShowerPhi);
-
-
+  
+  class ImportAntenna {
+    
+  public:
+    
+    // --------------------------------------------------------------- Construction
+    
+    /*!
+      \brief Default constructor
+      
+      \param parID -- antenna ID
+      \param parFileName -- file name of the simulation file to be read in
+      \param parShowerTheta -- shower zenith angle - in REAS convention!
+      \param parAzimuthAngle -- shower azimuth angle - in REAS convention!
+      
+      Angles are in REAS convention! Zenith angle is angle to the zenith direction.
+      Azimuth angle is specified as the direction into which the shower propagates.
+      0 degree is to north, 90 degree is to west.
+    */
+    ImportAntenna (string parID,
+		   string parFileName,
+		   double parShowerTheta,
+		   double parShowerPhi);
+    
+    
   // ---------------------------------------------------------------- Destruction
 
   /*!

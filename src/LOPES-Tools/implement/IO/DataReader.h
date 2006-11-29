@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: DataReader.h,v 1.22 2006/08/17 15:33:33 bahren Exp $*/
+/* $Id: DataReader.h,v 1.23 2006/10/31 18:24:08 bahren Exp $*/
 
 #ifndef DATAREADER_H
 #define DATAREADER_H
@@ -42,10 +42,24 @@
 #include <scimath/Mathematics.h>
 #include <scimath/Mathematics/FFTServer.h>
 
-#include <lopes/IO/DataIterator.h>
-#include <lopes/Functionals/HanningFilter.h>
+#include <IO/DataIterator.h>
+#include <Functionals/HanningFilter.h>
 
-#include <casa/namespace.h>
+using std::cout;
+using std::cerr;
+using std::endl;
+
+using casa::AipsError;
+using casa::Cube;
+using casa::DComplex;
+using casa::IPosition;
+using casa::Matrix;
+using casa::Quantity;
+using casa::Record;
+using casa::String;
+using casa::Vector;
+
+namespace LOPES {  // namespace LOPES -- begin
 
 /*!
   \class DataReader
@@ -103,14 +117,14 @@
       provided in the base class as a virtual function, but then needs to
       be reimplemented in the derived classes to actually set the streams
       \code
-      Bool LopesEvent::setStreams ()
+      bool LopesEvent::setStreams ()
       {
         bool status (true);
       
 	uint nofSamples (blocksize_p);
 	Vector<uint> antennas (length_);
-	Vector<Float> adc2voltage (DataReader::adc2voltage());
-	Matrix<Complex> fft2calfft (DataReader::fft2calfft());
+	Vector<double> adc2voltage (DataReader::adc2voltage());
+	Matrix<DComplex> fft2calfft (DataReader::fft2calfft());
 	Vector<String> filenames (length_);
 	DataIterator *iterator;
 
@@ -146,12 +160,12 @@
       tDataReader.cc for further examples):
       \code
       {
-        Float alpha (0.5);
+        double alpha (0.5);
 	
 	DataReader dr  (blocksize, adc2voltage, fft2calfft);
 	dr.setHanningFilter (alpha);
 	
-	Matrix<Complex> fft_filtered (dr.fft());
+	Matrix<DComplex> fft_filtered (dr.fft());
       }
       \endcode
       </td>
@@ -187,10 +201,10 @@
     DataReaderTools::assignFromRecord. After this access to the data is as simple
     as:
     \code
-    Matrix<Float> fx (dr->fx());
-    Matrix<Float> voltage (dr->voltage());
-    Matrix<Complex> fft (dr->fft());
-    Matrix<Complex> calfft (dr->calfft());
+    Matrix<double> fx (dr->fx());
+    Matrix<double> voltage (dr->voltage());
+    Matrix<DComplex> fft (dr->fft());
+    Matrix<DComplex> calfft (dr->calfft());
     \endcode
 */
 
@@ -200,13 +214,13 @@ class DataReader {
   Record header_p;
 
   //! Conversion from ADC values to voltages
-  Vector<Float> adc2voltage_p;
+  Vector<double> adc2voltage_p;
 
   //! Conversion from raw to calibrated FFT
-  Matrix<Complex> fft2calfft_p;
+  Matrix<DComplex> fft2calfft_p;
 
   //! Value of the ADC sampling rate, [Hz]
-  Float samplingRate_p;
+  double samplingRate_p;
 
   //! Nyquist zone, in which the data have been sampled
   uint nyquistZone_p;
@@ -215,13 +229,13 @@ class DataReader {
   Vector<uint> antennas_p;
   
   //! Enable/Disable frequency channel selection
-  Bool selectChannels_p;
+  bool selectChannels_p;
 
   //! Hanning filter to be applied to the time-domain data (optional)
-  HanningFilter<Float> hanningFilter_p;
+  HanningFilter<double> hanningFilter_p;
 
   //! Apply the Hanning filter to the data?
-  Bool applyHanning_p;
+  bool applyHanning_p;
 
   //! At which block of the data volume do we start reading data
   uint startBlock_p;
@@ -252,9 +266,9 @@ class DataReader {
 
     \return status -- 
   */
-  virtual Bool setStreams () {
-    std::cout << "[DataReader::setStreams]" << std::endl;
-    return True;
+  virtual bool setStreams () {
+    cout << "[DataReader::setStreams]" << endl;
+    return true;
   };
 
   /*!
@@ -276,8 +290,8 @@ class DataReader {
    */
   void init (uint const &blocksize,
 	     Vector<uint> const &antennas,
-	     Vector<Float> const &adc2voltage,
-	     Matrix<Complex> const &fft2calfft,
+	     Vector<double> const &adc2voltage,
+	     Matrix<DComplex> const &fft2calfft,
 	     Vector<String> const &filenames,
 	     DataIterator const *iterators);
   
@@ -327,7 +341,7 @@ class DataReader {
   */
   DataReader (uint const &blocksize,
 	      uint const &nyquistZone,
-	      Float const &samplerate);
+	      double const &samplerate);
 
   /*!
     \brief Argumented constructor
@@ -339,8 +353,8 @@ class DataReader {
                           calibrated FFT
   */
   DataReader (uint const &blocksize,
-	      Vector<Float> const &adc2voltage,
-	      Matrix<Complex> const &fft2calfft);
+	      Vector<double> const &adc2voltage,
+	      Matrix<DComplex> const &fft2calfft);
 
   /*!
     \brief Argumented constructor
@@ -359,8 +373,8 @@ class DataReader {
     DataReader (String const &filename,
 		uint const &blocksize,
 		T const &var,
-		Vector<Float> const &adc2voltage,
-		Matrix<Complex> const &fft2calfft);
+		Vector<double> const &adc2voltage,
+		Matrix<DComplex> const &fft2calfft);
   
   /*!
     \brief Copy constructor
@@ -434,7 +448,7 @@ class DataReader {
 
     \return samplingRate -- The value of the ADC sampling rate, [Hz]
   */
-  Float samplingRate () const {
+  double samplingRate () const {
     return samplingRate_p;
   }
   
@@ -446,14 +460,14 @@ class DataReader {
     \return samplingRate -- The value of the ADC sampling rate, in units of
                             <i>unit</i>
   */
-  Float samplingRate (String const &unit);
+  double samplingRate (String const &unit);
   
   /*!
     \brief Set the ADC sampling rate
 
     \param samplingRate -- The value of the ADC sampling rate, [Hz]
   */
-  void setSamplingRate (Float const &samplingRate);
+  void setSamplingRate (double const &samplingRate);
 
   /*!
     \brief Set the ADC sampling rate
@@ -485,7 +499,7 @@ class DataReader {
 
     \return fx2voltage -- Weights to convert raw ADC samples to voltages
   */
-  Vector<Float> adc2voltage () const {
+  Vector<double> adc2voltage () const {
     return adc2voltage_p;
   }
 
@@ -505,7 +519,7 @@ class DataReader {
 
     \param fx2voltage -- Weights to convert raw ADC samples to voltages
   */
-  void setADC2voltage (Vector<Float> const &adc2voltage);
+  void setADC2voltage (Vector<double> const &adc2voltage);
 
   /*!
     \brief Weights for conversion from raw to calibrated FFT
@@ -514,7 +528,7 @@ class DataReader {
                           transform on the voltages to calibrated spectra,
 			  accounting for the slope of the bandpass filter.
   */
-  Matrix<Complex> fft2calfft () const {
+  Matrix<DComplex> fft2calfft () const {
     return fft2calfft_p;
   }
 
@@ -525,7 +539,7 @@ class DataReader {
                          transform on the voltages to calibrated spectra,
 			 accounting for the slope of the bandpass filter.
   */
-  void setFFT2calFFT (Matrix<Complex> const &fft2calfft);
+  void setFFT2calFFT (Matrix<DComplex> const &fft2calfft);
 
   /*!
     \brief Get the record with the header information
@@ -594,21 +608,21 @@ class DataReader {
     
     \return fx -- Raw ADC time series, [Counts]
   */
-  virtual Matrix<Float> fx ();
+  virtual Matrix<double> fx ();
 
   /*!
     \brief Get the voltage time series
     
     \return voltage -- Voltage time series, [Volt]
   */
-  virtual Matrix<Float> voltage ();
+  virtual Matrix<double> voltage ();
 
   /*!
     \brief Raw FFT of the voltage time series
     
     \return fft -- Raw FFT of the voltage time series
   */
-  virtual Matrix<Complex> fft ();
+  virtual Matrix<DComplex> fft ();
 
   /*!
     \brief Get the calibrated FFT
@@ -616,25 +630,25 @@ class DataReader {
     \return calfft -- Calibrated FFT, i.e. spectra after correction for the antenna
                       gain-curves.
   */
-  virtual Matrix<Complex> calfft ();
+  virtual Matrix<DComplex> calfft ();
 
   /*!
     \brief Get the cross-correlation spectra
 
     \param fromCalFFT -- Cross-correlation spectra from the calibrated FFT data? If
-                         set to <i>False</i>, the cross-correlation is carried out on
+                         set to <i>false</i>, the cross-correlation is carried out on
 			 the raw FFT.
 
     \return ccSpectra -- Data cube with the cross-correlation spectra,
                          [nfreq,nant,nant]
   */
-  virtual Cube<Complex> ccSpectra (Bool const &fromCalFFT=True);
+  virtual Cube<DComplex> ccSpectra (bool const &fromCalFFT=true);
 
   /*!
     \brief Get the visibilities
 
     \param fromCalFFT -- Cross-correlation spectra from the calibrated FFT data? If
-                         set to <i>False</i>, the cross-correlation is carried out
+                         set to <i>false</i>, the cross-correlation is carried out
 			 on the raw FFT.
 
     \return vis -- The visibilities
@@ -645,7 +659,7 @@ class DataReader {
     \todo We need an additional switch, to include/exclude the auto-correlation
     products (this feature is required when passing data to the MSSimulator).
   */
-  virtual Matrix<Complex> visibilities (Bool const &fromCalFFT=True);
+  virtual Matrix<DComplex> visibilities (bool const &fromCalFFT=true);
 
   // ------------------------------------------------------ Selection of antennas
 
@@ -742,7 +756,7 @@ class DataReader {
    
    \param antennaSelection -- Selection of the antennas in the dataset
   */
-  Bool setSelectedAntennas (Vector<uint> const &antennaSelection,
+  bool setSelectedAntennas (Vector<uint> const &antennaSelection,
 			    bool const &absolute=true);
 
   /*!
@@ -750,7 +764,7 @@ class DataReader {
    
    \param antennaSelection -- Selection of the antennas in the dataset
   */
-  Bool setSelectedAntennas (Vector<Bool> const &antennaSelection);
+  bool setSelectedAntennas (Vector<bool> const &antennaSelection);
 
   // -------------------------------------------- Selection of frequency channels
 
@@ -765,7 +779,7 @@ class DataReader {
 
     \return status -- 
   */
-  Bool setSelectedChannels (Vector<uint> const &channelSelection);
+  bool setSelectedChannels (Vector<uint> const &channelSelection);
 
   /*!
     \brief Set the numbers of the frequency channels selected for processing
@@ -774,7 +788,7 @@ class DataReader {
 
     \return status -- 
   */
-  Bool setSelectedChannels (Vector<Bool> const &channelSelection);
+  bool setSelectedChannels (Vector<bool> const &channelSelection);
 
   /*!
     \brief Get the number of selected frequency channels
@@ -795,7 +809,7 @@ class DataReader {
     \return frequency -- Frequency values corresponding to the channels in the
                          FFT, [Hz]
    */
-  Vector<Double> frequencyValues (Bool const &onlySelected=True);
+  Vector<double> frequencyValues (bool const &onlySelected=true);
 
   /*!
     \brief Enable/Disable the Hanning filter
@@ -807,14 +821,14 @@ class DataReader {
     Hammingfilter. To disable the HanningFilter call this function with
     \f$ \alpha = 0 \f$.
    */
-  void setHanningFilter (const Float& alpha);
+  void setHanningFilter (const double& alpha);
   /*!
     \brief Enable/Disable the Hanning filter
 
     \param alpha -- Slope parameter of the HanningFilter.
     \param beta  -- Width of the plateau with w[n]=1.
   */
-  void setHanningFilter (const Float &alpha,
+  void setHanningFilter (const double &alpha,
 			 const uint &beta);
   
  private:
@@ -843,7 +857,7 @@ class DataReader {
   */
   void init (uint const &blocksize,
 	     uint const &nyquistZone,
-	     Float const &samplerate);
+	     double const &samplerate);
   
   /*!
     \brief Initialization of internal parameters
@@ -853,8 +867,8 @@ class DataReader {
     \param fft2calfft  -- 
   */
   void init (uint const &blocksize,
-	     Vector<Float> const &adc2voltage,
-	     Matrix<Complex> const &fft2calfft);
+	     Vector<double> const &adc2voltage,
+	     Matrix<DComplex> const &fft2calfft);
     
   /*!
     \brief Store the output length of the FFT
@@ -868,7 +882,10 @@ class DataReader {
   /*!
     \brief Select the frequency channels
   */
-  Matrix<Complex> selectChannels (Matrix<Complex> const &data);
-};
+  Matrix<DComplex> selectChannels (Matrix<DComplex> const &data);
+
+};  // class DataReader -- end
+
+}  // namespace LOPES -- end
 
 #endif /* DATAREADERBASE_H */

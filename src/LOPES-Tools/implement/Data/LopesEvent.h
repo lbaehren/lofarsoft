@@ -24,17 +24,21 @@
 
 /* $Id: LopesEvent.h,v 1.11 2006/07/05 16:01:08 bahren Exp $ */
 
-#ifndef _LOPESEVENT_H_
-#define _LOPESEVENT_H_
+#ifndef LOPESEVENT_H
+#define LOPESEVENT_H
 
 #include <sstream>
 #include <fstream>
 #include <iostream>
 
-#include <lopes/Data/Data.h>
-#include <lopes/IO/DataReader.h>
+#include <Data/Data.h>
+#include <IO/DataReader.h>
 
-using namespace std;
+using std::fstream;
+
+using casa::DComplex;
+using casa::Matrix;
+using casa::Vector;
 
 namespace LOPES {
 
@@ -183,8 +187,8 @@ class LopesEvent : public DataReader {
   */
   LopesEvent (string const &name,
 	      uint const &blocksize,
-	      Vector<Float> const &adc2voltage,
-	      Matrix<Complex> const &fft2calfft);
+	      Vector<double> const &adc2voltage,
+	      Matrix<DComplex> const &fft2calfft);
   
   /*!
     \brief Argumented constructor
@@ -313,7 +317,10 @@ class LopesEvent : public DataReader {
   /*!
     \brief Open an event file
   */
-  void    openEvent(const char* name, fstream* handle, int* handle_beg, int* handle_end);
+  void    openEvent(const char* name,
+		    fstream* handle, 
+		    int* handle_beg,
+		    int* handle_end);
 
   /*!
     \brief Start reading a header at a filehandle
@@ -323,22 +330,26 @@ class LopesEvent : public DataReader {
   /*!
     \brief Start reading file contents at a filehandle
   */
-  void    readContentsHere(fstream* handle, int* handle_beg, int* handle_end);
+  void    readContentsHere(fstream* handle,
+			   int* handle_beg, 
+			   int* handle_end);
 
   /*!
     \brief Write a lopes event file
   */
-  void    writeEvent(const char* name);
+  void writeEvent(const char* name);
 
   /*!
     \brief Open a Lopes event file and write its header
   */
-  void    writeHeader(const char* name);
+  void writeHeader(const char* name);
   
   /*!
     \brief Start writing a header at a filehandle
   */
-  void    writeHeaderHere(fstream* handle, int* handle_beg, int* handle_end);
+  void writeHeaderHere(fstream* handle,
+		       int* handle_beg,
+		       int* handle_end);
 
   /*!
     \brief Write all channel data at a filehandle
@@ -348,7 +359,8 @@ class LopesEvent : public DataReader {
   /*!
     \brief Write channel data at a filehandle
   */
-  void    writeChannelHere(fstream* handle, uint c_num);
+  void    writeChannelHere(fstream* handle,
+			   uint c_num);
            
   Data*   dataSetById(uint id);
 
@@ -373,7 +385,7 @@ class LopesEvent : public DataReader {
     
     \return fx -- Raw ADC time series, [Counts]
   */
-  Matrix<Float> fx ();  
+  Matrix<double> fx ();  
 
  protected:
 

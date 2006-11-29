@@ -19,16 +19,24 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: NDABeam.h,v 1.3 2006/08/07 16:14:47 bahren Exp $*/
+/* $Id: NDABeam.h,v 1.4 2006/10/31 18:24:08 bahren Exp $*/
 
 #ifndef NDABEAM_H
 #define NDABEAM_H
 
 #include <casa/aips.h>
 #include <casa/Arrays.h>
-#include <lopes/Data/ITSMetadata.h>
-#include <lopes/IO/DataReader.h>
-#include <lopes/Utilities/StringTools.h>
+
+#include <Data/ITSMetadata.h>
+#include <IO/DataReader.h>
+#include <Utilities/StringTools.h>
+
+using casa::DComplex;
+using casa::Matrix;
+using casa::String;
+using casa::Vector;
+
+namespace LOPES {  // namespace LOPES -- begin
 
 /*!
   \class NDABeam
@@ -127,8 +135,8 @@ class NDABeam : public DataReader {
   */
   NDABeam (String const &metafile,
 	   uint const &blocksize,
-	   Vector<Float> const &adc2voltage,
-	   Matrix<Complex> const &fft2calfft);
+	   Vector<Double> const &adc2voltage,
+	   Matrix<DComplex> const &fft2calfft);
   /*!
     \brief Copy constructor
 
@@ -215,7 +223,7 @@ class NDABeam : public DataReader {
     
     \return fx -- Raw ADC time series, [Counts]
   */
-  Matrix<Float> fx ();
+  Matrix<Double> fx ();
 
  private:
 
@@ -240,5 +248,7 @@ class NDABeam : public DataReader {
   Bool setStreams ();
 
 };
+
+}  // namespace LOPES -- end
 
 #endif /* NDABEAM_H */

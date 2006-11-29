@@ -25,9 +25,16 @@
 
 #include <casa/aips.h>
 #include <casa/Arrays.h>
-#include <lopes/Data/ITSMetadata.h>
-#include <lopes/IO/DataReader.h>
-#include <lopes/Utilities/StringTools.h>
+
+#include <Data/ITSMetadata.h>
+#include <IO/DataReader.h>
+#include <Utilities/StringTools.h>
+
+using casa::DComplex;
+using casa::Matrix;
+using casa::Vector;
+
+namespace LOPES {  // namespace LOPES -- begin
 
 /*!
   \class ITSCapture
@@ -97,8 +104,8 @@ class ITSCapture : public DataReader {
   */
   ITSCapture (String const &metafile,
 	      uint const &blocksize,
-	      Vector<Float> const &adc2voltage,
-	      Matrix<Complex> const &fft2calfft);
+	      Vector<double> const &adc2voltage,
+	      Matrix<DComplex> const &fft2calfft);
   /*!
     \brief Copy constructor
 
@@ -185,7 +192,7 @@ class ITSCapture : public DataReader {
     
     \return fx -- Raw ADC time series, [Counts]
   */
-  Matrix<Float> fx ();
+  Matrix<double> fx ();
 
  private:
 
@@ -207,8 +214,10 @@ class ITSCapture : public DataReader {
     \return status -- Status of the operation; returns <i>true</i> if everything
                       went fine.
   */
-  Bool setStreams ();
+  bool setStreams ();
 
 };
+
+}  // namespace LOPES -- end
 
 #endif /* ITSCAPTURE_H */

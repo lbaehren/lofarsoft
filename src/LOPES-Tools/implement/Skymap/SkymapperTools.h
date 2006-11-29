@@ -30,12 +30,25 @@
 #include <casa/Exceptions/Error.h>
 #include <casa/Quanta.h>
 
-#include <lopes/IO/DataReaderTools.h>
-#include <lopes/Observation/ObservationData.h>
-#include <lopes/Skymap/Skymap.h>
-#include <lopes/Skymap/Skymapper.h>
+#include <IO/DataReaderTools.h>
+#include <Observation/ObservationData.h>
+#include <Skymap/Skymap.h>
+#include <Skymap/Skymapper.h>
 
-#include <casa/namespace.h>
+using casa::AipsError;
+using casa::CoordinateSystem;
+using casa::IPosition;
+using casa::LinearCoordinate;
+using casa::MEpoch;
+using casa::MFrequency;
+using casa::Quantity;
+using casa::ObsInfo;
+using casa::SpectralCoordinate;
+using casa::String;
+using casa::Time;
+using casa::Vector;
+  
+namespace LOPES {  // namespace LOPES -- begin
 
 /*!
   \class SkymapperTools
@@ -101,11 +114,11 @@ class SkymapperTools {
     \return centerSkymap -- Coordinates of the skymap center in the reference
     frame of the skymap.
   */
-  static Vector<Double> skymapCenter (const Quantity epoch,
+  static Vector<double> skymapCenter (const Quantity epoch,
 				      const String telescope,
 				      const String refcodeSkymap,
 				      const String refcodeInput,
-				      const Vector<Double> &centerInput);
+				      const Vector<double> &centerInput);
   
   /*!
     \brief Set the SkymapGrid object embedded in Skymap.
@@ -132,8 +145,8 @@ class SkymapperTools {
 			     const String refcodeCenter,
 			     const String projection,
 			     const IPosition& shape,
-			     const Vector<Double>& center,
-			     const Vector<Double>& increment);
+			     const Vector<double>& center,
+			     const Vector<double>& increment);
 
   // ============================================================================
   //
@@ -210,7 +223,7 @@ class SkymapperTools {
   */
   static CoordinateSystem coordinateSystem (const String &imagefile,
 					    const ObsInfo &obsinfo=ObsInfo(),
-					    const Bool replaceObsInfo=False);
+					    const Bool replaceObsInfo=false);
 
   /*!
     \brief Get the coordinate system from an image
@@ -222,9 +235,9 @@ class SkymapperTools {
 
     \return csys -- Coordinate system associated with the image
   */
-  static CoordinateSystem coordinateSystem (const PagedImage<Float> &image,
+  static CoordinateSystem coordinateSystem (const PagedImage<float> &image,
 					    const ObsInfo &obsinfo=ObsInfo(),
-					    const Bool replaceObsInfo=False);
+					    const Bool replaceObsInfo=false);
   
   /*!
     \brief Set the coordinate system from the coordinate axis parameters
@@ -243,10 +256,12 @@ class SkymapperTools {
 					   const String &refcode,
 					   const String &projection,
 					   const IPosition &shape,
-					   const Vector<Double> &crpix,
-					   const Vector<Double> &crval,
-					   const Vector<Double> &cdelt);
+					   const Vector<double> &crpix,
+					   const Vector<double> &crval,
+					   const Vector<double> &cdelt);
 
 };
+
+}  // namespace LOPES -- end
 
 #endif /* SKYMAPPERTOOLS_H */

@@ -19,7 +19,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: NDABeam.cc,v 1.1 2006/08/07 13:20:57 bahren Exp $*/
+/* $Id: NDABeam.cc,v 1.2 2006/10/31 18:24:08 bahren Exp $*/
 
 #include <lopes/Data/NDABeam.h>
 
@@ -53,8 +53,8 @@ NDABeam::NDABeam (String const &metafile,
 
 NDABeam::NDABeam (String const &metafile,
 		  uint const &blocksize,
-		  Vector<Float> const &adc2voltage,
-		  Matrix<Complex> const &fft2calfft)
+		  Vector<Double> const &adc2voltage,
+		  Matrix<DComplex> const &fft2calfft)
   : DataReader (blocksize,
 		adc2voltage,
 		fft2calfft)
@@ -140,8 +140,8 @@ Bool NDABeam::setStreams ()
 
   uint blocksize (blocksize_p);
   Vector<uint> antennas (metadata_p.antennas());
-  Vector<Float> adc2voltage (DataReader::adc2voltage());
-  Matrix<Complex> fft2calfft (DataReader::fft2calfft());
+  Vector<Double> adc2voltage (DataReader::adc2voltage());
+  Matrix<DComplex> fft2calfft (DataReader::fft2calfft());
   Vector<String> filenames (metadata_p.datafiles(true));
   DataIterator *iterator;
   
@@ -196,14 +196,14 @@ Bool NDABeam::setStreams ()
 
 // --------------------------------------------------------------------------- fx
 
-Matrix<Float> NDABeam::fx ()
+Matrix<Double> NDABeam::fx ()
 {
   uint i (0);
   int errstat(0);
   short tmpData[blocksize_p];
   uint nofSelectedAntennas (DataReader::nofSelectedAntennas());
   // Data vector returned after reading is completed
-  Matrix<Float> data (blocksize_p,
+  Matrix<Double> data (blocksize_p,
 		      nofSelectedAntennas);
   
   // -----------------------------------------------------------------
