@@ -1,0 +1,27 @@
+#
+# $Id: templates,v 1.6 2006/11/09 16:08:03 bahren Exp $
+#
+## -- casa/Arrays ---------------------------------------------------------------
+1000 casa/Arrays/ArrayIO.cc 
+     template void readAsciiMatrix(Matrix<Double> &, Char const *) 
+## -- lopes/Beamforming ---------------------------------------------------------
+1000 casa/Arrays/ArrayLogical.cc 
+     template Bool allNearAbs(Array<Double> const &, Double const &, Double) 
+     = casa/BasicSL/Complex.h 
+     template Bool allNearAbs(Array<Complex> const &, Array<Complex> const &, Double) 
+     template Bool allNearAbs(Array<DComplex> const &, Array<DComplex> const &, Double) 
+1010 scimath/Mathematics/FFTServer.cc
+     = casa/BasicSL/Complex.h 
+     template class FFTServer<Float,Complex> 
+     template class FFTServer<Double, DComplex> 
+## -- images/Images -------------------------------------------------------------
+1000 images/Images/ImageInterface.cc 
+     template class ImageInterface<Float> 
+     template class ImageInterface<Double> 
+1000 images/Images/PagedImage.cc 
+     template class PagedImage<Float> 
+     template class PagedImage<Double> 
+1000 images/Images/TempImage.cc 
+     template class TempImage<Float> 
+     template class TempImage<Double> 
+## -- lopes/IO ------------------------------------------------------------------

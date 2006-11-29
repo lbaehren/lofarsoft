@@ -18,22 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/*!
-  \brief Flagger testing for clipping of signals
-
-  \ingroup Analysis
-  
-  \author Lars B&auml;hren
-
-  \date 2005/06/16
-
-  \test tClippingFraction.cc
-
-  \todo Try creating a templated version of this class, since variables
-  typically might be either <i>float</i> or <i>double</i>.
-
-*/
-
 #ifndef CLIPPINGFRACTION_H
 #define CLIPPINGFRACTION_H
 
@@ -52,6 +36,22 @@ using casa::Vector;
 
 namespace LOPES {  // Namespace LOPES -- begin
   
+  /*!
+    \class ClippingFraction
+    
+    \brief Flagger testing for clipping of signals
+    
+    \ingroup Analysis
+    
+    \author Lars B&auml;hren
+    
+    \date 2005/06/16
+    
+    \test tClippingFraction.cc
+    
+    \todo Try creating a templated version of this class, since variables
+    typically might be either <i>float</i> or <i>double</i>.
+  */
   template <class T> class ClippingFraction {
     
     //! Lower clipping threshold

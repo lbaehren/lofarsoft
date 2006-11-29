@@ -37,7 +37,7 @@ endif (HAVE_CASA)
 ## -----------------------------------------------------------------------------
 
 ADD_LIBRARY (lopestools
-## -- Analysis -----------------------------------
+## -- Analysis ---------------------------------------------
   Analysis/ClippingFraction.cc
   Analysis/DataBlockStatistics.cc
 #  Analysis/DynamicSpectrum.cc
@@ -46,7 +46,14 @@ ADD_LIBRARY (lopestools
   Analysis/PeakList.cc
   Analysis/PeakSearch.cc
   Analysis/SourceFit.cc
-##  -- Calibration -------------------------------
+## -- Beamforming ------------------------------------------
+  Beamforming/Beamformer.cc
+  Beamforming/ccBeam.cc
+  Beamforming/GeomDelay.cc
+  Beamforming/GeomPhase.cc
+  Beamforming/Phasing.cc
+  Beamforming/XBeam.cc
+##  -- Calibration -----------------------------------------
   Calibration/AntennaGain.cc
   Calibration/AverageGain.cc
   Calibration/BaselineGain.cc
@@ -59,31 +66,31 @@ ADD_LIBRARY (lopestools
   Calibration/PluginBase.cc
   Calibration/RFIMitigation.cc
   Calibration/RFIMitigationPlugin.cc
-## -- Coordinates --------------------------------
+## -- Coordinates ------------------------------------------
   Coordinates/AxisCoordinates.cc
   Coordinates/AxisIterator.cc
   Coordinates/CoordinateGrid.cc
   Coordinates/GeodeticEllipsoid.cc
   Coordinates/GridCoordinate.cc
   Coordinates/PolarCoordinate.cc
-## -- Data ---------------------------------------
+## -- Data -------------------------------------------------
   Data/Data.cc
   Data/DynamicSpectrum.cc
   Data/TIM40.cc
   Data/UnitPrefix.cc
-## -- Display ------------------------------------
+## -- Display ----------------------------------------------
   Display/PGPlot.cc
-## -- Functionals --------------------------------
+## -- Functionals ------------------------------------------
   Functionals/Hermite1D.cc
   Functionals/Shapelets1D.cc
   Functionals/Shapelets2D.cc
   Functionals/ShapeletsModel1D.cc
   Functionals/StatisticsFilter.cc
-## -- IO -----------------------------------------
+## -- IO ---------------------------------------------------
   IO/DataIO.cc
   IO/DataIterator.cc
   IO/LogfileName.cc
-## -- LopesBase ----------------------------------
+## -- LopesBase --------------------------------------------
   LopesBase/BasicHeader.cc
   LopesBase/BasicObject.cc
   LopesBase/DataConversion.cc
@@ -94,7 +101,7 @@ ADD_LIBRARY (lopestools
   LopesBase/StoredInputObject.cc
   LopesBase/StoredMultiplyObject.cc
   LopesBase/StoredObject.cc
-## -- Math ---------------------------------------
+## -- Math -------------------------------------------------
   Math/Algebra.cc
   Math/ArrayMath.cc
   Math/MathAlgebra.cc
@@ -106,8 +113,20 @@ ADD_LIBRARY (lopestools
   Math/Statistics.cc
   Math/ThreeVector.cc
   Math/VectorConversion.cc
-## -- Utilities ----------------------------------
+## -- Observation ------------------------------------------
+  Observation/AntennaLayout.cc
+#  Observation/ObservationData.cc
+  Observation/ObservationFrame.cc
+  Observation/ObservationMeta.cc
+## -- Skymap -----------------------------------------------
+#  Skymap/Skymap.cc
+  Skymap/SkymapGrid.cc
+#  Skymap/Skymapper.cc
+#  Skymap/SkymapperTools.cc
+  Skymap/SkymapQuantity.cc
+## -- Utilities --------------------------------------------
   Utilities/ProgressBar.cc
+  Utilities/StringTools.cc
   Utilities/Timestamp.cc
   Utilities/TestArray.cc
   )

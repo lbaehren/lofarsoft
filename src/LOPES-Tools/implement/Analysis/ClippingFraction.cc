@@ -22,6 +22,10 @@
 
 #include <Analysis/ClippingFraction.h>
 
+/*!
+  \class ClippingFraction
+*/
+
 namespace LOPES {  // Namespace LOPES -- begin
   
   // ============================================================================
