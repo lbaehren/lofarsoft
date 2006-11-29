@@ -19,8 +19,8 @@
  ***************************************************************************/
 /* $Id: DataFlag.h,v 1.5 2006/05/04 11:46:29 bahren Exp $ */
 
-#ifndef _DATAFLAG_H_
-#define _DATAFLAG_H_
+#ifndef DATAFLAG_H
+#define DATAFLAG_H
 
 #include <casa/aips.h>
 #include <casa/Arrays/Array.h>
@@ -31,35 +31,38 @@
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
 
-#include <lopes/Analysis/ClippingFraction.h>
+#include <Analysis/ClippingFraction.h>
 
-#include <casa/namespace.h>
+using casa::Matrix;
+using casa::Vector;
 
-/*!
-  \class DataFlag
-
-  \ingroup Data
-
-  \brief Flags for a number of data sets.
-
-  \author Lars B&auml;hren
-
-  \date 2005/06/24
-
-  \test tDataFlag.cc
- */
-
-template <class T> class DataFlag : public ClippingFraction<T> {
-
-  //! Threshold above which an antenna is flagged.
-  T threshold_p;
-
-  //! Flag values.
-  Vector<T> flags_p;
-
-  //! Test if signals are clipped?
-  Bool testClipping_p;
-
+namespace LOPES {  // namespace LOPES -- begin
+  
+  /*!
+    \class DataFlag
+    
+    \ingroup Data
+    
+    \brief Flags for a number of data sets.
+    
+    \author Lars B&auml;hren
+    
+    \date 2005/06/24
+    
+    \test tDataFlag.cc
+  */
+  
+  template <class T> class DataFlag : public ClippingFraction<T> {
+    
+    //! Threshold above which an antenna is flagged.
+    T threshold_p;
+    
+    //! Flag values.
+    Vector<T> flags_p;
+    
+    //! Test if signals are clipped?
+    bool testClipping_p;
+    
  public:
   
   // --- Construction ----------------------------------------------------------
@@ -69,7 +72,7 @@ template <class T> class DataFlag : public ClippingFraction<T> {
 
     \param num -- Number of data sets.
   */
-  DataFlag (const Int& num);
+  DataFlag (const int& num);
 
   /*!
     \brief Constructor
@@ -78,7 +81,7 @@ template <class T> class DataFlag : public ClippingFraction<T> {
     \param threshold -- Threshold for the float to boolean conversion of the 
                         flag values.
   */
-  DataFlag (const Int& num,
+  DataFlag (const int& num,
 	    const T& threshold);
 
   /*!
@@ -89,7 +92,7 @@ template <class T> class DataFlag : public ClippingFraction<T> {
                         flag values.
     \param limits    -- Maximum valid signal limits.
   */
-  DataFlag (const Int& num,
+  DataFlag (const int& num,
 	    const T& threshold,
 	    const Vector<T>& limits);
 
@@ -98,7 +101,7 @@ template <class T> class DataFlag : public ClippingFraction<T> {
     
     \param flags -- Flags for the data sets.
   */
-  DataFlag (const Vector<Bool>& flags);
+  DataFlag (const Vector<bool>& flags);
 
   /*!
     \brief Constructor
@@ -134,19 +137,19 @@ template <class T> class DataFlag : public ClippingFraction<T> {
   /*!
     \brief Get flag for an individual dataset (as bool).
   */
-  void flags (Bool& flag,
-	      const uInt& num);
+  void flags (bool& flag,
+	      const uint& num);
 
   /*!
     \brief Get flag for an individual dataset (as float).
   */
   void flags (T& flag,
-	      const uInt& num);
+	      const uint& num);
 
   /*!
     \brief Get the flags for all datasets (as bool).
   */
-  void flags (Vector<Bool>& flags);
+  void flags (Vector<bool>& flags);
 
   /*!
     \brief Get the flags for all datasets (as float).
@@ -156,7 +159,7 @@ template <class T> class DataFlag : public ClippingFraction<T> {
   /*!
     \brief 
   */
-  void setFlags (const Vector<Bool>& flags);
+  void setFlags (const Vector<bool>& flags);
   
   /*!
     \brief 
@@ -172,12 +175,12 @@ template <class T> class DataFlag : public ClippingFraction<T> {
     \brief 
   */
   void setFlags (const Vector<T>& data,
-		 const Int& num);
+		 const int& num);
   
   /*!
     \brief 
   */
-  void flagData (Vector<Bool>& flags,
+  void flagData (Vector<bool>& flags,
 		 const Matrix<T>& data);
   
   /*!
@@ -191,7 +194,9 @@ template <class T> class DataFlag : public ClippingFraction<T> {
   /*!
     \brief Convert internal flag value (float) to boolean.
   */
-  Bool float2bool (const T& flag);
+  bool float2bool (const T& flag);
 };
+
+}  // namespace LOPES -- end
 
 #endif

@@ -20,7 +20,7 @@
 
 /* $Id: DataCC.h,v 1.7 2006/05/04 11:46:29 bahren Exp $ */
 
-#if !defined(DATACC_H)
+#ifndef DATACC_H
 #define DATACC_H
 
 // C++ Standard library
@@ -49,11 +49,18 @@
 #include <measures/Measures/MEpoch.h>
 #include <casa/Quanta.h>
 
-#include <lopes/Observation/ObservationMeta.h>
-#include <lopes/Utilities/Masking.h>
-#include <lopes/Utilities/StringTools.h>
+#include <Observation/ObservationMeta.h>
+#include <Utilities/Masking.h>
+#include <Utilities/StringTools.h>
 
-#include <casa/namespace.h>
+using casa::Complex;
+using casa::Cube;
+using casa::IPosition;
+using casa::Matrix;
+using casa::String;
+using casa::Vector;
+
+namespace LOPES {  // namespace LOPES -- begin
 
 /*!
   \class DataCC
@@ -85,26 +92,25 @@
 
   \test tDataCC.cc
 */
-
-class DataCC : public ObservationMeta {
-
-  // Path to the input datafile
-  String datafile_p;
-  // Data cube containing the cross correlated data
-  Cube<Complex> ccCube_p;
-  // Ordering of the data cube axes within the disk file
-  Vector<Int> axisOrder_p;
-  // Number of points (channels) in the fft.
-  Int fftsize_p;
-  // Channels numbers of the frequencies
-  Vector<Int> availableChannels_p;
-  // Antenna selection
-  Vector<Bool> antennaSelection_p;
-  // Frequency channel selection
-  Vector<Bool> frequencySelection_p;
-  // Baselines for a visibility dataset
-  Matrix<Int> baselines_p;
-
+  class DataCC : public ObservationMeta {
+    
+    // Path to the input datafile
+    String datafile_p;
+    // Data cube containing the cross correlated data
+    Cube<Complex> ccCube_p;
+    // Ordering of the data cube axes within the disk file
+    Vector<int> axisOrder_p;
+    // Number of points (channels) in the fft.
+    int fftsize_p;
+    // Channels numbers of the frequencies
+    Vector<int> availableChannels_p;
+    // Antenna selection
+    Vector<bool> antennaSelection_p;
+    // Frequency channel selection
+    Vector<bool> frequencySelection_p;
+    // Baselines for a visibility dataset
+    Matrix<int> baselines_p;
+    
  public:
   
   // === Construction / Deconstruction =========================================
@@ -135,20 +141,20 @@ class DataCC : public ObservationMeta {
   // === Mapping between data cube axes in disk file and storage ===============
 
   /*!
-    \fn Vector<Int> axisOrder ()
+    \fn Vector<int> axisOrder ()
 
     \brief Get the ordering of the cross-correlation matrix axes.
   */
-  Vector<Int> axisOrder () {
+  Vector<int> axisOrder () {
     return axisOrder_p;
   }
   
   /*!
-    \fn void setAxisOrder (const Vector<Int>&)
+    \fn void setAxisOrder (const Vector<int>&)
 
     \brief Set the ordering of the cross-correlation matrix axes.
   */
-  void setAxisOrder (const Vector<Int>&);
+  void setAxisOrder (const Vector<int>&);
 
   // === Access to the cross-correlation data-cube ===================
 
@@ -172,27 +178,27 @@ class DataCC : public ObservationMeta {
   Cube<Complex> ccCube ();
 
   /*!
-    \fn Cube<Complex> ccCube (const Vector<Int>&, const Vector<Int>&)
+    \fn Cube<Complex> ccCube (const Vector<int>&, const Vector<int>&)
 
     \brief Get the complex data cube
   */
-  Cube<Complex> ccCube (const Vector<Int>&, 
-			const Vector<Int>&);
+  Cube<Complex> ccCube (const Vector<int>&, 
+			const Vector<int>&);
   
   /*!
-    \fn Cube<Complex> ccCube (const Vector<Bool>&, const Vector<Bool>&)
+    \fn Cube<Complex> ccCube (const Vector<bool>&, const Vector<bool>&)
 
     \brief Get the contents of the complex data cube selectively
 
-    \param antennaMask   - Boolean array for the selection of antennae.
-    \param frequencyMask - Boolean array for the selection of frequency
+    \param antennaMask   - boolean array for the selection of antennae.
+    \param frequencyMask - boolean array for the selection of frequency
                            channels.
     
     \return ccCube - Cross-correlations for the selected set of antennae and
                      frequency channels.
   */
-  Cube<Complex> ccCube (const Vector<Bool>&, 
-			const Vector<Bool>&);
+  Cube<Complex> ccCube (const Vector<bool>&, 
+			const Vector<bool>&);
 
   // === Convert the cc datacube to visibilities =====================
 
@@ -209,15 +215,15 @@ class DataCC : public ObservationMeta {
   /*!
     \brief Convert the cc datacube to visibilities.
 
-    \param antennaMask   - Boolean array for the selection of antennae.
-    \param frequencyMask - Boolean array for the selection of frequency
+    \param antennaMask   - boolean array for the selection of antennae.
+    \param frequencyMask - boolean array for the selection of frequency
                            channels.
    */
-  Matrix<Complex> visibilities (const Vector<Bool>& antennaMask,
-				const Vector<Bool>& frequencyMask);
+  Matrix<Complex> visibilities (const Vector<bool>& antennaMask,
+				const Vector<bool>& frequencyMask);
   
   /*!
-    \fn Matrix<Complex> visibilities (const Int)
+    \fn Matrix<Complex> visibilities (const int)
 
     \brief Convert the cc datacube to visibilities.
 
@@ -241,7 +247,7 @@ class DataCC : public ObservationMeta {
     }
     \endverbatim
    */
-  Matrix<Complex> visibilities (const Int nofChannels);
+  Matrix<Complex> visibilities (const int nofChannels);
 
   /*!
     \brief Convert the cc datacube to visibilities.
@@ -249,13 +255,13 @@ class DataCC : public ObservationMeta {
     \param band        - Frequency band
     \param nofChannels - Number of frequency channels.
    */
-  Matrix<Complex> visibilities (const Vector<Double>& band, 
-				const Int nofChannels);
+  Matrix<Complex> visibilities (const Vector<double>& band, 
+				const int nofChannels);
 
   /*!
     \brief Get the antenna baselines for the visibility data
    */
-  Matrix<Int> baselines ();
+  Matrix<int> baselines ();
 
 
   // === Auto-/Cross-correlation spectra =======================================
@@ -265,7 +271,7 @@ class DataCC : public ObservationMeta {
 
     \param ant - Array index of the antenna.
   */
-  Vector<Double> spectrum (const Int ant);  
+  Vector<double> spectrum (const int ant);  
 
   /*!
     \brief Get the cross-correlation power spectrum for a combination of antennae
@@ -273,8 +279,8 @@ class DataCC : public ObservationMeta {
     \param ant1 - Array index of the first antenna.
     \param ant2 - Array index of the second antenna.
   */
-  Vector<Double> spectrum (const Int ant1,
-			   const Int ant2);
+  Vector<double> spectrum (const int ant1,
+			   const int ant2);
 
   /*!
     \brief Export cross-correlation power spectrum to an output stream
@@ -283,8 +289,8 @@ class DataCC : public ObservationMeta {
     \param ant2 - Array index of the second antenna.
     \param os   - Output stream to which the spectrum data are written
   */
-  void spectrum (const Int ant1,
-		 const Int ant2,
+  void spectrum (const int ant1,
+		 const int ant2,
 		 std::ostream& os);
   
   /*!
@@ -293,8 +299,8 @@ class DataCC : public ObservationMeta {
     \param ant1 - Array index of the first antenna.
     \param ant2 - Array index of the second antenna.
   */
-  Vector<Complex> ccSpectrum (const Int ant1,
-			      const Int ant2);
+  Vector<Complex> ccSpectrum (const int ant1,
+			      const int ant2);
   
   // === Data I/O from/to disk =================================================
 
@@ -319,7 +325,7 @@ class DataCC : public ObservationMeta {
 
     \return fftsize -- The number of points in the FFT.
   */
-  Int fftsize () {
+  int fftsize () {
     return fftsize_p;
   }
   
@@ -328,22 +334,22 @@ class DataCC : public ObservationMeta {
 
     \return channel -- The available frequency channels
   */
-  Vector<Int> frequencyChannels () {
+  Vector<int> frequencyChannels () {
     return availableChannels_p; 
   }
   
   /*!
-    \fn Vector<Double> frequencyValues ()
+    \fn Vector<double> frequencyValues ()
 
     \brief Get the frequency values along the third cc-datacube axis
 
     Get the frequency values, in [Hz], at the center of each channel along the 
     third axis of the cross-correlation data-cube.
   */
-  Vector<Double> frequencyValues ();
+  Vector<double> frequencyValues ();
 
   /*!
-    \fn Vector<Double> frequencyValues (Bool)
+    \fn Vector<double> frequencyValues (bool)
 
     \brief Get the frequency values along the third cc-datacube axis
 
@@ -352,17 +358,17 @@ class DataCC : public ObservationMeta {
 
     \param onlySelected - Return only the selected frequency channels?
   */
-  Vector<Double> frequencyValues (const Bool);
+  Vector<double> frequencyValues (const bool);
 
   /*!
-    \fn Vector<Bool> frequencyMask ()
+    \fn Vector<bool> frequencyMask ()
 
     \brief Get a frequency mask for the applied channel selection.
 
-    \return mask - Boolean array indicating wether a certain channel is selected
+    \return mask - boolean array indicating wether a certain channel is selected
                    or deselected.
    */
-  Vector<Bool> frequencyMask ();
+  Vector<bool> frequencyMask ();
 
  private:
   
@@ -378,21 +384,23 @@ class DataCC : public ObservationMeta {
   void axisTransformation ();
 
   //! Check the provided mask for the antenna selection
-  void setAntennaSelection (const Vector<Bool>&);
+  void setAntennaSelection (const Vector<bool>&);
 
   //! Check the provided mask for the frequency channel selection
-  void setFrequencySelection (const Vector<Bool>&);
+  void setFrequencySelection (const Vector<bool>&);
 
   /*! 
-    \param antennaMask   - Boolean array for the selection of antennae.
-    \param frequencyMask - Boolean array for the selection of frequency
+    \param antennaMask   - boolean array for the selection of antennae.
+    \param frequencyMask - boolean array for the selection of frequency
                            channels.
 
     \todo Check if copying values via slicing operates correctly!
    */
-  Matrix<Complex> ccCube2Visibilities(const Vector<Bool>&,
-				      const Vector<Bool>&);
+  Matrix<Complex> ccCube2Visibilities(const Vector<bool>&,
+				      const Vector<bool>&);
 
-};
+  };  // class DataCC -- end
+
+}  // namespace LOPES -- end
 
 #endif

@@ -32,6 +32,7 @@
 
 using casa::DComplex;
 using casa::Matrix;
+using casa::String;
 using casa::Vector;
 
 namespace LOPES {  // namespace LOPES -- begin

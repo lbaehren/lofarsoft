@@ -21,11 +21,13 @@
 
 /* $Id: NDABeam.cc,v 1.2 2006/10/31 18:24:08 bahren Exp $*/
 
-#include <lopes/Data/NDABeam.h>
+#include <Data/NDABeam.h>
 
 /*!
   \class NDABeam
 */
+
+namespace LOPES {  // namespace LOPES -- begin
 
 // ==============================================================================
 //
@@ -237,3 +239,5 @@ Matrix<Double> NDABeam::fx ()
 
   return data;
 }
+
+}  // namespace LOPES -- end

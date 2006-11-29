@@ -20,49 +20,51 @@
 
 /* $Id: ITSCapture.cc,v 1.2 2006/07/27 09:59:14 bahren Exp $*/
 
-#include <lopes/Data/ITSCapture.h>
+#include <Data/ITSCapture.h>
 
 /*!
   \class ITSCapture
 */
 
-// ==============================================================================
-//
-//  Construction
-//
-// ==============================================================================
-
-ITSCapture::ITSCapture ()
-{
-  ITSMetadata meta;
-  metadata_p = meta;
-}
-
-ITSCapture::ITSCapture (String const &metafile)
-{
-  setMetafile (metafile);
-}
-
-ITSCapture::ITSCapture (String const &metafile,
-			uint const &blocksize)
-  : DataReader (blocksize)
-{
-  setMetafile (metafile);
-}
-
-ITSCapture::ITSCapture (String const &metafile,
-			uint const &blocksize,
-			Vector<Float> const &adc2voltage,
-			Matrix<Complex> const &fft2calfft)
-  : DataReader (blocksize,
-		adc2voltage,
-		fft2calfft)
-{
-  setMetafile (metafile);
-}
-
-ITSCapture::ITSCapture (ITSCapture const &other)
-{
+namespace LOPES {  // namespace LOPES -- begin
+  
+  // ==============================================================================
+  //
+  //  Construction
+  //
+  // ==============================================================================
+  
+  ITSCapture::ITSCapture ()
+  {
+    ITSMetadata meta;
+    metadata_p = meta;
+  }
+  
+  ITSCapture::ITSCapture (String const &metafile)
+  {
+    setMetafile (metafile);
+  }
+  
+  ITSCapture::ITSCapture (String const &metafile,
+			  uint const &blocksize)
+    : DataReader (blocksize)
+  {
+    setMetafile (metafile);
+  }
+  
+  ITSCapture::ITSCapture (String const &metafile,
+			  uint const &blocksize,
+			  Vector<double> const &adc2voltage,
+			  Matrix<DComplex> const &fft2calfft)
+    : DataReader (blocksize,
+		  adc2voltage,
+		  fft2calfft)
+  {
+    setMetafile (metafile);
+  }
+  
+  ITSCapture::ITSCapture (ITSCapture const &other)
+  {
   copy (other);
 }
 
@@ -139,8 +141,8 @@ Bool ITSCapture::setStreams ()
 
   uint blocksize (blocksize_p);
   Vector<uint> antennas (metadata_p.antennas());
-  Vector<Float> adc2voltage (DataReader::adc2voltage());
-  Matrix<Complex> fft2calfft (DataReader::fft2calfft());
+  Vector<double> adc2voltage (DataReader::adc2voltage());
+  Matrix<DComplex> fft2calfft (DataReader::fft2calfft());
   Vector<String> filenames (metadata_p.datafiles(true));
   DataIterator *iterator;
   
@@ -195,14 +197,14 @@ Bool ITSCapture::setStreams ()
 
 // --------------------------------------------------------------------------- fx
 
-Matrix<Float> ITSCapture::fx ()
+Matrix<double> ITSCapture::fx ()
 {
   uint i (0);
   int errstat(0);
   short tmpData[blocksize_p];
   uint nofSelectedAntennas (DataReader::nofSelectedAntennas());
   // Data vector returned after reading is completed
-  Matrix<Float> data (blocksize_p,
+  Matrix<double> data (blocksize_p,
 		      nofSelectedAntennas);
   
   // -----------------------------------------------------------------
@@ -236,3 +238,5 @@ Matrix<Float> ITSCapture::fx ()
 
   return data;
 }
+
+}  // namespace LOPES -- end

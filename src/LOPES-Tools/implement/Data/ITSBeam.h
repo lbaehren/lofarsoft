@@ -31,66 +31,67 @@
 #include <IO/DataReader.h>
 #include <Utilities/StringTools.h>
 
+using casa::AipsError;
 using casa::DComplex;
 using casa::String;
 
 namespace LOPES {  // namespace LOPES -- begin
-
-/*!
-  \class ITSBeam
-
-  \ingroup Data
-
-  \brief Beamformed ITS waveform data 
-
-  \author Lars B&auml;hren and Andreas Nigl
-
-  \date 2006/08/04
-
-  \test tITSBeam.cc
-
-  <h3>Prerequisite</h3>
-
-  <ul type="square">
-    <li>[LOPES-Tools] DataReader
-    <li>[LOPES-Tools] ITSMetadata
-  </ul>
-
-  <h3>Synopsis</h3>
-
-  The data are saved as float32 little endian in a binary file (on a typical
-  Linux machine with x86 architecture).
-
-  As for the ITSCapture class an <i>experiment.meta</i> must be provided along
-  with the data (the example below is from <tt>/data/ITS/jupX9tb</tt>):
-  \verbatim
-  [OBSERVATION]
-  description=NDA-ITS observations of Jupiter - ITS beam
-  experiment_type=capturing
-  basename=jupiter_20051130_09
-  starttime=Fri Jan  1 12:00:00 2010
-  interval=0
-  capturemode=SYNCSTOP
-  capturesize=S16_512M
-  antennas=0 1
-  signextension=true
-  skipcapture=false
-  iterations=1
-  current_status=scheduled
-  current_iteration=0
-  observation_id=1133341829
-  observation_owner=ITS observer
-  submittime=2005-11-30T09:10:47.00Z
-  # machineformat=ieee-le
-  # precision=float32
-  #EOF
-  triggertime[1]=2005-11-30T09:15:23.30Z
-  file=/data/ITS/jupX9tb/jupX9tbE.dat
-  file=/data/ITS/jupX9tb/jupX9tbN.dat
-  \endverbatim
-
-  <b>Notes:</b>
   
+  /*!
+    \class ITSBeam
+    
+    \ingroup Data
+    
+    \brief Beamformed ITS waveform data 
+    
+    \author Lars B&auml;hren and Andreas Nigl
+    
+    \date 2006/08/04
+    
+    \test tITSBeam.cc
+    
+    <h3>Prerequisite</h3>
+    
+    <ul type="square">
+      <li>[LOPES-Tools] DataReader
+      <li>[LOPES-Tools] ITSMetadata
+    </ul>
+    
+    <h3>Synopsis</h3>
+    
+    The data are saved as float32 little endian in a binary file (on a typical
+    Linux machine with x86 architecture).
+    
+    As for the ITSCapture class an <i>experiment.meta</i> must be provided along
+    with the data (the example below is from <tt>/data/ITS/jupX9tb</tt>):
+    \verbatim
+    [OBSERVATION]
+    description=NDA-ITS observations of Jupiter - ITS beam
+    experiment_type=capturing
+    basename=jupiter_20051130_09
+    starttime=Fri Jan  1 12:00:00 2010
+    interval=0
+    capturemode=SYNCSTOP
+    capturesize=S16_512M
+    antennas=0 1
+    signextension=true
+    skipcapture=false
+    iterations=1
+    current_status=scheduled
+    current_iteration=0
+    observation_id=1133341829
+    observation_owner=ITS observer
+    submittime=2005-11-30T09:10:47.00Z
+    # machineformat=ieee-le
+    # precision=float32
+    #EOF
+    triggertime[1]=2005-11-30T09:15:23.30Z
+    file=/data/ITS/jupX9tb/jupX9tbE.dat
+    file=/data/ITS/jupX9tb/jupX9tbN.dat
+    \endverbatim
+    
+    <b>Notes:</b>
+    
   <ol>
     <li>Use the <tt>experiment.meta</tt> file of the original ITS experiment as
     starting point for the metafile provided with the beamformed data; this not only

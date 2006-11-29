@@ -21,110 +21,112 @@
 
 /* $Id: ITSBeam.cc,v 1.6 2006/10/31 18:24:08 bahren Exp $*/
 
-#include <lopes/Data/ITSBeam.h>
+#include <Data/ITSBeam.h>
 
 /*!
   \class ITSBeam
 */
 
-// ==============================================================================
-//
-//  Construction
-//
-// ==============================================================================
-
-ITSBeam::ITSBeam ()
-{
-  ITSMetadata meta;
-  metadata_p = meta;
-}
-
-ITSBeam::ITSBeam (String const &metafile)
-{
-  setMetafile (metafile);
-}
-
-ITSBeam::ITSBeam (String const &metafile,
-		  uint const &blocksize)
-  : DataReader (blocksize)
-{
-  setMetafile (metafile);
-}
-
-ITSBeam::ITSBeam (String const &metafile,
-		  uint const &blocksize,
-		  Vector<Double> const &adc2voltage,
-		  Matrix<DComplex> const &fft2calfft)
-  : DataReader (blocksize,
-		adc2voltage,
-		fft2calfft)
-{
-  setMetafile (metafile);
-}
-
-ITSBeam::ITSBeam (ITSBeam const &other)
-{
-  copy (other);
-}
-
-// ==============================================================================
-//
-//  Destruction
-//
-// ==============================================================================
-
-ITSBeam::~ITSBeam ()
-{
-  destroy();
-}
-
-void ITSBeam::destroy ()
-{;}
-
-// ==============================================================================
-//
-//  Operators
-//
-// ==============================================================================
-
-ITSBeam& ITSBeam::operator= (ITSBeam const &other)
-{
-  if (this != &other) {
-    destroy ();
+namespace LOPES {  // namespace LOPES -- begin
+  
+  // ============================================================================
+  //
+  //  Construction
+  //
+  // ============================================================================
+  
+  ITSBeam::ITSBeam ()
+  {
+    ITSMetadata meta;
+    metadata_p = meta;
+  }
+  
+  ITSBeam::ITSBeam (String const &metafile)
+  {
+    setMetafile (metafile);
+  }
+  
+  ITSBeam::ITSBeam (String const &metafile,
+		    uint const &blocksize)
+    : DataReader (blocksize)
+  {
+    setMetafile (metafile);
+  }
+  
+  ITSBeam::ITSBeam (String const &metafile,
+		    uint const &blocksize,
+		    Vector<Double> const &adc2voltage,
+		    Matrix<DComplex> const &fft2calfft)
+    : DataReader (blocksize,
+		  adc2voltage,
+		  fft2calfft)
+  {
+    setMetafile (metafile);
+  }
+  
+  ITSBeam::ITSBeam (ITSBeam const &other)
+  {
     copy (other);
   }
-  return *this;
-}
-
-void ITSBeam::copy (ITSBeam const &other)
-{
-  metadata_p = other.metadata_p;
-}
-
-// ==============================================================================
-//
-//  Parameters
-//
-// ==============================================================================
-
-void ITSBeam::setMetafile (String const &metafile)
-{
-  bool status (true);
   
-  // make a connection to the metafile and get its contents
-  try {
-    metadata_p.setMetafile (metafile);
-  } catch (AipsError x) {
-    cerr << "[ITSBeam::setMetafile] " << x.getMesg() << endl;
-    status = false;
+  // ============================================================================
+  //
+  //  Destruction
+  //
+  // ============================================================================
+  
+  ITSBeam::~ITSBeam ()
+  {
+    destroy();
   }
   
-  // Set up the file streams by which to connect to the data stored on disk
-  if (status) {
-    status = setStreams ();
+  void ITSBeam::destroy ()
+  {;}
+  
+  // ============================================================================
+  //
+  //  Operators
+  //
+  // ============================================================================
+  
+  ITSBeam& ITSBeam::operator= (ITSBeam const &other)
+  {
+    if (this != &other) {
+      destroy ();
+      copy (other);
+    }
+    return *this;
   }
-}
-
+  
+  void ITSBeam::copy (ITSBeam const &other)
+  {
+    metadata_p = other.metadata_p;
+  }
+  
+  // ============================================================================
+  //
+  //  Parameters
+  //
+  // ===========================================================================
+  
+  void ITSBeam::setMetafile (String const &metafile)
+  {
+    bool status (true);
+    
+    // make a connection to the metafile and get its contents
+    try {
+      metadata_p.setMetafile (metafile);
+    } catch (AipsError x) {
+      cerr << "[ITSBeam::setMetafile] " << x.getMesg() << endl;
+      status = false;
+    }
+    
+    // Set up the file streams by which to connect to the data stored on disk
+    if (status) {
+      status = setStreams ();
+    }
+  }
+  
 // ==============================================================================
 //
 //  Methods
@@ -236,3 +238,5 @@ Matrix<Double> ITSBeam::fx ()
   
   return data;
 }
+
+}  // namespace LOPES -- end

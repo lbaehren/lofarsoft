@@ -41,7 +41,6 @@ ADD_LIBRARY (lopestools
   Analysis/ClippingFraction.cc
   Analysis/DataBlockStatistics.cc
 #  Analysis/DynamicSpectrum.cc
-  Analysis/Masking.cc
   Analysis/Peak.cc
   Analysis/PeakList.cc
   Analysis/PeakSearch.cc
@@ -75,8 +74,20 @@ ADD_LIBRARY (lopestools
   Coordinates/PolarCoordinate.cc
 ## -- Data -------------------------------------------------
   Data/Data.cc
+  Data/DataCC.cc
+  Data/DataFlag.cc
   Data/DynamicSpectrum.cc
-  Data/TIM40.cc
+  Data/ITSBeam.cc
+  Data/ITSCapture.cc
+#  Data/ITSCorrelation.cc
+#  Data/ITSMetadata.cc
+  Data/LopesEvent.cc
+#  Data/MSFiller.cc
+  Data/NDABeam.cc
+#  Data/nuMoon.cc
+#  Data/NuMoonHeader.cc
+#  Data/TIM40.cc
+#  Data/TIM40Header.cc
   Data/UnitPrefix.cc
 ## -- Display ----------------------------------------------
   Display/PGPlot.cc
@@ -129,6 +140,7 @@ ADD_LIBRARY (lopestools
   Skymap/SkymapperTools.cc
   Skymap/SkymapQuantity.cc
 ## -- Utilities --------------------------------------------
+  Utilities/Masking.cc
   Utilities/ProgressBar.cc
   Utilities/StringTools.cc
   Utilities/Timestamp.cc

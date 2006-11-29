@@ -36,59 +36,59 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <lopes/Data/Data.h>
-#include <lopes/Data/LopesEvent.h>
 
-using namespace std;
+#include <Data/Data.h>
+#include <Data/LopesEvent.h>
+
 
 namespace LOPES {
-
-// ==============================================================================
-//
-//  Construction
-//
-// ==============================================================================
-
-// ------------------------------------------------------------------- LopesEvent
-
-LopesEvent::LopesEvent()
-  : DataReader (1)
-{
-  /*
-    Assign some value to the internal variables, at least to indicate they 
-    haven't been assigned a proper value yet
-  */
-  init ();
-
-  /*
-    Initialize the parameters required by the DataReader
-  */
-  setStreams ();
-}
-
-// ------------------------------------------------------------------- LopesEvent
-
-LopesEvent::LopesEvent (const char* name)
-  : DataReader (1)
-{
-  init (name);
-}
-
-// ------------------------------------------------------------------- LopesEvent
-
-LopesEvent::LopesEvent (string const &name,
-			uint const &blocksize)
-  : DataReader (blocksize)
-{
-  init (name.c_str());
-}
-
+  
+  // ============================================================================
+  //
+  //  Construction
+  //
+  // ============================================================================
+  
+  // ----------------------------------------------------------------- LopesEvent
+  
+  LopesEvent::LopesEvent()
+    : DataReader (1)
+  {
+    /*
+      Assign some value to the internal variables, at least to indicate they 
+      haven't been assigned a proper value yet
+    */
+    init ();
+    
+    /*
+      Initialize the parameters required by the DataReader
+    */
+    setStreams ();
+  }
+  
+  // ----------------------------------------------------------------- LopesEvent
+  
+  LopesEvent::LopesEvent (const char* name)
+    : DataReader (1)
+  {
+    init (name);
+  }
+  
+  // ----------------------------------------------------------------- LopesEvent
+  
+  LopesEvent::LopesEvent (string const &name,
+			  uint const &blocksize)
+    : DataReader (blocksize)
+  {
+    init (name.c_str());
+  }
+  
 // ------------------------------------------------------------------- LopesEvent
 
 LopesEvent::LopesEvent (string const &name,
 			uint const &blocksize,
-			Vector<Float> const &adc2voltage,
-			Matrix<Complex> const &fft2calfft)
+			Vector<double> const &adc2voltage,
+			Matrix<DComplex> const &fft2calfft)
   : DataReader (blocksize,
 		adc2voltage,
 		fft2calfft)
@@ -487,8 +487,8 @@ Bool LopesEvent::setStreams ()
 
   uint nofSamples (blocksize_p);
   Vector<uint> antennas (length_);
-  Vector<Float> adc2voltage (DataReader::adc2voltage());
-  Matrix<Complex> fft2calfft (DataReader::fft2calfft());
+  Vector<double> adc2voltage (DataReader::adc2voltage());
+  Matrix<DComplex> fft2calfft (DataReader::fft2calfft());
   Vector<String> filenames (length_);
   DataIterator *iterator;
 
@@ -583,12 +583,12 @@ Bool LopesEvent::setStreams ()
 
 // --------------------------------------------------------------------------- fx
 
-Matrix<Float> LopesEvent::fx ()
+Matrix<double> LopesEvent::fx ()
 {
   uint antenna (0);
   uint sample (0);
   uint nofSelectedAntennas (DataReader::nofSelectedAntennas());
-  Matrix<Float> fx (blocksize_p,nofSelectedAntennas);
+  Matrix<double> fx (blocksize_p,nofSelectedAntennas);
 
   for (antenna=0; antenna<nofSelectedAntennas; antenna++) {
     Data *data = dataSet(selectedAntennas_p(antenna));
@@ -600,4 +600,4 @@ Matrix<Float> LopesEvent::fx ()
   return fx;
 }
 
-}
+}  // namespace LOPES -- end

@@ -35,50 +35,50 @@
 #include <IO/DataReader.h>
 
 using std::fstream;
+using std::string;
 
 using casa::DComplex;
 using casa::Matrix;
 using casa::Vector;
 
 namespace LOPES {
-
-/*!
-  \class LopesEvent
   
-  \ingroup Data
-
-  \brief Class for dealing with LOPES event files
-  
-  \author Sven Lafebre
-
-  \test tLopesEvent.cc
-
-  <h3>Prerequisite</h3>
-
-  <ul type="square">
-    <li>[LOPES-Tools] Data
-    <li>[LOPES-Tools] DataReader
-  </ul>
-  
-  <h3>Synopsis</h3>
-  
-  This class contains the framework for reading, writing and accessing LOPES
-  event files, conforming to the LOPES data record specification version 3 as
-  described under section <em>LOPES data records</em> in <em>The LOPES-Tools
-  Software package Manual</em>.
-
-  As of 2006/06/13 the LopesEvent class is derived from the DataReader class;
-  the motivation for this is provide the means to perform pre-processing of
-  data (such as conversion from ADC values to voltages) directly within a 
-  common framework -- for more a more detailed description see the documentation
-  of the DataReader class. The major changes introduced by this are
-  <ul>
-    <li>the <tt>blocksize</tt> no longer is stored in LopesEvent, but is in
-    DataReader. Thus access to this parameter is via DataReader::blocksize() 
-    and DataReader::setBlocksize() for an object, and via direct manipulation
-    of the protected <tt>blocksize_p</tt> variable.
-    <li>
-  </ul>
+  /*!
+    \class LopesEvent
+    
+    \ingroup Data
+    
+    \brief Class for dealing with LOPES event files
+    
+    \author Sven Lafebre
+    
+    \test tLopesEvent.cc
+    
+    <h3>Prerequisite</h3>
+    
+    <ul type="square">
+      <li>[LOPES-Tools] Data
+      <li>[LOPES-Tools] DataReader
+    </ul>
+    
+    <h3>Synopsis</h3>
+    
+    This class contains the framework for reading, writing and accessing LOPES
+    event files, conforming to the LOPES data record specification version 3 as
+    described under section <em>LOPES data records</em> in <em>The LOPES-Tools
+    Software package Manual</em>.
+    
+    As of 2006/06/13 the LopesEvent class is derived from the DataReader class;
+    the motivation for this is provide the means to perform pre-processing of
+    data (such as conversion from ADC values to voltages) directly within a 
+    common framework -- for more a more detailed description see the documentation
+    of the DataReader class. The major changes introduced by this are
+    <ul>
+      <li>the <tt>blocksize</tt> no longer is stored in LopesEvent, but is in
+      DataReader. Thus access to this parameter is via DataReader::blocksize() 
+      and DataReader::setBlocksize() for an object, and via direct manipulation
+      of the protected <tt>blocksize_p</tt> variable.
+    </ul>
 
   <h3>Limitations</h3>
 
