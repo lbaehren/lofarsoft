@@ -27,6 +27,21 @@ IF (CASA_INCLUDE_DIR)
   STRING (REGEX REPLACE /code/include "" AIPSROOT ${CASA_INCLUDE_DIR})
 ENDIF (CASA_INCLUDE_DIR)
 
+find_path (GLISH_INCLUDE_DIR glish.h
+  PATHS
+  /casa
+  /opt/casa
+  /sw/share/casa
+  PATH_SUFFIXES
+  code/aips/glish/include/Glish
+  stable/code/aips/glish/include/Glish
+  weekly/code/aips/glish/include/Glish
+  )
+
+if (GLISH_INCLUDE_DIR)
+  STRING (REGEX REPLACE include/Glish include GLISH_INCLUDE_DIR ${GLISH_INCLUDE_DIR})
+endif (GLISH_INCLUDE_DIR)
+
 ## -----------------------------------------------------------------------------
 ## Preparation: get additional information about the system
 

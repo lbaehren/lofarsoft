@@ -1,6 +1,6 @@
 # - Check for the presence of <PACKAGE>
 #
-# The following variables are set when Blitz++ is found:
+# The following variables are set when <PACKAGE> is found:
 #  HAVE_<PACKAGE>       = Set to true, if all components of <PACKAGE>
 #                          have been found.
 #  <PACKAGE>_INCLUDE_DIR = Include path for the header files of <PACKAGE>
