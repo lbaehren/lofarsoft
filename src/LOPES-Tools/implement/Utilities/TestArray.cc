@@ -26,60 +26,59 @@
 
 #ifdef HAVE_CASA
 
-template <class T>
-TestArray<T>::TestArray ()
-{
-  casa::IPosition shape(1,1);
-  array_p.resize (shape);
-  array_p = 0;
-}
-
-template <class T>
-TestArray<T>::TestArray (casa::Array<T> & vect) {
-  setArray (vect);
-}
-
-template <class T>
-TestArray<T>::~TestArray ()
-{}
-
-template <class T>
-void TestArray<T>::setArray (casa::Array<T> & vect)
-{
-  array_p.resize (vect.shape());
-  array_p = vect;
+namespace LOPES {  // namespace LOPES -- begin
+  
+  template <class T>
+  TestArray<T>::TestArray ()
+  {
+    casa::IPosition shape(1,1);
+    array_p.resize (shape);
+    array_p = 0;
+  }
+  
+  template <class T>
+  TestArray<T>::TestArray (casa::Array<T> & vect) {
+    setArray (vect);
+  }
+  
+  template <class T>
+  TestArray<T>::~TestArray ()
+  {}
+  
+  template <class T>
+  void TestArray<T>::setArray (casa::Array<T> & vect)
+  {
+    array_p.resize (vect.shape());
+    array_p = vect;
+    //
+    nofElements_p = vect.nelements();
+  }
+  
+  
+  // ===========================================================================
   //
-  nofElements_p = vect.nelements();
-}
+  //  Summary of the object
+  //
+  // ===========================================================================
+  
+  template <class T>
+  void TestArray<T>::summary ()
+  {
+    std::cout << " Shape of the array : " << array_p.shape() << std::endl;
+    std::cout << " Number of elements : " << nofElements_p   << std::endl;
+  }
+  
+  // ===========================================================================
+  //
+  //  Template instantiation
+  //
+  // ===========================================================================
+  
+  template class TestArray<int>;
+  template class TestArray<unsigned int>;
+  template class TestArray<float>;
+  template class TestArray<double>;
 
-
-// =============================================================================
-//
-//  Summary of the object
-//
-// =============================================================================
-
-template <class T>
-void TestArray<T>::summary ()
-{
-  std::cout << " Shape of the array : " << array_p.shape() << std::endl;
-  std::cout << " Number of elements : " << nofElements_p   << std::endl;
-}
-
-// =============================================================================
-//
-//  Template instantiation
-//
-// =============================================================================
-
-// template class casa::Array<int>;
-// template class casa::Array<unsigned int>;
-// template class casa::Array<float>;
-// template class casa::Array<double>;
-
-template class TestArray<int>;
-template class TestArray<unsigned int>;
-template class TestArray<float>;
-template class TestArray<double>;
-
+}  // namespace LOPES -- end
+  
 #endif

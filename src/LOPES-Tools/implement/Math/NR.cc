@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <cmath>
 #include <Math/NR.h>
 
 namespace LOPES {  // NAMESPACE LOPES -- BEGIN

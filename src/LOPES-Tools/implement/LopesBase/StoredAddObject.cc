@@ -27,6 +27,7 @@ using std::cout;
 using std::endl;
 
 using casa::AipsError;
+using casa::Complex;
 using casa::DComplex;
 using casa::Vector;
 
@@ -36,7 +37,7 @@ namespace LOPES {  // Namespace LOPES -- begin
   
   template<class T> StoredAddObject<T>::StoredAddObject (uint parents)
     : StoredObject<T>() {
-    className_p = "StoredAddObject";
+    BasicObject::className_p = "StoredAddObject";
     if (parents <= 1) {
       throw(AipsError("StoredAddObject: Need at least two parents"));
     }
@@ -173,6 +174,7 @@ namespace LOPES {  // Namespace LOPES -- begin
   
   template StoredAddObject<float>;
   template StoredAddObject<double>;
+  template StoredAddObject<Complex>;
   template StoredAddObject<DComplex>;
   
 }  // Namespace LOPES -- end

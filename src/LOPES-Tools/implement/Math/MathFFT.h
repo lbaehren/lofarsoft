@@ -128,8 +128,8 @@ namespace LOPES { // Namespace LOPES -- begin
   template <typename T, typename S>
     Vector<T> FFT2Fx (Vector<S> &from,
 		      int const &fftsize,
-		      bool const &invdir=True,
-		      bool const &realtocomplex=False);
+		      bool const &invdir=true,
+		      bool const &realtocomplex=false);
   
   /*!
     \brief Compute time-series from FFT'ed data

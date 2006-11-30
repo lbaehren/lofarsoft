@@ -31,31 +31,34 @@
 // Header files from standard library
 #include <stdlib.h>
 
-#ifdef HAVE_CASA
+// LOPES-Tools header files
 #include <Utilities/TestArray.h>
-#endif
+
+using casa::Array;
+using casa::IPosition;
+using LOPES::TestArray;
 
 int main ()
 {
-
+  
   std::cout << "[1] Testing default constructor ..." << std::endl;
   {
     TestArray<double> obj;
     //
     obj.summary();
   }
-
+  
   std::cout << "[2] Testing default constructor (int) ..." << std::endl;
   {
     TestArray<int> obj;
     //
     obj.summary();
   }
-
+  
   std::cout << "[3] Testing argumented constructor (double) ..." << std::endl;
   {
-    casa::IPosition shape (2,10,10);
-    casa::Array<double> arr (shape);
+    IPosition shape (2,10,10);
+    Array<double> arr (shape);
     arr = 1.0;
     //
     TestArray<double> obj (arr);
@@ -65,8 +68,8 @@ int main ()
   
   std::cout << "[4] Testing argumented constructor (int) ..." << std::endl;
   {
-    casa::IPosition shape (2,15,15);
-    casa::Array<int> arr (shape);
+    IPosition shape (2,15,15);
+    Array<int> arr (shape);
     arr = 1;
     //
     TestArray<int> obj (arr);

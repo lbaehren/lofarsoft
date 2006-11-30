@@ -28,15 +28,17 @@
 #include <casa/Arrays.h>
 #include <casa/BasicSL/Complex.h>
 
+namespace LOPES {  // namespace LOPES -- begin
+
 /*!
   \class TestArray
   
   \brief Test compiling a class depending on CASA array classes
   
   \author Lars B&auml;hren
-
+  
   \test tTestArray.cc
-
+  
   A simple class making use of the CASA array classes, used for testing how 
   to compile such code using CMake.
 */
@@ -51,7 +53,7 @@ template <class T> class TestArray {
   
   /*!
     \brief Default constructor
-
+    
     This will simply create an array of shape [1] and contents zero.
   */
   TestArray ();
@@ -62,7 +64,7 @@ template <class T> class TestArray {
     \param vect -- The array to be stored internally
   */
   TestArray (casa::Array<T> & vect);
-
+  
   /*!
     \brief Destructor
   */
@@ -98,7 +100,9 @@ template <class T> class TestArray {
   */
   void summary ();
 
-};
+ };  // class TestArray -- end
+
+}  // namespace LOPES -- end
 
 #endif
 

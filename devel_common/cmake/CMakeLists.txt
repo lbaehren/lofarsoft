@@ -3,30 +3,36 @@ PROJECT (CMAKE_TEST)
 ## -----------------------------------------------------------------------------
 ## Test file for the various CMake find scripts.
 
-MESSAGE (STATUS "Testing FindBlitz ++++++++++++++++++++++++++++++++++++++++++++")
+message (STATUS "Testing FindBlitz ++++++++++++++++++++++++++++++++++++++++++++")
 
-INCLUDE (./FindBlitz.cmake)
+include (./FindBlitz.cmake)
 
-MESSAGE (STATUS "Testing FindBoost ++++++++++++++++++++++++++++++++++++++++++++")
+message (STATUS "Testing FindBoost ++++++++++++++++++++++++++++++++++++++++++++")
 
-INCLUDE (./FindBoost.cmake)
+include (./FindBoost.cmake)
 
-MESSAGE (STATUS "Testing FindCASA +++++++++++++++++++++++++++++++++++++++++++++")
+message (STATUS "Testing FindCASA +++++++++++++++++++++++++++++++++++++++++++++")
 
-INCLUDE (./FindCASA.cmake)
+include (./FindCASA.cmake)
 
-MESSAGE (STATUS "Testing FindCFITSIO ++++++++++++++++++++++++++++++++++++++++++")
+message (STATUS "Testing FindCFITSIO ++++++++++++++++++++++++++++++++++++++++++")
 
-INCLUDE (./FindCFITSIO.cmake)
+include (./FindCFITSIO.cmake)
 
-MESSAGE (STATUS "Testing FindCPGPLOT ++++++++++++++++++++++++++++++++++++++++++")
+message (STATUS "Testing FindCPGPLOT ++++++++++++++++++++++++++++++++++++++++++")
 
-INCLUDE (./FindCPGPLOT.cmake)
+include (./FindCPGPLOT.cmake)
 
-MESSAGE (STATUS "Testing FindHDF5 +++++++++++++++++++++++++++++++++++++++++++++")
+message (STATUS "Testing FindHDF5 +++++++++++++++++++++++++++++++++++++++++++++")
 
-INCLUDE (./FindHDF5.cmake)
+include (./FindHDF5.cmake)
 
-MESSAGE (STATUS "Testing FindROOT +++++++++++++++++++++++++++++++++++++++++++++")
+message (STATUS "Testing FindROOT +++++++++++++++++++++++++++++++++++++++++++++")
 
-INCLUDE (./FindROOT.cmake)
+include (./FindROOT.cmake)
+
+message (STATUS "Testing FindWCS ++++++++++++++++++++++++++++++++++++++++++++++")
+
+include (./FindWCS.cmake)
+
+message (STATUS "Testing completed ++++++++++++++++++++++++++++++++++++++++++++")

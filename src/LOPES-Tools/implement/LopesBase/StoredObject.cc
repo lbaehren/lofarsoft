@@ -72,5 +72,16 @@ namespace LOPES {  // Namespace LOPES -- begin
       return false;
     };
   }
+
+  // ============================================================================
+  //
+  //  Template instantiation 
+  //
+  // ============================================================================
   
+  template StoredObject<float>;
+  template StoredObject<double>;
+  template StoredObject<Complex>;
+  template StoredObject<DComplex>;
+
 }  // Namespace LOPES -- end

@@ -9,7 +9,7 @@
 ## Check for the header files
 
 FIND_PATH (WCS_INCLUDE_DIR wcs.h
-  PATHS /usr/local/include /usr/include /sw/include /opt/casa
+  PATHS /usr/local/include /usr/include /sw/include /opt/casa /sw/share/casa
   PATH_SUFFIXES code/casa/wcslib stable/code/casa/wcslib
   )
 
@@ -24,8 +24,8 @@ ENDIF (WCS_INCLUDE_DIR)
 ## Check for the library
 
 FIND_LIBRARY (WCS_LIBRARY wcs
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib /opt/casa
-  PATH_SUFFIXES linux_gnu/lib stable/linux_gnu/lib
+  PATHS /usr/local/lib /usr/lib /lib /sw/lib /opt/casa /sw/share/casa
+  PATH_SUFFIXES darwin/lib linux_gnu/lib stable/linux_gnu/lib
   )
 
 ## -----------------------------------------------------------------------------

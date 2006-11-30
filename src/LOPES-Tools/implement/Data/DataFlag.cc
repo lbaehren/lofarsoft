@@ -1,6 +1,9 @@
 
 #include <Data/DataFlag.h>
 
+using std::cerr;
+using std::endl;
+
 namespace LOPES {  // namespace LOPES -- begin
   
   // --- Construction ------------------------------------------------------------

@@ -1,4 +1,4 @@
-PROJECT (LOPES-Tools)
+project (LOPES-Tools)
 
 INCLUDE (CPack)
 

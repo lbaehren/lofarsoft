@@ -25,6 +25,7 @@
 
 // AIPS++/CASA includes
 #include <casa/aips.h>
+#include <casa/string.h>
 #include <casa/Arrays.h>
 
 // LOPES-Tools includes
@@ -32,7 +33,9 @@
 #include <LopesBase/BasicObject.h>
 
 using casa::AipsError;
+using casa::Complex;
 using casa::DComplex;
+using casa::String;
 using casa::Vector;
 
 namespace LOPES {  // Namespace LOPES -- begin
@@ -68,7 +71,7 @@ template <class T> class StoredObject : public BasicObject {
       \brief The data is stored here
     */
     Vector<T> data_p;
-    
+
   public:
     
     // --- Construction ----------------------------------------------------------

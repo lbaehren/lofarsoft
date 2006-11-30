@@ -26,6 +26,7 @@
 
 // AIPS++/CASA includes
 #include <casa/aips.h>
+#include <casa/string.h>
 #include <casa/Arrays.h>
 
 // LOPES-Tools includes
@@ -194,7 +195,9 @@ namespace LOPES {  // Namespace LOPES -- begin
       <tt>result</tt> has to point to and any requirements what you can or must 
       not do with it afterwards.
     */
-    virtual bool get (void *result) {return false;};
+    virtual bool get (void *result) {
+      return false;
+    }
     
     /*!
       \brief Add a child class to this class.
@@ -210,7 +213,10 @@ namespace LOPES {  // Namespace LOPES -- begin
       
       \return ok -- Was operation successful? Returns <tt>true</tt> if yes.
     */
-    virtual bool setParent(uint num, BasicObject* obj) { return putParent(num, obj); };
+    virtual bool setParent(uint num,
+			   BasicObject* obj) {
+      return putParent(num, obj);
+    }
     
     /*!
       \brief Present a list of children of this class

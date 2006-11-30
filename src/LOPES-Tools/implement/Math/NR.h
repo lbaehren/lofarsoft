@@ -5,21 +5,21 @@
 #define FPMIN 1.0e-30
 
 namespace LOPES {  // NAMESPACE LOPES -- BEGIN
-
-    //! Complementary error function
-    double NRerfcc (double x);
-    
-    //! Logarithm of the Gamma function
-    double NRgammln (double xx);
-    
-    //! Continued fraction for the incomplete betta function
-    double NRbetacf (double a,
-		     double b,
-		     double x);
-    
-    //! Incomplete beta function
-    double NRbetai (double a,
-		    double b,
-		    double x);
-
+  
+  //! Complementary error function
+  double NRerfcc (double x);
+  
+  //! Logarithm of the Gamma function
+  double NRgammln (double xx);
+  
+  //! Continued fraction for the incomplete betta function
+  double NRbetacf (double a,
+		   double b,
+		   double x);
+  
+  //! Incomplete beta function
+  double NRbetai (double a,
+		  double b,
+		  double x);
+  
 }  // NAMESPACE LOPES -- END
