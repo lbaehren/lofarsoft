@@ -93,8 +93,9 @@ find_package (X11)
 ## Start with the generic information common to all the platforms
 
 include_directories (
+  .
   ${CASA_SOURCE_DIR}
-  ${CASA_SOURCE_DIR}/implement
+  ${CASA_SOURCE_DIR}/include
   )
 
 set (CASA_OPTLEVEL "-O3")
@@ -144,4 +145,7 @@ message (STATUS "CMAKE_MODULE_LINKER_FLAGS = ${CMAKE_MODULE_LINKER_FLAGS}")
 ## -----------------------------------------------------------------------------
 ## List of sub-directories
 
-subdirs (implement)
+subdirs (
+  casa
+  scimath
+  )

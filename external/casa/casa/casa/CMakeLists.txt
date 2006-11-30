@@ -1,6 +1,6 @@
 ## CASA/implement/casa
 
-project (CASA)
+project (libcasa)
 
 ## -----------------------------------------------------------------------------
 ## libcasa
