@@ -3,10 +3,29 @@
 project (libcasa)
 
 ## -----------------------------------------------------------------------------
+## Directories containing the test programs
+
+subdirs (
+  Arrays/test
+  BasicMath/test
+  BasicSL/test
+  Containers/test
+  Exceptions/test
+  Inputs/test
+  IO/test
+  Logging/test
+  OS/test
+  Quanta/test
+  System/test
+#  test
+  Utilities/test
+  )
+
+## -----------------------------------------------------------------------------
 ## libcasa
 
 add_library (casa
-## casa/implement/casa
+## -- casa/implement/casa
   aips.cc
   version2.cc
 ## casa/implement/casa/Arrays --------------------
@@ -255,10 +274,3 @@ add_library (casa
   templates.cc
 )
 
-## -----------------------------------------------------------------------------
-## Directories containing the test programs
-
-subdirs (
-  Arrays/test
-  Containers/test
-  )

@@ -220,27 +220,31 @@ public:
 //
 // <todo asof="">
 // </todo>
-
-template<class t> class indexError : public IndexError {
-protected:
-  t oIndex;                 // Offending Index
-public:
-  //
-  // This constructor takes the error message and the index
-  // which cause the error to occur.
-  //
-  // <group>
-  indexError(t oI, const Char *str, Category c=BOUNDARY);
-  indexError(t oI, const String &str, Category c=BOUNDARY);
-  indexError(t oI, Category c=BOUNDARY) : IndexError(c), oIndex(oI) {};
-  // </group>
-
-  //
-  // Destructor which does nothing.
-  //
-  ~indexError() throw();
-};
-
+  
+  template<class t> class indexError : public IndexError {
+  protected:
+    t oIndex;                 // Offending Index
+  public:
+    //
+    // This constructor takes the error message and the index
+    // which cause the error to occur.
+    //
+    // <group>
+    indexError(t oI,
+	       const Char *str,
+	       Category c=BOUNDARY);
+    indexError(t oI,
+	       const String &str,
+	       Category c=BOUNDARY);
+    indexError(t oI,
+	       Category c=BOUNDARY) : IndexError(c), oIndex(oI) {};
+      // </group>
+      
+      //
+      // Destructor which does nothing.
+      //
+      ~indexError() throw();
+  };
 
 // <summary>Duplicate key errors</summary>
 // <use visibility=export>

@@ -12,31 +12,55 @@
 #include <casa/Arrays/MaskedArray.h>
 #include <casa/Arrays/Vector.h>
 
+#include <casa/Containers/Block.h>
+
+#include <casa/Exceptions/Error.h>
+
 namespace casa{
+
+  // ----------------------------------------------------- Arrays
   
   template class Array<unsigned int>;
   template class Array<int>;
-  template class Array<float>;
-  template class Array<double>;
-  
-  template class Block<unsigned int>;
-  template class Block<int>;
-  template class Block<float>;
-  template class Block<double>;
+  template class Array<Float>;
+  template class Array<Double>;
+  template class Array<Complex>;
+  template class Array<DComplex>;
   
   template class Cube<unsigned int>;
   template class Cube<int>;
-  template class Cube<float>;
-  template class Cube<double>;
+  template class Cube<Float>;
+  template class Cube<Double>;
+  template class Cube<Complex>;
+  template class Cube<DComplex>;
   
   template class MaskedArray<unsigned int>;
   template class MaskedArray<int>;
   template class MaskedArray<float>;
-  template class MaskedArray<double>;
+  template class MaskedArray<Double>;
   
   template class Vector<unsigned int>;
   template class Vector<int>;
-  template class Vector<float>;
-  template class Vector<double>;
+  template class Vector<Float>;
+  template class Vector<Double>;
+  template class Vector<Complex>;
+  template class Vector<DComplex>;
 
+  // ------------------------------------------------- Containers
+
+  template class Block<unsigned int>;
+  template class Block<int>;
+  template class Block<Float>;
+  template class Block<Double>;
+  
+  // ------------------------------------------------- Exceptions
+  
+  template class indexError<String>;
+  template class indexError<Double>;
+  template class indexError<Float>;
+  template class indexError<Int>;
+  template class indexError<Short>;
+  template class indexError<uInt>;
+  template class indexError<void *>;
+  
 }
