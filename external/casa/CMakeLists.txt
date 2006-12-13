@@ -103,6 +103,7 @@ set (CASA_OPTLEVEL "-O3")
 ## Platform-dependent compiler/linker settings
 
 if (UNIX)
+  ## Compiler flags
   add_definitions (
     -DAIPS_STDLIB
     -DAIPS_NO_TEMPLATE_SRC
@@ -110,6 +111,8 @@ if (UNIX)
     -DAIPS_NO_LEA_MALLOC
     )
   set (CASA_CXXSTD "-fPIC -pipe -Wall -Wno-non-template-friend -Woverloaded-virtual -Wno-comment -fexceptions -Wcast-align")
+  ## Linker flags
+  set (CASA_LDSTD "-Xlinker -rpath -Xlinker")
   if (APPLE)
     add_definitions (
       -DAIPS_DARWIN
@@ -134,7 +137,7 @@ set (CMAKE_VERBOSE_MAKEFILE 0)
 
 set (CMAKE_C_FLAGS "${CASA_OPTLEVEL} ${CASA_CXXSTD}")
 set (CMAKE_CXX_FLAGS "${CASA_OPTLEVEL} ${CASA_CXXSTD}")
-#SET (CMAKE_MODULE_LINKER_FLAGS "${CASA_LDSTD}")
+SET (CMAKE_MODULE_LINKER_FLAGS "${CASA_LDSTD}")
 
 message (STATUS "CASA_SOURCE_DIR ......... = ${CASA_SOURCE_DIR}")
 message (STATUS "CMAKE_BUILD_TYPE ........ = ${CMAKE_BUILD_TYPE}" )
@@ -148,4 +151,5 @@ message (STATUS "CMAKE_MODULE_LINKER_FLAGS = ${CMAKE_MODULE_LINKER_FLAGS}")
 subdirs (
   casa
   scimath
+  tables
   )

@@ -251,4 +251,14 @@ add_library (casa
   Utilities/Template.cc
   Utilities/ValType.cc
   Utilities/cregex.cc
+## -- Template instantiation
+  templates.cc
+)
+
+## -----------------------------------------------------------------------------
+## Directories containing the test programs
+
+subdirs (
+  Arrays/test
+  Containers/test
   )
