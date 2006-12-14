@@ -26,9 +26,6 @@ set (tests
 ## ------------------------------------------------------------------------------
 ## Build the test programs
 
-add_executable (templates ../../templates.cc)
-target_link_libraries (templates casa)
-
 foreach (src ${tests})
   add_executable (${src} ${src}.cc)
   target_link_libraries (${src} casa)

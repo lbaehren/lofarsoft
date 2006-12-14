@@ -31,16 +31,17 @@
 #include <casa/iostream.h>
 
 #include <casa/namespace.h>
-main() {
-  Dlink<int> *hed = new Dlink<int>(23);
 
+int main() {
+  Dlink<int> *hed = new Dlink<int>(23);
+  
   hed = new Dlink<int>(12,0,hed);
   hed = new Dlink<int>(19,0,hed);
   hed = new Dlink<int>(82,0,hed);
   hed = new Dlink<int>(71,0,hed);
   hed = new Dlink<int>(3,0,hed);
   hed = new Dlink<int>(10,0,hed);
-
+  
   Dlink<int> *cur = hed;
   int forward = 1;
   cout << ">";

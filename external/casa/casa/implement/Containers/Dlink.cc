@@ -30,14 +30,24 @@
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
-int Dlink_deprecated_flag = 0;
-
-template<class t> Dlink<t>::Dlink(t e,Dlink<t> *p,Dlink<t> *n) : Link<t>(e,p,n) {
+  int Dlink_deprecated_flag = 0;
+  
+  template<class t> Dlink<t>::Dlink(t e,Dlink<t> *p,Dlink<t> *n) : Link<t>(e,p,n) {
     if ( ! Dlink_deprecated_flag ) {
-	cerr << "ERROR: Dlink<t> is deprecated, Link<t> should be used instead" << endl;
-	Dlink_deprecated_flag++;
+      cerr << "ERROR: Dlink<t> is deprecated, Link<t> should be used instead" << endl;
+      Dlink_deprecated_flag++;
     }
-}
-
+  }
+  
+  // ============================================================================
+  //
+  //  Template instantiation (of course we should not have to do this here)
+  //
+  // ============================================================================
+  
+//   template class Dlink<Int>;
+//   template class Dlink<Short>;
+//   template class Dlink<uInt>;
+  
 } //# NAMESPACE CASA - END
 
