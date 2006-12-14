@@ -274,7 +274,7 @@ add_library (casa
 #  templatesArrays.cc
   templatesBasicMath.cc
 #  templatesBasicSL.cc
-#  templatesContainers.cc
+  templatesContainers.cc
   templatesExceptions.cc
   templatesQuanta.cc
   templatesSystem.cc
