@@ -22,6 +22,14 @@
 
 #include <iostream>
 #include <Data/DynamicSpectrum.h>
+#include <casa/Arrays.h>
+
+using std::cout;
+using std::endl;
+
+// template class casa::Array<int>;
+// template class casa::Array<float>;
+// template class casa::Array<double>;
 
 /*!
   \file tDynamicSpectrum.cc
@@ -37,30 +45,49 @@
 
 // -----------------------------------------------------------------------------
 
+int test_casaArrays ()
+{
+  int nofFailedTests (0);
+  int nofAxes (2);
+  casa::IPosition shape (nofAxes,100,200);
+
+  cout << "[1]" << endl;
+  {
+    casa::Array<int> data (shape);
+
+    cout << " - shape         = " << data.shape()     << endl;
+    cout << " - nof. elements = " << data.nelements() << endl;
+  }
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
 int test_blitzArrays ()
 {
   int nofFailedTests (0);
   int nofAxes (2);
   int shape[2] = {100,200};
 
-  std::cout << "[1]" <<std::endl;
+  cout << "[1]" <<endl;
   {
     blitz::Array<int,1> data (shape[0]);
     //
-    std::cout << " - dimensions    = " << data.dimensions()  << std::endl;
-    std::cout << " - rank          = " << data.rank()        << std::endl;
-    std::cout << " - shape         = " << data.shape()       << std::endl;
-    std::cout << " - nof. elements = " << data.numElements() << std::endl;
+    cout << " - dimensions    = " << data.dimensions()  << endl;
+    cout << " - rank          = " << data.rank()        << endl;
+    cout << " - shape         = " << data.shape()       << endl;
+    cout << " - nof. elements = " << data.numElements() << endl;
   }
 
-  std::cout << "[2]" <<std::endl;
+  cout << "[2]" <<endl;
   {
     blitz::Array<int,2> data (shape[0],shape[1]);
     //
-    std::cout << " - dimensions    = " << data.dimensions()  << std::endl;
-    std::cout << " - rank          = " << data.rank()        << std::endl;
-    std::cout << " - shape         = " << data.shape()       << std::endl;
-    std::cout << " - nof. elements = " << data.numElements() << std::endl;
+    cout << " - dimensions    = " << data.dimensions()  << endl;
+    cout << " - rank          = " << data.rank()        << endl;
+    cout << " - shape         = " << data.shape()       << endl;
+    cout << " - nof. elements = " << data.numElements() << endl;
   }
 
   return nofFailedTests;
@@ -77,14 +104,14 @@ int test_DynamicSpectrum ()
 {
   int nofFailedTests (0);
   
-  std::cout << "\n[test_DynamicSpectrum]\n" << std::endl;
+  cout << "\n[test_DynamicSpectrum]\n" << endl;
   
-  std::cout << "[1] Testing default constructor ..." << std::endl;
+  cout << "[1] Testing default constructor ..." << endl;
   {
     LOPES::DynamicSpectrum ds;
   }
   
-  std::cout << "[2] Testing argumented constructor ..." << std::endl;
+  cout << "[2] Testing argumented constructor ..." << endl;
   {
     blitz::Array<int,1> shape (2);
     shape = 100,20;

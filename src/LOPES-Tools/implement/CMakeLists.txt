@@ -5,7 +5,8 @@ SUBDIRS (
   Data
   Functionals
   IO
-  Utilities
+  Testing/test
+  Utilities/test
   )
 
 ## -----------------------------------------------------------------------------
@@ -101,8 +102,8 @@ ADD_LIBRARY (lopestools
   IO/DataBlockSettings.cc
   IO/DataIO.cc
   IO/DataIterator.cc
-  IO/DataReader.cc
-  IO/DataReaderTools.cc
+#  IO/DataReader.cc
+#  IO/DataReaderTools.cc
   IO/ImportAntenna.cc
   IO/LogfileName.cc
 ## -- LopesBase --------------------------------------------
@@ -112,10 +113,10 @@ ADD_LIBRARY (lopestools
   LopesBase/DataCoordinfo.cc
   LopesBase/DataFrequency.cc
   LopesBase/ExchangeFormat.cc
-  LopesBase/StoredAddObject.cc
-  LopesBase/StoredInputObject.cc
-  LopesBase/StoredMultiplyObject.cc
-  LopesBase/StoredObject.cc
+#  LopesBase/StoredAddObject.cc
+#  LopesBase/StoredInputObject.cc
+#  LopesBase/StoredMultiplyObject.cc
+#  LopesBase/StoredObject.cc
 ## -- Math -------------------------------------------------
   Math/Algebra.cc
   Math/ArrayMath.cc
@@ -139,10 +140,14 @@ ADD_LIBRARY (lopestools
 #  Skymap/Skymapper.cc
   Skymap/SkymapperTools.cc
   Skymap/SkymapQuantity.cc
+## -- Testing ----------------------------------------------
+  Testing/Templates.cc
 ## -- Utilities --------------------------------------------
   Utilities/Masking.cc
   Utilities/ProgressBar.cc
   Utilities/StringTools.cc
   Utilities/Timestamp.cc
   Utilities/TestArray.cc
+## -- template instantiation -------------------------------
+#  templates.cc
   )

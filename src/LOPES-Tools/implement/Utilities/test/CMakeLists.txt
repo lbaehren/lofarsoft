@@ -15,5 +15,5 @@ TARGET_LINK_LIBRARIES (tProgressBar lopestools)
 ADD_EXECUTABLE (tTimestamp tTimestamp.cc)
 TARGET_LINK_LIBRARIES (tTimestamp lopestools)
 
-ADD_EXECUTABLE (tTestArray tTestArray.cc)
-TARGET_LINK_LIBRARIES (tTestArray lopestools ${CASA_LIBRARY})
+#ADD_EXECUTABLE (tTestArray tTestArray.cc)
+#TARGET_LINK_LIBRARIES (tTestArray lopestools ${CASA_LIBRARY})
