@@ -1,6 +1,7 @@
 project (libscimath)
 
 add_library (scimath
+## -- scimath/implement/Fitting --------------------------------------
   Fitting/FitGaussian.cc
   Fitting/FittingProxy.cc
   Fitting/GenericL2Fit.cc
@@ -14,6 +15,7 @@ add_library (scimath
   Fitting/LinearFitSVD.cc
   Fitting/NonLinearFit.cc
   Fitting/NonLinearFitLM.cc
+## -- scimath/implement/Functionals ----------------------------------
   Functionals/ArraySampledFunctional.cc
   Functionals/Chebyshev.cc
   Functionals/ChebyshevParam.cc
@@ -80,6 +82,7 @@ add_library (scimath
   Functionals/UnaryFunction.cc
   Functionals/UnaryParam.cc
   Functionals/WrapperParam.cc
+## -- scimath/implement/Mathematics ----------------------------------
   Mathematics/AutoDiff.cc
   Mathematics/AutoDiffIO.cc
   Mathematics/AutoDiffMath.cc
@@ -111,4 +114,8 @@ add_library (scimath
   Mathematics/StatAcc.cc
   Mathematics/VanVleck.cc
   Mathematics/VectorKernel.cc
+## -- Template instantiation -----------------------------------------
+  Fitting/templates.cc
+  Functionals/templates.cc
+  Mathematics/templates.cc
   )

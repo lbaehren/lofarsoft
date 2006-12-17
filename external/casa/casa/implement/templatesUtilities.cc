@@ -4,6 +4,7 @@
 #include <casa/fstream.h>
 #include <casa/Arrays/Array.h>
 #include <casa/Arrays/ArrayError.h>
+#include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Slicer.h>
 #include <casa/Arrays/Vector.h>
@@ -12,26 +13,40 @@
 #include <casa/BasicMath/Random.h>
 #include <casa/Containers/Block.h>
 #include <casa/Containers/IterError.h>
+#include <casa/Containers/List.h>
+#include <casa/Containers/OrderedMap.h>
 #include <casa/Containers/RecordDescRep.h>
+#include <casa/Containers/RecordInterface.h>
 #include <casa/Containers/RecordRep.h>
 #include <casa/Exceptions/Error.h>
+#include <casa/Inputs/Param.h>
 #include <casa/IO/ByteIO.h>
 #include <casa/IO/TypeIO.h>
 #include <casa/Logging/LogSinkInterface.h>
 #include <casa/OS/DataConversion.h>
 #include <casa/OS/SysEvent.h>
+#include <casa/Quanta/MVBaseline.h> 
+#include <casa/Quanta/MVDoppler.h> 
+#include <casa/Quanta/MVDouble.h> 
+#include <casa/Quanta/MVEarthMagnetic.h> 
+#include <casa/Quanta/MVEpoch.h> 
+#include <casa/Quanta/MVFrequency.h> 
 #include <casa/Quanta/MVDirection.h>
 #include <casa/Quanta/MVFrequency.h>
 #include <casa/Quanta/MVPosition.h>
 #include <casa/Quanta/MVRadialVelocity.h>
 #include <casa/Quanta/MVTime.h>
+#include <casa/Quanta/MVuvw.h>
+#include <casa/Quanta/QBase.h>
 #include <casa/Quanta/Quantum.h>
 #include <casa/Quanta/QuantumHolder.h>
 #include <casa/Quanta/Unit.h>
 #include <casa/System/PGPlotterInterface.h>
+#include <casa/Utilities/CountedPtr.h>
 #include <casa/Utilities/DefaultValue.h>
 #include <casa/Utilities/Fallible.h>
 #include <casa/Utilities/Regex.h>
+
 
 // include of implementation files
 
@@ -40,6 +55,11 @@
 #include <casa/Utilities/COWPtr.cc>
 #include <casa/Utilities/CountedPtr.cc>
 #include <casa/Utilities/Compare.cc>
+#include <casa/Utilities/GenSort.cc>
+#include <casa/Utilities/LinearSearch.cc>
+#include <casa/Utilities/PtrHolder.cc>
+#include <casa/Utilities/Register.cc>
+#include <casa/Utilities/Sequence.cc>
 
 namespace casa {
   template class assert_<ArrayError>;
@@ -343,197 +363,95 @@ namespace casa {
   template class Fallible<Double>;
   template class Fallible<Int>;
   template class Fallible<uInt>;
+  
+  template class GenSort<DComplex>;
+  template class GenSortIndirect<String>;
+  template class GenSort<Double>;
+  template class GenSort<Float>;
+  template class GenSort<Int>;
+  template class GenSort<String>;
+  template class GenSort<uInt>;
+  template class GenSortIndirect<Double>;
+  template uInt genSort(Vector<uInt> &, Block<Double> const &);
+  template uInt genSort(Vector<uInt> &, Block<Double> const &, Sort::Order);
+  template class GenSortIndirect<Float>;
+  template class GenSortIndirect<Int>;
+  template class GenSortIndirect<uInt>;
+  template uInt genSort(Array<uInt> &);
+  template uInt genSort(Double *, uInt);
+  template uInt genSort(Float *, uInt);
+  
+  template Int linearSearch(Bool &, Vector<Int> const &, Int const &, uInt, uInt);
+  template Int linearSearch(Bool &, Vector<uInt> const &, uInt const &, uInt, uInt);
+  
+  template class PtrHolder<Random>;
+  template class PtrHolder<QBase>;
+  template class PtrHolder<Vector<String> >;
+  template class PtrHolder<RecordInterface>;
+  template class PtrHolder<LogSinkInterface>;
+  
+  template <class Qtype> class Quantum;
+  template <class T> class Array;
+  template uInt Register(Quantum<Array<Complex> > const *);
+  template <class Qtype> class Quantum;
+  template <class T> class Array;
+  template uInt Register(Quantum<Array<DComplex> > const *);
+  template <class Qtype> class Quantum;
+  template <class T> class Vector;
+  template uInt Register(Quantum<Vector<Complex> > const *);
+  template <class Qtype> class Quantum;
+  template <class T> class Vector;
+  template uInt Register(Quantum<Vector<DComplex> > const *);
+  template <class Qtype> class Quantum;
+  template uInt Register(Quantum<Complex> const *);
+  template <class Qtype> class Quantum;
+  template uInt Register(Quantum<DComplex> const *);
+  template uInt Register(Complex const *);
+  template uInt Register(DComplex const *);
+  template uInt Register(ListNotice<void *> const *);
+  template uInt Register(OrderedMapNotice<String, Block<IPosition> > const *);
+  template uInt Register(OrderedMapNotice<String, Int> const *);
+  template uInt Register(String const *);
+  template uInt Register(ListNotice<Param> const *);
+  template uInt Register(ListNotice<CountedPtr<SysEventTargetInfo> > const *);
+  template uInt Register(ListNotice<uInt> const *);
+  template uInt Register(ListNotice<uLong> const *);
+  template uInt Register(OrderedMapNotice<Int, Array<Float> > const *);
+  template uInt Register(OrderedMapNotice<Int, Vector<Float> > const *);
+  template uInt Register(OrderedMapNotice<Int, Int> const *);
+  template uInt Register(RecordNotice const *);
+  template uInt Register(SysEventTargetInfo const *);
+  template uInt Register(MVBaseline const *);
+  template uInt Register(MVDirection const *);
+  template uInt Register(MVDoppler const *);
+  template uInt Register(MVDouble const *);
+  template uInt Register(MVEarthMagnetic const *);
+  template uInt Register(MVEpoch const *);
+  template uInt Register(MVFrequency const *);
+  template uInt Register(MVPosition const *);
+  template uInt Register(MVRadialVelocity const *);
+  template uInt Register(MVuvw const *);
+  template <class Qtype> class Quantum;
+  template <class T> class Array;
+  template uInt Register(Quantum<Array<Double> > const *);
+  template uInt Register(Quantum<Array<Float> > const *);
+  template uInt Register(Quantum<Array<Int> > const *);
+  template <class T> class Matrix;
+  template uInt Register(Quantum<Matrix<Double> > const *);
+  template <class T> class Vector;
+  template uInt Register(Quantum<Vector<Double> > const *);
+  template uInt Register(Quantum<Vector<Float> > const *);
+  template uInt Register(Quantum<Vector<Int> > const *);
+  template uInt Register(Quantum<Double> const *);
+  template uInt Register(Quantum<Float> const *);
+  template uInt Register(Quantum<Int> const *);
+  template uInt Register(Double const *);
+  template uInt Register(Float const *);
+  template uInt Register(Int const *);
+  template uInt Register(Long const *);
+  template uInt Register(lDouble const *);
+  template uInt Register(uInt const *);
+
+  template class Sequence<uInt>;
+
 }
-
-
-// 1000 casa/Utilities/GenSort.cc 
-//      = casa/BasicSL/Complex.h 
-//      template class GenSort<DComplex>;
-// 1010 casa/Utilities/GenSort.cc casa/BasicSL/String.h 
-//      template class GenSortIndirect<String>;
-// 1020 casa/Utilities/GenSort.cc 
-//      template class GenSort<Double>;
-// 1030 casa/Utilities/GenSort.cc 
-//      template class GenSort<Float>;
-// 1040 casa/Utilities/GenSort.cc 
-//      template class GenSort<Int>;
-// 1050 casa/Utilities/GenSort.cc 
-//      template class GenSort<String>;
-// 1060 casa/Utilities/GenSort.cc 
-//      template class GenSort<uInt>;
-// 1070 casa/Utilities/GenSort.cc 
-//      template class GenSortIndirect<Double>;
-//      template uInt genSort(Vector<uInt> &, Block<Double> const &);
-//      template uInt genSort(Vector<uInt> &, Block<Double> const &, Sort::Order);
-// 1080 casa/Utilities/GenSort.cc 
-//      template class GenSortIndirect<Float>;
-// 1090 casa/Utilities/GenSort.cc 
-//      template class GenSortIndirect<Int>;
-// 1100 casa/Utilities/GenSort.cc 
-//      template class GenSortIndirect<uInt>;
-// 1110 casa/Utilities/GenSort.cc 
-//      template uInt genSort(Array<uInt> &);
-// 1120 casa/Utilities/GenSort.cc 
-//      template uInt genSort(Double *, uInt);
-// 1130 casa/Utilities/GenSort.cc 
-//      template uInt genSort(Float *, uInt);
-
-// 1000 casa/Utilities/LinearSearch.cc casa/Arrays/Vector.h 
-//      template Int linearSearch(Bool &, Vector<Int> const &, Int const &, uInt, uInt);
-//      template Int linearSearch(Bool &, Vector<uInt> const &, uInt const &, uInt, uInt);
-// 1000 casa/Utilities/PtrHolder.cc 
-//      = casa/BasicMath/Random.h 
-//      template class PtrHolder<Random>;
-// 1010 casa/Utilities/PtrHolder.cc 
-//      = casa/Quanta/QBase.h 
-//      template class PtrHolder<QBase>;
-// 1020 casa/Utilities/PtrHolder.cc casa/BasicSL/String.h 
-//      = casa/Arrays/Vector.h 
-//      template class PtrHolder<Vector<String> >;
-// 1030 casa/Utilities/PtrHolder.cc casa/Containers/RecordInterface.h 
-//      template class PtrHolder<RecordInterface>;
-// 1040 casa/Utilities/PtrHolder.cc casa/Logging/LogSinkInterface.h 
-//      template class PtrHolder<LogSinkInterface>;
-
-// 1000 casa/Utilities/Register.cc 
-//      = casa/BasicSL/Complex.h 
-//      template <class Qtype> class Quantum 
-//      template <class T> class Array 
-//      template uInt Register(Quantum<Array<Complex> > const *);
-// 1010 casa/Utilities/Register.cc 
-//      = casa/BasicSL/Complex.h 
-//      template <class Qtype> class Quantum 
-//      template <class T> class Array 
-//      template uInt Register(Quantum<Array<DComplex> > const *);
-// 1020 casa/Utilities/Register.cc 
-//      = casa/BasicSL/Complex.h 
-//      template <class Qtype> class Quantum 
-//      template <class T> class Vector 
-//      template uInt Register(Quantum<Vector<Complex> > const *);
-// 1030 casa/Utilities/Register.cc 
-//      = casa/BasicSL/Complex.h 
-//      template <class Qtype> class Quantum 
-//      template <class T> class Vector 
-//      template uInt Register(Quantum<Vector<DComplex> > const *);
-// 1040 casa/Utilities/Register.cc 
-//      = casa/BasicSL/Complex.h 
-//      template <class Qtype> class Quantum 
-//      template uInt Register(Quantum<Complex> const *);
-// 1050 casa/Utilities/Register.cc 
-//      = casa/BasicSL/Complex.h 
-//      template <class Qtype> class Quantum 
-//      template uInt Register(Quantum<DComplex> const *);
-// 1060 casa/Utilities/Register.cc 
-//      = casa/BasicSL/Complex.h 
-//      template uInt Register(Complex const *);
-// 1070 casa/Utilities/Register.cc 
-//      = casa/BasicSL/Complex.h 
-//      template uInt Register(DComplex const *);
-// 1080 casa/Utilities/Register.cc 
-//      = casa/Containers/List.h 
-//      template uInt Register(ListNotice<void *> const *);
-// 1090 casa/Utilities/Register.cc 
-//      = casa/Containers/OrderedMap.h 
-//      = casa/BasicSL/String.h 
-//      = casa/Arrays/IPosition.h 
-//      = casa/Containers/Block.h 
-//      template uInt Register(OrderedMapNotice<String, Block<IPosition> > const *);
-// 1100 casa/Utilities/Register.cc 
-//      = casa/Containers/OrderedMap.h 
-//      = casa/BasicSL/String.h 
-//      template uInt Register(OrderedMapNotice<String, Int> const *);
-// 1110 casa/Utilities/Register.cc casa/BasicSL/String.h 
-//      template uInt Register(String const *);
-// 1120 casa/Utilities/Register.cc casa/Containers/List.h 
-//      = casa/Inputs/Param.h 
-//      template uInt Register(ListNotice<Param> const *);
-// 1130 casa/Utilities/Register.cc casa/Containers/List.h 
-//      = casa/Utilities/CountedPtr.h casa/OS/SysEvent.h 
-//      template uInt Register(ListNotice<CountedPtr<SysEventTargetInfo> > const *);
-// 1140 casa/Utilities/Register.cc casa/Containers/List.h 
-//      template uInt Register(ListNotice<uInt> const *);
-// 1150 casa/Utilities/Register.cc casa/Containers/List.h 
-//      template uInt Register(ListNotice<uLong> const *);
-// 1160 casa/Utilities/Register.cc casa/Containers/OrderedMap.h 
-//      = casa/Arrays/Array.h 
-//      template uInt Register(OrderedMapNotice<Int, Array<Float> > const *);
-// 1170 casa/Utilities/Register.cc casa/Containers/OrderedMap.h 
-//      = casa/Arrays/Vector.h 
-//      template uInt Register(OrderedMapNotice<Int, Vector<Float> > const *);
-// 1180 casa/Utilities/Register.cc casa/Containers/OrderedMap.h 
-//      template uInt Register(OrderedMapNotice<Int, Int> const *);
-// 1190 casa/Utilities/Register.cc casa/Containers/RecordInterface.h 
-//      template uInt Register(RecordNotice const *);
-// 1200 casa/Utilities/Register.cc casa/OS/SysEvent.h 
-//      template uInt Register(SysEventTargetInfo const *);
-// 1210 casa/Utilities/Register.cc casa/Quanta/MVBaseline.h 
-//      template uInt Register(MVBaseline const *);
-// 1220 casa/Utilities/Register.cc casa/Quanta/MVDirection.h 
-//      template uInt Register(MVDirection const *);
-// 1230 casa/Utilities/Register.cc casa/Quanta/MVDoppler.h 
-//      template uInt Register(MVDoppler const *);
-// 1240 casa/Utilities/Register.cc casa/Quanta/MVDouble.h 
-//      template uInt Register(MVDouble const *);
-// 1250 casa/Utilities/Register.cc casa/Quanta/MVEarthMagnetic.h 
-//      template uInt Register(MVEarthMagnetic const *);
-// 1260 casa/Utilities/Register.cc casa/Quanta/MVEpoch.h 
-//      template uInt Register(MVEpoch const *);
-// 1270 casa/Utilities/Register.cc casa/Quanta/MVFrequency.h 
-//      template uInt Register(MVFrequency const *);
-// 1280 casa/Utilities/Register.cc casa/Quanta/MVPosition.h 
-//      template uInt Register(MVPosition const *);
-// 1290 casa/Utilities/Register.cc casa/Quanta/MVRadialVelocity.h 
-//      template uInt Register(MVRadialVelocity const *);
-// 1300 casa/Utilities/Register.cc casa/Quanta/MVuvw.h 
-//      template uInt Register(MVuvw const *);
-// 1310 casa/Utilities/Register.cc 
-//      template <class Qtype> class Quantum 
-//      template <class T> class Array 
-//      template uInt Register(Quantum<Array<Double> > const *);
-// 1320 casa/Utilities/Register.cc 
-//      template <class Qtype> class Quantum 
-//      template <class T> class Array 
-//      template uInt Register(Quantum<Array<Float> > const *);
-// 1330 casa/Utilities/Register.cc 
-//      template <class Qtype> class Quantum 
-//      template <class T> class Array 
-//      template uInt Register(Quantum<Array<Int> > const *);
-// 1340 casa/Utilities/Register.cc 
-//      template <class Qtype> class Quantum 
-//      template <class T> class Matrix 
-//      template uInt Register(Quantum<Matrix<Double> > const *);
-// 1350 casa/Utilities/Register.cc 
-//      template <class Qtype> class Quantum 
-//      template <class T> class Vector 
-//      template uInt Register(Quantum<Vector<Double> > const *);
-// 1360 casa/Utilities/Register.cc 
-//      template <class Qtype> class Quantum 
-//      template <class T> class Vector 
-//      template uInt Register(Quantum<Vector<Float> > const *);
-// 1370 casa/Utilities/Register.cc 
-//      template <class Qtype> class Quantum 
-//      template <class T> class Vector 
-//      template uInt Register(Quantum<Vector<Int> > const *);
-// 1380 casa/Utilities/Register.cc 
-//      template <class Qtype> class Quantum 
-//      template uInt Register(Quantum<Double> const *);
-// 1390 casa/Utilities/Register.cc 
-//      template <class Qtype> class Quantum 
-//      template uInt Register(Quantum<Float> const *);
-// 1400 casa/Utilities/Register.cc 
-//      template <class Qtype> class Quantum 
-//      template uInt Register(Quantum<Int> const *);
-// 1410 casa/Utilities/Register.cc 
-//      template uInt Register(Double const *);
-// 1420 casa/Utilities/Register.cc 
-//      template uInt Register(Float const *);
-// 1430 casa/Utilities/Register.cc 
-//      template uInt Register(Int const *);
-// 1440 casa/Utilities/Register.cc 
-//      template uInt Register(Long const *);
-// 1450 casa/Utilities/Register.cc 
-//      template uInt Register(lDouble const *);
-// 1460 casa/Utilities/Register.cc 
-//      template uInt Register(uInt const *);
-// 1000 casa/Utilities/Sequence.cc 
-//      template class Sequence<uInt> 

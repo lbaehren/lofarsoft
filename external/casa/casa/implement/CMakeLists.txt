@@ -271,13 +271,13 @@ add_library (casa
   Utilities/ValType.cc
   Utilities/cregex.cc
 ## -- Template instantiation----------------------
-#  templatesArrays.cc
-  templatesBasicMath.cc
-#  templatesBasicSL.cc
+  templatesArrays.cc
+  BasicMath/templates.cc
+#  BasicSL/templates.cc
   templatesContainers.cc
-  templatesExceptions.cc
-  templatesQuanta.cc
-  templatesSystem.cc
+  Exceptions/templates.cc
+  Quanta/templates.cc
+  System/templates.cc
   templatesUtilities.cc
 )
 
