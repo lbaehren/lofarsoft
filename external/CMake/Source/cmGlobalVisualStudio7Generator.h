@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmGlobalVisualStudio7Generator.h,v $
   Language:  C++
-  Date:      $Date: 2006/06/30 17:48:43 $
-  Version:   $Revision: 1.34.2.3 $
+  Date:      $Date: 2006/11/10 15:12:55 $
+  Version:   $Revision: 1.34.2.5 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -107,7 +107,7 @@ protected:
                            const char* name, const char* path, cmTarget &t);
   virtual void WriteProjectConfigurations(std::ostream& fout, 
                                           const char* name,
-                                          bool in_all);
+                                          bool partOfDefaultBuild);
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);
   virtual void AddPlatformDefinitions(cmMakefile* mf);
@@ -118,7 +118,10 @@ protected:
                             const char* name, const char* path,
                             const std::vector<std::string>& dependencies);
 
+  std::string ConvertToSolutionPath(const char* path);
 
+  bool IsPartOfDefaultBuild(const char* project,
+                            cmTarget* target);
   std::vector<std::string> Configurations;
   std::map<cmStdString, cmStdString> GUIDMap;
 

@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmTryCompileCommand.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/06/30 17:48:46 $
-  Version:   $Revision: 1.55.2.2 $
+  Date:      $Date: 2006/10/13 14:52:06 $
+  Version:   $Revision: 1.55.2.3 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -178,6 +178,7 @@ int cmTryCompileCommand::CoreTryCompileCode(
         }
       err << "\nSee PROJECT command for help enabling other languages.";
       cmSystemTools::Error(err.str().c_str());
+      fclose(fout);
       return -1;
       }
     std::string langFlags = "CMAKE_";

@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmIfCommand.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/06/30 17:48:43 $
-  Version:   $Revision: 1.62.2.2 $
+  Date:      $Date: 2006/10/27 20:01:47 $
+  Version:   $Revision: 1.62.2.4 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -30,13 +30,56 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
   
   // watch for our ELSE or ENDIF
   if (!cmSystemTools::Strucmp(lff.Name.c_str(),"else") || 
+      !cmSystemTools::Strucmp(lff.Name.c_str(),"elseif") ||
       !cmSystemTools::Strucmp(lff.Name.c_str(),"endif"))
       {
       // if it was an else statement then we should change state
       // and block this Else Command
     if (!cmSystemTools::Strucmp(lff.Name.c_str(),"else"))
         {
-        this->IsBlocking = !this->IsBlocking;
+      this->IsBlocking = this->HasRun;
+      return true;
+      }
+    // if it was an elseif statement then we should check state
+    // and possibly block this Else Command
+    if (!cmSystemTools::Strucmp(lff.Name.c_str(),"elseif"))
+      {
+      if (!this->HasRun)
+        {
+        char* errorString = 0;
+        
+        std::vector<std::string> expandedArguments;
+        mf.ExpandArguments(lff.Arguments, expandedArguments);
+        bool isTrue = 
+          cmIfCommand::IsTrue(expandedArguments,&errorString,&mf);
+        
+        if (errorString)
+          {
+          std::string err = "had incorrect arguments: ";
+          unsigned int i;
+          for(i =0; i < lff.Arguments.size(); ++i)
+            {
+            err += (lff.Arguments[i].Quoted?"\"":"");
+            err += lff.Arguments[i].Value;
+            err += (lff.Arguments[i].Quoted?"\"":"");
+            err += " ";
+            }
+          err += "(";
+          err += errorString;
+          err += ").";
+          cmSystemTools::Error(err.c_str());
+          delete [] errorString;
+          return false;
+          }
+        
+        if (isTrue)
+          {
+          this->IsBlocking = false;
+          this->HasRun = true;
+          return true;
+          }
+        }
+      this->IsBlocking = true;
         return true;
         }
       // otherwise it must be an ENDIF statement, in that case remove the
@@ -113,6 +156,10 @@ bool cmIfCommand
   cmIfFunctionBlocker *f = new cmIfFunctionBlocker();
   // if is isn't true block the commands
   f->IsBlocking = !isTrue;
+  if (isTrue)
+    {
+    f->HasRun = true;
+    }
   f->Args = args;
   this->Makefile->AddFunctionBlocker(f);
   
@@ -226,7 +273,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         IncrementArguments(newArgs,argP1,argP2);
         reducible = 1;
         }
-      // does a file exist
+      // does a directory with this name exist
       if (*arg == "IS_DIRECTORY" && argP1  != newArgs.end())
         {
         if(cmSystemTools::FileIsDirectory((argP1)->c_str()))
@@ -347,9 +394,16 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
         {
         def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
         def2 = cmIfCommand::GetVariableOrString((argP2)->c_str(), makefile);
-        if (*(argP1) == "LESS")
+        double lhs;
+        double rhs;
+        if(sscanf(def, "%lg", &lhs) != 1 ||
+           sscanf(def2, "%lg", &rhs) != 1)
           {
-          if(atof(def) < atof(def2))
+          *arg = "0";
+          }
+        else if (*(argP1) == "LESS")
+          {
+          if(lhs < rhs)
             {
             *arg = "1";
             }
@@ -360,7 +414,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           }
         else if (*(argP1) == "GREATER")
           {
-          if(atof(def) > atof(def2))
+          if(lhs > rhs)
             {
             *arg = "1";
             }
@@ -371,7 +425,7 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           }          
         else
           {
-          if(atof(def) == atof(def2))
+          if(lhs == rhs)
             {
             *arg = "1";
             }
@@ -409,6 +463,29 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
           result = (val == 0);
           }
         if(result)
+          {
+          *arg = "1";
+          }
+        else
+          {
+          *arg = "0";
+          }
+        newArgs.erase(argP2);
+        newArgs.erase(argP1);
+        argP1 = arg;
+        IncrementArguments(newArgs,argP1,argP2);
+        reducible = 1;
+        }
+
+      // is file A newer than file B
+      if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
+          *(argP1) == "IS_NEWER_THAN")
+        {
+        int fileIsNewer=0;
+        bool success=cmSystemTools::FileTimeCompare(arg->c_str(),
+            (argP2)->c_str(),
+            &fileIsNewer);
+        if(success==false || fileIsNewer==1 || fileIsNewer==0)
           {
           *arg = "1";
           }

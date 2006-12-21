@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCPackGenericGenerator.h,v $
   Language:  C++
-  Date:      $Date: 2006/07/24 15:19:36 $
-  Version:   $Revision: 1.10.2.2 $
+  Date:      $Date: 2006/10/27 20:01:49 $
+  Version:   $Revision: 1.10.2.3 $
 
   Copyright (c) 2002 Kitware, Inc. All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -109,6 +109,8 @@ protected:
 
   //! Run install commands if specified
   virtual int InstallProjectViaInstallCommands(
+    bool movable, const char* tempInstallDirectory);
+  virtual int InstallProjectViaInstallScript(
     bool movable, const char* tempInstallDirectory);
   virtual int InstallProjectViaInstalledDirectories(
     bool movable, const char* tempInstallDirectory);

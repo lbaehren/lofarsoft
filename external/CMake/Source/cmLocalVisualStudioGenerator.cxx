@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmLocalVisualStudioGenerator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/07/24 15:19:35 $
-  Version:   $Revision: 1.2.2.1 $
+  Date:      $Date: 2006/10/27 20:01:48 $
+  Version:   $Revision: 1.2.2.3 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -23,11 +23,31 @@
 //----------------------------------------------------------------------------
 cmLocalVisualStudioGenerator::cmLocalVisualStudioGenerator()
 {
+  this->WindowsShell = true;
+  this->WindowsVSIDE = true;
 }
 
 //----------------------------------------------------------------------------
 cmLocalVisualStudioGenerator::~cmLocalVisualStudioGenerator()
 {
+}
+
+//----------------------------------------------------------------------------
+bool cmLocalVisualStudioGenerator::SourceFileCompiles(const cmSourceFile* sf)
+{
+  // Identify the language of the source file.
+  if(const char* lang = this->GetSourceFileLanguage(*sf))
+    {
+    // Check whether this source will actually be compiled.
+    return (!sf->GetCustomCommand() &&
+            !sf->GetPropertyAsBool("HEADER_FILE_ONLY") &&
+            !sf->GetPropertyAsBool("EXTERNAL_OBJECT"));
+    }
+  else
+    {
+    // Unknown source file language.  Assume it will not be compiled.
+    return false;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -37,7 +57,8 @@ void cmLocalVisualStudioGenerator::ComputeObjectNameRequirements
   // Clear the current set of requirements.
   this->NeedObjectName.clear();
 
-  // Count the number of object files with each name.
+  // Count the number of object files with each name.  Note that
+  // windows file names are not case sensitive.
   std::map<cmStdString, int> objectNameCounts;
   for(unsigned int i = 0; i < sourceGroups.size(); ++i)
     {
@@ -46,14 +67,13 @@ void cmLocalVisualStudioGenerator::ComputeObjectNameRequirements
     for(std::vector<const cmSourceFile*>::const_iterator s = srcs.begin();
         s != srcs.end(); ++s)
       {
-      const cmSourceFile& sf = *(*s);
-      if(!sf.GetCustomCommand() &&
-         !sf.GetPropertyAsBool("HEADER_FILE_ONLY") &&
-         !sf.GetPropertyAsBool("EXTERNAL_OBJECT"))
+      const cmSourceFile* sf = *s;
+      if(this->SourceFileCompiles(sf))
         {
         std::string objectName =
+          cmSystemTools::LowerCase(
           cmSystemTools::GetFilenameWithoutLastExtension(
-            sf.GetFullPath().c_str());
+              sf->GetFullPath().c_str()));
         objectName += ".obj";
         objectNameCounts[objectName] += 1;
         }
@@ -70,13 +90,12 @@ void cmLocalVisualStudioGenerator::ComputeObjectNameRequirements
         s != srcs.end(); ++s)
       {
       const cmSourceFile* sf = *s;
-      if(!sf->GetCustomCommand() &&
-         !sf->GetPropertyAsBool("HEADER_FILE_ONLY") &&
-         !sf->GetPropertyAsBool("EXTERNAL_OBJECT"))
+      if(this->SourceFileCompiles(sf))
         {
         std::string objectName =
+          cmSystemTools::LowerCase(
           cmSystemTools::GetFilenameWithoutLastExtension(
-            sf->GetFullPath().c_str());
+              sf->GetFullPath().c_str()));
         objectName += ".obj";
         if(objectNameCounts[objectName] > 1)
           {
@@ -85,4 +104,70 @@ void cmLocalVisualStudioGenerator::ComputeObjectNameRequirements
         }
       }
     }
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmLocalVisualStudioGenerator
+::ConstructScript(const cmCustomCommandLines& commandLines,
+                  const char* workingDirectory,
+                  bool escapeOldStyle,
+                  bool escapeAllowMakeVars,
+                  const char* newline_text)
+{
+  // Avoid leading or trailing newlines.
+  const char* newline = "";
+
+  // Store the script in a string.
+  std::string script;
+  if(workingDirectory)
+    {
+    script += newline;
+    newline = newline_text;
+    script += "cd ";
+    script += this->Convert(workingDirectory, START_OUTPUT, SHELL);
+    }
+  // for visual studio IDE add extra stuff to the PATH
+  // if CMAKE_MSVCIDE_RUN_PATH is set.
+  if(this->Makefile->GetDefinition("MSVC_IDE"))
+    {
+    const char* extraPath =
+      this->Makefile->GetDefinition("CMAKE_MSVCIDE_RUN_PATH");
+    if(extraPath)
+      {
+      script += newline;
+      newline = newline_text;
+      script += "set PATH=";
+      script += extraPath;
+      script += ";%PATH%";
+      }
+    }
+  // Write each command on a single line.
+  for(cmCustomCommandLines::const_iterator cl = commandLines.begin();
+      cl != commandLines.end(); ++cl)
+    {
+    // Start a new line.
+    script += newline;
+    newline = newline_text;
+
+    // Start with the command name.
+    const cmCustomCommandLine& commandLine = *cl;
+    script += this->Convert(commandLine[0].c_str(),START_OUTPUT,SHELL);
+
+    // Add the arguments.
+    for(unsigned int j=1;j < commandLine.size(); ++j)
+      {
+      script += " ";
+      if(escapeOldStyle)
+        {
+        script += this->EscapeForShellOldStyle(commandLine[j].c_str());
+        }
+      else
+        {
+        script += this->EscapeForShell(commandLine[j].c_str(),
+                                       escapeAllowMakeVars);
+        }
+      }
+    }
+  return script;
 }

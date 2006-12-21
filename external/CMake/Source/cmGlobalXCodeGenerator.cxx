@@ -3,8 +3,8 @@
 Program:   CMake - Cross-Platform Makefile Generator
 Module:    $RCSfile: cmGlobalXCodeGenerator.cxx,v $
 Language:  C++
-Date:      $Date: 2006/07/28 12:57:57 $
-Version:   $Revision: 1.111.2.4 $
+Date:      $Date: 2006/10/27 20:01:47 $
+Version:   $Revision: 1.111.2.6 $
 
 Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
 See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -196,7 +196,6 @@ std::string cmGlobalXCodeGenerator
     makeCommand += " ";
     makeCommand += additionalOptions;
     }
-  makeCommand += " OBJROOT=.";
   return makeCommand;
 }
 
@@ -282,10 +281,9 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
 {
   cmMakefile* mf = root->GetMakefile();
   // Add ALL_BUILD
-  const char* no_output = 0;
   const char* no_working_directory = 0;
   std::vector<std::string> no_depends;
-  mf->AddUtilityCommand("ALL_BUILD", false, no_output, no_depends,
+  mf->AddUtilityCommand("ALL_BUILD", false, no_depends,
                         no_working_directory,
                         "echo", "Build all projects");
   cmTarget* allbuild = mf->FindTarget("ALL_BUILD");
@@ -308,7 +306,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
     }
   cmCustomCommandLines commandLines;
   commandLines.push_back(makecommand);
-  mf->AddUtilityCommand("XCODE_DEPEND_HELPER", false, no_output,
+  mf->AddUtilityCommand("XCODE_DEPEND_HELPER", false,
                         no_working_directory,
                         no_depends,
                         commandLines);
@@ -868,17 +866,11 @@ std::string cmGlobalXCodeGenerator::ExtractFlag(const char* flag,
   std::string::size_type pos = flags.find(flag);
   if(pos != flags.npos)
     {
-    retFlag = flag;
-    // remove the flag
-    flags[pos]=' ';
-    flags[pos+1]=' ';
-    char pos2 = flags[pos+2];
-    // if the pos after the option 
-    if(pos2 != ' ' && pos2 != 0 )
+    while(pos < flags.size() && flags[pos] != ' ')
       {
-      retFlag += pos2;
-      // remove the next part of the flag
-      flags[pos+2] = ' ';
+      retFlag += flags[pos];
+      flags[pos] = ' ';
+      pos++;
       }
     }
   return retFlag;
@@ -956,16 +948,20 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
       }
     }
   makefileStream << "\n\n";
-  
   for(std::vector<cmCustomCommand>::const_iterator i = commands.begin();
       i != commands.end(); ++i)
     {
     cmCustomCommand const& cc = *i; 
     if(!cc.GetCommandLines().empty())
       {
-      
-      makefileStream << "\n#" << "Custom command rule: " << 
-        cc.GetComment() << "\n";
+      bool escapeOldStyle = cc.GetEscapeOldStyle();
+      bool escapeAllowMakeVars = cc.GetEscapeAllowMakeVars();
+      makefileStream << "\n#" << "Custom command rule: ";
+      if(cc.GetComment())
+        {
+        makefileStream << cc.GetComment();
+        }
+      makefileStream << "\n";
       const std::vector<std::string>& outputs = cc.GetOutputs();
       if(!outputs.empty())
         {
@@ -1038,7 +1034,17 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
         for(unsigned int j=1; j < commandLine.size(); ++j)
           {
           cmd += " ";
-          cmd += cmSystemTools::EscapeSpaces(commandLine[j].c_str());
+          if(escapeOldStyle)
+            {
+            cmd += (this->CurrentLocalGenerator
+                    ->EscapeForShellOldStyle(commandLine[j].c_str()));
+            }
+          else
+            {
+            cmd += (this->CurrentLocalGenerator->
+                    EscapeForShell(commandLine[j].c_str(),
+                                   escapeAllowMakeVars));
+            }
           }
         makefileStream << "\t" << cmd.c_str() << "\n";
         }
@@ -1380,7 +1386,19 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     optLevel[0] = '1';
     }
   std::string gflagc = this->ExtractFlag("-g", cflags);
+  // put back gdwarf-2 if used since there is no way
+  // to represent it in the gui, but we still want debug yes
+  if(gflagc == "-gdwarf-2")
+    {
+    cflags += " ";
+    cflags += gflagc;
+    }
   std::string gflag = this->ExtractFlag("-g", flags);
+  if(gflag == "-gdwarf-2")
+    {
+    flags += " ";
+    flags += gflag;
+    }
   const char* debugStr = "YES";
   if(gflagc.size() ==0  && gflag.size() == 0)
     {
@@ -1420,18 +1438,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   std::string install_name_dir;
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
-    // Select whether to generate an install_name directory for the
-    // install tree or the build tree.
-    if(target.GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH"))
-      {
-      install_name_dir =
-        target.GetInstallNameDirForInstallTree(configName);
-      }
-    else
-      {
-      install_name_dir =
-        target.GetInstallNameDirForBuildTree(configName);
-      }
+    // Get the install_name directory for the build tree.
+    install_name_dir = target.GetInstallNameDirForBuildTree(configName);
 
     if(install_name_dir.empty())
       {

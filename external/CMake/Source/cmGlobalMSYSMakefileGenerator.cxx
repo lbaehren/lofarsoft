@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmGlobalMSYSMakefileGenerator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/06/30 17:48:43 $
-  Version:   $Revision: 1.7.2.3 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.7.2.4 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -72,6 +72,7 @@ void cmGlobalMSYSMakefileGenerator
     {
     gxx = tgxx;
     }
+  mf->AddDefinition("MSYS", "1");
   mf->AddDefinition("CMAKE_GENERATOR_CC", gcc.c_str());
   mf->AddDefinition("CMAKE_GENERATOR_CXX", gxx.c_str());
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf);
@@ -88,6 +89,7 @@ cmLocalGenerator *cmGlobalMSYSMakefileGenerator::CreateLocalGenerator()
 {
   cmLocalUnixMakefileGenerator3* lg = new cmLocalUnixMakefileGenerator3;
   lg->SetWindowsShell(false);
+  lg->SetMSYSShell(true);
   lg->SetGlobalGenerator(this);
   lg->SetIgnoreLibPrefix(true);
   lg->SetPassMakeflags(false);

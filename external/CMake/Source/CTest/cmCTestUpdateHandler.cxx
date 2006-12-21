@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCTestUpdateHandler.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/03/15 14:23:35 $
-  Version:   $Revision: 1.35 $
+  Date:      $Date: 2006/10/27 20:01:50 $
+  Version:   $Revision: 1.35.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -278,7 +278,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   if ( initialCheckoutCommand )
     {
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
-      "   First perform the initil checkout: " << initialCheckoutCommand
+      "   First perform the initial checkout: " << initialCheckoutCommand
       << std::endl);
     cmStdString parent = cmSystemTools::GetParentDirectory(sourceDirectory);
     if ( parent.empty() )
@@ -744,7 +744,7 @@ int cmCTestUpdateHandler::ProcessHandler()
           ofs << output << std::endl;
           }
         }
-      if ( res && retVal == 0)
+      if ( res )
         {
         cmCTestLog(this->CTest, DEBUG, output << std::endl);
         std::string::size_type sline = 0;
@@ -1090,7 +1090,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   os << "</UpdateReturnStatus>" << std::endl;
   os << "</Update>" << std::endl;
 
-  if (! res || retVal )
+  if (! res  )
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
       "Error(s) when updating the project" << std::endl);

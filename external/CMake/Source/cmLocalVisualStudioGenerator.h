@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmLocalVisualStudioGenerator.h,v $
   Language:  C++
-  Date:      $Date: 2006/07/24 15:19:35 $
-  Version:   $Revision: 1.1.2.1 $
+  Date:      $Date: 2006/10/13 14:52:05 $
+  Version:   $Revision: 1.1.2.2 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -35,8 +35,17 @@ public:
   virtual ~cmLocalVisualStudioGenerator();
 
 protected:
+
+  /** Construct a script from the given list of command lines.  */
+  std::string ConstructScript(const cmCustomCommandLines& commandLines,
+                              const char* workingDirectory,
+                              bool escapeOldStyle,
+                              bool escapeAllowMakeVars,
+                              const char* newline = "\n");
+
   // Safe object file name generation.
   void ComputeObjectNameRequirements(std::vector<cmSourceGroup> const&);
+  bool SourceFileCompiles(const cmSourceFile* sf);
   std::set<const cmSourceFile*> NeedObjectName;
 };
 

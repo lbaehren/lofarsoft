@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmMessageCommand.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/06/30 17:48:46 $
-  Version:   $Revision: 1.18.2.1 $
+  Date:      $Date: 2006/10/13 14:52:06 $
+  Version:   $Revision: 1.18.2.2 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -59,8 +59,14 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args)
 
   if (send_error || fatal_error)
     {
-    //cmSystemTools::Error(message.c_str());
+    if( !this->Makefile->GetCMakeInstance()->GetDebugOutput())
+      {
+      cmSystemTools::Error(message.c_str());
+      }
+    else
+      {
     this->SetError(message.c_str());
+    }
     }
   else
     {
@@ -77,6 +83,11 @@ bool cmMessageCommand::InitialPass(std::vector<std::string> const& args)
     {
     cmSystemTools::SetFatalErrorOccured();
     }
+  // if debug is on then retru
+  if(this->Makefile->GetCMakeInstance()->GetDebugOutput())
+    {
   return (!send_error && !fatal_error);
+    }
+  return true;
 }
 

@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCPluginAPI.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/03/15 16:01:59 $
-  Version:   $Revision: 1.29 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.29.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -23,6 +23,12 @@
 #include "cmCPluginAPI.h"
 
 #include "cmSourceFile.h"
+
+#include <stdlib.h>
+
+#ifdef __QNX__
+# include <malloc.h> /* for malloc/free on QNX */
+#endif
 
 extern "C"
 {
@@ -200,8 +206,8 @@ void CCONV cmAddUtilityCommand(void *arg, const char* utilityName,
                          int all,
                          int numDepends,
                          const char **depends,
-                         int numOutputs,
-                         const char **outputs)
+                         int,
+                         const char **)
 {
   // Get the makefile instance.  Perform an extra variable expansion
   // now because the API caller expects it.
@@ -228,19 +234,9 @@ void CCONV cmAddUtilityCommand(void *arg, const char* utilityName,
     depends2.push_back(mf->ExpandVariablesInString(expand));
     }
 
-  // Only one output is allowed.
-  const char* output = 0;
-  std::string outputStr;
-  if(numOutputs > 0)
-    {
-    expand = outputs[0];
-    outputStr = mf->ExpandVariablesInString(expand);
-    output = outputStr.c_str();
-    }
-
   // Pass the call to the makefile instance.
   mf->AddUtilityCommand(utilityName, (all ? true : false),
-                        output, 0, depends2, commandLines);
+                        0, depends2, commandLines);
 }
 void CCONV cmAddCustomCommand(void *arg, const char* source,
                         const char* command,

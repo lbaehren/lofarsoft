@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmake.h,v $
   Language:  C++
-  Date:      $Date: 2006/06/30 17:48:46 $
-  Version:   $Revision: 1.65.2.3 $
+  Date:      $Date: 2006/11/10 15:12:55 $
+  Version:   $Revision: 1.65.2.5 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -281,6 +281,10 @@ class cmake
   const char* GetCPackCommand();
   const char* GetCMakeCommand() { return this->CMakeCommand.c_str(); }
 
+  // Do we want debug output during the cmake run.
+  bool GetDebugOutput() { return this->DebugOutput; }
+  void DebugOutputOn() { this->DebugOutput = true;}
+
 protected:
   typedef cmGlobalGenerator* (*CreateGeneratorFunctionType)();
   typedef std::map<cmStdString,
@@ -333,6 +337,7 @@ private:
   bool Verbose;
   bool InTryCompile;
   bool ScriptMode;
+  bool DebugOutput;
   std::string CMakeCommand;
   std::string CXXEnvironment;
   std::string CCEnvironment;

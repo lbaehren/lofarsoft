@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmLoadCommandCommand.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/03/16 22:09:08 $
-  Version:   $Revision: 1.25 $
+  Date:      $Date: 2006/10/13 14:52:03 $
+  Version:   $Revision: 1.25.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -20,6 +20,12 @@
 #include "cmDynamicLoader.h"
 
 #include <cmsys/DynamicLoader.hxx>
+
+#include <stdlib.h>
+
+#ifdef __QNX__
+# include <malloc.h> /* for malloc/free on QNX */
+#endif
 
 #include <signal.h>
 extern "C" void TrapsForSignalsCFunction(int sig);

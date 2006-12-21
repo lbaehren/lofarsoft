@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmMakefileExecutableTargetGenerator.h,v $
   Language:  C++
-  Date:      $Date: 2006/02/16 20:19:00 $
-  Version:   $Revision: 1.2 $
+  Date:      $Date: 2006/10/13 14:52:06 $
+  Version:   $Revision: 1.2.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -22,6 +22,8 @@
 class cmMakefileExecutableTargetGenerator: public cmMakefileTargetGenerator
 {
 public:
+  cmMakefileExecutableTargetGenerator();
+
   /* the main entry point for this class. Writes the Makefiles associated
      with this target */
   virtual void WriteRuleFiles();

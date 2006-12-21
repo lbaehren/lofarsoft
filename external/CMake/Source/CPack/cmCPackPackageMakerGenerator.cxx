@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCPackPackageMakerGenerator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/05/14 19:22:47 $
-  Version:   $Revision: 1.16.2.2 $
+  Date:      $Date: 2006/10/30 16:36:06 $
+  Version:   $Revision: 1.16.2.3 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -236,13 +236,16 @@ bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(const char* name)
   if ( !inFileName )
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "CPack option: " << cpackVar.c_str()
-      << " not specified. It should point to " << name << ".rtf, " << name
+                  << " not specified. It should point to " 
+                  << (name ? name : "(NULL)")
+                  << ".rtf, " << name
       << ".html, or " << name << ".txt file" << std::endl);
     return false;
     }
   if ( !cmSystemTools::FileExists(inFileName) )
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find " << name
+    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find " 
+                  << (name ? name : "(NULL)")
       << " resource file: " << inFileName << std::endl);
     return false;
     }
@@ -260,7 +263,8 @@ bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(const char* name)
   destFileName += name + ext;
 
 
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: " << inFileName
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Configure file: " 
+                << (inFileName ? inFileName : "(NULL)")
     << " to " << destFileName.c_str() << std::endl);
   this->ConfigureFile(inFileName, destFileName.c_str());
   return true;

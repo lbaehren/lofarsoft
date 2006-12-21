@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmIfCommand.h,v $
   Language:  C++
-  Date:      $Date: 2006/06/30 17:48:43 $
-  Version:   $Revision: 1.32.2.2 $
+  Date:      $Date: 2006/10/27 20:01:47 $
+  Version:   $Revision: 1.32.2.4 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -28,7 +28,7 @@
 class cmIfFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  cmIfFunctionBlocker() {}
+  cmIfFunctionBlocker() {this->HasRun = false;}
   virtual ~cmIfFunctionBlocker() {}
   virtual bool IsFunctionBlocked(const cmListFileFunction& lff,
                                  cmMakefile &mf);
@@ -38,6 +38,7 @@ public:
   
   std::vector<cmListFileArgument> Args;
   bool IsBlocking;
+  bool HasRun;
 };
 
 /** \class cmIfCommand
@@ -127,6 +128,10 @@ public:
       "  IF(EXISTS file-name)\n"
       "  IF(EXISTS directory-name)\n"
       "True if the named file or directory exists.  "
+      "Behavior is well-defined only for full paths.\n"
+      "  IF(file1 IS_NEWER_THAN file2)\n"
+      "True if file1 is newer than file2 or if one of the two files "
+      "doesn't exist. "
       "Behavior is well-defined only for full paths.\n"
       "  IF(IS_DIRECTORY directory-name)\n"
       "True if the given name is a directory.  "

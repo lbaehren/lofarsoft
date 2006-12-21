@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmMakeDirectoryCommand.h,v $
   Language:  C++
-  Date:      $Date: 2004/02/23 03:07:02 $
-  Version:   $Revision: 1.8 $
+  Date:      $Date: 2006/10/13 14:52:05 $
+  Version:   $Revision: 1.8.8.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -60,7 +60,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Create a directory on the file system.";
+    return "Old directory creation command.  Use the FILE command.";
     }
   
   /**
@@ -69,12 +69,21 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
+      "This command has been superceded by the FILE(MAKE_DIRECTORY ...) "
+      "command.  "
+      "It is provided for compatibility with older CMake code.\n"
       "  MAKE_DIRECTORY(directory)\n"
       "Creates the specified directory.  Full paths should be given.  Any "
       "parent directories that do not exist will also be created.  Use with "
       "care.";
     }
   
+  /** This command is kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged()
+    {
+    return true;
+    }
+
   cmTypeMacro(cmMakeDirectoryCommand, cmCommand);
 };
 

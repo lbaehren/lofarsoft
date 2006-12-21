@@ -4,6 +4,15 @@
 SET(CMAKE_BACKWARDS_COMPATIBILITY 1.4)
 PROJECT (Complex)
 
+# Choose whether to test CMakeLib.
+SET(COMPLEX_TEST_CMAKELIB 1)
+IF(CMAKE_TEST_DIFFERENT_GENERATOR)
+  SET(COMPLEX_TEST_CMAKELIB 0)
+ENDIF(CMAKE_TEST_DIFFERENT_GENERATOR)
+IF(CMAKE_TEST_SYSTEM_LIBRARIES)
+  SET(COMPLEX_TEST_CMAKELIB 0)
+ENDIF(CMAKE_TEST_SYSTEM_LIBRARIES)
+
 #
 # Define a macro
 #
@@ -43,6 +52,17 @@ MACRO(TEST_VAR_ARG fa)
 ENDMACRO(TEST_VAR_ARG)
 
 TEST_VAR_ARG(1 2 3)
+
+# Floating-point comparison test.
+IF(2.4 LESS 2.4)
+  MESSAGE(FATAL_ERROR "Failed: 2.4 LESS 2.4")
+ENDIF(2.4 LESS 2.4)
+IF(2.4 GREATER 2.4)
+  MESSAGE(FATAL_ERROR "Failed: 2.4 GREATER 2.4")
+ENDIF(2.4 GREATER 2.4)
+IF(NOT 2.4 EQUAL 2.4)
+  MESSAGE(FATAL_ERROR "Failed: NOT 2.4 EQUAL 2.4")
+ENDIF(NOT 2.4 EQUAL 2.4)
 
 #
 # Use the ansi CXX compile flag for building cmake
@@ -100,8 +120,9 @@ INCLUDE_DIRECTORIES(
 INCLUDE_DIRECTORIES(BEFORE
   ${Complex_BINARY_DIR}
 )
+INCLUDE_DIRECTORIES(SYSTEM Library/SystemDir)
 
-INCLUDE_REGULAR_EXPRESSION("^(cmTest|file|sharedFile).*$" "^cmMissing")
+INCLUDE_REGULAR_EXPRESSION("^(cmTest|file|sharedFile|test).*$" "^cmMissing")
 
 LINK_DIRECTORIES(
   ${Complex_BINARY_DIR}/Library
@@ -271,6 +292,44 @@ ENDWHILE(while_var LESS 1000)
 
 SET(SHOULD_BE_ZERO )
 SET(SHOULD_BE_ONE 1)
+
+# test elseif functionality, the mess below tries to catch problem 
+# of clauses being executed early or late etc
+set (RESULT 3)
+if (RESULT EQUAL 1)
+  if (RESULT EQUAL 2)
+    set (ELSEIF_RESULT 1)
+  elseif (RESULT EQUAL 3)
+    set (ELSEIF_RESULT 1)
+  endif (RESULT EQUAL 2)  
+elseif (RESULT EQUAL 2)
+  set (ELSEIF_RESULT 1)
+elseif (RESULT EQUAL 3)
+  if (RESULT EQUAL 2)
+    set (ELSEIF_RESULT 1)
+  elseif (RESULT EQUAL 3)
+    if (NOT ELSEIF_RESULT EQUAL 1)
+      set (ELSEIF_RESULT 2)
+    endif (NOT ELSEIF_RESULT EQUAL 1)      
+  endif (RESULT EQUAL 2)  
+elseif (RESULT EQUAL 4)
+  if (RESULT EQUAL 2)
+    set (ELSEIF_RESULT 1)
+  elseif (RESULT EQUAL 3)
+    set (ELSEIF_RESULT 1)
+  endif (RESULT EQUAL 2)  
+else (RESULT  EQUAL 1)
+  if (RESULT EQUAL 2)
+    set (ELSEIF_RESULT 1)
+  elseif (RESULT EQUAL 3)
+    set (ELSEIF_RESULT 1)
+  endif (RESULT EQUAL 2)  
+endif (RESULT EQUAL 1)
+
+if (NOT ELSEIF_RESULT EQUAL 2)
+  set (ELSEIF_RESULT 0)
+endif (NOT ELSEIF_RESULT EQUAL 2)
+
 #
 # Configure file 
 # (plug vars to #define so that they can be tested)
@@ -302,6 +361,7 @@ IF(NOT STRING_REGEX_PASSED)
   MESSAGE(SEND_ERROR
     "STRING(REGEX REPLACE ... ) test failed (\"${RESULT}\" v. \"a[b]c[d]e\")")
 ENDIF(NOT STRING_REGEX_PASSED)
+
 
 #
 # Create the libs and the main exe

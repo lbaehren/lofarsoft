@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cpack.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/07/24 15:19:36 $
-  Version:   $Revision: 1.16.2.4 $
+  Date:      $Date: 2006/10/27 20:01:49 $
+  Version:   $Revision: 1.16.2.6 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -301,6 +301,12 @@ int main (int argc, char *argv[])
       globalMF->AddDefinition(cdit->first.c_str(), cdit->second.c_str());
       }
 
+    const char* cpackModulesPath =
+      globalMF->GetDefinition("CPACK_MODULE_PATH");
+    if ( cpackModulesPath )
+      {
+      globalMF->AddDefinition("CMAKE_MODULE_PATH", cpackModulesPath);
+      }
     const char* genList = globalMF->GetDefinition("CPACK_GENERATOR");
     if ( !genList )
       {
@@ -308,6 +314,8 @@ int main (int argc, char *argv[])
         "CPack generator not specified" << std::endl);
       parsed = 0;
       }
+    else
+      {
     std::vector<std::string> generatorsVector;
     cmSystemTools::ExpandListArgument(genList,
       generatorsVector);
@@ -370,6 +378,47 @@ int main (int argc, char *argv[])
             << std::endl);
           parsed = 0;
         }
+            if ( parsed )
+              {
+#ifdef _WIN32
+              std::string comspec = "cmw9xcom.exe";
+              cmSystemTools::SetWindows9xComspecSubstitute(comspec.c_str());
+#endif
+
+              const char* projName = mf->GetDefinition("CPACK_PACKAGE_NAME");
+              cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE, "Use generator: "
+                << cpackGenerator->GetNameOfClass() << std::endl);
+              cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE, "For project: "
+                << projName << std::endl);
+  
+              const char* projVersion = 
+                mf->GetDefinition("CPACK_PACKAGE_VERSION");
+              if ( !projVersion )
+                {
+                const char* projVersionMajor
+                  = mf->GetDefinition("CPACK_PACKAGE_VERSION_MAJOR");
+                const char* projVersionMinor
+                  = mf->GetDefinition("CPACK_PACKAGE_VERSION_MINOR");
+                const char* projVersionPatch
+                  = mf->GetDefinition("CPACK_PACKAGE_VERSION_PATCH");
+                cmOStringStream ostr;
+                ostr << projVersionMajor << "." << projVersionMinor << "."
+                  << projVersionPatch;
+                mf->AddDefinition("CPACK_PACKAGE_VERSION", 
+                                  ostr.str().c_str());
+                }
+  
+              int res = cpackGenerator->ProcessGenerator();
+              if ( !res )
+                {
+                cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
+                  "Error when generating package: " << projName << std::endl);
+                return 1;
+                }
+              }
+            }
+          }
+        }
       }
     }
 
@@ -405,41 +454,6 @@ int main (int argc, char *argv[])
 #define cout no_cout_use_cmCPack_Log
     }
 
-#ifdef _WIN32
-  std::string comspec = "cmw9xcom.exe";
-  cmSystemTools::SetWindows9xComspecSubstitute(comspec.c_str());
-#endif
-
-  const char* projName = mf->GetDefinition("CPACK_PACKAGE_NAME");
-  cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE, "Use generator: "
-    << cpackGenerator->GetNameOfClass() << std::endl);
-  cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE, "For project: "
-    << projName << std::endl);
-
-  const char* projVersion = mf->GetDefinition("CPACK_PACKAGE_VERSION");
-  if ( !projVersion )
-    {
-    const char* projVersionMajor
-      = mf->GetDefinition("CPACK_PACKAGE_VERSION_MAJOR");
-    const char* projVersionMinor
-      = mf->GetDefinition("CPACK_PACKAGE_VERSION_MINOR");
-    const char* projVersionPatch
-      = mf->GetDefinition("CPACK_PACKAGE_VERSION_PATCH");
-    cmOStringStream ostr;
-    ostr << projVersionMajor << "." << projVersionMinor << "."
-      << projVersionPatch;
-    mf->AddDefinition("CPACK_PACKAGE_VERSION", ostr.str().c_str());
-    }
-
-  int res = cpackGenerator->ProcessGenerator();
-  if ( !res )
-    {
-    cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-      "Error when generating package: " << projName << std::endl);
-    return 1;
-        }
-      }
-    }
 
   return 0;
 }

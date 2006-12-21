@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmInstallTargetsCommand.h,v $
   Language:  C++
-  Date:      $Date: 2006/02/19 20:25:27 $
-  Version:   $Revision: 1.11 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.11.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -72,6 +72,12 @@ public:
       "(Windows DLL), the files will be copied to that directory.";
     }
   
+  /** This command is kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged()
+    {
+    return true;
+    }
+
   cmTypeMacro(cmInstallTargetsCommand, cmCommand);
 };
 

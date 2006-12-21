@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmGlobalVisualStudio7Generator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/06/30 17:48:43 $
-  Version:   $Revision: 1.70.2.4 $
+  Date:      $Date: 2006/11/10 15:12:55 $
+  Version:   $Revision: 1.70.2.6 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -216,7 +216,6 @@ void cmGlobalVisualStudio7Generator::Generate()
 {
   // add a special target that depends on ALL projects for easy build
   // of one configuration only.
-  const char* no_output = 0;
   const char* no_working_dir = 0;
   std::vector<std::string> no_depends;
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
@@ -227,7 +226,7 @@ void cmGlobalVisualStudio7Generator::Generate()
     if(gen.size())
       {
       gen[0]->GetMakefile()->
-        AddUtilityCommand("ALL_BUILD", false, no_output, no_depends,
+        AddUtilityCommand("ALL_BUILD", false, no_depends,
                           no_working_dir,
                           "echo", "Build all projects");
       std::string cmake_command = 
@@ -538,13 +537,16 @@ void cmGlobalVisualStudio7Generator
         const cmCustomCommandLines& cmds = cc.GetCommandLines();
         std::string name = cmds[0][0];
         this->WriteProjectConfigurations(fout, name.c_str(), 
-                                         l->second.IsInAll());
+                                         true);
         }
       else if ((l->second.GetType() != cmTarget::INSTALL_FILES)
           && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
         {
+        bool partOfDefaultBuild = this->IsPartOfDefaultBuild(
+          root->GetMakefile()->GetProjectName(),
+          &l->second);
         this->WriteProjectConfigurations(fout, si->c_str(), 
-                                         l->second.IsInAll());
+                                         partOfDefaultBuild);
         ++si;
         }
       }
@@ -555,6 +557,21 @@ void cmGlobalVisualStudio7Generator
   this->WriteSLNFooter(fout);
 }
 
+//----------------------------------------------------------------------------
+std::string
+cmGlobalVisualStudio7Generator::ConvertToSolutionPath(const char* path)
+{
+  // Convert to backslashes.  Do not use ConvertToOutputPath because
+  // we will add quoting ourselves, and we know these projects always
+  // use windows slashes.
+  std::string d = path;
+  std::string::size_type pos = 0;
+  while((pos = d.find('/', pos)) != d.npos)
+    {
+    d[pos++] = '\\';
+    }
+  return d;
+}
 
 // Write a dsp file into the SLN file,
 // Note, that dependencies from executables to 
@@ -563,10 +580,10 @@ void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
                                const char* dspname,
                                const char* dir, cmTarget&)
 {
-  std::string d = cmSystemTools::ConvertToOutputPath(dir);
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
        << dspname << "\", \""
-       << d << "\\" << dspname << ".vcproj\", \"{"
+       << this->ConvertToSolutionPath(dir)
+       << "\\" << dspname << ".vcproj\", \"{"
        << this->GetGUID(dspname) << "}\"\nEndProject\n";
 }
 
@@ -652,9 +669,8 @@ cmGlobalVisualStudio7Generator
 // Write a dsp file into the SLN file, Note, that dependencies from
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator
-::WriteProjectConfigurations(std::ostream& fout, 
-                                                           const char* name, 
-                                                           bool in_all_build)
+::WriteProjectConfigurations(std::ostream& fout, const char* name,
+                             bool partOfDefaultBuild)
 {
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
@@ -662,7 +678,7 @@ void cmGlobalVisualStudio7Generator
     {
     fout << "\t\t{" << guid << "}." << *i 
          << ".ActiveCfg = " << *i << "|Win32\n";
-    if (in_all_build)
+    if(partOfDefaultBuild)
       {
       fout << "\t\t{" << guid << "}." << *i 
            << ".Build.0 = " << *i << "|Win32\n";
@@ -683,7 +699,7 @@ void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& fout,
   std::string d = cmSystemTools::ConvertToOutputPath(location);
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
        << name << "\", \""
-       << d << "\", \"{"
+       << this->ConvertToSolutionPath(location) << "\", \"{"
        << this->GetGUID(name)
        << "}\"\n";
   fout << "EndProject\n";
@@ -785,4 +801,26 @@ cmGlobalVisualStudio7Generator
     dir += config;
     dir += suffix;
     }
+}
+
+bool cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(const char* project,
+                                                          cmTarget* target)
+{
+  if(target->GetPropertyAsBool("EXCLUDE_FROM_DEFAULT_BUILD"))
+    {
+    return false;
+    }
+  // if it is a utilitiy target then only make it part of the 
+  // default build if another target depends on it
+  int type = target->GetType();
+  if (type == cmTarget::GLOBAL_TARGET)
+    {
+    return false;
+    }
+  if(type == cmTarget::UTILITY)
+    {
+    return this->IsDependedOn(project, target);
+    } 
+  // default is to be part of the build
+  return true;
 }

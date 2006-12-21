@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmSetTargetPropertiesCommand.h,v $
   Language:  C++
-  Date:      $Date: 2006/06/30 17:48:46 $
-  Version:   $Revision: 1.21.2.3 $
+  Date:      $Date: 2006/11/10 15:12:55 $
+  Version:   $Revision: 1.21.2.6 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -108,7 +108,11 @@ public:
         "the same version number. "
         "For executables VERSION can be used to specify the build version. "
         "When building or installing appropriate symlinks are created if "
-        "the platform supports symlinks.\n"
+        "the platform supports symlinks. "
+        "For shared libraries and executables on Windows the VERSION "
+        "attribute is parsed to extract a \"major.minor\" version number. "
+        "These numbers are used as the image version of the binary. "
+        "\n"
         "There are a few properties used to specify RPATH rules. "
         "INSTALL_RPATH is a semicolon-separated list specifying the rpath "
         "to use in installed targets (for platforms that support it). "
@@ -133,11 +137,22 @@ public:
         "the target in an IDE like visual studio.  VS_KEYWORD can be set "
         "to change the visual studio keyword, for example QT integration "
         "works better if this is set to Qt4VSv1.0.\n"
+        "When a library is built CMake by default generates code to remove "
+        "any existing library using all possible names.  This is needed "
+        "to support libraries that switch between STATIC and SHARED by "
+        "a user option.  However when using OUTPUT_NAME to build a static "
+        "and shared library of the same name using different logical target "
+        "names the two targets will remove each other's files.  This can be "
+        "prevented by setting the CLEAN_DIRECT_OUTPUT property to 1.\n"
         "The PRE_INSTALL_SCRIPT and POST_INSTALL_SCRIPT properties are the "
         "old way to specify CMake scripts to run before and after "
         "installing a target.  They are used only when the old "
         "INSTALL_TARGETS command is used to install the target.  Use the "
         "INSTALL command instead."
+        "\n"
+        "The EXCLUDE_FROM_DEFAULT_BUILD property is used by the visual "
+        "studio generators.  If it is set to 1 the target will not be "
+        "part of the default build when you select \"Build Solution\"."
         ;
     }
   

@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCPackTarBZip2Generator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/05/07 14:55:39 $
-  Version:   $Revision: 1.1.2.1 $
+  Date:      $Date: 2006/10/30 16:36:07 $
+  Version:   $Revision: 1.1.2.2 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -108,7 +108,7 @@ int cmCPackTarBZip2Generator::CompressFiles(const char* outFileName,
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem renaming: \""
         << compressOutFile.c_str() << "\" to \""
-        << outFileName << std::endl);
+        << (outFileName ? outFileName : "(NULL)") << std::endl);
       return 0;
       }
     }

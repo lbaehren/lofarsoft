@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCTestCoverageHandler.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/03/29 17:01:24 $
-  Version:   $Revision: 1.31 $
+  Date:      $Date: 2006/10/27 20:01:49 $
+  Version:   $Revision: 1.31.2.2 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -180,6 +180,12 @@ int cmCTestCoverageHandler::ProcessHandler()
 {
   int error = 0;
 
+  // do we have time for this
+  if (this->CTest->GetRemainingTimeAllowed() < 120)
+    {
+    return error;
+    }
+  
   std::string sourceDir
     = this->CTest->GetCTestConfiguration("SourceDirectory");
   std::string binaryDir
@@ -251,9 +257,11 @@ int cmCTestCoverageHandler::ProcessHandler()
 
   if ( files.size() == 0 )
     {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, " Cannot find any coverage files."
+    cmCTestLog(this->CTest, WARNING,
+      " Cannot find any coverage files. Ignoring Coverage request."
       << std::endl);
     // No coverage files is a valid thing, so the exit code is 0
+    cmSystemTools::ChangeDirectory(currentDirectory.c_str());
     return 0;
     }
 
@@ -602,7 +610,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
       "Cannot open coverage summary file." << std::endl);
-
+    cmSystemTools::ChangeDirectory(currentDirectory.c_str());
     return -1;
     }
 
@@ -615,6 +623,7 @@ int cmCTestCoverageHandler::ProcessHandler()
   int logFileCount = 0;
   if ( !this->StartCoverageLogFile(covLogFile, logFileCount) )
     {
+    cmSystemTools::ChangeDirectory(currentDirectory.c_str());
     return -1;
     }
   totalCoverageMap::iterator fileIterator;
@@ -650,6 +659,7 @@ int cmCTestCoverageHandler::ProcessHandler()
       logFileCount ++;
       if ( !this->StartCoverageLogFile(covLogFile, logFileCount) )
         {
+        cmSystemTools::ChangeDirectory(currentDirectory.c_str());
         return -1;
         }
       }
@@ -707,7 +717,8 @@ int cmCTestCoverageHandler::ProcessHandler()
     std::string line;
     for ( cc= 0; cc < fcov.size(); cc ++ )
       {
-      if ( !cmSystemTools::GetLineFromStream(ifs, line) )
+      if ( !cmSystemTools::GetLineFromStream(ifs, line) &&
+        cc != fcov.size() -1 )
         {
         cmOStringStream ostr;
         ostr << "Problem reading source file: " << fullFileName.c_str()

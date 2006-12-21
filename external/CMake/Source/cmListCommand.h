@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmListCommand.h,v $
   Language:  C++
-  Date:      $Date: 2006/05/16 18:04:08 $
-  Version:   $Revision: 1.2.2.3 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.2.2.4 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -93,6 +93,8 @@ protected:
   bool HandleInsertCommand(std::vector<std::string> const& args);
   bool HandleRemoveAtCommand(std::vector<std::string> const& args);
   bool HandleRemoveItemCommand(std::vector<std::string> const& args);
+  bool HandleSortCommand(std::vector<std::string> const& args);
+  bool HandleReverseCommand(std::vector<std::string> const& args);
 
 
   bool GetList(std::vector<std::string>& list, const char* var);

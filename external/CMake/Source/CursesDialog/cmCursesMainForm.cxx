@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCursesMainForm.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/03/16 16:28:13 $
-  Version:   $Revision: 1.68 $
+  Date:      $Date: 2006/10/13 14:52:07 $
+  Version:   $Revision: 1.68.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -597,14 +597,6 @@ void cmCursesMainForm::UpdateStatusBar(const char* message)
   pos_form_cursor(this->Form);
 }
 
-void cmCursesMainForm::UpdateProgressOld(const char *msg, float prog, void*)
-{
-  if ( prog < 0 )
-    {
-    std::cout << "-- " << msg << std::endl;
-    }
-}
-
 void cmCursesMainForm::UpdateProgress(const char *msg, float prog, void* vp)
 {
   cmCursesMainForm* cm = static_cast<cmCursesMainForm*>(vp);
@@ -810,8 +802,8 @@ void cmCursesMainForm::FillCacheManagerFromUI()
         {
         // The user has changed the value.  Mark it as modified.
         it.SetProperty("MODIFIED", true);
-        }
       it.SetValue(fixedNewValue.c_str());
+        }
       }
     }
 }

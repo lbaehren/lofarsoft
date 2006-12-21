@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmGetTargetPropertyCommand.h,v $
   Language:  C++
-  Date:      $Date: 2005/11/16 17:11:14 $
-  Version:   $Revision: 1.9 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.9.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -58,10 +58,17 @@ public:
         "will be set to \"NOTFOUND\".  Use SET_TARGET_PROPERTIES to set "
         "property values.  Properties are usually used to control how "
         "a target is built.\n"
+        "The read-only property \"<CONFIG>_LOCATION\" provides the full "
+        "path to the file on disk that will be created for the target when "
+        "building under configuration <CONFIG> "
+        "(in upper-case, such as \"DEBUG_LOCATION\"). "
         "The read-only property \"LOCATION\" specifies "
         "the full path to the file on disk that will be created for the "
-        "target.  This is very useful for executable targets to get "
-        "the path to the executable file for use in a custom command. "
+        "target. The path may contain a build-system-specific portion that "
+        "is replaced at build time with the configuration getting built "
+        "(such as \"$(ConfigurationName)\" in VS). "
+        "This is very useful for executable targets to get "
+        "the path to the executable file for use in a custom command.\n"
         "The read-only property \"TYPE\" returns which type the specified "
         "target has (EXECUTABLE, STATIC_LIBRARY, SHARED_LIBRARY, "
         "MODULE_LIBRARY, UTILITY, INSTALL_FILES or INSTALL_PROGRAMS). "

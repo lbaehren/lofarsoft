@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCTestScriptHandler.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/07/24 15:19:36 $
-  Version:   $Revision: 1.31.2.3 $
+  Date:      $Date: 2006/10/27 20:01:49 $
+  Version:   $Revision: 1.31.2.5 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -364,7 +364,8 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   this->Makefile->AddFunctionBlocker(f);
 
   // finally read in the script
-  if (!this->Makefile->ReadListFile(0, script.c_str()))
+  if (!this->Makefile->ReadListFile(0, script.c_str()) ||
+    cmSystemTools::GetErrorOccuredFlag())
     {
     return 2;
     }
@@ -385,6 +386,11 @@ int cmCTestScriptHandler::ExtractVariables()
     = this->Makefile->GetSafeDefinition("CTEST_SOURCE_DIRECTORY");
   this->BinaryDir
     = this->Makefile->GetSafeDefinition("CTEST_BINARY_DIRECTORY");
+
+  // add in translations for src and bin
+  cmSystemTools::AddKeepPath(this->SourceDir.c_str());
+  cmSystemTools::AddKeepPath(this->BinaryDir.c_str());
+
   this->CTestCmd
     = this->Makefile->GetSafeDefinition("CTEST_COMMAND");
   this->CVSCheckOut
@@ -958,4 +964,25 @@ bool cmCTestScriptHandler::EmptyBinaryDirectory(const char *sname)
     return false;
     }
   return true;
+}
+
+//-------------------------------------------------------------------------
+double cmCTestScriptHandler::GetRemainingTimeAllowed()
+{
+  if (!this->Makefile)
+    {
+    return 1.0e7;
+    }
+
+  const char *timelimitS
+    = this->Makefile->GetDefinition("CTEST_TIME_LIMIT");
+  
+  if (!timelimitS)
+    {
+    return 1.0e7;
+    }
+
+  double timelimit = atof(timelimitS);
+  
+  return timelimit - cmSystemTools::GetTime() + this->ScriptStartTime;
 }

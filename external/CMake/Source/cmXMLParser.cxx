@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmXMLParser.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/03/30 18:49:55 $
-  Version:   $Revision: 1.4 $
+  Date:      $Date: 2006/10/27 20:01:48 $
+  Version:   $Revision: 1.4.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -16,7 +16,7 @@
 =========================================================================*/
 #include "cmXMLParser.h"
 
-#include <cmexpat/expat.h>
+#include <cm_expat.h>
 #include <ctype.h>
 
 //----------------------------------------------------------------------------

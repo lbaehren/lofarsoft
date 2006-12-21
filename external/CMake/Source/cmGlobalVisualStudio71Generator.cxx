@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmGlobalVisualStudio71Generator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/05/11 20:05:57 $
-  Version:   $Revision: 1.30.2.2 $
+  Date:      $Date: 2006/11/10 15:12:55 $
+  Version:   $Revision: 1.30.2.4 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -254,13 +254,16 @@ void cmGlobalVisualStudio71Generator
         const cmCustomCommandLines& cmds = cc.GetCommandLines();
         std::string project = cmds[0][0];
         this->WriteProjectConfigurations(fout, project.c_str(), 
-                                         l->second.IsInAll());
+                                         true);
         }
       else if ((l->second.GetType() != cmTarget::INSTALL_FILES)
                && (l->second.GetType() != cmTarget::INSTALL_PROGRAMS))
         {
+        bool partOfDefaultBuild = this->IsPartOfDefaultBuild(
+          root->GetMakefile()->GetProjectName(),
+          &l->second);
         this->WriteProjectConfigurations(fout, si->c_str(), 
-                                         l->second.IsInAll());
+                                         partOfDefaultBuild);
         ++si;
         }
       }
@@ -294,10 +297,10 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
                                               const char* dir,
                                               cmTarget& t)
 {
-  std::string d = cmSystemTools::ConvertToOutputPath(dir);
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
        << dspname << "\", \""
-       << d << "\\" << dspname << ".vcproj\", \"{"
+       << this->ConvertToSolutionPath(dir)
+       << "\\" << dspname << ".vcproj\", \"{"
        << this->GetGUID(dspname) << "}\"\n";
   fout << "\tProjectSection(ProjectDependencies) = postProject\n";
   this->WriteProjectDepends(fout, dspname, dir, t);
@@ -379,10 +382,9 @@ void cmGlobalVisualStudio71Generator
                                const char* location,
                                const std::vector<std::string>& depends)
 { 
-    std::string d = cmSystemTools::ConvertToOutputPath(location);
   fout << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" 
        << name << "\", \""
-       << d << "\", \"{"
+       << this->ConvertToSolutionPath(location) << "\", \"{"
        << this->GetGUID(name)
        << "}\"\n";
   
@@ -415,9 +417,8 @@ void cmGlobalVisualStudio71Generator
 // Write a dsp file into the SLN file, Note, that dependencies from
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator
-::WriteProjectConfigurations(std::ostream& fout, 
-                                                           const char* name, 
-                                                           bool in_all_build)
+::WriteProjectConfigurations(std::ostream& fout, const char* name,
+                             bool partOfDefaultBuild)
 {
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
@@ -425,7 +426,7 @@ void cmGlobalVisualStudio71Generator
     {
     fout << "\t\t{" << guid << "}." << *i 
          << ".ActiveCfg = " << *i << "|Win32\n";
-    if (in_all_build)
+    if(partOfDefaultBuild)
       {
       fout << "\t\t{" << guid << "}." << *i 
            << ".Build.0 = " << *i << "|Win32\n";

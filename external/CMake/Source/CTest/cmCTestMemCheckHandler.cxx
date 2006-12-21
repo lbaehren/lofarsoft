@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCTestMemCheckHandler.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/03/30 18:49:56 $
-  Version:   $Revision: 1.12 $
+  Date:      $Date: 2006/10/27 20:01:49 $
+  Version:   $Revision: 1.12.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -334,7 +334,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     }
   else
     {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
+    cmCTestLog(this->CTest, WARNING,
       "Memory checker (MemoryCheckCommand) "
       "not set, or cannot find the specified program."
       << std::endl);

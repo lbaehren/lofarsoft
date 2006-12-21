@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCPackZIPGenerator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/05/11 14:33:21 $
-  Version:   $Revision: 1.2.2.2 $
+  Date:      $Date: 2006/10/13 14:52:07 $
+  Version:   $Revision: 1.2.2.3 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -91,20 +91,22 @@ int cmCPackZIPGenerator::CompressFiles(const char* outFileName,
   const char* toplevel, const std::vector<std::string>& files)
 {
   std::string tempFileName;
+  tempFileName = toplevel;
+  tempFileName += "/winZip.filelist";
+  bool needQuotesInFile = false;
   cmOStringStream dmgCmd;
   switch ( this->ZipStyle )
     {
   case cmCPackZIPGenerator::StyleWinZip:
-    tempFileName = toplevel;
-    tempFileName += "/winZip.filelist";
     dmgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
       << "\" -P \"" << outFileName
-           << "\" @\"" << tempFileName.c_str() << "\"";
+           << "\" @winZip.filelist";
+    needQuotesInFile = true;
     break;
   case cmCPackZIPGenerator::StyleUnixZip:
     dmgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM")
-      << "\" \"" << outFileName
-      << "\"";
+      << "\" -r \"" << outFileName
+      << "\" . -i@winZip.filelist";
     break;
   default:
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Unknown ZIP style"
@@ -117,9 +119,16 @@ int cmCPackZIPGenerator::CompressFiles(const char* outFileName,
     std::vector<std::string>::const_iterator fileIt;
     for ( fileIt = files.begin(); fileIt != files.end(); ++ fileIt )
       {
-      out << "\""
-          << cmSystemTools::RelativePath(toplevel, fileIt->c_str())
-          << "\"" << std::endl;
+      if ( needQuotesInFile )
+        {
+        out << "\"";
+        }
+      out << cmSystemTools::RelativePath(toplevel, fileIt->c_str());
+      if ( needQuotesInFile )
+        {
+        out << "\"";
+        }
+      out << std::endl;
       }
     }
   else

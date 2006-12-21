@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCTestBuildHandler.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/07/24 15:19:36 $
-  Version:   $Revision: 1.42.2.3 $
+  Date:      $Date: 2006/11/10 15:12:55 $
+  Version:   $Revision: 1.42.2.6 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -37,6 +37,9 @@
 #include <math.h>
 #include <float.h>
 
+#if defined(__BORLANDC__)
+# pragma warn -8060 /* possibly incorrect assignment */
+#endif
 
 static const char* cmCTestErrorMatches[] = {
   "^[Bb]us [Ee]rror",
@@ -72,7 +75,7 @@ static const char* cmCTestErrorMatches[] = {
   ": Can't find library for",
   ": internal link edit command failed",
   ": Unrecognized option \\`.*\\'",
-  "\", line [0-9]+\\.[0-9]+: [0-9]+-[0-9]+ \\([^W]\\)",
+  "\", line [0-9]+\\.[0-9]+: [0-9]+-[0-9]+ \\([^WI]\\)",
   "ld: 0706-006 Cannot find or open library file: -l ",
   "ild: \\(argument error\\) can't find library argument ::",
   "^could not be found and will not be loaded.",
@@ -96,6 +99,7 @@ static const char* cmCTestErrorExceptions[] = {
   "candidates are:",
   ": warning",
   ": \\(Warning\\)",
+  ": note",
   "makefile:",
   "Makefile:",
   ":[ \\t]+Where:",
@@ -106,6 +110,7 @@ static const char* cmCTestErrorExceptions[] = {
 
 static const char* cmCTestWarningMatches[] = {
   "([^ :]+):([0-9]+): warning:",
+  "([^ :]+):([0-9]+): note:",
   "^cc[^C]*CC: WARNING File = ([^,]+), Line = ([0-9]+)",
   "^ld([^:])*:([ \\t])*WARNING([^:])*:",
   "([^:]+): warning ([0-9]+):",
@@ -116,7 +121,7 @@ static const char* cmCTestWarningMatches[] = {
   "WARNING: ",
   "([^ :]+) : warning",
   "([^:]+): warning",
-  "\", line [0-9]+\\.[0-9]+: [0-9]+-[0-9]+ \\(W\\)",
+  "\", line [0-9]+\\.[0-9]+: [0-9]+-[0-9]+ \\([WI]\\)",
   "^cxx: Warning:",
   ".*file: .* has no symbols",
   "([^ :]+):([0-9]+): (Warning|Warnung)",
@@ -244,6 +249,12 @@ void cmCTestBuildHandler::PopulateCustomVectors(cmMakefile *mf)
 int cmCTestBuildHandler::ProcessHandler()
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "Build project" << std::endl);
+
+  // do we have time for this
+  if (this->CTest->GetRemainingTimeAllowed() < 120)
+    {
+    return 0;
+    }
 
   int entry;
   for ( entry = 0;
@@ -822,7 +833,8 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, int length,
         {
         // This is not an error or warning.
         // So, figure out if this is a post-context line
-        if ( this->LastErrorOrWarning != this->ErrorsAndWarnings.end() &&
+        if ( this->ErrorsAndWarnings.size() && 
+             this->LastErrorOrWarning != this->ErrorsAndWarnings.end() &&
           this->PostContextCount < this->MaxPostContext )
           {
           this->PostContextCount ++;

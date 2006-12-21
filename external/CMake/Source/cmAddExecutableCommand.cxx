@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmAddExecutableCommand.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/05/11 02:15:08 $
-  Version:   $Revision: 1.25.2.1 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.25.2.2 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -31,6 +31,7 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
   ++s;
   bool use_win32 = false;
   bool use_macbundle = false;
+  bool in_all = true;
   while ( s != args.end() )
     {
     if (*s == "WIN32")
@@ -42,6 +43,11 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
       {
       ++s;
       use_macbundle = true;
+      }
+    else if(*s == "EXCLUDE_FROM_ALL")
+      {
+      ++s;
+      in_all = false;
       }
     else
       {
@@ -57,7 +63,8 @@ bool cmAddExecutableCommand::InitialPass(std::vector<std::string> const& args)
     }
 
   std::vector<std::string> srclists(s, args.end());
-  cmTarget* tgt = this->Makefile->AddExecutable(exename.c_str(), srclists); 
+  cmTarget* tgt = this->Makefile->AddExecutable(exename.c_str(), srclists,
+                                                in_all);
   if ( use_win32 )
     {
     tgt->SetProperty("WIN32_EXECUTABLE", "ON");

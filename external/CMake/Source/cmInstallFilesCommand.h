@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmInstallFilesCommand.h,v $
   Language:  C++
-  Date:      $Date: 2006/03/15 16:02:04 $
-  Version:   $Revision: 1.16 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.16.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -94,6 +94,12 @@ public:
       "is stored in the variable CMAKE_INSTALL_PREFIX.";
     }
   
+  /** This command is kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged()
+    {
+    return true;
+    }
+
   cmTypeMacro(cmInstallFilesCommand, cmCommand);
 
 protected:

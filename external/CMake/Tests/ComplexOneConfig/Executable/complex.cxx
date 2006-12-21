@@ -8,7 +8,7 @@
 extern "C" {
 #include "testConly.h"
 }
-#ifndef CMAKE_TEST_DIFFERENT_GENERATOR
+#ifdef COMPLEX_TEST_CMAKELIB
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
 #include "cmDynamicLoader.h"
@@ -23,6 +23,12 @@ extern "C" {
 #include <string.h>
 #endif
 
+#ifdef COMPLEX_TEST_LINK_STATIC
+extern "C"
+{
+  int TestLinkGetType();
+}
+#endif
 
 int cm_passed = 0;
 int cm_failed = 0;
@@ -58,7 +64,7 @@ void cmPassed(const char* Message, const char* m2="")
 This is a problem. Looks like ADD_DEFINITIONS and REMOVE_DEFINITIONS does not work
 #endif
 
-#ifndef CMAKE_TEST_DIFFERENT_GENERATOR
+#ifdef COMPLEX_TEST_CMAKELIB
 // Here is a stupid function that tries to use std::string methods
 // so that the dec cxx compiler will instantiate the stuff that
 // we are using from the CMakeLib library....
@@ -102,7 +108,7 @@ bool TestLibraryOrder(bool shouldFail)
   orderLibs.DebugOn();
   orderLibs.AddLinkExtension(".so");
   orderLibs.AddLinkExtension(".a");
-  orderLibs.SetLinkPrefix("lib");
+  orderLibs.AddLinkPrefix("lib");
   cmTargetManifest manifest;
   orderLibs.SetLinkInformation("test", linkLibraries, linkDirectories,
                                manifest, "");
@@ -321,7 +327,7 @@ int main()
 #endif
   std::string exe = lib;
 
-#ifndef CMAKE_TEST_DIFFERENT_GENERATOR  
+#ifdef COMPLEX_TEST_CMAKELIB  
   // Test a single character executable to test a: in makefiles
   exe += "A";
   exe += cmSystemTools::GetExecutableExtension();
@@ -438,6 +444,12 @@ int main()
   cmPassed("COMPILE_FLAGS did work with SET_TARGET_PROPERTIES");
 #endif
   
+#ifdef ELSEIF_RESULT
+  cmPassed("ELSEIF did work");
+#else
+  cmFailed("ELSEIF did not work");
+#endif
+
   if(file2() != 1)
     {
     cmFailed("Call to file2 function from library failed.");
@@ -1047,7 +1059,7 @@ int main()
     }
 #endif
 
-#ifndef CMAKE_TEST_DIFFERENT_GENERATOR  
+#ifdef COMPLEX_TEST_CMAKELIB  
   // ----------------------------------------------------------------------
   // Some pre-build/pre-link/post-build custom-commands have been
   // attached to the lib (see Library/).
@@ -1245,7 +1257,7 @@ int main()
   cmPassed("CMake SET CACHE FORCE");
 #endif
 
-#ifndef CMAKE_TEST_DIFFERENT_GENERATOR
+#ifdef COMPLEX_TEST_CMAKELIB
   // first run with shouldFail = true, this will
   // run with A B C as set by the CMakeList.txt file.
   if(!TestLibraryOrder(true))
@@ -1270,7 +1282,18 @@ int main()
   // Test the generated file stream.
   TestCMGeneratedFileSTream();
 #endif
-  
+
+#ifdef COMPLEX_TEST_LINK_STATIC
+  if(TestLinkGetType())
+    {
+    cmPassed("Link to static over shared worked.");
+    }
+  else
+    {
+    cmFailed("Link to static over shared failed.");
+    }
+#endif
+
   // ----------------------------------------------------------------------
   // Summary
 

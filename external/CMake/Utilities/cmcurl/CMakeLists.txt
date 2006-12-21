@@ -18,6 +18,11 @@ SET(OPERATING_SYSTEM "${CMAKE_SYSTEM_NAME}")
 SET(CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
 SET(CMAKE_REQUIRED_FLAGS ${CMAKE_ANSI_CFLAGS})
 
+# Disable warnings on Borland to avoid changing 3rd party code.
+IF(BORLAND)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w-")
+ENDIF(BORLAND)
+
 # If we are on AIX, do the _ALL_SOURCE magic
 IF(${CMAKE_SYSTEM_NAME} MATCHES AIX)
   SET(_ALL_SOURCE 1)
@@ -380,6 +385,9 @@ MACRO(CURL_INTERNAL_TEST CURL_TEST)
     IF(${CURL_TEST})
       SET(${CURL_TEST} 1 CACHE INTERNAL "Curl test ${FUNCTION}")
       MESSAGE(STATUS "Performing Curl Test ${CURL_TEST} - Success")
+      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
+        "Performing Curl Test ${CURL_TEST} passed with the following output:\n"
+        "${OUTPUT}\n")
     ELSE(${CURL_TEST})
       MESSAGE(STATUS "Performing Curl Test ${CURL_TEST} - Failed")
       SET(${CURL_TEST} "" CACHE INTERNAL "Curl test ${FUNCTION}")

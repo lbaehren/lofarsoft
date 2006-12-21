@@ -478,8 +478,8 @@ static yyconst flex_int32_t yy_rule_can_match_eol[15] =
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmListFileLexer.c,v $
   Language:  C++
-  Date:      $Date: 2005/09/19 21:20:48 $
-  Version:   $Revision: 1.12 $
+  Date:      $Date: 2006/10/13 14:52:03 $
+  Version:   $Revision: 1.12.4.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -503,32 +503,15 @@ Modify cmListFileLexer.c:
   - add a statement "(void)yyscanner;" to the top of these methods:
       yy_fatal_error, cmListFileLexer_yyalloc, cmListFileLexer_yyrealloc, cmListFileLexer_yyfree
   - remove all YY_BREAK lines occurring right after return statements
+  - remove the isatty forward declaration
 
 */
 
-/* Disable features we do not need. */
-#define YY_NEVER_INTERACTIVE 1
-#define YY_NO_INPUT 1
-#define YY_NO_UNPUT 1
-#define YY_NO_UNISTD_H 1
-#define ECHO
+#include "cmStandardLexer.h"
 
 /* Setup the proper cmListFileLexer_yylex declaration.  */
 #define YY_EXTRA_TYPE cmListFileLexer*
 #define YY_DECL int cmListFileLexer_yylex (yyscan_t yyscanner, cmListFileLexer* lexer)
-
-/* Disable some warnings.  */
-#if defined(_MSC_VER)
-# pragma warning ( disable : 4127 )
-# pragma warning ( disable : 4131 )
-# pragma warning ( disable : 4244 )
-# pragma warning ( disable : 4251 )
-# pragma warning ( disable : 4267 )
-# pragma warning ( disable : 4305 )
-# pragma warning ( disable : 4309 )
-# pragma warning ( disable : 4706 )
-# pragma warning ( disable : 4786 )
-#endif
 
 #include "cmListFileLexer.h"
 
@@ -1526,10 +1509,6 @@ static void cmListFileLexer_yy_load_buffer_state  (yyscan_t yyscanner)
         cmListFileLexer_yyfree((void *) b ,yyscanner );
 }
 
-#ifndef __cplusplus
-extern int isatty (int );
-#endif /* __cplusplus */
-    
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
  * such as during a cmListFileLexer_yyrestart() or at EOF.

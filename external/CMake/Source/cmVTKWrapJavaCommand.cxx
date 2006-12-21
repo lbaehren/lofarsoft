@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmVTKWrapJavaCommand.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/05/14 19:22:44 $
-  Version:   $Revision: 1.30.2.1 $
+  Date:      $Date: 2006/10/13 14:52:06 $
+  Version:   $Revision: 1.30.2.2 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -190,9 +190,8 @@ void cmVTKWrapJavaCommand::FinalPass()
     alldepends.push_back(res2);
     }
 
-  const char* no_output = 0;
   const char* no_working_directory = 0;
-  this->Makefile->AddUtilityCommand((this->LibraryName+"JavaClasses").c_str(),
-                                true, no_output, 
-                                alldepends, no_working_directory, "");
+  this->Makefile->AddUtilityCommand(
+    (this->LibraryName+"JavaClasses").c_str(),
+    true, alldepends, no_working_directory, "");
 }

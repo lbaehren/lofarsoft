@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmakemain.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/06/30 17:48:46 $
-  Version:   $Revision: 1.50.2.3 $
+  Date:      $Date: 2006/10/13 14:52:06 $
+  Version:   $Revision: 1.50.2.4 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -85,6 +85,9 @@ static const cmDocumentationEntry cmDocumentationOptions[] =
   {"--debug-trycompile", "Do not delete the try compile directories..",
    "Do not delete the files and directories created for try_compile calls. "
    "This is useful in debugging failed try_compiles."},
+  {"--debug-output", "Put cmake in a debug mode.",
+   "Print extra stuff during the cmake run like stack traces with "
+   "message(send_error ) calls."},
   {"--help-command cmd [file]", "Print help for a single command and exit.",
    "Full documentation specific to the given command is displayed."},
   {"--help-command-list [file]", "List available listfile commands and exit.",

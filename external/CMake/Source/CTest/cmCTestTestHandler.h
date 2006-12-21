@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCTestTestHandler.h,v $
   Language:  C++
-  Date:      $Date: 2006/03/16 16:34:58 $
-  Version:   $Revision: 1.18 $
+  Date:      $Date: 2006/10/27 20:01:50 $
+  Version:   $Revision: 1.18.2.1 $
 
   Copyright (c) 2002 Kitware, Inc. All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -73,6 +73,20 @@ public:
    */
   bool SetTestsProperties(const std::vector<std::string>& args);
 
+  void Initialize();
+
+  struct cmCTestTestProperties
+  {
+    cmStdString Name;
+    cmStdString Directory;
+    std::vector<std::string> Args;
+    std::vector<cmsys::RegularExpression> ErrorRegularExpressions;
+    std::vector<cmsys::RegularExpression> RequiredRegularExpressions;
+    std::map<cmStdString, cmStdString> Measurements;
+    bool IsInBasedOnREOptions;
+    bool WillFail;
+  };
+
   struct cmCTestTestResult
   {
     std::string Name;
@@ -85,23 +99,10 @@ public:
     std::string Output;
     std::string RegressionImages;
     int         TestCount;
+    cmCTestTestProperties* Properties;
   };
-
-  void Initialize();
 
 protected:
-  struct cmCTestTestProperties
-  {
-    cmStdString Name;
-    cmStdString Directory;
-    std::vector<std::string> Args;
-    std::vector<cmsys::RegularExpression> ErrorRegularExpressions;
-    std::vector<cmsys::RegularExpression> RequiredRegularExpressions;
-    bool IsInBasedOnREOptions;
-    bool WillFail;
-  };
-
-
   virtual int PreProcessHandler();
   virtual int PostProcessHandler();
   virtual void GenerateTestCommand(std::vector<const char*>& args);

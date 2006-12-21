@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmLinkLibrariesCommand.h,v $
   Language:  C++
-  Date:      $Date: 2005/03/18 15:41:40 $
-  Version:   $Revision: 1.15 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.15.6.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -75,6 +75,12 @@ public:
       "type of build.";
     }
   
+  /** This command is kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged()
+    {
+    return true;
+    }
+
   cmTypeMacro(cmLinkLibrariesCommand, cmCommand);
 };
 

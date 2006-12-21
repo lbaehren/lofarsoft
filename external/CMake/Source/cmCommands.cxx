@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCommands.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/04/20 20:16:32 $
-  Version:   $Revision: 1.103.2.1 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.103.2.2 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -20,7 +20,9 @@
 #include "cmAuxSourceDirectoryCommand.cxx"
 #include "cmBuildNameCommand.cxx"
 #include "cmCreateTestSourceList.cxx"
+#include "cmElseIfCommand.cxx"
 #include "cmEnableLanguageCommand.cxx"
+#include "cmEndMacroCommand.cxx"
 #include "cmEndWhileCommand.cxx"
 #include "cmExecuteProcessCommand.cxx"
 #include "cmExportLibraryDependencies.cxx"
@@ -73,7 +75,9 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmAuxSourceDirectoryCommand);
   commands.push_back(new cmBuildNameCommand);
   commands.push_back(new cmCreateTestSourceList);
+  commands.push_back(new cmElseIfCommand);
   commands.push_back(new cmEnableLanguageCommand);
+  commands.push_back(new cmEndMacroCommand);
   commands.push_back(new cmEndWhileCommand);
   commands.push_back(new cmExecuteProcessCommand);
   commands.push_back(new cmExportLibraryDependenciesCommand);

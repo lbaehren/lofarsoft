@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCTestScriptHandler.h,v $
   Language:  C++
-  Date:      $Date: 2006/04/30 14:59:20 $
-  Version:   $Revision: 1.16.2.1 $
+  Date:      $Date: 2006/10/27 20:01:49 $
+  Version:   $Revision: 1.16.2.2 $
 
   Copyright (c) 2002 Kitware, Inc. All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -95,6 +95,13 @@ public:
    */
   static void SleepInSeconds(unsigned int secondsToWait);
   void UpdateElapsedTime();
+
+  /** 
+   * Return the time remaianing that the script is allowed to run in
+   * seconds if the user has set the variable CTEST_TIME_LIMIT. If that has
+   * not been set it returns 1e7 seconds
+   */
+  double GetRemainingTimeAllowed();
 
   cmCTestScriptHandler();
   ~cmCTestScriptHandler();

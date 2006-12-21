@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmake.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/07/24 15:19:36 $
-  Version:   $Revision: 1.247.2.6 $
+  Date:      $Date: 2006/11/10 15:12:55 $
+  Version:   $Revision: 1.247.2.9 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -111,6 +111,7 @@ void cmNeedBackwardsCompatibility(const std::string& variable,
 
 cmake::cmake()
 {
+  this->DebugOutput = false;
   this->DebugTryCompile = false;
   this->ClearBuildSystem = false;
   this->FileComparison = new cmFileTimeComparison;
@@ -445,6 +446,11 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       {
       std::cout << "debug trycompile on\n";
       this->DebugTryCompileOn();
+      }
+    else if(arg.find("--debug-output",0) == 0)
+      {
+      std::cout << "Running with debug output on.\n";
+      this->DebugOutputOn();
       }
     else if(arg.find("-G",0) == 0)
       {
@@ -990,6 +996,9 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       std::string dirName = args[2];
       dirName += "/Progress";
       cmSystemTools::RemoveADirectory(dirName.c_str());
+      int count = atoi(args[3].c_str());
+      if (count)
+        {
       cmSystemTools::MakeDirectory(dirName.c_str());
       // write the count into the directory
       std::string fName = dirName;
@@ -997,9 +1006,9 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       FILE *progFile = fopen(fName.c_str(),"w");
       if (progFile)
         {
-        int count = atoi(args[3].c_str());
         fprintf(progFile,"%i\n",count);
         fclose(progFile);
+        }
         }
       return 0;
       }
@@ -1011,6 +1020,21 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       dirName += "/Progress";
       std::string fName;
       FILE *progFile;
+
+      // read the count
+      fName = dirName;
+      fName += "/count.txt";
+      progFile = fopen(fName.c_str(),"r");
+      int count = 0;
+      if (!progFile)
+        {
+        return 0;
+        }
+      else
+        {
+        fscanf(progFile,"%i",&count);
+        fclose(progFile);
+        }
       unsigned int i;
       for (i = 3; i < args.size(); ++i)
         {
@@ -1026,20 +1050,10 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
         }
       int fileNum = static_cast<int>
         (cmsys::Directory::GetNumberOfFilesInDirectory(dirName.c_str()));
-      // read the count
-      fName = dirName;
-      fName += "/count.txt";
-      progFile = fopen(fName.c_str(),"r");
-      if (progFile)
-        {
-        int count = 0;
-        fscanf(progFile,"%i",&count);
         if (count > 0)
           {
           // print the progress
           fprintf(stdout,"[%3i%%] ",((fileNum-3)*100)/count);
-          }
-        fclose(progFile);
         }
       return 0;
       }
@@ -1184,6 +1198,18 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
       return cmake::ExecuteLinkScript(args);
       }
 
+    // Internal CMake unimplemented feature notification.
+    else if (args[1] == "cmake_unimplemented_variable")
+      {
+      std::cerr << "Feature not implemented for this platform.";
+      if(args.size() == 3)
+        {
+        std::cerr << "  Variable " << args[2] << " is not set.";
+        }
+      std::cerr << std::endl;
+      return 1;
+      }
+
 #ifdef CMAKE_BUILD_WITH_CMAKE
     // Internal CMake color makefile support.
     else if (args[1] == "cmake_echo_color")
@@ -1281,6 +1307,7 @@ int cmake::ExecuteCMakeCommand(std::vector<std::string>& args)
   return 1;
 }
 
+//----------------------------------------------------------------------------
 void cmake::GetRegisteredGenerators(std::vector<std::string>& names)
 {
   for(RegisteredGeneratorsMap::const_iterator i = this->Generators.begin();
@@ -1319,6 +1346,11 @@ void cmake::SetHomeOutputDirectory(const char* lib)
 
 void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
 {
+  if(!gg)
+    {
+    cmSystemTools::Error("Error SetGlobalGenerator called with null");
+    return;
+    }
   // delete the old generator
   if (this->GlobalGenerator)
     {
@@ -1687,7 +1719,6 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
   this->SetArgs(args);
   if(cmSystemTools::GetErrorOccuredFlag())
     {
-    CMakeCommandUsage(args[0].c_str());
     return -1;
     }
 

@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCommand.h,v $
   Language:  C++
-  Date:      $Date: 2006/03/15 16:01:59 $
-  Version:   $Revision: 1.23 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.23.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -97,6 +97,15 @@ public:
    * This determines if the method is deprecated or not. 
    */
   virtual bool IsDeprecated(int /*major*/, int /*minor*/)
+    {
+    return false;
+    }
+
+  /**
+   * This determines if usage of the method is discouraged or not.
+   * This is currently only used for generating the documentation.
+   */
+  virtual bool IsDiscouraged()
     {
     return false;
     }

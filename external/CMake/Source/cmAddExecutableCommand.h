@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmAddExecutableCommand.h,v $
   Language:  C++
-  Date:      $Date: 2006/03/10 18:06:25 $
-  Version:   $Revision: 1.14 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.14.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -62,8 +62,8 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ADD_EXECUTABLE(exename [WIN32] [MACOSX_BUNDLE] source1\n"
-      "                 source2 ... sourceN)\n"
+      "  ADD_EXECUTABLE(exename [WIN32] [MACOSX_BUNDLE] [EXCLUDE_FROM_ALL]\n"
+      "                 source1 source2 ... sourceN)\n"
       "This command adds an executable target to the current directory.  "
       "The executable will be built from the list of source files "
       "specified.\n"
@@ -86,6 +86,9 @@ public:
       "  MACOSX_BUNDLE_SHORT_VERSION_STRING\n"
       "  MACOSX_BUNDLE_BUNDLE_VERSION\n"
       "  MACOSX_BUNDLE_COPYRIGHT\n"
+      "If EXCLUDE_FROM_ALL is given the target will not be built by default. "
+      "It will be built only if the user explicitly builds the target or "
+      "another target that requires the target depends on it."
       ;
     }
 

@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmRemoveCommand.h,v $
   Language:  C++
-  Date:      $Date: 2005/03/18 15:41:41 $
-  Version:   $Revision: 1.6 $
+  Date:      $Date: 2006/10/13 14:52:06 $
+  Version:   $Revision: 1.6.6.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -56,7 +56,7 @@ public:
    */
   virtual const char* GetTerseDocumentation() 
     {
-    return "Remove a value from a list in a variable.";
+    return "Old list item removal command.  Use the LIST command.";
     }
   
   /**
@@ -65,10 +65,18 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
+      "This command has been superceded by the LIST(REMOVE ...) command.  "
+      "It is provided for compatibility with older CMake code.\n"
       "  REMOVE(VAR VALUE VALUE ...)\n"
       "Removes VALUE from the variable VAR.  "
       "This is typically used to remove entries from a vector "
       "(e.g. semicolon separated list).  VALUE is expanded.";
+    }
+  
+  /** This command is kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged()
+    {
+    return true;
     }
   
   cmTypeMacro(cmRemoveCommand, cmCommand);

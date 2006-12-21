@@ -19,6 +19,7 @@ INCLUDE_DIRECTORIES(
   ${CMAKE_ZLIB_INCLUDES}
   ${CMAKE_EXPAT_INCLUDES}
   ${CMAKE_TAR_INCLUDES}
+  ${CMAKE_COMPRESS_INCLUDES}
   )
 
 # let cmake know it is supposed to use it
@@ -122,6 +123,8 @@ SET(SRCS
   cmInstallScriptGenerator.cxx
   cmInstallTargetGenerator.h
   cmInstallTargetGenerator.cxx
+  cmInstallDirectoryGenerator.h
+  cmInstallDirectoryGenerator.cxx
   cmListFileCache.cxx
   cmListFileCache.h
   cmListFileLexer.c
@@ -215,11 +218,13 @@ ENDIF (WIN32)
 
 # create a library used by the command line and the GUI
 ADD_LIBRARY(CMakeLib ${SRCS})
-TARGET_LINK_LIBRARIES(CMakeLib cmsys ${CMAKE_EXPAT_LIBRARIES} ${CMAKE_ZLIB_LIBRARIES} ${CMAKE_TAR_LIBRARIES})
+TARGET_LINK_LIBRARIES(CMakeLib cmsys
+  ${CMAKE_EXPAT_LIBRARIES} ${CMAKE_ZLIB_LIBRARIES}
+  ${CMAKE_TAR_LIBRARIES} ${CMAKE_COMPRESS_LIBRARIES})
 
 # On Apple we need Carbon
 IF(APPLE)
-  TARGET_LINK_LIBRARIES(CMakeLib "-framework Carbon")
+  TARGET_LINK_LIBRARIES(CMakeLib "-framework CoreFoundation")
 ENDIF(APPLE)
 
 # On some platforms we need the rpcrt4 library for the VS 7 generators.
@@ -347,12 +352,20 @@ IF(BUILD_TESTING)
     SET(CMAKE_TEST_DIFFERENT_GENERATOR TRUE)
   ENDIF(NOT CMAKE_TEST_GENERATOR)
 
+  SET(CMAKE_TEST_SYSTEM_LIBRARIES 0)
+  FOREACH(util CURL EXPAT XMLRPC ZLIB)
+    IF(CMAKE_USE_SYSTEM_${util})
+      SET(CMAKE_TEST_SYSTEM_LIBRARIES 1)
+    ENDIF(CMAKE_USE_SYSTEM_${util})
+  ENDFOREACH(util)
+
   # This variable is set by cmake, however to
   # test cmake we want to make sure that 
   # the ctest from this cmake is used for testing
   # and not the ctest from the cmake building and testing
   # cmake.
   SET(CMAKE_CTEST_COMMAND "${EXECUTABLE_OUTPUT_PATH}/ctest")
+  SET(CMAKE_CMAKE_COMMAND "${EXECUTABLE_OUTPUT_PATH}/cmake")
 
   # Should the long tests be run?
   OPTION(CMAKE_RUN_LONG_TESTS "Should the long tests be run (such as Bootstrap)." ON)
@@ -377,6 +390,29 @@ IF(BUILD_TESTING)
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-project TestTar
     --test-command TestTarExec)
+
+  ADD_TEST(TargetName ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/TargetName"
+    "${CMake_BINARY_DIR}/Tests/TargetName"
+    --build-two-config
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-project TargetName
+    --test-command ${CMAKE_CMAKE_COMMAND} -E compare_files 
+    ${CMake_SOURCE_DIR}/Tests/TargetName/scripts/hello_world
+    ${CMake_BINARY_DIR}/Tests/TargetName/scripts/hello_world)
+  ADD_TEST(LibName ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/LibName"
+    "${CMake_BINARY_DIR}/Tests/LibName"
+    --build-two-config
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-project LibName 
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/LibName/lib"
+    --test-command foobar
+    )
 
   ADD_TEST(CustomCommand  ${CMAKE_CTEST_COMMAND}
     --build-and-test 
@@ -592,11 +628,12 @@ IF(BUILD_TESTING)
       "${CMake_BINARY_DIR}/Tests/Complex"
       --build-two-config
       --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-project complex
+      --build-project Complex
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/Complex/bin"  
       --build-options
       -DCMAKE_TEST_DIFFERENT_GENERATOR:BOOL=${CMAKE_TEST_DIFFERENT_GENERATOR}
+      -DCMAKE_TEST_SYSTEM_LIBRARIES:BOOL=${CMAKE_TEST_SYSTEM_LIBRARIES}
       --test-command complex 
       )
 
@@ -605,11 +642,12 @@ IF(BUILD_TESTING)
       "${CMake_SOURCE_DIR}/Tests/ComplexOneConfig"
       "${CMake_BINARY_DIR}/Tests/ComplexOneConfig"
       --build-generator ${CMAKE_TEST_GENERATOR}
-      --build-project complex
+      --build-project Complex
       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/ComplexOneConfig/bin" 
       --build-options
       -DCMAKE_TEST_DIFFERENT_GENERATOR:BOOL=${CMAKE_TEST_DIFFERENT_GENERATOR}
+      -DCMAKE_TEST_SYSTEM_LIBRARIES:BOOL=${CMAKE_TEST_SYSTEM_LIBRARIES}
       --test-command complex)
 
 #    ADD_TEST(complexRelativePaths  ${CMAKE_CTEST_COMMAND}
@@ -691,7 +729,7 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/Testing"
     "${CMake_BINARY_DIR}/Tests/Testing"
     --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project testing
+    --build-project Testing
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Testing/bin"
     --test-command testing
@@ -702,7 +740,7 @@ IF(BUILD_TESTING)
     "${CMake_SOURCE_DIR}/Tests/Wrapping"
     "${CMake_BINARY_DIR}/Tests/Wrapping"
     --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-project wrapping
+    --build-project Wrapping
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
     --test-command wrapping
@@ -715,7 +753,7 @@ IF(BUILD_TESTING)
     QT_QT_LIBRARY
     QT_UIC_EXE)
 
-  IF (QT_FOUND AND QT_UIC_EXECUTABLE)
+  IF (QT_FOUND AND QT_WRAP_UI)
     ADD_TEST(qtwrapping  ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/Wrapping"
@@ -726,7 +764,7 @@ IF(BUILD_TESTING)
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
       --test-command qtwrapping
       )
-  ENDIF (QT_FOUND AND QT_UIC_EXECUTABLE)
+  ENDIF (QT_FOUND AND QT_WRAP_UI)
 
   ADD_TEST(testdriver1 ${CMAKE_CTEST_COMMAND}
     --build-and-test
@@ -856,7 +894,7 @@ IF(BUILD_TESTING)
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/LinkLine"
     --build-generator ${CMAKE_TEST_GENERATOR}
     --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
-    --build-project Linkline
+    --build-project LinkLine
     --test-command Exec
     )
 

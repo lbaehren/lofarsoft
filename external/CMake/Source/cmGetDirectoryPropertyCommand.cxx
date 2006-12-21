@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmGetDirectoryPropertyCommand.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/05/11 02:15:09 $
-  Version:   $Revision: 1.6.2.1 $
+  Date:      $Date: 2006/10/27 20:01:47 $
+  Version:   $Revision: 1.6.2.2 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -53,6 +53,10 @@ bool cmGetDirectoryPropertyCommand::InitialPass(
       sd += "/";
       sd += *i;
       }
+
+    // The local generators are associated with collapsed paths.
+    sd = cmSystemTools::CollapseFullPath(sd.c_str());
+
     // lookup the makefile from the directory name
     cmLocalGenerator *lg = 
       this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->

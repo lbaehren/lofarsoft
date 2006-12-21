@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmIncludeDirectoryCommand.h,v $
   Language:  C++
-  Date:      $Date: 2006/04/04 13:35:22 $
-  Version:   $Revision: 1.12 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.12.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -61,13 +61,16 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  INCLUDE_DIRECTORIES([AFTER|BEFORE] dir1 dir2 ...)\n"
+      "  INCLUDE_DIRECTORIES([AFTER|BEFORE] [SYSTEM] dir1 dir2 ...)\n"
       "Add the given directories to those searched by the compiler for "
       "include files. By default the directories are appended onto "
       "the current list of directories. This default behavior can be "
       "changed by setting CMAKE_INCLUDE_DIRECTORIES_BEFORE to ON. "
       "By using BEFORE or AFTER you can select between appending and "
-      "prepending, independent from the default. ";
+      "prepending, independent from the default. "
+      "If the SYSTEM option is given the compiler will be told that the "
+      "directories are meant as system include directories on some "
+      "platforms.";
     }
   
   cmTypeMacro(cmIncludeDirectoryCommand, cmCommand);

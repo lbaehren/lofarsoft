@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCommandArgumentParserHelper.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/07/27 14:37:07 $
-  Version:   $Revision: 1.12.2.3 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.12.2.4 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -37,6 +37,7 @@ cmCommandArgumentParserHelper::cmCommandArgumentParserHelper()
   strcpy(this->BSLASHVariable, "\\");
 
   this->NoEscapeMode = false;
+  this->ReplaceAtSyntax = false;
 }
 
 
@@ -115,6 +116,21 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
   return this->AddString(value);
 }
 
+char* cmCommandArgumentParserHelper::ExpandVariableForAt(const char* var)
+{
+  if(this->ReplaceAtSyntax)
+    {
+    return this->ExpandVariable(var);
+    }
+  else
+    {
+    std::string ref = "@";
+    ref += var;
+    ref += "@";
+    return this->AddString(ref.c_str());
+    }
+}
+
 char* cmCommandArgumentParserHelper::CombineUnions(char* in1, char* in2)
 {
   if ( !in1 )
@@ -172,6 +188,7 @@ bool cmCommandArgumentParserHelper::HandleEscapeSymbol
   case '(':
   case ')':
   case '$':
+  case '@':
   case '^':
     this->AllocateParserType(pt, &symbol, 1);
     break;

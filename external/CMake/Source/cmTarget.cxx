@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmTarget.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/06/30 17:48:46 $
-  Version:   $Revision: 1.96.2.3 $
+  Date:      $Date: 2006/11/30 23:13:49 $
+  Version:   $Revision: 1.96.2.7 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -230,15 +230,41 @@ void cmTarget::TraceVSDependencies(std::string projFile,
       unsigned int i;
       for (i = 0; i < outsf->GetCustomCommand()->GetDepends().size(); ++i)
         {
-        std::string dep = cmSystemTools::GetFilenameName(
-          outsf->GetCustomCommand()->GetDepends()[i]);
+        const std::string& fullName 
+          = outsf->GetCustomCommand()->GetDepends()[i];
+        std::string dep = cmSystemTools::GetFilenameName(fullName);
         if (cmSystemTools::GetFilenameLastExtension(dep) == ".exe")
           {
           dep = cmSystemTools::GetFilenameWithoutLastExtension(dep);
           }
-        // watch for target dependencies,
-        if(this->Makefile->GetLocalGenerator()->
-           GetGlobalGenerator()->FindTarget(0, dep.c_str()))
+        bool isUtility = false;
+        // see if we can find a target with this name
+        cmTarget* t =  this->Makefile->GetLocalGenerator()->
+          GetGlobalGenerator()->FindTarget(0, dep.c_str());
+        if(t)
+          {
+          // if we find the target and the dep was given as a full
+          // path, then make sure it was not a full path to something
+          // else, and the fact that the name matched a target was 
+          // just a coincident 
+          if(cmSystemTools::FileIsFullPath(fullName.c_str()))
+            {
+            std::string tLocation = t->GetLocation(0);
+            tLocation = cmSystemTools::GetFilenamePath(tLocation);
+            std::string depLocation = cmSystemTools::GetFilenamePath(
+              std::string(fullName));
+            if(depLocation == tLocation)
+              {
+              isUtility = true;
+              }
+            }
+          // if it was not a full path then it must be a target
+          else
+            {
+            isUtility = true;
+            }
+          }
+        if(isUtility)
           {
           // add the depend as a utility on the target
           this->AddUtility(dep.c_str());
@@ -737,7 +763,9 @@ void cmTarget::Emit( const std::string& lib,
 {
   // It's already been emitted
   if( emitted.find(lib) != emitted.end() )
+    {
     return;
+    }
 
   // Emit the dependencies only if this library node hasn't been
   // visited before. If it has, then we have a cycle. The recursion
@@ -797,7 +825,9 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
   // If the library is already in the dependency map, then it has
   // already been fully processed.
   if( dep_map.find(lib) != dep_map.end() )
+    {
     return;
+    }
 
   const char* deps = mf.GetDefinition( (lib+"_LIB_DEPENDS").c_str() );
   if( deps && strcmp(deps,"") != 0 )
@@ -857,13 +887,21 @@ const char* cmTarget::GetDirectory(const char* config)
         this->Makefile->GetSafeDefinition("EXECUTABLE_OUTPUT_PATH");
       break;
     default:
-      return 0;
+      this->Directory = this->Makefile->GetStartOutputDirectory();
+      break;
     }
   if(this->Directory.empty())
     {
     this->Directory = this->Makefile->GetStartOutputDirectory();
     }
-
+  // if LIBRARY_OUTPUT_PATH or EXECUTABLE_OUTPUT_PATH was relative
+  // then make them full paths because this directory MUST 
+  // be a full path or things will not work!!!
+  if(!cmSystemTools::FileIsFullPath(this->Directory.c_str()))
+    {
+    this->Directory = this->Makefile->GetCurrentOutputDirectory() + 
+      std::string("/") + this->Directory;
+    }
   if(config)
     {
     // Add the configuration's subdirectory.
@@ -890,6 +928,29 @@ const char* cmTarget::GetLocation(const char* config)
   return this->Location.c_str();
 }
 
+//----------------------------------------------------------------------------
+void cmTarget::GetTargetVersion(int& major, int& minor)
+{
+  // Set the default values.
+  major = 0;
+  minor = 0;
+
+  // Look for a VERSION property.
+  if(const char* version = this->GetProperty("VERSION"))
+    {
+    // Try to parse the version number and store the results that were
+    // successfully parsed.
+    int parsed_major;
+    int parsed_minor;
+    switch(sscanf(version, "%d.%d", &parsed_major, &parsed_minor))
+      {
+      case 2: minor = parsed_minor; // no break!
+      case 1: major = parsed_major; // no break!
+      default: break;
+      }
+    }
+}
+
 const char *cmTarget::GetProperty(const char* prop)
 {
   // watch for special "computed" properties that are dependent on other
@@ -908,6 +969,14 @@ const char *cmTarget::GetProperty(const char* prop)
     this->SetProperty("LOCATION", this->GetLocation(0));
     }
   
+  // Per-configuration location can be computed.
+  int len = static_cast<int>(strlen(prop));
+  if(len > 9 && strcmp(prop+len-9, "_LOCATION") == 0)
+    {
+    std::string configName(prop, len-9);
+    this->SetProperty(prop, this->GetLocation(configName.c_str()));
+    }
+
   // the type property returns what type the target is
   if (!strcmp(prop,"TYPE"))
     {
@@ -915,31 +984,31 @@ const char *cmTarget::GetProperty(const char* prop)
       {
       case cmTarget::STATIC_LIBRARY:
         return "STATIC_LIBRARY";
-        break;
+        // break; /* unreachable */
       case cmTarget::MODULE_LIBRARY:
         return "MODULE_LIBRARY";
-        break;
+        // break; /* unreachable */
       case cmTarget::SHARED_LIBRARY:
         return "SHARED_LIBRARY";
-        break;
+        // break; /* unreachable */
       case cmTarget::EXECUTABLE:
         return "EXECUTABLE";
-        break;
+        // break; /* unreachable */
       case cmTarget::UTILITY:
         return "UTILITY";
-        break;
+        // break; /* unreachable */
       case cmTarget::GLOBAL_TARGET:
         return "GLOBAL_TARGET";
-        break;
+        // break; /* unreachable */
       case cmTarget::INSTALL_FILES:
         return "INSTALL_FILES";
-        break;
+        // break; /* unreachable */
       case cmTarget::INSTALL_PROGRAMS:
         return "INSTALL_PROGRAMS";
-        break;
+        // break; /* unreachable */
       case cmTarget::INSTALL_DIRECTORY:
         return "INSTALL_DIRECTORY";
-        break;
+        // break; /* unreachable */
       }
     return 0;
     }
@@ -1158,6 +1227,17 @@ void cmTarget::GetFullNameInternal(TargetType type,
     return;
     }
 
+  // Return an empty name for the import library if this platform
+  // does not support import libraries.
+  if(implib &&
+     !this->Makefile->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"))
+    {
+    outPrefix = "";
+    outBase = "";
+    outSuffix = "";
+    return;
+    }
+
   // The implib option is only allowed for shared libraries.
   if(type != cmTarget::SHARED_LIBRARY)
     {
@@ -1235,6 +1315,17 @@ void cmTarget::GetFullNameInternal(TargetType type,
 
   // Append the per-configuration postfix.
   outBase += configPostfix?configPostfix:"";
+
+  // Name shared libraries with their version number on some platforms.
+  if(const char* version = this->GetProperty("VERSION"))
+    {
+    if(type == cmTarget::SHARED_LIBRARY && !implib &&
+       this->Makefile->IsOn("CMAKE_SHARED_LIBRARY_NAME_WITH_VERSION"))
+      {
+      outBase += "-";
+      outBase += version;
+      }
+    }
 
   // Append the suffix.
   outSuffix = targetSuffix?targetSuffix:"";
@@ -1412,16 +1503,29 @@ void cmTarget::GetExecutableNamesInternal(std::string& name,
     }
 #endif
 
+  // Get the components of the executable name.
+  std::string prefix;
+  std::string base;
+  std::string suffix;
+  this->GetFullNameInternal(type, config, false, prefix, base, suffix);
+
   // The executable name.
-  name = this->GetFullNameInternal(type, config, false);
+  name = prefix+base+suffix;
 
   // The executable's real name on disk.
+#if defined(__CYGWIN__)
+  realName = prefix+base;
+#else
   realName = name;
+#endif
   if(version)
     {
     realName += "-";
     realName += version;
     }
+#if defined(__CYGWIN__)
+  realName += suffix;
+#endif
 }
 
 //----------------------------------------------------------------------------

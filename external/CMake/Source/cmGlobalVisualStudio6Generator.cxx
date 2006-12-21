@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmGlobalVisualStudio6Generator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/06/30 17:48:43 $
-  Version:   $Revision: 1.58.2.3 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.58.2.4 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -162,7 +162,6 @@ void cmGlobalVisualStudio6Generator::Generate()
 {
   // add a special target that depends on ALL projects for easy build
   // of one configuration only.
-  const char* no_output = 0;
   std::vector<std::string> no_depends;
   const char* no_working_dir = 0;
   std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
@@ -173,7 +172,7 @@ void cmGlobalVisualStudio6Generator::Generate()
     if(gen.size())
       {
       gen[0]->GetMakefile()->AddUtilityCommand("ALL_BUILD", false, 
-                                               no_output, no_depends, 
+                                               no_depends, 
                                                no_working_dir,
                           "echo", "Build all projects");
       }

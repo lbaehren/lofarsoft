@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmGlobalWatcomWMakeGenerator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/05/11 20:05:57 $
-  Version:   $Revision: 1.5.2.2 $
+  Date:      $Date: 2006/10/27 20:01:47 $
+  Version:   $Revision: 1.5.2.4 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -23,6 +23,7 @@ cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator()
   this->FindMakeProgramFile = "CMakeFindWMake.cmake";
   this->ForceUnixPaths = false;
   this->ToolSupportsColor = true;
+  this->NeedSymbolicMark = true;
   this->EmptyCommandsHack = "@cd .";
 }
 
@@ -47,9 +48,9 @@ cmLocalGenerator *cmGlobalWatcomWMakeGenerator::CreateLocalGenerator()
 {
   cmLocalUnixMakefileGenerator3* lg = new cmLocalUnixMakefileGenerator3;
   lg->SetSilentNoColon(true);
-  lg->SetEchoNeedsQuote(false);
   lg->SetDefineWindowsNULL(true);
   lg->SetWindowsShell(true);
+  lg->SetWatcomWMake(true);
   lg->SetMakeSilentFlag("-s -h");
   lg->SetGlobalGenerator(this);
   lg->SetIgnoreLibPrefix(true);

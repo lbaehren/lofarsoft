@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmVTKWrapTclCommand.h,v $
   Language:  C++
-  Date:      $Date: 2006/03/15 16:02:07 $
-  Version:   $Revision: 1.12 $
+  Date:      $Date: 2006/10/13 14:52:06 $
+  Version:   $Revision: 1.12.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -77,6 +77,12 @@ public:
       "               SourceListName class1 class2 ...\n"
       "               [COMMANDS CommandName1 CommandName2 ...])\n"
       "Create Tcl wrappers for VTK classes.";
+    }
+
+  /** This command is kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged()
+    {
+    return true;
     }
 
   /**

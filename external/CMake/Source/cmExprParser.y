@@ -4,8 +4,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmExprParser.y,v $
   Language:  C++
-  Date:      $Date: 2005/10/17 20:53:11 $
-  Version:   $Revision: 1.2 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.2.4.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -58,6 +58,9 @@ static void cmExprError(yyscan_t yyscanner, const char* message);
 /* Disable some warnings in the generated code.  */
 #ifdef __BORLANDC__
 # pragma warn -8004 /* Variable assigned a value that is not used.  */
+# pragma warn -8008 /* condition always returns true */
+# pragma warn -8060 /* possibly incorrect assignment */
+# pragma warn -8066 /* unreachable code */
 #endif
 #ifdef _MSC_VER
 # pragma warning (disable: 4102) /* Unused goto label.  */

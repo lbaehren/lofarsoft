@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmGlobalBorlandMakefileGenerator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/06/30 17:48:43 $
-  Version:   $Revision: 1.20.2.3 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.20.2.4 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -43,7 +43,6 @@ void cmGlobalBorlandMakefileGenerator
 cmLocalGenerator *cmGlobalBorlandMakefileGenerator::CreateLocalGenerator()
 {
   cmLocalUnixMakefileGenerator3* lg = new cmLocalUnixMakefileGenerator3;
-  lg->SetEchoNeedsQuote(false);
   lg->SetIncludeDirective("!include");
   lg->SetWindowsShell(true);
   lg->SetDefineWindowsNULL(true);

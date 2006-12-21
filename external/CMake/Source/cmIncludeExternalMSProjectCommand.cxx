@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmIncludeExternalMSProjectCommand.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/05/11 20:05:57 $
-  Version:   $Revision: 1.13.2.2 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.13.2.3 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -41,18 +41,33 @@ bool cmIncludeExternalMSProjectCommand
         }
       }
     
+    // Hack together a utility target storing enough information
+    // to reproduce the target inclusion.
     std::string utility_name("INCLUDE_EXTERNAL_MSPROJECT");
     utility_name += "_";
     utility_name += args[0];
     std::string path = args[1];
     cmSystemTools::ConvertToUnixSlashes(path);
-    const char* no_output = 0;
-    const char* no_working_directory = 0;
-    this->Makefile->AddUtilityCommand(utility_name.c_str(), true,
-                                  no_output, depends,
-                                  no_working_directory,
-                                  args[0].c_str(), path.c_str());
     
+    // Create a target instance for this utility.
+    cmTarget target;
+    target.SetType(cmTarget::UTILITY, utility_name.c_str());
+    target.SetInAll(true);
+    target.SetMakefile(this->Makefile);
+    std::vector<std::string> no_outputs;
+    cmCustomCommandLines commandLines;
+    cmCustomCommandLine commandLine;
+    commandLine.push_back(args[0]);
+    commandLine.push_back(path);
+    commandLines.push_back(commandLine);
+    cmCustomCommand cc(no_outputs, depends, commandLines, 0, 0);
+    target.GetPostBuildCommands().push_back(cc);
+
+    // Add the target to the set of targets.
+    cmTargets::iterator it =
+      this->Makefile->GetTargets()
+      .insert(cmTargets::value_type(utility_name.c_str(),target)).first;
+    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->AddTarget(*it);
     }
 #endif
   return true;

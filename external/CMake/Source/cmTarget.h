@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmTarget.h,v $
   Language:  C++
-  Date:      $Date: 2006/06/30 17:48:46 $
-  Version:   $Revision: 1.62.2.2 $
+  Date:      $Date: 2006/10/27 20:01:48 $
+  Version:   $Revision: 1.62.2.3 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -175,6 +175,11 @@ public:
       configuration.  This location is suitable for use as the LOCATION
       target property.  */
   const char* GetLocation(const char* config);
+
+  /** Get the target major and minor version numbers interpreted from
+      the VERSION property.  Version 0 is returned if the property is
+      not set or cannot be parsed.  */
+  void GetTargetVersion(int& major, int& minor);
 
   /**
    * Trace through the source files in this target and add al source files

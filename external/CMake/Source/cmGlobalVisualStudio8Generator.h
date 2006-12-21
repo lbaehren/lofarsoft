@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmGlobalVisualStudio8Generator.h,v $
   Language:  C++
-  Date:      $Date: 2006/05/11 20:05:57 $
-  Version:   $Revision: 1.4.2.2 $
+  Date:      $Date: 2006/11/10 15:12:55 $
+  Version:   $Revision: 1.4.2.4 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -56,7 +56,8 @@ protected:
   virtual void WriteSLNHeader(std::ostream& fout);
   virtual void WriteSolutionConfigurations(std::ostream& fout);
   virtual void WriteProjectConfigurations(std::ostream& fout,
-                                          const char* name, bool in_all);
+                                          const char* name,
+                                          bool partOfDefaultBuild);
   std::string PlatformName; // Win32 or x64 
 };
 #endif

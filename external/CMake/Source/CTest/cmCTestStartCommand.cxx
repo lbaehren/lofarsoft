@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCTestStartCommand.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/07/24 15:19:36 $
-  Version:   $Revision: 1.12.2.2 $
+  Date:      $Date: 2006/10/13 14:52:07 $
+  Version:   $Revision: 1.12.2.3 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -76,6 +76,10 @@ bool cmCTestStartCommand::InitialPass(
       "as an argument or set CTEST_BINARY_DIRECTORY");
     return false;
     }
+
+  cmSystemTools::AddKeepPath(src_dir);
+  cmSystemTools::AddKeepPath(bld_dir);
+
   this->CTest->EmptyCTestConfiguration();
   this->CTest->SetCTestConfiguration("SourceDirectory",
     cmSystemTools::CollapseFullPath(src_dir).c_str());

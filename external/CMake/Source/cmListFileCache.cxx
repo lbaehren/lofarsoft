@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmListFileCache.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/05/14 19:22:42 $
-  Version:   $Revision: 1.27.2.1 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.27.2.2 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -20,6 +20,10 @@
 #include "cmSystemTools.h"
 
 #include <cmsys/RegularExpression.hxx>
+
+#ifdef __BORLANDC__
+# pragma warn -8060 /* possibly incorrect assignment */
+#endif
 
 bool cmListFileCacheParseFunction(cmListFileLexer* lexer,
                                   cmListFileFunction& function,

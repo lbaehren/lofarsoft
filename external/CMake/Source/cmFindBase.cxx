@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmFindBase.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/07/24 15:19:35 $
-  Version:   $Revision: 1.14.2.2 $
+  Date:      $Date: 2006/11/13 17:59:55 $
+  Version:   $Revision: 1.14.2.4 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -57,8 +57,13 @@ cmFindBase::cmFindBase()
     ""
     "This command is used to find a SEARCH_XXX_DESC. "
     "A cache entry named by <VAR> is created to store the result "
-    "of this command.  If nothing is found, the result will be "
-    "<VAR>-NOTFOUND.  The name of the SEARCH_XXX that "
+    "of this command.  "
+    "If the SEARCH_XXX is found the result is stored in the variable "
+    "and the search will not be repeated unless the variable is cleared.  "
+    "If nothing is found, the result will be "
+    "<VAR>-NOTFOUND, and the search will be attempted again the "
+    "next time FIND_XXX is invoked with the same variable.  "
+    "The name of the SEARCH_XXX that "
     "is searched for is specified by the names listed "
     "after the NAMES argument.   Additional search locations "
     "can be specified after the PATHS argument.  If ENV var is "
@@ -616,21 +621,19 @@ void cmFindBase::ExpandRegistryAndCleanPath()
         j != this->SearchPathSuffixes.end(); ++j)
       {
       std::string p = *i + std::string("/") + *j;
-      if(cmSystemTools::FileIsDirectory(p.c_str()))
-        {
+      // add to all paths because the search path may be modified 
+      // later with lib being replaced for lib64 which may exist
         this->SearchPaths.push_back(p);
         }
       }
-    }
   // now put the path without the path suffixes in the SearchPaths
   for(i = finalPath.begin();
       i != finalPath.end(); ++i)
     {
-    if(cmSystemTools::FileIsDirectory(i->c_str()))
-      {
+    // put all search paths in because it may later be replaced
+    // by lib64 stuff fixes bug 4009
       this->SearchPaths.push_back(*i);
       }
-    }
 }
 
 void cmFindBase::PrintFindStuff()

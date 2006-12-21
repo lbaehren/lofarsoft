@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCPackNSISGenerator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/05/14 19:22:47 $
-  Version:   $Revision: 1.13.2.3 $
+  Date:      $Date: 2006/11/17 20:55:42 $
+  Version:   $Revision: 1.13.2.6 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -147,7 +147,11 @@ int cmCPackNSISGenerator::InitializeInternal()
   if ( !cmsys::SystemTools::ReadRegistryValue(
       "HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS", nsisPath) )
     {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find NSIS registry value"
+    cmCPackLogger
+      (cmCPackLog::LOG_ERROR, 
+       "Cannot find NSIS registry value. This is usually caused by NSIS "
+       "not being installed. Please install NSIS from "
+       "http://nsis.sourceforge.org"
       << std::endl);
     return 0;
     }
@@ -232,6 +236,7 @@ int cmCPackNSISGenerator::InitializeInternal()
     this->SetOptionIfNotSet("CPACK_NSIS_DELETE_ICONS", 
                             deleteStr.str().c_str());
     }
+  this->SetOptionIfNotSet("CPACK_NSIS_COMPRESSOR", "lzma");
 
   return this->Superclass::InitializeInternal();
 }
@@ -248,7 +253,7 @@ bool cmCPackNSISGenerator::GetListOfSubdirectories(const char* topdir,
     if (strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".") &&
         strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".."))
       {
-      kwsys_stl::string fullPath = topdir;
+      cmsys_stl::string fullPath = topdir;
       fullPath += "/";
       fullPath += dir.GetFile(static_cast<unsigned long>(fileNum));
       if(cmsys::SystemTools::FileIsDirectory(fullPath.c_str()) &&

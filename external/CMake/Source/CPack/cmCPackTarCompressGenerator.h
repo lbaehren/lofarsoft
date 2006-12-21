@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCPackTarCompressGenerator.h,v $
   Language:  C++
-  Date:      $Date: 2006/05/07 14:55:39 $
-  Version:   $Revision: 1.2.2.1 $
+  Date:      $Date: 2006/10/13 14:52:06 $
+  Version:   $Revision: 1.2.2.2 $
 
   Copyright (c) 2002 Kitware, Inc. All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -42,6 +42,7 @@ protected:
   virtual const char* GetOutputExtension() { return "tar.Z"; }
 
   int RenameFile(const char* oldname, const char* newname);
+  int GenerateHeader(std::ostream* os);
 };
 
 #endif

@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmAddLibraryCommand.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/03/15 16:01:58 $
-  Version:   $Revision: 1.24 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.24.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -28,6 +28,7 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
   // otherwise it defaults to static library.
   int shared = 
     !cmSystemTools::IsOff(this->Makefile->GetDefinition("BUILD_SHARED_LIBS"));
+  bool in_all = true;
   
   std::vector<std::string>::const_iterator s = args.begin();
 
@@ -56,6 +57,11 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
       ++s;
       shared = 2;
       }
+    else if(*s == "EXCLUDE_FROM_ALL")
+      {
+      ++s;
+      in_all = false;
+      }
     }
 
   if (s == args.end())
@@ -74,7 +80,8 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
     ++s;
     }
 
-  this->Makefile->AddLibrary(this->LibName.c_str(), shared, srclists);
+  this->Makefile->AddLibrary(this->LibName.c_str(), shared, srclists,
+                             in_all);
   
   return true;
 }

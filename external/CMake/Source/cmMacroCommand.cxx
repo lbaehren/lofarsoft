@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmMacroCommand.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/06/30 17:48:45 $
-  Version:   $Revision: 1.25.2.2 $
+  Date:      $Date: 2006/12/01 20:32:48 $
+  Version:   $Revision: 1.25.2.5 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -235,9 +235,19 @@ bool cmMacroHelperCommand::InvokeInitialPass
       }
     if(!this->Makefile->ExecuteCommand(newLFF))
       {
+      if(args.size())
+        {
+        arg.FilePath = args[0].FilePath;
+        arg.Line = args[0].Line;
+        }
+      else
+        {
+        arg.FilePath =  "Unknown";
+        arg.Line = 0;
+        }
       cmOStringStream error;
       error << "Error in cmake code at\n"
-            << args[0].FilePath << ":" << args[0].Line << ":\n"
+            << arg.FilePath << ":" << arg.Line << ":\n"
             << "A command failed during the invocation of macro \""
             << this->Args[0].c_str() << "\".";
       cmSystemTools::Error(error.str().c_str());

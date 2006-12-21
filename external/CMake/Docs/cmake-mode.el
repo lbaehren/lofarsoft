@@ -3,7 +3,7 @@
 ;  Program:   CMake - Cross-Platform Makefile Generator
 ;  Module:    $RCSfile: cmake-mode.el,v $
 ;
-;  Copyright (c) 2000-$Date: 2006/04/28 12:59:47 $ Kitware, Inc., Insight Consortium.  All rights reserved.
+;  Copyright (c) 2000-$Date: 2006/10/13 14:52:01 $ Kitware, Inc., Insight Consortium.  All rights reserved.
 ;  See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
 ;
 ;     This software is distributed WITHOUT ANY WARRANTY; without even
@@ -55,9 +55,9 @@
                                        "\\|" "[ \t\r\n]"
                                        "\\)*"))
 (defconst cmake-regex-block-open
-  "^\\(IF\\|MACRO\\|FOREACH\\|ELSE\\|WHILE\\)$")
+  "^\\(IF\\|MACRO\\|FOREACH\\|ELSE\\|ELSEIF\\|WHILE\\)$")
 (defconst cmake-regex-block-close
-  "^[ \t]*\\(ENDIF\\|ENDFOREACH\\|ENDMACRO\\|ELSE\\|ENDWHILE\\)[ \t]*(")
+  "^[ \t]*\\(ENDIF\\|ENDFOREACH\\|ENDMACRO\\|ELSE\\|ELSEIF\\|ENDWHILE\\)[ \t]*(")
 
 ;------------------------------------------------------------------------------
 

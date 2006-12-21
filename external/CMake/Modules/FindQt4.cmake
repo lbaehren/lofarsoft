@@ -19,6 +19,9 @@
 #                    QT_USE_QTOPENGL
 #                    QT_USE_QTSQL
 #                    QT_USE_QTXML
+#                    QT_USE_QTSVG
+#                    QT_USE_QTTEST
+#                    QT_USE_QTUITOOLS
 #
 # All the libraries required are stored in a variable called QT_LIBRARIES.  
 # Add this variable to your TARGET_LINK_LIBRARIES.
@@ -45,6 +48,7 @@
 #  QT_QTXML_FOUND         True if QtXml was found.
 #  QT_QTSVG_FOUND         True if QtSvg was found.
 #  QT_QTTEST_FOUND        True if QtTest was found.
+#  QT_QTUITOOLS_FOUND     True if QtUiTools was found.
 #                      
 #  QT_DEFINITIONS   Definitions to use when compiling code that uses Qt.
 #                  
@@ -71,6 +75,8 @@
 #  QT_QTTEST_INCLUDE_DIR       Path to "include/QtTest"
 #                            
 #  QT_LIBRARY_DIR              Path to "lib" of Qt4
+#                            
+#  QT_PLUGINS_DIR              Path to "plugins" for Qt4
 #                            
 # For every library of Qt there are three variables:
 #  QT_QTFOO_LIBRARY_RELEASE, which contains the full path to the release version
@@ -167,18 +173,28 @@ SET(QT_USE_FILE ${CMAKE_ROOT}/Modules/UseQt4.cmake)
 
 SET( QT_DEFINITIONS "")
 
-IF (WIN32)
-  SET(QT_DEFINITIONS -DQT_DLL)
-ENDIF(WIN32)
-
 # check for qmake
 FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake qmake-qt4 PATHS
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\4.0.0;InstallDir]/bin"
   "[HKEY_CURRENT_USER\\Software\\Trolltech\\Versions\\4.0.0;InstallDir]/bin"
   $ENV{QTDIR}/bin
-)
+  )
 
 SET(QT4_INSTALLED_VERSION_TOO_OLD FALSE)
+
+##  macro for asking qmake to process pro files
+MACRO(QT_QUERY_QMAKE outvar invar)
+  FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake/tmp.pro
+    "message(CMAKE_MESSAGE<$$${invar}>)")
+  EXECUTE_PROCESS(COMMAND ${QT_QMAKE_EXECUTABLE}
+    WORKING_DIRECTORY  
+    ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake
+    OUTPUT_VARIABLE _qmake_query_output
+    ERROR_VARIABLE _qmake_query_output )
+  FILE(REMOVE_RECURSE 
+    "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake")
+  STRING(REGEX REPLACE ".*CMAKE_MESSAGE<([^>]*).*" "\\1" ${outvar} "${_qmake_query_output}")
+ENDMACRO(QT_QUERY_QMAKE)
 
 
 IF (QT_QMAKE_EXECUTABLE)
@@ -186,7 +202,19 @@ IF (QT_QMAKE_EXECUTABLE)
    SET(QT4_QMAKE_FOUND FALSE)
    
    EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE} ARGS "-query QT_VERSION" OUTPUT_VARIABLE QTVERSION)
-
+  # check for qt3 qmake and then try and find qmake-qt4 in the path
+  IF("${QTVERSION}" MATCHES "Unknown")
+    SET(QT_QMAKE_EXECUTABLE NOTFOUND CACHE FILEPATH "" FORCE)
+    FIND_PROGRAM(QT_QMAKE_EXECUTABLE NAMES qmake-qt4 PATHS
+      "[HKEY_CURRENT_USER\\Software\\Trolltech\\Qt3Versions\\4.0.0;InstallDir]/bin"
+      "[HKEY_CURRENT_USER\\Software\\Trolltech\\Versions\\4.0.0;InstallDir]/bin"
+      $ENV{QTDIR}/bin
+      )
+    IF(QT_QMAKE_EXECUTABLE)
+      EXEC_PROGRAM(${QT_QMAKE_EXECUTABLE} 
+        ARGS "-query QT_VERSION" OUTPUT_VARIABLE QTVERSION)
+    ENDIF(QT_QMAKE_EXECUTABLE)
+  ENDIF("${QTVERSION}" MATCHES "Unknown")
    # check that we found the Qt4 qmake, Qt3 qmake output won't match here
    STRING(REGEX MATCH "^[0-9]+\\.[0-9]+\\.[0-9]+" qt_version_tmp "${QTVERSION}")
    IF (qt_version_tmp)
@@ -226,7 +254,6 @@ IF (QT_QMAKE_EXECUTABLE)
       ELSE (found_vers LESS req_vers)
     SET(QT4_QMAKE_FOUND TRUE)
       ENDIF (found_vers LESS req_vers)
-
    ENDIF (qt_version_tmp)
 
 ENDIF (QT_QMAKE_EXECUTABLE)
@@ -292,6 +319,13 @@ IF (QT4_QMAKE_FOUND)
     SET(QT_MKSPECS_DIR ${qt_mkspecs_dir} CACHE PATH "The location of the Qt mkspecs")
   ENDIF (NOT QT_MKSPECS_DIR)
 
+  # ask qmake for the plugins directory
+  IF (NOT QT_PLUGINS_DIR)
+    EXEC_PROGRAM( ${QT_QMAKE_EXECUTABLE}
+      ARGS "-query QT_INSTALL_PLUGINS"
+      OUTPUT_VARIABLE qt_plugins_dir )
+    SET(QT_PLUGINS_DIR ${qt_plugins_dir} CACHE PATH "The location of the Qt plugins")
+  ENDIF (NOT QT_PLUGINS_DIR)
   ########################################
   #
   #       Setting the INCLUDE-Variables
@@ -391,7 +425,7 @@ IF (QT4_QMAKE_FOUND)
     )
 
   # Set QT_QTUITOOLS_INCLUDE_DIR
-  FIND_PATH(QT_QTUITOOLS_INCLUDE_DIR QtTest
+  FIND_PATH(QT_QTUITOOLS_INCLUDE_DIR QtUiTools
     PATHS
     ${QT_INCLUDE_DIR}/QtUiTools
     ${QT_LIBRARY_DIR}/QtUiTools.framework/Headers
@@ -467,11 +501,9 @@ IF (QT4_QMAKE_FOUND)
   # Set QT_INCLUDES
   SET( QT_INCLUDES ${QT_INCLUDE_DIR} ${QT_QT_INCLUDE_DIR} ${QT_MKSPECS_DIR}/default )
 
-
-    
     # Set QT_QTCORE_LIBRARY by searching for a lib with "QtCore."  as part of the filename
     FIND_LIBRARY(QT_QTCORE_LIBRARY_RELEASE NAMES QtCore QtCore4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH )
-    FIND_LIBRARY(QT_QTCORE_LIBRARY_DEBUG NAMES QtCore_debug QtCored4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
+  FIND_LIBRARY(QT_QTCORE_LIBRARY_DEBUG NAMES QtCore_debug QtCored QtCored4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
 
     # Set QT_QT3SUPPORT_LIBRARY
     FIND_LIBRARY(QT_QT3SUPPORT_LIBRARY_RELEASE NAMES Qt3Support Qt3Support4 PATHS ${QT_LIBRARY_DIR}        NO_DEFAULT_PATH)
@@ -523,17 +555,25 @@ IF (QT4_QMAKE_FOUND)
 
   IF( NOT QT_QTCORE_LIBRARY_DEBUG AND NOT QT_QTCORE_LIBRARY_RELEASE )
     IF( NOT Qt4_FIND_QUIETLY AND Qt4_FIND_REQUIRED)
-      MESSAGE( FATAL_ERROR "Could NOT find QtCore. Check CMakeFiles/CMakeError.log for more details.")
+      MESSAGE( FATAL_ERROR "Could NOT find QtCore. Check ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log for more details.")
     ENDIF( NOT Qt4_FIND_QUIETLY AND Qt4_FIND_REQUIRED)
   ENDIF( NOT QT_QTCORE_LIBRARY_DEBUG AND NOT QT_QTCORE_LIBRARY_RELEASE )
 
   # Set QT_QTASSISTANT_LIBRARY
-  FIND_LIBRARY(QT_QTASSISTANT_LIBRARY_RELEASE NAMES QtAssistantClient QtAssistant QtAssistant4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
-  FIND_LIBRARY(QT_QTASSISTANT_LIBRARY_DEBUG   NAMES QtAssistantClientd QtAssistantClient_debug QtAssistant_debug QtAssistantd4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
+  FIND_LIBRARY(QT_QTASSISTANT_LIBRARY_RELEASE NAMES QtAssistantClient QtAssistantClient4 QtAssistant QtAssistant4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
+  FIND_LIBRARY(QT_QTASSISTANT_LIBRARY_DEBUG   NAMES QtAssistantClientd QtAssistantClientd4 QtAssistantClient_debug QtAssistant_debug QtAssistantd4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
 
   # Set QT_QTDESIGNER_LIBRARY
   FIND_LIBRARY(QT_QTDESIGNER_LIBRARY_RELEASE NAMES QtDesigner QtDesigner4 PATHS ${QT_LIBRARY_DIR}        NO_DEFAULT_PATH)
   FIND_LIBRARY(QT_QTDESIGNER_LIBRARY_DEBUG   NAMES QtDesigner_debug QtDesignerd4 PATHS ${QT_LIBRARY_DIR} NO_DEFAULT_PATH)
+
+  # Set QT_QTMAIN_LIBRARY
+  IF(WIN32)
+    FIND_LIBRARY(QT_QTMAIN_LIBRARY_RELEASE NAMES qtmain PATHS ${QT_LIBRARY_DIR}
+      NO_DEFAULT_PATH)
+    FIND_LIBRARY(QT_QTMAIN_LIBRARY_DEBUG NAMES qtmaind PATHS ${QT_LIBRARY_DIR}
+      NO_DEFAULT_PATH)
+  ENDIF(WIN32)
 
   ############################################
   #
@@ -557,13 +597,16 @@ IF (QT4_QMAKE_FOUND)
         SET(QT_${basename}_LIBRARY         ${QT_${basename}_LIBRARY_DEBUG})
         SET(QT_${basename}_LIBRARIES       ${QT_${basename}_LIBRARY_DEBUG})
       ENDIF (QT_${basename}_LIBRARY_DEBUG AND NOT QT_${basename}_LIBRARY_RELEASE)
-
       IF (QT_${basename}_LIBRARY_DEBUG AND QT_${basename}_LIBRARY_RELEASE)
-        IF(NOT MSVC)
-        SET(QT_${basename}_LIBRARY         ${QT_${basename}_LIBRARY_RELEASE})
-        ELSE(NOT MSVC)
+        # if the generator supports configuration types then set
+        # optimized and debug libraries, or if the CMAKE_BUILD_TYPE has a value
+        IF (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
           SET(QT_${basename}_LIBRARY       optimized ${QT_${basename}_LIBRARY_RELEASE} debug ${QT_${basename}_LIBRARY_DEBUG})
-        ENDIF(NOT MSVC)
+        ELSE(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
+          # if there are no configuration types and CMAKE_BUILD_TYPE has no value
+          # then just use the release libraries
+          SET(QT_${basename}_LIBRARY       ${QT_${basename}_LIBRARY_RELEASE} )
+        ENDIF(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
         SET(QT_${basename}_LIBRARIES       optimized ${QT_${basename}_LIBRARY_RELEASE} debug ${QT_${basename}_LIBRARY_DEBUG})
       ENDIF (QT_${basename}_LIBRARY_DEBUG AND QT_${basename}_LIBRARY_RELEASE)
 
@@ -582,7 +625,10 @@ IF (QT4_QMAKE_FOUND)
   ENDMACRO (_QT4_ADJUST_LIB_VARS)
 
   IF(WIN32)
+    # there is no include for qtmain but adjust macro needs it set
+    SET(QT_QTMAIN_INCLUDE_DIR 1)
      _QT4_ADJUST_LIB_VARS(QTMAIN)
+    SET(QT_QTMAIN_INCLUDE_DIR )
   ENDIF(WIN32)
 
 
@@ -603,6 +649,8 @@ IF (QT4_QMAKE_FOUND)
   _QT4_ADJUST_LIB_VARS(QTUITOOLS)
   _QT4_ADJUST_LIB_VARS(QTTEST)
 
+
+
   #######################################
   #
   #       Check the executables of Qt 
@@ -612,23 +660,8 @@ IF (QT4_QMAKE_FOUND)
 
 
    # find moc and uic using qmake
-   FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake/tmp.pro
-    "message(MOC<$$QMAKE_MOC>)
-      message(UIC<$$QMAKE_UIC>)
-   ")
-
-   EXECUTE_PROCESS(COMMAND ${QT_QMAKE_EXECUTABLE}
-      WORKING_DIRECTORY  
-      ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake
-      OUTPUT_VARIABLE _moc_OUTPUT
-      ERROR_VARIABLE _moc_OUTPUT )
-   FILE(REMOVE_RECURSE 
-     "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmpQmake")
-
-   STRING(REGEX REPLACE 
-     ".*MOC<([^>]+).*" "\\1" QT_MOC_EXECUTABLE_INTERNAL "${_moc_OUTPUT}" )
-   STRING(REGEX REPLACE 
-     ".*UIC<([^>]+).*" "\\1" QT_UIC_EXECUTABLE_INTERNAL "${_moc_OUTPUT}" )
+  QT_QUERY_QMAKE(QT_MOC_EXECUTABLE_INTERNAL "QMAKE_MOC")
+  QT_QUERY_QMAKE(QT_UIC_EXECUTABLE_INTERNAL "QMAKE_UIC")
 
    FILE(TO_CMAKE_PATH 
      "${QT_MOC_EXECUTABLE_INTERNAL}" QT_MOC_EXECUTABLE_INTERNAL)
@@ -743,11 +776,21 @@ IF (QT4_QMAKE_FOUND)
     FOREACH (it ${ARGN})
       GET_FILENAME_COMPONENT(outfilename ${it} NAME_WE)
       GET_FILENAME_COMPONENT(infile ${it} ABSOLUTE)
+      GET_FILENAME_COMPONENT(rc_path ${infile} PATH)
       SET(outfile ${CMAKE_CURRENT_BINARY_DIR}/qrc_${outfilename}.cxx)
+      #  parse file for dependencies
+      FILE(READ "${infile}" _RC_FILE_CONTENTS)
+      STRING(REGEX MATCHALL "<file>[^<]*" _RC_FILES "${_RC_FILE_CONTENTS}")
+      SET(_RC_DEPENDS)
+      FOREACH(_RC_FILE ${_RC_FILES})
+        STRING(REGEX REPLACE "^<file>" "" _RC_FILE "${_RC_FILE}")
+        SET(_RC_DEPENDS ${_RC_DEPENDS} "${rc_path}/${_RC_FILE}")
+      ENDFOREACH(_RC_FILE)
       ADD_CUSTOM_COMMAND(OUTPUT ${outfile}
         COMMAND ${QT_RCC_EXECUTABLE}
         ARGS -name ${outfilename} -o ${outfile} ${infile}
-        MAIN_DEPENDENCY ${infile} )
+        MAIN_DEPENDENCY ${infile}
+        DEPENDS ${_RC_DEPENDS})
       SET(${outfiles} ${${outfiles}} ${outfile})
     ENDFOREACH (it)
 
@@ -820,22 +863,141 @@ IF (QT4_QMAKE_FOUND)
   ENDIF( QT_LIBRARY_DIR AND QT_INCLUDE_DIR AND QT_MOC_EXECUTABLE AND QT_UIC_EXECUTABLE AND  QT_RCC_EXECUTABLE)
   SET(QT_FOUND ${QT4_FOUND})
 
-
   #######################################
   #
-  #       System dependent settings  
+  #       Qt configuration
   #
   #######################################
-  # for unix add X11 stuff
-  IF(UNIX)
-    # on OS X X11 may not be required
-    IF (Q_WS_X11)
-    FIND_PACKAGE(X11)
-    ENDIF (Q_WS_X11)
-    FIND_PACKAGE(Threads)
-    SET(QT_QTCORE_LIBRARY ${QT_QTCORE_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
-  ENDIF(UNIX)
+  IF(EXISTS "${QT_MKSPECS_DIR}/qconfig.pri")
+    FILE(READ ${QT_MKSPECS_DIR}/qconfig.pri _qconfig_FILE_contents)
+    STRING(REGEX MATCH "QT_CONFIG[^\n]+" QT_QCONFIG ${_qconfig_FILE_contents})
+    STRING(REGEX MATCH "CONFIG[^\n]+" QT_CONFIG ${_qconfig_FILE_contents})
+  ENDIF(EXISTS "${QT_MKSPECS_DIR}/qconfig.pri")
 
+
+  ###############################################
+  #
+  #       configuration/system dependent settings  
+  #
+  ###############################################
+
+  SET(QT_GUI_LIB_DEPENDENCIES "")
+  SET(QT_CORE_LIB_DEPENDENCIES "")
+  
+  # shared build needs -DQT_SHARED
+  IF(NOT QT_CONFIG MATCHES "static")
+    # warning currently only qconfig.pri on Windows potentially contains "static"
+    # so QT_SHARED might not get defined properly on Mac/X11 (which seems harmless right now)
+    # Trolltech said they'd consider exporting it for all platforms in future releases.
+    SET(QT_DEFINITIONS ${QT_DEFINITIONS} -DQT_SHARED)
+  ENDIF(NOT QT_CONFIG MATCHES "static")
+  
+  ## system png
+  IF(QT_QCONFIG MATCHES "system-png")
+    FIND_LIBRARY(QT_PNG_LIBRARY NAMES png)
+    SET(QT_GUI_LIB_DEPENDENCIES ${QT_GUI_LIB_DEPENDENCIES} ${QT_PNG_LIBRARY})
+    MARK_AS_ADVANCED(QT_PNG_LIBRARY)
+  ENDIF(QT_QCONFIG MATCHES "system-png")
+  
+  # for X11, get X11 library directory
+  IF(Q_WS_X11)
+    QT_QUERY_QMAKE(QMAKE_LIBDIR_X11 "QMAKE_LIBDIR_X11")
+  ENDIF(Q_WS_X11)
+
+  ## X11 SM
+  IF(QT_QCONFIG MATCHES "x11sm")
+    # ask qmake where the x11 libs are
+    FIND_LIBRARY(QT_X11_SM_LIBRARY NAMES SM PATHS ${QMAKE_LIBDIR_X11})
+    FIND_LIBRARY(QT_X11_ICE_LIBRARY NAMES ICE PATHS ${QMAKE_LIBDIR_X11})
+    SET(QT_GUI_LIB_DEPENDENCIES ${QT_GUI_LIB_DEPENDENCIES} ${QT_X11_SM_LIBRARY} ${QT_X11_ICE_LIBRARY})
+    MARK_AS_ADVANCED(QT_X11_SM_LIBRARY)
+    MARK_AS_ADVANCED(QT_X11_ICE_LIBRARY)
+  ENDIF(QT_QCONFIG MATCHES "x11sm")
+  
+  ## Xi
+  IF(QT_QCONFIG MATCHES "tablet")
+    FIND_LIBRARY(QT_XI_LIBRARY NAMES Xi PATHS ${QMAKE_LIBDIR_X11})
+    SET(QT_GUI_LIB_DEPENDENCIES ${QT_GUI_LIB_DEPENDENCIES} ${QT_XI_LIBRARY})
+    MARK_AS_ADVANCED(QT_XI_LIBRARY)
+  ENDIF(QT_QCONFIG MATCHES "tablet")
+
+  ## Xrender
+  IF(QT_QCONFIG MATCHES "xrender")
+    FIND_LIBRARY(QT_XRENDER_LIBRARY NAMES Xrender PATHS ${QMAKE_LIBDIR_X11})
+    SET(QT_GUI_LIB_DEPENDENCIES ${QT_GUI_LIB_DEPENDENCIES} ${QT_XRENDER_LIBRARY})
+    MARK_AS_ADVANCED(QT_XRENDER_LIBRARY)
+  ENDIF(QT_QCONFIG MATCHES "xrender")
+  
+  ## Xrandr
+  IF(QT_QCONFIG MATCHES "xrandr")
+    FIND_LIBRARY(QT_XRANDR_LIBRARY NAMES Xrandr PATHS ${QMAKE_LIBDIR_X11})
+    SET(QT_GUI_LIB_DEPENDENCIES ${QT_GUI_LIB_DEPENDENCIES} ${QT_XRANDR_LIBRARY})
+    MARK_AS_ADVANCED(QT_XRANDR_LIBRARY)
+  ENDIF(QT_QCONFIG MATCHES "xrandr")
+  
+  ## Xcursor
+  IF(QT_QCONFIG MATCHES "xcursor")
+    FIND_LIBRARY(QT_XCURSOR_LIBRARY NAMES Xcursor PATHS ${QMAKE_LIBDIR_X11})
+    SET(QT_GUI_LIB_DEPENDENCIES ${QT_GUI_LIB_DEPENDENCIES} ${QT_XCURSOR_LIBRARY})
+    MARK_AS_ADVANCED(QT_XCURSOR_LIBRARY)
+  ENDIF(QT_QCONFIG MATCHES "xcursor")
+  
+  ## Xinerama
+  IF(QT_QCONFIG MATCHES "xinerama")
+    FIND_LIBRARY(QT_XINERAMA_LIBRARY NAMES Xinerama PATHS ${QMAKE_LIBDIR_X11})
+    SET(QT_GUI_LIB_DEPENDENCIES ${QT_GUI_LIB_DEPENDENCIES} ${QT_XINERAMA_LIBRARY})
+    MARK_AS_ADVANCED(QT_XINERAMA_LIBRARY)
+  ENDIF(QT_QCONFIG MATCHES "xinerama")
+  
+  ## system-freetype
+  IF(QT_QCONFIG MATCHES "system-freetype")
+    FIND_LIBRARY(QT_FREETYPE_LIBRARY NAMES freetype)
+    SET(QT_GUI_LIB_DEPENDENCIES ${QT_GUI_LIB_DEPENDENCIES} ${QT_FREETYPE_LIBRARY})
+    MARK_AS_ADVANCED(QT_FREETYPE_LIBRARY)
+  ENDIF(QT_QCONFIG MATCHES "system-freetype")
+  
+  ## fontconfig
+  IF(QT_QCONFIG MATCHES "fontconfig")
+    FIND_LIBRARY(QT_FONTCONFIG_LIBRARY NAMES fontconfig)
+    SET(QT_GUI_LIB_DEPENDENCIES ${QT_GUI_LIB_DEPENDENCIES} ${QT_FONTCONFIG_LIBRARY})
+    MARK_AS_ADVANCED(QT_FONTCONFIG_LIBRARY)
+  ENDIF(QT_QCONFIG MATCHES "fontconfig")
+  
+  ## system-zlib
+  IF(QT_QCONFIG MATCHES "system-zlib")
+    FIND_LIBRARY(QT_ZLIB_LIBRARY NAMES z)
+    SET(QT_CORE_LIB_DEPENDENCIES ${QT_CORE_LIB_DEPENDENCIES} ${QT_ZLIB_LIBRARY})
+    MARK_AS_ADVANCED(QT_ZLIB_LIBRARY)
+  ENDIF(QT_QCONFIG MATCHES "system-zlib")
+
+  IF(Q_WS_X11)
+    # X11 libraries Qt absolutely depends on
+    QT_QUERY_QMAKE(QT_LIBS_X11 "QMAKE_LIBS_X11")
+    SEPARATE_ARGUMENTS(QT_LIBS_X11)
+    FOREACH(QT_X11_LIB ${QT_LIBS_X11})
+      STRING(REGEX REPLACE "-l" "" QT_X11_LIB "${QT_X11_LIB}")
+      SET(QT_TMP_STR "QT_X11_${QT_X11_LIB}_LIBRARY")
+      FIND_LIBRARY(${QT_TMP_STR} NAMES "${QT_X11_LIB}" PATHS ${QMAKE_LIBDIR_X11})
+      SET(QT_GUI_LIB_DEPENDENCIES ${QT_GUI_LIB_DEPENDENCIES} ${${QT_TMP_STR}})
+    ENDFOREACH(QT_X11_LIB)
+
+    QT_QUERY_QMAKE(QT_LIBS_THREAD "QMAKE_LIBS_THREAD")
+    SET(QT_CORE_LIB_DEPENDENCIES ${QT_CORE_LIB_DEPENDENCIES} ${QT_LIBS_THREAD})
+    
+    QT_QUERY_QMAKE(QMAKE_LIBS_DYNLOAD "QMAKE_LIBS_DYNLOAD")
+    SET (QT_CORE_LIB_DEPENDENCIES ${QT_CORE_LIB_DEPENDENCIES} ${QMAKE_LIBS_DYNLOAD})
+
+  ENDIF(Q_WS_X11)
+
+  IF(Q_WS_WIN)
+    SET(QT_GUI_LIB_DEPENDENCIES ${QT_GUI_LIB_DEPENDENCIES} Imm32 Winmm)
+    SET(QT_CORE_LIB_DEPENDENCIES ${QT_CORE_LIB_DEPENDENCIES} Ws2_32)
+  ENDIF(Q_WS_WIN)
+  
+  IF(Q_WS_MAC)
+    SET(QT_GUI_LIB_DEPENDENCIES ${QT_GUI_LIB_DEPENDENCIES} "-framework Carbon" "-framework QuickTime")
+    SET(QT_CORE_LIB_DEPENDENCIES ${QT_CORE_LIB_DEPENDENCIES} "-framework ApplicationServices")
+  ENDIF(Q_WS_MAC)
 
   #######################################
   #

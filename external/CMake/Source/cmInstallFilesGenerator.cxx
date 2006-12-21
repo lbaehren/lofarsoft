@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmInstallFilesGenerator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/05/07 14:55:38 $
-  Version:   $Revision: 1.3.2.1 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.3.2.2 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -22,13 +22,14 @@
 cmInstallFilesGenerator
 ::cmInstallFilesGenerator(std::vector<std::string> const& files,
                           const char* dest, bool programs,
-                          const char* permissions,
+                          const char* file_permissions,
                           std::vector<std::string> const& configurations,
                           const char* component,
-                          const char* rename):
+                          const char* rename,
+                          bool optional):
   Files(files), Destination(dest), Programs(programs),
-  Permissions(permissions), Configurations(configurations),
-  Component(component), Rename(rename)
+  FilePermissions(file_permissions), Configurations(configurations),
+  Component(component), Rename(rename), Optional(optional)
 {
 }
 
@@ -45,14 +46,14 @@ void cmInstallFilesGenerator::GenerateScript(std::ostream& os)
   for(std::vector<std::string>::const_iterator fi = this->Files.begin();
       fi != this->Files.end(); ++fi)
     {
-    bool not_optional = false;
     const char* no_properties = 0;
+    const char* no_dir_permissions = 0;
     this->AddInstallRule(os, this->Destination.c_str(),
                          (this->Programs
                           ? cmTarget::INSTALL_PROGRAMS
                           : cmTarget::INSTALL_FILES), fi->c_str(),
-                         not_optional, no_properties,
-                         this->Permissions.c_str(),
+                         this->Optional, no_properties,
+                         this->FilePermissions.c_str(), no_dir_permissions,
                          this->Configurations,
                          this->Component.c_str(),
                          this->Rename.c_str());

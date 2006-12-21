@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmSubdirDependsCommand.h,v $
   Language:  C++
-  Date:      $Date: 2003/08/10 22:30:53 $
-  Version:   $Revision: 1.7 $
+  Date:      $Date: 2006/10/13 14:52:06 $
+  Version:   $Revision: 1.7.12.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -67,6 +67,12 @@ public:
       "parallel builds correctly.  This functionality is now automatic.";
     }
   
+  /** This command is kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged()
+    {
+    return true;
+    }
+
   cmTypeMacro(cmSubdirDependsCommand, cmCommand);
 };
 

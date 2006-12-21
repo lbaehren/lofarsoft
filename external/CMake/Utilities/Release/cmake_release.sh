@@ -4,8 +4,8 @@
 # Program:   CMake - Cross-Platform Makefile Generator
 # Module:    $RCSfile: cmake_release.sh,v $
 # Language:  C++
-# Date:      $Date: 2006/06/01 13:38:12 $
-# Version:   $Revision: 1.35.2.3 $
+# Date:      $Date: 2006/07/31 15:00:31 $
+# Version:   $Revision: 1.35.2.4 $
 #
 # Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
 # See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -23,8 +23,8 @@
 #
 
 # Release version number.
-TAG="CMake-2-4-2"
-VERSION="2.4.2"
+TAG="CMake-2-4-3"
+VERSION="2.4.3"
 CMAKE_VERSION="2.4"
 RELEASE="1"
 PREVIOUS_VERSION="2.2.3"

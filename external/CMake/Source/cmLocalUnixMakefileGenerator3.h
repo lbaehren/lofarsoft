@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmLocalUnixMakefileGenerator3.h,v $
   Language:  C++
-  Date:      $Date: 2006/07/24 15:19:35 $
-  Version:   $Revision: 1.45.2.2 $
+  Date:      $Date: 2006/10/27 20:01:48 $
+  Version:   $Revision: 1.45.2.4 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -73,7 +73,8 @@ public:
                      const char* target,
                      const std::vector<std::string>& depends,
                      const std::vector<std::string>& commands,
-                     bool symbolic);
+                     bool symbolic,
+                     bool in_help = false);
   
   // write the main variables used by the makefiles
   void WriteMakeVariables(std::ostream& makefileStream);
@@ -96,15 +97,24 @@ public:
   void SetMakeSilentFlag(const char* s) { this->MakeSilentFlag = s; }
   std::string &GetMakeSilentFlag() { return this->MakeSilentFlag; }
 
-  /** Set whether the echo command needs its argument quoted.  */
-  void SetEchoNeedsQuote(bool b) { this->EchoNeedsQuote = b; }
-
   /**
    * Set to true if the shell being used is the windows shell.
    * This controls if statements in the makefile and the SHELL variable.
    * The default is false.
    */
   void SetWindowsShell(bool v)  {this->WindowsShell = v;}
+
+  /**
+   * Set to true if the make tool being used is Watcom WMake.
+   */
+  void SetWatcomWMake(bool v)  {this->WatcomWMake = v;}
+
+  /**
+   * Set to true if the shell being used is the MSYS shell.
+   * This controls if statements in the makefile and the SHELL variable.
+   * The default is false.
+   */
+  void SetMSYSShell(bool v)  {this->MSYSShell = v;}
 
   /**
    * If set to true, then NULL is set to nil for non Windows_NT.
@@ -124,6 +134,14 @@ public:
    * be not end with :  i.e. .SILENT: or .SILENT
    */
   void SetSilentNoColon(bool v)  {this->SilentNoColon = v;}
+
+  /**
+   * Set the command to use for native make shell echo.  The value
+   * should include all parts of the command up to the beginning of
+   * the message (including a whitespace separator).
+   */
+  void SetNativeEchoCommand(const char* cmd, bool isWindows)
+    { this->NativeEchoCommand = cmd; this->NativeEchoWindows = isWindows; }
 
   /**
    * Set the string used to include one makefile into another default
@@ -174,12 +192,6 @@ public:
   // cleanup the name of a potential target
   std::string ConvertToMakeTarget(const char* tgt);
 
-
-  const char* GetSourceFileLanguage(const cmSourceFile& source);
-
-
-  
-  
   /** Called from command-line hook to scan dependencies.  */
   virtual bool ScanDependencies(const char* tgtInfo);
 
@@ -208,12 +220,35 @@ public:
   // write the target rules for the local Makefile into the stream
   void WriteLocalAllRules(std::ostream& ruleFileStream);
   
-  std::map<cmStdString,std::vector<cmTarget *> > GetLocalObjectFiles()
+  struct LocalObjectEntry
+  {
+    cmTarget* Target;
+    std::string Language;
+    LocalObjectEntry(): Target(0), Language() {}
+    LocalObjectEntry(cmTarget* t, const char* lang):
+      Target(t), Language(lang) {}
+  };
+  class LocalObjectInfo: public std::vector<LocalObjectEntry> {};
+  std::map<cmStdString, LocalObjectInfo> const& GetLocalObjectFiles()
     { return this->LocalObjectFiles;}
+
+  std::vector<cmStdString> const& GetLocalHelp() { return this->LocalHelp; }
 
   // return info about progress actions
   unsigned long GetNumberOfProgressActions();
   unsigned long GetNumberOfProgressActionsForTarget(const char *);
+
+  /** Get whether to create rules to generate preprocessed and
+      assembly sources.  This could be converted to a variable lookup
+      later.  */
+  bool GetCreatePreprocessedSourceRules()
+    {
+    return !this->SkipPreprocessedSourceRules;
+    }
+  bool GetCreateAssemblySourceRules()
+    {
+    return !this->SkipAssemblySourceRules;
+    }
 
 protected:
   // these two methods just compute reasonable values for LibraryOutputPath
@@ -222,6 +257,7 @@ protected:
   void FormatOutputPath(std::string& path, const char* name);
 
   void WriteLocalMakefile();
+  
   
   // write the target rules for the local Makefile into the stream
   void WriteLocalMakefileTargets(std::ostream& ruleFileStream,
@@ -267,6 +303,9 @@ protected:
   void WriteTargetRequiresRule(std::ostream& ruleFileStream,
                                cmTarget& target,
                                const std::vector<std::string>& objects);
+  void WriteObjectConvenienceRule(std::ostream& ruleFileStream,
+                                  const char* comment, const char* output,
+                                  LocalObjectInfo const& targets);
   
   std::string GetObjectFileName(cmTarget& target,
                                 const cmSourceFile& source,
@@ -306,12 +345,12 @@ private:
   std::string ExecutableOutputPath;
   std::string LibraryOutputPath;
   std::string ConfigurationName;
+  std::string NativeEchoCommand;
+  bool NativeEchoWindows;
   bool DefineWindowsNULL;
   bool UnixCD;
   bool PassMakeflags;
   bool SilentNoColon;
-  // Flag for whether echo command needs quotes.
-  bool EchoNeedsQuote;
   //==========================================================================
 
   std::string HomeRelativeOutputPath;
@@ -320,7 +359,14 @@ private:
      beginning of generation to avoid many duplicate lookups.  */
   bool ColorMakefile;
 
-  std::map<cmStdString,std::vector<cmTarget *> > LocalObjectFiles;
+  /* Copy the setting of CMAKE_SKIP_PREPROCESSED_SOURCE_RULES and
+     CMAKE_SKIP_ASSEMBLY_SOURCE_RULES at the beginning of generation to
+     avoid many duplicate lookups.  */
+  bool SkipPreprocessedSourceRules;
+  bool SkipAssemblySourceRules;
+
+  std::map<cmStdString, LocalObjectInfo> LocalObjectFiles;
+  std::vector<cmStdString> LocalHelp;
 
   /* does the work for each target */
   std::vector<cmMakefileTargetGenerator *> TargetGenerators;

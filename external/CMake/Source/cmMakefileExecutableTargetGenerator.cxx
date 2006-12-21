@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmMakefileExecutableTargetGenerator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/07/24 15:19:36 $
-  Version:   $Revision: 1.12.2.5 $
+  Date:      $Date: 2006/10/27 20:01:48 $
+  Version:   $Revision: 1.12.2.7 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -23,6 +23,12 @@
 #include "cmSourceFile.h"
 #include "cmTarget.h"
 #include "cmake.h"
+
+//----------------------------------------------------------------------------
+cmMakefileExecutableTargetGenerator::cmMakefileExecutableTargetGenerator()
+{
+  this->DriveCustomCommandsOnDepends = true;
+}
 
 //----------------------------------------------------------------------------
 void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
@@ -272,6 +278,13 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   exeCleanFiles.push_back(this->Convert(cleanFullName.c_str(),
                                         cmLocalGenerator::START_OUTPUT,
                                         cmLocalGenerator::UNCHANGED));
+#ifdef _WIN32
+  // There may be a manifest file for this target.  Add it to the
+  // clean set just in case.
+  exeCleanFiles.push_back(this->Convert((cleanFullName+".manifest").c_str(),
+                                        cmLocalGenerator::START_OUTPUT,
+                                        cmLocalGenerator::UNCHANGED));
+#endif
   if(cleanRealName != cleanName)
     {
     exeCleanFiles.push_back(this->Convert(cleanFullRealName.c_str(),
@@ -359,6 +372,24 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   vars.Objects = buildObjs.c_str();
   vars.Target = targetOutPathReal.c_str();
   vars.TargetPDB = targetOutPathPDB.c_str();
+
+  // Setup the target version.
+  std::string targetVersionMajor;
+  std::string targetVersionMinor;
+  {
+  cmOStringStream majorStream;
+  cmOStringStream minorStream;
+  int major;
+  int minor;
+  this->Target->GetTargetVersion(major, minor);
+  majorStream << major;
+  minorStream << minor;
+  targetVersionMajor = majorStream.str();
+  targetVersionMinor = minorStream.str();
+  }
+  vars.TargetVersionMajor = targetVersionMajor.c_str();
+  vars.TargetVersionMinor = targetVersionMinor.c_str();
+
   std::string linkString = linklibs.str();
   vars.LinkLibraries = linkString.c_str();
   vars.Flags = flags.c_str();

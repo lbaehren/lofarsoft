@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmAddTestCommand.h,v $
   Language:  C++
-  Date:      $Date: 2006/03/16 14:33:23 $
-  Version:   $Revision: 1.13 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.13.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -66,7 +66,7 @@ public:
       "been run, this command does nothing.  "
       "The tests are run by the testing subsystem by executing Exename "
       "with the specified arguments.  Exename can be either an executable "
-      "built by built by this project or an arbitrary executable on the "
+      "built by this project or an arbitrary executable on the "
       "system (like tclsh).  The test will be run with the current working "
       "directory set to the CMakeList.txt files corresponding directory "
       "in the binary tree.";

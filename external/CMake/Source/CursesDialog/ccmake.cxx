@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: ccmake.cxx,v $
   Language:  C++
-  Date:      $Date: 2004/10/27 14:45:45 $
-  Version:   $Revision: 1.32 $
+  Date:      $Date: 2006/10/13 14:52:07 $
+  Version:   $Revision: 1.32.6.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -110,11 +110,14 @@ int main(int argc, char** argv)
     {
     cmake hcm;
     std::vector<cmDocumentationEntry> commands;
+    std::vector<cmDocumentationEntry> generators;
     hcm.GetCommandDocumentation(commands);
+    hcm.GetGeneratorDocumentation(generators);
     doc.SetName("ccmake");
     doc.SetNameSection(cmDocumentationName);
     doc.SetUsageSection(cmDocumentationUsage);
     doc.SetDescriptionSection(cmDocumentationDescription);
+    doc.SetGeneratorsSection(&generators[0]);
     doc.SetOptionsSection(cmDocumentationOptions);
     doc.SetCommandsSection(&commands[0]);
     doc.SetSeeAlsoList(cmDocumentationSeeAlso);

@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCommandArgumentParserHelper.h,v $
   Language:  C++
-  Date:      $Date: 2006/03/15 16:01:59 $
-  Version:   $Revision: 1.8 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.8.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -59,6 +59,7 @@ public:
 
   char* ExpandSpecialVariable(const char* key, const char* var);
   char* ExpandVariable(const char* var);
+  char* ExpandVariableForAt(const char* var);
   void SetResult(const char* value);
 
   void SetMakefile(const cmMakefile* mf);
@@ -68,6 +69,7 @@ public:
   void SetLineFile(long line, const char* file);
   void SetEscapeQuotes(bool b) { this->EscapeQuotes = b; }
   void SetNoEscapeMode(bool b) { this->NoEscapeMode = b; }
+  void SetReplaceAtSyntax(bool b) { this->ReplaceAtSyntax = b; }
 
   const char* GetError() { return this->ErrorString.c_str(); } 
   char EmptyVariable[1];
@@ -101,6 +103,7 @@ private:
   bool EscapeQuotes;
   std::string ErrorString;
   bool NoEscapeMode;
+  bool ReplaceAtSyntax;
 };
 
 #endif

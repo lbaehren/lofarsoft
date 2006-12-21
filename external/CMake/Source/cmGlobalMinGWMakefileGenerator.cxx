@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmGlobalMinGWMakefileGenerator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/06/30 17:48:43 $
-  Version:   $Revision: 1.4.2.3 $
+  Date:      $Date: 2006/10/27 20:01:47 $
+  Version:   $Revision: 1.4.2.5 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -61,6 +61,18 @@ cmLocalGenerator *cmGlobalMinGWMakefileGenerator::CreateLocalGenerator()
   lg->SetIgnoreLibPrefix(true);
   lg->SetPassMakeflags(false);
   lg->SetUnixCD(true);
+
+  // mingw32-make has trouble running code like
+  //
+  //  @echo message with spaces
+  //
+  // If quotes are added
+  //
+  //  @echo "message with spaces"
+  //
+  // it runs but the quotes are displayed.  Instead just use cmake to
+  // echo.
+  lg->SetNativeEchoCommand("@$(CMAKE_COMMAND) -E echo ", false);
   return lg;
 }
 

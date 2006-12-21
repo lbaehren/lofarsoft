@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmExecProgramCommand.h,v $
   Language:  C++
-  Date:      $Date: 2006/03/10 18:54:57 $
-  Version:   $Revision: 1.17 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.17.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -88,6 +88,12 @@ public:
       ;
     }
   
+  /** This command is kept for compatibility with older CMake versions. */
+  virtual bool IsDiscouraged()
+    {
+    return true;
+    }
+
   cmTypeMacro(cmExecProgramCommand, cmCommand);
 };
 

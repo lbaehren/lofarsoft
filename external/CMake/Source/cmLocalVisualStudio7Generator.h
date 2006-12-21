@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmLocalVisualStudio7Generator.h,v $
   Language:  C++
-  Date:      $Date: 2006/07/24 15:19:35 $
-  Version:   $Revision: 1.22.2.2 $
+  Date:      $Date: 2006/10/27 20:01:48 $
+  Version:   $Revision: 1.22.2.4 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -71,6 +71,7 @@ private:
                                    std::string& flags);
   std::string GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
                                       const char* configName);
+  void FixGlobalTargets();
   void OutputVCProjFile();
   void WriteVCProjHeader(std::ostream& fout, const char *libName,
                          cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
@@ -111,6 +112,7 @@ private:
                        const std::vector<std::string>& depends,
                        const std::vector<std::string>& outputs,
                        const char* extraFlags);
+  void WriteTargetVersionAttribute(std::ostream& fout, cmTarget& target);
 
   void WriteGroup(const cmSourceGroup *sg, 
                   cmTarget target, std::ostream &fout, 

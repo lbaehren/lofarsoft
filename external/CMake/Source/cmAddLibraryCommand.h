@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmAddLibraryCommand.h,v $
   Language:  C++
-  Date:      $Date: 2006/03/15 16:01:58 $
-  Version:   $Revision: 1.15 $
+  Date:      $Date: 2006/10/13 14:52:02 $
+  Version:   $Revision: 1.15.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -61,7 +61,7 @@ public:
   virtual const char* GetFullDocumentation()
     {
     return
-      "  ADD_LIBRARY(libname [SHARED | STATIC | MODULE]\n"
+      "  ADD_LIBRARY(libname [SHARED | STATIC | MODULE] [EXCLUDE_FROM_ALL]\n"
       "              source1 source2 ... sourceN)\n"
       "Adds a library target.  SHARED, STATIC or MODULE keywords are used "
       "to set the library type.  If the keyword MODULE appears, the library "
@@ -69,7 +69,10 @@ public:
       "without dyld, MODULE is treated like SHARED.  If no keywords appear "
       " as the second argument, the type defaults to the current value of "
       "BUILD_SHARED_LIBS.  If this variable is not set, the type defaults "
-      "to STATIC.";
+      "to STATIC.\n"
+      "If EXCLUDE_FROM_ALL is given the target will not be built by default. "
+      "It will be built only if the user explicitly builds the target or "
+      "another target that requires the target depends on it.";
     }
   
   cmTypeMacro(cmAddLibraryCommand, cmCommand);

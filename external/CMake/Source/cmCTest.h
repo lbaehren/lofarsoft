@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCTest.h,v $
   Language:  C++
-  Date:      $Date: 2006/04/29 15:49:19 $
-  Version:   $Revision: 1.92.2.1 $
+  Date:      $Date: 2006/10/27 20:01:47 $
+  Version:   $Revision: 1.92.2.2 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -53,7 +53,7 @@ public:
   typedef std::set<cmStdString> SetOfStrings;
 
   ///! Process Command line arguments
-  int Run(std::vector<std::string>const&, std::string* output = 0);
+  int Run(std::vector<std::string> &, std::string* output = 0);
 
   /**
    * Initialize and finalize testing
@@ -137,6 +137,13 @@ public:
   ///! Get the current time as string
   std::string CurrentTime();
 
+  /** 
+   * Return the time remaianing that the script is allowed to run in
+   * seconds if the user has set the variable CTEST_TIME_LIMIT. If that has
+   * not been set it returns 1e7 seconds
+   */
+  double GetRemainingTimeAllowed();
+    
   ///! Open file in the output directory and set the stream
   bool OpenOutputFile(const std::string& path,
                       const std::string& name,
@@ -269,6 +276,9 @@ public:
   //! Set the output log file name
   void SetOutputLogFileName(const char* name);
 
+  //! Set the visual studio or Xcode config type
+  void SetConfigType(const char* ct);
+
   //! Various log types
   enum {
     DEBUG = 0,
@@ -368,6 +378,18 @@ private:
 
   void BlockTestErrorDiagnostics();
 
+
+  //! parse the option after -D and convert it into the appropriate steps
+  bool AddTestsForDashboardType(std::string &targ);
+
+  //! parse and process most common command line arguments
+  void HandleCommandLineArguments(size_t &i, 
+                                  std::vector<std::string> &args);
+
+  //! hande the -S -SP and -SR arguments
+  void HandleScriptArguments(size_t &i, 
+                             std::vector<std::string> &args,
+                             bool &SRArgumentSpecified);
 
   //! Reread the configuration file
   bool UpdateCTestConfiguration();

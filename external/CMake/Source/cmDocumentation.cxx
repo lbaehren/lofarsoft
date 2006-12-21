@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmDocumentation.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/05/11 02:15:09 $
-  Version:   $Revision: 1.31.2.1 $
+  Date:      $Date: 2006/10/27 20:01:47 $
+  Version:   $Revision: 1.31.2.3 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -69,12 +69,33 @@ static const cmDocumentationEntry cmDocumentationGeneratorsHeader[] =
 };
 
 //----------------------------------------------------------------------------
-const cmDocumentationEntry cmDocumentationMailingList[] =
+static const cmDocumentationEntry cmDocumentationStandardSeeAlso[] =
 {
   {0,
-   "For help and discussion about using cmake, a mailing list is provided "
-   "at cmake@www.cmake.org.  Please first read the full documentation at "
-   "http://www.cmake.org before posting questions to the list.", 0},
+   "The following resources are available to get help using CMake:", 0},
+  {"Home Page",
+   "http://www.cmake.org",
+   "The primary starting point for learning about CMake."},
+  {"Frequently Asked Questions",
+   "http://www.cmake.org/Wiki/CMake_FAQ",
+   "A Wiki is provided containing answers to frequently asked questions. "},
+  {"Online Documentation",
+   "http://www.cmake.org/HTML/Documentation.html",
+   "Links to available documentation may be found on this web page."},
+  {"Mailing List",
+   "http://www.cmake.org/HTML/MailingLists.html",
+   "For help and discussion about using cmake, a mailing list is provided at "
+   "cmake@cmake.org. "
+   "The list is member-post-only but one may sign up on the CMake web page. "
+   "Please first read the full documentation at "
+   "http://www.cmake.org before posting questions to the list."},
+  {0,
+   "Summary of helpful links:\n"
+   "  Home: http://www.cmake.org\n"
+   "  Docs: http://www.cmake.org/HTML/Documentation.html\n"
+   "  Mail: http://www.cmake.org/HTML/MailingLists.html\n"
+   "  FAQ:  http://www.cmake.org/Wiki/CMake_FAQ\n"
+   , 0},
   {0,0,0}
 };
 
@@ -545,6 +566,7 @@ void cmDocumentation
 //----------------------------------------------------------------------------
 void cmDocumentation::SetSeeAlsoList(const cmDocumentationEntry* also)
 {
+  this->SeeAlsoSection.clear();
   this->SeeAlsoString = ".B ";
   for(const cmDocumentationEntry* i = also; i->brief; ++i)
     {
@@ -554,6 +576,11 @@ void cmDocumentation::SetSeeAlsoList(const cmDocumentationEntry* also)
   cmDocumentationEntry e = {0, 0, 0};
   e.brief = this->SeeAlsoString.c_str();
   this->SeeAlsoSection.push_back(e);
+  for(const cmDocumentationEntry* i = cmDocumentationStandardSeeAlso;
+      i->brief; ++i)
+    {
+    this->SeeAlsoSection.push_back(*i);
+    }
   e.brief = 0;
   this->SeeAlsoSection.push_back(e);  
 }
@@ -840,13 +867,17 @@ void cmDocumentation::PrintParagraphHTML(std::ostream& os, const char* text)
 //----------------------------------------------------------------------------
 void cmDocumentation::PrintPreformattedMan(std::ostream& os, const char* text)
 {
-  os << text << "\n";
+  std::string man_text = text;
+  cmSystemTools::ReplaceString(man_text, "\\", "\\\\");
+  os << man_text << "\n";
 }
 
 //----------------------------------------------------------------------------
 void cmDocumentation::PrintParagraphMan(std::ostream& os, const char* text)
 {
-  os << text << "\n\n";
+  std::string man_text = text;
+  cmSystemTools::ReplaceString(man_text, "\\", "\\\\");
+  os << man_text << "\n\n";
 }
 
 //----------------------------------------------------------------------------
@@ -938,8 +969,20 @@ void cmDocumentation::PrintColumn(std::ostream& os, const char* text)
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::PrintHTMLEscapes(std::ostream& os, const char* text)
+static bool cmDocumentationIsHyperlinkChar(char c)
 {
+  // This is not a complete list but works for CMake documentation.
+  return ((c >= 'A' && c <= 'Z') ||
+          (c >= 'a' && c <= 'z') ||
+          (c >= '0' && c <= '9') ||
+          c == '-' || c == '.' || c == '/' || c == '~' || c == '@' ||
+          c == ':' || c == '_' || c == '&' || c == '?' || c == '=');
+}
+
+//----------------------------------------------------------------------------
+static void cmDocumentationPrintHTMLChar(std::ostream& os, char c)
+{
+  // Use an escape sequence if necessary.
   static cmDocumentationEntry escapes[] =
   {
     {"<", "&lt;", 0},
@@ -948,20 +991,73 @@ void cmDocumentation::PrintHTMLEscapes(std::ostream& os, const char* text)
     {"\n", "<br>", 0},
     {0,0,0}
   };
-  for(const char* p = text; *p; ++p)
+  for(const cmDocumentationEntry* op = escapes; op->name; ++op)
     {
-    bool found = false;
-    for(const cmDocumentationEntry* op = escapes; !found && op->name; ++op)
-      {
-      if(op->name[0] == *p)
+    if(op->name[0] == c)
         {
         os << op->brief;
-        found = true;
+      return;
+      }
+    }
+
+  // No escape sequence is needed.
+  os << c;
+}
+
+//----------------------------------------------------------------------------
+const char* cmDocumentationPrintHTMLLink(std::ostream& os, const char* begin)
+{
+  // Look for the end of the link.
+  const char* end = begin;
+  while(cmDocumentationIsHyperlinkChar(*end))
+    {
+    ++end;
+    }
+
+  // Print the hyperlink itself.
+  os << "<a href=\"";
+  for(const char* c = begin; c != end; ++c)
+    {
+    cmDocumentationPrintHTMLChar(os, *c);
+    }
+  os << "\">";
+
+  // The name of the hyperlink is the text itself.
+  for(const char* c = begin; c != end; ++c)
+    {
+    cmDocumentationPrintHTMLChar(os, *c);
+    }
+  os << "</a>";
+
+  // Return the position at which to continue scanning the input
+  // string.
+  return end;
+}
+
+//----------------------------------------------------------------------------
+void cmDocumentation::PrintHTMLEscapes(std::ostream& os, const char* text)
+{
+  // Hyperlink prefixes.
+  static const char* hyperlinks[] = {"http://", "ftp://", "mailto:", 0};
+
+  // Print each character.
+  for(const char* p = text; *p;)
+    {
+    // Handle hyperlinks specially to make them active.
+    bool found_hyperlink = false;
+    for(const char** h = hyperlinks; !found_hyperlink && *h; ++h)
+      {
+      if(strncmp(p, *h, strlen(*h)) == 0)
+        {
+        p = cmDocumentationPrintHTMLLink(os, p);
+        found_hyperlink = true;
         }
       }
-    if(!found)
+
+    // Print other characters normally.
+    if(!found_hyperlink)
       {
-      os << *p;
+      cmDocumentationPrintHTMLChar(os, *p++);
       }
     }
 }
@@ -1166,7 +1262,7 @@ void cmDocumentation::CreateFullDocumentation()
     this->AddSection("Standard CMake Modules", &this->ModulesSection[0]);
     }
   this->AddSection("Copyright", cmDocumentationCopyright);
-  this->AddSection("Mailing List", cmDocumentationMailingList);
+  this->AddSection("See Also", cmDocumentationStandardSeeAlso);
 }
 
 //----------------------------------------------------------------------------
@@ -1204,7 +1300,6 @@ void cmDocumentation::CreateManDocumentation()
     }
 
   this->AddSection("COPYRIGHT", cmDocumentationCopyright);
-  this->AddSection("MAILING LIST", cmDocumentationMailingList);  
   if(!this->SeeAlsoSection.empty())
     {
     this->AddSection("SEE ALSO", &this->SeeAlsoSection[0]);
