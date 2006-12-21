@@ -40,15 +40,15 @@
 
 void a();
 
-main()
+int main()
 {
-    try {
-	a();
-    } catch (AipsError x) {
-	cout << "Caught an exception: " << x.getMesg() << endl;
-	return 1;
-    } 
-    return 0;                           // exit with success status
+  try {
+    a();
+  } catch (AipsError x) {
+    cout << "Caught an exception: " << x.getMesg() << endl;
+    return 1;
+  } 
+  return 0;                           // exit with success status
 }
 
 void a()

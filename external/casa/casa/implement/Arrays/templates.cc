@@ -159,6 +159,23 @@ namespace casa {
   template ostream & operator<<(ostream &, Array<uInt> const &);
   template ostream & operator<<(ostream &, Array<uLong> const &);
   template ostream & operator<<(ostream &, Array<uShort> const &);
+  // test/templates
+  template Bool read(istream &, Array<Complex> &, IPosition const *, Bool);
+  template Bool read(istream &, Array<Double> &, IPosition const *, Bool);
+  template Bool readArrayBlock(istream &, Bool &, IPosition &, Block<Complex> &, IPosition const *, Bool);
+  template Bool readArrayBlock(istream &, Bool &, IPosition &, Block<Double> &, IPosition const *, Bool);
+  template istream & operator>>(istream &, Array<Double> &);
+  template void readAsciiMatrix(Matrix<Int> &, Char const *);
+  template void readAsciiVector(Vector<Double> &, Char const *);
+  template void read_array(Array<Int> &, Char const *);
+  template void read_array(Array<Int> &, String const &);
+  template void writeAsciiMatrix(Matrix<Int> const &, Char const *);
+  template void writeAsciiVector(Vector<Double> const &, Char const *);
+  template void write_array(Array<Int> const &, Char const *);
+  template void write_array(Array<Int> const &, String const &);
+  template istream & operator>>(istream &, Array<Quantum<Double> > &);
+  template Bool read(istream &, Array<Quantum<Double> > &, IPosition const *, Bool);
+  template Bool readArrayBlock(istream &, Bool &, IPosition &, Block<Quantum<Double> > &, IPosition const *, Bool);
   
   template class ArrayIterator<Bool>;
   template class ArrayIterator<uChar>;
@@ -777,6 +794,14 @@ namespace casa {
   template Array<DComplex> concatenateArray(Array<DComplex> const &, Array<DComplex> const &);
   template Array<String> concatenateArray(Array<String> const &, Array<String> const &);
   template Array<Double> reorderArray(Array<Double> const &, IPosition const &, Bool);
+  // test/templates
+  template Array<Int> cube(Array<Int> const &);
+  template Array<Int> operator-(Array<Int> const &, Array<Int> const &);
+  template Array<Int> operator-(Array<Int> const &, Int const &);
+  template Array<Int> square(Array<Int> const &);
+  template Int mean(Array<Int> const &);
+  template Int median(Array<Int> const &, Bool);
+  template Int median(Array<Int> const &, Bool, Bool, Bool);
 
   template class Cube<Matrix<CountedPtr<Random> > >;
   template class Cube<Complex>;

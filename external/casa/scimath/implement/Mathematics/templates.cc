@@ -97,13 +97,13 @@ namespace casa {
   template class KB_Conv<Float>;
   template class KB_Conv<Double>;
   template class MathFunc<Float>;
-  template class MathFunc<Double>;
+//   template class MathFunc<Double>;
   template class Mod_KB_Conv<Float>;
   template class Mod_KB_Conv<Double>;
   template class Sinc_Conv<Float>;
   template class Sinc_Conv<Double>;
   template class Sph_Conv<Float>;
-  template class Sph_Conv<Double>;
+//   template class Sph_Conv<Double>;
   template class Unary<Float>;
   template class Unary<Double>;
 
