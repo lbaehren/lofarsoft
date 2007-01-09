@@ -73,6 +73,6 @@ add_library (measures
   TableMeasures/TableQuantumDesc.cc
   ## -- Template instantiation----------------------
   templates.cc
-#  Measures/templates.cc
-#  TableMeasures/templates.cc
+  Measures/templates.cc
+  TableMeasures/templates.cc
   )
