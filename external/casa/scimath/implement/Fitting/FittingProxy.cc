@@ -370,9 +370,11 @@ Record FittingProxy::linear(Int id, const Record& fnc,
   Double *conit = constr.data();
   casa::Vector<Double> ctmp(returnval.nelements());
   Double *ctit = ctmp.data();
-  for (uInt i=0; i<fitter.getDeficiency(); ++i, conit+returnval.nelements()) {
+  uInt i=0;
+  uInt j=0;
+  for (i=0; i<fitter.getDeficiency(); ++i, conit+returnval.nelements()) {
     ctmp = fitter.getSVDConstraint(i);
-    for (uInt j=0; j<returnval.nelements(); ++j) *conit++ = ctit[j];
+    for (j=0; j<returnval.nelements(); ++j) *conit++ = ctit[j];
   };
   covar = fitter.compuCovariance();
   err.resize();

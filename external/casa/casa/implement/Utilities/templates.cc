@@ -55,6 +55,7 @@
 #include <casa/Utilities/COWPtr.cc>
 #include <casa/Utilities/CountedPtr.cc>
 #include <casa/Utilities/Compare.cc>
+#include <casa/Utilities/Copy.cc>
 #include <casa/Utilities/GenSort.cc>
 #include <casa/Utilities/LinearSearch.cc>
 #include <casa/Utilities/PtrHolder.cc>
@@ -414,7 +415,9 @@ namespace casa {
   template uInt Register(String const *);
   template uInt Register(ListNotice<Param> const *);
   template uInt Register(ListNotice<CountedPtr<SysEventTargetInfo> > const *);
+  template uInt Register(ListNotice<Int> const *);
   template uInt Register(ListNotice<uInt> const *);
+  template uInt Register(ListNotice<Long> const *);
   template uInt Register(ListNotice<uLong> const *);
   template uInt Register(OrderedMapNotice<Int, Array<Float> > const *);
   template uInt Register(OrderedMapNotice<Int, Vector<Float> > const *);
@@ -453,5 +456,146 @@ namespace casa {
   template uInt Register(uInt const *);
 
   template class Sequence<uInt>;
+  template class Sequence<Int>;
+  template class Sequence<Float>;
+  
+  template void objcopy(String*, const String*, uInt);
+  template void objcopy(uInt*, const uInt*, uInt);
+  template void objcopy(Int*, const Int*, uInt);
+  template void objcopy(Float*, const Float*, uInt);
+  template void objcopy(Double*, const Double*, uInt);
+  template void objcopy(Complex*, const Complex*, uInt);
+  template void objcopy(DComplex*, const DComplex*, uInt);
+  template void objcopy(char*, const char*, uInt);
+  template void objcopy(bool*, const bool*, uInt);
+  template void objcopy(short*, const short*, uInt);
+  template void objcopy(long*, const long*, uInt);
+  template void objcopy(long long*, const long long*, uInt);
+  template void objcopy(IPosition*, const IPosition*, uInt);
+  template void objcopy(MVPosition*, const MVPosition*, uInt);
+  template void objcopy(ArraySlicer*, const ArraySlicer*, uInt);
+  template void objcopy(MVDirection*, const MVDirection*, uInt);
+  template void objcopy(MVFrequency*, const MVFrequency*, uInt);
 
+  template void objcopy<void*>(void**, void* const*, uInt);
+  template void objcopy<unsigned char>(unsigned char*, unsigned char const*, uInt);
+  template void objcopy<uLong>(uLong*, uLong const*, uInt);
+  template void objcopy<uShort>(uShort*, uShort const*, uInt);
+  template void objcopy<float*>(float**, float* const*, uInt);
+  template void objcopy<Array<double> >(Array<double>*, Array<double> const*, uInt);
+  template void objcopy<Vector<float> >(Vector<float>*, Vector<float> const*, uInt);
+  template void objcopy<Vector<double> >(Vector<double>*, Vector<double> const*, uInt);
+  template void objcopy<Vector<Complex> >(Vector<Complex>*, Vector<Complex> const*, uInt);
+  template void objcopy<Vector<DComplex> >(Vector<DComplex>*, Vector<DComplex> const*, uInt);
+  template void objcopy<Vector<String> >(Vector<String>*, Vector<String> const*, uInt);
+  template void objcopy<Unit>(Unit*, Unit const*, uInt);
+  template void objcopy<QuantumHolder>(QuantumHolder*, QuantumHolder const*, uInt);
+  template void objcopy<MVTime>(MVTime*, MVTime const*, uInt);
+  template void objcopy<CountedPtr<Random> >(CountedPtr<Random> *, CountedPtr<Random>  const*, uInt);
+
+  template void objcopy<bool>(bool*, bool const*, uInt, uInt, uInt);
+  template void objcopy<char>(char*, char const*, uInt, uInt, uInt);
+  template void objcopy<unsigned char>(unsigned char*, unsigned char const*, uInt, uInt, uInt);
+  template void objcopy<int>(int*, int const*, uInt, uInt, uInt);
+  template void objcopy<uInt>(uInt*, uInt const*, uInt, uInt, uInt);
+  template void objcopy<short>(short*, short const*, uInt, uInt, uInt);
+  template void objcopy<uShort>(uShort*, uShort const*, uInt, uInt, uInt);
+  template void objcopy<long>(long*, long const*, uInt, uInt, uInt);
+  template void objcopy<uLong>(uLong*, uLong const*, uInt, uInt, uInt);
+  template void objcopy<float>(float*, float const*, uInt, uInt, uInt);
+  template void objcopy<float*>(float**, float* const*, uInt, uInt, uInt);
+  template void objcopy<Double>(Double*, Double const*, uInt, uInt, uInt);
+  template void objcopy<Complex>(Complex*, Complex const*, uInt, uInt, uInt);
+  template void objcopy<DComplex>(DComplex*, DComplex const*, uInt, uInt, uInt);
+  template void objcopy<String>(String*, String const*, uInt, uInt, uInt);
+  template void objcopy<MVPosition>(MVPosition*, MVPosition const*, uInt, uInt, uInt);
+  template void objcopy<ArraySlicer>(ArraySlicer*, ArraySlicer const*, uInt, uInt, uInt);
+  template void objcopy<MVDirection>(MVDirection*, MVDirection const*, uInt, uInt, uInt);
+  template void objcopy<MVFrequency>(MVFrequency*, MVFrequency const*, uInt, uInt, uInt);
+  template void objcopy<QuantumHolder>(QuantumHolder*, QuantumHolder const*, uInt, uInt, uInt);
+  template void objcopy<MVRadialVelocity>(MVRadialVelocity*, MVRadialVelocity const*, uInt);
+  template void objcopy<MVRadialVelocity>(MVRadialVelocity*, MVRadialVelocity const*, uInt, uInt, uInt);
+  template void objcopy<Unit>(Unit*, Unit const*, uInt, uInt, uInt);
+  template void objcopy<Array<double> >(Array<double>*, Array<double> const*, uInt, uInt, uInt);
+  template void objcopy<Vector<float> >(Vector<float>*, Vector<float> const*, uInt, uInt, uInt);
+  template void objcopy<Vector<double> >(Vector<double>*, Vector<double> const*, uInt, uInt, uInt);
+  template void objcopy<Vector<Complex> >(Vector<Complex>*, Vector<Complex> const*, uInt, uInt, uInt);
+  template void objcopy<MVTime>(MVTime*, MVTime const*, uInt, uInt, uInt);
+  template void objcopy<Quantum<float> >(Quantum<float>*, Quantum<float> const*, uInt);
+  template void objcopy<Quantum<float> >(Quantum<float>*, Quantum<float> const*, uInt, uInt, uInt);
+  template void objcopy<Quantum<double> >(Quantum<double>*, Quantum<double> const*, uInt);
+  template void objcopy<Quantum<double> >(Quantum<double>*, Quantum<double> const*, uInt, uInt, uInt);
+  template void objcopy<CountedPtr<Random> >(CountedPtr<Random> *, CountedPtr<Random>  const*, uInt, uInt, uInt);
+
+  template void objset<void*>(void**, void*, uInt);
+  template void objset<bool*>(bool**, bool*, uInt);
+  template void objset<bool*>(bool**, bool*, uInt, uInt);
+  template void objset<Float*>(Float**, Float*, uInt);
+  template void objset<Float*>(Float**, Float*, uInt, uInt);
+  template void objset<bool>(bool*, bool, uInt);
+  template void objset<bool>(bool*, bool, uInt, uInt);
+  template void objset<char>(char*, char, uInt);
+  template void objset<char>(char*, char, uInt, uInt);
+  template void objset<double>(double*, double, uInt);
+  template void objset<double>(double*, double, uInt, uInt);
+  template void objset<float>(float*, float, uInt);
+  template void objset<float>(float*, float, uInt, uInt);
+  template void objset<Complex*>(Complex**, Complex*, uInt);
+  template void objset<Complex*>(Complex**, Complex*, uInt, uInt);
+  template void objset<DComplex*>(DComplex**, DComplex*, uInt);
+  template void objset<DComplex*>(DComplex**, DComplex*, uInt, uInt);
+  template void objset<unsigned char>(unsigned char*, unsigned char, uInt);
+  template void objset<unsigned char>(unsigned char*, unsigned char, uInt, uInt);
+  template void objset<int>(int*, int, uInt);
+  template void objset<int>(int*, int, uInt, uInt);
+  template void objset<uInt>(uInt*, uInt, uInt);
+  template void objset<uInt>(uInt*, uInt, uInt, uInt);
+  template void objset<long>(long*, long, uInt);
+  template void objset<long>(long*, long, uInt, uInt);
+  template void objset<uLong>(uLong*, uLong, uInt);
+  template void objset<uLong>(uLong*, uLong, uInt, uInt);
+  template void objset<short>(short*, short, uInt);
+  template void objset<short>(short*, short, uInt, uInt);
+  template void objset<uShort>(uShort*, uShort, uInt);
+  template void objset<uShort>(uShort*, uShort, uInt, uInt);
+  template void objset<Complex>(Complex*, Complex, uInt);
+  template void objset<Complex>(Complex*, Complex, uInt, uInt);
+  template void objset<DComplex>(DComplex*, DComplex, uInt);
+  template void objset<DComplex>(DComplex*, DComplex, uInt, uInt);
+  template void objset<String>(String*, String, uInt);
+  template void objset<String>(String*, String, uInt, uInt);
+  template void objset<Unit>(Unit*, Unit, uInt);
+  template void objset<Unit>(Unit*, Unit, uInt, uInt);
+  template void objset<MVTime>(MVTime*, MVTime, uInt);
+  template void objset<MVTime>(MVTime*, MVTime, uInt, uInt);
+  template void objset<Array<double> >(Array<double>*, Array<double>, uInt);
+  template void objset<Array<double> >(Array<double>*, Array<double>, uInt, uInt);
+  template void objset<Vector<float> >(Vector<float>*, Vector<float>, uInt);
+  template void objset<Vector<float> >(Vector<float>*, Vector<float>, uInt, uInt);
+  template void objset<Vector<double> >(Vector<double>*, Vector<double>, uInt);
+  template void objset<Vector<double> >(Vector<double>*, Vector<double>, uInt, uInt);
+  template void objset<Vector<Complex> >(Vector<Complex>*, Vector<Complex>, uInt);
+  template void objset<Vector<Complex> >(Vector<Complex>*, Vector<Complex>, uInt, uInt);
+  template void objset<MVPosition>(MVPosition*, MVPosition, uInt);
+  template void objset<MVPosition>(MVPosition*, MVPosition, uInt, uInt);
+  template void objset<ArraySlicer>(ArraySlicer*, ArraySlicer, uInt);
+  template void objset<ArraySlicer>(ArraySlicer*, ArraySlicer, uInt, uInt);
+  template void objset<MVDirection>(MVDirection*, MVDirection, uInt);
+  template void objset<MVDirection>(MVDirection*, MVDirection, uInt, uInt);
+  template void objset<MVFrequency>(MVFrequency*, MVFrequency, uInt);
+  template void objset<MVFrequency>(MVFrequency*, MVFrequency, uInt, uInt);
+  template void objset<QuantumHolder>(QuantumHolder*, QuantumHolder, uInt);
+  template void objset<QuantumHolder>(QuantumHolder*, QuantumHolder, uInt, uInt);
+  template void objset<MVRadialVelocity>(MVRadialVelocity*, MVRadialVelocity, uInt);
+  template void objset<MVRadialVelocity>(MVRadialVelocity*, MVRadialVelocity, uInt, uInt);
+  template void objset<Quantum<double> >(Quantum<double>*, Quantum<double>, uInt);
+  template void objset<Quantum<double> >(Quantum<double>*, Quantum<double>, uInt, uInt);
+  template void objset<Quantum<float> >(Quantum<float>*, Quantum<float>, uInt);
+  template void objset<Quantum<float> >(Quantum<float>*, Quantum<float>, uInt, uInt);
+  template void objset<CountedPtr<Random> >(CountedPtr<Random>*, CountedPtr<Random>, uInt);
+  template void objset<CountedPtr<Random> >(CountedPtr<Random>*, CountedPtr<Random>, uInt, uInt);
+  template void objset<Matrix<CountedPtr<Random> > >(Matrix<CountedPtr<Random> >*, Matrix<CountedPtr<Random> >, uInt);
+  template void objset<Matrix<CountedPtr<Random> > >(Matrix<CountedPtr<Random> >*, Matrix<CountedPtr<Random> >, uInt, uInt);
+  
+  template void objmove<String>(String*, String const*, uInt);
 }

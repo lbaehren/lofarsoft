@@ -202,6 +202,30 @@ namespace casa {
   template class ArrayIterator<Char>;
   template class ArrayIterator<uLong>;
   template class ReadOnlyArrayIterator<Char>;
+
+  template Bool allEQ(Array<bool> const &, bool const &);
+  template Bool allEQ(Array<Int> const &, Int const &);
+  template Bool allEQ(Array<uInt> const &, uInt const &);
+  template Bool allEQ(Array<Short> const &, Short const &);
+  template Bool allEQ(Array<uShort> const &, uShort const &);
+  template Bool allEQ(Array<Long> const &, Long const &);
+  template Bool allEQ(Array<uLong> const &, uLong const &);
+  template Bool allEQ(Array<float> const &, float const &);
+  template Bool allEQ(Array<double> const &, double const &);
+  template Bool allEQ(Array<Complex> const &, Complex const &);
+  template Bool allEQ(Array<DComplex> const &, DComplex const &);
+  template Bool allEQ(Array<String> const &, String const &);
+
+  template Bool allEQ(Array<bool> const &, Array<bool> const &);
+  template Bool allEQ(Array<Int> const &, Array<Int> const &);
+  template Bool allEQ(Array<uInt> const &, Array<uInt> const &);
+  template Bool allEQ(Array<Short> const &, Array<Short> const &);
+  template Bool allEQ(Array<uShort> const &, Array<uShort> const &);
+  template Bool allEQ(Array<Float> const &, Array<Float> const &);
+  template Bool allEQ(Array<Double> const &, Array<Double> const &);
+  template Bool allEQ(Array<Complex> const &, Array<Complex> const &);
+  template Bool allEQ(Array<DComplex> const &, Array<DComplex> const &);
+  template Bool allEQ(Array<String> const &, Array<String> const &);
   
   template Array<Bool> operator!=(Array<Complex> const &, Array<Complex> const &);
   template Array<Bool> operator!=(Array<Complex> const &, Complex const &);
@@ -221,10 +245,8 @@ namespace casa {
   template Array<Bool> operator>=(Array<Complex> const &, Array<Complex> const &);
   template Array<Bool> operator>=(Array<Complex> const &, Complex const &);
   template Array<Bool> operator>=(Complex const &, Array<Complex> const &);
-  template Bool allEQ(Array<Complex> const &, Array<Complex> const &);
   template Bool allNear(Array<Complex> const &, Complex const &, Double);
   template Bool allNearAbs(Array<Complex> const &, Complex const &, Double);
-  template Bool allEQ(Array<DComplex> const &, Array<DComplex> const &);
   template Bool allNearAbs(Array<DComplex> const &, DComplex const &, Double);
   template Bool anyEQ(DComplex const &, Array<DComplex> const &);
   template LogicalArray operator!=(Array<DComplex> const &, Array<DComplex> const &);
@@ -245,8 +267,6 @@ namespace casa {
   template LogicalArray nearAbs(Array<DComplex> const &, Array<DComplex> const &, Double);
   template LogicalArray nearAbs(Array<DComplex> const &, DComplex const &, Double);
   template LogicalArray nearAbs(DComplex const &, Array<DComplex> const &, Double);
-  template Bool allEQ(Array<String> const &, Array<String> const &);
-  template Bool allEQ(Array<String> const &, String const &);
   template Bool anyEQ(Array<String> const &, String const &);
   template Bool anyEQ(String const &, Array<String> const &);
   template Bool anyNE(Array<String> const &, Array<String> const &);
@@ -273,8 +293,6 @@ namespace casa {
   template LogicalArray operator>=(Array<MVTime> const &, Array<MVTime> const &);
   template LogicalArray operator>=(Array<MVTime> const &, MVTime const &);
   template LogicalArray operator>=(MVTime const &, Array<MVTime> const &);
-  template Bool allEQ(Array<Double> const &, Array<Double> const &);
-  template Bool allEQ(Array<Double> const &, Double const &);
   template Bool allGE(Array<Double> const &, Double const &);
   template Bool allLE(Array<Double> const &, Double const &);
   template Bool allNear(Array<Double> const &, Array<Double> const &, Double);
@@ -304,8 +322,6 @@ namespace casa {
   template LogicalArray nearAbs(Array<Double> const &, Array<Double> const &, Double);
   template LogicalArray nearAbs(Array<Double> const &, Double const &, Double);
   template LogicalArray nearAbs(Double const &, Array<Double> const &, Double);
-  template Bool allEQ(Array<Float> const &, Array<Float> const &);
-  template Bool allEQ(Array<Float> const &, Float const &);
   template Bool allGE(Array<Float> const &, Float const &);
   template Bool allLT(Array<Float> const &, Float const &);
   template Bool anyEQ(Array<Float> const &, Float const &);
@@ -314,8 +330,6 @@ namespace casa {
   template Bool anyLT(Array<Float> const &, Float const &);
   template Bool anyNE(Array<Float> const &, Float const &);
   template Bool anyNE(Array<Float> const &, Array<Float> const &);
-  template Bool allEQ(Array<Int> const &, Array<Int> const &);
-  template Bool allEQ(Array<Int> const &, Int const &);
   template Bool allGE(Array<Int> const &, Int const &);
   template Bool allLT(Array<Int> const &, Int const &);
   template Bool anyEQ(Array<Int> const &, Int const &);
@@ -331,15 +345,12 @@ namespace casa {
   template Array<Bool> operator<(Array<Int> const &, Int const &);
   template Array<Bool> operator>=(Array<Int> const &, Int const &);
   template Array<Bool> operator<=(Array<Int> const &, Int const &);
-  template Bool allEQ(Array<Short> const &, Array<Short> const &);
   template Array<Bool> operator==(Array<Short> const &, Short const &);
   template Array<Bool> operator>(Array<Short> const &, Short const &);
   template Bool allEQ(Array<uChar> const &, Array<uChar> const &);
   template Bool allEQ(Array<uChar> const &, uChar const &);
   template Array<Bool> operator==(Array<uChar> const &, uChar const &);
   template Array<Bool> operator>(Array<uChar> const &, uChar const &);
-  template Bool allEQ(Array<uInt> const &, Array<uInt> const &);
-  template Bool allEQ(Array<uInt> const &, uInt const &);
   template Bool allGE(Array<uInt> const &, uInt const &);
   template Bool allLT(Array<uInt> const &, uInt const &);
   template Bool anyEQ(Array<uInt> const &, uInt const &);
@@ -379,8 +390,6 @@ namespace casa {
   template Bool anyNE(Array<Bool> const &, Array<Bool> const &);
   template Bool anyNE(Array<Bool> const &, Bool const &);
   template Bool allAND(Array<Bool> const &, Bool const &);
-  template Bool allEQ(Array<Bool> const &, Array<Bool> const &);
-  template Bool allEQ(Array<Bool> const &, Bool const &);
   template Bool allOR(Array<Bool> const &, Array<Bool> const &);
   template Bool anyEQ(Array<Bool> const &, Bool const &);
   template Bool anyEQ(Bool const &, Array<Bool> const &);

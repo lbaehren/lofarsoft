@@ -271,6 +271,7 @@ add_library (casa
   Utilities/ValType.cc
   Utilities/cregex.cc
 ## -- Template instantiation----------------------
+#  templates.cc
   Arrays/templates.cc
   BasicMath/templates.cc
 #  BasicSL/templates.cc

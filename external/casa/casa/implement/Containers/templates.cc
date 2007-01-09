@@ -44,25 +44,35 @@
 
 namespace casa {
 
+  template AipsIO & operator>>(AipsIO &, SimpleOrderedMap<String, String> &);
+  template AipsIO & operator<<(AipsIO &, SimpleOrderedMap<String, String> const &);
+  template AipsIO & operator>>(AipsIO &, SimpleOrderedMap<Int, Int> &);
+  template AipsIO & operator<<(AipsIO &, SimpleOrderedMap<Int, Int> const &);
   template AipsIO & operator>>(AipsIO &, Block<String> &);
-  template ostream & operator<<(ostream &, Block<String> const &);
-  template void showBlock(ostream &, Block<String> const &, Int);
-  template void getBlock(AipsIO &, Block<String> &);
   template AipsIO & operator<<(AipsIO &, Block<uInt> const &);
   template AipsIO & operator>>(AipsIO &, Block<Int> &);
   template AipsIO & operator>>(AipsIO &, Block<uInt> &);
+
+  template ostream & operator<<(ostream &, Block<String> const &);
+  template void showBlock(ostream &, Block<String> const &, Int);
+  template void getBlock(AipsIO &, Block<String> &);
   template void getBlock(AipsIO &, Block<Int> &);
   template void getBlock(AipsIO &, Block<uInt> &);
   template void putBlock(AipsIO &, Block<uInt> const &, Int);
   template void showBlock(ostream &, Block<uInt> const &, Int);
   
-  template class Link<Vector<Double> *>;
+  template class Link<Vector<Int> *>;
+  template class Link<Vector<uInt> *>;
   template class Link<Vector<Float> *>;
+  template class Link<Vector<Double> *>;
   template class Link<Param>;
   template class Link<CountedPtr<SysEventTargetInfo> >;
   template class Link<NoticeTarget *>;
   template class Link<Int>;
   template class Link<uInt>;
+  template class Link<Short>;
+  template class Link<uShort>;
+  template class Link<Long>;
   template class Link<uLong>;
   template class Link<void *>;
 
@@ -70,25 +80,36 @@ namespace casa {
 //   template class Dlink<uInt>;
 //   template class Dlink<uLong>;
   
-  template class ConstListIter<Param>;
-  template class List<Param>;
-  template class ListIter<Param>;
-  template class ListNotice<Param>;
-  template class ConstListIter<CountedPtr<SysEventTargetInfo> >;
-  template class List<CountedPtr<SysEventTargetInfo> >;
-  template class ListIter<CountedPtr<SysEventTargetInfo> >;
-  template class ListNotice<CountedPtr<SysEventTargetInfo> >;
-  template class ConstListIter<uInt>;
-  template class List<uInt>;
-  template class ListIter<uInt>;
-  template class ListNotice<uInt>;
-  template class ConstListIter<uLong>;
-  template class List<uLong>;
-  template class ListIter<uLong>;
-  template class ListNotice<uLong>;
-  template class ConstListIter<void *>;
   template class List<void *>;
+  template class List<Int>;
+  template class List<uInt>;
+  template class List<Long>;
+  template class List<uLong>;
+  template class List<Param>;
+  template class List<CountedPtr<SysEventTargetInfo> >;
+
+  template class ConstListIter<void *>;
+  template class ConstListIter<Int>;
+  template class ConstListIter<uInt>;
+  template class ConstListIter<Long>;
+  template class ConstListIter<uLong>;
+  template class ConstListIter<Param>;
+  template class ConstListIter<CountedPtr<SysEventTargetInfo> >;
+
   template class ListIter<void *>;
+  template class ListIter<Int>;
+  template class ListIter<uInt>;
+  template class ListIter<Param>;
+  template class ListIter<Long>;
+  template class ListIter<uLong>;
+  template class ListIter<CountedPtr<SysEventTargetInfo> >;
+
+  template class ListNotice<Param>;
+  template class ListNotice<CountedPtr<SysEventTargetInfo> >;
+  template class ListNotice<Int>;
+  template class ListNotice<uInt>;
+  template class ListNotice<Long>;
+  template class ListNotice<uLong>;
   template class ListNotice<void *>;
   
   template class ConstMapIter<String, Block<IPosition> >;
@@ -269,13 +290,12 @@ namespace casa {
   template class SimpleOrderedMap<Double, Int>;
   template class SimpleOrderedMap<void *, void *>;
 
-  template AipsIO & operator>>(AipsIO &, SimpleOrderedMap<String, String> &);
-  template AipsIO & operator<<(AipsIO &, SimpleOrderedMap<String, String> const &);
-  template AipsIO & operator>>(AipsIO &, SimpleOrderedMap<Int, Int> &);
-  template AipsIO & operator<<(AipsIO &, SimpleOrderedMap<Int, Int> const &);
-
-  template class Stack<Vector<Double> *>;
-  template class Stack<Vector<Float> *>;
   template class Stack<void *>;
-
+  template class Stack<Int>;
+  template class Stack<uInt>;
+  template class Stack<Vector<Int> *>;
+  template class Stack<Vector<uInt> *>;
+  template class Stack<Vector<Float> *>;
+  template class Stack<Vector<Double> *>;
+ 
 }
