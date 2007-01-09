@@ -152,4 +152,5 @@ subdirs (
   casa
   scimath
   tables
+  measures
   )

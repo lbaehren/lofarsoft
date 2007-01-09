@@ -1,0 +1,27 @@
+/ArrayMeasColumn.cc/19.4/Tue Nov 30 17:50:34 2004//Tstable
+/ArrayMeasColumn.h/19.7/Sat Jun 18 21:19:16 2005//Tstable
+/ArrayQuantColumn.cc/19.4/Tue Nov 30 17:50:34 2004//Tstable
+/ArrayQuantColumn.h/19.7/Sat Jun 18 21:19:16 2005//Tstable
+/ScalarMeasColumn.cc/19.4/Tue Nov 30 17:50:35 2004//Tstable
+/ScalarMeasColumn.h/19.7/Sat Jun 18 21:19:16 2005//Tstable
+/ScalarQuantColumn.cc/19.4/Tue Nov 30 17:50:35 2004//Tstable
+/ScalarQuantColumn.h/19.7/Sat Jun 18 21:19:16 2005//Tstable
+/TableMeasColumn.cc/19.4/Tue Nov 30 17:50:35 2004//Tstable
+/TableMeasColumn.h/19.4/Tue Nov 30 17:50:35 2004//Tstable
+/TableMeasDesc.cc/19.3/Tue Nov 30 17:50:35 2004//Tstable
+/TableMeasDesc.h/19.5/Sat Jun 18 21:19:16 2005//Tstable
+/TableMeasDescBase.cc/19.4/Tue Nov 30 17:50:35 2004//Tstable
+/TableMeasDescBase.h/19.4/Tue Nov 30 17:50:35 2004//Tstable
+/TableMeasOffsetDesc.cc/19.3/Tue Nov 30 17:50:35 2004//Tstable
+/TableMeasOffsetDesc.h/19.5/Tue Nov 30 17:50:35 2004//Tstable
+/TableMeasRefDesc.cc/19.3/Tue Nov 30 17:50:35 2004//Tstable
+/TableMeasRefDesc.h/19.5/Tue Nov 30 17:50:35 2004//Tstable
+/TableMeasType.cc/19.3/Tue Nov 30 17:50:35 2004//Tstable
+/TableMeasType.h/19.4/Tue Nov 30 17:50:35 2004//Tstable
+/TableMeasValueDesc.cc/19.3/Tue Nov 30 17:50:35 2004//Tstable
+/TableMeasValueDesc.h/19.5/Tue Nov 30 17:50:35 2004//Tstable
+/TableQuantumDesc.cc/19.3/Tue Nov 30 17:50:35 2004//Tstable
+/TableQuantumDesc.h/19.5/Tue Nov 30 17:50:35 2004//Tstable
+/changelog/1.2/Wed Dec 22 11:55:56 2004//Tstable
+/makefile/19.1/Tue Aug 24 22:56:51 2004//Tstable
+D/test////
