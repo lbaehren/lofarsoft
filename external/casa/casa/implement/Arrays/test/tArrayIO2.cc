@@ -45,18 +45,18 @@ void doMat();
 void doVec();
 
 
-main (int argc)
+int main (int argc)
 {
-    try {
-	doBin ( (argc<2));
-	doMat();
-	doVec();
-    } catch (AipsError x) {
-	cout << "\nCaught an exception: " << x.getMesg() << endl;
-        return 1;
-    } 
-    cout << "end" << endl;
-    return 0;                       // successfully executed
+  try {
+    doBin ( (argc<2));
+    doMat();
+    doVec();
+  } catch (AipsError x) {
+    cout << "\nCaught an exception: " << x.getMesg() << endl;
+    return 1;
+  } 
+  cout << "end" << endl;
+  return 0;                       // successfully executed
 }
 
 

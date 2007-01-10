@@ -56,29 +56,30 @@
 
 
 #include <casa/namespace.h>
-main()
+
+int main()
 {
-    try {
-        {
-            cout << endl << "Testing Array logical operators." << endl;
-
-            Vector<Int> x(5), y(5);
-            LogicalVector b(5), c(5);
-            x=1;
-            indgen (y);
-
-            cout << endl << "x= " << endl;
-            cout << x << endl;
-            cout << endl << "y= " << endl;
-            cout << y << endl;
-
-            b = (x <= y);
-            cout << endl << "b= (x <= y) = " << endl;
-            cout << b << endl;
-
-            b = (x < y);
-            cout << endl << "b= (x < y) = " << endl;
-            cout << b << endl;
+  try {
+    {
+      cout << endl << "Testing Array logical operators." << endl;
+      
+      Vector<Int> x(5), y(5);
+      LogicalVector b(5), c(5);
+      x=1;
+      indgen (y);
+      
+      cout << endl << "x= " << endl;
+      cout << x << endl;
+      cout << endl << "y= " << endl;
+      cout << y << endl;
+      
+      b = (x <= y);
+      cout << endl << "b= (x <= y) = " << endl;
+      cout << b << endl;
+      
+      b = (x < y);
+      cout << endl << "b= (x < y) = " << endl;
+      cout << b << endl;
 
             b = (x >= y);
             cout << endl << "b= (x >= y) = " << endl;
