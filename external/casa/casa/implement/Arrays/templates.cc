@@ -58,18 +58,18 @@ namespace casa {
   template class Array<Matrix<CountedPtr<Random> > >;
   template class Array<CountedPtr<Random> >;
   template class Array<Array<Double> >;
-  template class Array<Bool>;
-  template class Array<Char>;
   template class Array<Double>;
   template class Array<Float *>;
   template class Array<Float>;
-  template class Array<Int>;
+  template class Array<uLong>;
   template class Array<Long>;
+  template class Array<uInt>;
+  template class Array<Int>;
+  template class Array<uShort>;
   template class Array<Short>;
   template class Array<uChar>;
-  template class Array<uInt>;
-  template class Array<uLong>;
-  template class Array<uShort>;
+  template class Array<Char>;
+  template class Array<Bool>;
   
 #ifdef AIPS_SUN_NATIVE 
   template class Array<Vector<Complex> >::ConstIteratorSTL;
@@ -411,6 +411,21 @@ namespace casa {
   template Array<uInt> partialNTrue(Array<Bool> const &, IPosition const &);
   template Array<uInt> partialNFalse(Array<Bool> const &, IPosition const &);
   
+  template Array<Float> pow(Float const &, Array<Float> const &);
+  template Array<Double> pow(Double const &, Array<Double> const &);
+  template Array<Complex> pow(Complex const &, Array<Complex> const &);
+  template Array<DComplex> pow(DComplex const &, Array<DComplex> const &);
+
+  template Array<Float> pow(Array<Float> const &, Array<Float> const &);
+  template Array<Double> pow(Array<Double> const &, Array<Double> const &);
+  template Array<Complex> pow(Array<Complex> const &, Array<Complex> const &);
+  template Array<DComplex> pow(Array<DComplex> const &, Array<DComplex> const &);
+
+  template Array<Float> pow(Array<Float> const &, Double const &);
+  template Array<Double> pow(Array<Double> const &, Double const &);
+  template Array<Complex> pow(Array<Complex> const &, Double const &);
+  template Array<DComplex> pow(Array<DComplex> const &, Double const &);
+
   template void convertArray(Array<Double> &, Array<MVTime> const &);
   template Array<Complex> abs(Array<Complex> const &);
   template Array<Complex> cos(Array<Complex> const &);
@@ -425,8 +440,6 @@ namespace casa {
   template Array<Complex> operator-(Array<Complex> const &, Array<Complex> const &);
   template Array<Complex> operator/(Array<Complex> const &, Complex const &);
   template Array<Complex> operator/(Complex const &, Array<Complex> const &);
-  template Array<Complex> pow(Array<Complex> const &, Array<Complex> const &);
-  template Array<Complex> pow(Array<Complex> const &, Double const &);
   template Array<Complex> sin(Array<Complex> const &);
   template Array<Complex> sinh(Array<Complex> const &);
   template Array<Complex> sqrt(Array<Complex> const &);
@@ -464,9 +477,6 @@ namespace casa {
   template Array<DComplex> operator/(Array<DComplex> const &, Array<DComplex> const &);
   template Array<DComplex> operator/(Array<DComplex> const &, DComplex const &);
   template Array<DComplex> operator/(DComplex const &, Array<DComplex> const &);
-  template Array<DComplex> pow(Array<DComplex> const &, Array<DComplex> const &);
-  template Array<DComplex> pow(Array<DComplex> const &, Double const &);
-  template Array<DComplex> pow(DComplex const &, Array<DComplex> const &);
   template Array<DComplex> sin(Array<DComplex> const &);
   template Array<DComplex> sinh(Array<DComplex> const &);
   template Array<DComplex> sqrt(Array<DComplex> const &);
@@ -545,9 +555,6 @@ namespace casa {
   template Array<Double> operator/(Array<Double> const &, Array<Double> const &);
   template Array<Double> operator/(Array<Double> const &, Double const &);
   template Array<Double> operator/(Double const &, Array<Double> const &);
-  template Array<Double> pow(Array<Double> const &, Array<Double> const &);
-  template Array<Double> pow(Array<Double> const &, Double const &);
-  template Array<Double> pow(Double const &, Array<Double> const &);
   template Array<Double> sin(Array<Double> const &);
   template Array<Double> sinh(Array<Double> const &);
   template Array<Double> sqrt(Array<Double> const &);
@@ -611,8 +618,6 @@ namespace casa {
   template Array<Float> operator/(Array<Float> const &, Array<Float> const &);
   template Array<Float> operator/(Array<Float> const &, Float const &);
   template Array<Float> operator/(Float const &, Array<Float> const &);
-  template Array<Float> pow(Array<Float> const &, Array<Float> const &);
-  template Array<Float> pow(Array<Float> const &, Double const &);
   template Array<Float> sin(Array<Float> const &);
   template Array<Float> sinh(Array<Float> const &);
   template Array<Float> sqrt(Array<Float> const &);

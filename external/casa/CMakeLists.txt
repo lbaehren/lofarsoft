@@ -7,8 +7,6 @@ INCLUDE (CPack)
 
 IF (UNIX)
   IF (APPLE)
-    MESSAGE (STATUS "System platform = APPLE")
-    MESSAGE (STATUS "Architecture    = ${CMAKE_OSX_ARCHITECTURES}")
     SET (AIPSARCH "darwin")
     SET (AIPS_DARWIN 1)
   ELSE (APPLE)
@@ -110,7 +108,6 @@ if (UNIX)
     -DAIPS_AUTO_STL
     -DAIPS_NO_LEA_MALLOC
     )
-  set (CASA_CXXSTD "-fPIC -pipe -Wall -Wno-non-template-friend -Woverloaded-virtual -Wno-comment -fexceptions -Wcast-align")
   ## Linker flags
   set (CASA_LDSTD "-Xlinker -rpath -Xlinker")
   if (APPLE)
@@ -126,8 +123,18 @@ if (UNIX)
       -DAIPS_LITTLE_ENDIAN
       -D_LARGEFILE_SOURCE
       )
-    set (CASA_CXXSTD "${CASA_CXXSTD} -Wmissing-prototypes")
   endif (APPLE)
+  add_definitions (
+    ${CASA_OPTLEVEL}
+    -fPIC
+    -pipe
+    -Wall
+    -Wno-comment
+    -fexceptions
+    -Wcast-align
+    -Wno-non-template-friend
+    -Woverloaded-virtual
+    )
 endif (UNIX)
 
 ## Now that all the platform-specific settings have been done, we can assign
@@ -140,7 +147,8 @@ set (CMAKE_CXX_FLAGS "${CASA_OPTLEVEL} ${CASA_CXXSTD}")
 SET (CMAKE_MODULE_LINKER_FLAGS "${CASA_LDSTD}")
 
 message (STATUS "CASA_SOURCE_DIR ......... = ${CASA_SOURCE_DIR}")
-message (STATUS "CMAKE_BUILD_TYPE ........ = ${CMAKE_BUILD_TYPE}" )
+message (STATUS "CMAKE_SYSTEM_NAME ....... = ${CMAKE_SYSTEM_NAME}")
+message (STATUS "CMAKE_SYSTEM_PROCESSOR .. = ${CMAKE_SYSTEM_PROCESSOR}")
 message (STATUS "CMAKE_C_FLAGS ........... = ${CMAKE_C_FLAGS}")
 message (STATUS "CMAKE_CXX_FLAGS ......... = ${CMAKE_CXX_FLAGS}")
 message (STATUS "CMAKE_MODULE_LINKER_FLAGS = ${CMAKE_MODULE_LINKER_FLAGS}")

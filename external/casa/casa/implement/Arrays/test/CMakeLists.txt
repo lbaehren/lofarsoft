@@ -30,6 +30,8 @@ set (tests
   tMatrixMath
   tSlicer
   tStringArray
+  ## -- custom test files
+  dArray
   )
 
 ## ------------------------------------------------------------------------------
