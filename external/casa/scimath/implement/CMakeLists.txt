@@ -115,7 +115,7 @@ add_library (scimath
   Mathematics/VanVleck.cc
   Mathematics/VectorKernel.cc
 ## -- Template instantiation -----------------------------------------
-  Fitting/templates.cc
-  Functionals/templates.cc
-  Mathematics/templates.cc
+  ../../templates/scimath/Fitting.cc
+  ../../templates/scimath/Functionals.cc
+  ../../templates/scimath/Mathematics.cc
   )

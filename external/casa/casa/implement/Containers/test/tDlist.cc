@@ -31,7 +31,8 @@
 #include <casa/iostream.h>
 
 #include <casa/namespace.h>
-main() {
+
+int main() {
 
   Dlist<int> one;
   DlistIter<int> onePa(one);

@@ -143,7 +143,6 @@ endif (UNIX)
 set (CMAKE_VERBOSE_MAKEFILE 0)
 
 set (CMAKE_C_FLAGS "${CASA_OPTLEVEL} ${CASA_CXXSTD}")
-set (CMAKE_CXX_FLAGS "${CASA_OPTLEVEL} ${CASA_CXXSTD}")
 SET (CMAKE_MODULE_LINKER_FLAGS "${CASA_LDSTD}")
 
 message (STATUS "CASA_SOURCE_DIR ......... = ${CASA_SOURCE_DIR}")
@@ -161,4 +160,5 @@ subdirs (
   scimath
   tables
   measures
+  ms
   )
