@@ -118,6 +118,7 @@ add_library (scimath
   ../../templates/scimath/Arrays.cc
   ../../templates/scimath/BasicMath.cc
   ../../templates/scimath/Containers.cc
+  ../../templates/scimath/Utilities.cc
 #  ../../templates/scimath/Fitting.cc
 #  ../../templates/scimath/Functionals.cc
 #  ../../templates/scimath/Mathematics.cc
