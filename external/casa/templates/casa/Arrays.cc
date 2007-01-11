@@ -71,6 +71,20 @@ namespace casa {
   template class Array<uChar>;
   template class Array<Char>;
   template class Array<Bool>;
+
+  template class Cube<Matrix<CountedPtr<Random> > >;
+  template class Cube<Bool>;
+  template class Cube<Int>;
+  template class Cube<uInt>;
+  template class Cube<Short>;
+  template class Cube<uShort>;
+  template class Cube<Long>;
+  template class Cube<uLong>;
+  template class Cube<Float>;
+  template class Cube<Double>;
+  template class Cube<Complex>;
+  template class Cube<DComplex>;
+
   
 #ifdef AIPS_SUN_NATIVE 
   template class Array<Vector<Complex> >::ConstIteratorSTL;
@@ -215,563 +229,6 @@ namespace casa {
   template class MatrixIterator<Complex>;
   template class MatrixIterator<DComplex>;
   template class MatrixIterator<String>;
-
-  // allEQ
-
-  template bool allEQ(Bool const&, Array<Bool> const&);
-  template bool allEQ(Int const&, Array<Int> const&);
-  template bool allEQ(uInt const&, Array<uInt> const&);
-  template bool allEQ(Short const&, Array<Short> const&);
-  template bool allEQ(uShort const&, Array<uShort> const&);
-  template bool allEQ(Long const&, Array<Long> const&);
-  template bool allEQ(uLong const&, Array<uLong> const&);
-  template bool allEQ(Float const&, Array<Float> const&);
-  template bool allEQ(Double const&, Array<Double> const&);
-  template bool allEQ(Complex const&, Array<Complex> const&);
-  template bool allEQ(DComplex const&, Array<DComplex> const&);
-  template bool allEQ(String const&, Array<String> const&);
-
-  template Bool allEQ(Array<Bool> const &, Bool const &);
-  template Bool allEQ(Array<Int> const &, Int const &);
-  template Bool allEQ(Array<uInt> const &, uInt const &);
-  template Bool allEQ(Array<Short> const &, Short const &);
-  template Bool allEQ(Array<uShort> const &, uShort const &);
-  template Bool allEQ(Array<Long> const &, Long const &);
-  template Bool allEQ(Array<uLong> const &, uLong const &);
-  template Bool allEQ(Array<float> const &, float const &);
-  template Bool allEQ(Array<double> const &, double const &);
-  template Bool allEQ(Array<Complex> const &, Complex const &);
-  template Bool allEQ(Array<DComplex> const &, DComplex const &);
-  template Bool allEQ(Array<String> const &, String const &);
-
-  template Bool allEQ(Array<bool> const &, Array<bool> const &);
-  template Bool allEQ(Array<Int> const &, Array<Int> const &);
-  template Bool allEQ(Array<uInt> const &, Array<uInt> const &);
-  template Bool allEQ(Array<Short> const &, Array<Short> const &);
-  template Bool allEQ(Array<uShort> const &, Array<uShort> const &);
-  template Bool allEQ(Array<Long> const &, Array<Long> const &);
-  template Bool allEQ(Array<uLong> const &, Array<uLong> const &);
-  template Bool allEQ(Array<Float> const &, Array<Float> const &);
-  template Bool allEQ(Array<Double> const &, Array<Double> const &);
-  template Bool allEQ(Array<Complex> const &, Array<Complex> const &);
-  template Bool allEQ(Array<DComplex> const &, Array<DComplex> const &);
-  template Bool allEQ(Array<String> const &, Array<String> const &);
-
-  // allGE
-
-  template bool allGE(Bool const&, Array<Bool> const&);
-  template bool allGE(Int const&, Array<Int> const&);
-  template bool allGE(uInt const&, Array<uInt> const&);
-  template bool allGE(Short const&, Array<Short> const&);
-  template bool allGE(uShort const&, Array<uShort> const&);
-  template bool allGE(Long const&, Array<Long> const&);
-  template bool allGE(uLong const&, Array<uLong> const&);
-  template bool allGE(Float const&, Array<Float> const&);
-  template bool allGE(Double const&, Array<Double> const&);
-  template bool allGE(Complex const&, Array<Complex> const&);
-  template bool allGE(DComplex const&, Array<DComplex> const&);
-  template bool allGE(String const&, Array<String> const&);
-
-  template Bool allGE(Array<Bool> const &, Bool const &);
-  template Bool allGE(Array<Int> const &, Int const &);
-  template Bool allGE(Array<uInt> const &, uInt const &);
-  template Bool allGE(Array<Short> const &, Short const &);
-  template Bool allGE(Array<uShort> const &, uShort const &);
-  template Bool allGE(Array<Long> const &, Long const &);
-  template Bool allGE(Array<uLong> const &, uLong const &);
-  template Bool allGE(Array<float> const &, float const &);
-  template Bool allGE(Array<double> const &, double const &);
-  template Bool allGE(Array<Complex> const &, Complex const &);
-  template Bool allGE(Array<DComplex> const &, DComplex const &);
-  template Bool allGE(Array<String> const &, String const &);
-
-  template Bool allGE(Array<bool> const &, Array<bool> const &);
-  template Bool allGE(Array<Int> const &, Array<Int> const &);
-  template Bool allGE(Array<uInt> const &, Array<uInt> const &);
-  template Bool allGE(Array<Short> const &, Array<Short> const &);
-  template Bool allGE(Array<uShort> const &, Array<uShort> const &);
-  template Bool allGE(Array<Long> const &, Array<Long> const &);
-  template Bool allGE(Array<uLong> const &, Array<uLong> const &);
-  template Bool allGE(Array<Float> const &, Array<Float> const &);
-  template Bool allGE(Array<Double> const &, Array<Double> const &);
-  template Bool allGE(Array<Complex> const &, Array<Complex> const &);
-  template Bool allGE(Array<DComplex> const &, Array<DComplex> const &);
-  template Bool allGE(Array<String> const &, Array<String> const &);
-
-  // allGT
-
-  template bool allGT(Bool const&, Array<Bool> const&);
-  template bool allGT(Int const&, Array<Int> const&);
-  template bool allGT(uInt const&, Array<uInt> const&);
-  template bool allGT(Short const&, Array<Short> const&);
-  template bool allGT(uShort const&, Array<uShort> const&);
-  template bool allGT(Long const&, Array<Long> const&);
-  template bool allGT(uLong const&, Array<uLong> const&);
-  template bool allGT(Float const&, Array<Float> const&);
-  template bool allGT(Double const&, Array<Double> const&);
-  template bool allGT(Complex const&, Array<Complex> const&);
-  template bool allGT(DComplex const&, Array<DComplex> const&);
-  template bool allGT(String const&, Array<String> const&);
-
-  template Bool allGT(Array<Bool> const &, Bool const &);
-  template Bool allGT(Array<Int> const &, Int const &);
-  template Bool allGT(Array<uInt> const &, uInt const &);
-  template Bool allGT(Array<Short> const &, Short const &);
-  template Bool allGT(Array<uShort> const &, uShort const &);
-  template Bool allGT(Array<Long> const &, Long const &);
-  template Bool allGT(Array<uLong> const &, uLong const &);
-  template Bool allGT(Array<float> const &, float const &);
-  template Bool allGT(Array<double> const &, double const &);
-  template Bool allGT(Array<Complex> const &, Complex const &);
-  template Bool allGT(Array<DComplex> const &, DComplex const &);
-  template Bool allGT(Array<String> const &, String const &);
-
-  template Bool allGT(Array<bool> const &, Array<bool> const &);
-  template Bool allGT(Array<Int> const &, Array<Int> const &);
-  template Bool allGT(Array<uInt> const &, Array<uInt> const &);
-  template Bool allGT(Array<Short> const &, Array<Short> const &);
-  template Bool allGT(Array<uShort> const &, Array<uShort> const &);
-  template Bool allGT(Array<Long> const &, Array<Long> const &);
-  template Bool allGT(Array<uLong> const &, Array<uLong> const &);
-  template Bool allGT(Array<Float> const &, Array<Float> const &);
-  template Bool allGT(Array<Double> const &, Array<Double> const &);
-  template Bool allGT(Array<Complex> const &, Array<Complex> const &);
-  template Bool allGT(Array<DComplex> const &, Array<DComplex> const &);
-  template Bool allGT(Array<String> const &, Array<String> const &);
-
-  // allLE
-
-  template bool allLE(Bool const&, Array<Bool> const&);
-  template bool allLE(Int const&, Array<Int> const&);
-  template bool allLE(uInt const&, Array<uInt> const&);
-  template bool allLE(Short const&, Array<Short> const&);
-  template bool allLE(uShort const&, Array<uShort> const&);
-  template bool allLE(Long const&, Array<Long> const&);
-  template bool allLE(uLong const&, Array<uLong> const&);
-  template bool allLE(Float const&, Array<Float> const&);
-  template bool allLE(Double const&, Array<Double> const&);
-  template bool allLE(Complex const&, Array<Complex> const&);
-  template bool allLE(DComplex const&, Array<DComplex> const&);
-  template bool allLE(String const&, Array<String> const&);
-
-  template Bool allLE(Array<Bool> const &, Bool const &);
-  template Bool allLE(Array<Int> const &, Int const &);
-  template Bool allLE(Array<uInt> const &, uInt const &);
-  template Bool allLE(Array<Short> const &, Short const &);
-  template Bool allLE(Array<uShort> const &, uShort const &);
-  template Bool allLE(Array<Long> const &, Long const &);
-  template Bool allLE(Array<uLong> const &, uLong const &);
-  template Bool allLE(Array<float> const &, float const &);
-  template Bool allLE(Array<double> const &, double const &);
-  template Bool allLE(Array<Complex> const &, Complex const &);
-  template Bool allLE(Array<DComplex> const &, DComplex const &);
-  template Bool allLE(Array<String> const &, String const &);
-
-  template Bool allLE(Array<bool> const &, Array<bool> const &);
-  template Bool allLE(Array<Int> const &, Array<Int> const &);
-  template Bool allLE(Array<uInt> const &, Array<uInt> const &);
-  template Bool allLE(Array<Short> const &, Array<Short> const &);
-  template Bool allLE(Array<uShort> const &, Array<uShort> const &);
-  template Bool allLE(Array<Long> const &, Array<Long> const &);
-  template Bool allLE(Array<uLong> const &, Array<uLong> const &);
-  template Bool allLE(Array<Float> const &, Array<Float> const &);
-  template Bool allLE(Array<Double> const &, Array<Double> const &);
-  template Bool allLE(Array<Complex> const &, Array<Complex> const &);
-  template Bool allLE(Array<DComplex> const &, Array<DComplex> const &);
-  template Bool allLE(Array<String> const &, Array<String> const &);
-
-  // allLT
-
-  template bool allLT(Bool const&, Array<Bool> const&);
-  template bool allLT(Int const&, Array<Int> const&);
-  template bool allLT(uInt const&, Array<uInt> const&);
-  template bool allLT(Short const&, Array<Short> const&);
-  template bool allLT(uShort const&, Array<uShort> const&);
-  template bool allLT(Long const&, Array<Long> const&);
-  template bool allLT(uLong const&, Array<uLong> const&);
-  template bool allLT(Float const&, Array<Float> const&);
-  template bool allLT(Double const&, Array<Double> const&);
-  template bool allLT(Complex const&, Array<Complex> const&);
-  template bool allLT(DComplex const&, Array<DComplex> const&);
-  template bool allLT(String const&, Array<String> const&);
-
-  template Bool allLT(Array<Bool> const &, Bool const &);
-  template Bool allLT(Array<Int> const &, Int const &);
-  template Bool allLT(Array<uInt> const &, uInt const &);
-  template Bool allLT(Array<Short> const &, Short const &);
-  template Bool allLT(Array<uShort> const &, uShort const &);
-  template Bool allLT(Array<Long> const &, Long const &);
-  template Bool allLT(Array<uLong> const &, uLong const &);
-  template Bool allLT(Array<float> const &, float const &);
-  template Bool allLT(Array<double> const &, double const &);
-  template Bool allLT(Array<Complex> const &, Complex const &);
-  template Bool allLT(Array<DComplex> const &, DComplex const &);
-  template Bool allLT(Array<String> const &, String const &);
-
-  template Bool allLT(Array<bool> const &, Array<bool> const &);
-  template Bool allLT(Array<Int> const &, Array<Int> const &);
-  template Bool allLT(Array<uInt> const &, Array<uInt> const &);
-  template Bool allLT(Array<Short> const &, Array<Short> const &);
-  template Bool allLT(Array<uShort> const &, Array<uShort> const &);
-  template Bool allLT(Array<Long> const &, Array<Long> const &);
-  template Bool allLT(Array<uLong> const &, Array<uLong> const &);
-  template Bool allLT(Array<Float> const &, Array<Float> const &);
-  template Bool allLT(Array<Double> const &, Array<Double> const &);
-  template Bool allLT(Array<Complex> const &, Array<Complex> const &);
-  template Bool allLT(Array<DComplex> const &, Array<DComplex> const &);
-  template Bool allLT(Array<String> const &, Array<String> const &);
-
-  // allNE
-
-  template bool allNE(Bool const&, Array<Bool> const&);
-  template bool allNE(Int const&, Array<Int> const&);
-  template bool allNE(uInt const&, Array<uInt> const&);
-  template bool allNE(Short const&, Array<Short> const&);
-  template bool allNE(uShort const&, Array<uShort> const&);
-  template bool allNE(Long const&, Array<Long> const&);
-  template bool allNE(uLong const&, Array<uLong> const&);
-  template bool allNE(Float const&, Array<Float> const&);
-  template bool allNE(Double const&, Array<Double> const&);
-  template bool allNE(Complex const&, Array<Complex> const&);
-  template bool allNE(DComplex const&, Array<DComplex> const&);
-  template bool allNE(String const&, Array<String> const&);
-
-  template Bool allNE(Array<Bool> const &, Bool const &);
-  template Bool allNE(Array<Int> const &, Int const &);
-  template Bool allNE(Array<uInt> const &, uInt const &);
-  template Bool allNE(Array<Short> const &, Short const &);
-  template Bool allNE(Array<uShort> const &, uShort const &);
-  template Bool allNE(Array<Long> const &, Long const &);
-  template Bool allNE(Array<uLong> const &, uLong const &);
-  template Bool allNE(Array<float> const &, float const &);
-  template Bool allNE(Array<double> const &, double const &);
-  template Bool allNE(Array<Complex> const &, Complex const &);
-  template Bool allNE(Array<DComplex> const &, DComplex const &);
-  template Bool allNE(Array<String> const &, String const &);
-
-  template Bool allNE(Array<bool> const &, Array<bool> const &);
-  template Bool allNE(Array<Int> const &, Array<Int> const &);
-  template Bool allNE(Array<uInt> const &, Array<uInt> const &);
-  template Bool allNE(Array<Short> const &, Array<Short> const &);
-  template Bool allNE(Array<uShort> const &, Array<uShort> const &);
-  template Bool allNE(Array<Long> const &, Array<Long> const &);
-  template Bool allNE(Array<uLong> const &, Array<uLong> const &);
-  template Bool allNE(Array<Float> const &, Array<Float> const &);
-  template Bool allNE(Array<Double> const &, Array<Double> const &);
-  template Bool allNE(Array<Complex> const &, Array<Complex> const &);
-  template Bool allNE(Array<DComplex> const &, Array<DComplex> const &);
-  template Bool allNE(Array<String> const &, Array<String> const &);
-
-  // anyEQ
-
-  template bool anyEQ(Bool const&, Array<Bool> const&);
-  template bool anyEQ(Int const&, Array<Int> const&);
-  template bool anyEQ(uInt const&, Array<uInt> const&);
-  template bool anyEQ(Short const&, Array<Short> const&);
-  template bool anyEQ(uShort const&, Array<uShort> const&);
-  template bool anyEQ(Long const&, Array<Long> const&);
-  template bool anyEQ(uLong const&, Array<uLong> const&);
-  template bool anyEQ(Float const&, Array<Float> const&);
-  template bool anyEQ(Double const&, Array<Double> const&);
-  template bool anyEQ(Complex const&, Array<Complex> const&);
-  template bool anyEQ(DComplex const&, Array<DComplex> const&);
-  template bool anyEQ(String const&, Array<String> const&);
-
-  template Bool anyEQ(Array<Bool> const &, Bool const &);
-  template Bool anyEQ(Array<Int> const &, Int const &);
-  template Bool anyEQ(Array<uInt> const &, uInt const &);
-  template Bool anyEQ(Array<Short> const &, Short const &);
-  template Bool anyEQ(Array<uShort> const &, uShort const &);
-  template Bool anyEQ(Array<Long> const &, Long const &);
-  template Bool anyEQ(Array<uLong> const &, uLong const &);
-  template Bool anyEQ(Array<float> const &, float const &);
-  template Bool anyEQ(Array<double> const &, double const &);
-  template Bool anyEQ(Array<Complex> const &, Complex const &);
-  template Bool anyEQ(Array<DComplex> const &, DComplex const &);
-  template Bool anyEQ(Array<String> const &, String const &);
-
-  template Bool anyEQ(Array<bool> const &, Array<bool> const &);
-  template Bool anyEQ(Array<Int> const &, Array<Int> const &);
-  template Bool anyEQ(Array<uInt> const &, Array<uInt> const &);
-  template Bool anyEQ(Array<Short> const &, Array<Short> const &);
-  template Bool anyEQ(Array<uShort> const &, Array<uShort> const &);
-  template Bool anyEQ(Array<Long> const &, Array<Long> const &);
-  template Bool anyEQ(Array<uLong> const &, Array<uLong> const &);
-  template Bool anyEQ(Array<Float> const &, Array<Float> const &);
-  template Bool anyEQ(Array<Double> const &, Array<Double> const &);
-  template Bool anyEQ(Array<Complex> const &, Array<Complex> const &);
-  template Bool anyEQ(Array<DComplex> const &, Array<DComplex> const &);
-  template Bool anyEQ(Array<String> const &, Array<String> const &);
-
-  // anyGE
-
-  template bool anyGE(Bool const&, Array<Bool> const&);
-  template bool anyGE(Int const&, Array<Int> const&);
-  template bool anyGE(uInt const&, Array<uInt> const&);
-  template bool anyGE(Short const&, Array<Short> const&);
-  template bool anyGE(uShort const&, Array<uShort> const&);
-  template bool anyGE(Long const&, Array<Long> const&);
-  template bool anyGE(uLong const&, Array<uLong> const&);
-  template bool anyGE(Float const&, Array<Float> const&);
-  template bool anyGE(Double const&, Array<Double> const&);
-  template bool anyGE(Complex const&, Array<Complex> const&);
-  template bool anyGE(DComplex const&, Array<DComplex> const&);
-  template bool anyGE(String const&, Array<String> const&);
-
-  template Bool anyGE(Array<Bool> const &, Bool const &);
-  template Bool anyGE(Array<Int> const &, Int const &);
-  template Bool anyGE(Array<uInt> const &, uInt const &);
-  template Bool anyGE(Array<Short> const &, Short const &);
-  template Bool anyGE(Array<uShort> const &, uShort const &);
-  template Bool anyGE(Array<Long> const &, Long const &);
-  template Bool anyGE(Array<uLong> const &, uLong const &);
-  template Bool anyGE(Array<float> const &, float const &);
-  template Bool anyGE(Array<double> const &, double const &);
-  template Bool anyGE(Array<Complex> const &, Complex const &);
-  template Bool anyGE(Array<DComplex> const &, DComplex const &);
-  template Bool anyGE(Array<String> const &, String const &);
-
-  template Bool anyGE(Array<bool> const &, Array<bool> const &);
-  template Bool anyGE(Array<Int> const &, Array<Int> const &);
-  template Bool anyGE(Array<uInt> const &, Array<uInt> const &);
-  template Bool anyGE(Array<Short> const &, Array<Short> const &);
-  template Bool anyGE(Array<uShort> const &, Array<uShort> const &);
-  template Bool anyGE(Array<Long> const &, Array<Long> const &);
-  template Bool anyGE(Array<uLong> const &, Array<uLong> const &);
-  template Bool anyGE(Array<Float> const &, Array<Float> const &);
-  template Bool anyGE(Array<Double> const &, Array<Double> const &);
-  template Bool anyGE(Array<Complex> const &, Array<Complex> const &);
-  template Bool anyGE(Array<DComplex> const &, Array<DComplex> const &);
-  template Bool anyGE(Array<String> const &, Array<String> const &);
-
-  // anyGT
-
-  template bool anyGT(Bool const&, Array<Bool> const&);
-  template bool anyGT(Int const&, Array<Int> const&);
-  template bool anyGT(uInt const&, Array<uInt> const&);
-  template bool anyGT(Short const&, Array<Short> const&);
-  template bool anyGT(uShort const&, Array<uShort> const&);
-  template bool anyGT(Long const&, Array<Long> const&);
-  template bool anyGT(uLong const&, Array<uLong> const&);
-  template bool anyGT(Float const&, Array<Float> const&);
-  template bool anyGT(Double const&, Array<Double> const&);
-  template bool anyGT(Complex const&, Array<Complex> const&);
-  template bool anyGT(DComplex const&, Array<DComplex> const&);
-  template bool anyGT(String const&, Array<String> const&);
-
-  template Bool anyGT(Array<Bool> const &, Bool const &);
-  template Bool anyGT(Array<Int> const &, Int const &);
-  template Bool anyGT(Array<uInt> const &, uInt const &);
-  template Bool anyGT(Array<Short> const &, Short const &);
-  template Bool anyGT(Array<uShort> const &, uShort const &);
-  template Bool anyGT(Array<Long> const &, Long const &);
-  template Bool anyGT(Array<uLong> const &, uLong const &);
-  template Bool anyGT(Array<float> const &, float const &);
-  template Bool anyGT(Array<double> const &, double const &);
-  template Bool anyGT(Array<Complex> const &, Complex const &);
-  template Bool anyGT(Array<DComplex> const &, DComplex const &);
-  template Bool anyGT(Array<String> const &, String const &);
-
-  template Bool anyGT(Array<bool> const &, Array<bool> const &);
-  template Bool anyGT(Array<Int> const &, Array<Int> const &);
-  template Bool anyGT(Array<uInt> const &, Array<uInt> const &);
-  template Bool anyGT(Array<Short> const &, Array<Short> const &);
-  template Bool anyGT(Array<uShort> const &, Array<uShort> const &);
-  template Bool anyGT(Array<Long> const &, Array<Long> const &);
-  template Bool anyGT(Array<uLong> const &, Array<uLong> const &);
-  template Bool anyGT(Array<Float> const &, Array<Float> const &);
-  template Bool anyGT(Array<Double> const &, Array<Double> const &);
-  template Bool anyGT(Array<Complex> const &, Array<Complex> const &);
-  template Bool anyGT(Array<DComplex> const &, Array<DComplex> const &);
-  template Bool anyGT(Array<String> const &, Array<String> const &);
-
-  // anyLE
-
-  template bool anyLE(Bool const&, Array<Bool> const&);
-  template bool anyLE(Int const&, Array<Int> const&);
-  template bool anyLE(uInt const&, Array<uInt> const&);
-  template bool anyLE(Short const&, Array<Short> const&);
-  template bool anyLE(uShort const&, Array<uShort> const&);
-  template bool anyLE(Long const&, Array<Long> const&);
-  template bool anyLE(uLong const&, Array<uLong> const&);
-  template bool anyLE(Float const&, Array<Float> const&);
-  template bool anyLE(Double const&, Array<Double> const&);
-  template bool anyLE(Complex const&, Array<Complex> const&);
-  template bool anyLE(DComplex const&, Array<DComplex> const&);
-  template bool anyLE(String const&, Array<String> const&);
-
-  template Bool anyLE(Array<Bool> const &, Bool const &);
-  template Bool anyLE(Array<Int> const &, Int const &);
-  template Bool anyLE(Array<uInt> const &, uInt const &);
-  template Bool anyLE(Array<Short> const &, Short const &);
-  template Bool anyLE(Array<uShort> const &, uShort const &);
-  template Bool anyLE(Array<Long> const &, Long const &);
-  template Bool anyLE(Array<uLong> const &, uLong const &);
-  template Bool anyLE(Array<float> const &, float const &);
-  template Bool anyLE(Array<double> const &, double const &);
-  template Bool anyLE(Array<Complex> const &, Complex const &);
-  template Bool anyLE(Array<DComplex> const &, DComplex const &);
-  template Bool anyLE(Array<String> const &, String const &);
-
-  template Bool anyLE(Array<bool> const &, Array<bool> const &);
-  template Bool anyLE(Array<Int> const &, Array<Int> const &);
-  template Bool anyLE(Array<uInt> const &, Array<uInt> const &);
-  template Bool anyLE(Array<Short> const &, Array<Short> const &);
-  template Bool anyLE(Array<uShort> const &, Array<uShort> const &);
-  template Bool anyLE(Array<Long> const &, Array<Long> const &);
-  template Bool anyLE(Array<uLong> const &, Array<uLong> const &);
-  template Bool anyLE(Array<Float> const &, Array<Float> const &);
-  template Bool anyLE(Array<Double> const &, Array<Double> const &);
-  template Bool anyLE(Array<Complex> const &, Array<Complex> const &);
-  template Bool anyLE(Array<DComplex> const &, Array<DComplex> const &);
-  template Bool anyLE(Array<String> const &, Array<String> const &);
-
-  // anyLT
-
-  template bool anyLT(Bool const&, Array<Bool> const&);
-  template bool anyLT(Int const&, Array<Int> const&);
-  template bool anyLT(uInt const&, Array<uInt> const&);
-  template bool anyLT(Short const&, Array<Short> const&);
-  template bool anyLT(uShort const&, Array<uShort> const&);
-  template bool anyLT(Long const&, Array<Long> const&);
-  template bool anyLT(uLong const&, Array<uLong> const&);
-  template bool anyLT(Float const&, Array<Float> const&);
-  template bool anyLT(Double const&, Array<Double> const&);
-  template bool anyLT(Complex const&, Array<Complex> const&);
-  template bool anyLT(DComplex const&, Array<DComplex> const&);
-  template bool anyLT(String const&, Array<String> const&);
-
-  template Bool anyLT(Array<Bool> const &, Bool const &);
-  template Bool anyLT(Array<Int> const &, Int const &);
-  template Bool anyLT(Array<uInt> const &, uInt const &);
-  template Bool anyLT(Array<Short> const &, Short const &);
-  template Bool anyLT(Array<uShort> const &, uShort const &);
-  template Bool anyLT(Array<Long> const &, Long const &);
-  template Bool anyLT(Array<uLong> const &, uLong const &);
-  template Bool anyLT(Array<float> const &, float const &);
-  template Bool anyLT(Array<double> const &, double const &);
-  template Bool anyLT(Array<Complex> const &, Complex const &);
-  template Bool anyLT(Array<DComplex> const &, DComplex const &);
-  template Bool anyLT(Array<String> const &, String const &);
-
-  template Bool anyLT(Array<bool> const &, Array<bool> const &);
-  template Bool anyLT(Array<Int> const &, Array<Int> const &);
-  template Bool anyLT(Array<uInt> const &, Array<uInt> const &);
-  template Bool anyLT(Array<Short> const &, Array<Short> const &);
-  template Bool anyLT(Array<uShort> const &, Array<uShort> const &);
-  template Bool anyLT(Array<Long> const &, Array<Long> const &);
-  template Bool anyLT(Array<uLong> const &, Array<uLong> const &);
-  template Bool anyLT(Array<Float> const &, Array<Float> const &);
-  template Bool anyLT(Array<Double> const &, Array<Double> const &);
-  template Bool anyLT(Array<Complex> const &, Array<Complex> const &);
-  template Bool anyLT(Array<DComplex> const &, Array<DComplex> const &);
-  template Bool anyLT(Array<String> const &, Array<String> const &);
-
-  // anyNE
-
-  template bool anyNE(Bool const&, Array<Bool> const&);
-  template bool anyNE(Int const&, Array<Int> const&);
-  template bool anyNE(uInt const&, Array<uInt> const&);
-  template bool anyNE(Short const&, Array<Short> const&);
-  template bool anyNE(uShort const&, Array<uShort> const&);
-  template bool anyNE(Long const&, Array<Long> const&);
-  template bool anyNE(uLong const&, Array<uLong> const&);
-  template bool anyNE(Float const&, Array<Float> const&);
-  template bool anyNE(Double const&, Array<Double> const&);
-  template bool anyNE(Complex const&, Array<Complex> const&);
-  template bool anyNE(DComplex const&, Array<DComplex> const&);
-  template bool anyNE(String const&, Array<String> const&);
-
-  template Bool anyNE(Array<Bool> const &, Bool const &);
-  template Bool anyNE(Array<Int> const &, Int const &);
-  template Bool anyNE(Array<uInt> const &, uInt const &);
-  template Bool anyNE(Array<Short> const &, Short const &);
-  template Bool anyNE(Array<uShort> const &, uShort const &);
-  template Bool anyNE(Array<Long> const &, Long const &);
-  template Bool anyNE(Array<uLong> const &, uLong const &);
-  template Bool anyNE(Array<float> const &, float const &);
-  template Bool anyNE(Array<double> const &, double const &);
-  template Bool anyNE(Array<Complex> const &, Complex const &);
-  template Bool anyNE(Array<DComplex> const &, DComplex const &);
-  template Bool anyNE(Array<String> const &, String const &);
-
-  template Bool anyNE(Array<bool> const &, Array<bool> const &);
-  template Bool anyNE(Array<Int> const &, Array<Int> const &);
-  template Bool anyNE(Array<uInt> const &, Array<uInt> const &);
-  template Bool anyNE(Array<Short> const &, Array<Short> const &);
-  template Bool anyNE(Array<uShort> const &, Array<uShort> const &);
-  template Bool anyNE(Array<Long> const &, Array<Long> const &);
-  template Bool anyNE(Array<uLong> const &, Array<uLong> const &);
-  template Bool anyNE(Array<Float> const &, Array<Float> const &);
-  template Bool anyNE(Array<Double> const &, Array<Double> const &);
-  template Bool anyNE(Array<Complex> const &, Array<Complex> const &);
-  template Bool anyNE(Array<DComplex> const &, Array<DComplex> const &);
-  template Bool anyNE(Array<String> const &, Array<String> const &);
-
-  // allNear
-
-  template bool allNear(Array<Float> const&, Array<Float> const&, double);
-  template bool allNear(Array<Double> const&, Array<Double> const&, double);
-  template bool allNear(Array<Complex> const&, Array<Complex> const&, double);
-  template bool allNear(Array<DComplex> const&, Array<DComplex> const&, double);
-
-  // allNear
-
-  template bool allNear(Float const&, Array<Float> const&, double);
-  template bool allNear(Double const&, Array<Double> const&, double);
-  template bool allNear(Complex const&, Array<Complex> const&, double);
-  template bool allNear(DComplex const&, Array<DComplex> const&, double);
-
-  // allNearAbs
-
-  template Bool allNearAbs(Float const &, Array<Float> const &, Double);
-  template Bool allNearAbs(Double const &, Array<Double> const &, Double);
-  template Bool allNearAbs(Complex const &, Array<Complex> const &, Double);
-  template Bool allNearAbs(DComplex const &, Array<DComplex> const &, Double);
-
-  template Bool allNearAbs(Array<Float> const &, Float const &, Double);
-  template Bool allNearAbs(Array<Double> const &, Double const &, Double);
-  template Bool allNearAbs(Array<Complex> const &, Complex const &, Double);
-  template Bool allNearAbs(Array<DComplex> const &, DComplex const &, Double);
-
-  template Bool allNearAbs(Array<Float> const &, Array<Float> const &, Double);
-  template Bool allNearAbs(Array<Double> const &, Array<Double> const &, Double);
-  template Bool allNearAbs(Array<Complex> const &, Array<Complex> const &, Double);
-  template Bool allNearAbs(Array<DComplex> const &, Array<DComplex> const &, Double);
-
-  // anyNear
-
-  template bool anyNear(Float const&, Array<Float> const&, Double);
-  template bool anyNear(Double const&, Array<Double> const&, Double);
-  template bool anyNear(Complex const&, Array<Complex> const&, Double);
-  template bool anyNear(DComplex const&, Array<DComplex> const&, Double);
-
-  template bool anyNear(Array<Float> const&, Float const&, Double);
-  template bool anyNear(Array<Double> const&, Double const&, Double);
-  template bool anyNear(Array<Complex> const&, Complex const&, Double);
-  template bool anyNear(Array<DComplex> const&, DComplex const&, Double);
-
-  template bool anyNear(Array<Float> const&, Array<Float> const&, Double);
-  template bool anyNear(Array<Double> const&, Array<Double> const&, Double);
-  template bool anyNear(Array<Complex> const&, Array<Complex> const&, Double);
-  template bool anyNear(Array<DComplex> const&, Array<DComplex> const&, Double);
-
-  // anyNearAbs
-
-  template bool anyNearAbs(Float const&, Array<Float> const&, Double);
-  template bool anyNearAbs(Double const&, Array<Double> const&, Double);
-  template bool anyNearAbs(Complex const&, Array<Complex> const&, Double);
-  template bool anyNearAbs(DComplex const&, Array<DComplex> const&, Double);
-
-  template bool anyNearAbs(Array<Float> const&, Float const&, Double);
-  template bool anyNearAbs(Array<Double> const&, Double const&, Double);
-  template bool anyNearAbs(Array<Complex> const&, Complex const&, Double);
-  template bool anyNearAbs(Array<DComplex> const&, DComplex const&, Double);
-
-  template bool anyNearAbs(Array<Float> const&, Array<Float> const&, Double);
-  template bool anyNearAbs(Array<Double> const&, Array<Double> const&, Double);
-  template bool anyNearAbs(Array<Complex> const&, Array<Complex> const&, Double);
-  template bool anyNearAbs(Array<DComplex> const&, Array<DComplex> const&, Double);
 
   // ---------------------------------------------
 
@@ -1050,7 +507,6 @@ namespace casa {
   template Array<DComplex> sqrt(Array<DComplex> const &);
   template DComplex max(Array<DComplex> const &);
   template DComplex min(Array<DComplex> const &);
-  template DComplex product(Array<DComplex> const &);
   template DComplex sum(Array<DComplex> const &);
   template Complex sum(Array<Complex> const &);
   template void max(Array<DComplex> &, Array<DComplex> const &, Array<DComplex> const &);
@@ -1069,23 +525,7 @@ namespace casa {
   template DComplex mean(Array<DComplex> const &);
   template DComplex median(Array<DComplex> const &, Bool);
   template DComplex median(Array<DComplex> const &, Bool, Bool, Bool);
-  template Float product(Array<Float> const &); 
   template Array<Bool> operator*(Array<Bool> const &, Array<Bool> const &);
-  template void convertArray(Array<Complex> &, Array<DComplex> const &);
-  template void convertArray(Array<Complex> &, Array<Double> const &);
-  template void convertArray(Array<Complex> &, Array<Float> const &);
-  template void convertArray(Array<Complex> &, Array<Int> const &);
-  template void convertArray(Array<Complex> &, Array<Short> const &);
-  template void convertArray(Array<Complex> &, Array<uChar> const &);
-  template void convertArray(Array<Complex> &, Array<uInt> const &);
-  template void convertArray(Array<DComplex> &, Array<Complex> const &);
-  template void convertArray(Array<DComplex> &, Array<DComplex> const &);
-  template void convertArray(Array<DComplex> &, Array<Double> const &);
-  template void convertArray(Array<DComplex> &, Array<Float> const &);
-  template void convertArray(Array<DComplex> &, Array<Int> const &);
-  template void convertArray(Array<DComplex> &, Array<Short> const &);
-  template void convertArray(Array<DComplex> &, Array<uChar> const &);
-  template void convertArray(Array<DComplex> &, Array<uInt> const &);
   template void convertArray(Array<uInt> &, Array<Bool> const &);
   template Array<String> operator+(String const &, Array<String> const &);
   template void operator+=(Array<String> &, Array<String> const &);
@@ -1136,7 +576,6 @@ namespace casa {
   template Double median(Array<Double> const &, Bool);
   template Double median(Array<Double> const &, Bool, Bool, Bool);
   template Double min(Array<Double> const &);
-  template Double product(Array<Double> const &);
   template Double stddev(Array<Double> const &);
   template Double sum(Array<Double> const &);
   template Double variance(Array<Double> const &);
@@ -1232,7 +671,6 @@ namespace casa {
   template Array<Int> operator/(Array<Int> const &, Int const &);
   template Int max(Array<Int> const &);
   template Int min(Array<Int> const &);
-  template Int product(Array<Int> const &);
   template Int sum(Array<Int> const &);
   template void indgen(Array<Int> &);
   template void indgen(Array<Int> &, Int);
@@ -1301,51 +739,6 @@ namespace casa {
   template void indgen(Array<uShort> &);
   template void indgen(Array<uShort> &, uShort, uShort);
   template void minMax(uShort &, uShort &, Array<uShort> const &);
-// 1180 casa/Arrays/ArrayMath.cc casa/Arrays/Array.h 
-  template void convertArray(Array<Double> &, Array<Double> const &);
-  template void convertArray(Array<Double> &, Array<Float> const &);
-  template void convertArray(Array<Double> &, Array<Int> const &);
-  template void convertArray(Array<Double> &, Array<Short> const &);
-  template void convertArray(Array<Double> &, Array<uChar> const &);
-  template void convertArray(Array<Double> &, Array<uInt> const &);
-  template void convertArray(Array<Double> &, Array<uShort> const &);
-  template void convertArray(Array<Float> &, Array<Double> const &);
-  template void convertArray(Array<Float> &, Array<Int> const &);
-  template void convertArray(Array<Float> &, Array<Short> const &);
-  template void convertArray(Array<Float> &, Array<uShort> const & );
-  template void convertArray(Array<Float> &, Array<uChar> const &);
-  template void convertArray(Array<Float> &, Array<uInt> const &);
-  template void convertArray(Array<Int> &, Array<Short> const &);
-  template void convertArray(Array<Int> &, Array<uChar> const &);
-  template void convertArray(Array<Int> &, Array<uInt> const &);
-  template void convertArray(Array<Int> &, Array<uShort> const &);
-  template void convertArray(Array<Int> &, Array<Bool> const &);
-  template void convertArray(Array<Int> &, Array<Float> const &);
-  template void convertArray(Array<Int> &, Array<Double> const &);
-  template void convertArray(Array<Short> &, Array<Char> const &);
-  template void convertArray(Array<Short> &, Array<Double> const &);
-  template void convertArray(Array<Short> &, Array<Float> const &);
-  template void convertArray(Array<Short> &, Array<Int> const &);
-  template void convertArray(Array<Short> &, Array<Long> const &);
-  template void convertArray(Array<Short> &, Array<Short> const &);
-  template void convertArray(Array<Short> &, Array<uChar> const &);
-  template void convertArray(Array<Short> &, Array<uInt> const &);
-  template void convertArray(Array<Short> &, Array<uLong> const &);
-  template void convertArray(Array<Short> &, Array<uShort> const &);
-  template void convertArray(Array<uChar> &, Array<Int> const &);
-  template void convertArray(Array<uChar> &, Array<Short> const &);
-  template void convertArray(Array<uChar> &, Array<Float> const &);
-  template void convertArray(Array<uChar> &, Array<Double> const &);
-  template void convertArray(Array<uInt> &, Array<Int> const &);
-  template void convertArray(Array<uInt> &, Array<Short> const &);
-  template void convertArray(Array<uInt> &, Array<uChar> const &);
-  template void convertArray(Array<uInt> &, Array<Float> const &);
-  template void convertArray(Array<uInt> &, Array<Double> const &);
-  template void convertArray(Array<uShort> &, Array<uChar> const &);
-  template void convertArray(Array<uShort> &, Array<Short> const &);
-  template void convertArray(Array<uShort> &, Array<Int> const &);
-  template void convertArray(Array<uShort> &, Array<Float> const &);
-  template void convertArray(Array<uShort> &, Array<Double> const &);
 // 1190 casa/Arrays/ArrayMath.cc casa/Arrays/Array.h 
   template void operator*=(Array<Bool> &, Array<Bool> const &);
   template Bool sum(Array<Bool> const &);
@@ -1392,79 +785,6 @@ namespace casa {
   template Int median(Array<Int> const &, Bool);
   template Int median(Array<Int> const &, Bool, Bool, Bool);
 
-  template class Cube<Matrix<CountedPtr<Random> > >;
-  template class Cube<Complex>;
-  template class Cube<DComplex>;
-  template class Cube<Bool>;
-  template class Cube<Double>;
-  template class Cube<Float>;
-  template class Cube<Int>;
-  template class Cube<Short>;
-  template class Cube<uInt>;
-
-  template Array<Complex> & operator/=(Array<Complex> &, MaskedArray<Complex> const &);
-  template Float min(MaskedArray<Float> const &);
-  template Float max(MaskedArray<Float> const &);
-  template Double min(MaskedArray<Double> const &);
-  template Double max(MaskedArray<Double> const &);
-  template MaskedArray<Float> abs(MaskedArray<Float> const &);
-  template Float sum(MaskedArray<Float> const &);
-  template Float mean(MaskedArray<Float> const &);
-  template Array<Complex> & operator+=(Array<Complex> &, MaskedArray<Complex> const &);
-  template const MaskedArray<Complex> & operator+=(MaskedArray<Complex> const &, Complex const &);
-  template const MaskedArray<Complex> & operator+=(MaskedArray<Complex> const &, MaskedArray<Complex> const &);
-  template const MaskedArray<Complex> & operator/=(MaskedArray<Complex> const &, MaskedArray<Float> const &);
-  template const MaskedArray<Float> & operator+=(MaskedArray<Float> const &, Array<Float> const &);
-  template Array<Float> & operator+=(Array<Float> &, MaskedArray<Float> const &);
-  template const MaskedArray<Complex> & operator+=(MaskedArray<Complex> const &, Array<Complex> const &);
-  template Float variance(MaskedArray<Float> const &);
-  template Float variance(MaskedArray<Float> const &, Float);
-  template MaskedArray<Float> operator-(MaskedArray<Float> const &, Float const &);
-  template MaskedArray<Float> operator-(Float const &, MaskedArray<Float> const &);
-  template const MaskedArray<Float> & operator*=(MaskedArray<Float> const &, MaskedArray<Float> const &);
-  template const MaskedArray<Float> & operator-=(MaskedArray<Float> const &, Float const &);
-  template const MaskedArray<Float> & operator-=(MaskedArray<Float> const &, MaskedArray<Float> const &);
-  template const MaskedArray<Float> & operator+=(MaskedArray<Float> const &, Float const &);
-  template const MaskedArray<Float> & operator+=(MaskedArray<Float> const &, MaskedArray<Float> const &);
-  template const MaskedArray<Float> & operator/=(MaskedArray<Float> const &, MaskedArray<Float> const &);
-  template const MaskedArray<Int> & operator+=(MaskedArray<Int> const &, Int const &);
-  template MaskedArray<Int> operator-(MaskedArray<Int> const &);
-  template MaskedArray<uInt> operator-(MaskedArray<uInt> const &);
-  template void minMax(Float &, Float &, IPosition &, IPosition &, MaskedArray<Float> const &);
-  template void minMax(Float &, Float &, MaskedArray<Float> const &);
-
-  template class MaskedArray<Array<Double> >;
-  template class MaskedArray<Slicer>;
-  template class MaskedArray<Vector<Complex> >;
-  template class MaskedArray<Vector<Double> >;
-  template class MaskedArray<Vector<Float> >;
-  template class MaskedArray<Bool>;
-  template class MaskedArray<uChar>;
-  template class MaskedArray<Short>;
-  template class MaskedArray<uShort>;
-  template class MaskedArray<Int>;
-  template class MaskedArray<uInt>;
-  template class MaskedArray<Float>;
-  template class MaskedArray<Double>;
-  template class MaskedArray<Complex>;
-  template class MaskedArray<DComplex>;
-  template class MaskedArray<String>;
-  template class MaskedArray<MVDirection>;
-  template class MaskedArray<MVFrequency>;
-  template class MaskedArray<MVPosition>;
-  template class MaskedArray<MVRadialVelocity>;
-  template class MaskedArray<MVTime>;
-  template class MaskedArray<Quantum<Double> >;
-  template class MaskedArray<Quantum<Float> >;
-  template class MaskedArray<QuantumHolder>;
-  template class MaskedArray<Unit>;
-  template class MaskedArray<Matrix<CountedPtr<Random> > >;
-  template class MaskedArray<CountedPtr<Random> >;
-  template class MaskedArray<Char>;
-  template class MaskedArray<Float *>;
-  template class MaskedArray<Long>;
-  template class MaskedArray<uLong>;
-
   template class Matrix<Complex>;
   template class Matrix<DComplex>;
   template class Matrix<String>;
@@ -1483,7 +803,6 @@ namespace casa {
   template class Matrix<uLong>;
   template class Matrix<uShort>;
 
-  template Matrix<Complex> product(Matrix<Complex> const &, Matrix<Complex> const &);
   template Matrix<Complex> transpose(Matrix<Complex> const &);
   template Matrix<DComplex> transpose(Matrix<DComplex> const &);
   template Double innerProduct(Vector<Double> const &, Vector<Double> const &);
@@ -1559,4 +878,19 @@ namespace casa {
   template class VectorIterator<uShort>;
   template class VectorIterator<Int>;
 
+  template Vector<Int> crossProduct(Vector<Int> const&, Vector<Int> const&);
+  template Vector<uInt> crossProduct(Vector<uInt> const&, Vector<uInt> const&);
+  template Vector<Short> crossProduct(Vector<Short> const&, Vector<Short> const&);
+  template Vector<uShort> crossProduct(Vector<uShort> const&, Vector<uShort> const&);
+  template Vector<Long> crossProduct(Vector<Long> const&, Vector<Long> const&);
+  template Vector<uLong> crossProduct(Vector<uLong> const&, Vector<uLong> const&);
+  template Vector<Float> crossProduct(Vector<Float> const&, Vector<Float> const&);
+  template Vector<Double> crossProduct(Vector<Double> const&, Vector<Double> const&);
+  template Vector<Complex> crossProduct(Vector<Complex> const&, Vector<Complex> const&);
+  template Vector<DComplex> crossProduct(Vector<DComplex> const&, Vector<DComplex> const&);
+
+  template Matrix<Int> product(Vector<Int> const&, Matrix<Int> const&);
+  template Matrix<uInt> product(Vector<uInt> const&, Matrix<uInt> const&);
+  template Matrix<Short> product(Vector<Short> const&, Matrix<Short> const&);
+  template Matrix<uShort> product(Vector<uShort> const&, Matrix<uShort> const&);
 }

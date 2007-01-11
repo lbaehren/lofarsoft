@@ -22,6 +22,11 @@ subdirs (
   )
 
 ## -----------------------------------------------------------------------------
+## Files for template instantiation
+
+subdirs (../../templates)
+
+## -----------------------------------------------------------------------------
 ## libcasa
 
 add_library (casa
@@ -271,14 +276,15 @@ add_library (casa
   Utilities/ValType.cc
   Utilities/cregex.cc
 ## -- Template instantiation----------------------
-#  templates.cc
-  Arrays/templates.cc
-  BasicMath/templates.cc
-#  BasicSL/templates.cc
-  Containers/templates.cc
-  Exceptions/templates.cc
-  Quanta/templates.cc
-  System/templates.cc
-  Utilities/templates.cc
+  ../../templates/casa/Arrays.cc
+  ../../templates/casa/ArrayLogical.cc
+  ../../templates/casa/ArrayMath.cc
+  ../../templates/casa/MaskedArray.cc
+  ../../templates/casa/BasicMath.cc
+  ../../templates/casa/Containers.cc
+  ../../templates/casa/Exceptions.cc
+  ../../templates/casa/Quanta.cc
+  ../../templates/casa/System.cc
+  ../../templates/casa/Utilities.cc
 )
 
