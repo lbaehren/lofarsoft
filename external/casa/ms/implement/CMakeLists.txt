@@ -96,4 +96,11 @@ add_library (ms
   MeasurementSets/StokesConverter.cc
 ## -- ms/implement/MSPlot ------------------------
   MSPlot/MsPlot.cc
+## -- template instanatiation --------------------
+  ../../templates/ms/Array.cc
+  ../../templates/ms/CountedPtr.cc
+  ../../templates/ms/MaskedArray.cc
+  ../../templates/ms/MsPlot.cc
+  ../../templates/ms/MSTable.cc
+  ../../templates/ms/Vector.cc
   )
