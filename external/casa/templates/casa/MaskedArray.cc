@@ -23,6 +23,7 @@
 #include <casa/Arrays/MaskArrMath.cc>
 #include <casa/Arrays/MaskArrMath2.cc>
 #include <casa/Arrays/MaskArrLogi.cc>
+#include <casa/Arrays/MaskArrIO.cc>
 
 namespace casa {
 
@@ -63,6 +64,22 @@ namespace casa {
   //  Operators
   //
   // ============================================================================
+
+  // ------------------------------------------------------------------ operator>
+
+  template MaskedArray<bool> operator> (bool const&, MaskedArray<bool> const&);
+  template MaskedArray<bool> operator> (int const&, MaskedArray<int> const&);
+  template MaskedArray<bool> operator> (Short const&, MaskedArray<Short> const&);
+  template MaskedArray<bool> operator> (Float const&, MaskedArray<Float> const&);
+  template MaskedArray<bool> operator> (Double const&, MaskedArray<Double> const&);
+
+  // ------------------------------------------------------------------ operator!
+
+  template MaskedArray<bool> operator! (MaskedArray<bool> const&);
+//   template MaskedArray<bool> operator! (MaskedArray<int> const&);
+//   template MaskedArray<bool> operator! (MaskedArray<Short> const&);
+//   template MaskedArray<bool> operator! (MaskedArray<Float> const&);
+//   template MaskedArray<bool> operator! (MaskedArray<Double> const&);
 
   // ------------------------------------------------------------------ operator+
 
@@ -191,10 +208,21 @@ namespace casa {
 
   // ----------------------------------------------------------------- operator<=
 
+  template MaskedArray<bool> operator<= (bool const&, MaskedArray<bool> const&);
+  template MaskedArray<bool> operator<= (int const&, MaskedArray<int> const&);
+  template MaskedArray<bool> operator<= (Short const&, MaskedArray<Short> const&);
+  template MaskedArray<bool> operator<= (Float const&, MaskedArray<Float> const&);
+  template MaskedArray<bool> operator<= (Double const&, MaskedArray<Double> const&);
+
   template MaskedArray<bool> operator<= (Array<int> const&, MaskedArray<int> const&);
   template MaskedArray<bool> operator<= (Array<Short> const&, MaskedArray<Short> const&);
   template MaskedArray<bool> operator<= (Array<Float> const&, MaskedArray<Float> const&);
   template MaskedArray<bool> operator<= (Array<Double> const&, MaskedArray<Double> const&);
+
+  template MaskedArray<bool> operator<= (MaskedArray<int> const&, int const&);
+  template MaskedArray<bool> operator<= (MaskedArray<Short> const&, Short const&);
+  template MaskedArray<bool> operator<= (MaskedArray<Float> const&, Float const&);
+  template MaskedArray<bool> operator<= (MaskedArray<Double> const&, Double const&);
 
   template MaskedArray<bool> operator<= (MaskedArray<int> const&, Array<int> const&);
   template MaskedArray<bool> operator<= (MaskedArray<Short> const&, Array<Short> const&);
@@ -205,6 +233,42 @@ namespace casa {
   template MaskedArray<bool> operator<= (MaskedArray<Short> const&, MaskedArray<Short> const&);
   template MaskedArray<bool> operator<= (MaskedArray<Float> const&, MaskedArray<Float> const&);
   template MaskedArray<bool> operator<= (MaskedArray<Double> const&, MaskedArray<Double> const&);
+
+  // ----------------------------------------------------------------- operator<<
+
+  template ostream & operator<<(ostream &, MaskedArray<Bool> const &);
+  template ostream & operator<<(ostream &, MaskedArray<Int> const &); 
+  template ostream & operator<<(ostream &, MaskedArray<Short> const &); 
+  template ostream & operator<<(ostream &, MaskedArray<Float> const &); 
+  template ostream & operator<<(ostream &, MaskedArray<Double> const &); 
+
+  // ----------------------------------------------------------------- operator&&
+
+  template MaskedArray<bool> operator&& (bool const&, MaskedArray<bool> const&);
+  template MaskedArray<bool> operator&& (int const&, MaskedArray<int> const&);
+  template MaskedArray<bool> operator&& (Short const&, MaskedArray<Short> const&);
+  template MaskedArray<bool> operator&& (Float const&, MaskedArray<Float> const&);
+  template MaskedArray<bool> operator&& (Double const&, MaskedArray<Double> const&);
+
+  template MaskedArray<bool> operator&& (MaskedArray<bool> const&, bool const&);
+  template MaskedArray<bool> operator&& (MaskedArray<int> const&, int const&);
+  template MaskedArray<bool> operator&& (MaskedArray<Short> const&, Short const&);
+  template MaskedArray<bool> operator&& (MaskedArray<Float> const&, Float const&);
+  template MaskedArray<bool> operator&& (MaskedArray<Double> const&, Double const&);
+
+  // ----------------------------------------------------------------- operator||
+
+  template MaskedArray<bool> operator|| (bool const&, MaskedArray<bool> const&);
+  template MaskedArray<bool> operator|| (int const&, MaskedArray<int> const&);
+  template MaskedArray<bool> operator|| (Short const&, MaskedArray<Short> const&);
+  template MaskedArray<bool> operator|| (Float const&, MaskedArray<Float> const&);
+  template MaskedArray<bool> operator|| (Double const&, MaskedArray<Double> const&);
+
+  template MaskedArray<bool> operator|| (MaskedArray<bool> const&, bool const&);
+  template MaskedArray<bool> operator|| (MaskedArray<int> const&, int const&);
+  template MaskedArray<bool> operator|| (MaskedArray<Short> const&, Short const&);
+  template MaskedArray<bool> operator|| (MaskedArray<Float> const&, Float const&);
+  template MaskedArray<bool> operator|| (MaskedArray<Double> const&, Double const&);
 
   // ============================================================================
   //
@@ -219,14 +283,28 @@ namespace casa {
 
   // ---------------------------------------------------------------------- avdev
 
+  template int avdev (MaskedArray<int> const&);
+  template Float avdev (MaskedArray<Float> const&);
+  template Double avdev (MaskedArray<Double> const&);
+
   template int avdev (MaskedArray<int> const&, int);
 
   // ---------------------------------------------------------------------- atan2
+
+  template MaskedArray<int> atan2 (int const&, MaskedArray<int> const&);
+  template MaskedArray<Short> atan2 (Short const&, MaskedArray<Short> const&);
+  template MaskedArray<Float> atan2 (Float const&, MaskedArray<Float> const&);
+  template MaskedArray<Double> atan2 (Double const&, MaskedArray<Double> const&);
 
   template MaskedArray<int> atan2 (Array<int> const&, MaskedArray<int> const&);
   template MaskedArray<Short> atan2 (Array<Short> const&, MaskedArray<Short> const&);
   template MaskedArray<Float> atan2 (Array<Float> const&, MaskedArray<Float> const&);
   template MaskedArray<Double> atan2 (Array<Double> const&, MaskedArray<Double> const&);
+
+  template MaskedArray<int> atan2 (MaskedArray<int> const&, int const&);
+  template MaskedArray<Short> atan2 (MaskedArray<Short> const&, Short const&);
+  template MaskedArray<Float> atan2 (MaskedArray<Float> const&, Float const&);
+  template MaskedArray<Double> atan2 (MaskedArray<Double> const&, Double const&);
 
   template MaskedArray<int> atan2 (MaskedArray<int> const&, Array<int> const&);
   template MaskedArray<Short> atan2 (MaskedArray<Short> const&, Array<Short> const&);
@@ -237,6 +315,11 @@ namespace casa {
   template MaskedArray<Short> atan2 (MaskedArray<Short> const&, MaskedArray<Short> const&);
   template MaskedArray<Float> atan2 (MaskedArray<Float> const&, MaskedArray<Float> const&);
   template MaskedArray<Double> atan2 (MaskedArray<Double> const&, MaskedArray<Double> const&);
+
+  // ------------------------------------------------------------------------ cos
+
+  template MaskedArray<Float> cos (MaskedArray<Float> const &);
+  template MaskedArray<Double> cos (MaskedArray<Double> const &);
 
   // ------------------------------------------------------------------------ max
 
@@ -322,11 +405,21 @@ namespace casa {
 
   // ------------------------------------------------------------------------ pow
 
-  template MaskedArray<int> pow<int, int>(Array<int> const&, MaskedArray<int> const&);
+  template MaskedArray<int> pow (Array<int> const&, MaskedArray<int> const&);
+  template MaskedArray<Float> pow (Array<Float> const&, MaskedArray<Float> const&);
+  template MaskedArray<Double> pow (Array<Double> const&, MaskedArray<Double> const&);
 
-  template MaskedArray<int> pow<int, int> (MaskedArray<int> const&, Array<int> const&);
+//   template MaskedArray<int> pow (MaskedArray<int> const&, int const&);
+//   template MaskedArray<Float> pow (MaskedArray<Float> const&, Float const&);
+  template MaskedArray<Double> pow (MaskedArray<Double> const&, Double const&);
+
+  template MaskedArray<int> pow (MaskedArray<int> const&, Array<int> const&);
+  template MaskedArray<Float> pow (MaskedArray<Float> const&, Array<Float> const&);
+  template MaskedArray<Double> pow (MaskedArray<Double> const&, Array<Double> const&);
 
   template MaskedArray<int> pow<int, int> (MaskedArray<int> const&, MaskedArray<int> const&);
+  template MaskedArray<Float> pow<Float, Float> (MaskedArray<Float> const&, MaskedArray<Float> const&);
+  template MaskedArray<Double> pow<Double, Double> (MaskedArray<Double> const&, MaskedArray<Double> const&);
 
   // -------------------------------------------------------------------- product
 
@@ -334,6 +427,19 @@ namespace casa {
   template uInt product (MaskedArray<uInt> const&);
   template Float product (MaskedArray<Float> const&);
   template Double product (MaskedArray<Double> const&);
+
+  // --------------------------------------------------------------------- square
+
+  template MaskedArray<double> cube (MaskedArray<double> const&);
+
+  template MaskedArray<double> square (MaskedArray<double> const&);
+
+  // --------------------------------------------------------------------- stddev
+
+//   template int stddev (MaskedArray<int> const&);
+//   template uInt stddev (MaskedArray<uInt> const&);
+  template Float stddev (MaskedArray<Float> const&);
+  template Double stddev (MaskedArray<Double> const&);
 
   // ------------------------------------------------------------------------ sum
 
@@ -443,6 +549,162 @@ namespace casa {
   template Bool allAND (const MaskedArray<Float> &, const MaskedArray<Float> &);
   template Bool allAND (const MaskedArray<Double> &, const MaskedArray<Double> &);
 
+  // allEQ
+
+  template bool allEQ (bool const&, MaskedArray<bool> const&);
+  template bool allEQ (int const&, MaskedArray<int> const&);
+  template bool allEQ (uInt const&, MaskedArray<uInt> const&);
+  template bool allEQ (Short const&, MaskedArray<Short> const&);
+  template bool allEQ (uShort const&, MaskedArray<uShort> const&);
+  template bool allEQ (Long const&, MaskedArray<Long> const&);
+  template bool allEQ (uLong const&, MaskedArray<uLong> const&);
+  template bool allEQ (Float const&, MaskedArray<Float> const&);
+  template bool allEQ (Double const&, MaskedArray<Double> const&);
+
+  template bool allEQ (MaskedArray<bool> const&, bool const&);
+  template bool allEQ (MaskedArray<int> const&, int const&);
+  template bool allEQ (MaskedArray<uInt> const&, uInt const&);
+  template bool allEQ (MaskedArray<Short> const&, Short const&);
+  template bool allEQ (MaskedArray<uShort> const&, uShort const&);
+  template bool allEQ (MaskedArray<Long> const&, Long const&);
+  template bool allEQ (MaskedArray<uLong> const&, uLong const&);
+  template bool allEQ (MaskedArray<Float> const&, Float const&);
+  template bool allEQ (MaskedArray<Double> const&, Double const&);
+
+  template Bool allEQ (const Array<Bool> &, const MaskedArray<Bool> &);
+  template Bool allEQ (const Array<Int> &, const MaskedArray<Int> &);
+  template Bool allEQ (const Array<uInt> &, const MaskedArray<uInt> &);
+  template Bool allEQ (const Array<Short> &, const MaskedArray<Short> &);
+  template Bool allEQ (const Array<uShort> &, const MaskedArray<uShort> &);
+  template Bool allEQ (const Array<Long> &, const MaskedArray<Long> &);
+  template Bool allEQ (const Array<uLong> &, const MaskedArray<uLong> &);
+  template Bool allEQ (const Array<Float> &, const MaskedArray<Float> &);
+  template Bool allEQ (const Array<Double> &, const MaskedArray<Double> &);
+
+  template Bool allEQ (const MaskedArray<Bool> &, const Array<Bool> &);
+  template Bool allEQ (const MaskedArray<Int> &, const Array<Int> &);
+  template Bool allEQ (const MaskedArray<uInt> &, const Array<uInt> &);
+  template Bool allEQ (const MaskedArray<Short> &, const Array<Short> &);
+  template Bool allEQ (const MaskedArray<uShort> &, const Array<uShort> &);
+  template Bool allEQ (const MaskedArray<Long> &, const Array<Long> &);
+  template Bool allEQ (const MaskedArray<uLong> &, const Array<uLong> &);
+  template Bool allEQ (const MaskedArray<Float> &, const Array<Float> &);
+  template Bool allEQ (const MaskedArray<Double> &, const Array<Double> &);
+
+  template Bool allEQ (const MaskedArray<Bool> &, const MaskedArray<Bool> &);
+  template Bool allEQ (const MaskedArray<Int> &, const MaskedArray<Int> &);
+  template Bool allEQ (const MaskedArray<uInt> &, const MaskedArray<uInt> &);
+  template Bool allEQ (const MaskedArray<Short> &, const MaskedArray<Short> &);
+  template Bool allEQ (const MaskedArray<uShort> &, const MaskedArray<uShort> &);
+  template Bool allEQ (const MaskedArray<Long> &, const MaskedArray<Long> &);
+  template Bool allEQ (const MaskedArray<uLong> &, const MaskedArray<uLong> &);
+  template Bool allEQ (const MaskedArray<Float> &, const MaskedArray<Float> &);
+  template Bool allEQ (const MaskedArray<Double> &, const MaskedArray<Double> &);
+
+  // ---------------------------------------------------------------------- allGE
+
+  template bool allGE (bool const&, MaskedArray<bool> const&);
+  template bool allGE (int const&, MaskedArray<int> const&);
+  template bool allGE (uInt const&, MaskedArray<uInt> const&);
+  template bool allGE (Short const&, MaskedArray<Short> const&);
+  template bool allGE (uShort const&, MaskedArray<uShort> const&);
+  template bool allGE (Long const&, MaskedArray<Long> const&);
+  template bool allGE (uLong const&, MaskedArray<uLong> const&);
+  template bool allGE (Float const&, MaskedArray<Float> const&);
+  template bool allGE (Double const&, MaskedArray<Double> const&);
+
+  template bool allGE (MaskedArray<bool> const&, bool const&);
+  template bool allGE (MaskedArray<int> const&, int const&);
+  template bool allGE (MaskedArray<uInt> const&, uInt const&);
+  template bool allGE (MaskedArray<Short> const&, Short const&);
+  template bool allGE (MaskedArray<uShort> const&, uShort const&);
+  template bool allGE (MaskedArray<Long> const&, Long const&);
+  template bool allGE (MaskedArray<uLong> const&, uLong const&);
+  template bool allGE (MaskedArray<Float> const&, Float const&);
+  template bool allGE (MaskedArray<Double> const&, Double const&);
+
+  template Bool allGE (const Array<Bool> &, const MaskedArray<Bool> &);
+  template Bool allGE (const Array<Int> &, const MaskedArray<Int> &);
+  template Bool allGE (const Array<uInt> &, const MaskedArray<uInt> &);
+  template Bool allGE (const Array<Short> &, const MaskedArray<Short> &);
+  template Bool allGE (const Array<uShort> &, const MaskedArray<uShort> &);
+  template Bool allGE (const Array<Long> &, const MaskedArray<Long> &);
+  template Bool allGE (const Array<uLong> &, const MaskedArray<uLong> &);
+  template Bool allGE (const Array<Float> &, const MaskedArray<Float> &);
+  template Bool allGE (const Array<Double> &, const MaskedArray<Double> &);
+
+  template Bool allGE (const MaskedArray<Bool> &, const Array<Bool> &);
+  template Bool allGE (const MaskedArray<Int> &, const Array<Int> &);
+  template Bool allGE (const MaskedArray<uInt> &, const Array<uInt> &);
+  template Bool allGE (const MaskedArray<Short> &, const Array<Short> &);
+  template Bool allGE (const MaskedArray<uShort> &, const Array<uShort> &);
+  template Bool allGE (const MaskedArray<Long> &, const Array<Long> &);
+  template Bool allGE (const MaskedArray<uLong> &, const Array<uLong> &);
+  template Bool allGE (const MaskedArray<Float> &, const Array<Float> &);
+  template Bool allGE (const MaskedArray<Double> &, const Array<Double> &);
+
+  template Bool allGE (const MaskedArray<Bool> &, const MaskedArray<Bool> &);
+  template Bool allGE (const MaskedArray<Int> &, const MaskedArray<Int> &);
+  template Bool allGE (const MaskedArray<uInt> &, const MaskedArray<uInt> &);
+  template Bool allGE (const MaskedArray<Short> &, const MaskedArray<Short> &);
+  template Bool allGE (const MaskedArray<uShort> &, const MaskedArray<uShort> &);
+  template Bool allGE (const MaskedArray<Long> &, const MaskedArray<Long> &);
+  template Bool allGE (const MaskedArray<uLong> &, const MaskedArray<uLong> &);
+  template Bool allGE (const MaskedArray<Float> &, const MaskedArray<Float> &);
+  template Bool allGE (const MaskedArray<Double> &, const MaskedArray<Double> &);
+
+  // ---------------------------------------------------------------------- allGT
+
+  template bool allGT (bool const&, MaskedArray<bool> const&);
+  template bool allGT (int const&, MaskedArray<int> const&);
+  template bool allGT (uInt const&, MaskedArray<uInt> const&);
+  template bool allGT (Short const&, MaskedArray<Short> const&);
+  template bool allGT (uShort const&, MaskedArray<uShort> const&);
+  template bool allGT (Long const&, MaskedArray<Long> const&);
+  template bool allGT (uLong const&, MaskedArray<uLong> const&);
+  template bool allGT (Float const&, MaskedArray<Float> const&);
+  template bool allGT (Double const&, MaskedArray<Double> const&);
+
+  template bool allGT (MaskedArray<bool> const&, bool const&);
+  template bool allGT (MaskedArray<int> const&, int const&);
+  template bool allGT (MaskedArray<uInt> const&, uInt const&);
+  template bool allGT (MaskedArray<Short> const&, Short const&);
+  template bool allGT (MaskedArray<uShort> const&, uShort const&);
+  template bool allGT (MaskedArray<Long> const&, Long const&);
+  template bool allGT (MaskedArray<uLong> const&, uLong const&);
+  template bool allGT (MaskedArray<Float> const&, Float const&);
+  template bool allGT (MaskedArray<Double> const&, Double const&);
+
+  template Bool allGT (const Array<Bool> &, const MaskedArray<Bool> &);
+  template Bool allGT (const Array<Int> &, const MaskedArray<Int> &);
+  template Bool allGT (const Array<uInt> &, const MaskedArray<uInt> &);
+  template Bool allGT (const Array<Short> &, const MaskedArray<Short> &);
+  template Bool allGT (const Array<uShort> &, const MaskedArray<uShort> &);
+  template Bool allGT (const Array<Long> &, const MaskedArray<Long> &);
+  template Bool allGT (const Array<uLong> &, const MaskedArray<uLong> &);
+  template Bool allGT (const Array<Float> &, const MaskedArray<Float> &);
+  template Bool allGT (const Array<Double> &, const MaskedArray<Double> &);
+
+  template Bool allGT (const MaskedArray<Bool> &, const Array<Bool> &);
+  template Bool allGT (const MaskedArray<Int> &, const Array<Int> &);
+  template Bool allGT (const MaskedArray<uInt> &, const Array<uInt> &);
+  template Bool allGT (const MaskedArray<Short> &, const Array<Short> &);
+  template Bool allGT (const MaskedArray<uShort> &, const Array<uShort> &);
+  template Bool allGT (const MaskedArray<Long> &, const Array<Long> &);
+  template Bool allGT (const MaskedArray<uLong> &, const Array<uLong> &);
+  template Bool allGT (const MaskedArray<Float> &, const Array<Float> &);
+  template Bool allGT (const MaskedArray<Double> &, const Array<Double> &);
+
+  template Bool allGT (const MaskedArray<Bool> &, const MaskedArray<Bool> &);
+  template Bool allGT (const MaskedArray<Int> &, const MaskedArray<Int> &);
+  template Bool allGT (const MaskedArray<uInt> &, const MaskedArray<uInt> &);
+  template Bool allGT (const MaskedArray<Short> &, const MaskedArray<Short> &);
+  template Bool allGT (const MaskedArray<uShort> &, const MaskedArray<uShort> &);
+  template Bool allGT (const MaskedArray<Long> &, const MaskedArray<Long> &);
+  template Bool allGT (const MaskedArray<uLong> &, const MaskedArray<uLong> &);
+  template Bool allGT (const MaskedArray<Float> &, const MaskedArray<Float> &);
+  template Bool allGT (const MaskedArray<Double> &, const MaskedArray<Double> &);
+
   // allLE
 
   template bool allLE (bool const&, MaskedArray<bool> const&);
@@ -494,6 +756,58 @@ namespace casa {
   template Bool allLE (const MaskedArray<uLong> &, const MaskedArray<uLong> &);
   template Bool allLE (const MaskedArray<Float> &, const MaskedArray<Float> &);
   template Bool allLE (const MaskedArray<Double> &, const MaskedArray<Double> &);
+
+  // allLT
+
+  template bool allLT (bool const&, MaskedArray<bool> const&);
+  template bool allLT (int const&, MaskedArray<int> const&);
+  template bool allLT (uInt const&, MaskedArray<uInt> const&);
+  template bool allLT (Short const&, MaskedArray<Short> const&);
+  template bool allLT (uShort const&, MaskedArray<uShort> const&);
+  template bool allLT (Long const&, MaskedArray<Long> const&);
+  template bool allLT (uLong const&, MaskedArray<uLong> const&);
+  template bool allLT (Float const&, MaskedArray<Float> const&);
+  template bool allLT (Double const&, MaskedArray<Double> const&);
+
+  template bool allLT (MaskedArray<bool> const&, bool const&);
+  template bool allLT (MaskedArray<int> const&, int const&);
+  template bool allLT (MaskedArray<uInt> const&, uInt const&);
+  template bool allLT (MaskedArray<Short> const&, Short const&);
+  template bool allLT (MaskedArray<uShort> const&, uShort const&);
+  template bool allLT (MaskedArray<Long> const&, Long const&);
+  template bool allLT (MaskedArray<uLong> const&, uLong const&);
+  template bool allLT (MaskedArray<Float> const&, Float const&);
+  template bool allLT (MaskedArray<Double> const&, Double const&);
+
+  template Bool allLT (const Array<Bool> &, const MaskedArray<Bool> &);
+  template Bool allLT (const Array<Int> &, const MaskedArray<Int> &);
+  template Bool allLT (const Array<uInt> &, const MaskedArray<uInt> &);
+  template Bool allLT (const Array<Short> &, const MaskedArray<Short> &);
+  template Bool allLT (const Array<uShort> &, const MaskedArray<uShort> &);
+  template Bool allLT (const Array<Long> &, const MaskedArray<Long> &);
+  template Bool allLT (const Array<uLong> &, const MaskedArray<uLong> &);
+  template Bool allLT (const Array<Float> &, const MaskedArray<Float> &);
+  template Bool allLT (const Array<Double> &, const MaskedArray<Double> &);
+
+  template Bool allLT (const MaskedArray<Bool> &, const Array<Bool> &);
+  template Bool allLT (const MaskedArray<Int> &, const Array<Int> &);
+  template Bool allLT (const MaskedArray<uInt> &, const Array<uInt> &);
+  template Bool allLT (const MaskedArray<Short> &, const Array<Short> &);
+  template Bool allLT (const MaskedArray<uShort> &, const Array<uShort> &);
+  template Bool allLT (const MaskedArray<Long> &, const Array<Long> &);
+  template Bool allLT (const MaskedArray<uLong> &, const Array<uLong> &);
+  template Bool allLT (const MaskedArray<Float> &, const Array<Float> &);
+  template Bool allLT (const MaskedArray<Double> &, const Array<Double> &);
+
+  template Bool allLT (const MaskedArray<Bool> &, const MaskedArray<Bool> &);
+  template Bool allLT (const MaskedArray<Int> &, const MaskedArray<Int> &);
+  template Bool allLT (const MaskedArray<uInt> &, const MaskedArray<uInt> &);
+  template Bool allLT (const MaskedArray<Short> &, const MaskedArray<Short> &);
+  template Bool allLT (const MaskedArray<uShort> &, const MaskedArray<uShort> &);
+  template Bool allLT (const MaskedArray<Long> &, const MaskedArray<Long> &);
+  template Bool allLT (const MaskedArray<uLong> &, const MaskedArray<uLong> &);
+  template Bool allLT (const MaskedArray<Float> &, const MaskedArray<Float> &);
+  template Bool allLT (const MaskedArray<Double> &, const MaskedArray<Double> &);
 
   // allOR
 
@@ -599,6 +913,214 @@ namespace casa {
   template Bool anyAND (const MaskedArray<Float> &, const MaskedArray<Float> &);
   template Bool anyAND (const MaskedArray<Double> &, const MaskedArray<Double> &);
 
+  // anyGE
+
+  template bool anyGE (bool const&, MaskedArray<bool> const&);
+  template bool anyGE (int const&, MaskedArray<int> const&);
+  template bool anyGE (uInt const&, MaskedArray<uInt> const&);
+  template bool anyGE (Short const&, MaskedArray<Short> const&);
+  template bool anyGE (uShort const&, MaskedArray<uShort> const&);
+  template bool anyGE (Long const&, MaskedArray<Long> const&);
+  template bool anyGE (uLong const&, MaskedArray<uLong> const&);
+  template bool anyGE (Float const&, MaskedArray<Float> const&);
+  template bool anyGE (Double const&, MaskedArray<Double> const&);
+
+  template bool anyGE (MaskedArray<bool> const&, bool const&);
+  template bool anyGE (MaskedArray<int> const&, int const&);
+  template bool anyGE (MaskedArray<uInt> const&, uInt const&);
+  template bool anyGE (MaskedArray<Short> const&, Short const&);
+  template bool anyGE (MaskedArray<uShort> const&, uShort const&);
+  template bool anyGE (MaskedArray<Long> const&, Long const&);
+  template bool anyGE (MaskedArray<uLong> const&, uLong const&);
+  template bool anyGE (MaskedArray<Float> const&, Float const&);
+  template bool anyGE (MaskedArray<Double> const&, Double const&);
+
+  template Bool anyGE (const Array<Bool> &, const MaskedArray<Bool> &);
+  template Bool anyGE (const Array<Int> &, const MaskedArray<Int> &);
+  template Bool anyGE (const Array<uInt> &, const MaskedArray<uInt> &);
+  template Bool anyGE (const Array<Short> &, const MaskedArray<Short> &);
+  template Bool anyGE (const Array<uShort> &, const MaskedArray<uShort> &);
+  template Bool anyGE (const Array<Long> &, const MaskedArray<Long> &);
+  template Bool anyGE (const Array<uLong> &, const MaskedArray<uLong> &);
+  template Bool anyGE (const Array<Float> &, const MaskedArray<Float> &);
+  template Bool anyGE (const Array<Double> &, const MaskedArray<Double> &);
+
+  template Bool anyGE (const MaskedArray<Bool> &, const Array<Bool> &);
+  template Bool anyGE (const MaskedArray<Int> &, const Array<Int> &);
+  template Bool anyGE (const MaskedArray<uInt> &, const Array<uInt> &);
+  template Bool anyGE (const MaskedArray<Short> &, const Array<Short> &);
+  template Bool anyGE (const MaskedArray<uShort> &, const Array<uShort> &);
+  template Bool anyGE (const MaskedArray<Long> &, const Array<Long> &);
+  template Bool anyGE (const MaskedArray<uLong> &, const Array<uLong> &);
+  template Bool anyGE (const MaskedArray<Float> &, const Array<Float> &);
+  template Bool anyGE (const MaskedArray<Double> &, const Array<Double> &);
+
+  template Bool anyGE (const MaskedArray<Bool> &, const MaskedArray<Bool> &);
+  template Bool anyGE (const MaskedArray<Int> &, const MaskedArray<Int> &);
+  template Bool anyGE (const MaskedArray<uInt> &, const MaskedArray<uInt> &);
+  template Bool anyGE (const MaskedArray<Short> &, const MaskedArray<Short> &);
+  template Bool anyGE (const MaskedArray<uShort> &, const MaskedArray<uShort> &);
+  template Bool anyGE (const MaskedArray<Long> &, const MaskedArray<Long> &);
+  template Bool anyGE (const MaskedArray<uLong> &, const MaskedArray<uLong> &);
+  template Bool anyGE (const MaskedArray<Float> &, const MaskedArray<Float> &);
+  template Bool anyGE (const MaskedArray<Double> &, const MaskedArray<Double> &);
+
+  // anyGT
+
+  template bool anyGT (bool const&, MaskedArray<bool> const&);
+  template bool anyGT (int const&, MaskedArray<int> const&);
+  template bool anyGT (uInt const&, MaskedArray<uInt> const&);
+  template bool anyGT (Short const&, MaskedArray<Short> const&);
+  template bool anyGT (uShort const&, MaskedArray<uShort> const&);
+  template bool anyGT (Long const&, MaskedArray<Long> const&);
+  template bool anyGT (uLong const&, MaskedArray<uLong> const&);
+  template bool anyGT (Float const&, MaskedArray<Float> const&);
+  template bool anyGT (Double const&, MaskedArray<Double> const&);
+
+  template bool anyGT (MaskedArray<bool> const&, bool const&);
+  template bool anyGT (MaskedArray<int> const&, int const&);
+  template bool anyGT (MaskedArray<uInt> const&, uInt const&);
+  template bool anyGT (MaskedArray<Short> const&, Short const&);
+  template bool anyGT (MaskedArray<uShort> const&, uShort const&);
+  template bool anyGT (MaskedArray<Long> const&, Long const&);
+  template bool anyGT (MaskedArray<uLong> const&, uLong const&);
+  template bool anyGT (MaskedArray<Float> const&, Float const&);
+  template bool anyGT (MaskedArray<Double> const&, Double const&);
+
+  template Bool anyGT (const Array<Bool> &, const MaskedArray<Bool> &);
+  template Bool anyGT (const Array<Int> &, const MaskedArray<Int> &);
+  template Bool anyGT (const Array<uInt> &, const MaskedArray<uInt> &);
+  template Bool anyGT (const Array<Short> &, const MaskedArray<Short> &);
+  template Bool anyGT (const Array<uShort> &, const MaskedArray<uShort> &);
+  template Bool anyGT (const Array<Long> &, const MaskedArray<Long> &);
+  template Bool anyGT (const Array<uLong> &, const MaskedArray<uLong> &);
+  template Bool anyGT (const Array<Float> &, const MaskedArray<Float> &);
+  template Bool anyGT (const Array<Double> &, const MaskedArray<Double> &);
+
+  template Bool anyGT (const MaskedArray<Bool> &, const Array<Bool> &);
+  template Bool anyGT (const MaskedArray<Int> &, const Array<Int> &);
+  template Bool anyGT (const MaskedArray<uInt> &, const Array<uInt> &);
+  template Bool anyGT (const MaskedArray<Short> &, const Array<Short> &);
+  template Bool anyGT (const MaskedArray<uShort> &, const Array<uShort> &);
+  template Bool anyGT (const MaskedArray<Long> &, const Array<Long> &);
+  template Bool anyGT (const MaskedArray<uLong> &, const Array<uLong> &);
+  template Bool anyGT (const MaskedArray<Float> &, const Array<Float> &);
+  template Bool anyGT (const MaskedArray<Double> &, const Array<Double> &);
+
+  template Bool anyGT (const MaskedArray<Bool> &, const MaskedArray<Bool> &);
+  template Bool anyGT (const MaskedArray<Int> &, const MaskedArray<Int> &);
+  template Bool anyGT (const MaskedArray<uInt> &, const MaskedArray<uInt> &);
+  template Bool anyGT (const MaskedArray<Short> &, const MaskedArray<Short> &);
+  template Bool anyGT (const MaskedArray<uShort> &, const MaskedArray<uShort> &);
+  template Bool anyGT (const MaskedArray<Long> &, const MaskedArray<Long> &);
+  template Bool anyGT (const MaskedArray<uLong> &, const MaskedArray<uLong> &);
+  template Bool anyGT (const MaskedArray<Float> &, const MaskedArray<Float> &);
+  template Bool anyGT (const MaskedArray<Double> &, const MaskedArray<Double> &);
+
+  // anyLE
+
+  template bool anyLE (bool const&, MaskedArray<bool> const&);
+  template bool anyLE (int const&, MaskedArray<int> const&);
+  template bool anyLE (uInt const&, MaskedArray<uInt> const&);
+  template bool anyLE (Short const&, MaskedArray<Short> const&);
+  template bool anyLE (uShort const&, MaskedArray<uShort> const&);
+  template bool anyLE (Long const&, MaskedArray<Long> const&);
+  template bool anyLE (uLong const&, MaskedArray<uLong> const&);
+  template bool anyLE (Float const&, MaskedArray<Float> const&);
+  template bool anyLE (Double const&, MaskedArray<Double> const&);
+
+  template bool anyLE (MaskedArray<bool> const&, bool const&);
+  template bool anyLE (MaskedArray<int> const&, int const&);
+  template bool anyLE (MaskedArray<uInt> const&, uInt const&);
+  template bool anyLE (MaskedArray<Short> const&, Short const&);
+  template bool anyLE (MaskedArray<uShort> const&, uShort const&);
+  template bool anyLE (MaskedArray<Long> const&, Long const&);
+  template bool anyLE (MaskedArray<uLong> const&, uLong const&);
+  template bool anyLE (MaskedArray<Float> const&, Float const&);
+  template bool anyLE (MaskedArray<Double> const&, Double const&);
+
+  template Bool anyLE (const Array<Bool> &, const MaskedArray<Bool> &);
+  template Bool anyLE (const Array<Int> &, const MaskedArray<Int> &);
+  template Bool anyLE (const Array<uInt> &, const MaskedArray<uInt> &);
+  template Bool anyLE (const Array<Short> &, const MaskedArray<Short> &);
+  template Bool anyLE (const Array<uShort> &, const MaskedArray<uShort> &);
+  template Bool anyLE (const Array<Long> &, const MaskedArray<Long> &);
+  template Bool anyLE (const Array<uLong> &, const MaskedArray<uLong> &);
+  template Bool anyLE (const Array<Float> &, const MaskedArray<Float> &);
+  template Bool anyLE (const Array<Double> &, const MaskedArray<Double> &);
+
+  template Bool anyLE (const MaskedArray<Bool> &, const Array<Bool> &);
+  template Bool anyLE (const MaskedArray<Int> &, const Array<Int> &);
+  template Bool anyLE (const MaskedArray<uInt> &, const Array<uInt> &);
+  template Bool anyLE (const MaskedArray<Short> &, const Array<Short> &);
+  template Bool anyLE (const MaskedArray<uShort> &, const Array<uShort> &);
+  template Bool anyLE (const MaskedArray<Long> &, const Array<Long> &);
+  template Bool anyLE (const MaskedArray<uLong> &, const Array<uLong> &);
+  template Bool anyLE (const MaskedArray<Float> &, const Array<Float> &);
+  template Bool anyLE (const MaskedArray<Double> &, const Array<Double> &);
+
+  template Bool anyLE (const MaskedArray<Bool> &, const MaskedArray<Bool> &);
+  template Bool anyLE (const MaskedArray<Int> &, const MaskedArray<Int> &);
+  template Bool anyLE (const MaskedArray<uInt> &, const MaskedArray<uInt> &);
+  template Bool anyLE (const MaskedArray<Short> &, const MaskedArray<Short> &);
+  template Bool anyLE (const MaskedArray<uShort> &, const MaskedArray<uShort> &);
+  template Bool anyLE (const MaskedArray<Long> &, const MaskedArray<Long> &);
+  template Bool anyLE (const MaskedArray<uLong> &, const MaskedArray<uLong> &);
+  template Bool anyLE (const MaskedArray<Float> &, const MaskedArray<Float> &);
+  template Bool anyLE (const MaskedArray<Double> &, const MaskedArray<Double> &);
+
+  // anyLT
+
+  template bool anyLT (bool const&, MaskedArray<bool> const&);
+  template bool anyLT (int const&, MaskedArray<int> const&);
+  template bool anyLT (uInt const&, MaskedArray<uInt> const&);
+  template bool anyLT (Short const&, MaskedArray<Short> const&);
+  template bool anyLT (uShort const&, MaskedArray<uShort> const&);
+  template bool anyLT (Long const&, MaskedArray<Long> const&);
+  template bool anyLT (uLong const&, MaskedArray<uLong> const&);
+  template bool anyLT (Float const&, MaskedArray<Float> const&);
+  template bool anyLT (Double const&, MaskedArray<Double> const&);
+
+  template bool anyLT (MaskedArray<bool> const&, bool const&);
+  template bool anyLT (MaskedArray<int> const&, int const&);
+  template bool anyLT (MaskedArray<uInt> const&, uInt const&);
+  template bool anyLT (MaskedArray<Short> const&, Short const&);
+  template bool anyLT (MaskedArray<uShort> const&, uShort const&);
+  template bool anyLT (MaskedArray<Long> const&, Long const&);
+  template bool anyLT (MaskedArray<uLong> const&, uLong const&);
+  template bool anyLT (MaskedArray<Float> const&, Float const&);
+  template bool anyLT (MaskedArray<Double> const&, Double const&);
+
+  template Bool anyLT (const Array<Bool> &, const MaskedArray<Bool> &);
+  template Bool anyLT (const Array<Int> &, const MaskedArray<Int> &);
+  template Bool anyLT (const Array<uInt> &, const MaskedArray<uInt> &);
+  template Bool anyLT (const Array<Short> &, const MaskedArray<Short> &);
+  template Bool anyLT (const Array<uShort> &, const MaskedArray<uShort> &);
+  template Bool anyLT (const Array<Long> &, const MaskedArray<Long> &);
+  template Bool anyLT (const Array<uLong> &, const MaskedArray<uLong> &);
+  template Bool anyLT (const Array<Float> &, const MaskedArray<Float> &);
+  template Bool anyLT (const Array<Double> &, const MaskedArray<Double> &);
+
+  template Bool anyLT (const MaskedArray<Bool> &, const Array<Bool> &);
+  template Bool anyLT (const MaskedArray<Int> &, const Array<Int> &);
+  template Bool anyLT (const MaskedArray<uInt> &, const Array<uInt> &);
+  template Bool anyLT (const MaskedArray<Short> &, const Array<Short> &);
+  template Bool anyLT (const MaskedArray<uShort> &, const Array<uShort> &);
+  template Bool anyLT (const MaskedArray<Long> &, const Array<Long> &);
+  template Bool anyLT (const MaskedArray<uLong> &, const Array<uLong> &);
+  template Bool anyLT (const MaskedArray<Float> &, const Array<Float> &);
+  template Bool anyLT (const MaskedArray<Double> &, const Array<Double> &);
+
+  template Bool anyLT (const MaskedArray<Bool> &, const MaskedArray<Bool> &);
+  template Bool anyLT (const MaskedArray<Int> &, const MaskedArray<Int> &);
+  template Bool anyLT (const MaskedArray<uInt> &, const MaskedArray<uInt> &);
+  template Bool anyLT (const MaskedArray<Short> &, const MaskedArray<Short> &);
+  template Bool anyLT (const MaskedArray<uShort> &, const MaskedArray<uShort> &);
+  template Bool anyLT (const MaskedArray<Long> &, const MaskedArray<Long> &);
+  template Bool anyLT (const MaskedArray<uLong> &, const MaskedArray<uLong> &);
+  template Bool anyLT (const MaskedArray<Float> &, const MaskedArray<Float> &);
+  template Bool anyLT (const MaskedArray<Double> &, const MaskedArray<Double> &);
+
   // anyOR
 
   template bool anyOR (bool const&, MaskedArray<bool> const&);
@@ -640,5 +1162,17 @@ namespace casa {
   template Bool anyOR (const MaskedArray<uLong> &, const MaskedArray<uLong> &);
   template Bool anyOR (const MaskedArray<Float> &, const MaskedArray<Float> &);
   template Bool anyOR (const MaskedArray<Double> &, const MaskedArray<Double> &);
+
+  template void indgen (MaskedArray<Bool>&);
+  template void indgen (MaskedArray<Int>&);
+  template void indgen (MaskedArray<uInt>&);
+  template void indgen (MaskedArray<Short>&);
+  template void indgen (MaskedArray<uShort>&);
+  template void indgen (MaskedArray<Long>&);
+  template void indgen (MaskedArray<uLong>&);
+  template void indgen (MaskedArray<Float>&);
+  template void indgen (MaskedArray<Double>&);
+
+  template void indgen (MaskedArray<int>&, int);
 
 }

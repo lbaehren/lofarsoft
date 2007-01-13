@@ -230,7 +230,7 @@ namespace casa {
   template class MatrixIterator<DComplex>;
   template class MatrixIterator<String>;
 
-  // ---------------------------------------------
+  // ------------------------------------------------------------------ operator<
 
   template Array<Bool> operator<(Int const &, Array<Int> const &);
   template Array<Bool> operator<(uInt const &, Array<uInt> const &);
@@ -241,6 +241,15 @@ namespace casa {
   template Array<Bool> operator<(Complex const &, Array<Complex> const &);
   template Array<Bool> operator<(DComplex const &, Array<DComplex> const &);
 
+  template Array<Bool> operator<(Array<Int> const &, Int const &);
+  template Array<Bool> operator<(Array<uInt> const &, uInt const &);
+  template Array<Bool> operator<(Array<Short> const &, Short const &);
+  template Array<Bool> operator<(Array<Long> const &, Long const &);
+  template Array<Bool> operator<(Array<Float> const &, Float const &);
+  template Array<Bool> operator<(Array<Double> const &, Double const &);
+  template Array<Bool> operator<(Array<Complex> const &, Complex const &);
+  template Array<Bool> operator<(Array<DComplex> const &, DComplex const &);
+
   template Array<Bool> operator<(Array<Int> const &, Array<Int> const &);
   template Array<Bool> operator<(Array<uInt> const &, Array<uInt> const &);
   template Array<Bool> operator<(Array<Short> const &, Array<Short> const &);
@@ -250,6 +259,8 @@ namespace casa {
   template Array<Bool> operator<(Array<Complex> const &, Array<Complex> const &);
   template Array<Bool> operator<(Array<DComplex> const &, Array<DComplex> const &);
   
+  // ----------------------------------------------------------------- operator<=
+
   template Array<Bool> operator<=(Int const &, Array<Int> const &);
   template Array<Bool> operator<=(uInt const &, Array<uInt> const &);
   template Array<Bool> operator<=(Short const &, Array<Short> const &);
@@ -341,7 +352,6 @@ namespace casa {
   template Array<Bool> operator!=(DComplex const &, Array<DComplex> const &);
   
   template Array<Bool> operator!=(Array<Complex> const &, Complex const &);
-  template Array<Bool> operator<(Array<Complex> const &, Complex const &);
   template Array<Bool> operator<=(Array<Complex> const &, Complex const &);
   template Array<Bool> operator==(Array<Complex> const &, Complex const &);
   template Array<Bool> operator>(Array<Complex> const &, Complex const &);
@@ -395,7 +405,6 @@ namespace casa {
   template Array<Bool> operator!=(Array<Int> const &, Int const &);
   template Array<Bool> operator==(Array<Int> const &, Int const &);
   template Array<Bool> operator>(Array<Int> const &, Int const &);
-  template Array<Bool> operator<(Array<Int> const &, Int const &);
   template Array<Bool> operator>=(Array<Int> const &, Int const &);
   template Array<Bool> operator<=(Array<Int> const &, Int const &);
   template Array<Bool> operator==(Array<Short> const &, Short const &);
@@ -407,11 +416,9 @@ namespace casa {
   template Array<Bool> operator!=(Array<uInt> const &, uInt const &);
   template Array<Bool> operator==(Array<uInt> const &, uInt const &);
   template Array<Bool> operator>(Array<uInt> const &, uInt const &);
-  template Array<Bool> operator<(Array<uInt> const &, uInt const &);
   template Array<Bool> operator||(Array<uInt> const &, Array<uInt> const &);
   template Bool allNear(Array<Float> const &, Float const &, Double);
   template LogicalArray operator!=(Array<Float> const &, Float const &);
-  template LogicalArray operator<(Array<Float> const &, Float const &);
   template LogicalArray operator<=(Array<Float> const &, Float const &);
   template LogicalArray operator==(Array<Float> const &, Float const &);
   template LogicalArray operator>(Array<Float> const &, Float const &);
