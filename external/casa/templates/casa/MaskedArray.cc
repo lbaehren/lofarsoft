@@ -334,6 +334,38 @@ namespace casa {
   template Complex max(MaskedArray<Complex> const &);
   template DComplex max(MaskedArray<DComplex> const &);
 
+  template MaskedArray<Int> max (Int const&, MaskedArray<Int> const&);
+  template MaskedArray<uInt> max (uInt const&, MaskedArray<uInt> const&);
+  template MaskedArray<Float> max (Float const&, MaskedArray<Float> const&);
+  template MaskedArray<Double> max (Double const&, MaskedArray<Double> const&);
+  template MaskedArray<Complex> max (Complex const&, MaskedArray<Complex> const&);
+  template MaskedArray<DComplex> max (DComplex const&, MaskedArray<DComplex> const&);
+
+  template MaskedArray<int> max(Array<int> const&, MaskedArray<int> const&);
+  template MaskedArray<uInt> max(Array<uInt> const&, MaskedArray<uInt> const&);
+  template MaskedArray<Float> max(Array<Float> const&, MaskedArray<Float> const&);
+  template MaskedArray<Double> max(Array<Double> const&, MaskedArray<Double> const&);
+
+  template MaskedArray<Int> max (MaskedArray<Int> const&, Int const&);
+  template MaskedArray<uInt> max (MaskedArray<uInt> const&, uInt const&);
+  template MaskedArray<Float> max (MaskedArray<Float> const&, Float const&);
+  template MaskedArray<Double> max (MaskedArray<Double> const&, Double const&);
+
+  template MaskedArray<Int> max (MaskedArray<Int> const&, Array<Int> const&);
+  template MaskedArray<uInt> max (MaskedArray<uInt> const&, Array<uInt> const&);
+  template MaskedArray<Float> max (MaskedArray<Float> const&, Array<Float> const&);
+  template MaskedArray<Double> max (MaskedArray<Double> const&, Array<Double> const&);
+
+  template MaskedArray<Int> max (MaskedArray<Int> const&, MaskedArray<Int> const&);
+  template MaskedArray<uInt> max (MaskedArray<uInt> const&, MaskedArray<uInt> const&);
+  template MaskedArray<Float> max (MaskedArray<Float> const&, MaskedArray<Float> const&);
+  template MaskedArray<Double> max (MaskedArray<Double> const&, MaskedArray<Double> const&);
+
+  template void max (MaskedArray<Int> const&, Array<Int> const&, Array<Int> const&);
+  template void max (MaskedArray<uInt> const&, Array<uInt> const&, Array<uInt> const&);
+  template void max (MaskedArray<Float> const&, Array<Float> const&, Array<Float> const&);
+  template void max (MaskedArray<Double> const&, Array<Double> const&, Array<Double> const&);
+
   // ------------------------------------------------------------------------ min
 
   template Int min(MaskedArray<Int> const &);
@@ -347,20 +379,37 @@ namespace casa {
   template Complex min(MaskedArray<Complex> const &);
   template DComplex min(MaskedArray<DComplex> const &);
 
+  template MaskedArray<Int> min (Int const&, MaskedArray<Int> const&);
+  template MaskedArray<uInt> min (uInt const&, MaskedArray<uInt> const&);
+  template MaskedArray<Float> min (Float const&, MaskedArray<Float> const&);
+  template MaskedArray<Double> min (Double const&, MaskedArray<Double> const&);
+  template MaskedArray<Complex> min (Complex const&, MaskedArray<Complex> const&);
+  template MaskedArray<DComplex> min (DComplex const&, MaskedArray<DComplex> const&);
+
   template MaskedArray<int> min(Array<int> const&, MaskedArray<int> const&);
   template MaskedArray<uInt> min(Array<uInt> const&, MaskedArray<uInt> const&);
   template MaskedArray<Float> min(Array<Float> const&, MaskedArray<Float> const&);
   template MaskedArray<Double> min(Array<Double> const&, MaskedArray<Double> const&);
 
-  template MaskedArray<int> min(MaskedArray<int> const&, Array<int> const&);
-  template MaskedArray<uInt> min(MaskedArray<uInt> const&, Array<uInt> const&);
-  template MaskedArray<Float> min(MaskedArray<Float> const&, Array<Float> const&);
-  template MaskedArray<Double> min(MaskedArray<Double> const&, Array<Double> const&);
+  template MaskedArray<Int> min (MaskedArray<Int> const&, Int const&);
+  template MaskedArray<uInt> min (MaskedArray<uInt> const&, uInt const&);
+  template MaskedArray<Float> min (MaskedArray<Float> const&, Float const&);
+  template MaskedArray<Double> min (MaskedArray<Double> const&, Double const&);
 
-  template MaskedArray<int> min(MaskedArray<int> const&, MaskedArray<int> const&);
-  template MaskedArray<uInt> min(MaskedArray<uInt> const&, MaskedArray<uInt> const&);
-  template MaskedArray<Float> min(MaskedArray<Float> const&, MaskedArray<Float> const&);
-  template MaskedArray<Double> min(MaskedArray<Double> const&, MaskedArray<Double> const&);
+  template MaskedArray<Int> min (MaskedArray<Int> const&, Array<Int> const&);
+  template MaskedArray<uInt> min (MaskedArray<uInt> const&, Array<uInt> const&);
+  template MaskedArray<Float> min (MaskedArray<Float> const&, Array<Float> const&);
+  template MaskedArray<Double> min (MaskedArray<Double> const&, Array<Double> const&);
+
+  template MaskedArray<Int> min (MaskedArray<Int> const&, MaskedArray<Int> const&);
+  template MaskedArray<uInt> min (MaskedArray<uInt> const&, MaskedArray<uInt> const&);
+  template MaskedArray<Float> min (MaskedArray<Float> const&, MaskedArray<Float> const&);
+  template MaskedArray<Double> min (MaskedArray<Double> const&, MaskedArray<Double> const&);
+
+  template void min (MaskedArray<Int> const&, Array<Int> const&, Array<Int> const&);
+  template void min (MaskedArray<uInt> const&, Array<uInt> const&, Array<uInt> const&);
+  template void min (MaskedArray<Float> const&, Array<Float> const&, Array<Float> const&);
+  template void min (MaskedArray<Double> const&, Array<Double> const&, Array<Double> const&);
 
   // --------------------------------------------------------------------- minMax
 

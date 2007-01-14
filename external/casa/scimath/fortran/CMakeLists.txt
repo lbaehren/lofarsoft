@@ -1,6 +1,6 @@
 project (scimath_f Fortran)
 
-add_library (
+add_library (scimath_f
 #  ADDGRD.f
   abshis.f
   absmax.f

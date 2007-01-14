@@ -73,6 +73,19 @@ namespace casa {
   template void convertArray(Array<uShort> &, Array<Float> const &);
   template void convertArray(Array<uShort> &, Array<Double> const &);
 
+  // --------------------------------------------------------------- crossProduct
+
+  template Vector<Int> crossProduct(Vector<Int> const&, Vector<Int> const&);
+  template Vector<uInt> crossProduct(Vector<uInt> const&, Vector<uInt> const&);
+  template Vector<Short> crossProduct(Vector<Short> const&, Vector<Short> const&);
+  template Vector<uShort> crossProduct(Vector<uShort> const&, Vector<uShort> const&);
+  template Vector<Long> crossProduct(Vector<Long> const&, Vector<Long> const&);
+  template Vector<uLong> crossProduct(Vector<uLong> const&, Vector<uLong> const&);
+  template Vector<Float> crossProduct(Vector<Float> const&, Vector<Float> const&);
+  template Vector<Double> crossProduct(Vector<Double> const&, Vector<Double> const&);
+  template Vector<Complex> crossProduct(Vector<Complex> const&, Vector<Complex> const&);
+  template Vector<DComplex> crossProduct(Vector<DComplex> const&, Vector<DComplex> const&);
+
   // -------------------------------------------------------------- directProduct
 
   template Matrix<Int> directProduct(Matrix<Int> const &, Matrix<Int> const &);
@@ -85,6 +98,98 @@ namespace casa {
   template Matrix<Double> directProduct(Matrix<Double> const &, Matrix<Double> const &);
   template Matrix<Complex> directProduct(Matrix<Complex> const &, Matrix<Complex> const &);
   template Matrix<DComplex> directProduct(Matrix<DComplex> const &, Matrix<DComplex> const &);
+
+  // --------------------------------------------------------------- innerProduct
+  
+  template Int innerProduct(Vector<Int> const &, Vector<Int> const &);
+  template uInt innerProduct(Vector<uInt> const &, Vector<uInt> const &);
+  template Short innerProduct(Vector<Short> const &, Vector<Short> const &);
+  template uShort innerProduct(Vector<uShort> const &, Vector<uShort> const &);
+  template Float innerProduct(Vector<Float> const &, Vector<Float> const &);
+  template Double innerProduct(Vector<Double> const &, Vector<Double> const &);
+  
+  // ------------------------------------------------------------------------ max
+
+  template void max (Array<Int> &, Array<Int> const &, Int const &);
+  template void max (Array<uInt> &, Array<uInt> const &, uInt const &);
+  template void max (Array<Short> &, Array<Short> const &, Short const &);
+  template void max (Array<uShort> &, Array<uShort> const &, uShort const &);
+  template void max (Array<Long> &, Array<Long> const &, Long const &);
+  template void max (Array<uLong> &, Array<uLong> const &, uLong const &);
+  template void max (Array<Float> &, Array<Float> const &, Float const &);
+  template void max (Array<Double> &, Array<Double> const &, Double const &);
+  template void max (Array<Complex> &, Array<Complex> const &, Complex const &);
+  template void max (Array<DComplex> &, Array<DComplex> const &, DComplex const &);
+
+  template void max (Array<Int> &, Array<Int> const &, Array<Int> const &);
+  template void max (Array<Float> &, Array<Float> const &, Array<Float> const &);
+  template void max (Array<Double> &, Array<Double> const &, Array<Double> const &);
+  template void max (Array<Complex> &, Array<Complex> const &, Array<Complex> const &);
+  template void max (Array<DComplex> &, Array<DComplex> const &, Array<DComplex> const &);
+
+  template Int max (Array<Int> const &);
+  template uInt max (Array<uInt> const &);
+  template Short max(Array<Short> const &);
+  template uShort max(Array<uShort> const &);
+  template Long max(Array<Long> const &);
+  template uLong max(Array<uLong> const &);
+  template Float max (Array<Float> const &);
+  template Double max (Array<Double> const &);
+  template Complex max (Array<Complex> const &);
+  template DComplex max (Array<DComplex> const &);
+  template Char max(Array<Char> const &);
+  template uChar max(Array<uChar> const &);
+
+  template Array<Int> max(Array<Int> const &, Int const &);
+  template Array<Float> max(Array<Float> const &, Float const &);
+  template Array<Double> max(Array<Double> const &, Double const &);
+  template Array<Complex> max(Array<Complex> const &, Complex const &);
+  template Array<DComplex> max(Array<DComplex> const &, DComplex const &);
+
+  template Array<Int> max(Array<Int> const &, Array<Int> const &);
+  template Array<Float> max(Array<Float> const &, Array<Float> const &);
+  template Array<Double> max(Array<Double> const &, Array<Double> const &);
+  template Array<Complex> max(Array<Complex> const &, Array<Complex> const &);
+  template Array<DComplex> max(Array<DComplex> const &, Array<DComplex> const &);
+
+  // ------------------------------------------------------------------------ min
+
+  template void min (Array<Int> &, Array<Int> const &, Int const &);
+  template void min (Array<Float> &, Array<Float> const &, Float const &);
+  template void min (Array<Double> &, Array<Double> const &, Double const &);
+  template void min (Array<Complex> &, Array<Complex> const &, Complex const &);
+  template void min (Array<DComplex> &, Array<DComplex> const &, DComplex const &);
+
+  template void min (Array<Int> &, Array<Int> const &, Array<Int> const &);
+  template void min (Array<Float> &, Array<Float> const &, Array<Float> const &);
+  template void min (Array<Double> &, Array<Double> const &, Array<Double> const &);
+  template void min (Array<Complex> &, Array<Complex> const &, Array<Complex> const &);
+  template void min (Array<DComplex> &, Array<DComplex> const &, Array<DComplex> const &);
+
+  template Int min (Array<Int> const &);
+  template uInt min (Array<uInt> const &);
+  template Short min(Array<Short> const &);
+  template uShort min (Array<uShort> const &);
+  template Long min (Array<Long> const &);
+  template uLong min(Array<uLong> const &);
+  template Float min (Array<Float> const &);
+  template Double min (Array<Double> const &);
+  template Complex min (Array<Complex> const &);
+  template DComplex min (Array<DComplex> const &);
+  template Char min (Array<Char> const &);
+  template uChar min (Array<uChar> const &);
+
+  template Array<Int> min (Array<Int> const &, Int const &);
+  template Array<Float> min (Array<Float> const &, Float const &);
+  template Array<Double> min (Array<Double> const &, Double const &);
+  template Array<Complex> min (Array<Complex> const &, Complex const &);
+  template Array<DComplex> min (Array<DComplex> const &, DComplex const &);
+
+  template Array<Int> min (Array<Int> const &, Array<Int> const &);
+  template Array<Float> min (Array<Float> const &, Array<Float> const &);
+  template Array<Double> min (Array<Double> const &, Array<Double> const &);
+  template Array<Complex> min (Array<Complex> const &, Array<Complex> const &);
+  template Array<DComplex> min (Array<DComplex> const &, Array<DComplex> const &);
 
   // -------------------------------------------------------------------- product
   
@@ -132,4 +237,14 @@ namespace casa {
   template Matrix<Complex> product(Vector<Complex> const &, Matrix<Complex> const &);
   template Matrix<DComplex> product(Vector<DComplex> const &, Matrix<DComplex> const &);
 
+  // ------------------------------------------------------------------ transpose
+
+  template Matrix<Bool> transpose(Matrix<Bool> const &);
+  template Matrix<Int> transpose(Matrix<Int> const &);
+  template Matrix<uInt> transpose(Matrix<uInt> const &);
+  template Matrix<Short> transpose(Matrix<Short> const &);
+  template Matrix<Float> transpose(Matrix<Float> const &);
+  template Matrix<Double> transpose(Matrix<Double> const &);
+  template Matrix<Complex> transpose(Matrix<Complex> const &);
+  template Matrix<DComplex> transpose(Matrix<DComplex> const &);
 }

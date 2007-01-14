@@ -12,6 +12,7 @@
 #include <casa/BasicSL/String.h>
 #include <casa/BasicMath/Random.h>
 #include <casa/Containers/Block.h>
+#include <casa/Containers/Dlist.h>
 #include <casa/Containers/IterError.h>
 #include <casa/Containers/List.h>
 #include <casa/Containers/OrderedMap.h>
@@ -532,67 +533,18 @@ namespace casa {
   
   template <class Qtype> class Quantum;
   template <class T> class Array;
-  template uInt Register(Quantum<Array<Complex> > const *);
   template <class Qtype> class Quantum;
   template <class T> class Array;
-  template uInt Register(Quantum<Array<DComplex> > const *);
   template <class Qtype> class Quantum;
   template <class T> class Vector;
-  template uInt Register(Quantum<Vector<Complex> > const *);
   template <class Qtype> class Quantum;
   template <class T> class Vector;
-  template uInt Register(Quantum<Vector<DComplex> > const *);
   template <class Qtype> class Quantum;
-  template uInt Register(Quantum<Complex> const *);
   template <class Qtype> class Quantum;
-  template uInt Register(Quantum<DComplex> const *);
-  template uInt Register(Complex const *);
-  template uInt Register(DComplex const *);
-  template uInt Register(ListNotice<void *> const *);
-  template uInt Register(OrderedMapNotice<String, Block<IPosition> > const *);
-  template uInt Register(OrderedMapNotice<String, Int> const *);
-  template uInt Register(String const *);
-  template uInt Register(ListNotice<Param> const *);
-  template uInt Register(ListNotice<CountedPtr<SysEventTargetInfo> > const *);
-  template uInt Register(ListNotice<Int> const *);
-  template uInt Register(ListNotice<uInt> const *);
-  template uInt Register(ListNotice<Long> const *);
-  template uInt Register(ListNotice<uLong> const *);
-  template uInt Register(OrderedMapNotice<Int, Array<Float> > const *);
-  template uInt Register(OrderedMapNotice<Int, Vector<Float> > const *);
-  template uInt Register(OrderedMapNotice<Int, Int> const *);
-  template uInt Register(RecordNotice const *);
-  template uInt Register(SysEventTargetInfo const *);
-  template uInt Register(MVBaseline const *);
-  template uInt Register(MVDirection const *);
-  template uInt Register(MVDoppler const *);
-  template uInt Register(MVDouble const *);
-  template uInt Register(MVEarthMagnetic const *);
-  template uInt Register(MVEpoch const *);
-  template uInt Register(MVFrequency const *);
-  template uInt Register(MVPosition const *);
-  template uInt Register(MVRadialVelocity const *);
-  template uInt Register(MVuvw const *);
   template <class Qtype> class Quantum;
   template <class T> class Array;
-  template uInt Register(Quantum<Array<Double> > const *);
-  template uInt Register(Quantum<Array<Float> > const *);
-  template uInt Register(Quantum<Array<Int> > const *);
   template <class T> class Matrix;
-  template uInt Register(Quantum<Matrix<Double> > const *);
   template <class T> class Vector;
-  template uInt Register(Quantum<Vector<Double> > const *);
-  template uInt Register(Quantum<Vector<Float> > const *);
-  template uInt Register(Quantum<Vector<Int> > const *);
-  template uInt Register(Quantum<Double> const *);
-  template uInt Register(Quantum<Float> const *);
-  template uInt Register(Quantum<Int> const *);
-  template uInt Register(Double const *);
-  template uInt Register(Float const *);
-  template uInt Register(Int const *);
-  template uInt Register(Long const *);
-  template uInt Register(lDouble const *);
-  template uInt Register(uInt const *);
 
   template class Sequence<Int>;
   template class Sequence<uInt>;
@@ -743,4 +695,92 @@ namespace casa {
   template void objset<Matrix<CountedPtr<Random> > >(Matrix<CountedPtr<Random> >*, Matrix<CountedPtr<Random> >, uInt, uInt);
   
   template void objmove<String>(String*, String const*, uInt);
+  
+  // ------------------------------------------------------------------- Register
+  
+  template uInt Register(Int const *);
+  template uInt Register(uInt const *);
+  template uInt Register(Short const *);
+  template uInt Register(uShort const *);
+  template uInt Register(Long const *);
+  template uInt Register(uLong const *);
+  template uInt Register(Float const *);
+  template uInt Register(Double const *);
+  template uInt Register(lDouble const *);
+  template uInt Register(Complex const *);
+  template uInt Register(DComplex const *);
+  template uInt Register(String const *);
+  template uInt Register(RecordNotice const *);
+  template uInt Register(SysEventTargetInfo const *);
+  template uInt Register(MVBaseline const *);
+  template uInt Register(MVDirection const *);
+  template uInt Register(MVDoppler const *);
+  template uInt Register(MVDouble const *);
+  template uInt Register(MVEarthMagnetic const *);
+  template uInt Register(MVEpoch const *);
+  template uInt Register(MVFrequency const *);
+  template uInt Register(MVPosition const *);
+  template uInt Register(MVRadialVelocity const *);
+  template uInt Register(MVuvw const *);
+
+  template uInt Register (Quantum<Int> const *);
+  template uInt Register (Quantum<uInt> const *);
+  template uInt Register (Quantum<Short> const *);
+  template uInt Register (Quantum<uShort> const *);
+  template uInt Register (Quantum<Float> const *);
+  template uInt Register (Quantum<Double> const *);
+  template uInt Register (Quantum<Complex> const *);
+  template uInt Register (Quantum<DComplex> const *);
+
+  template uInt Register (Quantum<Array<Int> > const *);
+  template uInt Register (Quantum<Array<uInt> > const *);
+  template uInt Register (Quantum<Array<Short> > const *);
+  template uInt Register (Quantum<Array<uShort> > const *);
+  template uInt Register (Quantum<Array<Float> > const *);
+  template uInt Register (Quantum<Array<Double> > const *);
+  template uInt Register (Quantum<Array<Complex> > const *);
+  template uInt Register (Quantum<Array<DComplex> > const *);
+
+  template uInt Register (Quantum<Matrix<Int> > const *);
+  template uInt Register (Quantum<Matrix<uInt> > const *);
+  template uInt Register (Quantum<Matrix<Short> > const *);
+  template uInt Register (Quantum<Matrix<uShort> > const *);
+  template uInt Register (Quantum<Matrix<Float> > const *);
+  template uInt Register (Quantum<Matrix<Double> > const *);
+  template uInt Register (Quantum<Matrix<Complex> > const *);
+  template uInt Register (Quantum<Matrix<DComplex> > const *);
+
+  template uInt Register (Quantum<Vector<Int> > const *);
+  template uInt Register (Quantum<Vector<uInt> > const *);
+  template uInt Register (Quantum<Vector<Short> > const *);
+  template uInt Register (Quantum<Vector<uShort> > const *);
+  template uInt Register (Quantum<Vector<Float> > const *);
+  template uInt Register (Quantum<Vector<Double> > const *);
+  template uInt Register (Quantum<Vector<Complex> > const *);
+  template uInt Register (Quantum<Vector<DComplex> > const *);
+  
+  template uInt Register (ListNotice<void *> const *);
+  template uInt Register (ListNotice<Int> const *);
+  template uInt Register (ListNotice<uInt> const *);
+  template uInt Register (ListNotice<Short> const *);
+  template uInt Register (ListNotice<uShort> const *);
+  template uInt Register (ListNotice<Long> const *);
+  template uInt Register (ListNotice<uLong> const *);
+  template uInt Register (ListNotice<Float> const *);
+  template uInt Register (ListNotice<Double> const *);
+  template uInt Register (ListNotice<Param> const *);
+  template uInt Register (ListNotice<CountedPtr<SysEventTargetInfo> > const *);
+  template uInt Register (ListNotice<Dlist<int> > const*);
+  template uInt Register (ListNotice<List<int> > const*);
+  template uInt Register (ListNotice<OrderedPair<int, int> > const*);
+  template uInt Register (ListNotice<OrderedPair<int, Array<float> > > const*);
+  template uInt Register (ListNotice<OrderedPair<String, int> > const*);
+  template uInt Register (ListNotice<OrderedPair<String, OrderedPair<String, uInt> > > const*);
+
+  template uInt Register (OrderedMapNotice<Int, Array<Float> > const *);
+  template uInt Register (OrderedMapNotice<Int, Vector<Float> > const *);
+  template uInt Register (OrderedMapNotice<Int, Int> const *);
+  template uInt Register (OrderedMapNotice<String, Block<IPosition> > const *);
+  template uInt Register (OrderedMapNotice<String, Int> const *);
+
 }

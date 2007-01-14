@@ -36,7 +36,7 @@
 #include <casa/namespace.h>
 //template<class key,class value> void print(const ListMap<key,value> &);
 
-main() {
+int main() {
   ListMap<int,int> map(-1);
   ListMap<String,OrderedPair<String,uInt> > smap(OrderedPair<String,uInt>("dummy",0));
   ListMap<String,int> amap(-1,ListMap<String,int>::Append);

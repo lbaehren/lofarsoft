@@ -1,6 +1,6 @@
 project (CASA)
 
 subdirs (
-#  fortran
+  fortran
   implement
   )

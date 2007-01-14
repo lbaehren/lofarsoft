@@ -26,13 +26,13 @@ MeasuresProxy::~MeasuresProxy() {
 }
 
 String MeasuresProxy::getMeasureType(const Record &in) {
-  Bool b;
   String out;
   if (in.isDefined("type")) {
     out= "?";//b = GlishArray(in.get("type")).get(out);
   } else {
     out = "none";
   }
+  return out;
 }
 
 Bool MeasuresProxy::doFrame(const MeasureHolder &in) {

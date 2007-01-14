@@ -109,7 +109,7 @@ ConstDlistIter<t> &ConstDlistIter<t>::operator=(const ConstDlistIter<t> *other) 
 extern int DlistIter_deprecated_flag;
 
 template<class t>
-DlistIter<t>::DlistIter(Dlist<t> &st) : ListIter<t>(st), ConstDlistIter<t>(st), ConstListIter<t>(st) {
+DlistIter<t>::DlistIter(Dlist<t> &st) : ConstListIter<t>(st), ListIter<t>(st), ConstDlistIter<t>(st) {
     if ( ! DlistIter_deprecated_flag ) {
 	cerr << "ERROR: DlistIter<t> is deprecated, ListIter<t> should be used instead" << endl;
 	DlistIter_deprecated_flag++;
@@ -117,7 +117,7 @@ DlistIter<t>::DlistIter(Dlist<t> &st) : ListIter<t>(st), ConstDlistIter<t>(st), 
 }
 
 template<class t>
-DlistIter<t>::DlistIter(Dlist<t> *st, Bool OWN) : ListIter<t>(st,OWN), ConstDlistIter<t>(st), ConstListIter<t>(st) {
+DlistIter<t>::DlistIter(Dlist<t> *st, Bool OWN) : ConstListIter<t>(st), ListIter<t>(st,OWN), ConstDlistIter<t>(st) {
     if ( ! DlistIter_deprecated_flag ) {
 	cerr << "ERROR: DlistIter<t> is deprecated, ListIter<t> should be used instead" << endl;
 	DlistIter_deprecated_flag++;
@@ -126,8 +126,7 @@ DlistIter<t>::DlistIter(Dlist<t> *st, Bool OWN) : ListIter<t>(st,OWN), ConstDlis
 
 
 template<class t>
-DlistIter<t>::DlistIter(const DlistIter<t> *other) : ListIter<t>(other), ConstDlistIter<t>(other),
-                                         ConstListIter<t>(other) {
+DlistIter<t>::DlistIter(const DlistIter<t> *other) : ConstListIter<t>(other), ListIter<t>(other), ConstDlistIter<t>(other)  {
     if ( ! DlistIter_deprecated_flag ) {
 	cerr << "ERROR: DlistIter<t> is deprecated, ListIter<t> should be used instead" << endl;
 	DlistIter_deprecated_flag++;
@@ -135,9 +134,8 @@ DlistIter<t>::DlistIter(const DlistIter<t> *other) : ListIter<t>(other), ConstDl
 }
 
 template<class t>
-DlistIter<t>::DlistIter(const DlistIter<t> &other) : ListIter<t>(other), 
-                                         ConstDlistIter<t>(other), 
-                                         ConstListIter<t>(other) {
+DlistIter<t>::DlistIter(const DlistIter<t> &other) : ConstListIter<t>(other), ListIter<t>(other), 
+                                         ConstDlistIter<t>(other) {
     if ( ! DlistIter_deprecated_flag ) {
 	cerr << "ERROR: DlistIter<t> is deprecated, ListIter<t> should be used instead" << endl;
 	DlistIter_deprecated_flag++;
@@ -145,7 +143,7 @@ DlistIter<t>::DlistIter(const DlistIter<t> &other) : ListIter<t>(other),
 }
 
 template<class t>
-DlistIter<t>::DlistIter() : ListIter<t>(), ConstDlistIter<t>(), ConstListIter<t>() {
+DlistIter<t>::DlistIter() : ConstListIter<t>(), ListIter<t>(), ConstDlistIter<t>() {
     if ( ! DlistIter_deprecated_flag ) {
 	cerr << "ERROR: DlistIter<t> is deprecated, ListIter<t> should be used instead" << endl;
 	DlistIter_deprecated_flag++;

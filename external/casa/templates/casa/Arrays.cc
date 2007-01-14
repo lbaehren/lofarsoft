@@ -2,7 +2,6 @@
 // include of header files 
 
 #include <casa/Arrays/Array.h>
-#include <casa/Arrays/MaskedArray.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Slicer.h>
 #include <casa/Arrays/Vector.h>
@@ -30,7 +29,6 @@
 #include <casa/Arrays/ArrayUtil.cc>
 #include <casa/Arrays/Cube.cc>
 #include <casa/Arrays/MaskArrMath.cc>
-#include <casa/Arrays/MaskedArray.cc>
 #include <casa/Arrays/Matrix.cc>
 #include <casa/Arrays/MatrixIter.cc>
 #include <casa/Arrays/MatrixMath.cc>
@@ -475,8 +473,6 @@ namespace casa {
   template Array<Complex> sin(Array<Complex> const &);
   template Array<Complex> sinh(Array<Complex> const &);
   template Array<Complex> sqrt(Array<Complex> const &);
-  template Complex max(Array<Complex> const &);
-  template Complex min(Array<Complex> const &);
   template void minMax(Complex &, Complex &, Array<Complex> const &);
   template void operator*=(Array<Complex> &, Array<Complex> const &);
   template void operator*=(Array<Complex> &, Complex const &);
@@ -492,10 +488,6 @@ namespace casa {
   template Array<DComplex> exp(Array<DComplex> const &);
   template Array<DComplex> log(Array<DComplex> const &);
   template Array<DComplex> log10(Array<DComplex> const &);
-  template Array<DComplex> max(Array<DComplex> const &, Array<DComplex> const &);
-  template Array<DComplex> max(Array<DComplex> const &, DComplex const &);
-  template Array<DComplex> min(Array<DComplex> const &, Array<DComplex> const &);
-  template Array<DComplex> min(Array<DComplex> const &, DComplex const &);
   template Array<DComplex> operator*(Array<DComplex> const &, Array<DComplex> const &);
   template Array<DComplex> operator*(Array<DComplex> const &, DComplex const &);
   template Array<DComplex> operator*(DComplex const &, Array<DComplex> const &);
@@ -512,14 +504,8 @@ namespace casa {
   template Array<DComplex> sin(Array<DComplex> const &);
   template Array<DComplex> sinh(Array<DComplex> const &);
   template Array<DComplex> sqrt(Array<DComplex> const &);
-  template DComplex max(Array<DComplex> const &);
-  template DComplex min(Array<DComplex> const &);
   template DComplex sum(Array<DComplex> const &);
   template Complex sum(Array<Complex> const &);
-  template void max(Array<DComplex> &, Array<DComplex> const &, Array<DComplex> const &);
-  template void max(Array<DComplex> &, Array<DComplex> const &, DComplex const &);
-  template void min(Array<DComplex> &, Array<DComplex> const &, Array<DComplex> const &);
-  template void min(Array<DComplex> &, Array<DComplex> const &, DComplex const &);
   template void minMax(DComplex &, DComplex &, Array<DComplex> const &);
   template void operator*=(Array<DComplex> &, Array<DComplex> const &);
   template void operator*=(Array<DComplex> &, DComplex const &);
@@ -553,10 +539,6 @@ namespace casa {
   template Array<Double> fmod(Double const &, Array<Double> const &);
   template Array<Double> log(Array<Double> const &);
   template Array<Double> log10(Array<Double> const &);
-  template Array<Double> max(Array<Double> const &, Array<Double> const &);
-  template Array<Double> max(Array<Double> const &, Double const &);
-  template Array<Double> min(Array<Double> const &, Array<Double> const &);
-  template Array<Double> min(Array<Double> const &, Double const &);
   template Array<Double> operator*(Array<Double> const &, Array<Double> const &);
   template Array<Double> operator*(Array<Double> const &, Double const &);
   template Array<Double> operator*(Double const &, Array<Double> const &);
@@ -578,11 +560,9 @@ namespace casa {
   template Double avdev(Array<Double> const &);
   template Double avdev(Array<Double> const &, Double);
   template Double fractile(Array<Double> const &, Float, Bool, Bool);
-  template Double max(Array<Double> const &);
   template Double mean(Array<Double> const &);
   template Double median(Array<Double> const &, Bool);
   template Double median(Array<Double> const &, Bool, Bool, Bool);
-  template Double min(Array<Double> const &);
   template Double stddev(Array<Double> const &);
   template Double sum(Array<Double> const &);
   template Double variance(Array<Double> const &);
@@ -590,10 +570,6 @@ namespace casa {
   template void indgen(Array<Double> &);
   template void indgen(Array<Double> &, Double);
   template void indgen(Array<Double> &, Double, Double);
-  template void max(Array<Double> &, Array<Double> const &, Array<Double> const &);
-  template void max(Array<Double> &, Array<Double> const &, Double const &);
-  template void min(Array<Double> &, Array<Double> const &, Array<Double> const &);
-  template void min(Array<Double> &, Array<Double> const &, Double const &);
   template void minMax(Double &, Double &, Array<Double> const &);
   template void minMax(Double &, Double &, IPosition &, IPosition &, Array<Double> const &);
   template void minMax(Double &, Double &, IPosition &, IPosition &, Array<Double> const &, Array<Bool> const &);
@@ -618,8 +594,6 @@ namespace casa {
   template Array<Float> fmod(Array<Float> const &, Array<Float> const &);
   template Array<Float> log(Array<Float> const &);
   template Array<Float> log10(Array<Float> const &);
-  template Array<Float> max(Array<Float> const &, Array<Float> const &);
-  template Array<Float> min(Array<Float> const &, Array<Float> const &);
   template Array<Float> operator*(Array<Float> const &, Array<Float> const &);
   template Array<Float> operator*(Array<Float> const &, Float const &);
   template Array<Float> operator*(Float const &, Array<Float> const &);
@@ -638,11 +612,9 @@ namespace casa {
   template Array<Float> tan(Array<Float> const &);
   template Array<Float> tanh(Array<Float> const &);
   template Float fractile(Array<Float> const &, Float, Bool, Bool);
-  template Float max(Array<Float> const &);
   template Float mean(Array<Float> const &);
   template Float median(Array<Float> const &, Bool);
   template Float median(Array<Float> const &, Bool, Bool, Bool);
-  template Float min(Array<Float> const &);
   template Float stddev(Array<Float> const &);
   template Float sum(Array<Float> const &);
   template Float variance(Array<Float> const &);
@@ -650,10 +622,6 @@ namespace casa {
   template void indgen(Array<Float> &);
   template void indgen(Array<Float> &, Float);
   template void indgen(Array<Float> &, Float, Float);
-  template void max(Array<Float> &, Array<Float> const &, Array<Float> const &);
-  template void max(Array<Float> &, Array<Float> const &, Float const &);
-  template void min(Array<Float> &, Array<Float> const &, Array<Float> const &);
-  template void min(Array<Float> &, Array<Float> const &, Float const &);
   template void minMax(Float &, Float &, Array<Float> const &);
   template void minMax(Float &, Float &, IPosition &, IPosition &, Array<Float> const &);
   template void minMax(Float &, Float &, IPosition &, IPosition &, Array<Float> const &, Array<Bool> const &);
@@ -667,8 +635,6 @@ namespace casa {
   template void operator/=(Array<Float> &, Array<Float> const &);
   template void operator/=(Array<Float> &, Float const &);
   template Array<Int> abs(Array<Int> const &);
-  template Array<Int> max(Array<Int> const &, Array<Int> const &);
-  template Array<Int> min(Array<Int> const &, Array<Int> const &);
   template Array<Int> operator*(Array<Int> const &, Array<Int> const &);
   template Array<Int> operator*(Array<Int> const &, Int const &);
   template Array<Int> operator*(Int const &, Array<Int> const &);
@@ -676,14 +642,10 @@ namespace casa {
   template Array<Int> operator+(Array<Int> const &, Array<Int> const &);
   template Array<Int> operator-(Array<Int> const &);
   template Array<Int> operator/(Array<Int> const &, Int const &);
-  template Int max(Array<Int> const &);
-  template Int min(Array<Int> const &);
   template Int sum(Array<Int> const &);
   template void indgen(Array<Int> &);
   template void indgen(Array<Int> &, Int);
   template void indgen(Array<Int> &, Int, Int);
-  template void max(Array<Int> &, Array<Int> const &, Array<Int> const &);
-  template void min(Array<Int> &, Array<Int> const &, Array<Int> const &);
   template void minMax(Int &, Int &, Array<Int> const &);
   template void operator*=(Array<Int> &, Array<Int> const &);
   template void operator*=(Array<Int> &, Int const &);
@@ -695,16 +657,12 @@ namespace casa {
   template void operator/=(Array<Int> &, Int const &);
   template Array<uChar> min<uChar>(Array<uChar> const &, Array<uChar> const &);
   template void min<uChar>(Array<uChar> &, Array<uChar> const &, Array<uChar> const &);
-  template uChar max(Array<uChar> const &);
-  template uChar min(Array<uChar> const &);
   template void indgen(Array<uChar> &);
   template void indgen(Array<uChar> &, uChar, uChar);
   template void minMax(uChar &, uChar &, Array<uChar> const &);
   template Array<uInt> operator*(Array<uInt> const &, uInt const &);
   template Array<uInt> operator-(Array<uInt> const &, uInt const &);
   template Array<uInt> operator/(Array<uInt> const &, uInt const &);
-  template uInt max(Array<uInt> const &);
-  template uInt min(Array<uInt> const &);
   template uInt sum(Array<uInt> const &);
   template void indgen(Array<uInt> &);
   template void indgen(Array<uInt> &, uInt);
@@ -715,34 +673,24 @@ namespace casa {
   template void operator-=(Array<uInt> &, uInt const &);
   template void operator/=(Array<uInt> &, uInt const &);
 // 1130 casa/Arrays/ArrayMath.cc casa/Arrays/Array.h 
-  template Char max(Array<Char> const &);
-  template Char min(Array<Char> const &);
   template void indgen(Array<Char> &);
   template void indgen(Array<Char> &, Char, Char);
   template void minMax(Char &, Char &, Array<Char> const &);
 // 1140 casa/Arrays/ArrayMath.cc casa/Arrays/Array.h 
-  template Long max(Array<Long> const &);
-  template Long min(Array<Long> const &);
   template void indgen(Array<Long> &);
   template void indgen(Array<Long> &, Long, Long);
   template void minMax(Long &, Long &, Array<Long> const &);
 // 1150 casa/Arrays/ArrayMath.cc casa/Arrays/Array.h 
-  template Short max(Array<Short> const &);
-  template Short min(Array<Short> const &);
   template void indgen(Array<Short> &);
   template void indgen(Array<Short> &, Short, Short);
   template void minMax(Short &, Short &, Array<Short> const &);
   template void operator+=(Array<Short> &, Short const &);
   template void operator-=(Array<Short> &, Short const &);
 // 1160 casa/Arrays/ArrayMath.cc casa/Arrays/Array.h 
-  template uLong max(Array<uLong> const &);
-  template uLong min(Array<uLong> const &);
   template void indgen(Array<uLong> &);
   template void indgen(Array<uLong> &, uLong, uLong);
   template void minMax(uLong &, uLong &, Array<uLong> const &);
 // 1170 casa/Arrays/ArrayMath.cc casa/Arrays/Array.h 
-  template uShort max(Array<uShort> const &);
-  template uShort min(Array<uShort> const &);
   template void indgen(Array<uShort> &);
   template void indgen(Array<uShort> &, uShort, uShort);
   template void minMax(uShort &, uShort &, Array<uShort> const &);
@@ -810,18 +758,6 @@ namespace casa {
   template class Matrix<uLong>;
   template class Matrix<uShort>;
 
-  template Matrix<Complex> transpose(Matrix<Complex> const &);
-  template Matrix<DComplex> transpose(Matrix<DComplex> const &);
-  template Double innerProduct(Vector<Double> const &, Vector<Double> const &);
-  template Float innerProduct(Vector<Float> const &, Vector<Float> const &);
-  template Int innerProduct(Vector<Int> const &, Vector<Int> const &);
-  template Matrix<Bool> transpose(Matrix<Bool> const &);
-  template Matrix<Double> transpose(Matrix<Double> const &);
-  template Matrix<Float> transpose(Matrix<Float> const &);
-  template Matrix<Int> transpose(Matrix<Int> const &);
-  template Vector<Double> product(Matrix<Double> const &, Vector<Double> const &);
-  template Vector<Float> product(Matrix<Float> const &, Vector<Float> const &);
-
   template class Vector<Slicer>;
   template class Vector<Vector<Complex> >;
   template class Vector<MVDirection>;
@@ -885,19 +821,4 @@ namespace casa {
   template class VectorIterator<uShort>;
   template class VectorIterator<Int>;
 
-  template Vector<Int> crossProduct(Vector<Int> const&, Vector<Int> const&);
-  template Vector<uInt> crossProduct(Vector<uInt> const&, Vector<uInt> const&);
-  template Vector<Short> crossProduct(Vector<Short> const&, Vector<Short> const&);
-  template Vector<uShort> crossProduct(Vector<uShort> const&, Vector<uShort> const&);
-  template Vector<Long> crossProduct(Vector<Long> const&, Vector<Long> const&);
-  template Vector<uLong> crossProduct(Vector<uLong> const&, Vector<uLong> const&);
-  template Vector<Float> crossProduct(Vector<Float> const&, Vector<Float> const&);
-  template Vector<Double> crossProduct(Vector<Double> const&, Vector<Double> const&);
-  template Vector<Complex> crossProduct(Vector<Complex> const&, Vector<Complex> const&);
-  template Vector<DComplex> crossProduct(Vector<DComplex> const&, Vector<DComplex> const&);
-
-  template Matrix<Int> product(Vector<Int> const&, Matrix<Int> const&);
-  template Matrix<uInt> product(Vector<uInt> const&, Matrix<uInt> const&);
-  template Matrix<Short> product(Vector<Short> const&, Matrix<Short> const&);
-  template Matrix<uShort> product(Vector<uShort> const&, Matrix<uShort> const&);
 }
