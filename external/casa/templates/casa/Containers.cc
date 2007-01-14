@@ -349,7 +349,7 @@ namespace casa {
   template ostream &operator<< (ostream &, const Map<Int, Int>&);
   template ostream &operator<< (ostream &, const Map<String, Int>&);
   template ostream &operator<< (ostream &, const Map<Int, Array<Float> >&);
-//  template ostream &operator<< (ostream &, Map<String, OrderedPair<String, uInt> > const&);
+//   template ostream &operator<< (ostream &, Map<String, OrderedPair<String, uInt> > const&);
 
   // ============================================================================
   //
