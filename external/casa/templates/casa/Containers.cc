@@ -343,8 +343,8 @@ namespace casa {
 
   // ---------------------------------------------------------------------- Queue
 
-  template class Queue<Int>;
   template class Queue<LogMessage>;
+  template class Queue<Int>;
 
   // ----------------------------------------------------------- RORecordFieldPtr
   // ------------------------------------------------------------- RecordFieldPtr
@@ -482,6 +482,7 @@ namespace casa {
   // tObjectPool
   template class ObjectPool <Vector<Double>, uInt>;
 
-  // tOrdMap
+  // tPoolStack
+  template class PoolStack<Vector<Double>, uInt>;
 
 }
