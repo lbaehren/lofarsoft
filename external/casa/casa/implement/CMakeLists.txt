@@ -287,5 +287,6 @@ add_library (casa
   ../../templates/casa/Quanta.cc
   ../../templates/casa/System.cc
   ../../templates/casa/Utilities.cc
+  ../../templates/casa/Register.cc
 )
 

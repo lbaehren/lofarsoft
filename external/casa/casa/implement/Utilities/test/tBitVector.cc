@@ -30,6 +30,7 @@
 #include <casa/iostream.h>
 
 #include <casa/namespace.h>
+
 void doIt()
 {
     uInt maxbits=35;
@@ -140,7 +141,7 @@ void doIt()
 }
 
 
-main () {
+int main () {
     try {
 	doIt();
     } catch (AipsError x) {

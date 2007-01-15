@@ -30,7 +30,8 @@
 #include <casa/iostream.h>
 
 #include <casa/namespace.h>
-main() {
+
+int main() {
   
   foo *ap = 0;
   bar *bp = 0;

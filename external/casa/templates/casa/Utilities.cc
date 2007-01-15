@@ -47,10 +47,15 @@
 #include <casa/Utilities/DefaultValue.h>
 #include <casa/Utilities/Fallible.h>
 #include <casa/Utilities/Regex.h>
-
+#include <casa/Utilities/Register.h>
+#include <casa/Utilities/test/tCountedPtr.h>
 
 // include of implementation files
 
+#include <casa/Arrays/Array.cc>
+#include <casa/Arrays/ArrayIO.cc>
+#include <casa/Arrays/MaskedArray.cc>
+#include <casa/Arrays/Vector.cc>
 #include <casa/Utilities/Assert.cc>
 #include <casa/Utilities/BinarySearch.cc>
 #include <casa/Utilities/COWPtr.cc>
@@ -60,20 +65,31 @@
 #include <casa/Utilities/GenSort.cc>
 #include <casa/Utilities/LinearSearch.cc>
 #include <casa/Utilities/PtrHolder.cc>
-#include <casa/Utilities/Register.cc>
 #include <casa/Utilities/Sequence.cc>
 
 namespace casa {
+
+  // ============================================================================
+  //
+  //  ReposFiller/templates
+  //
+  // ============================================================================
+
+  // --------------------------------------------------------------------- assert
+
   template class assert_<ArrayError>;
   template class assert_<InvalidIterError>;
   template class assert_<AbortError>;
   template class assert_<AipsError>;
 
-  template Int binarySearchBrackets(Bool &, Vector<Float> const &, Float const &, uInt, Int);
+  // ------------------------------------------------------- binarySearchBrackets
+
+  template Int binarySearchBrackets(Bool &, Int * const &, Int const &, uInt, Int);
   template Int binarySearchBrackets(Bool &, Block<Complex> const &, Complex const &, uInt, Int);
   template Int binarySearchBrackets(Bool &, Block<Double> const &, Double const &, uInt, Int);
   template Int binarySearchBrackets(Bool &, Block<Float> const &, Float const &, uInt, Int);
   template Int binarySearchBrackets(Bool &, Block<uInt> const &, uInt const &, uInt, Int);
+  template Int binarySearchBrackets(Bool &, Vector<Float> const &, Float const &, uInt, Int);
 
   /*
     For better readability and easier upgrade, classes are collected into
@@ -521,10 +537,13 @@ namespace casa {
   template uInt genSort(Array<uInt> &);
   template uInt genSort(Double *, uInt);
   template uInt genSort(Float *, uInt);
-  
+  template uInt genSort(Int *, uInt, Sort::Order, Int);
+  template uInt genSort(Vector<uInt> &, Int const *, uInt, Sort::Order, Int);
+
   template Int linearSearch(Bool &, Vector<Int> const &, Int const &, uInt, uInt);
   template Int linearSearch(Bool &, Vector<uInt> const &, uInt const &, uInt, uInt);
   
+  template class PtrHolder<Int>;
   template class PtrHolder<Random>;
   template class PtrHolder<QBase>;
   template class PtrHolder<Vector<String> >;
@@ -696,94 +715,36 @@ namespace casa {
   
   template void objmove<String>(String*, String const*, uInt);
   
-  // ------------------------------------------------------------------- Register
-  
-  template uInt Register(Int const *);
-  template uInt Register(uInt const *);
-  template uInt Register(Short const *);
-  template uInt Register(uShort const *);
-  template uInt Register(Long const *);
-  template uInt Register(uLong const *);
-  template uInt Register(Float const *);
-  template uInt Register(Double const *);
-  template uInt Register(lDouble const *);
-  template uInt Register(Complex const *);
-  template uInt Register(DComplex const *);
-  template uInt Register(String const *);
-  template uInt Register(RecordNotice const *);
-  template uInt Register(SysEventTargetInfo const *);
-  template uInt Register(MVBaseline const *);
-  template uInt Register(MVDirection const *);
-  template uInt Register(MVDoppler const *);
-  template uInt Register(MVDouble const *);
-  template uInt Register(MVEarthMagnetic const *);
-  template uInt Register(MVEpoch const *);
-  template uInt Register(MVFrequency const *);
-  template uInt Register(MVPosition const *);
-  template uInt Register(MVRadialVelocity const *);
-  template uInt Register(MVuvw const *);
+  // ============================================================================
+  //
+  //  Utilities/test/templates
+  //
+  // ============================================================================
 
-  template uInt Register (Quantum<Int> const *);
-  template uInt Register (Quantum<uInt> const *);
-  template uInt Register (Quantum<Short> const *);
-  template uInt Register (Quantum<uShort> const *);
-  template uInt Register (Quantum<Float> const *);
-  template uInt Register (Quantum<Double> const *);
-  template uInt Register (Quantum<Complex> const *);
-  template uInt Register (Quantum<DComplex> const *);
+  // casa/Arrays/Array.cc
+  template class Array<Regex>;
+  template class MaskedArray<Regex>;
+  template class Vector<Regex>;
+  template ostream & operator<<(ostream &, Array<Regex> const &);
 
-  template uInt Register (Quantum<Array<Int> > const *);
-  template uInt Register (Quantum<Array<uInt> > const *);
-  template uInt Register (Quantum<Array<Short> > const *);
-  template uInt Register (Quantum<Array<uShort> > const *);
-  template uInt Register (Quantum<Array<Float> > const *);
-  template uInt Register (Quantum<Array<Double> > const *);
-  template uInt Register (Quantum<Array<Complex> > const *);
-  template uInt Register (Quantum<Array<DComplex> > const *);
+  // casa/Utilities/BinarySearch.cc
+  template Int binarySearch(Bool &, IPosition const &, Int const &, uInt, Int);
 
-  template uInt Register (Quantum<Matrix<Int> > const *);
-  template uInt Register (Quantum<Matrix<uInt> > const *);
-  template uInt Register (Quantum<Matrix<Short> > const *);
-  template uInt Register (Quantum<Matrix<uShort> > const *);
-  template uInt Register (Quantum<Matrix<Float> > const *);
-  template uInt Register (Quantum<Matrix<Double> > const *);
-  template uInt Register (Quantum<Matrix<Complex> > const *);
-  template uInt Register (Quantum<Matrix<DComplex> > const *);
+  // casa/Utilities/CountedPtr.cc
+  template class CountedConstPtr<Block<Regex> >;
+  template class CountedPtr<Block<Regex> >;
+  template class PtrRep<Block<Regex> >;
+  template class SimpleCountedConstPtr<Block<Regex> >;
+  template class SimpleCountedPtr<Block<Regex> >;
+  template class CountedConstPtr<myobj>;
+  template class CountedPtr<myobj>;
+  template class PtrRep<myobj>;
+  template class SimpleCountedConstPtr<myobj>;
+  template class SimpleCountedPtr<myobj>;
 
-  template uInt Register (Quantum<Vector<Int> > const *);
-  template uInt Register (Quantum<Vector<uInt> > const *);
-  template uInt Register (Quantum<Vector<Short> > const *);
-  template uInt Register (Quantum<Vector<uShort> > const *);
-  template uInt Register (Quantum<Vector<Float> > const *);
-  template uInt Register (Quantum<Vector<Double> > const *);
-  template uInt Register (Quantum<Vector<Complex> > const *);
-  template uInt Register (Quantum<Vector<DComplex> > const *);
-  
-  template uInt Register (ListNotice<void *> const *);
-  template uInt Register (ListNotice<Int> const *);
-  template uInt Register (ListNotice<uInt> const *);
-  template uInt Register (ListNotice<Short> const *);
-  template uInt Register (ListNotice<uShort> const *);
-  template uInt Register (ListNotice<Long> const *);
-  template uInt Register (ListNotice<uLong> const *);
-  template uInt Register (ListNotice<Float> const *);
-  template uInt Register (ListNotice<Double> const *);
-  template uInt Register (ListNotice<Param> const *);
-  template uInt Register (ListNotice<CountedPtr<SysEventTargetInfo> > const *);
-  template uInt Register (ListNotice<Dlist<int> > const*);
-  template uInt Register (ListNotice<List<int> > const*);
-  template uInt Register (ListNotice<OrderedPair<int, int> > const*);
-  template uInt Register (ListNotice<OrderedPair<int, Array<float> > > const*);
-  template uInt Register (ListNotice<OrderedPair<String, int> > const*);
-  template uInt Register (ListNotice<OrderedPair<String, OrderedPair<String, uInt> > > const*);
-
-  template uInt Register (OrderedMapNotice<Int, Int> const*);
-  template uInt Register (OrderedMapNotice<Int, uInt> const*);
-  template uInt Register (OrderedMapNotice<Int, Array<Float> > const *);
-  template uInt Register (OrderedMapNotice<Int, Vector<Float> > const *);
-  template uInt Register (OrderedMapNotice<String, Int> const *);
-  template uInt Register (OrderedMapNotice<String, uInt> const*);
-  template uInt Register (OrderedMapNotice<String, Block<IPosition> > const *);
-  template uInt Register (OrderedMapNotice<String, OrderedPair<String, uInt> > const*);
+  // casa/Utilities/LinearSearch.cc
+  template Int linearSearch(Bool &, IPosition const &, Int const &, uInt, uInt);
+  template Int linearSearch1(IPosition const &, Int const &, uInt);
+  template Int linearSearchBrackets(Bool &, Int * const &, Int const &, uInt, uInt);
 
 }

@@ -161,4 +161,5 @@ subdirs (
   tables
   measures
   ms
+  lattices
   )
