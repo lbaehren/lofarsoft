@@ -3,24 +3,8 @@
 ## Set up the list with test program sources
 
 set (tests
-  tBlock
-  tDlink
-  tDlist
-  tHashMap
-  tHashMapIO
-  tHashMapIter
-  tList
-#  tListMap2
-#  tListMap
-  tObjectPool
-#  tOrdMap2
-#  tOrdMap
-  tPoolStack
-  tQueue
-  tRecord
-  tRecordDesc
-  tSimOrdMap
-  tStack
+  tInput
+  tParam
   )
 
 ## ------------------------------------------------------------------------------

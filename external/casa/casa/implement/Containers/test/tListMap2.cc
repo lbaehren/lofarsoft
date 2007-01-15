@@ -36,7 +36,7 @@
 // disk and read back. It outputs to stdout. A script executing
 // this test program makes a diff of the output and a reference output.
 
-main () {
+int main () {
     Int i;
     i=-32768;
     ListMap<Int,Int> Name(i);

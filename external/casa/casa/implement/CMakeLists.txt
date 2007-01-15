@@ -17,7 +17,6 @@ subdirs (
   OS/test
   Quanta/test
   System/test
-#  test
   Utilities/test
   )
 
@@ -283,6 +282,8 @@ add_library (casa
   ../../templates/casa/BasicMath.cc
   ../../templates/casa/Containers.cc
   ../../templates/casa/Exceptions.cc
+  ../../templates/casa/IO.cc
+  ../../templates/casa/OS.cc
   ../../templates/casa/Quanta.cc
   ../../templates/casa/System.cc
   ../../templates/casa/Utilities.cc

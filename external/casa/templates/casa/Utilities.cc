@@ -777,10 +777,13 @@ namespace casa {
   template uInt Register (ListNotice<OrderedPair<String, int> > const*);
   template uInt Register (ListNotice<OrderedPair<String, OrderedPair<String, uInt> > > const*);
 
+  template uInt Register (OrderedMapNotice<Int, Int> const*);
+  template uInt Register (OrderedMapNotice<Int, uInt> const*);
   template uInt Register (OrderedMapNotice<Int, Array<Float> > const *);
   template uInt Register (OrderedMapNotice<Int, Vector<Float> > const *);
-  template uInt Register (OrderedMapNotice<Int, Int> const *);
-  template uInt Register (OrderedMapNotice<String, Block<IPosition> > const *);
   template uInt Register (OrderedMapNotice<String, Int> const *);
+  template uInt Register (OrderedMapNotice<String, uInt> const*);
+  template uInt Register (OrderedMapNotice<String, Block<IPosition> > const *);
+  template uInt Register (OrderedMapNotice<String, OrderedPair<String, uInt> > const*);
 
 }

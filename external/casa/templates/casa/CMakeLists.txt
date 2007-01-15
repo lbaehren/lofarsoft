@@ -6,6 +6,7 @@ set (casaTemplates
 	Containers.cc
 	Exceptions.cc
 	MaskedArray.cc
+	IO.cc
 	Quanta.cc
 	System.cc
 	Utilities.cc
