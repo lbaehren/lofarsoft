@@ -1,11 +1,11 @@
 ## CASA/implement/casa
 
-project (libcasa)
+PROJECT (libcasa)
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-subdirs (
+SUBDIRS (
   Arrays/test
   BasicMath/test
   BasicSL/test
@@ -23,12 +23,12 @@ subdirs (
 ## -----------------------------------------------------------------------------
 ## Files for template instantiation
 
-subdirs (../../templates)
+SUBDIRS (../../templates)
 
 ## -----------------------------------------------------------------------------
 ## libcasa
 
-add_library (casa
+ADD_LIBRARY (casa
 ## -- casa/implement/casa
   aips.cc
   version2.cc

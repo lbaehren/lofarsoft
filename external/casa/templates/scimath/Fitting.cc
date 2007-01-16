@@ -1,6 +1,7 @@
 
 // include of header files 
 
+#include <casa/Arrays.h>
 #include <casa/BasicSL/Complex.h>
 #include <scimath/Mathematics/AutoDiff.h>
 #include <scimath/Mathematics/AutoDiffA.h>
@@ -20,13 +21,23 @@
 
 namespace casa {
 
+  // ============================================================================
+  //
+  //  ReposFiller/templates
+  //
+  // ============================================================================
+
   // casa/Arrays/Matrix.cc
   template class Matrix<Float>;
   template class Matrix<Double>;
+  template class Matrix<Complex>;
+  template class Matrix<DComplex>;
 
   // casa/Arrays/Vector.cc
   template class Vector<Float>;
   template class Vector<Double>;
+  template class Vector<Complex>;
+  template class Vector<DComplex>;
 
   // scimath/Fitting/FitGaussian.cc 
   template class FitGaussian<Float>;
@@ -44,6 +55,9 @@ namespace casa {
   template class GenericL2Fit<DComplex>;
   template class GenericL2Fit<Double>;
   template class GenericL2Fit<Float>;
+
+  template Matrix<T> FitGaussian<T>::fit(const Matrix<T>&, const Vector<T>&, const Vector<T>&, T,
+						     unsigned int, T);
 
 // 1000 scimath/Fitting/LSQFit2.cc 
 //      = algorithm 
@@ -310,5 +324,11 @@ namespace casa {
   template class NonLinearFitLM<AutoDiffA<Float> >;
   template class NonLinearFitLM<Double>;
   template class NonLinearFitLM<Float>;
+
+  // ============================================================================
+  //
+  //  test/templates
+  //
+  // ============================================================================
 
 }

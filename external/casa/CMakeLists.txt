@@ -28,7 +28,7 @@ INCLUDE (CheckIncludeFiles)
 #  PATH_SUFFIXES sys
 #  )
 
-find_path (HAVE_STRING_H
+FIND_PATH (HAVE_STRING_H
   string.h
   PATHS /usr/include /usr/local/include /sw/include
 #  PATH_SUFFIXES c++ c++/4.0.0 g++
@@ -37,7 +37,7 @@ find_path (HAVE_STRING_H
 ## -----------------------------------------------------------------------------
 ## Required external libraries
 
-find_package (X11)
+FIND_PACKAGE (X11)
 
 ## -----------------------------------------------------------------------------
 ## Compiler settings
@@ -90,41 +90,41 @@ find_package (X11)
 
 ## Start with the generic information common to all the platforms
 
-include_directories (
+INCLUDE_DIRECTORIES (
   .
   ${CASA_SOURCE_DIR}
   ${CASA_SOURCE_DIR}/include
   )
 
-set (CASA_OPTLEVEL "-O3")
+SET (CASA_OPTLEVEL "-O3")
 
 ## Platform-dependent compiler/linker settings
 
-if (UNIX)
+IF (UNIX)
   ## Compiler flags
-  add_definitions (
+  ADD_DEFINITIONS (
     -DAIPS_STDLIB
     -DAIPS_NO_TEMPLATE_SRC
     -DAIPS_AUTO_STL
     -DAIPS_NO_LEA_MALLOC
     )
   ## Linker flags
-  set (CASA_LDSTD "-Xlinker -rpath -Xlinker")
-  if (APPLE)
-    add_definitions (
+  SET (CASA_LDSTD "-Xlinker -rpath -Xlinker")
+  IF (APPLE)
+    ADD_DEFINITIONS (
       -DAIPS_DARWIN
       -DAIPS_BIG_ENDIAN
       -DNATIVE_EXCP
       )
-    set (CASA_CXXSTD "${CASA_CXXSTD} -fno-implicit-templates -Wreturn-type -Wimplicit -fPIC")
-  else (APPLE)
-    add_definitions (
+    SET (CASA_CXXSTD "${CASA_CXXSTD} -fno-implicit-templates -Wreturn-type -Wimplicit -fPIC")
+  ELSE (APPLE)
+    ADD_DEFINITIONS (
       -DAIPS_LINUX
       -DAIPS_LITTLE_ENDIAN
       -D_LARGEFILE_SOURCE
       )
-  endif (APPLE)
-  add_definitions (
+  ENDIF (APPLE)
+  ADD_DEFINITIONS (
     ${CASA_OPTLEVEL}
     -fPIC
     -pipe
@@ -135,27 +135,27 @@ if (UNIX)
     -Wno-non-template-friend
     -Woverloaded-virtual
     )
-endif (UNIX)
+ENDIF (UNIX)
 
 ## Now that all the platform-specific settings have been done, we can assign
 ## the variables internally used by CMake
 
-set (CMAKE_VERBOSE_MAKEFILE 0)
+SET (CMAKE_VERBOSE_MAKEFILE 0)
 
-set (CMAKE_C_FLAGS "${CASA_OPTLEVEL} ${CASA_CXXSTD}")
+SET (CMAKE_C_FLAGS "${CASA_OPTLEVEL} ${CASA_CXXSTD}")
 SET (CMAKE_MODULE_LINKER_FLAGS "${CASA_LDSTD}")
 
-message (STATUS "CASA_SOURCE_DIR ......... = ${CASA_SOURCE_DIR}")
-message (STATUS "CMAKE_SYSTEM_NAME ....... = ${CMAKE_SYSTEM_NAME}")
-message (STATUS "CMAKE_SYSTEM_PROCESSOR .. = ${CMAKE_SYSTEM_PROCESSOR}")
-message (STATUS "CMAKE_C_FLAGS ........... = ${CMAKE_C_FLAGS}")
-message (STATUS "CMAKE_CXX_FLAGS ......... = ${CMAKE_CXX_FLAGS}")
-message (STATUS "CMAKE_MODULE_LINKER_FLAGS = ${CMAKE_MODULE_LINKER_FLAGS}")
+MESSAGE (STATUS "CASA_SOURCE_DIR ......... = ${CASA_SOURCE_DIR}")
+MESSAGE (STATUS "CMAKE_SYSTEM_NAME ....... = ${CMAKE_SYSTEM_NAME}")
+MESSAGE (STATUS "CMAKE_SYSTEM_PROCESSOR .. = ${CMAKE_SYSTEM_PROCESSOR}")
+MESSAGE (STATUS "CMAKE_C_FLAGS ........... = ${CMAKE_C_FLAGS}")
+MESSAGE (STATUS "CMAKE_CXX_FLAGS ......... = ${CMAKE_CXX_FLAGS}")
+MESSAGE (STATUS "CMAKE_MODULE_LINKER_FLAGS = ${CMAKE_MODULE_LINKER_FLAGS}")
 
 ## -----------------------------------------------------------------------------
 ## List of sub-directories
 
-subdirs (
+SUBDIRS (
   casa
   scimath
   tables

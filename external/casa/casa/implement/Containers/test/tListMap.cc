@@ -41,7 +41,7 @@ int main() {
   ListMap<String,OrderedPair<String,uInt> > smap(OrderedPair<String,uInt>("dummy",0));
   ListMap<String,int> amap(-1,ListMap<String,int>::Append);
 
-  map(2) = 90;
+  map(2)  = 90;
   map(15) = 79;
   map(27) = 104;
   map(21) = map(27);
@@ -51,16 +51,16 @@ int main() {
   map(21) = 109;
   map(29) = map(21);
   map(28) = map(29);
-  map(4) = 9;
+  map(4)  = 9;
   map.setOrder(ListMap<int,int>::Prepend);
   map(30) = 4;
-  map(6) = 92;
+  map(6)  = 92;
 
   cout << map << endl;
 
 //print(map);
 
-  smap("fred") = OrderedPair<String,uInt>("wilma",30);
+  smap("fred")   = OrderedPair<String,uInt>("wilma",30);
   smap("barney") = OrderedPair<String,uInt>("betty",28);
   smap("homer")  = OrderedPair<String,uInt>("marge",40);
   smap("bambam") = OrderedPair<String,uInt>("pebbles",8);
@@ -70,16 +70,16 @@ int main() {
 //print(smap);
 
   smap("barney") = OrderedPair<String,uInt>("madona",25);
-  smap("fred") = OrderedPair<String,uInt>("anne",12);
+  smap("fred")   = OrderedPair<String,uInt>("anne",12);
  
-  cout << smap << endl;
+//   cout << smap << endl;
 
 //print(smap);
 //print(smap);
 
-  cout << smap("homer").x() << "," << smap("homer").y() << endl;
-  cout << smap("fred").x() << "," << smap("fred").y() << endl;
-  cout << smap("barney").x() << "," << smap("barney").y() << endl;
+//   cout << smap("homer").x()  << "," << smap("homer").y()  << endl;
+//   cout << smap("fred").x()   << "," << smap("fred").y()   << endl;
+//   cout << smap("barney").x() << "," << smap("barney").y() << endl;
 
   amap("a") = 97;
   amap("b") = 98;
@@ -88,7 +88,7 @@ int main() {
   amap("e") = 101;
   amap("f") = 102;
 
-  cout << amap << endl;
+//   cout << amap << endl;
 
 //print(amap);
 

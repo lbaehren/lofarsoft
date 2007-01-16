@@ -149,12 +149,17 @@ namespace casa {
   template uInt Register (ListNotice<Float> const *);
   template uInt Register (ListNotice<Double> const *);
   template uInt Register (ListNotice<Param> const *);
+  template uInt Register (ListNotice<Block<IPosition> > const *);
   template uInt Register (ListNotice<CountedPtr<SysEventTargetInfo> > const *);
   template uInt Register (ListNotice<Dlist<int> > const*);
   template uInt Register (ListNotice<List<int> > const*);
   template uInt Register (ListNotice<OrderedPair<int, int> > const*);
   template uInt Register (ListNotice<OrderedPair<int, Array<float> > > const*);
+  template uInt Register (ListNotice<OrderedPair<int, Vector<float> > > const*);
   template uInt Register (ListNotice<OrderedPair<String, int> > const*);
+  template uInt Register (ListNotice<OrderedPair<String, uInt> > const *);
+  template uInt Register (ListNotice<OrderedPair<String, Double> > const *);
+  template uInt Register (ListNotice<OrderedPair<String, Block<IPosition> > > const*);
   template uInt Register (ListNotice<OrderedPair<String, OrderedPair<String, uInt> > > const*);
 
   template uInt Register (OrderedMapNotice<Int, Int> const*);

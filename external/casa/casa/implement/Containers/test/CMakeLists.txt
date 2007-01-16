@@ -2,7 +2,7 @@
 ## ------------------------------------------------------------------------------
 ## Set up the list with test program sources
 
-set (tests
+SET (tests
   tBlock
   tDlink
   tDlist
@@ -10,8 +10,8 @@ set (tests
   tHashMapIO
   tHashMapIter
   tList
-#  tListMap2
 #  tListMap
+#  tListMap2
   tObjectPool
 #  tOrdMap2
 #  tOrdMap
@@ -26,8 +26,8 @@ set (tests
 ## ------------------------------------------------------------------------------
 ## Build the test programs
 
-foreach (src ${tests})
-  add_executable (${src} ${src}.cc)
-  target_link_libraries (${src} casa)
-endforeach (src)
+FOREACH (src ${tests})
+  ADD_EXECUTABLE (${src} ${src}.cc)
+  TARGET_LINK_LIBRARIES (${src} casa)
+ENDFOREACH (src)
 

@@ -61,6 +61,14 @@ namespace casa {
   //
   // ============================================================================
 
+  template class Block<Int>;
+  template class Block<uInt>;
+  template class Block<Float>;
+  template class Block<Double>;
+  template class Block<String>;
+  template class Block<IPosition>;
+  template class Block<LogMessage>;
+
   // --------------------------------------------------------------------- AipsIO
 
   template AipsIO & operator>> (AipsIO &, Block<Int> &);
@@ -93,6 +101,43 @@ namespace casa {
   template class Link<Vector<Double> *>;
   template class Link<CountedPtr<SysEventTargetInfo> >;
   template class Link<NoticeTarget *>;
+
+  // ---------------------------------------------------------------- OrderedPair
+
+  template class OrderedPair<Int, Bool>;
+  template class OrderedPair<Int, Int>;
+  template class OrderedPair<Int, uInt>;
+  template class OrderedPair<Int, Float>;
+  template class OrderedPair<Int, Double>;
+  template class OrderedPair<Int, String>;
+  template class OrderedPair<Int, DataType>;
+  template class OrderedPair<Int, Array<Float> >;
+  template class OrderedPair<Int, Vector<Float> >;
+  template class OrderedPair<Int, Vector<Int> >;
+  template class OrderedPair<Int, Vector<uInt> >;
+  template class OrderedPair<Int, Vector<Double> >;
+  template class OrderedPair<Int, Quantum<Double> >;
+  template class OrderedPair<Int, Quantum<Array<Double> > >;
+  template class OrderedPair<Int, Quantum<Vector<Double> > >;
+  //
+  template class OrderedPair<uInt, Int>;
+  template class OrderedPair<uInt, uInt>;
+  //
+  template class OrderedPair<String, Bool>;
+  template class OrderedPair<String, Int>;
+  template class OrderedPair<String, uInt>;
+  template class OrderedPair<String, String>;
+  template class OrderedPair<String, void *>;
+  template class OrderedPair<String, Block<IPosition> >;
+  template class OrderedPair<String, Record *>;
+  template <class T> class AutoDiffRep;
+  template class OrderedPair<uInt, PoolStack<AutoDiffRep<Complex>, uInt> *>;
+  template class OrderedPair<uInt, PoolStack<AutoDiffRep<DComplex>, uInt> *>;
+  template class OrderedPair<uInt, PoolStack<AutoDiffRep<Double>, uInt> *>;
+  template class OrderedPair<uInt, PoolStack<AutoDiffRep<Float>, uInt> *>;
+  template class OrderedPair<Double, uInt>;
+  template class OrderedPair<Double, Int>;
+  template class OrderedPair<void *, void *>;
 
   // -------------------------------------------------------------- ConstListIter
   // ------------------------------------------------------------------- ListIter
@@ -135,6 +180,8 @@ namespace casa {
   template class List<Float>;
   template class List<Double>;
   template class List<Param>;
+  template class List<Block<IPosition> >;
+  template class List<OrderedPair<String, uInt> >;
   template class List<CountedPtr<SysEventTargetInfo> >;
 
   template class ListNotice<void *>;
@@ -147,7 +194,33 @@ namespace casa {
   template class ListNotice<Float>;
   template class ListNotice<Double>;
   template class ListNotice<Param>;
+  template class ListNotice<Block<IPosition> >;
+  template class ListNotice<OrderedPair<String, uInt> >;
   template class ListNotice<CountedPtr<SysEventTargetInfo> >;
+
+  template class ListMap <Int, Int>;
+  template class ListMap <Int, Array<Float> >;
+  template class ListMap <Int, Vector<Float> >;
+  template class ListMap <String, Int>;
+  template class ListMap <String, Double>;
+  template class ListMap <String, Block<IPosition> >;
+  template class ListMap <String, OrderedPair<String, uInt> >;
+
+  template class ListMapRep <Int, Int>;
+  template class ListMapRep <Int, Array<Float> >;
+  template class ListMapRep <Int, Vector<Float> >;
+  template class ListMapRep <String, Int>;
+  template class ListMapRep <String, Double>;
+  template class ListMapRep <String, Block<IPosition> >;
+  template class ListMapRep <String, OrderedPair<String, uInt> >;
+
+  template class ListMapIterRep <Int, Int>;
+  template class ListMapIterRep <Int, Array<Float> >;
+  template class ListMapIterRep <Int, Vector<Float> >;
+  template class ListMapIterRep <String, Int>;
+  template class ListMapIterRep <String, Double>;
+  template class ListMapIterRep <String, Block<IPosition> >;
+  template class ListMapIterRep <String, OrderedPair<String, uInt> >;
 
   template ostream &operator<< (ostream &, const List<Int> &);
   template ostream &operator<< (ostream &, const List<uInt> &);
@@ -158,43 +231,8 @@ namespace casa {
   template ostream &operator<< (ostream &, const List<Float> &);
   template ostream &operator<< (ostream &, const List<Double> &);
   template ostream &operator<< (ostream &, const List<Param> &);
-
-  // ---------------------------------------------------------------- OrderedPair
-
-  template class OrderedPair<Int, Bool>;
-  template class OrderedPair<Int, Int>;
-  template class OrderedPair<Int, uInt>;
-  template class OrderedPair<Int, Float>;
-  template class OrderedPair<Int, Double>;
-  template class OrderedPair<Int, String>;
-  template class OrderedPair<Int, DataType>;
-  template class OrderedPair<Int, Array<Float> >;
-  template class OrderedPair<Int, Vector<Float> >;
-  template class OrderedPair<Int, Vector<Int> >;
-  template class OrderedPair<Int, Vector<uInt> >;
-  template class OrderedPair<Int, Vector<Double> >;
-  template class OrderedPair<Int, Quantum<Double> >;
-  template class OrderedPair<Int, Quantum<Array<Double> > >;
-  template class OrderedPair<Int, Quantum<Vector<Double> > >;
-  //
-  template class OrderedPair<uInt, Int>;
-  template class OrderedPair<uInt, uInt>;
-  //
-  template class OrderedPair<String, Bool>;
-  template class OrderedPair<String, Int>;
-  template class OrderedPair<String, uInt>;
-  template class OrderedPair<String, String>;
-  template class OrderedPair<String, void *>;
-  template class OrderedPair<String, Block<IPosition> >;
-  template class OrderedPair<String, Record *>;
-  template <class T> class AutoDiffRep;
-  template class OrderedPair<uInt, PoolStack<AutoDiffRep<Complex>, uInt> *>;
-  template class OrderedPair<uInt, PoolStack<AutoDiffRep<DComplex>, uInt> *>;
-  template class OrderedPair<uInt, PoolStack<AutoDiffRep<Double>, uInt> *>;
-  template class OrderedPair<uInt, PoolStack<AutoDiffRep<Float>, uInt> *>;
-  template class OrderedPair<Double, uInt>;
-  template class OrderedPair<Double, Int>;
-  template class OrderedPair<void *, void *>;
+  template ostream &operator<< (ostream &, const List<Block<IPosition> > &);
+//   template ostream &operator<< (ostream &, const List<OrderedPair<String, uInt> > &);
 
   // ----------------------------------------------------------------- OrderedMap
 
@@ -239,6 +277,7 @@ namespace casa {
   // ----------------------------------------------------------------- MapIterRep
 
   template class ConstMapIter <Int, Int>;
+  template class ConstMapIter <Int, Double>;
   template class ConstMapIter <Int, Array<Float> >;
   template class ConstMapIter <Int, Vector<Float> >;
   template class ConstMapIter <String, Int>;
@@ -247,6 +286,7 @@ namespace casa {
   template class ConstMapIter <String, OrderedPair<String, uInt> >;
 
   template class MapIter <Int, Int>;
+  template class MapIter <Int, Double>;
   template class MapIter <Int, Array<Float> >;
   template class MapIter <Int, Vector<Float> >;
   template class MapIter <String, Int>;
@@ -255,6 +295,7 @@ namespace casa {
   template class MapIter <String, OrderedPair<String, uInt> >;
 
   template class Map <Int, Int>;
+  template class Map <Int, Double>;
   template class Map <Int, Array<Float> >;
   template class Map <Int, Vector<Float> >;
   template class Map <String, Int>;
@@ -263,6 +304,7 @@ namespace casa {
   template class Map <String, OrderedPair<String, uInt> >;
 
   template class MapIterRep <Int, Int>;
+  template class MapIterRep <Int, Double>;
   template class MapIterRep <Int, Array<Float> >;
   template class MapIterRep <Int, Vector<Float> >;
   template class MapIterRep <String, Int>;
@@ -271,6 +313,7 @@ namespace casa {
   template class MapIterRep <String, OrderedPair<String, uInt> >;
 
   template class MapRep <Int, Int>;
+  template class MapRep <Int, Double>;
   template class MapRep <Int, Array<Float> >;
   template class MapRep <Int, Vector<Float> >;
   template class MapRep <String, Int>;
@@ -279,6 +322,7 @@ namespace casa {
   template class MapRep <String, OrderedPair<String, uInt> >;
 
   template ostream &operator<< (ostream &, const Map<Int, Int>&);
+  template ostream &operator<< (ostream &, const Map<Int, Double>&);
   template ostream &operator<< (ostream &, const Map<Int, Array<Float> >&);
   template ostream &operator<< (ostream &, const Map<Int, Vector<Float> >&);
   template ostream &operator<< (ostream &, const Map<String, Int>&);
@@ -343,8 +387,13 @@ namespace casa {
 
   // ---------------------------------------------------------------------- Queue
 
-  template class Queue<LogMessage>;
   template class Queue<Int>;
+  template class Queue<uInt>;
+  template class Queue<Float>;
+  template class Queue<Double>;
+  template class Queue<String>;
+  template class Queue<IPosition>;
+  template class Queue<LogMessage>;
 
   // ----------------------------------------------------------- RORecordFieldPtr
   // ------------------------------------------------------------- RecordFieldPtr
@@ -431,24 +480,13 @@ namespace casa {
   template class Stack<Vector<Float> *>;
   template class Stack<void *>;
   
-  template class ListMapRep<Int, Int>;
-  template class ListMapRep<Int, Array<Float> >;
-  template class ListMapRep<String, Int>;
-  template class ListMapRep<String, OrderedPair<String, uInt> >;
-
   template ostream &operator<< (ostream &, const ConstListIter<Int> &);
-
-//   template ostream &operator<< (ostream &, Map<String, OrderedPair<String, uInt> > const&);
 
   // ============================================================================
   //
   //  Containers/test/templates
   //
   // ============================================================================
-
-//  template Bool allEQ(Array<Complex> const &, Complex const &);
-//  template Bool allEQ(Array<DComplex> const &, DComplex const &);
-//  template Bool allEQ(Array<Short> const &, Short const &);
 
   template class Dlink<Int>;
   template class Dlink<uInt>;
@@ -474,10 +512,6 @@ namespace casa {
   template class Link<OrderedPair<String, Int> >;
   template class Link<OrderedPair<String, uInt> >;
   template class Link<OrderedPair<String, OrderedPair<String, uInt> > >;
-
-  // tListMap2
-
-  // tListMap
 
   // tObjectPool
   template class ObjectPool <Vector<Double>, uInt>;
