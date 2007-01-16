@@ -1,5 +1,19 @@
 project (libscimath)
 
+## -----------------------------------------------------------------------------
+## Directories containing the test programs
+
+SUBDIRS (
+  Fitting/test
+  Functionals/test
+  Mathematics/test
+  )
+
+## -----------------------------------------------------------------------------
+## Files for template instantiation
+
+SUBDIRS (../../templates)
+
 add_library (scimath
 ## -- scimath/implement/Fitting --------------------------------------
   Fitting/FitGaussian.cc

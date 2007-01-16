@@ -2,10 +2,13 @@
 // include of header files 
 
 #include <casa/Arrays.h>
+#include <casa/Arrays/VectorSTLIterator.h>
 #include <casa/BasicSL/Complex.h>
 #include <scimath/Mathematics/AutoDiff.h>
 #include <scimath/Mathematics/AutoDiffA.h>
 #include <scimath/Mathematics/AutoDiffMath.h>
+
+#include <algorithm>
 
 // include of implementation files
 
@@ -16,6 +19,7 @@
 #include <scimath/Fitting/LSQaips.cc>
 #include <scimath/Fitting/LinearFit.cc>
 #include <scimath/Fitting/LinearFitSVD.cc>
+#include <scimath/Fitting/LSQFit2.cc>
 #include <scimath/Fitting/NonLinearFit.cc>
 #include <scimath/Fitting/NonLinearFitLM.cc>
 
@@ -30,18 +34,15 @@ namespace casa {
   // casa/Arrays/Matrix.cc
   template class Matrix<Float>;
   template class Matrix<Double>;
-  template class Matrix<Complex>;
-  template class Matrix<DComplex>;
 
   // casa/Arrays/Vector.cc
   template class Vector<Float>;
   template class Vector<Double>;
-  template class Vector<Complex>;
-  template class Vector<DComplex>;
 
   // scimath/Fitting/FitGaussian.cc 
   template class FitGaussian<Float>;
   template class FitGaussian<Double>;
+//   template Matrix<Float> FitGaussian<Float>::fit (const Matrix<Float>&, const Vector<Float>&, const Vector<Float>&, Float, uInt, Float);
 
   // scimath/Fitting/GenericL2Fit.cc 
   template class GenericL2Fit<AutoDiff<Complex> >;
@@ -56,219 +57,203 @@ namespace casa {
   template class GenericL2Fit<Double>;
   template class GenericL2Fit<Float>;
 
-  template Matrix<T> FitGaussian<T>::fit(const Matrix<T>&, const Vector<T>&, const Vector<T>&, T,
-						     unsigned int, T);
+  // 1000 scimath/Fitting/LSQFit2.cc ---------------------------------
+  
+#if !defined(AIPS_INTELCC) && !defined(AIPS_CRAY_PGI)
+  template Double *swap_ranges<Double *, Double *>(Double *, Double *, Double *);
+#endif
 
-// 1000 scimath/Fitting/LSQFit2.cc 
-//      = algorithm 
-//      #namespace 
-//      #ifndef AIPS_INTELCC 
-//        template casa::Double *swap_ranges<casa::Double *, casa::Double *>(casa::Double *, casa::Double *, casa::Double *) 
-//      #endif 
-// 1010 scimath/Fitting/LSQFit2.cc 
-//      = casa/Arrays/VectorSTLIterator.h 
-//      template void LSQFit::makeNorm<Double, VectorSTLIterator<Double> >(VectorSTLIterator<Double> const &, Double const &, Double const &, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, VectorSTLIterator<Double> >(VectorSTLIterator<Double> const &, Double const &, Double const &, LSQFit::Real, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, VectorSTLIterator<Double>, VectorSTLIterator<uInt> >(uInt nIndex, VectorSTLIterator<uInt> const &, VectorSTLIterator<Double> const &, Double const &, Double const &, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, VectorSTLIterator<Double>, VectorSTLIterator<uInt> >(uInt nIndex, VectorSTLIterator<uInt> const &, VectorSTLIterator<Double> const &, Double const &, Double const &, LSQFit::Real, Bool, Bool) 
-//      template Bool LSQFit::addConstraint<Double, VectorSTLIterator<Double> >(VectorSTLIterator<Double> const &, Double const &) 
-//      template Bool LSQFit::addConstraint<Double, VectorSTLIterator<Double>, VectorSTLIterator<uInt> >(uInt nIndex, VectorSTLIterator<uInt> const &, VectorSTLIterator<Double> const &, Double const &) 
-//      template Bool LSQFit::setConstraint<Double, VectorSTLIterator<Double> >(uInt n, VectorSTLIterator<Double> const &, Double const &) 
-//      template Bool LSQFit::setConstraint<Double, VectorSTLIterator<Double>, VectorSTLIterator<uInt> >(uInt n, uInt nIndex, VectorSTLIterator<uInt> const &, VectorSTLIterator<Double> const &, Double const &) 
-//      template Bool LSQFit::getConstraint<VectorSTLIterator<Double> >(uInt, VectorSTLIterator<Double> &) const 
-//      template void LSQFit::solve<VectorSTLIterator<Double> >(VectorSTLIterator<Double> &) 
-//      template Bool LSQFit::solveLoop<VectorSTLIterator<Double> >(Double &, uInt &, VectorSTLIterator<Double> &, Bool) 
-//      template Bool LSQFit::solveLoop<VectorSTLIterator<Double> >(uInt &, VectorSTLIterator<Double> &, Bool) 
-//      template void LSQFit::copy<VectorSTLIterator<Double> >(Double const *, Double const *, VectorSTLIterator<Double> &, LSQReal) 
-//      template void LSQFit::uncopy<VectorSTLIterator<Double> >(Double *, Double const *, VectorSTLIterator<Double> &, LSQReal) 
-//      template void LSQFit::copyDiagonal<VectorSTLIterator<Double> >(VectorSTLIterator<Double> &, LSQReal) 
-//      template Bool LSQFit::getErrors<VectorSTLIterator<Double> >(VectorSTLIterator<Double> &) 
-// 1020 scimath/Fitting/LSQFit2.cc 
-//      = casa/Arrays/VectorSTLIterator.h 
-//      template void LSQFit::makeNorm<Float, VectorSTLIterator<Float> >(VectorSTLIterator<Float> const &, Float const &, Float const &, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, VectorSTLIterator<Float> >(VectorSTLIterator<Float> const &, Float const &, Float const &, LSQFit::Real, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, VectorSTLIterator<Float>, VectorSTLIterator<uInt> >(uInt nIndex, VectorSTLIterator<uInt> const &, VectorSTLIterator<Float> const &, Float const &, Float const &, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, VectorSTLIterator<Float>, VectorSTLIterator<uInt> >(uInt nIndex, VectorSTLIterator<uInt> const &, VectorSTLIterator<Float> const &, Float const &, Float const &, LSQFit::Real, Bool, Bool) 
-//      template Bool LSQFit::addConstraint<Float, VectorSTLIterator<Float> >(VectorSTLIterator<Float> const &, Float const &) 
-//      template Bool LSQFit::addConstraint<Float, VectorSTLIterator<Float>, VectorSTLIterator<uInt> >(uInt nIndex, VectorSTLIterator<uInt> const &, VectorSTLIterator<Float> const &, Float const &) 
-//      template Bool LSQFit::setConstraint<Float, VectorSTLIterator<Float> >(uInt n, VectorSTLIterator<Float> const &, Float const &) 
-//      template Bool LSQFit::setConstraint<Float, VectorSTLIterator<Float>, VectorSTLIterator<uInt> >(uInt n, uInt nIndex, VectorSTLIterator<uInt> const &, VectorSTLIterator<Float> const &, Float const &) 
-//      template Bool LSQFit::getConstraint<VectorSTLIterator<Float> >(uInt, VectorSTLIterator<Float> &) const 
-//      template void LSQFit::solve<VectorSTLIterator<Float> >(VectorSTLIterator<Float> &) 
-//      template Bool LSQFit::solveLoop<VectorSTLIterator<Float> >(Double &, uInt &, VectorSTLIterator<Float> &, Bool) 
-//      template Bool LSQFit::solveLoop<VectorSTLIterator<Float> >(uInt &, VectorSTLIterator<Float> &, Bool) 
-//      template void LSQFit::copy<VectorSTLIterator<Float> >(Double const *, Double const *, VectorSTLIterator<Float> &, LSQReal) 
-//      template void LSQFit::uncopy<VectorSTLIterator<Float> >(Double *, Double const *, VectorSTLIterator<Float> &, LSQReal) 
-//      template void LSQFit::copyDiagonal<VectorSTLIterator<Float> >(VectorSTLIterator<Float> &, LSQReal) 
-//      template Bool LSQFit::getErrors<VectorSTLIterator<Float> >(VectorSTLIterator<Float> &) 
-// 1030 scimath/Fitting/LSQFit2.cc 
-//      = casa/Arrays/VectorSTLIterator.h 
-//      typedef VectorSTLIterator<std::complex<Double> > It1 
-//      typedef VectorSTLIterator<uInt> It1Int 
-//      template void LSQFit::makeNorm<Double, It1>(It1 const &, Double const &, std::complex<Double> const &, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It1>(It1 const &, Double const &, std::complex<Double> const &, LSQFit::AsReal, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It1>(It1 const &, Double const &, std::complex<Double> const &, LSQFit::Complex, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It1>(It1 const &, Double const &, std::complex<Double> const &, LSQFit::Conjugate, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It1>(It1 const &, Double const &, std::complex<Double> const &, LSQFit::Separable, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It1, It1Int>(uInt nIndex, It1Int const &, It1 const &, Double const &, std::complex<Double> const &, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It1, It1Int>(uInt nIndex, It1Int const &, It1 const &, Double const &, std::complex<Double> const &, LSQFit::AsReal, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It1, It1Int>(uInt nIndex, It1Int const &, It1 const &, Double const &, std::complex<Double> const &, LSQFit::Complex, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It1, It1Int>(uInt nIndex, It1Int const &, It1 const &, Double const &, std::complex<Double> const &, LSQFit::Conjugate, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It1, It1Int>(uInt nIndex, It1Int const &, It1 const &, Double const &, std::complex<Double> const &, LSQFit::Separable, Bool, Bool) 
-//      template Bool LSQFit::addConstraint<Double, It1>(It1 const &, std::complex<Double> const &) 
-//      template Bool LSQFit::addConstraint<Double, It1, It1Int>(uInt nIndex, It1Int const &, It1 const &, std::complex<Double> const &) 
-//      template Bool LSQFit::setConstraint<Double, It1>(uInt n, It1 const &, std::complex<Double> const &) 
-//      template Bool LSQFit::setConstraint<Double, It1, It1Int>(uInt n, uInt nIndex, It1Int const &, It1 const &, std::complex<Double> const &) 
-//      template Bool LSQFit::getConstraint<It1>(uInt, It1 &) const 
-//      template void LSQFit::solve<It1>(It1 &) 
-//      template Bool LSQFit::solveLoop<It1>(Double &, uInt &, It1 &, Bool) 
-//      template Bool LSQFit::solveLoop<It1>(uInt &, It1 &, Bool) 
-//      template void LSQFit::copy<It1>(Double const *, Double const *, It1 &, LSQComplex) 
-//      template void LSQFit::uncopy<It1>(Double *, Double const *, It1 &, LSQComplex) 
-//      template void LSQFit::copyDiagonal<It1>(It1 &, LSQComplex) 
-//      template Bool LSQFit::getErrors<It1>(It1 &) 
-// 1040 scimath/Fitting/LSQFit2.cc 
-//      = casa/Arrays/VectorSTLIterator.h 
-//      typedef VectorSTLIterator<std::complex<Float> > It2 
-//      typedef VectorSTLIterator<uInt> It2Int 
-//      template void LSQFit::makeNorm<Float, It2>(It2 const &, Float const &, std::complex<Float> const &, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It2>(It2 const &, Float const &, std::complex<Float> const &, LSQFit::AsReal, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It2>(It2 const &, Float const &, std::complex<Float> const &, LSQFit::Complex, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It2>(It2 const &, Float const &, std::complex<Float> const &, LSQFit::Conjugate, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It2>(It2 const &, Float const &, std::complex<Float> const &, LSQFit::Separable, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It2, It2Int>(uInt nIndex, It2Int const &, It2 const &, Float const &, std::complex<Float> const &, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It2, It2Int>(uInt nIndex, It2Int const &, It2 const &, Float const &, std::complex<Float> const &, LSQFit::AsReal, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It2, It2Int>(uInt nIndex, It2Int const &, It2 const &, Float const &, std::complex<Float> const &, LSQFit::Complex, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It2, It2Int>(uInt nIndex, It2Int const &, It2 const &, Float const &, std::complex<Float> const &, LSQFit::Conjugate, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It2, It2Int>(uInt nIndex, It2Int const &, It2 const &, Float const &, std::complex<Float> const &, LSQFit::Separable, Bool, Bool) 
-//      template Bool LSQFit::addConstraint<Float, It2>(It2 const &, std::complex<Float> const &) 
-//      template Bool LSQFit::addConstraint<Float, It2, It2Int>(uInt nIndex, It2Int const &, It2 const &, std::complex<Float> const &) 
-//      template Bool LSQFit::setConstraint<Float, It2>(uInt n, It2 const &, std::complex<Float> const &) 
-//      template Bool LSQFit::setConstraint<Float, It2, It2Int>(uInt n, uInt nIndex, It2Int const &, It2 const &, std::complex<Float> const &) 
-//      template Bool LSQFit::getConstraint<It2>(uInt, It2 &) const 
-//      template void LSQFit::solve<It2>(It2 &) 
-//      template Bool LSQFit::solveLoop<It2>(Double &, uInt &, It2 &, Bool) 
-//      template Bool LSQFit::solveLoop<It2>(uInt &, It2 &, Bool) 
-//      template void LSQFit::copy<It2>(Double const *, Double const *, It2 &, LSQComplex) 
-//      template void LSQFit::uncopy<It2>(Double *, Double const *, It2 &, LSQComplex) 
-//      template void LSQFit::copyDiagonal<It2>(It2 &, LSQComplex) 
-//      template Bool LSQFit::getErrors<It2>(It2 &) 
-// 1050 scimath/Fitting/LSQFit2.cc 
-//      = complex 
-//      typedef std::complex<Double>* It3 
-//      typedef uInt* It3Int 
-//      template void LSQFit::makeNorm<Double, It3>(It3 const &, Double const &, std::complex<Double> const &, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It3>(It3 const &, Double const &, std::complex<Double> const &, LSQFit::AsReal, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It3>(It3 const &, Double const &, std::complex<Double> const &, LSQFit::Complex, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It3>(It3 const &, Double const &, std::complex<Double> const &, LSQFit::Conjugate, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It3>(It3 const &, Double const &, std::complex<Double> const &, LSQFit::Separable, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It3, It3Int>(uInt nIndex, It3Int const &, It3 const &, Double const &, std::complex<Double> const &, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It3, It3Int>(uInt nIndex, It3Int const &, It3 const &, Double const &, std::complex<Double> const &, LSQFit::AsReal, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It3, It3Int>(uInt nIndex, It3Int const &, It3 const &, Double const &, std::complex<Double> const &, LSQFit::Complex, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It3, It3Int>(uInt nIndex, It3Int const &, It3 const &, Double const &, std::complex<Double> const &, LSQFit::Conjugate, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It3, It3Int>(uInt nIndex, It3Int const &, It3 const &, Double const &, std::complex<Double> const &, LSQFit::Separable, Bool, Bool) 
-//      template Bool LSQFit::addConstraint<Double, It3>(It3 const &, std::complex<Double> const &) 
-//      template Bool LSQFit::addConstraint<Double, It3, It3Int>(uInt nIndex, It3Int const &, It3 const &, std::complex<Double> const &) 
-//      template Bool LSQFit::setConstraint<Double, It3>(uInt n, It3 const &, std::complex<Double> const &) 
-//      template Bool LSQFit::setConstraint<Double, It3, It3Int>(uInt n, uInt nIndex, It3Int const &, It3 const &, std::complex<Double> const &) 
-//      template Bool LSQFit::getConstraint<Double>(uInt, std::complex<Double> *) const 
-//      template void LSQFit::solve<Double>(std::complex<Double> *) 
-//      template Bool LSQFit::solveLoop<Double>(Double &, uInt &, std::complex<Double> *, Bool) 
-//      template Bool LSQFit::solveLoop<Double>(uInt &, std::complex<Double> *, Bool) 
-//      template void LSQFit::copy<std::complex<Double> >(Double const *, Double const *, std::complex<Double> *, LSQComplex) 
-//      template void LSQFit::uncopy<std::complex<Double> >(Double *, Double const *, std::complex<Double> *, LSQComplex) 
-//      template Bool LSQFit::getErrors<Double>(std::complex<Double> *) 
-//      template Bool LSQFit::getCovariance<Double>(std::complex<Double> *) 
-// 1060 scimath/Fitting/LSQFit2.cc 
-//      = complex 
-//      typedef std::complex<Float>* It4 
-//      typedef uInt* It4Int 
-//      template void LSQFit::makeNorm<Float, It4>(It4 const &, Float const &, std::complex<Float> const &, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It4>(It4 const &, Float const &, std::complex<Float> const &, LSQFit::AsReal, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It4>(It4 const &, Float const &, std::complex<Float> const &, LSQFit::Complex, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It4>(It4 const &, Float const &, std::complex<Float> const &, LSQFit::Conjugate, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It4>(It4 const &, Float const &, std::complex<Float> const &, LSQFit::Separable, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It4, It4Int>(uInt nIndex, It4Int const &, It4 const &, Float const &, std::complex<Float> const &, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It4, It4Int>(uInt nIndex, It4Int const &, It4 const &, Float const &, std::complex<Float> const &, LSQFit::AsReal, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It4, It4Int>(uInt nIndex, It4Int const &, It4 const &, Float const &, std::complex<Float> const &, LSQFit::Complex, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It4, It4Int>(uInt nIndex, It4Int const &, It4 const &, Float const &, std::complex<Float> const &, LSQFit::Conjugate, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It4, It4Int>(uInt nIndex, It4Int const &, It4 const &, Float const &, std::complex<Float> const &, LSQFit::Separable, Bool, Bool) 
-//      template Bool LSQFit::addConstraint<Float, It4>(It4 const &, std::complex<Float> const &) 
-//      template Bool LSQFit::addConstraint<Float, It4, It4Int>(uInt nIndex, It4Int const &, It4 const &, std::complex<Float> const &) 
-//      template Bool LSQFit::setConstraint<Float, It4>(uInt n, It4 const &, std::complex<Float> const &) 
-//      template Bool LSQFit::setConstraint<Float, It4, It4Int>(uInt n, uInt nIndex, It4Int const &, It4 const &, std::complex<Float> const &) 
-//      template Bool LSQFit::getConstraint<Float>(uInt, std::complex<Float> *) const 
-//      template void LSQFit::solve<Float>(std::complex<Float> *) 
-//      template Bool LSQFit::solveLoop<Float>(Double &, uInt &, std::complex<Float> *, Bool) 
-//      template Bool LSQFit::solveLoop<Float>(uInt &, std::complex<Float> *, Bool) 
-//      template void LSQFit::copy<std::complex<Float> >(Double const *, Double const *, std::complex<Float> *, LSQComplex) 
-//      template void LSQFit::uncopy<std::complex<Float> >(Double *, Double const *, std::complex<Float> *, LSQComplex) 
-//      template Bool LSQFit::getErrors<Float>(std::complex<Float> *) 
-//      template Bool LSQFit::getCovariance<Float>(std::complex<Float> *) 
-// 1070 scimath/Fitting/LSQFit2.cc 
-//      typedef Double* It5 
-//      typedef uInt* It5Int 
-//      template void LSQFit::makeNorm<Double, It5>(It5 const &, Double const &, Double const &, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It5>(It5 const &, Double const &, Double const &, LSQFit::Real, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It5, It5Int>(uInt nIndex, It5Int const &, It5 const &, Double const &, Double const &, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It5, It5Int>(uInt nIndex, It5Int const &, It5 const &, Double const &, Double const &, LSQFit::Real, Bool, Bool) 
-//      template Bool LSQFit::addConstraint<Double, It5>(It5 const &, Double const &) 
-//      template Bool LSQFit::addConstraint<Double, It5, It5Int>(uInt nIndex, It5Int const &, It5 const &, Double const &) 
-//      template Bool LSQFit::setConstraint<Double, It5>(uInt n, It5 const &, Double const &) 
-//      template Bool LSQFit::setConstraint<Double, It5, It5Int>(uInt n, uInt nIndex, It5Int const &, It5 const &, Double const &) 
-//      template Bool LSQFit::getConstraint<Double>(uInt, Double *) const 
-//      template void LSQFit::solve<Double>(Double *) 
-//      template Bool LSQFit::solveLoop<Double>(Double &, uInt &, Double *, Bool) 
-//      template Bool LSQFit::solveLoop<Double>(uInt &, Double *, Bool) 
-//      template void LSQFit::copy<Double>(Double const *, Double const *, Double *, LSQReal) 
-//      template void LSQFit::uncopy<Double>(Double *, Double const *, Double *, LSQReal) 
-//      template Bool LSQFit::getErrors<Double>(Double *) 
-//      template Bool LSQFit::getCovariance<Double>(Double *) 
-// 1080 scimath/Fitting/LSQFit2.cc 
-//      typedef Float* It6 
-//      typedef uInt* It6Int 
-//      template void LSQFit::makeNorm<Float, It6>(It6 const &, Float const &, Float const &, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It6>(It6 const &, Float const &, Float const &, LSQFit::Real, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It6, It6Int>(uInt nIndex, It6Int const &, It6 const &, Float const &, Float const &, Bool, Bool) 
-//      template void LSQFit::makeNorm<Float, It6, It6Int>(uInt nIndex, It6Int const &, It6 const &, Float const &, Float const &, LSQFit::Real, Bool, Bool) 
-//      template Bool LSQFit::addConstraint<Float, It6>(It6 const &, Float const &) 
-//      template Bool LSQFit::addConstraint<Float, It6, It6Int>(uInt nIndex, It6Int const &, It6 const &, Float const &) 
-//      template Bool LSQFit::setConstraint<Float, It6>(uInt n, It6 const &, Float const &) 
-//      template Bool LSQFit::setConstraint<Float, It6, It6Int>(uInt n, uInt nIndex, It6Int const &, It6 const &, Float const &) 
-//      template Bool LSQFit::getConstraint<Float>(uInt, Float *) const 
-//      template void LSQFit::solve<Float>(Float *) 
-//      template Bool LSQFit::solveLoop<Float>(Double &, uInt &, Float *, Bool) 
-//      template Bool LSQFit::solveLoop<Float>(uInt &, Float *, Bool) 
-//      template void LSQFit::copy<Float>(Double const *, Double const *, Float *, LSQReal) 
-//      template void LSQFit::uncopy<Float>(Double *, Double const *, Float *, LSQReal) 
-//      template Bool LSQFit::getErrors<Float>(Float *) 
-//      template Bool LSQFit::getCovariance<Float>(Float *) 
-// 1090 scimath/Fitting/LSQFit2.cc 
-//      typedef Float* It7 
-//      typedef uInt* It7Int 
-//      template void LSQFit::makeNorm<Double, It7>(It7 const &, Double const &, Double const &, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It7>(It7 const &, Double const &, Double const &, LSQFit::Real, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It7, It7Int>(uInt nIndex, It7Int const &, It7 const &, Double const &, Double const &, Bool, Bool) 
-//      template void LSQFit::makeNorm<Double, It7, It7Int>(uInt nIndex, It7Int const &, It7 const &, Double const &, Double const &, LSQFit::Real, Bool, Bool) 
-//      template Bool LSQFit::addConstraint<Double, It7>(It7 const &, Double const &) 
-//      template Bool LSQFit::addConstraint<Double, It7, It7Int>(uInt nIndex, It7Int const &, It7 const &, Double const &) 
-//      template Bool LSQFit::setConstraint<Double, It7>(uInt n, It7 const &, Double const &) 
-//      template Bool LSQFit::setConstraint<Double, It7, It7Int>(uInt n, uInt nIndex, It7Int const &, It7 const &, Double const &) 
+  typedef uInt* It3Int;
+  typedef Double* It5;
+  
+  typedef std::complex<Float>* It4;
+  typedef std::complex<Double>* It3;
+
+  typedef VectorSTLIterator<uInt> ItuInt;
+  typedef VectorSTLIterator<Float> ItFloat;
+  typedef VectorSTLIterator<Double> ItDouble;
+  typedef VectorSTLIterator<std::complex<Float> > ItComplex;
+  typedef VectorSTLIterator<std::complex<Double> > ItDComplex;
+  
+  // 1010 scimath/Fitting/LSQFit2.cc ---------------------------------
+  
+  template void LSQFit::makeNorm<Double, ItDouble >(ItDouble const &, Double const &, Double const &, Bool, Bool);
+  template void LSQFit::makeNorm<Double, ItDouble >(ItDouble const &, Double const &, Double const &, LSQFit::Real, Bool, Bool);
+  template void LSQFit::makeNorm<Double, ItDouble, VectorSTLIterator<uInt> >(uInt nIndex, VectorSTLIterator<uInt> const &, ItDouble const &, Double const &, Double const &, Bool, Bool);
+  template void LSQFit::makeNorm<Double, ItDouble, VectorSTLIterator<uInt> >(uInt nIndex, VectorSTLIterator<uInt> const &, ItDouble const &, Double const &, Double const &, LSQFit::Real, Bool, Bool);
+  template Bool LSQFit::addConstraint<Double, ItDouble >(ItDouble const &, Double const &);
+  template Bool LSQFit::addConstraint<Double, ItDouble, VectorSTLIterator<uInt> >(uInt nIndex, VectorSTLIterator<uInt> const &, ItDouble const &, Double const &);
+  template Bool LSQFit::setConstraint<Double, ItDouble >(uInt n, ItDouble const &, Double const &);
+  template Bool LSQFit::setConstraint<Double, ItDouble, VectorSTLIterator<uInt> >(uInt n, uInt nIndex, VectorSTLIterator<uInt> const &, ItDouble const &, Double const &);
+  template Bool LSQFit::getConstraint<ItDouble >(uInt, ItDouble &) const;
+  template void LSQFit::solve<ItDouble >(ItDouble &);
+  template Bool LSQFit::solveLoop<ItDouble >(Double &, uInt &, ItDouble &, Bool);
+  template Bool LSQFit::solveLoop<ItDouble >(uInt &, ItDouble &, Bool);
+  template void LSQFit::copy<ItDouble >(Double const *, Double const *, ItDouble &, LSQReal);
+  template void LSQFit::uncopy<ItDouble >(Double *, Double const *, ItDouble &, LSQReal);
+  template void LSQFit::copyDiagonal<ItDouble >(ItDouble &, LSQReal);
+  template Bool LSQFit::getErrors<ItDouble >(ItDouble &);
+  
+  // 1020 scimath/Fitting/LSQFit2.cc ---------------------------------
+  
+  template void LSQFit::makeNorm<Float, ItFloat >(ItFloat const &, Float const &, Float const &, Bool, Bool);
+  template void LSQFit::makeNorm<Float, ItFloat >(ItFloat const &, Float const &, Float const &, LSQFit::Real, Bool, Bool);
+  template void LSQFit::makeNorm<Float, ItFloat, VectorSTLIterator<uInt> >(uInt nIndex, VectorSTLIterator<uInt> const &, ItFloat const &, Float const &, Float const &, Bool, Bool);
+  template void LSQFit::makeNorm<Float, ItFloat, VectorSTLIterator<uInt> >(uInt nIndex, VectorSTLIterator<uInt> const &, ItFloat const &, Float const &, Float const &, LSQFit::Real, Bool, Bool);
+  template Bool LSQFit::addConstraint<Float, ItFloat >(ItFloat const &, Float const &);
+  template Bool LSQFit::addConstraint<Float, ItFloat, VectorSTLIterator<uInt> >(uInt nIndex, VectorSTLIterator<uInt> const &, ItFloat const &, Float const &);
+  template Bool LSQFit::setConstraint<Float, ItFloat >(uInt n, ItFloat const &, Float const &);
+  template Bool LSQFit::setConstraint<Float, ItFloat, VectorSTLIterator<uInt> >(uInt n, uInt nIndex, VectorSTLIterator<uInt> const &, ItFloat const &, Float const &);
+  template Bool LSQFit::getConstraint<ItFloat >(uInt, ItFloat &) const;
+  template void LSQFit::solve<ItFloat >(ItFloat &);
+  template Bool LSQFit::solveLoop<ItFloat >(Double &, uInt &, ItFloat &, Bool);
+  template Bool LSQFit::solveLoop<ItFloat >(uInt &, ItFloat &, Bool);
+  template void LSQFit::copy<ItFloat >(Double const *, Double const *, ItFloat &, LSQReal);
+  template void LSQFit::uncopy<ItFloat >(Double *, Double const *, ItFloat &, LSQReal);
+  template void LSQFit::copyDiagonal<ItFloat >(ItFloat &, LSQReal);
+  template Bool LSQFit::getErrors<ItFloat >(ItFloat &);
+  
+  // 1030 scimath/Fitting/LSQFit2.cc ---------------------------------
+  
+  template void LSQFit::makeNorm<Double, ItDComplex>(ItDComplex const &, Double const &, std::complex<Double> const &, Bool, Bool);
+  template void LSQFit::makeNorm<Double, ItDComplex>(ItDComplex const &, Double const &, std::complex<Double> const &, LSQFit::AsReal, Bool, Bool);
+  template void LSQFit::makeNorm<Double, ItDComplex>(ItDComplex const &, Double const &, std::complex<Double> const &, LSQFit::Complex, Bool, Bool);
+  template void LSQFit::makeNorm<Double, ItDComplex>(ItDComplex const &, Double const &, std::complex<Double> const &, LSQFit::Conjugate, Bool, Bool);
+  template void LSQFit::makeNorm<Double, ItDComplex>(ItDComplex const &, Double const &, std::complex<Double> const &, LSQFit::Separable, Bool, Bool);
+  template void LSQFit::makeNorm<Double, ItDComplex, ItuInt>(uInt nIndex, ItuInt const &, ItDComplex const &, Double const &, std::complex<Double> const &, Bool, Bool);
+  template void LSQFit::makeNorm<Double, ItDComplex, ItuInt>(uInt nIndex, ItuInt const &, ItDComplex const &, Double const &, std::complex<Double> const &, LSQFit::AsReal, Bool, Bool);
+  template void LSQFit::makeNorm<Double, ItDComplex, ItuInt>(uInt nIndex, ItuInt const &, ItDComplex const &, Double const &, std::complex<Double> const &, LSQFit::Complex, Bool, Bool);
+  template void LSQFit::makeNorm<Double, ItDComplex, ItuInt>(uInt nIndex, ItuInt const &, ItDComplex const &, Double const &, std::complex<Double> const &, LSQFit::Conjugate, Bool, Bool);
+  template void LSQFit::makeNorm<Double, ItDComplex, ItuInt>(uInt nIndex, ItuInt const &, ItDComplex const &, Double const &, std::complex<Double> const &, LSQFit::Separable, Bool, Bool);
+  template Bool LSQFit::addConstraint<Double, ItDComplex>(ItDComplex const &, std::complex<Double> const &);
+  template Bool LSQFit::addConstraint<Double, ItDComplex, ItuInt>(uInt nIndex, ItuInt const &, ItDComplex const &, std::complex<Double> const &);
+  template Bool LSQFit::setConstraint<Double, ItDComplex>(uInt n, ItDComplex const &, std::complex<Double> const &);
+  template Bool LSQFit::setConstraint<Double, ItDComplex, ItuInt>(uInt n, uInt nIndex, ItuInt const &, ItDComplex const &, std::complex<Double> const &);
+  template Bool LSQFit::getConstraint<ItDComplex>(uInt, ItDComplex &) const;
+  template void LSQFit::solve<ItDComplex>(ItDComplex &);
+  template Bool LSQFit::solveLoop<ItDComplex>(Double &, uInt &, ItDComplex &, Bool);
+  template Bool LSQFit::solveLoop<ItDComplex>(uInt &, ItDComplex &, Bool);
+  template void LSQFit::copy<ItDComplex>(Double const *, Double const *, ItDComplex &, LSQComplex);
+  template void LSQFit::uncopy<ItDComplex>(Double *, Double const *, ItDComplex &, LSQComplex);
+  template void LSQFit::copyDiagonal<ItDComplex>(ItDComplex &, LSQComplex);
+  template Bool LSQFit::getErrors<ItDComplex>(ItDComplex &);
+  
+  // 1040 scimath/Fitting/LSQFit2.cc ---------------------------------
+  
+  template void LSQFit::makeNorm<Float, ItComplex>(ItComplex const &, Float const &, std::complex<Float> const &, Bool, Bool);
+  template void LSQFit::makeNorm<Float, ItComplex>(ItComplex const &, Float const &, std::complex<Float> const &, LSQFit::AsReal, Bool, Bool);
+  template void LSQFit::makeNorm<Float, ItComplex>(ItComplex const &, Float const &, std::complex<Float> const &, LSQFit::Complex, Bool, Bool);
+  template void LSQFit::makeNorm<Float, ItComplex>(ItComplex const &, Float const &, std::complex<Float> const &, LSQFit::Conjugate, Bool, Bool);
+  template void LSQFit::makeNorm<Float, ItComplex>(ItComplex const &, Float const &, std::complex<Float> const &, LSQFit::Separable, Bool, Bool);
+  template void LSQFit::makeNorm<Float, ItComplex, ItuInt>(uInt nIndex, ItuInt const &, ItComplex const &, Float const &, std::complex<Float> const &, Bool, Bool);
+  template void LSQFit::makeNorm<Float, ItComplex, ItuInt>(uInt nIndex, ItuInt const &, ItComplex const &, Float const &, std::complex<Float> const &, LSQFit::AsReal, Bool, Bool);
+  template void LSQFit::makeNorm<Float, ItComplex, ItuInt>(uInt nIndex, ItuInt const &, ItComplex const &, Float const &, std::complex<Float> const &, LSQFit::Complex, Bool, Bool);
+  template void LSQFit::makeNorm<Float, ItComplex, ItuInt>(uInt nIndex, ItuInt const &, ItComplex const &, Float const &, std::complex<Float> const &, LSQFit::Conjugate, Bool, Bool);
+  template void LSQFit::makeNorm<Float, ItComplex, ItuInt>(uInt nIndex, ItuInt const &, ItComplex const &, Float const &, std::complex<Float> const &, LSQFit::Separable, Bool, Bool);
+  template Bool LSQFit::addConstraint<Float, ItComplex>(ItComplex const &, std::complex<Float> const &);
+template Bool LSQFit::addConstraint<Float, ItComplex, ItuInt>(uInt nIndex, ItuInt const &, ItComplex const &, std::complex<Float> const &);
+  template Bool LSQFit::setConstraint<Float, ItComplex>(uInt n, ItComplex const &, std::complex<Float> const &);
+  template Bool LSQFit::setConstraint<Float, ItComplex, ItuInt>(uInt n, uInt nIndex, ItuInt const &, ItComplex const &, std::complex<Float> const &);
+  template Bool LSQFit::getConstraint<ItComplex>(uInt, ItComplex &) const;
+  template void LSQFit::solve<ItComplex>(ItComplex &);
+  template Bool LSQFit::solveLoop<ItComplex>(Double &, uInt &, ItComplex &, Bool);
+  template Bool LSQFit::solveLoop<ItComplex>(uInt &, ItComplex &, Bool);
+  template void LSQFit::copy<ItComplex>(Double const *, Double const *, ItComplex &, LSQComplex);
+  template void LSQFit::uncopy<ItComplex>(Double *, Double const *, ItComplex &, LSQComplex);
+  template void LSQFit::copyDiagonal<ItComplex>(ItComplex &, LSQComplex);
+  template Bool LSQFit::getErrors<ItComplex>(ItComplex &);
+  
+  // 1050 scimath/Fitting/LSQFit2.cc ---------------------------------
+  
+  template void LSQFit::makeNorm<Double, It3>(It3 const &, Double const &, std::complex<Double> const &, Bool, Bool);
+  template void LSQFit::makeNorm<Double, It3>(It3 const &, Double const &, std::complex<Double> const &, LSQFit::AsReal, Bool, Bool);
+  template void LSQFit::makeNorm<Double, It3>(It3 const &, Double const &, std::complex<Double> const &, LSQFit::Complex, Bool, Bool);
+  template void LSQFit::makeNorm<Double, It3>(It3 const &, Double const &, std::complex<Double> const &, LSQFit::Conjugate, Bool, Bool);
+  template void LSQFit::makeNorm<Double, It3>(It3 const &, Double const &, std::complex<Double> const &, LSQFit::Separable, Bool, Bool);
+  template void LSQFit::makeNorm<Double, It3, It3Int>(uInt nIndex, It3Int const &, It3 const &, Double const &, std::complex<Double> const &, Bool, Bool);
+  template void LSQFit::makeNorm<Double, It3, It3Int>(uInt nIndex, It3Int const &, It3 const &, Double const &, std::complex<Double> const &, LSQFit::AsReal, Bool, Bool);
+  template void LSQFit::makeNorm<Double, It3, It3Int>(uInt nIndex, It3Int const &, It3 const &, Double const &, std::complex<Double> const &, LSQFit::Complex, Bool, Bool);
+  template void LSQFit::makeNorm<Double, It3, It3Int>(uInt nIndex, It3Int const &, It3 const &, Double const &, std::complex<Double> const &, LSQFit::Conjugate, Bool, Bool);
+  template void LSQFit::makeNorm<Double, It3, It3Int>(uInt nIndex, It3Int const &, It3 const &, Double const &, std::complex<Double> const &, LSQFit::Separable, Bool, Bool);
+  template Bool LSQFit::addConstraint<Double, It3>(It3 const &, std::complex<Double> const &);
+  template Bool LSQFit::addConstraint<Double, It3, It3Int>(uInt nIndex, It3Int const &, It3 const &, std::complex<Double> const &);
+  template Bool LSQFit::setConstraint<Double, It3>(uInt n, It3 const &, std::complex<Double> const &);
+  template Bool LSQFit::setConstraint<Double, It3, It3Int>(uInt n, uInt nIndex, It3Int const &, It3 const &, std::complex<Double> const &);
+  template Bool LSQFit::getConstraint<Double>(uInt, std::complex<Double> *) const;
+  template void LSQFit::solve<Double>(std::complex<Double> *);
+  template Bool LSQFit::solveLoop<Double>(Double &, uInt &, std::complex<Double> *, Bool);
+  template Bool LSQFit::solveLoop<Double>(uInt &, std::complex<Double> *, Bool);
+  template void LSQFit::copy<std::complex<Double> >(Double const *, Double const *, std::complex<Double> *, LSQComplex);
+  template void LSQFit::uncopy<std::complex<Double> >(Double *, Double const *, std::complex<Double> *, LSQComplex);
+  template Bool LSQFit::getErrors<Double>(std::complex<Double> *);
+  template Bool LSQFit::getCovariance<Double>(std::complex<Double> *);
+  
+  // 1060 scimath/Fitting/LSQFit2.cc ---------------------------------
+  
+  template void LSQFit::makeNorm<Float, It4>(It4 const &, Float const &, std::complex<Float> const &, Bool, Bool);
+  template void LSQFit::makeNorm<Float, It4>(It4 const &, Float const &, std::complex<Float> const &, LSQFit::AsReal, Bool, Bool);
+  template void LSQFit::makeNorm<Float, It4>(It4 const &, Float const &, std::complex<Float> const &, LSQFit::Complex, Bool, Bool);
+  template void LSQFit::makeNorm<Float, It4>(It4 const &, Float const &, std::complex<Float> const &, LSQFit::Conjugate, Bool, Bool);
+  template void LSQFit::makeNorm<Float, It4>(It4 const &, Float const &, std::complex<Float> const &, LSQFit::Separable, Bool, Bool);
+  template void LSQFit::makeNorm<Float, It4, It3Int>(uInt nIndex, It3Int const &, It4 const &, Float const &, std::complex<Float> const &, Bool, Bool);
+  template void LSQFit::makeNorm<Float, It4, It3Int>(uInt nIndex, It3Int const &, It4 const &, Float const &, std::complex<Float> const &, LSQFit::AsReal, Bool, Bool);
+  template void LSQFit::makeNorm<Float, It4, It3Int>(uInt nIndex, It3Int const &, It4 const &, Float const &, std::complex<Float> const &, LSQFit::Complex, Bool, Bool);
+  template void LSQFit::makeNorm<Float, It4, It3Int>(uInt nIndex, It3Int const &, It4 const &, Float const &, std::complex<Float> const &, LSQFit::Conjugate, Bool, Bool);
+  template void LSQFit::makeNorm<Float, It4, It3Int>(uInt nIndex, It3Int const &, It4 const &, Float const &, std::complex<Float> const &, LSQFit::Separable, Bool, Bool);
+  template Bool LSQFit::addConstraint<Float, It4>(It4 const &, std::complex<Float> const &);
+  template Bool LSQFit::addConstraint<Float, It4, It3Int>(uInt nIndex, It3Int const &, It4 const &, std::complex<Float> const &);
+  template Bool LSQFit::setConstraint<Float, It4>(uInt n, It4 const &, std::complex<Float> const &);
+  template Bool LSQFit::setConstraint<Float, It4, It3Int>(uInt n, uInt nIndex, It3Int const &, It4 const &, std::complex<Float> const &);
+  template Bool LSQFit::getConstraint<Float>(uInt, std::complex<Float> *) const;
+  template void LSQFit::solve<Float>(std::complex<Float> *);
+  template Bool LSQFit::solveLoop<Float>(Double &, uInt &, std::complex<Float> *, Bool);
+  template Bool LSQFit::solveLoop<Float>(uInt &, std::complex<Float> *, Bool);
+  template void LSQFit::copy<std::complex<Float> >(Double const *, Double const *, std::complex<Float> *, LSQComplex);
+  template void LSQFit::uncopy<std::complex<Float> >(Double *, Double const *, std::complex<Float> *, LSQComplex);
+  template Bool LSQFit::getErrors<Float>(std::complex<Float> *);
+  template Bool LSQFit::getCovariance<Float>(std::complex<Float> *);
+  
+  // 1070 scimath/Fitting/LSQFit2.cc ---------------------------------
+  
+  template void LSQFit::makeNorm<Double, It5>(It5 const &, Double const &, Double const &, Bool, Bool);
+  template void LSQFit::makeNorm<Double, It5>(It5 const &, Double const &, Double const &, LSQFit::Real, Bool, Bool);
+  template void LSQFit::makeNorm<Double, It5, It3Int>(uInt nIndex, It3Int const &, It5 const &, Double const &, Double const &, Bool, Bool);
+  template void LSQFit::makeNorm<Double, It5, It3Int>(uInt nIndex, It3Int const &, It5 const &, Double const &, Double const &, LSQFit::Real, Bool, Bool);
+  template Bool LSQFit::addConstraint<Double, It5>(It5 const &, Double const &);
+  template Bool LSQFit::addConstraint<Double, It5, It3Int>(uInt nIndex, It3Int const &, It5 const &, Double const &);
+  template Bool LSQFit::setConstraint<Double, It5>(uInt n, It5 const &, Double const &);
+  template Bool LSQFit::setConstraint<Double, It5, It3Int>(uInt n, uInt nIndex, It3Int const &, It5 const &, Double const &);
+  template Bool LSQFit::getConstraint<Double>(uInt, Double *) const;
+  template void LSQFit::solve<Double>(Double *);
+  template Bool LSQFit::solveLoop<Double>(Double &, uInt &, Double *, Bool);
+  template Bool LSQFit::solveLoop<Double>(uInt &, Double *, Bool);
+  template void LSQFit::copy<Double>(Double const *, Double const *, Double *, LSQReal);
+  template void LSQFit::uncopy<Double>(Double *, Double const *, Double *, LSQReal);
+  template Bool LSQFit::getErrors<Double>(Double *);
+  template Bool LSQFit::getCovariance<Double>(Double *);
+  
+  // 1080 scimath/Fitting/LSQFit2.cc ---------------------------------
+
+
+  // 1090 scimath/Fitting/LSQFit2.cc ---------------------------------
+
 
   // scimath/Fitting/LSQaips.cc 
-  template Bool LSQaips::getCovariance<Double>(Array<Double> &);
-  template Bool LSQaips::solveLoop<Double>(Double &, uInt &, Vector<Double> &, Bool doSVD);
-  template Bool LSQaips::solveLoop<Double>(uInt &, Vector<Double> &, Bool doSVD);
   template Bool LSQaips::getCovariance<Float>(Array<Float> &);
-  template Bool LSQaips::solveLoop<Float>(Double &, uInt &, Vector<Float> &, Bool doSVD);
-  template Bool LSQaips::solveLoop<Float>(uInt &, Vector<Float> &, Bool doSVD);
-  template Bool LSQaips::getCovariance<std::complex<Double> >(Array<std::complex<Double> > &);
-  template Bool LSQaips::solveLoop<std::complex<Double> >(Double &, uInt &, Vector<std::complex<Double> > &, Bool doSVD);
-  template Bool LSQaips::solveLoop<std::complex<Double> >(uInt &, Vector<std::complex<Double> > &, Bool doSVD);
+  template Bool LSQaips::getCovariance<Double>(Array<Double> &);
   template Bool LSQaips::getCovariance<std::complex<Float> >(Array<std::complex<Float> > &);
-  template Bool LSQaips::solveLoop<std::complex<Float> >(Double &, uInt &, Vector<std::complex<Float> > &, Bool doSVD);
-  template Bool LSQaips::solveLoop<std::complex<Float> >(uInt &, Vector<std::complex<Float> > &, Bool doSVD);
+  template Bool LSQaips::getCovariance<std::complex<Double> >(Array<std::complex<Double> > &);
 
+  template Bool LSQaips::solveLoop<Float>(uInt &, Vector<Float> &, Bool doSVD);
+  template Bool LSQaips::solveLoop<Double>(uInt &, Vector<Double> &, Bool doSVD);
+  template Bool LSQaips::solveLoop<std::complex<Float> >(uInt &, Vector<std::complex<Float> > &, Bool doSVD);
+  template Bool LSQaips::solveLoop<std::complex<Double> >(uInt &, Vector<std::complex<Double> > &, Bool doSVD);
+  
+  template Bool LSQaips::solveLoop<Float>(Double &, uInt &, Vector<Float> &, Bool doSVD);  
+  template Bool LSQaips::solveLoop<Double>(Double &, uInt &, Vector<Double> &, Bool doSVD);
+  template Bool LSQaips::solveLoop<std::complex<Float> >(Double &, uInt &, Vector<std::complex<Float> > &, Bool doSVD);
+  template Bool LSQaips::solveLoop<std::complex<Double> >(Double &, uInt &, Vector<std::complex<Double> > &, Bool doSVD);
+  
   // scimath/Fitting/LinearFit.cc 
   template class LinearFit<AutoDiff<Complex> >;
   template class LinearFit<AutoDiffA<Complex> >;

@@ -3,22 +3,17 @@
 ## Set up the list with test program sources
 
 SET (tests
-  dConstraints
-  dLSQFit
-  tFitGaussian
-  tLinearFitSVD
-  tLSQaips
-  tLSQFit
-  tNonLinearFitLM
+  dLogging2
+  dLogging
+  tLoggerHolder
+  tLogging
   )
 
 ## ------------------------------------------------------------------------------
 ## Build the test programs
-##
-## XLIBLIST := LAPACK F77
 
 FOREACH (src ${tests})
   ADD_EXECUTABLE (${src} ${src}.cc)
-  TARGET_LINK_LIBRARIES (${src} scimath casa lapack)
+  TARGET_LINK_LIBRARIES (${src} table)
 ENDFOREACH (src)
 
