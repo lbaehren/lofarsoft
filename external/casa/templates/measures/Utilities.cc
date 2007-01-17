@@ -20,44 +20,13 @@
 
 // include of implementation files
 
-#include <casa/Arrays/Array.cc>
-#include <casa/Arrays/ArrayLogical.cc>
-#include <casa/Arrays/MaskedArray.cc>
-#include <casa/Arrays/Vector.cc>
 #include <casa/Utilities/CountedPtr.cc>
 #include <casa/Utilities/PtrHolder.cc>
 #include <casa/Utilities/Register.cc>
 
 namespace casa {
 
-  template class Array<MDirection>;
-  template class Array<MFrequency>;
-  template class Array<MPosition>;
-  template class Array<MeasureHolder>;
-  template class Array<Stokes::StokesTypes>;
-
-#ifdef AIPS_SUN_NATIVE 
-  template class Array<MDirection>::ConstIteratorSTL;
-  template class Array<MFrequency>::ConstIteratorSTL;
-  template class Array<MPosition>::ConstIteratorSTL;
-  template class Array<MeasureHolder>::ConstIteratorSTL;
-  template class Array<Stokes::StokesTypes>::ConstIteratorSTL;
-#endif 
-
-  template Bool allEQ(Array<Stokes::StokesTypes> const &, Array<Stokes::StokesTypes> const &);
-  template Bool anyNE(Array<Stokes::StokesTypes> const &, Array<Stokes::StokesTypes> const &);
-
-  template class MaskedArray<MDirection>;
-  template class MaskedArray<MFrequency>;
-  template class MaskedArray<MPosition>;
-  template class MaskedArray<MeasureHolder>;
-  template class MaskedArray<Stokes::StokesTypes>;
-
-  template class Vector<MeasureHolder>;
-  template class Vector<Stokes::StokesTypes>;
-  template class Vector<MDirection>;
-  template class Vector<MFrequency>;
-  template class Vector<MPosition>;
+  // -- CountedPtr.cc
 
   template class CountedConstPtr<Block<MeasureHolder> >;
   template class CountedPtr<Block<MeasureHolder> >;
@@ -94,12 +63,13 @@ namespace casa {
   template class PtrRep<TableMeasDescBase>;
   template class SimpleCountedPtr<TableMeasDescBase>;
   template class SimpleCountedConstPtr<TableMeasDescBase>;
-
-// This seems to be the only way at present to find out if we are using egcs.
-// This test might break eventually.
-// This comment is needed to get the #endif in the .cc file!
+  
+  // -- PtrHolder.cc
 
   template class PtrHolder<Measure>;
+
+  // -- Register.cc
+
   template uInt Register(MBaseline const *);
   template uInt Register(MDirection const *);
   template uInt Register(MDoppler const *);

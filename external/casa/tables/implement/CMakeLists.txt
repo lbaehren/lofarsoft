@@ -10,30 +10,24 @@ SUBDIRS (
   )
 
 ## -----------------------------------------------------------------------------
-## Files for template instantiation
+## libtables
 
-SUBDIRS (../../templates)
+## collect the source files in the modules
+
+FILE (GLOB tables_LogTables LogTables/*.cc)
+FILE (GLOB tables_TablePlot TablePlot/*.cc)
+FILE (GLOB tables_Tables Tables/*.cc)
+
+## collect the files responsible for template instantiation
 
 FILE (GLOB tables_templates ../../templates/tables/*.cc)
 
-MESSAGE (STATUS "Template instantiation file : ${tables_templates}")
-
-## -----------------------------------------------------------------------------
-## libtables
+## build the library
 
 add_library (tables
-## -- LogTables --------------------------------------------
-  LogTables/LogFilterExpr.cc
-  LogTables/LogFilterTaql.cc
-  LogTables/LoggerHolder.cc
-  LogTables/NewFile.cc
-  LogTables/TableLogSink.cc
-## -- TablePlot --------------------------------------------
-  TablePlot/BasePlot.cc
-  TablePlot/CrossPlot.cc
-  TablePlot/TPPlotter.cc
-  TablePlot/TablePlot.cc
-## -- Tables -----------------------------------------------
+  ${tables_LogTables}
+  ${tables_TablePlot}
+  ## -- Tables --
   Tables/ArrColData.cc
   Tables/ArrColDesc.cc
   Tables/ArrayColumn.cc
@@ -184,11 +178,6 @@ add_library (tables
   Tables/VirtColEng.cc
   Tables/VirtScaCol.cc
   Tables/VirtualTaQLColumn.cc
-## -- Template instantiation -------------------------------
-  ../../templates/tables/Arrays.cc
-  ../../templates/tables/Containers.cc
-  ../../templates/tables/Utilities.cc
-  ../../templates/tables/LogTables.cc
-  ../../templates/tables/TablePlot.cc
-  ../../templates/tables/Tables.cc
+  ## -- Template instantiation
+  ${tables_templates}
   )

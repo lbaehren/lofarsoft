@@ -2,18 +2,11 @@
 project (CASA_scimath_libscimath)
 
 ## -----------------------------------------------------------------------------
-## Directories containing the test programs
-
-SUBDIRS (
-  Fitting/test
-  Functionals/test
-  Mathematics/test
-  )
-
-## -----------------------------------------------------------------------------
 ## Files for template instantiation
 
 SUBDIRS (../../templates)
+
+FILE (GLOB scimath_templates ../../templates/scimath/*.cc)
 
 add_library (scimath
 ## -- scimath/implement/Fitting --------------------------------------
@@ -138,3 +131,14 @@ add_library (scimath
 #  ../../templates/scimath/Functionals.cc
 #  ../../templates/scimath/Mathematics.cc
   )
+
+## -----------------------------------------------------------------------------
+## Directories containing the test programs
+
+SUBDIRS (
+  Fitting/test
+  Functionals/test
+  Mathematics/test
+  )
+
+FILE (GLOB tables_templates ../../templates/scimath/*.cc)
