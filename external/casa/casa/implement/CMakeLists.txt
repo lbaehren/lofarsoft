@@ -1,6 +1,4 @@
-## CASA/implement/casa
-
-PROJECT (libcasa)
+PROJECT (CASA_casa_libcasa)
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
@@ -24,6 +22,10 @@ SUBDIRS (
 ## Files for template instantiation
 
 SUBDIRS (../../templates)
+
+FILE (GLOB tables_templates ../../templates/casa/*.cc)
+
+MESSAGE (STATUS "Template instantiation files : ${tables_templates}")
 
 ## -----------------------------------------------------------------------------
 ## libcasa

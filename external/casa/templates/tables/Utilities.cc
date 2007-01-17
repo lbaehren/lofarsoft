@@ -1,8 +1,10 @@
 
+#include <casa/Arrays/IPosition.h>
+#include <casa/Arrays/Vector.h>
+#include <casa/Containers/Block.h>
+#include <casa/Containers/List.h>
 #include <tables/Tables/ScalarColumn.h>
 #include <tables/Tables/TableRecordRep.h>
-#include <casa/Containers/Block.h>
-#include <casa/Arrays/IPosition.h>
 #include <tables/TablePlot/BasePlot.h>
 #include <tables/Tables/ExprNode.h>
 #include <tables/Tables/Table.h>
@@ -11,13 +13,15 @@
 #include <tables/Tables/TiledFileAccess.h>
 #include <tables/Tables/TableDesc.h>
 #include <tables/Tables/TableRecordRep.h>
-#include <casa/Containers/List.h>
 #include <tables/Tables/TableParse.h>
+#include <tables/Tables/DataManError.h>
 
+#include <casa/Utilities/Assert.cc>
 #include <casa/Utilities/BinarySearch.cc>
 #include <casa/Utilities/COWPtr.cc>
 #include <casa/Utilities/CountedPtr.cc>
 #include <casa/Utilities/Register.cc>
+#include <casa/Utilities/GenSort.cc>
 
 namespace casa {
 
@@ -70,5 +74,11 @@ namespace casa {
   template class SimpleCountedPtr<TableRecordRep>;
 
   template uInt Register(ListNotice<TableParse> const *);
+
+  // -- casa/Utilities/Assert.cc
+  template class assert_<DataManError>;
+
+  // -- casa/Utilities/GenSort.cc  
+  template uInt genSort(Vector<uInt> &, Block<uInt> const &);
 
   }

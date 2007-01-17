@@ -1,4 +1,4 @@
-project (scimath_f C Fortran)
+PROJECT (CASA_scimath_scimath_f C Fortran)
 
 set (scimath_f_sources
   ADDGRD.f

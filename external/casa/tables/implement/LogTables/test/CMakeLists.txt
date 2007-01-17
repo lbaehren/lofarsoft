@@ -14,6 +14,6 @@ SET (tests
 
 FOREACH (src ${tests})
   ADD_EXECUTABLE (${src} ${src}.cc)
-  TARGET_LINK_LIBRARIES (${src} table)
+  TARGET_LINK_LIBRARIES (${src} casa tables)
 ENDFOREACH (src)
 

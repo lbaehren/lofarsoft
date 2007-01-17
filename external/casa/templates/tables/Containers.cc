@@ -7,6 +7,7 @@
 #include <tables/Tables/DataManager.h>
 #include <tables/Tables/TableRecord.h>
 
+#include <casa/Containers/BlockIO.cc>
 #include <casa/Containers/Link.cc>
 #include <casa/Containers/List.cc>
 #include <casa/Containers/OrderedPair.cc>
@@ -34,5 +35,13 @@ namespace casa {
   template class SimpleOrderedMap<String, ColumnDesc>;
   template class SimpleOrderedMap<String, DataManager *(*)(String const &, Record const &)>;
   template class SimpleOrderedMap<String, RefColumn *>;
+
+  // -- casa/Containers/BlockIO.cc
+  template ostream & operator<<(ostream &, Block<uInt> const &);
+
+  // -- casa/Containers/RecordField.cc
+  template class RORecordFieldPtr<Table>;
+  template class RecordFieldPtr<Table>;
+
 
 }

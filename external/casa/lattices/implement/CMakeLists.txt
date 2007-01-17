@@ -1,6 +1,6 @@
 ## CASA/implement/lattices
 
-project (liblattices)
+PROJECT (CASA_lattices_liblattices)
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs

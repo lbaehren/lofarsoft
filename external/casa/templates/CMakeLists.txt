@@ -1,16 +1,11 @@
 ## Template instantiation for the module libraries of the CASA system
 
-project (templates)
-
-MACRO(GLOB_FILES VAR)
-  FOREACH(file ${ARGN})
-    LIST(APPEND ${VAR} ${file})
-  ENDFOREACH(file)
-ENDMACRO(GLOB_FILES)
+project (CASA_templates)
 
 subdirs (
   casa
+  measures
+  ms
   scimath
   tables
-  measures
 )

@@ -3,12 +3,22 @@
 
 #include <casa/BasicSL/Complex.h>
 #include <casa/BasicSL/String.h>
+#include <casa/Containers/Block.h>
+#include <casa/Utilities/ValTypeId.h>
 #include <tables/Tables/TableRecord.h>
 #include <tables/Tables/TableVector.h>
 #include <tables/Tables/TVec.h>
+#include <tables/Tables/test/tTableDesc.h>
+#include <tables/Tables/test/dVSCEngine.h>
 
 // include of implementation files
 
+#include <casa/Arrays/Array.cc>
+#include <casa/Arrays/ArrayIter.cc>
+#include <casa/Arrays/MaskedArray.cc>
+#include <casa/Arrays/Vector.cc>
+#include <casa/Utilities/Compare.cc>
+#include <casa/Utilities/CountedPtr.cc>
 #include <tables/Tables/ArrColData.cc>
 #include <tables/Tables/ArrColDesc.cc>
 #include <tables/Tables/ArrayColumn.cc>
@@ -17,17 +27,23 @@
 #include <tables/Tables/ScaColData.cc>
 #include <tables/Tables/ScaColDesc.cc>
 #include <tables/Tables/ScalarColumn.cc>
+#include <tables/Tables/ScaledArrayEngine.cc>
+#include <tables/Tables/ScaledComplexData.cc>
+#include <tables/Tables/TableVector.cc>
+#include <tables/Tables/TabVecLogic.cc>
+#include <tables/Tables/TabVecMath.cc>
 #include <tables/Tables/TVec.cc>
+#include <tables/Tables/TVecLogic.cc>
 #include <tables/Tables/TVecMath.cc>
 #include <tables/Tables/TVecScaCol.cc>
 #include <tables/Tables/TVecTemp.cc>
-#include <tables/Tables/TabVecMath.cc>
-#include <tables/Tables/TableVector.cc>
 #include <tables/Tables/VirtArrCol.cc>
 #include <tables/Tables/VirtScaCol.cc>
+#include <tables/Tables/VSCEngine.cc>
 
 namespace casa {
 
+  // -- tables/Tables/ArrColData.cc
   template class ArrayColumnData<Bool>;
   template class ArrayColumnData<Char>;
   template class ArrayColumnData<uChar>;
@@ -41,6 +57,7 @@ namespace casa {
   template class ArrayColumnData<DComplex>;
   template class ArrayColumnData<String>;
 
+  // -- tables/Tables/ArrColDesc.cc
   template class ArrayColumnDesc<Bool>;
   template class ArrayColumnDesc<Char>;
   template class ArrayColumnDesc<uChar>;
@@ -157,4 +174,122 @@ namespace casa {
 
   template class VirtualScalarColumn<Float>;
 
+  // ============================================================================
+
+  // -- tables/Tables/BaseMappedArrayEngine.cc
+  // -- tables/Tables/ScaledArrayEngine.cc 
+  template class BaseMappedArrayEngine<Double, Int>;
+  template class BaseMappedArrayEngine<Float, uChar>;
+  template class ScaledArrayEngine<Double, Int>;
+  template class ScaledArrayEngine<Float, uChar>;
+
+  // -- tables/Tables/MappedArrayEngine.cc 
+  // -- tables/Tables/BaseMappedArrayEngine.cc 
+  template class BaseMappedArrayEngine<Float, uShort>;
+  template class MappedArrayEngine<Float, uShort>;
+
+  // -- tables/Tables/ScaledComplexData.cc 
+  // -- tables/Tables/BaseMappedArrayEngine.cc 
+  // -- tables/Tables/VirtArrCol.cc 
+  // -- casa/BasicSL/Complex.h 
+  template class BaseMappedArrayEngine<DComplex, Int>;
+  template class BaseMappedArrayEngine<Complex, Short>;
+  template class ScaledComplexData<DComplex, Int>;
+  template class ScaledComplexData<Complex, Short>;
+  template class VirtualArrayColumn<DComplex>;
+
+  // -- tables/Tables/TabVecLogic.cc
+  // -- tables/Tables/TabVecMath.cc 
+  // -- tables/Tables/TVecLogic.cc
+  // -- tables/Tables/TVecMath.cc 
+  template Bool allEQ(ROTableVector<Double> const &, ROTableVector<Double> const &);
+  template Bool allEQ(ROTableVector<Float> const &, ROTableVector<Float> const &);
+  template Bool allEQ(ROTableVector<Int> const &, ROTableVector<Int> const &);
+  template Bool allNE(ROTableVector<Int> const &, ROTableVector<Int> const &);
+  template Bool anyEQ(ROTableVector<Int> const &, ROTableVector<Int> const &);
+  template Bool anyNE(ROTableVector<Double> const &, ROTableVector<Double> const &);
+  template Bool anyNE(ROTableVector<Float> const &, ROTableVector<Float> const &);
+  template Bool anyNE(ROTableVector<Int> const &, ROTableVector<Int> const &);
+  template void operator*=(TableVector<Int> &, Int const &);
+  template TableVector<Int> operator+(ROTableVector<Int> const &, Int const &);
+  template TableVector<Int> operator+(ROTableVector<Int> const &, ROTableVector<Int> const &);
+  template void operator+=(TableVector<Int> &, ROTableVector<Int> const &);
+  template Bool tabVecReptvEQ(TabVecRep<Double> const &, TabVecRep<Double> const &);
+  template Bool tabVecReptvEQ(TabVecRep<Float> const &, TabVecRep<Float> const &);
+  template Bool tabVecReptvEQ(TabVecRep<Int> const &, TabVecRep<Int> const &);
+  template Bool tabVecReptvNE(TabVecRep<Int> const &, TabVecRep<Int> const &);
+  template TabVecRep<Int> & tabVecReptvadd(TabVecRep<Int> const &, TabVecRep<Int> const &);
+  template void tabVecReptvassadd(TabVecRep<Int> &, TabVecRep<Int> const &);
+  template void tabVecRepvalasstim(TabVecRep<Int> &, Int const &);
+  template TabVecRep<Int> & tabVecRepvalradd(TabVecRep<Int> const &, Int const &);
+
+  // -- tables/Tables/TableVector.cc
+  // -- tables/Tables/TVec.cc 
+  // -- tables/Tables/TVecScaCol.cc
+  // -- tables/Tables/TVecTemp.cc 
+  template class ROTableVector<Float>;
+  template class TableVector<Float>;
+  template class TabVecRep<Float>;
+  template class TabVecScaCol<Float>;
+  template class TabVecTemp<Float>;
+
+  // -- tables/Tables/VirtArrCol.cc
+  // -- tables/Tables/VirtScaCol.cc 
+  template class VirtualArrayColumn<Double>;
+  template class VirtualScalarColumn<Double>;
+  
+  // -- casa/Arrays/Array.cc 
+  // -- casa/Arrays/MaskedArray.cc 
+  // -- casa/Arrays/Vector.cc
+  // -- tables/Tables/ScaColData.cc 
+  // -- tables/Tables/ScaColDesc.cc
+  // -- tables/Tables/ScalarColumn.cc 
+  // -- tables/Tables/VSCEngine.cc
+  // -- tables/Tables/VirtScaCol.cc 
+  // -- casa/Utilities/Compare.cc 
+  // -- casa/Utilities/CountedPtr.cc
+  template class Array<VSCExample>;
+  template class MaskedArray<VSCExample>;
+  template class Vector<VSCExample>;
+  template class ScalarColumnData<VSCExample>;
+  template class ScalarColumnDesc<VSCExample>;
+  template class ROScalarColumn<VSCExample>;
+  template class ScalarColumn<VSCExample>;
+  template class VSCEngine<VSCExample>;
+  template class VirtualScalarColumn<VSCExample>;
+  template class ObjCompare<VSCExample>;
+  template class CountedConstPtr<Block<VSCExample> >;
+  template class CountedPtr<Block<VSCExample> >;
+  template class PtrRep<Block<VSCExample> >;
+  template class SimpleCountedConstPtr<Block<VSCExample> >;
+  template class SimpleCountedPtr<Block<VSCExample> >;
+  template String valDataTypeId(VSCExample const *);
+  
+  // -- casa/Arrays/Array.cc 
+  // -- casa/Arrays/ArrayIter.cc 
+  // -- casa/Arrays/MaskedArray.cc
+  // -- casa/Arrays/Vector.cc 
+  // -- tables/Tables/ArrColData.cc
+  // -- tables/Tables/ArrColDesc.cc 
+  // -- tables/Tables/ScaColData.cc
+  // -- tables/Tables/ScaColDesc.cc 
+  // -- casa/Utilities/Compare.cc 
+  // -- casa/Utilities/CountedPtr.cc
+  template class Array<ExampleDesc>;
+  template class ArrayIterator<ExampleDesc>;
+  template class ReadOnlyArrayIterator<ExampleDesc>;
+  template class MaskedArray<ExampleDesc>;
+  template class Vector<ExampleDesc>;
+  template class ArrayColumnData<ExampleDesc>;
+  template class ArrayColumnDesc<ExampleDesc>;
+  template class ScalarColumnData<ExampleDesc>;
+  template class ScalarColumnDesc<ExampleDesc>;
+  template class ObjCompare<ExampleDesc>;
+  template class CountedConstPtr<Block<ExampleDesc> >;
+  template class CountedPtr<Block<ExampleDesc> >;
+  template class PtrRep<Block<ExampleDesc> >;
+  template class SimpleCountedConstPtr<Block<ExampleDesc> >;
+  template class SimpleCountedPtr<Block<ExampleDesc> >;
+  template String valDataTypeId(ExampleDesc const *);
+  
 }

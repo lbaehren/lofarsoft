@@ -1,4 +1,4 @@
-project (CASA)
+PROJECT (CASA_lattices)
 
 subdirs (
   fortran

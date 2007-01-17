@@ -1,4 +1,6 @@
 
+PROJECT (CASA_scimath_tFitting)
+
 ## ------------------------------------------------------------------------------
 ## Set up the list with test program sources
 

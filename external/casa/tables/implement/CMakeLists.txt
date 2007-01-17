@@ -1,4 +1,5 @@
-project (libtables)
+
+PROJECT (casa_tables_libtables)
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
@@ -12,6 +13,10 @@ SUBDIRS (
 ## Files for template instantiation
 
 SUBDIRS (../../templates)
+
+FILE (GLOB tables_templates ../../templates/tables/*.cc)
+
+MESSAGE (STATUS "Template instantiation file : ${tables_templates}")
 
 ## -----------------------------------------------------------------------------
 ## libtables

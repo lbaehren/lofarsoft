@@ -1,4 +1,5 @@
-project (libscimath)
+
+project (CASA_scimath_libscimath)
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs

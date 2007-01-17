@@ -1,4 +1,4 @@
-project (CASA)
+project (casa_tables)
 
 subdirs (
   fortran

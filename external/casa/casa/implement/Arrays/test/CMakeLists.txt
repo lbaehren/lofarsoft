@@ -1,4 +1,6 @@
 
+PROJECT (CASA_casa_tArrays)
+
 ## ------------------------------------------------------------------------------
 ## Set up the list with test program sources
 
