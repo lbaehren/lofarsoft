@@ -31,6 +31,8 @@ add_library (measures
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-subdirs (
-  Measures
-  )
+foreach (measures_module ${measures_modules})
+  LIST (APPEND tests "${measures_module}/test")
+endforeach (measures_module)
+
+SUBDIRS (${tests})

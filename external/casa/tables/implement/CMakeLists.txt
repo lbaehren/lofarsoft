@@ -2,21 +2,19 @@
 PROJECT (casa_tables_libtables)
 
 ## -----------------------------------------------------------------------------
-## Directories containing the test programs
-
-SUBDIRS (
-  LogTables/test
-  Tables/test
-  )
-
-## -----------------------------------------------------------------------------
 ## libtables
+
+SET (tables_modules
+  LogTables
+  TablePlot
+  Tables
+  )
 
 ## collect the source files in the modules
 
-FILE (GLOB tables_LogTables LogTables/*.cc)
-FILE (GLOB tables_TablePlot TablePlot/*.cc)
-FILE (GLOB tables_Tables Tables/*.cc)
+foreach (tables_module ${tables_modules})
+  FILE (GLOB tables_${tables_module} ${tables_module}/*.cc)
+endforeach (tables_module)
 
 ## collect the files responsible for template instantiation
 
@@ -181,3 +179,21 @@ add_library (tables
   ## -- Template instantiation
   ${tables_templates}
   )
+
+## library dependencies
+
+target_link_libraries (tables casa)
+
+## -----------------------------------------------------------------------------
+## Directories containing the test programs
+
+#foreach (tables_module ${tables_modules})
+#  LIST (APPEND tests "${tables_module}/test")
+#endforeach (tables_module)
+
+set (tests
+  LogTables/test
+  Tables/test
+)
+
+SUBDIRS (${tests})

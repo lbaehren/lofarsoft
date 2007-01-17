@@ -53,32 +53,49 @@ FIND_PACKAGE (X11)
 ##       -Wno-non-template-friend -Woverloaded-virtual -Wcast-align -Wno-comment
 ##       -pipe -fno-implicit-templates -Wreturn-type -Wimplicit -fPIC -c ???.cc;
 ##
-## (b) Debian GNU/Linux
+## (b) Mac OS X (Darwin) - Intel
+##
+##  CPPDBG  += -DAIPS_DARWIN -DAIPS_BIG_ENDIAN -DNATIVE_EXCP -DAIPS_ARRAY_INDEX_CHECK
+##  CPPOPT  += -DAIPS_DARWIN -DAIPS_BIG_ENDIAN -DNATIVE_EXCP
+##  CPPSTD  += -DAIPS_STDLIB
+##
+##  CC      := gcc
+##  CDBG    += -DAIPS_SVID3 -DHAVE_LINUX_GLIBC -Wreturn-type -Wimplicit -fPIC
+##  COPTLVL := -O2
+##  COPT    += -DAIPS_SVID3 -DHAVE_LINUX_GLIBC -Wreturn-type -Wimplicit -fPIC
+##
+##  C++       := c++
+##  C++DBG    += -pipe -fno-implicit-templates -Wreturn-type -Wimplicit -fPIC
+##  C++OPTLVL := -O2
+##  C++OPT    += -pipe -fno-implicit-templates -Wreturn-type -Wimplicit -fPIC
+##
+##  LDDBG     := -Xlinker -rpath -Xlinker $(AIPSARCH)/lib
+##  LDOPT     := -s $(LDDBG)
+##
+## (c) Debian GNU/Linux
 ## 
-##  g++ -Wno-deprecated -DAIPS_LINUX -DAIPS_LITTLE_ENDIAN -DAIPS_STDLIB
-##      -DAIPS_NO_LEA_MALLOC -D_GLIBCPP_DEPRECATED -DAIPS_AUTO_STL
-##      -DAIPS_NO_TEMPLATE_SRC -DAIPS_NO_TEMPLATE_SRC
-##      -I/opt/casa/stable/code/include -I. -O2 -fPIC -pipe -Wall
-##      -Wno-non-template-friend -Woverloaded-virtual -Wmissing-prototypes
-##      -Wcast-align -Wno-comment -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
-##      -c ???.cc;
+##  CPPSTD   += -DAIPS_LINUX -DAIPS_LITTLE_ENDIAN -DAIPS_STDLIB  -DAIPS_AUTO_STL
+##              -DAIPS_NO_LEA_MALLOC -D_GLIBCPP_DEPRECATED
 ##
-## The following settings have been extracted from a 'makedefs' file used on an
-## Intel Mac:
+##  CC       := $(C++ROOT)/bin/gcc
+##  CSTD     += -DHAVE_LINUX_GLIBC -Wall
+##  COPTLVL  := -O2 -fno-strength-reduce
 ##
-##  CPPSTD  += -DAIPS_LINUX -DAIPS_BIG_ENDIAN -DAIPS_STDLIB -DAIPS_NO_LEA_MALLOC
-##             -D_GLIBCPP_DEPRECATED -DAIPS_AUTO_STL
-##  CPPOPT  += -DAIPS_NO_TEMPLATE_SRC
-##  CC      := $(C++ROOT)/bin/gcc
-##  CSTD    += -DHAVE_LINUX_GLIBC -Wall
-##  COPTLVL := -O2 -fno-strength-reduce
-##  C++     := $(C++ROOT)/bin/g++ -Wno-deprecated
-##  C++STD  += -pipe -Wall -Wno-non-template-friend -Woverloaded-virtual
-##             -Wmissing -prototypes -Wcast-align -Wno-comment
-##             -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
-##  LDSTD   := -Xlinker -rpath -Xlinker
-##             $(AIPSARCH)/lib:$(C++ROOT)/lib:$(MotifLIBD):$(X11LIBD)
+##  C++      := $(C++ROOT)/bin/g++ -Wno-deprecated
+##  C++STD   += -pipe -Wall -Wno-non-template-friend -Woverloaded-virtual
+##              -Wmissing-prototypes -Wcast-align -Wno-comment -D_FILE_OFFSET_BITS=64
+##              -D_LARGEFILE_SOURCE
 ##
+##  which results in:
+##
+##  CPPOPT  = -DAIPS_LINUX -DAIPS_LITTLE_ENDIAN -DAIPS_STDLIB -DAIPS_AUTO_STL
+##            -DAIPS_NO_LEA_MALLOC -D_GLIBCPP_DEPRECATED  
+##          = $(CPPSTD)
+##
+##  C++OPT  = -O3 -fPIC -pipe -Wall -Wno-non-template-friend -Woverloaded-virtual
+##            -Wmissing-prototypes -Wno-comment -D_FILE_OFFSET_BITS=64
+##            -D_LARGEFILE_SOURCE
+##  
 ## Optimized compile command within a package (e.g. casa/implement) is:
 ##
 ##  $(C++) $(CPPOPT) $(AIPSINCL) -I. $(C++OPT) -c ???.cc
@@ -101,15 +118,13 @@ SET (CASA_OPTLEVEL "-O3")
 ## Platform-dependent compiler/linker settings
 
 IF (UNIX)
-  ## Compiler flags
   ADD_DEFINITIONS (
-    -DAIPS_STDLIB
-    -DAIPS_NO_TEMPLATE_SRC
-    -DAIPS_AUTO_STL
-    -DAIPS_NO_LEA_MALLOC
+    ## CPPOPT
+    -DAIPS_STDLIB -DAIPS_NO_TEMPLATE_SRC -DAIPS_AUTO_STL -DAIPS_NO_LEA_MALLOC
+    ## LDOPT
+##    -s -Xlinker -rpath -Xlinker
     )
-  ## Linker flags
-  SET (CASA_LDSTD "-Xlinker -rpath -Xlinker")
+  set (CASA_LDSTD "-Xlinker -rpath -Xlinker")
   IF (APPLE)
     ADD_DEFINITIONS (
       -DAIPS_DARWIN
@@ -141,9 +156,8 @@ ENDIF (UNIX)
 ## the variables internally used by CMake
 
 SET (CMAKE_VERBOSE_MAKEFILE 0)
-
+SET (CASA_MODULE_LINKER_FLAGS "${CASA_LDSTD}")
 SET (CMAKE_C_FLAGS "${CASA_OPTLEVEL} ${CASA_CXXSTD}")
-SET (CMAKE_MODULE_LINKER_FLAGS "${CASA_LDSTD}")
 
 MESSAGE (STATUS "CASA_SOURCE_DIR ......... = ${CASA_SOURCE_DIR}")
 MESSAGE (STATUS "CMAKE_SYSTEM_NAME ....... = ${CMAKE_SYSTEM_NAME}")

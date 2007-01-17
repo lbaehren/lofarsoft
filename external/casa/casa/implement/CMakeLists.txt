@@ -52,18 +52,8 @@ ADD_LIBRARY (casa
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-SUBDIRS (
-  Arrays/test
-  BasicMath/test
-  BasicSL/test
-  Containers/test
-  Exceptions/test
-  Inputs/test
-  IO/test
-  Logging/test
-  OS/test
-  Quanta/test
-  System/test
-  Utilities/test
-  )
+foreach (casa_module ${casa_modules})
+  LIST (APPEND tests "${casa_module}/test")
+endforeach (casa_module)
 
+SUBDIRS (${tests})
