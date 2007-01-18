@@ -132,7 +132,7 @@
 *                        coordinates.
 *
 *      LABDEN   I        Decimal encoded labelling density control for
-*                        use where PGSBOX is called upon to determine a
+*                        use_where PGSBOX is called upon to determine a
 *                        suitable grid spacing (e.g. via NG1 = 0,
 *                        GRID1(0) = 0).  LABDEN = 100*D2 + D1 where
 *                        D1, and D2 are the approximate number of grid
@@ -328,7 +328,7 @@
 *
 *    3) PGSBOX maintains a table of axis crossings, CACHE, in which it
 *       stores information used for axis labelling.  The caller need not
-*       normally be concerned about the use of this table other than to
+*       normally be concerned about the use_of this table other than to
 *       provide sufficient space.  Typically, NC = 256 should be enough;
 *       if not, IERR = 3 will be returned.
 *
@@ -425,7 +425,7 @@
 *   modification.  Comments within NLFUNC should specify the parameters
 *   it wants passed to it via these arrays.
 *
-*   PGSBOX first calls NLFUNC with OPCODE = 0 to cause it to initialize
+*   PGSBOX first calls NLFUNC with OPCODE = 0 to cause_it to initialize
 *   its work arrays (if necessary).  It then uses OPCODE = -1 to
 *   determine the range of world coordinate values.  It anchors the
 *   start of each coordinate grid line with a call with OPCODE = +1, and
@@ -433,7 +433,7 @@
 *
 *   The CONTXT array is also passed to NLFUNC without modification to
 *   allow it to preserve state information between calls for OPCODE = 2.
-*   In particular, NLFUNC can use this to detect discontinuities in the
+*   In particular, NLFUNC can use_this to detect discontinuities in the
 *   grid lines.
 *
 *   The CONTRL argument is provided so that NLFUNC can force PGSBOX to
@@ -592,7 +592,7 @@
       IF (IC.GE.0 .AND. IC.LT.NC-1) FULLSM = CACHE(1,NC-1).EQ.1D0
 
       IF (IC.GE.0 .AND. (FULLSM .OR. DOEDGE)) THEN
-*        Use extrema cached from a previous call.
+*        Use_extrema cached from a previous call.
          WMIN(1) = CACHE(1,0)
          WMAX(1) = CACHE(2,0)
          WMIN(2) = CACHE(3,0)
@@ -820,7 +820,7 @@
                FACT = 1D0/15D0
                STEP = STEP*FACT
             ELSE IF (FTYPE(J).EQ.'Y' .AND. STEP.LT.0.5D0) THEN
-*              Calendar increment of less than 12h; use time format.
+*              Calendar increment of less than 12h; use_time format.
                FTYPE(J) = 'y'
 
 *              Rescale days to hours.
@@ -941,9 +941,9 @@
                STEP = STEP/FACT
 
             ELSE IF (FTYPE(J).EQ.'Y') THEN
-*              Calendar axis: use coded steps.
+*              Calendar axis: use_coded steps.
                IF (STEP.LT.15D0) THEN
-*                 Timespan of a few months; use multi-day increments.
+*                 Timespan of a few months; use_multi-day increments.
                   STEP = ANINT(STEP)
                   IF (STEP.LT.1D0) THEN
                      STEP = 1D0
@@ -956,7 +956,7 @@
                   END IF
 
                ELSE IF (STEP.LT.270D0) THEN
-*                 Timespan of a few years; use multi-month increments.
+*                 Timespan of a few years; use_multi-month increments.
                   STEP = ANINT(STEP/30.44D0)
                   IF (STEP.LT.1.5D0) THEN
                      STEP = 1D0
@@ -2069,7 +2069,7 @@
             ANGLE = INDEX('DEF', FTYPE(IWRLD)).NE.0
             L = LMAG(IWRLD)
 
-*           Use integer arithmetic to avoid rounding problems.
+*           Use_integer arithmetic to avoid rounding problems.
             IF (FTYPE(IWRLD).EQ.'y') THEN
                TMP = ABS(MOD(CACHE(4,J),1D0)*24D0)
 
@@ -2497,7 +2497,7 @@
 *
 *   Notes:
 *    1) These algorithms are from D.A. Hatcher, QJRAS 25, 53-55, as
-*       modified by P.T. Wallace for use in SLALIB (subroutines CLDJ
+*       modified by P.T. Wallace for use_in SLALIB (subroutines CLDJ
 *       and DJCL).
 *
 *   Author: Mark Calabretta, Australia Telescope National Facility

@@ -132,6 +132,10 @@ add_library (scimath
 #  ../../templates/scimath/Mathematics.cc
   )
 
+## library dependencies
+
+target_link_libraries (scimath casa scimath_f)
+
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
