@@ -2,134 +2,30 @@
 project (CASA_scimath_libscimath)
 
 ## -----------------------------------------------------------------------------
-## Files for template instantiation
+## libscimath
 
-SUBDIRS (../../templates)
+SET (scimath_modules
+  Fitting
+  Functionals
+  Mathematics
+  )
+
+## collect the source files in the modules
+
+foreach (scimath_module ${scimath_modules})
+  FILE (GLOB scimath_${scimath_module} ${scimath_module}/*.cc)
+  LIST(APPEND scimath_sources ${scimath_${scimath_module}})
+endforeach (scimath_module)
+
+## collect the files responsible for template instantiation
 
 FILE (GLOB scimath_templates ../../templates/scimath/*.cc)
 
+## build the library
+
 add_library (scimath
-## -- scimath/implement/Fitting --------------------------------------
-  Fitting/FitGaussian.cc
-  Fitting/FittingProxy.cc
-  Fitting/GenericL2Fit.cc
-  Fitting/LSQFit.cc
-  Fitting/LSQFit2.cc
-  Fitting/LSQFit3.cc
-  Fitting/LSQMatrix.cc
-  Fitting/LSQMatrix2.cc
-  Fitting/LSQaips.cc
-  Fitting/LinearFit.cc
-  Fitting/LinearFitSVD.cc
-  Fitting/NonLinearFit.cc
-  Fitting/NonLinearFitLM.cc
-## -- scimath/implement/Functionals ----------------------------------
-  Functionals/ArraySampledFunctional.cc
-  Functionals/Chebyshev.cc
-  Functionals/ChebyshevParam.cc
-  Functionals/Combi2Function.cc
-  Functionals/CombiFunction.cc
-  Functionals/CombiParam.cc
-  Functionals/CompiledFunction.cc
-  Functionals/CompiledParam.cc
-  Functionals/Compound2Function.cc
-  Functionals/CompoundFunction.cc
-  Functionals/CompoundParam.cc
-  Functionals/DiracDFunction.cc
-  Functionals/DiracDParam.cc
-  Functionals/EclecticFunctionFactory.cc
-  Functionals/EvenPolynomial.cc
-  Functionals/EvenPolynomial2.cc
-  Functionals/EvenPolynomialParam.cc
-  Functionals/FuncExprData.cc
-  Functionals/FuncExpression.cc
-  Functionals/Function.cc
-  Functionals/FunctionFactoryErrors.cc
-  Functionals/FunctionHolder.cc
-  Functionals/FunctionOrder.cc
-  Functionals/FunctionParam.cc
-  Functionals/FunctionWrapper.cc
-  Functionals/FunctionalProxy.cc
-  Functionals/GNoiseFunction.cc
-  Functionals/GNoiseParam.cc
-  Functionals/Gaussian1D.cc
-  Functionals/Gaussian1D2.cc
-  Functionals/Gaussian1DParam.cc
-  Functionals/Gaussian2D.cc
-  Functionals/Gaussian2D2.cc
-  Functionals/Gaussian2DParam.cc
-  Functionals/Gaussian3D.cc
-  Functionals/Gaussian3D2.cc
-  Functionals/Gaussian3DParam.cc
-  Functionals/GaussianND.cc
-  Functionals/GaussianNDParam.cc
-  Functionals/HyperPlane.cc
-  Functionals/HyperPlane2.cc
-  Functionals/HyperPlaneParam.cc
-  Functionals/Interpolate1D.cc
-  Functionals/KaiserBFunction.cc
-  Functionals/KaiserBParam.cc
-  Functionals/MarshButterworthBandpass.cc
-  Functionals/MarshallableChebyshev.cc
-  Functionals/OddPolynomial.cc
-  Functionals/OddPolynomial2.cc
-  Functionals/OddPolynomialParam.cc
-  Functionals/Polynomial.cc
-  Functionals/Polynomial2.cc
-  Functionals/PolynomialParam.cc
-  Functionals/SPolynomial.cc
-  Functionals/SPolynomialParam.cc
-  Functionals/ScalarSampledFunctional.cc
-  Functionals/SerialHelper.cc
-  Functionals/SimButterworthBandpass.cc
-  Functionals/SincFunction.cc
-  Functionals/SincParam.cc
-  Functionals/Sinusoid1D.cc
-  Functionals/Sinusoid1D2.cc
-  Functionals/Sinusoid1DParam.cc
-  Functionals/UnaryFunction.cc
-  Functionals/UnaryParam.cc
-  Functionals/WrapperParam.cc
-## -- scimath/implement/Mathematics ----------------------------------
-  Mathematics/AutoDiff.cc
-  Mathematics/AutoDiffIO.cc
-  Mathematics/AutoDiffMath.cc
-  Mathematics/AutoDiffRep.cc
-  Mathematics/ConvolveGridder.cc
-  Mathematics/Convolver.cc
-  Mathematics/DFTServer.cc
-  Mathematics/FFTPack.cc
-  Mathematics/FFTServer.cc
-  Mathematics/Gridder.cc
-  Mathematics/HistAcc.cc
-  Mathematics/Interpolate2D.cc
-  Mathematics/Interpolate2D2.cc
-  Mathematics/InterpolateArray1D.cc
-  Mathematics/MathFunc.cc
-  Mathematics/MathFunc2.cc
-  Mathematics/MatrixMathLA.cc
-  Mathematics/MatrixSolver.cc
-  Mathematics/MedianSlider.cc
-  Mathematics/NNGridder.cc
-  Mathematics/NNLSMatrixSolver.cc
-  Mathematics/NumericTraits.cc
-  Mathematics/Primes.cc
-  Mathematics/RigidVector.cc
-  Mathematics/RigidVector2.cc
-  Mathematics/SCSL.cc
-  Mathematics/SquareMatrix.cc
-  Mathematics/SquareMatrix2.cc
-  Mathematics/StatAcc.cc
-  Mathematics/VanVleck.cc
-  Mathematics/VectorKernel.cc
-## -- Template instantiation -----------------------------------------
-  ../../templates/scimath/Arrays.cc
-  ../../templates/scimath/BasicMath.cc
-  ../../templates/scimath/Containers.cc
-  ../../templates/scimath/Utilities.cc
-  ../../templates/scimath/Fitting.cc
-#  ../../templates/scimath/Functionals.cc
-#  ../../templates/scimath/Mathematics.cc
+  ${scimath_sources}
+  ${scimath_templates}
   )
 
 ## library dependencies
@@ -139,10 +35,8 @@ target_link_libraries (scimath casa scimath_f)
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-SUBDIRS (
-  Fitting/test
-  Functionals/test
-  Mathematics/test
-  )
+foreach (scimath_module ${scimath_modules})
+  LIST (APPEND tests "${scimath_module}/test")
+endforeach (scimath_module)
 
-FILE (GLOB tables_templates ../../templates/scimath/*.cc)
+SUBDIRS (${tests})

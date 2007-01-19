@@ -22,6 +22,7 @@ SET (casa_modules
 
 foreach (casa_module ${casa_modules})
   FILE (GLOB casa_${casa_module} ${casa_module}/*.cc)
+  LIST(APPEND casa_sources ${casa_${casa_module}})
 endforeach (casa_module)
 
 ## collect the files responsible for template instantiation
@@ -33,19 +34,7 @@ FILE (GLOB casa_templates ../../templates/casa/*.cc)
 ADD_LIBRARY (casa
   aips.cc
   version2.cc
-  ${casa_Arrays}
-  ${casa_BasicMath}
-  ${casa_BasicSL}
-  ${casa_Containers}
-  ${casa_Exceptions}
-  ${casa_IO}
-  ${casa_Inputs}
-  ${casa_Logging}
-  ${casa_OS}
-  ${casa_Quanta}
-  ${casa_System}
-  ${casa_Utilities}
-  ## -- Template instantiation
+  ${casa_sources}
   ${casa_templates}
 )
 

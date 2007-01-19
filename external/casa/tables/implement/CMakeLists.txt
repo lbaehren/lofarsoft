@@ -14,6 +14,7 @@ SET (tables_modules
 
 foreach (tables_module ${tables_modules})
   FILE (GLOB tables_${tables_module} ${tables_module}/*.cc)
+  LIST(APPEND tables_sources ${tables_${tables_module}})
 endforeach (tables_module)
 
 ## collect the files responsible for template instantiation
