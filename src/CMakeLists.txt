@@ -1,3 +1,8 @@
 PROJECT (LUS)
 
-SUBDIRS (LOPES-Tools BDSM VLT)
+SUBDIRS (
+  BDSM
+  CR-Pipeline
+  LOPES-Tools
+  VLT
+  )

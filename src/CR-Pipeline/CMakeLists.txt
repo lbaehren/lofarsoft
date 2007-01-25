@@ -1,7 +1,7 @@
 
 project (CR)
 
-include (../../common/FindBlitz.cmake)
+include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindBlitz.cmake)
 
 include_directories (
   .
