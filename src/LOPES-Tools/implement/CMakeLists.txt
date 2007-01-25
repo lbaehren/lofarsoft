@@ -39,40 +39,40 @@ endif (HAVE_CASA)
 
 ADD_LIBRARY (lopestools
 ## -- Analysis ---------------------------------------------
-  Analysis/ClippingFraction.cc
-  Analysis/DataBlockStatistics.cc
+#  Analysis/ClippingFraction.cc
+#  Analysis/DataBlockStatistics.cc
 #  Analysis/DynamicSpectrum.cc
-  Analysis/Peak.cc
-  Analysis/PeakList.cc
-  Analysis/PeakSearch.cc
-  Analysis/SourceFit.cc
+#  Analysis/Peak.cc
+#  Analysis/PeakList.cc
+#  Analysis/PeakSearch.cc
+#  Analysis/SourceFit.cc
 ## -- Beamforming ------------------------------------------
-  Beamforming/Beamformer.cc
-  Beamforming/ccBeam.cc
-  Beamforming/GeomDelay.cc
-  Beamforming/GeomPhase.cc
-  Beamforming/Phasing.cc
-  Beamforming/XBeam.cc
+#  Beamforming/Beamformer.cc
+#  Beamforming/ccBeam.cc
+#  Beamforming/GeomDelay.cc
+#  Beamforming/GeomPhase.cc
+#  Beamforming/Phasing.cc
+#  Beamforming/XBeam.cc
 ##  -- Calibration -----------------------------------------
-  Calibration/AntennaGain.cc
-  Calibration/AverageGain.cc
-  Calibration/BaselineGain.cc
-  Calibration/CalTableCreator.cc
-  Calibration/CalTableInterpolater.cc
-  Calibration/CalTableReader.cc
-  Calibration/CalTableWriter.cc
-  Calibration/PhaseCalibration.cc
-  Calibration/PhaseCalibrationPlugin.cc
-  Calibration/PluginBase.cc
-  Calibration/RFIMitigation.cc
-  Calibration/RFIMitigationPlugin.cc
+#  Calibration/AntennaGain.cc
+#  Calibration/AverageGain.cc
+#  Calibration/BaselineGain.cc
+#  Calibration/CalTableCreator.cc
+#  Calibration/CalTableInterpolater.cc
+#  Calibration/CalTableReader.cc
+#  Calibration/CalTableWriter.cc
+#  Calibration/PhaseCalibration.cc
+#  Calibration/PhaseCalibrationPlugin.cc
+#  Calibration/PluginBase.cc
+#  Calibration/RFIMitigation.cc
+#  Calibration/RFIMitigationPlugin.cc
 ## -- Coordinates ------------------------------------------
-  Coordinates/AxisCoordinates.cc
-  Coordinates/AxisIterator.cc
-  Coordinates/CoordinateGrid.cc
-  Coordinates/GeodeticEllipsoid.cc
-  Coordinates/GridCoordinate.cc
-  Coordinates/PolarCoordinate.cc
+#  Coordinates/AxisCoordinates.cc
+#  Coordinates/AxisIterator.cc
+#  Coordinates/CoordinateGrid.cc
+#  Coordinates/GeodeticEllipsoid.cc
+#  Coordinates/GridCoordinate.cc
+#  Coordinates/PolarCoordinate.cc
 ## -- Data -------------------------------------------------
   Data/Data.cc
   Data/DataCC.cc
@@ -98,6 +98,9 @@ ADD_LIBRARY (lopestools
   Functionals/Shapelets2D.cc
   Functionals/ShapeletsModel1D.cc
   Functionals/StatisticsFilter.cc
+## -- Imaging ----------------------------------------------
+  Imaging/GeometricalDelay.cc
+  Imaging/GeometricalPhase.cc
 ## -- IO ---------------------------------------------------
   IO/DataBlockSettings.cc
   IO/DataIO.cc
