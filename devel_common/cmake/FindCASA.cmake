@@ -151,7 +151,7 @@ FIND_LIBRARY (TASKING_LIBRARY tasking ${AIPSLIBD})
 ##
 
 set (LINKcasa "-lcasa" CACHE STRING "LINKcasa")
-set (LINKscimath "-lscimath ${LINKcasa}" CACHE STRING "LINKscimath")
+set (LINKscimath "-lscimath -lscimath_f ${LINKcasa}" CACHE STRING "LINKscimath")
 set (LINKtables "-ltables ${LINKcasa}" CACHE STRING "LINKtables")
 set (LINKmeasures "-lmeasures -ltables ${LINKscimath}" CACHE STRING "LINKmeasures")
 set (LINKfits "-lfits ${LINKmeasures}" CACHE STRING "LINKfits")
