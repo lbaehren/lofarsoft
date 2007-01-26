@@ -1,5 +1,11 @@
+
+## Project name; this can be used for package creation
+
 project (LOPES-Tools)
 
 INCLUDE (CPack)
 
-SUBDIRS (implement apps)
+SUBDIRS (
+  implement
+  apps
+  )
