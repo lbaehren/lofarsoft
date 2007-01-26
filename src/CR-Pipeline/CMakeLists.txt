@@ -2,6 +2,7 @@
 project (CR)
 
 include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindBlitz.cmake)
+include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindCASA.cmake)
 
 include_directories (
   .

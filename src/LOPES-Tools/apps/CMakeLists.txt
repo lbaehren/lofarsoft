@@ -24,5 +24,3 @@ subdirs (
 #  treetest
   trigrun
   )
-
-include_directories (. ..)

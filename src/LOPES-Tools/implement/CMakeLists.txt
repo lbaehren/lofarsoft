@@ -1,5 +1,32 @@
 PROJECT (LOPES-Tools)
 
+## -----------------------------------------------------------------------------
+## libcasa
+
+SET (lopes_modules
+  Analysis
+  Beamforming
+  Calibration
+  Coordinates
+  Data
+  Display
+  Functionals
+  IO
+  LopesBase
+  Math
+  Observation
+  Skymap
+  Testing
+  Utilities
+  )
+
+## collect the source files in the modules
+
+foreach (lopes_module ${lopes_modules})
+  FILE (GLOB lopes_${lopes_module} ${lopes_module}/*.cc)
+  LIST(APPEND lopes_sources ${lopes_${lopes_module}})
+endforeach (lopes_module)
+
 SUBDIRS (
   Calibration
   Data
@@ -98,9 +125,6 @@ ADD_LIBRARY (lopestools
   Functionals/Shapelets2D.cc
   Functionals/ShapeletsModel1D.cc
   Functionals/StatisticsFilter.cc
-## -- Imaging ----------------------------------------------
-  Imaging/GeometricalDelay.cc
-  Imaging/GeometricalPhase.cc
 ## -- IO ---------------------------------------------------
   IO/DataBlockSettings.cc
   IO/DataIO.cc

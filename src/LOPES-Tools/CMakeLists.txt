@@ -5,6 +5,8 @@ project (LOPES-Tools)
 
 INCLUDE (CPack)
 
+## Subdirectories to inspected
+
 SUBDIRS (
   implement
   apps

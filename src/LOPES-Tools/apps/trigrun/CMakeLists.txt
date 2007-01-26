@@ -1,4 +1,6 @@
-project (LOPES-Tools)
+
+## ------------------------------------------------------------------------------
+## Find external packages
 
 find_path (POPT_H popt.h
   PATH /usr/include /usr/local/include /sw/include
@@ -10,14 +12,19 @@ else (POPT_H)
   message (STATUS "Unable to find popt.h")
 endif (POPT_H)
 
+## ------------------------------------------------------------------------------
+## Include directories
+
 include_directories (
   .
   ..
   ../../implement
-  ${CASA_INCLUDE_DIR}
   ${POPT_H}
+  ${CASA_INCLUDE_DIR}
   )
 
-add_executable (trigrun trigrun.cc)
+## ------------------------------------------------------------------------------
+## create executable
 
+add_executable (trigrun trigrun.cc)
 target_link_libraries (trigrun lopes ${CASA_LIBRARY})

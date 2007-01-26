@@ -37,7 +37,7 @@
   </ul>
 */
 
-#include <iostream>
+#include <casa/iostream.h>
 #include <sstream>
 #include <popt.h>
 
