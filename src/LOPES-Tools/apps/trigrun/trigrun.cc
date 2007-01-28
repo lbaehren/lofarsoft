@@ -48,9 +48,10 @@
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::string;
 
 int main (int argc, const char** argv)
- {
+{
   int arg_blocksize =  6;
   int arg_threshold =  6;
   int arg_delay     =  0;
@@ -104,10 +105,10 @@ int main (int argc, const char** argv)
       cout << args[file] << endl;
       
       try {
-	LopesEvent l(args[file]);
+	LOPES::LopesEvent l(args[file]);
 	LOPES::PeakSearch s(arg_blocksize, arg_threshold, arg_delay);
 	LOPES::PeakList p[l.length()];
-
+	
 	for (uint i = 0; i < l.length(); i ++) {
 	  p[i] = s.findPeaks(l[i]);
 	}

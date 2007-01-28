@@ -25,16 +25,16 @@
 
 // Standard header files
 #include <stdlib.h>
-#include <iostream>
 #include <stdio.h>
 #include <math.h>
 #include <vector>
-using namespace std;
 
+namespace CR {  // Namespace CR -- BEGIN
+  
 /*!
   \class Hermite1D
 
-  \ingroup Shapelets
+  \ingroup Math
 
   \brief A class to implement Hermite Polynomials.
 
@@ -292,5 +292,7 @@ class Hermite1D {
   void destroy(void);
 
 };
+
+}  // Namespace CR -- END
 
 #endif

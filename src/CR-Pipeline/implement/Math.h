@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006                                                  *
- *   Lars Bahren (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,44 +18,24 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tDynamicSpectrum.cc,v 1.1 2006/02/22 18:53:34 bahren Exp $*/
-
-#include <Analysis/DynamicSpectrum.h>
-
 /*!
-  \file tDynamicSpectrum.cc
+  \file Math.h
 
-  \brief A collection of test routines for DynamicSpectrum
- 
-  \author Lars Bahren
- 
-  \date 2006/02/22
-*/
-
-// -----------------------------------------------------------------------------
-
-/*!
-  \brief Test constructors for a new DynamicSpectrum object
-
-  \return nofFailedTests -- The number of failed tests.
-*/
-int test_DynamicSpectrum ()
-{
-  int nofFailedTests (0);
+  \namespace CR
   
-  return nofFailedTests;
-}
+  \defgroup Math
 
-// -----------------------------------------------------------------------------
+  \brief Math module for the CR-pipeline
+  
+  \author Lars B&auml;hren
+  
+  \date 2007/01/16
 
-int main ()
-{
-  int nofFailedTests (0);
+  <h3>Usage</h3>
 
-  // Test for the constructor(s)
-  {
-    nofFailedTests += test_DynamicSpectrum ();
-  }
+  Usage this file in order to import all the prototypes for functions and classes
+  in the <i>Math</i> module.
+*/
 
-  return nofFailedTests;
-}
+#include <Math/Hermite1D.h>
+#include <Math/Shapelets1D.h>

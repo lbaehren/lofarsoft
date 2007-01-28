@@ -22,6 +22,9 @@
 
 #include <Data/TIM40Header.h>
 
+using std::endl;
+using std::ostream;
+
 namespace LOPES {
 
 // ==============================================================================
@@ -38,21 +41,21 @@ TIM40Header::TIM40Header ()
 TIM40Header::TIM40Header (const String& project,
 			  const String& dataType,
 			  const String& filename,
-			  const uInt& id,
-			  const uInt& measurement,
+			  const uint& id,
+			  const uint& measurement,
 			  const String& frequencyUnit,
-			  const Double& samplerateValue,
+			  const double& samplerateValue,
 			  const String& samplerateUnit,
-			  const uInt& nyquistZone,
+			  const uint& nyquistZone,
 			  const String& location,
-			  const Vector<Float>& antPos,
+			  const Vector<float>& antPos,
 			  const String& weather,
-			  const Int& timezone,
+			  const int& timezone,
 			  const String& time,
 			  const String& date,
-			  const Int& ADCMaxChann,
-			  const Int& ADCMinChann,
-			  const Float& maxVolt,
+			  const int& ADCMaxChann,
+			  const int& ADCMinChann,
+			  const float& maxVolt,
 			  const String& localCalFile,
 			  const String& antennaCalFile,
 			  const String& calFileFreqUnit,
@@ -154,7 +157,7 @@ Quantity TIM40Header::samplerate (const String& unit)
   return Samplerate_p.get(Unit(unit));
 }
 
-void TIM40Header::setSamplerate (const Double& value,
+void TIM40Header::setSamplerate (const double& value,
 				 const String& unit)
 {
   TIM40Header::setSamplerate (Quantity(value,unit));
@@ -170,9 +173,9 @@ void TIM40Header::setSamplerate (const MVFrequency& samplerate)
   Samplerate_p = samplerate;
 }
 
-void TIM40Header::setSampleInfo (const Double& samplerateValue,
+void TIM40Header::setSampleInfo (const double& samplerateValue,
 				 const String& samplerateUnit,
-				 const uInt& nyquistZone)
+				 const uint& nyquistZone)
 {
   TIM40Header::setSamplerate (samplerateValue,samplerateUnit);
   TIM40Header::setNyquistZone (nyquistZone);
@@ -180,21 +183,21 @@ void TIM40Header::setSampleInfo (const Double& samplerateValue,
   TIM40Header::setBandwidth ();
 }
 
-Vector<Int> TIM40Header::ADCRange ()
+Vector<int> TIM40Header::ADCRange ()
 {
-  Vector<Int> range (2);
+  Vector<int> range (2);
   range(0) = ADCMaxChann_p;
   range(1) = ADCMinChann_p;
   return range;
 }
 
-void TIM40Header::setADCRange (const Vector<Int>& range)
+void TIM40Header::setADCRange (const Vector<int>& range)
 {
   ADCMaxChann_p = min(range);
   ADCMinChann_p = max(range);
 }
 
-Float TIM40Header::ADC2Voltage ()
+float TIM40Header::ADC2Voltage ()
 {
   return MaxVolt_p/ADCMaxChann_p;
 }
@@ -228,7 +231,7 @@ void TIM40Header::init ()
   Samplerate_p      = MVFrequency(Quantity(80.0,"MHz"));
   NyquistZone_p     = 2;
   Location_p        = "UNDEFINED";
-  AntPos_p          = Vector<Float> (3,0.0);
+  AntPos_p          = Vector<float> (3,0.0);
   Weather_p         = "UNDEFINED";
   Timezone_p        = 0;
   Time_p            = "UNDEFINED";
@@ -249,7 +252,7 @@ void TIM40Header::show ()
   TIM40Header::show (std::cout);
 }
 
-void TIM40Header::show (std::ostream& s = std::cout)
+void TIM40Header::show (ostream& s = std::cout)
 {
   s << "[TIM40Header]" << endl;
   s << " - Project         = " << project() << endl;

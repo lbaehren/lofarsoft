@@ -33,7 +33,11 @@
 #include <casa/Arrays/Matrix.h>
 #include <casa/Quanta/MVFrequency.h>
 
-#include <casa/namespace.h>
+using casa::MVFrequency;
+using casa::Quantity;
+using casa::String;
+using casa::Unit;
+using casa::Vector;
 
 namespace LOPES {
 
@@ -96,20 +100,20 @@ class TIM40Header {
   String Project_p;
   String DataType_p;
   String Filename_p;
-  uInt ID_p;
-  uInt Measurement_p;
+  uint ID_p;
+  uint Measurement_p;
   String FrequencyUnit_p;
   MVFrequency Samplerate_p;
-  uInt NyquistZone_p;
+  uint NyquistZone_p;
   String Location_p;
-  Vector<Float> AntPos_p;
+  Vector<float> AntPos_p;
   String Weather_p;
-  Int Timezone_p;
+  int Timezone_p;
   String Time_p;
   String Date_p;
-  Int ADCMaxChann_p;
-  Int ADCMinChann_p;
-  Float MaxVolt_p;
+  int ADCMaxChann_p;
+  int ADCMinChann_p;
+  float MaxVolt_p;
   String LocalCalFile_p;
   String AntennaCalFile_p;
   String CalFileFreqUnit_p;
@@ -193,21 +197,21 @@ class TIM40Header {
   TIM40Header (const String& project,
 	       const String& dataType,
 	       const String& filename,
-	       const uInt& id,
-	       const uInt& measurement,
+	       const uint& id,
+	       const uint& measurement,
 	       const String& frequencyUnit,
-	       const Double& samplerateValue,
+	       const double& samplerateValue,
 	       const String& samplerateUnit,
-	       const uInt& nyquistZone,
+	       const uint& nyquistZone,
 	       const String& location,
-	       const Vector<Float>& antPos,
+	       const Vector<float>& antPos,
 	       const String& weather,
-	       const Int& timezone,
+	       const int& timezone,
 	       const String& time,
 	       const String& date,
-	       const Int& ADCMaxChann,
-	       const Int& ADCMinChann,
-	       const Float& maxVolt,
+	       const int& ADCMaxChann,
+	       const int& ADCMinChann,
+	       const float& maxVolt,
 	       const String& localCalFile,
 	       const String& antennaCalFile,
 	       const String& calFileFreqUnit,
@@ -301,7 +305,7 @@ class TIM40Header {
     \return id -- ID of the data type, indicating wether it is from an experiment,
                   a simulation, etc.
   */
-  uInt id () {
+  uint id () {
     return ID_p;
   }
 
@@ -310,7 +314,7 @@ class TIM40Header {
 
     \param id -- ID of the data type
   */
-  void setId (const uInt& id) {
+  void setId (const uint& id) {
     ID_p = id;
   }
 
@@ -319,7 +323,7 @@ class TIM40Header {
 
     \return measurement -- Identifier for the type of measurement
   */
-  uInt measurement () {
+  uint measurement () {
     return Measurement_p;
   }
 
@@ -328,7 +332,7 @@ class TIM40Header {
 
     \param measurement -- Identifier for the type of measurement
   */
-  void setMeasurement (const uInt& measurement) {
+  void setMeasurement (const uint& measurement) {
     Measurement_p = measurement;
   }
 
@@ -388,7 +392,7 @@ class TIM40Header {
     \param value -- Value of the samplerate, e.g. <i>80.0</i>
     \param unit  -- Physical units of the samplerate, e.g. <i>MHz</i>
    */
-  void setSamplerate (const Double& value,
+  void setSamplerate (const double& value,
 		      const String& unit);
 
   /*!
@@ -396,7 +400,7 @@ class TIM40Header {
 
     \return nyquistZone -- The Nyquist zone in which the data are sampled
   */
-  uInt nyquistZone () {
+  uint nyquistZone () {
     return NyquistZone_p;
   }
   
@@ -405,7 +409,7 @@ class TIM40Header {
 
     \param nyquistZone -- The Nyquist zone in which the data are sampled
   */
-  void setNyquistZone (const uInt& nyquistZone) {
+  void setNyquistZone (const uint& nyquistZone) {
     NyquistZone_p = nyquistZone;
   }
   
@@ -432,7 +436,7 @@ class TIM40Header {
 
     \return antPos -- The position of the antenna from which these data originate
   */
-  Vector<Float> antPos () {
+  Vector<float> antPos () {
     return AntPos_p;
   }
 
@@ -441,7 +445,7 @@ class TIM40Header {
 
     \param antPos -- The position of the antenna from which these data originate
   */
-  void setAntPos (const Vector<Float>& antPos) {
+  void setAntPos (const Vector<float>& antPos) {
     AntPos_p.resize(antPos.shape());
     AntPos_p = antPos;
   }
@@ -471,7 +475,7 @@ class TIM40Header {
                         situated; this can be used for computation of seasonal
 			offsets.
   */
-  Int timezone () {
+  int timezone () {
     return Timezone_p;
   }
 
@@ -482,7 +486,7 @@ class TIM40Header {
                        situated; this can be used for computation of seasonal
 		       offsets.
   */
-  void setTimezone (const Int& timezone) {
+  void setTimezone (const int& timezone) {
     Timezone_p = timezone;
   }
 
@@ -529,7 +533,7 @@ class TIM40Header {
     
     \param ADCMaxChann -- Maximum channel of the ADC converter
    */
-  void setADCMaxChann (const Int& ADCMaxChann) {
+  void setADCMaxChann (const int& ADCMaxChann) {
     ADCMaxChann_p = ADCMaxChann;
   }
 
@@ -538,7 +542,7 @@ class TIM40Header {
     
     \param ADCMinChann -- Minimum channel of the ADC converter
    */
-  void setADCMinChann (const Int& ADCMinChann) {
+  void setADCMinChann (const int& ADCMinChann) {
     ADCMinChann_p = ADCMinChann;
   }
 
@@ -547,7 +551,7 @@ class TIM40Header {
 
     \return maxVolt -- The voltage value corresponding to the maximum ADC channel
   */
-  Float maxVolt () {
+  float maxVolt () {
     return MaxVolt_p;
   }
 
@@ -556,7 +560,7 @@ class TIM40Header {
 
     \param maxVolt -- The voltage value corresponding to the maximum ADC channel
   */
-  void setMaxVolt (const Float& maxVolt) {
+  void setMaxVolt (const float& maxVolt) {
     MaxVolt_p = maxVolt;
   }
 
@@ -660,16 +664,16 @@ class TIM40Header {
     \param samplerate     -- The sample rate, in units of the <i>samplerateUnit</i>
     \param nyquistZone    -- The Nyquist zone in which the data are sampled
   */
-  void setSampleInfo (const Double& samplerateValue,
+  void setSampleInfo (const double& samplerateValue,
 		      const String& samplerateUnit,
-		      const uInt& nyquistZone);
+		      const uint& nyquistZone);
 
   /*!
     \brief Get the range of the ADC channels
 
     \return ADCRange -- Range of the ADC channels.
   */
-  Vector<Int> ADCRange ();
+  Vector<int> ADCRange ();
 
   /*!
     \brief Set the range of the ADC channels.
@@ -678,12 +682,12 @@ class TIM40Header {
                     vector of more than two values; in this case the minimum and
 		    maximum value are stored.
   */
-  void setADCRange (const Vector<Int>& range);
+  void setADCRange (const Vector<int>& range);
 
   /*!
     \brief Multiplikation factor to convert ADC values to voltages
    */
-  Float ADC2Voltage ();
+  float ADC2Voltage ();
 
   // -------------------------------------------------------------------- Methods
 

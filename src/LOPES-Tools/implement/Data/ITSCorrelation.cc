@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006                                                  *
- *   Lars Bahren (<mail>)                                                     *
+ *   Copyright (C) 2006                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -20,11 +20,13 @@
 
 /* $Id: ITSCorrelation.cc,v 1.2 2006/07/13 14:11:54 bahren Exp $*/
 
-#include <lopes/Data/ITSCorrelation.h>
+#include <Data/ITSCorrelation.h>
 
 /*!
   \class ITSCorrelation
 */
+
+namespace LOPES {  // namespace LOPES -- begin
 
 // ==============================================================================
 //
@@ -101,9 +103,9 @@ void ITSCorrelation::setMetafile (String const &metafile)
   }
 }
 
-Bool ITSCorrelation::setStreams ()
+bool ITSCorrelation::setStreams ()
 {
-  Bool status (True);
+  bool status (true);
 
   return status;
 }
@@ -114,15 +116,17 @@ Bool ITSCorrelation::setStreams ()
 //
 // ==============================================================================
 
-Cube<Complex> ITSCorrelation::ccSpectra (Bool const &fromCalFFT)
+Cube<DComplex> ITSCorrelation::ccSpectra (bool const &fromCalFFT)
 {
   uint nofSelectedAntennas (DataReader::nofSelectedAntennas());
   
-  Cube<Complex> out (nofSelectedAntennas,
-		     nofSelectedAntennas,
-		     fftLength_p);
+  Cube<DComplex> out (nofSelectedAntennas,
+		      nofSelectedAntennas,
+		      fftLength_p);
   
   out = 0.0;
   
   return out;
 }
+
+}  // namespace LOPES -- end

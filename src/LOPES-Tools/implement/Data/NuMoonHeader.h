@@ -28,207 +28,214 @@
 #include <casa/aips.h>
 #include <casa/BasicSL/String.h>
 
-#include <casa/namespace.h>
+using std::cout;
+using std::endl;
 
-/*!
-  \class NuMoonHeader
+using casa::String;
 
-  \ingroup Data
-
-  \brief Brief description for class NuMoonHeader
-
-  \author Lars B&auml;hren
-
-  \date 2006/02/24
-
-  \test tNuMoonHeader.cc
-
-  <h3>Prerequisite</h3>
-
-  <h3>Synopsis</h3>
-
-  \verbatim
-  HEADER    DADA
-  HDR_VERSION    1.0
-  HDR_SIZE    4096
-  DADA_VERSION    1.0
-  PIC_VERSION    1.0
-  OBS_ID    MOON
-  PRIMARY    unset
-  SECONDARY    unset
-  FILE_NAME    /data1/data
-  FILE_SIZE    800000000
-  FILE_NUMBER  0                   
-  UTC_START    2006-02-20-03:59:40 
-  MJD_START    53786.16643518519   #
-  OBS_OFFSET   1600000000          
-  OBS_OVERLAP    0
-  SOURCE    moon
-  RA    03:58:53.705
-  DEC    +54:13:13.58
-  TELESCOPE    WSRT
-  INSTRUMENT    PuMa2
-  FREQ         120                 
-  BW    20
-  TSAMP    0.025
-  NBIT    8
-  NDIM    1
-  NPOL    2
-  BYTES_PER_SECOND 80000000
-  \endverbatim
+namespace LOPES {  // namespace LOPES -- begin
   
-  <h3>Example(s)</h3>
-
-*/
-
-class NuMoonHeader {
-
-  String header_p;
-  int hdrVersion_p;
-  int hdrSize_p;
-  int dataVersion_p;
-  int picVersion_p;
-  String observationId_p;
-  String primary_p;
-  String secondary_p;
-  String fileName_p;
-  int fileSize_p;
-  int fileNumber_p;
-/*   String UTC_START; */
-/*   String MJD_START; */
-/*   Double OBS_OFFSET; */
-/*   Double OBS_OVERLAP; */
-/*   String source_p; */
+  /*!
+    \class NuMoonHeader
+    
+    \ingroup Data
+    
+    \brief Brief description for class NuMoonHeader
+    
+    \author Lars B&auml;hren
+    
+    \date 2006/02/24
+    
+    \test tNuMoonHeader.cc
+    
+    <h3>Prerequisite</h3>
+    
+    <h3>Synopsis</h3>
+    
+    \verbatim
+    HEADER    DADA
+    HDR_VERSION    1.0
+    HDR_SIZE    4096
+    DADA_VERSION    1.0
+    PIC_VERSION    1.0
+    OBS_ID    MOON
+    PRIMARY    unset
+    SECONDARY    unset
+    FILE_NAME    /data1/data
+    FILE_SIZE    800000000
+    FILE_NUMBER  0                   
+    UTC_START    2006-02-20-03:59:40 
+    MJD_START    53786.16643518519   #
+    OBS_OFFSET   1600000000          
+    OBS_OVERLAP    0
+    SOURCE    moon
+    RA    03:58:53.705
+    DEC    +54:13:13.58
+    TELESCOPE    WSRT
+    INSTRUMENT    PuMa2
+    FREQ         120                 
+    BW    20
+    TSAMP    0.025
+    NBIT    8
+    NDIM    1
+    NPOL    2
+    BYTES_PER_SECOND 80000000
+    \endverbatim
+    
+    <h3>Example(s)</h3>
+    
+  */
   
- public:
-  
-  enum Keyword {
-    //! The type of header (check this!)
-    HEADER,
-    //! Header version (might change in the future)
-    HDR_VERSION,
-    //! Header size
-    HDR_SIZE,
-    //! DADA version
-    DADA_VERSION,
-    //! Pic version (??)
-    PIC_VERSION,
-    //! Observation ID
-    OBS_ID,
-    //! Primary (??)
-    PRIMARY,
-    //! Secondary (??)
-    SECONDARY,
-    //! Original file name
-    FILE_NAME,
-    //! Size of the file
-    FILE_SIZE,
-    //! Number of the file
-    FILE_NUMBER,
-    //! Observation start (UTC)
-    UTC_START,
-    //! Observation start (MJD)
-    MJD_START,
-    //! Offset w.r.t. to observation start
-    OBS_OFFSET,
-    //! Observation overlap (??)
-    OBS_OVERLAP,
-    //! Source observed
-    SOURCE,
-    //! RA of source position (J2000)
-    RA,
-    //! DEC of source position (J2000)
-    DEC,
-    //! Telescope with which the observation was carried out
-    TELESCOPE,
-    //! Instrument with which the observation was carried out
-    INSTRUMENT,
-    //! Observation center frequency [MHz]
-    FREQ,
-    //! Bandwidth
-    BW,
-    //! (??)
-    TSAMP,
-    //! Number of bits per data value
-    NBIT,
-    //! Number of axis in the data array
-    NDIM,
-    //! Number of polarizations
-    NPOL,
-    //! Bytes per second
-    BYTES_PER_SECOND
+  class NuMoonHeader {
+    
+    String header_p;
+    int hdrVersion_p;
+    int hdrSize_p;
+    int dataVersion_p;
+    int picVersion_p;
+    String observationId_p;
+    String primary_p;
+    String secondary_p;
+    String fileName_p;
+    int fileSize_p;
+    int fileNumber_p;
+    /*   String UTC_START; */
+    /*   String MJD_START; */
+    /*   Double OBS_OFFSET; */
+    /*   Double OBS_OVERLAP; */
+    /*   String source_p; */
+    
+  public:
+    
+    enum Keyword {
+      //! The type of header (check this!)
+      HEADER,
+      //! Header version (might change in the future)
+      HDR_VERSION,
+      //! Header size
+      HDR_SIZE,
+      //! DADA version
+      DADA_VERSION,
+      //! Pic version (??)
+      PIC_VERSION,
+      //! Observation ID
+      OBS_ID,
+      //! Primary (??)
+      PRIMARY,
+      //! Secondary (??)
+      SECONDARY,
+      //! Original file name
+      FILE_NAME,
+      //! Size of the file
+      FILE_SIZE,
+      //! Number of the file
+      FILE_NUMBER,
+      //! Observation start (UTC)
+      UTC_START,
+      //! Observation start (MJD)
+      MJD_START,
+      //! Offset w.r.t. to observation start
+      OBS_OFFSET,
+      //! Observation overlap (??)
+      OBS_OVERLAP,
+      //! Source observed
+      SOURCE,
+      //! RA of source position (J2000)
+      RA,
+      //! DEC of source position (J2000)
+      DEC,
+      //! Telescope with which the observation was carried out
+      TELESCOPE,
+      //! Instrument with which the observation was carried out
+      INSTRUMENT,
+      //! Observation center frequency [MHz]
+      FREQ,
+      //! Bandwidth
+      BW,
+      //! (??)
+      TSAMP,
+      //! Number of bits per data value
+      NBIT,
+      //! Number of axis in the data array
+      NDIM,
+      //! Number of polarizations
+      NPOL,
+      //! Bytes per second
+      BYTES_PER_SECOND
+    };
+    
+    // --------------------------------------------------------------- Construction
+    
+    /*!
+      \brief Default constructor
+    */
+    NuMoonHeader ();
+    
+    /*!
+      \brief Default constructor
+    */
+    NuMoonHeader (const String& fileName);
+    
+    /*!
+      \brief Copy constructor
+      
+      \param other -- Another NuMoonHeader object from which to create this new
+      one.
+    */
+    NuMoonHeader (NuMoonHeader const& other);
+    
+    // ---------------------------------------------------------------- Destruction
+    
+    /*!
+      \brief Destructor
+    */
+    ~NuMoonHeader ();
+    
+    // ------------------------------------------------------------------ Operators
+    
+    /*!
+      \brief Overloading of the copy operator
+      
+      \param other -- Another NuMoonHeader object from which to make a copy.
+    */
+    NuMoonHeader &operator= (NuMoonHeader const &other); 
+    
+    // ----------------------------------------------------------------- Parameters
+    
+    /*!
+      \brief Get the name of the file from which the data are read
+      
+      \return filename -- Name of the file from which the data are read
+    */
+    String fileName () {
+      return fileName_p;
+    }
+    
+    void setFileName (const String& fileName);
+    
+    // -------------------------------------------------------------------- Methods
+    
+    
+    
+  private:
+    
+    /*!
+      \brief Unconditional copying
+    */
+    void copy (NuMoonHeader const& other);
+    
+    /*!
+      \brief Unconditional deletion 
+    */
+    void destroy(void);
+    
+    /*!
+      \brief Parse the header of the data file
+    */
+    void parseHeader ();
+    
   };
 
-  // --------------------------------------------------------------- Construction
-
-  /*!
-    \brief Default constructor
-  */
-  NuMoonHeader ();
-
-  /*!
-    \brief Default constructor
-  */
-  NuMoonHeader (const String& fileName);
-
-  /*!
-    \brief Copy constructor
-
-    \param other -- Another NuMoonHeader object from which to create this new
-                    one.
-  */
-  NuMoonHeader (NuMoonHeader const& other);
-
-  // ---------------------------------------------------------------- Destruction
-
-  /*!
-    \brief Destructor
-  */
-  ~NuMoonHeader ();
-
-  // ------------------------------------------------------------------ Operators
-
-  /*!
-    \brief Overloading of the copy operator
-
-    \param other -- Another NuMoonHeader object from which to make a copy.
-  */
-  NuMoonHeader &operator= (NuMoonHeader const &other); 
-
-  // ----------------------------------------------------------------- Parameters
-
-  /*!
-    \brief Get the name of the file from which the data are read
-
-    \return filename -- Name of the file from which the data are read
-  */
-  String fileName () {
-    return fileName_p;
-  }
-
-  void setFileName (const String& fileName);
-
-  // -------------------------------------------------------------------- Methods
-
-
-
- private:
-
-  /*!
-    \brief Unconditional copying
-  */
-  void copy (NuMoonHeader const& other);
-
-  /*!
-    \brief Unconditional deletion 
-  */
-  void destroy(void);
-
-  /*!
-    \brief Parse the header of the data file
-   */
-  void parseHeader ();
-
-};
+}  // namespace LOPES -- end
 
 #endif /* _NUMOONHEADER_H_ */

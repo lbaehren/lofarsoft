@@ -26,44 +26,45 @@
 #include <stdlib.h>
 #include <iostream>
 #include <stdio.h>
-#include <math.h>
-using namespace std;
+#include <cmath>
 
 // Custom header files
-#include <Functionals/Shapelets1D.h>
+#include <Math/Shapelets1D.h>
 
 #define PI 3.14159265358979323846
 
-// =============================================================================
-//
-//  Construction / Deconstruction
-//
-// =============================================================================
-
-Shapelets1D::Shapelets1D ()
-  : Hermite1D ()
-{
-  Shapelets1D::setBeta ();
-}
-
-Shapelets1D::Shapelets1D (int const &order)
-  : Hermite1D (order)
-{
-  Shapelets1D::setBeta ();
-}
-
-Shapelets1D::Shapelets1D (int const &order,
-			  double const &beta)
-  : Hermite1D (order)
-{
-  Shapelets1D::setBeta (beta);
-}
-
-Shapelets1D::~Shapelets1D ()
-{
-  coefficients_p.clear();
-  integral_p.clear();
-}
+namespace CR {  // Namespace CR -- BEGIN
+  
+  // ============================================================================
+  //
+  //  Construction / Deconstruction
+  //
+  // ============================================================================
+  
+  Shapelets1D::Shapelets1D ()
+    : Hermite1D ()
+  {
+    Shapelets1D::setBeta ();
+  }
+  
+  Shapelets1D::Shapelets1D (int const &order)
+    : Hermite1D (order)
+  {
+    Shapelets1D::setBeta ();
+  }
+  
+  Shapelets1D::Shapelets1D (int const &order,
+			    double const &beta)
+    : Hermite1D (order)
+  {
+    Shapelets1D::setBeta (beta);
+  }
+  
+  Shapelets1D::~Shapelets1D ()
+  {
+    coefficients_p.clear();
+    integral_p.clear();
+  }
 
 // =============================================================================
 //
@@ -141,8 +142,8 @@ double Shapelets1D::eval (int const &l,
   double phi (0.0);
   
   if (l > order_p) {
-    cerr << "[Shapelets1D::fx] Adjusting internal coefficient cache "
-	 << order_p << " -> " << l << " ..." << endl;
+    std::cerr << "[Shapelets1D::fx] Adjusting internal coefficient cache "
+	 << order_p << " -> " << l << " ..." << std::endl;
     Shapelets1D::setOrder (l);
   }
   
@@ -172,11 +173,11 @@ double Shapelets1D::fx (int const &l,
 
 // -------------------------------------------------------------- Shapelets1D::fx
 
-vector<double> Shapelets1D::fx (int const &l,
-				vector<double> const &x)
+std::vector<double> Shapelets1D::fx (int const &l,
+				std::vector<double> const &x)
 {
   unsigned int nofValues = x.size();
-  vector<double> y (nofValues);
+  std::vector<double> y (nofValues);
   
   for (unsigned i=0; i<nofValues; i++) {
     y[i] = fx (l,x[i]);
@@ -187,15 +188,15 @@ vector<double> Shapelets1D::fx (int const &l,
 
 // -------------------------------------------------------------- Shapelets1D::fx
 
-vector<double> Shapelets1D::fx (vector<int> const &l,
-				vector<double> const &x)
+std::vector<double> Shapelets1D::fx (std::vector<int> const &l,
+				std::vector<double> const &x)
 {
   int nelem (0);
-  vector<double> y;
+  std::vector<double> y;
   
   // check if the vector sizes match
   if (l.size() != x.size()) {
-    std::cout << "[Shapelets1D::fx] Mismatching array sizes!" << endl;
+    std::cout << "[Shapelets1D::fx] Mismatching array sizes!" << std::endl;
     y.resize(1,0.0);
   } else {
     nelem = x.size();
@@ -224,11 +225,11 @@ double Shapelets1D::dfdx (int const &l,
 
 // ------------------------------------------------------------- Shapelets1D::dfdx
 
-vector<double> Shapelets1D::dfdx (int const &l,
-				vector<double> const &x)
+std::vector<double> Shapelets1D::dfdx (int const &l,
+				std::vector<double> const &x)
 {
   unsigned int nofValues = x.size();
-  vector<double> y (nofValues);
+  std::vector<double> y (nofValues);
   
   for (unsigned i=0; i<nofValues; i++) {
     y[i] = dfdx (l,x[i]);
@@ -239,15 +240,15 @@ vector<double> Shapelets1D::dfdx (int const &l,
 
 // ------------------------------------------------------------- Shapelets1D::dfdx
 
-vector<double> Shapelets1D::dfdx (vector<int> const &l,
-				  vector<double> const &x)
+std::vector<double> Shapelets1D::dfdx (std::vector<int> const &l,
+				  std::vector<double> const &x)
 {
   int nelem (0);
-  vector<double> y;
+  std::vector<double> y;
   
   // check if the vector sizes match
   if (l.size() != x.size()) {
-    std::cout << "[Shapelets1D::dfdx] Mismatching array sizes!" << endl;
+    std::cout << "[Shapelets1D::dfdx] Mismatching array sizes!" << std::endl;
     y.resize(1,0.0);
   } else {
     nelem = x.size();
@@ -263,11 +264,11 @@ vector<double> Shapelets1D::dfdx (vector<int> const &l,
 
 // -------------------------------------------------------------- Shapelets1D::fft
 
-complex<double> Shapelets1D::fft (int const &l, 
-				  double const &x)
+std::complex<double> Shapelets1D::fft (int const &l, 
+				       double const &x)
 {
-  complex<double> i = complex<double>(0,1);
-  complex<double> y = pow(i,l);
+  std::complex<double> i = std::complex<double>(0,1);
+  std::complex<double> y = pow(i,l);
 
   y *= beta_p*eval(l,x*beta_p);
 
@@ -351,7 +352,7 @@ double Shapelets1D::factln (int n)
 {
   static double a[101];
   
-  if (n < 0) cerr << "[Shapelets1D::factrl] Negative factorial" << endl;
+  if (n < 0) std::cerr << "[Shapelets1D::factrl] Negative factorial" << std::endl;
   if (n <= 1) return 0.0;
   if (n <= 100) return a[n] ? a[n] : (a[n]=Shapelets1D::gammln(n+1.0));
   else return Shapelets1D::gammln(n+1.0);
@@ -363,7 +364,7 @@ double Shapelets1D::factrl (int n) {
   static double a[33]={1.0,1.0,2.0,6.0,24.0};
   int j;
   
-  if (n < 0) cerr << "[Shapelets1D::factrl] Negative factorial" << endl;
+  if (n < 0) std::cerr << "[Shapelets1D::factrl] Negative factorial" << std::endl;
   if (n > 32) return exp(Shapelets1D::gammln(n+1.0));
   while (ntop<n) {
     j=ntop++;
@@ -376,3 +377,5 @@ double Shapelets1D::bico (int n, int k)
 {
   return floor(0.5+exp(Shapelets1D::factln(n)-Shapelets1D::factln(k)-Shapelets1D::factln(n-k)));
 }
+  
+}  // Namespace CR -- END

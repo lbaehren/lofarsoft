@@ -21,8 +21,10 @@
 /* $Id: ITSMetadata.cc,v 1.7 2006/08/07 12:48:04 bahren Exp $*/
 
 #include <fstream>
-#include <lopes/Data/ITSMetadata.h>
+#include <Data/ITSMetadata.h>
 
+namespace LOPES {  // namespace LOPES -- begin
+  
 // ==============================================================================
 //
 //  Construction
@@ -30,20 +32,20 @@
 // ==============================================================================
 
 ITSMetadata::ITSMetadata ()
-  : isOk_p (False)
+  : isOk_p (false)
 {
   init ();
 }
 
 ITSMetadata::ITSMetadata (String const &metafile)
-  : isOk_p (False)
+  : isOk_p (false)
 {
   init ();
   setMetafile (metafile);
 }
 
 ITSMetadata::ITSMetadata (ITSMetadata const &other)
-  : isOk_p (False)
+  : isOk_p (false)
 {
   copy (other);
 }
@@ -62,8 +64,8 @@ void ITSMetadata::init ()
   interval_p         = 0;
   captureMode_p      = ITSMetadata::IMMEDIATE;
   captureSize_p      = ITSMetadata::S16_512K;
-  signExtension_p    = True;
-  skipcapture_p      = False;
+  signExtension_p    = true;
+  skipcapture_p      = false;
   iterations_p       = 0;
   currentIteration_p = 0;
   observationId_p    = 0;
@@ -129,7 +131,7 @@ void ITSMetadata::copy (ITSMetadata const& other)
     antennaHasValidData_p = other.antennaHasValidData_p;
   } catch (AipsError x) {
     cerr << "[ITSMetadata::copy]" << x.getMesg() << endl;
-    isOk_p = False;
+    isOk_p = false;
   }
 }
 
@@ -146,7 +148,7 @@ void ITSMetadata::destroy ()
 
 void ITSMetadata::setMetafile (const String& metafile)
 {
-  Bool status (True);
+  bool status (true);
   String metafile_tmp (metafile);
 
   // check if the file is actually there
@@ -156,12 +158,12 @@ void ITSMetadata::setMetafile (const String& metafile)
     infile.open(metafile.c_str(), ios::in);
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
-    status = False;
+    status = false;
   }
   
   if (!infile || infile == NULL) {
     cerr << "[ITSMetadata::setMetafile] Error opening file " << metafile << endl;
-    status = False;
+    status = false;
     //
     metafile_tmp = adjustPathToMetafile (metafile);
     setMetafile (metafile_tmp);
@@ -186,7 +188,7 @@ void ITSMetadata::setMetafile (const String& metafile)
       ifstream infile_tmp;
       infile_tmp.open(metafile.c_str(), ios::in);
       if (!infile_tmp || infile_tmp == NULL) {
-	status = False;
+	status = false;
       } else {
 	// close the file stream
 	infile_tmp.close();
@@ -199,7 +201,7 @@ void ITSMetadata::setMetafile (const String& metafile)
     metafile_p = metafile_tmp;
     
     // Decompose path to meta file into directory and filename
-    directory_p  = StringTools::dirFromPath(metafile_tmp);
+    directory_p  = dirFromPath(metafile_tmp);
     
     // Read in the information from the experiment meta file
     readMetafile ();
@@ -216,7 +218,7 @@ string ITSMetadata::adjustPathToMetafile (string const &path)
 {
   string newPath;
   
-  newPath = StringTools::dirFromPath(path);
+  newPath = dirFromPath(path);
   newPath += "/experiment.meta";
   
   return newPath;
@@ -247,7 +249,7 @@ bool ITSMetadata::setDatafiles (String const &filenames)
   
   try {
     // decompose the input string into the substrings
-    Vector<String> datafiles = StringTools::getSubstrings(filenames," ");
+    Vector<String> datafiles = getSubstrings(filenames," ");
     // keep in mind, that the input string contains one empty entry, which needs
     // needs to be skipped when storing the information internally
     uint nofDatafiles (datafiles.nelements()-1);
@@ -323,14 +325,14 @@ bool ITSMetadata::checkDatafiles ()
 
 // ----------------------------------------------------------------- hasValidData
 
-Bool ITSMetadata::hasValidData (uint const &antenna) const
+bool ITSMetadata::hasValidData (uint const &antenna) const
 {
   if (antenna > antennas_p.nelements()) {
-    return False;
+    return false;
   } else if (!antennaHasValidData_p(antenna)) {
-    return False;
+    return false;
   } else {
-    return True;
+    return true;
   }
 }
 
@@ -342,7 +344,7 @@ bool ITSMetadata::setAntennas (String const &antennas)
 
   try {
     // decompose the input string into the substrings
-    Vector<String> antennaNumbers = StringTools::getSubstrings(antennas," ");
+    Vector<String> antennaNumbers = getSubstrings(antennas," ");
     // keep in mind, that the input string contains one empty entry, which needs
     // needs to be skipped when storing the information internally
     uint nofAntennas (antennaNumbers.nelements()-1);
@@ -420,7 +422,7 @@ void ITSMetadata::readMetafile ()
       // try to extract the keyword
       if (! infile.eof() && infile.good() && status && buffer != "") {
 	try {
-	  keyword = strtok (StringTools::string2char(buffer), "=");
+	  keyword = strtok (string2char(buffer), "=");
 	} catch (AipsError x) {
 	  cerr << x.getMesg() << endl;
 	  keyword = "";
@@ -430,7 +432,7 @@ void ITSMetadata::readMetafile ()
 	  try {
 	    // need to handled separately (see documentation)
 	    if (keyword == "file") {
-	      metaValue = StringTools::fileFromPath(strtok (NULL, "\n"));
+	      metaValue = fileFromPath(strtok (NULL, "\n"));
 	      dataFilenames += " ";
 	      dataFilenames += metaValue;
 	    }
@@ -489,4 +491,6 @@ void ITSMetadata::readMetafile ()
   infile.close();
   isOk_p = status;
 }
+
+}  // namespace LOPES -- end
 

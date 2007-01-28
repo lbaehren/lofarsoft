@@ -26,8 +26,10 @@
 #include <complex>
 #include <blitz/array.h>
 
-#include <Functionals/Hermite1D.h>
+#include <Math/Hermite1D.h>
 
+namespace CR {  // Namespace CR -- BEGIN
+  
 /*!
   \class Shapelets1D
 
@@ -111,10 +113,10 @@ class Shapelets1D : public Hermite1D {
   double beta_p;
 
   // The normalization factors of the Shapelet functions
-  vector<double> coefficients_p;
+  std::vector<double> coefficients_p;
 
   // Integral over x-axis, [-\infty,+\infty]
-  vector<double> integral_p;
+  std::vector<double> integral_p;
 
  public:
 
@@ -191,8 +193,8 @@ class Shapelets1D : public Hermite1D {
     
     \return y - Vector of values of the shapelet function \f$ B_l (x;\beta) \f$.
   */
-  vector<double> fx (int const &l, 
-		     vector<double> const &x);
+  std::vector<double> fx (int const &l, 
+		     std::vector<double> const &x);
 
   /*!
     \brief Evaluate the shapelet function at a set of points.
@@ -202,8 +204,8 @@ class Shapelets1D : public Hermite1D {
     
     \return y - Vector of values of the shapelet function \f$ B_l (x;\beta) \f$.
   */
-  vector<double> fx (vector<int> const &l, 
-		     vector<double> const &x);
+  std::vector<double> fx (std::vector<int> const &l, 
+		     std::vector<double> const &x);
 
   /*!
     \brief First order derivative w.r.t. \f$ x \f$.
@@ -228,8 +230,8 @@ class Shapelets1D : public Hermite1D {
     \param l - Order of the shapelet function; integer number.
     \param x - Vector of values for which the function is evaluated.
   */
-  vector<double> dfdx (int const &l, 
-		       vector<double> const &x);
+  std::vector<double> dfdx (int const &l, 
+		       std::vector<double> const &x);
 
   /*!
     \brief First order derivative w.r.t. \f$ x \f$.
@@ -239,8 +241,8 @@ class Shapelets1D : public Hermite1D {
     \param l - Order of the shapelet function; integer number.
     \param x - Vector of values for which the function is evaluated.
   */
-  vector<double> dfdx (vector<int> const &l, 
-		       vector<double> const &x);
+  std::vector<double> dfdx (std::vector<int> const &l, 
+		       std::vector<double> const &x);
   
   /*!
     \brief Second order derivative w.r.t. \f$ x \f$.
@@ -265,8 +267,8 @@ class Shapelets1D : public Hermite1D {
     
     \return y - Value of the shapelet function \f$ \widetilde{B_{n}}(k;\beta) \f$.
   */
-  complex<double> fft (int const &l, 
-		       double const &x);
+  std::complex<double> fft (int const &l, 
+			    double const &x);
   
   // === Global characteristics ================================================
   
@@ -317,7 +319,7 @@ class Shapelets1D : public Hermite1D {
   double bico (int n, int k);
 
 };
-
-
+  
+}  // Namespace CR -- END
 
 #endif

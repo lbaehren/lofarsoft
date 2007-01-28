@@ -374,8 +374,8 @@ namespace LOPES {  // namespace LOPES -- begin
   {
     Vector <double> inColumn (blocksize_p,1.0);
     Vector<DComplex> outColumn;
-    casa::FFTServer<double,DComplex> server(IPosition(1,blocksize_p),
-					    casa::FFTEnums::REALTOCOMPLEX);
+    casa::FFTServer<double,casa::DComplex> server(IPosition(1,blocksize_p),
+						  casa::FFTEnums::REALTOCOMPLEX);
     server.fft(outColumn,inColumn);
     
     fftLength_p = outColumn.nelements();
@@ -571,234 +571,234 @@ namespace LOPES {  // namespace LOPES -- begin
   // ----------------------------------------------------------------------- calfft
   
   Matrix<DComplex> DataReader::calfft ()
-{
-  int antenna(0);
-  int channel(0);
-  int nofSelectedAntennas (DataReader::nofSelectedAntennas());
-  int nofSelectedChannels (DataReader::nofSelectedChannels());
-  Matrix<DComplex> in (fft());
-  Matrix<DComplex> out (nofSelectedChannels,nofSelectedAntennas);
-
-  out = 0.0;
-
-//   cout << "[DataReader::calfft]" << endl;
-//   cout << " - selected antennas = " << selectedAntennas_p   << endl;
-//   cout << " - selected channels = " << selectedChannels_p   << endl;
-//   cout << " - shape(fft)        = " << in.shape()           << endl;
-//   cout << " - shape(fft2calfft) = " << fft2calfft_p.shape() << endl;
-//   cout << " - shape(calfft)     = " << out.shape()          << endl;
-
-  /*
-    Conversion from raw to calibrated FFT: as we may have selected on both
-    antenna numbers and frequency channels, we cannot simply do
+  {
+    int antenna(0);
+    int channel(0);
+    int nofSelectedAntennas (DataReader::nofSelectedAntennas());
+    int nofSelectedChannels (DataReader::nofSelectedChannels());
+    Matrix<DComplex> in (fft());
+    Matrix<DComplex> out (nofSelectedChannels,nofSelectedAntennas);
+    
+    out = 0.0;
+    
+    //   cout << "[DataReader::calfft]" << endl;
+    //   cout << " - selected antennas = " << selectedAntennas_p   << endl;
+    //   cout << " - selected channels = " << selectedChannels_p   << endl;
+    //   cout << " - shape(fft)        = " << in.shape()           << endl;
+    //   cout << " - shape(fft2calfft) = " << fft2calfft_p.shape() << endl;
+    //   cout << " - shape(calfft)     = " << out.shape()          << endl;
+    
+    /*
+      Conversion from raw to calibrated FFT: as we may have selected on both
+      antenna numbers and frequency channels, we cannot simply do
       out = in*fft2calfft_p;
-  */
-  try {
-    for (antenna=0; antenna<nofSelectedAntennas; antenna++) {
-      for (channel=0; channel<nofSelectedChannels; channel++) {
-	out (channel,antenna) = in(channel,antenna)
-	  *fft2calfft_p(selectedChannels_p(channel),selectedAntennas_p(antenna));
+    */
+    try {
+      for (antenna=0; antenna<nofSelectedAntennas; antenna++) {
+	for (channel=0; channel<nofSelectedChannels; channel++) {
+	  out (channel,antenna) = in(channel,antenna)
+	    *fft2calfft_p(selectedChannels_p(channel),selectedAntennas_p(antenna));
+	}
+      }
+    } catch (AipsError x) {
+      cerr << "[DataReader::calfft]" << x.getMesg() << endl;
+    }
+    
+    return out;
+  }
+  
+  // -------------------------------------------------------------------- ccSpectra
+  
+  Cube<DComplex> DataReader::ccSpectra (bool const &fromCalFFT)
+  {
+    int antenna1 (0);
+    int antenna2 (0);
+    int channel  (0);
+    Matrix<DComplex> in (DataReader::nofSelectedChannels(),
+			 DataReader::nofSelectedAntennas());
+    
+    if (fromCalFFT == true) {
+      in = calfft();
+    } else {
+      in = fft();
+    }
+    
+    IPosition shape (in.shape());
+    Cube<DComplex> out (shape(0),shape(1),shape(1),0.0);
+    
+    for (antenna2=0; antenna2<shape(1); antenna2++) {
+      for (antenna1=0; antenna1<shape(1); antenna1++) {
+	for (channel=0; channel<shape(0); channel++) {
+	  out (channel,antenna1,antenna2) = in(channel,antenna1)*in(channel,antenna2);
+	}
       }
     }
-  } catch (AipsError x) {
-    cerr << "[DataReader::calfft]" << x.getMesg() << endl;
+    
+    return out;
   }
-
-  return out;
-}
-
-// -------------------------------------------------------------------- ccSpectra
-
-Cube<DComplex> DataReader::ccSpectra (bool const &fromCalFFT)
-{
-  int antenna1 (0);
-  int antenna2 (0);
-  int channel  (0);
-  Matrix<DComplex> in (DataReader::nofSelectedChannels(),
-		      DataReader::nofSelectedAntennas());
-
-  if (fromCalFFT == true) {
-    in = calfft();
-  } else {
-    in = fft();
-  }
-
-  IPosition shape (in.shape());
-  Cube<DComplex> out (shape(0),shape(1),shape(1),0.0);
-
-  for (antenna2=0; antenna2<shape(1); antenna2++) {
+  
+  // ----------------------------------------------------------------- visibilities
+  
+  Matrix<DComplex> DataReader::visibilities (bool const &fromCalFFT)
+  {
+    int antenna1 (0);
+    int antenna2 (0);
+    int channel  (0);
+    int baseline (0);
+    Matrix<DComplex> in (DataReader::nofSelectedChannels(),
+			 DataReader::nofSelectedAntennas());
+    
+    if (fromCalFFT == true) {
+      in = calfft();
+    } else {
+      in = fft();
+    }
+    
+    IPosition shape (in.shape());
+    Matrix<DComplex> vis (shape(0),nofBaselines(false));
+    
     for (antenna1=0; antenna1<shape(1); antenna1++) {
-      for (channel=0; channel<shape(0); channel++) {
-	out (channel,antenna1,antenna2) = in(channel,antenna1)*in(channel,antenna2);
+      for (antenna2=antenna1+1; antenna2<shape(1); antenna2++) {
+	for (channel=0; channel<shape(0); channel++) {
+	  vis(channel,baseline) = in(channel,antenna1)*conj(in(channel,antenna2));
+	}
+	baseline++;
       }
     }
+    
+    return vis;
   }
-
-  return out;
-}
-
-// ----------------------------------------------------------------- visibilities
-
-Matrix<DComplex> DataReader::visibilities (bool const &fromCalFFT)
-{
-  int antenna1 (0);
-  int antenna2 (0);
-  int channel  (0);
-  int baseline (0);
-  Matrix<DComplex> in (DataReader::nofSelectedChannels(),
-		      DataReader::nofSelectedAntennas());
-
-  if (fromCalFFT == true) {
-    in = calfft();
-  } else {
-    in = fft();
-  }
-
-  IPosition shape (in.shape());
-  Matrix<DComplex> vis (shape(0),nofBaselines(false));
-
-  for (antenna1=0; antenna1<shape(1); antenna1++) {
-    for (antenna2=antenna1+1; antenna2<shape(1); antenna2++) {
-      for (channel=0; channel<shape(0); channel++) {
-	vis(channel,baseline) = in(channel,antenna1)*conj(in(channel,antenna2));
+  
+  // ==============================================================================
+  //
+  //  Conversion & Selection
+  //
+  // ==============================================================================
+  
+  // --------------------------------------------------------------- setADC2voltage
+  
+  void DataReader::setADC2voltage (Vector<double> const &adc2voltage)
+  {
+    uint nelem (adc2voltage.nelements());
+    
+    if (nelem == nofSelectedAntennas()) {
+      Vector<double> tmp (nofAntennas());
+      tmp = 1.0;
+      // re-arrange the provided values to match the correct array shape
+      for (uint antenna(0); antenna<nelem; antenna++) {
+	tmp(selectedAntennas_p(antenna)) = adc2voltage (antenna);
       }
-      baseline++;
+      // store the values 
+      adc2voltage_p.resize(tmp.shape());
+      adc2voltage_p = tmp;
+    }
+    else if (nelem == nofAntennas()) {
+      adc2voltage_p.resize(nelem);
+      adc2voltage_p = adc2voltage;
+    }
+    else {
+      cerr << "[DataReader::setADC2voltage] Mismatching array shapes" << endl;
+      cerr << " shape(adc2voltage)  = " << nelem                 << endl;
+      cerr << " # antennas          = " << nofAntennas()         << endl;
+      cerr << " # selected antennas = " << nofSelectedAntennas() << endl;
+    }
+    
+  }
+  
+  // ---------------------------------------------------------------- setFFT2calFFT
+  
+  void DataReader::setFFT2calFFT (Matrix<DComplex> const &fft2calfft)
+  {
+    bool status (true);
+    IPosition shape (fft2calfft.shape());
+    uint nofChannels (fftLength_p);
+    uint nofAntennas (nofAntennas());
+    uint nofSelectedAntennas (nofSelectedAntennas());
+    uint nofSelectedChannels (nofSelectedChannels());
+    
+    /*
+      We can use a single general loop for accepting the input data; the only
+      difference in the actual access to the matrix elements will be caused by the
+      shape of the input matrix, thus if we check for this first we can use generic
+      code later on.
+    */
+    
+    if (uint(shape(0)) == nofSelectedChannels &&
+	uint(shape(1)) == nofSelectedAntennas) {
+      //
+      nofChannels = nofSelectedChannels;
+      nofAntennas = nofSelectedAntennas;
+    }
+    else if (uint(shape(0)) == nofSelectedChannels &&
+	     uint(shape(1)) == nofAntennas) {
+      //
+      nofChannels = nofSelectedChannels;
+    }
+    else if (uint(shape(0)) == fftLength_p &&
+	     uint(shape(1)) == nofSelectedAntennas) {
+      //
+      nofChannels = fftLength_p;
+      nofAntennas = nofSelectedAntennas;
+    }
+    else if (uint(shape(0)) == fftLength_p &&
+	     uint(shape(1)) == nofAntennas) {
+      //
+      nofChannels = fftLength_p;
+    }
+    else {
+      cerr << "[DataReader::setFFT2calFFT] Mismatching array shapes" << endl;
+      cerr << " shape(fft2calfft)       = " << shape                 << endl;
+      cerr << " FFT output length       = " << fftLength_p           << endl;
+      cerr << " # of selected channels  = " << nofSelectedChannels   << endl;
+      cerr << " # of antennas           = " << nofAntennas           << endl;
+      cerr << " # of selected antennas  = " << nofSelectedAntennas   << endl;
+      //
+      status = false;
+    }
+    
+    // store the new values - if everything went fine so far
+    if (status) {
+      uint antenna(0);
+      uint channel(0);
+      // adjust the size of the internal array
+      fft2calfft_p.resize (fftLength_p,nofAntennas);
+      fft2calfft_p = 1.0;
+      //
+      for (antenna=0; antenna<nofAntennas; antenna++) {
+	for (channel=0; channel<nofChannels; channel++) {
+	  fft2calfft_p (selectedChannels_p(channel),selectedAntennas_p(antenna))
+	    = fft2calfft(channel,antenna);
+	}
+      }
     }
   }
   
-  return vis;
-}
-
-// ==============================================================================
-//
-//  Conversion & Selection
-//
-// ==============================================================================
-
-// --------------------------------------------------------------- setADC2voltage
-
-void DataReader::setADC2voltage (Vector<double> const &adc2voltage)
-{
-  uint nelem (adc2voltage.nelements());
-
-  if (nelem == nofSelectedAntennas()) {
-    Vector<double> tmp (nofAntennas());
-    tmp = 1.0;
-    // re-arrange the provided values to match the correct array shape
-    for (uint antenna(0); antenna<nelem; antenna++) {
-      tmp(selectedAntennas_p(antenna)) = adc2voltage (antenna);
-    }
-    // store the values 
-    adc2voltage_p.resize(tmp.shape());
-    adc2voltage_p = tmp;
-  }
-  else if (nelem == nofAntennas()) {
-    adc2voltage_p.resize(nelem);
-    adc2voltage_p = adc2voltage;
-  }
-  else {
-    cerr << "[DataReader::setADC2voltage] Mismatching array shapes" << endl;
-    cerr << " shape(adc2voltage)  = " << nelem                 << endl;
-    cerr << " # antennas          = " << nofAntennas()         << endl;
-    cerr << " # selected antennas = " << nofSelectedAntennas() << endl;
-  }
-
-}
-
-// ---------------------------------------------------------------- setFFT2calFFT
-
-void DataReader::setFFT2calFFT (Matrix<DComplex> const &fft2calfft)
-{
-  bool status (true);
-  IPosition shape (fft2calfft.shape());
-  uint nofChannels (fftLength_p);
-  uint nofAntennas (nofAntennas());
-  uint nofSelectedAntennas (nofSelectedAntennas());
-  uint nofSelectedChannels (nofSelectedChannels());
-
-  /*
-    We can use a single general loop for accepting the input data; the only
-    difference in the actual access to the matrix elements will be caused by the
-    shape of the input matrix, thus if we check for this first we can use generic
-    code later on.
-   */
-
-  if (uint(shape(0)) == nofSelectedChannels &&
-      uint(shape(1)) == nofSelectedAntennas) {
-    //
-    nofChannels = nofSelectedChannels;
-    nofAntennas = nofSelectedAntennas;
-  }
-  else if (uint(shape(0)) == nofSelectedChannels &&
-	   uint(shape(1)) == nofAntennas) {
-    //
-    nofChannels = nofSelectedChannels;
-  }
-  else if (uint(shape(0)) == fftLength_p &&
-	   uint(shape(1)) == nofSelectedAntennas) {
-    //
-    nofChannels = fftLength_p;
-    nofAntennas = nofSelectedAntennas;
-  }
-  else if (uint(shape(0)) == fftLength_p &&
-	   uint(shape(1)) == nofAntennas) {
-    //
-    nofChannels = fftLength_p;
-  }
-  else {
-    cerr << "[DataReader::setFFT2calFFT] Mismatching array shapes" << endl;
-    cerr << " shape(fft2calfft)       = " << shape                 << endl;
-    cerr << " FFT output length       = " << fftLength_p           << endl;
-    cerr << " # of selected channels  = " << nofSelectedChannels   << endl;
-    cerr << " # of antennas           = " << nofAntennas           << endl;
-    cerr << " # of selected antennas  = " << nofSelectedAntennas   << endl;
-    //
-    status = false;
-  }
-
-  // store the new values - if everything went fine so far
-  if (status) {
-    uint antenna(0);
-    uint channel(0);
-    // adjust the size of the internal array
-    fft2calfft_p.resize (fftLength_p,nofAntennas);
-    fft2calfft_p = 1.0;
-    //
-    for (antenna=0; antenna<nofAntennas; antenna++) {
-      for (channel=0; channel<nofChannels; channel++) {
-	fft2calfft_p (selectedChannels_p(channel),selectedAntennas_p(antenna))
-	  = fft2calfft(channel,antenna);
-      }
+  // ------------------------------------------------------------- setHanningFilter
+  
+  void DataReader::setHanningFilter (double const &alpha)
+  {
+    if (alpha == 0.0) {
+      applyHanning_p = false;
+    } else {
+      HanningFilter<double> tmp (blocksize_p,alpha);
+      hanningFilter_p = tmp;
+      applyHanning_p = true;
     }
   }
-}
-
-// ------------------------------------------------------------- setHanningFilter
-
-void DataReader::setHanningFilter (double const &alpha)
-{
-  if (alpha == 0.0) {
-    applyHanning_p = false;
-  } else {
-    HanningFilter<double> tmp (blocksize_p,alpha);
-    hanningFilter_p = tmp;
-    applyHanning_p = true;
+  
+  void DataReader::setHanningFilter (const double &alpha,
+				     const uint &beta)
+  {
+    if (alpha == 0.0) {
+      applyHanning_p = false;
+    } else {
+      HanningFilter<double> tmp (blocksize_p,
+				 alpha,
+				 beta);
+      hanningFilter_p = tmp;
+      applyHanning_p = true;
+    }
   }
-}
-
-void DataReader::setHanningFilter (const double &alpha,
-				   const uint &beta)
-{
-  if (alpha == 0.0) {
-    applyHanning_p = false;
-  } else {
-    HanningFilter<double> tmp (blocksize_p,
-			      alpha,
-			       beta);
-    hanningFilter_p = tmp;
-    applyHanning_p = true;
-  }
-}
   
   // --------------------------------------------------------------- selectChannels
   
@@ -994,11 +994,9 @@ void DataReader::setHanningFilter (const double &alpha,
     return status;
   }
 
-
-
-bool DataReader::setSelectedChannels (Vector<bool> const &channelSelection)
-{
-  uint nelem (channelSelection.nelements());
+  bool DataReader::setSelectedChannels (Vector<bool> const &channelSelection)
+  {
+    uint nelem (channelSelection.nelements());
     
     if (nelem == fftLength_p) {
       Vector<uint> selectedChannels (ntrue(channelSelection));

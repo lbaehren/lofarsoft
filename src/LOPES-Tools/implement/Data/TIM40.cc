@@ -21,6 +21,7 @@
 #include <Data/TIM40.h>
 
 using std::endl;
+using std::ostream;
 
 namespace LOPES {  // Namespace LOPES -- begin
   
@@ -136,7 +137,7 @@ int TIM40::nyquistZone ()
 //
 // =============================================================================
 
-void TIM40::show (std::ostream& os)
+void TIM40::show (ostream& os)
 {
   os << "[TIM40]" << endl;
 

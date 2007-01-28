@@ -24,6 +24,8 @@
 // Custom header files
 #include <Functionals/Shapelets2D.h>
 
+using LOPES::Shapelets2D;
+
 // =============================================================================
 
 /*!

@@ -22,5 +22,5 @@ subdirs (
   timclient
 #  timebeam
 #  treetest
-  trigrun
+#  trigrun
   )

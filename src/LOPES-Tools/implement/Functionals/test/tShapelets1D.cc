@@ -23,6 +23,8 @@
 // Custom header files
 #include <Functionals/Shapelets1D.h>
 
+using LOPES::Shapelets1D;
+
 // =============================================================================
 
 /*!

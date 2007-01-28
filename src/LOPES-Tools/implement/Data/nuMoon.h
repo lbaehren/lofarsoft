@@ -27,91 +27,95 @@
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
 
-#include <lopes/IO/DataReader.h>
+#include <IO/DataReader.h>
 
-/*!
-  \class nuMoon
-
-  \ingroup Data
-
-  \brief Brief description for class nuMoon
-
-  \author Lars B&auml;hren
-
-  \date 2006/05/31
-
-  \test tnuMoon.cc
-
-  <h3>Prerequisite</h3>
-
-  <ul type="square">
-    <li>[start filling in your text here]
-  </ul>
-
-  <h3>Synopsis</h3>
-
-  <h3>Example(s)</h3>
-
-*/
-
-class nuMoon : public DataReader {
-
- public:
-
-  // --------------------------------------------------------------- Construction
-
-  /*!
-    \brief Default constructor
-  */
-  nuMoon ();
-
-  /*!
-    \brief Copy constructor
-
-    \param other -- Another nuMoon object from which to create this new
-                    one.
-  */
-  nuMoon (nuMoon const &other);
-
-  // ---------------------------------------------------------------- Destruction
-
-  /*!
-    \brief Destructor
-  */
-  ~nuMoon ();
-
-  // ------------------------------------------------------------------ Operators
-
-  /*!
-    \brief Overloading of the copy operator
-
-    \param other -- Another nuMoon object from which to make a copy.
-  */
-  nuMoon& operator= (nuMoon const &other); 
-
-  // ----------------------------------------------------------------- Parameters
-
+namespace LOPES {  // namespace LOPES -- begin
   
-
-  // -------------------------------------------------------------------- Methods
-
-
- protected:
-
-  Bool setStreams ();
-
- private:
-
   /*!
-    \brief Unconditional copying
+    \class nuMoon
+    
+    \ingroup Data
+    
+    \brief Brief description for class nuMoon
+    
+    \author Lars B&auml;hren
+    
+    \date 2006/05/31
+    
+    \test tnuMoon.cc
+    
+    <h3>Prerequisite</h3>
+    
+    <ul type="square">
+    <li>[start filling in your text here]
+    </ul>
+    
+    <h3>Synopsis</h3>
+    
+    <h3>Example(s)</h3>
+    
   */
-  void copy (nuMoon const &other);
+  
+  class nuMoon : public DataReader {
+    
+  public:
+    
+    // ------------------------------------------------------------- Construction
+    
+    /*!
+      \brief Default constructor
+    */
+    nuMoon ();
+    
+    /*!
+      \brief Copy constructor
+      
+      \param other -- Another nuMoon object from which to create this new
+      one.
+    */
+    nuMoon (nuMoon const &other);
+    
+    // -------------------------------------------------------------- Destruction
+    
+    /*!
+      \brief Destructor
+    */
+    ~nuMoon ();
+    
+    // ---------------------------------------------------------------- Operators
+    
+    /*!
+      \brief Overloading of the copy operator
+      
+      \param other -- Another nuMoon object from which to make a copy.
+    */
+    nuMoon& operator= (nuMoon const &other); 
+    
+    // --------------------------------------------------------------- Parameters
+    
+    
+    
+    // ------------------------------------------------------------------ Methods
+    
+    
+  protected:
+    
+    bool setStreams ();
+    
+  private:
+    
+    /*!
+      \brief Unconditional copying
+    */
+    void copy (nuMoon const &other);
+    
+    /*!
+      \brief Unconditional deletion 
+    */
+    void destroy(void);
+    
+  };
 
-  /*!
-    \brief Unconditional deletion 
-  */
-  void destroy(void);
-
-};
+}  //  namespace LOPES -- end
 
 #endif /* NUMOON_H */

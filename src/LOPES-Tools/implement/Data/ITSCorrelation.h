@@ -23,8 +23,20 @@
 #ifndef ITSCORRELATION_H
 #define ITSCORRELATION_H
 
-#include <lopes/Data/ITSMetadata.h>
-#include <lopes/IO/DataReader.h>
+#include <Data/ITSMetadata.h>
+#include <IO/DataReader.h>
+
+using casa::AipsError;
+using casa::Complex;
+using casa::Cube;
+using casa::DComplex;
+using casa::Matrix;
+using casa::Vector;
+
+using LOPES::DataReader;
+using LOPES::ITSMetadata;
+
+namespace LOPES {  // namespace LOPES -- begin
 
 /*!
   \class ITSCorrelation
@@ -125,7 +137,7 @@ class ITSCorrelation : public DataReader {
     \return ccSpectra -- Data cube with the cross-correlation spectra,
                          [nfreq,nant,nant]
   */
-  Cube<Complex> ccSpectra (Bool const &fromCalFFT=True);
+  Cube<DComplex> ccSpectra (bool const &fromCalFFT=true);
 
  private:
 
@@ -149,8 +161,10 @@ class ITSCorrelation : public DataReader {
     \return status -- Status of the operation; returns <i>true</i> if everything
                       went fine.
   */
-  Bool setStreams ();
+  bool setStreams ();
 
 };
+
+}  // namespace LOPES -- end
 
 #endif /* ITSCORRELATION_H */

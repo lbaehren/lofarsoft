@@ -28,6 +28,7 @@ foreach (lopes_module ${lopes_modules})
 endforeach (lopes_module)
 
 SUBDIRS (
+  Analysis
   Calibration
   Data
   Functionals
@@ -37,34 +38,10 @@ SUBDIRS (
   )
 
 ## -----------------------------------------------------------------------------
-## Locate required external components/libraries
-
-INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindBlitz.cmake)
-INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindBoost.cmake)
-INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindCASA.cmake)
-INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindCFITSIO.cmake)
-INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindCPGPLOT.cmake)
-INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindROOT.cmake)
-INCLUDE (${LOPES-Tools_SOURCE_DIR}/../../../devel_common/cmake/FindWCS.cmake)
-
-INCLUDE_DIRECTORIES(
-  .
-  ${CASA_INCLUDE_DIR}
-  ${GLISH_INCLUDE_DIR}
-  ${CFITSIO_INCLUDE_DIR}
-  ${CPGPLOT_INCLUDE_DIR}
-  ${Blitz_INCLUDE_DIR}
-  ${WCS_INCLUDE_DIR}
-  )
-
-if (HAVE_CASA)
-  add_definitions (-DHAVE_CASA)
-endif (HAVE_CASA)
-
-## -----------------------------------------------------------------------------
 ## Build the LopesTools library
 
 ADD_LIBRARY (lopestools
+  templates.cc
 ## -- Analysis ---------------------------------------------
 #  Analysis/ClippingFraction.cc
 #  Analysis/DataBlockStatistics.cc
@@ -107,23 +84,30 @@ ADD_LIBRARY (lopestools
   Data/DynamicSpectrum.cc
   Data/ITSBeam.cc
   Data/ITSCapture.cc
-#  Data/ITSCorrelation.cc
-#  Data/ITSMetadata.cc
+  Data/ITSCorrelation.cc
+  Data/ITSMetadata.cc
   Data/LopesEvent.cc
 #  Data/MSFiller.cc
   Data/NDABeam.cc
-#  Data/nuMoon.cc
-#  Data/NuMoonHeader.cc
-#  Data/TIM40.cc
-#  Data/TIM40Header.cc
+  Data/nuMoon.cc
+  Data/NuMoonHeader.cc
+  Data/TIM40.cc
+  Data/TIM40Header.cc
   Data/UnitPrefix.cc
 ## -- Display ----------------------------------------------
   Display/PGPlot.cc
 ## -- Functionals ------------------------------------------
+  Functionals/BasicFilter.cc
+  Functionals/HanningFilter.cc
   Functionals/Hermite1D.cc
+  Functionals/LinearRegression.cc
+  Functionals/MedianFilter.cc
+  Functionals/RaisedCosineFilter.cc
+  Functionals/RangeSplitter.cc
   Functionals/Shapelets1D.cc
   Functionals/Shapelets2D.cc
   Functionals/ShapeletsModel1D.cc
+  Functionals/ShapeletsModel2D.cc
   Functionals/StatisticsFilter.cc
 ## -- IO ---------------------------------------------------
   IO/DataBlockSettings.cc

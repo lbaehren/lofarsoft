@@ -35,6 +35,8 @@ using casa::AipsError;
 using casa::DComplex;
 using casa::String;
 
+using LOPES::ITSMetadata;
+
 namespace LOPES {  // namespace LOPES -- begin
   
   /*!

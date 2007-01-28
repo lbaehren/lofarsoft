@@ -33,7 +33,6 @@ using LOPES::TemplatesBase;
 */
 void test_TemplatesBase ()
 {
-
   cout << "[1] Testing default constructor ..." << endl;
   try {
     TemplatesBase<short> tShort;

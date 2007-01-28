@@ -20,8 +20,10 @@
 
 /* $Id: NuMoonHeader.cc,v 1.1 2006/07/05 16:22:59 bahren Exp $*/
 
-#include <lopes/Data/NuMoonHeader.h>
+#include <Data/NuMoonHeader.h>
 
+namespace LOPES {  // namespace LOPES -- begin
+  
 // ==============================================================================
 //
 //  Construction
@@ -91,7 +93,7 @@ void NuMoonHeader::destroy ()
 void NuMoonHeader::parseHeader ()
 {
   String line ("a");
-  ifstream infile;
+  std::ifstream infile;
   int position (0);
   int n(0);
 
@@ -108,3 +110,5 @@ void NuMoonHeader::parseHeader ()
 
   infile.close();
 }
+
+}  // namespace LOPES -- end

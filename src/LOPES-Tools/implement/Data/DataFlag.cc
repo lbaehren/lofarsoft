@@ -156,9 +156,7 @@ namespace LOPES {  // namespace LOPES -- begin
   //
   // ============================================================================
 
-//   template DataFlag<int>;
-//   template DataFlag<uint>;
-//   template DataFlag<float>;
-//   template DataFlag<double>;
+  template class DataFlag<float>;
+  template class DataFlag<double>;
   
 }  // namespace LOPES -- end

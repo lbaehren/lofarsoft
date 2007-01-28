@@ -27,11 +27,15 @@ namespace LOPES {
     std::cout << " - data = " << data_p << std::endl;
   }
 
+  // ============================================================================
+  //
   // Template instantiation
+  //
+  // ============================================================================
   
-  template class TemplatesBase<short>;
-  template class TemplatesBase<int>;
-  template class TemplatesBase<float>;
-  template class TemplatesBase<double>;
+//   template class TemplatesBase<short>;
+//   template class TemplatesBase<int>;
+//   template class TemplatesBase<float>;
+//   template class TemplatesBase<double>;
   
 }

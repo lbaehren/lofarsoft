@@ -22,6 +22,11 @@
 
 #include <Functionals/BasicFilter.h>
 
+using std::cout;
+using std::endl;
+
+using LOPES::BasicFilter;
+
 /*!
   \file tBasicFilter.cc
 
@@ -41,27 +46,27 @@
 
   \return nofFailedTests -- The number of failed tests.
 */
-Int test_BasicFilter ();
+int test_BasicFilter ();
 /*!
   \brief Test manipulation and retrival of the filter weights
 
   \return nofFailedTests -- The number of failed tests.
 */
-Int test_weights ();
+int test_weights ();
 /*!
   \brief Test operator overloading
 
   \return nofFailedTests -- The number of failed tests.
 */
-Int test_operators ();
+int test_operators ();
 
 // ------------------------------------------------------------- test_BasicFilter
 
-Int test_BasicFilter ()
+int test_BasicFilter ()
 {
   cout << "\n[test_BasicFilter]\n" << endl;
 
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
   //
   unsigned int blocksize (1024);
   Vector<Float> weights_float (blocksize,1);
@@ -80,7 +85,7 @@ Int test_BasicFilter ()
   }
 
   // simplest argumented constructor
-  cout << "[2] BasicFilter<T> (const Int&blocksize)" << endl;
+  cout << "[2] BasicFilter<T> (const int&blocksize)" << endl;
   {
     cout << " - float" << endl;
     BasicFilter<Float> filter_float(blocksize);
@@ -127,11 +132,11 @@ Int test_BasicFilter ()
 
 // ----------------------------------------------------------------- test_weights
 
-Int test_weights ()
+int test_weights ()
 {
   cout << "\n[test_weights]\n" << endl;
 
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
   //
   unsigned int blocksize (1024);
 
@@ -176,11 +181,11 @@ Int test_weights ()
 
 // --------------------------------------------------------------- test_operators
 
-Int test_operators ()
+int test_operators ()
 {
   cout << "\n[test_operators]\n" << endl;
 
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
   //
   unsigned int blocksize (512);
   Vector<Float> weights (1024,1.5);
@@ -206,7 +211,7 @@ Int test_operators ()
 
 int main ()
 {
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
 
   // Test for the constructor(s)
   {
