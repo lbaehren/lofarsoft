@@ -1,14 +1,15 @@
-# - Check for the presence of LAPACK
-#
-# The following variables are set when LAPACK is found:
-#  HAVE_LAPACK       = Set to true, if all components of LAPACK
-#                          have been found.
-#  LAPACK_LIBRARY     = Link these to use LAPACK
 
 ## -----------------------------------------------------------------------------
-## Check for the library
+## Check for the presence of LAPACK
+##
+## The following variables are set when LAPACK is found:
+##  HAVE_LAPACK     - Set to true, if all components of LAPACK have been found.
+##  LAPACK_LIBRARY - Link these to use LAPACK
 
-FIND_LIBRARY (LAPACK_LIBRARY lapack
+## -----------------------------------------------------------------------------
+## Check for the library files (-llapack -lblas -lcblas -latlas)
+
+FIND_LIBRARY (LAPACK_LIBRARY lapack blas cblas atlas
   PATHS /usr/local/lib /usr/lib /lib /sw/lib
   )
 

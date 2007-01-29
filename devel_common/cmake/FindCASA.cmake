@@ -1,14 +1,23 @@
-# - Check for the AIPS++/CASA library
-#
-# Variables assigned:
-#  HAVE_CASA
-#  CASA_INCLUDE_DIR  -- Path to the CASA header files
-#
+
+## -----------------------------------------------------------------------------
+## - Check for the AIPS++/CASA library
+##
+## Variables assigned:
+##  HAVE_CASA
+##  HAVE_AIPS_H       -- aips.h header file located
+##  HAVE_GLISH_H      -- glish.h header file located
+##  CASA_INCLUDE_DIR  -- Path to the CASA header files
+##
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files first, as from this we can derive a number of 
 ## fundamental CASA variables (such as e.g. the root directory of the
-## installation)
+## installation). The main point to keep in mind here is, that parts of the
+## final installation will reside in architecture-dependent directories - the
+## setup of the code directory however is generic, so once we have located it
+## we can go from there.
+
+## Find "aips.h", which is included by all other files
 
 find_path (CASA_INCLUDE_DIR aips.h
   PATHS
@@ -17,37 +26,39 @@ find_path (CASA_INCLUDE_DIR aips.h
   /sw/share/casa
   PATH_SUFFIXES
   code/include/casa
-  stable/code/include/casa
+  current/code/include/casa
   weekly/code/include/casa
+  stable/code/include/casa
   )
 
-IF (CASA_INCLUDE_DIR)
-  SET (HAVE_AIPS_H true)
-  STRING (REGEX REPLACE include/casa include CASA_INCLUDE_DIR ${CASA_INCLUDE_DIR})
-  STRING (REGEX REPLACE /code/include "" AIPSROOT ${CASA_INCLUDE_DIR})
-ENDIF (CASA_INCLUDE_DIR)
+if (CASA_INCLUDE_DIR)
+  set (HAVE_AIPS_H true)
+  string (REGEX REPLACE include/casa include CASA_INCLUDE_DIR ${CASA_INCLUDE_DIR})
+  string (REGEX REPLACE /code/include "" AIPSROOT ${CASA_INCLUDE_DIR})
+endif (CASA_INCLUDE_DIR)
 
-find_path (GLISH_INCLUDE_DIR glish.h
-  PATHS
-  /casa
-  /opt/casa
-  /sw/share/casa
-  PATH_SUFFIXES
-  code/aips/glish/include/Glish
-  stable/code/aips/glish/include/Glish
-  weekly/code/aips/glish/include/Glish
-  )
+## Find "glish.h", which is pointing towards the location of the Glish source code
 
-if (GLISH_INCLUDE_DIR)
-  STRING (REGEX REPLACE include/Glish include GLISH_INCLUDE_DIR ${GLISH_INCLUDE_DIR})
-endif (GLISH_INCLUDE_DIR)
+if (HAVE_AIPS_H)
+  ## locate the Glish header file
+  find_path (GLISH_INCLUDE_DIR glish.h
+    ${CASA_INCLUDE_DIR}
+    PATH_SUFFIXES
+    Glish
+    )
+  ## adjust the include path for the Glish header files
+  if (GLISH_INCLUDE_DIR)
+    set (HAVE_GLISH_H true)
+    STRING (REGEX REPLACE include/Glish include GLISH_INCLUDE_DIR ${GLISH_INCLUDE_DIR})
+  endif (GLISH_INCLUDE_DIR)
+endif (HAVE_AIPS_H)
 
 ## -----------------------------------------------------------------------------
 ## Preparation: get additional information about the system
 
-IF (UNIX)
-  SET (AIPS_ARCH "LINUX")
-  SET (AIPS_ENDIAN "LITTLE")
+if (UNIX)
+  set (AIPS_ARCH "LINUX")
+  set (AIPS_ENDIAN "LITTLE")
   IF (APPLE)
     ## definition passed to the compiler
     SET (AIPS_DARWIN 1)
@@ -59,8 +70,34 @@ IF (UNIX)
     IF (${CMAKE_OSX_ARCHITECTURES} MATCHES "ppc")
       SET (AIPS_ENDIAN "BIG")
     ENDIF (${CMAKE_OSX_ARCHITECTURES} MATCHES "ppc")
-  ENDIF (APPLE)
-ENDIF (UNIX)
+  endif (APPLE)
+endif (UNIX)
+
+## -----------------------------------------------------------------------------
+## Check for the library
+
+set (CASA_MODULES
+  aips
+  alma
+  atnf
+  bima
+  calibration
+  casa
+  components
+  contrib
+  coordinates
+  demo
+  dish
+  display
+  fits
+  flagging
+  graphics
+  hia
+  images
+  ionosphere
+  jive
+  lattices
+  )
 
 FIND_PATH (AIPSLIBD version.o
   PATHS ${AIPSROOT}
@@ -68,14 +105,6 @@ FIND_PATH (AIPSLIBD version.o
   )
 
 STRING (REGEX REPLACE /lib "" AIPSARCH ${AIPSLIBD})
-
-#MESSAGE (STATUS "AIPSROOT = ${AIPSROOT}")
-#MESSAGE (STATUS "AIPSARCH = ${AIPSARCH}")
-#MESSAGE (STATUS "AIPSINCD = ${CASA_INCLUDE_DIR}")
-#MESSAGE (STATUS "AIPSLIBD = ${AIPSLIBD}")
-
-## -----------------------------------------------------------------------------
-## Check for the library
 
 FIND_LIBRARY (CALIBRATION_LIBRARY calibration ${AIPSLIBD})
 FIND_LIBRARY (CASA_LIBRARY casa ${AIPSLIBD})

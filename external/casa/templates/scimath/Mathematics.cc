@@ -65,12 +65,10 @@ namespace casa {
 
   template class ObjectPool<AutoDiffRep<AutoDiff<Double> >, uInt>;
 
-  template <class T> class AutoDiffRep;
   template class OrderedPair<uInt, PoolStack<AutoDiffRep<AutoDiff<Double> >, uInt> *>;
 
   template class PoolStack<AutoDiffRep<AutoDiff<Double> >, uInt>;
 
-  template <class T> class AutoDiffRep;
   template class SimpleOrderedMap<uInt, PoolStack<AutoDiffRep<AutoDiff<Double> >, uInt>*>;
 
   template class Fallible<Float>;
@@ -81,6 +79,7 @@ namespace casa {
   template AutoDiff<AutoDiff<Double> > operator*(AutoDiff<Double> const &, AutoDiff<AutoDiff<Double> > const &);
   template AutoDiff<AutoDiff<Double> > operator*(AutoDiff<AutoDiff<Double> > const &, AutoDiff<Double> const &);
 
+  template class AutoDiffRep<DComplex>;
   template class AutoDiffRep<AutoDiff<Double> >;
 
   template class Convolver<Double>;

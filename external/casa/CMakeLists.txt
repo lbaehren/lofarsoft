@@ -10,9 +10,20 @@ IF (UNIX)
     SET (AIPSARCH "darwin")
     SET (AIPS_DARWIN 1)
   ELSE (APPLE)
-    MESSAGE (STATUS "System platform = UNIX")
+    SET (AIPSARCH "linux")
+    SET (AIPS_DARWIN 0)
   ENDIF (APPLE)
 ENDIF (UNIX)
+
+## -----------------------------------------------------------------------------
+## Check for additional tools which are required
+
+find_file (bison_bin bison /usr/bin /usr/local/bin)
+find_file (flex_bin flex /usr/bin /usr/local/bin)
+
+message ("Required external software:")
+message (STATUS "Bison = ${bison_bin}")
+message (STATUS "Flex  = ${flex_bin}")
 
 ## -----------------------------------------------------------------------------
 ## Check for platform specific header files; in most cases we should be able to
@@ -20,13 +31,6 @@ ENDIF (UNIX)
 ## proper results - where therefore run an explicit check.
 
 INCLUDE (CheckIncludeFiles)
-
-#CHECK_INCLUDE_FILES (stdlib.h HAVE_STDLIB_H)
-
-#FIND_PATH (HAVE_MALLOC_H malloc.h
-#  PATHS ${INCLUDE_DIRS}
-#  PATH_SUFFIXES sys
-#  )
 
 FIND_PATH (HAVE_STRING_H
   string.h
@@ -37,7 +41,10 @@ FIND_PATH (HAVE_STRING_H
 ## -----------------------------------------------------------------------------
 ## Required external libraries
 
-FIND_PACKAGE (X11)
+find_package (X11)
+
+include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindLAPACK.cmake)
+include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindFFTW3.cmake)
 
 ## -----------------------------------------------------------------------------
 ## Compiler settings
@@ -159,12 +166,12 @@ SET (CMAKE_VERBOSE_MAKEFILE 0)
 SET (CASA_MODULE_LINKER_FLAGS "${CASA_LDSTD}")
 SET (CMAKE_C_FLAGS "${CASA_OPTLEVEL} ${CASA_CXXSTD}")
 
-MESSAGE (STATUS "CASA_SOURCE_DIR ......... = ${CASA_SOURCE_DIR}")
-MESSAGE (STATUS "CMAKE_SYSTEM_NAME ....... = ${CMAKE_SYSTEM_NAME}")
-MESSAGE (STATUS "CMAKE_SYSTEM_PROCESSOR .. = ${CMAKE_SYSTEM_PROCESSOR}")
-MESSAGE (STATUS "CMAKE_C_FLAGS ........... = ${CMAKE_C_FLAGS}")
-MESSAGE (STATUS "CMAKE_CXX_FLAGS ......... = ${CMAKE_CXX_FLAGS}")
-MESSAGE (STATUS "CMAKE_MODULE_LINKER_FLAGS = ${CMAKE_MODULE_LINKER_FLAGS}")
+message (STATUS "CASA_SOURCE_DIR ......... = ${CASA_SOURCE_DIR}")
+message (STATUS "CMAKE_SYSTEM_NAME ....... = ${CMAKE_SYSTEM_NAME}")
+message (STATUS "CMAKE_SYSTEM_PROCESSOR .. = ${CMAKE_SYSTEM_PROCESSOR}")
+message (STATUS "CMAKE_C_FLAGS ........... = ${CMAKE_C_FLAGS}")
+message (STATUS "CMAKE_CXX_FLAGS ......... = ${CMAKE_CXX_FLAGS}")
+message (STATUS "CMAKE_MODULE_LINKER_FLAGS = ${CMAKE_MODULE_LINKER_FLAGS}")
 
 ## -----------------------------------------------------------------------------
 ## List of sub-directories

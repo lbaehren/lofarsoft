@@ -3,56 +3,56 @@
 # The following variables are set when Blitz++ is found:
 #  HAVE_BLITZ        = True when both Blitz++ header and include files are 
 #                      found; if any of them is missing, HAVE_BLITZ=false
-#  Blitz_INCLUDE_DIR = the path to where the boost include files are.
-#  Blitz_LIBRARY     = Link these to use Blitz++
+#  BLITZ_INCLUDE_DIR = the path to where the boost include files are.
+#  BLITZ_LIBRARY     = Link these to use Blitz++
 
-#SET (Blitz_VERSION "1_33_1")
+#SET (BLITZ_VERSION "1_33_1")
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-FIND_PATH (Blitz_INCLUDE_DIR array.h
+FIND_PATH (BLITZ_INCLUDE_DIR array.h
   PATHS /usr/local/include /usr/include /sw/include
   PATH_SUFFIXES blitz
   )
 
-IF (Blitz_INCLUDE_DIR)
-  STRING (REGEX REPLACE include/blitz include Blitz_INCLUDE_DIR ${Blitz_INCLUDE_DIR})
-ENDIF (Blitz_INCLUDE_DIR)
+IF (BLITZ_INCLUDE_DIR)
+  STRING (REGEX REPLACE include/blitz include BLITZ_INCLUDE_DIR ${BLITZ_INCLUDE_DIR})
+ENDIF (BLITZ_INCLUDE_DIR)
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-FIND_LIBRARY (Blitz_LIBRARY blitz
+FIND_LIBRARY (BLITZ_LIBRARY blitz
   PATHS /usr/local/lib /usr/lib /lib /sw/lib
   )
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
-IF (Blitz_INCLUDE_DIR AND Blitz_LIBRARY)
+IF (BLITZ_INCLUDE_DIR AND BLITZ_LIBRARY)
   SET (HAVE_BLITZ TRUE)
-ELSE (Blitz_INCLUDE_DIR AND Blitz_LIBRARY)
-  IF (NOT Blitz_FIND_QUIETLY)
-    IF (NOT Blitz_INCLUDE_DIR)
+ELSE (BLITZ_INCLUDE_DIR AND BLITZ_LIBRARY)
+  IF (NOT BLITZ_FIND_QUIETLY)
+    IF (NOT BLITZ_INCLUDE_DIR)
       MESSAGE (STATUS "Unable to find Blitz header files!")
-    ENDIF (NOT Blitz_INCLUDE_DIR)
-    IF (NOT Blitz_LIBRARY)
+    ENDIF (NOT BLITZ_INCLUDE_DIR)
+    IF (NOT BLITZ_LIBRARY)
       MESSAGE (STATUS "Unable to find Blitz library files!")
-    ENDIF (NOT Blitz_LIBRARY)
-  ENDIF (NOT Blitz_FIND_QUIETLY)
-ENDIF (Blitz_INCLUDE_DIR AND Blitz_LIBRARY)
+    ENDIF (NOT BLITZ_LIBRARY)
+  ENDIF (NOT BLITZ_FIND_QUIETLY)
+ENDIF (BLITZ_INCLUDE_DIR AND BLITZ_LIBRARY)
 
 IF (HAVE_BLITZ)
-  IF (NOT Blitz_FIND_QUIETLY)
+  IF (NOT BLITZ_FIND_QUIETLY)
     MESSAGE (STATUS "Found components for Blitz")
-    MESSAGE (STATUS "Blitz_INCLUDE_DIR = ${Blitz_INCLUDE_DIR}")
-    MESSAGE (STATUS "Blitz_LIBRARY     = ${Blitz_LIBRARY}")
-  ENDIF (NOT Blitz_FIND_QUIETLY)
+    MESSAGE (STATUS "BLITZ_INCLUDE_DIR = ${BLITZ_INCLUDE_DIR}")
+    MESSAGE (STATUS "BLITZ_LIBRARY     = ${BLITZ_LIBRARY}")
+  ENDIF (NOT BLITZ_FIND_QUIETLY)
 ELSE (HAVE_BLITZ)
-  IF (Blitz_FIND_REQUIRED)
+  IF (BLITZ_FIND_REQUIRED)
     MESSAGE (FATAL_ERROR "Could not find Blitz!")
-  ENDIF (Blitz_FIND_REQUIRED)
+  ENDIF (BLITZ_FIND_REQUIRED)
 ENDIF (HAVE_BLITZ)
 
 ## ------------------------------------------------------------------------------
@@ -60,6 +60,6 @@ ENDIF (HAVE_BLITZ)
 
 MARK_AS_ADVANCED (
   HAVE_BLITZ
-  Blitz_LIBRARY
-  Blitz_INCLUDE_DIR
+  BLITZ_LIBRARY
+  BLITZ_INCLUDE_DIR
   )
