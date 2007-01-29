@@ -2,6 +2,8 @@
 ## ------------------------------------------------------------------------------
 ## Find external packages
 
+
+
 # basic stuff is already handled a top level
 
 ## ------------------------------------------------------------------------------
@@ -12,6 +14,7 @@ include_directories (
   ..
   ../../implement
   ${CASA_INCLUDE_DIR}
+  ${CFITSIO_INCLUDE_DIR}
   )
 
 ## ------------------------------------------------------------------------------
@@ -38,3 +41,9 @@ ENDFOREACH (src)
 
 add_executable (tUseFFTW3 tUseFFTW3.cc)
 target_link_libraries (tUseFFTW3 ${FFTW3_LIBRARY})
+
+## ------------------------------------------------------------------------------
+## Test for CFITSIO
+
+add_executable (tUseCFITSIO tUseCFITSIO.cc)
+target_link_libraries (tUseCFITSIO ${CFITSIO_LIBRARIES})

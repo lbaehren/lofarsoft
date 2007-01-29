@@ -12,6 +12,12 @@
 
 namespace casa {
 
+  // ============================================================================
+  //
+  //  ReposFiller/templates
+  //
+  // ============================================================================
+
   // Functional
 
   template class Functional<AutoDiffA<DComplex>, AutoDiffA<DComplex> >;
@@ -35,4 +41,12 @@ namespace casa {
   template class Functional<Vector<AutoDiffA<Double> >, AutoDiffA<Double> >;
   template class Functional<Vector<AutoDiffA<Float> >, AutoDiffA<Float> >;
 
+  // ============================================================================
+  //
+  //  test/templates
+  //
+  // ============================================================================
+
+  template class Functional<Vector<Complex>, Vector<Complex> >;
+  template class Functional<Vector<DComplex>, Vector<DComplex> >;
 }

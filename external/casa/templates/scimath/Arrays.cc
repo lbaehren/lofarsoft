@@ -45,6 +45,7 @@
 // include of implementation files
 
 #include <casa/Arrays/Array.cc>
+#include <casa/Arrays/ArrayMath.cc>
 #include <casa/Arrays/Cube.cc>
 #include <casa/Arrays/MaskedArray.cc>
 #include <casa/Arrays/Matrix.cc>
@@ -159,4 +160,10 @@ namespace casa {
   template class Vector<RigidVector<Double, 2> >;
   template class Vector<SquareMatrix<Float, 2> >;
   template class Vector<SquareMatrix<Float, 4> >;
+
+  // casa/Arrays/ArrayMath.cc
+
+  template void indgen(Array<Complex> &, Complex);
+  template void indgen(Array<Complex> &, Complex, Complex);
+
 }

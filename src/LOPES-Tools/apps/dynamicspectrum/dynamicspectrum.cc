@@ -270,9 +270,9 @@ Bool DynamicSpectrum2FITS (const String& outfile,
   long fpixel (1);
   long naxis (2);
   long nelements (dynamicSpectrum.nelements());
-  long naxes[2] = { shape(1), shape(0)};
+  long naxes[2] = { shape(1), shape(0)};  // [Time,Freq]
 
-  float pixels[shape(0)][shape(1)];  //  [Freq,Time]
+  float pixels[shape(0)][shape(1)];       // [Freq,Time]
 
   // -----------------------------------------------------------------
   // (a) FITS image for the phase value

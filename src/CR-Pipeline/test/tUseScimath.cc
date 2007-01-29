@@ -22,9 +22,15 @@
 #include <iostream>
 #include <string>
 
+#include <casa/aips.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicSL/Complex.h>
 #include <scimath/Mathematics/FFTServer.h>
+#include <casa/Arrays/Array.cc>
+#include <casa/Arrays/ArrayIO.cc>
+#include <casa/Arrays/ArrayLogical.cc>
+#include <casa/Arrays/ArrayMath.cc>
+#include <casa/Arrays/MaskedArray.cc>
 
 /*!
   \file tUseCasa.cc
@@ -38,6 +44,10 @@
   This is the first part in a series of test to explore building against an
   existing CASA installation using CMake
 */
+
+// Template instantiation for CASA library 
+
+template bool casa::allNearAbs<float>(casa::Array<float> const&, float const&, double);
 
 /*!
   \brief main routine
