@@ -88,7 +88,13 @@ namespace CR { // NAMESPACE CR -- BEGIN
   //
   // ============================================================================
 
-  
+  bool ccBeam::beam (blitz::Array<double,2> &dataBeam,
+		     const blitz::Array<double,2> &dataFFT)
+  {
+    bool status (true);
+    
+    return status;
+  }
   
   // ============================================================================
   //

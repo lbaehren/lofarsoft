@@ -101,7 +101,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     /*!
       \brief Destructor
     */
-    ~ccBeam ();
+    virtual ~ccBeam ();
     
     // ---------------------------------------------------------------- Operators
     

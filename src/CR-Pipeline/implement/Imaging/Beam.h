@@ -80,7 +80,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     /*!
       \brief Destructor
     */
-    ~Beam ();
+    virtual ~Beam ();
     
     // ---------------------------------------------------------------- Operators
     
@@ -108,7 +108,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
      */
     virtual bool beam (blitz::Array<double,2> &dataBeam,
 		       const blitz::Array<double,2> &dataFFT);
-
+    
     /*!
       \brief Beamforming of the data, returning real-valued result
 
