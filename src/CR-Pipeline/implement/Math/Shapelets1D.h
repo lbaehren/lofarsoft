@@ -33,7 +33,7 @@ namespace CR {  // Namespace CR -- BEGIN
 /*!
   \class Shapelets1D
 
-  \ingroup Shapelets
+  \ingroup Math
 
   \brief A class to implement 1-dimensional Shapelet functions
 

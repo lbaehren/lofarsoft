@@ -24,7 +24,9 @@
   \class Shapelets2D
 */
 
-#include <Functionals/Shapelets2D.h>
+#include <Math/Shapelets2D.h>
+
+namespace CR {  // Namespace CR -- BEGIN
 
 // =============================================================================
 //
@@ -78,3 +80,5 @@ double Shapelets2D::integral (vector<int> const &l)
 {
   return Shapelets1D::integral(l[0])*Shapelets1D::integral(l[1]);
 }
+
+}  // Namespace CR -- END

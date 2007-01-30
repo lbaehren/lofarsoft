@@ -97,18 +97,7 @@ ADD_LIBRARY (lopestools
 ## -- Display ----------------------------------------------
   Display/PGPlot.cc
 ## -- Functionals ------------------------------------------
-  Functionals/BasicFilter.cc
-  Functionals/HanningFilter.cc
-  Functionals/Hermite1D.cc
-  Functionals/LinearRegression.cc
-  Functionals/MedianFilter.cc
-  Functionals/RaisedCosineFilter.cc
-  Functionals/RangeSplitter.cc
-  Functionals/Shapelets1D.cc
-  Functionals/Shapelets2D.cc
-  Functionals/ShapeletsModel1D.cc
-  Functionals/ShapeletsModel2D.cc
-  Functionals/StatisticsFilter.cc
+  ${lopes_Functionals}
 ## -- IO ---------------------------------------------------
   IO/DataBlockSettings.cc
   IO/DataIO.cc
@@ -154,11 +143,7 @@ ADD_LIBRARY (lopestools
 ## -- Testing ----------------------------------------------
   Testing/Templates.cc
 ## -- Utilities --------------------------------------------
-  Utilities/Masking.cc
-  Utilities/ProgressBar.cc
-  Utilities/StringTools.cc
-  Utilities/Timestamp.cc
-  Utilities/TestArray.cc
+  ${lopes_Utilities}
 ## -- template instantiation -------------------------------
 #  templates.cc
   )
