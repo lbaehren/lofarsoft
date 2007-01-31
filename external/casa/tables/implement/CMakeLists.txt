@@ -83,7 +83,7 @@ add_library (tables
   Tables/PlainTable.cc
   Tables/ReadAsciiTable.cc
   Tables/RecordExpr.cc
-  #	Tables/RecordGram.cc
+  Tables/RecordGram.cc
   Tables/RefColumn.cc
   Tables/RefRows.cc
   Tables/RefTable.cc
@@ -146,7 +146,7 @@ add_library (tables
   Tables/TableError.cc
   Tables/TableExprData.cc
   Tables/TableExprId.cc
-#	Tables/TableGram.cc
+  Tables/TableGram.cc
   Tables/TableIndexProxy.cc
   Tables/TableInfo.cc
   Tables/TableIter.cc
