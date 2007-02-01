@@ -1,14 +1,13 @@
 # - Check for the presence of the CFITSIO library
 #
 #  HAVE_CFITSIO        = Do we have CFITSIO?
-#  CFITSIO_LIBRARY     = Location of the CFITSIO library (libcfitsio)
 #  CFITSIO_LIBRARIES   = Set of libraries required for linking against CFITSIO
-#  CFITSIO_INCLUDE_DIR = Directory where to find fitsio.h
+#  CFITSIO_INCLUDES = Directory where to find fitsio.h
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-FIND_PATH (CFITSIO_INCLUDE_DIR
+FIND_PATH (CFITSIO_INCLUDES
   fitsio.h longnam.h
   PATHS /usr/include /usr/local/include /sw/include /opt/casa/local/include
   PATH_SUFFIXES cfitsio
@@ -19,15 +18,15 @@ FIND_PATH (CFITSIO_INCLUDE_DIR
 
 ## [1] core library
 
-FIND_LIBRARY (CFITSIO_LIBRARY
+FIND_LIBRARY (CFITSIO_libcfitsio
   NAMES cfitsio
   PATHS /lib /usr/lib /usr/local/lib /sw/lib /opt/casa/local/lib
   PATH_SUFFIXES cfitsio
 )
 
-if (CFITSIO_LIBRARY)
-  set (CFITSIO_LIBRARIES ${CFITSIO_LIBRARY})
-endif (CFITSIO_LIBRARY)
+if (CFITSIO_libcfitsio)
+  set (CFITSIO_LIBRARIES ${CFITSIO_libcfitsio})
+endif (CFITSIO_libcfitsio)
 
 ## [2] math library
 
@@ -54,25 +53,25 @@ endif (CFITSIO_libnsl)
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
-IF (CFITSIO_INCLUDE_DIR AND CFITSIO_LIBRARIES)
+IF (CFITSIO_INCLUDES AND CFITSIO_LIBRARIES)
   SET (HAVE_CFITSIO TRUE)
-ELSE (CFITSIO_INCLUDE_DIR AND CFITSIO_LIBRARIES)
+ELSE (CFITSIO_INCLUDES AND CFITSIO_LIBRARIES)
   IF (NOT CFITSIO_FIND_QUIETLY)
-    IF (NOT CFITSIO_INCLUDE_DIR)
+    IF (NOT CFITSIO_INCLUDES)
       MESSAGE (STATUS "Unable to find CFITSIO header files!")
-    ENDIF (NOT CFITSIO_INCLUDE_DIR)
+    ENDIF (NOT CFITSIO_INCLUDES)
     IF (NOT CFITSIO_LIBRARIES)
       MESSAGE (STATUS "Unable to find CFITSIO library files!")
     ENDIF (NOT CFITSIO_LIBRARIES)
   ENDIF (NOT CFITSIO_FIND_QUIETLY)
-ENDIF (CFITSIO_INCLUDE_DIR AND CFITSIO_LIBRARIES)
+ENDIF (CFITSIO_INCLUDES AND CFITSIO_LIBRARIES)
 
 
 IF (HAVE_CFITSIO)
   IF (NOT CFITSIO_FIND_QUIETLY)
     MESSAGE (STATUS "Found components for CFITSIO")
-    MESSAGE (STATUS "CFITSIO_LIBRARIES   = ${CFITSIO_LIBRARIES}")
-    MESSAGE (STATUS "CFITSIO_INCLUDE_DIR = ${CFITSIO_INCLUDE_DIR}")
+    MESSAGE (STATUS "CFITSIO_LIBRARIES = ${CFITSIO_LIBRARIES}")
+    MESSAGE (STATUS "CFITSIO_INCLUDES  = ${CFITSIO_INCLUDES}")
   ENDIF (NOT CFITSIO_FIND_QUIETLY)
 ELSE (HAVE_CFITSIO)
   IF (CFITSIO_FIND_REQUIRED)
@@ -85,7 +84,6 @@ ENDIF (HAVE_CFITSIO)
 
 MARK_AS_ADVANCED (
   HAVE_CFITSIO
-  CFITSIO_LIBRARY
   CFITSIO_LIBRARIES
-  CFITSIO_INCLUDE_DIR
+  CFITSIO_INCLUDES
   )

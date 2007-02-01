@@ -161,7 +161,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
     if (bufferDelays_p) {
       return delays_p;
     } else {
-      blitz::Array<double,2> delays;
+      int nAnt (0);
+      int nSky (0);
+      int nofAnt (nofAntennaPositions());
+      int nofSky (nofSkyPositions());
+      blitz::Array<double,2> delays (nofAnt,nofSky);
+
+      for (nAnt=0; nAnt<nofAnt; nAnt++) {
+	for (nSky=0; nSky<nofSky; nSky++) {
+	  delays(nAnt,nSky) = antPositions_p(0)*skyPositions_p(0);
+	}
+      }
 
       return delays;
     }

@@ -3,13 +3,13 @@
 # The following variables are set when <PACKAGE> is found:
 #  HAVE_<PACKAGE>       = Set to true, if all components of <PACKAGE>
 #                          have been found.
-#  <PACKAGE>_INCLUDE_DIR = Include path for the header files of <PACKAGE>
-#  <PACKAGE>_LIBRARY     = Link these to use <PACKAGE>
+#  <PACKAGE>_INCLUDES   = Include path for the header files of <PACKAGE>
+#  <PACKAGE>_LIBRARIES  = Link these to use <PACKAGE>
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-FIND_PATH (<PACKAGE>_INCLUDE_DIR <header file(s)>
+find_path (<PACKAGE>_INCLUDES <header file(s)>
   PATHS /usr/local/include /usr/include /sw/include
   PATH_SUFFIXES <optional path extension>
   )
@@ -17,40 +17,40 @@ FIND_PATH (<PACKAGE>_INCLUDE_DIR <header file(s)>
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-FIND_LIBRARY (<PACKAGE>_LIBRARY <package name>
+find_library (<PACKAGE>_LIBRARIES <package name>
   PATHS /usr/local/lib /usr/lib /lib /sw/lib
   )
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
-IF (<PACKAGE>_INCLUDE_DIR AND <PACKAGE>_LIBRARY)
-  SET (HAVE_<PACKAGE> TRUE)
-ELSE (<PACKAGE>_INCLUDE_DIR AND <PACKAGE>_LIBRARY)
-  IF (NOT <PACKAGE>_FIND_QUIETLY)
-    IF (NOT <PACKAGE>_INCLUDE_DIR)
-      MESSAGE (STATUS "Unable to find <PACKAGE> header files!")
-    ENDIF (NOT <PACKAGE>_INCLUDE_DIR)
-    IF (NOT <PACKAGE>_LIBRARY)
-      MESSAGE (STATUS "Unable to find <PACKAGE> library files!")
-    ENDIF (NOT <PACKAGE>_LIBRARY)
-  ENDIF (NOT <PACKAGE>_FIND_QUIETLY)
-ENDIF (<PACKAGE>_INCLUDE_DIR AND <PACKAGE>_LIBRARY)
+if (<PACKAGE>_INCLUDES AND <PACKAGE>_LIBRARIES)
+  set (HAVE_<PACKAGE> TRUE)
+else (<PACKAGE>_INCLUDES AND <PACKAGE>_LIBRARIES)
+  if (NOT <PACKAGE>_FIND_QUIETLY)
+    if (NOT <PACKAGE>_INCLUDES)
+      message (STATUS "Unable to find <PACKAGE> header files!")
+    endif (NOT <PACKAGE>_INCLUDES)
+    if (NOT <PACKAGE>_LIBRARIES)
+      message (STATUS "Unable to find <PACKAGE> library files!")
+    endif (NOT <PACKAGE>_LIBRARIES)
+  endif (NOT <PACKAGE>_FIND_QUIETLY)
+endif (<PACKAGE>_INCLUDES AND <PACKAGE>_LIBRARIES)
 
-IF (HAVE_<PACKAGE>)
-  IF (NOT <PACKAGE>_FIND_QUIETLY)
-    MESSAGE (STATUS "Found components for <PACKAGE>")
-    MESSAGE (STATUS "<PACKAGE>_INCLUDE_DIR = ${<PACKAGE>_INCLUDE_DIR}")
-    MESSAGE (STATUS "<PACKAGE>_LIBRARY     = ${<PACKAGE>_LIBRARY}")
-  ENDIF (NOT <PACKAGE>_FIND_QUIETLY)
-ELSE (HAVE_<PACKAGE>)
-  IF (<PACKAGE>_FIND_REQUIRED)
-    MESSAGE (FATAL_ERROR "Could not find <PACKAGE>!")
-  ENDIF (<PACKAGE>_FIND_REQUIRED)
-ENDIF (HAVE_<PACKAGE>)
+if (HAVE_<PACKAGE>)
+  if (NOT <PACKAGE>_FIND_QUIETLY)
+    message (STATUS "Found components for <PACKAGE>")
+    message (STATUS "<PACKAGE>_INCLUDES = ${<PACKAGE>_INCLUDES}")
+    message (STATUS "<PACKAGE>_LIBRARIES     = ${<PACKAGE>_LIBRARIES}")
+  endif (NOT <PACKAGE>_FIND_QUIETLY)
+else (HAVE_<PACKAGE>)
+  if (<PACKAGE>_FIND_REQUIRED)
+    message (FATAL_ERROR "Could not find <PACKAGE>!")
+  endif (<PACKAGE>_FIND_REQUIRED)
+endif (HAVE_<PACKAGE>)
 
-MARK_AS_ADVANCED (
+mark_as_advanced (
   HAVE_<PACKAGE>
-  <PACKAGE>_LIBRARY
-  <PACKAGE>_INCLUDE_DIR
+  <PACKAGE>_LIBRARIES
+  <PACKAGE>_INCLUDES
   )

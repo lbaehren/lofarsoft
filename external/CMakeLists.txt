@@ -1,1 +1,4 @@
-SUBDIRS (VTK VisIt)
+
+subdirs (
+  casa
+  )

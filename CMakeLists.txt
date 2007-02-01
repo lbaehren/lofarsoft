@@ -1,4 +1,3 @@
-PROJECT (LOFAR)
 
 SET (UPDATE_TYPE "svn")
 

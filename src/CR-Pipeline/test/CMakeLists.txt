@@ -14,7 +14,7 @@ include_directories (
   ..
   ../../implement
   ${CASA_INCLUDE_DIR}
-  ${CFITSIO_INCLUDE_DIR}
+  ${CFITSIO_INCLUDES}
   )
 
 ## ------------------------------------------------------------------------------
@@ -22,7 +22,7 @@ include_directories (
 
 set (tests
   tUseCasa
-  tUseScimath
+#  tUseScimath
 )
 
 ## ------------------------------------------------------------------------------
@@ -45,11 +45,17 @@ target_link_libraries (tUseBlitz ${BLITZ_LIBRARIES})
 ## ------------------------------------------------------------------------------
 ## Test for CFITSIO
 
-add_executable (tUseCFITSIO tUseCFITSIO.cc)
-target_link_libraries (tUseCFITSIO ${CFITSIO_LIBRARIES})
+if (HAVE_CFITSIO)
+  add_executable (tUseCFITSIO tUseCFITSIO.cc)
+  target_link_libraries (tUseCFITSIO ${CFITSIO_LIBRARIES})
+else (HAVE_CFITSIO)
+  message (ERROR "Unable to build test program for CFITSIO.")
+endif (HAVE_CFITSIO)
 
 ## ------------------------------------------------------------------------------
 ## Test for FFTW3
 
-add_executable (tUseFFTW3 tUseFFTW3.cc)
-target_link_libraries (tUseFFTW3 ${FFTW3_LIBRARY})
+if (HAVE_FFTW3)
+  add_executable (tUseFFTW3 tUseFFTW3.cc)
+  target_link_libraries (tUseFFTW3 ${FFTW3_LIBRARY})
+endif (HAVE_FFTW3)
