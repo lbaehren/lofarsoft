@@ -8,22 +8,22 @@
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-FIND_PATH (WCS_INCLUDES wcs.h
-  PATHS /usr/local/include /usr/include /sw/include /opt/casa /sw/share/casa
-  PATH_SUFFIXES code/casa/wcslib stable/code/casa/wcslib
+find_path (WCS_INCLUDES wcs.h wcslib.h wcsutil.h
+  PATHS /include /usr/include /usr/local/include
+  PATH_SUFFIXES wcslib
   )
 
 ## correct the include path
 
-IF (WCS_INCLUDES)
-  STRING (REGEX REPLACE wcslib "" WCS_INCLUDES ${WCS_INCLUDES})
-ENDIF (WCS_INCLUDES)
+if (WCS_INCLUDES)
+  string (REGEX REPLACE wcslib "" WCS_INCLUDES ${WCS_INCLUDES})
+endif (WCS_INCLUDES)
 
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-FIND_LIBRARY (WCS_LIBRARIES wcs
+find_library (WCS_LIBRARIES wcs
   PATHS /usr/local/lib /usr/lib /lib /sw/lib /opt/casa /sw/share/casa
   PATH_SUFFIXES darwin/lib linux_gnu/lib stable/linux_gnu/lib
   )

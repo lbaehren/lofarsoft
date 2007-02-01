@@ -47,7 +47,32 @@
 
 // Template instantiation for CASA library 
 
-template bool casa::allNearAbs<float>(casa::Array<float> const&, float const&, double);
+namespace casa {
+  template class ArrayIterator<float>;
+  template class ArrayIterator<Double>;
+  template class ArrayIterator<Complex>;
+  template class ArrayIterator<DComplex>;
+
+  template class VectorIterator<float>;
+  template class VectorIterator<Double>;
+  template class VectorIterator<Complex>;
+  template class VectorIterator<DComplex>;
+
+  template Bool allNearAbs(float const &, Array<float> const &, Double);
+  template Bool allNearAbs(Double const &, Array<Double> const &, Double);
+  template Bool allNearAbs(Complex const &, Array<Complex> const &, Double);
+  template Bool allNearAbs(DComplex const &, Array<DComplex> const &, Double);
+  
+  template Bool allNearAbs(Array<float> const &, float const &, Double);
+  template Bool allNearAbs(Array<Double> const &, Double const &, Double);
+  template Bool allNearAbs(Array<Complex> const &, Complex const &, Double);
+  template Bool allNearAbs(Array<DComplex> const &, DComplex const &, Double);
+  
+  template Bool allNearAbs(Array<float> const &, Array<float> const &, Double);
+  template Bool allNearAbs(Array<Double> const &, Array<Double> const &, Double);
+  template Bool allNearAbs(Array<Complex> const &, Array<Complex> const &, Double);
+  template Bool allNearAbs(Array<DComplex> const &, Array<DComplex> const &, Double);
+}
 
 /*!
   \brief main routine
