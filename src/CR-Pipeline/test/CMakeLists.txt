@@ -37,13 +37,19 @@ FOREACH (src ${tests})
 ENDFOREACH (src)
 
 ## ------------------------------------------------------------------------------
-## Test for FFTW3
+## Test for BLITZ
 
-add_executable (tUseFFTW3 tUseFFTW3.cc)
-target_link_libraries (tUseFFTW3 ${FFTW3_LIBRARY})
+add_executable (tUseBlitz tUseBlitz.cc)
+target_link_libraries (tUseBlitz ${BLITZ_LIBRARIES})
 
 ## ------------------------------------------------------------------------------
 ## Test for CFITSIO
 
 add_executable (tUseCFITSIO tUseCFITSIO.cc)
 target_link_libraries (tUseCFITSIO ${CFITSIO_LIBRARIES})
+
+## ------------------------------------------------------------------------------
+## Test for FFTW3
+
+add_executable (tUseFFTW3 tUseFFTW3.cc)
+target_link_libraries (tUseFFTW3 ${FFTW3_LIBRARY})
