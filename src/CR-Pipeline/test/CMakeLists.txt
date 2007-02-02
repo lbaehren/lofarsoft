@@ -26,6 +26,8 @@ include_directories (
 set (tests
   tUseCasa
   tUseScimath
+  tUseMeasures
+  tUseTables
 )
 
 ## ------------------------------------------------------------------------------
