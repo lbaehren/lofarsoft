@@ -16,6 +16,6 @@ set (tests
 
 foreach (src ${tests})
   add_executable (${src} ${src}.cc)
-  target_link_libraries (${src} imaging)
+  target_link_libraries (${src} cr)
 endforeach (src)
 
