@@ -16,7 +16,7 @@ FIND_PATH (FFTW3_INCLUDE_DIR fftw3.h
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-FIND_LIBRARY (FFTW3_LIBRARY fftw3
+FIND_LIBRARY (FFTW3_LIBRARY fftw3 fftw
   PATHS /usr/local/lib /usr/lib /lib /sw/lib
   )
 

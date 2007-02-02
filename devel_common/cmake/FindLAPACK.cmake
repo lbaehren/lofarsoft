@@ -9,33 +9,26 @@
 ## -----------------------------------------------------------------------------
 ## Check for the library files (-llapack -lblas -lcblas -latlas)
 
-set (LAPACK_SEARCH_PATH
-  /usr/local/lib
-  /usr/lib
-  /lib 
-  /sw/lib
+set (libs
+  atlas
+  blas
+  cblas
+  lapack
   )
+  
+set (LAPACK_LIBRARIES "")
 
-find_library (LAPACK_libatlas atlas ${LAPACK_SEARCH_PATH})
-find_library (LAPACK_libblas blas ${LAPACK_SEARCH_PATH})
-find_library (LAPACK_libcblas cblas ${LAPACK_SEARCH_PATH})
-find_library (LAPACK_liblapack lapack ${LAPACK_SEARCH_PATH})
-
-if (LAPACK_libatlas)
-  list (APPEND LAPACK_LIBRARIES ${LAPACK_libatlas})
-endif (LAPACK_libatlas)
-
-if (LAPACK_libblas)
-  list (APPEND LAPACK_LIBRARIES ${LAPACK_libblas})
-endif (LAPACK_libblas)
-
-if (LAPACK_libcblas)
-  list (APPEND LAPACK_LIBRARIES ${LAPACK_libcblas})
-endif (LAPACK_libcblas)
-
-if (LAPACK_liblapack)
-  list (APPEND LAPACK_LIBRARIES ${LAPACK_liblapack})
-endif (LAPACK_liblapack)
+foreach (lib ${libs})
+  ## try to locate the library
+  find_library (LAPACK_${lib} ${lib}
+    PATHS /usr/local/lib /usr/lib /lib /sw/lib
+    PATH_SUFFIXES lapack
+    )
+  ## check if location was successful
+  if (LAPACK_${lib})
+    list (APPEND LAPACK_LIBRARIES ${LAPACK_${lib}})
+  endif (LAPACK_${lib})
+endforeach (lib)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found

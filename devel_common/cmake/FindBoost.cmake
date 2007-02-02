@@ -35,7 +35,7 @@ set (BOOST_LIBRARIES "")
 
 foreach (lib ${libs})
   ## try to locate the library
-  find_library (BOOST_${lib} ${lib}
+  find_library (BOOST_${lib} ${lib} ${lib}-gcc
     PATHS /lib /usr/lib /usr/local/lib /sw/lib
     PATH_SUFFIXES boost
     )
