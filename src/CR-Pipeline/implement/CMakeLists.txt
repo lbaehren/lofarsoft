@@ -1,22 +1,18 @@
-
-subdirs (
-  Imaging
-  Math
-  )
-
-#include_directories (
-#  .
-#  ..
-#  ${CR_SOURCE_DIR}/include
-#  )
-
-## -----------------------------------------------------------------------------
-## libcr
-
 set (cr_modules
   Imaging
   Math
   )
+
+subdirs (${cr_modules})
+
+include_directories (
+  .
+  ..
+  ${CR_SOURCE_DIR}/include
+  )
+
+## -----------------------------------------------------------------------------
+## libcr
 
 ## collect the source files in the modules
 
