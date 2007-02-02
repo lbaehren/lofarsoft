@@ -38,7 +38,7 @@ C--
 C  1-Mar-1991 - new routine [JM].
 C 20-Apr-1992 - correct bug [ALF, TJP].
 C 28-Mar-1995 - add options DIR = 5 or 6 [TJP].
-C 31-Mar-1997 - use pgtikl [TJP].
+C 31-Mar-1997 - use_pgtikl [TJP].
 C-----------------------------------------------------------------------
       INTEGER  I
       LOGICAL  PGNOTO

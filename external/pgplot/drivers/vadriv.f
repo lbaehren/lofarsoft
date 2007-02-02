@@ -161,7 +161,7 @@ C
 C--- IFUNC=11, Begin Picture. ------------------------------------------
  110  CALL GRVA03(LUN,1)
 C
-C [MCS] - By default the Y-axis goes down the page - use the Picture
+C [MCS] - By default the Y-axis goes down the page - use_the Picture
 C area command to reverse this. '(',X0,Y0,X1,Y1,IS2
 C
       LBUF=1
@@ -172,7 +172,7 @@ C
       CALL GRVA04(MXLEN,CBUF,LBUF)
       LBUF=LBUF+1
       CBUF(LBUF:LBUF)=CHAR(IS2)
-C- Use the origin transfer command to ensure that the picture is
+C- use_the origin transfer command to ensure that the picture is
 C- centered on the page.
       I0=(MXLEN-NINT(RBUF(1)))/2
       J0=(MXWID-NINT(RBUF(2)))/2
@@ -204,7 +204,7 @@ C--- IFUNC=14, End Picture. --------------------------------------------
       RETURN
 C
 C--- IFUNC=15, Select color index. -------------------------------------
-C- Save pen number (up to 11) for possible use in pattern interior.
+C- Save pen number (up to 11) for possible use_in pattern interior.
  150  ICOL=MAX(0,MIN(NINT(RBUF(1)),11))
       RBUF(1)=MAX(0,MIN(ICOL,1))
       IF(ICOL.EQ.0) THEN
@@ -224,7 +224,7 @@ C
 C--- IFUNC=19, Set line style. -----------------------------------------
 C- Currently turned off, since pattern is reset at beginning of
 C- every new line segment.  Note, if GRVA01 was modified to
-C- properly use polylines then dash pattern may work better.
+C- properly use_polylines then dash pattern may work better.
  190  CBUF(1:4)='E1'//CDASH(NINT(RBUF(1)))//CHAR(IS2)
       WRITE(LUN,11) CBUF(:4)
       RETURN

@@ -13,7 +13,7 @@ C+
 *
 * Default device name: pgplot.xwd.
 *
-* If you have more than one image to plot (i.e. use PGPAGE) with this
+* If you have more than one image to plot (i.e. use_PGPAGE) with this
 * device, subsequent pages will be named: pgplot2.xwd, pgplot3.xwd,
 * etc, disrespective of the device name you specified.
 * You can however bypass this by specifying a device name including a
@@ -34,11 +34,11 @@ C+
 * Indices 0 to 255 are supported. Each of these indices can be assigned
 * one color. Default colors for indices 0 to 15 are implemented.
 *
-* Obtaining hardcopy: Use an XWD viewer (xwud) or converter.
+* Obtaining hardcopy: use_an XWD viewer (xwud) or converter.
 *=
 * 23-Jan-1995 - Steal GIDRIV.F code and bash appropriately [SCA].
 * 28-Dec-1995 - Prevent concurrent access [TJP].
-* 29-Apr-1996 - Use GRCTOI to decode environment variables [TJP].
+* 29-Apr-1996 - use_GRCTOI to decode environment variables [TJP].
 *-----------------------------------------------------------------------
       CHARACTER*(*) LTYPE, PTYPE, DEFNAM
       INTEGER DWD, DHT, BX, BY
@@ -506,7 +506,7 @@ C        -- if the supplied name contains a #-character, replace
 C           it with the page number
          CALL GRFAO(NAME1, L, TMP, NP, 0, 0, 0)
       ELSE IF (NP.EQ.1) THEN
-C        -- if this is the first page, use the supplied name
+C        -- if this is the first page, use_the supplied name
          NAME2 = NAME1
          RETURN
       ELSE IF (LN+2.LE.LEN(NAME1)) THEN

@@ -11,7 +11,7 @@ C necessary at the boundaries of the viewport.  Each contour line is
 C drawn with the current line attributes (color index, style, and
 C width).  This routine, unlike PGCONT, does not draw each contour as a
 C continuous line, but draws the straight line segments composing each
-C contour in a random order.  It is thus not suitable for use on pen
+C contour in a random order.  It is thus not suitable for use_on pen
 C plotters, and it usually gives unsatisfactory results with dashed or
 C dotted lines.  It is, however, faster than PGCONT, especially if
 C several contour levels are drawn with one call of PGCONS.

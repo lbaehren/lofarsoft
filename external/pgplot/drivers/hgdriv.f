@@ -27,7 +27,7 @@ C flag in PE mode does not work.  It was thus necessary to periodically
 C exit from PE mode, do absolute positioning in normal mode, then return
 C to PE mode.  The file size overhead of this workaround is miminal (maybe
 C 5%).  The printer rounding errors were ignored in the polygon fill
-C opcode, because in general the vectors will be of pseudo-random length
+C opcode, because_in general the vectors will be of pseudo-random length
 C and direction, so errors will grow only as sqrt(n).
 C
 C Supported device: Any HPGL-2 device (presently tested only on HP laserjet 3)

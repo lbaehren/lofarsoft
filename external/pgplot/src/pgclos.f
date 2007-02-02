@@ -10,7 +10,7 @@ C plotting can be done. If the call to PGCLOS is omitted, some or all
 C of the plot may be lost.
 C
 C [This routine was added to PGPLOT in Version 5.1.0. Older programs
-C use PGEND instead.]
+C use_PGEND instead.]
 C
 C Arguments: none
 C--

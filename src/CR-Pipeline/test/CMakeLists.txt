@@ -49,7 +49,7 @@ if (HAVE_CFITSIO)
   add_executable (tUseCFITSIO tUseCFITSIO.cc)
   target_link_libraries (tUseCFITSIO ${CFITSIO_LIBRARIES})
 else (HAVE_CFITSIO)
-  message (ERROR "Unable to build test program for CFITSIO.")
+  message (STATUS "Unable to build test program for CFITSIO.")
 endif (HAVE_CFITSIO)
 
 ## ------------------------------------------------------------------------------
@@ -67,6 +67,6 @@ if (HAVE_WCS)
   add_executable (tUseWCS tUseWCS.cc)
   target_link_libraries (tUseWCS ${WCS_LIBRARIES})
 else (HAVE_WCS)
-  message (FATAL_ERROR "Unable to build test program for WCS.")
+  message (STATUS "Unable to build test program for WCS.")
 endif (HAVE_WCS)
 

@@ -47,9 +47,9 @@ C Arguments:
 C  MM     (input)
 C  PP     (input)  : the value to be formatted is MM*10**PP.
 C  FORM   (input)  : controls how the number is formatted:
-C                    FORM = 0 -- use either decimal or exponential
-C                    FORM = 1 -- use decimal notation
-C                    FORM = 2 -- use exponential notation
+C                    FORM = 0 -- use_either decimal or exponential
+C                    FORM = 1 -- use_decimal notation
+C                    FORM = 2 -- use_exponential notation
 C  STRING (output) : the formatted character string, left justified.
 C                    If the length of STRING is insufficient, a single
 C                    asterisk is returned, and NC=1.
@@ -57,7 +57,7 @@ C  NC     (output) : the number of characters used in STRING:
 C                    the string to be printed is STRING(1:NC).
 C--
 C 23-Nov-1983
-C  9-Feb-1988 [TJP] - Use temporary variable to avoid illegal character
+C  9-Feb-1988 [TJP] - use_temporary variable to avoid illegal character
 C                     assignments; remove non-standard DO loops.
 C 15-Dec-1988 [TJP] - More corrections of the same sort.
 C 27-Nov-1991 [TJP] - Change code for multiplication sign.
@@ -91,7 +91,7 @@ C
       P = PP
 C
 C Convert M to a left-justified digit string in WORK. As M is a
-C positive integer, it cannot use more than 10 digits (2147483647).
+C positive integer, it cannot use_more than 10 digits (2147483647).
 C
       J = 10
    10 IF (M.NE.0) THEN

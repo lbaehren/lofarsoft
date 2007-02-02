@@ -33,7 +33,7 @@ C variables).  If NS is 1, then SYMBOL may be a scalar.  If N is
 C less than 1, nothing is drawn.
 C--
 C 11-Mar-1991 - new routine [JM].
-C 26-Feb-1997 - revised to use PGPT1 [TJP].
+C 26-Feb-1997 - revised to use_PGPT1 [TJP].
 C-----------------------------------------------------------------------
       INTEGER I, SYMB
 C

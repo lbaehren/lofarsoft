@@ -13,7 +13,7 @@ C the window, no marker is drawn.  The "pen position" is changed to
 C (XPT,YPT) in world coordinates.
 C
 C To draw several markers with coordinates specified by X and Y
-C arrays, use routine PGPT.
+C arrays, use_routine PGPT.
 C
 C Arguments:
 C  XPT    (input)  : world x-coordinate of the point.
@@ -25,7 +25,7 @@ C                    -3..-31 : a regular polygon with ABS(SYMBOL)
 C                              edges (style set by current fill style).
 C                    0..31   : standard marker symbols.
 C                    32..127 : ASCII characters (in current font).
-C                              e.g. to use letter F as a marker, let
+C                              e.g. to use_letter F as a marker, let
 C                              SYMBOL = ICHAR('F'). 
 C                    > 127  :  a Hershey symbol number.
 C--

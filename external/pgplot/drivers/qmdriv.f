@@ -414,7 +414,7 @@ C     Dash-dot-dot-dot
 C     End SELECT/CASE on ISTYLE
   196 CONTINUE
 C
-C     -- I use HEXSTR here for system-independence and also in case the
+C     -- I use_HEXSTR here for system-independence and also in case the
 C     -- PGPLOT package ever adds more line styles.
 C
       IF (BUFLEN+3 .GE. MAXLEN) CALL GRQM00 (UNIT, BUFFER, BUFLEN)
@@ -429,7 +429,7 @@ C
   200 CONTINUE
       IF (IC .EQ. 0) RETURN
 C
-C     -- Use NPTS as our indicator of whether this is first time or not
+C     -- use_NPTS as our indicator of whether this is first time or not
 C
       IF (NPTS.EQ.0) THEN
 C
@@ -438,7 +438,7 @@ C
          NPTS = RBUF(1)
          IF (BUFLEN+8 .GE. MAXLEN) CALL GRQM00 (UNIT, BUFFER, BUFLEN)
 C
-C        -- Use black fill, no border (in case PGPLOT doesn't go back to
+C        -- use_black fill, no border (in case PGPLOT doesn't go back to
 C           the last point) --------------------------------------------
 C
          BUFFER (BUFLEN+1:BUFLEN+8) = '^PF020^U'

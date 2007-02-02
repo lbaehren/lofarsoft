@@ -40,7 +40,7 @@ C Input capability:
 C   The PGPLOT cursor is supported.  When a cursor read is requested the
 C   the viewer becomes the active application and the active plot window
 C   becomes the key window.  This allows the user to terminate the cursor
-C   read by either a mouse click (which generates an 'A' character) or
+C   read by either a mouse_click (which generates an 'A' character) or
 C   by pressing a key on the keyboard.
 C
 C File format:

@@ -41,7 +41,7 @@ C Imagen printer with IMPRINT software,
 C    $ IMPRINT/STYLE=TEKTRONIX file.type
 C
 C Note: the file cannot easily be displayed on a Tektronix-compatible
-C *terminal* because it contains control characters which will be
+C *terminal* because_it contains control characters which will be
 C interpreted by the operating system. The terminal must be set to
 C "Passall" mode before the file can be displayed.
 C-----------------------------------------------------------------------

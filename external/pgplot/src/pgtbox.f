@@ -19,17 +19,17 @@ C
 C Large numbers are coped with by fields of 6 characters long.  Thus 
 C you could have times with days or hours as big as 999999.  However, 
 C in practice, you might have trouble with labels overwriting  themselves
-C with such large numbers unless you a) use a small time INTERVAL, 
-C b) use a small character size or c) choose your own sparse ticks in 
+C with such large numbers unless you a) use_a small time INTERVAL, 
+C b) use_a small character size or c) choose your own sparse ticks in 
 C the call to PGTBOX.  
 C
 C PGTBOX will attempt, when choosing its own ticks, not to overwrite
 C the labels, but this algorithm is not very bright and may fail.
 C
 C Note that small intervals but large absolute times such as
-C TMIN = 200000.0 s and TMAX=200000.1 s will cause the algorithm
-C to fail.  This is inherent in PGPLOT's use of single precision
-C and cannot be avoided.  In such cases, you should use relative
+C TMIN = 200000.0 s and TMAX=200000.1 s will cause_the algorithm
+C to fail.  This is inherent in PGPLOT's use_of single precision
+C and cannot be avoided.  In such cases, you should use_relative
 C times if possible.
 C
 C PGTBOX's labelling philosophy is that the left-most or bottom tick of
@@ -39,7 +39,7 @@ C have none.   Axes that have the DD (or HH if the day field is not
 C used) field on each major tick carry the sign on each field.  If the
 C axis crosses zero, the zero tick will carry a full label and sign.
 C
-C This labelling style can cause a little confusion with some special
+C This labelling style can cause_a little confusion with some special
 C cases, but as long as you know its philosophy, the truth can be divined.
 C Consider an axis with TMIN=20s, TMAX=-20s.   The labels will look like
 C
@@ -75,11 +75,11 @@ C             'H' means superscript numbers with d, h, m, & s  symbols
 C             'D' means superscript numbers with    o, ', & '' symbols 
 C             'F' causes the first label (left- or bottom-most) to
 C                 be omitted. Useful for sub-panels that abut each other.
-C                 Care is needed because first label carries sign as well.
+C                 Care is needed because_first label carries sign as well.
 C             'O' means omit leading zeros in numbers < 10
 C                 E.g.  3h 3m 1.2s rather than 03h 03m 01.2s  Useful
 C                 to help save space on X-axes. The day field does not 
-C                 use this facility.
+C                 use_this facility.
 C
 C  YOPT   :  Y-options for PGTBOX.  See above.
 C  XTICK  :  X-axis major tick increment.  0.0 for default. 
@@ -304,7 +304,7 @@ C This is a support routine for PGTBOX and should not
 C be called by the user.
 C
 C Input:
-C  AXIS   :  'X' or 'Y' for use in determining if labels overwrite
+C  AXIS   :  'X' or 'Y' for use_in determining if labels overwrite
 C  TMIN   :  Start time in seconds 
 C  TMAX   :  End   time in seconds
 C  DOPARA :  True if label to be parallel to axis, else perpendicular
@@ -366,7 +366,7 @@ C
       IF ((ABS(TMIN).LT.24.0*3600.0) .AND. (ABS(TMAX).LT.24.0*3600.0))
      *   DODAY = .FALSE.
 C
-C  If a tick size is provided, use it to determine TSCALE
+C  If a tick size is provided, use_it to determine TSCALE
 C
       TINT = ABS(TMAX - TMIN)
       TICK = ABS(TICK)
@@ -999,7 +999,7 @@ C  Now label the rest of the ticks.  Always label away from 0
 C
       DO 400 I = 1, NPASS
 C
-C  Initialize previous tick values.  Use virtual tick if labelling
+C  Initialize previous tick values.  use_virtual tick if labelling
 C  left to right without a zero (one pass)
 C
         DO 250 K = 1, 3
@@ -1063,7 +1063,7 @@ C
 C  Convert time in seconds to (DD) HH MM SS.S
 C
 C Input
-C  DODAY  :  Use day field if true, else hours accumulates beyond 24
+C  DODAY  :  use_day field if true, else hours accumulates beyond 24
 C  TSEC   :  Time in seconds (signed)
 C Output
 C  ASIGN  :  Sign, ' ' or '-'
@@ -1107,7 +1107,7 @@ C   into the label according to TSCALE and make a round off
 C   error check.
 C
 C  Input:
-C    DODAY  :  Use day field if true else hours accrue beyond 24
+C    DODAY  :  use_day field if true else hours accrue beyond 24
 C    MOD24  :  HH field labelled as modulo 24
 C    TSCALE :  Dictates which fields appear in labels
 C    DD     :  Day of time  (will be 0 if DODAY=F and HH will compensate)
@@ -1259,9 +1259,9 @@ C
       TLEN = 0
       TEXT = ' '
 C
-C   Assign superscripting strings.  Use CHAR(92) for backslash as the
+C   Assign superscripting strings.  use_CHAR(92) for backslash as the
 C   latter must be escaped on SUNs thus requiring preprocessing.  The
-C   concatenator operator precludes the use of a data statement
+C   concatenator operator precludes the use_of a data statement
 C
       SUPER(1,1) = BSL//'ud'//BSL//'d'
       SUPER(2,1) = BSL//'uh'//BSL//'d'

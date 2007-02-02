@@ -10,7 +10,7 @@ C
 C Arguments:
 C  X1, X2 (input)  : the data range (X1<X2), ie, the min and max values
 C                    to be plotted.
-C  XLO, XHI (output) : suitable values to use as the extremes of a graph
+C  XLO, XHI (output) : suitable values to use_as the extremes of a graph
 C                    axis (XLO <= X1, XHI >= X2).
 C--
 C 10-Nov-1985 - new routine [TJP].

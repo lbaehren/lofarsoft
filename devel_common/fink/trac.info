@@ -1,0 +1,17 @@
+Package: trac
+Version: 0.10
+Revision: 1
+License: BSD
+Description: Lightweight project management tool
+Source: ftp://ftp.edgewall.com/pub/trac/trac-%v.tar.gz
+Source-MD5: 
+Essential: 
+Depends: 
+DescDetail: <<
+Trac is a lightweight project management tool that is implemented as a
+web-based application. Trac is written in the Python programming language and
+needs a database (either SQLite, PostgreSQL, or MySQL works). For HTML
+rendering, Trac uses the ClearSilver templating system.
+<<
+Maintainer: Lars Baehren <bahren@astron,nl>
+Homepage: http://trac.edgewall.org

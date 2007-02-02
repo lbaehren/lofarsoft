@@ -28,7 +28,7 @@ C spans less than two decades, numeric labels are placed at 1, 2, and
 C 5 times each power of ten.
 C
 C If the axis spans less than one decade, or if it spans many decades,
-C it is preferable to use a linear axis labeled with the logarithm of
+C it is preferable to use_a linear axis labeled with the logarithm of
 C the quantity of interest.
 C
 C Arguments:
@@ -102,7 +102,7 @@ C           -- exponential labels requested
  10   CONTINUE
 C
 C Choose major interval if defaulted. Requested interval = STEP,
-C with NSUB subdivisions. We will use interval = DVMAJ with NSUBT
+C with NSUB subdivisions. We will use_interval = DVMAJ with NSUBT
 C subdivisions of size DVMIN. Note that DVMAJ is always positive.
 C
       IF (STEP.EQ.0.0) THEN

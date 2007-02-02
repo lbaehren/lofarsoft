@@ -405,7 +405,7 @@ C		Might be a vertical line:
 	    ENDDO
 	    RETURN
 	ENDIF
-C		 It is a vector : Use the algorithm
+C		 It is a vector : use_the algorithm
 
 	DX = X2 - X1
 	DY = Y2 - Y1

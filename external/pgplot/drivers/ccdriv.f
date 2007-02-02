@@ -28,7 +28,7 @@ C Input capability: None.
 C
 C File format: DEC color sixel format.
 C
-C Obtaining hardcopy: Use the VMS PRINT command.
+C Obtaining hardcopy: use_the VMS PRINT command.
 C-----------------------------------------------------------------------
 C 
 C To choose portrait mode, you must execute a DCL command of the 

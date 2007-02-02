@@ -29,7 +29,7 @@ C variables or expressions, eg:
 C       CALL PGERRY(1,X,Y+SIGMA,Y-SIGMA)
 C--
 C (6-Oct-1983)
-C 31-Mar-1997 - use pgtikl [TJP].
+C 31-Mar-1997 - use_pgtikl [TJP].
 C-----------------------------------------------------------------------
       INTEGER  I
       LOGICAL  PGNOTO

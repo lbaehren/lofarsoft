@@ -19,7 +19,7 @@ C                             Number of color entries corrected for 8
 C                             plane system.
 C
 C Version 1.2 - 1988 Mar 18 - S. C. Allendorf
-C                             Change PAUSE to LIB$GET_COMMAND and change
+C                             Change PAuse_to LIB$GET_COMMAND and change
 C                             cursor routines.
 C
 C Version 2.0 - 1988 Mar 23 - S. C. Allendorf
@@ -27,7 +27,7 @@ C                             Add hardware area and rectangle fills
 C                             (OPCODE = 24).  General cleanup.
 C
 C Version 3.0 - 1988 Apr 1  - S. C. Allendorf
-C                             Use absolute device coordinates and add
+C                             use_absolute device coordinates and add
 C                             keypad cursor control.
 C
 C Version 3.1 - 1988 Nov 24 - S. C. Allendorf
@@ -57,7 +57,7 @@ C
 C Version 4.3 - 1993 Apr 23 - T. J. Pearson
 C                             This driver crashes when used with UISX.
 C                             Changed so that it only crashes if the
-C                             caller tries to use it.
+C                             caller tries to use_it.
 C=======================================================================
 C
 C Supported device: This driver should work with all VAX/VMS 
@@ -81,7 +81,7 @@ C are available (4 indices are reserved for text windows and pointers).
 C On 8-plane systems, color indices 0-249 are available (6 indices
 C are reserved for text windows and pointers).
 C
-C Input capability: The cursor is controlled by the mouse or the keypad
+C Input capability: The cursor is controlled by the mouse_or the keypad
 C available on the controlling (DEC-like) keyboard. The user positions 
 C the cursor, and then types any key on the controlling keyboard.
 C
@@ -94,7 +94,7 @@ C
 C PGPLOT can be used in three modes on VAX Workstations. 
 C 
 C (1) Tektronix emulation. If you run a process in a Tektronix emulation
-C window, you can use device specification "/TEK" to tell PGPLOT to
+C window, you can use_device specification "/TEK" to tell PGPLOT to
 C plot in Tektronix mode within the same window. If you run in a VT220
 C window, you can tell PGPLOT to create a new Tektronix window and plot
 C in it by giving a device specification "TK:/TEK". (TK: is the VMS
@@ -105,9 +105,9 @@ C PGEND.
 C 
 C (2) UIS mode. In UIS mode, PGPLOT calls the UIS subroutines for
 C creating graphics on the workstation. This has some advantages over
-C Tektronix emulation; e.g., it is faster, can use colors, and can
+C Tektronix emulation; e.g., it is faster, can use_colors, and can
 C erase. The number of colors available depends on the VAXstation
-C model. Use device specification "/WS" to tell PGPLOT to create a new
+C model. use_device specification "/WS" to tell PGPLOT to create a new
 C window and plot using UIS calls. Again, the window is deleted on
 C program exit. PGPLOT executes a LIB$GET_COMMAND statement before
 C exiting, however, so that you can view the picture before it
@@ -125,9 +125,9 @@ C
 C Substitute LANDSCAPE for PORTRAIT to revert to horizontal
 C orientation. 
 C 
-C The PGPLOT cursor is controlled by the mouse or the keypad on the
+C The PGPLOT cursor is controlled by the mouse_or the keypad on the
 C controlling keyboard. Type any keyboard key to notify PGPLOT when you
-C have positioned the cursor. The mouse buttons are ignored (at 
+C have positioned the cursor. The mouse_buttons are ignored (at 
 C present).
 C
 C (3) DECWindows mode. In DECWindows mode, PGPLOT calls the XLIB

@@ -16,7 +16,7 @@ C  X1, Y1 (input)  : world coordinates of the tail of the arrow.
 C  X2, Y2 (input)  : world coordinates of the head of the arrow.
 C--
 C  7-Feb-92 Keith Horne @ STScI / TJP.
-C 13-Oct-92 - use arrowhead attributes; scale (TJP).
+C 13-Oct-92 - use_arrowhead attributes; scale (TJP).
 C-----------------------------------------------------------------------
       INTEGER AHFS, FS
       REAL DX, DY, XV1, XV2, YV1, YV2, XL, XR, YB, YT, DINDX, DINDY

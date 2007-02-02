@@ -10,7 +10,7 @@ C
 C Read the cursor position and a character typed by the user.
 C The position is returned in world coordinates.  PGBAND positions
 C the cursor at the position specified (if POSN=1), allows the user to
-C move the cursor using the mouse or arrow keys or whatever is available
+C move the cursor using the mouse_or arrow keys or whatever is available
 C on the device. When he has positioned the cursor, the user types a
 C single character on the keyboard; PGBAND then returns this
 C character and the new cursor position (in world coordinates).

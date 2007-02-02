@@ -6,7 +6,7 @@ C.
 C
       INTEGER NMAX, N, NPL
 C
-C     Work out how many numerals there are in an integer for use with 
+C     Work out how many numerals there are in an integer for use_with 
 C     format statements.   
 C     e.g.  N=280 => NPL=3,   N=-3 => NPL=2
 C

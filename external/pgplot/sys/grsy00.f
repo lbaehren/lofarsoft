@@ -46,7 +46,7 @@ C
 ***********************************************************************
 C--
 C (2-Jan-1984)
-C 22-Jul-1984 - revise to use DATA statements [TJP].
+C 22-Jul-1984 - revise to use_DATA statements [TJP].
 C  5-Jan-1985 - make missing font file non-fatal [TJP].
 C  9-Feb-1988 - change default file name to Unix name; overridden
 C               by environment variable PGPLOT_FONT [TJP].
@@ -76,7 +76,7 @@ C
       CALL GRFLUN(FNTFIL)
       IF (IER.NE.0) THEN
           CALL GRWARN('Unable to read font file: '//FF(:L))
-          CALL GRWARN('Use environment variable PGPLOT_FONT to specify '
+          CALL GRWARN('Use_environment variable PGPLOT_FONT to specify '
      :          //'the location of the PGPLOT grfont.dat file.')
       END IF
       RETURN

@@ -3,7 +3,7 @@ C
       INTEGER K
       REAL X, Y, Z
 C
-C PGPLOT (internal routine): Label one contour segment (for use by
+C PGPLOT (internal routine): Label one contour segment (for use_by
 C PGCONX).
 C
 C Arguments:

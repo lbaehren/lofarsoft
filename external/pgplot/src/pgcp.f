@@ -1,7 +1,7 @@
 C
       SUBROUTINE PGCP (K, X, Y, Z)
 C
-C PGPLOT (internal routine): Draw one contour segment (for use by
+C PGPLOT (internal routine): Draw one contour segment (for use_by
 C PGCNSC).
 C
 C Arguments:

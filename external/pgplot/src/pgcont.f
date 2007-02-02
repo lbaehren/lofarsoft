@@ -58,7 +58,7 @@ C
           TRANS(I) = TR(I)
    10 CONTINUE
 C
-C Use PGCONX with external function PGCP, which applies the TRANS
+C use_PGCONX with external function PGCP, which applies the TRANS
 C scaling.
 C
       CALL PGCONX (A, IDIM, JDIM, I1, I2, J1, J2, C, NC, PGCP)

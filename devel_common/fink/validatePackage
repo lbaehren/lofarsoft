@@ -1,0 +1,71 @@
+#!/bin/sh
+
+var_basedir=`pwd`
+var_finkdist=/sw/fink/dists
+
+## check the input: package name is required
+
+if test -z $1 ; then
+    echo "Missing name of package to validate! Exiting now.";
+    exit 1;
+else
+    var_package=$1
+fi
+
+## check for the location of the package information file
+
+cd $var_finkdist
+var_packageInfo=`find . -name $var_package.info`
+
+if test -z $var_packageInfo ; then 
+    echo "Unable to locate info file for package $var_package";
+    exit;
+else
+    echo "Found package info file: $var_packageInfo";
+fi
+
+## ------------------------------------------------------------------------------
+## First run validation check on the info file of the package; this step should
+## be repeated until no error/warning messages are thrown any more
+
+echo "[1] fink validate package.info ..."
+
+cd $var_finkdist
+fink validate $var_packageInfo
+
+## ------------------------------------------------------------------------------
+## Try building the package from the checked out source code
+
+echo "[2] fink --build-as-nobody rebuild package";
+
+fink --build-as-nobody rebuild $var_package
+
+## ------------------------------------------------------------------------------
+## Check the contents of the previously build binary package
+
+echo "[3] dpkg -c package*.deb";
+
+var_packageBinary=`find . -name $var_package*.deb`
+
+if test -z $var_packageBinary ; then 
+    echo "Unable to find binary package for $var_package";
+    exit;
+else
+    echo "Located binary package for $var_package"
+fi
+
+dpkg -c $var_packageBinary
+
+## ------------------------------------------------------------------------------
+## Validate the binary package
+
+echo "[4] fink validate package*.deb";
+
+fink validate $var_packageBinary
+
+## ------------------------------------------------------------------------------
+## Finally try to install the package
+
+echo "[5] fink install package";
+
+fink install $var_package

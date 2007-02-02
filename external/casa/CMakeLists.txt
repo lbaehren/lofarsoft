@@ -137,6 +137,7 @@ IF (UNIX)
       -DAIPS_DARWIN
       -DAIPS_BIG_ENDIAN
       -DNATIVE_EXCP
+      -D_LARGEFILE_SOURCE
       )
     SET (CASA_CXXSTD "${CASA_CXXSTD} -fno-implicit-templates -Wreturn-type -Wimplicit -fPIC")
   ELSE (APPLE)

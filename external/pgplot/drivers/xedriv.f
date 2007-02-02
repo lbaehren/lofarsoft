@@ -51,14 +51,14 @@ C orientation.
 C
 C Resolution: Nominally 75 dpi, but depends on the monitor.
 C
-C Color capability: This driver will use as many colors as the 
+C Color capability: This driver will use_as many colors as the 
 C DECWindows server will allow, up to a maximum of 145 colors.  This
 C maximum comes from the maximum number of colors that PGPLOT will use
 C internally, and a desire to avoid hogging the resources of the server.
 C
 C Input capability: The cursor is controlled by the mouse. The user
 C positions the cursor, and then types any key on the controlling
-C keyboard.  The buttons on the mouse are also defined to return the 
+C keyboard.  The buttons on the mouse_are also defined to return the 
 C following characters:
 C
 C      Button  Character
@@ -81,7 +81,7 @@ C the OPEN_DISPLAY call to sometimes abort the calling program. This may
 C happen if you have used SET DISPLAY to define a display using the 
 C local transport mechanism and you do not have access to it.  The 
 C routine should return 0 in such a case, but does not currently.  If 
-C you are going to use the SET DISPLAY command, use /TRANSPORT = DECNET 
+C you are going to use_the SET DISPLAY command, use_/TRANSPORT = DECNET 
 C instead of /TRANSPORT = LOCAL or make sure that you will be able to 
 C write to the display.  This means that someone must be logged into the 
 C workstation display and must have security set to allow you to write 
@@ -125,11 +125,11 @@ C                                       routine.
       EQUIVALENCE (PIXMAP,  ARGS(2))
       EQUIVALENCE (WINDOW,  ARGS(3))
       EQUIVALENCE (GC,      ARGS(4))
-C                                       We need these because FORTRAN
+C                                       We need these because_FORTRAN
 C                                       does not have unsigned types.
       EQUIVALENCE (JWORD(1), JLONG), (KBYTE(1), KWORD)
 C                                       Define some parameters to avoid
-C                                       having to use include files.
+C                                       having to use_include files.
       PARAMETER (DC$_TERM = 66)
       PARAMETER (DVI$_DEVCLASS = 4)
       PARAMETER (SS$_NORMAL = 1)
@@ -236,7 +236,7 @@ C                                       the colors.
             IF (MONO) THEN
 C                                       On static displays and
 C                                       monochrome displays we will only
-C                                       be able to use two colors.
+C                                       be able to use_two colors.
                MAXCOL = 1
             ELSE
 C                                       Determine the maximum number of
@@ -650,12 +650,12 @@ C                                       Process the window exposure.
      +               REPORT.EVNT_EXPOSE.X$L_EXEV_HEIGHT,
      +               REPORT.EVNT_EXPOSE.X$L_EXEV_X,
      +               REPORT.EVNT_EXPOSE.X$L_EXEV_Y)
-C                                       The user pressed a mouse button.
+C                                       The user pressed a mouse_button.
          ELSE IF (REPORT.EVNT_TYPE .EQ. X$C_BUTTON_PRESS) THEN
 C                                       Record the position
             I0 = REPORT.EVNT_BUTTON.X$L_BTEV_X
             J0 = REPORT.EVNT_BUTTON.X$L_BTEV_Y
-C                                       Translate the mouse buttons to
+C                                       Translate the mouse_buttons to
 C                                       the common letters Add, Delete, 
 C                                       and eXit.
             IF (REPORT.EVNT_BUTTON.X$L_BTEV_BUTTON .EQ.

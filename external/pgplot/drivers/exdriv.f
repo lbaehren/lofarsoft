@@ -354,7 +354,7 @@ C
 C
 C--- IFUNC=15, Select color index --------------------------------------
 C
-C        Use TALGLP.
+C        use_TALGLP.
 C
   150 CONTINUE
       IC = RBUF(1)
@@ -411,11 +411,11 @@ C
 C
 C--- IFUNC=20, Polygon fill. -------------------------------------------
 C
-C     -- Use TALPFL to fill polygon.
+C     -- use_TALPFL to fill polygon.
 C
   200 CONTINUE
 C
-C     -- Use NPTS as our indicator of whether this is first time or not.
+C     -- use_NPTS as our indicator of whether this is first time or not.
 C
       IF (NPTS .EQ. 0) THEN
 C

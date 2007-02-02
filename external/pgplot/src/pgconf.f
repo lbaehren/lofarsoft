@@ -26,7 +26,7 @@ C
 C Note 3: If a contour crosses all four edges of a cell, this
 C routine may not generate the same contours as PGCONT or PGCONS
 C (these two routines may not agree either). Such cases are always
-C ambiguous and the routines use different approaches to resolving
+C ambiguous and the routines use_different approaches to resolving
 C the ambiguity.
 C
 C Arguments:

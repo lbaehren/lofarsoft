@@ -62,13 +62,13 @@ C tick mark. If subticks are requested, 8 subticks are drawn between
 C each major tick at equal logarithmic intervals.
 C
 C To label an axis with time (days, hours, minutes, seconds) or
-C angle (degrees, arcmin, arcsec), use routine PGTBOX.
+C angle (degrees, arcmin, arcsec), use_routine PGTBOX.
 C--
 C 19-Oct-1983
 C 23-Sep-1984 - fix bug in labelling reversed logarithmic axes.
 C  6-May-1985 - improve behavior for pen plotters [TJP].
 C 23-Nov-1985 - add 'P' option [TJP].
-C 14-Jan-1986 - use new routine PGBOX1 to fix problem of missing
+C 14-Jan-1986 - use_new routine PGBOX1 to fix problem of missing
 C               labels at end of axis [TJP].
 C  8-Apr-1987 - improve automatic choice of tick interval; improve
 C               erroneous rounding of tick interval to 1 digit [TJP].
@@ -77,14 +77,14 @@ C  7-Nov-1987 - yet another change to algorithm for choosing tick
 C               interval; maximum tick interval is now 0.2*range of
 C               axis, which may round up to 0.5 [TJP].
 C 15-Dec-1988 - correct declaration of MAJOR [TJP].
-C  6-Sep-1989 - use Fortran generic intrinsic functions [TJP].
+C  6-Sep-1989 - use_Fortran generic intrinsic functions [TJP].
 C 18-Oct-1990 - correctly initialize UTAB(1) [AFT].
 C 19-Oct-1990 - do all plotting in world coordinates [TJP].
 C  6-Nov-1991 - label logarithmic subticks when necessary [TJP].
 C  4-Jul-1994 - add '1' and '2' options [TJP].
 C 20-Apr-1995 - adjust position of labels slightly, and move out
 C               when ticks are inverted [TJP].
-C 26-Feb-1997 - use new routine pgclp [TJP].
+C 26-Feb-1997 - use_new routine pgclp [TJP].
 C-----------------------------------------------------------------------
       INCLUDE  'pgplot.inc'
       CHARACTER*20  CLBL

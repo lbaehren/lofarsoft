@@ -31,7 +31,7 @@ C File format: Variable-length records, maximum 135 bytes, with
 C embedded carriage-control characters. A full-page plot occupies
 C 200 512-byte blocks.
 C
-C Obtaining hardcopy: Use the command PRINT/PASSALL.
+C Obtaining hardcopy: use_the command PRINT/PASSALL.
 C-----------------------------------------------------------------------
       CHARACTER*(*) TYPE, DEFNAM
       PARAMETER (TYPE='PRINTRONIX (Printronix P300/P600 printer)')

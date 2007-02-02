@@ -1,0 +1,56 @@
+Package: blitz
+Version: 0.9
+Revision: 1
+License: GPL
+Description: C++ class library for scientific computing
+Source: http://surfnet.dl.sourceforge.net/sourceforge/blitz/%n-%v.tar.gz
+Source-MD5: 031df2816c73e2d3bd6d667bbac19eca
+SourceRename: %f.tar.gz
+Source2: http://heanet.dl.sourceforge.net/sourceforge/blitz/blitz-0.9.tar.gz
+Source2-MD5: 031df2816c73e2d3bd6d667bbac19eca
+Source2Rename: %f.tar.gz
+Source3: http://kent.dl.sourceforge.net/sourceforge/blitz/blitz-0.9.tar.gz
+Source3-MD5: 031df2816c73e2d3bd6d667bbac19eca
+Source3Rename: %f.tar.gz
+Source4: http://mesh.dl.sourceforge.net/sourceforge/blitz/blitz-0.9.tar.gz
+Source4-MD5: 031df2816c73e2d3bd6d667bbac19eca
+Source4Rename: %f.tar.gz
+SourceDirectory: %n-%v
+#BuildDepends: <<
+#  doxygen
+#<<
+CompileScript: <<
+  #!/bin/bash -ev
+  ./configure --prefix=%p --enable-doxygen=no --enable-dot=no
+  make lib;
+  make check-testsuite;
+<<
+DescDetail: <<
+The C++ programming language offers many features useful for tackling complex
+scientific computing problems: inheritance, polymorphism, generic programming,
+and operator overloading are some of the most important. Unfortunately, these
+advanced features came with a hefty performance pricetag: until recently, C++
+lagged behind Fortran's performance by anywhere from 20% to a factor of ten.
+As a result, the adoption of C++ for scientific computing has been slow.
+
+Is there a way to soup up C++ so that we can keep the advanced language
+features but ditch the poor performance? This is the goal of the Blitz++
+project: to develop techniques which will enable C++ to rival -- and in some
+cases even exceed -- the speed of Fortran for numerical computing, while
+preserving an object-oriented interface. The Blitz++ Numerical Library is
+being constructed as a testbed for these techniques.
+
+Recent benchmarks show C++ encroaching steadily on Fortran's high-performance
+monopoly, and for some benchmarks, C++ is even faster than Fortran! These
+results are being obtained not through better optimizing compilers,
+preprocessors, or language extensions, but through the use of template
+techniques. By using templates cleverly, optimizations such as loop fusion,
+unrolling, tiling, and algorithm specialization can be performed automatically
+at compile time.
+
+Another goal of Blitz++ is to extend the conventional dense array model to
+incorporate new and useful features. Some examples of such extensions are
+flexible storage formats, tensor notation and index placeholders.
+<<
+Homepage: http://www.oonumerics.org/blitz
+Maintainer: Lars Baehren <bahren@astron,nl>

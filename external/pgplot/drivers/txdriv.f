@@ -35,7 +35,7 @@ C       by 4.5 inches vertically.}).
 C       { setenv PGPLOT_TX_XINCHES "5.0"
 C         setenv PGPLOT_TX_YINCHES "4.5"
 C         would be the equivalent UNIX command.  Everywhere
-C         you see the command $DEFINE...   use the command 
+C         you see the command $DEFINE...   use_the command 
 C         setenv...  under UNIX}.
 C                                                       
 C    Driver        Size (H x V) inches
@@ -86,7 +86,7 @@ C               $ DEFINE PGPLOT_TX_BITFILE "ALL" will produce
 C               a file copy of the complete bitmap of the
 C               graphics character.}
 C                                                       
-C Obtaining hardcopy: Use the command DUMP to view the
+C Obtaining hardcopy: use_the command DUMP to view the
 C               output files, or run TeX and include the
 C               character of this new font and DVI the output
 C               and print the resulting  binary file to the
@@ -122,7 +122,7 @@ C   TEX_USER_FONTS to be your directory where you keep your
 C   fonts, then TeX and the DVI driver will find the
 C   'pgplot.tfm' file and the 'pgplot.300pk' file.  So, 
 C   $DEFINE TEX_USER_FONTS  SYS$USERDISK:[USERNAME.FONTS]
-C   would cause TeX and the DVI driver to search the normal
+C   would cause_TeX and the DVI driver to search the normal
 C   search path and also the directory 
 C   SYS$USERDISK:[USERNAME.FONTS] for any fonts that you
 C   specified in your TeX file.  {Here is an exception for
@@ -135,7 +135,7 @@ C
 C   Notes:
 C     You must change the resolution for different output
 C   devices (our DVI driver, DVIHP, for our HP2000 LaserJet
-C   would use a resolution of 300 dots per inch; while our
+C   would use_a resolution of 300 dots per inch; while our
 C   DVI driver for the Vaxstation 2000 workstation would
 C   need a resolution of 78 dots per inch.  The 'pgplot.tfm'
 C   file would of course be the same in both cases, but the  
@@ -143,7 +143,7 @@ C   DVI drivers would look for 'pgplot.300pk' and 'pgplot.78pk'
 C   respectively).  If you produce an image which is too large
 C   (by defining logicals PGPLOT_TX_XINCHES and PGPLOT_TX_YINCHES)
 C   then some DVI drivers will leave the page blank where the
-C   graph of the character belongs (can sometimes use \hsize and
+C   graph of the character belongs (can sometimes use_\hsize and
 C   \vsize to help with this).  Finally,  if your device driver
 C   only works with PXL files (like our PRINTRONIX DVI driver),
 C   then you may want to run the   PKTOPX  program to convert
@@ -186,7 +186,7 @@ C *** PORTABILITY NOTES: ...search for the word "portability"
 C ***                               or the word "PORTABILITY"  
 C     -- ... -- 
 C Note: {The Vax uses bytes with values from -128 to 127. I therefore
-C use integers for my calculations, and then output the resulting
+C use_integers for my calculations, and then output the resulting
 C values as a byte by calling two routines which buffer the output
 C up until 512 bytes have been buffered and then writes this 1 record,
 C resets the buffer count and starts buffering again,   and also the
@@ -202,7 +202,7 @@ C to set a parameter to have all ones in its bit positions -
 C and SOLWHT='00'X to set a parameter to have all zeros in its bit positions--
 C this may need to be changed in porting the code to other machines.
 C The variables BITMAP and BUFFER are byte variables and thus
-C use non-standard FORTRAN language in setting and comparing
+C use_non-standard FORTRAN language in setting and comparing
 C values  throughout this driver code. Anywhere that byte variables
 C are used is a suspect in porting this code to other machines.}
 C *** I believe that TeX, etc., uses ASCII internally so that
@@ -335,7 +335,7 @@ C
       CHARACTER  BITFIL*80,DEFBIT*80,CHTMPS*80
       BYTE BYTVAL
 C *** PARAMETER  (DEFNAM = 'PGPLOT')
-C *** Use lower case instead for unix...
+C *** use_lower case instead for unix...
       PARAMETER  (DEFNAM = 'pgplot')
       PARAMETER  (SS_NORMAL = 1)
       PARAMETER  (BC=65)
@@ -913,9 +913,9 @@ C *** ------------------------------------
            IF(PKFILE(JTMP2:JTMP2).NE.' ') GOTO 142
 141      CONTINUE
 142      CONTINUE
-C ***    PORTABILITY NOTE: Might want to use   JTMP1=ICHAR('A')+CURCHA-1
+C ***    PORTABILITY NOTE: Might want to use_  JTMP1=ICHAR('A')+CURCHA-1
 C ***    or something equivalent if on an EBCDIC machine... ?
-C ***    I think (but I'm not sure) that TeX, etcetera, use ASCII internally.
+C ***    I think (but I'm not sure) that TeX, etcetera, use_ASCII internally.
 C ***    I coded this as VaX specific.
          JTMP1=BC+CURCHA-1
 C        IF(ICHAR('A').NE.65) CALL GRWARN('Next message is not correct.'
@@ -946,9 +946,9 @@ C
      3                DEVICE,LUN,NPKBYT,CHINFO,
      4                WIDTH,HEIGHT,BC,IXBXLL,IYBXLL,IXBXUR,IYBXUR)
 C ----------------
-C ***    PORTABILITY NOTE: Might want to use   JTMP1=ICHAR('A')+CURCHA-1
+C ***    PORTABILITY NOTE: Might want to use_  JTMP1=ICHAR('A')+CURCHA-1
 C ***    or something equivalent if on an EBCDIC machine... ?
-C ***    I think (but I'm not sure) that TeX, etcetera, use ASCII internally.
+C ***    I think (but I'm not sure) that TeX, etcetera, use_ASCII internally.
 C ***    I coded this as VaX specific.
 C        IF(ICHAR('A').NE.65) CALL GRWARN('Next message is not correct.'
 C    2     //'it assumes that the ASCII value of A was 65base10.')
@@ -1692,9 +1692,9 @@ C *** ------------
          IF(PKFILE(JTMP2:JTMP2).NE.' ') GOTO 151
 150   CONTINUE
 151   CONTINUE
-C ***    PORTABILITY NOTE: Might want to use   JTMP1=ICHAR('A')+CURCHA-1
+C ***    PORTABILITY NOTE: Might want to use_  JTMP1=ICHAR('A')+CURCHA-1
 C ***    or something equivalent if on an EBCDIC machine... ?
-C ***    I think (but I'm not sure) that TeX, etcetera, use ASCII internally.
+C ***    I think (but I'm not sure) that TeX, etcetera, use_ASCII internally.
 C ***    I coded this as VaX specific.
       JTMP1=BC+CURCHA-2
 C        IF(ICHAR('A').NE.65) CALL GRWARN('Next message is not correct.'
@@ -1713,7 +1713,7 @@ C *** Now we need to check if we are to open a new PK Font.
 C ***    We need to open a new PK Font.
 C ***
 C ***    We need to determine the new file names for the next font
-C ***    because we are out of space on the current font.
+C ***    because_we are out of space on the current font.
          WRITE(UNIT=MSG,FMT='(I5)') PKOUT
 C ***    We will used J to keep track of the length of MSG for the
 C ***    two file names below.
@@ -1776,7 +1776,7 @@ C                  If you have problems, change ACCESS='DIRECT' to
 C                  ACCESS='SEQUENTIAL' and add RECORDTYPE=FIXED and
 C                  modify write statements in GRTX11 and GRTX12 to
 C                  be writes to sequential files.  Also, consider
-C                  using the rewind statement if you use sequential files. 
+C                  using the rewind statement if you use_sequential files. 
          OPEN(UNIT=LUN(1),FILE=PKFILE,ACCESS='DIRECT',
      2     FORM='UNFORMATTED',STATUS='NEW',IOSTAT=IER,
      3     DISP='DELETE',RECL=128)
@@ -1807,7 +1807,7 @@ C                  If you have problems, change ACCESS='DIRECT' to
 C                  ACCESS='SEQUENTIAL' and add RECORDTYPE=FIXED and
 C                  modify write statements in GRTX11 and GRTX12 to
 C                  be writes to sequential files.  Also, consider using
-C                  the rewind statement if you use sequential files. 
+C                  the rewind statement if you use_sequential files. 
       OPEN(UNIT=LUN(2),FILE=TFMFIL,ACCESS='DIRECT',
      2     FORM='UNFORMATTED',STATUS='NEW',IOSTAT=IER,
      3     DISP='DELETE',RECL=128)
@@ -3091,7 +3091,7 @@ C *** for encoding the RUN CODE for the current PK Font character.
 C *** Documentation for the algorithm is found in the files PKtoPX.WEB,
 C *** PXtoPK.WEB, PKtype.WEB, and GFtoPK.WEB.  To obtain this 
 C *** documentation, WEAVE the WEB file, then TeX the output, then
-C *** use a dvi-translator the translate the DVI file into a binary
+C *** use_a dvi-translator the translate the DVI file into a binary
 C *** file suitable for output to your specific printer.
 C *** The PK format was designed by Tomas Rokicki in August, 1985.
 C *** Rokicki was a former Texas A&M Univerisity student.
@@ -3184,8 +3184,8 @@ C ***    Check and see if the current RUN CODE value is a repeat code.
 C ***        It is a repeat value.
 C ***        Increment the Repeat Code index to point to the next repeat value.
              IRPIND=IRPIND+1.
-C ***        We use the nybble value 14 to signify a repeat count value > 1,
-C ***        and use the nybble value 15 to signify a repeat count value = 1,
+C ***        We use_the nybble value 14 to signify a repeat count value > 1,
+C ***        and use_the nybble value 15 to signify a repeat count value = 1,
 C ***        then follows immediately the packed number representation
 C ***        of the repeat value.  For the signaling nybble (14, or 15),
 C ***        we require 1 nybble.
@@ -3368,7 +3368,7 @@ C *** using the optimal dyn_f value which was calculated earlier.
 C *** Documentation for the algorithm is found in the files PKtoPX.WEB,
 C *** PXtoPK.WEB, PKtype.WEB, and GFtoPK.WEB.  To obtain this 
 C *** documentation, WEAVE the WEB file, then TeX the output, then
-C *** use a dvi-translator the translate the DVI file into a binary
+C *** use_a dvi-translator the translate the DVI file into a binary
 C *** file suitable for output to your specific printer.
 C *** The PK format was designed by Tomas Rokicki in August, 1985.
 C *** Rokicki was a former Texas A&M Univerisity student.
@@ -3446,8 +3446,8 @@ C ***      Check and see if the current RUN CODE value is a repeat code.
 C ***        It is a repeat value.
 C ***        Increment the Repeat Code index to point to the next repeat value.
              IRPIND=IRPIND+1.
-C ***        We use the nybble value 14 to signify a repeat count value > 1,
-C ***        and use the nybble value 15 to signify a repeat count value = 1,
+C ***        We use_the nybble value 14 to signify a repeat count value > 1,
+C ***        and use_the nybble value 15 to signify a repeat count value = 1,
 C ***        then follows immediately the packed number representation
 C ***        of the repeat value.  For the signaling nybble (14, or 15),
 C ***        we require 1 nybble.
@@ -3534,7 +3534,7 @@ C ***
 1000  CONTINUE
 2000  CONTINUE
 C *** Note: We do not need to finish packing the last nybble of a byte
-C *** because the byte was zeroed out at the start of this routine.
+C *** because_the byte was zeroed out at the start of this routine.
 C *** Let us now perform a sanity check to make sure that we did not
 C *** go out of bounds on the array BENCOD (if we did, it is a programming
 C *** error --- this should not ever happen).
@@ -3617,7 +3617,7 @@ C *** Now, we will determine which format of the preamble will be used --
 C *** the long, the short, or the short extended.
 C ***
 C ***
-C *** We will use the short form if possible.  SHORT_FORM: label 500.
+C *** We will use_the short form if possible.  SHORT_FORM: label 500.
       IF( (PL(1).LT.1024) .AND. (CC.LT.256) .AND. 
      2    (TFM.LT.16) .AND. (DM.LT.256) .AND. (W.LT.256)
      3    .AND. (H.LT.256) .AND. (HOFF.GT.-129)
@@ -3625,7 +3625,7 @@ C *** We will use the short form if possible.  SHORT_FORM: label 500.
      5    .AND. (VOFF.LT.128))  GOTO 500
 C ***
 C ***
-C *** The short form was not possible.  We will try to use the 
+C *** The short form was not possible.  We will try to use_the 
 C *** short extended form.  SHORT_EXT: label 2000.
       IF( (PL(2).LT.196608) .AND. (CC.LT.256) .AND. 
      2    (TFM.LT.16) .AND. (DM.LT.65536) .AND. (W.LT.65536)
@@ -4255,7 +4255,7 @@ C ***
 C *** Store HEADER[2]...HEADER[11].
 C *** These 40 bytes identify the character coding scheme. The first byte
 C *** gives the number of bytes that are used to contain the identifying
-C *** string.  We will use 7 bytes to contain the string "GRAPHIC".
+C *** string.  We will use_7 bytes to contain the string "GRAPHIC".
 C *** ASCII codes in Hex are "G"=47,"R"=52","A"=41,"P"=50,"H"=48,
 C *** "I"=49,"C"=43. So, in Hex, HEADER[2]=07475241, HEADER[3]=50484943,
 C *** HEADER[4]=00000000, HEADER[5]=00000000, HEADER[6]=00000000,

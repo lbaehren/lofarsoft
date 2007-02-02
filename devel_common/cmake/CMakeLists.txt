@@ -1,38 +1,18 @@
 PROJECT (CMAKE_TEST)
 
+file (GLOB cmake_scripts Find*.cmake)
+
 ## -----------------------------------------------------------------------------
 ## Test file for the various CMake find scripts.
 
-message (STATUS "Testing FindBlitz ++++++++++++++++++++++++++++++++++++++++++++")
+message (STATUS "Testing CMake find scripts... ++++++++++++++++++++++++++++++++")
 
-include (./FindBlitz.cmake)
+message (${CMAKE_TEST_SOURCE_DIR})
 
-message (STATUS "Testing FindBoost ++++++++++++++++++++++++++++++++++++++++++++")
-
-include (./FindBoost.cmake)
-
-message (STATUS "Testing FindCASA +++++++++++++++++++++++++++++++++++++++++++++")
-
-include (./FindCASA.cmake)
-
-message (STATUS "Testing FindCFITSIO ++++++++++++++++++++++++++++++++++++++++++")
-
-include (./FindCFITSIO.cmake)
-
-message (STATUS "Testing FindCPGPLOT ++++++++++++++++++++++++++++++++++++++++++")
-
-include (./FindCPGPLOT.cmake)
-
-message (STATUS "Testing FindHDF5 +++++++++++++++++++++++++++++++++++++++++++++")
-
-include (./FindHDF5.cmake)
-
-message (STATUS "Testing FindROOT +++++++++++++++++++++++++++++++++++++++++++++")
-
-include (./FindROOT.cmake)
-
-message (STATUS "Testing FindWCS ++++++++++++++++++++++++++++++++++++++++++++++")
-
-include (./FindWCS.cmake)
+foreach (script ${cmake_scripts})
+  string (REGEX REPLACE "${CMAKE_TEST_SOURCE_DIR}/" "" name ${script})
+  message ("++++++ Testing ${name} ...")
+  include (${script})
+endforeach (script)
 
 message (STATUS "Testing completed ++++++++++++++++++++++++++++++++++++++++++++")

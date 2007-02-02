@@ -43,7 +43,7 @@ C File format: The metafile generated follow the "GSPC Metafile
 C Proposal" described in Computer Graphics (A.C.M.), Volume 13, number 3
 C (August 1979).
 C
-C Obtaining hardcopy: Use the translator program GMFPLOT.
+C Obtaining hardcopy: use_the translator program GMFPLOT.
 C-----------------------------------------------------------------------
       LOGICAL    CONT
       INTEGER*2  BUFFER(360), COMBUF(5), I0, I1, IB, IC, IG, IR, J0, J1

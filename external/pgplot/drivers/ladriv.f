@@ -35,11 +35,11 @@ C
 C Obtaining hardcopy:
 C   if the LA50 is connected to the user's VT2xx or VT3xx terminal
 C    then the printer can be accessed by sending the file
-C      directly to the terminal: use PGPLOT device TT:/LA50
+C      directly to the terminal: use_PGPLOT device TT:/LA50
 C    or DEFINE PGPLOT_LA50 TT: (be sure to do a SET TERM/FORM if
 C    page spacing is important)
 C   if the LA50 is attached to a different terminal port, e.g. TXZ99:,
-C    which preferably has been set spooled, use PGPLOT device TXZ99:/LA50
+C    which preferably has been set spooled, use_PGPLOT device TXZ99:/LA50
 C    or DEFINE PGPLOT_LA50 TXZ99: (be sure that TXZ99 has been set
 C    /FORM if page spacing is important)
 C-----------------------------------------------------------------------
@@ -223,7 +223,7 @@ C
       IF (ALLERR) RETURN
 C Assume the LA50 is attached to a terminal, if so send the terminal
 C into CONTROLLER mode while sending the plot. The extra escape sequences
-C should not cause any problems if the LA50 is directly connected.
+C should not cause_any problems if the LA50 is directly connected.
 C Put terminal into controller mode, then enter graphics mode.
       IF (NPICT.EQ.1) THEN
         WRITE (UNIT,'(5a)') ESC,'[5i',ESC,'Pq'

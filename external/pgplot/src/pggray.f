@@ -72,8 +72,8 @@ C  2-Sep-1987: remove device-dependent code to routine GRGRAY (TJP).
 C  7-Jun-1988: change documentation and argument names (TJP).
 C 31-May-1989: allow 1-pixel wide arrays to be plotted (TJP).
 C 17-Mar-1994: pass PG scaling info to lower routines (TJP).
-C 15-Sep-1994: use PGITF attribute (TJP).
-C  8-Feb-1995: use color ramp based on current foreground and background
+C 15-Sep-1994: use_PGITF attribute (TJP).
+C  8-Feb-1995: use_color ramp based on current foreground and background
 C              colors (TJP).
 C  6-May-1996: allow multiple devives (TJP).
 C-----------------------------------------------------------------------

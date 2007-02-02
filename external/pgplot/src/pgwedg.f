@@ -16,22 +16,22 @@ C Arguments:
 C  SIDE   (input)  : The first character must be one of the characters
 C                    'B', 'L', 'T', or 'R' signifying the Bottom, Left,
 C                    Top, or Right edge of the viewport.
-C                    The second character should be 'I' to use PGIMAG
-C                    to draw the wedge, or 'G' to use PGGRAY.
+C                    The second character should be 'I' to use_PGIMAG
+C                    to draw the wedge, or 'G' to use_PGGRAY.
 C  DISP   (input)  : the displacement of the wedge from the specified
 C                    edge of the viewport, measured outwards from the
-C                    viewport in units of the character height. Use a
+C                    viewport in units of the character height. use_a
 C                    negative value to write inside the viewport, a
 C                    positive value to write outside.
 C  WIDTH  (input)  : The total width of the wedge including annotation,
 C                    in units of the character height.
 C  FG     (input)  : The value which is to appear with shade
-C                    1 ("foreground"). Use the values of FG and BG
+C                    1 ("foreground"). use_the values of FG and BG
 C                    that were supplied to PGGRAY or PGIMAG.
 C  BG     (input)  : the value which is to appear with shade
 C                    0 ("background").
 C  LABEL  (input)  : Optional units label. If no label is required
-C                    use ' '.
+C                    use_' '.
 C--
 C  15-Oct-1992: New routine (MCS)
 C   2-Aug-1995: no longer needs common (TJP).
@@ -47,7 +47,7 @@ C                          Size of unit character height (NDC units).
       REAL NDCSIZ
 C                          True if wedge plotted horizontally.
       LOGICAL HORIZ
-C                          Use PGIMAG (T) or PGGRAY (F).
+C                          use_PGIMAG (T) or PGGRAY (F).
       LOGICAL IMAGE
 C                          Symbolic version of SIDE.
       INTEGER NSIDE,BOT,TOP,LFT,RGT
@@ -141,7 +141,7 @@ C (NDC units).
 C
       WEDWID = VWIDTH * (1.0-TXTFRC)
 C
-C Use these to determine viewport coordinates for the wedge + annotation.
+C use_these to determine viewport coordinates for the wedge + annotation.
 C
       VXA = XA
       VXB = XB

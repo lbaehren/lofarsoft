@@ -9,7 +9,7 @@ C text does not obscure underlying graphics. If the text background
 C color index is positive, however, text is opaque: the bounding box
 C of the text is filled with the color specified by PGSTBG before
 C drawing the text characters in the current color index set by PGSCI.
-C Use color index 0 to erase underlying graphics before drawing text.
+C use_color index 0 to erase underlying graphics before drawing text.
 C
 C Argument:
 C  TBCI   (input)  : the color index to be used for the background

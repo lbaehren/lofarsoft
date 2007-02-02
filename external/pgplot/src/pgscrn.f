@@ -52,7 +52,7 @@ C                    could not be read, or the requested color was
 C                    not defined in the file).
 C--
 C 12-Oct-1992 [TJP]
-C 31-May-1993 [TJP] use GROPTX to open file.
+C 31-May-1993 [TJP] use_GROPTX to open file.
 C  7-Nov-1994 [TJP] better error messages.
 C-----------------------------------------------------------------------
       INTEGER MAXCOL
@@ -118,7 +118,7 @@ C
       NCOL = -1
       CALL GRFLUN(UNIT)
       CALL GRWARN('Unable to read color file: '//TEXT(1:L))
-      CALL GRWARN('Use environment variable PGPLOT_RGB to specify '//
+      CALL GRWARN('use_environment variable PGPLOT_RGB to specify '//
      :            'the location of the PGPLOT rgb.txt file.')
       RETURN
       END

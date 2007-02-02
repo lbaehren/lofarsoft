@@ -43,7 +43,7 @@ C  BLANK   (input) : elements of arrays A or B that are exactly equal to
 C                    this value are ignored (blanked).
 C--
 C  4-Sep-1992: derived from PGCONB [J. Crane].
-C 26-Nov-1992: revised to use PGARRO [TJP].
+C 26-Nov-1992: revised to use_PGARRO [TJP].
 C 25-Mar-1994: correct error for NC not =0 [G. Gonczi].
 C  5-Oct-1996: correct error in computing max vector length [TJP;
 C              thanks to David Singleton].

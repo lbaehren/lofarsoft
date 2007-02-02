@@ -8,8 +8,8 @@ C Query the color index range to be used for producing images with
 C PGGRAY or PGIMAG, as set by routine PGSCIR or by device default.
 C
 C Arguments:
-C  ICILO  (output) : the lowest color index to use for images
-C  ICIHI  (output) : the highest color index to use for images
+C  ICILO  (output) : the lowest color index to use_for images
+C  ICIHI  (output) : the highest color index to use_for images
 C--
 C 1994-Mar-17 : new routine [AFT/TJP].
 C-----------------------------------------------------------------------

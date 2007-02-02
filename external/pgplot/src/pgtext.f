@@ -8,7 +8,7 @@ C
 C Write text. The bottom left corner of the first character is placed
 C at the specified position, and the text is written horizontally.
 C This is a simplified interface to the primitive routine PGPTXT.
-C For non-horizontal text, use PGPTXT.
+C For non-horizontal text, use_PGPTXT.
 C
 C Arguments:
 C  X      (input)  : world x-coordinate of start of string.

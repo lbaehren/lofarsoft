@@ -32,7 +32,7 @@ C File format: Variable-length records, maximum 197 bytes, with
 C embedded carriage-control characters. A full-page plot occupies
 C 600 512-byte blocks.
 C
-C Obtaining hardcopy: Use the command PRINT/PASSALL.
+C Obtaining hardcopy: use_the command PRINT/PASSALL.
 C-----------------------------------------------------------------------
       CHARACTER*(*) TYPE, DEFNAM
       PARAMETER (TYPE=

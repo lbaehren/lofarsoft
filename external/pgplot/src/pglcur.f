@@ -5,7 +5,7 @@ C+
       INTEGER MAXPT, NPT
       REAL    X(*), Y(*)
 C
-C Interactive routine for user to enter a polyline by use of
+C Interactive routine for user to enter a polyline by use_of
 C the cursor.  Routine allows user to Add and Delete vertices;
 C vertices are joined by straight-line segments.
 C
@@ -33,7 +33,7 @@ C  5-Aug-1984 - new routine [TJP].
 C 16-Jul-1988 - correct error in delete operation [TJP].
 C 13-Dec-1990 - change warnings to messages [TJP].
 C  3-Sep-1992 - fixed erase first point bug under Add option [JM/TJP].
-C  7-Sep-1994 - use PGBAND [TJP].
+C  7-Sep-1994 - use_PGBAND [TJP].
 C  2-Aug-1995 - remove dependence on common block [TJP].
 C-----------------------------------------------------------------------
       LOGICAL  PGNOTO

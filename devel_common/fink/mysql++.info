@@ -1,0 +1,27 @@
+Package: mysql++
+Version: 2.1.1
+Revision: 1
+License: GPL
+Description: C++ wrapper for MySQL
+Source: http://tangentsoft.net/mysql++/releases/mysql++-%v.tar.gz
+Source-MD5: 3a42b3422b37c65f88be9162a969d164
+SourceRename: %f.tar.gz
+SourceDirectory: %n-%v
+BuildDepends: <<
+  mysql-dev
+<<
+BuildDependsOnly: False
+CompileScript: <<
+  #!/bin/bash -ev
+  ./configure --prefix=%p --with-mysql=%p
+  make;
+<<
+DescDetail: << 
+  MySQL++ is a C++ wrapper for MySQL's C API. It is built around STL 
+  principles, to make dealing with the database as easy as dealing with an
+  STL container. MySQL++ relieves the programmer of dealing with cumbersome C
+  data structures, generation of repetitive SQL statements, and manual
+  creation of C++ data structures to mirror the database schema.
+<<
+Maintainer: Lars Baehren <bahren@astron,nl>
+Homepage: http://tangentsoft.net/mysql++

@@ -140,7 +140,7 @@ C
    29 CONTINUE
 C
 C Now search the interior of the array for a crossing point, which will
-C lie on a closed contour (because all unclosed contours have been
+C lie on a closed contour (because_all unclosed contours have been
 C eliminated). It is sufficient to search just the horizontal crossings
 C (or the vertical ones); any closed contour must cross a horizontal
 C and a vertical gridline. PGCN01 assumes that when it cannot proceed

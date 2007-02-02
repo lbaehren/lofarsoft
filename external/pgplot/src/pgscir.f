@@ -10,8 +10,8 @@ C by the device, a smaller range will be used. The number of
 C different colors available for images is ICIHI-ICILO+1.
 C
 C Arguments:
-C  ICILO  (input)  : the lowest color index to use for images
-C  ICIHI  (input)  : the highest color index to use for images
+C  ICILO  (input)  : the lowest color index to use_for images
+C  ICIHI  (input)  : the highest color index to use_for images
 C--
 C 1994-Mar-17 : new routine [AFT/TJP].
 C---

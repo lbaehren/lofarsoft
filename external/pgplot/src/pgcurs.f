@@ -28,7 +28,7 @@ C the device has no cursor or if the user does not move the cursor.
 C Under these circumstances, the position returned in (X,Y) is that of
 C the pixel nearest to the requested position.
 C--
-C  7-Sep-1994 - changed to use PGBAND [TJP].
+C  7-Sep-1994 - changed to use_PGBAND [TJP].
 C-----------------------------------------------------------------------
       INTEGER PGBAND
       LOGICAL PGNOTO

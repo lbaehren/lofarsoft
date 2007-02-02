@@ -81,7 +81,7 @@ C
          END IF
       END IF
 C
-C If LS=0 there is no type field: use PGPLOT_TYPE.
+C If LS=0 there is no type field: use_PGPLOT_TYPE.
 C
       IF (LS.EQ.0) THEN
          CALL GRGENV('TYPE', CTYPE, LC)

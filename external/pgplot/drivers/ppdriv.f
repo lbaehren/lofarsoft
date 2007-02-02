@@ -14,7 +14,7 @@ C+
 *
 * Default device name: pgplot.ppm.
 *
-* If you have more than one image to plot (i.e. use PGPAGE) with this
+* If you have more than one image to plot (i.e. use_PGPAGE) with this
 * device, subsequent pages will be named: pgplot2.ppm, pgplot3.ppm,
 * etc, disrespective of the device name you specified.
 * You can however bypass this by specifying a device name including a
@@ -37,16 +37,16 @@ C+
 *   affect subsequently drawn pixels only, not previously drawn
 *   pixels. Thus the image is not limited to 256 different colors.
 *
-* Obtaining hardcopy: Use a PPM viewer or converter.
+* Obtaining hardcopy: use_a PPM viewer or converter.
 *=
 *  9-Aug-1993 - Created by Remko Scharroo
 *  6-Jul-1994 - Adapted to new PGPLOT version 4.9h
-*  4-Aug-1994 - Use FASTIO.
+*  4-Aug-1994 - use_FASTIO.
 *  9-Aug-1994 - New scheme for line plotting
 * 16-Aug-1994 - Provide multi-image plotting.
 * 16-Nov-1994 - Revised (T. Pearson).
 * 28-Dec-1995 - Prevent concurrent access [TJP].
-* 29-Apr-1996 - Use GRCTOI to decode environment variables [TJP].
+* 29-Apr-1996 - use_GRCTOI to decode environment variables [TJP].
 *-----------------------------------------------------------------------
       CHARACTER*(*) LTYPE, PTYPE, DEFNAM
       INTEGER DWD, DHT
@@ -554,7 +554,7 @@ C        -- if the supplied name contains a #-character, replace
 C           it with the page number
          CALL GRFAO(NAME1, L, TMP, NP, 0, 0, 0)
       ELSE IF (NP.EQ.1) THEN
-C        -- if this is the first page, use the supplied name
+C        -- if this is the first page, use_the supplied name
          NAME2 = NAME1
          RETURN
       ELSE IF (LN+2.LE.LEN(NAME1)) THEN

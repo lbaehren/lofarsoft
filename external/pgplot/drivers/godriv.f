@@ -242,7 +242,7 @@ C*********
 	SUBROUTINE GRGO03(QBUF,ICNT)
 C-----------------------------------------------------------------------
 C GRPCKG(GOC): flush buffer contents.  QBUF is passed as
-C an argument because it is a dynamic array.
+C an argument because_it is a dynamic array.
 C
 C( 4-Feb-1986 KS / AAO )
 C-----------------------------------------------------------------------

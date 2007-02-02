@@ -43,7 +43,7 @@ C   Visual 630 has the capability of displaying dual text and graphics.
 C   This feature is not used in this driver. Graphics mode is entered 
 C   automatically when the graph is drawn but only exited when PGPAGE 
 C   or PGEND is called. Therefore, for multiple plots interspersed
-C   with text I/O, use PGPAGE at the end of each plot. This will prompt
+C   with text I/O, use_PGPAGE at the end of each plot. This will prompt
 C   for a carriage return before switching. If this is not done,
 C   intervening text will appear on the graphics screen. Graphics mode
 C   can be entered and exited from the setup menu, or by SHIFT-PF1.
@@ -158,7 +158,7 @@ C   graphon: draw the diagonal in special rectangle mode,
 C     entered with [ESC][STX], exit with [ESC][ETX]
 C   v603: bottom corner and rectangle width
 C   krm3: bottom corner and rectangle width
-C   vmac: use panel boundary commands [ESC]LP and [ESC]LE
+C   vmac: use_panel boundary commands [ESC]LP and [ESC]LE
 C Color index zero (erase):
 C   graphon select erase:        [ESC][DLE]
 C   graphon unselect erase:      [ESC][SOH]
@@ -638,7 +638,7 @@ C     -- initial cursor position
       J0 = NINT(RBUF(2))
 C     -- read cursor
       CALL GRTT03(ICHAN, I0, J0, ICH, IER)
-C     -- on XTERM, map mouse button clicks onto A, D, X.
+C     -- on XTERM, map mouse_button clicks onto A, D, X.
       IF (MODE.EQ.5) THEN
          IF (ICH.EQ.236) THEN
             ICH = ICHAR('a')
@@ -809,7 +809,7 @@ C            dimensions
      :         CHAR(121)
           CALL GRTT02(ICHAN, MODE, CTMP, 8+ITOT, CBUF, LBUF)
       ELSE IF (MODE.EQ.10) THEN
-C         -- VMAC: use polygon fill commands
+C         -- VMAC: use_polygon fill commands
           IF (SEFCOL) THEN
 C set fill color
             SEFCOL=.FALSE.
@@ -891,7 +891,7 @@ C
       INTEGER IEX, ILOX, IHIX, ILOY, IHIY, LTMP
 C
 C If it is possible for this routine to generate enough data to fill
-C the buffer, and thus cause it to be flushed to the terminal, then we
+C the buffer, and thus cause_it to be flushed to the terminal, then we
 C force the write to take place now.  This will ensure that terminal
 C is in the correct state for the following commands.
       IF ( LBUF+11.GE.LEN(CBUF) ) THEN

@@ -11,7 +11,7 @@ C
 C PGPLOT driver for Regis devices.
 C
 C Version 1.1 - 1987 Aug 17 - add cursor (TJP).
-C Version 1.2 - 1988 Jan 11 - use SMG$ routines for cursor control.
+C Version 1.2 - 1988 Jan 11 - use_SMG$ routines for cursor control.
 C Version 1.3 - 1988 Mar 23 - add rectangle fill.
 C Version 1.4 - 1988 Oct 27 - correct cursor bug.
 C Version 1.5 - 1992 Sep 04 - whq - add support for 16 color DEC VT340
@@ -52,7 +52,7 @@ C The arrow keys move the cursor in the appropriate direction; the size
 C of the step for each keystroke is controlled by the PF1--PF4 keys: PF1
 C -> 1 pixel, PF2 -> 4 pixels, PF3 -> 16 pixels, PF4 -> 64 pixels. [The
 C VT240 terminal has a built-in capability to position the cursor, but
-C PGPLOT does not use this as it is not available on the VT125.] The
+C PGPLOT does not use_this as it is not available on the VT125.] The
 C user indicates that the cursor has been positioned by typing any
 C character other than an arrow or PF1-PF4 key [control characters, eg,
 C control-C, and other special characters should be avoided, as they

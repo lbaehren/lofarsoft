@@ -25,7 +25,7 @@ C                    -3..-31 : a regular polygon with ABS(SYMBOL)
 C                              edges (style set by current fill style).
 C                    0..31   : standard marker symbols.
 C                    32..127 : ASCII characters (in current font).
-C                              e.g. to use letter F as a marker, let
+C                              e.g. to use_letter F as a marker, let
 C                              SYMBOL = ICHAR('F'). 
 C                    > 127  :  a Hershey symbol number.
 C
@@ -35,7 +35,7 @@ C N is less than 1, nothing is drawn.
 C--
 C 27-Nov-1986
 C 17-Dec-1990 - add polygons [PAH].
-C 14-Mar-1997 - optimization: use GRDOT1 [TJP].
+C 14-Mar-1997 - optimization: use_GRDOT1 [TJP].
 C-----------------------------------------------------------------------
       LOGICAL PGNOTO
 C

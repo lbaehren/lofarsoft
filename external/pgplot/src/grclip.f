@@ -13,7 +13,7 @@ C
 C Arguments:
 C--
 C (11-Feb-1983)
-C Revised 20-Jun-1985 (TJP); use floating arithmetic
+C Revised 20-Jun-1985 (TJP); use_floating arithmetic
 C Revised 12-Jun-1992 (TJP); clip exactly on the boundary
 C-----------------------------------------------------------------------
 C

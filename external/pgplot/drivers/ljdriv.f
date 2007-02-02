@@ -57,7 +57,7 @@ C
 C File format: See the LaserJet Printer Technical Reference Manual for 
 C details of the file format.
 C
-C Obtaining hardcopy: Use the command PRINT/PASSALL.
+C Obtaining hardcopy: use_the command PRINT/PASSALL.
 C-----------------------------------------------------------------------
 C 
 C To choose one of the specific LaserJet drivers, you must execute a DCL
@@ -65,7 +65,7 @@ C command of the following form before executing your program:
 C
 C $ DEFINE PGPLOT_LJ_MODE LJnn
 C
-C where nn is a number 1 - NDEV inclusive.  You may also use one of the
+C where nn is a number 1 - NDEV inclusive.  You may also use_one of the
 C equivalent names listed above.  These equivalent names are an attempt
 C to make the driver names make sense.  They are decoded as follows:
 C
@@ -85,10 +85,10 @@ C PHOT is a driver that puts out bitmaps suitable for inclusion in TeX
 C output if you are using the Arbortext DVIHP program.  The only drivers
 C that will work with unexpanded LaserJet are LJ08 and LJ09.  The other
 C seven drivers require a LaserJet Plus or LaserJet II.  Finally, do NOT
-C attempt to send grayscale plots to the drivers that use the optimized 
+C attempt to send grayscale plots to the drivers that use_the optimized 
 C bitmap dumps.  Terrible things will happen.
 C
-C If you add a driver to this file, please try to use the naming
+C If you add a driver to this file, please try to use_the naming
 C convention outlined above and send me a copy of the revisions.  I may
 C be reached at sca@iowa.physics.uiowa.edu on the Internet or IOWA::SCA 
 C on SPAN.
@@ -636,7 +636,7 @@ C BX, BY          I I      Dimensions of frame buffer
 C BITMAP        I/O B      (address of) the frame buffer.
 C
 C Version 1.0  03-Sep-1986  S. C. Allendorf
-C Version 2.0  08-Dec-1986  S. C. Allendorf  Use relative positioning
+C Version 2.0  08-Dec-1986  S. C. Allendorf  use_relative positioning
 C Version 2.1  28-Dec-1986  S. C. Allendorf  Optimize positioning code
 C Version 3.0  02-Jan-1987  S. C. Allendorf  Add code for rules
 C VERSION 3.1  10-FEB-1988  S. C. Allendorf  Attempt to speed up code

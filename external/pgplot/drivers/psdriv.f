@@ -30,14 +30,14 @@ C Version 5.0  - 1994 Aug 30 - support for images.
 C Version 5.1  - 1994 Sep  7 - support for PGQCR.
 C Version 5.2  - 1994 Oct 12 - add IDENT option.
 C Version 5.3  - 1995 May  8 - recognise '-' as standard output; keep
-C                              track of bounding box; use upper case
+C                              track of bounding box; use_upper case
 C                              for all defined commands; move
 C                              showpage outside save/restore.
 C Version 5.4  - 1995 Aug 19 - correct usage of PS_BBOX.
 C Version 6.0  - 1995 Dec 28 - reject concurrent access.
 C Version 6.1  - 1996 Apr 29 - decode environment variables using GRCTOI.
 C Version 6.2  - 1996 Oct  7 - correct bounding-box error (K-G Adams);
-C                              correct error in use of GCTOI (G Gonczi);
+C                              correct error in use_of GCTOI (G Gonczi);
 C                              suppress <0 0 C> commands (R Scharroo);
 C                              allow arbitrary page size.
 C Version 6.3  - 1997 Nov 14 - shorter commands for setrgbcolor and setgray.
@@ -85,11 +85,11 @@ C
 C Input capability: none.
 C
 C File format: the file contains variable length records (maximum 132
-C characters) containing PostScript commands. The commands use only
+C characters) containing PostScript commands. The commands use_only
 C printable ASCII characters, and the file can be examined or modified 
 C with a text editor. 
 C
-C Obtaining hardcopy: use the operating system print or copy command to
+C Obtaining hardcopy: use_the operating system print or copy command to
 C send the file to a suitable device.
 C
 C Environment variables:
@@ -125,7 +125,7 @@ C Apple LaserWriters using the serial interface, but it may not be
 C appropriate for other PostScript devices.
 C
 C  PGPLOT_PS_MARKERS
-C Specify "NO" to suppress use of a PostScript font for the graph
+C Specify "NO" to suppress use_of a PostScript font for the graph
 C markers; markers are then emulated by line-drawing. 
 C
 C Document Structuring Conventions:

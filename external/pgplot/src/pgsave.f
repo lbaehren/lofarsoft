@@ -13,7 +13,7 @@ C Calls to PGSAVE and PGUNSA should always be paired. Up to 20 copies
 C of the attributes may be saved. PGUNSA always retrieves the last-saved
 C values (last-in first-out stack).
 C
-C Note that when multiple devices are in use, PGUNSA retrieves the
+C Note that when multiple devices are in use_PGUNSA retrieves the
 C values saved by the last PGSAVE call, even if they were for a
 C different device.
 C

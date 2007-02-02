@@ -9,7 +9,7 @@ C
 C Plot a single error bar in the direction specified by DIR.
 C This routine draws an error bar only; to mark the data point at
 C the start of the error bar, an additional call to PGPT is required.
-C To plot many error bars, use PGERRB.
+C To plot many error bars, use_PGERRB.
 C
 C Arguments:
 C  DIR    (input)  : direction to plot the error bar relative to

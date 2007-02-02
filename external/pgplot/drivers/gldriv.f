@@ -8,7 +8,7 @@ C-----------------------------------------------------------------------
 C Version 1.0  - 1988 Mar 14 - B. H. Toby
 C                9/88 bull: added page eject to IFUNC 14
 C Version 2.0  - 1994 Mar 16 - T. J. Pearson (dual mode, standard F77)
-C Version 2.1  - 1994 Nov  6 - TJP: use PGPLOT_GL_TERMINAL.
+C Version 2.1  - 1994 Nov  6 - TJP: use_PGPLOT_GL_TERMINAL.
 C Version 3.0  - 1997 Jun 11 - TJP: add SC to specify page size.
 C Version 3.1  - 1998 Oct 23 - TJP: correct failure to close file.
 C Version 3.2  - 1998 Nov 9  - TJP: allow up to 8 pens.

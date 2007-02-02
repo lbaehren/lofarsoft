@@ -6,7 +6,7 @@ C+
       REAL    X(*), Y(*)
       INTEGER SYMBOL
 C
-C Interactive routine for user to enter data points by use of
+C Interactive routine for user to enter data points by use_of
 C the cursor.  Routine allows user to Add and Delete points.  The
 C points are returned in the order that they were entered (unlike
 C PGNCUR).
@@ -17,7 +17,7 @@ C  NPT    (in/out) : number of points entered; should be zero on
 C                    first call.
 C  X      (in/out) : array of x-coordinates.
 C  Y      (in/out) : array of y-coordinates.
-C  SYMBOL (input)  : code number of symbol to use for marking
+C  SYMBOL (input)  : code number of symbol to use_for marking
 C                    entered points (see PGPT).
 C
 C Note (1): The dimension of arrays X and Y must be greater than or
@@ -36,7 +36,7 @@ C X (eXit)   - leave subroutine.
 C--
 C  4-Nov-1985 - new routine (adapted from PGNCUR) - TJP.
 C 13-Dec-1990 - change warnings to messages [TJP].
-C  7-Sep-1994 - use PGBAND [TJP].
+C  7-Sep-1994 - use_PGBAND [TJP].
 C  2-Aug-1995 - remove dependence on common block [TJP].
 C-----------------------------------------------------------------------
       LOGICAL  PGNOTO

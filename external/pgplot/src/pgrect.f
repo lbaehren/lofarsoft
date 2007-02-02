@@ -7,7 +7,7 @@ C
 C This routine can be used instead of PGPOLY for the special case of
 C drawing a rectangle aligned with the coordinate axes; only two
 C vertices need be specified instead of four.  On most devices, it is
-C faster to use PGRECT than PGPOLY for drawing rectangles.  The
+C faster to use_PGRECT than PGPOLY for drawing rectangles.  The
 C rectangle has vertices at (X1,Y1), (X1,Y2), (X2,Y2), and (X2,Y1).
 C
 C Arguments:
@@ -15,7 +15,7 @@ C  X1, X2 (input) : the horizontal range of the rectangle.
 C  Y1, Y2 (input) : the vertical range of the rectangle.
 C--
 C 21-Nov-1986 - [TJP].
-C 22-Mar-1988 - use GRRECT for fill [TJP].
+C 22-Mar-1988 - use_GRRECT for fill [TJP].
 C  6-Mar-1995 - add hatching (by calling PGHTCH) [TJP].
 C-----------------------------------------------------------------------
       INCLUDE  'pgplot.inc'

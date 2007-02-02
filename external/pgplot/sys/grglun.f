@@ -9,7 +9,7 @@ C After GRGLUN is called, the unit should be opened to reserve
 C the unit number for future calls.  Once a unit is closed, it
 C becomes free and another call to GRGLUN could return the same
 C number.  Also, GRGLUN will not return a number in the range 1-9
-C as older software will often use these units without warning.
+C as older software will often use_these units without warning.
 C
 C Arguments:
 C  LUN    : receives the logical unit number, or -1 on error.

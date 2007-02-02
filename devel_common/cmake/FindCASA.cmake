@@ -77,12 +77,12 @@ endif (UNIX)
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-FIND_PATH (AIPSLIBD version.o
+find_path (AIPSLIBD version.o
   PATHS ${AIPSROOT}
   PATH_SUFFIXES darwin/lib linux/lib linux_gnu/lib
   )
 
-STRING (REGEX REPLACE /lib "" AIPSARCH ${AIPSLIBD})
+string (REGEX REPLACE /lib "" AIPSARCH ${AIPSLIBD})
 
 ## which libraries do we have to find?
 
@@ -165,87 +165,105 @@ endforeach (casa_lib)
 ##   LINKtasking     := tasking graphics msvis ms images TMPcomponents
 ##
 
+## string together the correct order of the libraries as passed to the linker
+
 set (LINKcasa
   ${CASA_libcasa}
   CACHE STRING "LINKcasa")
 
 set (LINKscimath
-  ${CASA_libscimath}
-  ${CASA_libscimath_f}
-  ${LINKcasa}
+  ${CASA_libscimath} ${CASA_libscimath_f} ${LINKcasa}
   CACHE STRING "LINKscimath")
 
 set (LINKtables
-  ${CASA_libtables}
-  ${LINKcasa}
+  ${CASA_libtables} ${LINKcasa}
   CACHE STRING "LINKtables")
 
 set (LINKmeasures
-  ${CASA_libmeasures}
-  ${CASA_libtables}
-  ${LINKscimath}
+  ${CASA_libmeasures} ${CASA_libtables} ${LINKscimath}
   CACHE STRING "LINKmeasures")
 
 set (LINKfits
-  ${CASA_libfits}
-  ${LINKmeasures}
+  ${CASA_libfits} ${LINKmeasures}
   CACHE STRING "LINKfits")
 
 set (LINKlattices
-  ${CASA_liblattices}
-  ${CASA_libtables}
-  ${LINKscimath}
+  ${CASA_liblattices} ${CASA_libtables} ${LINKscimath}
   CACHE STRING "LINKlattices")
 
 set (LINKcoordinates
-  ${CASA_libcoordinates}
-  ${LINKfits}
+  ${CASA_libcoordinates} ${LINKfits}
   CACHE STRING "LINKcoordinates")
 
 set (LINKcomponents
-  ${CASA_libcomponents}
-  ${LINKcoordinates}
+  ${CASA_libcomponents} ${LINKcoordinates}
   CACHE STRING "LINKcomponents")
 
 set (TMPcomponents 
-  ${CASA_libcomponents}
-  ${CASA_libcoordinates}
-  ${CASA_liblattices}
-  ${LINKfits}
+  ${CASA_libcomponents} ${CASA_libcoordinates} ${CASA_liblattices} ${LINKfits}
   CACHE STRING "TMPcomponents")
 
 set (LINKimages
-  ${CASA_libimages}
-  ${TMPcomponents}
+  ${CASA_libimages} ${TMPcomponents}
   CACHE STRING "LINKimages")
 
-set (LINKms "-lms ${LINKmeasures}" CACHE STRING "LINKms")
+set (LINKms
+  ${CASA_libms} ${LINKmeasures}
+  CACHE STRING "LINKms")
 
-set (LINKmsfits "-lmsfits -lms ${LINKfits}" CACHE STRING "LINKmsfits")
+set (LINKmsfits
+  ${CASA_libmsfits} ${CASA_libms} ${LINKfits}
+  CACHE STRING "LINKmsfits")
 
-set (LINKmsvis "-lmsvis ${LINKms}" CACHE STRING "LINKmsvis")
+set (LINKmsvis
+  ${CASA_libmsvis} ${LINKms}
+  CACHE STRING "LINKmsvis")
 
-set (LINKcalibration "-lcalibration ${LINKmsvis}" CACHE STRING "LINKcalibration")
-set (LINKionosphere "-lionosphere ${LINKmeasures}" CACHE STRING "LINKionosphere")
-set (LINKflagging "-lflagging -lmsvis -lms -llattices ${LINKmeasures}" CACHE STRING "LINKflagging")
-set (LINKdish "-ldish -lms -lfits -lcoordinates -llattices ${LINKmeasures}" CACHE STRING "LINKdish")
-set (LINKsimulators "-lsimulators ${LINKms}" CACHE STRING "LINKsimulators")
-set (LINKsynthesis "-lsynthesis -lcalibration -lmsvis -lms -limages ${TMPcomponents}" CACHE STRING "LINKsynthesis")
-set (LINKgraphics "-lgraphics ${LINKcasa}" CACHE STRING "LINKgraphics")
-set (LINKtasking "-ltasking -lgraphics -lmsvis -lms -limages ${TMPcomponents}" CACHE STRING "LINKtasking")
+set (LINKcalibration
+  ${CASA_libcalibration} ${LINKmsvis}
+  CACHE STRING "LINKcalibration")
 
-IF (CASA_libcasa)
-  SET (CASA_LIBRARIES ${LINKcasa})
-  IF (CASA_libscimath AND CASA_libscimath_f)
-    SET (CASA_LIBRARIES ${LINKscimath})
-  ENDIF (CASA_libscimath AND CASA_libscimath_f)
-  IF (CASA_libtables)
-    SET (CASA_LIBRARIES ${LINKtables})
-  ENDIF (CASA_libtables)
-  IF (CASA_libgraphics)
-    SET (CASA_LIBRARIES ${LINKgraphics})
-  ENDIF (CASA_libgraphics)
-  IF (CASA_libscimath AND CASA_libtables)
+set (LINKionosphere
+  ${CASA_libionosphere} ${LINKmeasures}
+  CACHE STRING "LINKionosphere")
+
+set (LINKflagging
+  ${CASA_libflagging} ${CASA_libmsvis} ${CASA_libms} ${CASA_liblattices}
+  ${LINKmeasures}
+  CACHE STRING "LINKflagging")
+
+set (LINKdish
+  "-ldish -lms -lfits -lcoordinates -llattices ${LINKmeasures}"
+  CACHE STRING "LINKdish")
+
+set (LINKsimulators
+  ${CASA_libsimulators} ${LINKms}
+  CACHE STRING "LINKsimulators")
+
+set (LINKsynthesis
+  "-lsynthesis -lcalibration -lmsvis -lms -limages ${TMPcomponents}"
+  CACHE STRING "LINKsynthesis")
+
+set (LINKgraphics
+  ${CASA_libgraphics} ${LINKcasa}
+  CACHE STRING "LINKgraphics")
+
+set (LINKtasking
+  "-ltasking -lgraphics -lmsvis -lms -limages ${TMPcomponents}"
+  CACHE STRING "LINKtasking")
+
+if (CASA_libcasa)
+  set (CASA_LIBRARIES ${LINKcasa})
+  if (CASA_libscimath AND CASA_libscimath_f)
+    set (CASA_LIBRARIES ${LINKscimath})
+  endif (CASA_libscimath AND CASA_libscimath_f)
+  if (CASA_libtables)
+    set (CASA_LIBRARIES ${LINKtables})
+  endif (CASA_libtables)
+  if (CASA_libgraphics)
+    set (CASA_LIBRARIES ${LINKgraphics})
+  endif (CASA_libgraphics)
+  if (CASA_libscimath AND CASA_libtables)
     if (CASA_libmeasures)
       set (CASA_LIBRARIES ${LINKmeasures})
       if (MS_LIBRARY)
@@ -270,25 +288,25 @@ endif (CASA_libcasa)
 ## -----------------------------------------------------------------------------
 ## If detection successful, register package as found
 
-IF (CASA_INCLUDES AND CASA_LIBRARIES)
-  SET(HAVE_CASA TRUE)
-  STRING (REGEX REPLACE lib/libcasa.a lib CASA_LIBRARIES_DIR ${CASA_libcasa})
-ELSE (CASA_INCLUDES AND CASA_LIBRARIES)
-  IF (NOT CASA_FIND_QUIETLY)
-    IF (NOT CASA_INCLUDES)
-      MESSAGE (STATUS "Unable to find CASA header files!")
-    ENDIF (NOT CASA_INCLUDES)
-    IF (NOT CASA_LIBRARIES)
-      MESSAGE (STATUS "Unable to find CASA library files!")
-    ENDIF (NOT CASA_LIBRARIES)
-  ENDIF (NOT CASA_FIND_QUIETLY)
-ENDIF (CASA_INCLUDES AND CASA_LIBRARIES)
+if (CASA_INCLUDES AND CASA_LIBRARIES)
+  set (HAVE_CASA TRUE)
+  string (REGEX REPLACE lib/libcasa.a lib CASA_LIBRARIES_DIR ${CASA_libcasa})
+else (CASA_INCLUDES AND CASA_LIBRARIES)
+  if (NOT CASA_FIND_QUIETLY)
+    if (NOT CASA_INCLUDES)
+      message (STATUS "Unable to find CASA header files!")
+    endif (NOT CASA_INCLUDES)
+    if (NOT CASA_LIBRARIES)
+      message (STATUS "Unable to find CASA library files!")
+    endif (NOT CASA_LIBRARIES)
+  endif (NOT CASA_FIND_QUIETLY)
+endif (CASA_INCLUDES AND CASA_LIBRARIES)
 
 ## ------------------------------------------------------------------------------
 ## Final assembly of the provided variables and flags; once this is done, we
 ## provide some extended feedback.
 
-IF (HAVE_CASA)
+if (HAVE_CASA)
   add_definitions (
     -DAIPS_${AIPS_ARCH}
     -DAIPS_${AIPS_ENDIAN}_ENDIAN
@@ -299,12 +317,11 @@ IF (HAVE_CASA)
     -D_GLIBCPP_DEPRECATED
     -DSIGNBIT 
     -DAIPS_NO_TEMPLATE_SRC
-    -DAIPS_NO_TEMPLATE_SRC
     -I${CASA_INCLUDES}
     -DAIPS_${AIPS_ARCH})
   set (CASA_CXX_FLAGS "-fPIC -pipe -Wall -Wno-non-template-friend -Woverloaded-virtual -Wno-comment -fexceptions -Wcast-align")
-  SET (CASA_CXX_LFLAGS "-L${CASA_LIBRARIES_DIR} ${CASA_LIBRARIES_DIR}/version.o ${CASA_LIBRARIES}")
-  IF (NOT CASA_FIND_QUIETLY)
+  set (CASA_CXX_LFLAGS "-L${CASA_LIBRARIES_DIR} ${CASA_LIBRARIES_DIR}/version.o ${CASA_LIBRARIES}")
+  if (NOT CASA_FIND_QUIETLY)
     message (STATUS "Found components for CASA.")
     message (STATUS "AIPSARCH ........... : ${AIPS_ARCH}")
     message (STATUS "AIPSROOT ........... : ${AIPSROOT}")
@@ -313,18 +330,18 @@ IF (HAVE_CASA)
     message (STATUS "CASA header files .. : ${CASA_INCLUDES}")
     message (STATUS "CASA compile command : ${CASA_CXX_FLAGS}")
     message (STATUS "CASA linker command  : ${CASA_CXX_LFLAGS}")
-  ENDIF (NOT CASA_FIND_QUIETLY)
-  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CASA_CXX_FLAGS}")
-ELSE (HAVE_CASA)
-  IF (CASA_FIND_REQUIRED)
-    MESSAGE(FATAL_ERROR "Could not find CASA")
-  ENDIF (CASA_FIND_REQUIRED)
-ENDIF (HAVE_CASA)
+  endif (NOT CASA_FIND_QUIETLY)
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CASA_CXX_FLAGS}")
+else (HAVE_CASA)
+  if (CASA_FIND_REQUIRED)
+    message (FATAL_ERROR "Could not find CASA")
+  endif (CASA_FIND_REQUIRED)
+endif (HAVE_CASA)
 
 ## ------------------------------------------------------------------------------
 ## Mark as advanced ...
 
-MARK_AS_ADVANCED (
+mark_as_advanced (
   HAVE_CASA
   CASA_INCLUDES
   CASA_LIBRARIES

@@ -7,7 +7,7 @@ C
 C Start plotting in a different panel. If the view surface has been
 C divided into panels by PGBEG or PGSUBP, this routine can be used to
 C move to a different panel. Note that PGPLOT does not remember what
-C viewport and window were in use in each panel; these should be reset
+C viewport and window were in use_in each panel; these should be reset
 C if necessary after calling PGPANL. Nor does PGPLOT clear the panel:
 C call PGERAS after calling PGPANL to do this.
 C

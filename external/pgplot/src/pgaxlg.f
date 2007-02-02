@@ -16,9 +16,9 @@ C otherwise minor tick marks are spaced by one decade. If the axis
 C spans less than two decades, numeric labels are placed at 1, 2, and
 C 5 times each power of ten.
 C
-C It is not advisable to use this routine if the axis spans less than
+C It is not advisable to use_this routine if the axis spans less than
 C one decade, or if it spans many decades. In these cases it is
-C preferable to use a linear axis labeled with the logarithm of the
+C preferable to use_a linear axis labeled with the logarithm of the
 C quantity of interest.
 C
 C Arguments:

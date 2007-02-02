@@ -14,7 +14,7 @@ C be called first to draw the contour lines, then this routine should be
 C called to add the labels. Labels are written at intervals along the
 C contour lines, centered on the contour lines with lettering aligned
 C in the up-hill direction. Labels are opaque, so a part of the under-
-C lying contour line is obscured by the label. Labels use the current
+C lying contour line is obscured by the label. Labels use_the current
 C attributes (character height, line width, color index, character
 C font).
 C
@@ -81,7 +81,7 @@ C
       PGCMIN = MININT
       PGCLAB = LABEL
 C
-C Use PGCONX with external function PGCL.
+C use_PGCONX with external function PGCL.
 C
       CL(1) = C
       CALL PGCONX (A, IDIM, JDIM, I1, I2, J1, J2, CL, 1, PGCL)

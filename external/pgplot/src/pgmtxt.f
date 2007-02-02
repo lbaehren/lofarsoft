@@ -21,7 +21,7 @@ C                    frame rather than parallel to it.
 C  DISP   (input)  : the displacement of the character string from the
 C                    specified edge of the viewport, measured outwards
 C                    from the viewport in units of the character
-C                    height. Use a negative value to write inside the
+C                    height. use_a negative value to write inside the
 C                    viewport, a positive value to write outside.
 C  COORD  (input)  : the location of the character string along the
 C                    specified edge of the viewport, as a fraction of

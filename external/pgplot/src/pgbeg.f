@@ -6,7 +6,7 @@ C+
       CHARACTER*(*) FILE
       INTEGER       NXSUB, NYSUB
 C
-C Note: new programs should use PGOPEN rather than PGBEG. PGOPEN
+C Note: new programs should use_PGOPEN rather than PGBEG. PGOPEN
 C is retained for compatibility with existing programs. Unlike PGOPEN,
 C PGBEG closes any graphics devices that are already open, so it 
 C cannot be used to open devices to be used in parallel.
@@ -27,10 +27,10 @@ C                    To test the return value, call
 C                    PGBEG as a function, eg IER=PGBEG(...); note
 C                    that PGBEG must be declared INTEGER in the
 C                    calling program. Some Fortran compilers allow
-C                    you to use CALL PGBEG(...) and discard the
+C                    you to use_CALL PGBEG(...) and discard the
 C                    return value, but this is not standard Fortran.
 C Arguments:
-C  UNIT  (input)   : this argument is ignored by PGBEG (use zero).
+C  UNIT  (input)   : this argument is ignored by PGBEG (use_zero).
 C  FILE  (input)   : the "device specification" for the plot device.
 C                    (For explanation, see description of PGOPEN.)
 C  NXSUB  (input)  : the number of subdivisions of the view surface in

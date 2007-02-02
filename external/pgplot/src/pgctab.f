@@ -6,8 +6,8 @@ C+
       INTEGER NC
       REAL    L(NC), R(NC), G(NC), B(NC), CONTRA, BRIGHT
 C
-C Use the given color table to change the color representations of
-C all color indexes marked for use by PGIMAG. To change which
+C use_the given color table to change the color representations of
+C all color indexes marked for use_by PGIMAG. To change which
 C color indexes are thus marked, call PGSCIR before calling PGCTAB
 C or PGIMAG. On devices that can change the color representations
 C of previously plotted graphics, PGCTAB will also change the colors

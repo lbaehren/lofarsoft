@@ -12,7 +12,7 @@ C                              Combined all drivers into one driver that
 C                              uses a logical name to choose the format.
 C Version 1.1  - 1989 Sept - B. H. Toby
 C                              (1) adapt for PC version of PGPLOT
-C                              (2) use alternate logical name definitions
+C                              (2) use_alternate logical name definitions
 C                              (3) support for DeskJet/ " Plus/ " 500
 C                              (4) reduce page size to 10.25 to fix PGIDENT
 C
@@ -24,7 +24,7 @@ C   IBM PC / HP DeskJet printer usage
 C       Default file name is LPT1 (parallel port#1)
 C       Setup the port using MODE LPTn:,,P         (parallel)
 C                         or MODE COMn:96,N,8,1,P  (serial)
-C   Use COMn/HJ or LPTn/HJ to send output directly to a device
+C   use_COMn/HJ or LPTn/HJ to send output directly to a device
 C       or FILE.EXT/HJ or d:\path\file.ext/HJ to send the output
 C      to a file
 C   Files can be written to disk and then copied to the printer.
@@ -59,14 +59,14 @@ C
 C File format: See the LaserJet & DeskJet Printer Technical Reference Manuals
 C for details of the file format.
 C
-C Obtaining hardcopy: Use the command PRINT/PASSALL.
+C Obtaining hardcopy: use_the command PRINT/PASSALL.
 C
 C Logical Name Usage:
 C ------- ---- ------
 C
-C   PGPLOT_HJ_MODE: use $ DEFINE PGPLOT_HJ_MODE HJnn
+C   PGPLOT_HJ_MODE: use_$ DEFINE PGPLOT_HJ_MODE HJnn
 C
-C     where nn is a number 1 - NDEV inclusive.  You may also use one of the
+C     where nn is a number 1 - NDEV inclusive.  You may also use_one of the
 C     equivalent names listed below.
 C       Thus  $ DEFINE PGPLOT_HJ_MODE HJ01
 C        and  $ DEFINE PGPLOT_HJ_MODE LHOR  are equivalent (etc.)
@@ -89,7 +89,7 @@ C     PHOT is a driver that puts out bitmaps suitable for inclusion in TeX
 C     output if you are using the Arbortext DVIHP program.  The only drivers
 C     that will work with unexpanded LaserJet are HJ08 and HJ09.  The other
 C     seven drivers require a LaserJet Plus or LaserJet II.  Finally, do NOT
-C     attempt to send grayscale plots to the drivers that use the optimized
+C     attempt to send grayscale plots to the drivers that use_the optimized
 C     bitmap dumps.  Terrible things will happen.
 C
 C       Driver  Equiv         Size (H x V)          Resolution
@@ -107,13 +107,13 @@ C
 C  The following logical names will override the PGPLOT_HJ_MODE settings,
 C  if used.
 C
-C   PGPLOT_HJ_RES: use $ DEFINE PGPLOT_HJ_RES x  where x is H, M, L or V
+C   PGPLOT_HJ_RES: use_$ DEFINE PGPLOT_HJ_RES x  where x is H, M, L or V
 C          H or HIGH     for 300 bpi
 C          M or MEDIUM   for 150 bpi
 C          L or LOW      for 100 bpi
 C          V or VERYLOW  for  75 bpi
 C
-C   PGPLOT_HJ_MAR: use $ DEFINE PGPLOT_HJ_MAR  "xx.xx,yy.yy"
+C   PGPLOT_HJ_MAR: use_$ DEFINE PGPLOT_HJ_MAR  "xx.xx,yy.yy"
 C       where "xx.xx" and "yy.yy" are the vertical and horizontal
 C       margin dimensions in inches. The number of characters, including
 C       spaces preceeding and following the comma, should not exceed five.
@@ -121,7 +121,7 @@ C         $ DEFINE PGPLOT_HJ_MAR  "1.0,1.0" is valid
 C         $ DEFINE PGPLOT_HJ_MAR  " 1.0 ,1.0" is valid
 C         but $ DEFINE PGPLOT_HJ_MAR  " 1.00 ,1.0" is not valid
 C
-C   PGPLOT_HJ_SIZE: use $ DEFINE PGPLOT_HJ_SIZE  "xx.xx,yy.yy"
+C   PGPLOT_HJ_SIZE: use_$ DEFINE PGPLOT_HJ_SIZE  "xx.xx,yy.yy"
 C       where "xx.xx" and "yy.yy" are the vertical and horizontal
 C       plot dimensions in inches. The number of characters, including
 C       spaces preceeding and following the comma, should not exceed five.
@@ -129,22 +129,22 @@ C         $ DEFINE PGPLOT_HJ_SIZE  "10.,8." is valid
 C         $ DEFINE PGPLOT_HJ_SIZE  "10.0 , 8.0 " is valid
 C         but $ DEFINE PGPLOT_HJ_SIZE  " 10.0 ,8.0" is not valid
 C
-C   PGPLOT_HJ_TEX: use $ DEFINE PGPLOT_HJ_TEX  T
+C   PGPLOT_HJ_TEX: use_$ DEFINE PGPLOT_HJ_TEX  T
 C         if PGPLOT_HJ_TEX is defined with any value, TeX mode (see above)
 C         will be used.
 C
-C   PGPLOT_HJ_NOFF: use $ DEFINE PGPLOT_HJ_NOFF  T
+C   PGPLOT_HJ_NOFF: use_$ DEFINE PGPLOT_HJ_NOFF  T
 C         if PGPLOT_HJ_NOFF is defined with any value, the form feed
 C         needed to eject the final page will be omitted. This is useful
 C         for spooled printers -- it prevents wasted (blank) pages.
 C
-C   PGPLOT_HJ_PAGE: use $ DEFINE PGPLOT_HJ_PAGE x  where x is L or P
-C     Use L (or LANDSCAPE) for Landscape mode
-C     Use P (or PORTRAIT) for Portrait mode
+C   PGPLOT_HJ_PAGE: use_$ DEFINE PGPLOT_HJ_PAGE x  where x is L or P
+C     use_L (or LANDSCAPE) for Landscape mode
+C     use_P (or PORTRAIT) for Portrait mode
 C
-C   PGPLOT_HJ_OPT: use $ DEFINE PGPLOT_HJ_OPT x  where x is O or C
-C     Use O (or OPTIMIZE) so that bitmap will be "optimized"
-C     Use C (or COMPRESS) so that bitmap will be "compressed"
+C   PGPLOT_HJ_OPT: use_$ DEFINE PGPLOT_HJ_OPT x  where x is O or C
+C     use_O (or OPTIMIZE) so that bitmap will be "optimized"
+C     use_C (or COMPRESS) so that bitmap will be "compressed"
 C
 C       "Optimized" mode minimizes the memory usage for the LaserJet devices.
 C       This sometimes leads to a larger file than if optimization is not
@@ -872,7 +872,7 @@ C BX, BY          I I      Dimensions of frame buffer
 C BITMAP        I/O B      (address of) the frame buffer.
 C
 C Version 1.0  03-Sep-1986  S. C. Allendorf
-C Version 2.0  08-Dec-1986  S. C. Allendorf  Use relative positioning
+C Version 2.0  08-Dec-1986  S. C. Allendorf  use_relative positioning
 C Version 2.1  28-Dec-1986  S. C. Allendorf  Optimize positioning code
 C Version 3.0  02-Jan-1987  S. C. Allendorf  Add code for rules
 C VERSION 3.1  10-FEB-1988  S. C. Allendorf  Attempt to speed up code

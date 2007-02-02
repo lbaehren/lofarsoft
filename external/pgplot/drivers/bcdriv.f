@@ -196,7 +196,7 @@ C--- IFUNC=14, End Picture. --------------------------------------------
       RETURN
 C
 C--- IFUNC=15, Select color index. -------------------------------------
-C- Save pen number (up to 11) for possible use in pattern interior.
+C- Save pen number (up to 11) for possible use_in pattern interior.
   150 ICOL=MAX(0,MIN(NINT(RBUF(1)),11))
       RBUF(1)=MAX(0,MIN(ICOL,1))
       RETURN
@@ -232,7 +232,7 @@ C IXDIM           I   I  First array dimension of the frame buffer
 C                        -considered as a two-dimensional byte array.
 C QXYBUF          I/O B  (address of) the frame buffer.
 C
-C 13-Mar-1987 - Copied from GRVE01 routine for use with GEDRIVER [AFT].
+C 13-Mar-1987 - Copied from GRVE01 routine for use_with GEDRIVER [AFT].
 C-----------------------------------------------------------------------
       BYTE    QXYBUF(0:*), QMASK(0:7)
       REAL    RBUF(4)

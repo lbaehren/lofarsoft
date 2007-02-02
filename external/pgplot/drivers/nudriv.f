@@ -12,7 +12,7 @@ C Version 1.1  - 1988 Mar 23 - add rectangle fill.
 C Version 1.2  - 1992 Sep  3 - add line-of-pixels.
 C Version 1.3  - 1992 Sep 21 - add markers.
 C Version 1.4  - 1993 Apr 22 - add optional debugging.
-C Version 1.5  - 1994 Aug 31 - use image primitives.
+C Version 1.5  - 1994 Aug 31 - use_image primitives.
 C Version 2.0  - 1996 Jan 22 - allow multiple active devices;
 C                              add QCR primitive.
 C Version 2.1  - 1997 Jun 13 - correctly initialize STATE.

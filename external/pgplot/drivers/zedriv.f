@@ -27,7 +27,7 @@ C   line, then TYPEing the file at the terminal will produce a plot.
 C   On Starlink:
 C   $ PRINT/NOFEED/QUE=ZETA PGPLOT.ZET
 C
-C   To stop a Zeta plot job, once it has been started, use the buttons
+C   To stop a Zeta plot job, once it has been started, use_the buttons
 C   on the plotter.  Press PAUSE, NEXT PLOT and CLEAR.  Only after
 C   this sequence is it safe to delete the job from the ZETA Queue.
 C   Failing to press the NEXT PLOT button will not correctly advance

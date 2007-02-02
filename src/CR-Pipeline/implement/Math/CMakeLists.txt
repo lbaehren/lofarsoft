@@ -18,4 +18,4 @@ subdirs (test)
 FILE (GLOB srcs *.cc)
 
 add_library(math ${srcs})
-target_link_libraries (math ${BLITZ_LIBRARY})
+target_link_libraries (math ${BLITZ_LIBRARIES})

@@ -33,10 +33,10 @@ C     of the allowed PGPLOT device types. PGPLOT supplies a default
 C     file or device name appropriate for this device type.
 C (3) A device specification with '/type' omitted; in this case
 C     the type is taken from the environment variable PGPLOT_TYPE,
-C     if defined (e.g., setenv PGPLOT_TYPE PS). Because of possible
+C     if defined (e.g., setenv PGPLOT_TYPE PS). Because_of possible
 C     confusion with '/' in file-names, omitting the device type
 C     in this way is not recommended.
-C (4) A blank string (' '); in this case, PGOPEN will use the value
+C (4) A blank string (' '); in this case, PGOPEN will use_the value
 C     of environment variable PGPLOT_DEV as the device specification,
 C     or '/NULL' if the environment variable is undefined.
 C (5) A single question mark, with optional trailing spaces ('?'); in
@@ -59,7 +59,7 @@ C types is displayed and the prompt is re-issued. If the user supplies
 C an invalid device specification, the prompt is re-issued. If the user
 C responds with an end-of-file character, e.g., ctrl-D in UNIX, program
 C execution is aborted; this  avoids the possibility of an infinite
-C prompting loop.  A programmer should avoid use of PGPLOT-prompting
+C prompting loop.  A programmer should avoid use_of PGPLOT-prompting
 C if this behavior is not desirable.
 C
 C The device type is case-insensitive (e.g., '/ps' and '/PS' are 
@@ -78,11 +78,11 @@ C (5)  '?  '
 C (6)  '?Device specification for PGPLOT: '
 C
 C [This routine was added to PGPLOT in Version 5.1.0. Older programs
-C use PGBEG instead.]
+C use_PGBEG instead.]
 C
 C Returns:
 C  PGOPEN          : returns either a positive value, the
-C                    identifier of the graphics device for use with
+C                    identifier of the graphics device for use_with
 C                    PGSLCT, or a 0 or negative value indicating an
 C                    error. In the event of error a message is
 C                    written on the standard error unit.
@@ -125,7 +125,7 @@ C
           DEFTYP = GRDTYP(DEFSTR(1:L))
       END IF
       IF (DEVICE.EQ.' ') THEN
-C        -- Blank device string: use default device and type.
+C        -- Blank device string: use_default device and type.
          ISTAT = GROPEN(DEFTYP,UNIT,DEFDEV(1:LDEFDE),PGID)
       ELSE IF (DEVICE(1:1).EQ.'?') THEN
          IF (DEVICE.EQ.'?') THEN
@@ -135,7 +135,7 @@ C           -- for device/type
      :           //DEFDEV(1:LDEFDE)//'): '
             LPROMP = LDEFDE + 48
          ELSE
-C           -- Device string starts with a question mark: use it
+C           -- Device string starts with a question mark: use_it
 C           -- as a prompt
             PROMPT = DEVICE(2:)
             LPROMP = LEN(DEVICE)-1
@@ -184,7 +184,7 @@ C
       PGNYC(PGID) = 1
       CALL GRQTYP(DEFSTR,JUNK)
 C
-C Set the prompt state to ON, so that terminal devices pause between
+C Set the prompt state to ON, so that terminal devices pause_between
 C pages; this can be changed with PGASK.
 C
       CALL PGASK(.TRUE.)

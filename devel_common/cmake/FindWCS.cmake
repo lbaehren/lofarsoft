@@ -9,7 +9,7 @@
 ## Check for the header files
 
 find_path (WCS_INCLUDES wcs.h wcslib.h wcsutil.h
-  PATHS /include /usr/include /usr/local/include
+  PATHS /include /usr/include /usr/local/include /sw/include
   PATH_SUFFIXES wcslib
   )
 

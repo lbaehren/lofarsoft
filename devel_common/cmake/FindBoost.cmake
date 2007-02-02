@@ -1,77 +1,82 @@
 # - Check for the presence of the Boost library
 #
-#  HAVE_BOOST
+#  HAVE_BOOST      = do we have BOOST?
+#  BOOST_INCLUDES  = location of the include files
+#  BOOST_LIBRARIES = location of the libraries
 #
-
-SET (Boost_VERSION 1_32)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-FIND_PATH (Boost_INCLUDE_DIR
-  config.hpp
-  PATHS /usr/local/include /usr/include /sw/include /opt/casa/local/include
-  PATH_SUFFIXES boost ${Boost_VERSION} ${Boost_VERSION}/boost
+FIND_PATH (BOOST_INCLUDES config.hpp
+  PATHS /include /usr/include /usr/local/include /opt/include /sw/include
+  PATH_SUFFIXES boost
   )
 
 ## -----------------------------------------------------------------------------
-## Check for the library; actually we check for the various parts, suchh as
-## libboost_python or libboost_wave.
+## Check for the various components of the library
 
-SET (Boost_LIBRARIES "")
+set (libs
+  boost_date_time
+  boost_filesystem
+  boost_iostreams
+  boost_program_options
+  boost_python
+  boost_regex
+  boost_serialization
+  boost_signals
+  boost_test_exec_monitor
+  boost_thread
+  boost_unit_test_framework
+  boost_wave
+)
 
-FIND_LIBRARY (Boost_python_LIBRARY
-  NAMES boost_python-${Boost_VERSION}
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib /opt/casa/local/lib
-  PATH_SUFFIXES boost
-  )
+set (BOOST_LIBRARIES "")
 
-IF (Boost_python_LIBRARY)
-  SET (Boost_LIBRARIES "${Boost_LIBRARIES} ${Boost_python_LIBRARY}")
-ENDIF (Boost_python_LIBRARY)
-
-FIND_LIBRARY (Boost_wave_LIBRARY
-  NAMES boost_wave-${Boost_VERSION}
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib
-  PATH_SUFFIXES boost
-  )
-
-IF (Boost_wave_LIBRARY)
-  SET (Boost_LIBRARIES "${Boost_LIBRARIES} ${Boost_wave_LIBRARY}")
-ENDIF (Boost_wave_LIBRARY)
+foreach (lib ${libs})
+  ## try to locate the library
+  find_library (BOOST_${lib} ${lib}
+    PATHS /lib /usr/lib /usr/local/lib /sw/lib
+    PATH_SUFFIXES boost
+    )
+  ## check if location was successful
+  if (BOOST_${lib})
+    list (APPEND BOOST_LIBRARIES ${BOOST_${lib}})
+  endif (BOOST_${lib})
+endforeach (lib)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
-IF (Boost_INCLUDE_DIR AND Boost_LIBRARIES)
+IF (BOOST_INCLUDES AND BOOST_LIBRARIES)
   SET (HAVE_BOOST TRUE)
-ELSE (Boost_INCLUDE_DIR AND Boost_LIBRARIES)
+ELSE (BOOST_INCLUDES AND BOOST_LIBRARIES)
   IF (NOT Boost_FIND_QUIETLY)
-    IF (NOT Boost_INCLUDE_DIR)
+    IF (NOT BOOST_INCLUDES)
       MESSAGE (STATUS "Unable to find Boost header files!")
-    ENDIF (NOT Boost_INCLUDE_DIR)
-    IF (NOT Boost_LIBRARIES)
+    ENDIF (NOT BOOST_INCLUDES)
+    IF (NOT BOOST_LIBRARIES)
       MESSAGE (STATUS "Unable to find Boost library files!")
-    ENDIF (NOT Boost_LIBRARIES)
+    ENDIF (NOT BOOST_LIBRARIES)
   ENDIF (NOT Boost_FIND_QUIETLY)
-ENDIF (Boost_INCLUDE_DIR AND Boost_LIBRARIES)
+ENDIF (BOOST_INCLUDES AND BOOST_LIBRARIES)
 
-IF (HAVE_BOOST)
-  IF (NOT Boost_FIND_QUIETLY)
-    MESSAGE (STATUS "Found components for Boost")
-    MESSAGE (STATUS "Boost library : ${Boost_LIBRARIES}")
-    MESSAGE (STATUS "Boost headers : ${Boost_INCLUDE_DIR}")
-  ENDIF (NOT Boost_FIND_QUIETLY)
-ELSE (HAVE_BOOST)
-  IF (Boost_FIND_REQUIRED)
-    MESSAGE (FATAL_ERROR "Could not find Boost!")
-  ENDIF (Boost_FIND_REQUIRED)
-ENDIF (HAVE_BOOST)
+if (HAVE_BOOST)
+  if (NOT Boost_FIND_QUIETLY)
+    message (STATUS "Found components for Boost")
+    message (STATUS "Boost library : ${BOOST_LIBRARIES}")
+    message (STATUS "Boost headers : ${BOOST_INCLUDES}")
+  endif (NOT Boost_FIND_QUIETLY)
+else (HAVE_BOOST)
+  if (Boost_FIND_REQUIRED)
+    message (FATAL_ERROR "Could not find Boost!")
+  endif (Boost_FIND_REQUIRED)
+endif (HAVE_BOOST)
 
 ## -----------------------------------------------------------------------------
 
-MARK_AS_ADVANCED(
+mark_as_advanced (
   HAVE_BOOST
-  Boost_INCLUDE_DIR
-  Boost_LIBRARIES
+  BOOST_INCLUDES
+  BOOST_LIBRARIES
 )

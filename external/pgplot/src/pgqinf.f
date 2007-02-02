@@ -14,7 +14,7 @@ C The following item codes are accepted (note that the strings must
 C match exactly, except for case, but only the first 8 characters are
 C significant). For items marked *, PGPLOT must be in the OPEN state
 C for the inquiry to succeed. If the inquiry is unsuccessful, either
-C because the item code is not recognized or because the information
+C because_the item code is not recognized or because_the information
 C is not available, a question mark ('?') is returned.
 C
 C   'VERSION'     - version of PGPLOT software in use.
@@ -48,7 +48,7 @@ C  LENGTH (output): the number of characters returned in VALUE
 C                   (excluding trailing blanks).
 C--
 C 18-Feb-1988 - [TJP].
-C 30-Aug-1988 - remove pseudo logical use of IER.
+C 30-Aug-1988 - remove pseudo logical use_of IER.
 C 12-Mar-1992 - change comments for clarity.
 C 17-Apr-1995 - clean up some zero-length string problems [TJP].
 C  7-Jul-1995 - get cursor information directly from driver [TJP].

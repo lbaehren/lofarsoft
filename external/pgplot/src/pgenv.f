@@ -38,7 +38,7 @@ C      AXIS = 10 : draw box and label X-axis logarithmically;
 C      AXIS = 20 : draw box and label Y-axis logarithmically;
 C      AXIS = 30 : draw box and label both axes logarithmically.
 C
-C For other axis options, use routine PGBOX. PGENV can be persuaded to
+C For other axis options, use_routine PGBOX. PGENV can be persuaded to
 C call PGBOX with additional axis options by defining an environment
 C parameter PGPLOT_ENVOPT containing the required option codes. 
 C Examples:
@@ -47,7 +47,7 @@ C   PGPLOT_ENVOPT=I      ! Invert the tick marks
 C   PGPLOT_ENVOPT=IV     ! Invert tick marks and label y Vertically
 C--
 C  1-May-1983
-C 25-Sep-1985 [TJP] - change to use PGWNAD.
+C 25-Sep-1985 [TJP] - change to use_PGWNAD.
 C 23-Nov-1985 [TJP] - add PGPLOT_ENVOPT option.
 C 31-Dec-1985 [TJP] - remove automatic PGBEG call.
 C 29-Aug-1989 [TJP] - remove common block; no longer needed.

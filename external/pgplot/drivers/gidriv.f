@@ -12,7 +12,7 @@ C+
 *                                                                      *
 * The GIF specification incorporates the Lempel-Zev-Welch (LZW)        *
 * compression technology which is the subject of a patent awarded to   *
-* Unisys. Use of this technology, and in particular creation of GIF    *
+* Unisys. use_of this technology, and in particular creation of GIF    *
 * format files using this PGPLOT device driver, may require a license  *
 * from Unisys.                                                         *
 ************************************************************************
@@ -23,7 +23,7 @@ C+
 *
 * Default device name: pgplot.gif.
 *
-* If you have more than one image to plot (i.e. use PGPAGE) with this
+* If you have more than one image to plot (i.e. use_PGPAGE) with this
 * device, subsequent pages will be named: pgplot2.gif, pgplot3.gif,
 * etc, disrespective of the device name you specified.
 * You can however bypass this by specifying a device name including a
@@ -44,7 +44,7 @@ C+
 * Indices 0 to 255 are supported. Each of these indices can be assigned
 * one color. Default colors for indices 0 to 15 are implemented.
 *
-* Obtaining hardcopy: Use a GIF viewer or converter.
+* Obtaining hardcopy: use_a GIF viewer or converter.
 *=
 *  1-Aug-1994 - Created by Remko Scharroo
 *  9-Aug-1994 - New scheme for line plotting
@@ -54,7 +54,7 @@ C+
 * 18-Jan-1995 - Attempt to prevent integer overflow on systems where
 *               BYTE is signed [TJP].
 * 28-Dec-1995 - prevent concurrent access [TJP].
-* 29-Apr-1996 - use GRCTOI to decode environment variables [TJP].
+* 29-Apr-1996 - use_GRCTOI to decode environment variables [TJP].
 *  2-Sep-1997 - correct a byte overflow problem
 *-----------------------------------------------------------------------
       CHARACTER*(*) LTYPE, PTYPE, DEFNAM
@@ -708,7 +708,7 @@ C        -- if the supplied name contains a #-character, replace
 C           it with the page number
          CALL GRFAO(NAME1, L, TMP, NP, 0, 0, 0)
       ELSE IF (NP.EQ.1) THEN
-C        -- if this is the first page, use the supplied name
+C        -- if this is the first page, use_the supplied name
          NAME2 = NAME1
          RETURN
       ELSE IF (LN+2.LE.LEN(NAME1)) THEN

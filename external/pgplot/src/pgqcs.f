@@ -7,7 +7,7 @@ C+
 C
 C Return the current PGPLOT character height in a variety of units.
 C This routine provides facilities that are not available via PGQCH.
-C Use PGQCS if the character height is required in units other than
+C use_PGQCS if the character height is required in units other than
 C those used in PGSCH.
 C
 C The PGPLOT "character height" is a dimension that scales with the
