@@ -11,6 +11,13 @@
 ##
 
 ## -----------------------------------------------------------------------------
+## Required external packages
+
+find_library (libg2c g2c
+  PATHS /usr/local/lib /usr/lib /lib /sw/lib
+  )
+
+## -----------------------------------------------------------------------------
 ## Check for the header files first, as from this we can derive a number of 
 ## fundamental CASA variables (such as e.g. the root directory of the
 ## installation). The main point to keep in mind here is, that parts of the
@@ -172,7 +179,7 @@ set (LINKcasa
   CACHE STRING "LINKcasa")
 
 set (LINKscimath
-  ${CASA_libscimath} ${CASA_libscimath_f} ${LINKcasa}
+  ${CASA_libscimath} ${CASA_libscimath_f} ${LINKcasa} ${libg2c}
   CACHE STRING "LINKscimath")
 
 set (LINKtables

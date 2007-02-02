@@ -1,8 +1,11 @@
+# $LastChangedDate$
 
 ## ------------------------------------------------------------------------------
 ## Find external packages
 
-
+find_library (libg2c g2c
+  PATHS /usr/local/lib /usr/lib /lib /sw/lib
+  )
 
 # basic stuff is already handled a top level
 
@@ -33,6 +36,7 @@ FOREACH (src ${tests})
   TARGET_LINK_LIBRARIES (${src}
     ${CASA_LIBRARIES}
     ${LAPACK_LIBRARIES}
+    ${libg2c}
     )  
 ENDFOREACH (src)
 
