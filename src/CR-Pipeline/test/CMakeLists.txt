@@ -28,6 +28,7 @@ set (tests
   tUseScimath
   tUseMeasures
   tUseTables
+  tUseLattices
 )
 
 ## ------------------------------------------------------------------------------
