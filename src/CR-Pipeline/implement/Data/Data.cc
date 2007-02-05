@@ -25,7 +25,7 @@
 
 using namespace std;
 
-namespace LOPES {
+namespace CR {
   
   Data::Data() {
     data_   = NULL;

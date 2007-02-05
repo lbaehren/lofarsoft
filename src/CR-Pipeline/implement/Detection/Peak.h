@@ -24,7 +24,7 @@
 #include <sstream>
 #include <fstream>
 
-namespace LOPES { // Namespace LOPES -- begin
+namespace CR { // Namespace CR -- begin
   
   /*!
     \class Peak
@@ -62,15 +62,15 @@ namespace LOPES { // Namespace LOPES -- begin
       \brief Argumented constructor
       
       The Peak constructor. This function allocates memory for the peak data, and
-      inititalizes it using the supplied parameters, where <b><em>t</em></b> maps
-      to the newly created <b>Peak</b>'s time stamp, <b><em>h</em></b> to its
-      absolute height, and <b><em>s</em></b> to its sigificance (in sigma above
+      inititalizes it using the supplied parameters, where <b><em>time</em></b> maps
+      to the newly created <b>Peak</b>'s time stamp, <b><em>height</em></b> to its
+      absolute height, and <b><em>sigma</em></b> to its sigificance (in sigma above
       average).
     */
-    Peak (uint t,
-	  int h,
-	  uint s);
-
+    Peak (uint time,
+	  int height,
+	  uint sigma);
+    
     /*!
       \brief Argumented constructor
     
@@ -126,6 +126,6 @@ namespace LOPES { // Namespace LOPES -- begin
 		      uint num);
   };
   
-} // Namespace LOPES -- end
+} // Namespace CR -- end
 
 #endif /* _PEAK_H_ */

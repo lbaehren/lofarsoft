@@ -25,10 +25,10 @@
 
 #include <sstream>
 #include <fstream>
-#include <Analysis/PeakList.h>
+#include <Detection/PeakList.h>
 #include <Data/Data.h>
 
-namespace LOPES { // Namespace LOPES -- begin
+namespace CR { // Namespace CR -- begin
   
   /*!
     \class PeakSearch
@@ -274,6 +274,6 @@ namespace LOPES { // Namespace LOPES -- begin
 		 uint np);
 };
 
-} // Namespace LOPES -- end
+} // Namespace CR -- end
 
 #endif /* _PEAKSEARCH_H_ */

@@ -27,7 +27,7 @@
 #include <fstream>
 #include <string.h>
 
-namespace LOPES {
+namespace CR {
   
   /*!
     \class Data

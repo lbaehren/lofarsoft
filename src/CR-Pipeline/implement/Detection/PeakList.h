@@ -23,9 +23,9 @@
 
 #include <sstream>
 #include <fstream>
-#include <Analysis/Peak.h>
+#include <Detection/Peak.h>
 
-namespace LOPES { // Namespace LOPES -- begin
+namespace CR { // Namespace CR -- begin
   
   /*!
     \class PeakList
@@ -107,6 +107,6 @@ namespace LOPES { // Namespace LOPES -- begin
     }
   };
   
-} // Namespace LOPES -- end
+} // Namespace CR -- end
 
 #endif /* _PEAKLIST_H_ */

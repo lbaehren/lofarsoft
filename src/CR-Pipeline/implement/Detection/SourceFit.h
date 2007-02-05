@@ -18,95 +18,81 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef _PEAKLIST_H_
-#define _PEAKLIST_H_
+#ifndef _SOURCEFIT_H_
+#define _SOURCEFIT_H_
 
 #include <sstream>
 #include <fstream>
-#include <Analysis/Peak.h>
+#include <casa/aips.h>
+#include <casa/Arrays/Array.h>
+#include <casa/Arrays/Vector.h>
+#include <casa/Arrays/Matrix.h>
 
-namespace LOPES { // Namespace LOPES -- begin
+#include <Detection/PeakList.h>
+
+using casa::Matrix;
+using casa::Vector;
+
+namespace CR { // Namespace CR -- begin
   
   /*!
-    \class PeakList
+    \class SourceFit
     
     \ingroup Analysis
     
-    \brief Class for peaks in a data stream
+    \brief Class for finding the position of a source
     
     \author Sven Lafebre
-
   */
-  class PeakList {
-
-    //! Length of the peak list
-    uint length_;
-    // 
-    uint space_;
-    //! Array of Peak objects as which the individual events are stored
-    Peak* peak_;
+  class SourceFit {
+    //! Array of fit parameters
+    Vector<double> fitParam;
+    Vector<bool>   doFitParam;
+    int            noFitParam;
     
-  public:
-    /*!
-      \brief Default constructor
-    */
-    PeakList();
-
-    /*!
-      \brief Argumented constructor
-
-      \param length -- Length of the peak list
-    */
-    PeakList(uint length);
+    Matrix<double> covar;
+    Matrix<double> alpha;
+    double         chisq;
+    double         alamda;
+    double         chiSqr;
+    double         chiSqrOld;
     
-    /*!
-      \brief Destructor
-    */
-    ~PeakList();
+    Matrix<double> r;
+    Vector<double> r0;
+    Vector<double> F;
+    Matrix<double> oneda;
+    Vector<double> r0Try;
+    Vector<double> beta;
+    Vector<double> da;
     
-    /*!
-      \brief Get the number of elements in the list
-
-      \return length -- The number of elements in the list
-    */
-    uint length() {
-      return length_;
-    }
-
-    /*!
-      \brief Retrieve the data for the i-th peak
-
-      \param i -- The number of the peak on the list to return
-      
-      \return peak -- The requested peak
-    */
-    Peak* peak(uint i);
-
-    /*!
-      \brief Add a peak to the existing list
-
-      \param p -- The peak to be added to the list
-    */
-    Peak* addPeak(Peak p);
-
-    /*!
-      \brief Add a peak to the existing list
-    */
-    Peak* addPeak();
-
-    /*!
-      \brief Go to the next peak in the list
-    */
-    Peak* nextPeak();
-
-    /*!
-      \brief ??
-    */
-    Peak* operator[] (uint i) {
-      return peak(i);
-    }
-  };
+  /* These functions were taken from:
+     Numerical recipes in C++: the art of scientific computing
+     William H. Press
+     2002, Cambridge University Press, Cambridge
+  */
+  //! mrqmin
+  void marquardtMinimize(PeakList*);
+  //! mrqcof
+  void marquardtMatrix(PeakList*,
+		       Vector<double>&,
+		       Matrix<double>&,
+		       Vector<double>&);
+  //! covsrt
+  void expandCovariance(Matrix<double>&);
+  //! gaussj
+  void gaussJordan(Matrix<double>&,
+		   Matrix<double>&);
   
-} // Namespace LOPES -- end
+  void init();
+  void fitFunction(int,
+		   Vector<double>,
+		   double&,
+		   Vector<double>&);	// funcs
+  
+ public:
+  void minimize(PeakList*);
+};
 
-#endif /* _PEAKLIST_H_ */
+} // Namespace CR -- end
+
+#endif /* _SOURCEFIT_H_ */

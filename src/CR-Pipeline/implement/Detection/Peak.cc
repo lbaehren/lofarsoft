@@ -22,7 +22,7 @@
 #include <string.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-#include <Analysis/Peak.h>
+#include <Detection/Peak.h>
 
 #include <fstream>
 
@@ -30,7 +30,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-namespace LOPES { // Namespace LOPES -- begin
+namespace CR { // Namespace CR -- begin
   
   Peak::Peak() {
     p_time         = 0;
@@ -86,4 +86,4 @@ namespace LOPES { // Namespace LOPES -- begin
     return this;
   }
   
-} // Namespace LOPES -- end
+} // Namespace CR -- end

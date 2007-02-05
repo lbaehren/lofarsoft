@@ -21,14 +21,14 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <Analysis/Peak.h>
-#include <Analysis/PeakList.h>
+#include <Detection/Peak.h>
+#include <Detection/PeakList.h>
 
 #define PL_PEAK_INC_NUM 128
 
 using namespace std;
 
-namespace LOPES { // Namespace LOPES -- begin
+namespace CR { // Namespace CR -- begin
   
   PeakList::PeakList() {
     length_ = 0;
@@ -83,4 +83,4 @@ namespace LOPES { // Namespace LOPES -- begin
     return &peak_[length_-1];
   }
   
-} // Namespace LOPES -- end
+} // Namespace CR -- end

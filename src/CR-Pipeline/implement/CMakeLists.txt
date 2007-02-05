@@ -3,6 +3,8 @@
 ## Modules
 
 set (cr_modules
+  Data
+  Detection
   Imaging
   Math
   )

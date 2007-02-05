@@ -22,7 +22,7 @@
 #include <sstream>
 #include <iostream>
 
-#include <Analysis/SourceFit.h>
+#include <Detection/SourceFit.h>
 
 #define SWAP(a,b) {temp=(a);(a)=(b);(b)=temp;}
 #define c 3.7474057
@@ -32,7 +32,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-namespace LOPES { // Namespace LOPES -- begin
+namespace CR { // Namespace CR -- begin
   
   void SourceFit::minimize(PeakList *p) {
     
@@ -357,4 +357,4 @@ namespace LOPES { // Namespace LOPES -- begin
     cout << "- gaussJordan" << endl;
   }
   
-} // Namespace LOPES -- end
+} // Namespace CR -- end

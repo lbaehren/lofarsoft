@@ -21,8 +21,8 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <Analysis/PeakSearch.h>
-#include <Analysis/SourceFit.h>
+#include <Detection/PeakSearch.h>
+#include <Detection/SourceFit.h>
 
 #define PS_MIN_BLOCKSIZE 2
 #define PS_MAX_BLOCKSIZE (7*sizeof(uint))
@@ -31,7 +31,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-namespace LOPES { // Namespace LOPES -- begin
+namespace CR { // Namespace CR -- begin
   
   PeakSearch::PeakSearch() {
     blocksize_ = 10;
@@ -248,4 +248,4 @@ void PeakSearch::corrPeaks(PeakList* pl, uint n, uint wn, uint np) {
   return corrPeaks(pl, n);
 }
 
-} // Namespace LOPES -- end
+} // Namespace CR -- end

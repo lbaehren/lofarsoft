@@ -18,69 +18,61 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include <Analysis/Peak.h>
-#include <Analysis/PeakList.h>
+/* $Id: tData.cc,v 1.3 2006/05/04 11:46:29 bahren Exp $ */
 
-#define PL_PEAK_INC_NUM 128
+#include <iostream>
+#include <sstream>
+
+#include <Data/Data.h>
 
 using namespace std;
 
-namespace LOPES { // Namespace LOPES -- begin
+using CR::Data;
+
+/*!
+  \file tData.cc
+
+  \ingroup Data
   
-  PeakList::PeakList() {
-    length_ = 0;
-    space_  = PL_PEAK_INC_NUM;
-    peak_   = (Peak*)malloc(space_*sizeof(Peak));
+  \brief A collection of test routines for Data
+
+  \author Sven Lafebre, Lars B&auml;hren
+*/
+
+// -------------------------------------------------------------------- test_Data
+
+/*!
+  \brief Test constructors for a new Data object
+  
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_Data ()
+{
+  int nofFailedTests (0);
+
+  Data d(50, 1200);
+  Data e(50, 1201);
+  Data f((uint)1e8, 1);
+  int a;
+  
+  d[2] = 10;
+  e[2] = 12;
+  f = d;
+  cin >> a;
+  cout << "d: " << d.id() << ", e: " << e.id() << ", f: " << f.id() << endl;
+  
+  cin >> a;  
+
+  return nofFailedTests;
+}
+
+int main (void)
+{
+  int nofFailedTests (0);
+
+  {
+    nofFailedTests += test_Data ();
   }
   
-  PeakList::PeakList(uint length) {
-    length_ = length;
-    space_  = length - (length % PL_PEAK_INC_NUM) + PL_PEAK_INC_NUM;
-    peak_   = (Peak*)malloc(space_*sizeof(Peak));
-  }
-  
-  PeakList::~PeakList() {
-    // This doesn't work! Why???
-    /*try {
-      free(peak_);
-      } catch (std::bad_alloc) {
-      cerr << "  FATAL: Error deallocating memory." << endl;
-      exit (1);
-      }*/
-  }
-  
-  Peak* PeakList::peak(uint i) {
-	if (i >= 0 && i < length_) {
-	  return &peak_[i];
-	} else {
-	  return NULL;
-	}
-  }
-  
-  Peak* PeakList::addPeak() {
-    Peak p;
-    
-    return addPeak(p);
-  }
-  
-  Peak* PeakList::addPeak(Peak p) {
-    length_ ++;
-    if (length_ > space_) {
-      space_ += PL_PEAK_INC_NUM;
-      peak_ = (Peak*)realloc(peak_, space_*sizeof(Peak));
-    }
-    
-    peak_[length_-1] = p;
-    
-    if (length_ > 2 && peak_[length_-1].time() == peak_[length_-2].time() + 1) {
-      length_ --;
-      peak_[length_-1].mergePeaks(&peak_[length_-1], 2);
-    }
-    
-    return &peak_[length_-1];
-  }
-  
-} // Namespace LOPES -- end
+  return nofFailedTests;
+}
