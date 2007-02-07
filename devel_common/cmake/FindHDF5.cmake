@@ -1,81 +1,80 @@
+# - Check for the presence of HDF5
 #
-# this module look for HDF5 (http://hdf.ncsa.uiuc.edu) support
-# it will define the following values
-#
-# HDF5_INCLUDE_DIR  = where hdf5.h can be found
-# HDF5_LIBRARY      = the library to link against (hdf5 etc)
-# HDF5_FOUND        = set to true after finding the library
-#
+# The following variables are set when HDF5 is found:
+#  HAVE_HDF5       = Set to true, if all components of HDF5
+#                          have been found.
+#  HDF5_INCLUDES   = Include path for the header files of HDF5
+#  HDF5_LIBRARIES  = Link these to use HDF5
 
-IF(EXISTS ${PROJECT_CMAKE}/Hdf5Config.cmake)
-  INCLUDE(${PROJECT_CMAKE}/Hdf5Config.cmake)
-ENDIF(EXISTS ${PROJECT_CMAKE}/Hdf5Config.cmake)
+## -----------------------------------------------------------------------------
+## Check for the header files
 
-IF(Hdf5_INCLUDE_DIRS)
+set (hdf5_headers
+  hdf5.h
+  H5Cpp.h
+  H5LT.h
+  )
 
-  FIND_PATH(HDF5_INCLUDE_DIR hdf5.h ${Hdf5_INCLUDE_DIRS})
-  FIND_LIBRARY(HDF5_LIBRARY hdf5 ${Hdf5_LIBRARY_DIRS})
+## check for the basic header file of the HDF5 library
 
-ELSE(Hdf5_INCLUDE_DIRS)
+find_path (HDF5_INCLUDES hdf5.h
+  PATHS /usr/local/include /usr/include /sw/include
+  PATH_SUFFIXES hdf5
+  )
 
-  SET(TRIAL_LIBRARY_PATHS
-    $ENV{HDF5_HOME}/lib
-    /usr/apps/lib
-    /usr/lib 
-    /usr/local/lib
-    /opt/lib
-    /sw/lib
+## check for header files available when library was build with "--enable-cxx"
+
+foreach (header ${hdf5_headers})
+  ## search for the header file
+  find_path (header_path ${header}
+    PATHS /usr/local/include /usr/include /sw/include
+    PATH_SUFFIXES hdf5
     )
-
-  SET(TRIAL_INCLUDE_PATHS
-    $ENV{HDF5_HOME}/include
-    /usr/apps/include
-    /usr/include
-    /opt/include
-    /usr/local/include
-    /sw/include
-    )
-
-  IF($ENV{HDF5_DIR} MATCHES "hdf")
-    MESSAGE(STATUS "Using environment variable HDF5_DIR.")
-    SET(TRIAL_LIBRARY_PATHS $ENV{HDF5_DIR}/lib ${TRIAL_LIBRARY_PATHS} )
-    SET(TRIAL_INCLUDE_PATHS $ENV{HDF5_DIR}/include ${TRIAL_INCLUDE_PATHS} )
-  ENDIF($ENV{HDF5_DIR} MATCHES "hdf")
-  
-  FIND_LIBRARY(HDF5_LIBRARY hdf5 ${TRIAL_LIBRARY_PATHS})
-  FIND_PATH(HDF5_INCLUDE_DIR hdf5.h ${TRIAL_INCLUDE_PATHS} )
-
-ENDIF(Hdf5_INCLUDE_DIRS)
+  ## check if the search has been successful
+  if (header_path)
+    list (APPEND HDF5_INCLUDES ${header_path})
+  else (header_path)
+    message (FATAL_ERROR "Unable to find ${header}!")
+  endif (header_path)
+endforeach (header)
 
 ## -----------------------------------------------------------------------------
-## Assign status of the search
+## Check for the library
 
-IF(HDF5_INCLUDE_DIR AND HDF5_LIBRARY)
-  SET(HDF5_FOUND 1 CACHE BOOL "Found hdf5 library")
-ELSE(HDF5_INCLUDE_DIR AND HDF5_LIBRARY)
-  SET(HDF5_FOUND 0 CACHE BOOL "Not fount hdf5 library")
-ENDIF(HDF5_INCLUDE_DIR AND HDF5_LIBRARY)
+find_library (HDF5_LIBRARIES hdf5
+  PATHS /usr/local/lib /usr/lib /lib /sw/lib
+  )
 
 ## -----------------------------------------------------------------------------
-## Feedback
+## Actions taken when all components have been found
 
-IF (HDF5_FOUND)
-  IF (NOT HDF5_FIND_QUIETLY)
-    MESSAGE (STATUS "Found components for HDF5")
-    MESSAGE (STATUS "HDF5 library : ${HDF5_LIBRARY}")
-    MESSAGE (STATUS "HDF5 headers : ${HDF5_INCLUDE_DIR}")
-  ENDIF (NOT HDF5_FIND_QUIETLY)
-ELSE (HDF5_FOUND)
-  IF (HDF5_FIND_REQUIRED)
-    MESSAGE (FATAL_ERROR "Could not find HDF5!")
-  ENDIF (HDF5_FIND_REQUIRED)
-ENDIF (HDF5_FOUND)
+if (HDF5_INCLUDES AND HDF5_LIBRARIES)
+  set (HAVE_HDF5 TRUE)
+else (HDF5_INCLUDES AND HDF5_LIBRARIES)
+  if (NOT HDF5_FIND_QUIETLY)
+    if (NOT HDF5_INCLUDES)
+      message (STATUS "Unable to find HDF5 header files!")
+    endif (NOT HDF5_INCLUDES)
+    if (NOT HDF5_LIBRARIES)
+      message (STATUS "Unable to find HDF5 library files!")
+    endif (NOT HDF5_LIBRARIES)
+  endif (NOT HDF5_FIND_QUIETLY)
+endif (HDF5_INCLUDES AND HDF5_LIBRARIES)
 
-## -----------------------------------------------------------------------------
-## Variables marked as advanced
+if (HAVE_HDF5)
+  if (NOT HDF5_FIND_QUIETLY)
+    message (STATUS "Found components for HDF5")
+    message (STATUS "HDF5_INCLUDES = ${HDF5_INCLUDES}")
+    message (STATUS "HDF5_LIBRARIES     = ${HDF5_LIBRARIES}")
+  endif (NOT HDF5_FIND_QUIETLY)
+else (HAVE_HDF5)
+  if (HDF5_FIND_REQUIRED)
+    message (FATAL_ERROR "Could not find HDF5!")
+  endif (HDF5_FIND_REQUIRED)
+endif (HAVE_HDF5)
 
-MARK_AS_ADVANCED(
-  HDF5_INCLUDE_DIR 
-  HDF5_LIBRARY 
-  HDF5_FOUND
-)
+mark_as_advanced (
+  HAVE_HDF5
+  HDF5_LIBRARIES
+  HDF5_INCLUDES
+  )
