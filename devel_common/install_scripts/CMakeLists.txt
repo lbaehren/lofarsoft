@@ -18,6 +18,7 @@ set (inc_locations
 	/opt/include
 	/opt/local/include
 	/sw/include
+	/Developer/SDKs/MacOSX10.4u.sdk/usr/include
 )
 
 set (lib_locations
@@ -26,11 +27,14 @@ set (lib_locations
 	/usr/local/lib
 	/opt/lib
 	/opt/local/lib
-	/Developer/SDKs/MacOSX10.4u.sdk/usr/lib
 	/sw/lib
+	/Developer/SDKs/MacOSX10.4u.sdk/usr/lib
+	/Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks
 )
 
 ## CFITSIO -----------------------------------------------------------
+
+message (STATUS "Checking for CFITSIO...")
 
 find_path (CFITSIOINCD fitsio.h ${inc_locations})
 find_library (libcfitsio cfitsio ${lib_locations})
@@ -40,6 +44,8 @@ file (APPEND makedefs "CFITSIOLIB  := ${libcfitsio}\n")
 file (APPEND makedefs "\n")
 
 ## FFTW3 -------------------------------------------------------------
+
+message (STATUS "Checking for FFTW...")
 
 find_path (FFTWINCD fftw.h fftw3.h PATHS ${inc_locations})
 find_library (libfftw fftw fftw3 PATHS ${lib_locations})
@@ -51,6 +57,8 @@ file (APPEND makedefs "\n")
 
 ## LAPACK ------------------------------------------------------------
 
+message (STATUS "Checking for LAPACK...")
+
 find_library (libblas blas PATHS ${lib_locations})
 find_library (libcblas cblas PATHS ${lib_locations})
 find_library (liblapack lapack PATHS ${lib_locations})
@@ -60,6 +68,8 @@ file (APPEND makedefs "\n")
 
 ## PGPLOT ------------------------------------------------------------
 
+message (STATUS "Checking for PGPLOT...")
+
 find_path (PGPLOTINCD cpgplot.h ${inc_locations} PATH_SUFFIXES pgplot)
 find_library (libpgplot pgplot ${lib_locations} PATH_SUFFIXES pgplot)
 
@@ -67,7 +77,29 @@ file (APPEND makedefs "PGPLOTINCD := ${PGPLOTINCD}\n")
 file (APPEND makedefs "PGPLOTLIB  := ${libpgplot}\n")
 file (APPEND makedefs "\n")
 
+## Python ------------------------------------------------------------
+
+message (STATUS "Checking for PYTHON...")
+
+find_path (PYTHONINCD 
+	NAMES Python.h
+	PATHS ${inc_locations}
+	PATH_SUFFIXES python2.5/config python2.4/config python2.3/config
+)
+
+find_library (libpython
+	NAMES python2.5 python2.4 python2.3
+	PATHS ${lib_locations}
+	PATH_SUFFIXES python2.5/config python2.4/config python2.3/config
+)
+
+file (APPEND makedefs "PYTHONINCD    := ${PYTHONINCD}\n")
+file (APPEND makedefs "PYTHONLIB     := ${libpython}\n")
+file (APPEND makedefs "\n")
+
 ## Tcl ---------------------------------------------------------------
+
+message (STATUS "Checking for TCL...")
 
 find_path (TCLINCD tcl.h PATHS ${inc_locations})
 find_library (libtcl tcl tcl8.4 tcl8.3 ${inc_locations})
@@ -78,6 +110,8 @@ file (APPEND makedefs "TCLLIB  := ${libtcl} ${libdl}\n")
 file (APPEND makedefs "\n")
 
 ## Tk ----------------------------------------------------------------
+
+message (STATUS "Checking for TK...")
 
 find_path (TKINCD tk.h PATHS ${inc_locations})
 find_library (libtk tk tk8.4 tk8.3 ${inc_locations})
