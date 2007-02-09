@@ -88,7 +88,7 @@ C-----------------------------------------------------------------------
 
       SUBROUTINE PGEX1
 C-----------------------------------------------------------------------
-C This example illustrates the use of PGENV, PGLAB, PGPT, PGLINE.
+C This example illustrates the use_of PGENV, PGLAB, PGPT, PGLINE.
 C-----------------------------------------------------------------------
       INTEGER I
       REAL XS(5),YS(5), XR(100), YR(100)
@@ -106,7 +106,7 @@ C number 9.
 C
       CALL PGPT(5,XS,YS,9)
 C
-C Compute the function at 60 points, and use PGLINE to draw it.
+C Compute the function at 60 points, and use_PGLINE to draw it.
 C
       DO 10 I=1,60
           XR(I) = 0.1*I
@@ -138,7 +138,7 @@ C-----------------------------------------------------------------------
 
       SUBROUTINE PGEX3
 C----------------------------------------------------------------------
-C This example illustrates the use of PGBOX and attribute routines to
+C This example illustrates the use_of PGBOX and attribute routines to
 C mix colors and line-styles.
 C----------------------------------------------------------------------
       REAL PI
@@ -281,7 +281,7 @@ C is 30 so both axes will be logarithmic. The X-axis (frequency) runs
 C from 0.01 to 100 GHz, the Y-axis (flux density) runs from 0.3 to 300
 C Jy. Note that it is necessary to specify the logarithms of these
 C quantities in the call to PGENV. We request equal scales in x and y
-C so that slopes will be correct.  Use PGLAB to label the graph.
+C so that slopes will be correct.  use_PGLAB to label the graph.
 C
       CALL PGSAVE
       CALL PGSCI(CYAN)
@@ -327,7 +327,7 @@ C-----------------------------------------------------------------------
       SUBROUTINE PGEX6
 C----------------------------------------------------------------------
 C Demonstration program for the PGPLOT plotting package.  This example
-C illustrates the use of PGPOLY, PGCIRC, and PGRECT using SOLID, 
+C illustrates the use_of PGPOLY, PGCIRC, and PGRECT using SOLID, 
 C OUTLINE, HATCHED, and CROSS-HATCHED fill-area attributes.
 C----------------------------------------------------------------------
       REAL PI, TWOPI
@@ -625,7 +625,7 @@ C
       CALL PGFUNX(PGBSJ1,500,0.0,10.0*PI,1)
 C
 C Call PGLAB to label the graph in a different color. Note the
-C use of "\f" to change font.  Use PGMTXT to write an additional
+C use_of "\f" to change font.  use_PGMTXT to write an additional
 C legend inside the viewport.
 C
       CALL PGSCI(GREEN)
@@ -768,7 +768,7 @@ C-----------------------------------------------------------------------
 
       SUBROUTINE PGEX13
 C----------------------------------------------------------------------
-C This example illustrates the use of PGTBOX.
+C This example illustrates the use_of PGTBOX.
 C----------------------------------------------------------------------
       INTEGER N
       PARAMETER (N=10)

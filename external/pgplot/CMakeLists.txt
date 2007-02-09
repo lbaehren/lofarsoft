@@ -16,6 +16,9 @@ find_package (ZLIB)
 include_directories (
   .
   ${pgplot_modules}
+  ${X11_INCLUDE_DIR}
+  ${TCL_INCLUDE_PATH}
+  ${TK_INCLUDE_PATH}
 )
 
 ## ------------------------------------------------------------------------------
@@ -50,4 +53,19 @@ add_library (pgplot
   ${pgplot_src_sources}
   ${pgplot_sys_sources}
   ${pgplot_drivers}
+  grexec.f
+  )
+target_link_libraries (pgplot
+	${JPEG_LIBRARIES}
+	${X11_LIBRARIES}
+  )
+
+## ------------------------------------------------------------------------------
+## Demo programs
+
+add_executable (pgdemo1 examples/pgdemo1.f)
+target_link_libraries (pgdemo1
+	pgplot
+	${JPEG_LIBRARIES}
+	${X11_LIBRARIES}
   )

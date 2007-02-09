@@ -69,6 +69,22 @@ cp drivers.list drivers.list.orig
 patch -p0 <../pgplot.patch
 
 ## ------------------------------------------------------------------------
+## Create build directory
+
+mkdir build
+cp drivers.list build
+
+cd build
+
+case $var_arch in
+  mac)
+    ../makemake   ..  freebsd
+  ;;
+esac
+
+exit
+
+## ------------------------------------------------------------------------
 ## Adjust the path to the Tcl/Tk library and include files
 
 cd $pgplot_src/sys_$var_arch
