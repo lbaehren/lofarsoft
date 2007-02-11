@@ -21,10 +21,6 @@ ENDIF (UNIX)
 find_file (bison_bin bison /usr/bin /usr/local/bin)
 find_file (flex_bin flex /usr/bin /usr/local/bin)
 
-message ("Required external software:")
-message (STATUS "Bison = ${bison_bin}")
-message (STATUS "Flex  = ${flex_bin}")
-
 ## -----------------------------------------------------------------------------
 ## Check for platform specific header files; in most cases we should be able to
 ## use the CMake build-in macro, but in a number of cases those will not yield

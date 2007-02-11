@@ -2,7 +2,7 @@
 PROJECT (casa_tables_libtables)
 
 ## -----------------------------------------------------------------------------
-## libtables
+## Collect the source files for the library and the template instantiation
 
 SET (tables_modules
   LogTables
@@ -10,10 +10,47 @@ SET (tables_modules
   Tables
   )
 
-## collect the source files in the modules
+## -----------------------------------------------------------------------------
+## Run flex and bison
+##
+##  FILES=`ls *.l | sed s/"\.l"//`
+##  for FILE in $FILES ; { flex -t -P$FILE $FILE.l > $FILE.lcc ; }
+##
+## FILES=`ls *.y | sed s/"\.y"//`
+## for FILE in $FILES ; { bison -p $FILE -o $FILE.ycc $FILE.y ; }
+
+if (flex_bin AND bison_bin)
+  foreach (tables_module ${tables_modules})
+    ## [1] get input files for Flex
+    FILE (GLOB flex_inputs ${tables_module}/*.l)
+    foreach (flex_input ${flex_inputs})
+      string (REGEX REPLACE "\\.l" ".lcc" flex_output ${flex_input})
+      execute_process (
+	COMMAND ${flex_bin} -t ${flex_input}
+	WORKING_DIRECTORY ${casa_tables_libtables}/tables_module
+	TIMEOUT 30
+	OUTPUT_FILE ${flex_output}
+	ERROR_VARIABLE flex_error
+	OUTPUT_QUIET
+	)
+      message ("${flex_input} -> ${flex_output}")
+    endforeach (flex_input)
+    ## [2] get input files for Bison
+    FILE (GLOB bison_inputs ${tables_module}/*.y)
+    foreach (bison_input ${bison_inputs})
+      string (REGEX REPLACE "\\.y" ".ycc" bison_output ${bison_input})
+      message ("${bison_input} -> ${bison_output}")
+    endforeach (bison_input)
+  endforeach (tables_module)
+endif (flex_bin AND bison_bin)
+
+## -----------------------------------------------------------------------------
+## build the library (libtables)
+
+## collect the source files for the library
 
 foreach (tables_module ${tables_modules})
-  FILE (GLOB tables_${tables_module} ${tables_module}/*.cc)
+  FILE (GLOB tables_${tables_module} ${tables_module}/*.cc  ${tables_module}/*.lcc)
   LIST(APPEND tables_sources ${tables_${tables_module}})
 endforeach (tables_module)
 
@@ -21,7 +58,7 @@ endforeach (tables_module)
 
 FILE (GLOB tables_templates ../../templates/tables/*.cc)
 
-## build the library
+## start building the library
 
 add_library (tables
   ${tables_LogTables}
