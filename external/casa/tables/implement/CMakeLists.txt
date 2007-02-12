@@ -21,19 +21,26 @@ SET (tables_modules
 
 if (flex_bin AND bison_bin)
   foreach (tables_module ${tables_modules})
+    message (STATUS "Parsing files in ${casa_tables_libtables_SOURCE_DIR}/${tables_module} ...")
     ## [1] get input files for Flex
     FILE (GLOB flex_inputs ${tables_module}/*.l)
     foreach (flex_input ${flex_inputs})
-      string (REGEX REPLACE "\\.l" ".lcc" flex_output ${flex_input})
-      execute_process (
-	COMMAND ${flex_bin} -t ${flex_input}
-	WORKING_DIRECTORY ${casa_tables_libtables}/tables_module
-	TIMEOUT 30
-	OUTPUT_FILE ${flex_output}
-	ERROR_VARIABLE flex_error
-	OUTPUT_QUIET
-	)
-      message ("${flex_input} -> ${flex_output}")
+      ## Make processing conditional, since files also could have been generated
+      ## manually; later option should be kept for providing an override machanism
+      if (NOT ${flex_input})
+	string (REGEX REPLACE "\\.l" ".lcc" flex_output ${flex_input})
+	execute_process (
+	  WORKING_DIRECTORY "${casa_tables_libtables_SOURCE_DIR}/${tables_module}"
+	  COMMAND "${flex_bin} --stdout ${flex_input} > ${flex_output}"
+	  TIMEOUT 30
+	  ERROR_VARIABLE flex_error
+	  OUTPUT_QUIET
+	  )
+	message ("${flex_input} -> ${flex_output}")
+	if (flex_error)
+	  message (FATAL_ERROR "flex failed!\n${flex_error}")
+	endif (flex_error)
+      endif (NOT ${flex_input})
     endforeach (flex_input)
     ## [2] get input files for Bison
     FILE (GLOB bison_inputs ${tables_module}/*.y)
