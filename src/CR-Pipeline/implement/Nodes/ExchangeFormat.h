@@ -26,12 +26,12 @@
 // AIPS++/CASA includes
 #include <casa/aips.h>
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
   
   /*!
     \class ExchangeFormat
     
-    \ingroup LopesBase
+    \ingroup Nodes
     
     \brief Description class for a data exchange format
     
@@ -227,6 +227,6 @@ class ExchangeFormat {
 
 };
 
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end
 
 #endif

@@ -24,7 +24,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: GenericL2Fit.h,v 19.13 2005/06/18 21:19:17 ddebonis Exp $
+//# $Id: GenericL2Fit.h,v 19.14 2006/12/12 23:17:37 gvandiep Exp $
 
 #ifndef SCIMATH_GENERICL2FIT_H
 #define SCIMATH_GENERICL2FIT_H
@@ -54,10 +54,8 @@ template <class T, class U> class Function;
 // </reviewed>
 //
 // <prerequisite>
-// <ol>
 //   <li> <linkto class="Function">Function</linkto> 
 //   <li> <linkto module="Fitting">Fitting</linkto>
-// </ol>
 // </prerequisite>
 //
 // <etymology>
@@ -147,12 +145,11 @@ template <class T, class U> class Function;
 // latter case the solution returned will be the fixed value.
 // 
 // <templating arg=T>
-// The following data types can be used to instantiate the GenericL2Fit 
-// templated class:
-// <li> Known classes for FunctionTraits. I.e simple numerical like
+// <li> The following data types can be used to instantiate the GenericL2Fit 
+//      templated class:
+//      Known classes for FunctionTraits. I.e simple numerical like
 //	<src>Float</src>, <src>Double</src>, <src>Complex</src>,
 //	 <src>DComplex</src>; and the <src>AutoDiff<></src> versions.
-// <li>  
 // </templating>
 //
 // If there are a large number of unknowns or a large number of data points
@@ -166,7 +163,7 @@ template <class T, class U> class Function;
 // the minimum angle allowed.
 //
 // Singular Value Decomposition is supported by the
-// <limkto class=GenericL2FitSVD>GenericL2FitSVD</linkto> class,
+// <linkto class=GenericL2FitSVD>GenericL2FitSVD</linkto> class,
 // which has a behaviour completely identical to this class (apart from a
 // default collinearity of 1e-8). 
 //
@@ -396,7 +393,7 @@ template<class T> class GenericL2Fit : public LSQaips {
   // Get the errors on the solved values
   // <thrown>
   //  <li> AipsError if none present (or Bool returned)
-  // </thrown)
+  // </thrown>
   // <group>
   const Vector<typename FunctionTraits<T>::BaseType> &errors() const;
   Bool errors(Vector<typename FunctionTraits<T>::BaseType> &err) const;

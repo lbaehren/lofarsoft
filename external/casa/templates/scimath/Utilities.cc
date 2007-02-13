@@ -1,3 +1,22 @@
+/***************************************************************************
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
 // include of header files 
 
@@ -8,16 +27,23 @@
 #include <casa/Containers/List.h>
 #include <casa/Containers/OrderedMap.h>
 #include <casa/Containers/OrderedPair.h>
+#include <casa/Containers/PoolStack.h>
+#include <casa/Utilities/Fallible.h>
 #include <scimath/Functionals/AbstractFunctionFactory.h>
 #include <scimath/Functionals/Function.h>
 #include <scimath/Functionals/Function1D.h>
 #include <scimath/Mathematics/AutoDiff.h>
 #include <scimath/Mathematics/AutoDiffA.h>
+#include <scimath/Mathematics/AutoDiffRep.h>
 #include <scimath/Mathematics/RigidVector.h>
 #include <scimath/Mathematics/SquareMatrix.h>
 
 // include of implementation files
 
+#include <casa/Containers/ObjectPool.cc>
+#include <casa/Containers/OrderedPair.cc>
+#include <casa/Containers/PoolStack.cc>
+#include <casa/Containers/SimOrdMap.cc>
 #include <casa/Utilities/CountedPtr.cc>
 #include <casa/Utilities/PtrHolder.cc>
 #include <casa/Utilities/Register.cc> 
@@ -157,5 +183,28 @@ namespace casa {
   template uInt Register(OrderedMapNotice<Double, SquareMatrix<Complex, 2>*> const *);
   template uInt Register(ListNotice<OrderedPair<String, OrderedPair<FunctionFactory<Double>*, Bool> > > const *);
   template uInt Register(ListNotice<OrderedPair<String, OrderedPair<FunctionFactory<Float>*, Bool> > > const *);
+
+  // ============================================================================
+  //
+  //  Additional templates for test programs
+  //
+  // ============================================================================
+
+  // 1000 casa/Containers/ObjectPool.cc
+  template class ObjectPool<AutoDiffRep<AutoDiff<Double> >, uInt>;
+
+  // 1000 casa/Containers/OrderedPair.cc
+  template <class T> class AutoDiffRep;
+  template class OrderedPair<uInt, PoolStack<AutoDiffRep<AutoDiff<Double> >, uInt> *>;
+
+  // 1000 casa/Containers/PoolStack.cc
+  template class PoolStack<AutoDiffRep<AutoDiff<Double> >, uInt>;
+
+  // 1000 casa/Containers/SimOrdMap.cc
+  template <class T> class AutoDiffRep;
+  template class SimpleOrderedMap<uInt, PoolStack<AutoDiffRep<AutoDiff<Double> >, uInt>*>;
+
+  // 1000 casa/Utilities/Fallible.h 
+  template class Fallible<Float>;
 
 }

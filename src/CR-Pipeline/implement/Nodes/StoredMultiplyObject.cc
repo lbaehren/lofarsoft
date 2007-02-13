@@ -20,7 +20,7 @@
 
 /* $Id: StoredMultiplyObject.cc,v 1.4 2005/12/09 01:31:43 bahren Exp $*/
 
-#include <LopesBase/StoredMultiplyObject.h>
+#include <Nodes/StoredMultiplyObject.h>
 
 using std::cerr;
 using std::cout;
@@ -31,7 +31,7 @@ using casa::Complex;
 using casa::DComplex;
 using casa::Vector;
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
   
   // --- Construction ------------------------------------------------------------
   
@@ -177,4 +177,4 @@ namespace LOPES {  // Namespace LOPES -- begin
   template StoredMultiplyObject<Complex>;
   template StoredMultiplyObject<DComplex>;
   
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end

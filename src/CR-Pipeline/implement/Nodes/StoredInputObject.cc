@@ -20,7 +20,7 @@
 
 /* $Id: StoredInputObject.cc,v 1.2 2005/07/27 15:33:06 horneff Exp $*/
 
-#include <LopesBase/StoredInputObject.h>
+#include <Nodes/StoredInputObject.h>
 
 using std::cerr;
 using std::cout;
@@ -30,7 +30,7 @@ using casa::AipsError;
 using casa::Complex;
 using casa::DComplex;
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
   
   // --- Construction ------------------------------------------------------------
   
@@ -87,4 +87,4 @@ namespace LOPES {  // Namespace LOPES -- begin
   template StoredInputObject<Complex>;
   template StoredInputObject<DComplex>;
   
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end

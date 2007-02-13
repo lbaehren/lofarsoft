@@ -1,5 +1,7 @@
 project (pgplot C Fortran)
 
+subdirs (build)
+
 set (pgplot_modules
   src
   sys
@@ -30,66 +32,6 @@ message (STATUS "PNG includes : ${PNG_INCLUDE_DIR}")
 message (STATUS "TCL inlcudes : ${TCL_INCLUDE_PATH}")
 message (STATUS "TK  inlcudes : ${TK_INCLUDE_PATH}")
 message (STATUS "X11 includes : ${X11_INCLUDE_DIR}")
-
-## ------------------------------------------------------------------------------
-## Create the drivers list
-##
-## In order to adhere to the basic installation instruction the list of selected
-## drivers is created inside a separate directory, "./build", in which also the 
-## later build will be carried out.
-
-set (drivers "build/drivers.list")
-
-FILE (MAKE_DIRECTORY "build")
-
-file (WRITE ${drivers} "! List of selected drivers\n\n")
-
-## GIF file format
-
-file (APPEND ${drivers} " GIDRIV 1 /GIF      GIF-format file, landscape\n")
-file (APPEND ${drivers} " GIDRIV 2 /VGIF     GIF-format file, portrait\n")
-
-## Null device
-
-file (APPEND ${drivers} " NUDRIV 0 /NULL     Null device	 Std F77\n")
-
-## PGPLOT metafile
-
-file (APPEND ${drivers} " PGDRIV 0 /PGMF     PGPLOT metafile  Std F77\n")
-
-## PNG (Portable Network Graphics) -- optional
-
-if (PNG_LIBRARIES)
-  file (APPEND ${drivers} " PNDRIV 1 /PNG      Portable Network Graphics file                    C\n")
-  file (APPEND ${drivers} " PNDRIV 2 /TPNG     Portable Network Graphics file - transparent background C\n")
-endif (PNG_LIBRARIES)
-
-## Postscript file formats
-
-file (APPEND ${drivers} " PSDRIV 1 /PS       PostScript printers, monochrome, landscape	Std F77\n")
-file (APPEND ${drivers} " PSDRIV 2 /VPS      Postscript printers, monochrome, portrait		Std F77\n")
-file (APPEND ${drivers} " PSDRIV 3 /CPS      PostScript printers, color, landscape		Std F77\n")
-file (APPEND ${drivers} " PSDRIV 4 /VCPS     PostScript printers, color, portrait		Std F77\n")
-
-## Tcl/Tk
-
-if (TCL_LIBRARY AND TK_LIBRARY)
- file (APPEND ${drivers} " TKDRIV 0 /XTK      X-window Tcl/Tk programs with pgplot widgets.     C\n")
-endif (TCL_LIBRARY AND TK_LIBRARY)
-
-## X-Windows
-
-file (APPEND ${drivers} " WDDRIV 1 /WD       X Window dump file, landscape\n")
-file (APPEND ${drivers} " WDDRIV 2 /VWD      X Window dump file, portrait\n")
-file (APPEND ${drivers} " XWDRIV 1 /XWINDOW  Workstations running X Window System		C\n")
-file (APPEND ${drivers} " XWDRIV 2 /XSERVE   Persistent window on X Window System		C\n")
-
-## XMOTIF driver
-
-file (APPEND ${drivers} " XMDRIV 0 /XMOTIF   Motif applications containing XmPgplot widgets.   C\n")
-
-## ------------------------------------------------------------------------------
-## Configure the build system
 
 ## ------------------------------------------------------------------------------
 ## Start building the library

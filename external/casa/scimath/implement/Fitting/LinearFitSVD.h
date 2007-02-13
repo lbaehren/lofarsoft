@@ -24,7 +24,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LinearFitSVD.h,v 19.8 2005/06/18 21:19:17 ddebonis Exp $
+//# $Id: LinearFitSVD.h,v 19.9 2006/12/12 23:17:37 gvandiep Exp $
 
 #ifndef SCIMATH_LINEARFITSVD_H
 #define SCIMATH_LINEARFITSVD_H
@@ -43,10 +43,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // </reviewed>
 //
 // <prerequisite>
-// <ol>
 //   <li> <linkto class="LinearFit">LinearFit</linkto>
 //   <li> <linkto module="Fitting">Fitting</linkto>
-// </ol>
 // </prerequisite>
 //
 // <etymology>

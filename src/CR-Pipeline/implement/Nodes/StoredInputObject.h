@@ -23,16 +23,16 @@
 #ifndef STOREDINPUTOBJECT_H
 #define STOREDINPUTOBJECT_H
 
-#include <LopesBase/StoredObject.h>
+#include <Nodes/StoredObject.h>
 
 using casa::Vector;
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
   
   /*!
     \class StoredInputObject
     
-    \ingroup LopesBase
+    \ingroup Nodes
     
     \brief Brief description for class StoredInputObject
     
@@ -79,6 +79,6 @@ namespace LOPES {  // Namespace LOPES -- begin
     
   };
   
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end
 
 #endif

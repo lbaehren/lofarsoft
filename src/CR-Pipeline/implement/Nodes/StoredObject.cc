@@ -20,12 +20,12 @@
 
 /* $Id: StoredObject.cc,v 1.8 2005/07/27 15:29:36 horneff Exp $*/
 
-#include <LopesBase/StoredObject.h>
+#include <Nodes/StoredObject.h>
 
 using std::cerr;
 using std::endl;
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
   
   // --- Construction ------------------------------------------------------------
   
@@ -84,4 +84,4 @@ namespace LOPES {  // Namespace LOPES -- begin
   template StoredObject<Complex>;
   template StoredObject<DComplex>;
 
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end

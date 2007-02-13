@@ -23,7 +23,7 @@
 using std::endl;
 using std::ostream;
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
   
   // ============================================================================
   //
@@ -160,4 +160,4 @@ void TIM40::show (ostream& os)
      << bandwidth_p << endl;
 }
 
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LSQFit.h,v 1.18 2006/10/27 13:31:20 wbrouw Exp $
+//# $Id: LSQFit.h,v 1.19 2006/12/22 02:59:04 gvandiep Exp $
 
 #ifndef SCIMATH_LSQFIT_H
 #define SCIMATH_LSQFIT_H
@@ -205,7 +205,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // checked for usage of LSQFit.
 // </note>
 //
-// The contents can be saved in a record (<src>toRecord<src>), 
+// The contents can be saved in a record (<src>toRecord</src>), 
 // and an object can be created from a record (<src>fromRecord</src>).
 // The record identifier is 'lfit'.
 // <br>The object can also be saved or restored using AipsIO.

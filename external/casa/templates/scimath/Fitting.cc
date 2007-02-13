@@ -40,8 +40,8 @@ namespace casa {
   template class Vector<Double>;
 
   // scimath/Fitting/FitGaussian.cc 
-  template class FitGaussian<Float>;
-  template class FitGaussian<Double>;
+//   template class FitGaussian<Float>;
+//   template class FitGaussian<Double>;
 //   template Matrix<Float> FitGaussian<Float>::fit (const Matrix<Float>&, const Vector<Float>&, const Vector<Float>&, Float, uInt, Float);
 
   // scimath/Fitting/GenericL2Fit.cc 
@@ -312,8 +312,10 @@ template Bool LSQFit::addConstraint<Float, ItComplex, ItuInt>(uInt nIndex, ItuIn
 
   // ============================================================================
   //
-  //  test/templates
+  //  Additional templates for test programs
   //
   // ============================================================================
+
+  template AutoDiff<double> sqrt<double>(AutoDiff<double> const&);
 
 }

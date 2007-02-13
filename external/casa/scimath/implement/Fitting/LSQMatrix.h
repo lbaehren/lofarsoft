@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LSQMatrix.h,v 1.12 2006/10/27 13:03:49 wbrouw Exp $
+//# $Id: LSQMatrix.h,v 1.13 2006/12/22 02:59:04 gvandiep Exp $
 
 #ifndef SCIMATH_LSQMATRIX_H
 #define SCIMATH_LSQMATRIX_H
@@ -63,7 +63,7 @@ class AipsIO;
 // The class contains a number of public methods (with _pub in name) that
 // can be used anywhere, and which perform index range checking.
 //
-// The contents can be saved in a record (<src>toRecord<src>), 
+// The contents can be saved in a record (<src>toRecord</src>), 
 // and an object can be created from a record (<src>fromRecord</src>).
 // The record identifier is 'tmat'.
 // </synopsis>

@@ -26,7 +26,7 @@
 #include <casa/aips.h>
 #include <casa/iostream.h>
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
   
   /*!
     \class TIM40
@@ -145,6 +145,6 @@ namespace LOPES {  // Namespace LOPES -- begin
     
   };
   
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end
 
 #endif

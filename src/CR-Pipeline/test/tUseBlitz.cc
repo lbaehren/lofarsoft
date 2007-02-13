@@ -105,7 +105,7 @@ int test_mathematics ()
     result = a/b;
 
     result = sqrt(a);
-    result = abs(b);
+    result = fabs(b);
 
     // triangular functions
     result = sin(a);
@@ -130,7 +130,7 @@ int test_mathematics ()
       result = arr(n)/arr(n);
       
       result = sqrt(arr(n));
-      result = abs(arr(n));
+      result = fabs(arr(n));
       
       result = sin(arr(n));
       result = cos(arr(n));

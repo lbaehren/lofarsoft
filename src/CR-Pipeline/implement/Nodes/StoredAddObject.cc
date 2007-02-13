@@ -20,7 +20,7 @@
 
 /* $Id: StoredAddObject.cc,v 1.1 2005/07/27 16:12:18 horneff Exp $*/
 
-#include <LopesBase/StoredAddObject.h>
+#include <Nodes/StoredAddObject.h>
 
 using std::cerr;
 using std::cout;
@@ -31,7 +31,7 @@ using casa::Complex;
 using casa::DComplex;
 using casa::Vector;
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
   
   // --- Construction ------------------------------------------------------------
   
@@ -177,5 +177,5 @@ namespace LOPES {  // Namespace LOPES -- begin
   template StoredAddObject<Complex>;
   template StoredAddObject<DComplex>;
   
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end
   

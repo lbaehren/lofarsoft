@@ -28,9 +28,9 @@
 #include <casa/string.h>
 #include <casa/Arrays.h>
 
-// LOPES-Tools includes
-#include <LopesBase/BasicHeader.h>
-#include <LopesBase/BasicObject.h>
+// CR-Pipeline includes
+#include <Nodes/BasicHeader.h>
+#include <Nodes/BasicObject.h>
 
 using casa::AipsError;
 using casa::Complex;
@@ -38,12 +38,12 @@ using casa::DComplex;
 using casa::String;
 using casa::Vector;
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
 
 /*!
   \class StoredObject
   
-  \ingroup LopesBase
+  \ingroup Nodes
 
   \brief Mother class for onjects that store their data localy
 
@@ -111,6 +111,6 @@ template <class T> class StoredObject : public BasicObject {
     
   };
   
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end
 
 #endif

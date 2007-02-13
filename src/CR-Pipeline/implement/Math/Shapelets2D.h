@@ -25,7 +25,7 @@
 
 #include <Math/Shapelets1D.h>
 
-using std::vector;
+using blitz::Array;
 
 namespace CR {  // Namespace CR -- BEGIN
   
@@ -102,15 +102,15 @@ namespace CR {  // Namespace CR -- BEGIN
     ~Shapelets2D ();
     
     // === Function evaluation =========================================
-
+    
     /*!
       \brief Evaluate a two-dimensional Shapelet function.
-
+      
       \param lm -- This is a shorthand for l=m
       \param xy -- This is a shorthand for x=y
-
+      
       \return 
-     */
+    */
     inline double fx (int const &lm,
 		      double const &xy)
       {
@@ -149,7 +149,7 @@ namespace CR {  // Namespace CR -- BEGIN
       
       \param l --
     */
-    double integral (vector<int> const &l);
+    double integral (Array<int,1> const &l);
     
   };
   

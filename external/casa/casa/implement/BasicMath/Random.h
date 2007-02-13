@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Random.h,v 19.7 2004/11/30 17:50:14 ddebonis Exp $
+//# $Id: Random.h,v 19.8 2006/11/24 04:07:49 gvandiep Exp $
 
 #ifndef CASA_RANDOM_H
 #define CASA_RANDOM_H
@@ -415,7 +415,7 @@ inline void MLCG::reseed(Int s1, Int s2)
 // </example>
 //
 // <thrown>
-// No exceptions are thrown directly from this class.
+//   <li> No exceptions are thrown directly from this class.
 // </thrown>
 //
 // <todo asof="2000/05/09">

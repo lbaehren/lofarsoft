@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Math.h,v 19.8 2004/11/30 17:50:14 ddebonis Exp $
+//# $Id: Math.h,v 19.9 2006/11/24 01:26:52 gvandiep Exp $
 
 #ifndef CASA_MATH_H
 #define CASA_MATH_H
@@ -130,6 +130,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // a definition of the following functions.
 // <srcblock>
 // Int abs(Int x)             absolute value function
+// </srcblock>
 // </synopsis>
 
 // <group name="Math.h interface for AIPS++">

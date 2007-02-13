@@ -20,9 +20,9 @@
 
 /* $Id: ExchangeFormat.cc,v 1.1 2005/07/22 10:02:31 sven Exp $*/
 
-#include <LopesBase/ExchangeFormat.h>
+#include <Nodes/ExchangeFormat.h>
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
   
   // --- Construction ------------------------------------------------------------
   
@@ -60,4 +60,4 @@ namespace LOPES {  // Namespace LOPES -- begin
     return format_p == f.format_p;
   }
   
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end

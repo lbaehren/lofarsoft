@@ -23,14 +23,14 @@
 #ifndef _STOREDMULTIPLYOBJECT_H_
 #define _STOREDMULTIPLYOBJECT_H_
 
-#include <LopesBase/StoredObject.h>
+#include <Nodes/StoredObject.h>
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
   
   /*!
     \class StoredMultiplyObject
     
-    \ingroup LopesBase
+    \ingroup Nodes
     
     \brief Class for objectes that multiply data from two (or more) parents and stores them
     
@@ -89,6 +89,6 @@ namespace LOPES {  // Namespace LOPES -- begin
     
   };
   
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end
 
 #endif

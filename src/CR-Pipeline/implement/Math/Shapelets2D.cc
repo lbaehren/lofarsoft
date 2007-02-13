@@ -27,58 +27,62 @@
 #include <Math/Shapelets2D.h>
 
 namespace CR {  // Namespace CR -- BEGIN
-
-// =============================================================================
-//
-// Construction / Deconstruction
-//
-// =============================================================================
-
-Shapelets2D::Shapelets2D ()
-  : Shapelets1D ()
-{}
-
-Shapelets2D::Shapelets2D (int const &order)
-  : Shapelets1D (order)
-{}
-
-Shapelets2D::Shapelets2D (int const &order, 
-			  double const &beta)
-  : Shapelets1D (order,beta)
-{}
-
-Shapelets2D::~Shapelets2D () {}
-
-
-// =============================================================================
-//
-//  Function evaluation
-//
-// =============================================================================
-
-double Shapelets2D::fx (int const &l, 
-			double const &x,
-			int const &m,
-			double const &y) 
-{  
-  return Shapelets1D::fx(l,x)*Shapelets1D::fx(m,y);
-}
-
-// =============================================================================
-//
-//  Global function properties
-//
-// =============================================================================
-
-double Shapelets2D::integral (int const &l,
-			      int const &m)
-{
-  return Shapelets1D::integral(l)*Shapelets1D::integral(m);
-}
-
-double Shapelets2D::integral (vector<int> const &l)
-{
-  return Shapelets1D::integral(l[0])*Shapelets1D::integral(l[1]);
-}
-
+  
+  // =============================================================================
+  //
+  // Construction / Deconstruction
+  //
+  // =============================================================================
+  
+  Shapelets2D::Shapelets2D ()
+    : Shapelets1D ()
+  {}
+  
+  Shapelets2D::Shapelets2D (int const &order)
+    : Shapelets1D (order)
+  {}
+  
+  Shapelets2D::Shapelets2D (int const &order, 
+			    double const &beta)
+    : Shapelets1D (order,beta)
+  {}
+  
+  Shapelets2D::~Shapelets2D () {}
+  
+  
+  // =============================================================================
+  //
+  //  Function evaluation
+  //
+  // =============================================================================
+  
+  double Shapelets2D::fx (int const &l, 
+			  double const &x,
+			  int const &m,
+			  double const &y) 
+  {  
+    return Shapelets1D::fx(l,x)*Shapelets1D::fx(m,y);
+  }
+  
+  // =============================================================================
+  //
+  //  Global function properties
+  //
+  // =============================================================================
+  
+  double Shapelets2D::integral (int const &l,
+				int const &m)
+  {
+    return Shapelets1D::integral(l)*Shapelets1D::integral(m);
+  }
+  
+  double Shapelets2D::integral (Array<int,1> const &l)
+  {
+    if (l.numElements() == 2) {
+      return Shapelets1D::integral(l(0))*Shapelets1D::integral(l(1));
+    } else {
+      return 0.0;
+    }
+  }
+  
 }  // Namespace CR -- END

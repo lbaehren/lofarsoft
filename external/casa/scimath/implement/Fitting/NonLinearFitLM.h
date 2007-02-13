@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: NonLinearFitLM.h,v 19.10 2006/09/10 23:31:31 gvandiep Exp $
+//# $Id: NonLinearFitLM.h,v 19.11 2006/12/12 23:17:37 gvandiep Exp $
 
 #ifndef SCIMATH_NONLINEARFITLM_H
 #define SCIMATH_NONLINEARFITLM_H
@@ -45,10 +45,8 @@ namespace casa { //# begin namespace casa
 // </reviewed>
 //
 // <prerequisite>
-// <ol>
 //   <li> <linkto class="NonLinearFit">NonLinearFit</linkto>
 //   <li> <linkto module="Fitting">Fitting</linkto>
-// </ol>
 // </prerequisite>
 //
 // <etymology>
@@ -68,16 +66,14 @@ namespace casa { //# begin namespace casa
 //
 // See Numerical Recipes for more information
 // on the Levenberg-Marquardt method.
+// </synopsis>
 // 
 // <templating arg=T>
-// The following data types can be used to instantiate the NonLinearFit 
-// templated class:
 // <li> Float
 // <li> Double
 // <li> Complex
 // <li> DComplex   
 // </templating>
-// </synopsis>
 //
 // <motivation>
 // Levenberg-Marquardt method is a standard method for non-linear

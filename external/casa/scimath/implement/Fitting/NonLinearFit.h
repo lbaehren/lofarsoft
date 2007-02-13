@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: NonLinearFit.h,v 19.10 2006/09/10 23:31:31 gvandiep Exp $
+//# $Id: NonLinearFit.h,v 19.11 2006/12/12 23:17:37 gvandiep Exp $
 
 #ifndef SCIMATH_NONLINEARFIT_H
 #define SCIMATH_NONLINEARFIT_H
@@ -42,11 +42,9 @@ namespace casa { //# begin namesapce casa
 // </reviewed>
 //
 // <prerequisite>
-// <ol>
 //   <li> <linkto class="Functional">Functional</linkto> 
 //   <li> <linkto class="Function">Function</linkto> 
 //   <li> <linkto module="Fitting">Fitting</linkto>
-// </ol>
 // </prerequisite>
 //
 // <etymology>
@@ -120,8 +118,6 @@ namespace casa { //# begin namesapce casa
 // latter case the solution returned will be the fixed value.
 // 
 // <templating arg=T>
-// The following data types can be used to instantiate the NonLinearFit 
-// templated class:
 // <li> Float
 // <li> Double
 // <li> Complex
