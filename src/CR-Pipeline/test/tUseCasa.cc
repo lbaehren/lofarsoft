@@ -26,6 +26,8 @@
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
 
+#include <templates.h>
+
 /*!
   \file tUseCasa.cc
 

@@ -40,6 +40,8 @@
 #include <lattices/Lattices/LCBox.h>
 #include <lattices/Lattices/LCEllipsoid.h>
 
+#include <templates.h>
+
 /*!
   \file tUseLattices.cc
 

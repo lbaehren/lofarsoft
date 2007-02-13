@@ -7,6 +7,7 @@ set (cr_modules
   Detection
   Imaging
   Math
+  Nodes
   )
 
 subdirs (${cr_modules})
@@ -15,6 +16,7 @@ include_directories (
   .
   ..
   ${CR_SOURCE_DIR}/include
+  ${BLITZ_INCLUDES}
   )
 
 ## -----------------------------------------------------------------------------

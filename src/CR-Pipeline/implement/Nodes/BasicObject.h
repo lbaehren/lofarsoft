@@ -29,20 +29,20 @@
 #include <casa/string.h>
 #include <casa/Arrays.h>
 
-// LOPES-Tools includes
-#include <LopesBase/BasicHeader.h>
-#include <LopesBase/ExchangeFormat.h>
+// custom header files
+#include <Nodes/BasicHeader.h>
+#include <Nodes/ExchangeFormat.h>
 
 using casa::AipsError;
 using casa::String;
 using casa::Vector;
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
   
   /*!
     \class BasicObject
     
-    \ingroup LopesBase
+    \ingroup Nodes
     
     \brief Base class for objects in a LOPES-Tools processing tree
     
@@ -237,7 +237,7 @@ namespace LOPES {  // Namespace LOPES -- begin
     Vector<String> listParents();
   };
 
-}   // Namespace LOPES -- end
+}   // Namespace CR -- end
   
 #endif
   

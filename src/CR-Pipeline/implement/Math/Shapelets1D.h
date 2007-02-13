@@ -101,8 +101,8 @@ namespace CR {  // Namespace CR -- BEGIN
   </ol>
 */
 
-class Shapelets1D : public Hermite1D {
-
+  class Shapelets1D : public Hermite1D {
+    
   // Order of the Hermite Polynomial
   int order_p;
 

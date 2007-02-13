@@ -310,7 +310,7 @@ namespace CR { // Namespace CR -- begin
 	if (ipiv(j) != 1) {
 	  for (k = 0; k < n; k ++) {
 	    if (ipiv(k) == 0) {
-	      if (fabs(a(j,k)) >= big) {
+	      if (abs(a(j,k)) >= big) {
 		big  = fabs(a(j,k));
 		irow = j;
 		icol = k;

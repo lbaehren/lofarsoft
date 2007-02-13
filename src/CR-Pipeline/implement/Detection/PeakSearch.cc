@@ -21,6 +21,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <cmath>
 #include <Detection/PeakSearch.h>
 #include <Detection/SourceFit.h>
 
@@ -97,7 +98,7 @@ namespace CR { // Namespace CR -- begin
   }
   
   PeakList PeakSearch::findPeaks(Data* d) {
-    if (d->length() < (uint)(1 << blocksize_) + abs(delay_)) {
+    if (d->length() < (uint)(1 << blocksize_) + abs((double)delay_)) {
       cerr << "  ERROR: Dataset contains too little samples to run findPeaks algorithm." << endl;
       return PeakList();
     }
@@ -120,7 +121,7 @@ namespace CR { // Namespace CR -- begin
 	  sdv += (abs(d->data(j))-avg)*(abs(d->data(j))-avg);
 	}
 	sdv >>= blocksize_;
-	sdv = (uint)sqrt((double)sdv);
+	sdv = (uint)std::sqrt((double)sdv);
 	k = 0;
 	limit = avg + threshold_*sdv;
       }

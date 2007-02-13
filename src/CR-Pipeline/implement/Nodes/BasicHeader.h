@@ -28,12 +28,12 @@
 
 using casa::Record;
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
   
   /*!
     \class BasicHeader
     
-    \ingroup LopesBase
+    \ingroup Nodes
     
     \brief Basic header information for a LOPES-Tools object
     
@@ -116,7 +116,7 @@ namespace LOPES {  // Namespace LOPES -- begin
     
   };
   
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end
 
 #endif
   

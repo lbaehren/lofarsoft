@@ -20,9 +20,9 @@
 
 /* $Id: BasicHeader.cc,v 1.1 2005/07/20 12:23:19 bahren Exp $*/
 
-#include <LopesBase/BasicHeader.h>
+#include <Nodes/BasicHeader.h>
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
   
 // --- Construction ------------------------------------------------------------
 
@@ -36,4 +36,4 @@ BasicHeader::~BasicHeader ()
 
 // --- Parameters --------------------------------------------------------------
 
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end

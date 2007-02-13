@@ -178,9 +178,11 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Set the threshold
       
-      This function sets the threshold of the PeakSearch object to <b><em>th</em></b>. Some
-      `sanity checks' are performed.
-      \param th    The threshold (in sigma above average) over which a peak is reported.
+      This function sets the threshold of the PeakSearch object to
+      <b><em>th</em></b>. Some `sanity checks' are performed.
+
+      \param th -- The threshold (in sigma above average) over which a peak is
+                   reported.
     */
     uint& threshold(uint th);
     
@@ -188,8 +190,9 @@ namespace CR { // Namespace CR -- begin
       \brief Set the delay
       
       This function sets the delay of the PeakSearch object to <b><em>dl</em></b>.
-      \param dl    The delay (in samples) between the last sample over which the average
-      was calculated and the sample being considered.
+
+      \param dl -- The delay (in samples) between the last sample over which the
+                   average was calculated and the sample being considered.
     */
     int&  delay(int dl);
   
@@ -226,10 +229,11 @@ namespace CR { // Namespace CR -- begin
     This function sets parameters according to those supplied to the function and then
     finds the actual peaks in a dataset <b><em>d</em></b> and returns
     an object containing information about the peaks.
-    \param *d     Pointer to the dataset to be analysed.
-    \param bs     Value of the <b><em>blocksize</em></b> to be used in the analysis.
-    \param th     Value of the <b><em>threshold</em></b> to be used in the analysis.
-    \param dl     Value of the <b><em>delay</em></b> to be used in the analysis.
+
+    \param *d -- Pointer to the dataset to be analysed.
+    \param bs -- Value of the <b><em>blocksize</em></b> to be used in the analysis.
+    \param th -- Value of the <b><em>threshold</em></b> to be used in the analysis.
+    \param dl -- Value of the <b><em>delay</em></b> to be used in the analysis.
   */
   PeakList findPeaks(Data* d,
 		     uint bs,

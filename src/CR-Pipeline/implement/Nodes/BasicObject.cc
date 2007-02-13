@@ -21,12 +21,12 @@
  ***************************************************************************/
 /* $Id: BasicObject.cc,v 1.13 2006/07/05 12:59:12 bahren Exp $*/
 
-#include <LopesBase/BasicObject.h>
+#include <Nodes/BasicObject.h>
 
 using std::cerr;
 using std::endl;
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
   
   // ---------------------------------------------------------------- BasicObject
   
@@ -136,7 +136,7 @@ namespace LOPES {  // Namespace LOPES -- begin
     return erg;
   }
 
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end
 
 // Assorted junk below
 

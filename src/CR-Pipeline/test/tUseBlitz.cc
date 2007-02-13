@@ -40,12 +40,14 @@ using blitz::Range;
 */
 
 /*!
-  \brief main routine
-  
+  \brief Test construction of Blitz arrays
+
   \return nofFailedTests -- The number of failed tests
 */
-int main () 
+int test_arrays ()
 {
+  std::cout << "\n[test_arrays()]\n" << std::endl;
+
   int nofFailedTests (0);
 
   std::cout << "[1] Create 1-dimensional arrays..." <<std::endl;
@@ -54,6 +56,7 @@ int main ()
     Array<int,1> arrInt (nelem);
     Array<float,1> arrFloat (nelem);
     Array<double,1> arrDouble (nelem);
+    Array<std::complex<double>,1> arrComplex (nelem);
     
     std::cout << arrInt    << std::endl;
     std::cout << arrFloat  << std::endl;
@@ -75,6 +78,68 @@ int main ()
     std::cerr << message << std::endl;
   }
   
+  return nofFailedTests;
+}
+
+/*!
+  \brief Test usage of mathematical functions and operations
+
+  \return nofFailedTests -- The number of failed tests
+*/
+int test_mathematics ()
+{
+  std::cout << "\n[test_mathematics()]\n" << std::endl;
+
+  int nofFailedTests (0);
+
+  std::cout << "[1] Mathematical operations on individual numbers..." <<std::endl;
+  try {
+    double a (+1.0);
+    double b (-2.0);
+    std::complex<double> c (0.5,4.0);
+    double result (0.0);
+
+    result = a+b;
+    result = a-b;
+    result = a*b;
+    result = a/b;
+
+    result = sqrt(a);
+    result = abs(b);
+
+    // triangular functions
+    result = sin(a);
+    result = cos(b);
+    
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+  }
+  
+  std::cout << "[2] Mathematical operations on array alements..." <<std::endl;
+  try {
+    int nelem (20);
+    Array<double,1> arr (nelem);
+    double result (0.0);
+
+    arr = 2.5;
+
+    for (int n(0); n<nelem; n++) {
+      result = arr(n)+arr(n);
+      result = arr(n)-arr(n);
+      result = arr(n)*arr(n);
+      result = arr(n)/arr(n);
+      
+      result = sqrt(arr(n));
+      result = abs(arr(n));
+      
+      result = sin(arr(n));
+      result = cos(arr(n));
+    }
+    
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+  }
+  
   std::cout << "[3] Mathematical operations on arrays..." <<std::endl;
   try {
     int nelem (20);
@@ -89,6 +154,26 @@ int main ()
     std::cerr << message << std::endl;
   }
   
+  return nofFailedTests;
+}
+
+/*!
+  \brief main routine
+  
+  \return nofFailedTests -- The number of failed tests
+*/
+int main () 
+{
+  int nofFailedTests (0);
+
+  {
+    nofFailedTests += test_arrays();
+  }
+
+  {
+    nofFailedTests += test_mathematics();
+  }
+
   std::cout << "[4] Multi-element operations" <<std::endl;
   try {
     int nelem (10);

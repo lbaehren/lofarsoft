@@ -195,17 +195,14 @@ namespace CR {  // Namespace CR -- BEGIN
   
   // -------------------------------------------------------------------------- fx
   
-  std::vector<double> Hermite1D::fx (int const &l,
-				     std::vector<double> const &x)
+  Array<double,1> Hermite1D::fx (int const &l,
+				 Array<double,1> const &x)
   {
-    int nelem;
-    std::vector<double> y;
-    
-    nelem = x.size();
-    y.resize(nelem,0.0);
+    int nelem (x.numElements());
+    Array<double,1> y (nelem);
     
     for (int n=0; n<nelem; n++) {
-      y[n] = fx (l,x[n]);
+      y(n) = fx (l,x(n));
     }
     
     return y;
@@ -213,11 +210,11 @@ namespace CR {  // Namespace CR -- BEGIN
   
   // -------------------------------------------------------------------------- fx
   
-  std::vector<double> Hermite1D::fx (std::vector<int> const &l,
-				     std::vector<double> const &x)
+  Array<double,1> Hermite1D::fx (Array<int,1> const &l,
+				     Array<double,1> const &x)
   {
     int nelem (0);
-    std::vector<double> y;
+    Array<double,1> y;
     
     // check if the vector sizes match
     if (l.size() != x.size()) {
@@ -251,17 +248,14 @@ namespace CR {  // Namespace CR -- BEGIN
   
   // ------------------------------------------------------------------------ dfdx
   
-  std::vector<double> Hermite1D::dfdx (int const &l,
-				       std::vector<double> const &x)
+  Array<double,1> Hermite1D::dfdx (int const &l,
+				       Array<double,1> const &x)
   {
-    int nelem;
-    std::vector<double> y;
-    
-    nelem = x.size();
-    y.resize(nelem,0.0);
+    int nelem (x.numElements());
+    Array<double,1> y (nelem);
     
     for (int n=0; n<nelem; n++) {
-      y[n] = dfdx (l,x[n]);
+      y(n) = dfdx (l,x(n));
     }
     
     return y;
@@ -269,11 +263,11 @@ namespace CR {  // Namespace CR -- BEGIN
   
   // ------------------------------------------------------------------------ dfdx
   
-  std::vector<double> Hermite1D::dfdx (std::vector<int> const &l,
-				       std::vector<double> const &x)
+  Array<double,1> Hermite1D::dfdx (Array<int,1> const &l,
+				       Array<double,1> const &x)
   {
     int nelem (0);
-    std::vector<double> y;
+    Array<double,1> y;
     
     // check if the vector sizes match
     if (l.size() != x.size()) {
@@ -284,7 +278,7 @@ namespace CR {  // Namespace CR -- BEGIN
       y.resize(nelem,0.0);
       
       for (int n(0); n<nelem; n++) {
-	y[n] = dfdx (l[n],x[n]);
+	y(n) = dfdx (l(n),x(n));
       }
     }
     
@@ -308,17 +302,17 @@ namespace CR {  // Namespace CR -- BEGIN
   
   // ---------------------------------------------------------------------- d2fdx2
   
-  std::vector<double> Hermite1D::d2fdx2 (int const &l,
-					 std::vector<double> const &x)
+  Array<double,1> Hermite1D::d2fdx2 (int const &l,
+					 Array<double,1> const &x)
   {
     int nelem;
-    std::vector<double> y;
+    Array<double,1> y;
     
     nelem = x.size();
     y.resize(nelem,0.0);
     
     for (int n=0; n<nelem; n++) {
-      y[n] = d2fdx2 (l,x[n]);
+      y(n) = d2fdx2 (l,x(n));
     }
     
     return y;
@@ -326,11 +320,11 @@ namespace CR {  // Namespace CR -- BEGIN
   
   // ---------------------------------------------------------------------- d2fdx2
   
-  std::vector<double> Hermite1D::d2fdx2 (std::vector<int> const &l,
-					 std::vector<double> const &x)
+  Array<double,1> Hermite1D::d2fdx2 (Array<int,1> const &l,
+				     Array<double,1> const &x)
   {
     int nelem (0);
-    std::vector<double> y;
+    Array<double,1> y;
     
     // check if the vector sizes match
     if (l.size() != x.size()) {
@@ -341,7 +335,7 @@ namespace CR {  // Namespace CR -- BEGIN
       y.resize(nelem,0.0);
       
       for (int n(0); n<nelem; n++) {
-	y[n] = d2fdx2 (l[n],x[n]);
+	y(n) = d2fdx2 (l(n),x(n));
       }
     }
     
