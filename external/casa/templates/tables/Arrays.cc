@@ -47,31 +47,31 @@ namespace casa {
   template class Vector<TableRecord>;
 
   // -- casa/Arrays/ArrayLogical.cc
-  template LogicalArray operator<(Array<Double> const &, Array<Double> const &);
-  template LogicalArray operator<(Double const &, Array<Double> const &);
-  template LogicalArray operator<=(Array<Double> const &, Array<Double> const &);
-  template LogicalArray operator<=(Double const &, Array<Double> const &);
-  template LogicalArray operator<(Array<DComplex> const &, Array<DComplex> const &);
-  template LogicalArray operator<(Array<DComplex> const &, DComplex const &);
-  template LogicalArray operator<(DComplex const &, Array<DComplex> const &);
-  template LogicalArray operator<=(Array<DComplex> const &, Array<DComplex> const &);
+//   template LogicalArray operator<(Array<Double> const &, Array<Double> const &);
+//   template LogicalArray operator<(Double const &, Array<Double> const &);
+//   template LogicalArray operator<=(Array<Double> const &, Array<Double> const &);
+//   template LogicalArray operator<=(Double const &, Array<Double> const &);
+//   template LogicalArray operator<(Array<DComplex> const &, Array<DComplex> const &);
+//   template LogicalArray operator<(Array<DComplex> const &, DComplex const &);
+//   template LogicalArray operator<(DComplex const &, Array<DComplex> const &);
+//   template LogicalArray operator<=(Array<DComplex> const &, Array<DComplex> const &);
   template LogicalArray operator<=(Array<DComplex> const &, DComplex const &);
-  template LogicalArray operator<=(DComplex const &, Array<DComplex> const &);
+//   template LogicalArray operator<=(DComplex const &, Array<DComplex> const &);
   template LogicalArray operator<(Array<String> const &, Array<String> const &);
   template LogicalArray operator<(Array<String> const &, String const &);
   template LogicalArray operator<(String const &, Array<String> const &);
   template LogicalArray operator<=(Array<String> const &, Array<String> const &);
   template LogicalArray operator<=(Array<String> const &, String const &);
   template LogicalArray operator<=(String const &, Array<String> const &);
-  template Bool allNear(Array<DComplex> const &, Array<DComplex> const &, Double);
+//   template Bool allNear(Array<DComplex> const &, Array<DComplex> const &, Double);
 
   // -- casa/Arrays/ArrayLogical.cc
-  template Bool allEQ(Array<Complex> const &, Complex const &);
-  template Bool allEQ(Array<DComplex> const &, DComplex const &);
-  template Bool allEQ(Array<Short> const &, Short const &);
-  template Bool allEQ(Array<uShort> const &, Array<uShort> const &);
-  template Bool allNear(Array<Complex> const &, Array<Complex> const &, Double);
-  template LogicalArray operator<(Array<Double> const &, Double const &);
+//   template Bool allEQ(Array<Complex> const &, Complex const &);
+//   template Bool allEQ(Array<DComplex> const &, DComplex const &);
+//   template Bool allEQ(Array<Short> const &, Short const &);
+//   template Bool allEQ(Array<uShort> const &, Array<uShort> const &);
+//   template Bool allNear(Array<Complex> const &, Array<Complex> const &, Double);
+//   template LogicalArray operator<(Array<Double> const &, Double const &);
 
   // -- casa/Arrays/ArrayMath.cc
   template void indgen(Array<Complex> &);
@@ -84,7 +84,7 @@ namespace casa {
   template Array<Float> fmod(Array<Float> const &, Float const &);
   template void indgen(Array<DComplex> &);
   template void indgen(Array<DComplex> &, DComplex, DComplex);
-  template void convertArray(Array<uShort> &, Array<Float> const &);
+//   template void convertArray(Array<uShort> &, Array<Float> const &);
 
   // -- casa/Arrays/Cube.cc 
 //   template class Cube<uChar>;

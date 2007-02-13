@@ -15,6 +15,7 @@
 
 #include <casa/Utilities/CountedPtr.cc>
 #include <casa/Utilities/PtrHolder.cc>
+// #include <casa/Utilities/GenSort.cc>
 
 namespace casa {
 
@@ -171,5 +172,16 @@ namespace casa {
 
   // 1020 casa/Utilities/PtrHolder.cc 
   template class PtrHolder<LatticeIterator<Float> >;
+
+  // ============================================================================
+  //
+  //  Additional templates for test programs
+  //
+  // ============================================================================
+
+  // 1000 casa/Utilities/GenSort.cc
+//   template class GenSort<Float>;
+//   template class GenSort<Double>;
+//   template class GenSort<Complex>;
 
 }

@@ -27,7 +27,7 @@ ADD_LIBRARY (lattices
   ${lattices_sources}
   ${lattices_templates}
 )
-target_link_libraries (lattices casa)
+target_link_libraries (lattices tables scimath casa)
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
