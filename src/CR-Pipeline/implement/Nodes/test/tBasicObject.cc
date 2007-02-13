@@ -19,7 +19,7 @@
  ***************************************************************************/
 /* $Id: tBasicObject.cc,v 1.2 2005/07/22 10:02:31 sven Exp $*/
 
-#include <lopes/LopesBase/BasicObject.h>
+#include <Nodes/BasicObject.h>
 
 /*!
   \file tBasicObject.cc
@@ -31,14 +31,16 @@
   \date 2005/07/13
 */
 
+using CR::BasicObject;
+
 // -----------------------------------------------------------------------------
 
 /*!
   \brief Test constructors for a new BasicObject object
 */
-Bool test_BasicObject ()
+bool test_BasicObject ()
 {
-  Bool ok (True);
+  bool ok (true);
 
   BasicObject b;
   
@@ -49,7 +51,7 @@ Bool test_BasicObject ()
 
 int main ()
 {
-  Bool ok (True);
+  bool ok (true);
 
   // Test for the constructor(s)
   {

@@ -19,7 +19,7 @@
  ***************************************************************************/
 /* $Id: tStoredInputObject.cc,v 1.1 2005/07/22 14:19:28 horneff Exp $*/
 
-#include <lopes/LopesBase/StoredInputObject.h>
+#include <Nodes/StoredInputObject.h>
 
 /*!
   \file tStoredInputObject.cc
@@ -36,9 +36,9 @@
 /*!
   \brief Test constructors for a new StoredInputObject object
 */
-Bool test_StoredInputObject ()
+bool test_StoredInputObject ()
 {
-  Bool ok (True);
+  bool ok (true);
   
   return ok;
 }
@@ -47,7 +47,7 @@ Bool test_StoredInputObject ()
 
 int main ()
 {
-  Bool ok (True);
+  bool ok (true);
 
   // Test for the constructor(s)
   {

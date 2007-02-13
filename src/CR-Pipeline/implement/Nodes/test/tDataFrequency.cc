@@ -4,7 +4,7 @@
 #include <casa/aips.h>
 #include <tasking/Glish.h>
 
-#include <lopes/LopesBase/DataFrequency.h>
+#include <Nodes/DataFrequency.h>
 
 #include <casa/namespace.h>
 
@@ -17,6 +17,8 @@
 
   \data 2005/03/14
 */
+
+using CR::DataFrequency;
 
 // =============================================================================
 

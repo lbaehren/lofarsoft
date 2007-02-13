@@ -19,7 +19,7 @@
  ***************************************************************************/
 /* $Id: tStoredObject.cc,v 1.2 2005/07/21 12:22:54 horneff Exp $*/
 
-#include <lopes/LopesBase/StoredObject.h>
+#include <Nodes/StoredObject.h>
 
 /*!
   \file tStoredObject.cc
@@ -36,18 +36,18 @@
 /*!
   \brief Test constructors for a new StoredObject object
 */
-Bool test_StoredObject ()
+bool test_StoredObject ()
 {
-  Bool ok (True);
-  StoredObject<Double> so;
-  Vector<Double> vec;
+  bool ok (true);
+  CR::StoredObject<casa::Double> so;
+  casa::Vector<casa::Double> vec;
   
   try {
     ok = so.get(&vec);
-    cout << "laber!a \n";
+    std::cout << "laber!a \n";
   } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
-    return False;
+    std::cerr << x.getMesg() << std::endl;
+    return false;
   };
   
   return ok;
@@ -57,16 +57,16 @@ Bool test_StoredObject ()
 
 int main ()
 {
-  Bool ok (True);
+  bool ok (true);
 
-  cout << "laber! \n";
+  std::cout << "laber! \n";
 
   // Test for the constructor(s)
   {
     ok = test_StoredObject ();
   }
 
-  cout << "laber!! \n";
+  std::cout << "laber!! \n";
 
   
   if (ok) {

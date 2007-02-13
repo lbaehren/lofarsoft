@@ -16,7 +16,7 @@ include_directories (
   .
   ..
   ../../implement
-  ${CASA_INCLUDE_DIR}
+  ${CASA_INCLUDES}
   ${CFITSIO_INCLUDES}
   )
 

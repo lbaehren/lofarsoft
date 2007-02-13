@@ -19,7 +19,7 @@
  ***************************************************************************/
 /* $Id: tStoredMultiplyObject.cc,v 1.1 2005/07/22 13:40:36 horneff Exp $*/
 
-#include <lopes/LopesBase/StoredMultiplyObject.h>
+#include <Nodes/StoredMultiplyObject.h>
 
 /*!
   \file tStoredMultiplyObject.cc
@@ -36,9 +36,9 @@
 /*!
   \brief Test constructors for a new StoredMultiplyObject object
 */
-Bool test_StoredMultiplyObject ()
+bool test_StoredMultiplyObject ()
 {
-  Bool ok (True);
+  bool ok (true);
   
   return ok;
 }
@@ -47,7 +47,7 @@ Bool test_StoredMultiplyObject ()
 
 int main ()
 {
-  Bool ok (True);
+  bool ok (true);
 
   // Test for the constructor(s)
   {

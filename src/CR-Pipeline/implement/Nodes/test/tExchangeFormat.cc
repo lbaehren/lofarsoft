@@ -20,9 +20,10 @@
 /* $Id: tExchangeFormat.cc,v 1.2 2006/07/05 12:59:12 bahren Exp $*/
 
 #include <iostream>
-#include <lopes/LopesBase/ExchangeFormat.h>
+#include <Nodes/ExchangeFormat.h>
 
 using namespace std;
+using CR::ExchangeFormat;
 
 /*!
   \file tExchangeFormat.cc
@@ -39,23 +40,23 @@ using namespace std;
 /*!
   \brief Test constructors for a new ExchangeFormat object
 */
-Bool test_ExchangeFormat ()
+bool test_ExchangeFormat ()
 {
-  Bool ok (True);
+  bool ok (true);
   ExchangeFormat a;
 
-  a.setFlag(EF_isComplex | EF_isScalar);
-  cout << a.flag(EF_isComplex) << endl;
-  cout << a.flag(EF_isScalar) << endl;
-  a.clearFlag(EF_isScalar);
-  cout << a.flag(EF_isScalar | EF_isComplex) << endl;
+  a.setFlag(CR::EF_isComplex | CR::EF_isScalar);
+  cout << a.flag(CR::EF_isComplex) << endl;
+  cout << a.flag(CR::EF_isScalar) << endl;
+  a.clearFlag(CR::EF_isScalar);
+  cout << a.flag(CR::EF_isScalar | CR::EF_isComplex) << endl;
 
   ExchangeFormat b = a;
   
-  b.setFlag(EF_isScalar);
-  cout << b.flag(EF_isComplex)   << " & "
-       << b.flag(EF_isScalar) << " = "
-       << b.flag(EF_isScalar & EF_isComplex) 
+  b.setFlag(CR::EF_isScalar);
+  cout << b.flag(CR::EF_isComplex)   << " & "
+       << b.flag(CR::EF_isScalar) << " = "
+       << b.flag(CR::EF_isScalar & CR::EF_isComplex) 
        << endl;
 
   return ok;
@@ -65,7 +66,7 @@ Bool test_ExchangeFormat ()
 
 int main ()
 {
-  Bool ok (True);
+  bool ok (true);
 
   // Test for the constructor(s)
   {
