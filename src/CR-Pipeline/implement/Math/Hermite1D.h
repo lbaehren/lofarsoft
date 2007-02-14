@@ -66,10 +66,10 @@ namespace CR {  // Namespace CR -- BEGIN
     For the first few orders the Hermite polymials are:
     \f[
       \begin{array}{rclllll}
-        H_{0} & = & +1  \					\
-	H_{1} & = &     & + 2 x \				\
-	H_{2} & = & -2  &       & + 4 x^{2} \			\
-	H_{3} & = &     & -12 x &            & 8 x^{3} \	\
+        H_{0} & = & +1  \\
+	H_{1} & = &     & + 2 x \\
+	H_{2} & = & -2  &       & + 4 x^{2} \\
+	H_{3} & = &     & -12 x &            & 8 x^{3} \\
 	H_{4} & = & +12 &       & - 48 x^{2} &         & 16 x^{4}
       \end{array}
     \f]

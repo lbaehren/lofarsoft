@@ -82,7 +82,7 @@ namespace CR { // Namespace CR -- begin
       These are:
       <ul>
       <li>
-      <em>bs</em>
+      <em>blocksize</em>
       The blocksize (in bits) over which the average and standard deviation
       are to be calculated. A blocksize of \f$k\f$ means \f$2^k\f$ samples are
       included in an average. This parameter is set to 10.
@@ -108,11 +108,11 @@ namespace CR { // Namespace CR -- begin
                    reported.
       \param dl    The delay (in samples) between the last sample over which the
                    average was calculated and the sample being considered.
-      \param bs    The blocksize (in bits) over which the average and standard
+      \param blocksize    The blocksize (in bits) over which the average and standard
                    deviation are to be calculated. A blocksize of \f$k\f$ means
 		   \f$2^k\f$ samples are included in an average.
     */
-    PeakSearch(uint bs,
+    PeakSearch(uint blocksize,
 	       uint th,
 	       int dl);
     
@@ -131,8 +131,10 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the threshold
       
-      This function gets the threshold (in sigma above average) of the PeakSearch object.
-      The threshold identifies the value over which a peak is reported.
+      This function gets the threshold (in sigma above average) of the PeakSearch
+      object. The threshold identifies the value over which a peak is reported.
+
+      \return threshold -- The threshold.
     */
     uint& threshold() {return threshold_;}
     
@@ -166,14 +168,14 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Set the blocksize
       
-      \param bs    The blocksize (in bits) over which the average and standard
+      \param blocksize    The blocksize (in bits) over which the average and standard
       deviation are to be calculated. A blocksize of \f$k\f$ means
       \f$2^k\f$ samples are included in an average.
       
       This function sets the blocksize of the PeakSearch object to
-      <b><em>bs</em></b>. Some `sanity checks' are performed.
+      <b><em>blocksize</em></b>. Some `sanity checks' are performed.
     */
-    uint& blocksize(uint bs);
+    uint& blocksize(uint blocksize);
     
     /*!
       \brief Set the threshold
@@ -231,12 +233,12 @@ namespace CR { // Namespace CR -- begin
     an object containing information about the peaks.
 
     \param *d -- Pointer to the dataset to be analysed.
-    \param bs -- Value of the <b><em>blocksize</em></b> to be used in the analysis.
+    \param blocksize -- Value of the <b><em>blocksize</em></b> to be used in the analysis.
     \param th -- Value of the <b><em>threshold</em></b> to be used in the analysis.
     \param dl -- Value of the <b><em>delay</em></b> to be used in the analysis.
   */
   PeakList findPeaks(Data* d,
-		     uint bs,
+		     uint blocksize,
 		     uint th,
 		     int dl);
   

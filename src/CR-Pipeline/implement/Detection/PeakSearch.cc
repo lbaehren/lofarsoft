@@ -31,6 +31,7 @@
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::abs;
 
 namespace CR { // Namespace CR -- begin
   
@@ -98,7 +99,7 @@ namespace CR { // Namespace CR -- begin
   }
   
   PeakList PeakSearch::findPeaks(Data* d) {
-    if (d->length() < (uint)(1 << blocksize_) + abs((double)delay_)) {
+    if (d->length() < (uint)(1 << blocksize_) + abs(delay_)) {
       cerr << "  ERROR: Dataset contains too little samples to run findPeaks algorithm." << endl;
       return PeakList();
     }
@@ -148,105 +149,105 @@ namespace CR { // Namespace CR -- begin
     return findPeaks(d);
   }
   
-void PeakSearch::corrPeaks(PeakList* pl, uint n) {
-  uint i[n];
-  bool good[n];
-  uint j;
-  Peak* p_low = NULL;
-  bool cont = true;
-  uint set, set_prev = 0, t_max, t_prev = 0;
-  
-  for (j = 0; j < n; j ++) {
-    i[j] = 0;
-  }
-  
-  while (cont) {
-    p_low = NULL;
+  void PeakSearch::corrPeaks(PeakList* pl, uint n) {
+    uint i[n];
+    bool good[n];
+    uint j;
+    Peak* p_low = NULL;
+    bool cont = true;
+    uint set, set_prev = 0, t_max, t_prev = 0;
     
-    // Find a new peak (any peak) to start from
     for (j = 0; j < n; j ++) {
-      if (pl[j].length() > 0) {
-	p_low = pl[j].peak(i[j]);
-	j = n;
-      }
-    }
-    // If there are no more peaks in the lists, exit loop
-    if (p_low == NULL) {
-      cont = false;
+      i[j] = 0;
     }
     
-    if (cont) {
-      // Get the current lowest peak
+    while (cont) {
+      p_low = NULL;
+      
+      // Find a new peak (any peak) to start from
       for (j = 0; j < n; j ++) {
-	good[j] = false;
-	if (pl[j].peak(i[j]) != NULL
-	    && pl[j].peak(i[j])->time() < p_low->time())
+	if (pl[j].length() > 0) {
 	  p_low = pl[j].peak(i[j]);
-      }
-      //cout << "t = " << p_low->time() << endl;
-      
-      // Is there a coincedence in the current window?
-      set = 0;
-      t_max = p_low->time();
-      for (j = 0; j < n; j ++) {
-	if (pl[j].peak(i[j]) != NULL
-	    && pl[j].peak(i[j])->time() < p_low->time() + window_) {
-	  set ++;
-	  good[j] = true;
-	  if (pl[j].peak(i[j])->time() > t_max)
-	    t_max = pl[j].peak(i[j])->time();
+	  j = n;
 	}
       }
+      // If there are no more peaks in the lists, exit loop
+      if (p_low == NULL) {
+	cont = false;
+      }
       
-      if (t_max != t_prev
-	  && set > set_prev
-	  && set > npeaks_) {
-	uint t = 0;
-	uint s = 0;
+      if (cont) {
+	// Get the current lowest peak
 	for (j = 0; j < n; j ++) {
-	  if (good[j]) {
-	    t += pl[j].peak(i[j])->time() - (pl[j].peak(i[j])->duration() >> 1);
-	    s += pl[j].peak(i[j])->significance();
-	  }
+	  good[j] = false;
+	  if (pl[j].peak(i[j]) != NULL
+	      && pl[j].peak(i[j])->time() < p_low->time())
+	    p_low = pl[j].peak(i[j]);
 	}
-	t /= set;
-	//cout << "t = " << t << "\t" << set << "\t" << s << endl;
+	//cout << "t = " << p_low->time() << endl;
 	
-	PeakList detection;
+	// Is there a coincedence in the current window?
+	set = 0;
+	t_max = p_low->time();
 	for (j = 0; j < n; j ++) {
-	  if (good[j]) {
-	    detection.addPeak(*(pl[j].peak(i[j])));
-	  } else {
-	    detection.addPeak();
+	  if (pl[j].peak(i[j]) != NULL
+	      && pl[j].peak(i[j])->time() < p_low->time() + window_) {
+	    set ++;
+	    good[j] = true;
+	    if (pl[j].peak(i[j])->time() > t_max)
+	      t_max = pl[j].peak(i[j])->time();
 	  }
 	}
 	
-	// What to do with the obtained correlated data? A sourcefit is not
-	// (yet) robust enough...
-	//				SourceFit f;
-	//				f.minimize(&detection);
-	for (j = 0; j < detection.length(); j++) {
-	  detection.peak(j)->print();
+	if (t_max != t_prev
+	    && set > set_prev
+	    && set > npeaks_) {
+	  uint t = 0;
+	  uint s = 0;
+	  for (j = 0; j < n; j ++) {
+	    if (good[j]) {
+	      t += pl[j].peak(i[j])->time() - (pl[j].peak(i[j])->duration() >> 1);
+	      s += pl[j].peak(i[j])->significance();
+	    }
+	  }
+	  t /= set;
+	  //cout << "t = " << t << "\t" << set << "\t" << s << endl;
+	  
+	  PeakList detection;
+	  for (j = 0; j < n; j ++) {
+	    if (good[j]) {
+	      detection.addPeak(*(pl[j].peak(i[j])));
+	    } else {
+	      detection.addPeak();
+	    }
+	  }
+	  
+	  // What to do with the obtained correlated data? A sourcefit is not
+	  // (yet) robust enough...
+	  //				SourceFit f;
+	  //				f.minimize(&detection);
+	  for (j = 0; j < detection.length(); j++) {
+	    detection.peak(j)->print();
+	  }
+	  cout << endl;
 	}
-	cout << endl;
+	
+	for (j = 0; j < n; j ++) {
+	  if (pl[j].peak(i[j]) != NULL
+	      && pl[j].peak(i[j])->time() == p_low->time())
+	    i[j] ++;
+	}
+	t_prev   = t_max;
+	set_prev = set;
       }
-      
-      for (j = 0; j < n; j ++) {
-	if (pl[j].peak(i[j]) != NULL
-	    && pl[j].peak(i[j])->time() == p_low->time())
-	  i[j] ++;
-      }
-      t_prev   = t_max;
-      set_prev = set;
     }
   }
-}
-
-void PeakSearch::corrPeaks(PeakList* pl, uint n, uint wn, uint np) {
-  window(wn);
-  npeaks(np);
   
-  return corrPeaks(pl, n);
-}
-
+  void PeakSearch::corrPeaks(PeakList* pl, uint n, uint wn, uint np) {
+    window(wn);
+    npeaks(np);
+    
+    return corrPeaks(pl, n);
+  }
+  
 } // Namespace CR -- end
