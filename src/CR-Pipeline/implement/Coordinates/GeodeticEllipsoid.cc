@@ -1,7 +1,7 @@
 
 #include <Coordinates/GeodeticEllipsoid.h>
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
   
   // ---  Construction ----------------------------------------------------------
   
@@ -442,4 +442,4 @@ Vector<double> GeodeticEllipsoid::helmertTransform (const Vector<double>& from,
   return to;
 }
 
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end

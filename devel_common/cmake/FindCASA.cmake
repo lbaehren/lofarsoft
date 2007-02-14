@@ -17,6 +17,17 @@ find_library (libg2c g2c
   PATHS /usr/local/lib /usr/lib /lib /sw/lib
   )
 
+find_library (libwcs wcs
+  PATHS /usr/local/lib /usr/lib /lib /sw/lib /opt/casa /sw/share/casa
+  PATH_SUFFIXES
+  darwin/lib
+  linux_gnu/lib
+  current/darwin/lib
+  current/linux_gnu/lib
+  stable/darwin/lib
+  stable/linux_gnu/lib
+  )
+
 ## -----------------------------------------------------------------------------
 ## Check for the header files first, as from this we can derive a number of 
 ## fundamental CASA variables (such as e.g. the root directory of the
@@ -178,9 +189,13 @@ set (LINKcasa
   ${CASA_libcasa}
   CACHE STRING "LINKcasa")
 
-set (LINKscimath
-  ${CASA_libscimath} ${CASA_libscimath_f} ${LINKcasa} ${libg2c}
-  CACHE STRING "LINKscimath")
+if (libg2c)
+  set (LINKscimath
+    ${CASA_libscimath} ${CASA_libscimath_f} ${LINKcasa} ${libg2c}
+    CACHE STRING "LINKscimath")
+else (libg2c)
+  message (ERROR "Missing g2c library required for libscimath!")
+endif (libg2c)
 
 set (LINKtables
   ${CASA_libtables} ${LINKcasa}
@@ -190,9 +205,13 @@ set (LINKmeasures
   ${CASA_libmeasures} ${CASA_libtables} ${LINKscimath}
   CACHE STRING "LINKmeasures")
 
-set (LINKfits
-  ${CASA_libfits} ${LINKmeasures}
-  CACHE STRING "LINKfits")
+if (libwcs)
+  set (LINKfits
+    ${CASA_libfits} ${LINKmeasures} ${libwcs}
+    CACHE STRING "LINKfits")
+else (libwcs)
+  message (ERROR "Missing WCS library required for libfits!")
+endif (libwcs)
 
 set (LINKlattices
   ${CASA_liblattices} ${CASA_libtables} ${LINKscimath}
@@ -327,7 +346,7 @@ if (HAVE_CASA)
     -I${CASA_INCLUDES}
     -DAIPS_${AIPS_ARCH})
   set (CASA_CXX_FLAGS "-fPIC -pipe -Wall -Wno-non-template-friend -Woverloaded-virtual -Wno-comment -fexceptions -Wcast-align")
-  set (CASA_CXX_LFLAGS "-L${CASA_LIBRARIES_DIR} ${CASA_LIBRARIES_DIR}/version.o ${CASA_LIBRARIES}")
+  set (CASA_CXX_LFLAGS "${CASA_LIBRARIES_DIR}/version.o ${CASA_LIBRARIES}")
   if (NOT CASA_FIND_QUIETLY)
     message (STATUS "Found components for CASA.")
     message (STATUS "AIPSARCH ........... : ${AIPS_ARCH}")

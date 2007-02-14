@@ -26,7 +26,7 @@ using std::cerr;
 using std::cout;
 using std::endl;
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
 
 // ----------------------------------------------- CoordinateGrid::CoordinateGrid
 
@@ -491,4 +491,4 @@ double CoordinateGrid::calcCoordinate (const int numCoord,
   return coord;
 }
 
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end

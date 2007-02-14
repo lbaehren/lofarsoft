@@ -26,7 +26,7 @@
   \class AxisIterator
 */
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
 
 // ==============================================================================
 //
@@ -129,4 +129,4 @@ void AxisIterator::setBlock (const int& block)
 //
 // ==============================================================================
 
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end

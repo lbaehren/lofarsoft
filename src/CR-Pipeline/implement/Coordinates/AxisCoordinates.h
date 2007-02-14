@@ -32,7 +32,7 @@
 
 using casa::Vector;
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
 
 /*!
   \class AxisCoordinates
@@ -51,7 +51,7 @@ namespace LOPES {  // Namespace LOPES -- begin
 
   <ul type="square">
     <li>One should be familiar with the mechanism how coordinate axes were handled
-        in the original LOPES-Tools implementation.
+        in the original CR-Tools implementation.
 	\code 
 	FileOffset=0,
 	FileBlocksize=65536,
@@ -368,6 +368,6 @@ class AxisCoordinates {
 
 };
 
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end
 
 #endif /* _AXISCOORDINATES_H_ */

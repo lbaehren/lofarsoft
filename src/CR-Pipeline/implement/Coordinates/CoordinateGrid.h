@@ -40,7 +40,7 @@ using casa::Matrix;
 using casa::String;
 using casa::Vector;
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
   
   /*!
     \class CoordinateGrid
@@ -333,7 +333,7 @@ namespace LOPES {  // Namespace LOPES -- begin
 			   const int numPoint);
   };
   
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end
 
 #endif
 

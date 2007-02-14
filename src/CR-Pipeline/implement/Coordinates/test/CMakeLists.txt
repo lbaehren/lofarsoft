@@ -1,23 +1,15 @@
 
-include_directories (
-  .
-  ..
-  ../../implement
-  ${CASA_INCLUDES}
-  )
+include_directories (. .. ../..)
 
 ## -----------------------------------------------------------------------------
 ## Set up the list with test program sources
 
 set (tests
-  tBasicObject
-  tDataConversion
-#  tDataFrequency
-  tExchangeFormat
-  tStoredAddObject
-  tStoredInputObject
-  tStoredMultiplyObject
-  tStoredObject
+  tAxisCoordinates
+  tAxisIterator
+  tCoordinateGrid
+  tGridCoordinate
+  tPolarCoordinate
   )
 
 ## ------------------------------------------------------------------------------

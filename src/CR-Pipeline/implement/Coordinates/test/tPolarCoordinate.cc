@@ -20,7 +20,7 @@
 
 /* $Id: tPolarCoordinate.cc,v 1.4 2006/03/08 16:30:12 bahren Exp $*/
 
-#include <lopes/Coordinates/PolarCoordinate.h>
+#include <Coordinates/PolarCoordinate.h>
 
 /*!
   \file tPolarCoordinate.cc
@@ -31,6 +31,12 @@
  
   \date 2006/02/28
 */
+
+using std::cerr;
+using std::cout;
+using std::endl;
+
+using CR::PolarCoordinate;
 
 // -----------------------------------------------------------------------------
 

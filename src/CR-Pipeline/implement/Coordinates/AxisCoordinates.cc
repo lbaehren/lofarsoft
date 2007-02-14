@@ -30,7 +30,7 @@ using std::endl;
   \class AxisCoordinates
 */
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
 
 // ==============================================================================
 //
@@ -263,4 +263,4 @@ Vector<double> AxisCoordinates::getIntermedFreq ()
   return values;
 }
 
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end

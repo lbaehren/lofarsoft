@@ -27,7 +27,7 @@
 
 using casa::Vector;
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
 
 /*!
   \class AxisIterator
@@ -45,7 +45,7 @@ namespace LOPES {  // Namespace LOPES -- begin
   <h3>Prerequisite</h3>
 
   <ul type="square">
-    <li>[LOPES-Tools] DataIterator 
+    <li>[CR-Tools] DataIterator 
   </ul>
 
   <h3>Synopsis</h3>
@@ -173,6 +173,6 @@ class AxisIterator : public AxisCoordinates {
 
 };
 
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end
 
 #endif /* _AXISITERATOR_H_ */

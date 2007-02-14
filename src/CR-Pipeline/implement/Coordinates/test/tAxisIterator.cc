@@ -20,7 +20,8 @@
 
 /* $Id: tAxisIterator.cc,v 1.1 2006/07/05 16:01:08 bahren Exp $*/
 
-#include <lopes/Coordinates/AxisIterator.h>
+#include <iostream>
+#include <Coordinates/AxisIterator.h>
 
 /*!
   \file tAxisIterator.cc
@@ -32,6 +33,19 @@
   \date 2006/03/15
 */
 
+using std::cout;
+using std::cerr;
+using std::endl;
+
+using casa::Double;
+using casa::Int;
+
+using CR::AxisIterator;
+using CR::AxisCoordinates;
+
+/*!
+  \brief List the porperties of the AxisIterator object
+*/
 void show_axes (AxisIterator& axis)
 {
   std::cout.precision(12);
@@ -52,7 +66,7 @@ void computePosition ()
   int block (0);
   int sample (0);
   int pos (0);
-  int presync (0);
+//  int presync (0);
 
   for (block=1; block<=nofBlocks; block++) {
     cout << block << " : [";

@@ -29,7 +29,7 @@ using std::endl;
   \class GridCoordinate
 */
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
 
 // ==============================================================================
 //
@@ -234,4 +234,4 @@ Vector<double> GridCoordinate::coordinates ()
   return coords;
 }
 
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end

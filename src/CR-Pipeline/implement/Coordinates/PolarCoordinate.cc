@@ -26,7 +26,7 @@
   \class PolarCoordinate
 */
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
 
 // ==============================================================================
 //
@@ -209,4 +209,4 @@ double PolarCoordinate::dTheta (const double& dRadius)
   return rad2deg(dTheta);
 }
 
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end

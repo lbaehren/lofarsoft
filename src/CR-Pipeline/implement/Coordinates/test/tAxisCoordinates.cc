@@ -21,7 +21,7 @@
 /* $Id: tAxisCoordinates.cc,v 1.4 2006/08/24 13:55:12 bahren Exp $*/
 
 #include <iostream>
-#include <lopes/Coordinates/AxisCoordinates.h>
+#include <Coordinates/AxisCoordinates.h>
 
 /*!
   \file tAxisCoordinates.cc
@@ -34,6 +34,12 @@
  
   \date 2006/03/13
 */
+
+using casa::Double;
+using casa::Int;
+using casa::Vector;
+
+using CR::AxisCoordinates;
 
 // -----------------------------------------------------------------------------
 
@@ -51,13 +57,13 @@
 */
 void show_parameters (AxisCoordinates& axis)
 {
-  cout << " - blocksize         [samples] = " << axis.blocksize() << endl;
-  cout << " - offset            [samples] = " << axis.offset() << endl;
-  cout << " - presync           [samples] = " << axis.presync() << endl;
-  cout << " - sample frequency  [Hz     ] = " << axis.sampleFrequency() << endl;
-  cout << " - frequency range   [Hz     ] = " << axis.frequencyRange() << endl;
-  cout << " - FFT output length [samples] = " << axis.fftLength() << endl;
-  cout << " - frequency bin     [Hz     ] = " << axis.frequencyBin() << endl;
+  std::cout << " - blocksize         [samples] = " << axis.blocksize() << std::endl;
+  std::cout << " - offset            [samples] = " << axis.offset() << std::endl;
+  std::cout << " - presync           [samples] = " << axis.presync() << std::endl;
+  std::cout << " - sample frequency  [Hz     ] = " << axis.sampleFrequency() << std::endl;
+  std::cout << " - frequency range   [Hz     ] = " << axis.frequencyRange() << std::endl;
+  std::cout << " - FFT output length [samples] = " << axis.fftLength() << std::endl;
+  std::cout << " - frequency bin     [Hz     ] = " << axis.frequencyBin() << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -65,14 +71,14 @@ void show_parameters (AxisCoordinates& axis)
 void show_axes (AxisCoordinates& axis)
 {
   std::cout.precision(12);
-  cout << " - Pos                    = "
-       << axis.axisValues(AxisCoordinates::Pos) << endl;
-  cout << " - Time                   = "
-       << axis.axisValues(AxisCoordinates::Time) << endl;
-  cout << " - Frequency              = "
-       << axis.axisValues(AxisCoordinates::Frequency) << endl;
-  cout << " - Intermediate frequency = "
-       << axis.axisValues(AxisCoordinates::IntermedFreq) << endl;
+  std::cout << " - Pos                    = "
+       << axis.axisValues(AxisCoordinates::Pos) << std::endl;
+  std::cout << " - Time                   = "
+       << axis.axisValues(AxisCoordinates::Time) << std::endl;
+  std::cout << " - Frequency              = "
+       << axis.axisValues(AxisCoordinates::Frequency) << std::endl;
+  std::cout << " - Intermediate frequency = "
+       << axis.axisValues(AxisCoordinates::IntermedFreq) << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -94,9 +100,9 @@ Int test_AxisCoordinates ()
   frequencyRange(0) = 40e06;
   frequencyRange(1) = 80e06;
 
-  cout << "\n[test_AxisCoordinates]\n" << endl;
+  std::cout << "\n[test_AxisCoordinates]\n" << std::endl;
 
-  cout << "[1] Testing default constructor ..." << endl;
+  std::cout << "[1] Testing default constructor ..." << std::endl;
   {
     AxisCoordinates axis;
     //
@@ -104,7 +110,7 @@ Int test_AxisCoordinates ()
     show_axes (axis);
   }
   
-  cout << "[2] Testing argumented constructor ..." << endl;
+  std::cout << "[2] Testing argumented constructor ..." << std::endl;
   {
     AxisCoordinates axis (blocksize,
 			  offset,
@@ -120,7 +126,7 @@ Int test_AxisCoordinates ()
     show_axes (axis);
   }
 
-  cout << "[3] Testing copy constructor" << endl;
+  std::cout << "[3] Testing copy constructor" << std::endl;
   {
     AxisCoordinates axis1 (blocksize,
 			   offset,
@@ -129,9 +135,9 @@ Int test_AxisCoordinates ()
 			   frequencyRange);
     AxisCoordinates axis2 (axis1);
 
-    cout << " - Parameters for object 1 ..." << endl;
+    std::cout << " - Parameters for object 1 ..." << std::endl;
     show_parameters (axis1);
-    cout << " - Parameters for object 2 ..." << endl;
+    std::cout << " - Parameters for object 2 ..." << std::endl;
     show_parameters (axis2);
   }
   

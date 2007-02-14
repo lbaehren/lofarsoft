@@ -38,7 +38,7 @@ using casa::LinearCoordinate;
 using casa::String;
 using casa::Vector;
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
 
 /*!
   \class GridCoordinate
@@ -290,6 +290,6 @@ class GridCoordinate : public LinearCoordinate {
 
 };
 
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end
 
 #endif /* GRIDCOORDINATE_H */

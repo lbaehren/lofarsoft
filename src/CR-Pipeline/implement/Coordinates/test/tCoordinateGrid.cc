@@ -1,7 +1,7 @@
 
 /* $Id: tCoordinateGrid.cc,v 1.3 2006/01/16 18:17:33 bahren Exp $ */
 
-#include <lopes/Coordinates/CoordinateGrid.h>
+#include <Coordinates/CoordinateGrid.h>
 
 /*!
   \file tCoordinateGrid.cc
@@ -12,6 +12,19 @@
   
   \date 2005/03/21
 */
+
+using std::cout;
+using std::cerr;
+using std::endl;
+
+using casa::AipsError;
+using casa::Double;
+using casa::Int;
+using casa::Matrix;
+using casa::String;
+using casa::Vector;
+
+using CR::CoordinateGrid;
 
 // =============================================================================
 
@@ -165,8 +178,8 @@ int test_CoordinateGrid (Vector<Int>& shape,
     //
     show_variables (cg);
     //
-    ofstream logfile;
-    logfile.open("tCoordinateGrid-grid1.data",ios::out);
+    std::ofstream logfile;
+    logfile.open("tCoordinateGrid-grid1.data",std::ios::out);
     logfile << "# Coordinate grid nodes for 3-dim regular grid." << endl;
     logfile << "# gnuplot > splot 'tCoordinateGrid-grid1.data'" << endl;
     cg.grid(logfile);
@@ -200,8 +213,8 @@ int test_CoordinateGrid (Vector<Int>& shape,
     //
     show_variables (cg);
     //
-    ofstream logfile;
-    logfile.open("tCoordinateGrid-grid2.data",ios::out);
+    std::ofstream logfile;
+    logfile.open("tCoordinateGrid-grid2.data",std::ios::out);
     logfile << "# Coordinate grid nodes for 2-dim regular grid." << endl;
     logfile << "# gnuplot > plot 'tCoordinateGrid-grid2.data'" << endl;
     cg.grid(logfile);
@@ -248,8 +261,8 @@ int test_CoordinateGrid (Vector<Int>& shape,
     //
     show_variables (cg);
     //
-    ofstream logfile;
-    logfile.open("tCoordinateGrid-grid3.data",ios::out);
+    std::ofstream logfile;
+    logfile.open("tCoordinateGrid-grid3.data",std::ios::out);
     logfile << "# Coordinate grid nodes for 5-dim regular grid." << endl;
     logfile << "# gnuplot > splot 'tCoordinateGrid-grid3.data' u 1:2:3" << endl;
     logfile << "# gnuplot > splot 'tCoordinateGrid-grid3.data' u 1:2:4" << endl;
@@ -315,7 +328,7 @@ int test_limits (Vector<Int>& shape,
     //
     cout << "\n[2] Setting range limits axis by axis ..." << endl;
     for (int axis=0; axis<naxes; axis++) {
-      cout << "\t axis=" << axis << "\t limits=" << tmpLimits << " ... " << flush;
+      cout << "\t axis=" << axis << "\t limits=" << tmpLimits << " ... " << std::flush;
       //
       tmpLimits(0) = limits(axis,0);
       tmpLimits(1) = limits(axis,1);
@@ -383,7 +396,7 @@ int test_grid (Vector<Int>& shape,
 int main ()
 {
   int nofFailedTests (0);
-  Bool ok;
+  bool ok;
   Vector<Double> center;
   Vector<Double> increment;
   Vector<Int> shape;

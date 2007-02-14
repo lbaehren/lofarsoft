@@ -26,7 +26,7 @@ using std::endl;
 using casa::String;
 using casa::Vector;
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
   
   /*!
     \class GeodeticEllipsoid
@@ -190,6 +190,6 @@ namespace LOPES {  // Namespace LOPES -- begin
   
 };
 
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end
 
 #endif

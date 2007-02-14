@@ -26,7 +26,7 @@
 #include <casa/Exceptions/Error.h>
 #include <coordinates/Coordinates/LinearCoordinate.h>
 
-#include <lopes/Coordinates/GridCoordinate.h>
+#include <Coordinates/GridCoordinate.h>
 
 /*!
   \file tGridCoordinate.cc
@@ -42,6 +42,17 @@
   We want to be able to work with a simple linear axis, which is defined within 
   a certain value range.
 */
+
+using std::cerr;
+using std::cout;
+using std::endl;
+
+using casa::Double;
+using casa::Int;
+using casa::String;
+using casa::uInt;
+
+using CR::GridCoordinate;
 
 // -----------------------------------------------------------------------------
 

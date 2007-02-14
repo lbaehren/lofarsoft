@@ -39,7 +39,6 @@ FOREACH (src ${tests})
   TARGET_LINK_LIBRARIES (${src}
     ${CASA_LIBRARIES}
     ${LAPACK_LIBRARIES}
-    ${libg2c}
     )  
 ENDFOREACH (src)
 

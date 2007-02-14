@@ -41,7 +41,7 @@ using std::cout;
 using std::endl;
 using std::vector;
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
 
 /*!
   \class PolarCoordinate
@@ -310,6 +310,6 @@ class PolarCoordinate {
 				 const double& theta);
 };
 
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end
 
 #endif /* _POLARCOORDINATE_H_ */
