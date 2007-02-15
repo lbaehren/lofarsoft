@@ -2,9 +2,14 @@
 #include <casa/aips.h>
 #include <casa/BasicSL/Complex.h>
 #include <casa/Utilities/Copy.h>
+#include <images/Images/ImageConcat.h>
+#include <images/Images/ImageInterface.h>
+#include <images/Images/MomentCalculator.h>
 #include <tables/Tables/ExprRange.h>
 
 #include <casa/Utilities/Copy2.cc>
+#include <casa/Utilities/PtrHolder.cc>
+#include <images/Images/PagedImage.cc>
 
 namespace casa {
   
@@ -59,21 +64,45 @@ namespace casa {
 
   template void objset<void*>(void**, void*, unsigned int);
 
-    // objcopy
+  // objcopy
+  
+  template void objcopy<void*>(void**, void* const*, unsigned int);
+  template void objcopy<TableExprRange>(TableExprRange*, TableExprRange const*, unsigned int);
+  template void objmove<unsigned int>(unsigned int*, unsigned int const*, unsigned int);
+  template void objmove<String>(String*, String const*, unsigned int);
+  template void objmove<void*>(void**, void* const*, unsigned int);
+  template void objmove<std::complex<double> >(std::complex<double>*, std::complex<double> const*, unsigned int);
+  template void objmove<std::complex<float> >(std::complex<float>*, std::complex<float> const*, unsigned int);
+  template void objmove<bool>(bool*, bool const*, unsigned int);
+  template void objmove<double>(double*, double const*, unsigned int);
+  template void objmove<float>(float*, float const*, unsigned int);
+  template void objmove<unsigned char>(unsigned char*, unsigned char const*, unsigned int);
+  template void objmove<int>(int*, int const*, unsigned int);
+  template void objmove<short>(short*, short const*, unsigned int);
+  template void objmove<unsigned short>(unsigned short*, unsigned short const*, unsigned int);
+  
+  // ============================================================================
+  //
+  //  libimages
+  //
+  // ============================================================================
 
-template void objcopy<void*>(void**, void* const*, unsigned int);
-template void objcopy<TableExprRange>(TableExprRange*, TableExprRange const*, unsigned int);
-template void objmove<unsigned int>(unsigned int*, unsigned int const*, unsigned int);
-template void objmove<String>(String*, String const*, unsigned int);
-template void objmove<void*>(void**, void* const*, unsigned int);
-template void objmove<std::complex<double> >(std::complex<double>*, std::complex<double> const*, unsigned int);
-template void objmove<std::complex<float> >(std::complex<float>*, std::complex<float> const*, unsigned int);
-template void objmove<bool>(bool*, bool const*, unsigned int);
-template void objmove<double>(double*, double const*, unsigned int);
-template void objmove<float>(float*, float const*, unsigned int);
-template void objmove<unsigned char>(unsigned char*, unsigned char const*, unsigned int);
-template void objmove<int>(int*, int const*, unsigned int);
-template void objmove<short>(short*, short const*, unsigned int);
-template void objmove<unsigned short>(unsigned short*, unsigned short const*, unsigned int);
+  //1000 casa/Utilities/PtrHolder.cc 
+  template class PtrHolder<ImageConcat<Float> >;
+
+  // 1010 casa/Utilities/PtrHolder.cc 
+  template class PtrHolder<ImageInterface<Float> >;
+
+  // 1020 casa/Utilities/PtrHolder.cc 
+  template class PtrHolder<MomentCalcBase<Float> >;
+
+  // 1030 casa/Utilities/PtrHolder.cc 
+  template class PtrHolder<PagedImage<Float> >;
+
+  // 1000 images/Images/PagedImage.cc casa/BasicSL/Complex.h 
+  template class PagedImage<Complex>;
+
+  //1010 images/Images/PagedImage.cc 
+  template class PagedImage<Float>;
 
 }

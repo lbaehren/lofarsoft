@@ -29,6 +29,7 @@ set (tests
   tUseMeasures
   tUseTables
   tUseLattices
+  tUseImages
 )
 
 ## ------------------------------------------------------------------------------

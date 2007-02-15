@@ -173,110 +173,159 @@ endforeach (casa_lib)
 ##   LINKms          := ms LINKmeasures
 ##   LINKmsfits      := msfits ms LINKfits
 ##   LINKmsvis       := msvis LINKms
+##   TMPmsvis        := msvis ms images
 ##   LINKcalibration := calibration LINKmsvis
 ##   LINKionosphere  := ionosphere LINKmeasures
 ##   LINKflagging    := flagging msvis ms lattices LINKmeasures
 ##   LINKdish        := dish ms fits coordinates lattices LINKmeasures
 ##   LINKsimulators  := simulators LINKms
-##   LINKsynthesis   := synthesis calibration msvis ms images TMPcomponents
+##   LINKsynthesis   := synthesis calibration TMPmsvis TMPcomponents
 ##   LINKgraphics    := graphics LINKcasa
-##   LINKtasking     := tasking graphics msvis ms images TMPcomponents
+##   LINKtasking     := tasking graphics TMPmsvis TMPcomponents
 ##
 
 ## string together the correct order of the libraries as passed to the linker
 
-set (LINKcasa
-  ${CASA_libcasa}
-  CACHE STRING "LINKcasa")
+## -- libcasa
+if (CASA_libcasa)
+  set (LINKcasa
+    ${CASA_libcasa}
+    CACHE STRING "LINKcasa")
+  ## -- libtables
+  if (CASA_libtables)
+    set (LINKtables
+      ${CASA_libtables} ${LINKcasa}
+      CACHE STRING "LINKtables")
+  endif (CASA_libtables)
+  ## -- libscimath
+  if (libg2c AND CASA_libscimath AND CASA_libscimath_f)
+    set (LINKscimath
+      ${CASA_libscimath} ${CASA_libscimath_f} ${LINKcasa} ${libg2c}
+      CACHE STRING "LINKscimath")
+  else (libg2c AND CASA_libscimath AND CASA_libscimath_f)
+    message (ERROR "Missing g2c library required for libscimath!")
+  endif (libg2c AND CASA_libscimath AND CASA_libscimath_f)
+  ## -- libmeasures
+  if (CASA_libmeasures AND CASA_libtables AND LINKscimath)
+    set (LINKmeasures
+      ${CASA_libmeasures} ${CASA_libtables} ${LINKscimath}
+      CACHE STRING "LINKmeasures")
+  endif (CASA_libmeasures AND CASA_libtables AND LINKscimath)
+  ## -- libfits
+  if (CASA_libfits AND LINKmeasures AND libwcs)
+    set (LINKfits
+      ${CASA_libfits} ${LINKmeasures} ${libwcs}
+      CACHE STRING "LINKfits")
+  else (CASA_libfits AND LINKmeasures AND libwcs)
+    message (ERROR "Missing WCS library required for libfits!")
+  endif (CASA_libfits AND LINKmeasures AND libwcs)
+  ## -- liblattices
+  if (CASA_liblattices AND CASA_libtables AND LINKscimath)
+    set (LINKlattices
+      ${CASA_liblattices} ${CASA_libtables} ${LINKscimath}
+      CACHE STRING "LINKlattices")
+  endif (CASA_liblattices AND CASA_libtables AND LINKscimath)
+  ## -- libcoordinates
+  if (CASA_libcoordinates AND LINKfits)
+    set (LINKcoordinates
+      ${CASA_libcoordinates} ${LINKfits}
+      CACHE STRING "LINKcoordinates")
+  endif (CASA_libcoordinates AND LINKfits)
+  ## -- libcomponents
+  if (CASA_libcomponents AND LINKcoordinates)
+    set (LINKcomponents
+      ${CASA_libcomponents} ${LINKcoordinates}
+      CACHE STRING "LINKcomponents")
+    if (CASA_liblattices AND LINKfits)
+      set (TMPcomponents 
+	${CASA_libcomponents} ${CASA_libcoordinates} ${CASA_liblattices} ${LINKfits}
+	CACHE STRING "TMPcomponents")
+    endif (CASA_liblattices AND LINKfits)
+  endif (CASA_libcomponents AND LINKcoordinates)
+  ## -- libimages
+  if (CASA_libimages AND TMPcomponents)
+    set (LINKimages
+      ${CASA_libimages} ${TMPcomponents}
+      CACHE STRING "LINKimages")
+  endif (CASA_libimages AND TMPcomponents)
+  ## -- libms
+  if (CASA_libms AND LINKmeasures)
+    set (LINKms
+      ${CASA_libms} ${LINKmeasures}
+      CACHE STRING "LINKms")
+  endif (CASA_libms AND LINKmeasures)
+  ## -- libmsfits
+  if (CASA_libmsfits AND CASA_libms AND LINKfits)
+    set (LINKmsfits
+      ${CASA_libmsfits} ${CASA_libms} ${LINKfits}
+      CACHE STRING "LINKmsfits")
+  endif (CASA_libmsfits AND CASA_libms AND LINKfits)
+  ## -- libmsvis
+  if (CASA_libmsvis AND LINKms)
+    set (LINKmsvis
+      ${CASA_libmsvis} ${LINKms}
+      CACHE STRING "LINKmsvis")
+    if (LINKimages)
+      set (TMPmsvis
+	${CASA_libmsvis} ${CASA_libms} ${CASA_libimages}
+	CACHE STRING "TMPmsvis")
+    endif (LINKimages)
+  endif (CASA_libmsvis AND LINKms)
+  ## -- libcalibration
+  if (CASA_libcalibration AND LINKmsvis)
+    set (LINKcalibration
+      ${CASA_libcalibration} ${LINKmsvis}
+      CACHE STRING "LINKcalibration")
+  endif (CASA_libcalibration AND LINKmsvis)
+  ## -- libionosphere
+  if (CASA_libionosphere AND LINKmeasures)
+    set (LINKionosphere
+      ${CASA_libionosphere} ${LINKmeasures}
+      CACHE STRING "LINKionosphere")
+  endif (CASA_libionosphere AND LINKmeasures)
+  ## -- libflagging
+  if (CASA_libflagging AND CASA_libmsvis AND CASA_libms AND CASA_liblattices)
+    set (LINKflagging
+      ${CASA_libflagging} ${CASA_libmsvis} ${CASA_libms} ${CASA_liblattices}
+      ${LINKmeasures}
+      CACHE STRING "LINKflagging")
+  endif (CASA_libflagging AND CASA_libmsvis AND CASA_libms AND CASA_liblattices)
+  ## -- libdish
+  set (LINKdish
+    ${CASA_libdish} ${CASA_libms} ${CASA_libfits} ${CASA_libcoordinates} ${CASA_liblattices}
+    ${LINKmeasures}
+    CACHE STRING "LINKdish")
+  ## -- libsimulators
+  if (CASA_libsimulators AND LINKms)
+    set (LINKsimulators
+      ${CASA_libsimulators} ${LINKms}
+      CACHE STRING "LINKsimulators")
+  endif (CASA_libsimulators AND LINKms)
+  ## -- libsynthesis
+  if (CASA_libsynthesis AND CASA_libcalibration AND TMPmsvis AND TMPcomponents)
+    set (LINKsynthesis
+      ${CASA_libsynthesis} ${CASA_libcalibration} ${TMPmsvis} ${TMPcomponents}
+      CACHE STRING "LINKsynthesis")
+  endif (CASA_libsynthesis AND CASA_libcalibration AND TMPmsvis AND TMPcomponents)
+  ## -- libgraphics
+  if (CASA_libgraphics AND LINKcasa)
+    set (LINKgraphics
+      ${CASA_libgraphics} ${LINKcasa}
+      CACHE STRING "LINKgraphics")
+  endif (CASA_libgraphics AND LINKcasa)
+  ## -- libtasking
+  if (CASA_libtasking AND CASA_libgraphics AND TMPmsvis)
+    set (LINKtasking
+      ${CASA_libtasking} ${CASA_libgraphics} ${CASA_libmsvis} ${CASA_libms} ${CASA_libimages}
+      ${TMPcomponents}
+      CACHE STRING "LINKtasking")
+  endif (CASA_libtasking AND CASA_libgraphics AND TMPmsvis)
+endif (CASA_libcasa)
 
-if (libg2c)
-  set (LINKscimath
-    ${CASA_libscimath} ${CASA_libscimath_f} ${LINKcasa} ${libg2c}
-    CACHE STRING "LINKscimath")
-else (libg2c)
-  message (ERROR "Missing g2c library required for libscimath!")
-endif (libg2c)
 
-set (LINKtables
-  ${CASA_libtables} ${LINKcasa}
-  CACHE STRING "LINKtables")
-
-set (LINKmeasures
-  ${CASA_libmeasures} ${CASA_libtables} ${LINKscimath}
-  CACHE STRING "LINKmeasures")
-
-if (libwcs)
-  set (LINKfits
-    ${CASA_libfits} ${LINKmeasures} ${libwcs}
-    CACHE STRING "LINKfits")
-else (libwcs)
-  message (ERROR "Missing WCS library required for libfits!")
-endif (libwcs)
-
-set (LINKlattices
-  ${CASA_liblattices} ${CASA_libtables} ${LINKscimath}
-  CACHE STRING "LINKlattices")
-
-set (LINKcoordinates
-  ${CASA_libcoordinates} ${LINKfits}
-  CACHE STRING "LINKcoordinates")
-
-set (LINKcomponents
-  ${CASA_libcomponents} ${LINKcoordinates}
-  CACHE STRING "LINKcomponents")
-
-set (TMPcomponents 
-  ${CASA_libcomponents} ${CASA_libcoordinates} ${CASA_liblattices} ${LINKfits}
-  CACHE STRING "TMPcomponents")
-
-set (LINKimages
-  ${CASA_libimages} ${TMPcomponents}
-  CACHE STRING "LINKimages")
-
-set (LINKms
-  ${CASA_libms} ${LINKmeasures}
-  CACHE STRING "LINKms")
-
-set (LINKmsfits
-  ${CASA_libmsfits} ${CASA_libms} ${LINKfits}
-  CACHE STRING "LINKmsfits")
-
-set (LINKmsvis
-  ${CASA_libmsvis} ${LINKms}
-  CACHE STRING "LINKmsvis")
-
-set (LINKcalibration
-  ${CASA_libcalibration} ${LINKmsvis}
-  CACHE STRING "LINKcalibration")
-
-set (LINKionosphere
-  ${CASA_libionosphere} ${LINKmeasures}
-  CACHE STRING "LINKionosphere")
-
-set (LINKflagging
-  ${CASA_libflagging} ${CASA_libmsvis} ${CASA_libms} ${CASA_liblattices}
-  ${LINKmeasures}
-  CACHE STRING "LINKflagging")
-
-set (LINKdish
-  "-ldish -lms -lfits -lcoordinates -llattices ${LINKmeasures}"
-  CACHE STRING "LINKdish")
-
-set (LINKsimulators
-  ${CASA_libsimulators} ${LINKms}
-  CACHE STRING "LINKsimulators")
-
-set (LINKsynthesis
-  "-lsynthesis -lcalibration -lmsvis -lms -limages ${TMPcomponents}"
-  CACHE STRING "LINKsynthesis")
-
-set (LINKgraphics
-  ${CASA_libgraphics} ${LINKcasa}
-  CACHE STRING "LINKgraphics")
-
-set (LINKtasking
-  "-ltasking -lgraphics -lmsvis -lms -limages ${TMPcomponents}"
-  CACHE STRING "LINKtasking")
+## -----------------------------------------------------------------------------
+## Depending on the set of located package libraries the instruction towards the
+## linker is put together
 
 if (CASA_libcasa)
   set (CASA_LIBRARIES ${LINKcasa})
