@@ -58,7 +58,7 @@ using casa::Vector;
 */
 casa::IPosition image_shape ()
 {
-  casa::IPosition shape (4,100,100,10,50);
+  casa::IPosition shape (5,25,25,10,50,128);
 
   return shape;
 }
@@ -156,11 +156,24 @@ int test_PagedImage ()
   int nofFailedTests (0);
   
   try {
+    casa::IPosition shape (image_shape());
     casa::String filename ("testimage.img");
-    casa::TiledShape shape (image_shape());
-    casa::PagedImage<Float> image (shape,
+    casa::TiledShape tshape (shape);
+
+    std::cout << " - Creating PagedImage of shape " << shape << " on disk..." << std::endl;
+    casa::PagedImage<Float> image (tshape,
 			      image_csys(),
 			      filename);
+    std::cout << " - Finished writing image." << std::endl;
+
+//     std::cout << " - Creating pixel array..." << std::endl;
+//     casa::Array<Float> pixels (shape);
+//     pixels = 1.0;
+
+//     std::cout << " - Write pixel values to image..." << std::endl;
+//     casa::IPosition start  (shape.nelements(),0);
+//     casa::IPosition stride (shape.nelements(),1);
+//     image.putSlice (pixels,start,stride);
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -177,6 +190,10 @@ int test_PagedImage ()
 int main () 
 {
   int nofFailedTests (0);
+
+  {
+    nofFailedTests += test_PagedImage ();
+  }
 
 //   try {
 //   } catch (std::string message) {

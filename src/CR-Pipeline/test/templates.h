@@ -89,20 +89,17 @@ namespace casa {
 
   //1000 casa/Utilities/PtrHolder.cc 
   template class PtrHolder<ImageConcat<Float> >;
-
-  // 1010 casa/Utilities/PtrHolder.cc 
   template class PtrHolder<ImageInterface<Float> >;
-
-  // 1020 casa/Utilities/PtrHolder.cc 
   template class PtrHolder<MomentCalcBase<Float> >;
-
-  // 1030 casa/Utilities/PtrHolder.cc 
   template class PtrHolder<PagedImage<Float> >;
 
-  // 1000 images/Images/PagedImage.cc casa/BasicSL/Complex.h 
-  template class PagedImage<Complex>;
+  template class PtrHolder<ImageConcat<Double> >;
+  template class PtrHolder<ImageInterface<Double> >;
+  template class PtrHolder<MomentCalcBase<Double> >;
+  template class PtrHolder<PagedImage<Double> >;
 
-  //1010 images/Images/PagedImage.cc 
+  // 1000 images/Images/PagedImage.cc casa/BasicSL/Complex.h 
   template class PagedImage<Float>;
+  template class PagedImage<Complex>;
 
 }
