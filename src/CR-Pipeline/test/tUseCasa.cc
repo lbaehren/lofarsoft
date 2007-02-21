@@ -25,8 +25,9 @@
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
+#include <casa/BasicMath/Math.h>
 
-#include <templates.h>
+#include <../implement/templates.h>
 
 /*!
   \file tUseCasa.cc
@@ -41,15 +42,18 @@
   existing CASA installation using CMake
 */
 
+// ------------------------------------------------------------------ test_Arrays
+
 /*!
-  \brief main routine
-  
+  \brief Test working with the array classes
+
   \return nofFailedTests -- The number of failed tests
 */
-int main () 
+
+int test_Arrays ()
 {
   int nofFailedTests (0);
-  
+
   std::cout << "[1] Testing IPosition class..." << std::endl;
   try {
     casa::IPosition shape (2,10,20);
@@ -81,6 +85,39 @@ int main ()
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
+// --------------------------------------------------------------- test_BasicMath
+
+/*!
+  \brief Test working with basic math related classes
+
+  return nofFailedTests -- The number of failed tests
+*/
+int test_BasicMath ()
+{
+  int nofFailedTests (0);
+
+
+  return nofFailedTests;
+}
+
+// ------------------------------------------------------------------------- main
+
+/*!
+  \brief main routine
+  
+  \return nofFailedTests -- The number of failed tests
+*/
+int main () 
+{
+  int nofFailedTests (0);
+
+  {
+    nofFailedTests += test_Arrays();
   }
   
   return nofFailedTests;

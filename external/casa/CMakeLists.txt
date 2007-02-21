@@ -37,7 +37,9 @@ FIND_PATH (HAVE_STRING_H
 ## -----------------------------------------------------------------------------
 ## Required external libraries
 
+find_package (TCL)
 find_package (X11)
+find_package (ZLIB)
 
 include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindLAPACK.cmake)
 include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindFFTW3.cmake)
@@ -123,7 +125,10 @@ SET (CASA_OPTLEVEL "-O3")
 IF (UNIX)
   ADD_DEFINITIONS (
     ## CPPOPT
-    -DAIPS_STDLIB -DAIPS_NO_TEMPLATE_SRC -DAIPS_AUTO_STL -DAIPS_NO_LEA_MALLOC
+    -DAIPS_STDLIB
+    -DAIPS_NO_TEMPLATE_SRC
+    -DAIPS_AUTO_STL
+    -DAIPS_NO_LEA_MALLOC
     ## LDOPT
 ##    -s -Xlinker -rpath -Xlinker
     )
@@ -133,6 +138,7 @@ IF (UNIX)
       -DAIPS_DARWIN
       -DAIPS_BIG_ENDIAN
       -DNATIVE_EXCP
+      -D_FILE_OFFSET_BITS=64
       -D_LARGEFILE_SOURCE
       )
     SET (CASA_CXXSTD "${CASA_CXXSTD} -fno-implicit-templates -Wreturn-type -Wimplicit -fPIC")

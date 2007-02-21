@@ -38,4 +38,7 @@ endforeach (cr_module)
 add_library (cr
   ${cr_sources}
   )
-target_link_libraries (cr ${CASA_LIBRARIES} ${LAPACK_LIBRARIES})
+target_link_libraries (cr
+  ${CASA_LIBRARIES}
+  ${LAPACK_LIBRARIES}
+  )

@@ -21,6 +21,7 @@ find_library (libg2c g2c
 
 include_directories (
   .
+  ${pgplot_SOURCE_DIR}
   ${pgplot_modules}
   ${PNG_INCLUDE_DIR}
   ${TCL_INCLUDE_PATH}
@@ -28,10 +29,11 @@ include_directories (
   ${X11_INCLUDE_DIR}
 )
 
-message (STATUS "PNG includes : ${PNG_INCLUDE_DIR}")
-message (STATUS "TCL inlcudes : ${TCL_INCLUDE_PATH}")
-message (STATUS "TK  inlcudes : ${TK_INCLUDE_PATH}")
-message (STATUS "X11 includes : ${X11_INCLUDE_DIR}")
+message (STATUS "PNG includes  : ${PNG_INCLUDE_DIR}")
+message (STATUS "TCL inlcudes  : ${TCL_INCLUDE_PATH}")
+message (STATUS "TK  inlcudes  : ${TK_INCLUDE_PATH}")
+message (STATUS "X11 includes  : ${X11_INCLUDE_DIR}")
+message (STATUS "ZLIB includes : ${ZLIB_INCLUDE_DIR}")
 
 ## ------------------------------------------------------------------------------
 ## Start building the library
@@ -68,6 +70,7 @@ set (pgplot_drivers
   ./drivers/wddriv.f
   ./drivers/xmdriv.c
   ./drivers/xwdriv.c
+  ./drivers/xmotif/XmPgplot.c
   )
 
 add_library (pgplot
@@ -77,9 +80,11 @@ add_library (pgplot
   grexec.f
   )
 target_link_libraries (pgplot
-  ${JPEG_LIBRARIES}
-  ${X11_LIBRARIES}
   ${libg2c}
+  ${JPEG_LIBRARIES}
+  ${PNG_LIBRARIES}
+  ${X11_LIBRARIES}
+  ${ZLIB_LIBRARIES}
   )
 
 ## ------------------------------------------------------------------------------
@@ -89,10 +94,13 @@ target_link_libraries (pgplot
 ##    -L/usr/X11R6/lib -lX11 -Wl,-framework -Wl,Foundation -L%p/lib -lpng -lz
 ##    -laquaterm -L$PGPLOT_DIR/lib -lpgplot
 
-add_executable (pgdemo1 examples/pgdemo1.f)
-target_link_libraries (pgdemo1
-  pgplot
-  ${JPEG_LIBRARIES}
-  ${X11_LIBRARIES}
-  ${libg2c}
+set (examples
+  pgdemo1
   )
+
+foreach (src ${examples})
+  add_executable (${src} examples/${src}.f)
+  target_link_libraries (${src} pgplot)
+  set_target_properties (${src}
+    PROPERTIES LINKER_LANGUAGE Fortran)
+endforeach (src)

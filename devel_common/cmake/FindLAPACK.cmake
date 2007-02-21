@@ -21,8 +21,12 @@ set (LAPACK_LIBRARIES "")
 foreach (lib ${libs})
   ## try to locate the library
   find_library (LAPACK_${lib} ${lib}
-    PATHS /usr/local/lib /usr/lib /lib /sw/lib
+    PATHS
+    /usr/lib
+    /usr/local/lib
+    /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
     PATH_SUFFIXES lapack
+    NO_DEFAULT_PATH
     )
   ## check if location was successful
   if (LAPACK_${lib})

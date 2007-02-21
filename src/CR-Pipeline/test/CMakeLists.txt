@@ -7,8 +7,6 @@ find_library (libg2c g2c
   PATHS /usr/local/lib /usr/lib /lib /sw/lib
   )
 
-# basic stuff is already handled a top level
-
 ## ------------------------------------------------------------------------------
 ## Include directories
 

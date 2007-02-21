@@ -23,8 +23,33 @@ find_path (G2C_INCLUDES g2c.h
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-find_library (G2C_LIBRARIES g2c
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib
+if (UNIX)
+  if (APPLE)
+    IF (${CMAKE_OSX_ARCHITECTURES} MATCHES "ppc")
+      set (lib_locations
+	/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/powerpc-apple-darwin8/4.0.0
+	/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/powerpc-apple-darwin8/4.0.1
+	)
+    ELSE (${CMAKE_OSX_ARCHITECTURES} MATCHES "ppc")
+      set (lib_locations
+	/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.0
+	/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.1
+	)
+    ENDIF (${CMAKE_OSX_ARCHITECTURES} MATCHES "ppc")
+  else (APPLE)
+    set (lib_locations
+      /usr/lib
+      /usr/local/lib
+      )
+  endif (APPLE)
+endif (UNIX)
+
+message ("g2c search paths: ${lib_locations}")
+
+find_library (G2C_LIBRARIES
+  names g2c gcc
+  PATHS ${lib_locations}
+  NO_DEFAULT_PATH
   )
 
 ## -----------------------------------------------------------------------------

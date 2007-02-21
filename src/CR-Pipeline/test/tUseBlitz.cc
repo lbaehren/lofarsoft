@@ -78,11 +78,27 @@ int test_arrays ()
     std::cerr << message << std::endl;
   }
   
+  std::cout << "[3] Construction from other array..." <<std::endl;
+  try {
+    Array<int,2> arrInt (10,20);
+    Array<float,2> arrFloat (10,20);
+    Array<double,2> arrDouble (10,20);
+
+    Array<int,2> arrIntCopy (arrInt);
+    Array<float,2> arrFloatCopy (arrFloat);
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+  }
+  
   return nofFailedTests;
 }
 
 /*!
   \brief Test usage of mathematical functions and operations
+
+  Testing is carried out in a sequence of steps: (a) first operate on standard
+  data types -- such as <tt>int</tt> or <tt>float</tt>, (b) operate on individual
+  elements of an array and (c) operate on the array.
 
   \return nofFailedTests -- The number of failed tests
 */
@@ -98,6 +114,8 @@ int test_mathematics ()
     double b (-2.0);
     std::complex<double> c (0.5,4.0);
     double result (0.0);
+
+    std::cout << "M_PI = " << M_PI << std::endl;
 
     result = a+b;
     result = a-b;
@@ -154,26 +172,6 @@ int test_mathematics ()
     std::cerr << message << std::endl;
   }
   
-  return nofFailedTests;
-}
-
-/*!
-  \brief main routine
-  
-  \return nofFailedTests -- The number of failed tests
-*/
-int main () 
-{
-  int nofFailedTests (0);
-
-  {
-    nofFailedTests += test_arrays();
-  }
-
-  {
-    nofFailedTests += test_mathematics();
-  }
-
   std::cout << "[4] Multi-element operations" <<std::endl;
   try {
     int nelem (10);
@@ -194,5 +192,28 @@ int main ()
     std::cerr << message << std::endl;
   }
   
+  return nofFailedTests;
+}
+
+/*!
+  \brief main routine
+  
+  \return nofFailedTests -- The number of failed tests
+*/
+int main () 
+{
+  int nofFailedTests (0);
+
+  {
+    nofFailedTests += test_arrays();
+  }
+
+  {
+    nofFailedTests += test_mathematics();
+  }
+
+  std::cout << "[tUseBlitz] Number of failed tests = "
+	    << nofFailedTests << std::endl;
+
   return nofFailedTests;
 }

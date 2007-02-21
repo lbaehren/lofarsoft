@@ -5,20 +5,23 @@
 #                          have been found.
 #  <PACKAGE>_INCLUDES   = Include path for the header files of <PACKAGE>
 #  <PACKAGE>_LIBRARIES  = Link these to use <PACKAGE>
+#  <PACKAGE>_LFGLAS     = Linker flags (optional)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (<PACKAGE>_INCLUDES <header file(s)>
-  PATHS /usr/local/include /usr/include /sw/include
+  PATHS /usr/include /usr/local/include /sw/include
   PATH_SUFFIXES <optional path extension>
+  NO_DEFAULT_PATH
   )
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
 find_library (<PACKAGE>_LIBRARIES <package name>
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib
+  PATHS /usr/lib /usr/local/lib /sw/lib
+  NO_DEFAULT_PATH
   )
 
 ## -----------------------------------------------------------------------------

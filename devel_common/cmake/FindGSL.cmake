@@ -1,95 +1,72 @@
-## Try to find gnu scientific library GSL  
-## (see http://www.gnu.org/software/gsl/)
-## Once run this will define: 
-## 
-## GSL_FOUND       = system has GSL lib
-##
-## GSL_LIBRARIES   = full path to the libraries
-##    on Unix/Linux with additional linker flags from "gsl-config --libs"
-## 
-## CMAKE_GSL_CXX_FLAGS  = Unix compiler flags for GSL, essentially "`gsl-config --cxxflags`"
-##
-## GSL_INCLUDE_DIR      = where to find headers 
-##
-## GSL_LINK_DIRECTORIES = link directories, useful for rpath on Unix
-## GSL_EXE_LINKER_FLAGS = rpath on Unix
-##
-## Felix Woelk 07/2004
-## minor corrections Jan Woetzel
-##
-## www.mip.informatik.uni-kiel.de
-## --------------------------------
+# - Check for the presence of GSL
+#
+# The following variables are set when GSL is found:
+#  HAVE_GSL       = Set to true, if all components of GSL have been found.
+#  GSL_INCLUDES   = Include path for the header files of GSL
+#  GSL_LIBRARIES  = Link these to use GSL
 
-IF(WIN32)
-  MESSAGE(SEND_ERROR "FindGSL.cmake: gnu scientific library GSL not (yet) supported on WIN32")
-  
-ELSE(WIN32)
-  IF(UNIX) 
-    SET(GSL_CONFIG_PREFER_PATH "$ENV{GSL_HOME}/bin" CACHE STRING "preferred path to OpenSG (osg-config)")
-    FIND_PROGRAM(GSL_CONFIG gsl-config
-      ${GSL_CONFIG_PREFER_PATH}
-      /usr/bin/
-      )
-    # MESSAGE("DBG GSL_CONFIG ${GSL_CONFIG}")
-    
-    IF (GSL_CONFIG) 
-      # set CXXFLAGS to be fed into CXX_FLAGS by the user:
-      SET(GSL_CXX_FLAGS "`${GSL_CONFIG} --cflags`")
-      
-      # set INCLUDE_DIRS to prefix+include
-      EXEC_PROGRAM(${GSL_CONFIG}
-        ARGS --prefix
-        OUTPUT_VARIABLE GSL_PREFIX)
-      SET(GSL_INCLUDE_DIR ${GSL_PREFIX}/include CACHE STRING INTERNAL)
+## -----------------------------------------------------------------------------
+## Check for existance of GSL configuration utility; if it is present, we can
+## use it to obtain further information on the GSL installation.
 
-      # set link libraries and link flags
-      SET(GSL_LIBRARIES "`${GSL_CONFIG} --libs`")
-      
-      ## extract link dirs for rpath  
-      EXEC_PROGRAM(${GSL_CONFIG}
-        ARGS --libs
-        OUTPUT_VARIABLE GSL_CONFIG_LIBS )
+find_program (GSL_CONFIG gsl-config
+  PATHS /usr/bin /usr/local/bin /sw/bin
+  )
 
-      ## split off the link dirs (for rpath)
-      ## use regular expression to match wildcard equivalent "-L*<endchar>"
-      ## with <endchar> is a space or a semicolon
-      STRING(REGEX MATCHALL "[-][L]([^ ;])+" 
-        GSL_LINK_DIRECTORIES_WITH_PREFIX 
-        "${GSL_CONFIG_LIBS}" )
-        #      MESSAGE("DBG  GSL_LINK_DIRECTORIES_WITH_PREFIX=${GSL_LINK_DIRECTORIES_WITH_PREFIX}")
+## -----------------------------------------------------------------------------
+## Check for the header files
 
-      ## remove prefix -L because we need the pure directory for LINK_DIRECTORIES
-      
-      IF (GSL_LINK_DIRECTORIES_WITH_PREFIX)
-        STRING(REGEX REPLACE "[-][L]" "" GSL_LINK_DIRECTORIES ${GSL_LINK_DIRECTORIES_WITH_PREFIX} )
-      ENDIF (GSL_LINK_DIRECTORIES_WITH_PREFIX)
-      SET(GSL_EXE_LINKER_FLAGS "-Wl,-rpath,${GSL_LINK_DIRECTORIES}" CACHE STRING INTERNAL)
-      #      MESSAGE("DBG  GSL_LINK_DIRECTORIES=${GSL_LINK_DIRECTORIES}")
-      #      MESSAGE("DBG  GSL_EXE_LINKER_FLAGS=${GSL_EXE_LINKER_FLAGS}")
+find_path (GSL_INCLUDES gsl_version.h
+  PATHS /usr/include /usr/local/include /sw/include
+  PATH_SUFFIXES gsl
+  NO_DEFAULT_PATH
+  )
 
-      #      ADD_DEFINITIONS("-DHAVE_GSL")
-      #      SET(GSL_DEFINITIONS "-DHAVE_GSL")
-      MARK_AS_ADVANCED(
-        GSL_CXX_FLAGS
-        GSL_INCLUDE_DIR
-        GSL_LIBRARIES
-        GSL_LINK_DIRECTORIES
-        GSL_DEFINITIONS
-      )
-      MESSAGE(STATUS "Using GSL from ${GSL_PREFIX}")
-      
-    ELSE(GSL_CONFIG)
-      MESSAGE("FindGSL.cmake: gsl-config not found. Please set it manually. GSL_CONFIG=${GSL_CONFIG}")
-    ENDIF(GSL_CONFIG)
+## -----------------------------------------------------------------------------
+## Check for the library; if we have "gsl-config" we can ask it for the linker
+## parameters
 
-  ENDIF(UNIX)
-ENDIF(WIN32)
+if (GSL_CONFIG)
+  execute_process (
+    COMMAND ${GSL_CONFIG} --libs
+    OUTPUT_VARIABLE GSL_LIBRARIES)  
+else (GSL_CONFIG)
+  find_library (GSL_LIBRARIES gsl
+    PATHS /usr/lib /usr/local/lib /sw/lib
+    NO_DEFAULT_PATH
+    )
+endif (GSL_CONFIG)
 
+## -----------------------------------------------------------------------------
+## Actions taken when all components have been found
 
-IF(GSL_LIBRARIES)
-  IF(GSL_INCLUDE_DIR OR GSL_CXX_FLAGS)
+if (GSL_INCLUDES AND GSL_LIBRARIES)
+  set (HAVE_GSL TRUE)
+else (GSL_INCLUDES AND GSL_LIBRARIES)
+  if (NOT GSL_FIND_QUIETLY)
+    if (NOT GSL_INCLUDES)
+      message (STATUS "Unable to find GSL header files!")
+    endif (NOT GSL_INCLUDES)
+    if (NOT GSL_LIBRARIES)
+      message (STATUS "Unable to find GSL library files!")
+    endif (NOT GSL_LIBRARIES)
+  endif (NOT GSL_FIND_QUIETLY)
+endif (GSL_INCLUDES AND GSL_LIBRARIES)
 
-    SET(GSL_FOUND 1)
-    
-  ENDIF(GSL_INCLUDE_DIR OR GSL_CXX_FLAGS)
-ENDIF(GSL_LIBRARIES)
+if (HAVE_GSL)
+  if (NOT GSL_FIND_QUIETLY)
+    message (STATUS "Found components for GSL")
+    message (STATUS "GSL_INCLUDES  = ${GSL_INCLUDES}")
+    message (STATUS "GSL_LIBRARIES = ${GSL_LIBRARIES}")
+  endif (NOT GSL_FIND_QUIETLY)
+else (HAVE_GSL)
+  if (GSL_FIND_REQUIRED)
+    message (FATAL_ERROR "Could not find GSL!")
+  endif (GSL_FIND_REQUIRED)
+endif (HAVE_GSL)
+
+mark_as_advanced (
+  HAVE_GSL
+  GSL_LIBRARIES
+  GSL_INCLUDES
+  )

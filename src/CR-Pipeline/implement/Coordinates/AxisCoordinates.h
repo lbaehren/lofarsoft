@@ -25,8 +25,8 @@
 
 #include <stdlib.h>
 #include <map>
+#include <cmath>
 
-#include <casa/aips.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/ArrayMath.h>
 

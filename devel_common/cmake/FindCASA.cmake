@@ -4,6 +4,7 @@
 ##
 ## Variables assigned:
 ##  HAVE_CASA
+##  CASA_BASEDIR   = Base directory of the CASA installation (aka AIPSROOT)
 ##  HAVE_AIPS_H    = aips.h header file located
 ##  HAVE_GLISH_H   = glish.h header file located
 ##  CASA_INCLUDES  = Path to the CASA header files
@@ -13,19 +14,10 @@
 ## -----------------------------------------------------------------------------
 ## Required external packages
 
+## [1] libg2c
+
 find_library (libg2c g2c
   PATHS /usr/local/lib /usr/lib /lib /sw/lib
-  )
-
-find_library (libwcs wcs
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib /opt/casa /sw/share/casa
-  PATH_SUFFIXES
-  darwin/lib
-  linux_gnu/lib
-  current/darwin/lib
-  current/linux_gnu/lib
-  stable/darwin/lib
-  stable/linux_gnu/lib
   )
 
 ## -----------------------------------------------------------------------------
@@ -53,24 +45,50 @@ find_path (CASA_INCLUDES aips.h
 if (CASA_INCLUDES)
   set (HAVE_AIPS_H true)
   string (REGEX REPLACE include/casa include CASA_INCLUDES ${CASA_INCLUDES})
-  string (REGEX REPLACE /code/include "" AIPSROOT ${CASA_INCLUDES})
+  string (REGEX REPLACE /code/include "" CASA_BASEDIR ${CASA_INCLUDES})
 endif (CASA_INCLUDES)
 
-## Find "glish.h", which is pointing towards the location of the Glish source code
+## -----------------------------------------------------------------------------
+## The is a number of packages, which are distrubuted along with CASA, so once
+## we have been able to discover the location of the CASA base directory, we
+## can set the paths to these additional packages
+
+## [1] Glish -- 
 
 if (HAVE_AIPS_H)
   ## locate the Glish header file
-  find_path (GLISH_INCLUDE_DIR glish.h
+  find_path (GLISH_INCLUDES glish.h
     ${CASA_INCLUDES}
     PATH_SUFFIXES
     Glish
     )
   ## adjust the include path for the Glish header files
-  if (GLISH_INCLUDE_DIR)
+  if (GLISH_INCLUDES)
     set (HAVE_GLISH_H true)
-    STRING (REGEX REPLACE include/Glish include GLISH_INCLUDE_DIR ${GLISH_INCLUDE_DIR})
-  endif (GLISH_INCLUDE_DIR)
+    STRING (REGEX REPLACE include/Glish include GLISH_INCLUDES ${GLISH_INCLUDES})
+  endif (GLISH_INCLUDES)
 endif (HAVE_AIPS_H)
+
+## [2] WCSLIB -- library for the dealing with world coordinate systems
+
+find_library (libwcs
+  wcs
+  PATHS ${CASA_BASEDIR}
+  PATH_SUFFIXES
+  darwin/lib
+  linux_gnu/lib
+  )
+
+find_path (wcslib_includes
+  wcs.h
+  PATHS ${CASA_BASEDIR}/code/casa
+  PATH_SUFFIXES wcslib
+  )
+
+if (wcslib_includes)
+  string (REGEX REPLACE wcslib "" wcslib_includes ${wcslib_includes})
+  list (APPEND CASA_INCLUDES ${wcslib_includes})
+endif (wcslib_includes)
 
 ## -----------------------------------------------------------------------------
 ## Preparation: get additional information about the system
@@ -96,7 +114,7 @@ endif (UNIX)
 ## Check for the library
 
 find_path (AIPSLIBD version.o
-  PATHS ${AIPSROOT}
+  PATHS ${CASA_BASEDIR}
   PATH_SUFFIXES darwin/lib linux/lib linux_gnu/lib
   )
 
@@ -399,7 +417,7 @@ if (HAVE_CASA)
   if (NOT CASA_FIND_QUIETLY)
     message (STATUS "Found components for CASA.")
     message (STATUS "AIPSARCH ........... : ${AIPS_ARCH}")
-    message (STATUS "AIPSROOT ........... : ${AIPSROOT}")
+    message (STATUS "CASA_BASEDIR ....... : ${CASA_BASEDIR}")
     message (STATUS "CASA_LIBRARIES_DIR . : ${CASA_LIBRARIES_DIR}")
     message (STATUS "CASA_LIBRARIES ..... : ${CASA_LIBRARIES}")
     message (STATUS "CASA header files .. : ${CASA_INCLUDES}")
@@ -418,6 +436,7 @@ endif (HAVE_CASA)
 
 mark_as_advanced (
   HAVE_CASA
+  CASA_BASEDIR
   CASA_INCLUDES
   CASA_LIBRARIES
   )

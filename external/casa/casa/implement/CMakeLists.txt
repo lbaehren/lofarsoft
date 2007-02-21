@@ -1,6 +1,17 @@
 PROJECT (CASA_casa_libcasa)
 
 ## -----------------------------------------------------------------------------
+## Additional required external software
+
+find_library (libm m
+  PATHS
+  /usr/lib
+  /usr/local/lib
+  /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
+  /sw/lib
+  )
+
+## -----------------------------------------------------------------------------
 ## libcasa
 
 SET (casa_modules
@@ -27,16 +38,17 @@ endforeach (casa_module)
 
 ## collect the files responsible for template instantiation
 
-FILE (GLOB casa_templates ../../templates/casa/*.cc)
+file (GLOB casa_templates ../../templates/casa/*.cc)
 
 ## build the library
 
-ADD_LIBRARY (casa
+add_library (casa
   aips.cc
   version2.cc
   ${casa_sources}
   ${casa_templates}
 )
+target_link_libraries (casa ${libm})
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
