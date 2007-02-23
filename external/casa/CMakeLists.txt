@@ -186,4 +186,5 @@ SUBDIRS (
   measures
   ms
   lattices
+  coordinates
   )

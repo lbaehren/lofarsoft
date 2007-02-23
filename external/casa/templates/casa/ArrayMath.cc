@@ -21,6 +21,7 @@ namespace casa {
   template void convertArray(Array<DComplex> &, Array<Short> const &);
   template void convertArray(Array<DComplex> &, Array<uChar> const &);
   template void convertArray(Array<DComplex> &, Array<uInt> const &);
+
   template void convertArray(Array<Complex> &, Array<DComplex> const &);
   template void convertArray(Array<Complex> &, Array<Double> const &);
   template void convertArray(Array<Complex> &, Array<Float> const &);
@@ -28,6 +29,7 @@ namespace casa {
   template void convertArray(Array<Complex> &, Array<Short> const &);
   template void convertArray(Array<Complex> &, Array<uChar> const &);
   template void convertArray(Array<Complex> &, Array<uInt> const &);
+
   template void convertArray(Array<Double> &, Array<Double> const &);
   template void convertArray(Array<Double> &, Array<Float> const &);
   template void convertArray(Array<Double> &, Array<Int> const &);
@@ -35,12 +37,14 @@ namespace casa {
   template void convertArray(Array<Double> &, Array<uChar> const &);
   template void convertArray(Array<Double> &, Array<uInt> const &);
   template void convertArray(Array<Double> &, Array<uShort> const &);
+
   template void convertArray(Array<Float> &, Array<Double> const &);
   template void convertArray(Array<Float> &, Array<Int> const &);
   template void convertArray(Array<Float> &, Array<Short> const &);
   template void convertArray(Array<Float> &, Array<uShort> const & );
   template void convertArray(Array<Float> &, Array<uChar> const &);
   template void convertArray(Array<Float> &, Array<uInt> const &);
+
   template void convertArray(Array<Int> &, Array<Short> const &);
   template void convertArray(Array<Int> &, Array<uChar> const &);
   template void convertArray(Array<Int> &, Array<uInt> const &);
@@ -48,6 +52,7 @@ namespace casa {
   template void convertArray(Array<Int> &, Array<Bool> const &);
   template void convertArray(Array<Int> &, Array<Float> const &);
   template void convertArray(Array<Int> &, Array<Double> const &);
+
   template void convertArray(Array<Short> &, Array<Char> const &);
   template void convertArray(Array<Short> &, Array<Double> const &);
   template void convertArray(Array<Short> &, Array<Float> const &);
@@ -58,20 +63,25 @@ namespace casa {
   template void convertArray(Array<Short> &, Array<uInt> const &);
   template void convertArray(Array<Short> &, Array<uLong> const &);
   template void convertArray(Array<Short> &, Array<uShort> const &);
+
   template void convertArray(Array<uChar> &, Array<Int> const &);
   template void convertArray(Array<uChar> &, Array<Short> const &);
   template void convertArray(Array<uChar> &, Array<Float> const &);
   template void convertArray(Array<uChar> &, Array<Double> const &);
+
   template void convertArray(Array<uInt> &, Array<Int> const &);
   template void convertArray(Array<uInt> &, Array<Short> const &);
   template void convertArray(Array<uInt> &, Array<uChar> const &);
   template void convertArray(Array<uInt> &, Array<Float> const &);
   template void convertArray(Array<uInt> &, Array<Double> const &);
+
   template void convertArray(Array<uShort> &, Array<uChar> const &);
   template void convertArray(Array<uShort> &, Array<Short> const &);
   template void convertArray(Array<uShort> &, Array<Int> const &);
   template void convertArray(Array<uShort> &, Array<Float> const &);
   template void convertArray(Array<uShort> &, Array<Double> const &);
+
+  template void convertArray(Array<Bool> &, Array<Int> const &);
 
   // --------------------------------------------------------------- crossProduct
 
