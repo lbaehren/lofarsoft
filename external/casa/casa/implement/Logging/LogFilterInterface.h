@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: LogFilterInterface.h,v 19.4 2004/11/30 17:50:17 ddebonis Exp $
+//# $Id: LogFilterInterface.h,v 19.5 2006/12/12 23:20:42 gvandiep Exp $
 
 #ifndef CASA_LOGFILTERINTERFACE_H
 #define CASA_LOGFILTERINTERFACE_H
@@ -86,8 +86,9 @@ class LogFilterInterface
 public:
   // Construct a filter with the LOWEST priority that you want passed.  Thus
   // <src>DEBUGGING</src> passes everything. Note that it is not possible to
-  // block <src>SEVERE</src> level messages, although you can use a <linkto
-  // class="NullLogSink">NullLogSink</linkto> which will have this effect.
+  // block <src>SEVERE</src> level messages, although you can use a
+  // <linkto class="NullLogSink">NullLogSink</linkto> which will have
+  // this effect.
   LogFilterInterface()
     {}
 

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: RawDataConversion.h,v 19.4 2004/11/30 17:50:17 ddebonis Exp $
+//# $Id: RawDataConversion.h,v 19.5 2006/12/12 23:20:42 gvandiep Exp $
 
 #ifndef CASA_RAWDATACONVERSION_H
 #define CASA_RAWDATACONVERSION_H
@@ -170,7 +170,7 @@ public:
     // </group>
 
     // Get the external size of the data type.
-    // This returns the </src>sizeof</src>.
+    // This returns the <src>sizeof</src>.
     // <group>
     virtual unsigned int externalSize (const char*) const;
     virtual unsigned int externalSize (const unsigned char*) const;

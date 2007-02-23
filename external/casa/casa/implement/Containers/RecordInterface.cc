@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: RecordInterface.cc,v 19.4 2006/09/22 01:10:16 gvandiep Exp $
+//# $Id: RecordInterface.cc,v 19.5 2007/01/29 22:09:18 gvandiep Exp $
 
 
 #include <casa/Containers/RecordInterface.h>
@@ -413,6 +413,15 @@ void RecordInterface::get (const RecordFieldId& id, Array<String>& value) const
 Bool RecordInterface::asBool (const RecordFieldId& id) const
 {
     Int whichField = idToNumber (id);
+    DataType dataType = type (whichField);
+    switch (dataType) {
+    case TpBool:
+        break;
+    case TpInt:
+	return *(const Int*)get_pointer (whichField, TpInt);
+    default:
+	throw (AipsError ("RecordInterface::asBool - invalid data type"));
+    }
     return *(const Bool*)get_pointer (whichField, TpBool);
 }
 uChar RecordInterface::asuChar (const RecordFieldId& id) const

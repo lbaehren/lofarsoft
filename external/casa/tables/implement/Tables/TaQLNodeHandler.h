@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TaQLNodeHandler.h,v 19.2 2005/06/30 11:00:54 gvandiep Exp $
+//# $Id: TaQLNodeHandler.h,v 19.4 2006/12/19 05:12:59 gvandiep Exp $
 
 #ifndef TABLES_TAQLNODEHANDLER_H
 #define TABLES_TAQLNODEHANDLER_H
@@ -85,6 +85,7 @@ class TaQLNodeHRValue;
 //  <li> It is possible to use expressions in the column list.
 //       That could not be done before, because the column list was
 //       parsed/processed before the table list.
+// </ul>
 // </motivation>
 
 class TaQLNodeHandler : public TaQLNodeVisitor
@@ -124,6 +125,7 @@ public:
   virtual TaQLNodeResult visitCreTabNode   (const TaQLCreTabNodeRep& node);
   virtual TaQLNodeResult visitColSpecNode  (const TaQLColSpecNodeRep& node);
   virtual TaQLNodeResult visitRecFldNode   (const TaQLRecFldNodeRep& node);
+  virtual TaQLNodeResult visitUnitNode     (const TaQLUnitNodeRep& node);
   // </group>
 
   // Get the actual result object from the result.

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: OrderedMap.h,v 19.9 2005/06/18 21:19:14 ddebonis Exp $
+//# $Id: OrderedMap.h,v 19.10 2006/12/12 23:20:42 gvandiep Exp $
 
 #ifndef CASA_ORDEREDMAP_H
 #define CASA_ORDEREDMAP_H
@@ -356,7 +356,7 @@ public:
   // Retrieve the value at the given index in the internal block
   // which stores the representation of the OrderedMap.
   //
-  // <note> This should typically not be used.
+  // <note> This should typically not be used.</note>
   //
   //+grp
   value &getVal(uInt inx) {

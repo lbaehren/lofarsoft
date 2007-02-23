@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TableRecordRep.cc,v 19.5 2006/02/28 14:10:26 gvandiep Exp $
+//# $Id: TableRecordRep.cc,v 19.7 2007/01/08 05:27:17 gvandiep Exp $
 
 #include <tables/Tables/TableRecordRep.h>
 #include <tables/Tables/TableRecord.h>
@@ -377,6 +377,27 @@ Bool TableRecordRep::areTablesMultiUsed() const
     return False;
 }
 
+
+void TableRecordRep::print (std::ostream& os, Int maxNrValues,
+			    const String& indent) const
+{
+    for (uInt i=0; i<nused_p; i++) {
+        os << indent << desc_p.name(i) << ": ";
+	if (desc_p.type(i) == TpRecord) {
+	    os << '{' << endl;
+	    static_cast<const TableRecord*>(data_p[i])->print(os, maxNrValues,
+							      indent+"  ");
+	    os << indent << '}' << endl;
+	} else if (desc_p.type(i) == TpTable) {
+	    os << "Table "
+	       << static_cast<const TableKeyword*>(data_p[i])->tableName();
+        } else {
+	    printDataField (os, desc_p.type(i),
+			    indent, maxNrValues, data_p[i]);
+	    os << endl;
+	}
+    }
+}
 
 void TableRecordRep::putRecord (AipsIO& os, int recordType,
 				const TableAttr& parentAttr) const

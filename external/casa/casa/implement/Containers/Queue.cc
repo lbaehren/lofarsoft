@@ -30,48 +30,46 @@
 #include <casa/Exceptions/Error.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
-  
-  template<class T> Queue<T>::Queue() : data_p(1), first_p(0), next_p(0)
-  {
+
+template<class T> Queue<T>::Queue() : first_p(0), next_p(0), data_p(1)
+{
     // Nothing
-  }
-  
-  template<class T> Queue<T>::~Queue()
-  {
+}
+
+template<class T> Queue<T>::~Queue()
+{
     // Nothing - storage reclaimed in Block dtor
-  }
-  
-  template<class T> Queue<T>::Queue(const Queue<T> &other)
-    : data_p(other.data_p),
-      first_p(other.first_p),
-      next_p(other.next_p)
-  {
+}
+
+template<class T> Queue<T>::Queue(const Queue<T> &other)
+    : first_p(other.first_p), next_p(other.next_p), data_p(other.data_p)
+{
     // The lazy solution. We could avoid some copying if we didn't copy
     // the empty elements first.
     compress();
-  }
-  
-  template<class T> Queue<T> &Queue<T>::operator=(const Queue<T> &other)
-  {
+}
+
+template<class T> Queue<T> &Queue<T>::operator=(const Queue<T> &other)
+{
     if (&other == this) {
-      return *this;
+	return *this;
     }
-    
+
     // The lazy solution. We could avoid some copying if we didn't copy
     // the empty elements first.
+    next_p = other.next_p;
     first_p = other.first_p;
-    next_p  = other.next_p;
-    data_p  = other.data_p;
+    data_p = other.data_p;
     compress();
     return *this;
-  }
-  
-  template<class T> void Queue<T>::clear()
-  {
+}
+
+template<class T> void Queue<T>::clear()
+{
     first_p = next_p = 0;
     data_p.resize(1, True, False);
-  }
-  
+}
+
 template<class T> void Queue<T>::compress()
 {
     // Take some care to do this efficiently

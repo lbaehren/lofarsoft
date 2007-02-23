@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: RetypedArrayEngine.h,v 19.8 2006/01/11 12:45:32 gvandiep Exp $
+//# $Id: RetypedArrayEngine.h,v 19.9 2006/12/22 02:19:44 gvandiep Exp $
 
 #ifndef TABLES_RETYPEDARRAYENGINE_H
 #define TABLES_RETYPEDARRAYENGINE_H
@@ -402,6 +402,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // NOT be included in this StokesVector.h, thus the implementations
 // should not be inlined (they are too large anyway), but put in a
 // separate .cc file where Array.h and Vector.h can be included.
+// </note>
 // <p>
 // Another compiler problem is that the variable mask_p is not
 // automatically converted to a void*, so an explicit cast has to be done.

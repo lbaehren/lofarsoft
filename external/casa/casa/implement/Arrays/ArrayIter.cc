@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ArrayIter.cc,v 19.4 2004/12/06 07:15:42 gvandiep Exp $
+//# $Id: ArrayIter.cc,v 19.5 2007/02/19 04:26:51 gvandiep Exp $
 
 #include <casa/Arrays/ArrayIter.h>
 #include <casa/Arrays/ArrayError.h>
@@ -86,7 +86,7 @@ template<class T> void ArrayIterator<T>::init(Array<T> &a)
     Int lastoff = 0;
     for (uInt i=0; i<iAxes.nelements(); i++) {
         uInt axis = iAxes(i);
-	trc(axis) = 0;
+	if (trc(axis) > 0) trc(axis) = 0;
 	offset_p(axis) = steps(axis) - lastoff;
 	lastoff += (shape(axis)-1)*steps(axis);
     }

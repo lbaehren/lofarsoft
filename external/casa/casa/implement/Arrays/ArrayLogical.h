@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ArrayLogical.h,v 19.7 2005/06/18 21:19:14 ddebonis Exp $
+//# $Id: ArrayLogical.h,v 19.8 2006/11/20 22:29:48 gvandiep Exp $
 
 #ifndef CASA_ARRAYLOGICAL_H
 #define CASA_ARRAYLOGICAL_H
@@ -386,6 +386,13 @@ template<class T> Bool anyOR (const T &val, const Array<T> &array);
 // </group>
 
 
+// Are all elements true?
+inline Bool allTrue (const Array<Bool>& array)
+  { return allEQ (array, True); }
+
+// Is any all element true?
+inline Bool anyTrue (const Array<Bool>& array)
+  { return anyEQ (array, True); }
 
 // 
 // Determine the number of true or false elements.

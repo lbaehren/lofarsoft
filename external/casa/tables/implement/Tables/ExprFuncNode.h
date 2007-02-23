@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ExprFuncNode.h,v 19.9 2006/11/20 00:56:17 gvandiep Exp $
+//# $Id: ExprFuncNode.h,v 19.10 2006/12/19 05:12:58 gvandiep Exp $
 
 #ifndef TABLES_EXPRFUNCNODE_H
 #define TABLES_EXPRFUNCNODE_H
@@ -241,6 +241,12 @@ public:
 				       FunctionType,
 				       PtrBlock<TableExprNodeRep*>&);
 
+    // Fill the result unit in the node.
+    // Adapt the children nodes if their units need to be converted.
+    static void fillUnits (TableExprNodeRep* node,
+			   PtrBlock<TableExprNodeRep*>& nodes,
+			   FunctionType func);
+
     // Link the children to the node and convert the children
     // to constants if possible. Also convert the node to
     // constant if possible.
@@ -253,6 +259,10 @@ public:
     static void fillChildNodes (TableExprFuncNode* thisNode,
 				PtrBlock<TableExprNodeRep*>& nodes,
 				const Block<Int>& dtypeOper);
+
+    // Fill the unit of the node for the functions with a predefined unit
+    // (like asin).
+    static void fillUnit (TableExprNodeRep& node, FunctionType func);
 
     // Some functions to be used by TableExprNodeFuncArray.
     // <group>
@@ -268,6 +278,11 @@ private:
     // Try if the function gives a constant result.
     // If so, set the expression type to Constant.
     void tryToConst();
+
+    // Make the units of nodes from <src>starg</src> till <src>endarg</src>
+    // equal. Return the unit found.
+    static const Unit& makeEqualUnits (PtrBlock<TableExprNodeRep*>& nodes,
+				       uInt starg, uInt endarg);
 
 
     FunctionType funcType_p;        // which function

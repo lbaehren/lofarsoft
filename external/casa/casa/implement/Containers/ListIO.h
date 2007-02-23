@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ListIO.h,v 19.7 2005/06/18 21:19:14 ddebonis Exp $
+//# $Id: ListIO.h,v 19.8 2006/12/21 23:28:32 gvandiep Exp $
 
 #ifndef CASA_LISTIO_H
 #define CASA_LISTIO_H
@@ -57,6 +57,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // <group>
 template<class t> ostream &operator<<(ostream &, const List<t> &);
 template<class t> ostream &operator<<(ostream &, const ConstListIter<t> &);
+// </group>
 // </group>
 
 

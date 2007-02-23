@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ExprNode.h,v 19.18 2006/11/20 00:56:17 gvandiep Exp $
+//# $Id: ExprNode.h,v 19.20 2006/12/19 05:12:59 gvandiep Exp $
 
 #ifndef TABLES_EXPRNODE_H
 #define TABLES_EXPRNODE_H
@@ -44,6 +44,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 //# Forward Declarations
 class Table;
 class String;
+class Unit;
 class TableRecord;
 class TableExprNodeSet;
 template<class T> class Block;
@@ -718,8 +719,8 @@ public:
     // as the source.
     // <br>Note that there exist TableExprNodeSet constructors to
     // convert an <src>IPosition</src> or <src>Slicer</src> object
-    // automatically to a <src/TableExprNodeSet</src>.
-    // An <src>IPosition<src> addresses a single element and results in
+    // automatically to a <src>TableExprNodeSet</src>.
+    // An <src>IPosition</src> addresses a single element and results in
     // a scalar node, while a <src>Slicer</src> can address multiple
     // elements and always results in an array node.
     TableExprNode operator() (const TableExprNodeSet& indices);
@@ -730,6 +731,11 @@ public:
     TableExprNode in (const TableExprNode& array) const;
     TableExprNode in (const TableExprNodeSet& set) const;
     // </group>
+
+    // Use a unit for the given TableExprNode.
+    // Note that if a column has a unit, it is automatically set. In that case
+    // this can be used to convert units.
+    TableExprNode useUnit (const Unit& unit) const;
 
     // Constructors to convert a constant value to a TableExprNode.
     // The constructor for char* is also supported to convert a
@@ -774,6 +780,10 @@ public:
     // Does the node contain no actual node?
     Bool isNull() const
       { return node_p == 0; }
+
+    // Get the unit of the expression.
+    const Unit& unit() const
+      { return node_p->unit(); }
 
     // Get the data type of the expression.
     // Currently the only possible values are TpBool, TpDouble,
@@ -953,6 +963,9 @@ public:
  
     // returns pointer to the representation-object of it
     const TableExprNodeRep* getNodeRep() const;
+
+    // Adapt the unit of the expression to the given unit (if not empty).
+    void adaptUnit (const Unit&);
 
 private:
     // returns pointer to the representation-object of it

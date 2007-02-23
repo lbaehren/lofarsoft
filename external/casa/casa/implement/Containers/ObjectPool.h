@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ObjectPool.h,v 19.5 2005/06/18 21:19:14 ddebonis Exp $
+//# $Id: ObjectPool.h,v 19.6 2006/11/24 01:26:11 gvandiep Exp $
 
 #ifndef CASA_OBJECTPOOL_H
 #define CASA_OBJECTPOOL_H
@@ -78,7 +78,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 //   // Release the objects for re-use
 //   pool.release(el5, 5);
 //   pool.release(el10, 10); 
-// </srcblock
+// </srcblock>
 // </example>
 //
 // <motivation>

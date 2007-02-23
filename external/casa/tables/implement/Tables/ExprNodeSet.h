@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ExprNodeSet.h,v 19.12 2006/11/10 01:16:01 gvandiep Exp $
+//# $Id: ExprNodeSet.h,v 19.14 2006/12/19 05:12:59 gvandiep Exp $
 
 #ifndef TABLES_EXPRNODESET_H
 #define TABLES_EXPRNODESET_H
@@ -187,6 +187,9 @@ public:
     // Replace the BaseTable pointer in this node and all its children.
     virtual void replaceTablePtr (const Table&);
 
+    // Let a set node convert itself to the given unit.
+    virtual void adaptSetUnits (const Unit&);
+
 private:
     // A copy of a TableExprNodeSetElem cannot be made.
     TableExprNodeSetElem& operator= (const TableExprNodeSetElem&);
@@ -274,8 +277,9 @@ inline TableExprNodeRep* TableExprNodeSetElem::increment() const
 //      All set elements must be scalars of any type.
 // </ol>
 // The type of all set elements has to be the same.
-// The set consists of <linkto class=TableExprNodeSetElem>TableExprNodeSetElem
-// <linkto> elements. The <src>add</src> function has to be used to
+// The set consists of
+// <linkto class=TableExprNodeSetElem>TableExprNodeSetElem</linkto>
+// elements. The <src>add</src> function has to be used to
 // add an element to the set.
 // <p>
 // It is possible to construct the object directly from an
@@ -383,6 +387,9 @@ public:
 
     // Replace the BaseTable pointer in this node and all its children.
     virtual void replaceTablePtr (const Table&);
+
+    // Let a set node convert itself to the given unit.
+    virtual void adaptSetUnits (const Unit&);
 
 private:
     // A copy of a TableExprNodeSet cannot be made.

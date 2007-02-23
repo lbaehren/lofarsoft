@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Block.h,v 19.6 2005/05/09 09:21:26 wbrouw Exp $
+//# $Id: Block.h,v 19.7 2006/11/24 04:07:49 gvandiep Exp $
 
 #ifndef CASA_BLOCK_H
 #define CASA_BLOCK_H
@@ -72,6 +72,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // <src>storage()</src>.
 // Resizing the array will also have this effect if the underlying storage
 // is actually affected.
+// </note>
 //
 // If index checking is turned on, an out-of-bounds index will
 // generate an <src>indexError<uInt></src> exception.

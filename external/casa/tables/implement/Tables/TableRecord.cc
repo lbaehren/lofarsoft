@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TableRecord.cc,v 19.7 2005/01/12 11:03:04 gvandiep Exp $
+//# $Id: TableRecord.cc,v 19.9 2007/01/08 05:27:17 gvandiep Exp $
 
 #include <tables/Tables/TableRecord.h>
 #include <tables/Tables/TableKeyword.h>
@@ -146,6 +146,12 @@ void TableRecord::assign (const RecordInterface& that)
     if (var) {
 	setRecordType (Variable);
     }
+}
+
+void TableRecord::print (ostream& os, Int maxNrValues,
+			 const String& indent) const
+{
+    rep_p.ref().print (os, maxNrValues, indent);
 }
 
 

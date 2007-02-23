@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Directory.h,v 19.5 2004/11/30 17:50:17 ddebonis Exp $
+//# $Id: Directory.h,v 19.6 2006/12/11 05:45:02 gvandiep Exp $
 
 #ifndef CASA_DIRECTORY_H
 #define CASA_DIRECTORY_H
@@ -147,7 +147,9 @@ public:
 
     // Remove the directory and its contents (recursively in all
     // subdirectories).
-    void removeRecursive();
+    // If <src>keepDir==True</src>, the directory itself is kept
+    //(to keep properties like placement on Lustre).
+    void removeRecursive (Bool keepDir = False);
 
     // Copy the directory and its contents (recursively) to the target
     // path using the system command cp -r.

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: VectorSTLIterator.h,v 1.10 2004/11/30 17:50:14 ddebonis Exp $
+//# $Id: VectorSTLIterator.h,v 1.12 2006/12/22 02:52:31 gvandiep Exp $
 
 #ifndef CASA_VECTORSTLITERATOR_H
 #define CASA_VECTORSTLITERATOR_H
@@ -46,7 +46,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // added). <br>
 // The following comments hold:
 // <ul>
-// <li> The Array class <src>begin()</src> and <src>end()<src> functions
+// <li> The Array class <src>begin()</src> and <src>end()</src> functions
 // create different objects.  This class can handle comparisons with the
 // <src> end()</src>
 // <li> A VectorSTLIterator can be created from a <src>Vector</src> (non-STL)
@@ -81,8 +81,11 @@ class VectorSTLIterator
   // the same as if created from <src>Vector.begin()</src>. Copy
   // constructor and assignment can be the default ones.
   // <group>
-  explicit VectorSTLIterator(const Vector<T> &c) : start_p(c.data()), 
-    step_p(std::max(1,c.steps()(0))), iter_p(c.data()) {;}
+  explicit VectorSTLIterator(const Vector<T> &c) :
+    start_p(const_cast<T*>(c.data())), 
+    step_p(std::max(1,c.steps()(0))),
+    iter_p(const_cast<T*>(c.data()))
+ {;}
   VectorSTLIterator() : start_p(0), step_p(1), iter_p(0) {;}
   VectorSTLIterator(const typename Array<T>::IteratorSTL &c) : start_p(c.pos()), 
     step_p(std::max(1,c.steps()(0))), iter_p(start_p) {;}

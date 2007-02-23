@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Directory.cc,v 19.6 2005/02/22 06:47:25 gvandiep Exp $
+//# $Id: Directory.cc,v 19.9 2006/12/17 22:53:06 gvandiep Exp $
 
 
 #if defined(AIPS_SOLARIS) || defined(AIPS_OSF)
@@ -198,12 +198,14 @@ void Directory::create (Bool overwrite)
 			      itsFile.path().expandedName() +
 			      " already exists"));
 	}
-	Directory(itsFile).removeRecursive();
-    }
-    if (mkdir (itsFile.path().expandedName().chars(), 0755) < 0) {
-	throw (AipsError ("Directory::create error on " +
-			  itsFile.path().expandedName() +
-			  ": " + strerror(errno)));
+	// Keep the directory, so special allocation on Lustre is preserved.
+	Directory(itsFile).removeRecursive(True);
+    } else {
+        if (mkdir (itsFile.path().expandedName().chars(), 0755) < 0) {
+	    throw (AipsError ("Directory::create error on " +
+			      itsFile.path().expandedName() +
+			      ": " + strerror(errno)));
+	}
     }
 }
 
@@ -232,7 +234,7 @@ void Directory::removeFiles()
     }
 }
 
-void Directory::removeRecursive()
+void Directory::removeRecursive (Bool keepDir)
 {
     DirectoryIterator iter(*this);
     while (! iter.pastEnd()) {
@@ -244,7 +246,9 @@ void Directory::removeRecursive()
 	}
 	iter++;
     }
-    remove();
+    if (!keepDir) {
+        remove();
+    }
 }
 
 void Directory::copy (const Path& target, Bool overwrite,

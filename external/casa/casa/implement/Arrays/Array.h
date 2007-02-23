@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Array.h,v 19.17 2005/07/13 09:52:57 gvandiep Exp $
+//# $Id: Array.h,v 19.19 2006/11/24 04:07:49 gvandiep Exp $
 
 #ifndef CASA_ARRAY_H
 #define CASA_ARRAY_H
@@ -161,7 +161,7 @@ template<class Domain, class Range> class Functional;
 // likely become "private".
 // </note>
 //
-// <todo asof="1999/12/30"
+// <todo asof="1999/12/30">
 //   <li> Integrate into the Lattice hierarchy
 //   <li> Factor out the common functions (shape etc) into a type-independent
 //        base class.
@@ -453,7 +453,7 @@ public:
     // <group>
     T* data()
       { return begin_p; }
-    T* const data() const
+    const T* data() const
       { return begin_p; }
     // </group>
 
@@ -553,7 +553,7 @@ public:
       const T& operator*() const
         { return *itsPos; }
 
-      const T* const pos() const
+      const T* pos() const
         { return itsPos; }
 
       void setPos (T* const pos)
@@ -626,7 +626,7 @@ public:
         { return iterator (*this); }
     const_iterator begin() const
         { return const_iterator (*this); }
-    const T* const end() const
+    const T* end() const
         { return end_p; }
     // </group>
 
@@ -636,9 +636,9 @@ public:
         { return begin_p; }
     const_contiter cbegin() const
         { return begin_p; }
-    const contiter cend()
+    contiter cend()
         { return end_p; }
-    const const_contiter cend() const
+    const_contiter cend() const
         { return end_p; }
     // </group>
 

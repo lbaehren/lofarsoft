@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: IPosition.h,v 19.7 2006/09/05 00:05:33 gvandiep Exp $
+//# $Id: IPosition.h,v 19.9 2006/12/21 23:30:29 gvandiep Exp $
 
 #ifndef CASA_IPOSITION_H
 #define CASA_IPOSITION_H
@@ -429,7 +429,7 @@ uInt toOffsetInArray (const IPosition& iposition, const IPosition& shape);
 // require that type T have shape and origin members which return
 // IPositions.
 // <thrown>
-//   <item> ArrayConformanceError: If all the IPositions are not the same length
+//   <li> ArrayConformanceError: If all the IPositions are not the same length
 // </thrown>
 // <group>
 Bool isInsideArray (const uInt offset, const IPosition& shape);
@@ -514,7 +514,6 @@ inline Bool IPosition::conform(const IPosition& other) const
 {
     return  (size_p == other.size_p);
 }
-// </group>
 
 } //# NAMESPACE CASA - END
 

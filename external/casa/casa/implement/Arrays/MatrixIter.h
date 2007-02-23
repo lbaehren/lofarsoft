@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MatrixIter.h,v 19.9 2005/06/18 21:19:14 ddebonis Exp $
+//# $Id: MatrixIter.h,v 19.10 2006/11/24 04:07:49 gvandiep Exp $
 
 #ifndef CASA_MATRIXITER_H
 #define CASA_MATRIXITER_H
@@ -97,6 +97,7 @@ private:
 //
 // <note role=tip> Note that the R/O MatrixIterator is not derived from R/O 
 //        ArrayIterator.
+// </note>
 //
 template<class T> class ReadOnlyMatrixIterator 
 {

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TiledFileHelper.h,v 19.4 2004/11/30 17:51:09 ddebonis Exp $
+//# $Id: TiledFileHelper.h,v 19.5 2006/12/12 23:14:17 gvandiep Exp $
 
 #ifndef TABLES_TILEDFILEHELPER_H
 #define TABLES_TILEDFILEHELPER_H
@@ -56,7 +56,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // <linkto class=TiledFileAccess>TiledFileAccess</linkto>.
 // It sets up a table description containing one array column
 // to make it possible to use the
-// <linkto class=TiledStMan>tiled storage manager<linkto>
+// <linkto class=TiledStMan>tiled storage manager</linkto>
 // to access an array in an arbitrary file.
 // </synopsis> 
 

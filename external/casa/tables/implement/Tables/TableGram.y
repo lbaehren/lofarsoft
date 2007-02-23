@@ -24,7 +24,7 @@
                            520 Edgemont Road
                            Charlottesville, VA 22903-2475 USA
 
-    $Id: TableGram.y,v 19.17 2006/10/03 04:25:15 gvandiep Exp $
+    $Id: TableGram.y,v 19.18 2006/12/19 05:12:59 gvandiep Exp $
 */
 
 /*
@@ -95,6 +95,7 @@ using namespace casa;
 %type <val> literal
 %type <nodename> tabname
 %type <nodename> stabname
+%type <nodename> unit
 %type <node> tabalias
 %type <node> tfnamen
 %type <node> tfname
@@ -135,6 +136,7 @@ using namespace casa;
 %type <node> arithexpr
 %type <node> inxexpr
 %type <node> simexpr
+%type <node> simbexpr
 %type <node> set
 %type <nodelist> singlerange
 %type <nodelist> subscripts
@@ -982,7 +984,16 @@ inxexpr:   simexpr {
 	   }
          ;
 
-simexpr:   LPAREN orexpr RPAREN
+simexpr:   simbexpr
+               { $$ = $1; }
+         | simbexpr unit {
+	       $$ = new TaQLNode(
+                    new TaQLUnitNodeRep ($2->getString(), *$1));
+	       TaQLNode::theirNodesCreated.push_back ($$);
+           }
+         ;
+
+simbexpr:  LPAREN orexpr RPAREN
                { $$ = $2; }
          | NAME LPAREN elemlist RPAREN {
 	       $$ = new TaQLNode(
@@ -1010,6 +1021,14 @@ simexpr:   LPAREN orexpr RPAREN
          | set {
 	       $$ = $1;
 	   }
+         ;
+
+unit:      NAME            /* simple unit */
+           { $$ = $1; }
+         | FLDNAME         /* unit with . */
+           { $$ = $1; }
+         | STRINGLITERAL   /* compound unit (with special characters) */
+           { $$ = $1; }
          ;
 
 literal:   LITERAL {

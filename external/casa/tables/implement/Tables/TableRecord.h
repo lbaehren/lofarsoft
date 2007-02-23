@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: TableRecord.h,v 19.6 2006/02/28 14:10:26 gvandiep Exp $
+//# $Id: TableRecord.h,v 19.8 2007/01/08 05:27:17 gvandiep Exp $
 
 
 #ifndef TABLES_TABLERECORD_H
@@ -406,6 +406,13 @@ public:
     // This is used to read a subrecord, whose description has
     // already been read.
     void getData (AipsIO& os, uInt version, const TableAttr&);
+
+    // Print the contents of the record.
+    // Only the first <src>maxNrValues</src> of an array will be printed.
+    // A value < 0 means the entire array.
+    virtual void print (std::ostream&,
+			Int maxNrValues = 25,
+			const String& indent="") const;
 
     // Reopen possible tables in keywords as read/write.
     // Tables are not reopened if they are not writable.

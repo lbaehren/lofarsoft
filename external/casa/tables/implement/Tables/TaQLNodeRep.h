@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TaQLNodeRep.h,v 19.3 2006/11/10 01:16:01 gvandiep Exp $
+//# $Id: TaQLNodeRep.h,v 19.6 2006/12/22 02:19:44 gvandiep Exp $
 
 #ifndef TABLES_TAQLNODEREP_H
 #define TABLES_TAQLNODEREP_H
@@ -60,7 +60,7 @@ class TaQLNodeVisitor;
 // TaQLNode/TaQLNodeRep form an envelope/letter pair.
 // TaQLNodeRep is the abstract base class for all classes used in the
 // raw TaQL parse tree
-// (e.g. linkto<class=TaQLConstNodeRep>TaQLConstNodeRep</linkto>).
+// (e.g. <linkto class=TaQLConstNodeRep>TaQLConstNodeRep</linkto>).
 // </synopsis> 
 
 // <motivation>
@@ -104,6 +104,7 @@ public:
   #define TaQLNode_CreTab   char(23)
   #define TaQLNode_ColSpec  char(24)
   #define TaQLNode_RecFld   char(25)
+  #define TaQLNode_Unit     char(26)
   // </group>
 
   // Constructor for derived classes specifying the type.

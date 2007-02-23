@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TSMDataColumn.cc,v 19.4 2004/11/30 17:51:05 ddebonis Exp $
+//# $Id: TSMDataColumn.cc,v 19.5 2007/02/07 00:07:12 gvandiep Exp $
 
 //# Includes
 #include <tables/Tables/TSMDataColumn.h>
@@ -148,7 +148,10 @@ IPosition TSMDataColumn::shape (uInt rownr)
     TSMCube* hypercube = stmanPtr_p->getHypercube (rownr);
     IPosition cubeShape = hypercube->cubeShape();
     if (cubeShape.nelements() == 0) {
-	throw (DataManInvOper ("StMan: no array in this row"));
+        throw (DataManInvOper ("TSM: no array in row " +
+			       String::toString(rownr) +
+			       " of column " + columnName() +
+			       " in "+ stmanPtr_p->fileName()));
     }
     IPosition shape (stmanPtr_p->nrCoordVector());
     for (uInt i=0; i<shape.nelements(); i++) {

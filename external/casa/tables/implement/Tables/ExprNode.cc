@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ExprNode.cc,v 19.10 2006/11/10 01:16:01 gvandiep Exp $
+//# $Id: ExprNode.cc,v 19.11 2006/12/19 05:12:59 gvandiep Exp $
 
 #include <tables/Tables/ExprNode.h>
 #include <tables/Tables/ExprNodeSet.h>
@@ -31,6 +31,7 @@
 #include <tables/Tables/ExprMathNode.h>
 #include <tables/Tables/ExprLogicNode.h>
 #include <tables/Tables/ExprFuncNode.h>
+#include <tables/Tables/ExprUnitNode.h>
 #include <tables/Tables/ExprDerNodeArray.h>
 #include <tables/Tables/ExprMathNodeArray.h>
 #include <tables/Tables/ExprLogicNodeArray.h>
@@ -195,6 +196,15 @@ TableExprNode TableExprNode::in (const TableExprNodeSet& set) const
     set.checkEqualDataTypes();
     TableExprNodeSet setcp = set;
     return newIN (setcp.setOrArray());
+}
+
+TableExprNode TableExprNode::useUnit (const Unit& unit) const
+{
+    if (node_p->dataType() != TableExprNodeRep::NTDouble
+    &&  node_p->dataType() != TableExprNodeRep::NTComplex) {
+        throwInvDT ("units can only be used with numeric values");
+    }
+    return TableExprNodeUnit::useUnit (node_p, unit);
 }
 
 DataType TableExprNode::getColumnDataType() const
@@ -1105,6 +1115,11 @@ TableExprNode TableExprNode::newArrayPartNode (const TableExprNode& arrayNode,
 							     inode);
     return TableExprNodeBinary::fillNode (anode, arrayNode.node_p,
 					  inode, False);
+}
+
+void TableExprNode::adaptUnit (const Unit& unit)
+{
+    TableExprNodeUnit::adaptUnit (node_p, unit);
 }
 
 TableExprNode TableExprNode::newRownrNode (const Table& table,

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ArrayError.h,v 19.7 2004/11/30 17:50:13 ddebonis Exp $
+//# $Id: ArrayError.h,v 19.8 2006/11/24 04:07:49 gvandiep Exp $
 
 #ifndef CASA_ARRAYERROR_H
 #define CASA_ARRAYERROR_H
@@ -54,8 +54,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // }
 // </srcblock>
 //
-// <note role=tip> There are too many ArrayRelated classes. Some should be deleted.
-//
+//# There are too many Array related error classes. Some should be deleted.
+
 class ArrayError : public AipsError
 {
 public:

@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: Record.h,v 19.5 2006/09/14 03:31:16 gvandiep Exp $
+//# $Id: Record.h,v 19.7 2007/01/08 05:25:43 gvandiep Exp $
 
 
 #ifndef CASA_RECORD_H
@@ -383,6 +383,13 @@ public:
     // Make a unique record representation
     // (to do copy-on-write in RecordFieldPtr).
     virtual void makeUnique();
+
+    // Print the contents of the record.
+    // Only the first <src>maxNrValues</src> of an array will be printed.
+    // A value < 0 means the entire array.
+    virtual void print (std::ostream&,
+			Int maxNrValues = 25,
+			const String& indent="") const;
 
 
 protected:

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TSMCoordColumn.cc,v 19.4 2004/11/30 17:51:05 ddebonis Exp $
+//# $Id: TSMCoordColumn.cc,v 19.5 2007/02/07 00:07:12 gvandiep Exp $
 
 //# Includes
 #include <tables/Tables/TSMCoordColumn.h>
@@ -133,7 +133,9 @@ IPosition TSMCoordColumn::shape (uInt rownr)
 	return IPosition (1, cubeShape(axisNr_p));
     }
     if (! hypercube->valueRecord().isDefined (columnName())) {
-	throw (DataManInvOper ("StMan: no array in this row"));
+        throw (DataManInvOper ("TSMCoord: no array in row " +
+			       String::toString(rownr) +
+			       " of coordinate column " + columnName()));
     }
     return hypercube->valueRecord().shape (columnName());
 }

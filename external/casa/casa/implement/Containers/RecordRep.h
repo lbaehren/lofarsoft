@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: RecordRep.h,v 19.6 2005/06/18 21:19:15 ddebonis Exp $
+//# $Id: RecordRep.h,v 19.8 2007/01/08 05:25:43 gvandiep Exp $
 
 
 #ifndef CASA_RECORDREP_H
@@ -208,6 +208,13 @@ public:
     // Merge all fields from the other record into this record.
     void merge (const RecordRep& other, RecordInterface::DuplicatesFlag);
     
+    // Print a record.
+    // Print the contents of the record.
+    // Only the first <src>maxNrValues</src> of an array will be printed.
+    // A value < 0 means the entire array.
+    void print (std::ostream&,
+		Int maxNrValues = 25,
+		const String& indent="") const;
 
 protected:
     // Utility functions to avoid code duplication in the public member 
@@ -253,6 +260,12 @@ protected:
     // Copy a data field.
     // This can only handle scalars and arrays.
     void copyDataField (DataType type, void* ptr, const void* that) const;
+
+    // Print a data field.
+    // This can only handle scalars and arrays.
+    void printDataField (std::ostream& os, DataType type,
+			 const String& indent, Int maxNrValues,
+			 const void* ptr) const;
 
     // Put a data field.
     // This can only handle scalars and arrays.

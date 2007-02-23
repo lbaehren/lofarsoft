@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MatrixMath.h,v 19.9 2005/11/09 17:59:31 wyoung Exp $
+//# $Id: MatrixMath.h,v 19.10 2006/12/21 23:30:29 gvandiep Exp $
 
 #ifndef CASA_MATRIXMATH_H
 #define CASA_MATRIXMATH_H
@@ -187,6 +187,7 @@ Matrix<Double> adjoint (const Matrix<Double> &A);
 //
   Matrix<Float> rproduct (const Matrix<Complex>&, const Matrix<Complex>&);
 
+// </group>
 
 
 } //# NAMESPACE CASA - END

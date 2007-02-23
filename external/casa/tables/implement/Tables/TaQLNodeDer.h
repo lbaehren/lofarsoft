@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TaQLNodeDer.h,v 19.3 2006/04/27 12:23:45 gvandiep Exp $
+//# $Id: TaQLNodeDer.h,v 19.4 2006/12/19 05:12:59 gvandiep Exp $
 
 #ifndef TABLES_TAQLNODEDER_H
 #define TABLES_TAQLNODEDER_H
@@ -78,6 +78,10 @@ public:
     : TaQLNodeRep (TaQLNode_Const),
       itsType(CTReal), itsIsTableName(False), itsRValue(value),
       itsCValue(value,0.) {}
+  explicit TaQLConstNodeRep (Double value, const String& unit)
+    : TaQLNodeRep (TaQLNode_Const),
+      itsType(CTReal), itsIsTableName(False), itsRValue(value),
+      itsCValue(value,0.), itsUnit(unit) {}
   explicit TaQLConstNodeRep (DComplex value)
     : TaQLNodeRep (TaQLNode_Const),
       itsType(CTComplex), itsIsTableName(False), itsCValue(value) {}
@@ -92,6 +96,8 @@ public:
   void setIsTableName()
     { itsIsTableName = True; }
   const String& getString() const;
+  const String& getUnit() const
+    { return itsUnit; }
   virtual TaQLNodeResult visit (TaQLNodeVisitor&) const;
   virtual void show (std::ostream& os) const;
   virtual void save (AipsIO& aio) const;
@@ -105,6 +111,7 @@ public:
   DComplex itsCValue;
   String   itsSValue;
   MVTime   itsTValue;
+  String   itsUnit;
 };
 
 
@@ -993,6 +1000,37 @@ public:
 
   String   itsName;
   TaQLNode itsValues;
+};
+
+
+// <summary>
+// Raw TaQL parse tree node defining a unit.
+// </summary>
+// <use visibility=local>
+// <reviewed reviewer="" date="" tests="tTaQLNode">
+// </reviewed>
+// <prerequisite>
+//# Classes you should understand before using this one.
+//   <li> <linkto class=TaQLNodeRep>TaQLNodeRep</linkto>
+// </prerequisite>
+// <synopsis> 
+// This class is a TaQLNodeRep holding the parts of a record field.
+// </synopsis> 
+
+class TaQLUnitNodeRep: public TaQLNodeRep
+{
+public:
+  TaQLUnitNodeRep (const String& unit, const TaQLNode& child)
+    : TaQLNodeRep (TaQLNode_Unit),
+      itsUnit(unit), itsChild(child) {}
+  virtual ~TaQLUnitNodeRep();
+  virtual TaQLNodeResult visit (TaQLNodeVisitor&) const;
+  virtual void show (std::ostream& os) const;
+  virtual void save (AipsIO& aio) const;
+  static TaQLUnitNodeRep* restore (AipsIO& aio);
+
+  String   itsUnit;
+  TaQLNode itsChild;
 };
 
 

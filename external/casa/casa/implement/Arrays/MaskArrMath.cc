@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MaskArrMath.cc,v 19.4 2004/11/30 17:50:14 ddebonis Exp $
+//# $Id: MaskArrMath.cc,v 19.6 2006/11/16 03:22:06 gvandiep Exp $
 
 #include <casa/Arrays/MaskArrMath.h>
 #include <casa/BasicMath/Math.h>
@@ -34,6 +34,8 @@
 #include <casa/Arrays/ArrayIter.h>
 #include <casa/Arrays/VectorIter.h>
 #include <casa/Utilities/GenSort.h>
+#include <casa/Utilities/Assert.h>
+#include <casa/Exceptions/Error.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
@@ -1481,6 +1483,15 @@ template<class T> T avdev(const MaskedArray<T> &left, T mean)
     return sum(avdeviations)/left.nelementsValid();
 }
 
+template<class T> T rms(const MaskedArray<T> &left)
+{
+    if (left.nelementsValid() < 1) {
+        throw (ArrayError("T ::rms(const MaskedArray<T> &left) - "
+                          "MaskedArray must have at least 1 element"));
+    }
+    return T(sqrt(sumsquares(left)/(1.0*left.nelementsValid())));
+}
+
 template<class T> T median(const MaskedArray<T> &left, Bool sorted,
 			   Bool takeEvenMean)
 {
@@ -1635,6 +1646,73 @@ template<class T> MaskedArray<T> cube(const MaskedArray<T> &left)
     result.freeMaskStorage(resultmaskStorage, resultmaskDelete);
 
     return result;
+}
+
+
+template <typename T>
+Array<T> slidingArrayMath (const MaskedArray<T>& array,
+			   const IPosition& halfBoxSize,
+			   T (*reductionFunc) (const MaskedArray<T>&),
+			   Bool fillEdge)
+{
+  uInt ndim = array.ndim();
+  const IPosition& shape = array.shape();
+  // Set full box size (-1) and resize/fill as needed.
+  IPosition hboxsz (2*halfBoxSize);
+  if (hboxsz.size() != array.ndim()) {
+    uInt sz = hboxsz.size();
+    hboxsz.resize (array.ndim());
+    for (uInt i=sz; i<hboxsz.size(); ++i) {
+      hboxsz[i] = 0;
+    }
+  }
+  // Determine the output shape. See if anything has to be done.
+  IPosition resShape(ndim);
+  for (uInt i=0; i<ndim; ++i) {
+    resShape[i] = shape[i] - hboxsz[i];
+    if (resShape[i] <= 0) {
+      if (!fillEdge) {
+	return Array<T>();
+      }
+      Array<T> res(shape);
+      res = T();
+      return res;
+    }
+  }
+  // Need to make shallow copy because operator() is non-const.
+  MaskedArray<T> arr (array);
+  Array<T> result (resShape);
+  DebugAssert (result.contiguousStorage(), AipsError);
+  T* res = result.data();
+  // Loop through all data and assemble as needed.
+  IPosition blc(ndim, 0);
+  IPosition trc(hboxsz);
+  IPosition pos(ndim, 0);
+  while (True) {
+    *res++ = reductionFunc(arr(blc,trc));
+    uInt ax;
+    for (ax=0; ax<ndim; ax++) {
+      if (++pos[ax] < resShape[ax]) {
+	blc[ax]++;
+	trc[ax]++;
+	break;
+      }
+      pos(ax) = 0;
+      blc[ax] = 0;
+      trc[ax] = hboxsz[ax];
+    }
+    if (ax == ndim) {
+      break;
+    }
+  }
+  if (!fillEdge) {
+    return result;
+  }
+  Array<T> fullResult(shape);
+  fullResult = T();
+  hboxsz /= 2;
+  fullResult(hboxsz, resShape+hboxsz-1) = result;
+  return fullResult;
 }
 
 

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Record.cc,v 19.3 2004/11/30 17:50:15 ddebonis Exp $
+//# $Id: Record.cc,v 19.5 2007/01/08 05:25:43 gvandiep Exp $
 
 #include <casa/Containers/Record.h>
 #include <casa/Containers/RecordDesc.h>
@@ -125,6 +125,10 @@ void Record::assign (const RecordInterface& that)
     *this = that;
 }
 
+void Record::print (ostream& os, Int maxNrValues, const String& indent) const
+{
+    rep_p.ref().print (os, maxNrValues, indent);
+}
 
 void Record::makeUnique()
 {

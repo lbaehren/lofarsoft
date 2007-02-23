@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ScaRecordColData.h,v 19.4 2004/11/30 17:51:04 ddebonis Exp $
+//# $Id: ScaRecordColData.h,v 19.5 2006/12/12 23:14:17 gvandiep Exp $
 
 #ifndef TABLES_SCARECORDCOLDATA_H
 #define TABLES_SCARECORDCOLDATA_H
@@ -88,7 +88,7 @@ template<class T> class Vector;
 // </synopsis>
 
 // <todo asof="$DATE:$">
-// A List of bugs, limitations, extensions or planned refinements.
+//# A List of bugs, limitations, extensions or planned refinements.
 //  <li> Introduce a class ArrayRecordColumnData to support arrays of records.
 // </todo>
 

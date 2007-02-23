@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSMIndColumn.cc,v 19.4 2004/11/30 17:51:02 ddebonis Exp $
+//# $Id: MSMIndColumn.cc,v 19.5 2007/02/07 00:07:12 gvandiep Exp $
 
 #include <tables/Tables/MSMIndColumn.h>
 #include <casa/Arrays/Array.h>
@@ -84,7 +84,9 @@ MSMIndColumn::Data* MSMIndColumn::getShape (uInt rownr)
 {
   void* ptr = getArrayPtr(rownr);
   if (ptr == 0) {
-    throw (DataManInvOper ("StMan: no array in this row"));
+    throw (DataManInvOper ("MSM: no array in row " +
+			   String::toString(rownr) +
+			   " of " + stmanPtr_p->fileName()));
   }
   return static_cast<Data*>(ptr);
 }

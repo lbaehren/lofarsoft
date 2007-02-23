@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: SimOrdMap.h,v 19.7 2005/06/18 21:19:15 ddebonis Exp $
+//# $Id: SimOrdMap.h,v 19.9 2006/12/12 23:20:42 gvandiep Exp $
 
 #ifndef CASA_SIMORDMAP_H
 #define CASA_SIMORDMAP_H
@@ -79,7 +79,7 @@ public:
 
     // Creates a map from another one; use copy semantics.
     // <thrown>
-    //   <item> AllocError
+    //   <li> AllocError
     // </thrown>
     SimpleOrderedMap (const SimpleOrderedMap<K,V>&);
 
@@ -88,13 +88,13 @@ public:
 
     // Assigns this SimpleOrderedMap to another with copy semantics.
     // <thrown>
-    //   <item> AllocError
+    //   <li> AllocError
     // </thrown>
     SimpleOrderedMap<K,V>& operator= (const SimpleOrderedMap<K,V>&);
 
     // Defines a mapping (ie. create a key value mapping)
     // <thrown>
-    //   <item> AllocError
+    //   <li> AllocError
     // </thrown>
     V &define (const K&, const V&);
 
@@ -108,10 +108,11 @@ public:
     // <note> With a constant map in the case where the key is not
     //        defined, the mapping between key and default value is 
     //        not created, but rather an exception is thrown.
+    // </note>
     //+grp
     V &operator()(const K &ky);
     // <thrown>
-    //   <item> indexError<K>
+    //   <li> indexError<K>
     // </thrown>
     const V &operator()(const K &ky) const;
     //-grp
@@ -164,13 +165,13 @@ public:
     // Rename a key.
     // If the new key already exists, the existing key will be removed.
     // <thrown>
-    //   <item> indexError<K>
+    //   <li> indexError<K>
     // </thrown>
     void rename (const K& newkey, const K& oldkey);
 
     // Undefines a mapping (ie. remove a key value mapping).
     // <thrown>
-    //   <item> indexError<K>
+    //   <li> indexError<K>
     // </thrown>
     void remove (const K&);
 
@@ -188,7 +189,7 @@ public:
 
     // Check the internal state.
     // <thrown>
-    //   <item> AipsError
+    //   <li> AipsError
     // </thrown>
     Bool ok() const;
 
@@ -211,20 +212,9 @@ protected:
 
     // Copy from another Block of OrderedPair's.
     // <thrown>
-    //   <item> AllocError
+    //   <li> AllocError
     // </thrown>
     void copyBlock (const SimpleOrderedMap<K,V>&);
-
-    // Function to get the i-th entry in the Block.
-    // It casts from void* to OrderedPair<K,V>*.
-    //# The compiler outlines these functions, so outcomment them
-    //# and turn it into a macro (at beginning of file).
-    //+grp
-//#    OrderedPair<K,V>* KVBLKpair(uInt i)
-//#	{ return (OrderedPair<K,V>*)(kvblk[i]); }
-//#    const OrderedPair<K,V>* KVBLKpair(uInt i) const
-//#	{ return (OrderedPair<K,V>*)(kvblk[i]); }
-    //-grp
 };
 
 

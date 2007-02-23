@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ScaRecordColDesc.h,v 19.4 2004/11/30 17:51:04 ddebonis Exp $
+//# $Id: ScaRecordColDesc.h,v 19.5 2006/12/12 23:14:17 gvandiep Exp $
 
 #ifndef TABLES_SCARECORDCOLDESC_H
 #define TABLES_SCARECORDCOLDESC_H
@@ -112,7 +112,7 @@ class ColumnSet;
 // </motivation>
 
 // <todo asof="$DATE:$">
-// A List of bugs, limitations, extensions or planned refinements.
+//# A List of bugs, limitations, extensions or planned refinements.
 //  <li> Introduce a class ArrayRecordColumnDesc to support arrays of records.
 // </todo>
 

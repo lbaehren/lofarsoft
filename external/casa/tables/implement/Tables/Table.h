@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Table.h,v 19.10 2006/02/28 14:10:25 gvandiep Exp $
+//# $Id: Table.h,v 19.13 2006/12/22 02:19:44 gvandiep Exp $
 
 #ifndef TABLES_TABLE_H
 #define TABLES_TABLE_H
@@ -554,7 +554,7 @@ public:
     // <br>When making a deep copy, it is possible to specify the data managers
     // using the <src>dataManagerInfo</src> argument.
     // See <src>getDataManagerInfo</src> for more info about that record.
-    // <br>If <src/noRows=True</src> no rows are copied. Also no rows are
+    // <br>If <src>noRows=True</src> no rows are copied. Also no rows are
     // copied in all subtables. It is useful if one wants to make a copy
     // of only the Table structure.
     void copy (const String& newName, TableOption, Bool noRows=False) const;
@@ -783,7 +783,7 @@ public:
     // Note that one cannot be sure that table "somename" is the root
     // (i.e. original) table. It may also be a subset of another table.
     // In the latter case doing
-    // <br> <src>    Vector<uInt> rownrs = subset.rowNumbers()<src>
+    // <br> <src>    Vector<uInt> rownrs = subset.rowNumbers()</src>
     // does not give the row numbers in <src>tab</src>, but in the root table
     // (which is probably not what you want).
     Vector<uInt> rowNumbers (const Table& that) const;
@@ -860,22 +860,22 @@ public:
     // </note>
     void renameColumn (const String& newName, const String& oldName);
 
-    // Write a table to AipsIO (for TypedKeywords<Table>).
+    // Write a table to AipsIO (for <src>TypedKeywords<Table></src>).
     // This will only write the table name.
     friend AipsIO& operator<< (AipsIO&, const Table&);
 
-    // Read a table from AipsIO (for TypedKeywords<Table>).
+    // Read a table from AipsIO (for <src>TypedKeywords<Table></src>).
     // This will read the table name and open the table as writable
     // if the table file is writable, otherwise as readonly.
     friend AipsIO& operator>> (AipsIO&, Table&);
 
-    // Read a table from AipsIO (for TableKeywords).
+    // Read a table from AipsIO (for <src>TableKeywords</src>).
     // This will read the table name and open the table as writable
     // if the switch is set and if the table file is writable.
     // otherwise it is opened as readonly.
     void getTableKeyword (AipsIO&, Bool openWritable);
 
-    // Write a table to ostream (for TypedKeywords<Table>).
+    // Write a table to ostream (for <src>TypedKeywords<Table></src>).
     // This only shows its name and number of columns and rows.
     friend ostream& operator<< (ostream&, const Table&);
 

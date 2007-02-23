@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Timer.h,v 19.5 2004/11/30 17:50:18 ddebonis Exp $
+//# $Id: Timer.h,v 19.6 2006/12/12 23:20:42 gvandiep Exp $
 
 #ifndef CASA_TIMER_H
 #define CASA_TIMER_H
@@ -85,6 +85,7 @@ class String;
 //
 // <note role=tip> This Timer class is based on the TI COOL library 
 //        Timer class
+// </note>
 // </synopsis>
 
 // <example>

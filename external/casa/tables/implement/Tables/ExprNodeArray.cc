@@ -23,11 +23,12 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ExprNodeArray.cc,v 19.5 2006/11/10 01:16:01 gvandiep Exp $
+//# $Id: ExprNodeArray.cc,v 19.6 2006/12/19 05:12:59 gvandiep Exp $
 
 #include <tables/Tables/ExprNode.h>
 #include <tables/Tables/ExprNodeArray.h>
 #include <tables/Tables/ExprNodeSet.h>
+#include <tables/Tables/ExprDerNode.h>
 #include <tables/Tables/TableError.h>
 #include <casa/Arrays/ArrayMath.h>
 #include <casa/Arrays/ArrayLogical.h>
@@ -404,6 +405,7 @@ TableExprNodeArrayColumn::TableExprNodeArrayColumn
 	ndim_p = -1;                         // unknown dimensionality
     }
     shape_p = tabCol_p.shapeColumn();
+    setUnit (TableExprNodeColumn::getColumnUnit(tabCol_p));
 }
 
 TableExprNodeArrayColumn::~TableExprNodeArrayColumn()

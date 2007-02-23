@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Conversion.h,v 19.6 2006/10/05 01:03:43 gvandiep Exp $
+//# $Id: Conversion.h,v 19.7 2006/11/24 04:07:49 gvandiep Exp $
 
 #ifndef CASA_CONVERSION_H
 #define CASA_CONVERSION_H
@@ -63,12 +63,12 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // different signature for memcpy (e.g. ObjectCenter and DEC-Alpha).
 // </ul>
 // Static functions in the classes
-// <linkto class=CanonicalConversion:description>CanonicalConversion</linkto>,
-// <linkto class=VAXConversion:description>VAXConversion</linkto>, and
-// <linkto class=IBMConversion:description>IBMConversion</linkto> convert data
+// <linkto class=CanonicalConversion>CanonicalConversion</linkto>,
+// <linkto class=VAXConversion>VAXConversion</linkto>, and
+// <linkto class=IBMConversion>IBMConversion</linkto> convert data
 // from/to canonical, VAX, and IBM/360 format, resp..
 // <br>Classes derived from
-// <linkto class=DataConversion:description>DataConversion</linkto>
+// <linkto class=DataConversion>DataConversion</linkto>
 // provide the same functionality in a polymorphic way.
 // </synopsis>
 

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: VirtualTaQLColumn.h,v 1.1 2005/02/15 15:16:58 gvandiep Exp $
+//# $Id: VirtualTaQLColumn.h,v 1.3 2006/12/12 23:14:17 gvandiep Exp $
 
 #ifndef TABLES_VIRTUALTAQLCOLUMN_H
 #define TABLES_VIRTUALTAQLCOLUMN_H
@@ -44,11 +44,9 @@ class TableExprNode;
 //
 // <prerequisite>
 //# Classes you should understand before using this one.
-// <list>
-//   <item> VirtualColumnColumn
-//   <item> VirtualScalarColumn
-//   <item> VirtualArrayColumn
-// </list>
+//   <li> VirtualColumnColumn
+//   <li> VirtualScalarColumn
+//   <li> VirtualArrayColumn
 // </prerequisite>
 //
 // <synopsis> 

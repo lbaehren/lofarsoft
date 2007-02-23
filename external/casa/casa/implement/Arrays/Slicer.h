@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Slicer.h,v 19.6 2004/11/30 17:50:14 ddebonis Exp $
+//# $Id: Slicer.h,v 19.8 2006/12/12 23:20:42 gvandiep Exp $
 
 #ifndef CASA_SLICER_H
 #define CASA_SLICER_H
@@ -280,8 +280,6 @@ public:
     // This value should be different from MIN_INT in IPosition.h.
     // It should also not be the lowest possible value, since that
     // will probably be used as an undefined value.
-    // <note> This definition may not be portable. Instead a #define
-    // or a static public data member could be used.
     enum {MimicSource= -2147483646};
 
     // Define the possible interpretations of the end-value.
@@ -379,8 +377,8 @@ public:
           (const IPosition& shape, const IPosition& origin,
            IPosition& startResult,  IPosition& endResult,
            IPosition& strideResult) const;
-
     // </group>
+
     // Report the defined starting position.
     const IPosition& start() const;
 
@@ -394,7 +392,7 @@ public:
     const IPosition& length() const;
 
     // Are all values fixed (i.e., no MimicSource given)?
-     Bool isFixed() const;
+    Bool isFixed() const;
 
 private:
     LengthOrLast asEnd_p;

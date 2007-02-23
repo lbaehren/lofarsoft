@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ISMBucket.h,v 19.6 2004/11/30 17:51:02 ddebonis Exp $
+//# $Id: ISMBucket.h,v 19.7 2006/12/22 02:19:44 gvandiep Exp $
 
 #ifndef TABLES_ISMBUCKET_H
 #define TABLES_ISMBUCKET_H
@@ -87,7 +87,7 @@ class ISMBase;
 // The contents of a bucket looks like:
 // <srcblock>
 //    -------------------------------------------------------------------
-//    | index offset   | data part     | index part</src>        | free |
+//    | index offset   | data part     | index part              | free |
 //    -------------------------------------------------------------------
 //     0                4               4+length(data part)
 //    <--------------------------bucketsize----------------------------->

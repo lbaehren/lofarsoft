@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: VectorIter.h,v 19.10 2005/06/18 21:19:14 ddebonis Exp $
+//# $Id: VectorIter.h,v 19.11 2006/11/24 04:07:49 gvandiep Exp $
 
 #ifndef CASA_VECTORITER_H
 #define CASA_VECTORITER_H
@@ -98,7 +98,8 @@ private:
 //
 // <note role=tip> Note that the R/O VectorIterator is not derived from R/O 
 //        ArrayIterator.
-//
+// </note>
+
 template<class T> class ReadOnlyVectorIterator 
 {
 public:

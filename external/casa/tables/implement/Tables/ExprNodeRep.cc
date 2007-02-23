@@ -23,12 +23,13 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ExprNodeRep.cc,v 19.7 2006/11/20 00:54:58 gvandiep Exp $
+//# $Id: ExprNodeRep.cc,v 19.8 2006/12/19 05:12:59 gvandiep Exp $
 
 #include <tables/Tables/ExprNodeRep.h>
 #include <tables/Tables/ExprNode.h>
 #include <tables/Tables/ExprDerNode.h>
 #include <tables/Tables/ExprDerNodeArray.h>
+#include <tables/Tables/ExprUnitNode.h>
 #include <tables/Tables/ExprRange.h>
 #include <tables/Tables/TableDesc.h>
 #include <tables/Tables/TableRecord.h>
@@ -86,7 +87,8 @@ TableExprNodeRep::TableExprNodeRep (const TableExprNodeRep& that)
   argtype_p  (that.argtype_p),
   exprtype_p (that.exprtype_p),
   ndim_p     (that.ndim_p),
-  shape_p    (that.shape_p)
+  shape_p    (that.shape_p),
+  unit_p     (that.unit_p)
 {}
 
 TableExprNodeRep::~TableExprNodeRep ()
@@ -112,10 +114,18 @@ void TableExprNodeRep::show (ostream& os, uInt indent) const
        << ndim_p << ' ' << shape_p << ' ' << table_p.baseTablePtr() << endl;
 }
 
+Double TableExprNodeRep::getUnitFactor() const
+{
+    return 1.;
+}
+
 void TableExprNodeRep::replaceTablePtr (const Table& table)
 {
     table_p = table;
 }
+
+void TableExprNodeRep::adaptSetUnits (const Unit&)
+{}
 
 //# Determine the number of rows in the table used in the expression.
 uInt TableExprNodeRep::nrow() const
@@ -513,6 +523,7 @@ TableExprNodeRep* TableExprNodeRep::convertNode (TableExprNodeRep* thisNode,
     // Put a BaseTable in it, so the expression analyzer knows the constant
     // comes from a Table.
     newNode->replaceTablePtr (thisNode->table());
+    newNode->setUnit (thisNode->unit());
     delete thisNode;
     return newNode;
 }    
@@ -749,7 +760,33 @@ TableExprNodeRep* TableExprNodeBinary::fillNode (TableExprNodeBinary* thisNode,
 	    thisNode->lnode_p = getRep(dNode)->link();
 	}
     }
+    // Check and adapt units.
+    thisNode->handleUnits();
     return convertNode (thisNode, convertConstType);
+}
+
+const Unit& TableExprNodeBinary::makeEqualUnits (TableExprNodeRep* left,
+						 TableExprNodeRep*& right)
+{
+    // The first real unit is chosen as the result unit.
+    const Unit* unit = &(left->unit());
+    if (right != 0) {
+        if (unit->empty()) {
+	    unit = &(right->unit());
+	} else if (! right->unit().empty()) {
+	    TableExprNodeUnit::adaptUnit (right, *unit);
+	}
+    }
+    return *unit;
+}
+
+void TableExprNodeBinary::handleUnits()
+{
+    const Unit& resUnit = makeEqualUnits (lnode_p, rnode_p);
+    // A comparison has no units, so only set if not bool.
+    if (dataType() != NTBool) {
+      setUnit (resUnit);
+    }
 }
 
 void TableExprNodeBinary::convertConstChild()
@@ -799,6 +836,7 @@ void TableExprNodeBinary::convertConstChild()
     // Put a BaseTable in it, so the expression analyzer knows the constant
     // comes from a Table.
     newNode->replaceTablePtr ((**constNode).table());
+    newNode->setUnit ((**constNode).unit());
     unlink (*constNode);
     *constNode = newNode->link();
 }

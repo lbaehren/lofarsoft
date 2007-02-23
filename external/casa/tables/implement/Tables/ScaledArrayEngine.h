@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ScaledArrayEngine.h,v 19.8 2006/01/11 12:45:32 gvandiep Exp $
+//# $Id: ScaledArrayEngine.h,v 19.9 2006/12/12 23:14:17 gvandiep Exp $
 
 #ifndef TABLES_SCALEDARRAYENGINE_H
 #define TABLES_SCALEDARRAYENGINE_H
@@ -133,10 +133,10 @@ template<class T> class ROScalarColumn;
 // </example>
 
 // <templating arg=VirtualType>
-//  only suited for built-in numerics data types
+//  <li> only suited for built-in numerics data types
 // </templating>
 // <templating arg=StoredType>
-//  only suited for built-in numerics data types
+//  <li> only suited for built-in numerics data types
 // </templating>
 
 template<class VirtualType, class StoredType> class ScaledArrayEngine : public BaseMappedArrayEngine<VirtualType, StoredType>

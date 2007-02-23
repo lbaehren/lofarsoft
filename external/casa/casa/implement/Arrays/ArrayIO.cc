@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ArrayIO.cc,v 19.4 2004/11/30 17:50:13 ddebonis Exp $
+//# $Id: ArrayIO.cc,v 19.5 2007/01/08 05:24:19 gvandiep Exp $
 
 //# Includes
 #include <casa/Arrays/ArrayIO.h>
@@ -43,6 +43,14 @@
 #include <casa/sstream.h>           // needed for internal IO
 
 namespace casa { //# NAMESPACE CASA - BEGIN
+
+// Take care that a uChar is printed numerically, not as a letter.
+inline void ArrayIO_printValue (ostream& s, const uChar& v)
+  { s << Int(v); }
+template<class T>
+inline void ArrayIO_printValue (ostream& s, const T& v)
+  { s << v; }
+
 
 template<class T>
 ostream &operator<<(ostream &s, const Array<T> &a)
@@ -68,10 +76,12 @@ ostream &operator<<(ostream &s, const Array<T> &a)
 	Int iend = a.shape()(0) - 1;
 	for (Int i=0; i < iend; i++) {
 	    ipos(0) = i;
-	    s << a(ipos) << ", ";
+	    ArrayIO_printValue (s, a(ipos));
+	    s << ", ";
 	}
 	ipos(0) = iend;
-	s << a(ipos) << "]";
+	ArrayIO_printValue (s, a(ipos));
+	s << "]";
     } else if (a.ndim() == 2) {
 	// Matrix
 	s << " (NB: Matrix in Row/Column order)" << endl;
@@ -87,7 +97,7 @@ ostream &operator<<(ostream &s, const Array<T> &a)
 	    }
 	    for (Int j=0; j <= col_end; j++) {
 		index(1) = j;
-		s << a(index);
+		ArrayIO_printValue (s, a(index));
 		if (j != col_end) {
 		    s << ", ";
 		}
@@ -115,7 +125,7 @@ ostream &operator<<(ostream &s, const Array<T> &a)
 	    for(i=0; i < ashape(0); i++) {
 		index(0) = i;
 		if (i > 0) s << ", ";
-		s << a(index); 
+		ArrayIO_printValue (s, a(index));
 	    }
 	    s << "]\n";
 	    ai.next();

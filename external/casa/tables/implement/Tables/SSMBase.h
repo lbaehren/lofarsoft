@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: SSMBase.h,v 19.5 2004/11/30 17:51:03 ddebonis Exp $
+//# $Id: SSMBase.h,v 19.6 2006/12/12 23:14:17 gvandiep Exp $
 
 #ifndef TABLES_SSMBASE_H
 #define TABLES_SSMBASE_H
@@ -363,7 +363,7 @@ private:
   // Construct the cache object (if not constructed yet).
   void makeCache();
   
-  // Read the header..
+  // Read the header.
   void readHeader();
   
   // Read the index from its buckets.

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: List.h,v 19.8 2005/06/18 21:19:14 ddebonis Exp $
+//# $Id: List.h,v 19.10 2006/12/21 22:16:02 gvandiep Exp $
 
 #ifndef CASA_LIST_H
 #define CASA_LIST_H
@@ -169,7 +169,6 @@ private:
 //   list.step(-4);                             //  89 10 8 2 | 12
 //   list.removeRight();                        //  89 10 8 2 |
 //   cout << list << endl;
-//// iterate(list);
 //   return 0;
 // }
 //     </srcblock>
@@ -299,6 +298,7 @@ protected:
 //        classes</linkto> to implement "dynamic" cursors so that
 //        multiple cursors are updated as elements are added and
 //        removed from the list.
+// </note>
 //    
 template<class t> class ConstListIter : public NoticeTarget
 {
@@ -598,6 +598,7 @@ protected:
 // <note role=tip> This class uses the "Notice" classes to implement "dynamic" cursors
 //        so that multiple cursors are updated as elements are added and
 //        removed from the list.
+// </note>
 //    
 template<class t> class ListIter : virtual public ConstListIter<t> {
 public:

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ScaledComplexData.h,v 19.8 2006/01/11 12:45:32 gvandiep Exp $
+//# $Id: ScaledComplexData.h,v 19.9 2006/12/12 23:14:17 gvandiep Exp $
 
 #ifndef TABLES_SCALEDCOMPLEXDATA_H
 #define TABLES_SCALEDCOMPLEXDATA_H
@@ -137,10 +137,10 @@ template<class T> class ROScalarColumn;
 // </example>
 
 // <templating arg=VirtualType>
-//  only complex data types
+//  <li> only complex data types
 // </templating>
 // <templating arg=StoredType>
-//  only built-in numerics data types
+//  <li> only built-in numerics data types
 // </templating>
 
 template<class VirtualType, class StoredType>

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TableParse.h,v 19.16 2006/11/10 01:16:01 gvandiep Exp $
+//# $Id: TableParse.h,v 19.17 2006/12/19 05:12:59 gvandiep Exp $
 
 #ifndef TABLES_TABLEPARSE_H
 #define TABLES_TABLEPARSE_H
@@ -279,7 +279,14 @@ public:
   const TableExprNode& indexNode() const;
 
   // Get the expression node.
+  // <group>
   const TableExprNode& node() const;
+  TableExprNode& node();
+  // </group>
+
+  // Adapt the possible unit of the expression to the possible unit
+  // of the column.
+  void adaptUnit (const Unit& columnUnit);
 
 private:
   String              columnName_p;
@@ -532,7 +539,8 @@ private:
 		      const String& colName, Int options,
 		      Int ndim, const IPosition& shape,
 		      const String& dmType, const String& dmGroup,
-		      const String& comment);
+		      const String& comment,
+		      const String& unitName);
 
   // Find the names of all stored columns in a table.
   Block<String> getStoredColumns (const Table& tab) const;
@@ -619,6 +627,10 @@ inline const TableExprNode& TableParseUpdate::indexNode() const
   { return indexNode_p; }
 inline const TableExprNode& TableParseUpdate::node() const
   { return node_p; }
+inline TableExprNode& TableParseUpdate::node()
+  { return node_p; }
+inline void TableParseUpdate::adaptUnit (const Unit& columnUnit)
+  { node_p.adaptUnit (columnUnit); }
 
 inline const TableExprNode& TableParseSort::node() const
   { return node_p; }

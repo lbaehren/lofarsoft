@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: LoggerHolder.h,v 19.5 2004/11/30 17:51:00 ddebonis Exp $
+//# $Id: LoggerHolder.h,v 19.6 2006/12/12 23:14:17 gvandiep Exp $
 
 #ifndef TABLES_LOGGERHOLDER_H
 #define TABLES_LOGGERHOLDER_H
@@ -76,7 +76,8 @@ class TableLogSink;
 // be used. This is an STL-style const_iterator object.
 //
 // LoggerHolder uses reference counting
-// (of class <linkto class=LoggerHolderRep</linkto>) to be able to retain
+// (of class <linkto class=LoggerHolderRep>LoggerHolderRep</linkto>)
+// to be able to retain
 // the object after the (ImageInterface) object containing it is gone.
 // Otherwise classes like SubImage would lose their log info.
 // </synopsis>

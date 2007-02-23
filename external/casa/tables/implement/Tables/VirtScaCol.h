@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: VirtScaCol.h,v 19.5 2005/06/18 21:19:18 ddebonis Exp $
+//# $Id: VirtScaCol.h,v 19.6 2006/12/12 23:14:17 gvandiep Exp $
 
 #ifndef TABLES_VIRTSCACOL_H
 #define TABLES_VIRTSCACOL_H
@@ -249,10 +249,11 @@ private:
 
 
 // <summary>
+// Global functions to get or put data of a virtual column
 // </summary>
 // <synopsis>
 // </synopsis>
-// <group>
+// <group name=getVirtualScalarColumn>
 inline void getVirtualScalarColumn (DataManagerColumn* col, uInt rownr,
 				    Bool* dataPtr, const Bool*)
     { col->get (rownr, dataPtr); }

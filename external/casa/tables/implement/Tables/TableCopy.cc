@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TableCopy.cc,v 19.11 2006/02/28 14:10:26 gvandiep Exp $
+//# $Id: TableCopy.cc,v 19.12 2007/02/19 04:28:06 gvandiep Exp $
 
 
 //# Includes
@@ -248,7 +248,7 @@ void TableCopy::copyRows (Table& out, const Table& in, uInt startout,
   ROTableRow inrow(in, cols);
   for (uInt i=0; i<nrrow; i++) {
     inrow.get (startin + i);
-    outrow.put (startout + i, inrow.record(), False);
+    outrow.put (startout + i, inrow.record(), inrow.getDefined(), False);
   }
   out.flush();
 }

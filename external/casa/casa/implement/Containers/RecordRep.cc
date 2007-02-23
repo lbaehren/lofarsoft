@@ -23,12 +23,13 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: RecordRep.cc,v 19.4 2005/05/06 07:31:46 wbrouw Exp $
+//# $Id: RecordRep.cc,v 19.6 2007/01/08 05:25:43 gvandiep Exp $
 
 #include <casa/Containers/RecordRep.h>
 #include <casa/Containers/BlockIO.h>
 #include <casa/Containers/Record.h>
-#include <casa/Arrays/Array.h>
+#include <casa/Arrays/Vector.h>
+#include <casa/Arrays/Slice.h>
 #include <casa/Arrays/ArrayError.h>
 #include <casa/Arrays/IPosition.h>
 #include <casa/IO/AipsIO.h>
@@ -729,7 +730,256 @@ void RecordRep::merge (const RecordRep& other,
 	mergeField (other, i, flag);
     }
 }
+
     
+void RecordRep::printDataField (std::ostream& os, DataType type,
+				const String& indent, Int maxNrValues,
+				const void* ptr) const
+{
+    switch (type) {
+    case TpBool:
+        os << "Bool " << *static_cast<const Bool*>(ptr);
+	break;
+    case TpUChar:
+        os << "uChar " << Int(*static_cast<const uChar*>(ptr));
+	break;
+    case TpShort:
+	os << "Short " << *static_cast<const Short*>(ptr);
+	break;
+    case TpInt:
+	os << "Int " << *static_cast<const Int*>(ptr);
+	break;
+    case TpUInt:
+	os << "uInt " << *static_cast<const uInt*>(ptr);
+	break;
+    case TpFloat:
+	os << "Float " << *static_cast<const float*>(ptr);
+	break;
+    case TpDouble:
+	os << "Double " << *static_cast<const double*>(ptr);
+	break;
+    case TpComplex:
+	os << "Complex " << *static_cast<const Complex*>(ptr);
+	break;
+    case TpDComplex:
+	os << "DComplex " << *static_cast<const DComplex*>(ptr);
+	break;
+    case TpString:
+        os << "String " << '"' << *static_cast<const String*>(ptr) << '"';
+	break;
+    case TpArrayBool:
+        os << "Bool array with shape "
+	   << static_cast<const Array<Bool>*>(ptr)->shape();
+	if (maxNrValues != 0) {
+	  const Array<Bool>& arr = *static_cast<const Array<Bool>*>(ptr);
+	  if (maxNrValues < 0) {
+	    cout << endl << arr;
+	  } else {
+	    Vector<Bool> vec = arr.reform (IPosition(1, arr.nelements()));
+	    if (uInt(maxNrValues+1) >= vec.nelements()) {
+	      cout << endl << indent << "  " << vec;
+	    } else {
+	      cout << ", first values:"
+		   << endl << indent << "  "
+		   << vec(Slice(0,maxNrValues-1));
+	    }
+	  }
+	}
+	break;
+    case TpArrayUChar:
+        os << "uChar array with shape "
+	   << static_cast<const Array<uChar>*>(ptr)->shape();
+	if (maxNrValues != 0) {
+	  const Array<uChar>& arr = *static_cast<const Array<uChar>*>(ptr);
+	  if (maxNrValues < 0) {
+	    cout << endl << arr;
+	  } else {
+	    Vector<uChar> vec = arr.reform (IPosition(1, arr.nelements()));
+	    if (uInt(maxNrValues+1) >= vec.nelements()) {
+	      cout << endl << indent << "  " << vec;
+	    } else {
+	      cout << ", first values:"
+		   << endl << indent << "  "
+		   << vec(Slice(0,maxNrValues-1));
+	    }
+	  }
+	}
+	break;
+    case TpArrayShort:
+        os << "Short array with shape "
+	   << static_cast<const Array<Short>*>(ptr)->shape();
+	if (maxNrValues != 0) {
+	  const Array<Short>& arr = *static_cast<const Array<Short>*>(ptr);
+	  if (maxNrValues < 0) {
+	    cout << endl << arr;
+	  } else {
+	    Vector<Short> vec = arr.reform (IPosition(1, arr.nelements()));
+	    if (uInt(maxNrValues+1) >= vec.nelements()) {
+	      cout << endl << indent << "  " << vec;
+	    } else {
+	      cout << ", first values:"
+		   << endl << indent << "  "
+		   << vec(Slice(0,maxNrValues-1));
+	    }
+	  }
+	}
+	break;
+    case TpArrayInt:
+        os << "Int array with shape "
+	   << static_cast<const Array<Int>*>(ptr)->shape();
+	if (maxNrValues != 0) {
+	  const Array<Int>& arr = *static_cast<const Array<Int>*>(ptr);
+	  if (maxNrValues < 0) {
+	    cout << endl << arr;
+	  } else {
+	    Vector<Int> vec = arr.reform (IPosition(1, arr.nelements()));
+	    if (uInt(maxNrValues+1) >= vec.nelements()) {
+	      cout << endl << indent << "  " << vec;
+	    } else {
+	      cout << ", first values:"
+		   << endl << indent << "  "
+		   << vec(Slice(0,maxNrValues-1));
+	    }
+	  }
+	}
+	break;
+    case TpArrayUInt:
+        os << "uInt array with shape "
+	   << static_cast<const Array<uInt>*>(ptr)->shape();
+	if (maxNrValues != 0) {
+	  const Array<uInt>& arr = *static_cast<const Array<uInt>*>(ptr);
+	  if (maxNrValues < 0) {
+	    cout << endl << arr;
+	  } else {
+	    Vector<uInt> vec = arr.reform (IPosition(1, arr.nelements()));
+	    if (uInt(maxNrValues+1) >= vec.nelements()) {
+	      cout << endl << indent << "  " << vec;
+	    } else {
+	      cout << ", first values:"
+		   << endl << indent << "  "
+		   << vec(Slice(0,maxNrValues-1));
+	    }
+	  }
+	}
+	break;
+    case TpArrayFloat:
+        os << "Float array with shape "
+	   << static_cast<const Array<Float>*>(ptr)->shape();
+	if (maxNrValues != 0) {
+	  const Array<Float>& arr = *static_cast<const Array<Float>*>(ptr);
+	  if (maxNrValues < 0) {
+	    cout << endl << arr;
+	  } else {
+	    Vector<Float> vec = arr.reform (IPosition(1, arr.nelements()));
+	    if (uInt(maxNrValues+1) >= vec.nelements()) {
+	      cout << endl << indent << "  " << vec;
+	    } else {
+	      cout << ", first values:"
+		   << endl << indent << "  "
+		   << vec(Slice(0,maxNrValues-1));
+	    }
+	  }
+	}
+	break;
+    case TpArrayDouble:
+        os << "Double array with shape "
+	   << static_cast<const Array<Double>*>(ptr)->shape();
+	if (maxNrValues != 0) {
+	  const Array<Double>& arr = *static_cast<const Array<Double>*>(ptr);
+	  if (maxNrValues < 0) {
+	    cout << endl << arr;
+	  } else {
+	    Vector<Double> vec = arr.reform (IPosition(1, arr.nelements()));
+	    if (uInt(maxNrValues+1) >= vec.nelements()) {
+	      cout << endl << indent << "  " << vec;
+	    } else {
+	      cout << ", first values:"
+		   << endl << indent << "  "
+		   << vec(Slice(0,maxNrValues-1));
+	    }
+	  }
+	}
+	break;
+    case TpArrayComplex:
+        os << "Complex array with shape "
+	   << static_cast<const Array<Complex>*>(ptr)->shape();
+	if (maxNrValues != 0) {
+	  const Array<Complex>& arr = *static_cast<const Array<Complex>*>(ptr);
+	  if (maxNrValues < 0) {
+	    cout << endl << arr;
+	  } else {
+	    Vector<Complex> vec = arr.reform (IPosition(1, arr.nelements()));
+	    if (uInt(maxNrValues+1) >= vec.nelements()) {
+	      cout << endl << indent << "  " << vec;
+	    } else {
+	      cout << ", first values:"
+		   << endl << indent << "  "
+		   << vec(Slice(0,maxNrValues-1));
+	    }
+	  }
+	}
+	break;
+    case TpArrayDComplex:
+        os << "DComplex array with shape "
+	   << static_cast<const Array<DComplex>*>(ptr)->shape();
+	if (maxNrValues != 0) {
+	  const Array<DComplex>& arr = *static_cast<const Array<DComplex>*>(ptr);
+	  if (maxNrValues < 0) {
+	    cout << endl << arr;
+	  } else {
+	    Vector<DComplex> vec = arr.reform (IPosition(1, arr.nelements()));
+	    if (uInt(maxNrValues+1) >= vec.nelements()) {
+	      cout << endl << indent << "  " << vec;
+	    } else {
+	      cout << ", first values:"
+		   << endl << indent << "  "
+		   << vec(Slice(0,maxNrValues-1));
+	    }
+	  }
+	}
+	break;
+    case TpArrayString:
+        os << "String array with shape "
+	   << static_cast<const Array<String>*>(ptr)->shape();
+	if (maxNrValues != 0) {
+	  const Array<String>& arr = *static_cast<const Array<String>*>(ptr);
+	  if (maxNrValues < 0) {
+	    cout << endl << arr;
+	  } else {
+	    Vector<String> vec = arr.reform (IPosition(1, arr.nelements()));
+	    if (uInt(maxNrValues+1) >= vec.nelements()) {
+	      cout << endl << indent << "  " << vec;
+	    } else {
+	      cout << ", first values:"
+		   << endl << indent << "  "
+		   << vec(Slice(0,maxNrValues-1));
+	    }
+	  }
+	}
+	break;
+    default:
+	throw (AipsError ("RecordRep::printDataField"));
+    }
+}
+
+void RecordRep::print (std::ostream& os,
+		       Int maxNrValues, const String& indent) const
+{
+    for (uInt i=0; i<nused_p; i++) {
+        os << indent << desc_p.name(i) << ": ";
+	if (desc_p.type(i) == TpRecord) {
+	    os << '{' << endl;
+	    static_cast<const Record*>(data_p[i])->print (os, maxNrValues,
+							  indent+"  ");
+	    os << indent << '}' << endl;
+        } else {
+	    printDataField (os, desc_p.type(i),
+			    indent, maxNrValues, data_p[i]);
+	    os << endl;
+	}
+    }
+}
+
 
 void RecordRep::putDataField (AipsIO& os, DataType type, const void* ptr) const
 {
@@ -871,7 +1121,6 @@ void RecordRep::getDataField (AipsIO& os, DataType type, void* ptr)
 	throw (AipsError ("RecordRep::getDataField"));
     }
 }
-
 
 void RecordRep::putRecord (AipsIO& os, int recordType) const
 {

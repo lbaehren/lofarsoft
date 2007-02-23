@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Link.h,v 19.6 2005/06/18 21:19:14 ddebonis Exp $
+//# $Id: Link.h,v 19.7 2006/12/21 22:16:02 gvandiep Exp $
 
 #ifndef CASA_LINK_H
 #define CASA_LINK_H
@@ -134,7 +134,7 @@ public:
     //      return a reference to the pointer to the next element in the list.
     //      This allows for modification of the list if necessary, e.g. for
     //      removal of elements.
-    //
+    //  </note>
     // <group>
     Link<t> *&next() {return Next;}
     const Link<t> *next() const {return Next;}
@@ -181,7 +181,7 @@ public:
     //        the middle of a list the elements which occur before the object will
     //        be left dangling, and the objects which follow the deleted object
     //        will also be deleted.
-    //
+    // </note>
     ~Link();
 
     //
@@ -194,7 +194,7 @@ public:
     // the next element in the list.
     // <note role=tip> The <src>Link<t>*</src> parameter is unused. It is a
     //    historical artifact which <b>will</b> be removed.
-    //
+    // </note>
     Link<t> *unlink(Link<t> * = 0);
 
 };

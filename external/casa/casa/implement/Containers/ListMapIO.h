@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ListMapIO.h,v 19.6 2004/11/30 17:50:15 ddebonis Exp $
+//# $Id: ListMapIO.h,v 19.7 2006/12/21 23:28:32 gvandiep Exp $
 
 #ifndef CASA_LISTMAPIO_H
 #define CASA_LISTMAPIO_H
@@ -48,6 +48,7 @@
 // </synopsis>
 //
 // <group name="ListMap IO">
+// </group>
 
 #include <casa/Containers/ListMap.h>
 #include <casa/Containers/MapIO.h>

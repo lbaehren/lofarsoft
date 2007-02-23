@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TableRow.cc,v 19.3 2004/11/30 17:51:09 ddebonis Exp $
+//# $Id: TableRow.cc,v 19.5 2007/02/19 22:03:15 gvandiep Exp $
 
 //# Includes
 #include <casa/aips.h>
@@ -36,6 +36,7 @@
 #include <tables/Tables/ArrayColumn.h>
 #include <casa/Containers/RecordField.h>
 #include <casa/Arrays/Vector.h>
+#include <casa/Utilities/Assert.h>
 #include <tables/Tables/TableError.h>
 
 
@@ -321,6 +322,8 @@ void ROTableRow::makeObjects (const RecordDesc& description,
     itsColumns.set (static_cast<void*>(0));
     itsFields.resize (itsNrused, False, False);
     itsFields.set (static_cast<void*>(0));
+    itsDefined.resize (itsNrused, False, False);
+    itsDefined.set (True);
     // Create the correct column object for each field.
     // (if not writing, an RO version is sufficient).
     // Also create a RecordFieldPtr object for each column.
@@ -526,6 +529,7 @@ const TableRecord& ROTableRow::get (uInt rownr, Bool alwaysRead) const
 		ndim = 0;
 	    }
 	}
+	itsDefined[i] = isDefined;
 	//# Now get the value; if undefined, create zero-length array
 	//# with the correct dimensionality.
 	switch (desc.type(i)) {
@@ -975,7 +979,29 @@ void TableRow::put (uInt rownr, const TableRecord& record,
     // internal record. Be sure to reread when the same row is asked for.
     setReread (rownr);
 }
-    
+
+void TableRow::put (uInt rownr, const TableRecord& record,
+		    const Block<Bool>& valuesDefined,
+		    Bool checkConformance)
+{
+    if (checkConformance) {
+	if (! namesConform (record)) {
+	    throw (TableError ("TableRow::put; names not conforming"));
+	}
+    }
+    const RecordDesc& thisDesc = itsRecord->description();
+    uInt nrfield = thisDesc.nfields();
+    AlwaysAssert (valuesDefined.nelements() >= nrfield, AipsError);
+    for (uInt i=0; i<nrfield; i++) {
+        if (valuesDefined[i]) {
+	    putField (rownr, record, i, i);
+	}
+    }
+    // The values (might) have changed, which is not reflected in the
+    // internal record. Be sure to reread when the same row is asked for.
+    setReread (rownr);
+}
+
 Bool TableRow::namesConform (const TableRecord& that) const
 {
     if (that.nfields() != itsNrused) {
@@ -992,4 +1018,3 @@ Bool TableRow::namesConform (const TableRecord& that) const
 }
 
 } //# NAMESPACE CASA - END
-

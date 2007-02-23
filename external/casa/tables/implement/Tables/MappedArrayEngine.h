@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MappedArrayEngine.h,v 19.3 2006/01/11 12:45:32 gvandiep Exp $
+//# $Id: MappedArrayEngine.h,v 19.4 2006/12/12 23:14:17 gvandiep Exp $
 
 #ifndef TABLES_MAPPEDARRAYENGINE_H
 #define TABLES_MAPPEDARRAYENGINE_H
@@ -112,10 +112,10 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // </example>
 
 // <templating arg=VirtualType>
-//  only suited for built-in numerics data types
+//  <li> only suited for built-in numerics data types
 // </templating>
 // <templating arg=StoredType>
-//  only suited for built-in numerics data types
+//  <li> only suited for built-in numerics data types
 // </templating>
 
 template<class VirtualType, class StoredType> class MappedArrayEngine : public BaseMappedArrayEngine<VirtualType, StoredType>

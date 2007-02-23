@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ArrayBase.h,v 19.4 2005/06/18 21:19:14 ddebonis Exp $
+//# $Id: ArrayBase.h,v 19.5 2006/11/10 01:14:43 gvandiep Exp $
 
 #ifndef CASA_ARRAYBASE_H
 #define CASA_ARRAYBASE_H
@@ -175,12 +175,14 @@ protected:
   // Make the indexing step sizes.
   void baseMakeSteps();
 
+public:
   // Various helper functions.
   // <group>
   void validateConformance (const ArrayBase&) const;
   void validateIndex (const IPosition&) const;
   // </group>
 
+protected:
   // Number of elements in the array. Cached rather than computed.
   uInt nels_p;
   // Dimensionality of the array.

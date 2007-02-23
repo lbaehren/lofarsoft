@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: StIndArrAIO.cc,v 19.4 2004/11/30 17:51:04 ddebonis Exp $
+//# $Id: StIndArrAIO.cc,v 19.5 2007/02/07 00:07:12 gvandiep Exp $
 
 #include <tables/Tables/StIndArrAIO.h>
 #include <tables/Tables/StArrayFile.h>
@@ -142,7 +142,9 @@ StIndArray* StManColumnIndArrayAipsIO::getShape (uInt rownr)
 {
     StIndArray* ptr = STMANINDGETBLOCK(rownr);
     if (ptr == 0) {
-	throw (DataManInvOper ("StMan: no array in this row"));
+        throw (DataManInvOper ("ASM: no array in row " +
+			       String::toString(rownr) +
+			       " of " + stmanPtr_p->fileName()));
     }
     ptr->getShape (*iosfile_p);
     return ptr;

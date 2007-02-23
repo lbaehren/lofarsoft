@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ArrayBase.cc,v 19.3 2005/04/04 07:19:41 gvandiep Exp $
+//# $Id: ArrayBase.cc,v 19.4 2007/02/19 04:26:51 gvandiep Exp $
 
 #include <casa/Arrays/ArrayBase.h>
 #include <casa/Arrays/ArrayError.h>
@@ -288,7 +288,7 @@ Int ArrayBase::makeSubset (ArrayBase& out,
   }
   uInt j;
   for (j=0; j < ndim(); j++) {
-    if (b(j) < 0 || b(j) > e(j)
+    if (b(j) < 0 || b(j) > e(j)+1
     ||  e(j) >= length_p(j)  ||  i(j) < 1) {
       throw(ArrayError("ArrayBase::operator()(b,e,i) - b,e or i "
 		       "incorrectly specified"));

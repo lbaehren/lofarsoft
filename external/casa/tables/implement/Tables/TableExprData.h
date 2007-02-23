@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: TableExprData.h,v 19.5 2004/11/30 17:51:08 ddebonis Exp $
+//# $Id: TableExprData.h,v 19.6 2006/12/12 23:14:17 gvandiep Exp $
 
 
 #ifndef TABLES_TABLEEXPRDATA_H
@@ -223,7 +223,7 @@ public:
   // Get a scalar in the given type.
   // This might involve converting for Double and DComplex.
   // Most default implementations throws an "not possible" exception.
-  // The default <src>getDComplex</src> invokes </src>getDouble</src>.
+  // The default <src>getDComplex</src> invokes <src>getDouble</src>.
   // <group>
   virtual Bool     getBool     (const Block<Int>& fieldNrs) const;
   virtual Double   getDouble   (const Block<Int>& fieldNrs) const;
@@ -235,7 +235,7 @@ public:
   // This might involve converting for Double and DComplex.
   // Most default implementations throws an "not possible" exception.
   // The default <src>getArrayDComplex</src> invokes
-  // </src>getArrayDouble</src>.
+  // <src>getArrayDouble</src>.
   // <group>
   virtual Array<Bool>     getArrayBool     (const Block<Int>& fieldNrs) const;
   virtual Array<Double>   getArrayDouble   (const Block<Int>& fieldNrs) const;

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ExprDerNode.h,v 19.7 2005/02/21 11:01:17 gvandiep Exp $
+//# $Id: ExprDerNode.h,v 19.8 2006/12/19 05:12:58 gvandiep Exp $
 
 #ifndef TABLES_EXPRDERNODE_H
 #define TABLES_EXPRDERNODE_H
@@ -291,6 +291,9 @@ public:
     Array<Complex>  getColumnComplex();
     Array<DComplex> getColumnDComplex();
     Array<String>   getColumnString();
+
+    // Get the column unit (can be empty).
+    static Unit getColumnUnit (const ROTableColumn&);
 
 protected:
     ROTableColumn* tabColPtr_p;                //# pointer to table column

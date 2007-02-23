@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ISMIndColumn.cc,v 19.4 2004/11/30 17:51:02 ddebonis Exp $
+//# $Id: ISMIndColumn.cc,v 19.5 2007/02/07 00:07:12 gvandiep Exp $
 
 //# Includes
 #include <tables/Tables/ISMIndColumn.h>
@@ -156,7 +156,9 @@ StIndArray* ISMIndColumn::getShape (uInt rownr)
 {
     StIndArray* ptr = getArrayPtr (rownr);
     if (ptr == 0) {
-	throw (DataManInvOper ("StMan: no array in this row"));
+      throw (DataManInvOper ("ISM: no array in row " +
+			     String::toString(rownr) +
+			     " of " + stmanPtr_p->fileName()));
     }
     ptr->getShape (*iosfile_p);
     return ptr;

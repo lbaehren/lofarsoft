@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Map.h,v 19.8 2005/06/18 21:19:14 ddebonis Exp $
+//# $Id: Map.h,v 19.9 2006/12/21 22:16:02 gvandiep Exp $
 
 #ifndef CASA_MAP_H
 #define CASA_MAP_H
@@ -76,6 +76,7 @@ public:
   //  <note> With a constant map in the case where the key is not
   //         defined, the mapping between key and default value is 
   //         not created, but rather an exception is thrown.
+  //  </note>
   //+grp
   value &operator()(const key &ky);
   const value &operator()(const key &ky) const;
@@ -163,6 +164,7 @@ public:
   //  <note> With a constant map in the case where the key is not
   //         defined, the mapping between key and default value is 
   //         not created, but rather an exception is thrown.
+  //  </note>
   //+grp
   value &operator()(const key &ky);
   const value &operator()(const key &ky) const;

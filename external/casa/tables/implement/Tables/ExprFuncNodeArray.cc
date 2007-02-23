@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ExprFuncNodeArray.cc,v 19.9 2006/11/20 00:56:17 gvandiep Exp $
+//# $Id: ExprFuncNodeArray.cc,v 19.10 2006/12/19 05:12:58 gvandiep Exp $
 
 #include <tables/Tables/ExprFuncNodeArray.h>
 #include <tables/Tables/TableError.h>
@@ -68,7 +68,11 @@ TableExprNodeRep* TableExprFuncNodeArray::fillNode
 				    PtrBlock<TableExprNodeRep*>& nodes,
 				    const Block<Int>& dtypeOper)
 {
+    // Fill child nodes as needed.
     TableExprFuncNode::fillChildNodes (&(thisNode->node_p), nodes, dtypeOper);
+    // Set the resulting unit.
+    TableExprFuncNode::fillUnits (thisNode, nodes, thisNode->funcType());
+    // Some functions on a variable can already give a constant result.
     thisNode->tryToConst();
     if (thisNode->operands().nelements() > 0) {
 	return convertNode (thisNode, True);
