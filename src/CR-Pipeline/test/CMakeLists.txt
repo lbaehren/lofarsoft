@@ -3,10 +3,6 @@
 ## ------------------------------------------------------------------------------
 ## Find external packages
 
-find_library (libg2c g2c
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib
-  )
-
 ## ------------------------------------------------------------------------------
 ## Include directories
 

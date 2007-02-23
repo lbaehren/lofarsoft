@@ -62,6 +62,7 @@ namespace casa {
   template class CountedConstPtr<Block<AutoDiffA<DComplex> > >;
   template class CountedPtr<Block<AutoDiffA<DComplex> > >;
   template class PtrRep<Block<AutoDiffA<DComplex> > >;
+
   template class CountedPtr<Block<Vector<SquareMatrix<Complex, 2> > > >;
   template class CountedConstPtr<Block<Vector<SquareMatrix<Complex, 2> > > >;
   template class SimpleCountedPtr<Block<Vector<SquareMatrix<Complex, 2> > > >;
@@ -77,6 +78,7 @@ namespace casa {
   template class PtrRep<Block<Vector<SquareMatrix<Float, 2> > > >;
   template class SimpleCountedConstPtr<Block<Vector<SquareMatrix<Float, 2> > > >;
   template class SimpleCountedPtr<Block<Vector<SquareMatrix<Float, 2> > > >;
+
   template class CountedConstPtr<Block<OrderedMap<Double, SquareMatrix<Complex, 2>*>*> >;
   template class CountedPtr<Block<OrderedMap<Double, SquareMatrix<Complex, 2>*>*> >;
   template class SimpleCountedConstPtr<Block<OrderedMap<Double, SquareMatrix<Complex, 2>*>*> >;

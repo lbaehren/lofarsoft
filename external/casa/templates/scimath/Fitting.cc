@@ -316,6 +316,6 @@ template Bool LSQFit::addConstraint<Float, ItComplex, ItuInt>(uInt nIndex, ItuIn
   //
   // ============================================================================
 
-  template AutoDiff<double> sqrt<double>(AutoDiff<double> const&);
+//   template AutoDiff<double> sqrt<double>(AutoDiff<double> const&);
 
 }

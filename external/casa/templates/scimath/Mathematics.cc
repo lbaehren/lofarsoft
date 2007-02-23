@@ -23,7 +23,6 @@
 #include <casa/BasicSL/Complex.h>
 #include <casa/Containers/PoolStack.h>
 #include <casa/Utilities/Fallible.h>
-#include <scimath/Mathematics/AutoDiff.h>
 #include <scimath/Mathematics/AutoDiffIO.h>
 #include <scimath/Mathematics/AutoDiffMath.h>
 #include <scimath/Mathematics/AutoDiffRep.h>
@@ -69,7 +68,10 @@ namespace casa {
   template class AutoDiff<Complex>;
   template class AutoDiff<DComplex>;
 
+  template ostream & operator<<(ostream &, Array<AutoDiff<Float> > const &);
   template ostream & operator<<(ostream &, Array<AutoDiff<Double> > const &);
+  template ostream & operator<<(ostream &, Array<AutoDiff<Complex> > const &);
+  template ostream & operator<<(ostream &, Array<AutoDiff<DComplex> > const &);
 
   template Bool allNearAbs(Array<Double> const &, Double const &, Double);
   template Bool allNearAbs(Array<Complex> const &, Array<Complex> const &, Double);
@@ -79,11 +81,44 @@ namespace casa {
   template void operator-=(Array<AutoDiff<Double> > &, AutoDiff<Double> const &);
   template void operator*=(Array<AutoDiff<Double> > &, AutoDiff<Double> const &);
   template void operator/=(Array<AutoDiff<Double> > &, AutoDiff<Double> const &);
+
   template void operator+=(Array<AutoDiff<Double> > &, Array<AutoDiff<Double> > const &);
   template void operator-=(Array<AutoDiff<Double> > &, Array<AutoDiff<Double> > const &);
   template void operator*=(Array<AutoDiff<Double> > &, Array<AutoDiff<Double> > const &);
   template void operator/=(Array<AutoDiff<Double> > &, Array<AutoDiff<Double> > const &);
+
+  template bool operator< (AutoDiff<Float> const&, AutoDiff<Float> const&);
+  template bool operator< (AutoDiff<Double> const&, AutoDiff<Double> const&);
+  template bool operator< (AutoDiff<Complex> const&, AutoDiff<Complex> const&);
+  template bool operator< (AutoDiff<DComplex> const&, AutoDiff<DComplex> const&);
+
+  template AutoDiff<float> operator* (AutoDiff<float> const&, AutoDiff<float> const&);
+  template AutoDiff<double> operator* (AutoDiff<double> const&, AutoDiff<double> const&);
+  template AutoDiff<Complex> operator* (AutoDiff<Complex> const&, AutoDiff<Complex> const&);
+  template AutoDiff<DComplex> operator* (AutoDiff<DComplex> const&, AutoDiff<DComplex> const&);
+
+  template AutoDiff<float> operator/ (AutoDiff<float> const&, AutoDiff<float> const&);
+  template AutoDiff<Double> operator/ (AutoDiff<Double> const&, AutoDiff<Double> const&);
+  template AutoDiff<Complex> operator/ (AutoDiff<Complex> const&, AutoDiff<Complex> const&);
+  template AutoDiff<DComplex> operator/ (AutoDiff<DComplex> const&, AutoDiff<DComplex> const&);
+
+  template AutoDiff<float> operator- (float const&, AutoDiff<float> const&);
+  template AutoDiff<double> operator- (double const&, AutoDiff<double> const&);
+
+  template AutoDiff<float> operator- (AutoDiff<float> const&, AutoDiff<float> const&);
+  template AutoDiff<double> operator- (AutoDiff<double> const&, AutoDiff<double> const&);
+  template AutoDiff<Complex> operator- (AutoDiff<Complex> const&, AutoDiff<Complex> const&);
+  template AutoDiff<DComplex> operator- (AutoDiff<DComplex> const&, AutoDiff<DComplex> const&);
+
+  template Array<AutoDiff<Float> > operator-(Array<AutoDiff<Float> > const &);
   template Array<AutoDiff<Double> > operator-(Array<AutoDiff<Double> > const &);
+  template Array<AutoDiff<Complex> > operator-(Array<AutoDiff<Complex> > const &);
+  template Array<AutoDiff<DComplex> > operator-(Array<AutoDiff<DComplex> > const &);
+
+  template AutoDiff<float> operator+ (AutoDiff<float> const&, AutoDiff<float> const&);
+  template AutoDiff<double> operator+ (AutoDiff<double> const&, AutoDiff<double> const&);
+  template AutoDiff<Complex> operator+ (AutoDiff<Complex> const&, AutoDiff<Complex> const&);
+  template AutoDiff<DComplex> operator+ (AutoDiff<DComplex> const&, AutoDiff<DComplex> const&);
 
   template class MaskedArray<AutoDiff<AutoDiff<Double> > >;
 
@@ -114,6 +149,11 @@ namespace casa {
 
   // 1000 scimath/Mathematics/AutoDiffIO.cc scimath/Mathematics/AutoDiff.h 
   template ostream & operator<<(ostream &, AutoDiff<AutoDiff<Double> > const &);
+
+  template bool operator== (AutoDiff<float> const&, AutoDiff<float> const&);
+  template bool operator== (AutoDiff<double> const&, AutoDiff<double> const&);
+  template bool operator== (AutoDiff<Complex> const&, AutoDiff<Complex> const&);
+  template bool operator== (AutoDiff<DComplex> const&, AutoDiff<DComplex> const&);
 
   // 1000 scimath/Mathematics/AutoDiffMath.cc 
   template AutoDiff<AutoDiff<Double> > operator*(AutoDiff<AutoDiff<Double> > const &, AutoDiff<AutoDiff<Double> > const &);
@@ -160,5 +200,48 @@ namespace casa {
   // 1000 scimath/Mathematics/StatAcc.cc 
   template class StatAcc<Float>;
   template class StatAcc<Int>;
+
+  template AutoDiff<Float> abs (AutoDiff<Float> const&);
+  template AutoDiff<Double> abs (AutoDiff<Double> const&);
+  template AutoDiff<Complex> abs (AutoDiff<Complex> const&);
+  template AutoDiff<DComplex> abs (AutoDiff<DComplex> const&);
+
+  template AutoDiff<float> asin (AutoDiff<float> const&);
+  template AutoDiff<double> asin (AutoDiff<double> const&);
+  template AutoDiff<Complex> asin (AutoDiff<Complex> const&);
+  template AutoDiff<DComplex> asin (AutoDiff<DComplex> const&);
+
+  template AutoDiff<float> cos (AutoDiff<float> const&);
+  template AutoDiff<double> cos (AutoDiff<double> const&);
+  template AutoDiff<Complex> cos (AutoDiff<Complex> const&);
+  template AutoDiff<DComplex> cos (AutoDiff<DComplex> const&);
+
+  template AutoDiff<float> exp (AutoDiff<float> const&);
+  template AutoDiff<double> exp (AutoDiff<double> const&);
+  template AutoDiff<Complex> exp (AutoDiff<Complex> const&);
+  template AutoDiff<DComplex> exp (AutoDiff<DComplex> const&);
+
+  template AutoDiff<Float> log (AutoDiff<Float> const&);
+  template AutoDiff<Double> log (AutoDiff<Double> const&);
+  template AutoDiff<Complex> log (AutoDiff<Complex> const&);
+  template AutoDiff<DComplex> log (AutoDiff<DComplex> const&);
+
+  template AutoDiff<float> pow (AutoDiff<float> const&, AutoDiff<float> const&);
+  template AutoDiff<double> pow (AutoDiff<double> const&, AutoDiff<double> const&);
+
+  template AutoDiff<float> sin (AutoDiff<float> const&);
+  template AutoDiff<double> sin (AutoDiff<double> const&);
+  template AutoDiff<Complex> sin (AutoDiff<Complex> const&);
+  template AutoDiff<DComplex> sin (AutoDiff<DComplex> const&);
+
+  template AutoDiff<float> sinh (AutoDiff<float> const&);
+  template AutoDiff<double> sinh (AutoDiff<double> const&);
+  template AutoDiff<Complex> sinh (AutoDiff<Complex> const&);
+  template AutoDiff<DComplex> sinh (AutoDiff<DComplex> const&);
+
+  template AutoDiff<float> sqrt (AutoDiff<float> const&);
+  template AutoDiff<double> sqrt (AutoDiff<double> const&);
+  template AutoDiff<Complex> sqrt (AutoDiff<Complex> const&);
+  template AutoDiff<DComplex> sqrt (AutoDiff<DComplex> const&);
 
 }
