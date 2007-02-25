@@ -1,0 +1,18 @@
+Package: wcs
+Version: 4.2
+Revision: 1
+License: BSD
+Description: an implementation of the FITS WCS standard.
+Source: http://www.atnf.csiro.au/~mcalabre/WCS/wcslib.tar.gz
+Source-MD5: 
+Essential: 
+Depends: 
+SourceDirectory: %n-%v
+DescDetail: <<
+WCSLIB is a C library, supplied with a full set of Fortran wrappers, that
+implements the "World Coordinate System" (WCS) convention in FITS (Flexible
+Image Transport System).  It also includes a PGPLOT-based routine, PGSBOX,
+for drawing general curvilinear coordinate graticules.
+<<
+Maintainer: Lars Baehren <bahren@astron,nl>
+Homepage: http://www.atnf.csiro.au/~mcalabre/WCS

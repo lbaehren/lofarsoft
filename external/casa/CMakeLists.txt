@@ -43,6 +43,7 @@ find_package (ZLIB)
 
 include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindLAPACK.cmake)
 include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindFFTW3.cmake)
+include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindCFITSIO.cmake)
 
 ## -----------------------------------------------------------------------------
 ## Compiler settings
@@ -116,6 +117,7 @@ INCLUDE_DIRECTORIES (
   .
   ${CASA_SOURCE_DIR}
   ${CASA_SOURCE_DIR}/include
+  ${CFITSIO_INCLUDES}
   )
 
 SET (CASA_OPTLEVEL "-O3")
@@ -180,11 +182,15 @@ message (STATUS "CMAKE_MODULE_LINKER_FLAGS = ${CMAKE_MODULE_LINKER_FLAGS}")
 ## List of sub-directories
 
 SUBDIRS (
+# required external components
+  wcslib
+# casa packages
   casa
   scimath
   tables
   measures
   ms
   lattices
+  fits
   coordinates
   )

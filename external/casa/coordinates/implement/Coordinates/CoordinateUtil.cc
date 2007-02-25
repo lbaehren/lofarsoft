@@ -1294,48 +1294,48 @@ Bool CoordinateUtil::setSpectralFormatting (String& errorMsg,
 // the frame and Doppler.
 //
 {
-   Int after = -1;
-   Int iS = cSys.findCoordinate(Coordinate::SPECTRAL, after);
-      if (iS>=0) {
-      SpectralCoordinate sCoord = cSys.spectralCoordinate(iS);
-     
-// Set format Unit
-           
-      Bool ok = sCoord.setFormatUnit (unit);
-      
-// Velocity State
-
-      MDoppler::Types oldDoppler = sCoord.velocityDoppler();
-      String oldVelUnit = sCoord.velocityUnit();
-//  
-      MDoppler::Types newDoppler(oldDoppler);
-      String newVelUnit(oldVelUnit);
-
-// Find new Doppler, if any
-                                        
-      if (!doppler.empty()) {
-         if (!MDoppler::getType(newDoppler, doppler)) {
-            errorMsg = String("Illegal velocity Doppler - nochange");
-            newDoppler = oldDoppler;
-            return False;
-         }
+  Int after = -1;
+  Int iS = cSys.findCoordinate(Coordinate::SPECTRAL, after);
+  if (iS>=0) {
+    SpectralCoordinate sCoord = cSys.spectralCoordinate(iS);
+    
+    // Set format Unit
+    
+    Bool ok = sCoord.setFormatUnit (unit);
+    
+    // Velocity State
+    
+    MDoppler::Types oldDoppler = sCoord.velocityDoppler();
+    String oldVelUnit = sCoord.velocityUnit();
+    //  
+    MDoppler::Types newDoppler(oldDoppler);
+    String newVelUnit(oldVelUnit);
+    
+    // Find new Doppler, if any
+    
+    if (!doppler.empty()) {
+      if (!MDoppler::getType(newDoppler, doppler)) {
+	errorMsg = String("Illegal velocity Doppler - nochange");
+	newDoppler = oldDoppler;
+	return False;
       }
-//
-     if (oldDoppler != newDoppler) {
-        if (!sCoord.setVelocity (newVelUnit, newDoppler)) {
-           errorMsg = sCoord.errorMessage();
-           return False;
-        }
-     }
- 
-// Replace in CS
-  
-      cSys.replaceCoordinate(sCoord, iS);
-   }
-//
-   return True;
+    }
+    //
+    if (oldDoppler != newDoppler) {
+      if (!sCoord.setVelocity (newVelUnit, newDoppler)) {
+	errorMsg = sCoord.errorMessage();
+	return False;
+      }
+    }
+    
+    // Replace in CS
+    
+    cSys.replaceCoordinate(sCoord, iS);
+  }
+  //
+  return True;
 }
-   
+
 
 
 

@@ -321,9 +321,7 @@
 #ifndef WCSLIB_FITSHDR
 #define WCSLIB_FITSHDR
 
-#ifdef __have_config_h
 #include "config.h"
-#endif
 
 #ifdef __cplusplus
 extern "C" {

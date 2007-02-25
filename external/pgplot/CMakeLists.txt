@@ -3,6 +3,9 @@ project (pgplot C Fortran)
 subdirs (build)
 
 set (pgplot_modules
+  cpg
+  drivers
+  drivers/xmotif
   src
   sys
 )
@@ -11,7 +14,6 @@ set (pgplot_modules
 ## Required external packages
 
 find_package (PNG)
-find_package (TCL)
 find_package (X11)
 find_package (ZLIB)
 
@@ -19,21 +21,30 @@ find_library (libg2c g2c
   PATHS /usr/local/lib /usr/lib /lib /sw/lib
   )
 
-include_directories (
-  .
-  ${pgplot_SOURCE_DIR}
-  ${pgplot_modules}
-  ${PNG_INCLUDE_DIR}
-  ${TCL_INCLUDE_PATH}
-  ${TK_INCLUDE_PATH}
-  ${X11_INCLUDE_DIR}
-)
+## -- Tcl/Tk -------------------------------------
 
-message (STATUS "PNG includes  : ${PNG_INCLUDE_DIR}")
-message (STATUS "TCL inlcudes  : ${TCL_INCLUDE_PATH}")
-message (STATUS "TK  inlcudes  : ${TK_INCLUDE_PATH}")
-message (STATUS "X11 includes  : ${X11_INCLUDE_DIR}")
-message (STATUS "ZLIB includes : ${ZLIB_INCLUDE_DIR}")
+find_path (tcl_inc tcl.h
+  PATHS /usr/include /usr/local/include /sw/include
+  PATH_SUFFIXES tcl tcl8.4
+  NO_DEFAULT_PATH
+  )
+
+find_library (tcl_lib tcl
+  PATHS /usr/lib /usr/local/lib /sw/lib
+  NO_DEFAULT_PATH
+  )
+
+find_library (tk_lib tk
+  PATHS /usr/lib /usr/local/lib /sw/lib
+  NO_DEFAULT_PATH
+  )
+
+## summary of external libraries
+
+message (STATUS "libg2c = ${libg2c}")
+message (STATUS "libtcl = ${tcl_lib} , ${tcl_inc}")
+message (STATUS "libtk  = ${tk_lib}")
+message (STATUS "libx11 = ${X11_LIBRARIES}")
 
 ## ------------------------------------------------------------------------------
 ## Start building the library
@@ -56,9 +67,18 @@ message (STATUS "ZLIB includes : ${ZLIB_INCLUDE_DIR}")
 ## 	$(RANLIB) libpgplot.a
 ##
 
-FILE (GLOB pgplot_sysfonts_sources ./fonts/*.f)
-FILE (GLOB pgplot_src_sources ./src/*.f ./src/*.c)
-FILE (GLOB pgplot_sys_sources ./sys/*.f ./sys/*.c)
+include_directories (
+  .
+  ${pgplot_SOURCE_DIR}
+  ${pgplot_modules}
+  ${tcl_inc}
+  ${PNG_INCLUDE_DIR}
+  ${X11_INCLUDE_DIR}
+)
+
+FILE (GLOB pgplot_fonts ./fonts/*.f)
+FILE (GLOB pgplot_src ./src/*.f ./src/*.c)
+FILE (GLOB pgplot_sys ./sys/*.f ./sys/*.c)
 
 set (pgplot_drivers
   ./drivers/gidriv.f
@@ -71,20 +91,44 @@ set (pgplot_drivers
   ./drivers/xmdriv.c
   ./drivers/xwdriv.c
   ./drivers/xmotif/XmPgplot.c
+  ./drivers/xtk/tkpgplot.c
   )
 
+## -- libpgplot ----------------------------------
+
 add_library (pgplot
-  ${pgplot_src_sources}
-  ${pgplot_sys_sources}
+  ${pgplot_src}
+  ${pgplot_sys}
   ${pgplot_drivers}
   grexec.f
   )
 target_link_libraries (pgplot
   ${libg2c}
+  ${tcl_lib}
+  ${tk_lib}
   ${JPEG_LIBRARIES}
   ${PNG_LIBRARIES}
   ${X11_LIBRARIES}
   ${ZLIB_LIBRARIES}
+  )
+
+## -- libcpgplot ---------------------------------
+
+add_library (cpgplot
+  cpg/cpgdemo.c
+  cpg/pgbind.c
+  )
+
+## -- libXmPgplot --------------------------------
+
+add_library (XmPgplot
+  drivers/xmotif/XmPgplot.c
+  )
+
+## -- libtkpgplot --------------------------------
+
+add_library (tkpgplot
+  drivers/xtk/tkpgplot.c
   )
 
 ## ------------------------------------------------------------------------------
@@ -96,11 +140,27 @@ target_link_libraries (pgplot
 
 set (examples
   pgdemo1
+  pgdemo2
+  pgdemo3
+  pgdemo4
+  pgdemo5
+  pgdemo6
   )
 
 foreach (src ${examples})
   add_executable (${src} examples/${src}.f)
-  target_link_libraries (${src} pgplot)
+  target_link_libraries (${src}
+    pgplot
+    XmPgplot
+    tkpgplot
+    ${libg2c}
+    ${tcl_lib}
+    ${tk_lib}
+    ${JPEG_LIBRARIES}
+    ${PNG_LIBRARIES}
+    ${X11_LIBRARIES}
+    ${ZLIB_LIBRARIES}
+    )
   set_target_properties (${src}
     PROPERTIES LINKER_LANGUAGE Fortran)
 endforeach (src)

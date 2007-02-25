@@ -98,7 +98,7 @@ C
       X = X2-X1
       Y = Y2-Y1
 C
-C Determine device resolution (pixels/inch), and use it to choose
+C Determine device resolution (pixels/inch), and use_it to choose
 C line width.
 C
       CALL PGQVP(3, XPIX1, XPIX2, YPIX1, YPIX2)
@@ -200,7 +200,7 @@ C
       CALL PGENV(0.,20.,REAL(N),0.,0,-2)
       CALL PGLAB(' ',' ','\fiPGPLOT \frFonts')
 C
-C Use PGTEXT to write the sample character strings.
+C Use_PGTEXT to write the sample character strings.
 C
       CALL PGSCH(1.6)
       DO 10 I=1,N
