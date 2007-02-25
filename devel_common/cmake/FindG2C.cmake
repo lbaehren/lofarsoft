@@ -18,6 +18,7 @@ find_path (G2C_INCLUDES g2c.h
   /sw/include
   PATH_SUFFIXES
   gcc
+  gcc-lib/i486-linux/3.3.5/include
   )
 
 ## -----------------------------------------------------------------------------

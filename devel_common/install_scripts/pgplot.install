@@ -3,14 +3,6 @@
 var_basedir=`pwd`
 var_arch=`uname | tr '[A-Z]' '[a-z]'`
 
-case $var_arch in
-	darwin)
-		var_arch=mac
-	;;
-	linux)
-	;;
-esac
-
 ## check the input
 
 if test -z $1 ; then
@@ -75,62 +67,52 @@ mkdir build
 cp drivers.list build
 
 cd build
-
 case $var_arch in
-  mac)
-    ../makemake   ..  freebsd
-  ;;
+    darwin)
+	../makemake .. 	freebsd
+    ;;
+    linux)
+	../makemake .. linux g77_gcc_aout	
+    ;;
 esac
-
-exit
 
 ## ------------------------------------------------------------------------
 ## Adjust the path to the Tcl/Tk library and include files
 
-cd $pgplot_src/sys_$var_arch
+for location in /usr/include /usr/local/include /usr/include/tcl8.4
+{
+    if test -f $location/tcl.h ;
+    then tcl_include=$location
+    fi
+}
 
-cp g77_gcc.conf g77_gcc.conf.orig
-
-cat g77_gcc.conf | sed s/"TK_INCL=\"-I\/usr"/"TK_INCL=\"-I$var_prefix_sed"/ > tmp && cp tmp g77_gcc.conf
-cat g77_gcc.conf | sed s/"TK_LIBS=\"-L\/usr"/"TK_LIBS=\"-L$var_prefix_sed"/ > tmp && cp tmp g77_gcc.conf
-cat g77_gcc.conf | sed s/"RV_INCL=\""/"RV_INCL=\"-I$var_prefix_inc_sed"/ > tmp && cp tmp g77_gcc.conf
-
+case $var_arch in
+    linux)
+	cat makefile | sed s/"TK_INCL=-I\/usr\/include"/"TK_INCL=-I\/usr\/include -I\/usr\/include\/tcl8.4"/ > makefile.tmp && \
+	mv makefile.tmp makefile
+    ;;
+esac
 
 ## ------------------------------------------------------------------------
-## Configure and build
+## Build
 
-echo "[$var_Package] Configuring and building package ..." ;
+echo "[$var_Package] Building package ..." ;
 
-mkdir -p $pgplot_dest
-cp $pgplot_src/drivers.list $pgplot_dest
-
-cd $pgplot_dest
-
-$pgplot_src/makemake $pgplot_src $var_arch g77_gcc
 make
 make cpg
 
 ## ------------------------------------------------------------------------
 ## Installation of header files and library
 
-echo "[$var_Package] Installing include files and library ..." ;
+echo "[$var_Package] Installing include files and library into $var_prefix/lib/pgplot..." ;
 
-cd $pgplot_dest
+cd $var_basedir
+mkdir -p $var_prefix/lib/pgplot
 
-mv *.h $var_prefix/include
-
-mv *.a $var_prefix/lib
-mv *.so $var_prefix/lib
-
-echo "[$var_Package] Creating symbolic links ...";
-
-cd $var_prefix/lib
-
-rm -f libpng.a
-
-if test -f /usr/lib/libpng.a ;
-then ln -s /usr/lib/libpng.a libpng.a ;
-fi
+for file in libpgplot.a grfont.dat rgb.txt pgxwin_server libXmPgplot.a XmPgplot.h libtkpgplot.a tkpgplot.h
+{
+    mv $pgplot_src/build/$file $var_prefix/lib/pgplot
+}
 
 ## ------------------------------------------------------------------------
 ## Post-installation clean-up
