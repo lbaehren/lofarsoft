@@ -21,9 +21,12 @@ fftw:
 
 cfitsio:
 	./cfitsio.install $(var_prefix)
-	
+
 ccfits: cfitsio
 	./ccfits.install $(var_prefix)
+
+lapack:
+	./lapack.install $(var_prefix)
 
 m4:
 	./m4.install $(var_prefix)
