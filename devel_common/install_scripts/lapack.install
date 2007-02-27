@@ -44,8 +44,6 @@ cd $var_PackageDir
 make blaslib
 make
 
-exit
-
 ## Post-installation cleanup of the directory
 
 echo "[$var_Package] Post-installation cleanup of the directory ...";
