@@ -18,19 +18,22 @@
 # *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 # ***************************************************************************
 
-## -------------------------------------------------------------------
+## ------------------------------------------------------------------------------
 ## Append the detected configuration information to the existing "makedefs"
 
-file (APPEND ../makedefs "\n\n")
-file (APPEND ../makedefs "#-----------------------------------------------------------\n")
-file (APPEND ../makedefs "# Configuration settings detected by CMake\n")
-file (APPEND ../makedefs "\n")
+set (outfile "makedefs")
+
+file (APPEND ${outfile} "\n\n")
+file (APPEND ${outfile} "#-----------------------------------------------------------\n")
+file (APPEND ${outfile} "# Configuration settings detected by CMake\n")
+file (APPEND ${outfile} "\n")
 
 
-## -------------------------------------------------------------------
+## ------------------------------------------------------------------------------
 ## Define where to search for libraries and header files
 
 set (bin_locations
+  ./bin
   /bin
   /usr/sbin
   /usr/bin
@@ -41,12 +44,14 @@ set (bin_locations
 )
 
 set (include_locations
+  ./include
   /usr/include
   /usr/local/include
   /sw/include
 )
 
 set (lib_locations
+  ./lib
   /opt/casa/local/lib
   /usr/lib
   /usr/local/lib
@@ -54,7 +59,48 @@ set (lib_locations
   /sw/lib
 )
 
-## -------------------------------------------------------------------
+## ------------------------------------------------------------------------------
+## Boost
+
+set (libs
+  boost_date_time
+  boost_filesystem
+  boost_iostreams
+  boost_program_options
+  boost_python
+  boost_regex
+  boost_serialization
+  boost_signals
+  boost_test_exec_monitor
+  boost_thread
+  boost_unit_test_framework
+  boost_wave
+)
+
+set (BOOST_LIBRARIES "")
+
+foreach (lib ${libs})
+  ## try to locate the library
+  find_library (BOOST_${lib} ${lib} ${lib}-gcc
+    PATHS ${lib_locations}
+    PATH_SUFFIXES boost
+    )
+  ## check if location was successful
+  if (BOOST_${lib})
+    list (APPEND BOOST_LIBRARIES ${BOOST_${lib}})
+  endif (BOOST_${lib})
+endforeach (lib)
+
+file (APPEND ${outfile} "BOOSTLIB := ${BOOST_LIBRARIES}\n\n")
+
+## ------------------------------------------------------------------------------
+## CFITSIO
+
+find_library (libcfitsio cfitsio ${lib_locations})
+
+file (APPEND ${outfile} "CFITSIOLIB := ${libcfitsio}\n\n")
+
+## ------------------------------------------------------------------------------
 ## FFTW Highly optimized FFT routines
 
 find_library (libfftw fftw ${lib_locations})
@@ -62,39 +108,13 @@ find_library (librfftw rfftw ${lib_locations})
 
 if (libfftw)
   if (librfftw)
-    file (APPEND ../makedefs "FFTWLIB := ${libfftw} ${librfftw}\n\n")
+    file (APPEND ${outfile} "FFTWLIB := ${libfftw} ${librfftw}\n\n")
   else (librfftw)
-    file (APPEND ../makedefs "FFTWLIB := ${libfftw}\n\n")
+    file (APPEND ${outfile} "FFTWLIB := ${libfftw}\n\n")
   endif (librfftw)
 endif (libfftw)
 
-## -------------------------------------------------------------------
-## Motif
-
-find_library (libXm Xm ${lib_locations})
-find_library (libXpm Xpm ${lib_locations})
-find_library (libXp Xp ${lib_locations})
-
-file (APPEND ../makedefs "MotifLIB := ${libXm} ${libXpm} ${libXp}\n\n")
-
-## -------------------------------------------------------------------
-## POPT
-
-find_library (libpopt popt ${lib_locations})
-
-file (APPEND ../makedefs "POPTLIB  := ${libpopt}\n\n")
-
-## -------------------------------------------------------------------
-## TCL (version 7.6 or later)
-
-find_library (libtcl tcl ${lib_locations})
-find_library (libdl dl ${lib_locations})
-find_library (libtk tk ${lib_locations})
-
-file (APPEND ../makedefs "TCLLIB  := ${libtcl} ${libdl}\n\n")
-file (APPEND ../makedefs "TKLIB   := ${libtk}\n\n")
-
-## -------------------------------------------------------------------
+## ------------------------------------------------------------------------------
 ## LAPACK (FORTRAN Linear Algebra Package).
 
 find_library (liblapack lapack ${lib_locations})
@@ -103,21 +123,87 @@ find_library (libblas blas ${lib_locations})
 find_library (libatlas atlas ${lib_locations})
 
 if (liblapack AND libblas)
-  set (LAPACKLIB "${LAPACKLIB} ${libblas}")
-  if (cblas)
-    set (LAPACKLIB "${LAPACKLIB} ${cblas}")
-  endif (cblas)
+  set (LAPACKLIB "${liblapack} ${libblas}")
+  if (libcblas)
+    set (LAPACKLIB "${LAPACKLIB} ${libcblas}")
+  endif (libcblas)
   if (libatlas)
     set (LAPACKLIB "${LAPACKLIB} ${libatlas}")
   endif (libatlas)
-  file (APPEND ../makedefs "LAPACKLIB   := ${LAPACKLIB}\n\n")
+  file (APPEND ${outfile} "LAPACKLIB := ${LAPACKLIB}\n\n")
 else (liblapack AND libblas)
   message (ERROR "Unable to locate liblapack & libblas - this is serious!")
 endif (liblapack AND libblas)
 
-#LAPACKLIB  :=-llapack -lblas -lcblas -latlas
+## ------------------------------------------------------------------------------
+## Motif
 
-## -------------------------------------------------------------------
+find_library (libXm Xm ${lib_locations})
+find_library (libXpm Xpm ${lib_locations})
+find_library (libXp Xp ${lib_locations})
+
+file (APPEND ${outfile} "MotifLIB := ${libXm} ${libXpm} ${libXp}\n\n")
+
+## ------------------------------------------------------------------------------
+## PGPLOT
+
+find_library (libpng png ${lib_locations})
+find_library (libpgplot pgplot ${lib_locations})
+find_library (libcpgplot cpgplot ${lib_locations})
+
+if (libpng)
+  set (PGPLOTLIB "${libpng}")
+endif (libpng)
+
+if (libpgplot)
+  set (PGPLOTLIB "${libpgplot} ${PGPLOTLIB}")
+endif (libpgplot)
+
+if (libcpgplot)
+  set (PGPLOTLIB "${libcpgplot} ${PGPLOTLIB}")
+endif (libcpgplot)
+
+file (APPEND ${outfile} "PGPLOTLIB := ${PGPLOTLIB}\n\n")
+
+## ------------------------------------------------------------------------------
+## POPT
+
+find_library (libpopt popt ${lib_locations})
+
+file (APPEND ${outfile} "POPTLIB := ${libpopt}\n\n")
+
+## ------------------------------------------------------------------------------
+## Python
+
+find_library (libpython
+  NAMES python python2.4
+  PATHS ${lib_locations}
+  PATH_SUFFIXES python2.4/config
+  )
+
+file (APPEND ${outfile} "PYTHONLIB := ${libpython}\n\n")
+
+## ------------------------------------------------------------------------------
+## Tcl/Tk (version 7.6 or later)
+
+find_library (libtcl tcl ${lib_locations})
+find_library (libdl dl ${lib_locations})
+find_library (libtk tk ${lib_locations})
+
+file (APPEND ${outfile} "TCLLIB := ${libtcl} ${libdl}\n\n")
+file (APPEND ${outfile} "TKLIB  := ${libtk}\n\n")
+
+## ------------------------------------------------------------------------------
+## X11
+
+find_library (libXt Xt ${lib_locations})
+find_library (libXmu Xmu ${lib_locations})
+find_library (libX11 X11 ${lib_locations})
+find_library (libXext Xext ${lib_locations})
+
+file (APPEND ${outfile} "X11LIB := ${libXt} ${libXmu} ${libX11} ${libXext}\n\n")
+
+## ------------------------------------------------------------------------------
 ## LaTeX applications
 
 find_program (tex tex ${bin_locations})
@@ -128,10 +214,10 @@ find_program (texindex texindex ${bin_locations})
 find_program (makeindex makeindex ${bin_locations})
 find_program (latex2html latex2html ${bin_locations})
 
-file (APPEND ../makedefs "TEX           := ${tex}\n")
-file (APPEND ../makedefs "LATEX         := ${latex}\n")
-file (APPEND ../makedefs "BIBTEX        := ${bibtex}\n")
-file (APPEND ../makedefs "DVIPS         := ${dvips}\n")
-file (APPEND ../makedefs "TEXINDEX      := ${texindex}\n")
-file (APPEND ../makedefs "MAKEINDEX     := ${makeindex}\n")
-file (APPEND ../makedefs "LATEX2HTMLBIN := ${latex2html}\n")
+file (APPEND ${outfile} "TEX           := ${tex}\n")
+file (APPEND ${outfile} "LATEX         := ${latex}\n")
+file (APPEND ${outfile} "BIBTEX        := ${bibtex}\n")
+file (APPEND ${outfile} "DVIPS         := ${dvips}\n")
+file (APPEND ${outfile} "TEXINDEX      := ${texindex}\n")
+file (APPEND ${outfile} "MAKEINDEX     := ${makeindex}\n")
+file (APPEND ${outfile} "LATEX2HTMLBIN := ${latex2html}\n")
