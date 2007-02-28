@@ -15,6 +15,7 @@ find_path (G2C_INCLUDES g2c.h
   PATHS
   /usr/local/include
   /usr/include
+  /usr/lib
   /sw/include
   PATH_SUFFIXES
   gcc
@@ -45,10 +46,8 @@ if (UNIX)
   endif (APPLE)
 endif (UNIX)
 
-message ("g2c search paths: ${lib_locations}")
-
 find_library (G2C_LIBRARIES
-  names g2c gcc
+  NAMES g2c gcc
   PATHS ${lib_locations}
   NO_DEFAULT_PATH
   )

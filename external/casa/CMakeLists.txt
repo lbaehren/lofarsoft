@@ -26,9 +26,10 @@ find_file (flex_bin flex /usr/bin /usr/local/bin)
 ## use the CMake build-in macro, but in a number of cases those will not yield
 ## proper results - where therefore run an explicit check.
 
-INCLUDE (CheckIncludeFiles)
+include (CheckIncludeFiles)
+include (CheckLibraryExists)
 
-FIND_PATH (HAVE_STRING_H
+find_path (HAVE_STRING_H
   string.h
   PATHS /usr/include /usr/local/include /sw/include
 #  PATH_SUFFIXES c++ c++/4.0.0 g++
@@ -37,13 +38,18 @@ FIND_PATH (HAVE_STRING_H
 ## -----------------------------------------------------------------------------
 ## Required external libraries
 
+find_package (Motif)
+find_package (PNG)
 find_package (TCL)
 find_package (X11)
 find_package (ZLIB)
 
-include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindLAPACK.cmake)
-include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindFFTW3.cmake)
 include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindCFITSIO.cmake)
+include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindFFTW3.cmake)
+include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindG2C.cmake)
+include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindLAPACK.cmake)
+include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindPGPLOT.cmake)
+include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindWCS.cmake)
 
 ## -----------------------------------------------------------------------------
 ## Compiler settings
@@ -125,7 +131,7 @@ SET (CASA_OPTLEVEL "-O3")
 ## Platform-dependent compiler/linker settings
 
 IF (UNIX)
-  ADD_DEFINITIONS (
+  add_definitions (
     ## CPPOPT
     -DAIPS_STDLIB
     -DAIPS_NO_TEMPLATE_SRC
@@ -181,10 +187,20 @@ message (STATUS "CMAKE_MODULE_LINKER_FLAGS = ${CMAKE_MODULE_LINKER_FLAGS}")
 ## -----------------------------------------------------------------------------
 ## List of sub-directories
 
-SUBDIRS (
-# required external components
-  wcslib
-# casa packages
+## list of external components which need to be build (e.g. because they haven't
+## been installed yet)
+
+if (NOT HAVE_CFITSIO)
+  message (ERROR "No system-wide installation found of CFITSIO!")
+endif (NOT HAVE_CFITSIO)
+
+if (NOT HAVE_WCS)
+  message (ERROR "No system-wide installation found of WCS!")
+endif (NOT HAVE_WCS)
+
+## list of CASA modules to be build
+
+subdirs (
   casa
   scimath
   tables

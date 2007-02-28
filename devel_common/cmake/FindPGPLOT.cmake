@@ -38,27 +38,36 @@ find_library (PGPLOT_libcpgplot
   )
 
 if (PGPLOT_libpgplot)
-  list (APPEND PGPLOT_LIBRARIES ${PGPLOT_libpgplot})
+  list (APPEND PGPLOT_LIBRARIES ${PGPLOT_libcpgplot})
 endif (PGPLOT_libpgplot)
 
 ## [3] libXmPgplot
 
 find_library (PGPLOT_libXmPgplot
   NAMES XmPgplot
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib
-  PATH_SUFFIXES pgplot
+  PATHS /usr/local/lib /usr/lib /lib /opt /sw/lib
+  PATH_SUFFIXES pgplot casa/local/lib
   )
 
 if (PGPLOT_libpgplot)
-  list (APPEND PGPLOT_LIBRARIES ${PGPLOT_libpgplot})
+  list (APPEND PGPLOT_LIBRARIES ${PGPLOT_libXmPgplot})
 endif (PGPLOT_libpgplot)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
-if (PGPLOT_libpgplot AND PGPLOT_libcpgplot AND PGPLOT_libXmPgplot)
-  set (HAVE_PGPLOT 1)
-endif (PGPLOT_libpgplot AND PGPLOT_libcpgplot AND PGPLOT_libXmPgplot)
+IF (PGPLOT_INCLUDES AND PGPLOT_LIBRARIES)
+  SET (HAVE_PGPLOT TRUE)
+ELSE (PGPLOT_INCLUDES AND PGPLOT_LIBRARIES)
+  IF (NOT PGPLOT_FIND_QUIETLY)
+    IF (NOT PGPLOT_INCLUDES)
+      MESSAGE (STATUS "Unable to find PGPLOT header files!")
+    ENDIF (NOT PGPLOT_INCLUDES)
+    IF (NOT PGPLOT_LIBRARIES)
+      MESSAGE (STATUS "Unable to find PGPLOT library files!")
+    ENDIF (NOT PGPLOT_LIBRARIES)
+  ENDIF (NOT PGPLOT_FIND_QUIETLY)
+ENDIF (PGPLOT_INCLUDES AND PGPLOT_LIBRARIES)
 
 if (HAVE_PGPLOT)
   if (NOT PGPLOT_FIND_QUIETLY)

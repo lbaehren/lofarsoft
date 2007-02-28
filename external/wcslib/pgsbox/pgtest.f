@@ -261,7 +261,7 @@
 *     Z versus time plot.
 *        - PGSBOX uses subroutine PGCRFN.
 *        - Separable (i.e. orthogonal), non-linear coordinate system.
-*        - Use of function PGCRFN for separable axis types.
+*        - use_of function PGCRFN for separable axis types.
 *        - Automatic choice of what edges to label; results in labelling
 *          the bottom and left sides of the plot.
 *        - Automatic choice of coordinate increments.
@@ -455,7 +455,7 @@
       GCODE(1) = 2
       GCODE(2) = 2
 
-*     Use colour to associate grid lines and labels.
+*     use_colour to associate grid lines and labels.
 *     Meridians in red.
       CALL PGSCR (10, 0.5, 0.0, 0.0)
 *     Parallels in blue.
@@ -661,7 +661,7 @@
 *     meridians and parallels before being processed by this call to
 *     PGSBOX which finally produces the labels.
 
-*     Draw the 45 degree meridians and parallels in grey and use colour
+*     Draw the 45 degree meridians and parallels in grey and use_colour
 *     to differentiate grid labels.
 *     Meridians and parallels in grey.
       CALL PGSCR (10, 0.7, 0.7, 0.7)
@@ -844,7 +844,7 @@
       OPT(1) = 'E'
       OPT(2) = 'E'
 
-*     Use colour to associate grid lines and labels.
+*     use_colour to associate grid lines and labels.
 *     Meridians in red.
       CALL PGSCR (10, 0.5, 0.0, 0.0)
 *     Parallels in blue.
@@ -958,7 +958,7 @@
 *     Linear-linear plot with two types of alternative labelling.
 *        - PGSBOX uses subroutine PGCRFN.
 *        - Separable (i.e. orthogonal), linear coordinate system.
-*        - Use of function PGCRFN for separable axis types.
+*        - use_of function PGCRFN for separable axis types.
 *        - Alternative labelling and axis annotation.
 *        - Direct manipulation of the axis-crossing table.
 *        - Tick mark and grid line control.
@@ -1081,7 +1081,7 @@
 
 *     Calendar axes using subroutine PGLBOX.
 *        - Separable (i.e. orthogonal), linear coordinate system.
-*        - Use of PGLBOX for simple linear axis types.
+*        - use_of PGLBOX for simple linear axis types.
 *        - Automatic choice of what edges to label; results in labelling
 *          the bottom and left sides of the plot.
 *        - Automatic choice of coordinate increments.

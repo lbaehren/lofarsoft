@@ -13,6 +13,7 @@ find_path (ROOT_INCLUDES tCanvas.h TCint.h TObject.h
   PATHS
   /usr/include
   /usr/local/include
+  /opt
   /sw/include
   /sw/share
   PATH_SUFFIXES
@@ -44,6 +45,7 @@ foreach (lib ${libs})
     PATHS
     /usr/lib
     /usr/local/lib
+    /opt
     /sw/lib
     /sw/share
     PATH_SUFFIXES

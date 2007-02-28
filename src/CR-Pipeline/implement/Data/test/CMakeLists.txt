@@ -6,6 +6,7 @@ include_directories (. .. ../..)
 
 set (tests
   tData
+  table2root
   )
 
 ## ------------------------------------------------------------------------------
@@ -13,6 +14,6 @@ set (tests
 
 foreach (src ${tests})
   add_executable (${src} ${src}.cc)
-  target_link_libraries (${src} cr)
+  target_link_libraries (${src} cr ${ROOT_LIBRARIES})
 endforeach (src)
 

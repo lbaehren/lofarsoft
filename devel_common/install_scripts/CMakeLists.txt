@@ -176,12 +176,16 @@ file (APPEND ${outfile} "POPTLIB := ${libpopt}\n\n")
 ## Python
 
 find_library (libpython
-  NAMES python python2.4
+  NAMES python python2.4 python2.3
   PATHS ${lib_locations}
-  PATH_SUFFIXES python2.4/config
+  PATH_SUFFIXES python2.4/config python2.3/config
   )
 
-file (APPEND ${outfile} "PYTHONLIB := ${libpython}\n\n")
+if (libpython)
+  file (APPEND ${outfile} "PYTHONLIB := ${libpython}\n\n")
+else (libpython)
+  message (ERROR "Unable to locate PYTHONLIB!")
+endif (libpython)
 
 ## ------------------------------------------------------------------------------
 ## Tcl/Tk (version 7.6 or later)
