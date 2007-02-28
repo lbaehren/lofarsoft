@@ -52,6 +52,9 @@ else (HAVE_<PACKAGE>)
   endif (<PACKAGE>_FIND_REQUIRED)
 endif (HAVE_<PACKAGE>)
 
+## -----------------------------------------------------------------------------
+## Mark advanced variables
+
 mark_as_advanced (
   HAVE_<PACKAGE>
   <PACKAGE>_LIBRARIES

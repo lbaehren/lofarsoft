@@ -46,7 +46,7 @@ echo "[$var_Package] Fetching source from FTP server ..." ;
 
 cd $var_basedir
 
-wget -c $var_PackageURL ;
+#wget -c $var_PackageURL ;
 
 tar -xvzf $var_PackageArchive
 
@@ -79,19 +79,18 @@ esac
 ## ------------------------------------------------------------------------
 ## Adjust the path to the Tcl/Tk library and include files
 
-for location in /usr/include /usr/local/include /usr/include/tcl8.4
+## search for the location of the header files
+
+for location in /usr/include /usr/local/include /usr/include/tcl8.4 /sw/include
 {
     if test -f $location/tcl.h ;
     then tcl_include=$location
     fi
 }
 
-case $var_arch in
-    linux)
-	cat makefile | sed s/"TK_INCL=-I\/usr\/include"/"TK_INCL=-I\/usr\/include -I\/usr\/include\/tcl8.4"/ > makefile.tmp && \
-	mv makefile.tmp makefile
-    ;;
-esac
+## 
+
+cat makefile | sed s/"TK_INCL=-I\/usr\/include"/"TK_INCL=-I\/usr\/include -I\/usr\/include\/tcl8.4 -I\/sw\/include"/ > makefile.tmp && mv makefile.tmp makefile
 
 ## ------------------------------------------------------------------------
 ## Build
@@ -119,6 +118,6 @@ for file in libpgplot.a grfont.dat rgb.txt pgxwin_server libXmPgplot.a XmPgplot.
 
 cd $var_basedir
 
-rm -rf $var_PackageArchive
-rm -rf $var_Package
-rm -rf $pgplot_dest
+#rm -rf $var_PackageArchive
+#rm -rf $var_Package
+#rm -rf $pgplot_dest
