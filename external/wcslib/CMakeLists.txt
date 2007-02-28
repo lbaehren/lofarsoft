@@ -59,8 +59,12 @@ INCLUDE (../../devel_common/cmake/FindPGPLOT.cmake)
 find_package (PNG)
 find_package (Motif)
 
-FIND_LIBRARY (libz z
-  /usr/lib /usr/local/lib
+find_library (libz z
+  PATHS /usr/lib /usr/local/lib
+  )
+
+find_library (libm m
+  PATHS /usr/lib /usr/local/lib
   )
 
 ## ------------------------------------------------------------------------------
@@ -76,6 +80,27 @@ INCLUDE_DIRECTORIES (
   ${CFITSIO_INCLUDES}
   ${PGPLOT_INCLUDES}
   )
+
+## ------------------------------------------------------------------------------
+## Create 'configure.h' in 'wcslib/C'
+
+if (HAVE_CFITSIO)
+  file (APPEND ./C/config.h "#define HAVE_CFITSIO 1\n")
+else (HAVE_CFITSIO)
+  file (APPEND ./C/config.h "#define HAVE_CFITSIO 0\n")
+endif (HAVE_CFITSIO)
+
+if (HAVE_PGPLOT)
+  file (APPEND ./C/config.h "#define HAVE_PGPLOT 1\n")
+else (HAVE_PGPLOT)
+  file (APPEND ./C/config.h "#define HAVE_PGPLOT 0\n")
+endif (HAVE_PGPLOT)
+
+if (HAVE_libm)
+  file (APPEND ./C/config.h "#define HAVE_LIBM 1\n")
+else (HAVE_libm)
+  file (APPEND ./C/config.h "#define HAVE_LIBM 0\n")
+endif (HAVE_libm)
 
 ## ------------------------------------------------------------------------------
 ## Build the WCSLIB
