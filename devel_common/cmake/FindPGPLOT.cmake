@@ -27,6 +27,8 @@ find_library (PGPLOT_libpgplot
 
 if (PGPLOT_libpgplot)
   list (APPEND PGPLOT_LIBRARIES ${PGPLOT_libpgplot})
+else (PGPLOT_libpgplot)
+  message (SEND_ERROR "Unable to locate libpgplot!")
 endif (PGPLOT_libpgplot)
 
 ## [2] libcpgplot
@@ -37,9 +39,11 @@ find_library (PGPLOT_libcpgplot
   PATH_SUFFIXES pgplot
   )
 
-if (PGPLOT_libpgplot)
+if (PGPLOT_libcpgplot)
   list (APPEND PGPLOT_LIBRARIES ${PGPLOT_libcpgplot})
-endif (PGPLOT_libpgplot)
+else (PGPLOT_libcpgplot)
+  message (SEND_ERROR "Unable to locate libcpgplot!")
+endif (PGPLOT_libcpgplot)
 
 ## [3] libXmPgplot
 
@@ -49,9 +53,11 @@ find_library (PGPLOT_libXmPgplot
   PATH_SUFFIXES pgplot casa/local/lib
   )
 
-if (PGPLOT_libpgplot)
+if (PGPLOT_libXmPgplot)
   list (APPEND PGPLOT_LIBRARIES ${PGPLOT_libXmPgplot})
-endif (PGPLOT_libpgplot)
+else (PGPLOT_libXmPgplot)
+  message (SEND_ERROR "Unable to locate libXmPgplot!")
+endif (PGPLOT_libXmPgplot)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
