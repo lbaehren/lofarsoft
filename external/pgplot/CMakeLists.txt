@@ -1,5 +1,7 @@
 project (pgplot C Fortran)
 
+include (CPack)
+
 subdirs (
   drivers
   examples
