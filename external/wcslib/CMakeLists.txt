@@ -84,6 +84,8 @@ INCLUDE_DIRECTORIES (
 ## ------------------------------------------------------------------------------
 ## Create 'configure.h' in 'wcslib/C'
 
+file (WRITE ./C/config.h "// -- Configuration set by CMake \n\n")
+
 if (HAVE_CFITSIO)
   file (APPEND ./C/config.h "#define HAVE_CFITSIO 1\n")
 else (HAVE_CFITSIO)
@@ -163,15 +165,19 @@ set (WCSLIB_TEST_PROGRAMS
 
 ## PGPLOTLIB := -lcpgplot -lpgplot -lpng -lz -lX11 -lg2c 
 
-foreach (TEST_PROGRAM ${WCSLIB_TEST_PROGRAMS})
-  add_executable (${TEST_PROGRAM} C/test/${TEST_PROGRAM}.c)
-  target_link_libraries (${TEST_PROGRAM}
-    pgsbox
-    wcs
-    ${PGPLOT_LIBRARIES}
-    ${PNG_LIBRARIES}
-    ${libz}
-    ${MOTIF_LIBRARIES}
-    ${G2C_LIBRARIES}
-    )
-endforeach (TEST_PROGRAM)
+if (wcs AND pgsbox AND HAVE_PGPLOT)
+  foreach (TEST_PROGRAM ${WCSLIB_TEST_PROGRAMS})
+    add_executable (${TEST_PROGRAM} C/test/${TEST_PROGRAM}.c)
+    target_link_libraries (${TEST_PROGRAM}
+      pgsbox
+      wcs
+      ${PGPLOT_LIBRARIES}
+      ${PNG_LIBRARIES}
+      ${libz}
+      ${MOTIF_LIBRARIES}
+      ${G2C_LIBRARIES}
+      )
+  endforeach (TEST_PROGRAM)
+else (wcs AND pgsbox AND HAVE_PGPLOT)
+  message (STATUS "Warning: Unable to build test programs - missing libraries!")
+endif (wcs AND pgsbox AND HAVE_PGPLOT)

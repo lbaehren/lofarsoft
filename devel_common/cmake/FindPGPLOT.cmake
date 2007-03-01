@@ -42,7 +42,7 @@ find_library (PGPLOT_libcpgplot
 if (PGPLOT_libcpgplot)
   list (APPEND PGPLOT_LIBRARIES ${PGPLOT_libcpgplot})
 else (PGPLOT_libcpgplot)
-  message (SEND_ERROR "Unable to locate libcpgplot!")
+  message (STATUS "Warning: Unable to locate libcpgplot!")
 endif (PGPLOT_libcpgplot)
 
 ## [3] libXmPgplot
@@ -56,7 +56,7 @@ find_library (PGPLOT_libXmPgplot
 if (PGPLOT_libXmPgplot)
   list (APPEND PGPLOT_LIBRARIES ${PGPLOT_libXmPgplot})
 else (PGPLOT_libXmPgplot)
-  message (SEND_ERROR "Unable to locate libXmPgplot!")
+  message (STATUS "Warning: Unable to locate libXmPgplot!")
 endif (PGPLOT_libXmPgplot)
 
 ## -----------------------------------------------------------------------------
