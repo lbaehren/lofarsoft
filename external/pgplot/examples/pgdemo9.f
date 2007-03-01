@@ -51,7 +51,7 @@ C
           CALL PGSCR(I+15, R, G, B)
    30 CONTINUE
 C
-C Use PGPIXL to plot the image.
+C Use_PGPIXL to plot the image.
 C
       CALL PGPIXL(IA,N,N, 1, N, 1, N, 0.0, 1.0, 0.0, 1.0)
 C

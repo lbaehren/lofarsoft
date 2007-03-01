@@ -1,7 +1,6 @@
 project (pgplot C Fortran)
 
 subdirs (
-  build
   drivers
   examples
   fonts
@@ -20,16 +19,23 @@ set (pgplot_modules
 ## ------------------------------------------------------------------------------
 ## Required external packages
 
+set (lib_locations
+  /usr/local/lib
+  /usr/lib
+  /usr/X11R6/lib
+  /sw/lib
+  )
+
 find_package (PNG)
 find_package (X11)
 find_package (ZLIB)
 
 find_library (libg2c g2c
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib
+  PATHS ${lib_locations}
   )
 
 find_library (libgif gif
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib
+  PATHS ${lib_locations}
   )
 
 ## -- Tcl/Tk -------------------------------------
@@ -50,11 +56,23 @@ find_library (libtk tk
   NO_DEFAULT_PATH
   )
 
+## -- X11 ----------------------------------------
+
+find_library (libXaw Xaw
+  PATHS ${lib_locations}
+  )
+
+find_library (libXt Xt
+  PATHS ${lib_locations}
+  )
+
 ## summary of external libraries
 
 message (STATUS "libg2c = ${libg2c}")
 message (STATUS "libtcl = ${libtcl} , ${tcl_inc}")
 message (STATUS "libtk  = ${libtk}")
+message (STATUS "libXaw = ${libXaw}")
+message (STATUS "libXt  = ${libXt}")
 message (STATUS "libx11 = ${X11_LIBRARIES}")
 
 ## ------------------------------------------------------------------------------
@@ -72,9 +90,12 @@ file (APPEND ${outfile} "PSDRIV 3 /CPS      PostScript printers, color, landscap
 file (APPEND ${outfile} "PSDRIV 4 /VCPS     PostScript printers, color, portrait		Std F77\n")
 file (APPEND ${outfile} "WDDRIV 1 /WD       X Window dump file, landscape\n")
 file (APPEND ${outfile} "WDDRIV 2 /VWD      X Window dump file, portrait\n")
-file (APPEND ${outfile} "XWDRIV 1 /XWINDOW  Workstations running X Window System		C\n")
-file (APPEND ${outfile} "XWDRIV 2 /XSERVE   Persistent window on X Window System		C\n")
 file (APPEND ${outfile} "XMDRIV 0 /XMOTIF   Motif applications containing XmPgplot widgets.   C\n")
+
+if (libXaw AND libXt)
+  file (APPEND ${outfile} "XWDRIV 1 /XWINDOW  Workstations running X Window System		C\n")
+  file (APPEND ${outfile} "XWDRIV 2 /XSERVE   Persistent window on X Window System		C\n")
+endif (libXaw AND libXt)
 
 if (libgif)
  file (APPEND ${outfile} "GIDRIV 1 /GIF      GIF-format file, landscape\n")
@@ -82,12 +103,12 @@ if (libgif)
 endif (libgif)
 
 if (PNG_LIBRARIES)
-  message ("PNDRIV 1 /PNG      Portable Network Graphics file                 C\n")
-  message ("PNDRIV 2 /TPNG     Portable Network Graphics file - transparent background C\n")
+ file (APPEND ${outfile} "PNDRIV 1 /PNG      Portable Network Graphics file                 C\n")
+ file (APPEND ${outfile} "PNDRIV 2 /TPNG     Portable Network Graphics file - transparent background C\n")
 endif (PNG_LIBRARIES)
 
 if (libtcl AND libtk)
-  message ("TKDRIV 0 /XTK      X-window Tcl/Tk programs with pgplot widgets.  C\n")
+ file (APPEND ${outfile} "TKDRIV 0 /XTK      X-window Tcl/Tk programs with pgplot widgets.  C\n")
 endif (libtcl AND libtk)
 
 ## ------------------------------------------------------------------------------
@@ -142,6 +163,12 @@ set (pgplot_drivers
 
 ## -- libpgplot ----------------------------------
 
+add_definitions (-DPG_PPU)
+
+set_source_files_properties (${pgplot_src}
+  PROPERTIES COMPILE_FLAGS "-fPIC -O2 -fPIC"
+  )
+
 add_library (pgplot
   ${pgplot_src}
   ${pgplot_sys}
@@ -153,6 +180,8 @@ target_link_libraries (pgplot
   ${libgif}
   ${libtcl}
   ${libtk}
+  ${libXaw}
+  ${libXt}
   ${JPEG_LIBRARIES}
   ${PNG_LIBRARIES}
   ${X11_LIBRARIES}
@@ -171,11 +200,17 @@ add_library (cpgplot
 add_library (XmPgplot
   drivers/xmotif/XmPgplot.c
   )
+target_link_libraries (XmPgplot
+  pgplot
+  )
 
 ## -- libtkpgplot --------------------------------
 
 add_library (tkpgplot
   drivers/xtk/tkpgplot.c
+  )
+target_link_libraries (tkpgplot
+  pgplot
   )
 
 ## ------------------------------------------------------------------------------
@@ -187,11 +222,16 @@ add_library (tkpgplot
 
 set (examples
   pgdemo1
-  pgdemo2
+#  pgdemo2
   pgdemo3
   pgdemo4
   pgdemo5
   pgdemo6
+  pgdemo7
+  pgdemo8
+  pgdemo9
+  pgdemo10
+  pgdemo11
   )
 
 foreach (src ${examples})

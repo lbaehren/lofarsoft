@@ -1,6 +1,6 @@
       PROGRAM PGDEM5
 C-----------------------------------------------------------------------
-C Demonstration program for PGPLOT. This programs shows the use of
+C Demonstration program for PGPLOT. This programs shows the use_of
 C routine PGOLIN to allow the user to draw polygons on the screen.
 C As each polygon is completed, it is filled in using routine PGPOLY.
 C The user positions the cursor to define the vertices of the polygon.

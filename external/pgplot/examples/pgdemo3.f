@@ -213,7 +213,7 @@ C
 
       SUBROUTINE PGEX34
 C-----------------------------------------------------------------------
-C This program is intended to demonstrate the use of the PGPLOT routine
+C This program is intended to demonstrate the use_of the PGPLOT routine
 C PGCONX. As an example, we take data defined on a sphere. We want to
 C draw a contour map of the data on an equal-area projection of the
 C surface of the sphere; we choose the Hammer-Aitoff equal-area
