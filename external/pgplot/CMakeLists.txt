@@ -26,6 +26,13 @@ set (lib_locations
   /sw/lib
   )
 
+set (inc_locations
+  /usr/include
+  /usr/local/include
+  /usr/X11R6/include
+  /sw/include
+  )
+
 find_package (PNG)
 find_package (X11)
 find_package (ZLIB)
@@ -40,23 +47,39 @@ find_library (libgif gif
 
 ## -- Tcl/Tk -------------------------------------
 
-find_path (tcl_inc tcl.h
-  PATHS /usr/include /usr/local/include /sw/include
+## header files
+
+find_path (inctcl tcl.h
+  PATHS ${inc_locations}
   PATH_SUFFIXES tcl tcl8.4
   NO_DEFAULT_PATH
   )
 
+## libraries
+
 find_library (libtcl tcl
-  PATHS /usr/lib /usr/local/lib /sw/lib
+  PATHS ${lib_locations}
   NO_DEFAULT_PATH
   )
 
 find_library (libtk tk
-  PATHS /usr/lib /usr/local/lib /sw/lib
+  PATHS ${lib_locations}
   NO_DEFAULT_PATH
   )
 
 ## -- X11 ----------------------------------------
+
+## header files
+
+find_path (incXm XmP.h
+  PATHS ${inc_locations}
+  PATH_SUFFIXES Xm
+  NO_DEFAULT_PATH
+  )
+
+string (REGEX REPLACE "include/Xm" "include" incXm ${incXm})
+
+## libraries
 
 find_library (libXaw Xaw
   PATHS ${lib_locations}
@@ -69,7 +92,7 @@ find_library (libXt Xt
 ## summary of external libraries
 
 message (STATUS "libg2c = ${libg2c}")
-message (STATUS "libtcl = ${libtcl} , ${tcl_inc}")
+message (STATUS "libtcl = ${libtcl} , ${inctcl}")
 message (STATUS "libtk  = ${libtk}")
 message (STATUS "libXaw = ${libXaw}")
 message (STATUS "libXt  = ${libXt}")
@@ -138,9 +161,10 @@ include_directories (
   .
   ${pgplot_SOURCE_DIR}
   ${pgplot_modules}
-  ${tcl_inc}
+  ${inctcl}
   ${PNG_INCLUDE_DIR}
   ${X11_INCLUDE_DIR}
+  ${incXm}
 )
 
 FILE (GLOB pgplot_fonts ./fonts/*.f)
