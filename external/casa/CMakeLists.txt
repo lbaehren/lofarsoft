@@ -49,7 +49,22 @@ include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindFFTW3.cmake)
 include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindG2C.cmake)
 include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindLAPACK.cmake)
 include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindPGPLOT.cmake)
+
+## WCSLIB -- in principle this can be a system-wide install, but in case none
+##           such exists, we go checking whether we can build it from source
+
 include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindWCS.cmake)
+
+if (NOT HAVE_WCS)
+  message (STATUS "Warning, not system-wide WCSLIB installation found - checking for source...")
+  ## try to locate WCSLIB source
+  find_file (WCS_CMAKE CMakeLists.txt
+    PATHS ${CASA_SOURCE_DIR}/../wcslib
+    )
+  if (WCS_CMAKE)
+    message (STATUS "Found WCSLIB source with CMake configuration.")
+  endif (WCS_CMAKE)
+endif (NOT HAVE_WCS)
 
 ## -----------------------------------------------------------------------------
 ## Compiler settings

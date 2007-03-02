@@ -24,6 +24,13 @@ subdirs (
 ## ------------------------------------------------------------------------------
 ## Find required external components
 
+set (lib_locations
+  /lib
+  /usr/lib
+  /usr/local/lib
+  /sw/lib
+  )
+
 INCLUDE (../../devel_common/cmake/FindG2C.cmake)
 
 ## CFITSIO is required to compile getwcstab.c which contains an
@@ -36,7 +43,7 @@ INCLUDE (../../devel_common/cmake/FindG2C.cmake)
 ##   tfitshdr, tpih1 and tpih2 by setting preprocessor macro
 ##   -DDO_CFITSIO.
 
-INCLUDE (../../devel_common/cmake/FindCFITSIO.cmake)
+include (../../devel_common/cmake/FindCFITSIO.cmake)
 
 #if (HAVE_CFITSIO)
 #  add_definitions (-DDO_CFITSIO)
@@ -54,17 +61,17 @@ INCLUDE (../../devel_common/cmake/FindCFITSIO.cmake)
 ##   Therefore it is quite likely that you will need to add additional
 ##   libraries to PGPLOTLIB.
 
-INCLUDE (../../devel_common/cmake/FindPGPLOT.cmake)
+include (../../devel_common/cmake/FindPGPLOT.cmake)
 
 find_package (PNG)
 find_package (Motif)
 
 find_library (libz z
-  PATHS /usr/lib /usr/local/lib
+  PATHS ${lib_locations}
   )
 
 find_library (libm m
-  PATHS /usr/lib /usr/local/lib
+  PATHS ${lib_locations}
   )
 
 ## ------------------------------------------------------------------------------
@@ -90,19 +97,22 @@ if (HAVE_CFITSIO)
   file (APPEND ./C/config.h "#define HAVE_CFITSIO 1\n")
 else (HAVE_CFITSIO)
   file (APPEND ./C/config.h "#define HAVE_CFITSIO 0\n")
+  message (STATUS "Warning: Unable to find CFITSIO!")
 endif (HAVE_CFITSIO)
 
 if (HAVE_PGPLOT)
   file (APPEND ./C/config.h "#define HAVE_PGPLOT 1\n")
 else (HAVE_PGPLOT)
   file (APPEND ./C/config.h "#define HAVE_PGPLOT 0\n")
+  message (STATUS "Warning: Unable to find PGPLOT!")
 endif (HAVE_PGPLOT)
 
-if (HAVE_libm)
+if (libm)
   file (APPEND ./C/config.h "#define HAVE_LIBM 1\n")
-else (HAVE_libm)
+else (libm)
   file (APPEND ./C/config.h "#define HAVE_LIBM 0\n")
-endif (HAVE_libm)
+  message (STATUS "Warning: Unable to find libm!")
+endif (libm)
 
 ## ------------------------------------------------------------------------------
 ## Build the WCSLIB
@@ -178,6 +188,4 @@ if (wcs AND pgsbox AND HAVE_PGPLOT)
       ${G2C_LIBRARIES}
       )
   endforeach (TEST_PROGRAM)
-else (wcs AND pgsbox AND HAVE_PGPLOT)
-  message (STATUS "Warning: Unable to build test programs - missing libraries!")
 endif (wcs AND pgsbox AND HAVE_PGPLOT)
