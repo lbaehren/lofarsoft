@@ -113,6 +113,7 @@ file (APPEND ${outfile} "PSDRIV 1 /PS       PostScript printers, monochrome, lan
 file (APPEND ${outfile} "PSDRIV 2 /VPS      Postscript printers, monochrome, portrait		Std F77\n")
 file (APPEND ${outfile} "PSDRIV 3 /CPS      PostScript printers, color, landscape		Std F77\n")
 file (APPEND ${outfile} "PSDRIV 4 /VCPS     PostScript printers, color, portrait		Std F77\n")
+file (APPEND ${outfile} "RVDRIV 0 /XRV       X-window Rivet/Tk programs with pgplot widgets.   C")
 file (APPEND ${outfile} "WDDRIV 1 /WD       X Window dump file, landscape\n")
 file (APPEND ${outfile} "WDDRIV 2 /VWD      X Window dump file, portrait\n")
 file (APPEND ${outfile} "XMDRIV 0 /XMOTIF   Motif applications containing XmPgplot widgets.   C\n")
@@ -179,6 +180,7 @@ set (pgplot_drivers
   ./drivers/pgdriv.f
   ./drivers/pgxwin.c
   ./drivers/psdriv.f
+  ./drivers/rvdriv.c
   ./drivers/tkdriv.c
   ./drivers/wddriv.f
   ./drivers/xmdriv.c
@@ -239,42 +241,4 @@ target_link_libraries (tkpgplot
   pgplot
   )
 
-## ------------------------------------------------------------------------------
-## Demo programs
-##
-##  When linking, use
-##    -L/usr/X11R6/lib -lX11 -Wl,-framework -Wl,Foundation -L%p/lib -lpng -lz
-##    -laquaterm -L$PGPLOT_DIR/lib -lpgplot
 
-set (examples
-  pgdemo1
-#  pgdemo2
-  pgdemo3
-  pgdemo4
-  pgdemo5
-  pgdemo6
-  pgdemo7
-  pgdemo8
-  pgdemo9
-  pgdemo10
-  pgdemo11
-  )
-
-foreach (src ${examples})
-  add_executable (${src} examples/${src}.f)
-  target_link_libraries (${src}
-    pgplot
-    XmPgplot
-    tkpgplot
-    ${libg2c}
-    ${libgif}
-    ${libtcl}
-    ${libtk}
-    ${JPEG_LIBRARIES}
-    ${PNG_LIBRARIES}
-    ${X11_LIBRARIES}
-    ${ZLIB_LIBRARIES}
-    )
-  set_target_properties (${src}
-    PROPERTIES LINKER_LANGUAGE Fortran)
-endforeach (src)
