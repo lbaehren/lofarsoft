@@ -7,15 +7,12 @@
 ## Include directories
 
 include_directories (
-  .
-  ..
-  ../../implement
   ${CASA_INCLUDES}
   ${CFITSIO_INCLUDES}
   )
 
 ## ------------------------------------------------------------------------------
-## Set up the list with test program sources
+## Test working with CASA libraries
 
 set (tests
   tUseCasa
@@ -36,6 +33,11 @@ FOREACH (src ${tests})
     ${LAPACK_LIBRARIES}
     )  
 ENDFOREACH (src)
+
+## ------------------------------------------------------------------------------
+## Relationship between the various control parameters
+
+add_executable (tProcessingParameters tProcessingParameters.cc)
 
 ## ------------------------------------------------------------------------------
 ## Test for BLITZ

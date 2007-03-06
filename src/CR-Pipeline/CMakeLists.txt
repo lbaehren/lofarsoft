@@ -11,6 +11,8 @@ include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindROOT.cmake)
 include_directories (
   .
   ..
+  ./implement
+  ./test
   ${BLITZ_INCLUDES}
   ${ROOT_INCLUDES}
   )
@@ -21,4 +23,4 @@ subdirs (
   test
   )
 
-SET (CMAKE_VERBOSE_MAKEFILE 0)
+SET (CMAKE_VERBOSE_MAKEFILE 1)
