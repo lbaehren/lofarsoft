@@ -51,10 +51,8 @@
 #include <casa/Arrays/ArrayLogical.cc>
 #include <casa/Arrays/ArrayMath.cc>
 #include <casa/Arrays/Cube.cc>
-#include <casa/Arrays/MaskedArray.cc>
 #include <casa/Arrays/Matrix.cc>
 #include <casa/Arrays/Vector.cc>
-#include <casa/BasicMath/Functional.cc>
 
 namespace casa {
 
@@ -102,30 +100,6 @@ namespace casa {
   template class Cube<OrderedMap<Double, SquareMatrix<Complex, 2>*>*>;
   template class Cube<RigidVector<Double, 2> >;
   template class Cube<SquareMatrix<Float, 4> >;
-
-  // MaskedArray
-
-  template class MaskedArray<AutoDiffA<Complex> >;
-  template class MaskedArray<AutoDiffA<DComplex> >;
-  template class MaskedArray<Vector<SquareMatrix<Complex, 2> > >;
-  template class MaskedArray<Vector<SquareMatrix<Complex, 4> > >;
-  template class MaskedArray<Vector<SquareMatrix<Float, 2> > >;
-  template class MaskedArray<SquareMatrix<Complex, 2> >;
-  template class MaskedArray<SquareMatrix<Complex, 4> >;
-  template class MaskedArray<OrderedMap<Double, SquareMatrix<Complex, 2>*>*>;
-  template class MaskedArray<CountedPtr<Function1D<Float> > >;
-  template class MaskedArray<CountedPtr<SquareMatrix<Complex, 4> > >;
-  template class MaskedArray<CountedPtr<SquareMatrix<Complex, 2> > >;
-  template class MaskedArray<AutoDiff<Complex> >;
-  template class MaskedArray<AutoDiff<DComplex> >;
-  template class MaskedArray<AutoDiff<Double> >;
-  template class MaskedArray<AutoDiff<Float> >;
-  template class MaskedArray<AutoDiffA<Double> >;
-  template class MaskedArray<AutoDiffA<Float> >;
-  template class MaskedArray<RigidVector<Double, 3> >;
-  template class MaskedArray<RigidVector<Double, 2> >;
-  template class MaskedArray<SquareMatrix<Float, 2> >;
-  template class MaskedArray<SquareMatrix<Float, 4> >;
 
   // Matrix
 
@@ -178,10 +152,6 @@ namespace casa {
   template void indgen(Array<Complex> &, Complex);
   template void indgen(Array<Complex> &, Complex, Complex);
 
-  // 1000 casa/BasicMath/Functional.cc casa/BasicSL/Complex.h 
-  template class Functional<Vector<Complex>, Vector<Complex> >;
-  template class Functional<Vector<DComplex>, Vector<DComplex> >;
-
   // - Mathematics/test
 
   // 1000 casa/Arrays/Array.cc scimath/Mathematics/AutoDiff.h 
@@ -205,9 +175,6 @@ namespace casa {
   template void operator*=(Array<AutoDiff<Double> > &, Array<AutoDiff<Double> > const &);
   template void operator/=(Array<AutoDiff<Double> > &, Array<AutoDiff<Double> > const &);
   template Array<AutoDiff<Double> > operator-(Array<AutoDiff<Double> > const &);
-
-  // 1000 casa/Arrays/MaskedArray.cc scimath/Mathematics/AutoDiff.h 
-  template class MaskedArray<AutoDiff<AutoDiff<Double> > >;
 
   // 1000 casa/Arrays/Vector.cc scimath/Mathematics/AutoDiff.h 
   template class Vector<AutoDiff<AutoDiff<Double> > >;

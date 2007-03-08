@@ -49,4 +49,5 @@ namespace casa {
 
   template class Functional<Vector<Complex>, Vector<Complex> >;
   template class Functional<Vector<DComplex>, Vector<DComplex> >;
+
 }
