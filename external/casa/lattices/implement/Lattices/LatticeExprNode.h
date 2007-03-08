@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LatticeExprNode.h,v 19.9 2006/08/22 03:05:39 gvandiep Exp $
+//# $Id: LatticeExprNode.h,v 19.10 2006/12/12 23:15:33 gvandiep Exp $
 
 #ifndef LATTICES_LATTICEEXPRNODE_H
 #define LATTICES_LATTICEEXPRNODE_H
@@ -172,7 +172,7 @@ class LatticeExprNode;
   // Determine the value range of the elements at the part <src>fraction1</src>
   // and fraction2 from the beginning of the given lattice. Both fractions
   // must be >=0 and <=1 and fraction1 must be <= fraction2.
-  // By default <fraction2</src> is equal to <src>1-fraction1</src>.
+  // By default <src>fraction2</src> is equal to <src>1-fraction1</src>.
   // Thus <src>fraction=0.25</src> gives the quartile range of the lattice.
   // <group>
    LatticeExprNode fractileRange (const LatticeExprNode& expr,

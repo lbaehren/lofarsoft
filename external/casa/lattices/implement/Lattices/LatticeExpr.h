@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LatticeExpr.h,v 19.7 2005/06/18 21:19:16 ddebonis Exp $
+//# $Id: LatticeExpr.h,v 19.8 2006/12/22 02:28:55 gvandiep Exp $
 
 #ifndef LATTICES_LATTICEEXPR_H
 #define LATTICES_LATTICEEXPR_H
@@ -87,6 +87,7 @@ template <class T> class LELArray;
 //  ArrayLattice<Float>   f2(IPosition (2,nx,ny));
 //  f2.set(2.0);
 //  f1.copyData(2*f2+f2);
+// </srcblock>
 //
 //  In this example, the values of the pixels in Lattice f1 are set
 //  to the values resulting from the expression "2*f2 + f2"

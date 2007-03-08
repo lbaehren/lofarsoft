@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Param.h,v 19.6 2004/11/30 17:50:17 ddebonis Exp $
+//# $Id: Param.h,v 19.7 2006/12/12 23:20:42 gvandiep Exp $
 
 #ifndef CASA_PARAM_H
 #define CASA_PARAM_H
@@ -130,7 +130,8 @@ public:
   // assignment operator
   Param& operator= (const Param&);
   
-  // Equality comparitor <note role=warning> This function ALWAYS returns 
+  // Equality comparitor.
+  // <note role=warning> This function ALWAYS returns 
   // false.  I have no idea why it was designed to do this. </note>
   Bool operator== (const Param&) const;
   

@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: ScalarSampledFunctional.h,v 19.5 2005/06/18 21:19:17 ddebonis Exp $
+//# $Id: ScalarSampledFunctional.h,v 19.6 2006/12/12 23:17:37 gvandiep Exp $
 
 #ifndef SCIMATH_SCALARSAMPLEDFUNCTIONAL_H
 #define SCIMATH_SCALARSAMPLEDFUNCTIONAL_H
@@ -109,12 +109,12 @@ template<class T> class Block;
 // </motivation>
 
 // <templating arg=Range>
-// Very few assumptions are made on the templating type. So this class
+// <li> Very few assumptions are made on the templating type. So this class
 // should work for a wide variety of templates types. 
 // </templating>
 
 // <thrown>
-// Exceptions are not thrown directly by this class.
+// <li> Exceptions are not thrown directly by this class.
 // </thrown>
 
 // <todo asof="1996/10/28">

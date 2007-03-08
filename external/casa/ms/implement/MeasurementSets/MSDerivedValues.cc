@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSDerivedValues.cc,v 19.3 2004/11/30 17:50:35 ddebonis Exp $
+//# $Id: MSDerivedValues.cc,v 19.4 2006/10/24 08:09:51 mvoronko Exp $
 
 #include <ms/MeasurementSets/MSDerivedValues.h>
 #include <casa/Arrays/ArrayMath.h>
@@ -112,6 +112,8 @@ MSDerivedValues& MSDerivedValues::setAntennaMount(const Vector<String>& mount)
     for (Int i=0; i<nAnt; i++) {
       if (mount(i)=="alt-az" || mount(i)=="ALT-AZ" || mount(i)=="") 
 	mount_p(i)=0;
+      else if (mount(i)=="alt-az+rotator" || mount(i)=="ALT-AZ+ROTATOR")
+        mount_p(i)=0; // a temporary mount type, behaves as alt-az in general
       else if (mount(i)=="equatorial" || mount(i)=="EQUATORIAL") mount_p(i)=1;
       else if (mount(i)=="X-Y" || mount(i)=="x-y") mount_p(i)=2;
       else if (mount(i)=="orbiting" || mount(i)=="ORBITING") mount_p(i)=3;

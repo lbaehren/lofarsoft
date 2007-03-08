@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TiledLineStepper.h,v 19.4 2004/11/30 17:50:31 ddebonis Exp $
+//# $Id: TiledLineStepper.h,v 19.5 2006/12/12 23:15:34 gvandiep Exp $
 
 #ifndef LATTICES_TILEDLINESTEPPER_H
 #define LATTICES_TILEDLINESTEPPER_H
@@ -305,7 +305,7 @@ public:
   // </group>
 
   // Return the axis path.
-  // See <class linkto=LatticeStepper>LatticeStepper</linkto> for a
+  // See <linkto class=LatticeStepper>LatticeStepper</linkto> for a
   // description and examples.
   virtual const IPosition& axisPath() const;
 

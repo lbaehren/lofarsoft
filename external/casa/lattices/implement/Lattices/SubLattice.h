@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: SubLattice.h,v 19.6 2005/06/18 21:19:16 ddebonis Exp $
+//# $Id: SubLattice.h,v 19.7 2006/12/12 23:15:34 gvandiep Exp $
 
 #ifndef LATTICES_SUBLATTICE_H
 #define LATTICES_SUBLATTICE_H
@@ -75,8 +75,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // </example>
 
 // <templating arg=T>
-// Any type that can be used by the Tables System can also be used by
-// this class.
+//  <li> Any type that can be used by the Tables System can also be used by
+//       this class.
 // </templating>
 
 //# <todo asof="yyyy/mm/dd">

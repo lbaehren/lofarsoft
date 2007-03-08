@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: QMath.h,v 19.8 2005/06/18 21:19:15 ddebonis Exp $
+//# $Id: QMath.h,v 19.9 2006/11/24 04:07:49 gvandiep Exp $
 
 #ifndef CASA_QMATH_H
 #define CASA_QMATH_H
@@ -82,7 +82,7 @@ template <class T> class Array;
 //   <li> <linkto file="QMath.h#arithmetic">Some useful arithmetic (linear) functions</linkto>
 //   <li> <linkto file="QMath.h#trigonometric">Trigonometric functions</linkto>
 //   <li> <linkto file="QMath.h#foreign">Functions to implement integer ceil/floor</linkto>
-// </ul
+// </ul>
 //
 // The operations/functions defined are:
 // <ul>

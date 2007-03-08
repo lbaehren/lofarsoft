@@ -37,7 +37,7 @@
 #include <ms/MeasurementSets/MeasurementSet.h>
 #include <ms/MeasurementSets/MSAntennaGram.h>
 #include <ms/MeasurementSets/MSAntennaParse.h> // routines used by bison actions
-#include <tables/Tables/TableParse.h>          // routines used by bison actions
+#include <tables/Tables/TableParse.h>       // routines used by bison actions
 #include <tables/Tables/TableError.h>
 #include <ms/MeasurementSets/MSAntennaIndex.h>
 #include <ms/MeasurementSets/MSSelectionError.h>
@@ -45,8 +45,8 @@
 //# stdlib.h is needed for bison 1.28 and needs to be included here
 //# (before the flex/bison files).
 #include <casa/stdlib.h>
-#include <ms/MeasurementSets/MSAntennaGram.ycc>                  // flex output
-#include <ms/MeasurementSets/MSAntennaGram.lcc>                  // bison output
+#include <MSAntennaGram.ycc>                  // flex output
+#include <MSAntennaGram.lcc>                  // bison output
 
 // Define the yywrap function for flex.
 int MSAntennaGramwrap()

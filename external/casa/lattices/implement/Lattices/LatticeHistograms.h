@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LatticeHistograms.h,v 19.6 2005/06/18 21:19:16 ddebonis Exp $
+//# $Id: LatticeHistograms.h,v 19.9 2006/12/22 02:56:16 gvandiep Exp $
 
 #ifndef LATTICES_LATTICEHISTOGRAMS_H
 #define LATTICES_LATTICEHISTOGRAMS_H
@@ -89,7 +89,7 @@ class PGPlotter;
 // <note role=tip>
 // Note that for complex lattices, real and imaginary are treated independently.
 // They are binned and plotted separately.
-// </note role=tip>
+// </note>
 //
 // <note role=tip>
 // If you ignore return error statuses from the functions that set the
@@ -201,7 +201,7 @@ public:
 
 // Specify a pixel intensity range for which all pixels in that range are 
 // included.  A vector of length 1 for <src>include</src> means that the 
-// range will be set to <src>-abs(include(0))<src> to <src>abs(include(0))</src>.
+// range will be set to <src>-abs(include(0))</src> to <src>abs(include(0))</src>.
 // A return value of <src>False</src> indicates that the internal
 // status of the class is bad. If you don't call this function, the default 
 // state of the class is to include all pixels.
@@ -318,7 +318,7 @@ private:
 
 
 // Convert a <T> to a <Float> for plotting
-   static Float convertT (const T value) {return Float(real(value));};   
+   static Float convertT (const T value) {return Float(std::real(value));};   
  
 // Convert a <Float> (from plotting) to a <T>
    static T convertF (const Float value) {return T(value);};

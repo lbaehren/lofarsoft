@@ -231,7 +231,7 @@ void FunctionalProxy::setmasks(const Vector<Bool>& val) {
 
 void FunctionalProxy::setmask(Int idx, Bool val)
 {
-  Int n (0);
+  uInt n;
   if (type_ == 0)
     (fhd_.asFunction()).nparameters();
   else
@@ -258,7 +258,7 @@ void FunctionalProxy::setmask(Int idx, Bool val)
 void FunctionalProxy::setpar(Int idx, Double val)
 {
   uInt n = (fhd_.asFunction()).nparameters();
-  if (idx < 0 || uInt(idx) >= n )
+  if (idx < 0 || idx >= n )
     throw(AipsError("parameter index out of bounds"));
   Record rec = fhd2rec();
   Vector<Double> v = rec.toArrayDouble("params");
@@ -269,7 +269,7 @@ void FunctionalProxy::setpar(Int idx, Double val)
 void FunctionalProxy::setparc(Int idx, DComplex val)
 {
   uInt n = (fhdc_.asFunction()).nparameters();
-  if (idx < 0 || uInt(idx) >= n )
+  if (idx < 0 || idx >= n )
     throw(AipsError("parameter index out of bounds"));
   Record rec = fhdc2rec();
   Vector<DComplex> v = rec.toArrayDComplex("params");

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Unit.h,v 19.6 2004/11/30 17:50:19 ddebonis Exp $
+//# $Id: Unit.h,v 19.8 2006/12/21 05:18:31 gvandiep Exp $
 
 #ifndef CASA_UNIT_H
 #define CASA_UNIT_H
@@ -45,6 +45,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // <use visibility=export>
 
 // <reviewed reviewer="UNKNOWN" date="before2004/08/25" tests="tUnit">
+// </reviewed>
 //
 //# // <prerequisite>
 //# // </prerequisite>
@@ -208,12 +209,12 @@ class Unit {
     Unit& operator=(const Unit &other);
 // Comparisons. Comparisons are done on the basis of the inherent units. I.e.
 // <src>m/s</src> are identical to <src>AU/cy</src>.
-// <grp>
+// <group>
     Bool operator==(const Unit &other) const;
     Bool operator!=(const Unit &other) const;
 // Fast check for "" units
     Bool empty() const;
-// </grp>
+// </group>
 //# Member functions
 // Get the unit value
     const UnitVal &getValue() const;

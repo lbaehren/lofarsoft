@@ -633,7 +633,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
     // There is a vector of values.
     AlwaysAssert (nodeType == TaQLNode_Const, AipsError);
     // Check if all data types are equal or can be made equal.
-    int dtype (0);
+    int dtype;
     for (uInt i=0; i<vals.size(); ++i) {
       TaQLConstNodeRep* val = (TaQLConstNodeRep*)(vals[i].getRep());
       if (i == 0) {

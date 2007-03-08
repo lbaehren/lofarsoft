@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Complex.h,v 19.14 2006/08/01 04:17:09 wyoung Exp $
+//# $Id: Complex.h,v 19.15 2006/12/21 23:29:39 gvandiep Exp $
 
 
 #ifndef CASA_COMPLEX_H
@@ -180,7 +180,6 @@ inline Bool operator<= (const Complex& left, const Complex& right)
 inline Bool operator<  (const Complex& left, const Complex& right)
   { return left==right  ?  False : norm(left) < norm(right); }
 // </group>
-// </group>
 
 
 // <summary>DComplex NaN </summary>
@@ -203,7 +202,6 @@ inline Bool operator<= (const DComplex& left, const DComplex& right)
   { return norm(left) <= norm(right); }
 inline Bool operator<  (const DComplex& left, const DComplex& right)
   { return norm(left) <  norm(right); }
-// </group>
 // </group>
 
 

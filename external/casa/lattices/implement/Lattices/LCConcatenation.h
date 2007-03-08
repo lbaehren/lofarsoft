@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LCConcatenation.h,v 19.4 2004/11/30 17:50:28 ddebonis Exp $
+//# $Id: LCConcatenation.h,v 19.5 2006/12/12 23:15:33 gvandiep Exp $
 
 #ifndef LATTICES_LCCONCATENATION_H
 #define LATTICES_LCCONCATENATION_H
@@ -63,8 +63,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // However, one can use it if wanted.
 // <br>
 // LCConcatenation can be seen as a mixture of the classes
-// </linkto class=LCUnion>LCUnion</linkto> and
-// </linkto class=LCExtension>LCExtension</linkto>. Like LCUnion it
+// <linkto class=LCUnion>LCUnion</linkto> and
+// <linkto class=LCExtension>LCExtension</linkto>. Like LCUnion it
 // combines regions and like LCExtension it increases the dimensionality
 // for the new region (be it with only 1).
 // <br>

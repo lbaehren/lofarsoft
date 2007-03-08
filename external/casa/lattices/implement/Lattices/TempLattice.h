@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: TempLattice.h,v 19.5 2005/06/18 21:19:16 ddebonis Exp $
+//# $Id: TempLattice.h,v 19.6 2006/12/12 23:15:34 gvandiep Exp $
 
 #ifndef LATTICES_TEMPLATTICE_H
 #define LATTICES_TEMPLATTICE_H
@@ -118,8 +118,8 @@ class Table;
 // </motivation>
 
 // <templating arg=T>
-// Any type that can be used by the Lattices can also be used by
-// this class.
+//  <li> Any type that can be used by the Lattices can also be used by
+//       this class.
 // </templating>
 
 //# <todo asof="yyyy/mm/dd">

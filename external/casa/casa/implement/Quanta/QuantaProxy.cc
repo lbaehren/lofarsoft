@@ -304,8 +304,6 @@ Record QuantaProxy::pow(const Record& rec, Int powerof)
   QuantumHolder qh = rec2qh(rec);
   if (qh.isQuantity()) {
     return quant2rec(casa::pow(qh.asQuantity(), powerof));
-  } else {
-    return Record (rec);
   }
   // this needs the template defined
   /*

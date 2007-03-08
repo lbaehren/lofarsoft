@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ArrayQuantColumn.h,v 19.7 2005/06/18 21:19:16 ddebonis Exp $
+//# $Id: ArrayQuantColumn.h,v 19.8 2006/12/22 05:24:00 gvandiep Exp $
 
 #ifndef MEASURES_ARRAYQUANTCOLUMN_H
 #define MEASURES_ARRAYQUANTCOLUMN_H
@@ -68,7 +68,7 @@ class String;
 // In addition,
 // for a ROArrayQuantColumn object to be useful the column should
 // contain Quanta.  Inserting Quanta into a column requires the use of a
-// <linkto class=ArrayQuantColumn">ArrayQuantColumn</A>
+// <linkto class=ArrayQuantColumn">ArrayQuantColumn</linkto>
 // object.<br>
 //
 // The ROArrayQuantColumn class is the array version

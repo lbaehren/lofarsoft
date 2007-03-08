@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: String.h,v 19.9 2005/06/18 21:19:14 ddebonis Exp $
+//# $Id: String.h,v 19.10 2006/11/24 01:28:06 gvandiep Exp $
 
 #ifndef CASA_STRING_H
 #define CASA_STRING_H
@@ -207,7 +207,7 @@ private:
 // Bool answer = allKeys.matches(finishIt, position);
 // // How many spaces are in our phrase?
 // Int spacesCount = allKeys.freq(" ");
-// </scrblock>
+// </srcblock>
 // </example>
 //
 // <motivation>

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: NNLSMatrixSolver.h,v 19.6 2004/11/30 17:50:46 ddebonis Exp $
+//# $Id: NNLSMatrixSolver.h,v 19.7 2006/12/12 23:17:37 gvandiep Exp $
 
 #ifndef SCIMATH_NNLSMATRIXSOLVER_H
 #define SCIMATH_NNLSMATRIXSOLVER_H
@@ -65,7 +65,6 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // </synopsis> 
 //
 // <todo asof="">
-// <ol>
 // <li> Add list of operators
 // </todo>
 

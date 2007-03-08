@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: Measure.h,v 19.6 2005/02/02 22:51:08 ddebonis Exp $
+//# $Id: Measure.h,v 19.7 2006/12/22 05:20:53 gvandiep Exp $
 
 #ifndef MEASURES_MEASURE_H
 #define MEASURES_MEASURE_H
@@ -66,7 +66,7 @@ template <class T> class Vector;
 //		parent of all specific Measures
 //	  <li> <linkto class=MCBase>MCBase</linkto> class, the base class
 //		for all specific conversion routines (like
-//		<linkto class=MCEpoch>MCEpoch).
+//		<linkto class=MCEpoch>MCEpoch</linkto>).
 //   	  <li> <linkto class=MeasData>MeasData</linkto> class, containing a set
 //		of generally usable constants, and all program data necessary for
 //		conversions.

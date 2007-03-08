@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: UnitDim.h,v 19.6 2004/11/30 17:50:19 ddebonis Exp $
+//# $Id: UnitDim.h,v 19.7 2006/11/24 04:07:49 gvandiep Exp $
 
 #ifndef CASA_UNITDIM_H
 #define CASA_UNITDIM_H
@@ -45,7 +45,7 @@ class UnitMap;
 // describes a unit in basic SI unit dimensions
 // </summary>
 
-// <use visibilty=local>
+// <use visibility=local>
 
 // <reviewed reviewer="UNKNOWN" date="before2004/08/25" tests="tUnit">
 //

@@ -24,7 +24,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: CrossPlot.h,v 1.4 2006/02/14 12:45:59 gvandiep Exp $
+//# $Id: CrossPlot.h,v 1.5 2006/12/12 23:14:17 gvandiep Exp $
 
 
 #ifndef TABLEPLOT_CROSSPLOT_H
@@ -53,7 +53,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 
 // <prerequisite>
 //#! Classes or concepts you should understand before using this class.
-// BasePlot
+//  <li> BasePlot
 // </prerequisite>
 
 // <etymology>

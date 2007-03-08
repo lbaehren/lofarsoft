@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: UnitName.h,v 19.6 2004/11/30 17:50:19 ddebonis Exp $
+//# $Id: UnitName.h,v 19.7 2006/11/24 04:07:49 gvandiep Exp $
 
 #ifndef CASA_UNITNAME_H
 #define CASA_UNITNAME_H
@@ -140,11 +140,11 @@ public:
     UnitName(const UnitName &other);
 
 // Construct from different parts
-// <grp>
+// <group>
     UnitName(const String &tag, const UnitVal &kind,
 	      const String &name = EmptyString);
     UnitName(const Unit &tag, const String &name = EmptyString);
-// </grp>
+// </group>
 
 
 // Destructor

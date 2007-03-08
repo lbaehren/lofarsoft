@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MsPlot.cc,v 1.11 2005/12/07 23:27:26 gli Exp $
+//# $Id: MsPlot.cc,v 1.12 2006/10/05 02:55:03 gvandiep Exp $
 
 //# Includes
 #include <casa/BasicSL/String.h>
@@ -499,7 +499,7 @@ void MsPlot<T>::global2local( const MPosition& observatory,
 template<class T>
 void MsPlot<T>::spwParser( const String& spwExpr, Vector<Int>& spwIndices, Vector<Int>& chanIndices, Vector<String>& chanRange ){
      const String::size_type len = spwExpr.length();
-	  uInt nmaxSpw = 60, nmaxChan = 600;
+	  const uInt nmaxSpw = 60, nmaxChan = 600;
 	  String spwArray[nmaxSpw], chanArray[nmaxChan];
      String spws = String("");
 	  String channels = String("");
@@ -640,7 +640,7 @@ void MsPlot<T>::corrParser( const String& corrExpr, Vector<String>& stokesNames 
 		if( (corrExpr.chars())[endPos] == ')' || (corrExpr.chars())[endPos] == ']' ) sbLen = sbLen-1;
 		String corrExprPure = corrExpr.substr( startPos, sbLen );
 		if( m_dbg ) cout<<"[MsPlot::corrParser()] corrExprPure = " << corrExprPure << endl;
-		Int nmax = (uInt)Stokes::NumberOfTypes;
+		const Int nmax = (Int)Stokes::NumberOfTypes;
 		String stokesNm[ nmax ];			
       uInt totalStokes = split( corrExprPure, stokesNm, nmax, " " );
 		stokesNames.resize( totalStokes );

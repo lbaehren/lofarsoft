@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: LatticeTwoPtCorr.h,v 1.6 2005/06/18 21:19:16 ddebonis Exp $
+//# $Id: LatticeTwoPtCorr.h,v 1.7 2006/12/12 23:15:33 gvandiep Exp $
 
 #ifndef LATTICES_LATTICETWOPTCORR_H
 #define LATTICES_LATTICETWOPTCORR_H
@@ -72,10 +72,10 @@ class String;
 // </example>
 
 
-//# <todo asof="yyyy/mm/dd">
+// <todo asof="yyyy/mm/dd">
 // <li> Add additional algorithms other than the structure function
 // <li> Allow cross correlation algorithms as well as autocorrelation
-//# </todo>
+// </todo>
 
 
 template <class T> class LatticeTwoPtCorr

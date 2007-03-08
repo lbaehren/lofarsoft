@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Error.h,v 19.9 2005/06/18 21:19:15 ddebonis Exp $
+//# $Id: Error.h,v 19.10 2006/11/24 04:07:49 gvandiep Exp $
 
 #ifndef CASA_ERROR_H
 #define CASA_ERROR_H
@@ -59,6 +59,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 //        <src>message.makePermanent()</src> call in the implementation of
 //        the constructors. This prevents the String from being cleaned up
 //        in the middle of an exception.
+//  </note>
 //
 // </synopsis>
 //
@@ -220,31 +221,27 @@ public:
 //
 // <todo asof="">
 // </todo>
-  
-  template<class t> class indexError : public IndexError {
-  protected:
-    t oIndex;                 // Offending Index
-  public:
-    //
-    // This constructor takes the error message and the index
-    // which cause the error to occur.
-    //
-    // <group>
-    indexError(t oI,
-	       const Char *str,
-	       Category c=BOUNDARY);
-    indexError(t oI,
-	       const String &str,
-	       Category c=BOUNDARY);
-    indexError(t oI,
-	       Category c=BOUNDARY) : IndexError(c), oIndex(oI) {};
-      // </group>
-      
-      //
-      // Destructor which does nothing.
-      //
-      ~indexError() throw();
-  };
+
+template<class t> class indexError : public IndexError {
+protected:
+  t oIndex;                 // Offending Index
+public:
+  //
+  // This constructor takes the error message and the index
+  // which cause the error to occur.
+  //
+  // <group>
+  indexError(t oI, const Char *str, Category c=BOUNDARY);
+  indexError(t oI, const String &str, Category c=BOUNDARY);
+  indexError(t oI, Category c=BOUNDARY) : IndexError(c), oIndex(oI) {};
+  // </group>
+
+  //
+  // Destructor which does nothing.
+  //
+  ~indexError() throw();
+};
+
 
 // <summary>Duplicate key errors</summary>
 // <use visibility=export>

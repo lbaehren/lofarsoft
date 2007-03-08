@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//#   $Id: Fit2D.h,v 19.7 2004/11/30 17:50:28 ddebonis Exp $
+//#   $Id: Fit2D.h,v 19.8 2006/12/12 23:15:33 gvandiep Exp $
 
 #ifndef LATTICES_FIT2D_H
 #define LATTICES_FIT2D_H
@@ -54,7 +54,7 @@ template<class T> class MaskedLattice;
 // </reviewed>
 
 // <prerequisite>
-//   <li> <linkto class=></linkto>
+//   <li> <linkto class=Lattice>Lattice</linkto>
 // </prerequisite>
 
 // <synopsis> 

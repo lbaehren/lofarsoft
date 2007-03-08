@@ -1,5 +1,5 @@
 //# MCuvw.cc:  Muvw conversion routines 
-//# Copyright (C) 1998,1999,2000,2002,2004
+//# Copyright (C) 1998-2000,2002,2004,2007
 //# Associated Universities, Inc. Washington DC, USA.
 //#
 //# This library is free software; you can redistribute it and/or modify it
@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MCuvw.cc,v 19.5 2004/11/30 17:50:33 ddebonis Exp $
+//# $Id: MCuvw.cc,v 19.6 2007/02/08 19:53:30 wbrouw Exp $
 
 //# Includes
 #include <casa/Exceptions.h>
@@ -32,7 +32,6 @@
 #include <casa/Utilities/Assert.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/Arrays/ArrayMath.h>
-#include <measures/Measures/MCFrame.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 

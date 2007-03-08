@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LatticeNavigator.h,v 19.4 2004/11/30 17:50:30 ddebonis Exp $
+//# $Id: LatticeNavigator.h,v 19.5 2006/12/12 23:15:33 gvandiep Exp $
 
 #ifndef LATTICES_LATTICENAVIGATOR_H
 #define LATTICES_LATTICENAVIGATOR_H
@@ -327,7 +327,7 @@ public:
   // </group>
 
   // Return the axis path.
-  // See <class linkto=LatticeStepper>LatticeStepper</linkto> for a
+  // See <linkto class=LatticeStepper>LatticeStepper</linkto> for a
   // description and examples.
   virtual const IPosition& axisPath() const = 0;
 

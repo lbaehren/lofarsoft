@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: Convolver.h,v 19.7 2005/06/18 21:19:17 ddebonis Exp $
+//# $Id: Convolver.h,v 19.8 2006/12/12 23:17:37 gvandiep Exp $
 
 #ifndef SCIMATH_CONVOLVER_H
 #define SCIMATH_CONVOLVER_H
@@ -55,7 +55,9 @@ typedef Convolver<Double> DoubleConvolver;
 // tests="tConvolution">
 // </reviewed>
 
-// <prerequisite> The mathematical concept of convolution </prerequisite>
+// <prerequisite>
+// <li> The mathematical concept of convolution
+// </prerequisite>
 //
 // <etymology>
 // The convolver class performs convolution!

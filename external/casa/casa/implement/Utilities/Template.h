@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Template.h,v 1.10 2005/06/18 21:19:15 ddebonis Exp $
+//# $Id: Template.h,v 1.11 2006/12/12 23:20:42 gvandiep Exp $
 
 #ifndef CASA_TEMPLATE_H
 #define CASA_TEMPLATE_H
@@ -50,7 +50,7 @@ template <class T> class Vector;
 // </reviewed>
 
 // <prerequisite>
-//   Knowledge about the aips++ DYO template system
+//  <li> Knowledge about the aips++ DYO template system
 // </prerequisite>
 
 // <synopsis>

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LatticeUtilities.h,v 19.11 2005/06/18 21:19:16 ddebonis Exp $
+//# $Id: LatticeUtilities.h,v 19.12 2006/12/22 02:28:55 gvandiep Exp $
 
 #ifndef LATTICES_LATTICEUTILITIES_H
 #define LATTICES_LATTICEUTILITIES_H
@@ -173,7 +173,7 @@ class LatticeUtilities
                IPosition & posMin, IPosition & posMax, 
                const Lattice<T>& lat);
 
-
+// </group>
 
 
 } //# NAMESPACE CASA - END

@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: FunctionMarshallable.h,v 19.5 2004/11/30 17:50:44 ddebonis Exp $
+//# $Id: FunctionMarshallable.h,v 19.6 2006/12/12 23:17:37 gvandiep Exp $
 
 #ifndef SCIMATH_FUNCTIONMARSHALLABLE_H
 #define SCIMATH_FUNCTIONMARSHALLABLE_H
@@ -106,7 +106,7 @@ public:
 
     // store the state of this Function into a Record
     // <thrown>
-    // InvalidSerializationError  if an error during serialization
+    //  <li> InvalidSerializationError  if an error during serialization
     // </thrown>
     virtual void store(Record& gr) const = 0;
 

@@ -1,5 +1,5 @@
 //# MCFrame.cc: Measure frame calculations proxy
-//# Copyright (C) 1996,1997,1998,1999,2000,2002,2003
+//# Copyright (C) 1996-2000,2002,2003,2007
 //# Associated Universities, Inc. Washington DC, USA.
 //#
 //# This library is free software; you can redistribute it and/or modify it
@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MCFrame.cc,v 19.7 2004/11/30 17:50:33 ddebonis Exp $
+//# $Id: MCFrame.cc,v 19.10 2007/02/26 14:03:46 wbrouw Exp $
 
 //# Includes
 #include <casa/Exceptions/Error.h>
@@ -58,16 +58,7 @@ MCFrame::MCFrame(MeasFrame &inf) :
   dirConvJ2000(0), j2000Longp(0), dirJ2000p(0),
   dirConvB1950(0), b1950Longp(0), dirB1950p(0),
   dirConvApp(0), appLongp(0), dirAppp(0),
-  radConvLSR(0), radLSRp(0) {
-    myf.setMCFramePoint(static_cast<void *>(this));
-    myf.setMCFrameDelete(MCFrameDelete);
-    myf.setMCFrameGetdbl(MCFrameGetdbl);
-    myf.setMCFrameGetmvdir(MCFrameGetmvdir);
-    myf.setMCFrameGetmvpos(MCFrameGetmvpos);
-    myf.setMCFrameGetuint(MCFrameGetuint);
-    create();
-    myf.unlock();
-}
+  radConvLSR(0), radLSRp(0) {;}
 
 // Destructor
 MCFrame::~MCFrame() {
@@ -102,21 +93,12 @@ MCFrame::~MCFrame() {
 
 // General member functions
 
-void MCFrame::make(MeasFrame &in) {
-  if (!in.empty() && !in.getMCFramePoint()) {
-    MCFrame *tmp = new MCFrame(in);
-    if (!tmp) {};		// to stop compiler warnings
-  };
-  if (!in.empty()) {
-    (static_cast<MCFrame *>(in.getMCFramePoint()))->create();
-  };
-}
-
 void MCFrame::resetEpoch() {
     delete epTDBp; epTDBp = 0;
     delete epUT1p; epUT1p = 0;
     delete epTTp; epTTp = 0;
     delete epLASTp; epLASTp = 0;
+    delete appLongp; appLongp = 0;
     delete dirAppp; dirAppp = 0;
     delete radLSRp; radLSRp = 0;
 }
@@ -398,11 +380,13 @@ Bool MCFrame::getB1950Lat(Double &tdb) {
 
 Bool MCFrame::getB1950(MVDirection &tdb) {
   if (myf.direction()) {
-    if (!dirB1950p) {
+    if (!b1950Longp) {
+      b1950Longp = new Vector<Double>(2);
       dirB1950p = new MVDirection;
       *dirB1950p = static_cast<MDirection::Convert *>(dirConvB1950)->operator()
 	(*dynamic_cast<const MVDirection *const>(myf.direction()->getData())).
 	getValue();
+      *b1950Longp = dirB1950p->get();
     };
     tdb = *dirB1950p;
     return True;
@@ -447,11 +431,13 @@ Bool MCFrame::getAppLat(Double &tdb) {
 
 Bool MCFrame::getApp(MVDirection &tdb) {
   if (myf.direction()) {
-    if (!dirAppp) {
+    if (!appLongp) {
+      appLongp = new Vector<Double>(2);
       dirAppp = new MVDirection;
       *dirAppp = static_cast<MDirection::Convert *>(dirConvApp)->operator()
 	(*dynamic_cast<const MVDirection *const>(myf.direction()->getData())).
 	getValue();
+      *appLongp = dirAppp->get();
     };
     tdb = *dirAppp;
     return True;
@@ -494,54 +480,6 @@ Bool MCFrame::getComet(MVPosition &tdb) {
   return False;
 }
 
-void MCFrame::create() {
-  if (myf.getEpset()) {
-    makeEpoch();
-    myf.setEpset(False);
-    myf.setEpreset(False);
-  };
-  if (myf.getPosset()) {
-    makePosition();
-    myf.setPosset(False);
-    myf.setPosreset(False);
-  };
-  if (myf.getDirset()) {
-    makeDirection();
-    myf.setDirset(False);
-    myf.setDirreset(False);
-  };
-  if (myf.getRadset()) {
-    makeRadialVelocity();
-    myf.setRadset(False);
-    myf.setRadreset(False);
-  };
-  if (myf.getComset()) {
-    makeComet();
-    myf.setComset(False);
-    myf.setComreset(False);
-  };
-  if (myf.getEpreset()) {
-    resetEpoch();
-    myf.setEpreset(False);
-  };
-  if (myf.getPosreset()) {
-    resetPosition();
-    myf.setPosreset(False);
-  };
-  if (myf.getDirreset()) {
-    resetDirection();
-    myf.setDirreset(False);
-  };
-  if (myf.getRadreset()) {
-    resetRadialVelocity();
-    myf.setRadreset(False);
-  };
-  if (myf.getComreset()) {
-    resetComet();
-    myf.setComreset(False);
-  };
-}
-
 void MCFrame::makeEpoch() {
   static const MEpoch::Ref REFTDB = MEpoch::Ref(MEpoch::TDB);
   static const MEpoch::Ref REFUT1 = MEpoch::Ref(MEpoch::UT1);
@@ -552,6 +490,7 @@ void MCFrame::makeEpoch() {
   epConvTDB = new MEpoch::Convert(*(myf.epoch()), REFTDB);
   epConvUT1 = new MEpoch::Convert(*(myf.epoch()), REFUT1);
   epConvTT  = new MEpoch::Convert(*(myf.epoch()), REFTT);
+  uInt locker = 0;			// locking assurance
   if (epTDBp) {
     delete epTDBp; epTDBp = 0;
   };
@@ -561,20 +500,19 @@ void MCFrame::makeEpoch() {
   if (epTTp) {
     delete epTTp; epTTp = 0;
   };
- if (epConvLAST) {
-    myf.lock();
+  myf.lock(locker);
+  if (epConvLAST) {
     delete static_cast<MEpoch::Convert *>(epConvLAST);
     epConvLAST = 0;
   };
   epConvLAST = new MEpoch::Convert(*(myf.epoch()),
 				   MEpoch::Ref(MEpoch::LAST, this->myf));
-  if (epConvLAST) {
-    myf.unlock();
-  };
+  myf.unlock(locker);
   if (epLASTp) {
     delete epLASTp; epLASTp = 0;
   };
-  if (dirAppp) {
+  if (appLongp) {
+    delete appLongp; appLongp = 0;
     delete dirAppp; dirAppp = 0;
   };
   if (radLSRp) {
@@ -610,41 +548,37 @@ void MCFrame::makePosition() {
 }
 
 void MCFrame::makeDirection() {
-  static const MDirection::Ref REFJ2000
-    = MDirection::Ref(MDirection::J2000);
+  static const MDirection::Ref REFJ2000 = MDirection::Ref(MDirection::J2000);
+  uInt locker =0;
+  myf.lock(locker);
   if (dirConvJ2000) {
-    myf.lock();
     delete static_cast<MDirection::Convert *>(dirConvJ2000);
     dirConvJ2000 = 0;
   };
   dirConvJ2000 = new MDirection::Convert(*(myf.direction()),
 					 MDirection::Ref(MDirection::J2000,
 							 this->myf));
-  if (dirConvJ2000) myf.unlock();
+  myf.unlock(locker);
 
-  static const MDirection::Ref REFB1950
-    = MDirection::Ref(MDirection::B1950);
+  static const MDirection::Ref REFB1950 = MDirection::Ref(MDirection::B1950);
+  myf.lock(locker);
   if (dirConvB1950) {
-    myf.lock();
     delete static_cast<MDirection::Convert *>(dirConvB1950);
     dirConvB1950 = 0;
   };
   dirConvB1950 = new MDirection::Convert(*(myf.direction()),
 					 MDirection::Ref(MDirection::B1950,
 							 this->myf));
-  if (dirConvB1950) myf.unlock();
-
+  myf.unlock(locker);
+  myf.lock(locker);
   if (dirConvApp) {
-    myf.lock();
     delete static_cast<MDirection::Convert *>(dirConvApp);
     dirConvApp = 0;
   };
   dirConvApp = new MDirection::Convert(*(myf.direction()),
 				       MDirection::Ref(MDirection::APP,
 						       this->myf));
-  if (dirConvApp) {
-    myf.unlock();
-  };
+  myf.unlock(locker);
   if (j2000Longp) {
     delete j2000Longp; j2000Longp = 0;
     delete dirJ2000p; dirJ2000p = 0;
@@ -655,8 +589,6 @@ void MCFrame::makeDirection() {
   };
   if (appLongp) {
     delete appLongp; appLongp = 0;
-  };
-  if (dirAppp) {
     delete dirAppp; dirAppp = 0;
   };
   if (radLSRp) {
@@ -675,155 +607,7 @@ void MCFrame::makeRadialVelocity() {
   };
 }
 
-void MCFrame::makeComet() {
-}
-
-void MCFrameDelete(void *dmf) {
-  delete static_cast<MCFrame *>(dmf);
-}
-
-Bool MCFrameGetdbl(void *dmf, uInt tp, Double &result) {
-  try {
-    switch (tp) {
-      
-    case MeasFrame::GetTDB:
-      return static_cast<MCFrame *>(dmf)->getTDB(result);
-      break;
-      
-    case MeasFrame::GetUT1:
-      return static_cast<MCFrame *>(dmf)->getUT1(result);
-      break;
-       
-    case MeasFrame::GetTT:
-      return static_cast<MCFrame *>(dmf)->getTT(result);
-      break;
-       
-    case MeasFrame::GetLong:
-      return static_cast<MCFrame *>(dmf)->getLong(result);
-      break;
-      
-    case MeasFrame::GetLat:
-      return static_cast<MCFrame *>(dmf)->getLat(result);
-      break;
-      
-    case MeasFrame::GetRadius:
-      return static_cast<MCFrame *>(dmf)->getRadius(result);
-      break;
-
-    case MeasFrame::GetLatGeo:
-      return static_cast<MCFrame *>(dmf)->getLatGeo(result);
-      break;
-      
-    case MeasFrame::GetJ2000Long:
-      return static_cast<MCFrame *>(dmf)->getJ2000Long(result);
-      break;
-      
-    case MeasFrame::GetJ2000Lat:
-      return static_cast<MCFrame *>(dmf)->getJ2000Lat(result);
-      break;
-      
-    case MeasFrame::GetB1950Long:
-      return static_cast<MCFrame *>(dmf)->getB1950Long(result);
-      break;
-      
-    case MeasFrame::GetB1950Lat:
-      return static_cast<MCFrame *>(dmf)->getB1950Lat(result);
-      break;
-      
-    case MeasFrame::GetAppLong:
-      return static_cast<MCFrame *>(dmf)->getAppLong(result);
-      break;
-      
-    case MeasFrame::GetAppLat:
-      return static_cast<MCFrame *>(dmf)->getAppLat(result);
-      break;
-      
-    case MeasFrame::GetLAST:
-      return static_cast<MCFrame *>(dmf)->getLAST(result);
-      break;
-      
-    case MeasFrame::GetLASTr:
-      return static_cast<MCFrame *>(dmf)->getLASTr(result);
-      break;
-      
-    case MeasFrame::GetLSR:
-      return static_cast<MCFrame *>(dmf)->getLSR(result);
-      break;
-      
-    default:
-      break;
-    };
-  } catch (AipsError x) {
-  } 
-  
-  result = 0;
-  return False;
-}
-
-Bool MCFrameGetmvdir(void *dmf, uInt tp, MVDirection &result) {
-  try {
-    switch (tp) {
-      
-    case MeasFrame::GetJ2000:
-      return static_cast<MCFrame *>(dmf)->getJ2000(result);
-      break;
-      
-    case MeasFrame::GetB1950:
-      return static_cast<MCFrame *>(dmf)->getB1950(result);
-      break;
-      
-    case MeasFrame::GetApp:
-      return static_cast<MCFrame *>(dmf)->getApp(result);
-      break;
-      
-    default:
-      break;
-    };
-  } catch (AipsError x) {
-  } 
-  MVDirection tmp;
-  result = tmp;
-  return False;
-}
-
-Bool MCFrameGetmvpos(void *dmf, uInt tp, MVPosition &result) {
-  try {
-    switch (tp) {
-       
-    case MeasFrame::GetITRF:
-      return static_cast<MCFrame *>(dmf)->getITRF(result);
-      break;
-       
-    case MeasFrame::GetComet:
-      return static_cast<MCFrame *>(dmf)->getComet(result);
-      break;
-      
-    default:
-      break;
-    };
-  } catch (AipsError x) {
-  } 
-  MVPosition tmp;
-  result = tmp;
-  return False;
-}
-
-Bool MCFrameGetuint(void *dmf, uInt tp, uInt &result) {
-  try {
-    switch (tp) {
-      
-    case MeasFrame::GetCometType:
-      return static_cast<MCFrame *>(dmf)->getCometType(result);
-      break;
-      
-    default:
-      break;
-    };
-  } catch (AipsError x) {
-  } 
-  result = 0;
-  return False;
-}
+void MCFrame::makeComet() {;}
 
 } //# NAMESPACE CASA - END
 

@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: ExtendLattice.h,v 19.5 2005/06/18 21:19:16 ddebonis Exp $
+//# $Id: ExtendLattice.h,v 19.6 2006/12/12 23:15:33 gvandiep Exp $
 
 #ifndef LATTICES_EXTENDLATTICE_H
 #define LATTICES_EXTENDLATTICE_H
@@ -68,8 +68,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // </example>
 
 // <templating arg=T>
-// Any type that can be used by the Tables System can also be used by
-// this class.
+//  <li> Any type that can be used by the Tables System can also be used by
+//       this class.
 // </templating>
 
 //# <todo asof="yyyy/mm/dd">

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TapeIO.cc,v 19.6 2006/10/05 01:02:33 gvandiep Exp $
+//# $Id: TapeIO.cc,v 19.7 2006/12/20 00:19:50 gvandiep Exp $
 
 #include <casa/IO/TapeIO.h>
 #include <casa/OS/Path.h>
@@ -34,6 +34,8 @@
 #include <fcntl.h>                // needed for ::open
 #include <errno.h>                // needed for errno
 #include <casa/string.h>          // needed for strerror
+
+// No tape support on Cray XT3
 #ifndef AIPS_CRAY_PGI
 #include <sys/mtio.h>             // needed for ioctl
 #if defined(AIPS_SOLARIS) || defined(AIPS_DARWIN)
@@ -341,4 +343,3 @@ void TapeIO::fillSeekable() {
 }
 
 } //# NAMESPACE CASA - END
-

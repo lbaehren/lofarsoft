@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: Sort.h,v 19.4 2004/11/30 17:50:20 ddebonis Exp $
+//# $Id: Sort.h,v 19.5 2006/12/12 23:20:42 gvandiep Exp $
 
 #ifndef CASA_SORT_H
 #define CASA_SORT_H
@@ -348,7 +348,7 @@ public:
     // The default indexVector is 0..nrrec-1.
     // The index of each first unique record is returned in the uniqueVector.
     // They are indices in the supplied indexVector, so
-    // /src>data[indexVector(uniqueVector(i))]</src>
+    // <src>data[indexVector(uniqueVector(i))]</src>
     // is giving the i-th unique record.
     // Note that the records indexed by <src>indexVector(uniqueVector(i))</src>
     // till <src>indexVector(uniqueVector(i+1))</src> are all the same.

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: SampledFunctional.h,v 19.5 2004/11/30 17:50:45 ddebonis Exp $
+//# $Id: SampledFunctional.h,v 19.6 2006/12/12 23:17:37 gvandiep Exp $
 
 #ifndef SCIMATH_SAMPLEDFUNCTIONAL_H
 #define SCIMATH_SAMPLEDFUNCTIONAL_H
@@ -84,12 +84,12 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // </motivation>
 
 // <templating arg=Range>
-// Templating restrictions will depend on the actual derived class that is
+// <li> Templating restrictions will depend on the actual derived class that is
 // used. 
 // </templating>
 
 // <thrown>
-// Exceptions will depend on derived classes and the templating
+// <li> Exceptions will depend on derived classes and the templating
 // arguements. This abstract class only defines an interface and does not
 // throw any exceptions. 
 // </thrown>

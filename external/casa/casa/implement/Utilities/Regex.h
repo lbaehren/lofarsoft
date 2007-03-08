@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Regex.h,v 19.6 2004/11/30 17:50:20 ddebonis Exp $
+//# $Id: Regex.h,v 19.7 2006/11/24 04:07:49 gvandiep Exp $
 
 #ifndef CASA_REGEX_H
 #define CASA_REGEX_H
@@ -55,7 +55,7 @@ struct re_registers;
 // GNU library (see files cregex.h and cregex.cc).
 // <br>
 // cregex.cc supports many syntaxes. Regex supports
-// only one syntax, the extended regular expression with { and not \{
+// only one syntax, the extended regular expression with { and not \\{
 // as a special character. The special characters are:
 // <dl>
 //  <dt> ^

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ScalarQuantColumn.h,v 19.7 2005/06/18 21:19:16 ddebonis Exp $
+//# $Id: ScalarQuantColumn.h,v 19.8 2006/12/22 05:24:00 gvandiep Exp $
 
 #ifndef MEASURES_SCALARQUANTCOLUMN_H
 #define MEASURES_SCALARQUANTCOLUMN_H
@@ -66,7 +66,7 @@ class Unit;
 // In addition,
 // for a ROScalarQuantColumn object to be useful the column should
 // contain Quanta.  Inserting Quanta into a column requires the use of a
-// <linkto class=ScalarQuantColumn">ScalarQuantColumn</A>
+// <linkto class=ScalarQuantColumn">ScalarQuantColumn</linkto>
 // object.<br>
 //
 // A ROScalarQuantColumn object is used much in the same way as a

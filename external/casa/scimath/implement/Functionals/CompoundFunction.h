@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: CompoundFunction.h,v 19.7 2005/06/18 21:19:17 ddebonis Exp $
+//# $Id: CompoundFunction.h,v 19.8 2006/12/12 23:17:37 gvandiep Exp $
 
 #ifndef SCIMATH_COMPOUNDFUNCTION_H
 #define SCIMATH_COMPOUNDFUNCTION_H
@@ -68,8 +68,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // the overall function parameters (i.e. through the parameters of the
 // <src>CompoundFunction</src>). If for any reason you want to set the
 // parameters of an individual function (see e.g. the example in the
-// <linkto class=Fit2D>Fit2D</a>), call <src>consolidate()</src> before and
-// after the actual setting.
+// <linkto class=Fit2D>Fit2D</linkto>), call <src>consolidate()</src> before
+// abd after the actual setting.
 //
 // <note role=tip>
 // Check <linkto class=CompoundFunction>CombiFunction</linkto> class

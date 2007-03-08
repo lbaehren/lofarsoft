@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: LatticeConvolver.h,v 19.8 2005/06/18 21:19:16 ddebonis Exp $
+//# $Id: LatticeConvolver.h,v 19.9 2006/12/12 23:15:33 gvandiep Exp $
 
 #ifndef LATTICES_LATTICECONVOLVER_H
 #define LATTICES_LATTICECONVOLVER_H
@@ -65,7 +65,9 @@ public:
 // <reviewed reviewer="" date="yyyy/mm/dd" tests="tLatticeConvolver">
 // </reviewed>
 
-// <prerequisite>The mathematical concept of convolution</prerequisite>
+// <prerequisite>
+//  <li> The mathematical concept of convolution
+// </prerequisite>
 //
 // <etymology>
 // The LatticeConvolver class will convolve Lattices. This class

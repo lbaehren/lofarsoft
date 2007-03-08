@@ -44,11 +44,18 @@ find_package (TCL)
 find_package (X11)
 find_package (ZLIB)
 
-include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindCFITSIO.cmake)
 include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindFFTW3.cmake)
 include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindG2C.cmake)
 include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindLAPACK.cmake)
 include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindPGPLOT.cmake)
+
+## CFITSIO
+
+include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindCFITSIO.cmake)
+
+if (NOT HAVE_CFITSIO)
+  message (STATUS "Warning, no system-wide CFITSIO installation found - checking for source...")
+endif (NOT HAVE_CFITSIO)
 
 ## WCSLIB -- in principle this can be a system-wide install, but in case none
 ##           such exists, we go checking whether we can build it from source
@@ -56,13 +63,14 @@ include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindPGPLOT.cmake)
 include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindWCS.cmake)
 
 if (NOT HAVE_WCS)
-  message (STATUS "Warning, not system-wide WCSLIB installation found - checking for source...")
+  message (STATUS "Warning, no system-wide WCSLIB found - checking for source...")
   ## try to locate WCSLIB source
   find_file (WCS_CMAKE CMakeLists.txt
     PATHS ${CASA_SOURCE_DIR}/../wcslib
     )
   if (WCS_CMAKE)
     message (STATUS "Found WCSLIB source with CMake configuration.")
+    set (WCS_INCLUDES ${CASA_SOURCE_DIR}/../wcslib/C)
   endif (WCS_CMAKE)
 endif (NOT HAVE_WCS)
 
@@ -201,17 +209,6 @@ message (STATUS "CMAKE_MODULE_LINKER_FLAGS = ${CMAKE_MODULE_LINKER_FLAGS}")
 
 ## -----------------------------------------------------------------------------
 ## List of sub-directories
-
-## list of external components which need to be build (e.g. because they haven't
-## been installed yet)
-
-if (NOT HAVE_CFITSIO)
-  message (ERROR "No system-wide installation found of CFITSIO!")
-endif (NOT HAVE_CFITSIO)
-
-if (NOT HAVE_WCS)
-  message (ERROR "No system-wide installation found of WCS!")
-endif (NOT HAVE_WCS)
 
 ## list of CASA modules to be build
 

@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: StatAcc.h,v 19.6 2005/06/18 21:19:17 ddebonis Exp $
+//# $Id: StatAcc.h,v 19.7 2006/12/12 23:17:37 gvandiep Exp $
 
 #ifndef SCIMATH_STATACC_H
 #define SCIMATH_STATACC_H
@@ -57,7 +57,7 @@ class String;
 // </etymology>
 //
 // <templating arg=T>
-// A statistics accumulator accepts (weighted) input values and 
+// <li> A statistics accumulator accepts (weighted) input values and 
 // calculates simple statistice (min, max, weighted mean, rms etc).
 // The accepted input types are real, i.e. Int, uInt, Float, Double, 
 // but not Complex. The reason for this is that the < operator of

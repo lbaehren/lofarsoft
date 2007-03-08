@@ -1,5 +1,5 @@
 //# UnitMap.cc: defines the UnitMap class containing standard unit definitions
-//# Copyright (C) 1994,1995,1996,1997,1998,1999,2000,2001,2002
+//# Copyright (C) 1994-2002,2007
 //# Associated Universities, Inc. Washington DC, USA.
 //#
 //# This library is free software; you can redistribute it and/or modify it
@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: UnitMap.cc,v 19.4 2004/11/30 17:50:19 ddebonis Exp $
+//# $Id: UnitMap.cc,v 19.5 2007/02/26 14:21:35 wbrouw Exp $
 
 //# Includes
 
@@ -70,7 +70,18 @@ void UnitMap::initUM() {
 
 UnitMap::UnitMap() {}
 
-UnitMap::~UnitMap() {}
+UnitMap::~UnitMap() {
+  releaseUM();
+}
+
+void UnitMap::releaseUM() {
+  delete UnitMap::mapPref;	mapPref = 0;
+  delete UnitMap::mapDef;	mapDef = 0;
+  delete UnitMap::mapSI;	mapSI = 0;
+  delete UnitMap::mapCust;	mapCust = 0;
+  delete UnitMap::mapUser;	mapUser = 0;
+  delete UnitMap::mapCache;	mapCache = 0;
+}
 
 Bool UnitMap::getCache(const String& s, UnitVal &val) {
   UnitMap::initUM();

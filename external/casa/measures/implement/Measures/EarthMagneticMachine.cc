@@ -1,5 +1,5 @@
 //# EarthMagneticMachine.cc: Calculates magnetic field in a direction
-//# Copyright (C) 1998,2000
+//# Copyright (C) 1998,2000,2007
 //# Associated Universities, Inc. Washington DC, USA.
 //#
 //# This library is free software; you can redistribute it and/or modify it
@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: EarthMagneticMachine.cc,v 19.4 2004/11/30 17:50:33 ddebonis Exp $
+//# $Id: EarthMagneticMachine.cc,v 19.5 2007/02/08 19:53:30 wbrouw Exp $
 
 //# Includes
 #include <measures/Measures/EarthMagneticMachine.h>
@@ -31,7 +31,6 @@
 #include <casa/BasicMath/Math.h>
 #include <measures/Measures/MCPosition.h>
 #include <measures/Measures/MCEpoch.h>
-#include <measures/Measures/MCFrame.h>
 #include <measures/Measures/MeasConvert.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
@@ -49,7 +48,6 @@ EarthMagneticMachine::EarthMagneticMachine(const MDirection::Ref &in,
   inref_p = in;
   inref_p.set(frame);
   hgt_p = hgt.getValue("m");
-  MCFrame::make(inref_p.getFrame());
   if (!frame.getITRF(pos_p)) {
     throw(AipsError("No position in frame for EarthMagneticMachine"));
   };
@@ -80,7 +78,6 @@ EarthMagneticMachine::EarthMagneticMachine(const MDirection::Ref &in,
   inref_p = in;
   inref_p.set(frame);
   rin_p = dir;
-  MCFrame::make(inref_p.getFrame());
   if (!frame.getITRF(pos_p)) {
     throw(AipsError("No position in frame for EarthMagneticMachine"));
   };

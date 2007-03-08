@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: LatticeCleaner.h,v 19.9 2005/06/18 21:19:16 ddebonis Exp $
+//# $Id: LatticeCleaner.h,v 19.10 2006/12/12 23:15:33 gvandiep Exp $
 
 #ifndef LATTICES_LATTICECLEANER_H
 #define LATTICES_LATTICECLEANER_H
@@ -67,7 +67,9 @@ public:
 // <reviewed reviewer="" date="yyyy/mm/dd" tests="tLatticeCleaner">
 // </reviewed>
 
-// <prerequisite> The mathematical concept of deconvolution </prerequisite>
+// <prerequisite>
+//  <li> The mathematical concept of deconvolution
+// </prerequisite>
 //
 // <etymology>
 

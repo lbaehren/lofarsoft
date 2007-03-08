@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LatticeStatistics.h,v 19.12 2005/12/06 20:18:51 wyoung Exp $
+//# $Id: LatticeStatistics.h,v 19.15 2006/12/22 02:56:16 gvandiep Exp $
 
 #ifndef LATTICES_LATTICESTATISTICS_H
 #define LATTICES_LATTICESTATISTICS_H
@@ -110,12 +110,13 @@ class IPosition;
 // you with a little more information when displaying/logging the 
 // statistics (such as world coordinates)
 // The virtual functions are
-//
+// <ul>
 // <li> <src>getBeamArea</src> can be used to return the synthesized beam
 //    area so that the FLUX statistic can be computed
 // <li> <src>listStats</src> is used to list the statistics to the logger
 // <li> <src>getLabelsM</src> find the X-axis label and the title label
 //     for the plotting.   
+// </ul>
 // </note>
 //
 // <note role=tip>
@@ -242,7 +243,7 @@ public:
 // you have given both an <src>include</src> and an <src>exclude</src> 
 // range.  A vector of length 1 for <src>include</src> and/or <src>exclude</src>
 // means that the range will be set to (say for <src>include</src>)
-// <src>-abs(include(0))<src> to <src>abs(include(0))</src>.  A return value
+// <src>-abs(include(0))</src> to <src>abs(include(0))</src>.  A return value
 // of <src>False</src> indicates that both an inclusion and exclusion 
 // range were given or that the internal state of the class is bad.   If you don't
 // call this function, the default state of the class  is to include all pixels.
@@ -424,7 +425,7 @@ private:
                             Bool dropDeg);
 
 // Convert a <AccumType> to a <Float> for plotting
-   static Float convertATtoF (AccumType value) {return Float(real(value));};
+   static Float convertATtoF (AccumType value) {return Float(std::real(value));};
 
 // Find the next good or bad point in an array
    Bool findNextDatum     (uInt& iFound,

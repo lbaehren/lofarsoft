@@ -1,5 +1,5 @@
 //# QC.cc: physical constants with units
-//# Copyright (C) 1994,1995,1996,1997,1998
+//# Copyright (C) 1994-1998,2007
 //# Associated Universities, Inc. Washington DC, USA.
 //#
 //# This library is free software; you can redistribute it and/or modify it
@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: QC.cc,v 19.3 2004/11/30 17:50:18 ddebonis Exp $
+//# $Id: QC.cc,v 19.4 2007/02/26 14:21:35 wbrouw Exp $
 
 //# Includes
 #include <casa/Quanta/QC.h>
@@ -56,12 +56,13 @@ QC_init::QC_init() {
     if (count++ == 0) {
         UnitMap::clearCache();
 	QC::init();		// make sure statics initialized
-    }
+    };
 }
 
 QC_init::~QC_init() {
     if (--count == 0) {
-    }
+      UnitMap::releaseUM();	// make sure UnitMaps released
+    };
 }
 
 void QC::init() {

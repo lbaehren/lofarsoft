@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Lattice.h,v 19.6 2005/06/18 21:19:16 ddebonis Exp $
+//# $Id: Lattice.h,v 19.7 2006/12/12 23:15:33 gvandiep Exp $
 
 #ifndef LATTICES_LATTICE_H
 #define LATTICES_LATTICE_H
@@ -82,7 +82,7 @@ template <class T> class LatticeIterInterface;
 //    <li> how to apply a function to all elements
 //    <li> various shape related functions.
 // </ul>
-// The base class <linkto class=LatticeBase</linkto> contains
+// The base class <linkto class=LatticeBase>LatticeBase</linkto> contains
 // several functions not dependent on the template parameter.
 // <note role=tip> Lattices always have a zero origin. </note>
 // </synopsis> 

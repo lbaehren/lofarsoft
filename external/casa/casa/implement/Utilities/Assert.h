@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Assert.h,v 19.5 2005/06/18 21:19:15 ddebonis Exp $
+//# $Id: Assert.h,v 19.6 2007/02/19 02:35:10 mvoronko Exp $
 
 #ifndef CASA_ASSERT_H
 #define CASA_ASSERT_H
@@ -155,9 +155,9 @@ public:
 // <src>exit(0)</src>.
 
 #define AlwaysAssert(expr, exception) \
-    {assert_<exception > dummy_(expr, "Failed AlwaysAssertExit " #expr,__FILE__,(Int)__LINE__); dummy_.null(); }
+    {casa::assert_<exception > dummy_(expr, "Failed AlwaysAssert " #expr,__FILE__,(casa::Int)__LINE__); dummy_.null(); }
 #define AlwaysAssertExit(expr) \
-    {assert_<AbortError> dummy_(expr, "Unrecoverable AlwaysAssertExit: " #expr,__FILE__,(Int)__LINE__); dummy_.null();}
+    {casa::assert_<AbortError> dummy_(expr, "Unrecoverable AlwaysAssertExit: " #expr,__FILE__,(casa::Int)__LINE__); dummy_.null();}
 
 #if defined(AIPS_DEBUG)
 
@@ -176,9 +176,9 @@ public:
 //     (assert_<AbortError> (expr, "Unrecoverable Assertion: " #expr,__FILE__,(Int)__LINE__))
 
 #define DebugAssert(expr, exception) \
-    {assert_<exception > dummy_(expr, "Failed Assertion: " #expr,__FILE__,(Int)__LINE__); dummy_.null();}
+    {casa::assert_<exception > dummy_(expr, "Failed Assertion: " #expr,__FILE__,(casa::Int)__LINE__); dummy_.null();}
 #define DebugAssertExit(expr) \
-    {assert_<AbortError> dummy_(expr, "Unrecoverable Assertion: " #expr,__FILE__,(Int)__LINE__); dummy_.null();}
+    {casa::assert_<AbortError> dummy_(expr, "Unrecoverable Assertion: " #expr,__FILE__,(casa::Int)__LINE__); dummy_.null();}
 
 #else
 

@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: HistAcc.h,v 19.5 2005/06/18 21:19:17 ddebonis Exp $
+//# $Id: HistAcc.h,v 19.6 2006/12/12 23:17:37 gvandiep Exp $
 
 #ifndef SCIMATH_HISTACC_H
 #define SCIMATH_HISTACC_H
@@ -57,7 +57,7 @@ class String;
 // </etymology>
 //
 // <templating arg=T>
-// The accepted input types are real, i.e. Int, uInt, Float, Double, 
+// <li> The accepted input types are real, i.e. Int, uInt, Float, Double, 
 // but not Complex. 
 // </templating>
 
