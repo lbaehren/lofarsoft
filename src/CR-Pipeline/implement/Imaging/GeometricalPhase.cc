@@ -22,10 +22,6 @@
 
 #include <Imaging/GeometricalPhase.h>
 
-/*!
-  \class GeometricalPhase
-*/
-
 namespace CR { // NAMESPACE CR -- BEGIN
   
   // ============================================================================

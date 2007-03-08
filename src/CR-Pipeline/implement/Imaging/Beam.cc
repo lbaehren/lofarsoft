@@ -22,10 +22,6 @@
 
 #include <Imaging/Beam.h>
 
-/*!
-  \class Beam
-*/
-
 namespace CR { // NAMESPACE CR -- BEGIN
   
   // ============================================================================

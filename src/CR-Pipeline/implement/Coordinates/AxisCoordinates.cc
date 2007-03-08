@@ -26,10 +26,6 @@
 using std::cout;
 using std::endl;
 
-/*!
-  \class AxisCoordinates
-*/
-
 namespace CR {  // Namespace CR -- begin
 
 // ==============================================================================

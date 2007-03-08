@@ -20,10 +20,6 @@
 
 /* $Id$ */
 
-/*!
-  \class Shapelets2D
-*/
-
 #include <Math/Shapelets2D.h>
 
 namespace CR {  // Namespace CR -- BEGIN

@@ -22,10 +22,6 @@
 
 #include <Imaging/GeometricalDelay.h>
 
-/*!
-  \class GeometricalDelay
-*/
-
 namespace CR { // NAMESPACE CR -- BEGIN
   
   // ============================================================================

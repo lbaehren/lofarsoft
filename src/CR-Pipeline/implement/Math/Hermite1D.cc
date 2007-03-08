@@ -21,10 +21,6 @@
 #include <iostream>
 #include <Math/Hermite1D.h>
 
-/*!
-  \class Hermite1D
-*/
-
 namespace CR {  // Namespace CR -- BEGIN
   
   // =============================================================================

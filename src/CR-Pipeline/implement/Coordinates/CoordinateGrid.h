@@ -336,5 +336,3 @@ namespace CR {  // Namespace CR -- begin
 }  // Namespace CR -- end
 
 #endif
-
-

@@ -22,10 +22,6 @@
 
 #include <Coordinates/AxisIterator.h>
 
-/*!
-  \class AxisIterator
-*/
-
 namespace CR {  // Namespace CR -- begin
 
 // ==============================================================================

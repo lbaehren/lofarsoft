@@ -27,7 +27,7 @@ find_path (ROOT_INCLUDES tCanvas.h TCint.h TObject.h
 
 set (libs
   Core
-  Graph
+  Graf
   Gui
   Hist
   MathCore

@@ -22,10 +22,6 @@
 
 #include <Imaging/HorizonScan.h>
 
-/*!
-  \class HorizonScan
-*/
-
 namespace CR { // NAMESPACE CR -- BEGIN
   
   // ============================================================================

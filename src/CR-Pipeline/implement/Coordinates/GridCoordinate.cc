@@ -25,10 +25,6 @@
 using std::cerr;
 using std::endl;
 
-/*!
-  \class GridCoordinate
-*/
-
 namespace CR {  // Namespace CR -- begin
 
 // ==============================================================================

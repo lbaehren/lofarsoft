@@ -22,10 +22,6 @@
 
 #include <Imaging/GeometricalWeight.h>
 
-/*!
-  \class GeometricalWeight
-*/
-
 namespace CR { // NAMESPACE CR -- BEGIN
   
   // ============================================================================
