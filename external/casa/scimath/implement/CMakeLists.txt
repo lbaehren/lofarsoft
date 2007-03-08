@@ -30,7 +30,11 @@ add_library (scimath
 
 ## library dependencies
 
-target_link_libraries (scimath scimath_f casa ${LAPACK_LIBRARIES})
+target_link_libraries (scimath
+  scimath_f
+  casa
+  ${LAPACK_LIBRARIES}
+  )
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs

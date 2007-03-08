@@ -92,6 +92,11 @@ namespace casa {
   template bool operator< (AutoDiff<Complex> const&, AutoDiff<Complex> const&);
   template bool operator< (AutoDiff<DComplex> const&, AutoDiff<DComplex> const&);
 
+  template bool operator> (AutoDiff<Float> const&, AutoDiff<Float> const&);
+  template bool operator> (AutoDiff<Double> const&, AutoDiff<Double> const&);
+  template bool operator> (AutoDiff<Complex> const&, AutoDiff<Complex> const&);
+  template bool operator> (AutoDiff<DComplex> const&, AutoDiff<DComplex> const&);
+
   template AutoDiff<float> operator* (AutoDiff<float> const&, AutoDiff<float> const&);
   template AutoDiff<double> operator* (AutoDiff<double> const&, AutoDiff<double> const&);
   template AutoDiff<Complex> operator* (AutoDiff<Complex> const&, AutoDiff<Complex> const&);
@@ -104,6 +109,13 @@ namespace casa {
 
   template AutoDiff<float> operator- (float const&, AutoDiff<float> const&);
   template AutoDiff<double> operator- (double const&, AutoDiff<double> const&);
+  template AutoDiff<Complex> operator- (Complex const&, AutoDiff<Complex> const&);
+  template AutoDiff<DComplex> operator- (DComplex const&, AutoDiff<DComplex> const&);
+
+  template AutoDiff<float> operator- (AutoDiff<float> const&, float const&);
+  template AutoDiff<double> operator- (AutoDiff<double> const&, double const&);
+  template AutoDiff<Complex> operator- (AutoDiff<Complex> const&, Complex const&);
+  template AutoDiff<DComplex> operator- (AutoDiff<DComplex> const&, DComplex const&);
 
   template AutoDiff<float> operator- (AutoDiff<float> const&, AutoDiff<float> const&);
   template AutoDiff<double> operator- (AutoDiff<double> const&, AutoDiff<double> const&);
@@ -177,10 +189,10 @@ namespace casa {
   template class ExpSincConv<Double>;
   template class GaussianConv<Double>;
   template class KB_Conv<Double>;
-  template class MathFunc<Double>;
+//   template class MathFunc<Double>;
   template class Mod_KB_Conv<Double>;
   template class Sinc_Conv<Double>;
-  template class Sph_Conv<Double>;
+//   template class Sph_Conv<Double>;
   template class Unary<Double>;
 
   // 1010 scimath/Mathematics/MathFunc.cc 
@@ -228,6 +240,8 @@ namespace casa {
 
   template AutoDiff<float> pow (AutoDiff<float> const&, AutoDiff<float> const&);
   template AutoDiff<double> pow (AutoDiff<double> const&, AutoDiff<double> const&);
+  template AutoDiff<Complex> pow (AutoDiff<Complex> const&, AutoDiff<Complex> const&);
+  template AutoDiff<DComplex> pow (AutoDiff<DComplex> const&, AutoDiff<DComplex> const&);
 
   template AutoDiff<float> sin (AutoDiff<float> const&);
   template AutoDiff<double> sin (AutoDiff<double> const&);

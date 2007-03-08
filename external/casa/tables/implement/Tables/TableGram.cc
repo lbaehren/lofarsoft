@@ -44,8 +44,8 @@
 //# stdlib.h is needed for bison 1.28 and needs to be included here
 //# (before the flex/bison files).
 #include <casa/stdlib.h>
-#include <TableGram.ycc>                  // flex output
-#include <TableGram.lcc>                  // bison output
+#include <tables/Tables/TableGram.ycc>                  // flex output
+#include <tables/Tables/TableGram.lcc>                  // bison output
 
 
 // Define the yywrap function for flex.

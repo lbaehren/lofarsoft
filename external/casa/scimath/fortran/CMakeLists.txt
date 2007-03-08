@@ -22,4 +22,5 @@ set_source_files_properties (${scimath_f_sources}
 
 add_library (scimath_f
   ${scimath_f_sources}
+  ${LAPACK_LIBRARIES}
   )
