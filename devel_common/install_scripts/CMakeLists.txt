@@ -68,7 +68,7 @@ set (AIPSARCH
 ## ------------------------------------------------------------------------------
 ## Append the detected configuration information to the existing "makedefs"
 
-set (outfile "makedefs")
+set (outfile "../makedefs")
 
 file (APPEND ${outfile} "\n\n")
 file (APPEND ${outfile} "#-----------------------------------------------------------\n")
@@ -143,9 +143,14 @@ file (APPEND ${outfile} "BOOSTLIB := ${BOOST_LIBRARIES}\n\n")
 ## ------------------------------------------------------------------------------
 ## CFITSIO
 
-find_library (libcfitsio cfitsio ${lib_locations})
+find_path (cfitsio_inc fitsio.h ${include_locations}
+  PATH_SUFFIXES cfitsio
+  )
 
-file (APPEND ${outfile} "CFITSIOLIB := ${libcfitsio}\n\n")
+find_library (cfitsio_lib cfitsio ${lib_locations})
+
+file (APPEND ${outfile} "CFITSIOINCD := ${cfitsio_inc}\n")
+file (APPEND ${outfile} "CFITSIOLIB  := ${cfitsio_lib}\n\n")
 
 ## ------------------------------------------------------------------------------
 ## FFTW Highly optimized FFT routines
@@ -215,9 +220,11 @@ file (APPEND ${outfile} "PGPLOTLIB := ${PGPLOTLIB}\n\n")
 ## ------------------------------------------------------------------------------
 ## POPT
 
-find_library (libpopt popt ${lib_locations})
+find_path (popt_inc popt.h ${include_locations})
+find_library (popt_lib popt ${lib_locations})
 
-file (APPEND ${outfile} "POPTLIB := ${libpopt}\n\n")
+file (APPEND ${outfile} "POPTINCD := ${popt_inc}\n")
+file (APPEND ${outfile} "POPTLIB  := ${popt_lib}\n\n")
 
 ## ------------------------------------------------------------------------------
 ## Python
@@ -237,12 +244,18 @@ endif (libpython)
 ## ------------------------------------------------------------------------------
 ## Tcl/Tk (version 7.6 or later)
 
-find_library (libtcl tcl ${lib_locations})
-find_library (libdl dl ${lib_locations})
-find_library (libtk tk ${lib_locations})
+find_path (tcl_inc tcl.h ${include_locations} PATH_SUFFIXES tcl8.4 tcl8.3)
+find_path (tk_inc tk.h ${include_locations} PATH_SUFFIXES tcl8.4 tcl8.3)
 
-file (APPEND ${outfile} "TCLLIB := ${libtcl} ${libdl}\n\n")
-file (APPEND ${outfile} "TKLIB  := ${libtk}\n\n")
+find_library (libtcl tcl ${lib_locations} PATH_SUFFIXES tcl8.4 tcl8.3)
+find_library (libdl dl ${lib_locations} PATH_SUFFIXES tcl8.4 tcl8.3)
+find_library (libtk tk ${lib_locations} PATH_SUFFIXES tcl8.4 tcl8.3)
+
+file (APPEND ${outfile} "TCLINCD := ${tcl_inc}\n")
+file (APPEND ${outfile} "TCLLIB  := ${libtcl} ${libdl}\n\n")
+
+file (APPEND ${outfile} "TKINCD  := ${tk_inc}\n")
+file (APPEND ${outfile} "TKLIB   := ${libtk}\n\n")
 
 ## ------------------------------------------------------------------------------
 ## X11

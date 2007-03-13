@@ -43,6 +43,9 @@ python:
 qt:
 	./qt.install $(var_prefix)
 
+rpfits:
+	./rpfits.install $(var_prefix)
+
 tcltk:
 	./tcltk.install $(var_prefix)
 
@@ -57,9 +60,7 @@ installation_archive=casa-local.tgz
 ## source and put them into the current directory
 
 update:
-	wget -c http://www.astron.nl/~bahren/wiki/data/media/computing/aips/$(installation_archive)
-	tar -xvzf $(installation_archive)
-	rm -rf $(installation_archive)
+	svn update
 
 tar:
 	tar -cvzf $(installation_archive) *.install *.patch makefile
@@ -68,7 +69,7 @@ tar:
 ## earlier downloads (e.g. from incomplete installations)
 
 clean:
-	rm -f *~ *.tgz *.gz
+	rm -f *~ *.tgz *.gz *.zip
 
 instclean: clean
 	rm -rf $(installation_dirs)
