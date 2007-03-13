@@ -19,6 +19,53 @@
 # ***************************************************************************
 
 ## ------------------------------------------------------------------------------
+## 
+## === Introduction and Motivation ===
+##
+## The main purpose of this script is to help with the configuration step
+## required to install CASA from source. By experience the main two bottlenecks
+## in this process are
+##  1. Installation of all required external packages (e.g. CFITSIO, PGPLOT, etc.)
+##  2. Adjustment of the global configuration file ('makedefs')
+## While - at least to a certain degree - the first point can behandled by a 
+## package manager (such as e.g. apt-get, fink, etc.) or a set of installation
+## scripts, the second task usually would be carried out using the GNU Autotools.
+## However it is the latter step, which never has been addressed properly, thus
+## requiring the user/system admin to manually set up the configuration files, 
+## typically going through a cycle of editing and verification.
+##
+## === Approach to the problem ===
+##
+## Since for the 'makedefs' the task essentially is to locate libaries and header
+## files for a set of packages, any suitable configuration tool can be utilized.
+##
+##  casa                      ..... AIPSROOT
+##  |-- CMakeLists.txt
+##  |-- <arch>                ..... AIPSARCH
+##  |   |-- aipsrc
+##  |   |-- makedefs
+##  |   |-- <site>            ..... AIPSSITE
+##  |   |   |-- aipsrc
+##  |   |   |-- makedefs
+##  |   |   `-- <host>        ..... AIPSHOST
+##  |   |-- bin
+##  |   `-- lib
+##  `-- code                  ..... AIPSCODE
+##
+## ------------------------------------------------------------------------------
+
+## ------------------------------------------------------------------------------
+## Inspect the system we are working on
+
+## possible variables to describe the architecture
+
+set (AIPSARCH
+  darwin
+  linux
+  linux_gnu
+  )
+
+## ------------------------------------------------------------------------------
 ## Append the detected configuration information to the existing "makedefs"
 
 set (outfile "makedefs")
