@@ -134,7 +134,7 @@ foreach (lib ${libs})
     )
   ## check if location was successful
   if (BOOST_${lib})
-    list (APPEND BOOST_LIBRARIES ${BOOST_${lib}})
+    set (BOOST_LIBRARIES "$(BOOST_LIBRARIES) ${BOOST_${lib}}")
   endif (BOOST_${lib})
 endforeach (lib)
 

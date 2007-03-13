@@ -59,6 +59,6 @@ esac
 
 echo "[$var_Package] Post-installation cleanup of the directory ...";
 
-#cd $var_basedir
-#rm -rf $var_PackageDir
-#rm -rf $var_PackageArchive
+cd $var_basedir
+rm -rf $var_PackageDir
+rm -rf $var_PackageArchive
