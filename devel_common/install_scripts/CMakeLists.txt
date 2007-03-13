@@ -107,6 +107,20 @@ set (lib_locations
 )
 
 ## ------------------------------------------------------------------------------
+## Blitz++
+
+find_path (blitz_inc blitz.h ${include_locations}
+  PATH_SUFFIXES blitz blitz++
+  )
+
+find_library (blitz_lib blitz ${lib_locations}
+  PATH_SUFFIXES blitz blitz++
+  )
+
+file (APPEND ${outfile} "BLITZINCD := ${blitz_inc}\n")
+file (APPEND ${outfile} "BLITZLIB  := ${blitz_lib}\n\n")
+
+## ------------------------------------------------------------------------------
 ## Boost
 
 set (libs
@@ -142,6 +156,9 @@ file (APPEND ${outfile} "BOOSTLIB := ${BOOST_LIBRARIES}\n\n")
 
 ## ------------------------------------------------------------------------------
 ## CFITSIO
+##
+## - we should include a test here whether or not the library has been built with
+##   large file support
 
 find_path (cfitsio_inc fitsio.h ${include_locations}
   PATH_SUFFIXES cfitsio
