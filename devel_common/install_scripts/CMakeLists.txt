@@ -39,18 +39,19 @@
 ## Since for the 'makedefs' the task essentially is to locate libaries and header
 ## files for a set of packages, any suitable configuration tool can be utilized.
 ##
-##  casa                      ..... AIPSROOT
+##  casa                           ..... AIPSROOT
 ##  |-- CMakeLists.txt
-##  |-- <arch>                ..... AIPSARCH
+##  |-- <arch>                     ..... AIPSARCH
 ##  |   |-- aipsrc
 ##  |   |-- makedefs
-##  |   |-- <site>            ..... AIPSSITE
+##  |   |-- <site>                 ..... AIPSSITE
 ##  |   |   |-- aipsrc
 ##  |   |   |-- makedefs
-##  |   |   `-- <host>        ..... AIPSHOST
+##  |   |   `-- <host>             ..... AIPSHOST
+##  |   |       `-- CMakeLists.txt
 ##  |   |-- bin
 ##  |   `-- lib
-##  `-- code                  ..... AIPSCODE
+##  `-- code                       ..... AIPSCODE
 ##
 ## ------------------------------------------------------------------------------
 
@@ -92,18 +93,23 @@ set (bin_locations
 
 set (include_locations
   ./include
+  ../../../local/include
+  /opt/casa/local/include
   /usr/include
   /usr/local/include
   /sw/include
+  /Developer/SDKs/MacOSX10.4u.sdk/usr/include
 )
 
 set (lib_locations
   ./lib
+  ../../../local/lib
   /opt/casa/local/lib
   /usr/lib
   /usr/local/lib
   /usr/X11R6/lib
   /sw/lib
+  /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
 )
 
 ## ------------------------------------------------------------------------------
@@ -170,6 +176,19 @@ file (APPEND ${outfile} "CFITSIOINCD := ${cfitsio_inc}\n")
 file (APPEND ${outfile} "CFITSIOLIB  := ${cfitsio_lib}\n\n")
 
 ## ------------------------------------------------------------------------------
+## F77
+
+find_library (libgcc gcc ${lib_locations}
+  PATH_SUFFIXES gcc/powerpc-apple-darwin8/4.0.0 gcc/powerpc-apple-darwin8/4.0.1
+  )
+
+if (libgcc)
+  file (APPEND ${outfile} "F77LIB := ${libgcc}\n\n")
+else (libgcc)
+  message (STATUS "Unable to find libgcc!")
+endif (libgcc)
+
+## ------------------------------------------------------------------------------
 ## FFTW Highly optimized FFT routines
 
 find_library (libfftw fftw ${lib_locations})
@@ -191,18 +210,25 @@ find_library (libcblas cblas ${lib_locations})
 find_library (libblas blas ${lib_locations})
 find_library (libatlas atlas ${lib_locations})
 
-if (liblapack AND libblas)
-  set (LAPACKLIB "${liblapack} ${libblas}")
-  if (libcblas)
-    set (LAPACKLIB "${LAPACKLIB} ${libcblas}")
-  endif (libcblas)
-  if (libatlas)
-    set (LAPACKLIB "${LAPACKLIB} ${libatlas}")
-  endif (libatlas)
-  file (APPEND ${outfile} "LAPACKLIB := ${LAPACKLIB}\n\n")
-else (liblapack AND libblas)
-  message (ERROR "Unable to locate liblapack & libblas - this is serious!")
-endif (liblapack AND libblas)
+if (liblapack)
+  set (LAPACKLIB "${liblapack}")
+else (liblapack)
+  message (ERROR "Unable to locate liblapack - this is serious!")
+endif (liblapack)
+
+if (libblas)
+  set (LAPACKLIB "${LAPACKLIB} ${libblas}")
+endif (libblas)
+
+if (libcblas)
+  set (LAPACKLIB "${LAPACKLIB} ${libcblas}")
+endif (libcblas)
+
+if (libatlas)
+  set (LAPACKLIB "${LAPACKLIB} ${libatlas}")
+endif (libatlas)
+
+file (APPEND ${outfile} "LAPACKLIB := ${LAPACKLIB}\n\n")
 
 ## ------------------------------------------------------------------------------
 ## Motif
@@ -257,6 +283,15 @@ if (libpython)
 else (libpython)
   message (ERROR "Unable to locate PYTHONLIB!")
 endif (libpython)
+
+## ------------------------------------------------------------------------------
+## SOFA
+
+find_library (libsofa sofa ${lib_locations})
+
+if (libsofa)
+  file (APPEND ${outfile} "SOFALIB := ${libsofa}\n\n")
+endif (libsofa)
 
 ## ------------------------------------------------------------------------------
 ## Tcl/Tk (version 7.6 or later)
