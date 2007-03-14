@@ -72,7 +72,7 @@ set (AIPSARCH
 set (outfile "../makedefs")
 
 file (APPEND ${outfile} "\n\n")
-file (APPEND ${outfile} "#-----------------------------------------------------------\n")
+file (APPEND ${outfile} "#===========================================================\n")
 file (APPEND ${outfile} "# Configuration settings detected by CMake\n")
 file (APPEND ${outfile} "\n")
 
@@ -178,7 +178,9 @@ file (APPEND ${outfile} "CFITSIOLIB  := ${cfitsio_lib}\n\n")
 ## ------------------------------------------------------------------------------
 ## F77
 
-find_library (libgcc gcc ${lib_locations}
+find_library (libgcc
+  NAMES gcc g2c
+  PATHS ${lib_locations}
   PATH_SUFFIXES gcc/powerpc-apple-darwin8/4.0.0 gcc/powerpc-apple-darwin8/4.0.1
   )
 

@@ -1,3 +1,4 @@
+
 #!/bin/sh
 
 var_basedir=`pwd`
@@ -6,10 +7,10 @@ var_arch=`uname | tr '[a-z]' '[A-Z]'`
 ## check the input
 
 if test -z $1 ; then
-	echo "Missing installation prefix variable!"
-	exit 1;
+    echo "Missing installation prefix variable!"
+    exit 1;
 else
-	var_prefix=$1
+    var_prefix=$1
 fi
 
 ## Package-specific variables ---------------------------------------------------
@@ -44,16 +45,23 @@ cd $var_PackageDir
 
 case $var_arch in
     LINUX)
-	cd linux;
-	echo "PREFIX := $var_prefix" >> GNUmakefile
-	make && make install
-#	## move the library
-#	mv librpfits.* $var_prefix/lib
-#	## move the executables
-#	mv rpfex $var_prefix/bin
-#	mv rpfhdr $var_prefix/bin
+    cd linux;
+    ;;
+    DARWIN)
+    cpu=`uname -p`
+    case $cpu in
+	powerpc)
+	cd darwin_ppc;
+	;;
+	i386)
+	cd darwin_x86;
+	;;
+    esac
     ;;
 esac
+
+echo "PREFIX := $var_prefix" >> GNUmakefile
+make && make install
 
 ## Post-installation cleanup of the directory
 
