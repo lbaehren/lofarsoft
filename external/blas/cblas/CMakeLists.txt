@@ -1,0 +1,7 @@
+
+subdirs (
+  lib
+  src
+  testing
+)
+

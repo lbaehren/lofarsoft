@@ -222,3 +222,13 @@ subdirs (
   fits
   coordinates
   )
+
+## ------------------------------------------------------------------------------
+## Installation
+
+if (UNIX)
+  set (installation_prefix /usr/local/share/casa)
+  if (APPLE)
+    set (installation_prefix /sw/share/casa)
+  endif (APPLE)
+endif (UNIX)

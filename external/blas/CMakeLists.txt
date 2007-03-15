@@ -1,7 +1,19 @@
 
+## -----------------------------------------------------------------------------
+##
+##  blas
+##  `-- cblas
+##      |-- lib
+##      |-- src
+##      `-- test
+##
+## -----------------------------------------------------------------------------
+
 project (BLAS Fortran C)
 
-subdirs (cblas cblas/src cblas/testing)
+subdirs (
+  cblas
+  )
 
 include_directories (
   .
@@ -32,7 +44,7 @@ add_definitions (-O3 -DADD_)
 
 FILE (GLOB cblas_sources cblas/src/*.f cblas/src/*.c)
 add_library (cblas ${cblas_sources})
-target_link_libraries (cblas blas ${libg2c})
+target_link_libraries (cblas ${libg2c} blas)
 
 ## cblas/*.c
 

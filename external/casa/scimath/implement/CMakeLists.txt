@@ -44,3 +44,12 @@ foreach (scimath_module ${scimath_modules})
 endforeach (scimath_module)
 
 SUBDIRS (${tests})
+
+## -----------------------------------------------------------------------------
+## Installation of libraries
+
+install (TARGETS scimath
+  RUNTIME DESTINATION ${installation_prefix}/bin
+  LIBRARY DESTINATION ${installation_prefix}/lib
+  ARCHIVE DESTINATION ${installation_prefix}/lib
+  )

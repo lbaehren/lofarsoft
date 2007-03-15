@@ -241,4 +241,39 @@ target_link_libraries (tkpgplot
   pgplot
   )
 
+## ------------------------------------------------------------------------------
+## Installation
 
+if (UNIX)
+  set (installation_prefix /usr/local)
+  if (APPLE)
+    set (installation_prefix /sw)
+  endif (APPLE)
+endif (UNIX)
+
+## installation of libraries
+
+install (TARGETS pgplot cpgplot XmPgplot tkpgplot
+  RUNTIME DESTINATION ${installation_prefix}/bin
+  LIBRARY DESTINATION ${installation_prefix}/lib
+  ARCHIVE DESTINATION ${installation_prefix}/lib
+  )
+
+## installation of header files
+
+set (pgplot_headers
+  ./cpg/cpgplot.h
+  ./drivers/commands.h
+  ./drivers/defines.h
+  ./drivers/pgxwin.h
+  ./drivers/xathena/XaPgplot.h
+  ./drivers/xathena/XaPgplotP.h
+  ./drivers/xmotif/XmPgplot.h
+  ./drivers/xmotif/XmPgplotP.h
+  ./drivers/xtk/rvpgplot.h
+  ./drivers/xtk/tkpgplot.h
+  )
+
+install (FILES ${pgplot_headers}
+  DESTINATION ${installation_prefix}/include/pgplot
+  )

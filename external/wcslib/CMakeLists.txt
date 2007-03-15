@@ -17,6 +17,7 @@ project (WCSLIB C Fortran)
 
 subdirs (
   C
+  C/test
   FORTRAN
   pgsbox
   )
@@ -145,47 +146,27 @@ add_library (pgsbox ${pgsbox_sources})
 target_link_libraries (pgsbox wcs ${PGPLOT_LIBRARIES})
 
 ## ------------------------------------------------------------------------------
-## The test programs for the WCSLIB
+## Installation
 
-set (WCSLIB_TEST_PROGRAMS
-  tcel1
-  tcel2
-  tfitshdr
-  tlin
-  tlog
-  tofits
-  tpih1
-  tpih2
-  tprj1
-  tprj2
-  tspc
-  tsph
-  tspx
-  ttab1
-  ttab2
-  ttab3
-  tunits
-  twcs
-  twcsfix
-  twcshdr
-  twcsmix
-  twcssub
-  twcstab
+if (UNIX)
+  set (installation_prefix /usr/local)
+  if (APPLE)
+    set (installation_prefix /sw)
+  endif (APPLE)
+endif (UNIX)
+
+## installation of libraries
+
+install (TARGETS wcs pgsbox
+  RUNTIME DESTINATION ${installation_prefix}/bin
+  LIBRARY DESTINATION ${installation_prefix}/lib
+  ARCHIVE DESTINATION ${installation_prefix}/lib
   )
 
-## PGPLOTLIB := -lcpgplot -lpgplot -lpng -lz -lX11 -lg2c 
+## installation of header files
 
-if (wcs AND pgsbox AND HAVE_PGPLOT)
-  foreach (TEST_PROGRAM ${WCSLIB_TEST_PROGRAMS})
-    add_executable (${TEST_PROGRAM} C/test/${TEST_PROGRAM}.c)
-    target_link_libraries (${TEST_PROGRAM}
-      pgsbox
-      wcs
-      ${PGPLOT_LIBRARIES}
-      ${PNG_LIBRARIES}
-      ${libz}
-      ${MOTIF_LIBRARIES}
-      ${G2C_LIBRARIES}
-      )
-  endforeach (TEST_PROGRAM)
-endif (wcs AND pgsbox AND HAVE_PGPLOT)
+file (GLOB libwcs_headers C/*.h)
+
+install (FILES ${libwcs_headers}
+  DESTINATION ${installation_prefix}/include/wcslib
+  )

@@ -58,3 +58,12 @@ foreach (casa_module ${casa_modules})
 endforeach (casa_module)
 
 SUBDIRS (${tests})
+
+## -----------------------------------------------------------------------------
+## Installation of libraries
+
+install (TARGETS casa
+  RUNTIME DESTINATION ${installation_prefix}/bin
+  LIBRARY DESTINATION ${installation_prefix}/lib
+  ARCHIVE DESTINATION ${installation_prefix}/lib
+  )
