@@ -88,6 +88,7 @@ set (bin_locations
   /usr/bin/X11
   /usr/local/sbin
   /usr/local/bin
+  /opt
   /sw/bin
 )
 
@@ -97,6 +98,7 @@ set (include_locations
   /opt/casa/local/include
   /usr/include
   /usr/local/include
+  /opt
   /sw/include
   /Developer/SDKs/MacOSX10.4u.sdk/usr/include
 )
@@ -108,6 +110,7 @@ set (lib_locations
   /usr/lib
   /usr/local/lib
   /usr/X11R6/lib
+  /opt
   /sw/lib
   /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
 )
@@ -285,6 +288,43 @@ if (libpython)
 else (libpython)
   message (ERROR "Unable to locate PYTHONLIB!")
 endif (libpython)
+
+## ------------------------------------------------------------------------------
+## Root (optional)
+
+find_path (ROOT_INCLUDES tCanvas.h TCint.h TObject.h
+  PATHS ${include_locations}
+  PATH_SUFFIXES root root/include
+  )
+
+set (ROOT_libs
+  Core
+  Graf
+  Gui
+  Hist
+  MathCore
+  Matrix
+  Minuit
+  Physics
+  Proof
+  PyROOT
+  Tree
+  )
+
+foreach (lib ${ROOT_libs})
+  ## try to locate the library
+  find_library (ROOT_${lib} ${lib}
+    PATHS ${lib_locations}
+    PATH_SUFFIXES root root/lib
+    )
+  ## check if location was successful
+  if (ROOT_${lib})
+    set (ROOT_LIBRARIES "${ROOT_LIBRARIES} ${ROOT_${lib}}")
+  endif (ROOT_${lib})
+endforeach (lib)
+
+file (APPEND ${outfile} "ROOTINCD := ${ROOT_INCLUDES}\n")
+file (APPEND ${outfile} "ROOTLIB  := ${ROOT_LIBRARIES}\n\n")
 
 ## ------------------------------------------------------------------------------
 ## SOFA
