@@ -8,7 +8,7 @@
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-find_path (WCS_INCLUDES wcs.h wcslib.h wcsutil.h
+find_path (WCS_INCLUDES wcs.h
   PATHS /include /usr/include /usr/local/include /sw/include
   PATH_SUFFIXES wcslib
   )
@@ -47,8 +47,8 @@ ENDIF (WCS_INCLUDES AND WCS_LIBRARIES)
 IF (HAVE_WCS)
   IF (NOT WCS_FIND_QUIETLY)
     MESSAGE (STATUS "Found components for WCS")
-    MESSAGE (STATUS "WCS_INCLUDES = ${WCS_INCLUDES}")
-    MESSAGE (STATUS "WCS_LIBRARIES     = ${WCS_LIBRARIES}")
+    MESSAGE (STATUS "WCS_INCLUDES  = ${WCS_INCLUDES}")
+    MESSAGE (STATUS "WCS_LIBRARIES = ${WCS_LIBRARIES}")
   ENDIF (NOT WCS_FIND_QUIETLY)
 ELSE (HAVE_WCS)
   IF (WCS_FIND_REQUIRED)
@@ -56,7 +56,7 @@ ELSE (HAVE_WCS)
   ENDIF (WCS_FIND_REQUIRED)
 ENDIF (HAVE_WCS)
 
-MARK_AS_ADVANCED (
+mark_as_advanced (
   HAVE_WCS
   WCS_LIBRARIES
   WCS_INCLUDES

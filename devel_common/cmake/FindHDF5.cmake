@@ -17,26 +17,26 @@ set (hdf5_headers
 
 ## check for the basic header file of the HDF5 library
 
-find_path (HDF5_INCLUDES hdf5.h
+find_path (HDF5_INCLUDES ${hdf5_headers}
   PATHS /usr/local/include /usr/include /sw/include
   PATH_SUFFIXES hdf5
   )
 
 ## check for header files available when library was build with "--enable-cxx"
 
-foreach (header ${hdf5_headers})
-  ## search for the header file
-  find_path (header_path ${header}
-    PATHS /usr/local/include /usr/include /sw/include
-    PATH_SUFFIXES hdf5
-    )
-  ## check if the search has been successful
-  if (header_path)
-    list (APPEND HDF5_INCLUDES ${header_path})
-  else (header_path)
-    message (FATAL_ERROR "Unable to find ${header}!")
-  endif (header_path)
-endforeach (header)
+#foreach (header ${hdf5_headers})
+#  ## search for the header file
+#  find_path (header_path ${header}
+#    PATHS /usr/local/include /usr/include /sw/include
+#    PATH_SUFFIXES hdf5
+#    )
+#  ## check if the search has been successful
+#  if (header_path)
+#    list (APPEND HDF5_INCLUDES ${header_path})
+#  else (header_path)
+#    message (FATAL_ERROR "Unable to find ${header}!")
+#  endif (header_path)
+#endforeach (header)
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
