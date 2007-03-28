@@ -146,7 +146,7 @@ ADD_EXECUTABLE (simulation
 	writearray.f
 	writefits3D.f
 )
-TARGET_LINK_LIBRARIES (simulation cfitsio bdsm_nr bdsm_cr8)
+TARGET_LINK_LIBRARIES (simulation ${CFITSIO_LIBRARIES} bdsm_nr bdsm_cr8)
 
 ADD_EXECUTABLE (simulation_ilse
 	arrstat.f
@@ -181,7 +181,7 @@ ADD_EXECUTABLE (simulation_ilse
 	writearray.f
 	writefits3D.f
 )
-TARGET_LINK_LIBRARIES (simulation_ilse cfitsio bdsm_nr)
+TARGET_LINK_LIBRARIES (simulation_ilse ${CFITSIO_LIBRARIES} bdsm_nr)
 
 ADD_EXECUTABLE (noise
 	acf.f
@@ -292,7 +292,7 @@ ADD_EXECUTABLE (noise
 	gasdev.f
 	mrqmin2d.f
 )
-TARGET_LINK_LIBRARIES (noise cfitsio bdsm_nr bdsm_cr8 bdsm_experiment bdsm_call)
+TARGET_LINK_LIBRARIES (noise ${CFITSIO_LIBRARIES} bdsm_nr bdsm_cr8 bdsm_experiment bdsm_call)
 
 ADD_EXECUTABLE (bdsm-awe
 	bdsm-awe.f
@@ -404,7 +404,7 @@ ADD_EXECUTABLE (bdsm-awe
 	gasdev.f
 	mrqmin2d.f
 )
-TARGET_LINK_LIBRARIES (bdsm-awe cfitsio bdsm_nr bdsm_cr8 bdsm_experiment bdsm_call)
+TARGET_LINK_LIBRARIES (bdsm-awe ${CFITSIO_LIBRARIES} bdsm_nr bdsm_cr8 bdsm_experiment bdsm_call)
 
 
 #ADD_EXECUTABLE (a

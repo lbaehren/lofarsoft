@@ -7,6 +7,7 @@ include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindCFITSIO.cmake)
 include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindFFTW3.cmake)
 include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindLAPACK.cmake)
 include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindROOT.cmake)
+include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindWCS.cmake)
 
 include_directories (
   .
