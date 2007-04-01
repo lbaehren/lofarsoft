@@ -5,7 +5,9 @@ project (simulation)
 ## -----------------------------------------------------------------------------
 ## external dependencies
 
-include (../../../../devel_common/cmake/FindROOT.cmake)
+if (NOT HAVE_ROOT)
+  include (../../../../devel_common/cmake/FindROOT.cmake)
+endif (NOT HAVE_ROOT)
 
 include_directories (
   .
@@ -23,4 +25,5 @@ add_library (simulator
 ## executables
 
 add_executable (sim_main main.cc)
+
 target_link_libraries (sim_main simulator)

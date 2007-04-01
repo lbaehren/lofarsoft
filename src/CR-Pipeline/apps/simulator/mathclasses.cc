@@ -10,7 +10,7 @@ using namespace std;
 #include "mathclasses.hh"
 
 
-azelvec xyz2azel(double x, double y, double z) { 
+azelvec xyz2azel (double x, double y, double z) { 
   azelvec azel ;
   azel[2] = sqrt(pow(x,2)+pow(y,2)+pow(z,2));
   azel[1] = rad2deg( acos( z / azel[2] ) );
