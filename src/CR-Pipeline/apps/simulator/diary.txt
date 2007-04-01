@@ -1,0 +1,1 @@
+g++ test_er.c -o test_er -I/usr/include/shift  -L/usr/local/lib -lshift -lnsl -lcrypt -ldl -lm  $(root-config --cflags) $(root-config --glibs) -O -fPIC

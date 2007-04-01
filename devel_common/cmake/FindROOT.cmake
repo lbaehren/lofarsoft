@@ -26,17 +26,37 @@ find_path (ROOT_INCLUDES tCanvas.h TCint.h TObject.h
 ## Check for the libraries
 
 set (libs
+  Cint
+  Cintex
   Core
+  EG
+  FitPanel
+  Foam
+  FFTW
+  Ged
+  Geom
+  GeomBuilder
+  GeomPainter
+  Gpad
   Graf
+  Graf3d
   Gui
+  GX11
+  Hbook
   Hist
+  HistPainter
   MathCore
   Matrix
   Minuit
   Physics
   Proof
+  ProofGui
+  ProofPlayer
   PyROOT
+  RIO
   Tree
+  TreePlayer
+  TreeViewer
   )
 
 foreach (lib ${libs})
