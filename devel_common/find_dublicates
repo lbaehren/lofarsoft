@@ -1,0 +1,36 @@
+#!/bin/sh
+
+if test -z $1 ; then
+    echo "No input argument provided - switching to default settings."
+    basedir="../src"
+else 
+    basedir=$1
+fi
+
+## change to the base directory from the to operate
+
+if test -d $basedir ; then
+    echo "Found base directory $basedir."
+    cd $basedir
+else 
+    exit 
+fi
+
+## Looks like we are good to go -- start assmebling file list of which to operate
+
+FILES=`find . -name *.cc | tr "/" "\n" | grep ".cc" | sort`
+
+for FILE in $FILES 
+{
+    var_files=`find . -name $FILE`
+    var_num=`find . -name $FILE | wc -l`
+    
+    case $var_num in
+	1)
+	;;
+	*)
+	echo "Found $var_num copies of $FILE"
+	echo "-- $var_files"
+	;;
+    esac
+}

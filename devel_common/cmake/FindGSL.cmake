@@ -65,8 +65,5 @@ else (HAVE_GSL)
   endif (GSL_FIND_REQUIRED)
 endif (HAVE_GSL)
 
-mark_as_advanced (
-  HAVE_GSL
-  GSL_LIBRARIES
-  GSL_INCLUDES
-  )
+## -----------------------------------------------------------------------------
+## Mark as advanced ...

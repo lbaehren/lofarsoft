@@ -48,8 +48,6 @@ ELSE (HAVE_FFTW3)
   ENDIF (FFTW3_FIND_REQUIRED)
 ENDIF (HAVE_FFTW3)
 
-MARK_AS_ADVANCED (
-  HAVE_FFTW3
-  FFTW3_LIBRARY
-  FFTW3_INCLUDE_DIR
-  )
+## ------------------------------------------------------------------------------
+## Mark as advanced ...
+

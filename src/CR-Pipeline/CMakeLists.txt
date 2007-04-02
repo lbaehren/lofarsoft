@@ -2,7 +2,7 @@
 project (CR)
 
 ## ------------------------------------------------------------------------------
-## External dependencies
+## External dependencies; check if we need to search for some components.
 
 if (NOT HAVE_BLITZ)
   include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindBlitz.cmake)
@@ -32,16 +32,28 @@ if (NOT HAVE_WCS)
   include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindWCS.cmake)
 endif (NOT HAVE_WCS)
 
+message ("[CR-Pipeline] External library settings summary:")
+message ("-- BLITZ   : ${HAVE_BLITZ}   ")
+message ("-- CASA    : ${HAVE_CASA}    ")
+message ("-- CFITSIO : ${HAVE_CFITSIO} ")
+message ("-- FFTW3   : ${HAVE_FFTW3}   ")
+message ("-- LAPACK  : ${HAVE_LAPACK}  ")
+message ("-- ROOT    : ${HAVE_ROOT}    ")
+message ("-- WCS     : ${HAVE_WCS}     ")
+
 ## ------------------------------------------------------------------------------
 ## Where to find the header files
 
 include_directories (
   .
   ..
-  ./implement
-  ./test
+  ${CR_SOURCE_DIR}/implement
+  ${CR_SOURCE_DIR}/test
   ${BLITZ_INCLUDES}
+  ${CASA_INCLUDES}
+  ${CFITSIO_INCLUDES}
   ${ROOT_INCLUDES}
+  ${WCS_INCLUDES}
   )
 
 ## ------------------------------------------------------------------------------
@@ -57,5 +69,3 @@ subdirs (
 ## Verbose level
 
 SET (CMAKE_VERBOSE_MAKEFILE 0)
-
-message (STATUS "CMAKE_CXX_FLAGS = ${CMAKE_CXX_FLAGS}")

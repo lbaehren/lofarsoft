@@ -56,8 +56,5 @@ ELSE (HAVE_WCS)
   ENDIF (WCS_FIND_REQUIRED)
 ENDIF (HAVE_WCS)
 
-mark_as_advanced (
-  HAVE_WCS
-  WCS_LIBRARIES
-  WCS_INCLUDES
-  )
+## ------------------------------------------------------------------------------
+## Mark as advanced ...

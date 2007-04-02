@@ -41,8 +41,5 @@ ELSE(LIBXML2_INCLUDE_DIR AND LIBXML2_LIBRARY)
   SET(FOUND_LIBXML2 0 CACHE BOOL "Not fount libxml2 library")
 ENDIF(LIBXML2_INCLUDE_DIR AND LIBXML2_LIBRARY)
 
-MARK_AS_ADVANCED(
-  LIBXML2_INCLUDE_DIR 
-  LIBXML2_LIBRARY 
-  FOUND_LIBXML2
-  )
+## -----------------------------------------------------------------------------
+## Mark as advanced ...

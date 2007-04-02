@@ -3,13 +3,30 @@
 ## ------------------------------------------------------------------------------
 ## Find external packages
 
+if (NOT HAVE_BLITZ)
+  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindBlitz.cmake)
+endif (NOT HAVE_BLITZ)
+
+if (NOT HAVE_CASA) 
+  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindCASA.cmake)
+endif (NOT HAVE_CASA)
+
+if (NOT HAVE_CFITSIO)
+  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindCFITSIO.cmake)
+endif (NOT HAVE_CFITSIO)
+
+if (NOT HAVE_FFTW3)
+  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindFFTW3.cmake)
+endif (NOT HAVE_FFTW3)
+
+if (NOT HAVE_WCS) 
+  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindWCS.cmake)
+endif (NOT HAVE_WCS)
+
 ## ------------------------------------------------------------------------------
 ## Include directories
 
-include_directories (
-  ${CASA_INCLUDES}
-  ${CFITSIO_INCLUDES}
-  )
+# the things should be handled one directory level up
 
 ## ------------------------------------------------------------------------------
 ## Test working with CASA libraries
@@ -65,7 +82,6 @@ if (HAVE_CFITSIO)
   target_link_libraries (tUseCFITSIO ${CFITSIO_LIBRARIES})
 else (HAVE_CFITSIO)
   message (STATUS "Unable to build test program for CFITSIO.")
-  message (STATUS "CFITSIO_LIBRARIES = ${CFITSIO_LIBRARIES}")
 endif (HAVE_CFITSIO)
 
 ## ------------------------------------------------------------------------------
@@ -74,6 +90,8 @@ endif (HAVE_CFITSIO)
 if (HAVE_FFTW3)
   add_executable (tUseFFTW3 tUseFFTW3.cc)
   target_link_libraries (tUseFFTW3 ${FFTW3_LIBRARY})
+else (HAVE_FFTW3)
+  message (STATUS "Unable to build test program for FFTW3.")
 endif (HAVE_FFTW3)
 
 ## ------------------------------------------------------------------------------

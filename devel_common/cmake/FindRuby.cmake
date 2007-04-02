@@ -70,8 +70,3 @@ else (HAVE_Ruby)
   endif (Ruby_FIND_REQUIRED)
 endif (HAVE_Ruby)
 
-mark_as_advanced (
-  HAVE_Ruby
-  Ruby_LIBRARIES
-  Ruby_INCLUDES
-  )

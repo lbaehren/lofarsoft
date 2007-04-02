@@ -58,7 +58,12 @@ ELSE (HAVE_LAPACK)
   ENDIF (LAPACK_FIND_REQUIRED)
 ENDIF (HAVE_LAPACK)
 
+## -----------------------------------------------------------------------------
+## Mark as advanced...
+
 MARK_AS_ADVANCED (
-  HAVE_LAPACK
-  LAPACK_LIBRARIES
+  LAPACK_atlas
+  LAPACK_blas
+  LAPACK_cblas
+  LAPACK_lapack
   )

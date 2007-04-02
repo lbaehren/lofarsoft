@@ -48,12 +48,16 @@ set (libs
   MathCore
   Matrix
   Minuit
+  Net
   Physics
+  Postscript
   Proof
   ProofGui
   ProofPlayer
   PyROOT
   RIO
+  Rint
+  thread
   Tree
   TreePlayer
   TreeViewer
@@ -107,11 +111,6 @@ else (HAVE_ROOT)
   endif (ROOT_FIND_REQUIRED)
 endif (HAVE_ROOT)
 
-## -----------------------------------------------------------------------------
-## Mark advanced variables
+## ------------------------------------------------------------------------------
+## Mark as advanced ...
 
-mark_as_advanced (
-  HAVE_ROOT
-  ROOT_LIBRARIES
-  ROOT_INCLUDES
-  )

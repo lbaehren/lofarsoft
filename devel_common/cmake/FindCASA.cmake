@@ -435,8 +435,11 @@ endif (HAVE_CASA)
 ## Mark as advanced ...
 
 mark_as_advanced (
-  HAVE_CASA
-  CASA_BASEDIR
-  CASA_INCLUDES
-  CASA_LIBRARIES
+  CASA_libcasa
+  CASA_libcoordinates
+  CASA_libimages
+  CASA_libmeasures
+  CASA_libscimath
+  CASA_libscimath_f
+  CASA_libtables
   )

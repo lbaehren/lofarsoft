@@ -16,13 +16,7 @@ subdirs (${cr_modules})
 ## -----------------------------------------------------------------------------
 ## Path to the various header files
 
-include_directories (
-  .
-  ..
-  ${CR_SOURCE_DIR}/include
-  ${BLITZ_INCLUDES}
-  ${WCS_INCLUDES}
-  )
+# these settings should be handled one level up
 
 ## -----------------------------------------------------------------------------
 ## collect the source files in the modules
@@ -35,10 +29,12 @@ endforeach (cr_module)
 ## -----------------------------------------------------------------------------
 ## build the library
 
-add_library (cr
-  ${cr_sources}
-  )
-target_link_libraries (cr
-  ${CASA_LIBRARIES}
-  ${LAPACK_LIBRARIES}
-  )
+if (CASA_LIBRARIES AND LAPACK_LIBRARIES)
+  add_library (cr
+    ${cr_sources}
+    )
+  target_link_libraries (cr
+    ${CASA_LIBRARIES}
+    ${LAPACK_LIBRARIES}
+    )
+endif (CASA_LIBRARIES AND LAPACK_LIBRARIES)

@@ -55,8 +55,5 @@ ELSE (HAVE_GLISH)
   ENDIF (Glish_FIND_REQUIRED)
 ENDIF (HAVE_GLISH)
 
-MARK_AS_ADVANCED (
-  HAVE_GLISH
-  Glish_LIBRARY
-  Glish_INCLUDE_DIR
-  )
+## -----------------------------------------------------------------------------
+## Mark as advanced ...

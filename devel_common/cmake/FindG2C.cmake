@@ -81,8 +81,5 @@ else (HAVE_G2C)
   endif (G2C_FIND_REQUIRED)
 endif (HAVE_G2C)
 
-mark_as_advanced (
-  HAVE_G2C
-  G2C_LIBRARIES
-  G2C_INCLUDES
-  )
+## -----------------------------------------------------------------------------
+## Mark as advanced ...

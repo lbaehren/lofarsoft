@@ -48,8 +48,5 @@ else (HAVE_Globus)
   endif (Globus_FIND_REQUIRED)
 endif (HAVE_Globus)
 
-mark_as_advanced (
-  HAVE_Globus
-  Globus_LIBRARIES
-  Globus_INCLUDES
-  )
+## -----------------------------------------------------------------------------
+## Mark as advanced ...

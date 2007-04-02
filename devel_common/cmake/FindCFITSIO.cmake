@@ -16,11 +16,13 @@ FIND_PATH (CFITSIO_INCLUDES
 ## -----------------------------------------------------------------------------
 ## Check for the parts of the library
 
+set (lib_locations /lib /usr/lib /usr/local/lib /sw/lib /opt/casa/local/lib)
+
 ## [1] core library
 
 FIND_LIBRARY (CFITSIO_libcfitsio
   NAMES cfitsio
-  PATHS /lib /usr/lib /usr/local/lib /sw/lib /opt/casa/local/lib
+  PATHS ${lib_locations}
   PATH_SUFFIXES cfitsio
 )
 
@@ -32,7 +34,7 @@ endif (CFITSIO_libcfitsio)
 
 FIND_LIBRARY (CFITSIO_libm
   NAMES m
-  PATHS /lib /usr/lib /usr/local/lib /sw/lib /opt/casa/local/lib
+  PATHS ${lib_locations}
 )
 
 if (CFITSIO_libm)
@@ -43,7 +45,7 @@ endif (CFITSIO_libm)
 
 FIND_LIBRARY (CFITSIO_libnsl
   NAMES nsl
-  PATHS /lib /usr/lib /usr/local/lib /sw/lib /opt/casa/local/lib
+  PATHS ${lib_locations}
   )
 
 if (CFITSIO_libnsl)
@@ -83,7 +85,7 @@ ENDIF (HAVE_CFITSIO)
 ## Mark as advanced ...
 
 MARK_AS_ADVANCED (
-  HAVE_CFITSIO
-  CFITSIO_LIBRARIES
-  CFITSIO_INCLUDES
+  CFITSIO_libcfitsio
+  CFITSIO_libm
+  CFITSIO_libnsl
   )

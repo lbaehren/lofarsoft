@@ -74,9 +74,3 @@ else (HAVE_BOOST)
 endif (HAVE_BOOST)
 
 ## -----------------------------------------------------------------------------
-
-mark_as_advanced (
-  HAVE_BOOST
-  BOOST_INCLUDES
-  BOOST_LIBRARIES
-)

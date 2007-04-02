@@ -61,8 +61,3 @@ ENDIF (HAVE_BLITZ)
 ## ------------------------------------------------------------------------------
 ## Mark as advanced ...
 
-MARK_AS_ADVANCED (
-  HAVE_BLITZ
-  BLITZ_LIBRARIES
-  BLITZ_INCLUDES
-  )

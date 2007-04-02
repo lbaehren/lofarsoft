@@ -73,8 +73,5 @@ else (HAVE_HDF5)
   endif (HDF5_FIND_REQUIRED)
 endif (HAVE_HDF5)
 
-mark_as_advanced (
-  HAVE_HDF5
-  HDF5_LIBRARIES
-  HDF5_INCLUDES
-  )
+## -----------------------------------------------------------------------------
+## Mark as advanced ...

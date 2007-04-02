@@ -88,9 +88,4 @@ else (HAVE_PGPLOT)
 endif (HAVE_PGPLOT)
 
 ## -----------------------------------------------------------------------------
-
-mark_as_advanced (
-  HAVE_PGPLOT
-  PGPLOT_INCLUDES
-  PGPLOT_LIBRARIES
-  )
+## Mark as advanced ...
