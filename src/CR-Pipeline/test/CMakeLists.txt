@@ -26,13 +26,20 @@ set (tests
 ## ------------------------------------------------------------------------------
 ## create executable(s)
 
-FOREACH (src ${tests})
-  ADD_EXECUTABLE (${src} ${src}.cc)
-  TARGET_LINK_LIBRARIES (${src}
-    ${CASA_LIBRARIES}
-    ${LAPACK_LIBRARIES}
-    )  
-ENDFOREACH (src)
+if (HAVE_CASA)
+  FOREACH (src ${tests})
+    ADD_EXECUTABLE (${src} ${src}.cc)
+    TARGET_LINK_LIBRARIES (${src}
+      ${CASA_LIBRARIES}
+      ${LAPACK_LIBRARIES}
+      )  
+  ENDFOREACH (src)
+endif (HAVE_CASA)
+
+## ------------------------------------------------------------------------------
+## Vectors of the standard library
+
+add_executable (tUseVector tUseVector.cc)
 
 ## ------------------------------------------------------------------------------
 ## Numerical ranges of the various data types

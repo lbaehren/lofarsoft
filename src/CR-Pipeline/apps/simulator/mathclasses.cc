@@ -7,7 +7,7 @@ using namespace std;
 // Coordinate transformations have been tested and are ok at last!!!!
 
 //... Private header file with prototype for mathclasses
-#include "mathclasses.hh"
+#include "mathclasses.h"
 
 
 azelvec xyz2azel (double x, double y, double z) { 
@@ -58,8 +58,7 @@ double deg2rad(double deg){
 }
 
 double pi( void ) {
-
-  return acos(-1);
+  return acos(double(-1));
 }
 
 double c( void ) {

@@ -7,9 +7,9 @@
 #include<vector>
 
 //project header files includes
-#include "dipole.hh"
-#include "Shower.hh"
-#include "mathclasses.hh"
+#include "dipole.h"
+#include "Shower.h"
+#include "mathclasses.h"
 
 //ROOT includes
 #include <TH1F.h>

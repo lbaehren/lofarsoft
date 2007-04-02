@@ -3,7 +3,7 @@
 
 #include <fstream>
 #include <iostream>
-#include "Detector.hh"
+#include "Detector.h"
 
 using namespace std;
 class DetectorReaderException {

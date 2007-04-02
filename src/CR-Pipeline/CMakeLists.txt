@@ -1,13 +1,31 @@
 
 project (CR)
 
-include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindBlitz.cmake)
-include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindCASA.cmake)
-include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindCFITSIO.cmake)
+## ------------------------------------------------------------------------------
+## External dependencies
+
+if (NOT HAVE_BLITZ)
+  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindBlitz.cmake)
+endif (NOT HAVE_BLITZ)
+
+if (NOT HAVE_CASA) 
+  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindCASA.cmake)
+endif (NOT HAVE_CASA)
+
+if (NOT HAVE_CFITSIO)
+  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindCFITSIO.cmake)
+endif (NOT HAVE_CFITSIO)
+
 include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindFFTW3.cmake)
 include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindLAPACK.cmake)
 include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindROOT.cmake)
-include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindWCS.cmake)
+
+if (NOT HAVE_WCS) 
+  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindWCS.cmake)
+endif (NOT HAVE_WCS)
+
+## ------------------------------------------------------------------------------
+## Where to find the header files
 
 include_directories (
   .
@@ -18,10 +36,16 @@ include_directories (
   ${ROOT_INCLUDES}
   )
 
+## ------------------------------------------------------------------------------
+## Subdirectories
+
 subdirs (
   apps
   implement
   test
   )
 
-SET (CMAKE_VERBOSE_MAKEFILE 1)
+## ------------------------------------------------------------------------------
+## Verbose level
+
+SET (CMAKE_VERBOSE_MAKEFILE 0)

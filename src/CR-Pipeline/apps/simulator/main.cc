@@ -4,13 +4,13 @@
 #include <vector>
 
 //Header files
-#include "dipole.hh"
-#include "Detector.hh"
-#include "detector_reader.hh"
-#include "Shower.hh"
-#include "mathclasses.hh"
-#include "xyzvec.hh"
-#include "azelvec.hh"
+#include <dipole.h>
+#include <Detector.h>
+#include <detector_reader.h>
+#include <Shower.h>
+#include <mathclasses.h>
+#include <xyzvec.h>
+#include <azelvec.h>
 
 //ROOT includes
 #include <TFile.h>

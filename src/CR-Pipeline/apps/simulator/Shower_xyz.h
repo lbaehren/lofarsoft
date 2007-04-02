@@ -3,9 +3,9 @@
 
 #include<math.h>
 #include<vector>
-#include "xyzvec.hh"
+#include "xyzvec.h"
 
-#include "mathclasses.hh"
+#include "mathclasses.h"
 
 using namespace std;
 class Shower {
