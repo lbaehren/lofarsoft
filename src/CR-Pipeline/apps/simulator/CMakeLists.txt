@@ -25,7 +25,7 @@ include_directories (
   ${ROOT_INCLUDES}
 )
 
-add_definitions (-O -fPIC)
+#add_definitions (-O -fPIC)
 
 ## -----------------------------------------------------------------------------
 ## library

@@ -3,8 +3,11 @@ PROJECT (BDSM Fortran)
 ## ------------------------------------------------------------------------------
 ## Find external libraries
 
-INCLUDE (../../../devel_common/cmake/FindCFITSIO.cmake)
-INCLUDE (../../../devel_common/cmake/FindCPGPLOT.cmake)
+if (NOT HAVE_CFITSIO)
+  include (../../../devel_common/cmake/FindCFITSIO.cmake)
+endif (NOT HAVE_CFITSIO)
+
+include (../../../devel_common/cmake/FindCPGPLOT.cmake)
 
 ## ------------------------------------------------------------------------------
 ## Build libraries

@@ -16,9 +16,17 @@ if (NOT HAVE_CFITSIO)
   include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindCFITSIO.cmake)
 endif (NOT HAVE_CFITSIO)
 
-include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindFFTW3.cmake)
-include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindLAPACK.cmake)
-include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindROOT.cmake)
+if (NOT HAVE_FFTW3)
+  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindFFTW3.cmake)
+endif (NOT HAVE_FFTW3)
+
+if (NOT HAVE_LAPACK)
+  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindLAPACK.cmake)
+endif (NOT HAVE_LAPACK)
+
+if (NOT HAVE_ROOT)
+  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindROOT.cmake)
+endif (NOT HAVE_ROOT)
 
 if (NOT HAVE_WCS) 
   include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindWCS.cmake)
@@ -49,3 +57,5 @@ subdirs (
 ## Verbose level
 
 SET (CMAKE_VERBOSE_MAKEFILE 0)
+
+message (STATUS "CMAKE_CXX_FLAGS = ${CMAKE_CXX_FLAGS}")

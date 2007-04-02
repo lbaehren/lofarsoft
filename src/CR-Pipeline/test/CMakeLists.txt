@@ -65,6 +65,7 @@ if (HAVE_CFITSIO)
   target_link_libraries (tUseCFITSIO ${CFITSIO_LIBRARIES})
 else (HAVE_CFITSIO)
   message (STATUS "Unable to build test program for CFITSIO.")
+  message (STATUS "CFITSIO_LIBRARIES = ${CFITSIO_LIBRARIES}")
 endif (HAVE_CFITSIO)
 
 ## ------------------------------------------------------------------------------
