@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2007                                                    *
- *   Lars Baehren (bahren@astron.nl)                                       *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -60,14 +60,20 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \tau_{ij} = \frac{1}{c} \left( |\vec \rho_j| - |\vec \rho_i| \right)
       = \frac{1}{c} \left( |\vec \rho - \vec x_j| - |\vec \rho - \vec x_i| \right)
     \f]
+
+    Though being geometrically correct, the above expression is suitable for
+    handling of baselines, rather than for the consideration of individual
+    antennas (though their positions of course can be considered as a baseline
+    w.r.t. to the array phase center). For an antenna located at \f$ \vec x_j \f$
+    the source position \f$ \vec \rho \f$ appears at \f$ \vec \rho_j \f$ such
+    the signals arrives with a delay of
+    \f[ \tau_j = \frac{1}{c} \left( |\vec \rho_j| - |\vec \rho| \right) =
+    \frac{1}{c} \left( |\vec \rho - \vec x_j| - |\vec \rho| \right) \f]
     
     <h3>Example(s)</h3>
     
   */  
   class GeometricalDelay {
-
-    //! Buffer the values for the geometrical delay?
-    bool bufferDelays_p;
 
   protected:
     
@@ -77,6 +83,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
     blitz::Array<double,2> skyPositions_p;
     //! [nofAntennas,nofSkyPositions] The geometrical delay itself
     blitz::Array<double,2> delays_p;
+    //! Buffer the values for the geometrical delay?
+    bool bufferDelays_p;
 
   public:
     
@@ -85,19 +93,25 @@ namespace CR { // NAMESPACE CR -- BEGIN
     /*!
       \brief Default constructor
 
-      Geometrical delay for a single zero-length baseline (\f$ \vec x_j -
-      \vec x_i = 0 \f$) and a single sky position at the coordinate system
-      origin (\f$ \mathbf{L} = 0 \f$).
+      Geometrical delay for a single antenna position at the
+      position of the phase center, \f$ \vec x = (0,0,0) \f$ and a single 
+      source position at unit distance above the antenna, \f$ \vec \rho =
+      (0,0,1) \f$
     */
     GeometricalDelay ();
     
     /*!
       \brief Argumented constructor (using Blitz arrays)
 
+      If an error is encountered processing the input parameters, we revert to
+      the individual default settings used with the default constructor; at least
+      this way we end up with an operational object.
+
       \param antPositions -- [nofAntennas,3] Antenna positions for which the
-                             delay is computed
+                             delay is computed, \f$ (x,y,z) \f$
       \param skyPositions -- [nofSkyPositions,3] Positions in the sky towards
-                             which to point 
+                             which to point, given in the same reference frame
+			     as the antenna positions, \f$ (x,y,z) \f$
       \param bufferDelay  -- Buffer the values for the geometrical delay? If set
                              <i>yes</i> the delays will be computed from the 
 			     provided antenna and sky positions and afterwards
@@ -136,13 +150,13 @@ namespace CR { // NAMESPACE CR -- BEGIN
     /*!
       \brief Are the values for the geometrical delay buffered?
 
-      \return bufferDelay -- Are the values for the geometrical delay buffered?
-                             If set <i>yes</i> the delays will be computed from
-			     the provided antenna and sky positions and afterwards
-			     kept in memory; if set <i>no</i> only the input 
-			     parameters are stored an no further action is taken.
+      \return bufferDelays -- Are the values for the geometrical delay buffered?
+                              If set <i>yes</i> the delays will be computed from
+			      the provided antenna and sky positions and afterwards
+			      kept in memory; if set <i>no</i> only the input 
+			      parameters are stored an no further action is taken.
      */
-    inline bool bufferDelay () {
+    inline bool bufferDelays () {
       return bufferDelays_p;
     }
     
@@ -243,12 +257,15 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \return delay -- [nofAntennas,nofSkyPositions] The geometrical delays for
                        for the combination of antenna and sky positions
     */
-    blitz::Array<double,2> delay ();
+    blitz::Array<double,2> delays ();
 
     /*!
       \brief Geometrical delay for a combination of antenna and sky positions
 
-      \param antPositions -- The antPositions, for which the delay is computed
+      \param antPositions -- The antPositions, for which the delay is computed;
+                             values are given as [nofAntenas,nofCoordinates] with
+			     the antenna positions given in cartesian coordinates
+			     \f$ (x,y,z) \f$
       \param skyPositions -- The sky positions, for which the delay is computed
       \param bufferDelay  -- Buffer the values for the geometrical delay? If set
                              <i>yes</i> the delays will be computed from the 
@@ -266,7 +283,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 	bufferDelays_p = bufferDelay;
 	antPositions_p = antPositions;
 	skyPositions_p = skyPositions;
-	return delay ();
+	return delays ();
       }
 
     /*!
@@ -319,6 +336,13 @@ namespace CR { // NAMESPACE CR -- BEGIN
     */
     void summary ();
     
+    /*!
+      \brief Provide a summary of the objects status and contents
+
+      \param os -- Output stream to which the summary is written
+    */
+    void summary (std::ostream &os);
+    
   private:
     
     /*!
@@ -332,10 +356,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
     void destroy(void);
 
     /*!
-      \brief Compute the geometrical delay
+      \brief Store the geometrical delays in the internal buffer
     */
     void setDelay ();
     
+    /*!
+      \brief Compute the geometrical delays
+
+      \return delays -- The geometrical delays, [nofAntennas,nofPositions]
+    */
+    blitz::Array<double,2> calcDelays ();
+
   };  // CLASS GEOMETRICALDELAY -- END
   
 }  // NAMESPACE CR -- END

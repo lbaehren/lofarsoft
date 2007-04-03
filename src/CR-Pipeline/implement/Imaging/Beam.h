@@ -107,7 +107,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
                           an error was encountered
      */
     virtual bool beam (blitz::Array<double,2> &dataBeam,
-		       const blitz::Array<double,2> &dataFFT);
+		       const blitz::Array<double,2> &dataFFT) {
+      return false;
+    }
     
     /*!
       \brief Beamforming of the data, returning real-valued result
@@ -117,10 +119,12 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered
-     */
+    */
     virtual bool beam (blitz::Array<std::complex<double>,2> &dataBeam,
-		       const blitz::Array<double,2> &dataFFT);
-
+		       const blitz::Array<double,2> &dataFFT) {
+      return false;
+    }
+    
     // ----------------------------------------------------------------- Feedback
     
     /*!

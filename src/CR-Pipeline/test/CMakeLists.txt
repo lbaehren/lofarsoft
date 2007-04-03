@@ -56,7 +56,7 @@ endif (HAVE_CASA)
 ## ------------------------------------------------------------------------------
 ## Vectors of the standard library
 
-add_executable (tUseVector tUseVector.cc)
+#add_executable (tUseVector tUseVector.cc)
 
 ## ------------------------------------------------------------------------------
 ## Numerical ranges of the various data types
