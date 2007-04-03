@@ -22,6 +22,11 @@
 
 #include <Imaging/Beam.h>
 
+using std::cerr;
+using std::cout;
+using std::endl;
+using CR::Beam;
+
 /*!
   \file tBeam.cc
 

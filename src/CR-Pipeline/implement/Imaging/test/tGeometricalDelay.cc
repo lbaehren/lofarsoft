@@ -21,6 +21,7 @@
 /* $Id: template-tclass.cc,v 1.6 2006/09/20 09:56:53 bahren Exp $*/
 
 #include <iostream>
+#include <fstream>
 
 #include <Imaging/GeometricalDelay.h>
 
@@ -29,7 +30,8 @@ using blitz::Range;
 using CR::GeometricalDelay;
 using CR::L2Norm;
 
-const double lightspeed = 2.99795e08;
+//! Speed of light (Source: Wikipedia)
+const double lightspeed = 299792458;
 
 /*!
   \file tGeometricalDelay.cc
@@ -150,15 +152,16 @@ int test_GeometricalDelay ()
 
   int nofFailedTests (0);
   uint nofCoordinates (3);
-  Array<double,2> skyPositions (1,nofCoordinates);
   Array<double,2> antPositions (2,nofCoordinates);
+  Array<double,2> skyPositions (3,nofCoordinates);
   
   antPositions = -100.0, 0.0, 0.0, 100.0, 0.0, 0.0;
-  skyPositions = 100.0, 100.0, 100.0;
+  skyPositions = 100.0, 0.0, 0.0, 0.0, 100.0, 0.0, 0.0, 0.0, 100.0;
   
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
     GeometricalDelay delay;
+    delay.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -168,10 +171,84 @@ int test_GeometricalDelay ()
   try {
     GeometricalDelay delay (antPositions,
 			    skyPositions);
+    delay.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
+  
+  std::cout << "[3] Testing copy constructor ..." << std::endl;
+  try {
+    GeometricalDelay delay (antPositions,
+			    skyPositions);
+    delay.summary();
+
+    GeometricalDelay delay_copy (delay);
+    delay_copy.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Test actual computation of the geometrical delay
+
+  In order to plot the data in the exported table, run
+  \verbatim
+  set grid
+  set xlabel 'Source distance, (0,0,z), from phase center [m]'
+  set ylabel 'Geometrical delay [sec]'
+  plot 'delays.data' u 2:3 t 'Antenna 1 [100,100,0]' w l, 'delays.data' u 2:4 t 'Antenna 1 [200,200,0]' w l
+  \endverbatim
+
+  \return nofFailedTests -- Number of failed tests
+
+*/
+int test_delayComputation ()
+{
+  std::cout << "\n[test_delayComputation]\n" << std::endl;
+
+  int nofFailedTests (0);
+  uint nofCoordinates (3);
+  uint nofAntennas (3);
+  uint nofPositions (1000);
+  double offset (1000);
+  double stepwidth (100);
+  Array<double,2> antPositions (nofAntennas,nofCoordinates);
+  Array<double,2> skyPositions (nofPositions,nofCoordinates);
+  
+  antPositions = 100,100,0, 200,200,0,-100,-100,0;
+
+  // assign the values for the sky positions
+  for (int n (0); n<nofPositions; n++) {
+    skyPositions(n,0) = 0.0;
+    skyPositions(n,1) = 0.0;
+    skyPositions(n,2) = offset+stepwidth*n;
+  }
+
+  GeometricalDelay delay (antPositions,
+			  skyPositions);
+  delay.summary();
+  
+  Array<double,2> delays = delay.delays();
+
+  // export the computed values
+  std::ofstream outfile;
+  outfile.open("delays.data");
+  for (int n (0); n<nofPositions; n++) {
+    outfile << "\t" << n
+	    << "\t" << skyPositions(n,2)
+	    << "\t" << delays(0,n)       // delay for antenna 1 @ [100,100,0]
+	    << "\t" << delays(1,n)       // delay for antenna 2 @ [200,200,0]
+	    << "\t" << delays(2,n)       // delay for antenna 3 @ [-100,-100,0]
+	    << std::endl;
+  }
+  outfile.close();
   
   return nofFailedTests;
 }
@@ -187,14 +264,20 @@ int main ()
 {
   int nofFailedTests (0);
 
-  {
-    nofFailedTests += test_formula ();
-  }
+//   {
+//     nofFailedTests += test_formula ();
+//   }
 
   // Test for the constructor(s)
   {
     nofFailedTests += test_GeometricalDelay ();
   }
+
+  // Test for the computation of the actual geometrical delay
+  {
+    nofFailedTests += test_delayComputation ();
+  }
+
 
   return nofFailedTests;
 }

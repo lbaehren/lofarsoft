@@ -136,12 +136,23 @@ int test_Norms ()
 
   int nofFailedTests (0);
   blitz::Array<double,1> vec (3);
-
-  vec = 1,2,3;
-
+ 
   try {
-    std::cout << " - L1Norm(vec) = " << CR::L1Norm(vec) << std::endl;
-    std::cout << " - L2Norm(vec) = " << CR::L2Norm(vec) << std::endl;
+    vec = 1,2,3;
+    std::cout << "\t" << vec
+	      << "\t" << CR::L1Norm(vec)
+	      << "\t" << CR::L2Norm(vec)
+	      << std::endl;
+    vec = 2,0,0;
+    std::cout << "\t" << vec
+	      << "\t" << CR::L1Norm(vec)
+	      << "\t" << CR::L2Norm(vec)
+	      << std::endl;
+    vec = 2,2,2;
+    std::cout << "\t" << vec
+	      << "\t" << CR::L1Norm(vec)
+	      << "\t" << CR::L2Norm(vec)
+	      << std::endl;
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
