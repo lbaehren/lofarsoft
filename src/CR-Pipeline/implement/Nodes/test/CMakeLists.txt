@@ -2,7 +2,7 @@
 include_directories (
   .
   ..
-  ../../implement
+  ${CR_SOURCE_DIR}/implement
   ${CASA_INCLUDES}
   )
 

@@ -8,6 +8,7 @@ project (simulation)
 set (lib_locations
   /usr/lib
   /usr/local/lib
+  /sw/lib
   )
 
 if (NOT HAVE_ROOT)
@@ -24,8 +25,6 @@ include_directories (
   .
   ${ROOT_INCLUDES}
 )
-
-#add_definitions (-O -fPIC)
 
 ## -----------------------------------------------------------------------------
 ## library

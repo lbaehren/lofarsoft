@@ -68,4 +68,4 @@ subdirs (
 ## ------------------------------------------------------------------------------
 ## Verbose level
 
-SET (CMAKE_VERBOSE_MAKEFILE 0)
+SET (CMAKE_VERBOSE_MAKEFILE 1)
