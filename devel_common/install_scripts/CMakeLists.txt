@@ -56,6 +56,11 @@
 ## ------------------------------------------------------------------------------
 
 ## ------------------------------------------------------------------------------
+## Output file to which the configuration is appended
+
+set (outfile "../makedefs")
+
+## ------------------------------------------------------------------------------
 ## Inspect the system we are working on
 
 ## possible variables to describe the architecture
@@ -65,17 +70,6 @@ set (AIPSARCH
   linux
   linux_gnu
   )
-
-## ------------------------------------------------------------------------------
-## Append the detected configuration information to the existing "makedefs"
-
-set (outfile "../makedefs")
-
-file (APPEND ${outfile} "\n\n")
-file (APPEND ${outfile} "#===========================================================\n")
-file (APPEND ${outfile} "# Configuration settings detected by CMake\n")
-file (APPEND ${outfile} "\n")
-
 
 ## ------------------------------------------------------------------------------
 ## Define where to search for libraries and header files
@@ -114,6 +108,18 @@ set (lib_locations
   /sw/lib
   /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
 )
+
+## ------------------------------------------------------------------------------
+## Append the detected configuration information to the existing "makedefs"
+
+file (APPEND ${outfile} "\n\n")
+file (APPEND ${outfile} "#===========================================================\n")
+file (APPEND ${outfile} "# Configuration settings detected by CMake\n")
+file (APPEND ${outfile} "#\n")
+file (APPEND ${outfile} "# Search paths for libraries: ${lib_locations}\n")
+file (APPEND ${outfile} "# Search paths for headers  : ${include_locations}\n")
+file (APPEND ${outfile} "\n")
+
 
 ## ------------------------------------------------------------------------------
 ## Blitz++
@@ -169,14 +175,27 @@ file (APPEND ${outfile} "BOOSTLIB := ${BOOST_LIBRARIES}\n\n")
 ## - we should include a test here whether or not the library has been built with
 ##   large file support
 
-find_path (cfitsio_inc fitsio.h ${include_locations}
+find_path (cfitsio_inc fitsio.h
+  PATHS ${include_locations}
   PATH_SUFFIXES cfitsio
   )
 
-find_library (cfitsio_lib cfitsio ${lib_locations})
+find_library (cfitsio_lib cfitsio
+  PATH ${lib_locations}
+  PATH_SUFFIXES cfitsio
+  )
 
-file (APPEND ${outfile} "CFITSIOINCD := ${cfitsio_inc}\n")
-file (APPEND ${outfile} "CFITSIOLIB  := ${cfitsio_lib}\n\n")
+if (cfitsio_inc)
+  file (APPEND ${outfile} "CFITSIOINCD := ${cfitsio_inc}\n")
+else (cfitsio_inc)
+  message (STATUS "Unable to find CFITSIO header files!!")
+endif (cfitsio_inc)
+
+if (cfitsio_lib)
+  file (APPEND ${outfile} "CFITSIOLIB  := ${cfitsio_lib}\n\n")
+else (cfitsio_lib)
+  message (STATUS "Unable to find libcfitsio!!")
+endif (cfitsio_lib)
 
 ## ------------------------------------------------------------------------------
 ## F77
@@ -238,11 +257,16 @@ file (APPEND ${outfile} "LAPACKLIB := ${LAPACKLIB}\n\n")
 ## ------------------------------------------------------------------------------
 ## Motif
 
+find_path (Motif_inc Xm.h ${include_locations}
+  PATH_SUFFIXES Xm
+  )
+
 find_library (libXm Xm ${lib_locations})
 find_library (libXpm Xpm ${lib_locations})
 find_library (libXp Xp ${lib_locations})
 
-file (APPEND ${outfile} "MotifLIB := ${libXm} ${libXpm} ${libXp}\n\n")
+file (APPEND ${outfile} "MotifINCD := ${Motif_inc}\n")
+file (APPEND ${outfile} "MotifLIB  := ${libXm} ${libXpm} ${libXp}\n\n")
 
 ## ------------------------------------------------------------------------------
 ## PGPLOT
@@ -354,12 +378,22 @@ file (APPEND ${outfile} "TKLIB   := ${libtk}\n\n")
 ## ------------------------------------------------------------------------------
 ## X11
 
+find_path (X_inc X.h ${include_locations}
+  PATH_SUFFIXES X11
+  )
+
 find_library (libXt Xt ${lib_locations})
 find_library (libXmu Xmu ${lib_locations})
 find_library (libX11 X11 ${lib_locations})
 find_library (libXext Xext ${lib_locations})
 
-file (APPEND ${outfile} "X11LIB := ${libXt} ${libXmu} ${libX11} ${libXext}\n\n")
+file (APPEND ${outfile} "X11INCD := ${X_inc}\n")
+file (APPEND ${outfile} "X11LIB  := ${libXt} ${libXmu} ${libX11} ${libXext}\n\n")
+
+find_library (libXpm Xpm ${lib_locations})
+
+file (APPEND ${outfile} "XPMLIB  := ${libXpm}\n")
+file (APPEND ${outfile} "XPMINCD := ${X_inc}\n\n")
 
 ## ------------------------------------------------------------------------------
 ## LaTeX applications
