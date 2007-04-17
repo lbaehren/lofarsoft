@@ -45,8 +45,12 @@
 #include <tables/Tables/ArrColDesc.h>
 #include <tables/Tables/ArrayColumn.h>
 
-
-#include <casa/namespace.h>
+using casa::DComplex;
+using casa::Double;
+using casa::IPosition;
+using casa::Matrix;
+using casa::String;
+using casa::Vector;
 
 /*!
   \class BaselineGain
@@ -228,9 +232,9 @@ class BaselineGain {
   */
   BaselineGain( const IPosition& spectraShape,
 		const Vector<Double>& spectraAbscissa,
-		const Int& nOfSubBands,
+		const int& nOfSubBands,
 		const BaselineGain::Method& whichMethod = MED );
-
+  
   // --- Destruction -----------------------------------------------------------
 
   /*!
@@ -272,7 +276,7 @@ class BaselineGain {
   */
   virtual void reset( const IPosition& spectraShape,
 		      const Vector<Double>& spectraAbscissa,
-		      const Int& nOfSubBands );
+		      const int& nOfSubBands );
   
   /*!
     \brief Set the scanning method.
@@ -301,7 +305,7 @@ class BaselineGain {
     
     \return whichMethod -- 0, 1, 2 or 3.	//###########################
   */
-  Int getMethod() {
+  int getMethod() {
     return whichMethod_p;
   }
   
@@ -325,7 +329,7 @@ class BaselineGain {
     
     \return nBlocksScanned -- The number of blocks scanned so far
   */
-  Int getNBlocksScanned() {
+  int getNBlocksScanned() {
     return nBlocksScanned_p;
   }
 
@@ -392,7 +396,7 @@ class BaselineGain {
   */
   virtual void normalizeSpectra( Matrix<DComplex>& spectra,
 				 const Vector<Double>& frequencies,
-				 const Vector<Bool>& antennas );
+				 const Vector<bool>& antennas );
 
   /*!
     \brief Default Baseline Gains Retrieval
@@ -425,7 +429,7 @@ class BaselineGain {
                              Matrix of baseline gain values.
   */
   
-  Matrix<Double> getBaselineGains( const Vector<Bool>& antReturn );
+  Matrix<Double> getBaselineGains( const Vector<bool>& antReturn );
 
   /*!
     \brief Baseline Gains Retrieval (with default antennas)
@@ -469,7 +473,7 @@ class BaselineGain {
                              Matrix of baseline gain values.
   */
   Matrix<Double> getBaselineGains( const Vector<Double>& freqReturn,
-				  const Vector<Bool>& antReturn );
+				  const Vector<bool>& antReturn );
 
   /*!
     \brief Default Export baseline gains to an AIPS++ table
@@ -497,7 +501,7 @@ class BaselineGain {
 			  vector would be the following: \f$[F,F,T,F,T]\f$.
     \param tableName   -- name of file to be generated
   */
-  void exportBaselineGains( const Vector<Bool>& antReturn,
+  void exportBaselineGains( const Vector<bool>& antReturn,
 			    const String& tableName );
 
   /*!
@@ -535,7 +539,7 @@ class BaselineGain {
     \param tableName   -- name of file to be generated
   */
   void exportBaselineGains( const Vector<Double>& freqReturn,
-			    const Vector<Bool>& antReturn,
+			    const Vector<bool>& antReturn,
 			    const String& tableName );
 
  private:
@@ -546,8 +550,8 @@ class BaselineGain {
   void setSpectraShape (const IPosition& spectraShape);
 
   // Set the endpoint indeces vector.
-  void setIntervalEndpoints( const Int& nOfFreqBins,
-			     const Int& nOfSubBands );
+  void setIntervalEndpoints( const int& nOfFreqBins,
+			     const int& nOfSubBands );
 
   // Set the frequency domain of the spectra being scanned.
   //   The length of this vector is nFreqChan.
@@ -581,7 +585,7 @@ class BaselineGain {
   //  1 | ending index of 1st band,    ... ending index of last band    |
   //  0 | beginning index of 1st band, ... beginning index of last band |
   //     -------------0--------------- ... ---------------N-------------
-  Matrix <Int> intervalEndpoints_p;
+  Matrix <int> intervalEndpoints_p;
 
  protected:
 
@@ -600,7 +604,7 @@ class BaselineGain {
   */
   Vector<Double> makeFreqAbscissa( const Double& minFreq,
 				  const Double& maxFreq,
-				  const Int& nOfFreqChan );
+				  const int& nOfFreqChan );
 
   /*! 
     \brief Count the number of antennas requested
@@ -616,7 +620,7 @@ class BaselineGain {
     \return nAnt -- number of True entries in antReturn. Or -1 if length of
                     antReturn is nonconformant with stored baselineGains_p.
   */
-  Int numRequestedAnt ( const Vector<Bool>& antReturn );
+  int numRequestedAnt ( const Vector<bool>& antReturn );
   
   /*!
     \brief Determine one of three cases which require different interpolations
@@ -650,8 +654,8 @@ class BaselineGain {
 			of antennas at construction or at reset.
    \return whichCase -- integer corresponding to case
   */
-  Int determineCase ( const Vector<Double>& freqReturn,
- 		      const Vector<Bool>& antReturn );
+  int determineCase ( const Vector<Double>& freqReturn,
+ 		      const Vector<bool>& antReturn );
 
   /*!
     \brief Return the frequencies requested, interpolating across argument
@@ -683,7 +687,7 @@ class BaselineGain {
   Matrix<Double> interpolateGains ( const Matrix<Double>& gains,
 				   const Vector<Double>& gainAbscissa,
 				   const Vector<Double>& freqReturn,
-				   const Vector<Bool>& antReturn );
+				   const Vector<bool>& antReturn );
   
   /*!
     \brief Export an AIPS++ table of data values and an appended reference vector
@@ -704,7 +708,7 @@ class BaselineGain {
   */
   void exportTable ( const Matrix<Double>& dataValues,
 		     const Vector<Double>& freqReturn,
-		     const Vector<Bool>& antReturn,
+		     const Vector<bool>& antReturn,
 		     const String& tablename);
 
   // --- Protected Variables ---------------------------------------------------
@@ -722,7 +726,7 @@ class BaselineGain {
     nBlocksScanned is reset to zero every time the reset() function is called,
     implicitly or explicitly.
   */
-  Int nBlocksScanned_p;
+  int nBlocksScanned_p;
 
   /*!
     \brief Length and width dimensions of expected spectral block.
