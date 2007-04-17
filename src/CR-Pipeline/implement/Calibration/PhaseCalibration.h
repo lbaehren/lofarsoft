@@ -37,6 +37,7 @@
 #include <casa/Quanta.h>
 #include <scimath/Functionals/Interpolate1D.h>
 #include <scimath/Functionals/ScalarSampledFunctional.h>
+#include <scimath/Mathematics/InterpolateArray1D.h>
 #include <tables/Tables/Table.h>
 #include <tables/Tables/TableDesc.h>
 #include <tables/Tables/SetupNewTab.h>
@@ -46,13 +47,8 @@
 #include <tables/Tables/ArrColDesc.h>
 #include <tables/Tables/ArrayColumn.h>
 
-// LOPES-Tools header files
-#include <Math/Math.h>
-#include <Functionals/StatisticsFilter.h>
-#include <scimath/Mathematics/InterpolateArray1D.h>
-
-#include <casa/namespace.h>
-
+// CR header files
+#include <Math/StatisticsFilter.h>
 
 /*!
   \class PhaseCalibration
