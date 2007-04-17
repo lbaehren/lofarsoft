@@ -432,7 +432,8 @@ else (HAVE_CASA)
 endif (HAVE_CASA)
 
 ## ------------------------------------------------------------------------------
-## Mark as advanced ...
+## Mark as advanced: clean up not to include all the temporary variables into
+## configuration settings
 
 mark_as_advanced (
   CASA_libcasa
@@ -442,4 +443,29 @@ mark_as_advanced (
   CASA_libscimath
   CASA_libscimath_f
   CASA_libtables
+  CASA_libcalibration
+  CASA_libcomponents
+  CASA_libfits
+  CASA_libgraphics
+  CASA_liblattices
+  CASA_libms
+  CASA_libmsfits
+  CASA_libmsvis
+  CASA_libtasking
+  LINKcasa
+  LINKscimath
+  LINKgraphics
+  LINKmeasures
+  LINKms
+  LINKfits
+  LINKcalibration
+  LINKcomponents
+  LINKcoordinates
+  LINKdish
+  LINKimages
+  LINKlattices
+  LINKmsfits
+  LINKmsvis
+  LINKtables
+  LINKtasking
   )
