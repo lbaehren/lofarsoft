@@ -8,7 +8,6 @@ set (cr_modules
   Detection
   Imaging
   Math
-  Nodes
   )
 
 subdirs (${cr_modules})

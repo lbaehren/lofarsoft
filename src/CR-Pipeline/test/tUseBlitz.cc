@@ -19,25 +19,29 @@
  ***************************************************************************/
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <cmath>
 
 #include <blitz/array.h>
 
+using std::cout;
 using blitz::Array;
 using blitz::Range;
 
 /*!
   \file tUseBlitz.cc
 
-  \brief A simple test for external build against libfits
+  \brief A simple test for external build against libblitz
 
   \author Lars B&auml;hren
 
   \date 2007/01/29
 
-  Check if we can properly build against the Blitz library
+  Check if we can properly build against the Blitz++ library
 */
+
+// ------------------------------------------------------------------------------
 
 /*!
   \brief Test construction of Blitz arrays
@@ -46,39 +50,41 @@ using blitz::Range;
 */
 int test_arrays ()
 {
-  std::cout << "\n[test_arrays()]\n" << std::endl;
+  cout << "\n[test_arrays]\n" << std::endl;
 
   int nofFailedTests (0);
-
-  std::cout << "[1] Create 1-dimensional arrays..." <<std::endl;
+  int nelem (5);
+  
+  cout << "[1] Create 1-dimensional arrays..." <<std::endl;
   try {
-    int nelem (5);
     Array<int,1> arrInt (nelem);
     Array<float,1> arrFloat (nelem);
     Array<double,1> arrDouble (nelem);
     Array<std::complex<double>,1> arrComplex (nelem);
     
-    std::cout << arrInt    << std::endl;
-    std::cout << arrFloat  << std::endl;
-    std::cout << arrDouble << std::endl;
+    cout << arrInt    << std::endl;
+    cout << arrFloat  << std::endl;
+    cout << arrDouble << std::endl;
   } catch (std::string message) {
     std::cerr << message << std::endl;
+    nofFailedTests++;
   }
   
-  std::cout << "[2] Create 2-dimensional arrays..." <<std::endl;
+  cout << "[2] Create 2-dimensional arrays..." <<std::endl;
   try {
     Array<int,2> arrInt (10,20);
     Array<float,2> arrFloat (10,20);
     Array<double,2> arrDouble (10,20);
 
-    std::cout << arrInt    << std::endl;
-    std::cout << arrFloat  << std::endl;
-    std::cout << arrDouble << std::endl;
+    cout << arrInt    << std::endl;
+    cout << arrFloat  << std::endl;
+    cout << arrDouble << std::endl;
   } catch (std::string message) {
     std::cerr << message << std::endl;
+    nofFailedTests++;
   }
   
-  std::cout << "[3] Construction from other array..." <<std::endl;
+  cout << "[3] Construction from other array..." <<std::endl;
   try {
     Array<int,2> arrInt (10,20);
     Array<float,2> arrFloat (10,20);
@@ -88,10 +94,13 @@ int test_arrays ()
     Array<float,2> arrFloatCopy (arrFloat);
   } catch (std::string message) {
     std::cerr << message << std::endl;
+    nofFailedTests++;
   }
-  
+
   return nofFailedTests;
 }
+
+// ------------------------------------------------------------------------------
 
 /*!
   \brief Test usage of mathematical functions and operations
@@ -104,18 +113,18 @@ int test_arrays ()
 */
 int test_mathematics ()
 {
-  std::cout << "\n[test_mathematics()]\n" << std::endl;
+  cout << "\n[test_mathematics]\n" << std::endl;
 
   int nofFailedTests (0);
 
-  std::cout << "[1] Mathematical operations on individual numbers..." <<std::endl;
+  cout << "[1] Mathematical operations on individual numbers..." <<std::endl;
   try {
     double a (+1.0);
     double b (-2.0);
     std::complex<double> c (0.5,4.0);
     double result (0.0);
 
-    std::cout << "M_PI = " << M_PI << std::endl;
+    cout << "M_PI = " << M_PI << std::endl;
 
     result = a+b;
     result = a-b;
@@ -133,7 +142,7 @@ int test_mathematics ()
     std::cerr << message << std::endl;
   }
   
-  std::cout << "[2] Mathematical operations on array alements..." <<std::endl;
+  cout << "[2] Mathematical operations on array alements..." <<std::endl;
   try {
     int nelem (20);
     Array<double,1> arr (nelem);
@@ -158,7 +167,7 @@ int test_mathematics ()
     std::cerr << message << std::endl;
   }
   
-  std::cout << "[3] Mathematical operations on arrays..." <<std::endl;
+  cout << "[3] Mathematical operations on arrays..." <<std::endl;
   try {
     int nelem (20);
     Array<double,1> arr (nelem);
@@ -167,12 +176,12 @@ int test_mathematics ()
       arr(i) = sin(0.5*i);
     }
     // show the contents of the array
-    std::cout << arr << std::endl;
+    cout << arr << std::endl;
   } catch (std::string message) {
     std::cerr << message << std::endl;
   }
   
-  std::cout << "[4] Multi-element operations" <<std::endl;
+  cout << "[4] Multi-element operations" <<std::endl;
   try {
     int nelem (10);
     Array<double,2> cartesian (nelem,3);
@@ -186,14 +195,110 @@ int test_mathematics ()
     cartesian(Range(Range::all()),1) = spherical(Range(Range::all()),0)*sin(spherical(Range(Range::all()),1))*sin(spherical(Range(Range::all()),2));
     cartesian(Range(Range::all()),2) = spherical(Range(Range::all()),0)*cos(spherical(Range(Range::all()),2));
     // show the contents of the arrays
-    std::cout << spherical << std::endl;
-    std::cout << cartesian << std::endl;
+    cout << spherical << std::endl;
+    cout << cartesian << std::endl;
   } catch (std::string message) {
     std::cerr << message << std::endl;
   }
   
   return nofFailedTests;
 }
+
+// ------------------------------------------------------------------------------
+
+/*!
+  \brief Test array I/O
+
+  Writing an array to a file is just the same as writing it out to standard
+  output:
+  \verbatim
+  5 x 5
+  [         1         2         3         4         5
+            6         7         8         9        10
+	    11        12        13        14        15
+	    16        17        18        19        20
+	    21        22        23        24        25 ]
+  \endverbatim
+
+  \return nofFailedTests -- The number of failed tests
+*/  
+int test_io ()
+{
+  cout << "\n[test_io]\n" << std::endl;
+
+  int nofFailedTests (0);
+  int nelem (5);
+  std::ofstream outfile;
+  std::ifstream infile;
+
+  cout << "[1] Testing I/O of Array<double,1>..." << std::endl;
+  try {
+    Array<double,1> vect (nelem);
+    
+    for (int n(0); n<nelem; n++) {
+      vect(n) = n+1;
+    }
+
+    // Write the data to a file on disk
+    outfile.open("blitzdata1.data");
+    outfile << vect << std::endl;
+    outfile.close();
+
+    // Read the data back in from disk ...
+    Array<double,1> vectFromDisk;
+
+    infile.open("blitzdata1.data");
+    infile >> vectFromDisk;
+    infile.close();
+    
+    // ... and compare the vectors
+    cout << "-- Original data vector:" << std::endl;
+    cout << vect         << std::endl;
+    cout << "-- Data vector written to disk and read back in:" << std::endl;
+    cout << vectFromDisk << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  } 
+
+  cout << "[2] Testing I/O of Array<double,2>..." << std::endl;
+  try {
+    Array<double,2> matrix (nelem,nelem);
+    int i,j,n(1);
+    
+    for (i=0; i<nelem; i++) {
+      for (j=0; j<nelem; j++) {
+	matrix(i,j) = n;
+	n++;
+      }
+    }
+
+    // Write the data to a file on disk
+    outfile.open("blitzdata2.data");
+    outfile << matrix << std::endl;
+    outfile.close();
+
+    // Read the data back in from disk ...
+    Array<double,2> vectFromDisk;
+
+    infile.open("blitzdata2.data");
+    infile >> vectFromDisk;
+    infile.close();
+    
+    // ... and compare the vectors
+    cout << "-- Original data vector:" << std::endl;
+    cout << matrix         << std::endl;
+    cout << "-- Data vector written to disk and read back in:" << std::endl;
+    cout << vectFromDisk << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  } 
+
+  return nofFailedTests;
+}
+
+// ------------------------------------------------------------------------------
 
 /*!
   \brief main routine
@@ -204,15 +309,13 @@ int main ()
 {
   int nofFailedTests (0);
 
-  {
-    nofFailedTests += test_arrays();
-  }
+  nofFailedTests += test_arrays();
+  
+  nofFailedTests += test_mathematics();
 
-  {
-    nofFailedTests += test_mathematics();
-  }
+  nofFailedTests += test_io();
 
-  std::cout << "[tUseBlitz] Number of failed tests = "
+  cout << "[tUseBlitz] Number of failed tests = "
 	    << nofFailedTests << std::endl;
 
   return nofFailedTests;

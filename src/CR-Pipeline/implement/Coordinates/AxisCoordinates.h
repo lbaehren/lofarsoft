@@ -328,7 +328,7 @@ class AxisCoordinates {
   /*!
     \brief Set up the default map of coordinate name/unit pairs.
   */
-  void AxisCoordinates::setCoordinatesMap ();
+  void setCoordinatesMap ();
 
   /*!
     \brief Get values for position axis
