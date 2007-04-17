@@ -36,6 +36,8 @@
 
 using namespace std;
 
+using CR::Data;
+
 /*!
   \class LopesEvent
   

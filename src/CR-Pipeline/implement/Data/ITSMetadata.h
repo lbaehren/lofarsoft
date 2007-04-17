@@ -34,7 +34,7 @@
 #include <casa/Exceptions/Error.h>
 
 // LOPES-Tools header files
-#include <lopes/Utilities/StringTools.h>
+#include <Utilities/StringTools.h>
 
 #include <casa/namespace.h>
 
@@ -52,12 +52,6 @@
   \test tITSMetadata.cc
 
   <h3>Prerequisite</h3>
-
-  <ul>
-  <li>[AIPS++/CASA] <a href="http://aips2.nrao.edu/docs/casa/implement/Containers/Record.html">Record</a> -- A hierarchical collection of named fields of various types
-    <li>[LOPES-Tools] AviaryPlugins
-    <li>[LOPES-Tools] StringTools
-  </ul>
 
   This implementation merges and replaces the functionality of the classes 
   ObservationMeta and [???]

@@ -21,7 +21,7 @@
 /* $Id: ITSMetadata.cc,v 1.8 2006/10/31 18:24:08 bahren Exp $*/
 
 #include <fstream>
-#include <lopes/Data/ITSMetadata.h>
+#include <Data/ITSMetadata.h>
 
 // ==============================================================================
 //
@@ -199,7 +199,7 @@ void ITSMetadata::setMetafile (const String& metafile)
     metafile_p = metafile_tmp;
     
     // Decompose path to meta file into directory and filename
-    directory_p  = LOPES::dirFromPath(metafile_tmp);
+    directory_p  = CR::dirFromPath(metafile_tmp);
     
     // Read in the information from the experiment meta file
     readMetafile ();
@@ -216,7 +216,7 @@ string ITSMetadata::adjustPathToMetafile (string const &path)
 {
   string newPath;
   
-  newPath = LOPES::dirFromPath(path);
+  newPath = CR::dirFromPath(path);
   newPath += "/experiment.meta";
   
   return newPath;
@@ -247,7 +247,7 @@ bool ITSMetadata::setDatafiles (String const &filenames)
   
   try {
     // decompose the input string into the substrings
-    Vector<String> datafiles = LOPES::getSubstrings(filenames," ");
+    Vector<String> datafiles = CR::getSubstrings(filenames," ");
     // keep in mind, that the input string contains one empty entry, which needs
     // needs to be skipped when storing the information internally
     uint nofDatafiles (datafiles.nelements()-1);
@@ -342,7 +342,7 @@ bool ITSMetadata::setAntennas (String const &antennas)
 
   try {
     // decompose the input string into the substrings
-    Vector<String> antennaNumbers = LOPES::getSubstrings(antennas," ");
+    Vector<String> antennaNumbers = CR::getSubstrings(antennas," ");
     // keep in mind, that the input string contains one empty entry, which needs
     // needs to be skipped when storing the information internally
     uint nofAntennas (antennaNumbers.nelements()-1);
@@ -420,7 +420,7 @@ void ITSMetadata::readMetafile ()
       // try to extract the keyword
       if (! infile.eof() && infile.good() && status && buffer != "") {
 	try {
-	  keyword = strtok (LOPES::string2char(buffer), "=");
+	  keyword = strtok (CR::string2char(buffer), "=");
 	} catch (AipsError x) {
 	  cerr << x.getMesg() << endl;
 	  keyword = "";
@@ -430,7 +430,7 @@ void ITSMetadata::readMetafile ()
 	  try {
 	    // need to handled separately (see documentation)
 	    if (keyword == "file") {
-	      metaValue = LOPES::fileFromPath(strtok (NULL, "\n"));
+	      metaValue = CR::fileFromPath(strtok (NULL, "\n"));
 	      dataFilenames += " ";
 	      dataFilenames += metaValue;
 	    }

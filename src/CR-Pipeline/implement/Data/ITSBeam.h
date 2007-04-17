@@ -26,9 +26,9 @@
 
 #include <casa/aips.h>
 #include <casa/Arrays.h>
-#include <lopes/Data/ITSMetadata.h>
-#include <lopes/IO/DataReader.h>
-#include <lopes/Utilities/StringTools.h>
+#include <Data/ITSMetadata.h>
+#include <IO/DataReader.h>
+#include <Utilities/StringTools.h>
 
 /*!
   \class ITSBeam
@@ -46,8 +46,8 @@
   <h3>Prerequisite</h3>
 
   <ul type="square">
-    <li>[LOPES-Tools] DataReader
-    <li>[LOPES-Tools] ITSMetadata
+    <li>[CR] DataReader
+    <li>[CR] ITSMetadata
   </ul>
 
   <h3>Synopsis</h3>

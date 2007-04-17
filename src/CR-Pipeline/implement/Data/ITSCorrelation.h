@@ -23,8 +23,8 @@
 #ifndef ITSCORRELATION_H
 #define ITSCORRELATION_H
 
-#include <lopes/Data/ITSMetadata.h>
-#include <lopes/IO/DataReader.h>
+#include <Data/ITSMetadata.h>
+#include <IO/DataReader.h>
 
 /*!
   \class ITSCorrelation

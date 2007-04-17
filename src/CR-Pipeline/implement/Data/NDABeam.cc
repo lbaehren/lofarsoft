@@ -19,12 +19,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: ITSBeam.cc,v 1.6 2006/10/31 18:24:08 bahren Exp $*/
+/* $Id: NDABeam.cc,v 1.2 2006/10/31 18:24:08 bahren Exp $*/
 
-#include <Data/ITSBeam.h>
+#include <Data/NDABeam.h>
 
 /*!
-  \class ITSBeam
+  \class NDABeam
 */
 
 // ==============================================================================
@@ -33,25 +33,25 @@
 //
 // ==============================================================================
 
-ITSBeam::ITSBeam ()
+NDABeam::NDABeam ()
 {
   ITSMetadata meta;
   metadata_p = meta;
 }
 
-ITSBeam::ITSBeam (String const &metafile)
+NDABeam::NDABeam (String const &metafile)
 {
   setMetafile (metafile);
 }
 
-ITSBeam::ITSBeam (String const &metafile,
+NDABeam::NDABeam (String const &metafile,
 		  uint const &blocksize)
   : DataReader (blocksize)
 {
   setMetafile (metafile);
 }
 
-ITSBeam::ITSBeam (String const &metafile,
+NDABeam::NDABeam (String const &metafile,
 		  uint const &blocksize,
 		  Vector<Double> const &adc2voltage,
 		  Matrix<DComplex> const &fft2calfft)
@@ -62,7 +62,7 @@ ITSBeam::ITSBeam (String const &metafile,
   setMetafile (metafile);
 }
 
-ITSBeam::ITSBeam (ITSBeam const &other)
+NDABeam::NDABeam (NDABeam const &other)
 {
   copy (other);
 }
@@ -73,12 +73,12 @@ ITSBeam::ITSBeam (ITSBeam const &other)
 //
 // ==============================================================================
 
-ITSBeam::~ITSBeam ()
+NDABeam::~NDABeam ()
 {
   destroy();
 }
 
-void ITSBeam::destroy ()
+void NDABeam::destroy ()
 {;}
 
 // ==============================================================================
@@ -87,7 +87,7 @@ void ITSBeam::destroy ()
 //
 // ==============================================================================
 
-ITSBeam& ITSBeam::operator= (ITSBeam const &other)
+NDABeam& NDABeam::operator= (NDABeam const &other)
 {
   if (this != &other) {
     destroy ();
@@ -96,7 +96,7 @@ ITSBeam& ITSBeam::operator= (ITSBeam const &other)
   return *this;
 }
 
-void ITSBeam::copy (ITSBeam const &other)
+void NDABeam::copy (NDABeam const &other)
 {
   metadata_p = other.metadata_p;
 }
@@ -107,7 +107,7 @@ void ITSBeam::copy (ITSBeam const &other)
 //
 // ==============================================================================
 
-void ITSBeam::setMetafile (String const &metafile)
+void NDABeam::setMetafile (String const &metafile)
 {
   bool status (true);
   
@@ -115,7 +115,7 @@ void ITSBeam::setMetafile (String const &metafile)
   try {
     metadata_p.setMetafile (metafile);
   } catch (AipsError x) {
-    cerr << "[ITSBeam::setMetafile] " << x.getMesg() << endl;
+    cerr << "[NDABeam::setMetafile] " << x.getMesg() << endl;
     status = false;
   }
   
@@ -133,9 +133,10 @@ void ITSBeam::setMetafile (String const &metafile)
 
 // ------------------------------------------------------------------- setStreams
 
-Bool ITSBeam::setStreams ()
+Bool NDABeam::setStreams ()
 {
   bool status (true);
+  short var (0);
 
   uint blocksize (blocksize_p);
   Vector<uint> antennas (metadata_p.antennas());
@@ -145,7 +146,7 @@ Bool ITSBeam::setStreams ()
   DataIterator *iterator;
   
   /*
-    Configure the DataIterator objects: for ITSBeam data, the values are
+    Configure the DataIterator objects: for NDABeam data, the values are
     stored as short integer without any header information preceeding the
     data within the data file.
   */
@@ -155,7 +156,7 @@ Bool ITSBeam::setStreams ()
   
   for (uint file (0); file<nofStreams; file++) {
     // data are stored as short integer
-    iterator[file].setStepWidth(sizeof(datatype_p));
+    iterator[file].setStepWidth(sizeof(var));
     // no header preceeding data
     iterator[file].setDataStart(0);
   }
@@ -195,11 +196,11 @@ Bool ITSBeam::setStreams ()
 
 // --------------------------------------------------------------------------- fx
 
-Matrix<Double> ITSBeam::fx ()
+Matrix<Double> NDABeam::fx ()
 {
   uint i (0);
   int errstat(0);
-  float tmpData[blocksize_p];
+  short tmpData[blocksize_p];
   uint nofSelectedAntennas (DataReader::nofSelectedAntennas());
   // Data vector returned after reading is completed
   Matrix<Double> data (blocksize_p,
@@ -213,16 +214,16 @@ Matrix<Double> ITSBeam::fx ()
     try{
       fileStream_p[selectedAntennas_p(file)].seekg(iterator_p[selectedAntennas_p(file)].position(), ios::beg);
     } catch (AipsError x) {
-      cerr << "[ITSBeam::fx] " << x.getMesg() << endl;
+      cerr << "[NDABeam::fx] " << x.getMesg() << endl;
       errstat = 1;
     }
     
     try{
       fileStream_p[selectedAntennas_p(file)].read ((char*)tmpData,
-						   sizeof (datatype_p)*blocksize_p);
+			       sizeof (short)*blocksize_p);
     } catch (AipsError x) {
       errstat = 2;
-      cerr << "[ITSBeam::fx] " << x.getMesg() << endl;
+      cerr << "[NDABeam::fx] " << x.getMesg() << endl;
     }
     
     if (errstat == 0) {
@@ -233,6 +234,6 @@ Matrix<Double> ITSBeam::fx ()
       data = 0.0;
     }
   }
-  
+
   return data;
 }

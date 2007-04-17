@@ -20,7 +20,7 @@
 
 /* $Id: ITSCapture.cc,v 1.3 2006/10/31 18:24:08 bahren Exp $*/
 
-#include <lopes/Data/ITSCapture.h>
+#include <Data/ITSCapture.h>
 
 /*!
   \class ITSCapture

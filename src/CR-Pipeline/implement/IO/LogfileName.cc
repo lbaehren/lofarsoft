@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006                                                  *
- *   Lars Bahren (<mail>)                                                     *
+ *   Copyright (C) 2006                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,13 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: ITSCorrelation.cc,v 1.3 2006/10/31 18:24:08 bahren Exp $*/
+/* $Id: LogfileName.cc,v 1.2 2006/01/09 19:23:10 bahren Exp $*/
 
-#include <Data/ITSCorrelation.h>
-
-/*!
-  \class ITSCorrelation
-*/
+#include <IO/LogfileName.h>
 
 // ==============================================================================
 //
@@ -32,15 +28,29 @@
 //
 // ==============================================================================
 
-ITSCorrelation::ITSCorrelation ()
-{;}
-
-ITSCorrelation::ITSCorrelation (String const &metafile)
+LogfileName::LogfileName ()
+  : prefix_p ("logfile"),
+    suffix_p ("log")
 {
-  setMetafile (metafile);
+  init ();
 }
 
-ITSCorrelation::ITSCorrelation (ITSCorrelation const &other)
+LogfileName::LogfileName (const String& prefix)
+  : prefix_p (prefix),
+    suffix_p ("log")
+{
+  init ();
+}
+
+LogfileName::LogfileName (const String& prefix,
+			  const String& suffix)
+  : prefix_p (prefix),
+    suffix_p (suffix)
+{
+  init ();
+}
+
+LogfileName::LogfileName (LogfileName const& other)
 {
   copy (other);
 }
@@ -51,13 +61,10 @@ ITSCorrelation::ITSCorrelation (ITSCorrelation const &other)
 //
 // ==============================================================================
 
-ITSCorrelation::~ITSCorrelation ()
+LogfileName::~LogfileName ()
 {
   destroy();
 }
-
-void ITSCorrelation::destroy ()
-{;}
 
 // ==============================================================================
 //
@@ -65,7 +72,7 @@ void ITSCorrelation::destroy ()
 //
 // ==============================================================================
 
-ITSCorrelation& ITSCorrelation::operator= (ITSCorrelation const &other)
+LogfileName &LogfileName::operator= (LogfileName const &other)
 {
   if (this != &other) {
     destroy ();
@@ -74,7 +81,13 @@ ITSCorrelation& ITSCorrelation::operator= (ITSCorrelation const &other)
   return *this;
 }
 
-void ITSCorrelation::copy (ITSCorrelation const &other)
+void LogfileName::copy (LogfileName const& other)
+{
+  prefix_p = other.prefix_p;
+  suffix_p = other.suffix_p;
+}
+
+void LogfileName::destroy ()
 {;}
 
 // ==============================================================================
@@ -83,30 +96,71 @@ void ITSCorrelation::copy (ITSCorrelation const &other)
 //
 // ==============================================================================
 
-void ITSCorrelation::setMetafile (String const &metafile)
+void LogfileName::init ()
 {
-  bool status (true);
-  
-  // make a connection to the metafile and get its contents
-  try {
-    metadata_p.setMetafile (metafile);
-  } catch (AipsError x) {
-    cerr << "[ITSCapture::setMetafile] " << x.getMesg() << endl;
-    status = false;
-  }
-  
-  // Set up the file streams by which to connect to the data stored on disk
-  if (status) {
-    status = setStreams ();
-  }
+  // Default values for the internal variables
+  separator_p = "-";
+
+  // fill the timestamp variable
+  setTimestamp ();
 }
 
-Bool ITSCorrelation::setStreams ()
+String LogfileName::filename ()
 {
-  Bool status (True);
+  ostringstream filename;
 
-  return status;
+  filename << prefix_p
+	   << separator_p
+	   << timestamp_p
+	   << "."
+	   << suffix_p;
+
+  return filename.str();
 }
+
+void LogfileName::setTimestamp ()
+{
+  Time timestruct;
+  uInt month (timestruct.month());
+  uInt dayOfMonth (timestruct.dayOfMonth());
+  uInt hours (timestruct.hours());
+  uInt minutes (timestruct.minutes());
+
+  ostringstream timestamp;
+  
+  // Add yyyy.mm.dd part of the filename
+
+  timestamp << timestruct.year() << ".";
+  //
+  if (month < 10) {
+    timestamp << "0";
+  }
+  timestamp << month << ".";
+  //
+  if (dayOfMonth < 10) {
+    timestamp << "0";
+  }
+  timestamp << dayOfMonth;
+
+  // Separator
+
+  timestamp << separator_p;
+
+  // Add the hh.mm part of the filename
+
+  if (hours < 10) {
+    timestamp << "0";
+  }
+  timestamp << timestruct.hours() << ":";
+  //
+  if (minutes < 10) {
+    timestamp << "0";
+  }
+  timestamp << minutes;
+  
+  timestamp_p = timestamp.str();
+}
+
 
 // ==============================================================================
 //
@@ -114,15 +168,6 @@ Bool ITSCorrelation::setStreams ()
 //
 // ==============================================================================
 
-Cube<DComplex> ITSCorrelation::ccSpectra (Bool const &fromCalFFT)
+void LogfileName::setFilename ()
 {
-  uint nofSelectedAntennas (DataReader::nofSelectedAntennas());
-  
-  Cube<DComplex> out (nofSelectedAntennas,
-		      nofSelectedAntennas,
-		      fftLength_p);
-  
-  out = 0.0;
-  
-  return out;
 }
