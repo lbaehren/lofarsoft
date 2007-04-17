@@ -18,141 +18,119 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: Shapelets2D.h,v 1.2 2005/07/15 10:06:05 bahren Exp $ */
+/* $Id: Shapelets2D.h,v 1.4 2006/06/26 15:57:56 bahren Exp $ */
 
 #ifndef SHAPELETS2D_H
 #define SHAPELETS2D_H
 
 #include <Math/Shapelets1D.h>
 
-using blitz::Array;
+/*!
+  \brief A class to implement 2-dimensional Shapelet functions.
 
-namespace CR {  // Namespace CR -- BEGIN
+  \ingroup Math
+  \ingroup Shapelets
+
+  \author Lars B&auml;hren
+
+  \date 2004/08
+
+  \test tShapelets2D.cc
+
+  <h3>Prerequisites</h3>
+  <ul>
+    <li>A. Refregier, <i>Shapelets - I. A method for image analysis</i>,
+    MNRAS, 338 (1), pp. 35-47, 2003
+
+    <li>Hermite1D   -- A class to implement Hermite Polynomials.
+    <li>Shapelets1D -- A class to implement 1-dimensional Shapelet functions.
+  </ul>
   
+  <h3>Synopsis</h3>
+
+  <table border="0">
+    <tr valign="top">
+      <td>
+      Using the 1-dimensional Shapelet basis functions, we can construct 
+      basis functions that allow to describe 2-dimensional objects; this is done by
+      simply taking the tensor product of two 1-dimensional basis functions,
+      \f[ \phi_{\mathbf n}(\mathbf x) = \phi_{n_1}(x_1) \, \phi_{n_2}(x_2) \f]
+      where \f$ \mathbf x = (x_1,x_2) \f$ and \f$ \mathbf n = (n_1,n_2) \f$. With
+      this again we also can define dimensional basis functions as
+      \f[ B_{\mathbf n}(\mathbf x;\beta) = \frac{1}{\beta}
+      \phi_{\mathbf n}(\beta^{-1} \mathbf x) \f]
+      </td>
+      <td>
+      <img src="figures/Shapelets2D.png">
+      </td>
+    </tr>
+  </table>
+
+*/
+
+class Shapelets2D : public Shapelets1D {
+
+ public:
+
+  //! Empty constructor
+  Shapelets2D ();
+
   /*!
-    \class Shapelets2D
-    
-    \ingroup Math
-    
-    \brief A class to implement 2-dimensional Shapelet functions.
-    
-    \author Lars B&auml;hren
-    
-    \date 2004/08
-    
-    \test tShapelets2D.cc
-    
-    <h3>Prerequisites</h3>
-    <ul>
-      <li>A. Refregier, <i>Shapelets - I. A method for image analysis</i>,
-      MNRAS, 338 (1), pp. 35-47, 2003
+    \brief Argumented constructor.
 
-      <li>Hermite1D   -- A class to implement Hermite Polynomials.
-      <li>Shapelets1D -- A class to implement 1-dimensional Shapelet functions.
-    </ul>
-    
-    <h3>Synopsis</h3>
-    
-    <table border="0">
-      <tr valign="top">
-        <td>
-	Using the 1-dimensional Shapelet basis functions, we can construct 
-	basis functions that allow to describe 2-dimensional objects; this is done by
-	simply taking the tensor product of two 1-dimensional basis functions,
-	\f[ \phi_{\mathbf n}(\mathbf x) = \phi_{n_1}(x_1) \, \phi_{n_2}(x_2) \f]
-	where \f$ \mathbf x = (x_1,x_2) \f$ and \f$ \mathbf n = (n_1,n_2) \f$. With
-	this again we also can define dimensional basis functions as
-	\f[ B_{\mathbf n}(\mathbf x;\beta) = \frac{1}{\beta}
-	\phi_{\mathbf n}(\beta^{-1} \mathbf x) \f]
-	</td>
-	<td>
-	<img src="../docs/figures/Shapelets2D.png">
-	</td>
-      </tr>
-    </table>
-    
-  */
-  
-  class Shapelets2D : public Shapelets1D {
-    
-  public:
-    
-    //! Empty constructor
-    Shapelets2D ();
-    
-    /*!
-      \brief Argumented constructor.
-      
-      \param order - Maximum order for which the function coefficients are
-                     pre-computed.
-    */
-    Shapelets2D (int const &order);
-    
-    /*!
-      \brief Argumented constructor.
-      
-      \param order - Maximum order for which the function coefficients are
-                     pre-computed.
-      \param beta  - Shapelet scale parameter, \f$ \beta \f$.
-    */
-    Shapelets2D (int const &order,
-		 double const &beta);
-    
-    //! Destructor
-    ~Shapelets2D ();
-    
-    // === Function evaluation =========================================
-    
-    /*!
-      \brief Evaluate a two-dimensional Shapelet function.
-      
-      \param lm -- This is a shorthand for l=m
-      \param xy -- This is a shorthand for x=y
-      
-      \return 
-    */
-    inline double fx (int const &lm,
-		      double const &xy)
-      {
-	return fx (lm,xy,lm,xy);
-      }
-    
-    /*!
-      \brief Evaluate a two-dimensional Shapelet function.
-      
-      \param l -- 
-      \param x -- 
-      \param m -- 
-      \param y -- 
-      
-      Evaluates \f$ B_{\mathbf n}(\mathbf x; \beta) = B_{n_1}(x_1; \beta)
-      \, B_{n_2}(x_2; \beta) \f$ via Shapelets1D::eval
-    */
-    double fx (int const &l,
-	       double const &x,
-	       int const &m,
-	       double const &y);
-    
-    // === Global function properties ==================================
-    
-    /*!
-      \brief Integral of the 2D basis functions
-      
-      \param l --
-      \param m --
-    */
-    double integral (int const &l,
-		     int const &m);
-    
-    /*!
-      \brief Integral of the 2D basis functions
-      
-      \param l --
-    */
-    double integral (Array<int,1> const &l);
-    
-  };
-  
-}  // Namespace CR -- END
+    \param order - Maximum order for which the function coefficients are
+                   pre-computed.
+   */
+  Shapelets2D (const int);
+
+  /*!
+    \brief Argumented constructor.
+
+    \param order - Maximum order for which the function coefficients are
+                   pre-computed.
+    \param beta  - Shapelet scale parameter, \f$ \beta \f$.
+   */
+  Shapelets2D (const int,
+	       const double);
+
+  //! Destructor
+  ~Shapelets2D ();
+
+  // === Function evaluation =========================================
+
+  /*!
+    \brief Evaluate a two-dimensional Shapelet function.
+
+    Evaluates \f$ B_{\mathbf n}(\mathbf x; \beta) = B_{n_1}(x_1; \beta)
+    \, B_{n_2}(x_2; \beta) \f$ via Shapelets1D::eval
+   */
+  double eval (const int,
+	       const double,
+	       const int,
+	       const double);
+
+  /*!
+    \brief Evaluate a two-dimensional Shapelet function.
+
+    Alternate interface accepting vector format input.
+   */
+  double eval (const vector<int>&,
+	       const vector<double>&);
+
+  // === Global function properties ==================================
+
+  /*!
+    \brief Integral of the 2D basis functions
+    \todo Still needs to be implemented.
+   */
+  double integral (const int,
+		   const int);
+
+  /*!
+    \todo Still needs to be implemented.
+   */
+  double integral (const vector<int>&);
+
+};
 
 #endif

@@ -1,0 +1,48 @@
+#
+# $Id: templates,v 1.15 2007/01/15 14:38:14 horneff Exp $
+#
+## -- casa/Arrays ---------------------------------------------------------------
+1000 casa/Arrays/ArrayLogical.cc
+     template Bool allNearAbs(Array<Double> const &, Double const &, Double)
+     = casa/BasicSL/Complex.h
+     template Bool allNearAbs(Array<Complex> const &, Array<Complex> const &, Double)
+     template Bool allNearAbs(Array<DComplex> const &, Array<DComplex> const &, Double)
+1000 scimath/Functionals/Function.cc casa/Arrays/Array.h 
+     template class Function<Float, Array<Float> > 
+     template class Function<Float, Double> 
+     template class Function<Int, Double> 
+     template ostream & operator<<(ostream &, Function<Double, Double> const &) 
+     = casa/BasicSL/Complex.h 
+     template class Function<Double, DComplex> 
+     template class Function<Int, Complex> 
+#1000 scimath/Functionals/Function1D.h casa/Arrays/Array.h 
+#     template class Function1D<Float, Array<Float> > 
+#     template class Function1D<Float, Double> 
+#     template class Function1D<Int, Double> 
+#     = casa/BasicSL/Complex.h 
+#     template class Function1D<Double, DComplex> 
+## -- scimath/Functionals -------------------------------------------------------
+#1000 scimath/Functionals/Interpolate1D.cc 
+#     = casa/BasicSL/Complex.h 
+#     = casa/Arrays/Array.h 
+#     template class Interpolate1D<Float, Array<Float> > 
+#     template class Interpolate1D<Double, Array<Double> > 
+#     template class Interpolate1D<Float, Float> 
+#     template class Interpolate1D<Double, Double> 
+##     template class Interpolate1D<Float, Complex> #This may work (it
+##compiles) but is not what I want.
+##     template class Interpolate1D<Double, Array<DComplex> >  # This is frigging not implemented!
+##     template class Interpolate1D<Double, DComplex>          # This doesn't work either!
+1000 scimath/Mathematics/FFTServer.cc
+     = casa/BasicSL/Complex.h
+     template class FFTServer<Float,Complex>
+     template class FFTServer<Double, DComplex>
+#1000 scimath/Mathematics/InterpolateArray1D.cc
+#     = casa/BasicSL/Complex.h
+#     template class InterpolateArray1D<Double, Double>
+#     template class InterpolateArray1D<Double, DComplex>
+#1000 casa/Utilities/BinarySearch.cc casa/Arrays/Vector.h
+#     template Int binarySearchBrackets(Bool &, Vector<Double> const &, Double const &, uInt, Int)
+## -- Calibration ---------------------------------------------------------------
+## -- Functionals ---------------------------------------------------------------
+## -- IO ------------------------------------------------------------------------

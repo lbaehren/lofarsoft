@@ -3,10 +3,12 @@
 ## Modules inside the "CR-Pipeline" package
 
 set (cr_modules
+  Analysis
+  Calibration
   Coordinates
   Data
-  Detection
   Imaging
+  IO
   Math
   )
 

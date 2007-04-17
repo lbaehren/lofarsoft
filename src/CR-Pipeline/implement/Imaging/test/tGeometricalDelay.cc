@@ -215,8 +215,8 @@ int test_delayComputation ()
 
   int nofFailedTests (0);
   uint nofCoordinates (3);
-  uint nofAntennas (3);
-  uint nofPositions (1000);
+  int nofAntennas (3);
+  int nofPositions (1000);
   double offset (1000);
   double stepwidth (100);
   Array<double,2> antPositions (nofAntennas,nofCoordinates);
