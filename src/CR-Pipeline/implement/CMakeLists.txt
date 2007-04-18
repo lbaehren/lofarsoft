@@ -10,6 +10,7 @@ set (cr_modules
   Imaging
   IO
   Math
+  Utilities
   )
 
 subdirs (${cr_modules})

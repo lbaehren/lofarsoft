@@ -31,6 +31,7 @@
 #include <casa/Arrays/Array.h>
 #include <casa/Arrays/ArrayMath.h>
 #include <casa/Arrays/IPosition.h>
+#include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicSL/Complex.h>
 #include <casa/Quanta.h>
@@ -45,12 +46,24 @@
 #include <tables/Tables/ArrColDesc.h>
 #include <tables/Tables/ArrayColumn.h>
 
+#include <Math/MathAlgebra.h>
+
 using casa::DComplex;
 using casa::Double;
+using casa::Interpolate1D;
 using casa::IPosition;
 using casa::Matrix;
+using casa::ScalarColumn;
+using casa::ScalarColumnDesc;
+using casa::ScalarSampledFunctional;
+using casa::SetupNewTable;
 using casa::String;
+using casa::Table;
+using casa::TableDesc;
 using casa::Vector;
+
+using std::cerr;
+using std::endl;
 
 /*!
   \class BaselineGain
@@ -585,7 +598,7 @@ class BaselineGain {
   //  1 | ending index of 1st band,    ... ending index of last band    |
   //  0 | beginning index of 1st band, ... beginning index of last band |
   //     -------------0--------------- ... ---------------N-------------
-  Matrix <int> intervalEndpoints_p;
+  Matrix<int> intervalEndpoints_p;
 
  protected:
 

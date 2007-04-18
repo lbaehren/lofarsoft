@@ -28,23 +28,23 @@
 //
 // ----------------------------------------------------------------------------
 
-AntennaGain::AntennaGain (const Int& nofAntennas,
-			  const Int& nofBands)
+AntennaGain::AntennaGain (const int& nofAntennas,
+			  const int& nofBands)
 {
   // set array with default gain values ...
-  Matrix<Double> gainCurves (nofBands,nofAntennas,1.0);
+  Matrix<double> gainCurves (nofBands,nofAntennas,1.0);
   // ... and set them as initial values
   AntennaGain::setGainCurves (gainCurves);
 }
 
-AntennaGain::AntennaGain (const Matrix<Double>& gainCurves)
+AntennaGain::AntennaGain (const Matrix<double>& gainCurves)
 {
   // just forwards the input
   AntennaGain::setGainCurves (gainCurves);
 }
 
-AntennaGain::AntennaGain (const Matrix<Double>& spectra,
-			  const Int& nofBands)
+AntennaGain::AntennaGain (const Matrix<double>& spectra,
+			  const int& nofBands)
 {
   AntennaGain::setGainCurves (spectra, nofBands);
 }
@@ -64,7 +64,7 @@ AntennaGain::~AntennaGain ()
 //
 // ----------------------------------------------------------------------------
 
-void AntennaGain::setGainCurves (const Matrix<Double>& gainCurves) 
+void AntennaGain::setGainCurves (const Matrix<double>& gainCurves) 
 {
   gainCurves.shape(nofBands_p,nofAntennas_p);
   //
@@ -72,16 +72,16 @@ void AntennaGain::setGainCurves (const Matrix<Double>& gainCurves)
   gainCurves_p = gainCurves;
 }
 
-void AntennaGain::setGainCurves (const Matrix<Double>& spectra,
-				 const Int& nofBands)
+void AntennaGain::setGainCurves (const Matrix<double>& spectra,
+				 const int& nofBands)
 {
   int ant(0);
   int band(0);
   IPosition shape (spectra.shape());
   IPosition blc (1,0);
   IPosition trc (1,0);
-  Double minBand (0);
-  Vector<Double> spectrum(shape(0));
+  double minBand (0);
+  Vector<double> spectrum(shape(0));
   // Set up the indices to break down the frequencies into sub-bands.
   AntennaGain::setBandIndices (spectra, nofBands);
   
@@ -107,8 +107,8 @@ void AntennaGain::setGainCurves (const Matrix<Double>& spectra,
 //
 // ----------------------------------------------------------------------------
 
-void AntennaGain::setBandIndices (const Matrix<Double>& spectra,
-				  const Int& nofBands)
+void AntennaGain::setBandIndices (const Matrix<double>& spectra,
+				  const int& nofBands)
 {
   // get the shape of the array with the spectra, [freq,ant]
   IPosition shape (spectra.shape());
@@ -118,7 +118,7 @@ void AntennaGain::setBandIndices (const Matrix<Double>& spectra,
   nofAntennas_p = shape(1);
 
   // Set up the range of array indices which has to be split
-  Vector<Int> indexRange(2);
+  Vector<int> indexRange(2);
   indexRange(0) = 0;
   indexRange(1) = shape(0)-1;
 
@@ -133,7 +133,7 @@ void AntennaGain::setBandIndices (const Matrix<Double>& spectra,
 //
 // ----------------------------------------------------------------------------
 
-Matrix<Double> AntennaGain::gainCurves (const Matrix<Double>& gainCurves)
+Matrix<double> AntennaGain::gainCurves (const Matrix<double>& gainCurves)
 {
   return gainCurves_p;
 }

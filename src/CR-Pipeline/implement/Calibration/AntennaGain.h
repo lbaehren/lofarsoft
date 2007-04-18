@@ -46,7 +46,8 @@
 // LOPES-Tools header files
 #include <Math/MathAlgebra.h>
 
-#include <casa/namespace.h>
+using casa::Matrix;
+using casa::Vector;
 
 /*!
   \class AntennaGain
@@ -76,7 +77,7 @@
   IPosition blc (x1,y1);
   IPosition trc (x2,y2);
 
-  Matrix<Double> subarray = array (blc,trc);
+  Matrix<double> subarray = array (blc,trc);
 
   for (int ant(0); ...) {
     for (int freq(0); ...) {
@@ -85,26 +86,25 @@
   }
   \endverbatim
 */
-
 class AntennaGain {
   
   /*!
     Number of antennas.
   */
-  Int nofAntennas_p;
+  int nofAntennas_p;
   
   /*!
     Number of frequency bands for which the antenna gains are determined
   */
-  Int nofBands_p;
-
+  int nofBands_p;
+  
   /*!
     Indices for splitting the spectrum of N channels intp a set of M subbands.
   */ 
-  Vector<Int> bandIndices_p;
+  Vector<int> bandIndices_p;
   
   //! The antenna gain curves for a given number of frequency bands
-  Matrix<Double> gainCurves_p;
+  Matrix<double> gainCurves_p;
   
  public:
   
@@ -117,15 +117,15 @@ class AntennaGain {
     \param nofBands    -- Number of frequency band, for which the gain values
                           are determined
   */
-  AntennaGain (const Int& nofAntennas,
-		const Int& nofBands);
+  AntennaGain (const int& nofAntennas,
+	       const int& nofBands);
   
   /*!
     \brief Constructor
     
     \param gainCurves -- Antenna gain curves
   */
-  AntennaGain (const Matrix<Double>& gainCurves);
+  AntennaGain (const Matrix<double>& gainCurves);
   
   /*!
     \brief Constructor
@@ -134,8 +134,8 @@ class AntennaGain {
     \param nofBands -- Number of frequency band, for which the gain values
                        are determined
   */
-  AntennaGain (const Matrix<Double>& spectra,
-		const Int& nofBands);
+  AntennaGain (const Matrix<double>& spectra,
+		const int& nofBands);
   
   // --- Destruction ------------------------------------------------
   
@@ -145,19 +145,19 @@ class AntennaGain {
   
   /*!
    */
-  Matrix<Double> gainCurves (const Matrix<Double>& gainCurves);
+  Matrix<double> gainCurves (const Matrix<double>& gainCurves);
   
-  void setGainCurves (const Matrix<Double>& gainCurves);
+  void setGainCurves (const Matrix<double>& gainCurves);
   
-  void setGainCurves (const Matrix<Double>& spectra,
-		      const Int& nofBands);
+  void setGainCurves (const Matrix<double>& spectra,
+		      const int& nofBands);
   
   // --- Calibration ------------------------------------------------
   
   /*!
     \brief Apply calibration to a set of spectra
   */
-  void calibrate (Matrix<Double>& spectra);
+  void calibrate (Matrix<double>& spectra);
   
   /*!
     \brief Apply gain calibration to a spectrum
@@ -165,8 +165,8 @@ class AntennaGain {
     \param spectrum -- Spectrum, to which the calibration is applied.
     \param antenna  -- Antenna to which the provided spectrum belongs.
   */
-  void calibrate (Vector<Double>& spectrum,
-		  const Int& antenna);
+  void calibrate (Vector<double>& spectrum,
+		  const int& antenna);
 
   // --- Export of the calibration data ------------------------------
 
@@ -189,8 +189,8 @@ class AntennaGain {
     \param spectra  -- Antenna spectra, [freq,ant]
     \param nofBands -- Number of frequency bands.
   */
-  void setBandIndices (const Matrix<Double>& spectra,
-		       const Int& nofBands);
+  void setBandIndices (const Matrix<double>& spectra,
+		       const int& nofBands);
 
 };
 
