@@ -410,7 +410,6 @@ if (HAVE_CASA)
     -D_GLIBCPP_DEPRECATED
     -DSIGNBIT 
     -DAIPS_NO_TEMPLATE_SRC
-    -I${CASA_INCLUDES}
     -DAIPS_${AIPS_ARCH})
   set (CASA_CXX_FLAGS "-fPIC -pipe -Wall -Wno-non-template-friend -Woverloaded-virtual -Wno-comment -fexceptions -Wcast-align")
   set (CASA_CXX_LFLAGS "${CASA_LIBRARIES_DIR}/version.o ${CASA_LIBRARIES}")
