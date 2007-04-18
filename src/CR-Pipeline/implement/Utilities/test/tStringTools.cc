@@ -20,7 +20,7 @@
 
 /* $Id: tStringTools.cc,v 1.3 2006/10/31 18:24:08 bahren Exp $ */
 
-#include <lopes/Utilities/StringTools.h>
+#include <Utilities/StringTools.h>
 
 // ------------------------------------------------------------------ string2char
 
@@ -33,7 +33,7 @@ int string2char ()
   for (int i=0; i<maxlen; i++) {
     teststring += "a";
     //
-    char* tmp = LOPES::string2char(teststring);
+    char* tmp = CR::string2char(teststring);
     //
     cout << i+1 << "\t[" << teststring << "] -> ["
 	 << tmp << "]" << endl;
@@ -59,10 +59,10 @@ int main ()
   int nofFailedTests (0);
   String filepath = "/home/user/bin/myfile.h";
 
-  String filename = LOPES::fileFromPath (filepath);
-  String dirname = LOPES::dirFromPath (filepath);
-  Vector<String> substrings = LOPES::getSubstrings (filepath,"/");
-  Int nofSubstrings = LOPES::nofSubstrings (filepath,"/");
+  String filename = CR::fileFromPath (filepath);
+  String dirname = CR::dirFromPath (filepath);
+  Vector<String> substrings = CR::getSubstrings (filepath,"/");
+  Int nofSubstrings = CR::nofSubstrings (filepath,"/");
 
   cout << "\n[tStringTools]\n" << endl;
   cout << " - Complete path to file : " << filepath << endl;

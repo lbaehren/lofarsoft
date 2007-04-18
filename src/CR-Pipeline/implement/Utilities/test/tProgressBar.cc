@@ -20,7 +20,10 @@
 
 /* $Id: tProgressBar.cc,v 1.2 2006/10/31 18:24:08 bahren Exp $ */
 
-#include <lopes/Utilities/ProgressBar.h>
+#include <cmath>
+#include <Utilities/ProgressBar.h>
+
+using CR::ProgressBar;
 
 /*!
   \file tProgressBar.cc
@@ -29,11 +32,6 @@
 
   \author Lars B&auml;hren
 
-  <h3>Test results</h3>
-
-  <img src="../figures/runningTime.png">
-  <img src="../figures/totalTime.png">
-  <img src="../figures/remainTime.png">
 */
 
 // --- Global variables --------------------------------------------------------
@@ -59,7 +57,7 @@ void testTimer2 () {
   for (int i=0; i<nofIterations; i++) {
     //
     for (int j=0; j<nofComputations; j++) {
-      x = sin(sin(1.0*j));
+      x = std::sin(std::sin(1.0*j));
     }
     //
     end = clock();
@@ -116,7 +114,7 @@ void testTimer () {
   \param bar             -- A progress bar
   \param nofComputations -- The number of computation loops.
 */
-void drawProgressBar (LOPES::ProgressBar& bar,
+void drawProgressBar (ProgressBar& bar,
 		      const int& nofComputations) {
 
   int nofLoops;
@@ -153,7 +151,7 @@ int test_ProgressBar (const int& loops,
 
   cout << "[1] ProgressBar (int)" << endl;
   {
-    LOPES::ProgressBar bar = LOPES::ProgressBar (loops);
+    ProgressBar bar = ProgressBar (loops);
     bar.showTime (false);
     //
     drawProgressBar (bar,nofComputations);
@@ -161,7 +159,7 @@ int test_ProgressBar (const int& loops,
 
   cout << "[2] ProgressBar (int,int)" << endl;
   {
-    LOPES::ProgressBar bar = LOPES::ProgressBar (loops,length);
+    ProgressBar bar = ProgressBar (loops,length);
     bar.showTime (false);
     //
     drawProgressBar (bar,nofComputations);
@@ -196,7 +194,7 @@ int main ()
   {
     cout << "\n[tProgressBar] Testing change of bar symbol." << endl;
     //
-    LOPES::ProgressBar bar = LOPES::ProgressBar (loops);
+    ProgressBar bar = ProgressBar (loops);
     //
     drawProgressBar (bar,nofComputations);
     //
@@ -210,7 +208,7 @@ int main ()
   {
     cout << "\n[tProgressBar] Testing change of bar width." << endl;
     //
-    LOPES::ProgressBar bar = LOPES::ProgressBar (loops);
+    ProgressBar bar = ProgressBar (loops);
     //
     drawProgressBar (bar,nofComputations);
     //
@@ -224,7 +222,7 @@ int main ()
   {
     cout << "\n[tProgressBar] Testing display of remain time." << endl;
     //
-    LOPES::ProgressBar bar = LOPES::ProgressBar (loops);
+    ProgressBar bar = ProgressBar (loops);
     //
     drawProgressBar (bar,nofComputations);
     //

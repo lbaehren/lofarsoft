@@ -21,7 +21,9 @@
 /* $Id: tTimestamp.cc,v 1.2 2006/10/31 18:24:08 bahren Exp $*/
 
 #include <iostream>
-#include <lopes/Utilities/Timestamp.h>
+#include <Utilities/Timestamp.h>
+
+using CR::Timestamp;
 
 /*!
   \file tTimestamp.cc
@@ -37,7 +39,7 @@
 
 // -----------------------------------------------------------------------------
 
-void showTime (LOPES::Timestamp &nb)
+void showTime (Timestamp &nb)
 {
   std::cout << " -- ymd         = " << nb.ymd()         << std::endl;
   std::cout << " -- hms         = " << nb.hms()         << std::endl;
@@ -83,19 +85,19 @@ int test_Timestamp ()
   
   std::cout << "[1] Testing default constructor ..." << std::endl;
   {
-    LOPES::Timestamp nb;
+    Timestamp nb;
     //
     showTime (nb);
   }
   
   std::cout << "[2] Testing copy constructor ..." << std::endl;
   {
-    LOPES::Timestamp nb;
+    Timestamp nb;
     //
     std::cout << " - Original object:" << std::endl;
     showTime (nb);
     //
-    LOPES::Timestamp nb2 (nb);
+    Timestamp nb2 (nb);
     //
     std::cout << " - Copied object:" << std::endl;
     showTime (nb2);
@@ -112,7 +114,7 @@ int test_setTime ()
 
   int nofFailedTests (0);
   
-  LOPES::Timestamp nb;
+  Timestamp nb;
   //
   std::cout << " - Object from default constructor:" << std::endl;
   showTime (nb);

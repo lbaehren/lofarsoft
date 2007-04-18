@@ -2,7 +2,7 @@
 /* $Id: tMasking.cc,v 1.5 2007/03/20 15:16:09 bahren Exp $ */
 
 // Custom header files
-#include <lopes/Utilities/Masking.h>
+#include <Utilities/Masking.h>
 
 /*!
   \file tMasking.cc
@@ -72,28 +72,28 @@ int test_mergeMasks () {
     //
     {
       logic = "AND";
-      Array<Bool> mask = LOPES::mergeMasks (mask1,mask2,logic);
+      Array<Bool> mask = CR::mergeMasks (mask1,mask2,logic);
       cout << " Merging logic : " << logic << endl;
       cout << " Merged mask   : " << mask << endl;
     }
     //
     {
       logic = "NAND";
-      Array<Bool> mask = LOPES::mergeMasks (mask1,mask2,logic);
+      Array<Bool> mask = CR::mergeMasks (mask1,mask2,logic);
       cout << " Merging logic : " << logic << endl;
       cout << " Merged mask   : " << mask << endl;
     }
     //
     {
       logic = "OR";
-      Array<Bool> mask = LOPES::mergeMasks (mask1,mask2,logic);
+      Array<Bool> mask = CR::mergeMasks (mask1,mask2,logic);
       cout << " Merging logic : " << logic << endl;
       cout << " Merged mask   : " << mask << endl;
     }
     //
     {
       logic = "NOR";
-      Array<Bool> mask = LOPES::mergeMasks (mask1,mask2,logic);
+      Array<Bool> mask = CR::mergeMasks (mask1,mask2,logic);
       cout << " Merging logic : " << logic << endl;
       cout << " Merged mask   : " << mask << endl;
     }
@@ -120,28 +120,28 @@ int test_mergeMasks () {
     //
     {
       logic = "AND";
-      Array<Bool> mask = LOPES::mergeMasks (mask1,mask2,logic);
+      Array<Bool> mask = CR::mergeMasks (mask1,mask2,logic);
       cout << " Merging logic : " << logic << endl;
       cout << " Merged mask   : " << mask << endl;
     }
     //
     {
       logic = "NAND";
-      Array<Bool> mask = LOPES::mergeMasks (mask1,mask2,logic);
+      Array<Bool> mask = CR::mergeMasks (mask1,mask2,logic);
       cout << " Merging logic : " << logic << endl;
       cout << " Merged mask   : " << mask << endl;
     }
     //
     {
       logic = "OR";
-      Array<Bool> mask = LOPES::mergeMasks (mask1,mask2,logic);
+      Array<Bool> mask = CR::mergeMasks (mask1,mask2,logic);
       cout << " Merging logic : " << logic << endl;
       cout << " Merged mask   : " << mask << endl;
     }
     //
     {
       logic = "NOR";
-      Array<Bool> mask = LOPES::mergeMasks (mask1,mask2,logic);
+      Array<Bool> mask = CR::mergeMasks (mask1,mask2,logic);
       cout << " Merging logic : " << logic << endl;
       cout << " Merged mask   : " << mask << endl;
     }

@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006                                                  *
- *   Lars Bahren (<mail>)                                                     *
+ *   Copyright (C) 2006                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -23,7 +23,7 @@
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
 
-#include <lopes/Utilities/ParameterFromRecord.h>
+#include <Utilities/ParameterFromRecord.h>
 
 /*!
   \file tParameterFromRecord.cc
