@@ -20,14 +20,15 @@
 
 /* $Id: tinverseFFT.cc,v 1.4 2007/04/03 14:03:07 bahren Exp $*/
 
-#include <fstream.h>
-#include <iostream.h>
+#include <iostream>
+#include <fstream>
 
 #include <casa/aips.h>
 #include <casa/Arrays.h>
 #include <casa/BasicSL/Complex.h>
 #include <casa/Exceptions/Error.h>
 
+#include <templates.h>
 #include <Analysis/inverseFFT.h>
 #include <Data/ITSCapture.h>
 #include <Data/LopesEvent.h>

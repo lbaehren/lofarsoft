@@ -340,36 +340,6 @@ int CalTableInterpolater<T>::IndexFromAntID(const Int AntID){
 //
 // ==============================================================================
 
-#include <casa/Arrays/ArrayLogical.cc>
-#include <casa/BasicMath/Functional.cc>
-#include <scimath/Functionals/Function.cc>
-#include <scimath/Functionals/FunctionParam.cc>
-
-template class FunctionParam<int>;
-template class FunctionParam<float>;
-template class FunctionParam<double>;
-template class FunctionParam<Complex>;
-template class FunctionParam<DComplex>;
-
-template casa::Bool casa::allNearAbs(Array<Double> const &, Double const &, Double);
-template casa::Bool casa::allNearAbs(Array<Complex> const &, Array<Complex> const &, Double);
-template casa::Bool casa::allNearAbs(Array<DComplex> const &, Array<DComplex> const &, Double);
-
-template class casa::Functional<int, float>;
-template class casa::Functional<int, double>;
-template class casa::Functional<casa::Int, casa::Complex>;
-template class casa::Functional<float, double>;
-template class casa::Functional<float, casa::Complex>;
-template class casa::Functional<float, casa::Array<float> >;
-template class casa::Functional<double, std::complex<double> >;
-template class casa::Functional<casa::Vector<float>, casa::Array<float> >;
-template class casa::Functional<casa::Vector<double>, std::complex<double> >;
-
-template class casa::Function<casa::Float, casa::Array<casa::Float> >;
-template class casa::Function<casa::Float, casa::Double>;
-template class casa::Function<casa::Int, casa::Double>;
-template class casa::Function<casa::Int, casa::Complex>;
-template class casa::Function<casa::Double, casa::DComplex>;
 
 #include <scimath/Functionals/Interpolate1D.cc>
 #include <scimath/Mathematics/InterpolateArray1D.cc>

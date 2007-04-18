@@ -23,6 +23,7 @@
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
 
+#include <templates.h>
 #include <Analysis/FirstStagePipeline.h>
 #include <Data/LopesEventIn.h>
 
