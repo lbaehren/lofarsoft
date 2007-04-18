@@ -23,8 +23,8 @@
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
 
-#include <lopes/Analysis/FirstStagePipeline.h>
-#include <lopes/Data/LopesEventIn.h>
+#include <Analysis/FirstStagePipeline.h>
+#include <Data/LopesEventIn.h>
 
 
 /*!
@@ -48,7 +48,7 @@
 */
 
 // We need that, otherwise we'd have to write "LOPES::LopesEventIn" instead of "LopesEventIn"
-using namespace LOPES;
+using namespace CR;
 
 int test_FirstStagePipeline ()
 {

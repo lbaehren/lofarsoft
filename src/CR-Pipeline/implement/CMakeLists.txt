@@ -34,9 +34,12 @@ endforeach (cr_module)
 if (CASA_LIBRARIES AND LAPACK_LIBRARIES)
   add_library (cr
     ${cr_sources}
+    templates.h
     )
   target_link_libraries (cr
     ${CASA_LIBRARIES}
     ${LAPACK_LIBRARIES}
     )
+else (CASA_LIBRARIES AND LAPACK_LIBRARIES)
+  message (STATUS "Sorry, unable to build CR library; missing CASA and LAPACK!")
 endif (CASA_LIBRARIES AND LAPACK_LIBRARIES)

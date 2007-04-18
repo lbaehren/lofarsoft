@@ -42,7 +42,7 @@
   \endcode
 */
 
-#include <lopes/Analysis/ClippingFraction.h>
+#include <Analysis/ClippingFraction.h>
 
 // --- Test constructors -------------------------------------------------------
 

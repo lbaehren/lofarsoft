@@ -28,14 +28,14 @@
 #include <casa/BasicSL/Complex.h>
 #include <casa/Exceptions/Error.h>
 
-#include <lopes/Analysis/inverseFFT.h>
-#include <lopes/Data/ITSCapture.h>
-#include <lopes/Data/LopesEvent.h>
-#include <lopes/IO/DataReader.h>
+#include <Analysis/inverseFFT.h>
+#include <Data/ITSCapture.h>
+#include <Data/LopesEvent.h>
+#include <IO/DataReader.h>
 
 #include <casa/namespace.h>
 
-using LOPES::inverseFFT;
+using CR::inverseFFT;
 
 /*!
   \file tinverseFFT.cc

@@ -30,9 +30,17 @@
 #include <scimath/Mathematics/InterpolateArray1D.h>
 #include <scimath/Functionals/ScalarSampledFunctional.h>
 #include <scimath/Functionals/ArraySampledFunctional.h>
-#include <casa/namespace.h>
 
 #include <Calibration/CalTableReader.h>
+
+using casa::Array;
+using casa::Bool;
+using casa::Complex;
+using casa::DComplex;
+using casa::Double;
+using casa::InterpolateArray1D;
+using casa::String;
+using casa::Vector;
 
 /*!
   \class CalTableInterpolater

@@ -20,7 +20,7 @@
 
 /* $Id: tDynamicSpectrum.cc,v 1.1 2006/02/22 18:53:34 bahren Exp $*/
 
-#include <lopes/Analysis/DynamicSpectrum.h>
+#include <Analysis/DynamicSpectrum.h>
 
 /*!
   \file tDynamicSpectrum.cc

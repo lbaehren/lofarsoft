@@ -23,8 +23,8 @@
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
 
-#include <lopes/Analysis/SecondStagePipeline.h>
-#include <lopes/Data/LopesEventIn.h>
+#include <Analysis/SecondStagePipeline.h>
+#include <Data/LopesEventIn.h>
 
 /*!
   \file tSecondStagePipeline.cc
@@ -41,7 +41,7 @@
 // -----------------------------------------------------------------------------
 
 // We need that, otherwise we'd have to write "LOPES::LopesEventIn" instead of "LopesEventIn"
-using namespace LOPES;
+using namespace CR;
 
 /*!
   \brief Test constructors for a new SecondStagePipeline object
