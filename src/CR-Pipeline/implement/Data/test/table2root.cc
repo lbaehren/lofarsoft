@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: table2root.cc,v 1.4 2006/02/07 18:18:30 bahren Exp $ */
+/* $Id: table2root.cc,v 1.1 2007/03/19 17:12:59 bahren Exp $ */
 
 #include <root/TString.h>
 #include <root/TClass.h>
@@ -44,8 +44,6 @@
 #include <tables/Tables/ExprNode.h>
 
 #include <table2root.h>
-
-#include <casa/namespace.h>
     
 /*!
   \file table2root.cc

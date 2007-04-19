@@ -1,5 +1,5 @@
 
-/* $Id: table2root.h,v 1.1 2005/07/13 09:46:57 bahren Exp $ */
+/* $Id: table2root.h,v 1.1 2007/03/19 17:12:59 bahren Exp $ */
 
 #include <root/TObject.h>
 #include <root/TClonesArray.h>
