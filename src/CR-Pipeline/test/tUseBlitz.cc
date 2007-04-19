@@ -18,6 +18,19 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+/*!
+  \file tUseBlitz.cc
+
+  \brief A collection of tests for working with the Blitz++ library
+
+  \author Lars B&auml;hren
+
+  \date 2007/01/29
+
+  With Blitz++ being a serious alternative to the usage of the CASA array
+  classes, there is some need to get aquainted 
+*/
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -29,23 +42,11 @@ using std::cout;
 using blitz::Array;
 using blitz::Range;
 
-/*!
-  \file tUseBlitz.cc
-
-  \brief A simple test for external build against libblitz
-
-  \author Lars B&auml;hren
-
-  \date 2007/01/29
-
-  Check if we can properly build against the Blitz++ library
-*/
-
 // ------------------------------------------------------------------------------
 
 /*!
   \brief Test construction of Blitz arrays
-
+  
   \return nofFailedTests -- The number of failed tests
 */
 int test_arrays ()
@@ -301,7 +302,108 @@ int test_io ()
 // ------------------------------------------------------------------------------
 
 /*!
-  \brief main routine
+  \brief Test conversion between Blitz++ and C++ array encapsulated in function
+
+  \return data -- Pointer to the data
+*/
+double* blitz2cpp (unsigned int const &nelem)
+{
+  Array<double,1> array1D (nelem);
+  double *data;
+
+  // fill the original array with some data
+  for (unsigned int n(0); n<nelem; n++) {
+    array1D(n) = 0.5*(n+1);
+  }
+  
+  data = new double [nelem];
+  data = array1D.data();
+  
+  return data;
+}
+
+/*!
+  \brief Test conversion from and to C++ arrays
+  
+  \return nofFailedTests -- The number of failed tests
+*/
+int test_cppArrays ()
+{
+  cout << "\n[test_cppArrays]\n" << std::endl;
+
+  int nofFailedTests (0);
+  int nelem (6);
+  double data[] = {1,2,3,4,5,6};
+
+  cout << "[1] Construct 1-dim Blitz array from C++ array..." << std::endl;
+  try {
+    cout << "-- Creating Blitz++ array from C++ array" << std::endl;
+    Array<double,1> array1D (data, blitz::shape(nelem), blitz::neverDeleteData);
+    // display the newly created array
+    std::cout << array1D << std::endl;
+    // backwards conversion to C++ array
+    cout << "-- Creating C++ array from Blitz++ array" << std::endl;
+    double *cppArray;
+    cppArray = new double [nelem];
+    cppArray = array1D.data();
+    for (int n(0); n<nelem; n++) {
+      std::cout << "\t" << cppArray[n];
+    }
+    std::cout << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  } 
+
+  cout << "[2] Construct 2-dim Blitz array from C++ array..." << std::endl;
+  try {
+    Array<double,2> array2D (data, blitz::shape(2,3), blitz::neverDeleteData);
+    // display the newly created array
+    std::cout << array2D << std::endl;
+    // backwards conversion to C++ array
+    cout << "-- Creating C++ array from Blitz++ array" << std::endl;
+    double *cppArray;
+    cppArray = new double [nelem];
+    cppArray = array2D.data();
+    for (int n(0); n<nelem; n++) {
+      std::cout << "\t" << cppArray[n];
+    }
+    std::cout << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  } 
+
+  cout << "[3] Construct 2-dim Blitz array from C++ array..." << std::endl;
+  try {
+    Array<double,2> array1D (data, blitz::shape(3,2), blitz::neverDeleteData);
+    // display the newly created array
+    std::cout << array1D << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  } 
+
+  cout << "[4] Retrieve pointer to array from function..." << std::endl;
+  try {
+    double *data = blitz2cpp (nelem);
+    // display the contents of the data array
+    for (int n(0); n<nelem; n++) {
+      std::cout << "\t" << data[n];
+    }
+    std::cout << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  } 
+
+  return nofFailedTests;
+}
+
+// ------------------------------------------------------------------------------
+
+/*!
+  \brief Main routine
   
   \return nofFailedTests -- The number of failed tests
 */
@@ -315,7 +417,9 @@ int main ()
 
   nofFailedTests += test_io();
 
-  cout << "[tUseBlitz] Number of failed tests = "
+  nofFailedTests += test_cppArrays ();
+
+  cout << "\n[tUseBlitz] Number of failed tests = "
 	    << nofFailedTests << std::endl;
 
   return nofFailedTests;
