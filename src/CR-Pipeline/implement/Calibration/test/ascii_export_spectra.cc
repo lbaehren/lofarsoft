@@ -38,13 +38,10 @@
 #include <casa/Arrays/Matrix.h>
 
 // LOPES-tools header files
-#include <lopes/Data/ITSCapture.h>
-#include <lopes/IO/DataReader.h>
-#include <lopes/Utilities/ProgressBar.h>
-
-#include <casa/namespace.h>
-
-
+#include <templates.h>
+#include <Data/ITSCapture.h>
+#include <IO/DataReader.h>
+#include <Utilities/ProgressBar.h>
 
 // *****************************************************************************
 // *** Global Variables ********************************************************
@@ -52,15 +49,15 @@
 
 // Constants for this specific Data Set
 // These must be changed if a new set of data is used
-const Double MIN_FREQ ( 0.0 ); // 0.0 MHz
-const Double MAX_FREQ ( 40000000 ); // 40 MHz
-const Int N_TOT_SAMPLES ( 33554432 ); // 32 MSamples (32 * 2^20)
-const Int N_ANT ( 10 ); // number of antennas; specific to the dataset
+const double MIN_FREQ ( 0.0 ); // 0.0 MHz
+const double MAX_FREQ ( 40000000 ); // 40 MHz
+const int N_TOT_SAMPLES ( 33554432 ); // 32 MSamples (32 * 2^20)
+const int N_ANT ( 10 ); // number of antennas; specific to the dataset
 // Constants set (explicitly and implicitly) by the user
 //// Definitions:
 //// block   : subsection of the time-domain samples to FFT into a single spectra
-Int blocksize; // sample width of the blocks used by DataReader object
-Int nTotBlocks; // number of blocks available with blockwidth = blocksize
+int blocksize; // sample width of the blocks used by DataReader object
+int nTotBlocks; // number of blocks available with blockwidth = blocksize
 
 
 // *****************************************************************************
@@ -90,15 +87,15 @@ String makeFilenamesVector()
 /*!
   \brief Generate a frequency reference vector
 */
-Vector<Double> makeFreqVector( const Int& nOfChan )
+Vector<double> makeFreqVector( const int& nOfChan )
 {
-  Vector<Double> freqVector ( nOfChan, 0.0 ); // length=nOfChan, initialize zero
+  Vector<double> freqVector ( nOfChan, 0.0 ); // length=nOfChan, initialize zero
   // calculate frequency sub band interval
-  Double interval ( ( MAX_FREQ - MIN_FREQ ) / nOfChan );
+  double interval ( ( MAX_FREQ - MIN_FREQ ) / nOfChan );
   // Declare frequency storage double. Set to midpoint of first channel.
-  Double frequency = MIN_FREQ + ( interval / 2 );
+  double frequency = MIN_FREQ + ( interval / 2 );
   // loop through each band and calculate the midpoint frequency
-  for ( Int chan ( 0 ); chan < nOfChan; chan++ ) {
+  for ( int chan ( 0 ); chan < nOfChan; chan++ ) {
     freqVector( chan ) = frequency;
     frequency += interval; // increment frequency by one channel interval
   } // end for: chan
@@ -113,13 +110,13 @@ Vector<Double> makeFreqVector( const Int& nOfChan )
 //
 // block      -- matrix to export, [freq,ant]
 // fileNumber -- number of file to be exported (1st, 2nd, etc)
-void exportTable( const Matrix<Double>& block,
-		  const Int& fileNumber )
+void exportTable( const Matrix<double>& block,
+		  const int& fileNumber )
 {
   // use nOfAntennas instead of global N_ANT, to be flexible for errors
-  Int nOfAntennas ( block.ncolumn() );
-  Int nOfFreqChan ( block.nrow() );
-  Vector<Double> frequencies ( makeFreqVector( nOfFreqChan ) );
+  int nOfAntennas ( block.ncolumn() );
+  int nOfFreqChan ( block.nrow() );
+  Vector<double> frequencies ( makeFreqVector( nOfFreqChan ) );
   ostringstream filename;
   ofstream datafile;
   // create filename
@@ -144,7 +141,7 @@ void exportTable( const Matrix<Double>& block,
 	   << nOfFreqChan
 	   << endl;
   datafile << "#" << endl;
-  for ( Int col ( -1 ); col < nOfAntennas; col++ ) {
+  for ( int col ( -1 ); col < nOfAntennas; col++ ) {
     if ( col == -1 ) {
       datafile << "#Freq"
 	       << "   \t"
@@ -163,12 +160,12 @@ void exportTable( const Matrix<Double>& block,
   datafile << "\n" << flush;
   // FILL FIELDS WITH DATA **************
   // Display progress
-  LOPES::ProgressBar bar ( nOfFreqChan );
+  CR::ProgressBar bar ( nOfFreqChan );
   bar.update( 0 );
   // loop across individual channels
-  for ( Int chan ( 0 ); chan < nOfFreqChan; chan++ ) {
+  for ( int chan ( 0 ); chan < nOfFreqChan; chan++ ) {
     // loop across frequency column (ant=-1) and antennas (ant!=-1)
-    for ( Int ant ( -1 ); ant < nOfAntennas; ant++ ) {
+    for ( int ant ( -1 ); ant < nOfAntennas; ant++ ) {
       if ( ant == -1 ) {
 	datafile << frequencies( chan )
 		 << "\t"
@@ -199,7 +196,7 @@ void setParameters()
 {
   // User-defined Parameters
   Bool set (False);
-  Int KSamples (0);
+  int KSamples (0);
   cout << " -- Enter Integer Value Parameters" << endl;
   // blocksize
   do {
@@ -240,7 +237,7 @@ int main()
   ITSCapture *capture = new ITSCapture ( makeFilenamesVector(),
 					 blocksize );
   dr = capture;
-  Int fileNumber ( 1 ); // number of the file (and block to be exported)
+  int fileNumber ( 1 ); // number of the file (and block to be exported)
   Char xport ('n'); // sentinel loop control
   do {
     cout << " Export block "

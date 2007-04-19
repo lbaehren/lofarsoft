@@ -20,7 +20,8 @@
 
 /* $Id: tPluginBase.cc,v 1.4 2006/07/12 10:13:16 bahren Exp $*/
 
-#include <lopes/Calibration/PluginBase.h>
+#include <templates.h>
+#include <Calibration/PluginBase.h>
 
 /*!
   \file tPluginBase.cc

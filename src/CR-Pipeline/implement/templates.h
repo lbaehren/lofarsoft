@@ -54,6 +54,7 @@
 #include <casa/Utilities/PtrHolder.cc>
 #include <scimath/Functionals/Function.cc>
 #include <scimath/Functionals/FunctionParam.cc>
+#include <scimath/Mathematics/FFTServer.cc>
 #include <images/Images/PagedImage.cc>
 
 namespace casa {
@@ -110,7 +111,7 @@ namespace casa {
 
   // casa/Utilities/BinarySearch
 
-  template int binarySearchBrackets<Vector<double>, double>(bool&, Vector<double> const&, double const&, unsigned int, int);
+  template int binarySearchBrackets (bool&, Vector<double> const&, double const&, unsigned int, int);
   
   // casa/Utilities/Copy
 
@@ -339,6 +340,11 @@ namespace casa {
   template class Function<Int, Double>;
   template class Function<Int, Complex>;
   template class Function<Double, DComplex>;
+
+  template ostream & operator<<(ostream &, Function<Double, Double> const &);
+
+  template class FFTServer<Float,Complex>;
+  template class FFTServer<Double, DComplex>;
  
   // ============================================================================
   //  images/implement

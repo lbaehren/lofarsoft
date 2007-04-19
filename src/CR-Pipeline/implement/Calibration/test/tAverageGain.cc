@@ -21,9 +21,8 @@
 /* $Id: tAverageGain.cc,v 1.7 2006/07/12 10:13:16 bahren Exp $ */
 
 // LOPES tools header files
-#include <lopes/Calibration/AverageGain.h>
-
-#include <casa/namespace.h>
+#include <templates.h>
+#include <Calibration/AverageGain.h>
 
 /*!
   \file tAverageGain.cc

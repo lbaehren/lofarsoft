@@ -36,15 +36,14 @@
 //casa header files
 #include <casa/Arrays.h>
 #include <casa/BasicSL/Complex.h>
-
-#include <lopes/Calibration/PluginBase.h>
-#include <lopes/Calibration/RFIMitigation.h>
-#include <lopes/Data/ITSCapture.h>
-#include <lopes/Data/LopesEvent.h>
-#include <lopes/IO/DataReader.h>
 #include <scimath/Mathematics/InterpolateArray1D.h>
 
-#include <casa/namespace.h>
+#include <templates.h>
+#include <Calibration/PluginBase.h>
+#include <Calibration/RFIMitigation.h>
+#include <Data/ITSCapture.h>
+#include <Data/LopesEvent.h>
+#include <IO/DataReader.h>
 
 // ------------------------------------------------------------------------------
 //

@@ -42,12 +42,11 @@
 #include <casa/BasicSL/Complex.h>
 
 // LOPES tools header files
-#include <lopes/Calibration/AntennaGain.h>
-#include <lopes/Calibration/BaselineGain.h>
-#include <lopes/Data/ITSCapture.h>
-#include <lopes/IO/DataReader.h>
-
-#include <casa/namespace.h>
+#include <templates.h>
+#include <Calibration/AntennaGain.h>
+#include <Calibration/BaselineGain.h>
+#include <Data/ITSCapture.h>
+#include <IO/DataReader.h>
 
 // --- Function prototypes -----------------------------------------------------
 

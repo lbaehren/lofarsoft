@@ -20,9 +20,10 @@
 
 /* $Id: tTVCalibrationPlugin.cc,v 1.2 2007/04/16 17:02:57 horneff Exp $*/
 
-#include <lopes/Calibration/TVCalibrationPlugin.h>
-#include <lopes/Analysis/FirstStagePipeline.h>
-#include <lopes/Data/LopesEventIn.h>
+#include <templates.h>
+#include <Calibration/TVCalibrationPlugin.h>
+#include <Analysis/FirstStagePipeline.h>
+#include <Data/LopesEventIn.h>
 
 
 /*!
@@ -39,7 +40,7 @@
 
 // -----------------------------------------------------------------------------
 
-using namespace LOPES;
+using namespace CR;
 
 FirstStagePipeline *Pipeline;
 LopesEventIn *lev;

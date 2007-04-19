@@ -20,11 +20,13 @@
 
 /* $Id: tCalTables.cc,v 1.4 2006/11/10 16:54:24 horneff Exp $*/
 
-#include <lopes/Calibration/CalTableCreator.h>
-#include <lopes/Calibration/CalTableWriter.h>
-#include <lopes/Calibration/CalTableReader.h>
-#include <tables/Tables/ExprNodeSet.h>
 #include <casa/Utilities/ValType.h>
+#include <tables/Tables/ExprNodeSet.h>
+
+#include <templates.h>
+#include <Calibration/CalTableCreator.h>
+#include <Calibration/CalTableWriter.h>
+#include <Calibration/CalTableReader.h>
 
 
 /*!

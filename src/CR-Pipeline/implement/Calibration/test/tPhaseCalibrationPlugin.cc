@@ -21,23 +21,21 @@
 /* $Id: tPhaseCalibrationPlugin.cc,v 1.5 2007/03/26 14:23:34 singh Exp $*/
 
 #include <casa/aips.h>
-#include <casa/Exceptions/Error.h>
-#include <lopes/Calibration/PhaseCalibration.h>
-
-#include <lopes/Data/ITSCapture.h>
-#include <lopes/Data/LopesEvent.h>
-
-#include <lopes/Data/LopesEventIn.h>
-#include <lopes/IO/DataReader.h>
-
-#include <casa/namespace.h>
 #include <casa/Arrays.h>
 #include <casa/BasicSL/Complex.h>
-#include <lopes/Calibration/PluginBase.h>
-#include <lopes/Calibration/PhaseCalibrationPlugin.h>
+#include <casa/Exceptions/Error.h>
+
+#include <templates.h>
+#include <Calibration/PhaseCalibration.h>
+#include <Calibration/PluginBase.h>
+#include <Calibration/PhaseCalibrationPlugin.h>
+#include <Data/ITSCapture.h>
+#include <Data/LopesEvent.h>
+#include <Data/LopesEventIn.h>
+#include <IO/DataReader.h>
 
 
-using namespace LOPES;
+using namespace CR;
 
 /*!
   \file tPhaseCalibrationPlugin.cc
@@ -162,27 +160,27 @@ PhaseCalibrationPlugin Phclpgin;
 //---------creating  vector and matrices with input arrays --------------
 //************************************************************************
 
-  for( Int i=0; i< 3; i++ ) {
-   for( Int j =0; j<2; j++ ) {
+  for( int i=0; i< 3; i++ ) {
+   for( int j =0; j<2; j++ ) {
       frequencyRanges(i,j) = frequencyRange[i][j] ;
    }
   }
   
- for( Int m =0; m<3; m++ ) {
-     for( Int n =0; n<10; n++ ){
+ for( int m =0; m<3; m++ ) {
+     for( int n =0; n<10; n++ ){
 	 expectedPhases(m,n) = expectedPhase[m][n];
      }
  }
        
- for( Int k=0; k<3; k++){
-     for( Int l=0; l<10; l++){
+ for( int k=0; k<3; k++){
+     for( int l=0; l<10; l++){
 	 phaseGradient(k,l) = Grad[k][l];
      }
  }
 
 Double interval = 0.0 ;
  
-for( Int k =0; k< row ; k++ ){
+for( uInt k =0; k< row ; k++ ){
 
    interval = (80-40)*1000000/row ;
 
@@ -191,18 +189,14 @@ for( Int k =0; k< row ; k++ ){
     }
 //cout<< " Frequency Values :" <<frequencyValues<< endl;
 
- for( Int k=0; k<6; k++){
+ for( int k=0; k<6; k++){
    	 sampleJumps(k) = sampleJump[k];
      }
  
-
-Double sampleRate = 80000000 ;
-
- Int referenceAntenna = 0 ;
-
-Double badnessWeight = 0.5 ;
-
-Double badnessThreshold = 0.15 ;
+// Double sampleRate = 80000000 ;
+//  int referenceAntenna = 0 ;
+// Double badnessWeight = 0.5 ;
+// Double badnessThreshold = 0.15 ;
 
 Vector<Bool> AntennaReturn ;
 
@@ -230,7 +224,7 @@ AntennaReturn =(Phclpgin.calcWeights( spectra ));
 
 int main ()
 {
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
 
   // Test for the constructor(s)
   {

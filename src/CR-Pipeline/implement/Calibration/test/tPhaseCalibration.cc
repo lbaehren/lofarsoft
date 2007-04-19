@@ -33,21 +33,16 @@
   \date 2006/07/03
 */
 
-// casa header files
-
 #include <casa/Arrays.h>
 #include <casa/BasicSL/Complex.h>
-#include <lopes/Calibration/PluginBase.h>
-#include <lopes/Calibration/PhaseCalibration.h>
 
-#include <lopes/Data/ITSCapture.h>
-#include <lopes/Data/LopesEvent.h>
-
-#include <lopes/Data/LopesEventIn.h>
-#include <lopes/IO/DataReader.h>
-
-#include <casa/namespace.h>
-
+#include <templates.h>
+#include <Calibration/PluginBase.h>
+#include <Calibration/PhaseCalibration.h>
+#include <Data/ITSCapture.h>
+#include <Data/LopesEvent.h>
+#include <Data/LopesEventIn.h>
+#include <IO/DataReader.h>
 
 // -----------------------------------------------------------------------------
 // 
@@ -191,31 +186,31 @@ logfile1p.close();
 	 phaseGradient(k,l) = Grad[k][l];
      }
  }
-
-Double interval = 0.0 ;
  
-for( Int k =0; k< row ; k++ ){
-
+ Double interval = 0.0 ;
+ 
+ for( uInt k =0; k< row ; k++ ){
+   
    interval = (80-40)*1000000/row ;
-
-    frequencyValues(k)= 40*1000000 + interval*k ;
-
-    }
-//cout<< " Frequency Values :" <<frequencyValues<< endl;
-
- for( Int k=0; k<6; k++){
-   	 sampleJumps(k) = sampleJump[k];
-     }
+   
+   frequencyValues(k)= 40*1000000 + interval*k ;
+   
+ }
+ //cout<< " Frequency Values :" <<frequencyValues<< endl;
  
-
-Double sampleRate = 80000000 ;
-
+ for( Int k=0; k<6; k++){
+   sampleJumps(k) = sampleJump[k];
+ }
+ 
+ 
+ Double sampleRate = 80000000 ;
+ 
  Int referenceAntenna = 0 ;
-
-Double badnessWeight = 0.5 ;
-
-Double badnessThreshold = 0.15 ;
-
+ 
+ Double badnessWeight = 0.5 ;
+ 
+ Double badnessThreshold = 0.15 ;
+ 
 Vector<Bool> AntennaReturn =(phcl.getAntennaReturn( spectra,
   		     				    frequencyRanges,
 		     				    expectedPhases,

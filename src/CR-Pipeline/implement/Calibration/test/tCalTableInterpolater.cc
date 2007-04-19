@@ -23,7 +23,8 @@
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
 
-#include <lopes/Calibration/CalTableInterpolater.h>
+#include <templates.h>
+#include <Calibration/CalTableInterpolater.h>
 
 /*!
   \file tCalTableInterpolater.cc

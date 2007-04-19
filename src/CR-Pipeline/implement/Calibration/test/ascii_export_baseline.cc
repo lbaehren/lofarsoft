@@ -22,22 +22,21 @@
 #include <casa/aips.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/Matrix.h>
-// #include <casa/Arrays/ArrayIO.h>
-// #include <casa/Arrays/ArrayMath.h>
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/Arrays/Matrix.h>
 #include <scimath/Mathematics.h>
-// #include <casa/BasicSL/Complex.h>
 
 // LOPES-tools header files
-#include <lopes/Calibration/BaselineGain.h>
-#include <lopes/Calibration/AverageGain.h>
-#include <lopes/IO/DataReader.h>
-#include <lopes/Data/ITSCapture.h>
-#include <lopes/Utilities/ProgressBar.h>
+#include <templates.h>
+#include <Calibration/BaselineGain.h>
+#include <Calibration/AverageGain.h>
+#include <IO/DataReader.h>
+#include <Data/ITSCapture.h>
+#include <Utilities/ProgressBar.h>
 
-#include <casa/namespace.h>
+using casa::Matrix;
+using casa::Vector;
 
 /*!
   \file ascii_export_baseline.cc
@@ -79,12 +78,12 @@
   \return normSpectraReal -- normalized spectra
  */
 Matrix<Double> makeNormalization (DataReader *dr,
-				 AverageGain& avgg );
+				  AverageGain& avgg );
 
 /*!
   \brief Set up the vector of frequency values
 */
-Vector<Double> makeFreqVector (const Int& nOfChan);
+Vector<Double> makeFreqVector (const int& nOfChan);
 
 // --- Global variables ------------------------------------------------------
 
@@ -92,15 +91,15 @@ Vector<Double> makeFreqVector (const Int& nOfChan);
 // These must be changed if a new set of data is used
 const Double MIN_FREQ ( 0.0 ); // 0.0 MHz
 const Double MAX_FREQ ( 40000000 ); // 40 MHz
-const Int N_TOT_SAMP ( 33554432 ); // 32 MSamples (32 * 2^20)
-const Int N_ANT ( 10 ); // number of antennas; specific to the dataset
-Int blocksize; // sample width per block
-Int nOfTotBlocks; // number of blocks in whole data set (depends on blocksize)
-Int nOfBlocks; // number of blocks to be scanned for a baseline
-Int nOfTotGroups; // number of groups of blocks in whole dataset
-Int nOfGroups; // number of groups to be averaged
-Int nOfSubBands; // number of subbands; for baseline scanning
-Int whichMethod; // scanning method (MED=0 MEAN=1, MIN=2)
+const int N_TOT_SAMP ( 33554432 ); // 32 MSamples (32 * 2^20)
+const int N_ANT ( 10 ); // number of antennas; specific to the dataset
+int blocksize; // sample width per block
+int nOfTotBlocks; // number of blocks in whole data set (depends on blocksize)
+int nOfBlocks; // number of blocks to be scanned for a baseline
+int nOfTotGroups; // number of groups of blocks in whole dataset
+int nOfGroups; // number of groups to be averaged
+int nOfSubBands; // number of subbands; for baseline scanning
+int whichMethod; // scanning method (MED=0 MEAN=1, MIN=2)
 Bool doNormalization; // if true, export a normalized spectrum
 IPosition dimGains ( 2 ); // dimensions of the gain curves matrix (2D)
 
@@ -161,7 +160,7 @@ String stringMethod()
 /*!
   \brief Generate a frequency reference vector
 */
-Vector<Double> makeFreqVector( const Int& nOfChan )
+Vector<Double> makeFreqVector( const int& nOfChan )
 {
   Vector<Double> freqVector ( nOfChan, 0.0 ); // length=nOfChan, initialize zero
   // calculate frequency sub band interval
@@ -169,7 +168,7 @@ Vector<Double> makeFreqVector( const Int& nOfChan )
   // Declare frequency storage double. Set to midpoint of first channel.
   Double frequency = MIN_FREQ + ( interval / 2 );
   // loop through each band and calculate the midpoint frequency
-  for ( Int chan ( 0 ); chan < nOfChan; chan++ ) {
+  for ( int chan ( 0 ); chan < nOfChan; chan++ ) {
     freqVector( chan ) = frequency;
     frequency += interval; // increment frequency by one channel interval
   } // end for: chan
@@ -186,12 +185,12 @@ Vector<Double> makeFreqVector( const Int& nOfChan )
 // fileNumber -- number of file to be exported (1st, 2nd, etc)
 // isNormSpectra -- whether or not data being exported is normalized spectra
 void exportTable( const Matrix<Double>& block,
-		  const Int& fileNumber,
+		  const int& fileNumber,
 		  const Bool& isNormSpectra )
 {
   // use nOfAntennas instead of global N_ANT, to be flexible for errors
-  Int nOfAntennas ( block.ncolumn() );
-  Int nOfFreqChan ( block.nrow() );
+  int nOfAntennas ( block.ncolumn() );
+  int nOfFreqChan ( block.nrow() );
   Vector<Double> frequencies ( makeFreqVector( nOfFreqChan ) );
   ostringstream filename;
   ofstream datafile;
@@ -230,7 +229,7 @@ void exportTable( const Matrix<Double>& block,
 	   << nOfGroups
 	   << endl;
   datafile << "#" << endl;
-  for ( Int col ( -1 ); col < nOfAntennas; col++ ) {
+  for ( int col ( -1 ); col < nOfAntennas; col++ ) {
     if ( col == -1 ) {
       datafile << "#Freq"
 	       << "   \t"
@@ -249,12 +248,12 @@ void exportTable( const Matrix<Double>& block,
   datafile << "\n" << flush;
   // FILL FIELDS WITH DATA **************
   // Display progress
-  LOPES::ProgressBar bar ( nOfFreqChan );
+  CR::ProgressBar bar ( nOfFreqChan );
   bar.update( 0 );
   // loop across individual channels
-  for ( Int chan ( 0 ); chan < nOfFreqChan; chan++ ) {
+  for ( int chan ( 0 ); chan < nOfFreqChan; chan++ ) {
     // loop across frequency column (ant=-1) and antennas (ant!=-1)
-    for ( Int ant ( -1 ); ant < nOfAntennas; ant++ ) {
+    for ( int ant ( -1 ); ant < nOfAntennas; ant++ ) {
       if ( ant == -1 ) {
 	datafile << frequencies( chan )
 		 << "   \t"
@@ -299,7 +298,7 @@ void setParameters()
   Bool set (False);
   cout << " -- Enter Integer Value Parameters" << endl;
   // blocksize
-  Int KSamples (0);
+  int KSamples (0);
   do {
     cout << " blocksize (in KSamples): ";
     cin >> KSamples;
@@ -470,7 +469,7 @@ void makeBaselines( DataReader *dr,
   avgg.reset();
 //   }
   cout << " -- Scanning for Baselines..." << endl;
-  LOPES::ProgressBar bar ( nOfGroups );
+  CR::ProgressBar bar ( nOfGroups );
   bar.update( 0 );
   // Each iteration of the outer for-loop scans a subgroup, then adds the
   //   baseline gain curve to the AverageGain object. The outer for-loop
@@ -478,7 +477,7 @@ void makeBaselines( DataReader *dr,
   //   If nOfGroups is set to 1, the outer loop acts as if it isn't there.
   //   This is what we want to happen if the user doesn't want to average
   //   the baselines.
-  for ( Int grp ( 0 ); grp < nOfGroups; grp++ ) {
+  for ( int grp ( 0 ); grp < nOfGroups; grp++ ) {
 //     // Reset the baseline gains so that the subgrp is scanned afresh.
 //     ampg.resetBaselineGains();
     // Inner for-loop.
@@ -486,7 +485,7 @@ void makeBaselines( DataReader *dr,
     //   baseline and readjusts the stored baseline gain curve accordingly
     //   (always fitting a minimum). (In this loop we will count blocks from
     //   zero instead of 1 even though DataReader counts from 1.
-    for ( Int blck ( 0 ); blck < nOfBlocks; blck++ ) {
+    for ( int blck ( 0 ); blck < nOfBlocks; blck++ ) {
       avgg.extractBaselineGains( dr->fft() ); // scan fft spectra for min baselines
       dr->nextBlock(); // increment dr to next block
     } // end for: blck
@@ -536,7 +535,7 @@ int main()
        << " ---------------------------------------"
        << endl;
   // ************ Initial Build/Export ***************
-  Int fileNumber ( 1 ); // number of data set about to be built and exported
+  int fileNumber ( 1 ); // number of data set about to be built and exported
   cout << " -- Build and export 'gains"
        << fileNumber
        << ".dat'"
