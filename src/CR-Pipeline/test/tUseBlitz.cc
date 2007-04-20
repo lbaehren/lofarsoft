@@ -21,6 +21,8 @@
 /*!
   \file tUseBlitz.cc
 
+  \ingroup CR
+
   \brief A collection of tests for working with the Blitz++ library
 
   \author Lars B&auml;hren
@@ -39,6 +41,7 @@
 #include <blitz/array.h>
 
 using std::cout;
+using std::endl;
 using blitz::Array;
 using blitz::Range;
 
@@ -51,41 +54,41 @@ using blitz::Range;
 */
 int test_arrays ()
 {
-  cout << "\n[test_arrays]\n" << std::endl;
+  cout << "\n[test_arrays]\n" << endl;
 
   int nofFailedTests (0);
   int nelem (5);
   
-  cout << "[1] Create 1-dimensional arrays..." <<std::endl;
+  cout << "[1] Create 1-dimensional arrays..." <<endl;
   try {
     Array<int,1> arrInt (nelem);
     Array<float,1> arrFloat (nelem);
     Array<double,1> arrDouble (nelem);
     Array<std::complex<double>,1> arrComplex (nelem);
     
-    cout << arrInt    << std::endl;
-    cout << arrFloat  << std::endl;
-    cout << arrDouble << std::endl;
+    cout << arrInt    << endl;
+    cout << arrFloat  << endl;
+    cout << arrDouble << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  cout << "[2] Create 2-dimensional arrays..." <<std::endl;
+  cout << "[2] Create 2-dimensional arrays..." <<endl;
   try {
     Array<int,2> arrInt (10,20);
     Array<float,2> arrFloat (10,20);
     Array<double,2> arrDouble (10,20);
 
-    cout << arrInt    << std::endl;
-    cout << arrFloat  << std::endl;
-    cout << arrDouble << std::endl;
+    cout << arrInt    << endl;
+    cout << arrFloat  << endl;
+    cout << arrDouble << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  cout << "[3] Construction from other array..." <<std::endl;
+  cout << "[3] Construction from other array..." <<endl;
   try {
     Array<int,2> arrInt (10,20);
     Array<float,2> arrFloat (10,20);
@@ -94,7 +97,7 @@ int test_arrays ()
     Array<int,2> arrIntCopy (arrInt);
     Array<float,2> arrFloatCopy (arrFloat);
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
@@ -114,18 +117,18 @@ int test_arrays ()
 */
 int test_mathematics ()
 {
-  cout << "\n[test_mathematics]\n" << std::endl;
+  cout << "\n[test_mathematics]\n" << endl;
 
   int nofFailedTests (0);
 
-  cout << "[1] Mathematical operations on individual numbers..." <<std::endl;
+  cout << "[1] Mathematical operations on individual numbers..." <<endl;
   try {
     double a (+1.0);
     double b (-2.0);
     std::complex<double> c (0.5,4.0);
     double result (0.0);
 
-    cout << "M_PI = " << M_PI << std::endl;
+    cout << "M_PI = " << M_PI << endl;
 
     result = a+b;
     result = a-b;
@@ -140,10 +143,10 @@ int test_mathematics ()
     result = cos(b);
     
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
   }
   
-  cout << "[2] Mathematical operations on array alements..." <<std::endl;
+  cout << "[2] Mathematical operations on array alements..." <<endl;
   try {
     int nelem (20);
     Array<double,1> arr (nelem);
@@ -165,10 +168,10 @@ int test_mathematics ()
     }
     
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
   }
   
-  cout << "[3] Mathematical operations on arrays..." <<std::endl;
+  cout << "[3] Mathematical operations on arrays..." <<endl;
   try {
     int nelem (20);
     Array<double,1> arr (nelem);
@@ -177,12 +180,12 @@ int test_mathematics ()
       arr(i) = sin(0.5*i);
     }
     // show the contents of the array
-    cout << arr << std::endl;
+    cout << arr << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
   }
   
-  cout << "[4] Multi-element operations" <<std::endl;
+  cout << "[4] Multi-element operations" <<endl;
   try {
     int nelem (10);
     Array<double,2> cartesian (nelem,3);
@@ -196,10 +199,10 @@ int test_mathematics ()
     cartesian(Range(Range::all()),1) = spherical(Range(Range::all()),0)*sin(spherical(Range(Range::all()),1))*sin(spherical(Range(Range::all()),2));
     cartesian(Range(Range::all()),2) = spherical(Range(Range::all()),0)*cos(spherical(Range(Range::all()),2));
     // show the contents of the arrays
-    cout << spherical << std::endl;
-    cout << cartesian << std::endl;
+    cout << spherical << endl;
+    cout << cartesian << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
   }
   
   return nofFailedTests;
@@ -225,14 +228,14 @@ int test_mathematics ()
 */  
 int test_io ()
 {
-  cout << "\n[test_io]\n" << std::endl;
+  cout << "\n[test_io]\n" << endl;
 
   int nofFailedTests (0);
   int nelem (5);
   std::ofstream outfile;
   std::ifstream infile;
 
-  cout << "[1] Testing I/O of Array<double,1>..." << std::endl;
+  cout << "[1] Testing I/O of Array<double,1>..." << endl;
   try {
     Array<double,1> vect (nelem);
     
@@ -242,7 +245,7 @@ int test_io ()
 
     // Write the data to a file on disk
     outfile.open("blitzdata1.data");
-    outfile << vect << std::endl;
+    outfile << vect << endl;
     outfile.close();
 
     // Read the data back in from disk ...
@@ -253,16 +256,16 @@ int test_io ()
     infile.close();
     
     // ... and compare the vectors
-    cout << "-- Original data vector:" << std::endl;
-    cout << vect         << std::endl;
-    cout << "-- Data vector written to disk and read back in:" << std::endl;
-    cout << vectFromDisk << std::endl;
+    cout << "-- Original data vector:" << endl;
+    cout << vect         << endl;
+    cout << "-- Data vector written to disk and read back in:" << endl;
+    cout << vectFromDisk << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   } 
 
-  cout << "[2] Testing I/O of Array<double,2>..." << std::endl;
+  cout << "[2] Testing I/O of Array<double,2>..." << endl;
   try {
     Array<double,2> matrix (nelem,nelem);
     int i,j,n(1);
@@ -276,7 +279,7 @@ int test_io ()
 
     // Write the data to a file on disk
     outfile.open("blitzdata2.data");
-    outfile << matrix << std::endl;
+    outfile << matrix << endl;
     outfile.close();
 
     // Read the data back in from disk ...
@@ -287,12 +290,12 @@ int test_io ()
     infile.close();
     
     // ... and compare the vectors
-    cout << "-- Original data vector:" << std::endl;
-    cout << matrix         << std::endl;
-    cout << "-- Data vector written to disk and read back in:" << std::endl;
-    cout << vectFromDisk << std::endl;
+    cout << "-- Original data vector:" << endl;
+    cout << matrix         << endl;
+    cout << "-- Data vector written to disk and read back in:" << endl;
+    cout << vectFromDisk << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   } 
 
@@ -303,6 +306,8 @@ int test_io ()
 
 /*!
   \brief Test conversion between Blitz++ and C++ array encapsulated in function
+
+  \param nelem -- Number of elements in the data array
 
   \return data -- Pointer to the data
 */
@@ -323,77 +328,122 @@ double* blitz2cpp (unsigned int const &nelem)
 }
 
 /*!
+  \brief Test conversion between Blitz++ and C++ array encapsulated in function
+
+  \retval data -- Pointer to the data
+  \param nelem -- Number of elements in the data array
+*/
+void blitz2cpp (double *data,
+		unsigned int const &nelem)
+{
+  cout << "-- Creating Blitz++ array for the original data..." << endl;
+  Array<double,1> array1D (nelem);
+
+  cout << "-- Populating Blitz++ array with some data..." << endl;
+  for (unsigned int n(0); n<nelem; n++) {
+    array1D(n) = 0.5*(n+1);
+  }
+
+  cout << "-- Copying data from Blitz++ to C++ array..." << endl;
+  data = array1D.data();
+}
+
+/*!
   \brief Test conversion from and to C++ arrays
+
+  The Blitz++ library provides methods by which (i) a Blitz++ array can be
+  contructed from pre-existing data and (ii) the contents of a Blitz++ array can
+  be cast into a C++ array. These methods are used e.g. in the dalLopesEvent
+  class, where internal storage and handling of the data is done using Blitz++
+  array, but we still need alternate way to export the data to another module.
   
   \return nofFailedTests -- The number of failed tests
 */
 int test_cppArrays ()
 {
-  cout << "\n[test_cppArrays]\n" << std::endl;
+  cout << "\n[test_cppArrays]\n" << endl;
 
   int nofFailedTests (0);
   int nelem (6);
   double data[] = {1,2,3,4,5,6};
 
-  cout << "[1] Construct 1-dim Blitz array from C++ array..." << std::endl;
+  cout << "[1] Construct 1-dim Blitz array from C++ array..." << endl;
   try {
-    cout << "-- Creating Blitz++ array from C++ array" << std::endl;
+    cout << "-- Creating Blitz++ array from C++ array" << endl;
     Array<double,1> array1D (data, blitz::shape(nelem), blitz::neverDeleteData);
     // display the newly created array
-    std::cout << array1D << std::endl;
+    std::cout << array1D << endl;
     // backwards conversion to C++ array
-    cout << "-- Creating C++ array from Blitz++ array" << std::endl;
+    cout << "-- Creating C++ array from Blitz++ array" << endl;
     double *cppArray;
     cppArray = new double [nelem];
     cppArray = array1D.data();
     for (int n(0); n<nelem; n++) {
       std::cout << "\t" << cppArray[n];
     }
-    std::cout << std::endl;
+    std::cout << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   } 
 
-  cout << "[2] Construct 2-dim Blitz array from C++ array..." << std::endl;
+  cout << "[2] Construct 2-dim Blitz array from C++ array..." << endl;
   try {
     Array<double,2> array2D (data, blitz::shape(2,3), blitz::neverDeleteData);
     // display the newly created array
-    std::cout << array2D << std::endl;
+    std::cout << array2D << endl;
     // backwards conversion to C++ array
-    cout << "-- Creating C++ array from Blitz++ array" << std::endl;
+    cout << "-- Creating C++ array from Blitz++ array" << endl;
     double *cppArray;
     cppArray = new double [nelem];
     cppArray = array2D.data();
     for (int n(0); n<nelem; n++) {
       std::cout << "\t" << cppArray[n];
     }
-    std::cout << std::endl;
+    std::cout << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   } 
 
-  cout << "[3] Construct 2-dim Blitz array from C++ array..." << std::endl;
+  cout << "[3] Construct 2-dim Blitz array from C++ array..." << endl;
   try {
     Array<double,2> array1D (data, blitz::shape(3,2), blitz::neverDeleteData);
     // display the newly created array
-    std::cout << array1D << std::endl;
+    std::cout << array1D << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   } 
 
-  cout << "[4] Retrieve pointer to array from function..." << std::endl;
+  cout << "[4] Retrieve pointer to array from function..." << endl;
   try {
     double *data = blitz2cpp (nelem);
     // display the contents of the data array
     for (int n(0); n<nelem; n++) {
       std::cout << "\t" << data[n];
     }
-    std::cout << std::endl;
+    std::cout << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
+    nofFailedTests++;
+  } 
+
+  cout << "[5] Retrieve pointer to array from function..." << endl;
+  try {
+    cout << "-- Declare the data array..." << endl;
+    double *data;
+    data = new double [nelem];
+    // retrieve the data
+    cout << "-- Retrieve the data from function..." << endl;
+    blitz2cpp (data, nelem);
+    // display the contents of the data array
+    for (int n(0); n<nelem; n++) {
+      std::cout << "\t" << data[n];
+    }
+    std::cout << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
     nofFailedTests++;
   } 
 
@@ -420,7 +470,7 @@ int main ()
   nofFailedTests += test_cppArrays ();
 
   cout << "\n[tUseBlitz] Number of failed tests = "
-	    << nofFailedTests << std::endl;
+	    << nofFailedTests << endl;
 
   return nofFailedTests;
 }

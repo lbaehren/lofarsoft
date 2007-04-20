@@ -45,6 +45,8 @@
 /*!
   \file tUseLattices.cc
 
+  \ingroup CR
+
   \brief A simple test for external build against liblattices
 
   \author Lars B&auml;hren

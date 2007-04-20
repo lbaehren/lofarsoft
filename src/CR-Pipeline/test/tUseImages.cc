@@ -37,6 +37,8 @@
 /*!
   \file tUseImages.cc
 
+  \ingroup CR
+
   \brief A simple test for external build against libimages
 
   \author Lars B&auml;hren

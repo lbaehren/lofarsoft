@@ -26,6 +26,8 @@
 /*!
   \file tUseFFTW3.cc
 
+  \ingroup CR
+
   \brief A simple test for external build against libfftw3
 
   \author Lars B&auml;hren

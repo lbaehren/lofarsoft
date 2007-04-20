@@ -24,6 +24,8 @@
   \author Lars B&auml;hren
 
   \date 2007/02/19
+
+  \defgroup CR
 */
 
 // Header files

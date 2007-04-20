@@ -27,6 +27,8 @@
 /*!
   \file tUseCFITSIO.cc
 
+  \ingroup CR
+
   \brief A simple test for external build against libcfitsio
 
   \author Lars B&auml;hren

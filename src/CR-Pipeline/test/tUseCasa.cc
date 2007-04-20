@@ -32,6 +32,8 @@
 /*!
   \file tUseCasa.cc
 
+  \ingroup CR
+
   \brief A simple test for external build against libcasa
 
   \author Lars B&auml;hren
