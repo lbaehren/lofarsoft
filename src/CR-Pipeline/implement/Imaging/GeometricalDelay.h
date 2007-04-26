@@ -321,6 +321,16 @@ namespace CR { // NAMESPACE CR -- BEGIN
     }
     
     // ------------------------------------------------------------------ Methods
+
+    /*
+      \brief Compute an individual delay
+     */
+    double calcDelay (double const &xSky,
+		      double const &ySky,
+		      double const &zSky,
+		      double const &xAntenna,
+		      double const &yAntenna,
+		      double const &zAntenna);
     
     /*!
       \brief Get the name of the class

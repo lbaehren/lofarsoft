@@ -200,7 +200,15 @@ namespace CR { // NAMESPACE CR -- BEGIN
     \return norm -- The L1-Norm for the vector
   */
   double L1Norm (const blitz::Array<double,1> &vec);
-
+  
+  /*!
+    \brief Compute the L1-Norm of a vector
+    
+    \todo not yet implemented
+  */
+  double L1Norm (double const &vec,
+		 unsigned int const &nelem);
+  
   /*!
     \brief Compute the L2-Norm of a vector
 
@@ -220,6 +228,14 @@ namespace CR { // NAMESPACE CR -- BEGIN
   */
   double L2Norm (const blitz::Array<double,1> &vec);
 
+  /*!
+    \brief Compute the L2-Norm of a vector
+
+    \todo not yet implemented
+  */
+  double L2Norm (double const &vec,
+		 unsigned int const &nelem);
+  
   // ============================================================================
   //
   //  Coordinate conversions

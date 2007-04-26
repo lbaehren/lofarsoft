@@ -39,11 +39,39 @@ namespace CR { // NAMESPACE CR -- BEGIN
     return sum(fabs(vec));
   }
 
+  // --------------------------------------------------------------------- L1Norm
+
+  double L1Norm (double const &vec,
+		 unsigned int const &nelem)
+  {
+    double sum (0.0);
+
+    for (unsigned int n(0); n<nelem; n++) {
+      sum += fabs(vec[n]);
+    }
+
+    return sum;
+  }
+
   // --------------------------------------------------------------------- L2Norm
 
   double L2Norm (const blitz::Array<double,1> &vec)
   {
     return sqrt(sum(pow2(vec)));
+  }
+
+  // --------------------------------------------------------------------- L2Norm
+
+  double L2Norm (double const &vec,
+		 unsigned int const &nelem)
+  {
+    double sum2 (0.0);
+
+    for (unsigned int n(0); n<nelem; n++) {
+      sum2 += vec[n]*vec[n];
+    }
+
+    return sqrt (sum2);
   }
 
   // ============================================================================

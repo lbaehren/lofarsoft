@@ -192,7 +192,31 @@ namespace CR { // NAMESPACE CR -- BEGIN
     delays_p.resize (nofAntennaPositions(),nofSkyPositions());
     delays_p = calcDelays();
   }
-  
+
+  // ------------------------------------------------------------------ calcDelay
+
+  double GeometricalDelay::calcDelay (double const &xSky,
+				      double const &ySky,
+				      double const &zSky,
+				      double const &xAntenna,
+				      double const &yAntenna,
+				      double const &zAntenna)
+  {
+    double delay (0.0);
+    double skyPosition[] = {xSky,ySky,zSky};
+    double *diff[3];
+    
+    diff[0] = xSky-xAntenna;
+    diff[1] = ySky-yAntenna;
+    diff[2] = zSky-zAntenna;
+    
+    delay = (L2Norm(diff,3)-L2Norm(skyPosition,3))/lightspeed;
+    
+    return delay;
+  }
+
+  // ----------------------------------------------------------------- calcDelays
+
   blitz::Array<double,2> GeometricalDelay::calcDelays ()
   {
     int nAnt (0);
