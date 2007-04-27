@@ -206,7 +206,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     \todo not yet implemented
   */
-  double L1Norm (double const &vec,
+  double L1Norm (double const *vec,
 		 unsigned int const &nelem);
   
   /*!
@@ -233,7 +233,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
     \todo not yet implemented
   */
-  double L2Norm (double const &vec,
+  double L2Norm (double const *vec,
 		 unsigned int const &nelem);
   
   // ============================================================================

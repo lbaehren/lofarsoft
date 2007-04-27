@@ -41,7 +41,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
   // --------------------------------------------------------------------- L1Norm
 
-  double L1Norm (double const &vec,
+  double L1Norm (double const *vec,
 		 unsigned int const &nelem)
   {
     double sum (0.0);
@@ -62,7 +62,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
   // --------------------------------------------------------------------- L2Norm
 
-  double L2Norm (double const &vec,
+  double L2Norm (double const *vec,
 		 unsigned int const &nelem)
   {
     double sum2 (0.0);
