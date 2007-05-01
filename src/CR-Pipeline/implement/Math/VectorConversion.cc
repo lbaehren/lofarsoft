@@ -175,8 +175,8 @@ namespace CR { // Namespace CR -- begin
     Vector<double> cartesian(3);
     uint shape = azel.nelements();
     double radius = 1.0;
-    double az = LOPES::deg2rad(azel(0));   //  both angles are provided in deg
-    double el = LOPES::deg2rad(azel(1));   //
+    double az = CR::deg2rad(azel(0));   //  both angles are provided in deg
+    double el = CR::deg2rad(azel(1));   //
     
     /* Check if a source distance is provided. */
     if (shape == 3 && azel(2) > 0) {
@@ -201,8 +201,8 @@ namespace CR { // Namespace CR -- begin
   {
     Vector<double> cartesian(3);
     double radius = 1.0;
-    double phi    = LOPES::deg2rad(polar(0));
-    double theta  = LOPES::deg2rad(polar(1));
+    double phi    = CR::deg2rad(polar(0));
+    double theta  = CR::deg2rad(polar(1));
     
     if (polar.nelements() == 3) {
       radius = polar(2);
@@ -231,8 +231,8 @@ namespace CR { // Namespace CR -- begin
     blitz::Array<T,1> cartesian(3);
     uInt shape = azel.numElements();
     T radius = 1.0;
-    T az = LOPES::deg2rad(azel(0));
-    T el = LOPES::deg2rad(azel(1));
+    T az = CR::deg2rad(azel(0));
+    T el = CR::deg2rad(azel(1));
     
     /* Check if a source distance is provided. */
     if (shape == 3 && azel(2) > 0) {
@@ -252,8 +252,8 @@ namespace CR { // Namespace CR -- begin
   {
     blitz::Array<T,1> cartesian(3);
     T radius = 1.0;
-    T phi    = LOPES::deg2rad(polar(0));
-    T theta  = LOPES::deg2rad(polar(1));
+    T phi    = CR::deg2rad(polar(0));
+    T theta  = CR::deg2rad(polar(1));
     
     if (polar.numElements() == 3) {
       radius = polar(2);

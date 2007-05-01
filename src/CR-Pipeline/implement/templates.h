@@ -49,6 +49,7 @@
 
 // Implementation files
 
+#include <casa/Arrays/ArrayIO.cc>
 #include <casa/Arrays/ArrayLogical.cc>
 #include <casa/BasicMath/Functional.cc> 
 #include <casa/Utilities/BinarySearch.cc>
@@ -67,6 +68,10 @@ namespace casa {
   Complex pow (Complex const&, Float const&);
   DComplex pow (DComplex const&, Double const&);
   
+  // casa/Arrays/ArrayIO
+
+  template void readAsciiMatrix(Matrix<Double> &, Char const *);
+
   // casa/Arrays/ArrayLogical
 
   template bool allNearAbs (Array<double> const&, double const&, double);
@@ -75,17 +80,17 @@ namespace casa {
 
   // casa/Arrays/Vector
 
-/*   template class Array<Bool>; */
-/*   template class Array<Int>; */
-/*   template class Array<uInt>; */
-/*   template class Array<Short>; */
-/*   template class Array<uShort>; */
-/*   template class Array<Long>; */
-/*   template class Array<uLong>; */
-/*   template class Array<Float>; */
-/*   template class Array<Double>; */
-/*   template class Array<Complex>; */
-/*   template class Array<DComplex>; */
+  template class Array<Bool>;
+  template class Array<Int>;
+  template class Array<uInt>;
+  template class Array<Short>;
+  template class Array<uShort>;
+  template class Array<Long>;
+  template class Array<uLong>;
+  template class Array<Float>;
+  template class Array<Double>;
+  template class Array<Complex>;
+  template class Array<DComplex>;
 
 /*   template class Vector<Bool>; */
 /*   template class Vector<Int>; */

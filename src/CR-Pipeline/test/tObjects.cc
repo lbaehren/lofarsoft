@@ -52,6 +52,10 @@ protected:
   string className_p;
   int level_p;
 
+  inline void incrementLevel () {
+    level_p++;
+  }
+
 public:
 
   //! Default constructor
@@ -66,6 +70,11 @@ public:
   //! Get the object's hierarchy level
   inline int level () const {
     return level_p;
+  }
+
+  //! Set the name of the object's class
+  inline void setClassName (string const &name) {
+    className_p = name;
   }
 
   //! Get the name of the object's class
@@ -175,8 +184,8 @@ public:
   //! Constructor
   TemplatedChildChildClass ()
     : TemplatedChildClass<T>() {
-//     className_p = "TemplatedChildChildClass";
-//     level_p    += 1;
+    BaseClass::setClassName ("TemplatedChildChildClass");
+    BaseClass::incrementLevel();
   }
 
   //! Destructor
@@ -189,7 +198,9 @@ public:
   
 };
 
+
 // ==============================================================================
+// Template instantiation
 
 template class TemplatedChildClass<int>;
 template class TemplatedChildClass<float>;
@@ -199,7 +210,9 @@ template class TemplatedChildChildClass<int>;
 template class TemplatedChildChildClass<float>;
 template class TemplatedChildChildClass<double>;
 
+
 // ==============================================================================
+// Main function of the test program
 
 int main () {
 

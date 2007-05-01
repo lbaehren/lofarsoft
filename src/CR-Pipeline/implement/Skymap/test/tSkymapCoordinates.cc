@@ -20,7 +20,7 @@
 
 /* $Id: tSkymapCoordinates.cc,v 1.2 2007/04/05 16:42:26 bahren Exp $*/
 
-#include <lopes/Skymap/SkymapCoordinates.h>
+#include <Skymap/SkymapCoordinates.h>
 
 using std::cout;
 using std::endl;
@@ -29,14 +29,14 @@ using casa::DirectionCoordinate;
 using casa::LinearCoordinate;
 using casa::SpectralCoordinate;
 
-using LOPES::SkymapCoordinates;
+using CR::SkymapCoordinates;
 
 /*!
   \file tSkymapCoordinates.cc
 
   \ingroup Skymap
 
-  \brief A collection of test routines for LOPES::SkymapCoordinates
+  \brief A collection of test routines for CR::SkymapCoordinates
  
   \author Lars B&auml;hren
  
@@ -283,7 +283,7 @@ int test_conversions ()
         of its contents.
     <li>Retrival of the individual coordinate axes (direction, distance, time,
         frequency) -- either from the CoordinateSystem object or directory using
-	the functions in LOPES::SkymapCoordinates.
+	the functions in CR::SkymapCoordinates.
     <li>
   </ol>
   

@@ -56,8 +56,8 @@ ObservationMeta::~ObservationMeta () {}
 
 void ObservationMeta::setMetafile (String path)
 {
-  String filename = LOPES::fileFromPath(path);
-  String dirname  = LOPES::dirFromPath(path);
+  String filename = CR::fileFromPath(path);
+  String dirname  = CR::dirFromPath(path);
   filename_  = filename;
   directory_ = dirname;
 }
@@ -554,7 +554,7 @@ void ObservationMeta::parsePluginOptions (String str)
   unsigned int nofChars = str.length();
   unsigned int start=0;
   unsigned int loc=0;
-  Int num = LOPES::nofSubstrings(str,sep);
+  Int num = CR::nofSubstrings(str,sep);
   Vector<String> substrings(num);
 
   num = start = 0;
@@ -681,8 +681,8 @@ Time ObservationMeta::iso8601ToTime (const String iso)
 
   // extract date and time from the the iso8601 time string
   ObservationMeta::extractFromISO8601 (date,time,iso);
-  Vector<String> subDate = LOPES::getSubstrings(date,"/");
-  Vector<String> subTime = LOPES::getSubstrings(time,":");
+  Vector<String> subDate = CR::getSubstrings(date,"/");
+  Vector<String> subTime = CR::getSubstrings(time,":");
   
   try {
     year  = atoi (subDate(0).c_str());
@@ -880,8 +880,11 @@ Vector<Int> ObservationMeta::string2vector (String s)
   return vect;
 }
 
-String ObservationMeta::nameDatafile (Int iter, Int ant)
+// ------------------------------------------------------------------ nameDatafile
+
+String ObservationMeta::nameDatafile (Int iter,
+				      Int ant)
 {
   String file = datafiles_(iter,ant);
-  return LOPES::fileFromPath(file);
+  return CR::fileFromPath(file);
 }
