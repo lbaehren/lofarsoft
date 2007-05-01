@@ -48,12 +48,27 @@ if (CASA_INCLUDES)
   string (REGEX REPLACE /code/include "" CASA_BASEDIR ${CASA_INCLUDES})
 endif (CASA_INCLUDES)
 
+## Once we have detected the header files - and therewith the path to the root
+## of the CASA installation, we need to locate the library files to get the 
+## library directory
+
+find_path (AIPSLIBD version.o casa
+  PATHS ${CASA_BASEDIR}
+  PATH_SUFFIXES darwin/lib linux/lib linux_gnu/lib
+  )
+
 ## -----------------------------------------------------------------------------
 ## The is a number of packages, which are distrubuted along with CASA, so once
 ## we have been able to discover the location of the CASA base directory, we
 ## can set the paths to these additional packages
 
 ## [1] Glish -- 
+
+# GLISHROOT := $(AIPSROOT)/code/aips/glish
+# GLISHDEFS :=
+# GLISHINCD  = $(GLISHROOT)/include
+# GLISHLIBD  = $(AIPSARCH)/lib
+# GLISHLIB  := -lglish -ledit -lsos -lnpd
 
 if (HAVE_AIPS_H)
   ## locate the Glish header file
@@ -67,6 +82,24 @@ if (HAVE_AIPS_H)
     set (HAVE_GLISH_H true)
     STRING (REGEX REPLACE include/Glish include GLISH_INCLUDES ${GLISH_INCLUDES})
   endif (GLISH_INCLUDES)
+  ## search for additional components in the Glish directory
+  find_path (sos_includes alloc.h
+    PATHS ${CASA_INCLUDES}
+    PATH_SUFFIXES ../aips/glish/sos/include/sos)
+  if (sos_includes) 
+    string (REGEX REPLACE include/sos include sos_includes ${sos_includes})
+    list (APPEND CASA_INCLUDES ${sos_includes})
+  else (sos_includes)
+    message (STATUS "Unable to locate header files for sos!")
+  endif (sos_includes)
+  ##  locate the library files
+  find_library (libglish glish ${AIPSLIBD})
+  find_library (libedit edit ${AIPSLIBD})
+  find_library (libsos sos ${AIPSLIBD})
+  find_library (libnpd npd ${AIPSLIBD})
+  if (libglish)
+    list (APPEND GLISH_LIBRARIES ${libglish} ${libedit} ${libsos} ${libnpd})
+  endif (libglish)
 endif (HAVE_AIPS_H)
 
 ## [2] WCSLIB -- library for the dealing with world coordinate systems
@@ -112,11 +145,6 @@ endif (UNIX)
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
-
-find_path (AIPSLIBD version.o
-  PATHS ${CASA_BASEDIR}
-  PATH_SUFFIXES darwin/lib linux/lib linux_gnu/lib
-  )
 
 string (REGEX REPLACE /lib "" AIPSARCH ${AIPSLIBD})
 
@@ -370,6 +398,11 @@ if (CASA_libcasa)
 	    set (CASA_LIBRARIES ${LINKcomponents})
 	    if (CASA_libimages)
 	      set (CASA_LIBRARIES ${LINKimages})
+	      ##
+	      if (CASA_libtasking)
+		set (CASA_LIBRARIES ${LINKtasking})
+	      endif (CASA_libtasking)
+	      ##
 	    endif (CASA_libimages)
 	  endif (CASA_libcomponents)
 	endif (CASA_libcoordinates)
