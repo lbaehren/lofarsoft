@@ -20,8 +20,8 @@
 
 /* $Id: ObservationData.cc,v 1.8 2007/03/14 12:58:44 bahren Exp $ */
 
-#include <lopes/Observation/ObservationData.h>
-#include <lopes/Skymap/SkymapperTools.h>
+#include <Observation/ObservationData.h>
+#include <Skymap/SkymapperTools.h>
 
 // =============================================================================
 //

@@ -42,18 +42,18 @@
 #include <tables/Tables/TableRecord.h>
 
 // LOPES-Tools header files
-#include <lopes/IO/DataReaderTools.h>
-#include <lopes/Observation/ObservationData.h>
-#include <lopes/Skymap/Skymap.h>
-#include <lopes/Skymap/SkymapCoordinates.h>
-#include <lopes/Skymap/SkymapQuantity.h>
+#include <IO/DataReaderTools.h>
+#include <Observation/ObservationData.h>
+#include <Skymap/Skymap.h>
+#include <Skymap/SkymapCoordinates.h>
+#include <Skymap/SkymapQuantity.h>
 
 using casa::IPosition;
 using casa::Matrix;
 using casa::String;
 using casa::Vector;
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
 
 /*!
   \class Skymapper
@@ -395,6 +395,6 @@ class Skymapper {
 
 };
 
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end
 
 #endif /* _SKYMAPPER_H_ */

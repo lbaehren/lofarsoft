@@ -23,11 +23,11 @@
 #include <iostream>
 #include <casa/Containers/Record.h>
 #include <casa/Exceptions/Error.h>
-#include <lopes/Skymap/Skymapper.h>
-#include <lopes/Skymap/SkymapperTools.h>
-#include <lopes/Utilities/ProgressBar.h>
+#include <Skymap/Skymapper.h>
+#include <Skymap/SkymapperTools.h>
+#include <Utilities/ProgressBar.h>
 
-namespace LOPES {  // Namespace LOPES -- begin
+namespace CR {  // Namespace CR -- begin
   
   // ============================================================================
   //
@@ -241,7 +241,7 @@ namespace LOPES {  // Namespace LOPES -- begin
   */
 
   uint numLoop (0);
-  LOPES::ProgressBar bar (nofLoops);
+  CR::ProgressBar bar (nofLoops);
   IPosition start  (imageShape.nelements(),0);
   IPosition stride (imageShape.nelements(),1);
   Cube<Double> pixels;
@@ -341,4 +341,4 @@ void Skymapper::summary (std::ostream &os)
 //   os << " -- has pixel mask?      = " << image_p.hasPixelMask()  << std::endl;
 }
 
-}  // Namespace LOPES -- end
+}  // Namespace CR -- end

@@ -38,8 +38,8 @@
 #include <measures/Measures/MEpoch.h>
 #include <casa/Quanta.h>
 
-#include <lopes/Math/MathAlgebra.h>
-#include <lopes/Math/VectorConversion.h>
+#include <Math/MathAlgebra.h>
+#include <Math/VectorConversion.h>
 
 #include <casa/namespace.h>
 

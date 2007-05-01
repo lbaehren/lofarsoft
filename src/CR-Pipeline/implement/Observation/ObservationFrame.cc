@@ -21,7 +21,7 @@
 
 /* $Id: ObservationFrame.cc,v 1.2 2006/11/27 10:54:04 bahren Exp $ */
 
-#include <lopes/Observation/ObservationFrame.h>
+#include <Observation/ObservationFrame.h>
 
 using std::cout;
 using std::cerr;

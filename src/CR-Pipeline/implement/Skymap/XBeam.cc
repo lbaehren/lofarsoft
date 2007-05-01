@@ -20,7 +20,7 @@
 
 /* $Id: XBeam.cc,v 1.1 2007/03/19 12:29:47 bahren Exp $*/
 
-#include <lopes/Skymap/XBeam.h>
+#include <Skymap/XBeam.h>
 
 // =============================================================================
 //

@@ -20,7 +20,7 @@
 
 /* $Id */
 
-#include <lopes/Beamforming/Phasing.h>
+#include <Skymap/Phasing.h>
 
 Double Phasing::PI_p = 3.1415926535897932384626433832795;
 

@@ -1,5 +1,5 @@
 
-#ifndef _MATHALGEBRA_H
+#if !defined(_MATHALGEBRA_H)
 #define _MATHALGEBRA_H
 
 /* Id */

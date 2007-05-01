@@ -38,9 +38,9 @@
 #include <measures/Measures/MDirection.h>
 
 // Custom header files
-#include <lopes/Coordinates/TimeFreq.h>
-#include <lopes/IO/DataReader.h>
-#include <lopes/Observation/ObservationData.h>
+#include <Coordinates/TimeFreq.h>
+#include <IO/DataReader.h>
+#include <Observation/ObservationData.h>
 
 using casa::CoordinateSystem;
 using casa::DirectionCoordinate;
@@ -51,9 +51,9 @@ using casa::Matrix;
 using casa::SpectralCoordinate;
 using casa::Vector;
 
-using LOPES::TimeFreq;
+using CR::TimeFreq;
 
-namespace LOPES { // Namespace LOPES -- begin
+namespace CR { // Namespace CR -- begin
   
   /*!
     \class SkymapCoordinates
@@ -826,7 +826,7 @@ namespace LOPES { // Namespace LOPES -- begin
     
   };
   
-} // Namespace LOPES -- end
+} // Namespace CR -- end
 
 #endif /* SKYMAPCOORDINATES_H */
   

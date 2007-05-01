@@ -20,9 +20,9 @@
 
 /* $Id: SkymapCoordinates.cc,v 1.12 2007/04/19 14:22:46 horneff Exp $*/
 
-#include <lopes/Skymap/SkymapCoordinates.h>
+#include <Skymap/SkymapCoordinates.h>
 
-namespace LOPES { // Namespace LOPES -- begin
+namespace CR { // Namespace CR -- begin
   
   // ============================================================================
   //
@@ -792,4 +792,4 @@ namespace LOPES { // Namespace LOPES -- begin
     return status;
   }
   
-} // Namespace LOPES -- end
+} // Namespace CR -- end

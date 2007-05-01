@@ -19,9 +19,9 @@
  ***************************************************************************/
 
 
-#include <lopes/Observation/AntennaLayout.h>
+#include <Observation/AntennaLayout.h>
 
-namespace LOPES {  // namespace LOPES -- begin
+namespace CR {  // namespace CR -- begin
   
   // ============================================================================
   //
@@ -76,4 +76,4 @@ namespace LOPES {  // namespace LOPES -- begin
   //  Manipulation of the antenna layout table
   // ============================================================================
   
-}  //  namespace LOPES -- end
+}  //  namespace CR -- end

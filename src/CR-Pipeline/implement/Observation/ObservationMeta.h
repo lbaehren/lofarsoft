@@ -50,7 +50,7 @@
 #include <casa/Quanta/MVTime.h>
 #include <casa/OS/Time.h>
 
-#include <lopes/Utilities/StringTools.h>
+#include <Utilities/StringTools.h>
 
 #define LOPESMETA "lopeshdr.hdr"
 

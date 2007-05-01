@@ -42,7 +42,7 @@
 #include <measures/Measures/MeasRef.h>
 #include <measures/Measures/MeasTable.h>
 
-#include <lopes/Observation/ObservationData.h>
+#include <Observation/ObservationData.h>
 
 #include <casa/namespace.h>
 

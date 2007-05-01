@@ -38,7 +38,6 @@
 
 #include <Skymap/Phasing.h>
 #include <LopesBase/DataFrequency.h>
-#include <Math/Math.h>
 #include <Utilities/ProgressBar.h>
 
 #include <casa/namespace.h>

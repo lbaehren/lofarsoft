@@ -20,15 +20,11 @@
 
 /* $Id: ccBeam.cc,v 1.6 2007/04/20 14:48:26 horneff Exp $*/
 
-/*!
-  \class ccBeam
-*/
-
 #include <scimath/Mathematics.h>
 #include <scimath/Mathematics/FFTServer.h>
 
-#include <lopes/Beamforming/ccBeam.h>
-#include <lopes/Math/Algebra.h>
+#include <Skymap/ccBeam.h>
+#include <Math/Algebra.h>
 
 // ==============================================================================
 //
@@ -91,7 +87,7 @@ Vector<T> ccBeam<T,S>::ccbeam (const Matrix<T>& data)
   
   // we need to extract the sign at this point
   
-  return LOPES::sign(cc)*sqrt(abs(cc));
+  return CR::sign(cc)*sqrt(abs(cc));
 }
 
 // ----------------------------------------------------------------------- ccbeam

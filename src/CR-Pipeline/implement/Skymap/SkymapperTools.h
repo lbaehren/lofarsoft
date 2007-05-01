@@ -32,10 +32,10 @@
 #include <tasking/Glish.h>
 #include <Glish/Client.h>
 
-#include <lopes/IO/DataReaderTools.h>
-#include <lopes/Observation/ObservationData.h>
-#include <lopes/Skymap/Skymap.h>
-#include <lopes/Skymap/Skymapper.h>
+#include <IO/DataReaderTools.h>
+#include <Observation/ObservationData.h>
+#include <Skymap/Skymap.h>
+#include <Skymap/Skymapper.h>
 
 #include <casa/namespace.h>
 

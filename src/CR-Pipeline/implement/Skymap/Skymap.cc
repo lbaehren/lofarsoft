@@ -21,6 +21,8 @@
 #include <Skymap/Skymap.h>
 #include <Math/MathFFT.h>
 
+using CR::FFT2Fx;
+
 /* $Id: Skymap.cc,v 1.7 2006/10/31 18:24:08 bahren Exp $ */
 
 // =============================================================================
@@ -461,7 +463,7 @@ void Skymap::adjustSignalDomain (Matrix<DComplex>& skymap)
     for (pixel=0; pixel<shape(1); ++pixel) {
       vectFreq = skymap.column(pixel);
       // Use DComplex-DComplex backwards FFT
-      Vector<Double> vectTime = LOPES::FFT2Fx<Double,DComplex> (vectFreq,
+      Vector<Double> vectTime = FFT2Fx<Double,DComplex> (vectFreq,
 								fftsize,
 								True,
 								False);

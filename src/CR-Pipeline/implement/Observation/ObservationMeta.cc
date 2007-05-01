@@ -21,7 +21,7 @@
 
 /* $Id: ObservationMeta.cc,v 1.5 2006/11/27 10:54:04 bahren Exp $ */
 
-#include <lopes/Observation/ObservationMeta.h>
+#include <Observation/ObservationMeta.h>
 
 // =============================================================================
 //

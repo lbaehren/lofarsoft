@@ -20,11 +20,7 @@
 
 /* $Id: SkymapperTools.cc,v 1.7 2007/03/14 12:58:44 bahren Exp $*/
 
-#include <lopes/Skymap/SkymapperTools.h>
-
-/*!
-  \class SkymapperTools
-*/
+#include <Skymap/SkymapperTools.h>
 
 // ----------------------------------------------------------------- skymapCenter
 

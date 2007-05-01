@@ -20,7 +20,7 @@
 
 /* $Id: SkymapQuantity.cc,v 1.2 2006/09/20 10:21:59 bahren Exp $*/
 
-#include <lopes/Skymap/SkymapQuantity.h>
+#include <Skymap/SkymapQuantity.h>
 
 /*!
   \class SkymapQuantity

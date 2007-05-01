@@ -45,7 +45,7 @@ using casa::String;
 using casa::Table;
 using casa::Vector;
 
-namespace LOPES {  // namespace LOPES -- begin
+namespace CR {  // namespace CR -- begin
 
 /*!
   \class AntennaLayout
@@ -324,6 +324,6 @@ class AntennaLayout {
 
 };  // class AntennaLayout -- end
 
-}  // namespace LOPES --- end
+}  // namespace CR --- end
 
 #endif
