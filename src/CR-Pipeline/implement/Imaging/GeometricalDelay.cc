@@ -203,14 +203,13 @@ namespace CR { // NAMESPACE CR -- BEGIN
 				      double const &zAntenna)
   {
     double delay (0.0);
-    double skyPosition[] = {xSky,ySky,zSky};
-    double *diff[3];
+    blitz::Array<double,1> skyPosition(3);
+    blitz::Array<double,1> diff (3);
+
+    skyPosition = xSky,ySky,zSky;
+    diff        = xSky-xAntenna,ySky-yAntenna,zSky-zAntenna;
     
-    diff[0] = xSky-xAntenna;
-    diff[1] = ySky-yAntenna;
-    diff[2] = zSky-zAntenna;
-    
-    delay = (L2Norm(diff,3)-L2Norm(skyPosition,3))/lightspeed;
+    delay = (L2Norm(diff)-L2Norm(skyPosition))/lightspeed;
     
     return delay;
   }

@@ -135,9 +135,10 @@ int test_Norms ()
   std::cout << "\n[test_Norms]\n" << std::endl;
 
   int nofFailedTests (0);
-  blitz::Array<double,1> vec (3);
- 
+
+  std::cout << "[1] Computation using Blitz++ arrays" << std::endl;
   try {
+    blitz::Array<double,1> vec (3);
     vec = 1,2,3;
     std::cout << "\t" << vec
 	      << "\t" << CR::L1Norm(vec)
@@ -153,6 +154,32 @@ int test_Norms ()
 	      << "\t" << CR::L1Norm(vec)
 	      << "\t" << CR::L2Norm(vec)
 	      << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[2] Computation using C++ arrays" << std::endl;
+  try {
+    unsigned int nelem (3);
+    double *vec;
+    double l1norm (0.0);
+    double l2norm (0.0);
+
+    vec = new double [nelem];
+    
+    vec[0] = 1;
+    vec[1] = 2;
+    vec[2] = 3;
+    
+    l1norm = CR::L1Norm (vec,nelem);
+    l2norm = CR::L2Norm (vec,nelem);
+
+    std::cout << "[\t" << vec[0] << "\t" << vec[1] << "\t" << vec[2] << "]"
+	      << "\t" << l1norm
+	      << "\t" << l2norm
+	      << std::endl;
+
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
