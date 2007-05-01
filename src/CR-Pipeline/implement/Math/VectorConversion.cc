@@ -22,7 +22,7 @@
 
 #include <Math/VectorConversion.h>
 
-namespace LOPES { // Namespace LOPES -- begin
+namespace CR { // Namespace CR -- begin
   
   // ============================================================================
   //
@@ -274,4 +274,4 @@ namespace LOPES { // Namespace LOPES -- begin
 
 #endif
   
-} // Namespace LOPES -- end
+} // Namespace CR -- end

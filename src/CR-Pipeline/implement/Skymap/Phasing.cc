@@ -162,12 +162,12 @@ Double Phasing::geometricalDelay (const Vector<Double>& azel,
 				  Bool nearField=False)
 {
   const Double c = QC::c.getValue();
-  Vector<Double> rho = LOPES::azel2cartesian (azel);
+  Vector<Double> rho = CR::azel2cartesian (azel);
   Double delay;
   
   if (nearField && azel.nelements() == 3) {
     Vector<Double> diff = rho-baseline;
-    delay = (LOPES::L2Norm(diff)-LOPES::L2Norm(rho))/c;
+    delay = (CR::L2Norm(diff)-CR::L2Norm(rho))/c;
   } else {
     Vector<Double> product = rho*baseline;
     delay = -sum(product)/c;

@@ -9,7 +9,9 @@ set (cr_modules
   Data
   Imaging
   IO
+  LopesBase
   Math
+  Observation
   Skymap
   Utilities
   )

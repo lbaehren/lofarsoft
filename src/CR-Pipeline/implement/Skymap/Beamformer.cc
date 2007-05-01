@@ -32,6 +32,8 @@ using namespace std;
 const Double rad2deg = 180.0/C::pi;
 const Double deg2rad = C::pi/180.0;
 
+using CR::ProgressBar;
+
 // ==============================================================================
 //
 //  Construction / Deconstruction
@@ -330,7 +332,7 @@ void Beamformer::calcPhaseGradients (const Vector<Double>& frequencies,
   // ... and buffer the shape of this array
   shape_p = weights_p.shape();
   
-  LOPES::ProgressBar bar = LOPES::ProgressBar (shapeAntpos(0),70,"=");
+  ProgressBar bar = ProgressBar (shapeAntpos(0),70,"=");
 
   Matrix<DComplex> gradients (nfreq,shapeDir(0));
 
@@ -438,7 +440,7 @@ void Beamformer::addAntennas (Matrix<DComplex>& skymap,
     cout << "[Beamformer::addAntennas]" << endl;
   }
 
-  LOPES::ProgressBar bar = LOPES::ProgressBar (shape_p(2),70,"#");
+  ProgressBar bar = ProgressBar (shape_p(2),70,"#");
  
   for (int ant=0; ant<shapeSignals(1); ++ant) {
     //
@@ -611,7 +613,7 @@ void Beamformer::BFccMatrix (Matrix<Double>& skymap,
   skymap = 1.0/baselines;
 
   cout << "[Beamformer::BFccMatrix] Generating map from cc'ed data ..." << endl;
-  LOPES::ProgressBar bar = LOPES::ProgressBar (shape_p(1),70,"#");
+  CR::ProgressBar bar = CR::ProgressBar (shape_p(1),70,"#");
   bar.showTime(True);
 
   for (pixel=0; pixel<shape_p(1); ++pixel) {
@@ -675,7 +677,7 @@ void Beamformer::BFccMatrix (Matrix<Double>& skymap,
 //   cout << " - Shape of the frequency array : " << frequencies.shape() << endl;
 //   cout << " - Shape of the antenna array . : " << antennaPositions.shape() << endl;
 
-  LOPES::ProgressBar bar = LOPES::ProgressBar (nofPixels,70,"#");
+  CR::ProgressBar bar = CR::ProgressBar (nofPixels,70,"#");
   bar.showTime(True);
   
   for (Int pixel=0; pixel<nofPixels; pixel++) {

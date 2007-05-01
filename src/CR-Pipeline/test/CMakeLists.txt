@@ -62,12 +62,10 @@ endif (HAVE_CASA)
 
 ## ------------------------------------------------------------------------------
 ## Numerical ranges of the various data types
-
-add_executable (tNumericalRanges tNumericalRanges.cc)
-
-## ------------------------------------------------------------------------------
 ## Relationship between the various control parameters
 
+add_executable (tNumericalRanges tNumericalRanges.cc)
+add_executable (tObjects tObjects.cc)
 add_executable (tProcessingParameters tProcessingParameters.cc)
 
 ## ------------------------------------------------------------------------------

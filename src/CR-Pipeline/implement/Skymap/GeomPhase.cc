@@ -20,13 +20,13 @@
 
 /* $Id: GeomPhase.cc,v 1.1 2006/10/31 21:07:59 bahren Exp $*/
 
-#include <lopes/Beamforming/GeomPhase.h>
+#include <Skymap/GeomPhase.h>
 
 /*!
   \class GeomPhase
 */
 
-namespace LOPES {
+namespace CR {
   
   // ============================================================================
   //

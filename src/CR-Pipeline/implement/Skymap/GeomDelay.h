@@ -36,7 +36,7 @@
 
 #include <casa/namespace.h>
 
-namespace LOPES {
+namespace CR {
   
   /*!
     \class GeomDelay

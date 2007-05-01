@@ -20,13 +20,13 @@
 
 /* $Id: GeomDelay.cc,v 1.1 2006/10/31 21:07:59 bahren Exp $*/
 
-#include <lopes/Beamforming/GeomDelay.h>
+#include <Skymap/GeomDelay.h>
 
 /*!
   \class GeomDelay
 */
 
-namespace LOPES {
+namespace CR {
   
   Double GeomDelay::pi = 3.1415926535897932384626433832795;
   Double GeomDelay::lightspeed = 299792458.0;

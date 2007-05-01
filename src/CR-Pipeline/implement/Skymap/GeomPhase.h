@@ -28,11 +28,11 @@
 #include <casa/Exceptions/Error.h>
 
 // LOPES-Tools header files
-#include <lopes/Beamforming/GeomDelay.h>
+#include <Skymap/GeomDelay.h>
 
 #include <casa/namespace.h>
 
-namespace LOPES { // Namespace LOPES -- begin
+namespace CR { // Namespace CR -- begin
   
   /*!
     \class GeomPhase
@@ -121,6 +121,6 @@ namespace LOPES { // Namespace LOPES -- begin
     
   };
   
-} // Namespace LOPES -- end
+} // Namespace CR -- end
 
 #endif /* GEOMPHASE_H */

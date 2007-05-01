@@ -41,10 +41,9 @@
 #include <measures/Measures.h>
 
 using std::vector;
-
 using casa::Vector;
 
-namespace LOPES { // Namespace LOPES -- begin
+namespace CR { // Namespace CR -- begin
   
   /*!
     \file VectorConversion.cc
@@ -392,7 +391,7 @@ namespace LOPES { // Namespace LOPES -- begin
 
 #endif
   
-} // Namespace LOPES -- end
+} // Namespace CR -- end
 
 #endif /* VECTORCONVERSION_H */
   
