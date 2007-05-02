@@ -72,7 +72,7 @@ set (AIPSARCH
   )
 
 ## ------------------------------------------------------------------------------
-## Define where to search for libraries and header files
+## Define where to search for libraries, header files and applications
 
 set (bin_locations
   ./bin
@@ -124,11 +124,13 @@ file (APPEND ${outfile} "\n")
 ## ------------------------------------------------------------------------------
 ## Blitz++
 
-find_path (blitz_inc blitz.h ${include_locations}
+find_path (blitz_inc blitz.h
+  PATHS ${include_locations}
   PATH_SUFFIXES blitz blitz++
   )
 
-find_library (blitz_lib blitz ${lib_locations}
+find_library (blitz_lib blitz
+  PATHS ${lib_locations}
   PATH_SUFFIXES blitz blitz++
   )
 
@@ -227,6 +229,17 @@ if (libfftw)
 endif (libfftw)
 
 ## ------------------------------------------------------------------------------
+## GSL (GNU Scientific Library)
+
+find_library (libgsl gsl ${lib_locations})
+
+if (libgsl)
+  file (APPEND ${outfile} "GSLLIB := ${libgsl}\n\n")
+else (libgsl)
+  message (STATUS "Unable to find libgsl!")
+endif (libgsl)
+
+## ------------------------------------------------------------------------------
 ## LAPACK (FORTRAN Linear Algebra Package).
 
 find_library (liblapack lapack ${lib_locations})
@@ -257,7 +270,8 @@ file (APPEND ${outfile} "LAPACKLIB := ${LAPACKLIB}\n\n")
 ## ------------------------------------------------------------------------------
 ## Motif
 
-find_path (Motif_inc Xm.h ${include_locations}
+find_path (Motif_inc Xm.h
+  PATHS ${include_locations}
   PATH_SUFFIXES Xm
   )
 
@@ -292,8 +306,8 @@ file (APPEND ${outfile} "PGPLOTLIB := ${PGPLOTLIB}\n\n")
 ## ------------------------------------------------------------------------------
 ## POPT
 
-find_path (popt_inc popt.h ${include_locations})
-find_library (popt_lib popt ${lib_locations})
+find_path (popt_inc popt.h PATHS ${include_locations})
+find_library (popt_lib popt PATHS ${lib_locations})
 
 file (APPEND ${outfile} "POPTINCD := ${popt_inc}\n")
 file (APPEND ${outfile} "POPTLIB  := ${popt_lib}\n\n")
@@ -353,7 +367,7 @@ file (APPEND ${outfile} "ROOTLIB  := ${ROOT_LIBRARIES}\n\n")
 ## ------------------------------------------------------------------------------
 ## SOFA
 
-find_library (libsofa sofa ${lib_locations})
+find_library (libsofa sofa PATHS ${lib_locations})
 
 if (libsofa)
   file (APPEND ${outfile} "SOFALIB := ${libsofa}\n\n")
@@ -362,12 +376,27 @@ endif (libsofa)
 ## ------------------------------------------------------------------------------
 ## Tcl/Tk (version 7.6 or later)
 
-find_path (tcl_inc tcl.h ${include_locations} PATH_SUFFIXES tcl8.4 tcl8.3)
-find_path (tk_inc tk.h ${include_locations} PATH_SUFFIXES tcl8.4 tcl8.3)
+find_library (libdl dl
+  PATHS ${lib_locations}
+  PATH_SUFFIXES tcl8.4 tcl8.3)
 
-find_library (libtcl tcl ${lib_locations} PATH_SUFFIXES tcl8.4 tcl8.3)
-find_library (libdl dl ${lib_locations} PATH_SUFFIXES tcl8.4 tcl8.3)
-find_library (libtk tk ${lib_locations} PATH_SUFFIXES tcl8.4 tcl8.3)
+## Tcl
+
+find_path (tcl_inc tcl.h
+  PATHS ${include_locations}
+  PATH_SUFFIXES tcl8.4 tcl8.3)
+find_library (libtcl tcl
+  PATHS ${lib_locations}
+  PATH_SUFFIXES tcl8.4 tcl8.3)
+
+## Tk
+
+find_path (tk_inc tk.h
+  PATHS ${include_locations}
+  PATH_SUFFIXES tcl8.4 tcl8.3)
+find_library (libtk tk
+  PATHS ${lib_locations}
+  PATH_SUFFIXES tcl8.4 tcl8.3)
 
 file (APPEND ${outfile} "TCLINCD := ${tcl_inc}\n")
 file (APPEND ${outfile} "TCLLIB  := ${libtcl} ${libdl}\n\n")
@@ -378,19 +407,20 @@ file (APPEND ${outfile} "TKLIB   := ${libtk}\n\n")
 ## ------------------------------------------------------------------------------
 ## X11
 
-find_path (X_inc X.h ${include_locations}
+find_path (X_inc X.h
+  PATHS ${include_locations}
   PATH_SUFFIXES X11
   )
 
-find_library (libXt Xt ${lib_locations})
-find_library (libXmu Xmu ${lib_locations})
-find_library (libX11 X11 ${lib_locations})
-find_library (libXext Xext ${lib_locations})
+find_library (libXt Xt PATHS ${lib_locations})
+find_library (libXmu Xmu PATHS ${lib_locations})
+find_library (libX11 X11 PATHS ${lib_locations})
+find_library (libXext Xext PATHS ${lib_locations})
 
 file (APPEND ${outfile} "X11INCD := ${X_inc}\n")
 file (APPEND ${outfile} "X11LIB  := ${libXt} ${libXmu} ${libX11} ${libXext}\n\n")
 
-find_library (libXpm Xpm ${lib_locations})
+find_library (libXpm Xpm PATHS ${lib_locations})
 
 file (APPEND ${outfile} "XPMLIB  := ${libXpm}\n")
 file (APPEND ${outfile} "XPMINCD := ${X_inc}\n\n")
