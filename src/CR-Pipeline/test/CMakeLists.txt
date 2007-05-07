@@ -104,3 +104,12 @@ else (HAVE_WCS)
   message (STATUS "Unable to build test program for WCS.")
 endif (HAVE_WCS)
 
+## ------------------------------------------------------------------------------
+## Test for working with ROOT
+
+if (HAVE_ROOT) 
+  add_executable (tUseROOT tUseROOT.cc)
+  target_link_libraries (tUseROOT ${ROOT_LIBRARIES})
+else (HAVE_ROOT)
+  message (STATUS "Unable to build test program(s) for working with ROOT.")
+endif (HAVE_ROOT)
