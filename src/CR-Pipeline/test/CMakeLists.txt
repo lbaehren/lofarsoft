@@ -105,11 +105,12 @@ else (HAVE_WCS)
 endif (HAVE_WCS)
 
 ## ------------------------------------------------------------------------------
-## Test for working with ROOT
+## Test for working with ROOT (includes working with the DAL)
 
-if (HAVE_ROOT) 
+if (HAVE_ROOT AND HAVE_BLITZ)
+  include_directories (${DAL_SOURCE_DIR}/implement)
   add_executable (tUseROOT tUseROOT.cc)
-  target_link_libraries (tUseROOT ${ROOT_LIBRARIES})
-else (HAVE_ROOT)
+  target_link_libraries (tUseROOT dal ${ROOT_LIBRARIES} ${BLITZ_LIBRARIES})
+else (HAVE_ROOT AND HAVE_BLITZ)
   message (STATUS "Unable to build test program(s) for working with ROOT.")
-endif (HAVE_ROOT)
+endif (HAVE_ROOT AND HAVE_BLITZ)
