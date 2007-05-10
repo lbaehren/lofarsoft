@@ -25,6 +25,7 @@
 #include <TGraph.h>
 #include <TRandom.h>
 #include <TObjArray.h>
+#include <TSpectrum.h>
 #include <TVirtualFFT.h>
 // --- CR-Pipeline header files
 #include <Utilities/ProgressBar.h>
@@ -227,9 +228,8 @@ int test_processing (std::string const &infile)
   char nameTimeSeries [10];
   char nameHistogram [10];
   TH1F *ts;
-  TH1F *spectrum;
+  TH1 *spectrum = 0;
   TH1F *hist;
-  TVirtualFFT *fft;
   TObjArray HList (0);
 
   for (int antenna(0); antenna<nofAntennas; antenna++) {
@@ -244,14 +244,17 @@ int test_processing (std::string const &infile)
     // add histograms to object list
     HList.Add(ts);
     HList.Add(hist);
+    HList.Add(spectrum);
     // fill in the data for this antenna
     for (int sample(0); sample<blocksize; sample++) {
       ts->SetBinContent(sample,float(data(sample,antenna)));
-      hist->Fill(float(data(sample,antenna)));  
+      hist->Fill(float(data(sample,antenna)));
     }
     // fit the histogram by a Gaussian distribution
     hist->SetFillColor(32);
     hist->Fit("gaus");
+    // generate the spectrum
+    spectrum = ts->FFT(spectrum,"MAG");
   }
 
   cout << "-- Exporting data to ROOT file..." << endl;

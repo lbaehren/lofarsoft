@@ -17,23 +17,37 @@
 
 //Same list as in analysis_final_v20.C -- didn't check
 
-const Long_t numberToAnalyse = 10001, //const Long_t numberToAnalyse = 1024*8 + 1;
-             TotalNumbers = numberToAnalyse*2 - 2;
-const Int_t NumberOfSpectra = 200, //const Int_t NumberOfSpectra = 1024*40/numberToAnalyse;
-            FileTotal = 100, FreqBands = 4;
+const Long_t numberToAnalyse = 10001; //const Long_t numberToAnalyse = 1024*8 + 1;
+const Long_t TotalNumbers = numberToAnalyse*2 - 2;
+const Int_t NumberOfSpectra = 200; //const Int_t NumberOfSpectra = 1024*40/numberToAnalyse;
+const Int_t FileTotal = 100;
+const Int_t FreqBands = 4;
 
-Double_t gain_x[FreqBands], gain_y[FreqBands];
+Double_t gain_x[FreqBands];
+Double_t gain_y[FreqBands];
 
 const Double_t pi = 3.141592653589793238462643383279502884197169;
    
-char inFileName[FreqBands][256], outFileName[FreqBands][256],
-     outFileName4[256];
+char inFileName[FreqBands][256];
+char outFileName[FreqBands][256];
+char outFileName4[256];
 
-Double_t Dynamic_ampX[FreqBands][numberToAnalyse][NumberOfSpectra], Dynamic_ampY[FreqBands][numberToAnalyse][NumberOfSpectra], 	 
-	 Dynamic_phaseX[FreqBands][numberToAnalyse][NumberOfSpectra], Dynamic_phaseY[FreqBands][numberToAnalyse][NumberOfSpectra], 
-         Signalx[TotalNumbers], Signaly[TotalNumbers], Ampx[numberToAnalyse], Phasex[numberToAnalyse], Ampy[numberToAnalyse], Phasey[numberToAnalyse],
-         Power[FreqBands][TotalNumbers - 5], Power_1[FreqBands][TotalNumbers - 5], Power_3[FreqBands][TotalNumbers - 5], 
-	 reduction_factor, cal_fact_x = 1., cal_fact_y = 1.;
+Double_t Dynamic_ampX[FreqBands][numberToAnalyse][NumberOfSpectra];
+Double_t Dynamic_ampY[FreqBands][numberToAnalyse][NumberOfSpectra];
+Double_t Dynamic_phaseX[FreqBands][numberToAnalyse][NumberOfSpectra];
+Double_t Dynamic_phaseY[FreqBands][numberToAnalyse][NumberOfSpectra];
+Double_t Signalx[TotalNumbers];
+Double_t Signaly[TotalNumbers];
+Double_t Ampx[numberToAnalyse];
+Double_t Phasex[numberToAnalyse];
+Double_t Ampy[numberToAnalyse];
+Double_t Phasey[numberToAnalyse];
+Double_t Power[FreqBands][TotalNumbers - 5];
+Double_t Power_1[FreqBands][TotalNumbers - 5];
+Double_t Power_3[FreqBands][TotalNumbers - 5];
+Double_t reduction_factor;
+Double_t cal_fact_x = 1.;
+Double_t cal_fact_y = 1.;
 
 Double_t data_x[FreqBands][TotalNumbers],data_y[FreqBands][TotalNumbers],
          data_x_1[FreqBands][TotalNumbers],data_y_1[FreqBands][TotalNumbers],
