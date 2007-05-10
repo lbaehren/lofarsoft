@@ -6,6 +6,11 @@
 
   \author Lars B&auml;hren
 
+  To run everything in a chain do:
+  \code
+  make tUseROOT && ./CR-Pipeline/test/tUseROOT && root timeseries.C
+  \endcode
+
   In order to read the data back in and display them:
   \verbatim
   TFile f1 ("demo.root")
@@ -15,10 +20,11 @@
   \endverbatim
 */
 
-// Standard C++ library
+// --- Standard C++ library --------------------------------
+#include <fstream>
 #include <iostream>
 #include <string>
-// -- ROOT header files
+// -- ROOT header files ------------------------------------
 #include <TCanvas.h>
 #include <TH1F.h>
 #include <TFile.h>
@@ -27,11 +33,11 @@
 #include <TObjArray.h>
 #include <TSpectrum.h>
 #include <TVirtualFFT.h>
-// --- CR-Pipeline header files
+// --- CR-Pipeline header files ----------------------------
 #include <Utilities/ProgressBar.h>
-// --- DAL header files
+// --- DAL header files ------------------------------------
 #include <dalLopesEvent.h>
-// --- Blitz++ header files
+// --- Blitz++ header files --------------------------------
 #include <blitz/array.h>
 
 using std::cerr;
@@ -192,11 +198,9 @@ int test_histogram2file ()
     <li>Filling data into histgrams
   </ol>
 
-  The resuls will be written to a ROOT file; in order to inspect the contents 
-  start ROOT and run:
+  The resuls will be written to a ROOT file; in order to inspect the contents:
   \code
-  TFile f ("timeseries.root");
-  TBrowser browser;
+  root timeseries.C
   \endcode
 
   \param infile -- Input file from which to read the data
@@ -226,25 +230,34 @@ int test_processing (std::string const &infile)
   cout << "-- Filling data into histograms..." << endl;
 
   char nameTimeSeries [10];
+  char nameSpectrum [10];
   char nameHistogram [10];
+  char nameCanvas [10];
+  int fftLength (blocksize/2+1);
   TH1F *ts;
-  TH1 *spectrum = 0;
+  TH1 *fft = 0;
   TH1F *hist;
+  TH1F *spec;
+  TCanvas *c;
   TObjArray HList (0);
 
   for (int antenna(0); antenna<nofAntennas; antenna++) {
     // Update names and labels
     sprintf (nameTimeSeries,"Ant%d",antenna);
+    sprintf (nameSpectrum,"Spec%d",antenna);
     sprintf (nameHistogram,"Hist%d",antenna);
+    sprintf (nameCanvas,"Canv%d",antenna);
     //
     cout << "--> Antenna " << antenna << endl;
     // recreate histograms
     ts   = new TH1F (nameTimeSeries,"Time series",blocksize,0.,blocksize);
+    spec = new TH1F (nameSpectrum,"Spectrum",fftLength,0.,fftLength);
     hist = new TH1F (nameHistogram,"Time-series distribution",100,minValue,maxValue);
+    c    = new TCanvas (nameCanvas,"Antenna data",10,10,900,300);
     // add histograms to object list
     HList.Add(ts);
     HList.Add(hist);
-    HList.Add(spectrum);
+    HList.Add(spec);
     // fill in the data for this antenna
     for (int sample(0); sample<blocksize; sample++) {
       ts->SetBinContent(sample,float(data(sample,antenna)));
@@ -253,16 +266,31 @@ int test_processing (std::string const &infile)
     // fit the histogram by a Gaussian distribution
     hist->SetFillColor(32);
     hist->Fit("gaus");
-    // generate the spectrum
-    spectrum = ts->FFT(spectrum,"MAG");
+    // generate the fft
+    fft = ts->FFT(fft,"MAG");
+    for (int channel(0); channel<fftLength; channel++) {
+      spec->SetBinContent(channel,fft->GetBinContent(channel)*fft->GetBinContent(channel));
+    }
   }
 
   cout << "-- Exporting data to ROOT file..." << endl;
 
   TFile f ("timeseries.root","recreate");
   HList.Write();
-  f.Map();
   f.Close();
+
+  cout << "-- Creating ROOT script to display the data..." << endl;
+
+  std::ofstream outfile;
+  outfile.open("timeseries.C");
+  
+  outfile << "{"                               << endl;
+  outfile << " TFile f (\"timeseries.root\");" << endl;
+  outfile << " TBrowser browser;"              << endl;
+  outfile << "}"                               << endl;
+
+  outfile.close();
+
 
   return nofFailedTests;
 }

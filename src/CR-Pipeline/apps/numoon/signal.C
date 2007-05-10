@@ -17,11 +17,11 @@
 
 //Same list as in analysis_final_v20.C -- didn't check
 
-const Long_t numberToAnalyse = 10001; //const Long_t numberToAnalyse = 1024*8 + 1;
-const Long_t TotalNumbers = numberToAnalyse*2 - 2;
-const Int_t NumberOfSpectra = 200; //const Int_t NumberOfSpectra = 1024*40/numberToAnalyse;
-const Int_t FileTotal = 100;
-const Int_t FreqBands = 4;
+const Long_t numberToAnalyse (10001); //const Long_t numberToAnalyse = 1024*8 + 1;
+const Long_t TotalNumbers (numberToAnalyse*2 - 2);
+const Int_t NumberOfSpectra (200); //const Int_t NumberOfSpectra = 1024*40/numberToAnalyse;
+const Int_t FileTotal (100);
+const Int_t FreqBands (4);
 
 Double_t gain_x[FreqBands];
 Double_t gain_y[FreqBands];
@@ -85,305 +85,332 @@ TH1D *Px[FreqBands];
 TH1D *Py[FreqBands];
 TH1D *TotalPower[FreqBands];
 TH1D *TotalPowerAll = new TH1D("TotalPower","TotalPower",1000,0,10000); 
+
+/*!
+  \param freq          -- 
+  \param filestep      -- 
+  \param step_aver_fft -- 
+ */
+void FFTChannel (int freq,
+		 int filestep,
+		 int step_aver_fft)
+{
+  MyObject_newdata myMoon(inFileName[freq],
+			  4096 + 2*NumberOfSpectra*TotalNumbers*filestep+(2*TotalNumbers*step_aver_fft));
+  Bool_t onereadfailed = 0;
+  Double_t re_x=0., im_x=0., re_y=0., im_y=0.;
   
-void FFTChannel(int freq, int filestep, int step_aver_fft)
-{
-     MyObject_newdata myMoon(inFileName[freq], 4096 + 2*NumberOfSpectra*TotalNumbers*filestep+(2*TotalNumbers*step_aver_fft));
-     Bool_t onereadfailed = 0;
-     Double_t re_x=0., im_x=0., re_y=0., im_y=0.;
-    
-		  
-     for (Long_t event = 0; event < TotalNumbers; event++)
-     {
-	      
-	if (myMoon.unpackEventC())
-        {
- 		 Signalx[event]=(Double_t) (myMoon.getSubEventX());
-		 Signaly[event]=(Double_t) (myMoon.getSubEventY());
-		 SignalGraphX->SetBinContent(event, (int)Signalx[event]);
-		 SignalGraphY->SetBinContent(event, (int)Signaly[event]);
-		
-	}
-	else onereadfailed = 1;
-	
-	SignalGraphX->Draw("AC");
-	
-	fftx->SetPoint(event, Signalx[event]);
-	ffty->SetPoint(event, Signaly[event]);
-
-     }
-	  
-    fftx->Transform(); ffty->Transform();
-	  
-    for (Int_t binx=0; binx < numberToAnalyse; binx++) 
+  for (Long_t event = 0; event < TotalNumbers; event++)
     {
-	fftx->GetPointComplex(binx, re_x, im_x);
-	ffty->GetPointComplex(binx, re_y, im_y);
-	     
-	Ampx[binx]=TMath::Sqrt(re_x*re_x + im_x*im_x);
-	Ampy[binx]=TMath::Sqrt(re_y*re_y + im_y*im_y);      
-	
-	Phasex[binx]=atan2(im_x,re_x);
-	Phasey[binx]=atan2(im_y,re_y);
-	
-	Dynamic_ampX[freq][binx][step_aver_fft] = Ampx[binx];
-	Dynamic_phaseX[freq][binx][step_aver_fft] = Phasex[binx];
-	Dynamic_ampY[freq][binx][step_aver_fft] = Ampy[binx];
-	Dynamic_phaseY[freq][binx][step_aver_fft] = Phasey[binx];
+      
+      if (myMoon.unpackEventC())
+        {
+	  Signalx[event]=(Double_t) (myMoon.getSubEventX());
+	  Signaly[event]=(Double_t) (myMoon.getSubEventY());
+	  SignalGraphX->SetBinContent(event, (int)Signalx[event]);
+	  SignalGraphY->SetBinContent(event, (int)Signaly[event]);
+	  
+	}
+      else onereadfailed = 1;
+      
+      SignalGraphX->Draw("AC");
+      
+      fftx->SetPoint(event, Signalx[event]);
+      ffty->SetPoint(event, Signaly[event]);
+      
     }
-   
+  
+  fftx->Transform(); ffty->Transform();
+  
+  for (Int_t binx=0; binx < numberToAnalyse; binx++) 
+    {
+      fftx->GetPointComplex(binx, re_x, im_x);
+      ffty->GetPointComplex(binx, re_y, im_y);
+      
+      Ampx[binx]=TMath::Sqrt(re_x*re_x + im_x*im_x);
+      Ampy[binx]=TMath::Sqrt(re_y*re_y + im_y*im_y);      
+      
+      Phasex[binx]=atan2(im_x,re_x);
+      Phasey[binx]=atan2(im_y,re_y);
+      
+      Dynamic_ampX[freq][binx][step_aver_fft] = Ampx[binx];
+      Dynamic_phaseX[freq][binx][step_aver_fft] = Phasex[binx];
+      Dynamic_ampY[freq][binx][step_aver_fft] = Ampy[binx];
+      Dynamic_phaseY[freq][binx][step_aver_fft] = Phasey[binx];
+    }
+  
 }
 
-void RemoveRFIFreqChannel(int freq, int filestep)
+/*!
+  \param freq
+  \param filestep
+*/
+void RemoveRFIFreqChannel(int freq,
+			  int filestep)
 {
-      Double_t *thresholdrfi_0 =  new Double_t[3];
-	      
-      thresholdrfi_0[0] = 20.0;
-      thresholdrfi_0[1] = 10.0;
-      thresholdrfi_0[2] = 5.0;
-
-	  
-      //Removing RFI 1st frequency.
-
-      Double_t value_x, value_y;
-
-      for (Int_t iterations = 0; iterations < 2; iterations++)	
+  Double_t *thresholdrfi_0 =  new Double_t[3];
+  
+  thresholdrfi_0[0] = 20.0;
+  thresholdrfi_0[1] = 10.0;
+  thresholdrfi_0[2] = 5.0;
+  
+  
+  //Removing RFI 1st frequency.
+  
+  Double_t value_x, value_y;
+  
+  for (Int_t iterations = 0; iterations < 2; iterations++)	
+    {
+      for (Int_t xstep = 0; xstep < numberToAnalyse; xstep++)
 	{
-	  for (Int_t xstep = 0; xstep < numberToAnalyse; xstep++)
+	  value_x = 0;
+	  value_y = 0;
+	  
+	  for (Int_t ystep = 0; ystep < NumberOfSpectra; ystep++)
 	    {
-	      value_x = 0;
-	      value_y = 0;
+	      value_x += Dynamic_ampX[freq][xstep][ystep];
+	      value_y += Dynamic_ampY[freq][xstep][ystep];
 	      
-	      for (Int_t ystep = 0; ystep < NumberOfSpectra; ystep++)
-		{
-		  value_x += Dynamic_ampX[freq][xstep][ystep];
-		  value_y += Dynamic_ampY[freq][xstep][ystep];
-		  
-		}
-	      ProjectionX[freq]->SetBinContent(xstep+1,value_x);
-	      ProjectionY[freq]->SetBinContent(xstep+1,value_y);
-	      TotalProjectionX[freq]->AddBinContent(xstep+1,value_x);
-	      TotalProjectionY[freq]->AddBinContent(xstep+1,value_y);
 	    }
+	  ProjectionX[freq]->SetBinContent(xstep+1,value_x);
+	  ProjectionY[freq]->SetBinContent(xstep+1,value_y);
+	  TotalProjectionX[freq]->AddBinContent(xstep+1,value_x);
+	  TotalProjectionY[freq]->AddBinContent(xstep+1,value_y);
+	}
+      
+      //Int_t window = 100, max_peaks = 80;
+      
+      Double_t *candidates_x =  new Double_t[numberToAnalyse];
+      Double_t *candidates_y =  new Double_t[numberToAnalyse];
+      
+      Int_t NPeaks_x = 0;
+      Int_t NPeaks_y = 0;
+      
+      for(Int_t i = 0 ; i <numberToAnalyse;i++)
+	{
+	  candidates_x[i] = 0;
+	  candidates_y[i] = 0;
+	}
+      
+      
+      
+      TF1 *f1 = new TF1("f1","pol9",0.001,0.5);
+      TF1 *f2 = new TF1("f2","pol9",0.001,0.5);
+      
+      ProjectionX[freq]->Fit("f1","R,N,Q");
+      ProjectionY[freq]->Fit("f2","R,N,Q");
+      
+      for(Int_t bin = 1  ; bin < numberToAnalyse + 1 ; bin++)
+	{
+	  Double_t bincontent_x = ProjectionX[freq]->GetBinContent(bin);
 	  
-	  //Int_t window = 100, max_peaks = 80;
-
-	  Double_t *candidates_x =  new Double_t[numberToAnalyse];
-	  
-	  Double_t *candidates_y =  new Double_t[numberToAnalyse];
-
-	  Int_t NPeaks_x = 0, NPeaks_y = 0;
-	  
-	  
-	  for(Int_t i = 0 ; i <numberToAnalyse;i++)
-	    {
-	      candidates_x[i] = 0;
-	      candidates_y[i] = 0;
-	    }
-	  
-	  
-	  
-	  TF1 *f1 = new TF1("f1","pol9",0.001,0.5);
-	  TF1 *f2 = new TF1("f2","pol9",0.001,0.5);
-	  
-	  ProjectionX[freq]->Fit("f1","R,N,Q");
-	  ProjectionY[freq]->Fit("f2","R,N,Q");
-   
-	      for(Int_t bin = 1  ; bin < numberToAnalyse + 1 ; bin++)
-		{
-		  Double_t bincontent_x = ProjectionX[freq]->GetBinContent(bin);
-		  
-		  if(bincontent_x > (100 + thresholdrfi_0[iterations])*(f1->Eval(bin*0.5/numberToAnalyse))/100.)
-		    { 
-		      NPeaks_x++;
-		      candidates_x[bin-1] = 1;
-		    }
-		  Double_t bincontent_y = ProjectionY[freq]->GetBinContent(bin);
-		  if(bincontent_y > (100 + thresholdrfi_0[iterations])*(f2->Eval(bin*0.5/numberToAnalyse))/100.)
-		    {
-		      candidates_y[bin-1] = 1;
-		      NPeaks_y++;
-		    }
-		}
-	  
-	  delete f1;
-	  delete f2;
-	  
-	  
-	  if ( (filestep % 200) == 0)
-	    {
-	      
-	      for(Int_t bin = 0; bin<numberToAnalyse; bin++)
-		{
-		  Candidates_x->SetBinContent(bin+1,candidates_x[bin]);
-		  Candidates_y->SetBinContent(bin+1,candidates_y[bin]);
-		}
-	      Candidates_x->Write();
-	      Candidates_y->Write();
-	    }
-
-
-	  Double_t average_x, average_y, integralx, integraly;
-	  
-	  Int_t from, to;
-
-	  for (int step_aver_fft = 0; step_aver_fft < NumberOfSpectra; step_aver_fft++)
-	    {		   
-	      for (Int_t i = 15; i < numberToAnalyse; i++)
-		{     
-		  
-		  if (candidates_x[i]>0)
-		    {
-		      
-		      from = i - 19;
-		      to = i;
-		      
-		      if(from < 2)
-			{
-			  from = 14;
-			  to = i;
-			}
-	  
-		      integralx = 0;
-		      
-		      
-		      for (int j = from; j < to+1; j++)
-			{
-			  integralx += Dynamic_ampX[freq][j-1][step_aver_fft];			      
-			}
-		    
-		      average_x = integralx/(to-from+1);
-
-		      Dynamic_ampX[freq][i][step_aver_fft] = average_x;
-		      
-		    }
-		  
-		  if (candidates_y[i]>0)
-		    {
-		      
-		      from = i - 19;
-		      to = i;
-		      
-		      if(from < 2)
-			{
-			  from = 14;
-			  to = i;
-			}
-		      
-		      integraly = 0;
-		      
-		      
-		      for (int j = from; j < to+1; j++)
-			{
-			  integraly += Dynamic_ampY[freq][j-1][step_aver_fft];			      
-			}
-		     		      
-		      average_y = integraly/(to-from+1);
-		      
-		      Dynamic_ampY[freq][i][step_aver_fft] = average_y;
-		      
-		    }
-		    
-		}  
-		   
-	    } 
-
-	  Double_t value_x, value_y;
-
-	  for (Int_t xstep = 0; xstep < numberToAnalyse; xstep++)
-	    {
-	      value_x = 0;
-	      value_y = 0;
-	      
-	      for (Int_t ystep = 0; ystep < NumberOfSpectra; ystep++)
-		{
-		  value_x += Dynamic_ampX[freq][xstep][ystep];
-		  value_y += Dynamic_ampY[freq][xstep][ystep];
-		  
-		}
-	      TotalProjectionX_bgfree[freq]->AddBinContent(xstep+1,value_x);
-	      TotalProjectionY_bgfree[freq]->AddBinContent(xstep+1,value_y);
-	    }
-	      
-	  delete candidates_x;	      
-	  delete candidates_y;
-	      
-	  if (iterations == 0) 
-	    {
-	      N_Peaks_x_1->SetBinContent(filestep+1,NPeaks_x);
-	      N_Peaks_y_1->SetBinContent(filestep+1,NPeaks_y);
-		
-	    }
-	  else if (iterations == 1)
-	    {
-	      N_Peaks_x_2->SetBinContent(filestep+1,NPeaks_x);
-	      N_Peaks_y_2->SetBinContent(filestep+1,NPeaks_y);
-		
-	    }
-	  else
+	  if(bincontent_x > (100 + thresholdrfi_0[iterations])*(f1->Eval(bin*0.5/numberToAnalyse))/100.)
 	    { 
-	      N_Peaks_x_3->SetBinContent(filestep+1,NPeaks_x);
-	      N_Peaks_y_3->SetBinContent(filestep+1,NPeaks_y);
-		
+	      NPeaks_x++;
+	      candidates_x[bin-1] = 1;
 	    }
-	}
-
-      delete thresholdrfi_0;
-
-      Double_t sum_x = 0;
-
-      for (int ystep = 0; ystep < NumberOfSpectra; ystep++)
-	{
-	  for (int xstep = 0; xstep < numberToAnalyse; xstep++ )
+	  Double_t bincontent_y = ProjectionY[freq]->GetBinContent(bin);
+	  if(bincontent_y > (100 + thresholdrfi_0[iterations])*(f2->Eval(bin*0.5/numberToAnalyse))/100.)
 	    {
-	      sum_x +=  Dynamic_ampX[freq][xstep][ystep];
+	      candidates_y[bin-1] = 1;
+	      NPeaks_y++;
 	    }
 	}
       
-      if (sum_x == 0)
-	{ 	  
-	  cout << "zero integral in X pol." << endl;
-	  sum_x = 1.0;
-	}
+      delete f1;
+      delete f2;
       
-      cal_fact_x = gain_x[freq]/sum_x;
-
       
-      Double_t sum_y = 0;
-      
-      for (int ystep = 0; ystep < NumberOfSpectra; ystep++)
+      if ( (filestep % 200) == 0)
 	{
-	  for (int xstep = 0; xstep < numberToAnalyse; xstep++ )
+	  
+	  for(Int_t bin = 0; bin<numberToAnalyse; bin++)
 	    {
-	      sum_y +=  Dynamic_ampY[freq][xstep][ystep];
+	      Candidates_x->SetBinContent(bin+1,candidates_x[bin]);
+	      Candidates_y->SetBinContent(bin+1,candidates_y[bin]);
 	    }
+	  Candidates_x->Write();
+	  Candidates_y->Write();
 	}
       
-     
-      if (sum_y == 0)
-	{ 	  
-	  cout << "zero integral in Y pol." << endl;
-	  sum_y = 1.0;
-	}
-
-      cal_fact_y = gain_y[freq]/sum_y;
-
-      cal_factors_x[freq]->SetBinContent(filestep+1,cal_fact_x);
-      cal_factors_y[freq]->SetBinContent(filestep+1,cal_fact_y);
       
-
-//End of RFI removal
+      Double_t average_x;
+      Double_t average_y;
+      Double_t integralx;
+      Double_t integraly;
+      
+      Int_t from, to;
+      
+      for (int step_aver_fft = 0; step_aver_fft < NumberOfSpectra; step_aver_fft++)
+	{		   
+	  for (Int_t i = 15; i < numberToAnalyse; i++)
+	    {     
+	      
+	      if (candidates_x[i]>0)
+		{
+		  
+		  from = i - 19;
+		  to = i;
+		  
+		  if(from < 2)
+		    {
+		      from = 14;
+		      to = i;
+		    }
+		  
+		  integralx = 0;
+		  
+		  
+		  for (int j = from; j < to+1; j++)
+		    {
+		      integralx += Dynamic_ampX[freq][j-1][step_aver_fft];			      
+		    }
+		  
+		  average_x = integralx/(to-from+1);
+		  
+		  Dynamic_ampX[freq][i][step_aver_fft] = average_x;
+		  
+		}
+	      
+	      if (candidates_y[i]>0)
+		{
+		  
+		  from = i - 19;
+		  to = i;
+		  
+		  if(from < 2)
+		    {
+		      from = 14;
+		      to = i;
+		    }
+		  
+		  integraly = 0;
+		  
+		  
+		  for (int j = from; j < to+1; j++)
+		    {
+		      integraly += Dynamic_ampY[freq][j-1][step_aver_fft];			      
+		    }
+		  
+		  average_y = integraly/(to-from+1);
+		  
+		  Dynamic_ampY[freq][i][step_aver_fft] = average_y;
+		  
+		}
+	      
+	    }  
+	  
+	} 
+      
+      Double_t value_x, value_y;
+      
+      for (Int_t xstep = 0; xstep < numberToAnalyse; xstep++)
+	{
+	  value_x = 0;
+	  value_y = 0;
+	  
+	  for (Int_t ystep = 0; ystep < NumberOfSpectra; ystep++)
+	    {
+	      value_x += Dynamic_ampX[freq][xstep][ystep];
+	      value_y += Dynamic_ampY[freq][xstep][ystep];
+	      
+	    }
+	  TotalProjectionX_bgfree[freq]->AddBinContent(xstep+1,value_x);
+	  TotalProjectionY_bgfree[freq]->AddBinContent(xstep+1,value_y);
+	}
+      
+      delete candidates_x;	      
+      delete candidates_y;
+      
+      if (iterations == 0) 
+	{
+	  N_Peaks_x_1->SetBinContent(filestep+1,NPeaks_x);
+	  N_Peaks_y_1->SetBinContent(filestep+1,NPeaks_y);
+	  
+	}
+      else if (iterations == 1)
+	{
+	  N_Peaks_x_2->SetBinContent(filestep+1,NPeaks_x);
+	  N_Peaks_y_2->SetBinContent(filestep+1,NPeaks_y);
+	  
+	}
+      else
+	{ 
+	  N_Peaks_x_3->SetBinContent(filestep+1,NPeaks_x);
+	  N_Peaks_y_3->SetBinContent(filestep+1,NPeaks_y);
+	  
+	}
+    }
+  
+  delete thresholdrfi_0;
+  
+  Double_t sum_x = 0;
+  
+  for (int ystep = 0; ystep < NumberOfSpectra; ystep++)
+    {
+      for (int xstep = 0; xstep < numberToAnalyse; xstep++ )
+	{
+	  sum_x +=  Dynamic_ampX[freq][xstep][ystep];
+	}
+    }
+  
+  if (sum_x == 0)
+    { 	  
+      cout << "zero integral in X pol." << endl;
+      sum_x = 1.0;
+    }
+  
+  cal_fact_x = gain_x[freq]/sum_x;
+  
+  
+  Double_t sum_y = 0;
+  
+  for (int ystep = 0; ystep < NumberOfSpectra; ystep++)
+    {
+      for (int xstep = 0; xstep < numberToAnalyse; xstep++ )
+	{
+	  sum_y +=  Dynamic_ampY[freq][xstep][ystep];
+	}
+    }
+  
+  
+  if (sum_y == 0)
+    { 	  
+      cout << "zero integral in Y pol." << endl;
+      sum_y = 1.0;
+    }
+  
+  cal_fact_y = gain_y[freq]/sum_y;
+  
+  cal_factors_x[freq]->SetBinContent(filestep+1,cal_fact_x);
+  cal_factors_y[freq]->SetBinContent(filestep+1,cal_fact_y);
+  
+  
+  //End of RFI removal
 }
 
 
-void Dedisperse(int freq, int step_aver_fft_0, double_t TEC)
+void Dedisperse (int freq,
+		 int step_aver_fft_0,
+		 double_t TEC)
 {
-   Double_t re_x1[numberToAnalyse],re_y1[numberToAnalyse],im_x1[numberToAnalyse],im_y1[numberToAnalyse];
-   Double_t re_x2[numberToAnalyse],re_y2[numberToAnalyse],im_x2[numberToAnalyse],im_y2[numberToAnalyse];
-   Double_t re_x3[numberToAnalyse],re_y3[numberToAnalyse],im_x3[numberToAnalyse],im_y3[numberToAnalyse];
-   Double_t Ampx, Ampy, Phasex1, Phasey1, Phasex2, Phasey2, Phasex3, Phasey3;
+  Double_t re_x1[numberToAnalyse];
+  Double_t re_y1[numberToAnalyse];
+  Double_t im_x1[numberToAnalyse];
+  Double_t im_y1[numberToAnalyse];
 
-   Double_t DM1, DM2, DM3, nu[4], t0, oldphasey, oldphasex;
+  Double_t re_x2[numberToAnalyse];
+  Double_t re_y2[numberToAnalyse];
+  Double_t im_x2[numberToAnalyse];
+  Double_t im_y2[numberToAnalyse];
+
+  Double_t re_x3[numberToAnalyse];
+  Double_t re_y3[numberToAnalyse];
+  Double_t im_x3[numberToAnalyse];
+  Double_t im_y3[numberToAnalyse];
+  
+  Double_t Ampx, Ampy, Phasex1, Phasey1, Phasex2, Phasey2, Phasex3, Phasey3;
+  Double_t DM1, DM2, DM3, nu[4], t0, oldphasey, oldphasex;
 
   //Dedispersion 4rd frequency			
   for(Int_t stepx=0; stepx < numberToAnalyse; stepx++)
@@ -569,11 +596,10 @@ Double_t Threshold3 = 120.0)
   gain_x[0] = 6.19084967e+08; gain_y[0] = 5.98952122e+08; gain_x[1] = 7.774859231e+08; gain_y[1] = 7.79267692e+08;
   gain_x[2] = 3.27578819e+08; gain_y[2] = 3.29266576e+08; gain_x[3] = 2.833504e+08; gain_y[3] = 3.16298135e+08;
 
-
-  Int_t delay_1 = (int)((1.34e+09*0.2*TEC*(1/(151e+06*151e+06)-1/(165e+06*165e+06)))/25e-09 + 1),
-      delay_2 = (int)((1.34e+09*0.2*TEC*(1/(137e+06*137e+06)-1/(165e+06*165e+06)))/25e-09 + 1),
-      delay_3 = (int)((1.34e+09*0.2*TEC*(1/(123e+06*123e+06)-1/(165e+06*165e+06)))/25e-09 + 1);
-
+  
+  Int_t delay_1 = (int)((1.34e+09*0.2*TEC*(1/(151e+06*151e+06)-1/(165e+06*165e+06)))/25e-09 + 1);
+  Int_t delay_2 = (int)((1.34e+09*0.2*TEC*(1/(137e+06*137e+06)-1/(165e+06*165e+06)))/25e-09 + 1);
+  Int_t delay_3 = (int)((1.34e+09*0.2*TEC*(1/(123e+06*123e+06)-1/(165e+06*165e+06)))/25e-09 + 1);
 
   for (int filestep = 0; filestep < FileTotal; filestep++)
   {
