@@ -140,6 +140,15 @@ file (APPEND ${outfile} "BLITZLIB  := ${blitz_lib}\n\n")
 ## ------------------------------------------------------------------------------
 ## Boost
 
+## header files
+
+FIND_PATH (BOOST_INCLUDES config.hpp
+  PATHS ${include_locations}
+  PATH_SUFFIXES boost boost-1_33_1
+  )
+
+## libraries
+
 set (libs
   boost_date_time
   boost_filesystem
@@ -161,7 +170,7 @@ foreach (lib ${libs})
   ## try to locate the library
   find_library (BOOST_${lib} ${lib} ${lib}-gcc
     PATHS ${lib_locations}
-    PATH_SUFFIXES boost
+    PATH_SUFFIXES boost boost-1_33_1
     )
   ## check if location was successful
   if (BOOST_${lib})
@@ -169,7 +178,8 @@ foreach (lib ${libs})
   endif (BOOST_${lib})
 endforeach (lib)
 
-file (APPEND ${outfile} "BOOSTLIB := ${BOOST_LIBRARIES}\n\n")
+file (APPEND ${outfile} "BOOSTINCD := ${BOOST_INCLUDES}\n")
+file (APPEND ${outfile} "BOOSTLIB  := ${BOOST_LIBRARIES}\n\n")
 
 ## ------------------------------------------------------------------------------
 ## CFITSIO
@@ -202,17 +212,29 @@ endif (cfitsio_lib)
 ## ------------------------------------------------------------------------------
 ## F77
 
-find_library (libgcc
-  NAMES gcc g2c
+find_library (libg2c
+  NAMES g2c
   PATHS ${lib_locations}
   PATH_SUFFIXES gcc/powerpc-apple-darwin8/4.0.0 gcc/powerpc-apple-darwin8/4.0.1
   )
 
-if (libgcc)
-  file (APPEND ${outfile} "F77LIB := ${libgcc}\n\n")
-else (libgcc)
-  message (STATUS "Unable to find libgcc!")
-endif (libgcc)
+find_library (libgfortran
+  NAMES gfortran
+  PATHS ${lib_locations}
+  PATH_SUFFIXES gcc/powerpc-apple-darwin8/4.0.0 gcc/powerpc-apple-darwin8/4.0.1
+  )
+
+set (F77_LIBRARIES "")
+
+if (libg2c)
+  set (F77_LIBRARIES "${F77_LIBRARIES} ${libg2c}")
+endif (libg2c)
+
+if (libgfortran)
+  set (F77_LIBRARIES "${F77_LIBRARIES} ${libgfortran}")
+endif (libgfortran)
+
+file (APPEND ${outfile} "F77LIB := ${F77_LIBRARIES}\n\n")
 
 ## ------------------------------------------------------------------------------
 ## FFTW Highly optimized FFT routines

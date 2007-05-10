@@ -51,9 +51,9 @@ set (libs
   Net
   Physics
   Postscript
-  Proof
-  ProofGui
-  ProofPlayer
+#  Proof
+#  ProofGui
+#  ProofPlayer
   PyROOT
   RIO
   Rint

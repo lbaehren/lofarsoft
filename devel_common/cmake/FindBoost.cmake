@@ -10,7 +10,7 @@
 
 FIND_PATH (BOOST_INCLUDES config.hpp
   PATHS /include /usr/include /usr/local/include /opt/include /sw/include
-  PATH_SUFFIXES boost
+  PATH_SUFFIXES boost boost-1_33_1
   )
 
 ## -----------------------------------------------------------------------------
@@ -37,7 +37,7 @@ foreach (lib ${libs})
   ## try to locate the library
   find_library (BOOST_${lib} ${lib} ${lib}-gcc
     PATHS /lib /usr/lib /usr/local/lib /sw/lib
-    PATH_SUFFIXES boost
+    PATH_SUFFIXES boost boost-1_33_1
     )
   ## check if location was successful
   if (BOOST_${lib})
