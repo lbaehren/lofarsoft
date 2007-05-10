@@ -36,7 +36,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <cmath>
 
 #include <blitz/array.h>
 
