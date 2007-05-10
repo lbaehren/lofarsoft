@@ -18,14 +18,20 @@
 // Standard C++ library
 #include <iostream>
 #include <string>
-
-#include <TH1F.h>             // -- ROOT header files
-#include <TFile.h>            //
-#include <TGraph.h>           // 
-#include <TRandom.h>          // 
-#include <TObjArray.h>        // 
-#include <dalLopesEvent.h>    // -- DAL header files
-#include <blitz/array.h>      // -- Blitz++ header files
+// -- ROOT header files
+#include <TCanvas.h>
+#include <TH1F.h>
+#include <TFile.h>
+#include <TGraph.h>
+#include <TRandom.h>
+#include <TObjArray.h>
+#include <TVirtualFFT.h>
+// --- CR-Pipeline header files
+#include <Utilities/ProgressBar.h>
+// --- DAL header files
+#include <dalLopesEvent.h>
+// --- Blitz++ header files
+#include <blitz/array.h>
 
 using std::cerr;
 using std::cout;
@@ -37,7 +43,7 @@ using blitz::Array;
 /*!
   \brief Create histograms from antenna data stored in a LopesEvent file
 
-  \brief infile -- Input file from which to read the data
+  \param infile -- Input file from which to read the data
 */
 int test_lopesevent2hist (std::string const &infile)
 {
@@ -176,20 +182,105 @@ int test_histogram2file ()
 
 // ------------------------------------------------------------------------------
 
-int main ()
+/*!
+  \brief Test some minimal processing of the time-series data from a LOPES event
+
+  <ol>
+    <li>Read in LopesEvent data via the DAL.
+    <li>Extract the antenna time-series data
+    <li>Filling data into histgrams
+  </ol>
+
+  The resuls will be written to a ROOT file; in order to inspect the contents 
+  start ROOT and run:
+  \code
+  TFile f ("timeseries.root");
+  TBrowser browser;
+  \endcode
+
+  \param infile -- Input file from which to read the data
+
+  \return nofFailedTests -- The number of failed test in this function
+*/
+int test_processing (std::string const &infile)
 {
   int nofFailedTests (0);
 
+  cout << "-- Open data file..." << endl;
+
+  dalLopesEvent le (infile);
+
+  cout << "-- Retrieve antenna data from file ..." << endl;
+
+  Array<short,2> data = le.channeldata();
+  int nofAntennas (le.nofAntennas());
+  int blocksize (le.blocksize());
+  float minValue (min(data));
+  float maxValue (max(data));
+
+  cout << "--> nof. antennas       = " << nofAntennas  << endl;
+  cout << "--> samples per antenna = " << blocksize    << endl;
+  cout << "--> Shape of data array = " << data.shape() << endl;
+  
+  cout << "-- Filling data into histograms..." << endl;
+
+  char nameTimeSeries [10];
+  char nameHistogram [10];
+  TH1F *ts;
+  TH1F *spectrum;
+  TH1F *hist;
+  TVirtualFFT *fft;
+  TObjArray HList (0);
+
+  for (int antenna(0); antenna<nofAntennas; antenna++) {
+    // Update names and labels
+    sprintf (nameTimeSeries,"Ant%d",antenna);
+    sprintf (nameHistogram,"Hist%d",antenna);
+    //
+    cout << "--> Antenna " << antenna << endl;
+    // recreate histograms
+    ts   = new TH1F (nameTimeSeries,"Time series",blocksize,0.,blocksize);
+    hist = new TH1F (nameHistogram,"Time-series distribution",100,minValue,maxValue);
+    // add histograms to object list
+    HList.Add(ts);
+    HList.Add(hist);
+    // fill in the data for this antenna
+    for (int sample(0); sample<blocksize; sample++) {
+      ts->SetBinContent(sample,float(data(sample,antenna)));
+      hist->Fill(float(data(sample,antenna)));  
+    }
+    // fit the histogram by a Gaussian distribution
+    hist->SetFillColor(32);
+    hist->Fit("gaus");
+  }
+
+  cout << "-- Exporting data to ROOT file..." << endl;
+
+  TFile f ("timeseries.root","recreate");
+  HList.Write();
+  f.Map();
+  f.Close();
+
+  return nofFailedTests;
+}
+
+// ------------------------------------------------------------------------------
+
+int main ()
+{
+  int nofFailedTests (0);
+  
   // Test dataset to work with
-
+  
   std::string LopesEventFile ("/home/lars/data/lopes/2007-01-31/2007.01.31.23:59:33.960.event");
-
+  
   // Tests
-
-  nofFailedTests += test_histogram2file();
-  nofFailedTests += test_lopesevent2hist (LopesEventFile);
-
+  
+  //   nofFailedTests += test_histogram2file();
+  //   nofFailedTests += test_lopesevent2hist (LopesEventFile);
+  nofFailedTests += test_processing (LopesEventFile);
+  
   cout << nofFailedTests << " failed tests." << endl;
-
+  
   return nofFailedTests;
 }
