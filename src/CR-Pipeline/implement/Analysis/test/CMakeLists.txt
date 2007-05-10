@@ -26,3 +26,5 @@ endforeach (src)
 #add_executable (table2root table2root.cc)
 #target_link_libraries (table2root ${ROOT_LIBRARIES})
 
+add_executable (tHistograms tHistograms.cc)
+target_link_libraries (tHistograms ${ROOT_LIBRARIES})
