@@ -47,6 +47,7 @@ message ("-- WCS     : ${HAVE_WCS}     ")
 include_directories (
   .
   ..
+  ${DAL_SOURCE_DIR}/implement
   ${CR_SOURCE_DIR}/implement
   ${CR_SOURCE_DIR}/test
   ${BLITZ_INCLUDES}
