@@ -1,0 +1,11 @@
+#!/bin/sh
+
+##
+## Run Joe's Python script, which uses the a Python wrapper to the DAL to read
+## HDF5-based time-series data; once the data are read in, pylab is used to
+## display the data
+##
+
+cd /home/lars/coding/lofar/usg/src/DAL/implement
+
+python tLopes.py
