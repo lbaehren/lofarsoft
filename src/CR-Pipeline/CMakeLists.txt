@@ -48,6 +48,7 @@ include_directories (
   .
   ..
   ${DAL_SOURCE_DIR}/implement
+  ${CR_SOURCE_DIR}../DAL/implement
   ${CR_SOURCE_DIR}/implement
   ${CR_SOURCE_DIR}/test
   ${BLITZ_INCLUDES}
