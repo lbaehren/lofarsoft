@@ -195,7 +195,8 @@ int test_histogram2file ()
   <ol>
     <li>Read in LopesEvent data via the DAL.
     <li>Extract the antenna time-series data
-    <li>Filling data into histgrams
+    <li>Filling data into histograms
+    <li>Fitting of the histograms by Gausssian distribution
   </ol>
 
   The resuls will be written to a ROOT file; in order to inspect the contents:
@@ -210,6 +211,7 @@ int test_histogram2file ()
 int test_processing (std::string const &infile)
 {
   int nofFailedTests (0);
+  int channel (0);
 
   cout << "-- Open data file..." << endl;
 
@@ -220,12 +222,16 @@ int test_processing (std::string const &infile)
   Array<short,2> data = le.channeldata();
   int nofAntennas (le.nofAntennas());
   int blocksize (le.blocksize());
+  int fftLength (blocksize/2+1);
   float minValue (min(data));
   float maxValue (max(data));
+  float channelPower (0.0);
+  float stationSpectrum [fftLength];
 
+  cout << "--> Shape of data array = " << data.shape() << endl;
   cout << "--> nof. antennas       = " << nofAntennas  << endl;
   cout << "--> samples per antenna = " << blocksize    << endl;
-  cout << "--> Shape of data array = " << data.shape() << endl;
+  cout << "--> FFT output length   = " << fftLength    << endl;
   
   cout << "-- Filling data into histograms..." << endl;
 
@@ -233,13 +239,16 @@ int test_processing (std::string const &infile)
   char nameSpectrum [10];
   char nameHistogram [10];
   char nameCanvas [10];
-  int fftLength (blocksize/2+1);
   TH1F *ts;
   TH1 *fft = 0;
   TH1F *hist;
   TH1F *spec;
   TCanvas *c;
   TObjArray HList (0);
+  
+  for (channel=0; channel<fftLength; channel++) {
+  	stationSpectrum[channel] = 0.0;
+  }
 
   for (int antenna(0); antenna<nofAntennas; antenna++) {
     // Update names and labels
@@ -248,16 +257,17 @@ int test_processing (std::string const &infile)
     sprintf (nameHistogram,"Hist%d",antenna);
     sprintf (nameCanvas,"Canv%d",antenna);
     //
-    cout << "--> Antenna " << antenna << endl;
+    cout << "--> Processing Antenna " << antenna << endl;
     // recreate histograms
     ts   = new TH1F (nameTimeSeries,"Time series",blocksize,0.,blocksize);
-    spec = new TH1F (nameSpectrum,"Spectrum",fftLength,0.,fftLength);
     hist = new TH1F (nameHistogram,"Time-series distribution",100,minValue,maxValue);
-    c    = new TCanvas (nameCanvas,"Antenna data",10,10,900,300);
+    spec = new TH1F (nameSpectrum,"Spectrum",fftLength,0.,fftLength);
+    c    = new TCanvas (nameCanvas,"Antenna data",1000,800);
     // add histograms to object list
     HList.Add(ts);
     HList.Add(hist);
     HList.Add(spec);
+    HList.Add(c);
     // fill in the data for this antenna
     for (int sample(0); sample<blocksize; sample++) {
       ts->SetBinContent(sample,float(data(sample,antenna)));
@@ -265,12 +275,35 @@ int test_processing (std::string const &infile)
     }
     // fit the histogram by a Gaussian distribution
     hist->SetFillColor(32);
-    hist->Fit("gaus");
+//    hist->Fit("gaus");
     // generate the fft
     fft = ts->FFT(fft,"MAG");
-    for (int channel(0); channel<fftLength; channel++) {
-      spec->SetBinContent(channel,fft->GetBinContent(channel)*fft->GetBinContent(channel));
+    for (channel=0; channel<fftLength; channel++) {
+      channelPower = fft->GetBinContent(channel)*fft->GetBinContent(channel);
+      spec->SetBinContent(channel,channelPower);
+      stationSpectrum[channel] += channelPower;
     }
+    
+    // Collect the various plots in a canvas to display them along-side
+    c->Divide(1,3);
+        
+    c->cd(1);
+    ts->Draw();
+    c->cd(2);
+    hist->Draw();
+    c->cd(3);
+    spec->Draw();
+    c->Update();
+  }
+
+  cout << "-- Joint power spectrum for all antennas in the station..." << endl;
+    
+  TH1F *specStation;
+  specStation = new TH1F ("specStation","Station Spectrum",fftLength,0.,fftLength);
+  HList.Add(specStation);
+    
+  for (channel=0; channel<fftLength; channel++) {
+    specStation->SetBinContent(channel,stationSpectrum[channel]);
   }
 
   cout << "-- Exporting data to ROOT file..." << endl;
