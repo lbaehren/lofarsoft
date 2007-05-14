@@ -7,6 +7,7 @@ set (cr_modules
   Calibration
   Coordinates
   Data
+  Display
   Imaging
   IO
   LopesBase
@@ -42,8 +43,8 @@ if (CASA_LIBRARIES AND LAPACK_LIBRARIES)
   target_link_libraries (cr
     ${CASA_LIBRARIES}
     ${CFITSIO_LIBRARIES}
-#    ${GLISH_LIBRARIES}
     ${LAPACK_LIBRARIES}
+    ${PGPLOT_LIBRARIES}
     )
 else (CASA_LIBRARIES AND LAPACK_LIBRARIES)
   message (STATUS "Sorry, unable to build CR library; missing CASA and LAPACK!")

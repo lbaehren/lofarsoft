@@ -24,6 +24,10 @@ if (NOT HAVE_LAPACK)
   include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindLAPACK.cmake)
 endif (NOT HAVE_LAPACK)
 
+if (NOT HAVE_PGPLOT)
+  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindPGPLOT.cmake)
+endif (NOT HAVE_PGPLOT)
+
 if (NOT HAVE_ROOT)
   include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindROOT.cmake)
 endif (NOT HAVE_ROOT)
@@ -38,6 +42,7 @@ message ("-- CASA    : ${HAVE_CASA}    ")
 message ("-- CFITSIO : ${HAVE_CFITSIO} ")
 message ("-- FFTW3   : ${HAVE_FFTW3}   ")
 message ("-- LAPACK  : ${HAVE_LAPACK}  ")
+message ("-- PGPLOT  : ${HAVE_PGPLOT}  ")
 message ("-- ROOT    : ${HAVE_ROOT}    ")
 message ("-- WCS     : ${HAVE_WCS}     ")
 
@@ -61,6 +66,7 @@ include_directories (
   ${BLITZ_INCLUDES}
   ${CASA_INCLUDES}
   ${CFITSIO_INCLUDES}
+  ${PGPLOT_INCLUDES}
   ${ROOT_INCLUDES}
   ${WCS_INCLUDES}
   )
