@@ -62,7 +62,7 @@ int main ()
   String filename = CR::fileFromPath (filepath);
   String dirname = CR::dirFromPath (filepath);
   Vector<String> substrings = CR::getSubstrings (filepath,"/");
-  Int nofSubstrings = CR::nofSubstrings (filepath,"/");
+  int nofSubstrings = CR::nofSubstrings (filepath,"/");
 
   cout << "\n[tStringTools]\n" << endl;
   cout << " - Complete path to file : " << filepath << endl;
