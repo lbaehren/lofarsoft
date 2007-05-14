@@ -58,12 +58,16 @@
 #include <scimath/Functionals/Function.cc>
 #include <scimath/Functionals/FunctionParam.cc>
 #include <scimath/Mathematics/FFTServer.cc>
+#include <images/Images/ImageInterface.cc>
 #include <images/Images/PagedImage.cc>
 
 namespace casa {
 
   // ============================================================================
-  //  casa/implement
+  //
+  //  casa
+  //
+  // ============================================================================
 
   Complex pow (Complex const&, Float const&);
   DComplex pow (DComplex const&, Double const&);
@@ -349,7 +353,10 @@ namespace casa {
   template class Functional<uInt, Float>;
 
   // ============================================================================
-  // scimath
+  //
+  //  scimath
+  //
+  // ============================================================================
 
   template class FunctionParam<int>;
   template class FunctionParam<float>;
@@ -369,11 +376,24 @@ namespace casa {
   template class FFTServer<Double, DComplex>;
  
   // ============================================================================
-  //  images/implement
+  //
+  //  images
+  //
+  // ============================================================================
 
-  // 1000 images/Images/PagedImage.cc
+  template class ImageInterface<Float>;
+  template class ImageInterface<Double>;
+  template class ImageInterface<Complex>;
 
   template class PagedImage<Float>;
+  template class PagedImage<Double>;
   template class PagedImage<Complex>;
 
+  // ============================================================================
+  //
+  //  tasking
+  //
+  // ============================================================================
+
+  
 }

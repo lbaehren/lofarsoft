@@ -56,11 +56,11 @@ using CR::ObservationData;
 
   \return antennaPositions -- Array with the 3D antenna positions,
  */
-Matrix<Double> antennaPositions (uint const &nofAntennas,
+Matrix<double> antennaPositions (uint const &nofAntennas,
 				 bool const &coordAxisFirst)
 {
   IPosition shape (2,3,nofAntennas);
-  Matrix<Double> pos (shape);
+  Matrix<double> pos (shape);
 
   // Assign values
   for (uint antenna (0); antenna<nofAntennas; antenna++) {
@@ -73,7 +73,7 @@ Matrix<Double> antennaPositions (uint const &nofAntennas,
   if (coordAxisFirst) {
     return pos;
   } else {
-    Matrix<Double> swapped (shape(1),shape(0));
+    Matrix<double> swapped (shape(1),shape(0));
     for (int antenna (0); antenna<shape(1); antenna++) {
       for (int coord (0); coord<shape(0); coord++) {
 	swapped(antenna,coord) = pos(coord,antenna);
@@ -216,7 +216,7 @@ int test_antennas ()
   int nofFailedTests (0);
   ObsInfo obsInfo = getObsInfo();
   uint nofAntennas (10);
-  Matrix<Double> antPos (antennaPositions(nofAntennas,true));
+  Matrix<double> antPos (antennaPositions(nofAntennas,true));
 
   cout << "\n[1] Set antenna positions after object creation" << endl;
   try {
@@ -239,7 +239,7 @@ int test_antennas ()
     ObservationData obsData (obsInfo.obsDate(),
 			     obsInfo.telescope());
 
-    Matrix<Double> positions = antennaPositions(nofAntennas,false);
+    Matrix<double> positions = antennaPositions(nofAntennas,false);
     obsData.setAntennaPositions (positions,false);
 
     cout << "coordinate axis first : " << obsData.antennaPositions (True)  << endl;
@@ -280,8 +280,8 @@ int test_conversionEngine ()
   int nofFailedTests (0);
   Quantity epoch (52940.4624,"d");
   String telescope ("LOPES");
-  Vector<Double> sunAZEL (2);
-  Vector<Double> sunJ2000 (2);
+  Vector<double> sunAZEL (2);
+  Vector<double> sunJ2000 (2);
 
   sunAZEL(0) = 178.822463;   // Position of the Sun in AZEL coordinates
   sunAZEL(1) = 28.0218712;   // at LOPES telescope on 52940.4624
@@ -292,7 +292,7 @@ int test_conversionEngine ()
   // Test 1: Conversion between local and celestial reference frame
   cout << "\n [1] Conversion between local and celestial reference frame\n" << endl;
   try {
-    Vector<Double> sun (2);
+    Vector<double> sun (2);
     Vector<String> refcode(3);
     //
     refcode(0) = "J2000";
@@ -333,7 +333,7 @@ int test_conversionEngine ()
   cout << "\n [2] Conversion between two celestial reference frames\n" << endl;
   try {
     ObservationData obsData (epoch,telescope);
-    Vector<Double> sun (2);
+    Vector<double> sun (2);
     Vector<String> refcode(3);
     MVDirection MVDirectionFROM;
     Vector<Quantity> QDirectionTO(2);

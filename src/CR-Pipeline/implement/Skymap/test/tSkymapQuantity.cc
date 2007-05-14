@@ -23,7 +23,7 @@
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
 
-#include <lopes/Skymap/SkymapQuantity.h>
+#include <Skymap/SkymapQuantity.h>
 
 /*!
   \file tSkymapQuantity.cc

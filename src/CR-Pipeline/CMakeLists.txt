@@ -42,15 +42,22 @@ message ("-- ROOT    : ${HAVE_ROOT}    ")
 message ("-- WCS     : ${HAVE_WCS}     ")
 
 ## ------------------------------------------------------------------------------
+## Check for the presence of further USG comonents
+
+find_path (DAL_INCLUDES dal.h lopesevent.h
+  PATHS ${CR_SOURCE_DIR}/.. ..
+  PATH_SUFFIXES DAL/implement
+  )
+
+## ------------------------------------------------------------------------------
 ## Where to find the header files
 
 include_directories (
   .
   ..
-  ${DAL_SOURCE_DIR}/implement
-  ${CR_SOURCE_DIR}../DAL/implement
   ${CR_SOURCE_DIR}/implement
   ${CR_SOURCE_DIR}/test
+  ${DAL_INCLUDES}
   ${BLITZ_INCLUDES}
   ${CASA_INCLUDES}
   ${CFITSIO_INCLUDES}

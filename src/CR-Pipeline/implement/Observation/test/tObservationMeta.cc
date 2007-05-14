@@ -107,7 +107,7 @@ void printAntpos (ObservationMeta& obsMeta)
 {
   cout << "\n[tObservationMeta::printAntpos]\n" << endl;
 
-  Matrix<Double> antpos = obsMeta.antennaPositions();
+  Matrix<double> antpos = obsMeta.antennaPositions();
   IPosition shape = antpos.shape();
 
   cout << "Shape of the antenna positions matrix : " << shape << endl;

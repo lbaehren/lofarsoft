@@ -363,7 +363,7 @@ if (CASA_libcasa)
   if (CASA_libtasking AND CASA_libgraphics AND TMPmsvis)
     set (LINKtasking
       ${CASA_libtasking} ${CASA_libgraphics} ${CASA_libmsvis} ${CASA_libms} ${CASA_libimages}
-      ${TMPcomponents}
+      ${TMPcomponents} 
       CACHE STRING "LINKtasking")
   endif (CASA_libtasking AND CASA_libgraphics AND TMPmsvis)
 endif (CASA_libcasa)
@@ -400,7 +400,7 @@ if (CASA_libcasa)
 	      set (CASA_LIBRARIES ${LINKimages})
 	      ##
 	      if (CASA_libtasking)
-		set (CASA_LIBRARIES ${LINKtasking})
+		set (CASA_LIBRARIES ${LINKtasking} ${GLISH_LIBRARIES})
 	      endif (CASA_libtasking)
 	      ##
 	    endif (CASA_libimages)

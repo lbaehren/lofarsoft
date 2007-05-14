@@ -32,11 +32,12 @@
 using casa::IPosition;
 using casa::ProgressMeter;
 
-#include <lopes/Skymap/Skymapper.h>
+#include <templates.h>
+#include <Skymap/Skymapper.h>
 
-using LOPES::SkymapCoordinates;
-using LOPES::Skymapper;
-using LOPES::TimeFreq;
+using CR::SkymapCoordinates;
+using CR::Skymapper;
+using CR::TimeFreq;
 
 /*!
   \file tSkymapper.cc
