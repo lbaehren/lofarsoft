@@ -1,8 +1,27 @@
-
-#if !defined(PROGRESSBAR_H)
-#define PROGRESSBAR_H
+/***************************************************************************
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
 /* $Id: ProgressBar.h,v 1.3 2006/10/31 18:24:08 bahren Exp $ */
+
+#ifndef PROGRESSBAR_H
+#define PROGRESSBAR_H
 
 #include <stdio.h>
 #include <iostream>
@@ -12,7 +31,13 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <time.h>
-using namespace std;
+
+using std::cerr;
+using std::cout;
+using std::endl;
+using std::flush;
+using std::setw;
+using std::string;
 
 namespace CR {
 
@@ -81,74 +106,96 @@ class ProgressBar {
  public:
   
   /*!
-    \fn ProgressBar (int)
-
+    \brief Argumented constructor.
+    
+    Using this constructor the progress bar itself will be drawn with the default
+    symbol, #.
+  
+    \param loops -- Total number of loops
+  */
+  ProgressBar (int const &loops);
+  
+  /*!
     \brief Argumented constructor.
 
     Using this constructor the progress bar itself will be drawn with the default
     symbol, #.
-    \param maximumValue = Total number of loops
+
+    \param loops    -- Total number of loops
+    \param barwidth -- Total length of the progress bar (number of characters)
   */
-  ProgressBar (int);
+  ProgressBar (int const &loops,
+	       int const &barwidth);
   
   /*!
-    \fn ProgressBar (int,int)
-
     \brief Argumented constructor.
 
-    Using this constructor the progress bar itself will be drawn with the default
-    symbol, #.
-    \param maximumValue = Total number of loops
-    \param barwidth     = Total length of the progress bar (number of
-                          characters)
+    \param loops    -- Total number of loops, etc...
+    \param barwidth -- Total length of the progress bar (number of
+                       characters)
+    \param symbol   -- The Symbol used for the bar itself.
   */
-  ProgressBar (int,int);
+  ProgressBar (int const &loops,
+	       int const &barwidth,
+	       string const &symbol);
   
-  /*!
-    \fn ProgressBar (int,int,string)
-
-    \brief Argumented constructor.
-
-    \param maximumValue = Total number of loops, etc...
-    \param barwidth     = Total length of the progress bar (number of
-                          characters)
-    \param symbol       = The Symbol used for the bar itself.
-  */
-  ProgressBar (int,int,string);
-
   // === Progress bar options ========================================
 
   /*!
-    \fn int maximumValue ()
-
     \brief Get the total number of loops for which the bar has been initialized.
-   */
-  int maximumValue ();
 
+    \return maximumValue -- The total number of loops for which the bar has been
+                            initialized.
+  */
+  inline int maximumValue () {
+    return maximumValue_p;
+  }
+  
   /*!
-    \fn void setNofLoops (const int)
-
     \brief Set the total number of loops for which the bar is initialized.
-   */
-  void setMaximumValue (const int);
 
+    \param loops -- The maximum number of loops, over which the progress will be
+                    monitored
+  */
+  inline void setMaximumValue (int const &loops) {
+    maximumValue_p = loops;
+  }
+  
   /*!
-    \fn void symbol ()
-
     \brief Get the symbol used for drawing the progress bar.
-   */
-  string symbol ();
+
+    \return symbol -- The symbol/character used for drawing the progress bar
+  */
+  inline string symbol () {
+    return symbol_p;
+  }
 
   /*!
     \fn void setSymbol (const string)
 
     \brief Set the symbol used for drawing the progress bar.
-   */
-  void setSymbol (const string);
+  */
+  inline void setSymbol (string const &symbol) {
+    symbol_p = symbol;
+  }
+  
+  /*!
+    \brief Get the width of the progress bar
 
-  int barwidth ();
+    \return barwidth -- The width of the progress bar (in characters).
+  */
+  inline int barwidth () {
+    return barwidth_p;
+  }
 
-  void setBarwidth (const int);
+  /*!
+    \brief Set the width of the progress bar
+
+    \return barwidth -- The width of the progress bar (in characters)
+  */
+  inline void setBarwidth (int const &barwidth) {
+    barwidth_p = barwidth;
+  }
   
   /*!
     \fn void showTime (bool)
@@ -164,20 +211,47 @@ class ProgressBar {
   // === Draw progress bar ===========================================
   
   /*!
-    \fn void update (int)
-
     \brief Update the progress bar.
 
-    Draw an updated progress bar.
-    
     \param numCompleted = Number of completed computation steps.
   */
   void update (int);
 
+  // -- Summary of object parameters --------------------------------------------
+
+  /*
+    \brief Provide a summary of the object's internal parameters
+  */
+  inline void summary () {
+    summary (std::cout);
+  }
+  
+  /*
+    \brief Provide a summary of the object's internal parameters
+
+    \param os -- Output stream to which the summary is written
+  */
+  void summary (std::ostream &os);
+  
  private:
   
-  void init (int,int,string);
-  void setStarttime ();
+  /*!
+    \brief Initialize the internal parameters of the progress bar
+
+    \param loops    -- 
+    \param barwidth -- 
+    \param symbol   -- 
+  */
+  void init (int const &loops,
+	     int const &barwidth,
+	     string const &symbol);
+
+  /*!
+    \brief Store the start time at which the progress bar has been initialized
+  */
+  inline void setStarttime () {
+    starttime_p = clock();
+  }
   
 };
 

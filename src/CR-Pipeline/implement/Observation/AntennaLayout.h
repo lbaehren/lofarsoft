@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#if !defined (ANTENNALAYOUT_H)
+#ifndef ANTENNALAYOUT_H
 #define ANTENNALAYOUT_H
 
 /* $Id: AntennaLayout.h,v 1.5 2006/11/27 10:54:04 bahren Exp $ */

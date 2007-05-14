@@ -1,3 +1,22 @@
+/***************************************************************************
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
 /* $Id: StringTools.cc,v 1.3 2006/10/31 18:24:08 bahren Exp $ */
 
@@ -7,7 +26,7 @@ namespace CR {
 
   // ---------------------------------------------------------------- string2char
   
-  char* string2char (const String& mystring)
+  char* string2char (String const &mystring)
   {
     int x (0);
     char* retChar;
@@ -27,8 +46,8 @@ namespace CR {
   
   // ---------------------------------------------------------------- string2char
 
-  char* string2char (const String& mystring,
-		     const uInt & length)
+  char* string2char (String const &mystring,
+		     unsigned int const &length)
   {
     unsigned int nofChars (mystring.length());
     char* mychar;
@@ -102,16 +121,18 @@ namespace CR {
   std::vector<std::string> getSubstrings (std::string const &str,
 					  std::string const &sep) 
   {
+    unsigned int i (0);
     string tmp;
-    uint nofChars = str.length();
-    uint start=0,loc=0;
+    unsigned int nofChars = str.length();
+    unsigned int start (0);
+    unsigned int loc (0);
     int num (nofSubstrings(str,sep));
     std::vector<std::string> substrings;
     
     substrings.resize(num);
     
     num = start = 0;
-    for (unsigned int i=0; i<nofChars; i++) {
+    for (i=0; i<nofChars; i++) {
       loc = str.find(sep,i);
       if (i == loc) {
 	tmp.assign(str,start,loc-start);
@@ -129,12 +150,12 @@ namespace CR {
   
   // ---------------------------------------------------------------- nofSubstrings
   
-  Int nofSubstrings (const String str,
-		     const String sep)
+  int nofSubstrings (String const &str,
+		     String const &sep)
   {
     unsigned int nofChars = str.length();
     unsigned int loc=0;
-    Int num = 1;
+    int num = 1;
     
     for (unsigned int i=0; i<nofChars; i++) {
       loc = str.find(sep,i);
@@ -154,7 +175,7 @@ namespace CR {
     String tmp;
     unsigned int nofChars = str.length();
     unsigned int start=0,loc=0;
-    Int num = nofSubstrings(str,sep);
+    int num = nofSubstrings(str,sep);
     Vector<String> substrings(num);
     
     num = start = 0;

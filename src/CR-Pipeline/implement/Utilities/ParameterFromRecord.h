@@ -37,34 +37,43 @@
 #include <tasking/Glish/GlishRecord.h>
 #include <tasking/Tasking/ForeignArrayParameterAccessor.h>
 
-#include <casa/namespace.h>
+using casa::GlishRecord;
+using casa::MDirection;
+using casa::MeasureHolder;
+using casa::MEpoch;
+using casa::MPosition;
+using casa::Quantity;
+using casa::Quantum;
+using casa::QuantumHolder;
+using casa::Record;
+using casa::String;
 
 namespace CR {
-
-/*!
-  \ingroup Utilities
-
-  \brief Methods to extract non-atomic parameters from a GlishRecord
-
-  \author Lars B&auml;hren
-
-  \date 2006/07/11
-
-  \test tParameterFromRecord.cc
-
-  <h3>Prerequisite</h3>
-
-  <ul type="square">
-    <li>[AIPS++] casa/Containers/Record
-    <li>[AIPS++] casa/Quanta/QuantumHolder -- A holder for Quantities to enable
-                 record conversions
-    <li>[AIPS++] measures/Measures/MeasureHolder -- A holder for Measures to 
-                 enable record conversions
-    <li>[AIPS++] tasking/Tasking/Foreign2ParameterAccessor -- Quanta conversions
-    <li>[AIPS++] tasking/Tasking/Foreign3ParameterAccessor -- Measures conversions
-  </ul>
-
-  <h3>Synopsis</h3>
+  
+  /*!
+    \ingroup Utilities
+    
+    \brief Methods to extract non-atomic parameters from a GlishRecord
+    
+    \author Lars B&auml;hren
+    
+    \date 2006/07/11
+    
+    \test tParameterFromRecord.cc
+    
+    <h3>Prerequisite</h3>
+    
+    <ul type="square">
+      <li>[AIPS++] casa/Containers/Record
+      <li>[AIPS++] casa/Quanta/QuantumHolder -- A holder for Quantities to enable
+      record conversions
+      <li>[AIPS++] measures/Measures/MeasureHolder -- A holder for Measures to 
+      enable record conversions
+      <li>[AIPS++] tasking/Tasking/Foreign2ParameterAccessor -- Quanta conversions
+      <li>[AIPS++] tasking/Tasking/Foreign3ParameterAccessor -- Measures conversions
+    </ul>
+    
+    <h3>Synopsis</h3>
 
   <h3>Example(s)</h3>
 
@@ -75,14 +84,14 @@ namespace CR {
 
     // ... some stuff ...
     
-    Bool status;
+    bool status;
     Quantity obsTime;
     
     status = QuantityFromRecord (obsTime,  "time",  glishRec);
     \endcode
     <li>Extract a MEpoch from a GlishRecord
     \code
-    Bool status;
+    bool status;
     MEpoch date;
 
     status = MEpochFromRecord   (date,     "date",  glishRec);
@@ -109,7 +118,7 @@ namespace CR {
       \endverbatim
       <li>After passing of this record as event value, and parsing it via
       \code
-      Bool status (True);
+      bool status (True);
       Quantity obsTime;
       MEpoch date;
       MDirection j2000;
@@ -145,11 +154,11 @@ namespace CR {
   \return status -- Status of the operation; returns <tt>False</tt> in case
                     an error occured along the way.
 */
-Bool QuantityFromRecord (Quantity &out,
-			 String const &field,
-			 casa::GlishRecord const &rec);
-
-/*!
+  bool QuantityFromRecord (Quantity &out,
+			   String const &field,
+			   GlishRecord const &rec);
+  
+  /*!
   \brief Add a quantity to a GlishRecord
 
   \todo not yet implemented
@@ -161,7 +170,7 @@ Bool QuantityFromRecord (Quantity &out,
   \return status -- Status of the operation; returns <tt>False</tt> in case
                     an error occured along the way.
 */
-Bool QuantityToRecord (casa::GlishRecord &rec,
+bool QuantityToRecord (casa::GlishRecord &rec,
 		       String const &field,
 		       Quantity const &quantity);
 
@@ -180,7 +189,7 @@ Bool QuantityToRecord (casa::GlishRecord &rec,
   \return status -- Status of the operation; returns <tt>False</tt> in case
                     an error occured along the way.
 */
-Bool MEpochFromRecord (MEpoch &out,
+bool MEpochFromRecord (MEpoch &out,
 		       String const &field,
 		       casa::GlishRecord const &rec);
 
@@ -196,7 +205,7 @@ Bool MEpochFromRecord (MEpoch &out,
   \return status -- Status of the operation; returns <tt>False</tt> in case
                     an error occured along the way.
 */
-Bool MDirectionFromRecord (MDirection &out,
+bool MDirectionFromRecord (MDirection &out,
 			   String const &field,
 			   casa::GlishRecord const &rec);
 
@@ -212,7 +221,7 @@ Bool MDirectionFromRecord (MDirection &out,
   \return status -- Status of the operation; returns <tt>False</tt> in case
                     an error occured along the way.
 */
-Bool MPositionFromRecord (MPosition &out,
+bool MPositionFromRecord (MPosition &out,
 			  String const &field,
 			  casa::GlishRecord const &rec);
 

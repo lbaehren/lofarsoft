@@ -79,54 +79,56 @@ using casa::String;
   </ul>
  */
 
-class ObservationData {
-
-  // A short description of the observation/experiment.
-  String description_p;
-
-  // Miscellaneous information related to an observation.
-  ObsInfo obsInfo_p;
-
-  // The location of the observation site
-  MPosition obsPosition_p;
-
-  //! 3D antenna positions w.r.t. to the observatory position, [nCoord,nAntenna]
-  Matrix<double> antennaPositions_p;
-
- public:
-
-  // --------------------------------------------------------------- Construction
-
-  /*!
-    \brief Default constructor.
-  */
-  ObservationData ();
-
-  /*!
-    \brief Argumented constructor
-
-    \param observatory -- The name of the observatory.
-  */
-  ObservationData (const String observatory);
-
-  /*!
-    \brief Argumented constructor.
-
-    \param epoch       -- The epoch/time of the observation.
-    \param observatory -- The name of the observatory.
-  */
-  ObservationData (const Quantity epoch,
-		   const String observatory);
-
-  /*!
-    \brief Argumented constructor.
-
-    \param epoch       -- The epoch/time of the observation.
-    \param observatory -- The name of the observatory.
-  */
-  ObservationData (const MEpoch epoch,
-		   const String observatory);
+namespace CR {  // Namespace CR -- begin
   
+  class ObservationData {
+    
+    // A short description of the observation/experiment.
+    String description_p;
+    
+    // Miscellaneous information related to an observation.
+    ObsInfo obsInfo_p;
+    
+    // The location of the observation site
+    MPosition obsPosition_p;
+    
+    //! 3D antenna positions w.r.t. to the observatory position, [nCoord,nAntenna]
+    Matrix<double> antennaPositions_p;
+    
+  public:
+    
+    // ------------------------------------------------------------- Construction
+    
+    /*!
+      \brief Default constructor.
+    */
+    ObservationData ();
+    
+    /*!
+      \brief Argumented constructor
+      
+      \param observatory -- The name of the observatory.
+    */
+    ObservationData (const String observatory);
+    
+  /*!
+    \brief Argumented constructor.
+    
+    \param epoch       -- The epoch/time of the observation.
+    \param observatory -- The name of the observatory.
+  */
+    ObservationData (const Quantity epoch,
+		     const String observatory);
+    
+    /*!
+      \brief Argumented constructor.
+      
+      \param epoch       -- The epoch/time of the observation.
+      \param observatory -- The name of the observatory.
+    */
+    ObservationData (const MEpoch epoch,
+		     const String observatory);
+    
   /*!
     \brief Argumented constructor.
     
@@ -499,5 +501,7 @@ class ObservationData {
   void setObservatoryPosition ();
 
 };
+
+}  // -- Namespace CR -- end
 
 #endif

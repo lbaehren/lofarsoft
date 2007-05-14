@@ -1,3 +1,22 @@
+/***************************************************************************
+ *   Copyright (C) 2004,2005                                               *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
 /* $Id: tMasking.cc,v 1.5 2007/03/20 15:16:09 bahren Exp $ */
 
@@ -21,16 +40,16 @@
   
   \return ok -- Status of the test routine.
 */
-Bool test_validElements () {
+bool test_validElements () {
   
-  Bool ok (True);
-  uInt nofElements(20);
-  Int nofValid(0);
-  Int nofInvalid(0);
-  Vector<Bool> mask(nofElements,True);
+  bool ok (true);
+  unsigned int nofElements(20);
+  int nofValid(0);
+  int nofInvalid(0);
+  Vector<bool> mask(nofElements,true);
   
-  for (uInt i=0; i<nofElements; i++) {
-    mask(i) = False;
+  for (unsigned int i=0; i<nofElements; i++) {
+    mask(i) = false;
     nofValid = ntrue (mask);
     nofInvalid = mask.nelements() - nofValid;
     //
@@ -49,8 +68,8 @@ Bool test_validElements () {
   \brief Test merging of two existing masks
 
   \code 
-  Array<Bool> mergeMasks (const Array<Bool>& array1,
-			  const Array<Bool>& array2,
+  Array<bool> mergeMasks (const Array<bool>& array1,
+			  const Array<bool>& array2,
 			  const String logic);
   \endcode
 
@@ -63,37 +82,37 @@ int test_mergeMasks () {
   // Test 1
   try {
     IPosition shape (3,2);
-    Array<Bool> mask1(shape);
-    Array<Bool> mask2(shape);
+    Array<bool> mask1(shape);
+    Array<bool> mask2(shape);
     String logic;
     //
-    mask1 = True;
-    mask2 = False;
+    mask1 = true;
+    mask2 = false;
     //
     {
       logic = "AND";
-      Array<Bool> mask = CR::mergeMasks (mask1,mask2,logic);
+      Array<bool> mask = CR::mergeMasks (mask1,mask2,logic);
       cout << " Merging logic : " << logic << endl;
       cout << " Merged mask   : " << mask << endl;
     }
     //
     {
       logic = "NAND";
-      Array<Bool> mask = CR::mergeMasks (mask1,mask2,logic);
+      Array<bool> mask = CR::mergeMasks (mask1,mask2,logic);
       cout << " Merging logic : " << logic << endl;
       cout << " Merged mask   : " << mask << endl;
     }
     //
     {
       logic = "OR";
-      Array<Bool> mask = CR::mergeMasks (mask1,mask2,logic);
+      Array<bool> mask = CR::mergeMasks (mask1,mask2,logic);
       cout << " Merging logic : " << logic << endl;
       cout << " Merged mask   : " << mask << endl;
     }
     //
     {
       logic = "NOR";
-      Array<Bool> mask = CR::mergeMasks (mask1,mask2,logic);
+      Array<bool> mask = CR::mergeMasks (mask1,mask2,logic);
       cout << " Merging logic : " << logic << endl;
       cout << " Merged mask   : " << mask << endl;
     }
@@ -105,43 +124,43 @@ int test_mergeMasks () {
   // Test 2
   try {
     IPosition shape (3,4);
-    Array<Bool> mask1(shape);
-    Array<Bool> mask2(shape);
+    Array<bool> mask1(shape);
+    Array<bool> mask2(shape);
     String logic;
     //
     IPosition blc (3,0);
     IPosition trc (3,2);
     //
-    mask1 = True;
-    mask1(blc,trc) = False;
+    mask1 = true;
+    mask1(blc,trc) = false;
     //
-    mask2 = False;
-    mask2(blc,trc) = True;
+    mask2 = false;
+    mask2(blc,trc) = true;
     //
     {
       logic = "AND";
-      Array<Bool> mask = CR::mergeMasks (mask1,mask2,logic);
+      Array<bool> mask = CR::mergeMasks (mask1,mask2,logic);
       cout << " Merging logic : " << logic << endl;
       cout << " Merged mask   : " << mask << endl;
     }
     //
     {
       logic = "NAND";
-      Array<Bool> mask = CR::mergeMasks (mask1,mask2,logic);
+      Array<bool> mask = CR::mergeMasks (mask1,mask2,logic);
       cout << " Merging logic : " << logic << endl;
       cout << " Merged mask   : " << mask << endl;
     }
     //
     {
       logic = "OR";
-      Array<Bool> mask = CR::mergeMasks (mask1,mask2,logic);
+      Array<bool> mask = CR::mergeMasks (mask1,mask2,logic);
       cout << " Merging logic : " << logic << endl;
       cout << " Merged mask   : " << mask << endl;
     }
     //
     {
       logic = "NOR";
-      Array<Bool> mask = CR::mergeMasks (mask1,mask2,logic);
+      Array<bool> mask = CR::mergeMasks (mask1,mask2,logic);
       cout << " Merging logic : " << logic << endl;
       cout << " Merged mask   : " << mask << endl;
     }
@@ -174,14 +193,14 @@ int test_subMask ()
 
 int main (int argc, char* argv[]) {
 
-  Bool ok (True);
+  bool ok (true);
   int nofFailedTests (0);
   
   try {
     ok = test_validElements ();
   }
-  catch (AipsError x) {
-    cerr << "[test_validElements] " << x.getMesg() << endl;
+  catch (std::string message) {
+    cerr << "[test_validElements] " << message << endl;
     return 1;
   } 
 

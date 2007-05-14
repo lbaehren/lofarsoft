@@ -26,14 +26,14 @@ namespace CR {
   
   // ----------------------------------------------------------------- mergeMasks
   
-  Array<Bool> mergeMasks (const Array<Bool>& mask1,
-			  const Array<Bool>& mask2,
+  Array<bool> mergeMasks (const Array<bool>& mask1,
+			  const Array<bool>& mask2,
 			  const String logic)
   {
     IPosition shape1 = mask1.shape();
     IPosition shape2 = mask2.shape();
     IPosition shapeFallback (1);
-    Array<Bool> mask;
+    Array<bool> mask;
     
     // Check if the shape of the two arrays is consistent
     if (shape1 != shape2) {
@@ -41,7 +41,7 @@ namespace CR {
       cerr << "\tArray 1 : " << shape1 << endl;
       cerr << "\tArray 2 : " << shape2 << endl;
       mask.resize(shapeFallback);
-      mask = False;
+      mask = false;
     }
     else {
       if (logic == "AND") {
@@ -64,7 +64,7 @@ namespace CR {
 	cerr << "[mergeMasks] Unsupported merging option "
 	   << logic << endl;
 	mask.resize(shapeFallback);
-	mask = False;
+	mask = false;
       }
     }
     return mask;
@@ -72,24 +72,24 @@ namespace CR {
 
 // ------------------------------------------------------------------- setSubmask
   
-  void setSubmask (Vector<Bool>& outMask, 
-		   Vector<Bool> const &inMask,
-		   Vector<Int> const &inIndex)
+  void setSubmask (Vector<bool>& outMask, 
+		   Vector<bool> const &inMask,
+		   Vector<int> const &inIndex)
   {
-    Int nOutMask (outMask.nelements());
-    Int nInIndex (inIndex.nelements());
+    int nOutMask (outMask.nelements());
+    int nInIndex (inIndex.nelements());
     
     if (nInIndex == nOutMask) {
-      for (Int i=0; i<nOutMask; i++) {
+      for (int i=0; i<nOutMask; i++) {
 	if (inMask(inIndex(i))) {
-	  outMask(i) = True;
+	  outMask(i) = true;
 	} else {
-	  outMask(i) = False;
+	  outMask(i) = false;
 	}
       }
     } else {
       outMask.resize(nOutMask);
-      outMask = True;
+      outMask = true;
     }
     
   }
@@ -97,21 +97,21 @@ namespace CR {
   // ---------------------------------------------------------------- maskFromRange
   
   template <class T>
-  Vector<Bool> maskFromRange (Vector<T> const &range,
+  Vector<bool> maskFromRange (Vector<T> const &range,
 			      Vector<T> const &values)
   {
     IPosition shapeRange = range.shape();
-    uInt nofValues = values.nelements();
-    Vector<Bool> mask(nofValues,False);
+    unsigned int nofValues = values.nelements();
+    Vector<bool> mask(nofValues,false);
     
     // Step through all alement of the data vector and check if they lie within
     // the specified range.
     if (range.nelements() == 2) {
       T rangeMin = min(range);
       T rangeMax = max(range);
-      for (uInt k=0; k<nofValues; k++) {
+      for (unsigned int k=0; k<nofValues; k++) {
 	if (values(k) >= rangeMin && values(k) <= rangeMax) {
-	  mask(k) = True;
+	  mask(k) = true;
 	}
       }
     } else {
@@ -124,14 +124,13 @@ namespace CR {
   
   // -------------------------------------------------------------- validElements
   
-  uInt validElements (const Vector<Bool>& mask) 
+  unsigned int validElements (const Vector<bool>& mask) 
   {
-    uInt nofElements = mask.nelements();
-    uInt validElements;
+    unsigned int nofElements (mask.nelements());
+    unsigned int validElements (0);
     
-    validElements = 0;
-    for (uInt i=0; i<nofElements; i++) {
-      validElements += uInt(mask(i));
+    for (unsigned int i=0; i<nofElements; i++) {
+      validElements += (unsigned int)(mask(i));
     }
     
     return validElements;
@@ -139,14 +138,13 @@ namespace CR {
   
   // ------------------------------------------------------------ invalidElements
   
-  uInt invalidElements (const Vector<Bool>& mask) 
+  unsigned int invalidElements (const Vector<bool>& mask) 
   {
-    uInt nofElements = mask.nelements();
-    uInt invalidElements;
+    unsigned int nofElements = mask.nelements();
+    unsigned int invalidElements (nofElements);
     
-    invalidElements = nofElements;
-    for (uInt i=0; i<nofElements; i++) {
-      invalidElements -= uInt(mask(i));
+    for (unsigned int i=0; i<nofElements; i++) {
+      invalidElements -= (unsigned int)(mask(i));
     }
     
     return invalidElements;
@@ -154,11 +152,11 @@ namespace CR {
   
   // ----------------------------------------------------- Template instantiation
   
-  template Vector<Bool> maskFromRange (const Vector<Int>& range,
-				       const Vector<Int>& values);
-  template Vector<Bool> maskFromRange (const Vector<Float>& range,
-				       const Vector<Float>& values);
-  template Vector<Bool> maskFromRange (const Vector<Double>& range,
-				       const Vector<Double>& values);
+  template Vector<bool> maskFromRange (const Vector<int>& range,
+				       const Vector<int>& values);
+  template Vector<bool> maskFromRange (const Vector<float>& range,
+				       const Vector<float>& values);
+  template Vector<bool> maskFromRange (const Vector<double>& range,
+				       const Vector<double>& values);
   
 }

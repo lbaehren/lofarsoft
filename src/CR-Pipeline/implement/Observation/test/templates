@@ -17,13 +17,3 @@
      template void writeAsciiVector(Vector<Double> const &, Char const *) 
      template void write_array(Array<Int> const &, Char const *) 
      template void write_array(Array<Int> const &, String const &) 
-1000 casa/Arrays/ArrayLogical.cc 
-     template Bool allNearAbs(Array<Double> const &, Double const &, Double) 
-     = casa/BasicSL/Complex.h 
-     template Bool allNearAbs(Array<Complex> const &, Array<Complex> const &, Double) 
-     template Bool allNearAbs(Array<DComplex> const &, Array<DComplex> const &, Double) 
-## -- scimath/Mathematics -------------------------------------------------------
-1010 scimath/Mathematics/FFTServer.cc
-     = casa/BasicSL/Complex.h 
-     template class FFTServer<Float,Complex> 
-     template class FFTServer<Double, DComplex> 

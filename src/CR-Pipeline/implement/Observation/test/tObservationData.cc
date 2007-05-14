@@ -28,9 +28,12 @@
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/ArrayMath.h>
 
-#include <lopes/Observation/ObservationData.h>
+#include <templates.h>
+#include <Observation/ObservationData.h>
 
 #include <casa/namespace.h>
+
+using CR::ObservationData;
 
 /*!
   \file tObservationData.cc

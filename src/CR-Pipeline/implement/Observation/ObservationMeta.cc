@@ -23,6 +23,8 @@
 
 #include <Observation/ObservationMeta.h>
 
+namespace CR {  // Namespace CR -- begin
+
 // =============================================================================
 //
 //  Construction / Destruction
@@ -56,8 +58,8 @@ ObservationMeta::~ObservationMeta () {}
 
 void ObservationMeta::setMetafile (String path)
 {
-  String filename = CR::fileFromPath(path);
-  String dirname  = CR::dirFromPath(path);
+  String filename = fileFromPath(path);
+  String dirname  = dirFromPath(path);
   filename_  = filename;
   directory_ = dirname;
 }
@@ -77,9 +79,9 @@ String ObservationMeta::directory () { return directory_; }
 //
 // =============================================================================
 
-Bool ObservationMeta::readMetafile ()
+bool ObservationMeta::readMetafile ()
 {
-  Bool ok = True;
+  bool ok = true;
   char s[256];
   String keyword;
   ifstream metafile;
@@ -96,7 +98,7 @@ Bool ObservationMeta::readMetafile ()
     // try to extract the keyword
     try {
       keyword = strtok (s, "=");
-    } catch (AipsError x) {
+    } catch (casa::AipsError x) {
       cerr << x.getMesg() << endl;
     }
     // check if keyword could be extracted
@@ -104,12 +106,12 @@ Bool ObservationMeta::readMetafile ()
       try {
 	value = strtok (NULL, "\n");
 	record.add(keyword,value);
-      } catch (AipsError x) {
+      } catch (casa::AipsError x) {
 	cerr << x.getMesg() << endl;
       }
     } else {
       // Guard against reading beyound the EOF marker
-      if (keyword == "#EOF") ok = False;
+      if (keyword == "#EOF") ok = false;
     }
   }
   
@@ -124,7 +126,7 @@ Bool ObservationMeta::readMetafile ()
   IPosition nofAntennas = antennas_.shape();
   Vector<String> triggertime(iterations_);
   Matrix<String> datafiles (iterations_,nofAntennas(0));
-  Int iteration=-1,datafile=0;
+  int iteration=-1,datafile=0;
 
   datafiles = "";
   triggertime = "";
@@ -147,7 +149,7 @@ Bool ObservationMeta::readMetafile ()
       }
     }
     // watch out for '#EOF' marker separation the two halves of the meta file
-    if (keyword != "[OBSERVATION]" && keyword == "#EOF") ok = True;
+    if (keyword != "[OBSERVATION]" && keyword == "#EOF") ok = true;
   }
 
   ObservationMeta::triggertime (triggertime);
@@ -158,9 +160,9 @@ Bool ObservationMeta::readMetafile ()
   return ok;
 }
 
-Bool ObservationMeta::readMetafile (String filename)
+bool ObservationMeta::readMetafile (String filename)
 {
-  Bool ok; 
+  bool ok; 
 
   ObservationMeta::setMetafile (filename);
 
@@ -187,7 +189,7 @@ void ObservationMeta::lopesheader ()
 void ObservationMeta::lopesheader (std::ostream& s)
 {
   IPosition nofAntennas = antennas_.shape();
-  Int antenna;
+  int antenna;
   String date,time;
  
   /* Write the standard header information required for the LOPES Tools to
@@ -306,7 +308,7 @@ void ObservationMeta::metadata (GlishRecord& record)
     ObservationMeta::description(description);
   }
   if (record.exists("antennas")) {
-    Vector<Int> antennas;
+    Vector<int> antennas;
     gtmp = record.get("antennas");
     gtmp.get(s);
     antennas = ObservationMeta::string2vector (s);
@@ -319,14 +321,14 @@ void ObservationMeta::metadata (GlishRecord& record)
     ObservationMeta::setAntennaPositions(antposFile);
   }
   if (record.exists("iterations")) {
-    Int iterations;
+    int iterations;
     gtmp = record.get("iterations");
     gtmp.get(s);
     iterations = atoi (s.c_str());
     ObservationMeta::iterations(iterations);
   }
   if (record.exists("interval")) {
-    Int interval;
+    int interval;
     gtmp = record.get("interval");
     gtmp.get(s);
     interval = atoi (s.c_str());
@@ -363,14 +365,14 @@ void ObservationMeta::metadata (GlishRecord& record)
     ObservationMeta::plugin2(plugin2);
   }
   if (record.exists("signextension")) {
-    Bool signextension;
+    bool signextension;
     gtmp = record.get("signextension");
     gtmp.get(s);
     signextension = ObservationMeta::string2boolean (s);
     ObservationMeta::signextension(signextension);
   }
   if (record.exists("skipcapture")) {
-    Bool skipcapture;
+    bool skipcapture;
     gtmp = record.get("skipcapture");
     gtmp.get(s);
     skipcapture = ObservationMeta::string2boolean (s);
@@ -378,7 +380,7 @@ void ObservationMeta::metadata (GlishRecord& record)
   }
   // variables set during experiment
   if (record.exists("observation_id")) {
-    Int observationID;
+    int observationID;
     gtmp = record.get("observation_id");
     gtmp.get(s);
     observationID = atoi (s.c_str());
@@ -451,22 +453,22 @@ void ObservationMeta::metadata (std::ostream& s = std::cout)
 //
 // =============================================================================
 
-void ObservationMeta::antennas (Vector<Int>& antennas)
+void ObservationMeta::antennas (Vector<int>& antennas)
 {
-  Int nelem;
+  int nelem;
   antennas.shape(nelem);
   antennas_.resize(nelem);
   antennas_ = antennas;
 }
 
-Vector<Int> ObservationMeta::antennas () { return antennas_; }
+Vector<int> ObservationMeta::antennas () { return antennas_; }
 
-Vector<Int> ObservationMeta::antennas (Int shift)
+Vector<int> ObservationMeta::antennas (int shift)
 {
   IPosition shape = antennas_.shape();
-  Vector<Int> antennas(shape);
+  Vector<int> antennas(shape);
   
-  for (Int i=0; i<shape(0); i++) antennas(i) = antennas_(i) + shift;
+  for (int i=0; i<shape(0); i++) antennas(i) = antennas_(i) + shift;
 
   return antennas;
 }
@@ -479,42 +481,44 @@ void ObservationMeta::setAntennaPositions (String filename)
   // try to read in the data from the file
   try {
     ObservationMeta::readAntennaPositions ();
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
     cerr << "[ObservationMeta::antennaPositions] " << x.getMesg() << endl;
   }
 
 }
 
-Matrix<Double> ObservationMeta::antennaPositions () { return antennaPositions_; }
+Matrix<double> ObservationMeta::antennaPositions () { return antennaPositions_; }
 
-Bool ObservationMeta::readAntennaPositions ()
+bool ObservationMeta::readAntennaPositions ()
 {
-  Int nofCols,nofRows;
+  int nofCols,nofRows;
   IPosition antposShape;
   ifstream antposFile;
+  int row (0);
+  int col (0);
   
   /* Use the AIPS++ ArrayIO methods to read in the antenna position file */
   try {
     antposFile.open(antposFile_.c_str(),ios::in);
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
     cerr << "[ObservationMeta::antennaPositions] " << x.getMesg() << endl;
-    return False;
+    return false;
   }
   
   try {
     antposFile >> nofRows >> nofCols;
     antennaPositions_.resize(nofRows,nofCols);
-    for (int row=0; row<nofRows; row++) {
-      for (int col=0; col<nofCols; col++) {
+    for (row=0; row<nofRows; row++) {
+      for (col=0; col<nofCols; col++) {
 	antposFile >> antennaPositions_(row,col);
       }
     }
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
     cerr << "[ObservationMeta::antennaPositions] " << x.getMesg() << endl;
-    return False;
+    return false;
   }
   
-  return True;
+  return true;
 }
 
 // =============================================================================
@@ -554,7 +558,7 @@ void ObservationMeta::parsePluginOptions (String str)
   unsigned int nofChars = str.length();
   unsigned int start=0;
   unsigned int loc=0;
-  Int num = CR::nofSubstrings(str,sep);
+  int num = nofSubstrings(str,sep);
   Vector<String> substrings(num);
 
   num = start = 0;
@@ -675,14 +679,19 @@ void ObservationMeta::extractFromISO8601 (String& date,
 
 Time ObservationMeta::iso8601ToTime (const String iso)
 {
-  String date,time;
-  Int year=0,month=0,day=0,hour=0,min=0;
-  Double sec=0.0;
+  String date;
+  String time;
+  int year (0);
+  int month (0);
+  int day (0);
+  int hour (0);
+  int min (0);
+  double sec=0.0;
 
   // extract date and time from the the iso8601 time string
   ObservationMeta::extractFromISO8601 (date,time,iso);
-  Vector<String> subDate = CR::getSubstrings(date,"/");
-  Vector<String> subTime = CR::getSubstrings(time,":");
+  Vector<String> subDate = getSubstrings(date,"/");
+  Vector<String> subTime = getSubstrings(time,":");
   
   try {
     year  = atoi (subDate(0).c_str());
@@ -691,7 +700,7 @@ Time ObservationMeta::iso8601ToTime (const String iso)
     hour  = atoi (subTime(0).c_str());
     min   = atoi (subTime(1).c_str());
     sec   = atof (subTime(2).c_str());
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
     cerr << "[ObservationMeta::iso8601ToMeasure] " << x.getMesg() << endl;
   }
   
@@ -773,39 +782,39 @@ String ObservationMeta::type () { return type_; }
 
 // Sign extension
 
-void ObservationMeta::signextension (Bool signextension) {
+void ObservationMeta::signextension (bool signextension) {
   signextension_ = signextension;
 }
 
 void ObservationMeta::signextension (String s)
 {
-  Bool signextension;
+  bool signextension;
   signextension = ObservationMeta::string2boolean (s);
   ObservationMeta::signextension (signextension);
 }
 
-Bool ObservationMeta::signextension () { return signextension_; }
+bool ObservationMeta::signextension () { return signextension_; }
 
 // Skip capture
 
-void ObservationMeta::skipcapture (Bool skipcapture) {
+void ObservationMeta::skipcapture (bool skipcapture) {
   skipcapture_ = skipcapture;
 }
 
 void ObservationMeta::skipcapture (String s)
 {
-  Bool skipcapture;
+  bool skipcapture;
   skipcapture = ObservationMeta::string2boolean (s);
   ObservationMeta::skipcapture (skipcapture);
 }
 
-Bool ObservationMeta::skipcapture () { return skipcapture_; }
+bool ObservationMeta::skipcapture () { return skipcapture_; }
 
-void ObservationMeta::observationID (const Int observationID) {
+void ObservationMeta::observationID (const int observationID) {
   observationID_ = observationID;
 }
 
-Int ObservationMeta::observationID () { return observationID_; }
+int ObservationMeta::observationID () { return observationID_; }
 
 
 // =============================================================================
@@ -814,24 +823,24 @@ Int ObservationMeta::observationID () { return observationID_; }
 //
 // =============================================================================
 
-Bool ObservationMeta::string2boolean (String s)
+bool ObservationMeta::string2boolean (String s)
 {
-  Bool boolean;
+  bool boolean;
 
-  if ((s == "True") || (s == "true") || (s == "1")) boolean = True;
-  else if ((s == "False") || (s == "false") || (s == "0")) boolean = False;
-  else boolean = True;
+  if ((s == "true") || (s == "true") || (s == "1")) boolean = true;
+  else if ((s == "false") || (s == "false") || (s == "0")) boolean = false;
+  else boolean = true;
 
   return boolean;
 }
 
-Vector<Int> ObservationMeta::string2vector (String s)
+Vector<int> ObservationMeta::string2vector (String s)
 {
-  Vector<Int> offsets,vect;
-  Int lengthString;
-  Int nelem = 0;
+  Vector<int> offsets,vect;
+  int lengthString;
+  int nelem = 0;
   String tmp;
-  Bool verboseON = False;
+  bool verboseON = false;
 
   // Determine the number of elements stored within the string
   lengthString = int(s.length());
@@ -854,7 +863,7 @@ Vector<Int> ObservationMeta::string2vector (String s)
   }
   
   // Parse the input string to extract the vector elements
-  Int offset,length;
+  int offset,length;
   for (int i=1; i<nelem; ++i) {
     offset = offsets(i-1)-1;
     length = offsets(i)-offsets(i-1)-1;
@@ -880,11 +889,10 @@ Vector<Int> ObservationMeta::string2vector (String s)
   return vect;
 }
 
-// ------------------------------------------------------------------ nameDatafile
-
-String ObservationMeta::nameDatafile (Int iter,
-				      Int ant)
+String ObservationMeta::nameDatafile (int iter, int ant)
 {
   String file = datafiles_(iter,ant);
-  return CR::fileFromPath(file);
+  return fileFromPath(file);
 }
+
+}  // Namespace CR -- end

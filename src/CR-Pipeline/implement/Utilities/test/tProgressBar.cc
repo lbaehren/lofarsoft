@@ -23,6 +23,7 @@
 #include <cmath>
 #include <Utilities/ProgressBar.h>
 
+using std::sin;
 using CR::ProgressBar;
 
 /*!
@@ -32,6 +33,11 @@ using CR::ProgressBar;
 
   \author Lars B&auml;hren
 
+  <h3>Test results</h3>
+
+  <img src="../figures/runningTime.png">
+  <img src="../figures/totalTime.png">
+  <img src="../figures/remainTime.png">
 */
 
 // --- Global variables --------------------------------------------------------
@@ -57,7 +63,7 @@ void testTimer2 () {
   for (int i=0; i<nofIterations; i++) {
     //
     for (int j=0; j<nofComputations; j++) {
-      x = std::sin(std::sin(1.0*j));
+      x = sin(sin(1.0*j));
     }
     //
     end = clock();

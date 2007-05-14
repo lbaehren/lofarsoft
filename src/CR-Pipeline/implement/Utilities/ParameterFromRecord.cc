@@ -30,11 +30,11 @@ namespace CR {
   //
   // ============================================================================
   
-  Bool QuantityFromRecord (Quantity &out,
+  bool QuantityFromRecord (Quantity &out,
 			   String const &field,
 			   casa::GlishRecord const &glishRec)
   {
-    Bool status (True);
+    bool status (true);
     String error;
     
     // Extract the field from the input record
@@ -49,22 +49,22 @@ namespace CR {
       // extract quantum from record
       if (!x.fromRecord(error, rec)) {
 	std::cerr << error << std::endl;
-	status = False;
+	status = false;
       } else {
 	//
 	if (x.isQuantumDouble()) {
-	  Quantum<Double> quantum = x.asQuantumDouble();
+	  Quantum<double> quantum = x.asQuantumDouble();
 	  out = quantum;
 	}
 	else {
 	  std::cerr << "Illegal quantum type asked" << std::endl;
-	  status = False;
+	  status = false;
 	}
       }
     }
     else {
       std::cerr << "No field " << field << " found in input record!" << std::endl;
-      status = False;
+      status = false;
     }
     
     return status;
@@ -78,11 +78,11 @@ namespace CR {
   
   // ----------------------------------------------------------- MEpochFromRecord
   
-  Bool MEpochFromRecord (MEpoch &out,
+  bool MEpochFromRecord (MEpoch &out,
 			 String const &field,
 			 casa::GlishRecord const &glishRec)
   {
-    Bool status (True);
+    bool status (true);
     
     if (glishRec.exists(field)) {
       casa::GlishRecord record = glishRec.get(field);
@@ -92,17 +92,17 @@ namespace CR {
       //
       record.toRecord (rec);
       if (!x.fromRecord(error, rec)) {
-	status = False;
+	status = false;
       } else { 
 	if (!x.isMEpoch()) {
 	  error += String("Illegal Measure type asked");
-	  status = False;
+	  status = false;
 	}
 	out = x.asMEpoch();
       }
     } else {
       std::cerr << "No field " << field << " found in input record!" << std::endl;
-      status = False;
+      status = false;
     }
     
     return status;
@@ -110,11 +110,11 @@ namespace CR {
   
   // ------------------------------------------------------- MDirectionFromRecord
   
-  Bool MDirectionFromRecord (MDirection &out,
+  bool MDirectionFromRecord (MDirection &out,
 			     String const &field,
 			     casa::GlishRecord const &glishRec)
   {
-    Bool status (True);
+    bool status (true);
     
     if (glishRec.exists(field)) {
       casa::GlishRecord record = glishRec.get(field);
@@ -124,17 +124,17 @@ namespace CR {
       //
       record.toRecord (rec);
       if (!x.fromRecord(error, rec)) {
-	status = False;
+	status = false;
       } else { 
 	if (!x.isMDirection()) {
 	  error += String("Illegal Measure type asked");
-	  status = False;
+	  status = false;
 	}
 	out = x.asMDirection();
       }
     } else {
       std::cerr << "No field " << field << " found in input record!" << std::endl;
-      status = False;
+      status = false;
     }
     
     return status;
@@ -142,11 +142,11 @@ namespace CR {
   
   // -------------------------------------------------------- MPositionFromRecord
   
-  Bool MPositionFromRecord (MPosition &out,
+  bool MPositionFromRecord (MPosition &out,
 			    String const &field,
 			    casa::GlishRecord const &glishRec)
   {
-    Bool status (True);
+    bool status (true);
     
     if (glishRec.exists(field)) {
       casa::GlishRecord record = glishRec.get(field);
@@ -156,17 +156,17 @@ namespace CR {
       //
       record.toRecord (rec);
       if (!x.fromRecord(error, rec)) {
-	status = False;
+	status = false;
       } else { 
 	if (!x.isMPosition()) {
 	  error += String("Illegal Measure type asked");
-	  status = False;
+	  status = false;
 	}
 	out = x.asMPosition();
       }
     } else {
       std::cerr << "No field " << field << " found in input record!" << std::endl;
-      status = False;
+      status = false;
     }
     
     return status;

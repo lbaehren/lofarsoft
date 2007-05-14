@@ -18,160 +18,162 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: ObservationData.cc,v 1.8 2007/03/14 12:58:44 bahren Exp $ */
+/* $Id: ObservationData.cc,v 1.9 2007/05/02 09:37:10 bahren Exp $ */
 
 #include <Observation/ObservationData.h>
 #include <Skymap/SkymapperTools.h>
 
-// =============================================================================
-//
-//  Construction
-//
-// =============================================================================
-
-// -------------------------------------------------------------- ObservationData
-
-ObservationData::ObservationData ()
-{
-  ObsInfo obsInfo;
-  Time startTime;
-  Quantity epoch (startTime.modifiedJulianDay(), "d");
-  String telescope ("WSRT");
+namespace CR {  // -- Namespace CR -- begin
+  
+  // ============================================================================
   //
-  obsInfo.setObsDate (epoch);
-  obsInfo.setTelescope (telescope);
+  //  Construction
   //
-  ObservationData::init (obsInfo);
-}
-
-// -------------------------------------------------------------- ObservationData
-
-ObservationData::ObservationData (const String observatory)
-{
-  ObsInfo obsInfo;
-  Time startTime;
-  Quantity epoch (startTime.modifiedJulianDay(), "d");
-  //
-  obsInfo.setTelescope (observatory);
-  obsInfo.setObsDate (epoch);
-  //
-  ObservationData::init (obsInfo);
-}
-
-// -------------------------------------------------------------- ObservationData
-
-ObservationData::ObservationData (const Quantity epoch,
-				  const String observatory)
-{
-  ObsInfo obsInfo;
-  MEpoch obsDate (epoch);
-   //
-  obsInfo.setTelescope (observatory);
-  obsInfo.setObsDate (obsDate);
-  //
-  ObservationData::init (obsInfo);
-}
-
-// -------------------------------------------------------------- ObservationData
-
-ObservationData::ObservationData (const MEpoch epoch,
-				  const String observatory)
-{
-  ObsInfo obsInfo;
-   //
-  obsInfo.setTelescope (observatory);
-  obsInfo.setObsDate (epoch);
-  //
-  ObservationData::init (obsInfo);
-}
-
-// -------------------------------------------------------------- ObservationData
-
-ObservationData::ObservationData (const MEpoch obsDate,
-				  String const &obsName,
-				  Matrix<Double> const &antennaPositions,
-				  String const &observer)
-{
-  init (obsDate,
-	obsName,
-	antennaPositions,
+  // ============================================================================
+  
+  // ------------------------------------------------------------ ObservationData
+  
+  ObservationData::ObservationData ()
+  {
+    ObsInfo obsInfo;
+    Time startTime;
+    Quantity epoch (startTime.modifiedJulianDay(), "d");
+    String telescope ("WSRT");
+    //
+    obsInfo.setObsDate (epoch);
+    obsInfo.setTelescope (telescope);
+    //
+    ObservationData::init (obsInfo);
+  }
+  
+  // ------------------------------------------------------------ ObservationData
+  
+  ObservationData::ObservationData (const String observatory)
+  {
+    ObsInfo obsInfo;
+    Time startTime;
+    Quantity epoch (startTime.modifiedJulianDay(), "d");
+    //
+    obsInfo.setTelescope (observatory);
+    obsInfo.setObsDate (epoch);
+    //
+    ObservationData::init (obsInfo);
+  }
+  
+  // ------------------------------------------------------------ ObservationData
+  
+  ObservationData::ObservationData (const Quantity epoch,
+				    const String observatory)
+  {
+    ObsInfo obsInfo;
+    MEpoch obsDate (epoch);
+    //
+    obsInfo.setTelescope (observatory);
+    obsInfo.setObsDate (obsDate);
+    //
+    ObservationData::init (obsInfo);
+  }
+  
+  // ------------------------------------------------------------ ObservationData
+  
+  ObservationData::ObservationData (const MEpoch epoch,
+				    const String observatory)
+  {
+    ObsInfo obsInfo;
+    //
+    obsInfo.setTelescope (observatory);
+    obsInfo.setObsDate (epoch);
+    //
+    ObservationData::init (obsInfo);
+  }
+  
+  // ------------------------------------------------------------ ObservationData
+  
+  ObservationData::ObservationData (const MEpoch obsDate,
+				    String const &obsName,
+				    Matrix<Double> const &antennaPositions,
+				    String const &observer)
+  {
+    init (obsDate,
+	  obsName,
+	  antennaPositions,
 	observer);
-}
-
-// -------------------------------------------------------------- ObservationData
-
-ObservationData::ObservationData (const MEpoch obsDate,
-				  String const &obsName,
-				  const MPosition obsPosition,
-				  Matrix<Double> const &antennaPositions,
-				  String const &observer)
-{
-  init (obsDate,
-	obsName,
-	obsPosition,
-	antennaPositions,
-	observer);
-}
-
-// -------------------------------------------------------------- ObservationData
-
-ObservationData::ObservationData (const ObsInfo obsInfo)
-{
-  ObservationData::init (obsInfo);
-}
-
-// -------------------------------------------------------------- ObservationData
-
-ObservationData::ObservationData (ObservationData const& other)
-{
-  copy (other);
-}
-
-// =============================================================================
-//
-//  Destruction
-//
-// =============================================================================
-
-ObservationData::~ObservationData ()
-{
-  destroy();
-}
-
-// ==============================================================================
-//
-//  Operators
-//
-// ==============================================================================
-
-// -------------------------------------------------------------------- operator=
-
-ObservationData &ObservationData::operator= (ObservationData const &other)
-{
-  if (this != &other) {
-    destroy ();
+  }
+  
+  // ------------------------------------------------------------ ObservationData
+  
+  ObservationData::ObservationData (const MEpoch obsDate,
+				    String const &obsName,
+				    const MPosition obsPosition,
+				    Matrix<Double> const &antennaPositions,
+				    String const &observer)
+  {
+    init (obsDate,
+	  obsName,
+	  obsPosition,
+	  antennaPositions,
+	  observer);
+  }
+  
+  // ------------------------------------------------------------ ObservationData
+  
+  ObservationData::ObservationData (const ObsInfo obsInfo)
+  {
+    ObservationData::init (obsInfo);
+  }
+  
+  // ------------------------------------------------------------ ObservationData
+  
+  ObservationData::ObservationData (ObservationData const& other)
+  {
     copy (other);
   }
-  return *this;
-}
-
-// ------------------------------------------------------------------------- copy
-
-void ObservationData::copy (ObservationData const &other)
-{
-  description_p = other.description_p;
-  obsInfo_p     = other.obsInfo_p;
-  obsPosition_p = other.obsPosition_p;
-
-  antennaPositions_p.resize(other.antennaPositions_p.shape());
-  antennaPositions_p = other.antennaPositions_p;
-}
-
-// ---------------------------------------------------------------------- destroy
-
-void ObservationData::destroy ()
-{;}
-
+  
+  // ============================================================================
+  //
+  //  Destruction
+  //
+  // ============================================================================
+  
+  ObservationData::~ObservationData ()
+  {
+    destroy();
+  }
+  
+  // ============================================================================
+  //
+  //  Operators
+  //
+  // ============================================================================
+  
+  // ------------------------------------------------------------------ operator=
+  
+  ObservationData &ObservationData::operator= (ObservationData const &other)
+  {
+    if (this != &other) {
+      destroy ();
+      copy (other);
+    }
+    return *this;
+  }
+  
+  // ----------------------------------------------------------------------- copy
+  
+  void ObservationData::copy (ObservationData const &other)
+  {
+    description_p = other.description_p;
+    obsInfo_p     = other.obsInfo_p;
+    obsPosition_p = other.obsPosition_p;
+    
+    antennaPositions_p.resize(other.antennaPositions_p.shape());
+    antennaPositions_p = other.antennaPositions_p;
+  }
+  
+  // -------------------------------------------------------------------- destroy
+  
+  void ObservationData::destroy ()
+  {;}
+  
 
 // ==============================================================================
 //
@@ -478,20 +480,22 @@ MDirection::Convert ObservationData::conversionEngine (const String refcodeTO,
 //
 // =============================================================================
 
-
-void ObservationData::summary ()
-{
-  summary (std::cout);
-}
-
-void ObservationData::summary (std::ostream &os)
-{
-  os << "[ObservationData]" << std::endl;
-  os << " Description          = " << description()              << std::endl;
-  os << " Observer             = " << observer()                 << std::endl;
-  os << " Epoch                = " << epoch()                    << std::endl;
-  os << " Observatory          = " << observatory()              << std::endl;
-  os << " Observatory position = " << observatoryPosition()      << std::endl;
-  os << " nof. antennas        = " << nofAntennas()              << std::endl;
-  os << " antenna positions    = " << antennaPositions_p.shape() << std::endl;
-}
+  
+  void ObservationData::summary ()
+  {
+    summary (std::cout);
+  }
+  
+  void ObservationData::summary (std::ostream &os)
+  {
+    os << "[ObservationData]" << std::endl;
+    os << " Description          = " << description()              << std::endl;
+    os << " Observer             = " << observer()                 << std::endl;
+    os << " Epoch                = " << epoch()                    << std::endl;
+    os << " Observatory          = " << observatory()              << std::endl;
+    os << " Observatory position = " << observatoryPosition()      << std::endl;
+    os << " nof. antennas        = " << nofAntennas()              << std::endl;
+    os << " antenna positions    = " << antennaPositions_p.shape() << std::endl;
+  }
+  
+}  // -- Namespace CR -- end

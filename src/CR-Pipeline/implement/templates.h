@@ -70,7 +70,22 @@ namespace casa {
   
   // casa/Arrays/ArrayIO
 
+  template Bool read(istream &, Array<Complex> &, IPosition const *, Bool);
+  template Bool read(istream &, Array<Double> &, IPosition const *, Bool);
+  template Bool readArrayBlock(istream &, Bool &, IPosition &, Block<Complex> &, IPosition const *, Bool);
+  template Bool readArrayBlock(istream &, Bool &, IPosition &, Block<Double> &, IPosition const *, Bool);
+  template istream & operator>>(istream &, Array<Double> &);
+  template void readAsciiMatrix(Matrix<Int> &, Char const *);
   template void readAsciiMatrix(Matrix<Double> &, Char const *);
+  template void read_array(Array<Int> &, Char const *);
+  template void read_array(Array<Double> &, Char const *);
+  template void read_array(Array<Int> &, String const &);
+  template void read_array(Array<Double> &, String const &);
+  template void writeAsciiMatrix(Matrix<Int> const &, Char const *);
+  template void writeAsciiMatrix(Matrix<Double> const &, Char const *);
+  template void writeAsciiVector(Vector<Double> const &, Char const *);
+  template void write_array(Array<Int> const &, Char const *);
+  template void write_array(Array<Int> const &, String const &);
 
   // casa/Arrays/ArrayLogical
 

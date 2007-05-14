@@ -19,7 +19,7 @@
  ***************************************************************************/
 
 
-#if !defined(OBSERVATIONMETA_H)
+#ifndef OBSERVATIONMETA_H
 #define OBSERVATIONMETA_H
 
 /* $Id: ObservationMeta.h,v 1.6 2006/11/27 10:54:04 bahren Exp $ */
@@ -57,6 +57,18 @@
 using std::cout;
 using std::cerr;
 using std::endl;
+
+using casa::GlishArray;
+using casa::GlishRecord;
+using casa::IPosition;
+using casa::Matrix;
+using casa::MEpoch;
+using casa::MVEpoch;
+using casa::MVTime;
+using casa::Quantity;
+using casa::String;
+using casa::Time;
+using casa::Vector;
 
 /*!
   \class ObservationMeta
@@ -139,6 +151,8 @@ using std::endl;
   positions as \f$ (y,-x,z) \f$.
  */
 
+namespace CR {  // Namespace CR -- begin
+
 class ObservationMeta {
 
   String filename_;      // location where the metafile is stored on disk
@@ -148,9 +162,9 @@ class ObservationMeta {
   String starttime_;     // 
   String submittime_;     // 
   String description_;   // 
-  Vector<Int> antennas_; // Set of array elements used in the observation
+  Vector<int> antennas_; // Set of array elements used in the observation
   String antposFile_;    // location of the antenna position file
-  Matrix<Double> antennaPositions_;
+  Matrix<double> antennaPositions_;
   int iterations_;       // 
   int interval_;         // 
   String capturemode_;   // 
@@ -160,7 +174,7 @@ class ObservationMeta {
   String plugin2_;       // 
   bool signextension_;   // 
   bool skipcapture_;           // 
-  Int observationID_;          //
+  int observationID_;          //
   Vector<String> triggertime_; //
   Matrix<String> datafiles_;   //
   
@@ -222,7 +236,7 @@ class ObservationMeta {
 
     \todo Guard against empty lines before reaching EOF.
   */
-  Bool readMetafile (String);
+  bool readMetafile (String);
 
   /*!
     \brief Read in the contents of the metafile
@@ -231,7 +245,7 @@ class ObservationMeta {
     keyword/value structure - is copied into a GlishRecord and then written to
     internal storage via the ObservationMeta::metadata method.
   */
-  Bool readMetafile ();
+  bool readMetafile ();
 
   /*!
     \brief Export meta information in LOPES header format
@@ -304,9 +318,9 @@ class ObservationMeta {
 
   // === Data generated during the experiment ========================
 
-  void observationID (const Int);
+  void observationID (const int);
   
-  Int observationID ();
+  int observationID ();
 
   /*!
     \brief Get the list of datafiles generated during the experiment
@@ -350,9 +364,9 @@ class ObservationMeta {
   }
 
   //! Set the set of selected array elements
-  void antennas (Vector<Int>&);
+  void antennas (Vector<int>&);
   //! Get the set of selected array elements
-  Vector<Int> antennas ();
+  Vector<int> antennas ();
   /*!
     \brief Get the set of selected array elements
     
@@ -361,7 +375,7 @@ class ObservationMeta {
 		    values are one-based. The value of the offset is added to
 		    the array elements before returning the vector.
   */
-  Vector<Int> antennas (Int);
+  Vector<int> antennas (int);
 
   /*!
     \brief Read in the 3-dim positions of the array elements
@@ -372,7 +386,7 @@ class ObservationMeta {
   void setAntennaPositions (String);
 
   //! Return the 3-dim positions of the array elements
-  Matrix<Double> antennaPositions ();
+  Matrix<double> antennaPositions ();
 
   /*!
     \brief Set the number of experiment repititions
@@ -408,13 +422,13 @@ class ObservationMeta {
   void type (String);
   String type ();
 
-  void signextension (Bool);
+  void signextension (bool);
   void signextension (String);
-  Bool signextension ();
+  bool signextension ();
 
-  void skipcapture (Bool);
+  void skipcapture (bool);
   void skipcapture (String);
-  Bool skipcapture ();
+  bool skipcapture ();
 
   // === AVIARY plugins ========================================================
 
@@ -434,13 +448,13 @@ class ObservationMeta {
   //! Set the list of datafiles generated during the experiment
   void setDatafiles (const Matrix<String>&);
   //! Read in the 3dim positions of the array elements
-    Bool readAntennaPositions ();
+    bool readAntennaPositions ();
   //! Parse the plugin options string
   void parsePluginOptions (String);
   //! Convert a string to a boolean variable
-  Bool string2boolean (String);
+  bool string2boolean (String);
   //! Convert a string to a vector of integers
-  Vector<Int> string2vector (String);
+  Vector<int> string2vector (String);
   //! Extract the date from a time string
   void extractFromISO8601 (String&,
 			   String&,
@@ -448,8 +462,10 @@ class ObservationMeta {
   //! Convert the ISO 8601 time string to a measure
   Time iso8601ToTime (const String);
   //! Extract the name of the data file from its complete path
-  String nameDatafile (Int, Int);
+  String nameDatafile (int, int);
 
 };
+
+}  // Namespace CR -- end
 
 #endif

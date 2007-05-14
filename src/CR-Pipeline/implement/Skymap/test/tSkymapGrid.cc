@@ -18,9 +18,13 @@
 #include <coordinates/Coordinates/CoordinateSystem.h>
 #include <coordinates/Coordinates/DirectionCoordinate.h>
 
-#include <lopes/Skymap/SkymapGrid.h>
+#include <templates.h>
+#include <Skymap/SkymapGrid.h>
 
+using casa::Double;
+using casa::Matrix;
 using casa::String;
+using casa::Vector;
 
 /*!
   \file tSkymapGrid.cc

@@ -46,6 +46,8 @@
 
 #include <casa/namespace.h>
 
+using CR::ObservationData;
+
 /*!
   \class SkymapGrid
 

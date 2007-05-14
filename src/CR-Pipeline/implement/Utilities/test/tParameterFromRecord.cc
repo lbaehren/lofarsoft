@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006                                                    *
- *   Lars B"ahren (bahren@astron.nl)                                       *
+ *   Lars Bahren (bahren@astron.nl)                                        *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -32,7 +32,7 @@
 
   \brief A collection of test routines for ParameterFromRecord
  
-  \author Lars Bahren
+  \author Lars B&auml;hren
  
   \date 2006/07/11
 */

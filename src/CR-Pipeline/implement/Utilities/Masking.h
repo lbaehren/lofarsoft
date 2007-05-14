@@ -20,7 +20,7 @@
 
 /* $Id: Masking.h,v 1.8 2007/03/19 17:40:33 bahren Exp $ */
 
-#if !defined(MASKING_H)
+#ifndef MASKING_H
 #define MASKING_H
 
 // AIPS++ wrapper classes
@@ -34,7 +34,14 @@
 #include <casa/Arrays/MaskedArray.h>
 #include <casa/Arrays/IPosition.h>
 
-#include <casa/namespace.h>
+using std::cerr;
+using std::cout;
+using std::endl;
+
+using casa::Array;
+using casa::IPosition;
+using casa::String;
+using casa::Vector;
 
 namespace CR {
 
@@ -79,8 +86,8 @@ namespace CR {
 		     - OR
 		     - NOR
   */
-  Array<Bool> mergeMasks (const Array<Bool>& array1,
-			  const Array<Bool>& array2,
+  Array<bool> mergeMasks (const Array<bool>& array1,
+			  const Array<bool>& array2,
 			  const String logic);
   
   /*!
@@ -96,9 +103,9 @@ namespace CR {
     \param inIndex - Position vector \f$ \vec n \f$, used to map the values from
     \f$ M_1 \f$ onto \f$ M_2 \f$.
   */
-  void setSubmask (Vector<Bool>& outMask, 
-		   Vector<Bool> const &inMask,
-		   Vector<Int> const &inIndex);
+  void setSubmask (Vector<bool>& outMask, 
+		   Vector<bool> const &inMask,
+		   Vector<int> const &inIndex);
   
   /*!
     \brief Create a mask for a range of values in a data vector
@@ -110,7 +117,7 @@ namespace CR {
     \return mask  - Boolean array with the mask
   */
   template <class T>
-    Vector<Bool> maskFromRange (Vector<T> const &range,
+    Vector<bool> maskFromRange (Vector<T> const &range,
 				Vector<T> const &values);
   
   /*!
@@ -120,7 +127,7 @@ namespace CR {
     
     \return validElements - The number of valid elements in the selection mask.
   */
-  uInt validElements (const Vector<Bool>& mask);
+  unsigned int validElements (const Vector<bool>& mask);
   
   /*!
     \brief Get the number of invalid (i.e. deselected) elements in a mask.
@@ -130,7 +137,7 @@ namespace CR {
     \return invalidElements - The number of invalid elements in the selection
     mask.
   */
-  uInt invalidElements (const Vector<Bool>& mask);
+  unsigned int invalidElements (const Vector<bool>& mask);
   
 }
 
