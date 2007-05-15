@@ -42,6 +42,8 @@
 
 #include <casa/namespace.h>
 
+using CR::DataFrequency;
+
 /*!
   \class Beamformer
 

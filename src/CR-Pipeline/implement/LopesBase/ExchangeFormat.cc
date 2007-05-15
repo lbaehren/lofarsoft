@@ -22,37 +22,41 @@
 
 #include <LopesBase/ExchangeFormat.h>
 
-// --- Construction ------------------------------------------------------------
-
-ExchangeFormat::ExchangeFormat () {
-	format_p = 0;
-}
-
-ExchangeFormat::ExchangeFormat (const uInt &f) {
-	format_p = f;
-}
-
-ExchangeFormat::ExchangeFormat (ExchangeFormat &f) {
-	format_p = f.format();
-}
-
-// --- Destruction -------------------------------------------------------------
-
-ExchangeFormat::~ExchangeFormat ()
-{;}
-
-// --- Parameters --------------------------------------------------------------
-
-void ExchangeFormat::setFlag(const uInt fl, Bool on) {
-	if (on) {
-		format_p = format_p | fl;
-	} else {
-		format_p = format_p & (~fl);
-	}
-}
-
-// --- Functions ---------------------------------------------------------------
-
-Bool ExchangeFormat::compare(const ExchangeFormat &f) {
-	return format_p == f.format_p;
-}
+namespace CR {  // Namespace CR -- begin
+  
+  // --- Construction ------------------------------------------------------------
+  
+  ExchangeFormat::ExchangeFormat () {
+    format_p = 0;
+  }
+  
+  ExchangeFormat::ExchangeFormat (const uInt &f) {
+    format_p = f;
+  }
+  
+  ExchangeFormat::ExchangeFormat (ExchangeFormat &f) {
+    format_p = f.format();
+  }
+  
+  // --- Destruction -------------------------------------------------------------
+  
+  ExchangeFormat::~ExchangeFormat ()
+  {;}
+  
+  // --- Parameters --------------------------------------------------------------
+  
+  void ExchangeFormat::setFlag(const uInt fl, bool on) {
+    if (on) {
+      format_p = format_p | fl;
+    } else {
+      format_p = format_p & (~fl);
+    }
+  }
+  
+  // --- Functions ---------------------------------------------------------------
+  
+  bool ExchangeFormat::compare(const ExchangeFormat &f) {
+    return format_p == f.format_p;
+  }
+  
+}  // Namespace CR -- end

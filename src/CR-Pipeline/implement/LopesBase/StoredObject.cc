@@ -22,67 +22,74 @@
 
 #include <LopesBase/StoredObject.h>
 
-// --- Construction ------------------------------------------------------------
+using std::cerr;
+using std::endl;
 
-
-template <class T> StoredObject<T>::StoredObject () 
-  : BasicObject()
-{	
-  className_p = "StoredObject";
-  format_p.setFlag(0);
-}
-
-template <class T> StoredObject<T>::StoredObject (uInt format) 
-  : BasicObject()
-{	
-  className_p = "StoredObject";
-  format_p.setFlag(format);
-}
-
-template <> StoredObject<Double>::StoredObject () 
-  : BasicObject()
-{	
-  className_p = "StoredObject";
-  format_p.setFlag(EF_isNumeric);
-}
-
-template <> StoredObject<DComplex>::StoredObject () 
-  : BasicObject() {	
-  className_p = "StoredObject";
-  format_p.setFlag(EF_isNumeric|EF_isComplex);
-}
-
-// --- Destruction -------------------------------------------------------------
-
-template <class T> StoredObject<T>::~StoredObject () {
-  cleanup();
-}
-
-// --- Parameters --------------------------------------------------------------
-
-template<class T> Bool StoredObject<T>::get(void *ref) {
-  Vector<T> *vecpoint;
-  if (valid_p || updateStorage()) {
-    try {
-      vecpoint = (Vector<T> *)ref;
-      vecpoint->reference(data_p);
-      return True;
-    } catch (AipsError x) {
-      cerr << x.getMesg() << endl;
-      cerr << "get: error while referencing data, probably got wrong type as argument." << endl;
-      return False;
+namespace CR {  // Namespace CR -- begin
+  
+  // --- Construction ------------------------------------------------------------
+  
+  
+  template <class T> StoredObject<T>::StoredObject () 
+    : BasicObject()
+  {	
+    className_p = "StoredObject";
+    format_p.setFlag(0);
+  }
+  
+  template <class T> StoredObject<T>::StoredObject (uInt format) 
+    : BasicObject()
+  {	
+    className_p = "StoredObject";
+    format_p.setFlag(format);
+  }
+  
+  template <> StoredObject<Double>::StoredObject () 
+    : BasicObject()
+  {	
+    className_p = "StoredObject";
+    format_p.setFlag(EF_isNumeric);
+  }
+  
+  template <> StoredObject<DComplex>::StoredObject () 
+    : BasicObject() {	
+    className_p = "StoredObject";
+    format_p.setFlag(EF_isNumeric|EF_isComplex);
+  }
+  
+  // --- Destruction -------------------------------------------------------------
+  
+  template <class T> StoredObject<T>::~StoredObject () {
+    cleanup();
+  }
+  
+  // --- Parameters --------------------------------------------------------------
+  
+  template<class T> bool StoredObject<T>::get(void *ref) {
+    Vector<T> *vecpoint;
+    if (valid_p || updateStorage()) {
+      try {
+	vecpoint = (Vector<T> *)ref;
+	vecpoint->reference(data_p);
+	return true;
+      } catch (AipsError x) {
+	cerr << x.getMesg() << endl;
+	cerr << "get: error while referencing data, probably got wrong type as argument." << endl;
+	return false;
+      };
+    } else {
+      throw(AipsError("Cannot return invalid data"));
+      return false;
     };
-  } else {
-    throw(AipsError("Cannot return invalid data"));
-    return False;
-  };
-}
-
-// ==============================================================================
-//
-// Template Instantiation
-//
-// ==============================================================================
-
-template class StoredObject<Double>;
-template class StoredObject<DComplex>;
+  }
+  
+  // ==============================================================================
+  //
+  // Template Instantiation
+  //
+  // ==============================================================================
+  
+  template class StoredObject<Double>;
+  template class StoredObject<DComplex>;
+  
+}  // Namespace CR -- end

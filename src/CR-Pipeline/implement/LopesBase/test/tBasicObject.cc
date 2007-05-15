@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005                                                  *
- *   Lars Baehren (<mail>)                                                     *
+ *   Copyright (C) 2005                                                    *
+ *   Lars Baehren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,9 +17,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
 /* $Id: tBasicObject.cc,v 1.3 2007/04/17 13:52:48 bahren Exp $*/
 
-#include <lopes/LopesBase/BasicObject.h>
+#include <LopesBase/BasicObject.h>
 
 /*!
   \file tBasicObject.cc
@@ -31,14 +32,16 @@
   \date 2005/07/13
 */
 
+using CR::BasicObject;
+
 // -----------------------------------------------------------------------------
 
 /*!
   \brief Test constructors for a new BasicObject object
 */
-Bool test_BasicObject ()
+bool test_BasicObject ()
 {
-  Bool ok (True);
+  bool ok (true);
 
   BasicObject b;
   b.summary();
@@ -50,7 +53,7 @@ Bool test_BasicObject ()
 
 int main ()
 {
-  Bool ok (True);
+  bool ok (true);
 
   // Test for the constructor(s)
   {

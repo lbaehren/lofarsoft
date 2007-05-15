@@ -17,12 +17,17 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
 /* $Id: tExchangeFormat.cc,v 1.2 2006/07/05 12:59:12 bahren Exp $*/
 
 #include <iostream>
-#include <lopes/LopesBase/ExchangeFormat.h>
+#include <LopesBase/ExchangeFormat.h>
 
 using namespace std;
+
+using CR::EF_isComplex;
+using CR::EF_isScalar;
+using CR::ExchangeFormat;
 
 /*!
   \file tExchangeFormat.cc
@@ -39,9 +44,9 @@ using namespace std;
 /*!
   \brief Test constructors for a new ExchangeFormat object
 */
-Bool test_ExchangeFormat ()
+bool test_ExchangeFormat ()
 {
-  Bool ok (True);
+  bool ok (true);
   ExchangeFormat a;
 
   a.setFlag(EF_isComplex | EF_isScalar);
@@ -65,7 +70,7 @@ Bool test_ExchangeFormat ()
 
 int main ()
 {
-  Bool ok (True);
+  bool ok (true);
 
   // Test for the constructor(s)
   {

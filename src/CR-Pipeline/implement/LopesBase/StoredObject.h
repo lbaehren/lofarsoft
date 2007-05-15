@@ -23,60 +23,62 @@
 #ifndef _STOREDOBJECT_H_
 #define _STOREDOBJECT_H_
 
-// AIPS++/CASA includes
 #include <casa/aips.h>
 #include <casa/Arrays.h>
 
-// LOPES-Tools includes
 #include <LopesBase/BasicHeader.h>
 #include <LopesBase/BasicObject.h>
 
+using casa::AipsError;
 using casa::Double;
 using casa::DComplex;
+using casa::Vector;
 
-/*!
-  \class StoredObject
-  
-  \ingroup LopesBase
-
-  \brief Mother class for onjects that store their data localy
-
-  \author Andreas Horneffer
-
-  \date 2005/07/20
-
-  \test tStoredObject.cc
-*/
-template <class T> class StoredObject : public BasicObject {
-  
- protected:
-  
-  virtual Bool updateStorage() {
-    return False;
-  };
+namespace CR {  // Namespace CR -- begin
   
   /*!
-    \brief The data is stored here
+    \class StoredObject
+    
+    \ingroup LopesBase
+    
+    \brief Mother class for onjects that store their data localy
+    
+    \author Andreas Horneffer
+    
+    \date 2005/07/20
+    
+    \test tStoredObject.cc
   */
-  Vector<T> data_p;
-  
- public:
-  
-  // --- Construction ----------------------------------------------------------
-  
-  /*!
-    \brief Constructor
-  */
-  StoredObject ();
-  
-  StoredObject (uInt format);
-  
-  // --- Destruction -----------------------------------------------------------
-  
-  /*!
-    \brief Destructor
-  */
-  ~StoredObject ();
+  template <class T> class StoredObject : public BasicObject {
+    
+  protected:
+    
+    virtual bool updateStorage() {
+      return false;
+    };
+    
+    /*!
+      \brief The data is stored here
+    */
+    Vector<T> data_p;
+    
+  public:
+    
+    // --- Construction ----------------------------------------------------------
+    
+    /*!
+      \brief Constructor
+    */
+    StoredObject ();
+    
+    StoredObject (uInt format);
+    
+    // --- Destruction -----------------------------------------------------------
+    
+    /*!
+      \brief Destructor
+    */
+    ~StoredObject ();
   
   // --- Parameters ------------------------------------------------------------
   /*!
@@ -95,8 +97,10 @@ template <class T> class StoredObject : public BasicObject {
     destroying it.
 
    */
-  virtual Bool get(void *ref);
+  virtual bool get(void *ref);
 
 };
+
+}  // Namespace CR -- end
 
 #endif

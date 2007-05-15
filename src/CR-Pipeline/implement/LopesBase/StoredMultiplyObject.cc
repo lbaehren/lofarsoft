@@ -18,132 +18,138 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: StoredMultiplyObject.cc,v 1.5 2007/04/13 14:48:32 bahren Exp $*/
+/* $Id: StoredMultiplyObject.cc,v 1.6 2007/05/02 08:14:15 bahren Exp $*/
 
 #include <LopesBase/StoredMultiplyObject.h>
 
-// --- Construction ------------------------------------------------------------
+using std::cerr;
+using std::cout;
+using std::endl;
 
-template<class T> StoredMultiplyObject<T>::StoredMultiplyObject (uInt parents)
-  : StoredObject<T>() {
-  this->className_p = "StoredMultiplyObject";
-  if (parents <= 1) {
-    throw(AipsError("StoredMultiplyObject: Need at least two parents"));
-  };
-  this->nParent_p = parents;
-  this->parent_p = new BasicObject* [this->nParent_p];
-  uInt i;
-  for (i=0;i<this->nParent_p;i++) { this->parent_p[i] = NULL;};
-}
-
-// --- Destruction -------------------------------------------------------------
-
-template<class T> StoredMultiplyObject<T>::~StoredMultiplyObject ()
-{;}
-
-
-// --- Children & Parents ----------------------------------------------------
-
-template <>
-Bool StoredMultiplyObject<Double>::setParent(uInt num,
-					     BasicObject* obj) {
-  if (obj->format(EF_isComplex) || !obj->format(EF_isNumeric)){
-    throw(AipsError("setParent: Parent not of desired format!"));
-    return False;
+namespace CR {  // Namespace CR -- begin
+  
+  // --- Construction ------------------------------------------------------------
+  
+  template<class T> StoredMultiplyObject<T>::StoredMultiplyObject (uInt parents)
+    : StoredObject<T>() {
+    this->className_p = "StoredMultiplyObject";
+    if (parents <= 1) {
+      throw(AipsError("StoredMultiplyObject: Need at least two parents"));
+    };
+    this->nParent_p = parents;
+    this->parent_p = new BasicObject* [this->nParent_p];
+    uInt i;
+    for (i=0;i<this->nParent_p;i++) { this->parent_p[i] = NULL;};
   }
-  return putParent(num,obj);
-}
-
-template <>
-Bool StoredMultiplyObject<DComplex>::setParent(uInt num, BasicObject* obj) {
-	if (!obj->format(EF_isNumeric)){
-	    throw(AipsError("setParent: Parent not of desired format!"));
-	    return False;
-	}
-	return putParent(num,obj);
-}
-
-// --- Parameters -------------------------------------------------------------
-
-template <>
-Bool StoredMultiplyObject<Double>::updateStorage(){
-  Vector<Double> tmpvec;
-  Double tmpval=1.;
-  Bool had_vec=False;
-  uInt i;
-  try{
-    for (i=0;i<nParent_p;i++) {
-      if (!parent_p[i]->format(EF_isScalar)){
-	if (!had_vec) {
-	  had_vec=True;
-	  parent_p[i]->get(&data_p);
-	  data_p.unique();
-	} else {
-	  parent_p[i]->get(&tmpvec);
-	  data_p *= tmpvec;
-	};
-      } else {
-	parent_p[i]->get(&tmpvec);
-	tmpval *= tmpvec(1);
-      };
-    };
-    if (had_vec) {
-      data_p *= tmpval;
-    } else {
-      data_p = Vector<Double>(1,tmpval);
-    };
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
-    return False;
-  };
   
-  cout << "Ran StoredMultiplyObject<Double>::updateStorage() sucessfully" <<endl;
+  // --- Destruction -------------------------------------------------------------
   
-  valid_p = True;
-  return True;
-}
-
-template <>
-Bool StoredMultiplyObject<DComplex>::updateStorage(){
-  Vector<Double> Dvec;
-  Vector<DComplex> Cvec,tmpCvec;
-  DComplex tmpval=1.;
-  Bool had_vec=False;
-  uInt i;
-  try{
-    for (i=0;i<nParent_p;i++) {
-      if (!parent_p[i]->format(EF_isScalar)){
-	if (!had_vec) {
-	  had_vec=True;
-	  if (!parent_p[i]->format(EF_isComplex)){
-	    parent_p[i]->get(&Dvec);
-	    data_p.resize(Dvec.shape());
-	    convertArray(data_p,Dvec);
-	  } else {
+  template<class T> StoredMultiplyObject<T>::~StoredMultiplyObject ()
+  {;}
+  
+  
+  // --- Children & Parents ----------------------------------------------------
+  
+  template <>
+  bool StoredMultiplyObject<Double>::setParent(uInt num,
+					       BasicObject* obj) {
+    if (obj->format(EF_isComplex) || !obj->format(EF_isNumeric)){
+      throw(AipsError("setParent: Parent not of desired format!"));
+      return false;
+    }
+    return putParent(num,obj);
+  }
+  
+  template <>
+  bool StoredMultiplyObject<DComplex>::setParent(uInt num, BasicObject* obj) {
+    if (!obj->format(EF_isNumeric)){
+      throw(AipsError("setParent: Parent not of desired format!"));
+      return false;
+    }
+    return putParent(num,obj);
+  }
+  
+  // --- Parameters -------------------------------------------------------------
+  
+  template <>
+  bool StoredMultiplyObject<Double>::updateStorage(){
+    Vector<Double> tmpvec;
+    Double tmpval=1.;
+    bool had_vec=false;
+    uInt i;
+    try{
+      for (i=0;i<nParent_p;i++) {
+	if (!parent_p[i]->format(EF_isScalar)){
+	  if (!had_vec) {
+	    had_vec=true;
 	    parent_p[i]->get(&data_p);
 	    data_p.unique();
-	  };
-	} else {
-	  if (!parent_p[i]->format(EF_isComplex)){
-	    parent_p[i]->get(&Dvec);
-	    tmpCvec.resize(Dvec.shape());
-	    convertArray(tmpCvec,Dvec);
-	    Cvec.reference(tmpCvec);
 	  } else {
-	    parent_p[i]->get(&Cvec);
+	    parent_p[i]->get(&tmpvec);
+	    data_p *= tmpvec;
 	  };
-	  data_p *= Cvec;
-	};
-      } else {
-	if (!parent_p[i]->format(EF_isComplex)){
-	  parent_p[i]->get(&Dvec);
-	  tmpval *= Dvec(1);
 	} else {
-	  parent_p[i]->get(&Cvec);
-	  tmpval *= Cvec(1);
+	  parent_p[i]->get(&tmpvec);
+	  tmpval *= tmpvec(1);
 	};
-	    }
+      };
+      if (had_vec) {
+	data_p *= tmpval;
+      } else {
+	data_p = Vector<Double>(1,tmpval);
+      };
+    } catch (AipsError x) {
+      cerr << x.getMesg() << endl;
+      return false;
     };
+    
+    cout << "Ran StoredMultiplyObject<Double>::updateStorage() sucessfully" <<endl;
+    
+    valid_p = true;
+    return true;
+  }
+  
+template <>
+bool StoredMultiplyObject<DComplex>::updateStorage(){
+    Vector<Double> Dvec;
+    Vector<DComplex> Cvec,tmpCvec;
+    DComplex tmpval=1.;
+    bool had_vec=false;
+    uInt i;
+    try{
+	for (i=0;i<nParent_p;i++) {
+	    if (!parent_p[i]->format(EF_isScalar)){
+		if (!had_vec) {
+		    had_vec=true;
+		    if (!parent_p[i]->format(EF_isComplex)){
+			parent_p[i]->get(&Dvec);
+			data_p.resize(Dvec.shape());
+			convertArray(data_p,Dvec);
+		    } else {
+			parent_p[i]->get(&data_p);
+			data_p.unique();
+		    };
+		} else {
+		    if (!parent_p[i]->format(EF_isComplex)){
+			parent_p[i]->get(&Dvec);
+			tmpCvec.resize(Dvec.shape());
+			convertArray(tmpCvec,Dvec);
+			Cvec.reference(tmpCvec);
+		    } else {
+			parent_p[i]->get(&Cvec);
+		    };
+		    data_p *= Cvec;
+		};
+	    } else {
+		if (!parent_p[i]->format(EF_isComplex)){
+		    parent_p[i]->get(&Dvec);
+		    tmpval *= Dvec(1);
+		} else {
+		    parent_p[i]->get(&Cvec);
+		    tmpval *= Cvec(1);
+		};
+	    }
+	};
 	if (had_vec) {
 	    data_p *= tmpval;
 	} else {
@@ -151,13 +157,13 @@ Bool StoredMultiplyObject<DComplex>::updateStorage(){
 	};
     } catch (AipsError x) {
 	cerr << x.getMesg() << endl;
-	return False;
+	return false;
     };
 
     cout << "Ran StoredMultiplyObject<DComplex>::updateStorage() sucessfully" <<endl;
 
-    valid_p = True;
-    return True;
+    valid_p = true;
+    return true;
 }
 
 
@@ -170,3 +176,5 @@ Bool StoredMultiplyObject<DComplex>::updateStorage(){
 
 template class StoredMultiplyObject<casa::Double>;
 template class StoredMultiplyObject<casa::DComplex>;
+
+}  // Namespace CR -- end

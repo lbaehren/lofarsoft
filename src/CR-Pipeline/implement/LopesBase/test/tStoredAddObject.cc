@@ -19,7 +19,7 @@
  ***************************************************************************/
 /* $Id: tStoredAddObject.cc,v 1.1 2005/07/27 16:12:18 horneff Exp $*/
 
-#include <lopes/LopesBase/StoredAddObject.h>
+#include <LopesBase/StoredAddObject.h>
 
 /*!
   \file tStoredAddObject.cc
@@ -31,14 +31,16 @@
   \date 2005/07/27
 */
 
+using CR::StoredAddObject;
+
 // -----------------------------------------------------------------------------
 
 /*!
   \brief Test constructors for a new StoredAddObject object
 */
-Bool test_StoredAddObject ()
+bool test_StoredAddObject ()
 {
-  Bool ok (True);
+  bool ok (true);
   
   return ok;
 }
@@ -47,7 +49,7 @@ Bool test_StoredAddObject ()
 
 int main ()
 {
-  Bool ok (True);
+  bool ok (true);
 
   // Test for the constructor(s)
   {

@@ -1,32 +1,55 @@
+/***************************************************************************
+ *   Copyright (C) 2005                                                    *
+ *   Lars Baehren (bahren@astron.nl)                                       *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
 #include <LopesBase/DataTIM40.h>
 
-// =============================================================================
-//
-//  Construction
-//
-// =============================================================================
+using std::endl;
 
-DataTIM40::DataTIM40 ()
-{
-  DataTIM40::defaultSettings ();
-}
-
-DataTIM40::DataTIM40 (const int ADCMinChannel, 
-		      const int ADCMaxChannel,
-		      const double maxVoltage,
-		      const double presync)
-{
-  DataTIM40::defaultSettings ();
+namespace CR {  // Namespace CR -- begin
+  
+  // =============================================================================
   //
-  ADCMinChannel_p = ADCMinChannel;
-  ADCMaxChannel_p = ADCMaxChannel;
-  maxVoltage_p = maxVoltage;
-  presync_p = presync;
-}
-
-DataTIM40::~DataTIM40 ()
-{;}
+  //  Construction
+  //
+  // =============================================================================
+  
+  DataTIM40::DataTIM40 ()
+  {
+    DataTIM40::defaultSettings ();
+  }
+  
+  DataTIM40::DataTIM40 (const int ADCMinChannel, 
+			const int ADCMaxChannel,
+			const double maxVoltage,
+			const double presync)
+  {
+    DataTIM40::defaultSettings ();
+    //
+    ADCMinChannel_p = ADCMinChannel;
+    ADCMaxChannel_p = ADCMaxChannel;
+    maxVoltage_p = maxVoltage;
+    presync_p = presync;
+  }
+  
+  DataTIM40::~DataTIM40 ()
+  {;}
 
 // =============================================================================
 //
@@ -57,58 +80,6 @@ void DataTIM40::defaultSettings ()
 
 // =============================================================================
 //
-//  Access to the board parameters
-//
-// =============================================================================
-
-int DataTIM40::ADCMinChannel () 
-{
-  return ADCMinChannel_p;
-}
-
-int DataTIM40::ADCMaxChannel () 
-{
-  return ADCMaxChannel_p;
-}
-
-double DataTIM40::maxVoltage ()
-{
-  return maxVoltage_p;
-}
-
-double DataTIM40::presync ()
-{
-  return presync_p;
-}
-
-// =============================================================================
-//
-//  Access to the sampling parameters
-//
-// =============================================================================
-
-double DataTIM40::frequencyUnit ()
-{
-  return frequencyUnit_p;
-}
-
-double DataTIM40::samplerateUnit ()
-{
-  return samplerateUnit_p;
-}
-
-double DataTIM40::samplerate ()
-{
-  return samplerate_p;
-}
-
-int DataTIM40::nyquistZone ()
-{
-  return nyquistZone_p;
-}
-
-// =============================================================================
-//
 //  Show the current settings for the TIM40 board
 //
 // =============================================================================
@@ -135,3 +106,5 @@ void DataTIM40::show (std::ostream& os)
   os << " - Frequency Bandwidth ............................ : "
      << bandwidth_p << endl;
 }
+
+}  // Namespace CR -- end

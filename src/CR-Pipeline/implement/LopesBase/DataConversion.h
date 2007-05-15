@@ -1,4 +1,26 @@
-#if !defined (DATACONVERSION_H)
+/***************************************************************************
+ *   Copyright (C) 2005                                                    *
+ *   Lars Baehren (bahren@astron.nl)                                       *
+ *   Andreas Horneffer (a.horneffer@astro.ru.nl)                           *
+ *   Sven Lafebre (s.lafebre@astro.ru.nl)                                  *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+
+#ifndef DATACONVERSION_H
 #define DATACONVERSION_H
 
 /* $Id: DataConversion.h,v 1.2 2006/08/01 15:03:25 bahren Exp $ */
@@ -17,7 +39,13 @@
 
 #include <LopesBase/DataTIM40.h>
 
-#include <casa/namespace.h>
+using casa::Complex;
+using casa::IPosition;
+using casa::Matrix;
+using casa::String;
+using casa::Vector;
+
+namespace CR {  // Namespace CR -- begin
 
 /*!
   \class DataConversion
@@ -35,9 +63,9 @@
 
 class DataConversion : public DataTIM40 {
   
-  Int nofAntennas_p;
-  Int blocksize_p;
-  Int fftlength_p;
+  int nofAntennas_p;
+  int blocksize_p;
+  int fftlength_p;
 
   Matrix<Complex> fft2calfft_p;
   
@@ -52,8 +80,8 @@ class DataConversion : public DataTIM40 {
     \param blocksize   -- Blocksize by which data are read; this is the input 
                           size of the FFT.
    */
-  DataConversion (const Int nofAntennas,
-		  const Int blocksize);
+  DataConversion (const int nofAntennas,
+		  const int blocksize);
 
   /*!
     \brief Argumented constructor
@@ -63,9 +91,9 @@ class DataConversion : public DataTIM40 {
                           size of the FFT.
     \param fftlength   -- Output length of the FFT.
    */
-  DataConversion (const Int nofAntennas,
-		  const Int blocksize,
-		  const Int fftlength);
+  DataConversion (const int nofAntennas,
+		  const int blocksize,
+		  const int fftlength);
 
   // --- Destruction -----------------------------------------------------------
 
@@ -75,14 +103,14 @@ class DataConversion : public DataTIM40 {
 
   Matrix<Complex> FFT2CalFFT ();
 
-  Bool setFFT2CalFFT (const Matrix<Complex>& fft2calfft);
+  bool setFFT2CalFFT (const Matrix<Complex>& fft2calfft);
 
   // --- Conversion between data fields ----------------------------------------
 
-  Vector<Double> Fx2Voltage (const Vector<Double>& dataFx,
-			     const Bool invert);
+  Vector<double> Fx2Voltage (const Vector<double>& dataFx,
+			     const bool invert);
 
-  Vector<Double> Fx2PowerT (const Vector<Double>& dataFx);
+  Vector<double> Fx2PowerT (const Vector<double>& dataFx);
 
   /*!
     \brief Convert FFT data to calibrated FFT data
@@ -94,11 +122,11 @@ class DataConversion : public DataTIM40 {
     \return dataCalFFT -- 
    */
   Vector<Complex> FFT2CalFFT (const Vector<Complex>& dataFFT,
-			      const Int antenna);
+			      const int antenna);
 
   Matrix<Complex> FFT2CalFFT (const Matrix<Complex>& dataFFT);
 
-  Vector<Double> FFT2Power (const Vector<Complex>& dataFFT);
+  Vector<double> FFT2Power (const Vector<Complex>& dataFFT);
 
   /*!
     \brief Convert calibrated power to noise temperature.
@@ -113,12 +141,14 @@ class DataConversion : public DataTIM40 {
 
     \return noiseT -- 
   */
-  Vector<Double> Power2NoiseT (const Vector<Double>& dataPower);
+  Vector<double> Power2NoiseT (const Vector<double>& dataPower);
 
  private:
   
-  Double frequencyBin ();
+  double frequencyBin ();
 
 };
+
+}  // Namespace CR -- end
 
 #endif

@@ -26,24 +26,26 @@
 // AIPS++/CASA includes
 #include <casa/Containers/Record.h>
 
-#include <casa/namespace.h>
+using casa::Record;
 
-/*!
-  \class BasicHeader
-
-  \ingroup LopesBase
-
-  \brief Basic header information for a LOPES-Tools object
-
-  \author Lars B&auml;hren
-
-  \date 2005/07/20
-
-  \test tBasicHeader.cc
-
-  <h3>Prerequisite</h3>
-
-  <ul type="square">
+namespace CR {  // Namespace CR -- begin
+  
+  /*!
+    \class BasicHeader
+    
+    \ingroup LopesBase
+    
+    \brief Basic header information for a LOPES-Tools object
+    
+    \author Lars B&auml;hren
+    
+    \date 2005/07/20
+    
+    \test tBasicHeader.cc
+    
+    <h3>Prerequisite</h3>
+    
+    <ul type="square">
     <li>[AIPS++] Record -- A hierarchical collection of named fields of various
                  types. The Record class is a particular type of a record class.
 		 The fields in Record may be of scalar type, array type, or a
@@ -58,60 +60,63 @@
 		 object is copied. This results in a cheap copy behaviour.
   </ul>
 
-  <h3>Synopsis</h3>
-
-  In order to make meta data available to objects derived from BasicObject,
-  we define a mechanism to store and access keyword/value pairs.
-
-  For the tree as a whole, header information should be available for
-  - an individual object
-  - a branch of a tree 
-  - the tree
-  In order to keep access to header information, a HeaderExtraction class
-  should wrap the actual request and extraction of a certain header information,
-  regardles where it is stored in the tree.
-
-  Information on the type of the stored data can be handled as flags, e.g. 
-  \verbatim
-  static int IS_ARRAY   = 00000001;
-  static int IS_COMPLEX = 00000010;
-  static int IS_STRING  = 00000100;
-  \endverbatim
-*/
-
-class BasicHeader {
-
-  //! Record structure to store the meta data.
-  Record header_p;
-
- public:
-
-  // --- Construction ----------------------------------------------------------
-
-  /*!
-    \brief Constructor
-
-    This is the default constructor.
+    <h3>Synopsis</h3>
+    
+    In order to make meta data available to objects derived from BasicObject,
+    we define a mechanism to store and access keyword/value pairs.
+    
+    For the tree as a whole, header information should be available for
+    - an individual object
+    - a branch of a tree 
+    - the tree
+    In order to keep access to header information, a HeaderExtraction class
+    should wrap the actual request and extraction of a certain header information,
+    regardles where it is stored in the tree.
+    
+    Information on the type of the stored data can be handled as flags, e.g. 
+    \verbatim
+    static int IS_ARRAY   = 00000001;
+    static int IS_COMPLEX = 00000010;
+    static int IS_STRING  = 00000100;
+    \endverbatim
   */
-  BasicHeader ();
-
-  // --- Destruction -----------------------------------------------------------
-
-  /*!
-    \brief Destructor
-  */
-  ~BasicHeader ();
-
-  // --- Parameters ------------------------------------------------------------
-
-  BasicHeader& header ();
-
-  Record& headerRecord () {
-    return header_p;
-  }
-
-  Bool setHeader (const Record& header);
-
-};
+  
+  class BasicHeader {
+    
+    //! Record structure to store the meta data.
+    Record header_p;
+    
+  public:
+    
+    // --- Construction ----------------------------------------------------------
+    
+    /*!
+      \brief Constructor
+      
+      This is the default constructor.
+    */
+    BasicHeader ();
+    
+    // --- Destruction -----------------------------------------------------------
+    
+    /*!
+      \brief Destructor
+    */
+    ~BasicHeader ();
+    
+    // --- Parameters ------------------------------------------------------------
+    
+    BasicHeader& header ();
+    
+    Record& headerRecord () {
+      return header_p;
+    }
+    
+    bool setHeader (const Record& header);
+    
+  };
+  
+}  // Namespace CR -- end
 
 #endif
+  

@@ -22,15 +22,19 @@
 
 #include <LopesBase/BasicHeader.h>
 
-// --- Construction ------------------------------------------------------------
-
-BasicHeader::BasicHeader ()
-{;}
-
-// --- Destruction -------------------------------------------------------------
-
-BasicHeader::~BasicHeader ()
-{;}
-
-// --- Parameters --------------------------------------------------------------
-
+namespace CR {  // Namespace CR -- begin
+  
+  // --- Construction -----------------------------------------------------------
+  
+  BasicHeader::BasicHeader ()
+  {;}
+  
+  // --- Destruction ------------------------------------------------------------
+  
+  BasicHeader::~BasicHeader ()
+  {;}
+  
+  // --- Parameters -------------------------------------------------------------
+  
+  
+}  // Namespace CR -- end

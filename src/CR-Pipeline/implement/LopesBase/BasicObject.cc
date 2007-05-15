@@ -19,168 +19,175 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
 /* $Id: BasicObject.cc,v 1.14 2007/04/17 13:52:47 bahren Exp $*/
 
 #include <LopesBase/BasicObject.h>
 
-// --- Construction ------------------------------------------------------------
+using std::cout;
+using std::endl;
 
-BasicObject::BasicObject ()
-  : className_p("BasicObject"),
-    title_p("UNDEFINED")
-{
-  init();
-}
-
-// --- Destruction -------------------------------------------------------------
-
-BasicObject::~BasicObject () {
-  cleanup();
-}
-
-
-// --- Parameters --------------------------------------------------------------
-
-Bool BasicObject::invalidate () {
-  uInt i (0);
+namespace CR {  // Namespace CR -- begin
   
-  if (valid_p) {
-    valid_p = False;
-    try {
-      for (i = 0; i < nChild_p; i ++){
-	child_p[i]->invalidate();
-      };
-    } catch (AipsError x) {
-      cerr << x.getMesg() << endl;
-      return False;
-    };
-  };
-  return True;  
-}
-
-// --- Functions -------------------------------------------------------------
-
-Bool BasicObject::init() {
-  className_p = "BasicObject";
-  valid_p     = False;
+  // --- Construction ------------------------------------------------------------
   
-  parent_p    = NULL;
-  nParent_p   = 0;
-  
-  child_p     = NULL;
-  nChild_p    = 0;
-  
-  return True;
-}
-
-Bool BasicObject::cleanup () {
-  if (parent_p != NULL)
-    delete [] parent_p;
-  
-  if (child_p  != NULL)
-    delete [] child_p;
-  
-  return True;
-}
-
-Bool BasicObject::addChild (BasicObject* obj) {
-  BasicObject** tmparr;
-  
-  tmparr = new BasicObject* [nChild_p+1];
-  if (child_p != NULL) {
-    for (uInt i = 0; i < nChild_p; i ++)
-      tmparr[i] = child_p[i];
-    delete [] child_p;
+  BasicObject::BasicObject ()
+    : className_p("BasicObject"),
+      title_p("UNDEFINED")
+  {
+    init();
   }
-  tmparr[nChild_p++] = obj;
-  child_p = tmparr;
   
-  return True;
-}
-
-Bool BasicObject::putParent(uInt num, BasicObject* obj) {
-  if (num >= nParent_p) {
-    throw(AipsError("putParent: Index exceeds number of parents."));
-    return False;
-  };
+  // --- Destruction -------------------------------------------------------------
   
-  if (parent_p[num] != NULL) {
-    throw(AipsError("putParent: Parent was already set."));
-    return False;
-  };
-  parent_p[num] = obj;
-  obj->addChild(this);
+  BasicObject::~BasicObject () {
+    cleanup();
+  }
   
-  return True;
-}
-
-// ----------------------------------------------------------------- listChildren
-
-Vector<String> BasicObject::listChildren(){
-  Vector<String> erg;
-  return erg;
-}
-
-// -------------------------------------------------------------------listParents
-
-Vector<String> BasicObject::listParents(){
-  Vector<String> erg;
-  return erg;
-}
-
-// ---------------------------------------------------------------------- summary
-
-void BasicObject::summary ()
-{
-  cout << "-- Class name            = " << className()    << endl;
-  cout << "-- Object title          = " << title()        << endl;
-  cout << "-- nof. parents          = " << nParent_p      << endl;
-  cout << "-- Is this a valid object? " << valid_p        << endl;
-  cout << "-- nof. children         = " << nChild_p       << endl;
-  cout << "-- Parent objects        = " << listParents()  << endl;
-  cout << "-- Child objects         = " << listChildren() << endl;
-}
-
+  
+  // --- Parameters --------------------------------------------------------------
+  
+  bool BasicObject::invalidate () {
+    uInt i (0);
+    
+    if (valid_p) {
+      valid_p = false;
+      try {
+	for (i = 0; i < nChild_p; i ++){
+	  child_p[i]->invalidate();
+	};
+      } catch (casa::AipsError x) {
+	std::cerr << x.getMesg() << std::endl;
+	return false;
+      };
+    };
+    return true;  
+  }
+  
+  // --- Functions -------------------------------------------------------------
+  
+  bool BasicObject::init() {
+    className_p = "BasicObject";
+    valid_p     = false;
+    
+    parent_p    = NULL;
+    nParent_p   = 0;
+    
+    child_p     = NULL;
+    nChild_p    = 0;
+    
+    return true;
+  }
+  
+  bool BasicObject::cleanup () {
+    if (parent_p != NULL)
+      delete [] parent_p;
+    
+    if (child_p  != NULL)
+      delete [] child_p;
+    
+    return true;
+  }
+  
+  bool BasicObject::addChild (BasicObject* obj) {
+    BasicObject** tmparr;
+    
+    tmparr = new BasicObject* [nChild_p+1];
+    if (child_p != NULL) {
+      for (uInt i = 0; i < nChild_p; i ++)
+	tmparr[i] = child_p[i];
+      delete [] child_p;
+    }
+    tmparr[nChild_p++] = obj;
+    child_p = tmparr;
+    
+    return true;
+  }
+  
+  bool BasicObject::putParent(uInt num, BasicObject* obj) {
+    if (num >= nParent_p) {
+      throw(casa::AipsError("putParent: Index exceeds number of parents."));
+      return false;
+    };
+    
+    if (parent_p[num] != NULL) {
+      throw(casa::AipsError("putParent: Parent was already set."));
+      return false;
+    };
+    parent_p[num] = obj;
+    obj->addChild(this);
+    
+    return true;
+  }
+  
+  // ----------------------------------------------------------------- listChildren
+  
+  Vector<String> BasicObject::listChildren(){
+    Vector<String> erg;
+    return erg;
+  }
+  
+  // -------------------------------------------------------------------listParents
+  
+  Vector<String> BasicObject::listParents(){
+    Vector<String> erg;
+    return erg;
+  }
+  
+  // ---------------------------------------------------------------------- summary
+  
+  void BasicObject::summary ()
+  {
+    cout << "-- Class name            = " << className()    << endl;
+    cout << "-- Object title          = " << title()        << endl;
+    cout << "-- nof. parents          = " << nParent_p      << endl;
+    cout << "-- Is this a valid object? " << valid_p        << endl;
+    cout << "-- nof. children         = " << nChild_p       << endl;
+    cout << "-- Parent objects        = " << listParents()  << endl;
+    cout << "-- Child objects         = " << listChildren() << endl;
+  }
+  
+}  // Namespace CR -- end
 
 // Assorted junk below
 
-/*Bool BasicObject::removeNode (Vector<BasicObject*> *ar, BasicObject* obj, Bool ret) {
+/*bool BasicObject::removeNode (Vector<BasicObject*> *ar, BasicObject* obj, bool ret) {
   
 try {
 // If there are no children, just go back
 if (ar->size() == 0)
-return False;
+return false;
 
 // If the last element matches, resize and go back
 if (ar->data()[ar->size()-1] == obj) {
 if (ret)
-obj->removeParent(this, False);
-ar->resize(ar->size()-1,True);
-return True;
+obj->removeParent(this, false);
+ar->resize(ar->size()-1,true);
+return true;
 }
 
-Bool done = False;
+bool done = false;
 
 // Check for a match; once we have one, start contracting the array
 for (uInt i = 0; i < ar->size()-1; i ++) {
 if (ar->data()[i] == obj)
-done = True;
-if (done == True) 
+done = true;
+if (done == true) 
 ar->data()[i] = ar->data()[i+1];
 }
 
 // If there was no match, go back
-if (done == False)
-return False;
+if (done == false)
+return false;
 
 // Resize array if there was a match
 if (ret)
-obj->removeParent(this, False);
-ar->resize(ar->size()-1,True);
+obj->removeParent(this, false);
+ar->resize(ar->size()-1,true);
 
 } catch (AipsError x) {
 cerr << x.getMesg() << endl;
-return False;
+return false;
 }
-return True;
+return true;
 }*/

@@ -19,7 +19,7 @@
  ***************************************************************************/
 /* $Id: tStoredObject.cc,v 1.4 2007/04/17 13:52:48 bahren Exp $*/
 
-#include <lopes/LopesBase/StoredObject.h>
+#include <LopesBase/StoredObject.h>
 
 /*!
   \file tStoredObject.cc
@@ -30,6 +30,13 @@
  
   \date 2005/07/20
 */
+
+using std::cerr;
+using std::cout;
+using std::endl;
+
+using CR::BasicObject;
+using CR::StoredObject;
 
 // -----------------------------------------------------------------------------
 

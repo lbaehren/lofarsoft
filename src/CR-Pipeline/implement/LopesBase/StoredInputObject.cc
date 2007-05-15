@@ -18,60 +18,70 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: StoredInputObject.cc,v 1.3 2007/04/13 14:48:32 bahren Exp $*/
+/* $Id: StoredInputObject.cc,v 1.4 2007/05/02 08:14:15 bahren Exp $*/
 
 #include <LopesBase/StoredInputObject.h>
 
-// --- Construction ------------------------------------------------------------
+using std::cerr;
+using std::endl;
 
-template<class T> StoredInputObject<T>::StoredInputObject ()
+namespace CR {  // Namespace CR -- begin
+  
+  // --- Construction ------------------------------------------------------------
+  
+  template<class T> StoredInputObject<T>::StoredInputObject ()
     : StoredObject<T>() {
-  this->className_p = "StoredInputObject";
-  this->nParent_p   = 0;
-}
-
-// --- Destruction -------------------------------------------------------------
-
-template<class T> StoredInputObject<T>::~StoredInputObject ()
-{;}
-
-// --- Parameters --------------------------------------------------------------
-template<class T> Bool StoredInputObject<T>::put(Vector<T> *ref) {
+    this->className_p = "StoredInputObject";
+    this->nParent_p = 0;
+  }
+  
+  // --- Destruction -------------------------------------------------------------
+  
+  template<class T> StoredInputObject<T>::~StoredInputObject ()
+  {;}
+  
+  // --- Parameters --------------------------------------------------------------
+  
+  template<class T> bool StoredInputObject<T>::put(Vector<T> *ref) {
     try {
-	this->data_p.resize();
-	this->data_p = *ref;
-	this->invalidate();
-	this->valid_p = True;
-    } catch (AipsError x) {
-	cerr << x.getMesg() << endl;
-	return False;
-    };
-    return True;
-};
-
-template<class T> Bool StoredInputObject<T>::put(Vector<T> *ref, Bool copy) {
-  try {
-    if (copy) {
       this->data_p.resize();
       this->data_p = *ref;
-    } else {
-      this->data_p.reference(*ref);
       this->invalidate();
-      this->valid_p = True;
+      this->valid_p = true;
+    } catch (AipsError x) {
+      cerr << x.getMesg() << endl;
+      return false;
     };
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
-    return False;
+    return true;
   };
-  return True;
-};
-
-
-// ==============================================================================
-//
-// Template Instantiation
-//
-// ==============================================================================
-
-template class StoredInputObject<casa::Double>;
-template class StoredInputObject<casa::DComplex>;
+  
+  template<class T> bool StoredInputObject<T>::put(Vector<T> *ref,
+						   bool copy) {
+    try {
+      if (copy) {
+	this->data_p.resize();
+	this->data_p = *ref;
+      } else {
+	this->data_p.reference(*ref);
+	this->invalidate();
+	this->valid_p = true;
+      };
+    } catch (AipsError x) {
+      cerr << x.getMesg() << endl;
+      return false;
+    };
+    return true;
+  };
+  
+  
+  
+  // ==============================================================================
+  //
+  // Template Instantiation
+  //
+  // ==============================================================================
+  
+  template class StoredInputObject<casa::Double>;
+  template class StoredInputObject<casa::DComplex>;
+  
+}  // Namespace CR -- end

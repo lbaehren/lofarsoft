@@ -23,11 +23,12 @@
 #ifndef _STOREDMULTIPLYOBJECT_H_
 #define _STOREDMULTIPLYOBJECT_H_
 
-
 #include <LopesBase/StoredObject.h>
 
-#include <casa/namespace.h>
+using casa::uInt;
 
+namespace CR {  // Namespace CR -- begin
+  
 /*!
   \class StoredMultiplyObject
 
@@ -57,7 +58,7 @@
 
 template <class T> class StoredMultiplyObject : public StoredObject<T>{
 
-    Bool updateStorage();
+    bool updateStorage();
 
  public:
 
@@ -84,9 +85,11 @@ template <class T> class StoredMultiplyObject : public StoredObject<T>{
 
     \return ok -- Was operation successful? Returns <tt>True</tt> if yes.
    */
-  virtual Bool setParent(uInt num, BasicObject* obj);
-
+  virtual bool setParent(uInt num,
+			 BasicObject* obj);
 
 };
+
+}  // Namespace CR -- end
 
 #endif

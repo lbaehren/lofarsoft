@@ -25,7 +25,7 @@
 
 #include <LopesBase/StoredObject.h>
 
-#include <casa/namespace.h>
+namespace CR {  // Namespace CR -- begin
 
 /*!
   \class StoredInputObject
@@ -70,10 +70,12 @@ template<class T> class StoredInputObject : public StoredObject<T>{
   /*!
     \brief Put the data into the storage (a copy is made)
   */
-  virtual Bool put(Vector<T> *ref);
+  virtual bool put(Vector<T> *ref);
 
-  virtual Bool put(Vector<T> *ref, Bool copy);
+  virtual bool put(Vector<T> *ref, bool copy);
 
 };
+
+}  // Namespace CR -- end
 
 #endif

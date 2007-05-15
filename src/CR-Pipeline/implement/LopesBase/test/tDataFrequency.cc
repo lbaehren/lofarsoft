@@ -1,12 +1,32 @@
+/***************************************************************************
+ *   Copyright (C) 2005                                                    *
+ *   Lars Baehren (bahren@astron.nl)                                       *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
 /* $Id: tDataFrequency.cc,v 1.1 2005/07/15 07:16:47 bahren Exp $ */
 
 #include <casa/aips.h>
 #include <tasking/Glish.h>
 
-#include <lopes/LopesBase/DataFrequency.h>
+#include <LopesBase/DataFrequency.h>
 
-#include <casa/namespace.h>
+using casa::GlishRecord;
+using CR::DataFrequency;
 
 /*!
   \file tDataFrequency.cc
@@ -24,14 +44,14 @@ GlishRecord setupGlishRecord () {
 
   GlishRecord rec;
   
-  Double FrequencyUnit  = 1e06;
-  Double SamplerateUnit = 1e06;
-  Double Samplerate     = 80;
-  Int NyquistZone       = 2;
-  Double FrequencyLow   = 0e06;
-  Double FrequencyHigh  = 40e06;
-  Int FFTSize           = 8191;
-  Int FFTlen            = 4096;
+  double FrequencyUnit  = 1e06;
+  double SamplerateUnit = 1e06;
+  double Samplerate     = 80;
+  int NyquistZone       = 2;
+  double FrequencyLow   = 0e06;
+  double FrequencyHigh  = 40e06;
+  int FFTSize           = 8191;
+  int FFTlen            = 4096;
 
   rec.add("FrequencyUnit",FrequencyUnit);
   rec.add("SamplerateUnit",SamplerateUnit);
@@ -71,11 +91,11 @@ void test_subBands (GlishRecord& rec)
 {
   cout << "\n[tDataFrequency::test_subBands]\n" << endl;
 
-  Int nofBands = 10;
+  int nofBands = 10;
   String division;
-  Vector<Double> freqRange;
-  Double bandwidth;
-  Double frac;
+  Vector<double> freqRange;
+  double bandwidth;
+  double frac;
 
   DataFrequency df (rec);
 

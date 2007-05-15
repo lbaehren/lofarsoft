@@ -1,5 +1,24 @@
+/***************************************************************************
+ *   Copyright (C) 2005                                                    *
+ *   Lars Baehren (bahren@astron.nl)                                       *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
-#if !defined(DATAFREQUENCY_H)
+#ifndef DATAFREQUENCY_H
 #define DATAFREQUENCY_H
 
 /* $Id: DataFrequency.h,v 1.3 2006/10/31 18:24:08 bahren Exp $ */
@@ -23,76 +42,85 @@ using namespace std;
 #include <tasking/Glish/GlishEvent.h>
 #include <tasking/Glish/GlishRecord.h>
 
-#include <casa/namespace.h>
+using casa::Complex;
+using casa::DComplex;
+using casa::GlishArray;
+using casa::GlishRecord;
+using casa::IPosition;
+using casa::Matrix;
+using casa::String;
+using casa::Vector;
 
-/*!
-  \class DataFrequency
-
-  \ingroup LopesBase
-
-  \brief Frequency domain settings of an observation
-
-  \author Lars Baehren
-
-  \test
-  - tDataFrequency.cc
-
-  <h3>Synopsis</h3>
-
-  We build up a data structure mirroring the related contents of the LOPES Tools
-  data object (essentially a Glish record):
-  \verbatim
-  FFTSize         := as_integer(data.getmeta('FFTSize'));
-  FFTlen          := as_integer(data.getmeta('FFTlen'));
-  FrequencyUnit   := as_double(data.head('FrequencyUnit'));
-  SamplerateUnit  := as_double(data.head('SamplerateUnit'));
-  Samplerate      := as_double(data.head('Samplerate'));
-  NyquistZone     := as_integer(data.head('NyquistZone'));
-  FrequencyRange  := [as_double(data.getmeta('FrequencyLow')),
-                      as_double(data.getmeta('FrequencyHigh'))];
-  \endverbatim
- */
-
-class DataFrequency {
-
-  //! Unit for the frequency values
-  Double FrequencyUnit_p;
-  //! Unit for the sample rate
-  Double SamplerateUnit_p;
-  //! Samplerate given in units of SamplerateUnit
-  Double Samplerate_p;
-  //! The Nyquist Zone
-  Int NyquistZone_p;
-  //! Maximum frequency range
-  Vector<Double> FrequencyRange_p;
-  //! Time domain size of FFT
-  Int FFTSize_p;
-  //! Frequency domain size of FFT
-  Int FFTlen_p;
-  //! Selected frequency bands
-  Matrix<Double> FrequencyBands_p;
-  //! Masking array for selection/deselection of frequency channels
-  Vector<Bool> FrequencyMask_p;
-
- public:
-
-  // === Construction / Destruction ============================================
-
+namespace CR {  // Namespace CR -- begin
+  
   /*!
-    \brief Empty constructor
+    \class DataFrequency
+    
+    \ingroup LopesBase
+    
+    \brief Frequency domain settings of an observation
+    
+    \author Lars B&auml;hren
+    
+    \test
+    - tDataFrequency.cc
+    
+    <h3>Synopsis</h3>
+    
+    We build up a data structure mirroring the related contents of the LOPES Tools
+    data object (essentially a Glish record):
+    \verbatim
+    FFTSize         := as_integer(data.getmeta('FFTSize'));
+    FFTlen          := as_integer(data.getmeta('FFTlen'));
+    FrequencyUnit   := as_double(data.head('FrequencyUnit'));
+    SamplerateUnit  := as_double(data.head('SamplerateUnit'));
+    Samplerate      := as_double(data.head('Samplerate'));
+    NyquistZone     := as_integer(data.head('NyquistZone'));
+    FrequencyRange  := [as_double(data.getmeta('FrequencyLow')),
+    as_double(data.getmeta('FrequencyHigh'))];
+    \endverbatim
   */
-  DataFrequency ();
-
-  /*!
-    \brief Construction from Glish record
-  */
-  DataFrequency (GlishRecord&);
-
-  /*!
-    \brief Destructor
-   */
-/*   ~DataFrequency (); */
-
+  
+  class DataFrequency {
+    
+    //! Unit for the frequency values
+    double FrequencyUnit_p;
+    //! Unit for the sample rate
+    double SamplerateUnit_p;
+    //! Samplerate given in units of SamplerateUnit
+    double Samplerate_p;
+    //! The Nyquist Zone
+    int NyquistZone_p;
+    //! Maximum frequency range
+    Vector<double> FrequencyRange_p;
+    //! Time domain size of FFT
+    int FFTSize_p;
+    //! Frequency domain size of FFT
+    int FFTlen_p;
+    //! Selected frequency bands
+    Matrix<double> FrequencyBands_p;
+    //! Masking array for selection/deselection of frequency channels
+    Vector<bool> FrequencyMask_p;
+    
+  public:
+    
+    // === Construction / Destruction ============================================
+    
+    /*!
+      \brief Empty constructor
+    */
+    DataFrequency ();
+    
+    /*!
+      \brief Construction from Glish record
+    */
+    DataFrequency (GlishRecord&);
+    
+    /*!
+      \brief Destructor
+    */
+    ~DataFrequency () {};
+    
   // === Initialization ========================================================
 
   /*!
@@ -103,30 +131,39 @@ class DataFrequency {
   // === Rates and units =======================================================
 
   //! Set the unit in which frequency values are expressed
-  void setFrequencyUnit (Double);
+  void setFrequencyUnit (double);
 
   //! Get the unit in which frequency values are expressed
-  Double FrequencyUnit ();
+  double FrequencyUnit ();
 
   //! Set the unit in which the samplerate is expressed
-  void setSamplerateUnit (Double);
+  void setSamplerateUnit (double);
 
   //! Get the unit in which the samplerate is expressed
-  Double SamplerateUnit ();
+  double SamplerateUnit ();
 
   //! Set the samplerate, in units of the SamplerateUnit
-  void setSamplerate (Double);
+  void setSamplerate (double);
 
   //! Get the samplerate, in units of the SamplerateUnit
-  Double Samplerate ();
+  inline double Samplerate () {
+    return Samplerate_p;
+  }
 
-  void setFrequencyLow (Double);
+  void setFrequencyLow (double);
 
-  void setFrequencyHigh (Double);
+  void setFrequencyHigh (double);
 
-  Vector<Double> frequencyRange ();
+  /*!
+    \brief Get the range of frequencies
 
-  void setFrequencyRange (const Vector<Double>&);
+    \return FrequencyRange -- The range of frequencies, [MHz].
+  */
+  inline Vector<double> frequencyRange () {
+    return FrequencyRange_p;
+  }
+  
+  void setFrequencyRange (const Vector<double>&);
 
   // === Frequency selection ===================================================
 
@@ -150,7 +187,7 @@ class DataFrequency {
                       <i>lin</i> (linear; this also is the default,
 		      <i>log</i> (logarithmic).
    */
-  void setFrequencyBands (const Int,
+  void setFrequencyBands (const int,
 			  const String);
   /*!
     \brief Divide frequency range into sub-bands.
@@ -162,8 +199,8 @@ class DataFrequency {
                        <i>lin</i> (linear; this also is the default,
 		       <i>log</i> (logarithmic).
    */
-  void setFrequencyBands (const Vector<Double>&,
-			  const Int,
+  void setFrequencyBands (const Vector<double>&,
+			  const int,
 			  const String);
 
   /*!
@@ -172,14 +209,14 @@ class DataFrequency {
     \param freqMIN - Lower limit of the selected frequency band.
     \param freqMAX - Upper limit of the selected frequency band.
    */
-  void setFrequencyBands (const Double&, const Double&);
+  void setFrequencyBands (const double&, const double&);
 
   /*!
     \brief Set the limits of a selected frequency band, [Hz]
 
     \param freqBand - Vector with the limits of a selected frequency band.
    */
-  void setFrequencyBands (const Vector<Double>&);
+  void setFrequencyBands (const Vector<double>&);
 
   /*!
     \brief Set the limits of multiple selected frequency bands, [Hz]
@@ -187,7 +224,7 @@ class DataFrequency {
     \param freqBands - Array with the limits of multiple selected frequency
                        bands, \f$ [N_{\rm Bands} \times 2] \f$
    */
-  void setFrequencyBands (const Matrix<Double>&);
+  void setFrequencyBands (const Matrix<double>&);
 
   /*!
     Get the limits of multiple selected frequency bands, [Hz]
@@ -195,14 +232,14 @@ class DataFrequency {
     \return freqBands - Array with the limits of multiple selected frequency
                         bands, \f$ [N_{\rm Bands} \times 2] \f$
    */
-  Matrix<Double> FrequencyBands ();
+  Matrix<double> FrequencyBands ();
 
-  void setFrequencyMask (Vector<Bool>&);
+  void setFrequencyMask (Vector<bool>&);
 
   /*!
     \brief Get the frequency mask
   */
-  Vector<Bool> FrequencyMask ();
+  Vector<bool> FrequencyMask ();
 
   /*!
    \brief Get the frequency mask for a user defined frequency band
@@ -210,10 +247,10 @@ class DataFrequency {
    \param freqMin - Lower limit of the selected frequency band.
    \param freqMax - Upper limit of the selected frequency band.
   */
-  Vector<Bool> FrequencyMask (const Double, const Double);
+  Vector<bool> FrequencyMask (const double, const double);
   
   //! Get the frequency mask for a user defined frequency band
-  Vector<Bool> FrequencyMask (const Vector<Double>&);
+  Vector<bool> FrequencyMask (const Vector<double>&);
 
   // === Access to the frequency values ========================================
 
@@ -229,7 +266,7 @@ class DataFrequency {
     input length of \f$ N \f$ samples and \f$ \nu_{\rm sample} \f$ is the
     sampling frequency.
   */
-  Vector<Double> Frequencies ();
+  Vector<double> Frequencies ();
 
   /*!
     \brief Get all selected/deselected frequency values
@@ -237,7 +274,7 @@ class DataFrequency {
     \param selected - Return the selected frequency values, i.e. those within 
                       the selected frequency bands.
    */
-  Vector<Double> Frequencies (Bool);
+  Vector<double> Frequencies (bool);
 
   /*!
     \brief Get the frequency values within a defined frequency range
@@ -247,7 +284,7 @@ class DataFrequency {
     outside [FrequencyLow,FrequencyHigh], just the valid set of frequencies 
     will be returned.
   */
-  Vector<Double> Frequencies (Double,Double);
+  Vector<double> Frequencies (double,double);
 
   /*!
     \brief Get the frequency values within a defined frequency range
@@ -257,30 +294,48 @@ class DataFrequency {
     outside [FrequencyLow,FrequencyHigh], just the valid set of frequencies 
     will be returned.
   */
-  Vector<Double> Frequencies (Vector<Double>&);
+  Vector<double> Frequencies (Vector<double>&);
 
   /*!
     \brief Get the frequency values selected by an masking array
   */
-  Vector<Double> Frequencies (Vector<Bool>&);
+  Vector<double> Frequencies (Vector<bool>&);
 
   /*!
     \brief Width of a frequency bin
    */
-  Double FrequencyBin ();
+  double FrequencyBin ();
 
   // === Fourier transform settings ============================================
 
   //! Set the Nyquist Zone in which we operate
-  void setNyquistZone (Int);
+  void setNyquistZone (int);
   //! Get the Nyquist Zone in which we operate
-  Int NyquistZone ();
+  inline int NyquistZone () {
+    return NyquistZone_p;
+  }
 
-  void setFFTSize (Int);
-  Int FFTSize ();
+  void setFFTSize (int);
 
-  void setFFTlen (Int);
-  Int FFTlen ();
+  /*!
+    \brief Get the input size of the FFT
+
+    \return FFTSize -- The input size of the FFT, [samples]
+  */
+  inline int FFTSize () {
+    return FFTSize_p;
+  }
+
+  void setFFTlen (int);
+
+  /*!
+    \brief Get the output length of the FFT
+
+    \return FFTlen -- The output length of the FFT, [channels]
+  */
+  inline int FFTlen () {
+    return FFTlen_p;
+  }
 
   // === Conversion of quantities in the frequency domain ======================
 
@@ -296,14 +351,14 @@ class DataFrequency {
 
     Origin: <tt>TIM40convPower2NoiseT</tt> (data-TIM40.g)
   */
-  Vector<Double> Power2NoiseT (const Vector<Double>&);
+  Vector<double> Power2NoiseT (const Vector<double>&);
 
   /*!
     \brief Convert raw/calibrated FFT data to power spectrum
 
     Origin: <tt>TIM40convFFT2Power</tt> (data-TIM40.g)
    */
-  Vector<Double> FFT2Power (Vector<DComplex> const &fft);
+  Vector<double> FFT2Power (Vector<DComplex> const &fft);
 
   // === Logging facility to output stream =====================================
 
@@ -312,10 +367,10 @@ class DataFrequency {
  private:
   
   //! Get all allowed frequency values
-  Vector<Double> calcFrequencies ();
+  Vector<double> calcFrequencies ();
 
   //! Create a masking array based on a set of selected frequency bands
-  Vector<Bool> maskFromBands();
+  Vector<bool> maskFromBands();
 
   /*!
     \brief Determine the number of selected frequency channels in a masking array
@@ -324,9 +379,10 @@ class DataFrequency {
     \param selected - Return the number of selected or deselected channels?
     \return nofChannels - Number of selected/deselected frequency channels
   */
-  Int channelsInMask (const Vector<Bool>&, const Bool);
+  int channelsInMask (const Vector<bool>&, const bool);
 
 };
 
+}  // Namespace CR -- end
 
 #endif
