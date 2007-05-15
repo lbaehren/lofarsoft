@@ -173,14 +173,11 @@ bool GridCoordinate::setIncrement (const Vector<double> &incr)
   uInt naxes (incr.nelements());
   
   // check array sizes
-  AlwaysAssert(blc_p.nelements() == naxes &&
-	       trc_p.nelements() == naxes &&
-	       shape_p.nelements()== naxes,
-	       AipsError);  
-  
-  // recompute the number of grid nodes
-  for (uInt n(0); n<naxes; n++) {
-    shape_p(n) = int((trc_p(n)-blc_p(n))/incr(n) + 1.0);
+  if (blc_p.nelements() == naxes && trc_p.nelements() == naxes && shape_p.nelements()== naxes) {
+    // recompute the number of grid nodes
+    for (uInt n(0); n<naxes; n++) {
+      shape_p(n) = int((trc_p(n)-blc_p(n))/incr(n) + 1.0);
+    }
   }
 
   return LinearCoordinate::setIncrement (incr);
@@ -200,13 +197,10 @@ void GridCoordinate::setGridIncrement ()
   uInt naxes (incr.nelements());
   
   // check array sizes
-  AlwaysAssert(blc_p.nelements() == naxes &&
-	       trc_p.nelements() == naxes &&
-	       shape_p.nelements()== naxes,
-	       AipsError);  
-  
-  for (uInt n(0); n<naxes; n++) {
-    incr(n) = (trc_p(n)-blc_p(n))/(shape_p(n)-1.0);
+  if (blc_p.nelements() == naxes && trc_p.nelements() == naxes && shape_p.nelements()== naxes) {  
+    for (uInt n(0); n<naxes; n++) {
+      incr(n) = (trc_p(n)-blc_p(n))/(shape_p(n)-1.0);
+    }
   }
 
   LinearCoordinate::setIncrement (incr);
