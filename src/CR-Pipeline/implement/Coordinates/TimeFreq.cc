@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: TimeFreq.cc,v 1.7 2007/03/13 21:01:15 bahren Exp $*/
+/* $Id: TimeFreq.cc,v 1.9 2007/05/03 14:54:58 bahren Exp $*/
 
 #include <Coordinates/TimeFreq.h>
 
@@ -358,9 +358,12 @@ namespace CR { // Namespace CR -- begin
     casa::Vector<casa::String> units  (nofAxes,"s");
     casa::Vector<casa::Double> refVal (nofAxes,crval);
     casa::Vector<casa::Double> inc    (nofAxes,cdelt);
-    casa::Matrix<casa::Double> pc     (nofAxes,nofAxes,1.0);
+    casa::Matrix<casa::Double> pc     (nofAxes,nofAxes);
     casa::Vector<casa::Double> refPix (nofAxes,crpix);
     
+    pc            = 0.0;
+    pc.diagonal() = 1.0;
+
     return LinearCoordinate (names,
 			     units,
 			     refVal,
@@ -377,7 +380,7 @@ namespace CR { // Namespace CR -- begin
     
     double crval    = band[0];
     double cdelt    = frequencyIncrement();
-    double crpix    = 1;
+    double crpix    = 0;
     
     return frequencyAxis (crval,
 			  cdelt,

@@ -1,10 +1,30 @@
+/***************************************************************************
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
-/* $Id: GeodeticEllipsoid.h,v 1.2 2006/07/05 16:01:08 bahren Exp $ */
+/* $Id: GeodeticEllipsoid.h,v 1.3 2007/03/07 12:56:48 bahren Exp $ */
 
 #ifndef _GEODETICELLIPSOID_H_
 #define _GEODETICELLIPSOID_H_
 
-#include <iostream>
+#include <stdio.h>
+using namespace std;
 
 // include the AIPS++ wrapper classes
 #include <casa/aips.h>
@@ -18,15 +38,11 @@
 #include <casa/Arrays/Matrix.h>
 #include <scimath/Mathematics.h>
 
-using std::cerr;
-using std::complex;
-using std::cout;
-using std::endl;
-
+using casa::Complex;
 using casa::String;
 using casa::Vector;
 
-namespace CR {  // Namespace CR -- begin
+namespace CR { // Namespace CR -- begin
   
   /*!
     \class GeodeticEllipsoid
@@ -64,7 +80,7 @@ namespace CR {  // Namespace CR -- begin
     
   public:
     
-    // ---  Construction --------------------------------------------------------
+    // ---  Construction ---------------------------------------------------------
     
     /*!
       \brief Constructor
@@ -81,47 +97,74 @@ namespace CR {  // Namespace CR -- begin
 		       Vector<double> rotation,
 		       double scale);
     
-  // --- Deconstruction --------------------------------------------------------
+    // --- Deconstruction --------------------------------------------------------
+    
+    /*!
+      \brief Deconstructor
+    */
+    ~GeodeticEllipsoid ();
+    
+    // --- Internal parameters ---------------------------------------------------
+    
+    /*!
+      \brief Get the identifier of the geocentric system.
+    */
+    inline String name () {
+      return name_p;
+    }
+    
+    /*!
+      \brief Set the identifier of the geocentric system.
+    */
+    void setName (const String& name);
+    
+    /*!
+      \brief Get the length of the major axis
 
-  /*!
-    \brief Deconstructor
-   */
-  ~GeodeticEllipsoid ();
+      \return majorAxis -- The length of the major axis
+    */
+    inline double majorAxis () {
+      return majorAxis_p;
+    }
+    
+    void setMajorAxis (const double& a);
+    
+    /*!
+      \brief Get the length of the minor axis
 
-  // --- Internal parameters ---------------------------------------------------
+      \return minorAxis -- The length of the minor axis
+    */
+    inline double minorAxis () {
+      return minorAxis_p;
+    }
+    
+    void setMinorAxis (const double& b);
+    
+    /*!
+      \brief Get the translation of the reference frame
 
-  /*!
-    \brief Get the identifier of the geocentric system.
-  */
-  String name ();
-
-  /*!
-    \brief Set the identifier of the geocentric system.
-  */
-  void setName (const String& name);
-
-  double majorAxis ();
-
-  void setMajorAxis (const double& a);
-
-  double minorAxis ();
-
-  void setMinorAxis (const double& b);
-
-  Vector<double> translation ();
-
-  void setTranslation (const Vector<double>& translation);
-
-  Vector<double> rotation ();
-
-  void setRotation (const Vector<double>& rotation);
-
-  double scale ();
-
-  void setScale (const double& scale);
-
-  void setFlattening (const double& flattening);
-
+      \return translation
+    */
+    inline Vector<double> translation () {
+      return translation_p;
+    }
+    
+    void setTranslation (const Vector<double>& translation);
+    
+    inline Vector<double> rotation () {
+      return rotation_p;
+    }
+    
+    void setRotation (const Vector<double>& rotation);
+    
+    inline double scale () {
+      return scale_p;
+    }
+    
+    void setScale (const double& scale);
+    
+    void setFlattening (const double& flattening);
+    
   /*!
     Computes and stores the flattening, \f$ f \f$, of an ellipsoid with major
     semi-axis \f$ a \f$ and minor semi-axis \f$ b \f$.
@@ -190,6 +233,8 @@ namespace CR {  // Namespace CR -- begin
   
 };
 
-}  // Namespace CR -- end
+// =============================================================================
+
+} // Namespace CR -- end
 
 #endif

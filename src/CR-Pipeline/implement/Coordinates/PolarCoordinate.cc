@@ -18,47 +18,43 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: PolarCoordinate.cc,v 1.3 2006/03/01 14:34:39 bahren Exp $*/
+/* $Id: PolarCoordinate.cc,v 1.4 2007/03/07 12:56:48 bahren Exp $*/
 
 #include <Coordinates/PolarCoordinate.h>
 
-/*!
-  \class PolarCoordinate
-*/
-
-namespace CR {  // Namespace CR -- begin
-
-// ==============================================================================
-//
-//  Construction
-//
-// ==============================================================================
-
-PolarCoordinate::PolarCoordinate ()
-{
-  coordinate_p = polar2complex(1.0,0.0);
-}
-
-PolarCoordinate::PolarCoordinate (const double& radius,
-				  const double& theta)
+namespace CR { // Namespace CR -- begin
+  
+  // ============================================================================
+  //
+  //  Construction
+  //
+  // ============================================================================
+  
+  PolarCoordinate::PolarCoordinate ()
+  {
+    coordinate_p = polar2complex(1.0,0.0);
+  }
+  
+  PolarCoordinate::PolarCoordinate (const double& radius,
+				    const double& theta)
 {
   coordinate_p = polar2complex(radius,theta);
 }
-
-PolarCoordinate::PolarCoordinate (const vector<double>& xy)
-{
-  coordinate_p = cartesian2complex(xy);
-}
-
-PolarCoordinate::PolarCoordinate (const complex<double>& coordinate)
-{
-  coordinate_p = coordinate;
-}
-
-PolarCoordinate::PolarCoordinate (PolarCoordinate const& other)
-{
-  copy (other);
-}
+  
+  PolarCoordinate::PolarCoordinate (const vector<double>& xy)
+  {
+    coordinate_p = cartesian2complex(xy);
+  }
+  
+  PolarCoordinate::PolarCoordinate (const complex<double>& coordinate)
+  {
+    coordinate_p = coordinate;
+  }
+  
+  PolarCoordinate::PolarCoordinate (PolarCoordinate const& other)
+  {
+    copy (other);
+  }
 
 // ==============================================================================
 //

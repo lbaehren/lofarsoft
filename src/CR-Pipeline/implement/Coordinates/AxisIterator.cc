@@ -22,107 +22,109 @@
 
 #include <Coordinates/AxisIterator.h>
 
-namespace CR {  // Namespace CR -- begin
-
-// ==============================================================================
-//
-//  Construction
-//
-// ==============================================================================
-
-AxisIterator::AxisIterator ()
-{
-  setBlock(1);
-}
-
-AxisIterator::AxisIterator (const int& block)
-{
-  setBlock(block);
-}
-
-AxisIterator::AxisIterator (const int& blocksize,
-			    const int& offset,
-			    const int& presync,
-			    const double& sampleFrequency,
-			    const Vector<double>& frequencyRange)
-  : AxisCoordinates (blocksize,
-		     offset,
-		     presync,
-		     sampleFrequency,
-		     frequencyRange)
-{
-  setBlock(1);
-}
-
-AxisIterator::AxisIterator (const int& block,
-			    AxisCoordinates const& axis)
-  : AxisCoordinates (axis)
-{
-  setBlock(block);
-}
-
-AxisIterator::AxisIterator (AxisIterator const& other)
-{
-  copy (other);
-}
-
-// ==============================================================================
-//
-//  Destruction
-//
-// ==============================================================================
-
-AxisIterator::~AxisIterator ()
-{
-  destroy();
-}
-
-// ==============================================================================
-//
-//  Operators
-//
-// ==============================================================================
-
-AxisIterator& AxisIterator::operator= (AxisIterator const &other)
-{
-  if (this != &other) {
-    destroy ();
+namespace CR { // Namespace CR -- begin
+  
+  // ==============================================================================
+  //
+  //  Construction
+  //
+  // ==============================================================================
+  
+  AxisIterator::AxisIterator ()
+  {
+    setBlock(1);
+  }
+  
+  AxisIterator::AxisIterator (const int& block)
+  {
+    setBlock(block);
+  }
+  
+  AxisIterator::AxisIterator (const int& blocksize,
+			      const int& offset,
+			      const int& presync,
+			      const double& sampleFrequency,
+			      const Vector<double>& frequencyRange)
+    : AxisCoordinates (blocksize,
+		       offset,
+		       presync,
+		       sampleFrequency,
+		       frequencyRange)
+  {
+    setBlock(1);
+  }
+  
+  AxisIterator::AxisIterator (const int& block,
+			      AxisCoordinates const& axis)
+    : AxisCoordinates (axis)
+  {
+    setBlock(block);
+  }
+  
+  AxisIterator::AxisIterator (AxisIterator const& other)
+  {
     copy (other);
   }
-  return *this;
-}
-
-void AxisIterator::copy (AxisIterator const& other)
-{
-  block_p = other.block_p;
-}
-
-void AxisIterator::destroy ()
-{;}
-
-// ==============================================================================
-//
-//  Parameters
-//
-// ==============================================================================
-
-void AxisIterator::setBlock (const int& block)
-{
-  // guard against negative offset in file stream
-  if (block<1) {
-    block_p = 1;
-  } else {
-    block_p = block;
+  
+  // ==============================================================================
+  //
+  //  Destruction
+  //
+  // ==============================================================================
+  
+  AxisIterator::~AxisIterator ()
+  {
+    destroy();
   }
-  // adjust parameters of the base class
-  AxisCoordinates::setOffset ((block_p-1)*AxisCoordinates::blocksize());
-}
+  
+  // ==============================================================================
+  //
+  //  Operators
+  //
+  // ==============================================================================
+  
+  AxisIterator& AxisIterator::operator= (AxisIterator const &other)
+  {
+    if (this != &other) {
+      destroy ();
+      copy (other);
+    }
+    return *this;
+  }
+  
+  void AxisIterator::copy (AxisIterator const& other)
+  {
+    block_p = other.block_p;
+  }
+  
+  void AxisIterator::destroy ()
+  {;}
+  
+  // ==============================================================================
+  //
+  //  Parameters
+  //
+  // ==============================================================================
+  
+  void AxisIterator::setBlock (const int& block)
+  {
+    // guard against negative offset in file stream
+    if (block<1) {
+      block_p = 1;
+    } else {
+      block_p = block;
+    }
+    // adjust parameters of the base class
+    AxisCoordinates::setOffset ((block_p-1)*AxisCoordinates::blocksize());
+  }
+  
+  
+  // ==============================================================================
+  //
+  //  Methods
+  //
+  // ==============================================================================
 
 
-// ==============================================================================
-//
-//  Methods
-//
-// ==============================================================================
-
+  
 }  // Namespace CR -- end

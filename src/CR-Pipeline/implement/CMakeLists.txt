@@ -20,11 +20,6 @@ set (cr_modules
 subdirs (${cr_modules})
 
 ## -----------------------------------------------------------------------------
-## Path to the various header files
-
-# these settings should be handled one level up
-
-## -----------------------------------------------------------------------------
 ## collect the source files in the modules
 
 foreach (cr_module ${cr_modules})

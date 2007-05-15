@@ -18,10 +18,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: PolarCoordinate.h,v 1.4 2006/07/05 16:01:08 bahren Exp $*/
+/* $Id: PolarCoordinate.h,v 1.5 2007/03/07 12:56:48 bahren Exp $*/
 
-#ifndef POLARCOORDINATE_H
-#define POLARCOORDINATE_H
+#ifndef _POLARCOORDINATE_H_
+#define _POLARCOORDINATE_H_
 
 // Standard header files
 #include <stdlib.h>
@@ -30,60 +30,55 @@
 #include <math.h>
 #include <complex>
 #include <vector>
+using namespace std;
 
 #define PI 3.141592653589793238462643
 #define DEG2RAD PI/180.0
 #define RAD2DEG 180.0/PI
 
-using std::cerr;
-using std::complex;
-using std::cout;
-using std::endl;
-using std::vector;
-
-namespace CR {  // Namespace CR -- begin
-
-/*!
-  \class PolarCoordinate
-
-  \ingroup Coordinates
-
-  \brief A polar coordinate
-
-  \author Lars B&auml;hren
-
-  \date 2006/02/28
-
-  \test tPolarCoordinate.cc
-
-  <h3>Prerequisite</h3>
-
-  <ul type="square">
-    <li>Conversion from polar to cartesian coordinates:
-    \f[ \left( x \atop y \right) = \left( r \cos(\theta) \atop r \sin(\theta)
-    \right) \f]
-    <li>Conversion from cartesian to polar coordinates:
-    \f[ \left( r \atop \theta \right) = \left( \sqrt{x^2+y^2} \atop
-    {\rm atan} (\frac{y}{x}) \right) \f]
-    <li>Conversion from complex variable to polar coordinates:
-    \f[ \left( r \atop \theta \right) = \left( \sqrt{(\Re(z))^2+(\Im(z))^2}
-    \atop {\rm atan} (\frac{\Im(z)}{\Re(z)}) \right) \f]
-    <li>Opening angle \f$ \Delta \theta \f$ for an error circle of radius
-    \f$ \Delta d \f$ around the position:
-    \f[ \Delta \theta = \frac{1}{2} {\rm acos} \left\{ \frac{r^2 -
-    (\Delta d)^2}{r^2 + (\Delta d)^2} \right\} \f]
-  </ul>
-
-  <h3>Synopsis</h3>
-
-  As we are in need of using polar coordinates over and over again, it appears
-  to be useful to have a simple wrapper for the operations which can be performed
-  with a polar coordinate.
-
-  <h3>Example(s)</h3>
-
-  Construction can be done in various way (also see tPolarCoordinate.cc):
-  <ol>
+namespace CR { // Namespace CR -- begin
+  
+  /*!
+    \class PolarCoordinate
+    
+    \ingroup Coordinates
+    
+    \brief A polar coordinate
+    
+    \author Lars B&auml;hren
+    
+    \date 2006/02/28
+    
+    \test tPolarCoordinate.cc
+    
+    <h3>Prerequisite</h3>
+    
+    <ul type="square">
+      <li>Conversion from polar to cartesian coordinates:
+      \f[ \left( x \atop y \right) = \left( r \cos(\theta) \atop r \sin(\theta)
+      \right) \f]
+      <li>Conversion from cartesian to polar coordinates:
+      \f[ \left( r \atop \theta \right) = \left( \sqrt{x^2+y^2} \atop
+      {\rm atan} (\frac{y}{x}) \right) \f]
+      <li>Conversion from complex variable to polar coordinates:
+      \f[ \left( r \atop \theta \right) = \left( \sqrt{(\Re(z))^2+(\Im(z))^2}
+      \atop {\rm atan} (\frac{\Im(z)}{\Re(z)}) \right) \f]
+      <li>Opening angle \f$ \Delta \theta \f$ for an error circle of radius
+      \f$ \Delta d \f$ around the position:
+      \f[ \Delta \theta = \frac{1}{2} {\rm acos} \left\{ \frac{r^2 -
+      (\Delta d)^2}{r^2 + (\Delta d)^2} \right\} \f]
+    </ul>
+    
+    <h3>Synopsis</h3>
+    
+    As we are in need of using polar coordinates over and over again, it appears
+    to be useful to have a simple wrapper for the operations which can be performed
+    with a polar coordinate.
+    
+    <h3>Example(s)</h3>
+    
+    Construction can be done in various way (also see tPolarCoordinate.cc):
+    <ol>
     <li>Construction from \f$ (r,\theta) \f$
     \code 
     double r (1.0);
@@ -94,9 +89,9 @@ namespace CR {  // Namespace CR -- begin
     <li>Construction from cartesian coordinate \f$ (x,y) \f$
     \code
     vector<double> xy (2);
-
+    
     xy[0] = xy[1] =1.0;
-
+    
     PolarCoordinate pc (xy);
     \endcode
     <li>Construction from complex number
@@ -105,22 +100,22 @@ namespace CR {  // Namespace CR -- begin
     
     PolarCoordinate pc (z);
     \endcode
-  </ol>
-
-*/
-
-class PolarCoordinate {
-
-  //! The polar coordinate, stored as complex number
-  complex<double> coordinate_p;
-
-  //! The radial part of the polar coordinate
-  double radius_p;
-  //! The angular part of the polar coordinate
-  double theta_p;
-
- public:
-
+    </ol>
+    
+  */
+  
+  class PolarCoordinate {
+    
+    //! The polar coordinate, stored as complex number
+    complex<double> coordinate_p;
+    
+    //! The radial part of the polar coordinate
+    double radius_p;
+    //! The angular part of the polar coordinate
+    double theta_p;
+    
+  public:
+    
   // --------------------------------------------------------------- Construction
 
   /*!

@@ -18,31 +18,28 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: GridCoordinate.cc,v 1.2 2006/08/24 13:55:12 bahren Exp $*/
+/* $Id: GridCoordinate.cc,v 1.3 2007/03/06 15:17:17 bahren Exp $*/
 
 #include <Coordinates/GridCoordinate.h>
 
-using std::cerr;
-using std::endl;
-
 namespace CR {  // Namespace CR -- begin
-
-// ==============================================================================
-//
-//  Construction
-//
-// ==============================================================================
-
-GridCoordinate::GridCoordinate ()
-  : LinearCoordinate (1),
-    blc_p (Vector<double> (1,0.0)),
-    trc_p (Vector<double> (1,1.0)),
-    shape_p (IPosition (1,1))
-{;}
-
+  
+  // ==============================================================================
+  //
+  //  Construction
+  //
+  // ==============================================================================
+  
+  GridCoordinate::GridCoordinate ()
+    : LinearCoordinate (1),
+      blc_p (Vector<double> (1,0.0)),
+      trc_p (Vector<double> (1,1.0)),
+      shape_p (IPosition (1,1))
+  {;}
+  
 GridCoordinate::GridCoordinate (double const &blc,
 				double const &trc,
-				uint const &shape)
+				uInt const &shape)
   : LinearCoordinate (1),
     blc_p (Vector<double> (1,blc)),
     trc_p (Vector<double> (1,trc)),
@@ -55,7 +52,7 @@ GridCoordinate::GridCoordinate (String const &names,
 				String const &units,
 				double const &blc,
 				double const &trc,
-				uint const &shape)
+				uInt const &shape)
   : LinearCoordinate (1),
     blc_p (Vector<double> (1,blc)),
     trc_p (Vector<double> (1,trc)),
@@ -173,24 +170,22 @@ void GridCoordinate::setShape (const IPosition& shape)
 
 bool GridCoordinate::setIncrement (const Vector<double> &incr)
 {
-  uint naxes (incr.nelements());
+  uInt naxes (incr.nelements());
   
   // check array sizes
-  if (blc_p.nelements() == naxes &&
-      trc_p.nelements() == naxes &&
-      shape_p.nelements()== naxes) {
-    // recompute the number of grid nodes
-    for (uint n(0); n<naxes; n++) {
-      shape_p(n) = int((trc_p(n)-blc_p(n))/incr(n) + 1.0);
-    }
-    
-    return LinearCoordinate::setIncrement (incr);
-  } else {
-    cerr << "[GridCoordinate::setIncrement] Mismatching array dimensions!"
-	 << endl;
-    return false;
+  AlwaysAssert(blc_p.nelements() == naxes &&
+	       trc_p.nelements() == naxes &&
+	       shape_p.nelements()== naxes,
+	       AipsError);  
+  
+  // recompute the number of grid nodes
+  for (uInt n(0); n<naxes; n++) {
+    shape_p(n) = int((trc_p(n)-blc_p(n))/incr(n) + 1.0);
   }
+
+  return LinearCoordinate::setIncrement (incr);
 }
+
 
 // ==============================================================================
 //
@@ -202,32 +197,30 @@ void GridCoordinate::setGridIncrement ()
 {
 
   Vector<double> incr (LinearCoordinate::increment());
-  uint naxes (incr.nelements());
+  uInt naxes (incr.nelements());
   
   // check array sizes
-  if (blc_p.nelements() == naxes &&
-      trc_p.nelements() == naxes &&
-      shape_p.nelements()== naxes) {  
-    for (uint n(0); n<naxes; n++) {
-      incr(n) = (trc_p(n)-blc_p(n))/(shape_p(n)-1.0);
-    }
-    
-    LinearCoordinate::setIncrement (incr);
-    LinearCoordinate::setReferenceValue (blc_p);
-    LinearCoordinate::setReferencePixel (Vector<double> (naxes,0.0));
-  } else {
-    cerr << "[GridCoordinate::setGridIncrement] Mismatching array dimensions!"
-	 << endl;
+  AlwaysAssert(blc_p.nelements() == naxes &&
+	       trc_p.nelements() == naxes &&
+	       shape_p.nelements()== naxes,
+	       AipsError);  
+  
+  for (uInt n(0); n<naxes; n++) {
+    incr(n) = (trc_p(n)-blc_p(n))/(shape_p(n)-1.0);
   }
+
+  LinearCoordinate::setIncrement (incr);
+  LinearCoordinate::setReferenceValue (blc_p);
+  LinearCoordinate::setReferencePixel (Vector<double> (naxes,0.0));
 }
-
-// ------------------------------------------------------------------ coordinates
-
-Vector<double> GridCoordinate::coordinates ()
-{
-  Vector<double> coords;
-
-  return coords;
-}
-
+  
+  // ------------------------------------------------------------------ coordinates
+  
+  Array<double> coordinates ()
+  {
+    Array<double> coords;
+    
+    return coords;
+  }
+  
 }  // Namespace CR -- end

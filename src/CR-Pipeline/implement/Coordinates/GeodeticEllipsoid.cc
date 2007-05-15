@@ -1,51 +1,70 @@
+/***************************************************************************
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
 #include <Coordinates/GeodeticEllipsoid.h>
 
-namespace CR {  // Namespace CR -- begin
-  
-  // ---  Construction ----------------------------------------------------------
-  
-  GeodeticEllipsoid::GeodeticEllipsoid ()
-  {
-    String name ("Undefined");           // identifier
-    double a (0.0);                      // major axis [m]
-    double b (0.0);                      // minor axis [m]
-    Vector<double> translation(3);       // translation parameters [m]
-    Vector<double> rotation(3);          // rotation parameters
-    double scale (1.0);                  // Scale parameter
-    
-    // initialize the data fields ...
-    GeodeticEllipsoid::init(name,
-			    a,
-			    b,
-			    translation,
-			    rotation,
-			    scale);
-    
-    // ... but set the control flag to false, since the values are not yet set 
-    // up correctly;
-    flag_p = false;
-  }
-  
-  GeodeticEllipsoid::GeodeticEllipsoid (const String& name,
-					double major,
-					double minor,
-					Vector<double> translation,
-					Vector<double> rotation,
-					double scale)
-  {
-    GeodeticEllipsoid::init(name,
-			    major,
-			    minor,
-			    translation,
-			    rotation,
-			    scale);
-  }
+namespace CR { // Namespace CR -- begin
 
-  // --- Deconstruction ---------------------------------------------------------
-  
-  GeodeticEllipsoid::~GeodeticEllipsoid ()
-  {;}
+// ---  Construction -----------------------------------------------------------
+
+GeodeticEllipsoid::GeodeticEllipsoid ()
+{
+  String name ("Undefined");           // identifier
+  double a (0.0);                      // major axis [m]
+  double b (0.0);                      // minor axis [m]
+  Vector<double> translation(3);       // translation parameters [m]
+  Vector<double> rotation(3);          // rotation parameters
+  double scale (1.0);                  // Scale parameter
+
+  // initialize the data fields ...
+  GeodeticEllipsoid::init(name,
+			  a,
+			  b,
+			  translation,
+			  rotation,
+			  scale);
+
+  // ... but set the control flag to false, since the values are not yet set 
+  // up correctly;
+  flag_p = false;
+}
+
+GeodeticEllipsoid::GeodeticEllipsoid (const String& name,
+				      double major,
+				      double minor,
+				      Vector<double> translation,
+				      Vector<double> rotation,
+				      double scale)
+{
+  GeodeticEllipsoid::init(name,
+			  major,
+			  minor,
+			  translation,
+			  rotation,
+			  scale);
+}
+
+// --- Deconstruction ----------------------------------------------------------
+
+GeodeticEllipsoid::~GeodeticEllipsoid ()
+{;}
 
 // =============================================================================
 //
@@ -102,7 +121,7 @@ void GeodeticEllipsoid::setMinorAxis(const double& b)
 void GeodeticEllipsoid::setMinorAxis()
 {
   double a,f;
-  complex<double> b;
+  Complex b;
 
   a = majorAxis_p;
   f = flattening_p;
@@ -230,21 +249,6 @@ void GeodeticEllipsoid::print_variables() {
 
 }
 
-String GeodeticEllipsoid::name ()
-{
-  return name_p;
-}
-
-double GeodeticEllipsoid::majorAxis()
-{
-  return majorAxis_p;
-}
-
-double GeodeticEllipsoid::minorAxis ()
-{
-  return minorAxis_p;
-}
-
 double GeodeticEllipsoid::get_flattening()
 {
   /* Check first if the flattening value is already stored; if this is the case we 
@@ -255,21 +259,6 @@ double GeodeticEllipsoid::get_flattening()
 
   /* Since the value is available now, we can return it. */
   return flattening_p;
-}
-
-double GeodeticEllipsoid::scale()
-{
-  return scale_p;
- }
-
-Vector<double> GeodeticEllipsoid::translation ()
-{
-  return translation_p;
-}
-
-Vector<double> GeodeticEllipsoid::rotation ()
-{
-  return rotation_p;
 }
 
 // =============================================================================
@@ -442,4 +431,4 @@ Vector<double> GeodeticEllipsoid::helmertTransform (const Vector<double>& from,
   return to;
 }
 
-}  // Namespace CR -- end
+} // Namespace CR -- end

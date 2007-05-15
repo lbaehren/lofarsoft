@@ -18,192 +18,191 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: AxisCoordinates.h,v 1.3 2006/07/05 16:01:08 bahren Exp $*/
+/* $Id: AxisCoordinates.h,v 1.4 2007/04/20 15:06:04 bahren Exp $*/
 
-#ifndef AXISCOORDINATES_H
-#define AXISCOORDINATES_H
+#ifndef _AXISCOORDINATES_H_
+#define _AXISCOORDINATES_H_
 
 #include <stdlib.h>
 #include <map>
-#include <cmath>
 
+#include <casa/aips.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/ArrayMath.h>
 
 using casa::Vector;
 
 namespace CR {  // Namespace CR -- begin
-
-/*!
-  \class AxisCoordinates
-
-  \ingroup Coordinates
-
-  \brief Coordinates associated with the data samples axis
-
-  \author Lars B&auml;hren
-
-  \date 2006/03/13
-
-  \test tAxisCoordinates.cc
-
-  <h3>Prerequisite</h3>
-
-  <ul type="square">
-    <li>One should be familiar with the mechanism how coordinate axes were handled
-        in the original CR-Tools implementation.
-	\code 
-	FileOffset=0,
-	FileBlocksize=65536,
-	Dummystoredregion=[1 65536] ,
-	Offset=0,
-	Blocksize=65536,
-	Filesize=65536,
-	ZeroOffset=0,
-	Blocknum=1,
-	FFTSize=65536,
-	FFTlen=32769,
-	FreqBin=1220.70312,
-	FrequencyLow=40000000,
-	FrequencyHigh=80000000,
-	PowerNormFaktor=45057,
-	PhaseGradstoredregion=[1 32769] ,
-	RawFFTstoredregion=[1 32769] ,
-	AntennaGainstoredregion=[1 32769] ,
-	FieldStrengthFactor=0.0145101371]
-	\endcode
-	The conversion between different types of coordinates is described in the
-	<tt>Coordinfo</tt> field of the data object.
-  </ul>
-
-  <h3>Synopsis</h3>
-
   
-
-  <h3>Example(s)</h3>
-
-*/
-
-class AxisCoordinates {
-
-  //! Map of coordinate name/unit pairs.
-  std::map<const char*, const char*> axes_p;
-  //! Offset from the start of the data segment, [samples]
-  int offset_p;
-  //! Size of a single data block, [samples]
-  int blocksize_p;
-  //! Synchronization between sample and time axis
-  int presync_p;
-  //! Sample frequency, [Hz]
-  double sampleFrequency_p;
-  //! Frequency range, [Hz]
-  Vector<double> frequencyRange_p;
-
- public:
-
   /*!
-    \brief Names of the coordinates that can be associated with the axis
+    \class AxisCoordinates
+    
+    \ingroup Coordinates
+    
+    \brief Coordinates associated with the data samples axis
+    
+    \author Lars B&auml;hren
+    
+    \date 2006/03/13
+    
+    \test tAxisCoordinates.cc
+    
+    <h3>Prerequisite</h3>
+    
+    <ul type="square">
+    <li>One should be familiar with the mechanism how coordinate axes were handled
+    in the original LOPES-Tools implementation.
+    \code 
+    FileOffset=0,
+    FileBlocksize=65536,
+    Dummystoredregion=[1 65536] ,
+    Offset=0,
+    Blocksize=65536,
+    Filesize=65536,
+    ZeroOffset=0,
+    Blocknum=1,
+    FFTSize=65536,
+    FFTlen=32769,
+    FreqBin=1220.70312,
+    FrequencyLow=40000000,
+    FrequencyHigh=80000000,
+    PowerNormFaktor=45057,
+    PhaseGradstoredregion=[1 32769] ,
+    RawFFTstoredregion=[1 32769] ,
+    AntennaGainstoredregion=[1 32769] ,
+    FieldStrengthFactor=0.0145101371]
+    \endcode
+    The conversion between different types of coordinates is described in the
+    <tt>Coordinfo</tt> field of the data object.
+    </ul>
+    
+    <h3>Synopsis</h3>
+    
+    
+    
+    <h3>Example(s)</h3>
+    
   */
-  enum COORDINATE {
-    //! Position
-    Pos,
-    //! Time, [s]
-    Time,
-    //! f(x), i.e. the raw ADC values 
-    fx,
-    //! Voltage, derived from f(x), [Volt]
-    Voltage,
-    //! Intermediate frequency, [Hz]
-    IntermedFreq,
-    //! Frequency, [Hz]
-    Frequency,
-    //! Absolute of the FFT
-    AbsFFT,
-    //! Power
-    Power,
-    //! Mean power
-    MeanPower,
-    //! Calibrated power
-    CalPower,
-    //! Noise temperature, [K]
-    NoiseT,
-    //! Sky temperature, [K]
-    SkyT,
-    //! ??
-    MNT,
-    //! Phase, [degrees]
-    Phase,
-    //! Phase difference, [degrees]
-    PhaseDiff,
-    //! Phase gradient, [degrees]
-    PhaseGrad,
-    //! Antenna gain, [Volt]
-    AntennaGain,
-    //! Beam temperature
-    BeamT,
-    //! Beam flag
-    BeamF,
-    //! Time lag
-    TimeLag,
-    //! Position lag
-    PosLag,
-    //! Cross-correlation
-    CrossCorr,
-    //! Power temperature
-    PowerT,
-    //! A flag ??
-    FlagF,
-    //! A flag ??
-    FlagT,
-    //! Flux, [Jy]
-    Flux
-  };
-
-  // --------------------------------------------------------------- Construction
-
-  /*!
-    \brief Default constructor
-
-    Constructs a new AxisCoordinates objects with some default values for the
-    internal parameters:
-    - frequencyRange  = [40,80] MHz
-    - sampleFrequency = 80 MHz
-    - blocksize       = 1024
-    - offset          = 0
-    - presync         = 0
-  */
-  AxisCoordinates ();
-
-  /*!
-    \brief Argumented constructor
-
-    \param blocksize       -- Size of a single data block, [samples]
-    \param offset          -- Offset from the start of the data segment, [samples]
-    \param presync         -- Synchronization between sample and time axis
-    \param sampleFrequency -- Sample frequency, [Hz]
-    \param frequencyRange  -- Frequency range, [Hz]
-  */
-  AxisCoordinates (const int& blocksize,
-		   const int& offset,
-		   const int& presync,
-		   const double& sampleFrequency,
-		   const Vector<double>& frequencyRange);
-
-  /*!
-    \brief Copy constructor
-
-    \param other -- Another AxisCoordinates object from which to create this new
-                    one.
-  */
-  AxisCoordinates (AxisCoordinates const& other);
-
-  // ---------------------------------------------------------------- Destruction
-
-  /*!
-    \brief Destructor
-  */
-  ~AxisCoordinates ();
-
+  class AxisCoordinates {
+    
+    //! Map of coordinate name/unit pairs.
+    std::map<const char*, const char*> axes_p;
+    //! Offset from the start of the data segment, [samples]
+    int offset_p;
+    //! Size of a single data block, [samples]
+    int blocksize_p;
+    //! Synchronization between sample and time axis
+    int presync_p;
+    //! Sample frequency, [Hz]
+    double sampleFrequency_p;
+    //! Frequency range, [Hz]
+    Vector<double> frequencyRange_p;
+    
+  public:
+    
+    /*!
+      \brief Names of the coordinates that can be associated with the axis
+    */
+    enum COORDINATE {
+      //! Position
+      Pos,
+      //! Time, [s]
+      Time,
+      //! f(x), i.e. the raw ADC values 
+      fx,
+      //! Voltage, derived from f(x), [Volt]
+      Voltage,
+      //! Intermediate frequency, [Hz]
+      IntermedFreq,
+      //! Frequency, [Hz]
+      Frequency,
+      //! Absolute of the FFT
+      AbsFFT,
+      //! Power
+      Power,
+      //! Mean power
+      MeanPower,
+      //! Calibrated power
+      CalPower,
+      //! Noise temperature, [K]
+      NoiseT,
+      //! Sky temperature, [K]
+      SkyT,
+      //! ??
+      MNT,
+      //! Phase, [degrees]
+      Phase,
+      //! Phase difference, [degrees]
+      PhaseDiff,
+      //! Phase gradient, [degrees]
+      PhaseGrad,
+      //! Antenna gain, [Volt]
+      AntennaGain,
+      //! Beam temperature
+      BeamT,
+      //! Beam flag
+      BeamF,
+      //! Time lag
+      TimeLag,
+      //! Position lag
+      PosLag,
+      //! Cross-correlation
+      CrossCorr,
+      //! Power temperature
+      PowerT,
+      //! A flag ??
+      FlagF,
+      //! A flag ??
+      FlagT,
+      //! Flux, [Jy]
+      Flux
+    };
+    
+    // ------------------------------------------------------------- Construction
+    
+    /*!
+      \brief Default constructor
+      
+      Constructs a new AxisCoordinates objects with some default values for the
+      internal parameters:
+      - frequencyRange  = [40,80] MHz
+      - sampleFrequency = 80 MHz
+      - blocksize       = 1024
+      - offset          = 0
+      - presync         = 0
+    */
+    AxisCoordinates ();
+    
+    /*!
+      \brief Argumented constructor
+      
+      \param blocksize       -- Size of a single data block, [samples]
+      \param offset          -- Offset from the start of the data segment, [samples]
+      \param presync         -- Synchronization between sample and time axis
+      \param sampleFrequency -- Sample frequency, [Hz]
+      \param frequencyRange  -- Frequency range, [Hz]
+    */
+    AxisCoordinates (const int& blocksize,
+		     const int& offset,
+		     const int& presync,
+		     const double& sampleFrequency,
+		     const Vector<double>& frequencyRange);
+    
+    /*!
+      \brief Copy constructor
+      
+      \param other -- Another AxisCoordinates object from which to create this new
+                      one.
+    */
+    AxisCoordinates (AxisCoordinates const& other);
+    
+    // -------------------------------------------------------------- Destruction
+    
+    /*!
+      \brief Destructor
+    */
+    ~AxisCoordinates ();
+    
   // ------------------------------------------------------------------ Operators
 
   /*!
@@ -220,7 +219,7 @@ class AxisCoordinates {
 
     \return blocksize -- Size of a single data block, [samples]
   */
-  int blocksize () {
+  inline int blocksize () {
     return blocksize_p;
   }
 
@@ -238,7 +237,7 @@ class AxisCoordinates {
 
     \return offset -- Offset from the start of the data segment, [samples]
    */
-  int offset () {
+  inline int offset () {
     return offset_p;
   }
 
@@ -247,7 +246,7 @@ class AxisCoordinates {
 
     \param offset -- Offset from the start of the data segment, [samples]
    */
-  void setOffset (const int& offset) {
+  inline void setOffset (int const &offset) {
     offset_p = offset;
   }
 
@@ -256,7 +255,7 @@ class AxisCoordinates {
 
     \return presync -- The presync shift, i.e. the position where t=0
   */
-  int presync () {
+  inline int presync () {
     return presync_p;
   }
 
@@ -265,7 +264,7 @@ class AxisCoordinates {
     
     \param presync -- The presync shift, i.e. the position where t=0
   */
-  void setPresync (const int& presync) {
+  inline void setPresync (int const &presync) {
     presync_p = presync;
   }
 
@@ -274,18 +273,24 @@ class AxisCoordinates {
 
     \return sampleFrequency -- The sampling frequency, [Hz]
   */
-  double sampleFrequency () {
+  inline double sampleFrequency () {
     return sampleFrequency_p;
   }
 
-  void setSampleFrequency (const double& sampleFrequency) {
+  inline void setSampleFrequency (double const &sampleFrequency) {
     sampleFrequency_p = sampleFrequency;
   }
 
-  Vector<double> frequencyRange () {
+  /*!
+    \brief Get the frequency range
+  */
+  inline Vector<double> frequencyRange () {
     return frequencyRange_p;
   }
 
+  /*!
+    \brief Set the range of frequencies
+  */
   void setFrequencyRange (const Vector<double>& frequencyRange);
 
   /*!
@@ -308,10 +313,12 @@ class AxisCoordinates {
     
     \return fftLength -- Output length of the FFT
    */
-  int fftLength ();
+  inline int fftLength () {
+    return blocksize_p/2+1;
+  }
 
   // -------------------------------------------------------------------- Methods
-
+  
   /*!
     \brief Get the numerical values of the coordinate axis.
 
@@ -324,12 +331,39 @@ class AxisCoordinates {
   Vector<double> axisValues (const AxisCoordinates::COORDINATE& which);
 
  private:
-
+  
   /*!
     \brief Set up the default map of coordinate name/unit pairs.
   */
-  void setCoordinatesMap ();
-
+  inline void setCoordinatesMap () {
+    axes_p["Pos"]          = "Sample";
+    axes_p["Time"]         = "Seconds";
+    axes_p["fx"]           = "Counts";
+    axes_p["Voltage"]      = "Volt";
+    axes_p["IntermedFreq"] = "Hz";
+    axes_p["Frequency"]    = "Hz";
+    axes_p["AbsFFT"]       = "units";
+    axes_p["Power"]        = "Watts/Bin";
+    axes_p["MeanPower"]    = "Watts/Bin";
+    axes_p["CalPower"]     = "Watts/Bin";
+    axes_p["NoiseT"]       = "K";
+    axes_p["SkyT"]         = "K";
+    axes_p["MNT"]          = "K";
+    axes_p["Phase"]        = "Degree";
+    axes_p["PhaseDiff"]    = "Degree";
+    axes_p["PhaseGrad"]    = "Degree";
+    axes_p["AntennaGain"]  = "Volt";
+    axes_p["BeamT"]        = "K";
+    axes_p["BeamF"]        = "units";
+    axes_p["TimeLag"]      = "Seconds";
+    axes_p["PosLag"]       = "Samples";
+    axes_p["CrossCorr"]    = "units";
+    axes_p["PowerT"]       = "counts_2";
+    axes_p["FlagF"]        = "Weight";
+    axes_p["FlagT"]        = "Weight";
+    axes_p["Flux"]         = "Jy";
+  }
+  
   /*!
     \brief Get values for position axis
   */

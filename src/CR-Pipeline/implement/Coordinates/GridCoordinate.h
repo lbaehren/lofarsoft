@@ -18,10 +18,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: GridCoordinate.h,v 1.2 2006/08/24 13:55:12 bahren Exp $*/
+/* $Id: GridCoordinate.h,v 1.3 2007/03/06 15:17:17 bahren Exp $*/
 
-#ifndef COORDINATES_GRIDCOORDINATE_H
-#define COORDINATES_GRIDCOORDINATE_H
+#ifndef GRIDCOORDINATE_H
+#define GRIDCOORDINATE_H
 
 #include <casa/aips.h>
 #include <casa/Arrays/Matrix.h>
@@ -31,107 +31,108 @@
 #include <casa/Utilities/Assert.h>
 #include <coordinates/Coordinates/LinearCoordinate.h>
 
-using casa::assert_;
 using casa::AipsError;
+using casa::Array;
 using casa::IPosition;
 using casa::LinearCoordinate;
 using casa::String;
+using casa::uInt;
 using casa::Vector;
 
 namespace CR {  // Namespace CR -- begin
-
-/*!
-  \class GridCoordinate
-
-  \ingroup Coordinates
-
-  \brief A linear coordinate, which is defined for a certain range of values.
-
-  \author Lars B&auml;hren
-
-  \date 2006/04/04
-
-  \test tGridCoordinate.cc
-
-  \todo How are we going to deal with a grid, where certain elements might are
-  missing? - This might be handled using a masking array
-
-  <h3>Prerequisite</h3>
-
-  <ul type="square">
+  
+  /*!
+    \class GridCoordinate
+    
+    \ingroup Coordinates
+    
+    \brief A linear coordinate, which is defined for a certain range of values.
+    
+    \author Lars B&auml;hren
+    
+    \date 2006/04/04
+    
+    \test tGridCoordinate.cc
+    
+    \todo How are we going to deal with a grid, where certain elements might are
+    missing? - This might be handled using a masking array
+    
+    <h3>Prerequisite</h3>
+    
+    <ul type="square">
     <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/coordinates/implement/Coordinates/LinearCoordinate.html">LinearCoordinate</a>
     -- Interconvert between pixel and a linear world coordinate.
-  </ul>
-
-  <h3>Synopsis</h3>
-
-   The LinearCoordinate class ties pixel and world axes together through a general
-   linear transformation.
-   \verbatim
-   world = (cdelt * PC * (pixel - crpix)) + crval
-   \endverbatim
-   where PC is an \f$ N \times N\f$ matrix; pixel, crval, crpix and world are
-   length \f$ N \f$ vectors, and cdelt is an \f$ N \times N \f$ diagonal
-   matrix, represented as a length \f$ N \f$ vector.
-
-   The increment, \f$ \delta x \f$, can be derived from the range of values and
-   the number of nodes:
-   \f[ \delta x = \frac{x_{\rm max} - x_{\rm min}}{N-1} \f]
-
-  <h3>Example(s)</h3>
-
-*/
-
-class GridCoordinate : public LinearCoordinate {
-
-  //! Bottom-left-corner delimiting the range of the grid
-  Vector<double> blc_p;
-  //! Top-right-corner delimiting the range of the grid
-  Vector<double> trc_p;
-  //! Shape of the grid coordinates array
-  IPosition shape_p;
+    </ul>
     
- public:
-
-  // --------------------------------------------------------------- Construction
-
-  /*!
-    \brief Default constructor
-
-    Also uses the default constructor for the parent LinearCoordinate object.
+    <h3>Synopsis</h3>
+    
+    The LinearCoordinate class ties pixel and world axes together through a general
+    linear transformation.
+    \verbatim
+    world = (cdelt * PC * (pixel - crpix)) + crval
+    \endverbatim
+    where PC is an \f$ N \times N\f$ matrix; pixel, crval, crpix and world are
+    length \f$ N \f$ vectors, and cdelt is an \f$ N \times N \f$ diagonal
+    matrix, represented as a length \f$ N \f$ vector.
+    
+    The increment, \f$ \delta x \f$, can be derived from the range of values and
+    the number of nodes:
+    \f[ \delta x = \frac{x_{\rm max} - x_{\rm min}}{N-1} \f]
+    
+    <h3>Example(s)</h3>
+    
   */
-  GridCoordinate ();
-
-  /*!
-    \brief Argumented constructor
-
-    \param blc   -- Value for the Bottom-left-corner delimiting the range of
-                    the grid
-    \param trc   -- Value for the Top-right-corner delimiting the range of the
-                    grid
-    \param shape -- Number of grid nodes.
-  */
-  GridCoordinate (double const &blc,
-		  double const &trc,
-		  uint const &shape);
   
-  /*!
-    \brief Argumented constructor
-
-    \param names -- World axis name, e.g. "Distance"
-    \param units -- Physical units of the axis coordinates, e.g. "m"
-    \param blc   -- Vector with the values for the Bottom-left-corner delimiting
-                    the range of the grid
-    \param trc   -- Vector with the values for the Top-right-corner delimiting
-                    the range of the grid
-    \param shape -- 
-  */
-  GridCoordinate (String const &names,
-		  String const &units,
-		  double const &blc,
-		  double const &trc,
-		  uint const &shape);
-  
+  class GridCoordinate : public LinearCoordinate {
+    
+    //! Bottom-left-corner delimiting the range of the grid
+    Vector<double> blc_p;
+    //! Top-right-corner delimiting the range of the grid
+    Vector<double> trc_p;
+    //! Shape of the grid coordinates array
+    IPosition shape_p;
+    
+  public:
+    
+    // --------------------------------------------------------------- Construction
+    
+    /*!
+      \brief Default constructor
+      
+      Also uses the default constructor for the parent LinearCoordinate object.
+    */
+    GridCoordinate ();
+    
+    /*!
+      \brief Argumented constructor
+      
+      \param blc   -- Value for the Bottom-left-corner delimiting the range of
+                      the grid
+      \param trc   -- Value for the Top-right-corner delimiting the range of the
+                      grid
+      \param shape -- Number of grid nodes.
+    */
+    GridCoordinate (double const &blc,
+		    double const &trc,
+		    uInt const &shape);
+    
+    /*!
+      \brief Argumented constructor
+      
+      \param names -- World axis name, e.g. "Distance"
+      \param units -- Physical units of the axis coordinates, e.g. "m"
+      \param blc   -- Vector with the values for the Bottom-left-corner delimiting
+                      the range of the grid
+      \param trc   -- Vector with the values for the Top-right-corner delimiting
+                      the range of the grid
+      \param shape -- 
+    */
+    GridCoordinate (String const &names,
+		    String const &units,
+		    double const &blc,
+		    double const &trc,
+		    uInt const &shape);
+    
   /*!
     \brief Argumented constructor
 
@@ -194,7 +195,7 @@ class GridCoordinate : public LinearCoordinate {
     \return blc -- Vector with the values for the Bottom-left-corner delimiting
                    the range of the grid
   */
-  Vector<double> blc () {
+  inline Vector<double> blc () {
     return blc_p;
   }
 
@@ -213,7 +214,7 @@ class GridCoordinate : public LinearCoordinate {
     \return trc -- Vector with the values for the Top-right-corner delimiting
                    the range of the grid
   */
-  Vector<double> trc () {
+  inline Vector<double> trc () {
     return trc_p;
   }
 
@@ -231,7 +232,7 @@ class GridCoordinate : public LinearCoordinate {
 
     \return shape -- Shape of the grid coordinates array
   */
-  IPosition shape () {
+  inline IPosition shape () {
     return shape_p;
   }
 
@@ -245,11 +246,11 @@ class GridCoordinate : public LinearCoordinate {
   void setShape (const IPosition& shape);
 
   /*!
-    \brief Get the coordinates along the axis
+    \brief Get the coordinates along the axes
 
-    \return coordinates -- The set of coordinates
+    \return coordinates -- [axis,coordinate] The coordinate values along the axes
   */
-  Vector<double> coordinates ();
+  Array<double> coordinates ();
 
   // ----------------------------------------- Methods inheireted from base class
 
@@ -292,4 +293,4 @@ class GridCoordinate : public LinearCoordinate {
 
 }  // Namespace CR -- end
 
-#endif /* GRIDCOORDINATE_H */
+#endif /* _GRIDCOORDINATE_H_ */
