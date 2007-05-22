@@ -2,6 +2,8 @@
 #
 # Defines the following variables:
 #  HAVE_PGPLOT       = 
+#  PGPLOT_LIBRARY    = Path to libpgplot
+#  CPGPLOT_LIBRARY   = Path to libcpgplot
 #  PGPLOT_LIBRARIES  = Path to all parts of the PGPLOT library
 #  PGPLOT_INCLUDES   = Path to the PGPLOT header files
 
@@ -19,31 +21,33 @@ FIND_PATH (PGPLOT_INCLUDES
 
 ## [1] libpgplot
 
-find_library (PGPLOT_libpgplot
+find_library (PGPLOT_LIBRARY
   NAMES pgplot
   PATHS /usr/local/lib /usr/lib /lib /sw/lib
   PATH_SUFFIXES pgplot
+  NO_DEFAULT_PATH
   )
 
-if (PGPLOT_libpgplot)
-  list (APPEND PGPLOT_LIBRARIES ${PGPLOT_libpgplot})
-else (PGPLOT_libpgplot)
+if (PGPLOT_LIBRARY)
+  list (APPEND PGPLOT_LIBRARIES ${PGPLOT_LIBRARY})
+else (PGPLOT_LIBRARY)
   message (SEND_ERROR "Unable to locate libpgplot!")
-endif (PGPLOT_libpgplot)
+endif (PGPLOT_LIBRARY)
 
 ## [2] libcpgplot
 
-find_library (PGPLOT_libcpgplot
+find_library (CPGPLOT_LIBRARY
   NAMES cpgplot
   PATHS /usr/local/lib /usr/lib /lib /sw/lib
   PATH_SUFFIXES pgplot
+  NO_DEFAULT_PATH
   )
 
-if (PGPLOT_libcpgplot)
-  list (APPEND PGPLOT_LIBRARIES ${PGPLOT_libcpgplot})
-else (PGPLOT_libcpgplot)
+if (CPGPLOT_LIBRARY)
+  list (APPEND PGPLOT_LIBRARIES ${CPGPLOT_LIBRARY})
+else (CPGPLOT_LIBRARY)
   message (STATUS "Warning: Unable to locate libcpgplot!")
-endif (PGPLOT_libcpgplot)
+endif (CPGPLOT_LIBRARY)
 
 ## [3] libXmPgplot
 
