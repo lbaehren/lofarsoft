@@ -27,6 +27,7 @@
 #include <blitz/array.h>
 
 #include <Imaging/CoordinateConversion.h>
+#include <Math/VectorNorms.h>
 
 namespace CR { // NAMESPACE CR -- BEGIN
   
@@ -74,7 +75,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
   */  
   class GeometricalDelay {
-
+    
   protected:
     
     //! [nofAntennas,3] Antenna positions for which the delay is computed
@@ -85,14 +86,14 @@ namespace CR { // NAMESPACE CR -- BEGIN
     blitz::Array<double,2> delays_p;
     //! Buffer the values for the geometrical delay?
     bool bufferDelays_p;
-
+    
   public:
     
     // ------------------------------------------------------------- Construction
     
     /*!
       \brief Default constructor
-
+      
       Geometrical delay for a single antenna position at the
       position of the phase center, \f$ \vec x = (0,0,0) \f$ and a single 
       source position at unit distance above the antenna, \f$ \vec \rho =

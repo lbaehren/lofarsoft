@@ -86,7 +86,7 @@
 template <class T, class S> class ccBeam {
   
   //! Size of a block of data, [samples]; required for backwards FFT
-  Int blocksize_p;
+  int blocksize_p;
   
  public:
 
@@ -103,7 +103,7 @@ template <class T, class S> class ccBeam {
     \param blocksize -- Size of a block of data, [samples]; required for
                         backwards FFT
   */
-  ccBeam (Int const &blocksize);
+  ccBeam (const int &blocksize);
 
   // --------------------------------------------------------- Object destruction
 
@@ -119,7 +119,7 @@ template <class T, class S> class ccBeam {
 
     \return cc  -- The 'cc-beam' towards a direction \f$ \vec \rho \f$.
   */
-  Vector<T> ccbeam (const Matrix<T>& data);
+  Vector<T> ccbeam (const Matrix<T> &data);
 
   /*!
     \brief Computation of the 'cc-beam' from a set of beam-formed spectra
@@ -131,7 +131,7 @@ template <class T, class S> class ccBeam {
     \return cc  -- The 'cc-beam' towards a direction \f$ \vec \rho \f$.
   */
   Vector<T> ccbeam (const Matrix<S>& data,
-		    Int const &blocksize);
+		    const int &blocksize);
   
 };
 

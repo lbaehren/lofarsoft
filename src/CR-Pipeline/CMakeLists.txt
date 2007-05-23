@@ -4,9 +4,15 @@ project (CR)
 ## ------------------------------------------------------------------------------
 ## External dependencies; check if we need to search for some components.
 
+## Blitz++
+
 if (NOT HAVE_BLITZ)
   include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindBlitz.cmake)
 endif (NOT HAVE_BLITZ)
+
+if (HAVE_BLITZ)
+  add_definitions (-DHAVE_BLITZ)
+endif (HAVE_BLITZ)
 
 if (NOT HAVE_CASA) 
   include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindCASA.cmake)

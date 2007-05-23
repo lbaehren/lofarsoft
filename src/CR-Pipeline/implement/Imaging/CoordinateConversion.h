@@ -24,7 +24,18 @@
 #define COORDINATECONVERSION_H
 
 #include <cmath>
+#include <iostream>
+#include <string>
+
+#ifdef HAVE_BLITZ
 #include <blitz/array.h>
+using blitz::Array;
+using blitz::Range;
+#endif
+
+#ifdef HAVE_CASA
+#include <casa/Arrays/Vector.h>
+#endif
 
 namespace CR { // NAMESPACE CR -- BEGIN
   
@@ -193,62 +204,11 @@ namespace CR { // NAMESPACE CR -- BEGIN
   //
   // ============================================================================
 
-  /*!
-    \brief Compute the L1-Norm of a vector
-
-    The <a href="http://mathworld.wolfram.com/L1-Norm.html">L1-Norm</a> is a
-    vector norm defined for a vector \f$ \vec x = [x_1,x_2,...,x_N]^T \f$ with
-    complex entries by 
-    \f[ |\vec x|_{1} = \sum_{i=1}^{N} |x_i| \f]
-
-    \param vec -- The input vector
-
-    \return norm -- The L1-Norm for the vector
-  */
-  double L1Norm (const blitz::Array<double,1> &vec);
-  
-  /*!
-    \brief Compute the L1-Norm of a vector
-    
-    \todo not yet implemented
-  */
-  double L1Norm (double const *vec,
-		 unsigned int const &nelem);
-  
-  /*!
-    \brief Compute the L2-Norm of a vector
-
-    The <a href="http://mathworld.wolfram.com/L2-Norm.html">L2-Norm</a> is a
-    vector norm defined for a vector \f$ \vec x = [x_1,x_2,...,x_N]^T \f$ with
-    complex entries by
-    \f[ |\vec x| = \sqrt{\sum_{i=1}^{N} |x_i|^2} \f]
-    where \f$|x_{i}|\f$ on the right denotes the complex modulus. The
-    \f$\ell^2\f$-norm is the vector norm that is commonly encountered in vector
-    algebra and vector operations (such as the
-    <a href="http://mathworld.wolfram.com/DotProduct.html">dot product</a>),
-    where it is commonly denoted \f$|\vec x|\f$.
-
-    \param vec -- The input vector
-
-    \return norm -- The \f$\ell^2\f$-norm for the vector
-  */
-  double L2Norm (const blitz::Array<double,1> &vec);
-
-  /*!
-    \brief Compute the L2-Norm of a vector
-
-    \todo not yet implemented
-  */
-  double L2Norm (double const *vec,
-		 unsigned int const &nelem);
-  
   // ============================================================================
   //
   //  Coordinate conversions
   //
   // ============================================================================
-
-  // ---------------------------------------------------- (x,y,z) -> (r,phi,theta)
 
   /*!
     \brief Conversion from cartesian to spherical coordinates
@@ -270,33 +230,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			    const double &z);
 
   /*!
-    \brief Conversion from cartesian to spherical coordinates
-
-    \retval spherical -- [3] Spherical coordinates, \f$ \vec x =
-                         (r,\phi,\theta) \f$
-    \param  cartesian -- [3] Cartesian coordinates, \f$ \vec x = (x,y,z) \f$
-    
-    \return status -- Set to <i>false</i> if an error was encountered.
-  */
-  bool cartesian2spherical (blitz::Array<double,1> &spherical,
-			    const blitz::Array<double,1> &cartesian);
-
-  /*!
-    \brief Conversion from cartesian to spherical coordinates
-
-    \retval spherical -- [nofPoints,3] Spherical coordinates, \f$ \vec x =
-                         (r,\phi,\theta) \f$
-    \param  cartesian -- [nofPoints,3] Cartesian coordinates, \f$ \vec x =
-                         (x,y,z) \f$
-    
-    \return status -- Set to <i>false</i> if an error was encountered.
-  */
-  bool cartesian2spherical (blitz::Array<double,2> &spherical,
-			    const blitz::Array<double,2> &cartesian);
-
-  // -------------------------------------------------------- (x,y,z) -> (r,phi,h)
-
-  /*!
     \brief Conversion from cartesian to cylindrical coordinates
 
     \retval r   -- \f$r\f$-component of the vector in cylindrical coordinates
@@ -314,30 +247,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			      const double &x,
 			      const double &y,
 			      const double &z);
-
-  /*!
-    \brief Conversion from cartesian to cylindrical coordinates
-
-    \retval cylindrical -- Cylindrical coordinates, \f$ \vec x = (\rho,\phi,z) \f$
-    \param  cartesian   -- Cartesian coordinates, \f$ \vec x = (x,y,z) \f$
-    
-    \return status -- Set to <i>false</i> if an error was encountered.
-  */
-  bool cartesian2cylindrical (blitz::Array<double,1> &cylindrical,
-			      const blitz::Array<double,1> &cartesian);
-
-  /*!
-    \brief Conversion from cartesian to cylindrical coordinates
-
-    \retval cylindrical -- Cylindrical coordinates, \f$ \vec x = (\rho,\phi,z) \f$
-    \param  cartesian   -- Cartesian coordinates, \f$ \vec x = (x,y,z) \f$
-    
-    \return status -- Set to <i>false</i> if an error was encountered.
-  */
-  bool cartesian2cylindrical (blitz::Array<double,2> &cylindrical,
-			      const blitz::Array<double,2> &cartesian);
-
-  // ------------------------------------------------------- (r,phi,theta) (x,y,z)
 
   /*!
     \brief Conversion from cartesian to spherical coordinates
@@ -361,37 +270,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			    const double &phi,
 			    const double &theta,
 			    const bool &anglesInDegrees=false);
-  /*!
-    \brief Conversion from spherical to cartesian coordinates
-
-    \retval cartesian -- [3] Cartesian coordinates, \f$ \vec x = (x,y,z) \f$
-    \param  spherical -- [3] Spherical coordinates, \f$ \vec x =
-                         (r,\phi,\theta) \f$
-    \param anglesInDegrees -- Are the angles given in units of degrees? If
-                    <i>yes</i> angles will be converted to radians before the 
-		    conversion.
-    
-    \return status -- Set to <i>false</i> if an error was encountered.
-  */
-  bool spherical2cartesian (blitz::Array<double,1> &cartesian,
-			    const blitz::Array<double,1> &spherical,
-			    const bool &anglesInDegrees=false);
-  
-  /*!
-    \brief Conversion from spherical to cartesian coordinates
-
-    \retval cartesian -- [nofPoints,3] Cartesian coordinates,
-                         \f$\vec x = (x,y,z)\f$;
-    \param  spherical -- [nofPoints,3] Spherical coordinates,
-                         \f$\vec x = (r,\phi,\theta)\f$, with angles given in
-			 radians.
-    
-    \return status -- Set to <i>false</i> if an error was encountered.
-  */
-  bool spherical2cartesian (blitz::Array<double,2> &cartesian,
-			    const blitz::Array<double,2> &spherical);
-  
-  // -------------------------------------------------------- (r,phi,z) -> (x,y,z)
 
   /*!
     \brief Conversion from cylindrical to cartesian coordinates
@@ -412,6 +290,85 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			      const double &phi,
 			      const double &h);
 
+#ifdef HAVE_BLITZ
+
+  /*!
+    \brief Conversion from cartesian to spherical coordinates
+
+    \retval spherical -- [3] Spherical coordinates, \f$ \vec x =
+                         (r,\phi,\theta) \f$
+    \param  cartesian -- [3] Cartesian coordinates, \f$ \vec x = (x,y,z) \f$
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool cartesian2spherical (Array<double,1> &spherical,
+			    const Array<double,1> &cartesian);
+
+  /*!
+    \brief Conversion from cartesian to spherical coordinates
+
+    \retval spherical -- [nofPoints,3] Spherical coordinates, \f$ \vec x =
+                         (r,\phi,\theta) \f$
+    \param  cartesian -- [nofPoints,3] Cartesian coordinates, \f$ \vec x =
+                         (x,y,z) \f$
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool cartesian2spherical (Array<double,2> &spherical,
+			    const Array<double,2> &cartesian);
+
+  /*!
+    \brief Conversion from cartesian to cylindrical coordinates
+
+    \retval cylindrical -- Cylindrical coordinates, \f$ \vec x = (\rho,\phi,z) \f$
+    \param  cartesian   -- Cartesian coordinates, \f$ \vec x = (x,y,z) \f$
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool cartesian2cylindrical (Array<double,1> &cylindrical,
+			      const Array<double,1> &cartesian);
+
+  /*!
+    \brief Conversion from cartesian to cylindrical coordinates
+
+    \retval cylindrical -- Cylindrical coordinates, \f$ \vec x = (\rho,\phi,z) \f$
+    \param  cartesian   -- Cartesian coordinates, \f$ \vec x = (x,y,z) \f$
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool cartesian2cylindrical (Array<double,2> &cylindrical,
+			      const Array<double,2> &cartesian);
+
+  /*!
+    \brief Conversion from spherical to cartesian coordinates
+
+    \retval cartesian -- [3] Cartesian coordinates, \f$ \vec x = (x,y,z) \f$
+    \param  spherical -- [3] Spherical coordinates, \f$ \vec x =
+                         (r,\phi,\theta) \f$
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+                    <i>yes</i> angles will be converted to radians before the 
+		    conversion.
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool spherical2cartesian (Array<double,1> &cartesian,
+			    const Array<double,1> &spherical,
+			    const bool &anglesInDegrees=false);
+  
+  /*!
+    \brief Conversion from spherical to cartesian coordinates
+
+    \retval cartesian -- [nofPoints,3] Cartesian coordinates,
+                         \f$\vec x = (x,y,z)\f$;
+    \param  spherical -- [nofPoints,3] Spherical coordinates,
+                         \f$\vec x = (r,\phi,\theta)\f$, with angles given in
+			 radians.
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool spherical2cartesian (Array<double,2> &cartesian,
+			    const Array<double,2> &spherical);
+  
   /*!
     \brief Conversion from cylindrical to cartesian coordinates
     
@@ -420,8 +377,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     \return status -- Set to <i>false</i> if an error was encountered.
   */
-  bool cylindrical2cartesian (blitz::Array<double,1> &cartesian,
-			      const blitz::Array<double,1> &cylindrical);
+  bool cylindrical2cartesian (Array<double,1> &cartesian,
+			      const Array<double,1> &cylindrical);
   
   /*!
     \brief Conversion from cylindrical to cartesian coordinates
@@ -431,10 +388,11 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     \return status -- Set to <i>false</i> if an error was encountered.
   */
-  bool cylindrical2cartesian (blitz::Array<double,2> &cartesian,
-			      const blitz::Array<double,2> &cylindrical);
-  
-  
+  bool cylindrical2cartesian (Array<double,2> &cartesian,
+			      const Array<double,2> &cylindrical);
+
+#endif
+
 }  // NAMESPACE CR -- END
 
 #endif /* COORDINATECONVERSION_H */

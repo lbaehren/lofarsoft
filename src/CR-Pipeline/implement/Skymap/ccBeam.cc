@@ -24,7 +24,7 @@
 #include <scimath/Mathematics/FFTServer.h>
 
 #include <Skymap/ccBeam.h>
-#include <Math/Algebra.h>
+#include <Math/VectorNorms.h>
 
 // ==============================================================================
 //
@@ -43,7 +43,7 @@ ccBeam<T,S>::ccBeam ()
 // ----------------------------------------------------------------------- ccBeam
 
 template <class T, class S>
-ccBeam<T,S>::ccBeam (Int const &blocksize)
+ccBeam<T,S>::ccBeam (const int &blocksize)
 {
   blocksize_p = blocksize;
 }
@@ -64,7 +64,7 @@ ccBeam<T,S>::~ccBeam ()
 // ----------------------------------------------------------------------- ccbeam
 
 template <class T, class S>
-Vector<T> ccBeam<T,S>::ccbeam (const Matrix<T>& data)
+Vector<T> ccBeam<T,S>::ccbeam (const Matrix<T> &data)
 {
   int ant1 (0);
   int ant2 (0);
@@ -94,7 +94,7 @@ Vector<T> ccBeam<T,S>::ccbeam (const Matrix<T>& data)
 
 template <class T, class S>
 Vector<T> ccBeam<T,S>::ccbeam (const Matrix<S>& data,
-			       Int const &blocksize)
+			       const int &blocksize)
 {
   IPosition shape (data.shape());
   Matrix<T> dataTime (blocksize,shape(1),static_cast<T>(0));
@@ -123,5 +123,5 @@ Vector<T> ccBeam<T,S>::ccbeam (const Matrix<S>& data,
 //
 // ==============================================================================
 
-template class ccBeam<Float,Complex>;
-template class ccBeam<Double,DComplex>;
+template class ccBeam<casa::Float, casa::Complex>;
+template class ccBeam<casa::Double, casa::DComplex>;

@@ -22,83 +22,13 @@
 
 #include <Imaging/CoordinateConversion.h>
 
-using blitz::Range;
-
 namespace CR { // NAMESPACE CR -- BEGIN
   
-  // ============================================================================
-  //
-  //  Auxilliary vector operations
-  //
-  // ============================================================================
-
-  // --------------------------------------------------------------------- L1Norm
-
-  double L1Norm (const blitz::Array<double,1> &vec)
-  {
-    return sum(fabs(vec));
-  }
-
-  // --------------------------------------------------------------------- L1Norm
-
-  double L1Norm (double const *vec,
-		 unsigned int const &nelem)
-  {
-    double sum (0.0);
-
-    for (unsigned int n(0); n<nelem; n++) {
-      sum += fabs(vec[n]);
-    }
-
-    return sum;
-  }
-
-  // --------------------------------------------------------------------- L2Norm
-
-  double L2Norm (const blitz::Array<double,1> &vec)
-  {
-    return sqrt(sum(pow2(vec)));
-  }
-
-  // --------------------------------------------------------------------- L2Norm
-
-  double L2Norm (double const *vec,
-		 unsigned int const &nelem)
-  {
-    double sum2 (0.0);
-
-    for (unsigned int n(0); n<nelem; n++) {
-      sum2 += vec[n]*vec[n];
-    }
-
-    return sqrt (sum2);
-  }
-
   // ============================================================================
   //
   //  Coordinate conversions
   //
   // ============================================================================
-  
-  // -------------------------------------------------------- cartesian2sphercial
-
-  bool cartesian2spherical (blitz::Array<double,1> &spherical,
-			    const blitz::Array<double,1> &cartesian)
-  {
-    bool status (true);
-
-    return status;
-  }
-
-  // -------------------------------------------------------- cartesian2sphercial
-
-  bool cartesian2spherical (blitz::Array<double,2> &spherical,
-			    const blitz::Array<double,2> &cartesian)
-  {
-    bool status (true);
-
-    return status;
-  }
 
   // ------------------------------------------------------ cylindrical2cartesian
 
@@ -115,10 +45,64 @@ namespace CR { // NAMESPACE CR -- BEGIN
       x = r*cos(phi);
       y = r*sin(phi);
       z = h;
+    } catch (std::string err) {
+      std::cerr << err << std::endl;
+      status = false;
+    }
+
+    return status;
+  }
+
+  // -------------------------------------------------------- spherical2cartesian
+
+  bool spherical2cartesian (double &x,
+			    double &y,
+			    double &z,
+			    const double &r,
+			    const double &phi,
+			    const double &theta,
+			    const bool &anglesInDegrees)
+  {
+    bool status (true);
+
+    // check if we have to convert from degrees to radian
+    
+    try {
+      if (anglesInDegrees) {
+	x = r*cos(deg2rad(phi))*sin(deg2rad(theta));
+	y = r*sin(deg2rad(phi))*sin(deg2rad(theta));
+	z = r*cos(deg2rad(theta));
+      } else {
+	x = r*cos(phi)*sin(theta);
+	y = r*sin(phi)*sin(theta);
+	z = r*cos(theta);
+      }
     } catch (std::string message) {
       std::cerr << message << std::endl;
       status = false;
     }
+
+    return status;
+  }
+  
+#ifdef HAVE_BLITZ
+
+  // -------------------------------------------------------- cartesian2sphercial
+
+  bool cartesian2spherical (blitz::Array<double,1> &spherical,
+			    const blitz::Array<double,1> &cartesian)
+  {
+    bool status (true);
+
+    return status;
+  }
+
+  // -------------------------------------------------------- cartesian2sphercial
+
+  bool cartesian2spherical (blitz::Array<double,2> &spherical,
+			    const blitz::Array<double,2> &cartesian)
+  {
+    bool status (true);
 
     return status;
   }
@@ -149,38 +133,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
       status = false;
     }
     
-    return status;
-  }
-  
-  // -------------------------------------------------------- spherical2cartesian
-
-  bool spherical2cartesian (double &x,
-			    double &y,
-			    double &z,
-			    const double &r,
-			    const double &phi,
-			    const double &theta,
-			    const bool &anglesInDegrees)
-  {
-    bool status (true);
-
-    // check if we have to convert from degrees to radian
-    
-    try {
-      if (anglesInDegrees) {
-	x = r*cos(deg2rad(phi))*sin(deg2rad(theta));
-	y = r*sin(deg2rad(phi))*sin(deg2rad(theta));
-	z = r*cos(deg2rad(theta));
-      } else {
-	x = r*cos(phi)*sin(theta);
-	y = r*sin(phi)*sin(theta);
-	z = r*cos(theta);
-      }
-    } catch (std::string message) {
-      std::cerr << message << std::endl;
-      status = false;
-    }
-
     return status;
   }
   
@@ -235,6 +187,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     return status;
   }
+
+#endif
   
 }  // NAMESPACE CR -- END
 

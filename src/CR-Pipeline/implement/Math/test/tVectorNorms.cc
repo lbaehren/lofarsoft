@@ -19,13 +19,17 @@
  ***************************************************************************/
 
 #include <cmath>
+#include <iostream>
 #include <string>
-#include <Imaging/CoordinateConversion.h>
+#include <Math/VectorNorms.h>
+
+using std::cout;
+using std::endl;
 
 /*!
-  \file tCoordinateConversion.cc
+  \file tVectorNorms.cc
 
-  \brief Collection of tests for the methods in CoordinateConversion
+  \brief Collection of tests for the methods in VectorNorms
 
   \author Lars B&auml;hren
 
@@ -39,7 +43,7 @@
   by this we can extracts e.g. rows from a matrix:
   \code
   for (uint n(0); n<nofRows; n++) {
-    std::cout << arr(n,Range(Range::all())) << std::endl;
+    cout << arr(n,Range(Range::all())) << endl;
   }
   \endcode
   
@@ -47,48 +51,48 @@
 */
 int test_blitz ()
 {
-  std::cout << "\n[test_blitz]\n" << std::endl;
-
+  cout << "\n[test_blitz]\n" << endl;
+  
   int nofFailedTests (0);
-
+  
   int nofAntennas (5);
   int nofCoordinates (3);
   blitz::Array<double,2> arr (nofAntennas,nofCoordinates);
-
+  
   arr = 11,12,13,21,22,23,31,32,33,41,42,43,51,52,53;
   
   uint nofRows = arr.rows();
   uint nofCols = arr.cols();
-
-  std::cout << "[1] Basic properties of an array" << std::endl;
+  
+  cout << "[1] Basic properties of an array" << endl;
   try {
-    std::cout                           << arr               << std::endl;
-    std::cout << "arr.shape()       = " << arr.shape()       << std::endl;
-    std::cout << "arr.rows()        = " << arr.rows()        << std::endl;
-    std::cout << "arr.cols()        = " << arr.cols()        << std::endl;
-    std::cout << "arr.numElements() = " << arr.numElements() << std::endl;
+    cout                           << arr               << endl;
+    cout << "arr.shape()       = " << arr.shape()       << endl;
+    cout << "arr.rows()        = " << arr.rows()        << endl;
+    cout << "arr.cols()        = " << arr.cols()        << endl;
+    cout << "arr.numElements() = " << arr.numElements() << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[2] Extract rows using the Range operator" << std::endl;
+  cout << "[2] Extract rows using the Range operator" << endl;
   try {
     for (uint n(0); n<nofRows; n++) {
-      std::cout << arr(n,blitz::Range(blitz::Range::all())) << std::endl;
+      cout << arr(n,blitz::Range(blitz::Range::all())) << endl;
     }
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  std::cout << "[3] Extract columns using the Range operator" << std::endl;
+  cout << "[3] Extract columns using the Range operator" << endl;
   try {
     for (uint n(0); n<nofCols; n++) {
-      std::cout << arr(blitz::Range(blitz::Range::all()),n) << std::endl;
+      cout << arr(blitz::Range(blitz::Range::all()),n) << endl;
     }
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
@@ -98,49 +102,94 @@ int test_blitz ()
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test conversion from other to cartesian coordinates
+  \brief Test the functions for computation of the vector norms
 
-  Test for the routines handling the conversions: \f$(r,\theta,\varphi)
-  \rightarrow (x,y,z)\f$
+  For the example vector \f$\vec x = (1,2,3)\f$
+  <table>
+    <tr>
+      <td>Name</td>
+      <td>Symbols</td>
+      <td>Value</td>
+      <td>approx.</td>
+    </tr>
+    <tr>
+      <td>\f$L^1\f$-norm</td>
+      <td>\f$|\vec x|_{1}\f$</td>
+      <td>6</td>
+      <td>6.000</td>
+    </tr>
+    <tr>
+      <td>\f$L^2\f$-norm</td>
+      <td>\f$|\vec x|_{2}\f$</td>
+      <td>\f$\sqrt{14}\f$</td>
+      <td>3.742</td>
+    </tr>
+    <tr>
+      <td>\f$L^3\f$-norm</td>
+      <td>\f$|\vec x|_{3}\f$</td>
+      <td>\f$6^{2/3}\f$</td>
+      <td>3.302</td>
+    </tr>
+  </table>
 
   \return nofFailedTests -- The number of failed tests
 */
-int test_convert2cartesian ()
+int test_Norms ()
 {
-  std::cout << "\n[test_convert2cartesian]\n" << std::endl;
+  cout << "\n[test_Norms]\n" << endl;
 
   int nofFailedTests (0);
-  blitz::Array<double,1> xyz (3);
-
-  try {
-    double r (1.0);
-    double phi (CR::deg2rad(45.0));
-    double theta (CR::deg2rad(90));
-    double x (0);
-    double y (0);
-    double z (0);
-
-    CR::spherical2cartesian(x,y,z,r,phi,theta,false);
-
-    std::cout << "[" << r << "," << phi << "," << theta << "]\t->\t"
-	      << "[" << x << "," << y << "," << z << "]" << std::endl;
-
-    blitz::Array<double,1> spherical (3);
-    blitz::Array<double,1> cartesian (3);
-
-    spherical = r,phi,theta;
-
-    CR::spherical2cartesian (cartesian,spherical);
-
-    std::cout << spherical << std::endl;
-    std::cout << cartesian << std::endl;
-
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }  
   
-  return nofFailedTests;
+  cout << "[1] Computation using Blitz++ arrays" << endl;
+  try {
+    blitz::Array<double,1> vec (3);
+    vec = 1,2,3;
+    cout << "\t" << vec
+	 << "\t" << CR::L1Norm(vec)
+	 << "\t" << CR::L2Norm(vec)
+	 << endl;
+    vec = 2,0,0;
+    cout << "\t" << vec
+	 << "\t" << CR::L1Norm(vec)
+	 << "\t" << CR::L2Norm(vec)
+	 << endl;
+    vec = 2,2,2;
+    cout << "\t" << vec
+	 << "\t" << CR::L1Norm(vec)
+	 << "\t" << CR::L2Norm(vec)
+	 << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[2] Computation using C++ arrays" << endl;
+  try {
+    unsigned int nelem (3);
+    double *vec;
+    double l1norm (0.0);
+    double l2norm (0.0);
+    
+    vec = new double [nelem];
+    
+    vec[0] = 1;
+    vec[1] = 2;
+    vec[2] = 3;
+    
+    l1norm = CR::L1Norm (vec,nelem);
+    l2norm = CR::L2Norm (vec,nelem);
+    
+    cout << "[\t" << vec[0] << "\t" << vec[1] << "\t" << vec[2] << "]"
+	 << "\t" << l1norm
+	 << "\t" << l2norm
+	 << endl;
+    
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;  
 }
 
 // -----------------------------------------------------------------------------
@@ -159,7 +208,7 @@ int main ()
   }
 
   {
-    nofFailedTests += test_convert2cartesian ();
+    nofFailedTests += test_Norms ();
   }
 
   return nofFailedTests;  

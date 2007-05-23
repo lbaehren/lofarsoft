@@ -266,11 +266,11 @@ namespace CR { // Namespace CR -- begin
     return cartesian;
   }
 
-  template blitz::Array<Float,1> azel2cartesian (const blitz::Array<Float,1>& azel);
-  template blitz::Array<Double,1> azel2cartesian (const blitz::Array<Double,1>& azel);
+  template blitz::Array<float,1> azel2cartesian (const blitz::Array<float,1>& azel);
+  template blitz::Array<double,1> azel2cartesian (const blitz::Array<double,1>& azel);
 
-  template blitz::Array<Float,1> polar2cartesian (blitz::Array<Float,1> const &polar);
-  template blitz::Array<Double,1> polar2cartesian (blitz::Array<Double,1> const &polar);
+  template blitz::Array<float,1> polar2cartesian (blitz::Array<float,1> const &polar);
+  template blitz::Array<double,1> polar2cartesian (blitz::Array<double,1> const &polar);
 
 #endif
   

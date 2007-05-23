@@ -42,6 +42,7 @@
 
 using std::vector;
 using casa::Vector;
+using casa::uInt;
 
 namespace CR { // Namespace CR -- begin
   
