@@ -25,54 +25,55 @@
 
 #include <Math/Shapelets1D.h>
 
-/*!
-  \class ShapeletsModel2D
-
-  \ingroup Math
-  \ingroup Shapelets
-
-  \brief Shapelet decomposition of a 2-dimensional function.
-
-  \author Lars B&auml;hren
-
-  \date 2005/04
-
-  \test tShapeletsModel2D.cc
-
-  <h3>Prerequisites</h3>
-
-  <ul>
+namespace CR {  // Namespace CR -- begin
+  
+  /*!
+    \class ShapeletsModel2D
+    
+    \ingroup Math
+    
+    \brief Shapelet decomposition of a 2-dimensional function.
+    
+    \author Lars B&auml;hren
+    
+    \date 2005/04
+    
+    \test tShapeletsModel2D.cc
+    
+    <h3>Prerequisites</h3>
+    
+    <ul>
     <li>A. Refregier, <i>Shapelets - I. A method for image analysis</i>,
     MNRAS, 338 (1), pp. 35-47, 2003
-
+    
     <li>Hermite1D   -- A class to implement Hermite Polynomials.
     <li>Shapelets1D -- A class to implement 1-dimensional Shapelet functions.
     <li>Shapelets2D -- A class to implement 2-dimensional Shapelet functions.
-  </ul>
-
-  <h3>Synopsis</h3>
-
-  Shapelets are a complete, orthonormal set of 2D basis functions constructed
-  from Laguerre or Hermite polynomials weighted by a Gaussian. A linear
-  combination of these functions can be used to model any image, in a similar
-  way to Fourier or wavelet synthesis. The shapelet decomposition is
-  particularly efficient for images localised in space, and provide a high
-  level of compression for individual galaxies in astronomical data. The basis
-  has many elegant mathematical properties that make it convenient for image
-  analysis and processing. The formalism was first introduced to astronomy by
-  Alexandre Refregier & David Bacon, and a related method has also been
-  independently suggested by Gary Bernstein & Mike Jarvis.
-
-  This class implements the expansion of a function \f$ f \in \mathcal{L}^2
-  (R^2) \f$ in terms of dimensional Shapelet basis functions,
-  \f$ B_{\mathbf n}(\mathbf{x};\beta) \f$,
-  \f[
-    f(\mathbf{x}) = \sum_{n=0}^{\infty} f_{\mathbf{n}} \,
-    B_{\mathbf n} (\mathbf{x}-\mathbf{x}_0;\beta) = \sum_{n_1,n_2=0}^{\infty}
-    f_{n_1,n_2} B_{n_1} (x_{1}-x_{1,0};\beta) B_{n_2} (x_{2}-x_{2,0};\beta)
-  \f]
-  where the parameters of the model are:
-
+    </ul>
+    
+    <h3>Synopsis</h3>
+    
+    Shapelets are a complete, orthonormal set of 2D basis functions constructed
+    from Laguerre or Hermite polynomials weighted by a Gaussian. A linear
+    combination of these functions can be used to model any image, in a similar
+    way to Fourier or wavelet synthesis. The shapelet decomposition is
+    particularly efficient for images localised in space, and provide a high
+    level of compression for individual galaxies in astronomical data. The basis
+    has many elegant mathematical properties that make it convenient for image
+    analysis and processing. The formalism was first introduced to astronomy by
+    Alexandre Refregier & David Bacon, and a related method has also been
+    independently suggested by Gary Bernstein & Mike Jarvis.
+    
+    This class implements the expansion of a function \f$ f \in \mathcal{L}^2
+    (R^2) \f$ in terms of dimensional Shapelet basis functions,
+    \f$ B_{\mathbf n}(\mathbf{x};\beta) \f$,
+    \f[
+      f(\mathbf{x}) = \sum_{n=0}^{\infty} f_{\mathbf{n}} \,
+      B_{\mathbf n} (\mathbf{x}-\mathbf{x}_0;\beta) = \sum_{n_1,n_2=0}^{\infty}
+      f_{n_1,n_2} B_{n_1} (x_{1}-x_{1,0};\beta) B_{n_2} (x_{2}-x_{2,0};\beta)
+    \f]
+    where the parameters of the model are:
+    
   <table cellpadding="3" border="0">
     <tr>
       <td>\f$ \mathbf{n}_{\rm max} = (n_1,n_2)_{\rm max} \f$</td>
@@ -90,52 +91,51 @@
       <td>\f$ f_{\mathbf{n}} = f_{n_1,n_2} \f$</td>
       <td>Weighting coefficients of the Shapelet components.</td>
     </tr>
-  </table>
-
-*/
-
-class ShapeletsModel2D : public Shapelets1D {
-
-  // Center position of the model function
-  vector<double> center_p;	
-
-  // Coefficients for the individual shapelet functions
- double* coefficients_p;
-
-  // Integral of the current model
-  double integral_p;
-
- public:
-  
-  /*!
-    \brief Empty constructor
+    </table>
+    
   */
-  ShapeletsModel2D ();
-  
-  /*!
-    \brief Argumented constructor.
+  class ShapeletsModel2D : public Shapelets1D {
     
-    Interface to Shapelets2D::Shapelets2D; uses default values for \f$ x_0 \f$
-    and \f$ f_n \f$.
+    // Center position of the model function
+    vector<double> center_p;	
     
-    \param order - Maximum order for which the function coefficients are
-                   pre-computed.
-    \param beta  - Shapelet scale parameter, \f$ \beta \f$.
-   */
-  ShapeletsModel2D (const int order,
-		    const double beta);
-
-  /*!
-    \brief Argumented constructor.
+    // Coefficients for the individual shapelet functions
+    double* coefficients_p;
     
-    \param center       - Center position of the profile, \f$ \mathbf{x}_0 \f$.
-    \param coefficients - Weighting coefficients for the Shapelet components,
-                          \f$ f_{\mathbf{n}} = f_{n_1,n_2} \f$.
-   */
-  ShapeletsModel2D (const vector<double>& center,
-		    const double coefficients[]);
-
-  /*!
+    // Integral of the current model
+    double integral_p;
+    
+  public:
+    
+    /*!
+      \brief Empty constructor
+    */
+    ShapeletsModel2D ();
+    
+    /*!
+      \brief Argumented constructor.
+      
+      Interface to Shapelets2D::Shapelets2D; uses default values for \f$ x_0 \f$
+      and \f$ f_n \f$.
+      
+      \param order - Maximum order for which the function coefficients are
+                     pre-computed.
+      \param beta  - Shapelet scale parameter, \f$ \beta \f$.
+    */
+    ShapeletsModel2D (int const &order,
+		      double const &beta);
+    
+    /*!
+      \brief Argumented constructor.
+      
+      \param center       - Center position of the profile, \f$ \mathbf{x}_0 \f$.
+      \param coefficients - Weighting coefficients for the Shapelet components,
+      \f$ f_{\mathbf{n}} = f_{n_1,n_2} \f$.
+    */
+    ShapeletsModel2D (const vector<double>& center,
+		      const double coefficients[]);
+    
+    /*!
     \brief Argumented constructor.
     
     \param order        - Maximum order for which the function coefficients are
@@ -181,7 +181,9 @@ class ShapeletsModel2D : public Shapelets1D {
     
     \return center - Center position of the profile, \f$ \mathbf{x}_0 \f$.
   */
-  vector<double> center ();
+  inline vector<double> center () {
+    return center_p;
+  }
   
   /*!
     \brief Set the center, \f$ \mathbf{x}_0 \f$, of the model function.
@@ -241,7 +243,9 @@ class ShapeletsModel2D : public Shapelets1D {
     \param x - Position \f$ \mathbf{x} = (x_1,x_2) \f$ where to evaluate the 
            model function.
   */
-  double eval (const vector<double>& x);
+  inline double eval (const vector<double>& x) {
+    return ShapeletsModel2D::eval (x[0], x[1]);
+  }
 
   /*!
     \brief Evaluate the Shapelet model at a position \f$ \mathbf{x} \f$.
@@ -275,5 +279,7 @@ class ShapeletsModel2D : public Shapelets1D {
   void calcIntegral ();	
     
 };
+
+}  // Namespace CR -- end
 
 #endif

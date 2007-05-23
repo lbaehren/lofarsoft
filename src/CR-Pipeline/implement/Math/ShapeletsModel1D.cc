@@ -24,49 +24,51 @@
 
 #define PI 3.14159265358979323846
 
-// =============================================================================
-//
-//  Construction / Destruction
-//
-// =============================================================================
-
-ShapeletsModel1D::ShapeletsModel1D ()
-  : Shapelets1D ()
-{
-  ShapeletsModel1D::initModel ();
-}
-
-ShapeletsModel1D::ShapeletsModel1D (const int order,
-				    const double beta) 
-  : Shapelets1D (order,beta)
-{
-  ShapeletsModel1D::initModel ();
-}
-
-ShapeletsModel1D::ShapeletsModel1D (const double center,
-				    const vector<double>& coefficients) 
-  : Shapelets1D ()
-{
-  ShapeletsModel1D::setCenter (center);
-  ShapeletsModel1D::setCoefficients (coefficients);
-}
-
-ShapeletsModel1D::ShapeletsModel1D (const int order,
-				    const double beta,
-				    const double center,
-				    const vector<double>& coefficients) 
-  : Shapelets1D (order,beta)
-{
-  // Model parameters
-  ShapeletsModel1D::setCenter (center);
-  ShapeletsModel1D::setCoefficients (coefficients);
-}
-
-ShapeletsModel1D::~ShapeletsModel1D ()
-{
-  coefficients_p.clear();
-}
-
+namespace CR {  // Namespace CR -- begin
+  
+  // ============================================================================
+  //
+  //  Construction / Destruction
+  //
+  // ============================================================================
+  
+  ShapeletsModel1D::ShapeletsModel1D ()
+    : Shapelets1D ()
+  {
+    ShapeletsModel1D::initModel ();
+  }
+  
+  ShapeletsModel1D::ShapeletsModel1D (int const &order,
+				      double const &beta) 
+    : Shapelets1D (order,beta)
+  {
+    ShapeletsModel1D::initModel ();
+  }
+  
+  ShapeletsModel1D::ShapeletsModel1D (const double center,
+				      const vector<double>& coefficients) 
+    : Shapelets1D ()
+  {
+    ShapeletsModel1D::setCenter (center);
+    ShapeletsModel1D::setCoefficients (coefficients);
+  }
+  
+  ShapeletsModel1D::ShapeletsModel1D (const int order,
+				      const double beta,
+				      const double center,
+				      const vector<double>& coefficients) 
+    : Shapelets1D (order,beta)
+  {
+    // Model parameters
+    ShapeletsModel1D::setCenter (center);
+    ShapeletsModel1D::setCoefficients (coefficients);
+  }
+  
+  ShapeletsModel1D::~ShapeletsModel1D ()
+  {
+    coefficients_p.clear();
+  }
+  
 // =============================================================================
 //
 //  Initialize model parameters
@@ -180,30 +182,28 @@ vector<double> ShapeletsModel1D::eval (const vector<double>& x)
   return y;
 }
 
-
-// =============================================================================
-//
-//  Global model properties
-//
-// =============================================================================
-
-void ShapeletsModel1D::updateGlobals ()
-{
-  ShapeletsModel1D::calcIntegral ();
-}
-
-double ShapeletsModel1D::integral () {
-  return integral_p;
-}
-
-void ShapeletsModel1D::calcIntegral () {
   
-  int order (Shapelets1D::order());
-
-  integral_p = 0.0;
+  // =============================================================================
+  //
+  //  Global model properties
+  //
+  // =============================================================================
   
-  for (int n=0; n<=order; n++) {
-    integral_p += coefficients_p[n]*Shapelets1D::integral(n);
+  void ShapeletsModel1D::updateGlobals ()
+  {
+    ShapeletsModel1D::calcIntegral ();
   }
   
-}
+  void ShapeletsModel1D::calcIntegral () {
+    
+    int order (Shapelets1D::order());
+    
+    integral_p = 0.0;
+    
+    for (int n=0; n<=order; n++) {
+      integral_p += coefficients_p[n]*Shapelets1D::integral(n);
+    }
+    
+  }
+  
+}  // Namespace CR -- end

@@ -31,36 +31,36 @@
 using namespace std;
 
 // Custom header files
-#include <Math/Hermite1D.h>
 #include <Math/Shapelets1D.h>
 
-/*!
-  \brief Shapelet decomposition of a 1-dimensional profile.
-
-  \ingroup Math
-  \ingroup Shapelets
-
-  \author Lars B&auml;hren
-
-  \date 2005/03
-
-  \test tShapeletsModel1D.cc
-
-  <h3>Prerequisites</h3>
-
-  <ul>
-    <li>Hermite1D   -- A class to implement Hermite Polynomials.
-    <li>Shapelets1D -- A class to implement 1-dimensional Shapelet functions.
-  </ul>
-
-  <h3>Synopsis</h3>
-
-  Expansion of a function \f$ f \in \mathcal{L}^2 (R) \f$ in terms of
-  dimensional Shapelet basis functions, \f$ B_n(x;\beta) \f$,
-  \f[ f(x) = \sum_{n=0}^{\infty} f_n \, B_n(x-x_0;\beta) \f]
-  where the parameters of the model are:
-
-  <table cellpadding="3" border="0">
+namespace CR {  // Namespace CR -- begin
+  
+  /*!
+    \brief Shapelet decomposition of a 1-dimensional profile.
+    
+    \ingroup Math
+    
+    \author Lars B&auml;hren
+    
+    \date 2005/03
+    
+    \test tShapeletsModel1D.cc
+    
+    <h3>Prerequisites</h3>
+    
+    <ul>
+      <li>Hermite1D   -- A class to implement Hermite Polynomials.
+      <li>Shapelets1D -- A class to implement 1-dimensional Shapelet functions.
+    </ul>
+    
+    <h3>Synopsis</h3>
+    
+    Expansion of a function \f$ f \in \mathcal{L}^2 (R) \f$ in terms of
+    dimensional Shapelet basis functions, \f$ B_n(x;\beta) \f$,
+    \f[ f(x) = \sum_{n=0}^{\infty} f_n \, B_n(x-x_0;\beta) \f]
+    where the parameters of the model are:
+    
+    <table cellpadding="3" border="0">
     <tr>
       <td>\f$ n_{\rm max} \f$</td>
       <td>Maximum order of Shapelet functions included in the model.</td>
@@ -92,41 +92,40 @@ using namespace std;
     \f]
     where \f$ F_n \f$ is the itegral value of the n-th order dimensional Shapelet
     basis function.
-	</ol>
-*/
-
-class ShapeletsModel1D : public Shapelets1D {
-  
-  // Center position of the model function
-  double center_p;	
-
-  // Coefficients for the individual shapelet functions
-  vector<double> coefficients_p;
-
-  // Integral of the current model
-  double integral_p;
-
- public:
-  
-  /*!
-    \brief Empty constructor
+    </ol>
   */
-  ShapeletsModel1D ();
-  
-  /*!
-    \brief Argumented constructor.
+  class ShapeletsModel1D : public Shapelets1D {
     
-    Interface to Shapelets1D::Shapelets1D; uses default values for \f$ x_0 \f$
-    and \f$ f_n \f$.
+    // Center position of the model function
+    double center_p;	
     
-    \param order - Maximum order for which the function coefficients are
-                   pre-computed.
-    \param beta  - Shapelet scale parameter, \f$ \beta \f$.
-   */
-  ShapeletsModel1D (const int order,
-		    const double beta);
-  
-  /*!
+    // Coefficients for the individual shapelet functions
+    vector<double> coefficients_p;
+    
+    // Integral of the current model
+    double integral_p;
+    
+  public:
+    
+    /*!
+      \brief Empty constructor
+    */
+    ShapeletsModel1D ();
+    
+    /*!
+      \brief Argumented constructor.
+      
+      Interface to Shapelets1D::Shapelets1D; uses default values for \f$ x_0 \f$
+      and \f$ f_n \f$.
+      
+      \param order - Maximum order for which the function coefficients are
+                     pre-computed.
+      \param beta  - Shapelet scale parameter, \f$ \beta \f$.
+    */
+    ShapeletsModel1D (int const &order,
+		      double const &beta);
+    
+    /*!
     \brief Argumented constructor.
     
     This provides custom parameters to Shapelet-based model.
@@ -207,7 +206,9 @@ class ShapeletsModel1D : public Shapelets1D {
   /*!
     \brief Integral over the model function.
   */
-  double integral ();
+  inline double integral () {
+    return integral_p;
+  }
   
   // === Evaluation of the model function ============================
   
@@ -237,5 +238,7 @@ class ShapeletsModel1D : public Shapelets1D {
   void calcIntegral ();	
   
 };
+
+}  // Namespace CR -- end
 
 #endif
