@@ -44,7 +44,8 @@
 using casa::Complex;
 using casa::DComplex;
 using casa::IPosition;
-using casa::Vector;
+using casa::String;
+using casa::uInt;
 #endif
 
 /*!
@@ -168,7 +169,17 @@ namespace CR { // namespace CR -- begin
     \return sign - The sign of <i>x</i>.
   */
   template <class T>
-    T sign (const T &x);
+    T sign (T const &x);
+  
+  /*!
+    \brief Determine the sign of a real-valued number 
+    
+    \param x -- A real number.
+    
+    \return sign - The sign of <i>x</i>.
+  */
+  template <class T>
+    std::vector<T> sign (std::vector<T> const &x);
   
 #ifdef HAVE_CASA
   
@@ -180,13 +191,13 @@ namespace CR { // namespace CR -- begin
     \return sign - The signs of the \f$ x_i \f$.
   */
   template <class T>
-    Vector<T> sign (casa::Vector<T> const &x);
+    casa::Vector<T> sign (casa::Vector<T> const &x);
 
   /*!
     \brief Invert the order of elements in a vector.
   */
   template <class T>
-    Vector<T> invertOrder (casa::Vector<T> const &vec);
+    casa::Vector<T> invertOrder (casa::Vector<T> const &vec);
 
 #endif
 

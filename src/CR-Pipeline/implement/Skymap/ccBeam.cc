@@ -26,6 +26,9 @@
 #include <Skymap/ccBeam.h>
 #include <Math/VectorNorms.h>
 
+using std::cerr;
+using std::endl;
+
 // ==============================================================================
 //
 //  Construction
@@ -99,8 +102,8 @@ Vector<T> ccBeam<T,S>::ccbeam (const Matrix<S>& data,
   IPosition shape (data.shape());
   Matrix<T> dataTime (blocksize,shape(1),static_cast<T>(0));
   
-  FFTServer<T,S> server(IPosition(1,blocksize),
-			FFTEnums::REALTOCOMPLEX);
+  casa::FFTServer<T,S> server(IPosition(1,blocksize),
+			      casa::FFTEnums::REALTOCOMPLEX);
   
   try {
     Vector<T> tmp(blocksize);

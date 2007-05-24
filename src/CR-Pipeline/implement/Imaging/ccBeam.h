@@ -29,6 +29,7 @@
 
 // Custom header files
 #include <Imaging/Beam.h>
+#include <Math/VectorNorms.h>
 
 namespace CR { // NAMESPACE CR -- BEGIN
   
@@ -129,7 +130,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
      */
     virtual bool beam (blitz::Array<double,2> &dataBeam,
 		       const blitz::Array<double,2> &dataFFT);
-
+    
     // ----------------------------------------------------------------- Feedback
     
     /*!

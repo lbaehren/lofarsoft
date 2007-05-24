@@ -23,6 +23,7 @@
 #include <string>
 #include <Math/VectorNorms.h>
 
+using std::cerr;
 using std::cout;
 using std::endl;
 
@@ -35,6 +36,10 @@ using std::endl;
 
   \date 2007/01/22
  */
+
+// -----------------------------------------------------------------------------
+
+#ifdef HAVE_BLITZ
 
 /*!
   \brief Some basic test to work with Blitz arrays
@@ -49,9 +54,9 @@ using std::endl;
   
   \return nofFailedTests -- The number of failed tests.
 */
-int test_blitz ()
+int test_blitz_functions ()
 {
-  cout << "\n[test_blitz]\n" << endl;
+  cout << "\n[test_blitz_functions]\n" << endl;
   
   int nofFailedTests (0);
   
@@ -98,6 +103,8 @@ int test_blitz ()
   
   return nofFailedTests;
 }
+
+#endif
 
 // -----------------------------------------------------------------------------
 
@@ -194,6 +201,50 @@ int test_Norms ()
 
 // -----------------------------------------------------------------------------
 
+#ifdef HAVE_CASA
+
+int test_casa_functions ()
+{
+  cout << "\n[test_casa_functions]\n" << endl;
+
+  int nofFailedTests (0);
+  int nelem (10);
+
+  cout << "[1] Sign of vector elements..." << endl;
+  try {
+    casa::Vector<int> vecInt (nelem,1);
+    casa::Vector<float> vecFloat (nelem,1);
+    casa::Vector<double> vecDouble (nelem,1);
+
+    casa::Vector<int> signVecInt = CR::sign (vecInt);
+    casa::Vector<float> signVecFloat = CR::sign (vecFloat);
+    casa::Vector<double> signVecDouble = CR::sign (vecDouble);
+  } catch (std::string err) {
+    cerr << err << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[2] Inversion of vector elements order..." << endl;
+  try {
+    casa::Vector<int> vecInt (nelem,1);
+    casa::Vector<float> vecFloat (nelem,1);
+    casa::Vector<double> vecDouble (nelem,1);
+
+    casa::Vector<int> invVecInt = CR::invertOrder (vecInt);
+    casa::Vector<float> invVecFloat = CR::invertOrder (vecFloat);
+    casa::Vector<double> invVecDouble = CR::invertOrder (vecDouble);
+  } catch (std::string err) {
+    cerr << err << endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
+#endif
+
+// -----------------------------------------------------------------------------
+
 /*!
   \brief Main function 
 
@@ -204,12 +255,24 @@ int main ()
   int nofFailedTests (0);
 
   {
-    nofFailedTests += test_blitz ();
-  }
-
-  {
     nofFailedTests += test_Norms ();
   }
+
+#ifdef HAVE_BLITZ
+
+  {
+    nofFailedTests += test_blitz_functions ();
+  }
+
+#endif
+
+#ifdef HAVE_CASA
+
+  {
+    nofFailedTests += test_casa_functions();
+  }
+
+#endif
 
   return nofFailedTests;  
 }

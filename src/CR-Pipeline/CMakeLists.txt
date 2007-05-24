@@ -14,9 +14,17 @@ if (HAVE_BLITZ)
   add_definitions (-DHAVE_BLITZ)
 endif (HAVE_BLITZ)
 
+## CASA
+
 if (NOT HAVE_CASA) 
   include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindCASA.cmake)
 endif (NOT HAVE_CASA)
+
+if (HAVE_CASA)
+  add_definitions (-DHAVE_CASA)
+endif (HAVE_CASA)
+
+## CFITSIO
 
 if (NOT HAVE_CFITSIO)
   include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindCFITSIO.cmake)

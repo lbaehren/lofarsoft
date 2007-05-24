@@ -115,7 +115,7 @@ namespace CR { // Namespace CR -- begin
   casa::Vector<T> sign (casa::Vector<T> const &x)
   {
     int nelem (x.nelements());
-    casa::Vector<T> s(shape);
+    casa::Vector<T> s(nelem);
 
     for (int n=0; n<nelem; ++n) {
       s(n) = sign (x(n));
@@ -127,12 +127,12 @@ namespace CR { // Namespace CR -- begin
   // ---------------------------------------------------------------- invertOrder
 
   template <class T>
-  Vector<T> invertOrder (Vector<T> const &vec)
+  casa::Vector<T> invertOrder (casa::Vector<T> const &vec)
   {
-    Int nelements (vec.nelements());
-    Vector<T> inv (nelements);
-    Int n (0);
-    Int m (nelements-1);
+    int nelements (vec.nelements());
+    casa::Vector<T> inv (nelements);
+    int n (0);
+    int m (nelements-1);
 
     for (n=0; n<nelements; n++, m--) {
       inv(m) = vec(n);
@@ -171,13 +171,13 @@ namespace CR { // Namespace CR -- begin
   template casa::Vector<float> sign (casa::Vector<float> const &x);
   template casa::Vector<double> sign (casa::Vector<double> const &x);
   
-  template Vector<String> invertOrder (Vector<String> const &vec);
-  template Vector<uInt> invertOrder (Vector<uInt> const &vec);
-  template Vector<int> invertOrder (Vector<int> const &vec);
-  template Vector<float> invertOrder (Vector<float> const &vec);
-  template Vector<double> invertOrder (Vector<double> const &vec);
-  template Vector<Complex> invertOrder (Vector<Complex> const &vec);
-  template Vector<DComplex> invertOrder (Vector<DComplex> const &vec);
+  template casa::Vector<String> invertOrder (casa::Vector<String> const &vec);
+  template casa::Vector<uInt> invertOrder (casa::Vector<uInt> const &vec);
+  template casa::Vector<int> invertOrder (casa::Vector<int> const &vec);
+  template casa::Vector<float> invertOrder (casa::Vector<float> const &vec);
+  template casa::Vector<double> invertOrder (casa::Vector<double> const &vec);
+  template casa::Vector<Complex> invertOrder (casa::Vector<Complex> const &vec);
+  template casa::Vector<DComplex> invertOrder (casa::Vector<DComplex> const &vec);
 
 #endif
 

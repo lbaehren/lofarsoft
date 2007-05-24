@@ -36,7 +36,10 @@
 #include <casa/BasicSL/Complex.h>
 #include <casa/BasicMath/Math.h>
 
-#include <casa/namespace.h>
+using casa::AipsError;
+using casa::IPosition;
+using casa::Matrix;
+using casa::Vector;
 
 /*!
   \class ccBeam
