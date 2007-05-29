@@ -39,9 +39,33 @@ namespace CR { // Namespace CR -- begin
 
     angles_p.resize(1,0.0);
   }
+
+  RotationMatrix::RotationMatrix (unsigned int const &rank)
+  {
+    if (!setRank (rank)) {
+      std::cerr << "[RotationMatrix::RotationMatrix] Failed assigning valid rank!"
+		<< std::endl;
+    }
+
+    angles_p.resize(nofAngles_p,0.0);
+  }
+
+  RotationMatrix::RotationMatrix (unsigned int const &rank,
+				  vector<double> const &angles,
+				  bool const &anglesInDegree)
+  {
+    bool status (true);
+    
+    if (setRank(rank)) {
+      status = setAngles (angles,anglesInDegree);
+    }
+  }
+  
+#ifdef HAVE_BLITZ
   
   RotationMatrix::RotationMatrix (unsigned int const &rank,
-				  vector<double> const &angles)
+				  blitz::Array<double,1> const &angles,
+				  bool const &anglesInDegree)
   {
     bool status (true);
     
@@ -50,6 +74,23 @@ namespace CR { // Namespace CR -- begin
     }
   }
   
+#endif
+
+#ifdef HAVE_CASA
+  
+  RotationMatrix::RotationMatrix (unsigned int const &rank,
+				  casa::Vector<double> const &angles,
+				  bool const &anglesInDegree)
+  {
+    bool status (true);
+    
+    if (setRank(rank)) {
+      status = setAngles (angles);
+    }
+  }
+
+#endif
+    
   RotationMatrix::RotationMatrix (RotationMatrix const &other)
   {
     copy (other);
@@ -98,6 +139,8 @@ namespace CR { // Namespace CR -- begin
   //  Parameters
   //
   // ============================================================================
+
+  // -------------------------------------------------------------------- setRank
   
   bool RotationMatrix::setRank (unsigned int const &rank)
   {
@@ -126,10 +169,13 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
 
-  bool RotationMatrix::setAngles (vector<double> const &angles)
+  // ------------------------------------------------------------------ setAngles
+
+  bool RotationMatrix::setAngles (vector<double> const &angles,
+				  bool const &anglesInDegree)
   {
     bool status (true);
-    unsigned int nelem = angles.size();
+    unsigned int nelem (angles.size());
     unsigned int n (0);
 
     if (nelem == 1) {
@@ -149,13 +195,53 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
   
+  // ------------------------------------------------------------------ setAngles
+
+#ifdef HAVE_BLITZ
+  
+  bool RotationMatrix::setAngles (blitz::Array<double,1> const &angles,
+				  bool const &anglesInDegree)
+  {
+    unsigned int nelem (angles.numElements());
+    vector<double> rotationAngles (nelem);
+    
+    for (unsigned int n(0); n<nelem; n++) {
+      rotationAngles[n] = angles(n);
+    }
+    
+    return setAngles (rotationAngles,anglesInDegree);
+  }
+  
+#endif
+
+  // ------------------------------------------------------------------ setAngles
+  
+#ifdef HAVE_CASA
+  
+  bool RotationMatrix::setAngles (casa::Vector<double> const &angles,
+				  bool const &anglesInDegree)
+  {
+    unsigned int nelem (angles.nelements());
+    vector<double> rotationAngles (nelem);
+
+    for (unsigned int n(0); n<nelem; n++) {
+      rotationAngles[n] = angles(n);
+    }
+
+    return setAngles (rotationAngles,anglesInDegree);
+  }
+
+#endif
+
+  // -------------------------------------------------------------------- summary
+
   void RotationMatrix::summary (std::ostream &os)
   {
     os << "-- Rank        = " << rank_p      << std::endl;
     os << "-- nof. angles = " << nofAngles_p << std::endl;
     
     os << "-- Angles      = " << "[ ";
-    for (unsigned int n(0); angles_p.size(); n++) {
+    for (unsigned int n(0); n<angles_p.size(); n++) {
       os << angles_p[n] << " ";
     }
     os << "]" << std::endl;
@@ -167,6 +253,13 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
+  bool RotationMatrix::rotate (vector<double> &out,
+			       vector<double> const &in)
+  {
+    bool status (true);
+    
+    return status;
+  }
   
 
 } // Namespace CR -- end

@@ -5,10 +5,11 @@ include_directories (. .. ../..)
 ## Set up the list with test program sources
 
 set (tests
-  tVectorNorms
   tRotationMatrix
   tRotation2D
   tRotation3D
+  tVectorNorms
+  tVectorConversion
   )
 
 ## ------------------------------------------------------------------------------

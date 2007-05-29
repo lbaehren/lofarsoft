@@ -87,17 +87,34 @@ namespace CR { // Namespace CR -- begin
     
     /*!
       \brief Argumented constructor
+
+      \param rank -- Rank of the space in which the rotation takes places
+    */
+    RotationMatrix (unsigned int const &rank);
+    
+    /*!
+      \brief Argumented constructor
+
+      \param rank           -- 
+      \param angles         -- 
+      \param anglesInDegree -- 
     */
     RotationMatrix (unsigned int const &rank,
-		    vector<double> const &angles);
+		    vector<double> const &angles,
+		    bool const &anglesInDegree=true);
     
 #ifdef HAVE_BLITZ
 
     /*!
       \brief Argumented constructor (using Blitz++ array classes)
+
+      \param rank           -- 
+      \param angles         -- 
+      \param anglesInDegree -- 
     */
     RotationMatrix (unsigned int const &rank,
-		    blitz::Array<double,1> const &angles);
+		    blitz::Array<double,1> const &angles,
+		    bool const &anglesInDegree=true);
 
 #endif
 
@@ -105,9 +122,14 @@ namespace CR { // Namespace CR -- begin
     
     /*!
       \brief Argumented constructor (CASA array classes)
+
+      \param rank           -- 
+      \param angles         -- 
+      \param anglesInDegree -- 
     */
     RotationMatrix (unsigned int const &rank,
-		    casa::Vector<double> const &angles);
+		    casa::Vector<double> const &angles,
+		    bool const &anglesInDegree=true);
 
 #endif
     
@@ -171,7 +193,8 @@ namespace CR { // Namespace CR -- begin
 
       \return status -- 
     */
-    bool setAngles (vector<double> const &angles);
+    bool setAngles (vector<double> const &angles,
+		    bool const &anglesInDegree=true);
 
 #ifdef HAVE_BLITZ
     
@@ -182,7 +205,8 @@ namespace CR { // Namespace CR -- begin
 
       \return status -- 
     */
-    bool setAngles (blitz::Array<double,1> const &angles);
+    bool setAngles (blitz::Array<double,1> const &angles,
+		    bool const &anglesInDegree=true);
 
 #endif
     
@@ -195,7 +219,8 @@ namespace CR { // Namespace CR -- begin
 
       \return status -- 
     */
-    bool setAngles (casa::Vector<double> const &angles);
+    bool setAngles (casa::Vector<double> const &angles,
+		    bool const &anglesInDegree=true);
 
 #endif
     

@@ -18,20 +18,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: template-tclass.cc,v 1.7 2007/03/06 14:53:26 bahren Exp $*/
+/* $Id: template-tclass.cc,v 1.6 2006/09/20 09:56:53 bahren Exp $*/
 
-#include <Math/RotationMatrix.h>
-
-using CR::RotationMatrix;
+#include <Math/VectorConversion.h>
 
 /*!
-  \file tRotationMatrix.cc
+  \file tVectorConversion.cc
 
   \ingroup Math
 
-  \brief A collection of test routines for RotationMatrix
+  \brief A collection of test routines for VectorConversion
  
-  \author Lars Baehren
+  \author Lars B&auml;hren
  
   \date 2007/05/29
 */
@@ -39,47 +37,31 @@ using CR::RotationMatrix;
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test constructors for a new RotationMatrix object
+  \brief Test routines for conversion of angles
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_RotationMatrix ()
+int test_angleConversion ()
 {
   int nofFailedTests (0);
   
-  std::cout << "\n[test_RotationMatrix]\n" << std::endl;
+  std::cout << "\n[test_VectorConversion]\n" << std::endl;
 
-  std::cout << "[1] Testing default constructor ..." << std::endl;
+  std::cout << "[1] Testing conversion of individual values ..." << std::endl;
   try {
-    RotationMatrix newObject;
-    newObject.summary();
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-  
-  std::cout << "[2] Testing argumented constructor ..." << std::endl;
-  try {
-    RotationMatrix rotation2d (2);
-    RotationMatrix rotation3d (3);
+    double angleInDegree (0.0);
+    double angleInRadian (0);
 
-    std::cout << "--> Rotation in 2 dimensions" << std::endl;
-    rotation2d.summary();
-    std::cout << "--> Rotation in 3 dimensions" << std::endl;
-    rotation3d.summary();
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-  
-  std::cout << "[2] Testing argumented constructor ..." << std::endl;
-  try {
-    unsigned int rank (2);
-    vector<double> angles (1,45.0);
-    RotationMatrix rotation2d (rank,angles);
-    rotation2d.summary();
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
+    for (unsigned int n(0); n<18; n++) {
+      angleInDegree = n*10.0;
+      angleInRadian = CR::deg2rad (angleInDegree);
+      std::cout << "\t" << angleInDegree
+		<< "\t" << angleInRadian
+		<< "\t" << CR::rad2deg (angleInRadian)
+		<< std::endl;
+    }
+  } catch (std::string err) {
+    std::cerr << err << std::endl;
     nofFailedTests++;
   }
   
@@ -94,7 +76,7 @@ int main ()
 
   // Test for the constructor(s)
   {
-    nofFailedTests += test_RotationMatrix ();
+    nofFailedTests += test_angleConversion ();
   }
 
   return nofFailedTests;

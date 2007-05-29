@@ -49,6 +49,11 @@ namespace CR { // Namespace CR -- begin
     </ul>
     
     <h3>Synopsis</h3>
+
+    \f[
+      \mathbf{R}(\alpha) = \left[ \begin{array}{cc} \cos\alpha & \sin\alpha \\
+      -\sin\alpha & \cos\alpha \end{array} \right]
+    \f]
     
     <h3>Example(s)</h3>
     

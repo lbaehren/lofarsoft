@@ -80,7 +80,7 @@ namespace CR {  // Namespace CR -- begin
   void Shapelets1D::initShapelets1D ()
   {
     // store numbers for book-keeping
-    order_p = Hermite1D::order ();
+    order_p    = Hermite1D::order ();
     nofCoeff_p = Hermite1D::order () + 1;
     // compute the normalization coefficients
     Shapelets1D::calcCoefficients ();

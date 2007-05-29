@@ -40,6 +40,8 @@
 #include <casa/Exceptions/Error.h>
 #include <measures/Measures.h>
 
+#include <Math/Constants.h>
+
 using std::vector;
 using casa::Vector;
 using casa::uInt;
@@ -126,8 +128,24 @@ namespace CR { // Namespace CR -- begin
     \return rad -- Angle in radian
   */
   inline double deg2rad (double const &deg) {
-    return deg*casa::C::pi/180.0;
+    return deg*CR::pi/180.0;
   }
+
+  /*!
+    \brief Convert radian to degrees
+
+    \param deg -- Vector with angles given in degrees
+
+    \return rad -- Vector with angles given in radian
+  */
+  inline vector<double> deg2rad (vector<double> const &deg) {
+    vector<double> rad (deg.size());
+    for (unsigned int n(0); n<deg.size(); n++) {
+      rad[n] = deg2rad(deg[n]);
+    }
+    return rad;
+  }
+
   /*!
     \brief Convert radian to degrees
     
@@ -135,7 +153,7 @@ namespace CR { // Namespace CR -- begin
     \param deg -- Angle in degrees
   */
   inline void deg2rad (double &rad,
-		double const &deg) {
+		       double const &deg) {
     rad = deg2rad (rad);
   }
   
@@ -147,8 +165,24 @@ namespace CR { // Namespace CR -- begin
     \return deg -- Angle in degrees
   */
   inline double rad2deg (double const &rad) {
-    return rad*180/casa::C::pi;
+    return rad*180/CR::pi;
   }
+
+  /*!
+    \brief Convert radian to degrees
+
+    \param rad -- Vector with angles given in radian
+
+    \return deg -- Vector with angles given in degree
+  */
+  inline vector<double> rad2deg (vector<double> const &rad) {
+    vector<double> deg (rad.size());
+    for (unsigned int n(0); n<rad.size(); n++) {
+      deg[n] = rad2deg(rad[n]);
+    }
+    return deg;
+  }
+
   /*!
     \brief Convert radian to degrees
     
