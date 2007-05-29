@@ -177,15 +177,22 @@ namespace CR { // Namespace CR -- begin
     bool status (true);
     unsigned int nelem (angles.size());
     unsigned int n (0);
+    vector<double> anglesInRadian (nelem);
+
+    if (anglesInDegree) {
+      anglesInRadian = deg2rad (angles);
+    } else {
+      anglesInRadian = angles;
+    }
 
     if (nelem == 1) {
       angles_p.resize(nofAngles_p);
       for (n=0; n<nofAngles_p; n++) {
-	angles_p[n] = angles[0];
+	angles_p[n] = anglesInRadian[0];
       }
     } else if (nelem == nofAngles_p) {
       angles_p.resize(nofAngles_p);
-      angles_p = angles;
+      angles_p = anglesInRadian;
     } else {
       std::cerr << "[RotationMatrix::setAngles] Invalid number of rotation angles!"
 		<< std::endl;
@@ -237,12 +244,14 @@ namespace CR { // Namespace CR -- begin
 
   void RotationMatrix::summary (std::ostream &os)
   {
-    os << "-- Rank        = " << rank_p      << std::endl;
-    os << "-- nof. angles = " << nofAngles_p << std::endl;
+    vector<double> rotationAngles (angles(true));
+
+    os << "-- Rank         = " << rank_p      << std::endl;
+    os << "-- nof. angles  = " << nofAngles_p << std::endl;
     
-    os << "-- Angles      = " << "[ ";
+    os << "-- Angles (deg) = " << "[ ";
     for (unsigned int n(0); n<angles_p.size(); n++) {
-      os << angles_p[n] << " ";
+      os << rotationAngles[n] << " ";
     }
     os << "]" << std::endl;
   }

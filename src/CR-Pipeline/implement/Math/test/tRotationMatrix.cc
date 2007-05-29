@@ -74,10 +74,15 @@ int test_RotationMatrix ()
   
   std::cout << "[2] Testing argumented constructor ..." << std::endl;
   try {
-    unsigned int rank (2);
     vector<double> angles (1,45.0);
-    RotationMatrix rotation2d (rank,angles);
+    //
+    std::cout << "--> Rotation in 2 dimensions" << std::endl;
+    RotationMatrix rotation2d (2,angles);
     rotation2d.summary();
+    //
+    std::cout << "--> Rotation in 3 dimensions" << std::endl;
+    RotationMatrix rotation3d (3,angles);
+    rotation3d.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;

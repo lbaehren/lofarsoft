@@ -65,6 +65,27 @@ int test_angleConversion ()
     nofFailedTests++;
   }
   
+  std::cout << "[2] Testing conversion of set of values ..." << std::endl;
+  try {
+    unsigned int nelem (10);
+    vector<double> angleInDegree (nelem);
+    vector<double> angleInRadian (nelem);
+
+    for (unsigned int n(0); n<nelem; n++) {
+      angleInDegree[n] = n*10;
+    }
+
+    angleInRadian = CR::deg2rad (angleInDegree);
+
+    for (unsigned int n(0); n<nelem; n++) {
+      std::cout << "\t" << angleInDegree[n] << "\t" << angleInRadian[n] << std::endl;
+    }
+
+  } catch (std::string err) {
+    std::cerr << err << std::endl;
+    nofFailedTests++;
+  }
+  
   return nofFailedTests;
 }
 

@@ -36,6 +36,7 @@
 #include <casa/Arrays/Vector.h>
 #endif
 
+#include <Math/VectorConversion.h>
 
 using std::vector;
 
@@ -182,8 +183,12 @@ namespace CR { // Namespace CR -- begin
 
       \return angles -- 
     */
-    inline vector<double> angles () {
-      return angles_p;
+    inline vector<double> angles (bool const &anglesInDegree=true) {
+      if (anglesInDegree) {
+	return rad2deg (angles_p);
+      } else {
+	return angles_p;
+      }
     }
     
     /*!

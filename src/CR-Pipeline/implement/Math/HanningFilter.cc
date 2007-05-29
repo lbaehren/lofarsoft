@@ -20,6 +20,7 @@
 
 /* $Id: HanningFilter.cc,v 1.7 2006/11/02 12:39:16 horneff Exp $ */
 
+#include <Math/Constants.h>
 #include <Math/HanningFilter.h>
 
 #include <casa/namespace.h>
@@ -201,7 +202,7 @@ void HanningFilter<T>::setWeights ()
   T x (0);
 
   if (beta_p == 0) {
-    factor = 2*C::pi/(blocksize-1);
+    factor = 2*CR::pi/(blocksize-1);
     
     for (unsigned int n(0); n<blocksize; n++) {
       x = (T)n*factor;
@@ -212,16 +213,16 @@ void HanningFilter<T>::setWeights ()
     uint n(0);
     
     // raising segment
-    factor = C::pi/(betaRise_p-1);
+    factor = CR::pi/(betaRise_p-1);
     for (n=0; n<betaRise_p; n++) {
       x = (T)n*factor;
       weights(n) = alpha_p - (T(1)-alpha_p)*cos(x);
     }
     
     // falling segment
-    factor = C::pi/(betaFall_p-1);
+    factor = CR::pi/(betaFall_p-1);
     for (n=0; n<betaFall_p; n++) {
-      x = (T)n*factor+T(C::pi);
+      x = (T)n*factor+T(CR::pi);
       weights(blocksize-betaFall_p+n) = alpha_p - (T(1)-alpha_p)*cos(x);
     }
   }

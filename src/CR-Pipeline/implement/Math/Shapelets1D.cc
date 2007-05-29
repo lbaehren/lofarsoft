@@ -26,9 +26,8 @@
 using namespace std;
 
 // Custom header files
+#include <Math/Constants.h>
 #include <Math/Shapelets1D.h>
-
-#define PI 3.14159265358979323846
 
 namespace CR {  // Namespace CR -- begin
   
@@ -127,7 +126,7 @@ namespace CR {  // Namespace CR -- begin
   
   void Shapelets1D::calcCoefficients ()
   {
-    double sqrt_pi = sqrt(PI);
+    double sqrt_pi = sqrt(pi);
     double pw;
     
     /* allocate memory for the normalization coefficients ... */
@@ -201,7 +200,7 @@ namespace CR {  // Namespace CR -- begin
       // n is even
       if ((n/2)*2 == n) {
 	pw = 1.0*(1-n);
-	integral_p[n] = sqrt(pow(2.0,pw)*sqrt(PI)*beta_p*Shapelets1D::bico(n,n/2));
+	integral_p[n] = sqrt(pow(2.0,pw)*sqrt(pi)*beta_p*Shapelets1D::bico(n,n/2));
       }
     }
   }

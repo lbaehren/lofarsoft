@@ -21,10 +21,48 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+/*!
+  \brief A collection of numerical constants for common usage
+
+  \ingroup Math
+
+  <h3>References</h3>
+
+  <ul>
+    <li><tt>casa/BasicSL/Constants.h</tt> -- Mathematical and physical constants
+        implemented with the CASA libraries
+    <li>Abramowitz & Stegun (1964) Handbook of Mathematical Functions, Dover
+    Publications Inc., New York (9th printing, 1972)
+  </ul>
+*/
+
 namespace CR {  // Namespace CR -- begin
   
+  /*
+    Irrationals
+  */
+  //! Square-root of 2, \f$ \sqrt{2} \f$
+  const double sqrt2    = 1.4142135623730950488;
+  //! Square-root of 3, \f$ \sqrt{3} \f$
+  const double sqrt3    = 1.7320508075688772935;
+  //! One over square-root of 2, \f$ 1/\sqrt{2} \f$
+  const double _1_sqrt2	= 0.70710678118654752440;
+  //! One over square-root of 3, \f$ 1/\sqrt{3} \f$
+  const double _1_sqrt3 = 0.57735026918962576451;
+  
+  // PI and functions thereof:
+  //! \f$ \pi \f$
   const double pi = 3.1415926535897932384626433832795;
-
+  
+  // Angular measure:
+  const double radian  = 1.0;
+  //! Circumference of a circle with unit radius, \f$ 2 \pi \f$
+  const double circle  = 6.2831853071795864769252867;
+  //! Conversion factor from degree to radian, \f$ \pi/180^\circ \f$
+  const double degree  = 0.0174532925199432957692369;
+  const double arcmin  = 0.000290888208665721596153948459;
+  const double arcsec  = 0.00000484813681109535993589914098765;
+  
 }  // Namespace CR -- end
 
 #endif
