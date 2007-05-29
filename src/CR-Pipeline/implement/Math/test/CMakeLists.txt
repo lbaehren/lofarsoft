@@ -6,6 +6,9 @@ include_directories (. .. ../..)
 
 set (tests
   tVectorNorms
+  tRotationMatrix
+  tRotation2D
+  tRotation3D
   )
 
 ## ------------------------------------------------------------------------------

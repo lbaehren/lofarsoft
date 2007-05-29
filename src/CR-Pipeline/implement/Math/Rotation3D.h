@@ -18,32 +18,29 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: template-class.h,v 1.17 2006/11/08 22:07:16 bahren Exp $*/
+/* $Id: template-class.h,v 1.18 2007/03/06 14:53:26 bahren Exp $*/
 
-#ifndef BEAM_H
-#define BEAM_H
+#ifndef ROTATION3D_H
+#define ROTATION3D_H
 
-// Standard library header files
 #include <string>
-#include <complex>
 
-// Custom header files
-#include <Imaging/GeometricalWeight.h>
+#include <Math/RotationMatrix.h>
 
-namespace CR { // NAMESPACE CR -- BEGIN
+namespace CR { // Namespace CR -- begin
   
   /*!
-    \class Beam
+    \class Rotation3D
     
-    \ingroup Imaging
+    \ingroup Math
     
-    \brief Brief description for class Beam
+    \brief Brief description for class Rotation3D
     
-    \author Lars B&auml;hren
+    \author Lars Baehren
 
-    \date 2007/01/29
+    \date 2007/05/29
 
-    \test tBeam.cc
+    \test tRotation3D.cc
     
     <h3>Prerequisite</h3>
     
@@ -56,7 +53,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     <h3>Example(s)</h3>
     
   */  
-  class Beam {
+  class Rotation3D : public RotationMatrix {
     
   public:
     
@@ -65,101 +62,67 @@ namespace CR { // NAMESPACE CR -- BEGIN
     /*!
       \brief Default constructor
     */
-    Beam ();
+    Rotation3D ();
     
     /*!
       \brief Copy constructor
       
-      \param other -- Another Beam object from which to create this new
+      \param other -- Another Rotation3D object from which to create this new
       one.
     */
-    Beam (Beam const &other);
+    Rotation3D (Rotation3D const &other);
     
     // -------------------------------------------------------------- Destruction
 
     /*!
       \brief Destructor
     */
-    virtual ~Beam ();
+    ~Rotation3D ();
     
     // ---------------------------------------------------------------- Operators
     
     /*!
       \brief Overloading of the copy operator
       
-      \param other -- Another Beam object from which to make a copy.
+      \param other -- Another Rotation3D object from which to make a copy.
     */
-    Beam& operator= (Beam const &other); 
+    Rotation3D& operator= (Rotation3D const &other); 
     
     // --------------------------------------------------------------- Parameters
-
-
-    
-    // ------------------------------------------------------------------ Methods
-
-#ifdef HAVE_BLITZ
-
-    /*!
-      \brief Beamforming of the data, returning real-valued result
-
-      \retval dataBeam -- [nofSkyPosition,nofChannels] 
-      \param  dataFFT  -- 
-
-      \return status   -- Status of the operation; returns <i>false</i> if an
-                          an error was encountered
-     */
-    virtual bool beam (blitz::Array<double,2> &dataBeam,
-		       const blitz::Array<double,2> &dataFFT) {
-      return false;
-    }
-    
-    /*!
-      \brief Beamforming of the data, returning real-valued result
-
-      \retval dataBeam -- [nofSkyPosition,nofChannels] 
-      \param  dataFFT  -- 
-
-      \return status   -- Status of the operation; returns <i>false</i> if an
-                          an error was encountered
-    */
-    virtual bool beam (blitz::Array<std::complex<double>,2> &dataBeam,
-		       const blitz::Array<double,2> &dataFFT) {
-      return false;
-    }
-    
-#endif
-
-    // ----------------------------------------------------------------- Feedback
     
     /*!
       \brief Get the name of the class
       
-      \return className -- The name of the class, Beam.
+      \return className -- The name of the class, Rotation3D.
     */
     std::string className () const {
-      return "Beam";
+      return "Rotation3D";
     }
-    
+
     /*!
-      \brief Provide a summary of the class's internal data and status
+      \brief Provide a summary of the internal status
     */
-    void summary ();
+    void summary ();    
+
+    // ------------------------------------------------------------------ Methods
+    
+    
     
   private:
     
     /*!
       \brief Unconditional copying
     */
-    void copy (Beam const &other);
+    void copy (Rotation3D const &other);
     
     /*!
       \brief Unconditional deletion 
     */
     void destroy(void);
     
-  };  // CLASS BEAM -- END
+  };
   
-}  // NAMESPACE CR -- END
+} // Namespace CR -- end
 
-#endif /* BEAM_H */
+#endif /* ROTATION3D_H */
   
