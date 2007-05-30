@@ -109,7 +109,16 @@ namespace CR {  // Namespace CR -- begin
       
       \param observatory -- The name of the observatory.
     */
-    ObservationData (const String observatory);
+    ObservationData (String const &observatory);
+    
+    /*!
+      \brief Argumented constructor
+      
+      \param observatory -- The name of the observatory.
+      \param observer    -- The name (or initials) of the observer.
+    */
+    ObservationData (String const &observatory,
+		     String const &observer);
     
   /*!
     \brief Argumented constructor.
@@ -118,7 +127,7 @@ namespace CR {  // Namespace CR -- begin
     \param observatory -- The name of the observatory.
   */
     ObservationData (const Quantity epoch,
-		     const String observatory);
+		     String const &observatory);
     
     /*!
       \brief Argumented constructor.
@@ -127,7 +136,7 @@ namespace CR {  // Namespace CR -- begin
       \param observatory -- The name of the observatory.
     */
     ObservationData (const MEpoch epoch,
-		     const String observatory);
+		     String const &observatory);
     
   /*!
     \brief Argumented constructor.

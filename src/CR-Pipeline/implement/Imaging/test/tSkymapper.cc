@@ -33,7 +33,7 @@ using casa::IPosition;
 using casa::ProgressMeter;
 
 #include <templates.h>
-#include <Skymap/Skymapper.h>
+#include <Imaging/Skymapper.h>
 
 using CR::SkymapCoordinates;
 using CR::Skymapper;
@@ -42,7 +42,7 @@ using CR::TimeFreq;
 /*!
   \file tSkymapper.cc
 
-  \ingroup Skymap
+  \ingroup Imaging
 
   \brief A collection of test routines for Skymapper
  

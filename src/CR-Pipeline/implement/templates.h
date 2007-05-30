@@ -18,15 +18,20 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+namespace CR {  // Namespace CR -- begin
+
 /*!
   \brief Template instantiation for CASA objects
+  
+  \defgroup CR
+  \ingroup CR
 
   \author Lars B&auml;hren
 
   \date 2007/02/19
-
-  \defgroup CR
 */
+
+}  // Namespace CR -- end
 
 // Header files
 

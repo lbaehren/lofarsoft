@@ -21,9 +21,12 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+namespace CR {  // Namespace CR -- begin
+  
 /*!
   \brief A collection of numerical constants for common usage
 
+  \ingroup CR
   \ingroup Math
 
   <h3>References</h3>
@@ -36,8 +39,6 @@
   </ul>
 */
 
-namespace CR {  // Namespace CR -- begin
-  
   /*
     Irrationals
   */

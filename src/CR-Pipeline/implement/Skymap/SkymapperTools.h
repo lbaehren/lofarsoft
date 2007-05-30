@@ -35,7 +35,7 @@
 #include <IO/DataReaderTools.h>
 #include <Observation/ObservationData.h>
 #include <Skymap/Skymap.h>
-#include <Skymap/Skymapper.h>
+#include <Imaging/Skymapper.h>
 
 #include <casa/namespace.h>
 

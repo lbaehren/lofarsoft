@@ -145,7 +145,15 @@ namespace CR { // Namespace CR -- begin
   }
   
   void SkymapCoordinates::copy (SkymapCoordinates const &other)
-  {;}
+  {
+    timeFreq_p       = other.timeFreq_p;
+    obsData_p        = other.obsData_p;
+    nofBlocks_p      = other.nofBlocks_p;
+    mapOrientation_p = other.mapOrientation_p;
+    mapQuantity_p    = other.mapQuantity_p;
+    shape_p          = other.shape_p;
+    directionMask_p  = other.directionMask_p;
+  }
 
   // ============================================================================
   //
@@ -180,6 +188,7 @@ namespace CR { // Namespace CR -- begin
     mapOrientation_p = mapOrientation;
     mapQuantity_p    = mapQuantity;
     shape_p          = IPosition (5,120,120,1,1,1);
+    directionMask_p  = Matrix<bool> (120,120,true);
     
     return defaultCoordinateSystem ();
   }
@@ -471,30 +480,33 @@ namespace CR { // Namespace CR -- begin
     Matrix<Double> values (shape);
 
     /*
+      Update the shape of the pixel mask for the directions
+    */
+    directionMask_p.resize(shape_p(0),shape_p(1));
+
+    /*
       Extract the direction axis from the coordinate system object and adjust
       the reference frame used for the world coordinates
     */
 
     cout << "--> extracting the direction axis ..." << endl;
-    DirectionCoordinate axis = directionAxis();
+    DirectionCoordinate dc = directionAxis();
     cout << "--> adjusting reference frame conversion ..." << endl;
-    axis.setReferenceConversion(type);
+    dc.setReferenceConversion(type);
     cout << "--> converting coordinate values ..." << endl;
-    for (lon=0; lon<shape_p(0); lon++) {
-      pixel(0) = double(lon);
-      for (lat=0; lat<shape_p(1); lat++) {
-	pixel(1) = double(lat);
+    for (lon=0, pixel(0)=0.0; lon<shape_p(0); lon++, pixel(0)++) {
+      for (lat=0, pixel(1)=0.0; lat<shape_p(1); lat++, pixel(1)++) {
 	// perform the actual conversion from pixel to world coordinate
-	try {
-	  axis.toWorld (world,pixel);
-	} catch (casa::AipsError x) {
-	  cerr << x.getMesg() << endl;
-	}
+	directionMask_p (lon,lat) = dc.toWorld (world,pixel);
 	// stored the retrieved value into the returned array
 	values.row(nValue) = world;
 	nValue++;
       }
     }
+
+    cout << "--> summary of coordinate conversion:" << endl;
+    cout << "-- Projection        = " << dc.projection().name()  << endl;
+    cout << "-- Shape pixel mask  = " << directionMask_p.shape() << endl;
 
     return values;
   }
@@ -760,6 +772,7 @@ namespace CR { // Namespace CR -- begin
     std::string top;
     std::string right;
     vector<double> frequencyBand (timeFreq_p.frequencyBand());
+    DirectionCoordinate dc (directionAxis());
 
     status = mapQuantity (domain,quantity);
     status = mapOrientation (top,right);
@@ -800,6 +813,7 @@ namespace CR { // Namespace CR -- begin
 
     os << "-- Image properties:" << std::endl;
     os << " nof. processed blocks    = " << nofBlocks_p             << std::endl;
+    os << " Projection               = " << dc.projection().name()  << std::endl;
     os << " Skymap orientation       = " << mapOrientation_p
        << " [" << top << "," << right << "]"                        << std::endl;
     os << " Skymap quantity          = " << mapQuantity_p           

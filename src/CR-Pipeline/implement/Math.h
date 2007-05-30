@@ -18,11 +18,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <Math/Hermite1D.h>
+#include <Math/Shapelets1D.h>
+
+namespace CR {  // Namespace CR -- begin
+
 /*!
   \file Math.h
 
-  \namespace CR
-  
   \defgroup Math
 
   \brief Math module for the CR-pipeline
@@ -37,5 +40,4 @@
   in the <i>Math</i> module.
 */
 
-#include <Math/Hermite1D.h>
-#include <Math/Shapelets1D.h>
+}

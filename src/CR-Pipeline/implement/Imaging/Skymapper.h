@@ -58,7 +58,8 @@ namespace CR {  // Namespace CR -- begin
 /*!
   \class Skymapper
   
-  \ingroup Skymap
+  \ingroup CR
+  \ingroup Imaging
   
   \brief Brief description for class Skymapper
   

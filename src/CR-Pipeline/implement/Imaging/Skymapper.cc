@@ -23,7 +23,7 @@
 #include <iostream>
 #include <casa/Containers/Record.h>
 #include <casa/Exceptions/Error.h>
-#include <Skymap/Skymapper.h>
+#include <Imaging/Skymapper.h>
 #include <Skymap/SkymapperTools.h>
 #include <Utilities/ProgressBar.h>
 

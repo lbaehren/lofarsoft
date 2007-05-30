@@ -45,7 +45,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class RotationMatrix
     
-    \ingroup Math
+  \ingroup Math
     
     \brief Brief description for class RotationMatrix
     

@@ -20,8 +20,8 @@
 
 /* $Id */
 
-#if !defined(_MATHFFT_H)
-#define _MATHFFT_H
+#ifndef MATHFFT_H
+#define MATHFFT_H
 
 /* // C++ Standard library */
 /* #include <stdio.h> */
@@ -51,8 +51,13 @@
 
 #include <casa/namespace.h>
 
+namespace CR { // Namespace CR -- begin
+  
 /*!
   \brief Fourier transform related mathematical operations.
+
+  \ingroup CR
+  \ingroup Math
 
   \author Lars Baehren
 
@@ -97,8 +102,6 @@
 
 */
 
-namespace CR { // Namespace CR -- begin
-  
   /*!
     \brief Compute a new time-series from fft-data 
     

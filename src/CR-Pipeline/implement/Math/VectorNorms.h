@@ -48,8 +48,12 @@ using casa::String;
 using casa::uInt;
 #endif
 
+namespace CR { // namespace CR -- begin
+
 /*!
   \brief Various vector norms
+  
+  \ingroup Math
 
   \author Lars B&auml;hren
 
@@ -64,8 +68,6 @@ using casa::uInt;
   <h3>Example(s)</h3>
 
 */
-
-namespace CR { // namespace CR -- begin
 
   // ============================================================================
   //

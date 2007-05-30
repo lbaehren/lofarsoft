@@ -11,6 +11,7 @@ set (tests
   tGeometricalWeight
   tMDirection
   tSkymapCoordinates
+  tSkymapper
   )
 
 ## ------------------------------------------------------------------------------

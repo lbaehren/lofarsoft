@@ -32,7 +32,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class Rotation2D
     
-    \ingroup Math
+  \ingroup Math
     
     \brief Brief description for class Rotation2D
     

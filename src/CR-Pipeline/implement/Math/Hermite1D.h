@@ -34,7 +34,7 @@ namespace CR {  // Namespace CR -- begin
   /*!
     \class Hermite1D
 
-    \ingroup Math
+  \ingroup Math
     
     \brief A class to implement Hermite Polynomials.
     

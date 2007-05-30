@@ -23,16 +23,18 @@
 
 #include <casa/namespace.h>
 
+namespace CR { // Namespace CR -- begin
+  
 /*!
   \brief Algebraic operations on vectors and matrices
+
+  \ingroup Math
 
   \author Lars B&auml;hren
 
   \date 2004/10
 */
 
-namespace CR { // Namespace CR -- begin
-  
   /*!
     \brief L1-Norm of a vector.
     

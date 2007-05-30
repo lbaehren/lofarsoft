@@ -21,8 +21,6 @@
 /*!
   \file Imaging.h
 
-  \namespace CR
-  
   \defgroup Imaging
 
   \brief Imaging module for the CR-pipeline
