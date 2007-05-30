@@ -261,9 +261,9 @@ namespace CR { // Namespace CR -- begin
       \return status -- Status of the operation; returns <i>false</i> if an error
                         was encountered.
     */
-    bool rotate (vector<double> &out,
-		 vector<double> const &in);
-
+    virtual bool rotate (vector<double> &out,
+			 vector<double> const &in);
+    
 #ifdef HAVE_BLITZ
     
     /*!
@@ -275,9 +275,9 @@ namespace CR { // Namespace CR -- begin
       \return status -- Status of the operation; returns <i>false</i> if an error
                         was encountered.
     */
-    bool rotate (blitz::Array<double,1> &out,
-		 blitz::Array<double,1> const &in);
-
+    virtual bool rotate (blitz::Array<double,1> &out,
+			 blitz::Array<double,1> const &in);
+    
     /*!
       \brief Apply rotation to a matrix
 
@@ -287,9 +287,9 @@ namespace CR { // Namespace CR -- begin
       \return status -- Status of the operation; returns <i>false</i> if an error
                         was encountered.
     */
-    bool rotate (blitz::Array<double,2> &out,
-		 blitz::Array<double,2> const &in);
-
+    virtual bool rotate (blitz::Array<double,2> &out,
+			 blitz::Array<double,2> const &in);
+    
 #endif
     
 #ifdef HAVE_CASA

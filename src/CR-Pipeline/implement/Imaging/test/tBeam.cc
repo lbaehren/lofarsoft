@@ -34,7 +34,7 @@ using CR::Beam;
 
   \brief A collection of test routines for Beam
  
-  \author Lars Baehren
+  \author Lars B&auml;hren
  
   \date 2007/01/29
 */

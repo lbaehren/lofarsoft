@@ -45,7 +45,7 @@
 #include <IO/DataReaderTools.h>
 #include <Observation/ObservationData.h>
 #include <Skymap/Skymap.h>
-#include <Skymap/SkymapCoordinates.h>
+#include <Imaging/SkymapCoordinates.h>
 #include <Skymap/SkymapQuantity.h>
 
 using casa::IPosition;

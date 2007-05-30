@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: SkymapCoordinates.h,v 1.13 2007/04/19 14:22:46 horneff Exp $*/
+/* $Id: SkymapCoordinates.h,v 1.1 2007/05/02 09:37:10 bahren Exp $*/
 
 #ifndef SKYMAPCOORDINATES_H
 #define SKYMAPCOORDINATES_H
@@ -58,7 +58,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class SkymapCoordinates
     
-    \ingroup Skymap
+    \ingroup Imaging
     
     \brief Handling of the various coordinates involved in the creation of a skymap
     
@@ -76,6 +76,8 @@ namespace CR { // Namespace CR -- begin
       <li>ObservationData
       <li><a href="http://casa.nrao.edu/docs/doxygen/group__Coordinates.html">CASA
           coordinates module</a>
+      <li><a href="http://casa.nrao.edu/docs/doxygen/group__Arrays.html">CASA
+          arrays module</a>
     </ul>
     
     <h3>Synopsis</h3>
@@ -371,6 +373,17 @@ namespace CR { // Namespace CR -- begin
     inline SkymapCoordinates::MapOrientation mapOrientation () {
       return mapOrientation_p;
     }
+
+    /*!
+      \brief Get the orientation of the generated sky map
+
+      \retval top   -- Celestial direction towards the top of the map
+      \retval right -- Celestial direction towards the right of the map
+
+      \return status -- Status of the operation.
+    */
+    bool mapOrientation (std::string &top,
+			 std::string &right);
     
     /*!
       \brief Set the orientation of the generated sky map
@@ -475,6 +488,35 @@ namespace CR { // Namespace CR -- begin
       return true;
     }
     
+    /*!
+      \brief Get the coordinate values along the direction axes
+
+      \return directionValues -- The coordinate values along the distance axis
+    */
+    Matrix<Double> directionAxisValues ();
+
+    /*!
+      \brief Get the coordinate values along the direction axes
+
+      \param refcode -- Extra conversion type; whenever a conversion from pixel
+                        to world is done, the world value is then further
+			converted to the corresponding MDirection::Types value.
+			
+      \return directionValues -- The coordinate values along the distance axis
+    */
+    Matrix<Double> directionAxisValues (casa::String const &refcode);
+
+    /*!
+      \brief Get the coordinate values along the direction axes
+
+      \param type -- Extra conversion type; whenever a conversion from pixel to
+                     world is done, the world value is then further converted to
+		     this MDirection::Types value.
+
+      \return directionValues -- The coordinate values along the distance axis
+    */
+    Matrix<Double> directionAxisValues (casa::MDirection::Types const &type);
+
     // ------------------------------------------------------------ Distance axis
 
     /*!
@@ -542,6 +584,13 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the coordinate values along the time axis
 
+      \return timeValues -- The coordinate values along the time axis
+    */
+    Vector<Double> timeAxisValues ();
+
+    /*!
+      \brief Get the coordinate values along the time axis
+
       \param pixelValues -- Pixel coordinates for which to return the time
                             values
 
@@ -559,6 +608,13 @@ namespace CR { // Namespace CR -- begin
     inline SpectralCoordinate frequencyAxis () {
       return csys_p.spectralCoordinate(SkymapCoordinates::Frequency);
     }
+
+    /*!
+      \brief Get the coordinate values along the frequency axis
+
+      \return frequencyValues -- The coordinate values along the frequency axis
+    */
+    Vector<Double> frequencyAxisValues ();
 
     /*!
       \brief Get the coordinate values along the frequency axis

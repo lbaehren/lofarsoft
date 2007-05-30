@@ -261,14 +261,85 @@ namespace CR { // Namespace CR -- begin
   //  Methods
   //
   // ============================================================================
+
+  // --------------------------------------------------------------------- rotate
   
   bool RotationMatrix::rotate (vector<double> &out,
 			       vector<double> const &in)
   {
     bool status (true);
+
+    // check nof. elements in the input vector
+    unsigned int nelem (in.size());
+
+    if (nelem == rank_p) {
+      out.resize(nelem);
+      /*
+	Rotation in 2-dimensional space
+      */
+      if (nelem == 2) {
+	out[0] =  cos(angles_p[0])*in[0] + sin(angles_p[0])*in[1];
+	out[1] = -sin(angles_p[0])*in[0] + cos(angles_p[0])*in[1];
+      }
+      /*
+	Rotation in 3-dimensional space
+       */
+      else if (nelem == 3) {
+      } else {
+	out = in;
+	std::cerr << "[RotationMatrix::rotate] Unsupported vector rank!"
+		  << std::endl;
+      }
+    } else {
+      status = false;
+    }
     
     return status;
   }
   
+#ifdef HAVE_BLITZ
+    
+  bool RotationMatrix::rotate (blitz::Array<double,1> &out,
+			       blitz::Array<double,1> const &in)
+  {
+    bool status (true);
+
+    // check nof. elements in the input vector
+    unsigned int nelem (in.numElements());
+
+    if (nelem == rank_p) {
+      out.resize(nelem);
+      /*
+	Rotation in 2-dimensional space
+      */
+      if (nelem == 2) {
+	out(0) =  cos(angles_p[0])*in(0) + sin(angles_p[0])*in(1);
+	out(1) = -sin(angles_p[0])*in(0) + cos(angles_p[0])*in(1);
+      }
+      /*
+	Rotation in 3-dimensional space
+      */
+      else if (nelem == 3) {
+      } else {
+	out = in;
+	std::cerr << "[RotationMatrix::rotate] Unsupported vector rank!"
+		  << std::endl;
+      }
+    } else {
+      status = false;
+    }
+
+    return status;
+  }
+  
+  bool RotationMatrix::rotate (blitz::Array<double,2> &out,
+			       blitz::Array<double,2> const &in)
+  {
+    bool status (true);
+
+    return status;
+  }
+    
+#endif
 
 } // Namespace CR -- end

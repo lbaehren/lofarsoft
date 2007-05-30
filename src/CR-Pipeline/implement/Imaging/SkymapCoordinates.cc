@@ -18,9 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: SkymapCoordinates.cc,v 1.12 2007/04/19 14:22:46 horneff Exp $*/
+/* $Id: SkymapCoordinates.cc,v 1.2 2007/05/03 14:54:58 bahren Exp $*/
 
-#include <Skymap/SkymapCoordinates.h>
+#include <Imaging/SkymapCoordinates.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -162,9 +162,11 @@ namespace CR { // Namespace CR -- begin
     return init (timeFreq,
 		 obsData,
 		 nofBlocks,
-		 NORTH_EAST,
-		 FREQ_POWER);
+		 SkymapCoordinates::NORTH_EAST,
+		 SkymapCoordinates::FREQ_POWER);
   }
+  
+  // ----------------------------------------------------------------------- init
   
   bool SkymapCoordinates::init (TimeFreq const &timeFreq,
 				ObservationData const &obsData,
@@ -182,6 +184,40 @@ namespace CR { // Namespace CR -- begin
     return defaultCoordinateSystem ();
   }
 
+  // ------------------------------------------------------------- mapOrientation
+
+  bool SkymapCoordinates::mapOrientation (std::string &top,
+					  std::string &right)
+  {
+    bool ok (true);
+    switch (mapOrientation_p) {
+    case NORTH_EAST:
+      top   = "North";
+      right = "East";
+      break;
+    case NORTH_WEST:
+      top   = "North";
+      right = "West";
+      break;
+    case SOUTH_EAST:
+      top   = "South";
+      right = "East";
+      break;
+    case SOUTH_WEST:
+      top   = "South";
+      right = "West";
+      break;
+    }
+    try {
+      
+    } catch (std::string message) {
+      std::cerr << "[SkymapCoordinates::mapOrientation] " << message << std::endl;
+      ok = false;
+    }
+
+    return ok;
+  }
+  
   // ---------------------------------------------------------- setMapOrientation
 
   bool
@@ -388,6 +424,81 @@ namespace CR { // Namespace CR -- begin
     return coord;
   }
 
+  // -------------------------------------------------------- directionAxisValues
+
+  Matrix<Double> SkymapCoordinates::directionAxisValues ()
+  {
+    bool verbose (false);
+    // Extract the direction axis from the coordinate system object
+    DirectionCoordinate coord = directionAxis();
+    // Extract the MDirection type
+    casa::MDirection::Types type = coord.directionType();
+    casa::String directionRefString;
+
+    // Feedback on the obtained result
+    if (verbose) {
+      MDirection direction (type);
+      unsigned int refType = direction.getRef().getType();
+      cout << "[SkymapCoordinates::directionAxisValues]" << endl;
+      cout << "-- Reference string = " << direction.getRefString() << endl;
+      cout << "-- Direction type   = " << direction.type()         << endl;
+      cout << "-- Reference type   = " << refType                  << endl;
+    }
+    
+    return directionAxisValues (type);
+  }
+
+  // -------------------------------------------------------- directionAxisValues
+
+  Matrix<Double>
+  SkymapCoordinates::directionAxisValues (casa::String const &refcode)
+  {
+    // Convert reference code strin to reference type
+    return directionAxisValues (MDirectionType(refcode));
+  }
+
+  // -------------------------------------------------------- directionAxisValues
+
+  Matrix<Double>
+  SkymapCoordinates::directionAxisValues (casa::MDirection::Types const &type)
+  {
+    int lon (0);
+    int lat (0);
+    int nValue (0);
+    IPosition shape (2,shape_p(0)*shape_p(1),2);
+    Vector<double> pixel (2);
+    Vector<double> world (2);
+    Matrix<Double> values (shape);
+
+    /*
+      Extract the direction axis from the coordinate system object and adjust
+      the reference frame used for the world coordinates
+    */
+
+    cout << "--> extracting the direction axis ..." << endl;
+    DirectionCoordinate axis = directionAxis();
+    cout << "--> adjusting reference frame conversion ..." << endl;
+    axis.setReferenceConversion(type);
+    cout << "--> converting coordinate values ..." << endl;
+    for (lon=0; lon<shape_p(0); lon++) {
+      pixel(0) = double(lon);
+      for (lat=0; lat<shape_p(1); lat++) {
+	pixel(1) = double(lat);
+	// perform the actual conversion from pixel to world coordinate
+	try {
+	  axis.toWorld (world,pixel);
+	} catch (casa::AipsError x) {
+	  cerr << x.getMesg() << endl;
+	}
+	// stored the retrieved value into the returned array
+	values.row(nValue) = world;
+	nValue++;
+      }
+    }
+
+    return values;
+  }
+
   // ------------------------------------------------------------ setDistanceAxis
 
   bool SkymapCoordinates::setDistanceAxis (Double const &refPixel,
@@ -569,6 +680,70 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
 
+  // ------------------------------------------------------------- timeAxisValues
+
+  Vector<Double> SkymapCoordinates::timeAxisValues ()
+  {
+    unsigned int nofValues = shape_p(SkymapCoordinates::Time);
+    Vector<Double> pixel (nofValues);
+
+    for (unsigned int n(0); n<nofValues; n++) {
+      pixel(n) = double(n);
+    }
+
+    return timeAxisValues (pixel);
+  }
+
+  Vector<Double>
+  SkymapCoordinates::timeAxisValues (Vector<Double> const &pixelValues)
+  {
+    uint nofPixels (pixelValues.nelements());
+    Vector<Double> worldValues (nofPixels);
+    Vector<Double> valPixel (1);
+    Vector<Double> valWorld (1);
+    LinearCoordinate axis = timeAxis ();
+    
+    for (uint pixel(0); pixel<nofPixels; pixel++) {
+      valPixel(0) = pixelValues(pixel);
+      axis.toWorld (valWorld,valPixel);
+      worldValues(pixel) = valWorld(0);
+   }
+
+    return worldValues;
+  }
+
+  // -------------------------------------------------------- frequencyAxisValues
+
+  Vector<Double> SkymapCoordinates::frequencyAxisValues ()
+  {
+    unsigned int nofValues = shape_p(SkymapCoordinates::Frequency);
+    Vector<Double> pixel (nofValues);
+
+    for (unsigned int n(0); n<nofValues; n++) {
+      pixel(n) = double(n);
+    }
+
+    return frequencyAxisValues (pixel);
+  }
+
+  Vector<Double>
+  SkymapCoordinates::frequencyAxisValues (Vector<Double> const &pixelValues)
+  {
+    uint nofPixels (pixelValues.nelements());
+    Vector<Double> worldValues (nofPixels);
+    Vector<Double> valPixel (1);
+    Vector<Double> valWorld (1);
+    SpectralCoordinate axis = frequencyAxis ();
+    
+    for (uint pixel(0); pixel<nofPixels; pixel++) {
+      valPixel(0) = pixelValues(pixel);
+      axis.toWorld (valWorld,valPixel);
+      worldValues(pixel) = valWorld(0);
+   }
+
+    return worldValues;
+  }
+
   // ============================================================================
   //
   //  Methods
@@ -582,9 +757,12 @@ namespace CR { // Namespace CR -- begin
     bool status (true);
     std::string domain;
     std::string quantity;
+    std::string top;
+    std::string right;
     vector<double> frequencyBand (timeFreq_p.frequencyBand());
 
     status = mapQuantity (domain,quantity);
+    status = mapOrientation (top,right);
     
     os << "-- TimeFreq object:" << std::endl;
     os << " Blocksize      [samples] = " << timeFreq_p.blocksize()
@@ -622,7 +800,8 @@ namespace CR { // Namespace CR -- begin
 
     os << "-- Image properties:" << std::endl;
     os << " nof. processed blocks    = " << nofBlocks_p             << std::endl;
-    os << " Skymap orientation       = " << mapOrientation_p        << std::endl;
+    os << " Skymap orientation       = " << mapOrientation_p
+       << " [" << top << "," << right << "]"                        << std::endl;
     os << " Skymap quantity          = " << mapQuantity_p           
        << " [" << domain << "," << quantity << "]"                  << std::endl;
     os << " Number of coordinates    = " << csys_p.nCoordinates()   << std::endl;
@@ -759,6 +938,9 @@ namespace CR { // Namespace CR -- begin
     /*
       organization of the axes: [lon,lat,dist,time,freq]
                                 [ 0 , 1 , 2  ,3   , 4  ]
+
+      organization of the coordinates: [Direction,Linear,Linear,Spectral]
+                                       [ 0       , 1    , 2    , 3      ]
     */
 
     try {

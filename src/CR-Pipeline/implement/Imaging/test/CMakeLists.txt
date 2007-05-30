@@ -9,6 +9,8 @@ set (tests
   tGeometricalDelay
   tGeometricalPhase
   tGeometricalWeight
+  tMDirection
+  tSkymapCoordinates
   )
 
 ## ------------------------------------------------------------------------------

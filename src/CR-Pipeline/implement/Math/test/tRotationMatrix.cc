@@ -45,10 +45,10 @@ using CR::RotationMatrix;
 */
 int test_RotationMatrix ()
 {
-  int nofFailedTests (0);
-  
   std::cout << "\n[test_RotationMatrix]\n" << std::endl;
 
+  int nofFailedTests (0);
+  
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
     RotationMatrix newObject;
@@ -93,6 +93,48 @@ int test_RotationMatrix ()
 
 // -----------------------------------------------------------------------------
 
+/*!
+  \brief Test application of rotation by manipulating a regular grid
+
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_rotateGrid ()
+{
+  std::cout << "\n[test_rotateGrid]\n" << std::endl;
+
+  int nofFailedTests (0);
+
+  try {
+    bool status (true);
+    int nelem (5);
+    double increment (1.0);
+    RotationMatrix rotation2d (2,vector<double>(1,45.0));
+    rotation2d.summary();
+    //
+    vector<double> inVector(2);
+    vector<double> outVector (2);
+
+    for (int nx(0); nx<nelem; nx++) {
+      inVector[0] = nx*increment;
+      for (int ny (0); ny<nelem; ny++) {
+	inVector[1] = ny*increment;
+	status = rotation2d.rotate(outVector,inVector);
+	std::cout << inVector[0] << "  " << inVector[1]
+		  << "\t"
+		  << outVector[0] << "  " << outVector[1]
+		  << std::endl;
+      }
+    }
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
 int main ()
 {
   int nofFailedTests (0);
@@ -100,6 +142,11 @@ int main ()
   // Test for the constructor(s)
   {
     nofFailedTests += test_RotationMatrix ();
+  }
+
+  // Test application of rotation by manipulating a regular grid
+  {
+    nofFailedTests += test_rotateGrid ();
   }
 
   return nofFailedTests;

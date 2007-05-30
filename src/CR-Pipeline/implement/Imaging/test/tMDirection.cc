@@ -18,69 +18,31 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: template-tclass.cc,v 1.7 2007/03/06 14:53:26 bahren Exp $*/
-
-#include <Math/Rotation2D.h>
-
-using CR::Rotation2D;
-
 /*!
-  \file tRotation2D.cc
+  \file tMDirection.cc
 
-  \ingroup Math
+  \ingroup Imaging
 
-  \brief A collection of test routines for Rotation2D
+  \brief A number of tests to work with the CASA MDirection classes
  
-  \author Lars Baehren
+  \author Lars B&auml;hren
  
-  \date 2007/05/29
+  \date 2007/05/30
+
+  Besides some basic testing of the casa::MDirection class, we also test the
+  functionality as available with casa::DirectionCoordinate and
+  CR::SkymapCoordinates, as both make use of the functionality of MDirection.
 */
 
 // -----------------------------------------------------------------------------
 
-/*!
-  \brief Test constructors for a new Rotation2D object
 
-  \return nofFailedTests -- The number of failed tests.
-*/
-int test_Rotation2D ()
-{
-  int nofFailedTests (0);
-  
-  std::cout << "\n[test_Rotation2D]\n" << std::endl;
-
-  std::cout << "[1] Testing default constructor ..." << std::endl;
-  try {
-    Rotation2D rotation;
-    rotation.summary();
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-  
-  std::cout << "[2] Testing argumented constructor ..." << std::endl;
-  try {
-    vector<double> angles (1,45);
-    Rotation2D rotation (angles,true);
-    rotation.summary();
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-  
-  return nofFailedTests;
-}
 
 // -----------------------------------------------------------------------------
 
-int main ()
+int main () 
 {
   int nofFailedTests (0);
-
-  // Test for the constructor(s)
-  {
-    nofFailedTests += test_Rotation2D ();
-  }
 
   return nofFailedTests;
 }

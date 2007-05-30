@@ -31,8 +31,14 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   Rotation2D::Rotation2D ()
-  {;}
+    : RotationMatrix (2)
+  {}
   
+  Rotation2D::Rotation2D (vector<double> const &angles,
+			  bool const &anglesInDegree)
+    : RotationMatrix (2,angles,anglesInDegree)
+  {}
+
   Rotation2D::Rotation2D (Rotation2D const &other)
   {
     copy (other);
@@ -75,10 +81,6 @@ namespace CR { // Namespace CR -- begin
   //  Parameters
   //
   // ============================================================================
-  
-  void Rotation2D::summary ()
-  {;}
-  
   
   
   // ============================================================================

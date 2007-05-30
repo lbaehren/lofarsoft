@@ -70,6 +70,41 @@ namespace CR { // Namespace CR -- begin
     Rotation2D ();
     
     /*!
+      \brief Argumented constructor
+
+      \param angles         -- 
+      \param anglesInDegree -- 
+    */
+    Rotation2D (vector<double> const &angles,
+		bool const &anglesInDegree=true);
+    
+#ifdef HAVE_BLITZ
+
+    /*!
+      \brief Argumented constructor (using Blitz++ array classes)
+
+      \param angles         -- 
+      \param anglesInDegree -- 
+    */
+    Rotation2D (blitz::Array<double,1> const &angles,
+		bool const &anglesInDegree=true);
+
+#endif
+
+#ifdef HAVE_CASA
+    
+    /*!
+      \brief Argumented constructor (CASA array classes)
+
+      \param angles         -- 
+      \param anglesInDegree -- 
+    */
+    Rotation2D (casa::Vector<double> const &angles,
+		bool const &anglesInDegree=true);
+
+#endif
+
+    /*!
       \brief Copy constructor
       
       \param other -- Another Rotation2D object from which to create this new
@@ -103,11 +138,6 @@ namespace CR { // Namespace CR -- begin
     std::string className () const {
       return "Rotation2D";
     }
-
-    /*!
-      \brief Provide a summary of the internal status
-    */
-    void summary ();    
 
     // ------------------------------------------------------------------ Methods
     
