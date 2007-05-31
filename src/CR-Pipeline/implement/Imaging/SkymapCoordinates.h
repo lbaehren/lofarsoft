@@ -124,6 +124,7 @@ namespace CR { // Namespace CR -- begin
       straight forward construction/configuration from the strings or floating point
       number, such that a few intermediate steps are required.
       <ol>
+        <li>SkymapCoordinates::directionType
         <li>SkymapCoordinates::ProjectionType
 	<li>SkymapCoordinates::MDirectionType
       </ol>
@@ -463,6 +464,17 @@ namespace CR { // Namespace CR -- begin
     }
 
     // ----------------------------------------------------------- Direction axis
+    
+    /*!
+      \brief Get the name of the map projection
+
+      \return projection -- The name of the spherical map projection used
+                            for the direction coordinates
+    */
+    inline String projection () {
+      DirectionCoordinate dc = directionAxis();
+      return dc.projection().name();
+    }
 
     /*!
       \brief Get the coordinate handling the direction axes
@@ -792,11 +804,11 @@ namespace CR { // Namespace CR -- begin
       \param increment  -- Coordinate increment, CDELT
       \param pixels     -- Number of pixels in the celestial plane
     */
-    DirectionCoordinate directionCoordinate (const String& refcode,
-					     const String& projection,
-					     const Vector<Double>& refValue,
-					     const Vector<Double>& increment,
-					     const IPosition& pixels);
+    static DirectionCoordinate directionCoordinate (const String& refcode,
+						    const String& projection,
+						    const Vector<Double>& refValue,
+						    const Vector<Double>& increment,
+						    const IPosition& pixels);
     
     // ------------------------------------------------------ Conversion routines
 

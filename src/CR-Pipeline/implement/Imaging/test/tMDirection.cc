@@ -51,6 +51,8 @@
 
 /*!
   \brief Show the contents of an MDirection object
+
+  \param md -- MDirection object
 */
 void show_MDirection (MDirection const &md)
 {
@@ -131,11 +133,44 @@ int test_SkymapCoordinates ()
   CR::SkymapCoordinates coord (timeFreq,
 			       obsData,
 			       nofBlocks);
-  // ... and provide a summary of its contents
-  coord.summary();
-  
+
   // -----------------------------------------------------------------
-  // [2] Retrieve the coordinate handling the direction axes
+  // [2] Retrieve the coordinate system constructed for the image
+
+  casa::CoordinateSystem csys = coord.coordinateSystem();
+
+  {
+    cout << "--> Summary of the coordinate system:" << endl;
+    cout << "-- Number of coordinates    = " << csys.nCoordinates()   << endl;
+    cout << "-- World axis names         = " << csys.worldAxisNames() << endl;
+    cout << "-- World axis units         = " << csys.worldAxisUnits() << endl;
+    cout << "-- Reference pixel  (CRPIX) = " << csys.referencePixel() << endl;
+    cout << "-- Reference value  (CRVAL) = " << csys.referenceValue() << endl;
+    cout << "-- Increment        (CDELT) = " << csys.increment()      << endl;
+  }
+
+  try {
+    int nofSteps (10);
+    Vector<double> pixel (5);
+    Vector<double> world (5);
+
+    pixel = 0.0;
+
+    csys.toWorld(world,pixel);
+    cout << "-- Coordinate conversion : " << endl;
+
+    for (int n(0); n<nofSteps; n++) {
+      pixel(0) = double(n);
+      csys.toWorld(world,pixel);
+      cout << "\t" << pixel << " -> " << world << endl;
+    }
+  } catch (std::string err) {
+    cerr << err << endl;
+    nofFailedTests++;
+  }
+    
+  // -----------------------------------------------------------------
+  // [3] Retrieve the coordinate handling the direction axes
 
   casa::DirectionCoordinate dc (coord.directionAxis());
   
@@ -145,8 +180,10 @@ int test_SkymapCoordinates ()
     Vector<Double> cdelt = dc.increment();
     Matrix<Double> pc    = dc.linearTransform();
     Projection proj      = dc.projection();
+    MDirection md (dc.directionType());
    
     cout << "--> Summary of the direction coordinate:" << endl;
+    cout << "-- Direction type   = " << md.getRefString() << endl;
     cout << "-- Projection       = " << proj.name()    << endl;
     cout << "-- Reference pixel  = " << crpix          << endl;
     cout << "-- Reference value  = " << crval          << endl;

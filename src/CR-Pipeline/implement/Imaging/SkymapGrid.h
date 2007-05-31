@@ -20,7 +20,7 @@
 
 /* $Id: SkymapGrid.h,v 1.6 2006/08/09 10:04:22 bahren Exp $ */
 
-#if !defined(SKYMAPGRID_H)
+#ifndef SKYMAPGRID_H
 #define SKYMAPGRID_H
 
 #include <casa/aips.h>
@@ -46,7 +46,7 @@
 
 #include <casa/namespace.h>
 
-using CR::ObservationData;
+namespace CR {  // Namespace CR -- begin
 
 /*!
   \class SkymapGrid
@@ -302,8 +302,17 @@ class SkymapGrid {
 
   // --- WCS settings ------------------------------------------------
 
-  ObsInfo observationInfo ();
+  /*!
+    \brief Get the object encapsulating various observation information
 
+    \return obsInfo -- Object holding a number of observation related 
+                       information, such as observatory, observer and
+		       epoch.
+  */
+  inline ObsInfo observationInfo () {
+    return csys_p.obsInfo();
+  }
+  
   void setObservationInfo (const ObsInfo& obsInfo);
 
   /*!
@@ -367,9 +376,11 @@ class SkymapGrid {
     \brief Get the shape of the coordinate grid
 
     \return shape - The grid shape as IPosition vector.
-   */
-  IPosition shape ();
-
+  */
+  inline IPosition shape () {
+    return shape_p;
+  }
+  
   /*!
     \brief Set the shape of the coordinate grid.
 
@@ -389,7 +400,7 @@ class SkymapGrid {
 
     \return center - \f$ (\alpha,\delta)_c \f$
    */
-  Vector<Double> center () {
+  inline Vector<Double> center () {
     return center_p;
   }
 
@@ -444,8 +455,10 @@ class SkymapGrid {
 
     \return northIsUp
   */
-  Bool isNorthUp ();
-
+  inline Bool isNorthUp () {
+    return northIsUp_p;
+  }
+  
   /*!
     \brief Is direction towards north about to point upwards?
 
@@ -462,7 +475,9 @@ class SkymapGrid {
 
     \return eastIsLeft
   */
-  Bool isEastLeft ();
+  inline Bool isEastLeft () {
+    return eastIsLeft_p;
+  }
 
   /*!
     \brief Is direction towards east about to point to the left?
@@ -668,5 +683,7 @@ class SkymapGrid {
   MDirection::Types MDirectionType (const String refcode);
   
 };
+
+}  // Namespace CR -- end
 
 #endif

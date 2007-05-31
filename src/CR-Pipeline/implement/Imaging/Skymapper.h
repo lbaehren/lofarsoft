@@ -77,15 +77,14 @@ namespace CR {  // Namespace CR -- begin
     <li><a href="http://casa.nrao.edu/docs/doxygen/group__Images.html">CASA
     Images package</a>
 
-    <li>[LOPES-Tools] Beamformer
-    <li>[LOPES-Tools] DataReader
-    <li>[LOPES-Tools] DataReaderTools
-    <li>[LOPES-Tools] ObservationData
-    <li>[LOPES-Tools] Skymap
-    <li>[LOPES-Tools] SkymapCoordinates -- coordinates involved in the creation
-                      of a skymap
-    <li>[LOPES-Tools] SkymapQuantity
-    <li>[LOPES-Tools] SkymapperTools
+    <li>Beamformer
+    <li>DataReader
+    <li>DataReaderTools
+    <li>ObservationData
+    <li>Skymap
+    <li>SkymapCoordinates -- coordinates involved in the creation of a skymap
+    <li>SkymapQuantity
+    <li>SkymapperTools
   </ul>
 
   <h3>Synopsis</h3>
@@ -181,8 +180,6 @@ class Skymapper {
     
     \param coordinates -- Coordinates information encapsulated in a
                           SkymapCoordinates object.
-    
-    \todo
   */
   Skymapper (SkymapCoordinates const &coordinates);
 

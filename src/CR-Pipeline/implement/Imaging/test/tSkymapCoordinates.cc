@@ -323,7 +323,7 @@ int test_coordinateSystem ()
   int nofFailedTests (0);                 // nof. failed tests
   bool status (true);
   TimeFreq timeFreq (1024,40e6,1);        // Time and Frequency data
-  ObservationData obsData ("WSRT");  // Observation data
+  ObservationData obsData ("WSRT");       // Observation data
   uint nofBlocks (10);                    // Number of processed blocks
   
   // create SkymapCoordinates object
@@ -335,10 +335,14 @@ int test_coordinateSystem ()
   
   cout << "[0] Check the numbering of the image axes..." << endl;
   try {
-    cout << "-- Coordinate for direction axes : " << SkymapCoordinates::Direction << endl;
-    cout << "-- Coordinate for distance axis  : " << SkymapCoordinates::Distance  << endl;
-    cout << "-- Coordinate for time     axis  : " << SkymapCoordinates::Time      << endl;
-    cout << "-- Coordinate for frequency axis : " << SkymapCoordinates::Frequency << endl;
+    cout << "-- Coordinate for direction axes : "
+	 << SkymapCoordinates::Direction << endl;
+    cout << "-- Coordinate for distance axis  : "
+	 << SkymapCoordinates::Distance  << endl;
+    cout << "-- Coordinate for time     axis  : "
+	 << SkymapCoordinates::Time      << endl;
+    cout << "-- Coordinate for frequency axis : "
+	 << SkymapCoordinates::Frequency << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;

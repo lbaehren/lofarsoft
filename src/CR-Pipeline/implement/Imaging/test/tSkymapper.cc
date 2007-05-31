@@ -35,6 +35,7 @@ using casa::ProgressMeter;
 #include <templates.h>
 #include <Imaging/Skymapper.h>
 
+using CR::ObservationData;
 using CR::SkymapCoordinates;
 using CR::Skymapper;
 using CR::TimeFreq;

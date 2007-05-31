@@ -42,7 +42,7 @@ namespace CR { // Namespace CR -- begin
     
     if (!status) {
       std::cerr << "[SkymapCoordinates] Error initializing object!"
-		<< std::endl;
+		<< endl;
     }
   }
   
@@ -60,7 +60,7 @@ namespace CR { // Namespace CR -- begin
     
     if (!status) {
       std::cerr << "[SkymapCoordinates] Error initializing object!"
-		<< std::endl;
+		<< endl;
     }
   }
 
@@ -82,7 +82,7 @@ namespace CR { // Namespace CR -- begin
     
     if (!status) {
       std::cerr << "[SkymapCoordinates] Error initializing object!"
-		<< std::endl;
+		<< endl;
     }
   }
   
@@ -104,7 +104,7 @@ namespace CR { // Namespace CR -- begin
     
     if (!status) {
       std::cerr << "[SkymapCoordinates] Error initializing object!"
-		<< std::endl;
+		<< endl;
     }
   }
   
@@ -220,7 +220,7 @@ namespace CR { // Namespace CR -- begin
     try {
       
     } catch (std::string message) {
-      std::cerr << "[SkymapCoordinates::mapOrientation] " << message << std::endl;
+      std::cerr << "[SkymapCoordinates::mapOrientation] " << message << endl;
       ok = false;
     }
 
@@ -237,7 +237,7 @@ namespace CR { // Namespace CR -- begin
     try {
       mapOrientation_p = mapOrientation;
     } catch (std::string message) {
-      std::cerr << "[SkymapCoordinates::setMapOrientation] " << message << std::endl;
+      std::cerr << "[SkymapCoordinates::setMapOrientation] " << message << endl;
       ok = false;
     }
     
@@ -279,7 +279,7 @@ namespace CR { // Namespace CR -- begin
 	break;
       }
     } catch (std::string message) {
-      std::cerr << "[SkymapCoordinates::mapQuantity] " << message << std::endl;
+      std::cerr << "[SkymapCoordinates::mapQuantity] " << message << endl;
       ok = false;
     }
     
@@ -296,7 +296,7 @@ namespace CR { // Namespace CR -- begin
     try {
       mapQuantity_p = mapQuantity;
     } catch (std::string message) {
-      std::cerr << "[SkymapCoordinates::setMapQuantity] " << message << std::endl;
+      std::cerr << "[SkymapCoordinates::setMapQuantity] " << message << endl;
       ok = false;
     }
 
@@ -325,7 +325,7 @@ namespace CR { // Namespace CR -- begin
 	mapQuantity_p = TIME_X;
       } else {
 	std::cerr << "[SkymapCoordinates::setMapQuantity] Unknown signal quantity "
-		  << quantity << std::endl;
+		  << quantity << endl;
 	ok = false;
       }
     } else if (domain == "freq" || domain == "Freq" || domain == "FREQ") {
@@ -335,12 +335,12 @@ namespace CR { // Namespace CR -- begin
 	mapQuantity_p = FREQ_POWER;
       } else {
 	std::cerr << "[SkymapCoordinates::setMapQuantity] Unknown signal quantity "
-		  << quantity << std::endl;
+		  << quantity << endl;
 	ok = false;
       }
     } else {
       std::cerr << "[SkymapCoordinates::setMapQuantity] Unknown signal domain "
-		<< domain << std::endl;
+		<< domain << endl;
       ok = false;
     }
 
@@ -370,14 +370,14 @@ namespace CR { // Namespace CR -- begin
       ok = md.setRefString (refcode);
       ok = md.getType(tp,refcode);
     } catch (std::string message) {
-      std::cerr << "[SkymapCoordinates::MDirectionType] " << message << std::endl;
+      std::cerr << "[SkymapCoordinates::MDirectionType] " << message << endl;
     }
 
     if (!ok) {
       std::cerr << "[SkymapCoordinates::MDirectionType] Wrong reference code!\n"
 		<< " String reads " <<  md.getRefString()
 		<< " but should be " << refcode
-		<< std::endl;
+		<< endl;
     }
     
     return tp;
@@ -393,7 +393,7 @@ namespace CR { // Namespace CR -- begin
     try {
       tp = prj.type(refcode);
     } catch (std::string message) {
-      std::cerr << "[SkymapCoordinates::ProjectionType] " << message << std::endl;
+      std::cerr << "[SkymapCoordinates::ProjectionType] " << message << endl;
     }
     
     return tp;
@@ -427,8 +427,6 @@ namespace CR { // Namespace CR -- begin
 			       xform,
 			       refPixel(0),
 			       refPixel(1));
-    
-//     coord.setReferencePixel(refPixel);
     
     return coord;
   }
@@ -491,8 +489,8 @@ namespace CR { // Namespace CR -- begin
 
     cout << "--> extracting the direction axis ..." << endl;
     DirectionCoordinate dc = directionAxis();
-    cout << "--> adjusting reference frame conversion ..." << endl;
-    dc.setReferenceConversion(type);
+//     cout << "--> adjusting reference frame conversion ..." << endl;
+//     dc.setReferenceConversion(type);
     cout << "--> converting coordinate values ..." << endl;
     for (lon=0, pixel(0)=0.0; lon<shape_p(0); lon++, pixel(0)++) {
       for (lat=0, pixel(1)=0.0; lat<shape_p(1); lat++, pixel(1)++) {
@@ -591,7 +589,7 @@ namespace CR { // Namespace CR -- begin
       obsData_p = obsData;
     } catch (std::string message) {
       std::cerr << "[SkymapCoordinates::setObservationData] Error storing new value!"
-		<< std::endl;
+		<< endl;
       status = false;
     }
     
@@ -614,7 +612,7 @@ namespace CR { // Namespace CR -- begin
       timeFreq_p = timeFreq;
     } catch (std::string message) {
       std::cerr << "[SkymapCoordinates::setTimeFreq] Error storing new value!"
-		<< std::endl;
+		<< endl;
       status = false;
     }
     
@@ -632,7 +630,7 @@ namespace CR { // Namespace CR -- begin
     } catch (std::string message) {
       std::cerr << "[SkymapCoordinates::setTimeFreq] "
 	"Error extracting TimeFreq from DataReader!"
-		<< std::endl;
+		<< endl;
       status = false;
     }
     
@@ -685,7 +683,7 @@ namespace CR { // Namespace CR -- begin
       // write the modified coordinate axis back to the coordinate system
       return csys_p.replaceCoordinate(axis,axisNumber);
     } catch (std::string message) {
-      std::cerr << "[SkymapCoordinates::setTimeAxis] " << message << std::endl;
+      std::cerr << "[SkymapCoordinates::setTimeAxis] " << message << endl;
       status = false;
     }
 
@@ -777,54 +775,54 @@ namespace CR { // Namespace CR -- begin
     status = mapQuantity (domain,quantity);
     status = mapOrientation (top,right);
     
-    os << "-- TimeFreq object:" << std::endl;
+    os << "-- TimeFreq object:" << endl;
     os << " Blocksize      [samples] = " << timeFreq_p.blocksize()
-       << std::endl;
+       << endl;
     os << " Sample frequency    [Hz] = " << timeFreq_p.sampleFrequency()
-       << std::endl;
+       << endl;
     os << " Nyquist zone             = " << timeFreq_p.nyquistZone()
-       << std::endl;
+       << endl;
     os << " Reference time     [sec] = " << timeFreq_p.referenceTime()
-       << std::endl;
+       << endl;
     os << " FFT length    [channels] = " << timeFreq_p.fftLength()
-       << std::endl;
+       << endl;
     os << " Sample interval      [s] = " << timeFreq_p.sampleInterval()
-       << std::endl;
+       << endl;
     os << " Frequency increment [Hz] = " << timeFreq_p.frequencyIncrement()
-       << std::endl;
+       << endl;
     os << " Frequency band      [Hz] = " << frequencyBand[0]
-       << " .. " << frequencyBand[1] << std::endl;
+       << " .. " << frequencyBand[1] << endl;
     
-    os << "-- ObservationData object:" << std::endl;
+    os << "-- ObservationData object:" << endl;
     os << " Description              = " << obsData_p.description()
-       << std::endl;
+       << endl;
     os << " Observer                 = " << obsData_p.observer()
-       << std::endl;
+       << endl;
     os << " Epoch                    = " << obsData_p.epoch()
-       << std::endl;
+       << endl;
     os << " Observatory              = " << obsData_p.observatory()
-       << std::endl;
+       << endl;
     os << " Observatory position     = " << obsData_p.observatoryPosition()
-       << std::endl;
+       << endl;
     os << " nof. antennas            = " << obsData_p.nofAntennas()
-       << std::endl;
+       << endl;
     os << " antenna positions        = " << obsData_p.antennaPositions().shape()
-       << std::endl;
+       << endl;
 
-    os << "-- Image properties:" << std::endl;
-    os << " nof. processed blocks    = " << nofBlocks_p             << std::endl;
-    os << " Projection               = " << dc.projection().name()  << std::endl;
+    os << "-- Image properties:" << endl;
+    os << " nof. processed blocks    = " << nofBlocks_p             << endl;
+    os << " Projection               = " << dc.projection().name()  << endl;
     os << " Skymap orientation       = " << mapOrientation_p
-       << " [" << top << "," << right << "]"                        << std::endl;
+       << " [" << top << "," << right << "]"                        << endl;
     os << " Skymap quantity          = " << mapQuantity_p           
-       << " [" << domain << "," << quantity << "]"                  << std::endl;
-    os << " Number of coordinates    = " << csys_p.nCoordinates()   << std::endl;
-    os << " Shape of the pixel array = " << shape_p                 << std::endl;
-    os << " World axis names         = " << csys_p.worldAxisNames() << std::endl;
-    os << " World axis units         = " << csys_p.worldAxisUnits() << std::endl;
-    os << " Reference pixel  (CRPIX) = " << csys_p.referencePixel() << std::endl;
-    os << " Reference value  (CRVAL) = " << csys_p.referenceValue() << std::endl;
-    os << " Increment        (CDELT) = " << csys_p.increment()      << std::endl;
+       << " [" << domain << "," << quantity << "]"                  << endl;
+    os << " Number of coordinates    = " << csys_p.nCoordinates()   << endl;
+    os << " Shape of the pixel array = " << shape_p                 << endl;
+    os << " World axis names         = " << csys_p.worldAxisNames() << endl;
+    os << " World axis units         = " << csys_p.worldAxisUnits() << endl;
+    os << " Reference pixel  (CRPIX) = " << csys_p.referencePixel() << endl;
+    os << " Reference value  (CRVAL) = " << csys_p.referenceValue() << endl;
+    os << " Increment        (CDELT) = " << csys_p.increment()      << endl;
   }
 
   // ============================================================================
@@ -843,7 +841,7 @@ namespace CR { // Namespace CR -- begin
     // Set the correct shape of the image
     if (!setShape()) {
       std::cerr << "[SkymapCoordinates::defaultCoordsys] "
-		<< " Error setting up image shape " << std::endl;
+		<< " Error setting up image shape " << endl;
       status = false;
     }
 
@@ -851,7 +849,7 @@ namespace CR { // Namespace CR -- begin
     try {
       cs.setObsInfo(obsData_p.obsInfo());
     } catch (std::string message) {
-      std::cerr << "[SkymapCoordinates::defaultCoordsys] " << message << std::endl;
+      std::cerr << "[SkymapCoordinates::defaultCoordsys] " << message << endl;
       status = false;
     }
     
@@ -862,7 +860,7 @@ namespace CR { // Namespace CR -- begin
       cs.addCoordinate(defaultTimeAxis());
       cs.addCoordinate(defaultFrequencyAxis());
     } catch (std::string message) {
-      std::cerr << "[SkymapCoordinates::defaultCoordsys] " << message << std::endl;
+      std::cerr << "[SkymapCoordinates::defaultCoordsys] " << message << endl;
       status = false;
     }
 
@@ -870,7 +868,7 @@ namespace CR { // Namespace CR -- begin
     try {
       csys_p = cs;
     } catch (std::string message) {
-      std::cerr << "[SkymapCoordinates::defaultCoordsys] " << message << std::endl;
+      std::cerr << "[SkymapCoordinates::defaultCoordsys] " << message << endl;
       status = false;
     }
     
@@ -977,7 +975,7 @@ namespace CR { // Namespace CR -- begin
 	break;
       }
     } catch (std::string message) {
-      std::cerr << "[SkymapCoordinates::setShape] " << message << std::endl;
+      std::cerr << "[SkymapCoordinates::setShape] " << message << endl;
       status = false;
     }
 

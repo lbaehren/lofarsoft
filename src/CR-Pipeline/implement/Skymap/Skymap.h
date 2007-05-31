@@ -62,6 +62,8 @@ using namespace std;
 #include <Skymap/SkymapQuantity.h>
 #include <Utilities/ProgressBar.h>
 
+using CR::SkymapGrid;
+
 /*!
   \class Skymap
 

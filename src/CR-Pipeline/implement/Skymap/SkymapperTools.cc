@@ -22,6 +22,9 @@
 
 #include <Skymap/SkymapperTools.h>
 
+using CR::ObservationData;
+using CR::SkymapGrid;
+
 // ----------------------------------------------------------------- skymapCenter
 
 Vector<Double> SkymapperTools::skymapCenter (const Quantity epoch,

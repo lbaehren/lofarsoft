@@ -26,6 +26,9 @@ using casa::Matrix;
 using casa::String;
 using casa::Vector;
 
+using CR::ObservationData;
+using CR::SkymapGrid;
+
 /*!
   \file tSkymapGrid.cc
 
