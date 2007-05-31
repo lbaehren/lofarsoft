@@ -51,7 +51,7 @@ using CR::ObservationData;
 /*!
   \class SkymapGrid
 
-  \ingroup Skymap
+  \ingroup Imaging
 
   \brief (Regular) Coordinate grids for the creation of a Skymap.
 

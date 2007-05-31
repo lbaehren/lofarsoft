@@ -58,7 +58,7 @@ using namespace std;
 #include <Observation/ObservationData.h>
 #include <Observation/ObservationFrame.h>
 #include <Skymap/Beamformer.h>
-#include <Skymap/SkymapGrid.h>
+#include <Imaging/SkymapGrid.h>
 #include <Skymap/SkymapQuantity.h>
 #include <Utilities/ProgressBar.h>
 

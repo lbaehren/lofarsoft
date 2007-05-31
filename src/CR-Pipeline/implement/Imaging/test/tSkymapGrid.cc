@@ -19,7 +19,7 @@
 #include <coordinates/Coordinates/DirectionCoordinate.h>
 
 #include <templates.h>
-#include <Skymap/SkymapGrid.h>
+#include <Imaging/SkymapGrid.h>
 
 using casa::Double;
 using casa::Matrix;
@@ -29,7 +29,7 @@ using casa::Vector;
 /*!
   \file tSkymapGrid.cc
 
-  \ingroup Skymap
+  \ingroup Imaging
 
   \brief A collection of test for SkymapGrid
 

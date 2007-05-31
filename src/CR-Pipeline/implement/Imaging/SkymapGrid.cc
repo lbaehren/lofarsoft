@@ -21,7 +21,7 @@
 /* $Id: SkymapGrid.cc,v 1.6 2006/08/09 10:04:22 bahren Exp $ */
 
 
-#include <Skymap/SkymapGrid.h>
+#include <Imaging/SkymapGrid.h>
 
 // =============================================================================
 //

@@ -151,7 +151,7 @@ int test_SkymapCoordinates ()
     cout << "-- Reference pixel  = " << crpix          << endl;
     cout << "-- Reference value  = " << crval          << endl;
     cout << "-- Increment        = " << cdelt          << endl;
-    cout << "-- Linear transform = " << pc.row(0)      << endl;
+    cout << "-- Linear transform = " << pc.row(0) << ", " << pc.row(1) << endl;
   }
 
   return nofFailedTests;
