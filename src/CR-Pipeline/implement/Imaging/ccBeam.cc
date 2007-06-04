@@ -84,6 +84,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
   //
   // ============================================================================
 
+#ifdef HAVE_BLITZ
+
   bool ccBeam::beam (blitz::Array<double,2> &dataBeam,
 		     const blitz::Array<double,2> &dataFFT)
   {
@@ -91,6 +93,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     return status;
   }
+
+#endif
   
   // ============================================================================
   //

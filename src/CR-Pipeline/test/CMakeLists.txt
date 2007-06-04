@@ -34,7 +34,7 @@ endif (NOT HAVE_WCS)
 ## Test working with CASA libraries
 
 set (tests
-  tUseCasa
+  tUseCASA
   tUseScimath
   tUseMeasures
   tUseTables

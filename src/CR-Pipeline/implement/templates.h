@@ -115,6 +115,7 @@ namespace casa {
   template class Array<Double>;
   template class Array<Complex>;
   template class Array<DComplex>;
+  template class Array<IPosition>;
 
 /*   template class Vector<Bool>; */
 /*   template class Vector<Int>; */

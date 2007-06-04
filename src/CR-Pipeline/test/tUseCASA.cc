@@ -24,6 +24,7 @@
 #include <casa/Arrays/Array.h>
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/Slice.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicMath/Math.h>
 
@@ -84,6 +85,27 @@ int test_Arrays ()
     //
     std::cout << " - shape(vec) = " << vec.shape() << std::endl;
     std::cout << " - shape(mat) = " << mat.shape() << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[4] Test slicing arrays..." << std:: endl;
+  try {
+    unsigned int n(0);
+    unsigned int nelem (10);
+    casa::Vector<double> vect (nelem);
+
+    // fill the vector
+    for (n=0; n<nelem; n++) {
+      vect(n) = double(n);
+    }
+
+    // display slices of the vector
+    for (n=0; n<nelem/2+1; n++) {
+      std::cout << "\t" << vect(casa::Slice(n,nelem/2)) << std::endl;
+    }
+
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;

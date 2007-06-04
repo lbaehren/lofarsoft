@@ -27,6 +27,11 @@
 #include <string>
 #include <complex>
 
+#ifdef HAVE_CASA
+#include <casa/Arrays/Matrix.h>
+#include <casa/BasicSL/Complex.h>
+#endif
+
 // Custom header files
 #include <Imaging/GeometricalWeight.h>
 
@@ -124,6 +129,38 @@ namespace CR { // NAMESPACE CR -- BEGIN
     */
     virtual bool beam (blitz::Array<std::complex<double>,2> &dataBeam,
 		       const blitz::Array<double,2> &dataFFT) {
+      return false;
+    }
+    
+#endif
+
+#ifdef HAVE_CASA
+
+    /*!
+      \brief Beamforming of the data, returning real-valued result
+
+      \retval dataBeam -- [nofSkyPosition,nofChannels] 
+      \param  dataFFT  -- 
+
+      \return status   -- Status of the operation; returns <i>false</i> if an
+                          an error was encountered
+     */
+    virtual bool beam (casa::Matrix<double> &dataBeam,
+		       const casa::Matrix<double> &dataFFT) {
+      return false;
+    }
+    
+    /*!
+      \brief Beamforming of the data, returning real-valued result
+
+      \retval dataBeam -- [nofSkyPosition,nofChannels] 
+      \param  dataFFT  -- 
+
+      \return status   -- Status of the operation; returns <i>false</i> if an
+                          an error was encountered
+    */
+    virtual bool beam (casa::Matrix<casa::DComplex> &dataBeam,
+		       const casa::Matrix<double> &dataFFT) {
       return false;
     }
     
