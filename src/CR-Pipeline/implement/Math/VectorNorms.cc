@@ -85,7 +85,7 @@ namespace CR { // Namespace CR -- begin
   }
   
   template <class T>
-  double L2Norm (blitz::Array<T,1> const &vec)
+  T L2Norm (blitz::Array<T,1> const &vec)
   {
     return sqrt(sum(pow2(vec)));
   }
@@ -95,17 +95,15 @@ namespace CR { // Namespace CR -- begin
 #ifdef HAVE_CASA
 
   template <class T>
-  T L1Norm (const casa::Vector<T> &vec)
+  T L1Norm (casa::Vector<T> const &vec)
   {
-    double norm (0.0);
-    norm = sqrt(sum(fabs(vec)));
-    return norm;
+    return sqrt(sum(fabs(vec)));
   }
 
   template <class T>
-  double L2Norm (const casa::Vector<T> &vec)
+  T L2Norm (casa::Vector<T> const &vec)
   {
-    double norm (0.0);
+    T norm (0.0);
     norm = sqrt(sum(pow(vec,2)));
     return norm;
   }
@@ -185,20 +183,16 @@ namespace CR { // Namespace CR -- begin
 
 #ifdef HAVE_BLITZ
 
-  template float L1Norm (const blitz::Array<float,1> &vec);
-  template double L1Norm (const blitz::Array<double,1> &vec);
+  template float L1Norm (blitz::Array<float,1> const &vec);
+  template double L1Norm (blitz::Array<double,1> const &vec);
 
-  template float L2Norm (const blitz::Array<float,1> &vec);
-  template double L2Norm (const blitz::Array<double,1> &vec);
+  template float L2Norm (blitz::Array<float,1> const &vec);
+  template double L2Norm (blitz::Array<double,1> const &vec);
 
 #endif
 
 #ifdef HAVE_CASA
 
-  template casa::Vector<int> sign (casa::Vector<int> const &x);
-  template casa::Vector<float> sign (casa::Vector<float> const &x);
-  template casa::Vector<double> sign (casa::Vector<double> const &x);
-  
   template casa::Vector<String> invertOrder (casa::Vector<String> const &vec);
   template casa::Vector<uInt> invertOrder (casa::Vector<uInt> const &vec);
   template casa::Vector<int> invertOrder (casa::Vector<int> const &vec);
@@ -207,12 +201,17 @@ namespace CR { // Namespace CR -- begin
   template casa::Vector<Complex> invertOrder (casa::Vector<Complex> const &vec);
   template casa::Vector<DComplex> invertOrder (casa::Vector<DComplex> const &vec);
 
-  template float L1Norm (const casa::Vector<float> &vec);
-  template double L1Norm (const casa::Vector<double> &vec);
+  template float L1Norm (casa::Vector<float> const &vec);
+  template double L1Norm (casa::Vector<double> const &vec);
 
-  template float L2Norm (const casa::Vector<float> &vec);
-  template double L2Norm (const casa::Vector<double> &vec);
+  template float L2Norm (casa::Vector<float> const &vec);
+  template double L2Norm (casa::Vector<double> const &vec);
+  template casa::Double L2Norm (casa::Vector<casa::Double> const &vec);
 
+  template casa::Vector<int> sign (casa::Vector<int> const &x);
+  template casa::Vector<float> sign (casa::Vector<float> const &x);
+  template casa::Vector<double> sign (casa::Vector<double> const &x);
+  
 #endif
 
 } // Namespace CR -- end

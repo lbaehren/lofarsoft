@@ -36,25 +36,6 @@ namespace CR { // Namespace CR -- begin
 */
 
   /*!
-    \brief L1-Norm of a vector.
-    
-    \param vec   -- Vector of real numbers.
-    
-    \return norm -- L1-Norm of the vector.
-  */
-  Double L1Norm (const Vector<Double>&);
-  
-  /*!
-    \brief Euclidean Norm of a vector
-    
-    <a href="http://mathworld.wolfram.com/EuclideanNorm.html">Euclidean norm</a>
-    (\f$ \mathcal L^2 \f$ norm) of a vector:
-    
-    \f$ |\vec x| = \sqrt{\sum_{i} x_i^2} \f$
-  */
-  Double L2Norm (const Vector<Double>& x);
-  
-  /*!
     \brief Split a range of values into a number of subsets.
     
     Divide a range of values, \f$ [x_{\rm min},x_{\rm max}] \f$, into \f$ N \f$

@@ -24,6 +24,8 @@
 
 const double lightspeed = 2.99795e08;
 
+using CR::L2Norm;
+
 namespace CR { // NAMESPACE CR -- BEGIN
   
   // ============================================================================
@@ -382,7 +384,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 //       skyPos = skyPositions_p(nSky,blitz::Range(blitz::Range::all()));
       for (nAnt=0; nAnt<nofAnt; nAnt++) {
 // 	diff = skyPos-antPositions_p(nAnt,blitz::Range(blitz::Range::all()));
-	delays(nAnt,nSky) = (L2Norm(diff)-L2Norm(skyPos))/lightspeed;
+// 	delays(nAnt,nSky) = (L2Norm(diff)-L2Norm(skyPos))/lightspeed;
       }
     }
     

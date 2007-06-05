@@ -4,24 +4,6 @@
 
 namespace CR { // Namespace CR -- begin
 
-  // --------------------------------------------------------------------- L1Norm
-
-  Double L1Norm (const Vector<Double>& vec)
-  {
-    Double norm (0.0);
-    norm = sqrt(sum(fabs(vec)));
-    return norm;
-  }
-  
-  // --------------------------------------------------------------------- L2Norm
-
-  Double L2Norm (const Vector<Double>& vec)
-  {
-    Double norm (0.0);
-    norm = sqrt(sum(pow(vec,2)));
-    return norm;
-  }
-  
   // ============================================================================
   //
   //  Operations on vectors

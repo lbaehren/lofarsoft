@@ -154,7 +154,7 @@ namespace CR { // namespace CR -- begin
     \return norm -- The \f$\ell^2\f$-norm for the vector
   */
   template <class T>
-    double L2Norm (blitz::Array<double,1> const &vec);
+    T L2Norm (blitz::Array<double,1> const &vec);
   
 #endif
 
@@ -173,7 +173,7 @@ namespace CR { // namespace CR -- begin
     \return norm -- The L1-Norm for the vector
   */
   template <class T>
-    T L1Norm (const casa::Vector<T> &vec);
+    T L1Norm (casa::Vector<T> const &vec);
   
   /*!
     \brief Compute the L2-Norm of a vector
@@ -193,7 +193,7 @@ namespace CR { // namespace CR -- begin
     \return norm -- The \f$\ell^2\f$-norm for the vector
   */
   template <class T>
-    double L2Norm (const casa::Vector<double> &vec);
+    double L2Norm (casa::Vector<double> const &vec);
   
 #endif
 
