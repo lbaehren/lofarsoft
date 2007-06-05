@@ -32,6 +32,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   //
   // ============================================================================
   
+#ifdef HAVE_BLITZ
   GeometricalDelay::GeometricalDelay ()
   {
     antPositions_p.resize(1,3);
@@ -43,6 +44,25 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
     setDelay();
   }
+#else 
+#ifdef HAVE_CASA
+  GeometricalDelay::GeometricalDelay ()
+  {
+    casa::IPosition shape(2,1,3);
+    antPositions_p.resize(shape);
+    skyPositions_p.resize(shape);
+    
+    antPositions_p = 0.0;
+
+    skyPositions_p      = 0.0;
+    skyPositions_p(0,2) = 1.0;
+
+    bufferDelays_p  = true;
+
+    setDelay();
+  }
+#endif
+#endif
   
   GeometricalDelay::GeometricalDelay (const blitz::Array<double,2> &antPositions,
 				      const blitz::Array<double,2> &skyPositions,
@@ -248,11 +268,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
   //  Methods
   //
   // ============================================================================
-
-  void GeometricalDelay::summary ()
-  {
-    summary (std::cout);
-  }
 
   void GeometricalDelay::summary (std::ostream &os)
   {

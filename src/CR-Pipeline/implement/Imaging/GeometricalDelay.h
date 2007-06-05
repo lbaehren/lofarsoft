@@ -24,7 +24,16 @@
 #define GEOMETRICALDELAY_H
 
 #include <string>
+
+#ifdef HAVE_BLITZ
 #include <blitz/array.h>
+#endif
+
+#ifdef HAVE_CASA
+#include <casa/Arrays/IPosition.h>
+#include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/Vector.h>
+#endif
 
 #include <Imaging/CoordinateConversion.h>
 #include <Math/VectorNorms.h>
@@ -78,12 +87,21 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
   protected:
     
+#ifdef HAVE_BLITZ
     //! [nofAntennas,3] Antenna positions for which the delay is computed
     blitz::Array<double,2> antPositions_p;
     //! [nofSkyPositions,3] Positions in the sky towards which to point
     blitz::Array<double,2> skyPositions_p;
     //! [nofAntennas,nofSkyPositions] The geometrical delay itself
     blitz::Array<double,2> delays_p;
+#else
+#ifdef HAVE_CASA
+    casa::Matrix<double> antPositions_p;
+    casa::Matrix<double> skyPositions_p;
+    casa::Matrix<double> delays_p;
+#endif
+#endif
+
     //! Buffer the values for the geometrical delay?
     bool bufferDelays_p;
     
@@ -119,9 +137,18 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			     kept in memory; if set <i>no</i> only the input 
 			     parameters are stored an no further action is taken.
     */
+#ifdef HAVE_BLITZ
     GeometricalDelay (const blitz::Array<double,2> &antPositions,
 		      const blitz::Array<double,2> &skyPositions,
 		      const bool &bufferDelay=true);
+#else
+#ifdef HAVE_CASA
+    GeometricalDelay (const casa::Matrix<double> &antPositions,
+		      const casa::Matrix<double> &skyPositions,
+		      const bool &bufferDelay=true);
+#endif
+#endif
+
     /*!
       \brief Copy constructor
       
@@ -180,9 +207,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \return antPositions -- Antenna positions for which the delays are computed,
                               [nofAntennas,3]
     */
+#ifdef HAVE_BLITZ
     inline blitz::Array<double,2> antPositions () {
       return antPositions_p;
     }
+#else
+#ifdef HAVE_CASA
+    inline casa::Matrix<double> antPositions () {
+      return antPositions_p;
+    }
+#endif
+#endif
 
     /*!
       \brief Set the antenna positions, for which the delay is computed
@@ -195,8 +230,15 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			     kept in memory; if set <i>no</i> only the input 
 			     parameters are stored an no further action is taken.
     */
+#ifdef HAVE_BLITZ
     bool setAntPositions (const blitz::Array<double,2> &antPositions,
 			  const bool &bufferDelay=true);
+#else 
+#ifdef HAVE_CASA
+    bool setAntPositions (const casa::Matrix<double> &antPositions,
+			  const bool &bufferDelay=true);
+#endif
+#endif
 
     /*!
       \brief Set a specific antenna position
@@ -206,8 +248,15 @@ namespace CR { // NAMESPACE CR -- BEGIN
                             position information is provided; \f$ 0 \leq n \leq
 			    N_{\rm antennas}-1 \f$
     */
+#ifdef HAVE_BLITZ
     void setAntPosition (const blitz::Array<double,1> &antPosition,
 			 const uint &number);
+#else 
+#ifdef HAVE_CASA
+    void setAntPosition (const casa::Vector<double> &antPosition,
+			 const uint &number);
+#endif
+#endif
     
     /*!
       \brief Get the sky positions, for which the delay is computed
@@ -215,9 +264,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \return skyPosition -- The positions on the sky, for which the delay is
                              computed, [nofSkyPositions,3].
     */
+#ifdef HAVE_BLITZ
     inline blitz::Array<double,2> skyPositions () {
       return skyPositions_p;
     }
+#else
+#ifdef HAVE_CASA
+    inline casa::Matrix<double> skyPositions () {
+      return skyPositions_p;
+    }
+#endif
+#endif
 
     /*!
       \brief Set the sky positions, for which the delay is computed
@@ -231,8 +288,15 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			     kept in memory; if set <i>no</i> only the input 
 			     parameters are stored an no further action is taken.
     */
+#ifdef HAVE_BLITZ
     bool setSkyPositions (const blitz::Array<double,2> &skyPositions,
 			  const bool &bufferDelay=true);
+#else 
+#ifdef HAVE_CASA
+    bool setSkyPositions (const casa::Matrix<double> &skyPositions,
+			  const bool &bufferDelay=true);
+#endif
+#endif
 
     /*!
       \brief Set the sky positions, for which the delay is computed
@@ -248,9 +312,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			     kept in memory; if set <i>no</i> only the input 
 			     parameters are stored an no further action is taken.
     */
+#ifdef HAVE_BLITZ
     void setSkyPositions (const blitz::Array<double,2> &skyPositions,
 			  const CR::CoordType &coordType,
 			  const bool &bufferDelay=true);
+#else
+#ifdef HAVE_CASA
+    void setSkyPositions (const casa::Matrix<double> &skyPositions,
+			  const CR::CoordType &coordType,
+			  const bool &bufferDelay=true);
+#endif
+#endif
     
     /*!
       \brief Get the values of the geometrical delay
@@ -258,7 +330,13 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \return delay -- [nofAntennas,nofSkyPositions] The geometrical delays for
                        for the combination of antenna and sky positions
     */
+#ifdef HAVE_BLITZ
     blitz::Array<double,2> delays ();
+#else
+#ifdef HAVE_CASA
+    casa::Matrix<double> delays ();
+#endif
+#endif
 
     /*!
       \brief Geometrical delay for a combination of antenna and sky positions
@@ -277,6 +355,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \return delay -- [nofAntennas,nofSkyPositions] The geometrical delays for
                        for the combination of antenna and sky positions
     */
+#ifdef HAVE_BLITZ
     blitz::Array<double,2> delay (const blitz::Array<double,2> &antPositions,
 				  const blitz::Array<double,2> &skyPositions,
 				  const bool &bufferDelay=false)
@@ -286,6 +365,19 @@ namespace CR { // NAMESPACE CR -- BEGIN
 	skyPositions_p = skyPositions;
 	return delays ();
       }
+#else
+#ifdef HAVE_CASA
+    casa::Matrix<double> delay (const casa::Matrix<double> &antPositions,
+				  const casa::Matrix<double> &skyPositions,
+				  const bool &bufferDelay=false)
+      {
+	bufferDelays_p = bufferDelay;
+	antPositions_p = antPositions;
+	skyPositions_p = skyPositions;
+	return delays ();
+      }
+#endif
+#endif
 
     /*!
       \brief Get the number of baselines
@@ -295,9 +387,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			      \f$ N_{\rm Baselines} = \frac{1}{2} (N^2-N)
 			      = \frac{N}{2} (N-1) \f$
     */
-    int nofBaselines () {
+#ifdef HAVE_BLITZ
+    inline int nofBaselines () {
       return antPositions_p.rows()*(antPositions_p.rows()-1)/2;
     }
+#else
+#ifdef HAVE_CASA
+    inline int nofBaselines () {
+      return antPositions_p.nrow()*(antPositions_p.nrow()-1)/2;
+    }
+#endif
+#endif
 
     /*!
       \brief Get the number of antenna positions
@@ -305,9 +405,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \return nofAntennaPositions -- The number of antenna positions, for which
                                      the geometrical delay is computed.
     */
-    int nofAntennaPositions () {
+#ifdef HAVE_BLITZ
+    inline int nofAntennaPositions () {
       return antPositions_p.rows();
     }
+#else
+#ifdef HAVE_CASA
+    inline int nofAntennaPositions () {
+      return antPositions_p.nrow();
+    }
+#endif
+#endif
 
     /*!
       \brief Get the number of (source) positions
@@ -317,9 +425,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			      elements along the first axis of the
 			      <tt>positions</tt> array.
     */
-    int nofSkyPositions () {
+#ifdef HAVE_BLITZ
+    inline int nofSkyPositions () {
       return skyPositions_p.rows();
     }
+#else
+#ifdef HAVE_CASA
+    inline int nofSkyPositions () {
+      return skyPositions_p.nrow();
+    }
+#endif
+#endif
     
     // ------------------------------------------------------------------ Methods
 
@@ -338,14 +454,16 @@ namespace CR { // NAMESPACE CR -- BEGIN
       
       \return className -- The name of the class, GeometricalDelay.
     */
-    std::string className () const {
+    inline std::string className () const {
       return "GeometricalDelay";
     }
 
     /*!
       \brief Provide a summary of the objects status and contents
     */
-    void summary ();
+    inline void summary () {
+      summary (std::cout);
+    }
     
     /*!
       \brief Provide a summary of the objects status and contents
