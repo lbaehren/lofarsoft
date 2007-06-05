@@ -153,8 +153,48 @@ namespace CR { // namespace CR -- begin
 
     \return norm -- The \f$\ell^2\f$-norm for the vector
   */
-  double L2Norm (blitz::Array<double,1> const &vec);
+  template <class T>
+    double L2Norm (blitz::Array<double,1> const &vec);
+  
+#endif
 
+#ifdef HAVE_CASA
+
+  /*!
+    \brief Compute the L1-Norm of a vector
+
+    The <a href="http://mathworld.wolfram.com/L1-Norm.html">L1-Norm</a> is a
+    vector norm defined for a vector \f$ \vec x = [x_1,x_2,...,x_N]^T \f$ with
+    complex entries by 
+    \f[ |\vec x|_{1} = \sum_{i=1}^{N} |x_i| \f]
+
+    \param vec -- The input vector
+
+    \return norm -- The L1-Norm for the vector
+  */
+  template <class T>
+    T L1Norm (const casa::Vector<T> &vec);
+  
+  /*!
+    \brief Compute the L2-Norm of a vector
+
+    The <a href="http://mathworld.wolfram.com/L2-Norm.html">L2-Norm</a> is a
+    vector norm defined for a vector \f$ \vec x = [x_1,x_2,...,x_N]^T \f$ with
+    complex entries by
+    \f[ |\vec x| = \sqrt{\sum_{i=1}^{N} |x_i|^2} \f]
+    where \f$|x_{i}|\f$ on the right denotes the complex modulus. The
+    \f$\ell^2\f$-norm is the vector norm that is commonly encountered in vector
+    algebra and vector operations (such as the
+    <a href="http://mathworld.wolfram.com/DotProduct.html">dot product</a>),
+    where it is commonly denoted \f$|\vec x|\f$.
+
+    \param vec -- The input vector
+
+    \return norm -- The \f$\ell^2\f$-norm for the vector
+  */
+  template <class T>
+    double L2Norm (const casa::Vector<double> &vec);
+  
 #endif
 
   // ============================================================================

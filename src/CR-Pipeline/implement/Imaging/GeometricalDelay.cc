@@ -32,19 +32,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
   //
   // ============================================================================
   
-#ifdef HAVE_BLITZ
-  GeometricalDelay::GeometricalDelay ()
-  {
-    antPositions_p.resize(1,3);
-    skyPositions_p.resize(1,3);
-    
-    antPositions_p = 0.0, 0.0, 0.0;
-    skyPositions_p = 0.0, 0.0, 1.0;
-    bufferDelays_p  = true;
-
-    setDelay();
-  }
-#else 
 #ifdef HAVE_CASA
   GeometricalDelay::GeometricalDelay ()
   {
@@ -61,9 +48,51 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
     setDelay();
   }
+#else 
+#ifdef HAVE_BLITZ
+  GeometricalDelay::GeometricalDelay ()
+  {
+    antPositions_p.resize(1,3);
+    skyPositions_p.resize(1,3);
+    
+    antPositions_p = 0.0, 0.0, 0.0;
+    skyPositions_p = 0.0, 0.0, 1.0;
+    bufferDelays_p  = true;
+
+    setDelay();
+  }
 #endif
 #endif
   
+#ifdef HAVE_CASA
+  GeometricalDelay::GeometricalDelay (const casa::Matrix<double> &antPositions,
+				      const casa::Matrix<double> &skyPositions,
+				      const bool &bufferDelay)
+  {
+    if (!setAntPositions (antPositions,false)) {
+      std::cerr << "-- There was an error setting the ant positions" << std::endl;
+      // use defaults
+      antPositions_p.resize(1,3);
+      antPositions_p = 0.0;
+    }
+    
+    if (!setSkyPositions (skyPositions,false)) {
+      std::cerr << "-- There was an error setting the sky positions" << std::endl;
+      // use defaults
+      skyPositions_p.resize(1,3);
+      skyPositions_p      = 0.0;
+      skyPositions_p(0,2) = 0.0;
+    }
+  
+    // once all the input parameters have been stored we can compute the delays
+    bufferDelays_p = bufferDelay;
+    if (bufferDelays_p) {
+      std::cout << "-- buffering geometrical delays..." << std::endl;
+      setDelay();
+    }
+  }
+#else
+#ifdef HAVE_BLITZ
   GeometricalDelay::GeometricalDelay (const blitz::Array<double,2> &antPositions,
 				      const blitz::Array<double,2> &skyPositions,
 				      const bool &bufferDelay)
@@ -89,6 +118,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
       setDelay();
     }
   }
+#endif
+#endif
   
   GeometricalDelay::GeometricalDelay (GeometricalDelay const &other)
   {
@@ -115,6 +146,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
   //
   // ============================================================================
   
+  // ------------------------------------------------------------------ operator=
+
   GeometricalDelay& GeometricalDelay::operator= (GeometricalDelay const &other)
   {
     if (this != &other) {
@@ -124,6 +157,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
     return *this;
   }
   
+  // ----------------------------------------------------------------------- copy
+
   void GeometricalDelay::copy (GeometricalDelay const &other)
   {
     antPositions_p.resize (other.antPositions_p.shape());
@@ -145,7 +180,31 @@ namespace CR { // NAMESPACE CR -- BEGIN
   // ============================================================================
   
   // ------------------------------------------------------------ setAntPositions
+  
+#ifdef HAVE_CASA
+  bool GeometricalDelay::setAntPositions (const casa::Matrix<double> &antPositions,
+					  const bool &bufferDelay)
+  {
+    bool status (true);
 
+    // check the shape of the array
+    if (antPositions.ncolumn() == 3) {
+      // store the array
+      antPositions_p.resize (antPositions.shape());
+      antPositions_p = antPositions;
+      // update the values of the geometrical delays
+      if (bufferDelay) {
+	setDelay();
+      }
+    } else {
+      std::cerr << "Wrong number of array colums; must be 3!" << std::endl;
+      status  = false;
+    }
+    
+    return status;
+  }
+#else 
+#ifdef HAVE_BLITZ
   bool GeometricalDelay::setAntPositions (const blitz::Array<double,2> &antPositions,
 					  const bool &bufferDelay)
   {
@@ -167,9 +226,35 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     return status;
   }
+#endif
+#endif
   
   // ------------------------------------------------------------ setSkyPositions
 
+#ifdef HAVE_CASA
+  bool GeometricalDelay::setSkyPositions (const casa::Matrix<double> &skyPositions,
+					  const bool &bufferDelay)
+  {
+    bool status (true);
+    
+    // check the shape of the array
+    if (skyPositions.ncolumn() == 3) {
+      // store the array
+      skyPositions_p.resize (skyPositions.shape());
+      skyPositions_p = skyPositions;
+      // update the values of the geometrical delays
+      if (bufferDelay) {
+	setDelay();
+      }
+    } else {
+      std::cerr << "Wrong number of array colums; must be 3!" << std::endl;
+      status  = false;
+    }
+    
+    return status;
+  }
+#else
+#ifdef HAVE_BLITZ
   bool GeometricalDelay::setSkyPositions (const blitz::Array<double,2> &skyPositions,
 					  const bool &bufferDelay)
   {
@@ -191,9 +276,24 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     return status;
   }
+#endif
+#endif
   
   // ---------------------------------------------------------------------- delay
 
+#ifdef HAVE_CASA
+  casa::Matrix<double> GeometricalDelay::delays ()
+  {
+    // if the delays are buffered internally, we just need to return the array
+    if (bufferDelays_p) {
+      std::cout << "-- returning buffered geometrical delays..." << std::endl;
+      return delays_p;
+    } else {
+      return calcDelays();
+    }
+  }
+#else
+#ifdef HAVE_BLITZ
   blitz::Array<double,2> GeometricalDelay::delays ()
   {
     // if the delays are buffered internally, we just need to return the array
@@ -204,6 +304,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
       return calcDelays();
     }
   }
+#endif
+#endif
 
   // ------------------------------------------------------------------- setDelay
 
@@ -215,6 +317,32 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
   // ------------------------------------------------------------------ calcDelay
 
+#ifdef HAVE_CASA
+  double GeometricalDelay::calcDelay (double const &xSky,
+				      double const &ySky,
+				      double const &zSky,
+				      double const &xAntenna,
+				      double const &yAntenna,
+				      double const &zAntenna)
+  {
+    double delay (0.0);
+    casa::Vector<double> skyPosition(3);
+    casa::Vector<double> diff (3);
+
+    skyPosition(0) = xSky;
+    skyPosition(1) = ySky;
+    skyPosition(2) = zSky;
+
+    diff(0) = xSky-xAntenna;
+    diff(1) = ySky-yAntenna;
+    diff(2) = zSky-zAntenna;
+    
+    delay = (L2Norm(diff)-L2Norm(skyPosition))/lightspeed;
+    
+    return delay;
+  }
+#else
+#ifdef HAVE_BLITZ
   double GeometricalDelay::calcDelay (double const &xSky,
 				      double const &ySky,
 				      double const &zSky,
@@ -233,9 +361,35 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     return delay;
   }
+#endif
+#endif
 
   // ----------------------------------------------------------------- calcDelays
 
+#ifdef HAVE_CASA
+  casa::Matrix<double> GeometricalDelay::calcDelays ()
+  {
+    int nAnt (0);
+    int nSky (0);
+    int nofAnt (nofAntennaPositions());
+    int nofSky (nofSkyPositions());
+    casa::Vector<double> skyPos (3);
+    casa::Vector<double> diff (3);
+    casa::Matrix<double> delays (nofAnt,nofSky);
+
+    // computation of the geometrical delays
+    for (nSky=0; nSky<nofSky; nSky++) {
+//       skyPos = skyPositions_p(nSky,blitz::Range(blitz::Range::all()));
+      for (nAnt=0; nAnt<nofAnt; nAnt++) {
+// 	diff = skyPos-antPositions_p(nAnt,blitz::Range(blitz::Range::all()));
+	delays(nAnt,nSky) = (L2Norm(diff)-L2Norm(skyPos))/lightspeed;
+      }
+    }
+    
+    return delays;
+  }
+#else
+#ifdef HAVE_BLITZ
   blitz::Array<double,2> GeometricalDelay::calcDelays ()
   {
     int nAnt (0);
@@ -245,11 +399,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
     blitz::Array<double,1> skyPos (3);
     blitz::Array<double,1> diff (3);
     blitz::Array<double,2> delays (nofAnt,nofSky);
-
-    // control feedback
-//     std::cout << "# antennas    = " << nofAnt << std::endl;
-//     std::cout << "# positions   = " << nofSky << std::endl;
-//     std::cout << "shape(delays) = " << delays.shape() << std::endl;
 
     // computation of the geometrical delays
     for (nSky=0; nSky<nofSky; nSky++) {
@@ -262,6 +411,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     return delays;
   }
+#endif
+#endif
   
   // ============================================================================
   //

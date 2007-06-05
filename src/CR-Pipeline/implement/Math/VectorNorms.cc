@@ -83,12 +83,33 @@ namespace CR { // Namespace CR -- begin
   {
     return sum(fabs(vec));
   }
-
-  double L2Norm (blitz::Array<double,1> const &vec)
+  
+  template <class T>
+  double L2Norm (blitz::Array<T,1> const &vec)
   {
     return sqrt(sum(pow2(vec)));
   }
 
+#endif
+
+#ifdef HAVE_CASA
+
+  template <class T>
+  T L1Norm (const casa::Vector<T> &vec)
+  {
+    double norm (0.0);
+    norm = sqrt(sum(fabs(vec)));
+    return norm;
+  }
+
+  template <class T>
+  double L2Norm (const casa::Vector<T> &vec)
+  {
+    double norm (0.0);
+    norm = sqrt(sum(pow(vec,2)));
+    return norm;
+  }
+  
 #endif
 
   // ============================================================================
@@ -158,12 +179,19 @@ namespace CR { // Namespace CR -- begin
   template float L1Norm (std::vector<float> const &vec);
   template double L1Norm (std::vector<double> const &vec);
 
-  template float L1Norm (const blitz::Array<float,1> &vec);
-  template double L1Norm (const blitz::Array<double,1> &vec);
-
   template int sign (int const &x);
   template float sign (float const &x);
   template double sign (double const &x);
+
+#ifdef HAVE_BLITZ
+
+  template float L1Norm (const blitz::Array<float,1> &vec);
+  template double L1Norm (const blitz::Array<double,1> &vec);
+
+  template float L2Norm (const blitz::Array<float,1> &vec);
+  template double L2Norm (const blitz::Array<double,1> &vec);
+
+#endif
 
 #ifdef HAVE_CASA
 
@@ -178,6 +206,12 @@ namespace CR { // Namespace CR -- begin
   template casa::Vector<double> invertOrder (casa::Vector<double> const &vec);
   template casa::Vector<Complex> invertOrder (casa::Vector<Complex> const &vec);
   template casa::Vector<DComplex> invertOrder (casa::Vector<DComplex> const &vec);
+
+  template float L1Norm (const casa::Vector<float> &vec);
+  template double L1Norm (const casa::Vector<double> &vec);
+
+  template float L2Norm (const casa::Vector<float> &vec);
+  template double L2Norm (const casa::Vector<double> &vec);
 
 #endif
 
