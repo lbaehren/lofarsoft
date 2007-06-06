@@ -21,6 +21,7 @@
 /* $Id */
 
 #include <Skymap/Phasing.h>
+#include <Math/VectorNorms.h>
 
 Double Phasing::PI_p = 3.1415926535897932384626433832795;
 

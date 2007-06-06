@@ -45,24 +45,7 @@ namespace CR { // Namespace CR -- begin
     
     return sum;
   }
-  
-  // --------------------------------------------------------------------- L2Norm
-  
-  template <class T>
-  T L2Norm (T const *vec,
-	    unsigned int const &nelem)
-  {
-    T sum2 (0.0);
-    
-    for (unsigned int n(0); n<nelem; n++) {
-      sum2 += vec[n]*vec[n];
-    }
-    
-    return sqrt (sum2);
-  }
-  
-  // --------------------------------------------------------------------- L1Norm
-  
+
   template <class T>
   T L1Norm (std::vector<T> const &vec)
   {
@@ -83,7 +66,36 @@ namespace CR { // Namespace CR -- begin
   {
     return sum(fabs(vec));
   }
+
+#endif  
+
+#ifdef HAVE_CASA
+
+  template <class T>
+  T L1Norm (casa::Vector<T> const &vec)
+  {
+    return sqrt(sum(fabs(vec)));
+  }
+
+#endif
   
+  // --------------------------------------------------------------------- L2Norm
+  
+  template <class T>
+  T L2Norm (T const *vec,
+	    unsigned int const &nelem)
+  {
+    T sum2 (0.0);
+    
+    for (unsigned int n(0); n<nelem; n++) {
+      sum2 += vec[n]*vec[n];
+    }
+    
+    return sqrt (sum2);
+  }
+  
+#ifdef HAVE_BLITZ
+
   template <class T>
   T L2Norm (blitz::Array<T,1> const &vec)
   {
@@ -93,12 +105,6 @@ namespace CR { // Namespace CR -- begin
 #endif
 
 #ifdef HAVE_CASA
-
-  template <class T>
-  T L1Norm (casa::Vector<T> const &vec)
-  {
-    return sqrt(sum(fabs(vec)));
-  }
 
   template <class T>
   T L2Norm (casa::Vector<T> const &vec)
@@ -201,12 +207,11 @@ namespace CR { // Namespace CR -- begin
   template casa::Vector<Complex> invertOrder (casa::Vector<Complex> const &vec);
   template casa::Vector<DComplex> invertOrder (casa::Vector<DComplex> const &vec);
 
-  template float L1Norm (casa::Vector<float> const &vec);
+//   template float L1Norm (casa::Vector<float> const &vec);
   template double L1Norm (casa::Vector<double> const &vec);
 
   template float L2Norm (casa::Vector<float> const &vec);
   template double L2Norm (casa::Vector<double> const &vec);
-  template casa::Double L2Norm (casa::Vector<casa::Double> const &vec);
 
   template casa::Vector<int> sign (casa::Vector<int> const &x);
   template casa::Vector<float> sign (casa::Vector<float> const &x);

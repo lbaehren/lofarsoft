@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005                                                  *
- *   Lars Bahren (<mail>)                                                     *
+ *   Copyright (C) 2005                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -64,6 +64,12 @@ namespace CR { // namespace CR -- begin
   <h3>Prerequisite</h3>
 
   <h3>Synopsis</h3>
+
+  <ul>
+    <li>All functions are templated to allow maximum flexibility.
+    <li>Most function support usage of: C++ arrays, STD vectors, Blitz++ arrays,
+    CASA arrays.
+  </ul>
 
   <h3>Example(s)</h3>
 
@@ -154,7 +160,7 @@ namespace CR { // namespace CR -- begin
     \return norm -- The \f$\ell^2\f$-norm for the vector
   */
   template <class T>
-    T L2Norm (blitz::Array<double,1> const &vec);
+    T L2Norm (blitz::Array<T,1> const &vec);
   
 #endif
 
@@ -193,7 +199,7 @@ namespace CR { // namespace CR -- begin
     \return norm -- The \f$\ell^2\f$-norm for the vector
   */
   template <class T>
-    double L2Norm (casa::Vector<double> const &vec);
+    T L2Norm (casa::Vector<T> const &vec);
   
 #endif
 

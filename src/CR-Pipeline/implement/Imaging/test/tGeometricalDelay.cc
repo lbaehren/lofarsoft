@@ -23,6 +23,12 @@
 #include <iostream>
 #include <fstream>
 
+#ifdef HAVE_CASA
+#include <casa/Arrays/IPosition.h>
+#include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/Vector.h>
+#endif
+
 #include <Imaging/GeometricalDelay.h>
 
 using blitz::Array;
@@ -52,6 +58,31 @@ const double lightspeed = 299792458;
 
   \return nofFailedTests -- The number of failed tests.
 */
+#ifdef HAVE_CASA
+int test_formula ()
+{
+  std::cout << "\n[test_formula]\n" << std::endl;
+  
+  int nofFailedTests (0);
+  
+  int nofCoordinates (3);
+  casa::Vector<double> skyPositions (nofCoordinates);
+  casa::Matrix<double> antPositions (2,nofCoordinates);
+  double delay (.0);
+  
+  antPositions(0,0) = -100.0;
+  antPositions(0,1) = 0.0;
+  antPositions(0,2) = 0.0;
+  antPositions(1,0) = 100.0;
+  antPositions(1,1) = 0.0;
+  antPositions(1,2) = 0.0;
+
+  skyPositions = 100.0;
+  
+  return nofFailedTests;
+}
+#else
+#ifdef HAVE_BLITZ
 int test_formula ()
 {
   std::cout << "\n[test_formula]\n" << std::endl;
@@ -138,6 +169,8 @@ int test_formula ()
   
   return nofFailedTests;
 }
+#endif
+#endif
 
 // -----------------------------------------------------------------------------
 
@@ -146,6 +179,17 @@ int test_formula ()
 
   \return nofFailedTests -- The number of failed tests.
 */
+#ifdef HAVE_CASA
+int test_GeometricalDelay ()
+{
+  std::cout << "\n[test_GeometricalDelay]\n" << std::endl;
+
+  int nofFailedTests (0);
+
+  return nofFailedTests;
+}
+#else
+#ifdef HAVE_BLITZ
 int test_GeometricalDelay ()
 {
   std::cout << "\n[test_GeometricalDelay]\n" << std::endl;
@@ -192,6 +236,8 @@ int test_GeometricalDelay ()
   
   return nofFailedTests;
 }
+#endif
+#endif
 
 // -----------------------------------------------------------------------------
 
@@ -209,6 +255,17 @@ int test_GeometricalDelay ()
   \return nofFailedTests -- Number of failed tests
 
 */
+#ifdef HAVE_CASA
+int test_delayComputation ()
+{
+  std::cout << "\n[test_delayComputation]\n" << std::endl;
+
+  int nofFailedTests (0);
+
+  return nofFailedTests;
+}
+#else
+#ifdef HAVE_BLITZ
 int test_delayComputation ()
 {
   std::cout << "\n[test_delayComputation]\n" << std::endl;
@@ -252,6 +309,8 @@ int test_delayComputation ()
   
   return nofFailedTests;
 }
+#endif
+#endif
 
 // -----------------------------------------------------------------------------
 
@@ -264,9 +323,9 @@ int main ()
 {
   int nofFailedTests (0);
 
-//   {
-//     nofFailedTests += test_formula ();
-//   }
+  {
+    nofFailedTests += test_formula ();
+  }
 
   // Test for the constructor(s)
   {
