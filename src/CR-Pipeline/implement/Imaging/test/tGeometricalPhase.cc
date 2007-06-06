@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Lars Baehren (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -54,10 +54,32 @@ int test_GeometricalPhase ()
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
     GeometricalPhase phase;
+    phase.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
+  
+  std::cout << "[2] Testing argumented constructor ..." << std::endl;
+#ifdef HAVE_CASA
+  try {
+    GeometricalPhase phase;
+    phase.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+#else 
+#ifdef HAVE_BLITZ
+  try {
+    GeometricalPhase phase;
+    phase.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+#endif
+#endif
   
   return nofFailedTests;
 }

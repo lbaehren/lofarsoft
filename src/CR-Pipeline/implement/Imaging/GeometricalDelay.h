@@ -61,6 +61,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     <h3>Synopsis</h3>
 
+    <b>Geometry.</b>
     The basic equation, for which the delays are computed, is documented in
     the GeometricalWeight class.
 
@@ -79,6 +80,21 @@ namespace CR { // NAMESPACE CR -- BEGIN
     the signals arrives with a delay of
     \f[ \tau_j = \frac{1}{c} \left( |\vec \rho_j| - |\vec \rho| \right) =
     \frac{1}{c} \left( |\vec \rho - \vec x_j| - |\vec \rho| \right) \f]
+
+    <b>Array classes.</b>
+    The class is constructed such, that both Blitz++ and CASA arrays are
+    supported. However in order to minimize conversions, only one type is
+    available at a time; this is obtained by encapsulating the array type 
+    specific parts (including also private variables) in preprocessor statements:
+    \code
+    #ifdef HAVE_CASA
+    // code working with the CASA array classes
+    #else 
+    #ifdef HAVE_BLITZ
+    // code working with the Blitz++ array classes
+    #endif
+    #endif
+    \endcode
     
     <h3>Example(s)</h3>
     
@@ -88,8 +104,11 @@ namespace CR { // NAMESPACE CR -- BEGIN
   protected:
     
 #ifdef HAVE_CASA
+    //! [nofAntennas,3] Antenna positions for which the delay is computed
     casa::Matrix<double> antPositions_p;
+    //! [nofSkyPositions,3] Positions in the sky towards which to point
     casa::Matrix<double> skyPositions_p;
+    //! [nofAntennas,nofSkyPositions] The geometrical delay itself
     casa::Matrix<double> delays_p;
 #else
 #ifdef HAVE_BLITZ
@@ -191,14 +210,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
     /*!
       \brief Enable/disable buffering of the values for the geometrical delay
 
-      \param bufferDelay  -- Buffer the values for the geometrical delay? If set
+      \param bufferDelays -- Buffer the values for the geometrical delay? If set
                              <i>yes</i> the delays will be computed from the 
 			     provided antenna and sky positions and afterwards
 			     kept in memory; if set <i>no</i> only the input 
 			     parameters are stored an no further action is taken.
     */
-    inline void bufferDelay (const bool &bufferDelay) {
-      bufferDelays_p = bufferDelay;
+    inline void bufferDelays (bool const &bufferDelays=true) {
+      bufferDelays_p = bufferDelays;
+      if (bufferDelays) {
+	setDelays();
+      }
     }
     
     /*!
@@ -224,7 +246,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       
       \param antPositions -- The antenna positions, for which the delay is
                              computed, [nofAntennas,3]
-      \param bufferDelay  -- Buffer the values for the geometrical delay? If set
+      \param bufferDelays -- Buffer the values for the geometrical delay? If set
                              <i>yes</i> the delays will be computed from the 
 			     provided antenna and sky positions and afterwards
 			     kept in memory; if set <i>no</i> only the input 
@@ -232,11 +254,11 @@ namespace CR { // NAMESPACE CR -- BEGIN
     */
 #ifdef HAVE_CASA
     bool setAntPositions (const casa::Matrix<double> &antPositions,
-			  const bool &bufferDelay=true);
+			  const bool &bufferDelays=true);
 #else
 #ifdef HAVE_BLITZ
     bool setAntPositions (const blitz::Array<double,2> &antPositions,
-			  const bool &bufferDelay=true);
+			  const bool &bufferDelays=true);
 #endif
 #endif
 
@@ -282,7 +304,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \param skyPositions -- The source positions, for which the delay is
                              computed, [nofSkyPositions,3]; cartesian
 			     coordinates by default
-      \param bufferDelay  -- Buffer the values for the geometrical delay? If set
+      \param bufferDelays  -- Buffer the values for the geometrical delay? If set
                              <i>yes</i> the delays will be computed from the 
 			     provided antenna and sky positions and afterwards
 			     kept in memory; if set <i>no</i> only the input 
@@ -290,11 +312,11 @@ namespace CR { // NAMESPACE CR -- BEGIN
     */
 #ifdef HAVE_CASA
     bool setSkyPositions (const casa::Matrix<double> &skyPositions,
-			  const bool &bufferDelay=true);
+			  const bool &bufferDelays=true);
 #else
 #ifdef HAVE_BLITZ
     bool setSkyPositions (const blitz::Array<double,2> &skyPositions,
-			  const bool &bufferDelay=true);
+			  const bool &bufferDelays=true);
 #endif
 #endif
 
@@ -306,7 +328,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \param coordType    -- Coordinate type, as which the position is provided;
                              if position not provided in cartesian coordinates,
 			     transformation will be performed
-      \param bufferDelay  -- Buffer the values for the geometrical delay? If set
+      \param bufferDelays  -- Buffer the values for the geometrical delay? If set
                              <i>yes</i> the delays will be computed from the 
 			     provided antenna and sky positions and afterwards
 			     kept in memory; if set <i>no</i> only the input 
@@ -315,12 +337,12 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_CASA
     void setSkyPositions (const casa::Matrix<double> &skyPositions,
 			  const CR::CoordType &coordType,
-			  const bool &bufferDelay=true);
+			  const bool &bufferDelays=true);
 #else
 #ifdef HAVE_BLITZ
     void setSkyPositions (const blitz::Array<double,2> &skyPositions,
 			  const CR::CoordType &coordType,
-			  const bool &bufferDelay=true);
+			  const bool &bufferDelays=true);
 #endif
 #endif
     
@@ -346,7 +368,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			     the antenna positions given in cartesian coordinates
 			     \f$ (x,y,z) \f$
       \param skyPositions -- The sky positions, for which the delay is computed
-      \param bufferDelay  -- Buffer the values for the geometrical delay? If set
+      \param bufferDelays  -- Buffer the values for the geometrical delay? If set
                              <i>yes</i> the delays will be computed from the 
 			     provided antenna and sky positions and afterwards
 			     kept in memory; if set <i>no</i> only the input 
@@ -356,22 +378,22 @@ namespace CR { // NAMESPACE CR -- BEGIN
                        for the combination of antenna and sky positions
     */
 #ifdef HAVE_CASA
-    casa::Matrix<double> delay (const casa::Matrix<double> &antPositions,
+    casa::Matrix<double> delays (const casa::Matrix<double> &antPositions,
 				const casa::Matrix<double> &skyPositions,
-				const bool &bufferDelay=false)
+				const bool &bufferDelays=false)
       {
-	bufferDelays_p = bufferDelay;
+	bufferDelays_p = bufferDelays;
 	antPositions_p = antPositions;
 	skyPositions_p = skyPositions;
 	return delays ();
       }
 #else
 #ifdef HAVE_BLITZ
-    blitz::Array<double,2> delay (const blitz::Array<double,2> &antPositions,
+    blitz::Array<double,2> delays (const blitz::Array<double,2> &antPositions,
 				  const blitz::Array<double,2> &skyPositions,
-				  const bool &bufferDelay=false)
+				  const bool &bufferDelays=false)
       {
-	bufferDelays_p = bufferDelay;
+	bufferDelays_p = bufferDelays;
 	antPositions_p = antPositions;
 	skyPositions_p = skyPositions;
 	return delays ();
@@ -487,7 +509,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     /*!
       \brief Store the geometrical delays in the internal buffer
     */
-    void setDelay ();
+    void setDelays ();
     
     /*!
       \brief Compute the geometrical delays

@@ -53,6 +53,40 @@ const double lightspeed = 299792458;
 
 // -----------------------------------------------------------------------------
 
+#ifdef HAVE_CASA
+void getPositions (casa::Matrix<double> &skyPositions,
+		   casa::Matrix<double> &antPositions)
+{
+  int nofCoordinates (3);
+  int nofAntennas (2);
+  int nofDirections (3);
+
+  // Antenna positions
+
+  antPositions.resize(nofAntennas,nofCoordinates);
+
+  antPositions(0,0) = -100.0;
+  antPositions(0,1) = 0.0;
+  antPositions(0,2) = 0.0;
+  antPositions(1,0) = 100.0;
+  antPositions(1,1) = 0.0;
+  antPositions(1,2) = 0.0;
+
+  // Pointing directions (sky positions)
+  
+  skyPositions.resize(nofDirections,nofCoordinates);
+
+  skyPositions            = 0.0;
+  skyPositions.diagonal() = 100.0;
+
+//   std::cout << "-- nof. antennas = " << nofAntennas   << std::endl;
+//   std::cout << "-- ant positions = " << antPositions  << std::endl;
+//   std::cout << "-- sky positions = " << skyPositions  << std::endl;
+}
+#endif
+
+// -----------------------------------------------------------------------------
+
 /*!
   \brief Fundamental testing on the different formulae for delay computation
 
@@ -61,23 +95,34 @@ const double lightspeed = 299792458;
 #ifdef HAVE_CASA
 int test_formula ()
 {
-  std::cout << "\n[test_formula]\n" << std::endl;
+  std::cout << "\n[test_formula] (CASA arrays)\n" << std::endl;
   
   int nofFailedTests (0);
   
   int nofCoordinates (3);
-  casa::Vector<double> skyPositions (nofCoordinates);
-  casa::Matrix<double> antPositions (2,nofCoordinates);
+  casa::Matrix<double> antPositions;
+  casa::Matrix<double> skyPositions;
   double delay (.0);
   
-  antPositions(0,0) = -100.0;
-  antPositions(0,1) = 0.0;
-  antPositions(0,2) = 0.0;
-  antPositions(1,0) = 100.0;
-  antPositions(1,1) = 0.0;
-  antPositions(1,2) = 0.0;
+  getPositions (skyPositions, antPositions);
 
-  skyPositions = 100.0;
+  /*!
+    Standard version for the computation of the delay
+   */
+  std::cout << "[1] Far-field geometry" << std::endl;
+  try {
+    double scalarProduct (.0);
+
+    for (int n(0); n<nofCoordinates; n++) {
+      scalarProduct += (antPositions(1,n)-antPositions(0,n))*skyPositions(2,n);
+    }
+    delay = scalarProduct/lightspeed;
+    
+    std::cout << "delay(FF)     = " << delay         << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
   
   return nofFailedTests;
 }
@@ -85,7 +130,7 @@ int test_formula ()
 #ifdef HAVE_BLITZ
 int test_formula ()
 {
-  std::cout << "\n[test_formula]\n" << std::endl;
+  std::cout << "\n[test_formula] (Blitz++ arrays)\n" << std::endl;
 
   int nofFailedTests (0);
 
@@ -182,17 +227,53 @@ int test_formula ()
 #ifdef HAVE_CASA
 int test_GeometricalDelay ()
 {
-  std::cout << "\n[test_GeometricalDelay]\n" << std::endl;
+  std::cout << "\n[test_GeometricalDelay] (CASA arrays)\n" << std::endl;
 
   int nofFailedTests (0);
+  casa::Matrix<double> antPositions;
+  casa::Matrix<double> skyPositions;
 
+  getPositions (skyPositions, antPositions);
+
+  std::cout << "[1] Testing default constructor ..." << std::endl;
+  try {
+    GeometricalDelay delay;
+    delay.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[2] Testing argumented constructor ..." << std::endl;
+  try {
+    GeometricalDelay delay (antPositions,
+			    skyPositions);
+    delay.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[3] Testing copy constructor ..." << std::endl;
+  try {
+    GeometricalDelay delay (antPositions,
+			    skyPositions);
+    delay.summary();
+
+    GeometricalDelay delay_copy (delay);
+    delay_copy.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
   return nofFailedTests;
 }
 #else
 #ifdef HAVE_BLITZ
 int test_GeometricalDelay ()
 {
-  std::cout << "\n[test_GeometricalDelay]\n" << std::endl;
+  std::cout << "\n[test_GeometricalDelay] (Blitz++ arrays)\n" << std::endl;
 
   int nofFailedTests (0);
   uint nofCoordinates (3);
