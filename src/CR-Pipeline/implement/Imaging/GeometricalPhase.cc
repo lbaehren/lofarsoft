@@ -216,7 +216,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
     // compute the phases
     for (nChannel=0; nChannel<nofChannels; nChannel++) {
-//       phases.xyPlane(nChannel) = frequencies_p(nChannel)*delays;
+      phases(Range::all(),Range::all(),nChannel) = frequencies_p(nChannel)*delays;
     }
 
     return phases;
