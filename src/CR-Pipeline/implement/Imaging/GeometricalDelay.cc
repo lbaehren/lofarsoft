@@ -46,7 +46,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     skyPositions_p      = 0.0;
     skyPositions_p(0,2) = 1.0;
 
-    bufferDelays_p  = true;
+    bufferDelays_p  = false;
 
     setDelays();
   }
@@ -59,7 +59,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     antPositions_p = 0.0, 0.0, 0.0;
     skyPositions_p = 0.0, 0.0, 1.0;
-    bufferDelays_p  = true;
+
+    bufferDelays_p  = false;
 
     setDelays();
   }
@@ -173,10 +174,12 @@ namespace CR { // NAMESPACE CR -- BEGIN
     skyPositions_p.resize (other.skyPositions_p.shape());
     skyPositions_p = other.skyPositions_p;
 
-    delays_p.resize(other.delays_p.shape());
-    delays_p        = other.delays_p;
-
     bufferDelays_p  = other.bufferDelays_p;
+
+    if (bufferDelays_p) {
+      delays_p.resize(other.delays_p.shape());
+      delays_p        = other.delays_p;
+    }
   }
 
   // ============================================================================
@@ -200,6 +203,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       antPositions_p = antPositions;
       // update the values of the geometrical delays
       if (bufferDelays) {
+	bufferDelays_p = bufferDelays;
 	setDelays();
       }
     } else {
@@ -223,6 +227,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       antPositions_p = antPositions;
       // update the values of the geometrical delays
       if (bufferDelays) {
+	bufferDelays_p = bufferDelays;
 	setDelays();
       }
     } else {
@@ -250,6 +255,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       skyPositions_p = skyPositions;
       // update the values of the geometrical delays
       if (bufferDelays) {
+	bufferDelays_p = bufferDelays;
 	setDelays();
       }
     } else {
@@ -273,6 +279,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       skyPositions_p = skyPositions;
       // update the values of the geometrical delays
       if (bufferDelays) {
+	bufferDelays_p = bufferDelays;
 	setDelays();
       }
     } else {
@@ -317,8 +324,10 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
   void GeometricalDelay::setDelays ()
   {
-    delays_p.resize (nofAntennaPositions(),nofSkyPositions());
-    delays_p = calcDelays();
+    if (bufferDelays_p) {
+      delays_p.resize (nofAntennaPositions(),nofSkyPositions());
+      delays_p = calcDelays();
+    }
   }
 
   // ============================================================================

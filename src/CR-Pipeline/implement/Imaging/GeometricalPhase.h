@@ -51,11 +51,24 @@ namespace CR { // NAMESPACE CR -- BEGIN
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[start filling in your text here]
+      <li>GeometricalDelay
+      <li>GeometricalWeight
     </ul>
     
     <h3>Synopsis</h3>
     
+    <b>Geometry.</b>
+    The basic equation, for which the delays are computed, is documented in
+    the GeometricalWeight class. The procedure to arrive at the geometrical
+    weights passed to the Beamform is divided into three steps, of which this
+    class implements the second one.
+
+    The geometrical phase \f$ \phi = \phi (\vec x, \vec \rho, \nu) \f$ is given
+    by
+    \f[ \phi (\vec x, \vec \rho, \nu) = 2 \pi \nu \tau_{\rm geom} \f]
+    where \f$ \tau_{\rm geom} \f$ is the geometrical delay (as computed in 
+    GeometricalDelay) and \f$ \nu \f$ the frequency.
+
     <h3>Example(s)</h3>
     
   */  
@@ -98,13 +111,21 @@ namespace CR { // NAMESPACE CR -- BEGIN
     */
 #ifdef HAVE_CASA
     GeometricalPhase (casa::Vector<double> const &frequencies,
-		      bool const &bufferPhases=true);
+		      bool const &bufferPhases=false);
 #else
 #ifdef HAVE_BLITZ
     GeometricalPhase (blitz::Array<double,1> const &frequencies,
-		      bool const &bufferPhases=true);
+		      bool const &bufferPhases=false);
 #endif
 #endif
+    
+    /*!
+      \brief Argumented constructor
+
+      \param delay -- GeometricalDelay object encapsulating the functionality
+                      on top of which this class builds.
+    */
+    GeometricalPhase (GeometricalDelay const &delay);
     
     /*!
       \brief Copy constructor
@@ -147,7 +168,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
       \param bufferPhases -- Buffer the values for the geometrical phases?
     */
-    inline void bufferPhases (bool const &bufferPhases=true) {
+    inline void bufferPhases (bool const &bufferPhases=false) {
       bufferPhases_p = bufferPhases;
       if (bufferPhases) {
 	setPhases();
@@ -190,11 +211,11 @@ namespace CR { // NAMESPACE CR -- BEGIN
     */
 #ifdef HAVE_CASA
     bool setFrequencies (const casa::Vector<double> &frequencies,
-			 bool const &bufferPhases=true);
+			 bool const &bufferPhases=false);
 #else
 #ifdef HAVE_BLITZ
     bool setFrequencies (const blitz::Array<double,1> &frequencies,
-			 bool const &bufferPhases=true);
+			 bool const &bufferPhases=false);
 #endif
 #endif
 

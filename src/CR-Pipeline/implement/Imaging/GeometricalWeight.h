@@ -55,12 +55,24 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     The basic equation, by which the geometrical weights for the beamforming
     are computed, is given by
-    \f[ A_{\rm geom} = \exp \left( i \Phi \right) = \exp \left( i \frac{2\pi\nu}{c} R L^{T} \right) \f]
+    \f[ A_{\rm geom} = \exp \left( i \Phi \right) = \exp \left( i \frac{2\pi\nu}{c}
+    R L^{T} \right) \f]
     where \f$ \nu \f$ is the observation frequency, \f$ c \f$ the speed of light,
     \f$ \mathbf{R} \f$ is a matrix collecting the positions of the \f$ 2p \f$
     array elements and \f$ L \f$ is a matrix collecting the \f$ q \f$ source
     positions. The geometrical delay \f$ \tau = R L^{T} \f$ is computed in the
     class GeometricalDelay.
+    
+    \f[
+    \begin{array}{rcl}
+    \tau_j & = & \frac{1}{c} \left( |\vec \rho - \vec x_j| - |\vec \rho| \right) \\
+    & \downarrow &  \\
+    \phi (\vec x_j, \vec \rho, \nu) & = & 2 \pi \nu \tau_{\rm geom} \\
+    & \downarrow &  \\
+    w (\vec x_j, \vec \rho, \nu) & = & \exp \Bigl( i\, \phi (\vec x_j, \vec \rho,
+    \nu) \Bigr)
+    \end{array}
+    \f]
 
     <h3>Example(s)</h3>
     

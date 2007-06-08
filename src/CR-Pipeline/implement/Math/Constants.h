@@ -53,7 +53,8 @@ namespace CR {  // Namespace CR -- begin
   
   // PI and functions thereof:
   //! \f$ \pi \f$
-  const double pi = 3.1415926535897932384626433832795;
+  const double pi   = 3.1415926535897932384626433832795;
+  const double _2pi = 2*pi;
   
   // Angular measure:
   const double radian  = 1.0;

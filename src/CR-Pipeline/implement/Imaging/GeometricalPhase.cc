@@ -21,6 +21,7 @@
 /* $Id: template-class.cc,v 1.10 2006/10/31 19:19:57 bahren Exp $*/
 
 #include <Imaging/GeometricalPhase.h>
+#include <Math/Constants.h>
 
 namespace CR { // NAMESPACE CR -- BEGIN
   
@@ -34,7 +35,11 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
   GeometricalPhase::GeometricalPhase ()
     : GeometricalDelay ()
-  {;}
+  {
+    casa::Vector<double> frequencies (1);
+    frequencies = 0.0;
+    setFrequencies (frequencies,false);
+  }
   
   // ----------------------------------------------------------- GeometricalPhase
   
@@ -56,6 +61,16 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #endif
 #endif
   
+  // ----------------------------------------------------------- GeometricalPhase
+
+  GeometricalPhase::GeometricalPhase (GeometricalDelay const &delay)
+    : GeometricalDelay (delay)
+  {
+    casa::Vector<double> frequencies (1);
+    frequencies = 0.0;
+    setFrequencies (frequencies,false);
+  }
+
   // ----------------------------------------------------------- GeometricalPhase
 
   GeometricalPhase::GeometricalPhase (GeometricalPhase const &other)
@@ -93,7 +108,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
   }
   
   void GeometricalPhase::copy (GeometricalPhase const &other)
-  {;}
+  {
+    bufferPhases_p = other.bufferPhases_p;
+
+    frequencies_p.resize (other.frequencies_p.shape());
+    frequencies_p = other.frequencies_p;
+
+    if (bufferPhases_p) {
+      phases_p.resize(other.phases_p.shape());
+      phases_p = other.phases_p;
+    }
+  }
 
   // ============================================================================
   //
@@ -109,13 +134,11 @@ namespace CR { // NAMESPACE CR -- BEGIN
   {
     bool status (true);
     
-    // buffer the phases?
-    bufferPhases_p = bufferPhases;
-    // store the array
     frequencies_p.resize (frequencies.shape());
     frequencies_p = frequencies;
-    // update the values of the geometrical delays
-    if (bufferPhases_p) {
+
+    if (bufferPhases) {
+      bufferPhases_p = bufferPhases;
       setPhases();
     }
     
@@ -128,8 +151,14 @@ namespace CR { // NAMESPACE CR -- BEGIN
   {
     bool status (true);
     
-    GeometricalPhase::bufferPhases (bufferPhases);
+    frequencies_p.resize (frequencies.shape());
+    frequencies_p = frequencies;
 
+    if (bufferPhases) {
+      bufferPhases_p = bufferPhases;
+      setPhases();
+    }
+    
     return status;
   }
 #endif
@@ -170,10 +199,12 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
   void GeometricalPhase::setPhases ()
   {
-    delays_p.resize (GeometricalDelay::nofAntennaPositions(),
-		     GeometricalDelay::nofSkyPositions(),
-		     nofFrequencies());
-    phases_p = calcPhases ();
+    if (bufferPhases_p) {
+      delays_p.resize (GeometricalDelay::nofAntennaPositions(),
+		       GeometricalDelay::nofSkyPositions(),
+		       nofFrequencies());
+      phases_p = calcPhases ();
+    }
   }
 
   // ----------------------------------------------------------------- calcPhases
@@ -193,7 +224,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
     // compute the phases
     for (nChannel=0; nChannel<nofChannels; nChannel++) {
-      phases.xyPlane(nChannel) = frequencies_p(nChannel)*delays;
+      phases.xyPlane(nChannel) = CR::_2pi*frequencies_p(nChannel)*delays;
     }
 
     return phases;
@@ -216,7 +247,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
     // compute the phases
     for (nChannel=0; nChannel<nofChannels; nChannel++) {
-      phases(Range::all(),Range::all(),nChannel) = frequencies_p(nChannel)*delays;
+      phases(Range::all(),Range::all(),nChannel) = CR::_2pi*frequencies_p(nChannel)*delays;
     }
 
     return phases;

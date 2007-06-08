@@ -63,7 +63,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
     <b>Geometry.</b>
     The basic equation, for which the delays are computed, is documented in
-    the GeometricalWeight class.
+    the GeometricalWeight class. The procedure to arrive at the geometrical
+    weights passed to the Beamform is divided into three steps, of which this
+    class implements the first one.
 
     For a sky position \f$ \vec\rho \f$ and antenna positions \f$ \vec x_j \f$
     and \f$ \vec x_j \f$ the geometrical delay \f$ \tau_{ij} \f$ is given by
@@ -159,12 +161,12 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_CASA
     GeometricalDelay (const casa::Matrix<double> &antPositions,
 		      const casa::Matrix<double> &skyPositions,
-		      const bool &bufferDelay=true);
+		      const bool &bufferDelay=false);
 #else 
 #ifdef HAVE_BLITZ
     GeometricalDelay (const blitz::Array<double,2> &antPositions,
 		      const blitz::Array<double,2> &skyPositions,
-		      const bool &bufferDelay=true);
+		      const bool &bufferDelay=false);
 #endif
 #endif
 
@@ -216,7 +218,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			     kept in memory; if set <i>no</i> only the input 
 			     parameters are stored an no further action is taken.
     */
-    inline void bufferDelays (bool const &bufferDelays=true) {
+    inline void bufferDelays (bool const &bufferDelays=false) {
       bufferDelays_p = bufferDelays;
       if (bufferDelays) {
 	setDelays();
@@ -254,11 +256,11 @@ namespace CR { // NAMESPACE CR -- BEGIN
     */
 #ifdef HAVE_CASA
     bool setAntPositions (const casa::Matrix<double> &antPositions,
-			  const bool &bufferDelays=true);
+			  const bool &bufferDelays=false);
 #else
 #ifdef HAVE_BLITZ
     bool setAntPositions (const blitz::Array<double,2> &antPositions,
-			  const bool &bufferDelays=true);
+			  const bool &bufferDelays=false);
 #endif
 #endif
 
@@ -312,11 +314,11 @@ namespace CR { // NAMESPACE CR -- BEGIN
     */
 #ifdef HAVE_CASA
     bool setSkyPositions (const casa::Matrix<double> &skyPositions,
-			  const bool &bufferDelays=true);
+			  const bool &bufferDelays=false);
 #else
 #ifdef HAVE_BLITZ
     bool setSkyPositions (const blitz::Array<double,2> &skyPositions,
-			  const bool &bufferDelays=true);
+			  const bool &bufferDelays=false);
 #endif
 #endif
 
@@ -337,12 +339,12 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_CASA
     void setSkyPositions (const casa::Matrix<double> &skyPositions,
 			  const CR::CoordType &coordType,
-			  const bool &bufferDelays=true);
+			  const bool &bufferDelays=false);
 #else
 #ifdef HAVE_BLITZ
     void setSkyPositions (const blitz::Array<double,2> &skyPositions,
 			  const CR::CoordType &coordType,
-			  const bool &bufferDelays=true);
+			  const bool &bufferDelays=false);
 #endif
 #endif
     
