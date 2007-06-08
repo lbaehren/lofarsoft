@@ -69,7 +69,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
   }
   
   void GeometricalWeight::copy (GeometricalWeight const &other)
-  {;}
+  {
+    // copy the underlying base object
+    GeometricalPhase::operator= (other);
+
+    bufferWeights_p = other.bufferWeights_p;
+
+    if (bufferWeights_p) {
+      weights_p.resize(other.weights_p.shape());
+      weights_p = other.weights_p;
+    }
+  }
 
   // ============================================================================
   //
@@ -77,7 +87,31 @@ namespace CR { // NAMESPACE CR -- BEGIN
   //
   // ============================================================================
   
-  
+#ifdef HAVE_CASA
+  casa::Cube<DComplex> GeometricalWeight::weights ()
+  {
+    if (bufferWeights_p) {
+      std::cout << "-- Returning buffered weights..." << std::endl;
+      return weights_p;
+    } else {
+      std::cout << "-- Returning recomputed weights..." << std::endl;
+      return calcWeights();
+    }
+  }
+#else
+#ifdef HAVE_BLITZ
+  blitz::Array<complex<double>,3> GeometricalWeight::weights ()
+  {
+    if (bufferWeights_p) {
+      std::cout << "-- Returning buffered weights..." << std::endl;
+      return weights_p;
+    } else {
+      std::cout << "-- Returning recomputed weights..." << std::endl;
+      return calcWeights();
+    }
+  }
+#endif
+#endif  
   
   // ============================================================================
   //
@@ -85,6 +119,31 @@ namespace CR { // NAMESPACE CR -- BEGIN
   //
   // ============================================================================
   
-  
+#ifdef HAVE_CASA
+  casa::Cube<DComplex> GeometricalWeight::calcWeights ()
+  {
+    // get the geometrical phases
+    casa::Cube<double> phases = GeometricalPhase::phases();
+    casa::IPosition shape     = phases.shape();
+    // array to store the computed weights
+    casa::Cube<DComplex> weights (shape);
+    
+    return weights;
+  }
+#else
+#ifdef HAVE_BLITZ
+  blitz::Array<complex<double>,3> GeometricalWeight::calcWeights ()
+  {
+    // get the geometrical phases
+    blitz::Array<double,3> phases = GeometricalPhase::phases();
+    //     casa::IPosition shape     = phases.shape();
+    // array to store the computed weights
+    blitz::Array<complex<double>,3> weights (phases.shape());
 
+    return weights;
+  }
+#endif
+#endif
+  
+  
 } // NAMESPACE CR -- END

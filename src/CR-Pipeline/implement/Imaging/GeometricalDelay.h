@@ -159,14 +159,14 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			     parameters are stored an no further action is taken.
     */
 #ifdef HAVE_CASA
-    GeometricalDelay (const casa::Matrix<double> &antPositions,
-		      const casa::Matrix<double> &skyPositions,
-		      const bool &bufferDelay=false);
+    GeometricalDelay (casa::Matrix<double> const &antPositions,
+		      casa::Matrix<double> const &skyPositions,
+		      bool const &bufferDelay=false);
 #else 
 #ifdef HAVE_BLITZ
-    GeometricalDelay (const blitz::Array<double,2> &antPositions,
-		      const blitz::Array<double,2> &skyPositions,
-		      const bool &bufferDelay=false);
+    GeometricalDelay (blitz::Array<double,2> const &antPositions,
+		      blitz::Array<double,2> const &skyPositions,
+		      bool const &bufferDelay=false);
 #endif
 #endif
 

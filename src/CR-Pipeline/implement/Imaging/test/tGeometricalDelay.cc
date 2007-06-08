@@ -342,7 +342,43 @@ int test_delayComputation ()
   std::cout << "\n[test_delayComputation]\n" << std::endl;
 
   int nofFailedTests (0);
+  uint nofCoordinates (3);
+  int nofAntennas (2);
+  int nofPositions (100);
+  double stepwidth (100);
+  casa::Matrix<double> antPositions (nofAntennas,nofCoordinates);
+  casa::Matrix<double> skyPositions (nofPositions,nofCoordinates);
 
+  // assign positions of the antennas
+  antPositions = 0.0;
+  antPositions(0,0) = -100;
+  antPositions(1,0) = 100;
+
+  // assign the values for the sky positions
+  for (int n (0); n<nofPositions; n++) {
+    skyPositions.row(n) = stepwidth*n;
+  }
+
+  GeometricalDelay delay (antPositions,
+			  skyPositions);
+  delay.summary();
+  
+  casa::Matrix<double> delays = delay.delays();
+
+  // export the computed values
+  std::ofstream outfile;
+  outfile.open("delays.data");
+  for (int n (0); n<nofPositions; n++) {
+    outfile << "\t" << n
+	    << "\t" << skyPositions(n,0)
+	    << "\t" << skyPositions(n,1)
+	    << "\t" << skyPositions(n,2)
+	    << "\t" << delays(0,n)       // delay for antenna 1 @ [-100,0,0]
+	    << "\t" << delays(1,n)       // delay for antenna 2 @ [100,0,0]
+	    << std::endl;
+  }
+  outfile.close();
+  
   return nofFailedTests;
 }
 #else

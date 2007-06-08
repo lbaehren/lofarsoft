@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2007                                                    *
- *   Lars Baehren (bahren@astron.nl)                                       *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -78,6 +78,18 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
   */  
   class GeometricalWeight : public GeometricalPhase {
+
+  protected:
+
+    bool bufferWeights_p;
+
+#ifdef HAVE_CASA
+    casa::Cube<DComplex> weights_p;
+#else
+#ifdef HAVE_BLITZ
+    blitz::Array<complex<double> > weights_p;
+#endif
+#endif
     
   public:
     
@@ -88,6 +100,42 @@ namespace CR { // NAMESPACE CR -- BEGIN
     */
     GeometricalWeight ();
     
+    /*!
+      \brief Argumented constructor
+      
+      \param antPositions  -- [nofAntennas,3] Antenna positions for which the
+                              delay is computed, \f$ (x,y,z) \f$
+      \param skyPositions  -- [nofSkyPositions,3] Positions in the sky towards
+                              which to point, given in the same reference frame
+			      as the antenna positions, \f$ (x,y,z) \f$
+      \param frequencies   -- Frequencies for which the geometrical delays are
+                              converted into phases
+      \param bufferDelays  -- Buffer the values for the geometrical delay? If set
+                              <i>yes</i> the delays will be computed from the 
+			      provided antenna and sky positions and afterwards
+			      kept in memory; if set <i>no</i> only the input 
+			      parameters are stored an no further action is taken.
+      \param bufferPhases  -- Buffer the values of the phases?
+      \param bufferWeights -- Buffer the values of the geometrical weights?
+    */
+#ifdef HAVE_CASA
+    GeometricalWeight (casa::Matrix<double> const &antPositions,
+		       casa::Matrix<double> const &skyPositions,
+		       casa::Vector<double> const &frequencies,
+		       bool const &bufferDelays=false,
+		       bool const &bufferPhases=false,
+		       bool const &bufferWeights=false);
+#else
+#ifdef HAVE_BLITZ
+    GeometricalWeight (const blitz::Array<double,2> &antPositions,
+		       const blitz::Array<double,2> &skyPositions,
+		       blitz::Array<double,1> const &frequencies,
+		       bool const &bufferDelays=false,
+		       bool const &bufferPhases=false,
+		       bool const &bufferWeights=false);
+#endif
+#endif
+
     /*!
       \brief Copy constructor
       
@@ -115,6 +163,42 @@ namespace CR { // NAMESPACE CR -- BEGIN
     // --------------------------------------------------------------- Parameters
     
     /*!
+      \brief Are the values for the geometrical weights buffered?
+
+      \return bufferWeights -- Returns <i>true</i> if the values for the weights
+                               are buffered.
+    */
+    inline bool bufferWeights () {
+      return bufferWeights_p;
+    }
+
+    /*!
+      \brief Enable/disable buffering of the values for the geometrical weights
+
+      \param bufferWeights -- Buffer the values for the geometrical weights?
+    */
+    inline void bufferWeights (bool const &bufferWeights=false) {
+      bufferWeights_p = bufferWeights;
+      if (bufferWeights) {
+	setWeights();
+      }
+    }
+
+    /*!
+      \brief Get the geometrical weights
+
+      \return weights -- [nofAntennas,nofPositions,nofFrequencies] Array with the
+                         values of the geometrical weights.
+    */
+#ifdef HAVE_CASA
+    casa::Cube<DComplex> weights ();
+#else
+#ifdef HAVE_BLITZ
+    blitz::Array<complex<double>,3> weights ();
+#endif
+#endif
+    
+    /*!
       \brief Get the name of the class
       
       \return className -- The name of the class, GeometricalWeight.
@@ -123,12 +207,43 @@ namespace CR { // NAMESPACE CR -- BEGIN
       return "GeometricalWeight";
     }
     
+    /*!
+      \brief Provide a summary of the objects status and contents
+    */
+    inline void summary () {
+      summary (std::cout);
+    }
+    
+    /*!
+      \brief Provide a summary of the objects status and contents
+
+      \param os -- Output stream to which the summary is written
+    */
+    void summary (std::ostream &os);
+    
     // ------------------------------------------------------------------ Methods
-    
-    
     
   private:
     
+    /*!
+      \brief Set the values of the geometrical weights
+    */
+    void setWeights();
+
+    /*!
+      /\brief Compute the values of the geometrical weights
+
+      \return weights -- [nofAntennas,nofPositions,nofFrequencies] Array with the
+                         values of the geometrical weights.
+     */
+#ifdef HAVE_CASA
+    casa::Cube<DComplex> calcWeights ();
+#else
+#ifdef HAVE_BLITZ
+    blitz::Array<complex<double>,3> calcWeights ();
+#endif
+#endif
+
     /*!
       \brief Unconditional copying
     */

@@ -36,6 +36,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   
 #ifdef HAVE_CASA
   GeometricalDelay::GeometricalDelay ()
+    : bufferDelays_p (false)
   {
     casa::IPosition shape(2,1,3);
     antPositions_p.resize(shape);
@@ -46,21 +47,18 @@ namespace CR { // NAMESPACE CR -- BEGIN
     skyPositions_p      = 0.0;
     skyPositions_p(0,2) = 1.0;
 
-    bufferDelays_p  = false;
-
     setDelays();
   }
 #else 
 #ifdef HAVE_BLITZ
   GeometricalDelay::GeometricalDelay ()
+    : bufferDelays_p (false)
   {
     antPositions_p.resize(1,3);
     skyPositions_p.resize(1,3);
     
     antPositions_p = 0.0, 0.0, 0.0;
     skyPositions_p = 0.0, 0.0, 1.0;
-
-    bufferDelays_p  = false;
 
     setDelays();
   }
@@ -70,9 +68,10 @@ namespace CR { // NAMESPACE CR -- BEGIN
   // ----------------------------------------------------------- GeometricalDelay
   
 #ifdef HAVE_CASA
-  GeometricalDelay::GeometricalDelay (const casa::Matrix<double> &antPositions,
-				      const casa::Matrix<double> &skyPositions,
-				      const bool &bufferDelays)
+  GeometricalDelay::GeometricalDelay (casa::Matrix<double> const &antPositions,
+				      casa::Matrix<double> const &skyPositions,
+				      bool const &bufferDelays)
+    : bufferDelays_p (false)
   {
     if (!setAntPositions (antPositions,false)) {
       std::cerr << "-- There was an error setting the ant positions" << std::endl;
@@ -98,9 +97,10 @@ namespace CR { // NAMESPACE CR -- BEGIN
   }
 #else
 #ifdef HAVE_BLITZ
-  GeometricalDelay::GeometricalDelay (const blitz::Array<double,2> &antPositions,
-				      const blitz::Array<double,2> &skyPositions,
-				      const bool &bufferDelays)
+  GeometricalDelay::GeometricalDelay (blitz::Array<double,2> const &antPositions,
+				      blitz::Array<double,2> const &skyPositions,
+				      bool const &bufferDelays)
+    : bufferDelays_p (false)
   {
     if (!setAntPositions (antPositions,false)) {
       std::cerr << "-- There was an error setting the ant positions" << std::endl;

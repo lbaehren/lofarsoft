@@ -104,6 +104,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     /*!
       \brief Argumented constructor
+
+      This uses thhe default constructor for GeometricalDelay.
       
       \param frequencies  -- Frequencies for which the geometrical delays are
                              converted into phases
@@ -115,6 +117,39 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #else
 #ifdef HAVE_BLITZ
     GeometricalPhase (blitz::Array<double,1> const &frequencies,
+		      bool const &bufferPhases=false);
+#endif
+#endif
+    
+    /*!
+      \brief Argumented constructor
+      
+      \param antPositions -- [nofAntennas,3] Antenna positions for which the
+                             delay is computed, \f$ (x,y,z) \f$
+      \param skyPositions -- [nofSkyPositions,3] Positions in the sky towards
+                             which to point, given in the same reference frame
+			     as the antenna positions, \f$ (x,y,z) \f$
+      \param frequencies  -- Frequencies for which the geometrical delays are
+                             converted into phases
+      \param bufferDelays -- Buffer the values for the geometrical delay? If set
+                             <i>yes</i> the delays will be computed from the 
+			     provided antenna and sky positions and afterwards
+			     kept in memory; if set <i>no</i> only the input 
+			     parameters are stored an no further action is taken.
+      \param bufferPhases -- Buffer the values of the phases?
+    */
+#ifdef HAVE_CASA
+    GeometricalPhase (casa::Matrix<double> const &antPositions,
+		      casa::Matrix<double> const &skyPositions,
+		      casa::Vector<double> const &frequencies,
+		      bool const &bufferDelays=false,
+		      bool const &bufferPhases=false);
+#else
+#ifdef HAVE_BLITZ
+    GeometricalPhase (const blitz::Array<double,2> &antPositions,
+		      const blitz::Array<double,2> &skyPositions,
+		      blitz::Array<double,1> const &frequencies,
+		      const bool &bufferDelays=false,
 		      bool const &bufferPhases=false);
 #endif
 #endif

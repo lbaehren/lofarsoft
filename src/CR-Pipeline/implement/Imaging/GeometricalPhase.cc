@@ -34,11 +34,12 @@ namespace CR { // NAMESPACE CR -- BEGIN
   // ----------------------------------------------------------- GeometricalPhase
 
   GeometricalPhase::GeometricalPhase ()
-    : GeometricalDelay ()
+    : GeometricalDelay (),
+      bufferPhases_p(false)
   {
     casa::Vector<double> frequencies (1);
     frequencies = 0.0;
-    setFrequencies (frequencies,false);
+    setFrequencies (frequencies);
   }
   
   // ----------------------------------------------------------- GeometricalPhase
@@ -46,7 +47,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_CASA
   GeometricalPhase::GeometricalPhase (casa::Vector<double> const &frequencies,
 				      bool const &bufferPhases)
-    : GeometricalDelay ()
+    : GeometricalDelay (),
+      bufferPhases_p(false)
   {
     setFrequencies (frequencies,bufferPhases);
   }
@@ -54,13 +56,39 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_BLITZ
   GeometricalPhase::GeometricalPhase (blitz::Array<double,1> const &frequencies,
 				      bool const &bufferPhases)
-    : GeometricalDelay ()
+    : GeometricalDelay (),
+      bufferPhases_p(false)
   {
     setFrequencies (frequencies,bufferPhases);
   }
 #endif
 #endif
   
+  // ----------------------------------------------------------- GeometricalPhase
+
+#ifdef HAVE_CASA
+  GeometricalPhase::GeometricalPhase (casa::Matrix<double> const &antPositions,
+				      casa::Matrix<double> const &skyPositions,
+				      casa::Vector<double> const &frequencies,
+				      bool const &bufferDelays,
+				      bool const &bufferPhases)
+    : GeometricalDelay (antPositions,skyPositions,bufferDelays)
+  {
+    setFrequencies (frequencies,bufferPhases);
+  }
+#else
+#ifdef HAVE_BLITZ
+  GeometricalPhase::GeometricalPhase (const blitz::Array<double,2> &antPositions,
+				      const blitz::Array<double,2> &skyPositions,
+				      blitz::Array<double,1> const &frequencies,
+				      const bool &bufferDelays,
+				      bool const &bufferPhases)
+    : GeometricalDelay (antPositions,skyPositions,bufferDelays)
+  {
+    setFrequencies (frequencies,bufferPhases);
+  }
+#endif
+#endif
   // ----------------------------------------------------------- GeometricalPhase
 
   GeometricalPhase::GeometricalPhase (GeometricalDelay const &delay)
@@ -109,6 +137,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
   
   void GeometricalPhase::copy (GeometricalPhase const &other)
   {
+    // copy the underlying base object
+    GeometricalDelay::operator= (other);
+
     bufferPhases_p = other.bufferPhases_p;
 
     frequencies_p.resize (other.frequencies_p.shape());
@@ -133,12 +164,13 @@ namespace CR { // NAMESPACE CR -- BEGIN
 					 bool const &bufferPhases)
   {
     bool status (true);
-    
+
     frequencies_p.resize (frequencies.shape());
     frequencies_p = frequencies;
 
-    if (bufferPhases) {
-      bufferPhases_p = bufferPhases;
+    bufferPhases_p = bufferPhases;
+
+    if (bufferPhases_p) {
       setPhases();
     }
     
@@ -154,8 +186,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
     frequencies_p.resize (frequencies.shape());
     frequencies_p = frequencies;
 
-    if (bufferPhases) {
-      bufferPhases_p = bufferPhases;
+    bufferPhases_p = bufferPhases;
+    
+    if (bufferPhases_p) {
       setPhases();
     }
     
@@ -177,8 +210,10 @@ namespace CR { // NAMESPACE CR -- BEGIN
   casa::Cube<double> GeometricalPhase::phases ()
   {
     if (bufferPhases_p) {
+      std::cout << "-- Returning buffered phases..." << std::endl;
       return phases_p;
     } else {
+      std::cout << "-- Returning recomputed phases..." << std::endl;
       return calcPhases();
     }
   }
@@ -187,8 +222,10 @@ namespace CR { // NAMESPACE CR -- BEGIN
   blitz::Array<double,3> GeometricalPhase::phases ()
   {
     if (bufferPhases_p) {
+      std::cout << "-- Returning buffered phases..." << std::endl;
       return phases_p;
     } else {
+      std::cout << "-- Returning recomputed phases..." << std::endl;
       return calcPhases();
     }
   }

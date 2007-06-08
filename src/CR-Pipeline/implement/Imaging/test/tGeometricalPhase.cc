@@ -29,14 +29,25 @@ using CR::GeometricalPhase;
 /*!
   \file tGeometricalPhase.cc
 
+  \ingroup CR
   \ingroup Imaging
 
   \brief A collection of test routines for GeometricalPhase
  
-  \author Lars Baehren
+  \author Lars B&auml;hren
  
   \date 2007/01/15
 */
+
+// -----------------------------------------------------------------------------
+
+void summary (GeometricalPhase &phase)
+{
+  std::cout << "-- Frequencies       : " << phase.frequencies()  << std::endl;
+  std::cout << "-- Antenna positions : " << phase.antPositions() << std::endl;
+  std::cout << "-- Sky positions     : " << phase.skyPositions() << std::endl;
+  std::cout << "-- Phases            : " << phase.phases()       << std::endl;
+}
 
 // -----------------------------------------------------------------------------
 
@@ -55,6 +66,7 @@ int test_GeometricalPhase ()
   try {
     GeometricalPhase phase;
     phase.summary();
+    summary(phase);
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -63,7 +75,14 @@ int test_GeometricalPhase ()
   std::cout << "[2] Testing argumented constructor ..." << std::endl;
 #ifdef HAVE_CASA
   try {
-    GeometricalPhase phase;
+    unsigned int nofChannels (10);
+    casa::Vector<double> frequencies (nofChannels);
+
+    for (unsigned int n(0); n<nofChannels; n++) {
+      frequencies(n) = n*1.0e06;
+    }
+
+    GeometricalPhase phase (frequencies);
     phase.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
@@ -72,13 +91,43 @@ int test_GeometricalPhase ()
 #else 
 #ifdef HAVE_BLITZ
   try {
-    GeometricalPhase phase;
+    unsigned int nofChannels (10);
+    blitz::Array<double,1> frequencies (nofChannels);
+
+    for (unsigned int n(0); n<nofChannels; n++) {
+      frequencies(n) = n*1.0e06;
+    }
+
+    GeometricalPhase phase (frequencies);
     phase.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
 #endif
+#endif
+
+  std::cout << "[3] Testing argumented constructor ..." << std::endl;
+#ifdef HAVE_CASA
+  try {
+    unsigned int nofCoordinates (3);
+    unsigned int nofAntennas (2);
+    unsigned int nofPositions (2);
+    unsigned int nofChannels (10);
+    casa::Matrix<double> antennaPositions (nofAntennas,nofCoordinates);
+    casa::Matrix<double> skyPositions (nofPositions,nofCoordinates);
+    casa::Vector<double> frequencies (nofChannels);
+
+    for (unsigned int n(0); n<nofChannels; n++) {
+      frequencies(n) = n*1.0e06;
+    }
+
+    GeometricalPhase phase (frequencies);
+    phase.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
 #endif
   
   return nofFailedTests;
