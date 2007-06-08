@@ -1,3 +1,3 @@
 PROJECT (CASA_casa)
 
-SUBDIRS (implement)
+SUBDIRS (implement mirlib)
