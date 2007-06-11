@@ -81,6 +81,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
   protected:
 
+    // Buffer the values of the geometrical weights?
     bool bufferWeights_p;
 
 #ifdef HAVE_CASA
