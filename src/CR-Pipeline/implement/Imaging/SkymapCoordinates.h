@@ -285,9 +285,6 @@ namespace CR { // Namespace CR -- begin
     //! Coordinate system attached to the image
     CoordinateSystem csys_p;
 
-    //! Direction mask to flag individual pixels
-    Matrix<bool> directionMask_p;
-    
   public:
     
     // ==========================================================================
@@ -531,19 +528,6 @@ namespace CR { // Namespace CR -- begin
       \return directionValues -- The coordinate values along the distance axis
     */
     Matrix<Double> directionAxisValues (casa::MDirection::Types const &type);
-
-    /*!
-      \brief Get the mask to flag individual direction pixels
-      
-      \return directionMask -- [nof. Lon. pixels, nof. Lat. pixels] Matrix of
-                               boolean values to keep track of individual 
-			       pixels of the direction axes, which have been
-			       flagged (e.g. because their world value lies
-			       beneath the local horizon).
-    */
-    inline Matrix<bool> directionMask () {
-      return directionMask_p;
-    }
 
     // ------------------------------------------------------------ Distance axis
 

@@ -157,7 +157,10 @@ class Skymapper {
   
   //! The number of processed data blocks so far
   uint nofProcessedBlocks_p;
-
+  
+  //! Direction mask to flag individual pixels
+  Matrix<bool> directionMask_p;
+  
   // -- questionable variables (might be thrown out later) ----------------------
 
   //! Electrical quantity, for which the sky map is generated
@@ -251,7 +254,20 @@ class Skymapper {
     \brief quantity -- Electrical quantity, for which the sky map is generated
   */
   void setSkymapQuantity (SkymapQuantity::Type quantity);
-
+  
+  /*!
+    \brief Get the mask to flag individual direction pixels
+    
+    \return directionMask -- [nof. Lon. pixels, nof. Lat. pixels] Matrix of
+                             boolean values to keep track of individual 
+			     pixels of the direction axes, which have been
+			     flagged (e.g. because their world value lies
+			     beneath the local horizon).
+  */
+  inline Matrix<bool> directionMask () {
+    return directionMask_p;
+  }
+  
   // -------------------------------------------------------------------- Methods
 
   /*!

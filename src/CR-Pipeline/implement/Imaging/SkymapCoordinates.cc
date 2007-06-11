@@ -152,7 +152,6 @@ namespace CR { // Namespace CR -- begin
     mapOrientation_p = other.mapOrientation_p;
     mapQuantity_p    = other.mapQuantity_p;
     shape_p          = other.shape_p;
-    directionMask_p  = other.directionMask_p;
   }
 
   // ============================================================================
@@ -188,7 +187,6 @@ namespace CR { // Namespace CR -- begin
     mapOrientation_p = mapOrientation;
     mapQuantity_p    = mapQuantity;
     shape_p          = IPosition (5,120,120,1,1,1);
-    directionMask_p  = Matrix<bool> (120,120,true);
     
     return defaultCoordinateSystem ();
   }
@@ -476,11 +474,7 @@ namespace CR { // Namespace CR -- begin
     Vector<double> pixel (2);
     Vector<double> world (2);
     Matrix<Double> values (shape);
-
-    /*
-      Update the shape of the pixel mask for the directions
-    */
-    directionMask_p.resize(shape_p(0),shape_p(1));
+    bool status (true);
 
     /*
       Extract the direction axis from the coordinate system object and adjust
@@ -495,16 +489,12 @@ namespace CR { // Namespace CR -- begin
     for (lon=0, pixel(0)=0.0; lon<shape_p(0); lon++, pixel(0)++) {
       for (lat=0, pixel(1)=0.0; lat<shape_p(1); lat++, pixel(1)++) {
 	// perform the actual conversion from pixel to world coordinate
-	directionMask_p (lon,lat) = dc.toWorld (world,pixel);
+	status = dc.toWorld (world,pixel);
 	// stored the retrieved value into the returned array
 	values.row(nValue) = world;
 	nValue++;
       }
     }
-
-    cout << "--> summary of coordinate conversion:" << endl;
-    cout << "-- Projection        = " << dc.projection().name()  << endl;
-    cout << "-- Shape pixel mask  = " << directionMask_p.shape() << endl;
 
     return values;
   }
