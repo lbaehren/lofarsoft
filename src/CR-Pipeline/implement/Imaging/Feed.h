@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Lars Baehren (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -24,9 +24,12 @@
 #define FEED_H
 
 // Standard library header files
+#include <iostream>
 #include <string>
 #include <vector>
 
+using std::cout;
+using std::endl;
 using std::vector;
 
 namespace CR { // Namespace CR -- begin
@@ -37,7 +40,7 @@ namespace CR { // Namespace CR -- begin
     \ingroup CR
     \ingroup Imaging
     
-    \brief Properties of an Antenna feed
+    \brief Properties of an antenna feed
     
     \author Lars B&auml;hren
 
@@ -46,13 +49,9 @@ namespace CR { // Namespace CR -- begin
     \test tFeed.cc
     
     <h3>Prerequisite</h3>
-    
-    <ul type="square">
-      <li>[start filling in your text here]
-    </ul>
-    
+        
     <h3>Synopsis</h3>
-    
+
     <h3>Example(s)</h3>
     
   */  
@@ -64,10 +63,14 @@ namespace CR { // Namespace CR -- begin
       \brief Type of antenna feed
      */
     typedef enum {
+      //! Single feed, x-polarization
       X,
+      //! Single feed, y-polarization
       Y,
       XY,
+      //! Single feed, left-handed polarization
       L,
+      //! Single feed, right-handed polarization
       R,
       LR
     } FeedType;
@@ -80,7 +83,7 @@ namespace CR { // Namespace CR -- begin
     int ID_p;
     //! Offset w.r.t. to the reference frame of the antenna, [m]
     vector<double> offset_p;
-    //! Rotation w.r.t. to the  reference frame fo the antenna, [rad]
+    //! Angles for the rotation w.r.t. the reference frame of the antenna, [rad]
     vector<double> orientation_p;
     
   public:
@@ -91,6 +94,42 @@ namespace CR { // Namespace CR -- begin
       \brief Default constructor
     */
     Feed ();
+    
+    /*!
+      \brief Argumented constructor
+
+      \param feedType -- Type of antenna feed
+    */
+    Feed (FeedType const &feedType);
+    
+    /*!
+      \brief Argumented constructor
+
+      \param feedType -- Type of antenna feed
+      \param ID       -- Identifier for the antenna feed
+    */
+    Feed (FeedType const &feedType,
+	  int const &ID);
+    
+    /*!
+      \brief Argumented constructor
+
+      \param feedType        -- Type of antenna feed
+      \param ID              -- Identifier for the antenna feed
+      \param offset          -- The offset \f$ (x,y,z) \f$ of the feed w.r.t. the
+                                reference frame of the antenna to which it
+				belongs, [m]
+      \param orientation     -- Angles \f$ (\alpha_1,\alpha_2,\alpha_3) \f$ for
+                                the rotation of the feed w.r.t. to the reference
+				frame of the antenna.
+      \param anglesInDegrees -- Are the rotation angles given in degree? Per
+                                default values are expected in radian.
+    */
+    Feed (FeedType const &feedType,
+	  int const &ID,
+	  vector<double> const &offset,
+	  vector<double> const &orientation,
+	  bool const &anglesInDegrees=false);
     
     /*!
       \brief Copy constructor
@@ -138,21 +177,41 @@ namespace CR { // Namespace CR -- begin
     
     /*!
       \brief Get the offset of the feed w.r.t. the reference frame of the antenna
-
-      \return offset -- The offset of the feed w.r.t. the reference frame of the
-                        antenna to which it belongs, [m]
+      
+      \return offset -- The offset \f$ (x,y,z) \f$ of the feed w.r.t. the
+                        reference frame of the antenna to which it belongs, [m]
     */
     inline vector<double> offset () {
-      return offset_p
+      return offset_p;
     }
-
-    void setOffset (vector<double> const &offset);
     
-    inline vector<double> orientation () {
-      return orientation_p
-    }
+    void setOffset (vector<double> const &offset);
 
-    void setOrientation (vector<double> const &orientation);
+    /*!
+      \brief Get the rotation angles w.r.t. reference frame of the antenna
+
+      \param anglesInDegrees -- Get the rotations in degrees? If set
+                                <tt>false</tt> the angles will be returned in
+				radian.
+
+      \return orientation -- Angles \f$ (\alpha_1,\alpha_2,\alpha_3) \f$ for the
+                             rotation of the feed w.r.t. to the reference frame
+			     of the antenna.
+    */
+    vector<double> orientation (bool const &anglesInDegrees=false);
+    
+    /*!
+      \brief Get the rotation angles w.r.t. reference frame of the antenna
+
+      \return angles   -- Angles \f$ (\alpha_1,\alpha_2,\alpha_3) \f$ for the
+                          rotation of the feed w.r.t. to the reference frame
+                          of the antenna.
+      \param anglesInDegrees -- Get the rotations in degrees? If set
+                                <tt>false</tt> the angles will be returned in
+				radian.
+    */
+    void setOrientation (vector<double> const &angles,
+			 bool const &anglesInDegrees=false);
     
     /*!
       \brief Get the name of the class

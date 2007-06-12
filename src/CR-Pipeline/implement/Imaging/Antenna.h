@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Lars Baehren (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -50,7 +50,7 @@ namespace CR { // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[start filling in your text here]
+      <li>Feed -- Properties of an antenna feed
     </ul>
     
     <h3>Synopsis</h3>
@@ -62,12 +62,12 @@ namespace CR { // Namespace CR -- begin
 
     //! Identifier of the antenna
     int ID_p;
-    //! Position w.r.t. the array reference position, [m]
-    vector<double> position_p;
-    //! Orientation w.r.t. the array referene frame, []
-    vector<double> orientation_p;
     //! Feeds of the antenna
     vector<Feed> feeds_p;
+    //! Position w.r.t. the array reference position, [m]
+    vector<double> position_p;
+    //! Orientation w.r.t. the array referene frame, [rad]
+    vector<double> orientation_p;
     
   public:
     
@@ -77,6 +77,27 @@ namespace CR { // Namespace CR -- begin
       \brief Default constructor
     */
     Antenna ();
+    
+    /*!
+      \brief Default constructor
+
+      \param ID              -- Identifier for the antenna
+      \param feeds           -- A set of Feed objects, describing the properties
+                                of the antenna feeds.
+      \param position        -- Positional offset \f$ (x,y,z) \f$ of the antenna
+                                w.r.t. to the reference frame of the antenna
+				array or station.
+      \param orientation     -- Angles \f$ (\alpha_1,\alpha_2,\alpha_3) \f$ for
+                                the rotation of the feed w.r.t. to the reference
+				frame of the antenna.
+      \param anglesInDegrees -- Are the rotation angles given in degree? Per
+                                default values are expected in radian.
+    */
+    Antenna (int const &ID,
+	     vector<Feed> const &feeds,
+	     vector<double> const &position,
+	     vector<double> const &orientation,
+	     bool const &anglesInDegrees);
     
     /*!
       \brief Copy constructor
@@ -103,6 +124,24 @@ namespace CR { // Namespace CR -- begin
     Antenna& operator= (Antenna const &other); 
     
     // --------------------------------------------------------------- Parameters
+    
+    /*!
+      \brief Get the ID of the antenna
+
+      \return ID -- The ID of the antenna
+    */
+    inline int ID () {
+      return ID_p;
+    }
+
+    /*!
+      \brief Set the ID of the antenna
+
+      \param ID -- The ID of the antenna
+    */
+    inline void setID (int const &ID) {
+      ID_p = ID;
+    }
     
     /*!
       \brief Get the name of the class

@@ -21,6 +21,8 @@
 /*!
   \file Imaging.h
 
+  \ingroup CR
+
   \defgroup Imaging
 
   \brief Imaging module for the CR-pipeline
@@ -35,8 +37,18 @@
   in the <i>Imaging</i> module.
 */
 
+#include <Imaging/Antenna.h>
+#include <Imaging/Beam.h>
+#include <Imaging/Beamformer.h>
+#include <Imaging/Beamshape.h>
 #include <Imaging/CoordinateConversion.h>
+#include <Imaging/Feed.h>
 #include <Imaging/GeometricalDelay.h>
 #include <Imaging/GeometricalPhase.h>
 #include <Imaging/GeometricalWeight.h>
 #include <Imaging/HorizonScan.h>
+#include <Imaging/SkymapCoordinates.h>
+#include <Imaging/SkymapGrid.h>
+#include <Imaging/Skymapper.h>
+#include <Imaging/ccBeam.h>
+#include <Imaging/xBeam.h>

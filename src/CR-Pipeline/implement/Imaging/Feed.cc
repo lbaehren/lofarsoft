@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Lars Baehren (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -20,7 +20,7 @@
 
 /* $Id: template-class.cc,v 1.12 2007/05/29 08:31:52 bahren Exp $*/
 
-#include <lopes/Imaging/Feed.h>
+#include <Imaging/Feed.h>
 
 namespace CR { // Namespace CR -- begin
   

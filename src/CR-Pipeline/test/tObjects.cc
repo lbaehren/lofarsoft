@@ -33,7 +33,7 @@ using std::string;
 
   \brief A number of simple tests for inheritance relationships between objects
 
-  \author Lars B&aunl;hren
+  \author Lars B&auml;hren
 
   \date 2007/04/17
 */
