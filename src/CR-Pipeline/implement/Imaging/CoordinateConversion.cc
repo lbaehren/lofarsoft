@@ -54,38 +54,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
     return status;
   }
 
-  // -------------------------------------------------------- spherical2cartesian
-
-  bool spherical2cartesian (double &x,
-			    double &y,
-			    double &z,
-			    const double &r,
-			    const double &phi,
-			    const double &theta,
-			    const bool &anglesInDegrees)
-  {
-    bool status (true);
-
-    // check if we have to convert from degrees to radian
-    
-    try {
-      if (anglesInDegrees) {
-	x = r*cos(deg2rad(phi))*sin(deg2rad(theta));
-	y = r*sin(deg2rad(phi))*sin(deg2rad(theta));
-	z = r*cos(deg2rad(theta));
-      } else {
-	x = r*cos(phi)*sin(theta);
-	y = r*sin(phi)*sin(theta);
-	z = r*cos(theta);
-      }
-    } catch (std::string message) {
-      std::cerr << message << std::endl;
-      status = false;
-    }
-
-    return status;
-  }
-  
 #ifdef HAVE_BLITZ
 
   // -------------------------------------------------------- cartesian2sphercial

@@ -116,9 +116,11 @@ namespace CR { // Namespace CR -- begin
 
   // ============================================================================
   //
-  // Conversion between angle representations
+  //  Conversion between angle representations
   //
   // ============================================================================
+
+  // [1] degree -> radian
 
   /*!
     \brief Convert radian to degrees
@@ -157,6 +159,8 @@ namespace CR { // Namespace CR -- begin
     rad = deg2rad (rad);
   }
   
+  // [2] radian -> degree
+
   /*!
     \brief Convert radian to degrees
 
@@ -297,13 +301,28 @@ namespace CR { // Namespace CR -- begin
   
   // -------------------------------------------------------- spherical2cartesian
   
+  /*!
+    \brief Conversion from cartesian to spherical coordinates
+
+    \retval x    -- \f$x\f$-component of the vector in cartesian coordinates
+    \retval y    -- \f$y\f$-component of the vector in cartesian coordinates
+    \retval z    -- \f$z\f$-component of the vector in cartesian coordinates
+    \param r     -- \f$r\f$-component of the vector in spherical coordinates
+    \param phi   -- \f$\phi\f$-component of the vector in spherical coordinates
+    \param theta -- \f$\theta\f$-component of the vector in spherical coordinates
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+                    <i>yes</i> angles will be converted to radians before the 
+		    conversion.
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
   void spherical2cartesian (double &x,
 			    double &y,
 			    double &z,
-			    double const &r,
-			    double const &phi,
-			    double const &theta,
-			    bool const &inputInDegrees);
+			    const double &r,
+			    const double &phi,
+			    const double &theta,
+			    const bool &anglesInDegrees=false);
   
   /*!
     \brief Convert position in Spherical to Cartesian coordinates

@@ -9,6 +9,7 @@ include_directories (. .. ../..)
 
 set (tests
   tAntenna
+  tBeamformer
   tCoordinateConversion
   tFeed
   tGeometricalDelay

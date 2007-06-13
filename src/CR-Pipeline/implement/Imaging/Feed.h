@@ -37,7 +37,6 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class Feed
 
-    \ingroup CR
     \ingroup Imaging
     
     \brief Properties of an antenna feed

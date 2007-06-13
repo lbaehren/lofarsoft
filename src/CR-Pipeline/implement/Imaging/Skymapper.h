@@ -47,6 +47,7 @@
 // LOPES-Tools header files
 #include <IO/DataReaderTools.h>
 #include <Observation/ObservationData.h>
+#include <Imaging/Beamformer.h>
 #include <Imaging/SkymapCoordinates.h>
 #include <Skymap/SkymapQuantity.h>
 
@@ -60,7 +61,6 @@ namespace CR {  // Namespace CR -- begin
 /*!
   \class Skymapper
   
-  \ingroup CR
   \ingroup Imaging
   
   \brief Brief description for class Skymapper
@@ -145,6 +145,8 @@ class Skymapper {
 
   //! Container and handler for the coordinates
   SkymapCoordinates coordinates_p;
+
+  Beamformer beamformer_p;
 
   // -- book-keeping
   

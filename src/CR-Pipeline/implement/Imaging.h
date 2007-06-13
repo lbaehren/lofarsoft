@@ -24,9 +24,8 @@
 /*!
   \file Imaging.h
 
+  \defgroup Imaging CR-Pipeline: Math module
   \ingroup CR
-
-  \defgroup Imaging
 
   \brief Imaging module for the CR-pipeline
   

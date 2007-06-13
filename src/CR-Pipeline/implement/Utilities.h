@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------*
- | $Id::                                                                 $ |
+ | $Id:: Math.h 391 2007-06-13 09:25:11Z baehren                         $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
- *   Lars Baehren (bahren@astron.nl)                                       *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,54 +21,21 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <iostream>
-#include <string>
-
-#include <fftw3.h>
-
 /*!
-  \file tUseFFTW3.cc
+  \file Utilities.h
 
-  \ingroup CR-Pipeline
+  \defgroup Utilities CR-Pipeline: Utilities collection
+  \ingroup CR
 
-  \brief A simple test for external build against libfftw3
-
+  \brief Utilities collection for the CR-pipeline
+  
   \author Lars B&auml;hren
-
-  \date 2007/01/29
-
   
+  \date 2007/01/16
 */
 
-/*!
-  \brief main routine
-  
-  \return nofFailedTests -- The number of failed tests
-*/
-int main () 
-{
-  int nofFailedTests (0);
-  
-  std::cout << "[1] Complex One-Dimensional DFT" << std::endl;
-  try {
-    int N (256);
-    fftw_complex *in;
-    fftw_complex *out;
-    fftw_plan p;
-    
-    in   = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N);
-    out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N);
-    p = fftw_plan_dft_1d(N, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-  
-//   try {
-//   } catch (std::string message) {
-//     std::cerr << message << std::endl;
-//     nofFailedTests++;
-//   }
-  
-  return nofFailedTests;
-}
+#include <Utilities/Masking.h>
+#include <Utilities/ParameterFromRecord.h>
+#include <Utilities/ProgressBar.h>
+#include <Utilities/StringTools.h>
+#include <Utilities/Timestamp.h>

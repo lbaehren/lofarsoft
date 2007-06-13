@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id::                                                                 $ |
+ | $Id: template-class.cc,v 1.13 2007/06/13 09:41:37 bahren Exp $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -21,48 +21,73 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/*!
-  \file Math.h
+#include <Imaging/Beamformer.h>
 
-  \defgroup Math CR-Pipeline: Imaging module
-  \ingroup CR
-
-  \brief Math module for the CR-pipeline
+namespace CR { // Namespace CR -- begin
   
-  \author Lars B&auml;hren
+  // ============================================================================
+  //
+  //  Construction
+  //
+  // ============================================================================
   
-  \date 2007/01/16
+  Beamformer::Beamformer ()
+  {;}
+  
+  Beamformer::Beamformer (Beamformer const &other)
+  {
+    copy (other);
+  }
+  
+  // ============================================================================
+  //
+  //  Destruction
+  //
+  // ============================================================================
+  
+  Beamformer::~Beamformer ()
+  {
+    destroy();
+  }
+  
+  void Beamformer::destroy ()
+  {;}
+  
+  // ============================================================================
+  //
+  //  Operators
+  //
+  // ============================================================================
+  
+  Beamformer& Beamformer::operator= (Beamformer const &other)
+  {
+    if (this != &other) {
+      destroy ();
+      copy (other);
+    }
+    return *this;
+  }
+  
+  void Beamformer::copy (Beamformer const &other)
+  {;}
 
-  <h3>Synopsis</h3>
+  // ============================================================================
+  //
+  //  Parameters
+  //
+  // ============================================================================
+  
+  void Beamformer::summary (std::ostream &os)
+  {;}
+  
+  
+  
+  // ============================================================================
+  //
+  //  Methods
+  //
+  // ============================================================================
+  
+  
 
-  Even though we make usage of the extensive functionality of the CASA math
-  modules, there sometimes are operations missing which will be required 
-  over and over again. The Math module of the CR-Pipeline is a collection of
-  such additional functions.
-
-  <h3>Usage</h3>
-
-  Usage this file in order to import all the prototypes for functions and classes
-  in the <i>Math</i> module.
-*/
-
-#include <Math/BasicFilter.h>
-#include <Math/Constants.h>
-#include <Math/HanningFilter.h>
-#include <Math/Hermite1D.h>
-#include <Math/LinearRegression.h>
-#include <Math/MathAlgebra.h>
-#include <Math/MathFFT.h>
-#include <Math/MedianFilter.h>
-#include <Math/RaisedCosineFilter.h>
-#include <Math/RangeSplitter.h>
-#include <Math/Rotation2D.h>
-#include <Math/Rotation3D.h>
-#include <Math/RotationMatrix.h>
-#include <Math/Shapelets1D.h>
-#include <Math/Shapelets2D.h>
-#include <Math/ShapeletsModel1D.h>
-#include <Math/ShapeletsModel2D.h>
-#include <Math/StatisticsFilter.h>
-#include <Math/VectorConversion.h>
-#include <Math/VectorNorms.h>
+} // Namespace CR -- end

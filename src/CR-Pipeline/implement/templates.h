@@ -25,9 +25,6 @@ namespace CR {  // Namespace CR -- begin
 
 /*!
   \brief Template instantiation for CASA objects
-  
-  \defgroup CR
-  \ingroup CR
 
   \author Lars B&auml;hren
 

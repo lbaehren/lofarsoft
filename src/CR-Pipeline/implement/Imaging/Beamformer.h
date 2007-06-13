@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id::                                                                 $ |
+ | $Id: template-class.h,v 1.20 2007/06/13 09:41:37 bahren Exp $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -21,36 +21,34 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef ANTENNA_H
-#define ANTENNA_H
+#ifndef BEAMFORMER_H
+#define BEAMFORMER_H
 
 // Standard library header files
+#include <iostream>
 #include <string>
-#include <vector>
 
-#include <Imaging/Feed.h>
-
-using std::vector;
+#include <Imaging/GeometricalWeight.h>
 
 namespace CR { // Namespace CR -- begin
   
   /*!
-    \class Antenna
+    \class Beamformer
 
     \ingroup Imaging
     
-    \brief Brief description for class Antenna
+    \brief Brief description for class Beamformer
     
     \author Lars B&auml;hren
 
-    \date 2007/06/12
+    \date 2007/06/13
 
-    \test tAntenna.cc
+    \test tBeamformer.cc
     
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>Feed -- Properties of an antenna feed
+      <li>[start filling in your text here]
     </ul>
     
     <h3>Synopsis</h3>
@@ -58,16 +56,7 @@ namespace CR { // Namespace CR -- begin
     <h3>Example(s)</h3>
     
   */  
-  class Antenna {
-
-    //! Identifier of the antenna
-    int ID_p;
-    //! Feeds of the antenna
-    vector<Feed> feeds_p;
-    //! Position w.r.t. the array reference position, [m]
-    vector<double> position_p;
-    //! Orientation w.r.t. the array referene frame, [rad]
-    vector<double> orientation_p;
+  class Beamformer : public GeometricalWeight {
     
   public:
     
@@ -76,80 +65,41 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Default constructor
     */
-    Antenna ();
-    
-    /*!
-      \brief Default constructor
-
-      \param ID              -- Identifier for the antenna
-      \param feeds           -- A set of Feed objects, describing the properties
-                                of the antenna feeds.
-      \param position        -- Positional offset \f$ (x,y,z) \f$ of the antenna
-                                w.r.t. to the reference frame of the antenna
-				array or station.
-      \param orientation     -- Angles \f$ (\alpha_1,\alpha_2,\alpha_3) \f$ for
-                                the rotation of the feed w.r.t. to the reference
-				frame of the antenna.
-      \param anglesInDegrees -- Are the rotation angles given in degree? Per
-                                default values are expected in radian.
-    */
-    Antenna (int const &ID,
-	     vector<Feed> const &feeds,
-	     vector<double> const &position,
-	     vector<double> const &orientation,
-	     bool const &anglesInDegrees);
+    Beamformer ();
     
     /*!
       \brief Copy constructor
       
-      \param other -- Another Antenna object from which to create this new
+      \param other -- Another Beamformer object from which to create this new
       one.
     */
-    Antenna (Antenna const &other);
+    Beamformer (Beamformer const &other);
     
     // -------------------------------------------------------------- Destruction
 
     /*!
       \brief Destructor
     */
-    ~Antenna ();
+    ~Beamformer ();
     
     // ---------------------------------------------------------------- Operators
     
     /*!
       \brief Overloading of the copy operator
       
-      \param other -- Another Antenna object from which to make a copy.
+      \param other -- Another Beamformer object from which to make a copy.
     */
-    Antenna& operator= (Antenna const &other); 
+    Beamformer& operator= (Beamformer const &other); 
     
     // --------------------------------------------------------------- Parameters
     
     /*!
-      \brief Get the ID of the antenna
-
-      \return ID -- The ID of the antenna
-    */
-    inline int ID () {
-      return ID_p;
-    }
-
-    /*!
-      \brief Set the ID of the antenna
-
-      \param ID -- The ID of the antenna
-    */
-    inline void setID (int const &ID) {
-      ID_p = ID;
-    }
-    
-    /*!
       \brief Get the name of the class
       
-      \return className -- The name of the class, Antenna.
+      \return className -- The name of the class, Beamformer.
     */
     std::string className () const {
-      return "Antenna";
+      return "Beamformer";
     }
 
     /*!
@@ -173,7 +123,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Unconditional copying
     */
-    void copy (Antenna const &other);
+    void copy (Beamformer const &other);
     
     /*!
       \brief Unconditional deletion 
@@ -184,5 +134,5 @@ namespace CR { // Namespace CR -- begin
   
 } // Namespace CR -- end
 
-#endif /* ANTENNA_H */
+#endif /* BEAMFORMER_H */
   
