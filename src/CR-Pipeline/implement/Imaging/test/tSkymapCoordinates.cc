@@ -500,14 +500,15 @@ int test_coordinateSystem ()
   cout << "[5] Retrival of coordinate values..." << endl;
   try {
     casa::Slice slice (0,5,1);
+    Matrix<bool>   maskDirection;
     Matrix<Double> valDirection;
     Matrix<Double> valITRF;
     Vector<Double> valDistance;
     Vector<Double> valTime;
     Vector<Double> valFreq;
 
-    valDirection = coord.directionAxisValues();
-    valITRF     = coord.directionAxisValues(MDirection::ITRF);
+    coord.directionAxisValues("AZEL",valDirection,maskDirection,true);
+    coord.directionAxisValues(MDirection::ITRF,valITRF,maskDirection,true);
     valDistance  = coord.distanceAxisValues();
     valTime      = coord.timeAxisValues();
     valFreq      = coord.frequencyAxisValues();

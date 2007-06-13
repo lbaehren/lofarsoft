@@ -24,7 +24,7 @@
 /*!
   \file Math.h
 
-  \defgroup Math CR-Pipeline: Imaging module
+  \defgroup Math CR-Pipeline: Math module
   \ingroup CR
 
   \brief Math module for the CR-pipeline

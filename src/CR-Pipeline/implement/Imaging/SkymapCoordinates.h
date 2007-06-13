@@ -503,29 +503,25 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the coordinate values along the direction axes
 
-      \param anglesInDegrees -- If set <tt>true</tt> the direction angles will
-                                be converted form the internal radian format to
-				degrees.
-
-      \return directionValues -- The coordinate values along the distance axis
-    */
-    Matrix<double> directionAxisValues (bool const &anglesInDegrees=false);
-
-    /*!
-      \brief Get the coordinate values along the direction axes
+      Given the nature of the required operations, the retrival of the values along
+      the direction axes requires a slightly more complex interface as is the case
+      for the other image coordinate axes.
 
       \param refcode         -- Extra conversion type; whenever a conversion from
                                 pixel to world is done, the world value is then
 				further converted to the corresponding
-				MDirection::Types value.
+				casa::MDirection::Types value.
       \param directions      -- The coordinate values along the distance axis
       \param mask            -- Pixel mask recording if pixels have been flagged
                                 due to errors in the conversion process
       \param anglesInDegrees -- If set <tt>true</tt> the direction angles will
                                 be converted form the internal radian format to
 				degrees.
+
+      \return status -- Status of the operation; returns <i>false</i> if an 
+                        error was encountered
     */
-    void directionAxisValues (casa::String const &refcode,
+    bool directionAxisValues (casa::String const &refcode,
 			      Matrix<double> &directions,
 			      Matrix<bool> &mask,
 			      bool const &anglesInDegrees=false);
@@ -533,24 +529,24 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the coordinate values along the direction axes
 
-      \param refcode -- Extra conversion type; whenever a conversion from pixel
-                        to world is done, the world value is then further
-			converted to the corresponding MDirection::Types value.
-			
-      \return directionValues -- The coordinate values along the distance axis
+      \param type            -- Extra conversion type; whenever a conversion from
+                                pixel to world is done, the world value is then
+				further converted to this casa::MDirection::Types
+				value.
+      \param directions      -- The coordinate values along the distance axis
+      \param mask            -- Pixel mask recording if pixels have been flagged
+                                due to errors in the conversion process
+      \param anglesInDegrees -- If set <tt>true</tt> the direction angles will
+                                be converted form the internal radian format to
+				degrees.
+
+      \return status -- Status of the operation; returns <i>false</i> if an 
+                        error was encountered
     */
-    Matrix<double> directionAxisValues (casa::String const &refcode);
-
-    /*!
-      \brief Get the coordinate values along the direction axes
-
-      \param type -- Extra conversion type; whenever a conversion from pixel to
-                     world is done, the world value is then further converted to
-		     this MDirection::Types value.
-
-      \return directionValues -- The coordinate values along the distance axis
-    */
-    Matrix<double> directionAxisValues (casa::MDirection::Types const &type);
+    bool directionAxisValues (casa::MDirection::Types const &type,
+			      Matrix<double> &directions,
+			      Matrix<bool> &mask,
+			      bool const &anglesInDegrees=false);
 
     // ------------------------------------------------------------ Distance axis
 
@@ -580,7 +576,7 @@ namespace CR { // Namespace CR -- begin
 
       \param lonPixels -- Number of steps along the distance axis
 
-      \return status -- Status of the operation;p returns <i>false</i> if an 
+      \return status -- Status of the operation; returns <i>false</i> if an 
                         error was encountered
     */
     inline bool setDistanceShape (uint const &nofSteps) {

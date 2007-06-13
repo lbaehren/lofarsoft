@@ -33,7 +33,7 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------------- azel2xyz
 
-  void azel2xyz (double &x,
+  bool azel2xyz (double &x,
 		 double &y,
 		 double &z,
 		 double const &r,
@@ -41,19 +41,28 @@ namespace CR { // Namespace CR -- begin
 		 double const &el,
 		 bool const &inputInDegrees)
   {
-    if (inputInDegrees) {
-      spherical2cartesian (x,
-			   y,
-			   z,
-			   r,
-			   deg2rad(az),
-			   deg2rad(el),
-			   false);
-    } else {
-      x = r*cos(el)*cos(az);
-      y = r*cos(el)*sin(az);
-      z = r*sin(el);
+    bool status (true);
+
+    try {
+      if (inputInDegrees) {
+	spherical2cartesian (x,
+			     y,
+			     z,
+			     r,
+			     deg2rad(az),
+			     deg2rad(el),
+			     false);
+      } else {
+	x = r*cos(el)*cos(az);
+	y = r*cos(el)*sin(az);
+	z = r*sin(el);
+      }
+    } catch (std::string message) {
+      std::cerr << message << std::endl;
+      status = false;
     }
+
+    return status;
   }
   
   vector<double> azel2xyz (vector<double> const &azel,
@@ -107,9 +116,24 @@ namespace CR { // Namespace CR -- begin
     return spherical2cartesian (azze,inputInDegrees);
   }
   
-  // -------------------------------------------------------- spherical2cartesian
+  // -------------------------------------------------------- cartesian2spherical
+  
+  bool cartesian2spherical (double &r,
+			    double &phi,
+			    double &theta,
+			    const double &x,
+			    const double &y,
+			    const double &z,
+			    const bool &anglesInDegrees)
+  {
+    bool status (true);
 
-  void spherical2cartesian (double &x,
+    return status;
+  }
+  
+  // -------------------------------------------------------- spherical2cartesian
+  
+  bool spherical2cartesian (double &x,
 			    double &y,
 			    double &z,
 			    double const &r,
@@ -117,19 +141,28 @@ namespace CR { // Namespace CR -- begin
 			    double const &theta,
 			    bool const &inputInDegrees)
   {
-    if (inputInDegrees) {
-      spherical2cartesian (x,
-			   y,
-			   z,
-			   r,
-			   deg2rad(phi),
-			   deg2rad(theta),
-			   false);
-    } else {
-      x = r*sin(phi)*cos(theta);
-      y = r*sin(phi)*sin(theta);
-      z = r*cos(phi); 
+    bool status (true);
+
+    try {
+      if (inputInDegrees) {
+	spherical2cartesian (x,
+			     y,
+			     z,
+			     r,
+			     deg2rad(phi),
+			     deg2rad(theta),
+			     false);
+      } else {
+	x = r*sin(phi)*cos(theta);
+	y = r*sin(phi)*sin(theta);
+	z = r*cos(phi); 
+      }
+    } catch (std::string message) {
+      std::cerr << message << std::endl;
+      status = false;
     }
+    
+    return status;
   }
 
   vector<double> spherical2cartesian (vector<double> const &spherical,
@@ -170,13 +203,22 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------- azel2cartesian
   
-  Vector<double> azel2cartesian (const Vector<double>& azel)
+  casa::Vector<double> azel2cartesian (const casa::Vector<double>& azel,
+				       bool const &anglesInDegrees)
   {
-    Vector<double> cartesian(3);
+    casa::Vector<double> cartesian(3);
     uint shape = azel.nelements();
     double radius = 1.0;
-    double az = CR::deg2rad(azel(0));   //  both angles are provided in deg
-    double el = CR::deg2rad(azel(1));   //
+    double az;
+    double el;
+
+    if (anglesInDegrees) {
+      az = CR::deg2rad(azel(0));
+      el = CR::deg2rad(azel(1));
+    } else {
+      az = azel(0);
+      el = azel(1);
+    }
     
     /* Check if a source distance is provided. */
     if (shape == 3 && azel(2) > 0) {
@@ -197,9 +239,9 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------ polar2cartesian
 
-  Vector<double> polar2cartesian (Vector<double> const &polar)
+  casa::Vector<double> polar2cartesian (casa::Vector<double> const &polar)
   {
-    Vector<double> cartesian(3);
+    casa::Vector<double> cartesian(3);
     double radius = 1.0;
     double phi    = CR::deg2rad(polar(0));
     double theta  = CR::deg2rad(polar(1));

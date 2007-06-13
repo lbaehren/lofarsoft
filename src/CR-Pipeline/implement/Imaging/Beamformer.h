@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id: template-class.h,v 1.20 2007/06/13 09:41:37 bahren Exp $ |
+ | $Id: template-class.h,v 1.20 2007/06/13 09:41:37 bahren Exp           $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -48,7 +48,7 @@ namespace CR { // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[start filling in your text here]
+      <li>Familiarity of beamforming with phased arrays.
     </ul>
     
     <h3>Synopsis</h3>

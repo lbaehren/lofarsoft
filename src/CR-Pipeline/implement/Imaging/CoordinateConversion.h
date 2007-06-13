@@ -154,44 +154,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
   // ============================================================================
 
   /*!
-    \brief Conversion from cartesian to spherical coordinates
-
-    \retval r     -- \f$r\f$-component of the vector in spherical coordinates
-    \retval phi   -- \f$\phi\f$-component of the vector in spherical coordinates
-    \retval theta -- \f$\theta\f$-component of the vector in spherical coordinates
-    \param x      -- \f$x\f$-component of the vector in cartesian coordinates
-    \param y      -- \f$y\f$-component of the vector in cartesian coordinates
-    \param z      -- \f$z\f$-component of the vector in cartesian coordinates
-    
-    \return status -- Set to <i>false</i> if an error was encountered.
-  */
-  bool cartesian2spherical (double &r,
-			    double &phi,
-			    double &theta,
-			    const double &x,
-			    const double &y,
-			    const double &z);
-
-  /*!
-    \brief Conversion from cartesian to cylindrical coordinates
-
-    \retval r   -- \f$r\f$-component of the vector in cylindrical coordinates
-    \retval phi -- \f$phi\f$-component of the vector in cylindrical coordinates
-    \retval h   -- \f$h\f$-component of the vector in cylindrical coordinates
-    \param  x   -- \f$x\f$-component of the vector in cartesian coordinates
-    \param  y   -- \f$y\f$-component of the vector in cartesian coordinates
-    \param  z   -- \f$z\f$-component of the vector in cartesian coordinates
-    
-    \return status -- Set to <i>false</i> if an error was encountered.
-  */
-  bool cartesian2cylindrical (double &r,
-			      double &phi,
-			      double &h,
-			      const double &x,
-			      const double &y,
-			      const double &z);
-
-  /*!
     \brief Conversion from cylindrical to cartesian coordinates
 
     \retval x  -- \f$x\f$-component of the vector in cartesian coordinates

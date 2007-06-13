@@ -29,22 +29,21 @@
 #include <string>
 #include <vector>
 
-// External libraries
 #ifdef HAVE_BLITZ
 #include <blitz/array.h>
 #endif
 
-// AIPS++/CASA header files
+#ifdef HAVE_CASA
 #include <casa/aips.h>
 #include <casa/Arrays.h>
 #include <casa/Exceptions/Error.h>
 #include <measures/Measures.h>
+using casa::uInt;
+#endif
 
 #include <Math/Constants.h>
 
 using std::vector;
-using casa::Vector;
-using casa::uInt;
 
 namespace CR { // Namespace CR -- begin
   
@@ -64,10 +63,15 @@ namespace CR { // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[start filling in your text here]
+      <li>Some overview of existing conventions for spherical coordinate systems.
     </ul>
     
     <h3>Synopsis</h3>
+
+    In order to provide maximal usability, most of the conversion routines have
+    been implemented to work with (a) standard C++ variables and containers of
+    the STDL, (b) <a href="http://www.oonumerics.org/blitz">Blitz++</a> arrays
+    and (c) <a href="http://casa.nrao.edu">CASA</a> arrays.
 
     <ul>
       <li>Common source of confusion can be the factor required to convert an angle 
@@ -106,7 +110,7 @@ namespace CR { // Namespace CR -- begin
     <ol>
       <li>For the Beamformer to point towards the local zenith:
       \code
-      vector<double> xyz = azel2xyz (0,90,true);
+      std::vector<double> xyz = azel2xyz (0,90,true);
       \endcode
       The last parameter is used to propagate the information, that the angular
       coordinates are given in degrees, thus requiring conversion before plugging
@@ -120,6 +124,7 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
+  //-----------------------------------------------------------------------------
   // [1] degree -> radian
 
   /*!
@@ -135,6 +140,17 @@ namespace CR { // Namespace CR -- begin
 
   /*!
     \brief Convert radian to degrees
+    
+    \retval rad -- Angle in radian
+    \param deg -- Angle in degrees
+  */
+  inline void deg2rad (double &rad,
+		       double const &deg) {
+    rad = deg2rad (rad);
+  }
+  
+  /*!
+    \brief Convert radian to degrees
 
     \param deg -- Vector with angles given in degrees
 
@@ -148,17 +164,21 @@ namespace CR { // Namespace CR -- begin
     return rad;
   }
 
+#ifdef HAVE_CASA
   /*!
-    \brief Convert radian to degrees
-    
-    \retval rad -- Angle in radian
-    \param deg -- Angle in degrees
+    \brief Convert angular positions from degree to radian
+
+    \param deg -- Vector with angles given in degrees
+
+    \return rad -- Vector with angles given in radian
   */
-  inline void deg2rad (double &rad,
-		       double const &deg) {
-    rad = deg2rad (rad);
+  inline casa::Vector<double> deg2rad (const casa::Vector<double>& deg) {
+    casa::Vector<double> rad = deg*casa::C::pi/180.0;
+    return rad;
   }
+#endif
   
+  //-----------------------------------------------------------------------------
   // [2] radian -> degree
 
   /*!
@@ -174,6 +194,17 @@ namespace CR { // Namespace CR -- begin
 
   /*!
     \brief Convert radian to degrees
+    
+    \retval deg -- Angle in degrees
+    \param rad -- Angle in radian
+  */
+  inline void rad2deg (double &deg,
+		       double const &rad) {
+    deg = rad2deg (rad);
+  }
+  
+  /*!
+    \brief Convert radian to degrees
 
     \param rad -- Vector with angles given in radian
 
@@ -187,16 +218,19 @@ namespace CR { // Namespace CR -- begin
     return deg;
   }
 
+#ifdef HAVE_CASA
   /*!
-    \brief Convert radian to degrees
-    
-    \retval deg -- Angle in degrees
-    \param rad -- Angle in radian
+    \brief Convert angular position from radian to degree
+
+    \param rad -- Vector with angles given in radian
+
+    \return deg -- Vector with angles given in degree
   */
-  inline void rad2deg (double &deg,
-		       double const &rad) {
-    deg = rad2deg (rad);
+  inline casa::Vector<double> rad2deg (const casa::Vector<double>& rad) {
+    casa::Vector<double> deg = rad*180.0/casa::C::pi;
+    return deg;
   }
+#endif
   
   // ============================================================================
   //
@@ -219,7 +253,7 @@ namespace CR { // Namespace CR -- begin
                             degrees? If yes, then an additional conversion step
 			    is performed.
   */
-  void azel2xyz (double &x,
+  bool azel2xyz (double &x,
 		 double &y,
 		 double &z,
 		 double const &r,
@@ -299,6 +333,31 @@ namespace CR { // Namespace CR -- begin
 		    inputInDegrees);
   }
   
+  // -------------------------------------------------------- cartesian2spherical
+  
+  /*!
+    \brief Conversion from cartesian to spherical coordinates
+
+    \retval r     -- \f$r\f$-component of the vector in spherical coordinates
+    \retval phi   -- \f$\phi\f$-component of the vector in spherical coordinates
+    \retval theta -- \f$\theta\f$-component of the vector in spherical coordinates
+    \param x      -- \f$x\f$-component of the vector in cartesian coordinates
+    \param y      -- \f$y\f$-component of the vector in cartesian coordinates
+    \param z      -- \f$z\f$-component of the vector in cartesian coordinates
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+                    <i>yes</i> angles will be converted to radians before the 
+		    conversion.
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool cartesian2spherical (double &r,
+			    double &phi,
+			    double &theta,
+			    const double &x,
+			    const double &y,
+			    const double &z,
+			    const bool &anglesInDegrees=false);
+  
   // -------------------------------------------------------- spherical2cartesian
   
   /*!
@@ -316,7 +375,7 @@ namespace CR { // Namespace CR -- begin
     
     \return status -- Set to <i>false</i> if an error was encountered.
   */
-  void spherical2cartesian (double &x,
+  bool spherical2cartesian (double &x,
 			    double &y,
 			    double &z,
 			    const double &r,
@@ -364,18 +423,6 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  //! Convert angular positions from degree to radian
-  inline Vector<double> deg2rad (const Vector<double>& deg) {
-    Vector<double> rad = deg*casa::C::pi/180.0;
-    return rad;
-  }
-  
-  //! Convert angular position from radian to degree
-  inline Vector<double> rad2deg (const Vector<double>& rad) {
-    Vector<double> deg = rad*180.0/casa::C::pi;
-    return deg;
-  }
-  
   /*!
     \brief Conversion from (AZ,EL) to (x,y,z)
 
@@ -404,7 +451,8 @@ namespace CR { // Namespace CR -- begin
 
     \return xyz -- Vector in cartesian coordinates
    */
-  Vector<double> azel2cartesian (const Vector<double>& azel);  
+  casa::Vector<double> azel2cartesian (const casa::Vector<double>& azel,
+				       bool const &anglesInDegrees=false);  
   
   /*!
     \brief Convert polar spherical coordinates to cartesian coordinates
@@ -418,7 +466,7 @@ namespace CR { // Namespace CR -- begin
       z = \rho\, \cos(\theta)
     \f]
   */
-  Vector<double> polar2cartesian (Vector<double> const &polar);
+  casa::Vector<double> polar2cartesian (casa::Vector<double> const &polar);
   
   // ============================================================================
   //

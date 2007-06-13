@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include <Imaging/SkymapCoordinates.h>
+#include <Math/VectorConversion.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -431,76 +432,108 @@ namespace CR { // Namespace CR -- begin
   }
 
   // -------------------------------------------------------- directionAxisValues
+
+  bool SkymapCoordinates::directionAxisValues (casa::String const &refcode,
+					       Matrix<double> &directions,
+					       Matrix<bool> &mask,
+					       bool const &anglesInDegrees)
+  {
+    /*
+      Translate the reference code string into a MDirectionType, such that we can
+      simply forward the function call
+    */
+    MDirection::Types directionType = MDirectionType (refcode);
+    /*
+      Carry out the extraction of the direction axis values
+    */
+    return directionAxisValues (directionType,
+				directions,
+				mask,
+				anglesInDegrees);
+  }
   
-  Matrix<double>
-  SkymapCoordinates::directionAxisValues (bool const &anglesInDegrees)
-  {
-    bool verbose (false);
-    // Extract the direction axis from the coordinate system object
-    DirectionCoordinate coord = directionAxis();
-    // Extract the MDirection type
-    casa::MDirection::Types type = coord.directionType();
-    casa::String directionRefString;
-    
-    // Feedback on the obtained result
-    if (verbose) {
-      MDirection direction (type);
-      unsigned int refType = direction.getRef().getType();
-      cout << "[SkymapCoordinates::directionAxisValues]" << endl;
-      cout << "-- Reference string = " << direction.getRefString() << endl;
-      cout << "-- Direction type   = " << direction.type()         << endl;
-      cout << "-- Reference type   = " << refType                  << endl;
-    }
-    
-    return directionAxisValues (type);
-  }
-
   // -------------------------------------------------------- directionAxisValues
-
-  Matrix<double>
-  SkymapCoordinates::directionAxisValues (casa::String const &refcode)
+  
+  bool SkymapCoordinates::directionAxisValues (casa::MDirection::Types const &type,
+					       Matrix<double> &directions,
+					       Matrix<bool> &mask,
+					       bool const &anglesInDegrees)
   {
-    // Convert reference code strin to reference type
-    return directionAxisValues (MDirectionType(refcode));
-  }
+    bool status (true);
 
-  // -------------------------------------------------------- directionAxisValues
-
-  Matrix<double>
-  SkymapCoordinates::directionAxisValues (casa::MDirection::Types const &type)
-  {
+    // local variables
     int lon (0);
     int lat (0);
     int nValue (0);
-    IPosition shape (2,shape_p(0)*shape_p(1),2);
     Vector<double> pixel (2);
     Vector<double> world (2);
-    Matrix<double> values (shape);
-    bool status (true);
+    /*
+      [1] adjust the shapes of the provided arrays
+    */
+    directions.resize (shape_p(0)*shape_p(1),2);
+    mask.resize (shape_p(0),shape_p(1));
 
     /*
-      Extract the direction axis from the coordinate system object and adjust
-      the reference frame used for the world coordinates
+      [2] The conversion from pixel to world coordinates is done using the
+      DirectionCoordinate extracted from the CoordinateSystem.
     */
-
     cout << "--> extracting the direction axis ..." << endl;
     DirectionCoordinate dc = directionAxis();
-//     cout << "--> adjusting reference frame conversion ..." << endl;
-//     dc.setReferenceConversion(type);
     cout << "--> converting coordinate values ..." << endl;
     for (lon=0, pixel(0)=0.0; lon<shape_p(0); lon++, pixel(0)++) {
       for (lat=0, pixel(1)=0.0; lat<shape_p(1); lat++, pixel(1)++) {
 	// perform the actual conversion from pixel to world coordinate
-	status = dc.toWorld (world,pixel);
+	mask(lon,lat) = dc.toWorld (world,pixel);
 	// stored the retrieved value into the returned array
-	values.row(nValue) = world;
+	directions.row(nValue) = world;
 	nValue++;
       }
     }
 
-    return values;
-  }
+    /*
+      If the coordinate values are requested for a different reference frame as 
+      internal to the image (e.g. because we need AZEL coordinate for the
+      beamforming while the map is presented in J2000), an additional conversion
+      step is required.
+    */
+    casa::MDirection::Types myDirectionType = dc.directionType();
 
+    if (myDirectionType != type) {
+      cout << "--> converting directions to target reference frame ..." << endl;
+      // create the frame required for the conversion
+      MeasFrame frame (obsData_p.epoch(),                // Observation epoch
+		       obsData_p.observatoryPosition()); // Observatory position
+      // create a conversion engine
+      MDirection::Convert conv (MDirection(myDirectionType),
+				MDirection::Ref(type,frame));
+      // check if the conversion engine is operational
+      if (conv.isNOP()) {
+	cerr << "--> Conversion engine not operational!" << endl;
+	status = false;
+      } else {
+	MVDirection MVDirectionFROM;
+	Vector<Quantity> QDirectionTO (2);
+	// go through the direction coordinate values and perform the conversion
+	for (int n(0); n<nValue; n++) {
+	  MVDirectionFROM = MVDirection (Quantity(directions(n,0),"rad"),
+					 Quantity(directions(n,1),"rad"));
+	  // conversion step
+	  QDirectionTO = conv (MVDirectionFROM).getValue().getRecordValue();
+	  // store the obtained values
+	  if (anglesInDegrees) {
+	    directions(n,0) = QDirectionTO(0).getValue("deg");
+	    directions(n,1) = QDirectionTO(1).getValue("deg");
+	  } else {
+	    directions(n,0) = QDirectionTO(0).getValue("rad");
+	    directions(n,1) = QDirectionTO(1).getValue("rad");
+	  }
+	}
+      }  
+    }
+    
+    return status;
+  }
+  
   // ------------------------------------------------------------ setDistanceAxis
 
   bool SkymapCoordinates::setDistanceAxis (double const &refPixel,
@@ -696,6 +729,8 @@ namespace CR { // Namespace CR -- begin
     return timeAxisValues (pixel);
   }
 
+  // ------------------------------------------------------------- timeAxisValues
+
   Vector<double>
   SkymapCoordinates::timeAxisValues (Vector<double> const &pixelValues)
   {
@@ -727,6 +762,8 @@ namespace CR { // Namespace CR -- begin
 
     return frequencyAxisValues (pixel);
   }
+
+  // -------------------------------------------------------- frequencyAxisValues
 
   Vector<double>
   SkymapCoordinates::frequencyAxisValues (Vector<double> const &pixelValues)

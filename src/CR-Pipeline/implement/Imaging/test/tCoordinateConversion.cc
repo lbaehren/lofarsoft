@@ -21,6 +21,7 @@
 #include <cmath>
 #include <string>
 #include <Imaging/CoordinateConversion.h>
+#include <Math/VectorConversion.h>
 
 /*!
   \file tCoordinateConversion.cc
@@ -33,7 +34,7 @@
  */
 
 /*!
-  \brief Some basic test to work with Blitz arrays
+  \brief Some basic test to work with Blitz++ arrays
 
   Of special use is the application of <i>Range</i> objects to arrays;
   by this we can extracts e.g. rows from a matrix:

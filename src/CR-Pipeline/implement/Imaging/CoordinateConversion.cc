@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include <Imaging/CoordinateConversion.h>
+#include <Math/VectorConversion.h>
 
 namespace CR { // NAMESPACE CR -- BEGIN
   
