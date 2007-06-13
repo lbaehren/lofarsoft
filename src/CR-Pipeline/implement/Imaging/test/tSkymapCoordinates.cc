@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tSkymapCoordinates.cc,v 1.2 2007/05/03 14:54:58 bahren Exp $*/
+/* $Id$*/
 
 #include <templates.h>
 #include <Imaging/SkymapCoordinates.h>

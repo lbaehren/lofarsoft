@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: template-tclass.cc,v 1.6 2006/09/20 09:56:53 bahren Exp $*/
+/* $Id$*/
 
 #include <iostream>
 #include <fstream>

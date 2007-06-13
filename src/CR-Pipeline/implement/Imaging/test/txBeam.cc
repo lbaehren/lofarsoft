@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: template-tclass.cc,v 1.7 2007/03/06 14:53:26 bahren Exp $*/
+/* $Id$*/
 
 #include <lopes/Imaging/xBeam.h>
 

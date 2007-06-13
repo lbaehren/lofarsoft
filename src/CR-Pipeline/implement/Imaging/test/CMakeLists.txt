@@ -5,7 +5,9 @@ include_directories (. .. ../..)
 ## Set up the list with test program sources
 
 set (tests
+  tAntenna
   tCoordinateConversion
+  tFeed
   tGeometricalDelay
   tGeometricalPhase
   tGeometricalWeight

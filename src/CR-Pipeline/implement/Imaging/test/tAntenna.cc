@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Lars Baehren (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -16,13 +16,14 @@
  *   along with this program; if not, write to the                         *
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *                                                                         *
+ *-------------------------------------------------------------------------*
+ * $Id::                                                                 $ *
  ***************************************************************************/
 
-/* $Id: template-tclass.cc,v 1.8 2007/06/05 14:47:41 bahren Exp $*/
+#include <Imaging/Antenna.h>
 
-#include <lopes/Imaging/Antenna.h>
-
-using LOPES::Antenna;
+using CR::Antenna;
 
 /*!
   \file tAntenna.cc

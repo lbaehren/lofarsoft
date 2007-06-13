@@ -1,5 +1,5 @@
 
-/* $Id: tSkymapGrid.cc,v 1.8 2007/04/13 15:13:49 bahren Exp $ */
+/* $Id$ */
 
 #include <iostream>
 #include <fstream>
