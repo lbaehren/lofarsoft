@@ -1,6 +1,9 @@
-/***************************************************************************
+/*-------------------------------------------------------------------------*
+ | $Id::                                                                 $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
  *   Copyright (C) 2007                                                    *
- *   Lars Baehren (bahren@astron.nl)                                       *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,8 +20,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-/* $Id: template-class.cc,v 1.10 2006/10/31 19:19:57 bahren Exp $*/
 
 #include <Imaging/GeometricalWeight.h>
 

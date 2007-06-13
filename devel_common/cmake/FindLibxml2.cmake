@@ -1,3 +1,7 @@
+##------------------------------------------------------------------------
+## $Id::                                                                 $
+##------------------------------------------------------------------------
+
 #
 # this module look for libxml (http://www.xmlsoft.org) support
 # it will define the following values

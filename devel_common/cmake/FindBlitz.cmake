@@ -1,3 +1,7 @@
+##------------------------------------------------------------------------
+## $Id::                                                                 $
+##------------------------------------------------------------------------
+
 # - Check for the presence of the Blitz++ library
 #
 # The following variables are set when Blitz++ is found:

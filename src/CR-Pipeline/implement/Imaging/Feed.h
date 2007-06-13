@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: template-class.h,v 1.19 2007/05/29 08:31:52 bahren Exp $*/
+/* $Id$*/
 
 #ifndef FEED_H
 #define FEED_H

@@ -1,4 +1,7 @@
-/***************************************************************************
+/*-------------------------------------------------------------------------*
+ | $Id::                                                                 $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
  *   Copyright (C) 2007                                                    *
  *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
@@ -18,13 +21,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Math/Hermite1D.h>
-#include <Math/Shapelets1D.h>
-
-namespace CR {  // Namespace CR -- begin
-
 /*!
   \file Math.h
+
+  \ingroup CR
 
   \defgroup Math
 
@@ -34,10 +34,36 @@ namespace CR {  // Namespace CR -- begin
   
   \date 2007/01/16
 
+  <h3>Synopsis</h3>
+
+  Even though we make usage of the extensive functionality of the CASA math
+  modules, there sometimes are operations missing which will be required 
+  over and over again. The Math module of the CR-Pipeline is a collection of
+  such additional functions.
+
   <h3>Usage</h3>
 
   Usage this file in order to import all the prototypes for functions and classes
   in the <i>Math</i> module.
 */
 
-}
+#include <Math/BasicFilter.h>
+#include <Math/Constants.h>
+#include <Math/HanningFilter.h>
+#include <Math/Hermite1D.h>
+#include <Math/LinearRegression.h>
+#include <Math/MathAlgebra.h>
+#include <Math/MathFFT.h>
+#include <Math/MedianFilter.h>
+#include <Math/RaisedCosineFilter.h>
+#include <Math/RangeSplitter.h>
+#include <Math/Rotation2D.h>
+#include <Math/Rotation3D.h>
+#include <Math/RotationMatrix.h>
+#include <Math/Shapelets1D.h>
+#include <Math/Shapelets2D.h>
+#include <Math/ShapeletsModel1D.h>
+#include <Math/ShapeletsModel2D.h>
+#include <Math/StatisticsFilter.h>
+#include <Math/VectorConversion.h>
+#include <Math/VectorNorms.h>

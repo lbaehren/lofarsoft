@@ -1,3 +1,7 @@
+##------------------------------------------------------------------------
+## $Id::                                                                 $
+##------------------------------------------------------------------------
+
 ===== Note to authors of FindXXX.cmake files =====
 
 We would like all FindXXX.cmake files to produce consistent variable names.
