@@ -503,9 +503,13 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the coordinate values along the direction axes
 
+      \param anglesInDegrees -- If set <tt>true</tt> the direction angles will
+                                be converted form the internal radian format to
+				degrees.
+
       \return directionValues -- The coordinate values along the distance axis
     */
-    Matrix<Double> directionAxisValues ();
+    Matrix<Double> directionAxisValues (bool const &anglesInDegrees=false);
 
     /*!
       \brief Get the coordinate values along the direction axes

@@ -44,7 +44,6 @@
 // LOPES-Tools header files
 #include <IO/DataReaderTools.h>
 #include <Observation/ObservationData.h>
-#include <Skymap/Skymap.h>
 #include <Imaging/SkymapCoordinates.h>
 #include <Skymap/SkymapQuantity.h>
 
@@ -143,9 +142,6 @@ class Skymapper {
 
   //! Container and handler for the coordinates
   SkymapCoordinates coordinates_p;
-
-  //! Skymap handler
-  Skymap skymap_p;
 
   // -- book-keeping
   
@@ -269,6 +265,14 @@ class Skymapper {
   }
   
   // -------------------------------------------------------------------- Methods
+
+  /*!
+    \brief Initialize the internal structure of the Skymapper for data processing
+
+    \return status -- Status of the operation; returns <tt>false</t> if an error
+                      was encountered.
+  */
+  bool initSkymapper ();
 
   /*!
     \brief Process a block of data and add the result to the image being created

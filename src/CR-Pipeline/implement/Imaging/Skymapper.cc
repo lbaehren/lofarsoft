@@ -43,7 +43,6 @@ namespace CR {  // Namespace CR -- begin
       nofProcessedBlocks_p (0)
   {
     coordinates_p = SkymapCoordinates ();
-    skymap_p      = Skymap ();
     filename_p    = "skymap.img";
   }
   
@@ -99,7 +98,6 @@ namespace CR {  // Namespace CR -- begin
     verbose_p            = other.verbose_p;
     filename_p           = other.filename_p;
     coordinates_p        = other.coordinates_p;
-    skymap_p             = other.skymap_p;
     nofProcessedBlocks_p = other.nofProcessedBlocks_p;
   }
   
@@ -120,6 +118,8 @@ namespace CR {  // Namespace CR -- begin
   //  Processing
   //
   // ==========================================================================
+
+  // -------------------------------------------------------------- processData
   
   bool Skymapper::processData (Matrix<DComplex> const &data)
   {
@@ -140,6 +140,7 @@ namespace CR {  // Namespace CR -- begin
     uint nofDistances = distances.nelements();
     
     for (uint distanceStep(0); distanceStep<nofDistances; distanceStep++) {
+      // 1. adjust the beamformer weights
     }
 
     // book-keeping of the number of data blocks processed so far
@@ -187,33 +188,33 @@ namespace CR {  // Namespace CR -- begin
     std::cout << " -- shape             = " << shape       << std::endl;
     std::cout << " -- reference value   = " << crval       << std::endl;
     std::cout << " -- coord. increment  = " << cdelt       << std::endl;
-    skymap_p.setSkymapGrid (csys.obsInfo(),
-			    refcode,
-			    projection,
-			    shape,
-			    crval,
-			    cdelt);
+//     skymap_p.setSkymapGrid (csys.obsInfo(),
+// 			    refcode,
+// 			    projection,
+// 			    shape,
+// 			    crval,
+// 			    cdelt);
 
-    skymap_p.setCoordinateSystem(csys);
+//     skymap_p.setCoordinateSystem(csys);
 
     // Elevation range
     Vector<Double> elevation (2);
     elevation(0) = 00.0;
     elevation(1) = 90.0;
-    skymap_p.setElevationRange (elevation);
+//     skymap_p.setElevationRange (elevation);
 
     // Orientation of the sky map
     Vector<String> orientation (2);
     orientation(0) = "East";
     orientation(1) = "North";
-    skymap_p.setOrientation (orientation);
+//     skymap_p.setOrientation (orientation);
 
-    // Default value for the distance parameter
-    skymap_p.setDistance(-1);
+//     // Default value for the distance parameter
+//     skymap_p.setDistance(-1);
 
     // Set up the Skymap-internal function pointer to the function handling
     // the actual data processing
-    skymap_p.setSkymapQuantity (quantity_p.skymapQuantity());
+//     skymap_p.setSkymapQuantity (quantity_p.skymapQuantity());
   } catch (AipsError x) {
     cerr << "[Skymapper::createImage] " << x.getMesg() << endl;
     return False;
@@ -257,21 +258,21 @@ namespace CR {  // Namespace CR -- begin
       // 2. update pointer to position in image array
       start(2) = radius;
       // 3. update the beamformer weights for the current shell
-      skymap_p.setPhaseGradients (frequencies,
-				  antennaPositions);
+//       skymap_p.setPhaseGradients (frequencies,
+// 				  antennaPositions);
       for (integration=0; integration<imageShape(3); integration++) {
 	start(3) = integration;
 	// 1. read in the data from disk
 	// 	  (this->*pFunction)(data);
 	// 2. process the data 
-	skymap_p.data2skymap(data);
+// 	skymap_p.data2skymap(data);
 	// show the progress we are making on the image generation
 	numLoop++;
 	bar.update(numLoop);
 	// retrieve the Skymap data cube ...
-	skymap_p.skymap (pixels,
-			 imageMask,
-			 Int(imageShape(4)));
+// 	skymap_p.skymap (pixels,
+// 			 imageMask,
+// 			 Int(imageShape(4)));
 	// ... and insert it at [az,el,RADIUS,INTEGRATION,freq]
 	image.putSlice (pixels,start,stride);
       } // ------------------------------------------------------ end integration

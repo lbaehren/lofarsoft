@@ -430,8 +430,9 @@ namespace CR { // Namespace CR -- begin
   }
 
   // -------------------------------------------------------- directionAxisValues
-
-  Matrix<Double> SkymapCoordinates::directionAxisValues ()
+  
+  Matrix<Double>
+  SkymapCoordinates::directionAxisValues (bool const &anglesInDegrees)
   {
     bool verbose (false);
     // Extract the direction axis from the coordinate system object
@@ -439,7 +440,7 @@ namespace CR { // Namespace CR -- begin
     // Extract the MDirection type
     casa::MDirection::Types type = coord.directionType();
     casa::String directionRefString;
-
+    
     // Feedback on the obtained result
     if (verbose) {
       MDirection direction (type);
