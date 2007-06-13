@@ -8,11 +8,8 @@ include_directories (. .. ../..)
 ## Set up the list with test program sources
 
 set (tests
-  tMasking
-  tParameterFromRecord
-  tProgressBar
-  tStringTools
-  tTimestamp
+  tSkymapperTools
+  tSkymapQuantity
   )
 
 ## ------------------------------------------------------------------------------

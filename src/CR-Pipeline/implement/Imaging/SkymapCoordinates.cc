@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: SkymapCoordinates.cc,v 1.2 2007/05/03 14:54:58 bahren Exp $*/
+// $Id$
 
 #include <Imaging/SkymapCoordinates.h>
 
@@ -402,13 +402,13 @@ namespace CR { // Namespace CR -- begin
   DirectionCoordinate
   SkymapCoordinates::directionCoordinate (const String& refcode,
 					  const String& projection,
-					  const Vector<Double>& refValue,
-					  const Vector<Double>& increment,
+					  const Vector<double>& refValue,
+					  const Vector<double>& increment,
 					  const IPosition& pixels)
   {
     uint nofAxes (2);
-    Vector<Double> refPixel (nofAxes);
-    Matrix<Double> xform(nofAxes,nofAxes,0.0);
+    Vector<double> refPixel (nofAxes);
+    Matrix<double> xform(nofAxes,nofAxes,0.0);
 
     // Setting for field of view centered on a viewing direction
     refPixel(0) = 0.5*pixels(0);
@@ -431,7 +431,7 @@ namespace CR { // Namespace CR -- begin
 
   // -------------------------------------------------------- directionAxisValues
   
-  Matrix<Double>
+  Matrix<double>
   SkymapCoordinates::directionAxisValues (bool const &anglesInDegrees)
   {
     bool verbose (false);
@@ -456,7 +456,7 @@ namespace CR { // Namespace CR -- begin
 
   // -------------------------------------------------------- directionAxisValues
 
-  Matrix<Double>
+  Matrix<double>
   SkymapCoordinates::directionAxisValues (casa::String const &refcode)
   {
     // Convert reference code strin to reference type
@@ -465,7 +465,7 @@ namespace CR { // Namespace CR -- begin
 
   // -------------------------------------------------------- directionAxisValues
 
-  Matrix<Double>
+  Matrix<double>
   SkymapCoordinates::directionAxisValues (casa::MDirection::Types const &type)
   {
     int lon (0);
@@ -474,7 +474,7 @@ namespace CR { // Namespace CR -- begin
     IPosition shape (2,shape_p(0)*shape_p(1),2);
     Vector<double> pixel (2);
     Vector<double> world (2);
-    Matrix<Double> values (shape);
+    Matrix<double> values (shape);
     bool status (true);
 
     /*
@@ -502,15 +502,15 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------ setDistanceAxis
 
-  bool SkymapCoordinates::setDistanceAxis (Double const &refPixel,
-					   Double const &refValue,
-					   Double const &increment)
+  bool SkymapCoordinates::setDistanceAxis (double const &refPixel,
+					   double const &refValue,
+					   double const &increment)
   {
     bool ok (true);
     uint nofErrors (0);
-    Vector<Double> crpix (1,refPixel);
-    Vector<Double> crval (1,refValue);
-    Vector<Double> cdelt (1,increment);
+    Vector<double> crpix (1,refPixel);
+    Vector<double> crval (1,refValue);
+    Vector<double> cdelt (1,increment);
     
     LinearCoordinate axis = distanceAxis ();
 
@@ -532,10 +532,10 @@ namespace CR { // Namespace CR -- begin
   
   // --------------------------------------------------------- distanceAxisValues
 
-  Vector<Double> SkymapCoordinates::distanceAxisValues ()
+  Vector<double> SkymapCoordinates::distanceAxisValues ()
   {
-    Vector<Double> crpix = distanceAxis().referencePixel();
-    Vector<Double> pixelValues (shape_p(2));
+    Vector<double> crpix = distanceAxis().referencePixel();
+    Vector<double> pixelValues (shape_p(2));
 
     for (int pixel(0); pixel<shape_p(2); pixel++) {
       pixelValues(pixel) = crpix(0)+pixel;
@@ -546,13 +546,13 @@ namespace CR { // Namespace CR -- begin
   
   // --------------------------------------------------------- distanceAxisValues
 
-  Vector<Double>
-  SkymapCoordinates::distanceAxisValues (Vector<Double> const &pixelValues)
+  Vector<double>
+  SkymapCoordinates::distanceAxisValues (Vector<double> const &pixelValues)
   {
     uint nofPixels (pixelValues.nelements());
-    Vector<Double> worldValues (nofPixels);
-    Vector<Double> valPixel (1);
-    Vector<Double> valWorld (1);
+    Vector<double> worldValues (nofPixels);
+    Vector<double> valPixel (1);
+    Vector<double> valWorld (1);
     LinearCoordinate axis = distanceAxis ();
     
     for (uint pixel(0); pixel<nofPixels; pixel++) {
@@ -683,10 +683,10 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------- timeAxisValues
 
-  Vector<Double> SkymapCoordinates::timeAxisValues ()
+  Vector<double> SkymapCoordinates::timeAxisValues ()
   {
     unsigned int nofValues = shape_p(SkymapCoordinates::Time);
-    Vector<Double> pixel (nofValues);
+    Vector<double> pixel (nofValues);
 
     for (unsigned int n(0); n<nofValues; n++) {
       pixel(n) = double(n);
@@ -695,13 +695,13 @@ namespace CR { // Namespace CR -- begin
     return timeAxisValues (pixel);
   }
 
-  Vector<Double>
-  SkymapCoordinates::timeAxisValues (Vector<Double> const &pixelValues)
+  Vector<double>
+  SkymapCoordinates::timeAxisValues (Vector<double> const &pixelValues)
   {
     uint nofPixels (pixelValues.nelements());
-    Vector<Double> worldValues (nofPixels);
-    Vector<Double> valPixel (1);
-    Vector<Double> valWorld (1);
+    Vector<double> worldValues (nofPixels);
+    Vector<double> valPixel (1);
+    Vector<double> valWorld (1);
     LinearCoordinate axis = timeAxis ();
     
     for (uint pixel(0); pixel<nofPixels; pixel++) {
@@ -715,10 +715,10 @@ namespace CR { // Namespace CR -- begin
 
   // -------------------------------------------------------- frequencyAxisValues
 
-  Vector<Double> SkymapCoordinates::frequencyAxisValues ()
+  Vector<double> SkymapCoordinates::frequencyAxisValues ()
   {
     unsigned int nofValues = shape_p(SkymapCoordinates::Frequency);
-    Vector<Double> pixel (nofValues);
+    Vector<double> pixel (nofValues);
 
     for (unsigned int n(0); n<nofValues; n++) {
       pixel(n) = double(n);
@@ -727,13 +727,13 @@ namespace CR { // Namespace CR -- begin
     return frequencyAxisValues (pixel);
   }
 
-  Vector<Double>
-  SkymapCoordinates::frequencyAxisValues (Vector<Double> const &pixelValues)
+  Vector<double>
+  SkymapCoordinates::frequencyAxisValues (Vector<double> const &pixelValues)
   {
     uint nofPixels (pixelValues.nelements());
-    Vector<Double> worldValues (nofPixels);
-    Vector<Double> valPixel (1);
-    Vector<Double> valWorld (1);
+    Vector<double> worldValues (nofPixels);
+    Vector<double> valPixel (1);
+    Vector<double> valWorld (1);
     SpectralCoordinate axis = frequencyAxis ();
     
     for (uint pixel(0); pixel<nofPixels; pixel++) {
@@ -873,8 +873,8 @@ namespace CR { // Namespace CR -- begin
     uint nofAxes (2);
     std::string refcode ("AZEL");
     std::string projection ("STG");
-    Vector<Double> refValue (nofAxes);
-    Vector<Double> increment (nofAxes);
+    Vector<double> refValue (nofAxes);
+    Vector<double> increment (nofAxes);
     IPosition shape (nofAxes);
 
     refValue(0) = 0.0*casa::C::pi/180.0;
@@ -901,10 +901,10 @@ namespace CR { // Namespace CR -- begin
     uint nofAxes (1);
     Vector<String> names (nofAxes,"Distance");
     Vector<String> units (nofAxes,"m");
-    Vector<Double> refVal (nofAxes,-1.0);
-    Vector<Double> inc (nofAxes,0.0);
-    Matrix<Double> pc (nofAxes,nofAxes);
-    Vector<Double> refPix (nofAxes,0.0);
+    Vector<double> refVal (nofAxes,-1.0);
+    Vector<double> inc (nofAxes,0.0);
+    Matrix<double> pc (nofAxes,nofAxes);
+    Vector<double> refPix (nofAxes,0.0);
 
     pc            = 0.0;
     pc.diagonal() = 1.0;

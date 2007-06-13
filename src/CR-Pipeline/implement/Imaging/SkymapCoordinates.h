@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: SkymapCoordinates.h,v 1.1 2007/05/02 09:37:10 bahren Exp $*/
+// $Id$
 
 #ifndef SKYMAPCOORDINATES_H
 #define SKYMAPCOORDINATES_H
@@ -44,7 +44,6 @@
 
 using casa::CoordinateSystem;
 using casa::DirectionCoordinate;
-using casa::Double;
 using casa::IPosition;
 using casa::LinearCoordinate;
 using casa::Matrix;
@@ -509,7 +508,26 @@ namespace CR { // Namespace CR -- begin
 
       \return directionValues -- The coordinate values along the distance axis
     */
-    Matrix<Double> directionAxisValues (bool const &anglesInDegrees=false);
+    Matrix<double> directionAxisValues (bool const &anglesInDegrees=false);
+
+    /*!
+      \brief Get the coordinate values along the direction axes
+
+      \param refcode         -- Extra conversion type; whenever a conversion from
+                                pixel to world is done, the world value is then
+				further converted to the corresponding
+				MDirection::Types value.
+      \param directions      -- The coordinate values along the distance axis
+      \param mask            -- Pixel mask recording if pixels have been flagged
+                                due to errors in the conversion process
+      \param anglesInDegrees -- If set <tt>true</tt> the direction angles will
+                                be converted form the internal radian format to
+				degrees.
+    */
+    void directionAxisValues (casa::String const &refcode,
+			      Matrix<double> &directions,
+			      Matrix<bool> &mask,
+			      bool const &anglesInDegrees=false);
 
     /*!
       \brief Get the coordinate values along the direction axes
@@ -520,7 +538,7 @@ namespace CR { // Namespace CR -- begin
 			
       \return directionValues -- The coordinate values along the distance axis
     */
-    Matrix<Double> directionAxisValues (casa::String const &refcode);
+    Matrix<double> directionAxisValues (casa::String const &refcode);
 
     /*!
       \brief Get the coordinate values along the direction axes
@@ -531,7 +549,7 @@ namespace CR { // Namespace CR -- begin
 
       \return directionValues -- The coordinate values along the distance axis
     */
-    Matrix<Double> directionAxisValues (casa::MDirection::Types const &type);
+    Matrix<double> directionAxisValues (casa::MDirection::Types const &type);
 
     // ------------------------------------------------------------ Distance axis
 
@@ -552,9 +570,9 @@ namespace CR { // Namespace CR -- begin
                           with the reference pixel
       \param increment -- Coordinate increment along the axis
     */
-    bool setDistanceAxis (Double const &refPixel,
-			  Double const &refValue,
-			  Double const &increment);
+    bool setDistanceAxis (double const &refPixel,
+			  double const &refValue,
+			  double const &increment);
     
     /*!
       \brief Set the number of steps taken along the distance axis
@@ -574,7 +592,7 @@ namespace CR { // Namespace CR -- begin
 
       \return distanceValues -- The coordinate values along the distance axis
     */
-    Vector<Double> distanceAxisValues ();
+    Vector<double> distanceAxisValues ();
 
     /*!
       \brief Get the coordinate values along the distance axis
@@ -584,7 +602,7 @@ namespace CR { // Namespace CR -- begin
 
       \return distanceValues -- The coordinate values along the distance axis
     */
-    Vector<Double> distanceAxisValues (Vector<Double> const &pixelValues);
+    Vector<double> distanceAxisValues (Vector<double> const &pixelValues);
 
     // ---------------------------------------------------------------- Time axis
 
@@ -602,7 +620,7 @@ namespace CR { // Namespace CR -- begin
 
       \return timeValues -- The coordinate values along the time axis
     */
-    Vector<Double> timeAxisValues ();
+    Vector<double> timeAxisValues ();
 
     /*!
       \brief Get the coordinate values along the time axis
@@ -612,7 +630,7 @@ namespace CR { // Namespace CR -- begin
 
       \return timeValues -- The coordinate values along the time axis
     */
-    Vector<Double> timeAxisValues (Vector<Double> const &pixelValues);
+    Vector<double> timeAxisValues (Vector<double> const &pixelValues);
 
     // ----------------------------------------------------------- Frequency axis
 
@@ -630,7 +648,7 @@ namespace CR { // Namespace CR -- begin
 
       \return frequencyValues -- The coordinate values along the frequency axis
     */
-    Vector<Double> frequencyAxisValues ();
+    Vector<double> frequencyAxisValues ();
 
     /*!
       \brief Get the coordinate values along the frequency axis
@@ -640,7 +658,7 @@ namespace CR { // Namespace CR -- begin
 
       \return frequencyValues -- The coordinate values along the frequency axis
     */
-    Vector<Double> frequencyAxisValues (Vector<Double> const &pixelValues);
+    Vector<double> frequencyAxisValues (Vector<double> const &pixelValues);
 
     // ==========================================================================
     // Feedback
@@ -794,8 +812,8 @@ namespace CR { // Namespace CR -- begin
     */
     static DirectionCoordinate directionCoordinate (const String& refcode,
 						    const String& projection,
-						    const Vector<Double>& refValue,
-						    const Vector<Double>& increment,
+						    const Vector<double>& refValue,
+						    const Vector<double>& increment,
 						    const IPosition& pixels);
     
     // ------------------------------------------------------ Conversion routines
