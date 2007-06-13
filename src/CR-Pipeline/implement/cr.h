@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id::                                                                 $ |
+ | $Id:: templates.h 391 2007-06-13 09:25:11Z baehren                    $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -22,35 +22,5 @@
  ***************************************************************************/
 
 /*!
-  \file Imaging.h
-
-  \defgroup Imaging CR-Pipeline: Imaging module
-  \ingroup CR
-
-  \brief Imaging module for the CR-pipeline
-  
-  \author Lars B&auml;hren
-  
-  \date 2007/01/16
-
-  <h3>Usage</h3>
-
-  Usage this file in order to import all the prototypes for functions and classes
-  in the <i>Imaging</i> module.
+  \defgroup CR Cosmic Rays (CR) analysis pipeline
 */
-
-#include <Imaging/Antenna.h>
-#include <Imaging/Beam.h>
-#include <Imaging/Beamformer.h>
-#include <Imaging/Beamshape.h>
-#include <Imaging/CoordinateConversion.h>
-#include <Imaging/Feed.h>
-#include <Imaging/GeometricalDelay.h>
-#include <Imaging/GeometricalPhase.h>
-#include <Imaging/GeometricalWeight.h>
-#include <Imaging/HorizonScan.h>
-#include <Imaging/SkymapCoordinates.h>
-#include <Imaging/SkymapGrid.h>
-#include <Imaging/Skymapper.h>
-#include <Imaging/ccBeam.h>
-#include <Imaging/xBeam.h>

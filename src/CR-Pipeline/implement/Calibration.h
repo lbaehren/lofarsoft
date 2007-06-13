@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id::                                                                 $ |
+ | $Id:: Imaging.h 392 2007-06-13 10:38:12Z baehren                      $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -22,12 +22,12 @@
  ***************************************************************************/
 
 /*!
-  \file Imaging.h
+  \file Calibration.h
 
-  \defgroup Imaging CR-Pipeline: Imaging module
+  \defgroup Calibration CR-Pipeline: Calibration module
   \ingroup CR
 
-  \brief Imaging module for the CR-pipeline
+  \brief Calibration module for the CR-pipeline
   
   \author Lars B&auml;hren
   
@@ -36,21 +36,19 @@
   <h3>Usage</h3>
 
   Usage this file in order to import all the prototypes for functions and classes
-  in the <i>Imaging</i> module.
+  in the <i>Calibration</i> module.
 */
 
-#include <Imaging/Antenna.h>
-#include <Imaging/Beam.h>
-#include <Imaging/Beamformer.h>
-#include <Imaging/Beamshape.h>
-#include <Imaging/CoordinateConversion.h>
-#include <Imaging/Feed.h>
-#include <Imaging/GeometricalDelay.h>
-#include <Imaging/GeometricalPhase.h>
-#include <Imaging/GeometricalWeight.h>
-#include <Imaging/HorizonScan.h>
-#include <Imaging/SkymapCoordinates.h>
-#include <Imaging/SkymapGrid.h>
-#include <Imaging/Skymapper.h>
-#include <Imaging/ccBeam.h>
-#include <Imaging/xBeam.h>
+#include <Calibration/AntennaGain.h>
+#include <Calibration/AverageGain.h>
+#include <Calibration/BaselineGain.h>
+#include <Calibration/CalTableCreator.h>
+#include <Calibration/CalTableInterpolater.h>
+#include <Calibration/CalTableReader.h>
+#include <Calibration/CalTableWriter.h>
+#include <Calibration/PhaseCalibration.h>
+#include <Calibration/PhaseCalibrationPlugin.h>
+#include <Calibration/PluginBase.h>
+#include <Calibration/RFIMitigation.h>
+#include <Calibration/RFIMitigationPlugin.h>
+#include <Calibration/TVCalibrationPlugin.h>
