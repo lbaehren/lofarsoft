@@ -33,9 +33,13 @@
   
   \date 2007/01/16
 
+  <h3>Synopsis</h3>
+
+  
+
   <h3>Usage</h3>
 
-  Usage this file in order to import all the prototypes for functions and classes
+  Use this file in order to import all the prototypes for functions and classes
   in the <i>Imaging</i> module.
 */
 

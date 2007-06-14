@@ -501,17 +501,17 @@ namespace CR { // Namespace CR -- begin
     if (myDirectionType != type) {
       cout << "--> converting directions to target reference frame ..." << endl;
       // create the frame required for the conversion
-      MeasFrame frame (obsData_p.epoch(),                // Observation epoch
+      casa::MeasFrame frame (obsData_p.epoch(),          // Observation epoch
 		       obsData_p.observatoryPosition()); // Observatory position
       // create a conversion engine
-      MDirection::Convert conv (MDirection(myDirectionType),
-				MDirection::Ref(type,frame));
+      casa::MDirection::Convert conv (casa::MDirection(myDirectionType),
+				      casa::MDirection::Ref(type,frame));
       // check if the conversion engine is operational
       if (conv.isNOP()) {
 	cerr << "--> Conversion engine not operational!" << endl;
 	status = false;
       } else {
-	MVDirection MVDirectionFROM;
+	casa::MVDirection MVDirectionFROM;
 	Vector<Quantity> QDirectionTO (2);
 	// go through the direction coordinate values and perform the conversion
 	for (int n(0); n<nValue; n++) {

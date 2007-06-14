@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id:: Imaging.h 392 2007-06-13 10:38:12Z baehren                      $ |
+ | $Id:: Coordinates.h 393 2007-06-13 10:49:08Z baehren                  $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -22,12 +22,12 @@
  ***************************************************************************/
 
 /*!
-  \file Calibration.h
+  \file Coordinates.h
 
-  \defgroup Calibration CR-Pipeline: Calibration module
+  \defgroup Coordinates CR-Pipeline: Coordinates module
   \ingroup CR
 
-  \brief Calibration module for the CR-pipeline
+  \brief Coordinates module for the CR-pipeline
   
   \author Lars B&auml;hren
   
@@ -36,19 +36,13 @@
   <h3>Usage</h3>
 
   Use this file in order to import all the prototypes for functions and classes
-  in the <i>Calibration</i> module.
+  in the <i>Coordinates</i> module.
 */
 
-#include <Calibration/AntennaGain.h>
-#include <Calibration/AverageGain.h>
-#include <Calibration/BaselineGain.h>
-#include <Calibration/CalTableCreator.h>
-#include <Calibration/CalTableInterpolater.h>
-#include <Calibration/CalTableReader.h>
-#include <Calibration/CalTableWriter.h>
-#include <Calibration/PhaseCalibration.h>
-#include <Calibration/PhaseCalibrationPlugin.h>
-#include <Calibration/PluginBase.h>
-#include <Calibration/RFIMitigation.h>
-#include <Calibration/RFIMitigationPlugin.h>
-#include <Calibration/TVCalibrationPlugin.h>
+#include <Coordinates/AxisCoordinates.h>
+#include <Coordinates/AxisIterator.h>
+#include <Coordinates/CoordinateGrid.h>
+#include <Coordinates/GeodeticEllipsoid.h>
+#include <Coordinates/GridCoordinate.h>
+#include <Coordinates/PolarCoordinate.h>
+#include <Coordinates/TimeFreq.h>

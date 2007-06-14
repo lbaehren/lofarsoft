@@ -18,8 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: TimeFreq.cc,v 1.9 2007/05/03 14:54:58 bahren Exp $*/
-
 #include <Coordinates/TimeFreq.h>
 
 namespace CR { // Namespace CR -- begin

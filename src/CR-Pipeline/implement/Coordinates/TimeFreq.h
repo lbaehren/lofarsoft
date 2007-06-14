@@ -18,8 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: TimeFreq.h,v 1.6 2007/03/13 21:01:15 bahren Exp $*/
-
 #ifndef TIMEFREQ_H
 #define TIMEFREQ_H
 

@@ -23,6 +23,8 @@
 
 /*!
   \file Math.h
+  
+  \ingroup CR
 
   \defgroup Math CR-Pipeline: Math module
   \ingroup CR
@@ -42,7 +44,7 @@
 
   <h3>Usage</h3>
 
-  Usage this file in order to import all the prototypes for functions and classes
+  Use this file in order to import all the prototypes for functions and classes
   in the <i>Math</i> module.
 */
 
