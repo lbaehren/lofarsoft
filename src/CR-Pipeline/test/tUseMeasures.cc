@@ -48,6 +48,9 @@
   \date 2007/01/26
 */
 
+using std::cout;
+using std::endl;
+
 using casa::MEpoch;
 using casa::MVAngle;
 using casa::Quantity;
@@ -65,53 +68,91 @@ int main ()
 {
   int nofFailedTests (0);
   
-  std::cout << "[1] Testing MVAngle..." << std::endl;
+  cout << "[1] Testing MVAngle..." << std::endl;
   try {
     MVAngle mva1 = Quantity(190,"deg") + Quantity(59,"'") + Quantity(59.95,"\"");
-    std::cout << " - Degrees:  " << mva1.degree()   << std::endl;
-    std::cout << " - Radians:  " << mva1.radian()   << std::endl;
-    std::cout << " - Fraction: " << mva1.circle()   << std::endl;
-    std::cout << " - Degrees:  " << mva1().degree() << std::endl;
-    std::cout << " - Radians:  " << mva1().radian() << std::endl;
-    std::cout << " - Fraction: " << mva1().circle() << std::endl;
+    cout << " - Degrees:  " << mva1.degree()   << std::endl;
+    cout << " - Radians:  " << mva1.radian()   << std::endl;
+    cout << " - Fraction: " << mva1.circle()   << std::endl;
+    cout << " - Degrees:  " << mva1().degree() << std::endl;
+    cout << " - Radians:  " << mva1().radian() << std::endl;
+    cout << " - Fraction: " << mva1().circle() << std::endl;
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
   
-  std::cout << "[2] Testing MVTime..." << std::endl;
+  cout << "[2] Testing MVTime..." << std::endl;
   try {
     MVTime mtim = 44362.6;
     
-    std::cout << " - Days:       " << mtim.day()    << std::endl;    
-    std::cout << " - Hours:      " << mtim.hour()   << std::endl;    
-    std::cout << " - Seconds:    " << mtim.second() << std::endl;    
-    std::cout << " - Minutes:    " << mtim.minute() << std::endl;
+    cout << " - Days:       " << mtim.day()    << std::endl;    
+    cout << " - Hours:      " << mtim.hour()   << std::endl;    
+    cout << " - Seconds:    " << mtim.second() << std::endl;    
+    cout << " - Minutes:    " << mtim.minute() << std::endl;
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
   
-  std::cout << "[3] Testing MEpoch..." << std::endl;
+  cout << "[3] Testing MEpoch..." << std::endl;
   try {
-    MEpoch ep(Quantity(50083.,"d"));
+    MEpoch today;
+    MEpoch ep (Quantity(50083.,"d"));
+    cout << "-- Default epoch        = " << today << endl;
+    cout << "-- User specified epoch = " << ep    << endl;
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
   
-  std::cout << "[4] Testing MDirection..." << std::endl;
+  cout << "[4] Testing MDirection..." << std::endl;
   try {
-    // Direction in J2000 coordinate-frame
+    // Zenith in J2000 coordinates
     MDirection j2000 (Quantity(0,"deg"),
-		      Quantity(30,"deg"),
+		      Quantity(90,"deg"),
 		      MDirection::J2000);
-    // Direction in B1900 coordinate-frame
-    MeasFrame b1900((MEpoch(Quantity(MeasData::MJDB1900,"d"))));
-    MDirection lsr1900(Quantity(270,"deg"),
-		       Quantity(30,"deg"),
-		       MDirection::Ref(MDirection::BMEAN,
-				       b1900));
+    // Zenith in GALACTIC coordinates
+    MDirection galactic (Quantity(0,"deg"),
+		      Quantity(90,"deg"),
+		      MDirection::GALACTIC);
+    // Zenith in AZEL coordinates
+    MDirection azel (Quantity(0,"deg"),
+		      Quantity(90,"deg"),
+		      MDirection::AZEL);
+
+    cout << "-- J2000 zenith    = " << j2000    << endl;
+    cout << "-- Galactic zenith = " << galactic << endl;
+    cout << "-- AZEL zenith     = " << azel     << endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  cout << "[5] Testing conversion of direction between frames..." << endl;
+  try {
+    casa::MDirection::Ref refB1950 (casa::MDirection::B1950);
+    casa::MDirection::Ref refJ2000 (casa::MDirection::J2000);
+
+    casa::MDirection::Convert conv (refB1950,
+				    refJ2000);
+    
+    cout << "-- Reference for source frame  = " << refB1950    << endl;
+    cout << "-- Reference for target frame  = " << refJ2000    << endl;
+    cout << "-- Coordinate conversion       = " << conv        << endl;
+
+    // testwise conversion of some coordinates
+    casa::MVDirection coordB1950;
+
+    for (int elevation (0); elevation<90; elevation+=10) {
+      coordB1950 = casa::MVDirection (casa::Quantity(0,"deg"),
+				      casa::Quantity(elevation,"deg"));
+      cout << "\t" << elevation
+	   << "\t" << coordB1950
+	   << "\t" << conv(coordB1950).getValue().getRecordValue()
+	   << endl;
+    }
+
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;

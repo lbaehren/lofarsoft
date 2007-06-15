@@ -292,7 +292,63 @@ namespace CR { // NAMESPACE CR -- BEGIN
   }
 #endif
 #endif
+
+  // ------------------------------------------------------------ setSkyPositions
   
+#ifdef HAVE_CASA
+  bool GeometricalDelay::setSkyPositions (casa::Matrix<double> const &skyPositions,
+					  CR::CoordinateTypes const &coordType,
+					  bool const &anglesInDegrees,
+					  bool const &bufferDelays)
+  {
+    bool status (true);
+
+    return status;
+  }
+#else
+#ifdef HAVE_BLITZ
+  bool GeometricalDelay::setSkyPositions (blitz::Array<double,2> const &skyPositions,
+					  CR::CoordinateTypes const &coordType,
+					  bool const &anglesInDegrees,
+					  bool const &bufferDelays)
+  {
+    bool status (true);
+    
+    return status;
+  }
+#endif
+#endif
+  
+  // ------------------------------------------------------------ setSkyPositions
+  
+#ifdef HAVE_CASA
+  bool GeometricalDelay::setSkyPositions (casa::Vector<double> const &xValues,
+					  casa::Vector<double> const &yValues,
+					  casa::Vector<double> const zValues,
+					  CR::CoordinateTypes const &coordType,
+					  bool const &anglesInDegrees,
+					  bool const &bufferDelays)
+  {
+    bool status (true);
+
+    return status;
+  }
+#else
+#ifdef HAVE_BLITZ
+  bool GeometricalDelay::setSkyPositions (blitz::Array><double,1> const &xValues,
+					  blitz::Array><double,1> const &yValues,
+					  blitz::Array><double,1> const zValues,
+					  CR::CoordinateTypes const &coordType,
+					  bool const &anglesInDegrees,
+					  bool const &bufferDelays)
+  {
+    bool status (true);
+
+    return status;
+  }
+#endif
+#endif
+
   // ---------------------------------------------------------------------- delay
 
 #ifdef HAVE_CASA

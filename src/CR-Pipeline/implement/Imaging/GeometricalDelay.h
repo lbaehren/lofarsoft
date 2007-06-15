@@ -37,6 +37,7 @@
 #endif
 
 #include <Imaging/CoordinateConversion.h>
+#include <Math/VectorConversion.h>
 #include <Math/VectorNorms.h>
 
 namespace CR { // NAMESPACE CR -- BEGIN
@@ -338,17 +339,56 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			     parameters are stored an no further action is taken.
     */
 #ifdef HAVE_CASA
-    void setSkyPositions (const casa::Matrix<double> &skyPositions,
-			  const CR::CoordType &coordType,
-			  const bool &bufferDelays=false);
+    bool setSkyPositions (casa::Matrix<double> const &skyPositions,
+			  CR::CoordinateTypes const &coordType,
+			  bool const &anglesInDegrees=false,
+			  bool const &bufferDelays=false);
 #else
 #ifdef HAVE_BLITZ
-    void setSkyPositions (const blitz::Array<double,2> &skyPositions,
-			  const CR::CoordType &coordType,
-			  const bool &bufferDelays=false);
+    bool setSkyPositions (blitz::Array<double,2> const &skyPositions,
+			  CR::CoordinateTypes const &coordType,
+			  bool const &anglesInDegrees=false,
+			  bool const &bufferDelays=false);
 #endif
 #endif
     
+    /*!
+      \brief 
+      
+      \param xValues         -- 
+      \param yValues         -- 
+      \param zValues         -- 
+      \param coordType       -- Coordinate type, as which the position is
+                                provided; if position not provided in cartesian
+				coordinates, transformation will be performed
+      \param anglesInDegrees -- 
+      \param bufferDelays  -- Buffer the values for the geometrical delay? If set
+                             <i>yes</i> the delays will be computed from the 
+			     provided antenna and sky positions and afterwards
+			     kept in memory; if set <i>no</i> only the input 
+			     parameters are stored an no further action is taken.
+      
+      \return status -- Success or failure of the operation; returns
+                        <t>false</tt> if an error was encountered
+    */
+#ifdef HAVE_CASA
+    bool setSkyPositions (casa::Vector<double> const &xValues,
+			  casa::Vector<double> const &yValues,
+			  casa::Vector<double> const zValues,
+			  CR::CoordinateTypes const &coordType,
+			  bool const &anglesInDegrees=false,
+			  bool const &bufferDelays=false);
+#else
+#ifdef HAVE_BLITZ
+    bool setSkyPositions (blitz::Array><double,1> const &xValues,
+			  blitz::Array><double,1> const &yValues,
+			  blitz::Array><double,1> const zValues,
+			  CR::CoordinateTypes const &coordType,
+			  bool const &anglesInDegrees=false,
+			  bool const &bufferDelays=false);
+#endif
+#endif
+
     /*!
       \brief Get the values of the geometrical delay
 

@@ -5,6 +5,15 @@
 project (CR)
 
 ## ------------------------------------------------------------------------------
+## Subdirectories
+
+subdirs (
+  implement
+  apps
+  test
+  )
+
+## ------------------------------------------------------------------------------
 ## External dependencies; check if we need to search for some components.
 
 ## Blitz++
@@ -86,15 +95,6 @@ include_directories (
   ${PGPLOT_INCLUDES}
   ${ROOT_INCLUDES}
   ${WCS_INCLUDES}
-  )
-
-## ------------------------------------------------------------------------------
-## Subdirectories
-
-subdirs (
-  apps
-  implement
-  test
   )
 
 ## ------------------------------------------------------------------------------

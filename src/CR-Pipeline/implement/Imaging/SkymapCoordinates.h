@@ -25,6 +25,7 @@
 #define SKYMAPCOORDINATES_H
 
 // Standard library header files
+#include <iostream>
 #include <string>
 
 // CASA header files
@@ -48,6 +49,7 @@ using casa::DirectionCoordinate;
 using casa::IPosition;
 using casa::LinearCoordinate;
 using casa::Matrix;
+using casa::MDirection;
 using casa::SpectralCoordinate;
 using casa::Vector;
 
@@ -505,7 +507,21 @@ namespace CR { // Namespace CR -- begin
 
       Given the nature of the required operations, the retrival of the values along
       the direction axes requires a slightly more complex interface as is the case
-      for the other image coordinate axes.
+      for the other image coordinate axes. In order to obtain the values of the
+      direction coordinates in the desired format we havve to go through the
+      following steps:
+      <ol>
+        <li>Extract the casa::DirectionCoordinate from the casa::CoordinateSystem
+	object which stores all the coordinate information; the conversion from
+	pixel to world coordinates is done via the <tt>toWorld()</tt> method.
+	<li>If the coordinate values are requested for a different reference
+	frame as internal to the image (e.g. because we need AZEL coordinate for
+	the beamforming while the map is presented in J2000), an additional
+	conversion step is required. For this we have to set up reference frame
+	information out of which a conversion engine is created; the latter in 
+	the subsequent step can be used to actually convert the coordinates from
+	one reference frame to another.
+      </ol>
 
       \param refcode         -- Extra conversion type; whenever a conversion from
                                 pixel to world is done, the world value is then

@@ -21,6 +21,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <casa/Quanta/MVDirection.h>
+#include <measures/Measures/MeasConvert.h>
+#include <measures/Measures/MeasRef.h>
+
 #include <Imaging/SkymapCoordinates.h>
 #include <Math/VectorConversion.h>
 
@@ -454,7 +458,7 @@ namespace CR { // Namespace CR -- begin
   
   // -------------------------------------------------------- directionAxisValues
   
-  bool SkymapCoordinates::directionAxisValues (casa::MDirection::Types const &type,
+  bool SkymapCoordinates::directionAxisValues (MDirection::Types const &refType,
 					       Matrix<double> &directions,
 					       Matrix<bool> &mask,
 					       bool const &anglesInDegrees)
@@ -470,9 +474,14 @@ namespace CR { // Namespace CR -- begin
     /*
       [1] adjust the shapes of the provided arrays
     */
-    directions.resize (shape_p(0)*shape_p(1),2);
-    mask.resize (shape_p(0),shape_p(1));
-
+    try {
+      directions.resize (shape_p(0)*shape_p(1),2);
+      mask.resize (shape_p(0),shape_p(1));
+    } catch (std::string message) {
+      std::cerr << "[SkymapCoordinates::directionAxisValues]" << message 
+		<< std::endl;
+    }
+    
     /*
       [2] The conversion from pixel to world coordinates is done using the
       DirectionCoordinate extracted from the CoordinateSystem.
@@ -496,29 +505,37 @@ namespace CR { // Namespace CR -- begin
       beamforming while the map is presented in J2000), an additional conversion
       step is required.
     */
-    casa::MDirection::Types myDirectionType = dc.directionType();
+    MDirection::Types myDirectionType = dc.directionType();
 
-    if (myDirectionType != type) {
+    if (myDirectionType != refType) {
       cout << "--> converting directions to target reference frame ..." << endl;
-      // create the frame required for the conversion
-      casa::MeasFrame frame (obsData_p.epoch(),          // Observation epoch
-		       obsData_p.observatoryPosition()); // Observatory position
+      /*
+	Create a frame from thhe time and location of the observation; the
+	required information are stored within the ObservationData object
+      */
+      casa::MeasFrame frame (obsData_p.epoch(),
+			     obsData_p.observatoryPosition());
+      /*
+	Set up the reference frame information required for creating a conversion
+	engine
+      */
+      MDirection::Ref refFrom (myDirectionType);
+      MDirection::Ref refTo (refType,frame);
       // create a conversion engine
-      casa::MDirection::Convert conv (casa::MDirection(myDirectionType),
-				      casa::MDirection::Ref(type,frame));
+      MDirection::Convert engine (refFrom,refTo);
       // check if the conversion engine is operational
-      if (conv.isNOP()) {
+      if (engine.isNOP()) {
 	cerr << "--> Conversion engine not operational!" << endl;
 	status = false;
       } else {
 	casa::MVDirection MVDirectionFROM;
-	Vector<Quantity> QDirectionTO (2);
+	Vector<casa::Quantity> QDirectionTO (2);
 	// go through the direction coordinate values and perform the conversion
 	for (int n(0); n<nValue; n++) {
 	  MVDirectionFROM = MVDirection (Quantity(directions(n,0),"rad"),
 					 Quantity(directions(n,1),"rad"));
 	  // conversion step
-	  QDirectionTO = conv (MVDirectionFROM).getValue().getRecordValue();
+	  QDirectionTO = engine (MVDirectionFROM).getValue().getRecordValue();
 	  // store the obtained values
 	  if (anglesInDegrees) {
 	    directions(n,0) = QDirectionTO(0).getValue("deg");

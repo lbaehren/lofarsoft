@@ -120,6 +120,25 @@ namespace CR { // Namespace CR -- begin
 
   // ============================================================================
   //
+  //  Structs to defined types of coordinates, etc.
+  //
+  // ============================================================================
+  
+  /*!
+    \brief List of coordinate systems, in which the positions can be provided
+  */
+  typedef enum {
+    //! Cartesian coordinates, \f$ \vec x = (x,y,z) \f$
+    Cartesian,
+    //! Spherical coordinates, \f$ \vec x = (r,\phi,\theta) \f$
+    Spherical,
+    //! Cylindrical coordinates, \f$ \vec x = (r,\phi,h) \f$
+    Cylindrical
+  } CoordinateTypes;
+  
+
+  // ============================================================================
+  //
   //  Conversion between angle representations
   //
   // ============================================================================
