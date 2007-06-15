@@ -23,6 +23,10 @@
 
 #include <Imaging/GeometricalDelay.h>
 
+using std::cerr;
+using std::cout;
+using std::endl;
+
 const double lightspeed = 2.99795e08;
 
 namespace CR { // NAMESPACE CR -- BEGIN
@@ -75,14 +79,14 @@ namespace CR { // NAMESPACE CR -- BEGIN
     : bufferDelays_p (false)
   {
     if (!setAntPositions (antPositions,false)) {
-      std::cerr << "-- There was an error setting the ant positions" << std::endl;
+      cerr << "-- There was an error setting the ant positions" << endl;
       // use defaults
       antPositions_p.resize(1,3);
       antPositions_p = 0.0;
     }
     
     if (!setSkyPositions (skyPositions,false)) {
-      std::cerr << "-- There was an error setting the sky positions" << std::endl;
+      cerr << "-- There was an error setting the sky positions" << endl;
       // use defaults
       skyPositions_p.resize(1,3);
       skyPositions_p      = 0.0;
@@ -92,7 +96,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     // once all the input parameters have been stored we can compute the delays
     bufferDelays_p = bufferDelays;
     if (bufferDelays_p) {
-      std::cout << "-- buffering geometrical delays..." << std::endl;
+      cout << "-- buffering geometrical delays..." << endl;
       setDelays();
     }
   }
@@ -104,14 +108,14 @@ namespace CR { // NAMESPACE CR -- BEGIN
     : bufferDelays_p (false)
   {
     if (!setAntPositions (antPositions,false)) {
-      std::cerr << "-- There was an error setting the ant positions" << std::endl;
+      cerr << "-- There was an error setting the ant positions" << endl;
       // use defaults
       antPositions_p.resize(1,3);
       antPositions_p = 0.0, 0.0, 0.0;
     }
     
     if (!setSkyPositions (skyPositions,false)) {
-      std::cerr << "-- There was an error setting the sky positions" << std::endl;
+      cerr << "-- There was an error setting the sky positions" << endl;
       // use defaults
       skyPositions_p.resize(1,3);
       skyPositions_p = 0.0, 0.0, 1.0;
@@ -120,7 +124,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     // once all the input parameters have been stored we can compute the delays
     bufferDelays_p = bufferDelays;
     if (bufferDelays_p) {
-      std::cout << "-- buffering geometrical delays..." << std::endl;
+      cout << "-- buffering geometrical delays..." << endl;
       setDelays();
     }
   }
@@ -208,7 +212,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 	setDelays();
       }
     } else {
-      std::cerr << "Wrong number of array colums; must be 3!" << std::endl;
+      cerr << "Wrong number of array colums; must be 3!" << endl;
       status  = false;
     }
     
@@ -232,7 +236,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 	setDelays();
       }
     } else {
-      std::cerr << "Wrong number of array colums; must be 3!" << std::endl;
+      cerr << "Wrong number of array colums; must be 3!" << endl;
       status  = false;
     }
     
@@ -260,7 +264,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 	setDelays();
       }
     } else {
-      std::cerr << "Wrong number of array colums; must be 3!" << std::endl;
+      cerr << "Wrong number of array colums; must be 3!" << endl;
       status  = false;
     }
     
@@ -284,7 +288,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 	setDelays();
       }
     } else {
-      std::cerr << "Wrong number of array colums; must be 3!" << std::endl;
+      cerr << "Wrong number of array colums; must be 3!" << endl;
       status  = false;
     }
     
@@ -331,6 +335,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
   {
     bool status (true);
 
+    // Check if the vectors are consistent in length
+    if (xValues.nelements() == yValues.nelements() &&
+	xValues.nelements() == zValues.nelements()) {
+      cout << "" << endl;
+    } else {
+      cerr << "[GeometricalDelay::setSkyPositions] Inconsistent vectors!"
+		<< endl;
+      cerr << "\t" << xValues.shape() << "\t" << yValues.shape() << endl;
+      status = false;
+    }
+
     return status;
   }
 #else
@@ -356,7 +371,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   {
     // if the delays are buffered internally, we just need to return the array
     if (bufferDelays_p) {
-      std::cout << "-- returning buffered geometrical delays..." << std::endl;
+      cout << "-- returning buffered geometrical delays..." << endl;
       return delays_p;
     } else {
       return calcDelays();
@@ -368,7 +383,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   {
     // if the delays are buffered internally, we just need to return the array
     if (bufferDelays_p) {
-      std::cout << "-- returning buffered geometrical delays..." << std::endl;
+      cout << "-- returning buffered geometrical delays..." << endl;
       return delays_p;
     } else {
       return calcDelays();
