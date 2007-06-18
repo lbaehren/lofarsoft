@@ -307,6 +307,48 @@ namespace CR { // NAMESPACE CR -- BEGIN
   {
     bool status (true);
 
+    /*
+      Check if the number of coordinates per point is correct
+    */
+    if (skyPositions.ncolumn() != 3) {
+      cerr << "Wrong number of array colums; must be 3!" << endl;
+      return false;
+    }
+
+    /*
+      The whole point behind the "coordType" parameter is to enable providing
+      the positions as something else but cartesian coordinates (e.g. 
+      shells of a sphere in spherical coordinates).
+    */
+
+    int nofPositions (skyPositions.nrow());
+    int n (0);
+    
+    switch (coordType) {
+      case CR::Cartesian:
+	skyPositions_p.resize(skyPositions.shape());
+	skyPositions_p = skyPositions;
+	break;
+    case CR::Spherical:
+      // adjust the size in the internal array storing the positions
+      skyPositions_p.resize(nofPositions,3);
+      // conversion of the 
+      for (n=0; n<nofPositions; n++) {
+	skyPositions_p.row(n) = spherical2cartesian (skyPositions.row(n),
+						     anglesInDegrees);
+      }
+      break;
+    case CR::Cylindrical:
+      status = false;
+      break;
+    }
+
+    // update the values of the geometrical delays
+    if (bufferDelays) {
+      bufferDelays_p = bufferDelays;
+      setDelays();
+    }
+    
     return status;
   }
 #else
@@ -318,6 +360,23 @@ namespace CR { // NAMESPACE CR -- BEGIN
   {
     bool status (true);
     
+    /*
+      Check if the number of coordinates per point is correct
+    */
+    if (skyPositions.cols() != 3) {
+      cerr << "Wrong number of array colums; must be 3!" << endl;
+      return false;
+    }
+
+    /*
+      The whole point behind the "coordType" parameter is to enable providing
+      the positions as something else but cartesian coordinates (e.g. 
+      shells of a sphere in spherical coordinates).
+    */
+
+    int nofPositions (skyPositions.rows());
+    int n (0);
+    
     return status;
   }
 #endif
@@ -328,31 +387,75 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_CASA
   bool GeometricalDelay::setSkyPositions (casa::Vector<double> const &xValues,
 					  casa::Vector<double> const &yValues,
-					  casa::Vector<double> const zValues,
+					  casa::Vector<double> const &zValues,
 					  CR::CoordinateTypes const &coordType,
 					  bool const &anglesInDegrees,
 					  bool const &bufferDelays)
   {
     bool status (true);
-
-    // Check if the vectors are consistent in length
-    if (xValues.nelements() == yValues.nelements() &&
-	xValues.nelements() == zValues.nelements()) {
-      cout << "" << endl;
-    } else {
-      cerr << "[GeometricalDelay::setSkyPositions] Inconsistent vectors!"
-		<< endl;
-      cerr << "\t" << xValues.shape() << "\t" << yValues.shape() << endl;
-      status = false;
+    unsigned int nelem (xValues.nelements());
+    unsigned int nofPositions (nelem*nelem*nelem);
+    unsigned int n  (0);
+    unsigned int nx (0);
+    unsigned int ny (0);
+    unsigned int nz (0);
+    
+    // Matrix with the combined set of sky positions
+    casa::Matrix<double> positions (nofPositions,3);
+    
+    for (nx=0; nx<nelem; nx++) {
+      for (ny=0; ny<nelem; ny++) {
+	for (nz=0; nz<nelem; nz++) {
+	  positions(n,0) = xValues(nx);
+	  positions(n,1) = yValues(ny);
+	  positions(n,2) = zValues(nz);
+	  n++;
+	}
+      }
     }
-
+    
+    // forward the sky position values to have them stored internally
+    setSkyPositions (positions,
+		     coordType,
+		     anglesInDegrees,
+		     bufferDelays);
     return status;
   }
 #else
 #ifdef HAVE_BLITZ
   bool GeometricalDelay::setSkyPositions (blitz::Array><double,1> const &xValues,
 					  blitz::Array><double,1> const &yValues,
-					  blitz::Array><double,1> const zValues,
+					  blitz::Array><double,1> const &zValues,
+					  CR::CoordinateTypes const &coordType,
+					  bool const &anglesInDegrees,
+					  bool const &bufferDelays)
+  {
+    bool status (true);
+
+    return status;
+  }
+#endif
+#endif
+  
+  // ------------------------------------------------------------ setSkyPositions
+  
+#ifdef HAVE_CASA
+  bool GeometricalDelay::setSkyPositions (casa::Matrix<double> const &xyValues,
+					  casa::Vector<double> const &zValues,
+					  casa::Vector<int> const &axisOrder,
+					  CR::CoordinateTypes const &coordType,
+					  bool const &anglesInDegrees,
+					  bool const &bufferDelays)
+  {
+    bool status (true);
+
+    return status;
+  }
+#else
+#ifdef HAVE_BLITZ
+  bool GeometricalDelay::setSkyPositions (blitz::Array><double,1> const &xyValues,
+					  blitz::Array><double,1> const &zValues,
+					  blitz::Array<int,1> const &axisOrder,
 					  CR::CoordinateTypes const &coordType,
 					  bool const &anglesInDegrees,
 					  bool const &bufferDelays)

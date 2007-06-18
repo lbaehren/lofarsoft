@@ -39,12 +39,12 @@ namespace CR { // Namespace CR -- begin
 		 double const &r,
 		 double const &az,
 		 double const &el,
-		 bool const &inputInDegrees)
+		 bool const &anglesInDegrees)
   {
     bool status (true);
 
     try {
-      if (inputInDegrees) {
+      if (anglesInDegrees) {
 	spherical2cartesian (x,
 			     y,
 			     z,
@@ -66,7 +66,7 @@ namespace CR { // Namespace CR -- begin
   }
   
   vector<double> azel2xyz (vector<double> const &azel,
-			   bool const &inputInDegrees)
+			   bool const &anglesInDegrees)
   {
     uint nelem (azel.size());
     vector<double> xyz (3);
@@ -78,7 +78,7 @@ namespace CR { // Namespace CR -- begin
 		azel[0],
 		azel[1],
 		azel[2],
-		inputInDegrees);      
+		anglesInDegrees);      
     } else if (nelem == 2) {
       azel2xyz (xyz[0],
 		xyz[1],
@@ -86,7 +86,7 @@ namespace CR { // Namespace CR -- begin
 		1.0,
 		azel[1],
 		azel[2],
-		inputInDegrees);      
+		anglesInDegrees);      
     } else {
       std::cerr << "[azel2xyz] Unable to convert; too few elements!"
 		<< std::endl;
@@ -103,17 +103,17 @@ namespace CR { // Namespace CR -- begin
 		 double const &r,
 		 double const &az,
 		 double const &ze,
-		 bool const &inputInDegrees)
+		 bool const &anglesInDegrees)
   {
-    spherical2cartesian (x,y,z,r,az,ze,inputInDegrees);
+    spherical2cartesian (x,y,z,r,az,ze,anglesInDegrees);
   }
   
   // ------------------------------------------------------------------- azze2xyz
   
   vector<double> azze2xyz (vector<double> const &azze,
-			   bool const &inputInDegrees)
+			   bool const &anglesInDegrees)
   {
-    return spherical2cartesian (azze,inputInDegrees);
+    return spherical2cartesian (azze,anglesInDegrees);
   }
   
   // -------------------------------------------------------- cartesian2spherical
@@ -139,12 +139,12 @@ namespace CR { // Namespace CR -- begin
 			    double const &r,
 			    double const &phi,
 			    double const &theta,
-			    bool const &inputInDegrees)
+			    bool const &anglesInDegrees)
   {
     bool status (true);
 
     try {
-      if (inputInDegrees) {
+      if (anglesInDegrees) {
 	spherical2cartesian (x,
 			     y,
 			     z,
@@ -166,7 +166,7 @@ namespace CR { // Namespace CR -- begin
   }
 
   vector<double> spherical2cartesian (vector<double> const &spherical,
-				      bool const &inputInDegrees)
+				      bool const &anglesInDegrees)
   {
     uint nelem (spherical.size());
     vector<double> cartesian (3);
@@ -178,7 +178,7 @@ namespace CR { // Namespace CR -- begin
 			   spherical[0],
 			   spherical[1],
 			   spherical[2],
-			   inputInDegrees);      
+			   anglesInDegrees);      
     } else if (nelem == 2) {
       spherical2cartesian (cartesian[0],
 			   cartesian[1],
@@ -186,7 +186,7 @@ namespace CR { // Namespace CR -- begin
 			   1.0,
 			   spherical[1],
 			   spherical[2],
-			   inputInDegrees);      
+			   anglesInDegrees);      
     } else {
       std::cerr << "[spherical2cartesian] Unable to convert; too few elements!"
 		<< std::endl;
@@ -194,7 +194,41 @@ namespace CR { // Namespace CR -- begin
 
     return cartesian;
   }
+  
+#ifdef HAVE_CASA
+  casa::Vector<double> spherical2cartesian (casa::Vector<double> const &spherical,
+					    bool const &anglesInDegrees)
+  {
+    uint nelem (spherical.nelements());
+    casa::Vector<double> cartesian (3);
 
+    if (nelem == 3) {
+      spherical2cartesian (cartesian(0),
+			   cartesian(1),
+			   cartesian(2),
+			   spherical(0),
+			   spherical(1),
+			   spherical(2),
+			   anglesInDegrees);      
+    } else if (nelem == 2) {
+      std::cerr << "[spherical2cartesian] Only two input elements; assuming r=1"
+		<< std::endl;
+      spherical2cartesian (cartesian(0),
+			   cartesian(1),
+			   cartesian(2),
+			   1.0,
+			   spherical(1),
+			   spherical(2),
+			   anglesInDegrees);      
+    } else {
+      std::cerr << "[spherical2cartesian] Unable to convert; too few elements!"
+		<< std::endl;
+    }
+
+    return cartesian;
+  }
+#endif
+  
   // ============================================================================
   //
   //  Conversion using CASA array classes

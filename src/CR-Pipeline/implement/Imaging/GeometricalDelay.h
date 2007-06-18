@@ -306,8 +306,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \brief Set the sky positions, for which the delay is computed
       
       \param skyPositions -- The source positions, for which the delay is
-                             computed, [nofSkyPositions,3]; cartesian
-			     coordinates by default
+                             computed, [nofSkyPositions,3]; coordinates must
+			     be <b>cartesian</b> since no further conversion
+			     is appplied.
       \param bufferDelays  -- Buffer the values for the geometrical delay? If set
                              <i>yes</i> the delays will be computed from the 
 			     provided antenna and sky positions and afterwards
@@ -353,7 +354,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #endif
     
     /*!
-      \brief 
+      \brief Set the sky positions, for which the delay is computed
       
       \param xValues         -- 
       \param yValues         -- 
@@ -374,7 +375,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_CASA
     bool setSkyPositions (casa::Vector<double> const &xValues,
 			  casa::Vector<double> const &yValues,
-			  casa::Vector<double> const zValues,
+			  casa::Vector<double> const &zValues,
 			  CR::CoordinateTypes const &coordType,
 			  bool const &anglesInDegrees=false,
 			  bool const &bufferDelays=false);
@@ -382,7 +383,47 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_BLITZ
     bool setSkyPositions (blitz::Array><double,1> const &xValues,
 			  blitz::Array><double,1> const &yValues,
-			  blitz::Array><double,1> const zValues,
+			  blitz::Array><double,1> const &zValues,
+			  CR::CoordinateTypes const &coordType,
+			  bool const &anglesInDegrees=false,
+			  bool const &bufferDelays=false);
+#endif
+#endif
+    
+    /*!
+      \brief Set the sky positions, for which the delay is computed
+
+      \param xyValues        -- 
+      \param zValues         -- 
+      \param axisOrder       -- The ordering of the coordinate axis in the
+                                arrays provided beforehand. For e.g.
+				\f$ (y-z,x) \f$ pass <tt>[1,2,0]</tt> as
+				argument.
+      \param coordType       -- 
+      \param anglesInDegrees -- Are the angles given in degree? If set to
+                                <tt>false</tt> the angles are considered in 
+				radian.
+      \param bufferDelays    -- Buffer the values for the geometrical delay? If
+                                set <i>true</i> the delays will be computed and
+				afterwards kept in memory; if set <i>false</i>
+				only the input parameters are stored an no
+				further action is taken.
+      
+      \return status -- Success or failure of the operation; returns
+                        <t>false</tt> if an error was encountered
+    */
+#ifdef HAVE_CASA
+    bool setSkyPositions (casa::Matrix<double> const &xyValues,
+			  casa::Vector<double> const &zValues,
+			  casa::Vector<int> const &axisOrder,
+			  CR::CoordinateTypes const &coordType,
+			  bool const &anglesInDegrees=false,
+			  bool const &bufferDelays=false);
+#else
+#ifdef HAVE_BLITZ
+    bool setSkyPositions (blitz::Array><double,1> const &xyValues,
+			  blitz::Array><double,1> const &zValues,
+			  blitz::Array<int,1> const &axisOrder,
 			  CR::CoordinateTypes const &coordType,
 			  bool const &anglesInDegrees=false,
 			  bool const &bufferDelays=false);

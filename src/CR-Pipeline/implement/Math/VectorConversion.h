@@ -265,12 +265,12 @@ namespace CR { // Namespace CR -- begin
     \retval y -- y-component of the vector in cartesian coordinates
     \retval z -- z-component of the vector in cartesian coordinates
 
-    \param r             -- Radius
-    \param az            -- Azimuth angle
-    \param el            -- Elevation angle
-    \param inputInDegree -- Are the angles in the input vector are provided in
-                            degrees? If yes, then an additional conversion step
-			    is performed.
+    \param r               -- Radius
+    \param az              -- Azimuth angle
+    \param el              -- Elevation angle
+    \param anglesInDegrees -- Are the angles in the input vector are provided in
+                              degrees? If yes, then an additional conversion step
+			      is performed.
   */
   bool azel2xyz (double &x,
 		 double &y,
@@ -278,7 +278,7 @@ namespace CR { // Namespace CR -- begin
 		 double const &r,
 		 double const &az,
 		 double const &el,
-		 bool const &inputInDegrees);
+		 bool const &anglesInDegrees);
   
   /*!
     \brief Convert position in Azimuth-Elevation to Cartesian coordinates
@@ -295,7 +295,7 @@ namespace CR { // Namespace CR -- begin
     \return xyz -- \f$ (x,y,z) \f$
   */
   vector<double> azel2xyz (vector<double> const &azel,
-			   bool const &inputInDegrees);
+			   bool const &anglesInDegrees);
   
   /*!
     \brief Convert position in Azimuth-Elevation to Cartesian coordinates
@@ -309,9 +309,9 @@ namespace CR { // Namespace CR -- begin
   */
   inline void azel2xyz (vector<double> &xyz,
 			vector<double> const &azel,
-			bool const &inputInDegrees) {
+			bool const &anglesInDegrees) {
     xyz = azel2xyz (azel,
-		    inputInDegrees);
+		    anglesInDegrees);
   }
   
   /*!
@@ -334,22 +334,22 @@ namespace CR { // Namespace CR -- begin
 		 double const &r,
 		 double const &az,
 		 double const &ze,
-		 bool const &inputInDegrees);
+		 bool const &anglesInDegrees);
   
   /*!
     \brief Convert position in Azimuth-Elevation to Cartesian coordinates
   */
   vector<double> azze2xyz (vector<double> const &azze,
-			   bool const &inputInDegrees);
+			   bool const &anglesInDegrees);
 
   /*!
     \brief Convert position in Azimuth-Elevation to Cartesian coordinates
   */
   inline void azze2xyz (vector<double> &xyz,
 			vector<double> const &azze,
-			bool const &inputInDegrees) {
+			bool const &anglesInDegrees) {
     xyz = azze2xyz (azze,
-		    inputInDegrees);
+		    anglesInDegrees);
   }
   
   // -------------------------------------------------------- cartesian2spherical
@@ -408,14 +408,22 @@ namespace CR { // Namespace CR -- begin
     Converts 3D vector representation from \f$ (r,\phi,\theta) \f$ to
     \f$ (x,y,z) \f$
     
-    \param spherical      -- 
-    \param inputInDegrees -- 
+    \param spherical      -- The 3D position in spherical coordinates,
+                             \f$ (r,\phi,\theta) \f$; if only two elements
+			     are provided, we consider them to be the two angles
+			     and perform the conversion for a position on a
+			     unit sphere (i.e. \f$ r=1 \f$).
+    \param anglesInDegrees -- 
 
     \return cartesian -- Representation of the vector in cartesian coordinates,
                          \f$ (x,y,z) \f$
   */
   vector<double> spherical2cartesian (vector<double> const &spherical,
-				      bool const &inputInDegrees);
+				      bool const &anglesInDegrees);
+#ifdef HAVE_CASA
+  casa::Vector<double> spherical2cartesian (casa::Vector<double> const &spherical,
+					    bool const &anglesInDegrees);
+#endif
   
   /*!
     \brief Convert position in Spherical to Cartesian coordinates
@@ -427,13 +435,13 @@ namespace CR { // Namespace CR -- begin
                          \f$ (x,y,z) \f$
     
     \param spherical      -- 
-    \param inputInDegrees -- 
+    \param anglesInDegrees -- 
   */
   inline void spherical2cartesian (vector<double> &cartesian,
 				   vector<double> const &spherical,
-				   bool const &inputInDegrees) {
+				   bool const &anglesInDegrees) {
     cartesian = spherical2cartesian (spherical,
-				     inputInDegrees);
+				     anglesInDegrees);
   }
   
   // ============================================================================

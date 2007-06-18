@@ -263,6 +263,11 @@ namespace CR { // Namespace CR -- begin
 
   vector<double> TimeFreq::timeValues (uint const &sampleOffset) {
     vector<uint> sampleValues (blocksize_p,sampleOffset);
+
+    for (uint n(0); n<blocksize_p; n++) {
+      sampleValues[n] += n;
+    }
+
     return timeValues (sampleValues);
   }
   
@@ -271,26 +276,23 @@ namespace CR { // Namespace CR -- begin
   vector<double> TimeFreq::timeValues (vector<uint> const &sampleValues)
   {
     uint nelem (sampleValues.size());
+    vector<double> times (blocksize_p);
 
     /*
-      check if the provided selection vector has the correct shape; if this is
-      not the case, we fall back onto the default method.
+      Since the function accepts vector of sample values of arbitray shape,
+      we at least give a warning in case the input vector does not match the
+      internally stored parameter for the blocksize
     */
-    if (nelem == blocksize_p) {
-      vector<double> times (blocksize_p);
-
-      for (uint n(0); n<nelem; n++) {
-	times[n] = referenceTime_p + sampleValues[n]/sampleFrequency_p;
-      }
-
-      return times;
-    } else {
-      // provide warning message ...
+    if (nelem != blocksize_p) {
       std::cerr << "[TimeFreq::timeValues] Selection vector has wrong length!"
 		<< std::endl;
-      // ... and call default method
-      return timeValues(0);
     }
+    
+    for (uint n(0); n<nelem; n++) {
+      times[n] = referenceTime_p + sampleValues[n]/sampleFrequency_p;
+    }
+    
+    return times;
     
   }
 

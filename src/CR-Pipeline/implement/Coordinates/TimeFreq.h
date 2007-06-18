@@ -28,8 +28,7 @@
 
 using std::vector;
 
-// CASA header files -- keep this optional
-#ifdef AIPS_STDLIB
+#ifdef HAVE_CASA
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicSL/String.h>
@@ -389,12 +388,15 @@ namespace CR { // Namespace CR -- begin
       \brief Get the values along the time axis
 
       \return timeValues -- Time values \f$ \{ t_n \f$ for the samples within
-              a data block of length \f$ N_{\rm Blocksize} \f$
+                            a data block of length \f$ N_{\rm Blocksize} \f$
+			    with zero offset; i.e. this function returns the 
+			    first \f$ N_{\rm Blocksize} \f$ time values (as
+			    we know nothing here about blocks etc.).
     */
     inline vector<double> timeValues () {
       return timeValues (0);
     }
-
+    
     /*!
       \brief Get the values along the time axis
       
@@ -402,10 +404,10 @@ namespace CR { // Namespace CR -- begin
              \f[ t[n] = t_0 + (n + n_0) T_{\rm Sample} \f]
 
       \return timeValues -- Time values \f$ \{ t_n \f$ for the samples within
-              a data block of length \f$ N_{\rm Blocksize} \f$
+      a data block of length \f$ N_{\rm Blocksize} \f$
     */
     vector<double> timeValues (uint const &sampleOffset);
-
+    
     /*!
       \brief Get the values along the time axis
 
@@ -416,7 +418,7 @@ namespace CR { // Namespace CR -- begin
               a data block of length \f$ N_{\rm Blocksize} \f$
     */
     vector<double> timeValues (vector<uint> const &sampleValues);
-
+    
     // ==========================================================================
     //
     // Additional methods which require CASA libraries

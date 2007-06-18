@@ -323,6 +323,86 @@ int test_GeometricalDelay ()
 // -----------------------------------------------------------------------------
 
 /*!
+  \brief Test setting and retrieving the internally stored parameters
+
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_parameters ()
+{
+  int nofFailedTests (0);
+  bool status (true);
+  int nofSkyPositions (5);
+  int nofAntennaPositions (2);
+
+  std::cout << "[1] Set new values for the sky positions ..." << std::endl;
+  try {
+    GeometricalDelay delay;
+    
+    casa::Matrix<double> skyPositions (nofSkyPositions,3);
+
+    skyPositions = 1.0;
+
+    status = delay.setSkyPositions(skyPositions,false);
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }  
+
+  std::cout << "[2] Set new values for the sky positions ..." << std::endl;
+  try {
+    GeometricalDelay delay;
+    
+    casa::Vector<double> xValues (2);
+    casa::Vector<double> yValues (2);
+    casa::Vector<double> zValues (3);
+
+    indgen (xValues);
+    indgen (yValues);
+    indgen (zValues);
+
+    /*
+      This is supposed to throw an error, since the lengths of the vector 
+      are inconsistent.
+    */
+    std::cout << "-- using inconsistent vector dimensions to trigger error"
+	      << std::endl;
+    status = delay.setSkyPositions(xValues,
+				   yValues,
+				   zValues,
+				   CR::Cartesian);
+    
+    if (status) {
+      std::cout << delay.skyPositions() << std::endl;
+    }
+    
+    /*
+      If we repeat the above with correct vector dimensions, everything will
+      be fine.
+    */
+    std::cout << "-- using vectors of consistent dimensions" << std::endl;
+    zValues.resize(2);
+    indgen (zValues);
+    status  = delay.setSkyPositions(xValues,
+				    yValues,
+				    zValues,
+				    CR::Cartesian);
+    
+    if (status) {
+      std::cout << delay.skyPositions() << std::endl;
+    }
+    
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }  
+
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
   \brief Test actual computation of the geometrical delay
 
   In order to plot the data in the exported table, run
@@ -447,6 +527,11 @@ int main ()
   // Test for the constructor(s)
   {
     nofFailedTests += test_GeometricalDelay ();
+  }
+
+  // Test access to the internal parameters
+  {
+    nofFailedTests += test_parameters ();
   }
 
   // Test for the computation of the actual geometrical delay
