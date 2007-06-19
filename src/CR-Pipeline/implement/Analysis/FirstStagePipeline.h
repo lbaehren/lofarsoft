@@ -38,6 +38,8 @@ using casa::Bool;
 using casa::DComplex;
 using casa::Double;
 
+using CR::HanningFilter;
+
 namespace CR { // Namespace CR -- begin
   
   /*!

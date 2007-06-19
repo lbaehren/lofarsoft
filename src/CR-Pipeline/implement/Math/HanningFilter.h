@@ -1,4 +1,7 @@
-/***************************************************************************
+/*-------------------------------------------------------------------------*
+ | $Id::                                                                 $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
  *   Copyright (C) 2005                                                    *
  *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
@@ -18,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: HanningFilter.h,v 1.7 2006/06/26 15:57:56 bahren Exp $ */
+/* $Id$ */
 
 #ifndef HANNINGFILTER_H
 #define HANNINGFILTER_H
@@ -43,200 +46,212 @@
 
 #include <Math/BasicFilter.h>
 
-#include <casa/namespace.h>
-
-/*!
-  \class HanningFilter
-
-  \ingroup Math
-
-  \brief A generalized Hanning filter 
-
-  \author Lars B&auml;hren
-
-  \date January 26, 2005
+namespace CR {  // Namespace CR -- begin
   
-  \test tHanningFilter.cc
-
-  <h3>Prerequisite</h3>
-
-  <ul type="square">
+  /*!
+    \class HanningFilter
+    
+    \ingroup Math
+    
+    \brief A generalized Hanning filter 
+    
+    \author Lars B&auml;hren
+    
+    \date January 26, 2005
+    
+    \test tHanningFilter.cc
+    
+    <h3>Prerequisite</h3>
+    
+    <ul type="square">
     <li>[CR] BasicFilter
-  </ul>
-
-  <h3>Synopsis</h3>
-
-  A simple Hanning filter for taping of data:
-  \f[
-    h[n] = \alpha - (1-\alpha) \cdot \cos \left( \frac{2 \pi n}{N-1} \right)
-  \f]
-  where \f$ \alpha \f$ is a parameter controlling the slope of the Hanning 
-  filter.
-
-  <img src="../figures/tHanningFilter.png">
- */
-
-template <class T> class HanningFilter : public BasicFilter<T> {
-
-  //!  Parameter for the slope of the Hanning filter.
-  T alpha_p;
-
-  //! Width of the plateau
-  uint beta_p;
-
-  //! Width of the raising slope
-  uint betaRise_p;
-
-  //! Width of the 
-  uint betaFall_p;
-  
- public:
-
-  // --- Construction ----------------------------------------------------------
-  
-  /*!
-    \brief Default constructor 
-  */
-  HanningFilter ();
-
-  /*!
-    \brief Argumented constructor.
-
-    Default value for the slope parameter: \f$ \alpha = 0.5 \f$.
+    </ul>
     
-    \param blocksize -- Number of frequency channels in a block of Fourier
-                        transformed data.
-  */
-  HanningFilter (const unsigned int& blocksize);
-
-  /*!
-    \brief Argumented constructor.
+    <h3>Synopsis</h3>
     
-    \param blocksize -- Number of frequency channels in a block of Fourier
-                        transformed data.
-    \param alpha     -- Parameter for the slope of the Hanning filter.
-  */
-  HanningFilter (unsigned int const &blocksize,
-		 T const &alpha);
-  
-  /*!
-    \brief Argumented constructor.
+    A simple Hanning filter for taping of data:
+    \f[
+      h[n] = \alpha - (1-\alpha) \cdot \cos \left( \frac{2 \pi n}{N-1} \right)
+    \f]
+    where \f$ \alpha \f$ is a parameter controlling the slope of the Hanning 
+    filter.
     
-    \param blocksize -- Number of frequency channels in a block of Fourier
-                        transformed data.
-    \param alpha     -- Parameter for the slope of the Hanning filter.
-    \param beta      -- Width of the plateau, where the window function is
-                        unity
+    <img src="../figures/tHanningFilter.png">
   */
-  HanningFilter (uint const &blocksize,
-		 T const &alpha,
-		 uint const &beta);
   
-  /*!
-    \brief Argumented constructor.
-
-    \todo not yet implemented
+  template <class T> class HanningFilter : public BasicFilter<T> {
     
-    \param blocksize -- Number of frequency channels in a block of Fourier
-                        transformed data.
-    \param alpha     -- Parameter for the slope of the Hanning filter.
-    \param beta      -- Width of the plateau, where the window function is
-                        unity
-  */
-  HanningFilter (uint const &blocksize,
-		 T const &alpha,
-		 uint const &beta,
-		 uint const &betaRise,
-		 uint const &betaFall);
-  /*!
-    \brief Copy constructor
-  */
-  HanningFilter (const HanningFilter<T>& other);
-
-  // --- Destruction -----------------------------------------------------------
+    //!  Parameter for the slope of the Hanning filter.
+    T alpha_p;
+    
+    //! Width of the plateau
+    uint beta_p;
+    
+    //! Width of the raising slope
+    uint betaRise_p;
+    
+    //! Width of the 
+    uint betaFall_p;
+    
+  public:
+    
+    // --- Construction ----------------------------------------------------------
+    
+    /*!
+      \brief Default constructor 
+    */
+    HanningFilter ();
+    
+    /*!
+      \brief Argumented constructor.
+      
+      Default value for the slope parameter: \f$ \alpha = 0.5 \f$.
+      
+      \param blocksize -- Number of frequency channels in a block of Fourier
+                          transformed data.
+    */
+    HanningFilter (unsigned int const &blocksize);
+    
+    /*!
+      \brief Argumented constructor.
+      
+      \param blocksize -- Number of frequency channels in a block of Fourier
+                          transformed data.
+      \param alpha     -- Parameter for the slope of the Hanning filter.
+    */
+    HanningFilter (unsigned int const &blocksize,
+		   T const &alpha);
+    
+    /*!
+      \brief Argumented constructor.
+      
+      \param blocksize -- Number of frequency channels in a block of Fourier
+      transformed data.
+      \param alpha     -- Parameter for the slope of the Hanning filter.
+      \param beta      -- Width of the plateau, where the window function is
+      unity
+    */
+    HanningFilter (uint const &blocksize,
+		   T const &alpha,
+		   uint const &beta);
+    
+    /*!
+      \brief Argumented constructor.
+      
+      \todo not yet implemented
+      
+      \param blocksize -- Number of frequency channels in a block of Fourier
+      transformed data.
+      \param alpha     -- Parameter for the slope of the Hanning filter.
+      \param beta      -- Width of the plateau, where the window function is
+      unity
+    */
+    HanningFilter (uint const &blocksize,
+		   T const &alpha,
+		   uint const &beta,
+		   uint const &betaRise,
+		   uint const &betaFall);
+    /*!
+      \brief Copy constructor
+    */
+    HanningFilter (const HanningFilter<T>& other);
+    
+    // --- Destruction -----------------------------------------------------------
+    
+    /*!
+      \brief Destructor.
+    */
+    ~HanningFilter ();
+    
+    // ------------------------------------------------------------------ Operators
+    
+    /*!
+      \brief Overloading of the copy operator
+      
+      \param other -- Another HanningFilter object from which to make a copy.
+    */
+    HanningFilter<T> &operator= (HanningFilter<T> const &other); 
+    
+    // --- Methods ---------------------------------------------------------------  
+    
+    /*!
+      \brief Get the slope parameter 
+      
+      \return alpha -- Parameter for the slope of the Hanning filter.
+    */
+    inline T alpha () {
+      return alpha_p;
+    }
+    
+    /*!
+      \brief Set the slope parameter 
+      
+      \param alpha -- Parameter for the slope of the Hanning filter.
+    */
+    void setAlpha (const T& alpha);
+    
+    /*!
+      \brief Get the width of the plateau, [samples/channels]
+      
+      \return beta -- Width of the plateau, [samples/channels]
+    */
+    inline uint beta () const {
+      return beta_p;
+    }
+    
+    /*!
+      \brief Set the width of the plateau, [samples/channels]
+      
+      \param beta -- Width of the plateau, [samples/channels]
+    */
+    void setBeta (uint const &beta);
+    
+    /*!
+      \brief Set the width of the plateau, [samples/channels]
+      
+      \param beta -- Width of the plateau, [samples/channels]
+    */
+    void setBeta (uint const &beta,
+		  uint const &betaRise,
+		  uint const &betaFall);
+    
+    /*!
+      \brief For an unsymmetrical filter, get the parameter for the rising slope
+      
+      \return betaRise -- 
+    */
+    inline uint betaRise () const {
+      return betaRise_p;
+    }
+    
+    /*!
+      \brief For an unsymmetrical filter, get the parameter for the falling slope
+      
+      \return betaFall -- 
+    */
+    inline uint betaFall () const {
+      return betaFall_p;
+    }
+    
+  private:
+    
+    /*!
+      \brief Unconditional copying
+    */
+    void copy (HanningFilter<T> const& other);
+    
+    /*!
+      \brief Unconditional deletion 
+    */
+    void destroy(void);
+    
+    /*!
+      \brief Set up the filter weights
+    */
+    void setWeights ();  
+    
+  };
   
-  /*!
-    \brief Destructor.
-  */
-  ~HanningFilter ();
-  
-  // ------------------------------------------------------------------ Operators
-
-  /*!
-    \brief Overloading of the copy operator
-
-    \param other -- Another HanningFilter object from which to make a copy.
-  */
-  HanningFilter<T> &operator= (HanningFilter<T> const &other); 
-
-  // --- Methods ---------------------------------------------------------------  
-
-  /*!
-    \brief Get the slope parameter 
-
-    \return alpha -- Parameter for the slope of the Hanning filter.
-  */
-  T alpha () {
-    return alpha_p;
-  }
-
-  /*!
-    \brief Set the slope parameter 
-
-    \param alpha -- Parameter for the slope of the Hanning filter.
-  */
-  void setAlpha (const T& alpha);
-
-  /*!
-    \brief Get the width of the plateau, [samples/channels]
-
-    \return beta -- Width of the plateau, [samples/channels]
-   */
-  uint beta () const {
-    return beta_p;
-  }
-
-  /*!
-    \brief Set the width of the plateau, [samples/channels]
-
-    \param beta -- Width of the plateau, [samples/channels]
-   */
-  void setBeta (uint const &beta);
-
-  /*!
-    \brief Set the width of the plateau, [samples/channels]
-
-    \param beta -- Width of the plateau, [samples/channels]
-   */
-  void setBeta (uint const &beta,
-		uint const &betaRise,
-		uint const &betaFall);
-
-  uint betaRise () const {
-    return betaRise_p;
-  }
-
-  uint betaFall () const {
-    return betaFall_p;
-  }
-  
- private:
-
-  /*!
-    \brief Unconditional copying
-  */
-  void copy (HanningFilter<T> const& other);
-
-  /*!
-    \brief Unconditional deletion 
-  */
-  void destroy(void);
-
-  /*!
-    \brief Set up the filter weights
-  */
-  void setWeights ();  
-
-};
+}  // Namespace CR -- end
 
 #endif

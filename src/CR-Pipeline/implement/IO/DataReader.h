@@ -51,8 +51,9 @@ using casa::Vector;
 #include <IO/DataIterator.h>
 #include <Math/HanningFilter.h>
 
-using CR::TimeFreq;
+using CR::HanningFilter;
 using CR::DataIterator;
+using CR::TimeFreq;
 
 /*!
   \class DataReader

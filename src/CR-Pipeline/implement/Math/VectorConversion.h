@@ -1,4 +1,7 @@
-/***************************************************************************
+/*-------------------------------------------------------------------------*
+ | $Id::                                                                 $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
  *   Copyright (C) 2006                                                    *
  *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
@@ -18,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: VectorConversion.h,v 1.4 2007/03/19 13:48:40 bahren Exp $*/
+/* $Id$*/
 
 #ifndef VECTORCONVERSION_H
 #define VECTORCONVERSION_H
@@ -344,6 +347,12 @@ namespace CR { // Namespace CR -- begin
 
   /*!
     \brief Convert position in Azimuth-Elevation to Cartesian coordinates
+
+    \retval xyz             -- 
+    \param  azze            -- 
+    \param  anglesInDegrees -- Are the angles in the input vector are provided in
+                              degrees? If yes, then an additional conversion step
+			      is performed.
   */
   inline void azze2xyz (vector<double> &xyz,
 			vector<double> const &azze,
