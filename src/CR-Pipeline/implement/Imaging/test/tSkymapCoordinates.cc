@@ -76,8 +76,32 @@ SkymapCoordinates create_SkymapCoordinates ()
 // -----------------------------------------------------------------------------
 
 /*!
+  \brief Provide a summary of a Coordinate object 
+
+  Example output:
+  \verbatim
+  -- World axis names        = [Longitude, Latitude]
+  -- World axis units        = [rad, rad]
+  -- Reference pixel (CRPIX) = [60, 60]
+  -- Reference value (CRVAL) = [0, 0.0274156]
+  -- Increment       (CDELT) = [-0.0349066, 0.0349066]
+  \endverbatim
+*/
+void show_Coordinate (casa::Coordinate &coord)
+{
+  cout << "-- World axis names        = " << coord.worldAxisNames() << endl;
+  cout << "-- World axis units        = " << coord.worldAxisUnits() << endl;
+  cout << "-- Reference pixel (CRPIX) = " << coord.referencePixel() << endl;
+  cout << "-- Reference value (CRVAL) = " << coord.referenceValue() << endl;
+  cout << "-- Increment       (CDELT) = " << coord.increment()      << endl;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
   \brief Provide a summary of a CoordinateSystem object
 
+  Example output:
   \verbatim
   -- Number of coordinates   = 4
   -- World axis names        = [Longitude, Latitude, Distance, Time, Frequency]
@@ -103,6 +127,55 @@ void show_CoordinateSystem (casa::CoordinateSystem &csys)
   cout << "-- Reference value (CRVAL) = " << csys.referenceValue() << endl;
   cout << "-- Increment       (CDELT) = " << csys.increment()      << endl;
   
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Export the direction axis values to an ASCII table
+
+  For plotting with Gnuplot use e.g.:
+  \code
+  set grid
+  plot 'directions-azel.data' u 3:4 w d
+  \endcode
+
+  \param filename   -- Name of the file, to which the data will be written
+  \param directions -- [nofDirections,2]
+  \param mask       -- [nofDirections,2]
+*/
+void export_DirectionAxisValues (std::string const &filename,
+				 casa::Matrix<double> const &directions,
+				 casa::Matrix<bool> const &mask)
+{
+  int n(0);
+  int nx(0);
+  int ny(0);
+  casa::IPosition shapeDirections (directions.shape());
+  casa::IPosition shapeMask (mask.shape());
+  std::ofstream outfile;
+
+  if (shapeDirections(0) == shapeMask(0)*shapeMask(1)) {
+    outfile.open(filename.c_str());
+    
+    cout << "--> exporting direction axis values ... " << std::flush;
+    for (nx=0; nx<shapeMask(0); nx++) {
+      for (ny=0; ny<shapeMask(1); ny++) {
+	outfile << "\t" << nx << "\t" << ny
+		<< "\t" << directions(n,0) << "\t" << directions(n,1)
+		<< "\t" << mask(nx,ny)
+		<< endl;
+	n++;
+      }
+    }
+    cout << "done" << endl;
+    
+    outfile.close();
+  } else {
+    cerr << "[export_DirectionAxisValues] Mismatching array shapes!" << endl;
+    cerr << "-- Direction values = " << shapeDirections << endl;
+    cerr << "-- Direction mask   = " << shapeMask << endl;
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -174,18 +247,6 @@ int test_SkymapCoordinates ()
   }
   
   cout << "[2] Testing argumented constructor ..." << endl;
-  try {
-    // create SkymapCoordinates object
-    SkymapCoordinates coord (timeFreq,
-			     obsData,
-			     nofBlocks);
-    coord.summary();
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-  
-  cout << "[3] Testing argumented constructor ..." << endl;
   try {
     // create SkymapCoordinates object
     SkymapCoordinates coord (timeFreq,
@@ -316,13 +377,6 @@ int test_conversions ()
 	the functions in LOPES::SkymapCoordinates.
     <li>
   </ol>
-  
-  Position to test conversion:
-  <table border="0">
-    <tr><td>J2000</td><td>(97.5777684,23.4197344)</td></tr>
-    <tr><td>B1950</td><td>(86.8167851,23.4061253)</td></tr>
-    <tr><td>GALACTIC</td><td>(-174.732126,-1.94879617)</td></tr>
-  </table>
   
   \return nofFailedTests -- The number of failed tests.
 */
@@ -538,6 +592,103 @@ int test_coordinateSystem ()
 
 // -----------------------------------------------------------------------------
 
+/*!
+  \brief Test working with and manipulation of the direction axis of the image
+
+  In order to validate the internally constructed conversion engine, we use known
+  positions of a source (here: the Sun).
+  <ul>
+    <li>J2000    : (97.5777684,23.4197344)
+    <li>B1950    : (86.8167851,23.4061253)
+    <li>GALACTIC : (-174.732126,-1.94879617)
+  </ul>
+  
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_directionAxis ()
+{
+  cout << "\n[test_directionAxis]\n" << endl;
+
+  int nofFailedTests (0);
+  bool status (true);
+  unsigned int nofAxes (2);
+  bool anglesInDegrees (true);
+  SkymapCoordinates coord (create_SkymapCoordinates ());
+  
+  cout << "[1] Retrival of the DirectionCoordinate..." << endl;
+  try {
+    casa::DirectionCoordinate dc = coord.directionAxis();
+    show_Coordinate (dc);
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[2] Setting direction coordinate from parameters..." << endl;
+  try {
+    std::string refcode ("AZEL");
+    std::string projection ("AIT");
+    Vector<double> refValue (nofAxes);
+    Vector<double> increment (nofAxes);
+    IPosition shape (nofAxes);
+    bool anglesInDegree (true);
+
+    refValue(0) = 179.0;
+    refValue(1) = 028.0;
+
+    increment(0) = -0.5;
+    increment(1) = +0.5;
+
+    shape(0) = 100;
+    shape(1) = 150;
+
+    // assign new direction coordinate ...
+    status = coord.setDirectionAxis (refcode,
+				     projection,
+				     refValue,
+				     increment,
+				     shape,
+				     anglesInDegree);
+    // ... and show its properties
+    if (status) {
+      coord.summary();
+    }
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[3] Retrieval of the coordinate values..." << endl;
+  try {
+    casa::Matrix<double> directions;
+    casa::Matrix<bool> mask;
+    anglesInDegrees = true;
+
+    status = coord.directionAxisValues ("AZEL",
+					directions,
+					mask,
+					anglesInDegrees);
+
+    if (status) {
+      export_DirectionAxisValues ("directions-azel.data",
+				  directions,
+				  mask);
+    }
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Test working with settings handling the properties of the created map
+  
+  \return nofFailedTests -- The number of failed tests.
+*/
 int test_mapProperties ()
 {
   cout << "\n[test_mapProperties]\n" << endl;
@@ -636,7 +787,7 @@ int test_imageCreation ()
   PagedImage<Float> image (tile,
 			   csys,
 			   String("testimage.img"));
-  cout << endl;
+  cout << "done" << endl;
   
   return nofFailedTests;
 }
@@ -655,8 +806,9 @@ int main ()
   // Only continue if we actually can construct an object
   if (nofFailedTests == 0) {
     nofFailedTests += test_conversions ();
-    nofFailedTests += test_coordinateSystem ();
     nofFailedTests += test_mapProperties ();
+    nofFailedTests += test_coordinateSystem ();
+    nofFailedTests += test_directionAxis ();
     nofFailedTests += test_imageCreation ();
   }
   

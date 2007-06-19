@@ -124,15 +124,13 @@ int test_SkymapCoordinates ()
   uint blocksize (512);
   double sampleFrequency (40e6);
   uint nyquistZone (1);
-  unsigned int nofBlocks (10);
   CR::TimeFreq timeFreq (blocksize,
 			 sampleFrequency,
 			 nyquistZone);
   CR::ObservationData obsData ("LOFAR-ITS",
 			       "Lars Baehren");
   CR::SkymapCoordinates coord (timeFreq,
-			       obsData,
-			       nofBlocks);
+			       obsData);
 
   // -----------------------------------------------------------------
   // [2] Retrieve the coordinate system constructed for the image

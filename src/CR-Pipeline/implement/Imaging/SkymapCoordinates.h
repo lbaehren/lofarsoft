@@ -176,8 +176,7 @@ namespace CR { // Namespace CR -- begin
       an 120x120 pixel -- at 2deg resolution -- all-sky image in AZEL coordinates
       using a STG projection; this setup corresponds to the internal settings 
       when using the default constructor for a Skymapper object.
-      <li>
-      Argumented constructor:
+      <li>Simple argumented constructor:
       \code
       TimeFreq timeFreq;
       timeFreq.setBlocksize (4096);
@@ -188,11 +187,8 @@ namespace CR { // Namespace CR -- begin
       obsData.setTelescope ("LOFAR");
       obsData.setObserver ("Lars Baehren");
       
-      uint nofBlocks (10);
-
       SkymapCoordinates coord (timeFreq,
-                               obsData,
-			       nofBlocks);
+                               obsData);
       \endcode
     </ol>
     
@@ -306,8 +302,7 @@ namespace CR { // Namespace CR -- begin
       \param nofBlocks -- The number of subsequent data blocks to be processed
     */
     SkymapCoordinates (TimeFreq const &timeFreq,
-		       ObservationData const &obsData,
-		       uint const &nofBlocks=1);
+		       ObservationData const &obsData);
     
     /*!
       \brief Argumented constructor
@@ -506,6 +501,19 @@ namespace CR { // Namespace CR -- begin
     inline DirectionCoordinate directionAxis () {
       return csys_p.directionCoordinate(SkymapCoordinates::Direction);
     }
+
+    /*!
+      \brief Update the DirectionCoordinate of the CoordinateSystem
+
+      \param dc      -- A casa::DirectionCoordinate object
+
+      \return status -- Status of the operation; returns <tt>false</tt> if an
+                        error was encountered
+    */
+    inline bool setDirectionAxis (casa::DirectionCoordinate const &dc) {
+      return csys_p.replaceCoordinate (dc,
+				       SkymapCoordinates::Direction);
+    }
     
     /*!
       \brief Set the direction coordinate based a set of basic parameters
@@ -518,7 +526,8 @@ namespace CR { // Namespace CR -- begin
       \param anglesInDegrees -- Are the direction angles given in degrees? If set 
                                 <tt>false</tt> the angles are expected in radian.
 
-      \return status -- Status of the operation.
+      \return status -- Status of the operation; returns <tt>false</tt> if an
+                        error was encountered
     */
     bool setDirectionAxis (String const &refcode,
 			   String const &projection,

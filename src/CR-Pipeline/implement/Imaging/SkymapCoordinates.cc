@@ -55,10 +55,10 @@ namespace CR { // Namespace CR -- begin
   // ---------------------------------------------------------- SkymapCoordinates
   
   SkymapCoordinates::SkymapCoordinates (TimeFreq const &timeFreq,
-					ObservationData const &obsData,
-					uint const &nofBlocks)
+					ObservationData const &obsData)
   {
     Bool status (true);
+    uint nofBlocks (1);
     
     status = init (timeFreq,
 		   obsData,
@@ -448,7 +448,7 @@ namespace CR { // Namespace CR -- begin
 					    bool const &anglesInDegrees)
   {
     bool status (true);
-
+    
     // Create a new DirectionCoordinate object from the provided parameters
     DirectionCoordinate coord = directionCoordinate (refcode,
 						     projection,
@@ -456,18 +456,21 @@ namespace CR { // Namespace CR -- begin
 						     increment,
 						     pixels,
 						     anglesInDegrees);
-    
-    // ... and replace it with a new one created from the input parameters
-    try {
-      status = csys_p.replaceCoordinate (coord,
-					 SkymapCoordinates::Direction);
-    } catch (std::string message) {
-      std::cerr << "[SkymapCoordinates::setDirectionAxis] " << message
-		<< std::endl;
-      status = false;
-    }
 
-    return status;
+    // store the shape information
+    status = setDirectionShape (pixels(0),pixels(1));
+
+    if (!status) {
+      cerr << "[SkymapCoordinates::setDirectionAxis] "
+	   << "There was an error storing the shape information!" << endl;
+      return false;
+    }
+    
+    /*
+      Replace the current DirectionCoordinate with a new one created from the
+      input parameters
+    */
+    return setDirectionAxis(coord);
   }
   
   // -------------------------------------------------------- directionCoordinate
@@ -483,6 +486,7 @@ namespace CR { // Namespace CR -- begin
     uint nofAxes (2);
     Vector<double> crval (nofAxes);
     Vector<double> crpix (nofAxes);
+    Vector<double> cdelt (nofAxes);
     Matrix<double> xform(nofAxes,nofAxes,0.0);
 
     // Setting for field of view centered on a viewing direction
@@ -494,16 +498,19 @@ namespace CR { // Namespace CR -- begin
     if (anglesInDegrees) {
       crval(0) = deg2rad(refValue(0));
       crval(1) = deg2rad(refValue(1));
+      cdelt(0) = deg2rad(increment(0));
+      cdelt(1) = deg2rad(increment(1));
     } else {
       crval = refValue;
+      cdelt = increment;
     }
     
     DirectionCoordinate coord (MDirectionType(refcode),
 			       casa::Projection(ProjectionType(projection)),
 			       crval(0),
 			       crval(1),
-			       increment(0),
-			       increment(1),
+			       cdelt(0),
+			       cdelt(1),
 			       xform,
 			       crpix(0),
 			       crpix(1));
@@ -586,7 +593,7 @@ namespace CR { // Namespace CR -- begin
     if (myDirectionType != refType) {
       cout << "--> converting directions to target reference frame ..." << endl;
       /*
-	Create a frame from thhe time and location of the observation; the
+	Create a frame from the time and location of the observation; the
 	required information are stored within the ObservationData object
       */
       casa::MeasFrame frame (obsData_p.epoch(),
@@ -1007,12 +1014,13 @@ namespace CR { // Namespace CR -- begin
     Vector<double> refValue (nofAxes);
     Vector<double> increment (nofAxes);
     IPosition shape (nofAxes);
+    bool anglesInDegree (true);
 
-    refValue(0) = 0.0*casa::C::pi/180.0;
-    refValue(1) = 90.0*casa::C::pi/180.0;
+    refValue(0) = 0.0;
+    refValue(1) = 90.0;
 
-    increment(0) = -2.0*casa::C::pi/180.0;
-    increment(1) = +2.0*casa::C::pi/180.0;
+    increment(0) = -2.0;
+    increment(1) = +2.0;
 
     shape(0) = shape_p(0);
     shape(1) = shape_p(1);
@@ -1021,7 +1029,8 @@ namespace CR { // Namespace CR -- begin
 				projection,
 				refValue,
 				increment,
-				shape);
+				shape,
+				anglesInDegree);
     
   }
   

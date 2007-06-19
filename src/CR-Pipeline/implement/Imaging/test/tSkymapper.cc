@@ -369,12 +369,9 @@ Int test_Skymapper ()
     // Observation info
     ObservationData obsData ("LOFAR-ITS");
     obsData.setObserver ("Lars Baehren");
-    // nof. processed blocks
-    uint nofBlocks (10);
     // Coordinates 
     SkymapCoordinates coords (timeFreq,
-			      obsData,
-			      nofBlocks);
+			      obsData);
     
     Skymapper skymapper (coords);
     
