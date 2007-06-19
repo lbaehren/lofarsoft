@@ -51,8 +51,6 @@ using std::vector;
 namespace CR { // Namespace CR -- begin
   
   /*!
-    \file VectorConversion.cc
-
     \ingroup Math
     
     \brief Functions to handle conversions between vector representations
@@ -88,6 +86,8 @@ namespace CR { // Namespace CR -- begin
       \f]
       <li>Conversion from spherical to cartesian coordinates:
       \f[
+        (r,\phi,\theta) \rightarrow (x,y,z)
+	\quad : \qquad
         \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
 	\left[ \begin{array}{c}
 	  r \sin(\phi) \cos(\theta) \\
@@ -99,6 +99,8 @@ namespace CR { // Namespace CR -- begin
       (Az,Ze) system corresponds to the standard setup for spherical coordinates.
       <li>Conversion from (Az,El) to cartesian coordinates:
       \f[
+        (r,az,el) \rightarrow (x,y,z)
+	\quad : \qquad
         \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
 	\left[ \begin{array}{c}
 	  r \cos(El) \cos(Az) \\

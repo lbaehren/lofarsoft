@@ -1,4 +1,7 @@
-/***************************************************************************
+/*-------------------------------------------------------------------------*
+ | $Id:: Math.h 395 2007-06-14 08:13:19Z baehren                         $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
  *   Copyright (C) 2007                                                  *
  *   Andreas Horneffer (<mail>)                                                     *
  *                                                                         *
@@ -34,11 +37,7 @@
 #include <Calibration/CalTableReader.h> 
 #include <Calibration/CalTableInterpolater.h>
 
-using casa::Bool;
-using casa::DComplex;
-using casa::Double;
-
-using CR::HanningFilter;
+#include <casa/namespace.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -72,7 +71,6 @@ namespace CR { // Namespace CR -- begin
     
   */  
   class FirstStagePipeline {
-
   protected:
     
     /*!

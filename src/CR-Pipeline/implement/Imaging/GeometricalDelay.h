@@ -393,12 +393,19 @@ namespace CR { // NAMESPACE CR -- BEGIN
     /*!
       \brief Set the sky positions, for which the delay is computed
 
+      A possible arrangement for the provided coordinates could be e.g.
+      <tt>axisOrder=[0,1,2]</tt>:
+      \f[
+        \mathbf M_{xy} = \left[ \begin{array}{cc} x_1 & y_1 \\ x_2 & y_2 \\
+	                 \vdots & \vdots \\ x_N & y_N \end{array} \right]
+	\quad , \qquad
+	\mathbf z = [ z_1, z_2, ..., z_M]^T
+      \f]
+
       \param xyValues        -- 
       \param zValues         -- 
       \param axisOrder       -- The ordering of the coordinate axis in the
-                                arrays provided beforehand. For e.g.
-				\f$ (y-z,x) \f$ pass <tt>[1,2,0]</tt> as
-				argument.
+                                arrays provided beforehand (see note above).
       \param coordType       -- 
       \param anglesInDegrees -- Are the angles given in degree? If set to
                                 <tt>false</tt> the angles are considered in 
@@ -463,8 +470,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
     */
 #ifdef HAVE_CASA
     casa::Matrix<double> delays (const casa::Matrix<double> &antPositions,
-				const casa::Matrix<double> &skyPositions,
-				const bool &bufferDelays=false)
+				 const casa::Matrix<double> &skyPositions,
+				 const bool &bufferDelays=false)
       {
 	bufferDelays_p = bufferDelays;
 	antPositions_p = antPositions;
@@ -474,8 +481,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #else
 #ifdef HAVE_BLITZ
     blitz::Array<double,2> delays (const blitz::Array<double,2> &antPositions,
-				  const blitz::Array<double,2> &skyPositions,
-				  const bool &bufferDelays=false)
+				   const blitz::Array<double,2> &skyPositions,
+				   const bool &bufferDelays=false)
       {
 	bufferDelays_p = bufferDelays;
 	antPositions_p = antPositions;

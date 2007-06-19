@@ -342,6 +342,29 @@ namespace CR { // Namespace CR -- begin
 		       SkymapCoordinates::MapQuantity mapQuantity);
     
     /*!
+      \brief Argumented constructor
+      
+      \param timeFreq        -- Time-frequency domain settings (blocksize, sample
+                                frequency, Nyquist zone).
+      \param obsData         -- Observation data (epoch, location, etc.)
+      \param refcode         -- Reference code for the celestial coordinate frame
+      \param projection      -- Reference code for the sphercial map projection
+      \param refValue        -- Reference value, CRVAL
+      \param increment       -- Coordinate increment, CDELT
+      \param pixels          -- Number of pixels in the celestial plane
+      \param anglesInDegrees -- Are the direction angles given in degrees? If set 
+                                <tt>false</tt> the angles are expected in radian.
+    */
+    SkymapCoordinates (TimeFreq const &timeFreq,
+		       ObservationData const &obsData,
+		       String const &refcode,
+		       String const &projection,
+		       Vector<double> const &refValue,
+		       Vector<double> const &increment,
+		       IPosition const &pixels,
+		       bool const &anglesInDegrees=true);
+    
+    /*!
       \brief Copy constructor
       
       \param other -- Another SkymapCoordinates object from which to create this
@@ -484,6 +507,26 @@ namespace CR { // Namespace CR -- begin
       return csys_p.directionCoordinate(SkymapCoordinates::Direction);
     }
     
+    /*!
+      \brief Set the direction coordinate based a set of basic parameters
+      
+      \param refcode         -- Reference code for the celestial coordinate frame
+      \param projection      -- Reference code for the sphercial map projection
+      \param refValue        -- Reference value, CRVAL
+      \param increment       -- Coordinate increment, CDELT
+      \param pixels          -- Number of pixels in the celestial plane
+      \param anglesInDegrees -- Are the direction angles given in degrees? If set 
+                                <tt>false</tt> the angles are expected in radian.
+
+      \return status -- Status of the operation.
+    */
+    bool setDirectionAxis (String const &refcode,
+			   String const &projection,
+			   Vector<double> const &refValue,
+			   Vector<double> const &increment,
+			   IPosition const &pixels,
+			   bool const &anglesInDegrees=true);
+
     /*!
       \brief Set the shape of the image's direction plain
 
@@ -817,17 +860,22 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get a direction coordinate based on its basic parameters
       
-      \param refcode    -- Reference code for the celestial coordinate frame
-      \param projection -- Reference code for the sphercial map projection
-      \param refValue   -- Reference value, CRVAL
-      \param increment  -- Coordinate increment, CDELT
-      \param pixels     -- Number of pixels in the celestial plane
+      \param refcode         -- Reference code for the celestial coordinate frame
+      \param projection      -- Reference code for the sphercial map projection
+      \param refValue        -- Reference value, CRVAL
+      \param increment       -- Coordinate increment, CDELT
+      \param pixels          -- Number of pixels in the celestial plane
+      \param anglesInDegrees -- Are the direction angles given in degrees? If set 
+                                <tt>false</tt> the angles are expected in radian.
+
+      \return coord -- A casa::DirectionCoordinate object
     */
-    static DirectionCoordinate directionCoordinate (const String& refcode,
-						    const String& projection,
-						    const Vector<double>& refValue,
-						    const Vector<double>& increment,
-						    const IPosition& pixels);
+    static DirectionCoordinate directionCoordinate (String const &refcode,
+						    String const &projection,
+						    Vector<double> const &refValue,
+						    Vector<double> const &increment,
+						    IPosition const &pixels,
+						    bool const &anglesInDegrees=true);
     
     // ------------------------------------------------------ Conversion routines
 

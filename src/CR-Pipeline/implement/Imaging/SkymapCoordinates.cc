@@ -116,6 +116,41 @@ namespace CR { // Namespace CR -- begin
   
   // ---------------------------------------------------------- SkymapCoordinates
   
+  SkymapCoordinates::SkymapCoordinates (TimeFreq const &timeFreq,
+					ObservationData const &obsData,
+					String const &refcode,
+					String const &projection,
+					Vector<double> const &refValue,
+					Vector<double> const &increment,
+					IPosition const &pixels,
+					bool const &anglesInDegrees)
+  {
+    Bool status (true);
+    uint nofBlocks (1);
+    
+    status = init (timeFreq,
+		   obsData,
+		   nofBlocks);
+    
+    if (status) {
+      status = setDirectionAxis (refcode,
+				 projection,
+				 refValue,
+				 increment,
+				 pixels,
+				 anglesInDegrees);
+      if (!status) {
+	std::cerr << "[SkymapCoordinates] Error assigning DirectionCoordinate!"
+		  << endl;
+      }
+    } else {
+      std::cerr << "[SkymapCoordinates] Error initializing object!"
+		<< endl;
+    }
+  }
+  
+  // ---------------------------------------------------------- SkymapCoordinates
+  
   SkymapCoordinates::SkymapCoordinates (SkymapCoordinates const &other)
   {
     copy (other);
@@ -403,34 +438,75 @@ namespace CR { // Namespace CR -- begin
     return tp;
   }
 
-  // -------------------------------------------------------- directionCoordinate
+  // ----------------------------------------------------------- setDirectionAxis
 
+  bool SkymapCoordinates::setDirectionAxis (String const &refcode,
+					    String const &projection,
+					    Vector<double> const &refValue,
+					    Vector<double> const &increment,
+					    IPosition const &pixels,
+					    bool const &anglesInDegrees)
+  {
+    bool status (true);
+
+    // Create a new DirectionCoordinate object from the provided parameters
+    DirectionCoordinate coord = directionCoordinate (refcode,
+						     projection,
+						     refValue,
+						     increment,
+						     pixels,
+						     anglesInDegrees);
+    
+    // ... and replace it with a new one created from the input parameters
+    try {
+      status = csys_p.replaceCoordinate (coord,
+					 SkymapCoordinates::Direction);
+    } catch (std::string message) {
+      std::cerr << "[SkymapCoordinates::setDirectionAxis] " << message
+		<< std::endl;
+      status = false;
+    }
+
+    return status;
+  }
+  
+  // -------------------------------------------------------- directionCoordinate
+  
   DirectionCoordinate
-  SkymapCoordinates::directionCoordinate (const String& refcode,
-					  const String& projection,
-					  const Vector<double>& refValue,
-					  const Vector<double>& increment,
-					  const IPosition& pixels)
+  SkymapCoordinates::directionCoordinate (String const &refcode,
+					  String const &projection,
+					  Vector<double> const &refValue,
+					  Vector<double> const &increment,
+					  IPosition const &pixels,
+					  bool const &anglesInDegrees)
   {
     uint nofAxes (2);
-    Vector<double> refPixel (nofAxes);
+    Vector<double> crval (nofAxes);
+    Vector<double> crpix (nofAxes);
     Matrix<double> xform(nofAxes,nofAxes,0.0);
 
     // Setting for field of view centered on a viewing direction
-    refPixel(0) = 0.5*pixels(0);
-    refPixel(1) = 0.5*pixels(1);
+    crpix(0) = 0.5*pixels(0);
+    crpix(1) = 0.5*pixels(1);
 
     xform.diagonal() = 1.0;
+
+    if (anglesInDegrees) {
+      crval(0) = deg2rad(refValue(0));
+      crval(1) = deg2rad(refValue(1));
+    } else {
+      crval = refValue;
+    }
     
     DirectionCoordinate coord (MDirectionType(refcode),
 			       casa::Projection(ProjectionType(projection)),
-			       refValue(0),
-			       refValue(1),
+			       crval(0),
+			       crval(1),
 			       increment(0),
 			       increment(1),
 			       xform,
-			       refPixel(0),
-			       refPixel(1));
+			       crpix(0),
+			       crpix(1));
     
     return coord;
   }

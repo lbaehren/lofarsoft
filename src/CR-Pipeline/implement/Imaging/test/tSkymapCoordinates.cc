@@ -56,7 +56,10 @@ using CR::SkymapCoordinates;
 */
 SkymapCoordinates create_SkymapCoordinates ()
 {
-  TimeFreq timeFreq (1024,40e6,1);        // Time and Frequency data
+  unsigned int blocksize (1024);
+  double sampleFrequency (40e6);
+  unsigned int nyquistZone (1);
+  TimeFreq timeFreq (blocksize,sampleFrequency,nyquistZone);
   ObservationData obsData ("LOPES");      // Observation data
   uint nofBlocks (1);                     // Number of processed blocks
   
@@ -313,6 +316,13 @@ int test_conversions ()
 	the functions in LOPES::SkymapCoordinates.
     <li>
   </ol>
+  
+  Position to test conversion:
+  <table border="0">
+    <tr><td>J2000</td><td>(97.5777684,23.4197344)</td></tr>
+    <tr><td>B1950</td><td>(86.8167851,23.4061253)</td></tr>
+    <tr><td>GALACTIC</td><td>(-174.732126,-1.94879617)</td></tr>
+  </table>
   
   \return nofFailedTests -- The number of failed tests.
 */

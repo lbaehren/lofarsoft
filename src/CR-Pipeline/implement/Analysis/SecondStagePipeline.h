@@ -1,4 +1,7 @@
-/***************************************************************************
+/*-------------------------------------------------------------------------*
+ | $Id:: Math.h 395 2007-06-14 08:13:19Z baehren                         $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
  *   Copyright (C) 2007                                                  *
  *   Andreas Horneffer (<mail>)                                                     *
  *                                                                         *
@@ -31,9 +34,11 @@
 #include <casa/Exceptions/Error.h>
 
 #include <Analysis/FirstStagePipeline.h>
-//#include <Calibration/PhaseCalibrationPlugin.h>
+//#include <lopes/Calibration/PhaseCalibrationPlugin.h>
 #include <Calibration/TVCalibrationPlugin.h>
 #include <Calibration/RFIMitigationPlugin.h>
+
+#include <casa/namespace.h>
 
 namespace CR { // Namespace CR -- begin
   

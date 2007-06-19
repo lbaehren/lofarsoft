@@ -1,4 +1,7 @@
-/***************************************************************************
+/*-------------------------------------------------------------------------*
+ | $Id:: Math.h 395 2007-06-14 08:13:19Z baehren                         $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
  *   Copyright (C) 2007                                                  *
  *   Andreas Horneffer (<mail>)                                                     *
  *                                                                         *
@@ -18,13 +21,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: SecondStagePipeline.cc,v 1.4 2007/04/16 17:02:02 horneff Exp $*/
+/* $Id: SecondStagePipeline.cc,v 1.7 2007/06/17 14:32:08 horneff Exp $*/
 
 #include <Analysis/SecondStagePipeline.h>
-
-/*!
-  \class SecondStagePipeline
-*/
 
 namespace CR { // Namespace CR -- begin
   
@@ -83,6 +82,7 @@ namespace CR { // Namespace CR -- begin
 	  cerr << "SecondStagePipeline::GetData: " << "updateCache failed!" << endl;
 	  return Matrix<DComplex>();
 	};
+	cachedDate_p = dr->header().asuInt("Date");
       };
     } catch (AipsError x) {
       cerr << "SecondStagePipeline::GetData: " << x.getMesg() << endl;

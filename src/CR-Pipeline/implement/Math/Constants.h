@@ -26,22 +26,28 @@
 
 namespace CR {  // Namespace CR -- begin
   
-/*!
-  \brief A collection of numerical constants for common usage
+  /*!
+    \brief A collection of numerical constants for common usage
+    
+    \ingroup CR
+    \ingroup Math
+    
+    <h3>References</h3>
+    
+    <ul>
+      <li><tt>casa/BasicSL/Constants.h</tt> -- Mathematical and physical constants
+      implemented with the CASA libraries
+      <li>Abramowitz & Stegun (1964) Handbook of Mathematical Functions, Dover
+      Publications Inc., New York (9th printing, 1972)
+    </ul>
+  */
 
-  \ingroup CR
-  \ingroup Math
-
-  <h3>References</h3>
-
-  <ul>
-    <li><tt>casa/BasicSL/Constants.h</tt> -- Mathematical and physical constants
-        implemented with the CASA libraries
-    <li>Abramowitz & Stegun (1964) Handbook of Mathematical Functions, Dover
-    Publications Inc., New York (9th printing, 1972)
-  </ul>
-*/
-
+  //=============================================================================
+  //
+  //  Mathematical constants
+  //
+  //=============================================================================
+  
   /*
     Irrationals
   */
@@ -67,6 +73,12 @@ namespace CR {  // Namespace CR -- begin
   const double degree  = 0.0174532925199432957692369;
   const double arcmin  = 0.000290888208665721596153948459;
   const double arcsec  = 0.00000484813681109535993589914098765;
+  
+  //=============================================================================
+  //
+  //  Astronomical/Physical constants
+  //
+  //=============================================================================
   
 }  // Namespace CR -- end
 

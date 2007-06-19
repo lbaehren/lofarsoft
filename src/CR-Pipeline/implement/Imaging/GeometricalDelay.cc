@@ -170,23 +170,23 @@ namespace CR { // NAMESPACE CR -- BEGIN
   }
   
   // ----------------------------------------------------------------------- copy
-
+  
   void GeometricalDelay::copy (GeometricalDelay const &other)
   {
     antPositions_p.resize (other.antPositions_p.shape());
     antPositions_p = other.antPositions_p;
-
+    
     skyPositions_p.resize (other.skyPositions_p.shape());
     skyPositions_p = other.skyPositions_p;
-
+    
     bufferDelays_p  = other.bufferDelays_p;
-
+    
     if (bufferDelays_p) {
       delays_p.resize(other.delays_p.shape());
       delays_p        = other.delays_p;
     }
   }
-
+  
   // ============================================================================
   //
   //  Parameters
@@ -392,20 +392,20 @@ namespace CR { // NAMESPACE CR -- BEGIN
 					  bool const &anglesInDegrees,
 					  bool const &bufferDelays)
   {
-    bool status (true);
-    unsigned int nelem (xValues.nelements());
-    unsigned int nofPositions (nelem*nelem*nelem);
+    unsigned int nelem_x (xValues.nelements());
+    unsigned int nelem_y (yValues.nelements());
+    unsigned int nelem_z (zValues.nelements());
     unsigned int n  (0);
     unsigned int nx (0);
     unsigned int ny (0);
     unsigned int nz (0);
     
     // Matrix with the combined set of sky positions
-    casa::Matrix<double> positions (nofPositions,3);
+    casa::Matrix<double> positions (nelem_x*nelem_y*nelem_z,3);
     
-    for (nx=0; nx<nelem; nx++) {
-      for (ny=0; ny<nelem; ny++) {
-	for (nz=0; nz<nelem; nz++) {
+    for (nx=0; nx<nelem_x; nx++) {
+      for (ny=0; ny<nelem_y; ny++) {
+	for (nz=0; nz<nelem_z; nz++) {
 	  positions(n,0) = xValues(nx);
 	  positions(n,1) = yValues(ny);
 	  positions(n,2) = zValues(nz);
@@ -415,11 +415,10 @@ namespace CR { // NAMESPACE CR -- BEGIN
     }
     
     // forward the sky position values to have them stored internally
-    setSkyPositions (positions,
-		     coordType,
-		     anglesInDegrees,
-		     bufferDelays);
-    return status;
+    return setSkyPositions (positions,
+			    coordType,
+			    anglesInDegrees,
+			    bufferDelays);
   }
 #else
 #ifdef HAVE_BLITZ
@@ -430,9 +429,33 @@ namespace CR { // NAMESPACE CR -- BEGIN
 					  bool const &anglesInDegrees,
 					  bool const &bufferDelays)
   {
-    bool status (true);
-
-    return status;
+    unsigned int nelem_x (xValues.nelements());
+    unsigned int nelem_y (yValues.nelements());
+    unsigned int nelem_z (zValues.nelements());
+    unsigned int n  (0);
+    unsigned int nx (0);
+    unsigned int ny (0);
+    unsigned int nz (0);
+    
+    // Matrix with the combined set of sky positions
+    blitz::Array<double,2> positions (nelem_x*nelem_y*nelem_z,3);
+    
+    for (nx=0; nx<nelem_x; nx++) {
+      for (ny=0; ny<nelem_y; ny++) {
+	for (nz=0; nz<nelem_z; nz++) {
+	  positions(n,0) = xValues(nx);
+	  positions(n,1) = yValues(ny);
+	  positions(n,2) = zValues(nz);
+	  n++;
+	}
+      }
+    }
+    
+    // forward the sky position values to have them stored internally
+    return setSkyPositions (positions,
+			    coordType,
+			    anglesInDegrees,
+			    bufferDelays);
   }
 #endif
 #endif
@@ -447,9 +470,46 @@ namespace CR { // NAMESPACE CR -- BEGIN
 					  bool const &anglesInDegrees,
 					  bool const &bufferDelays)
   {
-    bool status (true);
+    /*
+      Check the vector providing the information about how the axes are ordered:
+      - we need at least three indices
+      - the indices must be in the range [0,2]
+    */
+    if (axisOrder.nelements() < 3) {
+      std::cerr << "[GeometricalDelay::setSkyPositions] Ordering of axis incomplete!"
+		<< std::endl;
+      return false;
+    } else if (min(axisOrder) < 0 || max(axisOrder) > 2) {
+      std::cerr << "[GeometricalDelay::setSkyPositions] Index outside valid range!"
+		<< std::endl;
+      std::cerr << "\t" << axisOrder << std::endl;
+      return false;
+    }
 
-    return status;
+    // local variables
+    unsigned int nelem_xy (xyValues.nrow());
+    unsigned int nelem_z  (zValues.nelements());
+    unsigned int n (0);
+    unsigned int nxy (0);
+    unsigned int nz (0);
+
+    // Matrix with the combined set of sky positions
+    casa::Matrix<double> positions (nelem_xy*nelem_z,3);
+
+    for (nxy=0; nxy<nelem_xy; nxy++) {
+      for (nz=0; nz<nelem_z; nz++) {
+	positions(n,axisOrder(0)) = xyValues(nxy,0);
+	positions(n,axisOrder(1)) = xyValues(nxy,1);
+	positions(n,axisOrder(2)) = zValues(nz);
+	n++;
+      }
+    }
+
+    // forward the sky position values to have them stored internally
+    return setSkyPositions (positions,
+			    coordType,
+			    anglesInDegrees,
+			    bufferDelays);
   }
 #else
 #ifdef HAVE_BLITZ
@@ -460,9 +520,47 @@ namespace CR { // NAMESPACE CR -- BEGIN
 					  bool const &anglesInDegrees,
 					  bool const &bufferDelays)
   {
-    bool status (true);
+    /*
+      Check the vector providing the information about how the axes are ordered:
+      - we need at least three indices
+      - the indices must be in the range [0,2]
+    */
+    if (axisOrder.numElements() < 3) {
+      std::cerr << "[GeometricalDelay::setSkyPositions] Ordering of axis incomplete!"
+		<< std::endl;
+      return false;
+    } else if (min(axisOrder) < 0 || max(axisOrder) > 2) {
+      std::cerr << "[GeometricalDelay::setSkyPositions] Index outside valid range!"
+		<< std::endl;
+      std::cerr << "\t" << axisOrder << std::endl;
 
-    return status;
+      return false;
+    }
+
+    // local variables
+    unsigned int nelem_xy (xyValues.rows());
+    unsigned int nelem_z  (zValues.numElements());
+    unsigned int n (0);
+    unsigned int nxy (0);
+    unsigned int nz (0);
+
+    // Matrix with the combined set of sky positions
+    blitz::Array<double,2> positions (nelem_xy*nelem_z,3);
+
+    for (nxy=0; nxy<nelem_xy; nxy++) {
+      for (nz=0; nz<nelem_z; nz++) {
+	positions(n,axisOrder(0)) = xyValues(nxy,0);
+	positions(n,axisOrder(1)) = xyValues(nxy,1);
+	positions(n,axisOrder(2)) = zValues(nz);
+	n++;
+      }
+    }
+
+    // forward the sky position values to have them stored internally
+    return setSkyPositions (positions,
+			    coordType,
+			    anglesInDegrees,
+			    bufferDelays);
   }
 #endif
 #endif
