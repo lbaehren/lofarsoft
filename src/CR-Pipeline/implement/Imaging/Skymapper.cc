@@ -120,6 +120,26 @@ namespace CR {  // Namespace CR -- begin
   //
   // ==========================================================================
 
+  bool Skymapper::initSkymapper () 
+  {
+    bool status (true);
+
+    std::cout << "[Skymapper::initSkymapper]" << std::endl;
+
+    std::cout << "--> collecting objects to create image ..." << std::endl;
+    CoordinateSystem csys = coordinates_p.coordinateSystem();
+    IPosition shape       = coordinates_p.shape();
+    TiledShape tile (shape);
+    
+    std::cout << "--> creating the image file ... " << std::flush;
+    PagedImage<Float> image (tile,
+			     csys,
+			     filename_p);
+    std::cout << "done" << std::endl;
+    
+    return status;
+  }
+  
   // -------------------------------------------------------------- processData
   
   bool Skymapper::processData (Matrix<DComplex> const &data)
