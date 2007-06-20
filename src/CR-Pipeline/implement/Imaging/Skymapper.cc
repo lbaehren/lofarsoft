@@ -138,10 +138,10 @@ namespace CR {  // Namespace CR -- begin
     IPosition start  (imageShape.nelements(),0);
     IPosition stride (imageShape.nelements(),1);
     Vector<Double> distances = coordinates_p.distanceAxisValues();
-    uint nofDistances = distances.nelements();
+    uint nofDistances        = distances.nelements();
     
     for (uint distanceStep(0); distanceStep<nofDistances; distanceStep++) {
-      // 1. adjust the beamformer weights
+      
     }
 
     // book-keeping of the number of data blocks processed so far

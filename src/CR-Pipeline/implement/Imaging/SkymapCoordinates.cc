@@ -569,7 +569,6 @@ namespace CR { // Namespace CR -- begin
       [2] The conversion from pixel to world coordinates is done using the
       DirectionCoordinate extracted from the CoordinateSystem.
     */
-    cout << "--> extracting the direction axis ..." << endl;
     DirectionCoordinate dc = directionAxis();
     cout << "--> converting coordinate values ..." << endl;
     for (lon=0, pixel(0)=0.0; lon<shape_p(0); lon++, pixel(0)++) {
@@ -591,7 +590,6 @@ namespace CR { // Namespace CR -- begin
     MDirection::Types myDirectionType = dc.directionType();
 
     if (myDirectionType != refType) {
-      cout << "--> converting directions to target reference frame ..." << endl;
       /*
 	Create a frame from the time and location of the observation; the
 	required information are stored within the ObservationData object
@@ -604,7 +602,6 @@ namespace CR { // Namespace CR -- begin
       */
       MDirection::Ref refFrom (myDirectionType);
       MDirection::Ref refTo (refType,frame);
-      // create a conversion engine
       MDirection::Convert engine (refFrom,refTo);
       // check if the conversion engine is operational
       if (engine.isNOP()) {
@@ -629,8 +626,17 @@ namespace CR { // Namespace CR -- begin
 	  }
 	}
       }  
+    } else {
+      /*
+	Even in the case where no conversion between reference frames is
+	required, we still need to check if the returned values of the 
+	direction angles are supposed to be given in degrees.
+      */
+      if (anglesInDegrees) {
+	directions *= 180/CR::pi;
+      }
     }
-    
+
     return status;
   }
   

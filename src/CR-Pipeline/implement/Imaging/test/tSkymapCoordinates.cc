@@ -60,7 +60,7 @@ SkymapCoordinates create_SkymapCoordinates ()
   double sampleFrequency (40e6);
   unsigned int nyquistZone (1);
   TimeFreq timeFreq (blocksize,sampleFrequency,nyquistZone);
-  ObservationData obsData ("LOPES");      // Observation data
+  ObservationData obsData ("WSRT");       // Observation data
   uint nofBlocks (1);                     // Number of processed blocks
   
   // create SkymapCoordinates object
@@ -137,7 +137,15 @@ void show_CoordinateSystem (casa::CoordinateSystem &csys)
   For plotting with Gnuplot use e.g.:
   \code
   set grid
-  plot 'directions-azel.data' u 3:4 w d
+  set xlabel 'Longitude'
+  set ylabel 'Latitude'
+  plot 'directions-azel.data' u 3:4 w d t 'AZEL - CAR'
+  \endcode
+  To get postscript output:
+  \code
+  set terminal post color solid
+  set output 'directions-azel-car.ps'
+  replot
   \endcode
 
   \param filename   -- Name of the file, to which the data will be written
@@ -602,6 +610,13 @@ int test_coordinateSystem ()
     <li>B1950    : (86.8167851,23.4061253)
     <li>GALACTIC : (-174.732126,-1.94879617)
   </ul>
+  The exported direction values can be displayed using Gnuplot via:
+  \code
+  set grid
+  set xlabel 'Longitude'
+  set ylabel 'Latitude'
+  plot 'directions-azel.data' u 3:4 w d t 'AZEL', 'directions-j2000.data' u 3:4 w d t 'J2000', 'directions-galactic.data' u 3:4 w d t 'GALACTIC'
+  \endcode
   
   \return nofFailedTests -- The number of failed tests.
 */
@@ -611,6 +626,8 @@ int test_directionAxis ()
 
   int nofFailedTests (0);
   bool status (true);
+  std::string refcode ("AZEL");
+  std::string projection ("CAR");
   unsigned int nofAxes (2);
   bool anglesInDegrees (true);
   SkymapCoordinates coord (create_SkymapCoordinates ());
@@ -626,8 +643,6 @@ int test_directionAxis ()
 
   cout << "[2] Setting direction coordinate from parameters..." << endl;
   try {
-    std::string refcode ("AZEL");
-    std::string projection ("AIT");
     Vector<double> refValue (nofAxes);
     Vector<double> increment (nofAxes);
     IPosition shape (nofAxes);
@@ -664,6 +679,8 @@ int test_directionAxis ()
     casa::Matrix<bool> mask;
     anglesInDegrees = true;
 
+    cout << "-- retrieving directions in AZEL coordinates ..." << endl;
+
     status = coord.directionAxisValues ("AZEL",
 					directions,
 					mask,
@@ -671,6 +688,32 @@ int test_directionAxis ()
 
     if (status) {
       export_DirectionAxisValues ("directions-azel.data",
+				  directions,
+				  mask);
+    }
+
+    cout << "-- retrieving directions in J2000 coordinates ..." << endl;
+
+    status = coord.directionAxisValues ("J2000",
+					directions,
+					mask,
+					anglesInDegrees);
+
+    if (status) {
+      export_DirectionAxisValues ("directions-j2000.data",
+				  directions,
+				  mask);
+    }
+
+    cout << "-- retrieving directions in GALACTIC coordinates ..." << endl;
+
+    status = coord.directionAxisValues ("GALACTIC",
+					directions,
+					mask,
+					anglesInDegrees);
+
+    if (status) {
+      export_DirectionAxisValues ("directions-galactic.data",
 				  directions,
 				  mask);
     }
@@ -771,23 +814,73 @@ int test_imageCreation ()
   cout << "\n[test_imageCreation]\n" << endl;
 
   int nofFailedTests (0);
-
-  cout << "-- creating SkymapCoordinates object..." << endl;
   SkymapCoordinates coord = create_SkymapCoordinates ();
-
-  cout << "-- retrieve CoordinateSystem object..." << endl;
-  CoordinateSystem csys = coord.coordinateSystem();
-
-  cout << "-- get the shape of the image pixel array... " << std::flush;
-  IPosition shape = coord.shape();
-  TiledShape tile (shape);
-  cout << shape << endl;
   
-  cout << "-- creating the image file ... " << std::flush;
-  PagedImage<Float> image (tile,
-			   csys,
-			   String("testimage.img"));
-  cout << "done" << endl;
+  cout << "[1] Creating image from default settings ..." << endl;
+  try {
+    
+    cout << "-- retrieve CoordinateSystem object..." << endl;
+    CoordinateSystem csys = coord.coordinateSystem();
+    
+    cout << "-- get the shape of the image pixel array... " << std::flush;
+    IPosition shape = coord.shape();
+    TiledShape tile (shape);
+    cout << shape << endl;
+    
+    cout << "-- creating the image file ... " << std::flush;
+    PagedImage<Float> image (tile,
+			     csys,
+			     String("testimage1.img"));
+    cout << "done" << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[2] Creating image from user defined settings ..." << endl;
+  try {
+    bool status (true);
+    unsigned int nofAxes (2);
+    Vector<double> refValue (nofAxes);
+    Vector<double> increment (nofAxes);
+    IPosition shape (nofAxes);
+    bool anglesInDegree (true);
+    
+    refValue(0) = 179.0;
+    refValue(1) = 028.0;
+    
+    increment(0) = -0.25;
+    increment(1) = +0.25;
+    
+    shape(0) = 200;
+    shape(1) = 200;
+    
+    // assign new direction coordinate ...
+    status = coord.setDirectionAxis ("AZEL",
+				     "STG",
+				     refValue,
+				     increment,
+				     shape,
+				     anglesInDegree);
+    
+    if (status) {
+      CoordinateSystem csys = coord.coordinateSystem();
+      
+      cout << "-- get the shape of the image pixel array... " << std::flush;
+      IPosition shape = coord.shape();
+      TiledShape tile (shape);
+      cout << shape << endl;
+      
+      cout << "-- creating the image file ... " << std::flush;
+      PagedImage<Float> image (tile,
+			       csys,
+			       String("testimage2.img"));
+      cout << "done" << endl;
+    }
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
   
   return nofFailedTests;
 }
