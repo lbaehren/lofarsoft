@@ -52,11 +52,62 @@ namespace CR { // Namespace CR -- begin
     </ul>
     
     <h3>Synopsis</h3>
+
+    Implementation of a new beamforming methods requires three entries within
+    this class:
+    <ol>
+      <li>Add an entry to the enumeration of the beam-types
+      <li>The function implementing the new beam type, using the interface
+          of Beamformer::processData.
+      <li>Add entry to Beamformer::setBeamType in order to be able to selected
+          the new beam type.
+    </ol>
     
     <h3>Example(s)</h3>
     
   */  
   class Beamformer : public GeometricalWeight {
+    
+  public:
+    
+    /*!
+      \brief List of implemented and supported beam types.
+    */
+    typedef enum {
+      /*!
+	Add up the Fourier-transformed antennas signals
+      */
+      ADDANTENNAS,
+      /*!
+	Add up the Fourier-transformed antenna signals after forming of baselines
+      */
+      ADDBASELINES,
+      CCBEAM,
+      XBEAM
+    } BeamType;
+    
+  private:
+    
+    /*!
+      \brief Pointer to the function performing the beamforming
+     
+      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
+                      input data.
+      \param  data -- [nofDatasets,nofChannels] Input data which will be
+                      processed to form a given type of beam.
+
+      \return status   -- Status of the operation; returns <i>false</i> if an
+                          an error was encountered
+    */
+#ifdef HAVE_CASA
+    bool (Beamformer::*processData_p) (casa::Matrix<double> &beam,
+				       const casa::Matrix<double> &data);
+#else
+#ifdef HAVE_BLITZ
+    bool (Beamformer::*processData_p) (casa::Matrix<double> &beam,
+				       const casa::Matrix<double> &data);
+#endif
+#endif
     
   public:
     
@@ -92,6 +143,15 @@ namespace CR { // Namespace CR -- begin
     Beamformer& operator= (Beamformer const &other); 
     
     // --------------------------------------------------------------- Parameters
+
+    /*!
+      \brief Set the type of beam to be used at processing
+
+      \param beam    -- 
+
+      \return status -- 
+     */
+    bool setBeamType (Beamformer::BeamType const &beam);
     
     /*!
       \brief Get the name of the class
@@ -115,8 +175,75 @@ namespace CR { // Namespace CR -- begin
     void summary (std::ostream &os);    
 
     // ------------------------------------------------------------------ Methods
+
+    /*!
+      \brief Beamforming of the data, returning real-valued result
+
+      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
+                      input data.
+      \param  data -- [nofDatasets,nofChannels] Input data which will be
+                      processed to form a given type of beam.
+
+      \return status   -- Status of the operation; returns <i>false</i> if an
+                          an error was encountered
+    */
+#ifdef HAVE_CASA
+    bool processData (casa::Matrix<double> &beam,
+		      const casa::Matrix<double> &data) {
+      return (this->*processData_p) (beam,data);
+    }
+#else
+#ifdef HAVE_BLITZ
+    bool processData (blitz::Array<double,2> &beam,
+		      const blitz::Array<double,2> &data) {
+      return (this->*processData_p) (beam,data);
+    }
+#endif
+#endif
     
+    /*!
+      \brief Form beam by adding up Fourier-transformed data
+
+      \f[ S (\vec\rho,\nu) = \sum_{j=1}^{N_{\rm Ant}} \widetilde s_{j}
+      (\vec\rho,\nu) \f]
+
+      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
+                      input data.
+      \param  data -- [nofDatasets,nofChannels] Input data which will be
+                      processed to form a given type of beam.
+
+      \return status   -- Status of the operation; returns <i>false</i> if an
+                          an error was encountered
+    */
+#ifdef HAVE_CASA
+    bool add_signals_per_antenna (casa::Matrix<double> &beam,
+				  const casa::Matrix<double> &data);
+#else
+#ifdef HAVE_BLITZ
+    bool add_signals_per_antenna (blitz::Array<double,2> &beam,
+				  const blitz::Array<double,2> &data);
+#endif
+#endif
+
+#ifdef HAVE_CASA
+    bool cc_beam (casa::Matrix<double> &beam,
+		  const casa::Matrix<double> &data);
+#else
+#ifdef HAVE_BLITZ
+    bool cc_beam (blitz::Array<double,2> &beam,
+		  const blitz::Array<double,2> &data);
+#endif
+#endif
     
+#ifdef HAVE_CASA
+    bool x_beam (casa::Matrix<double> &beam,
+		 const casa::Matrix<double> &data);
+#else
+#ifdef HAVE_BLITZ
+    bool x_beam (blitz::Array<double,2> &beam,
+		 const blitz::Array<double,2> &data);
+#endif
+#endif
     
   private:
     

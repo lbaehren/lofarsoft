@@ -109,7 +109,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \brief Beamforming of the data, returning real-valued result
 
       \retval dataBeam -- [nofSkyPosition,nofChannels] 
-      \param  dataFFT  -- 
+      \param  dataFFT  -- [nofDatasets,nofChannels] 
 
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered
