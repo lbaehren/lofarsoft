@@ -224,7 +224,39 @@ namespace CR { // Namespace CR -- begin
 				  const blitz::Array<double,2> &data);
 #endif
 #endif
+    
+    /*!
+      \brief Form a cross-correlation beam
+      
+      The data from each unique pair of antennas is multiplied, the resulting
+      values are averaged, and then the square root is taken while preserving
+      the sign.
+      
+      \f[
+      cc(\vec \rho)[t] = \, ^+_- \sqrt{\left| \frac{1}{N_{Pairs}} \sum^{N-1}_{i=1}
+      \sum^{N}_{j>i} s_i(\vec\rho)[t] s_j(\vec\rho)[t] \right|}
+      \f]
+      
+      where 
+      \f[
+      s_j(\vec\rho)[t]
+      = \mathcal{F}^{-1} \left\{ \tilde s_j(\vec\rho)[k] \right\}
+      = \mathcal{F}^{-1} \left\{ w_j(\vec\rho)[k] \cdot \tilde s_j[k]\right\}
+      \f]
+      is the time shifted field strength of the single antennas for a direction
+      \f$\vec \rho \f$. \f$ N \f$ is the number of antennas, \f$t\f$ the time or
+      pixel index and \f$N_{Pairs}\f$ the number of unique pairs of antennas.
+      The negative sign is taken if the sum had a negative sign before taking the
+      absolute values, and the positive sign otherwise.
 
+      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
+                      input data.
+      \param  data -- [nofDatasets,nofChannels] Input data which will be
+                      processed to form a given type of beam.
+
+      \return status   -- Status of the operation; returns <i>false</i> if an
+                          an error was encountered
+    */
 #ifdef HAVE_CASA
     bool cc_beam (casa::Matrix<double> &beam,
 		  const casa::Matrix<double> &data);
@@ -235,6 +267,17 @@ namespace CR { // Namespace CR -- begin
 #endif
 #endif
     
+    /*!
+      \brief Form an axcess-beam (x-beam)
+
+      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
+                      input data.
+      \param  data -- [nofDatasets,nofChannels] Input data which will be
+                      processed to form a given type of beam.
+
+      \return status   -- Status of the operation; returns <i>false</i> if an
+                          an error was encountered
+    */
 #ifdef HAVE_CASA
     bool x_beam (casa::Matrix<double> &beam,
 		 const casa::Matrix<double> &data);
