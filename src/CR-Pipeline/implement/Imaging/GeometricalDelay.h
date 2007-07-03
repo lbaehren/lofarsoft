@@ -522,9 +522,15 @@ namespace CR { // NAMESPACE CR -- BEGIN
     inline int nofAntennaPositions () {
       return antPositions_p.nrow();
     }
+    inline int nofAntennas () {
+      return antPositions_p.nrow();
+    }
 #else
 #ifdef HAVE_BLITZ
     inline int nofAntennaPositions () {
+      return antPositions_p.rows();
+    }
+    inline int nofAntennas () {
       return antPositions_p.rows();
     }
 #endif

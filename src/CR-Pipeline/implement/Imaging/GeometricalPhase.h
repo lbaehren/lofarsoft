@@ -24,9 +24,6 @@
 #ifndef GEOMETRICALPHASE_H
 #define GEOMETRICALPHASE_H
 
-// Standard library header files
-#include <string>
-
 #ifdef HAVE_CASA
 #include <casa/Arrays/Cube.h>
 #endif

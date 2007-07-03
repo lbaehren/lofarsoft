@@ -52,7 +52,8 @@ int test_Beamformer ()
 
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
-    Beamformer newObject;
+    Beamformer bf;
+    bf.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;

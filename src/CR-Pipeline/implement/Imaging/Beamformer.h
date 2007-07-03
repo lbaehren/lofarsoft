@@ -82,11 +82,17 @@ namespace CR { // Namespace CR -- begin
 	Add up the Fourier-transformed antenna signals after forming of baselines
       */
       ADDBASELINES,
+      /*!
+	Cross-correlation beam
+      */
       CCBEAM,
       XBEAM
     } BeamType;
     
   private:
+
+    //! Type of beamforming method used in data processing
+    Beamformer::BeamType beamType_p;
     
     /*!
       \brief Pointer to the function performing the beamforming
@@ -101,11 +107,11 @@ namespace CR { // Namespace CR -- begin
     */
 #ifdef HAVE_CASA
     bool (Beamformer::*processData_p) (casa::Matrix<double> &beam,
-				       const casa::Matrix<double> &data);
+				       const casa::Matrix<DComplex> &data);
 #else
 #ifdef HAVE_BLITZ
-    bool (Beamformer::*processData_p) (casa::Matrix<double> &beam,
-				       const casa::Matrix<double> &data);
+    bool (Beamformer::*processData_p) (blitz:Array<double,2> &beam,
+				       const blitz:Array<complex<double>,2> &data);
 #endif
 #endif
     
@@ -117,6 +123,42 @@ namespace CR { // Namespace CR -- begin
       \brief Default constructor
     */
     Beamformer ();
+    
+    /*!
+      \brief Argumented constructor
+      
+      \param antPositions  -- [nofAntennas,3] Antenna positions for which the
+                              delay is computed, \f$ (x,y,z) \f$
+      \param skyPositions  -- [nofSkyPositions,3] Positions in the sky towards
+                              which to point, given in the same reference frame
+			      as the antenna positions, \f$ (x,y,z) \f$
+      \param frequencies   -- Frequencies for which the geometrical delays are
+                              converted into phases
+      \param bufferDelays  -- Buffer the values for the geometrical delay? If set
+                              <i>yes</i> the delays will be computed from the 
+			      provided antenna and sky positions and afterwards
+			      kept in memory; if set <i>no</i> only the input 
+			      parameters are stored an no further action is taken.
+      \param bufferPhases  -- Buffer the values of the phases?
+      \param bufferWeights -- Buffer the values of the geometrical weights?
+    */
+#ifdef HAVE_CASA
+    Beamformer (casa::Matrix<double> const &antPositions,
+		casa::Matrix<double> const &skyPositions,
+		casa::Vector<double> const &frequencies,
+		bool const &bufferDelays=false,
+		bool const &bufferPhases=false,
+		bool const &bufferWeights=false);
+#else
+#ifdef HAVE_BLITZ
+    Beamformer (const blitz::Array<double,2> &antPositions,
+		const blitz::Array<double,2> &skyPositions,
+		blitz::Array<double,1> const &frequencies,
+		bool const &bufferDelays=false,
+		bool const &bufferPhases=false,
+		bool const &bufferWeights=false);
+#endif
+#endif
     
     /*!
       \brief Copy constructor
@@ -145,7 +187,23 @@ namespace CR { // Namespace CR -- begin
     // --------------------------------------------------------------- Parameters
 
     /*!
-      \brief Set the type of beam to be used at processing
+      \brief Get the type of beam to be used at processing
+
+      \return beamType -- The type of beam to be used at data processing
+     */
+    inline Beamformer::BeamType beamType () {
+      return beamType_p;
+    }
+
+    /*!
+      \brief Get the name of the beam type to be used at processing
+
+      \return beamType -- The type of beam to be used at data processing
+     */
+    std::string beamTypeName ();
+
+    /*!
+      \brief Set the type of beam to be used at data processing
 
       \param beam    -- 
 
@@ -189,13 +247,13 @@ namespace CR { // Namespace CR -- begin
     */
 #ifdef HAVE_CASA
     bool processData (casa::Matrix<double> &beam,
-		      const casa::Matrix<double> &data) {
+		      const casa::Matrix<DComplex> &data) {
       return (this->*processData_p) (beam,data);
     }
 #else
 #ifdef HAVE_BLITZ
     bool processData (blitz::Array<double,2> &beam,
-		      const blitz::Array<double,2> &data) {
+		      const blitz::Array<complex<double>,2> &data) {
       return (this->*processData_p) (beam,data);
     }
 #endif
@@ -217,11 +275,11 @@ namespace CR { // Namespace CR -- begin
     */
 #ifdef HAVE_CASA
     bool add_signals_per_antenna (casa::Matrix<double> &beam,
-				  const casa::Matrix<double> &data);
+				  const casa::Matrix<DComplex> &data);
 #else
 #ifdef HAVE_BLITZ
     bool add_signals_per_antenna (blitz::Array<double,2> &beam,
-				  const blitz::Array<double,2> &data);
+				  const blitz::Array<complex<double>,2> &data);
 #endif
 #endif
     
@@ -259,11 +317,11 @@ namespace CR { // Namespace CR -- begin
     */
 #ifdef HAVE_CASA
     bool cc_beam (casa::Matrix<double> &beam,
-		  const casa::Matrix<double> &data);
+		  const casa::Matrix<DComplex> &data);
 #else
 #ifdef HAVE_BLITZ
     bool cc_beam (blitz::Array<double,2> &beam,
-		  const blitz::Array<double,2> &data);
+		  const blitz::Array<conplex<double>,2> &data);
 #endif
 #endif
     
@@ -280,11 +338,11 @@ namespace CR { // Namespace CR -- begin
     */
 #ifdef HAVE_CASA
     bool x_beam (casa::Matrix<double> &beam,
-		 const casa::Matrix<double> &data);
+		 const casa::Matrix<DComplex> &data);
 #else
 #ifdef HAVE_BLITZ
     bool x_beam (blitz::Array<double,2> &beam,
-		 const blitz::Array<double,2> &data);
+		 const blitz::Array<complex<double>,2> &data);
 #endif
 #endif
     
@@ -299,6 +357,11 @@ namespace CR { // Namespace CR -- begin
       \brief Unconditional deletion 
     */
     void destroy(void);
+
+    /*!
+      \brief Initialize internal settings of the Beamformer
+    */
+    void init ();
     
   };
   

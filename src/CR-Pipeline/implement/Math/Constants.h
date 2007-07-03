@@ -80,7 +80,8 @@ namespace CR {  // Namespace CR -- begin
   //
   //=============================================================================
   
-  const double lightspeed = 2.99795e08;
+  //! Vacuum velocity of light, [m/s]
+  const double lightspeed = 299792458.0;
 
 }  // Namespace CR -- end
 
