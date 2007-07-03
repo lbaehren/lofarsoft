@@ -300,7 +300,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     // Summary of the parameters added with this object
     os << "[GeometricalPhase] Summary of object" << std::endl;
-    os << "-- Frequency values : " << frequencies_p.shape() << std::endl;
+    os << "-- Frequency values  : " << frequencies_p.shape() << std::endl;
+    os << "-- buffer phases     : " << bufferPhases_p        << std::endl;
   }
 
 } // NAMESPACE CR -- END

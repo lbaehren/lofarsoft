@@ -89,6 +89,24 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  
+#ifdef HAVE_CASA
+  bool Beamformer::add_signals_per_antenna (casa::Matrix<double> &beam,
+					    const casa::Matrix<double> &data)
+  {
+    bool status (true);
+
+    return status;
+  }
+#else
+#ifdef HAVE_BLITZ
+  bool Beamformer::add_signals_per_antenna (blitz::Array<double,2> &beam,
+					    const blitz::Array<double,2> &data)
+  {
+    bool status (true);
+
+    return status;
+  }
+#endif
+#endif  
 
 } // Namespace CR -- end

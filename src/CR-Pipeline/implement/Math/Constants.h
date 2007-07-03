@@ -80,6 +80,8 @@ namespace CR {  // Namespace CR -- begin
   //
   //=============================================================================
   
+  const double lightspeed = 2.99795e08;
+
 }  // Namespace CR -- end
 
 #endif

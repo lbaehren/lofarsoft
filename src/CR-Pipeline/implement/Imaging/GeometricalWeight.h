@@ -24,9 +24,6 @@
 #ifndef GEOMETRICALWEIGHT_H
 #define GEOMETRICALWEIGHT_H
 
-// Standard library header files
-#include <string>
-
 // Custom header files
 #include <Imaging/GeometricalDelay.h>
 #include <Imaging/GeometricalPhase.h>

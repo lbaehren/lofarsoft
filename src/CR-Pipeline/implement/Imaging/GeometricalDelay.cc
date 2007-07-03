@@ -22,12 +22,11 @@
  ***************************************************************************/
 
 #include <Imaging/GeometricalDelay.h>
+#include <Math/Constants.h>
 
 using std::cerr;
 using std::cout;
 using std::endl;
-
-const double lightspeed = 2.99795e08;
 
 namespace CR { // NAMESPACE CR -- BEGIN
   

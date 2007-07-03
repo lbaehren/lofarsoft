@@ -157,6 +157,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #endif
 #endif  
   
+  void GeometricalWeight::summary (std::ostream &os)
+  {
+    os << "[GeometricalWeight] Summary of object"             << std::endl;
+    os << "-- Sky positions     : " << skyPositions_p.shape() << std::endl;
+    os << "-- Antenna positions : " << antPositions_p.shape() << std::endl;
+    os << "-- Frequency values  : " << frequencies_p.shape()  << std::endl;
+    os << "-- buffer delays     : " << bufferDelays_p         << std::endl;
+    os << "-- buffer phases     : " << bufferPhases_p         << std::endl;
+    os << "-- buffer weights    : " << bufferWeights_p        << std::endl;
+  }
+  
   // ============================================================================
   //
   //  Methods

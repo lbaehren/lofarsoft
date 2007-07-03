@@ -80,9 +80,6 @@ void getPositions (casa::Matrix<double> &skyPositions,
   skyPositions            = 0.0;
   skyPositions.diagonal() = 100.0;
 
-//   std::cout << "-- nof. antennas = " << nofAntennas   << endl;
-//   std::cout << "-- ant positions = " << antPositions  << endl;
-//   std::cout << "-- sky positions = " << skyPositions  << endl;
 }
 #endif
 
