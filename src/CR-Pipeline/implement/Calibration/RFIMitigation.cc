@@ -20,37 +20,23 @@
 
 /* $Id: RFIMitigation.cc,v 1.9 2007/03/07 14:36:52 singh Exp $*/
 
-/*!
-  \class RFIMitigation
-*/
-
-//Implementation of the RFIMitigation functions
-
-//author: Kalpana Singh
-//3-06
-
 #include <Calibration/RFIMitigation.h>
 
+using casa::AipsError;
 
-//*****************************************************************************
-//***********PUBLIC FUNCTIONS**************************************************
-//*****************************************************************************
-
-// --- Construction ------------------------------------------------------------
-//------------------------------------------------------------------------------
-
-//Default Constructor
+// ==============================================================================
+//
+//  Construction
+//
+// ==============================================================================
 
 RFIMitigation :: RFIMitigation ()
 {;}   
 
-//Argumented Consturctor
-
-
 RFIMitigation :: RFIMitigation( const Matrix<DComplex>& spectra,
 				const uint& nOfSegments,
 		                const uint& dataBlockSize )
-				
+  
 { 
   //FilterType:: filter filterType_p;
   
@@ -61,177 +47,175 @@ RFIMitigation :: RFIMitigation( const Matrix<DComplex>& spectra,
   //uInt strength_filter ;
 }
 
-//-----end of argumented constructor : RFIMitigation
-
-// ------------------------------------------------------------------------------
+// ==============================================================================
 //
 //  Destruction
 //
-// ------------------------------------------------------------------------------
+// ==============================================================================
 
 RFIMitigation :: ~RFIMitigation()
 {;} 
 
-// ------------------------------------------------------------------------------
-//******************************************************************************
-//********************Computation methods**************************************
-//******************************************************************************
-// ------------------------------------------------------------------------------
+// ==============================================================================
+//
+//  Destruction
+//
+// ==============================================================================
 
+// -------------------------------------------------------- getAbsoluteGainValues
 
-// ------------------------- getinterpolatedGains-------------------------------------
-
-
- Matrix<Double> getAbsoluteGainValues( const Matrix<DComplex>& spectra ) 
- 
- {
- Matrix<Double> absoluteValueArray( amplitude( spectra )) ;
- 
- return absoluteValueArray ;
- 
- }
- 
- 
- Vector<uint> RFIMitigation ::getSegmentationVector( const uint& dataBlockSize, 
- 				                    const uint& nOfSegments ) 
- {
- 
- try {
- 
- // nOfSegments = 25; optimized no. of segment for each data blocksize
- Int fft_Length = ( dataBlockSize/2 )+1 ;
- 
- Vector<uint> segmentation( nOfSegments-1 );
- 
- Int frequencyChannels = int( fft_Length/ nOfSegments ) ;
- 
- for( uint ns=0; ns <( nOfSegments -1 ); ns++ ) {
- 
-  segmentation( ns ) = ( ns +1 )*frequencyChannels ;
-    }
+Matrix<Double> getAbsoluteGainValues( const Matrix<DComplex>& spectra )   
+{
+  Matrix<Double> absoluteValueArray( amplitude( spectra )) ;
   
+  return absoluteValueArray ;
+}
+
+// -------------------------------------------------------- getSegmentationVector
+
+Vector<uint> RFIMitigation ::getSegmentationVector( const uint& dataBlockSize, 
+ 				                    const uint& nOfSegments ) 
+{  
+  try {
+ 
+    // nOfSegments = 25; optimized no. of segment for each data blocksize
+    Int fft_Length = ( dataBlockSize/2 )+1 ;
+    
+    Vector<uint> segmentation( nOfSegments-1 );
+    
+    Int frequencyChannels = int( fft_Length/ nOfSegments ) ;
+    
+    for( uint ns=0; ns <( nOfSegments -1 ); ns++ ) {
+      
+      segmentation( ns ) = ( ns +1 )*frequencyChannels ;
+    }
+    
     return segmentation ;
   }
   catch ( AipsError x ) {
-  cerr << "RFIMitigation :: getSegmentationVector " << x.getMesg () << endl ;
-  return Vector<uint> ();
- }
+    cerr << "RFIMitigation :: getSegmentationVector " << x.getMesg () << endl ;
+    return Vector<uint> ();
+  }
 }
 
- 
-Matrix<Double> RFIMitigation :: getinterpolatedGains( const Matrix<DComplex>& spectra,
-						     const uint& dataBlockSize,
-				                     const uint& nOfSegments  ) 
 
+Matrix<Double> RFIMitigation :: getinterpolatedGains( const Matrix<DComplex>& spectra,
+						      const uint& dataBlockSize,
+						      const uint& nOfSegments  ) 
+  
 {
   try {
- 
-  RFIMitigation rf;
-  
-  Matrix<Double> absoluteArray ( amplitude ( spectra )) ;
-  
-  Vector<uint> segmentationIndices = rf.getSegmentationVector( dataBlockSize, nOfSegments ) ;
-   
-   uInt segCount = segmentationIndices.nelements()+1;
-   
-   uInt nOfRows = absoluteArray.nrow();
-   // no. of columns of the segmentation matrix
-   uInt nOfColumns = absoluteArray.ncolumn();
-     
-   uInt ele =1 ;
-   
-   uInt segmentInit = 0;
-   
-   uInt segmentFinal;
-   
-   Matrix<Double> filteredMatrix (segCount, nOfColumns) ;
-   
-   Vector<Double> filteredIndexMedian( segCount );
-   
-   Vector<Double> filteredDataIndexInit( segCount+1 );
-   
-   Vector<Double> filteredDataIndexFinal( segCount );
-   
-   for(uint i=0; i< segCount; i++) {
-   
-   filteredDataIndexInit( i )= segmentInit ;
-   
-   if( i == ( segCount-1 )) {
-   segmentFinal = nOfRows -1;
-   filteredDataIndexFinal( i )= segmentFinal;
-   filteredIndexMedian( i )=( filteredDataIndexInit( i )+ filteredDataIndexFinal( i ))/2;
-   }
-   else {
-   segmentFinal = segmentationIndices( ele-1 ) ;
-   filteredDataIndexFinal( i )= segmentFinal;
-   filteredIndexMedian( i )=( filteredDataIndexInit( i )+ filteredDataIndexFinal( i ))/2;
-    } ;
-   
-     filteredDataIndexInit( i+1 )= filteredDataIndexFinal( i )+1;
-     
-  uint segmentLength = ( segmentFinal - segmentInit + 1) ;
-   
-    Matrix<Double> segmentMatrix( absoluteArray(Slice(segmentInit, segmentLength),
-   					       Slice(0, nOfColumns) ) );
-					       
-   //StatisticsFilter <Double> mf ( filterStrength, filterType_p );
-    Bool sorted( False );
-    Bool takeEvenMean( False );
-    Bool inPlace( False );
     
-    for ( uint j = 0; j < nOfColumns; j++) {
+    RFIMitigation rf;
     
-    Vector<Double> segmentVector = segmentMatrix.column(j);
+    Matrix<Double> absoluteArray ( amplitude ( spectra )) ;
     
-     filteredMatrix (i,j) = median( segmentVector,sorted,takeEvenMean,inPlace );
-    } 
-     segmentInit = segmentFinal+1;
-    ele = ele+1;
+    Vector<uint> segmentationIndices = rf.getSegmentationVector(dataBlockSize,
+								nOfSegments);
+    
+    uInt segCount = segmentationIndices.nelements()+1;
+    
+    uInt nOfRows = absoluteArray.nrow();
+    // no. of columns of the segmentation matrix
+    uInt nOfColumns = absoluteArray.ncolumn();
+    
+    uInt ele =1 ;
+    
+    uInt segmentInit = 0;
+    
+    uInt segmentFinal;
+    
+    Matrix<Double> filteredMatrix (segCount, nOfColumns) ;
+    
+    Vector<Double> filteredIndexMedian( segCount );
+    
+    Vector<Double> filteredDataIndexInit( segCount+1 );
+    
+    Vector<Double> filteredDataIndexFinal( segCount );
+    
+    for(uint i=0; i< segCount; i++) {
+      
+      filteredDataIndexInit( i )= segmentInit ;
+      
+      if( i == ( segCount-1 )) {
+	segmentFinal = nOfRows -1;
+	filteredDataIndexFinal( i )= segmentFinal;
+	filteredIndexMedian( i )=( filteredDataIndexInit( i )+ filteredDataIndexFinal( i ))/2;
+      }
+      else {
+	segmentFinal = segmentationIndices( ele-1 ) ;
+	filteredDataIndexFinal( i )= segmentFinal;
+	filteredIndexMedian( i )=( filteredDataIndexInit( i )+ filteredDataIndexFinal( i ))/2;
+      } ;
+      
+      filteredDataIndexInit( i+1 )= filteredDataIndexFinal( i )+1;
+      
+      uint segmentLength = ( segmentFinal - segmentInit + 1) ;
+      
+      Matrix<Double> segmentMatrix( absoluteArray(Slice(segmentInit, segmentLength),
+						  Slice(0, nOfColumns) ) );
+      
+      //StatisticsFilter <Double> mf ( filterStrength, filterType_p );
+      Bool sorted( False );
+      Bool takeEvenMean( False );
+      Bool inPlace( False );
+      
+      for ( uint j = 0; j < nOfColumns; j++) {
+	
+	Vector<Double> segmentVector = segmentMatrix.column(j);
+	
+	filteredMatrix (i,j) = median( segmentVector,
+				       sorted,
+				       takeEvenMean,
+				       inPlace);
+      } 
+      segmentInit = segmentFinal+1;
+      ele = ele+1;
     }
-   
-  uInt nOfRowsFilteredGains = filteredMatrix.nrow() ;
-  
-  Vector<Double> xin( nOfRowsFilteredGains );
-  
-  Vector<Double> xout( nOfRows );
-  
-  Vector<Double> yout( nOfRows );
-  
-  for( uint k = 0; k< nOfRows; k++){
-  
-  xout( k )= k*1.0000;
+    
+    uInt nOfRowsFilteredGains = filteredMatrix.nrow() ;
+    
+    Vector<Double> xin( nOfRowsFilteredGains );
+    
+    Vector<Double> xout( nOfRows );
+    
+    Vector<Double> yout( nOfRows );
+    
+    for( uint k = 0; k< nOfRows; k++){
+      
+      xout( k )= k*1.0000;
+    }
+    
+    Matrix<Double> interpolatedGains( nOfRows, nOfColumns, 0.0);
+    
+    for( uint p =0; p< segCount; p++){
+      
+      xin( p )= filteredIndexMedian( p );
+    }
+    
+    for( uint column = 0; column< nOfColumns ; column++ ){
+      
+      Vector<Double> yin = filteredMatrix.column( column );
+      
+      InterpolateArray1D<Double,Double>::interpolate( yout,xout,xin,yin,InterpolateArray1D<Double,Double>::linear);
+      
+      interpolatedGains.column( column ) = yout;
+    }
+    
+    return interpolatedGains ; 
   }
-  
-   Matrix<Double> interpolatedGains( nOfRows, nOfColumns, 0.0);
-  
-   for( uint p =0; p< segCount; p++){
-  
-     xin( p )= filteredIndexMedian( p );
-  }
- 
-  for( uint column = 0; column< nOfColumns ; column++ ){
-  
-  Vector<Double> yin = filteredMatrix.column( column );
-  
-  InterpolateArray1D<Double,Double>::interpolate( yout,xout,xin,yin,InterpolateArray1D<Double,Double>::linear);
-  
-   interpolatedGains.column( column ) = yout;
-  }
-  
-  return interpolatedGains ; 
- }
   catch ( AipsError x ) {
-  cerr << "RFIMitigation :: getFilteredGainValues " << x.getMesg () << endl ;
-  return Matrix<Double> ();
+    cerr << "RFIMitigation :: getFilteredGainValues " << x.getMesg () << endl ;
+    return Matrix<Double> ();
   }
   
 } // end of the function getinterpolatedGains
 
 
- 
+
 
 // ------------------------- getdifferenceSpectra-------------------------------------
-			  
+
  Matrix<Double> RFIMitigation :: getdifferenceSpectra( const Matrix<DComplex>& spectra,
  						      const uint& dataBlockSize,
 				                      const uint& nOfSegments )

@@ -28,6 +28,13 @@
 #include <tables/Tables/TableRow.h>
 #include <tables/Tables/SubTabDesc.h>
 
+using casa::DComplex;
+using casa::IPosition;
+using casa::String;
+using casa::uInt;
+
+namespace CR {  // Namespace CR -- begin
+
 /*!
   \class CalTableWriter
 
@@ -85,7 +92,7 @@ class CalTableWriter : public CalTableReader {
     
     \param tableFilename -- filename of the table to be edited.
   */
-  virtual Bool AttachTable(const String& tableFilename);
+  virtual bool AttachTable (const String& tableFilename);
   
 
   /*!
@@ -97,34 +104,34 @@ class CalTableWriter : public CalTableReader {
     \param startDate -- First date when this entry is valid
     \param stopDate=0 -- last date when this entry is valid or 0 if no end date 
 
-    \return ok -- Was operation successful? Returns <tt>True</tt> if yes.
+    \return ok -- Was operation successful? Returns <tt>true</tt> if yes.
 
     Maybe not too elegant:
     The data is added as the last row, so no sorting by date is done.
 
   */
-  Bool AddData(String data,
-	       Int const AntID,
+  bool AddData(String data,
+	       int const AntID,
 	       String const FieldName, 
 	       uInt const startDate,
 	       uInt const stopDate=0);
-  Bool AddData(Double data,
-	       Int const AntID,
+  bool AddData(double data,
+	       int const AntID,
 	       String const FieldName, 
 	       uInt const startDate,
 	       uInt const stopDate=0);
-  Bool AddData(DComplex data,
-	       Int const AntID,
+  bool AddData(DComplex data,
+	       int const AntID,
 	       String const FieldName, 
 	       uInt const startDate,
 	       uInt const stopDate=0);
-  Bool AddData(Array<Double> data,
-	       Int const AntID,
+  bool AddData(Array<double> data,
+	       int const AntID,
 	       String const FieldName, 
 	       uInt const startDate,
 	       uInt const stopDate=0);
-  Bool AddData(Array<DComplex> data,
-	       Int const AntID,
+  bool AddData(Array<DComplex> data,
+	       int const AntID,
 	       String const FieldName, 
 	       uInt const startDate,
 	       uInt const stopDate=0);
@@ -135,23 +142,23 @@ class CalTableWriter : public CalTableReader {
     \param FieldName -- Name of the field that is added
     \param FieldDesc -- Human readable description of the field, 
     \param DataType -- Type of the data that is stored in this field
-    \param shapeFixed=False -- If it is an array type: Is the shape fixed?
+    \param shapeFixed=false -- If it is an array type: Is the shape fixed?
     \param shape=IPosition(0) -- Shape of the fixed shape array.
-    \param SingleTables=False -- Put the data into seperate tables for each antenna
+    \param SingleTables=false -- Put the data into seperate tables for each antenna
     \param FriendField="" --  Name of the senior friend field of the field. (Read the 
                               (no yet) written document about friend fields.)
 
-    \return ok -- Was operation successful? Returns <tt>True</tt> if yes.
+    \return ok -- Was operation successful? Returns <tt>true</tt> if yes.
 
     Does not fill the new entries with any data. So a call to <tt>AddColumn()</tt> 
     is usually followed by several calls to <tt>AddData()</tt> 
   */
-  Bool AddField(const String FieldName,
+  bool AddField(const String FieldName,
 		const String FieldDesc,
 		const String DataType, 
-		const Bool shapeFixed=False,
+		const bool shapeFixed=false,
 		const IPosition shape=IPosition::IPosition(),
-		const Bool SingleTables=False,
+		const bool SingleTables=false,
 		const String FriendField="");
   
   /*!
@@ -160,12 +167,12 @@ class CalTableWriter : public CalTableReader {
     \param AntID -- ID of the new antenna. Must be unique!
     \param AntName -- Name of the new antenna.
     
-    \return ok -- Was operation successful? Returns <tt>True</tt> if yes.
+    \return ok -- Was operation successful? Returns <tt>true</tt> if yes.
 
     Does not fill the new entries with any data. So a call to <tt>AddAntenna()</tt> 
     is usually followed by several calls to <tt>AddData()</tt> 
   */
-  Bool AddAntenna(Int AntID,
+  bool AddAntenna(int AntID,
 		  String AntName);
 
   /*!
@@ -174,16 +181,16 @@ class CalTableWriter : public CalTableReader {
     \param data -- datum that is to be stored
     \param KeywordName -- Name of the field that to which the data belongs
 
-    \return ok -- Was operation successful? Returns <tt>True</tt> if yes.
+    \return ok -- Was operation successful? Returns <tt>true</tt> if yes.
 
     Sets the value of a keyword. If a keyword with this name already exists then 
     the old keyword is overwritten.
   */
-  Bool SetKeyword(String data, String const KeywordName);
-  Bool SetKeyword(Double data, String const KeywordName);
-  Bool SetKeyword(DComplex data, String const KeywordName);
-  Bool SetKeyword(Array<Double> data, String const KeywordName);
-  Bool SetKeyword(Array<DComplex> data, String const KeywordName);
+  bool SetKeyword(String data, String const KeywordName);
+  bool SetKeyword(double data, String const KeywordName);
+  bool SetKeyword(DComplex data, String const KeywordName);
+  bool SetKeyword(Array<double> data, String const KeywordName);
+  bool SetKeyword(Array<DComplex> data, String const KeywordName);
 
  private:
 
@@ -197,15 +204,21 @@ class CalTableWriter : public CalTableReader {
     \param *preRow -- returns the row number of the preceding row or -1 if none
     \param *succRow -- returns the row number of the succeding row or -1 if none
 
-    \return ok -- Was operation successful? Returns <tt>True</tt> if yes.
+    \return ok -- Was operation successful? Returns <tt>true</tt> if yes.
 
     Maybe not too elegant:
     The data is added as the last row, so no sorting by date is done.
 
   */
-  Bool GetPreSucRows(Int const AntID, Table const colTab, uInt const startDate, 
-		     uInt *stopDate, Int *preRow, Int *succRow);
+  bool GetPreSucRows(int const AntID,
+		     Table const colTab,
+		     uInt const startDate, 
+		     uInt *stopDate,
+		     int *preRow,
+		     int *succRow);
 
 };
+
+}  // Namespace CR -- end
 
 #endif /* _CALTABLEWRITER_H_ */

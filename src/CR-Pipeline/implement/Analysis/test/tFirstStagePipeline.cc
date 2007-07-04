@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -27,6 +27,14 @@
 #include <Analysis/FirstStagePipeline.h>
 #include <Data/LopesEventIn.h>
 
+using casa::DComplex;
+using casa::Double;
+using casa::Matrix;
+using casa::Record;
+using casa::Vector;
+
+using CR::FirstStagePipeline;
+using CR::LopesEventIn;
 
 /*!
   \file tFirstStagePipeline.cc
@@ -47,9 +55,6 @@
 
   \return nofFailedTests -- The number of failed tests.
 */
-
-// We need that, otherwise we'd have to write "LOPES::LopesEventIn" instead of "LopesEventIn"
-using namespace CR;
 
 int test_FirstStagePipeline ()
 {
@@ -101,7 +106,7 @@ int test_FirstStagePipeline ()
     Vector<Double> Frequencies;
     Matrix<DComplex> FFT;
     Matrix<Double> absFFT,phaseFFT;
-    Int i,j,fftlen,nants;
+    int i,j,fftlen,nants;
 
     FILE *allout;
 
@@ -121,7 +126,7 @@ int test_FirstStagePipeline ()
     fprintf(allout,"\n");
     fclose(allout);
 
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
   }

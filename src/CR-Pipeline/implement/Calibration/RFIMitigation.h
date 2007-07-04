@@ -135,19 +135,16 @@
 */
 
   
- class RFIMitigation 
-
-{
-
-private:
-
- uint segmentInit;
-
- uint segmentFinal;
- 
- 
-// --- Construction ----------------------------------------------------------
-
+class RFIMitigation {
+  
+ private:
+  
+  //! Number of the first channel in the segment
+  uint segmentInit;
+  //! Number of the last channel in the segment
+  uint segmentFinal;
+  
+  // --- Construction ----------------------------------------------------------
   
   // Matrix<DComplex> array;
   // 
@@ -155,7 +152,7 @@ private:
   // 
   // uInt strength_filter ;
   
-  public:
+ public:
   
   // --- Construction ----------------------------------------------------------
  

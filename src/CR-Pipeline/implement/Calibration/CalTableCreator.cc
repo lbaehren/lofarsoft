@@ -1,6 +1,9 @@
-/***************************************************************************
- *   Copyright (C) 2006                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+/*-------------------------------------------------------------------------*
+ | $Id: template-class.h,v 1.20 2007/06/13 09:41:37 bahren Exp           $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2006                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,105 +21,120 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: CalTableCreator.cc,v 1.3 2006/10/31 18:23:24 bahren Exp $*/
-
 #include <Calibration/CalTableCreator.h>
 
-// ==============================================================================
-//
-//  Construction
-//
-// ==============================================================================
+using std::cerr;
+using std::cout;
+using std::endl;
 
-CalTableCreator::CalTableCreator ()
-{;}
+using casa::ScalarColumnDesc;
+using casa::SetupNewTable;
+using casa::Table;
+using casa::TableDesc;
 
-CalTableCreator::CalTableCreator (String filename)
-{
-  Bool status (true);
-
-  status = newTable (filename);
-
-  if (!status) {
-    cerr << "[CalTableCreator] Error when trying to create a new table" << endl;
-  }
-}
-
-// ==============================================================================
-//
-//  Destruction
-//
-// ==============================================================================
-
-CalTableCreator::~CalTableCreator ()
-{
-  ;
-}
-
-// ==============================================================================
-//
-//  Operators
-//
-// ==============================================================================
-
-
-// ==============================================================================
-//
-//  Parameters
-//
-// ==============================================================================
-
-
-
-// ==============================================================================
-//
-//  Methods
-//
-// ==============================================================================
-
-
-Bool CalTableCreator::newTable(String filename)
-{
-  try {
-    //// Create the table description for the empty entries table
-    //    TableDesc entryDesc("master",TableDesc::Scratch);
-    //
-    //    entryDesc.addColumn(ScalarColumnDesc<Int>("StartDate", "First date when this entry is valid"));
-    //    entryDesc.addColumn(ScalarColumnDesc<Int>("StopDate", "Last date when this entry is valid"));
-
-       
-// Create the table description for the master table
-    TableDesc masterDesc("master",TableDesc::Scratch);
-    
-    masterDesc.addColumn(ScalarColumnDesc<Int>("AntID", "ID of the antenna"));
-    masterDesc.addColumn(ScalarColumnDesc<String>("AntName", "Name of the Antenna (e.g. the ID as string)"));
-    
-//Create the master table
-    SetupNewTable masterMaker(filename,masterDesc,Table::NewNoReplace);
-    Table master(masterMaker);
-    
-    ////Create an empty entries table
-    //    String tmpstring;
-    //    tmpstring = filename +"/entries";
-    //    SetupNewTable entriesMaker(tmpstring,entryDesc,Table::NewNoReplace);
-    //    Table entries(entriesMaker);
-    //    
-    ////Add the empty entries table as a keyword
-    //    master.rwKeywordSet().defineTable("emptyEntry",Table(entries));
-
-//Add some default keywords
-    master.rwKeywordSet().define("minDate",minDate);
-    master.rwKeywordSet().define("maxDate",maxDate);
-
-//Add a stupid default keyword //to be deleted...
-    master.rwKeywordSet().define("Observatory","LOPES");
-
-    cout << "endian:" << master.endianFormat() << " type:" << master.tableType() << endl;
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
-    return False;
-  };
+namespace CR {
   
-  return True;
-}
+  // ============================================================================
+  //
+  //  Construction
+  //
+  // ============================================================================
+  
+  CalTableCreator::CalTableCreator ()
+  {;}
+  
+  CalTableCreator::CalTableCreator (casa::String filename)
+  {
+    bool status (true);
+    
+    status = newTable (filename);
+    
+    if (!status) {
+      cerr << "[CalTableCreator] Error when trying to create a new table" << endl;
+    }
+  }
+  
+  // ============================================================================
+  //
+  //  Destruction
+  //
+  // ============================================================================
+  
+  CalTableCreator::~CalTableCreator ()
+  {
+    ;
+  }
+  
+  // ============================================================================
+  //
+  //  Operators
+  //
+  // ============================================================================
+  
+  
+  // ============================================================================
+  //
+  //  Parameters
+  //
+  // ============================================================================
+  
+  
+  
+  // ============================================================================
+  //
+  //  Methods
+  //
+  // ============================================================================
+  
+  
+  bool CalTableCreator::newTable(casa::String filename)
+  {
+    try {
+      //// Create the table description for the empty entries table
+      //    TableDesc entryDesc("master",TableDesc::Scratch);
+      //
+      //    entryDesc.addColumn(ScalarColumnDesc<int>("StartDate", "First date when this entry is valid"));
+      //    entryDesc.addColumn(ScalarColumnDesc<int>("StopDate", "Last date when this entry is valid"));
+      
+      
+      // Create the table description for the master table
+      TableDesc masterDesc("master",TableDesc::Scratch);
+      
+      masterDesc.addColumn(ScalarColumnDesc<int>("AntID", "ID of the antenna"));
+      masterDesc.addColumn(ScalarColumnDesc<casa::String>("AntName", "Name of the Antenna (e.g. the ID as string)"));
+      
+      //Create the master table
+      SetupNewTable masterMaker (filename,
+				 masterDesc,
+				 Table::NewNoReplace);
+      Table master (masterMaker);
+      
+      ////Create an empty entries table
+      //    casa::String tmpstring;
+      //    tmpstring = filename +"/entries";
+      //    SetupNewTable entriesMaker(tmpstring,entryDesc,Table::NewNoReplace);
+      //    Table entries(entriesMaker);
+      //    
+      ////Add the empty entries table as a keyword
+      //    master.rwKeywordSet().defineTable("emptyEntry",Table(entries));
+      
+      //Add some default keywords
+      master.rwKeywordSet().define("minDate",minDate);
+      master.rwKeywordSet().define("maxDate",maxDate);
+      
+      //Add a stupid default keyword //to be deleted...
+      master.rwKeywordSet().define("Observatory","LOPES");
+      
+      cout << "endian:" << master.endianFormat()
+	   << " type:" << master.tableType()
+	   << endl;
+    } catch (casa::AipsError x) {
+      cerr << x.getMesg() << endl;
+      return false;
+    };
+    
+    return true;
+  }
+  
+}  // Namespace CR -- end
 

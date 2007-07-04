@@ -62,9 +62,12 @@ namespace CR {  // Namespace CR -- begin
 #include <casa/Utilities/PtrHolder.cc>
 #include <scimath/Functionals/Function.cc>
 #include <scimath/Functionals/FunctionParam.cc>
+#include <scimath/Functionals/Interpolate1D.cc>
 #include <scimath/Mathematics/FFTServer.cc>
+#include <scimath/Mathematics/InterpolateArray1D.cc>
 #include <images/Images/ImageInterface.cc>
 #include <images/Images/PagedImage.cc>
+
 
 namespace casa {
 
@@ -378,6 +381,9 @@ namespace casa {
 
   template ostream & operator<<(ostream &, Function<Double, Double> const &);
 
+  template class InterpolateArray1D<double, double >;
+  template class InterpolateArray1D<double, std::complex<double> >;
+  
   template class FFTServer<Float,Complex>;
   template class FFTServer<Double, DComplex>;
  

@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2006                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -41,80 +41,83 @@
 #include <tables/Tables/StandardStMan.h>
 #include <tables/Tables/IncrementalStMan.h>
 
-#include <casa/namespace.h>
-
-/*!
-  \class CalTableCreator
-
-  \ingroup Calibration
-
-  \brief Tool to create an empty calibration table
-
-  \author Andreas Horneffer
-
-  \date 2006/01/18
-
-  \test tCalTableCreator.cc
-
-  <h3>Prerequisite</h3>
-
-  <h3>Synopsis</h3>
-
-  <h3>Example(s)</h3>
-
-  \code
-  CalTableCreator create;
-  create.newTable("empty_table");
-  \endcode
-*/
-
-class CalTableCreator {
-
- private:
-
+namespace CR {  // Namespace CR -- begin
+  
+  /*!
+    \class CalTableCreator
+    
+    \ingroup Calibration
+    
+    \brief Tool to create an empty calibration table
+    
+    \author Andreas Horneffer
+    
+    \date 2006/01/18
+    
+    \test tCalTableCreator.cc
+    
+    <h3>Prerequisite</h3>
+    
+    <h3>Synopsis</h3>
+    
+    <h3>Example(s)</h3>
+    
+    \code
+    CalTableCreator create;
+    create.newTable("empty_table");
+    \endcode
+  */
+  
+  class CalTableCreator {
+    
+  private:
+    
 #define minDate 0
 #define maxDate 0xffffffff  // 2106.02.07.06:28:15.000 end of the 32bit unsigned unix epoch...
-
-
- public:
-
-  // --------------------------------------------------------------- Construction
-
-  /*!
-    \brief Default constructor
-  */
-  CalTableCreator ();
-
-  /*!
-    \brief Argumented constructor
-
-    \param filename -- Name of the new table
-  */
-  CalTableCreator (String filename);
-
-
-  // ---------------------------------------------------------------- Destruction
-
-  /*!
-    \brief Destructor
-  */
-  ~CalTableCreator ();
-
-  // ------------------------------------------------------------------ Operators
-
-
-  // ----------------------------------------------------------------- Parameters
-
-  // -------------------------------------------------------------------- Methods
-
-  /*!
-    \brief Create a new empty table
-
-    \param filename -- Name of the new table
-
-    \return  ok -- Was operation successful? Returns \c True if yes.
-  */
-  Bool newTable(String filename);
-};
+    
+    
+  public:
+    
+    // ------------------------------------------------------------- Construction
+    
+    /*!
+      \brief Default constructor
+    */
+    CalTableCreator ();
+    
+    /*!
+      \brief Argumented constructor
+      
+      \param filename -- Name of the new table
+    */
+    CalTableCreator (casa::String filename);
+    
+    
+    // -------------------------------------------------------------- Destruction
+    
+    /*!
+      \brief Destructor
+    */
+    ~CalTableCreator ();
+    
+    // ---------------------------------------------------------------- Operators
+    
+    
+    // --------------------------------------------------------------- Parameters
+    
+    // ------------------------------------------------------------------ Methods
+    
+    /*!
+      \brief Create a new empty table
+      
+      \param filename -- Name of the new table
+      
+      \return  ok -- Was operation successful? Returns \c True if yes.
+    */
+    bool newTable (casa::String filename);
+  };
+  
+}  // Namespace CR -- end
 
 #endif /* _CALTABLECREATOR_H_ */
+  

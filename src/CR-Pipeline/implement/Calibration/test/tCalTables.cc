@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2006                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -28,6 +28,27 @@
 #include <Calibration/CalTableWriter.h>
 #include <Calibration/CalTableReader.h>
 
+using std::cerr;
+using std::cout;
+using std::endl;
+
+using casa::ArrayColumn;
+using casa::ArrayColumnDesc;
+using casa::ColumnDesc;
+using casa::DComplex;
+using casa::Double;
+using casa::Matrix;
+using casa::ScalarColumn;
+using casa::ScalarColumnDesc;
+using casa::SetupNewTable;
+using casa::TableDesc;
+using casa::TableExprNodeSet;
+using casa::uInt;
+using casa::Vector;
+
+using CR::CalTableCreator;
+using CR::CalTableReader;
+using CR::CalTableWriter;
 
 /*!
   \file tCalTableCreator.cc
@@ -46,22 +67,22 @@
 
   \return nofFailedTests -- The number of failed tests.
 */
-Int test_CalTableCreator () {
+int test_CalTableCreator () {
   try {
-    Bool ok;
+    bool ok;
     CalTableCreator maker;         
     cout << "CalTableCreator object created." << endl;
     ok = maker.newTable("testTable");
     cout << "testTable created:" << ok << endl;      
-  } catch (AipsError x) {
+  } catch (casa::AipsError x) {
       cerr << "Creator Test:" << x.getMesg() << endl;
       return 1;
   };
   return 0;
 }
 
-Int test_CalTableWriter () {
-  Int i,j,failed=0;
+int test_CalTableWriter () {
+  int i,j,failed=0;
   try {
     CalTableWriter writer;
     if (!writer.AttachTable("testTable")) {
@@ -71,10 +92,10 @@ Int test_CalTableWriter () {
     cout << "Start of CalTableWriter : ";
     writer.PrintSummary();
     if (!writer.AddAntenna(1,"Antenna number one!")) failed++;
-    if (!writer.AddField("Position","The antenna position","Array<Double>",True,IPosition(1,3))) failed++;
+    if (!writer.AddField("Position","The antenna position","Array<Double>",true,IPosition(1,3))) failed++;
     if (!writer.AddField("Gain","The electronics Gain","Array<DComplex>")) failed++;
-    if (!writer.AddField("GainFreqAx","The frequency axis of the Gain","Array<Double>",False,IPosition(1,3),False,"Gain")) failed++;
-    if (!writer.AddField("GainPosAx","The position axis of the Gain","Array<Double>",False,IPosition(1,3),False,"Gain")) failed++;
+    if (!writer.AddField("GainFreqAx","The frequency axis of the Gain","Array<Double>",false,IPosition(1,3),false,"Gain")) failed++;
+    if (!writer.AddField("GainPosAx","The position axis of the Gain","Array<Double>",false,IPosition(1,3),false,"Gain")) failed++;
     Vector<Double> PosData(3);
     for (i=0;i<3;i++) { PosData(i) = i+1; };
     if (!writer.AddData(PosData,1,"Position",1000)) failed++;
@@ -105,8 +126,8 @@ Int test_CalTableWriter () {
   return failed;
 }
 
-Int test_CalTableReader () {
-  Int failed (0);
+int test_CalTableReader () {
+  int failed (0);
   try {
     CalTableReader reader;
     if (!reader.AttachTable("testTable")) {
@@ -133,14 +154,14 @@ Int test_CalTableReader () {
   return failed;
 }
 
-Int test_stuff(){
+int test_stuff(){
   try {
     ColumnDesc newCol;
     newCol = ScalarColumnDesc<String>("Hurtz!","Das Hurtz Feld.");    
     TableDesc entryDesc("master",TableDesc::Scratch);
-    entryDesc.addColumn(ScalarColumnDesc<Int>("StartDate", "First date when this entry is valid"));
-    entryDesc.addColumn(ScalarColumnDesc<Int>("StopDate", "Last date when this entry is valid"));
-    entryDesc.addColumn(ScalarColumnDesc<Int>("AntID", "ID of the antenna"));
+    entryDesc.addColumn(ScalarColumnDesc<int>("StartDate", "First date when this entry is valid"));
+    entryDesc.addColumn(ScalarColumnDesc<int>("StopDate", "Last date when this entry is valid"));
+    entryDesc.addColumn(ScalarColumnDesc<int>("AntID", "ID of the antenna"));
     entryDesc.addColumn(ScalarColumnDesc<String>("String", "ID of the antenna"));
     entryDesc.addColumn(ScalarColumnDesc<Double>("Double", "ID of the antenna"));
     entryDesc.addColumn(ScalarColumnDesc<DComplex>("DComplex", "ID of the antenna"));
@@ -153,10 +174,10 @@ Int test_stuff(){
     Double tmpd,tmpd2;
     tmpd = 0./0.; //Set the variables to NaN
     tmpd2 = 0./0.;
-    ScalarColumn<Int>(entries,"AntID").put(0,10);
+    ScalarColumn<int>(entries,"AntID").put(0,10);
     ScalarColumn<String>(entries,"String").put(1,"String");
-    ScalarColumn<Double>(entries,"Double").put(2,ValType::undefDouble());
-    ScalarColumn<DComplex>(entries,"DComplex").put(3,ValType::undefDouble());
+    ScalarColumn<Double>(entries,"Double").put(2,casa::ValType::undefDouble());
+    ScalarColumn<DComplex>(entries,"DComplex").put(3,casa::ValType::undefDouble());
     Array<Double> arr(IPosition(1,3),tmpd);
     ArrayColumn<Double>(entries,"Array<Double").put(4,arr);
     ArrayColumn<Double>(entries,"Array<fixed>").put(4,arr);
@@ -178,7 +199,7 @@ Int test_stuff(){
     rowNrs = entries(isdefined(entries.col("Double"))).rowNumbers(entries); 
     cout << "Double" << rowNrs << endl;
     rowNrs.resize();
-    rowNrs = entries( isdefined(entries.col("DComplex")) && isNaN(entries.col("DComplex")(TableExprNodeSet(IPosition(1,1)))) ).rowNumbers(entries);
+    rowNrs = entries( isdefined(entries.col("DComplex")) && casa::isNaN(entries.col("DComplex")(TableExprNodeSet(IPosition(1,1)))) ).rowNumbers(entries);
     cout << "DComplex" << rowNrs << endl;
     rowNrs.resize();
     rowNrs = entries( isdefined(entries.col("Array<Double")) && isNaN(entries.col("Array<Double")(TableExprNodeSet(IPosition(1,1)))) ).rowNumbers(entries); 
@@ -191,12 +212,12 @@ Int test_stuff(){
     rowNrs.resize();
     rowNrs = entries( isNaN(entries.col("Array<fixed>")(TableExprNodeSet(IPosition(1,1))))  ).rowNumbers(entries); 
     cout << "Array<fixed>" << rowNrs << endl;
-    Bool tmpbool;
+    bool tmpbool;
     tmpbool = isnan(tmpd);
     cout << tmpbool << endl;
-    tmpbool = True;
+    tmpbool = true;
     cout << tmpbool << endl;
-    } catch (AipsError x) {
+  } catch (casa::AipsError x) {
       cerr << "Stuff Test:" << x.getMesg() << endl;
       return 1;
   };
@@ -208,7 +229,7 @@ Int test_stuff(){
 
 int main ()
 {
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
 
   // Test for the constructor(s)
   {
