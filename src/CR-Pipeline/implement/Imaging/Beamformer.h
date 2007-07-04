@@ -264,6 +264,9 @@ namespace CR { // Namespace CR -- begin
 
       \f[ S (\vec\rho,\nu) = \sum_{j=1}^{N_{\rm Ant}} \widetilde s_{j}
       (\vec\rho,\nu) \f]
+      From the above we get the (directed) power spectrum via
+      \f[ \widetilde P (\vec\rho,\nu) = \overline{\widetilde S (\vec\rho,\nu)}
+      \cdot \widetilde S (\vec\rho,\nu) \f]
 
       \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
                       input data.

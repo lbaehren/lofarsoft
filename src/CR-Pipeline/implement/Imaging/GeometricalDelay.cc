@@ -40,9 +40,10 @@ namespace CR { // NAMESPACE CR -- BEGIN
   
 #ifdef HAVE_CASA
   GeometricalDelay::GeometricalDelay ()
-    : bufferDelays_p (false)
+    : nofAntennas_p (1),
+      bufferDelays_p (false)
   {
-    casa::IPosition shape(2,1,3);
+    casa::IPosition shape(2,nofAntennas_p,3);
     antPositions_p.resize(shape);
     skyPositions_p.resize(shape);
     
@@ -56,10 +57,11 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #else 
 #ifdef HAVE_BLITZ
   GeometricalDelay::GeometricalDelay ()
-    : bufferDelays_p (false)
+    : nofAntennas_p (1),
+      bufferDelays_p (false)
   {
-    antPositions_p.resize(1,3);
-    skyPositions_p.resize(1,3);
+    antPositions_p.resize(nofAntennas_p,3);
+    skyPositions_p.resize(nofAntennas_p,3);
     
     antPositions_p = 0.0, 0.0, 0.0;
     skyPositions_p = 0.0, 0.0, 1.0;
@@ -82,6 +84,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       // use defaults
       antPositions_p.resize(1,3);
       antPositions_p = 0.0;
+      nofAntennas_p  = 1;
     }
     
     if (!setSkyPositions (skyPositions,false)) {
@@ -111,6 +114,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       // use defaults
       antPositions_p.resize(1,3);
       antPositions_p = 0.0, 0.0, 0.0;
+      nofAntennas_p  = 1;
     }
     
     if (!setSkyPositions (skyPositions,false)) {
@@ -177,7 +181,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     skyPositions_p.resize (other.skyPositions_p.shape());
     skyPositions_p = other.skyPositions_p;
-    
+
+    nofAntennas_p = other.nofAntennas_p;
+
     bufferDelays_p  = other.bufferDelays_p;
     
     if (bufferDelays_p) {
@@ -199,12 +205,14 @@ namespace CR { // NAMESPACE CR -- BEGIN
 					  const bool &bufferDelays)
   {
     bool status (true);
+    casa::IPosition shape (antPositions.shape());
 
     // check the shape of the array
-    if (antPositions.ncolumn() == 3) {
+    if (shape(1) == 3) {
       // store the array
-      antPositions_p.resize (antPositions.shape());
+      antPositions_p.resize (shape);
       antPositions_p = antPositions;
+      nofAntennas_p  = shape(0);
       // update the values of the geometrical delays
       if (bufferDelays) {
 	bufferDelays_p = bufferDelays;
@@ -229,6 +237,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       // store the array
       antPositions_p.resize (antPositions.shape());
       antPositions_p = antPositions;
+      nofAntennas_p  = antPositions.rows();
       // update the values of the geometrical delays
       if (bufferDelays) {
 	bufferDelays_p = bufferDelays;
@@ -597,7 +606,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   void GeometricalDelay::setDelays ()
   {
     if (bufferDelays_p) {
-      delays_p.resize (nofAntennaPositions(),nofSkyPositions());
+      delays_p.resize (nofAntennas_p,nofSkyPositions());
       delays_p = calcDelays();
     }
   }
@@ -675,18 +684,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_CASA
   casa::Matrix<double> GeometricalDelay::calcDelays ()
   {
-    int nAnt (0);
+    uint nAnt (0);
     int nSky (0);
-    int nofAnt (nofAntennaPositions());
     int nofSky (nofSkyPositions());
     casa::Vector<double> skyPos (3);
     casa::Vector<double> diff (3);
-    casa::Matrix<double> delays (nofAnt,nofSky);
+    casa::Matrix<double> delays (nofAntennas_p,nofSky);
 
     // computation of the geometrical delays
     for (nSky=0; nSky<nofSky; nSky++) {
       skyPos = skyPositions_p.row(nSky);
-      for (nAnt=0; nAnt<nofAnt; nAnt++) {
+      for (nAnt=0; nAnt<nofAntennas_p; nAnt++) {
  	diff = skyPos - antPositions_p.row(nAnt);
  	delays(nAnt,nSky) = (L2Norm(diff)-L2Norm(skyPos))/lightspeed;
       }
@@ -698,18 +706,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_BLITZ
   blitz::Array<double,2> GeometricalDelay::calcDelays ()
   {
-    int nAnt (0);
+    uint nAnt (0);
     int nSky (0);
-    int nofAnt (nofAntennaPositions());
     int nofSky (nofSkyPositions());
     blitz::Array<double,1> skyPos (3);
     blitz::Array<double,1> diff (3);
-    blitz::Array<double,2> delays (nofAnt,nofSky);
+    blitz::Array<double,2> delays (nofAntennas_p,nofSky);
 
     // computation of the geometrical delays
     for (nSky=0; nSky<nofSky; nSky++) {
       skyPos = skyPositions_p(nSky,blitz::Range(blitz::Range::all()));
-      for (nAnt=0; nAnt<nofAnt; nAnt++) {
+      for (nAnt=0; nAnt<nofAntennas_p; nAnt++) {
 	diff = skyPos-antPositions_p(nAnt,blitz::Range(blitz::Range::all()));
 	delays(nAnt,nSky) = (CR::L2Norm(diff)-CR::L2Norm(skyPos))/lightspeed;
       }

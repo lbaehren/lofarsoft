@@ -45,6 +45,8 @@
 #include <Data/LopesEvent.h>
 #include <IO/DataReader.h>
 
+using CR::RFIMitigation;
+
 // ------------------------------------------------------------------------------
 //
 //  Global variables

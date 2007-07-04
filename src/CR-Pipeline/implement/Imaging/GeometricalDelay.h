@@ -125,6 +125,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #endif
 #endif
 
+    //! Book-keeping: # of antennas
+    uint nofAntennas_p;
     //! Buffer the values for the geometrical delay?
     bool bufferDelays_p;
     
@@ -518,24 +520,13 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \return nofAntennaPositions -- The number of antenna positions, for which
                                      the geometrical delay is computed.
     */
-#ifdef HAVE_CASA
-    inline int nofAntennaPositions () {
-      return antPositions_p.nrow();
+    inline uint nofAntennaPositions () {
+      return nofAntennas_p;
     }
-    inline int nofAntennas () {
-      return antPositions_p.nrow();
+    inline uint nofAntennas () {
+      return nofAntennas_p;
     }
-#else
-#ifdef HAVE_BLITZ
-    inline int nofAntennaPositions () {
-      return antPositions_p.rows();
-    }
-    inline int nofAntennas () {
-      return antPositions_p.rows();
-    }
-#endif
-#endif
-
+    
     /*!
       \brief Get the number of (source) positions
 

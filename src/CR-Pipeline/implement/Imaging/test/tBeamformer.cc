@@ -64,6 +64,15 @@ int test_Beamformer ()
 
 // -----------------------------------------------------------------------------
 
+int test_processing ()
+{
+  int nofFailedTests (0);
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
 int main ()
 {
   int nofFailedTests (0);
@@ -71,6 +80,10 @@ int main ()
   // Test for the constructor(s)
   {
     nofFailedTests += test_Beamformer ();
+  }
+
+  if (nofFailedTests) {
+    nofFailedTests += test_processing ();
   }
 
   return nofFailedTests;
