@@ -128,7 +128,7 @@ namespace CR { // Namespace CR -- begin
     // Activate the buffering of the weighting factors
     bufferWeights_p = true;
     // default setting for the used beamforming method
-    status = setBeamType (Beamformer::ADDANTENNAS);
+    status = setBeamType (Beamformer::FREQ_POWER);
   }
   
   // --------------------------------------------------------------- beamTypeName
@@ -138,17 +138,23 @@ namespace CR { // Namespace CR -- begin
     std::string name;
     
     switch (beamType_p) {
-    case ADDANTENNAS:
-      name = "AddAntennas";
+    case FREQ_FIELD:
+      name = "FREQ_FIELD";
       break;
-    case ADDBASELINES:
-      name = "AddBaselines";
+    case FREQ_POWER:
+      name = "FREQ_POWER";
       break;
-    case CCBEAM:
-      name = "ccBeam";
+    case TIME_FIELD:
+      name = "TIME_FIELD";
       break;
-    case XBEAM:
-      name = "xBeam";
+    case TIME_POWER:
+      name = "TIME_POWER";
+      break;
+    case TIME_CC:
+      name = "TIME_CC";
+      break;
+    case TIME_X:
+      name = "TIME_X";
       break;
     }
 
@@ -162,20 +168,21 @@ namespace CR { // Namespace CR -- begin
     bool status (true);
     
     switch (beam) {
-    case ADDANTENNAS:
-      beamType_p = beam;
-      processData_p = &Beamformer::add_signals_per_antenna;
+    case FREQ_POWER:
+      beamType_p    = beam;
+      processData_p = &Beamformer::freq_power;
       break;
-    case ADDBASELINES:
-      beamType_p = beam;
+    case TIME_POWER:
+      beamType_p    = beam;
+      processData_p = &Beamformer::time_power;
       break;
-    case CCBEAM:
-      beamType_p = beam;
-      processData_p = &Beamformer::cc_beam;
+    case TIME_CC:
+      beamType_p    = beam;
+      processData_p = &Beamformer::time_cc;
       break;
-    case XBEAM:
-      beamType_p = beam;
-      processData_p = &Beamformer::x_beam;
+    case TIME_X:
+      beamType_p    = beam;
+      processData_p = &Beamformer::time_x;
       break;
     }
     
@@ -201,15 +208,14 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  // ---------------------------------------------------- add_signals_per_antenna
+  // ----------------------------------------------------------------- freq_power
 
 #ifdef HAVE_CASA
-  bool Beamformer::add_signals_per_antenna (casa::Matrix<double> &beam,
-					    const casa::Matrix<DComplex> &data)
+  bool Beamformer::freq_power (casa::Matrix<double> &beam,
+			       const casa::Matrix<DComplex> &data)
   {
     bool status (true);
     int nofSkyPositions (skyPositions_p.nrow());
-    int nofAntennas (antPositions_p.nrow());
     int nofFrequencies (frequencies_p.nelements());
     casa::IPosition shapeData (data.shape());
 
@@ -221,7 +227,7 @@ namespace CR { // Namespace CR -- begin
 	shapeData(1) == nofFrequencies) {
       // additional local variables
       int direction (0);
-      int antenna (0);
+      uint antenna (0);
       int freq (0);
       casa::DComplex tmp;
       // resize array returning the beamformed data
@@ -231,7 +237,7 @@ namespace CR { // Namespace CR -- begin
 	values.
       */
       for (direction=0; direction<nofSkyPositions; direction++) {
-	for (antenna=0; antenna<nofAntennas; antenna++) {
+	for (antenna=0; antenna<nofAntennas_p; antenna++) {
 	  for (freq=0; freq<nofFrequencies; freq++) {
 	    tmp = data(antenna,freq)*weights_p(antenna,direction,freq);
 	    beam(direction,freq) += real(tmp*conj(tmp));
@@ -239,7 +245,7 @@ namespace CR { // Namespace CR -- begin
 	}
       }
     } else {
-      std::cerr << "[Beamformer::add_signals_per_antenna]" << std::endl;
+      std::cerr << "[Beamformer::freq_power]" << std::endl;
       std::cerr << "-- Wrong shape of array with input data!" << std::endl;
       status = false;
     }
@@ -248,29 +254,80 @@ namespace CR { // Namespace CR -- begin
   }
 #else
 #ifdef HAVE_BLITZ
-  bool Beamformer::add_signals_per_antenna (blitz::Array<double,2> &beam,
-					    const blitz::Array<complex<double>,2> &data)
+  bool Beamformer::freq_power (blitz::Array<double,2> &beam,
+			       const blitz::Array<complex<double>,2> &data)
   {
     bool status (true);
     
     return status;
   }
 #endif
-#endif  
-
-  // -------------------------------------------------------------------- cc_beam
+#endif
+  
+  // ----------------------------------------------------------------- time_power
 
 #ifdef HAVE_CASA
-  bool Beamformer::cc_beam (casa::Matrix<double> &beam,
-			    const casa::Matrix<DComplex> &data)
+  bool Beamformer::time_power (casa::Matrix<double> &beam,
+			       const casa::Matrix<DComplex> &data)
   {
     bool status (true);
-    
+
     return status;
   }
 #else
 #ifdef HAVE_BLITZ
-  bool Beamformer::cc_beam (blitz::Array<double,2> &beam,
+  bool Beamformer::time_power (blitz::Array<double,2> &beam,
+			       const blitz::Array<complex<double>,2> &data)
+  {
+    bool status (true);
+
+    return status;
+  }
+#endif
+#endif
+
+  // -------------------------------------------------------------------- time_cc
+
+#ifdef HAVE_CASA
+  bool Beamformer::time_cc (casa::Matrix<double> &beam,
+			    const casa::Matrix<DComplex> &data)
+  {
+    bool status (true);
+    int nofSkyPositions (skyPositions_p.nrow());
+    int nofFrequencies (frequencies_p.nelements());
+    casa::IPosition shapeData (data.shape());
+    
+    /*
+      Check if the shape of the array with the input data matched the internal
+      parameters.
+    */
+    if (shapeData(0) == nofSkyPositions &&
+	shapeData(1) == nofFrequencies) {
+      // additional local variables
+      int direction (0);
+      uint antenna (0);
+      int freq (0);
+      /*
+	Compute the beams for all combinations of sky positions and frequency
+	values.
+      */
+      for (direction=0; direction<nofSkyPositions; direction++) {
+	for (antenna=0; antenna<nofAntennas_p; antenna++) {
+	  for (freq=0; freq<nofFrequencies; freq++) {
+	  }
+	}
+      }
+    } else {
+      std::cerr << "[Beamformer::time_cc]"                    << std::endl;
+      std::cerr << "-- Wrong shape of array with input data!" << std::endl;
+      status = false;
+    }
+
+    return status;
+  }
+#else
+#ifdef HAVE_BLITZ
+  bool Beamformer::time_cc (blitz::Array<double,2> &beam,
 			    const blitz::Array<conplex<double>,2> &data)
   {
     bool status (true);
@@ -280,10 +337,10 @@ namespace CR { // Namespace CR -- begin
 #endif
 #endif
   
-  // --------------------------------------------------------------------- x_beam
+  // --------------------------------------------------------------------- time_x
 
 #ifdef HAVE_CASA
-  bool Beamformer::x_beam (casa::Matrix<double> &beam,
+  bool Beamformer::time_x (casa::Matrix<double> &beam,
 			    const casa::Matrix<DComplex> &data)
   {
     bool status (true);
@@ -292,7 +349,7 @@ namespace CR { // Namespace CR -- begin
   }
 #else
 #ifdef HAVE_BLITZ
-  bool Beamformer::x_beam (blitz::Array<double,2> &beam,
+  bool Beamformer::time_x (blitz::Array<double,2> &beam,
 			    const blitz::Array<conplex<double>,2> &data)
   {
     bool status (true);

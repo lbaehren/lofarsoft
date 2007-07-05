@@ -74,19 +74,18 @@ namespace CR { // Namespace CR -- begin
       \brief List of implemented and supported beam types.
     */
     typedef enum {
-      /*!
-	Add up the Fourier-transformed antennas signals
-      */
-      ADDANTENNAS,
-      /*!
-	Add up the Fourier-transformed antenna signals after forming of baselines
-      */
-      ADDBASELINES,
-      /*!
-	Cross-correlation beam
-      */
-      CCBEAM,
-      XBEAM
+      //! Electric field strength as function of frequency
+      FREQ_FIELD,
+      //! Power of the electric field as function of frequency
+      FREQ_POWER,
+      //! Electric field strength as function of time (sample resolution)
+      TIME_FIELD,
+      //! Power of the electric field as function of time
+      TIME_POWER,
+      //! Cross-correlation beam (cc-beam)
+      TIME_CC,
+      //! Excess-beam
+      TIME_X
     } BeamType;
     
   private:
@@ -260,7 +259,7 @@ namespace CR { // Namespace CR -- begin
 #endif
     
     /*!
-      \brief Form beam by adding up Fourier-transformed data
+      \brief Directed spectral power, \f$ S (\vec\rho,\nu) \f$
 
       \f[ S (\vec\rho,\nu) = \sum_{j=1}^{N_{\rm Ant}} \widetilde s_{j}
       (\vec\rho,\nu) \f]
@@ -277,12 +276,33 @@ namespace CR { // Namespace CR -- begin
                           an error was encountered
     */
 #ifdef HAVE_CASA
-    bool add_signals_per_antenna (casa::Matrix<double> &beam,
-				  const casa::Matrix<DComplex> &data);
+    bool freq_power (casa::Matrix<double> &beam,
+		     const casa::Matrix<DComplex> &data);
 #else
 #ifdef HAVE_BLITZ
-    bool add_signals_per_antenna (blitz::Array<double,2> &beam,
-				  const blitz::Array<complex<double>,2> &data);
+    bool freq_power (blitz::Array<double,2> &beam,
+		     const blitz::Array<complex<double>,2> &data);
+#endif
+#endif
+    
+    /*!
+      \brief Directed power time series, \f$ S (\vec\rho,t) \f$
+
+      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
+                      input data.
+      \param  data -- [nofDatasets,nofChannels] Input data which will be
+                      processed to form a given type of beam.
+
+      \return status   -- Status of the operation; returns <i>false</i> if an
+                          an error was encountered
+    */
+#ifdef HAVE_CASA
+    bool time_power (casa::Matrix<double> &beam,
+		     const casa::Matrix<DComplex> &data);
+#else
+#ifdef HAVE_BLITZ
+    bool time_power (blitz::Array<double,2> &beam,
+		     const blitz::Array<complex<double>,2> &data);
 #endif
 #endif
     
@@ -319,11 +339,11 @@ namespace CR { // Namespace CR -- begin
                           an error was encountered
     */
 #ifdef HAVE_CASA
-    bool cc_beam (casa::Matrix<double> &beam,
+    bool time_cc (casa::Matrix<double> &beam,
 		  const casa::Matrix<DComplex> &data);
 #else
 #ifdef HAVE_BLITZ
-    bool cc_beam (blitz::Array<double,2> &beam,
+    bool time_cc (blitz::Array<double,2> &beam,
 		  const blitz::Array<conplex<double>,2> &data);
 #endif
 #endif
@@ -340,11 +360,11 @@ namespace CR { // Namespace CR -- begin
                           an error was encountered
     */
 #ifdef HAVE_CASA
-    bool x_beam (casa::Matrix<double> &beam,
+    bool time_x (casa::Matrix<double> &beam,
 		 const casa::Matrix<DComplex> &data);
 #else
 #ifdef HAVE_BLITZ
-    bool x_beam (blitz::Array<double,2> &beam,
+    bool time_x (blitz::Array<double,2> &beam,
 		 const blitz::Array<complex<double>,2> &data);
 #endif
 #endif
