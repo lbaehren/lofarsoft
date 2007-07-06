@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: Phasing.h,v 1.7 2007/03/19 12:29:46 bahren Exp $ */
+/* $Id$ */
 
 #if !defined(PHASING_H)
 #define PHASING_H

@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: XBeam.cc,v 1.1 2007/03/19 12:29:47 bahren Exp $*/
+/* $Id$*/
 
 #include <Skymap/XBeam.h>
 

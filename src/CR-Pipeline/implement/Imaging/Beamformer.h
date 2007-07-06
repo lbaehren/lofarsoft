@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id: template-class.h,v 1.20 2007/06/13 09:41:37 bahren Exp           $ |
+ | $Id$ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -347,13 +347,18 @@ namespace CR { // Namespace CR -- begin
 #endif
     
     /*!
-      \brief Directed spectral power, \f$ S (\vec\rho,\nu) \f$
+      \brief Directed spectral power, \f$ \widetilde P (\vec\rho,\nu) \f$
 
-      \f[ S (\vec\rho,\nu) = \sum_{j=1}^{N_{\rm Ant}} \widetilde s_{j}
-      (\vec\rho,\nu) \f]
-      From the above we get the (directed) power spectrum via
       \f[ \widetilde P (\vec\rho,\nu) = \overline{\widetilde S (\vec\rho,\nu)}
       \cdot \widetilde S (\vec\rho,\nu) \f]
+      where 
+      \f[ \widetilde S (\vec\rho,\nu) = \frac{1}{N_{\rm Ant}}
+      \sum_{j=1}^{N_{\rm Ant}} \widetilde S_{j} (\vec\rho,\nu) =
+      \frac{1}{N_{\rm Ant}} \sum_{j=1}^{N_{\rm Ant}} w (\vec x_j, \vec \rho, \nu)
+      \widetilde s_{j} (\nu) \f]
+      in which \f$ w \f$ is the weighting factor for each combination of antenna,
+      pointing direction and frequency and \f$ \widetilde s_j \f$ is the Fourier
+      transform of the data from antenna \f$ j \f$.
 
       \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
                       input data.

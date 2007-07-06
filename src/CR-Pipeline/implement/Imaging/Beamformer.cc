@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id: template-class.cc,v 1.13 2007/06/13 09:41:37 bahren Exp          $ |
+ | $Id$ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -308,6 +308,39 @@ namespace CR { // Namespace CR -- begin
 			       const blitz::Array<complex<double>,2> &data)
   {
     bool status (true);
+    int nofSkyPositions (skyPositions_p.nrow());
+    int nofFrequencies (frequencies_p.nelements());
+    casa::IPosition shapeData (data.shape());
+
+    /*
+      Check if the shape of the array with the input data matched the internal
+      parameters.
+    */
+    if (shapeData(0) == nofSkyPositions &&
+	shapeData(1) == nofFrequencies) {
+      // additional local variables
+      int direction (0);
+      uint antenna (0);
+      int freq (0);
+      int blocksize (2*(nofFrequencies-1));
+      Vector<DComplex> vectFreq (nofFrequencies);
+
+      for (direction=0; direction<nofSkyPositions; direction++) {
+	for (antenna=0; antenna<nofAntennas_p; antenna++) {
+	  // (1) Assemble the beamformed spectrum
+	  for (freq=0; freq<nofFrequencies; freq++) {
+	    vectFreq(freq) = data(antenna,freq)*weights_p(antenna,direction,freq);
+	  }
+	  // (2) Inverse Fourier transform back to the time domain
+	  // (3) Assemble power time-series
+	}
+      }
+
+    } else {
+      std::cerr << "[Beamformer::time_power]" << std::endl;
+      std::cerr << "-- Wrong shape of array with input data!" << std::endl;
+      status = false;
+    }
 
     return status;
   }

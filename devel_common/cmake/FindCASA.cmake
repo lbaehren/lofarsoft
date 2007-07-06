@@ -38,6 +38,7 @@ find_path (CASA_INCLUDES aips.h
   /casa
   /opt/casa
   /sw/share/casa
+  /app/aips++/Stable
   PATH_SUFFIXES
   code/include/casa
   current/code/include/casa

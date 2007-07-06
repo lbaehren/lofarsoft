@@ -19,7 +19,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: SkymapperTools.h,v 1.7 2007/03/14 12:58:44 bahren Exp $*/
+/* $Id$*/
 
 #ifndef SKYMAPPERTOOLS_H
 #define SKYMAPPERTOOLS_H

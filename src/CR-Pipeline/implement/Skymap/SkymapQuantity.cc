@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: SkymapQuantity.cc,v 1.2 2006/09/20 10:21:59 bahren Exp $*/
+/* $Id$*/
 
 #include <Skymap/SkymapQuantity.h>
 

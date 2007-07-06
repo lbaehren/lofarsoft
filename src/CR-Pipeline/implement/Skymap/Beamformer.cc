@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: Beamformer.cc,v 1.5 2006/10/31 18:24:08 bahren Exp $*/
+/* $Id$*/
 
 // C++ Standard library
 #include <iostream>

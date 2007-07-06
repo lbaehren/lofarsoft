@@ -23,7 +23,7 @@
 
 using CR::FFT2Fx;
 
-/* $Id: Skymap.cc,v 1.7 2006/10/31 18:24:08 bahren Exp $ */
+/* $Id$ */
 
 // =============================================================================
 //
@@ -464,9 +464,9 @@ void Skymap::adjustSignalDomain (Matrix<DComplex>& skymap)
       vectFreq = skymap.column(pixel);
       // Use DComplex-DComplex backwards FFT
       Vector<Double> vectTime = FFT2Fx<Double,DComplex> (vectFreq,
-								fftsize,
-								True,
-								False);
+							 fftsize,
+							 True,
+							 False);
       // store the data vector
       for (sample=0; sample<fftsize; ++sample) {
  	skymapReal_p(sample,pixel) = vectTime(sample);

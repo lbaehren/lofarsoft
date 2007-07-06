@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: Beamformer.h,v 1.11 2007/04/04 18:45:38 bahren Exp $*/
+/* $Id$*/
 
 #ifndef LOPES_BEAMFORMER_H
 #define LOPES_BEAMFORMER_H
