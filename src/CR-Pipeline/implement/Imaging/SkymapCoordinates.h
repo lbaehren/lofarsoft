@@ -41,6 +41,7 @@
 
 // Custom header files
 #include <Coordinates/TimeFreq.h>
+#include <Imaging/Beamformer.h>
 #include <IO/DataReader.h>
 #include <Observation/ObservationData.h>
 
@@ -235,28 +236,6 @@ namespace CR { // Namespace CR -- begin
       SOUTH_WEST
     } MapOrientation;
     
-    /*!
-      \brief Electrical quantities and/or corresponding beam types
-
-      Depending on the major domain, for which the skymap is created -- Time or
-      Frequency -- the WCS parameters for the time and frequency axes need to be
-      modified.
-    */
-    typedef enum {
-      //! Electric field strength as function of frequency
-      FREQ_FIELD,
-      //! Power of the electric field as function of frequency
-      FREQ_POWER,
-      //! Electric field strength as function of time (sample resolution)
-      TIME_FIELD,
-      //! Power of the electric field as function of time
-      TIME_POWER,
-      //! Cross-correlation beam (cc-beam)
-      TIME_CC,
-      //! Excess-beam
-      TIME_X
-    } MapQuantity ;
-    
     // ==========================================================================
     // Private data members
 
@@ -275,7 +254,7 @@ namespace CR { // Namespace CR -- begin
     MapOrientation mapOrientation_p;
 
     //! Electrical quantities and/or corresponding beam types
-    MapQuantity mapQuantity_p;
+    BeamType beamType_p;
     
     //! Shape of the image
     IPosition shape_p;
@@ -311,13 +290,13 @@ namespace CR { // Namespace CR -- begin
                                frequency, Nyquist zone).
       \param obsData        -- Observation data (epoch, location, etc.)
       \param mapOrientation -- Orientation of the generated sky map
-      \param mapQuantity    -- Electrical quantities and/or corresponding beam
+      \param beamType       -- Electrical quantities and/or corresponding beam
                                types
     */
     SkymapCoordinates (TimeFreq const &timeFreq,
 		       ObservationData const &obsData,
 		       SkymapCoordinates::MapOrientation mapOrientation,
-		       SkymapCoordinates::MapQuantity mapQuantity);
+		       BeamType beamType);
     /*!
       \brief Argumented constructor
       
@@ -327,14 +306,14 @@ namespace CR { // Namespace CR -- begin
       \param nofBlocks      -- The number of subsequent data blocks to be
                                processed
       \param mapOrientation -- Orientation of the generated sky map
-      \param mapQuantity    -- Electrical quantities and/or corresponding beam
+      \param beamType       -- Electrical quantities and/or corresponding beam
                                types
     */
     SkymapCoordinates (TimeFreq const &timeFreq,
 		       ObservationData const &obsData,
 		       uint const &nofBlocks,
 		       SkymapCoordinates::MapOrientation mapOrientation,
-		       SkymapCoordinates::MapQuantity mapQuantity);
+		       BeamType beamType);
     
     /*!
       \brief Argumented constructor
@@ -418,10 +397,10 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the electrical quantity and corresponding beam type
 
-      \return mapQuantity -- The electrical quantity and corresponding beam type
+      \return beamType -- The electrical quantity and corresponding beam type
     */
-    inline SkymapCoordinates::MapQuantity mapQuantity () {
-      return mapQuantity_p;
+    inline BeamType beamType () {
+      return beamType_p;
     }
     
     /*!
@@ -433,8 +412,8 @@ namespace CR { // Namespace CR -- begin
 
       \return status -- Status of the operation.
     */
-    bool mapQuantity (std::string &domain,
-		      std::string &quantity);
+    bool beamType (std::string &domain,
+		   std::string &quantity);
 
     /*!
       \brief Set the electrical quantity and corresponding beam type
@@ -443,7 +422,7 @@ namespace CR { // Namespace CR -- begin
 
       \return status -- Status of the operation.
     */
-    bool setMapQuantity (SkymapCoordinates::MapQuantity const &mapQuantity);
+    bool setBeamType (BeamType const &beamType);
 
     /*!
       \brief Set the electrical quantity and corresponding beam type
@@ -454,8 +433,8 @@ namespace CR { // Namespace CR -- begin
 
       \return status -- Status of the operation.
     */
-    bool setMapQuantity (std::string const &domain,
-			 std::string const &quantity);
+    bool setBeamType (std::string const &domain,
+		      std::string const &quantity);
 
     // ==========================================================================
     // Coordinates
@@ -933,16 +912,18 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Initialize the internal parameters
 
-      \param timeFreq  -- Time-frequency domain settings (blocksize, sample
-                          frequency, Nyquist zone).
-      \param obsData   -- Observation data (epoch, location, etc.)
-      \param nofBlocks -- The number of subsequent data blocks to be processed
+      \param timeFreq       -- Time-frequency domain settings (blocksize, sample
+                               frequency, Nyquist zone).
+      \param obsData        -- Observation data (epoch, location, etc.)
+      \param nofBlocks      -- The number of subsequent data blocks to be processed
+      \param mapOrientation -- Orientation of the generated skymap
+      \param beamType       -- 
     */
     bool init (TimeFreq const &timeFreq,
 	       ObservationData const &obsData,
 	       uint const &nofBlocks,
 	       SkymapCoordinates::MapOrientation mapOrientation,
-	       SkymapCoordinates::MapQuantity mapQuantity);
+	       BeamType beamType);
     
     /*!
       \brief Default shape of the image pixel array

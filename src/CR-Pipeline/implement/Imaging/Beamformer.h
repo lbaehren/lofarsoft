@@ -32,6 +32,24 @@
 
 namespace CR { // Namespace CR -- begin
   
+    /*!
+      \brief List of implemented and supported beam types.
+    */
+    typedef enum {
+      //! Electric field strength as function of frequency
+      FREQ_FIELD,
+      //! Power of the electric field as function of frequency
+      FREQ_POWER,
+      //! Electric field strength as function of time (sample resolution)
+      TIME_FIELD,
+      //! Power of the electric field as function of time
+      TIME_POWER,
+      //! Cross-correlation beam (cc-beam)
+      TIME_CC,
+      //! Excess-beam
+      TIME_X
+    } BeamType;
+    
   /*!
     \class Beamformer
 
@@ -68,30 +86,8 @@ namespace CR { // Namespace CR -- begin
   */  
   class Beamformer : public GeometricalWeight {
     
-  public:
-    
-    /*!
-      \brief List of implemented and supported beam types.
-    */
-    typedef enum {
-      //! Electric field strength as function of frequency
-      FREQ_FIELD,
-      //! Power of the electric field as function of frequency
-      FREQ_POWER,
-      //! Electric field strength as function of time (sample resolution)
-      TIME_FIELD,
-      //! Power of the electric field as function of time
-      TIME_POWER,
-      //! Cross-correlation beam (cc-beam)
-      TIME_CC,
-      //! Excess-beam
-      TIME_X
-    } BeamType;
-    
-  private:
-
     //! Type of beamforming method used in data processing
-    Beamformer::BeamType beamType_p;
+    BeamType beamType_p;
     
     /*!
       \brief Pointer to the function performing the beamforming
@@ -190,7 +186,7 @@ namespace CR { // Namespace CR -- begin
 
       \return beamType -- The type of beam to be used at data processing
      */
-    inline Beamformer::BeamType beamType () {
+    inline BeamType beamType () {
       return beamType_p;
     }
 
@@ -200,15 +196,107 @@ namespace CR { // Namespace CR -- begin
       \return beamType -- The type of beam to be used at data processing
      */
     std::string beamTypeName ();
-
+    
+    /*!
+      \brief Get the name of the beam type to be used at processing
+      
+      \param beamType -- The type of beam to be used at data processing
+      
+      \return name -- The name of the beam type to be used at data processing
+    */
+    static std::string beamTypeName (BeamType const &beamType) {
+      std::string name;
+      
+      switch (beamType) {
+      case FREQ_FIELD:
+	name = "FREQ_FIELD";
+	break;
+      case FREQ_POWER:
+	name = "FREQ_POWER";
+	break;
+      case TIME_FIELD:
+	name = "TIME_FIELD";
+	break;
+      case TIME_POWER:
+	name = "TIME_POWER";
+	break;
+      case TIME_CC:
+	name = "TIME_CC";
+	break;
+      case TIME_X:
+	name = "TIME_X";
+	break;
+      }
+      return name;
+    }
+    
     /*!
       \brief Set the type of beam to be used at data processing
-
+      
       \param beam    -- 
-
+      
       \return status -- 
-     */
-    bool setBeamType (Beamformer::BeamType const &beam);
+    */
+    bool setBeamType (BeamType const &beam);
+    
+    /*!
+      \brief Convert combination of domain and quantity label to BeamType
+      
+      \retval beamType -- 
+      \param domain    -- 
+      \param quantity  --
+    */
+    static bool beamType (BeamType &beamType,
+			  string const &domain,
+			  string const &quantity);
+    
+    /*!
+      \brief Convert BeamType to combination of domain and quantity label
+      
+      \retval domain   -- 
+      \retval quantity -- 
+      \param beamType  -- 
+    */
+    static bool beamType (std::string &domain,
+			  std::string &quantity,
+			  BeamType const &beamType)
+      {
+	bool ok (true);
+	
+	try {
+	  switch (beamType) {
+	  case TIME_FIELD:
+	    domain   = "TIME";
+	    quantity = "FIELD";
+	    break;
+	  case TIME_POWER:
+	    domain   = "TIME";
+	    quantity = "POWER";
+	    break;
+	  case TIME_CC:
+	    domain   = "TIME";
+	    quantity = "CC";
+	    break;
+	  case TIME_X:
+	    domain   = "TIME";
+	    quantity = "X";
+	    break;
+	  case FREQ_POWER:
+	    domain   = "FREQ";
+	    quantity = "POWER";
+	    break;
+	  case FREQ_FIELD:
+	    domain   = "FREQ";
+	    quantity = "FIELD";
+	    break;
+	  }
+	} catch (std::string message) {
+	  std::cerr << "[Beamformer::beamType] " << message << std::endl;
+	  ok = false;
+	}
+	
+	return ok;
+      }
     
     /*!
       \brief Get the name of the class

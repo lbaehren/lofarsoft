@@ -68,7 +68,7 @@ SkymapCoordinates create_SkymapCoordinates ()
 			   obsData,
 			   nofBlocks,
 			   SkymapCoordinates::NORTH_WEST,
-			   SkymapCoordinates::TIME_CC);
+			   CR::TIME_CC);
 
   return coord;
 }
@@ -261,7 +261,7 @@ int test_SkymapCoordinates ()
 			     obsData,
 			     nofBlocks,
 			     SkymapCoordinates::NORTH_WEST,
-			     SkymapCoordinates::TIME_CC);
+			     CR::TIME_CC);
     coord.summary();
   } catch (std::string message) {
     std::cerr << message << endl;
@@ -403,7 +403,7 @@ int test_coordinateSystem ()
 			   obsData,
 			   nofBlocks,
 			   SkymapCoordinates::NORTH_WEST,
-			   SkymapCoordinates::TIME_CC);
+			   CR::TIME_CC);
   
   cout << "[0] Check the numbering of the image axes..." << endl;
   try {
@@ -775,28 +775,28 @@ int test_mapProperties ()
     std::string quantity;
     SkymapCoordinates coord = create_SkymapCoordinates ();
 
-    coord.setMapQuantity (SkymapCoordinates::TIME_FIELD);
-    coord.mapQuantity (domain,quantity);
+    coord.setBeamType (CR::TIME_FIELD);
+    coord.beamType (domain,quantity);
     cout << "-- New map quantity = (" << domain << "," << quantity << ")" << endl;
 
-    coord.setMapQuantity (SkymapCoordinates::TIME_POWER);
-    coord.mapQuantity (domain,quantity);
+    coord.setBeamType (CR::TIME_POWER);
+    coord.beamType (domain,quantity);
     cout << "-- New map quantity = (" << domain << "," << quantity << ")" << endl;
 
-    coord.setMapQuantity (SkymapCoordinates::TIME_CC);
-    coord.mapQuantity (domain,quantity);
+    coord.setBeamType (CR::TIME_CC);
+    coord.beamType (domain,quantity);
     cout << "-- New map quantity = (" << domain << "," << quantity << ")" << endl;
 
-    coord.setMapQuantity (SkymapCoordinates::TIME_X);
-    coord.mapQuantity (domain,quantity);
+    coord.setBeamType (CR::TIME_X);
+    coord.beamType (domain,quantity);
     cout << "-- New map quantity = (" << domain << "," << quantity << ")" << endl;
 
-    coord.setMapQuantity (SkymapCoordinates::FREQ_FIELD);
-    coord.mapQuantity (domain,quantity);
+    coord.setBeamType (CR::FREQ_FIELD);
+    coord.beamType (domain,quantity);
     cout << "-- New map quantity = (" << domain << "," << quantity << ")" << endl;
 
-    coord.setMapQuantity (SkymapCoordinates::FREQ_POWER);
-    coord.mapQuantity (domain,quantity);
+    coord.setBeamType (CR::FREQ_POWER);
+    coord.beamType (domain,quantity);
     cout << "-- New map quantity = (" << domain << "," << quantity << ")" << endl;
 
   } catch (std::string message) {

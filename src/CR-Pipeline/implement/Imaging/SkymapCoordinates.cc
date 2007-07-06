@@ -75,7 +75,7 @@ namespace CR { // Namespace CR -- begin
   SkymapCoordinates::SkymapCoordinates (TimeFreq const &timeFreq,
 					ObservationData const &obsData,
 					SkymapCoordinates::MapOrientation mapOrientation,
-					SkymapCoordinates::MapQuantity mapQuantity)
+					BeamType beamType)
   {
     Bool status (true);
     uint nofBlocks (1);
@@ -84,7 +84,7 @@ namespace CR { // Namespace CR -- begin
 		   obsData,
 		   nofBlocks,
 		   mapOrientation,
-		   mapQuantity);
+		   beamType);
     
     if (!status) {
       std::cerr << "[SkymapCoordinates] Error initializing object!"
@@ -98,7 +98,7 @@ namespace CR { // Namespace CR -- begin
 					ObservationData const &obsData,
 					uint const &nofBlocks,
 					SkymapCoordinates::MapOrientation mapOrientation,
-					SkymapCoordinates::MapQuantity mapQuantity)
+					BeamType beamType)
   {
     Bool status (true);
     
@@ -106,7 +106,7 @@ namespace CR { // Namespace CR -- begin
 		   obsData,
 		   nofBlocks,
 		   mapOrientation,
-		   mapQuantity);
+		   beamType);
     
     if (!status) {
       std::cerr << "[SkymapCoordinates] Error initializing object!"
@@ -191,7 +191,7 @@ namespace CR { // Namespace CR -- begin
     obsData_p        = other.obsData_p;
     nofBlocks_p      = other.nofBlocks_p;
     mapOrientation_p = other.mapOrientation_p;
-    mapQuantity_p    = other.mapQuantity_p;
+    beamType_p    = other.beamType_p;
     shape_p          = other.shape_p;
   }
 
@@ -211,7 +211,7 @@ namespace CR { // Namespace CR -- begin
 		 obsData,
 		 nofBlocks,
 		 SkymapCoordinates::NORTH_EAST,
-		 SkymapCoordinates::FREQ_POWER);
+		 FREQ_POWER);
   }
   
   // ----------------------------------------------------------------------- init
@@ -220,13 +220,13 @@ namespace CR { // Namespace CR -- begin
 				ObservationData const &obsData,
 				uint const &nofBlocks,
 				SkymapCoordinates::MapOrientation mapOrientation,
-				SkymapCoordinates::MapQuantity mapQuantity)
+				BeamType beamType)
   {
     timeFreq_p       = timeFreq;
     obsData_p        = obsData;
     nofBlocks_p      = nofBlocks;
     mapOrientation_p = mapOrientation;
-    mapQuantity_p    = mapQuantity;
+    beamType_p       = beamType;
     shape_p          = IPosition (5,120,120,1,1,1);
     
     return defaultCoordinateSystem ();
@@ -283,59 +283,27 @@ namespace CR { // Namespace CR -- begin
     return ok;
   }
 
-  // ---------------------------------------------------------------- mapQuantity
+  // ---------------------------------------------------------------- beamType
 
-  bool SkymapCoordinates::mapQuantity (std::string &domain,
-				       std::string &quantity)
+  bool SkymapCoordinates::beamType (std::string &domain,
+				    std::string &quantity)
   {
-    bool ok (true);
-
-    try {
-      switch (mapQuantity_p) {
-      case TIME_FIELD:
-	domain   = "TIME";
-	quantity = "FIELD";
-	break;
-      case TIME_POWER:
-	domain   = "TIME";
-	quantity = "POWER";
-	break;
-      case TIME_CC:
-	domain   = "TIME";
-	quantity = "CC";
-	break;
-      case TIME_X:
-	domain   = "TIME";
-	quantity = "X";
-	break;
-      case FREQ_POWER:
-	domain   = "FREQ";
-	quantity = "POWER";
-	break;
-      case FREQ_FIELD:
-	domain   = "FREQ";
-	quantity = "FIELD";
-	break;
-      }
-    } catch (std::string message) {
-      std::cerr << "[SkymapCoordinates::mapQuantity] " << message << endl;
-      ok = false;
-    }
-    
-    return ok;
+    return Beamformer::beamType (domain,
+				 quantity,
+				 beamType_p);
   }
   
   // ------------------------------------------------------------- setMapQuantity
 
   bool
-  SkymapCoordinates::setMapQuantity (SkymapCoordinates::MapQuantity const &mapQuantity)
+  SkymapCoordinates::setBeamType (BeamType const &beamType)
   {
     bool ok (True);
 
     try {
-      mapQuantity_p = mapQuantity;
+      beamType_p = beamType;
     } catch (std::string message) {
-      std::cerr << "[SkymapCoordinates::setMapQuantity] " << message << endl;
+      std::cerr << "[SkymapCoordinates::setBeamType] " << message << endl;
       ok = false;
     }
 
@@ -348,41 +316,19 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------- setMapQuantity
 
-  bool SkymapCoordinates::setMapQuantity (std::string const &domain,
-					  std::string const &quantity)
+  bool SkymapCoordinates::setBeamType (std::string const &domain,
+				       std::string const &quantity)
   {
     bool ok (True);
     
-    if (domain == "time" || domain == "Time" || domain == "TIME") {
-      if (quantity == "field" || quantity == "Field" || quantity == "FIELD") {
-	mapQuantity_p = TIME_FIELD;
-      } else if (quantity == "power" || quantity == "Power" || quantity == "POWER") {
-	mapQuantity_p = TIME_POWER;
-      } else if (quantity == "cc" || quantity == "CC") {
-	mapQuantity_p = TIME_CC;
-      } else if (quantity == "x" || quantity == "X") {
-	mapQuantity_p = TIME_X;
-      } else {
-	std::cerr << "[SkymapCoordinates::setMapQuantity] Unknown signal quantity "
-		  << quantity << endl;
-	ok = false;
-      }
-    } else if (domain == "freq" || domain == "Freq" || domain == "FREQ") {
-      if (quantity == "field" || quantity == "Field" || quantity == "FIELD") {
-	mapQuantity_p = FREQ_FIELD;
-      } else if (quantity == "power" || quantity == "Power" || quantity == "POWER") {
-	mapQuantity_p = FREQ_POWER;
-      } else {
-	std::cerr << "[SkymapCoordinates::setMapQuantity] Unknown signal quantity "
-		  << quantity << endl;
-	ok = false;
-      }
-    } else {
-      std::cerr << "[SkymapCoordinates::setMapQuantity] Unknown signal domain "
-		<< domain << endl;
-      ok = false;
-    }
-
+    /*
+      The basic functionality for conversion is implemented in BeamType;
+      therefore we forward the request and deal with the result later on.
+    */
+    ok = Beamformer::beamType (beamType_p,
+			       domain,
+			       quantity);
+    
     if (ok) {
       ok = setShape ();
     }
@@ -792,7 +738,7 @@ namespace CR { // Namespace CR -- begin
     double crval (0.0);
     double increment (0.0);
     
-    switch (mapQuantity_p) {
+    switch (beamType_p) {
     case TIME_FIELD:
     case TIME_POWER:
     case TIME_CC:
@@ -907,7 +853,7 @@ namespace CR { // Namespace CR -- begin
     vector<double> frequencyBand (timeFreq_p.frequencyBand());
     DirectionCoordinate dc (directionAxis());
 
-    status = mapQuantity (domain,quantity);
+    status = beamType (domain,quantity);
     status = mapOrientation (top,right);
     
     os << "-- TimeFreq object:" << endl;
@@ -949,7 +895,7 @@ namespace CR { // Namespace CR -- begin
     os << " Projection               = " << dc.projection().name()  << endl;
     os << " Skymap orientation       = " << mapOrientation_p
        << " [" << top << "," << right << "]"                        << endl;
-    os << " Skymap quantity          = " << mapQuantity_p           
+    os << " Skymap quantity          = " << beamType_p           
        << " [" << domain << "," << quantity << "]"                  << endl;
     os << " Number of coordinates    = " << csys_p.nCoordinates()   << endl;
     os << " Shape of the pixel array = " << shape_p                 << endl;
@@ -1093,7 +1039,7 @@ namespace CR { // Namespace CR -- begin
     */
 
     try {
-      switch (mapQuantity_p) {
+      switch (beamType_p) {
       case TIME_FIELD:
       case TIME_POWER:
       case TIME_CC:
