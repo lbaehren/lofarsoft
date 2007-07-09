@@ -347,6 +347,30 @@ namespace CR { // Namespace CR -- begin
 #endif
     
     /*!
+      \brief Directed field as function of frequency, \f$ \widetilde S (\vec\rho,\nu) \f$
+
+      <b>Note:</b> This function cannot be called via the <tt>processData</tt>
+      method, since the returned array consists of complex values.
+      
+      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
+                      input data.
+      \param  data -- [nofDatasets,nofChannels] Input data which will be
+                      processed to form a given type of beam.
+
+      \return status   -- Status of the operation; returns <i>false</i> if an
+                          an error was encountered
+    */
+#ifdef HAVE_CASA
+    bool freq_field (casa::Matrix<DComplex> &beam,
+		     const casa::Matrix<DComplex> &data);
+#else
+#ifdef HAVE_BLITZ
+    bool freq_field (blitz::Array<complex<double>,2> &beam,
+		     const blitz::Array<complex<double>,2> &data);
+#endif
+#endif
+    
+    /*!
       \brief Directed spectral power, \f$ \widetilde P (\vec\rho,\nu) \f$
 
       \f[ \widetilde P (\vec\rho,\nu) = \overline{\widetilde S (\vec\rho,\nu)}

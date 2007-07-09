@@ -21,6 +21,16 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+// CASA header files
+#ifdef HAVE_CASA
+#include <scimath/Mathematics.h>
+#include <scimath/Mathematics/FFTServer.h>
+using casa::IPosition;
+using casa::FFTServer;
+using casa::Matrix;
+using casa::Vector;
+#endif
+// Custom header files
 #include <Imaging/Beamformer.h>
 
 namespace CR { // Namespace CR -- begin
@@ -42,9 +52,9 @@ namespace CR { // Namespace CR -- begin
   // ----------------------------------------------------------------- Beamformer
   
 #ifdef HAVE_CASA
-  Beamformer::Beamformer (casa::Matrix<double> const &antPositions,
-			  casa::Matrix<double> const &skyPositions,
-			  casa::Vector<double> const &frequencies,
+  Beamformer::Beamformer (Matrix<double> const &antPositions,
+			  Matrix<double> const &skyPositions,
+			  Vector<double> const &frequencies,
 			  bool const &bufferDelays,
 			  bool const &bufferPhases,
 			  bool const &bufferWeights)
@@ -235,17 +245,73 @@ namespace CR { // Namespace CR -- begin
   //  Methods
   //
   // ============================================================================
-  
-  // ----------------------------------------------------------------- freq_power
 
+  // ----------------------------------------------------------------- freq_field
+  
 #ifdef HAVE_CASA
-  bool Beamformer::freq_power (casa::Matrix<double> &beam,
-			       const casa::Matrix<DComplex> &data)
+  bool Beamformer::freq_field (Matrix<DComplex> &beam,
+			       const Matrix<DComplex> &data)
   {
     bool status (true);
     int nofSkyPositions (skyPositions_p.nrow());
     int nofFrequencies (frequencies_p.nelements());
-    casa::IPosition shapeData (data.shape());
+    IPosition shapeData (data.shape());
+
+    /*
+      Check if the shape of the array with the input data matched the internal
+      parameters.
+    */
+    if (shapeData(0) == nofSkyPositions &&
+	shapeData(1) == nofFrequencies) {
+      // additional local variables
+      int direction (0);
+      uint antenna (0);
+      int freq (0);
+      // resize array returning the beamformed data
+      beam.resize (nofSkyPositions,nofFrequencies,0.0);
+      /*
+	Compute the beams for all combinations of sky positions and frequency
+	values. We unfortunately need the innermost loop over the frequencies,
+	since the CASA Array module appears not to support the "+=" operator
+	for sub-arrays (e.g. to process all values along the frequency axis).
+      */
+      for (direction=0; direction<nofSkyPositions; direction++) {
+	for (antenna=0; antenna<nofAntennas_p; antenna++) {
+	  for (freq=0; freq<nofFrequencies; freq++) {
+	    beam(direction,freq) = data(antenna,freq)*weights_p(antenna,direction,freq);
+	  }
+	}
+      }
+    } else {
+      std::cerr << "[Beamformer::freq_field]" << std::endl;
+      std::cerr << "-- Wrong shape of array with input data!" << std::endl;
+      status = false;
+    }
+
+    return status;
+  }
+#else
+#ifdef HAVE_BLITZ
+  bool Beamformer::freq_field (blitz::Array<complex<double>,2> &beam,
+			       const blitz::Array<complex<double>,2> &data)
+  {
+    bool status (true);
+
+    return status;
+  }
+#endif
+#endif
+  
+  // ----------------------------------------------------------------- freq_power
+
+#ifdef HAVE_CASA
+  bool Beamformer::freq_power (Matrix<double> &beam,
+			       const Matrix<DComplex> &data)
+  {
+    bool status (true);
+    int nofSkyPositions (skyPositions_p.nrow());
+    int nofFrequencies (frequencies_p.nelements());
+    IPosition shapeData (data.shape());
 
     /*
       Check if the shape of the array with the input data matched the internal
@@ -295,8 +361,8 @@ namespace CR { // Namespace CR -- begin
   // ----------------------------------------------------------------- time_power
 
 #ifdef HAVE_CASA
-  bool Beamformer::time_power (casa::Matrix<double> &beam,
-			       const casa::Matrix<DComplex> &data)
+  bool Beamformer::time_power (Matrix<double> &beam,
+			       const Matrix<DComplex> &data)
   {
     bool status (true);
 
@@ -310,7 +376,7 @@ namespace CR { // Namespace CR -- begin
     bool status (true);
     int nofSkyPositions (skyPositions_p.nrow());
     int nofFrequencies (frequencies_p.nelements());
-    casa::IPosition shapeData (data.shape());
+    IPosition shapeData (data.shape());
 
     /*
       Check if the shape of the array with the input data matched the internal
@@ -350,13 +416,13 @@ namespace CR { // Namespace CR -- begin
   // -------------------------------------------------------------------- time_cc
 
 #ifdef HAVE_CASA
-  bool Beamformer::time_cc (casa::Matrix<double> &beam,
-			    const casa::Matrix<DComplex> &data)
+  bool Beamformer::time_cc (Matrix<double> &beam,
+			    const Matrix<DComplex> &data)
   {
     bool status (true);
     int nofSkyPositions (skyPositions_p.nrow());
     int nofFrequencies (frequencies_p.nelements());
-    casa::IPosition shapeData (data.shape());
+    IPosition shapeData (data.shape());
     
     /*
       Check if the shape of the array with the input data matched the internal
@@ -365,18 +431,56 @@ namespace CR { // Namespace CR -- begin
     if (shapeData(0) == nofSkyPositions &&
 	shapeData(1) == nofFrequencies) {
       // additional local variables
+      int nofBaselines (GeometricalDelay::nofBaselines());
+      int blocksize (2*(nofFrequencies-1));
       int direction (0);
-      uint antenna (0);
-      int freq (0);
+      uint antenna1 (0);
+      uint antenna2 (0);
+      int n (0);
+      Vector<DComplex> tmp1Freq (nofFrequencies);
+      Vector<DComplex> tmp2Freq (nofFrequencies);
+      Vector<double>   tmp1Time (blocksize);
+      Vector<double>   tmp2Time (blocksize);
+      /*
+	Set up the casa::FFTServer which is t handle the inverse Fourier
+	transform taking place before the summation step.
+      */
+      FFTServer<double,std::complex<double> > server(IPosition(1,blocksize),
+						     casa::FFTEnums::REALTOCOMPLEX);
+      // resize array returning the beamformed data
+      beam.resize (nofSkyPositions,blocksize,0.0);
       /*
 	Compute the beams for all combinations of sky positions and frequency
 	values.
       */
       for (direction=0; direction<nofSkyPositions; direction++) {
-	for (antenna=0; antenna<nofAntennas_p; antenna++) {
-	  for (freq=0; freq<nofFrequencies; freq++) {
+	for (antenna1=0; antenna1<nofAntennas_p; antenna1++) {
+	  // Shift the data for antenna 1 ... 
+	  for (n=0; n<nofFrequencies; n++) {
+	    tmp1Freq(n) = data(antenna1,n)*weights_p(antenna1,direction,n);
 	  }
+	  // ... and apply inverse Fourier transform
+	  server.fft (tmp1Time,tmp1Freq);
+	  for (antenna2=antenna1+1; antenna2<nofAntennas_p; antenna2++) {
+	    // Shift the data for antenna 2 ... 
+	    for (n=0; n<nofFrequencies; n++) {
+	      tmp2Freq(n) = data(antenna2,n)*weights_p(antenna2,direction,n);
+	    }
+	    // ... and apply inverse Fourier transform
+	    server.fft (tmp2Time,tmp2Freq);
+	    /*
+	      With shifted time-series avaiable for both antennas, we can
+	      assemble the beam
+	    */
+	    beam.row(direction) = tmp1Time*tmp2Time;
+	  }  // end loop: antenn2
+	}  // end loop: antenna1
+	// normalization w.r.t. the number of baselines
+	for (n=0; n<blocksize; n++) {
+	  beam (direction,n) /= nofBaselines;
 	}
+	//
+	beam.row(direction) = CR::sign(beam.row(direction))*sqrt(abs(beam.row(direction)));
       }
     } else {
       std::cerr << "[Beamformer::time_cc]"                    << std::endl;
@@ -399,10 +503,10 @@ namespace CR { // Namespace CR -- begin
 #endif
   
   // --------------------------------------------------------------------- time_x
-
+  
 #ifdef HAVE_CASA
-  bool Beamformer::time_x (casa::Matrix<double> &beam,
-			    const casa::Matrix<DComplex> &data)
+  bool Beamformer::time_x (Matrix<double> &beam,
+			   const Matrix<DComplex> &data)
   {
     bool status (true);
     
@@ -411,7 +515,7 @@ namespace CR { // Namespace CR -- begin
 #else
 #ifdef HAVE_BLITZ
   bool Beamformer::time_x (blitz::Array<double,2> &beam,
-			    const blitz::Array<conplex<double>,2> &data)
+			   const blitz::Array<conplex<double>,2> &data)
   {
     bool status (true);
     

@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include <Imaging/Beamformer.h>
+#include <templates.h>
 
 using CR::Beamformer;
 
