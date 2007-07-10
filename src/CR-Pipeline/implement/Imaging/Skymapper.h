@@ -83,7 +83,6 @@ namespace CR {  // Namespace CR -- begin
     <li>DataReader
     <li>DataReaderTools
     <li>ObservationData
-    <li>Skymap
     <li>SkymapCoordinates -- coordinates involved in the creation of a skymap
     <li>SkymapQuantity
     <li>SkymapperTools
@@ -123,7 +122,7 @@ namespace CR {  // Namespace CR -- begin
   // Create a new Skymapper object
   Skymapper skymapper (coords);
   
-  if (skymapper.isOperational()) {
+  if (skymapper.init()) {
     while (skymapper.nofProcessedBlocks()<=nofBlocks) {
       // get the current block of data
       data = some_function();
@@ -277,7 +276,7 @@ class Skymapper {
     \return status -- Status of the operation; returns <tt>false</t> if an error
                       was encountered.
   */
-  bool initSkymapper ();
+  bool init ();
 
   /*!
     \brief Process a block of data and add the result to the image being created

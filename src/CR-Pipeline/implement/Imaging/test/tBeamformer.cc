@@ -41,6 +41,61 @@ using CR::Beamformer;
 // -----------------------------------------------------------------------------
 
 /*!
+  \brief Create some antenna positions for the Beamformer
+
+  \param nofAntennas -- The number of antennas
+
+  \return positions -- 
+*/
+casa::Matrix<double> get_antennaPositions (uint const &nofAntennas=3)
+{
+  uint nofAxes (3);
+  casa::Matrix<double> positions (nofAntennas,nofAxes,0.0);
+
+  for (uint n(0); n<nofAntennas; n++) {
+    positions(n,0) = positions(n,1) = n*100;
+  }
+
+  return positions;
+}
+
+/*!
+  \brief Create some sky/pointing positions for the Beamformer
+
+  \param nofSkyPositions -- The number of positions on the sky to which to point
+                            to
+
+  \return positions -- 
+*/
+casa::Matrix<double> get_skyPositions (uint const &nofSkyPositions=3)
+{
+  uint nofAxes (3);
+  casa::Matrix<double> positions (nofSkyPositions,nofAxes,0.0);
+
+  for (uint n(0); n<nofSkyPositions; n++) {
+    positions(n,0) = positions(n,2) = (n+1)*1000;
+  }
+
+  return positions;
+}
+
+casa::Vector<double> get_frequencies (double const &freqMin=40e06,
+				      double const &freqMax=80e06,
+				      uint const &nofChannels=4096)
+{
+  casa::Vector<double> channels (nofChannels);
+  double incr ((freqMax-freqMin)/(nofChannels+1));
+
+  for (uint k(0); k<nofChannels; k++) {
+    channels(k) = freqMin+k*incr;
+  }
+
+  return channels;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
   \brief Test constructors for a new Beamformer object
 
   \return nofFailedTests -- The number of failed tests.

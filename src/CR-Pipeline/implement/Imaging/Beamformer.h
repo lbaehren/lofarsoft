@@ -447,7 +447,18 @@ namespace CR { // Namespace CR -- begin
       The negative sign is taken if the sum had a negative sign before taking the
       absolute values, and the positive sign otherwise.
 
-      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
+      Computation - for each direction in the sky - is performed as follows:
+      <ol>
+        <li>Compute the shifted time-series for all antennas,
+	\f$ s_j (\vec\rho,t) \f$, by first applying the weights to the Fourier
+	transformed data and thereafter transforming back to time domain.
+	<li>Sum over unique products from all antenna pairs and normalize by
+	the number of such pairs.
+	<li>Take the square root of the sum and multiply with the sign of the
+	some.
+      </ol>
+
+      \retval beam -- [nofSkyPosition,blocksize] Beam formed from the provided
                       input data.
       \param  data -- [nofDatasets,nofChannels] Input data which will be
                       processed to form a given type of beam.

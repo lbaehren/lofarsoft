@@ -28,6 +28,7 @@
 using casa::IPosition;
 using casa::FFTServer;
 using casa::Matrix;
+using casa::Slicer;
 using casa::Vector;
 #endif
 // Custom header files
@@ -431,16 +432,15 @@ namespace CR { // Namespace CR -- begin
     if (shapeData(0) == nofSkyPositions &&
 	shapeData(1) == nofFrequencies) {
       // additional local variables
-      int nofBaselines (GeometricalDelay::nofBaselines());
+      double nofBaselines (GeometricalDelay::nofBaselines());
       int blocksize (2*(nofFrequencies-1));
       int direction (0);
-      uint antenna1 (0);
-      uint antenna2 (0);
-      int n (0);
-      Vector<DComplex> tmp1Freq (nofFrequencies);
-      Vector<DComplex> tmp2Freq (nofFrequencies);
-      Vector<double>   tmp1Time (blocksize);
-      Vector<double>   tmp2Time (blocksize);
+      uint ant1 (0);
+      uint ant2 (0);
+      Vector<DComplex> tmpFreq (nofFrequencies,0.0);
+      Vector<double>   tmpTime (blocksize,0.0);
+      Matrix<double>   tmpData (nofAntennas_p,blocksize);
+
       /*
 	Set up the casa::FFTServer which is t handle the inverse Fourier
 	transform taking place before the summation step.
@@ -454,33 +454,27 @@ namespace CR { // Namespace CR -- begin
 	values.
       */
       for (direction=0; direction<nofSkyPositions; direction++) {
-	for (antenna1=0; antenna1<nofAntennas_p; antenna1++) {
-	  // Shift the data for antenna 1 ... 
-	  for (n=0; n<nofFrequencies; n++) {
-	    tmp1Freq(n) = data(antenna1,n)*weights_p(antenna1,direction,n);
-	  }
-	  // ... and apply inverse Fourier transform
-	  server.fft (tmp1Time,tmp1Freq);
-	  for (antenna2=antenna1+1; antenna2<nofAntennas_p; antenna2++) {
-	    // Shift the data for antenna 2 ... 
-	    for (n=0; n<nofFrequencies; n++) {
-	      tmp2Freq(n) = data(antenna2,n)*weights_p(antenna2,direction,n);
-	    }
-	    // ... and apply inverse Fourier transform
-	    server.fft (tmp2Time,tmp2Freq);
-	    /*
-	      With shifted time-series avaiable for both antennas, we can
-	      assemble the beam
-	    */
-	    beam.row(direction) = tmp1Time*tmp2Time;
-	  }  // end loop: antenn2
-	}  // end loop: antenna1
-	// normalization w.r.t. the number of baselines
-	for (n=0; n<blocksize; n++) {
-	  beam (direction,n) /= nofBaselines;
+	// Precompute the shifted time series for a given sky position
+	for (ant1=0; ant1<nofAntennas_p; ant1++) {
+	  // --- Apply the beamformer weights to the Fourier-transformed data
+	  tmpFreq = data.row(ant1)*weights_p(Slicer(IPosition(3,ant1,direction,0),IPosition(3,ant1,direction,nofFrequencies-1),IPosition(3,1,1,1)));
+	  // --- Inverse Fourier transform back to time domain
+	  server.fft (tmpTime,tmpFreq);
+	  tmpData.row(ant1) = tmpTime;
 	}
+	/*
+	  Once we have precomputed all the shifted time-series, we go through
+	  all baselines and add up antenna combinations.
+	*/
+	for (ant1=0; ant1<nofAntennas_p; ant1++) {
+	  for (ant2=ant1+1; ant2<nofAntennas_p; ant2++) {
+	    tmpTime += tmpData.row(ant1)*tmpData.row(ant2);
+	  }  // end loop: antenn2
+	}  // end loop: ant1
+	// normalization w.r.t. the number of baselines
+	tmpTime /= nofBaselines;
 	//
-	beam.row(direction) = CR::sign(beam.row(direction))*sqrt(abs(beam.row(direction)));
+	beam.row(direction) = CR::sign(tmpTime)*sqrt(abs(tmpTime));
       }
     } else {
       std::cerr << "[Beamformer::time_cc]"                    << std::endl;

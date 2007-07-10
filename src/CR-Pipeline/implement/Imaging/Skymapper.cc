@@ -120,11 +120,11 @@ namespace CR {  // Namespace CR -- begin
   //
   // ==========================================================================
 
-  bool Skymapper::initSkymapper () 
+  bool Skymapper::init () 
   {
     bool status (true);
 
-    std::cout << "[Skymapper::initSkymapper]" << std::endl;
+    std::cout << "[Skymapper::init]" << std::endl;
 
     std::cout << "--> collecting objects to create image ..." << std::endl;
     CoordinateSystem csys = coordinates_p.coordinateSystem();
