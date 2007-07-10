@@ -46,7 +46,9 @@ namespace CR { // Namespace CR -- begin
       TIME_POWER,
       //! Cross-correlation beam (cc-beam)
       TIME_CC,
-      //! Excess-beam
+      //! Power-beam (p-beam)
+      TIME_P,
+      //! Excess-beam (x-beam)
       TIME_X
     } BeamType;
     
@@ -129,29 +131,16 @@ namespace CR { // Namespace CR -- begin
 			      as the antenna positions, \f$ (x,y,z) \f$
       \param frequencies   -- Frequencies for which the geometrical delays are
                               converted into phases
-      \param bufferDelays  -- Buffer the values for the geometrical delay? If set
-                              <i>yes</i> the delays will be computed from the 
-			      provided antenna and sky positions and afterwards
-			      kept in memory; if set <i>no</i> only the input 
-			      parameters are stored an no further action is taken.
-      \param bufferPhases  -- Buffer the values of the phases?
-      \param bufferWeights -- Buffer the values of the geometrical weights?
     */
 #ifdef HAVE_CASA
     Beamformer (casa::Matrix<double> const &antPositions,
 		casa::Matrix<double> const &skyPositions,
-		casa::Vector<double> const &frequencies,
-		bool const &bufferDelays=false,
-		bool const &bufferPhases=false,
-		bool const &bufferWeights=false);
+		casa::Vector<double> const &frequencies);
 #else
 #ifdef HAVE_BLITZ
     Beamformer (const blitz::Array<double,2> &antPositions,
 		const blitz::Array<double,2> &skyPositions,
-		blitz::Array<double,1> const &frequencies,
-		bool const &bufferDelays=false,
-		bool const &bufferPhases=false,
-		bool const &bufferWeights=false);
+		blitz::Array<double,1> const &frequencies);
 #endif
 #endif
     
@@ -223,6 +212,9 @@ namespace CR { // Namespace CR -- begin
       case TIME_CC:
 	name = "TIME_CC";
 	break;
+      case TIME_P:
+	name = "TIME_P";
+	break;
       case TIME_X:
 	name = "TIME_X";
 	break;
@@ -276,6 +268,10 @@ namespace CR { // Namespace CR -- begin
 	  case TIME_CC:
 	    domain   = "TIME";
 	    quantity = "CC";
+	    break;
+	  case TIME_P:
+	    domain   = "TIME";
+	    quantity = "P";
 	    break;
 	  case TIME_X:
 	    domain   = "TIME";
@@ -477,7 +473,28 @@ namespace CR { // Namespace CR -- begin
 #endif
     
     /*!
-      \brief Form an axcess-beam (x-beam)
+      \brief Form a power-beam (p-beam)
+
+      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
+                      input data.
+      \param  data -- [nofDatasets,nofChannels] Input data which will be
+                      processed to form a given type of beam.
+
+      \return status   -- Status of the operation; returns <i>false</i> if an
+                          an error was encountered
+    */
+#ifdef HAVE_CASA
+    bool time_p (casa::Matrix<double> &beam,
+		 const casa::Matrix<DComplex> &data);
+#else
+#ifdef HAVE_BLITZ
+    bool time_p (blitz::Array<double,2> &beam,
+		 const blitz::Array<complex<double>,2> &data);
+#endif
+#endif
+    
+    /*!
+      \brief Form an excess-beam (x-beam)
 
       \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
                       input data.

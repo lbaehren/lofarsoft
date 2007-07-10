@@ -742,6 +742,7 @@ namespace CR { // Namespace CR -- begin
     case TIME_FIELD:
     case TIME_POWER:
     case TIME_CC:
+    case TIME_P:
     case TIME_X:
       increment = timeFreq_p.sampleInterval();
       break;
@@ -1043,6 +1044,7 @@ namespace CR { // Namespace CR -- begin
       case TIME_FIELD:
       case TIME_POWER:
       case TIME_CC:
+      case TIME_P:
       case TIME_X:
 	// time
 	shape(3) = timeFreq_p.blocksize()*nofBlocks_p;

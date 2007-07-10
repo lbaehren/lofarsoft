@@ -55,16 +55,13 @@ namespace CR { // Namespace CR -- begin
 #ifdef HAVE_CASA
   Beamformer::Beamformer (Matrix<double> const &antPositions,
 			  Matrix<double> const &skyPositions,
-			  Vector<double> const &frequencies,
-			  bool const &bufferDelays,
-			  bool const &bufferPhases,
-			  bool const &bufferWeights)
+			  Vector<double> const &frequencies)
     : GeometricalWeight(antPositions,
 			skyPositions,
 			frequencies,
-			bufferDelays,
-			bufferPhases,
-			bufferWeights)
+			false,
+			false,
+			true)
   {
     init ();
   }
@@ -72,16 +69,13 @@ namespace CR { // Namespace CR -- begin
 #ifdef HAVE_BLITZ
   Beamformer::Beamformer (const blitz::Array<double,2> &antPositions,
 			  const blitz::Array<double,2> &skyPositions,
-			  blitz::Array<double,1> const &frequencies,
-			  bool const &bufferDelays,
-			  bool const &bufferPhases,
-			  bool const &bufferWeights)
+			  blitz::Array<double,1> const &frequencies)
     : GeometricalWeight(antPositions,
 			skyPositions,
 			frequencies,
-			bufferDelays,
-			bufferPhases,
-			bufferWeights)
+			false,
+			false,
+			true)
   {
     init ();
   }
@@ -112,6 +106,8 @@ namespace CR { // Namespace CR -- begin
   //  Operators
   //
   // ============================================================================
+
+  // ------------------------------------------------------------------ operator=
   
   Beamformer& Beamformer::operator= (Beamformer const &other)
   {
@@ -121,9 +117,17 @@ namespace CR { // Namespace CR -- begin
     }
     return *this;
   }
+
+  // ----------------------------------------------------------------------- copy
   
   void Beamformer::copy (Beamformer const &other)
-  {;}
+  {
+    // copy the underlying base object
+    GeometricalWeight::operator= (other);
+
+    // copy settings to handle the type of beam
+    setBeamType (other.beamType_p);
+  }
 
   // ============================================================================
   //
@@ -171,6 +175,10 @@ namespace CR { // Namespace CR -- begin
       beamType_p    = beam;
       processData_p = &Beamformer::time_cc;
       break;
+    case TIME_P:
+      beamType_p    = beam;
+      processData_p = &Beamformer::time_p;
+      break;
     case TIME_X:
       beamType_p    = beam;
       processData_p = &Beamformer::time_x;
@@ -202,6 +210,8 @@ namespace CR { // Namespace CR -- begin
 	beamType = TIME_POWER;
       } else if (quantity == "cc" || quantity == "CC") {
 	beamType = TIME_CC;
+      } else if (quantity == "p" || quantity == "P") {
+	beamType = TIME_P;
       } else if (quantity == "x" || quantity == "X") {
 	beamType = TIME_X;
       } else {
@@ -227,6 +237,8 @@ namespace CR { // Namespace CR -- begin
 
     return ok;
   }
+
+  // -------------------------------------------------------------------- summary
 
   void Beamformer::summary (std::ostream &os)
   {
@@ -325,12 +337,13 @@ namespace CR { // Namespace CR -- begin
       uint antenna (0);
       int freq (0);
       casa::DComplex tmp;
-      // resize array returning the beamformed data
+
+      // Resize the array returning the beamformed data
       beam.resize (nofSkyPositions,nofFrequencies,0.0);
-      /*
-	Compute the beams for all combinations of sky positions and frequency
-	values.
-      */
+
+      std::cout << "[Beamformer::freq_power] Processing data..." << std::endl;
+
+      // Iteration over the set of directions in the sky
       for (direction=0; direction<nofSkyPositions; direction++) {
 	for (antenna=0; antenna<nofAntennas_p; antenna++) {
 	  for (freq=0; freq<nofFrequencies; freq++) {
@@ -392,6 +405,8 @@ namespace CR { // Namespace CR -- begin
       int blocksize (2*(nofFrequencies-1));
       Vector<DComplex> vectFreq (nofFrequencies);
 
+      std::cout << "[Beamformer::time_power] Processing data..." << std::endl;
+
       for (direction=0; direction<nofSkyPositions; direction++) {
 	for (antenna=0; antenna<nofAntennas_p; antenna++) {
 	  // (1) Assemble the beamformed spectrum
@@ -437,6 +452,7 @@ namespace CR { // Namespace CR -- begin
       int direction (0);
       uint ant1 (0);
       uint ant2 (0);
+      int freq (0);
       Vector<DComplex> tmpFreq (nofFrequencies,0.0);
       Vector<double>   tmpTime (blocksize,0.0);
       Matrix<double>   tmpData (nofAntennas_p,blocksize);
@@ -449,15 +465,16 @@ namespace CR { // Namespace CR -- begin
 						     casa::FFTEnums::REALTOCOMPLEX);
       // resize array returning the beamformed data
       beam.resize (nofSkyPositions,blocksize,0.0);
-      /*
-	Compute the beams for all combinations of sky positions and frequency
-	values.
-      */
+
+      std::cout << "[Beamformer::time_cc] Processing data..." << std::endl;
+
       for (direction=0; direction<nofSkyPositions; direction++) {
 	// Precompute the shifted time series for a given sky position
 	for (ant1=0; ant1<nofAntennas_p; ant1++) {
 	  // --- Apply the beamformer weights to the Fourier-transformed data
-	  tmpFreq = data.row(ant1)*weights_p(Slicer(IPosition(3,ant1,direction,0),IPosition(3,ant1,direction,nofFrequencies-1),IPosition(3,1,1,1)));
+	  for (freq=0; freq<nofFrequencies; freq++) {
+	    tmpFreq(freq) = data(ant1,freq)*weights_p(ant1,direction,freq);
+	  }
 	  // --- Inverse Fourier transform back to time domain
 	  server.fft (tmpTime,tmpFreq);
 	  tmpData.row(ant1) = tmpTime;
@@ -488,6 +505,28 @@ namespace CR { // Namespace CR -- begin
 #ifdef HAVE_BLITZ
   bool Beamformer::time_cc (blitz::Array<double,2> &beam,
 			    const blitz::Array<conplex<double>,2> &data)
+  {
+    bool status (true);
+    
+    return status;
+  }
+#endif
+#endif
+  
+  // --------------------------------------------------------------------- time_p
+  
+#ifdef HAVE_CASA
+  bool Beamformer::time_p (Matrix<double> &beam,
+			   const Matrix<DComplex> &data)
+  {
+    bool status (true);
+    
+    return status;
+  }
+#else
+#ifdef HAVE_BLITZ
+  bool Beamformer::time_p (blitz::Array<double,2> &beam,
+			   const blitz::Array<conplex<double>,2> &data)
   {
     bool status (true);
     
