@@ -55,6 +55,8 @@ using casa::Matrix;
 using casa::String;
 using casa::Vector;
 
+// ------------------------------------------------------------------------------
+
 /*!
   \brief Create the shape information for the created image
   
@@ -67,6 +69,8 @@ casa::IPosition image_shape ()
 
   return shape;
 }
+
+// ------------------------------------------------------------------------------
 
 /*!
   \brief Create the coordinate system attached to the image
@@ -150,6 +154,7 @@ casa::CoordinateSystem image_csys ()
   return cs;
 }
 
+// ------------------------------------------------------------------------------
 
 /*!
   \brief Test the creation of a paged image
@@ -165,7 +170,10 @@ int test_PagedImage ()
     casa::String filename ("testimage.img");
     casa::TiledShape tshape (shape);
 
-    std::cout << " - Creating PagedImage of shape " << shape << " on disk..." << std::endl;
+    std::cout << " - Creating PagedImage of shape "
+	      << shape
+	      << " on disk..."
+	      << std::endl;
     casa::PagedImage<Float> image (tshape,
 			      image_csys(),
 			      filename);
@@ -187,8 +195,10 @@ int test_PagedImage ()
   return nofFailedTests;
 }
 
+// ------------------------------------------------------------------------------
+
 /*!
-  \brief main routine
+  \brief Main routine
   
   \return nofFailedTests -- The number of failed tests
 */

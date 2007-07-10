@@ -145,7 +145,11 @@ class Skymapper {
   //! Container and handler for the coordinates
   SkymapCoordinates coordinates_p;
 
+  //! Object to handle the beamforming of the input data
   Beamformer beamformer_p;
+
+  //! Pointer to a paged image containing the generated data
+  casa::PagedImage<Double> *image_p;
 
   // -- book-keeping
   

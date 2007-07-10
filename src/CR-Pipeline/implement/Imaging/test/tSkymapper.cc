@@ -229,7 +229,6 @@ int test_PagedImage ()
 
   Int nofFailedTests (0);
   Skymapper skymapper;
-  CoordinateSystem cs (skymapper.coordinateSystem());
   String pathTestImage (Aipsrc::aipsRoot());
 
   pathTestImage += "/data/demo/Images/test_image";
@@ -275,7 +274,7 @@ int test_PagedImage ()
     TiledShape shape (skymapper.imageShape());
     //
     PagedImage<Float> image (shape,
-			     cs,
+			     skymapper.coordinateSystem(),
 			     String("tSkymapper-01.img"));
     // show image characteristics
     show_PagedImage (image);    
@@ -294,12 +293,12 @@ int test_PagedImage ()
   
   cout << " [3] Insert pixel array via slicing ... " << endl;
   try {
-    IPosition shape (5,120,120,50,64,10);
+    IPosition shape (5,120,120,10,10,10);
     TiledShape tile (shape);
 
-    cout << " -- creating the image ..." << endl;
+    cout << " --> creating the image of shape " << shape <<  " ..." << endl;
     PagedImage<Float> image (tile,
-			     cs,
+			     skymapper.coordinateSystem(),
 			     String("tSkymapper-02.img"));
     // ... and display some basic properties
     show_PagedImage (image); 
@@ -308,7 +307,7 @@ int test_PagedImage ()
     IPosition stride (5,1,1,1,1,1);
     Array<Float> pixels (IPosition(2,120,120));
 
-    cout << " -- filling the image by slices along the distance axis ..." << endl;
+    cout << " --> filling the image by slices along the distance axis ..." << endl;
     ProgressMeter meter(0, shape(2), "Filling image by slices", "Subtitle", "", "", True, 1);
 
     for (int radius(0); radius<shape(2); radius++) {
@@ -381,14 +380,7 @@ Int test_Skymapper ()
     nofFailedTests++;
   }
   
-  cout << "\n[3] Testing argumented constructor ..." << endl;
-  try {
-  } catch (AipsError x) {
-    cerr << "[tSkymapper::test_Skymapper] " << x.getMesg() << endl;
-    nofFailedTests++;
-  }
-  
-  cout << "\n[4] Logging of internal parameters ..." << endl;
+  cout << "\n[3] Logging of internal parameters ..." << endl;
   try {
     ofstream logfile;
     Skymapper skymapper;
@@ -419,63 +411,22 @@ Int test_Skymapper ()
 int test_processing (string const &lopesData,
 		     uint const &blocksize)
 {
-  cout << "\n[test_processing]" << endl;
-
+  cout << "\n[test_processing]\n" << endl;
+  
   int nofFailedTests (0);
+  bool status (true);
 
-  cout << "\n[1] Test processing with default parameters ..." << endl;
+  std::cout << "[1] Test init function for default object..." << std::endl;
   try {
-    // Data input
-    DataReader *dr;
-    LopesEvent *event = new LopesEvent (lopesData,
-					blocksize);
-    dr = event;
-
-    // Observation info
-    Matrix <Double> antennaPositions (readAntennaPositions());
-    ObservationData obsData ("LOFAR-ITS");
-    obsData.setObserver ("Lars Baehren");
-    obsData.setAntennaPositions (antennaPositions);
-
-    obsData.summary();
-
-    // Coordinate settings
-    IPosition shape (5,150,150,1,1,1);
-    String refcode ("AZEL");
-    String projection ("STG");
-    Vector<Double> crval (2);
-    Vector<Double> cdelt (2);
-
-    // -- center the map on the local zenith
-    crval(0) =  0.0;   // Azimuth
-    crval(1) = 90.0;   // Elevation
-    cdelt(0) = -1.0;
-    cdelt(1) = +1.0;
-    // -- center the map on the position of the Sun
-//     crval(0) = 178.0;
-//     crval(1) =  28.0;
-//     cdelt(0) =  -0.5;
-//     cdelt(1) =  +0.5;
-
-//     Skymapper skymapper (dr,
-// 			 obsData,
-// 			 shape,
-// 			 refcode,
-// 			 projection,
-// 			 crval,
-// 			 cdelt);
-//     skymapper.setFilename ("tSkymapper.img");
-//     skymapper.setBlocksPerTimeframe(5);
-//     skymapper.setSkymapQuantity (SkymapQuantity::FREQ_POWER);
-//     //
-//     skymapper.summary();
-//     //
-//     skymapper.createImage();
-  } catch (AipsError x) {
-    cerr << "[tSkymapper::test_Skymapper] " << x.getMesg() << endl;
+    Skymapper skymapper;
+    // provide a summary of the internal settings
+    skymapper.summary();
+    // initialize the Skymapper for operation on data
+    status = skymapper.init();
+  } catch (std::string message) {
+    cerr << message << endl;
     nofFailedTests++;
   }
-
   
   return nofFailedTests;
 }
@@ -488,24 +439,22 @@ int main (int argc,
   Int nofFailedTests (0);
   string metafile ("/data/ITS/exampledata.its/experiment.meta");
   string lopesData ("/data/LOPES/example.event");
-//   uint blocksize (1024);
+  uint blocksize (1024);
   
+  // Tests with some of the underlying CASA functionality
 //   {
 //     nofFailedTests += test_CoordinateSystem ();
+//     nofFailedTests += test_PagedImage ();
 //   }
-
-  {
-    nofFailedTests += test_PagedImage ();
-  }
 
   {
     nofFailedTests += test_Skymapper ();
   }
 
-//   {
-//     nofFailedTests += test_processing (lopesData,
-// 				       blocksize);
-//   }
+  {
+    nofFailedTests += test_processing (lopesData,
+				       blocksize);
+  }
 
   return nofFailedTests;
 }

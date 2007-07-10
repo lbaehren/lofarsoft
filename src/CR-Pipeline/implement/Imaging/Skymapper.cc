@@ -28,6 +28,8 @@
 #include <Skymap/SkymapperTools.h>
 #include <Utilities/ProgressBar.h>
 
+using std::endl;
+
 namespace CR {  // Namespace CR -- begin
   
   // ============================================================================
@@ -122,22 +124,34 @@ namespace CR {  // Namespace CR -- begin
 
   bool Skymapper::init () 
   {
-    bool status (true);
+    std::cout << "[Skymapper::init]" << endl;
 
-    std::cout << "[Skymapper::init]" << std::endl;
-
-    std::cout << "--> collecting objects to create image ..." << std::endl;
+    std::cout << "--> collecting objects to create image ..." << endl;
     CoordinateSystem csys = coordinates_p.coordinateSystem();
     IPosition shape       = coordinates_p.shape();
     TiledShape tile (shape);
     
     std::cout << "--> creating the image file ... " << std::flush;
-    PagedImage<Float> image (tile,
-			     csys,
-			     filename_p);
-    std::cout << "done" << std::endl;
-    
-    return status;
+    try {
+      image_p = new PagedImage<double> (tile,
+					csys,
+					filename_p);
+      std::cout << "done" << endl;
+    } catch (std::string message) {
+      std::cout << endl;
+      std::cerr << "--> Failed creating the image file!" << endl;
+      std::cerr << "--> " << message << endl;
+      isOperational_p = false;
+    }
+
+    // check the image file created in disk
+    if (image_p->ok() && image_p->isWritable()) {
+      std::cout << "--> Image file appears ok and is writable." << endl;
+    } else {
+      isOperational_p = false;
+    }
+      
+    return isOperational_p;
   }
   
   // -------------------------------------------------------------- processData
@@ -174,7 +188,7 @@ namespace CR {  // Namespace CR -- begin
   
   Bool Skymapper::createImage ()
   {
-    std::cout << "[Skymapper::createImage]" << std::endl;
+    std::cout << "[Skymapper::createImage]" << endl;
     
     Bool status     (True);
     int radius      (0);
@@ -203,20 +217,12 @@ namespace CR {  // Namespace CR -- begin
     crval *= 1/(C::pi/180.0);
     cdelt *= 1/(C::pi/180.0);
     
-    std::cout << " - Setting up the skymap grid ... "      << std::endl;
-    std::cout << " -- coord. refcode    = " << refcode     << std::endl;
-    std::cout << " -- coord. projection = " << projection  << std::endl;
-    std::cout << " -- shape             = " << shape       << std::endl;
-    std::cout << " -- reference value   = " << crval       << std::endl;
-    std::cout << " -- coord. increment  = " << cdelt       << std::endl;
-//     skymap_p.setSkymapGrid (csys.obsInfo(),
-// 			    refcode,
-// 			    projection,
-// 			    shape,
-// 			    crval,
-// 			    cdelt);
-
-//     skymap_p.setCoordinateSystem(csys);
+    std::cout << " - Setting up the skymap grid ... "      << endl;
+    std::cout << " -- coord. refcode    = " << refcode     << endl;
+    std::cout << " -- coord. projection = " << projection  << endl;
+    std::cout << " -- shape             = " << shape       << endl;
+    std::cout << " -- reference value   = " << crval       << endl;
+    std::cout << " -- coord. increment  = " << cdelt       << endl;
 
     // Elevation range
     Vector<Double> elevation (2);
@@ -256,7 +262,7 @@ namespace CR {  // Namespace CR -- begin
 			   csys,
 			   filename_p);
 
-  std::cout << "done." << std::endl;
+  std::cout << "done." << endl;
 
   /*
     This is the core loop, generating the final skymap from a set of sub-images
@@ -269,7 +275,7 @@ namespace CR {  // Namespace CR -- begin
   Cube<Double> pixels;
   Cube<Bool> imageMask;
 
-  std::cout << " - computing image pixels ..." << std::endl;
+  std::cout << " - computing image pixels ..." << endl;
   bar.update(numLoop);
 
   try {
@@ -299,8 +305,8 @@ namespace CR {  // Namespace CR -- begin
       } // ------------------------------------------------------ end integration
       // rewind DataReader::position to initial data block
     } // ------------------------------------------------------------- end radius
-    std::cout << std::endl;
-    std::cout << " - all image pixels computed." << std::endl;
+    std::cout << endl;
+    std::cout << " - all image pixels computed." << endl;
   } catch (AipsError x) {
     cerr << "[Skymapper::createImage] " << x.getMesg() << endl;
     return False;
@@ -335,32 +341,32 @@ void Skymapper::summary (std::ostream &os)
   String projection        = axis.projection().name();
   ObsInfo obsInfo          = csys.obsInfo();
 
-  os << "[Skymapper] Summary of the internal parameters"         << std::endl;
-  os << " - Observation ..........  "                            << std::endl;
-  os << " -- observer             = " << obsInfo.observer()      << std::endl;
-  os << " -- telescope            = " << obsInfo.telescope()     << std::endl;
-  os << " -- observation date     = " << obsInfo.obsDate()       << std::endl;
-  os << " - Data I/O ............   "                            << std::endl;
-  os << " -- blocksize            = " << timeFreq.blocksize()       << std::endl;
-  os << " -- sampling rate [Hz]   = " << timeFreq.sampleFrequency() << std::endl;
-  os << " -- Nyquist zone         = " << timeFreq.nyquistZone()     << std::endl;
-  os << " - Coordinates ..........  "                            << std::endl;
-  os << " -- reference code       = " << refcode                 << std::endl;
-  os << " -- projection           = " << projection              << std::endl;
-  os << " -- nof. coordinates     = " << csys.nCoordinates()     << std::endl;
-  os << " -- names                = " << csys.worldAxisNames()   << std::endl;
-  os << " -- units                = " << csys.worldAxisUnits()   << std::endl;
-  os << " -- ref. pixel           = " << csys.referencePixel()   << std::endl;
-  os << " -- ref. value           = " << csys.referenceValue()   << std::endl;
-  os << " -- coord. increment     = " << csys.increment()        << std::endl;
-  os << " - Image ................  "                            << std::endl;
-  os << " -- filename             = " << filename()              << std::endl;
-  os << " -- imaged quantity      = " << quantity_p.quantity()   << std::endl;
-//   os << " -- image type           = " << image_p.imageType()     << std::endl;
-//   os << " -- is persistent?       = " << image_p.isPersistent()  << std::endl;
-//   os << " -- is paged?            = " << image_p.isPaged()       << std::endl;
-//   os << " -- is writable?         = " << image_p.isWritable()    << std::endl;
-//   os << " -- has pixel mask?      = " << image_p.hasPixelMask()  << std::endl;
+  os << "[Skymapper] Summary of the internal parameters"            << endl;
+  os << " - Observation ..........  "                               << endl;
+  os << " -- observer             = " << obsInfo.observer()         << endl;
+  os << " -- telescope            = " << obsInfo.telescope()        << endl;
+  os << " -- observation date     = " << obsInfo.obsDate()          << endl;
+  os << " - Data I/O ............   "                               << endl;
+  os << " -- blocksize            = " << timeFreq.blocksize()       << endl;
+  os << " -- sampling rate [Hz]   = " << timeFreq.sampleFrequency() << endl;
+  os << " -- Nyquist zone         = " << timeFreq.nyquistZone()     << endl;
+  os << " - Coordinates ..........  "                            << endl;
+  os << " -- reference code       = " << refcode                 << endl;
+  os << " -- projection           = " << projection              << endl;
+  os << " -- nof. coordinates     = " << csys.nCoordinates()     << endl;
+  os << " -- names                = " << csys.worldAxisNames()   << endl;
+  os << " -- units                = " << csys.worldAxisUnits()   << endl;
+  os << " -- ref. pixel           = " << csys.referencePixel()   << endl;
+  os << " -- ref. value           = " << csys.referenceValue()   << endl;
+  os << " -- coord. increment     = " << csys.increment()        << endl;
+  os << " - Image ................  "                            << endl;
+  os << " -- filename             = " << filename()              << endl;
+  os << " -- imaged quantity      = " << quantity_p.quantity()   << endl;
+//   os << " -- image type           = " << image_p.imageType()     << endl;
+//   os << " -- is persistent?       = " << image_p.isPersistent()  << endl;
+//   os << " -- is paged?            = " << image_p.isPaged()       << endl;
+//   os << " -- is writable?         = " << image_p.isWritable()    << endl;
+//   os << " -- has pixel mask?      = " << image_p.hasPixelMask()  << endl;
 }
 
 }  // Namespace CR -- end
