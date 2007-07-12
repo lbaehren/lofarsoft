@@ -32,8 +32,8 @@
 using casa::IPosition;
 using casa::ProgressMeter;
 
-#include <templates.h>
 #include <Imaging/Skymapper.h>
+#include <create_data.h>
 
 using CR::ObservationData;
 using CR::SkymapCoordinates;
@@ -419,10 +419,54 @@ int test_processing (string const &lopesData,
   std::cout << "[1] Test init function for default object..." << std::endl;
   try {
     Skymapper skymapper;
+    // set the name of the created image file
+    skymapper.setFilename ("skymap01.img");
     // provide a summary of the internal settings
     skymapper.summary();
     // initialize the Skymapper for operation on data
     status = skymapper.init();
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[2] Test init function for custom object..." << std::endl;
+  try {
+    Skymapper skymapper (get_SkymapCoordinates());
+    // enable additional feedback during processing
+    skymapper.setVerboseLevel(1);
+    // set the name of the created image file
+    skymapper.setFilename ("skymap02.img");
+    // provide a summary of the internal settings
+    skymapper.summary();
+    // initialize the Skymapper for operation on data
+    status = skymapper.init();
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[3] Test processData function with generated data..." << std::endl;
+  try {
+    // create beamformer
+    uint nofAntennas (2);
+    uint nofSkyPositions (10);
+    uint nofFrequencies (1024);
+    Matrix<double> antennaPositions (get_antennaPositions(nofAntennas));
+    Matrix<double> skyPositions (get_skyPositions(nofSkyPositions));
+    Vector<double> frequencies (get_frequencies(40e06,80e06,nofFrequencies));
+    CR::Beamformer beamformer (antennaPositions,
+			       SkyPositions,
+			       frequencies);
+    // create Skymapper object
+    Skymapper skymapper (get_SkymapCoordinates());
+    // set the name of the created image file
+    skymapper.setVerboseLevel(1);
+    skymapper.setFilename ("skymap03.img");
+    // if initialization goes well, start processing a block of data data
+    if (skymapper.init()) {
+      
+    }
   } catch (std::string message) {
     cerr << message << endl;
     nofFailedTests++;

@@ -268,6 +268,32 @@ int test_SkymapCoordinates ()
     nofFailedTests++;
   }
   
+  cout << "[3] Testing copy constructor ..." << endl;
+  try {
+    // create SkymapCoordinates object
+    SkymapCoordinates coord1 (timeFreq,
+			      obsData,
+			      nofBlocks,
+			      SkymapCoordinates::NORTH_WEST,
+			      CR::FREQ_POWER);
+    // create new object from the previouse one
+    SkymapCoordinates coord2 (coord1);
+    // compare parameters
+    std::cout << "-- pixel array : "
+	      << coord1.shape()
+	      << " -> "
+	      << coord2.shape()
+	      << std::endl;
+    std::cout << "-- beam type   : "
+	      << coord1.beamType() 
+	      << " -> "
+	      << coord2.beamType()
+	      << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
   return nofFailedTests;
 }
 

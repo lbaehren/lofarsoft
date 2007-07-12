@@ -41,24 +41,40 @@ namespace CR {  // Namespace CR -- begin
   // ------------------------------------------------------------------ Skymapper
   
   Skymapper::Skymapper ()
-    : verbose_p (false),
-      isOperational_p (false),
-      nofProcessedBlocks_p (0)
   {
-    coordinates_p = SkymapCoordinates ();
-    filename_p    = "skymap.img";
+    init (0,
+	  false,
+	  0,
+	  "skymap.img",
+	  SkymapCoordinates(),
+	  Beamformer());
   }
   
   // ------------------------------------------------------------------ Skymapper
   
   Skymapper::Skymapper (SkymapCoordinates const &coordinates)
-    : verbose_p (false),
-      isOperational_p (false),
-      nofProcessedBlocks_p (0)
   {
-    coordinates_p = coordinates;
+    init (0,
+	  false,
+	  0,
+	  "skymap.img",
+	  coordinates,
+	  Beamformer());
   }
   
+  // ------------------------------------------------------------------ Skymapper
+  
+  Skymapper::Skymapper (SkymapCoordinates const &coordinates,
+			Beamformer const &beamformer)
+  {
+    init (0,
+	  false,
+	  0,
+	  "skymap.img",
+	  coordinates,
+	  beamformer);
+  }
+
   // ------------------------------------------------------------------ Skymapper
   
   Skymapper::Skymapper (Skymapper const& other)
@@ -98,10 +114,12 @@ namespace CR {  // Namespace CR -- begin
   
   void Skymapper::copy (Skymapper const& other)
   {
-    verbose_p            = other.verbose_p;
-    filename_p           = other.filename_p;
+    beamformer_p         = other.beamformer_p;
     coordinates_p        = other.coordinates_p;
+    filename_p           = other.filename_p;
     nofProcessedBlocks_p = other.nofProcessedBlocks_p;
+    quantity_p           = other.quantity_p;
+    verbose_p            = other.verbose_p;
   }
   
   // -------------------------------------------------------------------- destroy
@@ -114,29 +132,111 @@ namespace CR {  // Namespace CR -- begin
   //  Parameters
   //
   // ============================================================================
-  
 
-  // ==========================================================================
+  // ----------------------------------------------------------------------- init 
+  
+  void Skymapper::init (short const &verbose,
+			bool const &isOperational,
+			uint const &nofProcessedBlocks,
+			std::string const &filename,
+			SkymapCoordinates const &coordinates,
+			Beamformer const &beamformer)
+  {
+    verbose_p            = verbose;
+    isOperational_p      = isOperational;
+    nofProcessedBlocks_p = nofProcessedBlocks;
+    filename_p           = filename;
+    
+    if (!setBeamformer (beamformer)) {
+      std::cerr << "[Skymapper::init] Error setting Beamformer object!"
+		<< std::endl;
+    }
+
+    if (!setSkymapCoordinates (coordinates)) {
+      std::cerr << "[Skymapper::init] Error setting SkymapCoordinates object!"
+		<< std::endl;
+    }
+  }
+
+  // -------------------------------------------------------------- setBeamformer
+
+  bool Skymapper::setBeamformer (Beamformer const &beamformer)
+  {
+    bool status (true);
+
+    try {
+      beamformer_p = beamformer;
+    } catch (std::string message) {
+      std::cerr << "[Skymapper::setBeamformer] Error setting Beamformer object!"
+		<< std::endl;
+      std::cerr << "--> " << message << std::endl;
+    }
+    
+    return status;
+  }
+
+  // -------------------------------------------------------------- setBeamformer
+
+  bool Skymapper::setBeamformer (Matrix<double> const &antPositions,
+				 Matrix<double> const &skyPositions,
+				 Vector<double> const &frequencies)
+  {
+    bool status (true);
+    
+    status = beamformer_p.setAntPositions (antPositions);
+    status = beamformer_p.setSkyPositions (skyPositions);
+    status = beamformer_p.setFrequencies (frequencies);
+    
+    return status;
+  }
+
+  // ------------------------------------------------------- setSkymapCoordinates
+
+  bool Skymapper::setSkymapCoordinates (SkymapCoordinates const &coordinates)
+  {
+    bool status (true);
+    
+    try {
+      coordinates_p = coordinates;
+    } catch (std::string message) {
+      std::cerr << "[Skymapper::setSkymapCoordinates] "
+		<< "Error setting setSkymapCoordinates object!"
+		<< std::endl;
+      std::cerr << "--> " << message << std::endl;
+    }
+    
+    return status;
+  }
+
+  // ============================================================================
   //
   //  Processing
   //
-  // ==========================================================================
+  // ============================================================================
+
+  // ----------------------------------------------------------------------- init
 
   bool Skymapper::init () 
   {
-    std::cout << "[Skymapper::init]" << endl;
-
-    std::cout << "--> collecting objects to create image ..." << endl;
+    /*
+      We might want to do some additional checking on the Beamformer first,
+      because in case it is not operational, there is little sense in trying
+      to process the data.
+    */
+    
+    /*
+      With the image data written into an AIPS++ PagedImage, we need to create
+      and initialize one first, before we can start inserting the computed 
+      image data.
+    */
     CoordinateSystem csys = coordinates_p.coordinateSystem();
     IPosition shape       = coordinates_p.shape();
     TiledShape tile (shape);
-    
-    std::cout << "--> creating the image file ... " << std::flush;
+
     try {
       image_p = new PagedImage<double> (tile,
 					csys,
 					filename_p);
-      std::cout << "done" << endl;
     } catch (std::string message) {
       std::cout << endl;
       std::cerr << "--> Failed creating the image file!" << endl;
@@ -146,7 +246,8 @@ namespace CR {  // Namespace CR -- begin
 
     // check the image file created in disk
     if (image_p->ok() && image_p->isWritable()) {
-      std::cout << "--> Image file appears ok and is writable." << endl;
+      std::cout << "[Skymapper::init] Image file appears ok and is writable."
+		<< endl;
     } else {
       isOperational_p = false;
     }
@@ -154,7 +255,7 @@ namespace CR {  // Namespace CR -- begin
     return isOperational_p;
   }
   
-  // -------------------------------------------------------------- processData
+  // ---------------------------------------------------------------- processData
   
   bool Skymapper::processData (Matrix<DComplex> const &data)
   {
@@ -163,6 +264,8 @@ namespace CR {  // Namespace CR -- begin
     // Check if the Skymapper is operational first; otherwise there is no need
     // to proceed beyond this point
     if (!isOperational_p) {
+      std::cerr << "[Skymapper::processData] Skymapper is not operational!"
+		<< std::endl;
       return isOperational_p;
     }
 
@@ -173,9 +276,18 @@ namespace CR {  // Namespace CR -- begin
     IPosition stride (imageShape.nelements(),1);
     Vector<Double> distances = coordinates_p.distanceAxisValues();
     uint nofDistances        = distances.nelements();
+
+    if (verbose_p) {
+      std::cout << "[Skymapper::processData]" << std::endl;
+      std::cout << "-- shape of the input data = " << shape      << std::endl;
+      std::cout << "-- shape of the image      = " << imageShape << std::endl;
+      std::cout << "-- array start position    = " << start      << std::endl;
+      std::cout << "-- array position stride   = " << stride     << std::endl;
+      std::cout << "-- distance stepping       = " << distances  << std::endl;
+    }
     
-    for (uint distanceStep(0); distanceStep<nofDistances; distanceStep++) {
-      
+    for (uint dist(0); dist<nofDistances; dist++) {
+      std::cout << dist << "" << distances(dist) << std::endl;
     }
 
     // book-keeping of the number of data blocks processed so far
@@ -196,8 +308,6 @@ namespace CR {  // Namespace CR -- begin
     IPosition imageShape (coordinates_p.shape());
     int nofLoops   (imageShape(2)*imageShape(3));
     CoordinateSystem csys (coordinates_p.coordinateSystem());
-    Matrix<Double> antennaPositions;
-    Vector<Double> frequencies;
     Matrix<DComplex> data;
   
   /*
@@ -285,8 +395,6 @@ namespace CR {  // Namespace CR -- begin
       // 2. update pointer to position in image array
       start(2) = radius;
       // 3. update the beamformer weights for the current shell
-//       skymap_p.setPhaseGradients (frequencies,
-// 				  antennaPositions);
       for (integration=0; integration<imageShape(3); integration++) {
 	start(3) = integration;
 	// 1. read in the data from disk
@@ -313,60 +421,54 @@ namespace CR {  // Namespace CR -- begin
   }
   
   return status;
-}
-
-
-// ==============================================================================
-//
-//  Feedback 
-//
-// ==============================================================================
-
-// ---------------------------------------------------------------------- summary
-
-void Skymapper::summary ()
-{
-  summary (std::cout);
-}
-
-// ---------------------------------------------------------------------- summary
-
-void Skymapper::summary (std::ostream &os)
-{
-  TimeFreq timeFreq        = coordinates_p.timeFreq();
-  CoordinateSystem csys    = coordinates_p.coordinateSystem();
-  DirectionCoordinate axis = coordinates_p.directionAxis();
-  MDirection direction     = axis.directionType();
-  String refcode           = direction.getRefString();
-  String projection        = axis.projection().name();
-  ObsInfo obsInfo          = csys.obsInfo();
-
-  os << "[Skymapper] Summary of the internal parameters"            << endl;
-  os << " - Observation ..........  "                               << endl;
-  os << " -- observer             = " << obsInfo.observer()         << endl;
-  os << " -- telescope            = " << obsInfo.telescope()        << endl;
-  os << " -- observation date     = " << obsInfo.obsDate()          << endl;
-  os << " - Data I/O ............   "                               << endl;
-  os << " -- blocksize            = " << timeFreq.blocksize()       << endl;
-  os << " -- sampling rate [Hz]   = " << timeFreq.sampleFrequency() << endl;
-  os << " -- Nyquist zone         = " << timeFreq.nyquistZone()     << endl;
-  os << " - Coordinates ..........  "                            << endl;
-  os << " -- reference code       = " << refcode                 << endl;
-  os << " -- projection           = " << projection              << endl;
-  os << " -- nof. coordinates     = " << csys.nCoordinates()     << endl;
-  os << " -- names                = " << csys.worldAxisNames()   << endl;
-  os << " -- units                = " << csys.worldAxisUnits()   << endl;
-  os << " -- ref. pixel           = " << csys.referencePixel()   << endl;
-  os << " -- ref. value           = " << csys.referenceValue()   << endl;
-  os << " -- coord. increment     = " << csys.increment()        << endl;
-  os << " - Image ................  "                            << endl;
-  os << " -- filename             = " << filename()              << endl;
-  os << " -- imaged quantity      = " << quantity_p.quantity()   << endl;
-//   os << " -- image type           = " << image_p.imageType()     << endl;
-//   os << " -- is persistent?       = " << image_p.isPersistent()  << endl;
-//   os << " -- is paged?            = " << image_p.isPaged()       << endl;
-//   os << " -- is writable?         = " << image_p.isWritable()    << endl;
-//   os << " -- has pixel mask?      = " << image_p.hasPixelMask()  << endl;
-}
-
+  }
+  
+  
+  // ============================================================================
+  //
+  //  Feedback 
+  //
+  // ============================================================================
+  
+  // -------------------------------------------------------------------- summary
+  
+  void Skymapper::summary (std::ostream &os)
+  {
+    TimeFreq timeFreq        = coordinates_p.timeFreq();
+    CoordinateSystem csys    = coordinates_p.coordinateSystem();
+    DirectionCoordinate axis = coordinates_p.directionAxis();
+    MDirection direction     = axis.directionType();
+    String refcode           = direction.getRefString();
+    String projection        = axis.projection().name();
+    ObsInfo obsInfo          = csys.obsInfo();
+    
+    os << "[Skymapper] Summary of the internal parameters"            << endl;
+    os << " - Observation ..........  "                               << endl;
+    os << " -- observer             = " << obsInfo.observer()         << endl;
+    os << " -- telescope            = " << obsInfo.telescope()        << endl;
+    os << " -- observation date     = " << obsInfo.obsDate()          << endl;
+    os << " - Data I/O ............   "                               << endl;
+    os << " -- blocksize            = " << timeFreq.blocksize()       << endl;
+    os << " -- sampling rate [Hz]   = " << timeFreq.sampleFrequency() << endl;
+    os << " -- Nyquist zone         = " << timeFreq.nyquistZone()     << endl;
+    os << " - Coordinates ..........  "                               << endl;
+    os << " -- reference code       = " << refcode                    << endl;
+    os << " -- projection           = " << projection                 << endl;
+    os << " -- nof. coordinates     = " << csys.nCoordinates()        << endl;
+    os << " -- names                = " << csys.worldAxisNames()      << endl;
+    os << " -- units                = " << csys.worldAxisUnits()      << endl;
+    os << " -- ref. pixel           = " << csys.referencePixel()      << endl;
+    os << " -- ref. value           = " << csys.referenceValue()      << endl;
+    os << " -- coord. increment     = " << csys.increment()           << endl;
+    os << " - Image ................  "                               << endl;
+    os << " -- filename             = " << filename()                 << endl;
+    os << " -- imaged quantity      = " << quantity_p.quantity()      << endl;
+    os << " -- shape of pixel array = " << coordinates_p.shape()      << endl;
+    //   os << " -- image type           = " << image_p.imageType()     << endl;
+    //   os << " -- is persistent?       = " << image_p.isPersistent()  << endl;
+    //   os << " -- is paged?            = " << image_p.isPaged()       << endl;
+    //   os << " -- is writable?         = " << image_p.isWritable()    << endl;
+    //   os << " -- has pixel mask?      = " << image_p.hasPixelMask()  << endl;
+  }
+  
 }  // Namespace CR -- end

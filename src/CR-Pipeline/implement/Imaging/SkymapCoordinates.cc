@@ -175,6 +175,8 @@ namespace CR { // Namespace CR -- begin
   //  Operators
   //
   // ============================================================================
+
+  // ------------------------------------------------------------------ operator=
   
   SkymapCoordinates& SkymapCoordinates::operator= (SkymapCoordinates const &other)
   {
@@ -184,6 +186,8 @@ namespace CR { // Namespace CR -- begin
     }
     return *this;
   }
+
+  // ----------------------------------------------------------------------- copy
   
   void SkymapCoordinates::copy (SkymapCoordinates const &other)
   {
@@ -191,7 +195,7 @@ namespace CR { // Namespace CR -- begin
     obsData_p        = other.obsData_p;
     nofBlocks_p      = other.nofBlocks_p;
     mapOrientation_p = other.mapOrientation_p;
-    beamType_p    = other.beamType_p;
+    beamType_p       = other.beamType_p;
     shape_p          = other.shape_p;
   }
 
