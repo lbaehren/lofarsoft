@@ -2,14 +2,28 @@ PROJECT (VLT)
 
 INCLUDE_DIRECTORIES (. .. ${VLT_SOURCE_DIR}/implement)
 
-ADD_EXECUTABLE (matvecTest matvecTest.cc)
-TARGET_LINK_LIBRARIES (matvecTest aomath)
+set (tests
+  matvecTest
+  svdTest
+  testMath
+  tMAFilter
+  )
 
-ADD_EXECUTABLE (svdTest svdTest.cc)
-TARGET_LINK_LIBRARIES (svdTest aomath)
+foreach (src ${tests})
+  ## executable and its source
+  add_executable(${src} ${src}.cc)
+  ## libraries against which to link
+  target_link_libraries(${src}
+    aomath
+    )
+endforeach (src)
 
-ADD_EXECUTABLE (testMath testMath.cc)
-TARGET_LINK_LIBRARIES (testMath aomath)
+## ------------------------------------------------------------------------------
+## Installation
 
-ADD_EXECUTABLE (tMAFilter tMAFilter.cc)
-TARGET_LINK_LIBRARIES (tMAFilter aomath)
+install (
+  TARGETS ${tests}
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )
