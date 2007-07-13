@@ -456,7 +456,7 @@ int test_processing (string const &lopesData,
     Matrix<double> skyPositions (get_skyPositions(nofSkyPositions));
     Vector<double> frequencies (get_frequencies(40e06,80e06,nofFrequencies));
     CR::Beamformer beamformer (antennaPositions,
-			       SkyPositions,
+			       skyPositions,
 			       frequencies);
     // create Skymapper object
     Skymapper skymapper (get_SkymapCoordinates());

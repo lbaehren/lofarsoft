@@ -105,8 +105,6 @@ SET (CMAKE_VERBOSE_MAKEFILE 0)
 ## ------------------------------------------------------------------------------
 ## Installation
 
-## Locate the installation area
-
 find_path (prefix release_area.txt
   PATHS
   ${CR_SOURCE_DIR}

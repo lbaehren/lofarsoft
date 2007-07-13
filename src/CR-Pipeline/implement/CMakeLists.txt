@@ -47,3 +47,17 @@ if (CASA_LIBRARIES AND LAPACK_LIBRARIES)
 else (CASA_LIBRARIES AND LAPACK_LIBRARIES)
   message (STATUS "Sorry, unable to build CR library; missing CASA and LAPACK!")
 endif (CASA_LIBRARIES AND LAPACK_LIBRARIES)
+
+## ------------------------------------------------------------------------------
+## Installation
+
+## installation of libraries
+
+install (
+  TARGETS cr
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )
+
+## installation of header files

@@ -29,11 +29,6 @@ if (NOT HAVE_WCS)
 endif (NOT HAVE_WCS)
 
 ## ------------------------------------------------------------------------------
-## Include directories
-
-# the things should be handled one directory level up
-
-## ------------------------------------------------------------------------------
 ## Test working with CASA libraries
 
 set (tests
@@ -45,7 +40,6 @@ set (tests
   tUseImages
 )
 
-## ------------------------------------------------------------------------------
 ## create executable(s)
 
 if (HAVE_CASA)
@@ -57,6 +51,15 @@ if (HAVE_CASA)
       )  
   ENDFOREACH (src)
 endif (HAVE_CASA)
+
+## installation
+
+install (
+  TARGETS ${tests}
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )
 
 ## ------------------------------------------------------------------------------
 ## Vectors of the standard library
@@ -71,11 +74,27 @@ add_executable (tNumericalRanges tNumericalRanges.cc)
 add_executable (tObjects tObjects.cc)
 add_executable (tProcessingParameters tProcessingParameters.cc)
 
+## installation
+
+install (
+  TARGETS tNumericalRanges tObjects tProcessingParameters
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )
+
 ## ------------------------------------------------------------------------------
 ## Test for BLITZ
 
 add_executable (tUseBlitz tUseBlitz.cc)
 target_link_libraries (tUseBlitz ${BLITZ_LIBRARIES})
+
+## installation
+
+install (
+  TARGETS tUseBlitz
+  RUNTIME DESTINATION bin
+  )
 
 ## ------------------------------------------------------------------------------
 ## Test for CFITSIO
@@ -83,6 +102,11 @@ target_link_libraries (tUseBlitz ${BLITZ_LIBRARIES})
 if (HAVE_CFITSIO)
   add_executable (tUseCFITSIO tUseCFITSIO.cc)
   target_link_libraries (tUseCFITSIO ${CFITSIO_LIBRARIES})
+  ## installation
+  install (
+    TARGETS tUseCFITSIO
+    RUNTIME DESTINATION bin
+    )
 else (HAVE_CFITSIO)
   message (STATUS "Unable to build test program for CFITSIO.")
 endif (HAVE_CFITSIO)
@@ -93,6 +117,11 @@ endif (HAVE_CFITSIO)
 if (HAVE_FFTW3)
   add_executable (tUseFFTW3 tUseFFTW3.cc)
   target_link_libraries (tUseFFTW3 ${FFTW3_LIBRARY})
+  ## installation
+  install (
+    TARGETS tUseFFTW3
+    RUNTIME DESTINATION bin
+    )
 else (HAVE_FFTW3)
   message (STATUS "Unable to build test program for FFTW3.")
 endif (HAVE_FFTW3)
@@ -103,6 +132,11 @@ endif (HAVE_FFTW3)
 if (HAVE_WCS)
   add_executable (tUseWCS tUseWCS.cc)
   target_link_libraries (tUseWCS ${WCS_LIBRARIES})
+  ## installation
+  install (
+    TARGETS tUseWCS
+    RUNTIME DESTINATION bin
+    )
 else (HAVE_WCS)
   message (STATUS "Unable to build test program for WCS.")
 endif (HAVE_WCS)
@@ -116,3 +150,5 @@ if (HAVE_ROOT AND HAVE_BLITZ)
 else (HAVE_ROOT AND HAVE_BLITZ)
   message (STATUS "Unable to build test program(s) for working with ROOT.")
 endif (HAVE_ROOT AND HAVE_BLITZ)
+
+
