@@ -324,17 +324,6 @@ int test_PagedImage ()
     nofFailedTests++;
   }
 
-//   cout << " [4] Create paged image from paged array ..." << endl;
-//   try {
-//     IPosition shape (5,120,120,50,64,1);
-//     TiledShape tile (shape);
-//     //
-//     PagedArray<Float> array (tile,"tSkymapper-03.array");
-//   } catch (AipsError x) {
-//     cerr << "[tSkymapper::test_PagedImage] " << x.getMesg() << endl;
-//     nofFailedTests++;
-//   }
-  
   return nofFailedTests;
 }
 
@@ -452,20 +441,26 @@ int test_processing (string const &lopesData,
     uint nofAntennas (2);
     uint nofSkyPositions (10);
     uint nofFrequencies (1024);
+    std::cout << "-- getting parameters for Beamformer..." << std::endl;
     Matrix<double> antennaPositions (get_antennaPositions(nofAntennas));
     Matrix<double> skyPositions (get_skyPositions(nofSkyPositions));
     Vector<double> frequencies (get_frequencies(40e06,80e06,nofFrequencies));
+    std::cout << "-- creating Beamformer object..." << std::endl;
     CR::Beamformer beamformer (antennaPositions,
 			       skyPositions,
 			       frequencies);
     // create Skymapper object
+    std::cout << "-- creating Skymapper object..." << std::endl;
     Skymapper skymapper (get_SkymapCoordinates());
     // set the name of the created image file
-    skymapper.setVerboseLevel(1);
     skymapper.setFilename ("skymap03.img");
     // if initialization goes well, start processing a block of data data
+    std::cout << "-- initializing Skymapper for processing..." << std::endl;
     if (skymapper.init()) {
-      
+      std::cout << "-- creating array with input data..." << std::endl;
+      Matrix<DComplex> data (get_data(nofAntennas,nofFrequencies));
+      std::cout << "-- processing data..." << std::endl;
+      status = skymapper.processData (data);
     }
   } catch (std::string message) {
     cerr << message << endl;

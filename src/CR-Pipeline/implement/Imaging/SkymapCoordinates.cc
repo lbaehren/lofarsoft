@@ -806,6 +806,29 @@ namespace CR { // Namespace CR -- begin
     return worldValues;
   }
 
+  // ------------------------------------------------------------- timeAxisStride
+
+  int SkymapCoordinates::timeAxisStride ()
+  {
+    int stride (1);
+    
+    switch (beamType_p) {
+    case TIME_FIELD:
+    case TIME_POWER:
+    case TIME_CC:
+    case TIME_P:
+    case TIME_X:
+      stride = timeFreq_p.blocksize();
+      break;
+    case FREQ_POWER:
+    case FREQ_FIELD:
+      stride = 1;
+      break;
+    }
+
+    return stride;
+  }
+  
   // -------------------------------------------------------- frequencyAxisValues
 
   Vector<double> SkymapCoordinates::frequencyAxisValues ()

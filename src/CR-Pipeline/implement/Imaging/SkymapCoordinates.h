@@ -676,6 +676,15 @@ namespace CR { // Namespace CR -- begin
     */
     Vector<double> timeAxisValues (Vector<double> const &pixelValues);
 
+    /*!
+      \brief Stride along the image's time axis for two subsequent data blocks
+
+      \return stride -- The stride along the image's time axis, when inserting
+                        the beamformed data of subsequent blocks of input data
+			into the pixel array
+    */
+    int timeAxisStride ();
+
     // ----------------------------------------------------------- Frequency axis
 
     /*!

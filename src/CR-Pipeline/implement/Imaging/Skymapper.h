@@ -159,7 +159,9 @@ namespace CR {  // Namespace CR -- begin
     
     //! The number of processed data blocks so far
     uint nofProcessedBlocks_p;
-    
+
+    //! Direction values
+    Matrix<double> directionValues_p;
     //! Direction mask to flag individual pixels
     Matrix<bool> directionMask_p;
     

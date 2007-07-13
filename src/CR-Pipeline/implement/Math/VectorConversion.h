@@ -454,6 +454,39 @@ namespace CR { // Namespace CR -- begin
     cartesian = spherical2cartesian (spherical,
 				     anglesInDegrees);
   }
+#ifdef HAVE_CASA
+  inline void spherical2cartesian (casa::Vector<double> &cartesian,
+				   casa::Vector<double> const &spherical,
+				   bool const &anglesInDegrees) {
+    cartesian = spherical2cartesian (spherical,
+				     anglesInDegrees);
+  }
+#endif
+  
+  /*!
+    \brief Convert positions from Spherical to Cartesian coordinates
+
+    Converts 3D vector representation from \f$ (r,\phi,\theta) \f$ to
+    \f$ (x,y,z) \f$
+
+    \retval cartesian      -- [position,3] Representation of the vector in
+                              cartesian coordinates, \f$ (x,y,z) \f$    
+    \param spherical       -- [position,3] Representation of the vector in
+                              spherical coordinates
+    \param anglesInDegrees -- Are the angles given in degrees?
+  */
+#ifdef HAVE_CASA
+  inline void spherical2cartesian (casa::Matrix<double> &cartesian,
+				   casa::Matrix<double> const &spherical,
+				   bool const &anglesInDegrees) {
+    casa::IPosition shape (spherical.shape());
+    cartesian.resize(shape);
+    for (int n(0); n<shape(0); n++) {
+      cartesian.row(n) = spherical2cartesian (spherical.row(n),
+					      anglesInDegrees);
+    }
+  }
+#endif
   
   // ============================================================================
   //

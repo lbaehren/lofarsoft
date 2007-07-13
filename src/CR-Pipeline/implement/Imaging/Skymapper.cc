@@ -218,11 +218,29 @@ namespace CR {  // Namespace CR -- begin
 
   bool Skymapper::init () 
   {
+    bool status (true);
+
     /*
-      We might want to do some additional checking on the Beamformer first,
-      because in case it is not operational, there is little sense in trying
-      to process the data.
+      For the later Beamforming we need to retrieve the coordinates of the
+      poiting positions; since we keep the directions constant and iterate over
+      the distance axis, we get the full position information by later
+      combination.
     */
+    
+    {
+      Matrix<double> directionValues;
+      // retrieve the direction values as defined via the coordinate system
+      status = coordinates_p.directionAxisValues ("AZEL",
+						  directionValues_p,
+						  directionMask_p,
+						  false);
+    }
+    
+    if (status && verbose_p) {
+      std::cout << "[Skymapper::init] Retrieved directions." << std::endl;
+      std::cout << "-- direction values : " << directionValues_p.shape() << std::endl;
+      std::cout << "-- direction mask   : " << directionMask_p.shape()   << std::endl;
+    }
     
     /*
       With the image data written into an AIPS++ PagedImage, we need to create
@@ -238,20 +256,24 @@ namespace CR {  // Namespace CR -- begin
 					csys,
 					filename_p);
     } catch (std::string message) {
-      std::cout << endl;
-      std::cerr << "--> Failed creating the image file!" << endl;
+      std::cerr << "[Skymapper::init] Failed creating the image file!" << endl;
       std::cerr << "--> " << message << endl;
       isOperational_p = false;
     }
 
     // check the image file created in disk
     if (image_p->ok() && image_p->isWritable()) {
-      std::cout << "[Skymapper::init] Image file appears ok and is writable."
-		<< endl;
+      // book-keeping of operational status
+      isOperational_p = true;
+      // feedback to the outside world
+      if (verbose_p) {
+	std::cout << "[Skymapper::init] Image file appears ok and is writable."
+		  << endl;
+      }
     } else {
       isOperational_p = false;
     }
-      
+    
     return isOperational_p;
   }
   
@@ -269,14 +291,20 @@ namespace CR {  // Namespace CR -- begin
       return isOperational_p;
     }
 
-    // Local variables
+    // Local variables for iteration
     IPosition shape (data.shape());
     IPosition imageShape (coordinates_p.shape());
     IPosition start  (imageShape.nelements(),0);
     IPosition stride (imageShape.nelements(),1);
-    Vector<Double> distances = coordinates_p.distanceAxisValues();
-    uint nofDistances        = distances.nelements();
+    // Local variables for beamforming
+    Vector<double> distances (coordinates_p.distanceAxisValues());
+    uint nofDistances (distances.nelements());
+    Vector<double> distance (1);
+    Vector<int> axisOrder (3);
+    Matrix<double> beam;
 
+    casa::indgen(axisOrder);
+    
     if (verbose_p) {
       std::cout << "[Skymapper::processData]" << std::endl;
       std::cout << "-- shape of the input data = " << shape      << std::endl;
@@ -287,7 +315,16 @@ namespace CR {  // Namespace CR -- begin
     }
     
     for (uint dist(0); dist<nofDistances; dist++) {
-      std::cout << dist << "" << distances(dist) << std::endl;
+      // update the Beamformer
+      distance(0) = distances (dist);
+      beamformer_p.setSkyPositions(directionValues_p,
+				   distance,
+				   axisOrder,
+				   CR::Spherical,
+				   false,
+				   true);
+      // Navigation within the pixel array
+      start(SkymapCoordinates::Distance) = dist;
     }
 
     // book-keeping of the number of data blocks processed so far
