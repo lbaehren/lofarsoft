@@ -101,3 +101,23 @@ include_directories (
 ## Verbose level
 
 SET (CMAKE_VERBOSE_MAKEFILE 0)
+
+## ------------------------------------------------------------------------------
+## Installation
+
+## Locate the installation area
+
+find_path (prefix release_area.txt
+  PATHS
+  ${CR_SOURCE_DIR}
+  PATH_SUFFIXES
+  ../release
+  ../../release
+  NO_DEFAULT_PATH
+  )
+
+if (prefix)
+  message (STATUS "Installation area located for package CR.")
+  set (CMAKE_INSTALL_PREFIX ${prefix}) 
+endif (prefix)
+

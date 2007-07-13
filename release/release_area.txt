@@ -1,0 +1,8 @@
+
+NOTE:
+	This file is used to help CMake to locate the default installation area,
+	which is not e.g. /usr or /usr/local, but a directory below the root of the
+	USG code tree. The motivation for this is, that without overriding this
+	installation destination, all user software should end up in a well-defined
+	and self-contained area, which -- if necessary -- could be easily removed
+	from the system.

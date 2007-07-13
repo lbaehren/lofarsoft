@@ -244,19 +244,28 @@ target_link_libraries (tkpgplot
 ## ------------------------------------------------------------------------------
 ## Installation
 
-if (UNIX)
-  set (installation_prefix /usr/local)
-  if (APPLE)
-    set (installation_prefix /sw)
-  endif (APPLE)
-endif (UNIX)
+## Locate the installation area
+
+find_path (prefix release_area.txt
+  PATHS
+  ${pgplot_SOURCE_DIR}
+  PATH_SUFFIXES
+  ../release
+  ../../release
+  NO_DEFAULT_PATH
+  )
+
+if (prefix)
+  message (STATUS "Installation area located for package PGPlot.")
+  set (CMAKE_INSTALL_PREFIX ${prefix}) 
+endif (prefix)
 
 ## installation of libraries
 
 install (TARGETS pgplot cpgplot XmPgplot tkpgplot
-  RUNTIME DESTINATION ${installation_prefix}/bin
-  LIBRARY DESTINATION ${installation_prefix}/lib
-  ARCHIVE DESTINATION ${installation_prefix}/lib
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
   )
 
 ## installation of header files
@@ -275,5 +284,5 @@ set (pgplot_headers
   )
 
 install (FILES ${pgplot_headers}
-  DESTINATION ${installation_prefix}/include/pgplot
+  DESTINATION include/pgplot
   )

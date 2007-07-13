@@ -27,7 +27,7 @@ endif (HAVE_STDIO_H)
 ## ------------------------------------------------------------------------------
 ## Create the library
 
-ADD_LIBRARY(mir
+add_library (mir
   bug.c
   dio.c
   headio.c
@@ -39,4 +39,19 @@ ADD_LIBRARY(mir
   uvio.c
   xyio.c
   xyzio.c
+  )
+
+target_link_libraries (mir
+  casa
+)
+
+## ------------------------------------------------------------------------------
+## Installation
+
+## installation of libraries
+
+install (TARGETS mir
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
   )

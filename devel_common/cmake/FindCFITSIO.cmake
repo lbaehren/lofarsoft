@@ -4,9 +4,9 @@
 
 # - Check for the presence of the CFITSIO library
 #
-#  HAVE_CFITSIO        = Do we have CFITSIO?
-#  CFITSIO_LIBRARIES   = Set of libraries required for linking against CFITSIO
-#  CFITSIO_INCLUDES = Directory where to find fitsio.h
+#  HAVE_CFITSIO      = Do we have CFITSIO?
+#  CFITSIO_LIBRARIES = Set of libraries required for linking against CFITSIO
+#  CFITSIO_INCLUDES  = Directory where to find fitsio.h
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
@@ -54,6 +54,8 @@ FIND_LIBRARY (CFITSIO_libnsl
 
 if (CFITSIO_libnsl)
   list (APPEND CFITSIO_LIBRARIES ${CFITSIO_libnsl})
+else (CFITSIO_libnsl)
+  message (STATUS "Unable to find libnsl.")
 endif (CFITSIO_libnsl)
 
 ## -----------------------------------------------------------------------------
@@ -91,5 +93,10 @@ ENDIF (HAVE_CFITSIO)
 MARK_AS_ADVANCED (
   CFITSIO_libcfitsio
   CFITSIO_libm
-  CFITSIO_libnsl
   )
+
+if (CFITSIO_libnsl)
+  mark_as_advanced (
+    CFITSIO_libnsl
+    )
+endif (CFITSIO_libnsl)
