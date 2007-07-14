@@ -31,8 +31,6 @@ set (casacore_packages
 
 subdirs (${casacore_packages})
 
-include_directories (${casacore_packages})
-
 ## ------------------------------------------------------------------------------
 ## Dependency of the libraries
 
@@ -66,8 +64,25 @@ ENDIF (UNIX)
 ## -----------------------------------------------------------------------------
 ## Check for additional tools which are required
 
-find_file (bison_bin bison /usr/bin /usr/local/bin /sw/bin)
-find_file (flex_bin flex /usr/bin /usr/local/bin /sw/bin)
+## Bison
+
+find_program (bison_bin bison
+  PATHS /usr/bin /usr/local/bin /sw/bin
+  )
+
+if (bison_bin)
+  message (STATUS "Found bison : ${bison_bin}")
+endif (bison_bin)
+
+## Flex
+
+find_program (flex_bin flex
+  PATHS /usr/bin /usr/local/bin /sw/bin
+)
+
+if (flex_bin)
+  message (STATUS "Found flex : ${flex_bin}")
+endif (flex_bin)
 
 ## -----------------------------------------------------------------------------
 ## Check for platform specific header files; in most cases we should be able to
@@ -92,14 +107,36 @@ find_package (TCL)
 find_package (X11)
 find_package (ZLIB)
 
+set (include_locations
+  /usr/include
+  /usr/local/include
+  /sw/include
+  /opt/casa/local/include
+)
+
+set (lib_locations
+  /usr/lib
+  /usr/local/lib
+  /sw/lib
+  /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
+  )
+
+## --- libcfitsio --------------------------------
+
+FIND_PATH (CFITSIO_INCLUDES
+  fitsio.h longnam.h
+  PATHS ${include_locations}
+  PATH_SUFFIXES cfitsio
+  )
+
+if (CFITSIO_INCLUDES)
+  message (STATUS "Found CFITSIO header files : ${CFITSIO_INCLUDES}")
+endif (CFITSIO_INCLUDES)
+
 ## --- libm --------------------------------------
 
 find_library (libm m
-  PATHS
-  /usr/lib
-  /usr/local/lib
-  /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
-  /sw/lib
+  PATHS ${lib_locations}
   )
 
 if (libm)
@@ -108,6 +145,15 @@ endif (libm)
 
 ## -----------------------------------------------------------------------------
 ## Compiler and Linker options
+
+include_directories (
+  .
+  ..
+  ${casacore_packages}
+  ./tables/tables/Tables
+  ${CFITSIO_INCLUDES}
+  )
+
 
 IF (UNIX)
   add_definitions (

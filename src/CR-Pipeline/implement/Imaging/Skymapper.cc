@@ -28,6 +28,7 @@
 #include <Skymap/SkymapperTools.h>
 #include <Utilities/ProgressBar.h>
 
+using std::cout;
 using std::endl;
 
 namespace CR {  // Namespace CR -- begin
@@ -149,12 +150,12 @@ namespace CR {  // Namespace CR -- begin
     
     if (!setBeamformer (beamformer)) {
       std::cerr << "[Skymapper::init] Error setting Beamformer object!"
-		<< std::endl;
+		<< endl;
     }
 
     if (!setSkymapCoordinates (coordinates)) {
       std::cerr << "[Skymapper::init] Error setting SkymapCoordinates object!"
-		<< std::endl;
+		<< endl;
     }
   }
 
@@ -168,8 +169,8 @@ namespace CR {  // Namespace CR -- begin
       beamformer_p = beamformer;
     } catch (std::string message) {
       std::cerr << "[Skymapper::setBeamformer] Error setting Beamformer object!"
-		<< std::endl;
-      std::cerr << "--> " << message << std::endl;
+		<< endl;
+      std::cerr << "--> " << message << endl;
     }
     
     return status;
@@ -201,8 +202,8 @@ namespace CR {  // Namespace CR -- begin
     } catch (std::string message) {
       std::cerr << "[Skymapper::setSkymapCoordinates] "
 		<< "Error setting setSkymapCoordinates object!"
-		<< std::endl;
-      std::cerr << "--> " << message << std::endl;
+		<< endl;
+      std::cerr << "--> " << message << endl;
     }
     
     return status;
@@ -228,18 +229,29 @@ namespace CR {  // Namespace CR -- begin
     */
     
     {
+      // Retrieve the values of the direction axes
       Matrix<double> directionValues;
-      // retrieve the direction values as defined via the coordinate system
       status = coordinates_p.directionAxisValues ("AZEL",
 						  directionValues_p,
 						  directionMask_p,
 						  false);
+      // Retrieve the values of the distance axis
+      Vector<double> distances (coordinates_p.distanceAxisValues());
+      // Combine the values from the axes to yield the 3D positions
+      Vector<int> axisOrder (3);
+      casa::indgen(axisOrder);
+      beamformer_p.setSkyPositions(directionValues_p,
+				   distances,
+				   axisOrder,
+				   CR::Spherical,
+				   false,
+				   true);
     }
     
     if (status && verbose_p) {
-      std::cout << "[Skymapper::init] Retrieved directions." << std::endl;
-      std::cout << "-- direction values : " << directionValues_p.shape() << std::endl;
-      std::cout << "-- direction mask   : " << directionMask_p.shape()   << std::endl;
+      cout << "[Skymapper::init] Retrieved directions." << endl;
+      cout << "-- direction values : " << directionValues_p.shape() << endl;
+      cout << "-- direction mask   : " << directionMask_p.shape()   << endl;
     }
     
     /*
@@ -267,7 +279,7 @@ namespace CR {  // Namespace CR -- begin
       isOperational_p = true;
       // feedback to the outside world
       if (verbose_p) {
-	std::cout << "[Skymapper::init] Image file appears ok and is writable."
+	cout << "[Skymapper::init] Image file appears ok and is writable."
 		  << endl;
       }
     } else {
@@ -287,7 +299,7 @@ namespace CR {  // Namespace CR -- begin
     // to proceed beyond this point
     if (!isOperational_p) {
       std::cerr << "[Skymapper::processData] Skymapper is not operational!"
-		<< std::endl;
+		<< endl;
       return isOperational_p;
     }
 
@@ -306,12 +318,12 @@ namespace CR {  // Namespace CR -- begin
     casa::indgen(axisOrder);
     
     if (verbose_p) {
-      std::cout << "[Skymapper::processData]" << std::endl;
-      std::cout << "-- shape of the input data = " << shape      << std::endl;
-      std::cout << "-- shape of the image      = " << imageShape << std::endl;
-      std::cout << "-- array start position    = " << start      << std::endl;
-      std::cout << "-- array position stride   = " << stride     << std::endl;
-      std::cout << "-- distance stepping       = " << distances  << std::endl;
+      cout << "[Skymapper::processData]" << endl;
+      cout << "-- shape of the input data = " << shape      << endl;
+      cout << "-- shape of the image      = " << imageShape << endl;
+      cout << "-- array start position    = " << start      << endl;
+      cout << "-- array position stride   = " << stride     << endl;
+      cout << "-- distance stepping       = " << distances  << endl;
     }
     
     for (uint dist(0); dist<nofDistances; dist++) {
@@ -337,7 +349,7 @@ namespace CR {  // Namespace CR -- begin
   
   Bool Skymapper::createImage ()
   {
-    std::cout << "[Skymapper::createImage]" << endl;
+    cout << "[Skymapper::createImage]" << endl;
     
     Bool status     (True);
     int radius      (0);
@@ -364,12 +376,12 @@ namespace CR {  // Namespace CR -- begin
     crval *= 1/(C::pi/180.0);
     cdelt *= 1/(C::pi/180.0);
     
-    std::cout << " - Setting up the skymap grid ... "      << endl;
-    std::cout << " -- coord. refcode    = " << refcode     << endl;
-    std::cout << " -- coord. projection = " << projection  << endl;
-    std::cout << " -- shape             = " << shape       << endl;
-    std::cout << " -- reference value   = " << crval       << endl;
-    std::cout << " -- coord. increment  = " << cdelt       << endl;
+    cout << " - Setting up the skymap grid ... "      << endl;
+    cout << " -- coord. refcode    = " << refcode     << endl;
+    cout << " -- coord. projection = " << projection  << endl;
+    cout << " -- shape             = " << shape       << endl;
+    cout << " -- reference value   = " << crval       << endl;
+    cout << " -- coord. increment  = " << cdelt       << endl;
 
     // Elevation range
     Vector<Double> elevation (2);
@@ -402,14 +414,14 @@ namespace CR {  // Namespace CR -- begin
     frequency (which has pixel data of complex type).
   */
 
-  std::cout << " - Creating paged image on disk ... " << std::flush;
+  cout << " - Creating paged image on disk ... " << std::flush;
   
   TiledShape shape (imageShape);
   PagedImage<Double> image (shape,
 			   csys,
 			   filename_p);
 
-  std::cout << "done." << endl;
+  cout << "done." << endl;
 
   /*
     This is the core loop, generating the final skymap from a set of sub-images
@@ -422,7 +434,7 @@ namespace CR {  // Namespace CR -- begin
   Cube<Double> pixels;
   Cube<Bool> imageMask;
 
-  std::cout << " - computing image pixels ..." << endl;
+  cout << " - computing image pixels ..." << endl;
   bar.update(numLoop);
 
   try {
@@ -450,8 +462,8 @@ namespace CR {  // Namespace CR -- begin
       } // ------------------------------------------------------ end integration
       // rewind DataReader::position to initial data block
     } // ------------------------------------------------------------- end radius
-    std::cout << endl;
-    std::cout << " - all image pixels computed." << endl;
+    cout << endl;
+    cout << " - all image pixels computed." << endl;
   } catch (AipsError x) {
     cerr << "[Skymapper::createImage] " << x.getMesg() << endl;
     return False;

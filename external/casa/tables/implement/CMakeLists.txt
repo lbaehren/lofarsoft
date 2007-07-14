@@ -1,5 +1,65 @@
 
-PROJECT (casa_tables_libtables)
+## -----------------------------------------------------------------------------
+## Files processed by Flex
+##
+##  FILES=`ls *.l | sed s/"\.l"//`
+##  for FILE in $FILES ; { flex -t -P$FILE $FILE.l > $FILE.lcc ; }
+
+find_program (flex_bin flex
+  PATHS /usr/bin /usr/local/bin
+  )
+
+if (flex_bin)
+  # Tables/RecordGram.l
+  execute_process (
+    WORKING_DIRECTORY ${CASA_SOURCE_DIR}/tables/implement/Tables
+    COMMAND flex -t -PRecordGram RecordGram.l > RecordGram.lcc
+    TIMEOUT 20
+    ERROR_VARIABLE flex_error
+    OUTPUT_QUIET
+    )
+  # Tables/TableGram.l
+  execute_process (
+    WORKING_DIRECTORY ${CASA_SOURCE_DIR}/tables/implement/Tables
+    COMMAND flex -t -PTableGram TableGram.l > TableGram.lcc
+    TIMEOUT 20
+    ERROR_VARIABLE flex_error
+    OUTPUT_QUIET
+    )
+else (flex_bin)
+  message (SEND_ERROR "Unable to locate Flex executable!")
+endif (flex_bin)
+
+## -----------------------------------------------------------------------------
+## Files processed by Bison
+##
+## FILES=`ls *.y | sed s/"\.y"//`
+## for FILE in $FILES ; { bison -p $FILE -o $FILE.ycc $FILE.y ; }
+
+find_program (bison_bin bison
+  PATHS /usr/bin /usr/local/bin
+  )
+
+if (bison_bin)
+  # Tables/RecordGram.y
+  execute_process (
+    WORKING_DIRECTORY ${CASA_SOURCE_DIR}/tables/implement/Tables
+    COMMAND bison -p RecordGram -o RecordGram.ycc RecordGram.y
+    TIMEOUT 20
+    ERROR_VARIABLE bison_error
+    OUTPUT_QUIET
+    )
+  # Tables/TableGram.y
+  execute_process (
+    WORKING_DIRECTORY ${CASA_SOURCE_DIR}/tables/implement/Tables
+    COMMAND bison -p TableGram -o TableGram.ycc TableGram.y
+    TIMEOUT 20
+    ERROR_VARIABLE bison_error
+    OUTPUT_QUIET
+    )
+else (bison_bin)
+  message (SEND_ERROR "Unable to locate Bison executable!")
+endif (bison_bin)
 
 ## -----------------------------------------------------------------------------
 ## Collect the source files for the library and the template instantiation
@@ -9,47 +69,6 @@ SET (tables_modules
   TablePlot
   Tables
   )
-
-## -----------------------------------------------------------------------------
-## Run flex and bison
-##
-##  FILES=`ls *.l | sed s/"\.l"//`
-##  for FILE in $FILES ; { flex -t -P$FILE $FILE.l > $FILE.lcc ; }
-##
-## FILES=`ls *.y | sed s/"\.y"//`
-## for FILE in $FILES ; { bison -p $FILE -o $FILE.ycc $FILE.y ; }
-
-if (flex_bin AND bison_bin)
-  foreach (tables_module ${tables_modules})
-    message (STATUS "Parsing files in ${casa_tables_libtables_SOURCE_DIR}/${tables_module} ...")
-    ## [1] get input files for Flex
-    FILE (GLOB flex_inputs ${tables_module}/*.l)
-    foreach (flex_input ${flex_inputs})
-      string (REGEX REPLACE "\\.l" ".lcc" flex_output ${flex_input})
-      ## Make processing conditional, since files also could have been generated
-      ## manually; later option should be kept for providing an override machanism
-      if (NOT ${flex_output})
-	execute_process (
-	  WORKING_DIRECTORY "${casa_tables_libtables_SOURCE_DIR}/${tables_module}"
-	  COMMAND "${flex_bin} --stdout ${flex_input} > ${flex_output}"
-	  TIMEOUT 30
-	  ERROR_VARIABLE flex_error
-	  OUTPUT_QUIET
-	  )
-	message ("${flex_input} -> ${flex_output}")
-	if (flex_error)
-	  message (FATAL_ERROR "flex failed!\n${flex_error}")
-	endif (flex_error)
-      endif (NOT ${flex_output})
-    endforeach (flex_input)
-    ## [2] get input files for Bison
-    FILE (GLOB bison_inputs ${tables_module}/*.y)
-    foreach (bison_input ${bison_inputs})
-      string (REGEX REPLACE "\\.y" ".ycc" bison_output ${bison_input})
-      message ("${bison_input} -> ${bison_output}")
-    endforeach (bison_input)
-  endforeach (tables_module)
-endif (flex_bin AND bison_bin)
 
 ## -----------------------------------------------------------------------------
 ## build the library (libtables)
