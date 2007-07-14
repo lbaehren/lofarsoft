@@ -38,6 +38,10 @@ if (flex_bin)
     ERROR_VARIABLE flex_error
     OUTPUT_QUIET
     )
+  if (flex_error)
+    message (SEND_ERROR "There was an error processing RecordGram.ll!")
+    message (SEND_ERROR ${flex_error})
+  endif (flex_error)
   # Tables/TableGram.ll
   execute_process (
     WORKING_DIRECTORY ${casacore_SOURCE_DIR}/tables/tables/Tables
@@ -46,6 +50,10 @@ if (flex_bin)
     ERROR_VARIABLE flex_error
     OUTPUT_QUIET
     )
+  if (flex_error)
+    message (SEND_ERROR "There was an error processing TableGram.ll!")
+    message (SEND_ERROR ${flex_error})
+  endif (flex_error)
 else (flex_bin)
   message (SEND_ERROR "Unable to process flex input files!")
 endif (flex_bin)
