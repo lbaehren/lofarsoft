@@ -232,7 +232,7 @@ namespace CR {  // Namespace CR -- begin
       // Retrieve the values of the direction axes
       Matrix<double> directionValues;
       status = coordinates_p.directionAxisValues ("AZEL",
-						  directionValues_p,
+						  directionValues,
 						  directionMask_p,
 						  false);
       // Retrieve the values of the distance axis
@@ -240,18 +240,15 @@ namespace CR {  // Namespace CR -- begin
       // Combine the values from the axes to yield the 3D positions
       Vector<int> axisOrder (3);
       casa::indgen(axisOrder);
-      beamformer_p.setSkyPositions(directionValues_p,
-				   distances,
-				   axisOrder,
-				   CR::Spherical,
-				   false,
-				   true);
-    }
-    
-    if (status && verbose_p) {
-      cout << "[Skymapper::init] Retrieved directions." << endl;
-      cout << "-- direction values : " << directionValues_p.shape() << endl;
-      cout << "-- direction mask   : " << directionMask_p.shape()   << endl;
+      status = beamformer_p.setSkyPositions(directionValues,
+					    distances,
+					    axisOrder,
+					    CR::Spherical,
+					    false,
+					    true);
+      if (status && verbose_p) {
+	beamformer_p.summary();
+      }
     }
     
     /*
@@ -309,36 +306,16 @@ namespace CR {  // Namespace CR -- begin
     IPosition start  (imageShape.nelements(),0);
     IPosition stride (imageShape.nelements(),1);
     // Local variables for beamforming
-    Vector<double> distances (coordinates_p.distanceAxisValues());
-    uint nofDistances (distances.nelements());
-    Vector<double> distance (1);
-    Vector<int> axisOrder (3);
     Matrix<double> beam;
 
-    casa::indgen(axisOrder);
-    
     if (verbose_p) {
       cout << "[Skymapper::processData]" << endl;
       cout << "-- shape of the input data = " << shape      << endl;
       cout << "-- shape of the image      = " << imageShape << endl;
       cout << "-- array start position    = " << start      << endl;
       cout << "-- array position stride   = " << stride     << endl;
-      cout << "-- distance stepping       = " << distances  << endl;
     }
     
-    for (uint dist(0); dist<nofDistances; dist++) {
-      // update the Beamformer
-      distance(0) = distances (dist);
-      beamformer_p.setSkyPositions(directionValues_p,
-				   distance,
-				   axisOrder,
-				   CR::Spherical,
-				   false,
-				   true);
-      // Navigation within the pixel array
-      start(SkymapCoordinates::Distance) = dist;
-    }
-
     // book-keeping of the number of data blocks processed so far
     nofProcessedBlocks_p++;
 
