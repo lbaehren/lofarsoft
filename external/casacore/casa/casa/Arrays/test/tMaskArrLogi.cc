@@ -59,9 +59,9 @@
 #include <casa/Arrays/MaskArrLogi.h>
 #include <casa/Arrays/MaskArrMath.h>
 
-
 #include <casa/namespace.h>
-main()
+
+int main()
 {
     try {
         cout << endl << "Testing MaskedArray logical operators." << endl;

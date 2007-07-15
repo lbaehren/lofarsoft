@@ -159,7 +159,7 @@ void doit()
                                       // Block::~Block called at end of fn
 }
 
-main()
+int main()
 {
     doit();
     cout << "OK\n";

@@ -54,9 +54,9 @@
 #include <casa/Arrays/ArrayError.h>
 #include <casa/Arrays/LogiVector.h>
 
-
 #include <casa/namespace.h>
-main()
+
+int main()
 {
     try {
         {

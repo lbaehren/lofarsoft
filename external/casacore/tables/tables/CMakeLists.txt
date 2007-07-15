@@ -33,8 +33,9 @@ if (flex_bin)
   # Tables/RecordGram.ll
   execute_process (
     WORKING_DIRECTORY ${casacore_SOURCE_DIR}/tables/tables/Tables
-    COMMAND flex -t -PRecordGram RecordGram.ll > RecordGram.lcc
+    COMMAND flex -t -PRecordGram RecordGram.ll
     TIMEOUT 20
+    OUTPUT_FILE RecordGram.lcc
     ERROR_VARIABLE flex_error
     OUTPUT_QUIET
     )
@@ -45,8 +46,9 @@ if (flex_bin)
   # Tables/TableGram.ll
   execute_process (
     WORKING_DIRECTORY ${casacore_SOURCE_DIR}/tables/tables/Tables
-    COMMAND flex -t -PTableGram TableGram.ll > TableGram.lcc
+    COMMAND flex -t -PTableGram TableGram.ll
     TIMEOUT 20
+    OUTPUT_FILE TableGram.lcc
     ERROR_VARIABLE flex_error
     OUTPUT_QUIET
     )

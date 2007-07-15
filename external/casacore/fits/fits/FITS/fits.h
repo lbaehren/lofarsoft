@@ -25,28 +25,28 @@
 //#
 //# $Id: fits.h 19075 2005-11-14 17:40:07Z kgolap $
 
-# if !defined(AIPS_FITS)
-# define AIPS_FITS
+#if !defined(AIPS_FITS)
+#define AIPS_FITS
 
 //# Note that aips.h has to come first for the correct definition of off_t.
-# include <casa/aips.h>
-# include <stdlib.h>
-# include <ctype.h>
-# include <casa/iostream.h>
-# include <casa/BasicSL/Complex.h>
-# include <casa/BasicSL/IComplex.h>
-# include <fits/FITS/FITSError.h>
+#include <casa/aips.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <casa/iostream.h>
+#include <casa/BasicSL/Complex.h>
+#include <casa/BasicSL/IComplex.h>
+#include <fits/FITS/FITSError.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
 //# All FITS code seems to assume longs are 4 bytes. To take care of machines 
 //# for which this isn't true use FitsLong instead of Long in the FITS code
 //# where it matters.
-# if (defined(__alpha) || defined(__sgi) || defined(__x86_64__))
+#if (defined(__alpha) || defined(__sgi) || defined(__x86_64__))
     typedef Int FitsLong;
-# else
+#else
     typedef Long FitsLong;
-# endif 
+#endif 
 // recovered by GYL
 
 class ReservedFitsKeywordCollection; // Forward declarations

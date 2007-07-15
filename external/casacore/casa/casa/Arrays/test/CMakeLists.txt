@@ -1,0 +1,42 @@
+
+## ------------------------------------------------------------------------------
+## Test programs for casa/Arrays
+
+SET (tests
+  dArrayAccessor
+  tArray
+  tArrayAccessor
+  tArrayIO
+  tArrayIO2
+  tArrayIO3
+  tArrayIter
+  tArrayIter1
+  tArrayIteratorSTL
+  tArrayLogical
+  tArrayMath2
+  tArrayPosIter
+  tArrayUtil
+  tAxesSpecifier
+  tExtendSpecifier
+  tIPosition
+  tLinAlgebra
+  tMaskArrExcp
+  tMaskArrIO
+  tMaskArrLogi
+  tMaskArrMath0
+  tMaskArrMath1
+  tMaskArrMath2
+  tMaskedArray
+  tMatrixMath
+  tSlicer
+  tSlidingArrayMath
+  tStringArray
+  )
+
+## ------------------------------------------------------------------------------
+## Build the test programs
+
+FOREACH (src ${tests})
+  ADD_EXECUTABLE (${src} ${src}.cc)
+  TARGET_LINK_LIBRARIES (${src} casa)
+ENDFOREACH (src)

@@ -41,7 +41,7 @@ void b (Bool);
 void c (uInt bufSize);
 void d (uInt bufSize);
 
-main (int argc)
+int main (int argc)
 {
     try {
 	a (argc<2);

@@ -106,10 +106,9 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 //          (Bit, Byte, 0-length columns).
 //   <li> No attempt use any TDIM columns or keywords to shape arrays.
 // </todo>
-
-class BinaryTable : public BinaryTableExtension
-{
-public: 
+  
+  class BinaryTable : public BinaryTableExtension {
+  public: 
 
     //   The only constructor is from a FitsInput, you can also optionally
     //   provide a FITS error handler.  If useMiriadSM is True, use
