@@ -237,15 +237,22 @@ namespace CR {  // Namespace CR -- begin
 						  false);
       // Retrieve the values of the distance axis
       Vector<double> distances (coordinates_p.distanceAxisValues());
+      // Retrieve the values of the frequency axis
+      Vector<double> frequencies (coordinates_p.frequencyAxisValues());
       // Combine the values from the axes to yield the 3D positions
+      bool anglesInDegrees (true);
+      bool bufferDelays (false);
+      bool bufferPhases (false);
       Vector<int> axisOrder (3);
       casa::indgen(axisOrder);
       status = beamformer_p.setSkyPositions(directionValues,
 					    distances,
 					    axisOrder,
 					    CR::Spherical,
-					    false,
-					    true);
+					    anglesInDegrees,
+					    bufferDelays);
+      status = beamformer_p.setFrequencies (frequencies,
+					    bufferPhases);
       if (status && verbose_p) {
 	beamformer_p.summary();
       }
@@ -305,8 +312,6 @@ namespace CR {  // Namespace CR -- begin
     IPosition imageShape (coordinates_p.shape());
     IPosition start  (imageShape.nelements(),0);
     IPosition stride (imageShape.nelements(),1);
-    // Local variables for beamforming
-    Matrix<double> beam;
 
     if (verbose_p) {
       cout << "[Skymapper::processData]" << endl;
@@ -315,6 +320,13 @@ namespace CR {  // Namespace CR -- begin
       cout << "-- array start position    = " << start      << endl;
       cout << "-- array position stride   = " << stride     << endl;
     }
+
+    // forward the data to the beamformer for processing
+    Matrix<double> beam;
+    status = beamformer_p.processData (beam,
+				       data);
+
+    std::cout << "-- Shape of beamformed data = " << beam.shape() << std::endl;
     
     // book-keeping of the number of data blocks processed so far
     nofProcessedBlocks_p++;

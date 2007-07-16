@@ -82,6 +82,53 @@ namespace CR { // Namespace CR -- begin
       <li>Add entry to Beamformer::setBeamType in order to be able to selected
           the new beam type.
     </ol>
+
+    Beamforming methods:
+    <ol>
+      <li><b>Directed spectral power</b>
+      \f[ \widetilde P (\vec\rho,\nu) = \overline{\widetilde S (\vec\rho,\nu)}
+      \cdot \widetilde S (\vec\rho,\nu) \f]
+      where 
+      \f[ \widetilde S (\vec\rho,\nu) = \frac{1}{N_{\rm Ant}}
+      \sum_{j=1}^{N_{\rm Ant}} \widetilde S_{j} (\vec\rho,\nu) =
+      \frac{1}{N_{\rm Ant}} \sum_{j=1}^{N_{\rm Ant}} w (\vec x_j, \vec \rho, \nu)
+      \widetilde s_{j} (\nu) \f]
+      in which \f$ w \f$ is the weighting factor for each combination of antenna,
+      pointing direction and frequency and \f$ \widetilde s_j \f$ is the Fourier
+      transform of the data from antenna \f$ j \f$.
+      <li><b>Directed power time series</b>, \f$ S (\vec\rho,t) \f$
+      <li><b>Cross-correlation beam</b> (cc-beam)
+      The data from each unique pair of antennas is multiplied, the resulting
+      values are averaged, and then the square root is taken while preserving
+      the sign.
+      \f[
+      cc(\vec \rho)[t] = \, ^+_- \sqrt{\left| \frac{1}{N_{Pairs}} \sum^{N-1}_{i=1}
+      \sum^{N}_{j>i} s_i(\vec\rho)[t] s_j(\vec\rho)[t] \right|}
+      \f]
+      where 
+      \f[
+      s_j(\vec\rho)[t]
+      = \mathcal{F}^{-1} \left\{ \tilde s_j(\vec\rho)[k] \right\}
+      = \mathcal{F}^{-1} \left\{ w_j(\vec\rho)[k] \cdot \tilde s_j[k]\right\}
+      \f]
+      is the time shifted field strength of the single antennas for a direction
+      \f$\vec \rho \f$. \f$ N \f$ is the number of antennas, \f$t\f$ the time or
+      pixel index and \f$N_{Pairs}\f$ the number of unique pairs of antennas.
+      The negative sign is taken if the sum had a negative sign before taking the
+      absolute values, and the positive sign otherwise.
+      Computation - for each direction in the sky - is performed as follows:
+      <ol>
+        <li>Compute the shifted time-series for all antennas,
+	\f$ s_j (\vec\rho,t) \f$, by first applying the weights to the Fourier
+	transformed data and thereafter transforming back to time domain.
+	<li>Sum over unique products from all antenna pairs and normalize by
+	the number of such pairs.
+	<li>Take the square root of the sum and multiply with the sign of the
+	some.
+      </ol>
+
+
+    </ol>
     
     <h3>Example(s)</h3>
     
@@ -313,8 +360,8 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Provide a summary of the internal status
     */
-    void summary (std::ostream &os);    
-
+    void summary (std::ostream &os);
+    
     // ------------------------------------------------------------------ Methods
 
     /*!
@@ -330,15 +377,11 @@ namespace CR { // Namespace CR -- begin
     */
 #ifdef HAVE_CASA
     bool processData (casa::Matrix<double> &beam,
-		      const casa::Matrix<DComplex> &data) {
-      return (this->*processData_p) (beam,data);
-    }
+		      const casa::Matrix<DComplex> &data);
 #else
 #ifdef HAVE_BLITZ
     bool processData (blitz::Array<double,2> &beam,
-		      const blitz::Array<complex<double>,2> &data) {
-      return (this->*processData_p) (beam,data);
-    }
+		      const blitz::Array<complex<double>,2> &data);
 #endif
 #endif
     
@@ -367,93 +410,8 @@ namespace CR { // Namespace CR -- begin
 #endif
     
     /*!
-      \brief Directed spectral power, \f$ \widetilde P (\vec\rho,\nu) \f$
-
-      \f[ \widetilde P (\vec\rho,\nu) = \overline{\widetilde S (\vec\rho,\nu)}
-      \cdot \widetilde S (\vec\rho,\nu) \f]
-      where 
-      \f[ \widetilde S (\vec\rho,\nu) = \frac{1}{N_{\rm Ant}}
-      \sum_{j=1}^{N_{\rm Ant}} \widetilde S_{j} (\vec\rho,\nu) =
-      \frac{1}{N_{\rm Ant}} \sum_{j=1}^{N_{\rm Ant}} w (\vec x_j, \vec \rho, \nu)
-      \widetilde s_{j} (\nu) \f]
-      in which \f$ w \f$ is the weighting factor for each combination of antenna,
-      pointing direction and frequency and \f$ \widetilde s_j \f$ is the Fourier
-      transform of the data from antenna \f$ j \f$.
-
-      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
-                      input data.
-      \param  data -- [nofDatasets,nofChannels] Input data which will be
-                      processed to form a given type of beam.
-
-      \return status   -- Status of the operation; returns <i>false</i> if an
-                          an error was encountered
-    */
-#ifdef HAVE_CASA
-    bool freq_power (casa::Matrix<double> &beam,
-		     const casa::Matrix<DComplex> &data);
-#else
-#ifdef HAVE_BLITZ
-    bool freq_power (blitz::Array<double,2> &beam,
-		     const blitz::Array<complex<double>,2> &data);
-#endif
-#endif
-    
-    /*!
-      \brief Directed power time series, \f$ S (\vec\rho,t) \f$
-
-      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
-                      input data.
-      \param  data -- [nofDatasets,nofChannels] Input data which will be
-                      processed to form a given type of beam.
-
-      \return status   -- Status of the operation; returns <i>false</i> if an
-                          an error was encountered
-    */
-#ifdef HAVE_CASA
-    bool time_power (casa::Matrix<double> &beam,
-		     const casa::Matrix<DComplex> &data);
-#else
-#ifdef HAVE_BLITZ
-    bool time_power (blitz::Array<double,2> &beam,
-		     const blitz::Array<complex<double>,2> &data);
-#endif
-#endif
-    
-    /*!
       \brief Form a cross-correlation beam
       
-      The data from each unique pair of antennas is multiplied, the resulting
-      values are averaged, and then the square root is taken while preserving
-      the sign.
-      
-      \f[
-      cc(\vec \rho)[t] = \, ^+_- \sqrt{\left| \frac{1}{N_{Pairs}} \sum^{N-1}_{i=1}
-      \sum^{N}_{j>i} s_i(\vec\rho)[t] s_j(\vec\rho)[t] \right|}
-      \f]
-      
-      where 
-      \f[
-      s_j(\vec\rho)[t]
-      = \mathcal{F}^{-1} \left\{ \tilde s_j(\vec\rho)[k] \right\}
-      = \mathcal{F}^{-1} \left\{ w_j(\vec\rho)[k] \cdot \tilde s_j[k]\right\}
-      \f]
-      is the time shifted field strength of the single antennas for a direction
-      \f$\vec \rho \f$. \f$ N \f$ is the number of antennas, \f$t\f$ the time or
-      pixel index and \f$N_{Pairs}\f$ the number of unique pairs of antennas.
-      The negative sign is taken if the sum had a negative sign before taking the
-      absolute values, and the positive sign otherwise.
-
-      Computation - for each direction in the sky - is performed as follows:
-      <ol>
-        <li>Compute the shifted time-series for all antennas,
-	\f$ s_j (\vec\rho,t) \f$, by first applying the weights to the Fourier
-	transformed data and thereafter transforming back to time domain.
-	<li>Sum over unique products from all antenna pairs and normalize by
-	the number of such pairs.
-	<li>Take the square root of the sum and multiply with the sign of the
-	some.
-      </ol>
-
       \retval beam -- [nofSkyPosition,blocksize] Beam formed from the provided
                       input data.
       \param  data -- [nofDatasets,nofChannels] Input data which will be
@@ -530,6 +488,69 @@ namespace CR { // Namespace CR -- begin
       \brief Initialize internal settings of the Beamformer
     */
     void init ();
+
+    /*!
+      \brief Check if the input data are consistent with the internal settings
+
+      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
+                      input data.
+      \param  data -- [nofDatasets,nofChannels] Input data which will be
+                      processed to form a given type of beam.
+
+      \return status   -- Status of the operation; returns <i>false</i> if an
+                          an error was encountered
+    */
+#ifdef HAVE_CASA
+    bool checkData (casa::Matrix<double> &beam,
+		    const casa::Matrix<DComplex> &data);
+#else
+#ifdef HAVE_BLITZ
+    bool checkData (blitz::Array<double,2> &beam,
+		    const blitz::Array<complex<double>,2> &data);
+#endif
+#endif
+    
+    /*!
+      \brief Directed spectral power, \f$ \widetilde P (\vec\rho,\nu) \f$
+
+      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
+                      input data.
+      \param  data -- [nofDatasets,nofChannels] Input data which will be
+                      processed to form a given type of beam.
+
+      \return status   -- Status of the operation; returns <i>false</i> if an
+                          an error was encountered
+    */
+#ifdef HAVE_CASA
+    bool freq_power (casa::Matrix<double> &beam,
+		     const casa::Matrix<DComplex> &data);
+#else
+#ifdef HAVE_BLITZ
+    bool freq_power (blitz::Array<double,2> &beam,
+		     const blitz::Array<complex<double>,2> &data);
+#endif
+#endif
+    
+    /*!
+      \brief Directed power time series, \f$ S (\vec\rho,t) \f$
+
+      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
+                      input data.
+      \param  data -- [nofDatasets,nofChannels] Input data which will be
+                      processed to form a given type of beam.
+
+      \return status   -- Status of the operation; returns <i>false</i> if an
+                          an error was encountered
+    */
+#ifdef HAVE_CASA
+    bool time_power (casa::Matrix<double> &beam,
+		     const casa::Matrix<DComplex> &data);
+#else
+#ifdef HAVE_BLITZ
+    bool time_power (blitz::Array<double,2> &beam,
+		     const blitz::Array<complex<double>,2> &data);
+#endif
+#endif
     
   };
   

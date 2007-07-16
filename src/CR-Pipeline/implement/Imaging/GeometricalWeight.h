@@ -220,6 +220,24 @@ namespace CR { // NAMESPACE CR -- BEGIN
     */
     void summary (std::ostream &os);
     
+    // ---------------------------------- Methods reimplemented from base classes
+
+    /*!
+      \brief Set the frequencies values for which the phases are computed
+      
+      \param frequencies -- The frequency values for which the phases are
+                            computed.
+    */
+#ifdef HAVE_CASA
+    bool setFrequencies (const casa::Vector<double> &frequencies,
+			 bool const &bufferPhases=false);
+#else
+#ifdef HAVE_BLITZ
+    bool setFrequencies (const blitz::Array<double,1> &frequencies,
+			 bool const &bufferPhases=false);
+#endif
+#endif
+    
     // ------------------------------------------------------------------ Methods
     
   private:

@@ -259,6 +259,73 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
+  // ------------------------------------------------------------------ checkData
+
+#ifdef HAVE_CASA
+  bool Beamformer::checkData (casa::Matrix<double> &beam,
+			      const casa::Matrix<DComplex> &data)
+  {
+    bool ok (true);
+    
+    int nofSkyPositions (skyPositions_p.nrow());
+    int nofFrequencies (frequencies_p.nelements());
+    IPosition shapeData (data.shape());
+    
+    if (shapeData(0) == nofSkyPositions &&
+	shapeData(1) == nofFrequencies) {
+      ok = true;
+    } else {
+      std::cerr << "[Beamformer::checkData]" << std::endl;
+      std::cerr << "-- Wrong shape of array with input data!"    << std::endl;
+      std::cerr << "--> shape(data)    [antennas,channels]            = "
+		<< data.shape()
+		<< std::endl;
+      std::cerr << "--> shape(weights) [antennas,directions,channels] = "
+		<< weights_p.shape()
+		<< std::endl;
+      ok = false;
+    }
+    
+    return ok;
+  }
+#else
+#ifdef HAVE_BLITZ
+  bool Beamformer::checkData (blitz::Array<double,2> &beam,
+			      const blitz::Array<complex<double>,2> &data)
+  {
+    bool ok (true);
+    
+    return ok;
+  }
+#endif
+#endif
+  
+  // ---------------------------------------------------------------- processData
+  
+#ifdef HAVE_CASA
+  bool Beamformer::processData (casa::Matrix<double> &beam,
+				const casa::Matrix<DComplex> &data)
+  {
+    if (checkData(beam,data)) {
+      return (this->*processData_p) (beam,data);
+    } else {
+      return false;
+    }
+  }
+#else
+#ifdef HAVE_BLITZ
+  bool Beamformer::processData (blitz::Array<double,2> &beam,
+				const blitz::Array<complex<double>,2> &data)
+  {
+    if (checkData(beam,data)) {
+      return (this->*processData_p) (beam,data);
+    } else {
+      return false;
+    }
+  }
+#endif
+#endif
+  
   // ----------------------------------------------------------------- freq_field
   
 #ifdef HAVE_CASA
@@ -298,6 +365,8 @@ namespace CR { // Namespace CR -- begin
     } else {
       std::cerr << "[Beamformer::freq_field]" << std::endl;
       std::cerr << "-- Wrong shape of array with input data!" << std::endl;
+      std::cerr << "--> shape(data)    = " << data.shape()      << std::endl;
+      std::cerr << "--> shape(weights) = " << weights_p.shape() << std::endl;
       status = false;
     }
 
@@ -355,6 +424,8 @@ namespace CR { // Namespace CR -- begin
     } else {
       std::cerr << "[Beamformer::freq_power]" << std::endl;
       std::cerr << "-- Wrong shape of array with input data!" << std::endl;
+      std::cerr << "--> shape(data)    = " << data.shape()      << std::endl;
+      std::cerr << "--> shape(weights) = " << weights_p.shape() << std::endl;
       status = false;
     }
 
@@ -421,6 +492,8 @@ namespace CR { // Namespace CR -- begin
     } else {
       std::cerr << "[Beamformer::time_power]" << std::endl;
       std::cerr << "-- Wrong shape of array with input data!" << std::endl;
+      std::cerr << "--> shape(data)    = " << data.shape()      << std::endl;
+      std::cerr << "--> shape(weights) = " << weights_p.shape() << std::endl;
       status = false;
     }
 

@@ -173,7 +173,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     /*!
       \brief Destructor
     */
-    ~GeometricalPhase ();
+    virtual ~GeometricalPhase ();
     
     // ---------------------------------------------------------------- Operators
     
@@ -243,12 +243,12 @@ namespace CR { // NAMESPACE CR -- BEGIN
                             computed.
     */
 #ifdef HAVE_CASA
-    bool setFrequencies (const casa::Vector<double> &frequencies,
-			 bool const &bufferPhases=false);
+    virtual bool setFrequencies (const casa::Vector<double> &frequencies,
+				 bool const &bufferPhases=false);
 #else
 #ifdef HAVE_BLITZ
-    bool setFrequencies (const blitz::Array<double,1> &frequencies,
-			 bool const &bufferPhases=false);
+    virtual bool setFrequencies (const blitz::Array<double,1> &frequencies,
+				 bool const &bufferPhases=false);
 #endif
 #endif
 

@@ -8,6 +8,7 @@ include_directories (. .. ../..)
 ## Set up the list with test program sources
 
 set (tests
+  tMatrixOperations
   tRotationMatrix
   tRotation2D
   tRotation3D

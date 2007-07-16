@@ -170,6 +170,37 @@ namespace CR { // NAMESPACE CR -- BEGIN
   
   // ============================================================================
   //
+  //  Methods reimplemented from base classes
+  //
+  // ============================================================================
+
+#ifdef HAVE_CASA
+  bool GeometricalWeight::setFrequencies (const casa::Vector<double> &frequencies,
+					  bool const &bufferPhases)
+  {
+    bool ok (true);
+    
+    // forward the input parameters to the base classes
+    GeometricalPhase::setFrequencies (frequencies,
+				      bufferPhases);
+    setWeights ();
+    
+    return ok;
+  }
+#else
+#ifdef HAVE_BLITZ
+  bool GeometricalWeight::setFrequencies (const blitz::Array<double,1> &frequencies,
+					  bool const &bufferPhases)
+  {
+    bool ok (true);
+    
+    return ok;
+  }
+#endif
+#endif
+  
+  // ============================================================================
+  //
   //  Methods
   //
   // ============================================================================
