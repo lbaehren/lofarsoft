@@ -4,7 +4,6 @@ SUBDIRS (
   BDSM
   CR-Pipeline
   DAL
-#  LOPES-Tools
   VLT
   )
 
@@ -13,7 +12,7 @@ SUBDIRS (
 
 find_path (prefix release_area.txt
   PATHS
-  ${CR_SOURCE_DIR}
+  ${LUS_SOURCE_DIR}
   PATH_SUFFIXES
   ../release
   ../../release
