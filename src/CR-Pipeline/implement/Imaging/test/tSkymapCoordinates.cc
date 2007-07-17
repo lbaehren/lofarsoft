@@ -437,7 +437,7 @@ int test_coordinateSystem ()
 	 << SkymapCoordinates::Direction << endl;
     cout << "-- Coordinate for distance axis  : "
 	 << SkymapCoordinates::Distance  << endl;
-    cout << "-- Coordinate for time     axis  : "
+    cout << "-- Coordinate for time axis      : "
 	 << SkymapCoordinates::Time      << endl;
     cout << "-- Coordinate for frequency axis : "
 	 << SkymapCoordinates::Frequency << endl;

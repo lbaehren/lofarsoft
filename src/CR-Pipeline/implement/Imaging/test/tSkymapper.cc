@@ -449,19 +449,27 @@ int test_processing (string const &lopesData,
     CR::Beamformer beamformer (antennaPositions,
 			       skyPositions,
 			       frequencies);
+    // --- create SkymapCoordinates object ---
+    std::cout << "-- creating SkymapCoordinates object..." << std::endl;
+    uint nofDataBlocks (3);
+    CR::SkymapCoordinates skymapCoordinates (get_SkymapCoordinates());
+    skymapCoordinates.setNofBlocks (nofDataBlocks);
     // create Skymapper object
     std::cout << "-- creating Skymapper object..." << std::endl;
-    Skymapper skymapper (get_SkymapCoordinates());
+    string filename ("skymap03.img");
+    Skymapper skymapper (skymapCoordinates,
+			 beamformer);
     // set the name of the created image file
-    skymapper.setFilename ("skymap03.img");
+    skymapper.setFilename (filename);
     skymapper.setVerboseLevel (1);
     // if initialization goes well, start processing a block of data data
     std::cout << "-- initializing Skymapper for processing..." << std::endl;
     if (skymapper.init()) {
-      std::cout << "-- creating array with input data..." << std::endl;
-      Matrix<DComplex> data (get_data(nofAntennas,nofFrequencies));
-      std::cout << "-- processing data..." << std::endl;
-      status = skymapper.processData (data);
+      for (uint datablock(0); datablock<nofDataBlocks; datablock++) {
+	Matrix<DComplex> data (get_data(nofAntennas,nofFrequencies));
+	std::cout << "-- processing datablock " << datablock << " ..." << std::endl;
+	status = skymapper.processData (data);
+      }
     }
   } catch (std::string message) {
     cerr << message << endl;

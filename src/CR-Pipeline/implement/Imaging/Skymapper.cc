@@ -157,6 +157,7 @@ namespace CR {  // Namespace CR -- begin
       std::cerr << "[Skymapper::init] Error setting SkymapCoordinates object!"
 		<< endl;
     }
+
   }
 
   // -------------------------------------------------------------- setBeamformer
@@ -307,28 +308,49 @@ namespace CR {  // Namespace CR -- begin
       return isOperational_p;
     }
 
-    // Local variables for iteration
-    IPosition shape (data.shape());
-    IPosition imageShape (coordinates_p.shape());
-    IPosition start  (imageShape.nelements(),0);
-    IPosition stride (imageShape.nelements(),1);
-
-    if (verbose_p) {
-      cout << "[Skymapper::processData]" << endl;
-      cout << "-- shape of the input data = " << shape      << endl;
-      cout << "-- shape of the image      = " << imageShape << endl;
-      cout << "-- array start position    = " << start      << endl;
-      cout << "-- array position stride   = " << stride     << endl;
-    }
-
     // forward the data to the beamformer for processing
     Matrix<double> beam;
     status = beamformer_p.processData (beam,
 				       data);
 
-    std::cout << "-- Shape of beamformed data = " << beam.shape() << std::endl;
+    /*
+      Inserted the computed pixel values into the image.
+    */
+//     if (status) {
+      // Declare additional variables
+      int timeAxisStride (coordinates_p.timeAxisStride());
+      IPosition imageShape (coordinates_p.shape());
+      IPosition imageStart  (imageShape.nelements(),0);
+      IPosition imageStride (imageShape.nelements(),1);
+      IPosition beamShape (beam.shape());
+      IPosition beamStart  (beamShape.nelements(),0);
+      IPosition beamStride (beamShape.nelements(),1);
+
+      // adjust objects for array slicing
+      imageStart(3)  = timeAxisStride*nofProcessedBlocks_p;
+
+      // Provide some feedback
+      cout << "[Skymapper::processData]" << endl;
+      cout << "-- shape of the input data  = " << data.shape()   << endl;
+      cout << "-- Shape of beamformed data = " << beam.shape()   << endl;
+      cout << "-- shape of the image       = " << imageShape     << endl;
+      cout << "-- Stride on the time axis  = " << timeAxisStride << endl;
+      cout << "-- image array : start      = " << imageStart     << endl;
+      cout << "-- image array : stride     = " << imageStride    << endl;
+      cout << "-- beam array : start       = " << beamStart      << endl;
+      cout << "-- beam array : stride      = " << beamStride     << endl;
+      
+      for (int dist(0); dist<imageShape(SkymapCoordinates::Distance); dist++) {
+	//       image_p.putSlice (pixels,imageStart,imageStride);
+      }
+      
+//     }
     
-    // book-keeping of the number of data blocks processed so far
+    /*
+      Book-keeping of the number of processed blocks so far; this is accounted
+      for independent of whether the beamforming stage has been successful or
+      not, in order to keep navigation within the image pixel array consistent.
+    */
     nofProcessedBlocks_p++;
 
     return status;

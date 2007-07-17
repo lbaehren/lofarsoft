@@ -682,7 +682,17 @@ namespace CR { // Namespace CR -- begin
   //  Time & Frequency coordinates
   //
   // ============================================================================
+  
+  // --------------------------------------------------------------- setNofBlocks
 
+  bool SkymapCoordinates::setNofBlocks (uint const &nofBlocks)
+  {
+    // store the new value ...
+    nofBlocks_p = nofBlocks;
+    // ... and update the resulting shape of the image pixel array
+    return setShape();
+  }
+  
   // ---------------------------------------------------------------- setTimeFreq
 
   bool SkymapCoordinates::setTimeFreq (TimeFreq const &timeFreq)
@@ -1057,6 +1067,7 @@ namespace CR { // Namespace CR -- begin
   {
     bool status (true);
     IPosition shape (shape_p);
+    int strideTimeAxis (timeAxisStride());
 
     /*
       organization of the axes: [lon,lat,dist,time,freq]
@@ -1067,21 +1078,19 @@ namespace CR { // Namespace CR -- begin
     */
 
     try {
+      // Time-axis
+      shape(3) = strideTimeAxis*nofBlocks_p;
       switch (beamType_p) {
       case TIME_FIELD:
       case TIME_POWER:
       case TIME_CC:
       case TIME_P:
       case TIME_X:
-	// time
-	shape(3) = timeFreq_p.blocksize()*nofBlocks_p;
 	// frequency
 	shape(4) = 1;
 	break;
       case FREQ_POWER:
       case FREQ_FIELD:
-	// time
-	shape(3) = nofBlocks_p;
 	// frequency
 	shape(4) = timeFreq_p.fftLength();
 	break;
