@@ -520,7 +520,6 @@ namespace CR { // Namespace CR -- begin
       DirectionCoordinate extracted from the CoordinateSystem.
     */
     DirectionCoordinate dc = directionAxis();
-    cout << "--> converting coordinate values ..." << endl;
     for (lon=0, pixel(0)=0.0; lon<shape_p(0); lon++, pixel(0)++) {
       for (lat=0, pixel(1)=0.0; lat<shape_p(1); lat++, pixel(1)++) {
 	// perform the actual conversion from pixel to world coordinate

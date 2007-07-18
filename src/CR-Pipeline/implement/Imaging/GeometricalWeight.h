@@ -184,6 +184,26 @@ namespace CR { // NAMESPACE CR -- BEGIN
     }
 
     /*!
+      \brief Set the frequencies values for which the phases are computed
+      
+      \param frequencies  -- The frequency values for which the phases are
+                             computed.
+      \param bufferPhases -- Buffer the values for the geometrical phases?
+
+      \return status -- Status of the operation; returns <tt>false</tt> if an
+                        error was encountered.
+    */
+#ifdef HAVE_CASA
+    bool setFrequencies (const casa::Vector<double> &frequencies,
+			 bool const &bufferPhases=false);
+#else
+#ifdef HAVE_BLITZ
+    bool setFrequencies (const blitz::Array<double,1> &frequencies,
+			 bool const &bufferPhases=false);
+#endif
+#endif
+    
+    /*!
       \brief Get the geometrical weights
 
       \return weights -- [nofAntennas,nofPositions,nofFrequencies] Array with the
@@ -219,24 +239,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \param os -- Output stream to which the summary is written
     */
     void summary (std::ostream &os);
-    
-    // ---------------------------------- Methods reimplemented from base classes
-
-    /*!
-      \brief Set the frequencies values for which the phases are computed
-      
-      \param frequencies -- The frequency values for which the phases are
-                            computed.
-    */
-#ifdef HAVE_CASA
-    bool setFrequencies (const casa::Vector<double> &frequencies,
-			 bool const &bufferPhases=false);
-#else
-#ifdef HAVE_BLITZ
-    bool setFrequencies (const blitz::Array<double,1> &frequencies,
-			 bool const &bufferPhases=false);
-#endif
-#endif
     
     // ------------------------------------------------------------------ Methods
     

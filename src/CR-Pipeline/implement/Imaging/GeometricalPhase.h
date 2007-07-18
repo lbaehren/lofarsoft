@@ -207,7 +207,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 	setPhases();
       }
     }
-
+    
     /*!
       \brief Get the number of frequency channels, for which the phases are computed
 
@@ -239,8 +239,12 @@ namespace CR { // NAMESPACE CR -- BEGIN
     /*!
       \brief Set the frequencies values for which the phases are computed
       
-      \param frequencies -- The frequency values for which the phases are
-                            computed.
+      \param frequencies  -- The frequency values for which the phases are
+                             computed.
+      \param bufferPhases -- Buffer the values for the geometrical phases?
+
+      \return status -- Status of the operation; returns <tt>false</tt> if an
+                        error was encountered.
     */
 #ifdef HAVE_CASA
     virtual bool setFrequencies (const casa::Vector<double> &frequencies,

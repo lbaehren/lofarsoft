@@ -143,6 +143,11 @@ Matrix<DComplex> get_data (uint const &nofAntennas=3,
       data(antenna,channel) = DComplex(random(),random());
     }
   }
+
+  std::cout << "[get_data]" <<  std::endl;
+  std::cout << "-- nof. antennas = " << nofAntennas  << std::endl;
+  std::cout << "-- nof. channels = " << nofChannels  << std::endl;
+  std::cout << "-- shape(data)   = " << data.shape() << std::endl;
   
   return data;
 }

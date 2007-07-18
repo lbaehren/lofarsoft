@@ -211,10 +211,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
   casa::Cube<double> GeometricalPhase::phases ()
   {
     if (bufferPhases_p) {
-      std::cout << "-- Returning buffered phases..." << std::endl;
       return phases_p;
     } else {
-      std::cout << "-- Returning recomputed phases..." << std::endl;
       return calcPhases();
     }
   }
@@ -223,10 +221,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
   blitz::Array<double,3> GeometricalPhase::phases ()
   {
     if (bufferPhases_p) {
-      std::cout << "-- Returning buffered phases..." << std::endl;
       return phases_p;
     } else {
-      std::cout << "-- Returning recomputed phases..." << std::endl;
       return calcPhases();
     }
   }

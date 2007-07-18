@@ -174,6 +174,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
   //
   // ============================================================================
 
+  // ------------------------------------------------------------- setFrequencies
+
 #ifdef HAVE_CASA
   bool GeometricalWeight::setFrequencies (const casa::Vector<double> &frequencies,
 					  bool const &bufferPhases)
@@ -181,8 +183,12 @@ namespace CR { // NAMESPACE CR -- BEGIN
     bool ok (true);
     
     // forward the input parameters to the base classes
+    std::cout << "--> forwarding parameters to GeometricalPhase ..." << std::endl;
     GeometricalPhase::setFrequencies (frequencies,
 				      bufferPhases);
+    
+    // if necessary updated the buffered values for the weights
+    std::cout << "--> initiating update of weights ..." << std::endl;
     setWeights ();
     
     return ok;
@@ -198,7 +204,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   }
 #endif
 #endif
-  
+
   // ============================================================================
   //
   //  Methods
@@ -210,9 +216,18 @@ namespace CR { // NAMESPACE CR -- BEGIN
   void GeometricalWeight::setWeights ()
   {
     if (bufferWeights_p) {
-      delays_p.resize (GeometricalDelay::nofAntennaPositions(),
-		       GeometricalDelay::nofSkyPositions(),
-		       GeometricalPhase::nofFrequencies());
+      IPosition shape (3);
+
+      shape(0) = GeometricalDelay::nofAntennaPositions();
+      shape(1) = GeometricalDelay::nofSkyPositions();
+      shape(2) = GeometricalPhase::nofFrequencies();
+
+      std::cout << "--> new shape for Beamformer weights = " << shape << std::endl;
+
+      weights_p.resize (shape);
+
+      std::cout << "--> calculating weights..." << std::endl;
+
       weights_p = calcWeights ();
     }
   }

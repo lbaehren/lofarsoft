@@ -146,6 +146,9 @@ int test_beamType ()
 /*!
   \brief Test processing of incoming data
 
+  Test the <tt>processData</tt> routines, which is responsible for converting
+  incoming antennas (in the frequency domain) into beamformed data.
+
   \return nofFailedTests -- The number of failed tests.
 */
 int test_processing ()

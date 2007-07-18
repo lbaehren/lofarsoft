@@ -125,7 +125,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #endif
 #endif
 
-    //! Book-keeping: # of antennas
+    //! Book-keeping: number of antennas
     uint nofAntennas_p;
     //! Buffer the values for the geometrical delay?
     bool bufferDelays_p;
