@@ -267,11 +267,15 @@ namespace CR { // Namespace CR -- begin
   {
     bool ok (true);
     
-    int nofSkyPositions (skyPositions_p.nrow());
     int nofFrequencies (frequencies_p.nelements());
     IPosition shapeData (data.shape());
+
+    /*
+      shape(data) = [antenna,channel]
+      shape(beam) = [position,channel]
+    */
     
-    if (shapeData(0) == nofSkyPositions &&
+    if (shapeData(0) == nofAntennas_p &&
 	shapeData(1) == nofFrequencies) {
       ok = true;
     } else {
@@ -393,25 +397,17 @@ namespace CR { // Namespace CR -- begin
     bool status (true);
     int nofSkyPositions (skyPositions_p.nrow());
     int nofFrequencies (frequencies_p.nelements());
-    IPosition shapeData (data.shape());
-
-    /*
-      Check if the shape of the array with the input data matched the internal
-      parameters.
-    */
-    if (shapeData(0) == nofSkyPositions &&
-	shapeData(1) == nofFrequencies) {
-      // additional local variables
-      int direction (0);
-      uint antenna (0);
-      int freq (0);
-      casa::DComplex tmp;
-
+    int direction (0);
+    uint antenna (0);
+    int freq (0);
+    casa::DComplex tmp;
+    
+    try {
       // Resize the array returning the beamformed data
       beam.resize (nofSkyPositions,nofFrequencies,0.0);
-
+      
       std::cout << "[Beamformer::freq_power] Processing data..." << std::endl;
-
+      
       // Iteration over the set of directions in the sky
       for (direction=0; direction<nofSkyPositions; direction++) {
 	for (antenna=0; antenna<nofAntennas_p; antenna++) {
@@ -421,11 +417,8 @@ namespace CR { // Namespace CR -- begin
 	  }
 	}
       }
-    } else {
-      std::cerr << "[Beamformer::freq_power]" << std::endl;
-      std::cerr << "-- Wrong shape of array with input data!" << std::endl;
-      std::cerr << "--> shape(data)    = " << data.shape()      << std::endl;
-      std::cerr << "--> shape(weights) = " << weights_p.shape() << std::endl;
+    } catch (std::string message) {
+      std::cerr << "[Beamformer::freq_power] " << message << std::endl;
       status = false;
     }
 

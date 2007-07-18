@@ -170,14 +170,17 @@ Matrix<DComplex> get_data (uint const &nofAntennas=3,
   Reference value  (CRVAL) = [0, 1.5708, -1, 0, 0]
   Increment        (CDELT) = [-0.0349066, 0.0349066, 0, 2.5e-08, 39062.5]
   \endverbatim
+
+  \param blocksize       -- 
+  \param sampleFrequency -- 
+  \param nyquistZone     -- 
   
   \return coord -- A new SkymapCoordinates object
 */
-SkymapCoordinates get_SkymapCoordinates ()
+SkymapCoordinates get_SkymapCoordinates (uint const blocksize=1024,
+					 double const sampleFrequency=40e6,
+					 uint const nyquistZone=1)
 {
-  unsigned int blocksize (1024);
-  double sampleFrequency (40e6);
-  unsigned int nyquistZone (1);
   TimeFreq timeFreq (blocksize,
 		     sampleFrequency,
 		     nyquistZone);

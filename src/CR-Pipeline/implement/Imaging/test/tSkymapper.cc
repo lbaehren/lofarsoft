@@ -437,23 +437,24 @@ int test_processing (string const &lopesData,
   
   std::cout << "[3] Test processData function with generated data..." << std::endl;
   try {
-    // create beamformer
+    uint blocksize (1024);
+    uint nofDataBlocks (3);
     uint nofAntennas (2);
     uint nofSkyPositions (10);
-    uint nofFrequencies (1024);
+    // --- create SkymapCoordinates object ---
+    std::cout << "-- creating SkymapCoordinates object..." << std::endl;
+    CR::SkymapCoordinates skymapCoordinates (get_SkymapCoordinates(blocksize));
+    skymapCoordinates.setNofBlocks (nofDataBlocks);
+    // create beamformer
     std::cout << "-- getting parameters for Beamformer..." << std::endl;
     Matrix<double> antennaPositions (get_antennaPositions(nofAntennas));
     Matrix<double> skyPositions (get_skyPositions(nofSkyPositions));
-    Vector<double> frequencies (get_frequencies(40e06,80e06,nofFrequencies));
+    Vector<double> frequencies (skymapCoordinates.frequencyAxisValues());
+    uint nofFrequencies (frequencies.nelements());
     std::cout << "-- creating Beamformer object..." << std::endl;
     CR::Beamformer beamformer (antennaPositions,
 			       skyPositions,
 			       frequencies);
-    // --- create SkymapCoordinates object ---
-    std::cout << "-- creating SkymapCoordinates object..." << std::endl;
-    uint nofDataBlocks (3);
-    CR::SkymapCoordinates skymapCoordinates (get_SkymapCoordinates());
-    skymapCoordinates.setNofBlocks (nofDataBlocks);
     // create Skymapper object
     std::cout << "-- creating Skymapper object..." << std::endl;
     string filename ("skymap03.img");
