@@ -184,17 +184,9 @@ namespace CR {  // Namespace CR -- begin
   
   // -------------------------------------------------------------- setBeamformer
   
-  bool Skymapper::setBeamformer (Matrix<double> const &antPositions,
-				 Matrix<double> const &skyPositions,
-				 Vector<double> const &frequencies)
+  bool Skymapper::setBeamformer (Matrix<double> const &antPositions)
   {
-    bool status (true);
-    
-    status = beamformer_p.setAntPositions (antPositions);
-    status = beamformer_p.setSkyPositions (skyPositions);
-    status = beamformer_p.setFrequencies (frequencies);
-    
-    return status;
+    return beamformer_p.setAntPositions (antPositions);
   }
 
   // ------------------------------------------------------- setSkymapCoordinates
@@ -221,19 +213,18 @@ namespace CR {  // Namespace CR -- begin
   //
   // ============================================================================
 
-  // ----------------------------------------------------------------------- init
+  // -------------------------------------------------------------- initSkymapper
 
-  bool Skymapper::init () 
+  bool Skymapper::initSkymapper () 
   {
     bool status (true);
 
     /*
       For the later Beamforming we need to retrieve the coordinates of the
-      poiting positions; since we keep the directions constant and iterate over
+      pointing positions; since we keep the directions constant and iterate over
       the distance axis, we get the full position information by later
       combination.
     */
-    
     try {
       // Retrieve the values of the direction axes
       Matrix<double> directionValues;
@@ -244,9 +235,6 @@ namespace CR {  // Namespace CR -- begin
 
       // Retrieve the values of the distance axis
       Vector<double> distances (coordinates_p.distanceAxisValues());
-
-      // Retrieve the values of the frequency axis
-      Vector<double> frequencies (coordinates_p.frequencyAxisValues());
 
       // Combine the values from the axes to yield the 3D positions
       bool anglesInDegrees (true);
@@ -259,14 +247,21 @@ namespace CR {  // Namespace CR -- begin
 					    CR::Spherical,
 					    anglesInDegrees,
 					    bufferDelays);
-      cout << "--> setting frequency values in Beamformer ..." << endl;
-      status = beamformer_p.setFrequencies (frequencies);
-      cout << "==> Setup of Beamformer completed." << endl;
-      if (status && verbose_p) {
-	beamformer_p.summary();
-      }
     } catch (std::string message) {
-      cerr << "[Skymapper::init] Failed setting up the beamformer!" << endl;
+      cerr << "[Skymapper::initSkymapper] Failed assigning beam directions!"
+	   << endl;
+      cerr << message << endl;
+    }
+
+    /*
+      In order to set the beamforming weights we require the frequency values
+    */
+    try {
+      Vector<double> frequencies (coordinates_p.frequencyAxisValues());
+      status = beamformer_p.setFrequencies (frequencies);
+    } catch (std::string message) {
+      cerr << "[Skymapper::initSkymapper] Failed assigning frequency values!"
+	   << endl;
       cerr << message << endl;
     }
     
@@ -284,7 +279,7 @@ namespace CR {  // Namespace CR -- begin
 					csys,
 					filename_p);
     } catch (std::string message) {
-      cerr << "[Skymapper::init] Failed creating the image file!" << endl;
+      cerr << "[Skymapper::initSkymapper] Failed creating the image file!" << endl;
       cerr << "--> " << message << endl;
       isOperational_p = false;
     }
@@ -295,21 +290,12 @@ namespace CR {  // Namespace CR -- begin
       isOperational_p = true;
       // feedback to the outside world
       if (verbose_p) {
-	cout << "[Skymapper::init] Image file appears ok and is writable."
+	cout << "[Skymapper::initSkymapper] Image file appears ok and is writable."
 		  << endl;
       }
     } else {
       isOperational_p = false;
     }
-
-    // Check objects for consistence
-    
-    cout << "[Skymapper::init] Settings of the embedded objects:"       << endl;
-    cout << "--> nof. antennas    = " << beamformer_p.nofAntennas()     << endl;
-    cout << "--> nof. directions  = " << beamformer_p.nofSkyPositions() << endl;
-    cout << "--> nof. frequencies = " << beamformer_p.nofFrequencies()  << endl;
-    cout << "--> image shape      = " << coordinates_p.shape()          << endl;
-    
     
     return isOperational_p;
   }
@@ -343,25 +329,33 @@ namespace CR {  // Namespace CR -- begin
       IPosition imageStart  (imageShape.nelements(),0);
       IPosition imageStride (imageShape.nelements(),1);
       IPosition beamShape (beam.shape());
-      IPosition beamStart  (beamShape.nelements(),0);
-      IPosition beamStride (beamShape.nelements(),1);
+      IPosition blc_beam  (beamShape.nelements(),0);
+      IPosition trc_beam (beamShape.nelements(),1);
 
-      // adjust objects for array slicing
-      imageStart(3)  = timeAxisStride*nofProcessedBlocks_p;
+      // Adjust the slicing operators
+      imageStart(3) = timeAxisStride*nofProcessedBlocks_p;
+      blc_beam(1)  = 0;
+      trc_beam(1)    = beamShape(1)-1;
 
       // Provide some feedback
       cout << "[Skymapper::processData]" << endl;
-      cout << "-- shape of the input data  = " << data.shape()   << endl;
-      cout << "-- Shape of beamformed data = " << beam.shape()   << endl;
-      cout << "-- shape of the image       = " << imageShape     << endl;
-      cout << "-- Stride on the time axis  = " << timeAxisStride << endl;
-      cout << "-- image array : start      = " << imageStart     << endl;
-      cout << "-- image array : stride     = " << imageStride    << endl;
-      cout << "-- beam array : start       = " << beamStart      << endl;
-      cout << "-- beam array : stride      = " << beamStride     << endl;
+//       cout << "-- shape of the input data  = " << data.shape()   << endl;
+//       cout << "-- Shape of beamformed data = " << beam.shape()   << endl;
+//       cout << "-- shape of the image       = " << imageShape     << endl;
+//       cout << "-- Stride on the time axis  = " << timeAxisStride << endl;
       
-      for (int dist(0); dist<imageShape(SkymapCoordinates::Distance); dist++) {
-	//       image_p.putSlice (pixels,imageStart,imageStride);
+      for (int dist(0); dist<imageShape(2); dist++) {
+	// slicing instructions for beam array
+	blc_beam(0) = dist*imageShape(0)*imageShape(1);
+	trc_beam(0)   = (dist+1)*imageShape(0)*imageShape(1) - 1;
+	// slicing instructions for the image pixel array
+	imageStart(2) = dist;
+	// feedback on the setting
+	cout << "\t" << blc_beam << " -> " << trc_beam << "\t=>\t"
+	     << imageStart << " -> " << imageStride 
+	     << endl;
+	// insert beamformed data into the image's pixel array
+// 	image_p.putSlice (beam(blc_beam,trc_beam),imageStart,imageStride);
       }
       
     } else {
@@ -378,134 +372,6 @@ namespace CR {  // Namespace CR -- begin
 
     return status;
   }
-  
-  // ---------------------------------------------------------------- createImage
-  
-  Bool Skymapper::createImage ()
-  {
-    cout << "[Skymapper::createImage]" << endl;
-    
-    Bool status     (True);
-    int radius      (0);
-    int integration (0);
-    IPosition imageShape (coordinates_p.shape());
-    int nofLoops   (imageShape(2)*imageShape(3));
-    CoordinateSystem csys (coordinates_p.coordinateSystem());
-    Matrix<DComplex> data;
-  
-  /*
-    Adjust the settings of the embedded Skymap object
-  */
-  try {
-    // Extract the direction axis from the coordinate system
-    DirectionCoordinate axis = coordinates_p.directionAxis();
-    Vector<Double> crval (axis.referenceValue());
-    Vector<Double> cdelt (axis.increment());
-    IPosition shape (2,imageShape(0),imageShape(1));
-
-    MDirection direction = axis.directionType();
-    String refcode       = direction.getRefString();
-    String projection    = axis.projection().name();
-
-    crval *= 1/(C::pi/180.0);
-    cdelt *= 1/(C::pi/180.0);
-    
-    cout << " - Setting up the skymap grid ... "      << endl;
-    cout << " -- coord. refcode    = " << refcode     << endl;
-    cout << " -- coord. projection = " << projection  << endl;
-    cout << " -- shape             = " << shape       << endl;
-    cout << " -- reference value   = " << crval       << endl;
-    cout << " -- coord. increment  = " << cdelt       << endl;
-
-    // Elevation range
-    Vector<Double> elevation (2);
-    elevation(0) = 00.0;
-    elevation(1) = 90.0;
-//     skymap_p.setElevationRange (elevation);
-
-    // Orientation of the sky map
-    Vector<String> orientation (2);
-    orientation(0) = "East";
-    orientation(1) = "North";
-//     skymap_p.setOrientation (orientation);
-
-//     // Default value for the distance parameter
-//     skymap_p.setDistance(-1);
-
-    // Set up the Skymap-internal function pointer to the function handling
-    // the actual data processing
-//     skymap_p.setSkymapQuantity (quantity_p.skymapQuantity());
-  } catch (AipsError x) {
-    cerr << "[Skymapper::createImage] " << x.getMesg() << endl;
-    return False;
-  }
-  
-  /*
-    Create paged image on disk, based on the information assembled to far
-
-    The choice for "PagedImage<Double>" is problematic in the sense, that by
-    this preselection we exclude computation of electric field as function of
-    frequency (which has pixel data of complex type).
-  */
-
-  cout << " - Creating paged image on disk ... " << std::flush;
-  
-  TiledShape shape (imageShape);
-  PagedImage<Double> image (shape,
-			   csys,
-			   filename_p);
-
-  cout << "done." << endl;
-
-  /*
-    This is the core loop, generating the final skymap from a set of sub-images
-  */
-
-  uint numLoop (0);
-  CR::ProgressBar bar (nofLoops);
-  IPosition start  (imageShape.nelements(),0);
-  IPosition stride (imageShape.nelements(),1);
-  Cube<Double> pixels;
-  Cube<Bool> imageMask;
-
-  cout << " - computing image pixels ..." << endl;
-  bar.update(numLoop);
-
-  try {
-    for (radius=0; radius<imageShape(2); radius++) {
-      // 1. store the distance parameter
-//       skymap_p.setDistance(-1.0);
-      // 2. update pointer to position in image array
-      start(2) = radius;
-      // 3. update the beamformer weights for the current shell
-      for (integration=0; integration<imageShape(3); integration++) {
-	start(3) = integration;
-	// 1. read in the data from disk
-	// 	  (this->*pFunction)(data);
-	// 2. process the data 
-// 	skymap_p.data2skymap(data);
-	// show the progress we are making on the image generation
-	numLoop++;
-	bar.update(numLoop);
-	// retrieve the Skymap data cube ...
-// 	skymap_p.skymap (pixels,
-// 			 imageMask,
-// 			 Int(imageShape(4)));
-	// ... and insert it at [az,el,RADIUS,INTEGRATION,freq]
-	image.putSlice (pixels,start,stride);
-      } // ------------------------------------------------------ end integration
-      // rewind DataReader::position to initial data block
-    } // ------------------------------------------------------------- end radius
-    cout << endl;
-    cout << " - all image pixels computed." << endl;
-  } catch (AipsError x) {
-    cerr << "[Skymapper::createImage] " << x.getMesg() << endl;
-    return False;
-  }
-  
-  return status;
-  }
-  
   
   // ============================================================================
   //
@@ -526,34 +392,34 @@ namespace CR {  // Namespace CR -- begin
     ObsInfo obsInfo          = csys.obsInfo();
     
     os << "[Skymapper] Summary of the internal parameters"             << endl;
-    os << " - Observation ..........  "                                << endl;
-    os << " -- observer              = " << obsInfo.observer()         << endl;
-    os << " -- telescope             = " << obsInfo.telescope()        << endl;
-    os << " -- observation date      = " << obsInfo.obsDate()          << endl;
-    os << " - Data I/O ............   "                                << endl;
-    os << " -- blocksize   [samples] = " << timeFreq.blocksize()       << endl;
-    os << " -- FFT length [channels] = " << timeFreq.blocksize()       << endl;
-    os << " -- sampling rate    [Hz] = " << timeFreq.sampleFrequency() << endl;
-    os << " -- Nyquist zone          = " << timeFreq.nyquistZone()     << endl;
-    os << " -- nof. antennas         = " << beamformer_p.nofAntennas() << endl;
-    os << " - Coordinates ..........  "                                << endl;
-    os << " -- reference code  [WCS] = " << refcode                    << endl;
-    os << " -- projection      [WCS] = " << projection                 << endl;
-    os << " -- nof. coordinates      = " << csys.nCoordinates()        << endl;
-    os << " -- names                 = " << csys.worldAxisNames()      << endl;
-    os << " -- units                 = " << csys.worldAxisUnits()      << endl;
-    os << " -- ref. pixel            = " << csys.referencePixel()      << endl;
-    os << " -- ref. value            = " << csys.referenceValue()      << endl;
-    os << " -- coord. increment      = " << csys.increment()           << endl;
-    os << " - Image ................  "                                << endl;
-    os << " -- filename              = " << filename()                 << endl;
-    os << " -- imaged quantity       = " << quantity_p.quantity()      << endl;
-    os << " -- shape of pixel array  = " << coordinates_p.shape()      << endl;
-    //   os << " -- image type           = " << image_p.imageType()     << endl;
-    //   os << " -- is persistent?       = " << image_p.isPersistent()  << endl;
-    //   os << " -- is paged?            = " << image_p.isPaged()       << endl;
-    //   os << " -- is writable?         = " << image_p.isWritable()    << endl;
-    //   os << " -- has pixel mask?      = " << image_p.hasPixelMask()  << endl;
+    os << " - Observation ..............  "                               << endl;
+    os << " -- observer                 = " << obsInfo.observer()         << endl;
+    os << " -- telescope                = " << obsInfo.telescope()        << endl;
+    os << " -- observation date         = " << obsInfo.obsDate()          << endl;
+    os << " - Data I/O .................   "                              << endl;
+    os << " -- blocksize      [samples] = " << timeFreq.blocksize()       << endl;
+    os << " -- FFT length    [channels] = " << timeFreq.blocksize()       << endl;
+    os << " -- sampling rate       [Hz] = " << timeFreq.sampleFrequency() << endl;
+    os << " -- Nyquist zone             = " << timeFreq.nyquistZone()     << endl;
+    os << " -- nof. antennas            = " << beamformer_p.nofAntennas() << endl;
+    os << " - Coordinates .............  "                                << endl;
+    os << " -- reference code           = " << refcode                    << endl;
+    os << " -- projection               = " << projection                 << endl;
+    os << " -- nof. coordinates         = " << csys.nCoordinates()        << endl;
+    os << " -- names                    = " << csys.worldAxisNames()      << endl;
+    os << " -- units                    = " << csys.worldAxisUnits()      << endl;
+    os << " -- ref. pixel       (CRPIX) = " << csys.referencePixel()      << endl;
+    os << " -- ref. value       (CRVAL) = " << csys.referenceValue()      << endl;
+    os << " -- coord. increment (CDELT) = " << csys.increment()           << endl;
+    os << " - Image ....................  "                               << endl;
+    os << " -- filename                 = " << filename()                 << endl;
+    os << " -- imaged quantity          = " << quantity_p.quantity()      << endl;
+    os << " -- shape of pixel array     = " << coordinates_p.shape()      << endl;
+//     os << " -- image type               = " << image_p.imageType()        << endl;
+//     os << " -- is persistent?           = " << image_p.isPersistent()     << endl;
+//     os << " -- is paged?                = " << image_p.isPaged()          << endl;
+//     os << " -- is writable?             = " << image_p.isWritable()       << endl;
+//     os << " -- has pixel mask?          = " << image_p.hasPixelMask()     << endl;
   }
   
 }  // Namespace CR -- end

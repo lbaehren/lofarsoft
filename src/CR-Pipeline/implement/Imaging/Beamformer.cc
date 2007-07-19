@@ -265,7 +265,7 @@ namespace CR { // Namespace CR -- begin
   bool Beamformer::checkData (casa::Matrix<double> &beam,
 			      const casa::Matrix<DComplex> &data)
   {
-    bool ok (true);
+    uint nofFailedChecks (0);
     
     int nofFrequencies (frequencies_p.nelements());
     IPosition shapeData (data.shape());
@@ -274,23 +274,34 @@ namespace CR { // Namespace CR -- begin
       shape(data) = [antenna,channel]
       shape(beam) = [position,channel]
     */
-    
-    if (shapeData(0) == nofAntennas_p &&
-	shapeData(1) == nofFrequencies) {
-      ok = true;
-    } else {
-      std::cerr << "[Beamformer::checkData]" << std::endl;
-      std::cerr << "-- Wrong shape of array with input data!"    << std::endl;
+
+    // Check the number of antennas
+    if (shapeData(0) != int(nofAntennas_p)) {
+      nofFailedChecks++;
+    }
+
+    // Check the number of frequency channels
+    if (shapeData(1) != nofFrequencies) {
+      nofFailedChecks++;
+    }
+
+    if (nofFailedChecks) {
+      // Feedback on the failed checks
+      std::cerr << "[Beamformer::checkData] "
+		<< nofFailedChecks
+		<< " checks have failed!"
+		<< std::endl;
       std::cerr << "--> shape(data)    [antennas,channels]            = "
 		<< data.shape()
 		<< std::endl;
       std::cerr << "--> shape(weights) [antennas,directions,channels] = "
 		<< weights_p.shape()
 		<< std::endl;
-      ok = false;
+      // return value
+      return false;
+    } else {
+      return true;
     }
-    
-    return ok;
   }
 #else
 #ifdef HAVE_BLITZ
@@ -405,8 +416,6 @@ namespace CR { // Namespace CR -- begin
     try {
       // Resize the array returning the beamformed data
       beam.resize (nofSkyPositions,nofFrequencies,0.0);
-      
-      std::cout << "[Beamformer::freq_power] Processing data..." << std::endl;
       
       // Iteration over the set of directions in the sky
       for (direction=0; direction<nofSkyPositions; direction++) {

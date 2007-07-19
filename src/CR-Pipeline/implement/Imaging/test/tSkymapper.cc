@@ -413,7 +413,7 @@ int test_processing (string const &lopesData,
     // provide a summary of the internal settings
     skymapper.summary();
     // initialize the Skymapper for operation on data
-    status = skymapper.init();
+    status = skymapper.initSkymapper();
   } catch (std::string message) {
     cerr << message << endl;
     nofFailedTests++;
@@ -429,7 +429,7 @@ int test_processing (string const &lopesData,
     // provide a summary of the internal settings
     skymapper.summary();
     // initialize the Skymapper for operation on data
-    status = skymapper.init();
+    status = skymapper.initSkymapper();
   } catch (std::string message) {
     cerr << message << endl;
     nofFailedTests++;
@@ -440,34 +440,24 @@ int test_processing (string const &lopesData,
     uint blocksize (1024);
     uint nofDataBlocks (3);
     uint nofAntennas (2);
-    uint nofSkyPositions (10);
     // --- create SkymapCoordinates object ---
     std::cout << "-- creating SkymapCoordinates object..." << std::endl;
     CR::SkymapCoordinates skymapCoordinates (get_SkymapCoordinates(blocksize));
     skymapCoordinates.setNofBlocks (nofDataBlocks);
-    // create beamformer
-    std::cout << "-- getting parameters for Beamformer..." << std::endl;
-    Matrix<double> antennaPositions (get_antennaPositions(nofAntennas));
-    Matrix<double> skyPositions (get_skyPositions(nofSkyPositions));
-    Vector<double> frequencies (skymapCoordinates.frequencyAxisValues());
-    uint nofFrequencies (frequencies.nelements());
-    std::cout << "-- creating Beamformer object..." << std::endl;
-    CR::Beamformer beamformer (antennaPositions,
-			       skyPositions,
-			       frequencies);
+    IPosition shape (skymapCoordinates.shape());
     // create Skymapper object
     std::cout << "-- creating Skymapper object..." << std::endl;
     string filename ("skymap03.img");
-    Skymapper skymapper (skymapCoordinates,
-			 beamformer);
-    std::cout << "-- updating Skymapper settings..." << std::endl;
+    Skymapper skymapper (skymapCoordinates);
+    std::cout << "-- updating Skymapper parameters..." << std::endl;
+    skymapper.setBeamformer(get_antennaPositions(nofAntennas));
     skymapper.setFilename (filename);
     skymapper.setVerboseLevel (1);
     // if initialization goes well, start processing a block of data data
     std::cout << "-- initializing Skymapper for processing..." << std::endl;
-    if (skymapper.init()) {
+    if (skymapper.initSkymapper()) {
       for (uint datablock(0); datablock<nofDataBlocks; datablock++) {
-	Matrix<DComplex> data (get_data(nofAntennas,nofFrequencies));
+	Matrix<DComplex> data (get_data(nofAntennas,shape(4)));
 	std::cout << "-- processing datablock " << datablock << " ..." << std::endl;
 	status = skymapper.processData (data);
       }

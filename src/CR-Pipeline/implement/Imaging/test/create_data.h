@@ -72,18 +72,23 @@ Matrix<double> get_antennaPositions (uint const &nofAntennas=3)
 /*!
   \brief Create some sky/pointing positions for the Beamformer
 
-  \param nofSkyPositions -- The number of positions on the sky to which to point
-                            to
+  \param nofDirections -- Number of \f$ (\theta,\phi) \f$ directions
+  \param nofDistances  -- Number of distance steps.
 
   \return positions -- [position,coordinate] Sky positions, \f$ \vec\rho \f$
 */
-Matrix<double> get_skyPositions (uint const &nofSkyPositions=3)
+Matrix<double> get_skyPositions (uint const &nofDirections=3,
+				 uint const &nofDistances=1)
 {
   uint nofAxes (3);
-  Matrix<double> positions (nofSkyPositions,nofAxes,0.0);
+  uint nofPositions (nofDirections*nofDistances);
+  uint direction(0);
+  uint distance(0);
+  Matrix<double> positions (nofPositions,nofAxes,0.0);
 
-  for (uint n(0); n<nofSkyPositions; n++) {
-    positions(n,0) = positions(n,2) = (n+1)*1000;
+  for (direction=0; direction<nofDirections; direction++) {
+    for (distance=0; distance<nofDistances; distance++) {
+    }
   }
 
   return positions;
@@ -144,10 +149,10 @@ Matrix<DComplex> get_data (uint const &nofAntennas=3,
     }
   }
 
-  std::cout << "[get_data]" <<  std::endl;
-  std::cout << "-- nof. antennas = " << nofAntennas  << std::endl;
-  std::cout << "-- nof. channels = " << nofChannels  << std::endl;
-  std::cout << "-- shape(data)   = " << data.shape() << std::endl;
+/*   std::cout << "[get_data]" <<  std::endl; */
+/*   std::cout << "-- nof. antennas = " << nofAntennas  << std::endl; */
+/*   std::cout << "-- nof. channels = " << nofChannels  << std::endl; */
+/*   std::cout << "-- shape(data)   = " << data.shape() << std::endl; */
   
   return data;
 }
@@ -171,15 +176,17 @@ Matrix<DComplex> get_data (uint const &nofAntennas=3,
   Increment        (CDELT) = [-0.0349066, 0.0349066, 0, 2.5e-08, 39062.5]
   \endverbatim
 
-  \param blocksize       -- 
-  \param sampleFrequency -- 
-  \param nyquistZone     -- 
+  \param blocksize        -- 
+  \param sampleFrequency  -- 
+  \param nyquistZone      -- 
+  \param nofDistanceSteps -- 
   
   \return coord -- A new SkymapCoordinates object
 */
 SkymapCoordinates get_SkymapCoordinates (uint const blocksize=1024,
 					 double const sampleFrequency=40e6,
-					 uint const nyquistZone=1)
+					 uint const nyquistZone=1,
+					 uint const nofDistanceSteps=2)
 {
   TimeFreq timeFreq (blocksize,
 		     sampleFrequency,
@@ -193,6 +200,9 @@ SkymapCoordinates get_SkymapCoordinates (uint const blocksize=1024,
 			   nofBlocks,
 			   SkymapCoordinates::NORTH_WEST,
 			   CR::FREQ_POWER);
+
+  // update parameters
+  coord.setDistanceShape (nofDistanceSteps);
   
   return coord;
 }

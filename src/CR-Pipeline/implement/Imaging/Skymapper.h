@@ -120,7 +120,7 @@ namespace CR {  // Namespace CR -- begin
   // Create a new Skymapper object
   Skymapper skymapper (coords);
   
-  if (skymapper.init()) {
+  if (skymapper.initSkymapper()) {
     while (skymapper.nofProcessedBlocks()<=nofBlocks) {
       // get the current block of data
       data = some_function();
@@ -302,7 +302,7 @@ namespace CR {  // Namespace CR -- begin
     \return status -- Status of the operation; returns <tt>false</tt> if an error
                       was encountered.
   */
-  bool init ();
+  bool initSkymapper ();
 
   /*!
     \brief Process a block of data and add the result to the image being created
@@ -388,22 +388,15 @@ namespace CR {  // Namespace CR -- begin
   bool setBeamformer (Beamformer const &beamformer);
 
   /*!
-    \brief Set a new Beamformer object handle the combination of antenna signals
+    \brief Update the settings of the Beamformer object
     
     \param antPositions  -- [nofAntennas,3] Antenna positions for which the
-    delay is computed, \f$ (x,y,z) \f$
-    \param skyPositions  -- [nofSkyPositions,3] Positions in the sky towards
-    which to point, given in the same reference frame
-    as the antenna positions, \f$ (x,y,z) \f$
-    \param frequencies   -- Frequencies for which the geometrical delays are
-    converted into phases
+                            delay is computed, \f$ (x,y,z) \f$
     
     \return status -- Status of the operation; returns <tt>false</tt> if an error
                       was encountered.
   */
-  bool setBeamformer (Matrix<double> const &antPositions,
-		      Matrix<double> const &skyPositions,
-		      Vector<double> const &frequencies);
+  bool setBeamformer (Matrix<double> const &antPositions);
 
   // ------------------------------------------------------------------- feedback
 
@@ -485,17 +478,6 @@ namespace CR {  // Namespace CR -- begin
     \return fft -- Spectral data, [freq,ant]
   */
   void getData (Matrix<DComplex> &data);
-
-  /*!
-    \brief Create an image file on disk to be fillled later on
-
-    Collect all the information we have so far an create a PagedImage on disk, to
-    which the results from the processed data can be added to.
-
-    \return status -- Status of the operation; returns <i>false</i> if an error
-                      was encountered.
-  */
-  Bool createImage ();
 
   /*!
     \brief Default direction coordinates axis

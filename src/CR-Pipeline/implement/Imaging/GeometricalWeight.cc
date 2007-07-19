@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include <Imaging/GeometricalWeight.h>
+#include <Utilities/ProgressBar.h>
 
 namespace CR { // NAMESPACE CR -- BEGIN
   
@@ -183,12 +184,10 @@ namespace CR { // NAMESPACE CR -- BEGIN
     bool ok (true);
     
     // forward the input parameters to the base classes
-    std::cout << "--> forwarding parameters to GeometricalPhase ..." << std::endl;
     GeometricalPhase::setFrequencies (frequencies,
 				      bufferPhases);
     
     // if necessary updated the buffered values for the weights
-    std::cout << "--> initiating update of weights ..." << std::endl;
     setWeights ();
     
     return ok;
@@ -222,12 +221,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
       shape(1) = GeometricalDelay::nofSkyPositions();
       shape(2) = GeometricalPhase::nofFrequencies();
 
-      std::cout << "--> new shape for Beamformer weights = " << shape << std::endl;
-
+      // adjust the shape of the array storing the weights
       weights_p.resize (shape);
-
-      std::cout << "--> calculating weights..." << std::endl;
-
+      // compute and assign the new values
       weights_p = calcWeights ();
     }
   }
@@ -245,16 +241,22 @@ namespace CR { // NAMESPACE CR -- BEGIN
     casa::IPosition shape     = phases.shape();
     // array to store the computed weights
     casa::Cube<DComplex> weights (shape);
+    // progress bar
+    CR::ProgressBar progress (shape(2)-1);
 
+    std::cout << "[GeometricalWeight::calcWeights]" << std::endl;
 
     for (freq=0; freq<shape(2); freq++) {
       for (sky=0; sky<shape(1); sky++) {
  	for (ant=0; ant<shape(0); ant++) {
 	  weights(ant,sky,freq) = DComplex(cos(phases(ant,sky,freq)),
 					   sin(phases(ant,sky,freq)));
- 	}
-      }
-    }
+ 	}  // end loop: ant
+      }  // end loop: sky
+      progress.update(freq);
+    }  // end loop: freq
+
+    std::cout << " --> Computation of weights completed." << std::endl;
     
     return weights;
   }
