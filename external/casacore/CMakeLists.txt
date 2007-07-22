@@ -91,17 +91,10 @@ find_package (TCL)
 find_package (X11)
 find_package (ZLIB)
 
-## --- libcfitsio --------------------------------
-
-FIND_PATH (CFITSIO_INCLUDES
-  fitsio.h longnam.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES cfitsio
-  )
-
-if (CFITSIO_INCLUDES)
-  message (STATUS "Found CFITSIO header files : ${CFITSIO_INCLUDES}")
-endif (CFITSIO_INCLUDES)
+include (./FindCFITSIO.cmake)
+include (./FindG2C.cmake)
+include (./FindLAPACK.cmake)
+include (./FindWCS.cmake)
 
 ## --- libm --------------------------------------
 
@@ -117,7 +110,7 @@ endif (libm)
 ## Bison
 
 find_program (bison_bin bison
-  PATHS /usr/bin /usr/local/bin /sw/bin
+  PATHS ${bin_locations}
   )
 
 if (bison_bin)
@@ -127,7 +120,7 @@ endif (bison_bin)
 ## Flex
 
 find_program (flex_bin flex
-  PATHS /usr/bin /usr/local/bin /sw/bin
+  PATHS ${bin_locations}
 )
 
 if (flex_bin)
@@ -150,6 +143,7 @@ include_directories (
   ./ms/ms/MeasurementSets
   ./tables/tables/Tables
   ${CFITSIO_INCLUDES}
+  ${WCS_INCLUDES}
   )
 
 ## --- Identify the platform ---------------------
@@ -170,7 +164,7 @@ IF (UNIX)
   add_definitions (
     ## CPPOPT
     -DAIPS_STDLIB
-#    -DAIPS_NO_TEMPLATE_SRC
+    -DAIPS_NO_TEMPLATE_SRC
     -DAIPS_AUTO_STL
     -DAIPS_NO_LEA_MALLOC
     ## LDOPT
@@ -201,6 +195,7 @@ IF (UNIX)
     -Wno-comment
     -fexceptions
     -Wcast-align
+    -Woverloaded-virtual
     )
 ENDIF (UNIX)
 
