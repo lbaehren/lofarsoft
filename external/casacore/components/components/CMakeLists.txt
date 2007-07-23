@@ -24,11 +24,14 @@ target_link_libraries (components coordinates)
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-foreach (components_module ${components_modules})
-  LIST (APPEND tests "${components_module}/test")
-endforeach (components_module)
-
-SUBDIRS (${tests})
+if (casacore_tests)
+  ## build up the list of directories ...
+  foreach (components_module ${components_modules})
+    list (APPEND tests "${components_module}/test")
+  endforeach (components_module)
+  ## ... and register them
+  subdirs (${tests})
+endif (casacore_tests)
 
 ## -----------------------------------------------------------------------------
 ## Installation targets

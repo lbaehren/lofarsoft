@@ -21,11 +21,14 @@ target_link_libraries (fits measures casa ${CFITSIO_LIBRARIES})
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-foreach (fits_module ${fits_modules})
-  LIST (APPEND tests "${fits_module}/test")
-endforeach (fits_module)
-
-SUBDIRS (${tests})
+if (casacore_tests)
+  ## build up the list of directories ...
+  foreach (fits_module ${fits_modules})
+    list (APPEND tests "${fits_module}/test")
+  endforeach (fits_module)
+  ## ... and register them
+  subdirs (${tests})
+endif (casacore_tests)
 
 ## -----------------------------------------------------------------------------
 ## Installation targets

@@ -1,10 +1,11 @@
 
 ## ------------------------------------------------------------------------------
-## Test programs for casa/Inputs
+## Test programs for casa/Quanta
 
 SET (tests
-tInput
-tParam
+tQuantum
+tQuantumHolder
+tUnit
   )
 
 ## ------------------------------------------------------------------------------

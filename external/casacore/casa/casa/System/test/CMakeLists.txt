@@ -1,10 +1,13 @@
 
 ## ------------------------------------------------------------------------------
-## Test programs for casa/Inputs
+## Test programs for casa/IO
 
 SET (tests
-tInput
-tParam
+tAipsrc
+tAipsrcValue
+tAppInfo
+tChoice
+tObjectID
   )
 
 ## ------------------------------------------------------------------------------

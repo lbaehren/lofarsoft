@@ -91,11 +91,14 @@ endif (bison_bin)
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-foreach (tables_module ${tables_modules})
-  LIST (APPEND tests "${tables_module}/test")
-endforeach (tables_module)
-
-SUBDIRS (${tests})
+if (casacore_tests)
+  ## build up the list of directories ...
+  foreach (tables_module ${tables_modules})
+    list (APPEND tests "${tables_module}/test")
+  endforeach (tables_module)
+  ## ... and register them
+  subdirs (${tests})
+endif (casacore_tests)
 
 ## ------------------------------------------------------------------------------
 ## Installation

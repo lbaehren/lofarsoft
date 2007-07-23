@@ -1,10 +1,27 @@
 
 ## ------------------------------------------------------------------------------
-## Test programs for casa/Inputs
+## Test programs for casa/OS
 
 SET (tests
-tInput
-tParam
+tCanonicalConversion
+tConversion
+tDataConversion
+tDirectory
+tDirectoryIterator
+tEnvVar
+tFile
+tHostInfo
+tIBMConversion
+tLECanonicalConversion
+tMemory
+tModcompConversion
+tPath
+tPrecTimer
+tRegularFile
+tSymLink
+tTime
+tTimer
+tVAXConversion
   )
 
 ## ------------------------------------------------------------------------------

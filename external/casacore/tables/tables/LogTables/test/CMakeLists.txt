@@ -1,10 +1,12 @@
 
 ## ------------------------------------------------------------------------------
-## Test programs for casa/Inputs
+## Test programs for tables/LogTables
 
 SET (tests
-tInput
-tParam
+dLogging
+dLogging2
+tLoggerHolder
+tLogging
   )
 
 ## ------------------------------------------------------------------------------
@@ -12,5 +14,5 @@ tParam
 
 FOREACH (src ${tests})
   ADD_EXECUTABLE (${src} ${src}.cc)
-  TARGET_LINK_LIBRARIES (${src} casa)
+  TARGET_LINK_LIBRARIES (${src} tables)
 ENDFOREACH (src)

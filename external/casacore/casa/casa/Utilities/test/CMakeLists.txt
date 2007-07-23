@@ -1,10 +1,28 @@
 
 ## ------------------------------------------------------------------------------
-## Test programs for casa/Inputs
+## Test programs for casa/IO
 
 SET (tests
-tInput
-tParam
+dCOWptr
+dMUString
+tBinarySearch
+tBitVector
+tCOWPtr
+tCompositeNumber
+tCopy
+tCountedPtr
+tDataType
+tDefaultValue
+tDynBuffer
+tFallible
+tGenSort
+tLinearSearch
+tPtrHolder
+tRegex
+tRegex_1
+tRegister
+tSort
+tSort_1
   )
 
 ## ------------------------------------------------------------------------------

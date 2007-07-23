@@ -83,11 +83,14 @@ endif (flex_bin)
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-foreach (ms_module ${ms_modules})
-  LIST (APPEND tests "${ms_module}/test")
-endforeach (ms_module)
-
-SUBDIRS (${tests})
+if (casacore_tests)
+  ## build up the list of directories ...
+  foreach (ms_module ${ms_modules})
+    list (APPEND tests "${ms_module}/test")
+  endforeach (ms_module)
+  ## ... and register them
+  subdirs (${tests})
+endif (casacore_tests)
 
 ## ------------------------------------------------------------------------------
 ## Installation

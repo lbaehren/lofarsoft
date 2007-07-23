@@ -13,26 +13,7 @@ message (STATUS "[CMake package configuration] casacore")
 
 project (casacore)
 
-set (casacore_packages
-  casa
-  components
-  coordinates
-  fits
-  images
-  lattices
-  measures
-  mirlib
-  ms
-  msfits
-  msvis
-  scimath
-  tables
-  )
-
-subdirs (${casacore_packages})
-
-## ------------------------------------------------------------------------------
-## Dependency of the libraries in casacore
+## Dependency of the packages in casacore
 
 # casa        : --
 # tables      : casa
@@ -47,6 +28,29 @@ subdirs (${casacore_packages})
 # images      : components mirlib
 # msfits      : ms fits
 # msvis       : ms
+
+set (casacore_packages
+  casa
+  tables
+  mirlib
+  scimath
+  measures
+  fits
+  coordinates
+  components
+  lattices
+  ms
+  images
+  msfits
+  msvis
+  )
+
+subdirs (${casacore_packages})
+
+## -----------------------------------------------------------------------------
+## Options selectable by the user
+
+option (casacore_tests "Build the test programs?" 0)
 
 ## -----------------------------------------------------------------------------
 ## Check for platform specific header files; in most cases we should be able to
@@ -76,7 +80,6 @@ set (lib_locations
   /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
   )
 
-
 find_path (HAVE_CTYPE_H ctype.h PATHS ${include_locations})
 find_path (HAVE_FCNTL_H fcntl.h PATHS ${include_locations})
 find_path (HAVE_STRING_H string.h PATHS ${include_locations})
@@ -101,7 +104,7 @@ include (./FindWCS.cmake)
 find_library (libm m PATHS ${lib_locations})
 
 if (libm)
-  message (STATUS "Found LIBM: ${libm}")
+  message (STATUS "Found libm : ${libm}")
 endif (libm)
 
 ## -----------------------------------------------------------------------------
@@ -129,6 +132,22 @@ endif (flex_bin)
 
 ## -----------------------------------------------------------------------------
 ## Compiler and Linker options
+## 
+## Examples from the configuration and build using SCons:
+##  [libcasa]
+##  g++ -o "build_darwin_Power Macintosh/opt/aips.o" -c -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_DARWIN -DAIPS_NO_LEA_MALLOC -O2 -I. casa/aips.cc
+##  g++ -o "build_darwin_Power Macintosh/opt/Exceptions/Error2.o" -c -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_DARWIN -DAIPS_NO_LEA_MALLOC -O2 -I. casa/Exceptions/Error2.cc
+##  [libtables]
+##  g++ -o "build_darwin_Power Macintosh/opt/Tables/TaQLResult.o" -c -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_DARWIN -DAIPS_NO_LEA_MALLOC -O2 -I. -I/Volumes/UNIX/casacore/stage/include/casacore "-Ibuild_darwin_Power Macintosh/opt/Tables" tables/Tables/TaQLResult.cc
+##  g++ -o "build_darwin_Power Macintosh/opt/Tables/DataManager.o" -c -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_DARWIN -DAIPS_NO_LEA_MALLOC -O2 -I. -I/Volumes/UNIX/casacore/stage/include/casacore "-Ibuild_darwin_Power Macintosh/opt/Tables" tables/Tables/DataManager.cc
+##  [libmir]
+##  gcc -o "build_darwin_Power Macintosh/opt/dio.o" -c -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_DARWIN -DAIPS_NO_LEA_MALLOC -O2 -I. dio.c
+##  gcc -o "build_darwin_Power Macintosh/opt/bug.o" -c -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_DARWIN -DAIPS_NO_LEA_MALLOC -O2 -I. bug.c
+##  [libscimath]
+##  [measures]
+##  [fits]
+##  [coordinates]
+##  [components]
 
 ## --- Location of the header files --------------
 ##
@@ -162,24 +181,30 @@ ENDIF (UNIX)
 
 IF (UNIX)
   add_definitions (
-    ## CPPOPT
+    # -- optimization level --
+    -O2
+    # -- compiler flags utilized in the source code --
     -DAIPS_STDLIB
-    -DAIPS_NO_TEMPLATE_SRC
     -DAIPS_AUTO_STL
     -DAIPS_NO_LEA_MALLOC
+    # -- exceptions and warnings --
+    -Wall
+    -Wno-comment
+    -fexceptions
+    -Wcast-align
     ## LDOPT
 ##    -s -Xlinker -rpath -Xlinker
     )
   set (CASA_LDSTD "-Xlinker -rpath -Xlinker")
   IF (APPLE)
     ADD_DEFINITIONS (
-      -DAIPS_DARWIN
+       -DAIPS_DARWIN
       -DAIPS_BIG_ENDIAN
       -DNATIVE_EXCP
       -D_FILE_OFFSET_BITS=64
       -D_LARGEFILE_SOURCE
       )
-    SET (CASA_CXXSTD "${CASA_CXXSTD} -fno-implicit-templates -Wreturn-type -Wimplicit -fPIC")
+    SET (CASA_CXXSTD "${CASA_CXXSTD} -Wreturn-type -Wimplicit -fPIC")
   ELSE (APPLE)
     ADD_DEFINITIONS (
       -DAIPS_LINUX
@@ -188,14 +213,8 @@ IF (UNIX)
       )
   ENDIF (APPLE)
   ADD_DEFINITIONS (
-    -O2
     -fPIC
     -pipe
-    -Wall
-    -Wno-comment
-    -fexceptions
-    -Wcast-align
-    -Woverloaded-virtual
     )
 ENDIF (UNIX)
 
