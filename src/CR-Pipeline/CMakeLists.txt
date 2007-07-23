@@ -5,6 +5,11 @@
 project (CR)
 
 ## ------------------------------------------------------------------------------
+## User defined build/install options
+
+option (build_tests "Build the test programs?" 0)
+
+## ------------------------------------------------------------------------------
 ## Subdirectories
 
 subdirs (

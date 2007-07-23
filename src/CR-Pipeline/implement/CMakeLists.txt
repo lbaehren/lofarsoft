@@ -49,6 +49,18 @@ else (CASA_LIBRARIES AND LAPACK_LIBRARIES)
 endif (CASA_LIBRARIES AND LAPACK_LIBRARIES)
 
 ## ------------------------------------------------------------------------------
+## Test programs
+
+if (build_tests)
+  ## build up the list of directories ...
+  foreach (cr_module ${cr_modules})
+    list (APPEND tests "${cr_module}/test")
+  endforeach (cr_module)
+  ## ... and register them
+  subdirs (${tests})
+endif (build_tests)
+
+## ------------------------------------------------------------------------------
 ## Installation
 
 ## installation of libraries
