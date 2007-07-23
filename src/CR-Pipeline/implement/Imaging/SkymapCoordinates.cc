@@ -785,7 +785,7 @@ namespace CR { // Namespace CR -- begin
 
   Vector<double> SkymapCoordinates::timeAxisValues ()
   {
-    unsigned int nofValues = shape_p(SkymapCoordinates::Time);
+    unsigned int nofValues = shape_p(3);
     Vector<double> pixel (nofValues);
 
     for (unsigned int n(0); n<nofValues; n++) {
@@ -842,7 +842,7 @@ namespace CR { // Namespace CR -- begin
 
   Vector<double> SkymapCoordinates::frequencyAxisValues ()
   {
-    unsigned int nofValues = shape_p(SkymapCoordinates::Frequency);
+    unsigned int nofValues = shape_p(4);
     Vector<double> pixel (nofValues);
 
     for (unsigned int n(0); n<nofValues; n++) {

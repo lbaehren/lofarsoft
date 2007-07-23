@@ -97,7 +97,6 @@ find_package (ZLIB)
 include (./FindCFITSIO.cmake)
 include (./FindG2C.cmake)
 include (./FindLAPACK.cmake)
-include (./FindWCS.cmake)
 
 ## --- libm --------------------------------------
 
@@ -106,6 +105,14 @@ find_library (libm m PATHS ${lib_locations})
 if (libm)
   message (STATUS "Found libm : ${libm}")
 endif (libm)
+
+## --- libwcs ------------------------------------
+
+include (./FindWCS.cmake)
+
+if (NOT WCS_LIBRARIES)
+  message (SEND_ERROR "No system-wide WCSLIB installation found!")
+endif (NOT WCS_LIBRARIES)
 
 ## -----------------------------------------------------------------------------
 ## Check for additional tools which are required

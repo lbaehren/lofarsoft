@@ -9,7 +9,6 @@ SET (ms_modules
 ## collect the source files in the modules
 
 foreach (ms_module ${ms_modules})
-  ## source files for the library
   FILE (GLOB ms_${ms_module} ${ms_module}/*.cc ${ms_module}/*.tcc)
   LIST (APPEND ms_sources ${ms_${ms_module}})
 endforeach (ms_module)

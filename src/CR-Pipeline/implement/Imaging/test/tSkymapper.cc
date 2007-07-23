@@ -457,7 +457,8 @@ int test_processing (string const &lopesData,
     std::cout << "-- initializing Skymapper for processing..." << std::endl;
     if (skymapper.initSkymapper()) {
       for (uint datablock(0); datablock<nofDataBlocks; datablock++) {
-	Matrix<DComplex> data (get_data(nofAntennas,shape(4)));
+	Matrix<DComplex> data (get_data(nofAntennas,
+					shape(4)));
 	std::cout << "-- processing datablock " << datablock << " ..." << std::endl;
 	status = skymapper.processData (data);
       }

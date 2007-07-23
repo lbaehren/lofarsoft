@@ -259,6 +259,7 @@ namespace CR {  // Namespace CR -- begin
     try {
       Vector<double> frequencies (coordinates_p.frequencyAxisValues());
       status = beamformer_p.setFrequencies (frequencies);
+
     } catch (std::string message) {
       cerr << "[Skymapper::initSkymapper] Failed assigning frequency values!"
 	   << endl;
@@ -344,18 +345,33 @@ namespace CR {  // Namespace CR -- begin
 //       cout << "-- shape of the image       = " << imageShape     << endl;
 //       cout << "-- Stride on the time axis  = " << timeAxisStride << endl;
       
-      for (int dist(0); dist<imageShape(2); dist++) {
-	// slicing instructions for beam array
-	blc_beam(0) = dist*imageShape(0)*imageShape(1);
-	trc_beam(0)   = (dist+1)*imageShape(0)*imageShape(1) - 1;
-	// slicing instructions for the image pixel array
-	imageStart(2) = dist;
-	// feedback on the setting
-	cout << "\t" << blc_beam << " -> " << trc_beam << "\t=>\t"
-	     << imageStart << " -> " << imageStride 
-	     << endl;
-	// insert beamformed data into the image's pixel array
-// 	image_p.putSlice (beam(blc_beam,trc_beam),imageStart,imageStride);
+//       for (int dist(0); dist<imageShape(2); dist++) {
+// 	// slicing instructions for beam array
+// 	blc_beam(0) = dist*imageShape(0)*imageShape(1);
+// 	trc_beam(0)   = (dist+1)*imageShape(0)*imageShape(1) - 1;
+// 	// slicing instructions for the image pixel array
+// 	imageStart(2) = dist;
+// 	// feedback on the setting
+// 	cout << "\t" << blc_beam << " -> " << trc_beam << "\t=>\t"
+// 	     << imageStart << " -> " << imageStride 
+// 	     << endl;
+// 	// insert beamformed data into the image's pixel array
+//  	image_p->putSlice (beam(blc_beam,trc_beam),imageStart,imageStride);
+//       }
+
+      // inserting the computed values into the image is done per slice along the
+      // the frequency axis.
+      int coord(0);
+      for (imageStart(0)=0; imageStart(0)<imageShape(0); imageStart(0)++) {
+	for (imageStart(1)=0; imageStart(1)<imageShape(1); imageStart(1)++) {
+	  for (imageStart(2)=0; imageStart(2)<imageShape(2); imageStart(2)++) {
+	    // control feedback
+	    std::cout << imageStart << std::endl;
+// 	    image_p->putSlice (beam.row(coord),imageStart,imageStride);
+	    // increment counter
+	    coord++;
+	  }
+	}
       }
       
     } else {
