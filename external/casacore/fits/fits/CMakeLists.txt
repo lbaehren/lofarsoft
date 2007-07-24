@@ -15,8 +15,11 @@ endforeach (fits_module)
 
 ## build the library
 
-add_library (fits ${fits_sources})
-target_link_libraries (fits measures casa ${CFITSIO_LIBRARIES})
+add_library (fits
+  ${fits_sources}
+)
+target_link_libraries (fits
+  measures casa ${CFITSIO_LIBRARIES} ${WCS_LIBRARIES})
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs

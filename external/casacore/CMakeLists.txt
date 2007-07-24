@@ -51,6 +51,7 @@ subdirs (${casacore_packages})
 ## Options selectable by the user
 
 option (casacore_tests "Build the test programs?" 0)
+option (CMAKE_VERBOSE_MAKEFILE "Verbose makefile?" 0)
 
 ## -----------------------------------------------------------------------------
 ## Check for platform specific header files; in most cases we should be able to
@@ -90,13 +91,13 @@ find_path (HAVE_UNISTD_H unistd.h PATHS ${include_locations})
 
 find_package (Motif)
 find_package (PNG)
-find_package (TCL)
 find_package (X11)
 find_package (ZLIB)
 
 include (./FindCFITSIO.cmake)
 include (./FindG2C.cmake)
 include (./FindLAPACK.cmake)
+include (./FindWCS.cmake)
 
 ## --- libm --------------------------------------
 
@@ -105,14 +106,6 @@ find_library (libm m PATHS ${lib_locations})
 if (libm)
   message (STATUS "Found libm : ${libm}")
 endif (libm)
-
-## --- libwcs ------------------------------------
-
-include (./FindWCS.cmake)
-
-if (NOT WCS_LIBRARIES)
-  message (SEND_ERROR "No system-wide WCSLIB installation found!")
-endif (NOT WCS_LIBRARIES)
 
 ## -----------------------------------------------------------------------------
 ## Check for additional tools which are required
@@ -205,27 +198,25 @@ IF (UNIX)
   set (CASA_LDSTD "-Xlinker -rpath -Xlinker")
   IF (APPLE)
     ADD_DEFINITIONS (
-       -DAIPS_DARWIN
+      -DAIPS_DARWIN
       -DAIPS_BIG_ENDIAN
       -DNATIVE_EXCP
       -D_FILE_OFFSET_BITS=64
-      -D_LARGEFILE_SOURCE
       )
     SET (CASA_CXXSTD "${CASA_CXXSTD} -Wreturn-type -Wimplicit -fPIC")
   ELSE (APPLE)
     ADD_DEFINITIONS (
       -DAIPS_LINUX
       -DAIPS_LITTLE_ENDIAN
-      -D_LARGEFILE_SOURCE
       )
   ENDIF (APPLE)
   ADD_DEFINITIONS (
+    -D_LARGEFILE_SOURCE
     -fPIC
     -pipe
     )
 ENDIF (UNIX)
 
-SET (CMAKE_VERBOSE_MAKEFILE 0)
 SET (CMAKE_MODULE_LINKER_FLAGS ${CASA_LDSTD})
 SET (CMAKE_C_FLAGS ${CASA_CXXSTD})
 

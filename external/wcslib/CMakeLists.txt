@@ -148,19 +148,26 @@ target_link_libraries (pgsbox wcs ${PGPLOT_LIBRARIES})
 ## ------------------------------------------------------------------------------
 ## Installation
 
-if (UNIX)
-  set (installation_prefix /usr/local)
-  if (APPLE)
-    set (installation_prefix /sw)
-  endif (APPLE)
-endif (UNIX)
+find_path (prefix release_area.txt
+  PATHS
+  ${WCSLIB_SOURCE_DIR}
+  PATH_SUFFIXES
+  ../release
+  ../../release
+  NO_DEFAULT_PATH
+  )
+
+if (prefix)
+  message (STATUS "Installation area located for package WCSLIB.")
+  set (CMAKE_INSTALL_PREFIX ${prefix}) 
+endif (prefix)
 
 ## installation of libraries
 
 install (TARGETS wcs pgsbox
-  RUNTIME DESTINATION ${installation_prefix}/bin
-  LIBRARY DESTINATION ${installation_prefix}/lib
-  ARCHIVE DESTINATION ${installation_prefix}/lib
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
   )
 
 ## installation of header files
@@ -168,5 +175,5 @@ install (TARGETS wcs pgsbox
 file (GLOB libwcs_headers C/*.h)
 
 install (FILES ${libwcs_headers}
-  DESTINATION ${installation_prefix}/include/wcslib
+  DESTINATION include/wcslib
   )

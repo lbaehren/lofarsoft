@@ -31,6 +31,10 @@ set (test_sources
 ## PGPLOTLIB := -lcpgplot -lpgplot -lpng -lz -lX11 -lg2c 
 
 if (HAVE_PGPLOT)
+  include_directories (
+    ${WCSLIB}/C
+    ${WCSLIB}/C/test
+    )
   foreach (test_source ${test_sources})
     add_executable (${test_source} ${test_source}.c)
     target_link_libraries (${test_source}
