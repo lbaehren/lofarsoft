@@ -133,6 +133,15 @@ class ProgressBar {
   /*!
     \brief Argumented constructor.
 
+    \param loops  -- Total number of loops
+    \param symbol -- The Symbol used for the bar itself.
+  */
+  ProgressBar (int const &loops,
+	       string const &symbol);
+  
+  /*!
+    \brief Argumented constructor.
+
     \param loops    -- Total number of loops, etc...
     \param barwidth -- Total length of the progress bar (number of
                        characters)

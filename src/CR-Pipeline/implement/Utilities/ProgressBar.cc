@@ -55,6 +55,18 @@ namespace CR {
   // ---------------------------------------------------------------- ProgressBar
 
   ProgressBar::ProgressBar (int const &loops,
+			    string const &symbol)
+  {
+    int barwidth = 70;
+    //
+    ProgressBar::init (loops,
+		       barwidth,
+		       symbol);
+  }
+
+  // ---------------------------------------------------------------- ProgressBar
+
+  ProgressBar::ProgressBar (int const &loops,
 			    int const &barwidth,
 			    string const &symbol)
   {

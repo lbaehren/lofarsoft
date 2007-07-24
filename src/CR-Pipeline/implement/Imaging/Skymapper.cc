@@ -325,54 +325,30 @@ namespace CR {  // Namespace CR -- begin
     */
     if (status) {
       // Declare additional variables
+      int coord(0);
       int timeAxisStride (coordinates_p.timeAxisStride());
-      IPosition imageShape (coordinates_p.shape());
-      IPosition imageStart  (imageShape.nelements(),0);
-      IPosition imageStride (imageShape.nelements(),1);
-      IPosition beamShape (beam.shape());
-      IPosition blc_beam  (beamShape.nelements(),0);
-      IPosition trc_beam (beamShape.nelements(),1);
+      IPosition shape (coordinates_p.shape());
+      IPosition start  (shape.nelements(),0);
+      IPosition stride (shape.nelements(),1);
 
       // Adjust the slicing operators
-      imageStart(3) = timeAxisStride*nofProcessedBlocks_p;
-      blc_beam(1)  = 0;
-      trc_beam(1)    = beamShape(1)-1;
+      start(3) = timeAxisStride*nofProcessedBlocks_p;
 
-      // Provide some feedback
-      cout << "[Skymapper::processData]" << endl;
-//       cout << "-- shape of the input data  = " << data.shape()   << endl;
-//       cout << "-- Shape of beamformed data = " << beam.shape()   << endl;
-//       cout << "-- shape of the image       = " << imageShape     << endl;
-//       cout << "-- Stride on the time axis  = " << timeAxisStride << endl;
-      
-//       for (int dist(0); dist<imageShape(2); dist++) {
-// 	// slicing instructions for beam array
-// 	blc_beam(0) = dist*imageShape(0)*imageShape(1);
-// 	trc_beam(0)   = (dist+1)*imageShape(0)*imageShape(1) - 1;
-// 	// slicing instructions for the image pixel array
-// 	imageStart(2) = dist;
-// 	// feedback on the setting
-// 	cout << "\t" << blc_beam << " -> " << trc_beam << "\t=>\t"
-// 	     << imageStart << " -> " << imageStride 
-// 	     << endl;
-// 	// insert beamformed data into the image's pixel array
-//  	image_p->putSlice (beam(blc_beam,trc_beam),imageStart,imageStride);
-//       }
+      // Progress bar
+      ProgressBar bar (shape(0),">");
 
       // inserting the computed values into the image is done per slice along the
       // the frequency axis.
-      int coord(0);
-      for (imageStart(0)=0; imageStart(0)<imageShape(0); imageStart(0)++) {
-	for (imageStart(1)=0; imageStart(1)<imageShape(1); imageStart(1)++) {
-	  for (imageStart(2)=0; imageStart(2)<imageShape(2); imageStart(2)++) {
-	    // control feedback
-	    std::cout << imageStart << std::endl;
-// 	    image_p->putSlice (beam.row(coord),imageStart,imageStride);
+      for (start(0)=0; start(0)<shape(0); start(0)++) {
+	for (start(1)=0; start(1)<shape(1); start(1)++) {
+	  for (start(2)=0; start(2)<shape(2); start(2)++) {
+ 	    image_p->putSlice (beam.row(coord),start,stride);
 	    // increment counter
 	    coord++;
-	  }
-	}
-      }
+	  }  // -- end loop: start(2)
+	}  // -- end loop: start(1)
+	bar.update(start(0));
+      }  // -- end loop: start(0)
       
     } else {
       cerr << "[Skymapper::processData] No processing due to Beamformer error"
