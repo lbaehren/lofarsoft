@@ -1,4 +1,23 @@
 
+project (casacore_fits C Fortran)
+
+## -----------------------------------------------------------------------------
+## External libraries
+
+find_path (cfitsio_header fitsio.h
+  PATHS /usr/include /usr/local/include /sw/include
+  PATH_SUFFIXES cfitsio
+  )
+find_library (cfitsio_library cfitsio
+  PATHS /usr/lib /usr/local/lib /sw/lib
+  PATH_SUFFIXES cfitsio
+  )
+
+## feedback
+
+message (STATUS "fitsio.h   = ${cfitsio_header}")
+message (STATUS "libcfitsio = ${cfitsio_library}")
+
 ## -----------------------------------------------------------------------------
 ## libfits
 
@@ -17,9 +36,22 @@ endforeach (fits_module)
 
 add_library (fits
   ${fits_sources}
-)
+  )
+include_directories (
+  .
+  ..
+  ../..
+  ${cfitsio_header}
+  )
 target_link_libraries (fits
-  measures casa ${CFITSIO_LIBRARIES} ${WCS_LIBRARIES})
+  measures
+  scimath
+  scimath_f
+  tables
+  casa
+  ${cfitsio_library}
+  ${WCS_LIBRARIES}
+  )
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
@@ -41,3 +73,18 @@ install (TARGETS fits
   LIBRARY DESTINATION ${installation_prefix}/lib
   ARCHIVE DESTINATION ${installation_prefix}/lib
   )
+
+## -----------------------------------------------------------------------------
+## Include hierarchy 
+
+#  <fits/FITS/BasicFITS.cc>
+#  |-- <fits/FITS/BasicFITS.h>
+#  |-- <fits/FITS/FITS2.h>
+#  |   `-- <fits/FITS/hdu.h>
+#  |-- <fits/FITS/fitsio.h>
+#  |   |-- <fits/FITS/fits.h>
+#  |   |-- <fits/FITS/blockio.h>
+#  |   `-- <fits/FITS/hdu.h>
+#  `-- <fits/FITS/hdu.h>
+#      |-- <fits/FITS/fits.h>
+#      `-- <fits/FITS/blockio.h>

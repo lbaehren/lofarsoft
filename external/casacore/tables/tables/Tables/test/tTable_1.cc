@@ -43,7 +43,7 @@
 
 void a(uInt);
 
-main (int argc, char** argv) {
+int main (int argc, char** argv) {
     uInt nr = 500;
     if (argc > 1) {
 	istringstream istr(argv[1]);

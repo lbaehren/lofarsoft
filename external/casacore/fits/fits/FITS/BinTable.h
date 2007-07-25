@@ -28,7 +28,6 @@
 #ifndef FITS_BINTABLE_H
 #define FITS_BINTABLE_H
 
-
 //# Includes
 
 #include <casa/aips.h>
@@ -106,11 +105,11 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 //          (Bit, Byte, 0-length columns).
 //   <li> No attempt use any TDIM columns or keywords to shape arrays.
 // </todo>
+  
+  class BinaryTable : public BinaryTableExtension {
 
-class BinaryTable : public BinaryTableExtension
-{
-public: 
-
+  public: 
+    
     //   The only constructor is from a FitsInput, you can also optionally
     //   provide a FITS error handler.  If useMiriadSM is True, use
     //   the Miriad storage manager for all columns, otherwise AipsIO.
@@ -120,7 +119,7 @@ public:
     BinaryTable(FitsInput &,
 		FITSErrorHandler errhandler = FITSError::defaultHandler, 
 		Bool useMiriadSM = False, Bool sdfits = False);
-
+    
     ~BinaryTable();
 
     // Get the full table, using the supplied arguments to construct the table.
@@ -158,7 +157,7 @@ public:
 
 
 private:
-
+    
     //# Data Members
     // This is the Scratch table containing the current row
     Table* currRowTab;
@@ -166,20 +165,20 @@ private:
     Int *nelem;
     // This is a map from column number to column name
     SimpleOrderedMap<Int, String> *colNames;
-
+    
     TableRecord kwSet;
-
+    
     // These are used by any VADesc columns
     FITS::ValueType *vatypes_p;
     void **vaptr_p;
     VADescFitsField *va_p;
     char *theheap_p;
-
+    
     // this is the function that fills each row in as needed
     void fillRow();
-};
-
-
+  };
+  
+  
 } //# NAMESPACE CASA - END
 
 #endif

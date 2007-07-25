@@ -1,45 +1,34 @@
 
 ## -----------------------------------------------------------------------------
-## libcasa
+## libmsvis
 
-SET (casa_modules
-  Arrays
-  BasicMath
-  BasicSL
-  Containers
-  Exceptions
-  IO
-  Inputs
-  Logging
-  OS
-  Quanta
-  System
-  Utilities
+SET (msvis_modules
+  MSVis
   )
 
 ## collect the source files in the modules
 
-foreach (casa_module ${casa_modules})
-  FILE (GLOB casa_${casa_module} ${casa_module}/*.cc ${casa_module}/*.tcc)
-  LIST(APPEND casa_sources ${casa_${casa_module}})
-endforeach (casa_module)
+foreach (msvis_module ${msvis_modules})
+  FILE (GLOB msvis_${msvis_module} ${msvis_module}/*.cc ${msvis_module}/*.tcc)
+  LIST (APPEND msvis_sources ${msvis_${msvis_module}})
+endforeach (msvis_module)
 
+## -----------------------------------------------------------------------------
 ## build the library
 
-add_library (casa
-  aips.cc
-  ${casa_sources}
+add_library (msvis
+  ${msvis_sources}
 )
-target_link_libraries (casa ${libm})
+target_link_libraries (msvis ms)
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
 if (casacore_tests)
   ## build up the list of directories ...
-  foreach (casa_module ${casa_modules})
-    list (APPEND tests "${casa_module}/test")
-  endforeach (casa_module)
+  foreach (msvis_module ${msvis_modules})
+    list (APPEND tests "${msvis_module}/test")
+  endforeach (msvis_module)
   ## ... and register them
   subdirs (${tests})
 endif (casacore_tests)
@@ -47,7 +36,9 @@ endif (casacore_tests)
 ## ------------------------------------------------------------------------------
 ## Installation
 
-install (TARGETS casa
+## installation of libraries
+
+install (TARGETS msvis
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

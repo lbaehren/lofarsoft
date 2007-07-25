@@ -4,8 +4,7 @@
 ## Main CMake configuration file for building the "casacore" package.
 ##
 ## Pending issues:
-##  - fortran directory of "scimath"
-##  - libfits does not yet build
+##  - "libfits" does not yet build
 ##
 ## ------------------------------------------------------------------------------
 
@@ -50,14 +49,22 @@ subdirs (${casacore_packages})
 ## -----------------------------------------------------------------------------
 ## Options selectable by the user
 
-option (casacore_tests "Build the test programs?" 0)
-option (CMAKE_VERBOSE_MAKEFILE "Verbose makefile?" 0)
+option (casacore_tests
+  "Build the test programs?"
+  0
+  )
+
+option (CMAKE_VERBOSE_MAKEFILE
+  "Verbose makefile?"
+  0
+  )
 
 ## -----------------------------------------------------------------------------
 ## Check for platform specific header files; in most cases we should be able to
 ## use the CMake build-in macro, but in a number of cases those will not yield
 ## proper results - where therefore run an explicit check.
 
+include (CPack)
 include (CheckIncludeFiles)
 include (CheckLibraryExists)
 
@@ -103,37 +110,24 @@ include (./FindWCS.cmake)
 
 find_library (libm m PATHS ${lib_locations})
 
-if (libm)
-  message (STATUS "Found libm : ${libm}")
-endif (libm)
-
 ## -----------------------------------------------------------------------------
 ## Check for additional tools which are required
-
-## Bison
 
 find_program (bison_bin bison
   PATHS ${bin_locations}
   )
 
-if (bison_bin)
-  message (STATUS "Found bison : ${bison_bin}")
-endif (bison_bin)
-
-## Flex
-
 find_program (flex_bin flex
   PATHS ${bin_locations}
 )
-
-if (flex_bin)
-  message (STATUS "Found flex : ${flex_bin}")
-endif (flex_bin)
 
 ## -----------------------------------------------------------------------------
 ## Compiler and Linker options
 ## 
 ## Examples from the configuration and build using SCons:
+##
+## (a) Apple Mac OS-X PPC
+##
 ##  [libcasa]
 ##  g++ -o "build_darwin_Power Macintosh/opt/aips.o" -c -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_DARWIN -DAIPS_NO_LEA_MALLOC -O2 -I. casa/aips.cc
 ##  g++ -o "build_darwin_Power Macintosh/opt/Exceptions/Error2.o" -c -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_DARWIN -DAIPS_NO_LEA_MALLOC -O2 -I. casa/Exceptions/Error2.cc
@@ -148,73 +142,68 @@ endif (flex_bin)
 ##  [fits]
 ##  [coordinates]
 ##  [components]
+##
+## (b) Debian GNU Linux
+##
+##  [libcasa]
+##  g++ -o build_linux_i686/opt/aips.o -c -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_LINUX -DAIPS_LITTLE_ENDIAN -O2 -I. casa/aips.cc
+##  g++ -o build_linux_i686/opt/Exceptions/Error2.o -c -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_LINUX -DAIPS_LITTLE_ENDIAN -O2 -I. casa/Exceptions/Error2.cc
 
 ## --- Location of the header files --------------
-##
-## Some of the paths are set explicitely in order
-## to enable location of the parser output files.
 
 include_directories (
   .
   ..
   ${casacore_packages}
-  ./fits/fits/FITS
   ./ms/ms/MeasurementSets
   ./tables/tables/Tables
   ${CFITSIO_INCLUDES}
   ${WCS_INCLUDES}
   )
 
-## --- Identify the platform ---------------------
-
-IF (UNIX)
-  IF (APPLE)
-    SET (AIPSARCH "darwin")
-    SET (AIPS_DARWIN 1)
-  ELSE (APPLE)
-    SET (AIPSARCH "linux")
-    SET (AIPS_DARWIN 0)
-  ENDIF (APPLE)
-ENDIF (UNIX)
-
 ## --- Compiler settings -------------------------
 
 IF (UNIX)
   add_definitions (
-    # -- optimization level --
+    # -- optimization --
     -O2
+    -fPIC
+    -pipe
     # -- compiler flags utilized in the source code --
     -DAIPS_STDLIB
     -DAIPS_AUTO_STL
     -DAIPS_NO_LEA_MALLOC
+#   -D_LARGEFILE_SOURCE
     # -- exceptions and warnings --
     -Wall
     -Wno-comment
     -fexceptions
+    -Wno-non-template-friend
     -Wcast-align
     ## LDOPT
-##    -s -Xlinker -rpath -Xlinker
+    ##    -s -Xlinker -rpath -Xlinker
     )
+  set (CASA_CXXSTD "${CASA_CXXSTD} -Wreturn-type -Wimplicit -fPIC")
   set (CASA_LDSTD "-Xlinker -rpath -Xlinker")
   IF (APPLE)
-    ADD_DEFINITIONS (
+    ## definition common to apple architectures
+    add_definitions (
       -DAIPS_DARWIN
-      -DAIPS_BIG_ENDIAN
-      -DNATIVE_EXCP
-      -D_FILE_OFFSET_BITS=64
+#      -DNATIVE_EXCP
+#      -D_FILE_OFFSET_BITS=64
       )
-    SET (CASA_CXXSTD "${CASA_CXXSTD} -Wreturn-type -Wimplicit -fPIC")
+    ## PPC specific settings
+    if (CMAKE_OSX_ARCHITECTURES MATCHES ppc)
+      add_definitions (
+	-DAIPS_BIG_ENDIAN
+	)
+    endif (CMAKE_OSX_ARCHITECTURES MATCHES ppc)
   ELSE (APPLE)
     ADD_DEFINITIONS (
       -DAIPS_LINUX
       -DAIPS_LITTLE_ENDIAN
       )
   ENDIF (APPLE)
-  ADD_DEFINITIONS (
-    -D_LARGEFILE_SOURCE
-    -fPIC
-    -pipe
-    )
 ENDIF (UNIX)
 
 SET (CMAKE_MODULE_LINKER_FLAGS ${CASA_LDSTD})
@@ -222,8 +211,6 @@ SET (CMAKE_C_FLAGS ${CASA_CXXSTD})
 
 ## ------------------------------------------------------------------------------
 ## Installation
-
-include (CPack)
 
 find_path (prefix release_area.txt
   PATHS
@@ -249,3 +236,10 @@ message (STATUS "CMAKE_C_FLAGS ........... = ${CMAKE_C_FLAGS}")
 message (STATUS "CMAKE_CXX_FLAGS ......... = ${CMAKE_CXX_FLAGS}")
 message (STATUS "CMAKE_MODULE_LINKER_FLAGS = ${CMAKE_MODULE_LINKER_FLAGS}")
 message (STATUS "CMAKE_INSTALL_PREFIX .... = ${CMAKE_INSTALL_PREFIX}")
+message (STATUS "Bison lexical parser .... = ${bison_bin}")
+message (STATUS "Flex lexical parser ..... = ${flex_bin}")
+message (STATUS "libm library ............ = ${libm}")
+message (STATUS "CFITSIO header files .... = ${CFITSIO_INCLUDES}")
+message (STATUS "CFITSIO library ......... = ${CFITSIO_LIBRARIES}")
+message (STATUS "WCS header files ........ = ${WCS_INCLUDES}")
+message (STATUS "WCS library ............. = ${WCS_LIBRARIES}")

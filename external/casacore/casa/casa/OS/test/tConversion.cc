@@ -36,8 +36,7 @@
 #include <casa/namespace.h>
 // This program tests the class Conversion.
 
-
-main()
+int main()
 {
     uInt nbool = 100;
     uInt nbyte = (100 + 7) / 8;

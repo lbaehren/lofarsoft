@@ -62,8 +62,7 @@ void readInfo()
     cout << info.readme() << endl;
 }
 
-
-main ()
+int main ()
 {
     try {
 	writeInfo();

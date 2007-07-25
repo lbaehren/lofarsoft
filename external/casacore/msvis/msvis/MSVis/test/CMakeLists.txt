@@ -1,12 +1,11 @@
 
 ## ------------------------------------------------------------------------------
-## Test programs for tables/LogTables
+## Test programs for msvis/MSVis
 
 SET (tests
-  dLogging
-  dLogging2
-  tLoggerHolder
-  tLogging
+  tMSCalEnums
+  tVisIter
+  tVisibilityIterator
   )
 
 ## ------------------------------------------------------------------------------
@@ -14,5 +13,5 @@ SET (tests
 
 FOREACH (src ${tests})
   ADD_EXECUTABLE (${src} ${src}.cc)
-  TARGET_LINK_LIBRARIES (${src} tables casa)
+  TARGET_LINK_LIBRARIES (${src} msvis)
 ENDFOREACH (src)

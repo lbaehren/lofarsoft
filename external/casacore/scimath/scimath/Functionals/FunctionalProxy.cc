@@ -231,7 +231,7 @@ void FunctionalProxy::setmasks(const Vector<Bool>& val) {
 
 void FunctionalProxy::setmask(Int idx, Bool val)
 {
-  uInt n;
+  uInt n (0);
   if (type_ == 0)
     (fhd_.asFunction()).nparameters();
   else

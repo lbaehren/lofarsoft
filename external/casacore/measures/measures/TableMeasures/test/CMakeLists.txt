@@ -1,12 +1,10 @@
 
 ## ------------------------------------------------------------------------------
-## Test programs for tables/LogTables
+## Test programs for measures/TableMeasures
 
 SET (tests
-  dLogging
-  dLogging2
-  tLoggerHolder
-  tLogging
+  tTableMeasures
+  tTableQuantum
   )
 
 ## ------------------------------------------------------------------------------
@@ -14,5 +12,5 @@ SET (tests
 
 FOREACH (src ${tests})
   ADD_EXECUTABLE (${src} ${src}.cc)
-  TARGET_LINK_LIBRARIES (${src} tables casa)
+  TARGET_LINK_LIBRARIES (${src} measures)
 ENDFOREACH (src)
