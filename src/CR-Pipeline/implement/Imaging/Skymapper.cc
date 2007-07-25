@@ -337,19 +337,41 @@ namespace CR {  // Namespace CR -- begin
       // Progress bar
       ProgressBar bar (shape(0),">");
 
-      // inserting the computed values into the image is done per slice along the
-      // the frequency axis.
-      for (start(0)=0; start(0)<shape(0); start(0)++) {
-	for (start(1)=0; start(1)<shape(1); start(1)++) {
-	  for (start(2)=0; start(2)<shape(2); start(2)++) {
- 	    image_p->putSlice (beam.row(coord),start,stride);
-	    // increment counter
-	    coord++;
-	  }  // -- end loop: start(2)
-	}  // -- end loop: start(1)
-	bar.update(start(0));
-      }  // -- end loop: start(0)
+      /*
+	Insert the previously computed pixel values into the pixel array of
+	the already existing image.
+      */
       
+      // -----------------------------------------
+      // insert one spectrum at a time
+
+//       for (start(0)=0; start(0)<shape(0); start(0)++) {
+// 	for (start(1)=0; start(1)<shape(1); start(1)++) {
+// 	  for (start(2)=0; start(2)<shape(2); start(2)++) {
+//  	    image_p->putSlice (beam.row(coord),start,stride);
+// 	    // increment counter
+// 	    coord++;
+// 	  }  // -- end loop: start(2)
+// 	}  // -- end loop: start(1)
+// 	bar.update(start(0));
+//       }  // -- end loop: start(0)
+      
+      // -----------------------------------------
+      // insert radius-frequency plain at a time
+
+      IPosition beamSliceStart (2,0);
+      IPosition beamSliceEnd (2,shape(4)-1);
+
+      for (start(0)=0; start(0)<shape(0); start(0)++) {      // Longitude
+	for (start(1)=0; start(1)<shape(1); start(1)++) {    // Latitude
+	  for (start(2)=0; start(2)<shape(2); start(2)++) {  // Radius
+	    std::cout << "[" << shape(0)*shape(1)*shape(2) << " 0]" << std::endl;
+	  }
+	}
+      }
+
+      // -----------------------------------------
+
     } else {
       cerr << "[Skymapper::processData] No processing due to Beamformer error"
 	   << endl;

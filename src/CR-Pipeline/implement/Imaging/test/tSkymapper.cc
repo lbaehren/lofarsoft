@@ -26,16 +26,16 @@
 #include <casa/Arrays/Matrix.h>
 #include <casa/Exceptions/Error.h>
 #include <casa/System/Aipsrc.h>
-#include <casa/System/ProgressMeter.h>
 #include <images/Images/PagedImage.h>
 
 using casa::IPosition;
-using casa::ProgressMeter;
 
 #include <Imaging/Skymapper.h>
+#include <Utilities/ProgressBar.h>
 #include <create_data.h>
 
 using CR::ObservationData;
+using CR::ProgressBar;
 using CR::SkymapCoordinates;
 using CR::Skymapper;
 using CR::TimeFreq;
@@ -320,14 +320,17 @@ int test_PagedImage ()
   }
 
   /*
-    [4] 
+    [4] While the tests above of some general nature, the following code is 
+    intended as test case for the operation to be performed inside the Skymapper
+    code, where we require to insert the computed pixel values into the pixel
+    array of the existing image.
   */
   
   cout << " [4] Insert pixel array per frequency spectrum ... " << endl;
   try {
     int nofAxes (5);
     int nofChannels (128);
-    IPosition shape (nofAxes,120,120,20,10,nofChannels);
+    IPosition shape (nofAxes,40,40,20,10,nofChannels);
     TiledShape tile (shape);
 
     cout << " --> creating the image of shape " << shape <<  " ..." << endl;
@@ -340,39 +343,90 @@ int test_PagedImage ()
     int nofPixels (shape(0)*shape(1)*shape(2));
     Matrix<float> pixels (nofPixels,nofChannels);
 
-    cout << " --> filling the image by slices along the distance axis ..." << endl;
+    cout << " --> filling the image by distance-frequency plains ..." << endl;
 
-    int coord (0);
     IPosition start (nofAxes,0);
     IPosition stride (nofAxes,1);
-
+    IPosition beamSliceStart (2,0);
+    IPosition beamSliceEnd (2,shape(4)-1);
+    int slice (0);
+    
+    // The first loop simulates the sequence of processed data blocks
     for (start(3)=0; start(3)<shape(3); start(3)++) {
-      /*
-	Everything below this point corresponds to the operations required per
-	block of processed data.
-      */
-      // initialize pixel counter
-      coord = 0;
-      // go through the set of pixels
-      for (start(0)=0; start(0)<shape(0); start(0)++) {
-	for (start(1)=0; start(1)<shape(1); start(1)++) {
-	  for (start(2)=0; start(2)<shape(2); start(2)++) {
-	    cout << "\t" << start << endl;
-	    // assign new pixel values
-	    pixels.row(coord) = start(2);
-	    // insert pixels into image array
-	    image.doPutSlice (pixels.row(coord),start,stride);
-	    // increment pixel counter
-	    coord++;
-	  }
+      
+      // From onwards this position we perform the actual slicing operation
+
+      pixels = start(3);
+      slice  = 0;
+
+      for (start(0)=0; start(0)<shape(0); start(0)++) {      // Longitude
+	for (start(1)=0; start(1)<shape(1); start(1)++) {    // Latitude
+	  // news slicer positions
+	  beamSliceStart(0) = slice*shape(2);
+	  beamSliceEnd(0)   = beamSliceStart(0)+shape(2)-1;
+	  slice++;
+	  // feedback
+	  cout << "\t" << beamSliceStart << " -> " << beamSliceEnd
+	       << "  =>  " << start << endl;
+	  // insert the pixel values
+	  image.doPutSlice (pixels(beamSliceStart,beamSliceEnd),start,stride);
 	}
       }
     }
+
+    cout << " -- shape(pixels) = " << pixels.shape() << endl;
+    cout << " -- shape(image)  = " << shape          << endl;
     
   } catch (AipsError x) {
     cerr << "[tSkymapper::test_PagedImage] " << x.getMesg() << endl;
     nofFailedTests++;
   }
+
+//   cout << " [5] Insert one pixel value at a time ... " << endl;
+//   try {
+//     int nofAxes (5);
+//     int nofChannels (128);
+//     IPosition shape (nofAxes,40,40,20,10,nofChannels);
+//     TiledShape tile (shape);
+
+//     cout << " --> creating the image of shape " << shape <<  " ..." << endl;
+//     PagedImage<Float> image (tile,
+// 			     skymapper.coordinateSystem(),
+// 			     String("tPagedImage04.img"));
+//     // ... and display some basic properties
+//     show_PagedImage (image); 
+
+//     int coord (0);
+//     int nofPixels (shape(0)*shape(1)*shape(2));
+//     Matrix<float> pixels (nofPixels,nofChannels);
+//     IPosition start (5);
+//     ProgressBar progress (shape(0));
+
+//     for (start(3)=0; start(3)<shape(3); start(3)++) {
+      
+//       pixels = start(3);
+//       coord  = 0;
+      
+//       cout << " -- filling in pixel values for block " << start(3) << " ..."
+// 	   << endl;
+
+//       for (start(0)=0; start(0)<shape(0); start(0)++) {        // Longitude
+// 	for (start(1)=0; start(1)<shape(1); start(1)++) {      // Latitude
+// 	  for (start(2)=0; start(2)<shape(2); start(2)++) {    // Radius
+// 	    for (start(4)=0; start(4)<shape(4); start(4)++) {  // Frequency
+// 	      image.putAt (pixels(coord,start(4)),start);
+// 	    }
+// 	    coord++;
+// 	  }
+// 	}
+// 	progress.update(start(0)+1);
+//       }
+//     }
+    
+//   } catch (AipsError x) {
+//     cerr << "[tSkymapper::test_PagedImage] " << x.getMesg() << endl;
+//     nofFailedTests++;
+//   }
 
   return nofFailedTests;
 }

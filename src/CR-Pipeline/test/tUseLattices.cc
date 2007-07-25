@@ -55,19 +55,27 @@
   \date 2007/02/05
 */
 
+using std::cout;
+using std::endl;
+
 using casa::IPosition;
+using casa::Lattice;
+using casa::PagedArray;
 using casa::Slicer;
 
+// ------------------------------------------------------------------------------
+
 /*!
-  \brief main routine
-  
-  \return nofFailedTests -- The number of failed tests
+  \brief Test the construction of various ArrayLattice objects
+
+  \return nofFailedTest -- The number of failed tests
 */
-int main () 
+int test_ArrayLattice ()
 {
+  cout << "\n[test_ArrayLattice]\n" << endl;
+
   int nofFailedTests (0);
-  
-  std::cout << "[1] Test constructor for ArrayLattice..." << std::endl;
+
   try {
     const IPosition shape (4,4,4,2,3);
 
@@ -76,38 +84,35 @@ int main ()
     casa::ArrayLattice<casa::Float>  latticeFloat (shape);
     casa::ArrayLattice<casa::Double> latticeDouble (shape);
 
-    std::cout << " - shape(ArrayLattice<Int>)    = " << latticeInt.shape()    << std::endl;
-    std::cout << " - shape(ArrayLattice<Float>)  = " << latticeFloat.shape()  << std::endl;
-    std::cout << " - shape(ArrayLattice<Double>) = " << latticeDouble.shape() << std::endl;
+    cout << " - shape(ArrayLattice<Int>)    = " << latticeInt.shape()    << endl;
+    cout << " - shape(ArrayLattice<Float>)  = " << latticeFloat.shape()  << endl;
+    cout << " - shape(ArrayLattice<Double>) = " << latticeDouble.shape() << endl;
 
     // create from other
     casa::ArrayLattice<casa::Int>    latticeInt2 (latticeInt);
     casa::ArrayLattice<casa::Float>  latticeFloat2 (latticeFloat);
     casa::ArrayLattice<casa::Double> latticeDouble2 (latticeDouble);
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  std::cout << "[2] Test deletion of rows, array of Strings, and some more..." << std::endl;
-  try {
-    const IPosition shape (3,32,16,5);
+  return nofFailedTests;
+}
 
-    casa::TiledShape t (shape);
-    
-    if (t.shape() != shape) {
-      std::cerr << "Mismatching shapes" << std::endl;
-    }
+// ------------------------------------------------------------------------------
 
-    if (t.tileShape() != shape) {
-      std::cerr << "Mismatching tile shapes" << std::endl;
-    }
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
+/*!
+  \brief Test the construction of and working with a LatticeRegion object
+
+  \return nofFailedTest -- The number of failed tests
+*/
+int test_LatticeRegion ()
+{
+  cout << "\n[test_LatticeRegion]\n" << endl;
+
+  int nofFailedTests (0);
   
-  std::cout << "[3] Test for LatticeRegion class..." << std::endl;
   try {
     IPosition shape (2,11,20);
     IPosition start (2,3,4);
@@ -120,6 +125,11 @@ int main ()
     casa::LCEllipsoid cir (center, radius, shape);
     casa::LatticeRegion reg1(cir);
 
+    cout << " -- shape  = " << shape  << endl;
+    cout << " -- start  = " << start  << endl;
+    cout << " -- end    = " << end    << endl;
+    cout << " -- center = " << center << endl;
+
     reg1.hasMask();
     casa::LatticeRegion reg2 (Slicer(start,end,IPosition(2,2),Slicer::endIsLast),
 			      shape);
@@ -128,9 +138,101 @@ int main ()
 				       IPosition(2,1,2), Slicer::endIsLast)),
 			       reg2.shape());
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
+
+  return nofFailedTests;
+}
+
+// ------------------------------------------------------------------------------
+
+/*!
+  \brief Test slicing in subarray into a larger lattice
+  
+  To access the data in a PagedArray you can either:
+  <ol>
+    <li>Use a LatticeIterator
+    <li>Use the getSlice and putSlice member functions
+    <li>Use the parenthesis operator or getAt and putAt functions
+  </ol>
+  These access methods are given in order of preference.
+
+  \return nofFailedTests -- The number of failed tests
+*/
+int test_putSlice ()
+{
+  cout << "\n[test_putSlice]\n" << endl;
+
+  int nofFailedTests (0);
+
+  try {
+    int nofAxes (5);
+    int nofChannels (128);
+    IPosition shape (nofAxes,40,40,20,10,nofChannels);
+    casa::String filename ("PagedArray.tmp");
+
+    PagedArray<double> arr (shape,filename);
+
+    int nofPixels (shape(0)*shape(1)*shape(2));
+    IPosition pixelsShape (2,nofPixels,nofChannels);
+    casa::Matrix<float> pixels (pixelsShape);
+    // variables required for the array slicing operation
+    IPosition start (nofAxes,0);
+    IPosition stride (nofAxes,1);
+    IPosition beamSliceStart (2,0);
+    IPosition beamSliceEnd (2,shape(4)-1);
+    int slice (0);
+
+    cout << " -- array shape ..... = " << shape    << endl;
+    cout << " -- file name ....... = " << filename << endl;
+    cout << " -- pixel array shape = " << pixelsShape << endl;
+
+    for (start(3)=0; start(3)<shape(3); start(3)++) {
+      
+      // From onwards this position we perform the actual slicing operation
+
+      pixels = start(3);
+      slice  = 0;
+      
+      for (start(0)=0; start(0)<shape(0); start(0)++) {      // Longitude
+	for (start(1)=0; start(1)<shape(1); start(1)++) {    // Latitude
+	  // news slicer positions
+	  beamSliceStart(0) = slice*shape(2);
+	  beamSliceEnd(0)   = beamSliceStart(0)+shape(2)-1;
+	  slice++;
+	  // feedback
+	  cout << "\t" << beamSliceStart << " -> " << beamSliceEnd
+	       << "  =>  " << start << endl;
+	  // insert the pixel values
+// 	  arr.doPutSlice (pixels(beamSliceStart,beamSliceEnd),start,stride);
+	}
+      }
+    }
+    
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
+// ------------------------------------------------------------------------------
+
+/*!
+  \brief main routine
+  
+  \return nofFailedTests -- The number of failed tests
+*/
+int main () 
+{
+  int nofFailedTests (0);
+
+  nofFailedTests += test_ArrayLattice();
+  nofFailedTests += test_LatticeRegion();
+
+  nofFailedTests += test_putSlice();
   
   return nofFailedTests;
 }
