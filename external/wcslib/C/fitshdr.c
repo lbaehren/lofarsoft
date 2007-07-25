@@ -26,7 +26,7 @@
 #define YY_FLEX_MINOR_VERSION 5
 
 #include <stdio.h>
-
+#include <errno.h>
 
 /* cfront 1.2 defines "c_plusplus" instead of "__cplusplus" */
 #ifdef c_plusplus
@@ -39,7 +39,15 @@
 #ifdef __cplusplus
 
 #include <stdlib.h>
+#ifndef _WIN32
 #include <unistd.h>
+#else
+#ifndef YY_ALWAYS_INTERACTIVE
+#ifndef YY_NEVER_INTERACTIVE
+extern int isatty YY_PROTO(( int ));
+#endif
+#endif
+#endif
 
 /* Use prototypes in function declarations. */
 #define YY_USE_PROTOS
@@ -10079,7 +10087,7 @@ const char *fitshdr_errmsg[] = {
 
 void fitshdr_nullfill(char cptr[], int len);
 
-#line 10083 "lex.fitshdr.c"
+#line 10091 "lex.fitshdr.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -10167,8 +10175,17 @@ YY_MALLOC_DECL
  */
 #ifndef YY_INPUT
 #define YY_INPUT(buf,result,max_size) \
-	if ( (result = read( fileno(yyin), (char *) buf, max_size )) < 0 ) \
-		YY_FATAL_ERROR( "input in flex scanner failed" );
+	errno=0; \
+	while ( (result = read( fileno(yyin), (char *) buf, max_size )) < 0 ) \
+	{ \
+		if( errno != EINTR) \
+		{ \
+			YY_FATAL_ERROR( "input in flex scanner failed" ); \
+			break; \
+		} \
+		errno=0; \
+		clearerr(yyin); \
+	}
 #endif
 
 /* No semi-colon after return; correct usage is to write "yyterminate();" -
@@ -10258,7 +10275,7 @@ YY_DECL
 	
 	BEGIN(INITIAL);
 
-#line 10262 "lex.fitshdr.c"
+#line 10279 "lex.fitshdr.c"
 
 	if ( yy_init )
 		{
@@ -10826,7 +10843,7 @@ YY_RULE_SETUP
 #line 535 "fitshdr.l"
 ECHO;
 	YY_BREAK
-#line 10830 "lex.fitshdr.c"
+#line 10847 "lex.fitshdr.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -11385,9 +11402,13 @@ YY_BUFFER_STATE b;
 	}
 
 
+#ifndef _WIN32
+#include <unistd.h>
+#else
 #ifndef YY_ALWAYS_INTERACTIVE
 #ifndef YY_NEVER_INTERACTIVE
 extern int isatty YY_PROTO(( int ));
+#endif
 #endif
 #endif
 

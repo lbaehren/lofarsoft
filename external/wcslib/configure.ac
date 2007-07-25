@@ -113,9 +113,6 @@ INCDIRS="/usr/local/include \
          /usr/local/pgplot  \
          /usr/local/cfitsio \
          /local/pgplot      \
-         /sw/include/pgplot \
-         /sw/include/cfitsio \
-         /sw/include \
          /local/cfitsio"
 LIBDIRS="/usr/local/lib     \
          /usr/local/pgplot  \
@@ -123,9 +120,6 @@ LIBDIRS="/usr/local/lib     \
          /local/lib         \
          /local/pgplot      \
          /local/cfitsio     \
-         /sw/lib     \
-         /sw/lib/pgplot     \
-         /sw/lib/cfitsio     \
          /opt/SUNWspro/lib"
 
 for LIBDIR in $LIBDIRS ; do

@@ -7,7 +7,7 @@
 *
 *   PGCRVL is defunct.
 *
-*   Do not use_this routine - use_PGSBOX instead.
+*   Do not use this routine - use PGSBOX instead.
 *   ---------------------------------------------
 *
 *   What remains here is a driver for the more general PGSBOX routine
@@ -17,7 +17,7 @@
 *   PGCRVL's old AXEN argument is here translated into the BLC and TRC
 *   arguments required by PGSBOX.
 *
-*   New applications should use_PGSBOX directly.
+*   New applications should use PGSBOX directly.
 *
 *   Author: Mark Calabretta, Australia Telescope National Facility
 *   http://www.atnf.csiro.au/~mcalabre/index.html

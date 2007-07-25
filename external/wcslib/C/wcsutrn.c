@@ -26,7 +26,7 @@
 #define YY_FLEX_MINOR_VERSION 5
 
 #include <stdio.h>
-
+#include <errno.h>
 
 /* cfront 1.2 defines "c_plusplus" instead of "__cplusplus" */
 #ifdef c_plusplus
@@ -39,7 +39,15 @@
 #ifdef __cplusplus
 
 #include <stdlib.h>
+#ifndef _WIN32
 #include <unistd.h>
+#else
+#ifndef YY_ALWAYS_INTERACTIVE
+#ifndef YY_NEVER_INTERACTIVE
+extern int isatty YY_PROTO(( int ));
+#endif
+#endif
+#endif
 
 /* Use prototypes in function declarations. */
 #define YY_USE_PROTOS
@@ -3942,7 +3950,7 @@ char *yytext;
   #define YY_USER_ACTION printf("Rule %03d: \"%s\"\n", yy_act, yytext);
 #endif
 
-#line 3946 "lex.wcsutrn.c"
+#line 3954 "lex.wcsutrn.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -4030,8 +4038,17 @@ YY_MALLOC_DECL
  */
 #ifndef YY_INPUT
 #define YY_INPUT(buf,result,max_size) \
-	if ( (result = read( fileno(yyin), (char *) buf, max_size )) < 0 ) \
-		YY_FATAL_ERROR( "input in flex scanner failed" );
+	errno=0; \
+	while ( (result = read( fileno(yyin), (char *) buf, max_size )) < 0 ) \
+	{ \
+		if( errno != EINTR) \
+		{ \
+			YY_FATAL_ERROR( "input in flex scanner failed" ); \
+			break; \
+		} \
+		errno=0; \
+		clearerr(yyin); \
+	}
 #endif
 
 /* No semi-colon after return; correct usage is to write "yyterminate();" -
@@ -4102,7 +4119,7 @@ YY_DECL
 	printf("\n%s ->\n", unitstr);
 	#endif
 
-#line 4106 "lex.wcsutrn.c"
+#line 4123 "lex.wcsutrn.c"
 
 	if ( yy_init )
 		{
@@ -4538,7 +4555,7 @@ YY_RULE_SETUP
 #line 345 "wcsutrn.l"
 ECHO;
 	YY_BREAK
-#line 4542 "lex.wcsutrn.c"
+#line 4559 "lex.wcsutrn.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -5082,9 +5099,13 @@ YY_BUFFER_STATE b;
 	}
 
 
+#ifndef _WIN32
+#include <unistd.h>
+#else
 #ifndef YY_ALWAYS_INTERACTIVE
 #ifndef YY_NEVER_INTERACTIVE
 extern int isatty YY_PROTO(( int ));
+#endif
 #endif
 #endif
 

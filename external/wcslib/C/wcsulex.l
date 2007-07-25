@@ -86,7 +86,6 @@ ADD_UNIT  {ADD_ALL}|{ADD_SUP}|{ADD_SUB}|{ADD_NONE}
 %{
 #include <math.h>
 #include <stdio.h>
-#include <unistd.h>
 
 #include "wcsmath.h"
 #include "wcsunits.h"
