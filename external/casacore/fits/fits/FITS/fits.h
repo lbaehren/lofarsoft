@@ -25,17 +25,17 @@
 //#
 //# $Id: fits.h 19075 2005-11-14 17:40:07Z kgolap $
 
-# if !defined(AIPS_FITS)
-# define AIPS_FITS
+#if !defined(AIPS_FITS)
+#define AIPS_FITS
 
 //# Note that aips.h has to come first for the correct definition of off_t.
-# include <casa/aips.h>
-# include <stdlib.h>
-# include <ctype.h>
-# include <casa/iostream.h>
-# include <casa/BasicSL/Complex.h>
-# include <casa/BasicSL/IComplex.h>
-# include <fits/FITS/FITSError.h>
+#include <casa/aips.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <casa/iostream.h>
+#include <casa/BasicSL/Complex.h>
+#include <casa/BasicSL/IComplex.h>
+#include <fits/FITS/FITSError.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 

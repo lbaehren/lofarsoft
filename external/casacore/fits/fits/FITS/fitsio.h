@@ -28,11 +28,11 @@
 #ifndef FITS_FITSIO_H
 #define FITS_FITSIO_H
 
-# include <fits/FITS/fits.h>
-# include <fits/FITS/blockio.h>
-# include <fits/FITS/hdu.h>
+#include <fits/FITS/fits.h>
+#include <fits/FITS/blockio.h>
+#include <fits/FITS/hdu.h>
 //# include <casa/stdvector.h>
-# include <casa/Arrays/Vector.h>
+#include <casa/Arrays/Vector.h>
 
 //<category lib=aips module=FITS sect="FITS I/O">   
 //<summary> sequential FITS I/O </summary>

@@ -25,9 +25,9 @@
 //#
 //# $Id: blockio.cc 18281 2005-01-19 18:40:05Z gli $
 //
-# include <casa/sstream.h>
-# include <fits/FITS/blockio.h>
-# include <casa/string.h>
+#include <casa/sstream.h>
+#include <fits/FITS/blockio.h>
+#include <casa/string.h>
 #include <unistd.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN

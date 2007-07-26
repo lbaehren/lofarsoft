@@ -25,13 +25,13 @@
 //#
 //# $Id: hdu2.cc 18093 2004-11-30 17:51:10Z ddebonis $
 
-# include <fits/FITS/fits.h>
-# include <fits/FITS/hdu.h>
-# include <fits/FITS/fitsio.h>
-# include <casa/string.h>
-# include <casa/stdio.h>
-# include <assert.h>
-# include <casa/sstream.h>
+#include <fits/FITS/fits.h>
+#include <fits/FITS/hdu.h>
+#include <fits/FITS/fitsio.h>
+#include <casa/string.h>
+#include <casa/stdio.h>
+#include <assert.h>
+#include <casa/sstream.h>
 //# include <casa/strsteam.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN

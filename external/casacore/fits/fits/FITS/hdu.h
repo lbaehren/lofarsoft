@@ -28,12 +28,12 @@
 #ifndef FITS_HDU_H
 #define FITS_HDU_H
 
-# include <casa/aips.h>
-# include <fits/FITS/fits.h>
-# include <fits/FITS/blockio.h>
+#include <casa/aips.h>
+#include <fits/FITS/fits.h>
+#include <fits/FITS/blockio.h>
 //# include <casa/Utilities/String.h>
-# include <casa/BasicSL/String.h>
-# include <casa/Arrays/Vector.h>
+#include <casa/BasicSL/String.h>
+#include <casa/Arrays/Vector.h>
 
 //# # include <stdarg.h> // If we ever wan to put varargs support back
 

@@ -41,9 +41,7 @@ add_library (mir
   xyzio.c
   )
 
-target_link_libraries (mir
-  casa
-)
+target_link_libraries (mir casa)
 
 ## ------------------------------------------------------------------------------
 ## Installation

@@ -22,8 +22,16 @@ subdirs (
   pgsbox
   )
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Find required external components
+
+set (include_locations
+  /Developer/SDKs/MacOSX10.4u.sdk/usr/include
+  /usr/include/sys
+  /usr/include
+  /usr/local/include
+  /sw/include
+  )
 
 set (lib_locations
   /lib
@@ -46,9 +54,9 @@ INCLUDE (../../devel_common/cmake/FindG2C.cmake)
 
 include (../../devel_common/cmake/FindCFITSIO.cmake)
 
-#if (HAVE_CFITSIO)
-#  add_definitions (-DDO_CFITSIO)
-#endif (HAVE_CFITSIO)
+if (HAVE_CFITSIO)
+  add_definitions (-DDO_CFITSIO)
+endif (HAVE_CFITSIO)
 
 ## PGPLOT is Tim Pearson's FORTRAN graphics library with separate C
 ##   interface available from astro.caltech.edu.  It is only required by
@@ -67,15 +75,10 @@ include (../../devel_common/cmake/FindPGPLOT.cmake)
 find_package (PNG)
 find_package (Motif)
 
-find_library (libz z
-  PATHS ${lib_locations}
-  )
+find_library (libz z PATHS ${lib_locations})
+find_library (libm m PATHS ${lib_locations})
 
-find_library (libm m
-  PATHS ${lib_locations}
-  )
-
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Set paths where to look for header files
 
 INCLUDE_DIRECTORIES (
@@ -89,7 +92,7 @@ INCLUDE_DIRECTORIES (
   ${PGPLOT_INCLUDES}
   )
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Create 'configure.h' in 'wcslib/C'
 
 file (WRITE ./C/config.h "// -- Configuration set by CMake \n\n")
@@ -115,7 +118,7 @@ else (libm)
   message (STATUS "Warning: Unable to find libm!")
 endif (libm)
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Build the WCSLIB
 ##
 ## The original GNUMakefile provided with the source code states:
@@ -145,7 +148,7 @@ add_library (pgsbox ${pgsbox_sources})
 
 target_link_libraries (pgsbox wcs ${PGPLOT_LIBRARIES})
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Installation
 
 find_path (prefix release_area.txt

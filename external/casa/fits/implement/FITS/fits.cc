@@ -35,7 +35,7 @@
 # include <casa/BasicSL/Constants.h>
 
 
-# include <stdio.h>
+#include <stdio.h>
 #include <assert.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN

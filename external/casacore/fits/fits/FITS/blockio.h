@@ -24,6 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //# $Id: blockio.h 19522 2006-07-24 00:30:25Z mmarquar $
+
 #ifndef FITS_BLOCKIO_H
 #define FITS_BLOCKIO_H
 
@@ -31,7 +32,7 @@
 #include <casa/aips.h>
 
 // Make sure that cfitsio does not declare the wcs headers.
-extern "C"{
+extern "C" {
 #include <fitsio.h>  // header file from cfitsio
 #include <fitsio2.h> // using core functions of cfitsio
 }

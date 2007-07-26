@@ -1,23 +1,4 @@
 
-project (casacore_fits C Fortran)
-
-## -----------------------------------------------------------------------------
-## External libraries
-
-find_path (cfitsio_header fitsio.h
-  PATHS /usr/include /usr/local/include /sw/include
-  PATH_SUFFIXES cfitsio
-  )
-find_library (cfitsio_library cfitsio
-  PATHS /usr/lib /usr/local/lib /sw/lib
-  PATH_SUFFIXES cfitsio
-  )
-
-## feedback
-
-message (STATUS "fitsio.h   = ${cfitsio_header}")
-message (STATUS "libcfitsio = ${cfitsio_library}")
-
 ## -----------------------------------------------------------------------------
 ## libfits
 
@@ -37,20 +18,15 @@ endforeach (fits_module)
 add_library (fits
   ${fits_sources}
   )
-include_directories (
-  .
-  ..
-  ../..
-  ${cfitsio_header}
-  )
 target_link_libraries (fits
   measures
   scimath
   scimath_f
   tables
   casa
-  ${cfitsio_library}
-  ${WCS_LIBRARIES}
+  ${CFITSIO_LIBRARIES}
+  ${G2C_LIBRARIES}
+  wcs
   )
 
 ## -----------------------------------------------------------------------------

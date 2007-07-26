@@ -5,6 +5,7 @@
 ##
 ## Pending issues:
 ##  - "libfits" does not yet build
+##  - "tVanVleck" does not link due to missing f2c symbols
 ##
 ## ------------------------------------------------------------------------------
 
@@ -34,6 +35,7 @@ set (casacore_packages
   mirlib
   scimath
   measures
+  wcslib
   fits
   coordinates
   components
@@ -43,8 +45,6 @@ set (casacore_packages
   msfits
   msvis
   )
-
-subdirs (${casacore_packages})
 
 ## -----------------------------------------------------------------------------
 ## Options selectable by the user
@@ -104,7 +104,6 @@ find_package (ZLIB)
 include (./FindCFITSIO.cmake)
 include (./FindG2C.cmake)
 include (./FindLAPACK.cmake)
-include (./FindWCS.cmake)
 
 ## --- libm --------------------------------------
 
@@ -148,17 +147,22 @@ find_program (flex_bin flex
 ##  [libcasa]
 ##  g++ -o build_linux_i686/opt/aips.o -c -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_LINUX -DAIPS_LITTLE_ENDIAN -O2 -I. casa/aips.cc
 ##  g++ -o build_linux_i686/opt/Exceptions/Error2.o -c -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_LINUX -DAIPS_LITTLE_ENDIAN -O2 -I. casa/Exceptions/Error2.cc
+##
+## The following is for fixing compiler settings for libfits
+##
+## /usr/bin/c++ -DAIPS_STDLIB -DAIPS_NO_TEMPLATE_SRC -DAIPS_AUTO_STL -DAIPS_NO_LEA_MALLOC -DAIPS_DARWIN -DAIPS_BIG_ENDIAN -DNATIVE_EXCP -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -O3 -fPIC -pipe -Wall -Wno-comment -fexceptions -Wcast-align -Wno-non-template-friend -Woverloaded-virtual -o fits/implement/CMakeFiles/fits.dir/FITS/fits.o -c /Users/lars/Code/lofar/usg/external/casa/fits/implement/FITS/fits.cc
+## /usr/bin/c++ -DAIPS_STDLIB -DAIPS_NO_TEMPLATE_SRC -DAIPS_AUTO_STL -DAIPS_NO_LEA_MALLOC -DAIPS_DARWIN -DAIPS_BIG_ENDIAN -DNATIVE_EXCP -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -O2 -pipe -fPIC -Wall -Wno-comment -fexceptions -Wno-non-template-friend -Woverloaded-virtual -o fits/fits/CMakeFiles/fits.dir/FITS/BasicFITS.o -c /Users/lars/Code/lofar/usg/external/casacore/fits/fits/FITS/BasicFITS.cc
 
 ## --- Location of the header files --------------
 
 include_directories (
   .
-  ..
   ${casacore_packages}
-  ./ms/ms/MeasurementSets
-  ./tables/tables/Tables
+  ${casacore_SOURCE_DIR}/fits
+  ${casacore_SOURCE_DIR}/ms/ms/MeasurementSets
+  ${casacore_SOURCE_DIR}/tables/tables/Tables
   ${CFITSIO_INCLUDES}
-  ${WCS_INCLUDES}
+  ${G2C_INCLUDES}
   )
 
 ## --- Compiler settings -------------------------
@@ -173,13 +177,15 @@ IF (UNIX)
     -DAIPS_STDLIB
     -DAIPS_AUTO_STL
     -DAIPS_NO_LEA_MALLOC
+	-DAIPS_NO_TEMPLATE_SRC
 #   -D_LARGEFILE_SOURCE
     # -- exceptions and warnings --
     -Wall
     -Wno-comment
     -fexceptions
     -Wno-non-template-friend
-    -Wcast-align
+    -Woverloaded-virtual
+	-Wcast-align
     ## LDOPT
     ##    -s -Xlinker -rpath -Xlinker
     )
@@ -187,10 +193,12 @@ IF (UNIX)
   set (CASA_LDSTD "-Xlinker -rpath -Xlinker")
   IF (APPLE)
     ## definition common to apple architectures
+	set (AIPS_DARWIN 1)
     add_definitions (
       -DAIPS_DARWIN
-#      -DNATIVE_EXCP
-#      -D_FILE_OFFSET_BITS=64
+      -DNATIVE_EXCP
+      -D_FILE_OFFSET_BITS=64
+	  -D_LARGEFILE_SOURCE
       )
     ## PPC specific settings
     if (CMAKE_OSX_ARCHITECTURES MATCHES ppc)
@@ -209,7 +217,12 @@ ENDIF (UNIX)
 SET (CMAKE_MODULE_LINKER_FLAGS ${CASA_LDSTD})
 SET (CMAKE_C_FLAGS ${CASA_CXXSTD})
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
+## Sub-directories
+
+subdirs (${casacore_packages})
+
+## -----------------------------------------------------------------------------
 ## Installation
 
 find_path (prefix release_area.txt
@@ -226,7 +239,7 @@ if (prefix)
   set (CMAKE_INSTALL_PREFIX ${prefix}) 
 endif (prefix)
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Summary of settings
 
 message (STATUS "casacore_SOURCE_DIR ..... = ${casacore_SOURCE_DIR}")
@@ -241,5 +254,3 @@ message (STATUS "Flex lexical parser ..... = ${flex_bin}")
 message (STATUS "libm library ............ = ${libm}")
 message (STATUS "CFITSIO header files .... = ${CFITSIO_INCLUDES}")
 message (STATUS "CFITSIO library ......... = ${CFITSIO_LIBRARIES}")
-message (STATUS "WCS header files ........ = ${WCS_INCLUDES}")
-message (STATUS "WCS library ............. = ${WCS_LIBRARIES}")

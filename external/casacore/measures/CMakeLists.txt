@@ -1,5 +1,5 @@
 
 subdirs (
-  fortran
+  fortran/sofa
   measures
 )

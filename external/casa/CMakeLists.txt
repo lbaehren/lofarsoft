@@ -190,7 +190,7 @@ ENDIF (UNIX)
 ## Now that all the platform-specific settings have been done, we can assign
 ## the variables internally used by CMake
 
-SET (CMAKE_VERBOSE_MAKEFILE 0)
+SET (CMAKE_VERBOSE_MAKEFILE 1)
 SET (CMAKE_MODULE_LINKER_FLAGS "${CASA_LDSTD}")
 SET (CMAKE_C_FLAGS "${CASA_OPTLEVEL} ${CASA_CXXSTD}")
 

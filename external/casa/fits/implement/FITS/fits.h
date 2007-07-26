@@ -29,13 +29,13 @@
 # define AIPS_FITS
 
 //# Note that aips.h has to come first for the correct definition of off_t.
-# include <casa/aips.h>
-# include <stdlib.h>
-# include <ctype.h>
-# include <casa/iostream.h>
-# include <casa/BasicSL/Complex.h>
-# include <casa/BasicSL/IComplex.h>
-# include <fits/FITS/FITSError.h>
+#include <casa/aips.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <casa/iostream.h>
+#include <casa/BasicSL/Complex.h>
+#include <casa/BasicSL/IComplex.h>
+#include <fits/FITS/FITSError.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 

@@ -25,12 +25,12 @@
 //#
 //# $Id: fitsio.cc 18380 2005-02-10 18:08:40Z gli $
 
-# include <fits/FITS/hdu.h>
-# include <fits/FITS/fitsio.h>
-# include <casa/BasicSL/String.h>
-# include <casa/Containers/Block.h>
-# include <casa/string.h>
-# include <casa/sstream.h>
+#include <fits/FITS/hdu.h>
+#include <fits/FITS/fitsio.h>
+#include <casa/BasicSL/String.h>
+#include <casa/Containers/Block.h>
+#include <casa/string.h>
+#include <casa/sstream.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
