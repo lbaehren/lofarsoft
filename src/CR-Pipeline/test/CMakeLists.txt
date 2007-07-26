@@ -32,6 +32,7 @@ endif (NOT HAVE_WCS)
 ## Test working with CASA libraries
 
 set (tests
+  tUseArrays
   tUseCASA
   tUseScimath
   tUseMeasures

@@ -176,7 +176,7 @@ int test_putSlice ()
 
     int nofPixels (shape(0)*shape(1)*shape(2));
     IPosition pixelsShape (2,nofPixels,nofChannels);
-    casa::Matrix<float> pixels (pixelsShape);
+    casa::Matrix<double> pixels (pixelsShape);
     // variables required for the array slicing operation
     IPosition start (nofAxes,0);
     IPosition stride (nofAxes,1);
@@ -184,32 +184,57 @@ int test_putSlice ()
     IPosition beamSliceEnd (2,shape(4)-1);
     int slice (0);
 
-    cout << " -- array shape ..... = " << shape    << endl;
-    cout << " -- file name ....... = " << filename << endl;
-    cout << " -- pixel array shape = " << pixelsShape << endl;
+    casa::IPosition selectionShape (nofAxes,1,1,shape(2),1,shape(4));
+    casa::Slicer selectionSlicer (IPosition(nofAxes,0,0,0,0,0),
+				  IPosition(nofAxes,1,1,shape(2),1,shape(4)),
+				  IPosition(nofAxes,1),
+				  casa::Slicer::endIsLength);
+    casa::Array<double> selection (selectionShape);
 
+    // emulate processing of subsequent blocks of data
+    
     for (start(3)=0; start(3)<shape(3); start(3)++) {
       
       // From onwards this position we perform the actual slicing operation
 
       pixels = start(3);
       slice  = 0;
+
+      cout << " --> Writing data for block " << start(3) << " ..." << endl;
       
       for (start(0)=0; start(0)<shape(0); start(0)++) {      // Longitude
 	for (start(1)=0; start(1)<shape(1); start(1)++) {    // Latitude
-	  // news slicer positions
+	  // new slicer positions for pixel array
 	  beamSliceStart(0) = slice*shape(2);
 	  beamSliceEnd(0)   = beamSliceStart(0)+shape(2)-1;
 	  slice++;
-	  // feedback
-	  cout << "\t" << beamSliceStart << " -> " << beamSliceEnd
-	       << "  =>  " << start << endl;
+	  /* Feedback on the settings to slice the arrays */
+// 	  cout << "\t" << beamSliceStart << " -> " << beamSliceEnd
+// 	       << "  =>  " << selectionShape
+// 	       << "  =>  " << start << endl;
+	  /* Extract slice form the array of input data */
+   	  selection (selectionSlicer) = pixels(casa::Slicer(beamSliceStart,
+							    beamSliceEnd,
+							    IPosition(2,1),
+							    casa::Slicer::endIsLength));
 	  // insert the pixel values
-// 	  arr.doPutSlice (pixels(beamSliceStart,beamSliceEnd),start,stride);
+//   	  arr.doPutSlice (selection,
+//  			  IPosition(start),
+//  			  IPosition(stride));
 	}
       }
     }
-    
+
+    cout << "[test_putSlice] Summary of array properties"   << endl;
+    cout << " -- array shape        = " << shape             << endl;
+    cout << " -- file name          = " << filename          << endl;
+    cout << " -- pixel array shape  = " << pixelsShape       << endl;
+    cout << " -- selection shape    = " << selection.shape() << endl;
+    cout << " -- selection : start  = " << selectionSlicer.start() << endl;
+    cout << " -- selection : end    = " << selectionSlicer.end()   << endl;
+    cout << " -- selection : stride = " << selectionSlicer.stride() << endl;
+    cout << " -- selection : length = " << selectionSlicer.length() << endl;
+
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;

@@ -113,7 +113,7 @@ int test_Arrays ()
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
-  
+
   return nofFailedTests;
 }
 
