@@ -177,8 +177,6 @@ IF (UNIX)
     -DAIPS_STDLIB
     -DAIPS_AUTO_STL
     -DAIPS_NO_LEA_MALLOC
-	-DAIPS_NO_TEMPLATE_SRC
-#   -D_LARGEFILE_SOURCE
     # -- exceptions and warnings --
     -Wall
     -Wno-comment

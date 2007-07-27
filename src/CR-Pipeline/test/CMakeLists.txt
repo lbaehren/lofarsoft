@@ -2,10 +2,9 @@
 ## $Id::                                                                 $
 ##------------------------------------------------------------------------
 
-
 SET (CMAKE_VERBOSE_MAKEFILE 1)
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Find external packages
 
 if (NOT HAVE_BLITZ)
@@ -28,46 +27,65 @@ if (NOT HAVE_WCS)
   include (../../../devel_common/cmake/FindWCS.cmake)
 endif (NOT HAVE_WCS)
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Test working with CASA libraries
+## Most of the test programs are not in need of a full CASA installation, but
+## can be build using casacore; therefore we first check for the existence of 
+## casacore - if it is not available, we switch to CASA.
 
 set (tests
   tUseArrays
   tUseCASA
+  tUseTables
   tUseScimath
   tUseMeasures
-  tUseTables
   tUseLattices
   tUseImages
 )
 
-## create executable(s)
+if (casa AND tables)
+  ## build the executables ----------------------
+  add_executable (tUseArrays tUseArrays.cc)
+  target_link_libraries (tUseArrays casa tables)
+  ##
+  add_executable (tUseCASA tUseCASA.cc)
+  target_link_libraries (tUseCASA casa tables)
+  ##
+  add_executable (tUseTables tUseTables.cc)
+  target_link_libraries (tUseTables casa tables)
+  ## installation locations ---------------------
+  install (
+    TARGETS tUseArrays tUseCASA tUseTables
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    )
+elseif (casa AND tables)
+  if (HAVE_CASA)
+    ## build the excutables ---------------------
+    FOREACH (src ${tests})
+      ADD_EXECUTABLE (${src} ${src}.cc)
+      TARGET_LINK_LIBRARIES (${src}
+        ${CASA_LIBRARIES}
+        ${LAPACK_LIBRARIES}
+        )  
+    ENDFOREACH (src)
+	## installation locations -------------------
+    install (
+      TARGETS ${tests}
+      RUNTIME DESTINATION bin
+      LIBRARY DESTINATION lib
+      ARCHIVE DESTINATION lib
+      )
+  endif (HAVE_CASA)
+endif (casa AND tables)
 
-if (HAVE_CASA)
-  FOREACH (src ${tests})
-    ADD_EXECUTABLE (${src} ${src}.cc)
-    TARGET_LINK_LIBRARIES (${src}
-      ${CASA_LIBRARIES}
-      ${LAPACK_LIBRARIES}
-      )  
-  ENDFOREACH (src)
-endif (HAVE_CASA)
-
-## installation
-
-install (
-  TARGETS ${tests}
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  )
-
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Vectors of the standard library
 
 #add_executable (tUseVector tUseVector.cc)
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Numerical ranges of the various data types
 ## Relationship between the various control parameters
 
@@ -84,7 +102,7 @@ install (
   ARCHIVE DESTINATION lib
   )
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Test for BLITZ
 
 add_executable (tUseBlitz tUseBlitz.cc)
@@ -97,7 +115,7 @@ install (
   RUNTIME DESTINATION bin
   )
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Test for CFITSIO
 
 if (HAVE_CFITSIO)
@@ -112,7 +130,7 @@ else (HAVE_CFITSIO)
   message (STATUS "Unable to build test program for CFITSIO.")
 endif (HAVE_CFITSIO)
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Test for FFTW3
 
 if (HAVE_FFTW3)
@@ -127,7 +145,7 @@ else (HAVE_FFTW3)
   message (STATUS "Unable to build test program for FFTW3.")
 endif (HAVE_FFTW3)
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Test for CFITSIO
 
 if (HAVE_WCS)
@@ -142,7 +160,7 @@ else (HAVE_WCS)
   message (STATUS "Unable to build test program for WCS.")
 endif (HAVE_WCS)
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Test for working with ROOT (includes working with the DAL)
 
 if (HAVE_ROOT AND HAVE_BLITZ)

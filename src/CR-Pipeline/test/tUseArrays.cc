@@ -59,9 +59,13 @@ using casa::Vector;
 
   The code for the cosmic rays data analysis makes extensive use of the CASA
   array classes a prominent data container during computation.
+ 
+  <h3>Prerequisite</h3>
+ 
+  
 */
 
-// ------------------------------------------------------------ test_construction
+// ----------------------------------------------------------- test_construction
 
 /*!
   \brief A number of simple tests for cunstructing arrays
@@ -133,14 +137,15 @@ int test_construction ()
   return nofFailedTests;
 }
 
-// ------------------------------------------------------------ test_construction
-// ----------------------------------------------------------------- test_slicing
+// ---------------------------------------------------------------- test_slicing
 
 /*!
   \brief Test various slicing operations on arrays
 
   Instead of iterating through array on a per-pixel basis, one can use a Slicer
-  in order to address/manipulate/extract a subset of an array.
+  in order to address/manipulate/extract a subset of an array. Typical cases for
+  such operations are e.g. the access to a row/column of a matrix or to a plane
+  of a cube.
 
   \return nofFailedTests -- The number of failed tests
 */
@@ -199,10 +204,10 @@ int test_slicing ()
   return nofFailedTests;
 }
 
-// ------------------------------------------------------------------------- main
+// ------------------------------------------------------------------------ main
 
 /*!
-  \brief main routine
+  \brief The main routine of the test program
   
   \return nofFailedTests -- The number of failed tests
 */
