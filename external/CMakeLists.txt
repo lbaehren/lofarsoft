@@ -1,7 +1,7 @@
 
 subdirs (
   blas
-  casa
+  casacore
   pgplot
   sofa
   wcslib
