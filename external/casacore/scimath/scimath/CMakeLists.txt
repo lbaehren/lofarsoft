@@ -25,11 +25,14 @@ target_link_libraries (scimath casa)
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-foreach (scimath_module ${scimath_modules})
-  LIST (APPEND tests "${scimath_module}/test")
-endforeach (scimath_module)
-
-SUBDIRS (${tests})
+if (casacore_tests)
+  ## build up the list of directories ...
+  foreach (scimath_module ${scimath_modules})
+    LIST (APPEND tests "${scimath_module}/test")
+  endforeach (scimath_module)
+  ## ... and register them
+  SUBDIRS (${tests})
+endif (casacore_tests)
 
 ## -----------------------------------------------------------------------------
 ## Installation targets
