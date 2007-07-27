@@ -27,3 +27,12 @@ set_target_properties (sofa
   PROPERTIES
   COMPILE_FLAGS "-fPIC -O2 -fPIC"
   )
+
+## -----------------------------------------------------------------------------
+## Installation targets
+
+install (TARGETS sofa
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )
