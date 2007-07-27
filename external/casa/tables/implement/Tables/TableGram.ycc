@@ -257,7 +257,7 @@ TaQLConstNode* nodename;
 TaQLMultiNode* nodelist;
 TaQLSelectNode* nodeselect;
 }
-/* Line 187 of yacc.c.  */
+/* Line 193 of yacc.c.  */
 #line 262 "TableGram.ycc"
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

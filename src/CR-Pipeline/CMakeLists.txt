@@ -15,8 +15,11 @@ option (build_tests "Build the test programs?" 0)
 subdirs (
   implement
   apps
-  test
   )
+
+if (build_tests)
+  subdirs (test)
+endif (build_tests)
 
 ## ------------------------------------------------------------------------------
 ## External dependencies; check if we need to search for some components.

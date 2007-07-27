@@ -2,8 +2,6 @@
 ## $Id::                                                                 $
 ##------------------------------------------------------------------------
 
-SET (CMAKE_VERBOSE_MAKEFILE 1)
-
 ## -----------------------------------------------------------------------------
 ## Find external packages
 
@@ -60,25 +58,25 @@ if (casa AND tables)
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     )
-elseif (casa AND tables)
-  if (HAVE_CASA)
-    ## build the excutables ---------------------
-    FOREACH (src ${tests})
-      ADD_EXECUTABLE (${src} ${src}.cc)
-      TARGET_LINK_LIBRARIES (${src}
-        ${CASA_LIBRARIES}
-        ${LAPACK_LIBRARIES}
-        )  
-    ENDFOREACH (src)
-	## installation locations -------------------
-    install (
-      TARGETS ${tests}
-      RUNTIME DESTINATION bin
-      LIBRARY DESTINATION lib
-      ARCHIVE DESTINATION lib
-      )
-  endif (HAVE_CASA)
 endif (casa AND tables)
+
+if (HAVE_CASA)
+  ## build the excutables ---------------------
+  FOREACH (src ${tests})
+    ADD_EXECUTABLE (${src} ${src}.cc)
+    TARGET_LINK_LIBRARIES (${src}
+      ${CASA_LIBRARIES}
+      ${LAPACK_LIBRARIES}
+      )  
+  ENDFOREACH (src)
+  ## installation locations -------------------
+  install (
+    TARGETS ${tests}
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    )
+endif (HAVE_CASA)
 
 ## -----------------------------------------------------------------------------
 ## Vectors of the standard library

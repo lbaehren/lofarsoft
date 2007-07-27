@@ -31,6 +31,7 @@
 #include <casa/Arrays/Slice.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicMath/Math.h>
+#include <casa/System/ProgressMeter.h>
 
 #include <../implement/templates.h>
 
@@ -147,6 +148,16 @@ int test_construction ()
   such operations are e.g. the access to a row/column of a matrix or to a plane
   of a cube.
 
+  While plane-wise assignment of e.g. a Cube is working fine using Slice objects
+  \code
+    for (n=0; n<nelem; n++) {
+      cube(Slice(n,1,1),Slice(0,nelem,1),Slice(0,nelem,1)) = double(n);
+    }
+  \endcode
+  the next imaginable operation -- copy values from one plane of a cube to 
+  another plane of a second cube -- will fail (in fact the program aborts when
+  running it).
+
   \return nofFailedTests -- The number of failed tests
 */
 
@@ -177,19 +188,133 @@ int test_slicing ()
     int n(0);
     Matrix<double> mat (nelem,nelem);
     Cube<double> cube (nelem,nelem,nelem);
-
+    
     cout << " --> writing x-y planes via xyPlane() function ..." << endl;
     for (n=0; n<nelem; n++) {
       mat = double(n);
       cube.xyPlane(n) = mat;
     }
-
-    cout << " --> writing x-y planes via array Slicer ..." << endl;
+    
+    cout << " --> writing x-y planes via default Slice objects ..." << endl;
     for (n=0; n<nelem; n++) {
       mat = double(n);
       cube (Slice(), Slice(), n) = mat;
     }
+    
+    cout << " --> writing (x,y)-planes via specified Slice objects ..." << endl;
+    for (n=0; n<nelem; n++) {
+      mat = double(n);
+      cube (Slice(0,nelem,1),Slice(0,nelem,1),Slice(n,1,1)) = mat;
+    }
 
+    /* The following operation will not work; though the code compiles and links,
+       the program aborts as soon as be start copying the data from the matrix 
+       to one of the planes of the cube.
+    */
+//     cout << " --> writing (y,z)-planes via specified Slice objects ..." << endl;
+//     for (n=0; n<nelem; n++) {
+//       mat = double(n);
+//       cube (Slice(n,1,1),Slice(0,nelem,1),Slice(0,nelem,1)) = mat;
+//     }
+    
+    cout << " --> writing single value into y-z planes via specified Slice objects ..."
+	 << endl;
+    for (n=0; n<nelem; n++) {
+      cube(Slice(n,1,1),Slice(0,nelem,1),Slice(0,nelem,1)) = double(n);
+    }
+    
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+//   cout << "[3] Write planes of a Cube into planes of another Cube ..." << endl;
+//   try {
+//     int n(0);
+//     Cube<double> cube1 (nelem,nelem,nelem);
+//     Cube<double> cube2 (nelem,nelem,nelem);
+    
+//     for (n=0; n<nelem; n++) {
+//       // fill the n-th (x,y) plane of the first cube ...
+//       cube1 (Slice(0,nelem,1),Slice(0,nelem,1),Slice(n,1,1)) = double(n);
+//       // .. and copy this plane to the n-th (y,z) plane of the second cube
+//       cube2(Slice(n,1,1),Slice(0,nelem,1),Slice(0,nelem,1)).nonDegenerate(0)
+// 	= cube1 (Slice(0,nelem,1),Slice(0,nelem,1),Slice(n,1,1));
+//     }
+    
+//   } catch (std::string message) {
+//     std::cerr << message << endl;
+//     nofFailedTests++;
+//   }
+  
+  cout << "[4] Simulate inserting beamformed data into image's pixel array" << endl;
+  try {
+    int nofAxes (5);
+    int nofLon (100);
+    int nofLat (100);
+    int nofDist (20);
+    int nofTimesteps (10);
+    int nofFrequencies (128);
+    
+    // Pixel array of the image
+    IPosition shapePixels (nofAxes,nofLon,nofLat,nofDist,nofTimesteps,nofFrequencies);
+    Array<double> pixels (shapePixels);
+
+    /*
+      Array with the results of the beamforming; the various pointing positions
+      are not decomposed into (lon,lat,dist), so mapping back onto these three 
+      coordinates has to be done later.
+    */
+    int nofSkyPositions (nofLon*nofLat*nofDist);
+    IPosition shapeBeam (2,nofSkyPositions,nofFrequencies);
+    Array<double> beam (shapeBeam);
+
+    /*
+      Temporary array, into which we copy the data before inserting them into
+      the pixel array.
+    */
+    Array<double> tmp (IPosition(5,nofLon,nofLat,nofDist,1,1));
+
+    // summary of array properties
+    cout << " -- shape of pixel array     = " << shapePixels     << endl;
+    cout << " -- shape of the beam array  = " << shapeBeam       << endl;
+    cout << " -- nof. sky positions       = " << nofSkyPositions << endl;
+    cout << " -- shape of temporary array = " << tmp.shape()     << endl;
+    
+    /*
+      Insert the data from the beam array to the pixel array; we use the number
+      of timestep as outer loop, thereby enulating the subsequent processing 
+      of data blocks.
+    */
+    
+    // create meter to show progress on the operation
+    int counter (0);
+    casa::ProgressMeter meter (0,
+			       nofTimesteps*nofFrequencies,
+			       "Filling data",
+			       "Processing block",
+			       "","",true,1);
+
+    for (shapePixels(3)=0; shapePixels(3)<nofTimesteps; shapePixels(3)++) {
+      /*
+	Below this point is what needs to be done per block of incoming data
+      */
+      for (shapePixels(4)=0; shapePixels(4)<nofFrequencies; shapePixels(4)++) {
+	// Slicer (start,end,stride,Slicer::endIsLength)
+	Slicer slice (IPosition(nofAxes,0,0,0,shapePixels(3),shapePixels(4)),
+		      IPosition(nofAxes,nofLon,nofLat,nofDist,1,1),
+		      IPosition(nofAxes,1),
+		      Slicer::endIsLength);
+	// assign a new value to the temp array
+	tmp = shapePixels(3)*10+shapePixels(4);
+	// insert the temporary data into the pixel array
+	pixels(slice) = tmp;
+	// show progress
+	meter.update(counter);
+	counter++;
+      }
+    }
+    
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
