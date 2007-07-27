@@ -23,11 +23,14 @@ target_link_libraries (coordinates fits)
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-foreach (coordinates_module ${coordinates_modules})
-  LIST (APPEND tests "${coordinates_module}/test")
-endforeach (coordinates_module)
-
-SUBDIRS (${tests})
+if (casacore_tests)
+  ## build up the list of directories ...
+  foreach (coordinates_module ${coordinates_modules})
+    list (APPEND tests "${coordinates_module}/test")
+  endforeach (coordinates_module)
+  ## ... and register them
+  subdirs (${tests})
+endif (casacore_tests)
 
 ## -----------------------------------------------------------------------------
 ## Installation targets
