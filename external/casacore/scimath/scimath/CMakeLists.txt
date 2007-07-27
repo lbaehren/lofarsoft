@@ -38,7 +38,7 @@ endif (casacore_tests)
 ## Installation targets
 
 install (TARGETS scimath
-  RUNTIME DESTINATION ${installation_prefix}/bin
-  LIBRARY DESTINATION ${installation_prefix}/lib
-  ARCHIVE DESTINATION ${installation_prefix}/lib
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
   )
