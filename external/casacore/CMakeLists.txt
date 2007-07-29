@@ -122,10 +122,14 @@ find_library (libm m PATHS ${lib_locations})
 ## course only will be possible, if the "externa" directory
 ## has been checked out completely.
 
-find_path (WCSLIB_INCLUDES wcs.h wcshdr.h PATHS ${lib_locations})
 find_library (WCSLIB_LIBRARIES wcs ${lib_locations})
 
-if (NOT WCSLIB_LIBRARIES)
+find_path (WCSLIB_INCLUDES wcs.h wcshdr.h
+  PATHS ${lib_locations}
+  PATH_SUFFIXES wcs wcslib-4.2
+)
+
+if (NOT WCSLIB_INCLUDES OR NOT WCSLIB_LIBRARIES)
   message (STATUS "Unable to find installed version of WCSLIB; tyring to build it now.")
 	## try to locate the source directory first
 	find_path (WCSLIB_INCLUDES wcs.h wcshdr.h 
@@ -149,7 +153,7 @@ if (NOT WCSLIB_LIBRARIES)
 	elseif (WCSLIB_INCLUDES)
 	  message (SEND_ERROR "Unable to locate WCSLIB source directory!")
 	endif (WCSLIB_INCLUDES)
-endif (NOT WCSLIB_LIBRARIES)
+endif (NOT WCSLIB_INCLUDES OR NOT WCSLIB_LIBRARIES)
 
 ## -----------------------------------------------------------------------------
 ## Check for additional tools which are required
