@@ -26,7 +26,7 @@ target_link_libraries (fits
   casa
   ${CFITSIO_LIBRARIES}
   ${G2C_LIBRARIES}
-  wcs
+  ${WCSLIB_LIBRARIES}
   )
 
 ## -----------------------------------------------------------------------------

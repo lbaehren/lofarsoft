@@ -4,7 +4,7 @@
 ## Main CMake configuration file for building the "casacore" package.
 ##
 ## Pending issues:
-##  - "libfits" does not yet build
+##  - "libfits" does not yet build (on PPC Mac)
 ##  - "tVanVleck" does not link due to missing f2c symbols
 ##
 ## ------------------------------------------------------------------------------
@@ -35,7 +35,6 @@ set (casacore_packages
   mirlib
   scimath
   measures
-  wcslib
   fits
   coordinates
   components
@@ -72,6 +71,8 @@ set (bin_locations
   /usr/bin
   /usr/local/bin
   /sw/bin
+  ${casacore_SOURCE_DIR}/../release/bin
+  ${casacore_SOURCE_DIR}/../../release/bin
   )
 
 set (include_locations
@@ -79,6 +80,8 @@ set (include_locations
   /usr/local/include
   /sw/include
   /opt/casa/local/include
+  ${casacore_SOURCE_DIR}/../release/include
+  ${casacore_SOURCE_DIR}/../../release/include
 )
 
 set (lib_locations
@@ -86,6 +89,8 @@ set (lib_locations
   /usr/local/lib
   /sw/lib
   /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
+  ${casacore_SOURCE_DIR}/../release/lib
+  ${casacore_SOURCE_DIR}/../../release/lib
   )
 
 find_path (HAVE_CTYPE_H ctype.h PATHS ${include_locations})
@@ -105,9 +110,46 @@ include (./FindCFITSIO.cmake)
 include (./FindG2C.cmake)
 include (./FindLAPACK.cmake)
 
-## --- libm --------------------------------------
+## --- libm -----------------------------------------------
 
 find_library (libm m PATHS ${lib_locations})
+
+## --- WCSLIB ---------------------------------------------
+##
+## As the source code of WCSLIB is in the USG code repository,
+## we do have the possiblity to build the library from there
+## in case no system-wide installation can be found; this of
+## course only will be possible, if the "externa" directory
+## has been checked out completely.
+
+find_path (WCSLIB_INCLUDES wcs.h wcshdr.h PATHS ${lib_locations})
+find_library (WCSLIB_LIBRARIES wcs ${lib_locations})
+
+if (NOT WCSLIB_LIBRARIES)
+  message (STATUS "Unable to find installed version of WCSLIB; tyring to build it now.")
+	## try to locate the source directory first
+	find_path (WCSLIB_INCLUDES wcs.h wcshdr.h 
+	  PATHS
+	  ${casacore_SOURCE_DIR}/../wcslib-4.2
+	  ${casacore_SOURCE_DIR}/../wcslib
+	  PATH_SUFFIXES 
+	  C
+	)
+	## if the source directory could be located, trigger build of WCSLIB
+	if (WCSLIB_INCLUDES)
+	  ## create a symbolic link within the casacore directory
+      execute_process (
+        WORKING_DIRECTORY ${casacore_SOURCE_DIR}
+        COMMAND ln -fs ${WCSLIB_INCLUDES}/.. wcslib
+        TIMEOUT 20
+        ERROR_VARIABLE ln_error
+        OUTPUT_QUIET
+      )
+	  subdirs (wcslib)
+	elseif (WCSLIB_INCLUDES)
+	  message (SEND_ERROR "Unable to locate WCSLIB source directory!")
+	endif (WCSLIB_INCLUDES)
+endif (NOT WCSLIB_LIBRARIES)
 
 ## -----------------------------------------------------------------------------
 ## Check for additional tools which are required
@@ -178,11 +220,8 @@ IF (UNIX)
     -DAIPS_AUTO_STL
     -DAIPS_NO_LEA_MALLOC
     # -- exceptions and warnings --
-    -Wall
     -Wno-comment
     -fexceptions
-    -Wno-non-template-friend
-    -Woverloaded-virtual
 	-Wcast-align
     ## LDOPT
     ##    -s -Xlinker -rpath -Xlinker
@@ -252,3 +291,5 @@ message (STATUS "Flex lexical parser ..... = ${flex_bin}")
 message (STATUS "libm library ............ = ${libm}")
 message (STATUS "CFITSIO header files .... = ${CFITSIO_INCLUDES}")
 message (STATUS "CFITSIO library ......... = ${CFITSIO_LIBRARIES}")
+message (STATUS "WCSLIB header files ..... = ${WCSLIB_INCLUDES}")
+message (STATUS "WCSLIB library .......... = ${WCSLIB_LIBRARIES}")
