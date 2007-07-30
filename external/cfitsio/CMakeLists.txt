@@ -46,6 +46,15 @@ find_path (HAVE_STRINGS_H strings.h ${include_locations})
 find_path (HAVE_STRING_H string.h ${include_locations})
 
 ## -----------------------------------------------------------------------------
+## Chheck for external libraries
+
+find_library (libm m ${lib_locations})
+
+if (NOT libm)
+  message (SEND_ERROR "Unable to find libm!")
+endif (NOT libm)
+
+## -----------------------------------------------------------------------------
 ## Build options
 
 option (BUILD_HERA
@@ -130,6 +139,13 @@ set (cfitsio_f77
   f77_wrap4.c
 )
 
+include_directories (
+  .
+  ..
+  ${HAVE_STDLIB_H}
+  ${HAVE_MATH_H}
+)
+
 add_definitions (
   -O
   -O2
@@ -146,12 +162,13 @@ add_definitions (
 )
 
 add_library (cfitsio ${cfitsio_sources})
+target_link_libraries (cfitsio ${libm})
 
 ## -----------------------------------------------------------------------------
 ## Test program(s)
 
 add_executable (testprog testprog.c)
-target_link_libraries (testprog cfitsio)
+target_link_libraries (testprog cfitsio ${libm})
 
 ## -----------------------------------------------------------------------------
 ## Installation

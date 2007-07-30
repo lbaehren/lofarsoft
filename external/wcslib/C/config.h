@@ -44,9 +44,9 @@
 #define HAVE_UNISTD_H 1
 
 /* Define to 1 if any of the following functions are defined. */
-#define HAVE_FLOOR 1
+#define HAVE_FLOOR 
 #define HAVE_MEMSET 1
-#define HAVE_POW 1
-#define HAVE_SQRT 1
+#define HAVE_POW 
+#define HAVE_SQRT 
 #define HAVE_STRCHR 1
 #define HAVE_STRSTR 1
