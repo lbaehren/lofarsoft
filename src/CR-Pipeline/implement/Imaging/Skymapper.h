@@ -69,7 +69,10 @@ namespace CR {  // Namespace CR -- begin
     
     \date 2006/01/23
     
-    \test tSkymapper.cc
+    \test tSkymapper.cc -- Basic testing of the Skymapper class
+    \test tUseArrays.cc -- Test working with the CASA Array classes (inludes slicing)
+    \test tUseLattices.cc -- Test working with the CASA Lattice classes; keep in
+    mind that CASA images are derived from the PagedArray and Lattice classes.
     
     <h3>Prerequisite</h3>
     
@@ -388,7 +391,7 @@ namespace CR {  // Namespace CR -- begin
   bool setBeamformer (Beamformer const &beamformer);
 
   /*!
-    \brief Update the settings of the Beamformer object
+    \brief Update the antenna positions used by the Beamformer
     
     \param antPositions  -- [nofAntennas,3] Antenna positions for which the
                             delay is computed, \f$ (x,y,z) \f$
@@ -396,7 +399,7 @@ namespace CR {  // Namespace CR -- begin
     \return status -- Status of the operation; returns <tt>false</tt> if an error
                       was encountered.
   */
-  bool setBeamformer (Matrix<double> const &antPositions);
+  bool setAntennaPositions (Matrix<double> const &antPositions);
 
   // ------------------------------------------------------------------- feedback
 

@@ -585,7 +585,7 @@ int test_processing (string const &lopesData,
     string filename ("skymap03.img");
     Skymapper skymapper (skymapCoordinates);
     std::cout << "-- updating Skymapper parameters..." << std::endl;
-    skymapper.setBeamformer(get_antennaPositions(nofAntennas));
+    skymapper.setAntennaPositions(get_antennaPositions(nofAntennas));
     skymapper.setFilename (filename);
     skymapper.setVerboseLevel (1);
     // if initialization goes well, start processing a block of data data

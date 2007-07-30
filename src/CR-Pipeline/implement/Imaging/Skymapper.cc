@@ -184,7 +184,7 @@ namespace CR {  // Namespace CR -- begin
   
   // -------------------------------------------------------------- setBeamformer
   
-  bool Skymapper::setBeamformer (Matrix<double> const &antPositions)
+  bool Skymapper::setAntennaPositions (Matrix<double> const &antPositions)
   {
     return beamformer_p.setAntPositions (antPositions);
   }
@@ -325,7 +325,7 @@ namespace CR {  // Namespace CR -- begin
     */
     if (status) {
       // Declare additional variables
-      int coord(0);
+//       int coord(0);
       int timeAxisStride (coordinates_p.timeAxisStride());
       IPosition shape (coordinates_p.shape());
       IPosition start  (shape.nelements(),0);

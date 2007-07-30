@@ -31,6 +31,7 @@
 #include <casa/Arrays/Vector.h>
 #include <casa/Exceptions/Error.h>
 #include <casa/Utilities/Assert.h>
+#include <casa/System/ProgressMeter.h>
 #include <lattices/Lattices/ArrayLattice.h>
 #include <lattices/Lattices/PagedArray.h>
 #include <lattices/Lattices/Lattice.h>
@@ -166,74 +167,76 @@ int test_putSlice ()
 
   int nofFailedTests (0);
 
+  cout << "[1] Put slice via temporary array ..." << endl;
   try {
+    /* Dimensions of the image's pixel array */
     int nofAxes (5);
-    int nofChannels (128);
-    IPosition shape (nofAxes,40,40,20,10,nofChannels);
+    int nofLon (100);
+    int nofLat (100);
+    int nofDist (20);
+    int nofTimesteps (10);
+    int nofFrequencies (128);
+
+    /* Settings and creation of paged array */
+    IPosition shape (nofAxes,nofLon,nofLat,nofDist,nofTimesteps,nofFrequencies);
     casa::String filename ("PagedArray.tmp");
+    PagedArray<float> pixels (shape,filename);
 
-    PagedArray<double> arr (shape,filename);
-
+    /* Array simulation output of Beamformer */
     int nofPixels (shape(0)*shape(1)*shape(2));
-    IPosition pixelsShape (2,nofPixels,nofChannels);
-    casa::Matrix<double> pixels (pixelsShape);
-    // variables required for the array slicing operation
-    IPosition start (nofAxes,0);
-    IPosition stride (nofAxes,1);
-    IPosition beamSliceStart (2,0);
-    IPosition beamSliceEnd (2,shape(4)-1);
-    int slice (0);
+    IPosition beamShape (2,nofPixels,nofFrequencies);
+    casa::Matrix<float> beam (beamShape);
 
-    casa::IPosition selectionShape (nofAxes,1,1,shape(2),1,shape(4));
-    casa::Slicer selectionSlicer (IPosition(nofAxes,0,0,0,0,0),
-				  IPosition(nofAxes,1,1,shape(2),1,shape(4)),
-				  IPosition(nofAxes,1),
-				  casa::Slicer::endIsLength);
-    casa::Array<double> selection (selectionShape);
+    /*
+      Temporary array, into which we copy the data before inserting them into
+      the pixel array.
+    */
+    casa::Array<float> tmp (IPosition(5,nofLon,nofLat,nofDist,1,1));
 
-    // emulate processing of subsequent blocks of data
+    /* Provide some feedback before starting export the data */
+
+    cout << " -- Summary of array properties"  << endl;
+    cout << " --> array shape         = " << shape          << endl;
+    cout << " --> file name           = " << filename       << endl;
+    cout << " --> pixel array shape   = " << pixels.shape() << endl;
+    cout << " --> beam array shape    = " << beam.shape()   << endl;
+    cout << " --> shape of temp array = " << tmp.shape()    << endl;
+
+    /*
+      Insert the data from the beam array to the pixel array; we use the number
+      of timestep as outer loop, thereby enulating the subsequent processing 
+      of data blocks.
+    */
     
-    for (start(3)=0; start(3)<shape(3); start(3)++) {
-      
-      // From onwards this position we perform the actual slicing operation
-
-      pixels = start(3);
-      slice  = 0;
-
-      cout << " --> Writing data for block " << start(3) << " ..." << endl;
-      
-      for (start(0)=0; start(0)<shape(0); start(0)++) {      // Longitude
-	for (start(1)=0; start(1)<shape(1); start(1)++) {    // Latitude
-	  // new slicer positions for pixel array
-	  beamSliceStart(0) = slice*shape(2);
-	  beamSliceEnd(0)   = beamSliceStart(0)+shape(2)-1;
-	  slice++;
-	  /* Feedback on the settings to slice the arrays */
-// 	  cout << "\t" << beamSliceStart << " -> " << beamSliceEnd
-// 	       << "  =>  " << selectionShape
-// 	       << "  =>  " << start << endl;
-	  /* Extract slice form the array of input data */
-   	  selection (selectionSlicer) = pixels(casa::Slicer(beamSliceStart,
-							    beamSliceEnd,
-							    IPosition(2,1),
-							    casa::Slicer::endIsLength));
-	  // insert the pixel values
-//   	  arr.doPutSlice (selection,
-//  			  IPosition(start),
-//  			  IPosition(stride));
-	}
+    // create meter to show progress on the operation
+    int counter (0);
+    casa::ProgressMeter meter (0,
+			       nofTimesteps*nofFrequencies,
+			       "Filling data",
+			       "Processing block",
+			       "","",true,1);
+    
+    for (shape(3)=0; shape(3)<nofTimesteps; shape(3)++) {
+      /*
+	Below this point is what needs to be done per block of incoming data
+      */
+      for (shape(4)=0; shape(4)<nofFrequencies; shape(4)++) {
+	// Slicer (start,end,stride,Slicer::endIsLength)
+	Slicer slice (IPosition(nofAxes,0,0,0,shape(3),shape(4)),
+		      IPosition(nofAxes,nofLon,nofLat,nofDist,1,1),
+		      IPosition(nofAxes,1),
+		      Slicer::endIsLength);
+	// assign a new value to the temp array
+	tmp = shape(3)*10+shape(4);
+	// insert the temporary data into the pixel array
+	pixels.putSlice(tmp,
+			IPosition(nofAxes,0,0,0,shape(3),shape(4)),
+			IPosition(nofAxes,1));
+	// show progress
+	meter.update(counter);
+	counter++;
       }
     }
-
-    cout << "[test_putSlice] Summary of array properties"   << endl;
-    cout << " -- array shape        = " << shape             << endl;
-    cout << " -- file name          = " << filename          << endl;
-    cout << " -- pixel array shape  = " << pixelsShape       << endl;
-    cout << " -- selection shape    = " << selection.shape() << endl;
-    cout << " -- selection : start  = " << selectionSlicer.start() << endl;
-    cout << " -- selection : end    = " << selectionSlicer.end()   << endl;
-    cout << " -- selection : stride = " << selectionSlicer.stride() << endl;
-    cout << " -- selection : length = " << selectionSlicer.length() << endl;
 
   } catch (std::string message) {
     std::cerr << message << endl;
