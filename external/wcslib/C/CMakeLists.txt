@@ -24,7 +24,7 @@ endif (libm)
 
 ## Check for <errno.h> --------------------------
 
-find_path (HAVE_ERRNO_H errno.h ${include_locations})
+check_include_files (errno.h HAVE_ERRNO_H)
 
 if (HAVE_ERRNO_H)
   file (APPEND ${wcslib_config} "/* Define to 1 if you have the <errno.h> header file. */\n")
@@ -33,7 +33,7 @@ endif (HAVE_ERRNO_H)
 
 ## Check for <inttypes.h> -----------------------
 
-find_path (HAVE_INTTYPES_H inttypes.h ${include_locations})
+check_include_files (inttypes.h HAVE_INTTYPES_H)
 
 if (HAVE_INTTYPES_H)
   file (APPEND ${wcslib_config} "/* Define to 1 if you have the <inttypes.h> header file. */\n")
@@ -42,7 +42,7 @@ endif (HAVE_INTTYPES_H)
 
 ## Check for <limits.h> -----------------------
 
-find_path (HAVE_LIMITS_H limits.h ${include_locations})
+check_include_files (limits.h HAVE_LIMITS_H)
 
 if (HAVE_LIMITS_H)
   file (APPEND ${wcslib_config} "/* Define to 1 if you have the <limits.h> header file. */\n")
@@ -51,7 +51,7 @@ endif (HAVE_LIMITS_H)
 
 ## Check for <math.h> -----------------------
 
-find_path (HAVE_MATH_H math.h ${include_locations})
+check_include_files (math.h HAVE_MATH_H)
 
 if (HAVE_MATH_H)
   file (APPEND ${wcslib_config} "/* Define to 1 if you have the <math.h> header file. */\n")
@@ -60,7 +60,7 @@ endif (HAVE_MATH_H)
 
 ## Check for <memory.h> -----------------------
 
-find_path (HAVE_MEMORY_H memory.h ${include_locations})
+check_include_files (memory.h HAVE_MEMORY_H)
 
 if (HAVE_MEMORY_H)
   file (APPEND ${wcslib_config} "/* Define to 1 if you have the <memory.h> header file. */\n")
@@ -69,7 +69,7 @@ endif (HAVE_MEMORY_H)
 
 ## Check for <stdint.h> -----------------------
 
-find_path (HAVE_STDINT_H stdint.h ${include_locations})
+check_include_files (stdint.h HAVE_STDINT_H)
 
 if (HAVE_STDINT_H)
   file (APPEND ${wcslib_config} "/* Define to 1 if you have the <stdint.h> header file. */\n")
@@ -78,7 +78,7 @@ endif (HAVE_STDINT_H)
 
 ## Check for <stdio.h> -----------------------
 
-find_path (HAVE_STDIO_H stdio.h ${include_locations})
+check_include_files (stdio.h HAVE_STDIO_H)
 
 if (HAVE_STDIO_H)
   file (APPEND ${wcslib_config} "/* Define to 1 if you have the <stdio.h> header file. */\n")
@@ -87,7 +87,7 @@ endif (HAVE_STDIO_H)
 
 ## Check for <stdlib.h> -----------------------
 
-find_path (HAVE_STDLIB_H stdlib.h ${include_locations})
+check_include_files (stdlib.h HAVE_STDLIB_H)
 
 if (HAVE_STDLIB_H)
   file (APPEND ${wcslib_config} "/* Define to 1 if you have the <stdlib.h> header file. */\n")
@@ -96,7 +96,7 @@ endif (HAVE_STDLIB_H)
 
 ## Check for <strings.h> -----------------------
 
-find_path (HAVE_STRINGS_H strings.h ${include_locations})
+check_include_files (strings.h HAVE_STRINGS_H)
 
 if (HAVE_STRINGS_H)
   file (APPEND ${wcslib_config} "/* Define to 1 if you have the <strings.h> header file. */\n")
@@ -105,7 +105,7 @@ endif (HAVE_STRINGS_H)
 
 ## Check for <string.h> -----------------------
 
-find_path (HAVE_STRING_H string.h ${include_locations})
+check_include_files (string.h HAVE_STRING_H)
 
 if (HAVE_STRING_H)
   file (APPEND ${wcslib_config} "/* Define to 1 if you have the <string.h> header file. */\n")

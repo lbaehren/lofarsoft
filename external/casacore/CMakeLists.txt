@@ -59,13 +59,17 @@ option (CMAKE_VERBOSE_MAKEFILE
   )
 
 ## -----------------------------------------------------------------------------
-## Check for platform specific header files; in most cases we should be able to
-## use the CMake build-in macro, but in a number of cases those will not yield
-## proper results - where therefore run an explicit check.
+## Additional required CMake functionality
 
 include (CPack)
 include (CheckIncludeFiles)
 include (CheckLibraryExists)
+include (CheckTypeSize)
+
+## -----------------------------------------------------------------------------
+## Check for platform specific header files; in most cases we should be able to
+## use the CMake build-in macro, but in a number of cases those will not yield
+## proper results - where therefore run an explicit check.
 
 set (bin_locations
   /usr/bin
@@ -93,10 +97,13 @@ set (lib_locations
   ${casacore_SOURCE_DIR}/../../release/lib
   )
 
-find_path (HAVE_CTYPE_H ctype.h PATHS ${include_locations})
-find_path (HAVE_FCNTL_H fcntl.h PATHS ${include_locations})
-find_path (HAVE_STRING_H string.h PATHS ${include_locations})
-find_path (HAVE_UNISTD_H unistd.h PATHS ${include_locations})
+check_include_files (ctype.h HAVE_CTYPE_H)
+check_include_files (fcntl.h HAVE_FCNTL_H)
+check_include_files (string.h HAVE_STRING_H)
+check_include_files (unistd.h HAVE_UNISTD_H)
+
+check_type_size ("float" SIZEOF_FLOAT)
+check_type_size ("double" SIZEOF_DOUBLE)
 
 ## -----------------------------------------------------------------------------
 ## Required external libraries
@@ -286,7 +293,8 @@ endif (prefix)
 message (STATUS "casacore_SOURCE_DIR ..... = ${casacore_SOURCE_DIR}")
 message (STATUS "CMAKE_SYSTEM_NAME ....... = ${CMAKE_SYSTEM_NAME}")
 message (STATUS "CMAKE_SYSTEM_PROCESSOR .. = ${CMAKE_SYSTEM_PROCESSOR}")
-message (STATUS "CMAKE_SIZEOF_VOIDP ...... = ${CMAKE_SIZEOF_VOIDP}")
+message (STATUS "SIZEOF_FLOAT ............ = ${SIZEOF_FLOAT}")
+message (STATUS "SIZEOF_DOUBLE ........... = ${SIZEOF_DOUBLE}")
 message (STATUS "CMAKE_C_FLAGS ........... = ${CMAKE_C_FLAGS}")
 message (STATUS "CMAKE_CXX_FLAGS ......... = ${CMAKE_CXX_FLAGS}")
 message (STATUS "CMAKE_MODULE_LINKER_FLAGS = ${CMAKE_MODULE_LINKER_FLAGS}")

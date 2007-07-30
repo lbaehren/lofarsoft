@@ -26,6 +26,7 @@ set (lib_locations
 )
 
 include (CheckFunctionExists)
+include (CheckIncludeFiles)
 include (CheckLibraryExists)
 include (CPack)
 
