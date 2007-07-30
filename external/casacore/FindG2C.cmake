@@ -15,7 +15,7 @@
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-find_path (G2C_INCLUDES g2c.h
+find_path (G2C_INCLUDES g2c.h f2c.h
   PATHS
   /usr/local/include
   /usr/include

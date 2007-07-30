@@ -231,7 +231,6 @@ IF (UNIX)
     -DAIPS_AUTO_STL
     -DAIPS_NO_LEA_MALLOC
     # -- exceptions and warnings --
-    -Wno-comment
     -fexceptions
 	-Wcast-align
     ## LDOPT
