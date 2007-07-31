@@ -303,20 +303,13 @@ IF (UNIX)
       )
   ENDIF (APPLE)
   ## Platform test 32/64 bit
-  if (uname_bin)
-    execute_process (
-      WORKING_DIRECTORY ${casacore_SOURCE_DIR}
-      COMMAND ${uname_bin} -m
-      TIMEOUT 20
-      RESULT_VARIABLE uname_result
-      OUTPUT_VARIABLE uname_output
-      ERROR_VARIABLE uname_error
-	  OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-	if (uname_result MATCHES x86_64)
+  set (CMAKE_SYSTEM_64BIT 0)
+  if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
+    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
+      set (CMAKE_SYSTEM_64BIT 1)
 	  add_definitions (-DAIPS_64B)
-	endif (uname_result MATCHES x86_64)
-  endif (uname_bin)
+    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
+  endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
 ENDIF (UNIX)
 
 SET (CMAKE_MODULE_LINKER_FLAGS ${CASA_LDSTD})
@@ -348,9 +341,10 @@ endif (prefix)
 ## Summary of settings
 
 message (STATUS "casacore_SOURCE_DIR ..... = ${casacore_SOURCE_DIR}")
+message (STATUS "CMAKE_SYSTEM ............ = ${CMAKE_SYSTEM}")
 message (STATUS "CMAKE_SYSTEM_NAME ....... = ${CMAKE_SYSTEM_NAME}")
 message (STATUS "CMAKE_SYSTEM_PROCESSOR .. = ${CMAKE_SYSTEM_PROCESSOR}")
-message (STATUS "Machine hadware name .... = ${uname_output}")
+message (STATUS "CMAKE_SYSTEM_64BIT ...... = ${CMAKE_SYSTEM_64BIT}")
 message (STATUS "SIZEOF_FLOAT ............ = ${SIZEOF_FLOAT}")
 message (STATUS "SIZEOF_DOUBLE ........... = ${SIZEOF_DOUBLE}")
 message (STATUS "CMAKE_C_FLAGS ........... = ${CMAKE_C_FLAGS}")
