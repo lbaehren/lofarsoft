@@ -113,13 +113,38 @@ find_package (PNG)
 find_package (X11)
 find_package (ZLIB)
 
-include (./FindCFITSIO.cmake)
 include (./FindG2C.cmake)
 include (./FindLAPACK.cmake)
 
 ## --- libm -----------------------------------------------
 
 find_library (libm m PATHS ${lib_locations})
+
+## --- CFITSIO --------------------------------------------
+
+set (HAVE_CFITSIO 1)
+
+find_path (CFITSIO_INCLUDES fitsio.h fitsio2.h
+  PATHS ${include_locations}
+  PATH_SUFFIXES cfitsio fitsio
+)
+
+find_library (CFITSIO_LIBRARIES cfitsio
+  PATHS ${lib_locations}
+  PATH_SUFFIXES cfitsio fitsio
+)
+
+if (NOT CFITSIO_INCLUDES)
+  set (HAVE_CFITSIO 0)
+endif (NOT CFITSIO_INCLUDES)
+
+if (NOT CFITSIO_LIBRARIES)
+  set (HAVE_CFITSIO 0)
+endif (NOT CFITSIO_LIBRARIES)
+
+if (NOT HAVE_CFITSIO)
+  message (SEND_ERROR "Unable to find systm-wide installation of CFITSIO!")
+endif (NOT HAVE_CFITSIO)
 
 ## --- WCSLIB ---------------------------------------------
 ##
@@ -129,15 +154,27 @@ find_library (libm m PATHS ${lib_locations})
 ## course only will be possible, if the "externa" directory
 ## has been checked out completely.
 
+set (HAVE_WCSLIB 1)
+
 find_library (WCSLIB_LIBRARIES wcs ${lib_locations})
 
 find_path (WCSLIB_INCLUDES wcs.h wcshdr.h
-  PATHS ${lib_locations}
-  PATH_SUFFIXES wcs wcslib-4.2
+  PATHS ${include_locations}
+  PATH_SUFFIXES C wcs wcslib wcslib-4.2
 )
 
-if (NOT WCSLIB_INCLUDES OR NOT WCSLIB_LIBRARIES)
-  message (STATUS "Unable to find installed version of WCSLIB; tyring to build it now.")
+if (NOT WCSLIB_INCLUDES)
+  set (HAVE_WCSLIB 0)
+endif (NOT WCSLIB_INCLUDES)
+
+if (NOT WCSLIB_LIBRARIES)
+  set (HAVE_WCSLIB 0)
+endif (NOT WCSLIB_LIBRARIES)
+
+if (NOT HAVE_WCSLIB)
+  message (SEND_ERROR "WCSLIB_INCLUDES  = ${WCSLIB_INCLUDES}")
+  message (SEND_ERROR "WCSLIB_LIBRARIES = ${WCSLIB_LIBRARIES}")
+  message (FATAL_ERROR "Unable to find systm-wide installation of WCSLIB!")
 	## try to locate the source directory first
 	find_path (WCSLIB_INCLUDES wcs.h wcshdr.h 
 	  PATHS
@@ -160,7 +197,7 @@ if (NOT WCSLIB_INCLUDES OR NOT WCSLIB_LIBRARIES)
 	elseif (WCSLIB_INCLUDES)
 	  message (SEND_ERROR "Unable to locate WCSLIB source directory!")
 	endif (WCSLIB_INCLUDES)
-endif (NOT WCSLIB_INCLUDES OR NOT WCSLIB_LIBRARIES)
+endif (NOT HAVE_WCSLIB)
 
 ## -----------------------------------------------------------------------------
 ## Check for additional tools which are required
@@ -250,7 +287,11 @@ IF (UNIX)
     ## PPC specific settings
     if (CMAKE_OSX_ARCHITECTURES MATCHES ppc)
       add_definitions (
-	-DAIPS_BIG_ENDIAN
+	  -DAIPS_BIG_ENDIAN
+	)
+    elseif (CMAKE_OSX_ARCHITECTURES MATCHES ppc)
+      add_definitions (
+	  -DAIPS_LITTLE_ENDIAN
 	)
     endif (CMAKE_OSX_ARCHITECTURES MATCHES ppc)
   ELSE (APPLE)

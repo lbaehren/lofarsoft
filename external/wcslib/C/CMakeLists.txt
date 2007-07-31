@@ -165,6 +165,8 @@ file (APPEND ${wcslib_config} "\#define HAVE_STRSTR ${HAVE_STRSTR}\n")
 ## -----------------------------------------------------------------------------
 ## Sources and instructions to build the library
 
+file (GLOB wcslib_headers *.h)
+
 set (wcslib_sources 
   cel.c
   fitshdr.c
@@ -208,6 +210,12 @@ install (TARGETS wcs
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
+  )
+
+## Installation of header files
+
+install (FILES ${wcslib_headers}
+  DESTINATION include/wcslib
   )
 
 ## -----------------------------------------------------------------------------

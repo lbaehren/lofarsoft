@@ -69,6 +69,8 @@ option (BUILD_HERA
 ## 		ar rv libcfitsio.a ${OBJECTS}; \
 ##  		${RANLIB} libcfitsio.a;
 
+file (GLOB cfitsio_headers *.h)
+
 set (cfitsio_sources
   buffers.c
   cfileio.c
@@ -197,6 +199,6 @@ install (TARGETS cfitsio testprog
 
 ## Installation of header files
 
-install (FILES fitsio.h fitsio2.h longnam.h drvrsmem.h
+install (FILES ${cfitsio_headers}
   DESTINATION include/cfitsio
   )
