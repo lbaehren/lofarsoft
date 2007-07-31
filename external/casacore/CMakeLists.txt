@@ -210,6 +210,8 @@ find_program (flex_bin flex
   PATHS ${bin_locations}
 )
 
+find_program (uname_bin uname ${bin_locations})
+
 ## -----------------------------------------------------------------------------
 ## Compiler and Linker options
 ## 
@@ -300,6 +302,20 @@ IF (UNIX)
       -DAIPS_LITTLE_ENDIAN
       )
   ENDIF (APPLE)
+  ## Platform test 32/64 bit
+  if (uname_bin)
+    execute_process (
+      WORKING_DIRECTORY ${casacore_SOURCE_DIR}
+      COMMAND ${uname_bin} -m
+      TIMEOUT 20
+      RESULT_VARIABLE uname_result
+      OUTPUT_VARIABLE uname_output
+      ERROR_VARIABLE uname_error
+    )
+	if (uname_result MATCHES x86_64)
+	  add_definitions (-DAIPS_64B)
+	endif (uname_result MATCHES x86_64)
+  endif (uname_bin)
 ENDIF (UNIX)
 
 SET (CMAKE_MODULE_LINKER_FLAGS ${CASA_LDSTD})
@@ -333,6 +349,7 @@ endif (prefix)
 message (STATUS "casacore_SOURCE_DIR ..... = ${casacore_SOURCE_DIR}")
 message (STATUS "CMAKE_SYSTEM_NAME ....... = ${CMAKE_SYSTEM_NAME}")
 message (STATUS "CMAKE_SYSTEM_PROCESSOR .. = ${CMAKE_SYSTEM_PROCESSOR}")
+message (STATUS "Machine hadware name .... = ${uname_output}")
 message (STATUS "SIZEOF_FLOAT ............ = ${SIZEOF_FLOAT}")
 message (STATUS "SIZEOF_DOUBLE ........... = ${SIZEOF_DOUBLE}")
 message (STATUS "CMAKE_C_FLAGS ........... = ${CMAKE_C_FLAGS}")
