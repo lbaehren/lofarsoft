@@ -311,6 +311,7 @@ IF (UNIX)
       RESULT_VARIABLE uname_result
       OUTPUT_VARIABLE uname_output
       ERROR_VARIABLE uname_error
+	  OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 	if (uname_result MATCHES x86_64)
 	  add_definitions (-DAIPS_64B)
