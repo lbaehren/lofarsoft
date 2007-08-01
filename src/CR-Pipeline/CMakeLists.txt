@@ -67,7 +67,7 @@ if (cr_cmake)
   endif (NOT HAVE_LAPACK)
   ## -- PGPlot ---------------
   if (NOT HAVE_PGPLOT)
-    include (${cr_cmake}/cmake/FindPGPLOT.cmake)
+    include (${cr_cmake}/FindPGPLOT.cmake)
   endif (NOT HAVE_PGPLOT)
   ## -- ROOT -----------------
   if (NOT HAVE_ROOT)
