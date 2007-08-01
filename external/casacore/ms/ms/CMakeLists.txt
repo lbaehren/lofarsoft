@@ -19,7 +19,7 @@ endforeach (ms_module)
 add_library (ms
   ${ms_sources}
 )
-target_link_libraries (ms casa)
+target_link_libraries (ms measures tables scimath casa)
 
 ## -----------------------------------------------------------------------------
 ## Files processed by Bison & Flex

@@ -191,6 +191,17 @@ namespace CR {  // Namespace CR -- begin
     */
     Skymapper (SkymapCoordinates const &coordinates);
     
+    /*!
+      \brief Argumented constructor
+      
+      \param coordinates   -- Coordinates information encapsulated in a
+                              SkymapCoordinates object.
+      \param antPositions  -- [nofAntennas,3] Antenna positions for which the
+                              delay is computed, \f$ (x,y,z) \f$
+    */
+    Skymapper (SkymapCoordinates const &coordinates,
+	       Matrix<double> const &antPositions);
+    
   /*!
     \brief Argumented constructor
 

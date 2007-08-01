@@ -24,51 +24,63 @@ endif (build_tests)
 ## ------------------------------------------------------------------------------
 ## External dependencies; check if we need to search for some components.
 
-## Blitz++
+## check where to find the CMake scripts
 
-if (NOT HAVE_BLITZ)
-  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindBlitz.cmake)
-endif (NOT HAVE_BLITZ)
+find_path (cr_cmake template_FindXX.cmake 
+  PATHS 
+  ${CR_SOURCE_DIR}
+  ${CR_SOURCE_DIR}/..
+  ${CR_SOURCE_DIR}/../..
+  ${CR_SOURCE_DIR}/../../..
+  PATH_SUFFIXES
+  devel_common/cmake
+  )
 
-if (HAVE_BLITZ)
-  add_definitions (-DHAVE_BLITZ)
-endif (HAVE_BLITZ)
+## check for the external packages
 
-## CASA
+if (cr_cmake)
+  ## Blitz++
+  if (NOT HAVE_BLITZ)
+    include (${cr_cmake}/FindBlitz.cmake)
+  endif (NOT HAVE_BLITZ)
+  if (HAVE_BLITZ)
+    add_definitions (-DHAVE_BLITZ)
+  endif (HAVE_BLITZ)
+  ## CASA
+  if (NOT HAVE_CASA) 
+    include (${cr_cmake}/FindCASA.cmake)
+  endif (NOT HAVE_CASA)
+  if (HAVE_CASA)
+    add_definitions (-DHAVE_CASA)
+  endif (HAVE_CASA)
+  ## CFITSIO
+  if (NOT HAVE_CFITSIO)
+    include (${cr_cmake}/FindCFITSIO.cmake)
+  endif (NOT HAVE_CFITSIO)
+  ## FFTW3
+  if (NOT HAVE_FFTW3)
+    include (${cr_cmake}/FindFFTW3.cmake)
+  endif (NOT HAVE_FFTW3)
+  ## LAPACK
+  if (NOT HAVE_LAPACK)
+    include (${cr_cmake}/FindLAPACK.cmake)
+  endif (NOT HAVE_LAPACK)
+  ## -- PGPlot ---------------
+  if (NOT HAVE_PGPLOT)
+    include (${cr_cmake}/cmake/FindPGPLOT.cmake)
+  endif (NOT HAVE_PGPLOT)
+  ## -- ROOT -----------------
+  if (NOT HAVE_ROOT)
+    include (${cr_cmake}/FindROOT.cmake)
+  endif (NOT HAVE_ROOT)
+  ## -- WCSLIB ---------------
+  if (NOT HAVE_WCS) 
+    include (${cr_cmake}/FindWCS.cmake)
+  endif (NOT HAVE_WCS)
+elseif (cr_cmake)
+  message (SEND_ERROR "Unable to locate additional CMake scripts!")
+endif (cr_cmake)
 
-if (NOT HAVE_CASA) 
-  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindCASA.cmake)
-endif (NOT HAVE_CASA)
-
-if (HAVE_CASA)
-  add_definitions (-DHAVE_CASA)
-endif (HAVE_CASA)
-
-## CFITSIO
-
-if (NOT HAVE_CFITSIO)
-  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindCFITSIO.cmake)
-endif (NOT HAVE_CFITSIO)
-
-if (NOT HAVE_FFTW3)
-  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindFFTW3.cmake)
-endif (NOT HAVE_FFTW3)
-
-if (NOT HAVE_LAPACK)
-  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindLAPACK.cmake)
-endif (NOT HAVE_LAPACK)
-
-if (NOT HAVE_PGPLOT)
-  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindPGPLOT.cmake)
-endif (NOT HAVE_PGPLOT)
-
-if (NOT HAVE_ROOT)
-  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindROOT.cmake)
-endif (NOT HAVE_ROOT)
-
-if (NOT HAVE_WCS) 
-  include (${CR_SOURCE_DIR}/../../devel_common/cmake/FindWCS.cmake)
-endif (NOT HAVE_WCS)
 
 message (STATUS "[CR-Pipeline] External library settings summary:")
 message (STATUS "  BLITZ   : ${HAVE_BLITZ}   ")

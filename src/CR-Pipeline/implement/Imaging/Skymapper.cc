@@ -67,6 +67,22 @@ namespace CR {  // Namespace CR -- begin
   // ------------------------------------------------------------------ Skymapper
   
   Skymapper::Skymapper (SkymapCoordinates const &coordinates,
+			Matrix<double> const &antPositions)
+  {
+    Beamformer beamformer;
+    beamformer.setAntPositions (antPositions);
+    //
+    init (0,
+	  false,
+	  0,
+	  "skymap.img",
+	  coordinates,
+	  beamformer);
+  }
+  
+  // ------------------------------------------------------------------ Skymapper
+  
+  Skymapper::Skymapper (SkymapCoordinates const &coordinates,
 			Beamformer const &beamformer)
   {
     init (0,
