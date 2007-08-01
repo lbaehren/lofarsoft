@@ -251,6 +251,7 @@ include_directories (
   .
   ${casacore_packages}
   ${casacore_SOURCE_DIR}/fits
+  ${casacore_SOURCE_DIR}/images/images/Images
   ${casacore_SOURCE_DIR}/ms/ms/MeasurementSets
   ${casacore_SOURCE_DIR}/tables/tables/Tables
   ${CFITSIO_INCLUDES}
