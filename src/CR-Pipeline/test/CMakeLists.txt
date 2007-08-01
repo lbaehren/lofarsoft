@@ -59,6 +59,8 @@ endif (HAVE_CASA)
 ## Test working with casacore
 
 if (HAVE_CASACORE)
+  add_executable (tUseCasacore tUseCasacore.cc)
+  target_link_libraries (tUseCasacore ${CASACORE_LIBRARIES})
 endif (HAVE_CASACORE)
 
 ## -----------------------------------------------------------------------------
@@ -107,8 +109,6 @@ if (HAVE_CFITSIO)
     TARGETS tUseCFITSIO
     RUNTIME DESTINATION bin
     )
-else (HAVE_CFITSIO)
-  message (STATUS "Unable to build test program for CFITSIO.")
 endif (HAVE_CFITSIO)
 
 ## -----------------------------------------------------------------------------
@@ -122,12 +122,10 @@ if (HAVE_FFTW3)
     TARGETS tUseFFTW3
     RUNTIME DESTINATION bin
     )
-else (HAVE_FFTW3)
-  message (STATUS "Unable to build test program for FFTW3.")
 endif (HAVE_FFTW3)
 
 ## -----------------------------------------------------------------------------
-## Test for CFITSIO
+## Test for WCSLIB
 
 if (HAVE_WCS)
   add_executable (tUseWCS tUseWCS.cc)
@@ -137,18 +135,12 @@ if (HAVE_WCS)
     TARGETS tUseWCS
     RUNTIME DESTINATION bin
     )
-else (HAVE_WCS)
-  message (STATUS "Unable to build test program for WCS.")
 endif (HAVE_WCS)
 
 ## -----------------------------------------------------------------------------
 ## Test for working with ROOT (includes working with the DAL)
 
-if (HAVE_ROOT AND HAVE_BLITZ)
+if (HAVE_ROOT AND HAVE_BLITZ AND dal)
   add_executable (tUseROOT tUseROOT.cc)
   target_link_libraries (tUseROOT dal ${ROOT_LIBRARIES} ${BLITZ_LIBRARIES})
-else (HAVE_ROOT AND HAVE_BLITZ)
-  message (STATUS "Unable to build test program(s) for working with ROOT.")
-endif (HAVE_ROOT AND HAVE_BLITZ)
-
-
+endif (HAVE_ROOT AND HAVE_BLITZ AND dal)

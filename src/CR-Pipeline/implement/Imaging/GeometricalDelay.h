@@ -268,6 +268,22 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #endif
 #endif
 
+#ifdef HAVE_CASA
+    inline bool setAntennaPositions (const casa::Matrix<double> &antPositions,
+				     const bool &bufferDelays=false) {
+      return setAntPositions (antPositions,
+			      bufferDelays);
+    }
+#else
+#ifdef HAVE_BLITZ
+    inline bool setAntennaPositions (const blitz::Array<double,2> &antPositions,
+				     const bool &bufferDelays=false) {
+      return setAntPositions (antPositions,
+			      bufferDelays);
+    }
+#endif
+#endif
+
     /*!
       \brief Set a specific antenna position
 

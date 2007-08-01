@@ -205,7 +205,7 @@ using CR::TimeFreq;
 class DataReader : public TimeFreq {
 
   //! Conversion from ADC values to voltages
-  Vector<Double> adc2voltage_p;
+  Matrix<Double> adc2voltage_p;
 
   //! Conversion from raw to calibrated FFT
   Matrix<DComplex> fft2calfft_p;
@@ -431,7 +431,7 @@ class DataReader : public TimeFreq {
 
     \return fx2voltage -- Weights to convert raw ADC samples to voltages
   */
-  inline Vector<Double> adc2voltage () const {
+  inline Matrix<Double> ADC2Voltage () const {
     return adc2voltage_p;
   }
 
@@ -448,10 +448,50 @@ class DataReader : public TimeFreq {
       for later re-selection of antennas without affecting the proper conversion
       from ADC values to voltages.
     </ol>
+    This routine assignes a single conversion value to each antenna; in case 
+    you want to use this step to also flag in the time domain, use the method
+    below.
 
     \param fx2voltage -- Weights to convert raw ADC samples to voltages
   */
-  void setADC2voltage (Vector<Double> const &adc2voltage);
+  void setADC2Voltage (Vector<Double> const &adc2voltage);
+
+  /*!
+    \brief Set the weights for conversion from raw ADC samples to voltages
+
+    Kepp in mind, that there two possible shapes in which the data will be 
+    accepted:
+    <ol>
+      <li>nelem == nofSelectedAntennas() : only conversion values for the 
+      selected antennas are provided.
+      <li>nelem == nofAntennas() : conversion values for all antennas in the 
+      dataset are provided; this is the more secure method, as this will allow
+      for later re-selection of antennas without affecting the proper conversion
+      from ADC values to voltages.
+    </ol>
+
+    Example:
+    \code
+    int nofAntennas;
+    int blocksize;
+    // Create DataReader object
+    DataReader dr;
+    // 
+    // .. a number of operations on the new object
+    //
+
+    // create matrix to store the conversion factors
+    Matrix<double> adc2voltage (blocksize,nofAntennas);
+    // assign some values to the array
+    adc2voltage = some_function();
+    // store the conversion factors inside the DataReader object
+    dr.setADC2Voltage (adc2voltage);
+    \encode
+
+    \param fx2voltage -- [blocksize,antennas] Weights to convert raw ADC samples
+                         to voltages
+  */
+  void setADC2Voltage (Matrix<Double> const &adc2voltage);
 
   /*!
     \brief Weights for conversion from raw to calibrated FFT

@@ -156,7 +156,7 @@ Bool ITSCapture::setStreams ()
 
   uint blocksize (blocksize_p);
   Vector<uint> antennas (metadata_p.antennas());
-  Vector<Double> adc2voltage (DataReader::adc2voltage());
+  Vector<Double> adc2voltage (DataReader::ADC2Voltage());
   Matrix<DComplex> fft2calfft (DataReader::fft2calfft());
   Vector<String> filenames (metadata_p.datafiles(true));
   DataIterator *iterator;

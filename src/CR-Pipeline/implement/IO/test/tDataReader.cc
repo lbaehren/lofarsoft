@@ -26,7 +26,10 @@
 #include <casa/Exceptions/Error.h>
 
 // LOPES header files
-#include <lopes/IO/DataReader.h>
+#include <templates.h>
+#include <IO/DataReader.h>
+
+using casa::DComplex;
 
 /*!
   \file tDataReader.cc
@@ -50,7 +53,7 @@ void test_Record ()
   std::cout << "\n[test_Record]\n" << std::endl;
 
   // Set up description of the record fields
-  RecordDesc ITSMetadataDesc;
+  casa::RecordDesc ITSMetadataDesc;
 
   ITSMetadataDesc.addField ("description", TpString);
   ITSMetadataDesc.addField ("current_status", TpString);
@@ -59,7 +62,7 @@ void test_Record ()
   ITSMetadataDesc.addField ("current_iteration", TpInt);
 
   // create the record from the record description
-  Record ITSMetadataRec (ITSMetadataDesc);
+  casa::Record ITSMetadataRec (ITSMetadataDesc);
 
 }
 

@@ -505,7 +505,7 @@ Bool LopesEvent::setStreams ()
 
   uint nofSamples (blocksize_p);
   Vector<uint> antennas (length_);
-  Vector<Double> adc2voltage (DataReader::adc2voltage());
+  Vector<Double> adc2voltage (DataReader::ADC2Voltage());
   Matrix<DComplex> fft2calfft (DataReader::fft2calfft());
   Vector<String> filenames (length_);
   DataIterator *iterator;

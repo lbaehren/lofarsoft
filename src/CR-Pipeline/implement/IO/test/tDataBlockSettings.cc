@@ -19,7 +19,7 @@
  ***************************************************************************/
 /* $Id: tDataBlockSettings.cc,v 1.4 2005/08/05 13:46:28 bahren Exp $*/
 
-#include <lopes/IO/DataBlockSettings.h>
+#include <IO/DataBlockSettings.h>
 
 /*!
   \file tDataBlockSettings.cc
@@ -30,6 +30,8 @@
  
   \date 2005/07/28
 */
+
+using CR::DataBlockSettings;
 
 // -----------------------------------------------------------------------------
 

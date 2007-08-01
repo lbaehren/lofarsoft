@@ -348,7 +348,7 @@ void DataReader::init (uint const &blocksize,
       selectChannels_p = False;
       
       // process provided parameters
-      setADC2voltage (adc2voltage);
+      setADC2Voltage (adc2voltage);
       setFFT2calFFT (fft2calfft);
     } catch (std::string message) {
       std::cerr << "[DataReader::init]" << message << std::endl;
@@ -554,8 +554,11 @@ Matrix<Double> DataReader::voltage ()
     Keep in mind here, that there might be a set of antennas selected
    */
   try {
+    uint sample (0);
     for (uint antenna(0); antenna<nofSelectedAntennas(); antenna++) {
-      out.column(antenna) = in.column(antenna)*adc2voltage_p(selectedAntennas_p(antenna));
+      for (sample=0; sample<blocksize_p; sample++) {
+	out(sample,antenna) = in(sample,antenna)*adc2voltage_p(sample,selectedAntennas_p(antenna));
+      }
     }
   } catch (AipsError x) {
     cerr << "[DataReader::voltage]" << x.getMesg() << endl;
@@ -714,34 +717,72 @@ Matrix<DComplex> DataReader::visibilities (Bool const &fromCalFFT)
 //
 // ==============================================================================
 
-// --------------------------------------------------------------- setADC2voltage
+// --------------------------------------------------------------- setADC2Voltage
 
-void DataReader::setADC2voltage (Vector<Double> const &adc2voltage)
+void DataReader::setADC2Voltage (Vector<Double> const &adc2voltage)
 {
-  uint nelem (adc2voltage.nelements());
+  bool ok (true);
+  uint nofAntennas (adc2voltage.nelements());
+  Matrix<double> arr (blocksize_p,nofAntennas);
 
-  if (nelem == nofSelectedAntennas()) {
-    Vector<Double> tmp (nofAntennas());
-    tmp = 1.0;
-    // re-arrange the provided values to match the correct array shape
-    for (uint antenna(0); antenna<nelem; antenna++) {
-      tmp(selectedAntennas_p(antenna)) = adc2voltage (antenna);
+  // insert the input values into the full parameter matrix
+  try {
+    for (uint antenna(0); antenna<nofAntennas; antenna++) {
+      arr.column(antenna) = adc2voltage;
     }
-    // store the values 
-    adc2voltage_p.resize(tmp.shape());
-    adc2voltage_p = tmp;
-  }
-  else if (nelem == nofAntennas()) {
-    adc2voltage_p.resize(nelem);
-    adc2voltage_p = adc2voltage;
-  }
-  else {
-    cerr << "[DataReader::setADC2voltage] Mismatching array shapes" << endl;
-    cerr << " shape(adc2voltage)  = " << nelem                 << endl;
-    cerr << " # antennas          = " << nofAntennas()         << endl;
-    cerr << " # selected antennas = " << nofSelectedAntennas() << endl;
-  }
+  } catch (std::string message) {
+    cerr << "[DataReader::setADC2Voltage] " << message << endl;
+    ok = false;
+  } 
 
+  // forward the matrix to internal storage
+  if (ok) {
+    setADC2Voltage (arr);
+  } else {
+    cerr << "[DataReader::setADC2Voltage] Not forwarding ADC2Voltage values!" 
+	 << endl;
+  }
+}
+
+// --------------------------------------------------------------- setADC2Voltage
+
+void DataReader::setADC2Voltage (Matrix<Double> const &adc2voltage)
+{
+  casa::IPosition shape (adc2voltage.shape());
+
+  // check for the blocksize 
+  if (shape(0) != int(blocksize_p)) {
+    cerr << "[DataReader::setADC2Voltage] Mismatch between nof. samples and blocksize"
+	 << endl;
+    cerr << " --> blocksize    = " << blocksize_p << endl;
+    cerr << " --> nof. samples = " << shape(0)    << endl;
+  } else {
+    unsigned int sample (0);
+    // check for the number of antennas
+    if (shape(1) == int(nofSelectedAntennas())) {
+      Matrix<Double> tmp (blocksize_p,nofAntennas());
+      tmp = 1.0;
+      // re-arrange the provided values to match the correct array shape
+      for (int antenna(0); antenna<shape(1); antenna++) {
+	for (sample=0; sample<blocksize_p; sample++) {
+	  tmp(sample,selectedAntennas_p(antenna)) = adc2voltage (sample,antenna);
+	}
+      }
+      // store the values 
+      adc2voltage_p.resize(tmp.shape());
+      adc2voltage_p = tmp;
+    }
+    else if (shape(1) == int(nofAntennas())) {
+      adc2voltage_p.resize(shape);
+      adc2voltage_p = adc2voltage;
+    }
+    else {
+      cerr << "[DataReader::setADC2Voltage] Mismatching array shapes" << endl;
+      cerr << " shape(adc2voltage)  = " << shape                      << endl;
+      cerr << " # antennas          = " << nofAntennas()              << endl;
+      cerr << " # selected antennas = " << nofSelectedAntennas()      << endl;
+    }
+  }
 }
 
 // ---------------------------------------------------------------- setFFT2calFFT
