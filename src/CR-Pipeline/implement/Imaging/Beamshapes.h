@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id: Beamformer.h 445 2007-07-16 16:03:40Z baehren $ |
+ | $Id                                                                   $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -59,10 +59,16 @@ namespace CR { // Namespace CR -- begin
 
   public:
 
+    /*!
+      Source: beam.c
+    */
     static double sqr (double x){
       return x*x;
     }
 
+    /*!
+      Source: beam.c
+    */
     static complex<double> test_complex (const complex<double> *par,
 					 const complex<double> *x) {
       return 0;
@@ -71,15 +77,20 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Description still missing
 
+      Source: beam.c
+
        Evaluation of the equation:
-       \f[ (1-\sin(\theta)^2 \sin(\phi)^2) \sin(2*\pi*f/c*h_0*\cos(\theta))^2 \f]
-       where 
-       <li>c: speed of light,
-       <li> f : frequency h_0: height from ground
-       <li>th: pi/2-elevation
-       <li>phi: phi_0+azimuth, phi_0: dipole orientation
-       <li>parms: scale, phi_0, h_0
-       <li>axes: time,freq, az, el
+       \f[ \left( 1-\sin(\theta)^2 \sin(\phi)^2) \sin(2 \cdot \pi \cdot f/c \cdot h_0
+       \cdot \cos(\theta) \right)^2 \f]
+       where
+       <ul>
+         <li>c: speed of light,
+         <li>f : frequency h_0: height from ground
+         <li>th: pi/2-elevation
+         <li>phi: phi_0+azimuth, phi_0: dipole orientation
+         <li>parms: scale, phi_0, h_0
+         <li>axes: time,freq, az, el
+       </ul>
 
       \param par -- 
       \param x   -- 
@@ -88,7 +99,74 @@ namespace CR { // Namespace CR -- begin
     */
     static double test_double (const double *par,
 			       const double *x);
+
+    /*!
+      \brief see writeup for the exact formula
+
+      Source: beam_dr.c
+    */
+    static complex<double> Gamma1 (double tan_al,
+				   double sin_al,
+				   double sin_th,
+				   double cos_th,
+				   double cos_ph,
+				   double k,
+				   double h,
+				   double L);
     
+    /*!
+      \brief see writeup for the exact formula
+
+      Source: beam_dr.c
+    */
+    static complex<double> Gamma2 (double tan_al,
+				   double sin_al,
+				   double sin_th,
+				   double cos_th,
+				   double cos_ph,
+				   double k,
+				   double h,
+				   double L);
+    
+    /*!
+      \brief see writeup for the exact formula
+
+      Source: beam_dr.c
+    */
+    static complex<double> Gamma3 (double tan_al,
+				   double sin_al,
+				   double sin_th,
+				   double cos_th,
+				   double cos_ph,
+				   double k,
+				   double h,
+				   double L);
+    
+    /*!
+      \brief see writeup for the exact formula
+
+      Source: beam_dr.c
+    */
+    static complex<double> Gamma4 (double tan_al,
+				   double sin_al,
+				   double sin_th,
+				   double cos_th,
+				   double cos_ph,
+				   double k,
+				   double h,
+				   double L);
+
+    /*!
+      \brief equation - droopy dipole
+
+      \param par -- 
+      \param x   -- 
+
+      \return result -- 
+    */
+    static double droopy_dipole (const double *par,
+				 const double *x);
+
   };
   
 } // Namespace CR -- end
