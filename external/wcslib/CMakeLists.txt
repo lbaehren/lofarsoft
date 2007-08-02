@@ -1,3 +1,6 @@
+##------------------------------------------------------------------------------
+## $Id:: CMakeLists.txt 489 2007-08-01 11:40:38Z baehren                       $
+##------------------------------------------------------------------------------
 
 ## -----------------------------------------------------------------------------
 ## Project name and version number number
@@ -10,6 +13,14 @@ set (wcslib_VERSION "${wcslib_VERSION_MAJOR}.${wcslib_VERSION_MINOR}")
 
 ## -----------------------------------------------------------------------------
 ## Standard locations where to look for required components
+
+set (bin_locations
+  /usr/bin
+  /usr/local/bin
+  /sw/bin
+  ${casacore_SOURCE_DIR}/../release/bin
+  ${casacore_SOURCE_DIR}/../../release/bin
+  )
 
 set (include_locations
   /usr/include
@@ -47,13 +58,12 @@ find_library (libm m ${lib_locations})
 find_library (libpgplot pgplot ${lib_locations} PATH_SUFFIXES pgplot)
 find_library (libcpgplot cpgplot ${lib_locations} PATH_SUFFIXES pgplot)
 
-## Summary of the searches ----------------------
+## -----------------------------------------------------------------------------
+## Check for additional tools which are required
 
-message (STATUS "CFITSIO headers  = ${fitsio_h}")
-message (STATUS "CFITSIO library  = ${libcfitsio}")
-message (STATUS "libm library     = ${libm}")
-message (STATUS "PGPlot library   = ${libpgplot}")
-message (STATUS "PGPlot C library = ${libcpgplot}")
+find_program (flex_bin flex
+  PATHS ${bin_locations}
+)
 
 ## -----------------------------------------------------------------------------
 ## Subdirectories
@@ -81,3 +91,12 @@ if (prefix)
   set (CMAKE_INSTALL_PREFIX ${prefix}) 
 endif (prefix)
 
+## -----------------------------------------------------------------------------
+## Summary of settings
+
+message (STATUS "CFITSIO headers ............... = ${fitsio_h}")
+message (STATUS "CFITSIO library ............... = ${libcfitsio}")
+message (STATUS "libm library .................. = ${libm}")
+message (STATUS "PGPlot library ................ = ${libpgplot}")
+message (STATUS "PGPlot C library .............. = ${libcpgplot}")
+message (STATUS "Flex lexical analyzer generator = ${flex_bin}")

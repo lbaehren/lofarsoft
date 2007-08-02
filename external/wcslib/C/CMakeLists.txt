@@ -1,3 +1,6 @@
+##------------------------------------------------------------------------------
+## $Id:: CMakeLists.txt 489 2007-08-01 11:40:38Z baehren                       $
+##------------------------------------------------------------------------------
 
 ## -----------------------------------------------------------------------------
 ## Create "config.h"
@@ -161,6 +164,39 @@ file (APPEND ${wcslib_config} "\#define HAVE_POW ${HAVE_POW}\n")
 file (APPEND ${wcslib_config} "\#define HAVE_SQRT ${HAVE_SQRT}\n")
 file (APPEND ${wcslib_config} "\#define HAVE_STRCHR ${HAVE_STRCHR}\n")
 file (APPEND ${wcslib_config} "\#define HAVE_STRSTR ${HAVE_STRSTR}\n")
+
+## -----------------------------------------------------------------------------
+## Files processed by Flex
+##
+##  FILES=`ls *.l | sed s/"\.l"//`
+##  for FILE in $FILES ; { flex -t -P$FILE $FILE.l > $FILE.lcc ; }
+
+set (wcslib_flex_inputs
+  fitshdr
+  wcspih
+  wcsulex
+  wcsutrn
+)
+
+if (flex_bin)
+  foreach (src ${wcslib_flex_inputs})
+    message (STATUS "Flex processing ${src}...")
+    execute_process (
+      WORKING_DIRECTORY ${wcslib_SOURCE_DIR}/C
+      COMMAND flex -t -P${src} ${src}.l
+      TIMEOUT 20
+      OUTPUT_FILE ${src}.c
+      ERROR_VARIABLE flex_error
+      OUTPUT_QUIET
+      )
+    if (flex_error)
+      message (SEND_ERROR "There was an error processing ${src}.l!")
+      message (SEND_ERROR ${flex_error})
+    endif (flex_error)
+  endforeach (src)
+else (flex_bin)
+  message (SEND_ERROR "Unable to process flex input files!")
+endif (flex_bin)
 
 ## -----------------------------------------------------------------------------
 ## Sources and instructions to build the library

@@ -139,49 +139,49 @@ LIBPRE=""
 
 case $system in
     Darwin-*)
-	# Darwin can be powerpc or i386
-	ARCH=`uname -p`
-	EXT="darwin"
-        # For large file support (but may break Absoft compilers):
-        AC_DEFINE(_LARGEFILE_SOURCE)
-        AC_DEFINE(_FILE_OFFSET_BITS,64)
+	  # Darwin can be powerpc or i386
+	  ARCH=`uname -p`
+	  EXT="darwin"
+          # For large file support (but may break Absoft compilers):
+          AC_DEFINE(_LARGEFILE_SOURCE)
+          AC_DEFINE(_FILE_OFFSET_BITS,64)
 	;;
     SunOS-4*)
-	ARCH="sun"
-	EXT="sun"
+	  ARCH="sun"
+	  EXT="sun"
 	;;
     HP-UX-*)
-	ARCH="hp"
-	EXT="hpu"
-	if test "x$CFORTRANFLAGS" = x ; then
-		CFORTRANFLAGS="-Dappendus"
-	fi
-	CFLAGS="$CFLAGS -DPG_PPU" 
-	LIBPRE="-Wl,"
+	  ARCH="hp"
+	  EXT="hpu"
+	  if test "x$CFORTRANFLAGS" = x ; then
+	    CFORTRANFLAGS="-Dappendus"
+	  fi
+	  CFLAGS="$CFLAGS -DPG_PPU" 
+	  LIBPRE="-Wl,"
 	;;
     SunOS-5*)
-	ARCH="solaris"
-	EXT="sol"
-	if test "x$CFORTRANFLAGS" = x ; then
-		CFORTRANFLAGS="-Dsolaris"
-	fi
+	  ARCH="solaris"
+	  EXT="sol"
+	  if test "x$CFORTRANFLAGS" = x ; then
+	 	CFORTRANFLAGS="-Dsolaris"
+	  fi
         # For large file support:
         AC_DEFINE(_LARGEFILE_SOURCE)
         AC_DEFINE(_FILE_OFFSET_BITS,64)
 	;;
     OSF1*)
-	ARCH="alpha"
-	EXT="osf"
+	  ARCH="alpha"
+	  EXT="osf"
 	;;
     IRIX*)
-	ARCH="sgi"
-	EXT="sgi"
-	CFLAGS="$CFLAGS -DHAVE_POSIX_SIGNALS"
-	RANLIB="touch"
+	  ARCH="sgi"
+	  EXT="sgi"
+	  CFLAGS="$CFLAGS -DHAVE_POSIX_SIGNALS"
+	  RANLIB="touch"
 	;;
     ULTRIX*)
-	ARCH="dec"
-	EXT="dec"
+	  ARCH="dec"
+	  EXT="dec"
 	;;
     Linux*)
 	ARCH="linux"
@@ -191,13 +191,13 @@ case $system in
         AC_DEFINE(_FILE_OFFSET_BITS,64)
 	;;
     FREEBSD*|FreeBSD*)
-	ARCH="linux"
-	EXT="lnx"
+	  ARCH="linux"
+	  EXT="lnx"
 	;;
     CYGWIN*)
-	ARCH="cygwin"
-	EXT="cygwin"
-	CFLAGS="$CFLAGS -DHAVE_POSIX_SIGNALS"
+	  ARCH="cygwin"
+	  EXT="cygwin"
+	  CFLAGS="$CFLAGS -DHAVE_POSIX_SIGNALS"
 	;;
     *)
 		echo "cfitsio: == Don't know what do do with $system"

@@ -1,3 +1,6 @@
+##------------------------------------------------------------------------------
+## $Id:: CMakeLists.txt 489 2007-08-01 11:40:38Z baehren                       $
+##------------------------------------------------------------------------------
 
 project (libcfitsio)
 
@@ -23,30 +26,28 @@ set (lib_locations
 )
 
 include (CheckFunctionExists)
+include (CheckIncludeFiles)
 include (CheckLibraryExists)
 include (CPack)
 
 ## -----------------------------------------------------------------------------
 ## Check for ANSI header files
 
-set (HAVE_STDLIB_H 0)
-set (HAVE_STRING_H 0)
-set (HAVE_MATH_H 0)
-set (HAVE_MEMORY_H 0)
-set (HAVE_LIMITS_H 0)
-set (HAVE_STRINGS_H 0)
-set (HAVE_STRING 0)
-
-find_path (HAVE_STDLIB_H stdlib.h ${include_locations})
-find_path (HAVE_STRING_H string.h ${include_locations})
-find_path (HAVE_MATH_H math.h ${include_locations})
-find_path (HAVE_MEMORY_H memory.h ${include_locations})
-find_path (HAVE_LIMITS_H limits.h ${include_locations})
-find_path (HAVE_STRINGS_H strings.h ${include_locations})
-find_path (HAVE_STRING_H string.h ${include_locations})
+check_include_files (stdlib.h HAVE_STDLIB_H)
+check_include_files (math.h HAVE_MATH_H)
+check_include_files (memory.h HAVE_MEMORY_H)
+check_include_files (limits.h HAVE_LIMITS_H)
+check_include_files (pwd.h HAVE_PWD_H)
+check_include_files (strings.h HAVE_STRINGS_H)
+check_include_files (string.h HAVE_STRING_H)
 
 ## -----------------------------------------------------------------------------
-## Chheck for external libraries
+## Check if functions are defined
+
+check_function_exists (ftruncate HAVE_FTRUNCATE)
+
+## -----------------------------------------------------------------------------
+## Check for external libraries
 
 find_library (libm m ${lib_locations})
 
@@ -153,6 +154,7 @@ add_definitions (
   -O2
   -fPIC
   -fno-common
+  ## header files
   -DHAVE_STDLIB_H=${HAVE_STDLIB_H}
   -DHAVE_STRING_H=${HAVE_STRING_H}
   -DHAVE_MATH_H=${HAVE_MATH_H}
@@ -160,8 +162,20 @@ add_definitions (
   -DHAVE_LIMITS_H=${HAVE_LIMITS_H}
   -DHAVE_STRINGS_H=${HAVE_STRINGS_H}
   -DHAVE_STRING=${HAVE_STRING}
+  ## functions
+  -DHAVE_FTRUNCATE=${HAVE_FTRUNCATE}
+  ## build options
   -DBUILD_HERA=${BUILD_HERA}
 )
+
+## additional compiler flags for large file support
+
+if (UNIX)
+  add_definitions (
+    -D_FILE_OFFSET_BITS=64
+	-D_LARGEFILE_SOURCE
+  )
+endif (UNIX)
 
 add_library (cfitsio ${cfitsio_sources})
 target_link_libraries (cfitsio ${libm})
