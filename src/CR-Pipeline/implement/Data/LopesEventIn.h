@@ -35,6 +35,8 @@
 #include <IO/DataReader.h>
 #include <Data/lopesevent_def.h>
 
+using CR::DataReader;
+
 namespace CR { // Namespace CR -- begin
   
   // Not more than 30 antennas available (yet).

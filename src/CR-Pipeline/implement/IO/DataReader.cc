@@ -24,140 +24,142 @@
 #include <casa/Arrays/ArrayLogical.h>
 #include <casa/Arrays/ArrayMath.h>
 
-// ==============================================================================
-//
-//  Construction
-//
-// ==============================================================================
-
-// ------------------------------------------------------------------- DataReader
-
-DataReader::DataReader ()
-  : TimeFreq(),
-    streamsConnected_p(false)
-{
-  init (TimeFreq::blocksize());
-}
-
-// ------------------------------------------------------------------- DataReader
-
-DataReader::DataReader (uint const &blocksize)
-  : TimeFreq(blocksize),
-    streamsConnected_p(false)
-{
-  init (TimeFreq::blocksize());
-}
-
-// ------------------------------------------------------------------- DataReader
-
-DataReader::DataReader (uint const &blocksize,
-			uint const &nyquistZone,
-			Double const &samplerate)
-  : TimeFreq(blocksize,
-	     samplerate,
-	     nyquistZone),
-    streamsConnected_p(false)
-{
-  init (blocksize,
-	nyquistZone,
-	samplerate);
-}
-
-// ------------------------------------------------------------------- DataReader
-
-DataReader::DataReader (uint const &blocksize,
-			Vector<Double> const &adc2voltage,
-			Matrix<DComplex> const &fft2calfft)
-  : TimeFreq(blocksize),
-    streamsConnected_p(false)
-{
-  init (TimeFreq::blocksize(),
-	TimeFreq::nyquistZone(),
-	TimeFreq::sampleFrequency());
-
-  DataReader::setFFTLength ();
-
-  init (blocksize,
-	adc2voltage,
-	fft2calfft);
-}
-
-// ------------------------------------------------------------------- DataReader
-
-template <class T> 
-DataReader::DataReader (String const &filename,
-			uint const &blocksize,
-			T const &var,
-			Vector<Double> const &adc2voltage,
-			Matrix<DComplex> const &fft2calfft)
-  : TimeFreq(blocksize),
-    streamsConnected_p(false)
-{
-  init (TimeFreq::blocksize(),
-	TimeFreq::nyquistZone(),
-	TimeFreq::sampleFrequency());
+namespace CR {  //  Namespace CR -- begin
   
-  init (TimeFreq::blocksize(),
-	adc2voltage,
-	fft2calfft);
-}
-
-// ------------------------------------------------------------------- DataReader
-
-DataReader::DataReader (DataReader const &other)
-  : TimeFreq()
-{
-  copy (other);
-}
-
-// ==============================================================================
-//
-//  Destruction
-//
-// ==============================================================================
-
-DataReader::~DataReader ()
-{
-  destroy();
-}
-
-void DataReader::destroy ()
-{
-  /*
-    We need to be a bit careful at this point; since it does not make any sense
-    trying to delete array for which never any memory has been allocated, we
-    first should check for indications, that indeed this might have been the 
-    case.
-   */
-  if (streamsConnected_p) {
-    if (fileStream_p != NULL) {
-      // close all the data streams
-      for (uint stream (0); stream<nofStreams_p; stream++) {
-	fileStream_p[stream].close();
-      }
-      // release the fileStream array
-      delete [] fileStream_p;
-    };  
-    // release previously allocated memory
-    delete [] iterator_p;
+  // ============================================================================
+  //
+  //  Construction
+  //
+  // ============================================================================
+  
+  // ----------------------------------------------------------------- DataReader
+  
+  DataReader::DataReader ()
+    : TimeFreq(),
+      streamsConnected_p(false)
+  {
+    init (TimeFreq::blocksize());
   }
-}
-
-// ==============================================================================
-//
-//  Operators
-//
-// ==============================================================================
-
-DataReader& DataReader::operator= (DataReader const &other)
-{
-  if (this != &other) {
-    destroy ();
+  
+  // ----------------------------------------------------------------- DataReader
+  
+  DataReader::DataReader (uint const &blocksize)
+    : TimeFreq(blocksize),
+      streamsConnected_p(false)
+  {
+    init (TimeFreq::blocksize());
+  }
+  
+  // ----------------------------------------------------------------- DataReader
+  
+  DataReader::DataReader (uint const &blocksize,
+			  uint const &nyquistZone,
+			  Double const &samplerate)
+    : TimeFreq(blocksize,
+	       samplerate,
+	       nyquistZone),
+      streamsConnected_p(false)
+  {
+    init (blocksize,
+	  nyquistZone,
+	  samplerate);
+  }
+  
+  // ----------------------------------------------------------------- DataReader
+  
+  DataReader::DataReader (uint const &blocksize,
+			  Vector<Double> const &adc2voltage,
+			  Matrix<DComplex> const &fft2calfft)
+    : TimeFreq(blocksize),
+      streamsConnected_p(false)
+  {
+    init (TimeFreq::blocksize(),
+	  TimeFreq::nyquistZone(),
+	  TimeFreq::sampleFrequency());
+    
+    DataReader::setFFTLength ();
+    
+    init (blocksize,
+	  adc2voltage,
+	  fft2calfft);
+  }
+  
+  // ----------------------------------------------------------------- DataReader
+  
+  template <class T> 
+  DataReader::DataReader (String const &filename,
+			  uint const &blocksize,
+			  T const &var,
+			  Vector<Double> const &adc2voltage,
+			  Matrix<DComplex> const &fft2calfft)
+    : TimeFreq(blocksize),
+      streamsConnected_p(false)
+  {
+    init (TimeFreq::blocksize(),
+	  TimeFreq::nyquistZone(),
+	  TimeFreq::sampleFrequency());
+    
+    init (TimeFreq::blocksize(),
+	  adc2voltage,
+	  fft2calfft);
+  }
+  
+  // ----------------------------------------------------------------- DataReader
+  
+  DataReader::DataReader (DataReader const &other)
+    : TimeFreq()
+  {
     copy (other);
   }
-  return *this;
-}
-
+  
+  // ============================================================================
+  //
+  //  Destruction
+  //
+  // ============================================================================
+  
+  DataReader::~DataReader ()
+  {
+    destroy();
+  }
+  
+  void DataReader::destroy ()
+  {
+    /*
+      We need to be a bit careful at this point; since it does not make any sense
+      trying to delete array for which never any memory has been allocated, we
+      first should check for indications, that indeed this might have been the 
+      case.
+    */
+    if (streamsConnected_p) {
+      if (fileStream_p != NULL) {
+	// close all the data streams
+	for (uint stream (0); stream<nofStreams_p; stream++) {
+	  fileStream_p[stream].close();
+	}
+	// release the fileStream array
+	delete [] fileStream_p;
+      };  
+      // release previously allocated memory
+      delete [] iterator_p;
+    }
+  }
+  
+  // ============================================================================
+  //
+  //  Operators
+  //
+  // ============================================================================
+  
+  DataReader& DataReader::operator= (DataReader const &other)
+  {
+    if (this != &other) {
+      destroy ();
+      copy (other);
+    }
+    return *this;
+  }
+  
 // ------------------------------------------------------------------------- copy
 
 void DataReader::copy (DataReader const &other)
@@ -1097,3 +1099,5 @@ Bool DataReader::setSelectedChannels (Vector<Bool> const &channelSelection)
     return False;
   }
 }
+
+}  // Namespace CR -- end

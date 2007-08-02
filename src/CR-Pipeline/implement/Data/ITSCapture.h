@@ -30,6 +30,8 @@
 #include <IO/DataReader.h>
 #include <Utilities/StringTools.h>
 
+using CR::DataReader;
+
 /*!
   \class ITSCapture
 

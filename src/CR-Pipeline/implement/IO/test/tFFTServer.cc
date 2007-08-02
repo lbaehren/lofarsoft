@@ -36,8 +36,9 @@
 #include <scimath/Mathematics.h>
 #include <scimath/Mathematics/FFTServer.h>
 
-#include <lopes/Data/ITSCapture.h>
-#include <lopes/IO/DataReader.h>
+#include <templates.h>
+#include <Data/ITSCapture.h>
+#include <IO/DataReader.h>
 
 #include <casa/namespace.h>
 

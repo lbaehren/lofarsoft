@@ -1,0 +1,5 @@
+project (Timba)
+
+subdirs (
+  WH
+)

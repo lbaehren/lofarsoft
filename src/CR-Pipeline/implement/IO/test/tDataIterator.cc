@@ -25,10 +25,10 @@
 
 #include <casa/BasicSL/Complex.h>
 
-#include <lopes/IO/DataIterator.h>
+#include <IO/DataIterator.h>
 
 using namespace std;
-using namespace LOPES;
+using namespace CR;
 
 /*!
   \file tDataIterator.cc

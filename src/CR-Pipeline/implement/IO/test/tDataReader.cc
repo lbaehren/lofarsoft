@@ -30,6 +30,7 @@
 #include <IO/DataReader.h>
 
 using casa::DComplex;
+using CR::DataReader;
 
 /*!
   \file tDataReader.cc
@@ -122,7 +123,7 @@ void show_parameters (DataReader &dr)
   cout << " - selected antennas      = " << dr.selectedAntennas()    << endl;
   cout << " - nof. selected antennas = " << dr.nofSelectedAntennas() << endl;
   //
-  cout << " - shape(adc2voltage)     = " << dr.adc2voltage().shape() << endl;
+  cout << " - shape(adc2voltage)     = " << dr.ADC2Voltage().shape() << endl;
   cout << " - shape(fft2calfft)      = " << dr.fft2calfft().shape()  << endl;
 }
 
@@ -371,7 +372,7 @@ int test_conversionArrays ()
     adc2voltage.resize(nofFiles/2);
     adc2voltage = 0.25;
 
-    dr.setADC2voltage (adc2voltage);
+    dr.setADC2Voltage (adc2voltage);
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;

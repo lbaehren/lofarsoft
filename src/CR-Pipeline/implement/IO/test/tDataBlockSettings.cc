@@ -31,8 +31,6 @@
   \date 2005/07/28
 */
 
-using CR::DataBlockSettings;
-
 // -----------------------------------------------------------------------------
 
 void show_DataBlockSettings (DataBlockSettings settings)

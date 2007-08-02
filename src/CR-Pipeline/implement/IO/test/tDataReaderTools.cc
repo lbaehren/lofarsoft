@@ -27,12 +27,13 @@
 #include <casa/Arrays.h>
 #include <casa/Exceptions/Error.h>
 
-#include <lopes/IO/DataReaderTools.h>
-#include <lopes/Data/ITSCapture.h>
-#include <lopes/Data/LopesEvent.h>
+#include <templates.h>
+#include <IO/DataReaderTools.h>
+#include <Data/ITSCapture.h>
+#include <Data/LopesEvent.h>
 
 using namespace std;
-using namespace LOPES;
+using namespace CR;
 
 /*!
   \file tDataReaderTools.cc

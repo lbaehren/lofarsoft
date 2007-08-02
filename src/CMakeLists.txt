@@ -4,6 +4,7 @@ SUBDIRS (
   BDSM
   CR-Pipeline
   DAL
+  Timba
   VLT
   )
 

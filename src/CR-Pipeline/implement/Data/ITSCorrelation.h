@@ -26,6 +26,8 @@
 #include <Data/ITSMetadata.h>
 #include <IO/DataReader.h>
 
+using CR::DataReader;
+
 /*!
   \class ITSCorrelation
 
