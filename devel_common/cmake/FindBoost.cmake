@@ -9,12 +9,33 @@
 #  BOOST_LIBRARIES = location of the libraries
 #
 
+include (CheckIncludeFiles)
+include (CheckLibraryExists)
+include (CheckTypeSize)
+
+set (include_locations
+  /include
+  /usr/include
+  /usr/local/include
+  /opt/include
+  /sw/include
+  )
+
+set (lib_locations
+  /lib
+  /usr/lib
+  /usr/local/lib
+  /sw/lib
+  )
+
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-FIND_PATH (BOOST_INCLUDES config.hpp
-  PATHS /include /usr/include /usr/local/include /opt/include /sw/include
-  PATH_SUFFIXES boost boost-1_33_1
+find_path (BOOST_INCLUDES config.hpp
+  PATHS ${include_locations}
+  PATH_SUFFIXES
+  boost-1_33_1
+  boost
   )
 
 ## -----------------------------------------------------------------------------
@@ -39,15 +60,20 @@ set (BOOST_LIBRARIES "")
 
 foreach (lib ${libs})
   ## try to locate the library
-  find_library (BOOST_${lib} ${lib} ${lib}-gcc
-    PATHS /lib /usr/lib /usr/local/lib /sw/lib
-    PATH_SUFFIXES boost boost-1_33_1
+  find_library (BOOST_${lib} ${lib}-gcc-mt-1_33_1 ${lib}-gcc ${lib}
+    PATHS ${lib_locations}
+    PATH_SUFFIXES boost-1_33_1 boost
     )
   ## check if location was successful
   if (BOOST_${lib})
     list (APPEND BOOST_LIBRARIES ${BOOST_${lib}})
   endif (BOOST_${lib})
 endforeach (lib)
+
+## -----------------------------------------------------------------------------
+## Check for symbols in the library
+
+#check_library_exists (boost_python PyMem_Malloc ${lib-Locations} HAVE_PyMem_Malloc)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found

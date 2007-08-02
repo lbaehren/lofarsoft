@@ -290,7 +290,10 @@ void DataReader::init (uint const &blocksize,
   bool status (true);
   IPosition shapeADC (adc2voltage.shape());
   IPosition shapeFFT (fft2calfft.shape());
-  
+
+  /*
+    Check of the number of antennas is consistent
+  */
   if (shapeADC(0) != shapeFFT(1)) {
     cerr << "[DataReader::init] Inconsistent number of antennas!" << endl;
     cerr << " - shape(adc2voltage) = " << adc2voltage.shape() << endl;
@@ -309,8 +312,13 @@ void DataReader::init (uint const &blocksize,
       The blocksize must be set at first, because this also will determine the 
       output length of the FFT, which in turn is required for further checking
     */
-    TimeFreq::setBlocksize (blocksize);
-    setFFTLength ();
+    try {
+      TimeFreq::setBlocksize (blocksize);
+      setFFTLength ();
+    } catch (std::string message) {
+      cerr << "[DataReader::init]" << message << endl;
+      status = false;
+    }
     
     /*
       Antenna selection: by default we enable all antennas
@@ -326,12 +334,12 @@ void DataReader::init (uint const &blocksize,
       setAntennas (antennas,
 		   selectedAntennas);
     } catch (std::string message) {
-      std::cerr << "[DataReader::init]" << message << std::endl;
+      cerr << "[DataReader::init]" << message << endl;
       status = false;
     }
 
-    // book-keeping
-    nofStreams_p = adc2voltage.nelements();
+    /* book-keeping: memorize the number of data streams */
+    nofStreams_p = shapeADC(0);
     
     //   if (fftLength_p != uint(shape(0))) {
     //     cerr << "[DataReader::init] Inconsistent number of frequencies!" << endl;
@@ -727,10 +735,18 @@ void DataReader::setADC2Voltage (Vector<Double> const &adc2voltage)
   uint nofAntennas (adc2voltage.nelements());
   Matrix<double> arr (blocksize_p,nofAntennas);
 
+  cout << "[DataReader::setADC2Voltage]" << endl;
+  cout << " --> adc2voltage [Vector] = " << adc2voltage.shape() << endl;
+  cout << " --> adc2voltage [Matrix] = " << arr.shape()         << endl;
+
   // insert the input values into the full parameter matrix
   try {
-    for (uint antenna(0); antenna<nofAntennas; antenna++) {
-      arr.column(antenna) = adc2voltage;
+    uint antenna(0);
+    uint sample (0);
+    for (antenna=0; antenna<nofAntennas; antenna++) {
+      for (sample=0; sample<blocksize_p; sample++) {
+	arr(sample,antenna) = adc2voltage(antenna);
+      }
     }
   } catch (std::string message) {
     cerr << "[DataReader::setADC2Voltage] " << message << endl;

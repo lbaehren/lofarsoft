@@ -142,11 +142,15 @@ int test_DataReader ()
 
   int nofFailedTests (0);
   
-  uint blocksize (20);
+  uint blocksize (128);
   uint fftLength (blocksize/2+1);
   uint nofFiles (5);
   Vector<Double> adc2voltage (nofFiles,0.25);
   Matrix<DComplex> fft2calfft (fftLength,nofFiles,2.0);
+
+  std::cout << " -- blocksize = " << blocksize << std::endl;
+  std::cout << " -- fftLength = " << fftLength << std::endl;
+  std::cout << " -- nofFiles  = " << nofFiles  << std::endl;
 
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
@@ -161,6 +165,8 @@ int test_DataReader ()
   
   std::cout << "[2] Testing argumented constructor ..." << std::endl;
   {
+    std::cout << " --> blocksize = " << blocksize << std::endl;
+    //
     DataReader dr (blocksize);
     //
     show_parameters (dr);

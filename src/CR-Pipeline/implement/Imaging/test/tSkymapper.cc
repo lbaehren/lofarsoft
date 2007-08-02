@@ -225,7 +225,7 @@ int test_CoordinateSystem ()
   \endverbatim
 
 */
-int test_PagedImage ()
+int test_PagedImage (bool const &test_putAt=false)
 {
   cout << "\n[test_PagedImage]\n" << endl;
 
@@ -409,56 +409,58 @@ int test_PagedImage ()
   /*
     [5] In case everything else fails, the last resort is to insert the values
     pixel by pixel. While this is the securest method in terms addressing the
-    arrays, the interaction with the PagedImage is least efficient.
+    arrays, the interaction with the PagedImage is least efficient. For that
+    matter this test needs to be activated explicitely.
   */
 
-
-//   cout << " [5] Insert one pixel value at a time ... " << endl;
-//   try {
-//     int nofAxes (5);
-//     int nofChannels (128);
-//     IPosition shape (nofAxes,40,40,20,10,nofChannels);
-//     TiledShape tile (shape);
-
-//     cout << " --> creating the image of shape " << shape <<  " ..." << endl;
-//     PagedImage<float> image (tile,
-// 			     skymapper.coordinateSystem(),
-// 			     String("tPagedImage04.img"));
-//     // ... and display some basic properties
-//     show_PagedImage (image); 
-
-//     int coord (0);
-//     int nofPixels (shape(0)*shape(1)*shape(2));
-//     Matrix<float> pixels (nofPixels,nofChannels);
-//     IPosition start (5);
-//     ProgressBar progress (shape(0));
-
-//     for (start(3)=0; start(3)<shape(3); start(3)++) {
+  if (test_putAt) {
+    cout << " [5] Insert one pixel value at a time ... " << endl;
+    try {
+      int nofAxes (5);
+      int nofChannels (128);
+      IPosition shape (nofAxes,40,40,20,10,nofChannels);
+      TiledShape tile (shape);
       
-//       pixels = start(3);
-//       coord  = 0;
+      cout << " --> creating the image of shape " << shape <<  " ..." << endl;
+      PagedImage<float> image (tile,
+			       skymapper.coordinateSystem(),
+			       String("tPagedImage04.img"));
+      // ... and display some basic properties
+      show_PagedImage (image); 
       
-//       cout << " -- filling in pixel values for block " << start(3) << " ..."
-// 	   << endl;
-
-//       for (start(0)=0; start(0)<shape(0); start(0)++) {        // Longitude
-// 	for (start(1)=0; start(1)<shape(1); start(1)++) {      // Latitude
-// 	  for (start(2)=0; start(2)<shape(2); start(2)++) {    // Radius
-// 	    for (start(4)=0; start(4)<shape(4); start(4)++) {  // Frequency
-// 	      image.putAt (pixels(coord,start(4)),start);
-// 	    }
-// 	    coord++;
-// 	  }
-// 	}
-// 	progress.update(start(0)+1);
-//       }
-//     }
-    
-//   } catch (AipsError x) {
-//     cerr << "[tSkymapper::test_PagedImage] " << x.getMesg() << endl;
-//     nofFailedTests++;
-//   }
-
+      int coord (0);
+      int nofPixels (shape(0)*shape(1)*shape(2));
+      Matrix<float> pixels (nofPixels,nofChannels);
+      IPosition start (5);
+      ProgressBar progress (shape(0));
+      
+      for (start(3)=0; start(3)<shape(3); start(3)++) {
+	
+	pixels = start(3);
+	coord  = 0;
+	
+	cout << " -- filling in pixel values for block " << start(3) << " ..."
+	     << endl;
+	
+	for (start(0)=0; start(0)<shape(0); start(0)++) {        // Longitude
+	  for (start(1)=0; start(1)<shape(1); start(1)++) {      // Latitude
+	    for (start(2)=0; start(2)<shape(2); start(2)++) {    // Radius
+	      for (start(4)=0; start(4)<shape(4); start(4)++) {  // Frequency
+		image.putAt (pixels(coord,start(4)),start);
+	      }
+	      coord++;
+	    }
+	  }
+	  progress.update(start(0)+1);
+	}
+      }
+      
+    } catch (AipsError x) {
+      cerr << "[tSkymapper::test_PagedImage] " << x.getMesg() << endl;
+      nofFailedTests++;
+    }
+  }
+  
   return nofFailedTests;
 }
 
@@ -616,7 +618,7 @@ int main (int argc,
   string lopesData ("/data/LOPES/example.event");
   uint blocksize (1024);
   
-//     nofFailedTests += test_CoordinateSystem ();
+  nofFailedTests += test_CoordinateSystem ();
   nofFailedTests += test_PagedImage ();
 //   nofFailedTests += test_Skymapper ();
 //   nofFailedTests += test_processing (lopesData,

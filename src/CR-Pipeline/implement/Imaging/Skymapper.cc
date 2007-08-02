@@ -341,12 +341,23 @@ namespace CR {  // Namespace CR -- begin
     */
     if (status) {
       // Declare additional variables
-//       int coord(0);
       int timeAxisStride (coordinates_p.timeAxisStride());
       IPosition shape (coordinates_p.shape());
       IPosition start  (shape.nelements(),0);
       IPosition stride (shape.nelements(),1);
 
+      // Set up temporary array used to insert the output from the Beamformer
+      // into the pixel array of the PagedImage; this approach is not too 
+      // efficient, so a better method needs to be found.
+      
+      casa::Array<double> tmp (IPosition(5,
+					 shape(0),
+					 shape(1),
+					 shape(2),
+					 1,
+					 1)
+			       );
+      
       // Adjust the slicing operators
       start(3) = timeAxisStride*nofProcessedBlocks_p;
 
