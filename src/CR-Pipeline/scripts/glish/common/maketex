@@ -1,0 +1,62 @@
+#!/bin/csh
+cat >! results1.tex << EOF
+\documentclass[a4paper]{article}
+\usepackage{psfig,a4wide}
+\parindent=0pt
+\begin{document}
+EOF
+
+set ff = ( `'ls' -1 guipipeline-layout-*.ps | gawk '{gsub("[-.]"," "); print $3}' | sort -n`)
+
+echo Found files numbers: $ff
+
+foreach f ( $ff )
+
+cat >> results1.tex << EOF
+$f\quad\begin{minipage}[h]{0.26\textwidth}\psfig{figure=guipipeline-layout-$f.ps,width=\textwidth,angle=-90}\end{minipage}
+\begin{minipage}[h]{0.36\textwidth}\psfig{figure=guipipeline-distance-$f.ps,width=\textwidth,angle=-90}\end{minipage}
+\begin{minipage}[h]{0.36\textwidth}\psfig{figure=guipipeline-All-$f.ps,width=\textwidth,angle=-90}\end{minipage}
+EOF
+
+#@ f = $f + 1
+
+end
+
+
+cat >> results1.tex << EOF
+\end{document}
+EOF
+
+
+cat >! results2.tex << EOF
+\documentclass[a4paper]{article}
+\usepackage{psfig,a4wide}
+\parindent=0pt
+\begin{document}
+EOF
+
+foreach f ( $ff )
+
+cat >> results2.tex << EOF
+$f\quad\begin{minipage}[h]{0.32\textwidth}\psfig{figure=guipipeline-F-$f.ps,width=\textwidth,angle=-90}\end{minipage}
+\begin{minipage}[h]{0.32\textwidth}\psfig{figure=guipipeline-CC-$f.ps,width=\textwidth,angle=-90}\end{minipage}
+\begin{minipage}[h]{0.32\textwidth}\psfig{figure=guipipeline-X-$f.ps,width=\textwidth,angle=-90}\end{minipage}
+
+\phantom{Hallo}\\
+
+EOF
+
+end
+
+
+cat >> results2.tex << EOF
+\end{document}
+EOF
+
+latex results1.tex ; dvips results1 
+gv results1.ps &
+latex results2.tex ; dvips results2
+gv results2.ps &
+
+#lpr -Ptek8200 results2.ps
+

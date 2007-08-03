@@ -1,0 +1,2 @@
+#
+/sbin/ifconfig | gawk '/inet /{sub("^[^:]*:",""); if ($1!="127.0.0.1") {print $1;exit}}'

@@ -1,0 +1,13 @@
+#!/bin/bash
+if [ -z "$1" ]; then exit; fi # Ende ohne Parameter
+for file in $*
+do
+  exist=`ls $file`;
+  if [ "$exist" != "" ]; then
+echo $file
+    pstopnm -portrait -xmax 1224 -ymax 1584 ${file} #-xmax 612 -ymax 792 ${file}
+    #pstopnm -landscape -xmax 1224 -ymax 1584 ${file} #-xmax 612 -ymax 792
+    ppmtogif `echo "${file}" | sed -e {'s#\.ps$#001\.ppm#}'` > `echo "${file}" | sed -e {'s#\.ps$#\.gif#}'` #ppmtojpeg
+    rm `echo "${file}" | sed -e {'s#\.ps$#001\.ppm#}'`
+  fi
+done

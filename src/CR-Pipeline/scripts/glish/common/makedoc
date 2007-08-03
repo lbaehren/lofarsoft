@@ -1,0 +1,133 @@
+#!/bin/csh
+
+# $Id: makedoc,v 1.1 2007/01/18 23:13:30 bahren Exp $
+
+# ------------------------------------------------------------------------------
+# Change to the LOPES code directory and create a subdirectory to take up the
+# generated documentation.
+# ------------------------------------------------------------------------------
+
+set LOPESCODEDIR=/home/bahren/research/coding/lopestools/lopescasa/code/lopes/oldGlish/code
+
+cd $LOPESCODEDIR
+set files = ( utilities.g globals-const.g observatory-data.g globals.g `gawk -F "'" '/^ *include +add_dir/ {print $2}' start.g`)
+if ! -d Doc mkdir Doc
+
+# ------------------------------------------------------------------------------
+# Set up the necessary file names for the HTML documentation.
+# ------------------------------------------------------------------------------
+
+set ifile0=index.html
+set lfile0=changelogs.html
+set afile0=alphabeticindex.html
+set tfile0=tmp.html
+
+set ifile=Doc/$ifile0
+set lfile=Doc/$lfile0
+set afile=Doc/$afile0
+set tfile=Doc/$tfile0
+
+if -f $tfile rm -f $tfile
+touch $tfile
+
+# ------------------------------------------------------------------------------
+# Write the header of HTML documentation index file.
+# ------------------------------------------------------------------------------
+
+cat <<EOF >! $ifile
+<html><head><title>LOPES Tools Documentation</title></head><body>
+<h1>Table of Contents</h1>
+<ul>
+<li><b>LOPES Tools online documentation</b>
+<ul>
+<li>[<a href=http://www.astron.nl/~bahren/coding/lopestools/html/>Main page]</a>
+<li>[<a href=http://www.astron.nl/~bahren/coding/lopestools/html/annotated.html>Compound List</a>] classes, structs, unions and interfaces with brief descriptions
+<li>[<a href=http://www.astron.nl/~bahren/coding/lopestools/html/files.html>File List</a>] documented files with brief descriptions
+</ul>
+<li><b><a href=alphabeticindex.html>Alphabetic index of LOPES functions and
+variables (Glish) </a></b>
+<li><b>Documentation of functions and variables sorted by Glish files.</b>
+<ul>
+EOF
+
+cat <<EOF >! $afile
+<html><head><title>Alphabetic Index of LOPES Tools Functions and Variables</title></head><body>
+<h1>Alphabetic Index</h1>
+<ul>
+EOF
+
+# ------------------------------------------------------------------------------
+# Create the HTML documentation for the Glish code files.
+# ------------------------------------------------------------------------------
+
+foreach f ( $files )
+echo "Making documentation for $f"
+echo "<li>[<a href=$f:r.src.html>View</a>,<a href=../$f>Edit</a>,<a href=$f:r.idx.html>Index</a>,<a href=$f:r.aidx.html>Sorted Index</a>]: <b><a href=$f:r.doc.html>$f</a></b>" >> $ifile
+
+gawk -f makedoc.awk $f
+
+set sfile0 = $f:r.aidx.html
+set sfile = Doc/$sfile0
+
+cat <<EOF > $sfile
+<html><head><title>Alphabetic Index of Functions and Variables in $f</title></head><body>
+<h1>Alphabetic Index of <a href=../$f>$f</a></h1>
+<ul>
+EOF
+
+grep "<li>" Doc/$f:r.idx.html | sort -b -d -f >! $sfile.tmp
+cat $sfile.tmp >> $tfile
+
+cat $sfile.tmp <<EOF >> $sfile 
+</ul>
+</body>
+</html>
+EOF
+
+# Make sure hyperlinks are perserved
+
+set docfilename = `echo $sfile | sed s/aidx/doc/`
+cat $docfilename | sed s/"a&nbsp;href"/"a href"/g > tmp.doc && mv -f tmp.doc $docfilename
+
+# Clean up
+
+rm -f $sfile.tmp
+end
+
+sort -b -d -f $tfile >! $tfile.s
+
+# ------------------------------------------------------------------------------
+# Write the HTML footer for a file documentation page.
+# ------------------------------------------------------------------------------
+
+cat $tfile.s <<EOF >> $afile 
+</ul>
+</body>
+</html>
+EOF
+
+# ------------------------------------------------------------------------------
+# Cleaning up
+# ------------------------------------------------------------------------------
+
+rm -f $tfile $tfile.s
+
+# ------------------------------------------------------------------------------
+# Move the generated documentation to its final destination.
+# ------------------------------------------------------------------------------
+
+#if ($?1) then
+#  set DOCDIR=$1
+#  echo "Moving HTML documentation to its final destination."
+#  mv Doc $DOCDIR
+#endif
+
+# ------------------------------------------------------------------------------
+# Create the changelog
+# ------------------------------------------------------------------------------
+
+#./makelog $LOPESHOME/lopescasa
+#./makelog $LOPESHOME/lopesprog
+#./makelog $LOPESHOME/lopesdaq
+#./makelog $LOPESHOME/lopeslatex
+#./makelog $LOPESHOME/lopesdoc

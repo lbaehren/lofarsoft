@@ -1,0 +1,67 @@
+#!/bin/csh
+if ( ( X$1 == X'-h' ) || ( X$1X == XX ) )  then
+cat <<EOF
+
+itssplit
+------------------------------------------------------------------------
+This script will split ITS data files into small parts and copy
+one chung of it into a separate directory that can be retrieved
+as a (much smaller) ITS data file/directory.
+
+Usage: itssplit itsdir outdir [num]
+
+itsdir - the directory with ITS data files
+outdir - Directory name which will be used to store temporay split files.
+         The final results will be in outdir.its
+num    - Which chunk to store. Chunks are numbered aa, ab, ac, etc...
+
+EOF
+exit
+endif
+
+set indir=$1
+set outdir1=$2
+set outdir2=$2.its
+set num=aa
+set len=128k
+if ( $3X != X ) set num=$3
+ 
+echo Splitting files from dir $indir to directory $outdir2
+echo Chunk size = $len 
+echo Chunk number $num 
+
+set nowdir = `pwd`
+
+cd $indir 
+set files = ( e??.*.dat )
+set indir2 = `pwd`
+
+cd $nowdir
+
+if ( ! -d $outdir1 ) then
+  echo Making new directory $outdir1
+  mkdir $outdir1
+endif
+
+if ( ! -d $outdir2 ) then
+  echo Making new directory $outdir2
+  mkdir $outdir2
+endif
+
+cd $outdir1
+
+cp $indir2/experiment.meta $nowdir/$outdir2
+echo -n Splitting Files:
+
+foreach f ( $files )
+  set ant = $f:r:r
+  set ext = $f:r:e
+  echo -n " "$ant
+  split --bytes=$len $indir2/$f split-$ant.
+  cp split-$ant.$num $nowdir/$outdir2/$f
+  rm -f split-$ant.*
+end
+echo " - Done."
+cd $nowdir
+rmdir $outdir1
+$LOPESCODEDIR/itstolopes $outdir2

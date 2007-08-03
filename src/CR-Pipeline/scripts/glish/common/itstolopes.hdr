@@ -1,0 +1,18 @@
+#Measurement: 1
+#Project: ITS
+#DataType: TIM40f
+#FrequencyUnit: 1e6
+#SamplerateUnit: 1e6
+#Samplerate: 80
+#Bandwidth: 40
+#Weather: Undefined
+#ADCMaxChann: 2048
+#ADCMinChann: -2048
+#NyquistZone: 1
+#MaxVolt: 1
+#LocalCalFile: empty.tab
+#AntennaCalFile: empty.tab
+#Observatory: LOFAR-ITS
+#Location: Exloo (NL)
+#TIMoffset: 0
+#CalFileFreqUnit: 1e6

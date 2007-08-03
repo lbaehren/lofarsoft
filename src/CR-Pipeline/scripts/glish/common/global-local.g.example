@@ -1,0 +1,27 @@
+
+########################################################################
+########################################################################
+#
+#  File with site specific changes of global variables set in globals.g 
+#  like pathnames etc.
+#
+#  Add your own changes here 
+#
+#  Do _not_ put global-local.g on the cvs-server!
+#
+#  If you introduce a new global variables, put a value for the standard
+#  installation in globals.g and put your value in here (if it differs).
+#
+########################################################################
+########################################################################
+
+#-----------------------------------------------------------------------
+# E.g. if you want to use the debug binaries and not the optimised ones
+# you can, e.g., uncomment the following line:
+#-----------------------------------------------------------------------
+
+# globalconst.LOPESBIND := concat_dir(globalconst.LOPESCASA,'linux/bindbg')
+
+
+
+

@@ -1,0 +1,43 @@
+#!/bin/csh
+cat >! results.tex << EOF
+\documentclass[a4paper]{article}
+\usepackage{psfig,a4wide}
+\setlength{\textheight}{24cm}
+\setlength{\topmargin}{0.0cm}
+\parindent=0pt
+\begin{document}
+EOF
+
+set f = 1
+
+while ( -f "CGpipeline-$f-CC.ps" ) 
+
+cat >> results.tex << EOF
+$f\quad\begin{minipage}[h]{0.32\textwidth}\psfig{figure=CGpipeline-$f-all.ps,width=\textwidth,angle=-90}\end{minipage}
+\$\;\$\begin{minipage}[h]{0.32\textwidth}\psfig{figure=CGpipeline-$f-CC.ps,width=\textwidth,angle=-90}\end{minipage}
+\$\;\$\begin{minipage}[h]{0.32\textwidth}\psfig{figure=CGpipeline-$f-X.ps,width=\textwidth,angle=-90}\end{minipage}\\
+EOF
+
+@ f = $f + 1
+
+if (( ! -f "CGpipeline-$f-CC.ps" ) && ($f < 150 )) then 
+  set f = 151
+endif
+if (( ! -f "CGpipeline-$f-CC.ps" ) && ($f < 300 )) then 
+  set f = 301
+endif
+if (( ! -f "CGpipeline-$f-CC.ps" ) && ($f < 450 )) then 
+  set f = 451
+endif
+
+end
+
+
+cat >> results.tex << EOF
+\end{document}
+EOF
+
+
+latex results.tex ; dvips results 
+
+

@@ -1,0 +1,79 @@
+#!/bin/csh
+
+cd $LOPESCODEDIR
+
+if ( X$1X == X-hX) then 
+
+cat <<EOF 
+
+trigger: Starts a (glish) GUI to generate a software trigger for ITS
+that can be redirected to a remote site. It also starts an X-terminal
+on a another (local) machine which runs the glish interpreter and
+which will duplicate the trigger output messages and can also be sued
+to chat with the trigger GUI.
+
+usage: 
+
+trigger         will start glish window on the current X-windows display (may be
+                a remote station if port forwarding has been used with ssh) and 
+                the trigger gui on the local console of the machine where the
+                command has been invoked.
+
+
+trigger -gui <DISPLAY>   will send the trigger GUI to the remote station. Where
+                         <DISPLAY> indicates the X-windows DISPLAY variable, 
+                         e.g. dop37.astron.nl:0.0 or 10.87.2.71:0.0
+
+trigger -console <DISPLAY> will send the trigger GUI to the local station and
+                           the glish console to a remote station. <DISPLAY> 
+                           indicates the X-windows DISPLAY variable, 
+                           e.g. dop37.astron.nl:0.0 or 10.87.2.71:0.0
+                           if <DISPLAY> is omitted a default console at 
+                           ASTRON is used.
+
+trigger -gui <DISPLAY1>   -console <DISPLAY2>    is also possible.
+
+trigger -gui nancay       will set the display address of the Nancay X-terminal.
+
+EOF
+exit
+endif
+
+set console = `hostname -i|tr " " ":"`"0.0"
+set gui = $DISPLAY
+
+if (X$1X == X-guiX) then
+set gui = $2
+endif
+
+if (X$3X == X-guiX) then
+set gui = $4
+endif
+
+if (X$1X == X-consoleX) then
+set console = $2
+endif
+
+if (X$3X == X-consoleX) then
+set console = $4
+endif
+
+if ( $gui == "nancay" ) then
+  set gui=193.55.144.135:0.0
+endif
+
+# report the DISPLAY settings for the console window and the GUI
+
+echo "Console DISPLAY = $console"
+echo "GUI     DISPLAY = $gui"
+
+# check for the type of shell; depending on this we require a different syntax
+# for the export of DISPLAY
+
+if ( `echo $SHELL | tr '/' '\n' | grep csh` == "csh" ) then
+  xterm -display $console -T "ITS Trigger" -e "setenv DISPLAY $gui; glish -l $LOPESCODEDIR/starttrigger.g" &
+endif
+
+if ( `echo $SHELL | tr '/' '\n' | grep bash` == "bash" ) then
+  xterm -display $console -T "ITS Trigger" -e "export DISPLAY=$gui; glish -l $LOPESCODEDIR/starttrigger.g" &
+endif

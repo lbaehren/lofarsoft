@@ -1,0 +1,25 @@
+
+########################################################################
+########################################################################
+#
+#  Personalized startup script
+#
+# Customize your environment in this file!
+#
+########################################################################
+########################################################################
+
+# -------------------------------------------------------
+# E.g. include all the stuff needed to run crresults
+# (The way I am doing it. A.H.)
+# -------------------------------------------------------
+
+# data.load(8,F,2);
+##use this function for code that is in the lopescasa directory tree:
+# linclude('quality.g'); 
+# include '../guipipeline/guipipeline-results.all.g';
+# include '../guipipeline/guipipeline-results.data.g';
+
+
+
+

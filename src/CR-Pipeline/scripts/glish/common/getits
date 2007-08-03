@@ -1,0 +1,43 @@
+#!/bin/csh
+
+echo Will copy ITS files to your local directory
+echo "usage: getits <dir>"
+echo "where <dir> is the directory on http://astron-buinen.nema.rug.nl/data/"
+echo "The files will be copied to the same directory in your current path."
+
+# --------------------------------------------------------------------
+# Set the path variables for the data directory and the LOPES Tools
+# code directory.
+# --------------------------------------------------------------------
+
+set cdir = $LOPESCODEDIR
+set dir = $1
+
+# --------------------------------------------------------------------
+# Create the local directory for the data
+# --------------------------------------------------------------------
+
+if ! -e $dir mkdir $dir
+cd $dir
+
+# --------------------------------------------------------------------
+# Get the experiment meta file and extract the data file names
+# --------------------------------------------------------------------
+
+set BASEURL = "http://astron-buinen.nema.rug.nl/data"
+set METAFILE = "experiment.meta"
+
+wget -c $BASEURL/$dir/$METAFILE
+
+set FILES = `cat $METAFILE | grep $dir | grep file | sed s/$dir"\/"/"\n"/g | grep -v file`
+
+foreach FILE ( $FILES )
+  set URL = $BASEURL/$dir/$FILE
+  wget -c $URL
+end
+
+# --------------------------------------------------------------------
+# Convert the ITS metafile to a LOPES headerfile
+# --------------------------------------------------------------------
+
+$cdir/itstolopes .

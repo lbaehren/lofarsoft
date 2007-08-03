@@ -1,0 +1,36 @@
+#!/bin/csh
+cat >! results.tex << EOF
+\documentclass[a4paper]{article}
+\usepackage{psfig,a4wide}
+\setlength{\textheight}{24cm}
+\setlength{\topmargin}{0.0cm}
+\parindent=0pt
+\begin{document}
+EOF
+
+set f = 1
+
+while ( -f "guipipeline-layout-$f.ps" ) 
+
+cat >> results.tex << EOF
+$f\quad\begin{minipage}[h]{0.32\textwidth}\psfig{figure=guipipeline-F-$f.ps,width=\textwidth,angle=-90}\end{minipage}
+\$\;\$\begin{minipage}[h]{0.32\textwidth}\psfig{figure=guipipeline-CC-$f.ps,width=\textwidth,angle=-90}\end{minipage}
+\$\;\$\begin{minipage}[h]{0.32\textwidth}\psfig{figure=guipipeline-X-$f.ps,width=\textwidth,angle=-90}\end{minipage}\\
+$f\quad\begin{minipage}[h]{0.26\textwidth}\psfig{figure=guipipeline-layout-$f.ps,width=\textwidth,angle=-90}\end{minipage}
+\quad\begin{minipage}[h]{0.34\textwidth}\psfig{figure=guipipeline-distance-$f.ps,width=\textwidth,angle=-90}\end{minipage}
+\quad\begin{minipage}[h]{0.35\textwidth}\psfig{figure=guipipeline-All-$f.ps,width=\textwidth,angle=-90}\end{minipage}\\
+EOF
+
+@ f = $f + 1
+
+end
+
+
+cat >> results.tex << EOF
+\end{document}
+EOF
+
+
+latex results.tex ; dvips results 
+gv results.ps &
+

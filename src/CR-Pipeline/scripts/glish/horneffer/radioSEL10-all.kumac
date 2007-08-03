@@ -1,0 +1,27 @@
+*****************************************************************************
+*
+*  Purpose: PAW kumac to generate a selection output for 2005 so that the 
+*           data can be read into Glish
+*           Based on the original by S.Nehls
+*  Author : A.Horneffer
+*  Date   : 7.04.2006
+*
+*****************************************************************************
+chain -sel10
+chain sel10 /lxdata/dst/sel10/V11610/SEL10.04387f01-04650f26.hbook /lxdata/dst/sel10/V11610/SEL10.04651f01-04870f15.hbook /lxdata/dst/sel10/V11610/SEL10.04871f02-05122f06.hbook /lxdata/dst/sel10/V11610/SEL10.05320f01-05459f13.hbook /lxdata/dst/sel10/V11610/SEL10.05460f01-05522f17.hbook /lxdata/dst/sel10/V11610/SEL10.05523f01-05547f03.hbook
+
+cd //sel10
+
+output 50 /lxdata/temp1/horneff/event-listSEL10-05-a.dat
+n/scan 3 50000<=ymd<=60000 ! ! ! int(irun) int(ieve) int(gt) int(mmn) int(ymd) int(hms) int(clu0) az 
+
+output 51 /lxdata/temp1/horneff/event-listSEL10-05-b.dat
+n/scan 3 50000<=ymd<=60000 ! ! ! int(gt) ze xc yc size age nmu lmuo 
+
+output 52 /lxdata/temp1/horneff/event-listSEL10-05-c.dat
+n/scan 3 50000<=ymd<=60000 ! ! ! int(gt) t0 int(trgs) xcg ycg azg zeg sizeg 
+
+output 53 /lxdata/temp1/horneff/event-listSEL10-05-d.dat
+n/scan 3 50000<=ymd<=60000 ! ! ! int(gt) ageg sizmg int(fanka)
+
+return

@@ -1,0 +1,133 @@
+#!/bin/bash
+
+# $Id: itstolopes,v 1.1 2006/03/06 15:34:52 horneff Exp $
+
+# This script converts an ITS meta file (usually experiment.meta) to a lopes
+# header file (lopeshdr.hdr).
+# Features:
+# - The program prints a help message if no argument is given.
+# - You should supply the name of an ITS header file or its directory as the
+#   first argument.
+# - If the necessary conversion header and rule files are not in place, an
+#   attempt is made to provide substitutes.
+# Examples:
+# - ./itstolopes /media/sda1/2005.05/agroSensors_20050527_01_1 lopeshdr.hdr itstolopes_antpos_20050330.csv
+
+if [[ -z $1 || $1 == "-h" || $1 == "--help" ]]
+then
+	echo "ITS to LOPES, version 2004-12-06"
+	echo "Usage: $(basename $0) [DIR | ITSFILE] [LOPESFILE] [ANTFILE]"
+	echo ""
+	echo "    This script converts an ITS meta file (usually experiment.meta)"
+	echo "    to a LOPES header file (lopeshdr.hdr)."
+	echo "    The first argument can be an ITS meta file or the directory it is in."
+	echo "    The second argument is optional and defaults to 'lopeshdr.hdr' in the"
+	echo "    directory of the ITS meta file."
+	echo "    The third argument can be used to include a non-default antenna"
+	echo "    position file (which for the time being needs to be located in"
+	echo "    LOPESCODEDIR); if used the fully specified path to the data file"
+ 	echo "    must be given."
+	exit 1;
+fi
+
+# Check if our meta file is somewhere out there
+METAFILE="experiment.meta"
+OUTFILE="lopeshdr.hdr"
+if [[ -d $1 ]]
+then
+	METAPATH="$1/$METAFILE"
+	OUTPATH="$1/$OUTFILE"
+else
+	METAPATH="$1"
+	OUTPATH="$(dirname $1)/$OUTFILE"
+fi
+if [[ ! -e $METAPATH ]]
+then
+	echo "Metafile '$METAPATH' not found. Exiting."
+	exit 1;
+fi
+
+if [[ $2 ]]
+then
+	OUTPATH="$1/$2"
+fi
+
+if [[ $3 ]]
+then
+    ANTFILE="$3"
+    ANTPATH="$ANTFILE"
+else 
+    ANTFILE="itstolopes_antpos.dat"
+    ANTPATH="$LOPESCODEDIR/$ANTFILE"
+fi
+
+# Find necessary files for conversion
+AWKFILE="itstolopes.awk"
+AWKPATH="$LOPESCODEDIR/$AWKFILE"
+if [[ ! -e $AWKPATH ]]
+then
+	echo -n "Directory LOPESCODEDIR does not contain $AWKFILE."
+	LOCATE=$(locate -e $AWKFILE|head -1)
+	if [[ ! $0 || -z $LOCATE ]]
+	then
+		echo " Exiting."
+		exit 1;
+	fi
+	echo ""
+	echo "Using $LOCATE instead."
+	AWKPATH=$LOCATE
+fi
+
+if [[ ! -e $ANTPATH ]]
+then
+	echo -n "Directory LOPESCODEDIR does not contain $ANTFILE."
+	LOCATE=$(locate -e $ANTFILE|head -1)
+	if [[ ! $0 || -z $LOCATE ]]
+	then
+		echo " Exiting."
+		exit 1;
+	fi
+	echo ""
+	echo "Using $LOCATE instead."
+	ANTPATH=$LOCATE
+fi
+
+HDRFILE="itstolopes.hdr"
+HDRPATH="$LOPESCODEDIR/$HDRFILE"
+if [[ ! -e $HDRPATH ]]
+then
+	echo -n "Directory LOPESCODEDIR does not contain $HDRFILE."
+	LOCATE=$(locate -e $HDRFILE|head -1)
+	if [[ ! $0 || -z $LOCATE ]]
+	then
+		echo " Exiting."
+		exit 1;
+	fi
+	echo ""
+	echo "Using $LOCATE instead."
+	HDRPATH=$LOCATE
+fi
+
+# Report value of used variables (uncomment for debugging)
+#echo " ANTPATH  : $ANTPATH";
+#echo " METAPATH : $METAPATH";
+#echo " HDRPATH  : $HDRPATH";
+#echo " OUTPATH  : $OUTPATH";
+
+# Remove empty lines from metafile
+cat $METAPATH | sed '/^$/d' > meta.tmp && mv meta.tmp $METAPATH
+
+# Do the conversion
+printf "Converting ITS header $METAPATH to LOPES format ... "
+gawk -f $AWKPATH $ANTPATH $HDRPATH $METAPATH > $OUTPATH
+echo "Done."
+
+#Exit gracefully
+if [[ $? == 0 ]]
+then 
+	echo "Output written to $OUTPATH."
+	exit 0
+else
+	echo "Error processing file."
+	exit $?
+fi

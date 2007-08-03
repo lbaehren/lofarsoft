@@ -1,0 +1,6 @@
+#!/bin/csh
+if ( X$1X != XX) then
+  xterm -display 10.87.2.71:0.0 -T "ITS Trigger" -e "setenv DISPLAY $1; glish -l $LOPESCODEDIR/starttrigger.g" &
+else
+  xterm -display 10.87.2.71:0.0 -T "ITS Trigger" -e "glish -l $LOPESCODEDIR/starttrigger.g" &
+endif
