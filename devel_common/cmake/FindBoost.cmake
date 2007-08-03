@@ -41,7 +41,39 @@ find_path (BOOST_INCLUDES config.hpp
 ## -----------------------------------------------------------------------------
 ## Check for the various components of the library
 
+## The libraries tend to come in different name variants, so we need to take this
+## into account during the search. The implementation below is not yet the most
+## efficient solution; instead of listing all the variants explicitely, the more
+## elegant solution would be to append the different suffixes at the
+## "find_library()" command.
+
 set (libs
+  boost_date_time-gcc-1_33_1
+  boost_filesystem-gcc-1_33_1
+  boost_iostreams-gcc-1_33_1
+  boost_program_options-gcc-1_33_1
+  boost_python-gcc-1_33_1
+  boost_regex-gcc-1_33_1
+  boost_serialization-gcc-1_33_1
+  boost_signals-gcc-1_33_1
+  boost_test_exec_monitor-gcc-1_33_1
+  boost_thread-gcc-1_33_1
+  boost_unit_test_framework-gcc-1_33_1
+  boost_wave-gcc-1_33_1
+  ##
+  boost_date_time-gcc
+  boost_filesystem-gcc
+  boost_iostreams-gcc
+  boost_program_options-gcc
+  boost_python-gcc
+  boost_regex-gcc
+  boost_serialization-gcc
+  boost_signals-gcc
+  boost_test_exec_monitor-gcc
+  boost_thread-gcc
+  boost_unit_test_framework-gcc
+  boost_wave-gcc
+  ## (potentially) older versions
   boost_date_time
   boost_filesystem
   boost_iostreams
@@ -60,7 +92,7 @@ set (BOOST_LIBRARIES "")
 
 foreach (lib ${libs})
   ## try to locate the library
-  find_library (BOOST_${lib} ${lib}-gcc-mt-1_33_1 ${lib}-gcc ${lib}
+  find_library (BOOST_${lib} ${lib}
     PATHS ${lib_locations}
     PATH_SUFFIXES boost-1_33_1 boost
     )

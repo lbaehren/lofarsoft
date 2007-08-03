@@ -18,10 +18,9 @@
 ##
 
 set (include_locations
-  /casacore
-  /opt/casacore
-  /opt/casacore/include
-  /sw/share/casacore
+  /usr/include/casacore
+  /usr/local/include/casacore
+  /sw/include/casacore
   ./../casacore
   ./../external/casacore
   ./../../casacore
