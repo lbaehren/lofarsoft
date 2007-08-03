@@ -10,6 +10,12 @@
 ##  CASA_LIBRARIES    = Libraries of the casacore modules
 ##  HAVE_CASACORE     = Do we have both headers and libraries of casacore?
 ##
+## __TODO__
+##
+##  - If both CASA and casacore are present on a system, this scripts tends to
+##    find the CASA libraries instead of the casacore libraries; we need to come
+##    up with a method to separate both installations from each other.
+##
 
 set (include_locations
   /casacore
@@ -237,7 +243,7 @@ endif (CASACORE_msvis)
 ## different.
 
 foreach (casacore_lib ${casacore_libs})
-  find_library (CASACORE_lib${casacore_lib} ${casacore_lib} casa_${casacore_lib}
+  find_library (CASACORE_lib${casacore_lib} casa_${casacore_lib} ${casacore_lib}
     PATHS ${lib_locations}
   )
 endforeach (casacore_lib)
@@ -293,6 +299,22 @@ endif (CASACORE_libcomponents)
 if (CASACORE_liblattices)
   list (APPEND CASACORE_LIBRARIES ${CASACORE_liblattices})
 endif (CASACORE_liblattices)
+
+if (CASACORE_libms)
+  list (APPEND CASACORE_LIBRARIES ${CASACORE_libms})
+endif (CASACORE_libms)
+
+if (CASACORE_libimages)
+  list (APPEND CASACORE_LIBRARIES ${CASACORE_libimages})
+endif (CASACORE_libimages)
+
+if (CASACORE_libmsfits)
+  list (APPEND CASACORE_LIBRARIES ${CASACORE_libmsfits})
+endif (CASACORE_libmsfits)
+
+if (CASACORE_libmsvis)
+  list (APPEND CASACORE_LIBRARIES ${CASACORE_libmsvis})
+endif (CASACORE_libmsvis)
 
 ## -----------------------------------------------------------------------------
 ## If detection successful, register package as found
