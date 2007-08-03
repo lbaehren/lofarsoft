@@ -45,7 +45,7 @@ find_path (BOOST_INCLUDES config.hpp
 ## The libraries tend to come in different name variants, so we need to take this
 ## into account during the search. 
 
-set (libs
+set (boost_libraries
   boost_date_time
   boost_filesystem
   boost_iostreams
@@ -62,18 +62,17 @@ set (libs
 
 set (BOOST_LIBRARIES "")
 
-foreach (lib ${libs})
-  foreach (lib_variant ${lib}-gcc-1_33_1 ${lib}-gcc ${lib})
-    ## try to locate the library
-    find_library (BOOST_${lib_variant} ${lib_variant}
-      PATHS ${lib_locations}
-      PATH_SUFFIXES boost-1_33_1 boost
-      )
-    ## check if location was successful
-    if (BOOST_${lib_variant})
-      list (APPEND BOOST_LIBRARIES ${BOOST_${lib_variant}})
-    endif (BOOST_${lib_variant})
-  endforeach (lib_variant)
+foreach (lib ${boost_libraries})
+  ## try to locate the library
+  find_library (BOOST_${lib} ${lib}-gcc42-1_34_1 ${lib}-gcc-1_33_1 ${lib}-gcc ${lib}
+    PATHS ${lib_locations}
+    PATH_SUFFIXES boost-1_34_1 boost-1_33_1 boost
+    )
+  ## check if location was successful
+  if (BOOST_${lib})
+    list (APPEND BOOST_LIBRARIES ${BOOST_${lib}})
+    set (continue_search 0)
+  endif (BOOST_${lib})
 endforeach (lib)
 
 ## -----------------------------------------------------------------------------
@@ -82,23 +81,21 @@ endforeach (lib)
 ## We need this additional step especially for Python binding, as some of the
 ## required symbols might not be in place.
 
-if (BOOST_boost_python-gcc-1_33_1)
-  string (REGEX REPLACE libboost_python-gcc-1_33_1.so "" BOOST_LIBRARIES_DIR ${BOOST_boost_python-gcc-1_33_1})
-endif (BOOST_boost_python-gcc-1_33_1)
+find_library (libboost_python boost_python-gcc-1_33_1 boost_python-gcc boost_python
+  PATHS ${lib_locations}
+  PATH_SUFFIXES boost-1_34_1 boost-1_33_1 boost
+  )
 
-if (BOOST_boost_python-gcc)
-  string (REGEX REPLACE libboost_python-gcc.so "" BOOST_LIBRARIES_DIR ${BOOST_boost_python-gcc})
-endif (BOOST_boost_python-gcc)
-
-if (BOOST_LIBRARIES_DIR)
-  ## check for symbols in the library
-  check_library_exists (
-    boost_python boost_python-gcc boost_python-gcc-1_33_1
-    PyMem_Malloc
-    ${BOOST_LIBRARIES_DIR}
-    BOOST_PyMem_Malloc
-    )
-endif (BOOST_LIBRARIES_DIR)
+if (libboost_python)
+  foreach (boost_symbol PyMem_Malloc PyModule_Type PyMethod_Type)
+    ## check for symbols in the library
+    check_library_exists (${libboost_python}
+      ${boost_symbol}
+      ""
+      BOOST_${boost_symbol}
+      )
+  endforeach (boost_symbol)
+endif (libboost_python)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
@@ -119,10 +116,8 @@ ENDIF (BOOST_INCLUDES AND BOOST_LIBRARIES)
 if (HAVE_BOOST)
   if (NOT Boost_FIND_QUIETLY)
     message (STATUS "Found components for Boost")
-    message (STATUS "Boost library dir : ${BOOST_LIBRARIES_DIR}")
     message (STATUS "Boost library ... : ${BOOST_LIBRARIES}")
     message (STATUS "Boost headers ... : ${BOOST_INCLUDES}")
-    message (STATUS "Have PyMem_Malloc : ${BOOST_PyMem_Malloc}")
   endif (NOT Boost_FIND_QUIETLY)
 else (HAVE_BOOST)
   if (Boost_FIND_REQUIRED)
