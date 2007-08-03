@@ -413,6 +413,17 @@ namespace CR {  // Namespace CR -- begin
 
     return status;
   }
+
+  // -------------------------------------------------------- write_beam_to_image
+
+  bool Skymapper::write_beam_to_image (Matrix<double> const &beam)
+  {
+    bool status (true);
+
+    
+
+    return status;
+  }
   
   // ============================================================================
   //

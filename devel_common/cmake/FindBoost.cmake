@@ -25,6 +25,7 @@ set (lib_locations
   /lib
   /usr/lib
   /usr/local/lib
+  /opt/lib
   /sw/lib
   )
 
@@ -42,38 +43,9 @@ find_path (BOOST_INCLUDES config.hpp
 ## Check for the various components of the library
 
 ## The libraries tend to come in different name variants, so we need to take this
-## into account during the search. The implementation below is not yet the most
-## efficient solution; instead of listing all the variants explicitely, the more
-## elegant solution would be to append the different suffixes at the
-## "find_library()" command.
+## into account during the search. 
 
 set (libs
-  boost_date_time-gcc-1_33_1
-  boost_filesystem-gcc-1_33_1
-  boost_iostreams-gcc-1_33_1
-  boost_program_options-gcc-1_33_1
-  boost_python-gcc-1_33_1
-  boost_regex-gcc-1_33_1
-  boost_serialization-gcc-1_33_1
-  boost_signals-gcc-1_33_1
-  boost_test_exec_monitor-gcc-1_33_1
-  boost_thread-gcc-1_33_1
-  boost_unit_test_framework-gcc-1_33_1
-  boost_wave-gcc-1_33_1
-  ##
-  boost_date_time-gcc
-  boost_filesystem-gcc
-  boost_iostreams-gcc
-  boost_program_options-gcc
-  boost_python-gcc
-  boost_regex-gcc
-  boost_serialization-gcc
-  boost_signals-gcc
-  boost_test_exec_monitor-gcc
-  boost_thread-gcc
-  boost_unit_test_framework-gcc
-  boost_wave-gcc
-  ## (potentially) older versions
   boost_date_time
   boost_filesystem
   boost_iostreams
@@ -91,15 +63,17 @@ set (libs
 set (BOOST_LIBRARIES "")
 
 foreach (lib ${libs})
-  ## try to locate the library
-  find_library (BOOST_${lib} ${lib}
-    PATHS ${lib_locations}
-    PATH_SUFFIXES boost-1_33_1 boost
-    )
-  ## check if location was successful
-  if (BOOST_${lib})
-    list (APPEND BOOST_LIBRARIES ${BOOST_${lib}})
-  endif (BOOST_${lib})
+  foreach (lib_variant ${lib}-gcc-1_33_1 ${lib}-gcc ${lib})
+    ## try to locate the library
+    find_library (BOOST_${lib_variant} ${lib_variant}
+      PATHS ${lib_locations}
+      PATH_SUFFIXES boost-1_33_1 boost
+      )
+    ## check if location was successful
+    if (BOOST_${lib_variant})
+      list (APPEND BOOST_LIBRARIES ${BOOST_${lib_variant}})
+    endif (BOOST_${lib_variant})
+  endforeach (lib_variant)
 endforeach (lib)
 
 ## -----------------------------------------------------------------------------
@@ -108,13 +82,23 @@ endforeach (lib)
 ## We need this additional step especially for Python binding, as some of the
 ## required symbols might not be in place.
 
-find_path (BOOST_LIBRARIES_DIR
-  boost_python-gcc-mt-1_33_1 boost_python-gcc boost_python
-    PATHS ${lib_locations}
-    PATH_SUFFIXES boost-1_33_1 boost
-)
+if (BOOST_boost_python-gcc-1_33_1)
+  string (REGEX REPLACE libboost_python-gcc-1_33_1.so "" BOOST_LIBRARIES_DIR ${BOOST_boost_python-gcc-1_33_1})
+endif (BOOST_boost_python-gcc-1_33_1)
 
-CHECK_LIBRARY_EXISTS (boost_python PyMem_Malloc ${BOOST_LIBRARIES_DIR} BOOST_PyMem_Malloc)
+if (BOOST_boost_python-gcc)
+  string (REGEX REPLACE libboost_python-gcc.so "" BOOST_LIBRARIES_DIR ${BOOST_boost_python-gcc})
+endif (BOOST_boost_python-gcc)
+
+if (BOOST_LIBRARIES_DIR)
+  ## check for symbols in the library
+  check_library_exists (
+    boost_python boost_python-gcc boost_python-gcc-1_33_1
+    PyMem_Malloc
+    ${BOOST_LIBRARIES_DIR}
+    BOOST_PyMem_Malloc
+    )
+endif (BOOST_LIBRARIES_DIR)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
@@ -135,6 +119,7 @@ ENDIF (BOOST_INCLUDES AND BOOST_LIBRARIES)
 if (HAVE_BOOST)
   if (NOT Boost_FIND_QUIETLY)
     message (STATUS "Found components for Boost")
+    message (STATUS "Boost library dir : ${BOOST_LIBRARIES_DIR}")
     message (STATUS "Boost library ... : ${BOOST_LIBRARIES}")
     message (STATUS "Boost headers ... : ${BOOST_INCLUDES}")
     message (STATUS "Have PyMem_Malloc : ${BOOST_PyMem_Malloc}")

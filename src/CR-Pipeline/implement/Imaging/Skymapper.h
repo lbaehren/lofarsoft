@@ -69,10 +69,10 @@ namespace CR {  // Namespace CR -- begin
     
     \date 2006/01/23
     
-    \test tSkymapper.cc -- Basic testing of the Skymapper class
     \test tUseArrays.cc -- Test working with the CASA Array classes (inludes slicing)
     \test tUseLattices.cc -- Test working with the CASA Lattice classes; keep in
     mind that CASA images are derived from the PagedArray and Lattice classes.
+    \test tSkymapper.cc -- Basic testing of the Skymapper class
     
     <h3>Prerequisite</h3>
     
@@ -505,11 +505,21 @@ namespace CR {  // Namespace CR -- begin
     sky map", i.e. beamforming in the far-field of the telescope.
    */
   LinearCoordinate defaultDistanceAxis ();
-
+  
   /*!
     \brief Set the coordinates of the center of the skymap
-   */
+  */
   bool setSkymapCenter ();
+
+  /*!
+    \brief Write the beamformed data to the PagedImage on disk
+    
+    \param beam -- [position,channel] Output of the Beamformer
+    
+    \return status -- Status of the operation; returns <tt>false</tt> if an error
+                      was encountered.
+  */
+  bool write_beam_to_image (Matrix<double> const &beam);
 
 };
 
