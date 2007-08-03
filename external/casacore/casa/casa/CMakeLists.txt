@@ -55,3 +55,13 @@ install (TARGETS casa
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   )
+
+## ------------------------------------------------------------------------------
+## Dependency tree for basic aips.h header file
+##
+## <casa/aips.h>
+## |-- <casa/aipsenv.h>    // Define compiler specific flags
+## |-- <casa/aipstype.h>   // Define the standard types used by AIPS++.
+## |-- <casa/aipsxtype.h>  // Define the extra non-standard types used by aips++
+## `-- <casa/aipsdef.h>    // Define the special aips++ macros
+

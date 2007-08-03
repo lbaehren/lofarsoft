@@ -72,8 +72,17 @@ endforeach (lib)
 
 ## -----------------------------------------------------------------------------
 ## Check for symbols in the library
+##
+## We need this additional step especially for Python binding, as some of the
+## required symbols might not be in place.
 
-#check_library_exists (boost_python PyMem_Malloc ${lib-Locations} HAVE_PyMem_Malloc)
+find_path (BOOST_LIBRARIES_DIR
+  boost_python-gcc-mt-1_33_1 boost_python-gcc boost_python
+    PATHS ${lib_locations}
+    PATH_SUFFIXES boost-1_33_1 boost
+)
+
+CHECK_LIBRARY_EXISTS (boost_python PyMem_Malloc ${BOOST_LIBRARIES_DIR} BOOST_PyMem_Malloc)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
@@ -94,8 +103,9 @@ ENDIF (BOOST_INCLUDES AND BOOST_LIBRARIES)
 if (HAVE_BOOST)
   if (NOT Boost_FIND_QUIETLY)
     message (STATUS "Found components for Boost")
-    message (STATUS "Boost library : ${BOOST_LIBRARIES}")
-    message (STATUS "Boost headers : ${BOOST_INCLUDES}")
+    message (STATUS "Boost library ... : ${BOOST_LIBRARIES}")
+    message (STATUS "Boost headers ... : ${BOOST_INCLUDES}")
+    message (STATUS "Have PyMem_Malloc : ${BOOST_PyMem_Malloc}")
   endif (NOT Boost_FIND_QUIETLY)
 else (HAVE_BOOST)
   if (Boost_FIND_REQUIRED)

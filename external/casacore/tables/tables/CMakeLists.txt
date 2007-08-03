@@ -7,6 +7,9 @@ SET (tables_modules
   Tables
   )
 
+## -----------------------------------------------------------------------------
+## Build the library
+
 ## collect the source files in the modules
 
 foreach (tables_module ${tables_modules})
@@ -14,13 +17,13 @@ foreach (tables_module ${tables_modules})
   LIST(APPEND tables_sources ${tables_${tables_module}})
 endforeach (tables_module)
 
-## -----------------------------------------------------------------------------
 ## build the library
 
 add_library (tables
   ${tables_sources}
 )
 target_link_libraries (tables casa)
+add_dependencies (tables casa)
 
 ## -----------------------------------------------------------------------------
 ## Files processed by Flex

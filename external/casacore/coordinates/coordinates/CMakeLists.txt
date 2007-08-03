@@ -19,6 +19,7 @@ add_library (coordinates
   ${coordinates_sources}
 )
 target_link_libraries (coordinates fits)
+add_dependencies (coordinates fits)
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs

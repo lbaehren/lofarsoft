@@ -57,10 +57,20 @@ install (TARGETS fits
 #  |-- <fits/FITS/BasicFITS.h>
 #  |-- <fits/FITS/FITS2.h>
 #  |   `-- <fits/FITS/hdu.h>
+#  |       |-- <fits/FITS/fits.h>
+#  |       |   `-- <fits/FITS/FITSError.h>
+#  |       `-- <fits/FITS/blockio.h>
+#  |           `-- <fits/FITS/FITSError.h>
 #  |-- <fits/FITS/fitsio.h>
 #  |   |-- <fits/FITS/fits.h>
+#  |   |   `-- <fits/FITS/FITSError.h>
 #  |   |-- <fits/FITS/blockio.h>
+#  |   |   `-- <fits/FITS/FITSError.h>
 #  |   `-- <fits/FITS/hdu.h>
+#  |       |-- <fits/FITS/fits.h>
+#  |       |   `-- <fits/FITS/FITSError.h>
+#  |       `-- <fits/FITS/blockio.h>
+#  |           `-- <fits/FITS/FITSError.h>
 #  `-- <fits/FITS/hdu.h>
 #      |-- <fits/FITS/fits.h>
 #      `-- <fits/FITS/blockio.h>

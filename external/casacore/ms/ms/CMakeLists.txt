@@ -20,6 +20,7 @@ add_library (ms
   ${ms_sources}
 )
 target_link_libraries (ms measures tables scimath casa)
+add_dependencies (ms measures)
 
 ## -----------------------------------------------------------------------------
 ## Files processed by Bison & Flex

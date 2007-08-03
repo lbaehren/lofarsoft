@@ -21,6 +21,7 @@ add_library (scimath
   ${scimath_sources}
 )
 target_link_libraries (scimath casa)
+add_dependencies (scimath casa)
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs

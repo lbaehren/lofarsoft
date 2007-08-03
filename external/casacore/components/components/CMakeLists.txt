@@ -23,6 +23,7 @@ add_library (components
   ${components_sources}
 )
 target_link_libraries (components coordinates)
+add_dependencies (components coordinates)
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs

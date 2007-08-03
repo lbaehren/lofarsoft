@@ -20,6 +20,7 @@ add_library (lattices
   ${lattices_sources}
 )
 target_link_libraries (lattices tables scimath)
+add_dependencies (lattices tables scimath)
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs

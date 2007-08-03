@@ -105,8 +105,10 @@ check_include_files (fcntl.h HAVE_FCNTL_H)
 check_include_files (string.h HAVE_STRING_H)
 check_include_files (unistd.h HAVE_UNISTD_H)
 
+check_type_size ("int" SIZEOF_INT)
 check_type_size ("float" SIZEOF_FLOAT)
 check_type_size ("double" SIZEOF_DOUBLE)
+check_type_size ("long" SIZEOF_LONG)
 
 ## -----------------------------------------------------------------------------
 ## Required external libraries
@@ -276,6 +278,7 @@ IF (UNIX)
     # -- exceptions and warnings --
     -fexceptions
 	-Wcast-align
+	-Wall
     ## LDOPT
     ##    -s -Xlinker -rpath -Xlinker
     )
@@ -283,7 +286,6 @@ IF (UNIX)
   set (CASA_LDSTD "-Xlinker -rpath -Xlinker")
   IF (APPLE)
     ## definition common to apple architectures
-	set (AIPS_DARWIN 1)
     add_definitions (
       -DAIPS_DARWIN
       -DNATIVE_EXCP
@@ -310,8 +312,12 @@ IF (UNIX)
   set (CMAKE_SYSTEM_64BIT 0)
   if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
     if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
-      set (CMAKE_SYSTEM_64BIT 1)
-	  add_definitions (-DAIPS_64B)
+	  if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+        set (CMAKE_SYSTEM_64BIT 1)
+	    add_definitions (
+		  -DAIPS_64B
+		)
+	  endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
     endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
   endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
 ENDIF (UNIX)
@@ -351,6 +357,8 @@ message (STATUS "CMAKE_SYSTEM_PROCESSOR .. = ${CMAKE_SYSTEM_PROCESSOR}")
 message (STATUS "CMAKE_SYSTEM_64BIT ...... = ${CMAKE_SYSTEM_64BIT}")
 message (STATUS "SIZEOF_FLOAT ............ = ${SIZEOF_FLOAT}")
 message (STATUS "SIZEOF_DOUBLE ........... = ${SIZEOF_DOUBLE}")
+message (STATUS "SIZEOF_LONG ............. = ${SIZEOF_LONG}")
+message (STATUS "CMAKE_CXX_COMPILER ...... = ${CMAKE_CXX_COMPILER}")
 message (STATUS "CMAKE_C_FLAGS ........... = ${CMAKE_C_FLAGS}")
 message (STATUS "CMAKE_CXX_FLAGS ......... = ${CMAKE_CXX_FLAGS}")
 message (STATUS "CMAKE_MODULE_LINKER_FLAGS = ${CMAKE_MODULE_LINKER_FLAGS}")
