@@ -1,6 +1,9 @@
-/***************************************************************************
- *   Copyright (C) 2005                                                    *
- *   Lars B"ahren (<bahren@astron.nl>)                                     *
+/*-------------------------------------------------------------------------*
+ | $Id:: IO.h 393 2007-06-13 10:49:08Z baehren                           $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,8 +20,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-/* $Id: BasicFilter.cc,v 1.7 2006/11/02 12:39:16 horneff Exp $*/
 
 #include <Math/BasicFilter.h>
 

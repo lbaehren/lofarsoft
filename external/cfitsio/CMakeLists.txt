@@ -1,5 +1,5 @@
 ##------------------------------------------------------------------------------
-## $Id:: CMakeLists.txt 489 2007-08-01 11:40:38Z baehren                       $
+## $Id::                                                                       $
 ##------------------------------------------------------------------------------
 
 project (libcfitsio)
@@ -8,12 +8,15 @@ set (libcfitsio_VERSION_MAJOR 3)
 set (libcfitsio_VERSION_MINOR 4)
 set (libcfitsio_VERSION "${libcfitsio_VERSION_MAJOR}.${libcfitsio_VERSION_MINOR}")
 
+set (CMAKE_VERBOSE_MAKEFILE FALSE)
+
 ## -----------------------------------------------------------------------------
 ## Standard locations where to look for required components
 
 set (include_locations
   /usr/include
   /usr/local/include
+  /Developer/SDKs/MacOSX10.4u.sdk/usr/include
   /Developer/SDKs/MacOSX10.4u.sdk/usr/include/c++/4.0.0
   /sw/include
   /sw/lib/gcc4.2/include/c++/4.2.1
@@ -25,7 +28,6 @@ set (lib_locations
   /sw/lib
 )
 
-include (CheckFunctionExists)
 include (CheckIncludeFiles)
 include (CheckLibraryExists)
 include (CPack)
@@ -40,11 +42,26 @@ check_include_files (limits.h HAVE_LIMITS_H)
 check_include_files (pwd.h HAVE_PWD_H)
 check_include_files (strings.h HAVE_STRINGS_H)
 check_include_files (string.h HAVE_STRING_H)
+check_include_files (unistd.h HAVE_UNISTD_H)
+check_include_files (inttypes.h HAVE_INTTYPES_H)
+
+find_PATH (HAVE_IPC_H ipc.h PATHS ${include_locations} PATH_SUFFIXES sys)
+find_PATH (HAVE_SEM_H sem.h PATHS ${include_locations} PATH_SUFFIXES sys)
+find_PATH (HAVE_SHM_H shm.h PATHS ${include_locations} PATH_SUFFIXES sys)
 
 ## -----------------------------------------------------------------------------
 ## Check if functions are defined
 
+include (CheckFunctionExists)
+
 check_function_exists (ftruncate HAVE_FTRUNCATE)
+
+## -----------------------------------------------------------------------------
+## Check size of variables types
+
+include (CheckTypeSize)
+
+check_type_size ("long long" HAVE_LONGLONG)
 
 ## -----------------------------------------------------------------------------
 ## Check for external libraries
@@ -54,6 +71,12 @@ find_library (libm m ${lib_locations})
 if (NOT libm)
   message (SEND_ERROR "Unable to find libm!")
 endif (NOT libm)
+
+find_library (libnsl nsl ${lib_locations})
+
+if (NOT libnsl)
+  set (HAVE_NET_SERVICES 0)
+endif (NOT libnsl)
 
 ## -----------------------------------------------------------------------------
 ## Build options
@@ -69,6 +92,23 @@ option (BUILD_HERA
 ## libcfitsio.a:	${OBJECTS}
 ## 		ar rv libcfitsio.a ${OBJECTS}; \
 ##  		${RANLIB} libcfitsio.a;
+##
+## [cfitsio 2.5.1]
+## cc -c -O -O2 -Dg77Fortran -fPIC -fno-common
+##    -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MATH_H=1 -DHAVE_LIMITS_H=1
+##    -DHAVE_FTRUNCATE=1 -DHAVE_LONGLONG=1 -DHAVE_SHMEM_SERVICES=1
+##    -DHAVE_UNION_SEMUN=1 -DHAVE_NET_SERVICES=1  pliocomp.c
+## [cfitsio 3.0.4]
+## cc -c -O -O2 -Dg77Fortran -fPIC -fno-common 
+##    -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" 
+##    -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\"
+##    -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1
+##    -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1
+##    -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_STDLIB_H=1
+##    -DHAVE_STRING_H=1 -DHAVE_MATH_H=1 -DHAVE_LIMITS_H=1 -D_LARGEFILE_SOURCE=1
+##    -D_FILE_OFFSET_BITS=64 -DHAVE_FTRUNCATE=1 -DHAVE_LONGLONG=1
+##    -DHAVE_SHMEM_SERVICES=1 -DHAVE_UNION_SEMUN=1 -DHAVE_NET_SERVICES=1  cfileio.c
+##
 
 file (GLOB cfitsio_headers *.h)
 
@@ -155,15 +195,20 @@ add_definitions (
   -fPIC
   -fno-common
   ## header files
-  -DHAVE_STDLIB_H=${HAVE_STDLIB_H}
-  -DHAVE_STRING_H=${HAVE_STRING_H}
+  -DHAVE_INTTYPES_H=${HAVE_INTTYPES_H}
+  -DHAVE_LIMITS_H=${HAVE_LIMITS_H}
   -DHAVE_MATH_H=${HAVE_MATH_H}
   -DHAVE_MEMORY_H=${HAVE_MEMORY_H}
-  -DHAVE_LIMITS_H=${HAVE_LIMITS_H}
+  -DHAVE_STDLIB_H=${HAVE_STDLIB_H}
+  -DHAVE_STRING_H=${HAVE_STRING_H}
   -DHAVE_STRINGS_H=${HAVE_STRINGS_H}
-  -DHAVE_STRING=${HAVE_STRING}
+  -DHAVE_UNISTD_H=${HAVE_UNISTD_H}
   ## functions
   -DHAVE_FTRUNCATE=${HAVE_FTRUNCATE}
+  ## variable types
+  -DHAVE_LONGLONG=${HAVE_LONGLONG}
+  ## libraries
+  -DHAVE_NET_SERVICES=${HAVE_NET_SERVICES}
   ## build options
   -DBUILD_HERA=${BUILD_HERA}
 )
@@ -183,8 +228,22 @@ target_link_libraries (cfitsio ${libm})
 ## -----------------------------------------------------------------------------
 ## Test program(s)
 
-add_executable (testprog testprog.c)
-target_link_libraries (testprog cfitsio ${libm})
+set (cfitsio_tests
+  testprog
+  cookbook
+  fitscopy
+)
+
+if (HAVE_NET_SERVICES)
+  list (APPEND cfitsio_tests smem)
+endif (HAVE_NET_SERVICES)
+
+## build the test programs
+
+foreach (test ${cfitsio_tests})
+  add_executable (${test} ${test}.c)
+  target_link_libraries (${test} cfitsio ${libm})
+endforeach (test)
 
 ## -----------------------------------------------------------------------------
 ## Installation
@@ -205,7 +264,7 @@ endif (prefix)
 
 ## Installation of library and executables
 
-install (TARGETS cfitsio testprog
+install (TARGETS cfitsio ${cfitsio_tests}
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

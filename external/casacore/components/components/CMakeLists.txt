@@ -1,5 +1,5 @@
 ##------------------------------------------------------------------------------
-## $Id:: CMakeLists.txt 489 2007-08-01 11:40:38Z baehren                       $
+## $Id::                                                                       $
 ##------------------------------------------------------------------------------
 
 ## -----------------------------------------------------------------------------
@@ -23,18 +23,14 @@ add_library (components
   ${components_sources}
 )
 target_link_libraries (components coordinates)
-add_dependencies (components coordinates)
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
 if (casacore_tests)
-  ## build up the list of directories ...
   foreach (components_module ${components_modules})
-    list (APPEND tests "${components_module}/test")
+    add_subdirectory (${components_module}/test)
   endforeach (components_module)
-  ## ... and register them
-  subdirs (${tests})
 endif (casacore_tests)
 
 ## -----------------------------------------------------------------------------

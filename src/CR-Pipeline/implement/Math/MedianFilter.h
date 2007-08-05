@@ -21,8 +21,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
 #ifndef _MEDIANFILTER_H_
 #define _MEDIANFILTER_H_
 

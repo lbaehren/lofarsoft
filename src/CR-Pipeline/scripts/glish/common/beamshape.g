@@ -1,6 +1,6 @@
 
 #-------------------------------------------------------------------------------
-# $Id: beamshape.g,v 1.2 2006/07/05 16:17:28 bahren Exp $
+# $Id$
 #-------------------------------------------------------------------------------
 # The <a href="http://aips2.nrao.edu/docs/user/SynthesisRef/node143.html">simulator
 # tool</a> is used in order to create a measurement set.

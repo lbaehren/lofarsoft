@@ -1,6 +1,6 @@
 
 #-------------------------------------------------------------------------------
-# $Id: DataRecordIO.g,v 1.9 2006/08/07 16:48:30 bahren Exp $
+# $Id$
 #-------------------------------------------------------------------------------
 #
 # A set of methods to present a uniform method for adding parameters stored in

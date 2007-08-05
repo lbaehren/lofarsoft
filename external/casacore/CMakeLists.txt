@@ -1,5 +1,5 @@
 ##------------------------------------------------------------------------------
-## $Id:: CMakeLists.txt 489 2007-08-01 11:40:38Z baehren                       $
+## $Id::                                                                       $
 ##------------------------------------------------------------------------------
 
 ## -----------------------------------------------------------------------------
@@ -138,6 +138,9 @@ find_library (CFITSIO_LIBRARIES cfitsio
   PATHS ${lib_locations}
   PATH_SUFFIXES cfitsio fitsio
 )
+
+## If either the library or the include files cannot be located, we have to
+## consider CFITSIO to be incomplete for usage with casacore.
 
 if (NOT CFITSIO_INCLUDES)
   set (HAVE_CFITSIO 0)
@@ -328,7 +331,9 @@ SET (CMAKE_C_FLAGS ${CASA_CXXSTD})
 ## -----------------------------------------------------------------------------
 ## Sub-directories
 
-subdirs (${casacore_packages})
+foreach (casacore_package ${casacore_packages})
+  add_subdirectory (${casacore_package})
+endforeach (casacore_package)
 
 ## -----------------------------------------------------------------------------
 ## Installation

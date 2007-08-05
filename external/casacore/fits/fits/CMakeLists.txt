@@ -1,3 +1,6 @@
+##------------------------------------------------------------------------------
+## $Id::                                                                       $
+##------------------------------------------------------------------------------
 
 ## -----------------------------------------------------------------------------
 ## libfits
@@ -18,12 +21,7 @@ endforeach (fits_module)
 add_library (fits
   ${fits_sources}
   )
-target_link_libraries (fits
-  measures
-  scimath
-  scimath_f
-  tables
-  casa
+target_link_libraries (fits measures
   ${G2C_LIBRARIES}
   ${CFITSIO_LIBRARIES}
   ${WCSLIB_LIBRARIES}
@@ -33,12 +31,9 @@ target_link_libraries (fits
 ## Directories containing the test programs
 
 if (casacore_tests)
-  ## build up the list of directories ...
   foreach (fits_module ${fits_modules})
-    list (APPEND tests "${fits_module}/test")
+    add_subdirectory (${fits_module}/test)
   endforeach (fits_module)
-  ## ... and register them
-  subdirs (${tests})
 endif (casacore_tests)
 
 ## -----------------------------------------------------------------------------

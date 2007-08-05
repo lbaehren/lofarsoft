@@ -93,3 +93,23 @@ install (TARGETS images
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   )
+
+## -----------------------------------------------------------------------------
+## Debugging information
+##
+## ComponentImager
+## |-- <images/Images/ComponentImager.h>
+## |   `-- <casa/aips.h>
+## |-- <images/Images/ImageInterface.h>
+## |   |-- <casa/aips.h>
+## |   |-- <images/Images/RegionHandler.h>
+## |   |   `-- <casa/aips.h>
+## |   |-- <images/Images/MaskSpecifier.h>
+## |   |   `-- <casa/aips.h>
+## |   `-- <images/Images/ImageInfo.h>
+## |       |-- <casa/aips.h>
+## |       `-- <casa/iosfwd.h>
+## `-- <images/Images/ImageInfo.h>
+## |   |-- <casa/aips.h>
+## |   `-- <casa/iosfwd.h>
+##

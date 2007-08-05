@@ -35,7 +35,10 @@ set (lib_locations
 find_path (BOOST_INCLUDES config.hpp
   PATHS ${include_locations}
   PATH_SUFFIXES
+  boost-1_34_1
+  boost-1_34_1/boost
   boost-1_33_1
+  boost-1_33_1/boost
   boost
   )
 
@@ -64,7 +67,7 @@ set (BOOST_LIBRARIES "")
 
 foreach (lib ${boost_libraries})
   ## try to locate the library
-  find_library (BOOST_${lib} ${lib}-gcc42-1_34_1 ${lib}-gcc-1_33_1 ${lib}-gcc ${lib}
+  find_library (BOOST_${lib} ${lib}-gcc42-1_34_1 ${lib}-mt-1_34_1 ${lib}-gcc-1_33_1 ${lib}-gcc ${lib}
     PATHS ${lib_locations}
     PATH_SUFFIXES boost-1_34_1 boost-1_33_1 boost
     )
@@ -80,14 +83,18 @@ endforeach (lib)
 ##
 ## We need this additional step especially for Python binding, as some of the
 ## required symbols might not be in place.
+##
+## _NOTE_ This does not yet properly as 
+##        "nm libboost_python-mt-1_34_1.dylib | grep _PyMem_Malloc"
+##        report the symbol to be present in the library.
 
-find_library (libboost_python boost_python-gcc-1_33_1 boost_python-gcc boost_python
+find_library (libboost_python boost_python-mt-1_34_1 boost_python-gcc-1_33_1 boost_python-gcc boost_python
   PATHS ${lib_locations}
   PATH_SUFFIXES boost-1_34_1 boost-1_33_1 boost
   )
 
 if (libboost_python)
-  foreach (boost_symbol PyMem_Malloc PyModule_Type PyMethod_Type)
+  foreach (boost_symbol _PyMem_Malloc _PyModule_Type _PyMethod_Type)
     ## check for symbols in the library
     check_library_exists (${libboost_python}
       ${boost_symbol}

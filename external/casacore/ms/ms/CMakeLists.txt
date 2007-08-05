@@ -1,3 +1,6 @@
+##------------------------------------------------------------------------------
+## $Id::                                                                       $
+##------------------------------------------------------------------------------
 
 ## -----------------------------------------------------------------------------
 ## libms
@@ -20,7 +23,6 @@ add_library (ms
   ${ms_sources}
 )
 target_link_libraries (ms measures tables scimath casa)
-add_dependencies (ms measures)
 
 ## -----------------------------------------------------------------------------
 ## Files processed by Bison & Flex
@@ -84,12 +86,9 @@ endif (flex_bin)
 ## Directories containing the test programs
 
 if (casacore_tests)
-  ## build up the list of directories ...
   foreach (ms_module ${ms_modules})
-    list (APPEND tests "${ms_module}/test")
+    add_subdirectory (${ms_module}/test)
   endforeach (ms_module)
-  ## ... and register them
-  subdirs (${tests})
 endif (casacore_tests)
 
 ## ------------------------------------------------------------------------------

@@ -1,3 +1,6 @@
+##------------------------------------------------------------------------------
+## $Id::                                                                       $
+##------------------------------------------------------------------------------
 
 ## -----------------------------------------------------------------------------
 ## libtables
@@ -23,7 +26,6 @@ add_library (tables
   ${tables_sources}
 )
 target_link_libraries (tables casa)
-add_dependencies (tables casa)
 
 ## -----------------------------------------------------------------------------
 ## Files processed by Flex
@@ -95,12 +97,9 @@ endif (bison_bin)
 ## Directories containing the test programs
 
 if (casacore_tests)
-  ## build up the list of directories ...
   foreach (tables_module ${tables_modules})
-    list (APPEND tests "${tables_module}/test")
+    add_subdirectory (${tables_module}/test)
   endforeach (tables_module)
-  ## ... and register them
-  subdirs (${tests})
 endif (casacore_tests)
 
 ## ------------------------------------------------------------------------------

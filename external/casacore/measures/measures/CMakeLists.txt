@@ -1,3 +1,6 @@
+##------------------------------------------------------------------------------
+## $Id::                                                                       $
+##------------------------------------------------------------------------------
 
 ## -----------------------------------------------------------------------------
 ## libmeasures
@@ -25,12 +28,9 @@ target_link_libraries (measures tables scimath)
 ## Directories containing the test programs
 
 if (casacore_tests)
-  ## build up the list of directories ...
   foreach (measures_module ${measures_modules})
-    list (APPEND tests "${measures_module}/test")
+    add_subdirectory (${measures_module}/test)
   endforeach (measures_module)
-  ## ... and register them
-  subdirs (${tests})
 endif (casacore_tests)
 
 ## -----------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 
 #-------------------------------------------------------------------------------
-# $Id: DynamicSpectrum.g,v 1.3 2006/07/12 11:59:14 bahren Exp $
+# $Id$
 #-------------------------------------------------------------------------------
 # Alternative set of functions for the generation and analysis of dynamic 
 # spectra. In contrast to the routines provided by

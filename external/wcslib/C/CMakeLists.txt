@@ -257,7 +257,7 @@ install (FILES ${wcslib_headers}
 ## -----------------------------------------------------------------------------
 ## Location of the test programs
 
-subdirs (test)
+add_subdirectory (test)
 
 ## -----------------------------------------------------------------------------
 ## Book-keeping of some of the temporary variables

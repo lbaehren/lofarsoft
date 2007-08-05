@@ -1,3 +1,6 @@
+##------------------------------------------------------------------------------
+## $Id::                                                                       $
+##------------------------------------------------------------------------------
 
 ## -----------------------------------------------------------------------------
 ## libcoordinates
@@ -19,18 +22,14 @@ add_library (coordinates
   ${coordinates_sources}
 )
 target_link_libraries (coordinates fits)
-add_dependencies (coordinates fits)
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
 if (casacore_tests)
-  ## build up the list of directories ...
   foreach (coordinates_module ${coordinates_modules})
-    list (APPEND tests "${coordinates_module}/test")
+    add_subdirectory (${coordinates_module}/test)
   endforeach (coordinates_module)
-  ## ... and register them
-  subdirs (${tests})
 endif (casacore_tests)
 
 ## -----------------------------------------------------------------------------

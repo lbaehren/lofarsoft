@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# $Id: SkymapperGUI.g,v 1.1 2006/03/06 15:34:52 horneff Exp $
+# $Id$
 #-------------------------------------------------------------------------------
 # Graphical User Interface so set up the parameters required for the computation
 # of a skymap; see the LOPES Tools

@@ -1,6 +1,6 @@
 
 #-------------------------------------------------------------------------------
-# $Id: Skymapper.g,v 1.3 2006/08/09 10:01:43 bahren Exp $
+# $Id$
 #-------------------------------------------------------------------------------
 #
 # The Skymapper provides the functionality to create (multidimensional) skymaps

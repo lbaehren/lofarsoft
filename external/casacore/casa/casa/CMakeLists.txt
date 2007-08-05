@@ -1,5 +1,5 @@
 ##------------------------------------------------------------------------------
-## $Id:: CMakeLists.txt 489 2007-08-01 11:40:38Z baehren                       $
+## $Id::                                                                       $
 ##------------------------------------------------------------------------------
 
 ## -----------------------------------------------------------------------------
@@ -39,12 +39,9 @@ target_link_libraries (casa ${libm})
 ## Directories containing the test programs
 
 if (casacore_tests)
-  ## build up the list of directories ...
   foreach (casa_module ${casa_modules})
-    list (APPEND tests "${casa_module}/test")
+    add_subdirectory (${casa_module}/test)
   endforeach (casa_module)
-  ## ... and register them
-  subdirs (${tests})
 endif (casacore_tests)
 
 ## ------------------------------------------------------------------------------

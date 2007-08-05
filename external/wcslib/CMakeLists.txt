@@ -68,11 +68,9 @@ find_program (flex_bin flex
 ## -----------------------------------------------------------------------------
 ## Subdirectories
 
-subdirs (
-  ${wcslib_SOURCE_DIR}/C
-  ${wcslib_SOURCE_DIR}/FORTRAN
-  ${wcslib_SOURCE_DIR}/pgsbox
-)
+add_subdirectory (${wcslib_SOURCE_DIR}/C)
+add_subdirectory (${wcslib_SOURCE_DIR}/FORTRAN)
+add_subdirectory (${wcslib_SOURCE_DIR}/pgsbox)
 
 ## -----------------------------------------------------------------------------
 ## Installation
