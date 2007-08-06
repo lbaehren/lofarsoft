@@ -82,6 +82,7 @@ set (include_locations
   /usr/local/include
   /sw/include
   /opt/casa/local/include
+  /opt/gcc-4.2.1/include/c++/4.2.1
   ${casacore_SOURCE_DIR}/../release/include
   ${casacore_SOURCE_DIR}/../../release/include
 )
@@ -90,6 +91,7 @@ set (lib_locations
   /usr/lib
   /usr/local/lib
   /sw/lib
+  /opt/gcc-4.2.1/lib
   /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
   ${casacore_SOURCE_DIR}/../release/lib
   ${casacore_SOURCE_DIR}/../../release/lib
@@ -178,28 +180,28 @@ if (NOT HAVE_WCSLIB)
   message (SEND_ERROR "WCSLIB_INCLUDES  = ${WCSLIB_INCLUDES}")
   message (SEND_ERROR "WCSLIB_LIBRARIES = ${WCSLIB_LIBRARIES}")
   message (FATAL_ERROR "Unable to find systm-wide installation of WCSLIB!")
-	## try to locate the source directory first
-	find_path (WCSLIB_INCLUDES wcs.h wcshdr.h 
-	  PATHS
-	  ${casacore_SOURCE_DIR}/../wcslib-4.2
-	  ${casacore_SOURCE_DIR}/../wcslib
-	  PATH_SUFFIXES 
-	  C
-	)
-	## if the source directory could be located, trigger build of WCSLIB
-	if (WCSLIB_INCLUDES)
-	  ## create a symbolic link within the casacore directory
-      execute_process (
-        WORKING_DIRECTORY ${casacore_SOURCE_DIR}
-        COMMAND ln -fs ${WCSLIB_INCLUDES}/.. wcslib
-        TIMEOUT 20
-        ERROR_VARIABLE ln_error
-        OUTPUT_QUIET
+  ## try to locate the source directory first
+  find_path (WCSLIB_INCLUDES wcs.h wcshdr.h 
+    PATHS
+    ${casacore_SOURCE_DIR}/../wcslib-4.2
+    ${casacore_SOURCE_DIR}/../wcslib
+    PATH_SUFFIXES 
+    C
+    )
+  ## if the source directory could be located, trigger build of WCSLIB
+  if (WCSLIB_INCLUDES)
+    ## create a symbolic link within the casacore directory
+    execute_process (
+      WORKING_DIRECTORY ${casacore_SOURCE_DIR}
+      COMMAND ln -fs ${WCSLIB_INCLUDES}/.. wcslib
+      TIMEOUT 20
+      ERROR_VARIABLE ln_error
+      OUTPUT_QUIET
       )
-	  subdirs (wcslib)
-	elseif (WCSLIB_INCLUDES)
-	  message (SEND_ERROR "Unable to locate WCSLIB source directory!")
-	endif (WCSLIB_INCLUDES)
+    subdirs (wcslib)
+  elseif (WCSLIB_INCLUDES)
+    message (SEND_ERROR "Unable to locate WCSLIB source directory!")
+  endif (WCSLIB_INCLUDES)
 endif (NOT HAVE_WCSLIB)
 
 ## -----------------------------------------------------------------------------
@@ -342,11 +344,20 @@ IF (UNIX)
   add_definitions (
     # -- compiler flags utilized in the source code --
     -DAIPS_STDLIB
-	-DAIPS_NO_TEMPLATE_SRC
     -DAIPS_AUTO_STL
     -DAIPS_NO_LEA_MALLOC
+    # -- optimization --
+    -O3
+    -fPIC
+    -pipe
+    # -- exceptions and warnings --
+#    -Wall
+#    -fexceptions
+#    -Wcast-align
+    -Wno-deprecated
+#    -Wreturn-type
+#    -Wimplicit
     )
-  set (CASA_CXXSTD "${CASA_CXXSTD} -Wreturn-type -Wimplicit -fPIC")
   set (CASA_LDSTD "-Xlinker -rpath -Xlinker")
   IF (APPLE)
     ## definition common to apple architectures
@@ -359,11 +370,11 @@ IF (UNIX)
     ## PPC specific settings
     if (CMAKE_OSX_ARCHITECTURES MATCHES ppc)
       add_definitions (
-	  -DAIPS_BIG_ENDIAN
+	-DAIPS_BIG_ENDIAN
 	)
     elseif (CMAKE_OSX_ARCHITECTURES MATCHES ppc)
       add_definitions (
-	  -DAIPS_LITTLE_ENDIAN
+	-DAIPS_LITTLE_ENDIAN
 	)
     endif (CMAKE_OSX_ARCHITECTURES MATCHES ppc)
   ELSE (APPLE)
@@ -376,29 +387,17 @@ IF (UNIX)
   set (CMAKE_SYSTEM_64BIT 0)
   if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
     if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
-	  if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+      if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
         set (CMAKE_SYSTEM_64BIT 1)
-	    add_definitions (
-		  -DAIPS_64B
-		)
-	  endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+	add_definitions (
+	  -DAIPS_64B
+	  )
+      endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
     endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
   endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
-  add_definitions (
-    # -- optimization --
-    -O3
-    -fPIC
-    -pipe
-    # -- exceptions and warnings --
-	-Wall
-	-Wno-comment
-    -fexceptions
-	-Wcast-align
-  )
 ENDIF (UNIX)
 
 SET (CMAKE_MODULE_LINKER_FLAGS ${CASA_LDSTD})
-SET (CMAKE_C_FLAGS ${CASA_CXXSTD})
 
 ## -----------------------------------------------------------------------------
 ## Sub-directories

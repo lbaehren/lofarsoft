@@ -1,25 +1,25 @@
 /*-------------------------------------------------------------------------*
-| $Id: template-class.h,v 1.20 2007/06/13 09:41:37 bahren Exp           $ |
-*-------------------------------------------------------------------------*
-***************************************************************************
-*   Copyright (C) 2007                                                    *
-*   Lars B"ahren (bahren@astron.nl)                                       *
-*                                                                         *
-*   This program is free software; you can redistribute it and/or modify  *
-*   it under the terms of the GNU General Public License as published by  *
-*   the Free Software Foundation; either version 2 of the License, or     *
-*   (at your option) any later version.                                   *
-*                                                                         *
-*   This program is distributed in the hope that it will be useful,       *
-*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-*   GNU General Public License for more details.                          *
-*                                                                         *
-*   You should have received a copy of the GNU General Public License     *
-*   along with this program; if not, write to the                         *
-*   Free Software Foundation, Inc.,                                       *
-*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-***************************************************************************/
+ | $Id: template-class.h,v 1.20 2007/06/13 09:41:37 bahren Exp           $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
 #ifndef TIMEFREQ_H
 #define TIMEFREQ_H
@@ -215,7 +215,9 @@ namespace CR { // Namespace CR -- begin
     */
     void summary ();    
     
-    // ------------------------------------------------------ internal parameters
+    // ------------------------------------------------------ Internal parameters
+
+    // --- blocksize ---------------------------------------
     
     /*!
       \brief Get the blocksize, \f$ N_{\rm Blocksize} \f$
@@ -235,6 +237,8 @@ namespace CR { // Namespace CR -- begin
       blocksize_p = blocksize;
     }
 
+    // --- sampleFrequency ---------------------------------
+
     /*!
       \brief Get the sample frequency, \f$ \nu_{\rm Sample} \f$
 
@@ -245,6 +249,15 @@ namespace CR { // Namespace CR -- begin
     }
 
     /*!
+      \brief Get the sample frequency, \f$ \nu_{\rm Sample} \f$
+
+      \param unit -- The unit of the returned frequency, e.g. MHz
+
+      \return sampleFrequency -- Sample frequency in the ADC
+    */
+    double sampleFrequency (casa::String const &unit);
+
+    /*!
       \brief Set the sample frequency, \f$ \nu_{\rm Sample} \f$
 
       \param sampleFrequency -- Sample frequency in the ADC, [Hz]
@@ -252,6 +265,25 @@ namespace CR { // Namespace CR -- begin
     inline void setSampleFrequency (double const &sampleFrequency) {
       sampleFrequency_p = sampleFrequency;
     }
+
+    /*!
+      \brief Set the sample frequency, \f$ \nu_{\rm Sample} \f$
+
+      \param value -- Sample frequency in the ADC
+      \param unit  -- Unit in which the value is given, e.g. MHz
+    */
+    void setSampleFrequency (double const &value,
+			     std::string const &unit);
+    
+    /*!
+      \brief Set the sample frequency, \f$ \nu_{\rm Sample} \f$, from a Quantity
+
+      \param sampleFrequency -- Sample frequency in the ADC, provided as a
+                                casa::Quantity (i.e. a value with a unit).
+     */
+    void setSampleFrequency (casa::Quantity const &sampleFrequency);
+
+    // --- nyquistZone -------------------------------------
 
     /*!
       \brief Get the Nyquist zone, \f$ N_{\rm Nyquist} \f$
@@ -270,6 +302,8 @@ namespace CR { // Namespace CR -- begin
     inline void setNyquistZone (uint const &nyquistZone) {
       nyquistZone_p = nyquistZone;
     }
+
+    // --- referenceTime -----------------------------------
 
     /*!
       \brief Get the reference time, i.e. the start of the time axis
@@ -422,42 +456,8 @@ namespace CR { // Namespace CR -- begin
     */
     vector<double> timeValues (vector<uint> const &sampleValues);
     
-    // ==========================================================================
-    //
-    // Additional methods which require CASA libraries
-    //
-    // ==========================================================================
-
-#ifdef AIPS_STDLIB
-
     /*!
-      \brief [optional:CASA] Get the sample frequency, \f$ \nu_{\rm Sample} \f$
-
-      \param unit -- The unit of the returned frequency, e.g. MHz
-
-      \return sampleFrequency -- Sample frequency in the ADC
-    */
-    double sampleFrequency (casa::String const &unit);
-
-    /*!
-      \brief [optional:CASA] Set the sample frequency, \f$ \nu_{\rm Sample} \f$
-
-      \param value -- Sample frequency in the ADC
-      \param unit  -- Unit in which the value is given, e.g. MHz
-    */
-    void setSampleFrequency (double const &value,
-			     std::string const &unit);
-    
-    /*!
-      \brief [optional:CASA] Set the sample frequency, \f$ \nu_{\rm Sample} \f$, from a Quantity
-
-      \param sampleFrequency -- Sample frequency in the ADC, provided as a
-                                casa::Quantity (i.e. a value with a unit).
-     */
-    void setSampleFrequency (casa::Quantity const &sampleFrequency);
-
-    /*!
-      \brief [optional:CASA] Create time axis coordinate from parameters
+      \brief Create time axis coordinate from parameters
       
       \return coord -- The time axis as linear coordinate
     */
@@ -494,8 +494,6 @@ namespace CR { // Namespace CR -- begin
 				      double const &cdelt,
 				      double const &crpix);
     
-#endif
-
   private:
     
     /*!
