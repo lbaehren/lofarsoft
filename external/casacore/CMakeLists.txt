@@ -56,11 +56,6 @@ option (casacore_tests
   0
   )
 
-option (CMAKE_VERBOSE_MAKEFILE
-  "Verbose makefile?"
-  0
-  )
-
 ## -----------------------------------------------------------------------------
 ## Additional required CMake functionality
 
@@ -159,7 +154,7 @@ endif (NOT HAVE_CFITSIO)
 ## As the source code of WCSLIB is in the USG code repository,
 ## we do have the possiblity to build the library from there
 ## in case no system-wide installation can be found; this of
-## course only will be possible, if the "externa" directory
+## course only will be possible, if the "external" directory
 ## has been checked out completely.
 
 set (HAVE_WCSLIB 1)
@@ -220,40 +215,115 @@ find_program (flex_bin flex
 
 find_program (uname_bin uname ${bin_locations})
 
-## -----------------------------------------------------------------------------
-## Compiler and Linker options
-## 
-## Examples from the configuration and build using SCons:
+## =============================================================================
 ##
-## (a) Apple Mac OS-X PPC
+##  Compiler and Linker options
 ##
-##  [libcasa]
-##  g++ -o "build_darwin_Power Macintosh/opt/aips.o" -c -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_DARWIN -DAIPS_NO_LEA_MALLOC -O2 -I. casa/aips.cc
-##  g++ -o "build_darwin_Power Macintosh/opt/Exceptions/Error2.o" -c -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_DARWIN -DAIPS_NO_LEA_MALLOC -O2 -I. casa/Exceptions/Error2.cc
-##  [libtables]
-##  g++ -o "build_darwin_Power Macintosh/opt/Tables/TaQLResult.o" -c -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_DARWIN -DAIPS_NO_LEA_MALLOC -O2 -I. -I/Volumes/UNIX/casacore/stage/include/casacore "-Ibuild_darwin_Power Macintosh/opt/Tables" tables/Tables/TaQLResult.cc
-##  g++ -o "build_darwin_Power Macintosh/opt/Tables/DataManager.o" -c -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_DARWIN -DAIPS_NO_LEA_MALLOC -O2 -I. -I/Volumes/UNIX/casacore/stage/include/casacore "-Ibuild_darwin_Power Macintosh/opt/Tables" tables/Tables/DataManager.cc
-##  [libmir]
-##  gcc -o "build_darwin_Power Macintosh/opt/dio.o" -c -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_DARWIN -DAIPS_NO_LEA_MALLOC -O2 -I. dio.c
-##  gcc -o "build_darwin_Power Macintosh/opt/bug.o" -c -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_DARWIN -DAIPS_NO_LEA_MALLOC -O2 -I. bug.c
-##  [libscimath]
-##  [measures]
-##  [fits]
-##  [coordinates]
-##  [components]
-##
-## (b) Debian GNU Linux
-##
-##  [libcasa]
-##  g++ -o build_linux_i686/opt/aips.o -c -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_LINUX -DAIPS_LITTLE_ENDIAN -O2 -I. casa/aips.cc
-##  g++ -o build_linux_i686/opt/Exceptions/Error2.o -c -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_LINUX -DAIPS_LITTLE_ENDIAN -O2 -I. casa/Exceptions/Error2.cc
-##
-## The following is for fixing compiler settings for libfits
-##
-## /usr/bin/c++ -DAIPS_STDLIB -DAIPS_NO_TEMPLATE_SRC -DAIPS_AUTO_STL -DAIPS_NO_LEA_MALLOC -DAIPS_DARWIN -DAIPS_BIG_ENDIAN -DNATIVE_EXCP -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -O3 -fPIC -pipe -Wall -Wno-comment -fexceptions -Wcast-align -Wno-non-template-friend -Woverloaded-virtual -o fits/implement/CMakeFiles/fits.dir/FITS/fits.o -c /Users/lars/Code/lofar/usg/external/casa/fits/implement/FITS/fits.cc
-## /usr/bin/c++ -DAIPS_STDLIB -DAIPS_NO_TEMPLATE_SRC -DAIPS_AUTO_STL -DAIPS_NO_LEA_MALLOC -DAIPS_DARWIN -DAIPS_BIG_ENDIAN -DNATIVE_EXCP -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -O2 -pipe -fPIC -Wall -Wno-comment -fexceptions -Wno-non-template-friend -Woverloaded-virtual -o fits/fits/CMakeFiles/fits.dir/FITS/BasicFITS.o -c /Users/lars/Code/lofar/usg/external/casacore/fits/fits/FITS/BasicFITS.cc
+## =============================================================================
 
-## --- Location of the header files --------------
+## -----------------------------------------------------------------------------
+## Debugging information
+
+# libfits from porting the original CASA source code distribution
+#
+# /usr/bin/c++  -I<USG ROOT>/external/casa/.
+#               -I<USG ROOT>/external/casa
+#               -I<USG ROOT>/external/casa/include
+#               -I/sw/include/cfitsio
+#               -DAIPS_STDLIB -DAIPS_NO_TEMPLATE_SRC -DAIPS_AUTO_STL
+#               -DAIPS_NO_LEA_MALLOC -DAIPS_DARWIN -DAIPS_BIG_ENDIAN
+#               -DNATIVE_EXCP -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
+#               -O3 -fPIC -pipe -Wall -Wno-comment -fexceptions -Wcast-align
+#               -Wno-non-template-friend -Woverloaded-virtual
+#               -o fits/implement/CMakeFiles/fits.dir/FITS/BasicFITS.o
+#               -c <USG ROOT>/external/casa/fits/implement/FITS/BasicFITS.cc
+
+# [1] Lars-Mac (PPC Mac)
+#
+# /usr/bin/c++  -I<USG ROOT>/external/casacore/. 
+#               -I<USG ROOT>/external/casacore/casa
+#               -I<USG ROOT>/external/casacore/tables
+#               -I<USG ROOT>/external/casacore/mirlib
+#               -I<USG ROOT>/external/casacore/scimath
+#               -I<USG ROOT>/external/casacore/measures
+#               -I<USG ROOT>/external/casacore/fits
+#               -I<USG ROOT>/external/casacore/coordinates
+#               -I<USG ROOT>/external/casacore/components
+#               -I<USG ROOT>/external/casacore/lattices
+#               -I<USG ROOT>/external/casacore/ms
+#               -I<USG ROOT>/external/casacore/images
+#               -I<USG ROOT>/external/casacore/msfits
+#               -I<USG ROOT>/external/casacore/msvis
+#               -I<USG ROOT>/external/casacore/images/images/Images
+#               -I<USG ROOT>/external/casacore/ms/ms/MeasurementSets
+#               -I<USG ROOT>/external/casacore/tables/tables/Tables
+#               -I/sw/include/cfitsio
+#               -I/sw/include
+#               -O2 -fPIC -pipe
+#               -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_NO_LEA_MALLOC
+#               -fexceptions -Wcast-align -Wall
+#               -DAIPS_DARWIN -DAIPS_BIG_ENDIAN
+#               -o fits/fits/CMakeFiles/fits.dir/FITS/BasicFITS.o
+#               -c <USG ROOT>/external/casacore/fits/fits/FITS/BasicFITS.cc
+#
+# [2] papi (Debian GNU Linux, 64 bit)
+#
+# /usr/bin/c++  -I<USG ROOT>/external/casacore/.
+#               -I<USG ROOT>/external/casacore/casa
+#               -I<USG ROOT>/external/casacore/tables
+#               -I<USG ROOT>/external/casacore/mirlib
+#               -I<USG ROOT>/external/casacore/scimath
+#               -I<USG ROOT>/external/casacore/measures
+#               -I<USG ROOT>/external/casacore/fits
+#               -I<USG ROOT>/external/casacore/coordinates
+#               -I<USG ROOT>/external/casacore/components
+#               -I<USG ROOT>/external/casacore/lattices
+#               -I<USG ROOT>/external/casacore/ms
+#               -I<USG ROOT>/external/casacore/images
+#               -I<USG ROOT>/external/casacore/msfits
+#               -I<USG ROOT>/external/casacore/msvis
+#               -I<USG ROOT>/external/casacore/images/images/Images
+#               -I<USG ROOT>/external/casacore/ms/ms/MeasurementSets
+#               -I<USG ROOT>/external/casacore/tables/tables/Tables
+#               -I<USG ROOT>/external/casacore/../../release/include/cfitsio
+#               -O2 -fPIC -pipe
+#               -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_NO_LEA_MALLOC
+#               -fexceptions -Wcast-align -Wall
+#               -DAIPS_LINUX -DAIPS_LITTLE_ENDIAN -DAIPS_64B
+#               -o fits/fits/CMakeFiles/fits.dir/FITS/fitsio.o
+#               -c <USG ROOT>/external/casacore/fits/fits/FITS/fitsio.cc
+#
+# [3] Ray (SuSE Linux)
+#
+# /usr/bin/c++  -I<USG ROOT>/external/casacore/.
+#               -I<USG ROOT>/external/casacore/casa
+#               -I<USG ROOT>/external/casacore/tables
+#               -I<USG ROOT>/external/casacore/mirlib
+#               -I<USG ROOT>/external/casacore/scimath
+#               -I<USG ROOT>/external/casacore/measures
+#               -I<USG ROOT>/external/casacore/fits
+#               -I<USG ROOT>/external/casacore/coordinates
+#               -I<USG ROOT>/external/casacore/components
+#               -I<USG ROOT>/external/casacore/lattices
+#               -I<USG ROOT>/external/casacore/ms
+#               -I<USG ROOT>/external/casacore/images
+#               -I<USG ROOT>/external/casacore/msfits
+#               -I<USG ROOT>/external/casacore/msvis
+#               -I<USG ROOT>/external/casacore/images/images/Images
+#               -I<USG ROOT>/external/casacore/ms/ms/MeasurementSets
+#               -I<USG ROOT>/external/casacore/tables/tables/Tables
+#               -I/usr/include/cfitsio
+#               -I/usr/lib/gcc-lib/i586-suse-linux/3.3.3/include
+#               -O2 -fPIC -pipe
+#               -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_NO_LEA_MALLOC
+#               -fexceptions -Wcast-align -Wall
+#               -DAIPS_LINUX -DAIPS_LITTLE_ENDIAN
+#               -o fits/fits/CMakeFiles/fits.dir/FITS/BinTable.o
+#               -c <USG ROOT>/external/casacore/fits/fits/FITS/BinTable.cc
+
+
+## -----------------------------------------------------------------------------
+## Location of the header files
 
 include_directories (
   .
@@ -270,20 +340,11 @@ include_directories (
 
 IF (UNIX)
   add_definitions (
-    # -- optimization --
-    -O2
-    -fPIC
-    -pipe
     # -- compiler flags utilized in the source code --
     -DAIPS_STDLIB
+	-DAIPS_NO_TEMPLATE_SRC
     -DAIPS_AUTO_STL
     -DAIPS_NO_LEA_MALLOC
-    # -- exceptions and warnings --
-    -fexceptions
-	-Wcast-align
-	-Wall
-    ## LDOPT
-    ##    -s -Xlinker -rpath -Xlinker
     )
   set (CASA_CXXSTD "${CASA_CXXSTD} -Wreturn-type -Wimplicit -fPIC")
   set (CASA_LDSTD "-Xlinker -rpath -Xlinker")
@@ -291,9 +352,9 @@ IF (UNIX)
     ## definition common to apple architectures
     add_definitions (
       -DAIPS_DARWIN
-      -DNATIVE_EXCP
-      -D_FILE_OFFSET_BITS=64
-	  -D_LARGEFILE_SOURCE
+#	  -DNATIVE_EXCP
+#	  -D_FILE_OFFSET_BITS=64
+#	  -D_LARGEFILE_SOURCE
       )
     ## PPC specific settings
     if (CMAKE_OSX_ARCHITECTURES MATCHES ppc)
@@ -323,6 +384,17 @@ IF (UNIX)
 	  endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
     endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
   endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
+  add_definitions (
+    # -- optimization --
+    -O3
+    -fPIC
+    -pipe
+    # -- exceptions and warnings --
+	-Wall
+	-Wno-comment
+    -fexceptions
+	-Wcast-align
+  )
 ENDIF (UNIX)
 
 SET (CMAKE_MODULE_LINKER_FLAGS ${CASA_LDSTD})
