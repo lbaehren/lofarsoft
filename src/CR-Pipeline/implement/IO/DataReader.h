@@ -1,25 +1,25 @@
 /*-------------------------------------------------------------------------*
-| $Id: template-class.h,v 1.20 2007/06/13 09:41:37 bahren Exp           $ |
-*-------------------------------------------------------------------------*
-***************************************************************************
-*   Copyright (C) 2007                                                    *
-*   Lars B"ahren (bahren@astron.nl)                                       *
-*                                                                         *
-*   This program is free software; you can redistribute it and/or modify  *
-*   it under the terms of the GNU General Public License as published by  *
-*   the Free Software Foundation; either version 2 of the License, or     *
-*   (at your option) any later version.                                   *
-*                                                                         *
-*   This program is distributed in the hope that it will be useful,       *
-*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-*   GNU General Public License for more details.                          *
-*                                                                         *
-*   You should have received a copy of the GNU General Public License     *
-*   along with this program; if not, write to the                         *
-*   Free Software Foundation, Inc.,                                       *
-*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-***************************************************************************/
+ | $Id: template-class.h,v 1.20 2007/06/13 09:41:37 bahren Exp           $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
 #ifndef DATAREADER_H
 #define DATAREADER_H
@@ -266,11 +266,26 @@ namespace CR {  //  Namespace CR -- begin
       \brief Initialization of internal parameters
       
       \param blocksize   -- Size of a block of data, [samples]
-      \param adc2voltage -- 
-      \param fft2calfft  -- 
+      \param adc2voltage -- [antenna] Multiplication factors for conversion
+                            from ADC values to voltages
+      \param fft2calfft  -- [channel,antenna] Multiplication factors for
+                            conversion from raw to calibrated FFT
     */
     void init (uint const &blocksize,
 	       Vector<Double> const &adc2voltage,
+	       Matrix<DComplex> const &fft2calfft);
+    
+    /*!
+      \brief Initialization of internal parameters
+      
+      \param blocksize   -- Size of a block of data, [samples]
+      \param adc2voltage -- [sample,antenna] Multiplication factors for
+                            conversion from ADC values to voltages
+      \param fft2calfft  -- [channel,antenna] Multiplication factors for
+                            conversion from raw to calibrated FFT
+    */
+    void init (uint const &blocksize,
+	       Matrix<Double> const &adc2voltage,
 	       Matrix<DComplex> const &fft2calfft);
     
     /*!
@@ -356,6 +371,19 @@ namespace CR {  //  Namespace CR -- begin
   */
   DataReader (uint const &blocksize,
 	      Vector<Double> const &adc2voltage,
+	      Matrix<DComplex> const &fft2calfft);
+
+  /*!
+    \brief Argumented constructor
+
+    \param blocksize   -- Size of a block of data, [samples]
+    \param adc2voltage -- Multiplication factors for conversion from ADC values
+                          to voltages
+    \param fft2calfft  -- Multiplication factors for conversion from raw to
+                          calibrated FFT
+  */
+  DataReader (uint const &blocksize,
+	      Matrix<Double> const &adc2voltage,
 	      Matrix<DComplex> const &fft2calfft);
 
   /*!

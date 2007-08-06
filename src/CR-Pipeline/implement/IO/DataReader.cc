@@ -87,6 +87,25 @@ namespace CR {  //  Namespace CR -- begin
   
   // ----------------------------------------------------------------- DataReader
   
+  DataReader::DataReader (uint const &blocksize,
+			  Matrix<Double> const &adc2voltage,
+			  Matrix<DComplex> const &fft2calfft)
+    : TimeFreq(blocksize),
+      streamsConnected_p(false)
+  {
+    init (TimeFreq::blocksize(),
+	  TimeFreq::nyquistZone(),
+	  TimeFreq::sampleFrequency());
+    
+    DataReader::setFFTLength ();
+    
+    init (blocksize,
+	  adc2voltage,
+	  fft2calfft);
+  }
+  
+  // ----------------------------------------------------------------- DataReader
+  
   template <class T> 
   DataReader::DataReader (String const &filename,
 			  uint const &blocksize,
@@ -233,163 +252,163 @@ void DataReader::copy (DataReader const &other)
     cerr << "[DataReader::copy]" << x.getMesg() << endl;
   }
 }
-
-// ==============================================================================
-//
-//  Parameters
-//
-// ==============================================================================
-
-// ------------------------------------------------------------------------- init
-
-void DataReader::init (uint const &blocksize) 
-{
-  uint nyquistZone (nyquistZone_p);
-  double sampleFrequency (sampleFrequency_p);
   
-  init (blocksize,
-	nyquistZone,
-	sampleFrequency);
-}
-
-// ------------------------------------------------------------------------- init
-
-void DataReader::init (uint const &blocksize,
-		       uint const &nyquistZone,
-		       Double const &samplerate)
-{
-  // parameters strored in the base class
-  TimeFreq::setBlocksize (blocksize);
-  TimeFreq::setNyquistZone (nyquistZone);
-  TimeFreq::setSampleFrequency (samplerate);
-
-  DataReader::setFFTLength ();
-  fileStream_p = NULL;
-  setStartBlock   (1);
-
-  uint nofAntennas (1);
-  Vector<Double> adc2voltage (nofAntennas,1.0);
-  Matrix<DComplex> fft2calfft (fftLength_p,nofAntennas,1.0);
-
-  init (blocksize,
-	adc2voltage,
-	fft2calfft);
-}
-
-// ------------------------------------------------------------------------- init
-
-void DataReader::init (uint const &blocksize,
-		       Vector<Double> const &adc2voltage,
-		       Matrix<DComplex> const &fft2calfft)
-{
-  /*
-    Do some basic checking here: the provided numbers and array must be
-    conformant - esp. the number of elements in 'adc2voltage' must correspond
-    to the length of the second axis of 'fft2calfft'.
-  */
+  // ============================================================================
+  //
+  //  Parameters
+  //
+  // ============================================================================
   
-  bool status (true);
-  IPosition shapeADC (adc2voltage.shape());
-  IPosition shapeFFT (fft2calfft.shape());
-
-  /*
-    Check of the number of antennas is consistent
-  */
-  if (shapeADC(0) != shapeFFT(1)) {
-    cerr << "[DataReader::init] Inconsistent number of antennas!" << endl;
-    cerr << " - shape(adc2voltage) = " << adc2voltage.shape() << endl;
-    cerr << " - shape(fft2calfft)  = " << fft2calfft.shape() << endl;
-    cerr << " => Rejecting conversion arrays!" << endl;
-    status = false;
-    /*
-      If the shapes are incorrect there is no way to determine, which of the 
-      arrays we'd have to adjust, to get to a consistent setup; in order to 
-      nevertheless at least create a valid DataReader object, we make a call to 
-      init (uint const&)
-     */
-    init (blocksize);
-  } else {
-    /*
-      The blocksize must be set at first, because this also will determine the 
-      output length of the FFT, which in turn is required for further checking
-    */
-    try {
-      TimeFreq::setBlocksize (blocksize);
-      setFFTLength ();
-    } catch (std::string message) {
-      cerr << "[DataReader::init]" << message << endl;
-      status = false;
-    }
+  // ----------------------------------------------------------------------- init
+  
+  void DataReader::init (uint const &blocksize) 
+  {
+    uint nyquistZone (nyquistZone_p);
+    double sampleFrequency (sampleFrequency_p);
     
-    /*
-      Antenna selection: by default we enable all antennas
-    */
-    Vector<uint> antennas (shapeADC);
-    Vector<uint> selectedAntennas (shapeADC);
-
-    try {
-      for (int n(0); n<shapeADC(0); n++) {
-	antennas(n) = selectedAntennas(n) = n;
-      }
-      
-      setAntennas (antennas,
-		   selectedAntennas);
-    } catch (std::string message) {
-      cerr << "[DataReader::init]" << message << endl;
-      status = false;
-    }
-
-    /* book-keeping: memorize the number of data streams */
-    nofStreams_p = shapeADC(0);
-    
-    //   if (fftLength_p != uint(shape(0))) {
-    //     cerr << "[DataReader::init] Inconsistent number of frequencies!" << endl;
-    //     cerr << " - FFT output length = " << fftLength_p << endl;
-    //     cerr << " - shape(fft2calfft) = " << fft2calfft.shape() << endl;
-    //   }
-    
-    /*
-      Frequency channel selection: by default we enable all frequency channels
-    */
-    try {
-      Vector<Bool> selectedChannels (fftLength_p);
-      selectedChannels = True;
-      
-      setSelectedChannels (selectedChannels);
-      selectChannels_p = False;
-      
-      // process provided parameters
-      setADC2Voltage (adc2voltage);
-      setFFT2calFFT (fft2calfft);
-    } catch (std::string message) {
-      std::cerr << "[DataReader::init]" << message << std::endl;
-      status = false;
-    }
-    
-    // -- Setup of the Hanning filter (disabled by default)
-    
-    setHanningFilter (0.0);
-    
-    // -- feedback -----------------------------------------------------
-    
-//     cout << "[DataReader::init]" << endl;
-//     cout << " blocksize        = " << blocksize_p           << endl;
-//     cout << " fftLength        = " << fftLength()           << endl;
-//     cout << " Nyquist zone     = " << nyquistZone()         << endl;
-//     cout << " nofAntennas      = " << nofAntennas()         << endl;
-//     cout << " selectedAntennas = " << nofSelectedAntennas() << endl;
-//     cout << " selectedChannels = " << nofSelectedChannels() << endl;
+    init (blocksize,
+	  nyquistZone,
+	  sampleFrequency);
   }
   
-}
+  // ----------------------------------------------------------------------- init
+  
+  void DataReader::init (uint const &blocksize,
+			 uint const &nyquistZone,
+			 Double const &samplerate)
+  {
+    // parameters strored in the base class
+    TimeFreq::setBlocksize (blocksize);
+    TimeFreq::setNyquistZone (nyquistZone);
+    TimeFreq::setSampleFrequency (samplerate);
+    
+    DataReader::setFFTLength ();
+    fileStream_p = NULL;
+    setStartBlock   (1);
+    
+    uint nofAntennas (1);
+    Vector<Double> adc2voltage (nofAntennas,1.0);
+    Matrix<DComplex> fft2calfft (fftLength_p,nofAntennas,1.0);
+    
+    init (blocksize,
+	  adc2voltage,
+	  fft2calfft);
+  }
+  
+  // ----------------------------------------------------------------------- init
+  
+  void DataReader::init (uint const &blocksize,
+			 Vector<Double> const &adc2voltage,
+			 Matrix<DComplex> const &fft2calfft)
+  {
+    // convert vector of ADC2Voltage values to matrix ...
+    int nofAntennas (adc2voltage.nelements());
+    Matrix<double> adc2voltageMatrix (blocksize,nofAntennas);
 
-void DataReader::init (uint const &blocksize,
-		       Vector<uint> const &antennas,
-		       Vector<Double> const &adc2voltage,
-		       Matrix<DComplex> const &fft2calfft,
-		       Vector<String> const &filenames,
-		       DataIterator const *iterators)
-{
+    // ... which then is forwarded to the next init function
+  }
+  
+  // ----------------------------------------------------------------------- init
+  
+  //! \todo Function not yet implemented!
+  void DataReader::init (uint const &blocksize,
+			 Matrix<Double> const &adc2voltage,
+			 Matrix<DComplex> const &fft2calfft)
+  {
+    /*
+      Do some basic checking here: the provided numbers and array must be
+      conformant - esp. the number of elements in 'adc2voltage' must correspond
+      to the length of the second axis of 'fft2calfft'.
+    */
+    
+    bool status (true);
+    IPosition shapeADC (adc2voltage.shape());
+    IPosition shapeFFT (fft2calfft.shape());
+    
+    /*
+      Check of the number of antennas is consistent
+    */
+    if (shapeADC(0) != shapeFFT(1)) {
+      cerr << "[DataReader::init] Inconsistent number of antennas!" << endl;
+      cerr << " - shape(adc2voltage) = " << adc2voltage.shape() << endl;
+      cerr << " - shape(fft2calfft)  = " << fft2calfft.shape() << endl;
+      cerr << " => Rejecting conversion arrays!" << endl;
+      status = false;
+      /*
+	If the shapes are incorrect there is no way to determine, which of the 
+	arrays we'd have to adjust, to get to a consistent setup; in order to 
+	nevertheless at least create a valid DataReader object, we make a call to 
+	init (uint const&)
+      */
+      init (blocksize);
+    } else {
+      /*
+	The blocksize must be set at first, because this also will determine the 
+	output length of the FFT, which in turn is required for further checking
+      */
+      try {
+	TimeFreq::setBlocksize (blocksize);
+	setFFTLength ();
+      } catch (std::string message) {
+	cerr << "[DataReader::init]" << message << endl;
+	status = false;
+      }
+      
+      /*
+	Antenna selection: by default we enable all antennas
+      */
+      Vector<uint> antennas (shapeADC);
+      Vector<uint> selectedAntennas (shapeADC);
+      
+      try {
+	for (int n(0); n<shapeADC(0); n++) {
+	  antennas(n) = selectedAntennas(n) = n;
+	}
+	
+	setAntennas (antennas,
+		     selectedAntennas);
+      } catch (std::string message) {
+	cerr << "[DataReader::init]" << message << endl;
+	status = false;
+      }
+      
+      /* book-keeping: memorize the number of data streams */
+      nofStreams_p = shapeADC(0);
+      
+      /*
+	Frequency channel selection: by default we enable all frequency channels
+      */
+      try {
+	Vector<Bool> selectedChannels (fftLength_p);
+	selectedChannels = True;
+	
+	setSelectedChannels (selectedChannels);
+	selectChannels_p = False;
+	
+	// process provided parameters
+	setADC2Voltage (adc2voltage);
+	setFFT2calFFT (fft2calfft);
+      } catch (std::string message) {
+	std::cerr << "[DataReader::init]" << message << std::endl;
+	status = false;
+      }
+      
+      // -- Setup of the Hanning filter (disabled by default)
+      
+      setHanningFilter (0.0);
+      
+    }    
+  }
+  
+  // ----------------------------------------------------------------------- init
+
+  void DataReader::init (uint const &blocksize,
+			 Vector<uint> const &antennas,
+			 Vector<Double> const &adc2voltage,
+			 Matrix<DComplex> const &fft2calfft,
+			 Vector<String> const &filenames,
+			 DataIterator const *iterators)
+  {
   Bool status (True);
   uint nofFiles (filenames.nelements());
 

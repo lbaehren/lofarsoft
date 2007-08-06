@@ -22,10 +22,6 @@
 
 #include <Data/LopesEventIn.h>
 
-/*!
-  \class LopesEventIn
-*/
-
 namespace CR { // Namespace CR -- begin
   
   // ============================================================================
@@ -33,18 +29,31 @@ namespace CR { // Namespace CR -- begin
   //  Construction
   //
   // ============================================================================
+
+  // --------------------------------------------------------------- LopesEventIn
   
   LopesEventIn::LopesEventIn()
     : DataReader (1){
     init();
   }
 
-  LopesEventIn::LopesEventIn(String filename)
+  // --------------------------------------------------------------- LopesEventIn
+  
+  LopesEventIn::LopesEventIn(String const &filename)
     : DataReader (1){
     init();
     attachFile(filename);
   }
-
+  
+  // --------------------------------------------------------------- LopesEventIn
+  
+  LopesEventIn::LopesEventIn (String const &filename,
+			      uint const &blocksize)
+    : DataReader (blocksize){
+    init();
+    attachFile(filename);
+  }
+  
   void LopesEventIn::init(){
     DataReader::setNyquistZone(LOPES_NYQUIST_ZONE);
     DataReader::setSampleFrequency(LOPES_SAMPLERATE);

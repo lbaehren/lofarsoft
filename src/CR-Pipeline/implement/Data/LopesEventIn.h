@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2006                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,8 +17,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-/* $Id: LopesEventIn.h,v 1.3 2007/04/13 13:44:29 bahren Exp $*/
 
 #ifndef LOPESEVENTIN_H
 #define LOPESEVENTIN_H
@@ -130,14 +128,23 @@ namespace CR { // Namespace CR -- begin
       \brief Default constructor
     */
     LopesEventIn();
-
+    
     /*!
       \brief Augmented constructor
-
+      
       \param filename -- name (incl. path) of the lopes-eventfile to be read.
     */
-    LopesEventIn(String filename);
-        
+    LopesEventIn (String const &filename);
+    
+    /*!
+      \brief Augmented constructor
+      
+      \param filename -- name (incl. path) of the lopes-eventfile to be read.
+      \param blocksize   -- Size of a block of data, [samples]
+    */
+    LopesEventIn (String const &filename,
+		  uint const &blocksize);
+    
     // -------------------------------------------------------------- Destruction
 
     /*!
