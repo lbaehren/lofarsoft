@@ -2,7 +2,7 @@
 ## $Id::                                                                       $
 ##------------------------------------------------------------------------------
 
-## -----------------------------------------------------------------------------
+## =============================================================================
 ##
 ## Main CMake configuration file for building the "casacore" package.
 ##
@@ -10,7 +10,7 @@
 ##  - "libfits" does not yet build (on PPC Mac)
 ##  - "tVanVleck" does not link due to missing f2c symbols
 ##
-## -----------------------------------------------------------------------------
+## =============================================================================
 
 message (STATUS "[CMake package configuration] casacore")
 
@@ -49,20 +49,13 @@ set (casacore_packages
   )
 
 ## -----------------------------------------------------------------------------
-## Options selectable by the user
-
-option (casacore_tests
-  "Build the test programs?"
-  0
-  )
-
-## -----------------------------------------------------------------------------
 ## Additional required CMake functionality
 
 include (CPack)
 include (CheckIncludeFiles)
 include (CheckLibraryExists)
 include (CheckTypeSize)
+include (TestBigEndian)
 
 ## -----------------------------------------------------------------------------
 ## Check for platform specific header files; in most cases we should be able to
@@ -224,6 +217,14 @@ find_program (uname_bin uname ${bin_locations})
 ## =============================================================================
 
 ## -----------------------------------------------------------------------------
+## Options selectable by the user
+
+option (casacore_tests
+  "Build the test programs?"
+  0
+  )
+
+## -----------------------------------------------------------------------------
 ## Debugging information
 
 # libfits from porting the original CASA source code distribution
@@ -242,20 +243,7 @@ find_program (uname_bin uname ${bin_locations})
 
 # [1] Lars-Mac (PPC Mac)
 #
-# /usr/bin/c++  -I<USG ROOT>/external/casacore/. 
-#               -I<USG ROOT>/external/casacore/casa
-#               -I<USG ROOT>/external/casacore/tables
-#               -I<USG ROOT>/external/casacore/mirlib
-#               -I<USG ROOT>/external/casacore/scimath
-#               -I<USG ROOT>/external/casacore/measures
-#               -I<USG ROOT>/external/casacore/fits
-#               -I<USG ROOT>/external/casacore/coordinates
-#               -I<USG ROOT>/external/casacore/components
-#               -I<USG ROOT>/external/casacore/lattices
-#               -I<USG ROOT>/external/casacore/ms
-#               -I<USG ROOT>/external/casacore/images
-#               -I<USG ROOT>/external/casacore/msfits
-#               -I<USG ROOT>/external/casacore/msvis
+# /usr/bin/c++  -I<USG ROOT>/<casacore modules>
 #               -I<USG ROOT>/external/casacore/images/images/Images
 #               -I<USG ROOT>/external/casacore/ms/ms/MeasurementSets
 #               -I<USG ROOT>/external/casacore/tables/tables/Tables
@@ -268,22 +256,23 @@ find_program (uname_bin uname ${bin_locations})
 #               -o fits/fits/CMakeFiles/fits.dir/FITS/BasicFITS.o
 #               -c <USG ROOT>/external/casacore/fits/fits/FITS/BasicFITS.cc
 #
-# [2] papi (Debian GNU Linux, 64 bit)
+# [2] Yavanna (Intel Mac)
 #
-# /usr/bin/c++  -I<USG ROOT>/external/casacore/.
-#               -I<USG ROOT>/external/casacore/casa
-#               -I<USG ROOT>/external/casacore/tables
-#               -I<USG ROOT>/external/casacore/mirlib
-#               -I<USG ROOT>/external/casacore/scimath
-#               -I<USG ROOT>/external/casacore/measures
-#               -I<USG ROOT>/external/casacore/fits
-#               -I<USG ROOT>/external/casacore/coordinates
-#               -I<USG ROOT>/external/casacore/components
-#               -I<USG ROOT>/external/casacore/lattices
-#               -I<USG ROOT>/external/casacore/ms
-#               -I<USG ROOT>/external/casacore/images
-#               -I<USG ROOT>/external/casacore/msfits
-#               -I<USG ROOT>/external/casacore/msvis
+# /usr/bin/c++  -I<USG ROOT>/<casacore modules>
+#               -I<USG ROOT>/external/casacore/images/images/Images
+#               -I<USG ROOT>/external/casacore/ms/ms/MeasurementSets
+#               -I<USG ROOT>/external/casacore/tables/tables/Tables
+#               -I/sw/include/cfitsio
+#               -I/sw/include
+#               -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_NO_LEA_MALLOC
+#               -O3 -fPIC -pipe -Wno-deprecated
+#               -DAIPS_DARWIN
+#               -o fits/fits/CMakeFiles/fits.dir/FITS/BasicFITS.o
+#               -c <USG ROOT>/external/casacore/fits/fits/FITS/BasicFITS.cc
+#
+# [3] papi (Debian GNU Linux, 64 bit)
+#
+# /usr/bin/c++  -I<USG ROOT>/<casacore modules>
 #               -I<USG ROOT>/external/casacore/images/images/Images
 #               -I<USG ROOT>/external/casacore/ms/ms/MeasurementSets
 #               -I<USG ROOT>/external/casacore/tables/tables/Tables
@@ -295,22 +284,9 @@ find_program (uname_bin uname ${bin_locations})
 #               -o fits/fits/CMakeFiles/fits.dir/FITS/fitsio.o
 #               -c <USG ROOT>/external/casacore/fits/fits/FITS/fitsio.cc
 #
-# [3] Ray (SuSE Linux)
+# [4] Ray (SuSE Linux)
 #
-# /usr/bin/c++  -I<USG ROOT>/external/casacore/.
-#               -I<USG ROOT>/external/casacore/casa
-#               -I<USG ROOT>/external/casacore/tables
-#               -I<USG ROOT>/external/casacore/mirlib
-#               -I<USG ROOT>/external/casacore/scimath
-#               -I<USG ROOT>/external/casacore/measures
-#               -I<USG ROOT>/external/casacore/fits
-#               -I<USG ROOT>/external/casacore/coordinates
-#               -I<USG ROOT>/external/casacore/components
-#               -I<USG ROOT>/external/casacore/lattices
-#               -I<USG ROOT>/external/casacore/ms
-#               -I<USG ROOT>/external/casacore/images
-#               -I<USG ROOT>/external/casacore/msfits
-#               -I<USG ROOT>/external/casacore/msvis
+# /usr/bin/c++  -I<USG ROOT>/<casacore modules>
 #               -I<USG ROOT>/external/casacore/images/images/Images
 #               -I<USG ROOT>/external/casacore/ms/ms/MeasurementSets
 #               -I<USG ROOT>/external/casacore/tables/tables/Tables
@@ -355,43 +331,48 @@ IF (UNIX)
 #    -fexceptions
 #    -Wcast-align
     -Wno-deprecated
-#    -Wreturn-type
-#    -Wimplicit
     )
   set (CASA_LDSTD "-Xlinker -rpath -Xlinker")
-  IF (APPLE)
+  IF (APPLE OR CMAKE_SYSTEM_NAME MATCHES Darwin)
     ## definition common to apple architectures
     add_definitions (
       -DAIPS_DARWIN
 #	  -DNATIVE_EXCP
 #	  -D_FILE_OFFSET_BITS=64
 #	  -D_LARGEFILE_SOURCE
-      )
-    ## PPC specific settings
-    if (CMAKE_OSX_ARCHITECTURES MATCHES ppc)
-      add_definitions (
-	-DAIPS_BIG_ENDIAN
-	)
-    elseif (CMAKE_OSX_ARCHITECTURES MATCHES ppc)
-      add_definitions (
-	-DAIPS_LITTLE_ENDIAN
-	)
-    endif (CMAKE_OSX_ARCHITECTURES MATCHES ppc)
-  ELSE (APPLE)
-    ADD_DEFINITIONS (
-      -DAIPS_LINUX
-      -DAIPS_LITTLE_ENDIAN
-      )
-  ENDIF (APPLE)
-  ## Platform test 32/64 bit
+    )
+  ELSE (APPLE OR CMAKE_SYSTEM_NAME MATCHES Darwin)
+    ADD_DEFINITIONS (-DAIPS_LINUX)
+  ENDIF (APPLE OR CMAKE_SYSTEM_NAME MATCHES Darwin)
+  ##
+  ## Platform test Big/Little Endian ------------------------------------
+  ##
+  if (CMAKE_SYSTEM_PROCESSOR MATCHES "powerpc")
+    message (STATUS "System is big endian.")
+    add_definitions (-DAIPS_BIG_ENDIAN)
+    set (CMAKE_SYSTEM_BIG_ENDIAN 1)
+  elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "powerpc")
+    message (STATUS "System is little endian.")
+    add_definitions (-DAIPS_LITTLE_ENDIAN)
+    set (CMAKE_SYSTEM_BIG_ENDIAN 0)
+  endif (CMAKE_SYSTEM_PROCESSOR MATCHES "powerpc")
+#  TEST_BIG_ENDIAN (CMAKE_SYSTEM_BIG_ENDIAN)
+#  if (CMAKE_SYSTEM_BIG_ENDIAN)
+#    message (STATUS "System is big endian.")
+#    add_definitions (-DAIPS_BIG_ENDIAN)
+#  elseif (CMAKE_SYSTEM_BIG_ENDIAN)
+#    message (STATUS "System is little endian.")
+#    add_definitions (-DAIPS_LITTLE_ENDIAN)
+#  endif (CMAKE_SYSTEM_BIG_ENDIAN)
+  ##
+  ## Platform test 32/64 bit ------------------------------
+  ##
   set (CMAKE_SYSTEM_64BIT 0)
   if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
     if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
       if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
         set (CMAKE_SYSTEM_64BIT 1)
-	add_definitions (
-	  -DAIPS_64B
-	  )
+        add_definitions (-DAIPS_64B)
       endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
     endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
   endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
@@ -406,8 +387,11 @@ foreach (casacore_package ${casacore_packages})
   add_subdirectory (${casacore_package})
 endforeach (casacore_package)
 
-## -----------------------------------------------------------------------------
-## Installation
+## =============================================================================
+##
+##  Installation
+##
+## =============================================================================
 
 find_path (prefix release_area.txt
   PATHS
@@ -423,26 +407,30 @@ if (prefix)
   set (CMAKE_INSTALL_PREFIX ${prefix}) 
 endif (prefix)
 
-## -----------------------------------------------------------------------------
-## Summary of settings
+## =============================================================================
+##
+##  Summary of settings
+##
+## =============================================================================
 
-message (STATUS "casacore_SOURCE_DIR ..... = ${casacore_SOURCE_DIR}")
-message (STATUS "CMAKE_SYSTEM ............ = ${CMAKE_SYSTEM}")
-message (STATUS "CMAKE_SYSTEM_NAME ....... = ${CMAKE_SYSTEM_NAME}")
-message (STATUS "CMAKE_SYSTEM_PROCESSOR .. = ${CMAKE_SYSTEM_PROCESSOR}")
-message (STATUS "CMAKE_SYSTEM_64BIT ...... = ${CMAKE_SYSTEM_64BIT}")
-message (STATUS "SIZEOF_FLOAT ............ = ${SIZEOF_FLOAT}")
-message (STATUS "SIZEOF_DOUBLE ........... = ${SIZEOF_DOUBLE}")
-message (STATUS "SIZEOF_LONG ............. = ${SIZEOF_LONG}")
-message (STATUS "CMAKE_CXX_COMPILER ...... = ${CMAKE_CXX_COMPILER}")
-message (STATUS "CMAKE_C_FLAGS ........... = ${CMAKE_C_FLAGS}")
-message (STATUS "CMAKE_CXX_FLAGS ......... = ${CMAKE_CXX_FLAGS}")
-message (STATUS "CMAKE_MODULE_LINKER_FLAGS = ${CMAKE_MODULE_LINKER_FLAGS}")
-message (STATUS "CMAKE_INSTALL_PREFIX .... = ${CMAKE_INSTALL_PREFIX}")
-message (STATUS "Bison lexical parser .... = ${bison_bin}")
-message (STATUS "Flex lexical parser ..... = ${flex_bin}")
-message (STATUS "libm library ............ = ${libm}")
-message (STATUS "CFITSIO header files .... = ${CFITSIO_INCLUDES}")
-message (STATUS "CFITSIO library ......... = ${CFITSIO_LIBRARIES}")
-message (STATUS "WCSLIB header files ..... = ${WCSLIB_INCLUDES}")
-message (STATUS "WCSLIB library .......... = ${WCSLIB_LIBRARIES}")
+message (STATUS "casacore_SOURCE_DIR ........ = ${casacore_SOURCE_DIR}")
+message (STATUS "CMAKE_SYSTEM ............... = ${CMAKE_SYSTEM}")
+message (STATUS "CMAKE_SYSTEM_NAME .......... = ${CMAKE_SYSTEM_NAME}")
+message (STATUS "CMAKE_SYSTEM_PROCESSOR ..... = ${CMAKE_SYSTEM_PROCESSOR}")
+message (STATUS "CMAKE_SYSTEM_64BIT ......... = ${CMAKE_SYSTEM_64BIT}")
+message (STATUS "CMAKE_SYSTEM_BIG_ENDIAN .... = ${CMAKE_SYSTEM_BIG_ENDIAN}")
+message (STATUS "SIZEOF_FLOAT ............... = ${SIZEOF_FLOAT}")
+message (STATUS "SIZEOF_DOUBLE .............. = ${SIZEOF_DOUBLE}")
+message (STATUS "SIZEOF_LONG ................ = ${SIZEOF_LONG}")
+message (STATUS "CMAKE_CXX_COMPILER ......... = ${CMAKE_CXX_COMPILER}")
+message (STATUS "CMAKE_C_FLAGS .............. = ${CMAKE_C_FLAGS}")
+message (STATUS "CMAKE_CXX_FLAGS ............ = ${CMAKE_CXX_FLAGS}")
+message (STATUS "CMAKE_MODULE_LINKER_FLAGS .. = ${CMAKE_MODULE_LINKER_FLAGS}")
+message (STATUS "CMAKE_INSTALL_PREFIX ....... = ${CMAKE_INSTALL_PREFIX}")
+message (STATUS "Bison lexical parser ....... = ${bison_bin}")
+message (STATUS "Flex lexical parser ........ = ${flex_bin}")
+message (STATUS "libm library ............... = ${libm}")
+message (STATUS "CFITSIO header files ....... = ${CFITSIO_INCLUDES}")
+message (STATUS "CFITSIO library ............ = ${CFITSIO_LIBRARIES}")
+message (STATUS "WCSLIB header files ........ = ${WCSLIB_INCLUDES}")
+message (STATUS "WCSLIB library ............. = ${WCSLIB_LIBRARIES}")
