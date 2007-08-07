@@ -24,6 +24,16 @@ foreach (src ${tests})
 endforeach (src)
 
 ## ------------------------------------------------------------------------------
+## Installation
+
+install (
+  TARGETS ${tests}
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )
+
+## ------------------------------------------------------------------------------
 ## Additional test programs which require extra care
 
 #add_executable (table2root table2root.cc)

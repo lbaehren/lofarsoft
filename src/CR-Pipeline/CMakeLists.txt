@@ -2,7 +2,11 @@
 ## $Id::                                                                        $
 ##-------------------------------------------------------------------------------
 
+## Name of the project
 project (CR)
+
+## Minimum required version of CMake to configure the project
+cmake_minimum_required (VERSION 2.5)
 
 ## ------------------------------------------------------------------------------
 ## User defined build/install options
@@ -15,7 +19,7 @@ option (CR_DEBUGGING_MESSAGES "Print debugging information?" 0)
 
 subdirs (
   implement
-  apps
+#  apps
   )
 
 if (CR_BUILD_TESTS)
@@ -27,7 +31,7 @@ endif (CR_BUILD_TESTS)
 
 ## check where to find the CMake scripts
 
-find_path (cr_cmake template_FindXX.cmake 
+find_path (cr_cmake FindBlitz.cmake FindCASA.cmake FindCFITSIO.cmake
   PATHS 
   ${CR_SOURCE_DIR}
   ${CR_SOURCE_DIR}/..

@@ -24,3 +24,13 @@ foreach (src ${tests})
   target_link_libraries (${src} cr)
 endforeach (src)
 
+## ------------------------------------------------------------------------------
+## Installation
+
+install (
+  TARGETS ${tests}
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )
+

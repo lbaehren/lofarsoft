@@ -1,6 +1,6 @@
-##------------------------------------------------------------------------
-## $Id:: CMakeLists.txt 392 2007-06-13 10:38:12Z baehren                 $
-##------------------------------------------------------------------------
+##-------------------------------------------------------------------------------
+## $Id:: CMakeLists.txt 392 2007-06-13 10:38:12Z baehren                        $
+##-------------------------------------------------------------------------------
 
 include_directories (. .. ../..)
 
@@ -23,3 +23,13 @@ foreach (src ${tests})
   add_executable (${src} ${src}.cc)
   target_link_libraries (${src} cr)
 endforeach (src)
+
+## ------------------------------------------------------------------------------
+## Installation
+
+install (
+  TARGETS ${tests}
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )

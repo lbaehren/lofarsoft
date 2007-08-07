@@ -1,6 +1,6 @@
-##------------------------------------------------------------------------
-## $Id::                                                                 $
-##------------------------------------------------------------------------
+##-------------------------------------------------------------------------------
+## $Id::                                                                        $
+##-------------------------------------------------------------------------------
 
 ## -----------------------------------------------------------------------------
 ## Modules inside the "CR-Pipeline" package
@@ -37,20 +37,17 @@ if (CR_DEBUGGING_MESSAGES)
   add_definitions (-DDEBUGGING_MESSAGES)
 endif (CR_DEBUGGING_MESSAGES)
 
-if (CASA_LIBRARIES AND LAPACK_LIBRARIES)
-  add_library (cr
-    ${cr_sources}
-    templates.h
-    )
-  target_link_libraries (cr
-    ${CASA_LIBRARIES}
-    ${CFITSIO_LIBRARIES}
-    ${LAPACK_LIBRARIES}
-    ${CPGPLOT_LIBRARIES}
-    )
-else (CASA_LIBRARIES AND LAPACK_LIBRARIES)
-  message (STATUS "Sorry, unable to build CR library; missing CASA and LAPACK!")
-endif (CASA_LIBRARIES AND LAPACK_LIBRARIES)
+add_library (cr
+  ${cr_sources}
+  templates.h
+  )
+
+target_link_libraries (cr
+  ${CASA_LIBRARIES}
+  ${CFITSIO_LIBRARIES}
+  ${LAPACK_LIBRARIES}
+  ${CPGPLOT_LIBRARIES}
+  )
 
 ## ------------------------------------------------------------------------------
 ## Test programs
