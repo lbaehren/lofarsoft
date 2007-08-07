@@ -219,9 +219,10 @@ int test_dataStreams ()
   uint nofFiles (5);
   DataIterator *iterators;
 
-  iterators = new DataIterator[nofFiles](blocksize);
+  iterators = new DataIterator[nofFiles];
 
   for (uint file (0); file<nofFiles; file++) {
+    iterators[file].setBlocksize(blocksize);
     cout << file << "\t" << iterators[file].blocksize() << endl;
   }
   
