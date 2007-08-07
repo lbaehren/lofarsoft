@@ -111,6 +111,8 @@ namespace CR { // Namespace CR -- begin
     
     //! Blocksize, \f$ N_{\rm Blocksize} \f$ , [samples]
     uint blocksize_p;
+    //! Output length of the FFT, [samples]
+    uint fftLength_p;
     //! Sample frequency in the ADC, \f$ \nu_{\rm Sample} \f$, [Hz]
     double sampleFrequency_p;
     //! Nyquist zone, \f$ N_{\rm Nyquist} \f$,  [1]
@@ -235,8 +237,9 @@ namespace CR { // Namespace CR -- begin
     */
     inline void setBlocksize (uint const &blocksize) {
       blocksize_p = blocksize;
+      fftLength_p = blocksize_p/2+1;
     }
-
+    
     // --- sampleFrequency ---------------------------------
 
     /*!
@@ -336,7 +339,7 @@ namespace CR { // Namespace CR -- begin
 			   samples.
     */
     inline uint fftLength () {
-      return blocksize_p/2+1;
+      return fftLength_p;
     }
 
     /*!

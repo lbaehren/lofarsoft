@@ -33,7 +33,7 @@ namespace CR { // Namespace CR -- begin
   
   TimeFreq::TimeFreq ()
   {
-    blocksize_p       = 1;
+    setBlocksize (1);
     sampleFrequency_p = 80e06;
     nyquistZone_p     = 1;
     referenceTime_p   = 0;
@@ -41,7 +41,7 @@ namespace CR { // Namespace CR -- begin
   
   TimeFreq::TimeFreq (uint const &blocksize)
   {
-    blocksize_p       = blocksize;
+    setBlocksize (blocksize);
     sampleFrequency_p = 80e06;
     nyquistZone_p     = 1;
     referenceTime_p   = 0;
@@ -51,7 +51,7 @@ namespace CR { // Namespace CR -- begin
 		      double const &sampleFrequency,
 		      uint const &nyquistZone)
   {
-    blocksize_p       = blocksize;
+    setBlocksize (blocksize);
     sampleFrequency_p = sampleFrequency;
     nyquistZone_p     = nyquistZone;
     referenceTime_p   = 0;
@@ -62,7 +62,7 @@ namespace CR { // Namespace CR -- begin
 	    uint const &nyquistZone,
 	    double const &referenceTime)
   {
-    blocksize_p       = blocksize;
+    setBlocksize (blocksize);
     sampleFrequency_p = sampleFrequency;
     nyquistZone_p     = nyquistZone;
     referenceTime_p   = referenceTime;
@@ -105,6 +105,7 @@ namespace CR { // Namespace CR -- begin
   void TimeFreq::copy (TimeFreq const &other)
   {
     blocksize_p       = other.blocksize_p;
+    fftLength_p       = other.fftLength_p;
     sampleFrequency_p = other.sampleFrequency_p;
     nyquistZone_p     = other.nyquistZone_p;
     referenceTime_p   = other.referenceTime_p;
@@ -115,6 +116,8 @@ namespace CR { // Namespace CR -- begin
   //  Parameters
   //
   // ============================================================================
+
+  // -------------------------------------------------------------------- summary
   
   void TimeFreq::summary ()
   {
@@ -124,7 +127,7 @@ namespace CR { // Namespace CR -- begin
     std::cout << " Nyquist zone             = " << nyquistZone_p        << "\n";
     std::cout << " Reference time     [sec] = " << referenceTime_p      << "\n";
     std::cout << "-- Derived quantities:"                               << "\n";
-    std::cout << " FFT length    [channels] = " << fftLength()          << "\n";
+    std::cout << " FFT length    [channels] = " << fftLength_p          << "\n";
     std::cout << " Sample interval      [s] = " << sampleInterval()     << "\n";
     std::cout << " Frequency increment [Hz] = " << frequencyIncrement() << "\n";
     std::cout << " Frequency band      [Hz] = " << frequencyBand()[0]

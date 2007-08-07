@@ -13,6 +13,7 @@ set (tests
   tCoordinateGrid
   tGridCoordinate
   tPolarCoordinate
+  tTimeFreq
   )
 
 ## ------------------------------------------------------------------------------

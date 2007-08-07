@@ -1,29 +1,33 @@
 /*-------------------------------------------------------------------------*
-| $Id: template-class.h,v 1.20 2007/06/13 09:41:37 bahren Exp           $ |
-*-------------------------------------------------------------------------*
-***************************************************************************
-*   Copyright (C) 2007                                                    *
-*   Lars B"ahren (bahren@astron.nl)                                       *
-*                                                                         *
-*   This program is free software; you can redistribute it and/or modify  *
-*   it under the terms of the GNU General Public License as published by  *
-*   the Free Software Foundation; either version 2 of the License, or     *
-*   (at your option) any later version.                                   *
-*                                                                         *
-*   This program is distributed in the hope that it will be useful,       *
-*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-*   GNU General Public License for more details.                          *
-*                                                                         *
-*   You should have received a copy of the GNU General Public License     *
-*   along with this program; if not, write to the                         *
-*   Free Software Foundation, Inc.,                                       *
-*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-***************************************************************************/
+ | $Id: template-class.h,v 1.20 2007/06/13 09:41:37 bahren Exp           $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
 #include <IO/DataReader.h>
 #include <casa/Arrays/ArrayLogical.h>
 #include <casa/Arrays/ArrayMath.h>
+
+using std::cerr;
+using std::cout;
+using std::endl;
 
 namespace CR {  //  Namespace CR -- begin
   
@@ -39,6 +43,9 @@ namespace CR {  //  Namespace CR -- begin
     : TimeFreq(),
       streamsConnected_p(false)
   {
+#ifdef DEBUGGING_MESSAGES
+    cout << "[DataReader::DataReader ()]" << endl;
+#endif 
     init (TimeFreq::blocksize());
   }
   
@@ -48,6 +55,9 @@ namespace CR {  //  Namespace CR -- begin
     : TimeFreq(blocksize),
       streamsConnected_p(false)
   {
+#ifdef DEBUGGING_MESSAGES
+    cout << "[DataReader::DataReader (uint)]" << endl;
+#endif 
     init (TimeFreq::blocksize());
   }
   
@@ -61,6 +71,9 @@ namespace CR {  //  Namespace CR -- begin
 	       nyquistZone),
       streamsConnected_p(false)
   {
+#ifdef DEBUGGING_MESSAGES
+    cout << "[DataReader::DataReader (uint,uint,double)]" << endl;
+#endif 
     init (blocksize,
 	  nyquistZone,
 	  samplerate);
@@ -78,8 +91,6 @@ namespace CR {  //  Namespace CR -- begin
 	  TimeFreq::nyquistZone(),
 	  TimeFreq::sampleFrequency());
     
-    DataReader::setFFTLength ();
-    
     init (blocksize,
 	  adc2voltage,
 	  fft2calfft);
@@ -96,8 +107,6 @@ namespace CR {  //  Namespace CR -- begin
     init (TimeFreq::blocksize(),
 	  TimeFreq::nyquistZone(),
 	  TimeFreq::sampleFrequency());
-    
-    DataReader::setFFTLength ();
     
     init (blocksize,
 	  adc2voltage,
@@ -129,6 +138,9 @@ namespace CR {  //  Namespace CR -- begin
   DataReader::DataReader (DataReader const &other)
     : TimeFreq()
   {
+#ifdef DEBUGGING_MESSAGES
+    cout << "[DataReader::DataReader (DataReader)&]" << endl;
+#endif
     copy (other);
   }
   
@@ -140,11 +152,17 @@ namespace CR {  //  Namespace CR -- begin
   
   DataReader::~DataReader ()
   {
+#ifdef DEBUGGING_MESSAGES
+    cout << "[DataReader::~DataReader ()]" << endl;
+#endif
     destroy();
   }
   
   void DataReader::destroy ()
   {
+#ifdef DEBUGGING_MESSAGES
+    cout << "[DataReader::destroy ()]" << endl;
+#endif
     /*
       We need to be a bit careful at this point; since it does not make any sense
       trying to delete array for which never any memory has been allocated, we
@@ -180,78 +198,78 @@ namespace CR {  //  Namespace CR -- begin
     return *this;
   }
   
-// ------------------------------------------------------------------------- copy
-
-void DataReader::copy (DataReader const &other)
-{  
-  blocksize_p       = other.blocksize_p;
-  sampleFrequency_p = other.sampleFrequency_p;
-  nyquistZone_p     = other.nyquistZone_p;
+  // ----------------------------------------------------------------------- copy
   
-  try {
-    // -- header -----------------------------------------------------
-
-    header_p     = other.header_p;
-
-    // -- Array dimensions -------------------------------------------
-
-    fftLength_p    = other.fftLength_p;
-
-    // -- conversion -------------------------------------------------
-
-    adc2voltage_p.resize (other.adc2voltage_p.shape());
-    adc2voltage_p    = other.adc2voltage_p;
-
-    fft2calfft_p.resize (other.fft2calfft_p.shape());
-    fft2calfft_p     = other.fft2calfft_p;
-
-    // -- Antennas ---------------------------------------------------
-
-    antennas_p.resize (other.antennas_p.shape());
-    antennas_p       = other.antennas_p;
-
-    selectedAntennas_p.resize (other.selectedAntennas_p.shape());
-    selectedAntennas_p = other.selectedAntennas_p;
-
-    // -- Frequency channels -----------------------------------------
-
-    selectedChannels_p.resize (other.selectedChannels_p.shape());
-    selectedChannels_p = other.selectedChannels_p;
-
-    selectChannels_p = other.selectChannels_p;
-
-    hanningFilter_p  = other.hanningFilter_p;
-
-    applyHanning_p   = other.applyHanning_p;
-
-    // -- File streams -----------------------------------------------
-
-    nofStreams_p = other.nofStreams_p;
-    startBlock_p = other.startBlock_p;
-    iterator_p   = new DataIterator[nofStreams_p];
-    if (other.fileStream_p != NULL) {
-      fileStream_p = new fstream[nofStreams_p];
-      for (uint stream (0); stream<nofStreams_p; stream++) {
-	//other.fileStream_p[stream].tie((fileStream_p[stream]));
-      };
-      streamsConnected_p = true;
-    } else {
-      fileStream_p = NULL;
-      streamsConnected_p = false;
-    };
-
+  void DataReader::copy (DataReader const &other)
+  {  
+    blocksize_p       = other.blocksize_p;
+    sampleFrequency_p = other.sampleFrequency_p;
+    nyquistZone_p     = other.nyquistZone_p;
+    
     try {
-      for (uint stream (0); stream<nofStreams_p; stream++) {
-	iterator_p[stream]   = other.iterator_p[stream];
+      // -- header -----------------------------------------------------
+      
+      header_p     = other.header_p;
+      
+      // -- Array dimensions -------------------------------------------
+      
+      fftLength_p    = other.fftLength_p;
+      
+      // -- conversion -------------------------------------------------
+      
+      adc2voltage_p.resize (other.adc2voltage_p.shape());
+      adc2voltage_p    = other.adc2voltage_p;
+      
+      fft2calfft_p.resize (other.fft2calfft_p.shape());
+      fft2calfft_p     = other.fft2calfft_p;
+      
+      // -- Antennas ---------------------------------------------------
+      
+      antennas_p.resize (other.antennas_p.shape());
+      antennas_p       = other.antennas_p;
+      
+      selectedAntennas_p.resize (other.selectedAntennas_p.shape());
+      selectedAntennas_p = other.selectedAntennas_p;
+      
+      // -- Frequency channels -----------------------------------------
+      
+      selectedChannels_p.resize (other.selectedChannels_p.shape());
+      selectedChannels_p = other.selectedChannels_p;
+      
+      selectChannels_p = other.selectChannels_p;
+      
+      hanningFilter_p  = other.hanningFilter_p;
+      
+      applyHanning_p   = other.applyHanning_p;
+      
+      // -- File streams -----------------------------------------------
+      
+      nofStreams_p = other.nofStreams_p;
+      startBlock_p = other.startBlock_p;
+      iterator_p   = new DataIterator[nofStreams_p];
+      if (other.fileStream_p != NULL) {
+	fileStream_p = new fstream[nofStreams_p];
+	for (uint stream (0); stream<nofStreams_p; stream++) {
+	  //other.fileStream_p[stream].tie((fileStream_p[stream]));
+	};
+	streamsConnected_p = true;
+      } else {
+	fileStream_p = NULL;
+	streamsConnected_p = false;
+      };
+      
+      try {
+	for (uint stream (0); stream<nofStreams_p; stream++) {
+	  iterator_p[stream]   = other.iterator_p[stream];
+	}
+      } catch (AipsError x) {
+	cerr << x.getMesg() << endl;
       }
+      
     } catch (AipsError x) {
-      cerr << x.getMesg() << endl;
+      cerr << "[DataReader::copy]" << x.getMesg() << endl;
     }
-
-  } catch (AipsError x) {
-    cerr << "[DataReader::copy]" << x.getMesg() << endl;
   }
-}
   
   // ============================================================================
   //
@@ -266,6 +284,13 @@ void DataReader::copy (DataReader const &other)
     uint nyquistZone (nyquistZone_p);
     double sampleFrequency (sampleFrequency_p);
     
+#ifdef DEBUGGING_MESSAGES
+    cout << "[DataReader::init (uint) ]" << endl;
+    cout << " -- blocksize       = " << blocksize << endl;
+    cout << " -- nyquistZone     = " << nyquistZone << endl;
+    cout << " -- sampleFrequency = " << sampleFrequency << endl;
+#endif 
+
     init (blocksize,
 	  nyquistZone,
 	  sampleFrequency);
@@ -275,21 +300,40 @@ void DataReader::copy (DataReader const &other)
   
   void DataReader::init (uint const &blocksize,
 			 uint const &nyquistZone,
-			 Double const &samplerate)
+			 Double const &sampleFrequency)
   {
+#ifdef DEBUGGING_MESSAGES
+    cout << "[DataReader::init (uint,uint,double) ]" << endl;
+    cout << " -- blocksize ............... = " << blocksize << endl;
+    cout << " -- nyquistZone ............. = " << nyquistZone << endl;
+    cout << " -- sampleFrequency ......... = " << sampleFrequency     << endl;
+#endif 
+
     // parameters strored in the base class
     TimeFreq::setBlocksize (blocksize);
     TimeFreq::setNyquistZone (nyquistZone);
-    TimeFreq::setSampleFrequency (samplerate);
-    
-    DataReader::setFFTLength ();
+    TimeFreq::setSampleFrequency (sampleFrequency);
+
+#ifdef DEBUGGING_MESSAGES
+    cout << "[DataReader::init (uint,uint,double) ]" << endl;
+    cout << " -- TimeFreq::blocksize ..... = " << blocksize_p << endl;
+    cout << " -- TimeFreq::nyquistZone ... = " << nyquistZone_p       << endl;
+    cout << " -- TimeFreq::sampleFrequency = " << sampleFrequency_p   << endl;
+#endif 
+
     fileStream_p = NULL;
     setStartBlock   (1);
     
     uint nofAntennas (1);
-    Vector<Double> adc2voltage (nofAntennas,1.0);
+    Matrix<Double> adc2voltage (blocksize,nofAntennas,1.0);
     Matrix<DComplex> fft2calfft (fftLength_p,nofAntennas,1.0);
     
+#ifdef DEBUGGING_MESSAGES
+    cout << "[DataReader::init (uint,uint,double)]" << endl;
+    cout << " -- adc2voltage ............. = " << adc2voltage.shape() << endl;
+    cout << " -- fft2calfft .............. = " << fft2calfft.shape()  << endl;
+#endif 
+
     init (blocksize,
 	  adc2voltage,
 	  fft2calfft);
@@ -302,15 +346,25 @@ void DataReader::copy (DataReader const &other)
 			 Matrix<DComplex> const &fft2calfft)
   {
     // convert vector of ADC2Voltage values to matrix ...
+    uint sample (0);
+    int antenna (0);
     int nofAntennas (adc2voltage.nelements());
     Matrix<double> adc2voltageMatrix (blocksize,nofAntennas);
 
+    for (antenna=0; antenna<nofAntennas; antenna++) {
+      for (sample=0; sample<blocksize; sample++) {
+	adc2voltageMatrix (sample,antenna) = adc2voltage (antenna);
+      }
+    }
+    
     // ... which then is forwarded to the next init function
+    init (blocksize,
+	  adc2voltageMatrix,
+	  fft2calfft);
   }
   
   // ----------------------------------------------------------------------- init
   
-  //! \todo Function not yet implemented!
   void DataReader::init (uint const &blocksize,
 			 Matrix<Double> const &adc2voltage,
 			 Matrix<DComplex> const &fft2calfft)
@@ -322,13 +376,21 @@ void DataReader::copy (DataReader const &other)
     */
     
     bool status (true);
-    IPosition shapeADC (adc2voltage.shape());
-    IPosition shapeFFT (fft2calfft.shape());
+    IPosition shapeADC (adc2voltage.shape());  // [blocksize,nofAntennas]
+    IPosition shapeFFT (fft2calfft.shape());   // [fftLength,nofAntennas]
     
+#ifdef DEBUGGING_MESSAGES
+    cout << "[DataReader::init (uint,Matrix<Double>,Matrix<DComplex>) ]" << endl;
+    cout << " -- blocksize ............... = " << blocksize << endl;
+    cout << " -- TimeFreq::blocksize ..... = " << blocksize_p << endl;
+    cout << " -- adc2voltage ............. = " << adc2voltage.shape() << endl;
+    cout << " -- fft2calfft .............. = " << fft2calfft.shape()  << endl;
+#endif 
+
     /*
       Check of the number of antennas is consistent
     */
-    if (shapeADC(0) != shapeFFT(1)) {
+    if (shapeADC(1) != shapeFFT(1)) {
       cerr << "[DataReader::init] Inconsistent number of antennas!" << endl;
       cerr << " - shape(adc2voltage) = " << adc2voltage.shape() << endl;
       cerr << " - shape(fft2calfft)  = " << fft2calfft.shape() << endl;
@@ -348,7 +410,6 @@ void DataReader::copy (DataReader const &other)
       */
       try {
 	TimeFreq::setBlocksize (blocksize);
-	setFFTLength ();
       } catch (std::string message) {
 	cerr << "[DataReader::init]" << message << endl;
 	status = false;
@@ -357,11 +418,11 @@ void DataReader::copy (DataReader const &other)
       /*
 	Antenna selection: by default we enable all antennas
       */
-      Vector<uint> antennas (shapeADC);
-      Vector<uint> selectedAntennas (shapeADC);
+      Vector<uint> antennas (shapeADC(1));
+      Vector<uint> selectedAntennas (shapeADC(1));
       
       try {
-	for (int n(0); n<shapeADC(0); n++) {
+	for (int n(0); n<shapeADC(1); n++) {
 	  antennas(n) = selectedAntennas(n) = n;
 	}
 	
@@ -373,7 +434,7 @@ void DataReader::copy (DataReader const &other)
       }
       
       /* book-keeping: memorize the number of data streams */
-      nofStreams_p = shapeADC(0);
+      nofStreams_p = shapeADC(1);
       
       /*
 	Frequency channel selection: by default we enable all frequency channels
@@ -389,7 +450,7 @@ void DataReader::copy (DataReader const &other)
 	setADC2Voltage (adc2voltage);
 	setFFT2calFFT (fft2calfft);
       } catch (std::string message) {
-	std::cerr << "[DataReader::init]" << message << std::endl;
+	cerr << "[DataReader::init]" << message << endl;
 	status = false;
       }
       
@@ -409,153 +470,140 @@ void DataReader::copy (DataReader const &other)
 			 Vector<String> const &filenames,
 			 DataIterator const *iterators)
   {
-  Bool status (True);
-  uint nofFiles (filenames.nelements());
-
-  /*
-    [Step 1]
-    Make a call to the more simple internal init method first - this will
-    do the basic setup and provide a consistent set of internal parameters
-  */
-  init (blocksize,
-	adc2voltage,
-	fft2calfft);
-
-  /*
-    [Step 2]
-    Take care of the antenna numbers, as they are needed later of for accessing
-    the array containg conversion values and data to be returned
-  */
-  
-  /*
-    [Step 3]
-    Take care of the file streams
-  */
-  
-  // check the values for the number of files and the data block size
-  if (nofFiles != nofStreams_p ||
-      blocksize != blocksize_p) {
-    cerr << "[DataReader::setStreams] Wrong blocksize or number of filenames!"
-	 << endl;
-    cerr << " - blocksize (internal)   = " << blocksize_p << endl;
-    cerr << " - blocksize (streams)    = " << blocksize << endl;
-    cerr << " - nof. Files             = " << nofStreams_p << endl;
-    cerr << " - length of input vector = " << nofFiles << endl;
-    //
-    status = False;
-  } else {
-    // update the internal streams array
-    fileStream_p = new fstream[nofStreams_p];
-    iterator_p   = new DataIterator[nofStreams_p];
-    // connect the streams to the files
-    for (uint file(0); file<nofStreams_p; file++) {
-      fileStream_p[file].open(filenames(file).c_str(), ios::in | ios::binary);
-      iterator_p[file] = iterators[file];
-      iterator_p[file].setBlocksize(blocksize);
-    } 
-    streamsConnected_p = true;
-  }
-  
-}
-
-// ----------------------------------------------------------------- setFFTLength
-
-void DataReader::setFFTLength ()
-{
-  Vector <Double> inColumn (blocksize_p,1.0);
-  Vector<DComplex> outColumn;
-  FFTServer<Double,DComplex> server(IPosition(1,blocksize_p),
-				    FFTEnums::REALTOCOMPLEX);
-  server.fft(outColumn,inColumn);
-
-  fftLength_p = outColumn.nelements();
-}
-
-// -------------------------------------------------------------- frequencyValues
-
-Vector<Double> DataReader::frequencyValues (Bool const &onlySelected)
-{
-  uint nofChannels (0);
-  uint channel (0);
-  Vector<Double> frequencies;
-
-  // Get the values of all frequency channels
-  std::vector<double> freq (TimeFreq::frequencyValues());
-
-  if (onlySelected) {
-    nofChannels = nofSelectedChannels();
-    frequencies.resize (nofChannels);
-    //
-    for (channel=0; channel<nofChannels; channel++) {
-      frequencies(channel) = freq[selectedChannels_p(channel)];
+    Bool status (True);
+    uint nofFiles (filenames.nelements());
+    
+    /*
+      [Step 1]
+      Make a call to the more simple internal init method first - this will
+      do the basic setup and provide a consistent set of internal parameters
+    */
+    init (blocksize,
+	  adc2voltage,
+	  fft2calfft);
+    
+    /*
+      [Step 2]
+      Take care of the antenna numbers, as they are needed later of for accessing
+      the array containg conversion values and data to be returned
+    */
+    
+    /*
+      [Step 3]
+      Take care of the file streams
+    */
+    
+    // check the values for the number of files and the data block size
+    if (nofFiles != nofStreams_p ||
+	blocksize != blocksize_p) {
+      cerr << "[DataReader::setStreams] Wrong blocksize or number of filenames!"
+	   << endl;
+      cerr << " - blocksize (internal)   = " << blocksize_p << endl;
+      cerr << " - blocksize (streams)    = " << blocksize << endl;
+      cerr << " - nof. Files             = " << nofStreams_p << endl;
+      cerr << " - length of input vector = " << nofFiles << endl;
+      //
+      status = False;
+    } else {
+      // update the internal streams array
+      fileStream_p = new fstream[nofStreams_p];
+      iterator_p   = new DataIterator[nofStreams_p];
+      // connect the streams to the files
+      for (uint file(0); file<nofStreams_p; file++) {
+	fileStream_p[file].open(filenames(file).c_str(), ios::in | ios::binary);
+	iterator_p[file] = iterators[file];
+	iterator_p[file].setBlocksize(blocksize);
+      } 
+      streamsConnected_p = true;
     }
-  } else {
-    nofChannels = freq.size();
-    frequencies.resize (nofChannels);
-    //
-    for (channel=0; channel<nofChannels; channel++) {
-      frequencies(channel) = freq[channel];
+    
+  }
+  
+  // -------------------------------------------------------------- frequencyValues
+  
+  Vector<Double> DataReader::frequencyValues (Bool const &onlySelected)
+  {
+    uint nofChannels (0);
+    uint channel (0);
+    Vector<Double> frequencies;
+    
+    // Get the values of all frequency channels
+    std::vector<double> freq (TimeFreq::frequencyValues());
+    
+    if (onlySelected) {
+      nofChannels = nofSelectedChannels();
+      frequencies.resize (nofChannels);
+      //
+      for (channel=0; channel<nofChannels; channel++) {
+	frequencies(channel) = freq[selectedChannels_p(channel)];
+      }
+    } else {
+      nofChannels = freq.size();
+      frequencies.resize (nofChannels);
+      //
+      for (channel=0; channel<nofChannels; channel++) {
+	frequencies(channel) = freq[channel];
+      }
+    }
+    
+    return frequencies;
+  }
+  
+  // ============================================================================
+  //
+  //  Navigation through the data volume
+  //
+  // ============================================================================
+  
+  // -------------------------------------------------------------- setStartBlock
+  
+  void DataReader::setStartBlock (uint const &startBlock)
+  {
+    if (startBlock>0) {
+      startBlock_p = startBlock;
+    } else {
+      cerr << "[DataReader::setStartBlock] Invalid number for start block."
+		<< endl;
+      startBlock_p = 1;
     }
   }
-
-  return frequencies;
-}
-
-// ==============================================================================
-//
-//  Navigation through the data volume
-//
-// ==============================================================================
-
-// ---------------------------------------------------------------- setStartBlock
-
-void DataReader::setStartBlock (uint const &startBlock)
-{
-  if (startBlock>0) {
-    startBlock_p = startBlock;
-  } else {
-    std::cerr << "[DataReader::setStartBlock] Invalid number for start block."
-	      << std::endl;
-    startBlock_p = 1;
+  
+  // ------------------------------------------------------------------- setBlock
+  
+  void DataReader::setBlock (uint const &block)
+  {
+    for (unsigned int n(0); n<nofStreams_p; n++) {
+      iterator_p[n].setBlock(block);
+    }
   }
-}
-
-// --------------------------------------------------------------------- setBlock
-
-void DataReader::setBlock (uint const &block)
-{
-  for (unsigned int n(0); n<nofStreams_p; n++) {
-    iterator_p[n].setBlock(block);
+  
+  // ------------------------------------------------------------------ setStride
+  
+  void DataReader::setStride (uint const &stride)
+  {
+    for (unsigned int n(0); n<nofStreams_p; n++) {
+      iterator_p[n].setStride(stride);
+    }
   }
-}
-
-// -------------------------------------------------------------------- setStride
-
-void DataReader::setStride (uint const &stride)
-{
-  for (unsigned int n(0); n<nofStreams_p; n++) {
-    iterator_p[n].setStride(stride);
+  
+  // ------------------------------------------------------------------- setShift
+  
+  void DataReader::setShift (uint const &shift)
+  {
+    for (unsigned int n(0); n<nofStreams_p; n++) {
+      iterator_p[n].setShift(shift);
+    }
   }
-}
-
-// --------------------------------------------------------------------- setShift
-
-void DataReader::setShift (uint const &shift)
-{
-  for (unsigned int n(0); n<nofStreams_p; n++) {
-    iterator_p[n].setShift(shift);
+  
+  // ------------------------------------------------------------------ nextBlock
+  
+  void DataReader::nextBlock ()
+  {
+    for (unsigned int n(0); n<nofStreams_p; n++) {
+      iterator_p[n].nextBlock();
+    }
   }
-}
-
-// -------------------------------------------------------------------- nextBlock
-
-void DataReader::nextBlock ()
-{
-  for (unsigned int n(0); n<nofStreams_p; n++) {
-    iterator_p[n].nextBlock();
-  }
-}
-
+  
 // ==============================================================================
 //
 //  Methods
@@ -755,10 +803,6 @@ void DataReader::setADC2Voltage (Vector<Double> const &adc2voltage)
   uint nofAntennas (adc2voltage.nelements());
   Matrix<double> arr (blocksize_p,nofAntennas);
 
-  cout << "[DataReader::setADC2Voltage]" << endl;
-  cout << " --> adc2voltage [Vector] = " << adc2voltage.shape() << endl;
-  cout << " --> adc2voltage [Matrix] = " << arr.shape()         << endl;
-
   // insert the input values into the full parameter matrix
   try {
     uint antenna(0);
@@ -816,9 +860,9 @@ void DataReader::setADC2Voltage (Matrix<Double> const &adc2voltage)
     }
     else {
       cerr << "[DataReader::setADC2Voltage] Mismatching array shapes" << endl;
-      cerr << " shape(adc2voltage)  = " << shape                      << endl;
-      cerr << " # antennas          = " << nofAntennas()              << endl;
-      cerr << " # selected antennas = " << nofSelectedAntennas()      << endl;
+      cerr << " --> shape(adc2voltage)     = " << shape                 << endl;
+      cerr << " --> nof. antennas          = " << nofAntennas()         << endl;
+      cerr << " --> nof. selected antennas = " << nofSelectedAntennas() << endl;
     }
   }
 }
@@ -828,11 +872,19 @@ void DataReader::setADC2Voltage (Matrix<Double> const &adc2voltage)
 void DataReader::setFFT2calFFT (Matrix<DComplex> const &fft2calfft)
 {
   bool status (true);
-  IPosition shape (fft2calfft.shape());
+  IPosition shape (fft2calfft.shape());  //  [channel,antenna]
   unsigned int nofChannels (fftLength_p);
   unsigned int  nofAntennas         = DataReader::nofAntennas();
   unsigned int  nofSelectedAntennas = DataReader::nofSelectedAntennas();
   unsigned int  nofSelectedChannels = DataReader::nofSelectedChannels();
+
+#ifdef DEBUGGING_MESSAGES
+  cout << "[DataReader::setFFT2calFFT (Matrix<DComplex>)]" << endl;
+  cout << " -- fft2calfft          = " << shape               << endl;
+  cout << " -- nofChannels         = " << nofChannels         << endl;
+  cout << " -- nofAntennas         = " << nofAntennas         << endl;
+  cout << " -- nofSelectedAntennas = " << nofSelectedAntennas << endl;
+#endif
 
   /*
     We can use a single general loop for accepting the input data; the only
@@ -1022,7 +1074,6 @@ Bool DataReader::setSelectedAntennas (Vector<uint> const &antennaSelection,
   // check if the arrays size is correct
 
   try {
-    
     if (antennaSelection.nelements() > antennas_p.nelements()) {
       cerr << "[DataReader::setSelectedAntennas] Too many selected antennas!"
 	   << endl;
@@ -1033,7 +1084,6 @@ Bool DataReader::setSelectedAntennas (Vector<uint> const &antennaSelection,
       selectedAntennas_p.resize(antennaSelection.shape());
       selectedAntennas_p = antennaSelection;
     }
-    
   } catch (AipsError x) {
     cerr << "[DataReader::setSelectedAntennas]" << x.getMesg() << endl;
     status = False;
@@ -1090,50 +1140,61 @@ uint DataReader::nofBaselines (bool const &allAntennas) const
 
   return (nant-1)*nant/2;
 }
-
-// ==============================================================================
-//
-//  Frequency channels and frequency channel selection
-//
-// ==============================================================================
-
-
-Bool DataReader::setSelectedChannels (Vector<uint> const &channelSelection)
-{
-  Bool status (True);
-
-  selectedChannels_p.resize (channelSelection.shape());
-  selectedChannels_p = channelSelection;
-
-  selectChannels_p = true;
-
-  return status;
-}
-
-Bool DataReader::setSelectedChannels (Vector<Bool> const &channelSelection)
-{
-  uint nelem (channelSelection.nelements());
-
-  if (nelem == fftLength_p) {
-    Vector<uint> selectedChannels (ntrue(channelSelection));
-    uint counter (0);
+  
+  // ============================================================================
+  //
+  //  Frequency channels and frequency channel selection
+  //
+  // ============================================================================
+  
+  // -------------------------------------------------------- setSelectedChannels
+  
+  Bool DataReader::setSelectedChannels (Vector<uint> const &channelSelection)
+  {
+#ifdef DEBUGGING_MESSAGES
+    cout << "[DataReader::setSelectedChannels (Vector<uint>)]" << endl;
+    cout << " -- channelSelection = " << channelSelection.shape() << endl;
+#endif 
+    Bool status (True);
     
-    for (uint channel(0); channel<nelem; channel++) {
-      if (channelSelection(channel)) {
-	selectedChannels (counter) = channel;
-	counter++;
-      }
-    }
+    selectedChannels_p.resize (channelSelection.shape());
+    selectedChannels_p = channelSelection;
     
-    return setSelectedChannels (selectedChannels);
-  } else {
-    std::cerr << "[DataReader::setSelectedChannels] ";
-    std::cerr << "Wrong shape of channel selection array!"
-	      << endl;
-    std::cerr << " - FFT length              = " << fftLength_p << std::endl;
-    std::cerr << " - nelem(channelSelection) = " << nelem << std::endl;
-    return False;
+    selectChannels_p = true;
+    
+    return status;
   }
-}
+  
+  // -------------------------------------------------------- setSelectedChannels
 
+  Bool DataReader::setSelectedChannels (Vector<Bool> const &channelSelection)
+  {
+#ifdef DEBUGGING_MESSAGES
+    cout << "[DataReader::setSelectedChannels (Vector<bool>)]" << endl;
+    cout << " -- channelSelection = " << channelSelection.shape() << endl;
+#endif 
+    uint nelem (channelSelection.nelements());
+    
+    if (nelem == fftLength_p) {
+      Vector<uint> selectedChannels (ntrue(channelSelection));
+      uint counter (0);
+      
+      for (uint channel(0); channel<nelem; channel++) {
+	if (channelSelection(channel)) {
+	  selectedChannels (counter) = channel;
+	  counter++;
+	}
+      }
+      
+      return setSelectedChannels (selectedChannels);
+    } else {
+      cerr << "[DataReader::setSelectedChannels] ";
+      cerr << "Wrong shape of channel selection array!"
+		<< endl;
+      cerr << " - FFT length              = " << fftLength_p << endl;
+      cerr << " - nelem(channelSelection) = " << nelem << endl;
+      return False;
+    }
+  }
+  
 }  // Namespace CR -- end

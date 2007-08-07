@@ -1,13 +1,14 @@
-##------------------------------------------------------------------------
-## $Id::                                                                 $
-##------------------------------------------------------------------------
+##-------------------------------------------------------------------------------
+## $Id::                                                                        $
+##-------------------------------------------------------------------------------
 
 project (CR)
 
 ## ------------------------------------------------------------------------------
 ## User defined build/install options
 
-option (build_tests "Build the test programs?" 0)
+option (CR_BUILD_TESTS "Build the test programs?" 1)
+option (CR_DEBUGGING_MESSAGES "Print debugging information?" 0)
 
 ## ------------------------------------------------------------------------------
 ## Subdirectories
@@ -17,9 +18,9 @@ subdirs (
   apps
   )
 
-if (build_tests)
+if (CR_BUILD_TESTS)
   subdirs (test)
-endif (build_tests)
+endif (CR_BUILD_TESTS)
 
 ## ------------------------------------------------------------------------------
 ## External dependencies; check if we need to search for some components.

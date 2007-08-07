@@ -33,7 +33,7 @@
 #include <casa/BasicMath/Math.h>
 #include <casa/System/ProgressMeter.h>
 
-#include <../implement/templates.h>
+#include <templates.h>
 
 using std::cout;
 using std::cerr;

@@ -33,6 +33,10 @@ endforeach (cr_module)
 ## -----------------------------------------------------------------------------
 ## build the library
 
+if (CR_DEBUGGING_MESSAGES)
+  add_definitions (-DDEBUGGING_MESSAGES)
+endif (CR_DEBUGGING_MESSAGES)
+
 if (CASA_LIBRARIES AND LAPACK_LIBRARIES)
   add_library (cr
     ${cr_sources}
@@ -51,14 +55,14 @@ endif (CASA_LIBRARIES AND LAPACK_LIBRARIES)
 ## ------------------------------------------------------------------------------
 ## Test programs
 
-if (build_tests)
+if (CR_BUILD_TESTS)
   ## build up the list of directories ...
   foreach (cr_module ${cr_modules})
     list (APPEND tests "${cr_module}/test")
   endforeach (cr_module)
   ## ... and register them
   subdirs (${tests})
-endif (build_tests)
+endif (CR_BUILD_TESTS)
 
 ## ------------------------------------------------------------------------------
 ## Installation

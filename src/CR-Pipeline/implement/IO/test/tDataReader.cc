@@ -88,10 +88,10 @@ void test_Record ()
 */
 void show_data (DataReader &dr)
 {
-  cout << " - fx        = " << dr.fx() << endl;
-  cout << " - voltage   = " << dr.voltage() << endl;
-  cout << " - fft       = " << dr.fft() << endl;
-  cout << " - calfft    = " << dr.calfft() << endl;
+  cout << " - fx        = " << dr.fx()        << endl;
+  cout << " - voltage   = " << dr.voltage()   << endl;
+  cout << " - fft       = " << dr.fft()       << endl;
+  cout << " - calfft    = " << dr.calfft()    << endl;
   cout << " - ccSpectra = " << dr.ccSpectra() << endl;
 }
 
@@ -320,22 +320,23 @@ int test_selection ()
   <tt>fft2calfft</tt> used within the processing chain to perform the required
   conversion of values.
 
-  \return nofFailedTests -- The number of failed tests.
+  \param blocksize -- The number of samples per block of data per antenna.
+
+  \return nofFailedTests -- The number of failed tests encountered.
 */
-int test_conversionArrays ()
+int test_conversionArrays (uint const &blocksize)
 {  
   std::cout << "\n[test_conversionArrays]\n" << std::endl;
 
   int nofFailedTests (0);
 
-  uint blocksize (20);
   uint fftLength (blocksize/2+1);
-  uint nofFiles (5);
+  uint nofAntennas (5);
   
   cout << "[1] Use correct array shapes" << endl;
   try {
-    Vector<Double> adc2voltage (nofFiles,0.25);
-    Matrix<DComplex> fft2calfft (fftLength,nofFiles,2.0);
+    Vector<Double> adc2voltage (nofAntennas,0.25);
+    Matrix<DComplex> fft2calfft (fftLength,nofAntennas,2.0);
     
     DataReader dr (blocksize,
 		   adc2voltage,
@@ -350,8 +351,8 @@ int test_conversionArrays ()
   cout << "[2] Using incorrect shape for adc2voltage (must throw warning)" 
        << endl;
   try {
-    Vector<Double> adc2voltage (nofFiles/2,0.25);
-    Matrix<DComplex> fft2calfft (fftLength,nofFiles,2.0);
+    Vector<Double> adc2voltage (nofAntennas/2,0.25);
+    Matrix<DComplex> fft2calfft (fftLength,nofAntennas,2.0);
     
     DataReader dr (blocksize,
 		   adc2voltage,
@@ -366,8 +367,8 @@ int test_conversionArrays ()
   cout << "[3] Try to assign wrong array after construction (must throw warning)"
        << endl;
   try {
-    Vector<Double> adc2voltage (nofFiles,0.25);
-    Matrix<DComplex> fft2calfft (fftLength,nofFiles,2.0);
+    Vector<Double> adc2voltage (nofAntennas,0.25);
+    Matrix<DComplex> fft2calfft (fftLength,nofAntennas,2.0);
     
     DataReader dr (blocksize,
 		   adc2voltage,
@@ -375,10 +376,50 @@ int test_conversionArrays ()
 
     show_parameters (dr);
 
-    adc2voltage.resize(nofFiles/2);
+    adc2voltage.resize(nofAntennas/2);
     adc2voltage = 0.25;
 
     dr.setADC2Voltage (adc2voltage);
+  } catch (AipsError x) {
+    cerr << x.getMesg() << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[4] Go through sequence of the parameter adjustments ..." << endl;
+  try {
+    Matrix<double> adc2voltage (blocksize,nofAntennas,1.0);
+    Matrix<DComplex> fft2calfft (fftLength,nofAntennas,1.0);
+    
+    cout << " -- creating new DataReader object ..." << endl;
+    DataReader dr (blocksize,
+		   adc2voltage,
+		   fft2calfft);
+    cout << " --> blocksize ............ = " << dr.blocksize() << endl;
+    cout << " --> FFT length ........... = " << dr.fftLength() << endl;
+    cout << " --> nof. selected channels = " << dr.nofSelectedChannels() << endl;
+    cout << " --> nof. antennas ........ = " << dr.nofAntennas() << endl;
+    
+    {
+      Vector<double> adc2voltageVector (dr.nofAntennas(),1.0);
+      cout << " -- setting new values for adc2voltage (Vector<double>) ..." << endl;
+      cout << " --> shape(adc2voltage) = " << adc2voltageVector.shape() << endl;
+      dr.setADC2Voltage (adc2voltageVector);
+    }
+    
+    {
+      Matrix<double> adc2voltageMatrix (dr.blocksize(),dr.nofAntennas(),1.0);
+      cout << " -- setting new values for adc2voltage (Matrix<double>) ..." << endl;
+      cout << " --> shape(adc2voltage) = " << adc2voltageMatrix.shape() << endl;
+      dr.setADC2Voltage (adc2voltageMatrix);
+    }
+
+    {
+      Matrix<DComplex> fft2calfftMatrix (dr.fftLength(),dr.nofAntennas(),1.0);
+      cout << " -- setting new values for fft2calfft (Matrix<DComplex>) ..." << endl;
+      cout << " --> shape(fft2calfft) = " << fft2calfftMatrix.shape() << endl;
+      dr.setFFT2calFFT (fft2calfftMatrix);
+    }
+    
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
@@ -391,6 +432,10 @@ int test_conversionArrays ()
 
 /*!
   \brief Test access to the data building up the frequency axis
+
+  \param blocksize -- The number of samples per block of data per antenna.
+
+  \return nofFailedTests -- The number of failed tests encountered.
 */
 int test_frequency (uint const &blocksize)
 {  
@@ -469,10 +514,10 @@ int main ()
   }
 
   if (nofFailedTests == 0) {
-    nofFailedTests += test_conversionArrays ();
-    nofFailedTests += test_dataStreams ();
-    nofFailedTests += test_selection ();
-    nofFailedTests += test_frequency (blocksize);
+    nofFailedTests += test_conversionArrays (blocksize);
+//     nofFailedTests += test_dataStreams ();
+//     nofFailedTests += test_selection ();
+//     nofFailedTests += test_frequency (blocksize);
   } else {
     std::cerr << "[tDataReader]"
       "Little sense trying to test object methods without valid object..."

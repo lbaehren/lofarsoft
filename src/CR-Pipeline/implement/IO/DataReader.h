@@ -74,8 +74,8 @@ namespace CR {  //  Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-    <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/scimath/implement/Mathematics/FFTServer.html">FFTServer</a>
-    <li>[CR] DataIterator
+      <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/scimath/implement/Mathematics/FFTServer.html">FFTServer</a>
+      <li>[CR] DataIterator
     </ul>
     
     For a set of higher level construction/helper routines see DataReaderTools.
@@ -203,7 +203,7 @@ namespace CR {  //  Namespace CR -- begin
     Matrix<DComplex> fft (dr->fft());
     Matrix<DComplex> calfft (dr->calfft());
     \endcode
-*/
+  */
   
   class DataReader : public TimeFreq {
     
@@ -232,11 +232,6 @@ namespace CR {  //  Namespace CR -- begin
     
     //! Record structure to store the meta data.
     Record header_p;
-    
-    // --------------------------------------------------------- array dimensions
-    
-    //! Output length of the FFT, [Samples]
-    uint fftLength_p;
     
     // ------------------------------------------------------------- data streams
     
@@ -294,72 +289,72 @@ namespace CR {  //  Namespace CR -- begin
       \param blocksize   -- Size of a block of data, [samples]
       \param antennas    -- Antennas included in the experiment/observation and
                             containing valid data files
-    \param adc2voltage -- Multiplication factors for conversion from ADC values
-                          to voltages
-    \param fft2calfft  -- Multiplication factors for conversion from raw to
-                          calibrated FFT
-    \param filenames   -- Names of the files from which to read in the data
-    \param iterators   -- Set of DataIterator objects used for navigation within
-                          the file streams.
-
-    This is the primary method for the derived classes to initialize the
-    underlying DataReader object handling conversion of data.
-   */
-  void init (uint const &blocksize,
-	     Vector<uint> const &antennas,
-	     Vector<Double> const &adc2voltage,
-	     Matrix<DComplex> const &fft2calfft,
-	     Vector<String> const &filenames,
-	     DataIterator const *iterators);
-  
-  // ----------------------------------------------------- (selected of) antennas
-
-  //! Selection of the antennas
-  Vector<bool> antennaSelection_p;
-  Vector<uint> selectedAntennas_p;
-
-  // ----------------------------------------------------- (selected of) channels
-  
-  //! Selection of the frequency channels
-  Vector<uint> selectedChannels_p;
-
- public:
-
-  // --------------------------------------------------------------- Construction
-
-  /*!
-    \brief Default constructor
-
-    This is the default constructor for a new DataReader object; this will not
-    enable the actual reading of data, but otherwise represents a fully
-    operational object.
-
-    \verbatim
-    - blocksize   = 1
-    - FFT length  = 1
-    - nof. files  = 1
-    - adc2voltage = [1]
-    - fft2calfft  = [(1,0)]
-    \endverbatim
-  */
-  DataReader ();
-
-  /*!
-    \brief Argumented constructor
-
-    \param blocksize   -- Size of a block of data, [samples]
-  */
-  DataReader (uint const &blocksize);
-
-  /*!
-    \brief Argumented constructor
-
-    \param blocksize   -- Size of a block of data, [samples]
-  */
-  DataReader (uint const &blocksize,
-	      uint const &nyquistZone,
-	      Double const &samplerate);
-
+      \param adc2voltage -- Multiplication factors for conversion from ADC values
+                            to voltages
+      \param fft2calfft  -- Multiplication factors for conversion from raw to
+                            calibrated FFT
+      \param filenames   -- Names of the files from which to read in the data
+      \param iterators   -- Set of DataIterator objects used for navigation within
+                            the file streams.
+      
+      This is the primary method for the derived classes to initialize the
+      underlying DataReader object handling conversion of data.
+    */
+    void init (uint const &blocksize,
+	       Vector<uint> const &antennas,
+	       Vector<Double> const &adc2voltage,
+	       Matrix<DComplex> const &fft2calfft,
+	       Vector<String> const &filenames,
+	       DataIterator const *iterators);
+    
+    // ----------------------------------------------------- (selected of) antennas
+    
+    //! Selection of the antennas
+    Vector<bool> antennaSelection_p;
+    Vector<uint> selectedAntennas_p;
+    
+    // ----------------------------------------------------- (selected of) channels
+    
+    //! Selection of the frequency channels
+    Vector<uint> selectedChannels_p;
+    
+  public:
+    
+    // --------------------------------------------------------------- Construction
+    
+    /*!
+      \brief Default constructor
+      
+      This is the default constructor for a new DataReader object; this will not
+      enable the actual reading of data, but otherwise represents a fully
+      operational object.
+      
+      \verbatim
+      - blocksize   = 1
+      - FFT length  = 1
+      - nof. files  = 1
+      - adc2voltage = [1]
+      - fft2calfft  = [(1,0)]
+      \endverbatim
+    */
+    DataReader ();
+    
+    /*!
+      \brief Argumented constructor
+      
+      \param blocksize   -- Size of a block of data, [samples]
+    */
+    DataReader (uint const &blocksize);
+    
+    /*!
+      \brief Argumented constructor
+      
+      \param blocksize   -- Size of a block of data, [samples]
+    */
+    DataReader (uint const &blocksize,
+		uint const &nyquistZone,
+		Double const &samplerate);
+    
   /*!
     \brief Argumented constructor
 
@@ -879,15 +874,6 @@ namespace CR {  //  Namespace CR -- begin
 	     uint const &nyquistZone,
 	     Double const &samplerate);
   
-  /*!
-    \brief Store the output length of the FFT
-
-    This in done directly using an instance of the FFT server; this way we ensure
-    that the stored number indeed agrees with the shape returned by the FFT
-    server.
-   */
-  void setFFTLength ();
-
   /*!
     \brief Select the frequency channels
   */

@@ -23,6 +23,12 @@
 #include <templates.h>
 #include <Calibration/PluginBase.h>
 
+using std::cerr;
+using std::cout;
+using std::endl;
+
+using CR::PluginBase;
+
 /*!
   \file tPluginBase.cc
 
@@ -42,17 +48,17 @@
 
   \return nofFailedTests -- The number of failed tests.
 */
-Int test_PluginBase ()
+int test_PluginBase ()
 {
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
 
   cout << "\n[test_PluginBase]\n" << endl;
 
   cout << "[1] Testing the default constructor" << endl;
   {
-    PluginBase<Int> plugin_int;
-    PluginBase<Float> plugin_float;
-    PluginBase<Double> plugin_double;
+    PluginBase<int> plugin_int;
+    PluginBase<float> plugin_float;
+    PluginBase<double> plugin_double;
   }
 
   cout << "[2] Testing the argumented constructor" << endl;
@@ -60,17 +66,17 @@ Int test_PluginBase ()
     // int
     {
       Matrix<int> weights (10,10,1);
-      PluginBase<Int> plugin (weights);
+      PluginBase<int> plugin (weights);
     }
     // float
     {
       Matrix<float> weights (10,10,1);
-      PluginBase<Float> plugin (weights);
+      PluginBase<float> plugin (weights);
     }
     // double
     {
       Matrix<double> weights (10,10,1);
-      PluginBase<Double> plugin (weights);
+      PluginBase<double> plugin (weights);
     }
   }
   
@@ -81,7 +87,7 @@ Int test_PluginBase ()
 
 int main ()
 {
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
 
   // Test for the constructor(s)
   {
