@@ -117,6 +117,13 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
+  // --------------------------------------------------------------- setBlocksize
+
+  void TimeFreq::setBlocksize (uint const &blocksize) {
+    blocksize_p = blocksize;
+    fftLength_p = blocksize_p/2+1;
+  }
+  
   // -------------------------------------------------------------------- summary
   
   void TimeFreq::summary ()

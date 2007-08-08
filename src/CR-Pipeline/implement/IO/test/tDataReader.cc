@@ -29,6 +29,9 @@
 #include <templates.h>
 #include <IO/DataReader.h>
 
+using std::cout;
+using std::endl;
+
 using casa::DComplex;
 using CR::DataReader;
 
@@ -51,7 +54,7 @@ using CR::DataReader;
 */
 void test_Record ()
 {
-  std::cout << "\n[test_Record]\n" << std::endl;
+  cout << "\n[test_Record]\n" << std::endl;
 
   // Set up description of the record fields
   casa::RecordDesc ITSMetadataDesc;
@@ -67,66 +70,6 @@ void test_Record ()
 
 }
 
-// -------------------------------------------------------------------- show_data
-
-/*!
-  \brief Show the data array returned by the DataReader
-
-  \verbatim
-  - fx      = Axis Lengths: [1, 1]  (NB: Matrix in Row/Column order)
-  [0]
-  
-  - voltage = Axis Lengths: [1, 1]  (NB: Matrix in Row/Column order)
-  [0]
-  
-  - fft     = Axis Lengths: [1, 1]  (NB: Matrix in Row/Column order)
-  [(0,0)]
-  
-  - calfft  = Axis Lengths: [1, 1]  (NB: Matrix in Row/Column order)
-  [(0,0)]
-  \endverbatim
-*/
-void show_data (DataReader &dr)
-{
-  cout << " - fx        = " << dr.fx()        << endl;
-  cout << " - voltage   = " << dr.voltage()   << endl;
-  cout << " - fft       = " << dr.fft()       << endl;
-  cout << " - calfft    = " << dr.calfft()    << endl;
-  cout << " - ccSpectra = " << dr.ccSpectra() << endl;
-}
-
-// -------------------------------------------------------------- show_parameters
-
-/*!
-  \brief Show the internal parameters as accessable through public functions
-  
-  \verbatim
-  - blocksize   = 1
-  - FFT length  = 1
-  - nof. files  = 1
-  - adc2voltage = [1]
-  - fft2calfft  = Axis Lengths: [1, 1]  (NB: Matrix in Row/Column order)
-  [(1,0)]
-  \endverbatim
-*/
-void show_parameters (DataReader &dr)
-{
-  cout << " - nof. streams           = " << dr.nofStreams()       << endl;
-  cout << " - blocksize              = " << dr.blocksize() << endl;
-  //
-  cout << " - FFT length             = " << dr.fftLength() << endl;
-  cout << " - selected channels      = " << dr.selectedChannels() << endl;
-  cout << " - nof. selected channels = " << dr.nofSelectedChannels() << endl;
-  //
-  cout << " - antennas               = " << dr.antennas()            << endl;
-  cout << " - nof. antennas          = " << dr.nofAntennas()         << endl;
-  cout << " - selected antennas      = " << dr.selectedAntennas()    << endl;
-  cout << " - nof. selected antennas = " << dr.nofSelectedAntennas() << endl;
-  //
-  cout << " - shape(adc2voltage)     = " << dr.ADC2Voltage().shape() << endl;
-  cout << " - shape(fft2calfft)      = " << dr.fft2calfft().shape()  << endl;
-}
-
 // -------------------------------------------------------------- test_DataReader
 
 /*!
@@ -138,7 +81,7 @@ void show_parameters (DataReader &dr)
 */
 int test_DataReader ()
 {
-  std::cout << "\n[test_DataReader]\n" << std::endl;
+  cout << "\n[test_DataReader]\n" << std::endl;
 
   int nofFailedTests (0);
   
@@ -148,45 +91,38 @@ int test_DataReader ()
   Vector<Double> adc2voltage (nofFiles,0.25);
   Matrix<DComplex> fft2calfft (fftLength,nofFiles,2.0);
 
-  std::cout << " -- blocksize = " << blocksize << std::endl;
-  std::cout << " -- fftLength = " << fftLength << std::endl;
-  std::cout << " -- nofFiles  = " << nofFiles  << std::endl;
-
-  std::cout << "[1] Testing default constructor ..." << std::endl;
+  cout << "[1] Testing default constructor ..." << std::endl;
   try {
     DataReader dr;
     //
-    show_parameters (dr);    
-    show_data (dr);    
+    dr.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
   
-  std::cout << "[2] Testing argumented constructor ..." << std::endl;
+  cout << "[2] Testing argumented constructor ..." << std::endl;
   {
-    std::cout << " --> blocksize = " << blocksize << std::endl;
+    cout << " --> blocksize = " << blocksize << std::endl;
     //
     DataReader dr (blocksize);
     //
-    show_parameters (dr);
-    show_data (dr);    
+    dr.summary();
   }
   
-  std::cout << "[3] Testing argumented constructor ..." << std::endl;
+  cout << "[3] Testing argumented constructor ..." << std::endl;
   try {
     DataReader dr (blocksize,
 		   adc2voltage,
 		   fft2calfft);
     //
-    show_parameters (dr);
-    show_data (dr);    
+    dr.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
   
-  std::cout << "[4] Testing copy constructor ..." << std::endl;
+  cout << "[4] Testing copy constructor ..." << std::endl;
   try {
     DataReader dr1 (blocksize,
 		    adc2voltage,
@@ -194,8 +130,7 @@ int test_DataReader ()
     //
     DataReader dr2 (dr1);
     //
-    show_parameters (dr2);
-    show_data (dr2);
+    dr2.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -213,7 +148,7 @@ int test_DataReader ()
 */
 int test_dataStreams ()
 {
-  std::cout << "\n[test_dataStreams]\n" << std::endl;
+  cout << "\n[test_dataStreams]\n" << std::endl;
 
   uint blocksize (128);
   uint nofFiles (5);
@@ -240,7 +175,7 @@ int test_dataStreams ()
 */
 int test_selection ()
 {  
-  std::cout << "\n[test_selection]\n" << std::endl;
+  cout << "\n[test_selection]\n" << std::endl;
 
   int nofFailedTests (0);
   bool status (true);
@@ -251,24 +186,19 @@ int test_selection ()
   Vector<Double> adc2voltage (nofFiles,0.25);
   Matrix<DComplex> fft2calfft (fftLength,nofFiles,2.0);
 
-  std::cout << "[1] No selection of antennas or frequencies ..." << std::endl;
+  cout << "[1] No selection of antennas or frequencies ..." << std::endl;
 
   try {
     DataReader dr (blocksize,
 		   adc2voltage,
 		   fft2calfft);
-    show_parameters (dr);
-    //
-    Matrix<Double> voltage (dr.voltage());
-    Matrix<DComplex> calfft (dr.calfft());
-    std::cout << " - shape(voltage) = " << voltage.shape() << std::endl;
-    std::cout << " - shape(calfft)  = " << calfft.shape() << std::endl;
+    dr.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
 
-  std::cout << "[2] Testing antenna selection ..." << std::endl;
+  cout << "[2] Testing antenna selection ..." << std::endl;
   try {
     DataReader dr (blocksize,
 		   adc2voltage,
@@ -279,18 +209,16 @@ int test_selection ()
     cout << " - Antenna selection = " << selection << endl;
     //
     status = dr.setSelectedAntennas (selection);
-    show_parameters (dr);
     //
-    Matrix<Double> voltage (dr.voltage());
-    Matrix<DComplex> calfft (dr.calfft());
-    std::cout << " - shape(voltage) = " << voltage.shape() << std::endl;
-    std::cout << " - shape(calfft)  = " << calfft.shape() << std::endl;
+    if (status) {
+      dr.summary();
+    }
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
   
-  std::cout << "[3] Testing frequency channel selection ..." << std::endl;
+  cout << "[3] Testing frequency channel selection ..." << std::endl;
   {
     DataReader dr (blocksize,
 		   adc2voltage,
@@ -298,15 +226,13 @@ int test_selection ()
     Vector<Bool> selection (fftLength,True);
     selection(0) = selection(1) = False;
     //
-    cout << " - Antenna selection = " << selection << endl;
+    cout << " - Channel selection = " << selection << endl;
     //
     status = dr.setSelectedChannels (selection);
-    show_parameters (dr);
     //
-    Matrix<Double> voltage (dr.voltage());
-    Matrix<DComplex> calfft (dr.calfft());
-    std::cout << " - shape(voltage) = " << voltage.shape() << std::endl;
-    std::cout << " - shape(calfft)  = " << calfft.shape() << std::endl;
+    if (status) {
+      dr.summary();
+    }
   }
   
   return nofFailedTests;
@@ -327,7 +253,7 @@ int test_selection ()
 */
 int test_conversionArrays (uint const &blocksize)
 {  
-  std::cout << "\n[test_conversionArrays]\n" << std::endl;
+  cout << "\n[test_conversionArrays]\n" << std::endl;
 
   int nofFailedTests (0);
 
@@ -342,8 +268,7 @@ int test_conversionArrays (uint const &blocksize)
     DataReader dr (blocksize,
 		   adc2voltage,
 		   fft2calfft);
-
-    show_parameters (dr);
+    dr.summary();
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
@@ -358,8 +283,7 @@ int test_conversionArrays (uint const &blocksize)
     DataReader dr (blocksize,
 		   adc2voltage,
 		   fft2calfft);
-
-    show_parameters (dr);
+    dr.summary();
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
@@ -375,7 +299,7 @@ int test_conversionArrays (uint const &blocksize)
 		   adc2voltage,
 		   fft2calfft);
 
-    show_parameters (dr);
+    dr.summary();
 
     adc2voltage.resize(nofAntennas/2);
     adc2voltage = 0.25;
@@ -440,7 +364,7 @@ int test_conversionArrays (uint const &blocksize)
 */
 int test_frequency (uint const &blocksize)
 {  
-  std::cout << "\n[test_frequency]" << std::endl;
+  cout << "\n[test_frequency]" << std::endl;
 
   int nofFailedTests (0);
 
@@ -503,6 +427,61 @@ int test_frequency (uint const &blocksize)
   return nofFailedTests;
 }
 
+// -------------------------------------------------------------- test_processing
+
+/*!
+  \brief Test manipulations of DataReader object as performed in applications
+
+  \return nofFailedTests -- The number of failed tests encountered in this
+                            function.
+*/
+int test_processing ()
+{
+  cout << "\n[test_processing]" << std::endl;
+
+  int nofFailedTests (0);
+  uint blocksize (8192);
+
+  cout << "[1] Testing call sequence as in dstb ..." << endl;
+  try {
+    cout << " --> creating DataReader object ..." << endl;
+    DataReader dr (blocksize);
+    dr.summary();
+    cout << " --> adjusting blocksize ..." << endl;
+    blocksize = 1024;
+    dr.setBlocksize(blocksize);
+    dr.summary();
+    cout << " --> adjusting adc2voltage conversion factors ..." << endl;
+    Matrix<double> adc2voltage (dr.blocksize(),dr.nofSelectedAntennas(),1.0);
+    dr.setADC2Voltage(adc2voltage);
+    dr.summary();
+    cout << " --> adjusting ffft2calfft conversion factors ..." << endl;
+    Matrix<DComplex> fft2calfft (dr.fftLength(),dr.nofSelectedAntennas(),1.0);
+    dr.setFFT2calFFT(fft2calfft);
+    dr.summary();
+//     cout << " --> adjusting start block ..." << endl;
+//     uint startblock (1);
+//     dr.setStartBlock(startblock);
+//     cout << " --> adjusting stride ..." << endl;
+//     dr.setStride(0);
+//     cout << " --> adjusting offset ..." << endl;
+//     int offset (100);
+//     dr.setShift(offset);
+    cout << " --> adjusting frequency channel selection ..." << endl;
+    Vector<bool> frequencySelection (dr.fftLength(),true);
+    dr.setSelectedChannels(frequencySelection);
+    dr.summary();
+//     cout << " --> adjusting Hanning filter ..." << endl;
+//     double alpha (0.54);
+//     dr.setHanningFilter(alpha);
+  } catch (AipsError x) {
+    cerr << x.getMesg() << endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
 // ----------------------------------------------------------------- main routine
 
 int main ()
@@ -517,8 +496,9 @@ int main ()
   if (nofFailedTests == 0) {
     nofFailedTests += test_conversionArrays (blocksize);
 //     nofFailedTests += test_dataStreams ();
-//     nofFailedTests += test_selection ();
+    nofFailedTests += test_selection ();
 //     nofFailedTests += test_frequency (blocksize);
+    nofFailedTests += test_processing();
   } else {
     std::cerr << "[tDataReader]"
       "Little sense trying to test object methods without valid object..."

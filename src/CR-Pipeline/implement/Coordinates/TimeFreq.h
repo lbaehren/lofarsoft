@@ -179,7 +179,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Destructor
     */
-    ~TimeFreq ();
+    virtual ~TimeFreq ();
     
     // ---------------------------------------------------------------- Operators
     
@@ -235,10 +235,7 @@ namespace CR { // Namespace CR -- begin
 
       \param blocksize -- Blocksize, [samples]
     */
-    inline void setBlocksize (uint const &blocksize) {
-      blocksize_p = blocksize;
-      fftLength_p = blocksize_p/2+1;
-    }
+    virtual void setBlocksize (uint const &blocksize);
     
     // --- sampleFrequency ---------------------------------
 

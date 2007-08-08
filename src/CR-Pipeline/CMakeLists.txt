@@ -17,7 +17,9 @@ option (CR_DEBUGGING_MESSAGES "Print debugging information?" 0)
 ## ------------------------------------------------------------------------------
 ## Subdirectories
 
-ADD_SUBDIRECTORY (implement)
+subdirs (implement)
+
+#ADD_SUBDIRECTORY (implement)
 
 if (DAL_BUILD_TESTS)
   ADD_SUBDIRECTORY (test)

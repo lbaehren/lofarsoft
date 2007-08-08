@@ -433,7 +433,50 @@ namespace CR {  //  Namespace CR -- begin
   DataReader& operator= (DataReader const &other); 
 
   // ----------------------------------------------------------------- Parameters
+  
+  /*!
+    \brief Set the blocksize, \f$ N_{\rm Blocksize} \f$
+    
+    \param blocksize -- Blocksize, [samples]
+  */
+  void setBlocksize (uint const &blocksize);
 
+  /*!
+    \brief Set the blocksize, \f$ N_{\rm Blocksize} \f$
+    
+    \param blocksize -- Blocksize, [samples]
+    \param adc2voltage -- [sample,antenna] Weights to convert raw ADC samples to
+                          voltages
+  */
+  void setBlocksize (uint const &blocksize,
+		     Matrix<double> const &adc2voltage);
+  
+  /*!
+    \brief Set the blocksize, \f$ N_{\rm Blocksize} \f$
+    
+    \param blocksize   -- Blocksize, [samples]
+    \param adc2voltage -- [sample,antenna] Weights to convert raw ADC samples to
+                          voltages
+    \param fft2calfft  -- [channel,antenna]
+  */
+  void setBlocksize (uint const &blocksize,
+		     Matrix<double> const &adc2voltage,
+		     Matrix<DComplex> const &fft2calfft);
+  
+  /*!
+    \brief Provide a summary of the internal parameters to standard output
+   */
+  inline void summary () {
+    summary (std::cout);
+  }
+  
+  /*!
+    \brief Provide a summary of the internal parameters
+    
+    \param os -- Output stream, to which the summary is written
+  */
+  void summary (std::ostream &os);
+  
   /*!
     \brief Get the number of files to which the data streams are connected
 
@@ -478,7 +521,8 @@ namespace CR {  //  Namespace CR -- begin
     you want to use this step to also flag in the time domain, use the method
     below.
 
-    \param fx2voltage -- Weights to convert raw ADC samples to voltages
+    \param adc2voltage -- [sample,antenna] Weights to convert raw ADC samples to
+                          voltages
   */
   void setADC2Voltage (Vector<Double> const &adc2voltage);
 
