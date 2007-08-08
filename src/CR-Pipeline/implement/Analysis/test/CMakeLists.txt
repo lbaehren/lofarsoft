@@ -1,6 +1,6 @@
-##------------------------------------------------------------------------
-## $Id::                                                                 $
-##------------------------------------------------------------------------
+##------------------------------------------------------------------------------
+## $Id::                                                                       $
+##------------------------------------------------------------------------------
 
 include_directories (. .. ../..)
 
@@ -15,7 +15,7 @@ set (tests
   tSecondStagePipeline
   )
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Build the test programs
 
 foreach (src ${tests})
@@ -23,11 +23,30 @@ foreach (src ${tests})
   target_link_libraries (${src} cr)
 endforeach (src)
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
+## Installation
+
+install (
+  TARGETS ${tests}
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+)
+
+## -----------------------------------------------------------------------------
 ## Additional test programs which require extra care
 
-#add_executable (table2root table2root.cc)
-#target_link_libraries (table2root ${ROOT_LIBRARIES})
+if (ROOT_LIBRARIES)
+  ## build instructions
+  add_executable (tHistograms tHistograms.cc)
+  ## link instructions
+  target_link_libraries (tHistograms ${ROOT_LIBRARIES})
+  ## installation instructions
+  install (
+    TARGETS tHistograms
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+  )
+endif (ROOT_LIBRARIES)
 
-add_executable (tHistograms tHistograms.cc)
-target_link_libraries (tHistograms ${ROOT_LIBRARIES})

@@ -1,6 +1,6 @@
-##------------------------------------------------------------------------
-## $Id::                                                                 $
-##------------------------------------------------------------------------
+##------------------------------------------------------------------------------
+## $Id::                                                                       $
+##------------------------------------------------------------------------------
 
 include_directories (. .. ../..)
 
@@ -12,7 +12,7 @@ set (tests
   tSkymapQuantity
   )
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Build the test programs
 
 foreach (src ${tests})
@@ -20,9 +20,12 @@ foreach (src ${tests})
   target_link_libraries (${src} cr)
 endforeach (src)
 
-## ------------------------------------------------------------------------------
-## Additional test programs which require extra care
+## -----------------------------------------------------------------------------
+## Installation
 
-#add_executable (table2root table2root.cc)
-#target_link_libraries (table2root ${ROOT_LIBRARIES})
-
+install (
+  TARGETS ${tests}
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+)

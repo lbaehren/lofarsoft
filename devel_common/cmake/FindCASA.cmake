@@ -439,7 +439,6 @@ endif (CASA_INCLUDES AND CASA_LIBRARIES)
 if (HAVE_CASA)
   add_definitions (
     -DAIPS_${AIPS_ARCH}
-    -DAIPS_${AIPS_ENDIAN}_ENDIAN
     -DNATIVE_EXCP
     -DAIPS_STDLIB
     -DAIPS_AUTO_STL
@@ -447,7 +446,34 @@ if (HAVE_CASA)
     -D_GLIBCPP_DEPRECATED
     -DSIGNBIT 
     -DAIPS_NO_TEMPLATE_SRC
-    -DAIPS_${AIPS_ARCH})
+  )
+  ##
+  ## Platform test Big/Little Endian ------------------------------------
+  ##
+  if (CMAKE_SYSTEM_PROCESSOR MATCHES "powerpc")
+    message (STATUS "System is big endian.")
+    add_definitions (-DAIPS_BIG_ENDIAN)
+    set (CMAKE_SYSTEM_BIG_ENDIAN 1)
+  elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "powerpc")
+    message (STATUS "System is little endian.")
+    add_definitions (-DAIPS_LITTLE_ENDIAN)
+    set (CMAKE_SYSTEM_BIG_ENDIAN 0)
+  endif (CMAKE_SYSTEM_PROCESSOR MATCHES "powerpc")
+  ##
+  ## Platform test 32/64 bit ------------------------------
+  ##
+  set (CMAKE_SYSTEM_64BIT 0)
+  if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
+    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
+      if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+        set (CMAKE_SYSTEM_64BIT 1)
+        add_definitions (-DAIPS_64B)
+      endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
+  endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
+  ##
+  ## Flags for C++ compiler and Linker --------------------
+  ## 
   set (CASA_CXX_FLAGS "-fPIC -pipe -Wall -Wno-non-template-friend -Woverloaded-virtual -Wno-comment -fexceptions -Wcast-align")
   set (CASA_CXX_LFLAGS "${CASA_LIBRARIES_DIR}/version.o ${CASA_LIBRARIES}")
   if (NOT CASA_FIND_QUIETLY)

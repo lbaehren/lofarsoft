@@ -17,14 +17,11 @@ option (CR_DEBUGGING_MESSAGES "Print debugging information?" 0)
 ## ------------------------------------------------------------------------------
 ## Subdirectories
 
-subdirs (
-  implement
-#  apps
-  )
+ADD_SUBDIRECTORY (implement)
 
-if (CR_BUILD_TESTS)
-  subdirs (test)
-endif (CR_BUILD_TESTS)
+if (DAL_BUILD_TESTS)
+  ADD_SUBDIRECTORY (test)
+endif (DAL_BUILD_TESTS)
 
 ## ------------------------------------------------------------------------------
 ## External dependencies; check if we need to search for some components.
