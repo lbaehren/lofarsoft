@@ -1,0 +1,26 @@
+/*!
+
+\mainpage LOFAR User Software
+
+The <a href="http://usg.lofar.org">LOFAR User Software Group</a> represents a collaborative effort between the <a href="http://www.lofar.org">LOFAR</a> project and the scientific community as represented by the Key Science Projects (KSPs). It is intended to serve both a coordination role as well as contribute to the project software development. The USG effort is overseen by the LOFAR Science Office (LSO) and will ultimately include a mix of developers and scientists from the LSO, the LOFAR Engineering Group (LEG), and each of the KSPs.
+
+The primary task of the USG is to work with the LOFAR engineering and calibration groups and the KSPs to provide a coherent set of software for scientific investigations with LOFAR. This remit can include a variety of activities including software development, prototyping, algorithm specification, documentation, and testing. The specific activities of the USG are designed to support the scientific programs of the KSPs and, by extension, ultimately the needs of the general LOFAR user.
+
+The final result of the user software project will be a software bundle containing a mix of software developed by the LOFAR engineering group, adapted 3rd party software, and newly developed tools which allow users to reduce and analyse LOFAR data. In addition, the USG performs the following functions:
+
+<ul>
+  <li>Coordinate KSP software development with the LOFAR engineering and calibration groups
+  <li>Coordinate software development with contributing national and international partners
+  <li>Identify and support common development tasks among the KSPs
+  <li>Provide tools and software of general use to all KSPs
+  <li>Evaluate and integrate third-party software
+  <li>Provide scientific requirements for standard products and formats
+  <li>Provide guidelines for development and documentation of software
+  <li>Check compliance to these guidelines
+  <li>Develop testing tools and procedures
+  <li>Compile general documentation
+  <li>Maintain a generally accessible software repository
+  <li>Represent the interests of the LOFAR user community in other software consortia
+</ul>
+
+*/
