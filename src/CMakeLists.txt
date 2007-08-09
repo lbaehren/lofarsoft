@@ -2,7 +2,7 @@ PROJECT (LUS)
 
 SUBDIRS (
   BDSM
-  CR-Pipeline
+  CR-Tools
   DAL
   Timba
   VLT

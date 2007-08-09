@@ -336,6 +336,7 @@ IF (UNIX)
     -Wcast-align
     -Wno-non-template-friend
     -Woverloaded-virtual
+    -Wno-long-long
     )
   IF (APPLE OR CMAKE_SYSTEM_NAME MATCHES Darwin)
     ## definition common to apple architectures
