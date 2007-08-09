@@ -345,7 +345,7 @@ typedef union FFSTYPE
     char   log;         /* logical value */
     char   str[256];    /* string value  */
 }
-/* Line 187 of yacc.c.  */
+/* Line 193 of yacc.c.  */
 #line 350 "y.tab.c"
 	FFSTYPE;
 # define ffstype FFSTYPE /* obsolescent; will be withdrawn */

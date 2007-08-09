@@ -5,19 +5,31 @@
 # - Check for the presence of Glish
 #
 # The following variables are set when Blitz++ is found:
-#  HAVE_GLISH       = Set to true, if all components of Glish
-#                          have been found.
-#  Glish_INCLUDE_DIR = Include path for the header files of Glish
-#  Glish_LIBRARY     = Link these to use Glish
+#  HAVE_GLISH       = Set to true, if all components of Glish have been found.
+#  GLISH_INCLUDES = Include path for the header files of Glish
+#  GLISH_LIBRARIES     = Link these to use Glish
+
+set (casa_locations
+  /casa
+  /opt/casa
+  /sw/share/casa
+  ## CASA still might be installed under the old name
+  /opt/aips++
+  /app/aips++/Stable
+  )
+
+## -----------------------------------------------------------------------------
+## Get some basic information on the system
+
+if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
+  set (CASA_SYSTEM_NAME "darwin")
+endif (CMAKE_SYSTEM_NAME MATCHES "Darwin")
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (GLISH_INCLUDE_DIR glish.h
-  PATHS
-  /casa
-  /opt/casa
-  /sw/share/casa
+  PATHS ${include_locations}
   PATH_SUFFIXES
   code/aips/glish/include/Glish
   stable/code/aips/glish/include/Glish
@@ -27,31 +39,31 @@ find_path (GLISH_INCLUDE_DIR glish.h
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-FIND_LIBRARY (Glish_LIBRARY <package name>
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib
+FIND_LIBRARY (GLISH_LIBRARIES <package name>
+  PATHS ${lib_locations}
   )
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
-IF (Glish_INCLUDE_DIR AND Glish_LIBRARY)
+IF (GLISH_INCLUDES AND GLISH_LIBRARIES)
   SET (HAVE_GLISH TRUE)
-ELSE (Glish_INCLUDE_DIR AND Glish_LIBRARY)
+ELSE (GLISH_INCLUDES AND GLISH_LIBRARIES)
   IF (NOT Glish_FIND_QUIETLY)
-    IF (NOT Glish_INCLUDE_DIR)
+    IF (NOT GLISH_INCLUDES)
       MESSAGE (STATUS "Unable to find Glish header files!")
-    ENDIF (NOT Glish_INCLUDE_DIR)
-    IF (NOT Glish_LIBRARY)
+    ENDIF (NOT GLISH_INCLUDES)
+    IF (NOT GLISH_LIBRARIES)
       MESSAGE (STATUS "Unable to find Glish library files!")
-    ENDIF (NOT Glish_LIBRARY)
+    ENDIF (NOT GLISH_LIBRARIES)
   ENDIF (NOT Glish_FIND_QUIETLY)
-ENDIF (Glish_INCLUDE_DIR AND Glish_LIBRARY)
+ENDIF (GLISH_INCLUDES AND GLISH_LIBRARIES)
 
 IF (HAVE_GLISH)
   IF (NOT Glish_FIND_QUIETLY)
     MESSAGE (STATUS "Found components for Glish")
-    MESSAGE (STATUS "Glish_INCLUDE_DIR = ${Glish_INCLUDE_DIR}")
-    MESSAGE (STATUS "Glish_LIBRARY     = ${Glish_LIBRARY}")
+    MESSAGE (STATUS "GLISH_INCLUDES  = ${GLISH_INCLUDES}")
+    MESSAGE (STATUS "GLISH_LIBRARIES = ${GLISH_LIBRARIES}")
   ENDIF (NOT Glish_FIND_QUIETLY)
 ELSE (HAVE_GLISH)
   IF (Glish_FIND_REQUIRED)

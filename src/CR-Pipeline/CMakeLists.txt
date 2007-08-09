@@ -89,15 +89,23 @@ endif (cr_cmake)
 ## include path to Glish.h (which should be in tasking/implement)
 
 if (CASA_INCLUDES)
-  ## search for the Glish.h header file
-  find_path (HAVE_GLISH_H Glish.h
+  ## search for the Client.h header file
+  find_path (HAVE_GLISH_H Client.h
     PATHS ${CASA_INCLUDES}
-    PATH_SUFFIXES tasking ../tasking/implement
+    PATH_SUFFIXES tasking ../aips/glish/glish/include/Glish
     )
   ## if the header file was found create a symbolic link in "implement"
   if (HAVE_GLISH_H)
     message (STATUS "Found Glish.h = ${HAVE_GLISH_H}")
-    ## create a symbolic link 
+    ## remove potentially existing symbolic link
+    execute_process (
+      WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement
+      COMMAND rm -f Glish
+      TIMEOUT 10
+      ERROR_VARIABLE rm_error
+      OUTPUT_QUIET
+      )
+    ## create a new symbolic link
     execute_process (
       WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement
       COMMAND ln -fs ${HAVE_GLISH_H} Glish
