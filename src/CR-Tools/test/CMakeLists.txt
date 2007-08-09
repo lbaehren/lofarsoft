@@ -116,7 +116,7 @@ endif (HAVE_CFITSIO)
 
 if (HAVE_FFTW3)
   add_executable (tUseFFTW3 tUseFFTW3.cc)
-  target_link_libraries (tUseFFTW3 ${FFTW3_LIBRARY})
+  target_link_libraries (tUseFFTW3 ${FFTW3_LIBRARIES})
   ## installation
   install (
     TARGETS tUseFFTW3
