@@ -329,6 +329,45 @@ int test_slicing ()
   return nofFailedTests;
 }
 
+int test_math ()
+{
+  cout << "\n[test_math]\n" << std::endl;
+
+  int nofFailedTests (0);
+
+  uint nelem (5);
+  
+  try {
+    IPosition shape (2,nelem,nelem);
+    Matrix<double> mat (shape);
+    double factor (0.5);
+    
+    cout << mat << std::endl;
+
+    cout << " -- Testing: Array<T> += T ..." << std::endl;
+    mat += factor;
+    
+    cout << mat << std::endl;
+    
+    cout << " -- Testing: Array<T> /= T ..." << std::endl;
+    mat /= factor;
+    
+    cout << mat << std::endl;
+
+    cout << " -- Testing: Matrix<T>.row(n) = Matrix<T>.row(n)*T ..." << std::endl;
+    for (uint n(0); n<nelem; n++) {
+      mat.row(n) = mat.row(n)*double(n);
+    }
+    
+    cout << mat << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
 // ------------------------------------------------------------------------ main
 
 /*!
@@ -340,8 +379,9 @@ int main ()
 {
   int nofFailedTests (0);
 
-  nofFailedTests += test_construction();
-  nofFailedTests += test_slicing();
+//   nofFailedTests += test_construction();
+//   nofFailedTests += test_slicing();
+  nofFailedTests += test_math();
   
   return nofFailedTests;
 }
