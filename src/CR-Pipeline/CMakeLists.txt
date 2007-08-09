@@ -85,16 +85,31 @@ elseif (cr_cmake)
   message (SEND_ERROR "Unable to locate additional CMake scripts!")
 endif (cr_cmake)
 
+## For Glish we need to run an additional check in order to properly set up the
+## include path to Glish.h (which should be in tasking/implement)
 
-message (STATUS "[CR-Pipeline] External library settings summary:")
-message (STATUS "  BLITZ   : ${HAVE_BLITZ}   ")
-message (STATUS "  CASA    : ${HAVE_CASA}    ")
-message (STATUS "  CFITSIO : ${HAVE_CFITSIO} ")
-message (STATUS "  FFTW3   : ${HAVE_FFTW3}   ")
-message (STATUS "  LAPACK  : ${HAVE_LAPACK}  ")
-message (STATUS "  PGPLOT  : ${HAVE_PGPLOT}  ")
-message (STATUS "  ROOT    : ${HAVE_ROOT}    ")
-message (STATUS "  WCS     : ${HAVE_WCS}     ")
+if (CASA_INCLUDES)
+  ## search for the Glish.h header file
+  find_path (HAVE_GLISH_H Glish.h
+    PATHS ${CASA_INCLUDES}
+    PATH_SUFFIXES tasking ../tasking/implement
+    )
+  ## if the header file was found create a symbolic link in "implement"
+  if (HAVE_GLISH_H)
+    message (STATUS "Found Glish.h = ${HAVE_GLISH_H}")
+    ## create a symbolic link 
+    execute_process (
+      WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement
+      COMMAND ln -fs ${HAVE_GLISH_H} Glish
+      TIMEOUT 10
+      ERROR_VARIABLE ln_error
+      OUTPUT_QUIET
+      )
+    if (ln_error)
+      message (SEND_ERROR "[ln] ${ln_error}")
+    endif (ln_error)
+  endif (HAVE_GLISH_H)
+endif (CASA_INCLUDES)
 
 ## ------------------------------------------------------------------------------
 ## Check for the presence of further USG comonents
@@ -143,3 +158,17 @@ if (prefix)
   set (CMAKE_INSTALL_PREFIX ${prefix}) 
 endif (prefix)
 
+## ------------------------------------------------------------------------------
+## Configuration summary
+
+message (STATUS "BLITZ .......... : ${HAVE_BLITZ}")
+message (STATUS "CASA ........... : ${HAVE_CASA}")
+message (STATUS "CFITSIO ........ : ${HAVE_CFITSIO}")
+message (STATUS "FFTW3 .......... : ${HAVE_FFTW3}")
+message (STATUS "LAPACK ......... : ${HAVE_LAPACK}")
+message (STATUS "PGPLOT ......... : ${HAVE_PGPLOT}")
+message (STATUS "ROOT ........... : ${HAVE_ROOT}")
+message (STATUS "WCS ............ : ${HAVE_WCS}")
+
+message (STATUS "CASA_INCLUDES .. : ${CASA_INCLUDES}")
+message (STATUS "CFITSIO_INCLUDES : ${CFITSIO_INCLUDES}")
