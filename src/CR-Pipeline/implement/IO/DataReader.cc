@@ -685,6 +685,19 @@ namespace CR {  //  Namespace CR -- begin
     }
   }
   
+  // ------------------------------------------------------------------ positions
+  
+  Vector<unsigned int> DataReader::positions ()
+  {
+    Vector<unsigned int> currentPositions (nofStreams_p);
+    
+    for (unsigned int n(0); n<nofStreams_p; n++) {
+      currentPositions(n) = iterator_p[n].position();
+    }
+    
+    return currentPositions;
+  }
+  
   // ==============================================================================
   //
   //  Methods
@@ -1316,43 +1329,32 @@ uint DataReader::nofBaselines (bool const &allAntennas) const
     IPosition voltageShape;
     IPosition fftShape;
     IPosition calfftShape;
-
-    {
-      Matrix<double> fxData = DataReader::fx();
-      fxShape = fxData.shape();
-    }
-
-    {
-      Matrix<double> voltageData = DataReader::voltage();
-      voltageShape = voltageData.shape();
-    }
-
-    {
-      Matrix<DComplex> fftData = DataReader::fft();
-      fftShape = fftData.shape();
-    }
-
-    {
-      Matrix<DComplex> calfftData = DataReader::calfft();
-      calfftShape = calfftData.shape();
-    }
-
+    
+    fxShape      = fx().shape();
+    voltageShape = voltage().shape();
+    fftShape     = fft().shape();
+    calfftShape  = calfft().shape();
+    
     os << "[DataReader::summary]" << std::endl;
     // basic parameters
     os << " -- blocksize ............ = " << blocksize_p  << std::endl;
     os << " -- FFT length ........... = " << fftLength_p  << std::endl;
-    os << " -- nof. file streams .... = " << nofStreams() << std::endl;
+    os << " -- file streams connected?  " << streamsConnected_p << std::endl;
+    if (streamsConnected_p) {
+      os << " -- nof. file streams .... = " << nofStreams() << std::endl;
+      os << " -- stream positions ..... = " << positions()  << std::endl;
+    }
     // conversion factors
     os << " -- shape(adc2voltage) ... = " << ADC2Voltage().shape() << std::endl;
     os << " -- shape(fft2calfft) .... = " << fft2calfft().shape()  << std::endl;
     // output data
-    os << " -- nof. antennas ........ = " << nofAntennas()  << std::endl;
+    os << " -- nof. antennas ........ = " << nofAntennas()         << std::endl;
     os << " -- nof. selected antennas = " << nofSelectedAntennas() << std::endl;
     os << " -- nof. selected channels = " << nofSelectedChannels() << std::endl;
-    os << " -- shape(fx) ............ = " << fxShape        << std::endl;
-    os << " -- shape(voltage) ....... = " << voltageShape   << std::endl;
-    os << " -- shape(fft) ........... = " << fftShape       << std::endl;
-    os << " -- shape(calfft) ........ = " << calfftShape    << std::endl;
+    os << " -- shape(fx) ............ = " << fxShape               << std::endl;
+    os << " -- shape(voltage) ....... = " << voltageShape          << std::endl;
+    os << " -- shape(fft) ........... = " << fftShape              << std::endl;
+    os << " -- shape(calfft) ........ = " << calfftShape           << std::endl;
   }
 
 }  // Namespace CR -- end

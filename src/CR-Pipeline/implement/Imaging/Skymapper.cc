@@ -25,7 +25,7 @@
 #include <casa/Containers/Record.h>
 #include <casa/Exceptions/Error.h>
 #include <Imaging/Skymapper.h>
-#include <Skymap/SkymapperTools.h>
+// #include <Skymap/SkymapperTools.h>
 #include <Utilities/ProgressBar.h>
 
 using std::cerr;

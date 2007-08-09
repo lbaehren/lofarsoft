@@ -660,6 +660,14 @@ namespace CR {  //  Namespace CR -- begin
   inline void toStartBlock () {
     setBlock (startBlock_p);
   }
+  
+  /*!
+    \brief Get the current positions of the attached data streams
+    
+    \return positions -- [nofStreams] Vector with the current positions of the
+                         attached data streams.
+  */
+  Vector<unsigned int> positions ();
 
   // -------------------------------------------------------------------- Methods
 
