@@ -29,9 +29,7 @@
 #include <string>
 #include <vector>
 
-using std::vector;
-
-#ifdef HAVE_CASA
+// Header files from CASA library
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicSL/String.h>
@@ -39,9 +37,10 @@ using std::vector;
 #include <coordinates/Coordinates/LinearCoordinate.h>
 #include <coordinates/Coordinates/SpectralCoordinate.h>
 #include <measures/Measures/MFrequency.h>
+
+using std::vector;
 using casa::LinearCoordinate;
 using casa::SpectralCoordinate;
-#endif 
 
 namespace CR { // Namespace CR -- begin
   
@@ -51,18 +50,16 @@ namespace CR { // Namespace CR -- begin
     \ingroup Coordinates
     
     \brief Container for the basic parameters in the time-frequency domain
-
+    
     \author Lars B&auml;hren
-
+    
     \date 2007/03/06
-
+    
     \test tTimeFreq.cc
     
     <h3>Prerequisite</h3>
     
-    <ul type="square">
-      <li>[start filling in your text here]
-    </ul>
+    ---/---
     
     <h3>Synopsis</h3>
     
@@ -70,24 +67,24 @@ namespace CR { // Namespace CR -- begin
     small set of basic variables:
     <ul>
       <li><b>blocksize</b> -- The number of samples in a block of data, which is
-          getting processed.
+      getting processed.</li>
       <li><b>sampleFrequency</b> -- The frequency, [Hz], with which the data are
-          sampled in the analog-to-digital conversion step
+      sampled in the analog-to-digital conversion step</li>
       <li><b>nyquistZone</b> -- The Nyquist zone. The sample rate divided by two
-          (\f$ \nu_{\rm sample}/2 \f$) is known as the <i>Nyquist frequency</i>
-	  and the frequency range from DC (or 0 Hz) to \f$ \nu_{\rm sample}/2 \f$
-	  is called the first Nyquist zone.
+      (\f$ \nu_{\rm sample}/2 \f$) is known as the <i>Nyquist frequency</i>
+      and the frequency range from DC (or 0 Hz) to \f$ \nu_{\rm sample}/2 \f$
+      is called the first Nyquist zone.</li>
     </ul>
-
+    
     <h3>Example(s)</h3>
-
+    
     <ul>
       <li>Construction of a new object, providing all basic parameters:
       \code
       uint blocksize (2048);
       double sampleFrequency (80e06);
       uint nyquistZone (2);
-      
+    
       CR::TimeFreq data (blocksize,sampleFrequency,nyquistZone);
       \endcode
       <li>Assigning a new value to the sample frequency can be done in a number
@@ -95,18 +92,17 @@ namespace CR { // Namespace CR -- begin
       \code
       // sample frequency in its natural units, [Hz]
       data.setSampleFrequency (80e06);
-
+      
       // use combination of numerical value and unit
       data.setSampleFrequency (80,"MHz");
-
+      
       // physical quantity encapsulating numerical value and unit
       data.setSampleFrequency (casa::Quantity(80,"MHz"));
       \endcode
     </ul>
-    
-  */  
+  */
   class TimeFreq {
-
+    
   protected:
     
     //! Blocksize, \f$ N_{\rm Blocksize} \f$ , [samples]
@@ -424,7 +420,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the values along the time axis
 
-      \return timeValues -- Time values \f$ \{ t_n \f$ for the samples within
+      \return timeValues -- Time values \f$ \{ \nu \} \f$ for the samples within
                             a data block of length \f$ N_{\rm Blocksize} \f$
 			    with zero offset; i.e. this function returns the 
 			    first \f$ N_{\rm Blocksize} \f$ time values (as
@@ -440,7 +436,7 @@ namespace CR { // Namespace CR -- begin
       \param sampleOffset -- Offset \f$ n_0 \f$ in the sample number
              \f[ t[n] = t_0 + (n + n_0) T_{\rm Sample} \f]
 
-      \return timeValues -- Time values \f$ \{ t_n \f$ for the samples within
+      \return timeValues -- Time values \f$ \{ \nu \} \f$ for the samples within
       a data block of length \f$ N_{\rm Blocksize} \f$
     */
     vector<double> timeValues (uint const &sampleOffset);
@@ -451,7 +447,7 @@ namespace CR { // Namespace CR -- begin
       \param sampleValues -- The value of the samples, for which the related
              times are returned
 
-      \return timeValues -- Time values \f$ \{ t_n \f$ for the samples within
+      \return timeValues -- Time values \f$ \{ \nu \} \f$ for the samples within
               a data block of length \f$ N_{\rm Blocksize} \f$
     */
     vector<double> timeValues (vector<uint> const &sampleValues);

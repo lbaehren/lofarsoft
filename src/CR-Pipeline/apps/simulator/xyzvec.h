@@ -6,6 +6,9 @@
 
 using namespace std ;
 
+/*!
+  \ingroup CR_Applications
+*/
 class xyzvec : public vector<double> {
 
 

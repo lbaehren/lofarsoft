@@ -66,6 +66,7 @@ set (bin_locations
   /usr/bin
   /usr/local/bin
   /sw/bin
+  /sw/lib/gcc4.2/bin
   ${casacore_SOURCE_DIR}/../release/bin
   ${casacore_SOURCE_DIR}/../../release/bin
   )
@@ -74,6 +75,7 @@ set (include_locations
   /usr/include
   /usr/local/include
   /sw/include
+  /sw/lib/gcc4.2/include
   /opt/casa/local/include
   /opt/gcc-4.2.1/include/c++/4.2.1
   ${casacore_SOURCE_DIR}/../release/include
@@ -84,12 +86,14 @@ set (lib_locations
   /usr/lib
   /usr/local/lib
   /sw/lib
+  /sw/lib/gcc4.2/lib
   /opt/gcc-4.2.1/lib
   /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
   ${casacore_SOURCE_DIR}/../release/lib
   ${casacore_SOURCE_DIR}/../../release/lib
   )
 
+check_include_files (assert.h HAVE_ASSERT_H)
 check_include_files (ctype.h HAVE_CTYPE_H)
 check_include_files (fcntl.h HAVE_FCNTL_H)
 check_include_files (string.h HAVE_STRING_H)
@@ -99,6 +103,7 @@ check_type_size ("int" SIZEOF_INT)
 check_type_size ("float" SIZEOF_FLOAT)
 check_type_size ("double" SIZEOF_DOUBLE)
 check_type_size ("long" SIZEOF_LONG)
+check_type_size ("long long" SIZEOF_LONG_LONG)
 
 ## -----------------------------------------------------------------------------
 ## Required external libraries
@@ -219,10 +224,7 @@ find_program (uname_bin uname ${bin_locations})
 ## -----------------------------------------------------------------------------
 ## Options selectable by the user
 
-option (casacore_tests
-  "Build the test programs?"
-  0
-  )
+option (casacore_tests "Build the test programs?" 0)
 
 ## -----------------------------------------------------------------------------
 ## Debugging information
@@ -319,23 +321,26 @@ include_directories (
 IF (UNIX)
   add_definitions (
     # -- compiler flags utilized in the source code --
-    -DAIPS_STDLIB
-    -DAIPS_AUTO_STL
-    -DAIPS_NO_LEA_MALLOC
+	-DAIPS_STDLIB
+	-DAIPS_AUTO_STL
+	-DAIPS_NO_LEA_MALLOC
     # -- optimization --
-    -O3
-    -fPIC
+    -O2
     -pipe
+    -fPIC
     # -- exceptions and warnings --
-#    -Wall
-#    -fexceptions
-#    -Wcast-align
-    -Wno-deprecated
+#	-pedantic
+    -Wall
+    -Wno-comment
+    -fexceptions
+    -Wcast-align
+    -Wno-non-template-friend
+    -Woverloaded-virtual
     )
-  set (CASA_LDSTD "-Xlinker -rpath -Xlinker")
   IF (APPLE OR CMAKE_SYSTEM_NAME MATCHES Darwin)
     ## definition common to apple architectures
     add_definitions (
+	  -D__APPLE__
       -DAIPS_DARWIN
 #	  -DNATIVE_EXCP
 #	  -D_FILE_OFFSET_BITS=64
@@ -378,7 +383,11 @@ IF (UNIX)
   endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
 ENDIF (UNIX)
 
-SET (CMAKE_MODULE_LINKER_FLAGS ${CASA_LDSTD})
+if (CMAKE_CXX_COMPILER MATCHES "GNU")
+  add_definitions (-D__GNU__)
+endif (CMAKE_CXX_COMPILER MATCHES "GNU")
+
+SET (CMAKE_MODULE_LINKER_FLAGS "-Xlinker -rpath -Xlinker")
 
 ## -----------------------------------------------------------------------------
 ## Sub-directories
@@ -416,13 +425,16 @@ endif (prefix)
 message (STATUS "casacore_SOURCE_DIR ........ = ${casacore_SOURCE_DIR}")
 message (STATUS "CMAKE_SYSTEM ............... = ${CMAKE_SYSTEM}")
 message (STATUS "CMAKE_SYSTEM_NAME .......... = ${CMAKE_SYSTEM_NAME}")
+message (STATUS "CMAKE_SYSTEM_VERSION ....... = ${CMAKE_SYSTEM_VERSION}")
 message (STATUS "CMAKE_SYSTEM_PROCESSOR ..... = ${CMAKE_SYSTEM_PROCESSOR}")
 message (STATUS "CMAKE_SYSTEM_64BIT ......... = ${CMAKE_SYSTEM_64BIT}")
 message (STATUS "CMAKE_SYSTEM_BIG_ENDIAN .... = ${CMAKE_SYSTEM_BIG_ENDIAN}")
 message (STATUS "SIZEOF_FLOAT ............... = ${SIZEOF_FLOAT}")
 message (STATUS "SIZEOF_DOUBLE .............. = ${SIZEOF_DOUBLE}")
 message (STATUS "SIZEOF_LONG ................ = ${SIZEOF_LONG}")
+message (STATUS "SIZEOF_LONG_LONG ........... = ${SIZEOF_LONG_LONG}")
 message (STATUS "CMAKE_CXX_COMPILER ......... = ${CMAKE_CXX_COMPILER}")
+message (STATUS "CMAKE_CXX_COMPILER_ID ...... = ${CMAKE_CXX_COMPILER_ID}")
 message (STATUS "CMAKE_C_FLAGS .............. = ${CMAKE_C_FLAGS}")
 message (STATUS "CMAKE_CXX_FLAGS ............ = ${CMAKE_CXX_FLAGS}")
 message (STATUS "CMAKE_MODULE_LINKER_FLAGS .. = ${CMAKE_MODULE_LINKER_FLAGS}")

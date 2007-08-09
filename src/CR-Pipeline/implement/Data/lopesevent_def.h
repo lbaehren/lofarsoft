@@ -1,7 +1,9 @@
 
 /*!
   \file lopesevent.h
-
+ 
+  \ingroup Data
+ 
   \brief Include-file with the descriptions of the lopesevent datastructure
 
   <b> Also used by the eventsaveclient! Be really carefull before you change anything!</b>

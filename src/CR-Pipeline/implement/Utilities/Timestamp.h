@@ -127,11 +127,6 @@ class Timestamp {
 
   // ----------------------------------------------------------------- Parameters
 
-  /*!
-    \brief 
-
-    \param
-  */
 /*   void setTime (long const &unixTime); */
 
   /*!

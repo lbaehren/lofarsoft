@@ -53,11 +53,14 @@ target_link_libraries (casa ${libm})
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-foreach (casa_module ${casa_modules})
-  LIST (APPEND tests "${casa_module}/test")
-endforeach (casa_module)
-
-SUBDIRS (${tests})
+if (CASA_BUILD_TESTS)
+  ## Assemble the list of directories ...
+  foreach (casa_module ${casa_modules})
+    LIST (APPEND tests "${casa_module}/test")
+  endforeach (casa_module)
+  ## ... and register it
+  SUBDIRS (${tests})
+endif (CASA_BUILD_TESTS)
 
 ## -----------------------------------------------------------------------------
 ## Installation of libraries

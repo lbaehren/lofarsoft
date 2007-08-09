@@ -9,18 +9,34 @@
 #  CFITSIO_INCLUDES  = Directory where to find fitsio.h
 
 ## -----------------------------------------------------------------------------
+## Search locations
+
+set (include_locations
+  /usr/include
+  /usr/local/include
+  /sw/include
+  /opt/casa/local/include
+)
+
+set (lib_locations
+  /lib
+  /usr/lib
+  /usr/local/lib
+  /sw/lib
+  /opt/casa/local/lib
+)
+
+## -----------------------------------------------------------------------------
 ## Check for the header files
 
 FIND_PATH (CFITSIO_INCLUDES
   fitsio.h longnam.h
-  PATHS /usr/include /usr/local/include /sw/include /opt/casa/local/include
+  PATHS ${include_locations}
   PATH_SUFFIXES cfitsio
   )
 
 ## -----------------------------------------------------------------------------
 ## Check for the parts of the library
-
-set (lib_locations /lib /usr/lib /usr/local/lib /sw/lib /opt/casa/local/lib)
 
 ## [1] core library
 

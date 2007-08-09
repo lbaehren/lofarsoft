@@ -27,7 +27,7 @@
 namespace CR {  // Namespace CR -- begin
   
   /*!
-    \class DataIterator.h
+    \class DataIterator
     
     \ingroup IO
 
@@ -66,7 +66,7 @@ namespace CR {  // Namespace CR -- begin
     The above described access scheme is illustrated in the figure below (note
     that \f$ N_{Stride} > 0 \f$):
     
-    <img src="../figures/DataIterator_01.png">
+    +++ figure still missing +++
   */
   
   class DataIterator {

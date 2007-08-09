@@ -1,6 +1,23 @@
-PROJECT (CASA)
+##------------------------------------------------------------------------------
+## $Id::                                                                       $
+##------------------------------------------------------------------------------
 
-INCLUDE (CPack)
+## Name of the project
+project (CASA)
+
+## Minimum required version of CMake to configure the project
+cmake_minimum_required (VERSION 2.5)
+
+## =============================================================================
+##
+##  Configuration
+##
+## =============================================================================
+
+## -----------------------------------------------------------------------------
+## Options selectable by the user
+
+option (CASA_BUILD_TESTS "Build the test programs?" 0)
 
 ## -----------------------------------------------------------------------------
 ## Check for the platform
@@ -20,13 +37,14 @@ ENDIF (UNIX)
 ## use the CMake build-in macro, but in a number of cases those will not yield
 ## proper results - where therefore run an explicit check.
 
+include (CPack)
 include (CheckIncludeFiles)
 include (CheckLibraryExists)
 
 find_path (HAVE_STRING_H
   string.h
   PATHS /usr/include /usr/local/include /sw/include
-#  PATH_SUFFIXES c++ c++/4.0.0 g++
+  #  PATH_SUFFIXES c++ c++/4.0.0 g++
   )
 
 ## -----------------------------------------------------------------------------
@@ -38,23 +56,32 @@ find_package (TCL)
 find_package (X11)
 find_package (ZLIB)
 
-include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindFFTW3.cmake)
-include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindG2C.cmake)
-include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindLAPACK.cmake)
-include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindPGPLOT.cmake)
+## check where to find the CMake scripts
 
-## CFITSIO
+find_path (cmake_modules FindFFTW3.cmake FindLAPACK.cmake
+  PATHS 
+  ${CASA_SOURCE_DIR}
+  ${CASA_SOURCE_DIR}/..
+  ${CASA_SOURCE_DIR}/../..
+  PATH_SUFFIXES
+  devel_common/cmake
+  )
 
-include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindCFITSIO.cmake)
-
-if (NOT HAVE_CFITSIO)
-  message (STATUS "Warning, no system-wide CFITSIO installation found - checking for source...")
-endif (NOT HAVE_CFITSIO)
+if (cmake_modules)
+  include (${cmake_modules}/FindFFTW3.cmake)
+  include (${cmake_modules}/FindG2C.cmake)
+  include (${cmake_modules}/FindLAPACK.cmake)
+  include (${cmake_modules}/FindPGPLOT.cmake)
+  ## CFITSIO
+  include (${cmake_modules}/FindCFITSIO.cmake)
+  ## WCSLIB
+  if (NOT HAVE_WCS)
+  include (${cmake_modules}/FindWCS.cmake)
+  endif (NOT HAVE_WCS)
+endif (cmake_modules)
 
 ## WCSLIB -- in principle this can be a system-wide install, but in case none
 ##           such exists, we go checking whether we can build it from source
-
-include (${CASA_SOURCE_DIR}/../../devel_common/cmake/FindWCS.cmake)
 
 if (NOT HAVE_WCS)
   message (STATUS "Warning, no system-wide WCSLIB found - checking for source...")
@@ -141,6 +168,7 @@ INCLUDE_DIRECTORIES (
   ${CASA_SOURCE_DIR}
   ${CASA_SOURCE_DIR}/include
   ${CFITSIO_INCLUDES}
+  ${WCS_INCLUDES}
   )
 
 SET (CASA_OPTLEVEL "-O3")
@@ -190,16 +218,8 @@ ENDIF (UNIX)
 ## Now that all the platform-specific settings have been done, we can assign
 ## the variables internally used by CMake
 
-SET (CMAKE_VERBOSE_MAKEFILE 1)
 SET (CMAKE_MODULE_LINKER_FLAGS "${CASA_LDSTD}")
 SET (CMAKE_C_FLAGS "${CASA_OPTLEVEL} ${CASA_CXXSTD}")
-
-message (STATUS "CASA_SOURCE_DIR ......... = ${CASA_SOURCE_DIR}")
-message (STATUS "CMAKE_SYSTEM_NAME ....... = ${CMAKE_SYSTEM_NAME}")
-message (STATUS "CMAKE_SYSTEM_PROCESSOR .. = ${CMAKE_SYSTEM_PROCESSOR}")
-message (STATUS "CMAKE_C_FLAGS ........... = ${CMAKE_C_FLAGS}")
-message (STATUS "CMAKE_CXX_FLAGS ......... = ${CMAKE_CXX_FLAGS}")
-message (STATUS "CMAKE_MODULE_LINKER_FLAGS = ${CMAKE_MODULE_LINKER_FLAGS}")
 
 ## -----------------------------------------------------------------------------
 ## List of sub-directories
@@ -217,12 +237,43 @@ subdirs (
   coordinates
   )
 
-## ------------------------------------------------------------------------------
-## Installation
+## =============================================================================
+##
+##  Installation
+##
+## =============================================================================
 
-if (UNIX)
-  set (installation_prefix /usr/local/share/casa)
-  if (APPLE)
-    set (installation_prefix /sw/share/casa)
-  endif (APPLE)
-endif (UNIX)
+find_path (prefix release_area.txt
+  PATHS
+  ${CASA_SOURCE_DIR}
+  PATH_SUFFIXES
+  ../release
+  ../../release
+  NO_DEFAULT_PATH
+  )
+
+if (prefix)
+  message (STATUS "Installation area located for package CASA.")
+  set (CMAKE_INSTALL_PREFIX ${prefix}) 
+endif (prefix)
+
+## =============================================================================
+##
+##  Summary of settings
+##
+## =============================================================================
+
+message (STATUS "CASA_SOURCE_DIR ......... = ${CASA_SOURCE_DIR}")
+message (STATUS "CMAKE_SYSTEM_NAME ....... = ${CMAKE_SYSTEM_NAME}")
+message (STATUS "CMAKE_SYSTEM_PROCESSOR .. = ${CMAKE_SYSTEM_PROCESSOR}")
+message (STATUS "CMAKE_C_FLAGS ........... = ${CMAKE_C_FLAGS}")
+message (STATUS "CMAKE_CXX_FLAGS ......... = ${CMAKE_CXX_FLAGS}")
+message (STATUS "CMAKE_MODULE_LINKER_FLAGS = ${CMAKE_MODULE_LINKER_FLAGS}")
+message (STATUS "CMAKE_INSTALL_PREFIX .... = ${CMAKE_INSTALL_PREFIX}")
+
+message (STATUS "CFITSIO_INCLUDES ........ = ${CFITSIO_INCLUDES}")
+message (STATUS "CFITSIO_LIBRARIES ....... = ${CFITSIO_LIBRARIES}")
+message (STATUS "FFTW3_INCLUDES .......... = ${FFTW3_INCLUDES}")
+message (STATUS "FFTW3_LIBRARIES ......... = ${FFTW3_LIBRARIES}")
+message (STATUS "WCS_INCLUDES ............ = ${WCS_INCLUDES}")
+message (STATUS "WCS_LIBRARIES ........... = ${WCS_LIBRARIES}")

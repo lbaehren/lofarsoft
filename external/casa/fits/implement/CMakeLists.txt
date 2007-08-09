@@ -33,8 +33,11 @@ target_link_libraries (fits ${CFITSIO_LIBRARIES} wcs)
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-foreach (fits_module ${fits_modules})
-  LIST (APPEND tests "${fits_module}/test")
-endforeach (fits_module)
-
-SUBDIRS (${tests})
+if (CASA_BUILD_TESTS)
+  ## Assemble the list of directories ...
+  foreach (fits_module ${fits_modules})
+    LIST (APPEND tests "${fits_module}/test")
+  endforeach (fits_module)
+  ## ... and register it
+  SUBDIRS (${tests})
+endif (CASA_BUILD_TESTS)

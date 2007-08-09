@@ -22,10 +22,6 @@
 
 #include <Data/ITSCorrelation.h>
 
-/*!
-  \class ITSCorrelation
-*/
-
 // ==============================================================================
 //
 //  Construction

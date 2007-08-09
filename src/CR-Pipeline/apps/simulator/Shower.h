@@ -8,6 +8,10 @@
 #include "mathclasses.h"
 
 using namespace std;
+
+/*!
+  \ingroup CR_Applications
+*/
 class Shower {
 
 public:

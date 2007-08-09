@@ -32,8 +32,11 @@ target_link_libraries (lattices tables scimath casa)
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-foreach (lattices_module ${lattices_modules})
-  LIST (APPEND tests "${lattices_module}/test")
-endforeach (lattices_module)
-
-SUBDIRS (${tests})
+if (CASA_BUILD_TESTS)
+  ## Assemble the list of directories ...
+  foreach (lattices_module ${lattices_modules})
+    LIST (APPEND tests "${lattices_module}/test")
+  endforeach (lattices_module)
+  ## ... and register it
+  SUBDIRS (${tests})
+endif (CASA_BUILD_TESTS)

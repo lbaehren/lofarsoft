@@ -2,24 +2,34 @@
 ## $Id::                                                                       $
 ##------------------------------------------------------------------------------
 
-project (libcfitsio)
+project (CFITSIO)
 
-set (libcfitsio_VERSION_MAJOR 3)
-set (libcfitsio_VERSION_MINOR 4)
-set (libcfitsio_VERSION "${libcfitsio_VERSION_MAJOR}.${libcfitsio_VERSION_MINOR}")
+set (CFITSIO_VERSION_MAJOR 3)
+set (CFITSIO_VERSION_MINOR 4)
+set (CFITSIO_VERSION "${CFITSIO_VERSION_MAJOR}.${CFITSIO_VERSION_MINOR}")
 
-set (CMAKE_VERBOSE_MAKEFILE FALSE)
+## -----------------------------------------------------------------------------
+## Optional build settings
+
+option (CFITSIO_BUILD_TESTS "Build test programs for CFITSIO?" 1)
+option (CFITSIO_BUILD_HERA "Build for HERA project (for LHEA use only)" 0)
 
 ## -----------------------------------------------------------------------------
 ## Standard locations where to look for required components
 
+set (bin_locations
+  /usr/bin
+  /usr/local/bin
+  /sw/bin
+)
+
 set (include_locations
   /usr/include
   /usr/local/include
-  /Developer/SDKs/MacOSX10.4u.sdk/usr/include
-  /Developer/SDKs/MacOSX10.4u.sdk/usr/include/c++/4.0.0
   /sw/include
   /sw/lib/gcc4.2/include/c++/4.2.1
+  /Developer/SDKs/MacOSX10.4u.sdk/usr/include
+  /Developer/SDKs/MacOSX10.4u.sdk/usr/include/c++/4.0.0
 )
 
 set (lib_locations
@@ -61,6 +71,7 @@ check_function_exists (ftruncate HAVE_FTRUNCATE)
 
 include (CheckTypeSize)
 
+check_type_size ("long" HAVE_LONG)
 check_type_size ("long long" HAVE_LONGLONG)
 
 ## -----------------------------------------------------------------------------
@@ -79,12 +90,87 @@ if (NOT libnsl)
 endif (NOT libnsl)
 
 ## -----------------------------------------------------------------------------
-## Build options
+## CFITSIO Lexical Parser
 
-option (BUILD_HERA
-  "Build for HERA project (for LHEA use only)"
-  0
+## find required programs
+
+find_program (flex_bin flex ${bin_locations})
+find_program (bison_bin bison ${bin_locations})
+find_program (sed_bin sed ${bin_locations})
+
+## eval.l  ->  eval_l.c1  ->  eval_l.c
+
+if (flex_bin)
+  message (STATUS "Flex: processing eval.l ...")
+  execute_process (
+    WORKING_DIRECTORY ${CFITSIO_SOURCE_DIR}
+    COMMAND ${flex_bin} -t eval.l
+    TIMEOUT 10
+    OUTPUT_FILE eval_l.c1
+    ERROR_VARIABLE flex_error
+    OUTPUT_QUIET
   )
+  if (flex_error)
+    message (SEND_ERROR "[flex] ${flex_error}")
+  endif (flex_error)
+  ## replace symbols in the previously generated file
+  if (sed_bin)
+    message (STATUS "sed: processing eval_l.c1 ...")
+    execute_process (
+      WORKING_DIRECTORY ${CFITSIO_SOURCE_DIR}
+      COMMAND ${sed_bin} -e "s/yy/ff/g" -e "s/YY/FF/g" eval_l.c1
+      TIMEOUT 10
+      OUTPUT_FILE eval_l.c
+      ERROR_VARIABLE sed_error
+      OUTPUT_QUIET
+    )
+	if (sed_error)
+	  message (SEND_ERROR "[sed] ${sed_error}")
+	endif (sed_error)
+  endif (sed_bin)
+  ## remove temporary file
+  FILE (REMOVE "eval_l.c1")
+endif (flex_bin)
+
+## eval.y  ->  eval_y.c
+
+if (bison_bin)
+  message (STATUS "Bison: processing eval.y ...")
+  execute_process (
+    WORKING_DIRECTORY ${CFITSIO_SOURCE_DIR}
+    COMMAND ${bison_bin} -d -v -y eval.y
+    TIMEOUT 20
+    ERROR_VARIABLE bison_error
+    OUTPUT_QUIET
+  )
+  ## replace symbols in the previously generated file
+  if (sed_bin)
+    message (STATUS "sed: processing y.tab.c ...")
+    execute_process (
+      WORKING_DIRECTORY ${CFITSIO_SOURCE_DIR}
+      COMMAND ${sed_bin} -e "s/yy/ff/g" -e "s/YY/FF/g" y.tab.c
+      TIMEOUT 20
+      OUTPUT_FILE eval_y.c
+      ERROR_VARIABLE sed_error
+      OUTPUT_QUIET
+    )
+	if (sed_error)
+	  message (SEND_ERROR "[sed] ${sed_error}")
+	endif (sed_error)
+    message (STATUS "sed: processing y.tab.c ...")
+    execute_process (
+      WORKING_DIRECTORY ${CFITSIO_SOURCE_DIR}
+      COMMAND ${sed_bin} -e "s/yy/ff/g" -e "s/YY/FF/g" y.tab.h
+      TIMEOUT 20
+      OUTPUT_FILE eval_tab.h
+      ERROR_VARIABLE sed_error
+      OUTPUT_QUIET
+    )
+	if (sed_error)
+	  message (SEND_ERROR "[sed] ${sed_error}")
+	endif (sed_error)
+  endif (sed_bin)
+endif (bison_bin)
 
 ## -----------------------------------------------------------------------------
 ## Create the library
@@ -210,7 +296,7 @@ add_definitions (
   ## libraries
   -DHAVE_NET_SERVICES=${HAVE_NET_SERVICES}
   ## build options
-  -DBUILD_HERA=${BUILD_HERA}
+  -DBUILD_HERA=${CFITSIO_BUILD_HERA}
 )
 
 ## additional compiler flags for large file support
@@ -220,6 +306,9 @@ if (UNIX)
     -D_FILE_OFFSET_BITS=64
 	-D_LARGEFILE_SOURCE
   )
+  if (APPLE)
+    add_definitions (-D__APPLE__)
+  endif (APPLE)
 endif (UNIX)
 
 add_library (cfitsio ${cfitsio_sources})
@@ -228,29 +317,39 @@ target_link_libraries (cfitsio ${libm})
 ## -----------------------------------------------------------------------------
 ## Test program(s)
 
-set (cfitsio_tests
-  testprog
-  cookbook
-  fitscopy
-)
+if (CFITSIO_BUILD_TESTS)
 
-if (HAVE_NET_SERVICES)
-  list (APPEND cfitsio_tests smem)
-endif (HAVE_NET_SERVICES)
+  set (cfitsio_tests
+    cookbook
+    fitscopy
+    imcopy
+    listhead
+    speed
+    testprog
+  )
 
-## build the test programs
+  if (HAVE_NET_SERVICES)
+    list (APPEND cfitsio_tests smem)
+  endif (HAVE_NET_SERVICES)
 
-foreach (test ${cfitsio_tests})
-  add_executable (${test} ${test}.c)
-  target_link_libraries (${test} cfitsio ${libm})
-endforeach (test)
+  ## build the test programs
 
-## -----------------------------------------------------------------------------
-## Installation
+  foreach (test ${cfitsio_tests})
+    add_executable (${test} ${test}.c)
+    target_link_libraries (${test} cfitsio ${libm})
+  endforeach (test)
+
+endif (CFITSIO_BUILD_TESTS)
+
+## =============================================================================
+##
+##  Installation
+##
+## =============================================================================
 
 find_path (prefix release_area.txt
   PATHS
-  ${libcfitsio_SOURCE_DIR}
+  ${CFITSIO_SOURCE_DIR}
   PATH_SUFFIXES
   ../release
   ../../release
@@ -258,17 +357,27 @@ find_path (prefix release_area.txt
   )
 
 if (prefix)
-  message (STATUS "Installation area located for package libcfitsio.")
+  message (STATUS "Installation area located for package CFITSIO.")
   set (CMAKE_INSTALL_PREFIX ${prefix}) 
 endif (prefix)
 
-## Installation of library and executables
+## Installation of the library
 
 install (TARGETS cfitsio ${cfitsio_tests}
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   )
+
+## Installation of the executables
+
+if (CFITSIO_BUILD_TESTS)
+  install (TARGETS ${cfitsio_tests}
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    )
+endif (CFITSIO_BUILD_TESTS)
 
 ## Installation of header files
 

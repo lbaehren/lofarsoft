@@ -1,6 +1,6 @@
-##-------------------------------------------------------------------------------
+##------------------------------------------------------------------------------
 ## $Id::                                                                        $
-##-------------------------------------------------------------------------------
+##------------------------------------------------------------------------------
 
 ## Name of the project
 project (CR)
@@ -8,13 +8,13 @@ project (CR)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.5)
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## User defined build/install options
 
 option (CR_BUILD_TESTS "Build the test programs?" 1)
 option (CR_DEBUGGING_MESSAGES "Print debugging information?" 0)
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Subdirectories
 
 subdirs (implement)
@@ -25,7 +25,7 @@ if (DAL_BUILD_TESTS)
   ADD_SUBDIRECTORY (test)
 endif (DAL_BUILD_TESTS)
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## External dependencies; check if we need to search for some components.
 
 ## check where to find the CMake scripts

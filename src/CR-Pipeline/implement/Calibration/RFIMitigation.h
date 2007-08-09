@@ -67,7 +67,7 @@ namespace CR {  // Namespace CR -- begin
     
     <h3>Synopsis</h3>
     
-    Extract a gaincurve from a complex spectra of \f$N_{\rm Ant}\f$ array elements.
+    Extract a gaincurve from a complex spectra of \f$ N_{\rm Ant} \f$ array elements.
     Also provides the functionality to normalize a complex gain spectra by the 
     extracted the gaincurves. Then normalized gain spectra is subjected for the
     rejection of noise signals by adopting a certain kind of filter. 
@@ -75,7 +75,7 @@ namespace CR {  // Namespace CR -- begin
     The gain curve is extracted by the following method:
     
     Given a discrete complex spectrum
-    \f[ f[\nu_{k}] = A[\nu_{k}] \exp(i \phi[\nu_{k}]) \f]
+    \f[ \nu_{k} = A(\nu_{k}) \exp(i \phi[\nu_{k}]) \f]
     where
     \f[ k=0, 1, 2...(N_{\rm FreqChan}-1) \f]
     and
@@ -83,7 +83,7 @@ namespace CR {  // Namespace CR -- begin
     we extract the amplitudes of the terms,
     \f$A[\nu_{k}]\f$, and call these the terms of the absolute spectrum.
     The absolute spectrum is then divided into
-    \f$N_{\rm Segments}\f$ segments, referred to as frequency sub bands. 
+    \f$ N_{\rm Segments} \f$ segments, referred to as frequency sub bands. 
     Each sub band consists of \f$M_{\rm FreqChan}\f$ members, where
     \f[ M_{\rm FreqChan} = \frac{N_{\rm FreqChan}}{N_{\rm SubBands}} \f]
     According to the scanning method ( by impelementing median filter) one of
@@ -296,8 +296,6 @@ namespace CR {  // Namespace CR -- begin
       \returns gainValue array with the same dimension as that of input spectra after removal of RFI.
       
     */
-    
-    
     Matrix<Double> getOptimizedSpectra( const Matrix<DComplex>& spectra,
 					const uint& dataBlockSize,
 					const uint& nOfSegments ) ;

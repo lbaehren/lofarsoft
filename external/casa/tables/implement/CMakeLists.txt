@@ -105,13 +105,11 @@ target_link_libraries (tables casa)
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-#foreach (tables_module ${tables_modules})
-#  LIST (APPEND tests "${tables_module}/test")
-#endforeach (tables_module)
-
-set (tests
-  LogTables/test
-  Tables/test
-)
-
-SUBDIRS (${tests})
+if (CASA_BUILD_TESTS)
+  ## Assemble the list of directories ...
+  foreach (tables_module ${tables_modules})
+    LIST (APPEND tests "${tables_module}/test")
+  endforeach (tables_module)
+  ## ... and register it
+  SUBDIRS (${tests})
+endif (CASA_BUILD_TESTS)

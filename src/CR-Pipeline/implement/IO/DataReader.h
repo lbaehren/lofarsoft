@@ -103,43 +103,43 @@ namespace CR {  //  Namespace CR -- begin
     
     <table border="0" cellpadding="3">
       <tr bgcolor="silver">
-      <td width="15%">Function</td>
-      <td>Description</td>
+        <td width="15%">Function</td>
+        <td>Description</td>
       </tr>
       <tr valign="top">
-      <td bgcolor="orange">DataReader::setStreams()</td>
-      <td>
-      This function serves as the central point where the input streams are
-      set up to read in the data (from disk); a function prototype is
-      provided in the base class as a virtual function, but then needs to
-      be reimplemented in the derived classes to actually set the streams
-      \code
-      Bool LopesEvent::setStreams ()
-      {
-        bool status (true);
-      
-	uint nofSamples (blocksize_p);
-	Vector<uint> antennas (length_);
-	Vector<Double> adc2voltage (DataReader::adc2voltage());
-	Matrix<DComplex> fft2calfft (DataReader::fft2calfft());
-	Vector<String> filenames (length_);
-	DataIterator *iterator;
+       <td bgcolor="orange">DataReader::setStreams()</td>
+       <td>
+       This function serves as the central point where the input streams are
+       set up to read in the data (from disk); a function prototype is
+       provided in the base class as a virtual function, but then needs to
+       be reimplemented in the derived classes to actually set the streams
+       \code
+       Bool LopesEvent::setStreams ()
+       {
+         bool status (true);
+       
+	     uint nofSamples (blocksize_p);
+	     Vector<uint> antennas (length_);
+	     Vector<Double> adc2voltage (DataReader::adc2voltage());
+	     Matrix<DComplex> fft2calfft (DataReader::fft2calfft());
+	     Vector<String> filenames (length_);
+	     DataIterator *iterator;
 
-	// set and check the variables
+	     // set and check the variables
 	
-	// initialize the internals of the underlying DataReader object
-	DataReader::init (nofSamples,
-	                  antennas,
-			  adc2voltage,
-			  fft2calfft,
-			  filenames,
-			  iterator);
+	     // initialize the internals of the underlying DataReader object
+	     DataReader::init (nofSamples,
+	                       antennas,
+						   adc2voltage,
+						   fft2calfft,
+						   filenames,
+						   iterator);
 	
-	return status;
-      }
-      \endcode
-      </td>
-    </tr>
+	     return status;
+       }
+       \endcode
+       </td>
+     </tr>
     <tr valign="top">
       <td bgcolor="red">DataReader::init()</td>
       <td>
@@ -203,8 +203,8 @@ namespace CR {  //  Namespace CR -- begin
     Matrix<DComplex> fft (dr->fft());
     Matrix<DComplex> calfft (dr->calfft());
     \endcode
+   </ul>
   */
-  
   class DataReader : public TimeFreq {
     
     //! Conversion from ADC values to voltages, [sample,antenna]
@@ -349,8 +349,10 @@ namespace CR {  //  Namespace CR -- begin
     /*!
       \brief Argumented constructor
       
-      \param blocksize   -- Size of a block of data, [samples]
-    */
+	  \param blocksize       -- Blocksize, [samples]
+	  \param sampleFrequency -- Sample frequency in the ADC, [Hz]
+	  \param nyquistZone     -- Nyquist zone,  [1]
+	*/
     DataReader (uint const &blocksize,
 		uint const &nyquistZone,
 		Double const &samplerate);
@@ -664,28 +666,28 @@ namespace CR {  //  Namespace CR -- begin
   /*!
     \brief Get the raw time series after ADC conversion
     
-    \return fx -- Raw ADC time series, [Counts]
+    \return fx -- [sample,antenna] Raw ADC time series, [Counts]
   */
   virtual Matrix<Double> fx ();
 
   /*!
     \brief Get the voltage time series
     
-    \return voltage -- Voltage time series, [Volt]
+    \return voltage -- [sample,antenna] Voltage time series, [Volt]
   */
   virtual Matrix<Double> voltage ();
 
   /*!
     \brief Raw FFT of the voltage time series
     
-    \return fft -- Raw FFT of the voltage time series
+    \return fft -- [channel,antenna] Raw FFT of the voltage time series
   */
   virtual Matrix<DComplex> fft ();
 
   /*!
     \brief Get the calibrated FFT
     
-    \return calfft -- Calibrated FFT, i.e. spectra after correction for the antenna
+    \return calfft -- [channel,antenna] Calibrated FFT, i.e. spectra after correction for the antenna
                       gain-curves.
   */
   virtual Matrix<DComplex> calfft ();
@@ -926,4 +928,4 @@ namespace CR {  //  Namespace CR -- begin
 
 }  //  Namespace CR -- end
 
-#endif /* DATAREADERBASE_H */
+#endif /* DATAREADER_H */

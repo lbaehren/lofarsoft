@@ -39,11 +39,14 @@ target_link_libraries (scimath
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-foreach (scimath_module ${scimath_modules})
-  LIST (APPEND tests "${scimath_module}/test")
-endforeach (scimath_module)
-
-SUBDIRS (${tests})
+if (CASA_BUILD_TESTS)
+  ## Assemble the list of directories ...
+  foreach (scimath_module ${scimath_modules})
+    LIST (APPEND tests "${scimath_module}/test")
+  endforeach (scimath_module)
+  ## ... and register it
+  SUBDIRS (${tests})
+endif (CASA_BUILD_TESTS)
 
 ## -----------------------------------------------------------------------------
 ## Installation of libraries
