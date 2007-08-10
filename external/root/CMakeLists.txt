@@ -13,6 +13,11 @@ message (STATUS "[CMake package configuration] ROOT")
 project (ROOT)
 
 ## -----------------------------------------------------------------------------
+## Optional user settings
+
+option (ROOT_FORCE_INSTALL "Force installation from source package?" 0)
+
+## -----------------------------------------------------------------------------
 ## [1] Locate the CMake find scripts
 
 find_path (cmake_scripts FindROOT.cmake InstallROOT.cmake
@@ -38,6 +43,6 @@ include (${cmake_scripts}/FindROOT.cmake)
 ## [3] If no system-wide ROOT installation could be found, trigger (at least a
 ##     local) installation.
 
-if (NOT HAVE_ROOT)
+if (NOT HAVE_ROOT OR ROOT_FORCE_INSTALL)
   include (${cmake_scripts}/InstallROOT.cmake)
-endif (NOT HAVE_ROOT)
+endif (NOT HAVE_ROOT OR ROOT_FORCE_INSTALL)
