@@ -6,9 +6,9 @@
 ## Check for the casacore distribution
 ##
 ## Variables assigned:
-##  CASACORE_INCLUDES = Path to the casacore header files
-##  CASA_LIBRARIES    = Libraries of the casacore modules
-##  HAVE_CASACORE     = Do we have both headers and libraries of casacore?
+##  CASACORE_INCLUDES  = Path to the casacore header files
+##  CASACORE_LIBRARIES = Libraries of the casacore modules
+##  HAVE_CASACORE      = Do we have both headers and libraries of casacore?
 ##
 ## __TODO__
 ##
@@ -39,7 +39,7 @@ set (lib_locations
   ./../../release/lib
 )
 
-set (casacore_libs
+set (casacore_modules
   casa
   tables
   mirlib
@@ -241,7 +241,7 @@ endif (CASACORE_msvis)
 ## using SCons or CMake, the names of the library files will be slightly 
 ## different.
 
-foreach (casacore_lib ${casacore_libs})
+foreach (casacore_lib ${casacore_modules})
   find_library (CASACORE_lib${casacore_lib} casa_${casacore_lib} ${casacore_lib}
     PATHS ${lib_locations}
   )
@@ -318,19 +318,19 @@ endif (CASACORE_libmsvis)
 ## -----------------------------------------------------------------------------
 ## If detection successful, register package as found
 
-if (CASACORE_INCLUDES AND CASA_LIBRARIES)
+if (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
   set (HAVE_CASACORE TRUE)
-  string (REGEX REPLACE lib/libcasa.a lib CASA_LIBRARIES_DIR ${CASA_libcasa})
-else (CASACORE_INCLUDES AND CASA_LIBRARIES)
+  string (REGEX REPLACE lib/libcasa.a lib CASACORE_LIBRARIES_DIR ${CASA_libcasa})
+else (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
   if (NOT CASA_FIND_QUIETLY)
     if (NOT CASACORE_INCLUDES)
       message (STATUS "Unable to find CASACORE header files!")
     endif (NOT CASACORE_INCLUDES)
-    if (NOT CASA_LIBRARIES)
+    if (NOT CASACORE_LIBRARIES)
       message (STATUS "Unable to find CASACORE library files!")
-    endif (NOT CASA_LIBRARIES)
+    endif (NOT CASACORE_LIBRARIES)
   endif (NOT CASA_FIND_QUIETLY)
-endif (CASACORE_INCLUDES AND CASA_LIBRARIES)
+endif (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
 
 ## ------------------------------------------------------------------------------
 ## Final assembly of the provided variables and flags; once this is done, we
@@ -349,11 +349,11 @@ if (HAVE_CASACORE)
     -DAIPS_NO_TEMPLATE_SRC
     -DAIPS_${AIPS_ARCH})
   set (CASA_CXX_FLAGS "-fPIC -pipe -Wall -Wno-non-template-friend -Woverloaded-virtual -Wno-comment -fexceptions -Wcast-align")
-  set (CASA_CXX_LFLAGS "${CASA_LIBRARIES_DIR}/version.o ${CASA_LIBRARIES}")
+  set (CASA_CXX_LFLAGS "${CASACORE_LIBRARIES_DIR}/version.o ${CASACORE_LIBRARIES}")
   if (NOT CASA_FIND_QUIETLY)
     message (STATUS "Found components for CASACORE.")
-    message (STATUS "CASACORE_LIBRARIES_DIR . : ${CASA_LIBRARIES_DIR}")
-    message (STATUS "CASACORE_LIBRARIES ..... : ${CASA_LIBRARIES}")
+    message (STATUS "CASACORE_LIBRARIES_DIR . : ${CASACORE_LIBRARIES_DIR}")
+    message (STATUS "CASACORE_LIBRARIES ..... : ${CASACORE_LIBRARIES}")
     message (STATUS "CASACORE header files .. : ${CASACORE_INCLUDES}")
     message (STATUS "CASACORE compile command : ${CASA_CXX_FLAGS}")
     message (STATUS "CASACORE linker command  : ${CASA_CXX_LFLAGS}")
