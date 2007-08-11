@@ -388,6 +388,7 @@ if (CMAKE_CXX_COMPILER MATCHES "GNU")
   add_definitions (-D__GNU__)
 endif (CMAKE_CXX_COMPILER MATCHES "GNU")
 
+#SET (CMAKE_C_FLAGS "-O2 -fno-implicit-templates -Wreturn-type -Wimplicit -fPIC")
 SET (CMAKE_MODULE_LINKER_FLAGS "-Xlinker -rpath -Xlinker")
 
 ## -----------------------------------------------------------------------------
@@ -425,8 +426,6 @@ endif (prefix)
 
 message (STATUS "casacore_SOURCE_DIR ........ = ${casacore_SOURCE_DIR}")
 message (STATUS "CMAKE_SYSTEM ............... = ${CMAKE_SYSTEM}")
-message (STATUS "CMAKE_SYSTEM_NAME .......... = ${CMAKE_SYSTEM_NAME}")
-message (STATUS "CMAKE_SYSTEM_VERSION ....... = ${CMAKE_SYSTEM_VERSION}")
 message (STATUS "CMAKE_SYSTEM_PROCESSOR ..... = ${CMAKE_SYSTEM_PROCESSOR}")
 message (STATUS "CMAKE_SYSTEM_64BIT ......... = ${CMAKE_SYSTEM_64BIT}")
 message (STATUS "CMAKE_SYSTEM_BIG_ENDIAN .... = ${CMAKE_SYSTEM_BIG_ENDIAN}")

@@ -1,0 +1,318 @@
+#!/bin/sh
+
+# ------------------------------------------------------------------------------
+# $Id                                                                          $
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+# This shell script helps creating a new class in the implementation subtree
+# of the LOPES-Tools/CASA code tree. It will create the following new files:
+# - newClass.h   -- Header file containing function prototypes and Doxygen
+#                   documentation.
+# - newClass.cc  -- Implementation of the class.
+# - tNewClass.cc -- Test program for the new class.
+# - makefile     -- Standard AIPS++ makefiles in the implementation and test
+#                   directory.
+# ------------------------------------------------------------------------------
+
+## =============================================================================
+##
+##  Definitions
+##
+## =============================================================================
+
+## Extract the sub-directories from the listing of a directory; we need this
+## if we want to progress recursively through the 
+get_directories ()
+{
+  dirs="";
+  FILES=`ls | grep -v CMakeLists.txt`;
+  
+  for FILE in $FILES
+  {
+    if test -d $FILE ; then
+	  dirs="$dirs $FILE"
+	fi
+  }
+  
+  echo $dirs
+}
+
+## Try to find the location where we have the file templates from which the
+## new class source code will be derived.
+path_to_templates ()
+{
+  locations="templates ../templates ../../templates"
+  locations="$locations ./devel_common/templates ../devel_common/templates"
+  locations="$locations ../../devel_common/templates"
+
+  for dir in $locations
+  {
+    if test -f $dir/NewClass.h ; then
+	  location=$dir
+	fi
+  }
+  
+  echo $location
+}
+
+## =============================================================================
+##
+##  Processing
+##
+## =============================================================================
+
+## -----------------------------------------------------------------------------
+## Check if we are able to find the file templates which will be used to create
+## the neew class
+
+templates_location=`path_to_templates`
+
+if test -z $templates_location ; then
+  echo "ERROR : unable to find template files for a new class!"
+  exit;
+else 
+  var_basedir=`pwd`
+  templates_location=$var_basedir/$templates_location
+fi
+
+## -----------------------------------------------------------------------------
+## Check if the script is called from the correct location within the 
+## directory hierarchy
+
+if test -d implement ; then
+  echo "STATUS : Found directory implement."
+else
+  echo "ERROR : I think you started the script in the wrong location!"
+  exit;
+fi
+
+## change into the directory
+
+cd implement
+
+# ------------------------------------------------------------------------------
+# [1] In which (existing) module will the new class be placed? We get the list of
+# already existing modules first and present this to the user; afterwards we
+# await input.
+
+# get the list of existing modules in the "implement" directory
+MODULES=`get_directories`
+
+echo "";
+echo "In which module is the class inserted?"
+echo "";
+for MODULE in $MODULES
+{
+    echo " - $MODULE"
+}
+echo "";
+printf "? ";
+read var_module
+
+## Check if we have create a new module; if so, then we automatically create a
+## test directory
+
+if test -d $var_module ; then
+    echo "Class will be added to existing module $var_module";
+else
+    echo "No such module $var_module; creating it now.";
+    mkdir -p $var_module/test;
+fi
+
+## change into the directory
+
+if test -d $var_module ; then
+  cd $var_module
+else 
+  exit;
+fi
+
+## Create directory for test programs
+
+if test -d test ; then
+    echo "Test directory already is in place";
+else
+    echo "No test directory; creating it now.";
+    mkdir -p test;
+fi
+
+# ------------------------------------------------------------------------------
+# [2] Get the name of the new class and check if it already exists.
+
+echo "";
+echo "Name of the new class"
+echo "";
+printf "? ";
+read var_class
+
+for suffix in h cc cxx cpp
+{
+  if test -f $var_class.$suffix ; then
+      echo "Sorry, class $var_class already exists in module $var_module.";
+	  echo " --> $var_class.$suffix"
+      exit;
+  fi
+}
+
+## Will the new class be templated? If this is not the case we have to remove
+## the template statements during the generation of the new files.
+
+echo "";
+echo "Is the new class templated"
+echo "";
+printf " [y|n] ? "
+read var_useTemplates
+
+echo "";
+echo "Is the new class enclosed in a namespace"
+echo "";
+printf " [y|n] ? "
+read var_useNamespace
+
+case $var_useNamespace in
+  y)
+    echo "";
+    echo "Namespace"
+    echo "";
+    printf "? ";
+    read var_namespace
+  ;;
+  *)
+  ;;
+esac
+
+# ------------------------------------------------------------------------------
+# [4] Set up the variables used for substitution in the template files
+
+var_year=`date +%Y`
+var_date=$(date +%Y\\/%m\\/%d);
+var_user=$(whoami)
+var_author=$(finger $(whoami) | grep Name | sed s/": "/":"/g | tr \':\' \'\\n\' | \
+    grep -v Login | grep -v Name)
+var_guard=`echo $var_class | tr "[a-z]" "[A-Z]"`
+
+## -----------------------------------------------------------------------------
+## Feedback on settings
+
+echo "";
+echo "Variables used for substitution in the template files:"
+echo "";
+echo " - Module/Class ..... : $var_module/$var_class";
+echo " - Include guard .... : $var_guard";
+echo " - Year ............. : $var_year";
+echo " - Date ............. : $var_date";
+echo " - User name ........ : $var_user";
+echo " - Author ........... : $var_author";
+echo " - Templated class .. : $var_useTemplates"
+echo " - Class in namespace : $var_useNamespace"
+
+case $var_useNamespace in
+  y)
+    echo " - Namespace ........ : $var_namespace"
+  ;;
+  *)
+  ;;
+esac
+
+# ------------------------------------------------------------------------------
+# [5] Process the template files
+#
+# If the class is NOT templated, we need to run the following additional command
+# sequence on the files: 
+#                        cat FILENAME | sed s/"<T>"/""/g | grep -v "template <class T>"
+
+echo "";
+echo "Processing template files ...";
+echo "";
+
+# (a) Header file
+
+echo " --> Creating class header file ...";
+
+cat $templates_location/NewClass.h \
+    | sed s/"<year>"/$var_year/g \
+    | sed s/"<author>"/"$var_author"/g \
+    | sed s/"<date>"/$var_date/g \
+    | sed s/"<newNamespace>"/"$var_namespace"/g \
+    | sed s/"<newModule>"/"$var_module"/g \
+    | sed s/"<newClass>"/"$var_class"/g \
+    | sed s/"<NEWCLASS>"/"$var_guard"/g \
+    > $var_class.h
+
+# (b) Implementation file
+
+echo " --> Creating class implementation file ...";
+
+cat $templates_location/NewClass.cc \
+    | sed s/"<year>"/$var_year/g \
+    | sed s/"<author>"/"$var_author"/g \
+    | sed s/"<date>"/$var_date/g \
+    | sed s/"<newNamespace>"/"$var_namespace"/g \
+    | sed s/"<newModule>"/"$var_module"/g \
+    | sed s/"<newClass>"/"$var_class"/g \
+    | sed s/"<NEWCLASS>"/"$var_guard"/g \
+    > $var_class.cc
+
+# (c) Test program
+
+echo " --> Creating class test program ...";
+
+cat $templates_location/tNewClass.cc \
+    | sed s/"<year>"/$var_year/g \
+    | sed s/"<author>"/"$var_author"/g \
+    | sed s/"<date>"/$var_date/g \
+    | sed s/"<newNamespace>"/"$var_namespace"/g \
+    | sed s/"<newModule>"/"$var_module"/g \
+    | sed s/"<newClass>"/"$var_class"/g \
+    > test/t$var_class.cc
+
+# (d) Templated class
+
+case $var_useTemplates in
+    y)
+	echo "Keeping template markers";
+    ;;
+    *)
+	echo " --> Removing template markers";
+    ;;
+esac
+
+## (e) Namespace settings
+
+case $var_useNamespace in
+  n)
+	echo " --> Removing namespace markers";
+    cat $var_class.h | grep -v Namespace > tmp.h && mv tmp.h $var_class.h
+    cat $var_class.cc | grep -v Namespace > tmp.cc && mv tmp.cc $var_class.cc
+	cd test
+    cat t$var_class.cc | grep -v Namespace > tmp.cc && mv tmp.cc t$var_class.cc
+	cd ..
+  ;;
+  *)
+  ;;
+esac
+
+# ------------------------------------------------------------------------------
+# [5] Add newly created files/directories to the code repository?
+
+cd $var_basedir
+
+echo "";
+printf "Automatically add new files to the repository? [y|n] ";
+read var_yn;
+
+case $var_yn in
+    y)
+	  svn add implement/$var_module
+	  svn add implement/$var_module/$var_class.h
+	  svn add implement/$var_module/$var_class.cc
+	  svn add implement/$var_module/test/t$var_class.cc
+    ;;
+    n)
+	echo " --> Please remember adding the new files to the CVS repository!!";
+    ;;
+    *)
+	echo "[newClass] $var_yn"
+    ;;
+esac;
