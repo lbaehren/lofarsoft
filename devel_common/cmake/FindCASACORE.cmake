@@ -6,8 +6,8 @@
 ## Check for the casacore distribution
 ##
 ## Variables assigned:
-##  CASACORE_INCLUDES  = Path to the casacore header files
-##  CASACORE_LIBRARIES = Libraries of the casacore modules
+##  CASA_INCLUDES  = Path to the casacore header files
+##  CASA_LIBRARIES = Libraries of the casacore modules
 ##  HAVE_CASACORE      = Do we have both headers and libraries of casacore?
 ##
 ## __TODO__
@@ -56,11 +56,25 @@ set (casacore_modules
   )
 
 ## -----------------------------------------------------------------------------
+## Check for system header files
+
+include (CheckIncludeFiles)
+
+check_include_files (assert.h HAVE_ASSERT_H)
+check_include_files (ctype.h HAVE_CTYPE_H)
+check_include_files (fcntl.h HAVE_FCNTL_H)
+check_include_files (stdlib.h HAVE_STDLIB_H)
+check_include_files (stdio.h HAVE_STDIO_H)
+check_include_files (string.h HAVE_STRING_H)
+check_include_files (unistd.h HAVE_UNISTD_H)
+
+## -----------------------------------------------------------------------------
 ## Required external packages
 
+find_library (libcfitsio cfitsio PATHS ${lib_locations})
+find_library (libm m PATHS ${lib_locations})
 find_library (libg2c g2c f2c PATHS ${lib_locations})
 find_library (libwcs wcs PATHS ${lib_locations})
-find_library (libcfitsio cfitsio PATHS ${lib_locations})
 
 if (NOT libwcs)
   message (SEND_ERROR "Missing WCSLIB required for casacore!")
@@ -77,7 +91,7 @@ endif (NOT libcfitsio)
 ## installation or have remained at their original location in the source
 ## directories, we need to check for different variants to the include paths.
 
-set (CASACORE_INCLUDES "")
+set (CASA_INCLUDES "")
 
 ## [1] <casa/Arrays.h>
 
@@ -88,7 +102,7 @@ find_path (CASACORE_casa Arrays.h
 
 if (CASACORE_casa)
   string (REGEX REPLACE casa/casa casa tmp ${CASACORE_casa})
-  list (APPEND CASACORE_INCLUDES ${tmp})
+  list (APPEND CASA_INCLUDES ${tmp})
 endif (CASACORE_casa)
 
 ## [2] <tables/Tables.h>
@@ -100,7 +114,7 @@ find_path (CASACORE_tables Tables.h
 
 if (CASACORE_tables)
   string (REGEX REPLACE tables/tables tables tmp ${CASACORE_tables})
-  list (APPEND CASACORE_INCLUDES ${tmp})
+  list (APPEND CASA_INCLUDES ${tmp})
 endif (CASACORE_tables)
 
 ## [3] <miriad.h>
@@ -111,7 +125,7 @@ find_path (CASACORE_mirlib miriad.h
 )
 
 if (CASACORE_mirlib)
-  list (APPEND CASACORE_INCLUDES ${CASACORE_mirlib})
+  list (APPEND CASA_INCLUDES ${CASACORE_mirlib})
 endif (CASACORE_mirlib)
 
 ## [4] <scimath/Fitting.h>
@@ -123,7 +137,7 @@ find_path (CASACORE_scimath Fitting.h
 
 if (CASACORE_scimath)
   string (REGEX REPLACE scimath/scimath scimath tmp ${CASACORE_scimath})
-  list (APPEND CASACORE_INCLUDES ${tmp})
+  list (APPEND CASA_INCLUDES ${tmp})
 endif (CASACORE_scimath)
 
 ## [5] <measures/Measures.h>
@@ -135,7 +149,7 @@ find_path (CASACORE_measures Measures.h
 
 if (CASACORE_measures)
   string (REGEX REPLACE measures/measures measures tmp ${CASACORE_measures})
-  list (APPEND CASACORE_INCLUDES ${tmp})
+  list (APPEND CASA_INCLUDES ${tmp})
 endif (CASACORE_measures)
 
 ## [6] <fits/FITS.h>
@@ -147,7 +161,7 @@ find_path (CASACORE_fits FITS.h
 
 if (CASACORE_fits)
   string (REGEX REPLACE fits/fits fits tmp ${CASACORE_fits})
-  list (APPEND CASACORE_INCLUDES ${tmp})
+  list (APPEND CASA_INCLUDES ${tmp})
 endif (CASACORE_fits)
 
 ## [7] <coordinates/Coordinates.h>
@@ -159,7 +173,7 @@ find_path (CASACORE_coordinates Coordinates.h
 
 if (CASACORE_coordinates)
   string (REGEX REPLACE coordinates/coordinates coordinates tmp ${CASACORE_coordinates})
-  list (APPEND CASACORE_INCLUDES ${tmp})
+  list (APPEND CASA_INCLUDES ${tmp})
 endif (CASACORE_coordinates)
 
 ## [8] <components/ComponentModels.h>
@@ -171,7 +185,7 @@ find_path (CASACORE_components ComponentModels.h
 
 if (CASACORE_components)
   string (REGEX REPLACE components/components components tmp ${CASACORE_components})
-  list (APPEND CASACORE_INCLUDES ${tmp})
+  list (APPEND CASA_INCLUDES ${tmp})
 endif (CASACORE_components)
 
 ## [9] <lattices/Lattices.h>
@@ -183,7 +197,7 @@ find_path (CASACORE_lattices Lattices.h
 
 if (CASACORE_lattices)
   string (REGEX REPLACE lattices/lattices lattices tmp ${CASACORE_lattices})
-  list (APPEND CASACORE_INCLUDES ${tmp})
+  list (APPEND CASA_INCLUDES ${tmp})
 endif (CASACORE_lattices)
 
 ## [10] <ms/MeasurementSets.h>
@@ -195,7 +209,7 @@ find_path (CASACORE_ms MeasurementSets.h
 
 if (CASACORE_ms)
   string (REGEX REPLACE ms/ms ms tmp ${CASACORE_ms})
-  list (APPEND CASACORE_INCLUDES ${tmp})
+  list (APPEND CASA_INCLUDES ${tmp})
 endif (CASACORE_ms)
 
 ## [11] <images/Images.h>
@@ -207,7 +221,7 @@ find_path (CASACORE_images Images.h
 
 if (CASACORE_images)
   string (REGEX REPLACE images/images images tmp ${CASACORE_images})
-  list (APPEND CASACORE_INCLUDES ${tmp})
+  list (APPEND CASA_INCLUDES ${tmp})
 endif (CASACORE_images)
 
 ## [12] <msfits/MSFits.h>
@@ -219,7 +233,7 @@ find_path (CASACORE_msfits MSFits.h
 
 if (CASACORE_msfits)
   string (REGEX REPLACE msfits/msfits msfits tmp ${CASACORE_msfits})
-  list (APPEND CASACORE_INCLUDES ${tmp})
+  list (APPEND CASA_INCLUDES ${tmp})
 endif (CASACORE_msfits)
 
 ## [13] <msvis/MSVis.h>
@@ -231,21 +245,11 @@ find_path (CASACORE_msvis MSVis.h
 
 if (CASACORE_msvis)
   string (REGEX REPLACE msvis/msvis msvis tmp ${CASACORE_msvis})
-  list (APPEND CASACORE_INCLUDES ${tmp})
+  list (APPEND CASA_INCLUDES ${tmp})
 endif (CASACORE_msvis)
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
-
-## Locate the libraries themselves; depending on whether they have been build
-## using SCons or CMake, the names of the library files will be slightly 
-## different.
-
-foreach (casacore_lib ${casacore_modules})
-  find_library (CASACORE_lib${casacore_lib} casa_${casacore_lib} ${casacore_lib}
-    PATHS ${lib_locations}
-  )
-endforeach (casacore_lib)
 
 ## Dependency of the packages in casacore
 
@@ -263,126 +267,92 @@ endforeach (casacore_lib)
 # msfits      : ms fits
 # msvis       : ms
 
-if (CASACORE_libcasa)
-  list (APPEND CASACORE_LIBRARIES ${CASACORE_libcasa})
-endif (CASACORE_libcasa)
+## Locate the libraries themselves; depending on whether they have been build
+## using SCons or CMake, the names of the library files will be slightly 
+## different.
 
-if (CASACORE_libtables)
-  list (APPEND CASACORE_LIBRARIES ${CASACORE_libtables})
-endif (CASACORE_libtables)
-
-if (CASACORE_libmir)
-  list (APPEND CASACORE_LIBRARIES ${CASACORE_libmir})
-endif (CASACORE_libmir)
-
-if (CASACORE_libscimath)
-  list (APPEND CASACORE_LIBRARIES ${CASACORE_libscimath})
-endif (CASACORE_libscimath)
-
-if (CASACORE_libmeasures)
-  list (APPEND CASACORE_LIBRARIES ${CASACORE_libmeasures})
-endif (CASACORE_libmeasures)
-
-if (CASACORE_libfits)
-  list (APPEND CASACORE_LIBRARIES ${CASACORE_libfits})
-endif (CASACORE_libfits)
-
-if (CASACORE_libcoordinates)
-  list (APPEND CASACORE_LIBRARIES ${CASACORE_libcoordinates})
-endif (CASACORE_libcoordinates)
-
-if (CASACORE_libcomponents)
-  list (APPEND CASACORE_LIBRARIES ${CASACORE_libcomponents})
-endif (CASACORE_libcomponents)
-
-if (CASACORE_liblattices)
-  list (APPEND CASACORE_LIBRARIES ${CASACORE_liblattices})
-endif (CASACORE_liblattices)
-
-if (CASACORE_libms)
-  list (APPEND CASACORE_LIBRARIES ${CASACORE_libms})
-endif (CASACORE_libms)
-
-if (CASACORE_libimages)
-  list (APPEND CASACORE_LIBRARIES ${CASACORE_libimages})
-endif (CASACORE_libimages)
-
-if (CASACORE_libmsfits)
-  list (APPEND CASACORE_LIBRARIES ${CASACORE_libmsfits})
-endif (CASACORE_libmsfits)
-
-if (CASACORE_libmsvis)
-  list (APPEND CASACORE_LIBRARIES ${CASACORE_libmsvis})
-endif (CASACORE_libmsvis)
+foreach (casacore_lib ${casacore_modules})
+  ## search for the library
+  find_library (CASACORE_lib${casacore_lib} casa_${casacore_lib} ${casacore_lib}
+    PATHS ${lib_locations}
+  )
+  ## if we have found the library, add it to the list
+  if (CASACORE_lib${casacore_lib})
+	list (APPEND CASA_LIBRARIES ${CASACORE_lib${casacore_lib}})
+  endif (CASACORE_lib${casacore_lib})
+endforeach (casacore_lib)
 
 ## -----------------------------------------------------------------------------
 ## If detection successful, register package as found
 
-if (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
+if (CASA_INCLUDES AND CASA_LIBRARIES)
   set (HAVE_CASACORE TRUE)
-  string (REGEX REPLACE lib/libcasa.a lib CASACORE_LIBRARIES_DIR ${CASA_libcasa})
-else (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
+#  string (REGEX REPLACE lib/libcasa.a lib CASA_LIBRARIES_DIR ${CASA_libcasa})
+else (CASA_INCLUDES AND CASA_LIBRARIES)
   if (NOT CASA_FIND_QUIETLY)
-    if (NOT CASACORE_INCLUDES)
+    if (NOT CASA_INCLUDES)
       message (STATUS "Unable to find CASACORE header files!")
-    endif (NOT CASACORE_INCLUDES)
-    if (NOT CASACORE_LIBRARIES)
+    endif (NOT CASA_INCLUDES)
+    if (NOT CASA_LIBRARIES)
       message (STATUS "Unable to find CASACORE library files!")
-    endif (NOT CASACORE_LIBRARIES)
+    endif (NOT CASA_LIBRARIES)
   endif (NOT CASA_FIND_QUIETLY)
-endif (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
+endif (CASA_INCLUDES AND CASA_LIBRARIES)
 
 ## ------------------------------------------------------------------------------
 ## Final assembly of the provided variables and flags; once this is done, we
 ## provide some extended feedback.
 
-if (HAVE_CASACORE)
+## --- Compiler settings -------------------------
+
+IF (UNIX)
   add_definitions (
-    -DAIPS_${AIPS_ARCH}
-    -DAIPS_${AIPS_ENDIAN}_ENDIAN
-    -DNATIVE_EXCP
-    -DAIPS_STDLIB
-    -DAIPS_AUTO_STL
-    -DAIPS_NO_LEA_MALLOC
-    -D_GLIBCPP_DEPRECATED
-    -DSIGNBIT 
-    -DAIPS_NO_TEMPLATE_SRC
-    -DAIPS_${AIPS_ARCH})
-  set (CASA_CXX_FLAGS "-fPIC -pipe -Wall -Wno-non-template-friend -Woverloaded-virtual -Wno-comment -fexceptions -Wcast-align")
-  set (CASA_CXX_LFLAGS "${CASACORE_LIBRARIES_DIR}/version.o ${CASACORE_LIBRARIES}")
-  if (NOT CASA_FIND_QUIETLY)
-    message (STATUS "Found components for CASACORE.")
-    message (STATUS "CASACORE_LIBRARIES_DIR . : ${CASACORE_LIBRARIES_DIR}")
-    message (STATUS "CASACORE_LIBRARIES ..... : ${CASACORE_LIBRARIES}")
-    message (STATUS "CASACORE header files .. : ${CASACORE_INCLUDES}")
-    message (STATUS "CASACORE compile command : ${CASA_CXX_FLAGS}")
-    message (STATUS "CASACORE linker command  : ${CASA_CXX_LFLAGS}")
-  endif (NOT CASA_FIND_QUIETLY)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CASA_CXX_FLAGS}")
-else (HAVE_CASACORE)
-  if (CASA_FIND_REQUIRED)
-    message (FATAL_ERROR "Could not find CASA")
-  endif (CASA_FIND_REQUIRED)
-endif (HAVE_CASACORE)
-
-## ------------------------------------------------------------------------------
-## Mark as advanced: clean up not to include all the temporary variables into
-## configuration settings
-
-mark_as_advanced (
-  CASACORE_libcasa
-  CASACORE_libcoordinates
-  CASACORE_libimages
-  CASACORE_libmeasures
-  CASACORE_libscimath
-  CASACORE_libscimath_f
-  CASACORE_libtables
-  CASACORE_libcalibration
-  CASACORE_libcomponents
-  CASACORE_libfits
-  CASACORE_libgraphics
-  CASACORE_liblattices
-  CASACORE_libms
-  CASACORE_libmsfits
-  CASACORE_libmsvis
-  )
+    # -- compiler flags utilized in the source code --
+	-DAIPS_STDLIB
+	-DAIPS_AUTO_STL
+	-DAIPS_NO_LEA_MALLOC
+    )
+  IF (APPLE)
+    add_definitions (-DAIPS_DARWIN)
+  ELSE (APPLE)
+    ADD_DEFINITIONS (-DAIPS_LINUX)
+  ENDIF (APPLE)
+  ##
+  ## Platform test Big/Little Endian ------------------------------------
+  ##
+  if (CMAKE_SYSTEM_PROCESSOR MATCHES "powerpc")
+    message (STATUS "System is big endian.")
+    add_definitions (-DAIPS_BIG_ENDIAN)
+    set (CMAKE_SYSTEM_BIG_ENDIAN 1)
+  else (CMAKE_SYSTEM_PROCESSOR MATCHES "powerpc")
+    message (STATUS "System is little endian.")
+    add_definitions (-DAIPS_LITTLE_ENDIAN)
+    set (CMAKE_SYSTEM_BIG_ENDIAN 0)
+  endif (CMAKE_SYSTEM_PROCESSOR MATCHES "powerpc")
+#  TEST_BIG_ENDIAN (CMAKE_SYSTEM_BIG_ENDIAN)
+#  if (CMAKE_SYSTEM_BIG_ENDIAN)
+#    message (STATUS "System is big endian.")
+#    add_definitions (-DAIPS_BIG_ENDIAN)
+#  elseif (CMAKE_SYSTEM_BIG_ENDIAN)
+#    message (STATUS "System is little endian.")
+#    add_definitions (-DAIPS_LITTLE_ENDIAN)
+#  endif (CMAKE_SYSTEM_BIG_ENDIAN)
+  ##
+  ## Platform test 32/64 bit ------------------------------
+  ##
+  set (CMAKE_SYSTEM_64BIT 0)
+  if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
+    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
+      if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+        set (CMAKE_SYSTEM_64BIT 1)
+        add_definitions (-DAIPS_64B)
+      endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
+  endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
+  if (APPLE)
+    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+      set (CMAKE_SYSTEM_64BIT 1)
+      add_definitions (-DAIPS_64B)
+    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+  endif (APPLE)
+ENDIF (UNIX)

@@ -96,6 +96,8 @@ set (lib_locations
 check_include_files (assert.h HAVE_ASSERT_H)
 check_include_files (ctype.h HAVE_CTYPE_H)
 check_include_files (fcntl.h HAVE_FCNTL_H)
+check_include_files (stdlib.h HAVE_STDLIB_H)
+check_include_files (stdio.h HAVE_STDIO_H)
 check_include_files (string.h HAVE_STRING_H)
 check_include_files (unistd.h HAVE_UNISTD_H)
 
@@ -108,10 +110,11 @@ check_type_size ("long long" SIZEOF_LONG_LONG)
 ## -----------------------------------------------------------------------------
 ## Required external libraries
 
-find_package (Motif)
-find_package (PNG)
-find_package (X11)
-find_package (ZLIB)
+# Checking for C library gfortran... (cached) yes
+# Checking for C library m... (cached) yes
+# Checking for C library blas... (cached) yes
+# Checking for C library lapack... (cached) yes
+# Checking for C library cfitsio... (cached) yes
 
 include (./FindG2C.cmake)
 include (./FindLAPACK.cmake)
@@ -124,14 +127,14 @@ find_library (libm m PATHS ${lib_locations})
 
 set (HAVE_CFITSIO 1)
 
-find_path (CFITSIO_INCLUDES fitsio.h fitsio2.h
+find_path (CFITSIO_INCLUDES fitsio.h fitsio2.h longname.h
   PATHS ${include_locations}
-  PATH_SUFFIXES cfitsio fitsio
+  PATH_SUFFIXES cfitsio
 )
 
 find_library (CFITSIO_LIBRARIES cfitsio
   PATHS ${lib_locations}
-  PATH_SUFFIXES cfitsio fitsio
+  PATH_SUFFIXES cfitsio
 )
 
 ## If either the library or the include files cannot be located, we have to
@@ -159,11 +162,14 @@ endif (NOT HAVE_CFITSIO)
 
 set (HAVE_WCSLIB 1)
 
-find_library (WCSLIB_LIBRARIES wcs ${lib_locations})
-
-find_path (WCSLIB_INCLUDES wcs.h wcshdr.h
+find_path (WCSLIB_INCLUDES wcs.h
   PATHS ${include_locations}
-  PATH_SUFFIXES C wcs wcslib wcslib-4.2
+  PATH_SUFFIXES wcs wcslib
+)
+
+find_library (WCSLIB_LIBRARIES wcs
+  PATHS ${lib_locations}
+  PATH_SUFFIXES wcs wcslib
 )
 
 if (NOT WCSLIB_INCLUDES)
@@ -227,93 +233,28 @@ find_program (uname_bin uname ${bin_locations})
 option (casacore_tests "Build the test programs?" 0)
 
 ## -----------------------------------------------------------------------------
-## Debugging information
-
-# libfits from porting the original CASA source code distribution
-#
-# /usr/bin/c++  -I<USG ROOT>/external/casa/.
-#               -I<USG ROOT>/external/casa
-#               -I<USG ROOT>/external/casa/include
-#               -I/sw/include/cfitsio
-#               -DAIPS_STDLIB -DAIPS_NO_TEMPLATE_SRC -DAIPS_AUTO_STL
-#               -DAIPS_NO_LEA_MALLOC -DAIPS_DARWIN -DAIPS_BIG_ENDIAN
-#               -DNATIVE_EXCP -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
-#               -O3 -fPIC -pipe -Wall -Wno-comment -fexceptions -Wcast-align
-#               -Wno-non-template-friend -Woverloaded-virtual
-#               -o fits/implement/CMakeFiles/fits.dir/FITS/BasicFITS.o
-#               -c <USG ROOT>/external/casa/fits/implement/FITS/BasicFITS.cc
-
-# [1] Lars-Mac (PPC Mac)
-#
-# /usr/bin/c++  -I<USG ROOT>/<casacore modules>
-#               -I<USG ROOT>/external/casacore/images/images/Images
-#               -I<USG ROOT>/external/casacore/ms/ms/MeasurementSets
-#               -I<USG ROOT>/external/casacore/tables/tables/Tables
-#               -I/sw/include/cfitsio
-#               -I/sw/include
-#               -O2 -fPIC -pipe
-#               -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_NO_LEA_MALLOC
-#               -fexceptions -Wcast-align -Wall
-#               -DAIPS_DARWIN -DAIPS_BIG_ENDIAN
-#               -o fits/fits/CMakeFiles/fits.dir/FITS/BasicFITS.o
-#               -c <USG ROOT>/external/casacore/fits/fits/FITS/BasicFITS.cc
-#
-# [2] Yavanna (Intel Mac)
-#
-# /usr/bin/c++  -I<USG ROOT>/<casacore modules>
-#               -I<USG ROOT>/external/casacore/images/images/Images
-#               -I<USG ROOT>/external/casacore/ms/ms/MeasurementSets
-#               -I<USG ROOT>/external/casacore/tables/tables/Tables
-#               -I/sw/include/cfitsio
-#               -I/sw/include
-#               -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_NO_LEA_MALLOC
-#               -O3 -fPIC -pipe -Wno-deprecated
-#               -DAIPS_DARWIN
-#               -o fits/fits/CMakeFiles/fits.dir/FITS/BasicFITS.o
-#               -c <USG ROOT>/external/casacore/fits/fits/FITS/BasicFITS.cc
-#
-# [3] papi (Debian GNU Linux, 64 bit)
-#
-# /usr/bin/c++  -I<USG ROOT>/<casacore modules>
-#               -I<USG ROOT>/external/casacore/images/images/Images
-#               -I<USG ROOT>/external/casacore/ms/ms/MeasurementSets
-#               -I<USG ROOT>/external/casacore/tables/tables/Tables
-#               -I<USG ROOT>/external/casacore/../../release/include/cfitsio
-#               -O2 -fPIC -pipe
-#               -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_NO_LEA_MALLOC
-#               -fexceptions -Wcast-align -Wall
-#               -DAIPS_LINUX -DAIPS_LITTLE_ENDIAN -DAIPS_64B
-#               -o fits/fits/CMakeFiles/fits.dir/FITS/fitsio.o
-#               -c <USG ROOT>/external/casacore/fits/fits/FITS/fitsio.cc
-#
-# [4] Ray (SuSE Linux)
-#
-# /usr/bin/c++  -I<USG ROOT>/<casacore modules>
-#               -I<USG ROOT>/external/casacore/images/images/Images
-#               -I<USG ROOT>/external/casacore/ms/ms/MeasurementSets
-#               -I<USG ROOT>/external/casacore/tables/tables/Tables
-#               -I/usr/include/cfitsio
-#               -I/usr/lib/gcc-lib/i586-suse-linux/3.3.3/include
-#               -O2 -fPIC -pipe
-#               -DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_NO_LEA_MALLOC
-#               -fexceptions -Wcast-align -Wall
-#               -DAIPS_LINUX -DAIPS_LITTLE_ENDIAN
-#               -o fits/fits/CMakeFiles/fits.dir/FITS/BinTable.o
-#               -c <USG ROOT>/external/casacore/fits/fits/FITS/BinTable.cc
-
-
-## -----------------------------------------------------------------------------
 ## Location of the header files
 
 include_directories (
-  .
-  ${casacore_packages}
+  ${casacore_SOURCE_DIR}/casa
+  ${casacore_SOURCE_DIR}/tables
+  ${casacore_SOURCE_DIR}/mirlib
+  ${casacore_SOURCE_DIR}/scimath
+  ${casacore_SOURCE_DIR}/measures
   ${casacore_SOURCE_DIR}/fits
+  ${casacore_SOURCE_DIR}/coordinates
+  ${casacore_SOURCE_DIR}/components
+  ${casacore_SOURCE_DIR}/lattices
+  ${casacore_SOURCE_DIR}/ms
+  ${casacore_SOURCE_DIR}/images
+  ${casacore_SOURCE_DIR}/msfits
+  ${casacore_SOURCE_DIR}/msvis
   ${casacore_SOURCE_DIR}/images/images/Images
   ${casacore_SOURCE_DIR}/ms/ms/MeasurementSets
   ${casacore_SOURCE_DIR}/tables/tables/Tables
   ${CFITSIO_INCLUDES}
-  ${G2C_INCLUDES}
+  ${WCSLIB_INCLUDES}
+  ${WCSLIB_INCLUDES}/..
   )
 
 ## --- Compiler settings -------------------------
@@ -324,32 +265,15 @@ IF (UNIX)
 	-DAIPS_STDLIB
 	-DAIPS_AUTO_STL
 	-DAIPS_NO_LEA_MALLOC
-    # -- optimization --
-    -O2
-    -pipe
-    -fPIC
-    # -- exceptions and warnings --
-#	-pedantic
-    -Wall
-    -Wno-comment
-    -fexceptions
-    -Wcast-align
-    -Wno-non-template-friend
-    -Woverloaded-virtual
-    -Wno-long-long
     )
-  IF (APPLE OR CMAKE_SYSTEM_NAME MATCHES Darwin)
+  IF (APPLE)
     ## definition common to apple architectures
     add_definitions (
-	  -D__APPLE__
       -DAIPS_DARWIN
-#	  -DNATIVE_EXCP
-#	  -D_FILE_OFFSET_BITS=64
-#	  -D_LARGEFILE_SOURCE
     )
-  ELSE (APPLE OR CMAKE_SYSTEM_NAME MATCHES Darwin)
+  ELSE (APPLE)
     ADD_DEFINITIONS (-DAIPS_LINUX)
-  ENDIF (APPLE OR CMAKE_SYSTEM_NAME MATCHES Darwin)
+  ENDIF (APPLE)
   ##
   ## Platform test Big/Little Endian ------------------------------------
   ##
@@ -357,9 +281,9 @@ IF (UNIX)
     message (STATUS "System is big endian.")
     add_definitions (-DAIPS_BIG_ENDIAN)
     set (CMAKE_SYSTEM_BIG_ENDIAN 1)
-  elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "powerpc")
+  else (CMAKE_SYSTEM_PROCESSOR MATCHES "powerpc")
     message (STATUS "System is little endian.")
-    add_definitions (-DAIPS_LITTLE_ENDIAN)
+#    add_definitions (-DAIPS_LITTLE_ENDIAN)
     set (CMAKE_SYSTEM_BIG_ENDIAN 0)
   endif (CMAKE_SYSTEM_PROCESSOR MATCHES "powerpc")
 #  TEST_BIG_ENDIAN (CMAKE_SYSTEM_BIG_ENDIAN)
@@ -382,13 +306,14 @@ IF (UNIX)
       endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
     endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
   endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
+  if (APPLE)
+    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+      set (CMAKE_SYSTEM_64BIT 1)
+      add_definitions (-DAIPS_64B)
+    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+  endif (APPLE)
 ENDIF (UNIX)
 
-if (CMAKE_CXX_COMPILER MATCHES "GNU")
-  add_definitions (-D__GNU__)
-endif (CMAKE_CXX_COMPILER MATCHES "GNU")
-
-#SET (CMAKE_C_FLAGS "-O2 -fno-implicit-templates -Wreturn-type -Wimplicit -fPIC")
 SET (CMAKE_MODULE_LINKER_FLAGS "-Xlinker -rpath -Xlinker")
 
 ## -----------------------------------------------------------------------------
@@ -444,5 +369,7 @@ message (STATUS "Flex lexical parser ........ = ${flex_bin}")
 message (STATUS "libm library ............... = ${libm}")
 message (STATUS "CFITSIO header files ....... = ${CFITSIO_INCLUDES}")
 message (STATUS "CFITSIO library ............ = ${CFITSIO_LIBRARIES}")
+message (STATUS "LAPACK header files ........ = ${LAPACK_INCLUDES}")
+message (STATUS "LAPACK library ............. = ${LAPACK_LIBRARIES}")
 message (STATUS "WCSLIB header files ........ = ${WCSLIB_INCLUDES}")
 message (STATUS "WCSLIB library ............. = ${WCSLIB_LIBRARIES}")

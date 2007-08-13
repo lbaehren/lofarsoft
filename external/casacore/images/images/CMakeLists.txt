@@ -16,6 +16,8 @@ endforeach (images_module)
 
 ## build the library
 
+include_directories (../..)
+
 add_library (images
   ${images_sources}
 )

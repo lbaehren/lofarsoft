@@ -50,13 +50,20 @@ if (cr_cmake)
   if (HAVE_BLITZ)
     add_definitions (-DHAVE_BLITZ)
   endif (HAVE_BLITZ)
-  ## CASA
+  ## CASA - search for full installation first
   if (NOT HAVE_CASA) 
     include (${cr_cmake}/FindCASA.cmake)
   endif (NOT HAVE_CASA)
   if (HAVE_CASA)
     add_definitions (-DHAVE_CASA)
   endif (HAVE_CASA)
+  ## casacore - actually for the library that is all we need
+  if (NOT HAVE_CASA) 
+    include (${cr_cmake}/FindCASACORE.cmake)
+  endif (NOT HAVE_CASA)
+  if (HAVE_CASACORE)
+    add_definitions (-DHAVE_CASA)
+  endif (HAVE_CASACORE)
   ## CFITSIO
   if (NOT HAVE_CFITSIO)
     include (${cr_cmake}/FindCFITSIO.cmake)

@@ -16,11 +16,13 @@ foreach (fits_module ${fits_modules})
   LIST(APPEND fits_sources ${fits_${fits_module}})
 endforeach (fits_module)
 
+## -----------------------------------------------------------------------------
 ## build the library
 
 add_library (fits
   ${fits_sources}
   )
+
 target_link_libraries (fits measures
   ${G2C_LIBRARIES}
   ${CFITSIO_LIBRARIES}
@@ -104,3 +106,15 @@ install (TARGETS fits
 ## [2] This is the corresponding compile command when building "libfits" from
 ## "casacore":
 ## 
+##  g++ -o build_darwin_i386/opt/FITS/BasicFITS.o 
+##      -c
+##      -DAIPS_STDLIB
+##      -DAIPS_AUTO_STL
+##      -DAIPS_DARWIN
+##      -DAIPS_NO_LEA_MALLOC
+##      -DAIPS_LITTLE_ENDIAN
+##      -O2
+##      -I.
+##      -I/sw/share/casacore/stage/include/casacore
+##      fits/FITS/BasicFITS.cc
+##

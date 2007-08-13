@@ -8,6 +8,30 @@
 ## The following variables are set when LAPACK is found:
 ##  HAVE_LAPACK     - Set to true, if all components of LAPACK have been found.
 ##  LAPACK_LIBRARIES - Link these to use LAPACK
+##  LAPACK_INCLUDES  - Location of the LAPACK header files
+
+set (lib_locations
+ /usr/lib
+ /usr/local/lib
+ /sw/lib
+ /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
+)
+
+set (include_locations
+  /usr/include
+  /usr/local/include
+  /sw/include
+  /Developer/SDKs/MacOSX10.4u.sdk/usr/include
+  /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers
+)
+
+
+## -----------------------------------------------------------------------------
+## Check for the header files
+
+find_path (LAPACK_INCLUDES clapack.h
+  PATHS ${include_locations}
+)
 
 ## -----------------------------------------------------------------------------
 ## Check for the library files (-llapack -lblas -lcblas -latlas)
@@ -24,10 +48,7 @@ set (LAPACK_LIBRARIES "")
 foreach (lib ${libs})
   ## try to locate the library
   find_library (LAPACK_${lib} ${lib}
-    PATHS
-    /usr/lib
-    /usr/local/lib
-    /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
+    PATHS ${lib_locations}
     PATH_SUFFIXES lapack
     NO_DEFAULT_PATH
     )
@@ -53,7 +74,8 @@ ENDIF (LAPACK_LIBRARIES)
 IF (HAVE_LAPACK)
   IF (NOT LAPACK_FIND_QUIETLY)
     MESSAGE (STATUS "Found components for LAPACK")
-    MESSAGE (STATUS "LAPACK_LIBRARIES     = ${LAPACK_LIBRARIES}")
+    MESSAGE (STATUS "LAPACK_INCLUDES  = ${LAPACK_INCLUDES}")
+    MESSAGE (STATUS "LAPACK_LIBRARIES = ${LAPACK_LIBRARIES}")
   ENDIF (NOT LAPACK_FIND_QUIETLY)
 ELSE (HAVE_LAPACK)
   IF (LAPACK_FIND_REQUIRED)
