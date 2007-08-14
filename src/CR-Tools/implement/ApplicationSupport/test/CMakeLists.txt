@@ -1,5 +1,5 @@
 ##------------------------------------------------------------------------------
-## $Id:: CMakeLists.txt 392 2007-06-13 10:38:12Z baehren                       $
+## $Id:: CMakeLists.txt 520 2007-08-08 08:55:52Z baehren                       $
 ##------------------------------------------------------------------------------
 
 include_directories (. .. ../..)
@@ -8,11 +8,7 @@ include_directories (. .. ../..)
 ## Set up the list with test program sources
 
 set (tests
-  tDataBlockSettings
-  tDataIterator
-  tDataReader
-  tFFTServer
-  tLogfileName
+  tParameterFromRecord
   )
 
 ## -----------------------------------------------------------------------------
@@ -32,3 +28,13 @@ install (
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   )
+
+## -----------------------------------------------------------------------------
+## Installation
+
+install (
+  TARGETS ${tests}
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+)

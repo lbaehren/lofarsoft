@@ -28,7 +28,7 @@
 #include <casa/Exceptions/Error.h>
 
 #include <templates.h>
-#include <IO/DataReaderTools.h>
+#include <ApplicationSupport/DataReaderTools.h>
 #include <Data/ITSCapture.h>
 #include <Data/LopesEvent.h>
 
@@ -38,7 +38,7 @@ using namespace CR;
 /*!
   \file tDataReaderTools.cc
 
-  \ingroup IO
+  \ingroup ApplicationSupport
 
   \brief A collection of test routines for DataReaderTools
  

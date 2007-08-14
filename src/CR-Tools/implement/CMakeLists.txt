@@ -5,6 +5,8 @@
 ## -----------------------------------------------------------------------------
 ## Modules inside the "CR-Pipeline" package
 
+## Core modules
+
 set (cr_modules
   Analysis
   Calibration
@@ -20,22 +22,31 @@ set (cr_modules
   Utilities
   )
 
+## (optional) support for applications requiring additional external components
+
+list (APPEND cr_modules ApplicationSupport)
+
+## register the directories containing the source code
+
 subdirs (${cr_modules})
 
 ## -----------------------------------------------------------------------------
-## collect the source files in the modules
+## Build "libcr"
+
+## Assemble list of source files
 
 foreach (cr_module ${cr_modules})
   FILE (GLOB cr_${cr_module} ${cr_module}/*.cc)
   LIST (APPEND cr_sources ${cr_${cr_module}})
 endforeach (cr_module)
 
-## -----------------------------------------------------------------------------
-## build the library
+## Optional (pre-)compiler settings
 
 if (CR_DEBUGGING_MESSAGES)
   add_definitions (-DDEBUGGING_MESSAGES)
 endif (CR_DEBUGGING_MESSAGES)
+
+## Create the library
 
 add_library (cr
   ${cr_sources}

@@ -54,7 +54,7 @@ using casa::String;
 namespace CR {
   
   /*!
-    \ingroup Utilities
+    \ingroup ApplicationSupport
     
     \brief Methods to extract non-atomic parameters from a GlishRecord
     

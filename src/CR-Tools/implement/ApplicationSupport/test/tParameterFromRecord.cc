@@ -23,12 +23,12 @@
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
 
-#include <Utilities/ParameterFromRecord.h>
+#include <ApplicationSupport/ParameterFromRecord.h>
 
 /*!
   \file tParameterFromRecord.cc
 
-  \ingroup Utilities
+  \ingroup ApplicationSupport
 
   \brief A collection of test routines for ParameterFromRecord
  

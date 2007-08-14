@@ -35,7 +35,6 @@
 */
 
 #include <Utilities/Masking.h>
-#include <Utilities/ParameterFromRecord.h>
 #include <Utilities/ProgressBar.h>
 #include <Utilities/StringTools.h>
 #include <Utilities/Timestamp.h>

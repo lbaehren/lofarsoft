@@ -49,7 +49,7 @@
 /*!
   \class DataReaderTools
 
-  \ingroup IO
+  \ingroup ApplicationSupport
 
   \brief A collection of helpful tools for programs using the DataReader
 

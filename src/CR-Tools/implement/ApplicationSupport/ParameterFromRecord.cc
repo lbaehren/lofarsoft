@@ -23,7 +23,7 @@
 
 /* $Id$*/
 
-#include <Utilities/ParameterFromRecord.h>
+#include <ApplicationSupport/ParameterFromRecord.h>
 
 namespace CR {
   

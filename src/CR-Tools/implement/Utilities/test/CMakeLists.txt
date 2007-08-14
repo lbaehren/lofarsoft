@@ -9,7 +9,6 @@ include_directories (. .. ../..)
 
 set (tests
   tMasking
-  tParameterFromRecord
   tProgressBar
   tStringTools
   tTimestamp
