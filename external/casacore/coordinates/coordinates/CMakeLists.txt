@@ -21,7 +21,7 @@ endforeach (coordinates_module)
 add_library (coordinates
   ${coordinates_sources}
 )
-target_link_libraries (coordinates fits)
+target_link_libraries (coordinates fits ${LAPACK_LIBRARIES})
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs

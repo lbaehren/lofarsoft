@@ -17,14 +17,6 @@ foreach (ms_module ${ms_modules})
 endforeach (ms_module)
 
 ## -----------------------------------------------------------------------------
-## build the library
-
-add_library (ms
-  ${ms_sources}
-)
-target_link_libraries (ms measures tables scimath casa)
-
-## -----------------------------------------------------------------------------
 ## Files processed by Bison & Flex
 ##
 ## FILES=`ls *.y | sed s/"\.y"//`
@@ -81,6 +73,14 @@ if (flex_bin)
 else (flex_bin)
   message (SEND_ERROR "Unable to process flex input files!")
 endif (flex_bin)
+
+## -----------------------------------------------------------------------------
+## build the library
+
+add_library (ms
+  ${ms_sources}
+)
+target_link_libraries (ms measures tables scimath casa ${LAPACK_LIBRARIES})
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs

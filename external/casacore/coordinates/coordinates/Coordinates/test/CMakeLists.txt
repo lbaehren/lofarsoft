@@ -1,30 +1,32 @@
 
 ## ------------------------------------------------------------------------------
-## Test programs for casa/Containers
+## Test programs for coordinates/Coordinates
 
 SET (tests
-  tBlock
-  tHashMap
-  tHashMapIO
-  tHashMapIter
-  tList
-  tObjectPool
-  tOrdMap
-  tOrdMap2
-  tPoolStack
-  tQueue
-  tRecord
-  tRecordDesc
-  tSimOrdMap
-  tStack
-  )
+  dCoordinates
+  dRemoveAxes
+  dWorldMap
+  tCoordinate
+  tCoordinateSystem
+  tCoordinateUtil
+  tDirectionCoordinate
+  tFrequencyAligner
+  tGaussianConvert
+  tLinearCoordinate
+  tLinearXform
+  tObsInfo
+  tProjection
+  tSpectralCoordinate
+  tStokesCoordinate
+  tTabularCoordinate
+)
 
 ## ------------------------------------------------------------------------------
 ## Build the test programs
 
 FOREACH (src ${tests})
   ADD_EXECUTABLE (${src} ${src}.cc)
-  TARGET_LINK_LIBRARIES (${src} casa)
+  TARGET_LINK_LIBRARIES (${src} coordinates fits measures scimath scimath_f casa)
 ENDFOREACH (src)
 
 ## ------------------------------------------------------------------------------

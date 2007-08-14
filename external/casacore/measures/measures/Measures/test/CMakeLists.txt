@@ -27,5 +27,5 @@ SET (tests
 
 FOREACH (src ${tests})
   ADD_EXECUTABLE (${src} ${src}.cc)
-  TARGET_LINK_LIBRARIES (${src} measures tables scimath casa)
+  TARGET_LINK_LIBRARIES (${src} sofa measures tables scimath casa)
 ENDFOREACH (src)

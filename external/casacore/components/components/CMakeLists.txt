@@ -22,7 +22,7 @@ endforeach (components_module)
 add_library (components
   ${components_sources}
 )
-target_link_libraries (components coordinates)
+target_link_libraries (components coordinates ${LAPACK_LIBRARIES})
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs

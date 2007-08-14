@@ -19,7 +19,7 @@ endforeach (lattices_module)
 add_library (lattices
   ${lattices_sources}
 )
-target_link_libraries (lattices tables scimath)
+target_link_libraries (lattices tables scimath scimath_f casa ${LAPACK_LIBRARIES})
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs

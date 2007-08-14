@@ -7,7 +7,6 @@
 ## Main CMake configuration file for building the "casacore" package.
 ##
 ## Pending issues:
-##  - "libfits" does not yet build (on PPC Mac)
 ##  - "tVanVleck" does not link due to missing f2c symbols
 ##
 ## =============================================================================
@@ -28,7 +27,7 @@ project (casacore)
 # components  : coordinates
 # lattices    : tables scimath
 # ms          : measures
-# images      : components mirlib
+# images      : lattices components mirlib
 # msfits      : ms fits
 # msvis       : ms
 

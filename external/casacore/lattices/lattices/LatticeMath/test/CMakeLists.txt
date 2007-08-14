@@ -1,30 +1,18 @@
 
 ## ------------------------------------------------------------------------------
-## Test programs for casa/Containers
+## Test programs for lattices/LatticeMath
 
 SET (tests
-  tBlock
-  tHashMap
-  tHashMapIO
-  tHashMapIter
-  tList
-  tObjectPool
-  tOrdMap
-  tOrdMap2
-  tPoolStack
-  tQueue
-  tRecord
-  tRecordDesc
-  tSimOrdMap
-  tStack
-  )
+  tFit2D
+  tLatticeFit
+)
 
 ## ------------------------------------------------------------------------------
 ## Build the test programs
 
 FOREACH (src ${tests})
   ADD_EXECUTABLE (${src} ${src}.cc)
-  TARGET_LINK_LIBRARIES (${src} casa)
+  TARGET_LINK_LIBRARIES (${src} lattices)
 ENDFOREACH (src)
 
 ## ------------------------------------------------------------------------------
@@ -35,3 +23,4 @@ install (TARGETS ${tests}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
 )
+

@@ -21,7 +21,7 @@ include_directories (../..)
 add_library (images
   ${images_sources}
 )
-target_link_libraries (images components coordinates fits mir)
+target_link_libraries (images lattices components coordinates fits measures tables scimath casa mir)
 
 ## -----------------------------------------------------------------------------
 ## Files processed by Bison & Flex
