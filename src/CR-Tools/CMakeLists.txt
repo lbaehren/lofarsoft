@@ -147,6 +147,7 @@ include_directories (
   ${CASA_INCLUDES}
   ${CFITSIO_INCLUDES}
   ${PGPLOT_INCLUDES}
+  ${ROOT_INCLUDES}
   ${WCS_INCLUDES}
   )
 

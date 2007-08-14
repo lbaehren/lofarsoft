@@ -13,12 +13,17 @@ include (CheckIncludeFiles)
 include (CheckLibraryExists)
 include (CheckTypeSize)
 
+## -----------------------------------------------------------------------------
+## Search locations
+
 set (include_locations
   /include
   /usr/include
   /usr/local/include
   /opt/include
   /sw/include
+  ../release/include
+  ../../release/include
   )
 
 set (lib_locations
@@ -27,6 +32,8 @@ set (lib_locations
   /usr/local/lib
   /opt/lib
   /sw/lib
+  ../release/lib
+  ../../release/lib
   )
 
 ## -----------------------------------------------------------------------------

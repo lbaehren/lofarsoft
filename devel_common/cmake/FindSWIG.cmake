@@ -12,17 +12,48 @@
 #  SWIG_LFGLAS     = Linker flags (optional)
 
 ## -----------------------------------------------------------------------------
+## Search locations
+
+set (bin_locations
+  /usr/bin
+  /usr/local/bin
+  /sw/bin
+  /opt/casa/local/bin
+  ../release/bin
+  ../../release/bin
+)
+
+set (include_locations
+  /usr/include
+  /usr/local/include
+  /sw/include
+  /opt/casa/local/include
+  ../release/include
+  ../../release/include
+)
+
+set (lib_locations
+  /lib
+  /usr/lib
+  /usr/local/lib
+  /sw/lib
+  /opt/casa/local/lib
+  ../release/lib
+  ../../release/lib
+)
+
+## -----------------------------------------------------------------------------
 ## Find executable
 
 find_program (SWIG_BIN swig
-  PATHS /bin /usr/bin /usr/local/bin /sw/bin
+  PATHS ${bin_locations}
   )
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
 #find_path (SWIG_INCLUDES <header file(s)>
-#  PATHS /usr/include /usr/local/include /sw/include
+#  PATHS ${include_locations}
 #  PATH_SUFFIXES <optional path extension>
 #  NO_DEFAULT_PATH
 #  )
@@ -31,7 +62,7 @@ find_program (SWIG_BIN swig
 ## Check for the library
 
 #find_library (SWIG_LIBRARIES <package name>
-#  PATHS /usr/lib /usr/local/lib /sw/lib
+#  PATHS ${lib_locations}
 #  NO_DEFAULT_PATH
 #  )
 

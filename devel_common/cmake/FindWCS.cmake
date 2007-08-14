@@ -84,3 +84,9 @@ ENDIF (HAVE_WCS)
 
 ## ------------------------------------------------------------------------------
 ## Mark as advanced ...
+
+mark_as_advanced (
+  HAVE_WCS
+  WCS_INCLUDES
+  WCS_LIBRARIES
+)

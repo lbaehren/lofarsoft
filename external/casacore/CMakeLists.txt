@@ -186,6 +186,7 @@ if (NOT HAVE_WCSLIB)
   ## try to locate the source directory first
   find_path (WCSLIB_INCLUDES wcs.h wcshdr.h 
     PATHS
+    ${include_locations}
     ${casacore_SOURCE_DIR}/../wcslib-4.2
     ${casacore_SOURCE_DIR}/../wcslib
     PATH_SUFFIXES 

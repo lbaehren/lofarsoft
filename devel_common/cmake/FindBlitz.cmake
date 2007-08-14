@@ -13,13 +13,36 @@
 #SET (BLITZ_VERSION "1_33_1")
 
 ## -----------------------------------------------------------------------------
+## Search locations
+
+set (include_locations
+  /include
+  /usr/include
+  /usr/local/include
+  /opt/include
+  /sw/include
+  ../release/include
+  ../../release/include
+  )
+
+set (lib_locations
+  /lib
+  /usr/lib
+  /usr/local/lib
+  /opt/lib
+  /sw/lib
+  ../release/lib
+  ../../release/lib
+  )
+
+## -----------------------------------------------------------------------------
 ## Check for the header files; the include statement in the code should be e.g.
 ##   #include <blitz/array.h>
 ## in order to ease differentiation from where the various header files are
 ## included.
 
 FIND_PATH (BLITZ_INCLUDES array.h
-  PATHS /usr/local/include /usr/include /sw/include
+  PATHS ${include_locations}
   PATH_SUFFIXES blitz
   )
 
@@ -31,7 +54,7 @@ ENDIF (BLITZ_INCLUDES)
 ## Check for the library
 
 FIND_LIBRARY (BLITZ_LIBRARIES blitz
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib
+  PATHS ${lib_locations}
   )
 
 ## -----------------------------------------------------------------------------

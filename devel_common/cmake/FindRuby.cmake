@@ -11,6 +11,37 @@
 #  Ruby_LIBRARIES  = Link these to use Ruby
 
 ## -----------------------------------------------------------------------------
+## Search locations
+
+set (bin_locations
+  /usr/bin
+  /usr/local/bin
+  /sw/bin
+  /opt/casa/local/bin
+  ../release/bin
+  ../../release/bin
+)
+
+set (include_locations
+  /usr/include
+  /usr/local/include
+  /sw/include
+  /opt/casa/local/include
+  ../release/include
+  ../../release/include
+)
+
+set (lib_locations
+  /lib
+  /usr/lib
+  /usr/local/lib
+  /sw/lib
+  /opt/casa/local/lib
+  ../release/lib
+  ../../release/lib
+)
+
+## -----------------------------------------------------------------------------
 ## System properties; library and header files may reside in an architecture-
 ## dependent subdirectory
 
@@ -32,9 +63,7 @@ endif (UNIX)
 ## Check for the header files
 
 find_path (Ruby_INCLUDES ruby.h
-  PATHS
-  /usr/local/include /usr/include /sw/include
-  /usr/lib /sw/lib
+  PATHS ${include_locations}
   PATH_SUFFIXES ruby/1.8/${ARCH} ruby/1.8/universal-darwin8.0
   )
 
@@ -42,7 +71,7 @@ find_path (Ruby_INCLUDES ruby.h
 ## Check for the library
 
 find_library (Ruby_LIBRARIES ruby
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib
+  PATHS ${lib_locations}
   PATH_SUFFIXES ruby/1.8 ruby/1.9
   )
 

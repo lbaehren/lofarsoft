@@ -11,15 +11,34 @@
 #  ROOT_LFGLAS     = Linker flags (optional)
 
 ## -----------------------------------------------------------------------------
+## Search locations
+
+set (include_locations
+  /usr/include
+  /usr/local/include
+  /sw/include
+  /opt
+  /opt/include
+  ../release/include
+  ../../release/include
+)
+
+set (lib_locations
+  /lib
+  /usr/lib
+  /usr/local/lib
+  /sw/lib
+  /opt
+  /opt/lib
+  ../release/lib
+  ../../release/lib
+)
+
+## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (ROOT_INCLUDES tCanvas.h TCint.h TObject.h
-  PATHS
-  /usr/include
-  /usr/local/include
-  /opt
-  /sw/include
-  /sw/share
+  PATHS ${include_locations}
   PATH_SUFFIXES
   root
   root/include
@@ -70,12 +89,7 @@ set (libs
 foreach (lib ${libs})
   ## try to locate the library
   find_library (root${lib} ${lib}
-    PATHS
-    /usr/lib
-    /usr/local/lib
-    /opt
-    /sw/lib
-    /sw/share
+    PATHS ${lib_locations}
     PATH_SUFFIXES
     root
     root/lib
