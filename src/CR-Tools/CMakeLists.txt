@@ -85,9 +85,9 @@ if (cr_cmake)
     include (${cr_cmake}/FindROOT.cmake)
   endif (NOT HAVE_ROOT)
   ## -- WCSLIB ---------------
-  if (NOT HAVE_WCS) 
+  if (NOT HAVE_WCSLIB) 
     include (${cr_cmake}/FindWCS.cmake)
-  endif (NOT HAVE_WCS)
+  endif (NOT HAVE_WCSLIB)
 elseif (cr_cmake)
   message (SEND_ERROR "Unable to locate additional CMake scripts!")
 endif (cr_cmake)
@@ -148,7 +148,7 @@ include_directories (
   ${CFITSIO_INCLUDES}
   ${PGPLOT_INCLUDES}
   ${ROOT_INCLUDES}
-  ${WCS_INCLUDES}
+  ${WCSLIB_INCLUDES}
   )
 
 ## ------------------------------------------------------------------------------
@@ -183,7 +183,7 @@ message (STATUS "FFTW3 .......... : ${HAVE_FFTW3}")
 message (STATUS "LAPACK ......... : ${HAVE_LAPACK}")
 message (STATUS "PGPLOT ......... : ${HAVE_PGPLOT}")
 message (STATUS "ROOT ........... : ${HAVE_ROOT}")
-message (STATUS "WCS ............ : ${HAVE_WCS}")
+message (STATUS "WCSLIB ......... : ${HAVE_WCSLIB}")
 
 message (STATUS "CASA_INCLUDES .. : ${CASA_INCLUDES}")
 message (STATUS "CFITSIO_INCLUDES : ${CFITSIO_INCLUDES}")

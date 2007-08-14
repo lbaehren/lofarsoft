@@ -117,6 +117,7 @@ check_type_size ("long long" SIZEOF_LONG_LONG)
 
 include (./FindG2C.cmake)
 include (./FindLAPACK.cmake)
+include (./FindWCS.cmake)
 
 ## --- libm -----------------------------------------------
 
@@ -159,30 +160,10 @@ endif (NOT HAVE_CFITSIO)
 ## course only will be possible, if the "external" directory
 ## has been checked out completely.
 
-set (HAVE_WCSLIB 1)
-
-find_path (WCSLIB_INCLUDES wcs.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES wcs wcslib
-)
-
-find_library (WCSLIB_LIBRARIES wcs
-  PATHS ${lib_locations}
-  PATH_SUFFIXES wcs wcslib
-)
-
-if (NOT WCSLIB_INCLUDES)
-  set (HAVE_WCSLIB 0)
-endif (NOT WCSLIB_INCLUDES)
-
-if (NOT WCSLIB_LIBRARIES)
-  set (HAVE_WCSLIB 0)
-endif (NOT WCSLIB_LIBRARIES)
-
 if (NOT HAVE_WCSLIB)
   message (SEND_ERROR "WCSLIB_INCLUDES  = ${WCSLIB_INCLUDES}")
   message (SEND_ERROR "WCSLIB_LIBRARIES = ${WCSLIB_LIBRARIES}")
-  message (FATAL_ERROR "Unable to find systm-wide installation of WCSLIB!")
+  message (FATAL_ERROR "Unable to find system-wide installation of WCSLIB!")
   ## try to locate the source directory first
   find_path (WCSLIB_INCLUDES wcs.h wcshdr.h 
     PATHS

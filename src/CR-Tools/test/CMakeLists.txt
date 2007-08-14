@@ -127,15 +127,15 @@ endif (HAVE_FFTW3)
 ## -----------------------------------------------------------------------------
 ## Test for WCSLIB
 
-if (HAVE_WCS)
+if (HAVE_WCSLIB)
   add_executable (tUseWCS tUseWCS.cc)
-  target_link_libraries (tUseWCS ${WCS_LIBRARIES})
+  target_link_libraries (tUseWCS ${WCSLIB_LIBRARIES})
   ## installation
   install (
     TARGETS tUseWCS
     RUNTIME DESTINATION bin
     )
-endif (HAVE_WCS)
+endif (HAVE_WCSLIB)
 
 ## -----------------------------------------------------------------------------
 ## Test for working with ROOT (includes working with the DAL)
