@@ -20,7 +20,7 @@
 
 /* $Id$*/
 
-#include <Skymap/SkymapperTools.h>
+#include <ApplicationSupport/SkymapperTools.h>
 
 using CR::ObservationData;
 using CR::SkymapGrid;

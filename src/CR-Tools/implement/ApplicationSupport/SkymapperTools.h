@@ -32,9 +32,9 @@
 #include <tasking/Glish.h>
 #include <Glish/Client.h>
 
-#include <IO/DataReaderTools.h>
+#include <ApplicationSupport/DataReaderTools.h>
+#include <ApplicationSupport/Skymap.h>
 #include <Observation/ObservationData.h>
-#include <Skymap/Skymap.h>
 #include <Imaging/Skymapper.h>
 
 #include <casa/namespace.h>
@@ -42,7 +42,7 @@
 /*!
   \class SkymapperTools
 
-  \ingroup Skymap
+  \ingroup ApplicationSupport
 
   \brief Collection of tools and helper functions for the Skymapper class
 

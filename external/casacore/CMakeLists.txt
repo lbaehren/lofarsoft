@@ -45,6 +45,8 @@ set (casacore_packages
   images
   msfits
   msvis
+# add-ons to the original set of casacore packages
+  tasking
   )
 
 ## -----------------------------------------------------------------------------
@@ -230,6 +232,7 @@ include_directories (
   ${casacore_SOURCE_DIR}/images
   ${casacore_SOURCE_DIR}/msfits
   ${casacore_SOURCE_DIR}/msvis
+  ${casacore_SOURCE_DIR}/tasking
   ${casacore_SOURCE_DIR}/images/images/Images
   ${casacore_SOURCE_DIR}/ms/ms/MeasurementSets
   ${casacore_SOURCE_DIR}/tables/tables/Tables

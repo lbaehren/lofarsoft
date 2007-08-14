@@ -48,7 +48,7 @@ using std::cout;
 /*!
   \class Phasing
 
-  \ingroup Beamforming
+  \ingroup ApplicationSupport
 
   \brief Computation of delays for beamforming
 

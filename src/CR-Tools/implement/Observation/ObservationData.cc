@@ -20,8 +20,8 @@
 
 /* $Id: ObservationData.cc,v 1.9 2007/05/02 09:37:10 bahren Exp $ */
 
+#include <ApplicationSupport/SkymapperTools.h>
 #include <Observation/ObservationData.h>
-#include <Skymap/SkymapperTools.h>
 
 namespace CR {  // -- Namespace CR -- begin
   

@@ -36,7 +36,7 @@
 #include <scimath/Mathematics.h>
 #include <tasking/Glish.h>
 
-#include <Skymap/Phasing.h>
+#include <ApplicationSupport/Phasing.h>
 #include <LopesBase/DataFrequency.h>
 #include <Utilities/ProgressBar.h>
 
@@ -47,7 +47,7 @@ using CR::DataFrequency;
 /*!
   \class Beamformer
 
-  \ingroup Beamforming
+  \ingroup ApplicationSupport
 
   \brief An implementation for various beamforming methods.
 

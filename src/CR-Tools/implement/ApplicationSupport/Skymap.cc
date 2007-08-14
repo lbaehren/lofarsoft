@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Skymap/Skymap.h>
+#include <ApplicationSupport/Skymap.h>
 #include <Math/MathFFT.h>
 
 using CR::FFT2Fx;

@@ -54,10 +54,10 @@ using namespace std;
 #include <wcslib/prj.h>
 
 // custom
+#include <ApplicationSupport/Beamformer.h>
 #include <LopesBase/DataFrequency.h>
 #include <Observation/ObservationData.h>
 #include <Observation/ObservationFrame.h>
-#include <Skymap/Beamformer.h>
 #include <Imaging/SkymapGrid.h>
 #include <Skymap/SkymapQuantity.h>
 #include <Utilities/ProgressBar.h>
@@ -67,7 +67,7 @@ using CR::SkymapGrid;
 /*!
   \class Skymap
 
-  \ingroup Skymap
+  \ingroup ApplicationSupport
 
   \brief A Class to support the generation of skymaps.
 

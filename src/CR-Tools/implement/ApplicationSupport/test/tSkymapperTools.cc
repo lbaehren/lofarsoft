@@ -26,12 +26,12 @@
 #include <images/Images/PagedImage.h>
 
 #include <templates.h>
-#include <Skymap/SkymapperTools.h>
+#include <ApplicationSupport/SkymapperTools.h>
 
 /*!
   \file tSkymapperTools.cc
 
-  \ingroup Skymap
+  \ingroup ApplicationSupport
 
   \brief A collection of test routines for SkymapperTools
  

@@ -45,7 +45,6 @@
 #include <tables/Tables/TableRecord.h>
 
 // LOPES-Tools header files
-#include <IO/DataReaderTools.h>
 #include <Observation/ObservationData.h>
 #include <Imaging/Beamformer.h>
 #include <Imaging/SkymapCoordinates.h>
