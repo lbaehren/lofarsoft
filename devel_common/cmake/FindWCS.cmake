@@ -10,10 +10,32 @@
 #  WCS_LIBRARIES  = Link these to use WCS
 
 ## -----------------------------------------------------------------------------
+## Search locations
+
+set (include_locations
+  /usr/include
+  /usr/local/include
+  /sw/include
+  /opt/casa/local/include
+  ../release/include
+  ../../release/include
+)
+
+set (lib_locations
+  /lib
+  /usr/lib
+  /usr/local/lib
+  /sw/lib
+  /opt/casa/local/lib
+  ../release/lib
+  ../../release/lib
+)
+
+## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (WCS_INCLUDES wcs.h
-  PATHS /include /usr/include /usr/local/include /sw/include
+  PATHS ${include_locations}
   PATH_SUFFIXES wcslib
   )
 
@@ -28,7 +50,7 @@ endif (WCS_INCLUDES)
 ## Check for the library
 
 find_library (WCS_LIBRARIES wcs
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib /opt/casa /sw/share/casa
+  PATHS ${lib_locations}
   PATH_SUFFIXES darwin/lib linux_gnu/lib stable/linux_gnu/lib
   )
 

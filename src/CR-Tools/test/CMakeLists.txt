@@ -141,6 +141,7 @@ endif (HAVE_WCS)
 ## Test for working with ROOT (includes working with the DAL)
 
 if (HAVE_ROOT AND HAVE_BLITZ AND dal)
+  include_directories (${ROOT_INCLUDES})
   add_executable (tUseROOT tUseROOT.cc)
   target_link_libraries (tUseROOT dal ${ROOT_LIBRARIES} ${BLITZ_LIBRARIES})
 endif (HAVE_ROOT AND HAVE_BLITZ AND dal)
