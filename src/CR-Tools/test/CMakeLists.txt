@@ -18,25 +18,6 @@ set (tests
   tUseImages
 )
 
-if (casa AND tables)
-  ## build the executables ----------------------
-  add_executable (tUseArrays tUseArrays.cc)
-  target_link_libraries (tUseArrays casa tables)
-  ##
-  add_executable (tUseCASA tUseCASA.cc)
-  target_link_libraries (tUseCASA casa tables)
-  ##
-  add_executable (tUseTables tUseTables.cc)
-  target_link_libraries (tUseTables casa tables)
-  ## installation locations ---------------------
-  install (
-    TARGETS tUseArrays tUseCASA tUseTables
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    )
-endif (casa AND tables)
-
 if (HAVE_CASA)
   ## build the excutables ---------------------
   FOREACH (src ${tests})
@@ -53,6 +34,25 @@ if (HAVE_CASA)
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     )
+else (HAVE_CASA)
+  if (HAVE_CASACORE)
+    ## build the executables ----------------------
+    add_executable (tUseArrays tUseArrays.cc)
+    target_link_libraries (tUseArrays ${CASACORE_LIBRARIES})
+    ##
+    add_executable (tUseCASA tUseCASA.cc)
+    target_link_libraries (tUseCASA ${CASACORE_LIBRARIES})
+    ##
+    add_executable (tUseTables tUseTables.cc)
+    target_link_libraries (tUseTables ${CASACORE_LIBRARIES})
+    ## installation locations ---------------------
+    install (
+      TARGETS tUseArrays tUseCASA tUseTables
+      RUNTIME DESTINATION bin
+      LIBRARY DESTINATION lib
+      ARCHIVE DESTINATION lib
+      )
+  endif (HAVE_CASACORE)
 endif (HAVE_CASA)
 
 ## -----------------------------------------------------------------------------

@@ -12,22 +12,22 @@
 ## Search locations
 
 set (include_locations
+  ../release/include
+  ../../release/include
   /usr/include
   /usr/local/include
   /sw/include
   /opt/casa/local/include
-  ../release/include
-  ../../release/include
 )
 
 set (lib_locations
+  ../release/lib
+  ../../release/lib
   /lib
   /usr/lib
   /usr/local/lib
   /sw/lib
   /opt/casa/local/lib
-  ../release/lib
-  ../../release/lib
 )
 
 ## -----------------------------------------------------------------------------

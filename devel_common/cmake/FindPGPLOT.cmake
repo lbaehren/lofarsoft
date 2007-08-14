@@ -12,11 +12,35 @@
 #  PGPLOT_INCLUDES   = Path to the PGPLOT header files
 
 ## -----------------------------------------------------------------------------
+## Search locations
+
+set (include_locations
+  ../release/include
+  ../../release/include
+  /usr/include
+  /usr/local/include
+  /sw/include
+  /opt
+  /opt/include
+)
+
+set (lib_locations
+  ../release/lib
+  ../../release/lib
+  /lib
+  /usr/lib
+  /usr/local/lib
+  /sw/lib
+  /opt
+  /opt/lib
+)
+
+## -----------------------------------------------------------------------------
 ## Check for the header files
 
 FIND_PATH (PGPLOT_INCLUDES
   cpgplot.h
-  PATHS /usr/local /usr /sw
+  PATHS ${include_locations}
   PATH_SUFFIXES include/pgplot lib/pgplot
   )
 
@@ -27,7 +51,7 @@ FIND_PATH (PGPLOT_INCLUDES
 
 find_library (PGPLOT_LIBRARY
   NAMES pgplot
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib
+  PATHS ${lib_locations}
   PATH_SUFFIXES pgplot
   NO_DEFAULT_PATH
   )
@@ -42,7 +66,7 @@ endif (PGPLOT_LIBRARY)
 
 find_library (CPGPLOT_LIBRARY
   NAMES cpgplot
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib
+  PATHS ${lib_locations}
   PATH_SUFFIXES pgplot
   NO_DEFAULT_PATH
   )
@@ -57,7 +81,7 @@ endif (CPGPLOT_LIBRARY)
 
 find_library (PGPLOT_libXmPgplot
   NAMES XmPgplot
-  PATHS /usr/local/lib /usr/lib /lib /opt /sw/lib
+  PATHS ${lib_locations}
   PATH_SUFFIXES pgplot casa/local/lib
   )
 

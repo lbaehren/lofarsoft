@@ -14,24 +14,24 @@
 ## Search locations
 
 set (include_locations
+  ../release/include
+  ../../release/include
   /usr/include
   /usr/local/include
   /sw/include
   /opt
   /opt/include
-  ../release/include
-  ../../release/include
 )
 
 set (lib_locations
+  ../release/lib
+  ../../release/lib
   /lib
   /usr/lib
   /usr/local/lib
   /sw/lib
   /opt
   /opt/lib
-  ../release/lib
-  ../../release/lib
 )
 
 ## -----------------------------------------------------------------------------

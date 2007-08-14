@@ -6,8 +6,8 @@
 ## Check for the casacore distribution
 ##
 ## Variables assigned:
-##  CASA_INCLUDES  = Path to the casacore header files
-##  CASA_LIBRARIES = Libraries of the casacore modules
+##  CASACORE_INCLUDES  = Path to the casacore header files
+##  CASACORE_LIBRARIES = Libraries of the casacore modules
 ##  HAVE_CASACORE      = Do we have both headers and libraries of casacore?
 ##
 ## __TODO__
@@ -91,7 +91,7 @@ endif (NOT libcfitsio)
 ## installation or have remained at their original location in the source
 ## directories, we need to check for different variants to the include paths.
 
-set (CASA_INCLUDES "")
+set (CASACORE_INCLUDES "")
 
 ## [1] <casa/Arrays.h>
 
@@ -102,7 +102,7 @@ find_path (CASACORE_casa Arrays.h
 
 if (CASACORE_casa)
   string (REGEX REPLACE casa/casa casa tmp ${CASACORE_casa})
-  list (APPEND CASA_INCLUDES ${tmp})
+  list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_casa)
 
 ## [2] <tables/Tables.h>
@@ -114,7 +114,7 @@ find_path (CASACORE_tables Tables.h
 
 if (CASACORE_tables)
   string (REGEX REPLACE tables/tables tables tmp ${CASACORE_tables})
-  list (APPEND CASA_INCLUDES ${tmp})
+  list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_tables)
 
 ## [3] <miriad.h>
@@ -125,7 +125,7 @@ find_path (CASACORE_mirlib miriad.h
 )
 
 if (CASACORE_mirlib)
-  list (APPEND CASA_INCLUDES ${CASACORE_mirlib})
+  list (APPEND CASACORE_INCLUDES ${CASACORE_mirlib})
 endif (CASACORE_mirlib)
 
 ## [4] <scimath/Fitting.h>
@@ -137,7 +137,7 @@ find_path (CASACORE_scimath Fitting.h
 
 if (CASACORE_scimath)
   string (REGEX REPLACE scimath/scimath scimath tmp ${CASACORE_scimath})
-  list (APPEND CASA_INCLUDES ${tmp})
+  list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_scimath)
 
 ## [5] <measures/Measures.h>
@@ -149,7 +149,7 @@ find_path (CASACORE_measures Measures.h
 
 if (CASACORE_measures)
   string (REGEX REPLACE measures/measures measures tmp ${CASACORE_measures})
-  list (APPEND CASA_INCLUDES ${tmp})
+  list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_measures)
 
 ## [6] <fits/FITS.h>
@@ -161,7 +161,7 @@ find_path (CASACORE_fits FITS.h
 
 if (CASACORE_fits)
   string (REGEX REPLACE fits/fits fits tmp ${CASACORE_fits})
-  list (APPEND CASA_INCLUDES ${tmp})
+  list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_fits)
 
 ## [7] <coordinates/Coordinates.h>
@@ -173,7 +173,7 @@ find_path (CASACORE_coordinates Coordinates.h
 
 if (CASACORE_coordinates)
   string (REGEX REPLACE coordinates/coordinates coordinates tmp ${CASACORE_coordinates})
-  list (APPEND CASA_INCLUDES ${tmp})
+  list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_coordinates)
 
 ## [8] <components/ComponentModels.h>
@@ -185,7 +185,7 @@ find_path (CASACORE_components ComponentModels.h
 
 if (CASACORE_components)
   string (REGEX REPLACE components/components components tmp ${CASACORE_components})
-  list (APPEND CASA_INCLUDES ${tmp})
+  list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_components)
 
 ## [9] <lattices/Lattices.h>
@@ -197,7 +197,7 @@ find_path (CASACORE_lattices Lattices.h
 
 if (CASACORE_lattices)
   string (REGEX REPLACE lattices/lattices lattices tmp ${CASACORE_lattices})
-  list (APPEND CASA_INCLUDES ${tmp})
+  list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_lattices)
 
 ## [10] <ms/MeasurementSets.h>
@@ -209,7 +209,7 @@ find_path (CASACORE_ms MeasurementSets.h
 
 if (CASACORE_ms)
   string (REGEX REPLACE ms/ms ms tmp ${CASACORE_ms})
-  list (APPEND CASA_INCLUDES ${tmp})
+  list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_ms)
 
 ## [11] <images/Images.h>
@@ -221,7 +221,7 @@ find_path (CASACORE_images Images.h
 
 if (CASACORE_images)
   string (REGEX REPLACE images/images images tmp ${CASACORE_images})
-  list (APPEND CASA_INCLUDES ${tmp})
+  list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_images)
 
 ## [12] <msfits/MSFits.h>
@@ -233,7 +233,7 @@ find_path (CASACORE_msfits MSFits.h
 
 if (CASACORE_msfits)
   string (REGEX REPLACE msfits/msfits msfits tmp ${CASACORE_msfits})
-  list (APPEND CASA_INCLUDES ${tmp})
+  list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_msfits)
 
 ## [13] <msvis/MSVis.h>
@@ -245,7 +245,7 @@ find_path (CASACORE_msvis MSVis.h
 
 if (CASACORE_msvis)
   string (REGEX REPLACE msvis/msvis msvis tmp ${CASACORE_msvis})
-  list (APPEND CASA_INCLUDES ${tmp})
+  list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_msvis)
 
 ## -----------------------------------------------------------------------------
@@ -278,26 +278,26 @@ foreach (casacore_lib ${casacore_modules})
   )
   ## if we have found the library, add it to the list
   if (CASACORE_lib${casacore_lib})
-	list (APPEND CASA_LIBRARIES ${CASACORE_lib${casacore_lib}})
+	list (APPEND CASACORE_LIBRARIES ${CASACORE_lib${casacore_lib}})
   endif (CASACORE_lib${casacore_lib})
 endforeach (casacore_lib)
 
 ## -----------------------------------------------------------------------------
 ## If detection successful, register package as found
 
-if (CASA_INCLUDES AND CASA_LIBRARIES)
+if (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
   set (HAVE_CASACORE TRUE)
-#  string (REGEX REPLACE lib/libcasa.a lib CASA_LIBRARIES_DIR ${CASA_libcasa})
-else (CASA_INCLUDES AND CASA_LIBRARIES)
+#  string (REGEX REPLACE lib/libcasa.a lib CASACORE_LIBRARIES_DIR ${CASA_libcasa})
+else (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
   if (NOT CASA_FIND_QUIETLY)
-    if (NOT CASA_INCLUDES)
+    if (NOT CASACORE_INCLUDES)
       message (STATUS "Unable to find CASACORE header files!")
-    endif (NOT CASA_INCLUDES)
-    if (NOT CASA_LIBRARIES)
+    endif (NOT CASACORE_INCLUDES)
+    if (NOT CASACORE_LIBRARIES)
       message (STATUS "Unable to find CASACORE library files!")
-    endif (NOT CASA_LIBRARIES)
+    endif (NOT CASACORE_LIBRARIES)
   endif (NOT CASA_FIND_QUIETLY)
-endif (CASA_INCLUDES AND CASA_LIBRARIES)
+endif (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
 
 ## ------------------------------------------------------------------------------
 ## Final assembly of the provided variables and flags; once this is done, we
@@ -356,3 +356,9 @@ IF (UNIX)
     endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
   endif (APPLE)
 ENDIF (UNIX)
+
+## ------------------------------------------------------------------------------
+## Compatibility settings (should be removed at some point)
+
+set (CASA_INCLUDES ${CASACORE_INCLUDES})
+set (CASA_LIBRARIES ${CASACORE_LIBRARIES})

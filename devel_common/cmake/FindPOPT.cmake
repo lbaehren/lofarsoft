@@ -11,17 +11,41 @@
 #  POPT_LIBRARY     = Link these to use POPT
 
 ## -----------------------------------------------------------------------------
+## Search locations
+
+set (include_locations
+  ../release/include
+  ../../release/include
+  /usr/include
+  /usr/local/include
+  /sw/include
+  /opt
+  /opt/include
+)
+
+set (lib_locations
+  ../release/lib
+  ../../release/lib
+  /lib
+  /usr/lib
+  /usr/local/lib
+  /sw/lib
+  /opt
+  /opt/lib
+)
+
+## -----------------------------------------------------------------------------
 ## Check for the header files
 
 FIND_PATH (POPT_INCLUDE_DIR popt.h
-  PATHS /usr/local/include /usr/include /sw/include
+  PATHS ${include_locations}
   )
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
 FIND_LIBRARY (POPT_LIBRARY popt
-  PATHS /lib /usr/lib /usr/local/lib /sw/lib /opt/casa/local/lib
+  PATHS ${lib_locations}
   )
 
 ## -----------------------------------------------------------------------------
