@@ -86,6 +86,8 @@ if (cr_cmake)
   endif (CR_GLISH_SUPPORT)
   if (HAVE_CASA)
     add_definitions (-DHAVE_CASA)
+  else (HAVE_CASA)
+    message (STATUS "[CR] Failed to configure using CASA !")
   endif (HAVE_CASA)
   ## casacore - actually for the library that is all we need
   if (NOT HAVE_CASA) 

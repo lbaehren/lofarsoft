@@ -23,14 +23,17 @@ set (lib_locations
 )
 
 set (casa_locations
+  ## most Linux systems
   /aips++
   /casa
   /opt/aips++
   /opt/casa
+  /opt/casa/stable
+  /opt/casa/current
+  ## Mac OS X (Fink)
   /sw/share/aips++
   /sw/share/casa
-  /opt/aips++
-  /opt/casa
+  ## LOFAR development
   /app/aips++/Stable
   )
 
@@ -61,7 +64,7 @@ if (cr_cmake)
     include (${cr_cmake}/FindGlish.cmake)
   endif (NOT HAVE_GLISH)
 else (cr_cmake)
-  message (SEND_ERROR "Unable to locate additional CMake find scripts!")
+  message (SEND_ERROR "[FindCASA] Unable to locate additional CMake find scripts!")
 endif (cr_cmake)
 
 ## -----------------------------------------------------------------------------
@@ -104,6 +107,8 @@ find_path (AIPSLIBD version.o casa
 
 if (HAVE_GLISH)
   list (APPEND CASA_INCLUDES ${GLISH_INCLUDES})
+else (HAVE_GLISH)
+  message (SEND_ERROR "[FindCASA] No configuration settings for Glish available!")
 endif (HAVE_GLISH)
 
 ## [2] WCSLIB -- library for the dealing with world coordinate systems
@@ -253,7 +258,7 @@ if (CASA_libcasa)
       ${CASA_libscimath} ${CASA_libscimath_f} ${LINKcasa} ${libg2c}
       CACHE STRING "LINKscimath")
   else (libg2c AND CASA_libscimath AND CASA_libscimath_f)
-    message (ERROR "Missing g2c library required for libscimath!")
+    message (SEND_ERROR "[FindCASA] Missing g2c library required for libscimath!")
   endif (libg2c AND CASA_libscimath AND CASA_libscimath_f)
   ## -- libmeasures
   if (CASA_libmeasures AND CASA_libtables AND LINKscimath)
@@ -267,7 +272,7 @@ if (CASA_libcasa)
       ${CASA_libfits} ${LINKmeasures} ${libwcs}
       CACHE STRING "LINKfits")
   else (CASA_libfits AND LINKmeasures AND libwcs)
-    message (ERROR "Missing WCS library required for libfits!")
+    message (SEND_ERROR "[FindCASA] Missing WCS library required for libfits!")
   endif (CASA_libfits AND LINKmeasures AND libwcs)
   ## -- liblattices
   if (CASA_liblattices AND CASA_libtables AND LINKscimath)
