@@ -9,11 +9,12 @@ include_directories (. .. ../..)
 
 set (tests
   tMatrixOperations
-  tRotationMatrix
   tRotation2D
   tRotation3D
-  tVectorNorms
+  tRotationMatrix
+  tThreeVector
   tVectorConversion
+  tVectorNorms
   )
 
 ## -----------------------------------------------------------------------------
@@ -23,6 +24,11 @@ foreach (src ${tests})
   add_executable (${src} ${src}.cc)
   target_link_libraries (${src} cr)
 endforeach (src)
+
+## -----------------------------------------------------------------------------
+## Execution of test programs
+
+add_test (run_tThreeVector tThreeVector)
 
 ## -----------------------------------------------------------------------------
 ## Installation

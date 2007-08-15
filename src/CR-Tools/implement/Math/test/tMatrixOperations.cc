@@ -34,6 +34,8 @@ using std::string;
 
 /*!
   \file tMatrixOperations.cc
+  
+  \ingroup Math
 
   \brief Collection of tests on operations with/on matrices
 

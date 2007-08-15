@@ -29,6 +29,8 @@ using std::endl;
 
 /*!
   \file tVectorNorms.cc
+  
+  \ingroup Math
 
   \brief Collection of tests for the methods in VectorNorms
 

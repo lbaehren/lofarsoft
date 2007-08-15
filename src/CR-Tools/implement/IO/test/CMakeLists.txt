@@ -12,7 +12,10 @@ set (tests
   tDataIterator
   tDataReader
   tFFTServer
+  tImportAntenna
+  tImportSimulation
   tLogfileName
+  tSimulation2fftMatrix
   )
 
 ## -----------------------------------------------------------------------------
