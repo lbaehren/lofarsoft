@@ -134,13 +134,13 @@ template <class T> void ClippingFraction<T>::setLimits (const Vector<T>& limits)
 //
 // -----------------------------------------------------------------------------
 
-template <class T> Bool ClippingFraction<T>::eval (const Vector<T>& data,
+template <class T> bool ClippingFraction<T>::eval (const Vector<T>& data,
 						   T& fraction)
 {
-  Int nofData (data.nelements());
+  int nofData (data.nelements());
   T clipped (0);
 
-  for (Int n(0); n<nofData; n++) {
+  for (int n(0); n<nofData; n++) {
     if (data(n) <= clipLow_p) {
       clipped++;
     }
@@ -152,9 +152,9 @@ template <class T> Bool ClippingFraction<T>::eval (const Vector<T>& data,
   fraction = clipped/nofData;
   
   if (fraction > clipFraction_p) {
-    return True;
+    return true;
   } else {
-    return False;
+    return false;
   }
 }
 
@@ -164,5 +164,5 @@ template <class T> Bool ClippingFraction<T>::eval (const Vector<T>& data,
 //
 // ==============================================================================
 
-template class ClippingFraction<Float>;
-template class ClippingFraction<Double>;
+template class ClippingFraction<float>;
+template class ClippingFraction<double>;

@@ -1,3 +1,4 @@
+
 ##------------------------------------------------------------------------------
 ## $Id::                                                                        $
 ##------------------------------------------------------------------------------
@@ -6,13 +7,16 @@
 project (CR)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.5)
+cmake_minimum_required (VERSION 2.4)
 
 ## -----------------------------------------------------------------------------
 ## User defined build/install options
 
 option (CR_BUILD_TESTS "Build the test programs?" 1)
 option (CR_DEBUGGING_MESSAGES "Print debugging information?" 0)
+option (CR_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
+option (CR_GLISH_SUPPORT "Activate support for Glish applications?" 0)
+option (CR_PYTHON_SUPPORT "Activate support for Glish applications?" 0)
 
 ## -----------------------------------------------------------------------------
 ## Subdirectories
@@ -40,6 +44,19 @@ find_path (cr_cmake FindBlitz.cmake FindCASA.cmake FindCFITSIO.cmake
   devel_common/cmake
   )
 
+## take into account the current verbose mode
+
+if (NOT CR_VERBOSE_CONFIGURE)
+  set (BLITZ_FIND_QUIETLY 1)
+  set (CASA_FIND_QUIETLY 1)
+  set (CASACORE_FIND_QUIETLY 1)
+  set (CFITSIO_FIND_QUIETLY 1)
+  set (FFTW3_FIND_QUIETLY 1)
+  set (LAPACK_FIND_QUIETLY 1)
+  set (ROOT_FIND_QUIETLY 1)
+  set (WCSLIB_FIND_QUIETLY 1)
+endif (NOT CR_VERBOSE_CONFIGURE)
+
 ## check for the external packages
 
 if (cr_cmake)
@@ -51,9 +68,11 @@ if (cr_cmake)
     add_definitions (-DHAVE_BLITZ)
   endif (HAVE_BLITZ)
   ## CASA - search for full installation first
-  if (NOT HAVE_CASA) 
-    include (${cr_cmake}/FindCASA.cmake)
-  endif (NOT HAVE_CASA)
+  if (CR_GLISH_SUPPORT)
+    if (NOT HAVE_CASA)
+      include (${cr_cmake}/FindCASA.cmake)
+    endif (NOT HAVE_CASA)
+  endif (CR_GLISH_SUPPORT)
   if (HAVE_CASA)
     add_definitions (-DHAVE_CASA)
   endif (HAVE_CASA)
@@ -63,6 +82,7 @@ if (cr_cmake)
   endif (NOT HAVE_CASA)
   if (HAVE_CASACORE)
     add_definitions (-DHAVE_CASA)
+    add_definitions (-DHAVE_CASACORE)
   endif (HAVE_CASACORE)
   ## CFITSIO
   if (NOT HAVE_CFITSIO)
@@ -92,40 +112,6 @@ elseif (cr_cmake)
   message (SEND_ERROR "Unable to locate additional CMake scripts!")
 endif (cr_cmake)
 
-## For Glish we need to run an additional check in order to properly set up the
-## include path to Glish.h (which should be in tasking/implement)
-
-if (CASA_INCLUDES)
-  ## search for the Client.h header file
-  find_path (HAVE_GLISH_H Client.h
-    PATHS ${CASA_INCLUDES}
-    PATH_SUFFIXES tasking ../aips/glish/glish/include/Glish
-    )
-  ## if the header file was found create a symbolic link in "implement"
-  if (HAVE_GLISH_H)
-    message (STATUS "Found Glish.h = ${HAVE_GLISH_H}")
-    ## remove potentially existing symbolic link
-    execute_process (
-      WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement
-      COMMAND rm -f Glish
-      TIMEOUT 10
-      ERROR_VARIABLE rm_error
-      OUTPUT_QUIET
-      )
-    ## create a new symbolic link
-    execute_process (
-      WORKING_DIRECTORY ${CR_SOURCE_DIR}/implement
-      COMMAND ln -fs ${HAVE_GLISH_H} Glish
-      TIMEOUT 10
-      ERROR_VARIABLE ln_error
-      OUTPUT_QUIET
-      )
-    if (ln_error)
-      message (SEND_ERROR "[ln] ${ln_error}")
-    endif (ln_error)
-  endif (HAVE_GLISH_H)
-endif (CASA_INCLUDES)
-
 ## ------------------------------------------------------------------------------
 ## Check for the presence of further USG comonents
 
@@ -138,8 +124,6 @@ find_path (DAL_INCLUDES dal.h lopesevent.h
 ## Where to find the header files
 
 include_directories (
-  .
-  ..
   ${CR_SOURCE_DIR}/implement
   ${CR_SOURCE_DIR}/test
   ${DAL_INCLUDES}
@@ -176,14 +160,16 @@ endif (prefix)
 ## ------------------------------------------------------------------------------
 ## Configuration summary
 
-message (STATUS "BLITZ .......... : ${HAVE_BLITZ}")
-message (STATUS "CASA ........... : ${HAVE_CASA}")
-message (STATUS "CFITSIO ........ : ${HAVE_CFITSIO}")
-message (STATUS "FFTW3 .......... : ${HAVE_FFTW3}")
-message (STATUS "LAPACK ......... : ${HAVE_LAPACK}")
-message (STATUS "PGPLOT ......... : ${HAVE_PGPLOT}")
-message (STATUS "ROOT ........... : ${HAVE_ROOT}")
-message (STATUS "WCSLIB ......... : ${HAVE_WCSLIB}")
-
-message (STATUS "CASA_INCLUDES .. : ${CASA_INCLUDES}")
-message (STATUS "CFITSIO_INCLUDES : ${CFITSIO_INCLUDES}")
+message (STATUS "CMAKE_SYSTEM .......... : ${CMAKE_SYSTEM}")
+message (STATUS "CMAKE_SYSTEM_PROCESSOR  : ${CMAKE_SYSTEM_PROCESSOR}")
+message (STATUS "CMAKE_SYSTEM_64BIT .....: ${CMAKE_SYSTEM_64BIT}")
+message (STATUS "CMAKE_SYSTEM_BIG_ENDIAN : ${CMAKE_SYSTEM_BIG_ENDIAN}")
+message (STATUS "BLITZ ................. : ${HAVE_BLITZ}")
+message (STATUS "CASA .................. : ${HAVE_CASA}")
+message (STATUS "CASACORE .............. : ${HAVE_CASACORE}")
+message (STATUS "CFITSIO ............... : ${HAVE_CFITSIO}")
+message (STATUS "FFTW3 ................. : ${HAVE_FFTW3}")
+message (STATUS "LAPACK ................ : ${HAVE_LAPACK}")
+message (STATUS "PGPLOT ................ : ${HAVE_PGPLOT}")
+message (STATUS "ROOT .................. : ${HAVE_ROOT}")
+message (STATUS "WCSLIB ................ : ${HAVE_WCSLIB}")

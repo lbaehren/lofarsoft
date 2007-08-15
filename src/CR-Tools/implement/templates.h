@@ -54,11 +54,24 @@ namespace CR {  // Namespace CR -- begin
 
 // Implementation files
 
+#ifdef HAVE_CASACORE
+#include <casa/Arrays/ArrayIO.tcc>
+#include <casa/Arrays/ArrayLogical.tcc>
+#include <casa/BasicMath/Functional.tcc> 
+#include <casa/Utilities/BinarySearch.tcc>
+#include <casa/Utilities/PtrHolder.tcc>
+#include <scimath/Functionals/Function.tcc>
+#include <scimath/Functionals/FunctionParam.tcc>
+#include <scimath/Functionals/Interpolate1D.tcc>
+#include <scimath/Mathematics/FFTServer.tcc>
+#include <scimath/Mathematics/InterpolateArray1D.tcc>
+#include <images/Images/ImageInterface.tcc>
+#include <images/Images/PagedImage.tcc>
+#else
+#include <casa/BasicMath/Functional.cc> 
 #include <casa/Arrays/ArrayIO.cc>
 #include <casa/Arrays/ArrayLogical.cc>
-#include <casa/BasicMath/Functional.cc> 
 #include <casa/Utilities/BinarySearch.cc>
-#include <casa/Utilities/Copy2.cc>
 #include <casa/Utilities/PtrHolder.cc>
 #include <scimath/Functionals/Function.cc>
 #include <scimath/Functionals/FunctionParam.cc>
@@ -67,7 +80,9 @@ namespace CR {  // Namespace CR -- begin
 #include <scimath/Mathematics/InterpolateArray1D.cc>
 #include <images/Images/ImageInterface.cc>
 #include <images/Images/PagedImage.cc>
+#endif
 
+#include <casa/Utilities/Copy2.cc>
 
 namespace casa {
 
@@ -120,18 +135,36 @@ namespace casa {
   template class Array<DComplex>;
   template class Array<IPosition>;
 
-/*   template class Vector<Bool>; */
-/*   template class Vector<Int>; */
-/*   template class Vector<uInt>; */
-/*   template class Vector<Short>; */
-/*   template class Vector<uShort>; */
-/*   template class Vector<Long>; */
-/*   template class Vector<uLong>; */
-/*   template class Vector<Float>; */
-/*   template class Vector<Double>; */
-/*   template class Vector<Complex>; */
-/*   template class Vector<DComplex>; */
+  template class Vector<Bool>;
+  template class Vector<Int>;
+  template class Vector<uInt>;
+  template class Vector<Short>;
+  template class Vector<uShort>;
+  template class Vector<Long>;
+  template class Vector<uLong>;
+  template class Vector<Float>;
+  template class Vector<Double>;
+  template class Vector<Complex>;
+  template class Vector<DComplex>;
 
+  // casa/Arrays/MaskedArray
+  template class MaskedArray<Array<Double> >;
+  template class MaskedArray<Slicer>;
+  template class MaskedArray<Vector<Complex> >;
+  template class MaskedArray<Vector<Double> >;
+  template class MaskedArray<Vector<Float> >;
+  template class MaskedArray<Bool>;
+  template class MaskedArray<uChar>;
+  template class MaskedArray<Short>;
+  template class MaskedArray<uShort>;
+  template class MaskedArray<Int>;
+  template class MaskedArray<uInt>;
+  template class MaskedArray<Float>;
+  template class MaskedArray<Double>;
+  template class MaskedArray<Complex>;
+  template class MaskedArray<DComplex>;
+  template class MaskedArray<String>;
+  
   // casa/BasicMath/Functional
   
   template class Functional<int, float>;

@@ -21,8 +21,8 @@
 /* $Id: tDataFrequency.cc,v 1.1 2005/07/15 07:16:47 bahren Exp $ */
 
 #include <casa/aips.h>
-#include <tasking/Glish.h>
 
+#include <ApplicationSupport/Glish.h>
 #include <LopesBase/DataFrequency.h>
 
 using casa::GlishRecord;

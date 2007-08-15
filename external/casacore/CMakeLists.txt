@@ -13,8 +13,18 @@
 
 message (STATUS "[CMake package configuration] casacore")
 
+## Name of the project
 project (casacore)
 
+## Minimum required version of CMake to configure the project
+cmake_minimum_required (VERSION 2.4)
+
+## -----------------------------------------------------------------------------
+## User defined build/install options
+
+option (casacore_BUILD_TESTS "Build the test programs?" 0)
+
+## -----------------------------------------------------------------------------
 ## Dependency of the packages in casacore
 
 # casa        : --
@@ -45,8 +55,6 @@ set (casacore_packages
   images
   msfits
   msvis
-# add-ons to the original set of casacore packages
-  tasking
   )
 
 ## -----------------------------------------------------------------------------
@@ -211,11 +219,6 @@ find_program (uname_bin uname ${bin_locations})
 ## =============================================================================
 
 ## -----------------------------------------------------------------------------
-## Options selectable by the user
-
-option (casacore_tests "Build the test programs?" 0)
-
-## -----------------------------------------------------------------------------
 ## Location of the header files
 
 include_directories (
@@ -246,15 +249,15 @@ include_directories (
 IF (UNIX)
   add_definitions (
     # -- compiler flags utilized in the source code --
-	-DAIPS_STDLIB
-	-DAIPS_AUTO_STL
-	-DAIPS_NO_LEA_MALLOC
+    -DAIPS_STDLIB
+    -DAIPS_AUTO_STL
+    -DAIPS_NO_LEA_MALLOC
     )
   IF (APPLE)
     ## definition common to apple architectures
     add_definitions (
       -DAIPS_DARWIN
-    )
+      )
   ELSE (APPLE)
     ADD_DEFINITIONS (-DAIPS_LINUX)
   ENDIF (APPLE)

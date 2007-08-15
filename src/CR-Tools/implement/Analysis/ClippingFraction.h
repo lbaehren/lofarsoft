@@ -29,9 +29,6 @@
 
   \test tClippingFraction.cc
 
-  \todo Try creating a templated version of this class, since variables
-  typically might be either <i>float</i> or <i>double</i>.
-
 */
 
 /* $Id: ClippingFraction.h,v 1.7 2006/04/13 13:54:15 bahren Exp $ */
@@ -42,15 +39,15 @@
 // AIPS++ wrapper classes
 #include <casa/aips.h>
 #include <casa/iostream.h>
-#include <casa/Arrays.h>
+#include <casa/Containers/Block.h>
 #include <casa/Arrays/Array.h>
-#include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/Arrays/ArrayMath.h>
-#include <casa/Arrays/MaskedArray.h>
 #include <casa/Arrays/IPosition.h>
 
-#include <casa/namespace.h>
+using casa::Block;
+using casa::Matrix;
+using casa::Vector;
 
 template <class T> class ClippingFraction {
 
@@ -162,7 +159,7 @@ template <class T> class ClippingFraction {
 
     \return ok -- Is the clipping fraction criterion exceeded?
   */
-  Bool eval (const Vector<T>& data,
+  bool eval (const Vector<T>& data,
 	     T& fraction);
   
 };

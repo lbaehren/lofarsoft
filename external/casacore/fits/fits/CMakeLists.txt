@@ -32,11 +32,11 @@ target_link_libraries (fits measures
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-if (casacore_tests)
+if (casacore_BUILD_TESTS)
   foreach (fits_module ${fits_modules})
     add_subdirectory (${fits_module}/test)
   endforeach (fits_module)
-endif (casacore_tests)
+endif (casacore_BUILD_TESTS)
 
 ## -----------------------------------------------------------------------------
 ## Installation targets

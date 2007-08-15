@@ -27,11 +27,11 @@ target_link_libraries (measures tables scimath)
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-if (casacore_tests)
+if (casacore_BUILD_TESTS)
   foreach (measures_module ${measures_modules})
     add_subdirectory (${measures_module}/test)
   endforeach (measures_module)
-endif (casacore_tests)
+endif (casacore_BUILD_TESTS)
 
 ## -----------------------------------------------------------------------------
 ## Installation targets

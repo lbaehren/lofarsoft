@@ -266,11 +266,4 @@ template <class T> class StatisticsFilter {
   
 };
 
-#ifndef AIPS_NO_TEMPLATE_SRC
-#include <lopes/Math/StatisticsFilter.cc>
-#endif //# AIPS_NO_TEMPLATE_SRC
-#ifndef AIPS_NO_TEMPLATE_SRC
-#include <lopes/Math/StatisticsFilter.cc>
-#endif //# AIPS_NO_TEMPLATE_SRC
-
 #endif /* _STATISTICSFILTER_H_ */

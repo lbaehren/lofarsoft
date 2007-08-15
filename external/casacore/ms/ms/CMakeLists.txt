@@ -85,11 +85,11 @@ target_link_libraries (ms measures tables scimath casa ${LAPACK_LIBRARIES})
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-if (casacore_tests)
+if (casacore_BUILD_TESTS)
   foreach (ms_module ${ms_modules})
     add_subdirectory (${ms_module}/test)
   endforeach (ms_module)
-endif (casacore_tests)
+endif (casacore_BUILD_TESTS)
 
 ## ------------------------------------------------------------------------------
 ## Installation

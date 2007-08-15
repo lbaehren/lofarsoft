@@ -5,43 +5,91 @@
 # - Check for the presence of Glish
 #
 # The following variables are set when Blitz++ is found:
-#  HAVE_GLISH       = Set to true, if all components of Glish have been found.
-#  GLISH_INCLUDES = Include path for the header files of Glish
-#  GLISH_LIBRARIES     = Link these to use Glish
+#  HAVE_GLISH      = Set to true, if all components of Glish have been found.
+#  GLISH_INCLUDES  = Include path for the header files of Glish
+#  GLISH_LIBRARIES = Link these to use Glish
+
+## -----------------------------------------------------------------------------
+## Search locations
+
+set (include_locations
+  ../release/include
+  ../../release/include
+  code/aips/glish/glish/include/Glish
+  code/aips/glish/include/Glish
+  code/casa/code/aips/glish/glish/include/Glish
+)
+
+set (lib_locations
+  ../release/lib
+  ../../release/lib
+  linux/lib
+  linux_gnu/lib
+  darwin/lib
+)
 
 set (casa_locations
+  /aips++
   /casa
-  /opt/casa
-  /sw/share/casa
-  ## CASA still might be installed under the old name
   /opt/aips++
+  /opt/casa
+  /sw/share/aips++
+  /sw/share/casa
+  /opt/aips++
+  /opt/casa
   /app/aips++/Stable
   )
 
 ## -----------------------------------------------------------------------------
-## Get some basic information on the system
-
-if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
-  set (CASA_SYSTEM_NAME "darwin")
-endif (CMAKE_SYSTEM_NAME MATCHES "Darwin")
-
-## -----------------------------------------------------------------------------
 ## Check for the header files
 
-find_path (GLISH_INCLUDE_DIR glish.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES
-  code/aips/glish/include/Glish
-  stable/code/aips/glish/include/Glish
-  weekly/code/aips/glish/include/Glish
+find_path (GLISH_INCLUDES glish.h
+  PATHS ${casa_locations}
+  PATH_SUFFIXES ${include_locations}
   )
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-FIND_LIBRARY (GLISH_LIBRARIES <package name>
-  PATHS ${lib_locations}
+## [1] libglish
+
+find_library (GLISH_LIBRARIES glish
+  PATHS ${casa_locations}
+  PATH_SUFFIXES ${lib_locations}
   )
+
+## [2] libsos
+
+find_library (libsos sos
+  PATHS ${casa_locations}
+  PATH_SUFFIXES ${lib_locations}
+  )
+
+if (libsos)
+  list (APPEND GLISH_LIBRARIES ${libsos})
+endif (libsos)
+
+## [3] libnpd
+
+find_library (libnpd npd
+  PATHS ${casa_locations}
+  PATH_SUFFIXES ${lib_locations}
+  )
+
+if (libnpd)
+  list (APPEND GLISH_LIBRARIES ${libnpd})
+endif (libnpd)
+
+## [4] libregx
+
+find_library (libregx regx
+  PATHS ${casa_locations}
+  PATH_SUFFIXES ${lib_locations}
+  )
+
+if (libregx)
+  list (APPEND GLISH_LIBRARIES ${libregx})
+endif (libregx)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
@@ -73,3 +121,9 @@ ENDIF (HAVE_GLISH)
 
 ## -----------------------------------------------------------------------------
 ## Mark as advanced ...
+
+mark_as_advanced (
+  HAVE_GLISH
+  GLISH_INCLUDES
+  GLISH_LIBRARIES
+  )

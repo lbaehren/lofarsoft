@@ -24,14 +24,14 @@ target_link_libraries (msfits ms fits)
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-if (casacore_tests)
+if (casacore_BUILD_TESTS)
   ## build up the list of directories ...
   foreach (msfits_module ${msfits_modules})
     list (APPEND tests "${msfits_module}/test")
   endforeach (msfits_module)
   ## ... and register them
   subdirs (${tests})
-endif (casacore_tests)
+endif (casacore_BUILD_TESTS)
 
 ## ------------------------------------------------------------------------------
 ## Installation

@@ -33,6 +33,8 @@
   
   \date 2007/01/16
 
+  <h3>Synopsis</h3>
+  
   <h3>Usage</h3>
 
   Use this file in order to import all the prototypes for functions and classes

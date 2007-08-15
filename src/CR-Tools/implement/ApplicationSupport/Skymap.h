@@ -48,7 +48,7 @@ using namespace std;
 #include <measures/Measures/MeasTable.h>
 #include <scimath/Mathematics.h>
 #include <scimath/Mathematics/FFTServer.h>
-#include <tasking/Glish.h>
+#include <ApplicationSupport/Glish.h>
 
 // include the WCS library
 #include <wcslib/prj.h>

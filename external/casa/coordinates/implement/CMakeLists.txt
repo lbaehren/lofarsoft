@@ -30,8 +30,11 @@ target_link_libraries (coordinates tables scimath casa)
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-foreach (coordinates_module ${coordinates_modules})
-  LIST (APPEND tests "${coordinates_module}/test")
-endforeach (coordinates_module)
-
-SUBDIRS (${tests})
+if (CASA_BUILD_TESTS)
+  ## Assemble the list of directories ...
+  foreach (coordinates_module ${coordinates_modules})
+    LIST (APPEND tests "${coordinates_module}/test")
+  endforeach (coordinates_module)
+  ## ... and register it
+  SUBDIRS (${tests})
+endif (CASA_BUILD_TESTS)

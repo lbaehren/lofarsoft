@@ -6,9 +6,10 @@
 ## Check for the casacore distribution
 ##
 ## Variables assigned:
+##  HAVE_CASACORE      = Do we have both headers and libraries of casacore?
 ##  CASACORE_INCLUDES  = Path to the casacore header files
 ##  CASACORE_LIBRARIES = Libraries of the casacore modules
-##  HAVE_CASACORE      = Do we have both headers and libraries of casacore?
+##  CASACORE_COMPILE_FLAGS = 
 ##
 ## __TODO__
 ##
@@ -101,7 +102,8 @@ find_path (CASACORE_casa Arrays.h
 )
 
 if (CASACORE_casa)
-  string (REGEX REPLACE casa/casa casa tmp ${CASACORE_casa})
+  string (REGEX REPLACE "casa/casa" "casa" tmp ${CASACORE_casa})
+  get_filename_component (tmp ${tmp} ABSOLUTE)
   list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_casa)
 
@@ -114,6 +116,7 @@ find_path (CASACORE_tables Tables.h
 
 if (CASACORE_tables)
   string (REGEX REPLACE tables/tables tables tmp ${CASACORE_tables})
+  get_filename_component (tmp ${tmp} ABSOLUTE)
   list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_tables)
 
@@ -137,6 +140,7 @@ find_path (CASACORE_scimath Fitting.h
 
 if (CASACORE_scimath)
   string (REGEX REPLACE scimath/scimath scimath tmp ${CASACORE_scimath})
+  get_filename_component (tmp ${tmp} ABSOLUTE)
   list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_scimath)
 
@@ -149,6 +153,7 @@ find_path (CASACORE_measures Measures.h
 
 if (CASACORE_measures)
   string (REGEX REPLACE measures/measures measures tmp ${CASACORE_measures})
+  get_filename_component (tmp ${tmp} ABSOLUTE)
   list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_measures)
 
@@ -161,6 +166,7 @@ find_path (CASACORE_fits FITS.h
 
 if (CASACORE_fits)
   string (REGEX REPLACE fits/fits fits tmp ${CASACORE_fits})
+  get_filename_component (tmp ${tmp} ABSOLUTE)
   list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_fits)
 
@@ -173,6 +179,7 @@ find_path (CASACORE_coordinates Coordinates.h
 
 if (CASACORE_coordinates)
   string (REGEX REPLACE coordinates/coordinates coordinates tmp ${CASACORE_coordinates})
+  get_filename_component (tmp ${tmp} ABSOLUTE)
   list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_coordinates)
 
@@ -185,6 +192,7 @@ find_path (CASACORE_components ComponentModels.h
 
 if (CASACORE_components)
   string (REGEX REPLACE components/components components tmp ${CASACORE_components})
+  get_filename_component (tmp ${tmp} ABSOLUTE)
   list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_components)
 
@@ -197,6 +205,7 @@ find_path (CASACORE_lattices Lattices.h
 
 if (CASACORE_lattices)
   string (REGEX REPLACE lattices/lattices lattices tmp ${CASACORE_lattices})
+  get_filename_component (tmp ${tmp} ABSOLUTE)
   list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_lattices)
 
@@ -209,6 +218,7 @@ find_path (CASACORE_ms MeasurementSets.h
 
 if (CASACORE_ms)
   string (REGEX REPLACE ms/ms ms tmp ${CASACORE_ms})
+  get_filename_component (tmp ${tmp} ABSOLUTE)
   list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_ms)
 
@@ -221,6 +231,7 @@ find_path (CASACORE_images Images.h
 
 if (CASACORE_images)
   string (REGEX REPLACE images/images images tmp ${CASACORE_images})
+  get_filename_component (tmp ${tmp} ABSOLUTE)
   list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_images)
 
@@ -233,6 +244,7 @@ find_path (CASACORE_msfits MSFits.h
 
 if (CASACORE_msfits)
   string (REGEX REPLACE msfits/msfits msfits tmp ${CASACORE_msfits})
+  get_filename_component (tmp ${tmp} ABSOLUTE)
   list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_msfits)
 
@@ -245,6 +257,7 @@ find_path (CASACORE_msvis MSVis.h
 
 if (CASACORE_msvis)
   string (REGEX REPLACE msvis/msvis msvis tmp ${CASACORE_msvis})
+  get_filename_component (tmp ${tmp} ABSOLUTE)
   list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_msvis)
 
@@ -289,14 +302,14 @@ if (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
   set (HAVE_CASACORE TRUE)
 #  string (REGEX REPLACE lib/libcasa.a lib CASACORE_LIBRARIES_DIR ${CASA_libcasa})
 else (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
-  if (NOT CASA_FIND_QUIETLY)
+  if (NOT CASACORE_FIND_QUIETLY)
     if (NOT CASACORE_INCLUDES)
       message (STATUS "Unable to find CASACORE header files!")
     endif (NOT CASACORE_INCLUDES)
     if (NOT CASACORE_LIBRARIES)
       message (STATUS "Unable to find CASACORE library files!")
     endif (NOT CASACORE_LIBRARIES)
-  endif (NOT CASA_FIND_QUIETLY)
+  endif (NOT CASACORE_FIND_QUIETLY)
 endif (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
 
 ## ------------------------------------------------------------------------------
@@ -307,36 +320,37 @@ endif (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
 
 IF (UNIX)
   add_definitions (
-    # -- compiler flags utilized in the source code --
-	-DAIPS_STDLIB
-	-DAIPS_AUTO_STL
-	-DAIPS_NO_LEA_MALLOC
+    -DAIPS_STDLIB
+    -DAIPS_AUTO_STL
+    -DAIPS_NO_LEA_MALLOC
     )
+  set (CASACORE_COMPILE_FLAGS "-DAIPS_STDLIB -DAIPS_AUTO_STL -DAIPS_NO_LEA_MALLOC")
   IF (APPLE)
     add_definitions (-DAIPS_DARWIN)
-  ELSE (APPLE)
-    ADD_DEFINITIONS (-DAIPS_LINUX)
-  ENDIF (APPLE)
+    set (CASACORE_COMPILE_FLAGS "${CASACORE_COMPILE_FLAGS} -DAIPS_DARWIN")
+  else (APPLE)
+    add_definitions (-DAIPS_LINUX)
+    set (CASACORE_COMPILE_FLAGS "${CASACORE_COMPILE_FLAGS} -DAIPS_LINUX")
+  endif (APPLE)
   ##
   ## Platform test Big/Little Endian ------------------------------------
   ##
   if (CMAKE_SYSTEM_PROCESSOR MATCHES "powerpc")
-    message (STATUS "System is big endian.")
     add_definitions (-DAIPS_BIG_ENDIAN)
     set (CMAKE_SYSTEM_BIG_ENDIAN 1)
+    set (CASACORE_COMPILE_FLAGS "${CASACORE_COMPILE_FLAGS} -DAIPS_BIG_ENDIAN")
   else (CMAKE_SYSTEM_PROCESSOR MATCHES "powerpc")
-    message (STATUS "System is little endian.")
     add_definitions (-DAIPS_LITTLE_ENDIAN)
     set (CMAKE_SYSTEM_BIG_ENDIAN 0)
   endif (CMAKE_SYSTEM_PROCESSOR MATCHES "powerpc")
-#  TEST_BIG_ENDIAN (CMAKE_SYSTEM_BIG_ENDIAN)
-#  if (CMAKE_SYSTEM_BIG_ENDIAN)
-#    message (STATUS "System is big endian.")
-#    add_definitions (-DAIPS_BIG_ENDIAN)
-#  elseif (CMAKE_SYSTEM_BIG_ENDIAN)
-#    message (STATUS "System is little endian.")
-#    add_definitions (-DAIPS_LITTLE_ENDIAN)
-#  endif (CMAKE_SYSTEM_BIG_ENDIAN)
+  #  TEST_BIG_ENDIAN (CMAKE_SYSTEM_BIG_ENDIAN)
+  #  if (CMAKE_SYSTEM_BIG_ENDIAN)
+  #    message (STATUS "System is big endian.")
+  #    add_definitions (-DAIPS_BIG_ENDIAN)
+  #  elseif (CMAKE_SYSTEM_BIG_ENDIAN)
+  #    message (STATUS "System is little endian.")
+  #    add_definitions (-DAIPS_LITTLE_ENDIAN)
+  #  endif (CMAKE_SYSTEM_BIG_ENDIAN)
   ##
   ## Platform test 32/64 bit ------------------------------
   ##

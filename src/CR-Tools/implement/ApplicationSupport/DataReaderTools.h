@@ -35,8 +35,9 @@
 #include <casa/Arrays/Matrix.h>
 #include <casa/BasicSL/Complex.h>
 #include <casa/Exceptions/Error.h>
-#include <tasking/Glish.h>
-#include <tasking/Glish/GlishRecord.h>
+
+#include <ApplicationSupport/Glish.h>
+#include <ApplicationSupport/GlishRecord.h>
 
 #include <Data/LopesEvent.h>
 #include <Data/ITSBeam.h>

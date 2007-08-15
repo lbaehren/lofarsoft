@@ -38,11 +38,11 @@ target_link_libraries (casa ${libm})
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-if (casacore_tests)
+if (casacore_BUILD_TESTS)
   foreach (casa_module ${casa_modules})
     add_subdirectory (${casa_module}/test)
   endforeach (casa_module)
-endif (casacore_tests)
+endif (casacore_BUILD_TESTS)
 
 ## ------------------------------------------------------------------------------
 ## Installation

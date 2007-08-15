@@ -5,7 +5,11 @@
 ## -----------------------------------------------------------------------------
 ## Project name and version number number
 
+## Name of the project
 project (wcslib)
+
+## Minimum required version of CMake to configure the project
+cmake_minimum_required (VERSION 2.4)
 
 set (wcslib_VERSION_MAJOR 4)
 set (wcslib_VERSION_MINOR 2)

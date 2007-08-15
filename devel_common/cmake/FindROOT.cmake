@@ -19,6 +19,7 @@ set (include_locations
   /usr/include
   /usr/local/include
   /sw/include
+  /sw/share
   /opt
   /opt/include
 )
@@ -30,6 +31,7 @@ set (lib_locations
   /usr/lib
   /usr/local/lib
   /sw/lib
+  /sw/share
   /opt
   /opt/lib
 )

@@ -26,11 +26,11 @@ target_link_libraries (coordinates fits ${LAPACK_LIBRARIES})
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-if (casacore_tests)
+if (casacore_BUILD_TESTS)
   foreach (coordinates_module ${coordinates_modules})
     add_subdirectory (${coordinates_module}/test)
   endforeach (coordinates_module)
-endif (casacore_tests)
+endif (casacore_BUILD_TESTS)
 
 ## -----------------------------------------------------------------------------
 ## Installation targets

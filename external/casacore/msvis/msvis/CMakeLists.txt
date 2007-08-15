@@ -24,14 +24,14 @@ target_link_libraries (msvis ms)
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-if (casacore_tests)
+if (casacore_BUILD_TESTS)
   ## build up the list of directories ...
   foreach (msvis_module ${msvis_modules})
     list (APPEND tests "${msvis_module}/test")
   endforeach (msvis_module)
   ## ... and register them
   subdirs (${tests})
-endif (casacore_tests)
+endif (casacore_BUILD_TESTS)
 
 ## ------------------------------------------------------------------------------
 ## Installation

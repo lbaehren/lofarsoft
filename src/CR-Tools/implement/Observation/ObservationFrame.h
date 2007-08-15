@@ -31,7 +31,6 @@
 
 // AIPS++ wrapper classes
 #include <casa/aips.h>
-#include <tasking/Glish.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/ArrayMath.h>
@@ -42,6 +41,8 @@
 #include <measures/Measures/MeasTable.h>
 #include <casa/OS/Time.h>
 #include <casa/Quanta.h>
+
+#include <ApplicationSupport/Glish.h>
 
 using casa::Cube;
 using casa::IPosition;

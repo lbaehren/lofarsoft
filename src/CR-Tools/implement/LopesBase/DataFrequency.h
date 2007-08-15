@@ -38,9 +38,10 @@ using namespace std;
 #include <casa/BasicSL/Complex.h>
 #include <casa/Quanta/QC.h>
 #include <scimath/Mathematics.h>
-#include <tasking/Glish.h>
-#include <tasking/Glish/GlishEvent.h>
-#include <tasking/Glish/GlishRecord.h>
+
+#include <ApplicationSupport/Glish.h>
+#include <ApplicationSupport/GlishEvent.h>
+#include <ApplicationSupport/GlishRecord.h>
 
 using casa::Complex;
 using casa::DComplex;

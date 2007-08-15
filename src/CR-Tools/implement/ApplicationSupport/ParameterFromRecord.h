@@ -36,8 +36,8 @@
 #include <measures/Measures/MEpoch.h>
 #include <measures/Measures/MPosition.h>
 #include <measures/Measures/MeasureHolder.h>
-#include <tasking/Glish.h>
-#include <tasking/Glish/GlishRecord.h>
+#include <ApplicationSupport/Glish.h>
+#include <ApplicationSupport/GlishRecord.h>
 #include <tasking/Tasking/ForeignArrayParameterAccessor.h>
 
 using casa::GlishRecord;

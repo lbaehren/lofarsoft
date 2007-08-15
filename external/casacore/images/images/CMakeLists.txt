@@ -78,14 +78,14 @@ endif (flex_bin)
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-if (casacore_tests)
+if (casacore_BUILD_TESTS)
   ## build up the list of directories ...
   foreach (images_module ${images_modules})
     LIST (APPEND tests "${images_module}/test")
   endforeach (images_module)
   ## ... and register them
   SUBDIRS (${tests})
-endif (casacore_tests)
+endif (casacore_BUILD_TESTS)
 
 ## -----------------------------------------------------------------------------
 ## Installation targets

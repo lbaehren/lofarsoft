@@ -24,7 +24,9 @@ set (cr_modules
 
 ## (optional) support for applications requiring additional external components
 
-list (APPEND cr_modules ApplicationSupport)
+if (CR_GLISH_SUPPORT)
+  list (APPEND cr_modules ApplicationSupport)
+endif (CR_GLISH_SUPPORT)
 
 ## register the directories containing the source code
 
@@ -50,9 +52,11 @@ endif (CR_DEBUGGING_MESSAGES)
 
 add_library (cr
   ${cr_sources}
-  templates.h
+#  templates.h
   )
-
+set_target_properties (cr
+  PROPERTIES COMPILE_FLAGS "${CASACORE_COMPILE_FLAGS}"
+  )
 target_link_libraries (cr
   ${CASA_LIBRARIES}
   ${CFITSIO_LIBRARIES}

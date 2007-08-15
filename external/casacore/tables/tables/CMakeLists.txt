@@ -96,11 +96,11 @@ endif (bison_bin)
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-if (casacore_tests)
+if (casacore_BUILD_TESTS)
   foreach (tables_module ${tables_modules})
     add_subdirectory (${tables_module}/test)
   endforeach (tables_module)
-endif (casacore_tests)
+endif (casacore_BUILD_TESTS)
 
 ## ------------------------------------------------------------------------------
 ## Installation

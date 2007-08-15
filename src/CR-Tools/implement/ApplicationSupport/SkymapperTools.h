@@ -29,9 +29,9 @@
 #include <casa/string.h>
 #include <casa/Exceptions/Error.h>
 #include <casa/Quanta.h>
-#include <tasking/Glish.h>
 #include <Glish/Client.h>
 
+#include <ApplicationSupport/Glish.h>
 #include <ApplicationSupport/DataReaderTools.h>
 #include <ApplicationSupport/Skymap.h>
 #include <Observation/ObservationData.h>

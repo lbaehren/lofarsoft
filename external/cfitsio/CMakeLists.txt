@@ -2,7 +2,11 @@
 ## $Id::                                                                       $
 ##------------------------------------------------------------------------------
 
+## Name of the project
 project (CFITSIO)
+
+## Minimum required version of CMake to configure the project
+cmake_minimum_required (VERSION 2.4)
 
 set (CFITSIO_VERSION_MAJOR 3)
 set (CFITSIO_VERSION_MINOR 4)

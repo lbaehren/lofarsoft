@@ -27,11 +27,11 @@ target_link_libraries (components coordinates ${LAPACK_LIBRARIES})
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
-if (casacore_tests)
+if (casacore_BUILD_TESTS)
   foreach (components_module ${components_modules})
     add_subdirectory (${components_module}/test)
   endforeach (components_module)
-endif (casacore_tests)
+endif (casacore_BUILD_TESTS)
 
 ## -----------------------------------------------------------------------------
 ## Installation targets
