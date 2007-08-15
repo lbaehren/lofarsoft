@@ -49,6 +49,11 @@ find_path (BOOST_INCLUDES config.hpp
   boost
   )
 
+if (BOOST_INCLUDES)
+  string (REPLACE include/boost-1_33_1/boost include/boost-1_33_1 BOOST_INCLUDES ${BOOST_INCLUDES})
+  string (REPLACE include/boost-1_34_1/boost include/boost-1_34_1 BOOST_INCLUDES ${BOOST_INCLUDES})
+endif (BOOST_INCLUDES)
+
 ## -----------------------------------------------------------------------------
 ## Check for the various components of the library
 
