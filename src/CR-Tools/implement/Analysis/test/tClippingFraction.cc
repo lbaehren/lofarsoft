@@ -44,6 +44,10 @@
 
 #include <Analysis/ClippingFraction.h>
 
+using std::cerr;
+using std::cout;
+using std::endl;
+
 // --- Test constructors -------------------------------------------------------
 
 /*!
@@ -55,59 +59,59 @@
 int test_ClippingFraction ()
 {
   int failedTests (0);
-  Double fraction (0.5);
-  Vector<Double> limits (2);
+  double fraction (0.5);
+  Vector<double> limits (2);
 
   limits(0) = -1;
   limits(1) = 1;
 
   cout << "\n[tClippingFraction] Testing constructors\n" << endl;
 
-  cout << "[1] Testing ClippingFraction<Float>() ..." << endl;
+  cout << "[1] Testing ClippingFraction<float>() ..." << endl;
   try {
-    ClippingFraction<Float> clip;
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
+    ClippingFraction<float> clip;
+  } catch (std::string message) {
+    cerr << message << endl;
     failedTests++;
   }
 
-  cout << "[2] Testing ClippingFraction<Float>() ..." << endl;
+  cout << "[2] Testing ClippingFraction<float>() ..." << endl;
   try {
-    ClippingFraction<Double> clip;
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
+    ClippingFraction<double> clip;
+  } catch (std::string message) {
+    cerr << message << endl;
     failedTests++;
   }
 
-  cout << "[3] Testing ClippingFraction(Vector<Float>) ..." << endl;
+  cout << "[3] Testing ClippingFraction(Vector<float>) ..." << endl;
   try {
-    ClippingFraction<Float> clip (Vector<Float>limits);
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
+    ClippingFraction<float> clip (Vector<float>limits);
+  } catch (std::string message) {
+    cerr << message << endl;
     failedTests++;
   }
 
-  cout << "[4] Testing ClippingFraction(Vector<Double>) ..." << endl;
+  cout << "[4] Testing ClippingFraction(Vector<double>) ..." << endl;
   try {
-    ClippingFraction<Double> clip (limits);
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
+    ClippingFraction<double> clip (limits);
+  } catch (std::string message) {
+    cerr << message << endl;
     failedTests++;
   }
 
-  cout << "[5] Testing ClippingFraction(Vector<Double>, Double) ..." << endl;
+  cout << "[5] Testing ClippingFraction(Vector<double>, double) ..." << endl;
   try {
-    ClippingFraction<Float> clip (Vector<Float>limits, Float(fraction));
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
+    ClippingFraction<float> clip (Vector<float>limits, float(fraction));
+  } catch (std::string message) {
+    cerr << message << endl;
     failedTests++;
   }
 
-  cout << "[6] Testing ClippingFraction(Vector<Double>, Double) ..." << endl;
+  cout << "[6] Testing ClippingFraction(Vector<double>, double) ..." << endl;
   try {
-    ClippingFraction<Double> clip (limits, fraction);
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
+    ClippingFraction<double> clip (limits, fraction);
+  } catch (std::string message) {
+    cerr << message << endl;
     failedTests++;
   }
 
@@ -128,21 +132,21 @@ int test_operators ()
 
   cout << "\n[tClippingFraction] Testing operators\n" << endl;
 
-  cout << "[1] Testing copy operator for <Float> ..." << endl;
+  cout << "[1] Testing copy operator for <float> ..." << endl;
   try {
-    ClippingFraction<Float> clip;
-    ClippingFraction<Float> clip2 = clip;
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
+    ClippingFraction<float> clip;
+    ClippingFraction<float> clip2 = clip;
+  } catch (std::string message) {
+    cerr << message << endl;
     failedTests++;
   }
 
-  cout << "[2] Testing copy operator for <Double> ..." << endl;
+  cout << "[2] Testing copy operator for <double> ..." << endl;
   try {
-    ClippingFraction<Double> clip;
-    ClippingFraction<Double> clip2 = clip;
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
+    ClippingFraction<double> clip;
+    ClippingFraction<double> clip2 = clip;
+  } catch (std::string message) {
+    cerr << message << endl;
     failedTests++;
   }
 
@@ -155,11 +159,11 @@ int test_eval ()
 {
   int failedTests (0);
   int nofSamples = 21;
-  Vector<Float> data (nofSamples);
-  ClippingFraction<Float> clip;
+  Vector<float> data (nofSamples);
+  ClippingFraction<float> clip;
   //
-  Bool isClipping (False);
-  Float clippingFraction (0.0);
+  bool isClipping (false);
+  float clippingFraction (0.0);
 
   // Fill the data array 
   for (int n(0); n<nofSamples; n++) {
