@@ -23,9 +23,11 @@
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
 
-#include <IO/ImportSimulation.h>
 #include <IO/ImportAntenna.h>
+#include <IO/ImportSimulation.h>
 
+using CR::ImportAntenna;
+using CR::ImportSimulation;
 
 // -----------------------------------------------------------------------------
 

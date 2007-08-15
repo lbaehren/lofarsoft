@@ -29,24 +29,28 @@
 #include <Math/ThreeVector.h>
 
 using std::string;
+using CR::ImportAntenna;
+using CR::ThreeVector;
 
 /*!
   \file tImportAntenna.cc
-
+  
   \ingroup IO
-
+  
   \brief A collection of test routines for ImportAntenna
- 
+  
   \author Tim Huege
- 
+  
   \date 2006/10/16
+  
+  <b>Note:</b> should be taken with care, since program used hard-coded path
+  to the input data.
 */
 
 // -----------------------------------------------------------------------------
 
 int main ()
 {
-
   string name("/home/huege/lopescasa/code/lopes/implement/reas2event/dummy.dat");
   ImportAntenna Test("00000", name, 0.0, 180.0);
   
@@ -54,7 +58,7 @@ int main ()
   std::cout << "ValidData: " << Test.validData() << std::endl;
   std::cout << "ID: " << Test.getID() << std::endl;
 
-  Vector<Double> Ezeni, Eazi;
+  Vector<double> Ezeni, Eazi;
   
   bool negligibleRemainder = Test.getTimeSeries(Eazi, Ezeni);    
 
@@ -64,7 +68,6 @@ int main ()
   {
      std::cout << "Eazi: " << Eazi(i) << "   Ezeni: " << Ezeni(i) << std::endl;
   }
-
 
   return 0;
 }

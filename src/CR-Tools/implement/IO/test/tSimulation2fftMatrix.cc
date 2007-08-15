@@ -23,9 +23,12 @@
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
 
+#include <templates.h>
 #include <IO/Simulation2fftMatrix.h>
 #include <scimath/Mathematics/FFTServer.h>
 
+using CR::CalTableReader;
+using CR::ImportSimulation;
 using CR::Simulation2fftMatrix;
 
 /*!
@@ -58,7 +61,7 @@ int test_Simulation2fftMatrix ()
     Simulation2fftMatrix newObject;
 
     std::cout << "[2] Generating importSimulation object ... " ;
-    importSimulation Sim;
+    ImportSimulation Sim;
     bool ok = Sim.openNewSimulation("30deg1e17_shift",
 				    "lopes30",
 				    "/home/horneff/testreas");
