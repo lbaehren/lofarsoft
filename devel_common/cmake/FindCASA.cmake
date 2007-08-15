@@ -14,6 +14,26 @@
 ##  CASA_LIBRARIES = libraries of the CASA modules
 ##
 
+set (lib_locations
+  /usr/lib
+  /usr/local/lib
+  /opt
+  /opt/lib
+  /sw/lib
+)
+
+set (casa_locations
+  /aips++
+  /casa
+  /opt/aips++
+  /opt/casa
+  /sw/share/aips++
+  /sw/share/casa
+  /opt/aips++
+  /opt/casa
+  /app/aips++/Stable
+  )
+
 ## -----------------------------------------------------------------------------
 ## Required external packages
 
@@ -32,7 +52,7 @@ find_path (cr_cmake FindCASA.cmake FindGlish.cmake
 ## [1] libg2c
 
 find_library (libg2c g2c
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib
+  PATHS ${lib_locations}
   )
 
 if (cr_cmake)
@@ -55,16 +75,9 @@ endif (cr_cmake)
 ## Find "aips.h", which is included by all other files
 
 find_path (CASA_INCLUDES aips.h
-  PATHS
-  /casa
-  /opt/casa
-  /sw/share/casa
-  /app/aips++/Stable
+  PATHS ${casa_locations}
   PATH_SUFFIXES
   code/include/casa
-  current/code/include/casa
-  weekly/code/include/casa
-  stable/code/include/casa
   )
 
 if (CASA_INCLUDES)

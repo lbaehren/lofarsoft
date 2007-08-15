@@ -34,8 +34,6 @@ set (casa_locations
   /aips++
   /casa
   /opt/aips++
-  /opt/casa/current
-  /opt/casa/stable
   /opt/casa
   /sw/share/aips++
   /sw/share/casa

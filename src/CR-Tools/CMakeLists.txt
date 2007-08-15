@@ -13,10 +13,32 @@ cmake_minimum_required (VERSION 2.4)
 ## User defined build/install options
 
 option (CR_BUILD_TESTS "Build the test programs?" 1)
+option (CR_ENABLE_TESTING "Build the test programs?" 1)
 option (CR_DEBUGGING_MESSAGES "Print debugging information?" 0)
 option (CR_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
 option (CR_GLISH_SUPPORT "Activate support for Glish applications?" 1)
 option (CR_PYTHON_SUPPORT "Activate support for Glish applications?" 0)
+
+## Handle option: testing mode on/off
+
+if (CR_ENABLE_TESTING)
+  include (CTest)
+  enable_testing()
+endif (CR_ENABLE_TESTING)
+
+## Handle option: verbose mode on/off
+
+if (NOT CR_VERBOSE_CONFIGURE)
+  set (BLITZ_FIND_QUIETLY 1)
+  set (CASA_FIND_QUIETLY 1)
+  set (CASACORE_FIND_QUIETLY 1)
+  set (CFITSIO_FIND_QUIETLY 1)
+  set (FFTW3_FIND_QUIETLY 1)
+  set (GLISH_FIND_QUIETLY 1)
+  set (LAPACK_FIND_QUIETLY 1)
+  set (ROOT_FIND_QUIETLY 1)
+  set (WCSLIB_FIND_QUIETLY 1)
+endif (NOT CR_VERBOSE_CONFIGURE)
 
 ## -----------------------------------------------------------------------------
 ## Subdirectories
@@ -43,19 +65,6 @@ find_path (cr_cmake FindBlitz.cmake FindCASA.cmake FindCFITSIO.cmake
   PATH_SUFFIXES
   devel_common/cmake
   )
-
-## take into account the current verbose mode
-
-if (NOT CR_VERBOSE_CONFIGURE)
-  set (BLITZ_FIND_QUIETLY 1)
-  set (CASA_FIND_QUIETLY 1)
-  set (CASACORE_FIND_QUIETLY 1)
-  set (CFITSIO_FIND_QUIETLY 1)
-  set (FFTW3_FIND_QUIETLY 1)
-  set (LAPACK_FIND_QUIETLY 1)
-  set (ROOT_FIND_QUIETLY 1)
-  set (WCSLIB_FIND_QUIETLY 1)
-endif (NOT CR_VERBOSE_CONFIGURE)
 
 ## check for the external packages
 

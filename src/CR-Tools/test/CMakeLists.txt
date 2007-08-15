@@ -77,6 +77,10 @@ add_executable (tNumericalRanges tNumericalRanges.cc)
 add_executable (tObjects tObjects.cc)
 add_executable (tProcessingParameters tProcessingParameters.cc)
 
+## testing 
+
+add_test (run_tNumericalRanges tNumericalRanges)
+
 ## installation
 
 install (
