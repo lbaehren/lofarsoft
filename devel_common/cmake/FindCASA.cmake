@@ -37,7 +37,9 @@ find_library (libg2c g2c
 
 if (cr_cmake)
   ## Glish
-  include (${cr_cmake}/FindGlish.cmake)
+  if (NOT HAVE_GLISH)
+    include (${cr_cmake}/FindGlish.cmake)
+  endif (NOT HAVE_GLISH)
 else (cr_cmake)
   message (SEND_ERROR "Unable to locate additional CMake find scripts!")
 endif (cr_cmake)
@@ -84,6 +86,12 @@ find_path (AIPSLIBD version.o casa
 ## The is a number of packages, which are distrubuted along with CASA, so once
 ## we have been able to discover the location of the CASA base directory, we
 ## can set the paths to these additional packages
+
+## [1] Glish
+
+if (HAVE_GLISH)
+  list (APPEND CASA_INCLUDES ${GLISH_INCLUDES})
+endif (HAVE_GLISH)
 
 ## [2] WCSLIB -- library for the dealing with world coordinate systems
 

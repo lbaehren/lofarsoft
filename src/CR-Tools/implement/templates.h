@@ -135,35 +135,36 @@ namespace casa {
   template class Array<DComplex>;
   template class Array<IPosition>;
 
-  template class Vector<Bool>;
-  template class Vector<Int>;
-  template class Vector<uInt>;
-  template class Vector<Short>;
-  template class Vector<uShort>;
-  template class Vector<Long>;
-  template class Vector<uLong>;
-  template class Vector<Float>;
-  template class Vector<Double>;
-  template class Vector<Complex>;
-  template class Vector<DComplex>;
+/*   template class Vector<Bool>; */
+/*   template class Vector<Int>; */
+/*   template class Vector<uInt>; */
+/*   template class Vector<Short>; */
+/*   template class Vector<uShort>; */
+/*   template class Vector<Long>; */
+/*   template class Vector<uLong>; */
+/*   template class Vector<Float>; */
+/*   template class Vector<Double>; */
+/*   template class Vector<Complex>; */
+/*   template class Vector<DComplex>; */
 
   // casa/Arrays/MaskedArray
-  template class MaskedArray<Array<Double> >;
-  template class MaskedArray<Slicer>;
-  template class MaskedArray<Vector<Complex> >;
-  template class MaskedArray<Vector<Double> >;
-  template class MaskedArray<Vector<Float> >;
-  template class MaskedArray<Bool>;
-  template class MaskedArray<uChar>;
-  template class MaskedArray<Short>;
-  template class MaskedArray<uShort>;
-  template class MaskedArray<Int>;
-  template class MaskedArray<uInt>;
-  template class MaskedArray<Float>;
-  template class MaskedArray<Double>;
-  template class MaskedArray<Complex>;
-  template class MaskedArray<DComplex>;
-  template class MaskedArray<String>;
+
+/*   template class MaskedArray<Array<Double> >; */
+/*   template class MaskedArray<Slicer>; */
+/*   template class MaskedArray<Vector<Complex> >; */
+/*   template class MaskedArray<Vector<Double> >; */
+/*   template class MaskedArray<Vector<Float> >; */
+/*   template class MaskedArray<Bool>; */
+/*   template class MaskedArray<uChar>; */
+/*   template class MaskedArray<Short>; */
+/*   template class MaskedArray<uShort>; */
+/*   template class MaskedArray<Int>; */
+/*   template class MaskedArray<uInt>; */
+/*   template class MaskedArray<Float>; */
+/*   template class MaskedArray<Double>; */
+/*   template class MaskedArray<Complex>; */
+/*   template class MaskedArray<DComplex>; */
+/*   template class MaskedArray<String>; */
   
   // casa/BasicMath/Functional
   

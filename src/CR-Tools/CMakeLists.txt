@@ -15,7 +15,7 @@ cmake_minimum_required (VERSION 2.4)
 option (CR_BUILD_TESTS "Build the test programs?" 1)
 option (CR_DEBUGGING_MESSAGES "Print debugging information?" 0)
 option (CR_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
-option (CR_GLISH_SUPPORT "Activate support for Glish applications?" 0)
+option (CR_GLISH_SUPPORT "Activate support for Glish applications?" 1)
 option (CR_PYTHON_SUPPORT "Activate support for Glish applications?" 0)
 
 ## -----------------------------------------------------------------------------
@@ -173,3 +173,5 @@ message (STATUS "LAPACK ................ : ${HAVE_LAPACK}")
 message (STATUS "PGPLOT ................ : ${HAVE_PGPLOT}")
 message (STATUS "ROOT .................. : ${HAVE_ROOT}")
 message (STATUS "WCSLIB ................ : ${HAVE_WCSLIB}")
+
+message (STATUS "CASACORE includes = ${CASACORE_INCLUDES}")

@@ -6,21 +6,25 @@
 # - Check for the presence of G2C
 #
 # The following variables are set when G2C is found:
-#  HAVE_G2C       = Set to true, if all components of G2C
-#                          have been found.
+#  HAVE_G2C       = Set to true, if all components of G2C have been found.
 #  G2C_INCLUDES   = Include path for the header files of G2C
 #  G2C_LIBRARIES  = Link these to use G2C
 ## -----------------------------------------------------------------------------
+
+set (include_locations
+  /usr/include
+  /usr/lib
+  /opt
+  /opt/include
+  /usr/local/include
+  /sw/include
+  )
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (G2C_INCLUDES g2c.h
-  PATHS
-  /usr/local/include
-  /usr/include
-  /usr/lib
-  /sw/include
+  PATHS ${include_locations}
   PATH_SUFFIXES
   gcc
   gcc-lib/i486-linux/3.3.5/include

@@ -37,8 +37,6 @@ if (HAVE_CASA)
 else (HAVE_CASA)
   if (HAVE_CASACORE)
     message (STATUS "Enabling test programs using casacore ...")
-    message (STATUS "casacore headers : ${CASACORE_INCLUDES}")
-    message (STATUS "casacore compile flags : ${CASACORE_COMPILE_FLAGS}")
     ## build the executables ----------------------
     add_executable (tUseArrays tUseArrays.cc)
     target_link_libraries (tUseArrays ${CASACORE_LIBRARIES})
