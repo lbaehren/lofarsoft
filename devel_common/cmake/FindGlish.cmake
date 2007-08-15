@@ -31,14 +31,17 @@ set (lib_locations
 )
 
 set (casa_locations
+  ## most Linux systems
   /aips++
   /casa
   /opt/aips++
   /opt/casa
+  /opt/casa/stable
+  /opt/casa/current
+  ## Mac OS X (Fink)
   /sw/share/aips++
   /sw/share/casa
-  /opt/aips++
-  /opt/casa
+  ## LOFAR development
   /app/aips++/Stable
   )
 
