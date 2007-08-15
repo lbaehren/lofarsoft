@@ -39,6 +39,8 @@ set (lib_locations
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
+## <boost/config.hpp>
+
 find_path (BOOST_INCLUDES config.hpp
   PATHS ${include_locations}
   PATH_SUFFIXES
@@ -53,6 +55,24 @@ if (BOOST_INCLUDES)
   string (REPLACE include/boost-1_33_1/boost include/boost-1_33_1 BOOST_INCLUDES ${BOOST_INCLUDES})
   string (REPLACE include/boost-1_34_1/boost include/boost-1_34_1 BOOST_INCLUDES ${BOOST_INCLUDES})
 endif (BOOST_INCLUDES)
+
+## <boost/python.hpp>
+
+find_path (boost_python_hpp python.hpp
+  PATHS ${include_locations}
+  PATH_SUFFIXES
+  boost-1_34_1
+  boost-1_34_1/boost
+  boost-1_33_1
+  boost-1_33_1/boost
+  boost
+  )
+
+if (boost_python_hpp)
+  string (REPLACE include/boost-1_33_1/boost include/boost-1_33_1 boost_python_hpp ${boost_python_hpp})
+  string (REPLACE include/boost-1_34_1/boost include/boost-1_34_1 boost_python_hpp ${boost_python_hpp})
+  list (APPEND BOOST_INCLUDES ${boost_python_hpp})
+endif (boost_python_hpp)
 
 ## -----------------------------------------------------------------------------
 ## Check for the various components of the library
