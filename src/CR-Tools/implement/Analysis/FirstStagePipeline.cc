@@ -1,7 +1,4 @@
-/*-------------------------------------------------------------------------*
- | $Id:: Math.h 395 2007-06-14 08:13:19Z baehren                         $ |
- *-------------------------------------------------------------------------*
- ***************************************************************************
+/***************************************************************************
  *   Copyright (C) 2007                                                  *
  *   Andreas Horneffer (<mail>)                                                     *
  *                                                                         *
@@ -21,11 +18,15 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: FirstStagePipeline.cc,v 1.5 2007/03/12 11:01:55 horneff Exp $*/
+/* $Id: FirstStagePipeline.cc,v 1.6 2007/06/20 15:28:11 horneff Exp $*/
 
 #include <Analysis/FirstStagePipeline.h>
 
 #define pi 3.1415926536
+
+/*!
+  \class FirstStagePipeline
+*/
 
 namespace CR { // Namespace CR -- begin
   
@@ -40,6 +41,7 @@ namespace CR { // Namespace CR -- begin
   }
   
   void FirstStagePipeline::init(){
+    verbose = True; // make "debugging" output the default ;-)
     InterpInit = False;
     InterElGainCal_p = new CalTableInterpolater<Double>;
     InterPhaseCal_p = new CalTableInterpolater<DComplex>;

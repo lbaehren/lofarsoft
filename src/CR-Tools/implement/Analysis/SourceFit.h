@@ -27,11 +27,9 @@
 #include <casa/Arrays/Array.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/Arrays/Matrix.h>
-
 #include <Analysis/PeakList.h>
 
-using casa::Matrix;
-using casa::Vector;
+#include <casa/namespace.h>
 
 namespace CR { // Namespace CR -- begin
 

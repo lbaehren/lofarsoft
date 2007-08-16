@@ -1,7 +1,4 @@
-/*-------------------------------------------------------------------------*
- | $Id:: Math.h 395 2007-06-14 08:13:19Z baehren                         $ |
- *-------------------------------------------------------------------------*
- ***************************************************************************
+/***************************************************************************
  *   Copyright (C) 2007                                                  *
  *   Andreas Horneffer (<mail>)                                                     *
  *                                                                         *
@@ -21,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: FirstStagePipeline.h,v 1.3 2007/03/06 12:54:13 horneff Exp $*/
+/* $Id: FirstStagePipeline.h,v 1.4 2007/06/20 15:28:11 horneff Exp $*/
 
 #ifndef FIRSTSTAGEPIPELINE_H
 #define FIRSTSTAGEPIPELINE_H
@@ -74,6 +71,11 @@ namespace CR { // Namespace CR -- begin
   protected:
     
     /*!
+      \brief Generate verbose output;
+    */
+    Bool verbose;
+
+    /*!
       \brief Have the CalTableInterpolator objects been initialized?
     */
     Bool InterpInit;
@@ -90,7 +92,6 @@ namespace CR { // Namespace CR -- begin
     */
     uInt blocksize;
     Double samplerate;
-
 
     /*!
       \brief Record with the pathes to the CalTables
@@ -186,7 +187,11 @@ namespace CR { // Namespace CR -- begin
       ObsToCTPath.assign(InputRecord);
       return True;
     };
- 
+
+    /*!
+      \brief Set the verbosity
+    */
+    inline void setVerbosity(Bool newVerbosity) { verbose = newVerbosity; };
     
   private:
         

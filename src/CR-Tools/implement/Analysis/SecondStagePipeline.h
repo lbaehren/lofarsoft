@@ -1,7 +1,4 @@
-/*-------------------------------------------------------------------------*
- | $Id:: Math.h 395 2007-06-14 08:13:19Z baehren                         $ |
- *-------------------------------------------------------------------------*
- ***************************************************************************
+/***************************************************************************
  *   Copyright (C) 2007                                                  *
  *   Andreas Horneffer (<mail>)                                                     *
  *                                                                         *
@@ -21,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: SecondStagePipeline.h,v 1.2 2007/04/16 17:02:02 horneff Exp $*/
+/* $Id: SecondStagePipeline.h,v 1.3 2007/06/20 15:27:15 horneff Exp $*/
 
 #ifndef SECONDSTAGEPIPELINE_H
 #define SECONDSTAGEPIPELINE_H
@@ -34,7 +31,7 @@
 #include <casa/Exceptions/Error.h>
 
 #include <Analysis/FirstStagePipeline.h>
-//#include <lopes/Calibration/PhaseCalibrationPlugin.h>
+//#include <Calibration/PhaseCalibrationPlugin.h>
 #include <Calibration/TVCalibrationPlugin.h>
 #include <Calibration/RFIMitigationPlugin.h>
 
@@ -141,6 +138,13 @@ namespace CR { // Namespace CR -- begin
     */
     Matrix<DComplex> GetData(DataReader *dr);
 
+
+    /*!
+      \brief Get the mask of flagged antennas
+      
+      \return The antenna mask;
+    */
+    Vector<Bool> GetAntennaMask(DataReader *dr);
     
     
   private:

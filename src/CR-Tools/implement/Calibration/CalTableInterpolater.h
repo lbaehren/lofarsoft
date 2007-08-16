@@ -284,9 +284,15 @@ namespace CR {  //  Namespace CR -- begin
     
     \return ok -- Was operation successful? Returns \c True if yes.
   */
-  Bool GetInputData(const uInt date, const Int AntID, Array<T> &y, 
-		    Vector<Double> &x0, Vector<Double> &x1, Vector<Double> &x2,
-		    Vector<Double> &x3, Vector<Double> &x4, Int cacheIndex);
+  Bool GetInputData(const uInt date,
+		    const Int AntID,
+		    Array<T> &y, 
+		    Vector<Double> &x0,
+		    Vector<Double> &x1,
+		    Vector<Double> &x2,
+		    Vector<Double> &x3,
+		    Vector<Double> &x4,
+		    Int cacheIndex);
   
   };
   
@@ -296,8 +302,8 @@ namespace CR {  //  Namespace CR -- begin
   //
   // ============================================================================
   
-  template class CalTableInterpolater<Double>;
-  template class CalTableInterpolater<DComplex>;
+  template class CalTableInterpolater<casa::Double>;
+  template class CalTableInterpolater<casa::DComplex>;
   
 }  // Namespace CR -- end
 

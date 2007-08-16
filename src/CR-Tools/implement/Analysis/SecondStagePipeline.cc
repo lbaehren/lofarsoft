@@ -1,7 +1,4 @@
-/*-------------------------------------------------------------------------*
- | $Id:: Math.h 395 2007-06-14 08:13:19Z baehren                         $ |
- *-------------------------------------------------------------------------*
- ***************************************************************************
+/***************************************************************************
  *   Copyright (C) 2007                                                  *
  *   Andreas Horneffer (<mail>)                                                     *
  *                                                                         *
@@ -21,9 +18,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: SecondStagePipeline.cc,v 1.7 2007/06/17 14:32:08 horneff Exp $*/
+/* $Id: SecondStagePipeline.cc,v 1.8 2007/06/20 15:27:15 horneff Exp $*/
 
 #include <Analysis/SecondStagePipeline.h>
+
+/*!
+  \class SecondStagePipeline
+*/
 
 namespace CR { // Namespace CR -- begin
   
@@ -93,6 +94,7 @@ namespace CR { // Namespace CR -- begin
   
   Bool SecondStagePipeline::updateCache(DataReader *dr){
     try {
+      AntennaMask_p.resize(0);
       Matrix<DComplex> data;
       data = dr->calfft();
 
@@ -112,8 +114,24 @@ namespace CR { // Namespace CR -- begin
       return False;
     }; 
     return True;
-
   };
+  
+  Vector<Bool> SecondStagePipeline::GetAntennaMask(DataReader *dr){
+    try {
+      if (cachedDate_p != dr->header().asuInt("Date")) {
+	if (!updateCache(dr)) {
+	  cerr << "SecondStagePipeline::GetAntennaMask: " << "updateCache failed!" << endl;
+	  return AntennaMask_p;
+	};
+	cachedDate_p = dr->header().asuInt("Date");
+      };
+    } catch (AipsError x) {
+      cerr << "SecondStagePipeline::GetAntennaMask: " << x.getMesg() << endl;
+      return AntennaMask_p;
+    }; 
+    return AntennaMask_p;
+  };
+
  
   Bool SecondStagePipeline::InitPhaseCal(DataReader *dr){
     try {

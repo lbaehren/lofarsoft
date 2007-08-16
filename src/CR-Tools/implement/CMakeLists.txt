@@ -15,7 +15,7 @@ set (cr_modules
   Display
   Imaging
   IO
-  LopesBase
+  LopesLegacy
   Math
   Observation
   Skymap
