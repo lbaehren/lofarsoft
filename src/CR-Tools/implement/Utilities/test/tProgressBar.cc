@@ -49,12 +49,11 @@ const int nofIterations (20);
 /*!
   \brief Test computation of estimated time.
 */
-void testTimer2 () {
+void testTimer2 (int const &nofComputations) {
   
   cout << "\n[tProgressBar::testTimer2]\n" << endl;
   
   clock_t start, end;
-  int nofComputations (10000000);
   double diff;
   double x;
   
@@ -81,12 +80,11 @@ void testTimer2 () {
 /*!
   \brief Test computation of estimated time.
 */
-void testTimer () {
+void testTimer (int const &nofComputations) {
 
   cout << "\n[tProgressBar::testTimer]\n" << endl;
   
   struct timeval timeval_p;
-  int nofComputations (10000000);
   int diff;
   int starttime;
   double x;
@@ -156,21 +154,88 @@ int test_ProgressBar (const int& loops,
   cout << "\n[tProgressBar] Testing constructors.\n" << endl;
 
   cout << "[1] ProgressBar (int)" << endl;
-  {
+  try {
     ProgressBar bar = ProgressBar (loops);
     bar.showTime (false);
     //
     drawProgressBar (bar,nofComputations);
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
   }
-
+  
   cout << "[2] ProgressBar (int,int)" << endl;
-  {
+  try {
     ProgressBar bar = ProgressBar (loops,length);
     bar.showTime (false);
     //
     drawProgressBar (bar,nofComputations);
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
+// --- Control parameters ------------------------------------------------------
+
+int test_parameters (int const &loops,
+		     int const &nofComputations)
+{
+  int nofFailedTests (0);
+
+  cout << "[1] Testing change of bar symbol ..." << endl;
+  try {
+    ProgressBar bar = ProgressBar (loops);
+    //
+    drawProgressBar (bar,nofComputations);
+    //
+    bar.setSymbol("/");
+    drawProgressBar (bar,nofComputations);
+    //
+    bar.setSymbol("%");
+    drawProgressBar (bar,nofComputations);
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
   }
 
+  cout << "[2] Testing change of bar width ..." << endl;
+  try {
+    ProgressBar bar = ProgressBar (loops);
+    //
+    drawProgressBar (bar,nofComputations);
+    //
+    bar.setBarwidth(60);
+    drawProgressBar (bar,nofComputations);
+    //
+    bar.setBarwidth(50);
+    drawProgressBar (bar,nofComputations);
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[3] Testing display of remain time." << endl;
+  try {
+    int computations (nofComputations);
+    ProgressBar bar = ProgressBar (loops);
+    //
+    drawProgressBar (bar,nofComputations);
+    //
+    bar.showTime(true);
+    //
+    computations *= 5;
+    drawProgressBar (bar,computations);
+    //
+    computations *= 5;
+    drawProgressBar (bar,computations);
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+  
   return nofFailedTests;
 }
 
@@ -183,64 +248,15 @@ int test_ProgressBar (const int& loops,
 int main ()
 {
   int nofFailedTests (0);
-  int loops = 100;
-  int length = 60;
-  int nofComputations = 100000;
-
-
-  {
-    testTimer ();
-    testTimer2 ();
-  }
-
-  {
-    nofFailedTests += test_ProgressBar (loops, length, nofComputations);
-  }
-
-  {
-    cout << "\n[tProgressBar] Testing change of bar symbol." << endl;
-    //
-    ProgressBar bar = ProgressBar (loops);
-    //
-    drawProgressBar (bar,nofComputations);
-    //
-    bar.setSymbol("/");
-    drawProgressBar (bar,nofComputations);
-    //
-    bar.setSymbol("%");
-    drawProgressBar (bar,nofComputations);
-  }
-
-  {
-    cout << "\n[tProgressBar] Testing change of bar width." << endl;
-    //
-    ProgressBar bar = ProgressBar (loops);
-    //
-    drawProgressBar (bar,nofComputations);
-    //
-    bar.setBarwidth(60);
-    drawProgressBar (bar,nofComputations);
-    //
-    bar.setBarwidth(50);
-    drawProgressBar (bar,nofComputations);
-  }
-
-  {
-    cout << "\n[tProgressBar] Testing display of remain time." << endl;
-    //
-    ProgressBar bar = ProgressBar (loops);
-    //
-    drawProgressBar (bar,nofComputations);
-    //
-    bar.showTime(true);
-    //
-    nofComputations *= 5;
-    drawProgressBar (bar,nofComputations);
-    //
-    nofComputations *= 5;
-    drawProgressBar (bar,nofComputations);
-  }
-
-  return 0;
-
+  int loops (100);
+  int length (60);
+  int nofComputations (10000);
+  
+  testTimer (nofComputations);
+  testTimer2 (nofComputations);
+  
+  nofFailedTests += test_ProgressBar (loops, length, nofComputations);
+  nofFailedTests += test_parameters (loops, nofComputations);
+  
+  return nofFailedTests;
 }

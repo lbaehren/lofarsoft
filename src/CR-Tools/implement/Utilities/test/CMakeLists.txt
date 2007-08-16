@@ -20,6 +20,8 @@ set (tests
 foreach (src ${tests})
   add_executable (${src} ${src}.cc)
   target_link_libraries (${src} cr)
+  ## testing
+  add_test (${src} ${src})
 endforeach (src)
 
 ## -----------------------------------------------------------------------------
@@ -31,13 +33,3 @@ install (
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   )
-
-## -----------------------------------------------------------------------------
-## Installation
-
-install (
-  TARGETS ${tests}
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-)

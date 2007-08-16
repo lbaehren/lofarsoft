@@ -19,13 +19,15 @@ set (tests
 )
 
 if (HAVE_CASA)
-  ## build the excutables ---------------------
   FOREACH (src ${tests})
+    ## build the excutables
     ADD_EXECUTABLE (${src} ${src}.cc)
     TARGET_LINK_LIBRARIES (${src}
       ${CASA_LIBRARIES}
       ${LAPACK_LIBRARIES}
       )  
+    ## testing
+    add_test (${src} ${src})
   ENDFOREACH (src)
   ## installation locations -------------------
   install (
@@ -46,6 +48,10 @@ else (HAVE_CASA)
     ##
     add_executable (tUseTables tUseTables.cc)
     target_link_libraries (tUseTables ${CASACORE_LIBRARIES})
+    ## testing ------------------------------------
+    add_test (tUseArrays tUseArrays)
+    add_test (tUseCASA tUseCASA)
+    add_test (tUseTables tUseTables)
     ## installation locations ---------------------
     install (
       TARGETS tUseArrays tUseCASA tUseTables
@@ -73,24 +79,19 @@ endif (HAVE_CASACORE)
 ## Numerical ranges of the various data types
 ## Relationship between the various control parameters
 
-add_executable (tNumericalRanges tNumericalRanges.cc)
-add_executable (tObjects tObjects.cc)
-add_executable (tProcessingParameters tProcessingParameters.cc)
-
-## testing 
-
-add_test (run_tNumericalRanges tNumericalRanges)
-add_test (run_tObjects tObjects)
-add_test (run_tProcessingParameters tProcessingParameters)
-
-## installation
-
-install (
-  TARGETS tNumericalRanges tObjects tProcessingParameters
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  )
+foreach (test tNumericalRanges tObjects tProcessingParameters)
+  ## build program
+  add_executable (${test} ${test}.cc)
+  ## testing
+  add_test (${test} ${test})
+  ## installation
+  install (
+    TARGETS ${test}
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    )
+endforeach (test)
 
 ## -----------------------------------------------------------------------------
 ## Test for BLITZ
@@ -100,7 +101,7 @@ if (HAVE_BLITZ)
   add_executable (tUseBlitz tUseBlitz.cc)
   target_link_libraries (tUseBlitz ${BLITZ_LIBRARIES})
   ## testing
-  add_test (run_tUseBlitz tUseBlitz)
+  add_test (tUseBlitz tUseBlitz)
   ## installation
   install (
     TARGETS tUseBlitz
@@ -115,6 +116,8 @@ if (HAVE_CFITSIO)
   ## build test program
   add_executable (tUseCFITSIO tUseCFITSIO.cc)
   target_link_libraries (tUseCFITSIO ${CFITSIO_LIBRARIES})
+  ## testing
+  add_test (tUseCFITSIO tUseCFITSIO)
   ## installation
   install (
     TARGETS tUseCFITSIO
@@ -128,6 +131,8 @@ endif (HAVE_CFITSIO)
 if (HAVE_FFTW3)
   add_executable (tUseFFTW3 tUseFFTW3.cc)
   target_link_libraries (tUseFFTW3 ${FFTW3_LIBRARIES})
+  ## testing
+  add_test (tUseFFTW3 tUseFFTW3)
   ## installation
   install (
     TARGETS tUseFFTW3
@@ -141,6 +146,8 @@ endif (HAVE_FFTW3)
 if (HAVE_WCSLIB)
   add_executable (tUseWCS tUseWCS.cc)
   target_link_libraries (tUseWCS ${WCSLIB_LIBRARIES})
+  ## testing
+  add_test (tUseWCS tUseWCS)
   ## installation
   install (
     TARGETS tUseWCS
@@ -152,6 +159,9 @@ endif (HAVE_WCSLIB)
 ## Test for working with ROOT (includes working with the DAL)
 
 if (HAVE_ROOT AND HAVE_BLITZ AND dal)
+  ## build test program
   add_executable (tUseROOT tUseROOT.cc)
   target_link_libraries (tUseROOT dal ${ROOT_LIBRARIES} ${BLITZ_LIBRARIES})
+  ## testing
+  add_test (tUseROOT tUseROOT)
 endif (HAVE_ROOT AND HAVE_BLITZ AND dal)
