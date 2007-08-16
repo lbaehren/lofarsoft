@@ -147,8 +147,8 @@ namespace CR {  // Namespace CR -- begin
       
       \return y - Value of the Hermite polynomial \f$ H_l (x) \f$.
     */
-    double eval (const int l,
-		 const double x);
+    double eval (int const &l,
+		 double const &x);
     
     /*!
       \brief Evaluate the Hermite polynomial for a set of points.

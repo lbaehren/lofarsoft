@@ -109,16 +109,18 @@ namespace CR {  // Namespace CR -- begin
     
   }
   
-  // =============================================================================
+  // ============================================================================
   // 
   //  Evaluation of the polynomial.
   // 
-  // =============================================================================
+  // ============================================================================
   
-  double Hermite1D::eval (const int l,
-			  const double x) {
-    
-    double y;
+  // ----------------------------------------------------------------------- eval
+
+  double Hermite1D::eval (int const &l,
+			  double const &x)
+  {  
+    double y (0);
     
     /* Check if we have already computed the polynomial coefficients up to the
        order requested; if this is not the case, compute them and adjust the
@@ -143,15 +145,14 @@ namespace CR {  // Namespace CR -- begin
     return y;  
   }
   
+  // ----------------------------------------------------------------------- eval
+
   vector<double> Hermite1D::eval (const int l,
 				  const vector<double>& x)
   {
-    int nelem;
-    vector<double> y;
-    
-    nelem = x.size();
-    y.resize(nelem,0.0);
-    
+    int nelem (x.size());
+    vector<double> y (nelem);
+
     for (int n=0; n<nelem; n++) {
       y[n] = Hermite1D::eval (l,x[n]);
     }

@@ -51,23 +51,23 @@ namespace CR {  // Namespace CR -- begin
     <h3>Synopsis</h3>
     
     <table border="0">
-    <tr valign="top">
-    <td>
-    Using the 1-dimensional Shapelet basis functions, we can construct 
-    basis functions that allow to describe 2-dimensional objects; this is done by
-    simply taking the tensor product of two 1-dimensional basis functions,
-    \f[ \phi_{\mathbf n}(\mathbf x) = \phi_{n_1}(x_1) \, \phi_{n_2}(x_2) \f]
-    where \f$ \mathbf x = (x_1,x_2) \f$ and \f$ \mathbf n = (n_1,n_2) \f$. With
-    this again we also can define dimensional basis functions as
-    \f[ B_{\mathbf n}(\mathbf x;\beta) = \frac{1}{\beta}
-    \phi_{\mathbf n}(\beta^{-1} \mathbf x) \f]
-      </td>
-      <td>
-      <img src="figures/Shapelets2D.png">
-      </td>
+      <tr valign="top">
+        <td>
+	Using the 1-dimensional Shapelet basis functions, we can construct 
+	basis functions that allow to describe 2-dimensional objects; this is done by
+	simply taking the tensor product of two 1-dimensional basis functions,
+	\f[ \phi_{\mathbf n}(\mathbf x) = \phi_{n_1}(x_1) \, \phi_{n_2}(x_2) \f]
+	where \f$ \mathbf x = (x_1,x_2) \f$ and \f$ \mathbf n = (n_1,n_2) \f$. With
+	this again we also can define dimensional basis functions as
+	\f[ B_{\mathbf n}(\mathbf x;\beta) = \frac{1}{\beta}
+	\phi_{\mathbf n}(\beta^{-1} \mathbf x) \f]
+	</td>
+	<td>
+	<img src="figures/Shapelets2D.png">
+	</td>
       </tr>
-      </table>
-      
+    </table>
+    
   */
   
   class Shapelets2D : public Shapelets1D {
@@ -83,7 +83,7 @@ namespace CR {  // Namespace CR -- begin
       \param order - Maximum order for which the function coefficients are
                      pre-computed.
     */
-    Shapelets2D (int const &order=10);
+    Shapelets2D (int const &order);
 
     /*!
       \brief Argumented constructor.

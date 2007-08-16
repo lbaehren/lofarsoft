@@ -29,7 +29,7 @@
 
   \ingroup Coordinates
 
-  \brief A collection of test routines for LOPES::TimeFreq
+  \brief A collection of test routines for TimeFreq
  
   \author Lars B&auml;hren
  
@@ -443,26 +443,15 @@ int test_coordinateAxes ()
 int main ()
 {
   int nofFailedTests (0);
-
-  // Test for the constructor(s)
-  {
-    nofFailedTests += test_TimeFreq ();
-  }
-
-  // Test accesss to the sample frequency in the ADC
-  {
-    nofFailedTests += test_sampleFrequency ();
-  }
-
-  // Test retrival of the frequency values
-  {
-    nofFailedTests += test_frequencyValues ();
-  }
   
+  // Test for the constructor(s)
+  nofFailedTests += test_TimeFreq ();
+  // Test accesss to the sample frequency in the ADC
+  nofFailedTests += test_sampleFrequency ();
+  // Test retrival of the frequency values
+  nofFailedTests += test_frequencyValues ();
   // Test conversion of parameters to coordinate axes
-  {
-    nofFailedTests += test_coordinateAxes ();
-  }
-
+  nofFailedTests += test_coordinateAxes ();
+  
   return nofFailedTests;
 }

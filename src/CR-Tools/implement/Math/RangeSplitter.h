@@ -247,4 +247,8 @@ template <class T> class RangeSplitter {
 
 };
 
+template class RangeSplitter<int>;
+template class RangeSplitter<float>;
+template class RangeSplitter<double>;
+
 #endif /* _RANGESPLITTER_H_ */

@@ -25,10 +25,6 @@
 
 #include <Math/RangeSplitter.h>
 
-/*!
-  \class RangeSplitter
-*/
-
 // ==============================================================================
 //
 //  Construction
