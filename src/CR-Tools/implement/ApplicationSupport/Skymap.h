@@ -55,7 +55,7 @@ using namespace std;
 
 // custom
 #include <ApplicationSupport/Beamformer.h>
-#include <LopesBase/DataFrequency.h>
+#include <LopesLegacy/DataFrequency.h>
 #include <Observation/ObservationData.h>
 #include <Observation/ObservationFrame.h>
 #include <Imaging/SkymapGrid.h>
@@ -114,7 +114,7 @@ using CR::SkymapGrid;
   </ul>
 */
 
-class Skymap : public Beamformer
+class Skymap : public LOPES::Beamformer
 {
  private:
 

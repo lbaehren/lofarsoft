@@ -44,42 +44,44 @@
 
 using CR::DataFrequency;
 
-/*!
-  \class Beamformer
-
-  \ingroup ApplicationSupport
-
-  \brief An implementation for various beamforming methods.
-
-  \author Lars B&auml;hren
-
-  \test tBeamformer.cc
-
-  <h3>Prerequisite</h3>
-
-  <ul type="square">
-    <li>Some basic knowledge on beamforming with phased arrays of antennas 
-
-    <li>[AIPS++] <a href="http://www.fredosaurus.com/notes-cpp/arrayptr/23two-dim-array-memory-layout.html">2-D Array Memory Layout</a>
-    <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/Array.html">AIPS++
-    Array class</a>  - A templated N-D Array class with zero origin. 
-    <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/Vector.html">Vector</a>,
-    <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/Matrix.html">Matrix</a>,
-    and <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/Cube.html">Cube</a>
-    are one, two, and three dimensional specializations of Array.
-    <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/ArrayMath.html">Mathematical
-    operations for Arrays</a>.
-    <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/Slicer.html">AIPS++
-    Slicer class</a>  - Specify which elements to extract from an n-dimensional
-    array. If you need to extract or operate upon a portion of an array, the
-    Slicer class is the best way to specify the subarray you are interested in.
-    <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/IPosition.html">AIPS++
-    IPosition class</a> -- A Vector of integers, for indexing into Array objects.
-
-    <li>[LOPES-Tools] DataFrequency -- Frequency domain settings of an observation.
-    <li>[LOPES Tools] Phasing -- Computation of delays for beamforming
-    <li>[LOPES-Tools] ccBeam -- Methods for the computation of the 'cc-Beam'
-  </ul>
+namespace LOPES {  // Namespace LOPES -- begin
+  
+  /*!
+    \class Beamformer
+    
+    \ingroup ApplicationSupport
+    
+    \brief An implementation for various beamforming methods.
+    
+    \author Lars B&auml;hren
+    
+    \test tBeamformer.cc
+    
+    <h3>Prerequisite</h3>
+    
+    <ul type="square">
+      <li>Some basic knowledge on beamforming with phased arrays of antennas 
+      
+      <li>[AIPS++] <a href="http://www.fredosaurus.com/notes-cpp/arrayptr/23two-dim-array-memory-layout.html">2-D Array Memory Layout</a>
+      <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/Array.html">AIPS++
+      Array class</a>  - A templated N-D Array class with zero origin. 
+      <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/Vector.html">Vector</a>,
+      <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/Matrix.html">Matrix</a>,
+      and <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/Cube.html">Cube</a>
+      are one, two, and three dimensional specializations of Array.
+      <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/ArrayMath.html">Mathematical
+      operations for Arrays</a>.
+      <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/Slicer.html">AIPS++
+      Slicer class</a>  - Specify which elements to extract from an n-dimensional
+      array. If you need to extract or operate upon a portion of an array, the
+      Slicer class is the best way to specify the subarray you are interested in.
+      <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/IPosition.html">AIPS++
+      IPosition class</a> -- A Vector of integers, for indexing into Array objects.
+      
+      <li>DataFrequency -- Frequency domain settings of an observation.
+      <li>LOPES::Phasing -- Computation of delays for beamforming
+      <li>LOPES::ccBeam -- Methods for the computation of the 'cc-Beam'
+    </ul>
   
   <h3>Synopsis</h3>
 
@@ -640,5 +642,7 @@ class Beamformer : public DataFrequency {
   Int nofBaselines (const Int nant); 
 
 };
+
+}  // Namespace LOPES -- end
 
 #endif

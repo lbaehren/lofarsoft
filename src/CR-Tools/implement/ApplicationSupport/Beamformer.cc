@@ -34,61 +34,63 @@ const Double deg2rad = C::pi/180.0;
 
 using CR::ProgressBar;
 
-// ==============================================================================
-//
-//  Construction / Deconstruction
-//
-// ==============================================================================
-
-// ------------------------------------------------------------------- Beamformer
-
-Beamformer::Beamformer ()
-  : DataFrequency()
-{
-  Beamformer::initBeamformer ();
-}
-
-// ------------------------------------------------------------------- Beamformer
-
-Beamformer::Beamformer (Vector<Double> frequencies,
-			Matrix<Double> directions,
-			Matrix<Double> posAntennas)
-  : DataFrequency()
-{
-  Beamformer::initBeamformer ();
-  Beamformer::setPhaseGradients (frequencies,
-				 directions,
-				 posAntennas);
-}
-
-// ------------------------------------------------------------------- Beamformer
-
-Beamformer::Beamformer (Vector<Double> frequencies,
-			Cube<Double> directions,
-			Matrix<Double> posAntennas)
-  : DataFrequency()
-{
-  Beamformer::initBeamformer ();
-  Beamformer::setPhaseGradients (frequencies,
-				 directions,
-				 posAntennas);
-}
-
-// ------------------------------------------------------------------ ~Beamformer
-
-Beamformer::~Beamformer ()
-{
-  Bool deleteIt (True);
-  const DComplex* ptrPhaseGradients = weights_p.getStorage (deleteIt);
-  weights_p.freeStorage(ptrPhaseGradients,deleteIt);
-}
-
-// ==============================================================================
-//
-//  Initialization
-//
-// ==============================================================================
-
+namespace LOPES {  // Namespace LOPES -- begin
+  
+  // ============================================================================
+  //
+  //  Construction / Deconstruction
+  //
+  // ============================================================================
+  
+  // ----------------------------------------------------------------- Beamformer
+  
+  Beamformer::Beamformer ()
+    : DataFrequency()
+  {
+    Beamformer::initBeamformer ();
+  }
+  
+  // ----------------------------------------------------------------- Beamformer
+  
+  Beamformer::Beamformer (Vector<Double> frequencies,
+			  Matrix<Double> directions,
+			  Matrix<Double> posAntennas)
+    : DataFrequency()
+  {
+    Beamformer::initBeamformer ();
+    Beamformer::setPhaseGradients (frequencies,
+				   directions,
+				   posAntennas);
+  }
+  
+  // ----------------------------------------------------------------- Beamformer
+  
+  Beamformer::Beamformer (Vector<Double> frequencies,
+			  Cube<Double> directions,
+			  Matrix<Double> posAntennas)
+    : DataFrequency()
+  {
+    Beamformer::initBeamformer ();
+    Beamformer::setPhaseGradients (frequencies,
+				   directions,
+				   posAntennas);
+  }
+  
+  // ---------------------------------------------------------------- ~Beamformer
+  
+  Beamformer::~Beamformer ()
+  {
+    Bool deleteIt (True);
+    const DComplex* ptrPhaseGradients = weights_p.getStorage (deleteIt);
+    weights_p.freeStorage(ptrPhaseGradients,deleteIt);
+  }
+  
+  // ============================================================================
+  //
+  //  Initialization
+  //
+  // ============================================================================
+  
 // --------------------------------------------------------------- initBeamformer
 
 void Beamformer::initBeamformer ()
@@ -756,3 +758,5 @@ void Beamformer::printBeamformer (std::ostream &os)
   os << " - Verbose mode during computations? ..... : "
      << showProgress_p << endl;
 }
+
+}  // Namespace LOPES -- end
