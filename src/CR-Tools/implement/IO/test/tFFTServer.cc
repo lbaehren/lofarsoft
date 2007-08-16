@@ -52,6 +52,38 @@
   \date 2005/12/06
 */
 
+// -------------------------------------------------------------- infile_location
+
+std::string get_filenameData ()
+{
+  bool ok (true);
+  std::string filename ("");
+  std::vector<std::string> filenames;
+
+  filenames.push_back("/data/ITS/2005.08/lightning_20050831_1/experiment.meta");
+  filenames.push_back("/data/ITS/2005.11/jupiter_20051130_01/experiment.meta");
+  filenames.push_back("/data/ITS/2005.11/jupiter_20051130_02/experiment.meta");
+
+  for (uint n(0); filenames.size(); n++) {
+    //
+    std::cout << " --> checking file " << filenames[n] << " ..." << std::endl;
+    // try to open the file
+    FILE *fd = fopen(filenames[n].c_str(),"r");
+    if (fd == NULL) {
+      ok = false;
+      std::cerr << " ---> Failed to open file!" << std::endl;
+    } else {
+      filename = filenames[n];
+      // report success
+      std::cout << " ---> Success opening file." << std::endl;
+      // return the result
+      return filename;
+    }
+  }
+  
+  return filename;
+}
+
 // ------------------------------------------------------------------ test_invers
 
 /*!
@@ -66,18 +98,18 @@ int test_invers (String const &filename,
 		 const Int& blocksize)
 {
   int nofFailedTests (0);
-
+  
   DataReader *dr;
   ITSCapture *capture = new ITSCapture (filename, blocksize);
   dr = capture;
-
+  
   uInt nofFiles (dr->nofSelectedAntennas());
   Matrix<Double> voltage (dr->voltage());
   Matrix<DComplex> fft (dr->fft());
   Matrix<Double> voltageReconstruction (blocksize,nofFiles);
-
+  
   FFTServer<Double,DComplex> server(IPosition(1,blocksize),
-				  FFTEnums::REALTOCOMPLEX);
+				    FFTEnums::REALTOCOMPLEX);
   
   cout << "[1] Start from the FFT'ed data ..." << endl;
   try {
@@ -100,9 +132,9 @@ int test_invers (String const &filename,
   cout << "[2] Start from the initial raw data ..." << endl;
   try {
     Matrix<DComplex> tmp;
-
+    
     server.fft(tmp,voltage);
-
+    
     cout << " - sum(fft)          : " << sum(fft) << "  " << fft.shape() << endl;
     cout << " - sum(FFT(voltage)) : " << sum(tmp) << "  " << tmp.shape() << endl;
   } catch (AipsError x) {
@@ -115,16 +147,18 @@ int test_invers (String const &filename,
 
 // ----------------------------------------------------------------- main routine
 
-int main () {
+int main ()
+{
   int nofFailedTests (0);
-
-
-  Int blocksize (8192);
-  String filename ("/data/ITS/2005.08/lightning_20050831_1/experiment.meta");
-
-  {
-    nofFailedTests += test_invers(filename,blocksize);
-  }
   
+  Int blocksize (8192);
+  String filename = get_filenameData ();
+  
+  if (filename != "") {
+    nofFailedTests += test_invers(filename,blocksize);
+  } else {
+    nofFailedTests++;
+  }
+
   return nofFailedTests;
 }

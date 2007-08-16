@@ -23,7 +23,7 @@ foreach (src ${tests})
   ## build executable
   add_executable (${src} ${src}.cc)
   target_link_libraries (${src} cr)
-  ## testing 
+  ## testing
   add_test (${src} ${src})
 endforeach (src)
 

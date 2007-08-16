@@ -49,24 +49,30 @@ using CR::Data;
 int test_Data ()
 {
   int nofFailedTests (0);
-
-  Data d(50, 1200);
-  Data e(50, 1201);
-  Data f((uint)1e8, 1);
-  int a;
   
-  d[2] = 10;
-  e[2] = 12;
-  f = d;
-  cin >> a;
-  cout << "d: " << d.id() << ", e: " << e.id() << ", f: " << f.id() << endl;
-  
-  cin >> a;  
+  try {
+    int max (10);
+    Data d(50, 1200);
+    Data e(50, 1201);
+    Data f((uint)1e8, 1);
 
+    for (int a(0); a<max; a++) {
+      d[2] = 10;
+      e[2] = 12;
+      f = d;
+      cout << "d: " << d.id() << ", e: " << e.id() << ", f: " << f.id() << endl;
+    }
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
   return nofFailedTests;
 }
 
-int main (void)
+// ----------------------------------------------------------------- main routine
+
+int main ()
 {
   int nofFailedTests (0);
 

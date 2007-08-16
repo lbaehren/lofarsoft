@@ -36,13 +36,15 @@ ObservationMeta::ObservationMeta (String filename)
   ObservationMeta::readMetafile (filename);
 }
 
-ObservationMeta::ObservationMeta (String metaFile, String antposFile)
+ObservationMeta::ObservationMeta (String metaFile,
+				  String antposFile)
 {
   ObservationMeta::readMetafile (metaFile);
   ObservationMeta::setAntennaPositions(antposFile);
 }
 
-ObservationMeta::ObservationMeta (String filename, GlishRecord& datarec)
+ObservationMeta::ObservationMeta (String filename,
+				  GlishRecord& datarec)
 {
   ObservationMeta::readMetafile (filename);
   ObservationMeta::metadata (datarec);

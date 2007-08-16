@@ -19,7 +19,7 @@ set (tests
 ## Build the test programs
 
 foreach (src ${tests})
-  ## buidl executable
+  ## build executable
   add_executable (${src} ${src}.cc)
   target_link_libraries (${src} cr)
   ## testing

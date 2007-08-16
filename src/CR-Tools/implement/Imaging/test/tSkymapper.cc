@@ -620,7 +620,7 @@ int main (int argc,
   
   nofFailedTests += test_CoordinateSystem ();
   nofFailedTests += test_PagedImage ();
-//   nofFailedTests += test_Skymapper ();
+  nofFailedTests += test_Skymapper ();
 //   nofFailedTests += test_processing (lopesData,
 // 				     blocksize);
 
