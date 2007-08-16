@@ -80,6 +80,8 @@ add_executable (tProcessingParameters tProcessingParameters.cc)
 ## testing 
 
 add_test (run_tNumericalRanges tNumericalRanges)
+add_test (run_tObjects tObjects)
+add_test (run_tProcessingParameters tProcessingParameters)
 
 ## installation
 
@@ -93,20 +95,24 @@ install (
 ## -----------------------------------------------------------------------------
 ## Test for BLITZ
 
-add_executable (tUseBlitz tUseBlitz.cc)
-target_link_libraries (tUseBlitz ${BLITZ_LIBRARIES})
-
-## installation
-
-install (
-  TARGETS tUseBlitz
-  RUNTIME DESTINATION bin
-  )
+if (HAVE_BLITZ)
+  ## buid test program
+  add_executable (tUseBlitz tUseBlitz.cc)
+  target_link_libraries (tUseBlitz ${BLITZ_LIBRARIES})
+  ## testing
+  add_test (run_tUseBlitz tUseBlitz)
+  ## installation
+  install (
+    TARGETS tUseBlitz
+    RUNTIME DESTINATION bin
+    )
+endif (HAVE_BLITZ)
 
 ## -----------------------------------------------------------------------------
 ## Test for CFITSIO
 
 if (HAVE_CFITSIO)
+  ## build test program
   add_executable (tUseCFITSIO tUseCFITSIO.cc)
   target_link_libraries (tUseCFITSIO ${CFITSIO_LIBRARIES})
   ## installation
