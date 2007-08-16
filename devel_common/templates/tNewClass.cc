@@ -30,7 +30,7 @@ using <newNamespace>::<newClass>;  // Namespace usage
 
   \ingroup <newModule>
 
-  \brief A collection of test routines for <newClass>
+  \brief A collection of test routines for the <newClass> class
  
   \author <author>
  

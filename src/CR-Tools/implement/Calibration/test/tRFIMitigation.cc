@@ -45,6 +45,8 @@
 #include <Data/LopesEvent.h>
 #include <IO/DataReader.h>
 
+#include <casa/namespace.h>
+
 using CR::RFIMitigation;
 
 // ------------------------------------------------------------------------------
@@ -53,22 +55,9 @@ using CR::RFIMitigation;
 //
 // ------------------------------------------------------------------------------
 
- Int dataBlockSize ( 131072 );
-
- Double alpha   ( 0.5 );               //slope parameter of the hanning filter
-
- //Int fft_Length = ( blocksize/2 )+1 ;
-
-/*int main() {
-  
-  Int nofFailedTests (0);*/
- 
-  
-  // Test for the constructor(s)
-//   {
-//     nofFailedTests += test_RFIMitigation ();
-//   }
-//   
+Int dataBlockSize ( 131072 );
+// slope parameter for the HanningFilter
+Double alpha (0.5);
   
 //------------------------to test RFIMitigation class------------------------
 

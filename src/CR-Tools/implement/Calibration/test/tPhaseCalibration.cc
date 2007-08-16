@@ -33,6 +33,8 @@
   \date 2006/07/03
 */
 
+// casa header files
+
 #include <casa/Arrays.h>
 #include <casa/BasicSL/Complex.h>
 
@@ -43,6 +45,8 @@
 #include <Data/LopesEvent.h>
 #include <Data/LopesEventIn.h>
 #include <IO/DataReader.h>
+
+#include <casa/namespace.h>
 
 // -----------------------------------------------------------------------------
 // 
@@ -64,28 +68,28 @@ Vector<String> filenamesVector ()
   
   
   //2004.01.12.00:28:11.577.event" ;
- 
+  
   //2004.02.10.01:48:14.776.event"; 
   //2004.02.09.18:02:11.922.event"; 
-
+  
   return files ;
- }
- 
- Double frequencyRange[3][2] = { {62165865.6, 62223239.5},
-                                 {67670000.0, 67712097.0 },
-				 {67915000.0, 67947000.0 } };
-				 
-	
- Double expectedPhase[3][10] = { {0., 118., 4.8, 99.6, 172.4, -66., -113.6, 49., -138.1, 5.1},
-                                 {0., 112., -143., -73., -14., -136., -151., -25., 11.4, -1.2},
-				 {0., 122., -97., -42., 18.7, -113., -140., -14., 140.6, 29.9} } ;
-				 
+}
+
+Double frequencyRange[3][2] = { {62165865.6, 62223239.5},
+				{67670000.0, 67712097.0 },
+				{67915000.0, 67947000.0 } };
+
+
+Double expectedPhase[3][10] = { {0., 118., 4.8, 99.6, 172.4, -66., -113.6, 49., -138.1, 5.1},
+				{0., 112., -143., -73., -14., -136., -151., -25., 11.4, -1.2},
+				{0., 122., -97., -42., 18.7, -113., -140., -14., 140.6, 29.9} } ;
+
 Double sampleJump[6]={ -2, 2, -1, 1, -3, 3 } ;
 
 Double Grad[3][10] = { {-919.812673, -861.727128, -940.460636, -984.350944, -1459.81119, -1476.3772, -589.239534,                                   -695.093165, -631.581104, -1188.81975},
                        {-1000.96359, -937.753418, -1023.43323, -1071.19578, -1588.60373, -1606.63129, -641.225475,      -756.418093, -687.30265, -1293.70394},
-                      {-1004.61041, -941.169949, -1027.16192, -1075.09848, -1594.39151, -1612.48476,  -643.561662,-759.173963, -689.806711, -1298.41731} };
-			 
+		       {-1004.61041, -941.169949, -1027.16192, -1075.09848, -1594.39151, -1612.48476,  -643.561662,-759.173963, -689.806711, -1298.41731} };
+
 
 Vector<Double> frequencyValues(dataBlockSize+1, 0.0);
 
@@ -96,157 +100,152 @@ Matrix<Double> expectedPhases( 3, 10, 0.0 );
 Matrix<Double> phaseGradient( 3, 10, 0.0 ) ;
 
 Vector<Double> sampleJumps(6, 0);
-   
- /*!
-  \brief Test constructors for a new PhaseCalibration object
 
+// ------------------------------------------------------- test_PhaseCalibrations
+
+/*!
+  \brief Test constructors for a new PhaseCalibration object
+  
   \return nofFailedTests -- The number of failed tests.
 */
-
-Int test_PhaseCalibrations ()
+int test_PhaseCalibrations ()
 {
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
   
   try {
-  
-  PhaseCalibration phcl ; 
-  
+    
+    PhaseCalibration phcl ; 
+    
   } catch ( AipsError x) {
-  
-  cerr<< "test_PhaseCalibration :- Testing default constructor ..." << x.getMesg () << endl;
+    
+    cerr<< "test_PhaseCalibration :- Testing default constructor ..." << x.getMesg () << endl;
   }
-    return nofFailedTests;
+  return nofFailedTests;
 }
 
+/*!
+  \brief Test constructors for a new PhaseCalibration object
+  
+  \return nofFailedTests -- The number of failed tests.
+*/
 Bool test_PhaseCalibration ()
 {
- Bool ok ( True ) ;
- 
- try {
- 
-cout << " - getting filenames" << endl; 
-
-Vector<String> filenames = filenamesVector();
-
-//cout << " - setting up DataReader ..." << endl;
-//cout << " -- filename  = " << filenames(0) << endl; 
-//cout << " -- blocksize = " << dataBlockSize <<endl;
-
- DataReader *dr ;
-LopesEvent *anEvent = new LopesEvent( filenames(0), 
- 			               dataBlockSize );
-
-dr = anEvent ;
-dr->setHanningFilter (alpha );
-
-//cout << " - getting FFT data" << endl; 
-
-Matrix<DComplex> spectra (dr->fft());
- 
-//cout << " - extracting phases ..." << endl;
-
-Matrix<Double> phaseArray( phase( spectra ) ) ;
- 
-uInt row = phaseArray.nrow () ;
- 
-uInt column = phaseArray.ncolumn () ;
- 
-//cout << "Number of Rows : " << row << "\n"
-//      << "Number of Columns : " << column << endl;
-      
-ofstream logfile1p ;
- 
-logfile1p.open( "rawdata", ios::out ) ;
- 
- for( uInt sample(0); sample< row ; sample++ ) {
-    for( uInt antenna(0); antenna< column; antenna++ ) {
-       logfile1p << phaseArray( sample, antenna )
-                 << "\t" ;
-     }
-    logfile1p << endl ;
-  }
-logfile1p.close();
- 
- PhaseCalibration phcl ;
- 
- for( Int i=0; i< 3; i++ ) {
-   for( Int j =0; j<2; j++ ) {
-      frequencyRanges(i,j) = frequencyRange[i][j] ;
-   }
+  int nofFailedTests (0);
+  
+  try {
+    cout << " - getting filenames" << endl; 
+    
+    Vector<String> filenames = filenamesVector();
+    
+    DataReader *dr ;
+    LopesEvent *anEvent = new LopesEvent( filenames(0), 
+					  dataBlockSize );
+    
+    dr = anEvent ;
+    dr->setHanningFilter (alpha );
+    
+    //cout << " - getting FFT data" << endl; 
+    
+    Matrix<DComplex> spectra (dr->fft());
+    
+    //cout << " - extracting phases ..." << endl;
+    
+    Matrix<Double> phaseArray( phase( spectra ) ) ;
+    
+    uInt row = phaseArray.nrow () ;
+    
+    uInt column = phaseArray.ncolumn () ;
+    
+    //cout << "Number of Rows : " << row << "\n"
+    //      << "Number of Columns : " << column << endl;
+    
+    ofstream logfile1p ;
+    
+    logfile1p.open( "rawdata", ios::out ) ;
+    
+    for( uInt sample(0); sample< row ; sample++ ) {
+      for( uInt antenna(0); antenna< column; antenna++ ) {
+	logfile1p << phaseArray( sample, antenna )
+		  << "\t" ;
+      }
+      logfile1p << endl ;
+    }
+    logfile1p.close();
+    
+    PhaseCalibration phcl ;
+    
+    for( Int i=0; i< 3; i++ ) {
+      for( Int j =0; j<2; j++ ) {
+	frequencyRanges(i,j) = frequencyRange[i][j] ;
+      }
+    }
+    
+    for( Int m =0; m<3; m++ ) {
+      for( Int n =0; n<10; n++ ){
+	expectedPhases(m,n) = expectedPhase[m][n];
+      }
+    }
+    
+    for( Int k=0; k<3; k++){
+      for( Int l=0; l<10; l++){
+	phaseGradient(k,l) = Grad[k][l];
+      }
+    }
+    
+    Double interval = 0.0 ;
+    
+    for(uint k =0; k< row ; k++ ){
+      interval = (80-40)*1000000/row ;
+      frequencyValues(k)= 40*1000000 + interval*k;
+    }
+    //cout<< " Frequency Values :" <<frequencyValues<< endl;
+    
+    for( Int k=0; k<6; k++){
+      sampleJumps(k) = sampleJump[k];
+    }
+    
+    
+    Double sampleRate = 80000000 ;
+    
+    Int referenceAntenna = 0 ;
+    
+    Double badnessWeight = 0.5 ;
+    
+    Double badnessThreshold = 0.15 ;
+    
+    Vector<Bool> AntennaReturn =(phcl.getAntennaReturn( spectra,
+							frequencyRanges,
+							expectedPhases,
+							phaseGradient,
+							frequencyValues,
+							sampleJumps,
+							referenceAntenna,
+							sampleRate,
+							badnessWeight,
+							badnessThreshold ) ); 
+    
+    //return AntennaReturn ;
   }
   
- for( Int m =0; m<3; m++ ) {
-     for( Int n =0; n<10; n++ ){
-	 expectedPhases(m,n) = expectedPhase[m][n];
-     }
- }
-       
- for( Int k=0; k<3; k++){
-     for( Int l=0; l<10; l++){
-	 phaseGradient(k,l) = Grad[k][l];
-     }
- }
- 
- Double interval = 0.0 ;
- 
- for( uInt k =0; k< row ; k++ ){
-   
-   interval = (80-40)*1000000/row ;
-   
-   frequencyValues(k)= 40*1000000 + interval*k ;
-   
- }
- //cout<< " Frequency Values :" <<frequencyValues<< endl;
- 
- for( Int k=0; k<6; k++){
-   sampleJumps(k) = sampleJump[k];
- }
- 
- 
- Double sampleRate = 80000000 ;
- 
- Int referenceAntenna = 0 ;
- 
- Double badnessWeight = 0.5 ;
- 
- Double badnessThreshold = 0.15 ;
- 
-Vector<Bool> AntennaReturn =(phcl.getAntennaReturn( spectra,
-  		     				    frequencyRanges,
-		     				    expectedPhases,
-						    phaseGradient,
-						    frequencyValues,
-		     				    sampleJumps,
-		     				    referenceAntenna,
-		     				    sampleRate,
-						    badnessWeight,
-						    badnessThreshold ) ); 
-
-//return AntennaReturn ;
+  catch ( AipsError x ) {
+    
+    cerr<< " Bool test_PhaseCalibration " << x.getMesg() << endl ;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
 }
 
- catch ( AipsError x ) {
- 
- cerr<< " Bool test_PhaseCalibration " << x.getMesg() << endl ;
- ok =False ;
- }
- 
- return ok ;
- }
- 
- 
- 
- 
+
+
+
 // -----------------------------------------------------------------------------
 
 int main ()
 {
-  Int nofFailedTests (0);
-
-  // Test for the constructor(s)
-  {
-    nofFailedTests += test_PhaseCalibration ();
-  }
-
+  int nofFailedTests (0);
+  
+  nofFailedTests += test_PhaseCalibration ();
+  
   return nofFailedTests;
 }

@@ -47,8 +47,11 @@
 #include <tables/Tables/ArrColDesc.h>
 #include <tables/Tables/ArrayColumn.h>
 
-// CR header files
+#include <Math/Math.h>
 #include <Math/StatisticsFilter.h>
+
+#include <casa/namespace.h>
+
 
 /*!
   \class PhaseCalibration

@@ -10,17 +10,20 @@ include_directories (. .. ../..)
 set (tests
   tClippingFraction
   tDynamicSpectrum
-  tFirstStagePipeline
+#  tFirstStagePipeline
   tinverseFFT
-  tSecondStagePipeline
+#  tSecondStagePipeline
   )
 
 ## -----------------------------------------------------------------------------
 ## Build the test programs
 
 foreach (src ${tests})
+  ## buidl executable
   add_executable (${src} ${src}.cc)
   target_link_libraries (${src} cr)
+  ## testing
+  add_test (${src} ${src})
 endforeach (src)
 
 ## -----------------------------------------------------------------------------
@@ -41,6 +44,8 @@ if (ROOT_LIBRARIES)
   add_executable (tHistograms tHistograms.cc)
   ## link instructions
   target_link_libraries (tHistograms ${ROOT_LIBRARIES})
+  ## testing
+  add_test (tHistograms tHistograms)
   ## installation instructions
   install (
     TARGETS tHistograms

@@ -33,7 +33,6 @@
 #include <casa/Containers/RecordInterface.h>
 
 #include <Calibration/PluginBase.h>
-
 #include <Calibration/PluginBase.h>
 #include <Calibration/PhaseCalibration.h>
 

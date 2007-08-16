@@ -8,8 +8,8 @@ include_directories (. .. ../..)
 ## Set up the list with test program sources
 
 set (tests
-  ascii_export_baseline
-  ascii_export_spectra
+#  ascii_export_baseline
+#  ascii_export_spectra
   tAverageGain
   tBaselineGain
   tCalTableInterpolater
@@ -18,15 +18,18 @@ set (tests
   tPhaseCalibrationPlugin
   tPluginBase
   tRFIMitigation
-  tTVCalibrationPlugin
+#  tTVCalibrationPlugin
   )
 
 ## -----------------------------------------------------------------------------
 ## Build the test programs
 
 foreach (src ${tests})
+  ## build executable
   add_executable (${src} ${src}.cc)
   target_link_libraries (${src} cr)
+  ## testing
+  add_test (${src} ${src})
 endforeach (src)
 
 ## -----------------------------------------------------------------------------

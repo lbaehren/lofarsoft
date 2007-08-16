@@ -44,17 +44,10 @@
 #include <tables/Tables/StandardStMan.h>
 #include <tables/Tables/IncrementalStMan.h>
 
-using casa::AipsError;
-using casa::Array;
-using casa::ColumnsIndex;
-using casa::DComplex;
-using casa::RecordFieldPtr;
-using casa::String;
-using casa::Table;
-using casa::uInt;
+#include <casa/namespace.h>
 
-namespace CR {  // Namespace CR -- begin
-
+namespace CR {  //  Namespace CR -- begin
+  
   /*!
     \class CalTableReader
     
@@ -92,7 +85,7 @@ namespace CR {  // Namespace CR -- begin
     Int AntennaID = 010101; //antenna 1 in LOPES notation
     uInt date = time(); //get the value that is valid today
     // get the data
-    Vector<double> Pos;
+    Vector<Double> Pos;
     if (!table.get(date, AntennaID, fieldName, &Pos)) {
     cerr << "Error while retrieving data" << endl;
     };
@@ -112,7 +105,7 @@ namespace CR {  // Namespace CR -- begin
     // Index over the AntID Column
     ColumnsIndex *AntIDIndex_p;
     // Pointer to the index value
-    RecordFieldPtr<int> *indexedAnt_p;
+    RecordFieldPtr<Int> *indexedAnt_p;
     
     /*!
       \brief Get the column table identified by AntID and FieldName
@@ -124,204 +117,204 @@ namespace CR {  // Namespace CR -- begin
       \param *DataType=NULL -- return the data type of the field
       \param *isJunior=NULL -- return whether this field has a senior friend
       
-      \return ok -- Was operation successful? Returns <tt>true</tt> if yes.
+      \return ok -- Was operation successful? Returns <tt>True</tt> if yes.
     */
-    bool GetColumnTable(int const AntID,
+    Bool GetColumnTable(Int const AntID,
 			String const FieldName,
 			Table *subtab, 
-			int *rowNr,
+			Int *rowNr,
 			String *DataType=NULL,
-			bool *isJunior=NULL);
+			Bool *isJunior=NULL);
     
-    /*!
-      \brief Get the row in the column table that corresponds to the date
-      
-      \param AntId -- ID of the antenna for which the data is requested
-      \param colTable -- column table with the data
-      \param date -- date for which the data is requested
-      \param mindEmpty -- complain about empty result
-      
-      \return rowNr -- row number or -1 if row not found
-    */
-    int GetDateRow(int const AntID,
-		   Table const colTable,
-		   uInt const date,
-		   const bool mindEmpty=true);
+  /*!
+    \brief Get the row in the column table that corresponds to the date
     
-    /*!
-      \brief Get the row in the column table that corresponds to the date for a
-      junior friend field
-      
-      \param AntId     -- ID of the antenna for which the data is requested
-      \param colTable  -- column table with the data
-      \param date      -- date for which the data is requested
-      \param MaskField -- name of the mask field
-      
-      \return rowNr -- row number or -1 if row not found
-    */
-    int GetJuniorDateRow(int const AntID,
-			 Table const colTable,
-			 uInt const date,
-			 String const MaskField,
-			 const bool mindEmpty=true);
+    \param AntId -- ID of the antenna for which the data is requested
+    \param colTable -- column table with the data
+    \param date -- date for which the data is requested
+    \param mindEmpty -- complain about empty result
     
-  public:
-    
-    // --------------------------------------------------------------- Construction
-    
-    /*!
-      \brief Default constructor
-      
-      This constructor just creates a new object but does not do anything else.
-    */
-    CalTableReader ();
-    
-    /*!
-      \brief Augmented constructor
-      
-      \param tableFilename -- filename of the table to be read.
-    */
-    CalTableReader (const String& tableFilename);
-    
-    //  /*!
-    //    \brief Copy constructor
-    //
-    //    \param other -- Another CalTableReader object from which to create this new
-    //                    one.
-    //  */
-    //  CalTableReader (CalTableReader const& other);
-    
-    // ---------------------------------------------------------------- Destruction
-    
-    /*!
-      \brief Destructor
-    */
-    virtual ~CalTableReader ();
-    
-    // ----------------------------------------------------------------- Parameters
-    
-    // -------------------------------------------------------------------- Methods
-    
-    /*!
-      \brief Attach the table file to the reader object
-      
-      \param tableFilename -- filename of the table to be read.
-      
-      \return ok -- Was operation successful? Returns <tt>true</tt> if yes.
-    */
-    virtual bool AttachTable(const String& tableFilename);
-    
-    /*!
-      \brief Is this reader object attached to a table?
-      
-      \return  yes -- <tt>true</tt> if the object is attached.
-    */
-    virtual bool isAttached();
-    
-    
-    /*!
-      \brief Get a piece of data from the table
-      
-      \param date -- date for which the data is requested
-      \param AntID -- ID of the antenna for which the data is requested
-      \param FieldName -- Name of the field that is requested
-      \param *result -- Place where the returned data can be stored
-      
-      \return ok -- Was operation successful? Returns <tt>true</tt> if yes.
-      
-      The methods to get the data. I expect this to be called a lot.
-      
-    */
-    bool GetData(uInt const date,
-		 int const AntID,
-		 String const FieldName,
-		 String *result);
-    bool GetData(uInt const date,
-		 int const AntID,
-		 String const FieldName,
-		 double *result);
-    bool GetData(uInt const date,
-		 int const AntID,
-		 String const FieldName,
-		 DComplex *result);
-    bool GetData(uInt const date,
-		 int const AntID,
-		 String const FieldName,
-		 Array<double> *result);
-    bool GetData(uInt const date,
-		 int const AntID,
-		 String const FieldName,
-		 Array<DComplex> *result);
-    
-    /*!
-      \brief Get the value of a keyword
-      
-      \param KeywordName -- Name of the field that is requested
-      \param *result -- Place where the returned data can be stored
-      
-      \return ok -- Was operation successful? Returns <tt>true</tt> if yes.
-      
-      The methods to retrieve the data that was stored in a keyword. If the types 
-      mismatch then type promotion of scalars will be done if possible. If not 
-      possible, the function returns false.
-    */
-    bool GetKeyword(String const KeywordName, String *result);
-    bool GetKeyword(String const KeywordName, double *result);
-    bool GetKeyword(String const KeywordName, DComplex *result);
-    bool GetKeyword(String const KeywordName, Array<double> *result);
-    bool GetKeyword(String const KeywordName, Array<DComplex> *result);
-    
-    /*!
-      \brief Get the name of the data type of the keyword
-      
-      \param KeywordName -- Name of the keyword that is requested
-      
-      \return TypeName -- the name of the data type
-    */
-    String GetKeywordType(String const KeywordName);
-    
-    /*!
-      \brief Has the value of this field changed between the two given dates?
-      
-      \param date1 -- first date
-      \param date2 -- second date 
-      \param AntID -- ID of the antenna for which the data is requested
-      \param FieldName -- Name of the field that is requested
-      
-      \return yes -- true if both dates point to the same entry, False otherwise 
-      
-      This method checks whether the two given dates point to the same entry in
-      the calibration table. (I.e. to the same row in the column table.) Useful
-      e.g. to check whether one has to recompute calibration values.
-    */
-    bool isIdentical(uInt const date1,
-		     uInt const date2,
-		     int const AntID,
-		     String const FieldName);
-    
-    /*!
-      \brief Get the name of the data type of the field
-      
-      \param FieldName -- Name of the field that is requested
-      
-      \return TypeName -- the name of the data type
-    */
-    String GetFieldType(String const FieldName);
-    
-    
-    /*!
-      \brief Print the summary (number of rows and columns) of the master table
-      
-      \return true
-    */
-    bool PrintSummary();
-    
-  private:
-    
-    bool init();
-    bool cleanup();
-  };
+    \return rowNr -- row number or -1 if row not found
+  */
+  Int GetDateRow(Int const AntID,
+		 Table const colTable,
+		 uInt const date,
+		 const Bool mindEmpty=True);
 
-}  // Namespace CR -- end
+  /*!
+    \brief Get the row in the column table that corresponds to the date for a
+           junior friend field
+    
+    \param AntId     -- ID of the antenna for which the data is requested
+    \param colTable  -- column table with the data
+    \param date      -- date for which the data is requested
+    \param MaskField -- name of the mask field
+        
+    \return rowNr -- row number or -1 if row not found
+  */
+  Int GetJuniorDateRow(Int const AntID,
+		       Table const colTable,
+		       uInt const date,
+		       String const MaskField,
+		       const Bool mindEmpty=True);
   
+public:
+    
+  // --------------------------------------------------------------- Construction
+    
+  /*!
+    \brief Default constructor
+    
+    This constructor just creates a new object but does not do anything else.
+   */
+  CalTableReader ();
+ 
+ /*!
+    \brief Augmented constructor
+    
+    \param tableFilename -- filename of the table to be read.
+  */
+  CalTableReader (const String& tableFilename);
+
+//  /*!
+//    \brief Copy constructor
+//
+//    \param other -- Another CalTableReader object from which to create this new
+//                    one.
+//  */
+//  CalTableReader (CalTableReader const& other);
+
+  // ---------------------------------------------------------------- Destruction
+
+  /*!
+    \brief Destructor
+  */
+  virtual ~CalTableReader ();
+
+  // ----------------------------------------------------------------- Parameters
+
+  // -------------------------------------------------------------------- Methods
+
+ /*!
+    \brief Attach the table file to the reader object
+    
+    \param tableFilename -- filename of the table to be read.
+
+    \return ok -- Was operation successful? Returns <tt>True</tt> if yes.
+  */
+  virtual Bool AttachTable(const String& tableFilename);
+
+ /*!
+    \brief Is this reader object attached to a table?
+    
+    \return  yes -- <tt>True</tt> if the object is attached.
+ */
+  virtual Bool isAttached();
+
+
+  /*!
+    \brief Get a piece of data from the table
+
+    \param date -- date for which the data is requested
+    \param AntID -- ID of the antenna for which the data is requested
+    \param FieldName -- Name of the field that is requested
+    \param *result -- Place where the returned data can be stored
+
+    \return ok -- Was operation successful? Returns <tt>True</tt> if yes.
+
+    The methods to get the data. I expect this to be called a lot.
+
+  */
+  Bool GetData(uInt const date,
+	       Int const AntID,
+	       String const FieldName,
+	       String *result);
+  Bool GetData(uInt const date,
+	       Int const AntID,
+	       String const FieldName,
+	       Double *result);
+  Bool GetData(uInt const date,
+	       Int const AntID,
+	       String const FieldName,
+	       DComplex *result);
+  Bool GetData(uInt const date,
+	       Int const AntID,
+	       String const FieldName,
+	       Array<Double> *result);
+  Bool GetData(uInt const date,
+	       Int const AntID,
+	       String const FieldName,
+	       Array<DComplex> *result);
+
+  /*!
+    \brief Get the value of a keyword
+    
+    \param KeywordName -- Name of the field that is requested
+    \param *result -- Place where the returned data can be stored
+
+    \return ok -- Was operation successful? Returns <tt>True</tt> if yes.
+
+    The methods to retrieve the data that was stored in a keyword. If the types 
+    mismatch then type promotion of scalars will be done if possible. If not 
+    possible, the function returns false.
+  */
+  Bool GetKeyword(String const KeywordName, String *result);
+  Bool GetKeyword(String const KeywordName, Double *result);
+  Bool GetKeyword(String const KeywordName, DComplex *result);
+  Bool GetKeyword(String const KeywordName, Array<Double> *result);
+  Bool GetKeyword(String const KeywordName, Array<DComplex> *result);
+
+  /*!
+    \brief Get the name of the data type of the keyword
+    
+    \param KeywordName -- Name of the keyword that is requested
+    
+    \return TypeName -- the name of the data type
+  */
+  String GetKeywordType(String const KeywordName);
+
+  /*!
+    \brief Has the value of this field changed between the two given dates?
+    
+    \param date1 -- first date
+    \param date2 -- second date 
+    \param AntID -- ID of the antenna for which the data is requested
+    \param FieldName -- Name of the field that is requested
+
+    \return yes -- True if both dates point to the same entry, False otherwise 
+
+    This method checks whether the two given dates point to the same entry in
+    the calibration table. (I.e. to the same row in the column table.) Useful
+    e.g. to check whether one has to recompute calibration values.
+  */
+  Bool isIdentical(uInt const date1,
+		   uInt const date2,
+		   Int const AntID,
+		   String const FieldName);
+  
+  /*!
+    \brief Get the name of the data type of the field
+    
+    \param FieldName -- Name of the field that is requested
+    
+    \return TypeName -- the name of the data type
+  */
+  String GetFieldType(String const FieldName);
+
+
+  /*!
+    \brief Print the summary (number of rows and columns) of the master table
+    
+    \return True
+  */
+  Bool PrintSummary();
+  
+  private:
+  
+  Bool init();
+  Bool cleanup();
+  };
+  
+}  // Namespace CR -- end
+
 #endif /* _CALTABLEREADER_H_ */

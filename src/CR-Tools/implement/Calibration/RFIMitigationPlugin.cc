@@ -22,14 +22,8 @@
 
 #include <Calibration/RFIMitigationPlugin.h>
 
-/*!
-  \class RFIMitigationPlugin
-*/
+namespace CR { //namespace CR -- begin
 
-namespace CR 
-{  
-
-//Namespace CR -- begin
 // ==============================================================================
 //
 //  Construction
@@ -158,8 +152,7 @@ Bool RFIMitigationPlugin :: calcWeights(const Matrix<DComplex> &spectra)
   
  }
 
-} 
-  // Namespace CR -- end
+}  // Namespace CR -- end
 
 
 

@@ -26,14 +26,8 @@
 #include <templates.h>
 #include <Calibration/CalTableInterpolater.h>
 
-using std::cerr;
-using std::cout;
-using std::endl;
-
-using casa::DComplex;
-
-using CR::CalTableInterpolater;
 using CR::CalTableReader;
+using CR::CalTableInterpolater;
 
 /*!
   \file tCalTableInterpolater.cc
@@ -76,9 +70,9 @@ int test_CalTableInterpolaterDComplexMat ()
     cout << "SetAxis: " << nFT << endl;
     nFT += !interpol.SetAxis("GainPosAx");
     cout << "SetAxis: " << nFT << endl;
-    Vector<double> Freqs(5),Pos(2);
+    Vector<Double> Freqs(5),Pos(2);
     Array<DComplex> Gains;
-    int i;
+    Int i;
     for (i=0; i<=5; i++) {
       Freqs(i) = 1.+i/2.;
     };
@@ -91,7 +85,7 @@ int test_CalTableInterpolaterDComplexMat ()
     cout << "GetValues: " << nFT << endl;
     nFT += !interpol.GetValues(1001,1,&Gains);
     cout << "Interpolated gains:" << Gains << endl;
-  } catch (casa::AipsError x) {
+  } catch (AipsError x) {
     cerr << x.getMesg() << endl;
     nFT++;
   }

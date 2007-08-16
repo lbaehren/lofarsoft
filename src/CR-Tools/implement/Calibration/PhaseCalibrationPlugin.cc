@@ -23,9 +23,6 @@
 #include <Calibration/PhaseCalibrationPlugin.h>
 
 #define pi 3.1415926536
-/*!
-  \class PhaseCalibrationPlugin
-*/
 
 namespace CR { // Namespace CR -- begin
   

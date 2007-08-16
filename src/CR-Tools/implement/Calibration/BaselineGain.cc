@@ -18,17 +18,7 @@
 p *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-// Class BaselineGain
-// Implementation of the BaselineGain functions
-// 
-
-// include class definition
 #include <Calibration/BaselineGain.h>
-
-
-// *****************************************************************************
-// *** PUBLIC FUNCTIONS ********************************************************
-// *****************************************************************************
 
 // ==============================================================================
 //
@@ -971,5 +961,3 @@ void BaselineGain::setGainValueAsStddeviation ( const Matrix<DComplex>& spectra 
     } // end for: band									
   } // end for: ant									
  } // --- end function: setGainValueAsMinimum						
-
-//

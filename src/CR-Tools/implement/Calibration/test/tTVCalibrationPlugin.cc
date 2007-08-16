@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -25,7 +25,6 @@
 #include <Analysis/FirstStagePipeline.h>
 #include <Data/LopesEventIn.h>
 
-
 /*!
   \file tTVCalibrationPlugin.cc
 
@@ -46,7 +45,6 @@ FirstStagePipeline *Pipeline;
 LopesEventIn *lev;
 CalTableReader *CTRead;
 
-
 //Read in an event and initialize a pipeline
 int initevent(){
   int nofFailedTests=0;
@@ -57,9 +55,9 @@ int initevent(){
     
     Record obsrec;
     obsrec.define("LOPES","/home/horneff/lopescasa/data/LOPES/LOPES-CalTable");
-
+    
     Pipeline->SetObsRecord(obsrec);
-
+    
     if (! lev->attachFile("example.event") ){
       std::cout << "Failed to attach file: example.event" << endl;
       std::cout << "  (Maybe no file called \"example.event\" in the local directory. Copy one here.)" 
@@ -67,7 +65,7 @@ int initevent(){
       nofFailedTests++;
       return nofFailedTests;
     };
-
+    
     if (! Pipeline->InitEvent(lev)){
       std::cout << "  Failed to initializze the DataReader!" << std::endl;
       nofFailedTests++;
@@ -81,14 +79,9 @@ int initevent(){
   return nofFailedTests;
 }
 
-
-
-
-
-
 /*!
   \brief Test constructors for a new TVCalibrationPlugin object
-
+  
   \return nofFailedTests -- The number of failed tests.
 */
 int test_TVCalibrationPlugin ()
@@ -96,14 +89,14 @@ int test_TVCalibrationPlugin ()
   int nofFailedTests (0);
   
   std::cout << "\n[test_TVCalibrationPlugin]\n" << std::endl;
-
+  
   try {
     std::cout << "[0] Initializing event ..." << std::endl;
     nofFailedTests += initevent();
     
     std::cout << "[1] Testing default constructor ..." << std::endl;
     TVCalibrationPlugin pcal;
-
+    
     // Initialize the TVCalibrationPlugin-Object:
     // Temporary variables:
     Vector<Int> AntennaIDs;
@@ -164,9 +157,7 @@ int main ()
   int nofFailedTests (0);
 
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_TVCalibrationPlugin ();
-  }
-
+  nofFailedTests += test_TVCalibrationPlugin ();
+  
   return nofFailedTests;
 }

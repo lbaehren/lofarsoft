@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: TVCalibrationPlugin.cc,v 1.2 2007/04/16 17:02:57 horneff Exp $*/
+/* $Id: TVCalibrationPlugin.cc,v 1.3 2007/04/20 14:49:18 horneff Exp $*/
 
 #include <Calibration/TVCalibrationPlugin.h>
 
@@ -178,7 +178,7 @@ namespace CR { // Namespace CR -- begin
       Vector<DComplex> cFreqVals;
       cFreqVals =  parameters_p.toArrayDComplex("frequencyValues");
       weights_p.resize(data.shape());
-      tmpcomp *= 2*PI/samplerate;
+      tmpcomp *= -2.*PI/samplerate;
       for (antInd=0; antInd<nAntennas; antInd++){
 	weights_p.column(antInd) = exp(tmpcomp*correctionDelay(antInd)*cFreqVals);
       };
