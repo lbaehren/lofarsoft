@@ -19,27 +19,27 @@
 ##
 
 set (include_locations
+  ./../casacore
+  ./../external/casacore
+  ./../../casacore
+  ./../../external/casacore
   /usr/include/casacore
   /usr/local/include/casacore
   /sw/share/casacore
   /sw/share/casacore/stage/include
   /sw/include/casacore
-  ./../casacore
-  ./../external/casacore
-  ./../../casacore
-  ./../../external/casacore
 )
 
 set (lib_locations
+  ./../lib
+  ./../release/lib
+  ./../../lib
+  ./../../release/lib
   /usr/lib
   /usr/local/lib
   /opt/lib
   /opt/casacore/lib
   /sw/lib
-  ./../lib
-  ./../release/lib
-  ./../../lib
-  ./../../release/lib
 )
 
 set (casacore_modules
