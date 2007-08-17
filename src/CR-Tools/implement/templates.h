@@ -101,9 +101,11 @@ namespace casa {
   template Bool read(istream &, Array<Double> &, IPosition const *, Bool);
   template Bool readArrayBlock(istream &, Bool &, IPosition &, Block<Complex> &, IPosition const *, Bool);
   template Bool readArrayBlock(istream &, Bool &, IPosition &, Block<Double> &, IPosition const *, Bool);
+  template Array<bool> operator< <double>(Array<double> const&, double const&);
   template istream & operator>>(istream &, Array<Double> &);
   template void readAsciiMatrix(Matrix<Int> &, Char const *);
   template void readAsciiMatrix(Matrix<Double> &, Char const *);
+  template void readAsciiVector(Vector<double>&, char const*);
   template void read_array(Array<Int> &, Char const *);
   template void read_array(Array<Double> &, Char const *);
   template void read_array(Array<Int> &, String const &);

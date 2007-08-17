@@ -20,8 +20,8 @@
 
 /* $Id: tinverseFFT.cc,v 1.4 2007/04/03 14:03:07 bahren Exp $*/
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 #include <casa/aips.h>
 #include <casa/Arrays.h>
@@ -34,8 +34,10 @@
 #include <Data/LopesEvent.h>
 #include <IO/DataReader.h>
 
-#include <casa/namespace.h>
-
+using casa::DComplex;
+using casa::Matrix;
+using casa::String;
+using casa::Vector;
 using CR::inverseFFT;
 
 /*!
@@ -54,7 +56,7 @@ using CR::inverseFFT;
 
 uint dataBlockSize (1024) ;
 
-Double pi = 3.14159265 ;
+double pi = 3.14159265 ;
 
 /*!
   \brief Get a vector with the names of the test data files to work with
@@ -100,7 +102,7 @@ Bool test_inverseFFTS ()
   
   try{
     
-    Vector<Double> samples(dataBlockSize*16*4 ) ;
+    Vector<double> samples(dataBlockSize*16*4 ) ;
     
     for( uint t = 0; t < dataBlockSize*16*4;  t++ ){
       
@@ -117,8 +119,8 @@ Bool test_inverseFFTS ()
     //   cout << "sampled value :" <<  samples <<  endl ;   
         
     int s (0);
-    Double filterCoefficient (0.0);
-    Vector<Double> ppf_coeff(16384) ;
+    double filterCoefficient (0.0);
+    Vector<double> ppf_coeff(16384) ;
     
     infile.open("Coeffs16384Kaiser-quant.dat", ios::in ) ;
     
@@ -146,9 +148,9 @@ Bool test_inverseFFTS ()
     
     uint nofrows = nofelements / nofcolumns ;
     
-    Vector<Double> blockSamples (dataBlockSize);
+    Vector<double> blockSamples (dataBlockSize);
     
-    Matrix<Double> sampledValueMatrix( dataBlockSize, nofcolumns );
+    Matrix<double> sampledValueMatrix( dataBlockSize, nofcolumns );
     
     uint m =0 ;
     
@@ -179,9 +181,9 @@ Bool test_inverseFFTS ()
     }
     
     
-    Vector<Double> multipliedVector ( dataBlockSize, 0.0);
+    Vector<double> multipliedVector ( dataBlockSize, 0.0);
     
-    Matrix<Double> output( dataBlockSize, nofcolumns, 0.0 );
+    Matrix<double> output( dataBlockSize, nofcolumns, 0.0 );
     
     uint r = 15;
     
@@ -264,7 +266,7 @@ Bool test_inverseFFTS ()
     
   Matrix<DComplex> FFTRawMatrix (NOfRow/2+1,NOfColumn ) ;
   
-   FFTServer<Double,DComplex> server;
+   FFTServer<double,DComplex> server;
    
    Vector<DComplex> FFTRawVector(NOfRow/2+1);
     
@@ -299,7 +301,7 @@ Bool test_inverseFFTS ()
    }
    
    
-   Matrix<Double> AmplRawofFFT = amplitude(FFTRawMatrix);
+   Matrix<double> AmplRawofFFT = amplitude(FFTRawMatrix);
    
    ofstream logfile4;
 
@@ -323,11 +325,11 @@ Bool test_inverseFFTS ()
     
   //    cout << " No of columns in FFT Raw Matrix :" << NOFColumn << endl ;
   
-  Matrix<Double> IFFTRawMatrix (NOfRow,NOFColumn ) ;
+  Matrix<double> IFFTRawMatrix (NOfRow,NOFColumn ) ;
   
-   FFTServer<Double,DComplex> server1;
+   FFTServer<double,DComplex> server1;
    
-   Vector<Double> IFFTRawVector(NOfRow );
+   Vector<double> IFFTRawVector(NOfRow );
     
    for (uint f =0 ; f < NOFColumn; f++ ) {
    
@@ -363,7 +365,7 @@ Bool test_inverseFFTS ()
   
   Matrix<DComplex> FFTMatrix (dataBlockSize/2+1,nofColumn ) ;
   
-  // FFTServer<Double,DComplex> server;
+  // FFTServer<double,DComplex> server;
    
    Vector<DComplex> FFTVector(dataBlockSize/2+1);
     
@@ -398,7 +400,7 @@ Bool test_inverseFFTS ()
    }
    
    
-   Matrix<Double> AmplofFFT = amplitude(FFTMatrix);
+   Matrix<double> AmplofFFT = amplitude(FFTMatrix);
    
    ofstream logfile7;
 
@@ -418,17 +420,17 @@ Bool test_inverseFFTS ()
    
     // uint nOfColumns = fourierTransformed.ncolumns () ;
     
-   // FFTServer<Double,DComplex> server;
+   // FFTServer<double,DComplex> server;
     uint NOFCOLUMN = FFTMatrix.ncolumn () ;
     
     //uint NOFROW = FFTMatrix.nrow () ;
     
       
-  Matrix<Double> IFFTMatrix (NOfRow,NOFCOLUMN ) ;
+  Matrix<double> IFFTMatrix (NOfRow,NOFCOLUMN ) ;
   
-  // FFTServer<Double,DComplex> server1;
+  // FFTServer<double,DComplex> server1;
    
-   Vector<Double> IFFTVector(NOfRow );
+   Vector<double> IFFTVector(NOfRow );
     
    for (uint f =0 ; f < NOFCOLUMN; f++ ) {
    
@@ -466,23 +468,23 @@ Bool test_inverseFFTS ()
     
    
    
- // Matrix<Double> ppf_coefficients( dataBlockSize, 16 );
+ // Matrix<double> ppf_coefficients( dataBlockSize, 16 );
   
-//   Matrix<Double> ppf_coefficients = (invft.ppfCoefficients( ppf_coeff,
+//   Matrix<double> ppf_coefficients = (invft.ppfCoefficients( ppf_coeff,
 //    				                           dataBlockSize )) ;
 //   uint nofrows = ppf_coefficients.nrow () ;
 //      
 //      uint nofcolumns = ppf_coefficients.ncolumn() ; 
 //      for (uint j=0; j<nofrows; j++ ){
 //    for (uint i=0; i<nofcolumns; i++ ){
-//    Double ppfcoefficients = ppf_coefficients(j,i);
+//    double ppfcoefficients = ppf_coefficients(j,i);
 //    
 //    cout << ppfcoefficients << "\t" ;
 //    }
 //    cout <<  endl ;
 //    }							   
 //  
-//   Matrix<Double> dataSamples =(invft.blockSamples( output,
+//   Matrix<double> dataSamples =(invft.blockSamples( output,
 //    			                          dataBlockSize )) ;
 //  
 //  
@@ -490,26 +492,26 @@ Bool test_inverseFFTS ()
 //      
 //      uint nofColumns = dataSamples.ncolumn () ;
 //      
-//     Matrix<Double> matchingValues( nofRows, nofColumns ) ; 
+//     Matrix<double> matchingValues( nofRows, nofColumns ) ; 
 //           
 //     for( uint i=0; i< nofColumns ; i++ ) {
 //     
-//     Vector<Double> dataSampleColumn = dataSamples.column(i) ;
+//     Vector<double> dataSampleColumn = dataSamples.column(i) ;
 //     
 // //    cout << " wave samples of a column : " << dataSampleColumn << endl ;
 //     
-//  //  Vector<Double> multipliedVector = invft.multipliedVector( dataSampleColumn,
+//  //  Vector<double> multipliedVector = invft.multipliedVector( dataSampleColumn,
 //  //   				                             ppf_coefficients ) ;
 //    
 // //   cout << " column of the data sampled : " << multipliedVector << endl ;
 //     uint m = ppf_coefficients.ncolumn () ;   //ppfCoff.ncolumn() ;
 //    
-//   // Vector <Double> sampleVal = dataSampleColumnwaveSamples ;
+//   // Vector <double> sampleVal = dataSampleColumnwaveSamples ;
 //    
 //   
 //   for( uint j=0; j < m; j++ ){
 //   
-//   Vector<Double> ppfCoffColumn = ppf_coefficients.column(j) ;         //ppfCoff.column(j) ;
+//   Vector<double> ppfCoffColumn = ppf_coefficients.column(j) ;         //ppfCoff.column(j) ;
 //    
 //   dataSampleColumn = dataSampleColumn*ppfCoffColumn;        // sampleVal*ppfCoffColumn ;
 //   
@@ -524,7 +526,7 @@ Bool test_inverseFFTS ()
    
  //  cout << " fourier Transformed Vector :" <<  fourierTransformedVector << endl ;
     
- //  Vector<Double> inverseFourierVector = invft.IFFTVector( fourierTransformedVector,
+ //  Vector<double> inverseFourierVector = invft.IFFTVector( fourierTransformedVector,
  //   							   dataBlockSize ) ; 
    
 //   cout << " inverse Fourier Vector :" << inverseFourierVector << endl ;
@@ -540,22 +542,22 @@ Bool test_inverseFFTS ()
   return ok ;
   }
 
-// --------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
-int main ()
-
+int main (int argc,
+	  char *argv[])
 {
-Bool ok (True) ;
-Int retval(0) ;
+  int nofParameters (1);
+  int nofFailedTests (0);
 
-if(ok){
- ok = test_inverseFFTS () ;
- 
- if (!ok){
- retval = 1;
- cout << "Error...................early exit"
-      << endl ;
-     }
-    }
-  return retval;
+  // parameter check 
+  if (argc < nofParameters) {
+    std::cerr << "[tinverseFFT] Too few parameters!"  << std::endl;
+    std::cerr << " -- Usage: tinverseFFT <eventfile>" << std::endl;
+    return -1;
+  }
+
+  nofFailedTests += test_inverseFFTS () ;
+  
+  return nofFailedTests;
 }

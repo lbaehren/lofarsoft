@@ -18,41 +18,41 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tSecondStagePipeline.cc,v 1.1 2007/03/06 12:55:11 horneff Exp $*/
+/* $Id: tgenCRmap.cc,v 1.1 2007/04/19 14:23:30 horneff Exp $*/
 
-#include <casa/aips.h>
-#include <casa/Exceptions/Error.h>
-
+#include <Analysis/genCRmap.h>
 #include <Analysis/SecondStagePipeline.h>
 #include <Data/LopesEventIn.h>
 #include <templates.h>
 
+using CR::genCRmap;
 using CR::LopesEventIn;
 using CR::SecondStagePipeline;
 
 /*!
-  \file tSecondStagePipeline.cc
+  \file tgenCRmap.cc
 
   \ingroup Analysis
 
-  \brief A collection of test routines for SecondStagePipeline
+  \brief A collection of test routines for genCRmap
  
   \author Andreas Horneffer
  
-  \date 2007/02/22
+  \date 2007/04/17
 */
 
 /*!
-  \brief Test constructors for a new SecondStagePipeline object
+  \brief Test constructors for a new genCRmap object
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_SecondStagePipeline ()
+int test_genCRmap ()
 {
   int nofFailedTests (0);
   
-  std::cout << "\n[test_SecondStagePipeline]\n" << std::endl;
+  std::cout << "\n[test_genCRmap]\n" << std::endl;
 
+  std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
 
     // First we need a DataReader object. In our case we take "LopesEventIn" 
@@ -61,7 +61,7 @@ int test_SecondStagePipeline ()
 
     std::cout << "[1] Testing default constructor ..." << std::endl;
     // Need the pipeline object itself
-    SecondStagePipeline newObject;    
+    SecondStagePipeline SSPipe;    
     
     std::cout << "[2] Attaching observatories Record ..." << std::endl;
     // Generate a record that points to the CalTable files 
@@ -70,7 +70,7 @@ int test_SecondStagePipeline ()
     obsrec.define("LOPES","/home/horneff/lopescasa/data/LOPES/LOPES-CalTable");
 
     // Put the record into the pipeline object.
-    newObject.SetObsRecord(obsrec);
+    SSPipe.SetObsRecord(obsrec);
 
     std::cout << "[3] Opening Event ..." << std::endl;
     if (! lev.attachFile("example.event") ){
@@ -84,41 +84,25 @@ int test_SecondStagePipeline ()
     std::cout << "[4] Initializing the DataReader ..." << std::endl;
     // Open a new event/datafile/whatever.
     // This function does (nearly) all the magic.
-    if (! newObject.InitEvent(&lev)){
+    if (! SSPipe.InitEvent(&lev)){
       std::cout << "  Failed to initializze the DataReader!" << std::endl;
       nofFailedTests++;
       return nofFailedTests;
     };
 
-    std::cout << "[5] Arranging storage, ..." << std::endl;
-    Vector<Double> Frequencies;
+    // Get Data out of the pipeline
     Matrix<DComplex> FFT;
-    Matrix<Double> absFFT,phaseFFT;
-    Int i,j,fftlen,nants;
+    FFT = SSPipe.GetData(&lev);
+    
+    // Set up the CRmap object
+    genCRmap newObject;
+    newObject.setMapHeader(lev,SSPipe.GetCalTableReader());
 
-    FILE *allout;
+    newObject.GenerateMap("example-map",FFT);
 
-    allout = fopen("tSecondStagePipe_allants_calfft.tab","w");
-    Frequencies = lev.frequencyValues();
 
-    std::cout << "                      ... retrieving the data from the pipeline," << std::endl;
-    FFT = newObject.GetData(&lev);
-    absFFT = amplitude(FFT);
-    phaseFFT = phase(FFT);
-    fftlen = absFFT.nrow();
-    nants = absFFT.ncolumn();
-    std::cout << "                      ... and dumping the filtered data to file." << std::endl;
-    for (i=0; i< fftlen; i++) {
-      fprintf(allout,"\n %f ",Frequencies(i));
-      for (j=0; j<nants; j++) {
-	fprintf(allout,"\t %f %f ",absFFT(i,j),phaseFFT(i,j)-phaseFFT(i,0));
-      };
-    };
-    fprintf(allout,"\n");
-    fclose(allout);
-
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
     nofFailedTests++;
   }
   
@@ -133,7 +117,7 @@ int main ()
 
   // Test for the constructor(s)
   {
-    nofFailedTests += test_SecondStagePipeline ();
+    nofFailedTests += test_genCRmap ();
   }
 
   return nofFailedTests;

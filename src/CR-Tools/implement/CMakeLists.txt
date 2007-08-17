@@ -52,7 +52,7 @@ endif (CR_DEBUGGING_MESSAGES)
 
 add_library (cr
   ${cr_sources}
-#  templates.h
+  templates.h
   )
 set_target_properties (cr
   PROPERTIES COMPILE_FLAGS "${CASACORE_COMPILE_FLAGS}"

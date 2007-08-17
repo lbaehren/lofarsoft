@@ -214,13 +214,9 @@ endif (NOT HAVE_WCSLIB)
 ## -----------------------------------------------------------------------------
 ## Check for additional tools which are required
 
-find_program (bison_bin bison
-  PATHS ${bin_locations}
-  )
+find_program (bison_bin bison ${bin_locations})
 
-find_program (flex_bin flex
-  PATHS ${bin_locations}
-)
+find_program (flex_bin flex ${bin_locations})
 
 find_program (uname_bin uname ${bin_locations})
 

@@ -1,32 +1,39 @@
-##------------------------------------------------------------------------
-## $Id:: FindG2C.cmake 391 2007-06-13 09:25:11Z baehren                  $
-##------------------------------------------------------------------------
+##------------------------------------------------------------------------------
+## $Id:: FindG2C.cmake 548 2007-08-15 10:09:58Z baehren                        $
+##------------------------------------------------------------------------------
 
 ## -----------------------------------------------------------------------------
 # - Check for the presence of G2C
 #
 # The following variables are set when G2C is found:
-#  HAVE_G2C       = Set to true, if all components of G2C
-#                          have been found.
+#  HAVE_G2C       = Set to true, if all components of G2C have been found.
 #  G2C_INCLUDES   = Include path for the header files of G2C
 #  G2C_LIBRARIES  = Link these to use G2C
 ## -----------------------------------------------------------------------------
+
+set (include_locations
+  /usr/include
+  /usr/lib
+  /opt
+  /opt/include
+  /usr/local/include
+  /sw/include
+  )
+
+set (lib_locations
+  /usr/lib
+  /usr/local/lib
+  )
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (G2C_INCLUDES g2c.h f2c.h
-  PATHS
-  /usr/local/include
-  /usr/include
-  /usr/lib
-  /usr/lib64
-  /sw/include
+  PATHS ${include_locations}
   PATH_SUFFIXES
   gcc
   gcc-lib/i486-linux/3.3.5/include
   gcc-lib/i586-suse-linux/3.3.3/include
-  gcc-lib/x86_64-suse-linux/3.3.5/include
   )
 
 ## -----------------------------------------------------------------------------
@@ -35,26 +42,21 @@ find_path (G2C_INCLUDES g2c.h f2c.h
 if (UNIX)
   if (APPLE)
     IF (${CMAKE_OSX_ARCHITECTURES} MATCHES "ppc")
-      set (lib_locations
+      list (APPEND lib_locations
 	/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/powerpc-apple-darwin8/4.0.0
 	/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/powerpc-apple-darwin8/4.0.1
 	)
     ELSE (${CMAKE_OSX_ARCHITECTURES} MATCHES "ppc")
-      set (lib_locations
+      list (APPEND lib_locations
 	/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.0
 	/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.1
 	)
     ENDIF (${CMAKE_OSX_ARCHITECTURES} MATCHES "ppc")
-  else (APPLE)
-    set (lib_locations
-      /usr/lib
-      /usr/local/lib
-      )
   endif (APPLE)
 endif (UNIX)
 
 find_library (G2C_LIBRARIES
-  NAMES f2c g2c gcc
+  NAMES g2c gcc
   PATHS ${lib_locations}
   NO_DEFAULT_PATH
   )

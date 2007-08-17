@@ -31,6 +31,8 @@
 #include <casa/Exceptions/Error.h>
 #include <casa/string.h>
 #include <casa/Arrays.h>
+#include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/Vector.h>
 #include <scimath/Mathematics.h>
 
 #include <casa/namespace.h>
@@ -135,8 +137,8 @@ namespace LOPES { // Namespace LOPES -- begin
   //
   // ==============================================================================
   
-  template class xBeam<Float,Complex>;
-  template class xBeam<Double,DComplex>;
+  template class xBeam<casa::Float,casa::Complex>;
+  template class xBeam<casa::Double,casa::DComplex>;
   
 } // Namespace LOPES -- end
 

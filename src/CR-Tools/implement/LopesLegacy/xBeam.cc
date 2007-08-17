@@ -67,16 +67,17 @@ namespace LOPES { // Namespace LOPES -- begin
   // ----------------------------------------------------- xbeam from time-series
 
   template <class T, class S>
-  Vector<T> xBeam<T,S>::xbeam (const Matrix<T>& data) {
+  Vector<T> xBeam<T,S>::xbeam (const Matrix<T> &data) {
     Vector<T> xbeamS;
     try {
       IPosition shape (data.shape());
-      Vector<T> corr(shape(0),0.), pow, tmpvec, pown, corrn;;
+      Vector<T> corr(shape(0),0.), pow, tmpvec, pown, corrn;
       Int i,j,nants=shape(1);
-      Int nc,np;
+      Int nc (0), np(0);
 
       pow = square(data.column(nants-1));
-      nc=0; np=1;
+      nc=0;
+      np=1;
 
       for (i=0; i<(nants-1); i++){
 	tmpvec = data.column(i);
@@ -117,10 +118,13 @@ namespace LOPES { // Namespace LOPES -- begin
 
   template <class T, class S> 
   Vector<T> xBeam<T,S>::xbeam (const Matrix<S>& data,
-				 Int const &blocksize)
+			       Int const &blocksize)
   {
+    // get the shape of the input data
     IPosition shape (data.shape());
+    // matrix with intermediate data which will be forwarded for processing
     Matrix<T> dataTime (blocksize,shape(1),static_cast<T>(0));
+    // set up FFT server
     FFTServer<T,S> server(IPosition(1,blocksize),
 			  FFTEnums::REALTOCOMPLEX);
     try {

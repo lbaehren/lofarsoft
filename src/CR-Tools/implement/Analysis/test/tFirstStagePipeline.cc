@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007                                                    *
- *   Andreas Horneffer (<mail>)                                            *
+ *   Copyright (C) 2007                                                  *
+ *   Andreas Horneffer (<mail>)                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -23,18 +23,12 @@
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
 
-#include <templates.h>
 #include <Analysis/FirstStagePipeline.h>
 #include <Data/LopesEventIn.h>
+#include <templates.h>
 
-using casa::DComplex;
-using casa::Double;
-using casa::Matrix;
-using casa::Record;
-using casa::Vector;
-
-using CR::FirstStagePipeline;
 using CR::LopesEventIn;
+using CR::FirstStagePipeline;
 
 /*!
   \file tFirstStagePipeline.cc
@@ -106,7 +100,7 @@ int test_FirstStagePipeline ()
     Vector<Double> Frequencies;
     Matrix<DComplex> FFT;
     Matrix<Double> absFFT,phaseFFT;
-    int i,j,fftlen,nants;
+    Int i,j,fftlen,nants;
 
     FILE *allout;
 
@@ -126,7 +120,7 @@ int test_FirstStagePipeline ()
     fprintf(allout,"\n");
     fclose(allout);
 
-  } catch (casa::AipsError x) {
+  } catch (AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
   }

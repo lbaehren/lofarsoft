@@ -69,6 +69,12 @@ find_path (cr_cmake FindBlitz.cmake FindCASA.cmake FindCFITSIO.cmake
 
 ## check for the external packages
 
+find_package (Motif)
+find_package (PNG)
+find_package (TCL)
+find_package (X11)
+find_package (ZLIB)
+
 if (cr_cmake)
   ## Blitz++
   if (NOT HAVE_BLITZ)
