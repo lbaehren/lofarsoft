@@ -13,6 +13,8 @@ SET (tests
 FOREACH (src ${tests})
   ADD_EXECUTABLE (${src} ${src}.cc)
   TARGET_LINK_LIBRARIES (${src} lattices)
+  ## testing 
+  add_test (${src} ${src})
 ENDFOREACH (src)
 
 ## ------------------------------------------------------------------------------
@@ -23,4 +25,3 @@ install (TARGETS ${tests}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
 )
-

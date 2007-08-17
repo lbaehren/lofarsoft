@@ -63,8 +63,11 @@ SET (tests
 ## Build the test programs
 
 FOREACH (src ${tests})
+  ## create executable
   ADD_EXECUTABLE (${src} ${src}.cc)
   TARGET_LINK_LIBRARIES (${src} lattices tables scimath casa)
+  ## testing 
+  add_test (${src} ${src})
 ENDFOREACH (src)
 
 ## ------------------------------------------------------------------------------

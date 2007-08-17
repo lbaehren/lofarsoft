@@ -49,6 +49,8 @@ SET (tests
 FOREACH (src ${tests})
   ADD_EXECUTABLE (${src} ${src}.cc)
   TARGET_LINK_LIBRARIES (${src} images components coordinates fits measures tables scimath casa mir)
+  ## testing 
+  add_test (${src} ${src})
 ENDFOREACH (src)
 
 ## ------------------------------------------------------------------------------

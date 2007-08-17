@@ -33,6 +33,8 @@ SET (tests
 FOREACH (src ${tests})
   ADD_EXECUTABLE (${src} ${src}.cc)
   TARGET_LINK_LIBRARIES (${src} fits measures tables scimath scimath_f casa)
+  ## testing 
+  add_test (${src} ${src})
 ENDFOREACH (src)
 
 ## ------------------------------------------------------------------------------

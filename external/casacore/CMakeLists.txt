@@ -23,6 +23,18 @@ cmake_minimum_required (VERSION 2.4)
 ## User defined build/install options
 
 option (casacore_BUILD_TESTS "Build the test programs?" 0)
+option (casacore_ENABLE_TESTING "Build the test programs?" 1)
+
+## Handle option: testing mode on/off
+
+if (casacore_ENABLE_TESTING)
+  ## enable building the tests, otherwise there is nothing to run
+  set (casacore_BUILD_TESTS 1)
+  ## include the CTest environment
+  include (CTest)
+  ## enable testing
+  enable_testing()
+endif (casacore_ENABLE_TESTING)
 
 ## -----------------------------------------------------------------------------
 ## Dependency of the packages in casacore
