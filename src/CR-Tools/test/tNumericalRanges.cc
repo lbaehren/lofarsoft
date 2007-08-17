@@ -32,15 +32,18 @@ int main(void) {
   std::cout << std::endl;
   
   /*  char may be signed or unsigned, and all three will always be 1 byte  */
-  printf("unsigned char   %u byte,  from %12i to %12i", 
-         sizeof(unsigned char), 0, UCHAR_MAX);
-  std::cout << std::endl;
-  printf("signed char     %u byte,  from %12i to %12i", 
-         sizeof(signed char), SCHAR_MIN, SCHAR_MAX);
-  std::cout << std::endl;
-  printf("char            %u byte,  from %12i to %12i", 
-         sizeof(char), CHAR_MIN, CHAR_MAX);
-  std::cout << std::endl;
+
+  std::cout << " -- unsigned char " << sizeof(unsigned char) << " byte, from "
+	    << 0 << " to " << UCHAR_MAX
+	    << std::endl;
+
+  std::cout << " -- signed char " << sizeof(signed char) << " byte, from "
+	    << SCHAR_MIN << " to " << SCHAR_MAX
+	    << std::endl;
+
+  std::cout << " -- char " << sizeof(char) << " byte, from "
+	    << CHAR_MIN << " to " << CHAR_MAX
+	    << std::endl;
   
   /*  short, int and long are signed  */
   printf("unsigned short  %u bytes, from %12hu to %12hu", 
