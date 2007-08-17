@@ -20,10 +20,15 @@ set (include_locations
   /sw/include
   )
 
+set (lib_locations
+  /usr/lib
+  /usr/local/lib
+  )
+
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-find_path (G2C_INCLUDES g2c.h
+find_path (G2C_INCLUDES g2c.h f2c.h
   PATHS ${include_locations}
   PATH_SUFFIXES
   gcc
@@ -37,21 +42,16 @@ find_path (G2C_INCLUDES g2c.h
 if (UNIX)
   if (APPLE)
     IF (${CMAKE_OSX_ARCHITECTURES} MATCHES "ppc")
-      set (lib_locations
+      list (APPEND lib_locations
 	/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/powerpc-apple-darwin8/4.0.0
 	/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/powerpc-apple-darwin8/4.0.1
 	)
     ELSE (${CMAKE_OSX_ARCHITECTURES} MATCHES "ppc")
-      set (lib_locations
+      list (APPEND lib_locations
 	/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.0
 	/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.1
 	)
     ENDIF (${CMAKE_OSX_ARCHITECTURES} MATCHES "ppc")
-  else (APPLE)
-    set (lib_locations
-      /usr/lib
-      /usr/local/lib
-      )
   endif (APPLE)
 endif (UNIX)
 

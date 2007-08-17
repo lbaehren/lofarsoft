@@ -108,7 +108,7 @@ set (CASACORE_INCLUDES "")
 
 find_path (CASACORE_casa Arrays.h
   PATHS ${include_locations}
-  PATH_SUFFIXES casa/casa casacore/casa
+  PATH_SUFFIXES casa/casa
 )
 
 if (CASACORE_casa)
