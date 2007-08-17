@@ -46,28 +46,34 @@ int main(void) {
 	    << std::endl;
   
   /*  short, int and long are signed  */
-  printf("unsigned short  %u bytes, from %12hu to %12hu", 
-         sizeof(unsigned short), 0, USHRT_MAX);
-  std::cout << std::endl;
-  printf("signed short    %u bytes, from %12hi to %12hi", 
-         sizeof(signed short), SHRT_MIN, SHRT_MAX);
-  std::cout << std::endl;
-  printf("unsigned int    %u bytes, from %12u to %12u", 
-         sizeof(unsigned int), (unsigned int) 0, (unsigned int) UINT_MAX);
-  std::cout << std::endl;
-  printf("signed int      %u bytes, from %12i to %12i", 
-         sizeof(signed int), INT_MIN, INT_MAX);
-  std::cout << std::endl;
+
+  std::cout << " -- unsigned short " << sizeof(unsigned short) << " byte, from "
+	    << 0 << " to " << USHRT_MAX
+	    << std::endl;
   
-  printf("unsigned long   %u bytes, from %12lu to %12lu", 
-         sizeof(unsigned long), (unsigned long) 0, ULONG_MAX);
-  std::cout << std::endl;
-  printf("signed long     %u bytes, from %12li to %12li", 
-         sizeof(signed long), LONG_MIN, LONG_MAX);
-  std::cout << std::endl;
+  std::cout << " -- signed short " << sizeof(signed short) << " byte, from "
+	    << SHRT_MIN << " to " << SHRT_MAX
+	    << std::endl;
+  
+  std::cout << " -- unsigned int " << sizeof(unsigned int) << " byte, from "
+	    << (unsigned int) 0 << " to " << (unsigned int) UINT_MAX
+	    << std::endl;
+  
+  std::cout << " -- signed int " << sizeof(signed int) << " byte, from "
+	    << INT_MIN << " to " << INT_MAX
+	    << std::endl;
+  
+  std::cout << " -- unsigned long " << sizeof(unsigned long) << " byte, from "
+	    << (unsigned long) 0 << " to " << ULONG_MAX
+	    << std::endl;
+  
+  std::cout << " -- signed long " << sizeof(signed long) << " byte, from "
+	    << LONG_MIN << " to " << LONG_MAX
+	    << std::endl;
   
   /*   floating point types can store 0, may also be able to store 
        strange numbers like +Infinity and  */
+
   printf("float           %u bytes, positive range from %12e to %12e", 
          sizeof(float), FLT_MIN, FLT_MAX);
   printf("                         epsilon = %e", FLT_EPSILON);
