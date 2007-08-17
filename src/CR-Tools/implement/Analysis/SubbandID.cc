@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007                                                  *
+ *   Copyright (C) 2007                                                    *
  *   Kalpana Singh (<k.singh@astro.ru.nl>)                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -20,7 +20,7 @@
 
 /* $Id: subbandID.cc,v 1.3 2007/08/08 15:29:50 singh Exp $*/
 
-#include <Analysis/subbandID.h>
+#include <Analysis/SubbandID.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -30,35 +30,41 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  subbandID::subbandID ()
-  {;}
-  
-  // Arguement Constructor
-
-  subbandID::subbandID( const Double& samplingFreq,
-                        const uint& bandID,
-                        const uint& nofsubbands )
-
+  SubbandID::SubbandID ()
   {
-  //uint nofsubbands ;
+    samplingFreq_p = 80e06;
+    bandID_p       = 0;
+    nofSubbands_p  = 256;
   }
   
-  subbandID::subbandID ( const Double& samplingFreq,
+  SubbandID::SubbandID (Double const &samplingFreq,
+                        uint const &bandID,
+                        uint const &nofsubbands)
+    
+  {
+    samplingFreq_p = samplingFreq;
+    bandID_p       = bandID;
+    nofSubbands_p  = nofsubbands;
+  }
+  
+  SubbandID::SubbandID ( const Double& samplingFreq,
                          const Double& subband_freq_1,
                          const uint& nofsubbands  ) 
- {
-  //uint nofsubbands ;
+  {
+    samplingFreq_p = samplingFreq;
+    bandID_p       = 0;
+    nofSubbands_p  = nofsubbands;
   }
   
-  subbandID::subbandID ( const Double& samplingFreq,
+  SubbandID::SubbandID ( const Double& samplingFreq,
                          const Vector<Double>& subband_frequencies )
-                         			 
+    
   {
-  //uint nofsubbands ;
+    //uint nofsubbands ;
   }			 
   
-
-  subbandID::subbandID (subbandID const &other)
+  
+  SubbandID::SubbandID (SubbandID const &other)
   {
     copy (other);
   }
@@ -69,12 +75,12 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  subbandID::~subbandID ()
+  SubbandID::~SubbandID ()
   {
     destroy();
   }
   
-  void subbandID::destroy ()
+  void SubbandID::destroy ()
   {;}
   
   // ============================================================================
@@ -83,7 +89,7 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  subbandID& subbandID::operator= (subbandID const &other)
+  SubbandID& SubbandID::operator= (SubbandID const &other)
   {
     if (this != &other) {
       destroy ();
@@ -92,8 +98,12 @@ namespace CR { // Namespace CR -- begin
     return *this;
   }
   
-  void subbandID::copy (subbandID const &other)
-  {;}
+  void SubbandID::copy (SubbandID const &other)
+  {
+    samplingFreq_p = other.samplingFreq_p;
+    bandID_p       = other.bandID_p;
+    nofSubbands_p  = other.nofSubbands_p;
+  }
 
   // ============================================================================
   //
@@ -101,7 +111,7 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  void subbandID::summary ()
+  void SubbandID::summary ()
   {;}
   
   
@@ -112,80 +122,82 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  Vector<Double> subbandID :: calcFrequency( const Double& sampling_Freq,
+  Vector<Double> SubbandID :: calcFrequency (const Double& sampling_Freq,
                                              const uint& subband_ID,
                                              const uint& n_subbands )
-
- {
-  try {
-        Vector<Double> freq_Val ( n_subbands, 0.0 );
-        
-        Double freq_width = sampling_Freq / 1024. ;        
-        Double first_freq = freq_width*subband_ID ;
-
-        freq_Val (0) = first_freq ;
-       
-        for( uint n = 1; n <n_subbands; n++){
-            
-               freq_Val(n) = first_freq + freq_width ;
-               first_freq  = freq_Val(n) ;
-              }
-       return freq_Val;
+  {
+    samplingFreq_p = sampling_Freq;
+    bandID_p       = subband_ID;
+    nofSubbands_p  = n_subbands;
+    
+    try {
+      Vector<Double> freq_Val ( nofSubbands_p, 0.0 );
+      Double freq_width = samplingFreq_p / 1024. ;        
+      Double first_freq = freq_width*bandID_p ;
+      
+      freq_Val (0) = first_freq ;
+      
+      for( uint n = 1; n <nofSubbands_p; n++){
+	
+	freq_Val(n) = first_freq + freq_width ;
+	first_freq  = freq_Val(n) ;
       }
-   catch( AipsError x ){
-        cerr << " subbandID :: calcFrequency " << x.getMesg() << endl ;
-        return Vector<Double> () ;
-      }
+      return freq_Val;
+    }
+    catch( AipsError x ){
+      cerr << " SubbandID :: calcFrequency " << x.getMesg() << endl ;
+      return Vector<Double> () ;
+    }
   }
-
-
-  Vector<uint> subbandID :: calcSubbandID( const Double& sampling_freq,
+  
+  
+  Vector<uint> SubbandID :: calcSubbandID( const Double& sampling_freq,
                                            const Double& subband_freq,
                                            const uint& n_subbands )
   { 
     try {
-
-          Vector<uint> subbands_IDs( n_subbands, 0 );
-
-          uint subband_1 = int( subband_freq/(sampling_freq/1024.) ) ;
-
-          subbands_IDs (0) = subband_1 ; 
-
-          for( uint m =1; m < n_subbands ; m++ ){
-                                 
-                 subbands_IDs( m ) = subband_1 + m ;
-                }                                 
-          return subbands_IDs ;
-        }
+      
+      Vector<uint> subbands_IDs( n_subbands, 0 );
+      
+      uint subband_1 = int( subband_freq/(sampling_freq/1024.) ) ;
+      
+      subbands_IDs (0) = subband_1 ; 
+      
+      for( uint m =1; m < n_subbands ; m++ ){
+	
+	subbands_IDs( m ) = subband_1 + m ;
+      }                                 
+      return subbands_IDs ;
+    }
     catch( AipsError x ){
-       cerr << "subbandID :: calcSubbandID " <<  x.getMesg() << endl ;
-       return Vector<uint> () ;
-       }
-
+      cerr << "SubbandID :: calcSubbandID " <<  x.getMesg() << endl ;
+      return Vector<uint> () ;
+    }
+    
   }
   
   
-   Vector<uint> subbandID::calcbandIDVector ( const Double& sampling_freq,
-                                              const Vector<Double>& subband_frequencies )			       
-   {
-      try {
+  Vector<uint> SubbandID::calcbandIDVector ( const Double& sampling_freq,
+					     const Vector<Double>& subband_frequencies )			       
+  {
+    try {
       
-          uint nofsubabands = subband_frequencies.nelements() ;
-	  
-	  Double bandwidth = sampling_freq /1024. ; 
+      uint nofsubabands = subband_frequencies.nelements() ;
       
-          Vector<uint> subband_IDs( nofsubabands, 0 ) ;
-	  
-	  for( uint ns =0; ns <nofsubabands; ns++ ){
-	  
-	      subband_IDs( ns ) = int(subband_frequencies(ns)/bandwidth) ;
-	      }
-	  return subband_IDs ;
-	 }
-     catch( AipsError x ){
-         cerr << "subbandID :: calcbandIDVector "  << x.getMesg() << endl ;
-	 return Vector<uint> () ;
-	 }
+      Double bandwidth = sampling_freq /1024. ; 
+      
+      Vector<uint> subband_IDs( nofsubabands, 0 ) ;
+      
+      for( uint ns =0; ns <nofsubabands; ns++ ){
+	
+	subband_IDs( ns ) = int(subband_frequencies(ns)/bandwidth) ;
+      }
+      return subband_IDs ;
+    }
+    catch( AipsError x ){
+      cerr << "SubbandID :: calcbandIDVector "  << x.getMesg() << endl ;
+      return Vector<uint> () ;
+    }
   }
-
+  
 } // Namespace CR -- end

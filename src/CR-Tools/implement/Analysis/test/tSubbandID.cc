@@ -32,15 +32,15 @@
 #include <casa/BasicSL/Complex.h>
 #include <casa/Exceptions/Error.h>
 
-#include <Analysis/subbandID.h>
+#include <Analysis/SubbandID.h>
 
-using CR::subbandID ;
+using CR::SubbandID ;
 /*!
-  \file tsubbandID.cc
+  \file tSubbandID.cc
 
   \ingroup Analysis
 
-  \brief A collection of test routines for subbandID
+  \brief A collection of test routines for SubbandID
  
   \author Kalpana Singh
  
@@ -50,7 +50,7 @@ using CR::subbandID ;
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test constructors for a new subbandID object
+  \brief Test constructors for a new SubbandID object
 
   \return nofFailedTests -- The number of failed tests.
 */
@@ -69,20 +69,20 @@ Double subband_frequencies [24] = { 24218750, 24375000, 24531250, 24687500, 2484
 
 Vector<Double> band_frequencies (24, 0.0);
 
-int test_subbandID ()
+int test_SubbandID ()
 {
   int nofFailedTests (0);
   
   try {
-    subbandID sub_band_ID  ;
+    SubbandID sub_band_ID  ;
   }
    catch ( AipsError x ) {
-    cerr << "test_subbandID : -- testing default construtor ...." << x.getMesg() << endl;
+    cerr << "test_SubbandID : -- testing default construtor ...." << x.getMesg() << endl;
     }
    return nofFailedTests ;
   }
  
- Bool test_subbandIDs ()
+ Bool test_SubbandIDs ()
  { 
    Bool ok(True) ;
    try {
@@ -91,11 +91,11 @@ int test_subbandID ()
           band_frequencies(i)= subband_frequencies [i] ;
 	  }
       
-        subbandID sub_band_ID_1(sampling_freq, first_subband_freq, n_subbands )  ;  
+        SubbandID sub_band_ID_1(sampling_freq, first_subband_freq, n_subbands )  ;  
 	
-	subbandID sub_band_ID_2(sampling_freq, band_ID, n_subbands )  ;  
+	SubbandID sub_band_ID_2(sampling_freq, band_ID, n_subbands )  ;  
 	
-	subbandID sub_band_ID_3(sampling_freq, band_frequencies  )  ; 
+	SubbandID sub_band_ID_3(sampling_freq, band_frequencies  )  ; 
 	
 	Vector<Double> subband_freq(n_subbands, 0.0 );
 	
@@ -136,7 +136,7 @@ int main ()
   Bool ok (True);
   Int retval(0);
   if(ok){
-  ok = test_subbandIDs();
+  ok = test_SubbandIDs();
   
   if(!ok){
    retval = 1;

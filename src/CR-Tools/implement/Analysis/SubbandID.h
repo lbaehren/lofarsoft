@@ -1,4 +1,7 @@
-/***************************************************************************
+/*-------------------------------------------------------------------------*
+ | $Id: template-class.h,v 1.20 2007/06/13 09:41:37 bahren Exp           $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
  *   Copyright (C) 2007                                                    *
  *   Kalpana Singh (<k.singh@astro.ru.nl>)                                 *
  *                                                                         *
@@ -17,8 +20,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-/* $Id: subbandID.h,v 1.2 2007/08/06 14:43:10 singh Exp $*/
 
 #ifndef SUBBANDID_H
 #define SUBBANDID_H
@@ -50,34 +51,40 @@
 namespace CR { // Namespace CR -- begin
   
   /*!
-    \class subbandID
+    \class SubbandID
     
     \ingroup Analysis
     
-    \brief Brief description for class subbandID
+    \brief Brief description for class SubbandID
     
     \author Kalpana Singh
 
     \date 2007/06/05
 
-    \test tsubbandID.cc
+    \test tSubbandID.cc
     
     <h3>Prerequisite</h3>
     
-    <ul type="square">
-      <li>[ This class is developed to calculate the subband IDs that can be used for polyphase filter bank inversion or
-            for ionospheric calibration.
-            In case if subband IDs are provided then in that case to calculate the starting frequency of the subband with 
-	    bandwidth depending on the sampling frequency, in other specific case if vector of various subband (initial)
-	    frequencies is provided then in that case also subband IDs can be generated ]
-    </ul>
-    
     <h3>Synopsis</h3>
+    
+    This class is developed to calculate the subband IDs that can be used for
+    polyphase filter bank inversion or for ionospheric calibration. In case if
+    subband IDs are provided then in that case to calculate the starting
+    frequency of the subband with bandwidth depending on the sampling frequency,
+    in other specific case if vector of various subband (initial)
+    frequencies is provided then in that case also subband IDs can be generated
     
     <h3>Example(s)</h3>
     
   */  
-  class subbandID {
+  class SubbandID {
+    
+    //! Clock rate at which data is sampled
+    Double samplingFreq_p;
+    //! Subband ID of first subband used for observation
+    uint bandID_p;
+    //! Number of subbands used for observation
+    uint nofSubbands_p;
     
   public:
     
@@ -86,30 +93,26 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Default constructor
     */
-    subbandID ();
-
-   /*!
-    \brief Argumented Constructor
-
-    sets a vector of initial subband frequencies of all the subbands if ID of first subband is given 
-    and number of subbands is given
-
-
-   \param  samplingFreq    --  clock rate at which data is sampled
-
-   \param  bandID          --  subband ID of first subband used for observation
-
-   \param  nofsubbands     --  number of subbands used for observation, basically for beamforming, number of datafiles
-                               which is given for processing
-
-  */
-
-   subbandID ( const Double& samplingFreq,
-               const uint& bandID,
-               const uint& nofsubbands  );
-
-   /*!
-   \brief Argumented Constructor
+    SubbandID ();
+    
+    /*!
+      \brief Argumented Constructor
+      
+      Sets a vector of initial subband frequencies of all the subbands if ID of
+      first subband is given and number of subbands is given
+      
+      \param  samplingFreq    --  clock rate at which data is sampled
+      \param  bandID          --  subband ID of first subband used for observation
+      \param  nofsubbands     --  number of subbands used for observation, basically
+                                  for beamforming, number of datafiles which is
+				  given for processing
+    */
+    SubbandID (Double const &samplingFreq,
+	       uint const &bandID,
+	       uint const &nofsubbands);
+    
+    /*!
+      \brief Argumented Constructor
 
    sets the  vector of subband IDs if the initial subband frequency of first subband, which is used in observation 
    is given, and number of subbands used in observation is given.
@@ -123,7 +126,7 @@ namespace CR { // Namespace CR -- begin
 
    */
 
-  subbandID ( const Double& samplingFreq,
+  SubbandID ( const Double& samplingFreq,
               const Double& subband_freq_1,
               const uint& nofsubbands  ) ;
 
@@ -140,43 +143,43 @@ namespace CR { // Namespace CR -- begin
   
   */
    
-   subbandID ( const Double& samplingFreq,
+   SubbandID ( const Double& samplingFreq,
                const Vector<Double>& subband_frequencies ) ;
 
    
     /*!
       \brief Copy constructor
       
-      \param other -- Another subbandID object from which to create this new
+      \param other -- Another SubbandID object from which to create this new
       one.
     */
-    subbandID (subbandID const &other);
+    SubbandID (SubbandID const &other);
     
     // -------------------------------------------------------------- Destruction
 
     /*!
       \brief Destructor
     */
-    ~subbandID ();
+    ~SubbandID ();
     
     // ---------------------------------------------------------------- Operators
     
     /*!
       \brief Overloading of the copy operator
       
-      \param other -- Another subbandID object from which to make a copy.
+      \param other -- Another SubbandID object from which to make a copy.
     */
-    subbandID& operator= (subbandID const &other); 
+    SubbandID& operator= (SubbandID const &other); 
     
     // --------------------------------------------------------------- Parameters
     
     /*!
       \brief Get the name of the class
       
-      \return className -- The name of the class, subbandID.
+      \return className -- The name of the class, SubbandID.
     */
     std::string className () const {
-      return "subbandID";
+      return "SubbandID";
     }
 
     /*!
@@ -243,7 +246,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Unconditional copying
     */
-    void copy(subbandID const &other);
+    void copy(SubbandID const &other);
     
     /*!
       \brief Unconditional deletion 

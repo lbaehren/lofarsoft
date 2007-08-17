@@ -21,7 +21,7 @@
 /* $Id: ppfinversion.cc,v 1.5 2007/08/08 15:29:50 singh Exp $*/
 
 #include <Analysis/ppfinversion.h>
-#include <Analysis/subbandID.h>
+#include <Analysis/SubbandID.h>
 
 namespace CR { // Namespace CR -- begin
   

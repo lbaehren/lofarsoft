@@ -32,13 +32,13 @@
 #include <Analysis/ppfimplement.h>
 #include <Analysis/ppfinversion.h>
 #include <Analysis/ionoCalibration.h>
-#include <Analysis/subbandID.h>
+#include <Analysis/SubbandID.h>
 #include <templates.h>
 
 using CR::ionoCalibration ;
 using CR::ppfimplement ;
 using CR::ppfinversion ;
-using CR::subbandID ;
+using CR::SubbandID ;
 
 /*!
   \file tionoCalibration.cc
@@ -89,7 +89,7 @@ int test_ionoCalibration ()
      
      ppfinversion ppf_inv ;
      
-     subbandID sbID ;
+     SubbandID sbID ;
      
      ionoCalibration iono_cal ;
      }
@@ -165,7 +165,7 @@ int test_ionoCalibration ()
       }
     cout << " subband frequencies :" << subband_frequencies << endl;
     
-     subbandID sbID ;
+     SubbandID sbID ;
      
     Vector<uint> subband_IDs = sbID.calcbandIDVector( sampling_frequency,
 	                                               subband_frequencies ) ;
@@ -174,78 +174,78 @@ int test_ionoCalibration ()
  
   Matrix<DComplex>FFT_data_mid( 500, nofsegmentation, 0.0 );
   
-    for( uint r=0; r<500; r++ ){
-        
-       uint which_row = subband_IDs(r) ;
-       
-       FFT_data_mid.row(r) = ppf_data_first.row(which_row) ;
-       }
+  for( uint r=0; r<500; r++ ){
     
-     Matrix<DComplex> FFT_phase_dispersed = iono_cal.phaseRECorrection( FFT_data_mid,
-                                                                        hrAngle,
-                                                                        declinationAngle,
-                                                                        geomagLatitude,
-                                                                        height_ionosphere,
-		                                                        TEC_value,
-								        sampling_frequency,
-		                                                        subband_frequencies )   ;
+    uint which_row = subband_IDs(r) ;
     
-    
-      
-    Vector<Double> output_mid = ppf_inv.FIR_inversion( ppfcoeff_inv,
-                                                   FFT_phase_dispersed );	
-						 
-    ofstream logfile2;
-     
-        logfile2.open( "output_mid", ios::out );
-        for( uint f(0); f < ( dataBlockSize*nofsegmentation ) ; f++ ){
-             logfile2 << output_mid(f) << endl;
-          }	
-    
-     Matrix<DComplex> ppf_data_second =  ppf_impl.FFTSamples( output_mid,
-                                                             ppfcoeff );	  
-    
-    
- 
-   Matrix<DComplex>FFT_data_final( 500, nofsegmentation, 0.0 );
-  
-    for( uint r=0; r<500; r++ ){
-        
-       uint which_row = subband_IDs(r) ;
-       
-       FFT_data_final.row(r) = ppf_data_second.row(which_row) ;
-       }
- 						       
-    cout << " developed FFT_data according to the subband frequency : " << endl ;
-    Matrix<DComplex> FFT_phase_corrected = iono_cal.phaseCorrection( FFT_data_final,
-                                                                     hrAngle,
-                                                                     declinationAngle,
-                                                                     geomagLatitude,
-                                                                     height_ionosphere,
-		                                                     TEC_value,
-								     sampling_frequency,
-		                                                     subband_frequencies )   ;
-   
- 	uint nofrows = FFT_phase_corrected.nrow() ;
-	cout << "number of generated in phase corrected FFT array : " << nofrows<< endl;		     
-   Vector<Double> output_dispersion = ppf_inv.FIR_inversion( ppfcoeff_inv,
-                                                             FFT_phase_corrected );
-							     
-   							     
-   ofstream logfile3;
-     
-        logfile3.open( "output_dispersion", ios::out );
-        for( uint f(0); f < ( dataBlockSize*nofsegmentation ) ; f++ ){
-             logfile3 << output_dispersion(f) << endl;
-          }	 							         
-      
-  } catch (AipsError x) {
-    cerr << x.getMesg()<< endl;
-    ok = False;
+    FFT_data_mid.row(r) = ppf_data_first.row(which_row) ;
   }
   
-  return ok;
-}
+  Matrix<DComplex> FFT_phase_dispersed = iono_cal.phaseRECorrection( FFT_data_mid,
+								     hrAngle,
+								     declinationAngle,
+								     geomagLatitude,
+								     height_ionosphere,
+								     TEC_value,
+								     sampling_frequency,
+								     subband_frequencies )   ;
+  
+  
+  
+  Vector<Double> output_mid = ppf_inv.FIR_inversion( ppfcoeff_inv,
+						     FFT_phase_dispersed );	
+  
+  ofstream logfile2;
+  
+  logfile2.open( "output_mid", ios::out );
+  for( uint f(0); f < ( dataBlockSize*nofsegmentation ) ; f++ ){
+    logfile2 << output_mid(f) << endl;
+  }	
+  
+  Matrix<DComplex> ppf_data_second =  ppf_impl.FFTSamples( output_mid,
+							   ppfcoeff );	  
+  
+  
+  
+  Matrix<DComplex>FFT_data_final( 500, nofsegmentation, 0.0 );
+  
+  for( uint r=0; r<500; r++ ){
+    
+    uint which_row = subband_IDs(r) ;
+    
+    FFT_data_final.row(r) = ppf_data_second.row(which_row) ;
+  }
+  
+  cout << " developed FFT_data according to the subband frequency : " << endl ;
+  Matrix<DComplex> FFT_phase_corrected = iono_cal.phaseCorrection( FFT_data_final,
+								   hrAngle,
+								   declinationAngle,
+								   geomagLatitude,
+								   height_ionosphere,
+								   TEC_value,
+								   sampling_frequency,
+								   subband_frequencies )   ;
+  
+  uint nofrows = FFT_phase_corrected.nrow() ;
+  cout << "number of generated in phase corrected FFT array : " << nofrows<< endl;		     
+  Vector<Double> output_dispersion = ppf_inv.FIR_inversion( ppfcoeff_inv,
+							    FFT_phase_corrected );
+  
+  
+  ofstream logfile3;
+  
+  logfile3.open( "output_dispersion", ios::out );
+  for( uint f(0); f < ( dataBlockSize*nofsegmentation ) ; f++ ){
+    logfile3 << output_dispersion(f) << endl;
+  }	 							         
+  
+     } catch (AipsError x) {
+       cerr << x.getMesg()<< endl;
+       ok = False;
+     }
+     
+     return ok;
+ }
 // -----------------------------------------------------------------------------
 int main ()
 {
@@ -253,11 +253,11 @@ int main ()
   
   Int retval(0) ;
   if(ok) {
-  ok= test_ionoCalibrations ();
-  if(!ok){
-  retval = 1;
-  cout <<"Error............... early exit " << endl;
+    ok= test_ionoCalibrations ();
+    if(!ok){
+      retval = 1;
+      cout <<"Error............... early exit " << endl;
+    }
   }
- }
- return retval;
+  return retval;
 }

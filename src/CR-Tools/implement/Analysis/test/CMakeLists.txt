@@ -20,7 +20,7 @@ set (tests
   tppfimplement
   tppfinversion
   tSecondStagePipeline
-  tsubbandID
+  tSubbandID
   )
 
 ## -----------------------------------------------------------------------------

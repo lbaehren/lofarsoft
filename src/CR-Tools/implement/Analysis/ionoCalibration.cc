@@ -21,7 +21,7 @@
 /* $Id: ionoCalibration.cc,v 1.3 2007/08/08 15:29:50 singh Exp $*/
 
 #include <Analysis/ionoCalibration.h>
-#include <Analysis/subbandID.h>
+#include <Analysis/SubbandID.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -220,67 +220,65 @@ namespace CR { // Namespace CR -- begin
       }
   }
   
- 
-   Matrix<DComplex> ionoCalibration::SubbandGenerator( const Matrix<DComplex>& FTData,
-                                       		       const Double& samplingFreq,
-                  		       		       const Vector<Double>& subband_frequencies ) 
-						       
-   {
-     try {
-     
-            subbandID sbID ;
-	 
-	    Vector<uint> subband_IDs = sbID.calcbandIDVector( samplingFreq,
-	                                                      subband_frequencies ) ;
-         
-            uint nofelement = subband_IDs.nelements ();
-	 							   
-            uint Rows = FTData.nrow() ;
-	    uint Columns = FTData.ncolumn() ;
-	 
-	    Matrix<DComplex> conjugateArray( Rows, Columns, 0.0 ) ;
-	 
-	    Matrix<DComplex> generatedArray( 1024, Columns, 0.0 ) ;
-	 
-	    conjugateArray = conj( FTData ) ;
-	 
-	    if ( nofelement == Rows ) {
-	 
-	          for( uint r =0; r < nofelement ; r++ ){
-	       
-	               uint num = subband_IDs(r) ;
+  Matrix<DComplex>
+  ionoCalibration::SubbandGenerator( const Matrix<DComplex>& FTData,
+				     const Double& samplingFreq,
+				     const Vector<Double>& subband_frequencies ) 
+    
+  {
+    try {
+      
+      SubbandID sbID;
+      Vector<uint> subband_IDs = sbID.calcbandIDVector( samplingFreq,
+							subband_frequencies ) ;
+      
+      uint nofelement = subband_IDs.nelements ();
+      
+      uint Rows = FTData.nrow() ;
+      uint Columns = FTData.ncolumn() ;
+      
+      Matrix<DComplex> conjugateArray( Rows, Columns, 0.0 ) ;
+      
+      Matrix<DComplex> generatedArray( 1024, Columns, 0.0 ) ;
+      
+      conjugateArray = conj( FTData ) ;
+      
+      if ( nofelement == Rows ) {
 	
-	               generatedArray.row(num) = FTData.row(r) ;
-                       
-		       if( r <512 ){		   
-		          generatedArray.row( 1024-num ) = conjugateArray.row(r) ;
-		         }
-		       }
-	    }
-	return generatedArray ;
+	for( uint r =0; r < nofelement ; r++ ){
+	  
+	  uint num = subband_IDs(r) ;
+	  
+	  generatedArray.row(num) = FTData.row(r) ;
+          
+	  if( r <512 ){		   
+	    generatedArray.row( 1024-num ) = conjugateArray.row(r) ;
+	  }
 	}
-     
-     catch( AipsError x ){
-       cerr<< "ionoCalibration::SubbandGenerator " << x.getMesg() << endl ;
-       return Matrix<DComplex> () ;
-       }
+      }
+      return generatedArray ;
     }
     
+    catch( AipsError x ){
+      cerr<< "ionoCalibration::SubbandGenerator " << x.getMesg() << endl ;
+      return Matrix<DComplex> () ;
+    }
+  }
+  
+  Matrix<DComplex>
+  ionoCalibration::phaseCorrection( const Matrix<DComplex>& FFT_data,
+				    const Double& hrAngle,
+				    const Double& declinationAngle,
+				    const Double& geomagLatitude,
+				    const Double& height_ionosphere,
+				    const Double& TEC_value,
+				    const Double& samplingFreq,
+				    const Vector<Double>& subband_frequencies )
+  {
     
-  Matrix<DComplex> ionoCalibration::phaseCorrection( const Matrix<DComplex>& FFT_data,
-                                                     const Double& hrAngle,
-                                                     const Double& declinationAngle,
-                                                     const Double& geomagLatitude,
-                                                     const Double& height_ionosphere,
-		                                     const Double& TEC_value,
-		                                     const Double& samplingFreq,
-						     const Vector<Double>& subband_frequencies ) 
- 
- {
-   
     try {
-             
-	 ionoCalibration ionoCal ;
+      
+      ionoCalibration ionoCal ;
 	 
 	 DComplex j(0, 1);
 	 
