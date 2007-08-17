@@ -21,6 +21,8 @@
 set (include_locations
   /usr/include/casacore
   /usr/local/include/casacore
+  /sw/share/casacore
+  /sw/share/casacore/stage/include
   /sw/include/casacore
   ./../casacore
   ./../external/casacore
@@ -59,6 +61,10 @@ set (casacore_modules
 ## -----------------------------------------------------------------------------
 ## Check for system header files
 
+if (NOT CASACORE_FIND_QUIETLY)
+  message (STATUS "[FindCASACORE] Check for system header files ...")
+endif (NOT CASACORE_FIND_QUIETLY)
+
 include (CheckIncludeFiles)
 
 check_include_files (assert.h HAVE_ASSERT_H)
@@ -92,13 +98,17 @@ endif (NOT libcfitsio)
 ## installation or have remained at their original location in the source
 ## directories, we need to check for different variants to the include paths.
 
+if (NOT CASACORE_FIND_QUIETLY)
+  message (STATUS "[FindCASACORE] Check for the header files ...")
+endif (NOT CASACORE_FIND_QUIETLY)
+
 set (CASACORE_INCLUDES "")
 
 ## [1] <casa/Arrays.h>
 
 find_path (CASACORE_casa Arrays.h
   PATHS ${include_locations}
-  PATH_SUFFIXES casa/casa
+  PATH_SUFFIXES casa/casa casacore/casa
 )
 
 if (CASACORE_casa)
@@ -264,6 +274,10 @@ endif (CASACORE_msvis)
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
+if (NOT CASACORE_FIND_QUIETLY)
+  message (STATUS "[FindCASACORE] Check for the library ...")
+endif (NOT CASACORE_FIND_QUIETLY)
+
 ## Dependency of the packages in casacore
 
 # casa        : --
@@ -288,10 +302,10 @@ foreach (casacore_lib ${casacore_modules})
   ## search for the library
   find_library (CASACORE_lib${casacore_lib} casa_${casacore_lib} ${casacore_lib}
     PATHS ${lib_locations}
-  )
+    )
   ## if we have found the library, add it to the list
   if (CASACORE_lib${casacore_lib})
-	list (APPEND CASACORE_LIBRARIES ${CASACORE_lib${casacore_lib}})
+    list (APPEND CASACORE_LIBRARIES ${CASACORE_lib${casacore_lib}})
   endif (CASACORE_lib${casacore_lib})
 endforeach (casacore_lib)
 
@@ -300,7 +314,6 @@ endforeach (casacore_lib)
 
 if (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
   set (HAVE_CASACORE TRUE)
-#  string (REGEX REPLACE lib/libcasa.a lib CASACORE_LIBRARIES_DIR ${CASA_libcasa})
 else (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
   if (NOT CASACORE_FIND_QUIETLY)
     if (NOT CASACORE_INCLUDES)

@@ -21,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <lopes/<newModule>/<newClass>.h>
+#include <<newModule>/<newClass>.h>
 
 namespace <newNamespace> { // Namespace <newNamespace> -- begin
   
