@@ -80,7 +80,7 @@ namespace CR { // Namespace CR -- begin
   class SubbandID {
     
     //! Clock rate at which data is sampled
-    Double samplingFreq_p;
+    double sampleFrequency_p;
     //! Subband ID of first subband used for observation
     uint bandID_p;
     //! Number of subbands used for observation
@@ -101,62 +101,57 @@ namespace CR { // Namespace CR -- begin
       Sets a vector of initial subband frequencies of all the subbands if ID of
       first subband is given and number of subbands is given
       
-      \param  samplingFreq    --  clock rate at which data is sampled
-      \param  bandID          --  subband ID of first subband used for observation
-      \param  nofsubbands     --  number of subbands used for observation, basically
-                                  for beamforming, number of datafiles which is
-				  given for processing
+      \param  sampleFrequency -- clock rate at which data is sampled
+      \param  bandID          -- subband ID of first subband used for observation
+      \param  nofsubbands     -- number of subbands used for observation, basically
+                                 for beamforming, number of datafiles which is
+				 given for processing
     */
-    SubbandID (Double const &samplingFreq,
+    SubbandID (double const &sampleFrequency,
 	       uint const &bandID,
-	       uint const &nofsubbands);
+	       uint const &nofSubbands);
     
     /*!
       \brief Argumented Constructor
+      
+      Sets the  vector of subband IDs if the initial subband frequency of first
+      subband, which is used in observation is given, and number of subbands
+      used in observation is given.
+      
+      \param sampleFrequency  -- clock rate at which data is sampled
+      \param subband_freq_1 -- initial frequency of first subband which is used
+                               for observation
+      \param nofSubbands    -- number of subbands used for observation, basically
+                               for beamforming, number of datafiles which is
+			       given for processing
+    */
+    SubbandID (double const &sampleFrequency,
+	       double const &subband_freq_1,
+	       uint const &nofSubbands);
 
-   sets the  vector of subband IDs if the initial subband frequency of first subband, which is used in observation 
-   is given, and number of subbands used in observation is given.
-
-   \param  samplingFreq   --  clock rate at which data is sampled
-
-   \param subband_freq_1  --  initial frequency of first subband which is used for observation
-
-   \param nofsubbands     --  number of subbands used for observation, basically for beamforming, number of datafiles
-                              which is given for processing
-
-   */
-
-  SubbandID ( const Double& samplingFreq,
-              const Double& subband_freq_1,
-              const uint& nofsubbands  ) ;
-
-  
-  /*!
-  \brief Arguemented Constructor
-  
-  sets the vector of subband IDs for given vector of subband intial frequencies which are used for beamforming at
-  staion level or for tied array beam
-  
-  \param  samplingFreq           --  clock rate at which data is sampled
-  
-  \param   subband_frequencies   --  vector of subband frequencies.
-  
-  */
-   
-   SubbandID ( const Double& samplingFreq,
-               const Vector<Double>& subband_frequencies ) ;
-
-   
+    /*!
+      \brief Arguemented Constructor
+      
+      Sets the vector of subband IDs for given vector of subband intial
+      frequencies which are used for beamforming at station level or for tied
+      array beam
+      
+      \param sampleFrequency     -- clock rate at which data is sampled
+      \param subband_frequencies -- vector of subband frequencies.
+    */
+    SubbandID (double const &sampleFrequency,
+	       const Vector<double>& subband_frequencies ) ;
+    
     /*!
       \brief Copy constructor
       
       \param other -- Another SubbandID object from which to create this new
-      one.
+                      one.
     */
     SubbandID (SubbandID const &other);
     
     // -------------------------------------------------------------- Destruction
-
+    
     /*!
       \brief Destructor
     */
@@ -172,6 +167,42 @@ namespace CR { // Namespace CR -- begin
     SubbandID& operator= (SubbandID const &other); 
     
     // --------------------------------------------------------------- Parameters
+
+    /*!
+      \brief Get the clock rate at which data is sampled
+
+      \return sampleFrequency -- Clock rate at which data is sampled, [Hz]
+    */
+    double sampleFrequency () const {
+      return sampleFrequency_p;
+    }
+
+    /*!
+      \brief Set the clock rate at which data is sampled
+
+      \param sampleFrequency -- Clock rate at which data is sampled, [Hz]
+    */
+    inline void setSampleFrequency (double const &sampleFrequency) {
+      sampleFrequency_p = sampleFrequency;
+    }
+    
+    /*!
+      \brief Get the Subband ID of first subband used for observation
+
+      \return bandID -- Subband ID of first subband used for observation
+    */
+    inline uint bandID () const {
+      return bandID_p;
+    }
+
+    /*!
+      \brief Set the subband ID of first subband used for observation
+
+      \param bandID -- Subband ID of first subband used for observation
+    */
+    inline void bandID (uint const &bandID) {
+      bandID_p = bandID;
+    }
     
     /*!
       \brief Get the name of the class
@@ -185,61 +216,61 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Provide a summary of the internal status
     */
-    void summary ();    
+    inline void summary () {
+      summary (std::cout);
+    }
 
-    // --------------------------------- Computational Methods --------------------
+    /*!
+      \brief Provide a summary of the internal status
 
-     /*!
-   \brief calculating initial frequencies of subbands which are used for beamforming.
-
-   \param  sampling_Freq 	--  clock rate at which data is sampled
-
-   \param  subband_ID 		--  subband ID of first subband used for observation
-
-   \param n_subbands            --  number of subbands used for observation, basically for beamforming,
-                                   number of datafiles which is given for processing
-				   
-   returns vector of vector of initial frequencies of subbands which are used for beamforming.				  
-
-   */
-   
-    Vector<Double> calcFrequency ( const Double& sampling_Freq,
-                                   const uint& subband_ID,
-                                   const uint& n_subbands ) ;
-
-     /*!
-   \brief calculating subbands IDs which are used for beamforming.
-
-   \param  sampling_Freq 	--  clock rate at which data is sampled
-
-   \param  subband_freq		--  subband frequency of first subband of the subband vector which are 
-   				    used for observation
-
-   \param n_subbands            --  number of subbands used for observation, basically for beamforming,
-                                   number of datafiles which is given for processing
-				   
-   returns vector of vector of subbands IDs which are used for beamforming.				  
-
-   */
-   
-   Vector<uint> calcSubbandID ( const Double& sampling_Freq,
-                                const Double& subband_freq,
-                                const uint& n_subbands  ) ;
+      \param os -- Output stream to which the summary is written
+    */
+    void summary (std::ostream &os);
     
-     /*!
-   \brief calculating subbands IDs which are used for beamforming.
-
-   \param  sampling_Freq 	--  clock rate at which data is sampled
-
-   \param  subband_frequencies	--  vector of intial frequencies of all subbands which are 
-   				    used for beamforming.
-
-   returns vector of vector of subbands IDs which are used for beamforming.				  
-
-   */
-   
-   Vector<uint> calcbandIDVector ( const Double& sampling_freq,
-                                   const Vector<Double>& subband_frequencies ) ;
+    /*!
+      \brief Calculate initial frequencies of subbands used for beamforming.
+      
+      \param sampleFrequency -- Clock rate at which data is sampled
+      \param subband_ID      -- subband ID of first subband used for observation
+      \param nofSubbands      -- number of subbands used for observation,
+                                basically for beamforming, number of datafiles
+				which is given for processing
+      
+      \return frequencies -- Vector of vector of initial frequencies of subbands
+                             which are used for beamforming.      
+    */
+    Vector<double> calcFrequency ( const double& sampleFrequency,
+                                   const uint& subband_ID,
+                                   const uint& nofSubbands ) ;
+    
+    /*!
+      \brief Calculate subbands IDs which are used for beamforming.
+      
+      \param sampleFrequency -- clock rate at which data is sampled
+      \param subband_freq    -- subband frequency of first subband of the
+                                subband vector which are used for observation
+      \param nofSubbands      -- number of subbands used for observation,
+                                basically for beamforming, number of datafiles
+				which is given for processing
+      
+      \return subbandIDs -- Vector of subbands IDs which are used for beamforming
+    */
+    Vector<uint> calcSubbandID ( const double& sampleFrequency,
+				 const double& subband_freq,
+				 const uint& nofSubbands  ) ;
+    
+    /*!
+      \brief calculating subbands IDs which are used for beamforming.
+      
+      \param sampleFrequency 	 -- clock rate at which data is sampled
+      \param subband_frequencies -- vector of intial frequencies of all subbands
+                                    which are used for beamforming.
+      
+      \return subbands -- Vector of vector of subbands IDs which are used for
+                          beamforming.
+    */
+    Vector<uint> calcbandIDVector ( const double& sampleFrequency,
+				    const Vector<double>& subband_frequencies ) ;
     
   private:
     
@@ -258,4 +289,3 @@ namespace CR { // Namespace CR -- begin
 } // Namespace CR -- end
 
 #endif /* SUBBANDID_H */
-  
