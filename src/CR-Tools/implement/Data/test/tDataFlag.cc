@@ -21,12 +21,14 @@
 
 #include <Data/DataFlag.h>
 
+using CR::DataFlag;
+
 /*!
   \file tDataFlag.cc
 
   \ingroup Data
   
-  \brief A collection of test routines for DataFlag.
+  \brief A collection of test routines for the DataFlag class
 
   \author Lars B&auml;hren
 
@@ -40,11 +42,11 @@
 
   \return ok -- Status of the test routine
 */
-Bool test_DataFlag ()
+int test_DataFlag ()
 {
   cout << "\n[test_DataFlag] Testing constructors\n" << endl;
 
-  Bool ok (True);
+  int nofFailedTests (0);
   Int nofFiles (10);
   Float threshold (0.75);
   Vector<Float> limits (2);
@@ -56,35 +58,45 @@ Bool test_DataFlag ()
 
   // [1]
   cout << " - Test 1 (Int) ..." << endl;
-  {
+  try {
     DataFlag<Float> df (nofFiles);
+  } catch (std::string message) {
+    nofFailedTests++;
   }
     
   // [2]
   cout << " - Test 2 (Int, Float) ..." << endl;
-  {
+  try {
     DataFlag<Float> df (nofFiles, threshold);
+  } catch (std::string message) {
+    nofFailedTests++;
   }
 
   // [3]
   cout << " - Test 3 (Int, Float, Vector<Double>) ..." << endl;
-  {
+  try {
     DataFlag<Float> df (nofFiles, threshold, limits);
+  } catch (std::string message) {
+    nofFailedTests++;
   }
 
   // [4]
   cout << " - Test 4 (Vector<Bool>) ..." << endl;
-  {
+  try {
     DataFlag<Float> df (bFlags);
+  } catch (std::string message) {
+    nofFailedTests++;
   }
 
   // [5]
   cout << " - Test 5 (Vector<Float>) ..." << endl;
-  {
+  try {
     DataFlag<Float> df (fFlags);
+  } catch (std::string message) {
+    nofFailedTests++;
   }
 
-  return ok;
+  return nofFailedTests;
 }
 
 // -----------------------------------------------------------------------------
@@ -141,17 +153,14 @@ Bool test_flags ()
 
 // --- Main routine ------------------------------------------------------------
 
-int main () {
-  
+int main ()
+{
+  int nofFailedTests (0);
   Bool ok(True);
 
-  ok = test_DataFlag ();
+  nofFailedTests += test_DataFlag ();
 
   ok = test_flags ();
 
-  if (ok) {
-    return 0;
-  } else {
-    return 1;
-  }
+  return nofFailedTests;
 }

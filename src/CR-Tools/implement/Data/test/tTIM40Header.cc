@@ -22,6 +22,8 @@
 
 #include <Data/TIM40Header.h>
 
+using CR::TIM40Header;
+
 /*!
   \file tTIM40Header.cc
 
@@ -41,13 +43,18 @@
 
   \return nofFailedTests -- The number of failed tests.
 */
-Int test_TIM40Header ()
+int test_TIM40Header ()
 {
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
 
-  TIM40Header header;
-  header.show();
-  
+  try {
+    TIM40Header header;
+    header.show();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+ 
   return nofFailedTests;
 }
 
@@ -61,8 +68,8 @@ Int test_TIM40Header ()
 */
 int test_frequencyConversion () 
 {
-  Int nofFailedTests (0);
-  Double samplerateValue (80);
+  int nofFailedTests (0);
+  double samplerateValue (80);
   String samplerateUnit ("MHz");
 
   MVFrequency samplerate (Quantity(samplerateValue,samplerateUnit));
@@ -79,16 +86,12 @@ int test_frequencyConversion ()
 
 int main ()
 {
-  Int nofFailedTests (0);
-
+  int nofFailedTests (0);
+  
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_TIM40Header ();
-  }
-
+  nofFailedTests += test_TIM40Header ();
   // Test conversion of frequencies using measures
-  {
-    nofFailedTests += test_frequencyConversion ();
-  }
+  nofFailedTests += test_frequencyConversion ();
+  
   return nofFailedTests;
 }

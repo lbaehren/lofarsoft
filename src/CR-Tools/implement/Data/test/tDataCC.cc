@@ -27,6 +27,8 @@
 // Custom header files
 #include <Data/DataCC.h>
 
+using CR::DataCC;
+
 /*!
   \file tDataCC.cc
   
@@ -154,10 +156,11 @@ Bool exportSpectra (DataCC& ccdata)
   Matrix<Double> spectra(ccShape(1),ccShape(2));
   Vector<Double> freq = ccdata.frequencyValues();
   Double sum (0.0);
+  int ant (0);
 
   // Extract all autocorrelation spetra and cummulate value for mean spectrum
 
-  for (int ant=0; ant<ccShape(1); ant++) {
+  for (ant=0; ant<ccShape(1); ant++) {
     Vector<Double> spectrum = ccdata.spectrum(ant);
     spectra.row(ant) = spectrum;
   }
@@ -176,7 +179,7 @@ Bool exportSpectra (DataCC& ccdata)
     sum=0.0;
     // all AC spectra
     fileSpectra << chan << "\t" << freq(chan);
-    for (int ant=0; ant<ccShape(1); ant++) {
+    for (ant=0; ant<ccShape(1); ant++) {
       fileSpectra << "\t" << spectra(ant,chan);
       sum += spectra(ant,chan);
     }
@@ -272,6 +275,7 @@ Bool exportVisibilities (DataCC& ccdata)
 
 int main (int argc, char *argv[])
 {
+  int nofFailedTests (0);
   Bool ok (True);
   String metafile    = argv[1];
   String antennafile = argv[2];
@@ -286,21 +290,20 @@ int main (int argc, char *argv[])
     cc.readDataCC();
   } catch (AipsError x) {
     cerr << "[tDataCC] " << x.getMesg() << endl;
-    ok = False;
+    nofFailedTests++;
   }
-
-//   // report the setup for the frequency channels
-//   showFrequencies(cc);
-
+  
+  //   // report the setup for the frequency channels
+  //   showFrequencies(cc);
+  
   // Export the autocorrelation spectra
   ok = exportSpectra (cc);
-
+  
   // Export (some) complex cross-correlation spectra.
   ok = extractComplexSpectrum (cc);
-
+  
   // Conversion to visibilities 
   ok = exportVisibilities (cc);
 
-  return 1;
-
+  return nofFailedTests;
 }

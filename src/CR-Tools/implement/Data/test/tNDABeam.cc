@@ -24,6 +24,7 @@
 #include <casa/Exceptions/Error.h>
 
 #include <Data/NDABeam.h>
+#include <templates.h>
 
 /*!
   \file tNDABeam.cc
@@ -56,7 +57,7 @@ void show_parameters (NDABeam &data)
   cout << " - blocksize              = " << data.blocksize()           << endl;
   cout << " - FFT length             = " << data.fftLength()           << endl;
   cout << " - nof. streams           = " << data.nofStreams()          << endl;
-  cout << " - shape(adc2voltage)     = " << data.adc2voltage().shape() << endl;
+  cout << " - shape(adc2voltage)     = " << data.ADC2Voltage().shape() << endl;
   cout << " - shape(fft2calfft)      = " << data.fft2calfft().shape()  << endl;
   cout << " - Datafiles (names only) = " << data.datafiles(false)      << endl;
   cout << " - Datafiles (full path)  = " << data.datafiles(true)       << endl;
@@ -116,7 +117,7 @@ int test_readData (const String& metafile)
   NDABeam data (metafile,
 		blocksize);
 
-  cout << "adc2voltage = " << data.adc2voltage() << endl;
+  cout << "adc2voltage = " << data.ADC2Voltage() << endl;
   
   cout << "[1] Exporting raw ADC time series ... " << flush;
   {

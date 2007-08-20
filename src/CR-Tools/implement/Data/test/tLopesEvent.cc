@@ -25,6 +25,7 @@
 #include <casa/Exceptions/Error.h>
 
 #include <Data/LopesEvent.h>
+#include <templates.h>
 
 /*!
   \file tLopesEvent.cc
@@ -316,7 +317,7 @@ int test_DataReader (string const &name,
     Vector<Double> adc2voltage (shape(1));
     adc2voltage = 0.00048828125;
     
-    dr->setADC2voltage (adc2voltage);
+    dr->setADC2Voltage (adc2voltage);
   }
 
   cout << "[2] Writing voltages values ..." << endl;

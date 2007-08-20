@@ -15,6 +15,16 @@
 #include <casa/Arrays/ArrayMath.h>
 #include <casa/Arrays/IPosition.h>
 
+using std::cout;
+using std::endl;
+
+using casa::Array;
+using casa::Cube;
+using casa::IPosition;
+using casa::Matrix;
+using casa::Slice;
+using casa::Vector;
+
 /*!
  \file tArrays.cc
 
@@ -52,13 +62,13 @@
  \return ok -- Status of the performed operation; will return False if an 
          error was detected.
 */
-Bool test_accessIPosition (const IPosition& shape)
+bool test_accessIPosition (const IPosition& shape)
 {
   cout << "\n[test_accessIPosition]\n" << endl;
 
-  Bool ok (True);
-  Cube<Double> cube (shape,1.0);
-  Vector<Double> vec (shape(2));
+  bool ok (true);
+  Cube<double> cube (shape,1.0);
+  Vector<double> vec (shape(2));
   IPosition shapeVec (1,shape(2));
   IPosition blc (shape);
   IPosition trc (shape);
@@ -87,11 +97,11 @@ Bool test_accessIPosition (const IPosition& shape)
  
  \param cube -- Cube of doubles on which the tests are performed.
 */
-Int test_accessNestedLoops1 (Cube<Double>& cube)
+int test_accessNestedLoops1 (Cube<double>& cube)
 {
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
   IPosition shape (cube.shape());
-  Vector<Double> vec (shape(2));
+  Vector<double> vec (shape(2));
 
   for (int i=0; i<shape(0); i++) {
     for (int j=0; j<shape(1); j++) {
@@ -113,11 +123,11 @@ Int test_accessNestedLoops1 (Cube<Double>& cube)
  
  \param cube -- Cube of doubles on which the tests are performed.
 */
-Int test_accessNestedLoops2 (Cube<Double>& cube)
+int test_accessNestedLoops2 (Cube<double>& cube)
 {
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
   IPosition shape (cube.shape());
-  Vector<Double> vec (shape(2));
+  Vector<double> vec (shape(2));
 
   for (int k=0; k<shape(2); k++) {
     for (int j=0; j<shape(1); j++) {
@@ -135,16 +145,16 @@ Int test_accessNestedLoops2 (Cube<Double>& cube)
 /*!
   \brief Test row-wise extraction of values from a matrix
 */
-Int test_extractVectorFromMatrix ()
+int test_extractVectorFromMatrix ()
 {
   cout << "\n[test_extractVectorFromMatrix]\n" << endl;
 
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
   IPosition shape (20,20);
-  Matrix<Double> mat (shape,1.0);
+  Matrix<double> mat (shape,1.0);
 
   {
-    Vector<Double> sumRows (shape(1));
+    Vector<double> sumRows (shape(1));
     sumRows = 0.0;
     //
     for (int i(0); i<shape(1); i++) {
@@ -209,7 +219,7 @@ int test_ArraySlicing ()
 
   cout << "[1] Manipulation of sub-matrices ..." << endl;
   {
-    Matrix<Int> mat (shape2d);
+    Matrix<int> mat (shape2d);
     mat = 0;
 
     for (int n(0); n<shape2d(0); n+=2) {
@@ -221,7 +231,7 @@ int test_ArraySlicing ()
 
   cout << "[2] Manipulation of row elements ..." << endl;
   {
-    Matrix<Int> mat (shape2d);
+    Matrix<int> mat (shape2d);
     mat = 0;
     
     for (int n(0); n<shape2d(0); n++) {
@@ -233,7 +243,7 @@ int test_ArraySlicing ()
 
   cout << "[3] Manipulation of row elements ..." << endl;
   {
-    Cube<Int> mat (shape3d);
+    Cube<int> mat (shape3d);
     mat = 0;
     
     for (int n(0); n<nelem; n++) {
@@ -270,12 +280,12 @@ int test_crossAssignment ()
   {
     IPosition shape (3,10,10,10);
 
-    Cube<Float> cube (shape);
+    Cube<float> cube (shape);
     cube = 1.0;
     cout << " - shape of the input cube : " << cube.shape() << endl;
     cout << " - sum of the elements     : " << sum(cube) << endl;
 
-    Array<Float> array (cube);
+    Array<float> array (cube);
     cout << " - shape of the derived array : " << array.shape() << endl;
     cout << " - sum of the elements        : " << sum(array) << endl;
   }
@@ -284,12 +294,12 @@ int test_crossAssignment ()
   {
     IPosition shape (3,10,10,10);
 
-    Array<Float> array (shape);
+    Array<float> array (shape);
     array = 1.0;
     cout << " - shape of the input array   : " << array.shape() << endl;
     cout << " - sum of the elements        : " << sum(array) << endl;
 
-    Cube<Float> cube (array);
+    Cube<float> cube (array);
     cout << " - shape of the derived cube  : " << cube.shape() << endl;
     cout << " - sum of the elements        : " << sum(cube) << endl;
   }
@@ -298,12 +308,12 @@ int test_crossAssignment ()
   {
     IPosition shape (2,10,10);
 
-    Matrix<Float> matrix (shape);
+    Matrix<float> matrix (shape);
     matrix = 1.0;
     cout << " - shape of the input matrix : " << matrix.shape() << endl;
     cout << " - sum of the elements     : " << sum(matrix) << endl;
 
-    Array<Float> array (matrix);
+    Array<float> array (matrix);
     cout << " - shape of the derived array : " << array.shape() << endl;
     cout << " - sum of the elements        : " << sum(array) << endl;
   }
@@ -312,12 +322,12 @@ int test_crossAssignment ()
   {
     IPosition shape (2,10,10);
 
-    Array<Float> array (shape);
+    Array<float> array (shape);
     array = 1.0;
     cout << " - shape of the derived array : " << array.shape() << endl;
     cout << " - sum of the elements        : " << sum(array) << endl;
 
-    Matrix<Float> matrix (array);
+    Matrix<float> matrix (array);
     cout << " - shape of the input matrix : " << matrix.shape() << endl;
     cout << " - sum of the elements     : " << sum(matrix) << endl;
   }
@@ -333,7 +343,7 @@ int test_crossAssignment ()
 
 int main ()
 {
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
 
   IPosition shape (3,60,60,4096);
 

@@ -8,7 +8,16 @@ include_directories (. .. ../..)
 ## Set up the list with test program sources
 
 set (tests
+  tArrays
   tData
+  tDataCC
+  tDataFlag
+  tITSBeam
+  tITSMetadata
+  tLopesEvent
+  tLopesEventIn
+  tNDABeam
+  tTIM40Header
   )
 
 ## -----------------------------------------------------------------------------
