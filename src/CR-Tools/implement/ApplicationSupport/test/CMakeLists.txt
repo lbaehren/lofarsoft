@@ -8,8 +8,10 @@ include_directories (. .. ../..)
 ## Set up the list with test program sources
 
 set (tests
+  tBeamformer
   tDataReaderTools
   tParameterFromRecord
+  tPhasing
   tSkymapperTools
   )
 

@@ -48,7 +48,7 @@
 #include <Observation/ObservationData.h>
 #include <Imaging/Beamformer.h>
 #include <Imaging/SkymapCoordinates.h>
-#include <Skymap/SkymapQuantity.h>
+#include <Imaging/SkymapQuantity.h>
 
 using casa::IPosition;
 using casa::Matrix;

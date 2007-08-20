@@ -40,7 +40,7 @@
 namespace CR { // Namespace CR -- begin
   
   /*!
-    \class simplePlot
+    \class SimplePlot
     
     \ingroup Display
     
@@ -50,7 +50,7 @@ namespace CR { // Namespace CR -- begin
 
     \date 2007/06/19
 
-    \test tsimplePlot.cc
+    \test tSimplePlot.cc
     
     <h3>Prerequisite</h3>
     
@@ -63,7 +63,7 @@ namespace CR { // Namespace CR -- begin
     <h3>Example(s)</h3>
     
   */  
-  class simplePlot {
+  class SimplePlot {
     
     // \brief Pointer to the local pgplotter object
     PGPlotterLocal *plotter_p;
@@ -78,24 +78,24 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Default constructor
     */
-    simplePlot ();
+    SimplePlot ();
         
     // -------------------------------------------------------------- Destruction
 
     /*!
       \brief Destructor
     */
-    ~simplePlot ();
+    ~SimplePlot ();
         
     // --------------------------------------------------------------- Parameters
     
     /*!
       \brief Get the name of the class
       
-      \return className -- The name of the class, simplePlot.
+      \return className -- The name of the class, SimplePlot.
     */
     std::string className () const {
-      return "simplePlot";
+      return "SimplePlot";
     }
 
     /*!

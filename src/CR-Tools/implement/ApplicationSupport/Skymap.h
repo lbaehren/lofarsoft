@@ -59,7 +59,7 @@ using namespace std;
 #include <Observation/ObservationData.h>
 #include <Observation/ObservationFrame.h>
 #include <Imaging/SkymapGrid.h>
-#include <Skymap/SkymapQuantity.h>
+#include <Imaging/SkymapQuantity.h>
 #include <Utilities/ProgressBar.h>
 
 using CR::SkymapGrid;

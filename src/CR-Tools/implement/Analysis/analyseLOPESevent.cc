@@ -284,7 +284,7 @@ namespace CR { // Namespace CR -- begin
 	Matrix<Double> parts((j-i),nselants);
 	Vector<Double> xarr, yarr, empty, gauss;
 	String plotname;
-	simplePlot plotter;
+	SimplePlot plotter;
 	xarr = Times(plotRegion) * 1e6;
 	//plot the CC-beam
 	plotname = PlotPrefix;

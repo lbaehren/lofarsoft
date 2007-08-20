@@ -20,11 +20,7 @@
 
 /* $Id$*/
 
-#include <Skymap/SkymapQuantity.h>
-
-/*!
-  \class SkymapQuantity
-*/
+#include <Imaging/SkymapQuantity.h>
 
 // ==============================================================================
 //

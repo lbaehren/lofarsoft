@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Sven Lafebre                                    *
- *   s.lafebre@astro.ru.nl                                                 *
+ *   Copyright (C) 2006                                                    *
+ *   Lars Bahren (<mail>)                                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,14 +18,55 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <iostream>
-#include <cpgplot.h>
-#include <Display/PGPlot.h>
+#include <casa/aips.h>
+#include <casa/Exceptions/Error.h>
 
-using namespace std;
+#include <ApplicationSupport/Beamformer.h>
+#include <templates.h>
 
-int main () {
-  CR::PGPlot pg;
-  pg.initPlot();
-  return 0;
+/*!
+  \file tBeamformer.cc
+
+  \ingroup ApplicationSupport
+
+  \brief A collection of test routines for LOPES::Beamformer
+ 
+  \author Lars B&auml;hren
+ 
+  \date 2006/09/15
+*/
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Test constructors for a new Beamformer object
+
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_Beamformer ()
+{
+  int nofFailedTests (0);
+  
+  std::cout << "\n[test_Beamformer]\n" << std::endl;
+
+  std::cout << "[1] Testing default constructor ..." << std::endl;
+  {
+    LOPES::Beamformer newObject;
+  }
+  
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+int main ()
+{
+  int nofFailedTests (0);
+
+  // Test for the constructor(s)
+  {
+    nofFailedTests += test_Beamformer ();
+  }
+
+  return nofFailedTests;
 }

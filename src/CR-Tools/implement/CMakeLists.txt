@@ -12,17 +12,19 @@ set (cr_modules
   Calibration
   Coordinates
   Data
-  Display
   Imaging
   IO
   LopesLegacy
   Math
   Observation
-  Skymap
   Utilities
   )
 
 ## (optional) support for applications requiring additional external components
+
+if (HAVE_PGPLOT)
+  list (APPEND cr_modules Display)
+endif (HAVE_PGPLOT)
 
 if (CR_GLISH_SUPPORT)
   list (APPEND cr_modules ApplicationSupport)

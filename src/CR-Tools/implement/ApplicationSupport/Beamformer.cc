@@ -27,7 +27,7 @@ using namespace std;
 
 // custom C++ classes
 #include <ApplicationSupport/Beamformer.h>
-#include <Skymap/ccBeam.h>
+#include <LopesLegacy/ccBeam.h>
 
 const Double rad2deg = 180.0/C::pi;
 const Double deg2rad = C::pi/180.0;

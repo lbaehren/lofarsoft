@@ -38,7 +38,7 @@
 #include <Data/LopesEventIn.h>
 #include <Analysis/CRflaggingPlugin.h>
 #include <Analysis/fitCR2gauss.h>
-#include <Display/simplePlot.h>
+#include <Display/SimplePlot.h>
 
 #include <casa/namespace.h>
 
@@ -176,10 +176,19 @@ namespace CR { // Namespace CR -- begin
 
       \return Record with the results.
     */
-    Record ProcessEvent(String evname, Double Az, Double El, Double distance, Double XC, 
-			Double YC, Bool RotatePos, String PlotPrefix, Bool generatePlots,
-			Vector<Int> FlaggedAntIDs=Vector<Int>(), Bool verbose=False,
-			Bool simplexFit=False, Double ExtraDelay=0.);
+    Record ProcessEvent(String evname,
+			Double Az,
+			Double El,
+			Double distance,
+			Double XC, 
+			Double YC,
+			Bool RotatePos,
+			String PlotPrefix,
+			Bool generatePlots,
+			Vector<Int> FlaggedAntIDs=Vector<Int>(),
+			Bool verbose=False,
+			Bool simplexFit=False,
+			Double ExtraDelay=0.);
 
     /*
       \brief Fit the position with a simplex fit
@@ -192,12 +201,20 @@ namespace CR { // Namespace CR -- begin
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
-    Bool SimplexFit(Double &Az, Double &El, Double &distance, Double &center, Vector<Bool> AntennaSelection);
+    Bool SimplexFit (Double &Az,
+		     Double &El,
+		     Double &distance,
+		     Double &center,
+		     Vector<Bool> AntennaSelection);
 
-    Bool SimplexFit2(Double &Az, Double &El, Double &distance, Double &center, Vector<Bool> AntennaSelection);
+    Bool SimplexFit2 (Double &Az,
+		      Double &El,
+		      Double &distance,
+		      Double &center,
+		      Vector<Bool> AntennaSelection);
 
     /*
-      \brief Evaluate a smallish grid around to find a good starting point for the simplex fit
+      \brief Evaluate a smallish grid around to find a good starting point for the simplenx fit
       
       \param Az - (initial) value for the azimuth direction [in deg]; modified in place
       \param El - (initial) value for the elevation [in deg]; modified in place
@@ -207,7 +224,10 @@ namespace CR { // Namespace CR -- begin
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
-    Bool evaluateGrid(Double &Az, Double &El, Double &distance, Vector<Bool> AntennaSelection, 
+    Bool evaluateGrid(Double &Az,
+		      Double &El,
+		      Double &distance,
+		      Vector<Bool> AntennaSelection, 
 		      Double *centerp=NULL);
 
     /*
@@ -220,7 +240,9 @@ namespace CR { // Namespace CR -- begin
       \return the converted positions
     */
 
-    Matrix<Double> toShower(Matrix<Double> & pos, Double Az, Double El);
+    Matrix<Double> toShower(Matrix<Double> & pos,
+			    Double Az,
+			    Double El);
 
   private:
     
@@ -237,12 +259,20 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief needed for FitPosition
     */
-    Double getHeight(Double az, Double el, Double dist, Vector<Bool> AntennaSlection, Double *centerp=NULL);
+    Double getHeight (Double az,
+		      Double el,
+		      Double dist,
+		      Vector<Bool> AntennaSlection,
+		      Double *centerp=NULL);
 
     /*!
       \brief Gets the height of the X-Beam at this position...
     */
-    Double getHeight2(Double az, Double el, Double dist, Double Center, Vector<Bool> AntennaSlection);
+    Double getHeight2 (Double az,
+		       Double el,
+		       Double dist,
+		       Double Center,
+		       Vector<Bool> AntennaSlection);
     
   };
   

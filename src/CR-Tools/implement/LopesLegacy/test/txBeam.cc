@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2005 by Sven Lafebre                                    *
- *   s.lafebre@astro.ru.nl                                                 *
+ *   Copyright (C) 2007                                                  *
+ *   Andreas Horneffer (<mail>)                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,14 +18,58 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <iostream>
-#include <cpgplot.h>
-#include <Display/PGPlot.h>
+/* $Id: txBeam.cc,v 1.2 2007/08/08 15:51:18 lbaehren Exp $*/
 
-using namespace std;
+#include <lopes/Beamforming/xBeam.h>
 
-int main () {
-  CR::PGPlot pg;
-  pg.initPlot();
-  return 0;
+/*!
+  \file txBeam.cc
+
+  \ingroup Beamforming
+
+  \brief A collection of test routines for xBeam
+ 
+  \author Andreas Horneffer
+ 
+  \date 2007/06/16
+*/
+
+using LOPES::xBeam;
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Test constructors for a new xBeam object
+
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_xBeam ()
+{
+  int nofFailedTests (0);
+  
+  std::cout << "\n[test_xBeam]\n" << std::endl;
+
+  std::cout << "[1] Testing default constructor ..." << std::endl;
+  try {
+    xBeam<Float,Complex> newObject;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+int main ()
+{
+  int nofFailedTests (0);
+
+  // Test for the constructor(s)
+  {
+    nofFailedTests += test_xBeam ();
+  }
+
+  return nofFailedTests;
 }

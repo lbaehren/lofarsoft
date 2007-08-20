@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------*
- | $Id$ |
+ | $Id                                                                   $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Display/simplePlot.h>
+#include <Display/SimplePlot.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -31,11 +31,11 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  simplePlot::simplePlot (){
+  SimplePlot::SimplePlot (){
     init();
   };
 
-  void simplePlot::init(){
+  void SimplePlot::init(){
     plotter_p = NULL;
     ppCharacterHeight = 2;
     ppLineWidth = 3;
@@ -47,12 +47,12 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  simplePlot::~simplePlot ()
+  SimplePlot::~SimplePlot ()
   {
     destroy();
   }
   
-  void simplePlot::destroy () {
+  void SimplePlot::destroy () {
     if (plotter_p != NULL) {
       delete plotter_p;
       plotter_p = NULL;
@@ -65,7 +65,7 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  void simplePlot::summary (std::ostream &os)
+  void SimplePlot::summary (std::ostream &os)
   {;}
   
   
@@ -76,9 +76,17 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
+  // ------------------------------------------------------------------- InitPlot
   
-  Bool simplePlot::InitPlot(String file, Double xmin, Double xmax, Double ymin, 
-			    Double ymax, Int axis, Int just, Int col, Int cheight, 
+  Bool SimplePlot::InitPlot(String file,
+			    Double xmin,
+			    Double xmax,
+			    Double ymin, 
+			    Double ymax,
+			    Int axis,
+			    Int just,
+			    Int col,
+			    Int cheight, 
 			    Int linewidth){
     try {
       if (plotter_p != NULL) {
@@ -93,20 +101,25 @@ namespace CR { // Namespace CR -- begin
       plotter_p->env(xmin, xmax, ymin, ymax, just, axis);
       
     } catch (AipsError x) {
-      cerr << "simplePlot::InitPlot: " << x.getMesg() << endl;
+      cerr << "SimplePlot::InitPlot: " << x.getMesg() << endl;
       return False;
     }; 
     return True;    
   };
   
-  Bool simplePlot::PlotLine(Vector<Double> xvals, Vector<Double> yvals, Int col, Int style){
+  // ------------------------------------------------------------------- PlotLine
+
+  Bool SimplePlot::PlotLine(Vector<Double> xvals,
+			    Vector<Double> yvals,
+			    Int col,
+			    Int style){
     try {
       if (plotter_p == NULL){
-	cerr << "simplePlot::PlotLine: " << "plotter not initialized!" << endl;
+	cerr << "SimplePlot::PlotLine: " << "plotter not initialized!" << endl;
 	return False;
       }; 
       if (xvals.nelements() != yvals.nelements()){
-	cerr << "simplePlot::PlotLine: " << "x- and y-vector of different length!" << endl;
+	cerr << "SimplePlot::PlotLine: " << "x- and y-vector of different length!" << endl;
 	return False;
       }; 
       Vector<Float> xval_(xvals.shape()),yval_(yvals.shape());
@@ -119,23 +132,28 @@ namespace CR { // Namespace CR -- begin
       plotter_p->sls(1);
 
     } catch (AipsError x) {
-      cerr << "simplePlot::PlotLine: " << x.getMesg() << endl;
+      cerr << "SimplePlot::PlotLine: " << x.getMesg() << endl;
       return False;
     }; 
     return True;    
   };
 
+  // ---------------------------------------------------------------- PlotSymbols
 
-  Bool simplePlot::PlotSymbols(Vector<Double> xvals, Vector<Double> yvals, 
-			       Vector<Double> yerrs,Vector<Double> xerrs, 
-			       Int col, Int symbol, Int ticklength){
+  Bool SimplePlot::PlotSymbols (Vector<Double> xvals,
+				Vector<Double> yvals, 
+				Vector<Double> yerrs,
+				Vector<Double> xerrs, 
+				Int col,
+				Int symbol,
+				Int ticklength){
     try {
       if (plotter_p == NULL){
-	cerr << "simplePlot::PlotSymbols: " << "plotter not initialized!" << endl;
+	cerr << "SimplePlot::PlotSymbols: " << "plotter not initialized!" << endl;
 	return False;
       }; 
       if (xvals.nelements() != yvals.nelements()){
-	cerr << "simplePlot::PlotSymbols: " << "x- and y-vector of different length!" << endl;
+	cerr << "SimplePlot::PlotSymbols: " << "x- and y-vector of different length!" << endl;
 	return False;
       }; 
       Vector<Float> xval_(xvals.shape()),yval_(yvals.shape());
@@ -145,7 +163,7 @@ namespace CR { // Namespace CR -- begin
       plotter_p->pt(xval_, yval_, symbol);
       if (yerrs.nelements() != 0) {
 	if (xvals.nelements() != yerrs.nelements()){
-	  cerr << "simplePlot::PlotSymbols: " << "yerror-vector of different length!" << endl;
+	  cerr << "SimplePlot::PlotSymbols: " << "yerror-vector of different length!" << endl;
 	  return False;
 	}; 
 	Vector<Float> err1,err2,yerr_(yerrs.shape());
@@ -156,7 +174,7 @@ namespace CR { // Namespace CR -- begin
       }
       if (xerrs.nelements() != 0) {
 	if (xvals.nelements() != xerrs.nelements()){
-	  cerr << "simplePlot::PlotSymbols: " << "xerror-vector of different length!" << endl;
+	  cerr << "SimplePlot::PlotSymbols: " << "xerror-vector of different length!" << endl;
 	  return False;
 	}; 
 	Vector<Float> err1,err2,xerr_(xerrs.shape());
@@ -166,36 +184,52 @@ namespace CR { // Namespace CR -- begin
 	plotter_p->errx(err1,err2,yval_,ticklength);
       }
     } catch (AipsError x) {
-      cerr << "simplePlot::PlotSymbols: " << x.getMesg() << endl;
+      cerr << "SimplePlot::PlotSymbols: " << x.getMesg() << endl;
       return False;
     }; 
     return True;    
   };
   
-  Bool simplePlot::AddLabels(String xlabel, String ylabel, 
-			     String toplabel, Int col){
+  // ------------------------------------------------------------------ AddLabels
+
+  Bool SimplePlot::AddLabels(String xlabel,
+			     String ylabel, 
+			     String toplabel,
+			     Int col){
     try {
       if (plotter_p == NULL){
-	cerr << "simplePlot::AddLabels: " << "plotter not initialized!" << endl;
+	cerr << "SimplePlot::AddLabels: " << "plotter not initialized!" << endl;
 	return False;
       }; 
       plotter_p->sci(col);
       plotter_p->lab(xlabel,ylabel,toplabel);
     } catch (AipsError x) {
-      cerr << "simplePlot::AddLabels: " << x.getMesg() << endl;
+      cerr << "SimplePlot::AddLabels: " << x.getMesg() << endl;
       return False;
     }; 
     return True;    
   };
 
-  Bool simplePlot::quickPlot(String file, Vector<Double> xvals, Vector<Double> yvals, 
-			     Vector<Double> yerrs, Vector<Double> xerrs, String xlabel, 
-			     String ylabel, String toplabel, Int linecol, Bool plotASline, 
-			     Int style, Bool logx, Bool logy, Bool printingplot){
+  // ------------------------------------------------------------------ quickPlot
+
+  Bool SimplePlot::quickPlot(String file,
+			     Vector<Double> xvals,
+			     Vector<Double> yvals, 
+			     Vector<Double> yerrs,
+			     Vector<Double> xerrs,
+			     String xlabel, 
+			     String ylabel,
+			     String toplabel,
+			     Int linecol,
+			     Bool plotASline, 
+			     Int style,
+			     Bool logx,
+			     Bool logy,
+			     Bool printingplot){
     Bool status=True;
     try {
       if (logx || logy) {
-	cout  << "simplePlot::quickPlots: " << "@orry, logarithmic axes are not implemented yet!" << endl;
+	cout  << "SimplePlot::quickPlots: " << "@orry, logarithmic axes are not implemented yet!" << endl;
       }
       Double xmin,xmax,ymin,ymax,tmpval;
       xmin = min(xvals); xmax = max(xvals);
@@ -207,7 +241,16 @@ namespace CR { // Namespace CR -- begin
       ymin -= tmpval;
       ymax += tmpval;
       if (printingplot) {
-	status = InitPlot(file, xmin, xmax, ymin, ymax, 0, 0, 1, ppCharacterHeight, ppLineWidth);
+	status = InitPlot(file,
+			  xmin,
+			  xmax,
+			  ymin,
+			  ymax,
+			  0,
+			  0,
+			  1,
+			  ppCharacterHeight,
+			  ppLineWidth);
       } else {
 	status = InitPlot(file, xmin, xmax, ymin, ymax);	
       };
@@ -218,7 +261,7 @@ namespace CR { // Namespace CR -- begin
       }
       status = status && AddLabels(xlabel, ylabel, toplabel);
     } catch (AipsError x) {
-      cerr << "simplePlot::quickPlots: " << x.getMesg() << endl;
+      cerr << "SimplePlot::quickPlots: " << x.getMesg() << endl;
       return False;
     }; 
     return status;        
