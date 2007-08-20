@@ -20,12 +20,12 @@
 
 #include <iostream>
 #include <cpgplot.h>
-#include <Display/PGPlot.h>
+#include <lopes/Display/PGPlot.h>
 
 using namespace std;
 
 int main () {
-  CR::PGPlot pg;
+  LOPES::PGPlot pg;
   pg.initPlot();
   return 0;
 }

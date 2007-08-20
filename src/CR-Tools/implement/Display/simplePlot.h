@@ -30,9 +30,9 @@
 
 // AIPS++/CASA header files
 #include <casa/aips.h>
-#include <casa/Exceptions/Error.h>
- 
 #include <casa/Arrays.h>
+#include <casa/Exceptions/Error.h>
+ // #include <casa/System/PGPlotter.h>
 #include <graphics/Graphics/PGPlotterLocal.h>
 
 #include <casa/namespace.h>

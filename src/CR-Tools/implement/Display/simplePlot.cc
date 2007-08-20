@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id::                                                                 $ |
+ | $Id$ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                  *
@@ -85,7 +85,7 @@ namespace CR { // Namespace CR -- begin
 	delete plotter_p;
 	plotter_p = NULL;
       };
-      file += "/ps";
+      file += "/cps";
       plotter_p = new PGPlotterLocal(file);
       plotter_p->slw(linewidth);
       plotter_p->sch(cheight);
