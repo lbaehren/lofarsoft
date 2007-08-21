@@ -21,11 +21,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
 #ifndef ROTATIONMATRIX_H
 #define ROTATIONMATRIX_H
 
+#include <cmath>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -48,24 +47,36 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class RotationMatrix
     
-  \ingroup Math
+    \ingroup Math
     
     \brief Brief description for class RotationMatrix
     
     \author Lars B&auml;hren
 
     \date 2007/05/29
-
+    
     \test tRotationMatrix.cc
     
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[start filling in your text here]
+      <li>Basic knowledge of analytical geometry
     </ul>
     
     <h3>Synopsis</h3>
     
+    <ul>
+      <li>For a rotation in two dimensions:
+      \f[
+        \mathbf{R}(\alpha) = \left[ \begin{array}{cc} \cos\alpha & \sin\alpha \\
+	-\sin\alpha & \cos\alpha \end{array} \right]
+      \f]
+      <li>For a rotation in three dimensions:
+      \f[
+        \mathbf{R}(\alpha_1,\alpha_2,\alpha_3) = \left[  \right]
+      \f]
+    </ul>
+
     <h3>Example(s)</h3>
     
   */  
@@ -79,9 +90,11 @@ namespace CR { // Namespace CR -- begin
     unsigned int nofAngles_p;
     //! Rotation angles
     vector<double> angles_p;
+    //! The rotation matrix itself
+    vector<double> rotationMatrix_p;
     
   public:
-    
+
     // ------------------------------------------------------------- Construction
     
     /*!
@@ -325,6 +338,12 @@ namespace CR { // Namespace CR -- begin
     
   private:
 
+    void init (uint const &rank);
+
+    void init (uint const &rank,
+	       vector<double> const &angles,
+	       bool const &anglesInDegrees=false);
+
     /*!
       \brief Set the rank of the space in which the rotation takes places
       
@@ -334,6 +353,14 @@ namespace CR { // Namespace CR -- begin
                         was encountered.
     */
     bool setRank (unsigned int const &rank);
+    
+    /*!
+      \brief Set the rotation matrix from the provided angles
+      
+      \return status -- Status of the operation; returns <i>false</i> if an error
+                        was encountered.
+    */
+    bool setRotationMatrix ();
     
     /*!
       \brief Unconditional copying

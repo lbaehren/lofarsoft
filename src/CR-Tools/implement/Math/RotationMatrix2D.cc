@@ -20,7 +20,7 @@
 
 /* $Id: template-class.cc,v 1.11 2007/03/06 14:53:26 bahren Exp $*/
 
-#include <Math/Rotation3D.h>
+#include <Math/RotationMatrix2D.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -30,10 +30,16 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  Rotation3D::Rotation3D ()
-  {;}
+  RotationMatrix2D::RotationMatrix2D ()
+    : RotationMatrix (2)
+  {}
   
-  Rotation3D::Rotation3D (Rotation3D const &other)
+  RotationMatrix2D::RotationMatrix2D (vector<double> const &angles,
+				      bool const &anglesInDegree)
+    : RotationMatrix (2,angles,anglesInDegree)
+  {}
+  
+  RotationMatrix2D::RotationMatrix2D (RotationMatrix2D const &other)
   {
     copy (other);
   }
@@ -44,12 +50,12 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  Rotation3D::~Rotation3D ()
+  RotationMatrix2D::~RotationMatrix2D ()
   {
     destroy();
   }
   
-  void Rotation3D::destroy ()
+  void RotationMatrix2D::destroy ()
   {;}
   
   // ============================================================================
@@ -58,7 +64,7 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  Rotation3D& Rotation3D::operator= (Rotation3D const &other)
+  RotationMatrix2D& RotationMatrix2D::operator= (RotationMatrix2D const &other)
   {
     if (this != &other) {
       destroy ();
@@ -67,18 +73,14 @@ namespace CR { // Namespace CR -- begin
     return *this;
   }
   
-  void Rotation3D::copy (Rotation3D const &other)
+  void RotationMatrix2D::copy (RotationMatrix2D const &other)
   {;}
-
+  
   // ============================================================================
   //
   //  Parameters
   //
   // ============================================================================
-  
-  void Rotation3D::summary ()
-  {;}
-  
   
   
   // ============================================================================

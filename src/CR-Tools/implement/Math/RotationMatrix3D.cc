@@ -20,7 +20,7 @@
 
 /* $Id: template-class.cc,v 1.11 2007/03/06 14:53:26 bahren Exp $*/
 
-#include <Math/Rotation2D.h>
+#include <Math/RotationMatrix3D.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -30,16 +30,10 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  Rotation2D::Rotation2D ()
-    : RotationMatrix (2)
-  {}
+  RotationMatrix3D::RotationMatrix3D ()
+  {;}
   
-  Rotation2D::Rotation2D (vector<double> const &angles,
-			  bool const &anglesInDegree)
-    : RotationMatrix (2,angles,anglesInDegree)
-  {}
-
-  Rotation2D::Rotation2D (Rotation2D const &other)
+  RotationMatrix3D::RotationMatrix3D (RotationMatrix3D const &other)
   {
     copy (other);
   }
@@ -50,12 +44,12 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  Rotation2D::~Rotation2D ()
+  RotationMatrix3D::~RotationMatrix3D ()
   {
     destroy();
   }
   
-  void Rotation2D::destroy ()
+  void RotationMatrix3D::destroy ()
   {;}
   
   // ============================================================================
@@ -64,7 +58,7 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  Rotation2D& Rotation2D::operator= (Rotation2D const &other)
+  RotationMatrix3D& RotationMatrix3D::operator= (RotationMatrix3D const &other)
   {
     if (this != &other) {
       destroy ();
@@ -73,7 +67,7 @@ namespace CR { // Namespace CR -- begin
     return *this;
   }
   
-  void Rotation2D::copy (Rotation2D const &other)
+  void RotationMatrix3D::copy (RotationMatrix3D const &other)
   {;}
 
   // ============================================================================
@@ -81,6 +75,10 @@ namespace CR { // Namespace CR -- begin
   //  Parameters
   //
   // ============================================================================
+  
+  void RotationMatrix3D::summary ()
+  {;}
+  
   
   
   // ============================================================================

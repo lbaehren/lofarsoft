@@ -235,6 +235,8 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
+#ifdef HAVE_CASA
+
   // ------------------------------------------------------------- azel2cartesian
   
   casa::Vector<double> azel2cartesian (const casa::Vector<double>& azel,
@@ -290,6 +292,8 @@ namespace CR { // Namespace CR -- begin
     
     return cartesian;
   }
+
+#endif
 
   // ===========================================================================
   //

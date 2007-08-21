@@ -23,8 +23,8 @@
 
 /* $Id$*/
 
-#ifndef ROTATION2D_H
-#define ROTATION2D_H
+#ifndef ROTATIONMATRIX3D_H
+#define ROTATIONMATRIX3D_H
 
 #include <string>
 
@@ -33,17 +33,17 @@
 namespace CR { // Namespace CR -- begin
   
   /*!
-    \class Rotation2D
+    \class RotationMatrix3D
     
-  \ingroup Math
+    \ingroup Math
     
-    \brief Brief description for class Rotation2D
+    \brief Brief description for class RotationMatrix3D
     
     \author Lars Baehren
-
+    
     \date 2007/05/29
 
-    \test tRotation2D.cc
+    \test tRotationMatrix3D.cc
     
     <h3>Prerequisite</h3>
     
@@ -52,95 +52,72 @@ namespace CR { // Namespace CR -- begin
     </ul>
     
     <h3>Synopsis</h3>
-
-    \f[
-      \mathbf{R}(\alpha) = \left[ \begin{array}{cc} \cos\alpha & \sin\alpha \\
-      -\sin\alpha & \cos\alpha \end{array} \right]
-    \f]
     
     <h3>Example(s)</h3>
     
   */  
-  class Rotation2D : public RotationMatrix {
+  class RotationMatrix3D : public RotationMatrix {
     
   public:
     
+    enum RotationMatrix3DIndex {
+      XX = 0,
+      XY = 1,
+      XZ = 2,
+      YX = 3,
+      YY = 4,
+      YZ = 5,
+      ZX = 6,
+      ZY = 7,
+      ZZ = 8
+    };
+
     // ------------------------------------------------------------- Construction
     
     /*!
       \brief Default constructor
     */
-    Rotation2D ();
+    RotationMatrix3D ();
     
-    /*!
-      \brief Argumented constructor
-
-      \param angles         -- 
-      \param anglesInDegree -- 
-    */
-    Rotation2D (vector<double> const &angles,
-		bool const &anglesInDegree=true);
-    
-#ifdef HAVE_BLITZ
-
-    /*!
-      \brief Argumented constructor (using Blitz++ array classes)
-
-      \param angles         -- 
-      \param anglesInDegree -- 
-    */
-    Rotation2D (blitz::Array<double,1> const &angles,
-		bool const &anglesInDegree=true);
-
-#endif
-
-#ifdef HAVE_CASA
-    
-    /*!
-      \brief Argumented constructor (CASA array classes)
-
-      \param angles         -- 
-      \param anglesInDegree -- 
-    */
-    Rotation2D (casa::Vector<double> const &angles,
-		bool const &anglesInDegree=true);
-
-#endif
-
     /*!
       \brief Copy constructor
       
-      \param other -- Another Rotation2D object from which to create this new
+      \param other -- Another RotationMatrix3D object from which to create this new
       one.
     */
-    Rotation2D (Rotation2D const &other);
+    RotationMatrix3D (RotationMatrix3D const &other);
     
     // -------------------------------------------------------------- Destruction
 
     /*!
       \brief Destructor
     */
-    ~Rotation2D ();
+    ~RotationMatrix3D ();
     
     // ---------------------------------------------------------------- Operators
     
     /*!
       \brief Overloading of the copy operator
       
-      \param other -- Another Rotation2D object from which to make a copy.
+      \param other -- Another RotationMatrix3D object from which to make a copy.
     */
-    Rotation2D& operator= (Rotation2D const &other); 
+    RotationMatrix3D& operator= (RotationMatrix3D const &other); 
     
     // --------------------------------------------------------------- Parameters
     
     /*!
       \brief Get the name of the class
       
-      \return className -- The name of the class, Rotation2D.
+      \return className -- The name of the class, RotationMatrix3D.
     */
     std::string className () const {
-      return "Rotation2D";
+      return "RotationMatrix3D";
     }
+
+    /*!
+      \brief Provide a summary of the internal status
+    */
+    void summary ();    
 
     // ------------------------------------------------------------------ Methods
     
@@ -151,7 +128,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Unconditional copying
     */
-    void copy (Rotation2D const &other);
+    void copy (RotationMatrix3D const &other);
     
     /*!
       \brief Unconditional deletion 
@@ -162,5 +139,5 @@ namespace CR { // Namespace CR -- begin
   
 } // Namespace CR -- end
 
-#endif /* ROTATION2D_H */
+#endif /* ROTATION3D_H */
   

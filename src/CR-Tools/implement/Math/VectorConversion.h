@@ -64,6 +64,7 @@ namespace CR { // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
+      <li>Basic knowledge of analytical geometry
       <li>Some overview of existing conventions for spherical coordinate systems.
     </ul>
     
@@ -493,6 +494,8 @@ namespace CR { // Namespace CR -- begin
   //  Conversion using CASA array classes
   //
   // ============================================================================
+
+#ifdef HAVE_CASA
   
   /*!
     \brief Conversion from (AZ,EL) to (x,y,z)
@@ -538,6 +541,8 @@ namespace CR { // Namespace CR -- begin
     \f]
   */
   casa::Vector<double> polar2cartesian (casa::Vector<double> const &polar);
+
+#endif
   
   // ============================================================================
   //

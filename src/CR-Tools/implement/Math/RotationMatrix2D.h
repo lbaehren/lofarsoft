@@ -23,8 +23,8 @@
 
 /* $Id$*/
 
-#ifndef ROTATION3D_H
-#define ROTATION3D_H
+#ifndef ROTATIONMATRIX2D_H
+#define ROTATIONMATRIX2D_H
 
 #include <string>
 
@@ -33,17 +33,17 @@
 namespace CR { // Namespace CR -- begin
   
   /*!
-    \class Rotation3D
+    \class RotationMatrix2D
     
-  \ingroup Math
+    \ingroup Math
     
-    \brief Brief description for class Rotation3D
+    \brief Brief description for class RotationMatrix2D
     
     \author Lars Baehren
-
+    
     \date 2007/05/29
-
-    \test tRotation3D.cc
+    
+    \test tRotationMatrix2D.cc
     
     <h3>Prerequisite</h3>
     
@@ -52,61 +52,103 @@ namespace CR { // Namespace CR -- begin
     </ul>
     
     <h3>Synopsis</h3>
+
+    \f[
+      \mathbf{R}(\alpha) = \left[ \begin{array}{cc} \cos\alpha & \sin\alpha \\
+      -\sin\alpha & \cos\alpha \end{array} \right]
+    \f]
     
     <h3>Example(s)</h3>
     
   */  
-  class Rotation3D : public RotationMatrix {
+  class RotationMatrix2D : public RotationMatrix {
     
   public:
+    
+    enum RotationMatrix2DIndex {
+      XX = 0,
+      XY = 1,
+      YX = 2,
+      YY = 3
+    };
     
     // ------------------------------------------------------------- Construction
     
     /*!
       \brief Default constructor
     */
-    Rotation3D ();
+    RotationMatrix2D ();
+    
+    /*!
+      \brief Argumented constructor
+      
+      \param angles         -- 
+      \param anglesInDegree -- 
+    */
+    RotationMatrix2D (vector<double> const &angles,
+		      bool const &anglesInDegree=true);
+    
+#ifdef HAVE_BLITZ
+    
+    /*!
+      \brief Argumented constructor (using Blitz++ array classes)
+      
+      \param angles         -- 
+      \param anglesInDegree -- 
+    */
+    RotationMatrix2D (blitz::Array<double,1> const &angles,
+		      bool const &anglesInDegree=true);
+    
+#endif
+    
+#ifdef HAVE_CASA
+    
+    /*!
+      \brief Argumented constructor (CASA array classes)
+      
+      \param angles         -- 
+      \param anglesInDegree -- 
+    */
+    RotationMatrix2D (casa::Vector<double> const &angles,
+		      bool const &anglesInDegree=true);
+    
+#endif
     
     /*!
       \brief Copy constructor
       
-      \param other -- Another Rotation3D object from which to create this new
+      \param other -- Another RotationMatrix2D object from which to create this new
       one.
     */
-    Rotation3D (Rotation3D const &other);
+    RotationMatrix2D (RotationMatrix2D const &other);
     
     // -------------------------------------------------------------- Destruction
-
+    
     /*!
       \brief Destructor
     */
-    ~Rotation3D ();
+    ~RotationMatrix2D ();
     
     // ---------------------------------------------------------------- Operators
     
     /*!
       \brief Overloading of the copy operator
       
-      \param other -- Another Rotation3D object from which to make a copy.
+      \param other -- Another RotationMatrix2D object from which to make a copy.
     */
-    Rotation3D& operator= (Rotation3D const &other); 
+    RotationMatrix2D& operator= (RotationMatrix2D const &other); 
     
     // --------------------------------------------------------------- Parameters
     
     /*!
       \brief Get the name of the class
       
-      \return className -- The name of the class, Rotation3D.
+      \return className -- The name of the class, RotationMatrix2D.
     */
     std::string className () const {
-      return "Rotation3D";
+      return "RotationMatrix2D";
     }
-
-    /*!
-      \brief Provide a summary of the internal status
-    */
-    void summary ();    
-
+    
     // ------------------------------------------------------------------ Methods
     
     
@@ -116,7 +158,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Unconditional copying
     */
-    void copy (Rotation3D const &other);
+    void copy (RotationMatrix2D const &other);
     
     /*!
       \brief Unconditional deletion 
@@ -127,5 +169,5 @@ namespace CR { // Namespace CR -- begin
   
 } // Namespace CR -- end
 
-#endif /* ROTATION3D_H */
+#endif /* ROTATION2D_H */
   
