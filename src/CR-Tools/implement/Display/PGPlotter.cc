@@ -19,13 +19,43 @@
  ***************************************************************************/
 
 #include <iostream>
+#include <string>
 #include <cpgplot.h>
-#include <Display/PGPlot.h>
+#include <Data/Data.h>
+#include <Display/PGPlotter.h>
 
 using namespace std;
 
-int main () {
-  CR::PGPlot pg;
-  pg.initPlot();
-  return 0;
+namespace CR { // Namespace CR -- begin
+
+PGPlotter::PGPlotter() {
+   xAxisMin_ = -409.6;
+   xAxisMax_ =  409.6;
+
+   yAxisMin_ = 0;
+   yAxisMax_ = 1;
 }
+
+PGPlotter::~PGPlotter() {
+	cpgend();
+}
+
+void PGPlotter::initPlot() {
+  if (cpgbeg(0, "/XSERVE", 1, 1) < 0) {
+    if (cpgbeg(0, "/PS", 1, 1) < 0) {
+      cerr << "  ERROR: Could not initialize PGPlot environment." << endl;
+      throw string("PGPlot environment not found");
+    } else {
+      mode_ = "/PS";
+      cerr << "           Using /ps instead." << endl;
+    }
+  }
+  mode_ = "/XSERVE";
+  
+  cpgenv(xAxisMin_, xAxisMax_, yAxisMin_, yAxisMax_, 0, 1);
+  cpglab(xLabel_.c_str(), yLabel_.c_str(), title_.c_str());
+  cpgask(0);
+  cpgsch(1.2);
+}
+
+} // Namespace CR -- end

@@ -12,7 +12,7 @@ include_directories (
 ## Set up the list with test program sources
 
 set (tests
-  tPGPlot
+  tPGPlotter
   tSimplePlot
   )
 

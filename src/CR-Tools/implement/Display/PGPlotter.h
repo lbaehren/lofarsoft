@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef _PGPLOT_H_
-#define _PGPLOT_H_
+#ifndef _PGPLOTYER_H_
+#define _PGPLOTTER_H_
 
 #include <iostream>
 #include <fstream>
@@ -31,7 +31,7 @@ using namespace std;
 namespace CR { // Namespace CR -- begin
   
   /*!
-    \class PGPlot
+    \class PGPlotter
     
     \ingroup Display
     
@@ -39,7 +39,7 @@ namespace CR { // Namespace CR -- begin
     
     \author Sven Lafebre    
   */
-  class PGPlot {
+  class PGPlotter {
     //! Minimum for range of values on the x-axis
     double xAxisMin_;
     //! Maximum for range of values on the x-axis
@@ -61,11 +61,11 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Constructor
     */
-    PGPlot();
+    PGPlotter();
     /*!
       \brief Destructor
     */
-    ~PGPlot();
+    ~PGPlotter();
     /*!
       \brief Set the range of values on the x-axis
 
@@ -133,4 +133,4 @@ namespace CR { // Namespace CR -- begin
   
 } // Namespace CR -- end
 
-#endif /* _PGPLOT_H_ */
+#endif /* _PGPLOTTER_H_ */
