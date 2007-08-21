@@ -16,8 +16,8 @@ set (tests
   tMedianFilter
   tRaisedCosineFilter
   tRangeSplitter
-  tRotation2D
-  tRotation3D
+  tRotationMatrix2D
+  tRotationMatrix3D
   tRotationMatrix
   tShapelets1D
   tShapelets2D

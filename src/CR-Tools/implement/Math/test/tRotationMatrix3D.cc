@@ -20,16 +20,16 @@
 
 /* $Id: template-tclass.cc,v 1.7 2007/03/06 14:53:26 bahren Exp $*/
 
-#include <Math/Rotation3D.h>
+#include <Math/RotationMatrix3D.h>
 
-using CR::Rotation3D;
+using CR::RotationMatrix3D;
 
 /*!
-  \file tRotation3D.cc
+  \file tRotationMatrix3D.cc
 
   \ingroup Math
 
-  \brief A collection of test routines for Rotation3D
+  \brief A collection of test routines for RotationMatrix3D
  
   \author Lars Baehren
  
@@ -39,19 +39,19 @@ using CR::Rotation3D;
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test constructors for a new Rotation3D object
+  \brief Test constructors for a new RotationMatrix3D object
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_Rotation3D ()
+int test_RotationMatrix3D ()
 {
   int nofFailedTests (0);
   
-  std::cout << "\n[test_Rotation3D]\n" << std::endl;
+  std::cout << "\n[test_RotationMatrix3D]\n" << std::endl;
 
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
-    Rotation3D newObject;
+    RotationMatrix3D newObject;
     newObject.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
@@ -69,7 +69,7 @@ int main ()
 
   // Test for the constructor(s)
   {
-    nofFailedTests += test_Rotation3D ();
+    nofFailedTests += test_RotationMatrix3D ();
   }
 
   return nofFailedTests;

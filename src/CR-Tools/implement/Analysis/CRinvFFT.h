@@ -1,6 +1,9 @@
-/***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+/*-------------------------------------------------------------------------*
+ | $Id:: templates.h 391 2007-06-13 09:25:11Z baehren                    $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2007                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,8 +21,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: CRinvFFT.h,v 1.9 2007/06/21 18:04:55 horneff Exp $*/
-
 #ifndef CRINVFFT_H
 #define CRINVFFT_H
 
@@ -32,6 +33,7 @@
 
 #include <Analysis/SecondStagePipeline.h>
 #include <ApplicationSupport/Beamformer.h>
+#include <Calibration/CalTableInterpolater.h>
 
 #include <casa/namespace.h>
 
@@ -87,7 +89,7 @@ namespace CR { // Namespace CR -- begin
     LOPES::Beamformer bf_p;
 
     //! Interpolater for the antenna gain
-    CalTableInterpolater<Double> *InterAntGain_p;
+    CalTableInterpolater<casa::Double> *InterAntGain_p;
 
     //! Has the antenna gain interpolater been initialized?
     Bool AntGainInterpInit_p;

@@ -1,6 +1,9 @@
-/***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+/*-------------------------------------------------------------------------*
+ | $Id:: templates.h 391 2007-06-13 09:25:11Z baehren                    $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2007                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,10 +21,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: CRinvFFT.cc,v 1.16 2007/08/09 12:56:17 horneff Exp $*/
-
-#include <Analysis/CRinvFFT.h>
+// CASA
 #include <scimath/Mathematics/FFTServer.h>
+// CR-Tools
+#include <Analysis/CRinvFFT.h>
 #include <LopesLegacy/ccBeam.h>
 #include <LopesLegacy/xBeam.h>
 #include <Analysis/CRdelayPlugin.h>
@@ -66,9 +69,11 @@ namespace CR { // Namespace CR -- begin
     destroy();
   }
   
-  void CRinvFFT::destroy (){
+  void CRinvFFT::destroy () {
     AntGainInterpInit_p = False;
-    if (InterAntGain_p != NULL) {delete InterAntGain_p;};
+    if (InterAntGain_p != NULL) {
+      delete [] InterAntGain_p;
+    }
   }
   
   // ============================================================================
@@ -369,7 +374,5 @@ namespace CR { // Namespace CR -- begin
     }; 
     return True;
   }
-      
- 
 
 } // Namespace CR -- end

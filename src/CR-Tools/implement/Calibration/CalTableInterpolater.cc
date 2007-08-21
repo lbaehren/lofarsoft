@@ -1,6 +1,9 @@
-/***************************************************************************
- *   Copyright (C) 2006                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+/*-------------------------------------------------------------------------*
+ | $Id:: templates.h 391 2007-06-13 09:25:11Z baehren                    $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2006                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,8 +20,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-/* $Id: CalTableInterpolater.cc,v 1.11 2007/08/09 14:21:04 horneff Exp $*/
 
 #include <Calibration/CalTableInterpolater.h>
 

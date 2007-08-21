@@ -20,16 +20,16 @@
 
 /* $Id: template-tclass.cc,v 1.7 2007/03/06 14:53:26 bahren Exp $*/
 
-#include <Math/Rotation2D.h>
+#include <Math/RotationMatrix2D.h>
 
-using CR::Rotation2D;
+using CR::RotationMatrix2D;
 
 /*!
-  \file tRotation2D.cc
+  \file tRotationMatrix2D.cc
 
   \ingroup Math
 
-  \brief A collection of test routines for Rotation2D
+  \brief A collection of test routines for RotationMatrix2D
  
   \author Lars Baehren
  
@@ -39,19 +39,19 @@ using CR::Rotation2D;
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test constructors for a new Rotation2D object
+  \brief Test constructors for a new RotationMatrix2D object
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_Rotation2D ()
+int test_RotationMatrix2D ()
 {
   int nofFailedTests (0);
   
-  std::cout << "\n[test_Rotation2D]\n" << std::endl;
+  std::cout << "\n[test_RotationMatrix2D]\n" << std::endl;
 
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
-    Rotation2D rotation;
+    RotationMatrix2D rotation;
     rotation.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
@@ -61,7 +61,7 @@ int test_Rotation2D ()
   std::cout << "[2] Testing argumented constructor ..." << std::endl;
   try {
     vector<double> angles (1,45);
-    Rotation2D rotation (angles,true);
+    RotationMatrix2D rotation (angles,true);
     rotation.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
@@ -79,7 +79,7 @@ int main ()
 
   // Test for the constructor(s)
   {
-    nofFailedTests += test_Rotation2D ();
+    nofFailedTests += test_RotationMatrix2D ();
   }
 
   return nofFailedTests;

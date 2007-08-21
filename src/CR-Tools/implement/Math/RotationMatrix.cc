@@ -172,7 +172,6 @@ namespace CR { // Namespace CR -- begin
   {
     bool status (true);
     unsigned int nelem (angles.size());
-    unsigned int n (0);
     vector<double> anglesInRadian (nelem);
     
     /*
@@ -211,6 +210,28 @@ namespace CR { // Namespace CR -- begin
     }
 
     status = setRotationMatrix ();
+
+    return status;
+  }
+  
+  // ---------------------------------------------------------- setRotationMatrix
+
+  bool RotationMatrix::setRotationMatrix ()
+  {
+    bool status (true);
+    uint nelem (rank_p*rank_p);
+
+    rotationMatrix_p.resize(nelem);
+    
+    if (rank_p == 2) {
+      rotationMatrix_p[0] =  cos(angles_p[0]);    // [x,x]
+      rotationMatrix_p[1] =  sin(angles_p[0]);    // [x,y]
+      rotationMatrix_p[2] = -sin(angles_p[0]);    // [y,x]
+      rotationMatrix_p[3] =  cos(angles_p[0]);    // [y,y]
+    } else if (rank_p == 3) {
+    } else {
+      status = false;
+    }
 
     return status;
   }
