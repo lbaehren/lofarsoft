@@ -41,7 +41,6 @@
 #include <casa/Arrays.h>
 #include <casa/BasicSL/Complex.h>
 
-#include <templates.h>
 #include <Calibration/AntennaGain.h>
 #include <Calibration/BaselineGain.h>
 #include <Data/ITSCapture.h>

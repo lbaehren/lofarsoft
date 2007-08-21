@@ -35,8 +35,6 @@
 #include <images/Images/PagedImage.h>
 #include <lattices/Lattices/TiledShape.h>
 
-#include <templates.h>
-
 /*!
   \file tUseImages.cc
 

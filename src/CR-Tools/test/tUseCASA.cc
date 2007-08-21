@@ -31,8 +31,6 @@
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicMath/Math.h>
 
-#include <../implement/templates.h>
-
 /*!
   \file tUseCasa.cc
 

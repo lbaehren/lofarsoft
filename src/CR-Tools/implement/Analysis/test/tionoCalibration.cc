@@ -33,7 +33,6 @@
 #include <Analysis/ppfinversion.h>
 #include <Analysis/ionoCalibration.h>
 #include <Analysis/SubbandID.h>
-#include <templates.h>
 
 using CR::ionoCalibration ;
 using CR::ppfimplement ;

@@ -20,7 +20,6 @@
 
 /* $Id$*/
 
-#include <templates.h>
 #include <Imaging/SkymapCoordinates.h>
 #include <images/Images/PagedImage.h>
 

@@ -3,6 +3,27 @@
 ##------------------------------------------------------------------------------
 
 ## -----------------------------------------------------------------------------
+## Tests within the framework of the C++ standard library; this should be
+## working in any case.
+
+add_library (cr_test Templates.cc)
+
+foreach (test tNumericalRanges tObjects tProcessingParameters tTemplates)
+  ## build program
+  add_executable (${test} ${test}.cc)
+  target_link_libraries (${test} cr_test)
+  ## testing
+  add_test (${test} ${test})
+  ## installation
+  install (
+    TARGETS ${test}
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    )
+endforeach (test)
+
+## -----------------------------------------------------------------------------
 ## Test working with CASA libraries
 ## Most of the test programs are not in need of a full CASA installation, but
 ## can be build using casacore; therefore we first check for the existence of 
@@ -69,29 +90,6 @@ if (HAVE_CASACORE)
   add_executable (tUseCasacore tUseCasacore.cc)
   target_link_libraries (tUseCasacore ${CASACORE_LIBRARIES})
 endif (HAVE_CASACORE)
-
-## -----------------------------------------------------------------------------
-## Vectors of the standard library
-
-#add_executable (tUseVector tUseVector.cc)
-
-## -----------------------------------------------------------------------------
-## Numerical ranges of the various data types
-## Relationship between the various control parameters
-
-foreach (test tNumericalRanges tObjects tProcessingParameters)
-  ## build program
-  add_executable (${test} ${test}.cc)
-  ## testing
-  add_test (${test} ${test})
-  ## installation
-  install (
-    TARGETS ${test}
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    )
-endforeach (test)
 
 ## -----------------------------------------------------------------------------
 ## Test for BLITZ

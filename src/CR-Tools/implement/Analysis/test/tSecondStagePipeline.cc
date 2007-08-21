@@ -25,7 +25,6 @@
 
 #include <Analysis/SecondStagePipeline.h>
 #include <Data/LopesEventIn.h>
-#include <templates.h>
 
 using CR::LopesEventIn;
 using CR::SecondStagePipeline;

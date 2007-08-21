@@ -38,7 +38,6 @@
 #include <casa/Arrays.h>
 #include <casa/BasicSL/Complex.h>
 
-#include <templates.h>
 #include <Calibration/PluginBase.h>
 #include <Calibration/PhaseCalibration.h>
 #include <Data/ITSCapture.h>

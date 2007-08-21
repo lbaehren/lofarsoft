@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------*
- | $Id: tanalyseLOPESevent.cc,v 1.4 2007/06/21 16:07:31 horneff Exp $ |
+ | $Id                                                                   $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -22,7 +22,6 @@
  ***************************************************************************/
 
 #include <Analysis/analyseLOPESevent.h>
-#include <templates.h>
 
 using CR::analyseLOPESevent;
 using CR::LopesEventIn;

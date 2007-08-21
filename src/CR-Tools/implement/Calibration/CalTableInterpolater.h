@@ -299,15 +299,6 @@ namespace CR {  //  Namespace CR -- begin
   
   };
   
-  // ============================================================================
-  //
-  //  Template instantiations
-  //
-  // ============================================================================
-  
-  template class CalTableInterpolater<casa::Double>;
-  template class CalTableInterpolater<casa::DComplex>;
-  
 }  // Namespace CR -- end
 
 #endif /* CALTABLEINTERPOLATER_H */

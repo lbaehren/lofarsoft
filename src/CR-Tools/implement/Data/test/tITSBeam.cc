@@ -24,7 +24,6 @@
 #include <casa/Exceptions/Error.h>
 
 #include <Data/ITSBeam.h>
-#include <templates.h>
 
 /*!
   \file tITSBeam.cc

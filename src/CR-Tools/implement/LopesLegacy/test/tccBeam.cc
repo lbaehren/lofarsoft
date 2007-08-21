@@ -26,7 +26,7 @@
 #include <scimath/Mathematics.h>
 #include <scimath/Mathematics/FFTServer.h>
 // LOPES-Tools
-#include <lopes/Beamforming/ccBeam.h>
+#include <Beamforming/ccBeam.h>
 
 /*!
   \file tccBeam.cc

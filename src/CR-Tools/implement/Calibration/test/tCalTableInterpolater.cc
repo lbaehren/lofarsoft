@@ -23,7 +23,6 @@
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
 
-#include <templates.h>
 #include <Calibration/CalTableInterpolater.h>
 
 using CR::CalTableReader;

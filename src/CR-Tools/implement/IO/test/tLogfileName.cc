@@ -20,7 +20,6 @@
 
 /* $Id: tLogfileName.cc,v 1.2 2006/01/09 19:23:10 bahren Exp $*/
 
-#include <templates.h>
 #include <IO/LogfileName.h>
 
 /*!

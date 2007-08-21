@@ -28,7 +28,6 @@
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/ArrayMath.h>
 
-#include <templates.h>
 #include <Observation/ObservationData.h>
 
 #include <casa/namespace.h>

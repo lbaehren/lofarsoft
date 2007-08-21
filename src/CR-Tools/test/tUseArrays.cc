@@ -25,15 +25,16 @@
 #include <string>
 
 #include <casa/Arrays/Array.h>
+#include <casa/Arrays/ArrayMath.h>
 #include <casa/Arrays/Cube.h>
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/MatrixMath.h>
 #include <casa/Arrays/Slice.h>
+#include <casa/Arrays/Slicer.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicMath/Math.h>
 #include <casa/System/ProgressMeter.h>
-
-#include <templates.h>
 
 using std::cout;
 using std::cerr;

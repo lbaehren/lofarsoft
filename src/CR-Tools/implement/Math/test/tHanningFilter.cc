@@ -22,7 +22,6 @@
 
 #include <fstream>
 
-#include <templates.h>
 #include <Math/BasicFilter.h>
 #include <Math/HanningFilter.h>
 #include <IO/DataReader.h>

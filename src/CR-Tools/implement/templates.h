@@ -101,73 +101,10 @@ namespace casa {
   template Bool read(istream &, Array<Double> &, IPosition const *, Bool);
   template Bool readArrayBlock(istream &, Bool &, IPosition &, Block<Complex> &, IPosition const *, Bool);
   template Bool readArrayBlock(istream &, Bool &, IPosition &, Block<Double> &, IPosition const *, Bool);
-  template Array<bool> operator< <double>(Array<double> const&, double const&);
   template istream & operator>>(istream &, Array<Double> &);
-  template void readAsciiMatrix(Matrix<Int> &, Char const *);
-  template void readAsciiMatrix(Matrix<Double> &, Char const *);
-  template void readAsciiVector(Vector<double>&, char const*);
-  template void read_array(Array<Int> &, Char const *);
-  template void read_array(Array<Double> &, Char const *);
-  template void read_array(Array<Int> &, String const &);
-  template void read_array(Array<Double> &, String const &);
-  template void writeAsciiMatrix(Matrix<Int> const &, Char const *);
-  template void writeAsciiMatrix(Matrix<Double> const &, Char const *);
-  template void writeAsciiVector(Vector<Double> const &, Char const *);
   template void write_array(Array<Int> const &, Char const *);
   template void write_array(Array<Int> const &, String const &);
 
-  // casa/Arrays/ArrayLogical
-
-  template bool allNearAbs (Array<double> const&, double const&, double);
-  template Bool allNearAbs (Array<Complex> const &, Array<Complex> const &, Double);
-  template Bool allNearAbs (Array<DComplex> const &, Array<DComplex> const &, Double);
-
-  // casa/Arrays/Vector
-
-  template class Array<Bool>;
-  template class Array<Int>;
-  template class Array<uInt>;
-  template class Array<Short>;
-  template class Array<uShort>;
-  template class Array<Long>;
-  template class Array<uLong>;
-  template class Array<Float>;
-  template class Array<Double>;
-  template class Array<Complex>;
-  template class Array<DComplex>;
-  template class Array<IPosition>;
-
-/*   template class Vector<Bool>; */
-/*   template class Vector<Int>; */
-/*   template class Vector<uInt>; */
-/*   template class Vector<Short>; */
-/*   template class Vector<uShort>; */
-/*   template class Vector<Long>; */
-/*   template class Vector<uLong>; */
-/*   template class Vector<Float>; */
-/*   template class Vector<Double>; */
-/*   template class Vector<Complex>; */
-/*   template class Vector<DComplex>; */
-
-  // casa/Arrays/MaskedArray
-
-/*   template class MaskedArray<Array<Double> >; */
-/*   template class MaskedArray<Slicer>; */
-/*   template class MaskedArray<Vector<Complex> >; */
-/*   template class MaskedArray<Vector<Double> >; */
-/*   template class MaskedArray<Vector<Float> >; */
-/*   template class MaskedArray<Bool>; */
-/*   template class MaskedArray<uChar>; */
-/*   template class MaskedArray<Short>; */
-/*   template class MaskedArray<uShort>; */
-/*   template class MaskedArray<Int>; */
-/*   template class MaskedArray<uInt>; */
-/*   template class MaskedArray<Float>; */
-/*   template class MaskedArray<Double>; */
-/*   template class MaskedArray<Complex>; */
-/*   template class MaskedArray<DComplex>; */
-/*   template class MaskedArray<String>; */
-  
   // casa/BasicMath/Functional
   
   template class Functional<int, float>;
@@ -416,26 +353,6 @@ namespace casa {
   template class Function<Double, DComplex>;
 
   template ostream & operator<<(ostream &, Function<Double, Double> const &);
-
-  template class InterpolateArray1D<double, double >;
-  template class InterpolateArray1D<double, std::complex<double> >;
-  
-  template class FFTServer<Float,Complex>;
-  template class FFTServer<Double, DComplex>;
- 
-  // ============================================================================
-  //
-  //  images
-  //
-  // ============================================================================
-
-  template class ImageInterface<Float>;
-  template class ImageInterface<Double>;
-  template class ImageInterface<Complex>;
-
-  template class PagedImage<Float>;
-  template class PagedImage<Double>;
-  template class PagedImage<Complex>;
 
   // ============================================================================
   //

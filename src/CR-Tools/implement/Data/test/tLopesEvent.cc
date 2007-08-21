@@ -25,7 +25,6 @@
 #include <casa/Exceptions/Error.h>
 
 #include <Data/LopesEvent.h>
-#include <templates.h>
 
 /*!
   \file tLopesEvent.cc

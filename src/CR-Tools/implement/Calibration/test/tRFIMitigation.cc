@@ -38,7 +38,6 @@
 #include <casa/BasicSL/Complex.h>
 #include <scimath/Mathematics/InterpolateArray1D.h>
 
-#include <templates.h>
 #include <Calibration/PluginBase.h>
 #include <Calibration/RFIMitigation.h>
 #include <Data/ITSCapture.h>

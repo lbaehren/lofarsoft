@@ -119,4 +119,13 @@ namespace LOPES {  // Namespace LOPES -- begin
     return ccBeam::ccbeam(dataTime);
   }
   
+  // ============================================================================
+  //
+  //  Template instantiations
+  //
+  // ============================================================================
+  
+  template class ccBeam<casa::Float,casa::Complex>;
+  template class ccBeam<casa::Double,casa::DComplex>;
+  
 }  // Namespace LOPES -- end

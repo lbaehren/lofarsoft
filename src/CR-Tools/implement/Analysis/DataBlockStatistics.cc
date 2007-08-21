@@ -208,5 +208,6 @@ void DataBlockStatistics<T>::blockMeanStatistics (T& min,
 //
 // ==============================================================================
 
+template class DataBlockStatistics<Int>;
 template class DataBlockStatistics<Float>;
 template class DataBlockStatistics<Double>;

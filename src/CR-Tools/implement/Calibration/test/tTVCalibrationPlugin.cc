@@ -20,7 +20,6 @@
 
 /* $Id: tTVCalibrationPlugin.cc,v 1.2 2007/04/16 17:02:57 horneff Exp $*/
 
-#include <templates.h>
 #include <Calibration/TVCalibrationPlugin.h>
 #include <Analysis/FirstStagePipeline.h>
 #include <Data/LopesEventIn.h>

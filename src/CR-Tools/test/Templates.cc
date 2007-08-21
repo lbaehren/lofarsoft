@@ -1,6 +1,9 @@
-/***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+/*-------------------------------------------------------------------------*
+ | $Id                                                                   $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (<mail>)                                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,58 +21,43 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: txBeam.cc,v 1.2 2007/08/08 15:51:18 lbaehren Exp $*/
+#include <Templates.h>
 
-#include <Beamforming/xBeam.h>
+// ==============================================================================
+//
+//  Class VectorList
+//
+// ==============================================================================
 
-/*!
-  \file txBeam.cc
-
-  \ingroup Beamforming
-
-  \brief A collection of test routines for xBeam
- 
-  \author Andreas Horneffer
- 
-  \date 2007/06/16
-*/
-
-using LOPES::xBeam;
-
-// -----------------------------------------------------------------------------
-
-/*!
-  \brief Test constructors for a new xBeam object
-
-  \return nofFailedTests -- The number of failed tests.
-*/
-int test_xBeam ()
+template<class T> VectorList<T>::VectorList (T const &elem)
 {
-  int nofFailedTests (0);
-  
-  std::cout << "\n[test_xBeam]\n" << std::endl;
+  elements_p.resize(1);
+  elements_p[0] = elem;
+}
 
-  std::cout << "[1] Testing default constructor ..." << std::endl;
+template<class T> VectorList<T>::VectorList (vector<T> const &vect)
+{
+  elements_p.resize(vect.size());
+  elements_p = vect;
+}
+
+template<class T> bool VectorList<T>::appendElement (T const &elem)
+{
+  bool status (true);
+
   try {
-    xBeam<Float,Complex> newObject;
+    elements_p.push_back(elem);
   } catch (std::string message) {
     std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-  
-  return nofFailedTests;
-}
-
-// -----------------------------------------------------------------------------
-
-int main ()
-{
-  int nofFailedTests (0);
-
-  // Test for the constructor(s)
-  {
-    nofFailedTests += test_xBeam ();
+    status = false;
   }
 
-  return nofFailedTests;
+  return status;
 }
+
+// ------------------------------------------------------- Template instantiation
+
+template class VectorList<int>; 
+template class VectorList<float>;
+template class VectorList<double>;
+

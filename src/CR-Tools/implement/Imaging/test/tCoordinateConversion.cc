@@ -20,6 +20,7 @@
 
 #include <cmath>
 #include <string>
+
 #include <Imaging/CoordinateConversion.h>
 #include <Math/VectorConversion.h>
 

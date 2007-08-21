@@ -22,7 +22,6 @@
 #include <casa/Exceptions/Error.h>
 
 #include <ApplicationSupport/Beamformer.h>
-#include <templates.h>
 
 /*!
   \file tBeamformer.cc

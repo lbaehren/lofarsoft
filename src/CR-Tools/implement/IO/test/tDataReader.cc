@@ -26,7 +26,6 @@
 #include <casa/Exceptions/Error.h>
 
 // LOPES header files
-#include <templates.h>
 #include <IO/DataReader.h>
 
 using std::cout;

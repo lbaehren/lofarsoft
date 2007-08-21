@@ -28,7 +28,6 @@
 #include <casa/BasicSL/Complex.h>
 #include <casa/Exceptions/Error.h>
 
-#include <templates.h>
 #include <Analysis/inverseFFT.h>
 #include <Data/ITSCapture.h>
 #include <Data/LopesEvent.h>

@@ -20,7 +20,6 @@
 
 #include <iostream>
 
-#include <templates.h>
 #include <Imaging/Beamformer.h>
 #include <Imaging/SkymapCoordinates.h>
 

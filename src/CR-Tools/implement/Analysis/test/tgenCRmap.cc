@@ -23,7 +23,6 @@
 #include <Analysis/genCRmap.h>
 #include <Analysis/SecondStagePipeline.h>
 #include <Data/LopesEventIn.h>
-#include <templates.h>
 
 using CR::genCRmap;
 using CR::LopesEventIn;

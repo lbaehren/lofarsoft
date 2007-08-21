@@ -20,7 +20,7 @@
 
 /* $Id$*/
 
-#include <lopes/Imaging/Beamshape.h>
+#include <Imaging/Beamshape.h>
 
 /*!
   \file tBeamshape.cc

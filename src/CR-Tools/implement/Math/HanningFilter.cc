@@ -232,4 +232,15 @@ namespace CR {  // Namespace CR -- begin
     BasicFilter<T>::setWeights(weights);
   }
   
+  // =============================================================================
+  //
+  //  Template instantiation
+  //
+  // =============================================================================
+  
+  template class HanningFilter<Float>;
+  template class HanningFilter<Double>;
+  template class HanningFilter<Complex>;
+  template class HanningFilter<DComplex>;
+  
 }  // Namespace CR -- end

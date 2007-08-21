@@ -25,7 +25,6 @@
 #include <casa/Exceptions/Error.h>
 #include <images/Images/PagedImage.h>
 
-#include <templates.h>
 #include <ApplicationSupport/SkymapperTools.h>
 
 /*!

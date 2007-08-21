@@ -24,7 +24,6 @@
 
 #include <Analysis/CRinvFFT.h>
 #include <Data/LopesEventIn.h>
-#include <templates.h>
 
 /*!
   \file tCRinvFFT.cc

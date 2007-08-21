@@ -137,15 +137,6 @@ namespace LOPES {  // Namespace LOPES -- begin
     
   };
   
-  // ============================================================================
-  //
-  //  Template instantiations
-  //
-  // ============================================================================
-  
-  template class ccBeam<Float,Complex>;
-  template class ccBeam<Double,DComplex>;
-  
 }  // Namespace LOPES -- end
 
 #endif /* LOPES_CCBEAM_H */

@@ -27,7 +27,6 @@
 #include <casa/Arrays.h>
 #include <casa/Exceptions/Error.h>
 
-#include <templates.h>
 #include <ApplicationSupport/DataReaderTools.h>
 #include <Data/ITSCapture.h>
 #include <Data/LopesEvent.h>

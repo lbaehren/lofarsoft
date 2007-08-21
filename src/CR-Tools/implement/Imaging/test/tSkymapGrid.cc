@@ -18,7 +18,6 @@
 #include <coordinates/Coordinates/CoordinateSystem.h>
 #include <coordinates/Coordinates/DirectionCoordinate.h>
 
-#include <templates.h>
 #include <Imaging/SkymapGrid.h>
 
 using casa::Double;

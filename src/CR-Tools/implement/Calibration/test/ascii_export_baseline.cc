@@ -28,7 +28,6 @@
 #include <scimath/Mathematics.h>
 
 // LOPES-tools header files
-#include <templates.h>
 #include <Calibration/BaselineGain.h>
 #include <Calibration/AverageGain.h>
 #include <IO/DataReader.h>

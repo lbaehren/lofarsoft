@@ -423,6 +423,14 @@ Bool CalTableInterpolater<T>::GetInputData(const uInt date, const Int AntID, Arr
   }; 
   return True;
 }
-
-
+  
+  // ============================================================================
+  //
+  //  Template instantiations
+  //
+  // ============================================================================
+  
+  template class CalTableInterpolater<casa::Double>;
+  template class CalTableInterpolater<casa::DComplex>;
+  
 }  // Namespace CR -- end 

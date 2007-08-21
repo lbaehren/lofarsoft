@@ -24,7 +24,6 @@
 #include <casa/BasicMath/Random.h>
 
 #include <Imaging/SkymapCoordinates.h>
-#include <templates.h>
 
 using casa::DComplex;
 using casa::Matrix;

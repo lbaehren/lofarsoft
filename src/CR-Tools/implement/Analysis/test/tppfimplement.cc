@@ -31,7 +31,6 @@
 #include <Analysis/ppfimplement.h>
 #include <Analysis/ppfinversion.h>
 #include <Analysis/ionoCalibration.h>
-#include <templates.h>
 
 using CR::ppfimplement ;
 using CR::ppfinversion ;

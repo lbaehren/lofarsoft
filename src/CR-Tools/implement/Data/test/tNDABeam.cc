@@ -24,7 +24,6 @@
 #include <casa/Exceptions/Error.h>
 
 #include <Data/NDABeam.h>
-#include <templates.h>
 
 /*!
   \file tNDABeam.cc
