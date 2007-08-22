@@ -38,7 +38,6 @@
 
 #include <ApplicationSupport/Glish.h>
 #include <ApplicationSupport/GlishRecord.h>
-
 #include <Data/LopesEvent.h>
 #include <Data/ITSBeam.h>
 #include <Data/ITSCapture.h>
@@ -46,6 +45,8 @@
 #include <IO/DataReader.h>
 
 #include <casa/namespace.h>
+
+using CR::LopesEvent;
 
 /*!
   \class DataReaderTools

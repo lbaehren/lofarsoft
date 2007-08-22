@@ -40,6 +40,7 @@
 #include <casa/BasicMath/Functional.cc> 
 #include <casa/Arrays/ArrayIO.cc>
 #include <casa/Arrays/ArrayLogical.cc>
+#include <casa/Arrays/Vector.cc>
 #include <casa/Utilities/BinarySearch.cc>
 #include <casa/Utilities/PtrHolder.cc>
 #include <scimath/Functionals/Function.cc>
@@ -75,6 +76,21 @@ namespace casa {
   template class Array<Complex>;
   template class Array<DComplex>;
   template class Array<IPosition>;
+
+  // casa/Arrays/Vector
+
+//   template class Vector<Bool>;
+//   template class Vector<Int>;
+//   template class Vector<uInt>;
+//   template class Vector<Short>;
+//   template class Vector<uShort>;
+//   template class Vector<Long>;
+//   template class Vector<uLong>;
+//   template class Vector<Float>;
+//   template class Vector<Double>;
+//   template class Vector<Complex>;
+//   template class Vector<DComplex>;
+//   template class Vector<IPosition>;
 
   template Array<bool> operator< <double>(Array<double> const&, double const&);
 

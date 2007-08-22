@@ -23,11 +23,8 @@
 #ifndef _CGACCESSCLIENT_H_
 #define _CGACCESSCLIENT_H_
 
-// CGPipeline includes
-#include <lopes/Analysis/analyseLOPESevent.h>
 
 // Glish includes
-#include <tasking/Glish.h>
 #include <casa/aips.h>
 #include <casa/string.h>
 #include <casa/Arrays.h>
@@ -37,6 +34,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <Analysis/analyseLOPESevent.h>
+#include <ApplicationSupport/Glish.h>
 
 /*!
   \file CGaccessClient.h
@@ -51,12 +50,14 @@
   
   <h3>Prerequisite</h3>
   
-  analyseLOPESevent 
+  <ul>
+    <li>analyseLOPESevent 
+  </ul>
   
   <h3>Synopsis</h3>
   This is technically a Glish client. It is intended to make the intermediate 
   of the steps C++-based pipeline accessible from Glish so that they can be 
-  displayed in th gui.
+  displayed in the gui.
   
   <h3>Example(s)</h3>
   
@@ -65,52 +66,82 @@
 // ----------------------------------------------------------------------------
 
 /*!
-  \brief initialize the pipeline 
+  \brief Initialize the pipeline
+
+  \return status -- Status of the operation; return <tt>false</tt> if an error
+                    was encountered
 */
 Bool initPipeline(GlishSysEvent &event, void *);
 
 /*!
   \brief process one event
+
+  \return status -- Status of the operation; return <tt>false</tt> if an error
+                    was encountered
 */
 Bool LoadEvent(GlishSysEvent &event, void *);
 
 /*!
   \brief Get the Time
+
+  \return status -- Status of the operation; return <tt>false</tt> if an error
+                    was encountered
 */
 Bool GetTime(GlishSysEvent &event, void *);
 
 /*!
   \brief Get the Frequency
+
+  \return status -- Status of the operation; return <tt>false</tt> if an error
+                    was encountered
 */
 Bool GetFrequency(GlishSysEvent &event, void *);
 
 /*!
   \brief Get the FX
+
+  \return status -- Status of the operation; return <tt>false</tt> if an error
+                    was encountered
 */
 Bool GetFX(GlishSysEvent &event, void *);
 
 /*!
   \brief Get the Voltage
+
+  \return status -- Status of the operation; return <tt>false</tt> if an error
+                    was encountered
 */
 Bool GetVoltage(GlishSysEvent &event, void *);
 
 /*!
   \brief Get the FFT
+
+  \return status -- Status of the operation; return <tt>false</tt> if an error
+                    was encountered
 */
 Bool GetFFT(GlishSysEvent &event, void *);
 
 /*!
   \brief Get the CalFFT
+
+  \return status -- Status of the operation; return <tt>false</tt> if an error
+                    was encountered
 */
 Bool GetCalFFT(GlishSysEvent &event, void *);
 
 /*!
   \brief Get the FilteredFFT
+
+  \return status -- Status of the operation; return <tt>false</tt> if an error
+                    was encountered
 */
 Bool GetFilteredFFT(GlishSysEvent &event, void *);
 
 /*!
   \brief Get the Beams etc.
+
+  \return status -- Status of the operation; return <tt>false</tt> if an error
+                    was encountered
 */
 Bool GetTCXP(GlishSysEvent &event, void *);
 
@@ -118,6 +149,9 @@ Bool GetTCXP(GlishSysEvent &event, void *);
 
 /*!
   \brief Get the FieldStrength
+
+  \return status -- Status of the operation; return <tt>false</tt> if an error
+                    was encountered
 */
 Bool GetFieldStrength(GlishSysEvent &event, void *);
 

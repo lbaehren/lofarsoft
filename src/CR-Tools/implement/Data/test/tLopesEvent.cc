@@ -26,6 +26,10 @@
 
 #include <Data/LopesEvent.h>
 
+using CR::Data;
+using CR::DataReader;
+using CR::LopesEvent;
+
 /*!
   \file tLopesEvent.cc
 

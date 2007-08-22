@@ -24,10 +24,10 @@
 #define _CGUIPIPECLIENT_H_
 
 // CGuipipeline includes
-#include <lopes/Analysis/analyseLOPESevent.h>
+#include <Analysis/analyseLOPESevent.h>
+#include <ApplicationSupport/Glish.h>
 
 // Glish includes
-#include <tasking/Glish.h>
 #include <casa/aips.h>
 #include <casa/string.h>
 #include <casa/Arrays.h>

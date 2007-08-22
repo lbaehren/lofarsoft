@@ -47,6 +47,8 @@
 
 #include <casa/namespace.h>
 
+using CR::LopesEvent;
+
 // -----------------------------------------------------------------------------
 // 
 // Global Valriables

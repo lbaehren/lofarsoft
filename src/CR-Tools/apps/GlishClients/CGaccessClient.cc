@@ -20,15 +20,15 @@
 
 /* $Id: CGaccessClient.cc,v 1.1 2007/07/26 14:37:22 horneff Exp $*/
 
-#include <CGaccessClient.h>
+#include <GlishClients/CGaccessClient.h>
 
-// We need that, otherwise we'd have to write "LOPES::LopesEventIn" instead of "LopesEventIn"
-using namespace LOPES;
+using CR::DataReader;
+using CR::LopesEventIn;
 
 // global Variable that actually contains all the data
-analyseLOPESevent pipeline;
+CR::analyseLOPESevent pipeline;
 // local copies (of the pointers) to access the stuff.
-CRinvFFT *pipeline_p;    
+CR::CRinvFFT *pipeline_p;    
 DataReader * DataReader_p;
 
 //---------------------------------------------------------------------   initPipeline

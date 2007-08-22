@@ -20,10 +20,10 @@
 
 /* $Id: CGuiPipeClient.cc,v 1.5 2007/07/26 14:37:22 horneff Exp $*/
 
-#include <CGuiPipeClient.h>
+#include <GlishClients/CGuiPipeClient.h>
 
-// We need that, otherwise we'd have to write "LOPES::LopesEventIn" instead of "LopesEventIn"
-using namespace LOPES;
+using CR::analyseLOPESevent;
+using CR::LopesEventIn;
 
 analyseLOPESevent pipeline;
 
