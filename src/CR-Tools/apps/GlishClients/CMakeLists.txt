@@ -6,14 +6,20 @@
 ##-------------------------------------------------------------------------------
 ## Clients which need libglish only
 
+# antennaflagger  GLISH LAPACK F77 GLISH CFITSIO WCSLIB
 # glempf          GLISH CFITSIO WCSLIB
 # glsender        GLISH CFITSIO WCSLIB
 # lopestools      GLISH CFITSIO WCSLIB LAPACK F77
-# readdat         WCSLIB LAPACK F77 GLISH CFITSIO
+# moviemaker      GLISH
 # ppsync          GLISH
+# readdat         WCSLIB LAPACK F77 GLISH CFITSIO
+# skymapper       WCSLIB LAPACK F77 GLISH CFITSIO
 # timclient       GLISH
 # timebeam        WCSLIB LAPACK F77 GLISH CFITSIO
 # CalTableClient  WCSLIB LAPACK F77 GLISH CFITSIO
+
+add_executable (antennaflagger antennaflagger.cc)
+target_link_libraries (antennaflagger cr ${GLISH_LIBRARIES})
 
 add_executable (glempf glempf.cc)
 target_link_libraries (glempf cr ${GLISH_LIBRARIES})
@@ -24,14 +30,20 @@ target_link_libraries (glsender cr ${GLISH_LIBRARIES})
 add_executable (lopestools lopestools.cc)
 target_link_libraries (lopestools cr ${GLISH_LIBRARIES})
 
-add_executable (readdat readdat.cc)
-target_link_libraries (readdat cr ${GLISH_LIBRARIES})
+add_executable (moviemaker moviemaker.cc)
+target_link_libraries (moviemaker cr ${GLISH_LIBRARIES})
 
 add_executable (ppsync ppsync.cc)
 target_link_libraries (ppsync cr ${GLISH_LIBRARIES})
 
-#add_executable (timclient timclient.cc)
-#target_link_libraries (timclient cr ${GLISH_LIBRARIES})
+add_executable (readdat readdat.cc)
+target_link_libraries (readdat cr ${GLISH_LIBRARIES})
+
+add_executable (skymapper skymapper.cc)
+target_link_libraries (skymapper cr ${GLISH_LIBRARIES})
+
+add_executable (timclient timclient.cc)
+target_link_libraries (timclient cr ${GLISH_LIBRARIES})
 
 add_executable (timebeam timebeam.cc)
 target_link_libraries (timebeam cr ${GLISH_LIBRARIES})

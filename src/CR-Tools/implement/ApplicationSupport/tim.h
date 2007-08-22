@@ -18,7 +18,7 @@
  */
 
 /* version dependencies have been confined to a separate file */
-#include <plx9080.h>
+#include "plx9080.h"
 #include <semaphore.h>
 
 /*

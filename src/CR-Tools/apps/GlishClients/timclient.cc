@@ -1,4 +1,5 @@
 
+
 // C++ Standard library
 #include <stdio.h>
 #include <iostream>
@@ -22,13 +23,13 @@
 #include <tasking/Glish.h>
 
 // Custom header files
-#include <GlishClients/timu.h>
+#include <ApplicationSupport/TIMRegisters.h>
 
 #define DEBUG 21
 
 #include <casa/namespace.h>
 
-TIM *board = NULL;
+TIMRegisters *board = NULL;
 unsigned long syncaddress=1,readaddress=1;
 short *tmppoint = NULL; // For i386 Linux. May be different on other machines.
 
@@ -298,9 +299,14 @@ Bool get_next_data(GlishSysEvent &event) {
 #define COPYSIZE 128*1024
 #define FILESIZE  1024*1024*1024
 
-int board2files(TIM *board, FILE **fds, unsigned long blocksize){
-  unsigned long startaddress, readaddress;
-  unsigned long xfered=0,size;
+int board2files(TIMRegisters *board,
+		FILE **fds,
+		unsigned long blocksize)
+{
+  unsigned long startaddress;
+  unsigned long readaddress;
+  unsigned long xfered=0;
+  unsigned long size;
 
   if ((fileno(fds[0]) == -1) || (fileno(fds[1]) == -1)) {
     if (DEBUG>10)
@@ -421,7 +427,7 @@ Bool cardinit(GlishSysEvent &event) {
 
    if (board != NULL) { delete board; };
 
-   board = new TIM(filename);
+   board = new TIMRegisters (filename);
 
    if (board == NULL) {
      if (glishBus->replyPending()) {
@@ -491,7 +497,7 @@ Bool setconf(GlishSysEvent &event) {
    if ( timreg.exists("blocklen") ) {
      gtmp = timreg.get("blocklen");
      gtmp.get(regdata);
-     board->Blocklength(TIM::blocklength(regdata));
+     board->Blocklength(TIMRegisters::blocklength(regdata));
    };
 
    if (glishBus->replyPending()) {

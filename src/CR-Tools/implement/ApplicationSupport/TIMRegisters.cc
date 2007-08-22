@@ -10,161 +10,235 @@
 #include <iomanip>      // <iomanip.h>
 #include <sys/ioctl.h>
 
-#include <tim.h>
-#include <timu.h>
+#include <ApplicationSupport/tim.h>
+#include <ApplicationSupport/TIMRegisters.h>
 
 #define TIM_DEBUG
 
 using namespace std;
 
-const unsigned int TIM::blocksize[] = {32, 64, 256, 2*1024, 4*1024, 32*1024, 64*1024,
-				       1024*1024, 2*1048576, 4*1048576, 32*1048576,
-				       64*1048576, 256*1048576, 512*1048576,
-				       1024*1048576, 2*1073741824};
+const unsigned int TIMRegisters::blocksize[] = {32,
+						64,
+						256,
+						2*1024,
+						4*1024,
+						32*1024,
+						64*1024,
+						1024*1024,
+						2*1048576,
+						4*1048576,
+						32*1048576,
+						64*1048576,
+						256*1048576,
+						512*1048576,
+						1024*1048576,
+						2*1073741824};
 
-int TIM::cwrite(__u32 addr, void* buf, unsigned size)
-{
-    // Configuration writes go to base address 0
-    // ioctl(fd, TIM_IOPREFCNT, 1);
-    // cout << "cwrite address=0x" << hex << addr << endl;
-    lseek(fd,addr, SEEK_SET);
-    ::write(fd, buf, size);
-    // ioctl(fd, TIM_IOPREFCNT, prefetchcounter);
-    return 0;
-}
+// ==============================================================================
+//
+//  Construction
+//
+// ==============================================================================
 
-int TIM::cread(__u32 addr, void* buf, unsigned size)
+TIMRegisters::TIMRegisters(const char *dev)
 {
-    // Configuration reads go to base address 0
-    ioctl(fd, TIM_IOPREFCNT, 1);
-    // cout << "cread address=0x" << hex << addr << endl;
-    lseek(fd,addr, SEEK_SET);
-    ::read(fd, buf, size);
-    ioctl(fd, TIM_IOPREFCNT, 0);//prefetchcounter);
-    return 0;
-}
-
-int TIM::write(__u32 addr, void* buf, unsigned size)
-{
-    unsigned nsegment = addr / segmentsize;
-    if (nsegment != segmentreg) {
-      Segmentreg(nsegment);
-#ifdef TIM_DEBUG
-      cerr << "Write: Segmentreg=" << segmentreg << endl;
-#endif
+  if (dev)
+  {
+    fd = open(dev, O_RDWR);
+    if (fd <= 0) {
+	cerr << "Error opening device: " << dev << endl;
+        exit(-1);
     }
 
-    addr = (addr % segmentsize) + base_address;
-        
-    lseek(fd,addr, SEEK_SET);
-    ::write(fd, buf, size);
-    return size;
+    init();
+  }
 }
 
-int TIM::_read(__u32 addr, void* buf, unsigned size)
+TIMRegisters::TIMRegisters(int open_fd)
+  : segmentreg(0),
+    modereg(0),
+    clockreg(0),
+    versionreg(0),
+    segmentsize(0),
+    base_address(0),
+    prefetchcounter(0)
 {
-    unsigned nsegment = addr / segmentsize;
+  if (open_fd)
+  {
+    fd = open_fd;
+    init();
+  }
+}
+
+// ==============================================================================
+//
+//  Destruction
+//
+// ==============================================================================
+
+TIMRegisters::~TIMRegisters()
+{
+   close(fd);
+}
+
+// ==============================================================================
+//
+//  Parameter access
+//
+// ==============================================================================
+
+int TIMRegisters::cwrite(__u32 addr,
+			 void* buf,
+			 unsigned size)
+{
+  // Configuration writes go to base address 0
+  // ioctl(fd, TIM_IOPREFCNT, 1);
+  // cout << "cwrite address=0x" << hex << addr << endl;
+  lseek(fd,addr, SEEK_SET);
+  ::write(fd, buf, size);
+  // ioctl(fd, TIM_IOPREFCNT, prefetchcounter);
+  return 0;
+}
+
+int TIMRegisters::cread(__u32 addr,
+			void* buf,
+			unsigned size)
+{
+  // Configuration reads go to base address 0
+  ioctl(fd, TIM_IOPREFCNT, 1);
+  // cout << "cread address=0x" << hex << addr << endl;
+  lseek(fd,addr, SEEK_SET);
+  ::read(fd, buf, size);
+  ioctl(fd, TIM_IOPREFCNT, 0);//prefetchcounter);
+  return 0;
+}
+
+int TIMRegisters::write(__u32 addr,
+			void* buf,
+			unsigned size)
+{
+  unsigned nsegment = addr / segmentsize;
+  if (nsegment != segmentreg) {
+    Segmentreg(nsegment);
+#ifdef TIM_DEBUG
+    cerr << "Write: Segmentreg=" << segmentreg << endl;
+#endif
+  }
+  
+  addr = (addr % segmentsize) + base_address;
+  
+  lseek(fd,addr, SEEK_SET);
+  ::write(fd, buf, size);
+  return size;
+}
+
+int TIMRegisters::_read(__u32 addr,
+			void* buf,
+			unsigned size)
+{
+  unsigned nsegment = addr / segmentsize;
+  if (nsegment != segmentreg) {
+    Segmentreg(nsegment);
+#ifdef TIM_DEBUG
+    cerr << "Read: Segmentreg=" << segmentreg << endl;
+#endif
+  }
+  // Make sure that we are not going to read over a segment
+  // boundary
+  addr = (addr % segmentsize);
+  if ( addr+size > 16*1024*1024 ) {
+    size = 16*1024*1024 - addr;
+    cerr << "Clipped size to size=" << size << endl;
+  }
+  
+  addr += base_address;
+  lseek(fd,addr, SEEK_SET);
+  ::read(fd, buf, size);
+  return size;
+}
+
+#if 0 
+int TIMRegisters::read(__u32 addr,
+		       void* buf,
+		       unsigned size)
+{
+  unsigned int nsegment, tsize, xfered=0;
+  __u8 tmpbuff[64]; 
+  __u32 taddr, diff;
+  
+  // Make shore we continue reading at a 64-byte boundary
+  diff = addr & 0x3f;
+  nsegment = addr / segmentsize;
+  if (nsegment != segmentreg) {
+    Segmentreg(nsegment);
+  }
+  taddr = (addr % segmentsize);
+  lseek(fd, (taddr+ base_address), SEEK_SET);
+  ::read(fd, tmpbuff, 0x40); 
+  xfered = (0x40-diff);
+  memcpy(buf, ((char*)tmpbuff+diff), xfered);
+  //read the data in blocks, that fit into a segment
+  while (size>xfered) {
+    nsegment = (addr+xfered) / segmentsize;
     if (nsegment != segmentreg) {
       Segmentreg(nsegment);
 #ifdef TIM_DEBUG
       cerr << "Read: Segmentreg=" << segmentreg << endl;
 #endif
     }
-    // Make sure that we are not going to read over a segment
-    // boundary
-    addr = (addr % segmentsize);
-    if ( addr+size > 16*1024*1024 ) {
-	size = 16*1024*1024 - addr;
-        cerr << "Clipped size to size=" << size << endl;
-    }
-
-    addr += base_address;
-    lseek(fd,addr, SEEK_SET);
-    ::read(fd, buf, size);
-    return size;
-}
-
-
-#if 0 
-int TIM::read(__u32 addr, void* buf, unsigned size)
-{
-    unsigned int nsegment, tsize, xfered=0;
-    __u8 tmpbuff[64]; 
-    __u32 taddr, diff;
-
-    // Make shore we continue reading at a 64-byte boundary
-    diff = addr & 0x3f;
-    nsegment = addr / segmentsize;
-    if (nsegment != segmentreg) {
-      Segmentreg(nsegment);
-    }
-    taddr = (addr % segmentsize);
+    
+    taddr = ((addr+xfered) % segmentsize);
     lseek(fd, (taddr+ base_address), SEEK_SET);
-    ::read(fd, tmpbuff, 0x40); 
-    xfered = (0x40-diff);
-    memcpy(buf, ((char*)tmpbuff+diff), xfered);
-    //read the data in blocks, that fit into a segment
-    while (size>xfered) {
-      nsegment = (addr+xfered) / segmentsize;
-      if (nsegment != segmentreg) {
-	Segmentreg(nsegment);
-#ifdef TIM_DEBUG
-	cerr << "Read: Segmentreg=" << segmentreg << endl;
-#endif
-      }
-      
-      taddr = ((addr+xfered) % segmentsize);
-      lseek(fd, (taddr+ base_address), SEEK_SET);
-
-      tsize = size-xfered;
-      if ( (tsize+taddr) > segmentsize ) tsize = segmentsize-taddr;  
-      ::read(fd, ((char*)buf+xfered), tsize ); 
-      xfered += tsize;
-    };
-    return xfered;
+    
+    tsize = size-xfered;
+    if ( (tsize+taddr) > segmentsize ) tsize = segmentsize-taddr;  
+    ::read(fd, ((char*)buf+xfered), tsize ); 
+    xfered += tsize;
+  };
+  return xfered;
 }
 #endif
 
-int TIM::read(__u32 addr, void* buf, unsigned size)
+int TIMRegisters::read(__u32 addr, void* buf, unsigned size)
 {
-    unsigned int nsegment, tsize, xfered = 0;
-    __u8 tmpbuff[64]; 
-    __u32 taddr, diff;
-
-    // Make sure we continue reading at a 64-byte boundary
-
-    diff = addr & 0x3f;                     // offset from 64 byte boundary
-
-    nsegment = addr / segmentsize;          // segment number 
-    if (nsegment != segmentreg) {
-      Segmentreg(nsegment); 
-    }
-
-    taddr = (addr % segmentsize) & ~0x3f;   // determine the 64 byte boundary from which to read
-
-    if ( (__u32)lseek(fd, (taddr + base_address), SEEK_SET) != (taddr + base_address) ) { 
-      cerr << "Read: lseek failed to find address." << endl;
-    }
-
-    if ( ::read(fd, tmpbuff, 0x40) != 0x40 ) {
-      cerr << "Read: read from tim device failed." << endl;
-    } 
-
-    xfered = (0x40 - diff);
-    memcpy(buf, ( (char*)tmpbuff + diff) , xfered);
-
-    //read the data in blocks, that fit into a segment
-    while ( size > xfered ) {
-
-      // segment number
-      nsegment = (addr + xfered) / segmentsize;
-      if ( nsegment != segmentreg ) {
-	Segmentreg(nsegment);
+  unsigned int nsegment, tsize, xfered = 0;
+  __u8 tmpbuff[64]; 
+  __u32 taddr, diff;
+  
+  // Make sure we continue reading at a 64-byte boundary
+  
+  diff = addr & 0x3f;                     // offset from 64 byte boundary
+  
+  nsegment = addr / segmentsize;          // segment number 
+  if (nsegment != segmentreg) {
+    Segmentreg(nsegment); 
+  }
+  
+  taddr = (addr % segmentsize) & ~0x3f;   // determine the 64 byte boundary from which to read
+  
+  if ( (__u32)lseek(fd, (taddr + base_address), SEEK_SET) != (taddr + base_address) ) { 
+    cerr << "Read: lseek failed to find address." << endl;
+  }
+  
+  if ( ::read(fd, tmpbuff, 0x40) != 0x40 ) {
+    cerr << "Read: read from tim device failed." << endl;
+  } 
+  
+  xfered = (0x40 - diff);
+  memcpy(buf, ( (char*)tmpbuff + diff) , xfered);
+  
+  //read the data in blocks, that fit into a segment
+  while ( size > xfered ) {
+    
+    // segment number
+    nsegment = (addr + xfered) / segmentsize;
+    if ( nsegment != segmentreg ) {
+      Segmentreg(nsegment);
 #ifdef TIM_DEBUG
-	cerr << "Read: Segmentreg=" << segmentreg << endl;
+      cerr << "Read: Segmentreg=" << segmentreg << endl;
 #endif
-      }
-      
+    }
+    
       // addr + xfered is already aligned to a 64 byte boundary
       taddr = ( (addr+xfered) % segmentsize );
 
@@ -191,10 +265,10 @@ int TIM::read(__u32 addr, void* buf, unsigned size)
     return xfered;
 }
 
-int TIM::read_aligned(__u32 addr, void* buf, unsigned size)
+int TIMRegisters::read_aligned(__u32 addr, void* buf, unsigned size)
   /* This method reads from TIM assuming the startaddress is aligned
      to a 64 byte boundary. This means we can (nearly always) use DMA
-     reads, which should be faster than a normal TIM::read(). It also
+     reads, which should be faster than a normal TIMRegisters::read(). It also
      means that the userspace program has to provide an address which
      is aligned to the 64 byte boundary and a size which is a
      multiple of 64 bytes.
@@ -248,13 +322,13 @@ int TIM::read_aligned(__u32 addr, void* buf, unsigned size)
   return xfered;
 }
 
-int TIM::Modereg(__u32 val) 
+int TIMRegisters::Modereg(__u32 val) 
 {
    cwrite(TIM_MODEREG, &val, 4);
    return modereg = val;
 }
 
-int TIM::Modereg(void) 
+int TIMRegisters::Modereg(void) 
 {
    __u32 val;
    cread(TIM_MODEREG, (void*)&val, 4);
@@ -262,13 +336,13 @@ int TIM::Modereg(void)
    return modereg;
 }
 
-int TIM::Controlreg(__u32 val) 
+int TIMRegisters::Controlreg(__u32 val) 
 {
    cwrite(TIM_CTRLREG, &val, 4);
    return 4;
 }
 
-int TIM::Controlreg(void) 
+int TIMRegisters::Controlreg(void) 
 {
     __u32 controlreg;
    cread(TIM_CTRLREG, &controlreg, 4);
@@ -276,13 +350,13 @@ int TIM::Controlreg(void)
 }
 
 
-int TIM::Segmentreg(__u32 seg) 
+int TIMRegisters::Segmentreg(__u32 seg) 
 {
    cwrite(TIM_SEGREG, &seg, 4);
    return segmentreg = seg;
 }
 
-int TIM::Segmentreg(void) 
+int TIMRegisters::Segmentreg(void) 
 {
    __u32 val;
    cread(TIM_SEGREG, (void*)&val, 4);
@@ -290,13 +364,13 @@ int TIM::Segmentreg(void)
    return segmentreg;
 }
 
-int TIM::Clockreg(__u32 val) 
+int TIMRegisters::Clockreg(__u32 val) 
 {
    cwrite(TIM_CLKREG, &val, 4);
    return clockreg = val;
 }
 
-int TIM::Clockreg() 
+int TIMRegisters::Clockreg() 
 {
    __u32 val;
    cread(TIM_CLKREG, (void*)&val, 4);
@@ -304,20 +378,20 @@ int TIM::Clockreg()
    return clockreg;
 }
 
-int TIM::Startdelayreg(__u32 val) 
+int TIMRegisters::Startdelayreg(__u32 val) 
 {
    cwrite(TIM_SDELAYREG, &val, 4);
    return 4;
 }
 
-int TIM::Startdelayreg(void) 
+int TIMRegisters::Startdelayreg(void) 
 {
     __u32 startdelayreg;
    cread(TIM_SDELAYREG, &startdelayreg, 4);
    return int(startdelayreg & 0xff);
 }
 
-int TIM::Blocklength(enum blocklength b) 
+int TIMRegisters::Blocklength(enum blocklength b) 
 {
    modereg = (modereg & 0xf) | (b << 4); 
    __u32 val = modereg;
@@ -325,12 +399,12 @@ int TIM::Blocklength(enum blocklength b)
    return b;
 }
 
-int TIM::Blocklength() 
+int TIMRegisters::Blocklength() 
 {
    return modereg >> 4;
 }
 
-int TIM::Initram() 
+int TIMRegisters::Initram() 
 {
    /*
       init RAM 
@@ -341,62 +415,36 @@ int TIM::Initram()
    return 0;
 }
 
-void TIM::prefcnt(int cnt) 
+void TIMRegisters::prefcnt(int cnt) 
 {
    prefetchcounter = cnt;
    ioctl(fd, TIM_IOPREFCNT, prefetchcounter);
 }
 
-int TIM::intcsr() 
+int TIMRegisters::intcsr() 
 {
     unsigned long reg = 0;
     return ioctl(fd, TIM_IOINTCSR, reg);
 }
 
-void TIM::startbist() 
+void TIMRegisters::startbist() 
 {
     ioctl(fd, TIM_IOSETBIST);
 }
 
 
-int TIM::bist() 
+int TIMRegisters::bist() 
 {
     return ioctl(fd, TIM_IORDBIST);
 }
 
-
-TIM::TIM(const char *dev)
-{
-  if (dev)
-  {
-    fd = open(dev, O_RDWR);
-    if (fd <= 0) {
-	cerr << "Error opening device: " << dev << endl;
-        exit(-1);
-    }
-
-    init();
-  }
-}
-
-TIM::TIM(int open_fd) :
-    segmentreg(0), modereg(0), clockreg(0), versionreg(0),
-    segmentsize(0), base_address(0), prefetchcounter(0)
-{
-  if (open_fd)
-  {
-    fd = open_fd;
-    init();
-  }
-}
-
-void TIM::setfd(int open_fd)
+void TIMRegisters::setfd(int open_fd)
 {
   fd = open_fd;
   init();
 }
 
-void TIM::init()
+void TIMRegisters::init()
 {    
    prefetchcounter = 1;
    ioctl(fd, TIM_IOPREFCNT, prefetchcounter);
@@ -407,7 +455,7 @@ void TIM::init()
    // DQM = 1
    // blocklength 1
    //
-   // blocklength(TIM::B1);
+   // blocklength(TIMRegisters::B1);
    // capturemode(0);
    // setdqm();
 
@@ -445,12 +493,7 @@ void TIM::init()
 #endif
 }
 
-TIM::~TIM()
-{
-   close(fd);
-}
-
-void TIM::ShowRegs(void)
+void TIMRegisters::ShowRegs(void)
 {
 
  cout << "TIM Register settings:" << endl << hex
@@ -464,7 +507,7 @@ void TIM::ShowRegs(void)
                                  << Clockreg() << endl;
 }
 
-unsigned long TIM::Addressreg(void) 
+unsigned long TIMRegisters::Addressreg(void) 
 {
    unsigned long address, adr0, adr1, adr2, adr3;
    cread(TIM_ADRREG3, (void*)&adr3, 4);
@@ -483,7 +526,7 @@ unsigned long TIM::Addressreg(void)
    return address;
 }
 
-int TIM::Versionreg(void) 
+int TIMRegisters::Versionreg(void) 
 {
     unsigned long version;
     
@@ -493,7 +536,7 @@ int TIM::Versionreg(void)
 
 }
 
-int TIM::SDelayreg(void) 
+int TIMRegisters::SDelayreg(void) 
 {
    __u32 val1, val2;
    cread(TIM_SDELAYREG, (void*)&val1, 4);
@@ -503,7 +546,7 @@ int TIM::SDelayreg(void)
    return val1;
 }
 
-unsigned long TIM::Syncaddress(void) 
+unsigned long TIMRegisters::Syncaddress(void) 
 {
    unsigned long address, adr0, adr1, adr2, adr3, sdel;
    unsigned long syncaddress=0, delay=0;
