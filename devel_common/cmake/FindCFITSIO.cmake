@@ -37,7 +37,14 @@ FIND_PATH (CFITSIO_INCLUDES
   fitsio.h longnam.h
   PATHS ${include_locations}
   PATH_SUFFIXES cfitsio
+  NO_DEFAULT_PATH
   )
+
+## correct the include path
+
+if (CFITSIO_INCLUDES)
+  string (REGEX REPLACE cfitsio "" CFITSIO_INCLUDES ${CFITSIO_INCLUDES})
+endif (CFITSIO_INCLUDES)
 
 ## -----------------------------------------------------------------------------
 ## Check for the parts of the library
@@ -63,6 +70,8 @@ FIND_LIBRARY (CFITSIO_libm
 
 if (CFITSIO_libm)
   list (APPEND CFITSIO_LIBRARIES ${CFITSIO_libm})
+else (CFITSIO_libm)
+  message (STATUS "Unable to find libm.")
 endif (CFITSIO_libm)
 
 ## [3] file access

@@ -111,6 +111,10 @@ endif (HAVE_BLITZ)
 ## Test for CFITSIO
 
 if (HAVE_CFITSIO)
+  ## optional compiler settings
+  if (HAVE_WCSLIB)
+    add_definitions (-DHAVE_WCSLIB)
+  endif (HAVE_WCSLIB)
   ## build test program
   add_executable (tUseCFITSIO tUseCFITSIO.cc)
   target_link_libraries (tUseCFITSIO ${CFITSIO_LIBRARIES})
