@@ -1,25 +1,26 @@
+##------------------------------------------------------------------------------
+## $Id:: CMakeLists.txt 489 2007-08-01 11:40:38Z baehren                       $
+##------------------------------------------------------------------------------
+
+## -----------------------------------------------------------------------------
+## Project name and version number number
+
+## Name of the project
 project (pgplot C Fortran)
 
+## Minimum required version of CMake to configure the project
+cmake_minimum_required (VERSION 2.4)
+
+## -----------------------------------------------------------------------------
+## Additional CMake components
+
 include (CPack)
+include (CTest)
 
-subdirs (
-  drivers
-  examples
-  fonts
-  src
-  sys
-  )
+enable_testing()
 
-set (pgplot_modules
-  cpg
-  drivers
-  drivers/xmotif
-  src
-  sys
-)
-
-## ------------------------------------------------------------------------------
-## Required external packages
+## -----------------------------------------------------------------------------
+## Standard locations where to look for required components
 
 set (lib_locations
   /usr/local/lib
@@ -35,6 +36,9 @@ set (inc_locations
   /sw/include
   )
 
+## -----------------------------------------------------------------------------
+## Check for required external libraries
+
 find_package (PNG)
 find_package (X11)
 find_package (ZLIB)
@@ -47,31 +51,41 @@ find_library (libgif gif
   PATHS ${lib_locations}
   )
 
-## -- Tcl/Tk -------------------------------------
+## Tcl -------------------------------------------
 
-## header files
-
-find_path (inctcl tcl.h
+find_path (TCL_INCLUDES tcl.h
   PATHS ${inc_locations}
   PATH_SUFFIXES tcl tcl8.4
   NO_DEFAULT_PATH
   )
 
-## libraries
-
-find_library (libtcl tcl
+find_library (TCL_LIBRARIES tcl
   PATHS ${lib_locations}
   NO_DEFAULT_PATH
   )
 
-find_library (libtk tk
+if (TCL_INCLUDES AND TCL_LIBRARIES)
+  set (HAVE_TCL 1)
+endif (TCL_INCLUDES AND TCL_LIBRARIES)
+
+## Tk --------------------------------------------
+
+find_path (TK_INCLUDES tk.h
+  PATHS ${inc_locations}
+  PATH_SUFFIXES tcl tcl8.4 tk tk8.4
+  NO_DEFAULT_PATH
+  )
+
+find_library (TK_LIBRARIES tk
   PATHS ${lib_locations}
   NO_DEFAULT_PATH
   )
 
-## -- X11 ----------------------------------------
+if (TK_INCLUDES AND TK_LIBRARIES)
+  set (HAVE_TK 1)
+endif (TK_INCLUDES AND TK_LIBRARIES)
 
-## header files
+## X11 -------------------------------------------
 
 find_path (incXm XmP.h
   PATHS ${inc_locations}
@@ -81,21 +95,16 @@ find_path (incXm XmP.h
 
 string (REGEX REPLACE "include/Xm" "include" incXm ${incXm})
 
-## libraries
-
-find_library (libXaw Xaw
-  PATHS ${lib_locations}
-  )
-
-find_library (libXt Xt
-  PATHS ${lib_locations}
-  )
+find_library (libXaw Xaw PATHS ${lib_locations})
+find_library (libXt Xt PATHS ${lib_locations})
 
 ## summary of external libraries
 
 message (STATUS "libg2c = ${libg2c}")
-message (STATUS "libtcl = ${libtcl} , ${inctcl}")
-message (STATUS "libtk  = ${libtk}")
+message (STATUS "TCL_INCLUDES  = ${TCL_INCLUDES}")
+message (STATUS "TCL_LIBRARIES = ${TCL_LIBRARIES}")
+message (STATUS "TK_INCLUDES   = ${TK_INCLUDES}")
+message (STATUS "TK_LIBRARIES  = ${TK_LIBRARIES}")
 message (STATUS "libXaw = ${libXaw}")
 message (STATUS "libXt  = ${libXt}")
 message (STATUS "libx11 = ${X11_LIBRARIES}")
@@ -133,9 +142,9 @@ if (PNG_LIBRARIES)
  file (APPEND ${outfile} "PNDRIV 2 /TPNG     Portable Network Graphics file - transparent background C\n")
 endif (PNG_LIBRARIES)
 
-if (libtcl AND libtk)
+if (TCL_LIBRARIES AND TK_LIBRARIES)
  file (APPEND ${outfile} "TKDRIV 0 /XTK      X-window Tcl/Tk programs with pgplot widgets.  C\n")
-endif (libtcl AND libtk)
+endif (TCL_LIBRARIES AND TK_LIBRARIES)
 
 ## ------------------------------------------------------------------------------
 ## Start building the library
@@ -160,11 +169,25 @@ endif (libtcl AND libtk)
 ## 	$(RANLIB) libpgplot.a
 ##
 
+add_subdirectory (drivers)
+add_subdirectory (examples)
+add_subdirectory (fonts)
+add_subdirectory (src)
+add_subdirectory (sys)
+
+set (pgplot_modules
+  cpg
+  drivers
+  drivers/xmotif
+  src
+  sys
+)
+
 include_directories (
   .
   ${pgplot_SOURCE_DIR}
   ${pgplot_modules}
-  ${inctcl}
+  ${TCL_INCLUDES}
   ${PNG_INCLUDE_DIR}
   ${X11_INCLUDE_DIR}
   ${incXm}
@@ -206,8 +229,8 @@ add_library (pgplot
 target_link_libraries (pgplot
   ${libg2c}
   ${libgif}
-  ${libtcl}
-  ${libtk}
+  ${TCL_LIBRARIES}
+  ${TK_LIBRARIES}
   ${libXaw}
   ${libXt}
   ${JPEG_LIBRARIES}
@@ -234,17 +257,16 @@ target_link_libraries (XmPgplot
 
 ## -- libtkpgplot --------------------------------
 
-add_library (tkpgplot
-  drivers/xtk/tkpgplot.c
-  )
-target_link_libraries (tkpgplot
-  pgplot
-  )
+if (HAVE_TCL AND HAVE_TK)
+  ## list of source files
+  set (tkpgplot_sources drivers/xtk/tkpgplot.c)
+  ## build the library
+  add_library (tkpgplot ${tkpgplot_sources})
+  target_link_libraries (tkpgplot pgplot)
+endif (HAVE_TCL AND HAVE_TK)
 
 ## ------------------------------------------------------------------------------
 ## Installation
-
-## Locate the installation area
 
 find_path (prefix release_area.txt
   PATHS
@@ -256,7 +278,7 @@ find_path (prefix release_area.txt
   )
 
 if (prefix)
-  message (STATUS "Installation area located for package PGPlot.")
+  message (STATUS "Installation area located for package pgplot.")
   set (CMAKE_INSTALL_PREFIX ${prefix}) 
 endif (prefix)
 
