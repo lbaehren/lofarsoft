@@ -58,13 +58,14 @@
 #include <Math/MedianFilter.h>
 #include <Math/RaisedCosineFilter.h>
 #include <Math/RangeSplitter.h>
-#include <Math/Rotation2D.h>
-#include <Math/Rotation3D.h>
+#include <Math/RotationMatrix2D.h>
+#include <Math/RotationMatrix3D.h>
 #include <Math/RotationMatrix.h>
 #include <Math/Shapelets1D.h>
 #include <Math/Shapelets2D.h>
 #include <Math/ShapeletsModel1D.h>
 #include <Math/ShapeletsModel2D.h>
 #include <Math/StatisticsFilter.h>
+#include <Math/ThreeVector.h>
 #include <Math/VectorConversion.h>
 #include <Math/VectorNorms.h>
