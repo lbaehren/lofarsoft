@@ -1,4 +1,7 @@
-/***************************************************************************
+/*-------------------------------------------------------------------------*
+ | $Id:: templates.h 391 2007-06-13 09:25:11Z baehren                    $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
  *   Copyright (C) 2004,2005                                               *
  *   Andreas Horneffer                                                     *
  *                                                                         *
@@ -18,8 +21,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: treetest.cc,v 1.3 2007/05/02 08:14:14 bahren Exp $ */
-
 /*!
   \file treetest.cc
 
@@ -35,10 +36,13 @@
 #include <iostream>
 #include <sstream>
 
-#include <lopes/LopesBase/StoredInputObject.h>
-#include <lopes/LopesBase/StoredMultiplyObject.h>
+#include <LopesLegacy/StoredInputObject.h>
+#include <LopesLegacy/StoredMultiplyObject.h>
 
 using namespace std;
+
+using CR::StoredInputObject;
+using CR::StoredMultiplyObject;
 
 StoredInputObject<Double> *inp1,*inp2;
 StoredInputObject<DComplex> *inp3;
@@ -51,7 +55,9 @@ StoredMultiplyObject<DComplex> *mult3, *mult4;
   \return status -- Status of the operation; returns <i>False</i> in case an
                     error was encountered.
 */
-Bool genTree(){
+int genTree()
+{
+  int nofFailedTests (0);
 
   try {
     inp1 = new StoredInputObject<Double>;
@@ -77,65 +83,61 @@ Bool genTree(){
     mult4->setParent(0,mult1);
     mult4->setParent(1,mult2);
     mult4->setParent(2,mult3);
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
-    return False;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
   };
   
-  return True;
+  return nofFailedTests;
 };
 
-int main (int argc, const char** argv) {
+// ------------------------------------------------------------------------------
 
-    cout << "treetest started" << endl;
+int main (int argc, const char** argv)
+{
+  int nofFailedTests (0);
+  bool status (true);
 
-    try {
-	Bool erg;
-	erg = genTree();
-	cout << "tree generated:" << erg << endl;
-
-	Vector<Double> vec(10);
-	Int i;
-	for (i=0;i<10;i++){ vec(i) = i+1 ;};
-	erg = inp1->put(&vec);
-	cout << "data into 1: " << erg << endl;
-	for (i=0;i<10;i++){ vec(i) = 10. ;};
-	erg = inp2->put(&vec);
-	cout << "data into 2: " << erg << endl;
-
-	Vector<DComplex> Dvec(10);
-	for (i=0;i<10;i++){ Dvec(i) = 10. ;};
-	erg = inp3->put(&Dvec);
-	cout << "data into 3: " << erg << endl;
-
-
-	erg = mult1->get(&vec);
-	cout << "mult1: " << erg << "," << vec << endl;
-	erg = mult2->get(&vec);
-	cout << "mult2: " << erg << "," << vec << endl;
-
-
-	erg = mult3->get(&Dvec);
-	cout << "mult3: " << erg << "," << Dvec << endl;
-	erg = inp3->get(&Dvec);
-	cout << "input3: " << erg << "," << Dvec << endl;
-
-	erg = mult4->get(&Dvec);
-	cout << "mult4: " << erg << "," << Dvec << endl;
-	erg = inp3->get(&Dvec);
-	cout << "input3: " << erg << "," << Dvec << endl;
-
-
-	for (i=0;i<10;i++){ vec(i) = i+1. ;};
-	erg = inp1->put(&vec);
-	erg = mult4->get(&Dvec);
-	cout << "mult4: " << erg << "," << Dvec << endl;
-
- 
-    } catch (AipsError x) {
-	cerr << x.getMesg() << endl;
-	return 1;
-    };
-
-    return 0;
+  nofFailedTests += genTree();
+  
+  if (nofFailedTests == 0) {
+    Vector<Double> vec(10);
+    int i;
+    for (i=0;i<10;i++){ vec(i) = i+1 ;};
+    status = inp1->put(&vec);
+    cout << "data into 1: " << status << endl;
+    for (i=0;i<10;i++){ vec(i) = 10. ;};
+    status = inp2->put(&vec);
+    cout << "data into 2: " << status << endl;
+    
+    Vector<DComplex> Dvec(10);
+    for (i=0;i<10;i++){ Dvec(i) = 10. ;};
+    status = inp3->put(&Dvec);
+    cout << "data into 3: " << status << endl;
+    
+    
+    status = mult1->get(&vec);
+    cout << "mult1: " << status << "," << vec << endl;
+    status = mult2->get(&vec);
+    cout << "mult2: " << status << "," << vec << endl;
+    
+    
+    status = mult3->get(&Dvec);
+    cout << "mult3: " << status << "," << Dvec << endl;
+    status = inp3->get(&Dvec);
+    cout << "input3: " << status << "," << Dvec << endl;
+    
+    status = mult4->get(&Dvec);
+    cout << "mult4: " << status << "," << Dvec << endl;
+    status = inp3->get(&Dvec);
+    cout << "input3: " << status << "," << Dvec << endl;
+    
+    
+    for (i=0;i<10;i++){ vec(i) = i+1. ;};
+    status = inp1->put(&vec);
+    status = mult4->get(&Dvec);
+    cout << "mult4: " << status << "," << Dvec << endl;
+   }
+  
+  return 0;
 }

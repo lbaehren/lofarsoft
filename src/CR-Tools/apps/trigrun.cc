@@ -1,4 +1,7 @@
-/***************************************************************************
+/*-------------------------------------------------------------------------*
+ | $Id:: templates.h 391 2007-06-13 09:25:11Z baehren                    $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
  *   Copyright (C) 2005                                                    *
  *   Sven Lafebre ()                                                       *
  *                                                                         *
@@ -18,8 +21,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: trigrun.cc,v 1.7 2006/10/31 21:07:59 bahren Exp $ */
-
 /*!
   \file trigrun.cc
 
@@ -32,8 +33,9 @@
   <h3>Prerequisite</h3>
   
   <ul type="square">
-    <li>[LOPES-Tools] LopesEvent
-    <li>[LOPES-Tools] PeakSearch
+    <li>LopesEvent
+    <li>PeakSearch
+    <li>DataReader
   </ul>
 */
 
@@ -41,9 +43,9 @@
 #include <sstream>
 #include <popt.h>
 
-#include <lopes/IO/DataReader.h>
-#include <lopes/Data/LopesEvent.h>
-#include <lopes/Analysis/PeakSearch.h>
+#include <IO/DataReader.h>
+#include <Data/LopesEvent.h>
+#include <Analysis/PeakSearch.h>
 
 using namespace std;
 
@@ -101,9 +103,9 @@ int main (int argc, const char** argv)
       cout << args[file] << endl;
       
       try {
-	LopesEvent l(args[file]);
-	LOPES::PeakSearch s(arg_blocksize, arg_threshold, arg_delay);
-	LOPES::PeakList p[l.length()];
+	CR::LopesEvent l(args[file]);
+	CR::PeakSearch s(arg_blocksize, arg_threshold, arg_delay);
+	CR::PeakList p[l.length()];
 
 	for (uint i = 0; i < l.length(); i ++) {
 	  p[i] = s.findPeaks(l[i]);

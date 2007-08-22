@@ -44,9 +44,10 @@ endif (NOT CR_VERBOSE_CONFIGURE)
 ## -----------------------------------------------------------------------------
 ## Subdirectories
 
-subdirs (implement)
-
-#ADD_SUBDIRECTORY (implement)
+subdirs (
+  implement
+  apps
+  )
 
 if (CR_BUILD_TESTS)
   subdirs (test)
@@ -122,6 +123,10 @@ if (cr_cmake)
   if (NOT HAVE_PGPLOT)
     include (${cr_cmake}/FindPGPLOT.cmake)
   endif (NOT HAVE_PGPLOT)
+  ## -- popt -----------------
+  if (NOT HAVE_POPT)
+    include (${cr_cmake}/FindPOPT.cmake)
+  endif (NOT HAVE_POPT)
   ## -- ROOT -----------------
   if (NOT HAVE_ROOT)
     include (${cr_cmake}/FindROOT.cmake)
@@ -147,6 +152,7 @@ find_path (DAL_INCLUDES dal.h lopesevent.h
 
 include_directories (
   ${CR_SOURCE_DIR}/implement
+  ${CR_SOURCE_DIR}/apps
   ${CR_SOURCE_DIR}/test
   ${DAL_INCLUDES}
   ${BLITZ_INCLUDES}

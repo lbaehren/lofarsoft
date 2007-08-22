@@ -23,7 +23,7 @@ cmake_minimum_required (VERSION 2.4)
 ## User defined build/install options
 
 option (casacore_BUILD_TESTS "Build the test programs?" 0)
-option (casacore_ENABLE_TESTING "Build the test programs?" 1)
+option (casacore_ENABLE_TESTING "Enable running test programs?" 0)
 
 ## Handle option: testing mode on/off
 

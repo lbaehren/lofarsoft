@@ -34,7 +34,7 @@ DataReader* DataReaderTools::assignFromRecord (GlishRecord &rec,
 {
   bool status;
   uint nofMissingInputs (0);
-  DataReader *dr = new DataReader;
+  CR::DataReader *dr = new CR::DataReader;
 
   // -- parse the record ---------------------------------------------
 
@@ -133,10 +133,10 @@ DataReader* DataReaderTools::assignFromRecord (GlishRecord &rec,
   } else {
     if (datatype == "LopesEvent") {
       try {
-	LopesEvent *le = new LopesEvent (basefile,
-					 blocksize,
-					 adc2voltage,
-					 fft2calfft);
+	CR::LopesEvent *le = new CR::LopesEvent (basefile,
+						 blocksize,
+						 adc2voltage,
+						 fft2calfft);
 	dr = le;
       } catch (AipsError x) {
 	cerr << "[DataReaderTools::assignFromRecord] LopesEvent: "

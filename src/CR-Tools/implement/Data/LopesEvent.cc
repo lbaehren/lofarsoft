@@ -1,4 +1,7 @@
-/***************************************************************************
+/*-------------------------------------------------------------------------*
+ | $Id:: templates.h 391 2007-06-13 09:25:11Z baehren                    $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
  *   Copyright (C) 2005 by Sven Lafebre                                    *
  *   s.lafebre@astro.ru.nl                                                 *
  *                                                                         *
@@ -22,14 +25,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/*
-  WARNING:
-  Please mind that this class is only tested to work on Intel/lillte-endian machines.
-  Problems due to reading/writing of memory blocks of non standard size could occur.
-*/
-
-/* $Id: LopesEvent.cc,v 1.18 2006/12/18 15:26:36 bahren Exp $ */
-
 #include <sstream>
 #include <fstream>
 #include <iostream>
@@ -41,214 +36,216 @@
 
 using namespace std;
 
-// ==============================================================================
-//
-//  Construction
-//
-// ==============================================================================
-
-// ------------------------------------------------------------------- LopesEvent
-
-LopesEvent::LopesEvent()
-  : DataReader (1)
-{
-  /*
-    Assign some value to the internal variables, at least to indicate they 
-    haven't been assigned a proper value yet
-  */
-  init ();
-
-  /*
-    Initialize the parameters required by the DataReader
-  */
-  setStreams ();
-}
-
-// ------------------------------------------------------------------- LopesEvent
-
-LopesEvent::LopesEvent (const char* name)
-  : DataReader (1)
-{
-  init (name);
-}
-
-// ------------------------------------------------------------------- LopesEvent
-
-LopesEvent::LopesEvent (string const &name,
-			uint const &blocksize)
-  : DataReader (blocksize)
-{
-  init (name.c_str());
-}
-
-// ------------------------------------------------------------------- LopesEvent
-
-LopesEvent::LopesEvent (string const &name,
-			uint const &blocksize,
-			Vector<Double> const &adc2voltage,
-			Matrix<DComplex> const &fft2calfft)
-  : DataReader (blocksize,
-		adc2voltage,
-		fft2calfft)
-{
-  init (name.c_str());
-}
-
-// ==============================================================================
-//
-//  Destruction
-//
-// ==============================================================================
-
-LopesEvent::~LopesEvent()
-{
-  if (length_ > 0) {
-    for (uint i = 0; i < length_; i ++) {
-      delete data_[i];
+namespace CR {  //  Namespace CR -- begin
+  
+  // ============================================================================
+  //
+  //  Construction
+  //
+  // ============================================================================
+  
+  // ----------------------------------------------------------------- LopesEvent
+  
+  LopesEvent::LopesEvent()
+    : DataReader (1)
+  {
+    /*
+      Assign some value to the internal variables, at least to indicate they 
+      haven't been assigned a proper value yet
+    */
+    init ();
+    
+    /*
+      Initialize the parameters required by the DataReader
+    */
+    setStreams ();
+  }
+  
+  // ----------------------------------------------------------------- LopesEvent
+  
+  LopesEvent::LopesEvent (const char* name)
+    : DataReader (1)
+  {
+    init (name);
+  }
+  
+  // ----------------------------------------------------------------- LopesEvent
+  
+  LopesEvent::LopesEvent (string const &name,
+			  uint const &blocksize)
+    : DataReader (blocksize)
+  {
+    init (name.c_str());
+  }
+  
+  // ----------------------------------------------------------------- LopesEvent
+  
+  LopesEvent::LopesEvent (string const &name,
+			  uint const &blocksize,
+			  Vector<Double> const &adc2voltage,
+			  Matrix<DComplex> const &fft2calfft)
+    : DataReader (blocksize,
+		  adc2voltage,
+		  fft2calfft)
+  {
+    init (name.c_str());
+  }
+  
+  // ============================================================================
+  //
+  //  Destruction
+  //
+  // ============================================================================
+  
+  LopesEvent::~LopesEvent()
+  {
+    if (length_ > 0) {
+      for (uint i = 0; i < length_; i ++) {
+	delete data_[i];
+      }
+    }
+    
+    delete [] data_;
+  }
+  
+  // ============================================================================
+  //
+  //  Initialization of internal parameters
+  //
+  // ============================================================================
+  
+  // ----------------------------------------------------------------------- init
+  
+  void LopesEvent::init ()
+  {
+    length_ = 1;
+    
+    data_    = new Data*[length_];
+    data_[0] = new Data(1,1);
+    
+    filename_    = "unset";
+    version_     = 0;
+    timeJDR_     = 0;
+    timeTL_      = 0;
+    timeLTL_     = 0;
+    observatory_ = 0;
+    presync_     = 0;
+    dataType_    = 0;
+    evType_      = Unspecified;
+    
+    DataReader::setNyquistZone (2);
+  }
+  
+  // ----------------------------------------------------------------------- init
+  
+  void LopesEvent::init (const char* name)
+  {
+    fstream handle;
+    
+    try {
+      int handle_beg (0);
+      int handle_end (0);
+      
+      openEvent(name, &handle, &handle_beg, &handle_end);
+      readHeaderHere(&handle);
+      readContentsHere(&handle, &handle_beg, &handle_end);
+      handle.close();
+      // DataReader data stream settings
+      setStreams ();
+    } catch (string s) {
+      cerr << s << endl;
+    }
+    
+    DataReader::setNyquistZone (2);
+  }
+  
+  // ============================================================================
+  //
+  //  Initialize access to event file
+  //
+  // ============================================================================
+  
+  // ---------------------------------------------------------------- createEvent
+  
+  void LopesEvent::createEvent(const char* name,
+			       fstream* handle) {
+    // Create event on disk write only
+    handle->open(name, ios::out | ios::binary);
+    if (! *handle || *handle == NULL) {
+      cerr << "Could not open file " << name << " for writing." << endl
+	   << "Check permissions" <<endl;
     }
   }
-
-  delete [] data_;
-}
-
-// ==============================================================================
-//
-//  Initialization of internal parameters
-//
-// ==============================================================================
-
-// ------------------------------------------------------------------------- init
-
-void LopesEvent::init ()
-{
-  length_ = 1;
-
-  data_    = new Data*[length_];
-  data_[0] = new Data(1,1);
-
-  filename_    = "unset";
-  version_     = 0;
-  timeJDR_     = 0;
-  timeTL_      = 0;
-  timeLTL_     = 0;
-  observatory_ = 0;
-  presync_     = 0;
-  dataType_    = 0;
-  evType_      = Unspecified;
-
-  DataReader::setNyquistZone (2);
-}
-
-// ------------------------------------------------------------------------- init
-
-void LopesEvent::init (const char* name)
-{
-  fstream handle;
   
-  try {
-    int handle_beg (0);
-    int handle_end (0);
+  // ------------------------------------------------------------------ openEvent
+  
+  void LopesEvent::openEvent(const char* name,
+			     fstream* handle,
+			     int* handle_beg,
+			     int* handle_end)
+  {
+    // Open event read & write
+    handle->open(name, ios::in | ios::out | ios::binary);
+    if (! *handle || *handle == NULL) {
+      cerr << "Could not open file '" << name << "'." << endl;
+      throw string("No such file.");
+    }
+    filename_ = (string)name;
     
-    openEvent(name, &handle, &handle_beg, &handle_end);
-    readHeaderHere(&handle);
-    readContentsHere(&handle, &handle_beg, &handle_end);
-    handle.close();
-    // DataReader data stream settings
-    setStreams ();
-  } catch (string s) {
-    cerr << s << endl;
-  }
-
-  DataReader::setNyquistZone (2);
-}
-
-// ==============================================================================
-//
-//  Initialize access to event file
-//
-// ==============================================================================
-
-// ------------------------------------------------------------------ createEvent
-
-void LopesEvent::createEvent(const char* name,
-			     fstream* handle) {
-  // Create event on disk write only
-  handle->open(name, ios::out | ios::binary);
-  if (! *handle || *handle == NULL) {
-    cerr << "Could not open file " << name << " for writing." << endl
-	 << "Check permissions" <<endl;
-  }
-}
-
-// -------------------------------------------------------------------- openEvent
-
-void LopesEvent::openEvent(const char* name,
-			   fstream* handle,
-			   int* handle_beg,
-			   int* handle_end)
-{
-  // Open event read & write
-  handle->open(name, ios::in | ios::out | ios::binary);
-  if (! *handle || *handle == NULL) {
-    cerr << "Could not open file '" << name << "'." << endl;
-    throw string("No such file.");
-  }
-  filename_ = (string)name;
-  
-  uint bytes;
-  // Read supposed file size
-  handle->read((char*)&bytes, sizeof(uint));
-  
-  // Get real file size
-  handle->seekg(0, ios::end);
-  *handle_end = handle->tellg();
-  handle->seekg(0, ios::beg);
-  *handle_beg = handle->tellg();
-
-  int f_size = *handle_end - *handle_beg;
-  if (f_size < 48) {
-    cerr << "  ERROR: This file is too small for a Lopes event file." << endl;
-    throw string("File too small.");
-  }
-
-  // Check if file size is correct
-  if ((int)bytes != f_size) {
-    cerr << "  WARNING: File size does not match." << endl;
-  }
-
-  // Skip first int (we have this already)
-  handle->read((char*)&bytes, sizeof(uint));
-
-  // Initialize data set length
-  length_ = 0;
-}
-
-
-// ==============================================================================
-//
-//  Read operations
-//
-// ==============================================================================
-
-// ------------------------------------------------------------------- readHeader
-
-void LopesEvent::readHeader(const char* name)
-{
-  fstream handle;
-  
-  try {
-    int handle_beg, handle_end;
-
-    openEvent(name, &handle, &handle_beg, &handle_end);
-    readHeaderHere(&handle);
-    handle.close();
-  } catch (string s) {
-    cerr << s << endl;
+    uint bytes;
+    // Read supposed file size
+    handle->read((char*)&bytes, sizeof(uint));
+    
+    // Get real file size
+    handle->seekg(0, ios::end);
+    *handle_end = handle->tellg();
+    handle->seekg(0, ios::beg);
+    *handle_beg = handle->tellg();
+    
+    int f_size = *handle_end - *handle_beg;
+    if (f_size < 48) {
+      cerr << "  ERROR: This file is too small for a Lopes event file." << endl;
+      throw string("File too small.");
+    }
+    
+    // Check if file size is correct
+    if ((int)bytes != f_size) {
+      cerr << "  WARNING: File size does not match." << endl;
+    }
+    
+    // Skip first int (we have this already)
+    handle->read((char*)&bytes, sizeof(uint));
+    
+    // Initialize data set length
+    length_ = 0;
   }
   
-}
-
-// --------------------------------------------------------------- readHeaderHere
+  
+  // ============================================================================
+  //
+  //  Read operations
+  //
+  // ============================================================================
+  
+  // ----------------------------------------------------------------- readHeader
+  
+  void LopesEvent::readHeader(const char* name)
+  {
+    fstream handle;
+    
+    try {
+      int handle_beg, handle_end;
+      
+      openEvent(name, &handle, &handle_beg, &handle_end);
+      readHeaderHere(&handle);
+      handle.close();
+    } catch (string s) {
+      cerr << s << endl;
+    }
+    
+  }
+  
+  // ------------------------------------------------------------- readHeaderHere
 
 void LopesEvent::readHeaderHere(fstream* handle)
 {  
@@ -626,3 +623,4 @@ Matrix<Double> LopesEvent::fx ()
   return fx;
 }
 
+}  //  Namespace CR -- end

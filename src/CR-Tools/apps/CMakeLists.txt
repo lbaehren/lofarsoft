@@ -3,12 +3,17 @@
 ## $Id:: CMakeLists.txt 575 2007-08-17 14:04:03Z baehren                        $
 ##-------------------------------------------------------------------------------
 
-# treetest  GLISH CFITSIO WCSLIB
+## treetest  GLISH CFITSIO WCSLIB
+
+add_executable (treetest treetest.cc)
+target_link_libraries (treetest cr)
 
 ## trigrun   GLISH POPT LAPACK F77 CFITSIO WCSLIB
 
-add_executable (trigrun trigrun.cc)
-target_link_libraries (trigrun cr)
+if (HAVE_POPT)
+  add_executable (trigrun trigrun.cc)
+  target_link_libraries (trigrun cr ${POPT_LIBRARIES})
+endif (HAVE_POPT)
 
 ## ------------------------------------------------------------------------------
 ## Glish client programs
