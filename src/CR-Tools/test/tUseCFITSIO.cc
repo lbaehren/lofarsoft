@@ -25,7 +25,7 @@
 #include <string>
 #include <cmath>
 
-#include <fitsio.h>
+#include <cfitsio/fitsio.h>
 
 /*!
   \file tUseCFITSIO.cc
@@ -59,8 +59,8 @@ int main ()
   long fpixel (1);
   float pixels[nFreq][nTime];  // array shape: [Freq,Time]
 
-  std::cout << " - naxis     = " << naxis << std::endl;
-  std::cout << " - naxes     = " << naxes[0] << "," << naxes[1] << std::endl;
+  std::cout << " - naxis     = " << naxis     << std::endl;
+  std::cout << " - naxes     = " << naxes[0]  << "," << naxes[1] << std::endl;
   std::cout << " - nelements = " << nelements << std::endl;
   
   // fill the pixel array
@@ -74,6 +74,8 @@ int main ()
     std::cerr << "Error during filling of pixel array. " << message << std::endl;
     nofFailedTests++;
   }
+
+  // --------------------------------------------------------------------- Test 1
 
   std::cout << "[1] Create new file with primary array image" << std::endl;
   try {
@@ -90,6 +92,8 @@ int main ()
     nofFailedTests++;
   }
   
+  // --------------------------------------------------------------------- Test 2
+
   std::cout << "[2] Write the array of integers to the image" << std::endl;
   try {
     // Create a new file
@@ -107,10 +111,14 @@ int main ()
     nofFailedTests++;
   }
 
+  // --------------------------------------------------------------------- Test 3
+
   std::cout << "[3] Write the array of integers to the image" << std::endl;
   try {
     fitsfile *fptr;
     long exposure;
+    char *ctype[] = {"FREQ", "TIME"};
+    char *cunit[] = {"Hz", "sec"};
     short array[200][300];
     
     naxes[0]  = 300;
@@ -119,10 +127,11 @@ int main ()
     status = 0;
     fpixel = 1;
 
-    /* create new file */
+    std::cout << " -- Create new file on disk" << std::endl;
     fits_create_file(&fptr, "!testimage3.fits", &status);
     
-    /* Create the primary array image (16-bit short integer pixels */
+    std::cout << " -- Create the primary array image (16-bit short integer pixels"
+	      << std::endl;
     fits_create_img(fptr, SHORT_IMG, naxis, naxes, &status);
     
     /* Write a keyword; must pass the ADDRESS of the value */
@@ -130,14 +139,23 @@ int main ()
     fits_update_key(fptr,TLONG,"EXPOSURE",&exposure,"Total Exposure Time", &status);
     
     /* Initialize the values in the image with a linear ramp function */
-    for (nFreq = 0; nFreq < naxes[1]; nFreq++)
-      for (nTime = 0; nTime < naxes[0]; nTime++)
+    for (nFreq=0; nFreq < naxes[1]; nFreq++)
+      for (nTime=0; nTime < naxes[0]; nTime++)
 	array[nFreq][nTime] = nTime + nFreq;
     
-    /* Write the array of integers to the image */
+    std::cout << " -- Write the array of integers to the image" << std::endl;
     fits_write_img(fptr, TSHORT, fpixel, nelements, array[0], &status);
     
-    // close the file
+    std::cout << " -- Set the keywords for the coordinate type" << std::endl;
+    ffukys (fptr, "CTYPE1", ctype[0], "Frequency axis", &status);
+    ffukys (fptr, "CTYPE2", ctype[1], "Time axis", &status);
+
+    std::cout << " -- Set the keywords for the units on the coordinate axes"
+	      << std::endl;
+    ffukys (fptr, "CUNIT1", cunit[0], "Frequency axis units", &status);
+    ffukys (fptr, "CUNIT2", cunit[1], "Time axis units", &status);
+    
+    std::cout << " -- Close the disk file" << std::endl;
     fits_close_file(fptr, &status);
     
     // print out any error messages

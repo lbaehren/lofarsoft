@@ -6,56 +6,55 @@
 ##-------------------------------------------------------------------------------
 ## Clients which need libglish only
 
-# antennaflagger  GLISH LAPACK F77 GLISH CFITSIO WCSLIB
-# glempf          GLISH CFITSIO WCSLIB
-# glsender        GLISH CFITSIO WCSLIB
-# lopestools      GLISH CFITSIO WCSLIB LAPACK F77
-# moviemaker      GLISH
-# ppsync          GLISH
-# readdat         WCSLIB LAPACK F77 GLISH CFITSIO
-# skymapper       WCSLIB LAPACK F77 GLISH CFITSIO
-# timclient       GLISH
-# timebeam        WCSLIB LAPACK F77 GLISH CFITSIO
-# CalTableClient  WCSLIB LAPACK F77 GLISH CFITSIO
+# antennaflagger    GLISH LAPACK F77 GLISH CFITSIO WCSLIB
+# antennagaincurve  GLISH LAPACK F77 CFITSIO WCSLIB
+# ccData2Gaincurve  GLISH LAPACK F77 CFITSIO WCSLIB
+# dstb              LAPACK F77 GLISH CFITSIO WCSLIB
+# eventsaveclient   GLISH CFITSIO WCSLIB
+# fits2wf           GLISH CFITSIO WCSLIB
+# glempf            GLISH CFITSIO WCSLIB
+# glsender          GLISH CFITSIO WCSLIB
+# lopestools        GLISH CFITSIO WCSLIB LAPACK F77
+# moviemaker        GLISH
+# ppsync            GLISH
+# readdat           WCSLIB LAPACK F77 GLISH CFITSIO
+# skymapper         WCSLIB LAPACK F77 GLISH CFITSIO
+# timclient         GLISH
+# timebeam          WCSLIB LAPACK F77 GLISH CFITSIO
+# CalTableClient    WCSLIB LAPACK F77 GLISH CFITSIO
 
-add_executable (antennaflagger antennaflagger.cc)
-target_link_libraries (antennaflagger cr ${GLISH_LIBRARIES})
+set (glish_clients
+  antennaflagger
+  antennagaincurve
+  ccData2Gaincurve
+  dstb
+  eventsaveclient
+  fits2wf
+  glempf
+  glsender
+  lopestools
+  moviemaker
+  ppsync
+  readdat
+  skymapper
+  timclient
+  timebeam
+  CalTableClient
+)
 
-add_executable (glempf glempf.cc)
-target_link_libraries (glempf cr ${GLISH_LIBRARIES})
+foreach (client ${glish_clients})
+  ## compiler instructions
+  add_executable (${client} ${client}.cc)
+  ## linker instructions
+  target_link_libraries (${client} cr ${GLISH_LIBRARIES})
+endforeach (client)
 
-add_executable (glsender glsender.cc)
-target_link_libraries (glsender cr ${GLISH_LIBRARIES})
-
-add_executable (lopestools lopestools.cc)
-target_link_libraries (lopestools cr ${GLISH_LIBRARIES})
-
-add_executable (moviemaker moviemaker.cc)
-target_link_libraries (moviemaker cr ${GLISH_LIBRARIES})
-
-add_executable (ppsync ppsync.cc)
-target_link_libraries (ppsync cr ${GLISH_LIBRARIES})
-
-add_executable (readdat readdat.cc)
-target_link_libraries (readdat cr ${GLISH_LIBRARIES})
-
-add_executable (skymapper skymapper.cc)
-target_link_libraries (skymapper cr ${GLISH_LIBRARIES})
-
-add_executable (timclient timclient.cc)
-target_link_libraries (timclient cr ${GLISH_LIBRARIES})
-
-add_executable (timebeam timebeam.cc)
-target_link_libraries (timebeam cr ${GLISH_LIBRARIES})
-
-add_executable (CalTableClient CalTableClient.cc)
-target_link_libraries (CalTableClient cr ${GLISH_LIBRARIES})
-  
 ##-------------------------------------------------------------------------------
 ## Clients which need additional external packages (e.g. for plotting)
 
 # CGaccessClient  PGPLOT X11 WCSLIB LAPACK F77 GLISH CFITSIO
 # CGuiPipeClient  PGPLOT X11 WCSLIB LAPACK F77 GLISH CFITSIO
+# dynamicspectrum   WCSLIB LAPACK F77 GLISH CFITSIO
 
 add_executable (CGaccessClient CGaccessClient.cc)
 target_link_libraries (CGaccessClient
@@ -71,5 +70,12 @@ target_link_libraries (CGuiPipeClient
   ${GLISH_LIBRARIES}
   ${PGPLOT_LIBRARIES}
   ${X11_LIBRARIES}
+  )
+
+add_executable (dynamicspectrum dynamicspectrum.cc)
+target_link_libraries (dynamicspectrum
+  cr
+  ${GLISH_LIBRARIES}
+  ${CFITSIO_LIBRARIES}
   )
 

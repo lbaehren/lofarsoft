@@ -18,7 +18,6 @@ set (include_locations
   /usr/include
   /usr/local/include
   /sw/include
-  /opt/casa/local/include
 )
 
 set (lib_locations
@@ -28,7 +27,6 @@ set (lib_locations
   /usr/lib
   /usr/local/lib
   /sw/lib
-  /opt/casa/local/lib
 )
 
 ## -----------------------------------------------------------------------------

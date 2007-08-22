@@ -82,7 +82,8 @@ endif (CPGPLOT_LIBRARY)
 find_library (PGPLOT_libXmPgplot
   NAMES XmPgplot
   PATHS ${lib_locations}
-  PATH_SUFFIXES pgplot casa/local/lib
+  PATH_SUFFIXES pgplot
+  NO_DEFAULT_PATH
   )
 
 if (PGPLOT_libXmPgplot)

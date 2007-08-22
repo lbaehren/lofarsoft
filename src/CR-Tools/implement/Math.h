@@ -65,6 +65,7 @@
 #include <Math/Shapelets2D.h>
 #include <Math/ShapeletsModel1D.h>
 #include <Math/ShapeletsModel2D.h>
+#include <Math/Statistics.h>
 #include <Math/StatisticsFilter.h>
 #include <Math/ThreeVector.h>
 #include <Math/VectorConversion.h>
