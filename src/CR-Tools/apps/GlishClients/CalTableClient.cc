@@ -20,7 +20,9 @@
 
 /* $Id: CalTableClient.cc,v 1.4 2006/11/08 17:58:44 bahren Exp $*/
 
-#include <CalTableClient.h>
+#include <GlishClients/CalTableClient.h>
+
+using CR::CalTableWriter;
 
 CalTableWriter table;
 

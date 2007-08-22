@@ -24,12 +24,12 @@
 #define _CALTABLECLIENT_H_
 
 // CallTables includes
-#include <lopes/Calibration/CalTableWriter.h>
-#include <lopes/Calibration/CalTableReader.h>
-#include <lopes/Calibration/CalTableCreator.h>
+#include <ApplicationSupport/Glish.h>
+#include <Calibration/CalTableWriter.h>
+#include <Calibration/CalTableReader.h>
+#include <Calibration/CalTableCreator.h>
 
 // Glish includes
-#include <tasking/Glish.h>
 #include <casa/aips.h>
 #include <casa/string.h>
 #include <casa/Arrays.h>
