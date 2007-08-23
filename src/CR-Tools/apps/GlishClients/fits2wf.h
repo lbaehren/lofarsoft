@@ -48,8 +48,8 @@
 #include <wcslib/prj.h>
 
 // LOPES-Tools includes
-#include <lopes/Utilities/StringTools.h>
-#include <lopes/Math/MathFFT.h>
+#include <Utilities/StringTools.h>
+#include <Math.h>
 
 #include <casa/namespace.h>
 

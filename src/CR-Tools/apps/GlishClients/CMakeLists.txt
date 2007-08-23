@@ -10,6 +10,7 @@
 # antennagaincurve  GLISH LAPACK F77 CFITSIO WCSLIB
 # ccData2Gaincurve  GLISH LAPACK F77 CFITSIO WCSLIB
 # dstb              LAPACK F77 GLISH CFITSIO WCSLIB
+# dynamicspectrum   WCSLIB LAPACK F77 GLISH CFITSIO
 # eventsaveclient   GLISH CFITSIO WCSLIB
 # fits2wf           GLISH CFITSIO WCSLIB
 # glempf            GLISH CFITSIO WCSLIB
@@ -28,6 +29,7 @@ set (glish_clients
   antennagaincurve
   ccData2Gaincurve
   dstb
+  dynamicspectrum
   eventsaveclient
   fits2wf
   glempf
@@ -54,7 +56,6 @@ endforeach (client)
 
 # CGaccessClient  PGPLOT X11 WCSLIB LAPACK F77 GLISH CFITSIO
 # CGuiPipeClient  PGPLOT X11 WCSLIB LAPACK F77 GLISH CFITSIO
-# dynamicspectrum   WCSLIB LAPACK F77 GLISH CFITSIO
 
 add_executable (CGaccessClient CGaccessClient.cc)
 target_link_libraries (CGaccessClient
@@ -71,11 +72,3 @@ target_link_libraries (CGuiPipeClient
   ${PGPLOT_LIBRARIES}
   ${X11_LIBRARIES}
   )
-
-add_executable (dynamicspectrum dynamicspectrum.cc)
-target_link_libraries (dynamicspectrum
-  cr
-  ${GLISH_LIBRARIES}
-  ${CFITSIO_LIBRARIES}
-  )
-

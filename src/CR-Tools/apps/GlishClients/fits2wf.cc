@@ -22,7 +22,7 @@
 
 //------------------------------------------------------------
 // INCLUDE
-#include <fits2wf.h>
+#include "fits2wf.h"
 
 //------------------------------------------------------------
 // DEFINE
@@ -107,7 +107,7 @@ cout << "[fits2wf] reading FITS header..." << endl;
   // open file
   fitsfile *hfptr; // pointer to the FITS file, defined in fitsio.h
   String ending=".fits";
-  char *filename = LOPES::string2char(FITSfilename+ending); // name of existing FITS file
+  char *filename = CR::string2char(FITSfilename+ending); // name of existing FITS file
   int status(0);
 
 try {
@@ -196,7 +196,7 @@ cout << "[fits2wf] looping over blocks... " << "\n" << endl;
 
   // opens binary output file for timebeam
     ending=".bin";
-  filename = LOPES::string2char(FITSfilename+ending); // name of existing FITS file
+  filename = CR::string2char(FITSfilename+ending); // name of existing FITS file
   
 cout << "[fits2wf] opens & creates binary file: " << filename << endl;
 
@@ -212,14 +212,14 @@ if (fp == NULL) { // error handling
 try {
     
     ending="-abs.fits";
-    filename = LOPES::string2char(FITSfilename+ending); // name of existing FITS file
+    filename = CR::string2char(FITSfilename+ending); // name of existing FITS file
     
 cout << "[fits2wf] opens fits file with absolute values: " << filename << endl;
 
     if ( fits_open_file(&absfptr, filename, READONLY, &status) )
       fits_report_error(stderr, status); // print error report
     ending="-arg.fits";
-    filename = LOPES::string2char(FITSfilename+ending); // name of existing FITS file
+    filename = CR::string2char(FITSfilename+ending); // name of existing FITS file
     
 cout << "[fits2wf] opens fits file with phase values: " << filename << "\n" << endl;
 
@@ -319,7 +319,7 @@ hlp:=array(0.,shape(cfitsary)[1],shape(cfitsary)[2]); for (i in 1:shape(cfitsary
 //#    Vector<Float> timeblock(tvecshape);
       
       try {
-	timeblock = LOPES::FFT2Fx<Double,DComplex>(freqblock,timelen,True,False);
+	timeblock = CR::FFT2Fx<Double,DComplex>(freqblock,timelen,True,False);
       } catch (AipsError x) {
 	cerr << "[fits2wf@invFFT] " << x.getMesg() << "\n" << endl;
 	timeblock = 0;

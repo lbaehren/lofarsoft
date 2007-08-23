@@ -35,6 +35,7 @@ set (lib_locations
 find_path (WCSLIB_INCLUDES wcs.h
   PATHS ${include_locations}
   PATH_SUFFIXES wcslib
+  NO_DEFAULT_PATH
   )
 
 ## correct the include path
@@ -50,6 +51,7 @@ endif (WCSLIB_INCLUDES)
 find_library (WCSLIB_LIBRARIES wcs
   PATHS ${lib_locations}
   PATH_SUFFIXES darwin/lib linux_gnu/lib stable/linux_gnu/lib
+  NO_DEFAULT_PATH
   )
 
 ## -----------------------------------------------------------------------------

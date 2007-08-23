@@ -47,7 +47,7 @@
 #include <scimath/Mathematics.h>
 #include <fits/FITS/BasicFITS.h>
 
-#include <cfitsio/fitsio.h>
+#include <fitsio.h>
 /* #include <wcslib/prj.h> */
 
 // Custom header files

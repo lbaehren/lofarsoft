@@ -25,7 +25,7 @@
 #include <string>
 #include <cmath>
 
-#include <cfitsio/fitsio.h>
+#include <fitsio.h>
 
 /*!
   \file tUseCFITSIO.cc

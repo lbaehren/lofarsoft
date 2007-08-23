@@ -56,6 +56,7 @@ FIND_LIBRARY (CFITSIO_libcfitsio
   NAMES cfitsio
   PATHS ${lib_locations}
   PATH_SUFFIXES cfitsio
+  NO_DEFAULT_PATH
 )
 
 if (CFITSIO_libcfitsio)
@@ -67,6 +68,7 @@ endif (CFITSIO_libcfitsio)
 FIND_LIBRARY (CFITSIO_libm
   NAMES m
   PATHS ${lib_locations}
+  NO_DEFAULT_PATH
 )
 
 if (CFITSIO_libm)
@@ -80,6 +82,7 @@ endif (CFITSIO_libm)
 FIND_LIBRARY (CFITSIO_libnsl
   NAMES nsl
   PATHS ${lib_locations}
+  NO_DEFAULT_PATH
   )
 
 if (CFITSIO_libnsl)
