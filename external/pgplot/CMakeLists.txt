@@ -251,9 +251,7 @@ add_library (cpgplot
 add_library (XmPgplot
   drivers/xmotif/XmPgplot.c
   )
-target_link_libraries (XmPgplot
-  pgplot
-  )
+target_link_libraries (XmPgplot pgplot)
 
 ## -- libtkpgplot --------------------------------
 
@@ -263,6 +261,12 @@ if (HAVE_TCL AND HAVE_TK)
   ## build the library
   add_library (tkpgplot ${tkpgplot_sources})
   target_link_libraries (tkpgplot pgplot)
+  ## installation (needs to be conditional)
+  install (TARGETS tkpgplot
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    )
 endif (HAVE_TCL AND HAVE_TK)
 
 ## ------------------------------------------------------------------------------
@@ -284,7 +288,7 @@ endif (prefix)
 
 ## installation of libraries
 
-install (TARGETS pgplot cpgplot XmPgplot tkpgplot
+install (TARGETS pgplot cpgplot XmPgplot
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
