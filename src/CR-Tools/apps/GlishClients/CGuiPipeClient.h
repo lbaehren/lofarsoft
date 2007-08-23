@@ -41,7 +41,7 @@
 /*!
   \file CGuiPipeClient.h
   
-  \ingroup Applications
+  \ingroup CR_Applications
 
   \brief Wrapper to call the C++-based pipeline.
   

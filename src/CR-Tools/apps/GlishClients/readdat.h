@@ -50,6 +50,8 @@
 
 /*!
   \file readdat.h
+  
+  \ingroup CR_Applications
 
   \brief C-programm Glish client to read a datafile
 

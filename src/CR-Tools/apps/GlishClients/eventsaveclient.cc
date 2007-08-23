@@ -2,6 +2,8 @@
 /*!
   \file eventsaveclient.cc
   
+  \ingroup CR_Applications
+
   \brief Save/Read a LOPES-event to/from disk
   
   \todo Implement the possibility to send a LOPES-event to the

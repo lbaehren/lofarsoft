@@ -24,7 +24,7 @@
 /*!
   \file treetest.cc
 
-  \ingroup Applications
+  \ingroup CR_Applications
 
   \brief A test program for setting up a processing tree
 

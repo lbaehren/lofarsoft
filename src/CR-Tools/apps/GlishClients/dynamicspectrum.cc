@@ -23,6 +23,8 @@
 
 /*!
   \file dynamicspectrum.cc
+
+  \ingroup CR_Applications
 */
 
 #include "dynamicspectrum.h"

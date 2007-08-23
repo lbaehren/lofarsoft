@@ -46,6 +46,8 @@ using CR::ProgressBar;
 
 /*!
   \file antennaflagger.h
+  
+  \ingroup CR_Applications
 
   \brief Flagging of antennae based on a set of statistics.
 

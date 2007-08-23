@@ -49,6 +49,8 @@ int main ()
 {
   int nofFailedTests (0);
   
+  // --------------------------------------------------------------------- Test 1
+  
   std::cout << "[1] Complex One-Dimensional DFT" << std::endl;
   try {
     int N (256);
@@ -63,6 +65,16 @@ int main ()
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
+  
+  // --------------------------------------------------------------------- Test 2
+  
+//   try {
+//   } catch (std::string message) {
+//     std::cerr << message << std::endl;
+//     nofFailedTests++;
+//   }
+  
+  // --------------------------------------------------------------------- Test 3
   
 //   try {
 //   } catch (std::string message) {

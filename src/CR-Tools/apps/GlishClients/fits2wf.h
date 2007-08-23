@@ -56,7 +56,7 @@
 /*!
   \file fits2wf.h
 
-  \ingroup Applications
+  \ingroup CR_Applications
 
   \brief Conversion of a beamed dynamic spectrum to a waveform
  */

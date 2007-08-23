@@ -23,7 +23,7 @@
 /*!
   \file timebeam.h
 
-  \ingroup Applications
+  \ingroup CR_Applications
   
   \brief Generation of a timebeam
   

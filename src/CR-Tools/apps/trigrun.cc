@@ -24,7 +24,7 @@
 /*!
   \file trigrun.cc
 
-  \ingroup Applications
+  \ingroup CR_Applications
 
   \brief Search for peaks in data
 

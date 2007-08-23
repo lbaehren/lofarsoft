@@ -42,6 +42,8 @@ using CR::ProgressBar;
 
 /*!
   \file antennagaincurve.h
+  
+  \ingroup CR_Applications
 
   \brief Extraction of antenna gain curves from data
 

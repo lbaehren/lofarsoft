@@ -43,6 +43,8 @@
 
 /*!
   \file ppsync.cc
+  
+  \ingroup CR_Applications
 
   \brief Synchronization of parallel port CLI.
 

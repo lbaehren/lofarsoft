@@ -2,6 +2,8 @@
 /*!
   \file eventsaveclient-socket.cc
   
+  \ingroup CR_Applications
+
   \brief send events to the KASCADE-xevb.
 
   <h3>Synopsis</h3>

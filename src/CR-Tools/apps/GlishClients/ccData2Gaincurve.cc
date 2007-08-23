@@ -64,6 +64,8 @@ using casa::String;
 /*!
   \file ccData2Gaincurve.cc
 
+  \ingroup CR_Applications
+
   \brief Extract antenna gaincurves from a set of cross-correlation datasets.
 
   \author Lars B&auml;hren

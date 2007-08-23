@@ -82,7 +82,7 @@ using casa::Vector;
 /*!
   \file dynamicspectrum.h
 
-  \ingroup Applications
+  \ingroup CR_Applications
 
   \brief A Glish CLI for the generation dynamic spectra.
 

@@ -40,7 +40,7 @@
 /*!
   \file CGaccessClient.h
   
-  \ingroup Applications
+  \ingroup CR_Applications
 
   \brief Wrapper to access the stages of the C++-based pipeline from Glish
   

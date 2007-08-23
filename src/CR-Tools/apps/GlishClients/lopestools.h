@@ -42,6 +42,8 @@
 
 /*!
   \file lopestools.h
+  
+  \ingroup CR_Applications
 
   \brief Various functions to use with the LOPES-glish software
 

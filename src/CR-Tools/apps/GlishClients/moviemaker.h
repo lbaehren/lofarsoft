@@ -48,6 +48,8 @@ using namespace std;
 
 /*!
   \file MovieMaker.h
+  
+  ingroup CR_Applications
 
   \brief Additional functionality for the moviefromimage tool.
 

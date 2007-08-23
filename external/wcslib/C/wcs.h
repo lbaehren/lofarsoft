@@ -1122,6 +1122,15 @@ struct pscard {
    char value[72];		/* Parameter value.                         */
 };
 
+/*
+ *   For C++ usage, because of a name space conflict with the wtbarr typedef
+ *   defined in CFITSIO header fitsio.h, the wtbarr struct is renamed to
+ *   wtbarr_s by preprocessor macro substitution with scope limited to wcs.h
+ *   itself.
+ */
+#ifdef __cplusplus
+#define wtbarr wtbarr_s
+#endif
 				/* For extracting wcstab arrays.            */
 struct wtbarr {
    int  i;			/* Image axis number.                       */
