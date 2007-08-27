@@ -47,7 +47,7 @@ using namespace std;
 #include <casa/namespace.h>
 
 /*!
-  \file MovieMaker.h
+  \file moviemaker.h
   
   ingroup CR_Applications
 

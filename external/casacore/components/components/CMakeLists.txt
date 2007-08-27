@@ -19,10 +19,10 @@ endforeach (components_module)
 
 ## build the library
 
-add_library (components
+add_library (casa_components
   ${components_sources}
 )
-target_link_libraries (components coordinates ${LAPACK_LIBRARIES})
+target_link_libraries (casa_components casa_coordinates ${LAPACK_LIBRARIES})
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
@@ -36,7 +36,7 @@ endif (casacore_BUILD_TESTS)
 ## -----------------------------------------------------------------------------
 ## Installation targets
 
-install (TARGETS components
+install (TARGETS casa_components
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

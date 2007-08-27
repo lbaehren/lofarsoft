@@ -77,10 +77,10 @@ endif (flex_bin)
 ## -----------------------------------------------------------------------------
 ## build the library
 
-add_library (ms
+add_library (casa_ms
   ${ms_sources}
 )
-target_link_libraries (ms measures tables scimath casa ${LAPACK_LIBRARIES})
+target_link_libraries (casa_ms casa_measures casa_tables casa_scimath casa_casa ${LAPACK_LIBRARIES})
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
@@ -96,7 +96,7 @@ endif (casacore_BUILD_TESTS)
 
 ## installation of libraries
 
-install (TARGETS ms
+install (TARGETS casa_ms
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

@@ -11,12 +11,6 @@
 ##  CASACORE_LIBRARIES = Libraries of the casacore modules
 ##  CASACORE_COMPILE_FLAGS = 
 ##
-## __TODO__
-##
-##  - If both CASA and casacore are present on a system, this scripts tends to
-##    find the CASA libraries instead of the casacore libraries; we need to come
-##    up with a method to separate both installations from each other.
-##
 
 set (include_locations
   ./../casacore
@@ -294,13 +288,12 @@ endif (NOT CASACORE_FIND_QUIETLY)
 # msfits      : ms fits
 # msvis       : ms
 
-## Locate the libraries themselves; depending on whether they have been build
-## using SCons or CMake, the names of the library files will be slightly 
-## different.
+## Locate the libraries themselves; keep in mind that the libraries follow
+## the naming convention libcasa_<module>, e.g. libcasa_images.a
 
 foreach (casacore_lib ${casacore_modules})
   ## search for the library
-  find_library (CASACORE_lib${casacore_lib} casa_${casacore_lib} ${casacore_lib}
+  find_library (CASACORE_lib${casacore_lib} casa_${casacore_lib}
     PATHS ${lib_locations}
     )
   ## if we have found the library, add it to the list

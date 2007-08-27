@@ -19,10 +19,10 @@ endforeach (measures_module)
 
 ## build the library
 
-add_library (measures
+add_library (casa_measures
   ${measures_sources}
 )
-target_link_libraries (measures tables scimath)
+target_link_libraries (casa_measures casa_tables casa_scimath)
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
@@ -36,7 +36,7 @@ endif (casacore_BUILD_TESTS)
 ## -----------------------------------------------------------------------------
 ## Installation targets
 
-install (TARGETS measures
+install (TARGETS casa_measures
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

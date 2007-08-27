@@ -16,10 +16,10 @@ endforeach (msfits_module)
 ## -----------------------------------------------------------------------------
 ## build the library
 
-add_library (msfits
+add_library (casa_msfits
   ${msfits_sources}
 )
-target_link_libraries (msfits ms fits)
+target_link_libraries (casa_msfits casa_ms casa_fits)
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
@@ -38,7 +38,7 @@ endif (casacore_BUILD_TESTS)
 
 ## installation of libraries
 
-install (TARGETS msfits
+install (TARGETS casa_msfits
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

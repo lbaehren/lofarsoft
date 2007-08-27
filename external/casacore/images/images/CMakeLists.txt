@@ -18,10 +18,11 @@ endforeach (images_module)
 
 include_directories (../..)
 
-add_library (images
+add_library (casa_images
   ${images_sources}
 )
-target_link_libraries (images lattices components coordinates fits measures tables scimath casa mir)
+target_link_libraries (casa_images
+  casa_lattices casa_components casa_coordinates casa_fits casa_measures casa_tables casa_scimath casa_casa casa_mir)
 
 ## -----------------------------------------------------------------------------
 ## Files processed by Bison & Flex
@@ -90,7 +91,7 @@ endif (casacore_BUILD_TESTS)
 ## -----------------------------------------------------------------------------
 ## Installation targets
 
-install (TARGETS images
+install (TARGETS casa_images
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

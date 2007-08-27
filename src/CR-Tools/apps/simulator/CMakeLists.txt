@@ -37,7 +37,6 @@ add_library (simulator
   )
 
 target_link_libraries (simulator
-  ${libnsl}
   ${libdl}
   ${libm}
   ${ROOT_LIBRARIES}
@@ -49,7 +48,6 @@ target_link_libraries (simulator
 add_executable (sim_main main.cc)
 
 target_link_libraries (sim_main
-  ${libnsl}
   ${libdl}
   ${libm}
   ${ROOT_LIBRARIES}

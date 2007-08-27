@@ -12,7 +12,7 @@ SET (tests
 
 FOREACH (src ${tests})
   ADD_EXECUTABLE (${src} ${src}.cc)
-  TARGET_LINK_LIBRARIES (${src} lattices)
+  TARGET_LINK_LIBRARIES (${src} casa_lattices)
   ## testing 
   add_test (${src} ${src})
 ENDFOREACH (src)

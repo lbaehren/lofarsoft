@@ -79,7 +79,7 @@ add_subdirectory (${wcslib_SOURCE_DIR}/pgsbox)
 ## -----------------------------------------------------------------------------
 ## Installation
 
-find_path (prefix release_area.txt
+find_path (wcslib_INSTALL_PREFIX release_area.txt
   PATHS
   ${wcslib_SOURCE_DIR}
   PATH_SUFFIXES
@@ -88,10 +88,10 @@ find_path (prefix release_area.txt
   NO_DEFAULT_PATH
   )
 
-if (prefix)
+if (wcslib_INSTALL_PREFIX)
   message (STATUS "Installation area located for package wcslib.")
-  set (CMAKE_INSTALL_PREFIX ${prefix}) 
-endif (prefix)
+  set (CMAKE_INSTALL_PREFIX ${wcslib_INSTALL_PREFIX}) 
+endif (wcslib_INSTALL_PREFIX)
 
 ## -----------------------------------------------------------------------------
 ## Summary of settings

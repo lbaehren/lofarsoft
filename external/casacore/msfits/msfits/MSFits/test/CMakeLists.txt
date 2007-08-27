@@ -13,7 +13,7 @@ SET (tests
 
 FOREACH (src ${tests})
   ADD_EXECUTABLE (${src} ${src}.cc)
-  TARGET_LINK_LIBRARIES (${src} msfits)
+  TARGET_LINK_LIBRARIES (${src} casa_msfits)
   ## testing 
   add_test (${src} ${src})
 ENDFOREACH (src)

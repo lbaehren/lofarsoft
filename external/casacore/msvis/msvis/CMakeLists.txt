@@ -16,10 +16,10 @@ endforeach (msvis_module)
 ## -----------------------------------------------------------------------------
 ## build the library
 
-add_library (msvis
+add_library (casa_msvis
   ${msvis_sources}
 )
-target_link_libraries (msvis ms)
+target_link_libraries (casa_msvis casa_ms)
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
@@ -38,7 +38,7 @@ endif (casacore_BUILD_TESTS)
 
 ## installation of libraries
 
-install (TARGETS msvis
+install (TARGETS casa_msvis
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

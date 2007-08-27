@@ -1,18 +1,18 @@
 
 ## ------------------------------------------------------------------------------
-## Test programs for measures/TableMeasures
+## Test programs for casa/Logging
 
 SET (tests
-  tTableMeasures
-  tTableQuantum
   )
 
 ## ------------------------------------------------------------------------------
 ## Build the test programs
 
 FOREACH (src ${tests})
+  ## compiler instructions
   ADD_EXECUTABLE (${src} ${src}.cc)
-  TARGET_LINK_LIBRARIES (${src} casa_measures)
+  ## linker instructions
+  TARGET_LINK_LIBRARIES (${src} casa_casa)
   ## testing 
   add_test (${src} ${src})
 ENDFOREACH (src)

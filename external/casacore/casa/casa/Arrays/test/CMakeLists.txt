@@ -37,8 +37,10 @@ SET (tests
 ## Build the test programs
 
 FOREACH (src ${tests})
+  ## compiler instructions
   ADD_EXECUTABLE (${src} ${src}.cc)
-  TARGET_LINK_LIBRARIES (${src} casa ${libm})
+  ## linker instructions
+  TARGET_LINK_LIBRARIES (${src} casa_casa ${libm})
   ## testing 
   add_test (${src} ${src})
 ENDFOREACH (src)

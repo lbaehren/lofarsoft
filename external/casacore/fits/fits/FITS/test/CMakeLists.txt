@@ -32,7 +32,7 @@ SET (tests
 
 FOREACH (src ${tests})
   ADD_EXECUTABLE (${src} ${src}.cc)
-  TARGET_LINK_LIBRARIES (${src} fits measures tables scimath scimath_f casa)
+  TARGET_LINK_LIBRARIES (${src} casa_fits casa_measures casa_tables casa_scimath casa_scimath_f casa_casa)
   ## testing 
   add_test (${src} ${src})
 ENDFOREACH (src)

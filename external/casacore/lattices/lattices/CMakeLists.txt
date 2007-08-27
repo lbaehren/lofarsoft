@@ -16,10 +16,12 @@ endforeach (lattices_module)
 
 ## build the library
 
-add_library (lattices
+add_library (casa_lattices
   ${lattices_sources}
 )
-target_link_libraries (lattices tables scimath scimath_f casa ${LAPACK_LIBRARIES})
+target_link_libraries (casa_lattices casa_tables casa_scimath casa_scimath_f casa_casa
+  ${LAPACK_LIBRARIES}
+  )
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
@@ -38,7 +40,7 @@ endif (casacore_BUILD_TESTS)
 
 ## installation of libraries
 
-install (TARGETS lattices
+install (TARGETS casa_lattices
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

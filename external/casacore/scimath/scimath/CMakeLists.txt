@@ -17,10 +17,10 @@ endforeach (scimath_module)
 
 ## build the library
 
-add_library (scimath
+add_library (casa_scimath
   ${scimath_sources}
 )
-target_link_libraries (scimath casa)
+target_link_libraries (casa_scimath casa_casa)
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
@@ -37,7 +37,7 @@ endif (casacore_BUILD_TESTS)
 ## -----------------------------------------------------------------------------
 ## Installation targets
 
-install (TARGETS scimath
+install (TARGETS casa_scimath
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

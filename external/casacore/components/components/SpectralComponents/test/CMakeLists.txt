@@ -12,7 +12,17 @@ SET (tests
 
 FOREACH (src ${tests})
   ADD_EXECUTABLE (${src} ${src}.cc)
-  TARGET_LINK_LIBRARIES (${src} components coordinates fits measures tables scimath scimath_f casa ${G2C_LIBRARIES})
+  TARGET_LINK_LIBRARIES (${src} 
+  	casa_components
+	casa_coordinates
+	casa_fits
+	casa_measures
+	casa_tables
+	casa_scimath
+	casa_scimath_f
+	casa_casa
+	${G2C_LIBRARIES}
+	)
   ## testing 
   add_test (${src} ${src})
 ENDFOREACH (src)

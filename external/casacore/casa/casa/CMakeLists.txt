@@ -20,6 +20,9 @@ SET (casa_modules
   Utilities
   )
 
+## -----------------------------------------------------------------------------
+## Build the library
+
 ## collect the source files in the modules
 
 foreach (casa_module ${casa_modules})
@@ -27,13 +30,24 @@ foreach (casa_module ${casa_modules})
   LIST(APPEND casa_sources ${casa_${casa_module}})
 endforeach (casa_module)
 
-## build the library
+## compiler instructions
 
-add_library (casa
+add_library (casa_casa
   aips.cc
   ${casa_sources}
 )
-target_link_libraries (casa ${libm})
+
+## linker instructions
+
+target_link_libraries (casa_casa ${libm})
+
+## Installation
+
+install (TARGETS casa_casa
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
@@ -43,15 +57,6 @@ if (casacore_BUILD_TESTS)
     add_subdirectory (${casa_module}/test)
   endforeach (casa_module)
 endif (casacore_BUILD_TESTS)
-
-## ------------------------------------------------------------------------------
-## Installation
-
-install (TARGETS casa
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  )
 
 ## ------------------------------------------------------------------------------
 ## Dependency tree for basic aips.h header file

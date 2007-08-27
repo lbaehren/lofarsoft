@@ -18,12 +18,12 @@ FILE (GLOB scimath_f_sources *.f *.c)
 
 ## build the library
 
-add_library (scimath_f
+add_library (casa_scimath_f
   ${scimath_f_sources}
   ${LAPACK_LIBRARIES}
   )
 
-set_target_properties (scimath_f
+set_target_properties (casa_scimath_f
   PROPERTIES
   COMPILE_FLAGS "-fPIC -O2 -fPIC"
   )
@@ -31,7 +31,7 @@ set_target_properties (scimath_f
 ## -----------------------------------------------------------------------------
 ## Installation targets
 
-install (TARGETS scimath_f
+install (TARGETS casa_scimath_f
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

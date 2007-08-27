@@ -19,11 +19,12 @@ endforeach (fits_module)
 ## -----------------------------------------------------------------------------
 ## build the library
 
-add_library (fits
+add_library (casa_fits
   ${fits_sources}
   )
 
-target_link_libraries (fits measures
+target_link_libraries (casa_fits
+  casa_measures
   ${G2C_LIBRARIES}
   ${CFITSIO_LIBRARIES}
   ${WCSLIB_LIBRARIES}
@@ -41,7 +42,7 @@ endif (casacore_BUILD_TESTS)
 ## -----------------------------------------------------------------------------
 ## Installation targets
 
-install (TARGETS fits
+install (TARGETS casa_fits
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

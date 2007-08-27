@@ -1,0 +1,56 @@
+#!/bin/sh
+
+##------------------------------------------------------------------------------
+## $Id                                                                         $
+##------------------------------------------------------------------------------
+
+##------------------------------------------------------------------------------
+## When called, make sure, that the script is running from the correct location.
+
+echo "[DAL packager] Checking location for the script to run ..."
+
+if test -d src ; then
+    echo " --> Found directory src"
+    if test -d external ; then
+	echo " --> Found directory external"
+    else
+	exit 1;
+    fi
+else
+    exit 1;
+fi
+
+##------------------------------------------------------------------------------
+## Check that we have a clean start: if there already is a tar-archive around,
+## remove it.
+
+echo "[DAL packager] Cleaning source directory ...";
+
+if test -f dal.tgz ; then
+    echo " --> Found previously created tar archive; removing it."
+    rm -f dal.tgz
+fi
+
+##------------------------------------------------------------------------------
+## List of packages and their location in the source tree
+
+echo "[DAL packager] Running tar to package source directories ..."
+
+# ./usg
+# |-- external
+# |   |-- casacore
+# |   |-- cmake
+# |   |-- cfitsio
+# |   |-- hdf5
+# |   `-- wcs
+# `-- src
+#     `-- DAL
+
+external_packages="wcslib cfitsio casacore hdf5 boost"
+
+for package in $external_packages
+{
+    packages="${packages} external/$package"
+}
+
+tar -cvzf dal.tgz ${packages} src/DAL CMakeLists.txt devel_common release/release_area.txt

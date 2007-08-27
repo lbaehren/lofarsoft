@@ -22,10 +22,10 @@ endforeach (tables_module)
 
 ## build the library
 
-add_library (tables
+add_library (casa_tables
   ${tables_sources}
 )
-target_link_libraries (tables casa)
+target_link_libraries (casa_tables casa_casa)
 
 ## -----------------------------------------------------------------------------
 ## Files processed by Flex
@@ -107,7 +107,7 @@ endif (casacore_BUILD_TESTS)
 
 ## installation of libraries
 
-install (TARGETS tables
+install (TARGETS casa_tables
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

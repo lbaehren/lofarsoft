@@ -351,7 +351,7 @@ endif (CFITSIO_BUILD_TESTS)
 ##
 ## =============================================================================
 
-find_path (prefix release_area.txt
+find_path (CFITSIO_INSTALL_PREFIX release_area.txt
   PATHS
   ${CFITSIO_SOURCE_DIR}
   PATH_SUFFIXES
@@ -360,10 +360,10 @@ find_path (prefix release_area.txt
   NO_DEFAULT_PATH
   )
 
-if (prefix)
+if (CFITSIO_INSTALL_PREFIX)
   message (STATUS "Installation area located for package CFITSIO.")
-  set (CMAKE_INSTALL_PREFIX ${prefix}) 
-endif (prefix)
+  set (CMAKE_INSTALL_PREFIX ${CFITSIO_INSTALL_PREFIX}) 
+endif (CFITSIO_INSTALL_PREFIX)
 
 ## Installation of the library
 

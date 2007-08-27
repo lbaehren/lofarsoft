@@ -184,7 +184,7 @@ namespace CR {  // Namespace CR -- begin
     \param cc   - Matrix with the cross-correlated data.
     \param f    - Matrix of data.
     \param g    - Matrix of data.
-    \param axis - Index of the axis along which to cross-correlate: \f$x\f$-axis
+    \param axis - Index of the axis along which to cross-correlate: \f$ x \f$-axis
     (axis=0), \f$y\f$-axis (axis=1) or 2-dim cross-correlation 
     (axis=-1).
   */
@@ -279,7 +279,7 @@ namespace CR {  // Namespace CR -- begin
       \brief Regridding of a data vector
       
       Regrid data from a vector \f$ vec a_1 \f$ of length \f$ n_1 \f$ to a vector
-      \f$ \vec a_2 \f$ of length \f n_2 \f$, where \f$ n_1 \geq n_2 \f$.
+      \f$ \vec a_2 \f$ of length \f$ n_2 \f$, where \f$ n_1 \geq n_2 \f$.
     */
     Vector<double> averageData (const Vector<double>& dataIN,
 				const int lenOUT);

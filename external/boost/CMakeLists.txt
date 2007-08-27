@@ -2,6 +2,33 @@
 project (boost)
 
 ## -----------------------------------------------------------------------------
+## Only force rebuild of the library from the provided source code, if no system
+## installation can be found. In order to handle this properly, we use the CMake
+## find script
+
+## check where to find the CMake scripts
+
+find_path (boost_cmake FindBoost.cmake
+  PATHS 
+  ${boost_SOURCE_DIR}
+  ${boost_SOURCE_DIR}/..
+  ${boost_SOURCE_DIR}/../..
+  ${boost_SOURCE_DIR}/../../..
+  PATH_SUFFIXES
+  devel_common/cmake
+  )
+
+if (boost_cmake)
+  include (${boost_cmake}/FindBoost.cmake)
+endif (boost_cmake)
+
+## ==============================================================================
+## <-- begin build condition --------------------------------------------------->
+## ==============================================================================
+
+if (NOT HAVE_BOOST)
+
+## -----------------------------------------------------------------------------
 ## Settings 
 
 set (bin_locations
@@ -31,10 +58,10 @@ find_program (WGET_EXECUTABLE wget PATHS ${bin_locations})
 ## -----------------------------------------------------------------------------
 ## Feedback
 
-message (STATUS "boost source file .. : ${boost_source_file}")
-message (STATUS "curl ............... : ${CURL_EXECUTABLE}")
-message (STATUS "tar ................ : ${TAR_EXECUTABLE}")
-message (STATUS "wget ............... : ${WGET_EXECUTABLE}")
+message (STATUS "boost source file  : ${boost_source_file}")
+message (STATUS "curl ............. : ${CURL_EXECUTABLE}")
+message (STATUS "tar .............. : ${TAR_EXECUTABLE}")
+message (STATUS "wget ............. : ${WGET_EXECUTABLE}")
 
 ## =============================================================================
 ##  Processing 
@@ -134,3 +161,8 @@ endif (HAVE_BOOST_SOURCE_DIR)
 ## -----------------------------------------------------------------------------
 ## [4] Build the package from source
 
+## ==============================================================================
+## <-- end build condition ----------------------------------------------------->
+## ==============================================================================
+
+endif (NOT HAVE_BOOST)

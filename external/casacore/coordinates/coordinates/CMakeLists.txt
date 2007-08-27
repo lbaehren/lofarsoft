@@ -18,10 +18,10 @@ endforeach (coordinates_module)
 
 ## build the library
 
-add_library (coordinates
+add_library (casa_coordinates
   ${coordinates_sources}
 )
-target_link_libraries (coordinates fits ${LAPACK_LIBRARIES})
+target_link_libraries (casa_coordinates casa_fits ${LAPACK_LIBRARIES})
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
@@ -35,7 +35,7 @@ endif (casacore_BUILD_TESTS)
 ## -----------------------------------------------------------------------------
 ## Installation targets
 
-install (TARGETS coordinates
+install (TARGETS casa_coordinates
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

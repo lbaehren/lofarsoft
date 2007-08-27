@@ -21,7 +21,10 @@ SET (tests
 
 FOREACH (src ${tests})
   ADD_EXECUTABLE (${src} ${src}.cc)
-  TARGET_LINK_LIBRARIES (${src} scimath scimath_f casa ${LAPACK_LIBRARIES} ${G2C_LIBRARIES})
+  TARGET_LINK_LIBRARIES (${src} casa_scimath casa_scimath_f casa_casa
+    ${LAPACK_LIBRARIES}
+	${G2C_LIBRARIES}
+	)
   ## testing 
   add_test (${src} ${src})
 ENDFOREACH (src)

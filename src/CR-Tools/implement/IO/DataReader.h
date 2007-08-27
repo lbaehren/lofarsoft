@@ -558,7 +558,7 @@ namespace CR {  //  Namespace CR -- begin
     adc2voltage = some_function();
     // store the conversion factors inside the DataReader object
     dr.setADC2Voltage (adc2voltage);
-    \encode
+    \endcode
 
     \param fx2voltage -- [blocksize,antennas] Weights to convert raw ADC samples
                          to voltages

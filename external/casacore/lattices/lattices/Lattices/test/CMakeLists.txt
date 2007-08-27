@@ -65,7 +65,7 @@ SET (tests
 FOREACH (src ${tests})
   ## create executable
   ADD_EXECUTABLE (${src} ${src}.cc)
-  TARGET_LINK_LIBRARIES (${src} lattices tables scimath casa)
+  TARGET_LINK_LIBRARIES (${src} casa_lattices casa_tables casa_scimath casa_casa)
   ## testing 
   add_test (${src} ${src})
 ENDFOREACH (src)
