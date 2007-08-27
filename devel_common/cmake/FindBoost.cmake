@@ -17,23 +17,23 @@ include (CheckTypeSize)
 ## Search locations
 
 set (include_locations
+  ../release/include
+  ../../release/include
   /include
   /usr/include
   /usr/local/include
   /opt/include
   /sw/include
-  ../release/include
-  ../../release/include
   )
 
 set (lib_locations
+  ../release/lib
+  ../../release/lib
   /lib
   /usr/lib
   /usr/local/lib
   /opt/lib
   /sw/lib
-  ../release/lib
-  ../../release/lib
   )
 
 ## -----------------------------------------------------------------------------
