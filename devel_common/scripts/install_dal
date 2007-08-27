@@ -1,0 +1,100 @@
+#!/bin/sh
+
+##------------------------------------------------------------------------------
+## $Id                                                                         $
+##------------------------------------------------------------------------------
+
+##------------------------------------------------------------------------------
+## When called, make sure, that the script is running from the correct location.
+
+echo "[DAL installer] Checking location for the script to run ..."
+
+if test -d src ; then
+    echo " --> Found directory src"
+    if test -d external ; then
+	echo " --> Found directory external"
+    else
+	exit 1;
+    fi
+else
+    exit 1;
+fi
+
+##------------------------------------------------------------------------------
+## Check if we have the build directory; if this is not the case create it
+
+echo "[DAL installer] Checking for build directory ..."
+
+if test -d build ; then
+    echo " --> Successfully found build directory."
+else
+    echo " --> No build directory found - creating it now."
+    mkdir -p build
+fi
+
+cd build
+basedir=`pwd`
+
+##------------------------------------------------------------------------------
+## Configure and install the packages required for the DAL
+
+## [0] CMake
+
+echo "[DAL installer] Installing CMake ..."
+
+cd $basedir
+mkdir cmake 
+cd cmake
+./../../external/CMake/bootstrap --prefix=$basedir/../release && make install
+
+## [1] wcslib
+
+echo "[DAL installer] Installing WCSLIB ..."
+
+cd $basedir
+mkdir wcslib 
+cd wcslib
+cmake ../../external/wcslib && make install
+
+## [2] CFITSIO
+
+echo "[DAL installer] Installing CFITSIO ..."
+
+cd $basedir
+mkdir cfitsio 
+cd cfitsio
+cmake ../../external/cfitsio && make install
+
+## [2] CASACORE
+
+echo "[DAL installer] Installing CASACORE ..."
+
+cd $basedir
+mkdir casacore 
+cd casacore
+cmake ../../external/casacore && make install
+
+## [4] HDF5
+
+echo "[DAL installer] Installing HDF5 ..."
+
+cd $basedir
+ln -s ../external/hdf5 hdf5
+cd hdf5
+./configure --predix=$basedir/../release && make && make install
+
+## [4] Boost
+
+echo "[DAL installer] Installing Boost ..."
+
+cd $basedir
+ln -s ../external/boost boost
+cd boost
+./configure --predix=$basedir/../release && make && make install
+
+##------------------------------------------------------------------------------
+## Configure and install the DAL
+
+cd $basedir
+mkdir dal && cd dal
+cmake ../../src/DAL && make install

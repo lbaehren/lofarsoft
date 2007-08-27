@@ -46,7 +46,7 @@ echo "[DAL packager] Running tar to package source directories ..."
 # `-- src
 #     `-- DAL
 
-external_packages="wcslib cfitsio casacore hdf5 boost"
+external_packages="CMake wcslib cfitsio casacore hdf5 boost"
 
 for package in $external_packages
 {
