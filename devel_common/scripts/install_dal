@@ -86,7 +86,7 @@ echo "[DAL installer] Installing HDF5 ..."
 cd $basedir
 ln -s ../external/hdf5 hdf5
 cd hdf5
-./configure --predix=$basedir/../release && make && make install
+./configure --prefix=$basedir/../release && make && make install
 
 ## [4] Boost
 
@@ -95,7 +95,7 @@ echo "[DAL installer] Installing Boost ..."
 cd $basedir
 ln -s ../external/boost boost
 cd boost
-./configure --predix=$basedir/../release && make && make install
+./configure --prefix=$basedir/../release && make && make install
 
 ##------------------------------------------------------------------------------
 ## Configure and install the DAL
