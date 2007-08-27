@@ -374,7 +374,7 @@ Bool MSSelector::selectPolarization(const Vector<String>& wantedPol)
 	}
       }
     } else if (n==2) {
-      Int id1(0),id2(0);
+      Int id1,id2;
       for (Int i=0; i<numCorr; i++) {
 	if (inputPol(i)==wanted(0)) { id1=i; break;}
       }
