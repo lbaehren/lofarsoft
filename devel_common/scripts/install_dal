@@ -45,6 +45,11 @@ echo "[DAL installer] Installing CMake ..."
 cd $basedir
 mkdir cmake 
 cd cmake
+echo " -- Cleaning up directory ..."
+rm -rf ./../../external/CMake/Bootstrap.cmk
+rm -rf ./../../external/CMake/CMakeCache.txt
+rm -rf ./../../external/CMake/Source/cmConfigure.h
+echo " --> Initiating build ... "
 ./../../external/CMake/bootstrap --prefix=$basedir/../release && make install
 
 ## [1] wcslib
