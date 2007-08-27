@@ -7,7 +7,7 @@
 ##------------------------------------------------------------------------------
 ## When called, make sure, that the script is running from the correct location.
 
-echo "[DAL installer] Checking location for the script to run ..."
+echo "[CR-Tools installer] Checking location for the script to run ..."
 
 if test -d src ; then
     echo " --> Found directory src"
@@ -23,7 +23,7 @@ fi
 ##------------------------------------------------------------------------------
 ## Check if we have the build directory; if this is not the case create it
 
-echo "[DAL installer] Checking for build directory ..."
+echo "[CR-Tools installer] Checking for build directory ..."
 
 if test -d build ; then
     echo " --> Successfully found build directory."
@@ -36,11 +36,11 @@ cd build
 basedir=`pwd`
 
 ##------------------------------------------------------------------------------
-## Configure and install the packages required for the DAL
+## Configure and install the packages required for the CR-Tools
 
 ## [0] CMake
 
-echo "[DAL installer] Installing CMake ..."
+echo "[CR-Tools installer] Installing CMake ..."
 
 cd $basedir
 mkdir cmake 
@@ -54,7 +54,7 @@ echo " --> Initiating build ... "
 
 ## [1] wcslib
 
-echo "[DAL installer] Installing WCSLIB ..."
+echo "[CR-Tools installer] Installing WCSLIB ..."
 
 cd $basedir
 mkdir wcslib 
@@ -63,7 +63,7 @@ cmake ../../external/wcslib && make install
 
 ## [2] CFITSIO
 
-echo "[DAL installer] Installing CFITSIO ..."
+echo "[CR-Tools installer] Installing CFITSIO ..."
 
 cd $basedir
 mkdir cfitsio 
@@ -72,7 +72,7 @@ cmake ../../external/cfitsio && make install
 
 ## [2] CASACORE
 
-echo "[DAL installer] Installing CASACORE ..."
+echo "[CR-Tools installer] Installing CASACORE ..."
 
 cd $basedir
 mkdir casacore 
@@ -81,7 +81,7 @@ cmake ../../external/casacore && make install
 
 ## [4] HDF5
 
-echo "[DAL installer] Installing HDF5 ..."
+echo "[CR-Tools installer] Installing HDF5 ..."
 
 cd $basedir
 ln -s ../external/hdf5 hdf5
@@ -90,16 +90,22 @@ cd hdf5
 
 ## [4] Boost
 
-echo "[DAL installer] Installing Boost ..."
+echo "[CR-Tools installer] Installing Boost ..."
 
 cd $basedir
 ln -s ../external/boost boost
 cd boost
 ./configure --predix=$basedir/../release && make && make install
 
-##------------------------------------------------------------------------------
-## Configure and install the DAL
+## [5] Data Access Library (DAL)
 
 cd $basedir
 mkdir dal && cd dal
 cmake ../../src/DAL && make install
+
+##------------------------------------------------------------------------------
+## Configure and install the CR-Tools
+
+cd $basedir
+mkdir cr && cd cr
+cmake ../../src/CR-Tools && make install

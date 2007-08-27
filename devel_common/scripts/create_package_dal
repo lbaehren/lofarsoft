@@ -34,10 +34,11 @@ fi
 ##------------------------------------------------------------------------------
 ## List of packages and their location in the source tree
 
-echo "[DAL packager] Running tar to package source directories ..."
-
 # ./usg
+# |-- build
+# |-- devel_common
 # |-- external
+# |   |-- boost
 # |   |-- casacore
 # |   |-- cmake
 # |   |-- cfitsio
@@ -45,6 +46,8 @@ echo "[DAL packager] Running tar to package source directories ..."
 # |   `-- wcs
 # `-- src
 #     `-- DAL
+
+echo "[DAL packager] Running tar to package source directories ..."
 
 external_packages="CMake wcslib cfitsio casacore hdf5 boost"
 
