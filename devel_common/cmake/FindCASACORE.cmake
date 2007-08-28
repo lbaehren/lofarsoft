@@ -6,9 +6,9 @@
 ## Check for the casacore distribution
 ##
 ## Variables assigned:
-##  HAVE_CASACORE      = Do we have both headers and libraries of casacore?
-##  CASACORE_INCLUDES  = Path to the casacore header files
-##  CASACORE_LIBRARIES = Libraries of the casacore modules
+##  HAVE_CASACORE          = Do we have both headers and libraries of casacore?
+##  CASACORE_INCLUDES      = Path to the casacore header files
+##  CASACORE_LIBRARIES     = Libraries of the casacore modules
 ##  CASACORE_COMPILE_FLAGS = 
 ##
 
@@ -293,9 +293,15 @@ endif (NOT CASACORE_FIND_QUIETLY)
 
 foreach (casacore_lib ${casacore_modules})
   ## search for the library
-  find_library (CASACORE_lib${casacore_lib} casa_${casacore_lib}
-    PATHS ${lib_locations}
-    )
+  if (${casacore_lib} MATCHES "mirlib")
+    find_library (CASACORE_lib${casacore_lib} mir
+      PATHS ${lib_locations}
+      )
+  else (${casacore_lib} MATCHES "mirlib")
+    find_library (CASACORE_lib${casacore_lib} casa_${casacore_lib}
+      PATHS ${lib_locations}
+      )
+  endif (${casacore_lib} MATCHES "mirlib")
   ## if we have found the library, add it to the list
   if (CASACORE_lib${casacore_lib})
     list (APPEND CASACORE_LIBRARIES ${CASACORE_lib${casacore_lib}})

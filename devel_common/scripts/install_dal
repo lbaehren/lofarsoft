@@ -38,6 +38,8 @@ basedir=`pwd`
 ##------------------------------------------------------------------------------
 ## Configure and install the packages required for the DAL
 
+system_arch=`uname | tr [A-Z] [a-z]`
+
 ## [0] CMake
 
 echo "[DAL installer] Installing CMake ..."
@@ -88,14 +90,21 @@ ln -s ../external/hdf5 hdf5
 cd hdf5
 ./configure --prefix=$basedir/../release && make && make install
 
-## [4] Boost
+## [5] Boost
 
 echo "[DAL installer] Installing Boost ..."
 
 cd $basedir
 ln -s ../external/boost boost
 cd boost
-./configure --prefix=$basedir/../release && make && make install
+case $system_arch in
+    darwin)
+	./configure --toolset=darwin --prefix=$basedir/../release && make && make install
+    ;;
+    linux)
+	./configure --prefix=$basedir/../release && make && make install
+    ;;
+esac
 
 ##------------------------------------------------------------------------------
 ## Configure and install the DAL
