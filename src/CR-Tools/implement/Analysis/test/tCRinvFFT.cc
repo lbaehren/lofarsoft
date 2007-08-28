@@ -18,8 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tCRinvFFT.cc,v 1.4 2007/06/19 08:10:53 horneff Exp $*/
-
 #include <casa/Containers/Record.h>
 
 #include <Analysis/CRinvFFT.h>
@@ -35,6 +33,12 @@
   \author Andreas Horneffer
  
   \date 2007/04/20
+
+  <h3>Example</h3>
+
+  \code
+  ./tCRinvFFT /home/horneff/lopescasa/data/LOPES/LOPES-CalTable
+  \endcode
 */
 
 // -----------------------------------------------------------------------------
@@ -45,9 +49,14 @@ using CR::CRinvFFT;
 /*!
   \brief Test constructors for a new CRinvFFT object
 
+  \param caltable  -- Name of/path to the calibration table containing the 
+                      required antenna data.
+  \param eventfile -- LOPES event file with data
+
   \return nofFailedTests -- The number of failed tests.
 */
-int test_CRinvFFT ()
+int test_CRinvFFT (string const &caltable,
+		   string const &eventfile)
 {
   int nofFailedTests (0);
   
@@ -67,7 +76,7 @@ int test_CRinvFFT ()
     // Generate a record that points to the CalTable files 
     // Hardcoded path is not nice, but works...
     Record obsrec;
-    obsrec.define("LOPES","/home/horneff/lopescasa/data/LOPES/LOPES-CalTable");
+    obsrec.define("LOPES",caltable);
 
     // Put the record into the pipeline object.
     newObject.SetObsRecord(obsrec);
@@ -130,13 +139,25 @@ int test_CRinvFFT ()
 
 // -----------------------------------------------------------------------------
 
-int main ()
+int main (int argc,
+	  char *argv[])
 {
   int nofFailedTests (0);
+  int nofParameters (2);
+  string caltable;
+  string eventfile;
+
+  if (argc < nofParameters) {
+    std::cerr << "[tCRinvFFT] Incomplete list of input parameters!" << std::endl;
+  } else {
+    caltable  = argv[1];
+    eventfile = argv[2];
+  }
 
   // Test for the constructor(s)
   {
-    nofFailedTests += test_CRinvFFT ();
+    nofFailedTests += test_CRinvFFT (caltable,
+				     eventfile);
   }
 
   return nofFailedTests;

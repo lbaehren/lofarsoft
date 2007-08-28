@@ -61,7 +61,7 @@ namespace CR { // Namespace CR -- begin
 				    blitz::Array<double,1> const &shift)
   {
     bool status (true);
-    uint nelem (shift.numElements());
+    int nelem (shift.numElements());
 
     /* Check if the shapes of the input arrays are consistent */
     if (matrix.rows() == nelem && matrix.cols() == nelem) {
@@ -224,18 +224,19 @@ namespace CR { // Namespace CR -- begin
   bool LinearTransform::setMatrix (blitz::Array<double,2> const &matrix)
   {
     bool status (true);
+    int nelem (rank_p);
 
     /*
       Check if the provided matrix has the correct shape
     */
-    if (matrix.rows() == rank_p && matrix.cols() == rank_p) {
+    if (matrix.rows() == nelem && matrix.cols() == nelem) {
       // local variables
       int row (0);
       int col (0);
       uint n(0);
       // copy the array elements
-      for (row=0; row<rank_p; row++) {
-	for (col=0; col<rank_p; col++) {
+      for (row=0; row<nelem; row++) {
+	for (col=0; col<nelem; col++) {
 	  matrix_p[n] = matrix(col,row);
 	  n++;
 	}
@@ -256,23 +257,24 @@ namespace CR { // Namespace CR -- begin
   bool LinearTransform::setMatrix (casa::Matrix<double> const &matrix)
   {
     bool status (true);
+    int nelem (rank_p);
     casa::IPosition shape (matrix.shape());
 
-    if (shape(0) == rank_p && shape(1) == rank_p) {
+    if (shape(0) == nelem && shape(1) == nelem) {
       // local variables
-      uint row (0);
-      uint col (0);
-      uint n(0);
+      int row (0);
+      int col (0);
+      int n(0);
       // copy the array elements
-      for (row=0; row<rank_p; row++) {
-	for (col=0; col<rank_p; col++) {
+      for (row=0; row<nelem; row++) {
+	for (col=0; col<nelem; col++) {
 	  matrix_p[n] = matrix(col,row);
 	  n++;
 	}
       }
     } else {
-      cerr::cout << "[LinearTransform::setMatrix] Wrong shape of input array!"
-		 << std::endl;
+      std::cerr << "[LinearTransform::setMatrix] Wrong shape of input array!"
+		<< std::endl;
       std::cerr << " -- Rank         : " << rank_p << std::endl;
       std::cerr << " -- Matrix shape : " << shape  << std::endl;
     }
@@ -286,7 +288,7 @@ namespace CR { // Namespace CR -- begin
   void LinearTransform::shift (std::vector<double> &vect)
   {
     vect.resize(rank_p);
-    for (int n(0); n<rank_p; n++) {
+    for (uint n(0); n<rank_p; n++) {
       vect[n] = shift_p[n];
     }
   }
@@ -294,7 +296,7 @@ namespace CR { // Namespace CR -- begin
   void LinearTransform::shift (blitz::Array<double,1> &shift)
   {
     shift.resize(rank_p);
-    for (int n(0); n<rank_p; n++) {
+    for (uint n(0); n<rank_p; n++) {
       shift(n) = shift_p[n];
     }
   }
@@ -303,8 +305,8 @@ namespace CR { // Namespace CR -- begin
   void LinearTransform::shift (casa::Vector<double> &shift)
   {
     shift.resize(rank_p);
-    for (int n(0); n<rank_p; n++) {
-      vect(n) = shift_p[n];
+    for (uint n(0); n<rank_p; n++) {
+      shift(n) = shift_p[n];
     }
   }
 #endif
@@ -354,7 +356,7 @@ namespace CR { // Namespace CR -- begin
     bool status (true);
 
     if (shift.numElements() == rank_p) {
-      for (int n(0); n<rank_p; n++) {
+      for (uint n(0); n<rank_p; n++) {
 	shift_p[n] = shift(n);
       }
     } else {
