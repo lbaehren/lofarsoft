@@ -37,7 +37,7 @@
   <h3>Example</h3>
 
   \code
-  ./tCRinvFFT /home/horneff/lopescasa/data/LOPES/LOPES-CalTable
+  ./tCRinvFFT /home/horneff/lopescasa/data/LOPES/LOPES-CalTable /data/LOPES/cr/sel/2004.01.12.00:28:11.577.event
   \endcode
 */
 
@@ -82,8 +82,8 @@ int test_CRinvFFT (string const &caltable,
     newObject.SetObsRecord(obsrec);
 
     std::cout << "[3] Opening Event ..." << std::endl;
-    if (! lev.attachFile("/data/LOPES/cr/sel/2004.01.12.00:28:11.577.event") ){
-      std::cout << "Failed to attach file: /data/LOPES/cr/sel/2004.01.12.00:28:11.577.event" << endl;
+    if (! lev.attachFile(eventfile) ){
+      std::cout << "Failed to attach file: " << eventfile << endl;
       nofFailedTests++;
       return nofFailedTests;
     };
@@ -139,6 +139,11 @@ int test_CRinvFFT (string const &caltable,
 
 // -----------------------------------------------------------------------------
 
+/*!
+  \return nofFailedTests -- The number of failed tests; returns <tt>-1</tt> in
+                            case no test routines were run due to missing input
+			    parameters.
+*/
 int main (int argc,
 	  char *argv[])
 {
@@ -149,16 +154,14 @@ int main (int argc,
 
   if (argc < nofParameters) {
     std::cerr << "[tCRinvFFT] Incomplete list of input parameters!" << std::endl;
+    return -1;
   } else {
     caltable  = argv[1];
     eventfile = argv[2];
-  }
-
-  // Test for the constructor(s)
-  {
+    // [1] Test for the constructor(s)
     nofFailedTests += test_CRinvFFT (caltable,
 				     eventfile);
   }
-
+  
   return nofFailedTests;
 }
