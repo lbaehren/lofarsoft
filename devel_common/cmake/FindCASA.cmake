@@ -44,21 +44,19 @@ set (casa_locations
 
 find_path (cr_cmake FindCASA.cmake FindGlish.cmake
   PATHS 
-  ${CR_SOURCE_DIR}
-  ${CR_SOURCE_DIR}/..
-  ${CR_SOURCE_DIR}/../..
-  ${CR_SOURCE_DIR}/../../..
+  .
+  ./..
+  ./../..
+  ./../../..
   PATH_SUFFIXES
   devel_common/cmake
   )
 
-## [1] libg2c
-
-find_library (libg2c g2c
-  PATHS ${lib_locations}
-  )
-
 if (cr_cmake)
+  ## libg2c
+  if (NOT HAVE_G2C)
+    include (${cr_cmake}/FindG2C.cmake)
+  endif (NOT HAVE_G2C)
   ## Glish
   if (NOT HAVE_GLISH)
     include (${cr_cmake}/FindGlish.cmake)
@@ -253,13 +251,13 @@ if (CASA_libcasa)
       CACHE STRING "LINKtables")
   endif (CASA_libtables)
   ## -- libscimath
-  if (libg2c AND CASA_libscimath AND CASA_libscimath_f)
+  if (G2C_LIBRARIES AND CASA_libscimath AND CASA_libscimath_f)
     set (LINKscimath
-      ${CASA_libscimath} ${CASA_libscimath_f} ${LINKcasa} ${libg2c}
+      ${CASA_libscimath} ${CASA_libscimath_f} ${LINKcasa} ${G2C_LIBRARIES}
       CACHE STRING "LINKscimath")
-  else (libg2c AND CASA_libscimath AND CASA_libscimath_f)
+  else (G2C_LIBRARIES AND CASA_libscimath AND CASA_libscimath_f)
     message (SEND_ERROR "[FindCASA] Missing g2c library required for libscimath!")
-  endif (libg2c AND CASA_libscimath AND CASA_libscimath_f)
+  endif (G2C_LIBRARIES AND CASA_libscimath AND CASA_libscimath_f)
   ## -- libmeasures
   if (CASA_libmeasures AND CASA_libtables AND LINKscimath)
     set (LINKmeasures
