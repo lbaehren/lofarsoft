@@ -12,10 +12,27 @@
 #  <PACKAGE>_LFGLAS     = Linker flags (optional)
 
 ## -----------------------------------------------------------------------------
+## Standard locations where to look for required components
+
+set (lib_locations
+  /usr/local/lib
+  /usr/lib
+  /usr/X11R6/lib
+  /sw/lib
+  )
+
+set (include_locations
+  /usr/include
+  /usr/local/include
+  /usr/X11R6/include
+  /sw/include
+  )
+
+## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (<PACKAGE>_INCLUDES <header file(s)>
-  PATHS /usr/include /usr/local/include /sw/include
+  PATHS ${include_locations}
   PATH_SUFFIXES <optional path extension>
   NO_DEFAULT_PATH
   )
@@ -24,7 +41,7 @@ find_path (<PACKAGE>_INCLUDES <header file(s)>
 ## Check for the library
 
 find_library (<PACKAGE>_LIBRARIES <package name>
-  PATHS /usr/lib /usr/local/lib /sw/lib
+  PATHS ${lib_locations}
   NO_DEFAULT_PATH
   )
 
@@ -60,4 +77,6 @@ endif (HAVE_<PACKAGE>)
 ## Mark advanced variables
 
 mark_as_advanced (
+  <PACKAGE>_INCLUDES
+  <PACKAGE>_LIBRARIES
   )

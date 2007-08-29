@@ -12,12 +12,25 @@ project (pgplot C Fortran)
 cmake_minimum_required (VERSION 2.4)
 
 ## -----------------------------------------------------------------------------
+## User defined build/install options
+
+option (pgplot_ENABLE_TESTING "Enable testing environment?" 1)
+option (pgplot_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
+
 ## Additional CMake components
 
 include (CPack)
-include (CTest)
 
-enable_testing()
+## Handle option: testing mode on/off
+
+if (pgplot_ENABLE_TESTING)
+  ## include CMake module
+  include (CTest)
+  ## enable testing mode
+  enable_testing()
+  ## add directory containing the test programs and examples
+  add_subdirectory (examples)
+endif (pgplot_ENABLE_TESTING)
 
 ## -----------------------------------------------------------------------------
 ## Standard locations where to look for required components
@@ -29,7 +42,7 @@ set (lib_locations
   /sw/lib
   )
 
-set (inc_locations
+set (include_locations
   /usr/include
   /usr/local/include
   /usr/X11R6/include
@@ -57,14 +70,13 @@ find_path (pgplot_cmake FindBlitz.cmake FindCASA.cmake FindCFITSIO.cmake
 
 if (pgplot_cmake)
   include (${pgplot_cmake}/FindG2C.cmake)
+  include (${pgplot_cmake}/FindGIF.cmake)
 endif (pgplot_cmake)
-
-find_library (libgif gif PATHS ${lib_locations})
 
 ## Tcl -------------------------------------------
 
 find_path (TCL_INCLUDES tcl.h
-  PATHS ${inc_locations}
+  PATHS ${include_locations}
   PATH_SUFFIXES tcl tcl8.4
   NO_DEFAULT_PATH
   )
@@ -81,7 +93,7 @@ endif (TCL_INCLUDES AND TCL_LIBRARIES)
 ## Tk --------------------------------------------
 
 find_path (TK_INCLUDES tk.h
-  PATHS ${inc_locations}
+  PATHS ${include_locations}
   PATH_SUFFIXES tcl tcl8.4 tk tk8.4
   NO_DEFAULT_PATH
   )
@@ -98,7 +110,7 @@ endif (TK_INCLUDES AND TK_LIBRARIES)
 ## X11 -------------------------------------------
 
 find_path (Xm_INCLUDES XmP.h
-  PATHS ${inc_locations}
+  PATHS ${include_locations}
   PATH_SUFFIXES Xm
   NO_DEFAULT_PATH
   )
@@ -142,10 +154,10 @@ if (libXaw AND libXt)
   file (APPEND ${outfile} "XWDRIV 2 /XSERVE   Persistent window on X Window System		C\n")
 endif (libXaw AND libXt)
 
-if (libgif)
+if (GIF_LIBRARIES)
  file (APPEND ${outfile} "GIDRIV 1 /GIF      GIF-format file, landscape\n")
  file (APPEND ${outfile} "GIDRIV 2 /VGIF     GIF-format file, portrait\n")
-endif (libgif)
+endif (GIF_LIBRARIES)
 
 if (PNG_LIBRARIES)
  file (APPEND ${outfile} "PNDRIV 1 /PNG      Portable Network Graphics file                 C\n")
@@ -200,7 +212,6 @@ endif (TCL_LIBRARIES AND TK_LIBRARIES)
 ##
 
 add_subdirectory (drivers)
-add_subdirectory (examples)
 add_subdirectory (fonts)
 add_subdirectory (src)
 add_subdirectory (sys)
@@ -258,7 +269,7 @@ add_library (pgplot
   )
 target_link_libraries (pgplot
   ${G2C_LIBRARIES}
-  ${libgif}
+  ${GIF_LIBRARIES}
   ${TCL_LIBRARIES}
   ${TK_LIBRARIES}
   ${libXaw}

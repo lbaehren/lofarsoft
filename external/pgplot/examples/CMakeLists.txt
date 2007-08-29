@@ -28,7 +28,7 @@ foreach (src ${examples})
     XmPgplot
     tkpgplot
     ${G2C_LIBRARIES}
-    ${libgif}
+    ${GIF_LIBRARIES}
     ${TCL_LIBRARIES}
     ${TK_LIBRARIES}
     ${JPEG_LIBRARIES}
