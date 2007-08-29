@@ -1,30 +1,5 @@
 
 ## -----------------------------------------------------------------------------
-## libimages
-
-SET (images_modules
-  Images
-  Wnbt
-  )
-
-## collect the source files in the modules
-
-foreach (images_module ${images_modules})
-  FILE (GLOB images_${images_module} ${images_module}/*.cc ${images_module}/*.tcc)
-  LIST(APPEND images_sources ${images_${images_module}})
-endforeach (images_module)
-
-## build the library
-
-include_directories (../..)
-
-add_library (casa_images
-  ${images_sources}
-)
-target_link_libraries (casa_images
-  casa_lattices casa_components casa_coordinates casa_fits casa_measures casa_tables casa_scimath casa_casa casa_mir)
-
-## -----------------------------------------------------------------------------
 ## Files processed by Bison & Flex
 ##
 ## FILES=`ls *.y | sed s/"\.y"//`
@@ -75,6 +50,30 @@ if (flex_bin)
 else (flex_bin)
   message (SEND_ERROR "Unable to process flex input files!")
 endif (flex_bin)
+
+## -----------------------------------------------------------------------------
+## libimages
+
+SET (images_modules
+  Images
+  Wnbt
+  )
+
+## collect the source files in the modules
+
+foreach (images_module ${images_modules})
+  FILE (GLOB images_${images_module} ${images_module}/*.cc ${images_module}/*.tcc)
+  LIST(APPEND images_sources ${images_${images_module}})
+endforeach (images_module)
+
+## build the library
+
+include_directories (../..)
+
+add_library (casa_images
+  ${images_sources}
+)
+target_link_libraries (casa_images casa_lattices casa_components mir)
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs

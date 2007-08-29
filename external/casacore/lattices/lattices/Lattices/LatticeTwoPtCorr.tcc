@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LatticeTwoPtCorr.tcc 19909 2007-02-23 02:08:02Z Malte.Marquarding $
+//# $Id: LatticeTwoPtCorr.tcc 20114 2007-08-28 11:13:41Z gervandiepen $
 
 #include <lattices/Lattices/LatticeTwoPtCorr.h>
 
@@ -303,8 +303,9 @@ void LatticeTwoPtCorr<T>::autoCorrelation  (MaskedLattice<T>& latOut,
      typename Array<T>::iterator outIter;
      typename Array<T>::iterator sumIter;
      typename Array<Float>::iterator nIter;
+     typename Array<Float>::iterator nIterEnd = nPtsOut.end();
      for (outIter=itOut.rwMatrixCursor().begin(),sumIter=sumOut.begin(),nIter=nPtsOut.begin();
-          nIter!=nPtsOut.end(); nIter++,sumIter++,outIter++) {
+          nIter!=nIterEnd; ++nIter,++sumIter,++outIter) {
         if (*nIter > 0.5) {
            *outIter = *sumIter / *nIter;
         }

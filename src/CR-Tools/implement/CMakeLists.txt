@@ -26,9 +26,9 @@ if (HAVE_PGPLOT)
   list (APPEND cr_modules Display)
 endif (HAVE_PGPLOT)
 
-if (CR_GLISH_SUPPORT)
+if (CR_GLISH_SUPPORT AND HAVE_CASA)
   list (APPEND cr_modules ApplicationSupport)
-endif (CR_GLISH_SUPPORT)
+endif (CR_GLISH_SUPPORT AND HAVE_CASA)
 
 ## register the directories containing the source code
 

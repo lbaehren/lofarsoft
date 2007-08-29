@@ -91,13 +91,29 @@ if (casacore_BUILD_TESTS)
   endforeach (ms_module)
 endif (casacore_BUILD_TESTS)
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Installation
 
-## installation of libraries
+## Library
 
 install (TARGETS casa_ms
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   )
+
+## Header files
+
+FILE (GLOB ms_headers *.h)
+install (FILES ${ms_headers}
+  DESTINATION include/casacore/ms
+  )
+
+foreach (ms_module ${ms_modules})
+  ## assemble list of header files
+  FILE (GLOB ms_headers ${ms_module}/*.h)
+  ## set installation location
+  install (FILES ${ms_headers}
+    DESTINATION include/casacore/ms/${ms_module}
+    )
+endforeach (ms_module)

@@ -28,16 +28,14 @@
 #include <iostream>
 #include <string>
 
-// AIPS++/CASA header files
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
-
 #include <scimath/Mathematics/InterpolateArray1D.h>
 
 #include <Analysis/CRinvFFT.h>
-#include <Data/LopesEventIn.h>
 #include <Analysis/CRflaggingPlugin.h>
 #include <Analysis/fitCR2gauss.h>
+#include <Data/LopesEventIn.h>
 #include <Display/SimplePlot.h>
 
 #include <casa/namespace.h>

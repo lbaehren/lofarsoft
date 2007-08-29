@@ -76,7 +76,7 @@ include_directories (.)
 
 FOREACH (src ${tests})
   ADD_EXECUTABLE (${src} ${src}.cc)
-  TARGET_LINK_LIBRARIES (${src} casa_tables casa_casa)
+  TARGET_LINK_LIBRARIES (${src} casa_tables)
   ## testing 
   add_test (${src} ${src})
 ENDFOREACH (src)

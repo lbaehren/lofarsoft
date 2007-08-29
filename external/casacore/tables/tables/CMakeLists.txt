@@ -11,23 +11,6 @@ SET (tables_modules
   )
 
 ## -----------------------------------------------------------------------------
-## Build the library
-
-## collect the source files in the modules
-
-foreach (tables_module ${tables_modules})
-  FILE (GLOB tables_${tables_module} ${tables_module}/*.cc ${tables_module}/*.tcc)
-  LIST(APPEND tables_sources ${tables_${tables_module}})
-endforeach (tables_module)
-
-## build the library
-
-add_library (casa_tables
-  ${tables_sources}
-)
-target_link_libraries (casa_tables casa_casa)
-
-## -----------------------------------------------------------------------------
 ## Files processed by Flex
 ##
 ##  FILES=`ls *.l | sed s/"\.l"//`
@@ -94,6 +77,23 @@ else (bison_bin)
 endif (bison_bin)
 
 ## -----------------------------------------------------------------------------
+## Build the library
+
+## collect the source files in the modules
+
+foreach (tables_module ${tables_modules})
+  FILE (GLOB tables_${tables_module} ${tables_module}/*.cc ${tables_module}/*.tcc)
+  LIST(APPEND tables_sources ${tables_${tables_module}})
+endforeach (tables_module)
+
+## build the library
+
+add_library (casa_tables
+  ${tables_sources}
+)
+target_link_libraries (casa_tables casa_casa)
+
+## -----------------------------------------------------------------------------
 ## Directories containing the test programs
 
 if (casacore_BUILD_TESTS)
@@ -102,13 +102,29 @@ if (casacore_BUILD_TESTS)
   endforeach (tables_module)
 endif (casacore_BUILD_TESTS)
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Installation
 
-## installation of libraries
+## Library
 
 install (TARGETS casa_tables
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   )
+
+## Header files
+
+FILE (GLOB tables_headers *.h)
+install (FILES ${tables_headers}
+  DESTINATION include/casacore/tables
+  )
+
+foreach (tables_module ${tables_modules})
+  ## assemble list of header files
+  FILE (GLOB tables_headers ${tables_module}/*.h)
+  ## set installation location
+  install (FILES ${tables_headers}
+    DESTINATION include/casacore/tables/${tables_module}
+    )
+endforeach (tables_module)

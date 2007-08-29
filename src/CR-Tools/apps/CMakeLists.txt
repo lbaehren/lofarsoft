@@ -3,6 +3,11 @@
 ## $Id:: CMakeLists.txt 575 2007-08-17 14:04:03Z baehren                        $
 ##-------------------------------------------------------------------------------
 
+if (HAVE_CASACORE OR HAVE_CASA)
+  add_executable (imagefromfits imagefromfits.cc)
+  target_link_libraries (imagefromfits ${CASA_LIBRARIES})
+endif (HAVE_CASACORE OR HAVE_CASA)
+  
 ## treetest  GLISH CFITSIO WCSLIB
 
 add_executable (treetest treetest.cc)

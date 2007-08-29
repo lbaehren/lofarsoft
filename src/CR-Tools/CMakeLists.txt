@@ -42,6 +42,10 @@ if (NOT CR_VERBOSE_CONFIGURE)
   set (WCSLIB_FIND_QUIETLY 1)
 endif (NOT CR_VERBOSE_CONFIGURE)
 
+## Handle option: Activate support for Glish applications on/off
+
+# --> handled below
+
 ## -----------------------------------------------------------------------------
 ## Subdirectories
 
@@ -85,29 +89,6 @@ if (cr_cmake)
   if (HAVE_BLITZ)
     add_definitions (-DHAVE_BLITZ)
   endif (HAVE_BLITZ)
-  ## CASA - search for full installation first
-  if (CR_GLISH_SUPPORT)
-    if (NOT HAVE_CASA)
-      message (STATUS "[CR] Configuration to use CASA ...")
-      include (${cr_cmake}/FindCASA.cmake)
-    endif (NOT HAVE_CASA)
-  endif (CR_GLISH_SUPPORT)
-  if (HAVE_CASA)
-    add_definitions (-DHAVE_CASA)
-  else (HAVE_CASA)
-    message (STATUS "[CR] Failed to configure using CASA !")
-  endif (HAVE_CASA)
-  ## casacore - actually for the library that is all we need
-  if (NOT HAVE_CASA) 
-    message (STATUS "[CR] Configuration to use CASACORE ...")
-    include (${cr_cmake}/FindCASACORE.cmake)
-  endif (NOT HAVE_CASA)
-  if (HAVE_CASACORE)
-    add_definitions (-DHAVE_CASA)
-    add_definitions (-DHAVE_CASACORE)
-  else (HAVE_CASACORE)
-    set (HAVE_CASACORE FALSE)
-  endif (HAVE_CASACORE)
   ## CFITSIO
   if (NOT HAVE_CFITSIO)
     include (${cr_cmake}/FindCFITSIO.cmake)
@@ -140,6 +121,70 @@ elseif (cr_cmake)
   message (SEND_ERROR "Unable to locate additional CMake scripts!")
 endif (cr_cmake)
 
+## Handle option: Activate support for Glish applications on/off
+
+if (CR_GLISH_SUPPORT)
+  ## --- Support for Glish applications requires full CASA installation
+  if (NOT HAVE_CASA)
+    message (STATUS "[CR] Configuration to use CASA ...")
+    include (${cr_cmake}/FindCASA.cmake)
+  endif (NOT HAVE_CASA)
+  if (HAVE_CASA)
+    add_definitions (-DHAVE_CASA)
+  else (HAVE_CASA)
+    message (STATUS "[CR] Failed to configure using CASA !")
+  endif (HAVE_CASA)
+else (CR_GLISH_SUPPORT)
+  ## --- Without support for Glish applications everything we need is casacore
+  if (NOT HAVE_CASA) 
+    message (STATUS "[CR] Configuration to use CASACORE ...")
+    include (${cr_cmake}/FindCASACORE.cmake)
+  endif (NOT HAVE_CASA)
+  if (HAVE_CASACORE)
+    set (HAVE_CASA FALSE)
+    add_definitions (-DHAVE_CASA)
+    add_definitions (-DHAVE_CASACORE)
+  else (HAVE_CASACORE)
+    set (HAVE_CASACORE FALSE)
+  endif (HAVE_CASACORE)
+endif (CR_GLISH_SUPPORT)
+
+if (HAVE_CASA OR HAVE_CASACORE)
+  add_definitions (
+    -DWITH_CASA
+    -fPIC
+    -ftemplate-depth-100
+    # -- compiler flags utilized in the source code --
+    -DAIPS_STDLIB
+    -DAIPS_AUTO_STL
+    -DAIPS_NO_LEA_MALLOC
+    )
+  IF (APPLE)
+    ## definition common to apple architectures
+    add_definitions (
+      -DAIPS_DARWIN
+      )
+  ELSE (APPLE)
+    ADD_DEFINITIONS (-DAIPS_LINUX)
+  ENDIF (APPLE)
+  ## Platform test 32/64 bit ------------------------------
+  set (CMAKE_SYSTEM_64BIT 0)
+  if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
+    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
+      if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+        set (CMAKE_SYSTEM_64BIT 1)
+        add_definitions (-DAIPS_64B)
+      endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
+  endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
+  if (APPLE)
+    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+      set (CMAKE_SYSTEM_64BIT 1)
+      add_definitions (-DAIPS_64B)
+    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+  endif (APPLE)
+endif (HAVE_CASA OR HAVE_CASACORE)
+
 ## ------------------------------------------------------------------------------
 ## Check for the presence of further USG comonents
 
@@ -155,9 +200,9 @@ include_directories (
   ${CR_SOURCE_DIR}/implement
   ${CR_SOURCE_DIR}/apps
   ${CR_SOURCE_DIR}/test
+  ${CASA_INCLUDES}
   ${DAL_INCLUDES}
   ${BLITZ_INCLUDES}
-  ${CASA_INCLUDES}
   ${CFITSIO_INCLUDES}
   ${PGPLOT_INCLUDES}
   ${ROOT_INCLUDES}

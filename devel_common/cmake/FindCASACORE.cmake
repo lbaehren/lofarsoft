@@ -106,8 +106,8 @@ find_path (CASACORE_casa Arrays.h
 )
 
 if (CASACORE_casa)
-  string (REGEX REPLACE "casa/casa" "casa" tmp ${CASACORE_casa})
-  get_filename_component (tmp ${tmp} ABSOLUTE)
+  get_filename_component (tmp ${CASACORE_casa} ABSOLUTE)
+  string (REGEX REPLACE casa/casa casa tmp ${tmp})
   list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_casa)
 
@@ -119,8 +119,8 @@ find_path (CASACORE_tables Tables.h
 )
 
 if (CASACORE_tables)
-  string (REGEX REPLACE tables/tables tables tmp ${CASACORE_tables})
-  get_filename_component (tmp ${tmp} ABSOLUTE)
+  get_filename_component (tmp ${CASACORE_tables} ABSOLUTE)
+  string (REGEX REPLACE tables/tables tables tmp ${tmp})
   list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_tables)
 
@@ -132,7 +132,8 @@ find_path (CASACORE_mirlib miriad.h
 )
 
 if (CASACORE_mirlib)
-  list (APPEND CASACORE_INCLUDES ${CASACORE_mirlib})
+  get_filename_component (tmp ${CASACORE_mirlib} ABSOLUTE)
+  list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_mirlib)
 
 ## [4] <scimath/Fitting.h>
@@ -143,8 +144,8 @@ find_path (CASACORE_scimath Fitting.h
 )
 
 if (CASACORE_scimath)
-  string (REGEX REPLACE scimath/scimath scimath tmp ${CASACORE_scimath})
-  get_filename_component (tmp ${tmp} ABSOLUTE)
+  get_filename_component (tmp ${CASACORE_scimath} ABSOLUTE)
+  string (REGEX REPLACE scimath/scimath scimath tmp ${tmp})
   list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_scimath)
 
@@ -156,8 +157,8 @@ find_path (CASACORE_measures Measures.h
 )
 
 if (CASACORE_measures)
-  string (REGEX REPLACE measures/measures measures tmp ${CASACORE_measures})
-  get_filename_component (tmp ${tmp} ABSOLUTE)
+  get_filename_component (tmp ${CASACORE_measures} ABSOLUTE)
+  string (REGEX REPLACE measures/measures measures tmp ${tmp})
   list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_measures)
 
@@ -169,8 +170,8 @@ find_path (CASACORE_fits FITS.h
 )
 
 if (CASACORE_fits)
-  string (REGEX REPLACE fits/fits fits tmp ${CASACORE_fits})
-  get_filename_component (tmp ${tmp} ABSOLUTE)
+  get_filename_component (tmp ${CASACORE_fits} ABSOLUTE)
+  string (REGEX REPLACE fits/fits fits tmp ${tmp})
   list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_fits)
 
@@ -182,8 +183,8 @@ find_path (CASACORE_coordinates Coordinates.h
 )
 
 if (CASACORE_coordinates)
-  string (REGEX REPLACE coordinates/coordinates coordinates tmp ${CASACORE_coordinates})
-  get_filename_component (tmp ${tmp} ABSOLUTE)
+  get_filename_component (tmp ${CASACORE_coordinates} ABSOLUTE)
+  string (REGEX REPLACE coordinates/coordinates coordinates tmp ${tmp})
   list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_coordinates)
 
@@ -195,8 +196,8 @@ find_path (CASACORE_components ComponentModels.h
 )
 
 if (CASACORE_components)
-  string (REGEX REPLACE components/components components tmp ${CASACORE_components})
-  get_filename_component (tmp ${tmp} ABSOLUTE)
+  get_filename_component (tmp ${CASACORE_components} ABSOLUTE)
+  string (REGEX REPLACE components/components components tmp ${tmp})
   list (APPEND CASACORE_INCLUDES ${tmp})
 endif (CASACORE_components)
 
@@ -324,6 +325,14 @@ else (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
   endif (NOT CASACORE_FIND_QUIETLY)
 endif (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
 
+IF (HAVE_CASACORE)
+  IF (NOT CASACORE_FIND_QUIETLY)
+    MESSAGE (STATUS "Found components for CASACORE")
+    MESSAGE (STATUS "CASACORE_LIBRARIES = ${CASACORE_LIBRARIES}")
+    MESSAGE (STATUS "CASACORE_INCLUDES  = ${CASACORE_INCLUDES}")
+  ENDIF (NOT CASACORE_FIND_QUIETLY)
+ENDIF (HAVE_CASACORE)
+
 ## ------------------------------------------------------------------------------
 ## Final assembly of the provided variables and flags; once this is done, we
 ## provide some extended feedback.
@@ -386,5 +395,8 @@ ENDIF (UNIX)
 ## ------------------------------------------------------------------------------
 ## Compatibility settings (should be removed at some point)
 
+set (CASA_INCLUDES "")
 set (CASA_INCLUDES ${CASACORE_INCLUDES})
+
+set (CASA_LIBRARIES "")
 set (CASA_LIBRARIES ${CASACORE_LIBRARIES})

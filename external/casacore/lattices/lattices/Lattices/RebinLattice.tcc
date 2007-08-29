@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: RebinLattice.tcc 19909 2007-02-23 02:08:02Z Malte.Marquarding $
+//# $Id: RebinLattice.tcc 20114 2007-08-28 11:13:41Z gervandiepen $
 
 #include <lattices/Lattices/RebinLattice.h>
 
@@ -359,10 +359,11 @@ void RebinLattice<T>::bin (const Array<T>& dataIn, const Array<Bool>& maskIn)
 
       T sumData = 0;
       Int nSum = 0;
+      typename Array<T>::const_iterator dataIterEnd = cursor.end();
       typename Array<T>::const_iterator dataIter;
       typename Array<Bool>::const_iterator maskIter;
       for (dataIter=cursor.begin(),maskIter=cursorMask.begin();
-           dataIter!=cursor.end(); ++dataIter,++maskIter) {
+           dataIter!=dataIterEnd; ++dataIter,++maskIter) {
          if (*maskIter) {
             sumData += *dataIter;
             nSum++;

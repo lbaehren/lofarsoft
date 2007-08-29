@@ -32,8 +32,10 @@
 #include <casa/Exceptions/Error.h>
 
 #include <Analysis/SecondStagePipeline.h>
-#include <ApplicationSupport/Beamformer.h>
 #include <Calibration/CalTableInterpolater.h>
+#include <Imaging/GeometricalPhase.h>
+// --> needs to be replaced by GeometricalDelay
+#include <ApplicationSupport/Beamformer.h>
 
 #include <casa/namespace.h>
 

@@ -204,13 +204,25 @@ namespace CR { // Namespace CR -- begin
       tmpvec(0) = DirParams_p.asDouble("Az");
       tmpvec(1) = DirParams_p.asDouble("El");
       tmpvec(2) = DirParams_p.asDouble("Curvature");
+      // Container for the phase gradients
+      Matrix<DComplex> phaseGradients;
+      /* ---- old version (needs to go) ---- */
       // calculate the phase gradients
       if (verbose) { bf_p.showProgress(True); };
       bf_p.setPhaseGradients(dr->frequencyValues(), tmpvec, tmpAntPos);
       if (verbose) { bf_p.showProgress(False); };
       // retrieve the phase gradients
-      Matrix<DComplex> phaseGradients;
       phaseGradients = bf_p.phaseGradients().nonDegenerate();
+      /* ---- new version ---- */
+//       try {
+// 	CR::GeometricalPhase geomPhase (tmpAntPos,tmpvec,dr->frequencyValues());
+// 	phaseGradients.phases().nonDegenerate();
+//       } catch (std::string message) {
+// 	std::cerr << "[CRinvFFT::GetShiftedFFT]"
+// 		  << " Error while retrieving phase gradients!"
+// 		  << message
+// 		  << std::endl;
+//       }
       
       // ***** getting the antenna gain calibration
       // initialize the caltable interpolater (if needed)

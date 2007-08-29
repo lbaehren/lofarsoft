@@ -38,10 +38,9 @@ set (lib_locations
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-FIND_PATH (PGPLOT_INCLUDES
-  cpgplot.h
+FIND_PATH (PGPLOT_INCLUDES cpgplot.h
   PATHS ${include_locations}
-  PATH_SUFFIXES include/pgplot lib/pgplot
+  PATH_SUFFIXES pgplot
   )
 
 ## -----------------------------------------------------------------------------

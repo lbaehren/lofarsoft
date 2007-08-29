@@ -273,9 +273,52 @@ namespace CR { // Namespace CR -- begin
     bool forward (casa::Vector<double> &out,
 		  casa::Vector<double> const &in);
 #endif
+    
+    /*!
+      \brief Apply backward (inverse) linear transform
 
+      \retval out -- 
+      \param in   -- 
+      
+      \return status -- Status of the operation; returns <i>false</i> if an error
+                        was encountered.
+    */
     bool backward (std::vector<double> &out, 
-		   std::vector<double> const &in); 
+		   std::vector<double> const &in);
+
+    /*!
+      \brief Chain up two linear transforms
+
+      \retval result      -- 
+      \param  other       -- 
+      \param  otherIsLast -- 
+      
+      \return status -- Status of the operation; returns <i>false</i> if an error
+                        was encountered.
+    */
+    bool chainTransforms (LinearTransform &result,
+			  LinearTransform const &other,
+			  bool const &otherIsLast=true);
+    
+    /*!
+      \brief Chain up two linear transforms
+
+      For two linear transforms \f$ y = \mathbf{A}_1 x + s_1 \f$ and
+      \f$ z = \mathbf{A}_2 y + s_2 \f$ we have
+      \f[ z = \mathbf{A}_2 \left( \mathbf{A}_1 x + s_1 \right) + s_2 =
+      \mathbf{A}_2 \mathbf{A}_2 x + \mathbf{A}_2 s_1 + s_2 =
+      \mathbf{A}' x + s' \f]
+
+      \retval result -- 
+      \param  xform1 -- 
+      \param  xform2 -- 
+      
+      \return status -- Status of the operation; returns <i>false</i> if an error
+                        was encountered.
+    */
+    bool chainTransforms (LinearTransform &result,
+			  LinearTransform const &xform1,
+			  LinearTransform const &xform2);
     
   private:
 

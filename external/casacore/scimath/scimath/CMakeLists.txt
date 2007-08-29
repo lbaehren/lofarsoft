@@ -35,10 +35,28 @@ if (casacore_BUILD_TESTS)
 endif (casacore_BUILD_TESTS)
 
 ## -----------------------------------------------------------------------------
-## Installation targets
+## Installation
+
+## Library
 
 install (TARGETS casa_scimath
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   )
+
+## Header files
+
+FILE (GLOB scimath_headers *.h)
+install (FILES ${scimath_headers}
+  DESTINATION include/casacore/scimath
+  )
+
+foreach (scimath_module ${scimath_modules})
+  ## assemble list of header files
+  FILE (GLOB scimath_headers ${scimath_module}/*.h)
+  ## set installation location
+  install (FILES ${scimath_headers}
+    DESTINATION include/casacore/scimath/${scimath_module}
+    )
+endforeach (scimath_module)

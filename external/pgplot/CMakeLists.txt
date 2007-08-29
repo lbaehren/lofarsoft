@@ -43,13 +43,23 @@ find_package (PNG)
 find_package (X11)
 find_package (ZLIB)
 
-find_library (libg2c g2c
-  PATHS ${lib_locations}
+## check where to find the CMake scripts
+
+find_path (pgplot_cmake FindBlitz.cmake FindCASA.cmake FindCFITSIO.cmake
+  PATHS 
+  ${pgplot_SOURCE_DIR}
+  ${pgplot_SOURCE_DIR}/..
+  ${pgplot_SOURCE_DIR}/../..
+  ${pgplot_SOURCE_DIR}/../../..
+  PATH_SUFFIXES
+  devel_common/cmake
   )
 
-find_library (libgif gif
-  PATHS ${lib_locations}
-  )
+if (pgplot_cmake)
+  include (${pgplot_cmake}/FindG2C.cmake)
+endif (pgplot_cmake)
+
+find_library (libgif gif PATHS ${lib_locations})
 
 ## Tcl -------------------------------------------
 
@@ -87,27 +97,27 @@ endif (TK_INCLUDES AND TK_LIBRARIES)
 
 ## X11 -------------------------------------------
 
-find_path (incXm XmP.h
+find_path (Xm_INCLUDES XmP.h
   PATHS ${inc_locations}
   PATH_SUFFIXES Xm
   NO_DEFAULT_PATH
   )
 
-string (REGEX REPLACE "include/Xm" "include" incXm ${incXm})
+string (REGEX REPLACE "include/Xm" "include" Xm_INCLUDES ${Xm_INCLUDES})
 
 find_library (libXaw Xaw PATHS ${lib_locations})
 find_library (libXt Xt PATHS ${lib_locations})
 
 ## summary of external libraries
 
-message (STATUS "libg2c = ${libg2c}")
+message (STATUS "libg2c        = ${G2C_LIBRARIES}")
+message (STATUS "libXaw        = ${libXaw}")
+message (STATUS "libXt         = ${libXt}")
+message (STATUS "libx11        = ${X11_LIBRARIES}")
 message (STATUS "TCL_INCLUDES  = ${TCL_INCLUDES}")
 message (STATUS "TCL_LIBRARIES = ${TCL_LIBRARIES}")
 message (STATUS "TK_INCLUDES   = ${TK_INCLUDES}")
 message (STATUS "TK_LIBRARIES  = ${TK_LIBRARIES}")
-message (STATUS "libXaw = ${libXaw}")
-message (STATUS "libXt  = ${libXt}")
-message (STATUS "libx11 = ${X11_LIBRARIES}")
 
 ## ------------------------------------------------------------------------------
 ## Create list of drivers to be included into the library
@@ -148,13 +158,33 @@ endif (TCL_LIBRARIES AND TK_LIBRARIES)
 
 ## ------------------------------------------------------------------------------
 ## Start building the library
+##
+## The ``standard'' routines pgplot/src/pg*.f and pgplot/src/gr*.f. All of these
+## routines should be compiled and put in the object-module library, although the
+## ``obsolete'' routines may be omitted (they are not used by current PGPLOT
+## programs and will not be included in future versions of PGPLOT). The obsolete
+## routines are: grchar, grchr0, grdat2, grgtc0, grinqfont, grinqli, grinqpen,
+## grlinr, grmark, grmovr, grsetfont, grsetli, grsetpen, grtran, grvect, pgsetc,
+## pgsize.
 ## 
 ## Required PGPLOT sub-directories.
-##   - drivers
-##   - examples
-##   - fonts
-##   - src
-##   - sys
+## .
+## |-- applications
+## |   |-- curvefit
+## |   |-- plot10
+## |   `-- plotpg
+## |-- cpg
+## |-- drivers
+## |   |-- old
+## |   |-- xathena
+## |   |-- xmotif
+## |   `-- xtk
+## |-- examples
+## |-- fonts
+## |-- pgdispd
+## |-- pgmf
+## |-- src
+## |-- sys
 ## 
 ## DEFAULT_TARGETS="lib grfont.dat prog pgplot.doc"
 ##
@@ -190,12 +220,12 @@ include_directories (
   ${TCL_INCLUDES}
   ${PNG_INCLUDE_DIR}
   ${X11_INCLUDE_DIR}
-  ${incXm}
+  ${Xm_INCLUDES}
 )
 
-FILE (GLOB pgplot_fonts ./fonts/*.f)
 FILE (GLOB pgplot_src ./src/*.f ./src/*.c)
 FILE (GLOB pgplot_sys ./sys/*.f ./sys/*.c)
+FILE (GLOB pgplot_fonts ./fonts/*.f)
 
 set (pgplot_drivers
   ./drivers/gidriv.f
@@ -227,7 +257,7 @@ add_library (pgplot
   grexec.f
   )
 target_link_libraries (pgplot
-  ${libg2c}
+  ${G2C_LIBRARIES}
   ${libgif}
   ${TCL_LIBRARIES}
   ${TK_LIBRARIES}
@@ -272,7 +302,7 @@ endif (HAVE_TCL AND HAVE_TK)
 ## ------------------------------------------------------------------------------
 ## Installation
 
-find_path (prefix release_area.txt
+find_path (pgplot_prefix release_area.txt
   PATHS
   ${pgplot_SOURCE_DIR}
   PATH_SUFFIXES
@@ -281,10 +311,10 @@ find_path (prefix release_area.txt
   NO_DEFAULT_PATH
   )
 
-if (prefix)
+if (pgplot_prefix)
   message (STATUS "Installation area located for package pgplot.")
-  set (CMAKE_INSTALL_PREFIX ${prefix}) 
-endif (prefix)
+  set (CMAKE_INSTALL_PREFIX ${pgplot_prefix}) 
+endif (pgplot_prefix)
 
 ## installation of libraries
 
@@ -297,16 +327,16 @@ install (TARGETS pgplot cpgplot XmPgplot
 ## installation of header files
 
 set (pgplot_headers
-  ./cpg/cpgplot.h
-  ./drivers/commands.h
-  ./drivers/defines.h
-  ./drivers/pgxwin.h
-  ./drivers/xathena/XaPgplot.h
-  ./drivers/xathena/XaPgplotP.h
-  ./drivers/xmotif/XmPgplot.h
-  ./drivers/xmotif/XmPgplotP.h
-  ./drivers/xtk/rvpgplot.h
-  ./drivers/xtk/tkpgplot.h
+  ${pgplot_SOURCE_DIR}/cpg/cpgplot.h
+  ${pgplot_SOURCE_DIR}/drivers/commands.h
+  ${pgplot_SOURCE_DIR}/drivers/defines.h
+  ${pgplot_SOURCE_DIR}/drivers/pgxwin.h
+  ${pgplot_SOURCE_DIR}/drivers/xathena/XaPgplot.h
+  ${pgplot_SOURCE_DIR}/drivers/xathena/XaPgplotP.h
+  ${pgplot_SOURCE_DIR}/drivers/xmotif/XmPgplot.h
+  ${pgplot_SOURCE_DIR}/drivers/xmotif/XmPgplotP.h
+  ${pgplot_SOURCE_DIR}/drivers/xtk/rvpgplot.h
+  ${pgplot_SOURCE_DIR}/drivers/xtk/tkpgplot.h
   )
 
 install (FILES ${pgplot_headers}

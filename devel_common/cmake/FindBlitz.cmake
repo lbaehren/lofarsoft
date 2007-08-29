@@ -41,7 +41,7 @@ set (lib_locations
 ## in order to ease differentiation from where the various header files are
 ## included.
 
-FIND_PATH (BLITZ_INCLUDES array.h
+FIND_PATH (BLITZ_INCLUDES blitz.h
   PATHS ${include_locations}
   PATH_SUFFIXES blitz
   )
@@ -88,3 +88,7 @@ ENDIF (HAVE_BLITZ)
 ## ------------------------------------------------------------------------------
 ## Mark as advanced ...
 
+mark_as_advanced (
+  BLITZ_INCLUDES
+  BLITZ_LIBRARIES
+  )

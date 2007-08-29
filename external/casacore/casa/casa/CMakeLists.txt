@@ -41,13 +41,32 @@ add_library (casa_casa
 
 target_link_libraries (casa_casa ${libm})
 
+## -----------------------------------------------------------------------------
 ## Installation
+
+## library
 
 install (TARGETS casa_casa
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   )
+
+## header files
+
+FILE (GLOB casa_headers *.h)
+install (FILES ${casa_headers}
+  DESTINATION include/casacore/casa
+  )
+
+foreach (casa_module ${casa_modules})
+  ## assemble list of header files
+  FILE (GLOB casa_headers ${casa_module}/*.h)
+  ## set installation location
+  install (FILES ${casa_headers}
+    DESTINATION include/casacore/casa/${casa_module}
+    )
+endforeach (casa_module)
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
@@ -57,13 +76,4 @@ if (casacore_BUILD_TESTS)
     add_subdirectory (${casa_module}/test)
   endforeach (casa_module)
 endif (casacore_BUILD_TESTS)
-
-## ------------------------------------------------------------------------------
-## Dependency tree for basic aips.h header file
-##
-## <casa/aips.h>
-## |-- <casa/aipsenv.h>    // Define compiler specific flags
-## |-- <casa/aipstype.h>   // Define the standard types used by AIPS++.
-## |-- <casa/aipsxtype.h>  // Define the extra non-standard types used by aips++
-## `-- <casa/aipsdef.h>    // Define the special aips++ macros
 
