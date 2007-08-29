@@ -53,6 +53,8 @@ rm -rf ./../../external/CMake/CMakeCache.txt
 rm -rf ./../../external/CMake/Source/cmConfigure.h
 echo " --> Initiating build ... "
 ./../../external/CMake/bootstrap --prefix=$basedir/../release && make install
+echo "  --> Adding new bin directory to the PATH"
+export PATH=$basedir/../release/bin:$PATH
 
 ## [1] wcslib
 
