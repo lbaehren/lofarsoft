@@ -186,11 +186,12 @@ namespace CR { // Namespace CR -- begin
   {
     bool status (true);
     uint nelem (rank_p*rank_p);
+    double element (0);
 
     /* Check if the input array has enough elements by trying to access the
        last expected element. */
     try {
-      double elem = matrix[nelem-1];
+      element = matrix[nelem-1];
     } catch (std::string message) {
       std::cerr << "[LinearTransform::setMatrix] To few elements in input array!"
 		<< std::endl;
@@ -316,11 +317,12 @@ namespace CR { // Namespace CR -- begin
   bool LinearTransform::setShift (double const *shift)
   {
     bool status (true);
+    double element (0);
 
     /* Check if the input array has enough elements by trying to access the
        last expected element. */
     try {
-      double elem = shift[rank_p-1];
+      element = shift[rank_p-1];
     } catch (std::string message) {
       std::cerr << "[LinearTransform::setShift] To few elements in input array!"
 		<< std::endl;
@@ -354,9 +356,10 @@ namespace CR { // Namespace CR -- begin
   bool LinearTransform::setShift (blitz::Array<double,1> const &shift)
   {
     bool status (true);
+    int nelem (rank_p);
 
-    if (shift.numElements() == rank_p) {
-      for (uint n(0); n<rank_p; n++) {
+    if (shift.numElements() == nelem) {
+      for (uint n(0); n<nelem; n++) {
 	shift_p[n] = shift(n);
       }
     } else {

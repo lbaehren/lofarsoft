@@ -26,6 +26,7 @@ set (casa_locations
   ## most Linux systems
   /aips++
   /casa
+  /opt/aips++/current
   /opt/aips++
   /opt/casa
   /opt/casa/stable

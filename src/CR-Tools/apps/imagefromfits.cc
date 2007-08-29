@@ -22,17 +22,14 @@
  ***************************************************************************/
 
 #include <casa/aips.h>
-#include <casa/Exceptions/Error.h>
-#include <fits/FITS/BasicFITS.h>
-#include <casa/Inputs/Input.h>
-#include <casa/OS/File.h>
-#include <casa/OS/Path.h>
-
+#include <casa/iostream.h>
+// #include <casa/Inputs/Input.h>
+// #include <casa/OS/File.h>
+// #include <casa/OS/HostInfo.h>
+// #include <casa/OS/Path.h>
 #include <images/Images/PagedImage.h>
 #include <images/Images/ImageFITSConverter.h>
-#include <casa/OS/HostInfo.h>
-
-#include <casa/iostream.h>
+#include <fits/FITS/BasicFITS.h>
 
 #include <casa/namespace.h>
 
@@ -52,6 +49,16 @@
   This program is a modified version of the <i>fits2image</i> test program 
   distributed as of CASA/casacore.
 
+  A FITS to image conversion may be accomplished as follows:
+  \code
+  PagedImage<Float> *image = 0;
+  String fitsName = "exists.fits";
+  String imageName = "new.image";
+  String error;
+  Bool ok = ImageFITSConverter::FITSToImage(image, error, imageName, fitsName);
+  if (!image) .\.. error .\..
+  \endcode
+  
   <h3>Usage</h3>
 
   \verbatim
@@ -75,39 +82,19 @@ int main (int argc,
   casa::String infile  = argv[1];
   casa::String outfile = argv[2];
   casa::ImageInterface<casa::Float>* pOutImage;
-  casa::uInt whichRep (0);
-  casa::uInt whichHDU (0);
-  casa::Bool overwrite (true);
-  casa::Bool zeroBlanks (true);
   casa::Bool ok (false);
   casa::String error;
-
+  
   try {
-    if (oldParser) {
-      ok = ImageFITSConverter::FITSToImageOld(pOutImage,
-					      error,
-					      outFile,
-					      fitsFile,
-					      whichHDU,
-					      casa::HostInfo::memoryFree()/1024,
-					      overwrite,
-					      zeroBlanks);
-    } else {
-      ok = ImageFITSConverter::FITSToImage(pOutImage,
-					   error,
-					   outFile,
-					   fitsFile,
-					   whichRep,
-					   whichHDU, 
-					   casa::HostInfo::memoryFree()/1024,
-					   overwrite,
-					   zeroBlanks);
-    }
+    ok = ImageFITSConverter::FITSToImage (pOutImage,
+					  error,
+					  outfile,
+					  infile);
   } catch (std::string message) {
     std::cerr << "[imagefromfits] " << message << std::endl;
     return 1;
   }
-
+  
   /* Clean up memory */
   delete pOutImage;
 

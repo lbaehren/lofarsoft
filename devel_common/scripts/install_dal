@@ -106,6 +106,15 @@ case $system_arch in
     ;;
 esac
 
+echo "[DAL installer] Installing Blitz++ ..."
+
+cd $basedir
+ln -s ../external/blitz blitz
+cd blitz
+./configure --prefix=$basedir/../release && make && make install
+
+## [6] Blitz++
+
 ##------------------------------------------------------------------------------
 ## Configure and install the DAL
 
