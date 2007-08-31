@@ -32,7 +32,7 @@ using CR::LinearTransform;  // Namespace usage
 
   \brief A collection of test routines for the LinearTransform class
  
-  \author Lars Baehren
+  \author Lars B&auml;hren
  
   \date 2007/08/20
 */
@@ -46,12 +46,12 @@ using CR::LinearTransform;  // Namespace usage
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_LinearTransform ()
+int test_constructors ()
 {
+  std::cout << "\n[test_constructors]\n" << std::endl;
+
   int nofFailedTests (0);
   
-  std::cout << "\n[test_LinearTransform]\n" << std::endl;
-
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
     LinearTransform xform;
@@ -106,7 +106,7 @@ int test_LinearTransform ()
     uint rank (3);
     std::cout << " -- constructing original object ..." << std::endl;
     LinearTransform xform1 (rank);
-    std::cout << " -- constructiong new object via copy ..." << std::endl;
+    std::cout << " -- constructing new object via copy ..." << std::endl;
     LinearTransform xform2 (xform1);
   } catch (std::string message) {
     std::cerr << message << std::endl;
@@ -135,14 +135,83 @@ int test_LinearTransform ()
 
 // -----------------------------------------------------------------------------
 
+/*!
+  \brief Test application of the transform
+
+  \return nofFailedTests -- The number of failed tests within this function
+*/
+int test_transform ()
+{
+  std::cout << "\n[test_transform]\n" << std::endl;
+
+  int nofFailedTests (0);
+
+  uint rank (3);
+  LinearTransform xform (rank);
+  double *vectIn;
+  double *vectOut;
+  
+  vectIn  = new double[rank];
+  vectOut = new double[rank];
+  
+  std::cout << "[1] Forward transform using default parameters ..." << std::endl;
+  try {
+    vectIn[0] = 0.;
+    vectIn[1] = 1.;
+    vectIn[2] = 2.;
+    //
+    xform.forward (vectOut,vectIn);
+    //
+    std::cout << "\t[" << vectIn[0]
+	      << " " << vectIn[1]
+	      << " " << vectIn[2]
+	      << "]  ->  "
+	      << "[" << vectOut[0]
+	      << " " << vectOut[1]
+	      << " " << vectOut[2]
+	      << "]"
+	      << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[2] Forward transform using non-zero shift ..." << std::endl;
+  try {
+    std::vector<double> shift (rank);
+
+    shift[0] = shift[1] = shift[2] = 0.5;
+    
+    xform.setShift(shift);
+    xform.forward (vectOut,vectIn);
+    //
+    std::cout << "\t[" << vectIn[0]
+	      << " " << vectIn[1]
+	      << " " << vectIn[2]
+	      << "]  ->  "
+	      << "[" << vectOut[0]
+	      << " " << vectOut[1]
+	      << " " << vectOut[2]
+	      << "]"
+	      << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
 int main ()
 {
   int nofFailedTests (0);
 
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_LinearTransform ();
-  }
-
+  nofFailedTests += test_constructors ();
+  // Test routines for carrying out the transform
+  nofFailedTests += test_transform ();
+  
   return nofFailedTests;
 }

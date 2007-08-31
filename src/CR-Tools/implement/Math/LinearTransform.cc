@@ -114,7 +114,7 @@ namespace CR { // Namespace CR -- begin
   {
     rank_p = rank;
     
-    matrix_p = new double[rank_p];
+    matrix_p = new double[rank_p*rank_p];
     setUnitMatrix();
     
     shift_p  = new double[rank_p];
@@ -350,6 +350,29 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
 
+  // ------------------------------------------------------------------- setShift
+  
+  bool LinearTransform::setShift (std::vector<double> const &shift)
+  {
+    bool status (true);
+
+    if (shift.size() == rank_p) {
+      shift_p = new double [rank_p];
+      try {
+	for (uint n(0); n<rank_p; n++) {
+	  shift_p[n] = shift[n];
+	}
+      } catch (std::string message) {
+	std::cerr << "[LinearTransform::setShift] Error while copying shift values!"
+		  << std::endl;
+	std::cerr << " --> " << message << std::endl;
+	status = false;
+      }
+    }
+    
+    return status;
+  }
+  
   // ------------------------------------------------------------------- setShift
   
 #ifdef HAVE_BLITZ
