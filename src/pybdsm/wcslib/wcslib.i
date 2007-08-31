@@ -73,7 +73,7 @@
 	return NULL;
       }
 
-    Py_RETURN_NONE;
+    return Py_INCREF(Py_None), Py_None;
   }
 
   PyObject *xy2radec(double x1, double x2) {
