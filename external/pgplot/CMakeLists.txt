@@ -295,6 +295,7 @@ add_library (cpgplot
   cpg/cpgdemo.c
   cpg/pgbind.c
   )
+target_link_libraries (cpgplot pgplot)
 
 ## -- libXmPgplot --------------------------------
 
