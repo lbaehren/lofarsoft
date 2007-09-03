@@ -260,26 +260,32 @@ namespace CR { // NAMESPACE CR -- BEGIN
     */
 #ifdef HAVE_CASA
     bool setAntPositions (const casa::Matrix<double> &antPositions,
-			  const bool &bufferDelays=false);
+			  bool const &bufferDelays=false,
+			  bool const &antennaIndexFirst=true);
 #else
 #ifdef HAVE_BLITZ
     bool setAntPositions (const blitz::Array<double,2> &antPositions,
-			  const bool &bufferDelays=false);
+			  const bool &bufferDelays=false,
+			  bool const &antennaIndexFirst=true);
 #endif
 #endif
-
+    
 #ifdef HAVE_CASA
     inline bool setAntennaPositions (const casa::Matrix<double> &antPositions,
-				     const bool &bufferDelays=false) {
+				     const bool &bufferDelays=false,
+				     bool const &antennaIndexFirst=true) {
       return setAntPositions (antPositions,
-			      bufferDelays);
+			      bufferDelays,
+			      antennaIndexFirst);
     }
 #else
 #ifdef HAVE_BLITZ
     inline bool setAntennaPositions (const blitz::Array<double,2> &antPositions,
-				     const bool &bufferDelays=false) {
+				     const bool &bufferDelays=false,
+				     bool const &antennaIndexFirst=true) {
       return setAntPositions (antPositions,
-			      bufferDelays);
+			      bufferDelays,
+			      antennaIndexFirst);
     }
 #endif
 #endif

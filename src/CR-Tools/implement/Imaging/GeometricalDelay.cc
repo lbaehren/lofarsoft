@@ -202,7 +202,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
   
 #ifdef HAVE_CASA
   bool GeometricalDelay::setAntPositions (const casa::Matrix<double> &antPositions,
-					  const bool &bufferDelays)
+					  bool const &bufferDelays,
+					  bool const &antennaIndexFirst)
   {
     bool status (true);
     casa::IPosition shape (antPositions.shape());
@@ -228,7 +229,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #else 
 #ifdef HAVE_BLITZ
   bool GeometricalDelay::setAntPositions (const blitz::Array<double,2> &antPositions,
-					  const bool &bufferDelays)
+					  bool const &bufferDelays,
+					  bool const &antennaIndexFirst)
   {
     bool status (true);
 

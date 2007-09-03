@@ -613,9 +613,9 @@ namespace CR { // Namespace CR -- begin
       return false;
     }
     
-    uint row (0);
-    uint col (0);
-    uint n (0);
+    int row (0);
+    int col (0);
+    int n (0);
     
     out.resize (shape_p[0]);
     
