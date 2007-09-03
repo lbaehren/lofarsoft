@@ -210,9 +210,25 @@ namespace CR { // Namespace CR -- begin
     */
     bool setMatrix (double const *matrix);
 #ifdef HAVE_BLITZ
+    /*!
+      \brief Set the transformation matrix
+
+      \param matrix -- \f$ N \times M \f$ matrix
+
+      \return status -- Status of the operation; returns <i>false</i> if an error
+                        was encountered.
+    */
     bool setMatrix (blitz::Array<double,2> const &matrix);
 #endif
 #ifdef HAVE_CASA
+    /*!
+      \brief Set the transformation matrix
+
+      \param matrix -- \f$ N \times M \f$ matrix
+
+      \return status -- Status of the operation; returns <i>false</i> if an error
+                        was encountered.
+    */
     bool setMatrix (casa::Matrix<double> const &matrix);
 #endif
     

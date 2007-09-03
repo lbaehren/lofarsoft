@@ -215,9 +215,9 @@ namespace CR { // Namespace CR -- begin
     matrix_p = new double [shape_p[0]*shape_p[0]];
     shift_p  = new double [shape_p[0]];
 
-    uint i (0);
-    uint j (0);
-    uint n (0);
+    int i (0);
+    int j (0);
+    int n (0);
 
     for (i=0; i<shape_p[0]; i++) {
       shift_p[i] = other.shift_p[i];
@@ -279,7 +279,6 @@ namespace CR { // Namespace CR -- begin
   bool LinearTransform::setMatrix (blitz::Array<double,2> const &matrix)
   {
     bool status (true);
-    int nelem (shape_p[0]*shape_p[1]);
 
     /*
       Check if the provided matrix has the correct shape
@@ -312,7 +311,6 @@ namespace CR { // Namespace CR -- begin
   bool LinearTransform::setMatrix (casa::Matrix<double> const &matrix)
   {
     bool status (true);
-    int nelem (shape_p[0]*shape_p[1]);
     casa::IPosition shape (matrix.shape());
 
     if (shape(0) == shape_p[0] && shape(1) == shape_p[1]) {
@@ -330,7 +328,7 @@ namespace CR { // Namespace CR -- begin
     } else {
       std::cerr << "[LinearTransform::setMatrix] Wrong shape of input array!"
 		<< std::endl;
-      std::cerr << " -- Expected shape : " << shape_p << std::endl;
+      std::cerr << " -- Expected shape : " << showShape() << std::endl;
       std::cerr << " -- Provided shape : " << shape   << std::endl;
     }
     
@@ -390,7 +388,7 @@ namespace CR { // Namespace CR -- begin
     if (status) {
       shift_p = new double [shape_p[0]];
       try {
-	for (uint n(0); n<shape_p[0]; n++) {
+	for (int n(0); n<shape_p[0]; n++) {
 	  shift_p[n] = shift[n];
 	}
       } catch (std::string message) {
@@ -410,10 +408,10 @@ namespace CR { // Namespace CR -- begin
   {
     bool status (true);
 
-    if (shift.size() == shape_p[0]) {
+    if (int(shift.size()) == shape_p[0]) {
       shift_p = new double [shape_p[0]];
       try {
-	for (uint n(0); n<shape_p[0]; n++) {
+	for (int n(0); n<shape_p[0]; n++) {
 	  shift_p[n] = shift[n];
 	}
       } catch (std::string message) {
@@ -496,9 +494,9 @@ namespace CR { // Namespace CR -- begin
   
   void LinearTransform::setUnitMatrix ()
   {
-    uint row (0);
-    uint col (0);
-    uint n (0);
+    int row (0);
+    int col (0);
+    int n (0);
     
     for (row=0; row<shape_p[0]; row++) {
       for (col=0; col<shape_p[0]; col++) {
@@ -534,6 +532,7 @@ namespace CR { // Namespace CR -- begin
     } else {
       std::cerr << "[LinearTransform::det] Not yet implemented for rank "
 		<< shape_p[0] << std::endl;
+      return 0;
     }
   }
 
@@ -543,9 +542,9 @@ namespace CR { // Namespace CR -- begin
 				 double const *in)
   {
     bool status (true);
-    uint row (0);
-    uint col (0);
-    uint n (0);
+    int row (0);
+    int col (0);
+    int n (0);
     
     try {
       for (row=0; row<shape_p[0]; row++) {
@@ -571,15 +570,15 @@ namespace CR { // Namespace CR -- begin
     bool status (true);
 
     // check the length of the input vector
-    if (in.size() != shape_p[1]) {
+    if (int(in.size()) != shape_p[1]) {
       std::cerr << "[LinearTransform::forward] Incorrect length of input vector!"
 		<< std::endl;
       return false;
     }
 
-    uint row (0);
-    uint col (0);
-    uint n (0);
+    int row (0);
+    int col (0);
+    int n (0);
     
     out.resize (shape_p[0]);
     

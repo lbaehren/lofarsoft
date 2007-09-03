@@ -130,12 +130,17 @@ if (CR_GLISH_SUPPORT)
     message (STATUS "[CR] Configuration to use CASA ...")
     include (${cr_cmake}/FindCASA.cmake)
   endif (NOT HAVE_CASA)
+  ## Compiler flags for CASA
   if (HAVE_CASA)
     set (HAVE_CASACORE FALSE)
     add_definitions (-DHAVE_CASA)
   else (HAVE_CASA)
     message (STATUS "[CR] Failed to configure using CASA !")
   endif (HAVE_CASA)
+  ## Compiler flags for Glish
+  if (HAVE_GLISH)
+    add_definitions (-DHAVE_GLISH)
+  endif (HAVE_GLISH)
 else (CR_GLISH_SUPPORT)
   ## --- Without support for Glish applications everything we need is casacore
   if (NOT HAVE_CASA) 

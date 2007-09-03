@@ -207,12 +207,14 @@ namespace CR { // Namespace CR -- begin
       // Container for the phase gradients
       Matrix<DComplex> phaseGradients;
       /* ---- old version (needs to go) ---- */
+#ifdef HAVE_GLISH
       // calculate the phase gradients
       if (verbose) { bf_p.showProgress(True); };
       bf_p.setPhaseGradients(dr->frequencyValues(), tmpvec, tmpAntPos);
       if (verbose) { bf_p.showProgress(False); };
       // retrieve the phase gradients
       phaseGradients = bf_p.phaseGradients().nonDegenerate();
+#endif
       /* ---- new version ---- */
 //       try {
 // 	CR::GeometricalPhase geomPhase (tmpAntPos,tmpvec,dr->frequencyValues());

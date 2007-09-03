@@ -5,17 +5,17 @@
 
 ## imagefromfits  WCSLIB MIRLIB LAPACK F77 CFITSIO
 
-if (HAVE_CASACORE OR HAVE_CASA)
-  if (HAVE_CFITSIO)
-    add_executable (imagefromfits imagefromfits.cc)
-    target_link_libraries (imagefromfits
-      ${CASA_LIBRARIES}
-      ${CFITSIO_LIBRARIES}
-      ${LAPACK_LIBRARIES}
-      ${CPGPLOT_LIBRARIES}
-      )
-  endif (HAVE_CFITSIO)
-endif (HAVE_CASACORE OR HAVE_CASA)
+#if (HAVE_CASACORE OR HAVE_CASA)
+#  if (HAVE_CFITSIO)
+#    add_executable (imagefromfits imagefromfits.cc)
+#    target_link_libraries (imagefromfits
+#      ${CASA_LIBRARIES}
+#      ${CFITSIO_LIBRARIES}
+#      ${LAPACK_LIBRARIES}
+#      ${CPGPLOT_LIBRARIES}
+#      )
+#  endif (HAVE_CFITSIO)
+#endif (HAVE_CASACORE OR HAVE_CASA)
   
 ## treetest  GLISH CFITSIO WCSLIB
 
