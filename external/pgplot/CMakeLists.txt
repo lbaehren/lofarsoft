@@ -230,17 +230,13 @@ add_subdirectory (fonts)
 add_subdirectory (src)
 add_subdirectory (sys)
 
-set (pgplot_modules
-  cpg
-  drivers
-  drivers/xmotif
-  src
-  sys
-)
-
 include_directories (
-  .
   ${pgplot_SOURCE_DIR}
+  ${pgplot_SOURCE_DIR}/cpg
+  ${pgplot_SOURCE_DIR}/drivers
+  ${pgplot_SOURCE_DIR}/drivers/xmotif
+  ${pgplot_SOURCE_DIR}/src
+  ${pgplot_SOURCE_DIR}/sys
   ${pgplot_modules}
   ${TCL_INCLUDES}
   ${PNG_INCLUDE_DIR}
@@ -291,9 +287,10 @@ target_link_libraries (pgplot
 
 ## -- libcpgplot ---------------------------------
 
+FILE (GLOB cpgplot_sources ${pgplot_SOURCE_DIR}/cpg/*.c)
+
 add_library (cpgplot
-  cpg/cpgdemo.c
-  cpg/pgbind.c
+  ${cpgplot_sources}
   )
 target_link_libraries (cpgplot pgplot)
 
