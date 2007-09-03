@@ -21,12 +21,14 @@
 
 add_executable (treetest treetest.cc)
 target_link_libraries (treetest cr)
+install (TARGETS treetest RUNTIME DESTINATION bin)
 
 ## trigrun   GLISH POPT LAPACK F77 CFITSIO WCSLIB
 
 if (HAVE_POPT)
   add_executable (trigrun trigrun.cc)
   target_link_libraries (trigrun cr ${POPT_LIBRARIES})
+  install (TARGETS trigrun RUNTIME DESTINATION bin)
 endif (HAVE_POPT)
 
 ## ------------------------------------------------------------------------------
@@ -35,4 +37,3 @@ endif (HAVE_POPT)
 if (HAVE_GLISH)
   add_subdirectory (GlishClients)
 endif (HAVE_GLISH)
-

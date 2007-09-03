@@ -51,6 +51,7 @@ foreach (client ${glish_clients})
   target_link_libraries (${client} cr ${GLISH_LIBRARIES})
 endforeach (client)
 
+
 ##-------------------------------------------------------------------------------
 ## Clients which need additional external packages (e.g. for plotting)
 
@@ -72,3 +73,13 @@ target_link_libraries (CGuiPipeClient
   ${PGPLOT_LIBRARIES}
   ${X11_LIBRARIES}
   )
+
+## -----------------------------------------------------------------------------
+## Installation
+
+install (
+  TARGETS ${glish_clients} CGaccessClient CGuiPipeClient
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+)
