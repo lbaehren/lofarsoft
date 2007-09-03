@@ -130,6 +130,8 @@ message (STATUS "TCL_INCLUDES  = ${TCL_INCLUDES}")
 message (STATUS "TCL_LIBRARIES = ${TCL_LIBRARIES}")
 message (STATUS "TK_INCLUDES   = ${TK_INCLUDES}")
 message (STATUS "TK_LIBRARIES  = ${TK_LIBRARIES}")
+message (STATUS "GIF_LIBRARIES = ${GIF_LIBRARIES}")
+message (STATUS "PNG_LIBRARIES = ${PNG_LIBRARIES}")
 
 ## ------------------------------------------------------------------------------
 ## Create list of drivers to be included into the library
