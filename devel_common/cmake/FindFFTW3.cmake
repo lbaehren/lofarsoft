@@ -10,18 +10,33 @@
 #  FFTW3_INCLUDES = Include path for the header files of FFTW3
 #  FFTW3_LIBRARIES     = Link these to use FFTW3
 
+set (include_locations
+  /usr/local/include
+  /usr/include
+  /sw/include
+  /var/chroot/meqtrees/usr/include/fftw3.h
+)
+
+set (lib_locations
+  /usr/local/lib
+  /usr/lib
+  /lib
+  /sw/lib
+  /var/chroot/meqtrees/usr/lib
+)
+
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
 FIND_PATH (FFTW3_INCLUDES fftw3.h
-  PATHS /usr/local/include /usr/include /sw/include
+  PATHS ${include_locations}
   )
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
 FIND_LIBRARY (FFTW3_LIBRARIES fftw3 fftw
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib
+  PATHS ${lib_locations}
   )
 
 ## -----------------------------------------------------------------------------
