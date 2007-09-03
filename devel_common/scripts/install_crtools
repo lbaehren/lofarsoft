@@ -102,12 +102,14 @@ cd boost
 ## [5] Data Access Library (DAL)
 
 cd $basedir
-mkdir dal && cd dal
+mkdir dal
+cd dal
 cmake ../../src/DAL && make install
 
 ##------------------------------------------------------------------------------
 ## Configure and install the CR-Tools
 
 cd $basedir
-mkdir cr && cd cr
+mkdir cr
+cd cr
 cmake ../../src/CR-Tools && make install
