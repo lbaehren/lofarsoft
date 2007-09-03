@@ -134,6 +134,8 @@ message (STATUS "TK_LIBRARIES  = ${TK_LIBRARIES}")
 ## ------------------------------------------------------------------------------
 ## Create list of drivers to be included into the library
 
+set (pgplot_external_libraries "")
+
 set (outfile "build/drivers.list")
 
 file (WRITE ${outfile} "! List of selected drivers\n\n")
@@ -152,20 +154,30 @@ file (APPEND ${outfile} "XMDRIV 0 /XMOTIF   Motif applications containing XmPgpl
 if (libXaw AND libXt)
   file (APPEND ${outfile} "XWDRIV 1 /XWINDOW  Workstations running X Window System		C\n")
   file (APPEND ${outfile} "XWDRIV 2 /XSERVE   Persistent window on X Window System		C\n")
+  ## update linker list
+  list (APPEND pgplot_external_libraries ${libXaw})
+  list (APPEND pgplot_external_libraries ${libXt})
 endif (libXaw AND libXt)
 
 if (GIF_LIBRARIES)
  file (APPEND ${outfile} "GIDRIV 1 /GIF      GIF-format file, landscape\n")
  file (APPEND ${outfile} "GIDRIV 2 /VGIF     GIF-format file, portrait\n")
+ ## update linker list
+ list (APPEND pgplot_external_libraries ${GIF_LIBRARIES})
 endif (GIF_LIBRARIES)
 
 if (PNG_LIBRARIES)
  file (APPEND ${outfile} "PNDRIV 1 /PNG      Portable Network Graphics file                 C\n")
  file (APPEND ${outfile} "PNDRIV 2 /TPNG     Portable Network Graphics file - transparent background C\n")
+ ## update linker list
+ list (APPEND pgplot_external_libraries ${PNG_LIBRARIES})
 endif (PNG_LIBRARIES)
 
 if (TCL_LIBRARIES AND TK_LIBRARIES)
- file (APPEND ${outfile} "TKDRIV 0 /XTK      X-window Tcl/Tk programs with pgplot widgets.  C\n")
+  file (APPEND ${outfile} "TKDRIV 0 /XTK      X-window Tcl/Tk programs with pgplot widgets.  C\n")
+  ## update linker list
+  list (APPEND pgplot_external_libraries ${TCL_LIBRARIES})
+  list (APPEND pgplot_external_libraries ${TK_LIBRARIES})
 endif (TCL_LIBRARIES AND TK_LIBRARIES)
 
 ## ------------------------------------------------------------------------------
@@ -268,14 +280,9 @@ add_library (pgplot
   grexec.f
   )
 target_link_libraries (pgplot
+  ${pgplot_external_libraries}
   ${G2C_LIBRARIES}
-  ${GIF_LIBRARIES}
-  ${TCL_LIBRARIES}
-  ${TK_LIBRARIES}
-  ${libXaw}
-  ${libXt}
   ${JPEG_LIBRARIES}
-  ${PNG_LIBRARIES}
   ${X11_LIBRARIES}
   ${ZLIB_LIBRARIES}
   )
