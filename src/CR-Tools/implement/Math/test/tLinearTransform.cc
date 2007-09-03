@@ -55,6 +55,7 @@ int test_constructors ()
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
     LinearTransform xform;
+    xform.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -64,6 +65,7 @@ int test_constructors ()
   try {
     uint rank (3);
     LinearTransform xform (rank);
+    xform.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -71,31 +73,35 @@ int test_constructors ()
   
   std::cout << "[3] Testing fully argumented constructor ..." << std::endl;
   try {
-    uint rank (3);
+    uint rank (2);
+    std::vector<int> shape (rank);
     double *matrix;
     double *shift;
+
+    shape[0] = shape[1] = 3;
 
     // Assign some values to the array elements
 
     std::cout << " -- allocating memory for input arrays ..." << std::endl;
-    matrix = new double [rank*rank];
-    shift  = new double [rank];
+    matrix = new double [shape[0]*shape[1]];
+    shift  = new double [shape[0]];
 
     uint row (0);
     uint col (0);
     uint n (0);
 
     std::cout << " -- assigning values to input arrays ..." << std::endl;
-    for (row=0; row<rank; row++) {
+    for (row=0; row<shape[0]; row++) {
       shift[row] = row;
-      for (col=0; col<rank; col++) {
+      for (col=0; col<shape[1]; col++) {
 	matrix[n] = n;
 	n++;
       }
     }
 
     std::cout << " -- constructing new object ..." << std::endl;
-    LinearTransform xform (rank,matrix,shift);
+    LinearTransform xform (shape,matrix,shift);
+    xform.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -106,8 +112,10 @@ int test_constructors ()
     uint rank (3);
     std::cout << " -- constructing original object ..." << std::endl;
     LinearTransform xform1 (rank);
+    xform1.summary();
     std::cout << " -- constructing new object via copy ..." << std::endl;
     LinearTransform xform2 (xform1);
+    xform2.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -122,8 +130,12 @@ int test_constructors ()
 
     matrix = 0,1,2,3,4,5,6,7,8;
     shift  = 0.5,0.5,0.5;
+
+    std::cout << " -- Transformation matrix : " << matrix << std::endl;
+    std::cout << " -- Translation vector    : " << shift  << std::endl;
     
     LinearTransform xform (matrix,shift);
+    xform.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;

@@ -28,6 +28,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <iomanip>
 
 #ifdef HAVE_BLITZ
 #include <blitz/array.h>
@@ -45,7 +46,7 @@ namespace CR { // Namespace CR -- begin
     
     \ingroup Math
     
-    \brief Brief description for class LinearTransform
+    \brief A general \f$ M \rightarrow N \f$ linear transform
     
     \author Lars B&auml;hren
 
@@ -61,13 +62,15 @@ namespace CR { // Namespace CR -- begin
     
     <h3>Synopsis</h3>
 
-    A general linear transform in N-dimensional coordinates is given by 
+    A general linear transform from M-dimensional to N-dimensional space is given
+    by
     \f[ \vec y = \mathbf{A} \vec x + \vec s \f]
-    where \f$ \mathbf{A} \f$ is a N times N matrix and \f$ \vec s \f$ a vector
+    where \f$ \mathbf{A} \f$ is a N times M matrix and \f$ \vec s \f$ a vector
     of length N. Written out for individual components we have 
-    \f[ y_{i} = \sum_{k=1}^{N} a_{ik} x_{k} + s_{i} \f]
+    \f[ y_{i} = \sum_{k=1}^{M} a_{ik} x_{k} + s_{i} \f]
     where the \f$ a_{ik} \f$ are elements of the matrix \f$ \mathbf{A} \f$.
-    The corresponding inverse (backwards) transform is given by
+    For the case that M=N, the corresponding inverse (backwards) transform is
+    given by
     \f[ \vec x = \mathbf{A}^{-1} (\vec s - \vec y) \f]
     
     <h3>Example(s)</h3>
@@ -78,8 +81,8 @@ namespace CR { // Namespace CR -- begin
     uint col (0);
     uint n (0);
    
-    for (row=0; row<rank; row++) {
-      for (col=0; col<rank; col++) {
+    for (row=0; row<nofRows; row++) {
+      for (col=0; col<nofCols; col++) {
         matrix[n] = A[row][col];
         n++;
       }
@@ -88,15 +91,17 @@ namespace CR { // Namespace CR -- begin
     For a simple case thus:
     \f[ \left[ \begin{array}{ccc} 0 & 1 & 2 \\ 3 & 4 & 5 \\ 6 & 7 & 8 
     \end{array} \right] \qquad \rightarrow \qquad [0,1,2,3,4,5,6,7,8] \f]
-    
+    or
+    \f[ \left[ \begin{array}{ccc} 0 & 1 & 2 \\ 3 & 4 & 5 \end{array} \right]
+    \quad \rightarrow \quad [0,1,2,3,4,5] \f]
   */  
   class LinearTransform {
     
     //! Rank of vector space within which we operate
-    uint rank_p;
-    //! Transformation matrix
+    std::vector<int> shape_p;
+    //! Transformation matrix, [N,M]
     double *matrix_p;
-    //! Position shift
+    //! Position shift, [N]
     double *shift_p;
     
   public:
@@ -109,20 +114,33 @@ namespace CR { // Namespace CR -- begin
     LinearTransform ();
     
     /*! 
-      \brief Argumented constructor 
+      \brief Argumented constructor for \f$ N \rightarrow N \f$ transform
       
-      \param rank -- Rank of vector space within which we operate
+      \param shape -- Dimensions of the vector spaces between which to transform;
+                      this also corresponds to the shape of the transformation
+		      matrix \f$ \mathbf{A} \f$. In this case we have N = M.
     */ 
-    LinearTransform (uint const &rank); 
+    LinearTransform (int const &shape); 
+
+    /*! 
+      \brief Argumented constructor for \f$ M \rightarrow N \f$ transform
+      
+      \param shape -- Dimensions of the vector spaces between which to transform;
+                      this also corresponds to the shape of the transformation
+		      matrix \f$ \mathbf{A} \f$
+    */ 
+    LinearTransform (std::vector<int> const &shape); 
     
     /*! 
-      \brief Argumented constructor 
+      \brief Argumented constructor for \f$ M \rightarrow N \f$ transform
       
-      \param rank   -- Rank of the matrix and the vector
+      \param shape  -- Dimensions of the vector spaces between which to transform;
+                       this also corresponds to the shape of the transformation
+		       matrix \f$ \mathbf{A} \f$
       \param matrix -- Transformation matrix, \f$ \mathbf A \f$.
       \param shift  -- Position shift, \f$ \vec s \f$.
     */
-    LinearTransform (uint const &rank,
+    LinearTransform (std::vector<int> const &shape,
 		     double const *matrix,
 		     double const *shift);
     
@@ -172,7 +190,24 @@ namespace CR { // Namespace CR -- begin
     LinearTransform& operator= (LinearTransform const &other); 
     
     // --------------------------------------------------------------- Parameters
-    
+
+    /*!
+      \brief Get the shape of the transform
+      
+      \return shape -- 
+    */
+    inline std::vector<int> shape () const {
+      return shape_p;
+    }
+
+    /*!
+      \brief Set the transformation matrix
+
+      \param matrix -- \f$ N \times M \f$ matrix
+
+      \return status -- Status of the operation; returns <i>false</i> if an error
+                        was encountered.
+    */
     bool setMatrix (double const *matrix);
 #ifdef HAVE_BLITZ
     bool setMatrix (blitz::Array<double,2> const &matrix);
@@ -221,7 +256,18 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Provide a summary of the internal status
     */
-    void summary (std::ostream &os);    
+    void summary (std::ostream &os);
+
+    /*!
+      \brief Show the shape information in a format suitable for an output stream
+
+      \return shapeAsString -- The shape vector formatted as string.
+    */
+    inline std::string showShape () {
+      std::ostringstream shapeAsStream;
+      shapeAsStream << "[" << shape_p[0] << " " << shape_p[1] << "]";
+      return shapeAsStream.str();
+    }
 
     // ------------------------------------------------------------------ Methods
 
@@ -322,7 +368,9 @@ namespace CR { // Namespace CR -- begin
     
   private:
 
-    void init (uint const &rank);
+    void init (int const &rank);
+
+    void init (std::vector<int> const &shape);
 
     /*!
       \brief Set the transformation matrix to a unit matrix
@@ -339,7 +387,7 @@ namespace CR { // Namespace CR -- begin
     */
     inline double matrix (uint const &i,
 			  uint const &j) {
-      return matrix_p[i*rank_p+j];
+      return matrix_p[i*shape_p[0]+j];
     }
 
     /*!

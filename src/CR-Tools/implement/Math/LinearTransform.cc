@@ -30,43 +30,65 @@ namespace CR { // Namespace CR -- begin
   //  Construction
   //
   // ============================================================================
+
+  // ------------------------------------------------------------ LinearTransform
   
   LinearTransform::LinearTransform ()
   {
     init (1);
   }
   
-  LinearTransform::LinearTransform (uint const &rank)
+  // ------------------------------------------------------------ LinearTransform
+  
+  LinearTransform::LinearTransform (int const &rank)
   {
     init (rank);
   }
   
-  LinearTransform::LinearTransform (uint const &rank,
+  // ------------------------------------------------------------ LinearTransform
+  
+  LinearTransform::LinearTransform (std::vector<int> const &shape,
 				    double const *matrix,
 				    double const *shift)
   {
-    rank_p = rank;
+    shape_p.resize(2);
+
+    if (shape.size() > 1) {
+      shape_p[0] = shape[0];
+      shape_p[1] = shape[1];
+    } else {
+      shape_p[0] = shape[0];
+      shape_p[1] = shape[0];
+    }
 
     if (!setMatrix (matrix)) {
-      init (rank);
+      init (shape);
     }
 
     if (!setShift (shift)) {
-      init (rank);
+      init (shape);
     }
   }
+  
+  // ------------------------------------------------------------ LinearTransform
   
 #ifdef HAVE_BLITZ
   LinearTransform::LinearTransform (blitz::Array<double,2> const &matrix,
 				    blitz::Array<double,1> const &shift)
   {
     bool status (true);
-    int nelem (shift.numElements());
 
     /* Check if the shapes of the input arrays are consistent */
-    if (matrix.rows() == nelem && matrix.cols() == nelem) {
-      rank_p = nelem;
+    if (matrix.cols() == shift.numElements()) {
+      // store the shape information
+      shape_p.resize(2);
+      shape_p[0] = matrix.rows();
+      shape_p[1] = matrix.cols();
+      // store the transformation matrix
+      matrix_p = new double [shape_p[0]*shape_p[1]];
       status = setMatrix (matrix);
+      // store the translation vector
+      shift_p = new double [shape_p[1]];
       status = setShift (shift);
     } else {
       std::cerr << "[LinearTransform::LinearTransform] Inconsisten array shapes!"
@@ -77,6 +99,8 @@ namespace CR { // Namespace CR -- begin
   }
 #endif
 
+  // ------------------------------------------------------------ LinearTransform
+  
 #ifdef HAVE_CASA
   LinearTransform::LinearTransform (casa::Matrix<double> const &matrix,
 				    casa::Vector<double> const &shift)
@@ -86,9 +110,16 @@ namespace CR { // Namespace CR -- begin
     casa::IPosition shapeShift (shift.shape());
 
     /* Check if the shapes of the input arrays are consistent */
-    if (shapeMatrix(0) == shapeShift(0) && shapeMatrix(1) == shapeShift(0)) {
-      rank_p = shapeShift(0);
+    if (shapeMatrix(1) == shapeShift(0)) {
+      // store shape information
+      shape_p.resize(2);
+      shape_p[0] = shapeMatrix(0);
+      shape_p[1] = shapeMatrix(1);
+      // store the transformation matrix
+      matrix_p = new double [shape_p[0]*shape_p[1]];
       status = setMatrix (matrix);
+      // store the translation vector
+      shift_p = new double [shape_p[1]];
       status = setShift (shift);
     } else {
       std::cerr << "[LinearTransform::LinearTransform] Inconsisten array shapes!"
@@ -98,6 +129,8 @@ namespace CR { // Namespace CR -- begin
     }
   }
 #endif
+  
+  // ------------------------------------------------------------ LinearTransform
   
   LinearTransform::LinearTransform (LinearTransform const &other)
   {
@@ -109,17 +142,37 @@ namespace CR { // Namespace CR -- begin
   //  Initialization
   //
   // ============================================================================
+
+  // ----------------------------------------------------------------------- init
   
-  void LinearTransform::init (uint const &rank)
+  void LinearTransform::init (int const &rank)
   {
-    rank_p = rank;
-    
-    matrix_p = new double[rank_p*rank_p];
-    setUnitMatrix();
-    
-    shift_p  = new double[rank_p];
-    for (uint n(0); n<rank; n++) {
-      shift_p[n] = 0.0;
+    std::vector<int> shape (2);
+    // stored shape values
+    shape[0] = shape[1] = rank;
+    // forwarding of parameters
+    init (shape);
+  }
+  
+  // ----------------------------------------------------------------------- init
+  
+  void LinearTransform::init (std::vector<int> const &shape)
+  {
+    if (shape.size() == 1) {
+      init (shape[0]);
+    } else {
+      // set the shape of the matrix
+      shape_p.resize(2);
+      shape_p[0] = shape[0];
+      shape_p[1] = shape[1];
+      // initialize the transformation matrix
+      matrix_p = new double[shape_p[0]*shape_p[1]];
+      setUnitMatrix();
+      // initialize the shift vector
+      shift_p = new double[shape_p[0]];
+      for (int n(0); n<shape_p[0]; n++) {
+	shift_p[n] = 0.0;
+      }
     }
   }
 
@@ -156,18 +209,19 @@ namespace CR { // Namespace CR -- begin
   
   void LinearTransform::copy (LinearTransform const &other)
   {
-    rank_p = other.rank_p;
+    shape_p.resize(2);
+    shape_p = other.shape_p;
     
-    matrix_p = new double [rank_p*rank_p];
-    shift_p  = new double [rank_p];
+    matrix_p = new double [shape_p[0]*shape_p[0]];
+    shift_p  = new double [shape_p[0]];
 
     uint i (0);
     uint j (0);
     uint n (0);
 
-    for (i=0; i<rank_p; i++) {
+    for (i=0; i<shape_p[0]; i++) {
       shift_p[i] = other.shift_p[i];
-      for (j=0; j<rank_p; j++) {
+      for (j=0; j<shape_p[1]; j++) {
 	matrix_p[n] = other.matrix_p[n];
 	n++;
       }
@@ -185,7 +239,7 @@ namespace CR { // Namespace CR -- begin
   bool LinearTransform::setMatrix (double const *matrix)
   {
     bool status (true);
-    uint nelem (rank_p*rank_p);
+    int nelem (shape_p[0]*shape_p[1]);
     double element (0);
 
     /* Check if the input array has enough elements by trying to access the
@@ -205,7 +259,7 @@ namespace CR { // Namespace CR -- begin
     if (status) {
       matrix_p = new double [nelem];
       try {
-	for (uint n(0); n<nelem; n++) {
+	for (int n(0); n<nelem; n++) {
 	  matrix_p[n] = matrix[n];
 	}
       } catch (std::string message) {
@@ -225,19 +279,19 @@ namespace CR { // Namespace CR -- begin
   bool LinearTransform::setMatrix (blitz::Array<double,2> const &matrix)
   {
     bool status (true);
-    int nelem (rank_p);
+    int nelem (shape_p[0]*shape_p[1]);
 
     /*
       Check if the provided matrix has the correct shape
     */
-    if (matrix.rows() == nelem && matrix.cols() == nelem) {
+    if (matrix.rows() == shape_p[0] && matrix.cols() == shape_p[1]) {
       // local variables
       int row (0);
       int col (0);
       uint n(0);
       // copy the array elements
-      for (row=0; row<nelem; row++) {
-	for (col=0; col<nelem; col++) {
+      for (row=0; row<shape_p[0]; row++) {
+	for (col=0; col<shape_p[1]; col++) {
 	  matrix_p[n] = matrix(col,row);
 	  n++;
 	}
@@ -258,17 +312,17 @@ namespace CR { // Namespace CR -- begin
   bool LinearTransform::setMatrix (casa::Matrix<double> const &matrix)
   {
     bool status (true);
-    int nelem (rank_p);
+    int nelem (shape_p[0]*shape_p[1]);
     casa::IPosition shape (matrix.shape());
 
-    if (shape(0) == nelem && shape(1) == nelem) {
+    if (shape(0) == shape_p[0] && shape(1) == shape_p[1]) {
       // local variables
       int row (0);
       int col (0);
       int n(0);
       // copy the array elements
-      for (row=0; row<nelem; row++) {
-	for (col=0; col<nelem; col++) {
+      for (row=0; row<shape_p[0]; row++) {
+	for (col=0; col<shape_p[1]; col++) {
 	  matrix_p[n] = matrix(col,row);
 	  n++;
 	}
@@ -276,8 +330,8 @@ namespace CR { // Namespace CR -- begin
     } else {
       std::cerr << "[LinearTransform::setMatrix] Wrong shape of input array!"
 		<< std::endl;
-      std::cerr << " -- Rank         : " << rank_p << std::endl;
-      std::cerr << " -- Matrix shape : " << shape  << std::endl;
+      std::cerr << " -- Expected shape : " << shape_p << std::endl;
+      std::cerr << " -- Provided shape : " << shape   << std::endl;
     }
     
     return status;
@@ -288,16 +342,16 @@ namespace CR { // Namespace CR -- begin
   
   void LinearTransform::shift (std::vector<double> &vect)
   {
-    vect.resize(rank_p);
-    for (uint n(0); n<rank_p; n++) {
+    vect.resize(shape_p[0]);
+    for (int n(0); n<shape_p[0]; n++) {
       vect[n] = shift_p[n];
     }
   }
 #ifdef HAVE_BLITZ
   void LinearTransform::shift (blitz::Array<double,1> &shift)
   {
-    shift.resize(rank_p);
-    for (uint n(0); n<rank_p; n++) {
+    shift.resize(shape_p[0]);
+    for (int n(0); n<shape_p[0]; n++) {
       shift(n) = shift_p[n];
     }
   }
@@ -305,8 +359,8 @@ namespace CR { // Namespace CR -- begin
 #ifdef HAVE_CASA
   void LinearTransform::shift (casa::Vector<double> &shift)
   {
-    shift.resize(rank_p);
-    for (uint n(0); n<rank_p; n++) {
+    shift.resize(shape_p[0]);
+    for (int n(0); n<shape_p[0]; n++) {
       shift(n) = shift_p[n];
     }
   }
@@ -322,7 +376,7 @@ namespace CR { // Namespace CR -- begin
     /* Check if the input array has enough elements by trying to access the
        last expected element. */
     try {
-      element = shift[rank_p-1];
+      element = shift[shape_p[0]-1];
     } catch (std::string message) {
       std::cerr << "[LinearTransform::setShift] To few elements in input array!"
 		<< std::endl;
@@ -334,9 +388,9 @@ namespace CR { // Namespace CR -- begin
       storing this.
      */
     if (status) {
-      shift_p = new double [rank_p];
+      shift_p = new double [shape_p[0]];
       try {
-	for (uint n(0); n<rank_p; n++) {
+	for (uint n(0); n<shape_p[0]; n++) {
 	  shift_p[n] = shift[n];
 	}
       } catch (std::string message) {
@@ -356,10 +410,10 @@ namespace CR { // Namespace CR -- begin
   {
     bool status (true);
 
-    if (shift.size() == rank_p) {
-      shift_p = new double [rank_p];
+    if (shift.size() == shape_p[0]) {
+      shift_p = new double [shape_p[0]];
       try {
-	for (uint n(0); n<rank_p; n++) {
+	for (uint n(0); n<shape_p[0]; n++) {
 	  shift_p[n] = shift[n];
 	}
       } catch (std::string message) {
@@ -379,16 +433,23 @@ namespace CR { // Namespace CR -- begin
   bool LinearTransform::setShift (blitz::Array<double,1> const &shift)
   {
     bool status (true);
-    int nelem (rank_p);
+    int nelem (shape_p[1]);
 
-    if (shift.numElements() == nelem) {
-      for (uint n(0); n<nelem; n++) {
-	shift_p[n] = shift(n);
+    try {
+      if (shift.numElements() == nelem) {
+	for (int n(0); n<nelem; n++) {
+	  shift_p[n] = shift(n);
+	}
+      } else {
+	std::cerr << "[LinearTransform::setShift] Incorrect shape of vector!"
+		  << std::endl;
+	status = false;
       }
-    } else {
+    } catch (std::string message) {
+      std::cerr << "[LinearTransform::setShift] " << message << std::endl;
       status = false;
     }
-
+    
     return status;
   }
 #endif
@@ -399,7 +460,20 @@ namespace CR { // Namespace CR -- begin
   bool LinearTransform::setShift (casa::Vector<double> const &shift)
   {
     bool status (true);
+    int nelem (shift.nelements());
 
+    if (nelem == shape_p[0]) {
+      for (int n(0); n<shape_p[0]; n++) {
+	shift_p[n] = shift(n);
+      }
+    } else {
+      std::cerr << "[LinearTransform::setShift] Wrong length of vector!"
+		<< std::endl;
+      std::cerr << " -- Expected vector length = " << shape_p[0] << std::endl;
+      std::cerr << " -- Provided vector length = " << nelem      << std::endl;
+      status = false;
+    }
+    
     return status;
   }
 #endif
@@ -409,7 +483,7 @@ namespace CR { // Namespace CR -- begin
   void LinearTransform::summary (std::ostream &os)
   {
     os << "[LinearTransform::summary]" << std::endl;
-    os << " -- Rank : " << rank_p      << std::endl;
+    os << " -- Shape : " << showShape() << std::endl;
   }
   
   // ============================================================================
@@ -426,8 +500,8 @@ namespace CR { // Namespace CR -- begin
     uint col (0);
     uint n (0);
     
-    for (row=0; row<rank_p; row++) {
-      for (col=0; col<rank_p; col++) {
+    for (row=0; row<shape_p[0]; row++) {
+      for (col=0; col<shape_p[0]; col++) {
 	matrix_p[n] = 0;
 	n++;
       }
@@ -441,16 +515,16 @@ namespace CR { // Namespace CR -- begin
 				   uint const &j,
 				   double const &x)
   {
-    matrix_p[i*rank_p+j] = x;
+    matrix_p[i*shape_p[0]+j] = x;
   }
 
   // ------------------------------------------------------------------------ det
 
   double LinearTransform::det ()
   {
-    if (rank_p == 2) {
+    if (shape_p[0] == 2 && shape_p[1] == 2) {
       return (matrix_p[0]*matrix_p[3]-matrix_p[1]*matrix_p[2]);
-    } else if (rank_p == 2) {
+    } else if (shape_p[0] == 3 && shape_p[0] == 3) {
       return (matrix(0,0)*matrix(1,1)*matrix(2,2)
 	      +matrix(0,1)*matrix(1,2)*matrix(2,0)
 	      +matrix(0,2)*matrix(1,0)*matrix(2,1)
@@ -459,7 +533,7 @@ namespace CR { // Namespace CR -- begin
 	      -matrix(2,2)*matrix(1,0)*matrix(0,1));
     } else {
       std::cerr << "[LinearTransform::det] Not yet implemented for rank "
-		<< rank_p << std::endl;
+		<< shape_p[0] << std::endl;
     }
   }
 
@@ -474,9 +548,9 @@ namespace CR { // Namespace CR -- begin
     uint n (0);
     
     try {
-      for (row=0; row<rank_p; row++) {
+      for (row=0; row<shape_p[0]; row++) {
 	out[row] = shift_p[row];
-	for (col=0; col<rank_p; col++) {
+	for (col=0; col<shape_p[1]; col++) {
 	  out[row] += in[col]*matrix_p[n];
 	    n++;
 	}
@@ -497,7 +571,7 @@ namespace CR { // Namespace CR -- begin
     bool status (true);
 
     // check the length of the input vector
-    if (in.size() != rank_p) {
+    if (in.size() != shape_p[1]) {
       std::cerr << "[LinearTransform::forward] Incorrect length of input vector!"
 		<< std::endl;
       return false;
@@ -507,12 +581,12 @@ namespace CR { // Namespace CR -- begin
     uint col (0);
     uint n (0);
     
-    out.resize (rank_p);
+    out.resize (shape_p[0]);
     
     try {
-      for (row=0; row<rank_p; row++) {
+      for (row=0; row<shape_p[0]; row++) {
 	out[row] = shift_p[row];
-	for (col=0; col<rank_p; col++) {
+	for (col=0; col<shape_p[1]; col++) {
 	  out[row] += in[col]*matrix_p[n];
 	    n++;
 	}
@@ -534,7 +608,7 @@ namespace CR { // Namespace CR -- begin
     bool status (true);
 
     // check the length of the input vector
-    if (in.numElements() != rank_p) {
+    if (in.numElements() != shape_p[1]) {
       std::cerr << "[LinearTransform::forward] Incorrect length of input vector!"
 		<< std::endl;
       return false;
@@ -544,12 +618,12 @@ namespace CR { // Namespace CR -- begin
     uint col (0);
     uint n (0);
     
-    out.resize (rank_p);
+    out.resize (shape_p[0]);
     
     try {
-      for (row=0; row<rank_p; row++) {
+      for (row=0; row<shape_p[0]; row++) {
 	out(row) = shift_p[row];
-	for (col=0; col<rank_p; col++) {
+	for (col=0; col<shape_p[1]; col++) {
 	  out(row) += in(col)*matrix_p[n];
 	    n++;
 	}
