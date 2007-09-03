@@ -113,3 +113,18 @@ cd $basedir
 mkdir cr
 cd cr
 cmake ../../src/CR-Tools && make install
+
+##------------------------------------------------------------------------------
+## Required environment variables to set
+
+cd $basedir/..
+
+echo "-----------------------------------------------------------------"
+echo "Add the location of the new executables to your PATH variable:"
+echo ""
+echo " 1) For csh and tcsh"
+echo "      set path = ( $path `pwd`/release/bin )"
+echo "" 
+echo " 2) For sh and bash"
+echo "      export PATH=$PATH:`pwd`/release/bin"
+echo "-----------------------------------------------------------------"
