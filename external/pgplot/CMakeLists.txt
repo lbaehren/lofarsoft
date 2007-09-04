@@ -72,42 +72,10 @@ if (pgplot_cmake)
   include (${pgplot_cmake}/FindG2C.cmake)
   include (${pgplot_cmake}/FindGIF.cmake)
   include (${pgplot_cmake}/FindPNG.cmake)
+  include (${pgplot_cmake}/FindTCL.cmake)
+  include (${pgplot_cmake}/FindTK.cmake)
   include (${pgplot_cmake}/FindXaw.cmake)
 endif (pgplot_cmake)
-
-## Tcl -------------------------------------------
-
-find_path (TCL_INCLUDES tcl.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES tcl tcl8.4
-  NO_DEFAULT_PATH
-  )
-
-find_library (TCL_LIBRARIES tcl
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-  )
-
-if (TCL_INCLUDES AND TCL_LIBRARIES)
-  set (HAVE_TCL TRUE)
-endif (TCL_INCLUDES AND TCL_LIBRARIES)
-
-## Tk --------------------------------------------
-
-find_path (TK_INCLUDES tk.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES tcl tcl8.4 tk tk8.4
-  NO_DEFAULT_PATH
-  )
-
-find_library (TK_LIBRARIES tk
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-  )
-
-if (TK_INCLUDES AND TK_LIBRARIES)
-  set (HAVE_TK TRUE)
-endif (TK_INCLUDES AND TK_LIBRARIES)
 
 ## X11 -------------------------------------------
 
@@ -136,6 +104,7 @@ message (STATUS "HAVE_XAW  = ${HAVE_XAW}")
 ## ------------------------------------------------------------------------------
 ## Create list of drivers to be included into the library
 
+set (pgplot_external_includes "")
 set (pgplot_external_libraries "")
 
 set (outfile "build/drivers.list")
@@ -169,18 +138,22 @@ if (GIF_LIBRARIES)
 endif (GIF_LIBRARIES)
 
 if (PNG_LIBRARIES)
- file (APPEND ${outfile} "PNDRIV 1 /PNG      Portable Network Graphics file                 C\n")
- file (APPEND ${outfile} "PNDRIV 2 /TPNG     Portable Network Graphics file - transparent background C\n")
- ## update linker list
- list (APPEND pgplot_external_libraries ${PNG_LIBRARIES})
+  file (APPEND ${outfile} "PNDRIV 1 /PNG      Portable Network Graphics file                 C\n")
+  file (APPEND ${outfile} "PNDRIV 2 /TPNG     Portable Network Graphics file - transparent background C\n")
+  ## update compiler instructions
+  list (APPEND pgplot_external_includes ${PNG_INCLUDES})
+  ## update linker instructions
+  list (APPEND pgplot_external_libraries ${PNG_LIBRARIES})
 endif (PNG_LIBRARIES)
 
-if (TCL_LIBRARIES AND TK_LIBRARIES)
+if (HAVE_TCL AND HAVE_TK)
   file (APPEND ${outfile} "TKDRIV 0 /XTK      X-window Tcl/Tk programs with pgplot widgets.  C\n")
-  ## update linker list
+  ## update compiler instructions
+  list (APPEND pgplot_external_includes ${TCL_INCLUDES})
+  ## update linker instructions
   list (APPEND pgplot_external_libraries ${TCL_LIBRARIES})
   list (APPEND pgplot_external_libraries ${TK_LIBRARIES})
-endif (TCL_LIBRARIES AND TK_LIBRARIES)
+endif (HAVE_TCL AND HAVE_TK)
 
 ## ------------------------------------------------------------------------------
 ## Start building the library
@@ -238,8 +211,7 @@ include_directories (
   ${pgplot_SOURCE_DIR}/src
   ${pgplot_SOURCE_DIR}/sys
   ${pgplot_modules}
-  ${TCL_INCLUDES}
-  ${PNG_INCLUDE_DIR}
+  ${pgplot_external_includes}
   ${X11_INCLUDE_DIR}
   ${Xm_INCLUDES}
 )
