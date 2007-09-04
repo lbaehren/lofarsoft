@@ -32,7 +32,7 @@ set (include_locations
 
 find_path (TK_INCLUDES tk.h
   PATHS ${include_locations}
-  PATH_SUFFIXES tk tk8.4 tk8.3
+  PATH_SUFFIXES tk tk8.4 tk8.3 tcl tcl8.4 tcl8.3
   NO_DEFAULT_PATH
   )
 
