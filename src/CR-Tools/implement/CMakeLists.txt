@@ -15,6 +15,7 @@ set (cr_modules
   Imaging
   IO
   LopesLegacy
+  LopesStar
   Math
   Observation
   Utilities
