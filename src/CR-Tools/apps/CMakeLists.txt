@@ -37,3 +37,10 @@ endif (HAVE_POPT)
 if (HAVE_GLISH)
   add_subdirectory (GlishClients)
 endif (HAVE_GLISH)
+
+## ------------------------------------------------------------------------------
+## LOPES-Star tools
+
+if (HAVE_ROOT)
+  add_subdirectory (LopesStar)
+endif (HAVE_ROOT)
