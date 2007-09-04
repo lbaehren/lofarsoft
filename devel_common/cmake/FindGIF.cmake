@@ -5,8 +5,7 @@
 # - Check for the presence of GIF
 #
 # The following variables are set when GIF is found:
-#  HAVE_GIF       = Set to true, if all components of GIF
-#                          have been found.
+#  HAVE_GIF       = Set to true, if all components of GIF have been found.
 #  GIF_INCLUDES   = Include path for the header files of GIF
 #  GIF_LIBRARIES  = Link these to use GIF
 #  GIF_LFGLAS     = Linker flags (optional)
@@ -51,6 +50,7 @@ find_library (GIF_LIBRARIES gif
 if (GIF_INCLUDES AND GIF_LIBRARIES)
   set (HAVE_GIF TRUE)
 else (GIF_INCLUDES AND GIF_LIBRARIES)
+  set (HAVE_GIF FALSE)
   if (NOT GIF_FIND_QUIETLY)
     if (NOT GIF_INCLUDES)
       message (STATUS "Unable to find GIF header files!")

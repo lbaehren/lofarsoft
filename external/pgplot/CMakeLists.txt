@@ -52,13 +52,13 @@ set (include_locations
 ## -----------------------------------------------------------------------------
 ## Check for required external libraries
 
-find_package (PNG)
+find_package (JPEG)
 find_package (X11)
 find_package (ZLIB)
 
 ## check where to find the CMake scripts
 
-find_path (pgplot_cmake FindBlitz.cmake FindCASA.cmake FindCFITSIO.cmake
+find_path (pgplot_cmake FindG2C.cmake FindGIF.cmake
   PATHS 
   ${pgplot_SOURCE_DIR}
   ${pgplot_SOURCE_DIR}/..
@@ -71,6 +71,8 @@ find_path (pgplot_cmake FindBlitz.cmake FindCASA.cmake FindCFITSIO.cmake
 if (pgplot_cmake)
   include (${pgplot_cmake}/FindG2C.cmake)
   include (${pgplot_cmake}/FindGIF.cmake)
+  include (${pgplot_cmake}/FindPNG.cmake)
+  include (${pgplot_cmake}/FindXaw.cmake)
 endif (pgplot_cmake)
 
 ## Tcl -------------------------------------------
@@ -87,7 +89,7 @@ find_library (TCL_LIBRARIES tcl
   )
 
 if (TCL_INCLUDES AND TCL_LIBRARIES)
-  set (HAVE_TCL 1)
+  set (HAVE_TCL TRUE)
 endif (TCL_INCLUDES AND TCL_LIBRARIES)
 
 ## Tk --------------------------------------------
@@ -104,7 +106,7 @@ find_library (TK_LIBRARIES tk
   )
 
 if (TK_INCLUDES AND TK_LIBRARIES)
-  set (HAVE_TK 1)
+  set (HAVE_TK TRUE)
 endif (TK_INCLUDES AND TK_LIBRARIES)
 
 ## X11 -------------------------------------------
@@ -117,21 +119,19 @@ find_path (Xm_INCLUDES XmP.h
 
 string (REGEX REPLACE "include/Xm" "include" Xm_INCLUDES ${Xm_INCLUDES})
 
-find_library (libXaw Xaw PATHS ${lib_locations})
 find_library (libXt Xt PATHS ${lib_locations})
 
-## summary of external libraries
+## Summary of external libraries -----------------
 
-message (STATUS "libg2c        = ${G2C_LIBRARIES}")
-message (STATUS "libXaw        = ${libXaw}")
-message (STATUS "libXt         = ${libXt}")
-message (STATUS "libx11        = ${X11_LIBRARIES}")
-message (STATUS "TCL_INCLUDES  = ${TCL_INCLUDES}")
-message (STATUS "TCL_LIBRARIES = ${TCL_LIBRARIES}")
-message (STATUS "TK_INCLUDES   = ${TK_INCLUDES}")
-message (STATUS "TK_LIBRARIES  = ${TK_LIBRARIES}")
-message (STATUS "GIF_LIBRARIES = ${GIF_LIBRARIES}")
-message (STATUS "PNG_LIBRARIES = ${PNG_LIBRARIES}")
+message (STATUS "libg2c    = ${G2C_LIBRARIES}")
+message (STATUS "libXt     = ${libXt}")
+message (STATUS "libx11    = ${X11_LIBRARIES}")
+message (STATUS "HAVE_GIF  = ${HAVE_GIF}")
+message (STATUS "HAVE_JPEG = ${JPEG_FOUND}")
+message (STATUS "HAVE_PNG  = ${HAVE_PNG}")
+message (STATUS "HAVE_TCL  = ${HAVE_TCL}")
+message (STATUS "HAVE_TK   = ${HAVE_TK}")
+message (STATUS "HAVE_XAW  = ${HAVE_XAW}")
 
 ## ------------------------------------------------------------------------------
 ## Create list of drivers to be included into the library
@@ -153,13 +153,13 @@ file (APPEND ${outfile} "WDDRIV 1 /WD       X Window dump file, landscape\n")
 file (APPEND ${outfile} "WDDRIV 2 /VWD      X Window dump file, portrait\n")
 file (APPEND ${outfile} "XMDRIV 0 /XMOTIF   Motif applications containing XmPgplot widgets.   C\n")
 
-if (libXaw AND libXt)
+if (XAW_LIBRARIES AND libXt)
   file (APPEND ${outfile} "XWDRIV 1 /XWINDOW  Workstations running X Window System		C\n")
   file (APPEND ${outfile} "XWDRIV 2 /XSERVE   Persistent window on X Window System		C\n")
   ## update linker list
-  list (APPEND pgplot_external_libraries ${libXaw})
+  list (APPEND pgplot_external_libraries ${XAW_LIBRARIES})
   list (APPEND pgplot_external_libraries ${libXt})
-endif (libXaw AND libXt)
+endif (XAW_LIBRARIES AND libXt)
 
 if (GIF_LIBRARIES)
  file (APPEND ${outfile} "GIDRIV 1 /GIF      GIF-format file, landscape\n")

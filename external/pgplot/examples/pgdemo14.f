@@ -5,7 +5,7 @@ C
 C This program illustrates how an interactive program can be written
 C using PGPLOT. The program displays a number of active fields. Select
 C one of these fields using the cursor (e.g., click the mouse) to 
-C activate it; then use the keyboard keys to edit the string displayed
+C activate it; then use_the keyboard keys to edit the string displayed
 C in the field. Two of the fields have immediate action: 'DRAW' draws
 C a simple picture using the parameters specified in the input fields;
 C 'EXIT' terminates the program.

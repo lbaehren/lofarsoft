@@ -5,7 +5,7 @@ C-----------------------------------------------------------------------
       INTEGER PGOPEN
       WRITE (*,'(A)') ' Demonstration of routine PGVECT'
 C
-C Call PGBEG to initiate PGPLOT and open the output device; PGBEG
+C Call_PGBEG to initiate PGPLOT and open the output device; PGBEG
 C will prompt the user to supply the device name and type.
 C
       IF (PGOPEN('?') .LE. 0) STOP
@@ -16,7 +16,7 @@ C-----------------------------------------------------------------------
 
       SUBROUTINE PGEX35
 C-----------------------------------------------------------------------
-C Program to demonstrate the use of PGVECT along with
+C Program to demonstrate the use_of PGVECT along with
 C PGCONB by illustrating the flow around a cylinder with circulation.
 C
 C          NX      total # of axial stations

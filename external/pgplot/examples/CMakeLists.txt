@@ -5,9 +5,9 @@
 ##    -L/usr/X11R6/lib -lX11 -Wl,-framework -Wl,Foundation -L%p/lib -lpng -lz
 ##    -laquaterm -L$PGPLOT_DIR/lib -lpgplot
 
-set (examples
+set (pgplot_examples
   pgdemo1
-#  pgdemo2
+  pgdemo2
   pgdemo3
   pgdemo4
   pgdemo5
@@ -17,9 +17,15 @@ set (examples
   pgdemo9
   pgdemo10
   pgdemo11
+  pgdemo12
+  pgdemo13
+  pgdemo14
+  pgdemo15
+  pgdemo16
+  pgdemo17
   )
 
-foreach (src ${examples})
+foreach (src ${pgplot_examples})
   ## compile
   add_executable (${src} ${src}.f)
   ## link

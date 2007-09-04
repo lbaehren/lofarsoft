@@ -1,6 +1,6 @@
       PROGRAM PGDE12
 C-----------------------------------------------------------------------
-C Demonstration program for PGPLOT: use of PGPAP to change the
+C Demonstration program for PGPLOT: use_of PGPAP to change the
 C size of the view surface.
 C
 C

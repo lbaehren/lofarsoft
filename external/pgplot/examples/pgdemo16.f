@@ -154,7 +154,7 @@ C                    1 unless PGSCI has been called). If CI is 0 or
 C                    positive, bars for the first data set are colored
 C                    using this color index, and bars for subsequent
 C                    data sets are colored using CI+1, CI+2, etc.
-C                    (Axes and labels always use the current color
+C                    (Axes and labels always use_the current color
 C                    index.)
 C--
 C 27-Jan-97 [TJP]
