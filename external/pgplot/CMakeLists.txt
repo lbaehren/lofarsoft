@@ -75,17 +75,10 @@ if (pgplot_cmake)
   include (${pgplot_cmake}/FindTCL.cmake)
   include (${pgplot_cmake}/FindTK.cmake)
   include (${pgplot_cmake}/FindXaw.cmake)
+  include (${pgplot_cmake}/FindXm.cmake)
 endif (pgplot_cmake)
 
-## X11 -------------------------------------------
-
-find_path (Xm_INCLUDES XmP.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES Xm
-  NO_DEFAULT_PATH
-  )
-
-string (REGEX REPLACE "include/Xm" "include" Xm_INCLUDES ${Xm_INCLUDES})
+## Additional X11 components which might not be picked up otherwise
 
 find_library (libXt Xt PATHS ${lib_locations})
 
@@ -100,6 +93,7 @@ message (STATUS "HAVE_PNG  = ${HAVE_PNG}")
 message (STATUS "HAVE_TCL  = ${HAVE_TCL}")
 message (STATUS "HAVE_TK   = ${HAVE_TK}")
 message (STATUS "HAVE_XAW  = ${HAVE_XAW}")
+message (STATUS "HAVE_XM   = ${HAVE_XM}")
 
 ## ------------------------------------------------------------------------------
 ## Create list of drivers to be included into the library
@@ -120,7 +114,14 @@ file (APPEND ${outfile} "PSDRIV 4 /VCPS     PostScript printers, color, portrait
 file (APPEND ${outfile} "RVDRIV 0 /XRV       X-window Rivet/Tk programs with pgplot widgets.   C")
 file (APPEND ${outfile} "WDDRIV 1 /WD       X Window dump file, landscape\n")
 file (APPEND ${outfile} "WDDRIV 2 /VWD      X Window dump file, portrait\n")
-file (APPEND ${outfile} "XMDRIV 0 /XMOTIF   Motif applications containing XmPgplot widgets.   C\n")
+
+if (HAVE_XM)
+  file (APPEND ${outfile} "XMDRIV 0 /XMOTIF   Motif applications containing XmPgplot widgets.   C\n")
+  ## update compiler list
+  list (APPEND pgplot_external_includes ${XM_INCLUDES})
+  ## update linker list
+  list (APPEND pgplot_external_libraries ${XM_LIBRARIES})
+endif (HAVE_XM)
 
 if (XAW_LIBRARIES AND libXt)
   file (APPEND ${outfile} "XWDRIV 1 /XWINDOW  Workstations running X Window System		C\n")
@@ -268,10 +269,19 @@ target_link_libraries (cpgplot pgplot)
 
 ## -- libXmPgplot --------------------------------
 
-add_library (XmPgplot
-  drivers/xmotif/XmPgplot.c
-  )
-target_link_libraries (XmPgplot pgplot)
+if (HAVE_XM)
+  ## compiler instructions
+  add_library (XmPgplot
+    drivers/xmotif/XmPgplot.c
+    )
+  ## linker instructions
+  target_link_libraries (XmPgplot pgplot ${XM_LIBRARIES})
+  ## installation
+  install (TARGETS XmPgplot
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    )
+endif (HAVE_XM)
 
 ## -- libtkpgplot --------------------------------
 
@@ -308,7 +318,7 @@ endif (pgplot_prefix)
 
 ## installation of libraries
 
-install (TARGETS pgplot cpgplot XmPgplot
+install (TARGETS pgplot cpgplot
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
