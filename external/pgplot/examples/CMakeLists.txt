@@ -7,7 +7,7 @@
 
 set (pgplot_examples
   pgdemo1
-  pgdemo2
+#  pgdemo2
   pgdemo3
   pgdemo4
   pgdemo5

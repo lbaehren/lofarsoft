@@ -36,6 +36,7 @@ if (NOT CR_VERBOSE_CONFIGURE)
   set (FFTW3_FIND_QUIETLY 1)
   set (G2C_FIND_QUIETLY 1)
   set (GLISH_FIND_QUIETLY 1)
+  set (GSL_FIND_QUIETLY 1)
   set (LAPACK_FIND_QUIETLY 1)
   set (PGPLOT_FIND_QUIETLY 1)
   set (POPT_FIND_QUIETLY 1)
@@ -59,10 +60,22 @@ if (CR_BUILD_TESTS)
   subdirs (test)
 endif (CR_BUILD_TESTS)
 
-## -----------------------------------------------------------------------------
-## External dependencies; check if we need to search for some components.
+## =============================================================================
+##
+##  External dependencies
+##
+## =============================================================================
 
-## check where to find the CMake scripts
+## Standard CMake modules for location of packages
+
+find_package (Motif)
+find_package (PNG)
+find_package (TCL)
+find_package (X11)
+find_package (ZLIB)
+
+## -----------------------------------------------------------------------------
+## Locate additional CMake find scripts
 
 find_path (cr_cmake FindBlitz.cmake FindCASA.cmake FindCFITSIO.cmake
   PATHS 
@@ -73,14 +86,6 @@ find_path (cr_cmake FindBlitz.cmake FindCASA.cmake FindCFITSIO.cmake
   PATH_SUFFIXES
   devel_common/cmake
   )
-
-## check for the external packages
-
-find_package (Motif)
-find_package (PNG)
-find_package (TCL)
-find_package (X11)
-find_package (ZLIB)
 
 if (cr_cmake)
   ## Blitz++
@@ -98,6 +103,10 @@ if (cr_cmake)
   if (NOT HAVE_FFTW3)
     include (${cr_cmake}/FindFFTW3.cmake)
   endif (NOT HAVE_FFTW3)
+  ## GNU Scientific Library (GSL)
+  if (NOT HAVE_GSL)
+    include (${cr_cmake}/FindGSL.cmake)
+  endif (NOT HAVE_GSL)
   ## LAPACK
   if (NOT HAVE_LAPACK)
     include (${cr_cmake}/FindLAPACK.cmake)
@@ -209,12 +218,30 @@ include_directories (
   ${CR_SOURCE_DIR}/test
   ${CASA_INCLUDES}
   ${DAL_INCLUDES}
-  ${BLITZ_INCLUDES}
-  ${CFITSIO_INCLUDES}
   ${PGPLOT_INCLUDES}
-  ${ROOT_INCLUDES}
-  ${WCSLIB_INCLUDES}
   )
+
+## external components
+
+if (BLITZ_INCLUDES)
+  include_directories (${BLITZ_INCLUDES})
+endif (BLITZ_INCLUDES)
+
+if (CFITSIO_INCLUDES)
+  include_directories (${CFITSIO_INCLUDES})
+endif (CFITSIO_INCLUDES)
+
+if (GSL_INCLUDES)
+  include_directories (${GSL_INCLUDES})
+endif (GSL_INCLUDES)
+
+if (ROOT_INCLUDES)
+  include_directories (${ROOT_INCLUDES})
+endif (ROOT_INCLUDES)
+
+if (WCSLIB_INCLUDES)
+  include_directories (${WCSLIB_INCLUDES})
+endif (WCSLIB_INCLUDES)
 
 ## ------------------------------------------------------------------------------
 ## Verbose level
@@ -250,6 +277,7 @@ message (STATUS "CASA .................. : ${HAVE_CASA}")
 message (STATUS "CASACORE .............. : ${HAVE_CASACORE}")
 message (STATUS "CFITSIO ............... : ${HAVE_CFITSIO}")
 message (STATUS "FFTW3 ................. : ${HAVE_FFTW3}")
+message (STATUS "GSL ................... : ${HAVE_GSL}")
 message (STATUS "LAPACK ................ : ${HAVE_LAPACK}")
 message (STATUS "PGPLOT ................ : ${HAVE_PGPLOT}")
 message (STATUS "POPT .................. : ${HAVE_POPT}")

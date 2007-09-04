@@ -32,6 +32,20 @@ if (pgplot_ENABLE_TESTING)
   add_subdirectory (examples)
 endif (pgplot_ENABLE_TESTING)
 
+## Handle option: verbose during configuration on/off
+
+if (NOT pgplot_VERBOSE_CONFIGURE)
+  set (GIF_FIND_QUIETLY 1)
+  set (JPEG_FIND_QUIETLY 1)
+  set (PNG_FIND_QUIETLY 1)
+  set (TCL_FIND_QUIETLY 1)
+  set (TK_FIND_QUIETLY 1)
+  set (X11_FIND_QUIETLY 1)
+  set (XAW_FIND_QUIETLY 1)
+  set (XM_FIND_QUIETLY 1)
+  set (ZLIB_FIND_QUIETLY 1)
+endif (NOT pgplot_VERBOSE_CONFIGURE)
+
 ## -----------------------------------------------------------------------------
 ## Standard locations where to look for required components
 
@@ -82,46 +96,65 @@ endif (pgplot_cmake)
 
 find_library (libXt Xt PATHS ${lib_locations})
 
-## Summary of external libraries -----------------
-
-message (STATUS "libg2c    = ${G2C_LIBRARIES}")
-message (STATUS "libXt     = ${libXt}")
-message (STATUS "libx11    = ${X11_LIBRARIES}")
-message (STATUS "HAVE_GIF  = ${HAVE_GIF}")
-message (STATUS "HAVE_JPEG = ${JPEG_FOUND}")
-message (STATUS "HAVE_PNG  = ${HAVE_PNG}")
-message (STATUS "HAVE_TCL  = ${HAVE_TCL}")
-message (STATUS "HAVE_TK   = ${HAVE_TK}")
-message (STATUS "HAVE_XAW  = ${HAVE_XAW}")
-message (STATUS "HAVE_XM   = ${HAVE_XM}")
-
 ## ------------------------------------------------------------------------------
 ## Create list of drivers to be included into the library
 
 set (pgplot_external_includes "")
 set (pgplot_external_libraries "")
 
+## list of sources files providing drivers
+
+set (pgplot_drivers
+  ./drivers/nudriv.f
+  ./drivers/pgdriv.f
+  ./drivers/pgxwin.c
+  ./drivers/psdriv.f
+  ./drivers/rvdriv.c
+  ./drivers/wddriv.f
+  ./drivers/xmdriv.c
+  ./drivers/xwdriv.c
+  )
+
+## set the name of file containing the list of drivers
+
 set (outfile "build/drivers.list")
 
 file (WRITE ${outfile} "! List of selected drivers\n\n")
 
+## [1] Null device -------------------------------
+
 file (APPEND ${outfile} "NUDRIV 0 /NULL     Null device	 Std F77\n")
+
+## [2] PGPLOT metafile ----------------------------
+
 file (APPEND ${outfile} "PGDRIV 0 /PGMF     PGPLOT metafile  Std F77\n")
+
+## [3] Postscript --------------------------------
+
 file (APPEND ${outfile} "PSDRIV 1 /PS       PostScript printers, monochrome, landscape	Std F77\n")
 file (APPEND ${outfile} "PSDRIV 2 /VPS      Postscript printers, monochrome, portrait		Std F77\n")
 file (APPEND ${outfile} "PSDRIV 3 /CPS      PostScript printers, color, landscape		Std F77\n")
 file (APPEND ${outfile} "PSDRIV 4 /VCPS     PostScript printers, color, portrait		Std F77\n")
+
+## [4] X-window Rivet/Tk -------------------------
+
 file (APPEND ${outfile} "RVDRIV 0 /XRV       X-window Rivet/Tk programs with pgplot widgets.   C")
 file (APPEND ${outfile} "WDDRIV 1 /WD       X Window dump file, landscape\n")
 file (APPEND ${outfile} "WDDRIV 2 /VWD      X Window dump file, portrait\n")
 
+## [5] Motif applications containing XmPgplot
+
 if (HAVE_XM)
   file (APPEND ${outfile} "XMDRIV 0 /XMOTIF   Motif applications containing XmPgplot widgets.   C\n")
+  ## update driver list
+  list (APPEND pgplot_drivers ./drivers/xmotif/XmPgplot.c)
   ## update compiler list
   list (APPEND pgplot_external_includes ${XM_INCLUDES})
   ## update linker list
   list (APPEND pgplot_external_libraries ${XM_LIBRARIES})
 endif (HAVE_XM)
+
+## [6] X Window System
 
 if (XAW_LIBRARIES AND libXt)
   file (APPEND ${outfile} "XWDRIV 1 /XWINDOW  Workstations running X Window System		C\n")
@@ -131,12 +164,18 @@ if (XAW_LIBRARIES AND libXt)
   list (APPEND pgplot_external_libraries ${libXt})
 endif (XAW_LIBRARIES AND libXt)
 
+## [7] GIF-format file
+
 if (GIF_LIBRARIES)
  file (APPEND ${outfile} "GIDRIV 1 /GIF      GIF-format file, landscape\n")
  file (APPEND ${outfile} "GIDRIV 2 /VGIF     GIF-format file, portrait\n")
+ ## update driver list
+ list (APPEND pgplot_drivers ./drivers/gidriv.f)
  ## update linker list
  list (APPEND pgplot_external_libraries ${GIF_LIBRARIES})
 endif (GIF_LIBRARIES)
+
+## [8] Portable Network Graphics file
 
 if (PNG_LIBRARIES)
   file (APPEND ${outfile} "PNDRIV 1 /PNG      Portable Network Graphics file                 C\n")
@@ -149,6 +188,9 @@ endif (PNG_LIBRARIES)
 
 if (HAVE_TCL AND HAVE_TK)
   file (APPEND ${outfile} "TKDRIV 0 /XTK      X-window Tcl/Tk programs with pgplot widgets.  C\n")
+  ## update driver list
+  list (APPEND pgplot_drivers ./drivers/tkdriv.c)
+  list (APPEND pgplot_drivers ./drivers/xtk/tkpgplot.c)
   ## update compiler instructions
   list (APPEND pgplot_external_includes ${TCL_INCLUDES})
   ## update linker instructions
@@ -199,10 +241,14 @@ endif (HAVE_TCL AND HAVE_TK)
 ## 	$(RANLIB) libpgplot.a
 ##
 
+## subdirectories to consider
+
 add_subdirectory (drivers)
 add_subdirectory (fonts)
 add_subdirectory (src)
 add_subdirectory (sys)
+
+## include directories
 
 include_directories (
   ${pgplot_SOURCE_DIR}
@@ -214,27 +260,11 @@ include_directories (
   ${pgplot_modules}
   ${pgplot_external_includes}
   ${X11_INCLUDE_DIR}
-  ${Xm_INCLUDES}
 )
 
 FILE (GLOB pgplot_src ./src/*.f ./src/*.c)
 FILE (GLOB pgplot_sys ./sys/*.f ./sys/*.c)
 FILE (GLOB pgplot_fonts ./fonts/*.f)
-
-set (pgplot_drivers
-  ./drivers/gidriv.f
-  ./drivers/nudriv.f
-  ./drivers/pgdriv.f
-  ./drivers/pgxwin.c
-  ./drivers/psdriv.f
-  ./drivers/rvdriv.c
-  ./drivers/tkdriv.c
-  ./drivers/wddriv.f
-  ./drivers/xmdriv.c
-  ./drivers/xwdriv.c
-  ./drivers/xmotif/XmPgplot.c
-  ./drivers/xtk/tkpgplot.c
-  )
 
 ## -- libpgplot ----------------------------------
 

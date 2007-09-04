@@ -10,36 +10,57 @@
 #  GSL_LIBRARIES  = Link these to use GSL
 
 ## -----------------------------------------------------------------------------
-## Check for existance of GSL configuration utility; if it is present, we can
-## use it to obtain further information on the GSL installation.
+## Standard locations where to look for required components
 
-find_program (GSL_CONFIG gsl-config
-  PATHS /usr/bin /usr/local/bin /sw/bin
+set (lib_locations
+  /usr/local/lib
+  /usr/lib
+  /usr/X11R6/lib
+  /sw/lib
+  )
+
+set (include_locations
+  /usr/include
+  /usr/local/include
+  /usr/X11R6/include
+  /sw/include
   )
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (GSL_INCLUDES gsl_version.h
-  PATHS /usr/include /usr/local/include /sw/include
+  PATHS ${include_locations}
   PATH_SUFFIXES gsl
   NO_DEFAULT_PATH
   )
 
 ## -----------------------------------------------------------------------------
-## Check for the library; if we have "gsl-config" we can ask it for the linker
-## parameters
+## Check for the library
 
-if (GSL_CONFIG)
-  execute_process (
-    COMMAND ${GSL_CONFIG} --libs
-    OUTPUT_VARIABLE GSL_LIBRARIES)  
-else (GSL_CONFIG)
-  find_library (GSL_LIBRARIES gsl
-    PATHS /usr/lib /usr/local/lib /sw/lib
-    NO_DEFAULT_PATH
-    )
-endif (GSL_CONFIG)
+set (GSL_LIBRARIES "")
+
+## [1] libgsl
+
+find_library (libgsl gsl
+  PATHS ${lib_locations}
+  NO_DEFAULT_PATH
+  )
+
+if (libgsl)
+  list (APPEND GSL_LIBRARIES ${libgsl})
+endif (libgsl)
+
+## [2] libgslcblas
+
+find_library (libgslcblas gslcblas
+  PATHS ${lib_locations}
+  NO_DEFAULT_PATH
+  )
+
+if (libgslcblas)
+  list (APPEND GSL_LIBRARIES ${libgslcblas})
+endif (libgslcblas)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
@@ -70,4 +91,9 @@ else (HAVE_GSL)
 endif (HAVE_GSL)
 
 ## -----------------------------------------------------------------------------
-## Mark as advanced ...
+## Mark advanced variables
+
+mark_as_advanced (
+  GSL_INCLUDES
+  GSL_LIBRARIES
+  )
