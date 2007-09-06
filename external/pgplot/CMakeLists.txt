@@ -231,11 +231,6 @@ endif (HAVE_TCL AND HAVE_TK)
 ## 
 ## DEFAULT_TARGETS="lib grfont.dat prog pgplot.doc"
 ##
-## cpgdemo: cpgplot.h $(SRC)/cpg/cpgdemo.c libcpgplot.a
-##	$(CCOMPL) $(CFLAGD) -c -I. $(SRC)/cpg/cpgdemo.c
-##	$(FCOMPL) -o cpgdemo cpgdemo.o $(CPGPLOT_LIB) $(LIBS)
-##	rm -f cpgdemo.o
-##
 
 ## subdirectories to consider
 
@@ -243,6 +238,7 @@ add_subdirectory (drivers)
 add_subdirectory (fonts)
 add_subdirectory (src)
 add_subdirectory (sys)
+add_subdirectory (cpg)
 
 ## include directories
 
@@ -291,27 +287,6 @@ target_link_libraries (pgplot
   ${X11_LIBRARIES}
   ${ZLIB_LIBRARIES}
   )
-
-## -- libcpgplot ---------------------------------
-##
-## libcpgplot.a cpgplot.h: $(PG_SOURCE) pgbind 
-## 	./pgbind $(PGBIND_FLAGS) -h -w $(PG_SOURCE)
-## 	$(CCOMPL) -c $(CFLAGC) cpg*.c
-## 	rm -f cpg*.c
-## 	ar ru libcpgplot.a cpg*.o
-## 	$(RANLIB) libcpgplot.a
-## 	rm -f cpg*.o
-
-file (GLOB cpgplot_sources
-  ${pgplot_SOURCE_DIR}/src/*.c
-  ${pgplot_SOURCE_DIR}/src/*.f
-  ${pgplot_SOURCE_DIR}/sys/*.c
-  ${pgplot_SOURCE_DIR}/cpg/*.c
-  )
-
-add_library (cpgplot ${cpgplot_sources})
-add_dependencies (cpgplot pgplot)
-target_link_libraries (cpgplot pgplot)
 
 ## -- libXmPgplot --------------------------------
 
@@ -365,7 +340,7 @@ endif (pgplot_prefix)
 
 ## installation of libraries
 
-install (TARGETS pgplot cpgplot
+install (TARGETS pgplot
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
