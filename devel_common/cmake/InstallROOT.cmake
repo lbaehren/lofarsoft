@@ -13,6 +13,7 @@
 
 find_path (cmake_scripts FindROOT.cmake InstallROOT.cmake
   PATHS
+  .
   ..
   ../..
   PATH_SUFFIXES

@@ -35,6 +35,9 @@ find_path (GSL_INCLUDES gsl_version.h
   NO_DEFAULT_PATH
   )
 
+## adjust the include path to strip of the "gsl"
+string (REGEX REPLACE include/gsl include GSL_INCLUDES ${GSL_INCLUDES})
+
 ## -----------------------------------------------------------------------------
 ## Check for the library
 

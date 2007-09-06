@@ -25,6 +25,7 @@ set (cr_modules
 
 if (HAVE_PGPLOT)
   list (APPEND cr_modules Display)
+  add_definitions (-DNEED_FORTRAN_UNDERSCORES)
 endif (HAVE_PGPLOT)
 
 if (CR_GLISH_SUPPORT AND HAVE_CASA)

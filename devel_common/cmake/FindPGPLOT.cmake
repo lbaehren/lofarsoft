@@ -6,10 +6,8 @@
 #
 # Defines the following variables:
 #  HAVE_PGPLOT       = 
-#  PGPLOT_LIBRARY    = Path to libpgplot
-#  CPGPLOT_LIBRARY   = Path to libcpgplot
-#  PGPLOT_LIBRARIES  = Path to all parts of the PGPLOT library
 #  PGPLOT_INCLUDES   = Path to the PGPLOT header files
+#  PGPLOT_LIBRARIES  = Path to all parts of the PGPLOT library
 
 ## -----------------------------------------------------------------------------
 ## Search locations
@@ -46,50 +44,52 @@ FIND_PATH (PGPLOT_INCLUDES cpgplot.h
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
+set (PGPLOT_LIBRARIES "")
+
 ## [1] libpgplot
 
-find_library (PGPLOT_LIBRARY
+find_library (libpgplot
   NAMES pgplot
   PATHS ${lib_locations}
   PATH_SUFFIXES pgplot
   NO_DEFAULT_PATH
   )
 
-if (PGPLOT_LIBRARY)
-  list (APPEND PGPLOT_LIBRARIES ${PGPLOT_LIBRARY})
-else (PGPLOT_LIBRARY)
+if (libpgplot)
+  list (APPEND PGPLOT_LIBRARIES ${libpgplot})
+else (libpgplot)
   message (SEND_ERROR "Unable to locate libpgplot!")
-endif (PGPLOT_LIBRARY)
+endif (libpgplot)
 
 ## [2] libcpgplot
 
-find_library (CPGPLOT_LIBRARY
+find_library (libcpgplot
   NAMES cpgplot
   PATHS ${lib_locations}
   PATH_SUFFIXES pgplot
   NO_DEFAULT_PATH
   )
 
-if (CPGPLOT_LIBRARY)
-  list (APPEND PGPLOT_LIBRARIES ${CPGPLOT_LIBRARY})
-else (CPGPLOT_LIBRARY)
+if (libcpgplot)
+  list (APPEND PGPLOT_LIBRARIES ${libcpgplot})
+else (libcpgplot)
   message (STATUS "Warning: Unable to locate libcpgplot!")
-endif (CPGPLOT_LIBRARY)
+endif (libcpgplot)
 
 ## [3] libXmPgplot
 
-find_library (PGPLOT_libXmPgplot
+find_library (libXmPgplot
   NAMES XmPgplot
   PATHS ${lib_locations}
   PATH_SUFFIXES pgplot
   NO_DEFAULT_PATH
   )
 
-if (PGPLOT_libXmPgplot)
-  list (APPEND PGPLOT_LIBRARIES ${PGPLOT_libXmPgplot})
-else (PGPLOT_libXmPgplot)
+if (libXmPgplot)
+  list (APPEND PGPLOT_LIBRARIES ${libXmPgplot})
+else (libXmPgplot)
   message (STATUS "Warning: Unable to locate libXmPgplot!")
-endif (PGPLOT_libXmPgplot)
+endif (libXmPgplot)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
@@ -97,6 +97,7 @@ endif (PGPLOT_libXmPgplot)
 IF (PGPLOT_INCLUDES AND PGPLOT_LIBRARIES)
   SET (HAVE_PGPLOT TRUE)
 ELSE (PGPLOT_INCLUDES AND PGPLOT_LIBRARIES)
+  SET (HAVE_PGPLOT FALSE)
   IF (NOT PGPLOT_FIND_QUIETLY)
     IF (NOT PGPLOT_INCLUDES)
       MESSAGE (STATUS "Unable to find PGPLOT header files!")
@@ -121,3 +122,8 @@ endif (HAVE_PGPLOT)
 
 ## -----------------------------------------------------------------------------
 ## Mark as advanced ...
+
+mark_as_advanced (
+  PGPLOT_INCLUDES
+  PGPLOT_LIBRARIES
+  )

@@ -142,5 +142,14 @@ namespace LOPES { // Namespace LOPES -- begin
     }
   }
   
+  // ==============================================================================
+  //
+  //  Template instantiations
+  //
+  // ==============================================================================
+  
+  template class xBeam<casa::Float,casa::Complex>;
+  template class xBeam<casa::Double,casa::DComplex>;
+  
 } // Namespace LOPES -- end
 

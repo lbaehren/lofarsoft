@@ -3,7 +3,7 @@
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
- *   Lars Baehren (bahren@astron.nl)                                       *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -24,20 +24,19 @@
 #include <iostream>
 #include <string>
 
-#include <fftw3.h>
+#include <gsl/gsl_sf_bessel.h>
+#include <gsl/gsl_sf_exp.h>
 
 /*!
-  \file tUseFFTW3.cc
+  \file tUseGSL.cc
 
   \ingroup CR-Pipeline
 
-  \brief A simple test for external build against libfftw3
+  \brief A simple test for working with the GNU Scientific Library (GSL)
 
   \author Lars B&auml;hren
 
-  \date 2007/01/29
-
-  
+  \date 2007/09/06
 */
 
 /*!
@@ -49,18 +48,23 @@ int main ()
 {
   int nofFailedTests (0);
   
+  double x (0.);
+  int nofSamplePoints (20);
+  double incr (0.25);
+  
   // --------------------------------------------------------------------- Test 1
   
-  std::cout << "[1] Complex One-Dimensional DFT" << std::endl;
+  std::cout << "[1] GSL :: Special functions :: Bessel" << std::endl;
   try {
-    int N (256);
-    fftw_complex *in;
-    fftw_complex *out;
-    fftw_plan p;
-    
-    in   = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N);
-    out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * N);
-    p = fftw_plan_dft_1d(N, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
+    double y0 (0.);
+    double y1 (0.);
+
+    for (int n(0); n<nofSamplePoints; n++) {
+      x = n*incr;
+      y0 = gsl_sf_bessel_J0 (x);
+      y1 = gsl_sf_bessel_J1 (x);
+      std::cout << "\t" << x << "\t" << y0 << "\t" << y1 << std::endl;
+    }
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -68,11 +72,21 @@ int main ()
   
   // --------------------------------------------------------------------- Test 2
   
-//   try {
-//   } catch (std::string message) {
-//     std::cerr << message << std::endl;
-//     nofFailedTests++;
-//   }
+  std::cout << "[2] GSL :: Special functions :: Exponential" << std::endl;
+  try {
+    double y0 (0.);
+    double y1 (0.);
+
+    for (int n(0); n<nofSamplePoints; n++) {
+      x = n*incr;
+      y0 = gsl_sf_exp (x);
+      y1 = gsl_sf_expm1 (x);
+      std::cout << "\t" << x << "\t" << y0 << "\t" << y1 << std::endl;
+    }
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
   
   // --------------------------------------------------------------------- Test 3
   

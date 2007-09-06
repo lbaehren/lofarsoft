@@ -84,15 +84,7 @@ else (HAVE_CASA)
 endif (HAVE_CASA)
 
 ## -----------------------------------------------------------------------------
-## Test working with casacore
-
-if (HAVE_CASACORE)
-  add_executable (tUseCasacore tUseCasacore.cc)
-  target_link_libraries (tUseCasacore ${CASACORE_LIBRARIES})
-endif (HAVE_CASACORE)
-
-## -----------------------------------------------------------------------------
-## Test for BLITZ
+## Test(s) for Blitz++
 
 if (HAVE_BLITZ)
   ## buid test program
@@ -106,6 +98,14 @@ if (HAVE_BLITZ)
     RUNTIME DESTINATION bin
     )
 endif (HAVE_BLITZ)
+
+## -----------------------------------------------------------------------------
+## Tests for casacore
+
+if (HAVE_CASACORE)
+  add_executable (tUseCasacore tUseCasacore.cc)
+  target_link_libraries (tUseCasacore ${CASACORE_LIBRARIES})
+endif (HAVE_CASACORE)
 
 ## -----------------------------------------------------------------------------
 ## Test for CFITSIO
@@ -141,6 +141,21 @@ if (HAVE_FFTW3)
     RUNTIME DESTINATION bin
     )
 endif (HAVE_FFTW3)
+
+## -----------------------------------------------------------------------------
+## Test for GSL
+
+if (HAVE_GSL)
+  add_executable (tUseGSL tUseGSL.cc)
+  target_link_libraries (tUseGSL ${GSL_LIBRARIES})
+  ## testing
+  add_test (tUseGSL tUseGSL)
+  ## installation
+  install (
+    TARGETS tUseGSL
+    RUNTIME DESTINATION bin
+    )
+endif (HAVE_GSL)
 
 ## -----------------------------------------------------------------------------
 ## Test for WCSLIB

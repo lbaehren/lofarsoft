@@ -135,6 +135,8 @@ endif (HAVE_ROOT)
 ## Mark as advanced ...
 
 mark_as_advanced (
+  ROOT_INCLUDES
+  ROOT_LIBRARIES
   rootCint
   rootCintex
   rootCore
