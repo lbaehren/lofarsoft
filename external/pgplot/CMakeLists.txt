@@ -211,35 +211,30 @@ endif (HAVE_TCL AND HAVE_TK)
 ## pgsize.
 ## 
 ## Required PGPLOT sub-directories.
-## .
+## pgplot                          ... SRC
 ## |-- applications
 ## |   |-- curvefit
 ## |   |-- plot10
 ## |   `-- plotpg
 ## |-- cpg
-## |-- drivers
+## |-- drivers                     ... DRVDIR
 ## |   |-- old
 ## |   |-- xathena
 ## |   |-- xmotif
 ## |   `-- xtk
-## |-- examples
-## |-- fonts
+## |-- examples                    ... DEMDIR
+## |-- fonts                       ... FNTDIR
 ## |-- pgdispd
 ## |-- pgmf
-## |-- src
-## |-- sys
+## |-- src                         ... SRCDIR
+## |-- sys                         ... GENDIR
 ## 
 ## DEFAULT_TARGETS="lib grfont.dat prog pgplot.doc"
 ##
-## lib : libpgplot.a $(SHARED_LIB)
-## 
-## libpgplot.a : $(PG_ROUTINES) $(PG_NON_STANDARD) $(GR_ROUTINES) \
-## 	   $(DISPATCH_ROUTINE) $(DRIVERS) $(SYSTEM_ROUTINES)
-## 	ar ru libpgplot.a \
-## 		`ls $(PG_ROUTINES) \
-## 		$(PG_NON_STANDARD) $(GR_ROUTINES) $(DISPATCH_ROUTINE) \
-## 		$(DRIVERS) $(SYSTEM_ROUTINES) | sort | uniq`
-## 	$(RANLIB) libpgplot.a
+## cpgdemo: cpgplot.h $(SRC)/cpg/cpgdemo.c libcpgplot.a
+##	$(CCOMPL) $(CFLAGD) -c -I. $(SRC)/cpg/cpgdemo.c
+##	$(FCOMPL) -o cpgdemo cpgdemo.o $(CPGPLOT_LIB) $(LIBS)
+##	rm -f cpgdemo.o
 ##
 
 ## subdirectories to consider
@@ -268,6 +263,14 @@ FILE (GLOB pgplot_sys ./sys/*.f ./sys/*.c)
 FILE (GLOB pgplot_fonts ./fonts/*.f)
 
 ## -- libpgplot ----------------------------------
+##
+## libpgplot.a : $(PG_ROUTINES) $(PG_NON_STANDARD) $(GR_ROUTINES) \
+## 	   $(DISPATCH_ROUTINE) $(DRIVERS) $(SYSTEM_ROUTINES)
+## 	ar ru libpgplot.a \
+## 		`ls $(PG_ROUTINES) \
+## 		$(PG_NON_STANDARD) $(GR_ROUTINES) $(DISPATCH_ROUTINE) \
+## 		$(DRIVERS) $(SYSTEM_ROUTINES) | sort | uniq`
+## 	$(RANLIB) libpgplot.a
 
 add_definitions (-DPG_PPU)
 
@@ -290,9 +293,18 @@ target_link_libraries (pgplot
   )
 
 ## -- libcpgplot ---------------------------------
+##
+## libcpgplot.a cpgplot.h: $(PG_SOURCE) pgbind 
+## 	./pgbind $(PGBIND_FLAGS) -h -w $(PG_SOURCE)
+## 	$(CCOMPL) -c $(CFLAGC) cpg*.c
+## 	rm -f cpg*.c
+## 	ar ru libcpgplot.a cpg*.o
+## 	$(RANLIB) libcpgplot.a
+## 	rm -f cpg*.o
 
 file (GLOB cpgplot_sources
   ${pgplot_SOURCE_DIR}/src/*.c
+  ${pgplot_SOURCE_DIR}/src/*.f
   ${pgplot_SOURCE_DIR}/sys/*.c
   ${pgplot_SOURCE_DIR}/cpg/*.c
   )
