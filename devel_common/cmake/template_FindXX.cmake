@@ -51,6 +51,7 @@ find_library (<PACKAGE>_LIBRARIES <package name>
 if (<PACKAGE>_INCLUDES AND <PACKAGE>_LIBRARIES)
   set (HAVE_<PACKAGE> TRUE)
 else (<PACKAGE>_INCLUDES AND <PACKAGE>_LIBRARIES)
+  set (HAVE_<PACKAGE> FALSE)
   if (NOT <PACKAGE>_FIND_QUIETLY)
     if (NOT <PACKAGE>_INCLUDES)
       message (STATUS "Unable to find <PACKAGE> header files!")

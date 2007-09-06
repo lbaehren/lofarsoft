@@ -158,6 +158,21 @@ if (HAVE_GSL)
 endif (HAVE_GSL)
 
 ## -----------------------------------------------------------------------------
+## Test(s) for PGPlot
+
+if (HAVE_PGPLOT)
+  add_executable (tUsePGPlot tUsePGPlot.cc)
+  target_link_libraries (tUsePGPlot ${PGPLOT_LIBRARIES})
+  ## testing
+  add_test (tUsePGPlot tUsePGPlot)
+  ## installation
+  install (
+    TARGETS tUsePGPlot
+    RUNTIME DESTINATION bin
+    )
+endif (HAVE_PGPLOT)
+
+## -----------------------------------------------------------------------------
 ## Test for WCSLIB
 
 if (HAVE_WCSLIB)

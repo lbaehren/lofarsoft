@@ -32,14 +32,14 @@ endforeach (src)
 
 ## programs which need special treatment
 
-if (HAVE_POSTGRESQL)
+if (PostgreSQL_LIBRARIES)
   ## compiler instructions
   add_executable (RunFlagInDB RunFlagInDB.cc)
   ## linker instructions
-  target_link_libraries (RunFlagInDB cr)
+  target_link_libraries (RunFlagInDB cr ${PostgreSQL_LIBRARIES})
   ## installation
   list (APPEND LopesStar_apps RunFlagInDB)
-endif (HAVE_POSTGRESQL)
+endif (PostgreSQL_LIBRARIES)
 
 ## ------------------------------------------------------------------------------
 ## Installation

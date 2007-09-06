@@ -35,6 +35,7 @@ endif (pgplot_ENABLE_TESTING)
 ## Handle option: verbose during configuration on/off
 
 if (NOT pgplot_VERBOSE_CONFIGURE)
+  set (G2C_FIND_QUIETLY 1)
   set (GIF_FIND_QUIETLY 1)
   set (JPEG_FIND_QUIETLY 1)
   set (PNG_FIND_QUIETLY 1)
@@ -109,7 +110,6 @@ set (pgplot_drivers
   ./drivers/pgdriv.f
   ./drivers/pgxwin.c
   ./drivers/psdriv.f
-  ./drivers/rvdriv.c
   ./drivers/wddriv.f
   ./drivers/xmdriv.c
   ./drivers/xwdriv.c
@@ -138,7 +138,6 @@ file (APPEND ${outfile} "PSDRIV 4 /VCPS     PostScript printers, color, portrait
 
 ## [4] X-window Rivet/Tk -------------------------
 
-file (APPEND ${outfile} "RVDRIV 0 /XRV       X-window Rivet/Tk programs with pgplot widgets.   C")
 file (APPEND ${outfile} "WDDRIV 1 /WD       X Window dump file, landscape\n")
 file (APPEND ${outfile} "WDDRIV 2 /VWD      X Window dump file, portrait\n")
 
@@ -188,7 +187,9 @@ endif (PNG_LIBRARIES)
 
 if (HAVE_TCL AND HAVE_TK)
   file (APPEND ${outfile} "TKDRIV 0 /XTK      X-window Tcl/Tk programs with pgplot widgets.  C\n")
+  file (APPEND ${outfile} "RVDRIV 0 /XRV       X-window Rivet/Tk programs with pgplot widgets.   C")
   ## update driver list
+  list (APPEND pgplot_drivers ./drivers/rvdriv.c)
   list (APPEND pgplot_drivers ./drivers/tkdriv.c)
   list (APPEND pgplot_drivers ./drivers/xtk/tkpgplot.c)
   ## update compiler instructions
@@ -290,11 +291,14 @@ target_link_libraries (pgplot
 
 ## -- libcpgplot ---------------------------------
 
-FILE (GLOB cpgplot_sources ${pgplot_SOURCE_DIR}/cpg/*.c)
-
-add_library (cpgplot
-  ${cpgplot_sources}
+file (GLOB cpgplot_sources
+  ${pgplot_SOURCE_DIR}/src/*.c
+  ${pgplot_SOURCE_DIR}/sys/*.c
+  ${pgplot_SOURCE_DIR}/cpg/*.c
   )
+
+add_library (cpgplot ${cpgplot_sources})
+add_dependencies (cpgplot pgplot)
 target_link_libraries (cpgplot pgplot)
 
 ## -- libXmPgplot --------------------------------
@@ -305,6 +309,7 @@ if (HAVE_XM)
     drivers/xmotif/XmPgplot.c
     )
   ## linker instructions
+  add_dependencies (XmPgplot pgplot)
   target_link_libraries (XmPgplot pgplot ${XM_LIBRARIES})
   ## installation
   install (TARGETS XmPgplot
