@@ -58,7 +58,7 @@ namespace CR {  //  Namespace CR -- begin
   /*!
     \class DataCC
     
-    \ingroup Data
+    \ingroup ApplicationSupport
     
     \brief Storage for a set of cross-correlated data
     

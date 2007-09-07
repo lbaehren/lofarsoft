@@ -125,6 +125,8 @@ endif (libregx)
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
+SET (HAVE_GLISH FALSE)
+
 IF (GLISH_INCLUDES AND GLISH_LIBRARIES)
   SET (HAVE_GLISH TRUE)
 ELSE (GLISH_INCLUDES AND GLISH_LIBRARIES)

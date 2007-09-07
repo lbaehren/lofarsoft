@@ -49,6 +49,10 @@ foreach (cr_module ${cr_modules})
   LIST (APPEND cr_sources ${cr_${cr_module}})
 endforeach (cr_module)
 
+if (CR_GLISH_SUPPORT AND HAVE_CASA)
+  list (APPEND cr_sources templates.cc)
+endif (CR_GLISH_SUPPORT AND HAVE_CASA)
+
 ## Optional (pre-)compiler settings
 
 if (CR_DEBUGGING_MESSAGES)
@@ -57,18 +61,18 @@ endif (CR_DEBUGGING_MESSAGES)
 
 ## Create the library
 
-add_library (cr
-  ${cr_sources}
-  templates.cc
-  )
+add_library (cr ${cr_sources})
 set_target_properties (cr
   PROPERTIES COMPILE_FLAGS "${CASACORE_COMPILE_FLAGS}"
   )
 target_link_libraries (cr
   ${CASA_LIBRARIES}
-  ${CFITSIO_LIBRARIES}
+  ${G2C_LIBRARIES}
   ${LAPACK_LIBRARIES}
+  ${CFITSIO_LIBRARIES}
   ${CPGPLOT_LIBRARIES}
+  ${WCSLIB_LIBRARIES}
+  ${libm}
   )
 
 ## ------------------------------------------------------------------------------

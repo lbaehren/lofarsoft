@@ -9,6 +9,7 @@ include_directories (. .. ../..)
 
 set (tests
   tBeamformer
+  tDataCC
   tDataFrequency
   tDataReaderTools
   tObservationMeta

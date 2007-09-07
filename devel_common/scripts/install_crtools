@@ -54,7 +54,16 @@ echo " --> Initiating build ... "
 echo "  --> Adding new bin directory to the PATH"
 export PATH=$basedir/../release/bin:$PATH
 
-## [1] wcslib
+## [1] pgplot
+
+echo "[CR-Tools installer] Installing PGPLOT ..."
+
+cd $basedir
+mkdir pgplot 
+cd pgplot
+cmake ../../external/pgplot && make install
+
+## [2] wcslib
 
 echo "[CR-Tools installer] Installing WCSLIB ..."
 
@@ -63,7 +72,7 @@ mkdir wcslib
 cd wcslib
 cmake ../../external/wcslib && make install
 
-## [2] CFITSIO
+## [3] CFITSIO
 
 echo "[CR-Tools installer] Installing CFITSIO ..."
 
@@ -72,7 +81,7 @@ mkdir cfitsio
 cd cfitsio
 cmake ../../external/cfitsio && make install
 
-## [2] CASACORE
+## [4] CASACORE
 
 echo "[CR-Tools installer] Installing CASACORE ..."
 
@@ -81,7 +90,7 @@ mkdir casacore
 cd casacore
 cmake ../../external/casacore && make install
 
-## [4] HDF5
+## [5] HDF5
 
 echo "[CR-Tools installer] Installing HDF5 ..."
 
@@ -90,7 +99,7 @@ ln -s ../external/hdf5 hdf5
 cd hdf5
 ./configure --prefix=$basedir/../release && make && make install
 
-## [4] Boost
+## [6] Boost
 
 echo "[CR-Tools installer] Installing Boost ..."
 

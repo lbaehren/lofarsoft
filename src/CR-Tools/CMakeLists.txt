@@ -68,6 +68,8 @@ endif (CR_BUILD_TESTS)
 ##
 ## =============================================================================
 
+find_library (libm m PATHS /usr/lib /usr/local/lib /sw/lib)
+
 ## Standard CMake modules for location of packages
 
 find_package (Motif)

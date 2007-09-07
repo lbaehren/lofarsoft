@@ -25,14 +25,14 @@
 #include <casa/BasicSL/Complex.h>
 
 // Custom header files
-#include <Data/DataCC.h>
+#include <ApplicationSupport/DataCC.h>
 
 using CR::DataCC;
 
 /*!
   \file tDataCC.cc
   
-  \ingroup Data
+  \ingroup ApplicationSupport
   
   \brief A collection of tests for DataCC.
 

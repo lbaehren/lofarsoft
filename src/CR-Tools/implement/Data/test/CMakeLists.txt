@@ -10,7 +10,6 @@ include_directories (. .. ../..)
 set (tests
   tArrays
   tData
-  tDataCC
   tDataFlag
   tITSBeam
   tITSMetadata
