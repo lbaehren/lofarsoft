@@ -107,6 +107,7 @@ set (CASACORE_INCLUDES "")
 find_path (CASACORE_casa Arrays.h
   PATHS ${include_locations}
   PATH_SUFFIXES casa/casa
+  NO_DEFAULT_PATH
 )
 
 if (CASACORE_casa)
@@ -117,15 +118,18 @@ endif (CASACORE_casa)
 
 ## [2] <tables/Tables.h>
 
-find_path (CASACORE_tables Table.h TaQLNode.h
+find_path (CASACORE_tables Tables.h LogTables.h
   PATHS ${include_locations}
   PATH_SUFFIXES tables/tables
+  NO_DEFAULT_PATH
 )
 
 if (CASACORE_tables)
   get_filename_component (tmp ${CASACORE_tables} ABSOLUTE)
-  string (REGEX REPLACE tables/tables tables tmp ${tmp})
-  list (APPEND CASACORE_INCLUDES ${tmp})
+  string (REGEX REPLACE "tables/tables" "tables" casacore_tables_include ${tmp})
+  list (APPEND CASACORE_INCLUDES ${casacore_tables_include})
+elseif (CASACORE_tables)
+  message (SEND_ERROR "[casacore] Unable to locate Tables.h")
 endif (CASACORE_tables)
 
 ## [3] <miriad.h>
@@ -133,6 +137,7 @@ endif (CASACORE_tables)
 find_path (CASACORE_mirlib miriad.h
   PATHS ${include_locations}
   PATH_SUFFIXES mirlib
+  NO_DEFAULT_PATH
 )
 
 if (CASACORE_mirlib)
@@ -145,6 +150,7 @@ endif (CASACORE_mirlib)
 find_path (CASACORE_scimath Fitting.h
   PATHS ${include_locations}
   PATH_SUFFIXES scimath/scimath
+  NO_DEFAULT_PATH
 )
 
 if (CASACORE_scimath)
@@ -158,6 +164,7 @@ endif (CASACORE_scimath)
 find_path (CASACORE_measures Measures.h
   PATHS ${include_locations}
   PATH_SUFFIXES measures/measures
+  NO_DEFAULT_PATH
 )
 
 if (CASACORE_measures)
