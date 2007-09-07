@@ -37,8 +37,8 @@ namespace CR {
     
     retChar = new char [strlen(tmpChar)+1];
     
-    /* change the size of string2 to the size of string1 */
-    realloc(retChar, strlen(tmpChar)+1);
+//     /* change the size of string2 to the size of string1 */
+//     realloc(retChar, strlen(tmpChar)+1);
     
     do {
       retChar[x] = tmpChar[x];

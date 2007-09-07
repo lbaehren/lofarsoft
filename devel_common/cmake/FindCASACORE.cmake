@@ -13,6 +13,10 @@
 ##
 
 set (include_locations
+  ## locale installation
+  ./../release/include
+  ./../../release/lib
+  ## source code
   ./../casacore
   ./../external/casacore
   ./../../casacore
@@ -107,13 +111,13 @@ find_path (CASACORE_casa Arrays.h
 
 if (CASACORE_casa)
   get_filename_component (tmp ${CASACORE_casa} ABSOLUTE)
-  string (REGEX REPLACE casa/casa casa tmp ${tmp})
-  list (APPEND CASACORE_INCLUDES ${tmp})
+  string (REGEX REPLACE "casa/casa" "casa" casacore_casa_include ${tmp})
+  list (APPEND CASACORE_INCLUDES ${casacore_casa_include})
 endif (CASACORE_casa)
 
 ## [2] <tables/Tables.h>
 
-find_path (CASACORE_tables Tables.h
+find_path (CASACORE_tables Table.h TaQLNode.h
   PATHS ${include_locations}
   PATH_SUFFIXES tables/tables
 )

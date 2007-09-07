@@ -23,20 +23,7 @@
 
 // Implementation files
 
-#ifdef HAVE_CASACORE
-#include <casa/Arrays/ArrayIO.tcc>
-#include <casa/Arrays/ArrayLogical.tcc>
-#include <casa/BasicMath/Functional.tcc> 
-#include <casa/Utilities/BinarySearch.tcc>
-#include <casa/Utilities/PtrHolder.tcc>
-#include <scimath/Functionals/Function.tcc>
-#include <scimath/Functionals/FunctionParam.tcc>
-#include <scimath/Functionals/Interpolate1D.tcc>
-#include <scimath/Mathematics/FFTServer.tcc>
-#include <scimath/Mathematics/InterpolateArray1D.tcc>
-#include <images/Images/ImageInterface.tcc>
-#include <images/Images/PagedImage.tcc>
-#else
+#ifndef HAVE_CASACORE
 #include <casa/BasicMath/Functional.cc> 
 #include <casa/Arrays/ArrayIO.cc>
 #include <casa/Arrays/ArrayLogical.cc>
@@ -52,7 +39,19 @@
 #include <images/Images/PagedImage.cc>
 #endif
 
-#include <casa/Utilities/Copy2.cc>
+// #include <casa/Arrays/ArrayIO.tcc>
+// #include <casa/Arrays/ArrayLogical.tcc>
+// #include <casa/BasicMath/Functional.tcc> 
+// #include <casa/Utilities/BinarySearch.tcc>
+// #include <casa/Utilities/PtrHolder.tcc>
+// #include <scimath/Functionals/Function.tcc>
+// #include <scimath/Functionals/FunctionParam.tcc>
+// #include <scimath/Functionals/Interpolate1D.tcc>
+// #include <scimath/Mathematics/FFTServer.tcc>
+// #include <scimath/Mathematics/InterpolateArray1D.tcc>
+// #include <images/Images/ImageInterface.tcc>
+// #include <images/Images/PagedImage.tcc>
+// #include <casa/Utilities/Copy2.cc>
 
 namespace casa {
 

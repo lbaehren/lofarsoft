@@ -1,4 +1,5 @@
 
+
 ##------------------------------------------------------------------------------
 ## $Id::                                                                        $
 ##------------------------------------------------------------------------------
@@ -168,8 +169,6 @@ if (NOT HAVE_GLISH OR NOT CR_GLISH_SUPPORT)
     set (HAVE_CASA FALSE)
     add_definitions (-DHAVE_CASA)
     add_definitions (-DHAVE_CASACORE)
-  else (HAVE_CASACORE)
-    set (HAVE_CASACORE FALSE)
   endif (HAVE_CASACORE)
 endif (NOT HAVE_GLISH OR NOT CR_GLISH_SUPPORT)
 
@@ -224,7 +223,6 @@ include_directories (
   ${CR_SOURCE_DIR}/implement
   ${CR_SOURCE_DIR}/apps
   ${CR_SOURCE_DIR}/test
-  ${CASA_INCLUDES}
   ${DAL_INCLUDES}
   ${PGPLOT_INCLUDES}
   )
@@ -234,6 +232,14 @@ include_directories (
 if (BLITZ_INCLUDES)
   include_directories (${BLITZ_INCLUDES})
 endif (BLITZ_INCLUDES)
+
+if (HAVE_CASA)
+  include_directories (${CASA_INCLUDES})
+endif (HAVE_CASA)
+
+if (HAVE_CASACORE)
+  include_directories (${CASACORE_INCLUDES})
+endif (HAVE_CASACORE)
 
 if (CFITSIO_INCLUDES)
   include_directories (${CFITSIO_INCLUDES})
@@ -295,3 +301,8 @@ message (STATUS "PGPLOT ................ : ${HAVE_PGPLOT}")
 message (STATUS "POPT .................. : ${HAVE_POPT}")
 message (STATUS "ROOT .................. : ${HAVE_ROOT}")
 message (STATUS "WCSLIB ................ : ${HAVE_WCSLIB}")
+
+if (HAVE_CASACORE)
+  message (STATUS "casacore headers   = ${CASACORE_INCLUDES}")
+  message (STATUS "casacore libraries = ${CASACORE_LIBRARIES}")
+endif (HAVE_CASACORE)

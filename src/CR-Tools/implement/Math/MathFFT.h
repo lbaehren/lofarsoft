@@ -133,9 +133,9 @@ namespace CR { // Namespace CR -- begin
   */
   template <typename T, typename S>
     casa::Vector<T> FFT2Fx (casa::Vector<S> &from,
-		      Int const &fftsize,
-		      Bool const &invdir=True,
-		      Bool const &realtocomplex=False);
+			    Int const &fftsize,
+			    Bool const &invdir=True,
+			    Bool const &realtocomplex=False);
   
   /*!
     \brief Compute time-series from FFT'ed data
