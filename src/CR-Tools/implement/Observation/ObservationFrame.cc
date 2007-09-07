@@ -38,7 +38,7 @@ ObservationFrame::ObservationFrame()
   Quantity epoch;
   String obsName;
   Time currentTime;
-
+  
   epoch = Quantity(currentTime.modifiedJulianDay(),"d");
   obsName = "WSRT";
   
@@ -103,41 +103,6 @@ void ObservationFrame::setObservationFrame (Quantity epoch,
   // pass the input arguments to the functions setting up the individual values
   ObservationFrame::setEpoch(epoch);
   ObservationFrame::setObservatory (obsName,obsPosition);
-}
-
-void ObservationFrame::setObservationFrame (casa::GlishRecord& record)
-{
-  casa::GlishArray gtmp;
-  String s;
-
-  // Variables of the Observation frame
-  if (record.exists("Epoch")) {
-    casa::GlishRecord rec = record.get("Epoch");
-    double epochValue;
-    String epochUnit;
-    gtmp = rec.get("value");
-    gtmp.get(epochValue);
-    gtmp = rec.get("unit");
-    gtmp.get(epochUnit);
-    Quantity epoch = Quantity (epochValue,epochUnit);
-    ObservationFrame::setEpoch (epoch);
-  }
-  if (record.exists("ObservatoryName")) {
-    gtmp = record.get("ObservatoryName");
-    gtmp.get(s);
-    ObservationFrame::setObservatory (s);
-  }
-  if (record.exists("ObservatoryPosition")) {
-    cerr << "[ObservationFrame::setObservationFrame] Warning!" << endl;
-    cerr << "Assignment of ObservatoryPosition from record not yet supported" << endl;
-  }
-  if (record.exists("AntennaPositions")) {
-    Matrix<double> AntennaPositions;
-    gtmp = record.get("AntennaPositions");
-    gtmp.get(AntennaPositions);
-    ObservationFrame::setAntennaPositions (AntennaPositions);
-  }
-
 }
 
 void ObservationFrame::getObservationFrame (Quantity& epoch,

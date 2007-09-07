@@ -23,6 +23,10 @@
 
 #include <Imaging/SkymapGrid.h>
 
+using std::cerr;
+using std::cout;
+using std::endl;
+
 namespace CR {  // Namespace CR -- begin
   
   // ============================================================================
@@ -35,7 +39,7 @@ namespace CR {  // Namespace CR -- begin
   
   SkymapGrid::SkymapGrid ()
   {
-    init_p = True;
+    init_p = true;
     //
     SkymapGrid::init();
   }
@@ -46,7 +50,7 @@ namespace CR {  // Namespace CR -- begin
   {
     // Inhibit completion of initialization, to avoid overwriting the provided
     // observation information with default values
-    init_p = False;
+    init_p = false;
     // Store the observation information
     SkymapGrid::setObservationInfo (obsInfo);
     // Initialize the remaining grid parameters
@@ -58,8 +62,8 @@ namespace CR {  // Namespace CR -- begin
   SkymapGrid::SkymapGrid (const String refcode,
 			  const String projection,
 			  const IPosition& shape,
-			  const Vector<Double>& center,
-			  const Vector<Double>& increment)
+			  const Vector<double>& center,
+			  const Vector<double>& increment)
   {
     SkymapGrid::init (SkymapGrid::defaultObservationInfo(),
 		      refcode,
@@ -75,8 +79,8 @@ namespace CR {  // Namespace CR -- begin
 			  const String refcode,
 			  const String projection,
 			  const IPosition& shape,
-			  const Vector<Double>& center,
-			  const Vector<Double>& increment)
+			  const Vector<double>& center,
+			  const Vector<double>& increment)
   {
     SkymapGrid::init (obsInfo,
 		      refcode,
@@ -98,12 +102,12 @@ namespace CR {  // Namespace CR -- begin
   
   void SkymapGrid::init ()
   {
-    Int nofAxes (2);
+    int nofAxes (2);
     String refcode ("AZEL");
     String projection ("STG");
     IPosition shape (nofAxes);
-    Vector<Double> center (nofAxes);
-    Vector<Double> increment (nofAxes);
+    Vector<double> center (nofAxes);
+    Vector<double> increment (nofAxes);
     ObsInfo obsInfo (SkymapGrid::defaultObservationInfo());
     
     shape = 120;       // default grid : 120x120 pixels
@@ -131,11 +135,11 @@ namespace CR {  // Namespace CR -- begin
 			 const String refcode,
 			 const String projection,
 			 const IPosition& shape,
-			 const Vector<Double>& center,
-			 const Vector<Double>& increment)
+			 const Vector<double>& center,
+			 const Vector<double>& increment)
   {
-    verbose_p = False;
-    init_p = False;
+    verbose_p = false;
+    init_p = false;
     //
     SkymapGrid::setObservationInfo (obsInfo);
     SkymapGrid::setReferencecode (refcode);
@@ -143,12 +147,12 @@ namespace CR {  // Namespace CR -- begin
     SkymapGrid::setShape (shape);
     SkymapGrid::setCenter (center);
     SkymapGrid::setIncrement (increment);
-    SkymapGrid::setNorthUp (True);
-    SkymapGrid::setEastLeft (True);
+    SkymapGrid::setNorthUp (true);
+    SkymapGrid::setEastLeft (true);
     //
     SkymapGrid::setElevationRange (SkymapGrid::defaultElevation());
     //
-    init_p = True;
+    init_p = true;
     //
     SkymapGrid::setGrid ();
   }
@@ -258,7 +262,7 @@ namespace CR {  // Namespace CR -- begin
   
   DirectionCoordinate SkymapGrid::directionCoordinate ()
   {
-    Int coordinateAxis (0);
+    int coordinateAxis (0);
     Coordinate::Type type;
     DirectionCoordinate dc;
     
@@ -274,10 +278,10 @@ namespace CR {  // Namespace CR -- begin
   //
   // ============================================================================
   
-  Int SkymapGrid::nelements ()
+  int SkymapGrid::nelements ()
   {
-    Int nofAxes (shape_p.nelements());
-    Int nofPoints (1);
+    int nofAxes (shape_p.nelements());
+    int nofPoints (1);
     //
     for (int n=0; n<nofAxes; n++) {
       nofPoints *= shape_p(n);
@@ -286,10 +290,10 @@ namespace CR {  // Namespace CR -- begin
     return nofPoints;
   }
   
-  Int SkymapGrid::nelements (const Bool which)
+  int SkymapGrid::nelements (const bool which)
   {
-    Int nofPixels (mask_p.nelements());
-    Int nofElements (0);
+    int nofPixels (mask_p.nelements());
+    int nofElements (0);
     //
     for (int n=0; n<nofPixels; n++) {
       if (mask_p(n) == which) {
@@ -310,7 +314,7 @@ namespace CR {  // Namespace CR -- begin
     }
   }
   
-  void SkymapGrid::setShape (const Vector<Int>& shape) {
+  void SkymapGrid::setShape (const Vector<int>& shape) {
     shape_p = shape;
     //
     if (init_p) {
@@ -318,10 +322,10 @@ namespace CR {  // Namespace CR -- begin
     }
   }
   
-  Vector<Double> SkymapGrid::centerPixel()
+  Vector<double> SkymapGrid::centerPixel()
   {
-    Int nofAxes (shape_p.nelements());
-    Vector<Double> centerPixel (nofAxes);
+    int nofAxes (shape_p.nelements());
+    Vector<double> centerPixel (nofAxes);
     
     for (int n=0; n<nofAxes; n++) {
       centerPixel(n) = shape_p(n)/2.0+1;
@@ -330,7 +334,7 @@ namespace CR {  // Namespace CR -- begin
     return centerPixel;
   }
   
-  void SkymapGrid::setCenter (const Vector<Double>& center)
+  void SkymapGrid::setCenter (const Vector<double>& center)
   {
     IPosition shape (center.shape());
     //
@@ -342,7 +346,7 @@ namespace CR {  // Namespace CR -- begin
     }
   }
   
-  void SkymapGrid::setIncrement (const Vector<Double>& increment)
+  void SkymapGrid::setIncrement (const Vector<double>& increment)
   {
     IPosition shape (increment.shape());
     //
@@ -363,7 +367,7 @@ namespace CR {  // Namespace CR -- begin
   
   MDirection::Types SkymapGrid::MDirectionType (const String refcode)
   {
-    Bool ok (True);
+    bool ok (true);
     MDirection md;
     MDirection::Types tp;
     //
@@ -378,9 +382,9 @@ namespace CR {  // Namespace CR -- begin
   
   void SkymapGrid::setCoordinateSystem ()
   {
-    Vector<Double> refValue (center_p);                  // Reference value
-    Vector<Double> refPixel (SkymapGrid::centerPixel()); // Reference pixel
-    Matrix<Double> xform(2,2);                           // Linear transform
+    Vector<double> refValue (center_p);                  // Reference value
+    Vector<double> refPixel (SkymapGrid::centerPixel()); // Reference pixel
+    Matrix<double> xform(2,2);                           // Linear transform
     MDirection::Types typeMDirection (SkymapGrid::MDirectionType(refcode_p));
     Projection::Type typeProjection (Projection::STG);
     
@@ -402,15 +406,15 @@ namespace CR {  // Namespace CR -- begin
     }
     
     // Create the DirectionCoordinate to be added to the CoordinateSystem
-    DirectionCoordinate dir (typeMDirection,                // Direction
-			     Projection(typeProjection),    // Projection
-			     refValue(0)*C::pi/180.0,       // CRVAL(0)
-			     refValue(1)*C::pi/180.0,       // CRVAL(1)
-			     increment_p(0)*C::pi/180.0,    // CDELT(0)
-			     increment_p(1)*C::pi/180.0,    // CDELT(1)
-			     xform,                         // PC(i,j)
-			     refPixel(0),                   // CRPIX(0)
-			     refPixel(1));                  // CRPIX(1)
+    DirectionCoordinate dir (typeMDirection,                    // Direction
+			     Projection(typeProjection),        // Projection
+			     refValue(0)*casa::C::pi/180.0,     // CRVAL(0)
+			     refValue(1)*casa::C::pi/180.0,     // CRVAL(1)
+			     increment_p(0)*casa::C::pi/180.0,  // CDELT(0)
+			     increment_p(1)*casa::C::pi/180.0,  // CDELT(1)
+			     xform,                             // PC(i,j)
+			     refPixel(0),                       // CRPIX(0)
+			     refPixel(1));                      // CRPIX(1)
     
     // Set up the internal coordinate system
     try {
@@ -436,14 +440,14 @@ namespace CR {  // Namespace CR -- begin
     SkymapGrid::adjustIncrement();
     
     {
-      Bool ok (True);
-      Vector<Double> world (center_p.shape());
-      Vector<Double> pixel (center_p.shape());
-      Vector<Double> centerPixel (SkymapGrid::centerPixel());
-      Vector<Double> offset (center_p.shape());
+      bool ok (true);
+      Vector<double> world (center_p.shape());
+      Vector<double> pixel (center_p.shape());
+      Vector<double> centerPixel (SkymapGrid::centerPixel());
+      Vector<double> offset (center_p.shape());
       //
       world = center_p;
-      world *= C::pi/180;
+      world *= casa::C::pi/180;
       offset = 0.0;
       
       // To what pixel coordinates transforms the intended center position of 
@@ -458,7 +462,7 @@ namespace CR {  // Namespace CR -- begin
       csys_p.setReferencePixel (pixel);
       //
       pixel = SkymapGrid::centerPixel();
-      pixel *= C::pi/180;
+      pixel *= casa::C::pi/180;
       ok = csys_p.toWorld (world,pixel);
       //
       if (verbose_p) {
@@ -482,12 +486,12 @@ namespace CR {  // Namespace CR -- begin
   void SkymapGrid::adjustIncrement () 
   {
     DirectionCoordinate dc (SkymapGrid::directionCoordinate());
-    Vector<Double> increment (2);
+    Vector<double> increment (2);
     
     // (1) Get the projection type
     Projection projection (dc.projection());
     Projection::Type projectionType (projection.type());
-    Bool isZenithal (projection.isZenithal(projectionType));
+    bool isZenithal (projection.isZenithal(projectionType));
     
     // (2) Set the CDELT correction for the chosen map orientation
     if (northIsUp_p && eastIsLeft_p) {
@@ -522,8 +526,8 @@ namespace CR {  // Namespace CR -- begin
     }
     
     // (3) Set the coordinate increment
-    increment(0) *= increment_p(0)*C::pi/180.0;
-    increment(1) *= increment_p(1)*C::pi/180.0;
+    increment(0) *= increment_p(0)*casa::C::pi/180.0;
+    increment(1) *= increment_p(1)*casa::C::pi/180.0;
     
     csys_p.setIncrement (increment);
     
@@ -546,20 +550,20 @@ namespace CR {  // Namespace CR -- begin
   
   void SkymapGrid::setOrientation (const Vector<String>& directions)
   {
-    Int nelem (directions.nelements());
-    Bool eastIsLeft (True);
-    Bool northIsUp (True);
+    int nelem (directions.nelements());
+    bool eastIsLeft (true);
+    bool northIsUp (true);
     
     if (nelem < 2) {
       cerr << "[SkymapGrid::setOrientation] Too few parameters." << endl;
     } else {
       // check latitude
       if (directions(0) != "East") {
-	eastIsLeft = False;
+	eastIsLeft = false;
       }
       // check longitude
       if (directions(1) != "North") {
-	northIsUp = False;
+	northIsUp = false;
       }
       // set internal values
       SkymapGrid::setEastLeft (eastIsLeft);
@@ -586,12 +590,12 @@ namespace CR {  // Namespace CR -- begin
     return orientation;
   }
   
-  void SkymapGrid::setNorthUp (const Bool northIsUp)
+  void SkymapGrid::setNorthUp (const bool northIsUp)
   {
-    Bool recomputeGrid (True);
+    bool recomputeGrid (true);
     //
     if (northIsUp_p == northIsUp) {
-      recomputeGrid = False;
+      recomputeGrid = false;
     }
     //
     northIsUp_p = northIsUp;
@@ -601,12 +605,12 @@ namespace CR {  // Namespace CR -- begin
     }
   }
   
-  void SkymapGrid::setEastLeft (const Bool eastIsLeft)
+  void SkymapGrid::setEastLeft (const bool eastIsLeft)
   {
-    Bool recomputeGrid (True);
+    bool recomputeGrid (true);
     //
     if (eastIsLeft_p == eastIsLeft) {
-      recomputeGrid = False;
+      recomputeGrid = false;
     }
     //
     eastIsLeft_p = eastIsLeft;
@@ -623,7 +627,7 @@ namespace CR {  // Namespace CR -- begin
   //
   // =============================================================================
   
-  void SkymapGrid::setElevationRange (const Vector<Double>& elevation)
+  void SkymapGrid::setElevationRange (const Vector<double>& elevation)
   {
     elevation_p.resize(elevation.shape());
     elevation_p = elevation;
@@ -633,9 +637,9 @@ namespace CR {  // Namespace CR -- begin
     }  
   }
   
-  Vector<Double> SkymapGrid::defaultElevation ()
+  Vector<double> SkymapGrid::defaultElevation ()
   {
-    Vector<Double> elevation(2);
+    Vector<double> elevation(2);
     //
     elevation(0) = 0.0;
     elevation(1) = 90.0;
@@ -658,24 +662,24 @@ namespace CR {  // Namespace CR -- begin
     // frame to local ones.
     
     ObservationData obsData (csys_p.obsInfo());
-    MDirection::Convert engine = obsData.conversionEngine (refcode_p,
-							   True);
+    casa::MDirection::Convert engine = obsData.conversionEngine (refcode_p,
+								 true);
     
     // -----------------------------------------------------------------
     // Coordinate conversion
     
     try {
-      Int nofAxes (shape_p.nelements());
-      Int nofPixels (SkymapGrid::nelements());
-      Int numPixel (0);
+      int nofAxes (shape_p.nelements());
+      int nofPixels (SkymapGrid::nelements());
+      int numPixel (0);
       IPosition pixel (nofAxes);
-      Vector<Double> world (nofAxes);
+      Vector<double> world (nofAxes);
       MVDirection MVDirectionFROM;
       Vector<Quantity> QDirectionTO(nofAxes);
       //
       azel_p.resize (nofPixels,nofAxes);
       mask_p.resize (nofPixels);
-      mask_p = True;
+      mask_p = true;
       //
       for (pixel(0)=1; pixel(0)<=shape_p(0); pixel(0)++) {
 	for (pixel(1)=1; pixel(1)<=shape_p(1); pixel(1)++) {
@@ -689,10 +693,10 @@ namespace CR {  // Namespace CR -- begin
 	  azel_p(numPixel,1) = QDirectionTO(1).getValue("deg");
 	  // check if the elevation position is within the allowed range
 	  if (azel_p(numPixel,1) < elevation_p(0)) {
-	    mask_p(numPixel) = False;
+	    mask_p(numPixel) = false;
 	  }
 	  if (azel_p(numPixel,1) > elevation_p(1)) {
-	    mask_p(numPixel) = False;
+	    mask_p(numPixel) = false;
 	  }
 	  // increment pixel number counter
 	  numPixel++;
@@ -704,15 +708,15 @@ namespace CR {  // Namespace CR -- begin
     // -----------------------------------------------------------------//
   }
   
-  Matrix<Double> SkymapGrid::grid ()
+  Matrix<double> SkymapGrid::grid ()
   {
-    Bool ok (True);
-    Int nofAxes (shape_p.nelements());
-    Int nofPixels (SkymapGrid::nelements());
-    Int numPixel (0);
+    bool ok (true);
+    int nofAxes (shape_p.nelements());
+    int nofPixels (SkymapGrid::nelements());
+    int numPixel (0);
     IPosition pixel (2);
-    Vector<Double> world (2);
-    Matrix<Double> grid;
+    Vector<double> world (2);
+    Matrix<double> grid;
     
     try {
       grid.resize (nofPixels,nofAxes);
@@ -732,17 +736,17 @@ namespace CR {  // Namespace CR -- begin
     }
     
     // convert values from radian to degrees
-    grid /= C::pi/180.0;
+    grid /= casa::C::pi/180.0;
     
     return grid;
   }
   
-  Matrix<Double> SkymapGrid::grid (const Bool which)
+  Matrix<double> SkymapGrid::grid (const bool which)
   {
-    Int nofAxes (shape_p.nelements());
-    Int nofPixels (mask_p.nelements());
-    Int numPixel (0);
-    Int nofSelection (0);
+    int nofAxes (shape_p.nelements());
+    int nofPixels (mask_p.nelements());
+    int numPixel (0);
+    int nofSelection (0);
     
     // -----------------------------------------------------------------
     // Determine the number of grid nodes matching the selection
@@ -759,8 +763,8 @@ namespace CR {  // Namespace CR -- begin
     // -----------------------------------------------------------------
     // Extract the grid elements matching the selection criterium
     
-    Matrix<Double> gridAll (SkymapGrid::grid ());
-    Matrix<Double> grid (nofSelection,nofAxes);
+    Matrix<double> gridAll (SkymapGrid::grid ());
+    Matrix<double> grid (nofSelection,nofAxes);
     
     for (int n=0; n<nofPixels; n++) {
       if (mask_p(n) == which) {
@@ -774,8 +778,8 @@ namespace CR {  // Namespace CR -- begin
     return grid;
   }
   
-  void SkymapGrid::grid (Matrix<Double>& grid, 
-			 Vector<Bool>& mask)
+  void SkymapGrid::grid (Matrix<double>& grid, 
+			 Vector<bool>& mask)
   {
     grid = SkymapGrid::grid ();
     //
@@ -789,12 +793,12 @@ namespace CR {  // Namespace CR -- begin
   //
   // =============================================================================
   
-  Matrix<Double> SkymapGrid::azel (const Bool which) 
+  Matrix<double> SkymapGrid::azel (const bool which) 
   {
-    Int nofAxes (shape_p.nelements());
-    Int nofPixels (mask_p.nelements());
-    Int numPixel (0);
-    Int nofSelection (0);
+    int nofAxes (shape_p.nelements());
+    int nofPixels (mask_p.nelements());
+    int numPixel (0);
+    int nofSelection (0);
     
     // -----------------------------------------------------------------
     // Determine the number of grid nodes matching the selection
@@ -811,7 +815,7 @@ namespace CR {  // Namespace CR -- begin
     // -----------------------------------------------------------------
     // Extract the grid elements matching the selection criterium
     
-    Matrix<Double> azel (nofSelection,nofAxes);
+    Matrix<double> azel (nofSelection,nofAxes);
     
     for (int n=0; n<nofPixels; n++) {
       if (mask_p(n) == which) {
@@ -851,9 +855,9 @@ namespace CR {  // Namespace CR -- begin
        << northIsUp_p << "]" << endl;
     os << " -- Allowed range in elevation .. : " << elevation_p         << endl;
     
-    Bool ok (True);
-    Vector<Double> world (center_p.shape());
-    Vector<Double> pixel (center_p.shape());
+    bool ok (true);
+    Vector<double> world (center_p.shape());
+    Vector<double> pixel (center_p.shape());
     
     pixel = csys_p.referencePixel();
     ok = csys_p.toWorld (world,pixel);

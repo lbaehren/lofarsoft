@@ -57,7 +57,7 @@ namespace CR {  // Namespace CR -- begin
   /*!
     \class DataFrequency
     
-    \ingroup LopesLegacy
+    \ingroup ApplicationSupport
     
     \brief Frequency domain settings of an observation
     

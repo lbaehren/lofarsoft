@@ -21,7 +21,7 @@
 
 /* $Id: ObservationMeta.cc,v 1.5 2006/11/27 10:54:04 bahren Exp $ */
 
-#include <Observation/ObservationMeta.h>
+#include <ApplicationSupport/ObservationMeta.h>
 
 namespace CR {  // Namespace CR -- begin
 

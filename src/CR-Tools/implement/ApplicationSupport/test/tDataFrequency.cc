@@ -23,7 +23,7 @@
 #include <casa/aips.h>
 
 #include <ApplicationSupport/Glish.h>
-#include <LopesLegacy/DataFrequency.h>
+#include <ApplicationSupport/DataFrequency.h>
 
 using casa::GlishRecord;
 using CR::DataFrequency;

@@ -159,39 +159,6 @@ ObsInfo SkymapperTools::obsinfo (const MEpoch &obsDate,
   return obs;
 }
 
-// --------------------------------------------------------------- MDirectionType
-
-MDirection::Types SkymapperTools::MDirectionType (String const &refcode)
-{
-  Bool ok (True);
-  MDirection md;
-  MDirection::Types tp;
-  //
-  try {
-    ok = md.getType(tp,refcode);
-  } catch (AipsError x) {
-    cerr << "[SkymapperTools::MDirectionType] " << x.getMesg() << endl;
-  }
-  //
-  return tp;
-}
-
-// --------------------------------------------------------------- ProjectionType
-
-Projection::Type SkymapperTools::ProjectionType (String const &refcode)
-{
-  Projection prj;
-  Projection::Type tp (Projection::STG);
-
-  try {
-    tp = prj.type(refcode);
-  } catch (AipsError x) {
-    cerr << "[SkymapperTools::ProjectionType] " << x.getMesg() << endl;
-  }
-
-  return tp;
-}
-
 // ------------------------------------------------------------- coordinateSystem
 
 CoordinateSystem SkymapperTools::coordinateSystem (const String &imagefile,

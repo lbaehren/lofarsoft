@@ -73,7 +73,7 @@ using casa::Vector;
 /*!
   \class ObservationMeta
   
-  \ingroup Observation
+  \ingroup ApplicationSupport
 
   \brief A class for storage of metadata to an ITS experiment
 

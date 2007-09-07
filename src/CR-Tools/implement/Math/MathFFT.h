@@ -24,12 +24,6 @@
 #ifndef MATHFFT_H
 #define MATHFFT_H
 
-/* // C++ Standard library */
-/* #include <stdio.h> */
-/* #include <iostream> */
-/* #include <fstream> */
-/* using namespace std; */
-
 // AIPS++ wrapper classes
 #include <casa/aips.h>
 #include <casa/string.h>
@@ -54,43 +48,42 @@
 
 namespace CR { // Namespace CR -- begin
   
-/*!
-  \brief Fourier transform related mathematical operations.
-
-  \ingroup CR
-  \ingroup Math
-
-  \author Lars Baehren
-
-  \date 2005/02
-
-  This class provides a collection of mathematical tools and functions for
-  Fourier transform related mathematical operations.
-
-  <h3>Prerequisite</h3>
-
-  <ul>
-    <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/Array.html">Array</a>
-    A templated N-D Array class with zero origin.
-    <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/Vector.html">Vector</a>,
-    <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/Matrix.html">Matrix</a>,
-    and Cube are one, two, and three dimensional specializations of Array.
-    <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/ArrayMath.html">Mathematical
-    operations for Arrays</a>.
-    <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/aips/implement/Mathematics/FFTServer.html">FFTServer</a>
-    -- Methods for Fast Fourier Transforms. The FFTServer
-    class provides methods for performing n-dimensional Fast Fourier Transforms
-    with real and complex Array's of arbitrary size and dimensionality. It can
-    do either real to complex, complex to real, or complex to complex transforms
-    with the "origin" of the transform either at the centre of the Array or at 
-    the first element.<br>
-    Also see the description of the
-    <a href="http://aips2.nrao.edu/docs/user/Utility/node287.html">fftserver--Tool</a>
-  </ul>
-
-  <h3>References</h3>
-
-  <ul>
+  /*!
+    \brief Fourier transform related mathematical operations.
+    
+    \ingroup Math
+    
+    \author Lars B&auml;hren
+    
+    \date 2005/02
+    
+    This class provides a collection of mathematical tools and functions for
+    Fourier transform related mathematical operations.
+    
+    <h3>Prerequisite</h3>
+    
+    <ul>
+      <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/Array.html">Array</a>
+      A templated N-D Array class with zero origin.
+      <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/Vector.html">Vector</a>,
+      <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/Matrix.html">Matrix</a>,
+      and Cube are one, two, and three dimensional specializations of Array.
+      <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/aips/implement/Arrays/ArrayMath.html">Mathematical
+      operations for Arrays</a>.
+      <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/aips/implement/Mathematics/FFTServer.html">FFTServer</a>
+      -- Methods for Fast Fourier Transforms. The FFTServer
+      class provides methods for performing n-dimensional Fast Fourier Transforms
+      with real and complex Array's of arbitrary size and dimensionality. It can
+      do either real to complex, complex to real, or complex to complex transforms
+      with the "origin" of the transform either at the centre of the Array or at 
+      the first element.<br>
+      Also see the description of the
+      <a href="http://aips2.nrao.edu/docs/user/Utility/node287.html">fftserver--Tool</a>
+    </ul>
+    
+    <h3>References</h3>
+    
+    <ul>
     <li>Mathworld (Wolfram Research), <i>Cross-Correlation</i>
     (http://mathworld.wolfram.com/Cross-Correlation.html)
     <li>Numerical Recipes in C (http://www.library.cornell.edu/nr/bookcpdf.html)
@@ -134,8 +127,8 @@ namespace CR { // Namespace CR -- begin
   template <typename T, typename S>
     casa::Vector<T> FFT2Fx (casa::Vector<S> &from,
 			    Int const &fftsize,
-			    Bool const &invdir=True,
-			    Bool const &realtocomplex=False);
+			    bool const &invdir=true,
+			    bool const &realtocomplex=false);
   
   /*!
     \brief Compute time-series from FFT'ed data
@@ -144,14 +137,10 @@ namespace CR { // Namespace CR -- begin
     \param fftsize   -- Size of the dataset, that was fft'ed
   */
   template <typename T, typename S>
-    casa::Vector<T> FFT2Fx (casa::Vector<S>& fft,
-			    Int const &fftsize);
+    casa::Vector<T> backwardsFFT (casa::Vector<S>& fft,
+				  Int const &fftsize);
   
 } // end: Namespace Math
-
-#ifndef AIPS_NO_TEMPLATE_SRC
-#include <Math/MathFFT.cc>
-#endif
 
 #endif
   

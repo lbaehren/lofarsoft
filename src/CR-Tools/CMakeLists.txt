@@ -105,6 +105,10 @@ if (cr_cmake)
   if (NOT HAVE_FFTW3)
     include (${cr_cmake}/FindFFTW3.cmake)
   endif (NOT HAVE_FFTW3)
+  ## Glish
+  if (NOT HAVE_GLISH)
+    include (${cr_cmake}/FindGlish.cmake)
+  endif (NOT HAVE_GLISH)
   ## GNU Scientific Library (GSL)
   if (NOT HAVE_GSL)
     include (${cr_cmake}/FindGSL.cmake)
@@ -139,6 +143,13 @@ endif (cr_cmake)
 
 ## Handle option: Activate support for Glish applications on/off
 
+# If there is no Glish on the system, there is no use in trying to activate
+# the support for Glish applications
+
+if (NOT HAVE_GLISH)
+  set (CR_GLISH_SUPPORT FALSE)
+endif (NOT HAVE_GLISH)
+
 if (CR_GLISH_SUPPORT)
   ## --- Support for Glish applications requires full CASA installation
   if (NOT HAVE_CASA)
@@ -159,9 +170,7 @@ if (CR_GLISH_SUPPORT)
     message (STATUS "[CR] Failed to locate Glish!")
     message (STATUS "     CR-Tools will be build without Glish Support!")
   endif (HAVE_GLISH)
-endif (CR_GLISH_SUPPORT)
-
-if (NOT HAVE_GLISH OR NOT CR_GLISH_SUPPORT)
+else (CR_GLISH_SUPPORT)
   ## --- Without support for Glish applications we can/must use casacore
   message (STATUS "[CR] Configuration to use CASACORE ...")
   include (${cr_cmake}/FindCASACORE.cmake)
@@ -170,7 +179,8 @@ if (NOT HAVE_GLISH OR NOT CR_GLISH_SUPPORT)
     add_definitions (-DHAVE_CASA)
     add_definitions (-DHAVE_CASACORE)
   endif (HAVE_CASACORE)
-endif (NOT HAVE_GLISH OR NOT CR_GLISH_SUPPORT)
+endif (CR_GLISH_SUPPORT)
+
 
 if (HAVE_CASA OR HAVE_CASACORE)
   add_definitions (
@@ -295,6 +305,7 @@ message (STATUS "CASA .................. : ${HAVE_CASA}")
 message (STATUS "CASACORE .............. : ${HAVE_CASACORE}")
 message (STATUS "CFITSIO ............... : ${HAVE_CFITSIO}")
 message (STATUS "FFTW3 ................. : ${HAVE_FFTW3}")
+message (STATUS "Glish ................. : ${HAVE_GLISH}")
 message (STATUS "GSL ................... : ${HAVE_GSL}")
 message (STATUS "LAPACK ................ : ${HAVE_LAPACK}")
 message (STATUS "PGPLOT ................ : ${HAVE_PGPLOT}")

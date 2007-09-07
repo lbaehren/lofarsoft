@@ -10,7 +10,6 @@ include_directories (. .. ../..)
 set (tests
   tObservationData
   tObservationFrame
-  tObservationMeta
   tStationBeam
   )
 

@@ -37,7 +37,14 @@
 #include <coordinates/Coordinates/LinearCoordinate.h>
 #include <coordinates/Coordinates/Projection.h>
 #include <coordinates/Coordinates/SpectralCoordinate.h>
+#include <measures/Measures.h>
+#include <measures/Measures/MCDirection.h>
 #include <measures/Measures/MDirection.h>
+#include <measures/Measures/MEpoch.h>
+#include <measures/Measures/MPosition.h>
+#include <measures/Measures/MeasConvert.h>
+#include <measures/Measures/MeasRef.h>
+#include <measures/Measures/MeasTable.h>
 
 // Custom header files
 #include <Coordinates/TimeFreq.h>

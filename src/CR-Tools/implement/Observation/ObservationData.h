@@ -34,6 +34,7 @@
 #include <coordinates/Coordinates/Coordinate.h>
 #include <coordinates/Coordinates/ObsInfo.h>
 #include <measures/Measures.h>
+#include <measures/Measures/MCDirection.h>
 #include <measures/Measures/MDirection.h>
 #include <measures/Measures/MEpoch.h>
 #include <measures/Measures/MPosition.h>
@@ -42,14 +43,18 @@
 #include <casa/OS/Time.h>
 #include <casa/Quanta/MVTime.h>
 
+using casa::AipsError;
+using casa::IPosition;
 using casa::Matrix;
 using casa::MDirection;
 using casa::MEpoch;
 using casa::MeasFrame;
+using casa::MeasTable;
 using casa::MPosition;
 using casa::ObsInfo;
 using casa::Quantity;
 using casa::String;
+using casa::Time;
 
 /*!
   \class ObservationData

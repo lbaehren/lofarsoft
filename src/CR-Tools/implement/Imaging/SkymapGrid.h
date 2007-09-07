@@ -37,15 +37,28 @@
 #include <coordinates/Coordinates/CoordinateSystem.h>
 #include <coordinates/Coordinates/DirectionCoordinate.h>
 #include <measures/Measures.h>
+#include <measures/Measures/MCDirection.h>
 #include <measures/Measures/MDirection.h>
 #include <measures/Measures/MEpoch.h>
 #include <measures/Measures/MPosition.h>
+#include <measures/Measures/MeasConvert.h>
 #include <measures/Measures/MeasRef.h>
 #include <measures/Measures/MeasTable.h>
 
 #include <Observation/ObservationData.h>
 
-#include <casa/namespace.h>
+using casa::AipsError;
+using casa::Coordinate;
+using casa::CoordinateSystem;
+using casa::DirectionCoordinate;
+using casa::IPosition;
+using casa::Matrix;
+using casa::MVDirection;
+using casa::ObsInfo;
+using casa::Projection;
+using casa::String;
+using casa::Time;
+using casa::Vector;
 
 namespace CR {  // Namespace CR -- begin
 
@@ -205,7 +218,7 @@ namespace CR {  // Namespace CR -- begin
 class SkymapGrid {
 
   //! Switch between verbose/non-verbose mode
-  Bool verbose_p;
+  bool verbose_p;
 
   //! Reference code for the celestial coordiante frame
   String refcode_p;
@@ -214,27 +227,27 @@ class SkymapGrid {
   String projection_p;
 
   //! Orientation of the skymap
-  Bool eastIsLeft_p;
-  Bool northIsUp_p;
+  bool eastIsLeft_p;
+  bool northIsUp_p;
 
   IPosition shape_p;
-  Vector<Double> center_p;
-  Vector<Double> increment_p;
+  Vector<double> center_p;
+  Vector<double> increment_p;
 
   //! Go through the initialization steps? 
-  Bool init_p;
+  bool init_p;
 
   //! Coordinate system tool
   CoordinateSystem csys_p;
 
   //! Coordinate grid positions, [deg], in the local reference frame (AZEL).
-  Matrix<Double> azel_p;
+  Matrix<double> azel_p;
 
-  Vector<Double> elevation_p;
+  Vector<double> elevation_p;
 
   // Masking array, marking wether or not a grid node position is visible
   // in the local -- i.e. AZEL -- reference frame.
-  Vector<Bool> mask_p;
+  Vector<bool> mask_p;
 
  public:
 
@@ -272,8 +285,8 @@ class SkymapGrid {
   SkymapGrid (const String refcode,
 	      const String projection,
 	      const IPosition& shape,
-	      const Vector<Double>& center,
-	      const Vector<Double>& increment);
+	      const Vector<double>& center,
+	      const Vector<double>& increment);
   
   /*!
     \brief Argumented constructor
@@ -292,8 +305,8 @@ class SkymapGrid {
 	      const String refcode,
 	      const String projection,
 	      const IPosition& shape,
-	      const Vector<Double>& center,
-	      const Vector<Double>& increment);
+	      const Vector<double>& center,
+	      const Vector<double>& increment);
 
   ~SkymapGrid ();
 
@@ -354,24 +367,24 @@ class SkymapGrid {
   DirectionCoordinate directionCoordinate ();
 
   // --- Grid parameters ---------------------------------------------
-
+  
   /*!
     \brief Get the total number of grid nodes.
-
+    
     \return nelements -- The total number of grid nodes.
-   */
-  Int nelements ();
-
+  */
+  int nelements ();
+  
   /*!
     \brief Get the total number of grid nodes.
-
+    
     \param which -- Selection of which coordinates to count; if set 
-           <i>True</i> only the unflagged subset of coordinates is
-	   accounted for.
+    <i>true</i> only the unflagged subset of coordinates is
+    accounted for.
 
     \return nelements -- The total number of grid nodes.
    */
-  Int nelements (const Bool which);
+  int nelements (const bool which);
 
   /*!
     \brief Get the shape of the coordinate grid
@@ -394,14 +407,14 @@ class SkymapGrid {
 
     \param shape - The grid shape as vector of integers.
    */
-  void setShape (const Vector<Int>& shape);
+  void setShape (const Vector<int>& shape);
 
   /*!
     \brief Get the position on which the skymap is centered.
 
     \return center - \f$ (\alpha,\delta)_c \f$
    */
-  inline Vector<Double> center () {
+  inline Vector<double> center () {
     return center_p;
   }
 
@@ -410,14 +423,14 @@ class SkymapGrid {
 
     \param center - \f$ (\alpha,\delta)_c \f$
    */
-  void setCenter (const Vector<Double>& center);
+  void setCenter (const Vector<double>& center);
 
   /*!
     \brief Get the coordinate increment.
 
     \return increment - Coordinate increment, [deg].
   */
-  Vector<Double> increment () {
+  Vector<double> increment () {
     return increment_p;
   }
 
@@ -426,7 +439,7 @@ class SkymapGrid {
 
     \param increment - Coordinate increment, [deg].
   */
-  void setIncrement (const Vector<Double>& increment);
+  void setIncrement (const Vector<double>& increment);
 
   // --- Orientation of the map --------------------------------------
 
@@ -456,7 +469,7 @@ class SkymapGrid {
 
     \return northIsUp
   */
-  inline Bool isNorthUp () {
+  inline bool isNorthUp () {
     return northIsUp_p;
   }
   
@@ -469,14 +482,14 @@ class SkymapGrid {
 
     \param northIsUp
   */
-  void setNorthUp (const Bool northIsUp);
+  void setNorthUp (const bool northIsUp);
 
   /*!
     \brief Is direction towards east pointing to the left?
 
     \return eastIsLeft
   */
-  inline Bool isEastLeft () {
+  inline bool isEastLeft () {
     return eastIsLeft_p;
   }
 
@@ -489,7 +502,7 @@ class SkymapGrid {
 
     \param eastIsLeft
   */
-  void setEastLeft (const Bool eastIsLeft);
+  void setEastLeft (const bool eastIsLeft);
 
   // --- Elevation range in the local (AZEL) reference frame ---------
 
@@ -499,7 +512,7 @@ class SkymapGrid {
     \return elevation -- Limits of the elevation range in the local reference
                          frame (AZEL).
    */
-  Vector<Double> elevationRange () const {
+  Vector<double> elevationRange () const {
     return elevation_p;
   }
 
@@ -509,7 +522,7 @@ class SkymapGrid {
     \param elevation -- Limits of the elevation range in the local reference
                         frame (AZEL).
    */
-  void setElevationRange (const Vector<Double>& elevationRange);
+  void setElevationRange (const Vector<double>& elevationRange);
 
   // === Grid of spherical coordinates ===============================
 
@@ -519,49 +532,49 @@ class SkymapGrid {
     \return grid - Coordinate grid positions, [deg], in the frame of the
             celestial coordinate system.
   */
-  Matrix<Double> grid ();
+  Matrix<double> grid ();
 
   /*!
     \brief Get the positions of the grid nodes
 
     \param which - Selection of which coordinated to return; if set 
-           <i>True</i> only the unflagged subset of coordinates is
+           <i>true</i> only the unflagged subset of coordinates is
 	   returned.
 
     \return grid - Coordinate grid positions, [deg], in the frame of the
             celestial coordinate system.
   */
-  Matrix<Double> grid (const Bool which);
+  Matrix<double> grid (const bool which);
 
   /*!
     \brief Get the positions of the grid nodes
 
     \retval grid - Coordinate grid positions, [deg], in the frame of the
             celestial coordinate system.
-    \retval mask - Boolean array, marking wether or not a grid node position is
+    \retval mask - boolean array, marking wether or not a grid node position is
             visible in the local -- i.e. AZEL -- reference frame.
   */
-  void grid (Matrix<Double>& grid,
-	     Vector<Bool>& mask);
+  void grid (Matrix<double>& grid,
+	     Vector<bool>& mask);
 
   /*!
     \brief Get the positions of the grid nodes within a defined reference frame
 
     \param which - Selection of which coordinated to return; if set 
-           <i>True</i> only the unflagged subset of coordinates is
+           <i>true</i> only the unflagged subset of coordinates is
 	   returned.
     \retval grid - Coordinate grid positions, [deg], in the frame of the
             celestial coordinate system.
-    \retval mask - Boolean array, marking wether or not a grid node position is
+    \retval mask - boolean array, marking wether or not a grid node position is
             visible in the local -- i.e. AZEL -- reference frame.
   */
-  Matrix<Double> grid (const String refcode,
-		       Matrix<Double>& grid,
-		       Vector<Bool>& mask);
+  Matrix<double> grid (const String refcode,
+		       Matrix<double>& grid,
+		       Vector<bool>& mask);
 
   // --- Grid node positions in the local reference frame ------------
 
-  Matrix<Double> azel (const Bool which);
+  Matrix<double> azel (const bool which);
 
   // --- Masking array -----------------------------------------------
 
@@ -570,7 +583,7 @@ class SkymapGrid {
 
     \return mask -- The masking array
   */
-  Vector<Bool> mask () {
+  Vector<bool> mask () {
     return mask_p;
   }
 
@@ -602,8 +615,8 @@ class SkymapGrid {
   void init (const String refcode,
 	     const String projection,
 	     const IPosition& shape,
-	     const Vector<Double>& center,
-	     const Vector<Double>& increment);
+	     const Vector<double>& center,
+	     const Vector<double>& increment);
 
   /*!
     \brief Initialize the internal data of the newly created object.
@@ -622,8 +635,8 @@ class SkymapGrid {
 	     const String refcode,
 	     const String projection,
 	     const IPosition& shape,
-	     const Vector<Double>& center,
-	     const Vector<Double>& increment);
+	     const Vector<double>& center,
+	     const Vector<double>& increment);
 
   /*!
     \brief Copy all fields from "other" to this object
@@ -638,13 +651,13 @@ class SkymapGrid {
     \return elevation -- Default elevation range of local reference frame,
                          [0,90].
    */
-  Vector<Double> defaultElevation ();
+  Vector<double> defaultElevation ();
 
   void setCoordinateSystem ();
   
   void setOrientation ();
 
-  Vector<Double> centerPixel();
+  Vector<double> centerPixel();
 
   /*!
     \brief Adjust the coordinate increment.

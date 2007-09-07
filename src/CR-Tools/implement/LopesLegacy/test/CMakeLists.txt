@@ -10,7 +10,6 @@ include_directories (. .. ../..)
 set (tests
   tBasicObject
   tDataConversion
-  tDataFrequency
   tExchangeFormat
   tStoredAddObject
   tStoredInputObject

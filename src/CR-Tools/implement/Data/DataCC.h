@@ -47,7 +47,7 @@
 #include <measures/Measures/MEpoch.h>
 #include <casa/Quanta.h>
 
-#include <Observation/ObservationMeta.h>
+#include <ApplicationSupport/ObservationMeta.h>
 #include <Utilities/Masking.h>
 #include <Utilities/StringTools.h>
 

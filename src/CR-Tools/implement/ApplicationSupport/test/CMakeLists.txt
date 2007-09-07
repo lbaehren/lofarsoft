@@ -9,7 +9,9 @@ include_directories (. .. ../..)
 
 set (tests
   tBeamformer
+  tDataFrequency
   tDataReaderTools
+  tObservationMeta
   tParameterFromRecord
   tPhasing
   tSkymapperTools

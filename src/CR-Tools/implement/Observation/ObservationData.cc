@@ -20,8 +20,12 @@
 
 /* $Id: ObservationData.cc,v 1.9 2007/05/02 09:37:10 bahren Exp $ */
 
-#include <ApplicationSupport/SkymapperTools.h>
 #include <Observation/ObservationData.h>
+#include <Utilities/MConversions.h>
+
+using std::cerr;
+using std::cout;
+using std::endl;
 
 namespace CR {  // -- Namespace CR -- begin
   
@@ -108,7 +112,7 @@ namespace CR {  // -- Namespace CR -- begin
   
   ObservationData::ObservationData (const MEpoch obsDate,
 				    String const &obsName,
-				    Matrix<Double> const &antennaPositions,
+				    Matrix<double> const &antennaPositions,
 				    String const &observer)
   {
     init (obsDate,
@@ -122,7 +126,7 @@ namespace CR {  // -- Namespace CR -- begin
   ObservationData::ObservationData (const MEpoch obsDate,
 				    String const &obsName,
 				    const MPosition obsPosition,
-				    Matrix<Double> const &antennaPositions,
+				    Matrix<double> const &antennaPositions,
 				    String const &observer)
   {
     init (obsDate,
@@ -207,14 +211,14 @@ namespace CR {  // -- Namespace CR -- begin
     setObsInfo (obsInfo);
     
     // default values for antenna positions
-    setAntennaPositions (Matrix<Double> (3,1,0.0));
+    setAntennaPositions (Matrix<double> (3,1,0.0));
   }
   
   // ----------------------------------------------------------------------- init
   
   void ObservationData::init (const MEpoch obsDate,
 			      String const &obsName,
-			      Matrix<Double> const &antennaPositions,
+			      Matrix<double> const &antennaPositions,
 			      String const &observer)
   {
     MPosition obsPosition = observatoryPosition (obsName);
@@ -231,7 +235,7 @@ namespace CR {  // -- Namespace CR -- begin
   void ObservationData::init (const MEpoch obsDate,
 			      String const &obsName,
 			      const MPosition obsPosition,
-			      Matrix<Double> const &antennaPositions,
+			      Matrix<double> const &antennaPositions,
 			      String const &observer)
   {
     obsInfo_p.setObsDate   (obsDate);
@@ -345,13 +349,13 @@ namespace CR {  // -- Namespace CR -- begin
   
   // ---------------------------------------------------------- antennaPositions
   
-  Matrix<Double> ObservationData::antennaPositions (bool const &coordAxisFirst)
+  Matrix<double> ObservationData::antennaPositions (bool const &coordAxisFirst)
   {
     if (coordAxisFirst) {
       return antennaPositions_p;
     } else {
       IPosition shape (antennaPositions_p.shape());
-      Matrix<Double> positions (shape(1),shape(0));
+      Matrix<double> positions (shape(1),shape(0));
       // invert the position vectors
       for (int antenna (0); antenna<shape(1); antenna++) {
 	for (int coord (0); coord<shape(0); coord++) {
@@ -365,7 +369,7 @@ namespace CR {  // -- Namespace CR -- begin
   
 // ---------------------------------------------------------- setAntennaPositions
 
-void ObservationData::setAntennaPositions (Matrix<Double> const &antennaPositions,
+void ObservationData::setAntennaPositions (Matrix<double> const &antennaPositions,
 					   bool const &coordAxisFirst)
 {
   IPosition shape (antennaPositions.shape());
@@ -415,8 +419,8 @@ uint ObservationData::nofAntennas ()
   {
     bool ok (true);
     MeasFrame frame (obsInfo_p.obsDate(),obsPosition_p);
-    MDirection azel (SkymapperTools::MDirectionType ("AZEL"));
-    MDirection other (SkymapperTools::MDirectionType (refcode));
+    MDirection azel (MDirectionType ("AZEL"));
+    MDirection other (MDirectionType (refcode));
     
     //------------------------------------------------------------------
     
@@ -462,8 +466,8 @@ uint ObservationData::nofAntennas ()
   {
     bool ok (true);
     MeasFrame frame (obsInfo_p.obsDate(),obsPosition_p);
-    MDirection MDirectionFROM (SkymapperTools::MDirectionType (refcodeFROM));
-    MDirection MDirectionTO (SkymapperTools::MDirectionType (refcodeTO));
+    MDirection MDirectionFROM (MDirectionType (refcodeFROM));
+    MDirection MDirectionTO (MDirectionType (refcodeTO));
     MDirection::Types tpFROM;
     MDirection::Types tpTO;
     

@@ -27,9 +27,9 @@ if (HAVE_PGPLOT)
   add_definitions (-DNEED_FORTRAN_UNDERSCORES)
 endif (HAVE_PGPLOT)
 
-if (CR_GLISH_SUPPORT AND HAVE_CASA)
+if (CR_GLISH_SUPPORT)
   list (APPEND cr_modules ApplicationSupport)
-endif (CR_GLISH_SUPPORT AND HAVE_CASA)
+endif (CR_GLISH_SUPPORT)
 
 if (HAVE_ROOT AND HAVE_FFTW3)
   list (APPEND cr_modules LopesStar)

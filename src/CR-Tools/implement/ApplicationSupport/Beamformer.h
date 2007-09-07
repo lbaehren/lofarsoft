@@ -37,7 +37,7 @@
 #include <ApplicationSupport/Glish.h>
 
 #include <ApplicationSupport/Phasing.h>
-#include <LopesLegacy/DataFrequency.h>
+#include <ApplicationSupport/DataFrequency.h>
 #include <Utilities/ProgressBar.h>
 
 #include <casa/namespace.h>

@@ -70,8 +70,6 @@
     <li>Handling of coordinates and coordinate systems
     <ul>
       <li>SkymapperTools::obsinfo
-      <li>SkymapperTools::MDirectionType
-      <li>SkymapperTools::ProjectionType
       <li>SkymapperTools::coordinateSystem
     </ul>
   </ol>
@@ -181,24 +179,6 @@ class SkymapperTools {
   static ObsInfo obsinfo (const MEpoch &obsDate,
 			  const String &telescope="LOFAR",
 			  const String &observer="LOFAR/CR KSP");
-
-  /*!
-    \brief Get MDirection type from reference code of the coordinate frame
-
-    \param refcode -- Reference code of the coordinate frame
-
-    \return tp -- MDirection type
-  */
-  static MDirection::Types MDirectionType (String const &refcode);
-
-  /*!
-    \brief Get Projection type from reference code of the projection
-
-    \param refcode -- Reference code of the projection, e.g. <i>AIT</i>
-
-    \return tp -- Projection type
-  */
-  static Projection::Type ProjectionType (String const &refcode);
 
   /*!
     \brief Get the coordinate system from an image

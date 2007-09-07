@@ -18,16 +18,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-
-// Includes
-#include <Observation/ObservationMeta.h>
+#include <ApplicationSupport/ObservationMeta.h>
 
 using CR::ObservationMeta;
 
 /*!
   \file tObservationMeta.cc
   
-  \brief A collection of routines for testing the functionality of the ObservationMeta class
+  \brief A collection of tests for the ObservationMeta class
 
   \author Lars B&auml;hren
 */

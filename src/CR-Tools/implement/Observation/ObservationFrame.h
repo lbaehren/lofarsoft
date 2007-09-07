@@ -42,8 +42,6 @@
 #include <casa/OS/Time.h>
 #include <casa/Quanta.h>
 
-#include <ApplicationSupport/Glish.h>
-
 using casa::Cube;
 using casa::IPosition;
 using casa::Matrix;
@@ -182,14 +180,6 @@ class ObservationFrame {
 			    String obsName,
 			    MPosition obsPosition);
   
-  /*!
-    \brief Set up member data from Glish record  
-
-    \param record - Glish record containing the following fields:
-    Epoch, ObservatoryName
-  */
-  void setObservationFrame (casa::GlishRecord&);
-
   //! Get the epoch and the location of the observation
   /*!
     \retval epoch       - Epoch ob the observation.

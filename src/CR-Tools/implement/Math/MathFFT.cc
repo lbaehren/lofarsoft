@@ -34,8 +34,8 @@ namespace CR { // Namespace CR -- begin
   template <typename T, typename S>
   Vector<T> FFT2Fx (Vector<S>& from,
 		    Int const &fftsize,
-		    Bool const &invdir,
-		    Bool const &realtocomplex)
+		    bool const &invdir,
+		    bool const &realtocomplex)
   {
     Int fftlen (0);
     Int halfsize (0);
@@ -63,7 +63,7 @@ namespace CR { // Namespace CR -- begin
       for (k=0; k<fftlen; k++) {
 	input(k) = conj(from(fftlen-1-k));
       }
-      server.fft(dataFx,input,True);
+      server.fft(dataFx,input,true);
     } else {
       Vector<S> input(fftsize);
       
@@ -97,8 +97,8 @@ namespace CR { // Namespace CR -- begin
   // --------------------------------------------------------------------- FFT2Fx
   
   template <typename T, typename S>
-  Vector<T> FFT2Fx (Vector<S>& fft,
-		    Int const &fftsize)
+  Vector<T> backwardsFFT (Vector<S>& fft,
+			  Int const &fftsize)
   {
     Vector<T> fx (fftsize);
     
@@ -118,18 +118,18 @@ namespace CR { // Namespace CR -- begin
 
   template Vector<Float> FFT2Fx (Vector<Complex>& from,
 			       Int const &fftsize,
-			       Bool const &invdir,
-			       Bool const &realtocomplex);
+			       bool const &invdir,
+			       bool const &realtocomplex);
   
   template Vector<Double> FFT2Fx (Vector<DComplex>& from,
 				  Int const &fftsize,
-				  Bool const &invdir,
-				  Bool const &realtocomplex);
+				  bool const &invdir,
+				  bool const &realtocomplex);
   
-  template Vector<Float> FFT2Fx (Vector<Complex>& fft,
-				 Int const &fftsize);
+  template Vector<Float> backwardsFFT (Vector<Complex>& fft,
+				       Int const &fftsize);
   
-  template Vector<Double> FFT2Fx (Vector<DComplex>& fft,
-				  Int const &fftsize);
+  template Vector<Double> backwardsFFT (Vector<DComplex>& fft,
+					Int const &fftsize);
   
 } // Namespace CR -- end
