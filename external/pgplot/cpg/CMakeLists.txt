@@ -20,6 +20,7 @@ add_dependencies (cpgplot pgplot)
 set_target_properties (cpgplot
   PROPERTIES
   COMPILE_FLAGS -fPIC -O2 -fPIC
+  LINKER_LANGUAGE Fortran
   LINK_FLAGS -nofor_main
   )
 target_link_libraries (cpgplot pgplot ${G2C_LIBRARIES})
@@ -47,13 +48,9 @@ add_executable (cpgdemo cpgdemo.c)
 ## linker instructions
 
 target_link_libraries (cpgdemo cpgplot)
-set_target_properties (cpgdemo
-  PROPERTIES
-  LINKER_LANGUAGE Fortran
-  )
 
 ## -----------------------------------------------------------------------------
-## installation
+## Installation
 
 install (TARGETS pgbind cpgplot cpgdemo
   RUNTIME DESTINATION bin
