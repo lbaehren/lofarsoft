@@ -33,7 +33,7 @@
 #include <casa/Arrays.h>
 #include <casa/Exceptions/Error.h>
  // #include <casa/System/PGPlotter.h>
-#include <graphics/Graphics/PGPlotterLocal.h>
+#include <Display/PGPlotterLocal.h>
 
 #include <casa/namespace.h>
 

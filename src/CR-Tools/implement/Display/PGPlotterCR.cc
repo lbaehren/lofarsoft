@@ -22,13 +22,13 @@
 #include <string>
 #include <cpgplot.h>
 #include <Data/Data.h>
-#include <Display/PGPlotter.h>
+#include <Display/PGPlotterCR.h>
 
 using namespace std;
 
 namespace CR { // Namespace CR -- begin
 
-PGPlotter::PGPlotter() {
+PGPlotterCR::PGPlotterCR() {
    xAxisMin_ = -409.6;
    xAxisMax_ =  409.6;
 
@@ -36,11 +36,11 @@ PGPlotter::PGPlotter() {
    yAxisMax_ = 1;
 }
 
-PGPlotter::~PGPlotter() {
+PGPlotterCR::~PGPlotterCR() {
 	cpgend();
 }
 
-void PGPlotter::initPlot() {
+void PGPlotterCR::initPlot() {
   if (cpgbeg(0, "/XSERVE", 1, 1) < 0) {
     if (cpgbeg(0, "/PS", 1, 1) < 0) {
       cerr << "  ERROR: Could not initialize PGPlot environment." << endl;
