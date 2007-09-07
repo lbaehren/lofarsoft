@@ -161,15 +161,17 @@ endif (HAVE_GSL)
 ## Test(s) for PGPlot
 
 if (HAVE_PGPLOT)
-  add_executable (tUsePGPlot tUsePGPlot.cc)
-  target_link_libraries (tUsePGPlot ${PGPLOT_LIBRARIES})
-  ## testing
-  add_test (tUsePGPlot tUsePGPlot)
-  ## installation
-  install (
-    TARGETS tUsePGPlot
-    RUNTIME DESTINATION bin
-    )
+  ## compiler instructions
+#  add_executable (tUsePGPlot tUsePGPlot.cc)
+  ## linker instructions
+#  target_link_libraries (tUsePGPlot ${PGPLOT_LIBRARIES} ${G2C_LIBRARIES})
+#  ## testing
+#  add_test (tUsePGPlot tUsePGPlot)
+#  ## installation
+#  install (
+#    TARGETS tUsePGPlot
+#    RUNTIME DESTINATION bin
+#    )
 endif (HAVE_PGPLOT)
 
 ## -----------------------------------------------------------------------------

@@ -15,7 +15,6 @@ set (cr_modules
   Imaging
   IO
   LopesLegacy
-  LopesStar
   Math
   Observation
   Utilities
@@ -31,6 +30,10 @@ endif (HAVE_PGPLOT)
 if (CR_GLISH_SUPPORT AND HAVE_CASA)
   list (APPEND cr_modules ApplicationSupport)
 endif (CR_GLISH_SUPPORT AND HAVE_CASA)
+
+if (HAVE_ROOT AND HAVE_FFTW3)
+  list (APPEND cr_modules LopesStar)
+endif (HAVE_ROOT AND HAVE_FFTW3)
 
 ## register the directories containing the source code
 

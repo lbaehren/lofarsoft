@@ -16,7 +16,7 @@ option (CR_BUILD_TESTS "Build the test programs?" 1)
 option (CR_ENABLE_TESTING "Build the test programs?" 1)
 option (CR_DEBUGGING_MESSAGES "Print debugging information?" 0)
 option (CR_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
-option (CR_GLISH_SUPPORT "Activate support for Glish applications?" 1)
+option (CR_GLISH_SUPPORT "Activate support for Glish applications?" 0)
 option (CR_PYTHON_SUPPORT "Activate support for Glish applications?" 0)
 
 ## Handle option: testing mode on/off
@@ -154,13 +154,16 @@ if (CR_GLISH_SUPPORT)
   ## Compiler flags for Glish
   if (HAVE_GLISH)
     add_definitions (-DHAVE_GLISH)
+  elseif (HAVE_GLISH)
+    message (STATUS "[CR] Failed to locate Glish!")
+    message (STATUS "     CR-Tools will be build without Glish Support!")
   endif (HAVE_GLISH)
-else (CR_GLISH_SUPPORT)
-  ## --- Without support for Glish applications everything we need is casacore
-  if (NOT HAVE_CASA) 
-    message (STATUS "[CR] Configuration to use CASACORE ...")
-    include (${cr_cmake}/FindCASACORE.cmake)
-  endif (NOT HAVE_CASA)
+endif (CR_GLISH_SUPPORT)
+
+if (NOT HAVE_GLISH OR NOT CR_GLISH_SUPPORT)
+  ## --- Without support for Glish applications we can/must use casacore
+  message (STATUS "[CR] Configuration to use CASACORE ...")
+  include (${cr_cmake}/FindCASACORE.cmake)
   if (HAVE_CASACORE)
     set (HAVE_CASA FALSE)
     add_definitions (-DHAVE_CASA)
@@ -168,7 +171,7 @@ else (CR_GLISH_SUPPORT)
   else (HAVE_CASACORE)
     set (HAVE_CASACORE FALSE)
   endif (HAVE_CASACORE)
-endif (CR_GLISH_SUPPORT)
+endif (NOT HAVE_GLISH OR NOT CR_GLISH_SUPPORT)
 
 if (HAVE_CASA OR HAVE_CASACORE)
   add_definitions (

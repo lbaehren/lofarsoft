@@ -69,12 +69,12 @@ int main (int argc,
   std::cout << "[1] " << std::endl;
   try {
     cpgpap(6, 0.75);      /*  6inch, aspect ratio =1.0 (aquare)     */
-    cpgscr(0, 1, 1, 1);   /*  0: background (default is black)      */
-    cpgscr(1, 0, 0, 0);   /*  0: foreground (default is white)      */
-    cpgscf(1);            /*  1:normal, 2:roman, 3:italic, 4:script */
-    cpgsch(1.2);          /*                                        */
-    cpgslw(2);            /*  unit in 0.005 inch = 0.13 mm          */
-    cpgenv(-2*M_PI, 2*M_PI, -1, 1, 0, 0);
+//     cpgscr(0, 1, 1, 1);   /*  0: background (default is black)      */
+//     cpgscr(1, 0, 0, 0);   /*  0: foreground (default is white)      */
+//     cpgscf(1);            /*  1:normal, 2:roman, 3:italic, 4:script */
+//     cpgsch(1.2);          /*                                        */
+//     cpgslw(2);            /*  unit in 0.005 inch = 0.13 mm          */
+//     cpgenv(-2*M_PI, 2*M_PI, -1, 1, 0, 0);
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;

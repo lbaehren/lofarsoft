@@ -84,34 +84,34 @@ include (TestBigEndian)
 ## proper results - where therefore run an explicit check.
 
 set (bin_locations
+  ${casacore_SOURCE_DIR}/../release/bin
+  ${casacore_SOURCE_DIR}/../../release/bin
   /usr/bin
   /usr/local/bin
   /sw/bin
   /sw/lib/gcc4.2/bin
-  ${casacore_SOURCE_DIR}/../release/bin
-  ${casacore_SOURCE_DIR}/../../release/bin
   )
 
 set (include_locations
+  ${casacore_SOURCE_DIR}/../release/include
+  ${casacore_SOURCE_DIR}/../../release/include
   /usr/include
   /usr/local/include
   /sw/include
   /sw/lib/gcc4.2/include
   /opt/casa/local/include
   /opt/gcc-4.2.1/include/c++/4.2.1
-  ${casacore_SOURCE_DIR}/../release/include
-  ${casacore_SOURCE_DIR}/../../release/include
 )
 
 set (lib_locations
+  ${casacore_SOURCE_DIR}/../release/lib
+  ${casacore_SOURCE_DIR}/../../release/lib
   /usr/lib
   /usr/local/lib
   /sw/lib
   /sw/lib/gcc4.2/lib
   /opt/gcc-4.2.1/lib
   /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
-  ${casacore_SOURCE_DIR}/../release/lib
-  ${casacore_SOURCE_DIR}/../../release/lib
   )
 
 check_include_files (assert.h HAVE_ASSERT_H)
@@ -131,48 +131,35 @@ check_type_size ("long long" SIZEOF_LONG_LONG)
 ## -----------------------------------------------------------------------------
 ## Required external libraries
 
-# Checking for C library gfortran... (cached) yes
-# Checking for C library m... (cached) yes
-# Checking for C library blas... (cached) yes
-# Checking for C library lapack... (cached) yes
-# Checking for C library cfitsio... (cached) yes
+## Locate additional CMake find scripts
 
-include (./FindG2C.cmake)
-include (./FindLAPACK.cmake)
-include (./FindWCS.cmake)
+find_path (casacore_cmake FindCFITSIO.cmake FindG2C.cmake FindLAPACK.cmake
+  PATHS 
+  ${casacore_SOURCE_DIR}
+  ${casacore_SOURCE_DIR}/..
+  ${casacore_SOURCE_DIR}/../..
+  ${casacore_SOURCE_DIR}/../../..
+  PATH_SUFFIXES
+  devel_common/cmake
+  )
+
+if (casacore_cmake)
+  message (STATUS "[casacore] Using USG CMake find scripts")
+  include (${casacore_cmake}/FindCFITSIO.cmake)
+  include (${casacore_cmake}/FindG2C.cmake)
+  include (${casacore_cmake}/FindLAPACK.cmake)
+  include (${casacore_cmake}/FindWCS.cmake)
+elseif (casacore_cmake)
+  message (STATUS "[casacore] Using local CMake find scripts")
+  include (./FindCFITSIO.cmake)
+  include (./FindG2C.cmake)
+  include (./FindLAPACK.cmake)
+  include (./FindWCS.cmake)
+endif (casacore_cmake)
 
 ## --- libm -----------------------------------------------
 
 find_library (libm m PATHS ${lib_locations})
-
-## --- CFITSIO --------------------------------------------
-
-set (HAVE_CFITSIO 1)
-
-find_path (CFITSIO_INCLUDES fitsio.h fitsio2.h longname.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES cfitsio
-)
-
-find_library (CFITSIO_LIBRARIES cfitsio
-  PATHS ${lib_locations}
-  PATH_SUFFIXES cfitsio
-)
-
-## If either the library or the include files cannot be located, we have to
-## consider CFITSIO to be incomplete for usage with casacore.
-
-if (NOT CFITSIO_INCLUDES)
-  set (HAVE_CFITSIO 0)
-endif (NOT CFITSIO_INCLUDES)
-
-if (NOT CFITSIO_LIBRARIES)
-  set (HAVE_CFITSIO 0)
-endif (NOT CFITSIO_LIBRARIES)
-
-if (NOT HAVE_CFITSIO)
-  message (SEND_ERROR "Unable to find systm-wide installation of CFITSIO!")
-endif (NOT HAVE_CFITSIO)
 
 ## --- WCSLIB ---------------------------------------------
 ##
@@ -215,9 +202,7 @@ endif (NOT HAVE_WCSLIB)
 ## Check for additional tools which are required
 
 find_program (bison_bin bison ${bin_locations})
-
 find_program (flex_bin flex ${bin_locations})
-
 find_program (uname_bin uname ${bin_locations})
 
 ## =============================================================================

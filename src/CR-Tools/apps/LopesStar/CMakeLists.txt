@@ -5,9 +5,12 @@
 
 include_directories (
   ${StarTools_SOURCE_DIR}/src
-  ${FFTW3_INCLUDES}
   ${ROOT_INCLUDES}
   )
+
+if (HAVE_FFTW3)
+  include_directories (${FFTW3_INCLUDES})
+endif (HAVE_FFTW3)
 
 ## -----------------------------------------------------------------------------
 ## Applications

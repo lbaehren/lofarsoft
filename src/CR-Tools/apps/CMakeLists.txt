@@ -41,6 +41,6 @@ endif (HAVE_GLISH)
 ## ------------------------------------------------------------------------------
 ## LOPES-Star tools
 
-if (HAVE_ROOT)
+if (HAVE_ROOT AND HAVE_FFTW3)
   add_subdirectory (LopesStar)
-endif (HAVE_ROOT)
+endif (HAVE_ROOT AND HAVE_FFTW3)

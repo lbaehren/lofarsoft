@@ -34,7 +34,7 @@ set (lib_locations
 
 find_path (WCSLIB_INCLUDES wcs.h
   PATHS ${include_locations}
-  PATH_SUFFIXES wcslib
+  PATH_SUFFIXES wcs wcslib
   NO_DEFAULT_PATH
   )
 
@@ -60,6 +60,7 @@ find_library (WCSLIB_LIBRARIES wcs
 IF (WCSLIB_INCLUDES AND WCSLIB_LIBRARIES)
   SET (HAVE_WCSLIB TRUE)
 ELSE (WCSLIB_INCLUDES AND WCSLIB_LIBRARIES)
+  SET (HAVE_WCSLIB FALSE)
   IF (NOT WCSLIB_FIND_QUIETLY)
     IF (NOT WCSLIB_INCLUDES)
       MESSAGE (STATUS "Unable to find WCS header files!")
@@ -89,4 +90,4 @@ mark_as_advanced (
   HAVE_WCSLIB
   WCSLIB_INCLUDES
   WCSLIB_LIBRARIES
-)
+  )
