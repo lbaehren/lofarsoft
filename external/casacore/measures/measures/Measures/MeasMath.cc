@@ -1,5 +1,5 @@
 //# MeasMath.cc:  Measure conversion aid routines
-//# Copyright (C) 1998-2000,2002,2003,2004,2007
+//# Copyright (C) 1998-2000,2002-2004,2007
 //# Associated Universities, Inc. Washington DC, USA.
 //#
 //# This library is free software; you can redistribute it and/or modify it
@@ -23,21 +23,25 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MeasMath.cc 19852 2007-02-13 01:54:23Z Malte.Marquarding $
+//# $Id: MeasMath.cc 20117 2007-09-05 04:38:35Z Malte.Marquarding $
 
 //# Includes
 #include <measures/Measures/MeasMath.h>
+#include <casa/BasicMath/Math.h>
 #include <casa/Exceptions/Error.h>
+#include <casa/System/AipsrcValue.h>
+#include <measures/Measures/Aberration.h>
 #include <measures/Measures/MeasData.h>
 #include <measures/Measures/MeasTable.h>
-#include <measures/Measures/SolarPos.h>
-#include <measures/Measures/Aberration.h>
-#include <measures/Measures/Precession.h>
-#include <measures/Measures/Nutation.h>
 #include <measures/Measures/MRBase.h>
-#include <casa/BasicMath/Math.h>
+#include <measures/Measures/Nutation.h>
+#include <measures/Measures/Precession.h>
+#include <measures/Measures/SolarPos.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
+
+//# Static data
+uInt MeasMath::b1950_reg_p = 0;
 
 //# Constructors
 MeasMath::MeasMath() :
@@ -441,23 +445,72 @@ void MeasMath::deapplyHADECtoAZELGEO(MVPosition &in) {
 }
 
 void MeasMath::applyJ2000toB1950(MVPosition &in, Bool doin) {
+  if (!MeasMath::b1950_reg_p) {
+    b1950_reg_p = 
+      AipsrcValue<Double>::registerRC(String("measures.b1950.d_epoch"),
+				      Unit("a"), Unit("a"), 2000.0);
+  };
+  Double epo;
+  if (getInfo(UT1, True)) {
+    epo = (info_p[UT1]-MeasData::MJD2000)/MeasData::JDCEN;
+  } else epo = (AipsrcValue<Double>::get(MeasMath::b1950_reg_p)-2000.0)/100.0;
+  applyJ2000toB1950(in, epo, doin);
+}
+
+void MeasMath::applyJ2000toB1950_VLA(MVPosition &in, Bool doin) {
+  Double epo = 19.799-20.0;
+  applyJ2000toB1950(in, epo, doin);
+}
+
+void MeasMath::applyJ2000toB1950(MVPosition &in, Double epo, Bool doin) {
+  MVPosition VPOS3;
+  VPOS3 = in;
   // Frame rotation
   in *= MeasData::MToB1950(4);
   in.adjust();
   // E-terms
-  deapplyETerms(in, doin);
+  deapplyETerms(in, doin, epo);
+  MVPosition VPOS4;
+  do {
+    VPOS4 = in;
+    deapplyJ2000toB1950(VPOS4, epo, doin);
+    VPOS4 -= VPOS3;
+    in -= VPOS4*MeasData::MToB1950(4);
+  } while (VPOS4.radius() > 1e-12);
 }
 
 void MeasMath::deapplyJ2000toB1950(MVPosition &in, Bool doin) {
-  applyETerms(in,doin);
+  if (!MeasMath::b1950_reg_p) {
+    b1950_reg_p = 
+      AipsrcValue<Double>::registerRC(String("measures.b1950.d_epoch"),
+				      Unit("a"), Unit("a"), 2000.0);
+  };
+  Double epo;
+  if (getInfo(UT1, True)) {
+    epo = (info_p[UT1]-MeasData::MJD2000)/MeasData::JDCEN;
+  } else epo = (AipsrcValue<Double>::get(MeasMath::b1950_reg_p)-2000.0)/100.0;
+  deapplyJ2000toB1950(in, epo, doin);
+}
+
+void MeasMath::deapplyJ2000toB1950_VLA(MVPosition &in, Bool doin) {
+  Double epo = 19.799-20.0;
+  deapplyJ2000toB1950(in, epo, doin);
+}
+
+void MeasMath::deapplyJ2000toB1950(MVPosition &in, Double epo, Bool doin) {
+  applyETerms(in, doin, epo);
   // Frame rotation
+  MVPOS1 = in*MeasData::MToJ2000(2);
   in *= MeasData::MToJ2000(0);
+  in += (epo*C::arcsec)*MVPOS1;
   in.adjust();
 }
 
-void MeasMath::applyETerms(MVPosition &in, Bool doin) {
+void MeasMath::applyETerms(MVPosition &in, Bool doin, Double epo) {
   // E-terms
   MVPOS1 = MVPosition(MeasTable::AberETerm(0));
+  epo += 0.5;
+  MVPOS1 += (epo*C::arcsec)*MVPosition(MeasTable::AberETerm(1));
   if (doin) MVPOS2 = in;
   else {
     getInfo(B1950DIR);
@@ -468,10 +521,12 @@ void MeasMath::applyETerms(MVPosition &in, Bool doin) {
   rotateShift(in, MVPOS1, B1950LONG, B1950LAT, doin);
 }
 
-void MeasMath::deapplyETerms(MVPosition &in, Bool doin) {
+void MeasMath::deapplyETerms(MVPosition &in, Bool doin, Double epo) {
   // E-terms
   // Iterate
   MVPOS1 = MVPosition(MeasTable::AberETerm(0));
+  epo += 0.5;
+  MVPOS1 += (epo*C::arcsec)*MVPosition(MeasTable::AberETerm(1));
   if (doin) MVPOS4 = in;
   else {
     getInfo(B1950DIR);
@@ -484,7 +539,7 @@ void MeasMath::deapplyETerms(MVPosition &in, Bool doin) {
     MVPOS3.adjust();
     MVPOS3 -= MVPOS4;
     MVPOS2 -= MVPOS3;
-  } while (MVPOS3.radius() > 1e-10);
+  } while (MVPOS3.radius() > 1e-5);
   MVPOS2 -= MVPOS4;
   rotateShift(in, MVPOS2, B1950LONG, B1950LAT, doin);
 }
@@ -565,26 +620,6 @@ void MeasMath::deapplyPolarMotion(MVPosition &in) {
   in(1) = -in(1);
 }
 
-void MeasMath::applyPolarMotionLong(MVPosition &in) {
-  /// remove
-  getInfo(TDB);
-  getInfo(LASTR);
-  getInfo(LONG);
-  EULER1 = MeasTable::polarMotion(info_p[TDB]);
-  EULER1(2) = info_p[LASTR] - info_p[LONG];
-  in =  RotMatrix(EULER1) * in;
-}
-
-void MeasMath::deapplyPolarMotionLong(MVPosition &in) {
-  /// remove
-  getInfo(TDB);
-  getInfo(LASTR);
-  getInfo(LONG);
-  EULER1 = MeasTable::polarMotion(info_p[TDB]);
-  EULER1(2) = info_p[LASTR] - info_p[LONG];
-  in *= RotMatrix(EULER1);
-}
-
 void MeasMath::applyAZELtoAZELSW(MVPosition &in) {
   in(0) = -in(0);
   in(1) = -in(1);
@@ -657,7 +692,7 @@ void MeasMath::deapplyAPPtoTOPO(MVPosition &in, const Double len,
 }
 
 // General support
-void MeasMath::getInfo(FrameInfo i) {
+Bool MeasMath::getInfo(FrameInfo i, Bool ret) {
   // Frame information groups
   static FrameType InfoType[N_FrameInfo] = {
     EPOCH, EPOCH, EPOCH, EPOCH, POSITION, POSITION, POSITION, POSITION,
@@ -696,11 +731,13 @@ void MeasMath::getInfo(FrameInfo i) {
 	  (infomvd_p[i-N_FrameDInfo]);
       };
     } else {
+      if (ret) return False;
       throw(AipsError(String("Missing information in Frame ") +
 		      "specified for conversion"));
     };
     infoOK_p[i] = True;
   };
+  return True;
 }
 
 void MeasMath::rotateShift(MVPosition &in, const MVPosition &shft,

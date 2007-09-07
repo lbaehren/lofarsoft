@@ -1,5 +1,5 @@
 //# MCuvw.h: Muvw conversion routines 
-//# Copyright (C) 1998,1999,2000,2002,2004
+//# Copyright (C) 1998-2000,2002,2004,2007
 //# Associated Universities, Inc. Washington DC, USA.
 //#
 //# This library is free software; you can redistribute it and/or modify it
@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: MCuvw.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: MCuvw.h 20117 2007-09-05 04:38:35Z Malte.Marquarding $
 
 #ifndef MEASURES_MCUVW_H
 #define MEASURES_MCUVW_H
@@ -113,7 +113,11 @@ private:
     J2000_GAL,
     B1950_GAL,
     J2000_B1950,
+    J2000_B1950_VLA,
     B1950_J2000,
+    B1950_VLA_J2000,
+    B1950_B1950_VLA,
+    B1950_VLA_B1950,
     J2000_JMEAN,
     B1950_BMEAN,
     JMEAN_J2000,

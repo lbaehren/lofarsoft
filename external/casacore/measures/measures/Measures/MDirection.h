@@ -1,5 +1,5 @@
 //# MDirection.h: A Measure: astronomical direction
-//# Copyright (C) 1995-1999,2000,2002,2004
+//# Copyright (C) 1995-2000,2002,2004,2007
 //# Associated Universities, Inc. Washington DC, USA.
 //#
 //# This library is free software; you can redistribute it and/or modify it
@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: MDirection.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: MDirection.h 20117 2007-09-05 04:38:35Z Malte.Marquarding $
 
 #ifndef MEASURES_MDIRECTION_H
 #define MEASURES_MDIRECTION_H
@@ -77,7 +77,10 @@ template <class M> class ROScalarMeasColumn;
 //  <li>MDirection::JMEAN -- mean equator and equinox at frame epoch
 //  <li>MDirection::JTRUE -- true equator and equinox at frame epoch
 //  <li>MDirection::APP ---- apparent geocentric position
-//  <li>MDirection::B1950 -- mean epoch and ecliptic at B1950.0
+//  <li>MDirection::B1950 -- mean epoch and ecliptic at B1950.0. The epoch
+//	is taken from the frame epoch; or from the aipsrc variable
+//	measures.b1950.d_epoch; or has default 2000.0
+//  <li>MDirection::B1950_VLA -- mean epoch(1979.9)) and ecliptic at B1950.0
 //  <li>MDirection::BMEAN -- mean equator and equinox at frame epoch
 //  <li>MDirection::BTRUE -- true equator and equinox at frame epoch
 //  <li>MDirection::GALACTIC -- galactic coordinates
@@ -120,6 +123,10 @@ template <class M> class ROScalarMeasColumn;
 //   <li><em>Epoch</em>: all but J2000, B1950, GALACTIC, SUPGAL, ECLIPTIC, ICRS
 //   <li><em>Positiom</em>: HADEC, AZEL, AZELGEO
 // </ul>
+// The conversion between B1950 and J2000 may have an Epoch. If none given
+// an epoch of 2000.0 is assumed for the conversion, unless an aipsrc
+// variable <em>measures.b1950.d_epoch</em> is given.
+//
 // Conversions are based on the IAU system of 
 // <linkto class=Precession>precession</linkto> and 
 // <linkto class=Nutation>nutation</linkto> (with
@@ -186,6 +193,7 @@ public:
       JTRUE,
       APP,
       B1950,
+      B1950_VLA,
       BMEAN,
       BTRUE,
       GALACTIC,

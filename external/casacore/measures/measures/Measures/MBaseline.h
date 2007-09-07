@@ -1,5 +1,5 @@
 //# MBaseline.h: A Measure: Baseline on Earth
-//# Copyright (C) 1998,1999,2000,2002,2004
+//# Copyright (C) 1998-2000,2002,2004,2007
 //# Associated Universities, Inc. Washington DC, USA.
 //#
 //# This library is free software; you can redistribute it and/or modify it
@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: MBaseline.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: MBaseline.h 20117 2007-09-05 04:38:35Z Malte.Marquarding $
 
 #ifndef MEASURES_MBASELINE_H
 #define MEASURES_MBASELINE_H
@@ -105,6 +105,7 @@ class MBaseline : public MeasBase<MVBaseline, MeasRef<MBaseline> > {
     JTRUE,
     APP,
     B1950,
+    B1950_VLA,
     BMEAN,
     BTRUE,
     GALACTIC,

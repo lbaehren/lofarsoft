@@ -1,5 +1,5 @@
 //# MeasMath.h: Measure conversion aid routines
-//# Copyright (C) 1998,2000,2002,2003,2004,2007
+//# Copyright (C) 1998,2000,2002-2004,2007
 //# Associated Universities, Inc. Washington DC, USA.
 //#
 //# This library is free software; you can redistribute it and/or modify it
@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: MeasMath.h 19852 2007-02-13 01:54:23Z Malte.Marquarding $
+//# $Id: MeasMath.h 20117 2007-09-05 04:38:35Z Malte.Marquarding $
 
 #ifndef MEASURES_MEASMATH_H
 #define MEASURES_MEASMATH_H
@@ -170,10 +170,14 @@ public:
   void deapplyHADECtoAZEL(MVPosition &in);
   void applyHADECtoAZELGEO(MVPosition &in);
   void deapplyHADECtoAZELGEO(MVPosition &in); 
+  void applyJ2000toB1950(MVPosition &in, Double epo, Bool doin);
+  void deapplyJ2000toB1950(MVPosition &in, Double epo, Bool doin);
   void applyJ2000toB1950(MVPosition &in, Bool doin=True);
   void deapplyJ2000toB1950(MVPosition &in, Bool doin=True);
-  void applyETerms(MVPosition &in, Bool doin=True);
-  void deapplyETerms(MVPosition &in, Bool doin=True);
+  void applyJ2000toB1950_VLA(MVPosition &in, Bool doin=True);
+  void deapplyJ2000toB1950_VLA(MVPosition &in, Bool doin=True);
+  void applyETerms(MVPosition &in, Bool doin=True, Double epo=2000.0);
+  void deapplyETerms(MVPosition &in, Bool doin=True, Double epo=2000.0);
   void applyGALtoJ2000(MVPosition &in);
   void deapplyGALtoJ2000(MVPosition &in);
   void applyGALtoB1950(MVPosition &in);
@@ -186,8 +190,6 @@ public:
   void deapplyTOPOtoHADEC(MVPosition &in, Bool doin=True);
   void applyPolarMotion(MVPosition &in);
   void deapplyPolarMotion(MVPosition &in);
-  void applyPolarMotionLong(MVPosition &in);
-  void deapplyPolarMotionLong(MVPosition &in);
   void applyAZELtoAZELSW(MVPosition &in); 
   void applyECLIPtoJ2000(MVPosition &in);
   void deapplyECLIPtoJ2000(MVPosition &in);
@@ -280,6 +282,9 @@ private:
   Double info_p[N_FrameDInfo];
   MVDirection infomvd_p[N_FrameMVDInfo];
   // </group>
+  // Aipsrc definition for B1950 epoch (in years)
+  static uInt b1950_reg_p;
+ 
   // </group>
 
   //# Constructors
@@ -294,10 +299,11 @@ private:
 
   // Get information from the frame
   // <thrown>
-  //  <li> AipsError if information not available
+  //  <li> AipsError if information not available; or False return if
+  //		<em>ret=True<em>
   // </thrown>
   // <group>
-  void getInfo(FrameInfo i);
+  Bool getInfo(FrameInfo i, Bool ret=False);
   // </group>
 
   // Make a shift of coordinate into a rotation and apply it when doin is
