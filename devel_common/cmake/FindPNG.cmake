@@ -50,6 +50,7 @@ find_library (PNG_LIBRARIES png
 if (PNG_INCLUDES AND PNG_LIBRARIES)
   set (HAVE_PNG TRUE)
 else (PNG_INCLUDES AND PNG_LIBRARIES)
+  set (HAVE_PNG FALSE)
   if (NOT PNG_FIND_QUIETLY)
     if (NOT PNG_INCLUDES)
       message (STATUS "Unable to find PNG header files!")

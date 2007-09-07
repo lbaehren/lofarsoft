@@ -238,7 +238,10 @@ add_subdirectory (drivers)
 add_subdirectory (fonts)
 add_subdirectory (src)
 add_subdirectory (sys)
-add_subdirectory (cpg)
+
+if (HAVE_G2C)
+  add_subdirectory (cpg)
+endif (HAVE_G2C)
 
 ## include directories
 
@@ -254,7 +257,7 @@ include_directories (
   ${X11_INCLUDE_DIR}
 )
 
-FILE (GLOB pgplot_src ./src/*.f ./src/*.c)
+FILE (GLOB pgplot_src ${pgplot_SOURCE_DIR}/src/*.f)
 FILE (GLOB pgplot_sys ./sys/*.f ./sys/*.c)
 FILE (GLOB pgplot_fonts ./fonts/*.f)
 

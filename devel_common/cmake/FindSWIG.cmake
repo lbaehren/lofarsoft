@@ -69,29 +69,25 @@ find_program (SWIG_BIN swig
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
-if (SWIG_BIN)
+if (SWIG_INCLUDES AND SWIG_LIBRARIES)
   set (HAVE_SWIG TRUE)
-endif (SWIG_BIN)
-
-#if (SWIG_INCLUDES AND SWIG_LIBRARIES)
-#  set (HAVE_SWIG TRUE)
-#else (SWIG_INCLUDES AND SWIG_LIBRARIES)
-#  if (NOT SWIG_FIND_QUIETLY)
-#    if (NOT SWIG_INCLUDES)
-#      message (STATUS "Unable to find SWIG header files!")
-#    endif (NOT SWIG_INCLUDES)
-#    if (NOT SWIG_LIBRARIES)
-#      message (STATUS "Unable to find SWIG library files!")
-#    endif (NOT SWIG_LIBRARIES)
-#  endif (NOT SWIG_FIND_QUIETLY)
-#endif (SWIG_INCLUDES AND SWIG_LIBRARIES)
+else (SWIG_INCLUDES AND SWIG_LIBRARIES)
+  set (HAVE_SWIG FALSE)
+  if (NOT SWIG_FIND_QUIETLY)
+    if (NOT SWIG_INCLUDES)
+      message (STATUS "Unable to find SWIG header files!")
+    endif (NOT SWIG_INCLUDES)
+    if (NOT SWIG_LIBRARIES)
+      message (STATUS "Unable to find SWIG library files!")
+    endif (NOT SWIG_LIBRARIES)
+  endif (NOT SWIG_FIND_QUIETLY)
+endif (SWIG_INCLUDES AND SWIG_LIBRARIES)
 
 if (HAVE_SWIG)
   if (NOT SWIG_FIND_QUIETLY)
     message (STATUS "Found components for SWIG")
-    message (STATUS "SWIG_BIN         = ${SWIG_BIN}")
-#    message (STATUS "SWIG_INCLUDES  = ${SWIG_INCLUDES}")
-#    message (STATUS "SWIG_LIBRARIES = ${SWIG_LIBRARIES}")
+    message (STATUS "SWIG_INCLUDES  = ${SWIG_INCLUDES}")
+    message (STATUS "SWIG_LIBRARIES = ${SWIG_LIBRARIES}")
   endif (NOT SWIG_FIND_QUIETLY)
 else (HAVE_SWIG)
   if (SWIG_FIND_REQUIRED)
@@ -102,5 +98,7 @@ endif (HAVE_SWIG)
 ## -----------------------------------------------------------------------------
 ## Mark advanced variables
 
-#mark_as_advanced (
-#  )
+mark_as_advanced (
+  SWIG_INCLUDES
+  SWIG_LIBRARIES
+  )

@@ -11,15 +11,25 @@
 ## 	rm -f cpg*.o
 
 file (GLOB cpgplot_sources
-  ${pgplot_SOURCE_DIR}/src/*.c
-  ${pgplot_SOURCE_DIR}/src/*.f
   ${pgplot_SOURCE_DIR}/sys/*.c
   ${pgplot_SOURCE_DIR}/cpg/*.c
   )
 
 add_library (cpgplot ${cpgplot_sources})
 add_dependencies (cpgplot pgplot)
-target_link_libraries (cpgplot pgplot)
+set_target_properties (cpgplot
+  PROPERTIES
+  COMPILE_FLAGS -fPIC -O2 -fPIC
+  LINK_FLAGS -nofor_main
+  )
+target_link_libraries (cpgplot pgplot ${G2C_LIBRARIES})
+
+## -----------------------------------------------------------------------------
+## PGbind
+
+add_executable (pgbind pgbind.c)
+
+## once we have create 
 
 ## -----------------------------------------------------------------------------
 ## Demo program
@@ -37,11 +47,15 @@ add_executable (cpgdemo cpgdemo.c)
 ## linker instructions
 
 target_link_libraries (cpgdemo cpgplot)
+set_target_properties (cpgdemo
+  PROPERTIES
+  LINKER_LANGUAGE Fortran
+  )
 
 ## -----------------------------------------------------------------------------
 ## installation
 
-install (TARGETS cpgplot cpgdemo
+install (TARGETS pgbind cpgplot cpgdemo
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

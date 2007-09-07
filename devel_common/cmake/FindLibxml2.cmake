@@ -6,44 +6,77 @@
 # this module look for libxml (http://www.xmlsoft.org) support
 # it will define the following values
 #
-# LIBXML2_INCLUDE_DIR  = where libxml/xpath.h can be found
-# LIBXML2_LIBRARY      = the library to link against libxml2
+# LIBXML2_INCLUDES  = where libxml/xpath.h can be found
+# LIBXML2_LIBRARIES      = the library to link against libxml2
 # FOUND_LIBXML2        = set to 1 if libxml2 is found
 #
-IF(EXISTS ${PROJECT_CMAKE}/Libxml2Config.cmake)
-  INCLUDE(${PROJECT_CMAKE}/Libxml2Config.cmake)
-ENDIF(EXISTS ${PROJECT_CMAKE}/Libxml2Config.cmake)
-
-IF(Libxml2_INCLUDE_DIRS)
-
-  FIND_PATH(LIBXML2_INCLUDE_DIR libxml/xpath.h ${Libxml2_INCLUDE_DIRS})
-  FIND_LIBRARY(LIBXML2_LIBRARY xml2 ${Libxml2_LIBRARY_DIRS})
-
-ELSE(Libxml2_INCLUDE_DIRS)
-
-  SET(TRIAL_LIBRARY_PATHS
-    $ENV{LIBXML2_HOME}/lib
-    /usr/lib
-    /usr/local/lib
-    /sw/lib
-  ) 
-  SET(TRIAL_INCLUDE_PATHS
-    $ENV{LIBXML2_HOME}/include/libxml2
-    /usr/include/libxml2
-    /usr/local/include/libxml2
-    /sw/include/libxml2
-  ) 
-
-  FIND_LIBRARY(LIBXML2_LIBRARY xml2 ${TRIAL_LIBRARY_PATHS})
-  FIND_PATH(LIBXML2_INCLUDE_DIR libxml/xpath.h ${TRIAL_INCLUDE_PATHS})
-
-ENDIF(Libxml2_INCLUDE_DIRS)
-
-IF(LIBXML2_INCLUDE_DIR AND LIBXML2_LIBRARY)
-  SET(FOUND_LIBXML2 1 CACHE BOOL "Found libxml2 library")
-ELSE(LIBXML2_INCLUDE_DIR AND LIBXML2_LIBRARY)
-  SET(FOUND_LIBXML2 0 CACHE BOOL "Not fount libxml2 library")
-ENDIF(LIBXML2_INCLUDE_DIR AND LIBXML2_LIBRARY)
 
 ## -----------------------------------------------------------------------------
-## Mark as advanced ...
+## Standard locations where to look for required components
+
+set (lib_locations
+  /usr/local/lib
+  /usr/lib
+  /usr/X11R6/lib
+  /sw/lib
+  )
+
+set (include_locations
+  /usr/include
+  /usr/local/include
+  /usr/X11R6/include
+  /sw/include
+  )
+
+## -----------------------------------------------------------------------------
+## Check for the header files
+
+FIND_PATH (LIBXML2_INCLUDES xpath.h
+  PATHS ${include_locations}
+  PATH_SUFFIXES libxml libxml2
+  )
+
+## -----------------------------------------------------------------------------
+## Check for the library
+
+FIND_LIBRARY (LIBXML2_LIBRARIES xml2
+  PATHS ${lib_locations}
+  PATH_SUFFIXES libxml libxml2
+  )
+
+## -----------------------------------------------------------------------------
+## Actions taken when all components have been found
+
+IF (LIBXML2_INCLUDES AND LIBXML2_LIBRARIES)
+  SET (HAVE_LIBXML2 TRUE)
+ELSE (LIBXML2_INCLUDES AND LIBXML2_LIBRARIES)
+  SET (HAVE_LIBXML2 FALSE)
+  IF (NOT LIBXML2_FIND_QUIETLY)
+    IF (NOT LIBXML2_INCLUDES)
+      MESSAGE (STATUS "Unable to find LIBXML2 header files!")
+    ENDIF (NOT LIBXML2_INCLUDES)
+    IF (NOT LIBXML2_LIBRARIES)
+      MESSAGE (STATUS "Unable to find LIBXML2 library files!")
+    ENDIF (NOT LIBXML2_LIBRARIES)
+  ENDIF (NOT LIBXML2_FIND_QUIETLY)
+ENDIF (LIBXML2_INCLUDES AND LIBXML2_LIBRARIES)
+
+IF (HAVE_LIBXML2)
+  IF (NOT LIBXML2_FIND_QUIETLY)
+    MESSAGE (STATUS "Found components for LIBXML2")
+    MESSAGE (STATUS "LIBXML2_INCLUDES  = ${LIBXML2_INCLUDES}")
+    MESSAGE (STATUS "LIBXML2_LIBRARIES = ${LIBXML2_LIBRARIES}")
+  ENDIF (NOT LIBXML2_FIND_QUIETLY)
+ELSE (HAVE_LIBXML2)
+  IF (LIBXML2_FIND_REQUIRED)
+    MESSAGE (FATAL_ERROR "Could not find LIBXML2!")
+  ENDIF (LIBXML2_FIND_REQUIRED)
+ENDIF (HAVE_LIBXML2)
+
+## -----------------------------------------------------------------------------
+## Mark advanced variables
+
+mark_as_advanced (
+  LIBXML2_INCLUDES
+  LIBXML2_LIBRARIES
+  )
