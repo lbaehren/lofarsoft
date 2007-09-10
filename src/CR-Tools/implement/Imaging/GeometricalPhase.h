@@ -217,7 +217,13 @@ namespace CR { // NAMESPACE CR -- BEGIN
                                 phases are computed
     */
     inline int nofFrequencies () {
+#ifdef HAVE_CASA
+      return frequencies_p.nelements();
+#else
+#ifdef HAVE_BLITZ
       return frequencies_p.numElements();
+#endif
+#endif
     }
     
     /*!
