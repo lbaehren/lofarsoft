@@ -13,16 +13,19 @@
 
 set (include_locations
   /usr/include
-  /usr/lib
   /opt
   /opt/include
   /usr/local/include
   /sw/include
+  /usr/lib
+  /usr/lib64
   )
 
 set (lib_locations
   /usr/lib
   /usr/local/lib
+  /usr/lib64
+  /usr/local/lib64
   )
 
 ## -----------------------------------------------------------------------------
