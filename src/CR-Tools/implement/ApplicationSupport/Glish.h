@@ -59,22 +59,22 @@ namespace casa { //# NAMESPACE CASA - BEGIN
     
     The major external classes in this module are:
     <ul>
-      <li>GlishValue is the class for all Glish value objects in this module.
+      <li>casa::GlishValue is the class for all Glish value objects in this module.
       GlishValues follow copy-on-write semantics, so assignment and passing
       and return by value are cheap.
-      <li>GlishArray is a (possibly n-dimensional) array of glish values, all
+      <li>casa::GlishArray is a (possibly n-dimensional) array of glish values, all
       of which have the same type. This is also the class which is used to
       hold a single value.
-      <li>GlishRecord is a "structure" of values, made up of named arrays and
+      <li>casa::GlishRecord is a "structure" of values, made up of named arrays and
       records (the latter makes it hierarchical).
-      <li>GlishSysEvent is a named value which has been sent from an external
+      <li>casa::GlishSysEvent is a named value which has been sent from an external
       source.
-      <li>GlishSysEventSource the object inside the program which emits the
+      <li>casa::GlishSysEventSource the object inside the program which emits the
       GlishSysEvent objects. It is also the object to which events from this
       executable are posted. This object can also be used to register callbacks
       and and handle incoming events in an event driven manner.
-      <li>XSysEventSource allows the user to handle both Glish and X events
-      using the same event loop. See XSysEventSource for an example.
+      <li>casa::XSysEventSource allows the user to handle both Glish and X events
+      using the same event loop. See casa::XSysEventSource for an example.
     </ul>
     These classes insulate the user from the underlying Glish classes by hiding
     event management complications and translating Glish values into AIPS++
@@ -98,7 +98,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
     CLI. This module supports writing these clients in C++. While it would have
     been possible to use the native Glish classes, it is useful to have an
     independent interface which converts Glish classes into the classes used
-    by AIPS++ programmers, e.g. GlishArray.
+    by AIPS++ programmers, e.g. casa::GlishArray.
   */
 
 // <a name="procedural_example">

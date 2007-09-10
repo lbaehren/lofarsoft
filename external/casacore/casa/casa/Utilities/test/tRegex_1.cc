@@ -30,7 +30,6 @@
 #include <casa/iostream.h>
 
 #include <casa/namespace.h>
-
 int main () {
     const Int ntests = 29;
     String p[ntests];

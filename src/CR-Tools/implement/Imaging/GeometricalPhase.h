@@ -85,6 +85,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
     blitz::Array<double,1> frequencies_p;
     //! Array with the geometrical phases
     blitz::Array<double,3> phases_p;
+#else 
+    std::vector<double> frequencies_p;
 #endif
 #endif
 
@@ -215,7 +217,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
                                 phases are computed
     */
     inline int nofFrequencies () {
-      return frequencies_p.nelements();
+      return frequencies_p.numElements();
     }
     
     /*!
@@ -252,6 +254,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #else
 #ifdef HAVE_BLITZ
     virtual bool setFrequencies (const blitz::Array<double,1> &frequencies,
+				 bool const &bufferPhases=false);
+#else
+    virtual bool setFrequencies (const std::vector<double> &frequencies,
 				 bool const &bufferPhases=false);
 #endif
 #endif

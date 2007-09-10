@@ -32,8 +32,7 @@
 #include <casa/iostream.h>
 
 #include <casa/namespace.h>
-
-int main() {
+main() {
 
   Stack<int> one;
   Stack<int> two;

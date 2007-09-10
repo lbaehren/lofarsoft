@@ -68,21 +68,25 @@ namespace CR { // Namespace CR -- begin
   */  
   class analyseLOPESevent {
     
-    // \brief the pipeline object
+    //! the pipeline object
     CRinvFFT *pipeline_p;
 
-    // \brief the DataReader object to read in LOPES events
+    //! the DataReader object to read in LOPES events
     LopesEventIn *lev_p;
 
-    // \brief the used fitobject
+    //! the used fitobject
     fitCR2gauss fitObject;
 
-    // \brief the flagging object
+    //! the flagging object
     CRflaggingPlugin flagger;
 
-
     // \brief div. parameters
-    Double remoteStart, remoteStop, fitstart, fitstop, plotstart, plotstop;
+    Double remoteStart;
+    Double remoteStop;
+    Double fitstart;
+    Double fitstop;
+    Double plotstart;
+    Double plotstop;
 
   public:
     

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Cube.h 19957 2007-02-28 03:15:48Z gervandiepen $
+//# $Id: Cube.h 20105 2007-07-16 05:41:29Z Malte.Marquarding $
 
 #ifndef CASA_CUBE_H
 #define CASA_CUBE_H
@@ -241,6 +241,10 @@ public:
     // <group>
     Matrix<T> xyPlane(uInt zplane); 
     const  Matrix<T> xyPlane(uInt zplane) const; 
+    Matrix<T> xzPlane(uInt zplane); 
+    const  Matrix<T> xzPlane(uInt zplane) const; 
+    Matrix<T> yzPlane(uInt zplane); 
+    const  Matrix<T> yzPlane(uInt zplane) const; 
     // </group>
 
     // The length of each axis of the cube.

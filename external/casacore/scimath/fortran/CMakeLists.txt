@@ -26,6 +26,7 @@ add_library (casa_scimath_f
 set_target_properties (casa_scimath_f
   PROPERTIES
   COMPILE_FLAGS "-fPIC -O2 -fPIC"
+  LINKER_LANGUAGE Fortran
   )
 
 ## -----------------------------------------------------------------------------

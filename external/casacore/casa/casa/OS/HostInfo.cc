@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: HostInfo.cc 19437 2006-05-22 05:11:40Z mcalabre $
+//# $Id: HostInfo.cc 20110 2007-08-22 08:09:30Z jcguzmantanaka $
 
 #include <casa/BasicSL/String.h>
 #include <casa/OS/HostInfo.h>
@@ -34,7 +34,7 @@
 #include <sys/utsname.h>
 
 // Time related includes
-#if defined(AIPS_SOLARIS) || defined(_AIX) || defined(AIPS_IRIX) || defined(AIPS_DARWIN)
+#if defined(AIPS_SOLARIS) || defined(_AIX) || defined(AIPS_IRIX) || defined(AIPS_DARWIN) || defined(AIPS_CRAY_PGI)
 #include <sys/time.h>
 #elif defined(AIPS_OSF)
 #include <sys/timers.h>
@@ -86,7 +86,7 @@ Double HostInfo::secondsFrom1970()
     total += tp.tv_usec * 0.000001;
     return total;
 }
-#elif defined(AIPS_SOLARIS) || defined(_AIX) || defined(AIPS_IRIX) || defined(AIPS_DARWIN)
+#elif defined(AIPS_SOLARIS) || defined(_AIX) || defined(AIPS_IRIX) || defined(AIPS_DARWIN) || defined(AIPS_CRAY_PGI)
 Double HostInfo::secondsFrom1970()
 {
     struct timeval  tp;

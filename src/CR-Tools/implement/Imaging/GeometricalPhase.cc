@@ -38,9 +38,19 @@ namespace CR { // NAMESPACE CR -- BEGIN
     : GeometricalDelay (),
       bufferPhases_p(false)
   {
+#ifdef HAVE_CASA
     casa::Vector<double> frequencies (1);
     frequencies = 0.0;
-    setFrequencies (frequencies);
+#else
+#ifdef HAVE_BLITZ
+    blitz::Array<double,1> frequencies (1);
+    frequencies = 0.0;
+#else
+    std::vector<double> frequencies (1);
+    frequencies[0] = 0.0;
+#endif
+#endif
+    setFrequencies (frequencies,false);
   }
   
   // ----------------------------------------------------------- GeometricalPhase
@@ -90,13 +100,24 @@ namespace CR { // NAMESPACE CR -- BEGIN
   }
 #endif
 #endif
+
   // ----------------------------------------------------------- GeometricalPhase
 
   GeometricalPhase::GeometricalPhase (GeometricalDelay const &delay)
     : GeometricalDelay (delay)
   {
+#ifdef HAVE_CASA
     casa::Vector<double> frequencies (1);
     frequencies = 0.0;
+#else
+#ifdef HAVE_BLITZ
+    blitz::Array<double,1> frequencies (1);
+    frequencies = 0.0;
+#else
+    std::vector<double> frequencies (1);
+    frequencies[0] = 0.0;
+#endif
+#endif
     setFrequencies (frequencies,false);
   }
 
@@ -157,7 +178,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   //  Parameters
   //
   // ============================================================================
-  
+
   // ------------------------------------------------------------- setFrequencies
 
 #ifdef HAVE_CASA
@@ -193,6 +214,15 @@ namespace CR { // NAMESPACE CR -- BEGIN
       setPhases();
     }
     
+    return status;
+  }
+#else
+  bool GeometricalPhase::setFrequencies (const std::vector<double> &frequencies,
+					 bool const &bufferPhases)
+  {
+    bool status (true);
+
+
     return status;
   }
 #endif

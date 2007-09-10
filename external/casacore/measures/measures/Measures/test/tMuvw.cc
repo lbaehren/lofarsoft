@@ -1,5 +1,5 @@
 //# tMuvw.cc: This program tests Muvw class
-//# Copyright (C) 1998,1999,2000,2002,2007
+//# Copyright (C) 1998-2000,2002,2007
 //# Associated Universities, Inc. Washington DC, USA.
 //#
 //# This program is free software; you can redistribute it and/or modify it
@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tMuvw.cc 19918 2007-02-23 03:29:05Z Malte.Marquarding $
+//# $Id: tMuvw.cc 20117 2007-09-05 04:38:35Z Malte.Marquarding $
 
 //# Includes
 #include <casa/aips.h>
@@ -42,7 +42,6 @@
 #include <casa/Quanta/MVuvw.h>
 #include <casa/Arrays/ArrayMath.h>
 #include <casa/Arrays/ArrayLogical.h>
-#include <casa/Arrays/ArrayIO.h>
 #include <casa/iostream.h>
 
 #include <casa/namespace.h>
@@ -116,7 +115,7 @@ int main()
 	    Muvw::Convert backw(rout, rin);
 	    if (!allNearAbs(mb0.getValue().getValue() -
 			 backw(forw(mb0)).getValue().getValue(), 
-			 tvec, 3e-6)) {
+			 tvec, 1e-4)) {
 	      cout << Muvw::showType(i) << " to " <<
 		Muvw::showType(j) << ": " <<
 		mb0.getValue().getValue() -

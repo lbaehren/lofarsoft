@@ -208,7 +208,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			      the provided antenna and sky positions and afterwards
 			      kept in memory; if set <i>no</i> only the input 
 			      parameters are stored an no further action is taken.
-     */
+    */
     inline bool bufferDelays () {
       return bufferDelays_p;
     }
@@ -264,6 +264,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			  bool const &antennaIndexFirst=true);
 #else
 #ifdef HAVE_BLITZ
+    /*!
+      \brief Set the antenna positions, for which the delay is computed
+      
+      \param antPositions -- The antenna positions, for which the delay is
+                             computed, [nofAntennas,3]
+      \param bufferDelays -- Buffer the values for the geometrical delay? If set
+                             <i>yes</i> the delays will be computed from the 
+			     provided antenna and sky positions and afterwards
+			     kept in memory; if set <i>no</i> only the input 
+			     parameters are stored an no further action is taken.
+    */
     bool setAntPositions (const blitz::Array<double,2> &antPositions,
 			  const bool &bufferDelays=false,
 			  bool const &antennaIndexFirst=true);
@@ -405,9 +416,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			  bool const &bufferDelays=false);
 #else
 #ifdef HAVE_BLITZ
-    bool setSkyPositions (blitz::Array><double,1> const &xValues,
-			  blitz::Array><double,1> const &yValues,
-			  blitz::Array><double,1> const &zValues,
+    bool setSkyPositions (blitz::Array<double,1> const &xValues,
+			  blitz::Array<double,1> const &yValues,
+			  blitz::Array<double,1> const &zValues,
 			  CR::CoordinateTypes const &coordType,
 			  bool const &anglesInDegrees=false,
 			  bool const &bufferDelays=false);
@@ -452,8 +463,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			  bool const &bufferDelays=false);
 #else
 #ifdef HAVE_BLITZ
-    bool setSkyPositions (blitz::Array><double,1> const &xyValues,
-			  blitz::Array><double,1> const &zValues,
+    bool setSkyPositions (blitz::Array<double,1> const &xyValues,
+			  blitz::Array<double,1> const &zValues,
 			  blitz::Array<int,1> const &axisOrder,
 			  CR::CoordinateTypes const &coordType,
 			  bool const &anglesInDegrees=false,
@@ -545,6 +556,12 @@ namespace CR { // NAMESPACE CR -- BEGIN
     inline uint nofAntennaPositions () {
       return nofAntennas_p;
     }
+    /*!
+      \brief Get the number of antenna positions
+
+      \return nofAntennas -- The number of antenna positions, for which the
+                             geometrical delay is computed.
+    */
     inline uint nofAntennas () {
       return nofAntennas_p;
     }

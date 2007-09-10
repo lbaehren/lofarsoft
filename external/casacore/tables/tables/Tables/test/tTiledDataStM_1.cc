@@ -57,7 +57,7 @@
 void a (char** argv);
 void b();
 
-int main (int argc, char** argv)
+main (int argc, char** argv)
 {
     // Get the command line arguments as cell shape, cube shape, tile shape.
     if (argc != 5) {

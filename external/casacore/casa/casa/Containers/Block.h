@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Block.h 19763 2006-11-24 04:07:49Z gvandiep $
+//# $Id: Block.h 20113 2007-08-28 11:12:18Z gervandiepen $
 
 #ifndef CASA_BLOCK_H
 #define CASA_BLOCK_H
@@ -280,7 +280,45 @@ public:
   // </group>
 
   // The number of elements contained in this <src>Block<T></src>.
+  // <group>
   uInt nelements() const {return npts;}
+  uInt size() const {return npts;}
+  // </group>
+
+  // Define the STL-style iterators.
+  // It makes it possible to iterate through all data elements.
+  // <srcblock>
+  //  Block<Int> bl(100,0);
+  //  for (Block<Int>::iterator iter=bl.begin(); iter!=bl.end(); iter++) {
+  //    *iter += 1;
+  //  }
+  // </srcblock>
+  // <group name=STL-iterator>
+  // STL-style typedefs.
+  // <group>
+  typedef T                 value_type;
+  typedef T*                iterator;
+  typedef const T*          const_iterator;
+  typedef value_type*       pointer;
+  typedef const value_type* const_pointer; 
+  typedef value_type&       reference;
+  typedef const value_type& const_reference;
+  typedef size_t            size_type;
+  typedef ptrdiff_t         difference_type;
+  // </group>
+  // Get the begin and end iterator object for this block.
+  // <group>
+  iterator begin()
+    { return array; }
+  const_iterator begin() const
+    { return array; }
+  iterator end()
+    { return array + npts; }
+  const_iterator end() const
+    { return array + npts; }
+  // </group>
+  // </group>
+
  private:
   // The number of points in the vector
   uInt  npts;
@@ -340,6 +378,7 @@ public:
    T *storage()  {return (T *)block_p.storage();}
    const T *storage() const {return (const T *)block_p.storage();}
    uInt nelements() const {return block_p.nelements();}
+   uInt size() const {return block_p.size();}
  private:
    Block<void*> block_p;
  };

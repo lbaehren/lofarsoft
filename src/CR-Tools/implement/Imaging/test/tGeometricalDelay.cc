@@ -333,7 +333,8 @@ int test_skyPositions ()
   GeometricalDelay delay;
   int nofSkyPositions (5);
   bool status (true);
-  
+
+#ifdef HAVE_CASA  
   std::cout << "[1] Set new values via (Matrix) ..." << endl;
   try {  
     casa::Matrix<double> skyPositions (nofSkyPositions,3);
@@ -431,7 +432,8 @@ int test_skyPositions ()
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
-  }  
+  }
+#endif
 
   return nofFailedTests;
 }

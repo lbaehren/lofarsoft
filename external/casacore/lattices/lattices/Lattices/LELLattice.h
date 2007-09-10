@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LELLattice.h 19909 2007-02-23 02:08:02Z Malte.Marquarding $
+//# $Id: LELLattice.h 20123 2007-09-05 07:55:22Z gervandiepen $
 
 #ifndef LATTICES_LELLATTICE_H
 #define LATTICES_LELLATTICE_H
@@ -64,8 +64,8 @@ template <class T> class MaskedLattice;
 // Float,Double,Complex,DComplex and Bool.  
 //
 // A description of the implementation details of the LEL classes can
-// be found in <a href="../../../notes/216/216.html">Note 216</a>
-//
+// be found in
+// <a href="http://www.astron.nl/aips++/docs/notes/216">Note 216</a>
 // </synopsis> 
 //
 // <example>

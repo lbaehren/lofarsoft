@@ -196,7 +196,7 @@ void doTest()
     }
 }
 
-int main (int argc, char** argv)
+main (int argc, char** argv)
 {
     try {
 	// If no argument given, tell how to run.

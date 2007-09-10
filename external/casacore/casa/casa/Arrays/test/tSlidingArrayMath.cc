@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tSlidingArrayMath.cc 19997 2007-03-01 00:36:21Z gervandiepen $
+//# $Id: tSlidingArrayMath.cc 20113 2007-08-28 11:12:18Z gervandiepen $
 
 #include <casa/Arrays/ArrayLogical.h>
 #include <casa/Arrays/ArrayMath.h>
@@ -60,8 +60,9 @@ Float smartMedian (const Array<Float>& arr)
   Int nl = 0;
   Int nr = arr.size();
   Float pivot = nr/2;
+  Array<Float>::const_iterator iterEnd=arr.end();
   for (Array<Float>::const_iterator iter=arr.begin();
-       iter!=arr.end();
+       iter!=iterEnd;
        ++iter) {
     Float val = *iter;
     if (val <= pivot) {

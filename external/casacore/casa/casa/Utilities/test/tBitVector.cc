@@ -140,7 +140,7 @@ void doIt()
 }
 
 
-int main () {
+main () {
     try {
 	doIt();
     } catch (AipsError x) {

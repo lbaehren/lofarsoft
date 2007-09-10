@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MeasurementSets.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: MeasurementSets.h 20121 2007-09-05 07:34:45Z gervandiepen $
 
 #ifndef MS_MEASUREMENTSETS_H
 #define MS_MEASUREMENTSETS_H
@@ -42,7 +42,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // <prerequisite>
 // <ul>
 //   <li> <linkto module="Tables:description">Tables</linkto> module
-//   <li> <a href="../../notes/191/191.html">AIPS++ Note 191</a>
+//   <li> <a href="http://www.astron.nl/aips++/docs/notes/191/191.html">AIPS++ Note 191</a>
 // </ul>
 // </prerequisite>
 //
@@ -73,7 +73,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // Each table has a number
 // of predefined columns and keywords, a subset of which is required to be
 // present. The column and keyword layout of each table is described in
-// <a href="../../notes/191/191.html">AIPS++ Note 191</a> 
+// <a href="http://www.astron.nl/aips++/docs/notes/191/191.html">AIPS++ Note 191</a>
 // and in a separate class which contains two enum definitions.
 // The enum classes, e.g., 
 // <linkto class=MSMainEnums>MSMainEnums</linkto> and 

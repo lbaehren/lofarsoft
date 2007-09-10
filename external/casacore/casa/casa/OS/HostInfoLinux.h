@@ -1,5 +1,5 @@
 //# HostInfo_linux.h: Linux specific memory, swap, and CPU code.
-//# $Id: HostInfoLinux.h 18865 2005-07-25 21:13:46Z dschieb $
+//# $Id: HostInfoLinux.h 20110 2007-08-22 08:09:30Z jcguzmantanaka $
 
  /*
  **  This is a greatly MODIFIED version of a "top" machine dependent file.
@@ -122,6 +122,7 @@ HostMachineInfo::HostMachineInfo( ) : valid(1)
     int fd, len;
     char *p;
 
+#ifndef AIPS_CRAY_PGI
     /* make sure the proc filesystem is mounted */
     {
 	struct statfs sb;
@@ -132,6 +133,7 @@ HostMachineInfo::HostMachineInfo( ) : valid(1)
 	    return;
 	}
     }
+#endif
 
     /* get number of CPUs */
     {

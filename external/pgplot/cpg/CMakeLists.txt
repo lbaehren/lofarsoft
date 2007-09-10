@@ -47,7 +47,13 @@ add_executable (cpgdemo cpgdemo.c)
 
 ## linker instructions
 
-target_link_libraries (cpgdemo cpgplot)
+target_link_libraries (cpgdemo cpgplot ${G2C_LIBRARIES})
+
+set_target_properties (cpgdemo
+  PROPERTIES
+  COMPILE_FLAGS -fPIC -O2 -fPIC
+  LINKER_LANGUAGE Fortran
+  )
 
 ## -----------------------------------------------------------------------------
 ## Installation

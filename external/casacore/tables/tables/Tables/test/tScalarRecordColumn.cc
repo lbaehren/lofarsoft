@@ -189,7 +189,7 @@ void b()
     }
 }
 
-int main()
+main()
 {
     try {
 	a();

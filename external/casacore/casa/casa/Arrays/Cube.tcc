@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Cube.tcc 19846 2007-02-12 03:11:58Z Malte.Marquarding $
+//# $Id: Cube.tcc 20105 2007-07-16 05:41:29Z Malte.Marquarding $
 
 #include <casa/Arrays/Cube.h>
 #include <casa/Arrays/Matrix.h>
@@ -276,12 +276,52 @@ template<class T> Matrix<T> Cube<T>::xyPlane(uInt which)
     return tmp; // should match Matrix<T>(const Array<T> &)
 }
 
+
 template<class T> const Matrix<T> Cube<T>::xyPlane(uInt which) const
 {
     Cube<T> *This = const_cast<Cube<T>*>(this);
     // Cast away constness, but the return type is a const Matrix<T>, so
     // this should still be safe.
     return This->xyPlane(which);
+}
+
+template<class T> Matrix<T> Cube<T>::xzPlane(uInt which)
+{
+    DebugAssert(ok(), ArrayError);
+    if (Int(which) >= this->length_p(1)) {
+	throw(ArrayConformanceError("Cube<T>::xzPlane - plane > end"));
+    }
+    Cube<T> tmp((*this)(Slice(), which, Slice()));
+    return tmp.nonDegenerate(); // should match Matrix<T>(const Array<T> &)
+}
+
+
+template<class T> const Matrix<T> Cube<T>::xzPlane(uInt which) const
+{
+    Cube<T> *This = const_cast<Cube<T>*>(this);
+    // Cast away constness, but the return type is a const Matrix<T>, so
+    // this should still be safe.
+    cout << "test" << endl;
+    return This->xzPlane(which);
+}
+
+template<class T> Matrix<T> Cube<T>::yzPlane(uInt which)
+{
+    DebugAssert(ok(), ArrayError);
+    if (Int(which) >= this->length_p(0)) {
+	throw(ArrayConformanceError("Cube<T>::yzPlane - plane > end"));
+    }
+    Cube<T> tmp((*this)(which, Slice(), Slice()));
+    return tmp.nonDegenerate(); // should match Matrix<T>(const Array<T> &)
+}
+
+
+template<class T> const Matrix<T> Cube<T>::yzPlane(uInt which) const
+{
+    Cube<T> *This = const_cast<Cube<T>*>(this);
+    // Cast away constness, but the return type is a const Matrix<T>, so
+    // this should still be safe.
+    return This->yzPlane(which);
 }
 
 

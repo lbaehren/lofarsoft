@@ -132,7 +132,7 @@ Vector<uInt> findMatches (const Vector<Int>& fld1,
 }
 
 
-int main()
+main()
 {
   try {
     Vector<Int> fld1(4);

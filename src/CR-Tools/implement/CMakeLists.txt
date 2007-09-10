@@ -70,7 +70,7 @@ target_link_libraries (cr
   ${G2C_LIBRARIES}
   ${LAPACK_LIBRARIES}
   ${CFITSIO_LIBRARIES}
-  ${CPGPLOT_LIBRARIES}
+  ${PGPLOT_LIBRARIES}
   ${WCSLIB_LIBRARIES}
   ${libm}
   )

@@ -31,7 +31,7 @@
 #include <casa/BasicSL/Constants.h>
 
 #include <casa/namespace.h>
-int main()
+main()
 {
    cout << ">>> List of machine constants."                 << endl
         << endl

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LatticeExpr.h 19909 2007-02-23 02:08:02Z Malte.Marquarding $
+//# $Id: LatticeExpr.h 20123 2007-09-05 07:55:22Z gervandiepen $
 
 #ifndef LATTICES_LATTICEEXPR_H
 #define LATTICES_LATTICEEXPR_H
@@ -68,7 +68,7 @@ template <class T> class LELArray;
 //
 //    This class is termed an envelope class, and inside it are the
 //    letter classes which do the real work.    In reality, the letter
-//    classes are actually accessed via  bridging class called 
+//    classes are actually accessed via a bridging class called 
 //    LatticeExprNode, which exists to handle type conversions.
 //    The letter classes iterate through the Lattices and evaluate the 
 //    expression for each chunk of the iteration (usually a tile shape).
@@ -78,7 +78,8 @@ template <class T> class LELArray;
 //    functionality is available.
 //
 //    A description of the implementation details of these classes can
-//    be found in <a href="../../../notes/216/216.html">Note 216</a>
+//    be found in
+//    <a href="http://www.astron.nl/aips++/docs/notes/216">Note 216</a>
 // </synopsis> 
 //
 // <example>

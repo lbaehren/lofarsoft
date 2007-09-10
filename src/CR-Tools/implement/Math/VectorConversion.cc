@@ -309,7 +309,7 @@ namespace CR { // Namespace CR -- begin
   blitz::Array<T,1> azel2cartesian (const blitz::Array<T,1>& azel)
   {
     blitz::Array<T,1> cartesian(3);
-    uInt shape = azel.numElements();
+    unsigned int shape = azel.numElements();
     T radius = 1.0;
     T az = CR::deg2rad(azel(0));
     T el = CR::deg2rad(azel(1));

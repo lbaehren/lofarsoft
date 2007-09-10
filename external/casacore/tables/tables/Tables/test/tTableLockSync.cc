@@ -254,7 +254,8 @@ void b (Bool noReadLocking, Bool permLocking)
     }
 }
 
-int main (int argc, char** argv)
+
+main (int argc, char** argv)
 {
     if (argc < 2) {
 	cout << "Execute as: tTableLockSync 1 x  to create new table"

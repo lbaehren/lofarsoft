@@ -42,7 +42,7 @@ void doit();
 // disk and read back. It outputs to stdout. A script executing
 // this test program makes a diff of the output and a reference output.
 
-int main () {
+main () {
     try {
        doit();
     } catch (AipsError x) {

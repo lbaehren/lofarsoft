@@ -37,7 +37,6 @@
 #include <casa/stdio.h>
 
 #include <casa/namespace.h>
-
 int main()
 {
 // first, create a short table with a few columns to use during testing

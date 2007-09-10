@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Lattices.h 19779 2006-12-12 23:20:42Z gvandiep $
+//# $Id: Lattices.h 20123 2007-09-05 07:55:22Z gervandiepen $
 
 #ifndef LATTICES_LATTICES_H
 #define LATTICES_LATTICES_H
@@ -374,7 +374,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 //  only once, on a get of the first part of the lattice expression.
 //  <br> Note that a lattice expression is not writable, thus using
 //  the put function on such a lattice results in an exception.
-//  <br> <a href="../../notes/223/223.html">Note 223</a> gives a more detailed
+//  <br> <a href="http://www.astron.nl/aips++/docs/notes/223">Note 223</a>
+//  gives a more detailed
 //  explanation of the capabilities of LEL (Lattice Expression Language).
 //  <p>
 //  When the expression consists of images, the result can also be

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LELCondition.h 19909 2007-02-23 02:08:02Z Malte.Marquarding $
+//# $Id: LELCondition.h 20123 2007-09-05 07:55:22Z gervandiepen $
 
 #ifndef LATTICES_LELCONDITION_H
 #define LATTICES_LELCONDITION_H
@@ -64,7 +64,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // actually happens at tree evaluation time.
 // <p>
 // A description of the implementation details of the LEL classes can
-// be found in <a href="../../../notes/216/216.html">Note 216</a>
+// be found in
+// <a href="http://www.astron.nl/aips++/docs/notes/216">Note 216</a>
 // </synopsis> 
 
 // <example>

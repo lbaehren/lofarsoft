@@ -72,7 +72,7 @@ void tSPtr()
     }
 }
 
-int main()
+main()
 {
     {
 	PtrHolder<Int> ph;               // PtrHolder()

@@ -432,20 +432,20 @@ namespace CR { // NAMESPACE CR -- BEGIN
   }
 #else
 #ifdef HAVE_BLITZ
-  bool GeometricalDelay::setSkyPositions (blitz::Array><double,1> const &xValues,
-					  blitz::Array><double,1> const &yValues,
-					  blitz::Array><double,1> const &zValues,
+  bool GeometricalDelay::setSkyPositions (blitz::Array<double,1> const &xValues,
+					  blitz::Array<double,1> const &yValues,
+					  blitz::Array<double,1> const &zValues,
 					  CR::CoordinateTypes const &coordType,
 					  bool const &anglesInDegrees,
 					  bool const &bufferDelays)
   {
-    unsigned int nelem_x (xValues.nelements());
-    unsigned int nelem_y (yValues.nelements());
-    unsigned int nelem_z (zValues.nelements());
-    unsigned int n  (0);
-    unsigned int nx (0);
-    unsigned int ny (0);
-    unsigned int nz (0);
+    int nelem_x (xValues.numElements());
+    int nelem_y (yValues.numElements());
+    int nelem_z (zValues.numElements());
+    int n  (0);
+    int nx (0);
+    int ny (0);
+    int nz (0);
     
     // Matrix with the combined set of sky positions
     blitz::Array<double,2> positions (nelem_x*nelem_y*nelem_z,3);
@@ -523,8 +523,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
   }
 #else
 #ifdef HAVE_BLITZ
-  bool GeometricalDelay::setSkyPositions (blitz::Array><double,1> const &xyValues,
-					  blitz::Array><double,1> const &zValues,
+  bool GeometricalDelay::setSkyPositions (blitz::Array<double,1> const &xyValues,
+					  blitz::Array<double,1> const &zValues,
 					  blitz::Array<int,1> const &axisOrder,
 					  CR::CoordinateTypes const &coordType,
 					  bool const &anglesInDegrees,
@@ -548,11 +548,11 @@ namespace CR { // NAMESPACE CR -- BEGIN
     }
 
     // local variables
-    unsigned int nelem_xy (xyValues.rows());
-    unsigned int nelem_z  (zValues.numElements());
-    unsigned int n (0);
-    unsigned int nxy (0);
-    unsigned int nz (0);
+    int nelem_xy (xyValues.rows());
+    int nelem_z  (zValues.numElements());
+    int n (0);
+    int nxy (0);
+    int nz (0);
 
     // Matrix with the combined set of sky positions
     blitz::Array<double,2> positions (nelem_xy*nelem_z,3);
@@ -708,7 +708,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_BLITZ
   blitz::Array<double,2> GeometricalDelay::calcDelays ()
   {
-    uint nAnt (0);
+    int nAnt (0);
     int nSky (0);
     int nofSky (nofSkyPositions());
     blitz::Array<double,1> skyPos (3);

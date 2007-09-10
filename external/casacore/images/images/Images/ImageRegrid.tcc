@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: ImageRegrid.tcc 19941 2007-02-27 05:36:58Z Malte.Marquarding $
+//# $Id: ImageRegrid.tcc 20115 2007-08-28 11:14:45Z gervandiepen $
 
 #include <images/Images/ImageRegrid.h>
 
@@ -2197,8 +2197,9 @@ Bool ImageRegrid<T>::minmax(Double &minX, Double &maxX, Double &minY,
   minY = 1.0e30;
   maxY = -1.0e30;
   Array<Bool>::const_iterator pMask = mask.begin();
+  Array<Double>::const_iterator pXend = xData.end();
   for (Array<Double>::const_iterator pX = xData.begin(), pY = yData.begin();
-       pX != xData.end(); pX++, pY++, pMask++) {
+       pX != pXend; ++pX, ++pY, ++pMask) {
     if (*pMask) {
       minX = minX < *pX ? minX : *pX;
       maxX = maxX > *pX ? maxX : *pX;

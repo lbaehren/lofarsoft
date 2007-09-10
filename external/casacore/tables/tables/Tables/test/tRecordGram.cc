@@ -191,7 +191,8 @@ void doIt()
   }
 }
 
-int main()
+
+main()
 {
   try {
     doIt();

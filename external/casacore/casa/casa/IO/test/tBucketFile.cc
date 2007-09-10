@@ -40,7 +40,7 @@ void a();
 void b();
 void c();
 
-int main (int argc)
+main (int argc)
 {
     try {
 	a();

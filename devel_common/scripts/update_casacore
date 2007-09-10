@@ -1,0 +1,78 @@
+#!/bin/sh
+
+## -----------------------------------------------------------------------------
+## check input parameters
+
+if test -z $1 ; then
+    echo "Sorry, missing location of up-to-date casacore distribution!";
+    exit 1;
+else 
+    sourceDir=$1
+    targetDir=`pwd`
+    # provide some feedback
+    echo "-- Source directory = $sourceDir";
+    echo "-- Target directory = $targetDir";
+fi
+
+## -----------------------------------------------------------------------------
+## function to extract directories from the listing of a directory contents
+
+get_directories ()
+{
+  DIRS=""
+  FILES=`ls`
+  for FILE in $FILES
+  {
+    if test -d $FILE ; then
+      DIRS="$DIRS $FILE"
+    fi
+  }
+  echo $DIRS
+}
+
+## -----------------------------------------------------------------------------
+## List of modules in casacore
+
+casacore_modules="casa 
+	components \
+	coordinates \
+	fits \
+	images \
+	lattices \
+	measures \
+	mirlib \
+	ms \
+	msfits \
+	msvis \
+	scimath \
+	tables"
+
+## -----------------------------------------------------------------------------
+## Processing: get list of source files from the source directory (latest
+## casacore version retrieved from google.code) and copy to USG directory.
+
+cd $sourceDir
+
+for module in $casacore_modules 
+{
+    printf " -- Processing module $module ... ";
+    ## [1] Header files
+    FILES=`find $module -name *.h`
+    for FILE in $FILES 
+    {
+	cp $sourceDir/$FILE $targetDir/$FILE
+    }
+    ## [2] Implementation files
+    FILES=`find $module -name *.cc`
+    for FILE in $FILES 
+    {
+	cp $sourceDir/$FILE $targetDir/$FILE
+    }
+    ## [3] Template instantiation files
+    FILES=`find $module -name *.tcc`
+    for FILE in $FILES 
+    {
+	cp $sourceDir/$FILE $targetDir/$FILE
+    }
+    echo "done."
+}

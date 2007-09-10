@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LatticeExprNode.h 19779 2006-12-12 23:20:42Z gvandiep $
+//# $Id: LatticeExprNode.h 20123 2007-09-05 07:55:22Z gervandiepen $
 
 #ifndef LATTICES_LATTICEEXPRNODE_H
 #define LATTICES_LATTICEEXPRNODE_H
@@ -341,7 +341,8 @@ class LatticeExprNode;
 //    a tile shape) of the iteration.
 //
 //    A description of the implementation details of these classes can
-//    be found in <a href="../../../notes/216/216.html">Note 216</a>
+//    be found in
+//    <a href="http://www.astron.nl/aips++/docs/notes/216">Note 216</a>
 //
 //    The available functionality is defined by the global friend functions
 //    and operators, plus the public constructors.  The other public members

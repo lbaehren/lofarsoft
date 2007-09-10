@@ -7,7 +7,7 @@
 ## Main CMake configuration file for building the "casacore" package.
 ##
 ## Pending issues:
-##  - "tVanVleck" does not link due to missing f2c symbols
+##  - scimath/Mathematics/test/tVanVleck does not link due to missing f2c symbols
 ##
 ## =============================================================================
 

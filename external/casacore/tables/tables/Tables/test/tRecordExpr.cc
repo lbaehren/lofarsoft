@@ -142,7 +142,8 @@ void doIt()
   AlwaysAssertExit (result);
 }
 
-int main()
+
+main()
 {
   try {
     doIt();

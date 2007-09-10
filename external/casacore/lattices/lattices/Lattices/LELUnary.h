@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LELUnary.h 19909 2007-02-23 02:08:02Z Malte.Marquarding $
+//# $Id: LELUnary.h 20123 2007-09-05 07:55:22Z gervandiepen $
 
 #ifndef LATTICES_LELUNARY_H
 #define LATTICES_LELUNARY_H
@@ -65,8 +65,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // and Bool.  
 //
 // A description of the implementation details of the LEL classes can
-// be found in <a href="../../../notes/216/216.html">Note 216</a>
-//
+// be found in
+// <a href="http://www.astron.nl/aips++/docs/notes/216">Note 216</a>
 // </synopsis> 
 //
 // <example>
@@ -158,8 +158,8 @@ private:
 // of PLUS and MINUS.
 //
 // A description of the implementation details of the LEL classes can
-// be found in <a href="../../../notes/216/216.html">Note 216</a>
-//
+// be found in
+// <a href="http://www.astron.nl/aips++/docs/notes/216">Note 216</a>
 // </synopsis> 
 //
 // <example>
@@ -252,8 +252,8 @@ private:
 // in the enum  of NOT.
 //
 // A description of the implementation details of the LEL classes can
-// be found in <a href="../../../notes/216/216.html">Note 216</a>
-//
+// be found in
+// <a href="http://www.astron.nl/aips++/docs/notes/216">Note 216</a>
 // </synopsis> 
 //
 // <example>
