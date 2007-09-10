@@ -56,6 +56,11 @@ if (UNIX)
 	/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.1
 	)
     ENDIF (${CMAKE_OSX_ARCHITECTURES} MATCHES "ppc")
+  else (APPLE)
+    list (APPEND lib_locations
+      /usr/lib/gcc/x86_64-redhat-linux/3.4.3/32
+      /usr/lib/gcc/x86_64-redhat-linux/3.4.3
+      )
   endif (APPLE)
 endif (UNIX)
 
