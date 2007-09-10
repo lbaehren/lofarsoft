@@ -44,6 +44,7 @@ set (casacore_modules
   casa
   tables
   mirlib
+  scimath_f
   scimath
   measures
   fits

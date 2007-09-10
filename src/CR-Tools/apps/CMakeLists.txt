@@ -27,7 +27,7 @@ install (TARGETS treetest RUNTIME DESTINATION bin)
 
 if (HAVE_POPT)
   add_executable (trigrun trigrun.cc)
-  target_link_libraries (trigrun cr ${POPT_LIBRARIES})
+  target_link_libraries (trigrun cr ${POPT_LIBRARIES} ${CASA_LIBRARIES})
   install (TARGETS trigrun RUNTIME DESTINATION bin)
 endif (HAVE_POPT)
 

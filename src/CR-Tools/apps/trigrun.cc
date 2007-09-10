@@ -43,6 +43,8 @@
 #include <sstream>
 #include <popt.h>
 
+#include <scimath/Mathematics/FFTServer.h>
+
 #include <IO/DataReader.h>
 #include <Data/LopesEvent.h>
 #include <Analysis/PeakSearch.h>

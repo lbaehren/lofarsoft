@@ -34,6 +34,7 @@ find_path (G2C_INCLUDES g2c.h f2c.h
   gcc
   gcc-lib/i486-linux/3.3.5/include
   gcc-lib/i586-suse-linux/3.3.3/include
+  gcc/x86_64-redhat-linux/3.4.3/include
   )
 
 ## -----------------------------------------------------------------------------

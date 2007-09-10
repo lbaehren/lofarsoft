@@ -22,11 +22,15 @@ endforeach (scimath_module)
 add_library (casa_scimath
   ${scimath_sources}
 )
-target_link_libraries (casa_scimath casa_scimath_f casa_casa)
+target_link_libraries (casa_scimath
+  casa_scimath_f
+  casa_casa
+  ${LAPACK_LIBRARIES}
+  )
 set_target_properties (casa_scimath
   PROPERTIES
   LINKER_LANGUAGE Fortran
-)
+  )
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs
