@@ -1,5 +1,8 @@
 #!/bin/sh
 
+##-------------------------------------------------------------------------------
+## $Id:: CMakeLists.txt 724 2007-09-10 10:17:21Z baehren                        $
+##-------------------------------------------------------------------------------
 ##
 ## A simple shell script to configure and install as many as possible of
 ## the packages in the LOFAR USG distribution. Simple run
@@ -23,6 +26,7 @@ build_package ()
 {
     buildDir=$1
     sourceDir=$2
+    configureOption=$3
     # check if the build directory exists
     cd $basedir
     if test -d $buildDir ; then
@@ -32,7 +36,11 @@ build_package ()
 	# clean up the directory before we do anything else
 	rm -rf *
 	# run cmake on the source directory
-	cmake $basedir/../$sourceDir
+	if test -z $configureOption ; then
+	    cmake $basedir/../$sourceDir
+	else 
+	    cmake $basedir/../$sourceDir $$configureOption
+	fi
 	# build the package
 	make install;
 	}
@@ -66,27 +74,28 @@ case $1 in
 	echo "[build] Selected package Flex"
 	build_package flex external/flex
     ;;
+    hdf5)
+	echo "[build] Selected package Hdf5"
+	build_package hdf5 external/hdf5
+    ;;
+    wcslib)
+	echo "[build] Selected package WCSLIB"
+	build_package wcslib external/wcslib
+    ;;
     dal)
 	echo "[build] Selected package DAL"
 	## external packages
-	build_package wcslib external/wcslib
-	build_package cfitsio external/cfitsio
-	build_package casacore external/casacore
-	build_package hdf5 external/hdf5
-	build_package boost external/boost
+	./build.sh wcslib
+	./build.sh cfitsio
+	./build.sh casacore
+	build_package hdf5 external/hdf5 -DHDF5_FORCE_BUILD:BOOL=1
+	build_package boost external/boost -DBOOST_FORCE_BUILD:BOOL=1
 	## USG packages
 	build_package dal src/DAL
     ;;
     cr)
-	echo "[build] Selected package DAL"
-	## external packages
-	build_package wcslib external/wcslib
-	build_package cfitsio external/cfitsio
-	build_package casacore external/casacore
-	build_package hdf5 external/hdf5
-	build_package boost external/boost
-	## USG packages
-	build_package dal src/DAL
+	echo "[build] Selected package CR-Tools"
+	./build.sh dal
 	build_package cr src/CR-Tools
     ;;
     *)
