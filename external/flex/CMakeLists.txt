@@ -2,29 +2,30 @@
 ## ------------------------------------------------------------------------------
 #
 #  CMake wrapper around the GNU Autotools-based configure/build of the FLEX
-#  lexical generator.
+#  library.
 #
 ## ------------------------------------------------------------------------------
 
 project (FLEX)
 
 ## -----------------------------------------------------------------------------
-## Only force rebuild of the tool, if it cannot be found on the system.
+## Only force rebuild of the library from the provided source code, if no system
+## installation can be found. In order to handle this properly, we use the CMake
+## find script
 
 option (FLEX_FORCE_BUILD "Force rebuild and local installation" 0)
 
+## check where to find the CMake scripts
+
 set (bin_locations
-  ## possible system-wide installation locations
   /usr/bin
-  /usr/local/bin/
+  /usr/local/bin
+  /sw/bin
   /opt
   /opt/bin
-  /sw/bin
-  ## local installation as part of USG distribution
-  ${FLEX_SOURCE_DIR}../../release/bin
 )
 
-find_program (HAVE_FLEX flex ${bin_locations})
+find_program (HAVE_FLEX flex PATHS ${bin_locations})
 
 ## <-- begin build condition --------------------------------------------------->
 
@@ -51,24 +52,24 @@ endif (NOT FLEX_prefix)
 
 ## [1] configure
 
-message (STATUS "Running the Flex configure script...")
+message (STATUS "Running the FLEX configure script...")
 
 execute_process (
   WORKING_DIRECTORY ${FLEX_SOURCE_DIR}
   COMMAND ./configure --prefix=${FLEX_prefix}
-  TIMEOUT 180
+  TIMEOUT 300
   ERROR_VARIABLE error_configure
   ERROR_FILE error.log
   )
 
 if (error_configure)
-  message (STATUS "There was an error running the Flex configure script!")
+  message (STATUS "There was an error running the FLEX configure script!")
   message (SEND_ERROR "${error_configure}")
 endif (error_configure)
 
 ## [2] make
 
-message (STATUS "Building Flex ...")
+message (STATUS "Building FLEX library...")
 
 execute_process (
   WORKING_DIRECTORY ${FLEX_SOURCE_DIR}
@@ -79,7 +80,7 @@ execute_process (
   )
 
 if (error_make)
-  message (STATUS "There was an error building Flex!")
+  message (STATUS "There was an error building/installing the FLEX library!")
   message (SEND_ERROR "${error_make}")
 endif (error_make)
 
@@ -87,7 +88,7 @@ endif (error_make)
 
 if (NOT error_make)
 
-message (STATUS "Installing Flex ...")
+message (STATUS "Installing FLEX library...")
 
 execute_process (
   WORKING_DIRECTORY ${FLEX_SOURCE_DIR}
@@ -98,7 +99,7 @@ execute_process (
   )
 
 if (error_make_install)
-  message (STATUS "There was an error installing Flex!")
+  message (STATUS "There was an error building/installing the FLEX library!")
   message (SEND_ERROR "${error_make_install}")
 endif (error_make_install)
 
@@ -107,5 +108,5 @@ endif (NOT error_make)
 ## <-- end build condition ----------------------------------------------------->
 
 else (NOT HAVE_FLEX OR FLEX_FORCE_BUILD)
-  message (STATUS "Found system-wide installation of Flex; skipping rebuild!")
+  message (STATUS "Found system-wide installation of FLEX; skipping rebuild!")
 endif (NOT HAVE_FLEX OR FLEX_FORCE_BUILD)
