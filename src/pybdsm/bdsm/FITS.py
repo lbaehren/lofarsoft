@@ -53,7 +53,6 @@ class Op_loadFITS(Op):
 
         t.wcsset()
 
-        ### pixel coordinates are reversed w.r.t. FITS header
         opts.xy2radec = t.xy2radec
         opts.radec2xy = t.radec2xy
 
