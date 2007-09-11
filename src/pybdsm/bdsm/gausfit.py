@@ -9,9 +9,9 @@ class Op_gausfit(Op):
     """
 
     def __call__(self, img):
-        for idx, isl in enumerate(img.islands[0:10]):
+        for idx, isl in enumerate(img.islands):
             print "Fitting isl #", idx
-            t = self.fit_island(isl, img.opts.isl_thresh)
+            t = self.fit_island(isl, img.opts.thresh_isl)
             isl.gaus_fcn = t
             isl.gaul = t.parameters()
 
@@ -29,9 +29,9 @@ class Op_gausfit(Op):
             if not fcn.add_gaussian(peak, idx): ## no more gaussians can be added
                 break
             
-            fcn.fit()
+            fcn.fit(final=0, verbose=1)
 
-        fcn.fit()
+        fcn.fit(final=1, verbose=1)
         return fcn
 
 class gaus_fcn:
@@ -43,7 +43,8 @@ class gaus_fcn:
         self.pars = []  ## parameters
         self.opts = isl.opts
         self.orig = isl.masked
-        self.img = M.array(isl.masked, copy=True)
+        self.img = M.array(isl.masked, dtype=N.float64, copy=True)
+        self.origin = (isl.bbox[0], isl.bbox[2])
 
     def add_gaussian(self, peak, idx):
         if self.npar + 6 < self.dof:  ## add 6-parameter gaussian
@@ -68,7 +69,6 @@ class gaus_fcn:
             p = pars
         for g in self.gaul:
             img -= N.fromfunction(self.gauss2d, img.shape, params=p[g[0]:g[0]+g[1]])
-
         return img
 
     def fcn(self, x):
@@ -76,12 +76,24 @@ class gaus_fcn:
         arr.data[arr.mask]=0
         return arr.data.flat
 
-
-    def fit(self):
+    def fit(self, final=0, verbose=0):
+        precision = {}
+        if not final:
+            precision = {'xtol': 1e-4, 'ftol': 1e-4}
         res = opt.leastsq(self.fcn, self.pars,
-                          full_output=1, xtol=1e-3, ftol=1e-3)
-        print 'Nfev %d  chisq %f ; opt.leastsq' % \
-              (res[2]['nfev'], (res[2]['fvec']**2).sum())
+                          full_output=1, **precision)
+        if verbose == 1:
+            print 'Nfev %d  chisq %f' % \
+                (res[2]['nfev'], (res[2]['fvec']**2).sum())
+        elif verbose > 1:
+            print "================"
+            print "Par: ", res[0]
+            print "chi2:", (res[2]['fvec']**2).sum()
+            print "Nfev:", res[2]['nfev']
+            print "Err: ", res[4]
+            if res[4] != 1:
+                print "Err:", res[3]
+
         self.opars = self.pars
         self.pars = list(res[0])
 
@@ -93,7 +105,6 @@ class gaus_fcn:
             sx1, sx2, theta = self.opts.beam
         else:
             raise RuntimeError("Don't know how to calculate this")
-            
         theta = math.radians(theta)
         x1 -= x1o
         x2 -= x2o
@@ -107,6 +118,8 @@ class gaus_fcn:
             p = self.pars[g[0]:g[0]+g[1]]
             if g[1] == 3:
                 p.extend(self.opts.beam)
+            p[1] += self.origin[0]
+            p[2] += self.origin[1]
             l.append(p)
         return l
 

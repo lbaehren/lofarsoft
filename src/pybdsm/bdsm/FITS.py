@@ -58,31 +58,34 @@ class Op_loadFITS(Op):
         opts.radec2xy = t.radec2xy
 
     def init_beam(self, opts, hdr):
+        ### FIXME: beam shape conversion should include rotation angle
         ### first conversion routines:
         def beam2pix(x):
             bmaj, bmin, bpa = x
             s1 = abs(bmaj/hdr['cdelt1']) / 2.35482
             s2 = abs(bmin/hdr['cdelt2']) / 2.35482
-            th = bpa + 90  ### FIXME: check conventions
+            th = bpa ### FIXME: check conventions (th + 90)
             return (s1, s2, th)
 
         def pix2beam(x):
             s1, s2, th = x
             bmaj = abs(s1 * hdr['cdelt1']) * 2.35482
             bmin = abs(s2 * hdr['cdelt2']) * 2.35482
-            bpa  = th - 90
+            bpa  = th ### FIXME: check conventions (th - 90)
             if bmaj < bmin:
                 bmaj, bmin = bmin, bmaj
                 bpa += 90
             bpa = divmod(bpa, 180)[1] ### bpa lies between 0 and 180
             return (bmaj, bmin, bpa)
-
         
         if not opts._has_key('beam'):
             if not hdr.has_key('bmaj'):
                 raise RuntimeError('FITS header incomplete: no beam information')
             opts.beam = (hdr['bmaj'], hdr['bmin'], hdr['bpa'])
 
+        opts.pix2beam = pix2beam
         ### now convert beam into pixels
         opts.beam = beam2pix(opts.beam)
-        opts.pix2beam = pix2beam
+        ### force asymmetric beam shape
+        if abs(opts.beam[0]/opts.beam[1]) < 1.1:
+            opts.beam = (opts.beam[0], 1.1*opts.beam[0], opts.beam[2])

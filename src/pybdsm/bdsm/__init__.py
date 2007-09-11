@@ -8,7 +8,11 @@ from output import Op_outlist
 
 fits_chain = [Op_loadFITS(), Op_bstat(), Op_thresholds(), Op_islands(),
               Op_gausfit(), Op_outlist()]
-bdsm_default_opts = {}
+bdsm_default_opts = {'rms_clip': 3,       ### sigma's for hard threshold
+                     'isl_min_size': 4,   ### minimal island size, pixels
+                     'isl_peak_clip': 5,  ### sigma's for island peak
+                     'isl_clip': 3,       ### sigma's for island boundary
+                     }
 
 
 

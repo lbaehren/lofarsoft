@@ -140,7 +140,7 @@ class Op_islands(Op):
             ### islands detection
         islands = self.parser()
         for idx in xrange(data.shape[0]):
-            mask = (data[idx] > opts.isl_thresh).filled(fill_value = False)
+            mask = (data[idx] > opts.thresh_isl).filled(fill_value = False)
             runs = split(mask, idx)
             islands.add_line(runs)
 
@@ -148,8 +148,10 @@ class Op_islands(Op):
         isl = islands.flatten()
         res = []
         for i in isl:
-            if self.isl_size(i) > opts.isl_minsize:
-                res.append(island(img, i))
+            if self.isl_size(i) > opts.isl_min_size:
+                t = island(img, i)
+                if t.masked.max() > opts.thresh_isl2:
+                    res.append(t)
 
         img.islands = res
         img.rislands = isl
@@ -173,7 +175,7 @@ class island:
           ## create masks:
           ## isl_mask for the island itself
           ## mask     for island and surrounding noise
-        mask = self._noise_mask(img.opts.mean, img.opts.isl_thresh)
+	mask = self._noise_mask(img.opts.mean, img.opts.thresh_isl)
         isl_mask = N.ones(self.shape, dtype=bool)
         bb = self.bbox; x1o = bb[0]; x2o = bb[2]
         size = 0

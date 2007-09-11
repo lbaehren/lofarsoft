@@ -28,7 +28,7 @@ class Op_bstat(Op):
         opts = img.opts
 
         mean, rms   = self.stat(data)
-        cmean, crms = self.clip_stat(data, mean, rms)
+        cmean, crms = self.clip_stat(data, mean, rms, kappa=opts.rms_clip)
 
         opts.mean  = cmean
         opts.rms   = crms
@@ -36,15 +36,13 @@ class Op_bstat(Op):
         print "mean: ", mean, "rms: ", rms, \
             "\ncmean: ", cmean, "crms: ", crms
         return img
-    
+
+
 class Op_thresholds(Op):
     def __call__(self, img):
         opts = img.opts
-            ### for simplicity assume hard thresholds
-        opts.thresh_pix = 5  # sigma's for hard threshold
-        opts.isl_clip    = 3  # sigma's for island boundary
-        opts.isl_minsize = 4  # minimal island size
 
-        opts.isl_thresh = opts.mean + opts.rms*opts.isl_clip
-        
+        opts.thresh_isl = opts.mean + opts.rms*opts.isl_clip
+        opts.thresh_isl2= opts.mean + opts.rms*opts.isl_peak_clip
+
         return img
