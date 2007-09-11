@@ -29,8 +29,7 @@ class MSInfo
 		int nAntennae;
 		std::vector<Antenna> antennae;
 				
-		int nTimeSlots;
-		std::vector<double> timeSlots;
+		std::vector<double> timeSlots; // Timeslots that where written to the matlab file
 		
 		//int nPolarizations;
 		bool validInfo;

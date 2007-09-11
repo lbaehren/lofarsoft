@@ -18,7 +18,7 @@ class MatWriter{
 		~MatWriter();
 		int openFile(const string& fileName);
 		int writeCube(const Cube<complex<float> >& cube);
-		int closeFile();
+		int closeFile(const string& varName);
 		int writeInfoFile(const string& fileName, MSInfo& msInfo);
 		
 	private:

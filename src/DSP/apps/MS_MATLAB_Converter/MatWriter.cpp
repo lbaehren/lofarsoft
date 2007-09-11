@@ -14,6 +14,15 @@ using namespace casa;
 
 typedef float dataType;
 
+void writeMSInfoToScreen(MSInfo& msInfo)
+{
+	uint end= msInfo.timeSlots.size();
+	for (uint i=0; i< end; i++)
+	{
+		cout << "TimeSlot " << i << ": " << msInfo.timeSlots.at(i) << endl;
+	}
+}
+
 MatWriter::MatWriter()
 {
 	dimensions = 3;
@@ -27,18 +36,10 @@ MatWriter::~MatWriter()
 
 int MatWriter::writeInfoFile(const string& fileName, MSInfo& msInfo)
 {
+	//writeMSInfoToScreen(msInfo);
+	cout << "Writing INFO file..." << flush;
 	MATFile *matlabInfoDocument;
-	mxArray *paInfo;
-
 	matlabInfoDocument = matOpen(fileName.c_str(), "w");
-
-	int dimensionsInfoStruct = 1;
-	int dimensionLengthsInfoStruct[] = { 5 };
-
-	const char *names[]= {"Polarizations", "Antennae", "Bands", "Test1", "Test2"};
-	paInfo = mxCreateStructArray(1, dimensionLengthsInfoStruct, 5, names);
-	
-	matPutVariableAsGlobal(matlabInfoDocument, "MSInfo", paInfo);
 
 	mxArray *paFreqInfo;
 	int nChannels = msInfo.nChannels;
@@ -49,11 +50,27 @@ int MatWriter::writeInfoFile(const string& fileName, MSInfo& msInfo)
 		memcpy((void *)(mxGetPr(paFreqInfo)+i), (void *) &temp, sizeof(double));
 	}
 	matPutVariableAsGlobal(matlabInfoDocument, "Frequencies", paFreqInfo);
+
+	mxArray *paTimeslotInfo;
+	int nTimeSlots= msInfo.timeSlots.size();
+	paTimeslotInfo = mxCreateNumericArray(1, &nTimeSlots, mxDOUBLE_CLASS, mxREAL);
+
+	for (int i=0; i< nTimeSlots; i++)
+	{
+		double temp = msInfo.timeSlots.at(i);
+		cout << "Timeslot " << i << " = " << temp << endl;
+		memcpy((void *)(mxGetPr(paTimeslotInfo)+i), (void *) &temp, sizeof(double));
+	}
+	
+	matPutVariableAsGlobal(matlabInfoDocument, "TimeSlots", paTimeslotInfo);
+	
 	
 	matClose(matlabInfoDocument);
 	
-	mxDestroyArray(paInfo);
+	//mxDestroyArray(paInfo);
 	mxDestroyArray(paFreqInfo);
+	mxDestroyArray(paTimeslotInfo);
+	cout << "Done." << endl;
 	
 	return 0;
 }
@@ -180,7 +197,7 @@ int MatWriter::writeCube(const Cube<complex<float> >& cube)
 	return 0;
 }
 
-int MatWriter::closeFile()
+int MatWriter::closeFile(const string& varName)
 {
 	if(matlabDocument == NULL)
 	{
@@ -189,7 +206,7 @@ int MatWriter::closeFile()
 	}
 	int status =0;
 	std::cout << "Saving..." <<std::flush;
-	status = matPutVariableAsGlobal(matlabDocument, "Measurements", pa);
+	status = matPutVariableAsGlobal(matlabDocument, varName.c_str(), pa);
 	if (status != 0) {
 		printf("Error using matPutVariableAsGlobal\n");
 	}

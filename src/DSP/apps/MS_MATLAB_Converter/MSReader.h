@@ -24,13 +24,18 @@ class MSReader
 		int getNumberAntennae();
 		Cube<complex<float> > getTimeCube			(int timeSlot , int selectedBand, int polarizationID, int startFreq		 , int stopFreq    );
 		Cube<complex<float> > getFrequencyCube(int frequency, int selectedBand, int polarizationID, int startTimeSlot, int stopTimeSlot);
-		MSInfo getMSInfo(int bandID);
+		void setBandInfo(int bandID);
+		MSInfo& getMSInfo();
+
+		int getNTimeSlots();
 	private:
 		string msName;
 		MeasurementSet* ms;
 		//int nAntennae;
 		int bandsPerTimeSlot;
+		int nTimeSlots; // Available timeslots in MS
 		MSInfo msInfo;
+		
 };
 
 

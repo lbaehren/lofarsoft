@@ -43,6 +43,7 @@ CSimpleOpt::SOption cmdOptions[] = {
 	{ 7, _T("-f"), SO_NONE  },
 	{ 8, _T("-time"), SO_NONE  },
 	{ 8, _T("-t"), SO_NONE  },
+	{ 9, _T("-all"), SO_NONE },
 	SO_END_OF_OPTIONS
 };
 
@@ -56,10 +57,11 @@ void ShowUsage()
 	cout << setw(20) << "-fend"  				<< setw(60)   <<  "Frequency bin end." << endl;
 	cout << setw(20) << "-tstart"				<< setw(60)   << setiosflags(ios::left)<< "Time slot start. " << endl;
 	cout << setw(20) << "-tend"  				<< setw(60)   << setiosflags(ios::left)<< "Time slot end." << endl;
+	cout << setw(20) << "-all"  				<< setw(60)   << setiosflags(ios::left)<< "All time slots." << endl;
 	cout << setw(20) << "-polarization"	<< setw(60)		<< setiosflags(ios::left)<< "Polarization ID." << endl;
 	cout << setw(20) << "-band"  				<< setw(60)   << setiosflags(ios::left)<< "Band ID." << endl;
 	cout << setw(20) << "-frequency"		<< setw(60)   << setiosflags(ios::left)<< "Cube output is in R(i,j,t). (real slow)" << endl;
-	cout << setw(20) << "-time"					<< setw(60)   << setiosflags(ios::left)<< "Cube output is in R(i,j,f)." << endl;
+	cout << setw(20) << "-time"					<< setw(60)   << setiosflags(ios::left)<< "Cube output is in R(i,j,f). (default)" << endl;
 
 	cout << endl << "It is possible to abbreviate the arguments to respectivelly to" << endl;
 	cout << "-h -fs= -fe= -ts= te= -p= -b=" << endl << endl;
@@ -93,6 +95,8 @@ int main(int argc, char ** argv){
 
 	string msFileName;
 	string outputDir = ".";
+
+	bool allTimeSlots=false;
 
 	CSimpleOpt args(argc, argv, cmdOptions);
 
@@ -160,6 +164,9 @@ int main(int argc, char ** argv){
 				case 8:
 					fillMode = FillTime;
 					break;
+				case 9:
+					allTimeSlots = true;
+					break;
 				default:
 					cout << "Invalid argument: " <<  args.OptionText();
 					return 1;
@@ -192,12 +199,6 @@ int main(int argc, char ** argv){
 	{
 		outputDir.append("/");
 	}
-
-	cout << "Frequency range " << freqStart << "-" << freqStop << endl;
-	cout << "Time range "  << timeSlotStart << "-" << timeSlotStop << endl;
-	cout << "Polarization " << polarizations[polarizationID] << endl;
-	cout << "Selected band " << bandID << endl;
-
 	if(fillMode == FillTime)
 	{
 		cout << "Third dimension of cube is time." << endl;
@@ -209,21 +210,36 @@ int main(int argc, char ** argv){
 
 	cout << endl;
 
+	// create directory
 	int status = mkdir( outputDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH );
-
 	if(status == -1)
 	{
 		cout << "Directory " << outputDir << " already exists or no rights to create."  << endl;
 	}
 	
 	MSReader msReader(msFileName);
-	MSInfo msInfo = msReader.getMSInfo(bandID);
-
-	MatWriter matWriter;
-	matWriter.writeInfoFile("./info.mat", msInfo);
 	
-	int nAntennae = msInfo.nAntennae;
-	//cout << "N antennae " << nAntennae << flush << endl;
+	// To tell MSReader witch band we are going to use.. needs some redesigning
+	// It has to be called before msReader.getTimeCube and getFrequencyCube are called.
+	msReader.setBandInfo(bandID);
+	
+	MSInfo tempMSInfo = msReader.getMSInfo();
+
+	if(allTimeSlots)
+	{
+		timeSlotStop = msReader.getNTimeSlots();
+	}
+
+	if(freqStop == -1){ // the default is to copy the full frequency spectrum
+		freqStop = tempMSInfo.nChannels;
+	}
+
+	cout << "Frequency range " << freqStart << "-" << freqStop << endl;
+	cout << "Time range "  << timeSlotStart << "-" << timeSlotStop << endl;
+	cout << "Polarization " << polarizations[polarizationID] << endl;
+	cout << "Selected band " << bandID << endl;
+	
+	MatWriter matWriter;
 
 	if(fillMode == FillTime){
 
@@ -231,6 +247,7 @@ int main(int argc, char ** argv){
 		int error=0;
 	
 		stringstream stm("");
+		string varName;
 	
 		cout << "For loop start "<< timeSlotStart << flush;
 		cout << " For loop stop "<< timeSlotStop << flush << endl;
@@ -239,10 +256,12 @@ int main(int argc, char ** argv){
 		{
 			stm << "R";
 			stm << polarizations[polarizationID];
-			stm << "b";
-			stm << bandID;
+			//stm << "b";
+			//stm << bandID;
 			stm << "t";
 			stm << setw(4) << setfill('0') << timeSlot;
+			varName = stm.str();
+			
 			stm << ".mat";
 			//cout << "Output file name: " << stm.str() << endl;
 	
@@ -261,7 +280,7 @@ int main(int argc, char ** argv){
 			if(error!=0){
 				foundError = true;
 			}
-			error = matWriter.closeFile();
+			error = matWriter.closeFile(varName);
 			if(error!=0){
 				foundError = true;
 			}
@@ -271,6 +290,7 @@ int main(int argc, char ** argv){
 	else if(fillMode == FillFrequency)
 	{
 		stringstream stm("");
+		string varName;
 	
 		cout << "Loop for frequencies: "<< freqStart << flush;
 		cout << " - "<< freqStop << flush << endl;
@@ -278,10 +298,11 @@ int main(int argc, char ** argv){
 		{
 			stm << "R";
 			stm << polarizations[polarizationID];
-			stm << "b";
-			stm << bandID;
+			//stm << "b";
+			//stm << bandID;
 			stm << "f";
 			stm << setw(4) << setfill('0') << freq;
+			varName = stm.str();
 			stm << ".mat";
 			cout << "Output file name: " << stm.str() << endl;
 	
@@ -306,13 +327,22 @@ int main(int argc, char ** argv){
 			if(error!=0){
 				foundError = true;
 			}
-			error = matWriter.closeFile();
+			error = matWriter.closeFile(varName);
 			if(error!=0){
 				foundError = true;
 			}			
 			cout << endl;
 		}
 	}
+	String infoFilename("info.mat");
+	String infoFileFullName(outputDir);
+	
+	MSInfo msInfo = msReader.getMSInfo();
+	
+	infoFileFullName.append(infoFilename);
+
+	matWriter.writeInfoFile(infoFileFullName, msInfo);
+	
 	if(foundError)
 	{
 		cout << "Found error. Quit... " << endl;
