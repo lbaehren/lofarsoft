@@ -61,13 +61,27 @@ cmake ../../external/hdf5
 
 ## [2] USG packages ----------------------------------------
 
-cd $basedir/dal
-rm -rf *
+cd $basedir
+if test -d dal ; then
+    cd dal
+    rm -rf *
+else 
+    mkdir dal
+    cd dal
+fi
 cmake ../../src/DAL
 make install
 
-cd $basedir/cr
-rm -rf *
+## CR-Tools
+
+cd $basedir
+if test -d cr ; then
+    cd cr
+    rm -rf *
+else 
+    mkdir cr
+    cd cr
+fi
 cmake ../../src/CR-Tools
 make && make install
 ctest
