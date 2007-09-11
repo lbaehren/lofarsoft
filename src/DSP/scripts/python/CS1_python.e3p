@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Project SYSTEM "Project-3.8.dtd">
+<!-- Project file for project CS1_python -->
+<!-- Saved: 2007-08-29, 17:43:20 -->
+<!-- Copyright (C) 2007 Stefan de Koning, Adriaan Renting, renting@astron.nl -->
+<Project version="3.8">
+  <ProgLanguage mixed="0">Python</ProgLanguage>
+  <UIType>Other</UIType>
+  <Description></Description>
+  <Version>0.1</Version>
+  <Author>Stefan de Koning, Adriaan Renting</Author>
+  <Email>renting@astron.nl</Email>
+  <Sources>
+    <Source>
+      <Name>MeasurementSet.py</Name>
+    </Source>
+    <Source>
+      <Name>PercentileGenerator.py</Name>
+    </Source>
+    <Source>
+      <Name>GalacticForegroundFitters.py</Name>
+    </Source>
+    <Source>
+      <Name>BandpassExtractor.py</Name>
+    </Source>
+    <Source>
+      <Name>S200Mhz_MS.py</Name>
+    </Source>
+    <Source>
+      <Name>HBA_I200Mhz.py</Name>
+    </Source>
+    <Source>
+      <Name>Tools.py</Name>
+    </Source>
+    <Source>
+      <Name>Environment.py</Name>
+    </Source>
+    <Source>
+      <Name>DynamicSpectrumPlotter.py</Name>
+    </Source>
+    <Source>
+      <Name>Storage.py</Name>
+    </Source>
+    <Source>
+      <Name>HistogramGenerator.py</Name>
+    </Source>
+    <Source>
+      <Name>S200Mhz_1min1Khz.py</Name>
+    </Source>
+    <Source>
+      <Name>Flaggers.py</Name>
+    </Source>
+    <Source>
+      <Name>S200Mhz_Analysis.py</Name>
+    </Source>
+    <Source>
+      <Name>S200Mhz_Interpreter.py</Name>
+    </Source>
+    <Source>
+      <Name>FlagIO.py</Name>
+    </Source>
+    <Source>
+      <Name>BandpassFitters.py</Name>
+    </Source>
+    <Source>
+      <Name>S200Mhz_DSP.py</Name>
+    </Source>
+    <Source>
+      <Name>BandpassSurvey.py</Name>
+    </Source>
+  </Sources>
+  <Forms>
+  </Forms>
+  <Translations>
+  </Translations>
+  <Interfaces>
+  </Interfaces>
+  <Others>
+  </Others>
+  <Vcs>
+    <VcsType>Subversion</VcsType>
+    <VcsOptions>{'status': [], 'log': [], 'global': [], 'update': [], 'remove': [], 'add': [], 'tag': [], 'export': [], 'diff': [], 'commit': [], 'checkout': [], 'history': []}</VcsOptions>
+    <VcsOtherData>{'standardLayout': True}</VcsOtherData>
+  </Vcs>
+  <FiletypeAssociations>
+    <FiletypeAssociation pattern="*.ui.h" type="FORMS" />
+    <FiletypeAssociation pattern="*.ptl" type="SOURCES" />
+    <FiletypeAssociation pattern="*.idl" type="INTERFACES" />
+    <FiletypeAssociation pattern="*.ui" type="FORMS" />
+    <FiletypeAssociation pattern="*.py" type="SOURCES" />
+  </FiletypeAssociations>
+</Project>
