@@ -48,6 +48,22 @@ install (TARGETS casa_fits
   ARCHIVE DESTINATION lib
   )
 
+## Header files
+
+FILE (GLOB fits_headers *.h)
+install (FILES ${fits_headers}
+  DESTINATION include/casacore/fits
+  )
+
+foreach (fits_module ${fits_modules})
+  ## assemble list of header files
+  FILE (GLOB fits_headers ${fits_module}/*.h)
+  ## set installation location
+  install (FILES ${fits_headers}
+    DESTINATION include/casacore/fits/${fits_module}
+    )
+endforeach (fits_module)
+
 ## -----------------------------------------------------------------------------
 ## Include hierarchy 
 

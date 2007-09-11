@@ -11,7 +11,7 @@ project (FLEX)
 ## -----------------------------------------------------------------------------
 ## Only force rebuild of the tool, if it cannot be found on the system.
 
-option (FLEX_FORCE_REBUILD "Force rebuild and local installation" 0)
+option (FLEX_FORCE_BUILD "Force rebuild and local installation" 0)
 
 set (bin_locations
   ## possible system-wide installation locations
@@ -28,7 +28,7 @@ find_program (HAVE_FLEX flex ${bin_locations})
 
 ## <-- begin build condition --------------------------------------------------->
 
-if (NOT HAVE_FLEX OR FLEX_FORCE_REBUILD)
+if (NOT HAVE_FLEX OR FLEX_FORCE_BUILD)
 
 ## ------------------------------------------------------------------------------
 ## Locate the installation area
@@ -58,6 +58,7 @@ execute_process (
   COMMAND ./configure --prefix=${FLEX_prefix}
   TIMEOUT 180
   ERROR_VARIABLE error_configure
+  ERROR_FILE error.log
   )
 
 if (error_configure)
@@ -74,6 +75,7 @@ execute_process (
   COMMAND make 
   TIMEOUT 3600
   ERROR_VARIABLE error_make
+  ERROR_FILE error.log
   )
 
 if (error_make)
@@ -92,6 +94,7 @@ execute_process (
   COMMAND make install
   TIMEOUT 180
   ERROR_VARIABLE error_make_install
+  ERROR_FILE error.log
   )
 
 if (error_make_install)
@@ -103,6 +106,6 @@ endif (NOT error_make)
 
 ## <-- end build condition ----------------------------------------------------->
 
-else (NOT HAVE_FLEX OR FLEX_FORCE_REBUILD)
+else (NOT HAVE_FLEX OR FLEX_FORCE_BUILD)
   message (STATUS "Found system-wide installation of Flex; skipping rebuild!")
-endif (NOT HAVE_FLEX OR FLEX_FORCE_REBUILD)
+endif (NOT HAVE_FLEX OR FLEX_FORCE_BUILD)

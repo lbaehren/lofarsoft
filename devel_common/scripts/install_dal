@@ -83,22 +83,26 @@ mkdir casacore
 cd casacore
 cmake ../../external/casacore && make install
 
-## [4] HDF5
+## [4] HDF5  --> CMake wrapper around GNU Autotools
 
 echo "[DAL installer] Installing HDF5 ..."
 
 cd $basedir
-ln -s ../external/hdf5 hdf5
+mkdir hdf5
 cd hdf5
-./configure --prefix=$basedir/../release && make && make install
+cmake ../../external/hdf5
 
 ## [5] Boost
 
 echo "[DAL installer] Installing Boost ..."
 
 cd $basedir
-ln -s ../external/boost boost
-cd boost
+if test -d boost ; then
+    cd boost;
+else
+    ln -s ../external/boost boost;
+    cd boost;
+fi
 case $system_arch in
     darwin)
 	./configure --toolset=darwin --prefix=$basedir/../release && make && make install
@@ -108,14 +112,14 @@ case $system_arch in
     ;;
 esac
 
+## [6] Blitz++
+
 echo "[DAL installer] Installing Blitz++ ..."
 
 cd $basedir
 ln -s ../external/blitz blitz
 cd blitz
 ./configure --prefix=$basedir/../release && make && make install
-
-## [6] Blitz++
 
 ##------------------------------------------------------------------------------
 ## Configure and install the DAL

@@ -11,7 +11,7 @@ project (BISON)
 ## -----------------------------------------------------------------------------
 ## Only force rebuild of the tool, if it cannot be found on the system.
 
-option (BISON_FORCE_REBUILD "Force rebuild and local installation" 0)
+option (BISON_FORCE_BUILD "Force rebuild and local installation" 0)
 
 set (bin_locations
   ## possible system-wide installation locations
@@ -28,7 +28,7 @@ find_program (HAVE_BISON bison ${bin_locations})
 
 ## <-- begin build condition --------------------------------------------------->
 
-if (NOT HAVE_BISON OR BISON_FORCE_REBUILD)
+if (NOT HAVE_BISON OR BISON_FORCE_BUILD)
 
 ## ------------------------------------------------------------------------------
 ## Locate the installation area
@@ -103,6 +103,6 @@ endif (NOT error_make)
 
 ## <-- end build condition ----------------------------------------------------->
 
-else (NOT HAVE_BISON OR BISON_FORCE_REBUILD)
+else (NOT HAVE_BISON OR BISON_FORCE_BUILD)
   message (STATUS "Found system-wide installation of Bison; skipping rebuild!")
-endif (NOT HAVE_BISON OR BISON_FORCE_REBUILD)
+endif (NOT HAVE_BISON OR BISON_FORCE_BUILD)

@@ -6,27 +6,29 @@ project (boost)
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
+option (BOOST_FORCE_BUILD "Force rebuild and local installation" 0)
+
 ## check where to find the CMake scripts
 
-find_path (boost_cmake FindBoost.cmake
+find_path (BOOST_cmake FindBoost.cmake
   PATHS 
-  ${boost_SOURCE_DIR}
-  ${boost_SOURCE_DIR}/..
-  ${boost_SOURCE_DIR}/../..
-  ${boost_SOURCE_DIR}/../../..
+  ${BOOST_SOURCE_DIR}
+  ${BOOST_SOURCE_DIR}/..
+  ${BOOST_SOURCE_DIR}/../..
+  ${BOOST_SOURCE_DIR}/../../..
   PATH_SUFFIXES
   devel_common/cmake
   )
 
-if (boost_cmake)
-  include (${boost_cmake}/FindBoost.cmake)
-endif (boost_cmake)
+if (BOOST_cmake)
+  include (${BOOST_cmake}/FindBoost.cmake)
+endif (BOOST_cmake)
 
 ## ==============================================================================
 ## <-- begin build condition --------------------------------------------------->
 ## ==============================================================================
 
-if (NOT HAVE_BOOST)
+if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
 
 ## -----------------------------------------------------------------------------
 ## Settings 
@@ -38,15 +40,15 @@ set (bin_locations
   /opt
 )
 
-set (boost_version_major 1)
-set (boost_version_minor 34)
-set (boost_version_patch 1)
-set (boost_version "${boost_version_major}_${boost_version_minor}_${boost_version_patch}")
+set (BOOST_version_major 1)
+set (BOOST_version_minor 34)
+set (BOOST_version_patch 1)
+set (BOOST_version "${BOOST_version_major}_${BOOST_version_minor}_${BOOST_version_patch}")
 
-set (boost_source_dir "boost_${boost_version}")
-set (boost_source_file "${boost_source_dir}.tar.gz")
+set (BOOST_source_dir "BOOST_${BOOST_version}")
+set (BOOST_source_file "${BOOST_source_dir}.tar.gz")
 
-set (boost_url http://surfnet.dl.sourceforge.net/sourceforge/boost)
+set (BOOST_url http://surfnet.dl.sourceforge.net/sourceforge/boost)
 
 ## -----------------------------------------------------------------------------
 ## Locate required tools
@@ -58,7 +60,7 @@ find_program (WGET_EXECUTABLE wget PATHS ${bin_locations})
 ## -----------------------------------------------------------------------------
 ## Feedback
 
-message (STATUS "boost source file  : ${boost_source_file}")
+message (STATUS "boost source file  : ${BOOST_source_file}")
 message (STATUS "curl ............. : ${CURL_EXECUTABLE}")
 message (STATUS "tar .............. : ${TAR_EXECUTABLE}")
 message (STATUS "wget ............. : ${WGET_EXECUTABLE}")
@@ -73,7 +75,7 @@ message (STATUS "wget ............. : ${WGET_EXECUTABLE}")
 
 ## Is the source package there already?
 
-find_file (HAVE_BOOST_SOURCE ${boost_source_file} PATHS . .. /Volumes/UNIX)
+find_file (HAVE_BOOST_SOURCE ${BOOST_source_file} PATHS . .. /Volumes/UNIX)
 
 ## If the source package is not there yet, we try to fetch it
 
@@ -82,7 +84,7 @@ if (NOT HAVE_BOOST_SOURCE)
   if (WGET_EXECUTABLE)
     execute_process (
       WORKING_DIRECTORY .
-      COMMAND ${WGET_EXECUTABLE} -c ${boost_url}/${boost_source_file}
+      COMMAND ${WGET_EXECUTABLE} -c ${BOOST_url}/${BOOST_source_file}
       TIMEOUT 300
       ERROR_VARIABLE wget_cerr
       OUTPUT_QUIET
@@ -101,7 +103,7 @@ endif (NOT HAVE_BOOST_SOURCE)
 
 ## Once we have retrieved the source package, adjust the variable pointing to it
 
-find_file (HAVE_BOOST_SOURCE ${boost_source_file} PATHS . ..)
+find_file (HAVE_BOOST_SOURCE ${BOOST_source_file} PATHS . ..)
 
 ## -----------------------------------------------------------------------------
 ## [2] Unpack the source package
@@ -129,25 +131,25 @@ endif (TAR_EXECUTABLE AND HAVE_BOOST_SOURCE)
 
 if (UNIX)
   ## Default location for *NIX platforms
-  set (boost_prefix "/usr/local")
+  set (BOOST_prefix "/usr/local")
   if (APPLE)
     ## Check if there is a Fink installation on the system?
     find_file (HAVE_FINK VERSION PATHS /sw/fink /sw/fink/dists)
 	if (HAVE_FINK)
-	  set (boost_prefix "/sw")
+	  set (BOOST_prefix "/sw")
 	endif (HAVE_FINK)
   endif (APPLE)
 endif (UNIX)
 
 ## Adjust the path to the source package directory previously created
 
-find_path (HAVE_BOOST_SOURCE_DIR project-root.jam PATHS . ./${boost_source_dir})
+find_path (HAVE_BOOST_SOURCE_DIR project-root.jam PATHS . ./${BOOST_source_dir})
 
 if (HAVE_BOOST_SOURCE_DIR)
-  message (STATUS "Configuring source package for installation at ${boost_prefix} ...")
+  message (STATUS "Configuring source package for installation at ${BOOST_prefix} ...")
   execute_process (
     WORKING_DIRECTORY ${HAVE_BOOST_SOURCE_DIR}
-    COMMAND ./configure --prefix=${boost_prefix}
+    COMMAND ./configure --prefix=${BOOST_prefix}
     TIMEOUT 120
     ERROR_VARIABLE configure_cerr
     OUTPUT_QUIET
@@ -165,4 +167,6 @@ endif (HAVE_BOOST_SOURCE_DIR)
 ## <-- end build condition ----------------------------------------------------->
 ## ==============================================================================
 
-endif (NOT HAVE_BOOST)
+else (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
+  message (STATUS "Found system-wide installation of BOOST; skipping rebuild!")
+endif (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
