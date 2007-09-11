@@ -97,20 +97,9 @@ cmake ../../external/hdf5
 echo "[DAL installer] Installing Boost ..."
 
 cd $basedir
-if test -d boost ; then
-    cd boost;
-else
-    ln -s ../external/boost boost;
-    cd boost;
-fi
-case $system_arch in
-    darwin)
-	./configure --toolset=darwin --prefix=$basedir/../release && make && make install
-    ;;
-    linux)
-	./configure --prefix=$basedir/../release && make && make install
-    ;;
-esac
+mkdir boost
+cd boost
+cmake ../../external/boost
 
 ## [6] Blitz++
 
