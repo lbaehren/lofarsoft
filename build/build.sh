@@ -12,7 +12,7 @@
 
 basedir=`pwd`
 
-## -------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Helper functions
 
 build_package ()
@@ -42,47 +42,50 @@ build_package ()
     fi
 }
 
-## [1] External packages ---------------------------------------------
+## -----------------------------------------------------------------------------
+## Build individual/multiple packages
 
-for var_package in pgplot wcslib cfitsio casacore
-{
-   build_package $var_package external/$var_package
-}
-
-cd $basedir
-if test -d hdf5 ; then
-    cd hdf5
-    rm -rf *
-else 
-    mkdir hdf5
-    cd hdf5
-fi
-cmake ../../external/hdf5
-
-## [2] USG packages ----------------------------------------
-
-cd $basedir
-if test -d dal ; then
-    cd dal
-    rm -rf *
-else 
-    mkdir dal
-    cd dal
-fi
-cmake ../../src/DAL
-make install
-
-## CR-Tools
-
-cd $basedir
-if test -d cr ; then
-    cd cr
-    rm -rf *
-else 
-    mkdir cr
-    cd cr
-fi
-cmake ../../src/CR-Tools
-make && make install
-ctest
-
+case $1 in 
+    bison)
+	echo "[build] Selected package Bison"
+	build_package bison external/bison
+    ;;
+    flex)
+	echo "[build] Selected package Flex"
+	build_package flex external/flex
+    ;;
+    dal)
+	echo "[build] Selected package DAL"
+	## external packages
+	build_package wcslib external/wcslib
+	build_package cfitsio external/cfitsio
+	build_package casacore external/casacore
+	build_package hdf5 external/hdf5
+	build_package boost external/boost
+	## USG packages
+	build_package dal src/DAL
+    ;;
+    cr)
+	echo "[build] Selected package DAL"
+	## external packages
+	build_package wcslib external/wcslib
+	build_package cfitsio external/cfitsio
+	build_package casacore external/casacore
+	build_package hdf5 external/hdf5
+	build_package boost external/boost
+	## USG packages
+	build_package dal src/DAL
+	build_package cr src/CR-Tools
+    ;;
+    *)
+	## external packages
+	build_package bison external/bison
+	build_package flex external/flex
+	build_package pgplot external/pgplot
+	build_package wcslib external/wcslib
+	build_package cfitsio external/cfitsio
+	build_package casacore external/casacore
+	build_package hdf5 external/hdf5
+	build_package boost external/boost
+    ;;
+esac
