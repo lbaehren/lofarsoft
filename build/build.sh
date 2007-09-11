@@ -39,10 +39,14 @@ build_package ()
 	if test -z $configureOption ; then
 	    cmake $basedir/../$sourceDir
 	else 
-	    cmake $basedir/../$sourceDir $$configureOption
+	    cmake $basedir/../$sourceDir $configureOption
 	fi
 	# build the package
-	make install;
+	if test -z `make help | grep install` ; then
+	    echo "-- No target install for $buildDir."
+	else
+	    make install;
+	fi
 	}
     else 
 	{
@@ -62,6 +66,10 @@ case $1 in
 	echo "[build] Selected package Bison"
 	build_package bison external/bison
     ;;
+    blitz)
+	echo "[build] Selected package Blitz"
+	build_package blitz external/blitz
+    ;;
     casacore)
 	echo "[build] Selected package CASACORE"
 	build_package casacore external/casacore
@@ -69,6 +77,14 @@ case $1 in
     cfitsio)
 	echo "[build] Selected package CFITSIO"
 	build_package cfitsio external/cfitsio
+    ;;
+    cmake)
+	echo "[build] Selected package CMake"
+	echo " --> Cleaning up directory ..."
+	rm -rf ./../../external/CMake/Bootstrap.cmk
+	rm -rf ./../../external/CMake/CMakeCache.txt
+	rm -rf ./../../external/CMake/Source/cmConfigure.h
+	build_package cmake external/cmake
     ;;
     flex)
 	echo "[build] Selected package Flex"
@@ -85,9 +101,11 @@ case $1 in
     dal)
 	echo "[build] Selected package DAL"
 	## external packages
+	./build.sh cmake
 	./build.sh wcslib
 	./build.sh cfitsio
 	./build.sh casacore
+	./build.sh blitz
 	build_package hdf5 external/hdf5 -DHDF5_FORCE_BUILD:BOOL=1
 	build_package boost external/boost -DBOOST_FORCE_BUILD:BOOL=1
 	## USG packages
@@ -100,13 +118,14 @@ case $1 in
     ;;
     *)
 	## external packages
-	build_package bison external/bison
-	build_package flex external/flex
-	build_package pgplot external/pgplot
-	build_package wcslib external/wcslib
-	build_package cfitsio external/cfitsio
-	build_package casacore external/casacore
-	build_package hdf5 external/hdf5
-	build_package boost external/boost
+	./build.sh bison
+	./build.sh blitz
+	./build.sh flex
+	./build.sh pgplot
+	./build.sh wcslib
+	./build.sh cfitsio
+	./build.sh casacore
+	./build.sh hdf5
+	./build.sh boost
     ;;
 esac
