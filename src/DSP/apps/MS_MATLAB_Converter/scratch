@@ -1,0 +1,228 @@
+.novell 		18 mb
+.mozilla 		10 mb
+.thunderbird 7 mb
+.wapi 			 5 mb
+						40 mb
+
+
+int fillTimeCubes(std::string outputDir, MSReader* msReader ,int nAntennae, int timeSlotStart, int timeSlotStop, int freqStart, int freqStop, int bandID, int polarizationID)
+		fillTimeCubes(outputDir, msReader, nAntennae, timeSlotStart, timeSlotStop, freqStart, freqStop, bandID, polarizationID);
+
+
+Dynamic linked:
+14:39-469> ldd MSToMatlab
+        linux-gate.so.1 =>  (0xffffe000)
+        
+        libgfortran.so.1 => 			/usr/lib/libgfortran.so.1 (0xb7f70000)
+        libblas.so.3 => 					/usr/lib/libblas.so.3 (0xb7f1f000)
+        liblapack.so.3 => 				/usr/lib/liblapack.so.3 (0xb7a98000)
+        name=libcfitsio.so.2.4 => /usr/lib/name=libcfitsio.so.2.4 (0xb7963000)
+        
+        libut.so => 							/dop156_0/jeurink/glnx86/libut.so (0xb78c5000)
+        libicudata.so.24 => 			/dop156_0/jeurink/glnx86/libicudata.so.24 (0xb78c3000)
+        libicui18n.so.24 => 			/dop156_0/jeurink/glnx86/libicui18n.so.24 (0xb7807000)
+        libicuuc.so.24 => 				/dop156_0/jeurink/glnx86/libicuuc.so.24 (0xb7770000)
+        libustdio.so.24 => 				/dop156_0/jeurink/glnx86/libustdio.so.24 (0xb7761000)
+        libmat.so => 							/dop156_0/jeurink/glnx86/libmat.so (0xb7757000)
+        libmx.so => 							/dop156_0/jeurink/glnx86/libmx.so (0xb770e000)
+        
+        libstdc++.so.6 => 				/usr/lib/libstdc++.so.6 (0xb762e000)
+        libm.so.6 => 							/lib/libm.so.6 (0xb75ec000)
+        libc.so.6 => 							/lib/libc.so.6 (0xb74cc000)
+        libgcc_s.so.1 => 					/lib/libgcc_s.so.1 (0xb74c1000)
+        libg2c.so.0 =>						/usr/lib/libg2c.so.0 (0xb74a2000)
+        libdl.so.2 => 						/lib/libdl.so.2 (0xb749e000)
+        libpthread.so.0 => 				/lib/libpthread.so.0 (0xb748a000)
+        libstdc++.so.5 => 				/usr/lib/libstdc++.so.5 (0xb73cc000)
+        
+        libz.so => 								/dop156_0/jeurink/glnx86/libz.so (0xb73bd000)
+        /lib/ld-linux.so.2 (0xb7fe3000)
+
+Static linking of AIPS
+STD libs are still dynamic linked
+15:06-524> ldd ./MSToMatlab
+        linux-gate.so.1 =>  (0xffffe000)
+        libstdc++.so.6 => 	/usr/lib/libstdc++.so.6 (0xb7e74000)
+        libm.so.6 => 				/lib/libm.so.6 (0xb7e32000)
+        libgcc_s.so.1 => 		/lib/libgcc_s.so.1 (0xb7e27000)
+        libc.so.6 => 				/lib/libc.so.6 (0xb7d06000)
+        libpthread.so.0 =>  /lib/libpthread.so.0 (0xb7c0c000)
+        libstdc++.so.5 => 	/usr/lib/libstdc++.so.5 (0xb7b4e000)
+        
+				libmat.so => 				/dop156_0/jeurink/glnx86/libmat.so (0xb7f54000)
+        libmx.so => 				/dop156_0/jeurink/glnx86/libmx.so (0xb7cbd000)
+        libut.so => 				/dop156_0/jeurink/glnx86/libut.so (0xb7c20000)
+        libicudata.so.24 => /dop156_0/jeurink/glnx86/libicudata.so.24 (0xb7b4b000)
+        libicui18n.so.24 => /dop156_0/jeurink/glnx86/libicui18n.so.24 (0xb7a8f000)
+        libicuuc.so.24 => 	/dop156_0/jeurink/glnx86/libicuuc.so.24 (0xb79f8000)
+        libustdio.so.24 =>  /dop156_0/jeurink/glnx86/libustdio.so.24 (0xb79e9000)
+        libz.so => 					/dop156_0/jeurink/glnx86/libz.so (0xb79da000)
+        libdl.so.2 => 			/lib/libdl.so.2 (0xb79d5000)
+        /lib/ld-linux.so.2 (0xb7f5e000)
+
+
+
+
+void plotCube(const Cube<complex<float> >& cube)
+{
+	uInt nAntenae1 = cube.nrow();
+	uInt nAntenae2 = cube.ncolumn();
+	uInt nFreq = cube.nplane();
+
+	for(uInt i=0; i<nAntenae1; i++){ 
+		for(uInt j=0; j<nAntenae2; j++)
+{
+			if(j >= i)
+{
+				complex<float> complexFloat = cube(i,j,1);
+				cout << setw(5) << complexFloat << ",";
+}
+			else
+{
+				cout << setw(6) << " ";
+}
+}
+		cout << endl;
+}
+}
+
+
+
+
+
+
+
+
+
+
+
+	ROArrayColumn<complex<float > > dataColumn((*ms), "DATA");
+	ROScalarColumn<Int> antenna1Column((*ms), "ANTENNA1");
+	ROScalarColumn<Int> antenna2Column((*ms), "ANTENNA2");
+	ROScalarColumn<Double> timeCentroidColumn((*ms), "TIME_CENTROID");
+
+	Int antenna1 = antenna1Column(rowIndex);
+	Int antenna2 = antenna2Column(rowIndex);
+	Double timeCentroid = timeCentroidColumn(rowIndex);
+
+	// Get the 2d array (matrix). Size is expected to be nAntennae * nPolarizations
+	Matrix<complex<float > > matrix = dataColumn(rowIndex);
+	
+	// Get the measurements from matrix 'data' for given polarization
+	Vector<complex<float> > measurements = matrix.row(polarizationID);
+
+	for(int f = startFreq ; f < stopFreq; f++)
+	{
+		cout << measurements(f) << endl;
+	}
+
+
+
+ 
+
+
+void plotCube(const Cube<complex<float> >& cube);
+void countZeros(const Cube<complex<float> >& cube);
+
+void plotCube(const Cube<complex<float> >& cube)
+{
+	uInt nAntenae1 = cube.nrow();
+	uInt nAntenae2 = cube.ncolumn();
+	uInt nFreq = cube.nplane();
+
+	for(uInt i=0; i<nAntenae1; i++){
+		for(uInt j=0; j<nAntenae2; j++){
+			if(j >= i)
+			{
+				complex<float> complexFloat = cube(i,j,1);
+				cout << setw(5) << complexFloat << ",";
+			}
+			else
+			{
+				cout << setw(6) << " ";
+			}
+		}
+		cout << endl;
+	}
+}
+
+void countZeros(const Cube<complex<float> >& cube)
+{
+	uInt nAntenae1 = cube.nrow();
+	uInt nAntenae2 = cube.ncolumn();
+	uInt nFreq = cube.nplane();
+
+
+	double counterZero=0;
+	double counterNotZero=0;
+	
+	for(uInt i=0; i<nAntenae1; i++){
+		for(uInt j=0; j<nAntenae2; j++){
+			for(uInt f=0; f<nFreq; f++)
+			{
+				complex<float> complexFloat = cube(i,j,1);
+
+				double Re = real(complexFloat);
+				double Im = imag(complexFloat);
+
+				if(Re==0)
+				{
+					counterZero++;
+				}
+				else
+				{
+					counterNotZero++;
+				}
+			}
+		}
+	}
+
+	cout << "In coutZeros" << endl;
+	cout << "Amount of zero numbers: " << counterZero << endl;
+	cout << "Amount of numbers: " << counterNotZero << endl;
+	cout << "Cube(4,5,34)" << cube(antenna1, antenna2, f) << endl;
+	cout << endl;
+}
+
+
+	//Matrix<complex<float> > matrix = (*ms).data();
+/*	ROMSColumns msc((*ms));
+	Matrix<complex<float> > matrix = msc.data()(0);
+	Vector<complex<float> > vector = matrix.row(0);*/
+	//complex<float> > waarde = vector(0);
+	//cout << vector;
+	
+
+// 	Block<String> ms_iteration_variables(4);
+// 	ms_iteration_variables[0] = "TIME_CENTROID";
+// 	ms_iteration_variables[1] = "DATA_DESC_ID";
+// 	// ANT1 and ANT2 could be switched for some improved performance
+// 	ms_iteration_variables[2] = "ANTENNA1"; 
+// 	ms_iteration_variables[3] = "ANTENNA2";
+// 	
+// 	TableIterator tableIterator = TableIterator((*ms) , ms_iteration_variables);
+// 	Table t = tableIterator.table();
+// 	ROArrayColumn<complex<float > > dataColumn(t, "DATA");
+// 	Matrix<complex<float > > matrix = dataColumn(0);
+// 	cout << matrix.row(0);
+
+	
+	//t.actualTableDesc().show();
+	
+// 	tableIterator.next();
+// 	cout << tableIterator.table();
+ 	//ROMSColumns msc((*ms));
+	//ROArrayColumn<std::complex<float> > dataColumn = msc.data();
+
+	
+	
+/*	Array<std::complex<float> >arrayData = dataColumn(0);
+	std::complex<float> singleValue = arrayData(0,0);
+	//cout << "Opvragen column...\n";
+	//Matrix<std::complex<float> > matrix = dataColumn.getColumn();
+	//cout << arrayData;
+	
+	//cout << "Data row 0: "<< msc.data()(0) << endl;*/
+
+}
+

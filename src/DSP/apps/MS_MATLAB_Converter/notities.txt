@@ -1,0 +1,5 @@
+Beperkingen:
+
+Als de 3e dimensie de tijd is moet voor iedere frequentie de dataset in zijn geheel doorlopen worden. Hier is mbv. caching een forse snelheidwinst te behalen.
+
+De matlab bibliotheken kunnen (nog?) niet statisch gelinkt worden. 
