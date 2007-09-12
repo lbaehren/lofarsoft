@@ -4,6 +4,13 @@ class Op_outlist(Op):
     """Write out list of gaussians"""
 
     def __call__(self, img):
+        self.write_gaul(img)
+        self.write_star(img)
+        self.write_kvis_ann(img)
+
+        return img
+
+    def write_gaul(self, img):
         fname = img.opts.fits_name + '.gaul'
         f = open(fname, "w")
         
@@ -24,6 +31,7 @@ class Op_outlist(Op):
 
         f.close()
 
+    def write_star(self, img):
         fname = img.opts.fits_name + '.star'
         f = open(fname, 'w')
 
@@ -49,6 +57,29 @@ class Op_outlist(Op):
                 f.write(str)
 
         f.close()
+
+    def write_kvis_ann(self, img):
+        fname = img.opts.fits_name + '.kvis.ann'
+        f = open(fname, 'w')
+        f.write("### KVis annotation file\n\n")
+	f.write("color green\n\n")
+
+        for isl in img.islands:
+            for gaus in isl.gaul:
+                ### convert to canonical units
+                ra, dec = img.opts.xy2radec(*gaus[1:3])
+                shape = img.opts.pix2beam(gaus[3:6])
+                cross = (3*img.fits_hdr['cdelt1'], 3*img.fits_hdr['cdelt2'])
+
+                str = 'cross   %10.5f %10.5f   %10.7f %10.7f\n' % \
+                    (ra, dec, abs(cross[0]), abs(cross[1]))
+                f.write(str)
+                str = 'ellipse %10.5f %10.5f   %10.7f %10.7f %10.4f\n' % \
+                    (ra, dec, shape[0], shape[1], shape[2])
+                f.write(str)
+
+        f.close()
+
 
 def ra2hhmmss(deg):
     from math import modf
