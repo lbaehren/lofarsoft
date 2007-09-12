@@ -4,7 +4,7 @@
 import _ndarray
 import os
 
-include_dir = '/home/jmiller/work/debug/include/python2.5/numarray'
+include_dir = '/sw/include/python2.5/numarray'
 version     = '1.5.2'
 hasUInt64   = _ndarray.hasUInt64()
 LP64        = _ndarray.lp64()

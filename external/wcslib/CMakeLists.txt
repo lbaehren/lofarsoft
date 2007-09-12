@@ -6,14 +6,14 @@
 ## Project name and version number number
 
 ## Name of the project
-project (wcslib)
+project (WCSLIB)
 
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.4)
 
-set (wcslib_VERSION_MAJOR 4)
-set (wcslib_VERSION_MINOR 2)
-set (wcslib_VERSION "${wcslib_VERSION_MAJOR}.${wcslib_VERSION_MINOR}")
+set (WCSLIB_VERSION_MAJOR 4)
+set (WCSLIB_VERSION_MINOR 2)
+set (WCSLIB_VERSION "${WCSLIB_VERSION_MAJOR}.${WCSLIB_VERSION_MINOR}")
 
 ## -----------------------------------------------------------------------------
 ## Standard locations where to look for required components
@@ -48,6 +48,18 @@ include (CPack)
 ## -----------------------------------------------------------------------------
 ## Check for required external libraries
 
+## Locate additional CMake find scripts
+
+find_path (WCSLIB_cmake FindCFITSIO.cmake FindG2C.cmake FindLAPACK.cmake
+  PATHS 
+  ${WCSLIB_SOURCE_DIR}
+  ${WCSLIB_SOURCE_DIR}/..
+  ${WCSLIB_SOURCE_DIR}/../..
+  ${WCSLIB_SOURCE_DIR}/../../..
+  PATH_SUFFIXES
+  devel_common/cmake
+  )
+
 ## CFITSIO --------------------------------------
 
 find_path (fitsio_h fitsio.h ${include_locations})
@@ -72,26 +84,26 @@ find_program (flex_bin flex
 ## -----------------------------------------------------------------------------
 ## Subdirectories
 
-add_subdirectory (${wcslib_SOURCE_DIR}/C)
-add_subdirectory (${wcslib_SOURCE_DIR}/FORTRAN)
-add_subdirectory (${wcslib_SOURCE_DIR}/pgsbox)
+add_subdirectory (${WCSLIB_SOURCE_DIR}/C)
+add_subdirectory (${WCSLIB_SOURCE_DIR}/FORTRAN)
+add_subdirectory (${WCSLIB_SOURCE_DIR}/pgsbox)
 
 ## -----------------------------------------------------------------------------
 ## Installation
 
-find_path (wcslib_INSTALL_PREFIX release_area.txt
+find_path (WCSLIB_INSTALL_PREFIX release_area.txt
   PATHS
-  ${wcslib_SOURCE_DIR}
+  ${WCSLIB_SOURCE_DIR}
   PATH_SUFFIXES
   ../release
   ../../release
   NO_DEFAULT_PATH
   )
 
-if (wcslib_INSTALL_PREFIX)
-  message (STATUS "Installation area located for package wcslib.")
-  set (CMAKE_INSTALL_PREFIX ${wcslib_INSTALL_PREFIX}) 
-endif (wcslib_INSTALL_PREFIX)
+if (WCSLIB_INSTALL_PREFIX)
+  message (STATUS "Installation area located for package WCSLIB.")
+  set (CMAKE_INSTALL_PREFIX ${WCSLIB_INSTALL_PREFIX}) 
+endif (WCSLIB_INSTALL_PREFIX)
 
 ## -----------------------------------------------------------------------------
 ## Summary of settings
