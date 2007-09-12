@@ -60,19 +60,22 @@ find_path (WCSLIB_cmake FindCFITSIO.cmake FindG2C.cmake FindLAPACK.cmake
   devel_common/cmake
   )
 
-## CFITSIO --------------------------------------
+## locate external packages
 
-find_path (fitsio_h fitsio.h ${include_locations})
-find_library (libcfitsio cfitsio ${lib_locations})
+if (WCSLIB_cmake)
+  ## CFITSIO
+  set (CFITSIO_FIND_QUIETLY 1)
+  include (${WCSLIB_cmake}/FindCFITSIO.cmake)
+  ## PGPLOT
+  set (PGPLOT_FIND_QUIETLY 1)
+#  include (${WCSLIB_cmake}/FindPGPLOT.cmake)
+else (WCSLIB_cmake)
+  message (SEND_ERROR "Unable to locate additional CMake find scripts!")
+endif (WCSLIB_cmake)
 
 ## libm -----------------------------------------
 
 find_library (libm m ${lib_locations})
-
-## PGPlot ---------------------------------------
-
-find_library (libpgplot pgplot ${lib_locations} PATH_SUFFIXES pgplot)
-find_library (libcpgplot cpgplot ${lib_locations} PATH_SUFFIXES pgplot)
 
 ## -----------------------------------------------------------------------------
 ## Check for additional tools which are required
@@ -108,9 +111,6 @@ endif (WCSLIB_INSTALL_PREFIX)
 ## -----------------------------------------------------------------------------
 ## Summary of settings
 
-message (STATUS "CFITSIO headers ............... = ${fitsio_h}")
-message (STATUS "CFITSIO library ............... = ${libcfitsio}")
-message (STATUS "libm library .................. = ${libm}")
-message (STATUS "PGPlot library ................ = ${libpgplot}")
-message (STATUS "PGPlot C library .............. = ${libcpgplot}")
+message (STATUS "CFITSIO ............... = ${HAVE_CFITSIO}")
+message (STATUS "libm library .......... = ${libm}")
 message (STATUS "Flex lexical analyzer generator = ${flex_bin}")
