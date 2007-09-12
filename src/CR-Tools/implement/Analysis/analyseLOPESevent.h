@@ -29,7 +29,12 @@
 #include <string>
 
 #include <casa/aips.h>
+#include <casa/Arrays/Array.h>
+#include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/Vector.h>
+#include <casa/BasicSL/String.h>
 #include <casa/Exceptions/Error.h>
+#include <scimath/Mathematics/FFTServer.h>
 #include <scimath/Mathematics/InterpolateArray1D.h>
 
 #include <Analysis/CRinvFFT.h>

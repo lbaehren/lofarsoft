@@ -4,6 +4,7 @@ SUBDIRS (
   BDSM
   CR-Tools
   DAL
+  DSP
   Timba
   VLT
   )

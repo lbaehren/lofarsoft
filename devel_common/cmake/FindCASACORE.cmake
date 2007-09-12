@@ -24,7 +24,6 @@ set (include_locations
   /usr/include/casacore
   /usr/local/include/casacore
   /sw/share/casacore
-  /sw/share/casacore/stage/include
   /sw/include/casacore
 )
 
@@ -320,6 +319,10 @@ foreach (casacore_lib ${casacore_modules})
     list (APPEND CASACORE_LIBRARIES ${CASACORE_lib${casacore_lib}})
   endif (CASACORE_lib${casacore_lib})
 endforeach (casacore_lib)
+
+## Once we are done, rearrange the order of the libraries in the list
+
+list (REVERSE CASACORE_LIBRARIES)
 
 ## -----------------------------------------------------------------------------
 ## If detection successful, register package as found

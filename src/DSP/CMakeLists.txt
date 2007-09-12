@@ -1,10 +1,10 @@
 
 ##------------------------------------------------------------------------------
-## $Id::                                                                        $
+## $Id:: CMakeLists.txt 724 2007-09-10 10:17:21Z baehren                        $
 ##------------------------------------------------------------------------------
 
 ## Name of the project
-project (CR)
+project (DSP)
 
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.4)
@@ -12,23 +12,22 @@ cmake_minimum_required (VERSION 2.4)
 ## -----------------------------------------------------------------------------
 ## User defined build/install options
 
-option (CR_BUILD_TESTS "Build the test programs?" 1)
-option (CR_ENABLE_TESTING "Build the test programs?" 1)
-option (CR_DEBUGGING_MESSAGES "Print debugging information?" 0)
-option (CR_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
-option (CR_GLISH_SUPPORT "Activate support for Glish applications?" 0)
-option (CR_PYTHON_SUPPORT "Activate support for Glish applications?" 0)
+option (DSP_BUILD_TESTS "Build the test programs?" 1)
+option (DSP_ENABLE_TESTING "Build the test programs?" 1)
+option (DSP_DEBUGGING_MESSAGES "Print debugging information?" 0)
+option (DSP_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
+option (DSP_PYTHON_SUPPORT "Activate support for Glish applications?" 0)
 
 ## Handle option: testing mode on/off
 
-if (CR_ENABLE_TESTING)
+if (DSP_ENABLE_TESTING)
   include (CTest)
   enable_testing()
-endif (CR_ENABLE_TESTING)
+endif (DSP_ENABLE_TESTING)
 
 ## Handle option: verbose mode on/off
 
-if (NOT CR_VERBOSE_CONFIGURE)
+if (NOT DSP_VERBOSE_CONFIGURE)
   set (BLITZ_FIND_QUIETLY 1)
   set (CASA_FIND_QUIETLY 1)
   set (CASACORE_FIND_QUIETLY 1)
@@ -43,7 +42,7 @@ if (NOT CR_VERBOSE_CONFIGURE)
   set (PostgreSQL_FIND_QUIETLY 1)
   set (ROOT_FIND_QUIETLY 1)
   set (WCSLIB_FIND_QUIETLY 1)
-endif (NOT CR_VERBOSE_CONFIGURE)
+endif (NOT DSP_VERBOSE_CONFIGURE)
 
 ## Handle option: Activate support for Glish applications on/off
 
@@ -56,10 +55,6 @@ subdirs (
   implement
   apps
   )
-
-if (CR_BUILD_TESTS)
-  subdirs (test)
-endif (CR_BUILD_TESTS)
 
 ## =============================================================================
 ##
@@ -80,108 +75,55 @@ find_package (ZLIB)
 ## -----------------------------------------------------------------------------
 ## Locate additional CMake find scripts
 
-find_path (cr_cmake FindBlitz.cmake FindCASA.cmake FindCFITSIO.cmake
+find_path (DSP_cmake FindBlitz.cmake FindCASA.cmake FindCFITSIO.cmake
   PATHS 
-  ${CR_SOURCE_DIR}
-  ${CR_SOURCE_DIR}/..
-  ${CR_SOURCE_DIR}/../..
-  ${CR_SOURCE_DIR}/../../..
+  ${DSP_SOURCE_DIR}
+  ${DSP_SOURCE_DIR}/..
+  ${DSP_SOURCE_DIR}/../..
+  ${DSP_SOURCE_DIR}/../../..
   PATH_SUFFIXES
   devel_common/cmake
   )
 
-if (cr_cmake)
+if (DSP_cmake)
   ## Blitz++
   if (NOT HAVE_BLITZ)
-    include (${cr_cmake}/FindBlitz.cmake)
+    include (${DSP_cmake}/FindBlitz.cmake)
   endif (NOT HAVE_BLITZ)
   if (HAVE_BLITZ)
     add_definitions (-DHAVE_BLITZ)
   endif (HAVE_BLITZ)
+  ## CASACORE
+  if (NOT HAVE_CASACORE)
+    include (${DSP_cmake}/FindCASACORE.cmake)
+  endif (NOT HAVE_CASACORE)
   ## CFITSIO
   if (NOT HAVE_CFITSIO)
-    include (${cr_cmake}/FindCFITSIO.cmake)
+    include (${DSP_cmake}/FindCFITSIO.cmake)
   endif (NOT HAVE_CFITSIO)
   ## FFTW3
   if (NOT HAVE_FFTW3)
-    include (${cr_cmake}/FindFFTW3.cmake)
+    include (${DSP_cmake}/FindFFTW3.cmake)
   endif (NOT HAVE_FFTW3)
-  ## Glish
-  if (NOT HAVE_GLISH)
-    include (${cr_cmake}/FindGlish.cmake)
-  endif (NOT HAVE_GLISH)
   ## GNU Scientific Library (GSL)
   if (NOT HAVE_GSL)
-    include (${cr_cmake}/FindGSL.cmake)
+    include (${DSP_cmake}/FindGSL.cmake)
   endif (NOT HAVE_GSL)
   ## LAPACK
   if (NOT HAVE_LAPACK)
-    include (${cr_cmake}/FindLAPACK.cmake)
+    include (${DSP_cmake}/FindLAPACK.cmake)
   endif (NOT HAVE_LAPACK)
   ## -- PGPlot ---------------
   if (NOT HAVE_PGPLOT)
-    include (${cr_cmake}/FindPGPLOT.cmake)
+    include (${DSP_cmake}/FindPGPLOT.cmake)
   endif (NOT HAVE_PGPLOT)
-  ## -- popt -----------------
-  if (NOT HAVE_POPT)
-    include (${cr_cmake}/FindPOPT.cmake)
-  endif (NOT HAVE_POPT)
-  ## -- PostgreSQL -----------
-  if (NOT HAVE_PostgreSQL)
-    include (${cr_cmake}/FindPostgreSQL.cmake)
-  endif (NOT HAVE_PostgreSQL)
-  ## -- ROOT -----------------
-  if (NOT HAVE_ROOT)
-    include (${cr_cmake}/FindROOT.cmake)
-  endif (NOT HAVE_ROOT)
   ## -- WCSLIB ---------------
   if (NOT HAVE_WCSLIB) 
-    include (${cr_cmake}/FindWCS.cmake)
+    include (${DSP_cmake}/FindWCS.cmake)
   endif (NOT HAVE_WCSLIB)
-elseif (cr_cmake)
+elseif (DSP_cmake)
   message (SEND_ERROR "Unable to locate additional CMake scripts!")
-endif (cr_cmake)
-
-## Handle option: Activate support for Glish applications on/off
-
-# If there is no Glish on the system, there is no use in trying to activate
-# the support for Glish applications
-
-if (NOT HAVE_GLISH)
-  set (CR_GLISH_SUPPORT FALSE)
-endif (NOT HAVE_GLISH)
-
-if (CR_GLISH_SUPPORT)
-  ## --- Support for Glish applications requires full CASA installation
-  if (NOT HAVE_CASA)
-    message (STATUS "[CR] Configuration to use CASA ...")
-    include (${cr_cmake}/FindCASA.cmake)
-  endif (NOT HAVE_CASA)
-  ## Compiler flags for CASA
-  if (HAVE_CASA)
-    set (HAVE_CASACORE FALSE)
-    add_definitions (-DHAVE_CASA)
-  else (HAVE_CASA)
-    message (STATUS "[CR] Failed to configure using CASA !")
-  endif (HAVE_CASA)
-  ## Compiler flags for Glish
-  if (HAVE_GLISH)
-    add_definitions (-DHAVE_GLISH)
-  elseif (HAVE_GLISH)
-    message (STATUS "[CR] Failed to locate Glish!")
-    message (STATUS "     CR-Tools will be build without Glish Support!")
-  endif (HAVE_GLISH)
-else (CR_GLISH_SUPPORT)
-  ## --- Without support for Glish applications we can/must use casacore
-  message (STATUS "[CR] Configuration to use CASACORE ...")
-  include (${cr_cmake}/FindCASACORE.cmake)
-  if (HAVE_CASACORE)
-    set (HAVE_CASA FALSE)
-    add_definitions (-DHAVE_CASA)
-    add_definitions (-DHAVE_CASACORE)
-  endif (HAVE_CASACORE)
-endif (CR_GLISH_SUPPORT)
-
+endif (DSP_cmake)
 
 if (HAVE_CASA OR HAVE_CASACORE)
   add_definitions (
@@ -221,7 +163,7 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 ## Check for the presence of further USG comonents
 
 find_path (DAL_INCLUDES dal.h lopesevent.h
-  PATHS ${CR_SOURCE_DIR}/.. ..
+  PATHS ${DSP_SOURCE_DIR}/.. ..
   PATH_SUFFIXES DAL/implement
   )
 
@@ -229,9 +171,9 @@ find_path (DAL_INCLUDES dal.h lopesevent.h
 ## Where to find the header files
 
 include_directories (
-  ${CR_SOURCE_DIR}/implement
-  ${CR_SOURCE_DIR}/apps
-  ${CR_SOURCE_DIR}/test
+  ${DSP_SOURCE_DIR}/implement
+  ${DSP_SOURCE_DIR}/apps
+  ${DSP_SOURCE_DIR}/test
   ${DAL_INCLUDES}
   ${PGPLOT_INCLUDES}
   )
@@ -284,7 +226,7 @@ SET (CMAKE_VERBOSE_MAKEFILE 0)
 
 find_path (prefix release_area.txt
   PATHS
-  ${CR_SOURCE_DIR}
+  ${DSP_SOURCE_DIR}
   PATH_SUFFIXES
   ../release
   ../../release
@@ -308,10 +250,7 @@ message (STATUS "CASA .................. : ${HAVE_CASA}")
 message (STATUS "CASACORE .............. : ${HAVE_CASACORE}")
 message (STATUS "CFITSIO ............... : ${HAVE_CFITSIO}")
 message (STATUS "FFTW3 ................. : ${HAVE_FFTW3}")
-message (STATUS "Glish ................. : ${HAVE_GLISH}")
 message (STATUS "GSL ................... : ${HAVE_GSL}")
 message (STATUS "LAPACK ................ : ${HAVE_LAPACK}")
 message (STATUS "PGPLOT ................ : ${HAVE_PGPLOT}")
-message (STATUS "POPT .................. : ${HAVE_POPT}")
-message (STATUS "ROOT .................. : ${HAVE_ROOT}")
 message (STATUS "WCSLIB ................ : ${HAVE_WCSLIB}")

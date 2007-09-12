@@ -24,11 +24,23 @@ include_directories (
   )
 
 ## -----------------------------------------------------------------------------
-## Required external packages
+## Required external libraries
 
-find_library (libg2c g2c
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib
+## Locate additional CMake find scripts
+
+find_path (BLAS_cmake FindG2C.cmake FindLAPACK.cmake
+  PATHS 
+  ${BLAS_SOURCE_DIR}
+  ${BLAS_SOURCE_DIR}/..
+  ${BLAS_SOURCE_DIR}/../..
+  ${BLAS_SOURCE_DIR}/../../..
+  PATH_SUFFIXES
+  devel_common/cmake
   )
+
+if (BLAS_cmake)
+  include (${BLAS_cmake}/FindG2C.cmake)
+endif (BLAS_cmake)
 
 ## -----------------------------------------------------------------------------
 ## Build "libblas" first
@@ -38,18 +50,29 @@ FILE (GLOB blas_sources *.f *.c)
 add_library (blas ${blas_sources})
 
 ## -----------------------------------------------------------------------------
-## Build "libcblas"
+##  Installation
 
-add_definitions (-O3 -DADD_)
+## check for location installation location
 
-FILE (GLOB cblas_sources cblas/src/*.f cblas/src/*.c)
-add_library (cblas ${cblas_sources})
-target_link_libraries (cblas ${libg2c} blas)
+find_path (BLAS_INSTALL_PREFIX release_area.txt
+  PATHS
+  ${BLAS_SOURCE_DIR}
+  PATH_SUFFIXES
+  ../release
+  ../../release
+  NO_DEFAULT_PATH
+  )
 
-## cblas/*.c
+if (BLAS_INSTALL_PREFIX)
+  message (STATUS "Installation area located for package BLAS.")
+  set (CMAKE_INSTALL_PREFIX ${BLAS_INSTALL_PREFIX}) 
+endif (BLAS_INSTALL_PREFIX)
 
-add_executable (cblas_example1 cblas/cblas_example1.c)
-target_link_libraries (cblas_example1 blas cblas)
+## Installation of the library
 
-#add_executable (cblas_example2 cblas/cblas_example2.c)
-#target_link_libraries (cblas_example1 blas cblas)
+install (TARGETS blas
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )
+

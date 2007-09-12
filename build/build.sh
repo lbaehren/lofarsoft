@@ -5,7 +5,7 @@
 ##-------------------------------------------------------------------------------
 ##
 ## A simple shell script to configure and install as many as possible of
-## the packages in the LOFAR USG distribution. Simple run
+## the packages in the LOFAR USG distribution. Simply run
 ## 
 ##   ./build.sh
 ##
@@ -18,7 +18,7 @@ basedir=`pwd`
 ## -----------------------------------------------------------------------------
 ## Helper functions
 
-# \param buidrDir  -- directory in which to perform the build; this is a 
+# \param buildDir  -- directory in which to perform the build; this is a 
 #                     sub-directory created below "build"
 # \param sourceDir -- directory in which the source code of the package can be
 #                     found; the path is given relativ to $LOFARSOFT
@@ -67,8 +67,12 @@ case $1 in
 	build_package bison external/bison
     ;;
     blitz)
-	echo "[build] Selected package Blitz"
+	echo "[build] Selected package Blitz++"
 	build_package blitz external/blitz
+    ;;
+    boost)
+	echo "[build] Selected package Boost"
+	build_package boost external/boost
     ;;
     casacore)
 	echo "[build] Selected package CASACORE"
@@ -81,10 +85,13 @@ case $1 in
     cmake)
 	echo "[build] Selected package CMake"
 	echo " --> Cleaning up directory ..."
-	rm -rf ./../../external/CMake/Bootstrap.cmk
-	rm -rf ./../../external/CMake/CMakeCache.txt
-	rm -rf ./../../external/CMake/Source/cmConfigure.h
-	build_package cmake external/cmake
+	if test -z `which cmake` ; then
+	    rm -rf ./../../external/CMake/Bootstrap.cmk
+	    rm -rf ./../../external/CMake/CMakeCache.txt
+	    rm -rf ./../../external/CMake/Source/cmConfigure.h
+	else
+	    build_package cmake external/cmake
+	fi
     ;;
     flex)
 	echo "[build] Selected package Flex"
@@ -93,6 +100,10 @@ case $1 in
     hdf5)
 	echo "[build] Selected package Hdf5"
 	build_package hdf5 external/hdf5
+    ;;
+    pgplot)
+	echo "[build] Selected package Pgplot"
+	build_package pgplot external/pgplot
     ;;
     wcslib)
 	echo "[build] Selected package WCSLIB"
@@ -116,7 +127,7 @@ case $1 in
 	./build.sh dal
 	build_package cr src/CR-Tools
     ;;
-    *)
+    all)
 	## external packages
 	./build.sh bison
 	./build.sh blitz
@@ -127,5 +138,21 @@ case $1 in
 	./build.sh casacore
 	./build.sh hdf5
 	./build.sh boost
+    ;;
+    clean)
+    rm -f *~
+    rm -rf bison
+    rm -rf blitz;
+    rm -rf boost;
+    rm -rf casacore;
+    rm -rf cfitsio;
+    rm -rf cmake
+    rm -rf cr
+    rm -rf dal
+    rm -rf dsp
+    rm -rf flex
+    rm -rf hdf5
+    rm -rf pgplot
+    rm -rf wcslib
     ;;
 esac
