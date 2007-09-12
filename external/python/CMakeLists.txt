@@ -1,6 +1,8 @@
 
-add_subdirectory (matplotlib)
+## Configuration and build sensitiv to ordering
+
 add_subdirectory (numarray)
+add_subdirectory (matplotlib)
 
 ## ------------------------------------------------------------------------------
 ## Installation option for Python packages
