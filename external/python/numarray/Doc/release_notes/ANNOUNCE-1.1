@@ -1,0 +1,130 @@
+Release Notes for numarray-1.1
+
+Numarray is an array processing package designed to efficiently
+manipulate large multi-dimensional arrays.  Numarray is modelled after
+Numeric and features c-code generated from python template scripts,
+the capacity to operate directly on arrays in files, and improved type
+promotions.
+
+Although numarray-1.1 is predominantly a bugfix release, if you use
+numarray, I strongly recommend upgrading.
+
+I. ENHANCEMENTS
+
+986194	Add SMP threading
+
+Build/install with --smp to enable ufuncs to release the GIL during
+their compute loops.  You have to supply your own threads and
+partition your array computations among them to realize any SMP
+benefit.  This adds overhead so don't do it unless you have multiple
+CPUs and know how to manage multiple compute threads.
+
+1016142	CharArray eval() too slow
+
+CharArray.fasteval() was modified to use strtod() rather than Python's
+eval().  This makes it ~70x faster for converting CharArrays to
+NumArrays.  fasteval() no longer works for complex types.  eval() 
+still works for everything.
+
+989618	Document memmap.py (memory mapping)
+996177	Unsigned int type support limited
+1008968	Add kroenecker product
+
+II. BUGS FIXED / CLOSED
+
+984286	max.reduce of byteswapped array
+
+Sebastian Haase reported that the reduction of large (>100KB)
+byteswapped arrays did not work correctly.  This bug affected
+reductions and accumulations of byteswapped and misaligned arrays
+causing them to produce incorrect answers.  Thanks Sebastian!
+
+1011456	numeric compatibility byteoffset	  
+
+numarray's Numeric compatibility C-API didn't correctly account for
+the byte offsets produced by sub-arrays and array slices.  This was
+fixed by re-defining the meaning of the ->data pointer in the
+PyArrayObject struct to include byteoffset.  NA_OFFSETDATA() was
+likewise redefined to return ->data rather than ->data + ->byteoffset.
+Correctly written code is still source compatible.  Incorrectly
+written code will generally be transparently fixed.  Code which
+accounted for byteoffset without using NA_OFFSETDATA() will break.
+This bug affected functions in numarray.numeric as well as add-on
+packages like numarray.linear_algebra and numarray.fft.
+
+1009462	matrixmultiply (a,b) leaves b transposed
+
+Many people reported this side effect.  Thanks to all.
+
+919297	Windows build fails VC++ 7.0
+964356	random_array.randint exceeds boundaries	
+985710	buffer not aligned on 8 byte boundary  (Windows-98 broken)
+990328	Object Array repr for >1000 elements
+997898	Invalid sequences errors
+1004600	Segfault in array element deletion
+1005537	Incorrect handling of overlapping assignments in Numarray
+1008375	Weirdness with 'new' method
+1008462	searchsorted bug and fix
+1009309	randint bug fix patch
+1015896	a.is_c_array() mixed int/bool results
+1016140	argsort of string arrays
+
+See
+http://sourceforge.net/tracker/?atid=450446&group_id=1369&func=browse
+for more details.
+
+III. CAUTIONS
+
+1. This release is binary incompatible with numarray-1.0.  Writers of
+C-extensions which directly reference the byteoffset field of the
+PyArrayObject should be aware that the data pointer is now the sum of
+byteoffset and the buffer base pointer.  All C extensions which use
+the numarray C-API must be recompiled.  This incompatibility was an
+unfortunate consequence of the fix for "numeric compatibility
+byteoffset".
+
+
+WHERE
+-----------
+
+Numarray-1.1 windows executable installers, source code, and manual is
+here:
+
+http://sourceforge.net/project/showfiles.php?group_id=1369
+
+Numarray is hosted by Source Forge in the same project which hosts
+Numeric:
+
+http://sourceforge.net/projects/numpy/
+
+The web page for Numarray information is at:
+
+http://stsdas.stsci.edu/numarray/index.html
+
+Trackers for Numarray Bugs, Feature Requests, Support, and Patches are
+at the Source Forge project for NumPy at:
+
+http://sourceforge.net/tracker/?group_id=1369
+
+REQUIREMENTS
+------------------------------
+
+numarray-1.1 requires Python 2.2.2 or greater.  
+
+
+AUTHORS, LICENSE
+------------------------------
+
+Numarray was written by Perry Greenfield, Rick White, Todd Miller, JC
+Hsu, Paul Barrett, Phil Hodge at the Space Telescope Science
+Institute.  We'd like to acknowledge the assitance of Francesc Alted,
+Paul Dubois, Sebastian Haase, Tim Hochberg, Nadav Horesh, Edward
+C. Jones, Eric Jones, Jochen Kuepper, Travis Oliphant, Pearu Peterson,
+Peter Verveer, Colin Williams, and everyone else who has contributed
+with comments and feedback.
+
+Numarray is made available under a BSD-style License.  See
+LICENSE.txt in the source distribution for details.
+
+-- 
+Todd Miller             jmiller@stsci.edu

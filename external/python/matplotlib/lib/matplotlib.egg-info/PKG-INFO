@@ -1,0 +1,15 @@
+Metadata-Version: 1.0
+Name: matplotlib
+Version: 0.90.1-r3350
+Summary: Matlab(TM) style python plotting package
+Home-page: http://matplotlib.sourceforge.net
+Author: John D. Hunter
+Author-email: jdhunter@ace.bsd.uchicago.edu
+License: UNKNOWN
+Description: 
+        matplotlib strives to produce publication quality 2D graphics
+        using matlab plotting for inspiration.  Although the main lib is
+        object oriented, there is a functional interface "pylab"
+        for people coming from Matlab.
+        
+Platform: any

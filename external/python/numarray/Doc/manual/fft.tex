@@ -1,0 +1,206 @@
+\chapter{Fast-Fourier-Transform}
+\label{cha:fft}
+
+%begin{latexonly}
+\makeatletter \py@reset \makeatother
+%end{latexonly}
+\declaremodule{extension}{numarray.fft}
+\moduleauthor{The numarray team}{numpy-discussion@lists.sourceforge.net}
+\modulesynopsis{Fast Fourier Transform}
+
+\begin{quote}
+   This package provides functions for one- and two-dimensional
+   Fast-Fourier-Transforms (FFT) and inverse FFTs.
+\end{quote}
+
+
+The \module{numarray.fft} module provides a simple interface to the FFTPACK
+Fortran library, which is a powerful standard library for doing fast Fourier
+transforms of real and complex data sets, or the C fftpack library, which is
+algorithmically based on FFTPACK and provides a compatible interface.
+
+
+\section{Installation}
+\label{sec:FFT:installation}
+
+The default installation uses the provided \module{numarray.fft.fftpack} C
+implementation of these routines and this works without any further
+interaction.
+
+
+\subsection{Installation using FFTPACK}
+\label{sec:FFT:install-lapack}
+
+On some platforms, precompiled optimized versions of the FFTPACK libraries are
+preinstalled on the operating system, and the setup procedure needs to be
+modified to force the \module{numarray.fft} module to be linked against those
+rather than the builtin replacement functions.
+
+
+
+
+\section{FFT Python Interface}
+\label{sec:FFT:python-interface}
+
+The Python user imports the \module{numarray.fft} module, which provides 
+a set of utility functions of the most commonly used FFT routines, and
+allows the specification of which axes (dimensions) of the input arrays are to
+be used for the FFT's. These routines are:
+
+\begin{funcdesc}{fft}{a, n=None, axis=-1} 
+   Performs a \constant{n}-point discrete Fourier transform of the array 
+   \constant{a}, \constant{n} defaults to the size of \constant{a}. It is 
+   most efficient for \constant{n} a power of two. If \constant{n} is 
+   larger than \code{len(a)}, then \constant{a} will be
+   zero-padded to make up the difference. If \constant{n} is smaller than
+   \code{len(a)}, then \constant{a} will be aliased to reduce its size. This
+   also stores a cache of working memory for different sizes of 
+   \module{fft}'s, so you could theoretically run into memory problems if 
+   you call this too many times with too many different \constant{n}'s.
+   
+   The FFT is performed along the axis indicated by the \constant{axis} 
+   argument, which defaults to be the last dimension of \constant{a}.
+   
+   The format of the returned array is a complex array of the same shape as
+   \constant{a}, where the first element in the result array contains the DC
+   (steady-state) value of the FFT.
+   \remark{missing: ..., and where each successive ...}
+
+   Some examples are:
+\begin{verbatim}
+>>> a = array([1., 0., 1., 0., 1., 0., 1., 0.]) + 10
+>>> b = array([0., 1., 0., 1., 0., 1., 0., 1.]) + 10
+>>> c = array([0., 1., 0., 0., 0., 1., 0., 0.]) + 10
+>>> print numarray.fft.fft(a).real
+[ 84.   0.   0.   0.   4.   0.   0.   0.]
+>>> print numarray.fft.fft(b).real
+[ 84.   0.   0.   0.  -4.   0.   0.   0.]
+>>> print numarray.fft.fft(c).real
+[ 82.   0.   0.   0.  -2.   0.   0.   0.]
+\end{verbatim}
+\end{funcdesc}
+       
+\begin{funcdesc}{inverse_fft}{a, n=None, axis=-1}
+   Will return the \constant{n} point inverse discrete Fourier transform of
+   \constant{a}; \constant{n} defaults to the length of \constant{a}. 
+   It is most efficient for \constant{n} a power of two.  If \constant{n} 
+   is larger than \constant{a}, then \constant{a} will be zero-padded to 
+   make up the difference.  If \constant{n} is smaller than \constant{a}, 
+   then \constant{a} will be aliased to reduce its size.
+   This also stores a cache of working memory for different sizes of FFT's, so
+   you could theoretically run into memory problems if you call this too many
+   times with too many different \constant{n}'s.
+\end{funcdesc}
+       
+\begin{funcdesc}{real_fft}{a, n=None, axis=-1}
+   Will return the \constant{n} point discrete Fourier transform of the 
+   real valued array \constant{a}; \constant{n} defaults to the length of 
+   \constant{a}.  It is most efficient for \constant{n} a power of two.  
+   The returned array will be one half of the symmetric complex transform of 
+   the real array.
+
+\begin{verbatim}
+>>> x = cos(arange(30.0)/30.0*2*pi)
+>>> print numarray.fft.real_fft(x)
+[ -5.82867088e-16 +0.00000000e+00j   1.50000000e+01 -3.08862614e-15j
+   7.13643755e-16 -1.04457106e-15j   1.13047653e-15 -3.23843935e-15j
+  -1.52158521e-15 +1.14787259e-15j   3.60822483e-16 +3.60555504e-16j
+   1.34237661e-15 +2.05127011e-15j   1.98981960e-16 -1.02472357e-15j
+   1.55899290e-15 -9.94619821e-16j  -1.05417678e-15 -2.33364171e-17j
+  -2.08166817e-16 +1.00955541e-15j  -1.34094426e-15 +8.88633386e-16j
+   5.67513742e-16 -2.24823896e-15j   2.13735778e-15 -5.68448962e-16j
+  -9.55398954e-16 +7.76890265e-16j  -1.05471187e-15 +0.00000000e+00j]
+\end{verbatim}
+\end{funcdesc}
+       
+\begin{funcdesc}{inverse_real_fft}{a, n=None, axis=-1}
+   Will return the inverse FFT of the real valued array \constant{a}.
+\end{funcdesc}
+       
+\begin{funcdesc}{fft2d}{a, s=None, axes=(-2,-1)}
+   Will return the 2-dimensional FFT of the array \constant{a}.  This
+   is really just \function{fft_nd()} with different default behavior.
+\end{funcdesc}
+       
+\begin{funcdesc}{inverse_fft2d}{a, s=None, axes=(-2,-1)}
+  The inverse of \function{fft2d()}. This is really just
+  \function{inverse_fftnd()} with different default behavior.
+\end{funcdesc}
+       
+\begin{funcdesc}{real_fft2d}{a, s=None, axes=(-2,-1)}
+   Will return the 2-D FFT of the real valued array \constant{a}.
+\end{funcdesc}
+            
+\begin{funcdesc}{inverse_real_fft2d}{a, s=None, axes=(-2,-1)}
+  The inverse of \function{real_fft2d()}. This is really just
+  \function{inverse_real_fftnd()} with different default behavior.
+\end{funcdesc}
+
+            
+\section{fftpack Python Interface}
+\label{sec:FFT:c-api}
+
+%begin{latexonly}
+\makeatletter \py@reset \makeatother
+%end{latexonly}
+\declaremodule{extension}{numarray.fft.fftpack}
+\moduleauthor{The numarray team}{numpy-discussion@lists.sourceforge.net}
+\modulesynopsis{Fast Fourier Transform}
+
+The interface to the FFTPACK library is performed via the \module{fftpack}
+module, which is responsible for making sure that the arrays sent to the
+FFTPACK routines are in the right format (contiguous memory locations, right
+numerical storage format, etc). It provides interfaces to the following FFTPACK
+routines, which are also the names of the Python functions:
+\begin{funcdesc}{cffti}{i}
+\end{funcdesc}
+\begin{funcdesc}{cfftf}{data, savearea}
+\end{funcdesc}
+\begin{funcdesc}{cfftb}{data, savearea}
+\end{funcdesc}
+\begin{funcdesc}{rffti}{i}
+\end{funcdesc}
+\begin{funcdesc}{rfftf}{data, savearea}
+\end{funcdesc}
+\begin{funcdesc}{rfftb}{data, savearea}
+\end{funcdesc}
+The routines which start with \texttt{c} expect arrays of complex numbers, the
+routines which start with \texttt{r} expect real numbers only. The routines
+which end with \texttt{i} are the initalization functions, those which end with
+\texttt{f} perform the forward FFTs and those which end with \texttt{b} perform
+the backwards FFTs.
+
+The initialization functions require a single integer argument corresponding to
+the size of the dataset, and returns a work array. The forward and backwards
+FFTs require two array arguments -- the first is the data array, the second is
+the work array returned by the initialization function. They return arrays
+corresponding to the coefficients of the FFT, with the first element in the
+returned array corresponding to the DC component, the second one to the first
+fundamental, etc.The length of the returned array is 1 + half the length of the
+input array in the case of real FFTs, and the same size as the input array in
+the case of complex data.
+\begin{verbatim}
+>>> import numarray.fft.fftpack as fftpack
+>>> x = cos(arange(30.0)/30.0*2*pi)
+>>> w = fftpack.rffti(30)
+>>> f = fftpack.rfftf(x, w)
+>>> print f[0:5]
+[ -5.68989300e-16 +0.00000000e+00j   1.50000000e+01 -3.08862614e-15j
+        6.86516117e-16 -1.00588467e-15j   1.12688689e-15 -3.19983494e-15j
+       -1.52158521e-15 +1.14787259e-15j]
+\end{verbatim}
+
+
+
+%% Local Variables:
+%% mode: LaTeX
+%% mode: auto-fill
+%% fill-column: 79
+%% indent-tabs-mode: nil
+%% ispell-dictionary: "american"
+%% reftex-fref-is-default: nil
+%% TeX-auto-save: t
+%% TeX-command-default: "pdfeLaTeX"
+%% TeX-master: "numarray"
+%% TeX-parse-self: t
+%% End:

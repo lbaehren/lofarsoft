@@ -103,7 +103,11 @@ case $1 in
     ;;
     pgplot)
 	echo "[build] Selected package Pgplot"
-	build_package pgplot external/pgplot
+	build_package pgplot external/pgplot -DCMAKE_INSTALL_PREFIX:STRING=$basedir/../release
+    ;;
+    plplot)
+	echo "[build] Selected package Plplot"
+	build_package plplot external/plplot
     ;;
     wcslib)
 	echo "[build] Selected package WCSLIB"
@@ -116,9 +120,9 @@ case $1 in
 	./build.sh wcslib
 	./build.sh cfitsio
 	./build.sh casacore
-	./build.sh blitz
-	build_package hdf5 external/hdf5 -DHDF5_FORCE_BUILD:BOOL=1
+	build_package blitz external/blitz -DBLITZ_FORCE_BUILD:BOOL=1
 	build_package boost external/boost -DBOOST_FORCE_BUILD:BOOL=1
+	build_package hdf5 external/hdf5 -DHDF5_FORCE_BUILD:BOOL=1
 	## USG packages
 	build_package dal src/DAL
     ;;
@@ -130,14 +134,14 @@ case $1 in
     all)
 	## external packages
 	./build.sh bison
-	./build.sh blitz
+	build_package blitz external/blitz -DBLITZ_FORCE_BUILD:BOOL=1
+	build_package boost external/boost -DBOOST_FORCE_BUILD:BOOL=1
 	./build.sh flex
 	./build.sh pgplot
 	./build.sh wcslib
 	./build.sh cfitsio
 	./build.sh casacore
 	./build.sh hdf5
-	./build.sh boost
     ;;
     clean)
     rm -f *~

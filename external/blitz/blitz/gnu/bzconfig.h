@@ -359,17 +359,17 @@
 
 /* date */
 #ifndef BZ__config_date 
-#define BZ__config_date  "Fri Oct 14 21:21:14 PDT 2005" 
+#define BZ__config_date  "Wed Sep 12 14:52:20 CEST 2007" 
 #endif
 
 /* uname -a */
 #ifndef BZ__os_name 
-#define BZ__os_name  "Linux valhalla.cacr.caltech.edu 2.6.12-1.1376_FC3smp #1 SMP Fri Aug 26 23:51:16 EDT 2005 x86_64 x86_64 x86_64 GNU/Linux" 
+#define BZ__os_name  "Linux dop71 2.6.18-5-686 #1 SMP Thu Aug 30 02:19:07 UTC 2007 i686 GNU/Linux" 
 #endif
 
 /* target */
 #ifndef BZ__platform 
-#define BZ__platform  "x86_64-unknown-linux-gnu" 
+#define BZ__platform  "i686-pc-linux-gnu" 
 #endif
  
 /* once: _BLITZ_GNU_BZCONFIG_H */

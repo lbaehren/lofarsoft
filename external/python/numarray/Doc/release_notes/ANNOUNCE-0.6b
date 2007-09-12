@@ -1,0 +1,84 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 TRANSITIONAL//EN">
+<HTML>
+<HEAD>
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; CHARSET=UTF-8">
+  <META NAME="GENERATOR" CONTENT="GtkHTML/1.0.4">
+</HEAD>
+<BODY>
+<PRE>Numarray is an array processing package designed to efficiently
+manipulate large multi-dimensional arrays.&nbsp; Numarray is modelled after
+Numeric and features c-code generated from python template scripts,
+the capacity to operate directly on arrays in files, and improved type
+promotions.
+
+I. ENHANCEMENTS
+
+1. Repackaging
+
+numarray has been modified from a collection of Python modules into a
+Python package.&nbsp;&nbsp; See Doc/Repackaging in the source distribution for
+more details.
+
+2. Median Filter Function
+
+See numarray.image.combine.median for a function which computes the
+median pixels in a stack of images.
+
+3. Thread Safety Work
+
+Modifications to ufunc caching and IEEE error handling enable numarray
+to work in multi-threaded programs.&nbsp; This is barebones support, not
+thread awareness.
+
+II. BUGS FIXED
+
+733534 Broadcasts of non-array sequences fails
+733535 NA_typeNoToTypeObject sometimes fails
+736674 PyArray_ContiguousFromObject() fails for some scalars
+750320 CharArray.raw() is broken
+750326 building RPMS fails
+754836 Missing Src/_convmodule.c during setup
+756050 chararray multi-d copy fails for recarray
+772519 memory.new_memory() 64-bit scanning bug
+
+III. CAUTIONS
+
+1. Due to the distribution repackaging, numarray-0.6 will not install
+correctly on top of an existing numarray installation. Before
+installing numarray-0.6 remove your old version of numarray.
+
+IV. REQUIREMENTS
+
+numarray-0.6 requires Python 2.2.2 or greater.
+
+
+V. AUTHORS
+
+Numarray was written by Perry Greenfield, Rick White, Todd Miller, JC
+Hsu, Paul Barrett, Phil Hodge at the Space Telescope Science
+Institute.&nbsp; Thanks go to Jochen Kupper of the University of North
+Carolina for his work on Numarray and for porting the Numarray manual
+to TeX format.&nbsp; Thanks also to Edward C. Jones, Francesc Alted,
+Paul Dubois, Eric Jones, Travis Oliphant, Pearu Peterson,
+Konrad Hinsen, and everyone who has contributed with comments 
+and feedback.
+
+VI. LICENSE
+
+Numarray is made available under a BSD-style License.&nbsp; See
+LICENSE.txt in the source distribution for details.
+
+
+VII. WEB PAGE
+
+&lt;P&gt;&lt;A HREF=&quot;http://www.stsci.edu/resources/software_hardware/numarray&quot;&gt;numarray 0.6&lt;/A&gt; - array processing extension supporting records and memory mapping.&nbsp; (18-07-03)</PRE>
+<TABLE CELLSPACING="0" CELLPADDING="0" WIDTH="100%">
+<TR>
+<TD>
+<PRE></PRE>
+</TD>
+</TR>
+</TABLE>
+
+</BODY>
+</HTML>

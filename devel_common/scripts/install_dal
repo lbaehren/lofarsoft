@@ -32,87 +32,10 @@ else
     mkdir -p build
 fi
 
+##------------------------------------------------------------------------------
+## Configure and install the DAL (including required 3rd-party packages)
+
 cd build
 basedir=`pwd`
 
-##------------------------------------------------------------------------------
-## Configure and install the packages required for the DAL
-
-system_arch=`uname | tr [A-Z] [a-z]`
-
-## [0] CMake
-
-echo "[DAL installer] Installing CMake ..."
-
-cd $basedir
-mkdir cmake 
-cd cmake
-echo " --> Cleaning up directory ..."
-rm -rf ./../../external/CMake/Bootstrap.cmk
-rm -rf ./../../external/CMake/CMakeCache.txt
-rm -rf ./../../external/CMake/Source/cmConfigure.h
-echo " --> Initiating build ... "
-./../../external/CMake/bootstrap --prefix=$basedir/../release && make install
-echo "  --> Adding new bin directory to the PATH"
-export PATH=$basedir/../release/bin:$PATH
-
-## [1] wcslib
-
-echo "[DAL installer] Installing WCSLIB ..."
-
-cd $basedir
-mkdir wcslib 
-cd wcslib
-cmake ../../external/wcslib && make install
-
-## [2] CFITSIO
-
-echo "[DAL installer] Installing CFITSIO ..."
-
-cd $basedir
-mkdir cfitsio 
-cd cfitsio
-cmake ../../external/cfitsio && make install
-
-## [2] CASACORE
-
-echo "[DAL installer] Installing CASACORE ..."
-
-cd $basedir
-mkdir casacore 
-cd casacore
-cmake ../../external/casacore && make install
-
-## [4] HDF5  --> CMake wrapper around GNU Autotools
-
-echo "[DAL installer] Installing HDF5 ..."
-
-cd $basedir
-mkdir hdf5
-cd hdf5
-cmake ../../external/hdf5
-
-## [5] Boost
-
-echo "[DAL installer] Installing Boost ..."
-
-cd $basedir
-mkdir boost
-cd boost
-cmake ../../external/boost
-
-## [6] Blitz++
-
-echo "[DAL installer] Installing Blitz++ ..."
-
-cd $basedir
-ln -s ../external/blitz blitz
-cd blitz
-./configure --prefix=$basedir/../release && make && make install
-
-##------------------------------------------------------------------------------
-## Configure and install the DAL
-
-cd $basedir
-mkdir dal && cd dal
-cmake ../../src/DAL && make install
+./build.sh dal

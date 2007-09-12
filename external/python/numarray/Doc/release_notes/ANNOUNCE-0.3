@@ -1,0 +1,69 @@
+Numarray 0.3
+------------
+Numarray is an array processing package designed to efficiently
+manipulate large multi-dimensional arrays.  Numarray is modelled after
+Numeric and features c-code generated from python template scripts,
+the capacity to operate directly on arrays in files, and improved type
+promotion semantics.
+
+Numarray-0.3 incorporates safety checks to prevent crashing Python
+when a user accidentally changes private variables in numarray.
+
+The new safety checks ensure that:
+
+1. Numarray C-functions are called with properly sized buffers.
+2. Numarray C-functions are called with properly aligned buffers.
+3. Parameters match the C-function in count and i/o direction.
+4. The correct generic function wrapper is used to call each C-function.
+5. All indices implied by the array strides are valid.
+
+Failed checks result in python exceptions.
+
+A new memory object fixes an unforunate limitation of the python
+buffer object, namely the lack of guaranteed double aligned storage.
+
+The largest generated source module, _ufuncmodule.c, has been
+partitioned by data type into several smaller, more gcc-friendly
+modules, e.g. _ufuncFloat64module.c.
+
+The sort and argsort functions are fixed.
+The dot function is fixed for 1D arrays.
+Transpose, swapaxes, and reshape once again return views.
+
+WHERE
+-----------
+Numarray-0.3 windows executable installers and source code tar ball is here:
+
+http://sourceforge.net/project/showfiles.php?group_id=1369
+
+Numarray is hosted by Source Forge in the same project which hosts Numeric:
+
+http://sourceforge.net/projects/numpy/
+
+The web page for Numarray information is at:
+
+http://stsdas.stsci.edu/numarray/index.html
+
+Trackers for Numarray Bugs, Feature Requests, Support, and Patches are at
+the Source Forge project for NumPy at:
+
+http://sourceforge.net/tracker/?group_id=1369
+
+REQUIREMENTS
+--------------------------
+
+numarray-0.3 requires Python 2.0 or greater.
+
+
+AUTHORS, LICENSE
+------------------------------
+
+Numarray was written by Perry Greenfield, Rick White, Todd Miller, JC
+Hsu, Paul Barrett, and Phil Hodge at the Space Telescope Science
+Institute.  Numarray is made available under a BSD-style License.  See
+LICENSE.txt in the source distribution for details.
+
+
+-- 
+Todd Miller             jmiller@stsci.edu <mailto:jmiller@stsci.edu>
+STSCI / SSG            (410) 338 4576

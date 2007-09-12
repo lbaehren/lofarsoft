@@ -17,8 +17,10 @@ include (CheckTypeSize)
 ## Search locations
 
 set (include_locations
+  ## local installation
   ../release/include
   ../../release/include
+  ## system-wide installation
   /include
   /usr/include
   /usr/local/include
@@ -27,8 +29,10 @@ set (include_locations
   )
 
 set (lib_locations
+  ## local installation
   ../release/lib
   ../../release/lib
+  ## system-wide installation
   /lib
   /usr/lib
   /usr/local/lib
@@ -49,6 +53,7 @@ find_path (BOOST_INCLUDES config.hpp
   boost-1_33_1
   boost-1_33_1/boost
   boost
+  NO_DEFAULT_PATH
   )
 
 if (BOOST_INCLUDES)
@@ -102,6 +107,7 @@ foreach (lib ${boost_libraries})
   find_library (BOOST_${lib} ${lib}-gcc42-1_34_1 ${lib}-mt-1_34_1 ${lib}-gcc-1_33_1 ${lib}-gcc ${lib}
     PATHS ${lib_locations}
     PATH_SUFFIXES boost-1_34_1 boost-1_33_1 boost
+    NO_DEFAULT_PATH
     )
   ## check if location was successful
   if (BOOST_${lib})

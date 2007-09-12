@@ -1,0 +1,136 @@
+\chapter{Mlab}
+\label{cha:mlab}
+
+%begin{latexonly}
+\makeatletter
+\py@reset
+\makeatother
+%end{latexonly}
+\declaremodule[numarray.mlab]{extension}{numarray.mlab}
+\moduleauthor{The numarray team}{numpy-discussion@lists.sourceforge.net}
+\modulesynopsis{mlab}
+
+\section{Matlab(tm) compatible functions}
+\label{sec:Matlab-compatible-functions}
+
+\begin{quote}
+  \module{numarray.mlab} provides a set of Matlab(tm) compatible functions.
+\end{quote}
+
+This will hopefully become a complete set of the basic functions available in
+Matlab.  The syntax is kept as close to the Matlab syntax as possible.  One
+fundamental change is that the first index in Matlab varies the fastest (as in
+FORTRAN).  That means that it will usually perform reductions over columns,
+whereas with this object the most natural reductions are over rows.  It's
+perfectly possible to make this work the way it does in Matlab if that's
+desired.
+
+\begin{funcdesc}{mean}{m, axis=0}
+   \label{cha:mlab:mean}
+   \label{func:mean}
+   returns the mean along the axis'th dimension of m.  Note: if m is an integer
+   array, the result will be floating point. This was changed in release 10.1;
+   previously, a meaningless integer divide was used.
+\end{funcdesc}
+\begin{funcdesc}{median}{m}
+   \label{cha:mlab:median}
+   \label{func:median}
+   returns a mean of m along the first dimension of m.
+\end{funcdesc}
+\begin{funcdesc}{min}{m, axis=0}
+   \label{cha:mlab:min}
+   \label{func:min}
+   returns the minimum along the axis'th dimension of m.
+\end{funcdesc}
+\begin{funcdesc}{msort}{m}
+   \label{cha:mlab:msort}
+   \label{func:msort}
+   returns a sort along the first dimension of m as in MATLAB.
+\end{funcdesc}
+\begin{funcdesc}{prod}{m, axis=0}
+   \label{cha:mlab:prod}
+   \label{func:prod}
+   returns the product of the elements along the axis'th dimension of m.
+\end{funcdesc}
+\begin{funcdesc}{ptp}{m, axis = 0}
+   \label{cha:mlab:ptp}
+   \label{func:ptp}
+   returns the maximum - minimum along the axis'th dimension of m.
+\end{funcdesc}
+\begin{funcdesc}{rand}{d1, ..., dn}
+   \label{cha:mlab:rand}
+   \label{func:rand}
+   returns a matrix of the given dimensions which is initialized to random numbers from a uniform distribution in
+the range [0,1).
+\end{funcdesc}
+\begin{funcdesc}{rot90}{m,k=1}
+   \label{cha:mlab:rot90}
+   \label{func:rot90}
+   returns the matrix found by rotating m by k*90 degrees in the counterclockwise direction.
+\end{funcdesc}
+\begin{funcdesc}{sinc}{x}
+   \label{cha:mlab:sinc}
+   \label{func:sinc}
+   returns sin(pi*x)
+\end{funcdesc}
+\begin{funcdesc}{squeeze}{a}
+   \label{cha:mlab:squeeze}
+   \label{func:squeeze}
+   removes any ones from the shape of a
+\end{funcdesc}
+\begin{funcdesc}{std}{m, axis = 0}
+   \label{cha:mlab:std}
+   \label{func:std}
+   returns the unbiased estimate of the population standard deviation from a
+   sample along the axis'th dimension of m. (That is, the denominator for the
+   calculation is n-1, not n.) 
+\end{funcdesc}
+\newpage
+\begin{funcdesc}{sum}{m, axis=0}
+   \label{cha:mlab:sum}
+   \label{func:sum}
+   returns the sum of the elements along the axis'th dimension of m.
+\end{funcdesc}
+\begin{funcdesc}{svd}{m}
+   \label{cha:mlab:svd}
+   \label{func:svd}
+   return the singular value decomposition of m [u,x,v]
+\end{funcdesc}
+\begin{funcdesc}{trapz}{y,x=None}
+   \label{cha:mlab:trapz}
+   \label{func:trapz}
+   integrates y = f(x) using the trapezoidal rule
+\end{funcdesc}
+\begin{funcdesc}{tri}{N, M=N, k=0, typecode=None}
+   \label{cha:mlab:tri}
+   \label{func:tri}
+   returns a N-by-M matrix where all the diagonals starting from lower left corner up to the k-th are all ones.
+\end{funcdesc}
+\begin{funcdesc}{tril}{m,k=0}
+   \label{cha:mlab:tril}
+   \label{func:tril}
+   returns the elements on and below the k-th diagonal of m. k=0 is the main
+   diagonal, \begin{math} k > 0\end{math} is above and \begin{math}k < 0
+   \end{math} is below the main diagonal.
+\end{funcdesc}
+
+\begin{funcdesc}{triu}{m,k=0}
+   \label{sec:mlab-functions:triu}
+   \label{func:triu}
+   returns the elements on and above the k-th diagonal of m. k=0 is the main
+   diagonal, \begin{math}k > 0\end{math} is above and \begin{math}k <
+   0\end{math} is below the main diagonal.
+\end{funcdesc}
+
+%% Local Variables:
+%% mode: LaTeX
+%% mode: auto-fill
+%% fill-column: 79
+%% indent-tabs-mode: nil
+%% ispell-dictionary: "american"
+%% reftex-fref-is-default: nil
+%% TeX-auto-save: t
+%% TeX-command-default: "pdfeLaTeX"
+%% TeX-master: "numarray"
+%% TeX-parse-self: t
+%% End:

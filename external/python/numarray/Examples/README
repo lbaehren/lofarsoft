@@ -1,0 +1,12 @@
+This directories gives examples and benchmarks ot he usage of numarray.
+
+To install do 
+,----
+| python setup.py install
+`----
+in this directory.  This will install all examples.  You can test all of them
+by running 
+,----
+| python testall.py
+`----
+or go to the individual subdirectories and look at the examples more closely.

@@ -1,0 +1,975 @@
+Subject:
+FW: numarray design overview
+From:
+"Perry Greenfield" <perry@stsci.edu>
+Date:
+Mon, 12 Nov 2001 16:55:59 -0500
+To:
+<jmiller@stsci.edu>
+
+what actually got sent (a few changes) -- Perry
+
+-----Original Message-----
+From: Perry Greenfield [mailto:perry@stsci.edu]
+Sent: Monday, November 12, 2001 4:52 PM
+To: numpy-developers@lists.sourceforge.net
+Cc: Perry
+Subject: numarray design overview
+
+
+The following is intended as a design overview of numarray.
+
+****************************************************************************
+**
+
+Numarray, replacement for Numeric (a.k.a. numpy)
+
+Perry Greenfield (perry@stsci.edu), Rick White (rlw@stsci.edu), Todd
+Miller (jmiller@stsci.edu)  (with some assistance from JC Hsu and Paul
+Barrett)
+
+What has changed since our first limited release:
+
+Sorting functions (sort, argsort, searchsorted).
+Faster and more general put and take functions.
+Support for index arrays as part of general slices.
+Matrix multiplication, diagonal, trace, dot, innerproduct, outerproduct,
+identity
+Structural functions: repeat, indices, resize.
+"synonyms": sum, cumsum, product, cumproduct, alltrue, sometrue.
+Added a preliminary implementation of Complex types.
+Support for memory mapping (but undocumented)
+A fix for a significant memory leak.
+A fix for exception handling on Tru64 (but requires recompiling Python to
+work)
+
+Why a new version of Numeric?
+
+We desired a number of enhancements and changes to the existing Numeric.
+There was a general consensus amongst the recent Numeric maintainers that
+it should be rewritten if any significant changes are to be made.
+Furthermore, Guido has essentially mandated that it be rewritten if it
+is to be included into the core Python distribution.
+
+Some things this version is not:
+
+- Complete. Some functionality is missing, but not much.
+  (see Functionality section for a list of missing
+  functionality).
+- Optimized. While the lowest level functions are implemented in C,
+  almost all the other code is written in Python. This means that
+  performance for smaller arrays will be significantly slower than the
+  current Numeric (though performance for large arrays should be
+  competitive and certain functions, because they are implemented in C
+  like arange and ones are faster now). We intend to focus effort on
+  increasing performance, particularly after we complete what we consider
+  the important core functionality.
+- Well documented. We intend to rewrite the existing Numeric manual for
+  the new version (even with the differences, they have very similar
+  interfaces). For now, however, this document will serve as the
+  explanation of the differences from Numeric.
+- Behavior and interface settled in stone. Although we have made some
+  initial decisions in the implementation of Numarray regarding the user
+  interface and behavior, we are sensitive to the user community's
+  desires. In some cases we are pretty well decided on issues but in
+  others we are not. We address later which issues we still consider open.
+  In general, when their was a choice to be made and we didn't see a
+  strong argument for either (not that there isn't one!) we chose to
+  retain compatibility with Numeric. But we first address things we
+  explicitly decided to change and why.
+
+Changes in interface
+
+Perhaps the most controversial decision (explained in the design
+overview) is that arrays have no public attributes like shape, flat,
+real, or imaginary. All changes to properties of arrays are through
+accessor methods.
+
+The second most controversial change is in the coercion rules. There is
+now a distinction between how coercion is treated in two basic cases:
+arrays with scalars and arrays with arrays. In the array/array case, the
+coercion rules are mostly as one would expect and are nearly identical
+to those of Numeric. (The only difference is in combining signed and
+unsigned integers of the same size.) However, scalars are treated
+differently. If the scalar is of the same 'kind' as the array, for
+example, the array and scalar are both integer types, then the output
+type is the type of the array, even if it is of a normally 'lower' type
+than the scalar. Adding a Int16 array with an integer scalar results in
+an Int16 array, not an Int32 array as is the case in Numeric. Likewise
+adding a Float32 array to a float scalar results in a Float32 array
+rather than a Float64 array as is the case with Numeric. Adding a Int16
+array and a float scalar will result in a Float64 array, however, since
+the scalar is of a higher kind than the array.
+
+Array types are now represented by instances of NumericType classes
+rather than a single character code. However, we have implemented it
+in such a way that one may use the Numeric character type codes
+(e.g., 's','i','l','f','d', etc.)
+
+Arrays are Python classes and are not extension types.
+
+Output array arguments in ufuncs can be different types than the normal
+array type (implicit coercion to the type of the supplied array).
+
+The C interface is completely different (But only a small part of it has
+been implemented).
+
+Functionality not implemented yet:
+
+Int64, Float128 (how important?)
+Some aspects of Complex number types
+
+C API (in development, see below)
+Savespace attribute and behavior (no plans to implement)
+convolve
+
+Functions implemented:
+
+Full Slicing capability (both __getitem__, __setitem___)
+__str__, __repr__
+All ufuncs (except reduceat method; does anyone need this?)
+array
+arange (but no arrayrange alias yet)
+ones
+zeros
+transpose
+swapaxes
+choose
+where
+concatenate
+clip
+ravel
+nonzero
+fromstring
+fromfile
+take
+put
+nonzero
+compress
+argsort
+sort
+searchsorted
+matrixmultiply
+innerproduct
+outer product
+dot
+trace
+diagonal
+identity
+resize
+repeat
+indicies
+sum
+cumsum
+product
+cumproduct
+alltrue
+sometrue
+
+Methods implemented:
+
+itemsize
+iscontiguous
+isaligned
+type (instead of typecode)
+isbyteswapped
+tostring
+tofile
+tolist  (also array2list)
+nelements
+view
+copy
+new
+reshape
+
+NO PUBLIC ARRAY ATTRIBUTES! The list below shows the mapping to accessor
+functions
+
+Flat --> ravel()
+Real, imaginary: complex types not implemented yet
+Shape --> shape() to get, reshape() to set
+
+Functions not yet implemented
+
+convolve (but probably should not be part of basic Numarray)
+
+
+High level design overview
+
+Record Arrays
+
+A primary motivation our part was the ability to efficiently access
+arrays of records. Instead of making records a new array types (like
+integers and floats) we decided (based on a suggestion from Travis
+Oliphant) that we could generalize the basic numeric arrays to handle
+data that was part of a table, but not making records themselves part of
+the module (more on that later). But even making this possible
+introduces a significant complication. This can be illustrated by a
+simple example. Suppose one has a array of records where each record
+consists of an Int8 and a Float32. The record is 5 bytes long. Such an
+array of records can be viewed as two interleaved numarrays each having
+a stride of 5 bytes, differing only in the starting offset. The problem
+is that on some platforms  (Suns for example) one cannot access the
+float values as float values because they are not properly aligned in
+memory. They must be copied to an aligned memory location before they
+can be referenced as floats.
+
+If one wished to deal with such issues as instances of new types (e.g.,
+nonalignedFloat32 vs. Float32), many new types will be required, in turn
+requiring many new ufuncs to deal with those types. This is not the only
+example of variations on basic types. If memory mapping is to be useful
+for scientific processing, one must face the fact that some data on disk
+may not be stored in the native form of the processor (this is
+inevitable if one wishes to use datasets that are platform independent).
+In this case, Float32s may be byteswapped as they appear to the
+processor if memory mapped (or even if just read into a buffer). In many
+instances one may be dealing with large data sets and not wish to copy
+the entire dataset in order to byteswap it. If the numarray is to deal
+with such data transparently, it adds yet another variant on types.
+
+The only practical solutions to the issue appeared to be:
+
+1) Produce all variations of functions that can handle all combinations
+of possible types including nonaligned or byteswapped data. This is
+probably the most efficient solution, but the drawback is that it
+requires a huge number of functions (particularly for binary operators
+and functions).
+
+2) Convert the input arrays by making temporary copies of the entire
+array. This reduces the number of functions needed since the inputs can
+be coerced to supported types (much fewer). This is effectively the
+approach used by Numeric. Its primary drawback is that it requires heavy
+use of memory when dealing with large arrays; it prevents easy
+processing of large arrays.
+
+3) Pass a coercion function to the ufunc routine along with the data
+pointers. As the routine loops over each element, it calls the coercion
+function for each data input. This has the advantage of reducing the
+number or routines needed enormously. The disadvantage is that function
+call overhead is usually unacceptable for simple operations such as
+addition and multiplication.
+
+4) A hybrid of 2) and 3). Rather than coerce a single data element at a
+time, a function coerces a large number of elements at a time, but never
+larger than a specified limit. In this way, memory use is limited (one
+only uses a few moderately-sized temporary buffers, say, < 1MB) and the
+overhead of function calls is spread over tens or hundreds of thousands
+of elements. The drawbacks are that it is somewhat more complex to
+implement and does involve memory copies, but on the other hand, it does
+retain the most important advantages of 2) and 3).
+
+The effects on efficiency of the different approaches are uncertain
+unless tested with real benchmarks. This we did last year and were
+surprised to find that approach 4) was almost always competitive with 1)
+and even faster in some cases (usually it was on the order of 25% to 50%
+slower). Function calls were usually significantly slower (typically a
+factor of 3). Based on these results we decided to use approach 4). We
+discuss this in more detail later.
+
+Array classes
+
+Since we decided that things such record arrays should not be an
+intrinsic part of numeric arrays, it was a natural step to separate the
+implementation into two separate classes. The base class is an NDArray
+class. It implements most of the structural operations on arrays
+including __setitem__ and getitem__ functionality. The base class does
+not presume to know how the elements of the array are interpreted; they
+are essentially opaque entities. A subclass of NDArray implements all
+content-related functionality. In this way not only can NDAarray be used
+for numeric arrays (NumArray), but it can also be used for record
+arrays, character arrays, and arrays of other kinds (e.g., Python
+objects).
+
+Assumptions about NDArrays
+
+The data are always represented by a buffer object. At this time there
+is widespread agreement that the current Python buffer object is flawed.
+But it is important to understand that our needs for such an object are
+fairly straightforward, and that any reworking or replacement of buffer
+objects in the future can easily be handled. Our need is for a Python
+object that can allocate a buffer for us (for most Numeric arrays) and
+handle memory management of such buffers. Also needed is a means of
+memory mapping being able to return a similar object that will not go
+away (or change its pointer) so long as NDArrays have a reference to it.
+In principle NDArray should pay attention to whether or not the buffer
+is read-only or also writable. Currently it does not, but it should not
+be difficult to change that. One reason we haven't is that mmap returns
+an object from which buffer() returns a read-only buffer object even
+though the file is writable.
+
+The number of points in the code that depend on the specifics buffer
+object and its C interface are quite limited and likely to remain so (a
+handful of C routines). Changes in the future will not be a hardship so
+long as they provide for the above needs.
+
+Attributes of NDArrays
+
+Arrays have no public attributes (other than methods)! This is probably
+controversial. The reason we have taken that approach up to now is to
+prevent the use of __setattr__ which we see as a performance issue and
+which complicates the code significantly. We are endevoring to keep as
+much of the implementation in Python as possible. Our first approach to
+optimization will be to optimize in Python, and should that fall short,
+convert as much as necessary (but no more) to C. We feel that using
+__setattr__ would make retaining most of the Python code difficult. So
+all attributes are "private" (as much as Python attributes can be). If a
+user manipulates these private attributes (nothing is stopping them
+except good sense) they can cause Python to crash if they do the wrong
+thing. Nothing prevents people from adding their own attributes, either
+directly or through subclasses if they see fit.
+
+So attributes such as shape do not exist for NDArrays. We use (or will
+use) accessor methods instead.
+
+These are the important private attributes.
+
+_data       A reference to the data buffer. Many NDArray objects may
+            reference the same data buffer.
+_shape      A tuple (though with the current code sometime places a list
+            instead-these need to be stomped out).
+_strides    A tuple of byte strides
+_byteoffset The start of the array relative to the beginning of the data
+            buffer.
+_aligned    Flag indicating whether the data elements are aligned
+_contiguous Indicates whether there are gaps between elements.
+
+If an array has 3 dimensions then for x[k, j, i]
+The byte offset for that element in an array is given by:
+
+offset = _byteoffset +  i*_strides[2] + j*_strides[1] + k*_strides[0]
+
+where       0 <= i < _shape[2]
+            0 <= j < _shape[1]
+            0 <= k < _shape[0]
+
+For contiguous arrays _strides[i] = _shape[i+1]*_strides[i+1]
+
+NumArray
+
+NumArray is a subclass of NDArray. It adds the following attributes:
+
+_type     As you would expect. But note that the value is not the same as
+          for Numeric. Numarray types are NumericType objects. See
+          numerictypes.py for details.
+_byteswap Indicates if the values are byteswapped from the native
+          representation
+
+The types currently defined are:
+
+Bool, Int8, UInt8, Int16, UInt16, Int32, Float32, Float64
+
+(more on complex types later)
+
+To repeat, the value for type is an instance of a NumericType object.
+However, it is possible to use aliases for these type instances (for
+example, "Float" or
+"f4" for Float32). These type objects hold references to all the C
+conversion functions that are needed to convert that type into another
+numeric type. There is a type hierarchy (Through inheritance) so that
+one can check to see if a given array is of an IntegralType or FloatType
+for example. The Bool type is new and consists of a byte array that
+should only have values of 0 and 1. The actual implementation type
+should be hidden so that other forms may be used (bitarrays for
+example).
+
+It is important to note that although ndarrays are not numarrays, there
+is a presumed existence of numarrays. Integer numarrays are used by
+ndarray for index arrays (e.g., output of sorting and nonzero).
+
+While we are currently also working on RecordArray and CharArray classes
+that subclass NDArray which are distributed with numarray, but no
+attempt is being made to document these yet.
+
+There has been a little discussion about whether numarray should be a
+package instead. For now we have left them as modules.
+
+Ufuncs
+
+This is the most complex part of the design and needs the most
+explanation. To simplify ufuncs we decided to restrict them to arrays
+that are contiguous, aligned, and non-byteswapped. That makes the
+corresponding C routines that implement the function about as simple as
+possible. Furthermore, we decided to write special versions of binary
+functions where one argument is a scalar. Thus binary C ufuncs have 3
+versions: vector_vector, vector_scalar, and scalar_vector . [This is
+perhaps a case of premature optimization; we really haven't studied the
+speed benefits of supplying scalar versions-possibly these are really
+unncesssary.] (for consistency, unary ufuncs are always classified as
+vector even though that is the only possible kind). Regardless, the C
+ufuncs always have the same signature:
+
+long niter, long ninargs, long noutargs, void **buffers
+
+where niter is the number of elements to be operated on,
+      ninargs is the number of input ufunc arguments,
+      noutargs is the number of output ufunc arguments and,
+      buffers is an array of void pointers to the data buffers being
+operated
+          on.
+
+For scalar arguments, the scalar is stored in a buffer as well (to keep
+the interface as similar as possible). Note that the C ufunc assumes
+that all the pointers, sizes, etc, passed to it are correct. It is
+numarray's responsibility to ensure that these (and other) C functions
+are called with proper arguments. The C ufuncs are never called directly
+from Python but rather through a standard interface routine
+(_numarray._callCUFunc) (more on later)
+
+When arrays are not contiguous, aligned, or non-byteswapped, then
+another C function is called to copy the input arrays to a temporary
+buffer that is contiguous, aligned, and non-byteswapped (and for output
+arrays, to copy to a non-contiguous, non-aligned, or byteswapped array).
+This class of C functions can handle n-dimensional arrays with arbitrary
+strides in each dimension. These functions are called "stride" functions
+since they can handle strides. There are three types: simple copy, align
+copy, or byteswap copy (note that even though arrays can be both
+non-aligned and byteswapped, the function to byteswap also take care of
+alignment.) These functions are usually called to copy from a strided
+array to a contiguous array or the inverse, they can be used to copy
+from one strided array to another (and are used in such a way in a few
+places). The stride functions have a standard signature:
+
+long dim, long n, long *niters,
+        void *input, long inboffset, long *inbstrides,
+        void *output, long outboffset, long *outbstrides
+
+Where
+   dim is the number dimensions to iterate over
+   n is used for various purposes (often not used)
+   niters is an array of iterations for each dimension (shape in other
+     words)
+   input is a pointer to the input data buffer
+   inboffset is the byte offset of the first element from the input data
+     buffer pointer
+   inbstrides is an array of input strides,
+   likewise for output, outboffset, outbstrides.
+
+Similar to ufuncs, these functions are all called indirectly using
+_ndarray.callStrideConvCFunc
+
+As mentioned, heavy use is made of temporary buffers. A pool of buffers
+is kept (ufunc._BufferPool). New buffers are allocated as needed and
+placed in the pool. Operations that need a temporary buffer obtain one
+from the bufferpool and when it is no longer needed it is returned to
+the pool. In this way there is no need to continually allocated and free
+memory. The size of the buffers is set by a bufferPool method
+(ufunc._BufferPool.setBufferSize, size in bytes).
+
+The general scheme for ufuncs is that the input types are checked and a
+search is made for a ufunc that has a matching signature; if found, it
+is used. If one is not found then a search is made for a signature of
+the next 'highest' type. If one is found, then a determination can be
+made as to what type conversion is needed. For binary functions, there
+is an additional step of finding a common type (while the scheme allows
+for specifying a C function for a specific combination of input types,
+the default implementation only provides binary functions for matching
+input types). A table is provided that provides the standard 'common'
+type for two input types (although the scheme allows for a specific
+ufunc to be defined with its own binary conversion table). There are
+some cases where the common type is not the same as either of the two
+input types. For example, the combination of Int16 and UInt16 results in
+an Int32 since neither of the input types contains the range of the
+other (arguably Int32 combined with Float32 should produce Float64
+though it does not currently; we are interested in what users think
+about this).
+
+After the input types (and output type if an array is supplied) are
+analyzed and the appropriate C function identified, then the associated
+processing objects are constructed. If it is noticed that no conversions
+are necessary and that all the associated arrays are contiguous,
+aligned, and non-byteswapped this means that the C ufunc can operate on
+the entire arrays. (In the code this is referred to as the "fast" case.)
+If the operation does not satisfy this simple case then the "slow" case
+is set up. Each input and output is associated with an
+ufunc._InputConverter and ufunc._OutputConverter respectively. These
+converters are capable of performing both stride functions and type
+conversions in "blocks" using the temporary buffers. Any particular
+converter may have a stride operation or conversion operations, both (or
+neither). (It's quite possible that we can speed up performance on
+smaller arrays by caching signatures and the converter instances.
+
+The C ufunc is handled by a Operator object. The blocking is performed
+by _ufunc._doOverDimensions function which iteratively and recursively
+calls the .compute methods of the converter and operator objects. The
+size of the blocks are determined by the size of the largest type
+involved and the array shape. The function ufunc._getBlockingParameters
+uses this information to determine the size of the blocks if the array
+is larger than the temporary buffers. In brief, it finds the largest
+subarray that is smaller than the blocksize. If the last dimension is
+larger than the blocksize, then it is split into smaller 1-d arrays. If
+the last dimension is smaller than the blocksize, then it is always
+possible to find a subarray that is at least half the size of the block
+buffer. Once the blocking shape is determined (along with any leftover
+shape for the last iteration) the computation is performed on each
+subarray. The compute methods accept the subarray size as the shape to
+perform the stride operation on and partial indices indicating the
+offset within the array of the subarray.
+
+The code for _ndarraymodule.c and _numarraymodule.c is hand coded.
+Since the functions involved in conversion and ufuncs are so similar, it
+makes sense to generate the C code for these with a program.
+codegenerator.py is the module that uses simple string substitution to
+repetitively generate the code for _convmodule.c and _ufuncmodule.c for
+both types and functions (for ufuncs).
+
+The interface between Python and the C functions is very simple and
+primitive. Each function pointer is saved in a Python dictionary as a
+CObject; the key is a string indicating the signature that will be used
+in Python to look up the function. The end of _convmodule.c and
+_ufuncmodule.c consist of the dictionary construction. When ufunc.py
+intializes it extracts the contents of the _ufunc.ufuncDict and
+associates the functions with the respective ufuncs which evals the C
+module dictionary keys to form new keys. This implementation does allow
+users who fiddle with the low level Python elements to crash Python. We
+discuss this a bit more at the end under the topic "Safety" and whether
+it needs to be changed.
+
+While the above machinery was designed specifically for ufuncs, it is
+often used for other functionality in somewhat different contexts.
+
+The codegenerator machinery has been designed to be used by others to
+generate user ufuncs also. We intend to provide examples of such use.
+
+Exception handling.
+
+We desired better control over exception handling than currently exists
+in Numeric. This has traditionally been a problem area (see the numerous
+posts on c.l.p regarding floating point exceptions, especially those by
+Tim Peters). Numeric raises an exception for integer computations that
+result in a divide by zero and multiplies that result in overflows. The
+exception is raised after that operation is completed on all the array
+elements. No exceptions are raised for floating point errors (divide by
+zero, overflow, underflow, and invalid results), the compiler and
+processor are left to their default behavior which is usually to return
+Infs and NaNs as values).
+
+Our approach is to provide customizable error handling behavior. It
+should be possible to specify 3 different behaviors for each of the 4
+error types independently. These are:
+
+Ignore the error
+Print a warning
+Raise a Python exception
+
+The current implementation does that and has been tested successfully on
+Windows, Solaris and Redhat, Tru64. The implementation uses the
+floating point processor "sticky status
+flags" to detect errors. Unfortunately, until C99 implementations are
+widespread, this requires platform specific code to read and clear the
+floating point status flags, but we intend to isolate all such code in
+one file. There is a Python function _numarray.checkFPErrors that
+returns the state of the flags (and clears them in the process). There
+is a more generalized error handling function that uses that status
+value to determine what to do in the event of a detected error
+(numarray.handleError). We bracket all computations (including potential
+conversions) with calls to first clear the state, and then detect
+whether an error occurred. One can set the error mode by calling the
+error objects setMode method. For example:
+
+numarray.Error.setMode(all="warn") # the default mode
+numarray.Error.setMode(
+	dividebyzero="raise", underflow="ignore", invalid="warn")
+
+As mentioned it seems to work on at least 3 platforms; we hope that it
+is sufficiently general and supportable that it will be easy enough to
+maintain on all important platforms and we await feedback on whether
+others encounter problems using it. One standard problem is with
+optimizers. We don't expect that to be a problem since the status flag
+checking is not in the same routine as the computation.
+
+Integer exception modes work the same way. Although integer computations
+do not affect the floating point status flag directly, our code checks
+the denominator for 0 for divides (in much the same way Numeric does)
+and then performs a floating point divide by zero to set the status flag
+(overflows are handled similarly). So even integer exceptions use the
+floating point status flags indirectly.
+
+Currently the platform specific code is in _numarraymodule.c and that is
+where code for other platforms should be added. If this approach proves
+to work well, we would probably follow Tim Peters' suggestion and move
+all IEEE 754 related code into a separate file (possibly for use in core
+Python as well).
+
+We have not yet decided how to approach trying to handle exceptions with
+masks. One approach would be to test each result of a computation for
+NaNs or Infs using a standard function that would use platform specific
+code for such tests (again located close to the code for testing the
+status flag). One approach that is not practical is the use of the
+SIGFPE signal.
+
+C API
+
+A minimal C-API is now in place.  The C-API consists of an extension
+module (libnumarray) and header file (libnumarray.h).  The C-API
+currently only supports the writing of extension modules, but support
+for C-on-top programming is planned. The C header declares prototypes
+and "indirection macros" for each function in the API.  The prototypes
+are used for compiling the API module.  The "indirection macros" are
+used by client modules to call functions in the API through a jump
+table.  See
+
+       section 1.12 in "Extending and Embedding the Python Interpreter"
+       http://www.python.org/doc/current/ext/using-cobjects.html
+
+for more information on why this is done and how it works.
+
+The principal data structure of the C-API is "NDInfo" as shown below:
+
+# define MAXDIM  40
+# define SZ_BUF  79
+
+typedef struct {
+	void *data;			/* pointer to data buffer */
+	void *imag;			/* imaginary part, or NULL */
+	long ndim;			/* dimension (rank) of array */
+	long nelem;			/* total number of elements */
+	long shape[MAXDIM];		/* length of each axis */
+	long strides[MAXDIM];
+	long byteoffset;
+	long bytestride;
+	long itemsize;
+	char type[SZ_BUF+1];
+	/* flags */
+	int C_array;		/* aligned, contiguous, and not byteswapped */
+	int writeable;
+	int aligned;
+	int contiguous;
+	int byteswap;
+} NDInfo;
+
+Currently, the two functions provided in the API are:
+
+1) int 	   getNDInfo             (PyObject*object,NDInfo*NumArrayInfo)
+
+getNDInfo returns information about an NDArray instance, the base
+class for NumArray, CharArray, and RecArray.  The "type" field is undefined
+for an NDArray.
+
+2) int     getNumInfo            (PyObject*object,NDInfo*NumArrayInfo)
+
+getNumInfo returns information about a NumArray instance.
+
+
+Steps in using the C-API:
+
+The C API currently assumes that it will be used by an extension
+module built on top of numarray.
+
+To use the API functions, a client extension performs these steps:
+
+1. Include the API header in the extension module:
+
+#include <libnumarray.h>
+
+NOTE: Using a <numarray/> prefix is *not* recommmended.
+
+2. Initialize the API module in the client extension's init_<module>
+function:
+
+import_libnumarray();
+
+3. Call the API functions from python extension functions:
+
+static void foo(PyObject *self, PyObject *args)
+{
+	PyObject *ArrayObject;
+	NDInfo   ArrayInfo;
+
+	if (!PyArg_ParseTuple(args, "O", &ArrayObject))
+	   return PyErr_Format(fooError, "foo: Bad parameters.");
+
+	if (getNumInfo(ArrayObject, &ArrayInfo))
+	   return PyErr_Format(fooError, "foo: Error getting array info.");
+
+	... Use ArrayInfo to do some work on ArrayObject.
+	...     make sure ArrayInfo.C_array != 0 first!
+
+}
+
+4. Write your package setup script where the package might be called
+"foo" and the extensions might be called "_foomodule.so" and
+"_barmodule.so":
+
+from distutils.core import setup
+from numarrayext import NumarrayExtension
+
+setup(name = "foo",
+      version = "0.1",
+      description = "foo based on numarray"
+      packages=[""],
+      extra_path="foo",
+      package_dir={"":""},
+      ext_modules=map(NumarrayExtension, ["_foo", "_bar"])
+      )
+
+NumarrayExtension should know how to find the Numarray include files
+regardless
+of where the numarray setup script put them.
+
+
+Future direction of the C-API:
+
+The next two additions to the C-API will be the ability to create
+arrays from C and additional helper functions for using arrays in
+extensions.  This functionality is NOT IN THE CURRENT DISTRIBUTION and
+may change before release, especially if you suggest something else...
+
+An example of writing C-code which uses Numarray as a library might look
+like:
+
+#include <stdio.h>
+#include <Python.h>
+
+#include "libnumarray.h"
+
+int main(int argc, char *argv)
+{
+	PyObject *a;
+	Int32    data[2][4] = {{ 0 , 1, 2, 3 }, {4, 5, 6, 7}};
+
+	NA_Begin();
+
+	if ((a = NA_New(data, tInt32, 2, 2, 4))) {
+		PyObject_Print(a, stdout, 0);
+		fprintf(stdout, "\n");
+		fflush(stdout);
+	} else {
+		PyErr_Print();
+		Py_FatalError("Array creation call failed...");
+	}
+
+	NA_End();
+}
+
+NA_Begin() and NA_End() initialize and finalize both python and libnumarray.
+NA_New(buffer, type, ndim, dim1...) creates a new simple array 'a' which
+references the data in the buffer 'data'.
+
+Access to Numarrays from C will be limited to the python Object and
+Number protocol suites.
+
+A more complex function will be available for creating an arbitrary instance
+(e.g., one that is not aligned, or one that is byteswapped) of Numarray from
+C.
+
+Additional helper functions are planned which make it easy to
+pre-process and post process Numarray array data in a C extension.
+These functions will make it easier to handle arbitrary Numarrays
+(e.g. misaligned or byte swapped) by allocating and deallocating
+appropriate temporary arrays.  An example of the wrapper function
+a 1D convolution function might look like:
+
+static PyObject *
+Py_Convolve1D(PyObject *obj, PyObject *args)
+{
+	PyObject   *kernel, *data, *convolved=NULL, *cshadow;
+	NDInfo     kinfo, dinfo, cinfo;
+
+	if (!PyArg_ParseTuple(args, "OO|O", &kernel, &data, &convolved))
+		return PyErr_Format(_convolveError,
+				    "Convolve1D: Invalid parameters.");
+
+	/* Align, Byteswap, Contiguous, Typeconvert */
+	kernel  = NA_ConvertInput(kernel, &kinfo, tFloat64);
+	data    = NA_ConvertInput(data,   &dinfo, tFloat64);
+	cshadow = NA_ShadowOptionalOutput(convolved, &cinfo, tFloat64, data);
+
+	if (!(kernel && data && cshadow)) {
+		return PyErr_Format(_convolveError,
+		    "Convolve1D: error normalizing array inputs.");
+	}
+
+	/* Additional application parameter checks here... */
+
+	Convolve1D(kinfo.nelem, NA_OFFSETDATA(kinfo),
+		   dinfo.nelem, NA_OFFSETDATA(dinfo),
+		   NA_OFFSETDATA(cinfo));
+
+	/* Align, Byteswap, Contiguous, Typeconvert */
+	Py_DECREF(kernel);
+	Py_DECREF(data);
+	return NA_ReturnShadowedOptionalOutput(convolved, cshadow);
+}
+
+
+In the example above, each call to NA_ConvertInput makes a
+"normalized" copy of the input array (if required) and returns it.
+The NDInfo* parameter is filled in with the properties of the returned
+array.  The "normalized" copy corrects byteswap, alignment, contiguity
+and type mismatches between the supplied Numarray and the wrapped
+function's required input type.  When the supplied input "just works",
+its reference count is incremented and it is returned.
+
+The call to NA_ShadowOptionalOutput likewise creates a correctly typed
+temporary output array (the "shadow") if the one supplied is
+"abnormal" in some way.  NA_ShadowOptionalOutput *also* creates a
+correctly typed output array (by mirroring the input array) when the
+optional output parameter was omitted.  Either way, cinfo reflects the
+properties of the returned array. [The function names are tentative;
+better suggestions will be entertained]
+
+The call to Convolve1D features the macro call NA_OFFSETDATA(ndinfo) which
+returns the combined data base pointer and byteoffset, cast as (void *).
+
+The calls to Py_DECREF deallocate any required input temporaries.  If there
+were none, the extra reference count on the original input is removed.
+
+Finally, NA_ReturnShadowedOptionalOutput returns either Py_None if an
+output was specified *or* the result array if no output was specified.
+NA_ReturnShadowedOptionalOutput also deallocates any required
+temporary array.
+
+
+Complex types
+
+Originally we intended to make complex types just a different type like
+Float32 and Int16, but decided to try implementing Complex types as
+a subclass. That seems to work, but after doing it, we have come to
+think that a C implementation may be simpler. The current implementation
+is mostly complete, but is likely to be redone using C Ufuncs.
+
+General comments on the code
+
+We do not present the existing code as finished work. Readers will note
+many comments with "xxx" indicating incomplete functionality or issues
+for which there are questions or are yet to be settled.  Much of the
+existing code may be (or should be!) rewritten. The numtest.py module,
+based on Tim Peters' doctest, has grown organically and is in need off
+cleaning up and more careful verification.
+
+Ndarray.py 	      contains array base class and most structural
+                  functionality
+_ndarraymodule.c  low level C functions used by ndarray.py
+Numarray.py       contains numeric array class and support functions,
+                  normally the class users will import directly
+_numarraymodule.c low level C functions used by numarray.py
+ ufunc.py         implements ufunc machinery
+_ufuncmodule.c    machine generated code with specific ufunc functions
+_convmodule.c     machine generated code for handling conversions
+numerictypes.c    defines numeric type objects for numarray
+typeconv.py       handles type coercion rules and identification of
+                  conversion routines
+buffer.c          contains a small number of routines for accessing
+                  buffer object
+numtest.py        regression tests for numarray
+codegenerator.py  generates the files _ufuncmodule.c and _convmodule.c
+
+Future work and other issues
+
+Index arrays
+
+Arrays supplied as arguments to subscripts have
+special meaning. If the array is of Bool type, then the indexing will be
+treated as the equivalent of the compress function. If the array is of
+an Integer type, then a take or put operation will be implied. We will
+generalize the existing take and put as follows:
+
+If ind1, ind2,...indN are index arrays whose values indicate the index
+into another array then
+
+x[ind1, ind2]
+
+forms a new array with the same shape as ind1, ind2 (they all must be
+broadcastable to the same shape) and values such:
+
+result[i,j,k] = x[ind1[i,j,k], ind2[i,j,k]]
+
+In this example, ind1,2,3 are index arrays with 3 dimensions, but they
+could have an arbitrary number of dimensions. When using constants for
+some of the index positions, then the result uses that constant for all
+values. Slices and strides (at least initially) will not be permitted in
+the same subscript as index arrays. So
+
+x[ind1, 3, ind2]
+
+would be legal, but
+
+x[ind1, 2:5, ind2]
+
+would not be.
+
+Similarly for assignment:
+
+x[ind1, ind2, ind3] = values
+
+will form a new array such that:
+
+x[ind1[i,j,k], ind2[i,j,k], ind3[i,j,k]] = values[i,j,k]
+
+The index arrays and the value array must be broadcast consistent.
+(As an example: ind1.shape()=(5,4), ind2.shape()=(5,),
+ind3.shape()=(1,4), and values.shape()=(1).
+
+If indices are repeated, the last value encountered will be stored. When
+index values are out of range they will be clipped to the appropriate
+range. That is to say, negative indices will not have the same meaning
+by default. Use of the equivalent take and put functions will allow
+other interpretations of the indices (raise exceptions for out of bounds
+indices, allow negative indices to work backwards as they do when used
+individually, or for indices to wrap around). The same behavior applies
+for functions such as choose and where. [There is consideration being
+given to allowing negative indices having the traditional Python
+interpretation]
+
+Mask Arrays
+
+We would like to have the equivalent of mask arrays in the new version.
+We welcome suggestions about the best way to implement them.
+
+Safety
+
+Eliminating the ability to crash. The current implementation makes it
+possible for a foolish (or malicious?) user to crash Python by messing
+with the lower level interfaces in ndarray and numarray (e.g., supplying
+bad offsets, shapes, strides or cfunctions). Making ndarray and numarray
+bulletproof against such users requires changes to the low level
+implementation of the functions (though not enormous or hugely
+difficult). How urgent is it to make these changes? Is it necessary for
+them to be completed before it is accepted into core Python? The
+implementation will likely wrap the function pointers in a new C type
+that includes information on the number and types of the arguments.
+There are only a few C routines that call all the low level ufuncs and
+conversion routines that need to be modified to ensure consistency
+between the supplied arguments and the c functions so that safety is
+ensured.
+
+Other numeric types
+
+We expect that we will support extended numeric types if the platform
+supports them (e.g. Int64, Float128). However these are low priority for
+us now.
+
+Definition of _aligned.
+
+Currently it is defined in a very conservative way (array data is only
+considered aligned if the itemsize equals the bytestride). We eventually
+intend to define _aligned to be true when both the byteoffset and
+strides are multiples of the itemsize, even if the itemsize is a
+nonstandard size (like 7). Normally, special copy routines will be
+called only if itemsize is 2, 4, or 8, but that is no reason to make
+_aligned depend directly on that.
+
+Platform dependent code
+
+As mentioned, if the current approach for dealing with exceptions and
+types proves workable, the platform dependent parts of that probably
+should be moved to separate Files. Should ndarray.h and numarray.h be
+combined?
+
+Acknowlegements:
+
+The existance of the original Numeric package was a tremendous help
+in defining how a reimplementation should be designed. Although
+little of its code was used, it would be fair to say that the
+design choices made for how Numeric would appear to the user probably
+made doing a reimplementation twice as easy as it would have been
+since many of the interface issues were already solved.
+
+We would be greatly remiss if we did not acknowledge the discussions
+with, ideas from, and work contributed to the original Numeric of the
+following: Travis Oliphant, Paul Dubois, David Ascher, Tim Peters, Eric
+Jones, Jim Hugunin, Konrad Hinsen, Guido (you know who) and the past
+Numeric developers.
+
+
+
