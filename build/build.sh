@@ -42,7 +42,7 @@ build_package ()
 	    cmake $basedir/../$sourceDir $configureOption
 	fi
 	# build the package
-	if test -z `make help | grep install` ; then
+	if test -z "`make help | grep install`" ; then
 	    echo "-- No target install for $buildDir."
 	else
 	    make install;
