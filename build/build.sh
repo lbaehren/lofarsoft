@@ -105,13 +105,14 @@ case $1 in
 	fi
 	## run the configure script
 	echo " --> Running configure script for cmake ..."
-	$basedir/../external/cmake/configure --prefix=$basedir/../external
+	$basedir/../external/cmake/configure --prefix=$basedir/../release
 	## build and install
 	echo " --> initiating build and install ..."
 	make install
 	## check if we have been able to create a cmake executable
-	if test -f ../../external/bin/cmake ; then
+	if test -f ../../release/bin/cmake ; then
 	    echo " ==> Found newly created cmake executable."
+	    export PATH=$PATH:$basedir/../release/bin
 	else
 	    echo " ==> No cmake executable found in release/bin! Unable to continue!"
 	    exit 1;
