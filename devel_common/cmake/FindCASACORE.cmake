@@ -13,7 +13,7 @@
 ##
 
 set (include_locations
-  ## locale installation
+  ## local installation
   ./../release/include
   ./../../release/lib
   ## source code
@@ -28,10 +28,13 @@ set (include_locations
 )
 
 set (lib_locations
-  ./../lib
+  ## local installation
   ./../release/lib
-  ./../../lib
   ./../../release/lib
+  ## source code
+  ./../lib
+  ./../../lib
+  ## system-wide installation
   /usr/lib
   /usr/local/lib
   /opt/lib

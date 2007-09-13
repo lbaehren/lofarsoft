@@ -63,13 +63,23 @@ endif (NOT BOOST_prefix)
 
 message (STATUS "Running the BOOST configure script...")
 
-execute_process (
-  WORKING_DIRECTORY ${BOOST_SOURCE_DIR}
-  COMMAND ./configure --with-libraries=python --with-python=${PYTHON_EXECUTABLE} --prefix=${BOOST_prefix}
-  TIMEOUT 300
-  ERROR_VARIABLE error_configure
-  ERROR_FILE error.log
-  )
+if (PYTHON_EXECUTABLE)
+  execute_process (
+    WORKING_DIRECTORY ${BOOST_SOURCE_DIR}
+    COMMAND ./configure --with-libraries=python --with-python=${PYTHON_EXECUTABLE} --prefix=${BOOST_prefix}
+    TIMEOUT 300
+    ERROR_VARIABLE error_configure
+    ERROR_FILE error.log
+    )
+else (PYTHON_EXECUTABLE)
+  execute_process (
+    WORKING_DIRECTORY ${BOOST_SOURCE_DIR}
+    COMMAND ./configure --with-libraries=python --prefix=${BOOST_prefix}
+    TIMEOUT 300
+    ERROR_VARIABLE error_configure
+    ERROR_FILE error.log
+    )
+endif (PYTHON_EXECUTABLE)
 
 if (error_configure)
   message (STATUS "There was an error running the BOOST configure script!")

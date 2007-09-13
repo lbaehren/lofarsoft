@@ -62,13 +62,13 @@ else (HAVE_CASA)
     message (STATUS "Enabling test programs using casacore ...")
     ## build the executables ----------------------
     add_executable (tUseArrays tUseArrays.cc)
-    target_link_libraries (tUseArrays ${CASACORE_LIBRARIES})
+    target_link_libraries (tUseArrays ${CASA_LIBRARIES} ${LAPACK_LIBRARIES})
     ##
     add_executable (tUseCASA tUseCASA.cc)
-    target_link_libraries (tUseCASA ${CASACORE_LIBRARIES})
+    target_link_libraries (tUseCASA ${CASA_LIBRARIES} ${LAPACK_LIBRARIES})
     ##
     add_executable (tUseTables tUseTables.cc)
-    target_link_libraries (tUseTables ${CASACORE_LIBRARIES})
+    target_link_libraries (tUseTables ${CASA_LIBRARIES} ${LAPACK_LIBRARIES})
     ## testing ------------------------------------
     add_test (tUseArrays tUseArrays)
     add_test (tUseCASA tUseCASA)

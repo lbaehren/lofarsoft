@@ -67,7 +67,9 @@ endif (CR_BUILD_TESTS)
 ##
 ## =============================================================================
 
-find_library (libm m PATHS /usr/lib /usr/local/lib /sw/lib)
+find_library (libm m
+  PATHS /usr/lib /usr/local/lib /sw/lib /opt/lib
+  )
 
 ## Standard CMake modules for location of packages
 

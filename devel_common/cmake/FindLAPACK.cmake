@@ -37,12 +37,12 @@ find_path (LAPACK_INCLUDES clapack.h
 ## Check for the library files (-llapack -lblas -lcblas -latlas)
 
 set (libs
-  atlas
-  blas
-  cblas
   lapack
+  cblas
+  blas
+  atlas
   )
-  
+
 set (LAPACK_LIBRARIES "")
 
 foreach (lib ${libs})
