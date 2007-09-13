@@ -72,7 +72,7 @@ case $1 in
     ;;
     boost)
 	echo "[build] Selected package Boost"
-	build_package boost external/boost
+	build_package boost external/boost -DBOOST_FORCE_BUILD:BOOL=1
     ;;
     casacore)
 	echo "[build] Selected package CASACORE"
@@ -121,7 +121,7 @@ case $1 in
 	./build.sh cfitsio
 	./build.sh casacore
 	build_package blitz external/blitz -DBLITZ_FORCE_BUILD:BOOL=1
-	build_package boost external/boost -DBOOST_FORCE_BUILD:BOOL=1
+	./build.sh boost
 	build_package hdf5 external/hdf5 -DHDF5_FORCE_BUILD:BOOL=1
 	## USG packages
 	build_package dal src/DAL
@@ -135,7 +135,7 @@ case $1 in
 	## external packages
 	./build.sh bison
 	build_package blitz external/blitz -DBLITZ_FORCE_BUILD:BOOL=1
-	build_package boost external/boost -DBOOST_FORCE_BUILD:BOOL=1
+	./build.sh boost
 	./build.sh flex
 	./build.sh pgplot
 	./build.sh wcslib

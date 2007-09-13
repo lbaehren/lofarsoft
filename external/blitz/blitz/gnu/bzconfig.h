@@ -349,7 +349,7 @@
 
 /* CXX */
 #ifndef BZ__compiler_name 
-#define BZ__compiler_name  "c++" 
+#define BZ__compiler_name  "/usr/bin/c++" 
 #endif
 
 /* CXXFLAGS */
@@ -359,7 +359,7 @@
 
 /* date */
 #ifndef BZ__config_date 
-#define BZ__config_date  "Wed Sep 12 14:52:20 CEST 2007" 
+#define BZ__config_date  "Wed Sep 12 23:16:09 CEST 2007" 
 #endif
 
 /* uname -a */

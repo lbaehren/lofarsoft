@@ -38,4 +38,4 @@ fi
 cd build
 basedir=`pwd`
 
-./build.sh dal
+$basedir/build.sh dal

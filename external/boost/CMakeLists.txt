@@ -18,7 +18,7 @@ option (BOOST_FORCE_BUILD "Force rebuild and local installation" 0)
 
 ## check where to find the CMake scripts
 
-find_path (BOOST_cmake FindBOOST.cmake
+find_path (BOOST_cmake FindBOOST.cmake FindPython.cmake
   PATHS 
   ${BOOST_SOURCE_DIR}
   ${BOOST_SOURCE_DIR}/..
@@ -29,7 +29,8 @@ find_path (BOOST_cmake FindBOOST.cmake
   )
 
 if (BOOST_cmake)
-  include (${BOOST_cmake}/FindBOOST.cmake)
+  include (${BOOST_cmake}/FindBoost.cmake)
+  include (${BOOST_cmake}/FindPython.cmake)
 endif (BOOST_cmake)
 
 ## <-- begin build condition --------------------------------------------------->
@@ -55,13 +56,16 @@ endif (NOT BOOST_prefix)
 ## ------------------------------------------------------------------------------
 ## Run the configure script provided along with the distribution
 
-## [1] configure
+## [1] configure ---------------------------------
+
+## To be fully consistent at this point, I think we have to ensure that we are
+## building against the correct python version.
 
 message (STATUS "Running the BOOST configure script...")
 
 execute_process (
   WORKING_DIRECTORY ${BOOST_SOURCE_DIR}
-  COMMAND ./configure --with-libraries=python --prefix=${BOOST_prefix}
+  COMMAND ./configure --with-libraries=python --with-python=${PYTHON_EXECUTABLE} --prefix=${BOOST_prefix}
   TIMEOUT 300
   ERROR_VARIABLE error_configure
   ERROR_FILE error.log
@@ -72,7 +76,7 @@ if (error_configure)
   message (SEND_ERROR "${error_configure}")
 endif (error_configure)
 
-## [2] make
+## [2] make --------------------------------------
 
 message (STATUS "Building BOOST library...")
 
@@ -89,7 +93,7 @@ if (error_make)
   message (SEND_ERROR "${error_make}")
 endif (error_make)
 
-## [3] make install
+## [3] make install ------------------------------
 
 if (NOT error_make)
 
