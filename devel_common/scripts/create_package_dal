@@ -56,4 +56,4 @@ for package in $external_packages
     packages="${packages} external/$package"
 }
 
-tar -cvzf dal.tgz ${packages} src/DAL CMakeLists.txt devel_common release/release_area.txt build/build.sh
+tar -cvzf dal.tgz ${packages} src/DAL CMakeLists.txt devel_common release/release_area.txt build/build.sh --exclude .svn

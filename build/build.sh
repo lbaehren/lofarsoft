@@ -84,13 +84,37 @@ case $1 in
     ;;
     cmake)
 	echo "[build] Selected package CMake"
-	echo " --> Cleaning up directory ..."
-	if test -z `which cmake` ; then
-	    rm -rf ./../../external/CMake/Bootstrap.cmk
-	    rm -rf ./../../external/CMake/CMakeCache.txt
-	    rm -rf ./../../external/CMake/Source/cmConfigure.h
+	## Check if the source code to build cmake is available; if this
+	## is not the case with error, since this is the bottom-most 
+	## position in the dependency chain
+	if test -d $basedir/../external/cmake ; then
+	    echo " --> Cleaning up source directory ..."
+	    rm -rf $basedir/../external/cmake/Bootstrap.cmk
+	    rm -rf $basedir/../external/cmake/CMakeCache.txt
+	    rm -rf $basedir/../external/cmake/Source/cmConfigure.h
 	else
-	    build_package cmake external/cmake
+	    echo " ==> Missing source directory for cmake! Unable to continue!"
+	    exit 1;
+	fi
+	## prepare to build cmake from its source
+	if test -d cmake ; then
+	    cd cmake
+	else
+	    mkdir cmake
+	    cd cmake
+	fi
+	## run the configure script
+	echo " --> Running configure script for cmake ..."
+	$basedir/../external/cmake/configure --prefix=$basedir/../external
+	## build and install
+	echo " --> initiating build and install ..."
+	make install
+	## check if we have been able to create a cmake executable
+	if test -f ../../external/bin/cmake ; then
+	    echo " ==> Found newly created cmake executable."
+	else
+	    echo " ==> No cmake executable found in release/bin! Unable to continue!"
+	    exit 1;
 	fi
     ;;
     flex)
@@ -99,7 +123,7 @@ case $1 in
     ;;
     hdf5)
 	echo "[build] Selected package Hdf5"
-	build_package hdf5 external/hdf5
+	build_package hdf5 external/hdf5 -DHDF5_FORCE_BUILD:BOOL=1
     ;;
     pgplot)
 	echo "[build] Selected package Pgplot"
@@ -127,7 +151,7 @@ case $1 in
 	./build.sh blitz
 	./build.sh python
 	./build.sh boost
-	build_package hdf5 external/hdf5 -DHDF5_FORCE_BUILD:BOOL=1
+	./build.sh hdf5
 	## USG packages
 	build_package dal src/DAL
     ;;
@@ -166,6 +190,7 @@ case $1 in
     rm -rf flex
     rm -rf hdf5
     rm -rf pgplot
+    rm -rf python
     rm -rf wcslib
     ;;
     *)
