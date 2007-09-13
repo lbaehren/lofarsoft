@@ -33,21 +33,28 @@ set (include_locations
   )
 
 ## -----------------------------------------------------------------------------
-## Check for the header files
 
-find_path (PYTHON_INCLUDES <header file(s)>
-  PATHS ${include_locations}
-  PATH_SUFFIXES <optional path extension>
-  NO_DEFAULT_PATH
-  )
+foreach (python_version 2.6 2.5 2.4 2.3)
+  ## Check for the header files
+  find_path (PYTHON_INCLUDES Python.h
+    PATHS ${include_locations}
+    PATH_SUFFIXES python${python_version}
+    NO_DEFAULT_PATH
+    )
+  ## Check for the library
+  find_library (PYTHON_LIBRARIES python${python_version}
+    PATHS ${lib_locations}
+    PATH_SUFFIXES python${python_version}/config
+    NO_DEFAULT_PATH
+    )
+  # check if components have been found
+  if (NOT PYTHON_INCLUDES OR NOT PYTHON_LIBRARIES)
+    if (NOT PYTHON_FIND_QUIETLY)
+      message (SEND_ERROR "No consistent set of files found for Python ${python_version}")
+    endif (NOT PYTHON_FIND_QUIETLY)
+  endif (NOT PYTHON_INCLUDES OR NOT PYTHON_LIBRARIES)
+endforeach (python_version)
 
-## -----------------------------------------------------------------------------
-## Check for the library
-
-find_library (PYTHON_LIBRARIES <package name>
-  PATHS ${lib_locations}
-  NO_DEFAULT_PATH
-  )
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
