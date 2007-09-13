@@ -41,49 +41,7 @@ set (lib_locations
   )
 
 ## -----------------------------------------------------------------------------
-## Check for the header files
-
-## <boost/config.hpp>
-
-find_path (BOOST_INCLUDES config.hpp
-  PATHS ${include_locations}
-  PATH_SUFFIXES
-  boost-1_34_1
-  boost-1_34_1/boost
-  boost-1_33_1
-  boost-1_33_1/boost
-  boost
-  NO_DEFAULT_PATH
-  )
-
-if (BOOST_INCLUDES)
-  string (REPLACE include/boost-1_33_1/boost include/boost-1_33_1 BOOST_INCLUDES ${BOOST_INCLUDES})
-  string (REPLACE include/boost-1_34_1/boost include/boost-1_34_1 BOOST_INCLUDES ${BOOST_INCLUDES})
-endif (BOOST_INCLUDES)
-
-## <boost/python.hpp>
-
-find_path (boost_python_hpp python.hpp
-  PATHS ${include_locations}
-  PATH_SUFFIXES
-  boost-1_34_1
-  boost-1_34_1/boost
-  boost-1_33_1
-  boost-1_33_1/boost
-  boost
-  )
-
-if (boost_python_hpp)
-  string (REPLACE include/boost-1_33_1/boost include/boost-1_33_1 boost_python_hpp ${boost_python_hpp})
-  string (REPLACE include/boost-1_34_1/boost include/boost-1_34_1 boost_python_hpp ${boost_python_hpp})
-  list (APPEND BOOST_INCLUDES ${boost_python_hpp})
-endif (boost_python_hpp)
-
-## -----------------------------------------------------------------------------
-## Check for the various components of the library
-
-## The libraries tend to come in different name variants, so we need to take this
-## into account during the search. 
+## Check for the header files and the various module libraries
 
 set (boost_libraries
   boost_date_time
@@ -99,22 +57,45 @@ set (boost_libraries
   boost_unit_test_framework
   boost_wave
 )
-
 set (BOOST_LIBRARIES "")
 
-foreach (lib ${boost_libraries})
-  ## try to locate the library
-  find_library (BOOST_${lib} ${lib}-gcc42-1_34_1 ${lib}-mt-1_34_1 ${lib}-gcc-1_33_1 ${lib}-gcc ${lib}
-    PATHS ${lib_locations}
-    PATH_SUFFIXES boost-1_34_1 boost-1_33_1 boost
+foreach (boost_version 1_34_1 1_33_1)
+
+  ## Check for the header files ------------------
+
+  ## <boost/config.hpp>
+  find_path (BOOST_INCLUDES config.hpp python.hpp
+    PATHS ${include_locations}
+    PATH_SUFFIXES
+    boost-${boost_version}
+    boost-${boost_version}/boost
+    boost
     NO_DEFAULT_PATH
     )
-  ## check if location was successful
-  if (BOOST_${lib})
-    list (APPEND BOOST_LIBRARIES ${BOOST_${lib}})
-    set (continue_search 0)
-  endif (BOOST_${lib})
-endforeach (lib)
+  ## adjust the include path
+  if (BOOST_INCLUDES)
+    string (REPLACE include/boost-${boost_version}/boost include/boost-${boost_version} BOOST_INCLUDES ${BOOST_INCLUDES})
+  endif (BOOST_INCLUDES)
+
+  ## Check for the module libraries --------------
+  
+  foreach (lib ${boost_libraries})
+    ## try to locate the library
+    find_library (BOOST_${lib} ${lib}-gcc42-${boost_version} ${lib}-mt-${boost_version} ${lib}-gcc ${lib}
+      PATHS ${lib_locations}
+      PATH_SUFFIXES boost-${boost_version}
+      NO_DEFAULT_PATH
+      )
+    ## check if location was successful
+    if (BOOST_${lib})
+      list (APPEND BOOST_LIBRARIES ${BOOST_${lib}})
+      set (continue_search 0)
+    endif (BOOST_${lib})
+  endforeach (lib)
+  
+  ## Check for symbols in the library
+  
+endforeach (boost_version)
 
 ## -----------------------------------------------------------------------------
 ## Check for symbols in the library
