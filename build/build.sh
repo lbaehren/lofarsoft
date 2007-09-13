@@ -68,7 +68,7 @@ case $1 in
     ;;
     blitz)
 	echo "[build] Selected package Blitz++"
-	build_package blitz external/blitz
+	build_package blitz external/blitz -DBLITZ_FORCE_BUILD:BOOL=1
     ;;
     boost)
 	echo "[build] Selected package Boost"
@@ -109,6 +109,10 @@ case $1 in
 	echo "[build] Selected package Plplot"
 	build_package plplot external/plplot
     ;;
+    python)
+	echo "[build] Selected package PYTHON"
+	build_package python external/python
+    ;;
     wcslib)
 	echo "[build] Selected package WCSLIB"
 	build_package wcslib external/wcslib
@@ -120,7 +124,8 @@ case $1 in
 	./build.sh wcslib
 	./build.sh cfitsio
 	./build.sh casacore
-	build_package blitz external/blitz -DBLITZ_FORCE_BUILD:BOOL=1
+	./build.sh blitz
+	./build.sh python
 	./build.sh boost
 	build_package hdf5 external/hdf5 -DHDF5_FORCE_BUILD:BOOL=1
 	## USG packages
@@ -132,9 +137,10 @@ case $1 in
 	build_package cr src/CR-Tools
     ;;
     all)
-	## external packages
+	echo "[build] Building all external packsges"
 	./build.sh bison
-	build_package blitz external/blitz -DBLITZ_FORCE_BUILD:BOOL=1
+	./build.sh blitz
+	./build.sh python
 	./build.sh boost
 	./build.sh flex
 	./build.sh pgplot
@@ -142,14 +148,17 @@ case $1 in
 	./build.sh cfitsio
 	./build.sh casacore
 	./build.sh hdf5
+	echo "[build] Building all USG packsges"
+	build_package dal src/DAL
+	build_package cr src/CR-Tools
     ;;
     clean)
     rm -f *~
     rm -rf bison
-    rm -rf blitz;
-    rm -rf boost;
-    rm -rf casacore;
-    rm -rf cfitsio;
+    rm -rf blitz
+    rm -rf boost
+    rm -rf casacore
+    rm -rf cfitsio
     rm -rf cmake
     rm -rf cr
     rm -rf dal
@@ -158,5 +167,8 @@ case $1 in
     rm -rf hdf5
     rm -rf pgplot
     rm -rf wcslib
+    ;;
+    *)
+    echo "";
     ;;
 esac
