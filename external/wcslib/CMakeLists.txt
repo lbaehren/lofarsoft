@@ -69,6 +69,12 @@ if (WCSLIB_cmake)
   ## PGPLOT
   set (PGPLOT_FIND_QUIETLY 1)
 #  include (${WCSLIB_cmake}/FindPGPLOT.cmake)
+  ## Boost
+  set (BOOST_FIND_QUIETLY 1)
+  include (${WCSLIB_cmake}/FindBoost.cmake)
+  ## Python
+  set (PYTHON_FIND_QUIETLY 1)
+  include (${WCSLIB_cmake}/FindPython.cmake)
 else (WCSLIB_cmake)
   message (SEND_ERROR "Unable to locate additional CMake find scripts!")
 endif (WCSLIB_cmake)
@@ -90,6 +96,7 @@ find_program (flex_bin flex
 add_subdirectory (${WCSLIB_SOURCE_DIR}/C)
 add_subdirectory (${WCSLIB_SOURCE_DIR}/FORTRAN)
 add_subdirectory (${WCSLIB_SOURCE_DIR}/pgsbox)
+add_subdirectory (${WCSLIB_SOURCE_DIR}/Python)
 
 ## -----------------------------------------------------------------------------
 ## Installation

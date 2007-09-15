@@ -1,0 +1,29 @@
+##------------------------------------------------------------------------------
+## $Id$
+##------------------------------------------------------------------------------
+
+set(WCSLIB_wrapper_sources wrapper.cc)
+
+include_directories(
+  ${WCSLIB_SOURCE_DIR}/C
+  ${BOOST_INCLUDES}/..
+  ${PYTHON_INCLUDES}
+)
+
+if (BOOST_boost_python AND PYTHON_EXECUTABLE)
+  add_library (wcslib MODULE ${WCSLIB_wrapper_sources})
+  target_link_libraries (wcslib wcs ${BOOST_boost_python})
+  set_target_properties (wcslib PROPERTIES PREFIX "")
+else (BOOST_boost_python AND PYTHON_EXECUTABLE)
+  message(STATUS "Python wrappers would not be built")
+endif (BOOST_boost_python AND PYTHON_EXECUTABLE)
+
+## Linking loadable modules on Mac is slightly more trickier
+if(APPLE)
+  set_target_properties(wcslib PROPERTIES 
+      LINK_FLAGS "-bundle_loader ${PYTHON_EXECUTABLE}")
+endif(APPLE)
+
+## -----------------------------------------------------------------------------
+## Installation
+install(TARGETS wcslib DESTINATION lib/python)
