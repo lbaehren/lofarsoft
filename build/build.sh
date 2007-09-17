@@ -167,6 +167,7 @@ case $1 in
     cr)
 	echo "[build] Selected package CR-Tools"
 	./build.sh dal
+	./build.sh pgplot
 	build_package cr src/CR-Tools
     ;;
     all)
