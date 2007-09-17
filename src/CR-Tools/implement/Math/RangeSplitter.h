@@ -26,6 +26,8 @@
 #ifndef _RANGESPLITTER_H_
 #define _RANGESPLITTER_H_
 
+#include <iostream>
+
 #include <casa/aips.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/ArrayMath.h>
@@ -65,7 +67,7 @@ template <class T> class RangeSplitter {
   //! Which segmentation scheme to apply?
   String method_p;
   //! The number of segments into which the range of values is split
-  Int nofSegments_p;
+  int nofSegments_p;
   //! Limits of the generated segments
   Vector<T> rangeLimits_p;
   
@@ -90,7 +92,7 @@ template <class T> class RangeSplitter {
 
     \param nofSegments -- 
   */
-  RangeSplitter (const Int& nofSegments);
+  RangeSplitter (const int& nofSegments);
   
   /*!
     \brief Argumented constructor
@@ -98,7 +100,7 @@ template <class T> class RangeSplitter {
     \param nofSegments -- 
     \patam method      -- 
   */
-  RangeSplitter (const Int& nofSegments,
+  RangeSplitter (const int& nofSegments,
 		 const String& method);
   
   /*!
@@ -142,7 +144,7 @@ template <class T> class RangeSplitter {
     \return nofSegments -- The number of segments into which the range of values
                            is split
   */
-  Int nofSegments () {
+  int nofSegments () {
     return nofSegments_p;
   }
 
@@ -152,7 +154,7 @@ template <class T> class RangeSplitter {
     \param nofSegments -- The number of segments into which the range of values
                           is split
   */
-  void setNofSegments (const Int& nofSegments) {
+  void setNofSegments (const int& nofSegments) {
     nofSegments_p = nofSegments;
   }
 
@@ -203,7 +205,7 @@ template <class T> class RangeSplitter {
     \return status -- Returns <i>True</i> if everything went fine
   */
   Bool split (const Vector<T>& input,
-	      const Int& nofSegments);
+	      const int& nofSegments);
   
   /*!
     \brief Split the range of values
@@ -218,7 +220,7 @@ template <class T> class RangeSplitter {
     \return status -- Returns <i>True</i> if everything went fine
   */
   Bool split (const Vector<T>& input,
-	      const Int& nofSegments,
+	      const int& nofSegments,
 	      const String& method="lin");
   
  private:
@@ -245,10 +247,22 @@ template <class T> class RangeSplitter {
   Bool splitRange (const T& min,
 		   const T& max);
 
-};
+  // ------------------------------------------------------------------- Feedback
 
-template class RangeSplitter<int>;
-template class RangeSplitter<float>;
-template class RangeSplitter<double>;
+  /*!
+    \brief Provide a summary of the objects internal parameters and settings
+  */
+  inline void summary () {
+    summary (std::cout);
+  }
+
+  /*!
+    \brief Provide a summary of the objects internal parameters and settings
+
+    \param os -- Output stream to which the summary is written
+  */
+  void summary (std::ostream &os);
+
+};
 
 #endif /* _RANGESPLITTER_H_ */

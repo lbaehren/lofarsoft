@@ -27,9 +27,9 @@
 #include <casa/Arrays.h>
 #include <tables/Tables.h>
 
-#using std::cerr;
-#using std::cout;
-#using std::endl;
+using std::cerr;
+using std::cout;
+using std::endl;
 
 // ----------------------------------------------------------------- test_libcasa
 

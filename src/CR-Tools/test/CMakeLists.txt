@@ -60,26 +60,32 @@ if (HAVE_CASA)
 else (HAVE_CASA)
   if (HAVE_CASACORE)
     message (STATUS "Enabling test programs using casacore ...")
-    ## build the executables ----------------------
-    add_executable (tUseArrays tUseArrays.cc)
-    target_link_libraries (tUseArrays ${CASA_LIBRARIES} ${LAPACK_LIBRARIES})
-    ##
-    add_executable (tUseCASA tUseCASA.cc)
-    target_link_libraries (tUseCASA ${CASA_LIBRARIES} ${LAPACK_LIBRARIES})
-    ##
-    add_executable (tUseTables tUseTables.cc)
-    target_link_libraries (tUseTables ${CASA_LIBRARIES} ${LAPACK_LIBRARIES})
-    ## testing ------------------------------------
-    add_test (tUseArrays tUseArrays)
-    add_test (tUseCASA tUseCASA)
-    add_test (tUseTables tUseTables)
-    ## installation locations ---------------------
-    install (
-      TARGETS tUseArrays tUseCASA tUseTables
-      RUNTIME DESTINATION bin
-      LIBRARY DESTINATION lib
-      ARCHIVE DESTINATION lib
-      )
+    ## build the executables ---------------------
+    foreach (src tUseCasacore tUseArrays tUseTables)
+      ## compiler instructions -------------------
+      add_executable (${src} ${src}.cc)
+      ## linker instructions ---------------------
+      target_link_libraries (${src}
+	cr
+	${LAPACK_LIBRARIES}
+	${CASA_LIBRARIES}
+	${G2C_LIBRARIES}
+	${libm}
+	)
+      set_target_properties (${src}
+	PROPERTIES
+	COMPILE_FLAGS -fPIC -O2 -fPIC
+	)
+      ## testing ---------------------------------
+      add_test (${src} ${src})
+      ## installation locations ------------------
+      install (
+	TARGETS ${src}
+	RUNTIME DESTINATION bin
+	LIBRARY DESTINATION lib
+	ARCHIVE DESTINATION lib
+	)
+    endforeach (src)
   endif (HAVE_CASACORE)
 endif (HAVE_CASA)
 
@@ -98,14 +104,6 @@ if (HAVE_BLITZ)
     RUNTIME DESTINATION bin
     )
 endif (HAVE_BLITZ)
-
-## -----------------------------------------------------------------------------
-## Tests for casacore
-
-if (HAVE_CASACORE)
-  add_executable (tUseCasacore tUseCasacore.cc)
-  target_link_libraries (tUseCasacore ${CASACORE_LIBRARIES})
-endif (HAVE_CASACORE)
 
 ## -----------------------------------------------------------------------------
 ## Test for CFITSIO

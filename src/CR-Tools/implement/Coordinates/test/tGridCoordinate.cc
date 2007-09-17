@@ -20,6 +20,11 @@
 
 /* $Id: tGridCoordinate.cc,v 1.2 2006/08/24 13:55:12 bahren Exp $*/
 
+#include <iostream>
+
+#include <casa/aips.h>
+#include <casa/Arrays/Array.h>
+#include <casa/Arrays/ArrayIO.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicSL/String.h>

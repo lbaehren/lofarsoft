@@ -67,8 +67,8 @@ set_target_properties (cr
   )
 target_link_libraries (cr
   ${CASA_LIBRARIES}
-  ${LAPACK_LIBRARIES}
   ${G2C_LIBRARIES}
+  ${LAPACK_LIBRARIES}
   ${CFITSIO_LIBRARIES}
   ${PGPLOT_LIBRARIES}
   ${WCSLIB_LIBRARIES}

@@ -20,31 +20,40 @@
 ## treetest  GLISH CFITSIO WCSLIB
 
 add_executable (treetest treetest.cc)
-target_link_libraries (treetest cr ${CASA_LIBRARIES} ${LAPACK_LIBRARIES} ${libm})
-  set_target_properties (treetest
-    PROPERTIES
-    COMPILE_FLAGS -fPIC -O2 -fPIC
-    )
+target_link_libraries (treetest
+  cr
+  ${LAPACK_LIBRARIES}
+  ${CASA_LIBRARIES}
+  ${G2C_LIBRARIES}
+  ${libm}
+  )
+#  set_target_properties (treetest
+#    PROPERTIES
+#    COMPILE_FLAGS -fPIC -O2 -fPIC
+#    )
 install (TARGETS treetest RUNTIME DESTINATION bin)
 
 ## trigrun   GLISH POPT LAPACK F77 CFITSIO WCSLIB
 
 if (HAVE_POPT)
+  ## compiler instructions
   add_executable (trigrun trigrun.cc)
+  ## linker instructions
   target_link_libraries (trigrun cr ${POPT_LIBRARIES} ${CASA_LIBRARIES})
-  install (TARGETS trigrun RUNTIME DESTINATION bin)
   set_target_properties (trigrun
     PROPERTIES
     COMPILE_FLAGS -fPIC -O2 -fPIC
     )
+  ## installation instructions
+  install (TARGETS trigrun RUNTIME DESTINATION bin)
 endif (HAVE_POPT)
 
 ## ------------------------------------------------------------------------------
 ## Glish client programs
 
-if (HAVE_GLISH)
+if (CR_GLISH_SUPPORT AND HAVE_GLISH)
   add_subdirectory (GlishClients)
-endif (HAVE_GLISH)
+endif (CR_GLISH_SUPPORT AND HAVE_GLISH)
 
 ## ------------------------------------------------------------------------------
 ## LOPES-Star tools

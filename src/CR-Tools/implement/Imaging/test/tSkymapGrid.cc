@@ -20,7 +20,12 @@
 
 #include <Imaging/SkymapGrid.h>
 
-using casa::Double;
+using std::cerr;
+using std::cout;
+using std::endl;
+using std::flush;
+
+using casa::uInt;
 using casa::Matrix;
 using casa::String;
 using casa::Vector;
@@ -70,7 +75,7 @@ using CR::SkymapGrid;
 String time2filename (String basename) {
 
   Time sysTime;
-  ostringstream filename;
+  std::ostringstream filename;
   uInt month;
   uInt dayOfMonth;
   uInt hours;
@@ -114,26 +119,26 @@ int test_DirectionCoordinate ()
 {
   int nofFailedTests (0);
   bool ok (true);
-  Matrix<Double> xform(2,2);
+  Matrix<double> xform(2,2);
   xform = 0.0; xform.diagonal() = 1.0;
 
   DirectionCoordinate radec (MDirection::AZEL,
 			     Projection(Projection::STG),
-			     0*C::pi/180.0,
-			     90*C::pi/180.0,
-			     -1*C::pi/180.0,
-			     1*C::pi/180,
+			     0*casa::C::pi/180.0,
+			     90*casa::C::pi/180.0,
+			     -1*casa::C::pi/180.0,
+			     1*casa::C::pi/180,
 			     xform,
 			     128,
 			     128);
 
-  Vector<Double> pixel (radec.referencePixel());
-  Vector<Double> world (radec.referenceValue());
+  Vector<double> pixel (radec.referencePixel());
+  Vector<double> world (radec.referenceValue());
 
   ok = radec.toWorld (world,pixel);
 
   if (ok) {
-    cout << pixel << " -> " << world/C::pi*180.0 << endl;
+    cout << pixel << " -> " << world/casa::C::pi*180.0 << endl;
   } else {
     nofFailedTests++;
   }
@@ -154,9 +159,9 @@ int test_DirectionCoordinate ()
 */
 void test_CoordinateConversion (const DirectionCoordinate& dir)
 {
-  Vector<Double> referencePixel(dir.referencePixel());
-  Vector<Double> referenceValue(dir.referenceValue());
-  Vector<Double> increment(dir.increment());
+  Vector<double> referencePixel(dir.referencePixel());
+  Vector<double> referenceValue(dir.referenceValue());
+  Vector<double> increment(dir.increment());
 
   cout << "\n[test_CoordinateConversion]\n" << endl;
   cout << " - Reference pixel      = " << referencePixel << endl;
@@ -165,9 +170,9 @@ void test_CoordinateConversion (const DirectionCoordinate& dir)
 
   // coordinate conversion test
   {
-    Bool ok (True);
-    Vector<Double> pixel (referencePixel);
-    Vector<Double> world (referenceValue);
+    bool ok (true);
+    Vector<double> pixel (referencePixel);
+    Vector<double> world (referenceValue);
 
     ok = dir.toWorld (world,pixel);
     cout << " - Coordinate conversion : " << endl;
@@ -183,7 +188,7 @@ void test_CoordinateConversion (const DirectionCoordinate& dir)
     //
     world(0) = 178.82;
     world(1) = 28.02;
-    world *= C::pi/180.0;
+    world *= casa::C::pi/180.0;
     ok = dir.toPixel (pixel,world);
     cout << "\t" << world << " -> " << pixel;
     ok = dir.toWorld (world,pixel);
@@ -203,14 +208,14 @@ void test_CoordinateConversion (const DirectionCoordinate& dir)
 
   \return ok -- Status of the test routine.
  */
-Bool test_CoordinateSystem () 
+bool test_CoordinateSystem () 
 {
   cout << "\n[tSkymapGrid::test_CoordinateSystem]" << endl;
   
   Vector<String> refcode (3);
   Vector<String> projection (4);
   IPosition shape(2);
-  Matrix<Double> xform(2,2);
+  Matrix<double> xform(2,2);
 
   // Direction reference codes to be tested.
   refcode(0) = "J2000";
@@ -236,10 +241,10 @@ Bool test_CoordinateSystem ()
     //
     DirectionCoordinate dir (MDirection::AZEL,            // Direction
 			     Projection(Projection::STG), // Projection
-			     0*C::pi/180.0,               // CRVAL(0)
-			     90*C::pi/180.0,              // CRVAL(1)
-			     1*C::pi/180.0,               // CDELT(0)
-			     1*C::pi/180,                 // CDELT(1)
+			     0*casa::C::pi/180.0,               // CRVAL(0)
+			     90*casa::C::pi/180.0,              // CRVAL(1)
+			     1*casa::C::pi/180.0,               // CDELT(0)
+			     1*casa::C::pi/180,                 // CDELT(1)
 			     xform,                       // PC(i,j)
 			     shape(0)/2+1,                // CRPIX(0)
 			     shape(1)/2+1);               // CRPIX(1)
@@ -251,14 +256,14 @@ Bool test_CoordinateSystem ()
     cout << " -> " << cs.nCoordinates() << endl;
     //
     cout << " -- Axis names .......... : "
-	 << dir.axisNames(dir.directionType(),False) << endl;
+	 << dir.axisNames(dir.directionType(),false) << endl;
   }
 
   // Test 2 : Change the direction type 
   cout << "\n [2] Coordinate system with asignment of MDirection via refcode ..."
        << endl;
   for (uInt numRefcode=0; numRefcode<refcode.nelements(); numRefcode++) {
-    Bool ok;
+    bool ok;
     MDirection md;
     MDirection::Types tp;
     CoordinateSystem cs;
@@ -275,10 +280,10 @@ Bool test_CoordinateSystem ()
     cout << " -- Creating direction coordinate ... " << flush;
     DirectionCoordinate dir (tp,                          // Direction
 			     Projection(Projection::STG), // Projection
-			     0*C::pi/180.0,               // CRVAL(0)
-			     90*C::pi/180.0,              // CRVAL(1)
-			     -1*C::pi/180.0,              // CDELT(0)
-			     1*C::pi/180,                 // CDELT(1)
+			     0*casa::C::pi/180.0,               // CRVAL(0)
+			     90*casa::C::pi/180.0,              // CRVAL(1)
+			     -1*casa::C::pi/180.0,              // CDELT(0)
+			     1*casa::C::pi/180,                 // CDELT(1)
 			     xform,                       // PC(i,j)
 			     shape(0)/2+1,                // CRPIX(0)
 			     shape(1)/2+1);               // CRPIX(1)  
@@ -294,7 +299,7 @@ Bool test_CoordinateSystem ()
     {
       Projection proj;
       Projection::Type tp;
-      Bool isZenithal (False);
+      bool isZenithal (false);
       
       tp = proj.type(projection(n));
       isZenithal = proj.isZenithal(tp);
@@ -305,10 +310,10 @@ Bool test_CoordinateSystem ()
       cout << " -- Creating direction coordinate ... " << flush;
       DirectionCoordinate dir (MDirection::AZEL,            // Direction
 			       Projection(tp),              // Projection
-			       0*C::pi/180.0,               // CRVAL(0)
-			       90*C::pi/180.0,              // CRVAL(1)
-			       -1*C::pi/180.0,              // CDELT(0)
-			       1*C::pi/180,                 // CDELT(1)
+			       0*casa::C::pi/180.0,         // CRVAL(0)
+			       90*casa::C::pi/180.0,        // CRVAL(1)
+			       -1*casa::C::pi/180.0,        // CDELT(0)
+			       1*casa::C::pi/180,           // CDELT(1)
 			       xform,                       // PC(i,j)
 			       shape(0)/2+1,                // CRPIX(0)
 			       shape(1)/2+1);               // CRPIX(1)  
@@ -316,7 +321,7 @@ Bool test_CoordinateSystem ()
     }
   }
 
-  return True;
+  return true;
 }
 
 // =============================================================================
@@ -329,11 +334,11 @@ Bool test_CoordinateSystem ()
 
   \return ok -- Status of the test routine.
  */
-Bool test_SkymapGrid ()
+bool test_SkymapGrid ()
 {
   cout << "\n[tSkymapGrid::test_SkymapGrid]" << endl;
 
-  Bool ok (True);
+  bool ok (true);
 
   // Test 1 : Default constructor
   cout << "\n [1] Testing default constructor ..." << endl;
@@ -362,8 +367,8 @@ Bool test_SkymapGrid ()
     String refcode ("J2000");
     String projection ("TAN");
     IPosition shape (2);
-    Vector<Double> center (2);
-    Vector<Double> increment (2);
+    Vector<double> center (2);
+    Vector<double> increment (2);
 
     shape = 100;
     //
@@ -383,8 +388,8 @@ Bool test_SkymapGrid ()
     String refcode ("GALACTIC");
     String projection ("AIT");
     IPosition shape (2);
-    Vector<Double> center (2);
-    Vector<Double> increment (2);
+    Vector<double> center (2);
+    Vector<double> increment (2);
     ObsInfo obsInfo;
 
     obsInfo.setObserver ("LOPES-Tools programmer");
@@ -415,16 +420,16 @@ Bool test_SkymapGrid ()
 
   \return ok -- Status of the test routine.
  */
-Bool test_operators ()
+bool test_operators ()
 {
   cout << "\n[tSkymapGrid::test_operators]" << endl;
 
-  Bool ok (True);
+  bool ok (true);
   String refcode ("J2000");
   String projection ("STG");
   IPosition shape (2);
-  Vector<Double> center (2);
-  Vector<Double> increment (2);
+  Vector<double> center (2);
+  Vector<double> increment (2);
   
   shape = 20;
   //
@@ -449,7 +454,7 @@ Bool test_operators ()
       sg1 = sg2;
     } catch (AipsError x) {
       cerr << "[tSkymapGrid::test_operators] " << x.getMesg() << endl;
-      ok = False;
+      ok = false;
     }
     //
     cout << " - SkymapGrid after copy operation :" << endl;
@@ -470,16 +475,16 @@ Bool test_operators ()
 
   \return ok -- Status of the test routine.
  */
-Bool test_grid ()
+bool test_grid ()
 {
   cout << "\n[tSkymapGrid::test_grid]" << endl;
 
-  Bool ok (True);
+  bool ok (true);
   String refcode ("J2000");
   String projection ("STG");
   IPosition shape (2);
-  Vector<Double> center (2);
-  Vector<Double> increment (2);
+  Vector<double> center (2);
+  Vector<double> increment (2);
   
   shape = 20;
   //
@@ -495,11 +500,11 @@ Bool test_grid ()
     //
     sg.show (std::cout);
     //
-    Matrix<Double> grid = sg.grid();
+    Matrix<double> grid = sg.grid();
     IPosition shape (grid.shape());
     //
     String filename (time2filename("tSkymapGrid-grid1"));
-    std::ofstream logfile (filename.c_str(),ios::out);
+    std::ofstream logfile (filename.c_str(),std::ios::out);
     //
     for (int pix=0; pix<shape(0); pix++) {
       logfile << pix;
@@ -518,12 +523,12 @@ Bool test_grid ()
     //
     sg.show (std::cout);
     //
-    Matrix<Double> grid = sg.grid(True);
-    Matrix<Double> azel = sg.azel(True);
+    Matrix<double> grid = sg.grid(true);
+    Matrix<double> azel = sg.azel(true);
     IPosition shape (grid.shape());
     //
     String filename (time2filename("tSkymapGrid-grid2"));
-    ofstream logfile (filename.c_str(),ios::out);
+    std::ofstream logfile (filename.c_str(),std::ios::out);
     //
     for (int pix=0; pix<shape(0); pix++) {
       logfile << pix;
@@ -541,18 +546,18 @@ Bool test_grid ()
   // Test 3 : Retrieve coordinate grid selectively
   cout << "\n [3] Retrieve coordinate grid selectively" << endl;
   try {
-    Bool which (True);
+    bool which (true);
     //
     SkymapGrid sg (refcode, projection, shape, center, increment);
     //
-    Matrix<Double> grid = sg.grid(which);
-    Matrix<Double> azel = sg.azel(which);
+    Matrix<double> grid = sg.grid(which);
+    Matrix<double> azel = sg.azel(which);
     IPosition shape (grid.shape());
     //
     sg.show (std::cout);
     //
     String filename (time2filename("tSkymapGrid-grid3"));
-    ofstream logfile (filename.c_str(),ios::out);
+    std::ofstream logfile (filename.c_str(),std::ios::out);
     //
     for (int pix=0; pix<shape(0); pix++) {
       logfile << pix;
@@ -567,14 +572,14 @@ Bool test_grid ()
     logfile.close();
   } catch (AipsError x) {
     cerr << "[tSkymapGrid::test_grid] " << x.getMesg() << endl;
-    ok = False;
+    ok = false;
   }
 
   // Test 4 : Retrieve grid nodes within a given elevation range
   cout << "\n [4] Retrieve grid nodes within a given elevation range" << endl;
   try {
-    Bool which (True);
-    Vector<Double> elevation(2);
+    bool which (true);
+    Vector<double> elevation(2);
     // 
     elevation(0) = 20.0;
     elevation(1) = 50.0;
@@ -589,21 +594,24 @@ Bool test_grid ()
     //
     sg.setElevationRange (elevation);
     //
-    Matrix<Double> grid = sg.grid(which);
-    Matrix<Double> azel = sg.azel(which);
+    Matrix<double> grid = sg.grid(which);
+    Matrix<double> azel = sg.azel(which);
     IPosition shape (grid.shape());
     //
     sg.show (std::cout);
     //
     String filename (time2filename("tSkymapGrid-grid4"));
-    ofstream logfile (filename.c_str(),ios::out);
+    std::ofstream logfile (filename.c_str(),std::ios::out);
     //
-    for (int pix=0; pix<shape(0); pix++) {
+    int pix (0);
+    int coord (0);
+    //
+    for (pix=0; pix<shape(0); pix++) {
       logfile << pix;
-      for (int coord=0; coord<shape(1); coord++) {
+      for (coord=0; coord<shape(1); coord++) {
 	logfile << "\t" << grid(pix,coord);
       }
-      for (int coord=0; coord<shape(1); coord++) {
+      for (coord=0; coord<shape(1); coord++) {
 	logfile << "\t" << azel(pix,coord);
       }
       logfile << endl;
@@ -612,20 +620,20 @@ Bool test_grid ()
     logfile.close();
   } catch (AipsError x) {
     cerr << "[tSkymapGrid::test_grid] " << x.getMesg() << endl;
-    ok = False;
+    ok = false;
   }
 
   // Test 5 : Check for dependency of the local coordinate grid on the choice
   //          of the celestial reference frame.
   cout << "\n [5] Dependency of local grid on celestial reference frame" << endl;
   try {
-    Bool which (True);
+    bool which (true);
     Quantity epoch (52940.4624,"d");
     String telescope ("LOPES");
     ObservationData obsData (epoch,telescope);
     ObsInfo obsInfo (obsData.obsInfo());
-    Vector<Double> sunJ2000 (2);
-    Vector<Double> sunGALACTIC (2);
+    Vector<double> sunJ2000 (2);
+    Vector<double> sunGALACTIC (2);
     //
     sunJ2000(0) = -147.700631;
     sunJ2000(1) = -13.0431452;
@@ -637,14 +645,14 @@ Bool test_grid ()
     //
     refcode = "J2000";
     SkymapGrid sgJ2000 (obsInfo,refcode, projection, shape, sunJ2000, increment);
-    Matrix<Double> gridJ2000 = sgJ2000.grid(which);
-    Matrix<Double> azelJ2000 = sgJ2000.azel(which);
+    Matrix<double> gridJ2000 = sgJ2000.grid(which);
+    Matrix<double> azelJ2000 = sgJ2000.azel(which);
     IPosition shapeJ2000 (gridJ2000.shape());
     //
     refcode = "GALACTIC";
     SkymapGrid sgGALACTIC (obsInfo,refcode, projection, shape, sunGALACTIC, increment);
-    Matrix<Double> gridGALACTIC = sgGALACTIC.grid(which);
-    Matrix<Double> azelGALACTIC = sgGALACTIC.azel(which);
+    Matrix<double> gridGALACTIC = sgGALACTIC.grid(which);
+    Matrix<double> azelGALACTIC = sgGALACTIC.azel(which);
     IPosition shapeGALACTIC (gridGALACTIC.shape());
     //
     cout << " - Grid shape J2000 .. : " << shapeJ2000 << endl;
@@ -652,7 +660,7 @@ Bool test_grid ()
     //
     if (shapeJ2000 == shapeGALACTIC) {
       String filename (time2filename("tSkymapGrid-grid5"));
-      ofstream logfile (filename.c_str(),ios::out);
+      std::ofstream logfile (filename.c_str(),std::ios::out);
       //
       for (int pix=0; pix<shapeJ2000(0); pix++) {
 	logfile << pix;
@@ -677,7 +685,7 @@ Bool test_grid ()
     }
   } catch (AipsError x) {
     cerr << "[tSkymapGrid::test_grid] " << x.getMesg() << endl;
-    ok = False;
+    ok = false;
   }
 
   cout << "\n [#] Tests completed" << endl;
@@ -692,14 +700,14 @@ Bool test_grid ()
 
   \return ok -- Status of the test routine.
  */
-Bool test_orientation ()
+bool test_orientation ()
 {
-  Bool ok (True);
+  bool ok (true);
   String refcode ("J2000");
   String projection ("STG");
   IPosition shape (2);
-  Vector<Double> center (2);
-  Vector<Double> increment (2);
+  Vector<double> center (2);
+  Vector<double> increment (2);
   Vector<String> orientation(2);
   
   shape = 50;
@@ -718,7 +726,7 @@ Bool test_orientation ()
     //
     sg.setOrientation (orientation);
     //
-    Matrix<Double> grid = sg.grid(True);
+    Matrix<double> grid = sg.grid(true);
   }
 
   // Test 2: [East,South]
@@ -728,7 +736,7 @@ Bool test_orientation ()
     //
     sg.setOrientation (orientation);
     //
-    Matrix<Double> grid = sg.grid(True);
+    Matrix<double> grid = sg.grid(true);
   }
 
   // Test 3: [West,North]
@@ -738,7 +746,7 @@ Bool test_orientation ()
     //
     sg.setOrientation (orientation);
     //
-    Matrix<Double> grid = sg.grid(True);
+    Matrix<double> grid = sg.grid(true);
   }
 
   // Test 4: [West,South]
@@ -748,7 +756,7 @@ Bool test_orientation ()
     //
     sg.setOrientation (orientation);
     //
-    Matrix<Double> grid = sg.grid(True);
+    Matrix<double> grid = sg.grid(true);
   }
 
   return ok;

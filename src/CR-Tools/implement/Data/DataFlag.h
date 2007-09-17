@@ -35,7 +35,8 @@
 
 #include <Analysis/ClippingFraction.h>
 
-#include <casa/namespace.h>
+using casa::Matrix;
+using casa::Vector;
 
 namespace CR {  //  Namespace CR -- begin
   
@@ -62,7 +63,7 @@ namespace CR {  //  Namespace CR -- begin
     Vector<T> flags_p;
     
     //! Test if signals are clipped?
-    Bool testClipping_p;
+    bool testClipping_p;
     
   public:
     
@@ -73,7 +74,7 @@ namespace CR {  //  Namespace CR -- begin
       
       \param num -- Number of data sets.
     */
-    DataFlag (const Int& num);
+    DataFlag (const int& num);
     
     /*!
       \brief Constructor
@@ -82,7 +83,7 @@ namespace CR {  //  Namespace CR -- begin
       \param threshold -- Threshold for the float to boolean conversion of the 
                           flag values.
     */
-    DataFlag (const Int& num,
+    DataFlag (const int& num,
 	      const T& threshold);
     
     /*!
@@ -93,7 +94,7 @@ namespace CR {  //  Namespace CR -- begin
                           flag values.
       \param limits    -- Maximum valid signal limits.
     */
-    DataFlag (const Int& num,
+    DataFlag (const int& num,
 	      const T& threshold,
 	      const Vector<T>& limits);
     
@@ -102,7 +103,7 @@ namespace CR {  //  Namespace CR -- begin
       
       \param flags -- Flags for the data sets.
     */
-    DataFlag (const Vector<Bool>& flags);
+    DataFlag (const Vector<bool>& flags);
     
     /*!
       \brief Constructor
@@ -138,7 +139,7 @@ namespace CR {  //  Namespace CR -- begin
     /*!
       \brief Get flag for an individual dataset (as bool).
     */
-    void flags (Bool& flag,
+    void flags (bool& flag,
 		const uInt& num);
     
     /*!
@@ -150,7 +151,7 @@ namespace CR {  //  Namespace CR -- begin
     /*!
       \brief Get the flags for all datasets (as bool).
     */
-    void flags (Vector<Bool>& flags);
+    void flags (Vector<bool>& flags);
     
     /*!
       \brief Get the flags for all datasets (as float).
@@ -160,7 +161,7 @@ namespace CR {  //  Namespace CR -- begin
     /*!
       \brief Set the flags applied to the data
     */
-    void setFlags (const Vector<Bool>& flags);
+    void setFlags (const Vector<bool>& flags);
     
     /*!
       \brief Set the flags applied to the data
@@ -181,7 +182,7 @@ namespace CR {  //  Namespace CR -- begin
     /*!
       \brief Flag the data
     */
-    void flagData (Vector<Bool>& flags,
+    void flagData (Vector<bool>& flags,
 		   const Matrix<T>& data);
     
     /*!
@@ -195,18 +196,8 @@ namespace CR {  //  Namespace CR -- begin
     /*!
       \brief Convert internal flag value (float) to boolean.
     */
-    Bool float2bool (const T& flag);
+    bool float2bool (const T& flag);
   };
-  
-  // ============================================================================
-  //
-  //  Template instantiations
-  //
-  // ============================================================================
-  
-/*   template <class T> class ClippingFraction; */
-  template class DataFlag<Float>;
-  template class DataFlag<Double>;
   
 }  //  Namespace CR - end
 

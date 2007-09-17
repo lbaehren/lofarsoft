@@ -58,7 +58,7 @@ namespace CR {  //  Namespace CR -- begin
     DataFlag<T>::setFlags (flags);
   }
   
-  template <class T> DataFlag<T>::DataFlag (const Vector<Bool>& flags)
+  template <class T> DataFlag<T>::DataFlag (const Vector<bool>& flags)
     : ClippingFraction<T> ()
   {
     DataFlag<T>::setFlags (flags);
@@ -93,7 +93,7 @@ namespace CR {  //  Namespace CR -- begin
   
   // --- Access to the flags -----------------------------------------------------
   
-  template <class T> Bool DataFlag<T>::float2bool (const T& flag)
+  template <class T> bool DataFlag<T>::float2bool (const T& flag)
   {
     if (flag > threshold_p) {
       return True;
@@ -102,7 +102,7 @@ namespace CR {  //  Namespace CR -- begin
     }
   }
   
-  template <class T> void DataFlag<T>::flags (Bool& flag,
+  template <class T> void DataFlag<T>::flags (bool& flag,
 					      const uInt& num)
   {
     T fflag (0.0);
@@ -123,7 +123,7 @@ namespace CR {  //  Namespace CR -- begin
     }
   }
   
-  template <class T> void DataFlag<T>::flags (Vector<Bool>& flags)
+  template <class T> void DataFlag<T>::flags (Vector<bool>& flags)
   {
     uInt nofFiles (flags_p.nelements());
     //
@@ -140,7 +140,7 @@ namespace CR {  //  Namespace CR -- begin
     flags = flags_p;
   }
   
-  template <class T> void DataFlag<T>::setFlags (const Vector<Bool>& bFlags)
+  template <class T> void DataFlag<T>::setFlags (const Vector<bool>& bFlags)
   {
     Int nofElements (bFlags.nelements());
     Vector<T> flags (nofElements, 1.0);
@@ -160,21 +160,13 @@ namespace CR {  //  Namespace CR -- begin
     flags_p = flags;
   }
   
-  // --- Set the flags for a set of data -----------------------------------------
+  // ============================================================================
+  //
+  //  Template instantiations
+  //
+  // ============================================================================
   
-  template <class T> void DataFlag<T>::setFlags (const Matrix<T>& data)
-  {;}
-  
-  template <class T> void DataFlag<T>::setFlags (const Vector<T>& data,
-						 const Int& num)
-  {;}
-  
-  template <class T> void DataFlag<T>::flagData (Vector<Bool>& flags,
-						 const Matrix<T>& data)
-  {;}
-  
-  template <class T> void DataFlag<T>::flagData (Vector<T>& flags,
-						 const Matrix<T>& data)
-  {;}
+  template class DataFlag<float>;
+  template class DataFlag<double>;
   
 }  //  Namespace CR -- end

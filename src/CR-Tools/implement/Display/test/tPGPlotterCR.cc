@@ -21,14 +21,14 @@
 #include <iostream>
 #include <string>
 #include <cpgplot.h>
-#include <Display/PGPlotter.h>
+#include <Display/PGPlotterCR.h>
 
 using namespace std;
 
 int main ()
 {
   try {
-    CR::PGPlotter pg;
+    CR::PGPlotterCR pg;
     pg.initPlot();
   } catch (std::string message) {
     std::cerr << message << std::endl;

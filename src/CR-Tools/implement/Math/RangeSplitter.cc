@@ -46,14 +46,14 @@ RangeSplitter<T>::RangeSplitter (const String& method)
 }
 
 template <class T>
-RangeSplitter<T>::RangeSplitter (const Int& nofSegments)
+RangeSplitter<T>::RangeSplitter (const int& nofSegments)
 {
   nofSegments_p = nofSegments;
   method_p      = "lin";
 }
 
 template <class T>
-RangeSplitter<T>::RangeSplitter (const Int& nofSegments,
+RangeSplitter<T>::RangeSplitter (const int& nofSegments,
 				 const String& method)
 {
   nofSegments_p = nofSegments;
@@ -136,7 +136,7 @@ Bool RangeSplitter<T>::split (const T& minValue,
 
 template <class T>
 Bool RangeSplitter<T>::split (const Vector<T>& input,
-			      const Int& nofSegments)
+			      const int& nofSegments)
 {
   setNofSegments (nofSegments);
   
@@ -193,3 +193,27 @@ Bool RangeSplitter<T>::splitRange (const T& minValue,
 
   return status;
 }
+
+// ==============================================================================
+//
+//  Feedback
+//
+// ==============================================================================
+
+template <class T>
+void RangeSplitter<T>::summary (std::ostream &os)
+{
+  os << " - Segmentation mode : " << method()      << std::endl;
+  os << " - nof segments      : " << nofSegments() << std::endl;
+  os << " - range segments    : " << rangeLimits() << std::endl;
+}
+
+// ==============================================================================
+//
+// Template instantiation
+//
+// ==============================================================================
+
+template class RangeSplitter<int>;
+template class RangeSplitter<float>;
+template class RangeSplitter<double>;
