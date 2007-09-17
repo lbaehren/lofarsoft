@@ -140,7 +140,21 @@ case $1 in
     ;;
     plplot)
 	echo "[build] Selected package Plplot"
-	build_package plplot external/plplot
+	if test -d $basedir/../external/plplot ; then
+	    build_package plplot external/plplot;
+	else
+	    cd $basedir/../external
+	    ## download the source tar-ball from source forge
+	    wget -c http://ovh.dl.sourceforge.net/sourceforge/plplot/plplot-5.7.4.tar.gz
+	    ## unpack the tar-ball and adjust the name of the newly created directory
+	    tar -xvzf plplot-5.7.4.tar.gz
+	    mv plplot-5.7.4 plplot
+	    ## remove the tar-ball
+	    rm -f plplot-5.7.4.tar.gz
+	    ## recursive call of this method
+	    cd $basedir
+	    ./build.sh plplot
+	fi
     ;;
     python)
 	echo "[build] Selected package PYTHON"
@@ -188,6 +202,7 @@ case $1 in
     ;;
     clean)
     rm -f *~
+    rm -f *.log
     rm -rf bison
     rm -rf blitz
     rm -rf boost
@@ -200,6 +215,7 @@ case $1 in
     rm -rf flex
     rm -rf hdf5
     rm -rf pgplot
+    rm -rf plplot
     rm -rf python
     rm -rf wcslib
     ;;
