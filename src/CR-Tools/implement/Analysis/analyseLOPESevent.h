@@ -25,10 +25,11 @@
 #define ANALYSELOPESEVENT_H
 
 // Standard library header files
-#include <iostream>
 #include <string>
 
 #include <casa/aips.h>
+#include <casa/iostream.h>
+#include <casa/Arrays.h>
 #include <casa/Arrays/Array.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>

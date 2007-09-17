@@ -7,13 +7,21 @@
 ## A simple shell script to configure and install as many as possible of
 ## the packages in the LOFAR USG distribution. Simply run
 ## 
-##   ./build.sh
+##   ./build.sh <package>
 ##
 ## from within the build directory - and the script should take care of
 ## the rest.
 ##
 
 basedir=`pwd`
+
+## check command line parameters
+
+if test -z $1 ; then
+    echo "[build] Missing input parameters.";
+else
+    packageName=$1
+fi
 
 ## -----------------------------------------------------------------------------
 ## Helper functions
@@ -43,14 +51,14 @@ build_package ()
 	fi
 	# build the package
 	if test -z "`make help | grep install`" ; then
-	    echo "-- No target install for $buildDir."
+	    echo "[build] No target install for $buildDir."
 	else
 	    make install;
 	fi
 	}
     else 
 	{
-	echo "No build directory $buildDir - creating it now."
+	echo "[build] No build directory $buildDir - creating it now."
 	mkdir $buildDir;
 	# recursive call
 	build_package $buildDir $sourceDir
@@ -88,12 +96,12 @@ case $1 in
 	## is not the case with error, since this is the bottom-most 
 	## position in the dependency chain
 	if test -d $basedir/../external/cmake ; then
-	    echo " --> Cleaning up source directory ..."
+	    echo "[build] Cleaning up source directory ..."
 	    rm -rf $basedir/../external/cmake/Bootstrap.cmk
 	    rm -rf $basedir/../external/cmake/CMakeCache.txt
 	    rm -rf $basedir/../external/cmake/Source/cmConfigure.h
 	else
-	    echo " ==> Missing source directory for cmake! Unable to continue!"
+	    echo "[build] Missing source directory for cmake! Unable to continue!"
 	    exit 1;
 	fi
 	## prepare to build cmake from its source
@@ -104,17 +112,17 @@ case $1 in
 	    cd cmake
 	fi
 	## run the configure script
-	echo " --> Running configure script for cmake ..."
+	echo "[build] Running configure script for cmake ..."
 	$basedir/../external/cmake/configure --prefix=$basedir/../release
 	## build and install
-	echo " --> initiating build and install ..."
+	echo "[build] Initiating build and install of cmake ..."
 	make install
 	## check if we have been able to create a cmake executable
 	if test -f ../../release/bin/cmake ; then
-	    echo " ==> Found newly created cmake executable."
+	    echo "[build] Found newly created cmake executable."
 	    export PATH=$PATH:$basedir/../release/bin
 	else
-	    echo " ==> No cmake executable found in release/bin! Unable to continue!"
+	    echo "[build] No cmake executable found in release/bin! Unable to continue!"
 	    exit 1;
 	fi
     ;;

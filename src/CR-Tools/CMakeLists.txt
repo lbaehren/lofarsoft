@@ -223,8 +223,11 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 ## Check for the presence of further USG comonents
 
 find_path (DAL_INCLUDES dal.h lopesevent.h
-  PATHS ${CR_SOURCE_DIR}/.. ..
-  PATH_SUFFIXES DAL/implement
+  PATHS
+  ${CR_SOURCE_DIR}/..
+  ${CR_SOURCE_DIR}/../..
+  PATH_SUFFIXES
+  DAL/implement
   )
 
 ## ------------------------------------------------------------------------------
@@ -244,13 +247,15 @@ if (BLITZ_INCLUDES)
   include_directories (${BLITZ_INCLUDES})
 endif (BLITZ_INCLUDES)
 
-if (HAVE_CASA)
-  include_directories (${CASA_INCLUDES})
-endif (HAVE_CASA)
-
-if (HAVE_CASACORE)
-  include_directories (${CASACORE_INCLUDES})
-endif (HAVE_CASACORE)
+if (CR_GLISH_SUPPORT)
+  if (HAVE_CASA)
+    include_directories (${CASA_INCLUDES})
+  endif (HAVE_CASA)
+else (CR_GLISH_SUPPORT)
+  if (HAVE_CASACORE)
+    include_directories (${CASACORE_INCLUDES})
+  endif (HAVE_CASACORE)
+endif (CR_GLISH_SUPPORT)
 
 if (CFITSIO_INCLUDES)
   include_directories (${CFITSIO_INCLUDES})
