@@ -18,6 +18,10 @@ set (tests
   tSimulation2fftMatrix
   )
 
+if (HAVE_HDF5)
+  list (APPEND tests tH5ImportConfig)
+endif (HAVE_HDF5)
+
 ## -----------------------------------------------------------------------------
 ## Build the test programs
 

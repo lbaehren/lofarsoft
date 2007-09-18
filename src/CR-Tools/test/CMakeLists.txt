@@ -156,6 +156,22 @@ if (HAVE_GSL)
 endif (HAVE_GSL)
 
 ## -----------------------------------------------------------------------------
+## Test(s) for HDF5
+
+if (HAVE_HDF5)
+  ## compiler instructions
+  include_directories (${HDF5_INCLUDES})
+  add_executable (tUseHDF5 tUseHDF5.cc)
+  ## linker instructions
+  target_link_libraries (tUseHDF5 ${HDF5_LIBRARIES})
+  ## installation
+  install (
+    TARGETS tUseHDF5
+    RUNTIME DESTINATION bin
+    )
+endif (HAVE_HDF5)
+
+## -----------------------------------------------------------------------------
 ## Test(s) for PGPlot
 
 if (HAVE_PGPLOT)
