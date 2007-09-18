@@ -18,26 +18,33 @@ basedir=`pwd`
 ## -----------------------------------------------------------------------------
 ## check command line parameters
 
+echo "[build]";
+
 ## param 1 -- Name of the package to build
 
 if test -z $1 ; then
-    echo "[build] Missing input parameters.";
+    echo " -- Missing input parameters.";
     echo "";
-    echo " Usage:  build.sh <package>";
+    echo " Usage:  build.sh <package> [build-option]";
     echo "";
 else
-    param_packageName=$1
+    param_packageName=$1;
+    echo " -- Selected package: $param_packageName";
 fi
 
 ## param 2 -- Force build of package from provided source?
 
 if test -z $2 ; then
-    echo " -- No further parameters.";
+    echo " -- No further build options.";
     param_forceBuild=0;
 else
     case $2 in
 	--force-build)
-	param_forceBuild=1;
+	    param_forceBuild=1;
+	    echo " -- Recognized build option; forcing build."; 
+	;;
+	*)
+	    echo " --> Unknown parameter $2"
 	;;
     esac
 fi
@@ -135,7 +142,7 @@ case $param_packageName in
 	$basedir/../external/cmake/configure --prefix=$basedir/../release
 	## build and install
 	echo "[build] Initiating build and install of cmake ..."
-	make install
+	make && make install
 	## check if we have been able to create a cmake executable
 	if test -f ../../release/bin/cmake ; then
 	    echo "[build] Found newly created cmake executable."
@@ -237,8 +244,5 @@ case $param_packageName in
     rm -rf plplot;
     rm -rf python;
     rm -rf wcslib;
-    ;;
-    *)
-    echo "";
     ;;
 esac

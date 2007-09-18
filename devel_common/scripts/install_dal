@@ -38,4 +38,8 @@ fi
 cd build
 basedir=`pwd`
 
-$basedir/build.sh dal
+$basedir/build.sh dal --force-build
+
+##------------------------------------------------------------------------------
+## Feedback on post-install user activities
+
