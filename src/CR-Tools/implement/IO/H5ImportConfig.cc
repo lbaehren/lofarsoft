@@ -49,6 +49,23 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------- H5ImportConfig
 
+  H5ImportConfig::H5ImportConfig (std::vector<int> const &shape)
+  {
+    int rank = shape.size();
+    int *dimensions;
+
+    dimensions = new int [rank];
+    
+    for (int n(0); n<rank; n++) {
+      dimensions[n] = shape[n];
+    }
+    
+    init (rank,
+	  dimensions);
+  }
+  
+  // ------------------------------------------------------------- H5ImportConfig
+
   H5ImportConfig::H5ImportConfig (int const &rank,
 				  int const *dimensions)
   {
@@ -203,13 +220,11 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------- exportSettings
 
-  bool H5ImportConfig::exportSettings (std::string const &outfile)
+  bool H5ImportConfig::exportSettings ()
   {
     bool status (true);
     std::ofstream os;
 
-    // first store the name of the output file
-    status = setConfigFile (outfile);
 
     // open the file stream to which the configuration will be written
     os.open (configFile_p.c_str(),std::ios::out);
@@ -232,6 +247,17 @@ namespace CR { // Namespace CR -- begin
     os.close();
 
     return status;
+  }
+
+  // ------------------------------------------------------------- exportSettings
+
+  bool H5ImportConfig::exportSettings (std::string const &outfile)
+  {
+    if (setConfigFile (outfile)) {
+      return exportSettings ();
+    } else {
+      return false;
+    }
   }
 
 } // Namespace CR -- end

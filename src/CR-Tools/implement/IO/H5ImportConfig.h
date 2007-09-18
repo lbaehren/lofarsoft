@@ -27,6 +27,7 @@
 // Standard library header files
 #include <iostream>
 #include <string>
+#include <vector>
 
 namespace CR { // Namespace CR -- begin
   
@@ -85,6 +86,13 @@ namespace CR { // Namespace CR -- begin
       \brief Default constructor
     */
     H5ImportConfig ();
+    
+    /*!
+      \brief Argumented constructor
+      
+      \param shape -- Size of the dataset dimensions, aka. shape
+    */
+    H5ImportConfig (std::vector<int> const &shape);
     
     /*!
       \brief Argumented constructor
@@ -159,6 +167,20 @@ namespace CR { // Namespace CR -- begin
       }
       return status;
     }
+
+    /*!
+      \brief Get the number of data points in the dataset
+      
+      \return nofPoints -- The number of data points in the data set, as given by
+                           the product of the dataset dimensions.
+    */
+    inline int nofDatapoints () const {
+      int nofPoints (1);
+      for (int n(0); n<rank_p; n++) {
+	nofPoints *= dimensions_p[n];
+      }
+      return nofPoints;
+    }
     
     /*!
       \brief Get the size/shape of the dataset as string
@@ -191,6 +213,8 @@ namespace CR { // Namespace CR -- begin
     void summary (std::ostream &os);    
 
     // ------------------------------------------------------------------ Methods
+    
+    bool exportSettings ();
     
     bool exportSettings (std::string const &outfile);
     

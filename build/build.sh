@@ -186,6 +186,10 @@ case $param_packageName in
 	echo "[build] Selected package PYTHON"
 	build_package python external/python
     ;;
+    vtk)
+	echo "[build] Selected package VTK"
+	build_package vtk external/vtk
+    ;;
     wcslib)
 	echo "[build] Selected package WCSLIB"
 	build_package wcslib external/wcslib

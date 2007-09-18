@@ -14,8 +14,10 @@
 ## Search locations
 
 set (include_locations
+  ## local installation
   ../release/include
   ../../release/include
+  ## system-wide installation
   /usr/include
   /usr/local/include
   /sw/include
@@ -24,8 +26,10 @@ set (include_locations
 )
 
 set (lib_locations
+  ## local installation
   ../release/lib
   ../../release/lib
+  ## system-wide installation
   /lib
   /usr/lib
   /usr/local/lib
@@ -67,11 +71,22 @@ find_path (HDF5_INCLUDES ${hdf5_headers}
 #endforeach (header)
 
 ## -----------------------------------------------------------------------------
-## Check for the library
+## Check for the library components
 
-find_library (HDF5_LIBRARIES hdf5
-  PATHS ${lib_locations}
-  )
+set (hdf5_libs
+  hdf5
+  hdf5_hl
+)
+set (HDF5_LIBRARIES "")
+
+foreach (lib ${hdf5_libs})
+  find_library (HDF5_${lib} ${lib}
+    PATHS ${lib_locations}
+    )
+  if (HDF5_${lib})
+    list (APPEND HDF5_LIBRARIES ${HDF5_${lib}})
+  endif (HDF5_${lib})
+endforeach (lib)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
@@ -79,6 +94,7 @@ find_library (HDF5_LIBRARIES hdf5
 if (HDF5_INCLUDES AND HDF5_LIBRARIES)
   set (HAVE_HDF5 TRUE)
 else (HDF5_INCLUDES AND HDF5_LIBRARIES)
+  set (HAVE_HDF5 FALSE)
   if (NOT HDF5_FIND_QUIETLY)
     if (NOT HDF5_INCLUDES)
       message (STATUS "Unable to find HDF5 header files!")
