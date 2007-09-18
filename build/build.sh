@@ -15,12 +15,31 @@
 
 basedir=`pwd`
 
+## -----------------------------------------------------------------------------
 ## check command line parameters
+
+## param 1 -- Name of the package to build
 
 if test -z $1 ; then
     echo "[build] Missing input parameters.";
+    echo "";
+    echo " Usage:  build.sh <package>";
+    echo "";
 else
-    packageName=$1
+    param_packageName=$1
+fi
+
+## param 2 -- Force build of package from provided source?
+
+if test -z $2 ; then
+    echo " -- No further parameters.";
+    param_forceBuild=0;
+else
+    case $2 in
+	--force-build)
+	param_forceBuild=1;
+	;;
+    esac
 fi
 
 ## -----------------------------------------------------------------------------
@@ -69,18 +88,18 @@ build_package ()
 ## -----------------------------------------------------------------------------
 ## Build individual/multiple packages
 
-case $1 in 
+case $param_packageName in 
     bison)
 	echo "[build] Selected package Bison"
 	build_package bison external/bison
     ;;
     blitz)
 	echo "[build] Selected package Blitz++"
-	build_package blitz external/blitz -DBLITZ_FORCE_BUILD:BOOL=1
+	build_package blitz external/blitz -DBLITZ_FORCE_BUILD:BOOL=$param_forceBuild
     ;;
     boost)
 	echo "[build] Selected package Boost"
-	build_package boost external/boost -DBOOST_FORCE_BUILD:BOOL=1
+	build_package boost external/boost -DBOOST_FORCE_BUILD:BOOL=$param_forceBuild
     ;;
     casacore)
 	echo "[build] Selected package CASACORE"
@@ -132,7 +151,7 @@ case $1 in
     ;;
     hdf5)
 	echo "[build] Selected package Hdf5"
-	build_package hdf5 external/hdf5 -DHDF5_FORCE_BUILD:BOOL=1
+	build_package hdf5 external/hdf5 -DHDF5_FORCE_BUILD:BOOL=$param_forceBuild
     ;;
     pgplot)
 	echo "[build] Selected package Pgplot"
@@ -179,45 +198,45 @@ case $1 in
 	build_package dal src/DAL
     ;;
     cr)
-	echo "[build] Selected package CR-Tools"
-	./build.sh dal
-	./build.sh pgplot
-	build_package cr src/CR-Tools
+	echo "[build] Selected package CR-Tools";
+	./build.sh dal;
+	./build.sh pgplot;
+	build_package cr src/CR-Tools;
     ;;
     all)
-	echo "[build] Building all external packsges"
-	./build.sh bison
-	./build.sh blitz
-	./build.sh python
-	./build.sh boost
-	./build.sh flex
-	./build.sh pgplot
-	./build.sh wcslib
-	./build.sh cfitsio
-	./build.sh casacore
-	./build.sh hdf5
-	echo "[build] Building all USG packsges"
-	build_package dal src/DAL
-	build_package cr src/CR-Tools
+	echo "[build] Building all external packages";
+	./build.sh bison;
+	./build.sh blitz;
+	./build.sh python;
+	./build.sh boost;
+	./build.sh flex;
+	./build.sh pgplot;
+	./build.sh wcslib;
+	./build.sh cfitsio;
+	./build.sh casacore;
+	./build.sh hdf5;
+	echo "[build] Building all USG packsges";
+	build_package dal src/DAL;
+	build_package cr src/CR-Tools;
     ;;
     clean)
-    rm -f *~
-    rm -f *.log
-    rm -rf bison
-    rm -rf blitz
-    rm -rf boost
-    rm -rf casacore
-    rm -rf cfitsio
-    rm -rf cmake
-    rm -rf cr
-    rm -rf dal
-    rm -rf dsp
-    rm -rf flex
-    rm -rf hdf5
-    rm -rf pgplot
-    rm -rf plplot
-    rm -rf python
-    rm -rf wcslib
+    rm -f *~;
+    rm -f *.log;
+    rm -rf bison;
+    rm -rf blitz;
+    rm -rf boost;
+    rm -rf casacore;
+    rm -rf cfitsio;
+    rm -rf cmake;
+    rm -rf cr;
+    rm -rf dal;
+    rm -rf dsp;
+    rm -rf flex;
+    rm -rf hdf5;
+    rm -rf pgplot;
+    rm -rf plplot;
+    rm -rf python;
+    rm -rf wcslib;
     ;;
     *)
     echo "";
