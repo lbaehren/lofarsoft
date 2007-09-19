@@ -36,7 +36,9 @@ namespace CR { // Namespace CR -- begin
   };
 
   void SimplePlot::init(){
-    plotter_p = NULL;
+#ifdef HAVE_PGPLOT
+     plotter_p = NULL;
+#endif
     ppCharacterHeight = 2;
     ppLineWidth = 3;
   };
@@ -53,10 +55,12 @@ namespace CR { // Namespace CR -- begin
   }
   
   void SimplePlot::destroy () {
-    if (plotter_p != NULL) {
+#ifdef HAVE_PGPLOT
+     if (plotter_p != NULL) {
       delete plotter_p;
       plotter_p = NULL;
     };
+#endif
   };
   
   // ============================================================================
@@ -89,7 +93,8 @@ namespace CR { // Namespace CR -- begin
 			    Int cheight, 
 			    Int linewidth){
     try {
-      if (plotter_p != NULL) {
+#ifdef HAVE_PGPLOT
+       if (plotter_p != NULL) {
 	delete plotter_p;
 	plotter_p = NULL;
       };
@@ -100,6 +105,7 @@ namespace CR { // Namespace CR -- begin
       plotter_p->sci(col); 
       plotter_p->env(xmin, xmax, ymin, ymax, just, axis);
       
+#endif
     } catch (AipsError x) {
       cerr << "SimplePlot::InitPlot: " << x.getMesg() << endl;
       return False;
@@ -114,7 +120,8 @@ namespace CR { // Namespace CR -- begin
 			    Int col,
 			    Int style){
     try {
-      if (plotter_p == NULL){
+#ifdef HAVE_PGPLOT
+       if (plotter_p == NULL){
 	cerr << "SimplePlot::PlotLine: " << "plotter not initialized!" << endl;
 	return False;
       }; 
@@ -131,6 +138,7 @@ namespace CR { // Namespace CR -- begin
       plotter_p->line(xval_, yval_);
       plotter_p->sls(1);
 
+#endif
     } catch (AipsError x) {
       cerr << "SimplePlot::PlotLine: " << x.getMesg() << endl;
       return False;
@@ -148,7 +156,8 @@ namespace CR { // Namespace CR -- begin
 				Int symbol,
 				Int ticklength){
     try {
-      if (plotter_p == NULL){
+#ifdef HAVE_PGPLOT
+       if (plotter_p == NULL){
 	cerr << "SimplePlot::PlotSymbols: " << "plotter not initialized!" << endl;
 	return False;
       }; 
@@ -183,6 +192,7 @@ namespace CR { // Namespace CR -- begin
 	err2 = xval_+xerr_;
 	plotter_p->errx(err1,err2,yval_,ticklength);
       }
+#endif
     } catch (AipsError x) {
       cerr << "SimplePlot::PlotSymbols: " << x.getMesg() << endl;
       return False;
@@ -197,12 +207,14 @@ namespace CR { // Namespace CR -- begin
 			     String toplabel,
 			     Int col){
     try {
-      if (plotter_p == NULL){
+#ifdef HAVE_PGPLOT
+       if (plotter_p == NULL){
 	cerr << "SimplePlot::AddLabels: " << "plotter not initialized!" << endl;
 	return False;
       }; 
       plotter_p->sci(col);
       plotter_p->lab(xlabel,ylabel,toplabel);
+#endif
     } catch (AipsError x) {
       cerr << "SimplePlot::AddLabels: " << x.getMesg() << endl;
       return False;
@@ -228,7 +240,8 @@ namespace CR { // Namespace CR -- begin
 			     Bool printingplot){
     Bool status=True;
     try {
-      if (logx || logy) {
+#ifdef HAVE_PGPLOT
+       if (logx || logy) {
 	cout  << "SimplePlot::quickPlots: " << "@orry, logarithmic axes are not implemented yet!" << endl;
       }
       Double xmin,xmax,ymin,ymax,tmpval;
@@ -260,6 +273,7 @@ namespace CR { // Namespace CR -- begin
 	status = status && PlotSymbols(xvals, yvals, yerrs, xerrs, linecol, style);
       }
       status = status && AddLabels(xlabel, ylabel, toplabel);
+#endif
     } catch (AipsError x) {
       cerr << "SimplePlot::quickPlots: " << x.getMesg() << endl;
       return False;

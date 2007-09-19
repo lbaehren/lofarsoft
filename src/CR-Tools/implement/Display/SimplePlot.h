@@ -32,8 +32,10 @@
 #include <casa/aips.h>
 #include <casa/Arrays.h>
 #include <casa/Exceptions/Error.h>
+#ifdef HAVE_PGPLOT
  // #include <casa/System/PGPlotter.h>
 #include <Display/PGPlotterLocal.h>
+#endif
 
 #include <casa/namespace.h>
 
@@ -65,10 +67,12 @@ namespace CR { // Namespace CR -- begin
   */  
   class SimplePlot {
     
+#ifdef HAVE_PGPLOT
     // \brief Pointer to the local pgplotter object
     PGPlotterLocal *plotter_p;
 
     Int ppCharacterHeight, ppLineWidth;
+#endif
 
 
   public:
