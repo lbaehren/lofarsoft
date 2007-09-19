@@ -49,7 +49,7 @@
 #include <tables/Tables/ScaColDesc.h>
 #include <tables/Tables/ScaRecordColDesc.h>
 
-#include <Math/Math.h>
+#include <Math.h>
 
 namespace CR { // Namespace CR -- begin
   
