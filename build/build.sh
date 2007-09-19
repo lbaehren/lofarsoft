@@ -167,7 +167,7 @@ case $param_packageName in
     plplot)
 	echo "[build] Selected package Plplot"
 	if test -d $basedir/../external/plplot ; then
-	    build_package plplot external/plplot;
+	    build_package plplot external/plplot -DCMAKE_INSTALL_PREFIX:STRING=$basedir/../release;
 	else
 	    cd $basedir/../external
 	    ## download the source tar-ball from source forge
@@ -247,6 +247,7 @@ case $param_packageName in
     rm -rf pgplot;
     rm -rf plplot;
     rm -rf python;
+    rm -rf vtk;
     rm -rf wcslib;
     ;;
 esac
