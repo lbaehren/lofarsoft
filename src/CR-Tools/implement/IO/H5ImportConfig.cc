@@ -225,7 +225,7 @@ namespace CR { // Namespace CR -- begin
   bool H5ImportConfig::exportSettings ()
   {
     return exportSettings (configFile_p,
-			   false)
+			   false);
   }
 
   // ------------------------------------------------------------- exportSettings
