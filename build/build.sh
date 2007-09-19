@@ -61,6 +61,11 @@ build_package ()
     buildDir=$1
     sourceDir=$2
     configureOption=$3
+    # Feedback
+    echo "[build] Building package";
+    echo " -- Build directory ..... : $buildDir";
+    echo " -- Source directory .... : $sourceDir";
+    echo " -- Configuration options : $configureOption";
     # check if the build directory exists
     cd $basedir
     if test -d $buildDir ; then
