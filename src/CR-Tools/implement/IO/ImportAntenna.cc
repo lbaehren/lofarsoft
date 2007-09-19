@@ -25,9 +25,9 @@
 namespace CR { // Namespace CR -- begin
   
   // degree to radians
-  const double ImportAntenna::rad = M_PI/180.0;
+  const Double ImportAntenna::rad = M_PI/180.0;
   // warn if energy fraction in projected pulses falls below this limit
-  const double ImportAntenna::minimumEfficiency = 0.995;
+  const Double ImportAntenna::minimumEfficiency = 0.995;
   
   // ============================================================================
   //
@@ -37,11 +37,18 @@ namespace CR { // Namespace CR -- begin
   
   ImportAntenna::ImportAntenna (string parID,
 				string parFileName,
-				double parShowerTheta,
-				double parShowerPhi)
+				Double parShowerTheta,
+				Double parShowerPhi)
     : itsID(parID),
       itsFileName(parFileName),
       itsSamplingTimeScale(0.0),
+      itsSimulatedWindowStart(0.0),
+      itsSimulatedWindowEnd(0.0),
+      itsRequiredWindowStart(0.0),
+      itsRequiredWindowEnd(0.0),
+      itsPaddedWindowStart(0.0),
+      itsPaddedWindowEnd(0.0),
+      itsRequiredWindowValid(false),
       hasData(false),
       itsObservationAxis(-1.0*ThreeVector(cos(parShowerPhi*rad)*sin(parShowerTheta*rad),
 					  sin(parShowerPhi*rad)*sin(parShowerTheta*rad),
@@ -65,20 +72,20 @@ namespace CR { // Namespace CR -- begin
     else
       {	
 	bool firstPoint = true;
-	double tmpTimeStamp;
-	double firstTimeStamp=0.0;
+	Double tmpTimeStamp;
 	ThreeVector tmpDataPoint;
 	while (fin >> tmpTimeStamp >> tmpDataPoint)
 	  {
 	    itsTimeSeries.push_back(tmpDataPoint);
 	    if (firstPoint)
 	      {
-		firstTimeStamp = tmpTimeStamp;
+		itsSimulatedWindowStart = tmpTimeStamp;
 		firstPoint = false;
 	      }
+	    itsSimulatedWindowEnd = tmpTimeStamp;
 	  }
 	hasData = true;
-	itsSamplingTimeScale = (tmpTimeStamp-firstTimeStamp)/(itsTimeSeries.size()-1);	// calculate sampling time scale
+	itsSamplingTimeScale = (itsSimulatedWindowEnd-itsSimulatedWindowStart)/(itsTimeSeries.size()-1);	// calculate sampling time scale
       }
     fin.close();
   }
@@ -117,37 +124,46 @@ namespace CR { // Namespace CR -- begin
   Bool ImportAntenna::getTimeSeries(Vector<Double> &Eazimuth,
 				    Vector<Double> &Ezenith) const
   {
-    const long NumPoints = static_cast<long>(itsTimeSeries.size());				// original number of points in time series
-    const long NumPointsPadded = static_cast<long>(pow(2.0,ceil(log(static_cast<double>(NumPoints))/log(2.0))+1.0));	// enlarge to second next power of 2
-    const long PointsToPadBefore = (NumPointsPadded-NumPoints)/2;					// pad (rounded down) half of them before
-    const long PointsToPadAfter = NumPointsPadded-NumPoints-PointsToPadBefore;			// pad the rest behind
-    
+    if (not itsRequiredWindowValid)
+      {
+       	cout << "Error: required time window was not initialized correctly for antenna "
+	     << getID()
+	     << "\n";
+	return false;
+      }
+    const long NumPointsSimulated = static_cast<long>(itsTimeSeries.size()); // original number of points in time series
+    const long NumPointsBeforeSimulated = static_cast<long>((itsSimulatedWindowStart-itsRequiredWindowStart)/itsSamplingTimeScale+0.5);
+    const long NumPointsAfterSimulated = static_cast<long>((itsRequiredWindowEnd-itsSimulatedWindowEnd)/itsSamplingTimeScale+0.5);
+    const long NumPointsRequired = NumPointsBeforeSimulated+NumPointsSimulated+NumPointsAfterSimulated;
+    const long NumPointsPadded = static_cast<long>(pow(2.0,ceil(log(static_cast<Double>(NumPointsRequired))/log(2.0))+1.0));	// enlarge to second next power of 2
+    const long PointsToPadBefore = (NumPointsPadded-NumPointsRequired)/2;				// pad (rounded down) half of them before
+    const long PointsToPadAfter = NumPointsPadded-NumPointsRequired-PointsToPadBefore;			// pad the rest behind
     Eazimuth.resize(NumPointsPadded);
     Ezenith.resize(NumPointsPadded);
-    double fullEnergy = 0.0;
-    double projEnergy = 0.0;
+    Double fullEnergy = 0.0;
+    Double projEnergy = 0.0;
     
     // pad before actual data
-    for (long i=0; i<PointsToPadBefore; ++i)
+    for (long i=0; i<PointsToPadBefore+NumPointsBeforeSimulated; ++i)
       {
 	Eazimuth(i) = 0.0;
 	Ezenith(i) = 0.0;
       }
     
     // actual data
-    for (long i=0; i<NumPoints; ++i)
+    for (long i=0; i<NumPointsSimulated; ++i)
       {
-	Eazimuth(PointsToPadBefore+i)=itsTimeSeries.at(i).DottedWith(itsAzimuthAxis);
-	Ezenith(PointsToPadBefore+i)=itsTimeSeries.at(i).DottedWith(itsZenithAxis);
+	Eazimuth(PointsToPadBefore+NumPointsBeforeSimulated+i)=itsTimeSeries.at(i).DottedWith(itsAzimuthAxis);
+	Ezenith(PointsToPadBefore+NumPointsBeforeSimulated+i)=itsTimeSeries.at(i).DottedWith(itsZenithAxis);
 	fullEnergy+=itsTimeSeries.at(i).GetLength()*itsTimeSeries.at(i).GetLength();
-	projEnergy+=Eazimuth(PointsToPadBefore+i)*Eazimuth(PointsToPadBefore+i)+Ezenith(PointsToPadBefore+i)*Ezenith(PointsToPadBefore+i);
+	projEnergy+=Eazimuth(PointsToPadBefore+NumPointsBeforeSimulated+i)*Eazimuth(PointsToPadBefore+NumPointsBeforeSimulated+i)+Ezenith(PointsToPadBefore+NumPointsBeforeSimulated+i)*Ezenith(PointsToPadBefore+NumPointsBeforeSimulated+i);
       }
     
     // pad after actual data
-    for (long i=0; i<PointsToPadAfter; ++i)
+    for (long i=0; i<NumPointsAfterSimulated+PointsToPadAfter; ++i)
       {
-	Eazimuth(PointsToPadBefore+NumPoints+i) = 0.0;
-	Ezenith(PointsToPadBefore+NumPoints+i) = 0.0;
+	Eazimuth(PointsToPadBefore+NumPointsBeforeSimulated+NumPointsSimulated+i) = 0.0;
+	Ezenith(PointsToPadBefore+NumPointsBeforeSimulated+NumPointsSimulated+i) = 0.0;
       }
     
     if (projEnergy/fullEnergy < minimumEfficiency)
@@ -165,4 +181,30 @@ namespace CR { // Namespace CR -- begin
       }
   }
   
+  bool ImportAntenna::setRequiredWindowBoundaries(Double windowStart, Double windowEnd)
+  {
+    if (windowStart > itsSimulatedWindowStart)		{ return false; } // window starts too late
+    if (windowEnd < itsSimulatedWindowEnd)		{ return false; } // window ends too early
+    if ( (fmod(windowStart,itsSamplingTimeScale)/itsSamplingTimeScale>1.e-5)
+       && fabs(1.-(fmod(windowStart,itsSamplingTimeScale)/itsSamplingTimeScale))>1.e-5)
+       { return false; } // not a multiple of sampling timescale
+    if ( (fmod(windowEnd,itsSamplingTimeScale)/itsSamplingTimeScale>1.e-5)
+       && fabs(1.-(fmod(windowEnd,itsSamplingTimeScale)/itsSamplingTimeScale))>1.e-5)
+       { return false; } // not a multiple of sampling timescale
+    // values are valid, now calculate and set boundaries of padded time window
+    itsRequiredWindowStart = windowStart;
+    itsRequiredWindowEnd = windowEnd;
+    const long NumPointsSimulated = static_cast<long>(itsTimeSeries.size()); // original number of points in time series
+    const long NumPointsBeforeSimulated = static_cast<long>((itsSimulatedWindowStart-itsRequiredWindowStart)/itsSamplingTimeScale+0.5);
+    const long NumPointsAfterSimulated = static_cast<long>((itsRequiredWindowEnd-itsSimulatedWindowEnd)/itsSamplingTimeScale+0.5);
+    const long NumPointsRequired = NumPointsBeforeSimulated+NumPointsSimulated+NumPointsAfterSimulated;
+    const long NumPointsPadded = static_cast<long>(pow(2.0,ceil(log(static_cast<Double>(NumPointsRequired))/log(2.0))+1.0));	// enlarge to second next power of 2
+    const long PointsToPadBefore = (NumPointsPadded-NumPointsRequired)/2;				// pad (rounded down) half of them before
+    itsPaddedWindowStart = itsSimulatedWindowStart-(NumPointsBeforeSimulated+PointsToPadBefore)*itsSamplingTimeScale;	// calculate beginning of padded window
+    itsPaddedWindowEnd = itsPaddedWindowStart+(NumPointsPadded-1)*itsSamplingTimeScale;		// calculate end of padded window
+    itsRequiredWindowValid = true;
+    return true;
+  }
+
 }  // Namespace CR -- end
+

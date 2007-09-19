@@ -101,8 +101,8 @@ namespace CR {  // Namespace CR -- begin
     */
     ImportAntenna (string parID,
 		   string parFileName,
-		   double parShowerTheta,
-		   double parShowerPhi);
+		   Double parShowerTheta,
+		   Double parShowerPhi);
     
     // -------------------------------------------------------------- Destruction
     
@@ -146,6 +146,31 @@ namespace CR {  // Namespace CR -- begin
       \brief returns the time scale of the equidistantly sampled data (in seconds)
     */
     inline Double getSamplingTimeScale() const { return itsSamplingTimeScale; }
+
+    /*!
+      \brief returns the start of the original simulated time window (in seconds)
+    */
+    inline Double getSimulatedWindowStart() const { return itsSimulatedWindowStart; }
+
+    /*!
+      \brief returns the end of the original simulated time window (in seconds)
+    */
+    inline Double getSimulatedWindowEnd() const { return itsSimulatedWindowEnd; }
+
+    /*!
+      \brief returns the start of the padded time window (in seconds)
+    */
+    inline Double getWindowStart() const { return itsPaddedWindowStart; }
+
+    /*!
+      \brief returns the end of the padded time window (in seconds)
+    */
+    inline Double getWindowEnd() const { return itsPaddedWindowEnd; }
+
+    /*!
+      \brief sets required window boundaries, returns true if successful or false if illegal values were provided
+    */
+    bool setRequiredWindowBoundaries(Double windowStart, Double windowEnd);
     
     /*!
       \brief returns antenna ID string
@@ -156,7 +181,14 @@ namespace CR {  // Namespace CR -- begin
     
     string itsID;
     string itsFileName;
-    double itsSamplingTimeScale;
+    Double itsSamplingTimeScale;
+    Double itsSimulatedWindowStart;
+    Double itsSimulatedWindowEnd;
+    Double itsRequiredWindowStart;
+    Double itsRequiredWindowEnd;
+    Double itsPaddedWindowStart;
+    Double itsPaddedWindowEnd;
+    bool itsRequiredWindowValid;
     bool hasData;
     vector<ThreeVector> itsTimeSeries;
     /*!
@@ -174,8 +206,8 @@ namespace CR {  // Namespace CR -- begin
     */
     ThreeVector itsZenithAxis;
     
-    static const double rad;
-    static const double minimumEfficiency;
+    static const Double rad;
+    static const Double minimumEfficiency;
 
   };
   

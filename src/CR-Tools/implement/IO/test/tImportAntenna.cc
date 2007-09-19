@@ -52,16 +52,21 @@ using CR::ThreeVector;
 int main ()
 {
   string name("/home/huege/lopescasa/code/lopes/implement/reas2event/dummy.dat");
-  ImportAntenna Test("00000", name, 0.0, 180.0);
+  ImportAntenna Test("10001", name, 0.0, 180.0);
   
   std::cout << "SamplingTimeScale: " << Test.getSamplingTimeScale() << std::endl;
+  std::cout << "SimulatedWindowStart: " << Test.getSimulatedWindowStart() << std::endl;
+  std::cout << "SimulatedWindowEnd: " << Test.getSimulatedWindowEnd() << std::endl;
+  Test.setRequiredWindowBoundaries(1.e-5,6.e-5);
+  std::cout << "PaddedWindowStart: " << Test.getWindowStart() << std::endl;
+  std::cout << "PaddedWindowEnd: " << Test.getWindowEnd() << std::endl;
+  
   std::cout << "ValidData: " << Test.validData() << std::endl;
   std::cout << "ID: " << Test.getID() << std::endl;
 
   Vector<double> Ezeni, Eazi;
   
   bool negligibleRemainder = Test.getTimeSeries(Eazi, Ezeni);    
-
   std::cout << "Negligible remainder: " << negligibleRemainder << std::endl;
 
   for (long i=0; i<static_cast<long>(Eazi.size()); ++i)

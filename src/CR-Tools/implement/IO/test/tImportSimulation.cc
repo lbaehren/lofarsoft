@@ -25,6 +25,7 @@
 
 #include <IO/ImportAntenna.h>
 #include <IO/ImportSimulation.h>
+#include <iomanip>
 
 using CR::ImportAntenna;
 using CR::ImportSimulation;
@@ -53,11 +54,12 @@ int main ()
   while (Sim.getNextAntenna(pAnt))
   {
     ++i;
-    cout << "Antenna " << i << " has ID: " << pAnt->getID() << endl;
+    cout << "Antenna " << i << " has ID: " << pAnt->getID() << std::setprecision(8) << endl;
 
     bool negligibleRemainder = pAnt->getTimeSeries(Eazi, Ezeni);    
     std::cout << "Negligible remainder: " << negligibleRemainder << " Eazi: [" << min(Eazi) << " " 
-	      << max(Eazi) << "] Ezeni: [" << min(Ezeni) << " " << max(Ezeni) << "]" <<  std::endl;
+	      << max(Eazi) << "] Ezeni: [" << min(Ezeni) << " " << max(Ezeni) << "]"
+	      << " Window: [" << pAnt->getWindowStart() << " " << pAnt->getWindowEnd() << "]" << std::endl;
   }
 
   Int blocklen=Ezeni.nelements();

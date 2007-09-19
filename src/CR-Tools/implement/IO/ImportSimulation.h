@@ -151,6 +151,17 @@ namespace CR { // Namespace CR -- begin
       azimuth = itsAzimuthAngle; elevation = itsElevationAngle;
     }
     
+
+    /*!
+      \brief returns the sampling time scale of the equidistantly sampled data (in seconds)
+    */
+    inline Double getSamplingTimeScale() const { return itsAntennaList.front().getSamplingTimeScale(); } // take value from first antenna, is constant for all of them
+
+    /*!
+      \brief returns the time stamp of the first element of the sampled data (in seconds)
+    */
+    inline Double getSamplingWindowStart() const { return itsAntennaList.front().getWindowStart(); } 	// take value from first antenna, is constant for all of them
+
   private:
     
     Double itsAzimuthAngle;

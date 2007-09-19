@@ -76,6 +76,7 @@ namespace CR { // Namespace CR -- begin
     bool zenithOk       = false;
     bool azimuthOk      = false;
     bool algorithmOk    = false;
+    bool resbaseOk      = false;
     bool antennaReadsOk = true;
     
     // read in and parse reas parameter file
@@ -134,8 +135,7 @@ namespace CR { // Namespace CR -- begin
 		azimuthOk=true;
 		continue;
 	      }
-	    
-	    
+	    	    
 	    if (type.find("InnerTimeAlgorithm") < tend)
 	      {
 		int ii;
@@ -144,6 +144,16 @@ namespace CR { // Namespace CR -- begin
 		  { algorithmOk = true; }	
 		continue;
 	      }
+
+	    if (type.find("ResolutionReductionScale") < tend)
+	      {
+		Double dd;
+		ss >> dd;
+		if (dd == 0.0)							// make sure all antennas have same sampling timebase
+		  { resbaseOk = true; }	
+		continue;
+	      }
+
 	  }
       }
     fin.close();
@@ -157,7 +167,7 @@ namespace CR { // Namespace CR -- begin
       }
     String tmpFileName;
     ThreeVector dummyVector;
-    double dummydouble;
+    Double dummydouble;
 
     // only interested in the file name here
     while (bin >> tmpFileName >> dummyVector >> dummydouble)
@@ -196,8 +206,24 @@ namespace CR { // Namespace CR -- begin
     if (not antennaReadsOk) {
       cout << "Error: one or more antenna.dat files could not be read!\n";
     }  
+    if (not resbaseOk) {
+      cout << "Error: automatic resolution reduction cannot be used for reas2event!\n";
+    }  
+
+    // find common time window between all of the antennas
+    Double lowestWindowBoundary = 1.e10;	// dummy value
+    Double highestWindowBoundary = -1.e10;	// dummy value
+    for (vector<ImportAntenna>::const_iterator i=itsAntennaList.begin(); i!=itsAntennaList.end(); ++i)
+      {
+        if (i->getSimulatedWindowStart() < lowestWindowBoundary) { lowestWindowBoundary = i->getSimulatedWindowStart(); }
+	if (i->getSimulatedWindowEnd() > highestWindowBoundary) { highestWindowBoundary = i->getSimulatedWindowEnd(); }
+      }
+    for (vector<ImportAntenna>::iterator i=itsAntennaList.begin(); i!=itsAntennaList.end(); ++i)
+      {
+        i->setRequiredWindowBoundaries(lowestWindowBoundary,highestWindowBoundary);
+      }
     
-    return (zenithOk && azimuthOk && algorithmOk && antennaReadsOk);
+    return (zenithOk && azimuthOk && algorithmOk && resbaseOk && antennaReadsOk);
   }
   
   
