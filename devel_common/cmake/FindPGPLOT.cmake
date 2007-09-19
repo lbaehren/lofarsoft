@@ -58,7 +58,7 @@ find_library (libpgplot
 if (libpgplot)
   list (APPEND PGPLOT_LIBRARIES ${libpgplot})
 else (libpgplot)
-  message (SEND_ERROR "Unable to locate libpgplot!")
+  message (STATUS "Warning: Unable to locate libpgplot!")
 endif (libpgplot)
 
 ## [2] libcpgplot
