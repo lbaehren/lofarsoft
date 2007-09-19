@@ -27,8 +27,8 @@ set (bin_locations
   /usr/bin
   /usr/local/bin
   /sw/bin
-  ${casacore_SOURCE_DIR}/../release/bin
-  ${casacore_SOURCE_DIR}/../../release/bin
+  ${WCSLIB_SOURCE_DIR}/../release/bin
+  ${WCSLIB_SOURCE_DIR}/../../release/bin
   )
 
 set (include_locations
