@@ -19,34 +19,31 @@
   
 ## treetest  GLISH CFITSIO WCSLIB
 
-add_executable (treetest treetest.cc)
-target_link_libraries (treetest
-  cr
-  ${LAPACK_LIBRARIES}
-  ${CASA_LIBRARIES}
-  ${G2C_LIBRARIES}
-  ${libm}
-  )
-#  set_target_properties (treetest
-#    PROPERTIES
-#    COMPILE_FLAGS -fPIC -O2 -fPIC
-#    )
-install (TARGETS treetest RUNTIME DESTINATION bin)
+if (LAPACK_LIBRARIES AND G2C_LIBRARIES)
+  add_executable (treetest treetest.cc)
+  target_link_libraries (treetest cr)
+  install (TARGETS treetest RUNTIME DESTINATION bin)
+else (LAPACK_LIBRARIES AND G2C_LIBRARIES)
+  message (STATUS "[cr] Unable to build executable treetest.")
+endif (LAPACK_LIBRARIES AND G2C_LIBRARIES)
 
 ## trigrun   GLISH POPT LAPACK F77 CFITSIO WCSLIB
 
-if (HAVE_POPT)
+if (HAVE_POPT AND LAPACK_LIBRARIES)
   ## compiler instructions
   add_executable (trigrun trigrun.cc)
   ## linker instructions
-  target_link_libraries (trigrun cr ${POPT_LIBRARIES} ${CASA_LIBRARIES})
-  set_target_properties (trigrun
-    PROPERTIES
-    COMPILE_FLAGS -fPIC -O2 -fPIC
+  target_link_libraries (trigrun
+    cr
+    ${POPT_LIBRARIES}
     )
+#  set_target_properties (trigrun
+#    PROPERTIES
+#    COMPILE_FLAGS -fPIC -O2 -fPIC
+#    )
   ## installation instructions
   install (TARGETS trigrun RUNTIME DESTINATION bin)
-endif (HAVE_POPT)
+endif (HAVE_POPT AND LAPACK_LIBRARIES)
 
 ## ------------------------------------------------------------------------------
 ## Glish client programs

@@ -51,12 +51,12 @@ VPATH=$(srcdir) $(top_builddir)/src $(top_srcdir)/src
 
 ## Programs
 SHELL=/bin/sh
-CC=/opt/gcc-4.2.1/bin/gcc
+CC=/usr/bin/gcc
 ## H5_CPPFLAGS and H5_CFLAGS are used for extra flags used to build HDF5
 ## (flags that don't need to be included in h5cc, for instance).
-CFLAGS= -ansi -O -fomit-frame-pointer -finline-functions 
+CFLAGS= -std=c99 -Wno-long-long -O -fomit-frame-pointer -finline-functions 
 CPPFLAGS=-UH5_DEBUG_API -DNDEBUG -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -D_POSIX_SOURCE -D_BSD_SOURCE  
-H5_CFLAGS= -ansi -O -fomit-frame-pointer -finline-functions
+H5_CFLAGS= -std=c99 -Wno-long-long -O -fomit-frame-pointer -finline-functions
 H5_CPPFLAGS=-UH5_DEBUG_API -DNDEBUG -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -D_POSIX_SOURCE -D_BSD_SOURCE 
 LDFLAGS=
 ROOT=/home/lbaehren/coding/lofar/usg/external/hdf5

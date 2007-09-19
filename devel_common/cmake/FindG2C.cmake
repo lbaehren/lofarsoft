@@ -76,6 +76,7 @@ find_library (G2C_LIBRARIES
 if (G2C_INCLUDES AND G2C_LIBRARIES)
   set (HAVE_G2C TRUE)
 else (G2C_INCLUDES AND G2C_LIBRARIES)
+  set (HAVE_G2C FALSE)
   if (NOT G2C_FIND_QUIETLY)
     if (NOT G2C_INCLUDES)
       message (STATUS "Unable to find G2C header files!")
@@ -100,3 +101,8 @@ endif (HAVE_G2C)
 
 ## -----------------------------------------------------------------------------
 ## Mark as advanced ...
+
+MARK_AS_ADVANCED (
+  G2C_INCLUDES
+  G2C_LIBRARIES
+  )

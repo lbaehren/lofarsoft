@@ -38,90 +38,10 @@ basedir=`pwd`
 ##------------------------------------------------------------------------------
 ## Configure and install the packages required for the CR-Tools
 
-## [0] CMake
+cd build
+basedir=`pwd`
 
-echo "[CR-Tools installer] Installing CMake ..."
-
-cd $basedir
-mkdir cmake 
-cd cmake
-echo " --> Cleaning up directory ..."
-rm -rf ./../../external/CMake/Bootstrap.cmk
-rm -rf ./../../external/CMake/CMakeCache.txt
-rm -rf ./../../external/CMake/Source/cmConfigure.h
-echo " --> Initiating build ... "
-./../../external/CMake/bootstrap --prefix=$basedir/../release && make install
-echo "  --> Adding new bin directory to the PATH"
-export PATH=$basedir/../release/bin:$PATH
-
-## [1] pgplot
-
-echo "[CR-Tools installer] Installing PGPLOT ..."
-
-cd $basedir
-mkdir pgplot 
-cd pgplot
-cmake ../../external/pgplot && make install
-
-## [2] wcslib
-
-echo "[CR-Tools installer] Installing WCSLIB ..."
-
-cd $basedir
-mkdir wcslib 
-cd wcslib
-cmake ../../external/wcslib && make install
-
-## [3] CFITSIO
-
-echo "[CR-Tools installer] Installing CFITSIO ..."
-
-cd $basedir
-mkdir cfitsio 
-cd cfitsio
-cmake ../../external/cfitsio && make install
-
-## [4] CASACORE
-
-echo "[CR-Tools installer] Installing CASACORE ..."
-
-cd $basedir
-mkdir casacore 
-cd casacore
-cmake ../../external/casacore && make install
-
-## [5] HDF5
-
-echo "[CR-Tools installer] Installing HDF5 ..."
-
-cd $basedir
-ln -s ../external/hdf5 hdf5
-cd hdf5
-./configure --prefix=$basedir/../release && make && make install
-
-## [6] Boost
-
-echo "[CR-Tools installer] Installing Boost ..."
-
-cd $basedir
-ln -s ../external/boost boost
-cd boost
-./configure --prefix=$basedir/../release && make && make install
-
-## [5] Data Access Library (DAL)
-
-cd $basedir
-mkdir dal
-cd dal
-cmake ../../src/DAL && make install
-
-##------------------------------------------------------------------------------
-## Configure and install the CR-Tools
-
-cd $basedir
-mkdir cr
-cd cr
-cmake ../../src/CR-Tools && make install
+$basedir/build.sh cr --force-build
 
 ##------------------------------------------------------------------------------
 ## Required environment variables to set

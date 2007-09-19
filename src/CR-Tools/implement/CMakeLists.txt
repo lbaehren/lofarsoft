@@ -63,15 +63,16 @@ endif (CR_DEBUGGING_MESSAGES)
 
 add_library (cr ${cr_sources})
 set_target_properties (cr
-  PROPERTIES COMPILE_FLAGS "${CASACORE_COMPILE_FLAGS}"
+  PROPERTIES
+  COMPILE_FLAGS "${CASACORE_COMPILE_FLAGS} -fPIC -O2 -fPIC"
   )
 target_link_libraries (cr
   ${CASA_LIBRARIES}
-  ${G2C_LIBRARIES}
   ${LAPACK_LIBRARIES}
   ${CFITSIO_LIBRARIES}
   ${PGPLOT_LIBRARIES}
   ${WCSLIB_LIBRARIES}
+  ${G2C_LIBRARIES}
   ${X11_LIBRARIES}
   ${libm}
   )
