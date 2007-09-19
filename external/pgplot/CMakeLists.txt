@@ -12,10 +12,33 @@ project (pgplot C Fortran)
 cmake_minimum_required (VERSION 2.4)
 
 ## -----------------------------------------------------------------------------
-## User defined build/install options
+## Only force rebuild of the library from the provided source code, if no system
+## installation can be found. In order to handle this properly, we use the CMake
+## find script
 
-option (pgplot_ENABLE_TESTING "Enable testing environment?" 1)
-option (pgplot_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
+option (PGPLOT_FORCE_BUILD "Force rebuild and local installation" 0)
+option (PGPLOT_ENABLE_TESTING "Enable testing environment?" 1)
+option (PGPLOT_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
+
+## check where to find the CMake scripts
+
+find_path (pgplot_cmake FindPGPLOT.cmake FindG2C.cmake
+  PATHS 
+  ${pgplot_SOURCE_DIR}
+  ${pgplot_SOURCE_DIR}/..
+  ${pgplot_SOURCE_DIR}/../..
+  ${pgplot_SOURCE_DIR}/../../..
+  PATH_SUFFIXES
+  devel_common/cmake
+  )
+
+if (pgplot_cmake)
+  include (${pgplot_cmake}/FindPGPLOT.cmake)
+endif (pgplot_cmake)
+
+## <-- begin build condition --------------------------------------------------->
+
+if (NOT HAVE_PGPLOT OR PGPLOT_FORCE_BUILD)
 
 ## Additional CMake components
 
@@ -23,18 +46,18 @@ include (CPack)
 
 ## Handle option: testing mode on/off
 
-if (pgplot_ENABLE_TESTING)
+if (PGPLOT_ENABLE_TESTING)
   ## include CMake module
   include (CTest)
   ## enable testing mode
   enable_testing()
   ## add directory containing the test programs and examples
   add_subdirectory (examples)
-endif (pgplot_ENABLE_TESTING)
+endif (PGPLOT_ENABLE_TESTING)
 
 ## Handle option: verbose during configuration on/off
 
-if (NOT pgplot_VERBOSE_CONFIGURE)
+if (NOT PGPLOT_VERBOSE_CONFIGURE)
   set (G2C_FIND_QUIETLY 1)
   set (GIF_FIND_QUIETLY 1)
   set (JPEG_FIND_QUIETLY 1)
@@ -45,7 +68,7 @@ if (NOT pgplot_VERBOSE_CONFIGURE)
   set (XAW_FIND_QUIETLY 1)
   set (XM_FIND_QUIETLY 1)
   set (ZLIB_FIND_QUIETLY 1)
-endif (NOT pgplot_VERBOSE_CONFIGURE)
+endif (NOT PGPLOT_VERBOSE_CONFIGURE)
 
 ## -----------------------------------------------------------------------------
 ## Standard locations where to look for required components
@@ -71,17 +94,8 @@ find_package (JPEG)
 find_package (X11)
 find_package (ZLIB)
 
-## check where to find the CMake scripts
-
-find_path (pgplot_cmake FindG2C.cmake FindGIF.cmake
-  PATHS 
-  ${pgplot_SOURCE_DIR}
-  ${pgplot_SOURCE_DIR}/..
-  ${pgplot_SOURCE_DIR}/../..
-  ${pgplot_SOURCE_DIR}/../../..
-  PATH_SUFFIXES
-  devel_common/cmake
-  )
+## load additional custom CMake find scripts; locating the diectory already
+## has been done above
 
 if (pgplot_cmake)
   include (${pgplot_cmake}/FindG2C.cmake)
@@ -367,3 +381,9 @@ set (pgplot_headers
 install (FILES ${pgplot_headers}
   DESTINATION include/pgplot
   )
+
+## <-- end build condition ----------------------------------------------------->
+
+else (NOT HAVE_PGPLOT OR PGPLOT_FORCE_BUILD)
+  message (STATUS "Found system-wide installation of PGPLOT; skipping rebuild!")
+endif (NOT HAVE_PGPLOT OR PGPLOT_FORCE_BUILD)

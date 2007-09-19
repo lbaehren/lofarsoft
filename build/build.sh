@@ -166,8 +166,8 @@ case $param_packageName in
 	build_package hdf5 external/hdf5 -DHDF5_FORCE_BUILD:BOOL=$param_forceBuild
     ;;
     pgplot)
-	echo "[build] Selected package Pgplot"
-	build_package pgplot external/pgplot -DCMAKE_INSTALL_PREFIX:STRING=$basedir/../release
+	echo "[build] Selected package PGPlot"
+	build_package pgplot external/pgplot -DPGPLOT_FORCE_BUILD:BOOL=$param_forceBuild
     ;;
     plplot)
 	echo "[build] Selected package Plplot"
