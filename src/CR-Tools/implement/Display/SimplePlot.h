@@ -70,9 +70,9 @@ namespace CR { // Namespace CR -- begin
 #ifdef HAVE_PGPLOT
     // \brief Pointer to the local pgplotter object
     PGPlotterLocal *plotter_p;
+#endif
 
     Int ppCharacterHeight, ppLineWidth;
-#endif
 
 
   public:
