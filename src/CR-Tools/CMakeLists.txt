@@ -247,7 +247,6 @@ include_directories (
   ${CR_SOURCE_DIR}/apps
   ${CR_SOURCE_DIR}/test
   ${DAL_INCLUDES}
-  ${PGPLOT_INCLUDES}
   )
 
 ## external components

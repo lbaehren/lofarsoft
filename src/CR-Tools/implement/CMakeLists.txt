@@ -59,6 +59,22 @@ if (CR_DEBUGGING_MESSAGES)
   add_definitions (-DDEBUGGING_MESSAGES)
 endif (CR_DEBUGGING_MESSAGES)
 
+## Assemble list of external libraries against which to link
+
+set (cr_external_libraries
+  ${CASA_LIBRARIES}
+  ${G2C_LIBRARIES}
+  ${LAPACK_LIBRARIES}
+  ${CFITSIO_LIBRARIES}
+  ${WCSLIB_LIBRARIES}
+  ${X11_LIBRARIES}
+  ${libm}
+  )
+
+if (HAVE_PGPLOT)
+  list (APPEND cr_external_libraries ${PGPLOT_LIBRARIES})
+endif (HAVE_PGPLOT)
+
 ## Create the library
 
 add_library (cr ${cr_sources})
@@ -67,14 +83,7 @@ set_target_properties (cr
   COMPILE_FLAGS "${CASACORE_COMPILE_FLAGS} -fPIC -O2 -fPIC"
   )
 target_link_libraries (cr
-  ${CASA_LIBRARIES}
-  ${G2C_LIBRARIES}
-  ${LAPACK_LIBRARIES}
-  ${CFITSIO_LIBRARIES}
-  ${PGPLOT_LIBRARIES}
-  ${WCSLIB_LIBRARIES}
-  ${X11_LIBRARIES}
-  ${libm}
+  ${cr_external_libraries}
   )
 
 ## ------------------------------------------------------------------------------
