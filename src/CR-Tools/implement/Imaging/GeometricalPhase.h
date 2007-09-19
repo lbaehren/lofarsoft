@@ -48,19 +48,38 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     <h3>Prerequisite</h3>
     
-    <ul type="square">
-      <li>GeometricalDelay
-      <li>GeometricalWeight
-    </ul>
-    
     <h3>Synopsis</h3>
     
-    <b>Geometry.</b>
-    The basic equation, for which the delays are computed, is documented in
-    the GeometricalWeight class. The procedure to arrive at the geometrical
+    <table border="0">
+      <tr>
+        <td class="indexkey">Quantity</td>
+        <td class="indexkey">implemented in</td>
+        <td class="indexkey">Relation</td>
+      </tr>
+      <tr>
+        <td>gemoetrical delay</td>
+        <td>GeometricalDelay</td>
+        <td>\f$ \tau_j = \frac{1}{c} \left( |\vec \rho - \vec x_j| - |\vec \rho|
+	\right) \f$</td>
+      </tr>
+      <tr>
+        <td>geometrical phase</td>
+        <td>GeometricalPhase</td>
+        <td>\f$ \phi (\vec x_j, \vec \rho, \nu) = 2 \pi \nu \tau_{\rm geom} \f$</td>
+      </tr>
+      <tr>
+        <td>geometrical weight</td>
+        <td>GeometricalWeight</td>
+        <td>\f$ w (\vec x_j, \vec \rho, \nu) = \exp \Bigl( i\, \phi (\vec x_j,
+	\vec \rho, \nu) \Bigr) \f$</td>
+      </tr>
+    </table>
+    
+    The <i>basic equation</i>, for which the delays are computed, is documented
+    in the GeometricalWeight class. The procedure to arrive at the geometrical
     weights passed to the Beamform is divided into three steps, of which this
     class implements the second one.
-
+    
     The geometrical phase \f$ \phi = \phi (\vec x, \vec \rho, \nu) \f$ is given
     by
     \f[ \phi (\vec x, \vec \rho, \nu) = 2 \pi \nu \tau_{\rm geom} \f]
@@ -270,8 +289,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
     /*!
       \brief Get the geometrical phase(s)
 
-      \return delay -- Array with the geometrical phase(s) with a combintation
-                       of baselines, pointing positions and observation 
+      \return delay -- [antenna,skyPosition,frequency]
+                       Array with the geometrical phase(s) for a combination
+                       of antenna positions, pointing positions and observation
 		       frequencies.
     */
 #ifdef HAVE_CASA

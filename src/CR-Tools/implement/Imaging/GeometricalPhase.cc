@@ -279,11 +279,11 @@ namespace CR { // NAMESPACE CR -- BEGIN
     int nofChannels (nofFrequencies());
     int nChannel (0);
 
-    // get the geometrical delays
+    // get the geometrical delays, [nofAntennas,nofSkyPositions]
     casa::Matrix<double> delays = GeometricalDelay::delays();
     casa::IPosition shape       = delays.shape();
     
-    // array with the computed phases
+    // array with the computed phases, [antenna,skyPosition,frequency]
     casa::Cube<double> phases (shape(0),shape(1),nofChannels);
 
     // compute the phases

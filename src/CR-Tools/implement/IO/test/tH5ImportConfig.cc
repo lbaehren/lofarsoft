@@ -99,10 +99,12 @@ int test_H5ImportConfig ()
 
 /*!
   \brief Test how to export data stored in a array of values
+  
+  \code
+  h5import h5import.data -c h5import.txt -o testdata.hdf5
+  \endcode
 
-  \verbose
-   h5import h5import.data -c h5import.txt -o testdata.hdf5
-  \endverbose 
+  \return nofFailedTests -- The number of failed tests.
 */
 int test_exportArray ()
 {

@@ -2,8 +2,8 @@
  | $Id                                                                   $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Lars Baehren (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Lars Baehren (<mail>)                                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -24,6 +24,8 @@
 #include <IO/H5ImportConfig.h>
 #include <fstream>
 #include <sstream>
+
+using std::endl;
 
 namespace CR { // Namespace CR -- begin
   
@@ -133,16 +135,16 @@ namespace CR { // Namespace CR -- begin
 
   void H5ImportConfig::summary (std::ostream &os)
   {
-    os << " -- Configuration output = " << configFile_p         << std::endl;
-    os << " -- RANK                 = " << rank_p               << std::endl;
-    os << " -- DIMENSION-SIZES      = " << dimensionsAsString() << std::endl;
-    os << " -- PATH                 = " << path_p               << std::endl;
-    os << " -- INPUT-CLASS          = " << inputClass_p         << std::endl;
-    os << " -- INPUT-SIZE           = " << inputSize_p          << std::endl;
-    os << " -- OUTPUT-CLASS         = " << outputClass_p        << std::endl;
-    os << " -- OUTPUT-SIZE          = " << outputSize_p         << std::endl;
-    os << " -- OUTPUT-ARCHITECTURE  = " << outputArchitecture_p << std::endl;
-    os << " -- OUTPUT-BYTE-ORDER    = " << outputByteOrder_p    << std::endl;
+    os << " -- Configuration output = " << configFile_p         << endl;
+    os << " -- RANK                 = " << rank_p               << endl;
+    os << " -- DIMENSION-SIZES      = " << dimensionsAsString() << endl;
+    os << " -- PATH                 = " << path_p               << endl;
+    os << " -- INPUT-CLASS          = " << inputClass_p         << endl;
+    os << " -- INPUT-SIZE           = " << inputSize_p          << endl;
+    os << " -- OUTPUT-CLASS         = " << outputClass_p        << endl;
+    os << " -- OUTPUT-SIZE          = " << outputSize_p         << endl;
+    os << " -- OUTPUT-ARCHITECTURE  = " << outputArchitecture_p << endl;
+    os << " -- OUTPUT-BYTE-ORDER    = " << outputByteOrder_p    << endl;
   }
   
   std::string H5ImportConfig::dimensionsAsString (bool const &fastestFirst)
@@ -222,42 +224,44 @@ namespace CR { // Namespace CR -- begin
 
   bool H5ImportConfig::exportSettings ()
   {
-    bool status (true);
-    std::ofstream os;
-
-
-    // open the file stream to which the configuration will be written
-    os.open (configFile_p.c_str(),std::ios::out);
-
-    try {
-      os << "RANK                 " << rank_p                   << std::endl;
-      os << "DIMENSION-SIZES      " << dimensionsAsString(true) << std::endl;
-      os << "PATH                 " << path_p                   << std::endl;
-      os << "INPUT-CLASS          " << inputClass_p             << std::endl;
-      os << "INPUT-SIZE           " << inputSize_p              << std::endl;
-      os << "OUTPUT-CLASS         " << outputClass_p            << std::endl;
-      os << "OUTPUT-SIZE          " << outputSize_p             << std::endl;
-      os << "OUTPUT-ARCHITECTURE  " << outputArchitecture_p     << std::endl;
-      os << "OUTPUT-BYTE-ORDER    " << outputByteOrder_p        << std::endl;
-    } catch (std::string message) {
-      std::cerr << "" << message << std::endl;
-      status = false;
-    }
-
-    os.close();
-
-    return status;
+    return exportSettings (configFile_p,
+			   false)
   }
 
   // ------------------------------------------------------------- exportSettings
-
-  bool H5ImportConfig::exportSettings (std::string const &outfile)
+  
+  bool H5ImportConfig::exportSettings (std::string const &outfile,
+				       bool const &storeFilename)
   {
-    if (setConfigFile (outfile)) {
-      return exportSettings ();
-    } else {
-      return false;
+    bool status (true);
+
+    // process optional storage of filename
+    if (storeFilename) {
+      status = setConfigFile (outfile);
     }
+
+    // [1] Open the file stream to which the configuration will be written
+    std::ofstream os;
+    os.open (outfile.c_str(),std::ios::out);
+    // [2] Write out the configuration
+    try {
+      os << "RANK                 " << rank_p                   << endl;
+      os << "DIMENSION-SIZES      " << dimensionsAsString(true) << endl;
+      os << "PATH                 " << path_p                   << endl;
+      os << "INPUT-CLASS          " << inputClass_p             << endl;
+      os << "INPUT-SIZE           " << inputSize_p              << endl;
+      os << "OUTPUT-CLASS         " << outputClass_p            << endl;
+      os << "OUTPUT-SIZE          " << outputSize_p             << endl;
+      os << "OUTPUT-ARCHITECTURE  " << outputArchitecture_p     << endl;
+      os << "OUTPUT-BYTE-ORDER    " << outputByteOrder_p        << endl;
+    } catch (std::string message) {
+      std::cerr << "" << message << endl;
+      status = false;
+    }
+    // [3] Close the output filestream
+    os.close();
+
+    return status;
   }
 
 } // Namespace CR -- end

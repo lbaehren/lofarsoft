@@ -169,6 +169,15 @@ namespace CR { // Namespace CR -- begin
     }
 
     /*!
+      \brief Get the number of dimensions in the dataset
+
+      \return rank -- The number of dimensions in the dataset
+    */
+    inline int rank () const {
+      return rank_p;
+    };
+
+    /*!
       \brief Get the number of data points in the dataset
       
       \return nofPoints -- The number of data points in the data set, as given by
@@ -191,6 +200,24 @@ namespace CR { // Namespace CR -- begin
     */
     std::string dimensionsAsString (bool const &fastestFirst=false);
     
+    /*!
+      \brief Get the type of the output architecture
+
+      \return outputArchitecture -- Type of the output architecture
+    */
+    inline std::string outputArchitecture () const {
+      return outputArchitecture_p;
+    }
+
+    /*!
+      \brief Output byte order
+
+      \return outputByteOrder -- Output byte order
+    */
+    inline std::string outputByteOrder () const {
+      return outputByteOrder_p;
+    }
+
     /*!
       \brief Get the name of the class
       
@@ -216,7 +243,8 @@ namespace CR { // Namespace CR -- begin
     
     bool exportSettings ();
     
-    bool exportSettings (std::string const &outfile);
+    bool exportSettings (std::string const &outfile,
+			 bool const &storeFilename=true);
     
   private:
     

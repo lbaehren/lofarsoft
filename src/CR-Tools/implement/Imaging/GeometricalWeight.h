@@ -44,12 +44,33 @@ namespace CR { // NAMESPACE CR -- BEGIN
     \test tGeometricalWeight.cc
     
     <h3>Prerequisite</h3>
-    
-    <ul type="square">
-      <li>[start filling in your text here]
-    </ul>
-    
+
     <h3>Synopsis</h3>
+    
+    <table border="0">
+      <tr>
+        <td class="indexkey">Quantity</td>
+        <td class="indexkey">implemented in</td>
+        <td class="indexkey">Relation</td>
+      </tr>
+      <tr>
+        <td>gemoetrical delay</td>
+        <td>GeometricalDelay</td>
+        <td>\f$ \tau_j = \frac{1}{c} \left( |\vec \rho - \vec x_j| - |\vec \rho|
+	\right) \f$</td>
+      </tr>
+      <tr>
+        <td>geometrical phase</td>
+        <td>GeometricalPhase</td>
+        <td>\f$ \phi (\vec x_j, \vec \rho, \nu) = 2 \pi \nu \tau_{\rm geom} \f$</td>
+      </tr>
+      <tr>
+        <td>geometrical weight</td>
+        <td>GeometricalWeight</td>
+        <td>\f$ w (\vec x_j, \vec \rho, \nu) = \exp \Bigl( i\, \phi (\vec x_j,
+	\vec \rho, \nu) \Bigr) \f$</td>
+      </tr>
+    </table>
     
     The basic equation, by which the geometrical weights for the beamforming
     are computed, is given by
@@ -61,17 +82,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
     positions. The geometrical delay \f$ \tau = R L^{T} \f$ is computed in the
     class GeometricalDelay.
     
-    \f[
-    \begin{array}{rcl}
-    \tau_j & = & \frac{1}{c} \left( |\vec \rho - \vec x_j| - |\vec \rho| \right) \\
-    & \downarrow &  \\
-    \phi (\vec x_j, \vec \rho, \nu) & = & 2 \pi \nu \tau_{\rm geom} \\
-    & \downarrow &  \\
-    w (\vec x_j, \vec \rho, \nu) & = & \exp \Bigl( i\, \phi (\vec x_j, \vec \rho,
-    \nu) \Bigr)
-    \end{array}
-    \f]
-
     <h3>Example(s)</h3>
     
   */  

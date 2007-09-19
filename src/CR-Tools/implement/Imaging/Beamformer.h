@@ -67,9 +67,32 @@ namespace CR { // Namespace CR -- begin
     
     <h3>Prerequisite</h3>
     
-    <ul type="square">
-      <li>Familiarity of beamforming with phased arrays.
-    </ul>
+    The underlying geometrical framework utilized by the Beamformer is
+    implemented in the following classes:
+    <table border="0">
+      <tr>
+        <td class="indexkey">Quantity</td>
+        <td class="indexkey">implemented in</td>
+        <td class="indexkey">Relation</td>
+      </tr>
+      <tr>
+        <td>gemoetrical delay</td>
+        <td>GeometricalDelay</td>
+        <td>\f$ \tau_j = \frac{1}{c} \left( |\vec \rho - \vec x_j| - |\vec \rho|
+	\right) \f$</td>
+      </tr>
+      <tr>
+        <td>geometrical phase</td>
+        <td>GeometricalPhase</td>
+        <td>\f$ \phi (\vec x_j, \vec \rho, \nu) = 2 \pi \nu \tau_{\rm geom} \f$</td>
+      </tr>
+      <tr>
+        <td>geometrical weight</td>
+        <td>GeometricalWeight</td>
+        <td>\f$ w (\vec x_j, \vec \rho, \nu) = \exp \Bigl( i\, \phi (\vec x_j,
+	\vec \rho, \nu) \Bigr) \f$</td>
+      </tr>
+    </table>
     
     <h3>Synopsis</h3>
 
