@@ -12,9 +12,12 @@ include_directories (
 ## Set up the list with test program sources
 
 set (tests
-#  tPGPlotterCR
   tSimplePlot
   )
+
+if (HAVE_PGPLOT)
+  list (APPEND tests tPGPlotterCR)
+endif (HAVE_PGPLOT)
 
 ## -----------------------------------------------------------------------------
 ## Build the test programs
