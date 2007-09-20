@@ -26,8 +26,8 @@ print_help ()
     echo "";
     echo "SYNOPSIS";
     echo "    build.sh <package> [build-option]";
-    echo "    build.sh -clean";
-    echo "    build.sh -help";
+    echo "    build.sh { -clean | clean }";
+    echo "    build.sh { -h | --h | -help | --help | help }";
     echo "";
     echo "DESCRIPTION";
     echo "    A simple shell script to configure and install as many as possible of";
@@ -38,13 +38,13 @@ print_help ()
     echo "";
     echo "    The following options are available:";
     echo "";
-    echo " --force-build  = Force build from provided source code, even if system-wide";
-    echo "                  version exists; otherwise the system-wise version of a";
-    echo "                  library/package/binary will be used.";
+    echo "    --force-build  = Force build from provided source code, even if system-wide";
+    echo "                     version exists; otherwise the system-wise version of a";
+    echo "                     library/package/binary will be used.";
     echo "";
-    echo " --clean-build  = Clean up the build directory before the configuration step;";
-    echo "                  use this in order to erase previous configuration settings";
-    echo "                  and start fresh.";
+    echo "    --clean-build  = Clean up the build directory before the configuration step;";
+    echo "                     use this in order to erase previous configuration settings";
+    echo "                     and start fresh.";
     echo "";
 }
 
@@ -126,6 +126,9 @@ else
 			rm -rf pgplot plplot python;
 			rm -rf vtk;
 			rm -rf wcslib;
+		;;
+		clean)
+			./build.sh -clean;
 		;;
 		*)
 			param_packageName=$1;
