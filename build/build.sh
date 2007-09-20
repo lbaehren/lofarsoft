@@ -15,6 +15,11 @@
 
 basedir=`pwd`
 
+## Default values for the optional parameters
+
+param_forceBuild=0;
+param_cleanBuild=0;
+
 ## -----------------------------------------------------------------------------
 ## Helper functions
 
@@ -101,63 +106,60 @@ if test -z $1 ; then
     print_help
 else
     case $1 in
-	    -h)
-			print_help
-		;;
-		--h)
-			print_help
-		;;
-		-help)
-			print_help
-		;;
-		--help)
-			print_help
-		;;
-		help)
-			print_help
-		;;
-		-clean)
-			rm -f *~ *.log;
-			rm -rf bison blitz boost;
-			rm -rf casacore cfitsio cmake cr; 
-			rm -rf dal dsp;
-			rm -rf flex;
-			rm -rf hdf5;
-			rm -rf pgplot plplot python;
-			rm -rf vtk;
-			rm -rf wcslib;
-		;;
-		clean)
-			./build.sh -clean;
-		;;
-		*)
-			param_packageName=$1;
-			echo " -- Selected package: $param_packageName";
-		;;
-	esac
+	-h)
+	print_help
+	;;
+	--h)
+	print_help
+	;;
+	-help)
+	print_help
+	;;
+	--help)
+	print_help
+	;;
+	help)
+	print_help
+	;;
+	-clean)
+	rm -f *~ *.log;
+	rm -rf bison blitz boost;
+	rm -rf casacore cfitsio cmake cr; 
+	rm -rf dal dsp;
+	rm -rf flex;
+	rm -rf hdf5;
+	rm -rf pgplot plplot python;
+	rm -rf vtk;
+	rm -rf wcslib;
+	;;
+	clean)
+	./build.sh -clean;
+	;;
+	*)
+	param_packageName=$1;
+	echo " -- Selected package: $param_packageName";
+	;;
+    esac
 fi
 
 ## [2] Optional parameters: Force build of package from provided source?
 
-param_forceBuild=0;
-param_cleanBuild=0;
-
 option_found=true
 while [ "$option_found" == "true" ]
-do
+  do
   case $2 in
-    --force-build)
-	    param_forceBuild=1;
-		shift;
-	    echo " -- Recognized build option; forcing build."; 
-	;;
-    --clean-build)
-	    param_cleanBuild=1;
-		shift;
-	    echo " -- Recognized build option; forcing build."; 
-	;;
-	*)
-		option_found=false
+      --force-build)
+      param_forceBuild=1;
+      shift;
+      echo " -- Recognized build option; forcing build."; 
+      ;;
+      --clean-build)
+      param_cleanBuild=1;
+      shift;
+      echo " -- Recognized build option; forcing build."; 
+      ;;
+      *)
+      option_found=false
   esac
 done
 
