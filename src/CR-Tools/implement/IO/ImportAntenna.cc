@@ -29,7 +29,7 @@ namespace CR { // Namespace CR -- begin
   // warn if energy fraction in projected pulses falls below this limit
   const Double ImportAntenna::minimumEfficiency = 0.995;
   // conversion factor from cgs values to Volt per Meter
-  const Double cgsToVpm = 2.99792458e4;  
+  const Double ImportAntenna::cgsToVpm = 2.99792458e4;  
 
   // ============================================================================
   //
