@@ -194,13 +194,13 @@ numeric::array makeNum(object x){
 }
 
 //Create a one-dimensional Numeric array of length n and Numeric type t
-numeric::array makeNum(intp n, PyArray_TYPES t=PyArray_DOUBLE){
+numeric::array makeNum(int n, PyArray_TYPES t=PyArray_DOUBLE){
   object obj(handle<>(PyArray_FromDims(1, &n, t)));
   return extract<numeric::array>(obj);
 }
   
 //Create a Numeric array with dimensions dimens and Numeric type t
-numeric::array makeNum(std::vector<intp> dimens, 
+numeric::array makeNum(std::vector<int> dimens, 
 		       PyArray_TYPES t=PyArray_DOUBLE){
   object obj(handle<>(PyArray_FromDims(dimens.size(), &dimens[0], t)));
   return extract<numeric::array>(obj);
@@ -251,7 +251,7 @@ void check_rank(boost::python::numeric::array arr, int expected_rank){
   return;
 }
 
-intp size(numeric::array arr)
+int size(numeric::array arr)
 {
   if(!PyArray_Check(arr.ptr())){
     PyErr_SetString(PyExc_ValueError, "expected a PyArrayObject");
@@ -260,8 +260,8 @@ intp size(numeric::array arr)
   return PyArray_Size(arr.ptr());
 }
 
-void check_size(boost::python::numeric::array arr, intp expected_size){
-  intp actual_size = size(arr);
+void check_size(boost::python::numeric::array arr, int expected_size){
+  int actual_size = size(arr);
   if (actual_size != expected_size) {
     std::ostringstream stream;
     stream << "expected size " << expected_size 
@@ -272,13 +272,13 @@ void check_size(boost::python::numeric::array arr, intp expected_size){
   return;
 }
 
-std::vector<intp> shape(numeric::array arr){
-  std::vector<intp> out_dims;
+std::vector<int> shape(numeric::array arr){
+  std::vector<int> out_dims;
   if(!PyArray_Check(arr.ptr())){
     PyErr_SetString(PyExc_ValueError, "expected a PyArrayObject");
     throw_error_already_set();
   }
-  int* dims_ptr = PyArray_DIMS(arr.ptr());
+  npy_intp* dims_ptr = PyArray_DIMS(arr.ptr());
   int the_rank = rank(arr);
   for (int i = 0; i < the_rank; i++){
     out_dims.push_back(*(dims_ptr + i));
@@ -286,7 +286,7 @@ std::vector<intp> shape(numeric::array arr){
   return out_dims;
 }
 
-intp get_dim(boost::python::numeric::array arr, int dimnum){
+int get_dim(boost::python::numeric::array arr, int dimnum){
   assert(dimnum >= 0);
   int the_rank=rank(arr);
   if(the_rank < dimnum){
@@ -296,12 +296,12 @@ intp get_dim(boost::python::numeric::array arr, int dimnum){
     PyErr_SetString(PyExc_RuntimeError, stream.str().c_str());       
     throw_error_already_set();
   }
-  std::vector<intp> actual_dims = shape(arr);
+  std::vector<int> actual_dims = shape(arr);
   return actual_dims[dimnum];
 }
 
-void check_shape(boost::python::numeric::array arr, std::vector<intp> expected_dims){
-  std::vector<intp> actual_dims = shape(arr);
+void check_shape(boost::python::numeric::array arr, std::vector<int> expected_dims){
+  std::vector<int> actual_dims = shape(arr);
   if (actual_dims != expected_dims) {
     std::ostringstream stream;
     stream << "expected dimensions " << vector_str(expected_dims)
@@ -312,8 +312,8 @@ void check_shape(boost::python::numeric::array arr, std::vector<intp> expected_d
   return;
 }
 
-void check_dim(boost::python::numeric::array arr, int dimnum, intp dimsize){
-  std::vector<intp> actual_dims = shape(arr);
+void check_dim(boost::python::numeric::array arr, int dimnum, int dimsize){
+  std::vector<int> actual_dims = shape(arr);
   if(actual_dims[dimnum] != dimsize){
     std::ostringstream stream;
     stream << "Error: expected dimension number ";
@@ -351,8 +351,8 @@ void* data(numeric::array arr){
 //Copy data into the array
 void copy_data(boost::python::numeric::array arr, char* new_data){
   char* arr_data = (char*) data(arr);
-  intp nbytes = PyArray_NBYTES(arr.ptr());
-  for (intp i = 0; i < nbytes; i++) {
+  int nbytes = PyArray_NBYTES(arr.ptr());
+  for (int i = 0; i < nbytes; i++) {
     arr_data[i] = new_data[i];
   }
   return;
@@ -370,22 +370,22 @@ numeric::array astype(boost::python::numeric::array arr, PyArray_TYPES t){
   return (numeric::array) arr.astype(type2char(t));
 }
 
-std::vector<intp> strides(numeric::array arr){
-  std::vector<intp> out_strides;
+std::vector<int> strides(numeric::array arr){
+  std::vector<int> out_strides;
   if(!PyArray_Check(arr.ptr())){
     PyErr_SetString(PyExc_ValueError, "expected a PyArrayObject");
     throw_error_already_set();
   }
-  intp* strides_ptr = PyArray_STRIDES(arr.ptr());
-  intp the_rank = rank(arr);
-  for (intp i = 0; i < the_rank; i++){
+  npy_intp* strides_ptr = PyArray_STRIDES(arr.ptr());
+  int the_rank = rank(arr);
+  for (int i = 0; i < the_rank; i++){
     out_strides.push_back(*(strides_ptr + i));
   }
   return out_strides;
 }
 
 int refcount(numeric::array arr){
-  return REFCOUNT(arr.ptr());
+  return NPY_REFCOUNT(arr.ptr());
 }
 
 void check_PyArrayElementType(object newo){
@@ -426,9 +426,9 @@ inline std::string vector_str(const std::vector<T>& vec)
   return stream.str();
 }
 
-inline void check_size_match(std::vector<intp> dims, intp n)
+inline void check_size_match(std::vector<int> dims, int n)
 {
-  intp total = std::accumulate(dims.begin(),dims.end(),1,std::multiplies<intp>());
+  int total = std::accumulate(dims.begin(),dims.end(),1,std::multiplies<int>());
   if (total != n) {
     std::ostringstream stream;
     stream << "expected array size " << n

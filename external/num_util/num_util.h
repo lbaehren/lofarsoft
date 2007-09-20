@@ -11,7 +11,7 @@
 //
 
 #include <boost/python.hpp>
-#include <numpy/noprefix.h>
+#include <numpy/arrayobject.h>
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -37,7 +37,7 @@ namespace num_util{
    *@param t elements' numpy type. Default is double.
    *@return a numeric array of size n with elements initialized to zero.
    */
-  boost::python::numeric::array makeNum(intp n, PyArray_TYPES t);
+  boost::python::numeric::array makeNum(int n, PyArray_TYPES t);
 
   /** 
    *Creates a n-dimensional numpy array with dimensions dimens and numpy 
@@ -46,7 +46,7 @@ namespace num_util{
    *@param t elements' numpy type. Default is double.
    *@return a numeric array of shape dimens with elements initialized to zero.
    */
-  boost::python::numeric::array makeNum(std::vector<intp> dimens, 
+  boost::python::numeric::array makeNum(std::vector<int> dimens, 
 					PyArray_TYPES t);
 				      
   /** 
@@ -72,7 +72,7 @@ namespace num_util{
    *@return a numpy array of size n with elements initialized to data.
    */
 
-  template <typename T> boost::python::numeric::array makeNum(T* data, intp n = 0){
+  template <typename T> boost::python::numeric::array makeNum(T* data, int n = 0){
     boost::python::object obj(boost::python::handle<>(PyArray_FromDims(1, &n, getEnum<T>())));
     void *arr_data = PyArray_DATA((PyArrayObject*) obj.ptr());
     memcpy(arr_data, data, PyArray_ITEMSIZE((PyArrayObject*) obj.ptr()) * n); // copies the input data to 
@@ -89,8 +89,8 @@ namespace num_util{
    */
 
 
-  template <typename T> boost::python::numeric::array makeNum(T * data, std::vector<intp> dims){
-    intp total = std::accumulate(dims.begin(),dims.end(),1,std::multiplies<intp>());
+  template <typename T> boost::python::numeric::array makeNum(T * data, std::vector<int> dims){
+    int total = std::accumulate(dims.begin(),dims.end(),1,std::multiplies<int>());
     boost::python::object obj(boost::python::handle<>(PyArray_FromDims(dims.size(),&dims[0], getEnum<T>())));
     void *arr_data = PyArray_DATA((PyArrayObject*) obj.ptr());
     memcpy(arr_data, data, PyArray_ITEMSIZE((PyArrayObject*) obj.ptr()) * total);
@@ -143,7 +143,7 @@ namespace num_util{
    *@param arr a Boost/Python numeric array.
    *@return an integer that indicates the total size of the array.
    */
-  intp size(boost::python::numeric::array arr);
+  int size(boost::python::numeric::array arr);
   
   /** 
    *Throw an exception if the actual total size of the array is not equal to 
@@ -152,14 +152,14 @@ namespace num_util{
    *@param expected_size the expected size of an array.
    *@return -----
    */
-  void check_size(boost::python::numeric::array arr, intp expected_size);
+  void check_size(boost::python::numeric::array arr, int expected_size);
 
   /** 
    *Returns the dimensions in a vector.
    *@param arr a Boost/Python numeric array.
    *@return a vector with integer values that indicates the shape of the array.
   */
-  std::vector<intp> shape(boost::python::numeric::array arr);
+  std::vector<int> shape(boost::python::numeric::array arr);
 
   /**
    *Returns the size of a specific dimension.
@@ -167,7 +167,7 @@ namespace num_util{
    *@param dimnum an integer that identifies the dimension to retrieve.
    *@return the size of the requested dimension.
    */
-  intp get_dim(boost::python::numeric::array arr, int dimnum);
+  int get_dim(boost::python::numeric::array arr, int dimnum);
 
   /** 
    *Throws an exception if the actual dimensions of the array are not equal to
@@ -177,7 +177,7 @@ namespace num_util{
    *@return -----
    */
   void check_shape(boost::python::numeric::array arr, 
-		   std::vector<intp> expected_dims);
+		   std::vector<int> expected_dims);
 
   /**
    *Throws an exception if a specific dimension from a numpy array does not
@@ -187,7 +187,7 @@ namespace num_util{
    *@param dimsize an expected size of the specified dimension.
    *@return -----
   */
-  void check_dim(boost::python::numeric::array arr, int dimnum, intp dimsize);
+  void check_dim(boost::python::numeric::array arr, int dimnum, int dimsize);
 
   /** 
    *Returns true if the array is contiguous.
@@ -246,7 +246,7 @@ namespace num_util{
    *@param arr a Boost/Python numeric array.
    *@return the strides of an array.
    */
-  std::vector<intp> strides(boost::python::numeric::array arr);
+  std::vector<int> strides(boost::python::numeric::array arr);
 
   /** 
    *Throws an exception if the element of a numpy array is type cast to
@@ -308,7 +308,7 @@ namespace num_util{
    *@param n an expected size.
    *@return -----
    */
-  inline void check_size_match(std::vector<intp> dims, intp n);
+  inline void check_size_match(std::vector<int> dims, int n);
 
 } //  namespace num_util
 
