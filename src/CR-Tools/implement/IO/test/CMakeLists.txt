@@ -14,6 +14,7 @@ set (tests
   tFFTServer
   tImportAntenna
   tImportSimulation
+  tFalckeGorhamGalacticNoise
   tLogfileName
   tSimulation2fftMatrix
   )

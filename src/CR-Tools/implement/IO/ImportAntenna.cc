@@ -28,7 +28,9 @@ namespace CR { // Namespace CR -- begin
   const Double ImportAntenna::rad = M_PI/180.0;
   // warn if energy fraction in projected pulses falls below this limit
   const Double ImportAntenna::minimumEfficiency = 0.995;
-  
+  // conversion factor from cgs values to Volt per Meter
+  const Double cgsToVpm = 2.99792458e4;  
+
   // ============================================================================
   //
   //  Construction
@@ -153,9 +155,9 @@ namespace CR { // Namespace CR -- begin
     // actual data
     for (long i=0; i<NumPointsSimulated; ++i)
       {
-	Eazimuth(PointsToPadBefore+NumPointsBeforeSimulated+i)=itsTimeSeries.at(i).DottedWith(itsAzimuthAxis);
-	Ezenith(PointsToPadBefore+NumPointsBeforeSimulated+i)=itsTimeSeries.at(i).DottedWith(itsZenithAxis);
-	fullEnergy+=itsTimeSeries.at(i).GetLength()*itsTimeSeries.at(i).GetLength();
+	Eazimuth(PointsToPadBefore+NumPointsBeforeSimulated+i)=cgsToVpm*itsTimeSeries.at(i).DottedWith(itsAzimuthAxis);
+	Ezenith(PointsToPadBefore+NumPointsBeforeSimulated+i)=cgsToVpm*itsTimeSeries.at(i).DottedWith(itsZenithAxis);
+	fullEnergy+=cgsToVpm*cgsToVpm*itsTimeSeries.at(i).GetLength()*itsTimeSeries.at(i).GetLength();
 	projEnergy+=Eazimuth(PointsToPadBefore+NumPointsBeforeSimulated+i)*Eazimuth(PointsToPadBefore+NumPointsBeforeSimulated+i)+Ezenith(PointsToPadBefore+NumPointsBeforeSimulated+i)*Ezenith(PointsToPadBefore+NumPointsBeforeSimulated+i);
       }
     

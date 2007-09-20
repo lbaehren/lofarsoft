@@ -124,7 +124,7 @@ namespace CR {  // Namespace CR -- begin
     \brief Get the two zero-padded, equidistantly sampled time series arrays
 
     Get the two zero-padded, equidistantly sampled time series arrays containing
-    the efield data in cgs units.
+    the efield data in units of Volt/meter.
     
     \param Eazimuth -- returns time series projected on "azimuth aligned"
                        component (lies in x-y-plane)
@@ -207,6 +207,7 @@ namespace CR {  // Namespace CR -- begin
     ThreeVector itsZenithAxis;
     
     static const Double rad;
+    static const Double cgsToVpm;
     static const Double minimumEfficiency;
 
   };
