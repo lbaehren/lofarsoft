@@ -43,8 +43,8 @@ set (lib_locations
 
 set (hdf5_headers
   hdf5.h
-  H5Cpp.h
   H5LT.h
+  H5public.h
   )
 
 ## check for the basic header file of the HDF5 library
@@ -52,6 +52,7 @@ set (hdf5_headers
 find_path (HDF5_INCLUDES ${hdf5_headers}
   PATHS ${include_locations}
   PATH_SUFFIXES hdf5
+  NO_DEFAULT_PATH
   )
 
 ## check for header files available when library was build with "--enable-cxx"
@@ -73,20 +74,31 @@ find_path (HDF5_INCLUDES ${hdf5_headers}
 ## -----------------------------------------------------------------------------
 ## Check for the library components
 
-set (hdf5_libs
-  hdf5
-  hdf5_hl
-)
-set (HDF5_LIBRARIES "")
+## [1] Core library
 
-foreach (lib ${hdf5_libs})
-  find_library (HDF5_${lib} ${lib}
-    PATHS ${lib_locations}
-    )
-  if (HDF5_${lib})
-    list (APPEND HDF5_LIBRARIES ${HDF5_${lib}})
-  endif (HDF5_${lib})
-endforeach (lib)
+FIND_LIBRARY (libhdf5
+  NAMES hdf5
+  PATHS ${lib_locations}
+  PATH_SUFFIXES hdf5
+  NO_DEFAULT_PATH
+)
+
+if (libhdf5)
+  set (HDF5_LIBRARIES ${libhdf5})
+endif (libhdf5)
+
+## [2] Additional libraries
+
+FIND_LIBRARY (libhdf5_hl
+  NAMES hdf5_hl
+  PATHS ${lib_locations}
+  PATH_SUFFIXES hdf5
+  NO_DEFAULT_PATH
+)
+
+if (libhdf5_hl)
+  list (APPEND HDF5_LIBRARIES ${libhdf5_hl})
+endif (libhdf5_hl)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
@@ -119,3 +131,8 @@ endif (HAVE_HDF5)
 
 ## -----------------------------------------------------------------------------
 ## Mark as advanced ...
+
+mark_as_advanced (
+  HDF5_INCLUDES
+  HDF5_LIBRARIES
+)

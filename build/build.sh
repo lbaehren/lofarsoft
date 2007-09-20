@@ -229,11 +229,11 @@ case $param_packageName in
     ;;
     flex)
 	echo "[build] Selected package Flex"
-	build_package flex external/flex -DFLEX_FORCE_BUILD:BOOL=$param_forceBuild
+	build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$param_forceBuild"
     ;;
     hdf5)
 	echo "[build] Selected package Hdf5"
-	build_package hdf5 external/hdf5 -DHDF5_FORCE_BUILD:BOOL=$param_forceBuild
+	build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     pgplot)
 	echo "[build] Selected package PGPlot"

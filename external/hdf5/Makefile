@@ -77,11 +77,11 @@ TIME=time
 TRACE=:
 
 ## Installation points
-prefix=/Users/lars/Code/lofar/usg/external/hdf5/../../release
+prefix=/Users/lars/Code/lofar/usg/release/
 exec_prefix=${prefix}
 bindir=${exec_prefix}/bin
 libdir=${exec_prefix}/lib
-includedir=/Users/lars/Code/lofar/usg/external/hdf5/../../release/hdf5
+includedir=${prefix}/include
 docdir=${prefix}/doc
 PUB_LIB=$(LIB)
 
