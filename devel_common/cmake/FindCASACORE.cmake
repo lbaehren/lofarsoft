@@ -15,7 +15,7 @@
 set (include_locations
   ## local installation
   ./../release/include
-  ./../../release/lib
+  ./../../release/include
   ## source code
   ./../casacore
   ./../external/casacore
@@ -311,10 +311,12 @@ foreach (casacore_lib ${casacore_modules})
   if (${casacore_lib} MATCHES "mirlib")
     find_library (CASACORE_lib${casacore_lib} mir
       PATHS ${lib_locations}
+      NO_DEFAULT_PATH
       )
   else (${casacore_lib} MATCHES "mirlib")
     find_library (CASACORE_lib${casacore_lib} casa_${casacore_lib}
       PATHS ${lib_locations}
+      NO_DEFAULT_PATH
       )
   endif (${casacore_lib} MATCHES "mirlib")
   ## if we have found the library, add it to the list
