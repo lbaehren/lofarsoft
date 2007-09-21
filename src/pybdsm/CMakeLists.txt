@@ -8,5 +8,3 @@ project (pybdsm)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.4)
 
-add_subdirectory(wcslib)
-
