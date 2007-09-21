@@ -70,15 +70,16 @@ namespace CR { // Namespace CR -- begin
   void FalckeGorhamGalacticNoise::getNoise(Vector<Double> &frequencies, Vector<DComplex> &noise)
   {
     noise.resize(frequencies.nelements()); // delete potential entries in result vector
+    Double bandwidth = frequencies(frequencies.nelements()-1)-frequencies(0);
     for (long i=0; i<frequencies.nelements(); ++i)
     {
-      if (frequencies(i) == 0.0)
-      {
-        noise(i)=DComplex(0.0,0.0); // DC term has no noise
-	continue;
-      }
-//      Double abs = kB*32.*pow(frequencies(i)/408.e6,-2.5);	// Falcke Gorham 2003
-      Double abs = kB*2500;					// constant 2500 Kelvin
+      Double T = 0.0;
+      if (frequencies(i) > 0.0)					// set DC term or negative frequencies to zero
+      { T = 32.*pow(frequencies(i)/408.e6,-2.5); } 		// Falcke Gorham 2003
+
+//      T = 2500;						// 2500 Kelvin, for testing purposes      
+
+      Double abs = bandwidth*sqrt(0.5*kB*T*impedance);
       Double arg = UniformRNG();				// random phase between 0.0 and 2*Pi
       noise(i)=abs*DComplex(cos(arg),sin(arg));
     }

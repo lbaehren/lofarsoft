@@ -23,7 +23,9 @@
 
 namespace CR { // Namespace CR -- begin
 
-const double FrequencyNoise::kB = 1.38066e-16;	// Boltzmann constant in cm^2 g K^-1 Second^-2
+const double FrequencyNoise::kB = 1.3806503e-23;	// Boltzmann constant in m^2 kg K^-1 Second^-2
+//const double FrequencyNoise::impedance = 2.99792458e8*4.*M_PI*1.e-7;	// impedance of vacuum
+const double FrequencyNoise::impedance = 50.0;				// impedance of LOPES antennas
 
   // ============================================================================
   //

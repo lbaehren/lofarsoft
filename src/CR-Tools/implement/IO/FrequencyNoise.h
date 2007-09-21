@@ -88,13 +88,14 @@ namespace CR {  // Namespace CR -- begin
     
       \param frequencies -- pass a vector with the frequencies (in Hz) for which the noise is needed
     
-      \param noise -- returns a vector with the noise in the frequency domain (in cgs units)
+      \param noise -- returns a vector with the noise in the frequency domain (in SI units, correctly normalized for FFTServer backwards Fourier transform)
     */
     virtual void getNoise(Vector<Double> &frequencies,
 		          Vector<DComplex> &noise) = 0;
         
   protected:
-    static const double kB;	// Boltzmann constant in cgs units
+    static const double kB;		// Boltzmann constant in SI units
+    static const double impedance;	// impedance in Ohm
     
   };
   

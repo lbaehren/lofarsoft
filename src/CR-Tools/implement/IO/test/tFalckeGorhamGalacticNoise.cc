@@ -43,7 +43,11 @@ using CR::FalckeGorhamGalacticNoise;
   
   \ingroup IO
   
-  \brief A collection of test routines for FalckeGorhamNoise
+  \brief A collection of test routines for FalckeGorhamNoise.
+
+         If you want to test the normalisation of FalckeGorhamGalacticNoise,
+	 please set the noise temperature in FalckeGorhamGalacticNoise.cc to
+	 a constant value, e.g. 2500 Kelvin.
   
   \author Tim Huege
   
@@ -57,13 +61,13 @@ int main ()
 {
   FalckeGorhamGalacticNoise Test;
 
-  const long numpoints= 11;		// 10 frequencies
-  const double freqstep = 1.0e6;	// 1 MHz steps
+  const long numpoints= 137;
+  const double freqstep = 3.6e4;
   const double maxfreq = (numpoints-1)*freqstep;
   const double timestep = 2./maxfreq;
   const double noisetemp = 2500;	// 2500 Kelvin
-  const double noisepower = 1.38066e-16*noisetemp*maxfreq;
-  const double cmu0 = 2.99792458e8*4.*M_PI*1.e7;
+  const double impedance = 50.0;	// 50 Ohm
+  const double kB = 1.3806503e-23;
 
   Vector<Double> frequencies(numpoints);
   Vector<Double> timeseries;
@@ -85,9 +89,15 @@ int main ()
   for (long i=0; i<timeseries.nelements(); ++i)
   {
     cout << timeseries(i) << "\n";
-    timeintegral+=timeseries(i)*
+    timeintegral+=timeseries(i)*timeseries(i)/impedance*timestep;
   }
   
+  double theoreticalintegral = kB*noisetemp*maxfreq;
+  
+  cout << "\nTheoretical frequency integral (kB*T*bandwidth for fixed T): " << theoreticalintegral
+       << "\nCalculated time integral: " << timeintegral << "\t which is factor " << timeintegral/theoreticalintegral << " of expected value."
+       << endl;
+
   
   return 0;
 }
