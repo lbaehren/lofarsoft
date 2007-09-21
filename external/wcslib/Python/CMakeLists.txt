@@ -15,7 +15,7 @@ if (BOOST_boost_python AND PYTHON_EXECUTABLE)
   target_link_libraries (wcslib wcs ${BOOST_boost_python})
   set_target_properties (wcslib PROPERTIES PREFIX "")
 else (BOOST_boost_python AND PYTHON_EXECUTABLE)
-  message(STATUS "Python wrappers would not be built")
+  message(ERROR "Python wrappers could not be built")
 endif (BOOST_boost_python AND PYTHON_EXECUTABLE)
 
 ## Linking loadable modules on Mac is slightly more trickier

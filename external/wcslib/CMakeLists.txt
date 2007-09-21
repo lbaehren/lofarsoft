@@ -18,7 +18,7 @@ set (WCSLIB_VERSION "${WCSLIB_VERSION_MAJOR}.${WCSLIB_VERSION_MINOR}")
 ## -----------------------------------------------------------------------------
 ## User defined build/install options
 
-option (WCSLIB_PYTHON_WRAPPER "Generate Python wrapper for WCSLIB?" 0)
+option (WCSLIB_PYTHON_WRAPPER "Generate Python wrapper for WCSLIB?" 1)
 
 ## -----------------------------------------------------------------------------
 ## Standard locations where to look for required components
