@@ -1,8 +1,0 @@
-Compiling on mac:
-
-/sw/bin/swig -python -Iwcs wcslib.i
-gcc -c -fPIC -I/sw/include/python2.5 -Iwcs wcslib_wrap.c wcs/*.c
-gcc -bundle -undefined dynamic_lookup -o _wcslib.so *.o
-rm -f *.o
-
-
