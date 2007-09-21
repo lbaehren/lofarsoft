@@ -15,6 +15,8 @@
 ## Standard locations where to look for required components
 
 set (bin_locations
+  ./../release/bin
+  ./../../release/bin
   /usr/local/bin
   /usr/bin
   /usr/X11R6/bin
@@ -24,6 +26,8 @@ set (bin_locations
   )
 
 set (lib_locations
+  ./../release/lib
+  ./../../release/lib
   /usr/local/lib
   /usr/lib
   /usr/X11R6/lib
@@ -33,6 +37,8 @@ set (lib_locations
   )
 
 set (include_locations
+  ./../release/include
+  ./../../release/include
   /usr/include
   /usr/local/include
   /usr/X11R6/include

@@ -60,7 +60,7 @@ message (STATUS "Running the HDF5 configure script...")
 
 execute_process (
   WORKING_DIRECTORY ${HDF5_SOURCE_DIR}
-  COMMAND ./configure --prefix=${HDF5_prefix} --includedir=${HDF5_prefix}/hdf5
+  COMMAND ./configure --prefix=${HDF5_prefix} --includedir=${HDF5_prefix}/include/hdf5
   TIMEOUT 300
   ERROR_VARIABLE error_configure
   ERROR_FILE error.log

@@ -51,7 +51,7 @@ VPATH=$(srcdir) $(top_builddir)/src $(top_srcdir)/src
 
 ## Programs
 SHELL=/bin/sh
-CC=gcc
+CC=/usr/bin/gcc
 ## H5_CPPFLAGS and H5_CFLAGS are used for extra flags used to build HDF5
 ## (flags that don't need to be included in h5cc, for instance).
 CFLAGS= -std=c99 -Wno-long-long -O -fomit-frame-pointer -finline-functions 
@@ -77,11 +77,11 @@ TIME=time
 TRACE=:
 
 ## Installation points
-prefix=/Users/lars/Code/lofar/usg/release/
+prefix=/Users/lars/Code/lofar/usg/external/hdf5/../../release
 exec_prefix=${prefix}
 bindir=${exec_prefix}/bin
 libdir=${exec_prefix}/lib
-includedir=${prefix}/include
+includedir=/Users/lars/Code/lofar/usg/external/hdf5/../../release/include/hdf5
 docdir=${prefix}/doc
 PUB_LIB=$(LIB)
 
