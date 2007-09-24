@@ -36,7 +36,7 @@
 
   If we want to to something more but 2-dimensional visualization of our
   multidimensional images, we need to used tools like <i>VAPOR</i> or
-  <i>VisIt</i>. The problem however is that now of thhe visualization tools
+  <i>VisIt</i>. The problem however is that now of the visualization tools
   are able to work with our image data directly, so we need to go through some
   conversion step first.
 
@@ -52,15 +52,20 @@
   </ul>
 */
 
+#include <fstream>
 #include <iostream>
 #include <string>
-#include <vector>
 
 #include <casa/aips.h>
 #include <casa/Arrays/Array.h>
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Slicer.h>
+#include <casa/Arrays/Vector.h>
 #include <casa/System/ProgressMeter.h>
+#include <coordinates/Coordinates/Coordinate.h>
+#include <coordinates/Coordinates/CoordinateSystem.h>
+#include <coordinates/Coordinates/LinearCoordinate.h>
+#include <coordinates/Coordinates/SpectralCoordinate.h>
 #include <images/Images/PagedImage.h>
 
 using std::cerr;
@@ -69,10 +74,21 @@ using std::endl;
 using std::string;
 
 using casa::Array;
+using casa::Coordinate;
+using casa::CoordinateSystem;
 using casa::IPosition;
+using casa::LinearCoordinate;
 using casa::PagedImage;
 using casa::ProgressMeter;
 using casa::Slicer;
+using casa::SpectralCoordinate;
+using casa::Vector;
+
+// ==============================================================================
+// 
+//  Function prototypes
+//
+// ==============================================================================
 
 /*!
   \brief Provide a short summary of the loaded paged image
@@ -81,26 +97,33 @@ using casa::Slicer;
                     summary of the image went ok; otherwise <i>false</i> is
 		    returned.
 */
-bool image_summary (casa::PagedImage<casa::Float> const &image)
-{
-  bool status (true);
+bool image_summary (casa::PagedImage<casa::Float> const &image);
 
-  try {
-    cout << " -- Image type            : " << image.imageType()    << endl;
-    cout << " -- Is image paged?       : " << image.isPaged()      << endl;
-    cout << " -- Is image persistent?  : " << image.isPersistent() << endl;
-    cout << " -- Does image have mask? : " << image.hasPixelMask() << endl;
-    cout << " -- Current table name    : " << image.name(true)     << endl;
-    cout << " -- Shape of pixel array  : " << image.shape()        << endl;
-  } catch (std::string message) {
-    cerr << "[image2bov] " << message << endl;
-    status = false;
-  }
-  
-  return status;
-}
+casa::Vector<string> coordinate_types (casa::CoordinateSystem const &cs);
 
-// ---------------------------------------------------- export_to_brick_of_values
+/*!
+  \brief Get the world values along the time axis
+
+  As programs like VisIt store data as file per time-step, we need to properly
+  tag the generated bricks of values, to line them up later on. As the timestamps
+  can be extracted from the coordinate system associated with the image, we
+  extract this coordinate system first, retrieve the linear cooordinate and 
+  then perform a pixel-to-world transformation.
+
+  If the coordinate system associated with the image is constructed properly,
+  one could retrieve the time axis (LinearCordinate) and obtain the values via
+  the <tt>toWorld()</tt> method; however the coordinate system object might
+  not contain proper information about the coordinates -- even thought the
+  underlying WCS parameters are correct. Because of this the savest way to 
+  proceed is to explicitely carry out the conversion based on the CRVAL and
+  CDELT keywords for the coordinate axis in question.
+
+  \param image -- Paged AIPS++ image
+
+  \return timeValues -- Vector with the world values associated with the
+                        time coordinate axis, [sec].
+*/
+Vector<casa::Double> time_axis_values (casa::PagedImage<casa::Float> &image);
 
 /*!
   \brief Export the AIPS++ image pixel value to a brick of values
@@ -109,6 +132,126 @@ bool image_summary (casa::PagedImage<casa::Float> const &image)
 
   \return status --
 */
+bool export_to_brick_of_values (casa::PagedImage<casa::Float> &image);
+
+/*!
+  \brief Write the header file describing the exported data
+
+  \param datafile   -- Name of the dta file, to which the pixel values are 
+                       written.
+  \param timestep   -- Counter for the time step
+  \param timeValues -- World coordinate values along the time axis of the image
+  \param shape      -- Shape of the image pixel array
+
+  \return status --
+*/
+bool write_header_file (char *datafile,
+			int const &timestep,
+			Vector<casa::Double> const &timeValues,
+			IPosition const &shape);
+
+// ==============================================================================
+//
+//  Implementation
+//
+// ==============================================================================
+
+bool image_summary (casa::PagedImage<casa::Float> const &image)
+{
+  bool status (true);
+
+  CoordinateSystem cs = image.coordinates();
+
+  try {
+    // characteristics of the image
+    cout << " -- Image type            : " << image.imageType()    << endl;
+    cout << " -- Is image paged?       : " << image.isPaged()      << endl;
+    cout << " -- Is image persistent?  : " << image.isPersistent() << endl;
+    cout << " -- Does image have mask? : " << image.hasPixelMask() << endl;
+    cout << " -- Current table name    : " << image.name(true)     << endl;
+    cout << " -- Shape of pixel array  : " << image.shape()        << endl;
+    // characteristics of the coordinate system
+    cout << " -- nof. coordinates      : " << cs.nCoordinates()    << endl;
+    cout << " -- Coordinate types      : " << coordinate_types(cs) << endl;
+    cout << " -- World axis names      : " << cs.worldAxisNames()  << endl;
+    cout << " -- World axis units      : " << cs.worldAxisUnits()  << endl;
+    cout << " -- Reference value       : " << cs.referenceValue()  << endl;
+    cout << " -- World axis increment  : " << cs.increment()       << endl;
+  } catch (std::string message) {
+    cerr << "[image2bov] " << message << endl;
+    status = false;
+  }
+  
+  return status;
+}
+
+// ------------------------------------------------------------- coordinate_types
+
+casa::Vector<string> coordinate_types (casa::CoordinateSystem const &cs)
+{
+  unsigned int nofCoordinates = cs.nCoordinates();
+  Vector<string> names (nofCoordinates);
+
+  for (unsigned int n(0); n<nofCoordinates; n++) {
+    names(n) = Coordinate::typeToString(cs.type(n));
+  }
+  
+  return names;
+}
+
+// ------------------------------------------------------------- time_axis_values
+
+Vector<casa::Double> time_axis_values (casa::PagedImage<casa::Float> &image)
+{
+  unsigned int axisID (3);
+  IPosition shape (image.shape());
+  Vector<casa::Double> timeValues (shape(axisID),0.);
+  CoordinateSystem cs = image.coordinates();
+
+  // Extract refrence value and coordinate increment
+  Vector<casa::Double> refValue = cs.referenceValue();
+  Vector<casa::Double> incr = cs.increment();
+  
+  for (unsigned int n(0); n<shape(axisID); n++) {
+    timeValues(n) = refValue(axisID) + n*incr(axisID);
+  }
+
+  return timeValues;
+}
+
+// ------------------------------------------------------------ write_header_file
+
+bool write_header_file (char *datafile,
+			int const &timestep,
+			Vector<casa::Double> const &timeValues,
+			IPosition const &shape)
+{
+  bool status (true);
+  char headerfile[50];
+
+  // set the name of the header file
+  sprintf (headerfile,"file%04d.bov",timestep);
+  
+  // open stream for header file
+  std::ofstream os (headerfile,std::ios::out);
+
+  os << "TIME: " << timeValues(timestep) << endl;
+  os << "DATA_FILE: " << datafile        << endl;
+  os << "DATA_FORMAT: FLOAT"             << endl;
+  os << "VARIABLE: Radio_Brightness"     << endl;
+  os << "DATA_ENDIAN: LITTLE"            << endl;
+  os << "DATA_SIZE: " << shape(0) << " " << shape(1) << " " << shape(2) << endl;
+  os << "CENTERING: zonal"               << endl;
+  os << "BRICK_ORIGIN: 0. 0. 0."         << endl;
+  os << "BRICK_SIZE: 1. 1. 1."           << endl;
+
+  os.close();
+
+  return status;
+}
+
+// ---------------------------------------------------- export_to_brick_of_values
+
 bool export_to_brick_of_values (casa::PagedImage<casa::Float> &image)
 {
   bool status (true);
@@ -116,11 +259,14 @@ bool export_to_brick_of_values (casa::PagedImage<casa::Float> &image)
   IPosition start (shape);
   IPosition length (shape);
   IPosition stride (shape);
-  char outfileName[50];
+  char datafile[50];
 
   start     = 0;
   length(3) = 1;
   stride    = 1;
+
+  // Extract the values along the time axis
+  Vector<casa::Double> timeValues = time_axis_values (image);
 
   // set up the slice taken from the AIPS++ image
 
@@ -132,7 +278,7 @@ bool export_to_brick_of_values (casa::PagedImage<casa::Float> &image)
   int az (0);
   int el (0);
   int radius (0);
-  float buffer[shape(2)][shape(1)][shape(0)];
+  float buffer[shape(2)][shape(1)][shape(0)];  //  [NZ][NY][NX]
   int nofPixels (shape(0)*shape(1)*shape(2));
 
   ProgressMeter meter (0,shape(3),"Title","Subtitle","","");
@@ -156,10 +302,15 @@ bool export_to_brick_of_values (casa::PagedImage<casa::Float> &image)
     }
     // once we have extracted the 3D volume for a timestep, we write this to
     // disk
-    sprintf (outfileName,"file%04d.dat",timestep);
-    FILE *fp = fopen (outfileName,"wb");
+    sprintf (datafile,"file%04d.dat",timestep);
+    FILE *fp = fopen (datafile,"wb");
     fwrite((void *)buffer,sizeof(float),nofPixels, fp);
     fclose (fp);
+    // create header files to describe the data previously exported
+    status = write_header_file (datafile,
+				timestep,
+				timeValues,
+				shape);
     //
     meter.update(timestep);
   }
