@@ -40,6 +40,20 @@
   are able to work with our image data directly, so we need to go through some
   conversion step first.
 
+  <h3>Prerequisites</h3>
+
+  In order to visualize some 2D data in spherical coordinates:
+  <ol>
+    <li>read file
+    <li>create a Pseudocolor plot
+    <li>add a Transform operator
+    <li>display the Transform operator attributes window
+    <li>select the Coordinate tab of that window
+    <li>select the Spherical radio button of the Input coordinates region
+    <li>select the Cartesian radio button of the Output coordinates region
+    <li>click the window's Apply button
+  </ol>
+
   <h3>Example</h3>
 
   <ul>
@@ -85,6 +99,21 @@ using casa::SpectralCoordinate;
 using casa::Vector;
 
 // ==============================================================================
+//
+//  Global variables
+//
+// ==============================================================================
+
+/*
+  Mapping of the image axes:
+  
+  [az,el,r] = [0,1,2]  -->  [r,az,el] = [2,0,1]
+*/
+const int axisRadius (2);
+const int axisAzimuth (0);
+const int axisElevation (1);
+
+// ==============================================================================
 // 
 //  Function prototypes
 //
@@ -99,6 +128,13 @@ using casa::Vector;
 */
 bool image_summary (casa::PagedImage<casa::Float> const &image);
 
+/*!
+  \brief Get the names of the coordinate types used for the image axes
+
+  \param image -- 
+
+  \return types -- 
+*/
 casa::Vector<string> coordinate_types (casa::CoordinateSystem const &cs);
 
 /*!
@@ -128,9 +164,15 @@ Vector<casa::Double> time_axis_values (casa::PagedImage<casa::Float> &image);
 /*!
   \brief Export the AIPS++ image pixel value to a brick of values
 
+  Keep in mind that we need to perform some proper lining up of the image
+  coordinates; as the original AIPS++ image uses [az,el,radius,time,freq]
+  we need to rearrange the first three axes to obtain a proper reproduction
+  of the spatial brightness distribution.
+
   \param image -- Paged AIPS++ image
 
-  \return status --
+  \return status -- Status of the operation; returns <i>false</i> if an error
+                    was encountered.
 */
 bool export_to_brick_of_values (casa::PagedImage<casa::Float> &image);
 
@@ -240,7 +282,9 @@ bool write_header_file (char *datafile,
   os << "DATA_FORMAT: FLOAT"             << endl;
   os << "VARIABLE: Radio_Brightness"     << endl;
   os << "DATA_ENDIAN: LITTLE"            << endl;
-  os << "DATA_SIZE: " << shape(0) << " " << shape(1) << " " << shape(2) << endl;
+  os << "DATA_SIZE: " << shape(axisRadius)
+     << " " << shape(axisAzimuth)
+     << " " << shape(axisElevation) << endl;
   os << "CENTERING: zonal"               << endl;
   os << "BRICK_ORIGIN: 0. 0. 0."         << endl;
   os << "BRICK_SIZE: 1. 1. 1."           << endl;
@@ -278,8 +322,8 @@ bool export_to_brick_of_values (casa::PagedImage<casa::Float> &image)
   int az (0);
   int el (0);
   int radius (0);
-  float buffer[shape(2)][shape(1)][shape(0)];  //  [NZ][NY][NX]
-  int nofPixels (shape(0)*shape(1)*shape(2));
+  float buffer[shape(1)][shape(0)][shape(2)];
+  int nofPixels (shape(axisRadius)*shape(axisAzimuth)*shape(axisElevation));
 
   ProgressMeter meter (0,shape(3),"Title","Subtitle","","");
 
@@ -290,13 +334,13 @@ bool export_to_brick_of_values (casa::PagedImage<casa::Float> &image)
     status = image.doGetSlice (imageSlice,slicer);
     // copy the values from the AIPS++ array to a standard C/C++ array
     // such that we can dump them onto disk
-    for (az=0; az<shape(0); az++) {
-      slicePosition(0) = az;
-      for (el=0; el<shape(1); el++) {
-	slicePosition(1) = el;
-	for (radius=0; radius<shape(2); radius++) {
-	  slicePosition(2) = radius;
-	  buffer[radius][el][az] = imageSlice (slicePosition);
+    for (az=0; az<shape(axisAzimuth); az++) {
+      slicePosition(axisAzimuth) = az;
+      for (el=0; el<shape(axisElevation); el++) {
+	slicePosition(axisElevation) = el;
+	for (radius=0; radius<shape(axisRadius); radius++) {
+	  slicePosition(axisRadius) = radius;
+	  buffer[el][az][radius] = imageSlice (slicePosition);
 	}
       }
     }
