@@ -6,7 +6,7 @@ from Image import Op
 class Op_bstat(Op):
     def stat(self, arr):
         N = arr.count()
-        return arr.mean(), arr.std() * math.sqrt(N/(N-1))
+        return arr.mean(), arr.std() * math.sqrt(N/(N-1.))
 
     def clip_stat(self, arr, mean, sigma, kappa=3):
         nmean = nsigma = None; cnt = 0
