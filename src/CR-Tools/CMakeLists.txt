@@ -271,10 +271,12 @@ endif (CFITSIO_INCLUDES)
 
 if (PGPLOT_INCLUDES)
   include_directories (${PGPLOT_INCLUDES})
+  add_definitions (-DHAVE_PGPLOT)
 endif (PGPLOT_INCLUDES)
 
 if (GSL_INCLUDES)
   include_directories (${GSL_INCLUDES})
+  add_definitions (-DHAVE_GSL)
 endif (GSL_INCLUDES)
 
 if (PostgreSQL_INCLUDES)
@@ -283,10 +285,12 @@ endif (PostgreSQL_INCLUDES)
 
 if (ROOT_INCLUDES)
   include_directories (${ROOT_INCLUDES})
+  add_definitions (-DHAVE_ROOT)
 endif (ROOT_INCLUDES)
 
 if (WCSLIB_INCLUDES)
   include_directories (${WCSLIB_INCLUDES})
+  add_definitions (-DHAVE_WCSLIB)
 endif (WCSLIB_INCLUDES)
 
 ## ------------------------------------------------------------------------------

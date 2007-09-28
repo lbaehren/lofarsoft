@@ -208,20 +208,37 @@ namespace CR { // NAMESPACE CR -- BEGIN
     bool status (true);
     casa::IPosition shape (antPositions.shape());
 
-    // check the shape of the array
-    if (shape(1) == 3) {
-      // store the array
-      antPositions_p.resize (shape);
-      antPositions_p = antPositions;
-      nofAntennas_p  = shape(0);
-      // update the values of the geometrical delays
-      if (bufferDelays) {
-	bufferDelays_p = bufferDelays;
-	setDelays();
+    // storing input to internal area depends on the organisation of the array
+    if (antennaIndexFirst) {
+      // [antenna,coord]
+      if (shape(1) == 3) {
+	antPositions_p.resize (shape);
+	antPositions_p = antPositions;
+	// book-keeping: number of antennas
+	nofAntennas_p  = shape(0);
+      } else {
+	cerr << "Wrong number of array colums; must be 3!" << endl;
+	status  = false;
       }
     } else {
-      cerr << "Wrong number of array colums; must be 3!" << endl;
-      status  = false;
+      // [coord,antenna]
+      if (shape(0) == 3) {
+	antPositions_p.resize (IPosition(2,shape(1),shape(0)));
+	for (int row(0); row<shape(1); row++) {
+	  antPositions_p.row(row) = antPositions.column(row);
+	}
+	// book-keeping: number of antennas
+	nofAntennas_p  = shape(1);
+      } else {
+	cerr << "Wrong number of array rows; must be 3!" << endl;
+	status  = false;
+      }
+    }
+
+    // handle optional buffering of delays
+    if (bufferDelays) {
+      bufferDelays_p = bufferDelays;
+      setDelays();
     }
     
     return status;
@@ -233,21 +250,41 @@ namespace CR { // NAMESPACE CR -- BEGIN
 					  bool const &antennaIndexFirst)
   {
     bool status (true);
+    blitz::Array<int,1> shape;
 
-    // check the shape of the array
-    if (antPositions.cols() == 3) {
-      // store the array
-      antPositions_p.resize (antPositions.shape());
-      antPositions_p = antPositions;
-      nofAntennas_p  = antPositions.rows();
-      // update the values of the geometrical delays
-      if (bufferDelays) {
-	bufferDelays_p = bufferDelays;
-	setDelays();
+    shape = antPositions.rows(),antPositions.cols();
+
+    // storing input to internal area depends on the organisation of the array
+    if (antennaIndexFirst) {
+      // [antenna,coord]
+      if (shape(1) == 3) {
+	antPositions_p.resize (shape);
+	antPositions_p = antPositions;
+	// book-keeping: number of antennas
+	nofAntennas_p  = shape(0);
+      } else {
+	cerr << "Wrong number of array colums; must be 3!" << endl;
+	status  = false;
       }
     } else {
-      cerr << "Wrong number of array colums; must be 3!" << endl;
-      status  = false;
+      // [coord,antenna]
+      if (shape(0) == 3) {
+	antPositions_p.resize (IPosition(2,shape(1),shape(0)));
+	for (int row(0); row<shape(1); row++) {
+	  antPositions_p.row(row) = antPositions.column(row);
+	}
+	// book-keeping: number of antennas
+	nofAntennas_p  = shape(1);
+      } else {
+	cerr << "Wrong number of array rows; must be 3!" << endl;
+	status  = false;
+      }
+    }
+
+    // handle optional buffering of delays
+    if (bufferDelays) {
+      bufferDelays_p = bufferDelays;
+      setDelays();
     }
     
     return status;
