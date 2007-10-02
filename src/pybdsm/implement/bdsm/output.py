@@ -17,7 +17,7 @@ class Op_outlist(Op):
         for idx, isl in enumerate(img.islands):
             for gidx, gaus in enumerate(isl.gaul):
                 ### convert to canonical units
-                ra, dec = img.opts.xy2radec(*gaus[1:3])
+                ra, dec = img.opts.xy2radec(gaus[1:3])
                 shape = img.opts.pix2beam(gaus[3:6])
 
                 str = "%3d  %4d  %d    %10g %5g   %10g %5g   " \
@@ -38,7 +38,7 @@ class Op_outlist(Op):
         for isl in img.islands:
             for gaus in isl.gaul:
                 ### convert to canonical units
-                ra, dec = img.opts.xy2radec(*gaus[1:3])
+                ra, dec = img.opts.xy2radec(gaus[1:3])
                 shape = img.opts.pix2beam(gaus[3:6])
 
                 ra = ra2hhmmss(ra)
@@ -67,7 +67,7 @@ class Op_outlist(Op):
         for isl in img.islands:
             for gaus in isl.gaul:
                 ### convert to canonical units
-                ra, dec = img.opts.xy2radec(*gaus[1:3])
+                ra, dec = img.opts.xy2radec(gaus[1:3])
                 shape = img.opts.pix2beam(gaus[3:6])
                 cross = (3*img.fits_hdr['cdelt1'], 3*img.fits_hdr['cdelt2'])
 

@@ -41,20 +41,20 @@ class Op_loadFITS(Op):
         return img
 
     def init_wcs(self, opts, hdr):
-        t = wcslib.wcsprm()
-        t.set_crval(hdr['crval1'], hdr['crval2'])
-        t.set_crpix(hdr['crpix1'], hdr['crpix2'])
-        t.set_cdelt(hdr['cdelt1'], hdr['cdelt2'])
+        t = wcslib.wcs()
+        t.crval = (hdr['crval1'], hdr['crval2'])
+        t.crpix = (hdr['crpix1'], hdr['crpix2'])
+        t.cdelt = (hdr['cdelt1'], hdr['cdelt2'])
         if hdr.has_key('crota1'):
-            t.set_crota(hdr['crota1'], hdr['crota2'])
-        t.set_ctype(hdr['ctype1'], hdr['ctype2'])
+            t.crota = (hdr['crota1'], hdr['crota2'])
+        t.ctype = (hdr['ctype1'], hdr['ctype2'])
         if hdr.has_key('cunit1'):
-            t.set_cunit(hdr['cunit1'], hdr['cunit2'])
+            t.cunit = (hdr['cunit1'], hdr['cunit2'])
 
         t.wcsset()
 
-        opts.xy2radec = t.xy2radec
-        opts.radec2xy = t.radec2xy
+        opts.xy2radec = t.p2s
+        opts.radec2xy = t.s2p
 
     def init_beam(self, opts, hdr):
         ### FIXME: beam shape conversion should include rotation angle
