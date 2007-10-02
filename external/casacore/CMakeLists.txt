@@ -241,6 +241,7 @@ include_directories (
 
 IF (UNIX)
   add_definitions (
+    -fPIC
     # -- compiler flags utilized in the source code --
     -DAIPS_STDLIB
     -DAIPS_AUTO_STL
