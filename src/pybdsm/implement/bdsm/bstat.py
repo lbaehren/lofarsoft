@@ -2,6 +2,7 @@ import math
 import numpy as N
 import numpy.core.ma as M
 from Image import Op
+import _cbdsm
 
 class Op_bstat(Op):
     def stat(self, arr):
@@ -27,8 +28,9 @@ class Op_bstat(Op):
         data = img.img
         opts = img.opts
 
-        mean, rms   = self.stat(data)
-        cmean, crms = self.clip_stat(data, mean, rms, kappa=opts.rms_clip)
+        #mean, rms   = self.stat(data)
+        #cmean, crms = self.clip_stat(data, mean, rms, kappa=opts.rms_clip)
+        mean, rms, cmean, crms = _cbdsm.bstat(data.data, data.mask, opts.rms_clip)
 
         opts.mean  = cmean
         opts.rms   = crms

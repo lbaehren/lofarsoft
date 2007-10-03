@@ -78,6 +78,13 @@ else (PYBDSM_cmake)
   message (SEND_ERROR "Unable to locate additional CMake find scripts!")
 endif (PYBDSM_cmake)
 
+find_library (NUM_UTIL_LIBRARIES num_util
+	     PATHS ../release/lib ../../release/lib ../../../release/lib /usr/lib /usr/local/lib /sw/lib
+	     NO_DEFAULT_PATH)
+find_path (NUM_UTIL_INCLUDES num_util.h
+	  PATHS ../release/include ../../release/include ../../../release/include /usr/include /usr/local/include /sw/include
+	  NO_DEFAULT_PATH)
+
 
 ## -----------------------------------------------------------------------------
 ## Check for additional tools which are required
