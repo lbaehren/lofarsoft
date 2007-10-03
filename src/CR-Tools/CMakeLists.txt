@@ -196,7 +196,6 @@ endif (CR_GLISH_SUPPORT)
 
 if (HAVE_CASA OR HAVE_CASACORE)
   add_definitions (
-    -DWITH_CASA
     # -- compiler flags utilized in the source code --
     -DAIPS_STDLIB
     -DAIPS_AUTO_STL

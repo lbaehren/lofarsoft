@@ -110,9 +110,9 @@ BSEARCH_ALG	CROSS2
 # These are the Qscale values for the entire frame in variable bit-rate
 # mode, and starting points (but not important) for constant bit rate
 #
-IQSCALE		8
-PQSCALE		10
-BQSCALE		25
+IQSCALE		6
+PQSCALE		6
+BQSCALE		6
 
 # this must be ORIGINAL or DECODED
 REFERENCE_FRAME	ORIGINAL
@@ -120,7 +120,7 @@ REFERENCE_FRAME	ORIGINAL
 # for parallel parameters see parallel.param in the exmaples subdirectory
 
 # if you want constant bit-rate mode, specify it as follows (number is bits/sec):
-BIT_RATE  1000000
+#BIT_RATE  1000000
 
 # To specify the buffer size (327680 is default, measured in bits, for 16bit words)
 BUFFER_SIZE 327680

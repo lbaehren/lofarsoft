@@ -76,10 +76,12 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_CASA
   GeometricalDelay::GeometricalDelay (casa::Matrix<double> const &antPositions,
 				      casa::Matrix<double> const &skyPositions,
-				      bool const &bufferDelays)
+				      bool const &bufferDelays,
+				      bool const &antennaIndexFirst)
     : bufferDelays_p (false)
   {
-    if (!setAntPositions (antPositions,false)) {
+    cout << "[GeometricalDelay::GeometricalDelay]" << endl;
+    if (!setAntPositions (antPositions,false,antennaIndexFirst)) {
       cerr << "-- There was an error setting the ant positions" << endl;
       // use defaults
       antPositions_p.resize(1,3);
@@ -106,10 +108,22 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_BLITZ
   GeometricalDelay::GeometricalDelay (blitz::Array<double,2> const &antPositions,
 				      blitz::Array<double,2> const &skyPositions,
-				      bool const &bufferDelays)
+				      bool const &bufferDelays,
+				      bool const &antennaIndexFirst)
     : bufferDelays_p (false)
   {
-    if (!setAntPositions (antPositions,false)) {
+    bool status (true);
+
+    // [1] Store the antenna positions
+
+    try {
+      status = setAntPositions (antPositions,false,antennaIndexFirst);
+    } catch (std::string message) {
+      std::cerr << "[GeometricalDelay::GeometricalDelay] " << message << endl;
+      status = false;
+    }
+
+    if (!status) {
       cerr << "-- There was an error setting the ant positions" << endl;
       // use defaults
       antPositions_p.resize(1,3);
@@ -250,7 +264,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 					  bool const &antennaIndexFirst)
   {
     bool status (true);
-    blitz::Array<int,1> shape;
+    blitz::Array<int,1> shape (2);
 
     shape = antPositions.rows(),antPositions.cols();
 
@@ -258,7 +272,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     if (antennaIndexFirst) {
       // [antenna,coord]
       if (shape(1) == 3) {
-	antPositions_p.resize (shape);
+	antPositions_p.resize (shape(0),shape(1));
 	antPositions_p = antPositions;
 	// book-keeping: number of antennas
 	nofAntennas_p  = shape(0);
@@ -269,9 +283,13 @@ namespace CR { // NAMESPACE CR -- BEGIN
     } else {
       // [coord,antenna]
       if (shape(0) == 3) {
-	antPositions_p.resize (IPosition(2,shape(1),shape(0)));
-	for (int row(0); row<shape(1); row++) {
-	  antPositions_p.row(row) = antPositions.column(row);
+	int row (0);
+	int col (0);
+	antPositions_p.resize (shape(1),shape(0));
+	for (row=0; row<shape(1); row++) {
+	  for (col=0; col<shape(0); col++) {
+	    antPositions_p(row,col) = antPositions(col,row);
+	  }
 	}
 	// book-keeping: number of antennas
 	nofAntennas_p  = shape(1);

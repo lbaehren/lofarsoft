@@ -28,12 +28,13 @@ RestoreSession("visit0004.session",0);
 ## set attributes for saving a display window
 
 s = SaveWindowAttributes();
-s.format = s.PPM
+#s.format = s.PPM
+s.format = s.POSTSCRIPT
 s.outputToCurrentDirectory = 0;
 s.outputDirectory = "frames";
 s.fileName = "frame";
-s.width  = 512
-s.height = 512
+#s.width  = 512
+#s.height = 512
 SetSaveWindowAttributes(s);
 
 ## -------------------------------------------------------------------

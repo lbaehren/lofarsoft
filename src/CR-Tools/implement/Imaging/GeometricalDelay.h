@@ -190,12 +190,14 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_CASA
     GeometricalDelay (casa::Matrix<double> const &antPositions,
 		      casa::Matrix<double> const &skyPositions,
-		      bool const &bufferDelay=false);
+		      bool const &bufferDelay=false,
+		      bool const &antennaIndexFirst=true);
 #else 
 #ifdef HAVE_BLITZ
     GeometricalDelay (blitz::Array<double,2> const &antPositions,
 		      blitz::Array<double,2> const &skyPositions,
-		      bool const &bufferDelay=false);
+		      bool const &bufferDelay=false,
+		      bool const &antennaIndexFirst=true);
 #endif
 #endif
 

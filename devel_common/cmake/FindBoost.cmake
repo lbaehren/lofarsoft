@@ -152,3 +152,8 @@ else (HAVE_BOOST)
 endif (HAVE_BOOST)
 
 ## -----------------------------------------------------------------------------
+
+mark_as_advanced (
+  BOOST_INCLUDES
+  BOOST_LIBRARIES
+)
