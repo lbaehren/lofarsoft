@@ -61,12 +61,12 @@ build_package ()
 {
     buildDir=$1
     sourceDir=$2
-    configureOption=$3
+    buildOptions=$3
     # Feedback
     echo "[build] Building package";
     echo " -- Build directory ..... : $buildDir";
     echo " -- Source directory .... : $sourceDir";
-    echo " -- Configuration options : $configureOption";
+    echo " -- Configuration options : $buildOptions";
     # check if the build directory exists
     cd $basedir
     if test -d $buildDir ; then
@@ -74,10 +74,10 @@ build_package ()
 	# change into the build directory
 	cd $buildDir
 	# run cmake on the source directory
-	if test -z $configureOption ; then
+	if test -z $buildOptions ; then
 	    cmake $basedir/../$sourceDir
 	else 
-	    cmake $basedir/../$sourceDir $configureOption
+	    cmake $basedir/../$sourceDir $buildOptions
 	fi
 	# build the package
 	if test -z "`make help | grep install`" ; then
@@ -91,7 +91,7 @@ build_package ()
 	echo "[build] No build directory $buildDir - creating it now."
 	mkdir $buildDir;
 	# recursive call
-	build_package $buildDir $sourceDir
+	build_package $buildDir $sourceDir $buildOptions
 	}
     fi
 }
@@ -169,15 +169,15 @@ done
 case $param_packageName in 
     bison)
 		echo "[build] Selected package Bison"
-		build_package bison external/bison -DBISON_FORCE_BUILD:BOOL=$param_forceBuild
+		build_package bison external/bison "-DBISON_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     blitz)
 		echo "[build] Selected package Blitz++"
-		build_package blitz external/blitz -DBLITZ_FORCE_BUILD:BOOL=$param_forceBuild
+		build_package blitz external/blitz "-DBLITZ_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     boost)
 		echo "[build] Selected package Boost"
-		build_package boost external/boost -DBOOST_FORCE_BUILD:BOOL=$param_forceBuild
+		build_package boost external/boost "-DBOOST_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     casacore)
 		echo "[build] Selected package CASACORE"
@@ -237,7 +237,7 @@ case $param_packageName in
     ;;
     pgplot)
 	echo "[build] Selected package PGPlot"
-	build_package pgplot external/pgplot -DPGPLOT_FORCE_BUILD:BOOL=$param_forceBuild
+	build_package pgplot external/pgplot "-DPGPLOT_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     plplot)
 	echo "[build] Selected package Plplot"
