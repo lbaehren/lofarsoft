@@ -18,7 +18,7 @@ set (WCSLIB_VERSION "${WCSLIB_VERSION_MAJOR}.${WCSLIB_VERSION_MINOR}")
 ## -----------------------------------------------------------------------------
 ## User defined build/install options
 
-option (WCSLIB_PYTHON_WRAPPER "Generate Python wrapper for WCSLIB?" 1)
+option (WCSLIB_PYTHON_WRAPPER "Generate Python wrapper for WCSLIB?" 0)
 
 ## -----------------------------------------------------------------------------
 ## Standard locations where to look for required components
@@ -102,9 +102,9 @@ add_subdirectory (${WCSLIB_SOURCE_DIR}/C)
 add_subdirectory (${WCSLIB_SOURCE_DIR}/FORTRAN)
 add_subdirectory (${WCSLIB_SOURCE_DIR}/pgsbox)
 
-if (WCSLIB_PYTHON_WRAPPER)
+if (WCSLIB_PYTHON_WRAPPER AND HAVE_PYTHON)
   add_subdirectory (${WCSLIB_SOURCE_DIR}/Python)
-endif (WCSLIB_PYTHON_WRAPPER)
+endif (WCSLIB_PYTHON_WRAPPER AND HAVE_PYTHON)
 
 ## -----------------------------------------------------------------------------
 ## Installation
