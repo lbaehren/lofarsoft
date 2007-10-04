@@ -273,11 +273,11 @@ case $param_packageName in
 	echo "[build] Selected package DAL"
 	## external packages
 	./build.sh cmake
-	./build.sh casacore
-	./build.sh blitz
-	./build.sh python
-	./build.sh boost
-	./build.sh hdf5
+	./build.sh casacore --force-build
+	./build.sh blitz --force-build
+	./build.sh python --force-build
+	./build.sh boost --force-build
+	./build.sh hdf5 --force-build
 	## USG packages
 	build_package dal src/DAL
     ;;
