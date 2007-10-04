@@ -288,19 +288,12 @@ case $param_packageName in
 	build_package cr src/CR-Tools;
     ;;
     all)
-	echo "[build] Building all external packages";
+	echo "[build] Building external packages not build otherwise";
 	./build.sh bison;
-	./build.sh blitz;
-	./build.sh python;
-	./build.sh boost;
 	./build.sh flex;
 	./build.sh pgplot;
-	./build.sh wcslib;
-	./build.sh cfitsio;
-	./build.sh casacore;
-	./build.sh hdf5;
-	echo "[build] Building all USG packsges";
-	build_package dal src/DAL;
+	echo "[build] Building all USG packages";
+	./build.sh dal;
 	build_package cr src/CR-Tools;
     ;;
 esac

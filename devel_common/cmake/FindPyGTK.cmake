@@ -2,11 +2,10 @@
 ## $Id:: template_FindXX.cmake 815 2007-09-21 09:18:08Z baehren          $
 ##------------------------------------------------------------------------
 
-# - Check for the presence of PyGTK
+# - Check for the presence of PyGTK [www.pygtk.org]
 #
 # The following variables are set when PyGTK is found:
-#  HAVE_PyGTK       = Set to true, if all components of PyGTK
-#                          have been found.
+#  HAVE_PyGTK       = Set to true, if all components of PyGTK have been found.
 #  PyGTK_INCLUDES   = Include path for the header files of PyGTK
 #  PyGTK_LIBRARIES  = Link these to use PyGTK
 #  PyGTK_LFGLAS     = Linker flags (optional)

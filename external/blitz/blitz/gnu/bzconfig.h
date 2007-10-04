@@ -359,12 +359,12 @@
 
 /* date */
 #ifndef BZ__config_date 
-#define BZ__config_date  "Wed Sep 19 11:09:28 CEST 2007" 
+#define BZ__config_date  "Thu Oct  4 12:37:53 CEST 2007" 
 #endif
 
 /* uname -a */
 #ifndef BZ__os_name 
-#define BZ__os_name  "Linux kuzmin 2.6.8-24-bigsmp #1 SMP Wed Oct 6 09:16:23 UTC 2004 i686 i686 i386 GNU/Linux" 
+#define BZ__os_name  "Linux dop71 2.6.18-5-686 #1 SMP Thu Aug 30 02:19:07 UTC 2007 i686 GNU/Linux" 
 #endif
 
 /* target */
