@@ -270,8 +270,8 @@ case $param_packageName in
 	build_package wcslib external/wcslib
     ;;
     dal)
-	echo "[build] Selected package DAL"
 	## external packages
+	echo "[build::DAL] Processing required packages ..."
 	./build.sh cmake
 	./build.sh casacore --force-build
 	./build.sh blitz --force-build
@@ -279,12 +279,22 @@ case $param_packageName in
 	./build.sh boost --force-build
 	./build.sh hdf5 --force-build
 	## USG packages
+	echo "[build::DAL] Building Data Access Library ..."
 	build_package dal src/DAL
+	## Post-installation testing
+	echo ""
+	echo "[build::DAL] To test the DAL installation run:"
+	echo ""
+	echo "  cd build/dal; ctest --verbose"
+	echo ""
     ;;
     cr)
-	echo "[build] Selected package CR-Tools";
-	./build.sh dal;
+	echo "[build::CR-Tools] Processing required packages ..."
+	## external packages
 	./build.sh pgplot;
+	## USG packages
+	./build.sh dal;
+	echo "[build::CR-Tools] Building CR-Tools package ..."
 	build_package cr src/CR-Tools;
     ;;
     all)

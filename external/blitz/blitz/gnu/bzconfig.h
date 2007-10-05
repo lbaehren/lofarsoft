@@ -359,17 +359,17 @@
 
 /* date */
 #ifndef BZ__config_date 
-#define BZ__config_date  "Thu Oct  4 12:37:53 CEST 2007" 
+#define BZ__config_date  "Fri Oct  5 15:19:16 CEST 2007" 
 #endif
 
 /* uname -a */
 #ifndef BZ__os_name 
-#define BZ__os_name  "Linux dop71 2.6.18-5-686 #1 SMP Thu Aug 30 02:19:07 UTC 2007 i686 GNU/Linux" 
+#define BZ__os_name  "Darwin ehef108.hef.kun.nl 8.10.1 Darwin Kernel Version 8.10.1: Wed May 23 16:33:00 PDT 2007; root:xnu-792.22.5~1/RELEASE_I386 i386 i386" 
 #endif
 
 /* target */
 #ifndef BZ__platform 
-#define BZ__platform  "i686-pc-linux-gnu" 
+#define BZ__platform  "i686-apple-darwin8.10.1" 
 #endif
  
 /* once: _BLITZ_GNU_BZCONFIG_H */

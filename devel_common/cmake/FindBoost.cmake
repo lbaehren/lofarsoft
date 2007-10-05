@@ -41,22 +41,74 @@ set (lib_locations
   )
 
 ## -----------------------------------------------------------------------------
+## Options
+
+option (BOOST_date_time "Search for Boost++ module boost_date_time ?" 1)
+option (BOOST_filesystem "Search for Boost++ module boost_filesystem ?" 1)
+option (BOOST_iostreams "Search for Boost++ module boost_iostreams ?" 1)
+option (BOOST_program_options "Search for Boost++ module boost_program_options ?" 1)
+option (BOOST_regex "Search for Boost++ module boost_regex ?" 1)
+option (BOOST_wave "Search for Boost++ module boost_wave ?" 1)
+
+option (BOOST_pythonOnly "Search for Boost++ module boost_regex ?" 0)
+
+## -----------------------------------------------------------------------------
 ## Check for the header files and the various module libraries
 
 set (boost_libraries
-  boost_date_time
-  boost_filesystem
-  boost_iostreams
-  boost_program_options
   boost_python
-  boost_regex
-  boost_serialization
-  boost_signals
-  boost_test_exec_monitor
-  boost_thread
-  boost_unit_test_framework
-  boost_wave
 )
+
+## handle optional Boost components
+
+if (BOOST_pythonOnly)
+
+  message (STATUS "[FindBoost] Configuration for boost_python only.")
+
+  set (BOOST_date_time 0)
+  set (BOOST_filesystem 0)
+  set (BOOST_iostreams 0)
+  set (BOOST_program_options 0)
+  set (BOOST_regex 0)
+
+else (BOOST_pythonOnly)
+
+  list (APPEND boost_libraries
+    boost_serialization
+    boost_signals
+    boost_test_exec_monitor
+    boost_thread
+    boost_unit_test_framework
+    )
+  
+  if (BOOST_date_time)
+    list (APPEND boost_libraries boost_date_time)
+  endif (BOOST_date_time)
+  
+  if (BOOST_filesystem)
+    list (APPEND boost_libraries boost_filesystem)
+  endif (BOOST_filesystem)
+  
+  if (BOOST_iostreams)
+    list (APPEND boost_libraries boost_iostreams)
+  endif (BOOST_iostreams)
+  
+  if (BOOST_program_options)
+    list (APPEND boost_libraries boost_program_options)
+  endif (BOOST_program_options)
+  
+  if (BOOST_regex)
+    list (APPEND boost_libraries boost_regex)
+  endif (BOOST_regex)
+  
+  if (BOOST_wave)
+    list (APPEND boost_libraries boost_wave)
+  endif (BOOST_wave)
+  
+endif (BOOST_pythonOnly)
+
+## initialize list of detected libraries
+
 set (BOOST_LIBRARIES "")
 
 foreach (boost_version 1_34_1 1_33_1)
