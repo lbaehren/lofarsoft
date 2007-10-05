@@ -60,7 +60,17 @@ TableExprNode::TableExprNode (const Bool& val)
     node_p = new TableExprNodeConstBool (val);
     node_p->link();
 }
+TableExprNode::TableExprNode (const uInt& val)
+{
+    node_p = new TableExprNodeConstDouble (Double (val));
+    node_p->link();
+}
 TableExprNode::TableExprNode (const Int& val)
+{
+    node_p = new TableExprNodeConstDouble (Double (val));
+    node_p->link();
+}
+TableExprNode::TableExprNode (const Float& val)
 {
     node_p = new TableExprNodeConstDouble (Double (val));
     node_p->link();
