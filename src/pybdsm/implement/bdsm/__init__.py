@@ -1,3 +1,4 @@
+import time
 
 from Image import Image, Opts
 from FITS import Op_loadFITS
@@ -21,6 +22,16 @@ def execute(chain, opts):
     img = Image(bdsm_default_opts)
     img.opts._apply(opts)
     for op in chain:
+        op.__start_time = time.time()
         op(img)
+        op.__stop_time = time.time()
+
+    print "="*30
+    for op in chain:
+        print "%15s : %f" % (op.__class__.__name__, 
+                               (op.__stop_time - op.__start_time))
+    print "="*30
+    print "%15s : %f" % ("Total",
+                           (chain[-1].__stop_time - chain[0].__start_time))
 
     return img
