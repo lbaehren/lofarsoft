@@ -79,11 +79,10 @@ foreach (python_version 2.6 2.5 2.4 2.3)
   # check if components have been found
   if (NOT PYTHON_INCLUDES OR NOT PYTHON_LIBRARIES)
     if (NOT PYTHON_FIND_QUIETLY)
-      message (SEND_ERROR "No consistent set of files found for Python ${python_version}")
+      message (STATUS "No consistent set of files found for Python ${python_version}")
     endif (NOT PYTHON_FIND_QUIETLY)
   endif (NOT PYTHON_INCLUDES OR NOT PYTHON_LIBRARIES)
 endforeach (python_version)
-
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found

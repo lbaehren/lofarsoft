@@ -81,7 +81,7 @@ foreach (boost_version 1_34_1 1_33_1)
   
   foreach (lib ${boost_libraries})
     ## try to locate the library
-    find_library (BOOST_${lib} ${lib}-gcc42-${boost_version} ${lib}-mt-${boost_version} ${lib}-gcc ${lib}
+    find_library (BOOST_${lib} ${lib} ${lib}-gcc42-${boost_version} ${lib}-mt-${boost_version} ${lib}-gcc
       PATHS ${lib_locations}
       PATH_SUFFIXES boost-${boost_version}
       NO_DEFAULT_PATH
