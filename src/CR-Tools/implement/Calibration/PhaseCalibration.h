@@ -47,7 +47,7 @@
 #include <tables/Tables/ArrColDesc.h>
 #include <tables/Tables/ArrayColumn.h>
 
-#include <Math/Math.h>
+#include <Math.h>
 #include <Math/StatisticsFilter.h>
 
 #include <casa/namespace.h>
