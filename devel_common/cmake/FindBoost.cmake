@@ -122,11 +122,15 @@ foreach (boost_version 1_34_1 1_33_1)
     boost-${boost_version}
     boost-${boost_version}/boost
     boost
+    boost/boost
     NO_DEFAULT_PATH
     )
   ## adjust the include path
   if (BOOST_INCLUDES)
+    ## remove versioned include path
     string (REPLACE include/boost-${boost_version}/boost include/boost-${boost_version} BOOST_INCLUDES ${BOOST_INCLUDES})
+    ## adjust path to enable e.g. <boost/python/def.hpp>
+    string (REPLACE include/boost include BOOST_INCLUDES ${BOOST_INCLUDES})
   endif (BOOST_INCLUDES)
 
   ## Check for the module libraries --------------
@@ -135,7 +139,7 @@ foreach (boost_version 1_34_1 1_33_1)
     ## try to locate the library
     find_library (BOOST_${lib} ${lib} ${lib}-gcc42-${boost_version} ${lib}-mt-${boost_version} ${lib}-gcc
       PATHS ${lib_locations}
-      PATH_SUFFIXES boost-${boost_version}
+      PATH_SUFFIXES boost boost-${boost_version}
       NO_DEFAULT_PATH
       )
     ## check if location was successful

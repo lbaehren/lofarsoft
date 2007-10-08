@@ -5,6 +5,8 @@
 #  CMake wrapper around the GNU Autotools-based configure/build of the BOOST
 #  library.
 #
+#  [./boost/CMakeLists.txt]
+#
 ## ------------------------------------------------------------------------------
 
 project (BOOST)
@@ -20,7 +22,14 @@ include (CPack)
 ## find script
 
 option (BOOST_FORCE_BUILD "Force rebuild and local installation" 0)
-option (BOOST_CMAKE_BUILD "Use CMake port to configure and build Boost?" 0)
+option (BOOST_CMAKE_BUILD "Use CMake port to configure and build Boost?" 1)
+
+## Selective building of the Boost++ libraries
+
+option (BOOST_LIB_PYTHON "Build libboost_python" 1)
+option (BOOST_LIB_REGEX "Build libboost_regex" 0)
+option (BOOST_LIB_SIGNALS "Build libboost_signals" 0)
+option (BOOST_LIB_WAVE "Build libboost_wave" 0)
 
 ## check where to find the CMake scripts
 
@@ -74,7 +83,34 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
   ## ----------------------------------------------------------------------------
   ## CMake port for building Bost
 
-  # Organization of the header files after installation:
+  # (1) Organization of the source code
+  #
+  #  boost
+  #  |-- boost
+  #  |   `-- python
+  #  |       |-- converter
+  #  |       |-- detail
+  #  |       |-- object
+  #  |       `-- suite
+  #  |           `-- indexing
+  #  |               `-- detail
+  #  `-- libs
+  #      `-- python
+  #          |-- example
+  #          |   |-- quickstart
+  #          |   `-- tutorial
+  #          |-- pyste
+  #          |   |-- dist
+  #          |   |-- install
+  #          |   |-- src
+  #          |   |   `-- Pyste
+  #          |   `-- tests
+  #          |-- src
+  #          |   |-- converter
+  #          |   `-- object
+  #          `-- test
+  #
+  # (2) Organization of the header files after installation:
   #
   #  boost
   #  |-- python
@@ -103,7 +139,8 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
       ${PYTHON_INCLUDES}
       )
     
-    add_subdirectory (libs/python)
+    add_subdirectory (boost)
+    add_subdirectory (libs)
     
   else (BOOST_CMAKE_BUILD AND PYTHON_INCLUDES)
     

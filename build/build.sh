@@ -63,7 +63,7 @@ build_package ()
     sourceDir=$2
     buildOptions=$3
     # Feedback
-    echo "[build] Building package";
+    echo "[`date`] Building package";
     echo " -- Build directory ..... : $buildDir";
     echo " -- Source directory .... : $sourceDir";
     echo " -- Configuration options : $buildOptions";
@@ -81,14 +81,14 @@ build_package ()
 	fi
 	# build the package
 	if test -z "`make help | grep install`" ; then
-	    echo "[build] No target install for $buildDir."
+	    echo "[`date`] No target install for $buildDir."
 	else
 	    make install;
 	fi
 	}
     else 
 	{
-	echo "[build] No build directory $buildDir - creating it now."
+	echo "[`date`] No build directory $buildDir - creating it now."
 	mkdir $buildDir;
 	# recursive call
 	build_package $buildDir $sourceDir $buildOptions
@@ -168,19 +168,19 @@ done
 
 case $param_packageName in 
     bison)
-		echo "[build] Selected package Bison"
+		echo "[`date`] Selected package Bison"
 		build_package bison external/bison "-DBISON_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     blitz)
-		echo "[build] Selected package Blitz++"
+		echo "[`date`] Selected package Blitz++"
 		build_package blitz external/blitz "-DBLITZ_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     boost)
-		echo "[build] Selected package Boost"
+		echo "[`date`] Selected package Boost"
 		build_package boost external/boost "-DBOOST_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     casacore)
-		echo "[build] Selected package CASACORE"
+		echo "[`date`] Selected package CASACORE"
 		## -- build required packages
 		./build.sh wcslib
 		./build.sh cfitsio
@@ -188,21 +188,21 @@ case $param_packageName in
 		build_package casacore external/casacore
     ;;
     cfitsio)
-		echo "[build] Selected package CFITSIO"
+		echo "[`date`] Selected package CFITSIO"
 		build_package cfitsio external/cfitsio
     ;;
     cmake)
-	echo "[build] Selected package CMake"
+	echo "[`date`] Selected package CMake"
 	## Check if the source code to build cmake is available; if this
 	## is not the case with error, since this is the bottom-most 
 	## position in the dependency chain
 	if test -d $basedir/../external/cmake ; then
-	    echo "[build] Cleaning up source directory ..."
+	    echo "[`date`] Cleaning up source directory ..."
 	    rm -rf $basedir/../external/cmake/Bootstrap.cmk
 	    rm -rf $basedir/../external/cmake/CMakeCache.txt
 	    rm -rf $basedir/../external/cmake/Source/cmConfigure.h
 	else
-	    echo "[build] Missing source directory for cmake! Unable to continue!"
+	    echo "[`date`] Missing source directory for cmake! Unable to continue!"
 	    exit 1;
 	fi
 	## prepare to build cmake from its source
@@ -213,34 +213,34 @@ case $param_packageName in
 	    cd cmake;
 	fi
 	## run the configure script
-	echo "[build] Running configure script for cmake ..."
+	echo "[`date`] Running configure script for cmake ..."
 	$basedir/../external/cmake/configure --prefix=$basedir/../release
 	## build and install
-	echo "[build] Initiating build and install of cmake ..."
+	echo "[`date`] Initiating build and install of cmake ..."
 	make && make install
 	## check if we have been able to create a cmake executable
 	if test -f ../../release/bin/cmake ; then
-	    echo "[build] Found newly created cmake executable."
+	    echo "[`date`] Found newly created cmake executable."
 	    export PATH=$PATH:$basedir/../release/bin
 	else
-	    echo "[build] No cmake executable found in release/bin! Unable to continue!"
+	    echo "[`date`] No cmake executable found in release/bin! Unable to continue!"
 	    exit 1;
 	fi
     ;;
     flex)
-	echo "[build] Selected package Flex"
+	echo "[`date`] Selected package Flex"
 	build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$param_forceBuild"
     ;;
     hdf5)
-	echo "[build] Selected package Hdf5"
+	echo "[`date`] Selected package Hdf5"
 	build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     pgplot)
-	echo "[build] Selected package PGPlot"
+	echo "[`date`] Selected package PGPlot"
 	build_package pgplot external/pgplot "-DPGPLOT_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     plplot)
-	echo "[build] Selected package Plplot"
+	echo "[`date`] Selected package Plplot"
 	if test -d $basedir/../external/plplot ; then
 	    build_package plplot external/plplot "-DCMAKE_INSTALL_PREFIX:STRING=$basedir/../release -DCMAKE_INSTALL_BINDIR:STRING=bin -DCMAKE_INSTALL_DATADIR:STRING=share -DCMAKE_INSTALL_INCLUDEDIR:STRING=include -DPLD_aqt:BOOL=0";
 	else
@@ -258,20 +258,20 @@ case $param_packageName in
 	fi
     ;;
     python)
-	echo "[build] Selected package PYTHON"
+	echo "[`date`] Selected package PYTHON"
 	build_package python external/python
     ;;
     vtk)
-	echo "[build] Selected package VTK"
+	echo "[`date`] Selected package VTK"
 	build_package vtk external/vtk
     ;;
     wcslib)
-	echo "[build] Selected package WCSLIB"
+	echo "[`date`] Selected package WCSLIB"
 	build_package wcslib external/wcslib
     ;;
     dal)
 	## external packages
-	echo "[build::DAL] Processing required packages ..."
+	echo "[`date`] Processing required packages ..."
 	./build.sh cmake
 	./build.sh casacore --force-build
 	./build.sh blitz --force-build
@@ -279,30 +279,30 @@ case $param_packageName in
 	./build.sh boost --force-build
 	./build.sh hdf5 --force-build
 	## USG packages
-	echo "[build::DAL] Building Data Access Library ..."
+	echo "[`date`] Building Data Access Library ..."
 	build_package dal src/DAL
 	## Post-installation testing
 	echo ""
-	echo "[build::DAL] To test the DAL installation run:"
+	echo "[`date`] To test the DAL installation run:"
 	echo ""
 	echo "  cd build/dal; ctest --verbose"
 	echo ""
     ;;
     cr)
-	echo "[build::CR-Tools] Processing required packages ..."
+	echo "[`date`] Processing required packages ..."
 	## external packages
 	./build.sh pgplot;
 	## USG packages
 	./build.sh dal;
-	echo "[build::CR-Tools] Building CR-Tools package ..."
+	echo "[`date`] Building CR-Tools package ..."
 	build_package cr src/CR-Tools;
     ;;
     all)
-	echo "[build] Building external packages not build otherwise";
+	echo "[`date`] Building external packages not build otherwise";
 	./build.sh bison;
 	./build.sh flex;
 	./build.sh pgplot;
-	echo "[build] Building all USG packages";
+	echo "[`date`] Building all USG packages";
 	./build.sh dal;
 	build_package cr src/CR-Tools;
     ;;
