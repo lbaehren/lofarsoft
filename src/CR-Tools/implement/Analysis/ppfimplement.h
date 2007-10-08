@@ -49,7 +49,7 @@
 #include <casa/Exceptions/Error.h>
 #include <casa/namespace.h>
 
-#include <Math/Math.h>
+#include <Math.h>
 
 namespace CR { // Namespace CR -- begin
   

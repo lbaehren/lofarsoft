@@ -33,7 +33,7 @@
 
 #include <Analysis/SecondStagePipeline.h>
 #include <Calibration/CalTableInterpolater.h>
-#include <Imaging/GeometricalPhase.h>
+#include <Imaging/GeometricalWeight.h>
 // --> needs to be replaced by GeometricalDelay
 #ifdef HAVE_GLISH
 #include <ApplicationSupport/Beamformer.h>

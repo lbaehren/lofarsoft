@@ -208,23 +208,17 @@ namespace CR { // Namespace CR -- begin
       Matrix<DComplex> phaseGradients;
       /* ---- old version (needs to go) ---- */
 #ifdef HAVE_GLISH
-      // calculate the phase gradients
-      if (verbose) { bf_p.showProgress(True); };
-      bf_p.setPhaseGradients(dr->frequencyValues(), tmpvec, tmpAntPos);
-      if (verbose) { bf_p.showProgress(False); };
-      // retrieve the phase gradients
-      phaseGradients = bf_p.phaseGradients().nonDegenerate();
+      //      // calculate the phase gradients
+      //      if (verbose) { bf_p.showProgress(True); };
+      //      bf_p.setPhaseGradients(dr->frequencyValues(), tmpvec, tmpAntPos);
+      //      if (verbose) { bf_p.showProgress(False); };
+      //      // retrieve the phase gradients
+      //      phaseGradients = bf_p.phaseGradients().nonDegenerate();
 #endif
       /* ---- new version ---- */
-//       try {
-// 	CR::GeometricalPhase geomPhase (tmpAntPos,tmpvec,dr->frequencyValues());
-// 	phaseGradients.phases().nonDegenerate();
-//       } catch (std::string message) {
-// 	std::cerr << "[CRinvFFT::GetShiftedFFT]"
-// 		  << " Error while retrieving phase gradients!"
-// 		  << message
-// 		  << std::endl;
-//       }
+      CR::GeometricalWeight geomWeight(tmpAntPos,Matrix<Double>(tmpvec),dr->frequencyValues());
+      
+      phaseGradients = Matrix<DComplex>(geomWeight.weights().nonDegenerate());
       
       // ***** getting the antenna gain calibration
       // initialize the caltable interpolater (if needed)
@@ -249,6 +243,7 @@ namespace CR { // Namespace CR -- begin
       for (i=0;i<AntennaIDs.nelements();i++){
 	InterAntGain_p->GetValues(date, AntennaIDs(i), &tmparr);
 	CTRead->GetData(date, AntennaIDs(i), "FrequencyBand", &tmpvec);
+	cout << "CRinvFFT::GetShiftedFFT: " << tmpCvec.shape() << ";"<<tmparr.shape()<< phaseGradients.shape() << endl;
 	convertArray(tmpCvec,Vector<Double>(tmparr));
 	// compute 1.947/delta_nu/sqrt(Gain)
 	//   1.947        = constant (at least for LOPES)
