@@ -11,6 +11,10 @@ file (GLOB libboost_python_sources
 ## -----------------------------------------------------------------------------
 ## Compiler instructions
 
+add_definitions (
+  -fPIC
+  )
+
 add_library (boost_python
   ${libboost_python_sources}
   )
