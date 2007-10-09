@@ -10,7 +10,6 @@
 #
 
 include (CheckIncludeFiles)
-include (CheckLibraryExists)
 include (CheckTypeSize)
 
 ## -----------------------------------------------------------------------------
@@ -163,21 +162,17 @@ endforeach (boost_version)
 ##        "nm libboost_python-mt-1_34_1.dylib | grep _PyMem_Malloc"
 ##        report the symbol to be present in the library.
 
-find_library (libboost_python boost_python-mt-1_34_1 boost_python-gcc-1_33_1 boost_python-gcc boost_python
-  PATHS ${lib_locations}
-  PATH_SUFFIXES boost-1_34_1 boost-1_33_1 boost
-  )
+if (BOOST_boost_python)
 
-if (libboost_python)
-  foreach (boost_symbol _PyMem_Malloc _PyModule_Type _PyMethod_Type _PyErr_WarnEx)
-    ## check for symbols in the library
-    check_library_exists (${libboost_python}
-      ${boost_symbol}
-      ""
-      BOOST_${boost_symbol}
-      )
-  endforeach (boost_symbol)
-endif (libboost_python)
+  ## load CMake module required for checking symbols within a library
+  include (CheckLibraryExists)
+
+  check_library_exists (${BOOST_boost_python} _PyMem_Malloc "" BOOST__PyMem_Malloc)
+  check_library_exists (${BOOST_boost_python} _PyModule_Type "" BOOST__PyModule_Type)
+  check_library_exists (${BOOST_boost_python} _PyMethod_Type "" BOOST__PyMethod_Type)
+  check_library_exists (${BOOST_boost_python} _PyErr_WarnEx "" BOOST__PyErr_WarnEx)
+
+endif (BOOST_boost_python)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found

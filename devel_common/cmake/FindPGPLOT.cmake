@@ -13,8 +13,10 @@
 ## Search locations
 
 set (include_locations
+  ## local installation
   ../release/include
   ../../release/include
+  ## system-wide installation
   /usr/include
   /usr/local/include
   /sw/include
@@ -23,8 +25,10 @@ set (include_locations
 )
 
 set (lib_locations
+  ## local installation
   ../release/lib
   ../../release/lib
+  ## system-wide installation
   /lib
   /usr/lib
   /usr/local/lib

@@ -242,7 +242,7 @@ case $param_packageName in
     plplot)
 	echo "[`date`] Selected package Plplot"
 	if test -d $basedir/../external/plplot ; then
-	    build_package plplot external/plplot "-DCMAKE_INSTALL_PREFIX:STRING=$basedir/../release -DCMAKE_INSTALL_BINDIR:STRING=bin -DCMAKE_INSTALL_DATADIR:STRING=share -DCMAKE_INSTALL_INCLUDEDIR:STRING=include -DPLD_aqt:BOOL=0";
+	    build_package plplot external/plplot "-DCMAKE_INSTALL_PREFIX:STRING=$basedir/../release -DCMAKE_INSTALL_BINDIR:STRING=bin -DCMAKE_INSTALL_DATADIR:STRING=share -DCMAKE_INSTALL_INCLUDEDIR:STRING=include -DBUILD_SHARED_LIBS:BOOL=0 -DPLD_aqt:BOOL=0";
 	else
 	    cd $basedir/../external
 	    ## download the source tar-ball from source forge
@@ -270,23 +270,22 @@ case $param_packageName in
 	build_package wcslib external/wcslib
     ;;
     dal)
-	## external packages
-	echo "[`date`] Processing required packages ..."
-	./build.sh cmake
-	./build.sh casacore --force-build
-	./build.sh blitz --force-build
-	./build.sh python --force-build
-	./build.sh boost --force-build
-	./build.sh hdf5 --force-build
-	## USG packages
-	echo "[`date`] Building Data Access Library ..."
-	build_package dal src/DAL
-	## Post-installation testing
-	echo ""
-	echo "[`date`] To test the DAL installation run:"
-	echo ""
-	echo "  cd build/dal; ctest --verbose"
-	echo ""
+		## external packages
+		echo "[`date`] Processing required packages ..."
+		./build.sh cmake
+		./build.sh casacore --force-build
+		./build.sh python --force-build
+		./build.sh boost --force-build
+		./build.sh hdf5 --force-build
+		## USG packages
+		echo "[`date`] Building Data Access Library ..."
+		build_package dal src/DAL
+		## Post-installation testing
+		echo ""
+		echo "[`date`] To test the DAL installation run:"
+		echo ""
+		echo "  cd build/dal; ctest --verbose"
+		echo ""
     ;;
     cr)
 	echo "[`date`] Processing required packages ..."
