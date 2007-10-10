@@ -1,7 +1,21 @@
 
-## Configuration and build sensitiv to ordering
+## ------------------------------------------------------------------------------
+## Configuration and build
+
+## [1] numarray
 
 add_subdirectory (numarray)
+
+## [2] matplotlib
+
+#  matplotlib works with with Numeric or numarray.  At compile time,
+#  setup.py will look for both packages and compile the appropriate
+#  extensions into matplotlib.  At runtime, the correct extension code
+#  will be chosen based on your numerix setting in matplotlibrc.  If
+#  you want to be able to use either Numeric or numarray efficiently
+#  with matplotlib, it is important that you have *both* present and in
+#  your PYTHONPATH when you compile matplotlib.
+
 add_subdirectory (matplotlib)
 
 ## ------------------------------------------------------------------------------

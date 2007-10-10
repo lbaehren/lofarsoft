@@ -122,15 +122,24 @@ else
 	print_help
 	;;
 	-clean)
-	rm -f *~ *.log;
-	rm -rf bison blitz boost;
-	rm -rf casacore cfitsio cmake cr; 
-	rm -rf dal dsp;
-	rm -rf flex;
-	rm -rf hdf5;
-	rm -rf pgplot plplot python;
-	rm -rf vtk;
-	rm -rf wcslib;
+		rm -f *~ *.log;
+		rm -rf bison blitz boost;
+		rm -rf casacore cfitsio cmake cr; 
+		rm -rf dal dsp;
+		rm -rf flex;
+		rm -rf hdf5;
+		rm -rf pgplot plplot python;
+		rm -rf vtk;
+		rm -rf wcslib;
+	;;
+	-clean-release)
+		rm -rf ../release/bin
+		rm -rf ../release/doc
+		rm -rf ../release/include
+		rm -rf ../release/info
+		rm -rf ../release/lib
+		rm -rf ../release/man
+		rm -rf ../release/share
 	;;
 	clean)
 	./build.sh -clean;
@@ -282,9 +291,11 @@ case $param_packageName in
 		build_package dal src/DAL
 		## Post-installation testing
 		echo ""
+		echo "--------------------------------------------------";
 		echo "[`date`] To test the DAL installation run:"
 		echo ""
-		echo "  cd build/dal; ctest --verbose"
+		echo "  cd build/dal; ctest"
+		echo "--------------------------------------------------";
 		echo ""
     ;;
     cr)
