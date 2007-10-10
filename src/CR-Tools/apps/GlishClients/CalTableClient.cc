@@ -432,7 +432,7 @@ Bool SetKeyword(GlishSysEvent &event, void *){
       };
     } else if ((gtmp.elementType() == GlishArray::COMPLEX) || 
 	       (gtmp.elementType() == GlishArray::DCOMPLEX)) {
-      if (gtmp.nelements() > 1 ){
+      if (gtmp.nelements() == 1 ){
 	DComplex data;
 	gtmp.get(data,0);
 	if (table.SetKeyword(data,KeywordName)){
@@ -460,7 +460,7 @@ Bool SetKeyword(GlishSysEvent &event, void *){
 	};
       };
     } else {
-      if (gtmp.nelements() > 1 ){
+      if (gtmp.nelements() == 1 ){
 	Double data;
 	gtmp.get(data,0);
 	if (table.SetKeyword(data,KeywordName)){

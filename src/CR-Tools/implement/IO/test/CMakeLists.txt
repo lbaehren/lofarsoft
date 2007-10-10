@@ -8,6 +8,7 @@ include_directories (. .. ../..)
 ## Set up the list with test program sources
 
 set (tests
+  tApplyInstrumentEffects
   tDataBlockSettings
   tDataIterator
   tDataReader

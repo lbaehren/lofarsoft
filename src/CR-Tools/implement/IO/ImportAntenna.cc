@@ -137,7 +137,7 @@ namespace CR { // Namespace CR -- begin
     const long NumPointsBeforeSimulated = static_cast<long>((itsSimulatedWindowStart-itsRequiredWindowStart)/itsSamplingTimeScale+0.5);
     const long NumPointsAfterSimulated = static_cast<long>((itsRequiredWindowEnd-itsSimulatedWindowEnd)/itsSamplingTimeScale+0.5);
     const long NumPointsRequired = NumPointsBeforeSimulated+NumPointsSimulated+NumPointsAfterSimulated;
-    const long NumPointsPadded = static_cast<long>(pow(2.0,ceil(log(static_cast<Double>(NumPointsRequired))/log(2.0))+1.0));	// enlarge to second next power of 2
+    const long NumPointsPadded = static_cast<long>(pow(2.0,ceil(log(static_cast<Double>(NumPointsRequired))/log(2.0))+3.0));	// enlarge to forth next power of 2 (to accomodate the pulse delay)
     const long PointsToPadBefore = (NumPointsPadded-NumPointsRequired)/2;				// pad (rounded down) half of them before
     const long PointsToPadAfter = NumPointsPadded-NumPointsRequired-PointsToPadBefore;			// pad the rest behind
     Eazimuth.resize(NumPointsPadded);

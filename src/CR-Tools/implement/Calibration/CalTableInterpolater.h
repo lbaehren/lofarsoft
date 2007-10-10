@@ -198,11 +198,12 @@ namespace CR {  //  Namespace CR -- begin
   /*!
     \brief Set the Field that is to be imterpolated
 
-    \param FieldName -- Name of the field
+    \param FieldName        -- Name of the field
+    \param setKeyword=False -- Interpolate a Keyword instead of a field?
     
     \return ok -- Was operation successful? Returns <tt>True</tt> if yes.
   */
-  Bool SetField(const String &FieldName);
+  Bool SetField(const String &FieldName, Bool setKeyword=False);
 
   /*!
     \brief Set or add the name of a field that contains the axis values over 

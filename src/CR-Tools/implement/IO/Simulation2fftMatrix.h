@@ -203,7 +203,7 @@ namespace CR {  //  Namespace CR -- begin
     /*!
       \brief The two CalTableInterpolater objects
     */
-    CalTableInterpolater<Double> *CTIazi, *CTIzeni;
+    CalTableInterpolater<Double> *CTIazi, *CTIzeni, *CTIaziPhase, *CTIzeniPhase;
     
     /*!
       \brief Initialize the CalTableInterpolaters

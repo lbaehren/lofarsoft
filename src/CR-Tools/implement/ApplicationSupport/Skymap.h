@@ -55,7 +55,7 @@ using namespace std;
 
 // custom
 #include <ApplicationSupport/Beamformer.h>
-#include <LopesLegacy/DataFrequency.h>
+#include <ApplicationSupport/DataFrequency.h>
 #include <Observation/ObservationData.h>
 #include <Observation/ObservationFrame.h>
 #include <Imaging/SkymapGrid.h>

@@ -22,6 +22,7 @@
 
 #include <IO/Simulation2fftMatrix.h>
 #include <scimath/Mathematics/FFTServer.h>
+#include <casa/Arrays/ArrayMath.h>
 
 //Maximum number of antennas that this routine can handle.
 //LOPES has a maximum of 30 antennas
@@ -42,6 +43,8 @@ namespace CR {  //  Namespace CR -- begin
     has_data_p = False;
     CTIzeni=NULL;
     CTIazi=NULL;
+    CTIzeniPhase=NULL;
+    CTIaziPhase=NULL;
   }
   
   // ============================================================================
@@ -178,7 +181,7 @@ namespace CR {  //  Namespace CR -- begin
       };
       if (success){
 	AntIDs_p.resize(nAnt);
-	AntIDs_p = tempAntIDs(IPosition(1,nAnt));
+	AntIDs_p = tempAntIDs(Slice(0,nAnt));
 	fft_p.resize(fftlen_p,nAnt);
 	for (i=0; i<nAnt; i++) {
 	  fft_p.column(i) = tempFFT.column(i);
@@ -209,29 +212,47 @@ namespace CR {  //  Namespace CR -- begin
       }
       if (CTIzeni != NULL) { delete CTIzeni; };
       if (CTIazi != NULL) { delete CTIazi; };
+      if (CTIzeniPhase != NULL) { delete CTIzeniPhase; };
+      if (CTIaziPhase != NULL) { delete CTIaziPhase; };
       CTIzeni = new CalTableInterpolater<Double>(CTRead);
       CTIazi = new CalTableInterpolater<Double>(CTRead);
+      CTIzeniPhase = new CalTableInterpolater<Double>(CTRead);
+      CTIaziPhase = new CalTableInterpolater<Double>(CTRead);
       
       success = success && CTIzeni->SetField("AntennaZeniGain");
       success = success && CTIazi->SetField("AntennaAziGain");
+      success = success && CTIzeniPhase->SetField("AntennaZeniPhase");
+      success = success && CTIaziPhase->SetField("AntennaAziPhase");
       
       success = success && CTIzeni->SetAxis("AntennaGainFaktFreq");
       success = success && CTIazi->SetAxis("AntennaGainFaktFreq");
+      success = success && CTIzeniPhase->SetAxis("AntennaGainFaktFreq");
+      success = success && CTIaziPhase->SetAxis("AntennaGainFaktFreq");
       
       success = success && CTIzeni->SetAxis("AntennaGainFaktAz");
       success = success && CTIazi->SetAxis("AntennaGainFaktAz");
+      success = success && CTIzeniPhase->SetAxis("AntennaGainFaktAz");
+      success = success && CTIaziPhase->SetAxis("AntennaGainFaktAz");
       
       success = success && CTIzeni->SetAxis("AntennaGainFaktEl");
       success = success && CTIazi->SetAxis("AntennaGainFaktEl");
+      success = success && CTIzeniPhase->SetAxis("AntennaGainFaktEl");
+      success = success && CTIaziPhase->SetAxis("AntennaGainFaktEl");
       
       success = success && CTIzeni->SetAxisValue(1,frequency_p);
       success = success && CTIazi->SetAxisValue(1,frequency_p);
+      success = success && CTIzeniPhase->SetAxisValue(1,frequency_p);
+      success = success && CTIaziPhase->SetAxisValue(1,frequency_p);
       
       success = success && CTIzeni->SetAxisValue(2,Vector<Double>(1,azimuth));
       success = success && CTIazi->SetAxisValue(2,Vector<Double>(1,azimuth));
+      success = success && CTIzeniPhase->SetAxisValue(2,Vector<Double>(1,azimuth));
+      success = success && CTIaziPhase->SetAxisValue(2,Vector<Double>(1,azimuth));
       
       success = success && CTIzeni->SetAxisValue(3,Vector<Double>(1,elevation));
       success = success && CTIazi->SetAxisValue(3,Vector<Double>(1,elevation));
+      success = success && CTIzeniPhase->SetAxisValue(3,Vector<Double>(1,elevation));
+      success = success && CTIaziPhase->SetAxisValue(3,Vector<Double>(1,elevation));
       
     } catch (AipsError x) {
       cerr << "Simulation2fftMatrix::initCTinterpolater: " << x.getMesg() << endl;
@@ -246,16 +267,31 @@ namespace CR {  //  Namespace CR -- begin
   {
     Bool success = True;
     try {
-      Array<Double> gainZeni,gainAzi;
-      Vector<DComplex> gainZeniC(fftlen_p),gainAziC(fftlen_p);
+      Vector<DComplex> fftvals,tmpCvec;
+      Vector<Double> tmpvec;
+      DComplex tmpcomp(0.,1.);
+      Array<Double> gainZeni,gainAzi,phaseZeni,phaseAzi;
+      Vector<DComplex> gainZeniC(fftlen_p),gainAziC(fftlen_p),phaseZeniC(fftlen_p),phaseAziC(fftlen_p);
       success = success && CTIazi->GetValues(date_p, AntID, &gainAzi);
       success = success && CTIzeni->GetValues(date_p, AntID, &gainZeni);
-      
+      success = success && CTIaziPhase->GetValues(date_p, AntID, &phaseAzi);
+      success = success && CTIzeniPhase->GetValues(date_p, AntID, &phaseZeni);
+
       convertArray(gainAziC,Vector<Double>(gainAzi));
       convertArray(gainZeniC,Vector<Double>(gainZeni));
-      
+      convertArray(phaseAziC,Vector<Double>(phaseAzi));
+      convertArray(phaseZeniC,Vector<Double>(phaseZeni));
+ 
       if (success) {
-	return FFTazi*gainAziC+FFTzeni*gainZeniC;
+	fftvals = FFTazi/gainAziC*exp(phaseAziC*tmpcomp)+FFTzeni/gainZeniC*exp(phaseZeniC*tmpcomp);
+	// Finish the Antenna calibration with a number of "constants"
+	// tmpvec = sqrt(c/(4*pi*mu0))/freq
+	tmpvec = 4.35713e+06/frequency_p;
+	tmpvec(0) = tmpvec(1);
+	tmpCvec.resize(fftlen_p);
+	convertArray(tmpCvec,tmpvec);
+        fftvals *= tmpCvec;
+	return fftvals;
       }      
     } catch (AipsError x) {
       cerr << "Simulation2fftMatrix::combinePolarizations: " << x.getMesg() << endl;

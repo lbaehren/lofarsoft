@@ -1,6 +1,9 @@
-/***************************************************************************
- *   Copyright (C) 2007                                                    *
- *   Andreas Horneffer (<mail>)                                            *
+/*-------------------------------------------------------------------------*
+ | $Id                                                                     |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2007                                                  *
+ *   Andreas Horneffer (<mail>)                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,49 +21,48 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tsimulation2fftMatrix.cc,v 1.2 2007/03/09 17:59:00 horneff Exp $*/
-
-#include <casa/aips.h>
-#include <casa/Exceptions/Error.h>
-
-#include <IO/Simulation2fftMatrix.h>
+#include <IO/ApplyInstrumentEffects.h>
 #include <scimath/Mathematics/FFTServer.h>
-
 
 using CR::CalTableReader;
 using CR::ImportSimulation;
 using CR::Simulation2fftMatrix;
+using CR::ApplyInstrumentEffects;  // Namespace usage
 
 /*!
-  \file tSimulation2fftMatrix.cc
+  \file tApplyInstrumentEffects.cc
 
   \ingroup IO
 
-  \brief A collection of test routines for Simulation2fftMatrix
+  \brief A collection of test routines for the ApplyInstrumentEffects class
  
   \author Andreas Horneffer
  
-  \date 2007/03/08
+  \date 2007/09/21
 */
 
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test constructors for a new Simulation2fftMatrix object
+  \brief Test constructors for a new ApplyInstrumentEffects object
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_Simulation2fftMatrix ()
+int test_ApplyInstrumentEffects ()
 {
   int nofFailedTests (0);
   
   try {
-    std::cout << "\n[test_Simulation2fftMatrix]\n" << std::endl;
+    
+    
+    std::cout << "\n[test_ApplyInstrumentEffects]\n" << std::endl;
     
     std::cout << "[1] Testing default constructor ..." << std::endl;
-    Simulation2fftMatrix newObject;
-
-    std::cout << "[2] Generating importSimulation object ... " ;
+    ApplyInstrumentEffects newApplyInstrumentEffects;
+    newApplyInstrumentEffects.summary(); 
+    
+    std::cout << "[2] Opening Simulation ... " ;
+    Simulation2fftMatrix sim2fft;
     ImportSimulation Sim;
     bool ok = Sim.openNewSimulation("30deg1e17_shift",
 				    "lopes30",
@@ -69,20 +71,30 @@ int test_Simulation2fftMatrix ()
 
     std::cout << "[3] Generating and attaching CalTableReader object ... " << endl;;
     CalTableReader CTread("/home/horneff/lopescasa/data/LOPES/LOPES-CalTable");
-    newObject.setCalTable(&CTread);
+    sim2fft.setCalTable(&CTread);
+    newApplyInstrumentEffects.setCalTable(&CTread);
+    sim2fft.setObsDate(1104580800);
+    newApplyInstrumentEffects.setObsDate(1104580800);
+
 
     std::cout << "[4] Importing simulation ... " ;;     
-    ok =  newObject.SimulationImport(&Sim);
+    ok =  sim2fft.SimulationImport(&Sim);
     std::cout << " ok: " << ok << endl;
+
+    std::cout << "[5] Applying Instrument Effects ... " ;;   
+    newApplyInstrumentEffects.setAntennaIDs(sim2fft.getAntIDs());
+    newApplyInstrumentEffects.setFreqAxis(sim2fft.getFrequency());
+    Matrix<DComplex> FFT;
+    FFT = newApplyInstrumentEffects.ApplyEffects(sim2fft.getfft());
+    
 
     std::cout << "[5] Generating output file ... " << endl;;
 
     FILE *allout;
-    allout = fopen("tSimulation2fftMatrix_allfft.tab","w");
+    allout = fopen("tApplyInstrumentEffects_allfft.tab","w");
     
     std::cout << "   ... retrieving the data from the object," << std::endl;
-    Vector<Double> Frequencies = newObject.getFrequency();
-    Matrix<DComplex> FFT = newObject.getfft();
+    Vector<Double> Frequencies = sim2fft.getFrequency();
     Matrix<Double> absFFT = amplitude(FFT);
     Matrix<Double> phaseFFT = phase(FFT);
     Int fftlen = absFFT.nrow();
@@ -98,7 +110,7 @@ int test_Simulation2fftMatrix ()
     };
     fprintf(allout,"\n");
     fclose(allout);
-    Int blocklen_p = newObject.getBlocklen();
+    Int blocklen_p = sim2fft.getBlocklen();
     absFFT.resize(blocklen_p,nants);
     Vector<DComplex> in;
     Vector<Double> out;
@@ -113,7 +125,7 @@ int test_Simulation2fftMatrix ()
       absFFT.column(j) = out;
     };
 
-    allout = fopen("tSimulation2fftMatrix_pulse.tab","w");
+    allout = fopen("tApplyInstrumentEffects_pulse.tab","w");
     for (i=0; i< blocklen_p; i++) {
       fprintf(allout,"\n %i ",i);
       for (j=0; j<nants; j++) {
@@ -124,8 +136,9 @@ int test_Simulation2fftMatrix ()
     fclose(allout);
 
 
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
+
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
     nofFailedTests++;
   }
   
@@ -140,7 +153,7 @@ int main ()
 
   // Test for the constructor(s)
   {
-    nofFailedTests += test_Simulation2fftMatrix ();
+    nofFailedTests += test_ApplyInstrumentEffects ();
   }
 
   return nofFailedTests;

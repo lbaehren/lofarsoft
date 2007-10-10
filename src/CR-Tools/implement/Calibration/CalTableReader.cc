@@ -136,7 +136,7 @@ namespace CR {  // Namespace CR -- begin
       **indexedAnt_p = AntID;
       *rowNr = AntIDIndex_p->getRowNumber(found);
       if (!found) {
-	cerr << "CalTableReader::GetColumnTable: " << "unknown antenna ID!" << endl;
+	cerr << "CalTableReader::GetColumnTable: " << "unknown antenna ID:" << AntID <<"!" << endl;
 	return False;
       };
       // get the table

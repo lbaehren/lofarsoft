@@ -115,13 +115,23 @@ Bool CalTableInterpolater<T>::AttatchReader(CalTableReader *readerObject){
 
 
 template <class T>
-Bool CalTableInterpolater<T>::SetField(const String &FieldName){
+Bool CalTableInterpolater<T>::SetField(const String &FieldName, Bool setKeyword){
   try {
-    if (reader_p->GetFieldType(FieldName) == ""){
-      cerr << "CalTableInterpolater::SetField: Field Named: " << FieldName << " not known!" << endl;
-      return False;
+    if (!setKeyword){
+      if (reader_p->GetFieldType(FieldName) == ""){
+	cerr << "CalTableInterpolater::SetField: Field Named: " << FieldName << " not known!" << endl;
+	return False;
+      } else {
+	FieldName_p = FieldName;
+      };
     } else {
-      FieldName_p = FieldName;
+      if (reader_p->GetKeywordType(FieldName) == ""){
+	cerr << "CalTableInterpolater::SetField: Keyword Named: " << FieldName << " not known!" << endl;
+	return False;
+      } else {
+	FieldName_p = FieldName;
+	isKeyword = True;
+      };
     };
   } catch (AipsError x) {
     cerr << "CalTableInterpolater::SetField: " << x.getMesg() << endl;
@@ -133,9 +143,16 @@ Bool CalTableInterpolater<T>::SetField(const String &FieldName){
 template <class T>
 Bool CalTableInterpolater<T>::SetAxis(const String &AxisName, Int AxisNum){
   try {
-    if (reader_p->GetFieldType(AxisName) == ""){
-      cerr << "CalTableInterpolater::SetAxis: Field Named: " << AxisName << " not known!" << endl;
-      return False;
+    if (!isKeyword){
+      if (reader_p->GetFieldType(AxisName) == ""){
+	cerr << "CalTableInterpolater::SetAxis: Field Named: " << AxisName << " not known!" << endl;
+	return False;
+      };
+    } else {
+      if (reader_p->GetKeywordType(AxisName) == ""){
+	cerr << "CalTableInterpolater::SetAxis: Keyword Named: " << AxisName << " not known!" << endl;
+	return False;
+      };
     };
     if (AxisNum == 0) {
       AxisNum = NumAxes_p;
@@ -355,63 +372,81 @@ Bool CalTableInterpolater<T>::GetInputData(const uInt date, const Int AntID, Arr
 					   Vector<Double> &x0, Vector<Double> &x1, Vector<Double> &x2,
 					   Vector<Double> &x3, Vector<Double> &x4, Int cacheIndex){
   try {
-    if (!CacheInput_p) {
-      reader_p->GetData(date,AntID,FieldName_p,&y);
-      reader_p->GetData(date,AntID,AxisNames_p(0),&x0);
-      if (NumAxes_p>1) {
-	reader_p->GetData(date,AntID,AxisNames_p(1),&x1);
-	if (NumAxes_p>2) {
-	  reader_p->GetData(date,AntID,AxisNames_p(2),&x2);
-	  if (NumAxes_p>3) {
-	    reader_p->GetData(date,AntID,AxisNames_p(3),&x3);
-	    if (NumAxes_p>4) {
-	      reader_p->GetData(date,AntID,AxisNames_p(4),&x4);
+    if (!isKeyword){
+      if (!CacheInput_p) {
+	reader_p->GetData(date,AntID,FieldName_p,&y);
+	reader_p->GetData(date,AntID,AxisNames_p(0),&x0);
+	if (NumAxes_p>1) {
+	  reader_p->GetData(date,AntID,AxisNames_p(1),&x1);
+	  if (NumAxes_p>2) {
+	    reader_p->GetData(date,AntID,AxisNames_p(2),&x2);
+	    if (NumAxes_p>3) {
+	      reader_p->GetData(date,AntID,AxisNames_p(3),&x3);
+	      if (NumAxes_p>4) {
+		reader_p->GetData(date,AntID,AxisNames_p(4),&x4);
+	      };
+	    };
+	  };
+	};
+      } else {
+	if (CachedTime_p[cacheIndex] != date) {
+	  if (!reader_p->isIdentical(date,CachedTime_p[cacheIndex],AntID,FieldName_p)) {
+	    reader_p->GetData(date,AntID,FieldName_p,&CachedInputField_p[cacheIndex]);
+	  };
+	  if (!reader_p->isIdentical(date,CachedTime_p[cacheIndex],AntID,AxisNames_p(0))) {
+	    reader_p->GetData(date,AntID,AxisNames_p(0),&CachedInputFieldAxis_p[cacheIndex][0]);
+	  };
+	  if (NumAxes_p>1) {
+	    if (!reader_p->isIdentical(date,CachedTime_p[cacheIndex],AntID,AxisNames_p(1))) {
+	      reader_p->GetData(date,AntID,AxisNames_p(1),&CachedInputFieldAxis_p[cacheIndex][1]);
+	    };
+	    if (NumAxes_p>2) {
+	      if (!reader_p->isIdentical(date,CachedTime_p[cacheIndex],AntID,AxisNames_p(2))) {
+		reader_p->GetData(date,AntID,AxisNames_p(2),&CachedInputFieldAxis_p[cacheIndex][2]);
+	      };
+	      if (NumAxes_p>3) {
+		if (!reader_p->isIdentical(date,CachedTime_p[cacheIndex],AntID,AxisNames_p(3))) {
+		  reader_p->GetData(date,AntID,AxisNames_p(3),&CachedInputFieldAxis_p[cacheIndex][3]);
+		};
+		if (NumAxes_p>4) {
+		  if (!reader_p->isIdentical(date,CachedTime_p[cacheIndex],AntID,AxisNames_p(4))) {
+		    reader_p->GetData(date,AntID,AxisNames_p(4),&CachedInputFieldAxis_p[cacheIndex][4]);
+		  };
+		};
+	      };
+	    };
+	  };
+	  //Not all data in the cache belongs to the old "CachedTime" anymore.
+	  //So unset this. If things go well it is set when the output cache is written.
+	  CachedTime_p[cacheIndex] = 0;
+	};
+	y.reference(CachedInputField_p[cacheIndex]);
+	x0.reference(CachedInputFieldAxis_p[cacheIndex][0]);
+	if (NumAxes_p>1) {
+	  x1.reference(CachedInputFieldAxis_p[cacheIndex][1]);
+	  if (NumAxes_p>2) {
+	    x2.reference(CachedInputFieldAxis_p[cacheIndex][2]);
+	    if (NumAxes_p>3) {
+	      x3.reference(CachedInputFieldAxis_p[cacheIndex][3]);
+	      if (NumAxes_p>4) {
+		x4.reference(CachedInputFieldAxis_p[cacheIndex][4]);
+	      };
 	    };
 	  };
 	};
       };
     } else {
-      if (CachedTime_p[cacheIndex] != date) {
-	if (!reader_p->isIdentical(date,CachedTime_p[cacheIndex],AntID,FieldName_p)) {
-	  reader_p->GetData(date,AntID,FieldName_p,&CachedInputField_p[cacheIndex]);
-	};
-	if (!reader_p->isIdentical(date,CachedTime_p[cacheIndex],AntID,AxisNames_p(0))) {
-	  reader_p->GetData(date,AntID,AxisNames_p(0),&CachedInputFieldAxis_p[cacheIndex][0]);
-	};
-	if (NumAxes_p>1) {
-	  if (!reader_p->isIdentical(date,CachedTime_p[cacheIndex],AntID,AxisNames_p(1))) {
-	    reader_p->GetData(date,AntID,AxisNames_p(1),&CachedInputFieldAxis_p[cacheIndex][1]);
-	  };
-	  if (NumAxes_p>2) {
-	    if (!reader_p->isIdentical(date,CachedTime_p[cacheIndex],AntID,AxisNames_p(2))) {
-	      reader_p->GetData(date,AntID,AxisNames_p(2),&CachedInputFieldAxis_p[cacheIndex][2]);
-	    };
-	    if (NumAxes_p>3) {
-	      if (!reader_p->isIdentical(date,CachedTime_p[cacheIndex],AntID,AxisNames_p(3))) {
-		reader_p->GetData(date,AntID,AxisNames_p(3),&CachedInputFieldAxis_p[cacheIndex][3]);
-	      };
-	      if (NumAxes_p>4) {
-		if (!reader_p->isIdentical(date,CachedTime_p[cacheIndex],AntID,AxisNames_p(4))) {
-		  reader_p->GetData(date,AntID,AxisNames_p(4),&CachedInputFieldAxis_p[cacheIndex][4]);
-		};
-	      };
-	    };
-	  };
-	};
-	//Not all data in the cache belongs to the old "CachedTime" anymore.
-	//So unset this. If things go well it is set when the output cache is written.
-	CachedTime_p[cacheIndex] = 0;
-      };
-      y.reference(CachedInputField_p[cacheIndex]);
-      x0.reference(CachedInputFieldAxis_p[cacheIndex][0]);
+      //The input values are Keywords, i.e. no input caching
+      reader_p->GetKeyword(FieldName_p,&y);
+      reader_p->GetKeyword(AxisNames_p(0),&x0);
       if (NumAxes_p>1) {
-	x1.reference(CachedInputFieldAxis_p[cacheIndex][1]);
+	reader_p->GetKeyword(AxisNames_p(0),&x1);
 	if (NumAxes_p>2) {
-	  x2.reference(CachedInputFieldAxis_p[cacheIndex][2]);
- 	  if (NumAxes_p>3) {
-	    x3.reference(CachedInputFieldAxis_p[cacheIndex][3]);
+	  reader_p->GetKeyword(AxisNames_p(0),&x2);
+	  if (NumAxes_p>3) {
+	    reader_p->GetKeyword(AxisNames_p(0),&x3);
 	    if (NumAxes_p>4) {
-	      x4.reference(CachedInputFieldAxis_p[cacheIndex][4]);
+	      reader_p->GetKeyword(AxisNames_p(0),&x4);
 	    };
 	  };
 	};
