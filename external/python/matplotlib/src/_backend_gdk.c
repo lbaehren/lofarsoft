@@ -4,7 +4,7 @@
 
 #include "Python.h"
 #ifdef NUMARRAY
-#include "numarray/arrayobject.h"
+#include <numarray/arrayobject.h>
 #else
 #ifdef NUMERIC
 #include "Numeric/arrayobject.h"

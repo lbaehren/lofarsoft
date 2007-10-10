@@ -34,42 +34,47 @@
 #
 ## ------------------------------------------------------------------------------
 
-project (PYTHON_MATPLOTLIB)
+project (MATPLOTLIB)
 
 ## -----------------------------------------------------------------------------
 ## Only force rebuild of the library from the provided source code, if no system
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
-option (PYTHON_MATPLOTLIB_FORCE_BUILD "Force rebuild and local installation" 0)
+option (MATPLOTLIB_FORCE_BUILD "Force rebuild and local installation" 0)
+option (MATPLOTLIB_CMAKE_BUILD "Use CMake port to configure and build Boost?" 0)
 
 ## check where to find the CMake scripts
 
-find_path (PYTHON_MATPLOTLIB_cmake FindPython.cmake
+find_path (MATPLOTLIB_cmake FindPython.cmake
   PATHS 
-  ${PYTHON_MATPLOTLIB_SOURCE_DIR}
-  ${PYTHON_MATPLOTLIB_SOURCE_DIR}/..
-  ${PYTHON_MATPLOTLIB_SOURCE_DIR}/../..
-  ${PYTHON_MATPLOTLIB_SOURCE_DIR}/../../..
+  ${MATPLOTLIB_SOURCE_DIR}
+  ${MATPLOTLIB_SOURCE_DIR}/..
+  ${MATPLOTLIB_SOURCE_DIR}/../..
+  ${MATPLOTLIB_SOURCE_DIR}/../../..
   PATH_SUFFIXES
   devel_common/cmake
   )
 
-if (PYTHON_MATPLOTLIB_cmake)
+if (MATPLOTLIB_cmake)
+  ## Python
   set (PYTHON_FIND_QUIETLY 1)
-  include (${PYTHON_MATPLOTLIB_cmake}/FindPython.cmake)
-endif (PYTHON_MATPLOTLIB_cmake)
+  include (${MATPLOTLIB_cmake}/FindPython.cmake)
+  if (HAVE_PYTHON)
+    include_directories (${PYTHON_INCLUDES})
+  endif (HAVE_PYTHON)
+endif (MATPLOTLIB_cmake)
 
 ## <-- begin build condition --------------------------------------------------->
 
-if (NOT HAVE_PYTHON_MATPLOTLIB OR PYTHON_MATPLOTLIB_FORCE_BUILD)
+if (NOT HAVE_MATPLOTLIB OR MATPLOTLIB_FORCE_BUILD)
 
 ## ------------------------------------------------------------------------------
 ## Locate the installation area
 
-find_path (PYTHON_MATPLOTLIB_prefix release_area.txt
+find_path (MATPLOTLIB_prefix release_area.txt
   PATHS
-  ${PYTHON_MATPLOTLIB_SOURCE_DIR}
+  ${MATPLOTLIB_SOURCE_DIR}
   PATH_SUFFIXES
   ../release
   ../../release
@@ -77,9 +82,11 @@ find_path (PYTHON_MATPLOTLIB_prefix release_area.txt
   NO_DEFAULT_PATH
   )
 
-if (NOT PYTHON_MATPLOTLIB_prefix)
+if (MATPLOTLIB_prefix)
+  message (STATUS "Located installation area: ${MATPLOTLIB_prefix}")
+else (MATPLOTLIB_prefix)
   message (FATAL_ERROR "Unable to locate the installation area")
-endif (NOT PYTHON_MATPLOTLIB_prefix)
+endif (MATPLOTLIB_prefix)
 
 ## ------------------------------------------------------------------------------
 ## External dependencies
@@ -90,6 +97,9 @@ endif (NOT PYTHON_MATPLOTLIB_prefix)
 ##  also installed (eg freetype-devel).
 
 set (lib_locations
+  ## local installation
+  ${MATPLOTLIB_prefix}/lib
+  ## system-wide installation
   /lib
   /usr/lib
   /usr/local/lib
@@ -97,10 +107,29 @@ set (lib_locations
   /sw/lib
   )
 
+set (include_locations
+  ## local installation
+  ${MATPLOTLIB_prefix}/include
+  ${MATPLOTLIB_prefix}/include/python
+  ## system-wide installation
+  /include
+  /usr/include
+  /usr/local/include
+  /opt/include
+  /sw/include
+  )
+
 find_library (libfreetype freetype ${lib_locations})
 find_library (libgtk gtk ${lib_locations})
 find_library (libpng png ${lib_locations})
 find_library (libz z ${lib_locations})
+
+## ------------------------------------------------------------------------------
+## CMake-based installation
+
+if (MATPLOTLIB_CMAKE_BUILD)
+  add_subdirectory (src)
+endif (MATPLOTLIB_CMAKE_BUILD)
 
 ## ------------------------------------------------------------------------------
 ## Run the configure script provided along with the distribution
@@ -110,11 +139,11 @@ find_library (libz z ${lib_locations})
 message (STATUS "Running the Python setup script for this module ...")
 
 execute_process (
-  WORKING_DIRECTORY ${PYTHON_MATPLOTLIB_SOURCE_DIR}
-  COMMAND python setup.py build install --home=${PYTHON_MATPLOTLIB_prefix}
+  WORKING_DIRECTORY ${MATPLOTLIB_SOURCE_DIR}
+  COMMAND python setup.py build install
   TIMEOUT 1800
   ERROR_VARIABLE error_configure
-  ERROR_FILE error.log
+  ERROR_FILE matplotlib_configure.log
   )
 
 if (error_configure)
@@ -125,25 +154,25 @@ endif (error_configure)
 ## [2] build
 
 execute_process (
-  WORKING_DIRECTORY ${PYTHON_MATPLOTLIB_SOURCE_DIR}
-  COMMAND python setup.py build --home=${PYTHON_MATPLOTLIB_prefix
+  WORKING_DIRECTORY ${MATPLOTLIB_SOURCE_DIR}
+  COMMAND python setup.py build --home=${MATPLOTLIB_prefix}
   TIMEOUT 1800
   ERROR_VARIABLE error_build
-  ERROR_FILE build.log
+  ERROR_FILE matplotlib_build.log
   )
 
 ## [3] install
 
 execute_process (
-  WORKING_DIRECTORY ${PYTHON_MATPLOTLIB_SOURCE_DIR}
-  COMMAND python setup.py install --home=${PYTHON_MATPLOTLIB_prefix
+  WORKING_DIRECTORY ${MATPLOTLIB_SOURCE_DIR}
+  COMMAND python setup.py install --home=${MATPLOTLIB_prefix}
   TIMEOUT 1800
   ERROR_VARIABLE error_install
-  ERROR_FILE install.log
+  ERROR_FILE matplotlib_install.log
   )
 
 ## <-- end build condition ----------------------------------------------------->
 
-else (NOT HAVE_PYTHON_MATPLOTLIB OR PYTHON_MATPLOTLIB_FORCE_BUILD)
+else (NOT HAVE_MATPLOTLIB OR MATPLOTLIB_FORCE_BUILD)
   message (STATUS "Found system-wide installation of matplotlib; skipping rebuild!")
-endif (NOT HAVE_PYTHON_MATPLOTLIB OR PYTHON_MATPLOTLIB_FORCE_BUILD)
+endif (NOT HAVE_MATPLOTLIB OR MATPLOTLIB_FORCE_BUILD)

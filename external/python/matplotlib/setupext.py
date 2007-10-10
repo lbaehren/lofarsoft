@@ -43,13 +43,15 @@ WIN32 - VISUAL STUDIO 7.1 (2003)
 
 import os
 
+usg_pythonincludes = os.path.join(os.getcwd(),'../../release/include/python')
+
 basedir = {
     'win32'  : ['win32_static',],
     'linux2' : ['/usr/local', '/usr',],
     'linux'  : ['/usr/local', '/usr',],
     'cygwin' : ['/usr/local', '/usr',],
     'darwin' : ['/sw/lib/freetype2', '/sw/lib/freetype219', '/usr/local',
-                '/usr', '/sw'],
+                '/usr', '/sw', '/Users/lars/Code/lofar/usg/release/include/python'],
     'freebsd4' : ['/usr/local', '/usr'],
     'freebsd5' : ['/usr/local', '/usr'],
     'freebsd6' : ['/usr/local', '/usr'],
