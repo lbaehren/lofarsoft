@@ -297,8 +297,9 @@ namespace CR {  // Namespace CR -- begin
   template void DataIterator::setStepWidth (bool const &var);
   template void DataIterator::setStepWidth (short const &var);
   template void DataIterator::setStepWidth (int const &var);
-  template void DataIterator::setStepWidth (uint const &var);
+  template void DataIterator::setStepWidth (unsigned int const &var);
   template void DataIterator::setStepWidth (long const &var);
+  template void DataIterator::setStepWidth (unsigned long const &var);
   template void DataIterator::setStepWidth (float const &var);
   template void DataIterator::setStepWidth (double const &var);
   
