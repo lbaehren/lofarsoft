@@ -24,13 +24,25 @@ set (LopesStar_apps
   ChannelStatusControl
   )
 
+set (LopesStar_link_libraries
+  cr
+  )
+
+if (FFTW3_LIBRARIES)
+  list (APPEND LopesStar_link_libraries ${FFTW3_LIBRARIES})
+endif (FFTW3_LIBRARIES)
+
+if (ROOT_LIBRARIES)
+  list (APPEND LopesStar_link_libraries ${ROOT_LIBRARIES})
+endif (ROOT_LIBRARIES)
+
+if (PYTHON_LIBRARIES)
+  list (APPEND LopesStar_link_libraries ${PYTHON_LIBRARIES})
+endif (PYTHON_LIBRARIES)
+
 foreach (src ${LopesStar_apps})
   add_executable (${src} ${src}.cc)
-  target_link_libraries (${src}
-    cr
-    ${FFTW3_LIBRARIES}
-    ${ROOT_LIBRARIES}
-    )
+  target_link_libraries (${src} ${LopesStar_link_libraries})
 endforeach (src)
 
 ## programs which need special treatment
