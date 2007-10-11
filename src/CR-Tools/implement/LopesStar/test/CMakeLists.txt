@@ -30,6 +30,7 @@ foreach (src ${tests})
     cr
     ${FFTW3_LIBRARIES}
     ${ROOT_LIBRARIES}
+    ${PYTHON_LIBRARIES}
     )
   ## testing
   add_test (${src} ${src})

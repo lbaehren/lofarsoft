@@ -14,12 +14,13 @@
 using namespace std;
 using namespace TMath;
 
-//! Calculation of the calibration parameters determined from the amp. measurement with a ref. antenne from LOPES30
 /*!
+  Calculation of the calibration parameters determined from the amp. measurement
+  with a ref. antenne from LOPES30
 
-The used ref. antenne is well known and calibrated in field strength over the used frequency spectrum. Therefore the measured
-field strength distribution on frequency space can be calibrated - amp. calibration
-
+  The used ref. antenne is well known and calibrated in field strength over the
+  used frequency spectrum. Therefore the measured field strength distribution
+  on frequency space can be calibrated - amp. calibration.
 */
   
    
