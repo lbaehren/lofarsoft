@@ -21,31 +21,34 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef APPLYINSTRUMENTEFFECTS_H
-#define APPLYINSTRUMENTEFFECTS_H
+#ifndef TOLOPESGRID_H
+#define TOLOPESGRID_H
 
 // Standard library header files
 #include <iostream>
 #include <string>
 
-#include <Calibration/CalTableReader.h> 
-#include <Calibration/CalTableInterpolater.h>
-#include <IO/Simulation2fftMatrix.h>
+#include <casa/Arrays.h>
+#include <casa/BasicMath/Math.h>
+#include <scimath/Mathematics/FFTServer.h>
+#include <scimath/Mathematics/InterpolateArray1D.h>
+
+#include <casa/namespace.h>
 
 namespace CR { // Namespace CR -- begin
   
   /*!
-    \class ApplyInstrumentEffects
+    \class toLOPESgrid
     
     \ingroup IO
     
-    \brief Brief description for class ApplyInstrumentEffects
+    \brief Brief description for class toLOPESgrid
     
     \author Andreas Horneffer
 
-    \date 2007/09/21
+    \date 2007/10/10
 
-    \test tApplyInstrumentEffects.cc
+    \test ttoLOPESgrid.cc
     
     <h3>Prerequisite</h3>
     
@@ -58,30 +61,31 @@ namespace CR { // Namespace CR -- begin
     <h3>Example(s)</h3>
     
   */  
-  class ApplyInstrumentEffects {
-
+  class toLOPESgrid { //blubb
+    
   protected:
-    /*!
-      \brief Observation date used to get the calibration values from the CalTables
-    */
-    uInt date_p;
 
     /*!
-      \brief The CalTableReader
+      \brief start-, stop-time and sampling frequency.
     */
-    CalTableReader *CTRead;
-        
-    /*!
-      \brief Storage for the frequency-axis
-    */
-    Vector<Double> frequency_p;
+    Double starttime_p, stoptime_p, samplingfreq_p;
     
     /*!
-      \brief Storage for the Antenna-IDs
+      \brief length (number of samples) of the output data
     */
-    Vector<Int> AntIDs_p;
+    Int output_length_p;
 
-    
+    /*!
+      \brief time axis values of the output data
+    */
+    Vector<Double> times_p;
+
+   /*!
+      \brief the output data
+    */
+    Matrix<Double> data_p;
+      
+
   public:
     
     // ------------------------------------------------------------- Construction
@@ -89,25 +93,24 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Default constructor
     */
-    ApplyInstrumentEffects ();
-    
+    toLOPESgrid ();
+        
     // -------------------------------------------------------------- Destruction
 
     /*!
       \brief Destructor
     */
-    ~ApplyInstrumentEffects ();
-    
-    
+    ~toLOPESgrid ();
+        
     // --------------------------------------------------------------- Parameters
     
     /*!
       \brief Get the name of the class
       
-      \return className -- The name of the class, ApplyInstrumentEffects.
+      \return className -- The name of the class, toLOPESgrid.
     */
     std::string className () const {
-      return "ApplyInstrumentEffects";
+      return "toLOPESgrid";
     }
 
     /*!
@@ -122,80 +125,52 @@ namespace CR { // Namespace CR -- begin
     */
     void summary (std::ostream &os);    
 
-    // ------------------------------------------------------------ Input Methods
+    // ------------------------------------------------------------------ Methods
+    
+    /*!
+      \brief Clear the internal data-storage
+
+      \param nAntennas=30 - number of antennas (default: 30 for LOPES30)
+
+      \return ok -- Was operation successful? Returns <tt>True</tt> if yes
+    */
+    Bool reset(Int nAntennas=30);
 
     /*!
-      \brief Set the CalTableReader object
+      \brief Add frequency domain data to the internal dataset
       
-      \param newCTRead - pointer to a new and initialized CalTableReader object
-    */
-    void setCalTable(CalTableReader *newCTRead){
-      CTRead = newCTRead;
-    }
-    
-    /*!
-      \brief Set the Observation date for which the calibration data is taken from the CalTables
+      \param inFFT       - The frequency domain data to add
+      \param blocksize   - blocksize of the of the time-domain data
+      \param frequency   - frequency axis of the data
+      \param Centered=T  - the time-domain is centered around t=0
+      \param begintime   - time of the first sample (in seconds), unused if Centered==T
       
-      \param newObsDate - New value for the date
+      \return ok -- Was operation successful? Returns <tt>True</tt> if yes
     */
-    void setObsDate(uInt newObsDate){
-      date_p = newObsDate;
-    }
+    Bool AddFFTData(Matrix<DComplex> inFFT, Int blocksize, Vector<Double> frequency,
+		    Bool Centered=True, Double begintime=0.);
     
-    /*!
-      \brief Set the Antenna IDs
-      
-      \param newAntIDs - Vector with the Antenna IDs
-    */
-    void setAntennaIDs(Vector<Int> newAntIDs){
-      AntIDs_p = newAntIDs;
-    }
-    
-    /*!
-      \brief Set the frequency axis
-      
-      \param newFrequency - Vector with the frequency values
-    */
-    void setFreqAxis(Vector<Double> newFrequency){
-      frequency_p = newFrequency;
-    }
-    
-  
-    // ----------------------------------------------------------- Output Methods
 
     /*!
-      \brief Apply the effects to the frequency domain data
-      
-      \param input - Matrix with the frequency domain data
+      \brief Get the internal data
 
-      \return Matrix with the modified data
+      \return data - Matrix with the data
     */
-    Matrix<DComplex> ApplyEffects(Matrix<DComplex> input);
+    Matrix<Double> GetData() {
+      return data_p;
+    };
 
-    
+    /*!
+      \brief Get the time axis of the internal data
+
+      \return times - Vector with the time values
+    */
+    Vector<Double> GetTimes() {
+      return times_p;
+    };
+
   private:
-    
-    /*!
-      \brief Interpolater for the electronics-gain
-    */
-    CalTableInterpolater<Double> *CTIElGain;
-
-    /*!
-      \brief Interpolater for the Filter-Effects and Phase-Differences
-    */
-    CalTableInterpolater<DComplex> *CTIFilter, *CTIPhase;
-    
-    
-    /*!
-      \brief initialize the interpolaters
-    */    
-    Bool InitGPFInterpolaters();   
-
-    /*!
-      \brief initialization
-    */
-    void init(void);
-
+        
     /*!
       \brief Unconditional deletion 
     */
@@ -205,5 +180,5 @@ namespace CR { // Namespace CR -- begin
   
 } // Namespace CR -- end
 
-#endif /* APPLYINSTRUMENTEFFECTS_H */
+#endif /* TOLOPESGRID_H */
   

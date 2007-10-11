@@ -18,6 +18,7 @@ set (tests
   tFalckeGorhamGalacticNoise
   tLogfileName
   tSimulation2fftMatrix
+  ttoLOPESgrid
   )
 
 if (HAVE_HDF5)

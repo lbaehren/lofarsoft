@@ -304,8 +304,8 @@ namespace CR {  //  Namespace CR -- begin
   Bool Simulation2fftMatrix::CalcFreqeuncies(Double StepSize)
   {
     try {
-      Double samplingRate_p=1/StepSize;
-      Double freqResolution (samplingRate_p/(2*(fftlen_p-1)));
+      Double samplingRate_p=1./StepSize;
+      Double freqResolution (samplingRate_p/(2.*(fftlen_p-1.)));
       
       frequency_p.resize(fftlen_p);
       for (Int channel=0; channel<fftlen_p; channel++) {

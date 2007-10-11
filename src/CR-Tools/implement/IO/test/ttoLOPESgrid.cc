@@ -21,48 +21,46 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <IO/toLOPESgrid.h>
 #include <IO/ApplyInstrumentEffects.h>
 #include <scimath/Mathematics/FFTServer.h>
 
-using CR::CalTableReader;
-using CR::ImportSimulation;
-using CR::Simulation2fftMatrix;
-using CR::ApplyInstrumentEffects;  // Namespace usage
+using CR::toLOPESgrid;  // Namespace usage
+
+using namespace CR;
 
 /*!
-  \file tApplyInstrumentEffects.cc
+  \file ttoLOPESgrid.cc
 
   \ingroup IO
 
-  \brief A collection of test routines for the ApplyInstrumentEffects class
+  \brief A collection of test routines for the toLOPESgrid class
  
   \author Andreas Horneffer
  
-  \date 2007/09/21
+  \date 2007/10/10
 */
 
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test constructors for a new ApplyInstrumentEffects object
+  \brief Test constructors for a new toLOPESgrid object
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_ApplyInstrumentEffects ()
+int test_toLOPESgrid ()
 {
   int nofFailedTests (0);
   
   try {
     
-    
-    std::cout << "\n[test_ApplyInstrumentEffects]\n" << std::endl;
-    
+    std::cout << "\n[test_toLOPESgrid]\n" << std::endl;    
     std::cout << "[1] Testing default constructor ..." << std::endl;
-    ApplyInstrumentEffects newApplyInstrumentEffects;
-    newApplyInstrumentEffects.summary(); 
+    toLOPESgrid newtoLOPESgrid;
     
     std::cout << "[2] Opening Simulation ... " ;
     Simulation2fftMatrix sim2fft;
+    ApplyInstrumentEffects ApplyInstEff;
     ImportSimulation Sim;
     bool ok = Sim.openNewSimulation("30deg1e17_shift",
 				    "lopes30",
@@ -72,70 +70,46 @@ int test_ApplyInstrumentEffects ()
     std::cout << "[3] Generating and attaching CalTableReader object ... " << endl;;
     CalTableReader CTread("/home/horneff/lopescasa/data/LOPES/LOPES-CalTable");
     sim2fft.setCalTable(&CTread);
-    newApplyInstrumentEffects.setCalTable(&CTread);
+    ApplyInstEff.setCalTable(&CTread);
     sim2fft.setObsDate(1104580800);
-    newApplyInstrumentEffects.setObsDate(1104580800);
+    ApplyInstEff.setObsDate(1104580800);
 
 
     std::cout << "[4] Importing simulation ... " ;;     
     ok =  sim2fft.SimulationImport(&Sim);
     std::cout << " ok: " << ok << endl;
 
+    std::cout << "Simulation time steps:"<< Sim.getSamplingTimeScale() << "s." << endl;
+
     std::cout << "[5] Applying Instrument Effects ... " ;;   
-    newApplyInstrumentEffects.setAntennaIDs(sim2fft.getAntIDs());
-    newApplyInstrumentEffects.setFreqAxis(sim2fft.getFrequency());
+    ApplyInstEff.setAntennaIDs(sim2fft.getAntIDs());
+    ApplyInstEff.setFreqAxis(sim2fft.getFrequency());
     Matrix<DComplex> FFT;
-    FFT = newApplyInstrumentEffects.ApplyEffects(sim2fft.getfft());
-    
+    FFT = ApplyInstEff.ApplyEffects(sim2fft.getfft());
+    std::cout << " ok "  << endl;
 
-    std::cout << "[6] Generating output file ... " << endl;;
+    std::cout << "[6] Converting to LOPES grid ... " ;;   
+    ok = newtoLOPESgrid.AddFFTData(FFT,  sim2fft.getBlocklen(), sim2fft.getFrequency());
+    std::cout << " ok: " << ok << endl;
 
-    FILE *allout;
-    allout = fopen("tApplyInstrumentEffects_allfft.tab","w");
-    
+    std::cout << "[7] Generating output file ... " << endl;;
     std::cout << "   ... retrieving the data from the object," << std::endl;
-    Vector<Double> Frequencies = sim2fft.getFrequency();
-    Matrix<Double> absFFT = amplitude(FFT);
-    Matrix<Double> phaseFFT = phase(FFT);
-    Int fftlen = absFFT.nrow();
-    Int nants = absFFT.ncolumn();
-    Int i,j;
+    Matrix<Double> timedata;
+    Vector<Double> times;
+    Int i,j,blocklen_p,nants;
+
+    timedata = newtoLOPESgrid.GetData();
+    times = newtoLOPESgrid.GetTimes();
+    blocklen_p = times.nelements();
+    nants = timedata.ncolumn();
+
     std::cout << "   ... and dumping the data to file." << std::endl;
-    for (i=0; i< fftlen; i++) {
-      fprintf(allout,"\n %f ",Frequencies(i));
-      for (j=0; j<nants; j++) {
-	fprintf(allout,"\t %e %f ",absFFT(i,j),phaseFFT(i,j));
-	// fprintf(allout,"\t %f %f ",absFFT(i,j),phaseFFT(i,j)-phaseFFT(i,0));
-      };
-    };
-    fprintf(allout,"\n");
-    fclose(allout);
-    Int blocklen_p = sim2fft.getBlocklen();
-    absFFT.resize(blocklen_p,nants);
-    Vector<DComplex> in;
-    Vector<Double> out;
-
-    FFTServer<Double,DComplex> server(IPosition(1,blocklen_p),
-				      FFTEnums::REALTOCOMPLEX);
-
-    for (j=0; j<nants; j++) {
-      out.resize(blocklen_p);
-      server.fft(out, FFT.column(j));
-      absFFT.column(j) = out;
-    };
-    Double timestep,begintime;
-    timestep = 1./(max(Frequencies)*2.);
-    begintime = -0.5*timestep*blocklen_p; 
-    out.resize(blocklen_p);
-    for (i=0; i<blocklen_p; i++){
-      out(i) = begintime+i*timestep;
-    };
-
-    allout = fopen("tApplyInstrumentEffects_pulse.tab","w");
+    FILE *allout;
+    allout = fopen("ttoLOPESgrid_pulse.tab","w");
     for (i=0; i< blocklen_p; i++) {
-      fprintf(allout,"\n %e ",out(i));
+      fprintf(allout,"\n %f    ",times(i)*1e6);
       for (j=0; j<nants; j++) {
-	fprintf(allout,"\t %e ",absFFT(i,j));
+	fprintf(allout,"\t %e ",timedata(i,j));
       };
     };
     fprintf(allout,"\n");
@@ -143,7 +117,9 @@ int test_ApplyInstrumentEffects ()
 
 
 
-  } catch (std::string message) {
+
+
+ } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
@@ -159,7 +135,7 @@ int main ()
 
   // Test for the constructor(s)
   {
-    nofFailedTests += test_ApplyInstrumentEffects ();
+    nofFailedTests += test_toLOPESgrid ();
   }
 
   return nofFailedTests;
