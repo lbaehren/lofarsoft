@@ -75,6 +75,10 @@ if (HAVE_PGPLOT)
   list (APPEND cr_external_libraries ${PGPLOT_LIBRARIES})
 endif (HAVE_PGPLOT)
 
+if (HAVE_PNG)
+  list (APPEND cr_external_libraries ${PNG_LIBRARIES})
+endif (HAVE_PNG)
+
 ## Create the library
 
 add_library (cr ${cr_sources})
