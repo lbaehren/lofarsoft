@@ -15,8 +15,10 @@
 ## Standard locations where to look for required components
 
 set (bin_locations
+  ## local installation
   ./../release/bin
   ./../../release/bin
+  ## system-wide installation
   /usr/local/bin
   /usr/bin
   /usr/X11R6/bin
@@ -26,8 +28,10 @@ set (bin_locations
   )
 
 set (lib_locations
+  ## local installation
   ./../release/lib
   ./../../release/lib
+  ## system-wide installation
   /usr/local/lib
   /usr/lib
   /usr/X11R6/lib
@@ -50,17 +54,27 @@ set (include_locations
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-find_path (NUMARRAY_INCLUDES <header file(s)>
+find_path (NUMARRAY_INCLUDES numarray.h libnumarray.h
   PATHS ${include_locations}
-  PATH_SUFFIXES <optional path extension>
+  PATH_SUFFIXES
+  python
+  python/numarray
   NO_DEFAULT_PATH
   )
+
+## most likely we need to adjust the path in order to support include via
+## something like <numarray/numarray.h>
+
+string (REGEX REPLACE "include/python/numarray" "include/python" NUMARRAY_INCLUDES ${NUMARRAY_INCLUDES})
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-find_library (NUMARRAY_LIBRARIES <package name>
+find_library (NUMARRAY_LIBRARIES numarray
   PATHS ${lib_locations}
+  PATH_SUFFIXES
+  python
+  python/numarray
   NO_DEFAULT_PATH
   )
 
