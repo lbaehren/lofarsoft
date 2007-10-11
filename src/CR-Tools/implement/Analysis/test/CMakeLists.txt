@@ -40,16 +40,16 @@ endforeach (src)
 ## [1] Test working with ROOT histograms; this requires ROOT to be installed on
 ##     the system
 
-if (ROOT_LIBRARIES)
+if (ROOT_LIBRARIES AND PYTHON_LIBRARIES)
   ## build instructions
   add_executable (tHistograms tHistograms.cc)
   ## link instructions
-  target_link_libraries (tHistograms ${ROOT_LIBRARIES})
+  target_link_libraries (tHistograms ${ROOT_LIBRARIES} ${PYTHON_LIBRARIES})
   ## testing
   add_test (tHistograms tHistograms)
   ## installation instructions
   list (APPEND tests tHistograms)
-endif (ROOT_LIBRARIES)
+endif (ROOT_LIBRARIES AND PYTHON_LIBRARIES)
 
 ## [2] Test analysis of a LOPES-event; the programs requires both PGPlot and X11
 ##     for plotting the results, so it only makes sense building the executable
