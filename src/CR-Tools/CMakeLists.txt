@@ -77,7 +77,6 @@ find_library (libm m
 ## Standard CMake modules for location of packages
 
 find_package (Motif)
-find_package (PNG)
 find_package (TCL)
 find_package (X11)
 find_package (ZLIB)
@@ -135,6 +134,10 @@ if (cr_cmake)
   if (NOT HAVE_PGPLOT)
     include (${cr_cmake}/FindPGPLOT.cmake)
   endif (NOT HAVE_PGPLOT)
+  ## -- PNG ------------------
+  if (NOT HAVE_PNG)
+    include (${cr_cmake}/FindPNG.cmake)
+  endif (NOT HAVE_PNG)
   ## -- popt -----------------
   if (NOT HAVE_POPT)
     include (${cr_cmake}/FindPOPT.cmake)
