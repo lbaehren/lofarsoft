@@ -80,7 +80,7 @@ if (MATPLOTLIB_cmake)
   endif (NUMARRAY_LIBRARIES)
   ## --- PyGtk -----------------------------------
   set (PYGTK_FIND_QUIETLY 1)
-  include (${MATPLOTLIB_cmake}/FindPyGtk.cmake)
+  include (${MATPLOTLIB_cmake}/FindPyGTK.cmake)
   if (PYGTK_INCLUDES)
     include_directories (${PYGTK_INCLUDES})
   endif (PYGTK_INCLUDES)
