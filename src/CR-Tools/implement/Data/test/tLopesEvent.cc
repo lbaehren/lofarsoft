@@ -251,7 +251,6 @@ int test_Data (const char *name)
       //
       cout << antenna                 << "\t"
 	   << data                    << "\t"
-	   << (uint)data              << "\t"
 	   << data->data(0)           << "\t"
  	   << data->data(blocksize-1) << "\t"
 	   << sum                     << "\t"
