@@ -199,7 +199,7 @@ execute_process (
 
 execute_process (
   WORKING_DIRECTORY ${MATPLOTLIB_SOURCE_DIR}
-  COMMAND python setup.py install
+  COMMAND python setup.py install --home=${MATPLOTLIB_prefix}
   TIMEOUT 1800
   ERROR_VARIABLE error_install
   ERROR_FILE matplotlib_install.log
