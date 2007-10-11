@@ -57,12 +57,63 @@ find_path (MATPLOTLIB_cmake FindPython.cmake
   )
 
 if (MATPLOTLIB_cmake)
-  ## Python
+  ## --- Python ----------------------------------
   set (PYTHON_FIND_QUIETLY 1)
   include (${MATPLOTLIB_cmake}/FindPython.cmake)
-  if (HAVE_PYTHON)
+  ## includes
+  if (PYTHON_INCLUDES)
     include_directories (${PYTHON_INCLUDES})
-  endif (HAVE_PYTHON)
+  endif (PYTHON_INCLUDES)
+  ## linking
+  if (PYTHON_LIBRARIES)
+    list (APPEND matplotlib_link_libraries ${PYTHON_LIBRARIES})
+  endif (PYTHON_LIBRARIES)
+  ## --- Numarray --------------------------------
+  set (NUMARRAY_FIND_QUIETLY 1)
+  include (${MATPLOTLIB_cmake}/FindNumarray.cmake)
+  if (NUMARRAY_INCLUDES)
+    include_directories (${NUMARRAY_INCLUDES})
+  endif (NUMARRAY_INCLUDES)
+  ## linking
+  if (NUMARRAY_LIBRARIES)
+    list (APPEND matplotlib_link_libraries ${NUMARRAY_LIBRARIES})
+  endif (NUMARRAY_LIBRARIES)
+  ## --- PyGtk -----------------------------------
+  set (PYGTK_FIND_QUIETLY 1)
+  include (${MATPLOTLIB_cmake}/FindPyGtk.cmake)
+  if (PYGTK_INCLUDES)
+    include_directories (${PYGTK_INCLUDES})
+  endif (PYGTK_INCLUDES)
+  ## linking
+  if (PYGTK_LIBRARIES)
+    list (APPEND matplotlib_link_libraries ${PYGTK_LIBRARIES})
+  endif (PYGTK_LIBRARIES)
+  ## --- Glib ------------------------------------
+#  set (GLIB_FIND_QUIETLY 1)
+  include (${MATPLOTLIB_cmake}/FindGLIB.cmake)
+  if (GLIB_INCLUDES)
+    include_directories (${GLIB_INCLUDES})
+  endif (GLIB_INCLUDES)
+  ## linking
+  if (GLIB_LIBRARIES)
+    list (APPEND matplotlib_link_libraries ${GLIB_LIBRARIES})
+  endif (GLIB_LIBRARIES)
+  ## --- GTK -------------------------------------
+  set (GTK_FIND_QUIETLY 1)
+  include (${MATPLOTLIB_cmake}/FindGTK.cmake)
+  if (GTK_INCLUDES)
+    include_directories (${GTK_INCLUDES})
+  endif (GTK_INCLUDES)
+  ## linking
+  if (GTK_LIBRARIES)
+    list (APPEND matplotlib_link_libraries ${GTK_LIBRARIES})
+  endif (GTK_LIBRARIES)
+  ## --- Summary ---------------------------------
+  message (STATUS "Python   = ${HAVE_PYTHON}")
+  message (STATUS "Numarray = ${HAVE_NUMARRAY}")
+  message (STATUS "PyGtk    = ${HAVE_PYGTK}")
+  message (STATUS "GLib     = ${HAVE_GLIB}")
+  message (STATUS "GTK      = ${HAVE_GTK}")
 endif (MATPLOTLIB_cmake)
 
 ## <-- begin build condition --------------------------------------------------->
@@ -134,38 +185,21 @@ endif (MATPLOTLIB_CMAKE_BUILD)
 ## ------------------------------------------------------------------------------
 ## Run the configure script provided along with the distribution
 
-## [1] configure
-
-message (STATUS "Running the Python setup script for this module ...")
+## [1] build
 
 execute_process (
   WORKING_DIRECTORY ${MATPLOTLIB_SOURCE_DIR}
-  COMMAND python setup.py build install
-  TIMEOUT 1800
-  ERROR_VARIABLE error_configure
-  ERROR_FILE matplotlib_configure.log
-  )
-
-if (error_configure)
-  message (STATUS "There was an error running the matplotlib configure script!")
-  message (SEND_ERROR "${error_configure}")
-endif (error_configure)
-
-## [2] build
-
-execute_process (
-  WORKING_DIRECTORY ${MATPLOTLIB_SOURCE_DIR}
-  COMMAND python setup.py build --home=${MATPLOTLIB_prefix}
+  COMMAND python setup.py build
   TIMEOUT 1800
   ERROR_VARIABLE error_build
   ERROR_FILE matplotlib_build.log
   )
 
-## [3] install
+## [2] install
 
 execute_process (
   WORKING_DIRECTORY ${MATPLOTLIB_SOURCE_DIR}
-  COMMAND python setup.py install --home=${MATPLOTLIB_prefix}
+  COMMAND python setup.py install
   TIMEOUT 1800
   ERROR_VARIABLE error_install
   ERROR_FILE matplotlib_install.log
