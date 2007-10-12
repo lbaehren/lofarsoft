@@ -34,14 +34,14 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   analyseLOPESevent::analyseLOPESevent(){
-    pipeline_p = NULL;
-    lev_p = NULL;
+    pipeline_p  = NULL;
+    lev_p       = NULL;
     remoteStart = 1./4.;
-    remoteStop = 4./9.;
-    fitstart = -2e-6;
-    fitstop = -1.7e-6;
-    plotstart = -2.05e-6;
-    plotstop = -1.55e-6;
+    remoteStop  = 4./9.;
+    fitstart    = -2e-6;
+    fitstop     = -1.7e-6;
+    plotstart   = -2.05e-6;
+    plotstop    = -1.55e-6;
 
     clear();
   };
@@ -100,19 +100,26 @@ namespace CR { // Namespace CR -- begin
     return True;
   };
 
-
-
-  Record analyseLOPESevent::ProcessEvent(String evname, Double Az, Double El, Double distance, 
-					 Double XC, Double YC, Bool RotatePos, String PlotPrefix, 
-					 Bool generatePlots, Vector<Int> FlaggedAntIDs, 
-					 Bool verbose, Bool simplexFit, Double ExtraDelay){
+  Record analyseLOPESevent::ProcessEvent(String evname,
+					 Double Az,
+					 Double El,
+					 Double distance, 
+					 Double XC,
+					 Double YC,
+					 Bool RotatePos,
+					 String PlotPrefix, 
+					 Bool generatePlots,
+					 Vector<Int> FlaggedAntIDs, 
+					 Bool verbose,
+					 Bool simplexFit,
+					 Double ExtraDelay){
     Record erg;
     try {
       Int nsamples;
       Vector<Double> Times, ccBeam, xBeam, pBeam, tmpvec;
       Matrix<Double> TimeSeries;
       Record fiterg;
-
+      
       pipeline_p->setVerbosity(verbose);
       // initialize the Data Reader
       if (! lev_p->attachFile(evname) ){
@@ -123,7 +130,7 @@ namespace CR { // Namespace CR -- begin
 	cerr << "analyseLOPESevent::ProcessEvent: " << "Failed to initialize the DataReader!" << endl;
 	return Record();
       };
-
+      
       // Generate the antenna selection
       Vector <Bool> AntennaSelection;
       Int i,j,id,nants,nselants, nflagged=FlaggedAntIDs.nelements();
@@ -346,10 +353,9 @@ namespace CR { // Namespace CR -- begin
     return erg;
   }
 
-
-
-
-  Matrix<Double> analyseLOPESevent::toShower(Matrix<Double> & pos, Double Az, Double El){
+  Matrix<Double> analyseLOPESevent::toShower (Matrix<Double> & pos,
+					      Double Az,
+					      Double El){
     Matrix<Double> erg;
     try {
       if (pos.ncolumn() != 3) {
@@ -388,8 +394,11 @@ namespace CR { // Namespace CR -- begin
   };
   
 
-  Bool analyseLOPESevent::SimplexFit(Double &Az, Double &El, Double &distance, Double &center, 
-				     Vector<Bool> AntennaSelection ){    
+  Bool analyseLOPESevent::SimplexFit (Double &Az,
+				      Double &El,
+				      Double &distance,
+				      Double &center, 
+				      Vector<Bool> AntennaSelection ){    
     try {
       Int i,minpos,maxpos,niteration=0,oldminpos,nsameiter;
       Record erg;
@@ -540,8 +549,11 @@ namespace CR { // Namespace CR -- begin
     return True;
   };
 
-  Bool analyseLOPESevent::evaluateGrid(Double &Az, Double &El, Double &distance,
-				       Vector<Bool> AntennaSelection, Double *centerp){
+  Bool analyseLOPESevent::evaluateGrid (Double &Az,
+					Double &El,
+					Double &distance,
+					Vector<Bool> AntennaSelection,
+					Double *centerp){
     try {
       int estep,astep,arange,erange=3;
       Double maxaz=Az,maxel=El,maxheight=0.,maxcenter=-1.8e-6;
@@ -583,8 +595,11 @@ namespace CR { // Namespace CR -- begin
   };
   
   
-  Double analyseLOPESevent::getHeight(Double az, Double el, Double dist, 
-				      Vector<Bool> AntennaSelection, Double *centerp){
+  Double analyseLOPESevent::getHeight (Double az,
+				       Double el,
+				       Double dist, 
+				       Vector<Bool> AntennaSelection,
+				       Double *centerp){
     Double erg;
     try {
       Vector<Double> ccb,xb,pb;
@@ -631,10 +646,13 @@ namespace CR { // Namespace CR -- begin
     return erg;
   };
 
-  Bool analyseLOPESevent::SimplexFit2(Double &Az, Double &El, Double &distance, Double &center,
-				      Vector<Bool> AntennaSelection ){    
+  Bool analyseLOPESevent::SimplexFit2 (Double &Az,
+				       Double &El,
+				       Double &distance,
+				       Double &center,
+				       Vector<Bool> AntennaSelection ){    
     try {
-      Int i,minpos,maxpos,niteration=0,oldminpos,nsameiter;
+      Int i(0), minpos(0), maxpos(0), niteration(0), oldminpos(0), nsameiter(0);
       Record erg;
       Vector<Double> azs(5), els(5), dists(5), cents(5), height(5,0.);
       Double newaz, newel, newdist, newcent, newheight, nnewheight;
@@ -781,9 +799,12 @@ namespace CR { // Namespace CR -- begin
     return True;
   };
 
-  Double analyseLOPESevent::getHeight2(Double az, Double el, Double dist, Double Center,
-				       Vector<Bool> AntennaSelection){
-    Double erg;
+  Double analyseLOPESevent::getHeight2 (Double az,
+					Double el,
+					Double dist,
+					Double Center,
+					Vector<Bool> AntennaSelection){
+    Double erg (0);
     try {
       Vector<Double> xbeam,time,CenterVec(1),ergVec(1);
       Bool clipping=True;

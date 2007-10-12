@@ -55,10 +55,8 @@ endif (NOT CR_VERBOSE_CONFIGURE)
 ## -----------------------------------------------------------------------------
 ## Subdirectories
 
-subdirs (
-  implement
-  apps
-  )
+add_subdirectory (implement)  # Sources to build the library
+add_subdirectory (apps)       # Applications
 
 if (CR_BUILD_TESTS)
   subdirs (test)
@@ -321,17 +319,20 @@ find_path (prefix release_area.txt
   )
 
 if (prefix)
-  message (STATUS "[CR] Installation area located.")
   set (CMAKE_INSTALL_PREFIX ${prefix}) 
 endif (prefix)
 
 ## ------------------------------------------------------------------------------
 ## Configuration summary
 
+message (STATUS "+----------------------------------------------------------+")
+message (STATUS "| CR-Tools: Summary of configuration settings              |")
+message (STATUS "+----------------------------------------------------------+")
 message (STATUS "CMAKE_SYSTEM .......... : ${CMAKE_SYSTEM}")
 message (STATUS "CMAKE_SYSTEM_PROCESSOR  : ${CMAKE_SYSTEM_PROCESSOR}")
 message (STATUS "CMAKE_SYSTEM_64BIT .....: ${CMAKE_SYSTEM_64BIT}")
 message (STATUS "CMAKE_SYSTEM_BIG_ENDIAN : ${CMAKE_SYSTEM_BIG_ENDIAN}")
+message (STATUS "CMAKE_INSTALL_PREFIX .. : ${CMAKE_INSTALL_PREFIX}")
 message (STATUS "BLITZ ................. : ${HAVE_BLITZ}")
 message (STATUS "CASA .................. : ${HAVE_CASA}")
 message (STATUS "CASACORE .............. : ${HAVE_CASACORE}")
@@ -348,3 +349,4 @@ message (STATUS "POPT .................. : ${HAVE_POPT}")
 message (STATUS "Python ................ : ${HAVE_PYTHON}")
 message (STATUS "ROOT .................. : ${HAVE_ROOT}")
 message (STATUS "WCSLIB ................ : ${HAVE_WCSLIB}")
+message (STATUS "+----------------------------------------------------------+")

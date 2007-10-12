@@ -47,18 +47,18 @@ usg_pythonincludes = os.path.join(os.getcwd(),'../../release/include/python')
 
 basedir = {
     'win32'  : ['win32_static',],
-    'linux2' : ['/usr/local', '/usr',],
-    'linux'  : ['/usr/local', '/usr',],
-    'cygwin' : ['/usr/local', '/usr',],
+    'linux2' : ['/usr/local', '/usr', os.path.join(os.getcwd(),'../../release')],
+    'linux'  : ['/usr/local', '/usr', os.path.join(os.getcwd(),'../../release')],
+    'cygwin' : ['/usr/local', '/usr', os.path.join(os.getcwd(),'../../release')],
     'darwin' : ['/sw/lib/freetype2', '/sw/lib/freetype219', '/usr/local',
-                '/usr', '/sw', '/Users/lars/Code/lofar/usg/release/include/python'],
-    'freebsd4' : ['/usr/local', '/usr'],
-    'freebsd5' : ['/usr/local', '/usr'],
-    'freebsd6' : ['/usr/local', '/usr'],
-    'sunos5' : [os.getenv('MPLIB_BASE') or '/usr/local',],
-    'gnukfreebsd5' : ['/usr/local', '/usr'],
-    'gnukfreebsd6' : ['/usr/local', '/usr'],
-    'aix5' : ['/usr/local'],
+                '/usr', '/sw', os.path.join(os.getcwd(),'../../release')],
+    'freebsd4' : ['/usr/local', '/usr', os.path.join(os.getcwd(),'../../release')],
+    'freebsd5' : ['/usr/local', '/usr', os.path.join(os.getcwd(),'../../release')],
+    'freebsd6' : ['/usr/local', '/usr', os.path.join(os.getcwd(),'../../release')],
+    'sunos5' : [os.getenv('MPLIB_BASE') or '/usr/local', os.path.join(os.getcwd(),'../../release')],
+    'gnukfreebsd5' : ['/usr/local', '/usr', os.path.join(os.getcwd(),'../../release')],
+    'gnukfreebsd6' : ['/usr/local', '/usr', os.path.join(os.getcwd(),'../../release')],
+    'aix5' : ['/usr/local', os.path.join(os.getcwd(),'../../release')],
 }
 
 import sys, os, stat

@@ -291,11 +291,13 @@ case $param_packageName in
 		build_package dal src/DAL
 		## Post-installation testing
 		echo ""
-		echo "--------------------------------------------------";
+		echo "------------------------------------------------------------";
+		echo ""
 		echo "[`date`] To test the DAL installation run:"
 		echo ""
 		echo "  cd build/dal; ctest"
-		echo "--------------------------------------------------";
+		echo ""
+		echo "------------------------------------------------------------";
 		echo ""
     ;;
     cr)
