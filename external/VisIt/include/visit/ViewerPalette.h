@@ -1,1 +1,0 @@
-../../viewer/main/ViewerPalette.h

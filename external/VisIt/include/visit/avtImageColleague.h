@@ -1,1 +1,0 @@
-../../components/VisWindow/Colleagues/avtImageColleague.h

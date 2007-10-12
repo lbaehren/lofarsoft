@@ -1,1 +1,0 @@
-../../components/VisWindow/Interactors/NavigateCurve.h

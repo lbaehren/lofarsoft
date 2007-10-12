@@ -1,4 +1,0 @@
-Constant: DEFAULT_DURATION
-Declaration: static const int DEFAULT_DURATION;
-Definition: const int StatusAttributes::DEFAULT_DURATION = 5000;
-

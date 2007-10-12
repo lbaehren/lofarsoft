@@ -1,1 +1,0 @@
-../../components/MIR/Zoo/ZooMIR.h

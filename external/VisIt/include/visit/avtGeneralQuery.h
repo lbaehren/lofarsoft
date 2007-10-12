@@ -1,1 +1,0 @@
-../../components/Queries/Abstract/avtGeneralQuery.h

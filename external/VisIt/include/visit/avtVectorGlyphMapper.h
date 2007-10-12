@@ -1,1 +1,0 @@
-../../components/Plotter/avtVectorGlyphMapper.h

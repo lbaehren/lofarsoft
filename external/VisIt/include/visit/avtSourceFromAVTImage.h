@@ -1,1 +1,0 @@
-../../components/Pipeline/Sources/avtSourceFromAVTImage.h

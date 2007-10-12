@@ -1,1 +1,0 @@
-../../components/Queries/Pick/avtActualZoneCoordsQuery.h

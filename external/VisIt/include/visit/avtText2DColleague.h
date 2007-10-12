@@ -1,1 +1,0 @@
-../../components/VisWindow/Colleagues/avtText2DColleague.h

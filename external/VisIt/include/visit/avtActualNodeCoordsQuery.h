@@ -1,1 +1,0 @@
-../../components/Queries/Pick/avtActualNodeCoordsQuery.h

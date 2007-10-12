@@ -1,1 +1,0 @@
-../../components/Pipeline/Pipeline/avtImageReader.h

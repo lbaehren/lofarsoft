@@ -1,1 +1,0 @@
-../../components/Plotter/avtImageDrawable.h

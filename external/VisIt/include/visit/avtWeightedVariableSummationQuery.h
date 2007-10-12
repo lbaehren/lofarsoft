@@ -1,1 +1,0 @@
-../../components/Queries/Queries/avtWeightedVariableSummationQuery.h

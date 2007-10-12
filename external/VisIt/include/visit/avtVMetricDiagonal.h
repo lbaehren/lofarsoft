@@ -1,1 +1,0 @@
-../../components/Expressions/MeshQuality/avtVMetricDiagonal.h

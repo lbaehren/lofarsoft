@@ -1,1 +1,0 @@
-../../components/Database/Formats/avtSTSDFileFormatInterface.h
