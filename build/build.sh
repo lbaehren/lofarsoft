@@ -272,7 +272,7 @@ case $param_packageName in
     ;;
     vtk)
 	echo "[`date`] Selected package VTK"
-	build_package vtk external/vtk
+	echo "-- No configuration and build support available yet!"
     ;;
     wcslib)
 	echo "[`date`] Selected package WCSLIB"

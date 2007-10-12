@@ -47,9 +47,10 @@ option (BOOST_filesystem "Search for Boost++ module boost_filesystem ?" 1)
 option (BOOST_iostreams "Search for Boost++ module boost_iostreams ?" 1)
 option (BOOST_program_options "Search for Boost++ module boost_program_options ?" 1)
 option (BOOST_regex "Search for Boost++ module boost_regex ?" 1)
+option (BOOST_test_exec_monitor "Search for Boost++ module boost_test_exec_monitor ?" 1)
 option (BOOST_wave "Search for Boost++ module boost_wave ?" 1)
 
-option (BOOST_pythonOnly "Search for Boost++ module boost_regex ?" 0)
+option (BOOST_pythonOnly "Only search for Boost++ Python module ?" 0)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files and the various module libraries
