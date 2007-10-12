@@ -42,13 +42,13 @@ set (lib_locations
 ## -----------------------------------------------------------------------------
 ## Options
 
-option (BOOST_date_time "Search for Boost++ module boost_date_time ?" 1)
-option (BOOST_filesystem "Search for Boost++ module boost_filesystem ?" 1)
-option (BOOST_iostreams "Search for Boost++ module boost_iostreams ?" 1)
-option (BOOST_program_options "Search for Boost++ module boost_program_options ?" 1)
-option (BOOST_regex "Search for Boost++ module boost_regex ?" 1)
-option (BOOST_test_exec_monitor "Search for Boost++ module boost_test_exec_monitor ?" 1)
-option (BOOST_wave "Search for Boost++ module boost_wave ?" 1)
+option (BOOST_date_time "Search for Boost++ module date_time ?" 1)
+option (BOOST_filesystem "Search for Boost++ module filesystem ?" 1)
+option (BOOST_iostreams "Search for Boost++ module iostreams ?" 1)
+option (BOOST_program_options "Search for Boost++ module program_options ?" 1)
+option (BOOST_regex "Search for Boost++ module regex ?" 1)
+option (BOOST_test_exec_monitor "Search for Boost++ module test_exec_monitor ?" 0)
+option (BOOST_wave "Search for Boost++ module wave ?" 1)
 
 option (BOOST_pythonOnly "Only search for Boost++ Python module ?" 0)
 
@@ -70,6 +70,7 @@ if (BOOST_pythonOnly)
   set (BOOST_iostreams 0)
   set (BOOST_program_options 0)
   set (BOOST_regex 0)
+  set (BOOST_test_exec_monitor 0)
 
 else (BOOST_pythonOnly)
 
