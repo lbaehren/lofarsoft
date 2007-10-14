@@ -1,7 +1,7 @@
 
-##------------------------------------------------------------------------------
+##-------------------------------------------------------------------------------
 ## $Id::                                                                        $
-##------------------------------------------------------------------------------
+##-------------------------------------------------------------------------------
 
 ## Name of the project
 project (CR)
@@ -9,7 +9,7 @@ project (CR)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.4)
 
-## -----------------------------------------------------------------------------
+## ------------------------------------------------------------------------------
 ## User defined build/install options
 
 option (CR_BUILD_TESTS "Build the test programs?" 1)
@@ -52,16 +52,6 @@ endif (NOT CR_VERBOSE_CONFIGURE)
 
 # --> handled below
 
-## -----------------------------------------------------------------------------
-## Subdirectories
-
-add_subdirectory (implement)  # Sources to build the library
-add_subdirectory (apps)       # Applications
-
-if (CR_BUILD_TESTS)
-  subdirs (test)
-endif (CR_BUILD_TESTS)
-
 ## =============================================================================
 ##
 ##  External dependencies
@@ -93,18 +83,18 @@ find_path (cr_cmake FindBlitz.cmake FindCASA.cmake FindCFITSIO.cmake
   )
 
 if (cr_cmake)
-  ## Blitz++
+  ## --- Blitz++ ---------------------------------
   if (NOT HAVE_BLITZ)
     include (${cr_cmake}/FindBlitz.cmake)
   endif (NOT HAVE_BLITZ)
   if (HAVE_BLITZ)
     add_definitions (-DHAVE_BLITZ)
   endif (HAVE_BLITZ)
-  ## CFITSIO
+  ## --- CFITSIO ---------------------------------
   if (NOT HAVE_CFITSIO)
     include (${cr_cmake}/FindCFITSIO.cmake)
   endif (NOT HAVE_CFITSIO)
-  ## FFTW3
+  ## --- FFTW3 -----------------------------------
   if (NOT HAVE_FFTW3)
     include (${cr_cmake}/FindFFTW3.cmake)
   endif (NOT HAVE_FFTW3)
@@ -202,8 +192,6 @@ endif (CR_GLISH_SUPPORT)
 
 if (HAVE_CASA OR HAVE_CASACORE)
   add_definitions (
-    -ftemplate-depth-100
-    -fPIC
     -DWITH_CASA
     # -- compiler flags utilized in the source code --
     -DAIPS_STDLIB
@@ -216,7 +204,7 @@ if (HAVE_CASA OR HAVE_CASACORE)
       -DAIPS_DARWIN
       )
   ELSE (APPLE)
-    ADD_DEFINITIONS (-DAIPS_LINUX)
+    add_definitions (-DAIPS_LINUX)
   ENDIF (APPLE)
   ## Platform test 32/64 bit ------------------------------
   set (CMAKE_SYSTEM_64BIT 0)
@@ -254,24 +242,26 @@ include_directories (
   ${CR_SOURCE_DIR}/implement
   ${CR_SOURCE_DIR}/apps
   ${CR_SOURCE_DIR}/test
-  ${DAL_INCLUDES}
   )
+
+if (DAL_INCLUDES)
+  include_directories (${DAL_INCLUDES})
+endif (DAL_INCLUDES)
 
 ## external components
 
 if (BLITZ_INCLUDES)
   include_directories (${BLITZ_INCLUDES})
+  add_definitions (-DHAVE_BLITZ)
 endif (BLITZ_INCLUDES)
 
-if (CR_GLISH_SUPPORT)
-  if (HAVE_CASA)
-    include_directories (${CASA_INCLUDES})
-  endif (HAVE_CASA)
-else (CR_GLISH_SUPPORT)
-  if (HAVE_CASACORE)
-    include_directories (${CASACORE_INCLUDES})
-  endif (HAVE_CASACORE)
-endif (CR_GLISH_SUPPORT)
+if (CASA_INCLUDES)
+  include_directories (${CASA_INCLUDES})
+endif (CASA_INCLUDES)
+
+if (CASACORE_INCLUDES)
+  include_directories (${CASACORE_INCLUDES})
+endif (CASACORE_INCLUDES)
 
 if (CFITSIO_INCLUDES)
   include_directories (${CFITSIO_INCLUDES})
@@ -323,30 +313,48 @@ if (prefix)
 endif (prefix)
 
 ## ------------------------------------------------------------------------------
+## Subdirectories
+
+add_subdirectory (implement)  # Sources to build the library
+add_subdirectory (apps)       # Applications
+
+if (CR_BUILD_TESTS)
+  add_subdirectory (test)
+endif (CR_BUILD_TESTS)
+
+## ------------------------------------------------------------------------------
 ## Configuration summary
 
-message (STATUS "+----------------------------------------------------------+")
-message (STATUS "| CR-Tools: Summary of configuration settings              |")
-message (STATUS "+----------------------------------------------------------+")
-message (STATUS "CMAKE_SYSTEM .......... : ${CMAKE_SYSTEM}")
-message (STATUS "CMAKE_SYSTEM_PROCESSOR  : ${CMAKE_SYSTEM_PROCESSOR}")
-message (STATUS "CMAKE_SYSTEM_64BIT .....: ${CMAKE_SYSTEM_64BIT}")
-message (STATUS "CMAKE_SYSTEM_BIG_ENDIAN : ${CMAKE_SYSTEM_BIG_ENDIAN}")
-message (STATUS "CMAKE_INSTALL_PREFIX .. : ${CMAKE_INSTALL_PREFIX}")
-message (STATUS "BLITZ ................. : ${HAVE_BLITZ}")
-message (STATUS "CASA .................. : ${HAVE_CASA}")
-message (STATUS "CASACORE .............. : ${HAVE_CASACORE}")
-message (STATUS "CFITSIO ............... : ${HAVE_CFITSIO}")
-message (STATUS "FFTW3 ................. : ${HAVE_FFTW3}")
-message (STATUS "G2C ................... : ${HAVE_G2C}")
-message (STATUS "Glish ................. : ${HAVE_GLISH}")
-message (STATUS "GSL ................... : ${HAVE_GSL}")
-message (STATUS "HDF5 .................. : ${HAVE_HDF5}")
-message (STATUS "LAPACK ................ : ${HAVE_LAPACK}")
-message (STATUS "PGPLOT ................ : ${HAVE_PGPLOT}")
-message (STATUS "PNG ................... : ${HAVE_PNG}")
-message (STATUS "POPT .................. : ${HAVE_POPT}")
-message (STATUS "Python ................ : ${HAVE_PYTHON}")
-message (STATUS "ROOT .................. : ${HAVE_ROOT}")
-message (STATUS "WCSLIB ................ : ${HAVE_WCSLIB}")
-message (STATUS "+----------------------------------------------------------+")
+message (STATUS "+============================================================+")
+message (STATUS "| CR-Tools: Summary of configuration settings                |")
+message (STATUS "+------------------------------------------------------------+")
+message (STATUS " CMAKE_SYSTEM ........... : ${CMAKE_SYSTEM}")
+message (STATUS " CMAKE_SYSTEM_PROCESSOR . : ${CMAKE_SYSTEM_PROCESSOR}")
+message (STATUS " CMAKE_SYSTEM_64BIT ......: ${CMAKE_SYSTEM_64BIT}")
+message (STATUS " CMAKE_SYSTEM_BIG_ENDIAN  : ${CMAKE_SYSTEM_BIG_ENDIAN}")
+message (STATUS " BLITZ .................. : ${HAVE_BLITZ}")
+message (STATUS " CASA ................... : ${HAVE_CASA}")
+message (STATUS " CASACORE ............... : ${HAVE_CASACORE}")
+message (STATUS " CFITSIO ................ : ${HAVE_CFITSIO}")
+message (STATUS " FFTW3 .................. : ${HAVE_FFTW3}")
+message (STATUS " G2C .................... : ${HAVE_G2C}")
+message (STATUS " Glish .................. : ${HAVE_GLISH}")
+message (STATUS " GSL .................... : ${HAVE_GSL}")
+message (STATUS " HDF5 ................... : ${HAVE_HDF5}")
+message (STATUS " LAPACK ................. : ${HAVE_LAPACK}")
+message (STATUS " PGPLOT ................. : ${HAVE_PGPLOT}")
+message (STATUS " PNG .................... : ${HAVE_PNG}")
+message (STATUS " POPT ................... : ${HAVE_POPT}")
+message (STATUS " Python ................. : ${HAVE_PYTHON}")
+message (STATUS " ROOT ................... : ${HAVE_ROOT}")
+message (STATUS " WCSLIB ................. : ${HAVE_WCSLIB}")
+message (STATUS "+------------------------------------------------------------+")
+message (STATUS " Source directory ....... : ${CR_SOURCE_DIR}")
+message (STATUS " Installation location .. : ${CMAKE_INSTALL_PREFIX}")
+message (STATUS " Build the test programs  : ${CR_BUILD_TESTS}")
+message (STATUS " Enable testing ......... : ${CR_ENABLE_TESTING}")
+message (STATUS " Support for Glish ...... : ${CR_GLISH_SUPPORT}")
+message (STATUS " Support for Python ..... : ${CR_PYTHON_SUPPORT}")
+message (STATUS " Print debugging messages : ${CR_DEBUGGING_MESSAGES}")
+message (STATUS " Verbose configuration .. : ${CR_VERBOSE_CONFIGURE}")
+message (STATUS "+============================================================+")

@@ -51,10 +51,8 @@ endif (NOT DSP_VERBOSE_CONFIGURE)
 ## -----------------------------------------------------------------------------
 ## Subdirectories
 
-subdirs (
-  implement
-  apps
-  )
+add_subdirectory (implement)
+add_subdirectory (apps)
 
 ## =============================================================================
 ##
@@ -109,10 +107,14 @@ if (DSP_cmake)
   if (NOT HAVE_GSL)
     include (${DSP_cmake}/FindGSL.cmake)
   endif (NOT HAVE_GSL)
-  ## LAPACK
+  ## --- LAPACK ----------------------------------
   if (NOT HAVE_LAPACK)
     include (${DSP_cmake}/FindLAPACK.cmake)
   endif (NOT HAVE_LAPACK)
+  ## --- Matlab ----------------------------------
+  if (NOT HAVE_MATLAB)
+    include (${DSP_cmake}/FindMatlab.cmake)
+  endif (NOT HAVE_MATLAB)
   ## -- PGPlot ---------------
   if (NOT HAVE_PGPLOT)
     include (${DSP_cmake}/FindPGPLOT.cmake)
@@ -175,7 +177,6 @@ include_directories (
   ${DSP_SOURCE_DIR}/apps
   ${DSP_SOURCE_DIR}/test
   ${DAL_INCLUDES}
-  ${PGPLOT_INCLUDES}
   )
 
 ## external components
@@ -195,6 +196,10 @@ endif (HAVE_CASACORE)
 if (CFITSIO_INCLUDES)
   include_directories (${CFITSIO_INCLUDES})
 endif (CFITSIO_INCLUDES)
+
+if (MATLAB_INCLUDES)
+  include_directories (${MATLAB_INCLUDES})
+endif (MATLAB_INCLUDES)
 
 if (PGPLOT_INCLUDES)
   include_directories (${PGPLOT_INCLUDES})
@@ -234,7 +239,7 @@ find_path (prefix release_area.txt
   )
 
 if (prefix)
-  message (STATUS "[CR] Installation area located.")
+  message (STATUS "[DSP] Installation area located.")
   set (CMAKE_INSTALL_PREFIX ${prefix}) 
 endif (prefix)
 
@@ -246,11 +251,11 @@ message (STATUS "CMAKE_SYSTEM_PROCESSOR  : ${CMAKE_SYSTEM_PROCESSOR}")
 message (STATUS "CMAKE_SYSTEM_64BIT .....: ${CMAKE_SYSTEM_64BIT}")
 message (STATUS "CMAKE_SYSTEM_BIG_ENDIAN : ${CMAKE_SYSTEM_BIG_ENDIAN}")
 message (STATUS "BLITZ ................. : ${HAVE_BLITZ}")
-message (STATUS "CASA .................. : ${HAVE_CASA}")
 message (STATUS "CASACORE .............. : ${HAVE_CASACORE}")
 message (STATUS "CFITSIO ............... : ${HAVE_CFITSIO}")
 message (STATUS "FFTW3 ................. : ${HAVE_FFTW3}")
 message (STATUS "GSL ................... : ${HAVE_GSL}")
 message (STATUS "LAPACK ................ : ${HAVE_LAPACK}")
+message (STATUS "Matlab ................ : ${HAVE_MATLAB}")
 message (STATUS "PGPLOT ................ : ${HAVE_PGPLOT}")
 message (STATUS "WCSLIB ................ : ${HAVE_WCSLIB}")

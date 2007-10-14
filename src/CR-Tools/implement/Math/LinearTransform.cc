@@ -329,7 +329,7 @@ namespace CR { // Namespace CR -- begin
       std::cerr << "[LinearTransform::setMatrix] Wrong shape of input array!"
 		<< std::endl;
       std::cerr << " -- Expected shape : " << showShape() << std::endl;
-      std::cerr << " -- Provided shape : " << shape   << std::endl;
+      std::cerr << " -- Provided shape : " << shape       << std::endl;
     }
     
     return status;

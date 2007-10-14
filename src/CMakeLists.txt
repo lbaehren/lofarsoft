@@ -1,10 +1,10 @@
 PROJECT (LUS)
 
 SUBDIRS (
-  BDSM
-  CR-Tools
   DAL
-  DSP
+#  BDSM
+#  CR-Tools
+#  DSP
   Timba
   VLT
   )
