@@ -10,6 +10,11 @@
 
 add_subdirectory (aux_)
 add_subdirectory (limits)
+add_subdirectory (list)
+add_subdirectory (map)
+add_subdirectory (math)
+add_subdirectory (multiset)
+add_subdirectory (set)
 add_subdirectory (vector)
 
 ## ------------------------------------------------------------------------------

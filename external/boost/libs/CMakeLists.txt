@@ -1,4 +1,8 @@
 
+if (BOOST_LIB_MPL)
+  add_subdirectory (mpl)
+endif (BOOST_LIB_MPL)
+
 if (BOOST_LIB_PYTHON)
   add_subdirectory (python)
 endif (BOOST_LIB_PYTHON)

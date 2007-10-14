@@ -26,6 +26,7 @@ option (BOOST_CMAKE_BUILD "Use CMake port to configure and build Boost?" 1)
 
 ## Selective building of the Boost++ libraries
 
+option (BOOST_LIB_MPL "Build libboost_mpl" 0)
 option (BOOST_LIB_PYTHON "Build libboost_python" 1)
 option (BOOST_LIB_REGEX "Build libboost_regex" 0)
 option (BOOST_LIB_SIGNALS "Build libboost_signals" 0)
