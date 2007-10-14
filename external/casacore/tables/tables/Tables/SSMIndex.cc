@@ -22,7 +22,7 @@
 //#                        National Radio Astronomy Observatory
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
-//# $Id: SSMIndex.cc 18633 2005-05-09 08:41:58Z wbrouw $   
+//# $Id: SSMIndex.cc 20129 2007-10-11 06:56:36Z gervandiepen $   
 
 #include <tables/Tables/SSMIndex.h>
 #include <tables/Tables/SSMBase.h>
@@ -133,16 +133,18 @@ void SSMIndex::addRow (uInt aNrRows)
     return;
   }
    
-  // add extra row. If nrrows > itsLastRow.nelements take extra 64 rows
-  // this is cheaper in time. Take in account that NrRows can be bigger then 
-  // itsRowsPerBucket !
+  // add extra row. If nrrows > itsLastRow.nelements reserve extra rows
+  // which is cheaper.
+  // Take in account that NrRows can be bigger then itsRowsPerBucket !
   
   uInt aNr = (aNrRows+itsRowsPerBucket-1) / itsRowsPerBucket;
   
   uInt aNewNr = itsNUsed+aNr;
-  if (aNewNr > itsLastRow.nelements()) { 
-    if (aNewNr < itsLastRow.nelements()+64) {
-      aNewNr = itsLastRow.nelements()+64;
+  uInt aOldNr = itsLastRow.nelements();
+  if (aNewNr > aOldNr) { 
+    uInt newSize = aOldNr*2;
+    if (aNewNr < newSize) {
+      aNewNr = newSize;
     }
     itsLastRow.resize (aNewNr);
     itsBucketNumber.resize(aNewNr);
