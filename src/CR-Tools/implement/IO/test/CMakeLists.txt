@@ -19,6 +19,7 @@ set (tests
   tLogfileName
   tSimulation2fftMatrix
   ttoLOPESgrid
+  tTSmatrix2Event
   )
 
 if (HAVE_HDF5)
