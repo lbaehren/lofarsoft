@@ -5,8 +5,7 @@
 # - Check for the presence of HDF5
 #
 # The following variables are set when HDF5 is found:
-#  HAVE_HDF5       = Set to true, if all components of HDF5
-#                          have been found.
+#  HAVE_HDF5       = Set to true, if all components of HDF5 have been found.
 #  HDF5_INCLUDES   = Include path for the header files of HDF5
 #  HDF5_LIBRARIES  = Link these to use HDF5
 
@@ -76,7 +75,7 @@ find_path (HDF5_INCLUDES ${hdf5_headers}
 
 ## [1] Core library
 
-FIND_LIBRARY (libhdf5
+find_library (libhdf5
   NAMES hdf5
   PATHS ${lib_locations}
   PATH_SUFFIXES hdf5
@@ -135,4 +134,6 @@ endif (HAVE_HDF5)
 mark_as_advanced (
   HDF5_INCLUDES
   HDF5_LIBRARIES
+  libhdf5
+  libhdf5_hl
 )

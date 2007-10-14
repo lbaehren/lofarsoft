@@ -7,7 +7,7 @@
 # The following variables are set when Blitz++ is found:
 #  HAVE_BLITZ      = True when both Blitz++ header and include files are 
 #                    found; if any of them is missing, HAVE_BLITZ=false
-#  BLITZ_INCLUDES  = the path to where the boost include files are.
+#  BLITZ_INCLUDES  = the path to where the Blitz++ include files are.
 #  BLITZ_LIBRARIES = Link these to use Blitz++
 
 #SET (BLITZ_VERSION "1_33_1")

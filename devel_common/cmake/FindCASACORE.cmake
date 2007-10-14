@@ -420,3 +420,22 @@ set (CASA_INCLUDES ${CASACORE_INCLUDES})
 
 set (CASA_LIBRARIES "")
 set (CASA_LIBRARIES ${CASACORE_LIBRARIES})
+
+## ------------------------------------------------------------------------------
+## Variables only to be displayed in advanced mode
+
+mark_as_advanced (
+  CASACORE_casa
+  CASACORE_tables
+  CASACORE_scimath
+  CASACORE_ms
+  CASACORE_msfits
+  CASACORE_msvis
+  CASACORE_images
+  CASACORE_components
+  CASACORE_coordinates
+  CASACORE_fits
+  CASACORE_lattices
+  CASACORE_mirlib
+  CASACORE_measures
+  )

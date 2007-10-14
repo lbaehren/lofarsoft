@@ -40,24 +40,31 @@ set (lib_locations
   )
 
 ## -----------------------------------------------------------------------------
-## Options
+## Control parameters
 
-option (BOOST_date_time "Search for Boost++ module date_time ?" 1)
-option (BOOST_filesystem "Search for Boost++ module filesystem ?" 1)
-option (BOOST_iostreams "Search for Boost++ module iostreams ?" 1)
-option (BOOST_program_options "Search for Boost++ module program_options ?" 1)
-option (BOOST_regex "Search for Boost++ module regex ?" 1)
-option (BOOST_test_exec_monitor "Search for Boost++ module test_exec_monitor ?" 0)
-option (BOOST_wave "Search for Boost++ module wave ?" 1)
+## Switches for the individual Boost++ libraries
 
-option (BOOST_pythonOnly "Only search for Boost++ Python module ?" 0)
+set (BOOST_FIND_date_time ON)
+set (BOOST_FIND_filesystem ON)
+set (BOOST_FIND_iostreams ON)
+set (BOOST_FIND_program_options ON)
+set (BOOST_python ON)
+set (BOOST_FIND_regex ON)
+set (BOOST_FIND_serialization ON)
+set (BOOST_FIND_signals ON)
+set (BOOST_FIND_thread ON)
+set (BOOST_FIND_wave ON)
+
+## Switches handling multiple libraries
+
+set (BOOST_pythonOnly OFF)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files and the various module libraries
 
 set (boost_libraries
-  boost_python
-)
+  boost_unit_test_framework
+  )
 
 ## handle optional Boost components
 
@@ -65,48 +72,59 @@ if (BOOST_pythonOnly)
 
   message (STATUS "[FindBoost] Configuration for boost_python only.")
 
-  set (BOOST_date_time 0)
-  set (BOOST_filesystem 0)
-  set (BOOST_iostreams 0)
-  set (BOOST_program_options 0)
-  set (BOOST_regex 0)
-  set (BOOST_test_exec_monitor 0)
+  set (BOOST_python 1)
 
-else (BOOST_pythonOnly)
+  set (BOOST_FIND_date_time 0)
+  set (BOOST_FIND_filesystem 0)
+  set (BOOST_FIND_iostreams 0)
+  set (BOOST_FIND_program_options 0)
+  set (BOOST_FIND_regex 0)
+  set (BOOST_FIND_serialization 0)
+  set (BOOST_FIND_signals 0)
+  set (BOOST_FIND_thread 0)
+  set (BOOST_FIND_wave 0)
 
-  list (APPEND boost_libraries
-    boost_serialization
-    boost_signals
-    boost_test_exec_monitor
-    boost_thread
-    boost_unit_test_framework
-    )
-  
-  if (BOOST_date_time)
-    list (APPEND boost_libraries boost_date_time)
-  endif (BOOST_date_time)
-  
-  if (BOOST_filesystem)
-    list (APPEND boost_libraries boost_filesystem)
-  endif (BOOST_filesystem)
-  
-  if (BOOST_iostreams)
-    list (APPEND boost_libraries boost_iostreams)
-  endif (BOOST_iostreams)
-  
-  if (BOOST_program_options)
-    list (APPEND boost_libraries boost_program_options)
-  endif (BOOST_program_options)
-  
-  if (BOOST_regex)
-    list (APPEND boost_libraries boost_regex)
-  endif (BOOST_regex)
-  
-  if (BOOST_wave)
-    list (APPEND boost_libraries boost_wave)
-  endif (BOOST_wave)
-  
 endif (BOOST_pythonOnly)
+
+if (BOOST_FIND_date_time)
+  list (APPEND boost_libraries boost_date_time)
+endif (BOOST_FIND_date_time)
+
+if (BOOST_FIND_filesystem)
+  list (APPEND boost_libraries boost_filesystem)
+endif (BOOST_FIND_filesystem)
+
+if (BOOST_FIND_iostreams)
+  list (APPEND boost_libraries boost_iostreams)
+endif (BOOST_FIND_iostreams)
+
+if (BOOST_FIND_program_options)
+  list (APPEND boost_libraries boost_program_options)
+endif (BOOST_FIND_program_options)
+
+if (BOOST_python)
+  list (APPEND boost_libraries boost_python)
+endif (BOOST_python)
+
+if (BOOST_FIND_regex)
+  list (APPEND boost_libraries boost_regex)
+endif (BOOST_FIND_regex)
+
+if (BOOST_FIND_serialization)
+  list (APPEND boost_libraries boost_serialization)
+endif (BOOST_FIND_serialization)
+
+if (BOOST_FIND_signals)
+  list (APPEND boost_libraries boost_signals)
+endif (BOOST_FIND_signals)
+
+if (BOOST_FIND_thread)
+  list (APPEND boost_libraries boost_thread)
+endif (BOOST_FIND_thread)
+
+if (BOOST_FIND_wave)
+  list (APPEND boost_libraries boost_wave)
+endif (BOOST_FIND_wave)
 
 ## initialize list of detected libraries
 
@@ -197,6 +215,15 @@ if (HAVE_BOOST)
     message (STATUS "Found components for Boost")
     message (STATUS "Boost library ... : ${BOOST_LIBRARIES}")
     message (STATUS "Boost headers ... : ${BOOST_INCLUDES}")
+    message (STATUS "date_time         = ${BOOST_FIND_date_time}")
+    message (STATUS "filesystem        = ${BOOST_FIND_filesystem}")
+    message (STATUS "iostreams         = ${BOOST_FIND_iostreams}")
+    message (STATUS "program_options   = ${BOOST_FIND_program_options}")
+    message (STATUS "python            = ${BOOST_python}")
+    message (STATUS "regex             = ${BOOST_FIND_regex}")
+    message (STATUS "signals           = ${BOOST_FIND_signals}")
+    message (STATUS "thread            = ${BOOST_FIND_thread}")
+    message (STATUS "wave              = ${BOOST_FIND_wave}")
   endif (NOT BOOST_FIND_QUIETLY)
 else (HAVE_BOOST)
   if (BOOST_FIND_REQUIRED)
