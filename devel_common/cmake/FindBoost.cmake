@@ -52,6 +52,7 @@ set (BOOST_python ON)
 set (BOOST_FIND_regex ON)
 set (BOOST_FIND_serialization ON)
 set (BOOST_FIND_signals ON)
+set (BOOST_FIND_unit_test_framework ON)
 set (BOOST_FIND_thread ON)
 set (BOOST_FIND_wave ON)
 
@@ -62,27 +63,35 @@ set (BOOST_pythonOnly OFF)
 ## -----------------------------------------------------------------------------
 ## Check for the header files and the various module libraries
 
-set (boost_libraries
-  boost_unit_test_framework
-  )
-
-## handle optional Boost components
-
 if (BOOST_pythonOnly)
 
   message (STATUS "[FindBoost] Configuration for boost_python only.")
 
   set (BOOST_python 1)
 
-  set (BOOST_FIND_date_time 0)
-  set (BOOST_FIND_filesystem 0)
-  set (BOOST_FIND_iostreams 0)
-  set (BOOST_FIND_program_options 0)
-  set (BOOST_FIND_regex 0)
-  set (BOOST_FIND_serialization 0)
-  set (BOOST_FIND_signals 0)
-  set (BOOST_FIND_thread 0)
-  set (BOOST_FIND_wave 0)
+  set (BOOST_FIND_date_time OFF)
+  set (BOOST_FIND_filesystem OFF)
+  set (BOOST_FIND_iostreams OFF)
+  set (BOOST_FIND_program_options OFF)
+  set (BOOST_FIND_regex OFF)
+  set (BOOST_FIND_serialization OFF)
+  set (BOOST_FIND_signals OFF)
+  set (BOOST_FIND_thread OFF)
+  set (BOOST_FIND_unit_test_framework OFF)
+  set (BOOST_FIND_wave OFF)
+
+else (BOOST_pythonOnly)
+
+  set (BOOST_FIND_date_time ON)
+  set (BOOST_FIND_filesystem ON)
+  set (BOOST_FIND_iostreams ON)
+  set (BOOST_FIND_program_options ON)
+  set (BOOST_FIND_regex ON)
+  set (BOOST_FIND_serialization ON)
+  set (BOOST_FIND_signals ON)
+  set (BOOST_FIND_thread ON)
+  set (BOOST_FIND_unit_test_framework ON)
+  set (BOOST_FIND_wave ON)
 
 endif (BOOST_pythonOnly)
 
@@ -121,6 +130,10 @@ endif (BOOST_FIND_signals)
 if (BOOST_FIND_thread)
   list (APPEND boost_libraries boost_thread)
 endif (BOOST_FIND_thread)
+
+if (BOOST_FIND_unit_test_framework)
+  list (APPEND boost_libraries boost_unit_test_framework)
+endif (BOOST_FIND_unit_test_framework)
 
 if (BOOST_FIND_wave)
   list (APPEND boost_libraries boost_wave)
