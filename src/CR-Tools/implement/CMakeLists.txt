@@ -94,6 +94,10 @@ if (libm)
   list (APPEND cr_link_libraries ${libm})
 endif (libm)
 
+if (libutil)
+  list (APPEND cr_link_libraries ${libutil})
+endif (libutil)
+
 ## ------------------------------------------------------------------------------
 ## Create the library
 

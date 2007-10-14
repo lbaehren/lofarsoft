@@ -58,7 +58,13 @@ endif (NOT CR_VERBOSE_CONFIGURE)
 ##
 ## =============================================================================
 
+## system libraries
+
 find_library (libm m
+  PATHS /usr/lib /usr/local/lib /sw/lib /opt/lib
+  )
+
+find_library (libutil util
   PATHS /usr/lib /usr/local/lib /sw/lib /opt/lib
   )
 
