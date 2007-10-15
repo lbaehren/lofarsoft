@@ -32,6 +32,9 @@
 #include <casa/BasicMath/Math.h>
 #include <Data/lopesevent_def.h>
 
+using casa::Bool;
+using casa::Matrix;
+using casa::Vector;
 
 namespace CR { // Namespace CR -- begin
   
