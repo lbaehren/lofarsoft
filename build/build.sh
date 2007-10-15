@@ -285,6 +285,8 @@ case $param_packageName in
 		## external packages
 		echo "[`date`] Processing required packages ..."
 		./build.sh cmake
+		./build.sh bison
+		./build.sh flex
 		./build.sh casacore --force-build
 		./build.sh python --force-build
 		./build.sh boost --force-build
