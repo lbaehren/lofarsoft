@@ -107,24 +107,24 @@ if test -z $1 ; then
 else
     case $1 in
 	-h)
-	print_help
+		print_help
 	;;
 	--h)
-	print_help
+		print_help
 	;;
 	-help)
-	print_help
+		print_help
 	;;
 	--help)
-	print_help
+		print_help
 	;;
 	help)
-	print_help
+		print_help
 	;;
 	-clean)
 		rm -f *~ *.log;
 		rm -rf bison blitz boost;
-		rm -rf casacore cfitsio cmake cr; 
+		rm -rf casacore cfitsio cmake config cr; 
 		rm -rf dal dsp;
 		rm -rf flex;
 		rm -rf hdf5;
@@ -133,20 +133,23 @@ else
 		rm -rf wcslib;
 	;;
 	-clean-release)
-		rm -rf ../release/bin
-		rm -rf ../release/doc
-		rm -rf ../release/include
-		rm -rf ../release/info
-		rm -rf ../release/lib
-		rm -rf ../release/man
-		rm -rf ../release/share
+		rm -rf $basedir/../release/bin
+		rm -rf $basedir/../release/doc
+		rm -rf $basedir/../release/include
+		rm -rf $basedir/../release/info
+		rm -rf $basedir/../release/lib
+		rm -rf $basedir/../release/man
+		rm -rf $basedir/../release/share
+	;;
+	clean-release)
+		./build.sh -clean-release;
 	;;
 	clean)
-	./build.sh -clean;
+		./build.sh -clean;
 	;;
 	*)
-	param_packageName=$1;
-	echo " -- Selected package: $param_packageName";
+		param_packageName=$1;
+		echo " -- Selected package: $param_packageName";
 	;;
     esac
 fi
@@ -186,7 +189,7 @@ case $param_packageName in
     ;;
     boost)
 		echo "[`date`] Selected package Boost"
-		build_package boost external/boost "-DBOOST_FORCE_BUILD:BOOL=$param_forceBuild";
+		build_package boost external/boost "-DBOOST_FORCE_BUILD:BOOL=$param_forceBuild -DBOOST_FIND_python_ONLY:BOOL=1";
     ;;
     casacore)
 		echo "[`date`] Selected package CASACORE"
@@ -201,82 +204,82 @@ case $param_packageName in
 		build_package cfitsio external/cfitsio
     ;;
     cmake)
-	echo "[`date`] Selected package CMake"
-	## Check if the source code to build cmake is available; if this
-	## is not the case with error, since this is the bottom-most 
-	## position in the dependency chain
-	if test -d $basedir/../external/cmake ; then
-	    echo "[`date`] Cleaning up source directory ..."
-	    rm -rf $basedir/../external/cmake/Bootstrap.cmk
-	    rm -rf $basedir/../external/cmake/CMakeCache.txt
-	    rm -rf $basedir/../external/cmake/Source/cmConfigure.h
-	else
-	    echo "[`date`] Missing source directory for cmake! Unable to continue!"
-	    exit 1;
-	fi
-	## prepare to build cmake from its source
-	if test -d cmake ; then
-	    cd cmake;
-	else
-	    mkdir cmake;
-	    cd cmake;
-	fi
-	## run the configure script
-	echo "[`date`] Running configure script for cmake ..."
-	$basedir/../external/cmake/configure --prefix=$basedir/../release
-	## build and install
-	echo "[`date`] Initiating build and install of cmake ..."
-	make && make install
-	## check if we have been able to create a cmake executable
-	if test -f ../../release/bin/cmake ; then
-	    echo "[`date`] Found newly created cmake executable."
-	    export PATH=$PATH:$basedir/../release/bin
-	else
-	    echo "[`date`] No cmake executable found in release/bin! Unable to continue!"
-	    exit 1;
-	fi
+		echo "[`date`] Selected package CMake"
+		## Check if the source code to build cmake is available; if this
+		## is not the case with error, since this is the bottom-most 
+		## position in the dependency chain
+		if test -d $basedir/../external/cmake ; then
+	    	echo "[`date`] Cleaning up source directory ..."
+	    	rm -rf $basedir/../external/cmake/Bootstrap.cmk
+	    	rm -rf $basedir/../external/cmake/CMakeCache.txt
+	    	rm -rf $basedir/../external/cmake/Source/cmConfigure.h
+		else
+	    	echo "[`date`] Missing source directory for cmake! Unable to continue!"
+	    	exit 1;
+		fi
+		## prepare to build cmake from its source
+		if test -d cmake ; then
+	    	cd cmake;
+		else
+	    	mkdir cmake;
+	    	cd cmake;
+		fi
+		## run the configure script
+		echo "[`date`] Running configure script for cmake ..."
+		$basedir/../external/cmake/configure --prefix=$basedir/../release
+		## build and install
+		echo "[`date`] Initiating build and install of cmake ..."
+		make && make install
+		## check if we have been able to create a cmake executable
+		if test -f ../../release/bin/cmake ; then
+	    	echo "[`date`] Found newly created cmake executable."
+	    	export PATH=$PATH:$basedir/../release/bin
+		else
+	    	echo "[`date`] No cmake executable found in release/bin! Unable to continue!"
+	    	exit 1;
+		fi
     ;;
     flex)
-	echo "[`date`] Selected package Flex"
-	build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$param_forceBuild"
+		echo "[`date`] Selected package Flex"
+		build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$param_forceBuild"
     ;;
     hdf5)
-	echo "[`date`] Selected package Hdf5"
-	build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
+		echo "[`date`] Selected package Hdf5"
+		build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     pgplot)
-	echo "[`date`] Selected package PGPlot"
-	build_package pgplot external/pgplot "-DPGPLOT_FORCE_BUILD:BOOL=$param_forceBuild";
+		echo "[`date`] Selected package PGPlot"
+		build_package pgplot external/pgplot "-DPGPLOT_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     plplot)
-	echo "[`date`] Selected package Plplot"
-	if test -d $basedir/../external/plplot ; then
-	    build_package plplot external/plplot "-DCMAKE_INSTALL_PREFIX:STRING=$basedir/../release -DCMAKE_INSTALL_BINDIR:STRING=bin -DCMAKE_INSTALL_DATADIR:STRING=share -DCMAKE_INSTALL_INCLUDEDIR:STRING=include -DBUILD_SHARED_LIBS:BOOL=0 -DPLD_aqt:BOOL=0";
-	else
-	    cd $basedir/../external
-	    ## download the source tar-ball from source forge
-	    wget -c http://ovh.dl.sourceforge.net/sourceforge/plplot/plplot-5.7.4.tar.gz
-	    ## unpack the tar-ball and adjust the name of the newly created directory
-	    tar -xvzf plplot-5.7.4.tar.gz
-	    mv plplot-5.7.4 plplot
-	    ## remove the tar-ball
-	    rm -f plplot-5.7.4.tar.gz
-	    ## recursive call of this method
-	    cd $basedir
-	    ./build.sh plplot
-	fi
+		echo "[`date`] Selected package Plplot"
+		if test -d $basedir/../external/plplot ; then
+	    	build_package plplot external/plplot "-DCMAKE_INSTALL_PREFIX:STRING=$basedir/../release -DCMAKE_INSTALL_BINDIR:STRING=bin -DCMAKE_INSTALL_DATADIR:STRING=share -DCMAKE_INSTALL_INCLUDEDIR:STRING=include -DBUILD_SHARED_LIBS:BOOL=0 -DPLD_aqt:BOOL=0";
+		else
+		    cd $basedir/../external
+	    	## download the source tar-ball from source forge
+		    wget -c http://ovh.dl.sourceforge.net/sourceforge/plplot/plplot-5.7.4.tar.gz
+		    ## unpack the tar-ball and adjust the name of the newly created directory
+	    	tar -xvzf plplot-5.7.4.tar.gz
+		    mv plplot-5.7.4 plplot
+		    ## remove the tar-ball
+	    	rm -f plplot-5.7.4.tar.gz
+	    	## recursive call of this method
+	    	cd $basedir
+	    	./build.sh plplot
+		fi
     ;;
     python)
-	echo "[`date`] Selected package PYTHON"
-	build_package python external/python
+		echo "[`date`] Selected package PYTHON"
+		build_package python external/python
     ;;
     vtk)
-	echo "[`date`] Selected package VTK"
-	echo "-- No configuration and build support available yet!"
+		echo "[`date`] Selected package VTK"
+		echo "-- No configuration and build support available yet!"
     ;;
     wcslib)
-	echo "[`date`] Selected package WCSLIB"
-	build_package wcslib external/wcslib
+		echo "[`date`] Selected package WCSLIB"
+		build_package wcslib external/wcslib
     ;;
     dal)
 		## external packages
@@ -301,21 +304,27 @@ case $param_packageName in
 		echo ""
     ;;
     cr)
-	echo "[`date`] Processing required packages ..."
-	## external packages
-	./build.sh pgplot;
-	## USG packages
-	./build.sh dal;
-	echo "[`date`] Building CR-Tools package ..."
-	build_package cr src/CR-Tools;
+		echo "[`date`] Processing required packages ..."
+		./build.sh dal;
+		./build.sh pgplot;
+		echo "[`date`] Building CR-Tools package ..."
+		build_package cr src/CR-Tools;
     ;;
+	config)
+		if test -d config ; then
+			cd config;
+			rm -rf *
+			cmake $basedir/../devel_common/cmake
+		else 
+			mkdir config
+			./build.sh config
+		fi
+	;;
     all)
-	echo "[`date`] Building external packages not build otherwise";
-	./build.sh bison;
-	./build.sh flex;
-	./build.sh pgplot;
-	echo "[`date`] Building all USG packages";
-	./build.sh dal;
-	build_package cr src/CR-Tools;
+		echo "[`date`] Building external packages not build otherwise";
+		./build.sh bison;
+		./build.sh flex;
+		echo "[`date`] Building all USG packages";
+		./build.sh cr;
     ;;
 esac

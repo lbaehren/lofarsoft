@@ -45,7 +45,7 @@ find_path (BOOST_cmake FindBOOST.cmake FindPython.cmake
   )
 
 if (BOOST_cmake)
-  set (BOOST_pythonOnly 1)
+  set (BOOST_FIND_python_ONLY ON)
   include (${BOOST_cmake}/FindBoost.cmake)
   include (${BOOST_cmake}/FindPython.cmake)
 endif (BOOST_cmake)
