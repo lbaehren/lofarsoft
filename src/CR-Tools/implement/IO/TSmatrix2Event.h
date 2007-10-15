@@ -32,6 +32,10 @@
 #include <casa/BasicMath/Math.h>
 #include <Data/lopesevent_def.h>
 
+using std::cout;
+using std::cerr;
+using std::endl;
+
 using casa::Bool;
 using casa::Matrix;
 using casa::Vector;
@@ -71,9 +75,9 @@ namespace CR { // Namespace CR -- begin
     Bool hasData_p, hasDate_p;
 
 
-    Matrix<Short> data_p;
+    Matrix<short> data_p;
 
-    Vector<Int> AntIDs_p;
+    Vector<int> AntIDs_p;
     
   public:
     

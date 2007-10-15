@@ -87,7 +87,7 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  Bool TSmatrix2Event::SetData(Matrix<Double> data, Vector<Int> AntIDs, Int presync=0){
+  Bool TSmatrix2Event::SetData(Matrix<Double> data, Vector<int> AntIDs, int presync=0){
     try {
       if (data.ncolumn() != AntIDs.nelements()){
 	cerr "TSmatrix2Event::SetData : " << "Inconsistent data: (data.ncolumn() != AntIDs.nelements()) !" << endl;
@@ -95,7 +95,7 @@ namespace CR { // Namespace CR -- begin
       };
       data_p.resize(data.shape());
       //multiply with sqrt(R)*ADCSteps_per_Volt to get to ADC-Values
-      //convert to Integer (Short) for quantisation
+      //convert to Integer (short) for quantisation
       convertArray(data_p,(data*sqrt(50)*2048.));
       AntIDs_p.resize(AntIDs.shape());
       AntIDs_p = AntIDs;
@@ -130,7 +130,7 @@ namespace CR { // Namespace CR -- begin
 	cerr << "TSmatrix2Event::WriteEvent: " << "Data or date not set!" << endl;
 	return False;	
       };
-      Int blocksize,nAnt,length;
+      int blocksize,nAnt,length;
       blocksize = data_p.nrow();
       nAnt = data_p.ncolumn();
       if (blocksize != eventheader_p->blocksize ) {
