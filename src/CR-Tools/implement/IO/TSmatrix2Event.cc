@@ -90,10 +90,10 @@ namespace CR { // Namespace CR -- begin
   
   Bool TSmatrix2Event::SetData(Matrix<double> data,
 			       Vector<int> AntIDs,
-			       int presync=0){
+			       int presync){
     try {
       if (data.ncolumn() != AntIDs.nelements()){
-	cerr "TSmatrix2Event::SetData : " << "Inconsistent data: (data.ncolumn() != AntIDs.nelements()) !" << endl;
+	cerr << "TSmatrix2Event::SetData : " << "Inconsistent data: (data.ncolumn() != AntIDs.nelements()) !" << endl;
 	return False;
       };
       data_p.resize(data.shape());
@@ -113,7 +113,7 @@ namespace CR { // Namespace CR -- begin
     return True; 
   };
 
-  Bool TSmatrix2Event::Date(double date){
+  Bool TSmatrix2Event::SetDate (double date){
     try {
       eventheader_p->JDR = uInt(date);
       eventheader_p->TL  = uInt((date-eventheader_p->JDR)*5e6);
@@ -140,8 +140,7 @@ namespace CR { // Namespace CR -- begin
 	cerr << "TSmatrix2Event::WriteEvent: " << "Inconsitent data: (blocksize != eventheader_p->blocksize)!" << endl;
 	return False;	
       };
-      length = LOPESEV_HEADERSIZE + nAnt*(blocksize*sizeof(short int) )
-
+      length = LOPESEV_HEADERSIZE + nAnt*(blocksize*sizeof(short int) );
 
     } catch (AipsError x) {
       cerr << "TSmatrix2Event::WriteEvent: " << x.getMesg() << endl;

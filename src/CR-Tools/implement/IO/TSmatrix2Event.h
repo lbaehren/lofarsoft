@@ -38,8 +38,10 @@ using std::endl;
 
 using casa::AipsError;
 using casa::Bool;
+using casa::False;
 using casa::Matrix;
 using casa::String;
+using casa::True;
 using casa::uInt;
 using casa::Vector;
 
