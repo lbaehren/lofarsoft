@@ -36,8 +36,11 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
+using casa::AipsError;
 using casa::Bool;
 using casa::Matrix;
+using casa::String;
+using casa::uInt;
 using casa::Vector;
 
 namespace CR { // Namespace CR -- begin
@@ -140,17 +143,33 @@ namespace CR { // Namespace CR -- begin
 
     Bool reset(void);
 
-    Bool SetData(Matrix<Double> data, Vector<Int> AntIDs, Int presync=0);
+    Bool SetData(Matrix<double> data,
+		 Vector<int> AntIDs,
+		 int presync=0);
 
-    Bool SetDate(Double date);
+    Bool SetDate(double date);
 
-    Bool SetHeader(Int version=VERSION, uInt JDR=0, Int TL=0, Int LTL=0, Int Type=1,
-		   Int evclass=2, Int blocksize=0, Int presync=0, Int observatory=0);
+    Bool SetHeader(int version=VERSION,
+		   uInt JDR=0,
+		   int TL=0,
+		   int LTL=0,
+		   int Type=1,
+		   int evclass=2,
+		   int blocksize=0,
+		   int presync=0,
+		   int observatory=0);
 
     Bool WriteEvent(String filename);
 
-    Bool GetHeader(Int &version, uInt &JDR, Int &TL, Int &LTL, Int &Type,
-		   Int &evclass, Int &blocksize, Int &presync, Int &observatory);
+    Bool GetHeader(int &version,
+		   uInt &JDR,
+		   int &TL,
+		   int &LTL,
+		   int &Type,
+		   int &evclass,
+		   int &blocksize,
+		   int &presync,
+		   int &observatory);
     
   private:
     

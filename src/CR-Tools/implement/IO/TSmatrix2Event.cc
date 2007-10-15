@@ -34,7 +34,8 @@ namespace CR { // Namespace CR -- begin
   TSmatrix2Event::TSmatrix2Event() {
     eventheader_p = (lopesevent_v1*)malloc(LOPESEV_HEADERSIZE);
     if (eventheader_p == NULL) {
-      cerr << " TSmatrix2Event::TSmatrix2Event() : Failed to allocate memory!!!" << endl;
+      cerr << " TSmatrix2Event::TSmatrix2Event() : Failed to allocate memory!!!"
+	   << endl;
       exit(EXIT_FAILURE);
     };
     reset();
@@ -87,7 +88,9 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  Bool TSmatrix2Event::SetData(Matrix<Double> data, Vector<int> AntIDs, int presync=0){
+  Bool TSmatrix2Event::SetData(Matrix<double> data,
+			       Vector<int> AntIDs,
+			       int presync=0){
     try {
       if (data.ncolumn() != AntIDs.nelements()){
 	cerr "TSmatrix2Event::SetData : " << "Inconsistent data: (data.ncolumn() != AntIDs.nelements()) !" << endl;
@@ -110,7 +113,7 @@ namespace CR { // Namespace CR -- begin
     return True; 
   };
 
-  Bool TSmatrix2Event::Date(Double date){
+  Bool TSmatrix2Event::Date(double date){
     try {
       eventheader_p->JDR = uInt(date);
       eventheader_p->TL  = uInt((date-eventheader_p->JDR)*5e6);
