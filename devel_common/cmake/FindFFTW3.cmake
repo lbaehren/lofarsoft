@@ -5,23 +5,37 @@
 # - Check for the presence of FFTW3
 #
 # The following variables are set when FFTW3 is found:
-#  HAVE_FFTW3       = Set to true, if all components of FFTW3
-#                          have been found.
-#  FFTW3_INCLUDES = Include path for the header files of FFTW3
-#  FFTW3_LIBRARIES     = Link these to use FFTW3
+#  HAVE_FFTW3       = Set to true, if all components of FFTW3 have been found.
+#  FFTW3_INCLUDES   = Include path for the header files of FFTW3
+#  FFTW3_LIBRARIES  = Link these to use FFTW3
 
 set (include_locations
-  /usr/local/include
+  ## local installation
+  ./../release/include
+  ./../../release/include
+  ## system-wide installation
   /usr/include
+  /usr/local/include
+  /usr/X11R6/include
+  /opt/include
+  /opt/local/include
   /sw/include
+  ## extra locations
   /var/chroot/meqtrees/usr/include/fftw3.h
 )
 
 set (lib_locations
+  ## local installation
+  ./../release/lib
+  ./../../release/lib
+  ## system-wide installation
   /usr/local/lib
   /usr/lib
-  /lib
+  /usr/X11R6/lib
+  /opt/lib
+  /opt/local/lib
   /sw/lib
+  ## extra locations
   /var/chroot/meqtrees/usr/lib
 )
 
