@@ -130,7 +130,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
   #  |   `-- tuple.hpp
   #  `-- python.hpp
   
-  if (BOOST_CMAKE_BUILD AND PYTHON_INCLUDES)
+  if (BOOST_CMAKE_BUILD AND HAVE_PYTHON)
     
     message (STATUS "Building Boost using CMake.")
     
@@ -144,7 +144,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
     add_subdirectory (boost)
     add_subdirectory (libs)
     
-  else (BOOST_CMAKE_BUILD AND PYTHON_INCLUDES)
+  else (BOOST_CMAKE_BUILD AND HAVE_PYTHON)
     
     ## --------------------------------------------------------------------------
     ## Run the configure script provided along with the distribution
@@ -219,7 +219,7 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
     
     ## <-- end build condition ------------------------------------------------->
     
-  endif (BOOST_CMAKE_BUILD AND PYTHON_INCLUDES)
+  endif (BOOST_CMAKE_BUILD AND HAVE_PYTHON)
   
 else (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
   message (STATUS "Found system-wide installation of BOOST; skipping rebuild!")
