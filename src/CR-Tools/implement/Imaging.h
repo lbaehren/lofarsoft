@@ -35,6 +35,34 @@
 
   <h3>Synopsis</h3>
 
+  The functionality required for beamforming and subsequent imaging is broken
+  down into a number of classes.
+
+  <table border="0">
+    <tr>
+      <td class="indexkey">Quantity</td>
+      <td class="indexkey">implemented in</td>
+      <td class="indexkey">Relation</td>
+    </tr>
+    <tr>
+      <td>gemoetrical delay</td>
+      <td>CR::GeometricalDelay</td>
+      <td>\f$ \tau_j = \frac{1}{c} \left( |\vec \rho - \vec x_j| - |\vec \rho|
+      \right) \f$</td>
+    </tr>
+    <tr>
+      <td>geometrical phase</td>
+      <td>CR::GeometricalPhase</td>
+      <td>\f$ \phi (\vec x_j, \vec \rho, \nu) = 2 \pi \nu \tau_{\rm geom} \f$</td>
+    </tr>
+    <tr>
+      <td>geometrical weight</td>
+      <td>CR::GeometricalWeight</td>
+      <td>\f$ w (\vec x_j, \vec \rho, \nu) = \exp \Bigl( i\, \phi (\vec x_j,
+      \vec \rho, \nu) \Bigr) \f$</td>
+    </tr>
+  </table>
+
   <h3>Usage</h3>
 
   Use this file in order to import all the prototypes for functions and classes
