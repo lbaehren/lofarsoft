@@ -3,7 +3,7 @@
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
- *   Lars Baehren (<mail>)                                                 *
+ *   Kalpana Singh (<k.singh@astro.ru.nl>)                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -29,8 +29,33 @@
 #include <string>
 
 // AIPS++/CASA header files
+
 #include <casa/aips.h>
+#include <casa/iostream.h>
+#include <casa/fstream.h>
+#include <casa/string.h>
+#include <casa/Arrays/Array.h>
+#include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/ArrayMath.h>
+#include <casa/Arrays/IPosition.h>
+#include <casa/Arrays/Vector.h>
+#include <casa/BasicSL/Complex.h>
+
+#include <casa/Quanta.h>
 #include <casa/Exceptions/Error.h>
+#include <casa/namespace.h>
+#include <tables/Tables/Table.h>
+#include <tables/Tables/TableDesc.h>
+#include <tables/Tables/SetupNewTab.h>
+
+#include <tables/Tables/ScalarColumn.h>
+#include <tables/Tables/ScaColDesc.h>
+#include <tables/Tables/ScaRecordColDesc.h>
+
+#include <Math/Math.h>
+
+#include <gsl/manual/gsl_sf_hyperg.h>
+#include <gsl/manual/gsl_sf_gamma.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -75,6 +100,19 @@ namespace CR { // Namespace CR -- begin
       \param other -- Another StationBeam object from which to create this new
       one.
     */
+    
+    StationBeam( const Double& source_declination,
+                 const Double& source_hr_angle,
+		 const Vector<uint>& station_id,
+                 const Double& init_freq,
+		 const Double& bandwidth,
+		 const Double& station_radii,
+		 const Vector<Double>& position_x,
+		 const Vector<Double>& position_y,
+		 const Vector<Double>& legendre_root,
+		 const Vector<Double>& legendre_weight ) ;
+		 
+		 
     StationBeam (StationBeam const &other);
     
     // -------------------------------------------------------------- Destruction
@@ -82,7 +120,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Destructor
     */
-    ~StationBeam ();
+    virtual ~StationBeam ();
     
     // ---------------------------------------------------------------- Operators
     
@@ -119,7 +157,28 @@ namespace CR { // Namespace CR -- begin
     // ------------------------------------------------------------------ Methods
     
     
-    
+  Double station_beam(const Double& frequency,
+		      const Double& hr_angle,
+		      const Double& declination,
+		      const Double& source_declination,
+          	      const Double& source_hr_angle,
+		      const Double& station_radii,
+		      const Vector<Double>& legendre_root,
+		      const Vector<Double>& legendre_weight ) ;
+				      
+ 
+   
+  Double tied_array( const Double& frequency,
+	             const Double& hr_angle,
+		     const Double& declination,
+		     const Double& source_declination,
+		     const Double& source_hr_angle,
+		     const Double& station_radii,
+		     const Vector<Double>& position_x,
+		     const Vector<Double>& position_y,
+		     const Vector<Double>& legendre_root,
+		     const Vector<Double>& legendre_weight ) ;
+
   private:
     
     /*!

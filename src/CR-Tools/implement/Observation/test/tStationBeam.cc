@@ -3,7 +3,7 @@
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                  *
- *   Lars Baehren (<mail>)                                                     *
+ *   Kalpana Singh (<k.singh@astro.ru.nl>)                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -22,8 +22,14 @@
  ***************************************************************************/
 
 #include <Observation/StationBeam.h>
+#include <casa/aips.h>
+#include <fstream.h>
+#include <iostream.h>
 
-using CR::StationBeam;
+#include <casa/Arrays.h>
+#include <casa/ArrayMath.h>
+
+//using CR::StationBeam;
 
 /*!
   \file tStationBeam.cc
@@ -32,11 +38,23 @@ using CR::StationBeam;
 
   \brief A collection of test routines for StationBeam
  
-  \author Lars Baehren
+  \author Kalpana Singh
  
   \date 2007/08/10
 */
+Double pi = 3.1416 ;
 
+Double Diameter = 200. ;
+
+Double vel_light = 3e8 ;
+
+Double freq_obs = 150e6 ;
+
+Vector<Double> input( 100, 0.0 );
+
+Vector<Double> input_inv( 100, 0.0 );
+
+Vector<Double> output( 100, 0.0 );
 // -----------------------------------------------------------------------------
 
 /*!
@@ -52,7 +70,7 @@ int test_StationBeam ()
 
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
-    StationBeam newObject;
+  //  StationBeam newObject;
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -61,16 +79,71 @@ int test_StationBeam ()
   return nofFailedTests;
 }
 
+Bool test_StationBeams ()
+{
+
+ Bool ok(true) ;
+ 
+ try{
+ 
+ input(0)=-1.0;
+ 
+  for( uint r=0; r<99; r++){
+   input(r+1) = -1.+(r+1)*(2./100.);
+  }
+ 
+ ofstream logfile1 ;
+ 
+ logfile1.open("input",ios::out);
+ for(uint h=0; h<100; h++){
+    logfile1 << input(h) << endl ;
+    }
+ 
+ logfile1.close();
+ 
+ Double wave_length = vel_light/ freq_obs ;
+ 
+ Double mult_factor = pi*Diameter/ wave_length ;
+ 
+ for( uint s=0; s<100; s++ ){
+ 
+      arguement = mult_factor*input(s);
+      
+      expression = (sin(arguement)/arguement-cos(arguement))/arguement ;
+ 
+      output(s) = ( 2*expression/arguement )*(2*expression/arguement);
+    }
+  ofstream logfile2 ;
+ 
+ logfile2.open("power",ios::out);
+ for(uint h=0; h<100; h++){
+    logfile2 << input(h) << endl ;
+    }
+ 
+ logfile2.close();
+ }
+ catch( AipsError x ){
+ cerr <<x.getMesg() << endl ;
+ ok = False;
+ }
+ return ok ;
+ }
 // -----------------------------------------------------------------------------
 
 int main ()
 {
-  int nofFailedTests (0);
+Bool ok (True) ;
+Int retval(0);
 
-  // Test for the constructor(s)
-  {
-    nofFailedTests += test_StationBeam ();
+if(ok){
+ ok = test_StationBeams () ;
+ 
+  if(!ok){
+  retval = 1;
+  cout << "Error ...........early exit "
+       <<endl ;
+     }
   }
-
-  return nofFailedTests;
+ return retval ;
 }
+ 
