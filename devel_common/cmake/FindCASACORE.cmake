@@ -327,7 +327,9 @@ endforeach (casacore_lib)
 
 ## Once we are done, rearrange the order of the libraries in the list
 
-list (REVERSE CASACORE_LIBRARIES)
+if (CASACORE_LIBRARIES)
+  list (REVERSE CASACORE_LIBRARIES)
+endif (CASACORE_LIBRARIES)
 
 ## -----------------------------------------------------------------------------
 ## If detection successful, register package as found
