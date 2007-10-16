@@ -22,8 +22,12 @@
  ***************************************************************************/
 
 #include <IO/TSmatrix2Event.h>
+#include <IO/toLOPESgrid.h>
+#include <IO/ApplyInstrumentEffects.h>
 
 using CR::TSmatrix2Event;  // Namespace usage
+
+using namespace CR;
 
 /*!
   \file tTSmatrix2Event.cc
@@ -53,6 +57,53 @@ int test_TSmatrix2Event ()
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
     TSmatrix2Event newTSmatrix2Event;
+
+    std::cout << "[2] Opening Simulation ... " ;
+    Simulation2fftMatrix sim2fft;
+    ApplyInstrumentEffects ApplyInstEff;
+    ImportSimulation Sim;
+    bool ok = Sim.openNewSimulation("30deg1e17_shift",
+				    "lopes30",
+				    "/home/horneff/testreas");
+    std::cout << " ok: " << ok << endl;
+
+    std::cout << "[3] Generating and attaching CalTableReader object ... " << endl;;
+    CalTableReader CTread("/home/horneff/lopescasa/data/LOPES/LOPES-CalTable");
+    sim2fft.setCalTable(&CTread);
+    ApplyInstEff.setCalTable(&CTread);
+    sim2fft.setObsDate(1104580800);
+    ApplyInstEff.setObsDate(1104580800);
+
+
+    std::cout << "[4] Importing simulation ... " ;;     
+    ok =  sim2fft.SimulationImport(&Sim);
+    std::cout << " ok: " << ok << endl;
+
+    std::cout << "Simulation time steps:"<< Sim.getSamplingTimeScale() << "s." << endl;
+
+    std::cout << "[5] Applying Instrument Effects ... " ;;   
+    Vector<int> AntIDs;
+    AntIDs = sim2fft.getAntIDs();
+    ApplyInstEff.setAntennaIDs(AntIDs);
+    ApplyInstEff.setFreqAxis(sim2fft.getFrequency());
+    Matrix<DComplex> FFT;
+    FFT = ApplyInstEff.ApplyEffects(sim2fft.getfft());
+    std::cout << " ok "  << endl;
+
+    std::cout << "[6] Converting to LOPES grid ... " ;;   
+    toLOPESgrid toGrid;
+    ok = toGrid.AddFFTData(FFT,  sim2fft.getBlocklen(), sim2fft.getFrequency());
+    std::cout << " ok: " << ok << endl;
+    Matrix<Double> timedata;
+    timedata = toGrid.GetData();
+
+    std::cout << "[7] Inserting data into event-object ... " <<endl; 
+    ok = newTSmatrix2Event.SetData(timedata,AntIDs,32768);
+    ok = ok && newTSmatrix2Event.SetDate(1104580800.);
+    std::cout << "    ... and writing file ..." << endl;
+    ok = ok && newTSmatrix2Event.WriteEvent("tTSmatrix2Event_output.event");
+    std::cout << "    ok: " << ok << endl;
+
     //
     newTSmatrix2Event.summary(); 
   } catch (std::string message) {

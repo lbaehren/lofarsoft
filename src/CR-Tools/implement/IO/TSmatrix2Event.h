@@ -32,18 +32,8 @@
 #include <casa/BasicMath/Math.h>
 #include <Data/lopesevent_def.h>
 
-using std::cout;
-using std::cerr;
-using std::endl;
 
-using casa::AipsError;
-using casa::Bool;
-using casa::False;
-using casa::Matrix;
-using casa::String;
-using casa::True;
-using casa::uInt;
-using casa::Vector;
+#include <casa/namespace.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -75,7 +65,7 @@ namespace CR { // Namespace CR -- begin
 
   protected:
 
-    lopesevent_v1 *eventheader_p;
+    lopesevent *eventheader_p;
 
     Bool hasData_p, hasDate_p;
 
