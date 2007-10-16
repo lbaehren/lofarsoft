@@ -21,6 +21,7 @@
 /* $Id$*/
 
 #include <ApplicationSupport/SkymapperTools.h>
+#include <Utilities/MConversions.h>
 
 using CR::ObservationData;
 using CR::SkymapGrid;
@@ -218,8 +219,8 @@ CoordinateSystem SkymapperTools::coordinateSystem(const ObsInfo &obsinfo,
     xform = 0.0;
     xform.diagonal() = 1.0;
     
-    DirectionCoordinate coord (SkymapperTools::MDirectionType(refcode),
-			       Projection(SkymapperTools::ProjectionType(projection)),
+    DirectionCoordinate coord (CR::MDirectionType(refcode),
+			       Projection(CR::ProjectionType(projection)),
 			       crval(0)*C::pi/180.0,
 			       crval(1)*C::pi/180.0,
 			       -2*C::pi/180.0,
