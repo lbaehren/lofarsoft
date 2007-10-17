@@ -23,7 +23,7 @@
 
 #include <IO/ApplyInstrumentEffects.h>
 
-#define pi 3.1415926536
+#define PI 3.1415926536
 
 namespace CR { // Namespace CR -- begin
   
@@ -124,7 +124,7 @@ namespace CR { // Namespace CR -- begin
 	PhaseVec = fabs(tmpCvec)/tmpCvec;
 	//Calculate the (constant) delay effects
 	tmpComp = DComplex(0.,-1.);
-	tmpComp *= 2*pi;
+	tmpComp *= 2*PI;
         CTRead->GetData(date_p, AntIDs_p(i), "Delay", &delay);
 	convertArray(tmpCvec,frequency_p);
 	DelayVec=exp(tmpComp*delay*tmpCvec);

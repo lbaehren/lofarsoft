@@ -13,6 +13,7 @@ set (tests
   tDataIterator
   tDataReader
   tFFTServer
+  tgenTVSpec
   tImportAntenna
   tImportSimulation
   tFalckeGorhamGalacticNoise
