@@ -150,7 +150,7 @@ namespace CR { // Namespace CR -- begin
 	cerr << "TSmatrix2Event::WriteEvent: " << "Failed to open output file!" << endl;
 	return False;	
       };
-      cout << "TSmatrix2Event::WriteEvent: mark1"<<endl;
+
       lopesevent *tmpevent;
       tmpevent = (lopesevent *)malloc(sizeof(lopesevent));
       if (tmpevent == NULL){
@@ -158,7 +158,7 @@ namespace CR { // Namespace CR -- begin
 	fclose(fd);
 	return False;	
       };
-      cout << "TSmatrix2Event::WriteEvent: mark2"<<endl;
+
       // copy that header into the temporary storage
       tmpevent->length      = eventheader_p->length;
       tmpevent->version     = eventheader_p->version;
@@ -171,13 +171,9 @@ namespace CR { // Namespace CR -- begin
       tmpevent->LTL         = eventheader_p->LTL;
       tmpevent->observatory = eventheader_p->observatory;
 
-      cout << "TSmatrix2Event::WriteEvent: mark3"<<endl;      
-      cout << "Space: " << sizeof(lopesevent) << " Header: " << LOPESEV_HEADERSIZE 
-	   << " Data: " << ((blocksize*2+8)*nAnt) << " Shape: " << data_p.shape() << endl;
       unsigned int chan,i;
       short int *datapoint;
       datapoint = tmpevent->data;
-      cout << "Start: used bytes:" << ((char *)datapoint)-((char *)tmpevent) << " " << sizeof(short int) <<endl; 
       // copy that data into the temporary storage
       for (chan=0; chan < nAnt; chan++) {
 	// Some dirty typecasting and pointer calculations! 
@@ -191,11 +187,8 @@ namespace CR { // Namespace CR -- begin
 	  *datapoint = data_p(i,chan);
 	  datapoint++;
 	};
-	cout << "Chann:"<<chan<<" ID:"<<AntIDs_p(chan) 
-	     << " used bytes:" << ((char *)datapoint)-((char *)tmpevent) << endl; 
       }; //for (chan=0;...)
       tmpevent->length = sizeof(lopesevent)-MAXDATASIZE+(datapoint-tmpevent->data)*sizeof(short);
-      cout << "TSmatrix2Event::WriteEvent: mark4"<<endl;
       
       // write to the file
       i = fwrite(tmpevent, 1, tmpevent->length, fd);

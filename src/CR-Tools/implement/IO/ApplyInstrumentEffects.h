@@ -148,6 +148,7 @@ namespace CR { // Namespace CR -- begin
       \param newAntIDs - Vector with the Antenna IDs
     */
     void setAntennaIDs(Vector<Int> newAntIDs){
+      AntIDs_p.resize(newAntIDs.shape());
       AntIDs_p = newAntIDs;
     }
     
@@ -157,6 +158,7 @@ namespace CR { // Namespace CR -- begin
       \param newFrequency - Vector with the frequency values
     */
     void setFreqAxis(Vector<Double> newFrequency){
+      frequency_p.resize(newFrequency.shape());
       frequency_p = newFrequency;
     }
     

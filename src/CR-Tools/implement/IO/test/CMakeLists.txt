@@ -18,6 +18,7 @@ set (tests
   tImportSimulation
   tFalckeGorhamGalacticNoise
   tLogfileName
+  tsimulation2event
   tSimulation2fftMatrix
   ttoLOPESgrid
   tTSmatrix2Event

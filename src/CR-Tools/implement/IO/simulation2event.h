@@ -21,34 +21,33 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef GENTVSPEC_H
-#define GENTVSPEC_H
+#ifndef SIMULATION2EVENT_H
+#define SIMULATION2EVENT_H
 
 // Standard library header files
 #include <iostream>
 #include <string>
 
-#include <casa/Arrays.h>
-#include <casa/BasicMath/Math.h>
-
-#include <Calibration/CalTableReader.h> 
-#include <Calibration/CalTableInterpolater.h>
-
+#include <IO/TSmatrix2Event.h>
+#include <IO/toLOPESgrid.h>
+#include <IO/ApplyInstrumentEffects.h>
+#include <IO/genTVSpec.h>
+#include <IO/FalckeGorhamGalacticNoise.h>
 
 namespace CR { // Namespace CR -- begin
   
   /*!
-    \class genTVSpec
+    \class simulation2event
     
     \ingroup IO
     
-    \brief Brief description for class genTVSpec
+    \brief Brief description for class simulation2event
     
     \author Andreas Horneffer
 
     \date 2007/10/17
 
-    \test tgenTVSpec.cc
+    \test tsimulation2event.cc
     
     <h3>Prerequisite</h3>
     
@@ -61,24 +60,12 @@ namespace CR { // Namespace CR -- begin
     <h3>Example(s)</h3>
     
   */  
-  class genTVSpec {
-
-  protected:
+  class simulation2event {
     
     /*!
       \brief The CalTableReader
     */
     CalTableReader *CTRead;
-
-    /*!
-      \brief Storage for the frequency-axis
-    */
-    Vector<Double> frequency_p;
-
-    /*!
-      \brief Storage for the Antenna-IDs
-    */
-    Vector<Int> AntIDs_p;
 
   public:
     
@@ -87,24 +74,24 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Default constructor
     */
-    genTVSpec ();
+    simulation2event ();
     
     // -------------------------------------------------------------- Destruction
 
     /*!
       \brief Destructor
     */
-    ~genTVSpec ();
-    
+    ~simulation2event ();
+        
     // --------------------------------------------------------------- Parameters
     
     /*!
       \brief Get the name of the class
       
-      \return className -- The name of the class, genTVSpec.
+      \return className -- The name of the class, simulation2event.
     */
     std::string className () const {
-      return "genTVSpec";
+      return "simulation2event";
     }
 
     /*!
@@ -118,7 +105,7 @@ namespace CR { // Namespace CR -- begin
       \brief Provide a summary of the internal status
     */
     void summary (std::ostream &os);    
-    
+
     // ------------------------------------------------------------------ Methods
     
     /*!
@@ -129,38 +116,29 @@ namespace CR { // Namespace CR -- begin
     void setCalTable(CalTableReader *newCTRead){
       CTRead = newCTRead;
     }
-    
-    /*!
-      \brief Set the Antenna IDs
-      
-      \param newAntIDs - Vector with the Antenna IDs
-    */
-    void setAntennaIDs(Vector<Int> newAntIDs){
-      AntIDs_p = newAntIDs;
-    }
-    
-    /*!
-      \brief Set the frequency axis
-      
-      \param newFrequency - Vector with the frequency values
-    */
-    void setFreqAxis(Vector<Double> newFrequency){
-      frequency_p.resize(newFrequency.shape());
-      frequency_p = newFrequency;
-    }
-    
-    /*!
-      \brief Generate a spectrum that contains the signals for the TV-calibration
-      
-      \param date        - date for which to get the reference data from the CalTables
-      \param Amplitude=1 - Amplitude of the signals
 
-      \return Matrix with the data
+    /*!
+      \brief Open a simulation and generate a LOPES-style eventfile
+      
+      \param outfile -- name (including path) of the eventfile to be generated
+      \param SimulationName -- name of the REAS parameter file (without extension
+                               <tt>.reas</tt>)
+      \param AntListName   -- name of the antenna list file (without extension
+                            <tt>.list</tt>)
+      \param path="."      -- directory in which the simulation data lies (without <tt>/</tt> at end)
+      \param date=1104580800 -- Date for which to get the calibration data (default = 1.1.2005)
+      \param presync=32768 -- Number of samples before the "trigger" (default = LOPES default)
+      \param AddTV=True    -- Add mockup-signals of the TV-transmitter
+      \param AddNoise=True -- Add "Galactic" noise to the data
+      
+      \result returns true if read was successful
     */
-    Matrix<DComplex> GetTVSpectrum(uInt date, Double Amplitude=1e3);
+    Bool generateEvent(String outfile, String const SimulationName,String const AntListName,
+		       String const path=".", uInt date=1104580800, int presync=32768,
+		       Bool AddTV=True, Bool AddNoise=True); 
     
   private:
-    
+        
     /*!
       \brief Unconditional deletion 
     */
@@ -170,5 +148,5 @@ namespace CR { // Namespace CR -- begin
   
 } // Namespace CR -- end
 
-#endif /* GENTVSPEC_H */
+#endif /* SIMULATION2EVENT_H */
   
