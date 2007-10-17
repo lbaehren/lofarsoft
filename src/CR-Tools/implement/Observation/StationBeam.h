@@ -43,7 +43,6 @@
 
 #include <casa/Quanta.h>
 #include <casa/Exceptions/Error.h>
-#include <casa/namespace.h>
 #include <tables/Tables/Table.h>
 #include <tables/Tables/TableDesc.h>
 #include <tables/Tables/SetupNewTab.h>
@@ -52,10 +51,7 @@
 #include <tables/Tables/ScaColDesc.h>
 #include <tables/Tables/ScaRecordColDesc.h>
 
-#include <Math/Math.h>
-
-#include <gsl/manual/gsl_sf_hyperg.h>
-#include <gsl/manual/gsl_sf_gamma.h>
+#include <casa/namespace.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -104,11 +100,11 @@ namespace CR { // Namespace CR -- begin
     StationBeam( const Double& source_declination,
                  const Double& source_hr_angle,
 		 const Vector<uint>& station_id,
-                 const Double& init_freq,
+                 const Double& frequency,
 		 const Double& bandwidth,
 		 const Double& station_radii,
-		 const Vector<Double>& position_x,
-		 const Vector<Double>& position_y,
+		 Vector<Double>& position_x,
+		 Vector<Double>& position_y,
 		 const Vector<Double>& legendre_root,
 		 const Vector<Double>& legendre_weight ) ;
 		 
@@ -174,11 +170,55 @@ namespace CR { // Namespace CR -- begin
 		     const Double& source_declination,
 		     const Double& source_hr_angle,
 		     const Double& station_radii,
-		     const Vector<Double>& position_x,
-		     const Vector<Double>& position_y,
+		     const Vector<uint>& station_id,
+		     Vector<Double>& position_x,
+		     Vector<Double>& position_y,
 		     const Vector<Double>& legendre_root,
 		     const Vector<Double>& legendre_weight ) ;
+		     
 
+ Double integrate(  const Double& source_declination,
+		    const Double& source_hr_angle,
+		    const Double& station_radii,
+		    const Vector<uint>& station_id,
+		    Vector<Double>& position_x,
+		    Vector<Double>& position_y,
+		    const Vector<Double>& legendre_root,
+		    const Vector<Double>& legendre_weight )  ;
+		    		     		     		     
+ Double int_zenith( const Double& frequency,
+	            const Double& hr_angle,
+		    const Vector<Double>& declination,
+		    const Double& source_declination,
+		    const Double& source_hr_angle,
+		    const Double& station_radii,
+		    const Vector<uint>& station_id,
+		    Vector<Double>& position_x,
+		    Vector<Double>& position_y,
+		    const Vector<Double>& legendre_root,
+		    const Vector<Double>& legendre_weight )      ;
+		    
+ Double int_azimuth( const Double& frequency,
+	             const Vector<Double>& hr_angle,
+		     const Double& source_declination,
+		     const Double& source_hr_angle,
+		     const Double& station_radii,
+		     const Vector<uint>& station_id,
+		     Vector<Double>& position_x,
+		     Vector<Double>& position_y,
+		     const Vector<Double>& legendre_root,
+		     const Vector<Double>& legendre_weight )      ;		    
+
+Double int_frequency( const Vector<Double>& frequency,
+	              const Double& source_declination,
+		      const Double& source_hr_angle,
+		      const Double& station_radii,
+		      const Vector<uint>& station_id,
+		      Vector<Double>& position_x,
+		      Vector<Double>& position_y,
+		      const Vector<Double>& legendre_root,
+		      const Vector<Double>& legendre_weight )      ;		    
+		     
   private:
     
     /*!
