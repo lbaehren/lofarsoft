@@ -1,5 +1,5 @@
 #############################################################################
-# FILE NAME: init.sh
+# FILE NAME: init.csh
 #
 # DEVELOPMENT: LOFAR USG
 #
@@ -19,8 +19,8 @@
 #       and if not present is defined. This addition allows user's to 
 #       utilize the included python modules.
 #
-#       This version of the script is written in the sh language, 
-#       and is compatible bash, too.
+#       This version of the script is written in the csh language, 
+#       and is compatible tcsh, too.
 #
 #############################################################################
 
@@ -30,11 +30,12 @@
 # Check for the existence of the LOFARSOFT  environment variable
 #
 #############################################################################
-
-if test -z $LOFARSOFT ; then
+if(${?LOFARSOFT} == 0) then
    echo "ERROR:  Please set the LOFARSOFT environment variable"
-   exit;
-fi
+   exit
+else
+   echo "Initializing LOFAR software environment"
+endif
 
 
 #############################################################################
@@ -43,7 +44,10 @@ fi
 #
 #############################################################################
 
-export PATH=$PATH:$LOFARSOFT/release/bin
+echo "-- Add the LOFAR executables to the path"
+
+set path = ( $path $LOFARSOFT/release/bin )
+
 
 #############################################################################
 #
@@ -51,11 +55,16 @@ export PATH=$PATH:$LOFARSOFT/release/bin
 #
 #############################################################################
 
-if test -z $PYTHONPATH ; then
-	export PYTHONPATH=$LOFARSOFT/release/lib/python
-else
-	export PYTHONPATH=$PYTHONPATH:$LOFARSOFT/release/lib/python
-fi
+echo "-- Add the Python libraries to the existing search path"
+
+if ($?PYTHONPATH) then
+   if ( $PYTHONPATH != $LOFARSOFT/release/lib ) then   
+      setenv PYTHONPATH ${PYTHONPATH}:${LOFARSOFT}/release/lib/python
+   endif
+else 
+   setenv PYTHONPATH ${LOFARSOFT}/release/lib/python
+endif
+
 
 #############################################################################
 #                    Finished configuration                                 #  

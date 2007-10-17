@@ -7,6 +7,7 @@
 ## Main CMake configuration file for building the "casacore" package.
 ##
 ## Pending issues:
+##  - support building shared libraries
 ##  - scimath/Mathematics/test/tVanVleck does not link due to missing f2c symbols
 ##
 ## =============================================================================
@@ -24,6 +25,7 @@ cmake_minimum_required (VERSION 2.4)
 
 option (casacore_BUILD_TESTS "Build the test programs?" 0)
 option (casacore_ENABLE_TESTING "Enable running test programs?" 0)
+option (casacore_SHARED_LIBRARIES "Build libraries as shared libraries?" 0)
 
 ## Handle option: testing mode on/off
 

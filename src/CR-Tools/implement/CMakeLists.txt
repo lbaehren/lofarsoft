@@ -101,11 +101,6 @@ endif (libutil)
 ## ------------------------------------------------------------------------------
 ## Create the library
 
-add_definitions (
-  -fPIC
-  -ftemplate-depth-100
-  )
-
 add_library (cr ${cr_sources})
 
 if (NOT APPLE)

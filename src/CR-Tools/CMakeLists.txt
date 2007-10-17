@@ -198,8 +198,10 @@ endif (CR_GLISH_SUPPORT)
 
 if (HAVE_CASA OR HAVE_CASACORE)
   add_definitions (
-    -DWITH_CASA
+    -fPIC
+    -ftemplate-depth-100
     # -- compiler flags utilized in the source code --
+    -DWITH_CASA
     -DAIPS_STDLIB
     -DAIPS_AUTO_STL
     -DAIPS_NO_LEA_MALLOC

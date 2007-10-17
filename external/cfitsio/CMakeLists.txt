@@ -18,6 +18,33 @@ set (CFITSIO_VERSION "${CFITSIO_VERSION_MAJOR}.${CFITSIO_VERSION_MINOR}")
 option (CFITSIO_BUILD_TESTS "Build test programs for CFITSIO?" 1)
 option (CFITSIO_BUILD_HERA "Build for HERA project (for LHEA use only)" 0)
 
+## Only force rebuild of the library from the provided source code, if no system
+## installation can be found. In order to handle this properly, we use the CMake
+## find script
+
+option (CFITSIO_FORCE_BUILD "Force rebuild and local installation" 0)
+
+## check where to find the CMake scripts
+
+find_path (CFITSIO_cmake FindCFITSIO.cmake
+  PATHS 
+  ${CFITSIO_SOURCE_DIR}
+  ${CFITSIO_SOURCE_DIR}/..
+  ${CFITSIO_SOURCE_DIR}/../..
+  ${CFITSIO_SOURCE_DIR}/../../..
+  PATH_SUFFIXES
+  devel_common/cmake
+  )
+
+if (CFITSIO_cmake)
+  include (${CFITSIO_cmake}/FindCFITSIO.cmake)
+endif (CFITSIO_cmake)
+
+## <-- begin build condition --------------------------------------------------->
+
+if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
+endif (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
+
 ## -----------------------------------------------------------------------------
 ## Standard locations where to look for required components
 
