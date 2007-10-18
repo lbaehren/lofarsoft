@@ -63,7 +63,7 @@ int test_simulation2event ()
     std::cout << "[2] Generating test event ..." << std::endl;
     newsimulation2event.generateEvent("tsimulation2event.event","30deg1e17_shift",
 				      "lopes30", "/home/horneff/testreas",
-				      1104580800, 32768, True, True);
+				      1136116800, 32768, True, True);
 
     newsimulation2event.summary(); 
   } catch (std::string message) {

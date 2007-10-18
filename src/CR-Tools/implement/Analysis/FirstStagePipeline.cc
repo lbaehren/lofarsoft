@@ -22,7 +22,7 @@
 
 #include <Analysis/FirstStagePipeline.h>
 
-#define pi 3.1415926536
+#define PI 3.1415926536
 
 /*!
   \class FirstStagePipeline
@@ -154,7 +154,7 @@ namespace CR { // Namespace CR -- begin
       Vector<Double> elgain;
       Vector<DComplex> phasecal,tempComplexVec1,tempComplexVec2;
       DComplex tmpcomp(0.,1.);
-      tmpcomp *= 2*pi;
+      tmpcomp *= 2*PI;
       Vector<Double> freqVals = dr->frequencyValues();
       Double delay;
       for (i=0; i<nAnt ; i++){
