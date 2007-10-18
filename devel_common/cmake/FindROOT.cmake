@@ -82,6 +82,9 @@ set (libs
   PyROOT
   RIO
   Rint
+  Spectrum
+  SPlot
+  SQL
   thread
   Tree
   TreePlayer

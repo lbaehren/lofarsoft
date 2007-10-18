@@ -20,6 +20,15 @@ option (PGPLOT_FORCE_BUILD "Force rebuild and local installation" 0)
 option (PGPLOT_ENABLE_TESTING "Enable testing environment?" 1)
 option (PGPLOT_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
 
+## Driver selection
+
+option (PGPLOT_DRIVER_NULL "Enable device: Null device" 1)
+option (PGPLOT_DRIVER_PGMF "Enable device: PGPLOT metafile" 1)
+option (PGPLOT_DRIVER_PS   "Enable device: PostScript printers, monochrome, landscape" 1)
+option (PGPLOT_DRIVER_VPS  "Enable device: Postscript printers, monochrome, portrait" 1)
+option (PGPLOT_DRIVER_CPS  "Enable device: Postscript printers, color, landscape" 1)
+option (PGPLOT_DRIVER_VCPS  "Enable device: Postscript printers, color, portrait" 1)
+
 ## check where to find the CMake scripts
 
 find_path (pgplot_cmake FindPGPLOT.cmake FindG2C.cmake
@@ -137,18 +146,33 @@ file (WRITE ${outfile} "! List of selected drivers\n\n")
 
 ## [1] Null device -------------------------------
 
-file (APPEND ${outfile} "NUDRIV 0 /NULL     Null device	 Std F77\n")
+if (PGPLOT_DRIVER_NULL)
+  file (APPEND ${outfile} "NUDRIV 0 /NULL     Null device	 Std F77\n")
+endif (PGPLOT_DRIVER_NULL)
 
 ## [2] PGPLOT metafile ----------------------------
 
-file (APPEND ${outfile} "PGDRIV 0 /PGMF     PGPLOT metafile  Std F77\n")
+if (PGPLOT_DRIVER_PGMF)
+  file (APPEND ${outfile} "PGDRIV 0 /PGMF     PGPLOT metafile  Std F77\n")
+endif (PGPLOT_DRIVER_PGMF)
 
 ## [3] Postscript --------------------------------
 
-file (APPEND ${outfile} "PSDRIV 1 /PS       PostScript printers, monochrome, landscape	Std F77\n")
-file (APPEND ${outfile} "PSDRIV 2 /VPS      Postscript printers, monochrome, portrait		Std F77\n")
-file (APPEND ${outfile} "PSDRIV 3 /CPS      PostScript printers, color, landscape		Std F77\n")
-file (APPEND ${outfile} "PSDRIV 4 /VCPS     PostScript printers, color, portrait		Std F77\n")
+if (PGPLOT_DRIVER_PS)
+  file (APPEND ${outfile} "PSDRIV 1 /PS       PostScript printers, monochrome, landscape	Std F77\n")
+endif (PGPLOT_DRIVER_PS)
+
+if (PGPLOT_DRIVER_VPS)
+  file (APPEND ${outfile} "PSDRIV 2 /VPS      Postscript printers, monochrome, portrait		Std F77\n")
+endif (PGPLOT_DRIVER_VPS)
+
+if (PGPLOT_DRIVER_CPS)
+  file (APPEND ${outfile} "PSDRIV 3 /CPS      PostScript printers, color, landscape		Std F77\n")
+endif (PGPLOT_DRIVER_CPS)
+
+if (PGPLOT_DRIVER_VCPS)
+  file (APPEND ${outfile} "PSDRIV 4 /VCPS     PostScript printers, color, portrait		Std F77\n")
+endif (PGPLOT_DRIVER_VCPS)
 
 ## [4] X-window Rivet/Tk -------------------------
 

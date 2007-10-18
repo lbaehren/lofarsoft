@@ -7,8 +7,8 @@
 # The following variables are set when PostgreSQL is found:
 #  HAVE_PostgreSQL       = Set to true, if all components of PostgreSQL
 #                          have been found.
-#  PostgreSQL_INCLUDES   = Include path for the header files of PostgreSQL
-#  PostgreSQL_LIBRARIES  = Link these to use PostgreSQL
+#  POSTGRESQL_INCLUDES   = Include path for the header files of PostgreSQL
+#  POSTGRESQL_LIBRARIES  = Link these to use PostgreSQL
 #  PostgreSQL_LFGLAS     = Linker flags (optional)
 
 ## -----------------------------------------------------------------------------
@@ -29,9 +29,32 @@ set (include_locations
   )
 
 ## -----------------------------------------------------------------------------
+## Check for system header files included from within the library
+
+find_path (stdio_h stdio.h ${include_locations})
+find_path (stdlib_h stdlib.h ${include_locations})
+find_path (string_h string.h ${include_locations})
+find_path (stddef_h stddef.h ${include_locations})
+find_path (stdarg_h stdarg.h ${include_locations})
+find_path (strings_h strings.h ${include_locations})
+find_path (SupportDefs_h SupportDefs.h ${include_locations})
+
+if (strings_h)
+  add_definitions (-DHAVE_STRINGS_H=1)
+else (strings_h)
+  add_definitions (-DHAVE_STRINGS_H=0)
+endif (strings_h)
+
+if (SupportDefs_h)
+  add_definitions (-DHAVE_SUPPORTDEFS_H=1)
+else (SupportDefs_h)
+  add_definitions (-DHAVE_SUPPORTDEFS_H=0)
+endif (SupportDefs_h)
+
+## -----------------------------------------------------------------------------
 ## Check for the header files
 
-find_path (PostgreSQL_INCLUDES postgres_ext.h pgtypes_numeric.h libpq-fe.h
+find_path (PostgreSQL_INCLUDES postgres.h postgres_ext.h pgtypes_numeric.h libpq-fe.h
   PATHS ${include_locations}
   PATH_SUFFIXES postgresql
   NO_DEFAULT_PATH
@@ -77,6 +100,24 @@ find_library (libecpg ecpg
 if (libecpg)
   list (APPEND PostgreSQL_LIBRARIES ${libecpg})
 endif (libecpg)
+
+## [4] libpgport
+
+find_library (libpgport pgport
+  PATHS ${lib_locations}
+  PATH_SUFFIXES postgresql
+  NO_DEFAULT_PATH
+  )
+
+if (libpgport)
+  list (APPEND PostgreSQL_LIBRARIES ${libpgport})
+endif (libpgport)
+
+## adjust the ordering of the libraries during linking
+
+if (PostgreSQL_LIBRARIES)
+  list (REVERSE PostgreSQL_LIBRARIES)
+endif (PostgreSQL_LIBRARIES)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found

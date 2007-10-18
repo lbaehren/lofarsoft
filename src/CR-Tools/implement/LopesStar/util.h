@@ -2,7 +2,6 @@
 #define __defined_util_h
 
 #ifdef HAVE_POSTGRESQL
-//!postgresql
 #include <libpq-fe.h>
 #endif
 
@@ -149,25 +148,34 @@ struct header{
   };
   
 //! struct of calibration output
-  struct cal{
-    float CorrValue[Max_SpecRes];	/*!<frequency dependet correction values for the field strength*/
-    int channel_id[Max_NoCh];		/*!<channel id*/
-    float MaxHF[Max_NoCh];		/*!<maximum of HF data in the time domain of the calibration pulses*/
-    float MaxEnv[Max_NoCh];		/*!<maximum of the envelope in the time domain of the calibrationi pulses*/
-    bool ADCoverflow;			/*!<flag for the ADC overflow of the calibrated channel*/
-    int CalCh;				/*!<channel id of the measured channel*/
-  };
+struct cal{
+  //! frequency dependet correction values for the field strength
+  float CorrValue[Max_SpecRes];
+  //! channel id
+  int channel_id[Max_NoCh];
+  //! maximum of HF data in the time domain of the calibration pulses
+  float MaxHF[Max_NoCh];
+  //! maximum of the envelope in the time domain of the calibrationi pulses
+  float MaxEnv[Max_NoCh];
+  //! flag for the ADC overflow of the calibrated channel
+  bool ADCoverflow;
+  int CalCh;				/*!<channel id of the measured channel*/
+};
 
   
-//! create the Tevent branches
 /*!
-After you have defined your TChain of the input files, this function creates the branches needed to access the data.
-All the variables are collected in the struct event.
-\param Tevent is a pointer of type  TChain to the Tevent tree
-\param event is a pointer of type struct event, this struct contains all variables which belong to the tree Tevent
-*/
-void CreateTevent(TChain *Tevent, struct event *event);
+  \brief Create the Tevent branches
 
+  After you have defined your TChain of the input files, this function creates the
+  branches needed to access the data. All the variables are collected in the struct
+  event.
+
+  \param Tevent is a pointer of type  TChain to the Tevent tree
+  \param event  is a pointer of type struct event, this struct contains all
+                variables which belong to the tree Tevent
+*/
+void CreateTevent(TChain *Tevent,
+		  struct event *event);
 
 //! create the Tevent branches
 /*!
@@ -178,24 +186,30 @@ Sets up the branches of the given TTree
 void CreateTevent(TTree *Tevent, struct event *event);
 
 
-//! create extendet Tevent branches
 /*!
-Info about header and channel_profile is also set to the Tevent tree
-\param Tevent is a pointer of type  TChain to the Tevent tree
-\param header pointer to the struct header
-\param channel_profiles pointer to the struct channel_profile 
+  \brief create extendet Tevent branches
+
+  Info about header and channel_profile is also set to the Tevent tree
+
+  \param Tevent is a pointer of type  TChain to the Tevent tree
+  \param header pointer to the struct header
+  \param channel_profiles pointer to the struct channel_profile 
 */
-void CreateTeventExtend(TChain *Tevent, struct header *header, struct channel_profiles *channel_profiles);
+void CreateTeventExtend (TChain *Tevent,
+			 struct header *header,
+			 struct channel_profiles *channel_profiles);
 
 
-//! create extendet Tevent branches
 /*!
-stucture for TTree object
-\param Tevent is a pointer of type  TChain to the Tevent tree
-\param header pointer to the struct header
-\param channel_profiles pointer to the struct channel_profile 
+  \brief Create extendet Tevent branches stucture for TTree object
+
+  \param Tevent is a pointer of type  TChain to the Tevent tree
+  \param header pointer to the struct header
+  \param channel_profiles pointer to the struct channel_profile 
 */
-void CreateTeventExtend(TTree *Tevent, struct header *header, struct channel_profiles *channel_profiles);
+void CreateTeventExtend (TTree *Tevent,
+			 struct header *header,
+			 struct channel_profiles *channel_profiles);
 
 
 //! create the Theader branches
@@ -213,7 +227,8 @@ Same like CreateTevent, but for the Tchannel_profiles tree.
 \param Tchannel_profile is a pointer of type  TChain to the Tchannel_profile tree
 \param channel_profiles is a pointer of type struct channel_profiles, this struct contains all variables which belong to the tree Tchannel_profiles
 */
-void CreateTchannel_profiles(TChain *Tchannel_profile, struct channel_profiles *channel_profiles);
+void CreateTchannel_profiles(TChain *Tchannel_profile,
+			     struct channel_profiles *channel_profiles);
 
 
 //! create the TAnaFlag branches
@@ -222,7 +237,8 @@ Same like CreateTevent, but for the TAnaFlag tree.
 \param TFlag is a pointer of type  TChain to the TAnaFlag tree
 \param AnaFlag is a pointer of type struct AnaFlag, this struct contains all variables which belong to the tree TAnaFlag
 */
-void CreateTAnaFlag(TChain *TFlag, struct AnaFlag *AnaFlag);
+void CreateTAnaFlag(TChain *TFlag,
+		    struct AnaFlag *AnaFlag);
 
 
 //! create the Tselftrigger branches
@@ -232,7 +248,8 @@ Same like CreateTevent, but for the Tselftrigger tree.
 \param selftrigger is a pointer of type struct selftrigger, this struct contains all variables which belong to the tree Tselftrigger
 \note the self-trigger bit is only present at odd ADC channels (north/south polarisation)
 */
-void CreateTselftrigger(TChain *Tselftrigger, struct selftrigger *selftrigger);
+void CreateTselftrigger(TChain *Tselftrigger,
+			struct selftrigger *selftrigger);
 
 
 //! create a TChain object
@@ -254,13 +271,19 @@ Description of the parameters:
 \param Timeshift it is also possible to shift the timestamp in time by \f$\Delta\f$t
 \return 1 if everything is ok, 0 if wrong timestamp is converted
 */
-int ConvertTimeStamp(char *Timestamp, int *Sec, int *Nanosec, double Timeshift = 0);
+int ConvertTimeStamp(char *Timestamp,
+		     int *Sec, 
+		     int *Nanosec,
+		     double Timeshift = 0);
 
 #ifdef HAVE_POSTGRESQL
-//! Checks the result of a query 
 /*!
-Call this function with a result pointer of PGresult and the function checks whether the result is valid or an error occurred.
-\param res is a pointer of the postgresql result, that have to be checked
+ \brief Checks the result of a query to the database
+
+ Call this function with a result pointer of PGresult and the function checks
+ whether the result is valid or an error occurred.
+ 
+ \param res is a pointer of the postgresql result, that have to be checked
 */
 void ResCheck(PGresult* res);
 #endif
@@ -272,7 +295,10 @@ void ResCheck(PGresult* res);
 \param start and \param stop define the length to average over the samples
 \param stop is set to window_size/2-100 if nothing is defined
 */
-void SubtractPedestal(int window_size, short int *trace, int start = 0, int stop = -1);
+void SubtractPedestal(int window_size,
+		      short int *trace,
+		      int start = 0,
+		      int stop = -1);
 
 
 //! subtract the pedestal of a given trace (type: float)
@@ -280,7 +306,10 @@ void SubtractPedestal(int window_size, short int *trace, int start = 0, int stop
 same as above with the trace of type float
 */
 
-void SubtractPedestal(int window_size, float *trace, int start = 0, int stop = -1);
+void SubtractPedestal(int window_size,
+		      float *trace,
+		      int start = 0,
+		      int stop = -1);
 
 
 //! Fast Fourier Transform of the Trace
@@ -293,19 +322,35 @@ This function makes a fft with the given trace and calculates the amplitude and 
 \param RawFFT is filled with the raw fft output. The first part is filled with the real and the second with the complex part of the transformation. The length of the array must be 2 times window_size.
 \param data_window is a switch to turn of the window function of the raw data, if false is set, the window function is a rectangle.
 */
-void TraceFFT(int window_size, short int *trace, float *Amp, float *Phase, float *RawFFT, bool data_window=true);
+void TraceFFT (int window_size,
+	       short int *trace,
+	       float *Amp,
+	       float *Phase, 
+	       float *RawFFT,
+	       bool data_window=true);
 
 //! Fast Fourier Transform of the Trace
 /*!
 same TraceFFT with float type of trace
 */
-void TraceFFT(int window_size, float *trace, float *Amp, float *Phase, float *RawFFT, bool data_window=true);
+void TraceFFT (int window_size,
+	       float *trace,
+	       float *Amp,
+	       float *Phase,
+	       float *RawFFT,
+	       bool data_window=true);
 
 //! Core of the Fast Fourier Transform
 /*!
 this function is called from the TraceFFT Wrapper functions. This includes the core of the fft method
 */
-void TraceFFTCore(int window_size, void *trace, bool Flag, float *Amp, float *Phase, float *RawFFT, bool data_window=true);
+void TraceFFTCore (int window_size,
+		   void *trace,
+		   bool Flag, 
+		   float *Amp,
+		   float *Phase,
+		   float *RawFFT,
+		   bool data_window=true);
 
 
 //! Inverse Fast Fourier Transform of the Trace
@@ -315,20 +360,28 @@ Same an TraceFFT but the inverse order
 void TraceiFFT(int window_size,  float *RawFFT, float *trace, int NoZeros=0);	      
 
 
-//! Amplitude and Phase converted to a trace
 /*!
-You have to give this function just the amplitude and phase distribution and you will get back
-the trace (not interpolated)
-The window_size is the length of the original data. 
-This function is not tested with interpolated data!!!
-\param window_size defines the length of the ADC trace.
-\param Amp Amplitude distribution with half of the window_size
-\param Phase Phase distribution with half of the window_size
-\param trace is the time signal with length of window_size
-\param fft_data RawFFT data pointer to recalculate the inverse FFT
-\param NoZeros number of used zeros
+  \brief Amplitude and Phase converted to a trace
+
+  You have to give this function just the amplitude and phase distribution and
+  you will get back the trace (not interpolated)
+
+  The window_size is the length of the original data. 
+  This function is not tested with interpolated data!!!
+
+  \param window_size defines the length of the ADC trace.
+  \param Amp Amplitude distribution with half of the window_size
+  \param Phase Phase distribution with half of the window_size
+  \param trace is the time signal with length of window_size
+  \param fft_data RawFFT data pointer to recalculate the inverse FFT
+  \param NoZeros number of used zeros
 */
-void AmpPhase2Trace(int window_size,  float *Amp, float *Phase, float *trace, float* fft_data, int NoZeros = 0);
+void AmpPhase2Trace (int window_size,
+		     float *Amp,
+		     float *Phase,
+		     float *trace,
+		     float* fft_data,
+		     int NoZeros = 0);
 
 
 //! Counts the pulses of raw ADC trace over a threshold
@@ -345,7 +398,12 @@ When the algorithm detects a pulse, the next search bin will 30 bins later.
 \param debug enable degub output, default disable
 \return The number of peaks over the given threshold, if no peak is found, 0 is returned. If a problem happens -1 is given back.
 */
-int PulseCount(unsigned int window_size, const float *Trace, double *Mean, double *Sigma, double *Max, bool debug=false);
+int PulseCount (unsigned int window_size,
+		const float *Trace,
+		double *Mean,
+		double *Sigma,
+		double *Max,
+		bool debug=false);
 
 
 //! Band-path Filter 
@@ -357,7 +415,11 @@ This function calculates a band-path filter of the given trace. Two FFTs are nec
 \param stop_freq is the stop frequency of the filter in MHz
 \param trace_out is a pointer of length window_size with the signal after filtering
 */
-void BandFilterFFT(int window_size, float *trace, float start_freq, float stop_freq, float *trace_out);
+void BandFilterFFT (int window_size,
+		    float *trace,
+		    float start_freq,
+		    float stop_freq,
+		    float *trace_out);
 
 
 //! Band-path Filter 
@@ -368,7 +430,10 @@ This function filters one given frequency out of the time signal.
 \param freq is the frequency to filter out
 \param trace_out is a pointer of length window_size with the signal after filtering
 */
-void FrequencyFilter(int window_size, float *trace, float freq, float *trace_out);
+void FrequencyFilter (int window_size,
+		      float *trace,
+		      float freq,
+		      float *trace_out);
 
 
 //! Trace checker for ADC error
@@ -390,7 +455,12 @@ The alternative fft function seems to be not as acruate as the other one.
 \param RawFFT must be a pointer with length of two window_sizes
 \param data_window is switch to enable or disable a window function for the trace
 */
-void TraceFFTReal(int window_size, short int *trace, float *Amp, float *Phase, float *RawFFT, bool data_window=true);
+void TraceFFTReal (int window_size,
+		   short int *trace,
+		   float *Amp,
+		   float *Phase,
+		   float *RawFFT,
+		   bool data_window=true);
 
 
 //! inverse fft of the alternative transform

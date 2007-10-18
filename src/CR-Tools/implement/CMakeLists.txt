@@ -90,6 +90,14 @@ if (HAVE_PNG)
   list (APPEND cr_link_libraries ${PNG_LIBRARIES})
 endif (HAVE_PNG)
 
+if (HAVE_ROOT)
+  list (APPEND cr_link_libraries ${ROOT_LIBRARIES})
+endif (HAVE_ROOT)
+
+if (HAVE_PostgreSQL)
+  list (APPEND cr_link_libraries ${PostgreSQL_LIBRARIES})
+endif (HAVE_PostgreSQL)
+
 if (libm)
   list (APPEND cr_link_libraries ${libm})
 endif (libm)

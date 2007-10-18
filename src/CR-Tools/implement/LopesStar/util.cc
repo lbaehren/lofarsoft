@@ -309,22 +309,26 @@ int ConvertTimeStamp(char *Timestamp, int  *Sec, int *Nanosec, double Timeshift)
 
 }
 
-/**********************************************************************************************/
+/*******************************************************************************/
 
 #ifdef HAVE_POSTGRESQL
+
 void ResCheck( PGresult *res){
-   if(PQresultStatus(res)>5){
+  if(PQresultStatus(res)>5){
     cerr << PQresStatus(PQresultStatus(res)) << endl;
     cerr << "Program terminated ... "<< endl;
     exit(1);
-   }
-
+  }
+  
 }
+
 #endif
 
-/**********************************************************************************************/
+/*******************************************************************************/
 
-void SubtractPedestal(int window_size, short int *trace, int start, int stop){
+void SubtractPedestal (int window_size,
+		       short int *trace,
+		       int start, int stop) {
 
    int TraceMean=0;
    if(stop==-1) stop = window_size/2-100;

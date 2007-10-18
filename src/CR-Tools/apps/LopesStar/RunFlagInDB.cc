@@ -103,7 +103,9 @@ int main(int argc, char *argv[])
 
 
   res = PQexec(conn,"BEGIN;");
+#ifdef HAVE_POSTGRESQL  
   ResCheck(res);
+#endif
   PQfreemem(res);
   
   for(int i=0; i<TAnaFlag->GetEntries(); i++){

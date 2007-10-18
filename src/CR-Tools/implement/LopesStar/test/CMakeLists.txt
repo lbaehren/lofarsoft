@@ -16,9 +16,12 @@ set (tests
   starTrace
   RunLoop
   OptWindowSize
-  CalibrationD30
   MC_timestamp
   )
+
+if (HAVE_PostgreSQL)
+  list (APPEND tests CalibrationD30)
+endif (HAVE_PostgreSQL)
 
 ## -----------------------------------------------------------------------------
 ## Build the test programs
