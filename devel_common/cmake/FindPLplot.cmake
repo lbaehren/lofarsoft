@@ -8,7 +8,7 @@
 #  HAVE_PLPLOT       = Set to true, if all components of PLplot have been found.
 #  PLPLOT_INCLUDES   = Include path for the header files of PLplot
 #  PLPLOT_LIBRARIES  = Link these to use PLplot
-#  PLPLOT_LFGLAS     = Linker flags (optional)
+#  PLPLOT_LFLAGS     = Linker flags (optional)
 
 ## -----------------------------------------------------------------------------
 ## Standard locations where to look for required components
