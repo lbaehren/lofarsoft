@@ -250,7 +250,7 @@ case $param_packageName in
     plplot)
 		echo "[`date`] Selected package Plplot"
 		if test -d $basedir/../external/plplot ; then
-	    	build_package plplot external/plplot "-DCMAKE_INSTALL_PREFIX:STRING=$basedir/../release -DCMAKE_INSTALL_BINDIR:STRING=bin -DCMAKE_INSTALL_DATADIR:STRING=share -DCMAKE_INSTALL_INCLUDEDIR:STRING=include -DBUILD_SHARED_LIBS:BOOL=0 -DPLD_aqt:BOOL=0";
+	    	build_package plplot external/plplot "-DCMAKE_INSTALL_PREFIX:STRING=$basedir/../release -DCMAKE_INSTALL_BINDIR:STRING=bin -DCMAKE_INSTALL_DATADIR:STRING=share -DCMAKE_INSTALL_INCLUDEDIR:STRING=include -DBUILD_SHARED_LIBS:BOOL=0 -DENABLE_DYNDRIVERS:BOOL=OFF -DPLD_aqt:BOOL=OFF";
 		else
 		    cd $basedir/../external
 	    	## download the source tar-ball from source forge
