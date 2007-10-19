@@ -51,15 +51,15 @@ VPATH=$(srcdir) $(top_builddir)/src $(top_srcdir)/src
 
 ## Programs
 SHELL=/bin/sh
-CC=/usr/bin/gcc
+CC=/sw/lib/gcc4.2/bin/gcc
 ## H5_CPPFLAGS and H5_CFLAGS are used for extra flags used to build HDF5
 ## (flags that don't need to be included in h5cc, for instance).
-CFLAGS= -std=c99 -Wno-long-long -O -fomit-frame-pointer -finline-functions 
-CPPFLAGS=-UH5_DEBUG_API -DNDEBUG -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -D_POSIX_SOURCE -D_BSD_SOURCE  
-H5_CFLAGS= -std=c99 -Wno-long-long -O -fomit-frame-pointer -finline-functions
-H5_CPPFLAGS=-UH5_DEBUG_API -DNDEBUG -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -D_POSIX_SOURCE -D_BSD_SOURCE 
+CFLAGS= -ansi -O -fomit-frame-pointer -finline-functions 
+CPPFLAGS=-UH5_DEBUG_API -DNDEBUG  
+H5_CFLAGS= -ansi -O -fomit-frame-pointer -finline-functions
+H5_CPPFLAGS=-UH5_DEBUG_API -DNDEBUG 
 LDFLAGS=
-ROOT=/home/lars/coding/lofar/usg/external/hdf5
+ROOT=/Users/lars/Code/lofar/usg/external/hdf5
 LIBS=-lz -lm 
 AR=ar
 RANLIB=ranlib
@@ -77,11 +77,11 @@ TIME=time
 TRACE=:
 
 ## Installation points
-prefix=/home/lars/coding/lofar/usg/external/hdf5/../../release
+prefix=/Users/lars/Code/lofar/usg/external/hdf5/../../release
 exec_prefix=${prefix}
 bindir=${exec_prefix}/bin
 libdir=${exec_prefix}/lib
-includedir=/home/lars/coding/lofar/usg/external/hdf5/../../release/include/hdf5
+includedir=/Users/lars/Code/lofar/usg/external/hdf5/../../release/include/hdf5
 docdir=${prefix}/doc
 PUB_LIB=$(LIB)
 
