@@ -253,10 +253,9 @@ case $param_packageName in
 		## first pass
 		mkdir $basedir/plplot 
 		cd $basedir/plplot 
-		cmake -C $basedir/../devel_common/cmake/SettingsPLplot.cmake -DCMAKE_INSTALL_PREFIX:STRING=$basedir/../release $basedir/../external/plplot
-		cmake -C $basedir/../devel_common/cmake/SettingsPLplot.cmake -DCMAKE_INSTALL_PREFIX:STRING=$basedir/../release $basedir/../external/plplot
+		cmake -C $basedir/../devel_common/cmake/SettingsPLplot.cmake $basedir/../external/plplot
 		## second pass
-	    	build_package plplot external/plplot "-DCMAKE_INSTALL_PREFIX:STRING=$basedir/../release  -DENABLE_DYNDRIVERS:BOOL=OFF -DPLD_aqt:BOOL=OFF";
+	    	build_package plplot external/plplot
 		else
 		    cd $basedir/../external
 	    	## download the source tar-ball from source forge
