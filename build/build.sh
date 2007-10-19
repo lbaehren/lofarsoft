@@ -39,7 +39,7 @@ print_help ()
     echo "    the packages in the LOFAR USG distribution.";
     echo "";
     echo "    <package> = bison blitz boost casacore cfitsio cmake cr dal flex hdf5";
-    echo "                pgplot plplot python wcslib";
+    echo "                plplot python wcslib";
     echo "";
     echo "    The following options are available:";
     echo "";
@@ -128,7 +128,7 @@ else
 		rm -rf dal dsp;
 		rm -rf flex;
 		rm -rf hdf5;
-		rm -rf pgplot plplot python;
+		rm -rf plplot python;
 		rm -rf vtk;
 		rm -rf wcslib;
 	;;
@@ -247,10 +247,6 @@ case $param_packageName in
 		echo "[`date`] Selected package Hdf5"
 		build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
-    pgplot)
-		echo "[`date`] Selected package PGPlot"
-		build_package pgplot external/pgplot "-DPGPLOT_FORCE_BUILD:BOOL=$param_forceBuild";
-    ;;
     plplot)
 		echo "[`date`] Selected package Plplot"
 		if test -d $basedir/../external/plplot ; then
@@ -308,7 +304,6 @@ case $param_packageName in
     cr)
 		echo "[`date`] Processing required packages ..."
 		./build.sh dal;
-		./build.sh pgplot;
 		echo "[`date`] Building CR-Tools package ..."
 		build_package cr src/CR-Tools;
     ;;

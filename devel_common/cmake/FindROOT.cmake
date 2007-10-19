@@ -8,7 +8,7 @@
 #  HAVE_ROOT       = Set to true, if all components of ROOT have been found.
 #  ROOT_INCLUDES   = Include path for the header files of ROOT
 #  ROOT_LIBRARIES  = Link these to use ROOT
-#  ROOT_LFGLAS     = Linker flags (optional)
+#  ROOT_LFLAGS     = Linker flags (optional)
 
 ## -----------------------------------------------------------------------------
 ## Search locations

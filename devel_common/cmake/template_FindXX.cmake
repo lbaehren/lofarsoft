@@ -9,7 +9,7 @@
 #                          have been found.
 #  <PACKAGE>_INCLUDES   = Include path for the header files of <PACKAGE>
 #  <PACKAGE>_LIBRARIES  = Link these to use <PACKAGE>
-#  <PACKAGE>_LFGLAS     = Linker flags (optional)
+#  <PACKAGE>_LFLAGS     = Linker flags (optional)
 
 ## -----------------------------------------------------------------------------
 ## Standard locations where to look for required components
