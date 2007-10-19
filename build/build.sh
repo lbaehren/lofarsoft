@@ -250,7 +250,13 @@ case $param_packageName in
     plplot)
 		echo "[`date`] Selected package Plplot"
 		if test -d $basedir/../external/plplot ; then
-	    	build_package plplot external/plplot "-DCMAKE_INSTALL_PREFIX:STRING=$basedir/../release -DCMAKE_INSTALL_BINDIR:STRING=bin -DCMAKE_INSTALL_DATADIR:STRING=share -DCMAKE_INSTALL_INCLUDEDIR:STRING=include -DBUILD_SHARED_LIBS:BOOL=0 -DENABLE_DYNDRIVERS:BOOL=OFF -DPLD_aqt:BOOL=OFF";
+		## first pass
+		mkdir $basedir/plplot 
+		cd $basedir/plplot 
+		cmake -C $basedir/../devel_common/cmake/SettingsPLplot.cmake -DCMAKE_INSTALL_PREFIX:STRING=$basedir/../release $basedir/../external/plplot
+		cmake -C $basedir/../devel_common/cmake/SettingsPLplot.cmake -DCMAKE_INSTALL_PREFIX:STRING=$basedir/../release $basedir/../external/plplot
+		## second pass
+	    	build_package plplot external/plplot "-DCMAKE_INSTALL_PREFIX:STRING=$basedir/../release  -DENABLE_DYNDRIVERS:BOOL=OFF -DPLD_aqt:BOOL=OFF";
 		else
 		    cd $basedir/../external
 	    	## download the source tar-ball from source forge
