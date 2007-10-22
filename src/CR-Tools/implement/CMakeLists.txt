@@ -86,6 +86,10 @@ if (HAVE_PGPLOT)
   list (APPEND cr_link_libraries ${PGPLOT_LIBRARIES})
 endif (HAVE_PGPLOT)
 
+if (HAVE_PLPLOT)
+  list (APPEND cr_link_libraries ${PLPLOT_LIBRARIES})
+endif (HAVE_PLPLOT)
+
 if (HAVE_PNG)
   list (APPEND cr_link_libraries ${PNG_LIBRARIES})
 endif (HAVE_PNG)
