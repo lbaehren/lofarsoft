@@ -59,7 +59,7 @@ namespace CR { // Namespace CR -- begin
     
     \ingroup Display
     
-    \brief Generate simple (postscript) plots with the CASA pgplotter interface
+    \brief Generate simple (postscript) plots with PLplot or the CASA pgplotter interface
     
     \author Andreas Horneffer
 
@@ -138,7 +138,7 @@ namespace CR { // Namespace CR -- begin
       \param xmax - Maximal x-value of the plotting area
       \param ymin - Minimal y-value of the plotting area
       \param ymax - Maximal y-value of the plotting area
-      \param axis=0 - axis parameter of pgplot::env() see pgplotter documentation
+      \param axis=0 - axis parameter of "env()" see PLplot documentation
       \param just=0 - set to 1 to have x and y axes on the same scale
       \param col=1 - color index for the coordinate axes
       \param cheight=1 - size of the characters
@@ -155,7 +155,7 @@ namespace CR { // Namespace CR -- begin
       \param xvals - x-values of the line to be plotted
       \param yvals - y-values of the line to be plotted
       \param col=2 - color index for the line
-      \param style=1 - index of the line style
+      \param style=1 - index of the line style (see pllsty() or sls() documentation)
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
