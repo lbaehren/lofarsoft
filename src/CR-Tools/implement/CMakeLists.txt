@@ -98,6 +98,14 @@ if (HAVE_ROOT)
   list (APPEND cr_link_libraries ${ROOT_LIBRARIES})
 endif (HAVE_ROOT)
 
+if (HAVE_TCL)
+  list (APPEND cr_link_libraries ${TCL_LIBRARIES})
+endif (HAVE_TCL)
+
+if (HAVE_TK)
+  list (APPEND cr_link_libraries ${TK_LIBRARIES})
+endif (HAVE_TK)
+
 if (HAVE_PostgreSQL)
   list (APPEND cr_link_libraries ${PostgreSQL_LIBRARIES})
 endif (HAVE_PostgreSQL)

@@ -40,11 +40,14 @@ if (NOT CR_VERBOSE_CONFIGURE)
   set (HDF5_FIND_QUIETLY 1)
   set (LAPACK_FIND_QUIETLY 1)
   set (PGPLOT_FIND_QUIETLY 1)
+  set (PLPLOT_FIND_QUIETLY 1)
   set (PNG_FIND_QUIETLY 1)
   set (POPT_FIND_QUIETLY 1)
   set (PostgreSQL_FIND_QUIETLY 1)
   set (PYTHON_FIND_QUIETLY 1)
   set (ROOT_FIND_QUIETLY 1)
+  set (TCL_FIND_QUIETLY 1)
+  set (TK_FIND_QUIETLY 1)
   set (WCSLIB_FIND_QUIETLY 1)
 endif (NOT CR_VERBOSE_CONFIGURE)
 
@@ -124,23 +127,23 @@ if (cr_cmake)
   if (NOT HAVE_LAPACK)
     include (${cr_cmake}/FindLAPACK.cmake)
   endif (NOT HAVE_LAPACK)
-  ## -- PGPlot ---------------
+  ## -- PGPlot -----------------------------------
   if (NOT HAVE_PGPLOT)
     include (${cr_cmake}/FindPGPLOT.cmake)
   endif (NOT HAVE_PGPLOT)
-  ## -- PLplot ---------------
+  ## -- PLplot -----------------------------------
   if (NOT HAVE_PLPLOT)
     include (${cr_cmake}/FindPLplot.cmake)
   endif (NOT HAVE_PLPLOT)
-  ## -- PNG ------------------
+  ## -- PNG --------------------------------------
   if (NOT HAVE_PNG)
     include (${cr_cmake}/FindPNG.cmake)
   endif (NOT HAVE_PNG)
-  ## -- popt -----------------
+  ## -- popt -------------------------------------
   if (NOT HAVE_POPT)
     include (${cr_cmake}/FindPOPT.cmake)
   endif (NOT HAVE_POPT)
-  ## -- PostgreSQL -----------
+  ## -- PostgreSQL -------------------------------
   if (NOT HAVE_PostgreSQL)
     include (${cr_cmake}/FindPostgreSQL.cmake)
   endif (NOT HAVE_PostgreSQL)
@@ -152,6 +155,13 @@ if (cr_cmake)
   if (NOT HAVE_ROOT)
     include (${cr_cmake}/FindROOT.cmake)
   endif (NOT HAVE_ROOT)
+  ## --- Tcl/Tk ----------------------------------  
+  if (NOT HAVE_TCL)
+    include (${cr_cmake}/FindTCL.cmake)
+  endif (NOT HAVE_TCL)
+  if (NOT HAVE_TK)
+    include (${cr_cmake}/FindTK.cmake)
+  endif (NOT HAVE_TK)
   ## -- WCSLIB -----------------------------------
   if (NOT HAVE_WCSLIB) 
     include (${cr_cmake}/FindWCS.cmake)
@@ -304,6 +314,14 @@ if (ROOT_INCLUDES)
   add_definitions (-DHAVE_ROOT)
 endif (ROOT_INCLUDES)
 
+if (TCL_INCLUDES)
+  include_directories (${TCL_INCLUDES})
+endif (TCL_INCLUDES)
+
+if (TK_INCLUDES)
+  include_directories (${TK_INCLUDES})
+endif (TK_INCLUDES)
+
 if (WCSLIB_INCLUDES)
   include_directories (${WCSLIB_INCLUDES})
   add_definitions (-DHAVE_WCSLIB)
@@ -367,6 +385,7 @@ message (STATUS " POPT ................... : ${HAVE_POPT}")
 message (STATUS " PostgreSQL ............. : ${HAVE_PostgreSQL}")
 message (STATUS " Python ................. : ${HAVE_PYTHON}")
 message (STATUS " ROOT ................... : ${HAVE_ROOT}")
+message (STATUS " Tcl / Tk  .............. : ${HAVE_TCL} / ${HAVE_TK}")
 message (STATUS " WCSLIB ................. : ${HAVE_WCSLIB}")
 message (STATUS "+------------------------------------------------------------+")
 message (STATUS " Source directory ....... : ${CR_SOURCE_DIR}")
