@@ -55,6 +55,9 @@ namespace CR { // Namespace CR -- begin
   }
   
   void SimplePlot::destroy () {
+#ifdef HAVE_PLPLOT
+      plend();
+#endif
 #ifdef HAVE_PGPLOT
      if (plotter_p != NULL) {
       delete plotter_p;
@@ -93,7 +96,25 @@ namespace CR { // Namespace CR -- begin
 			    Int cheight, 
 			    Int linewidth){
     try {
+#ifdef HAVE_PLPLOT
+      plend();
+      // set device to postscript-color
+      plsdev("psc");
+      // set output-filename
+      plsfnam(file.c_str());   
+      // set the background to white, and foreground to black
+      plscol0(0, 255, 255, 255);
+      plscol0(1, 0, 0, 0);
+      //initialize the plot
+      plinit();
+      plschr(0.,cheight);
+      plcol0(col);
+      plwid(linewidth);
+      plenv(xmin, xmax, ymin, ymax, just, axis);
+      
+#endif
 #ifdef HAVE_PGPLOT
+      //initialize a PGPlotter
        if (plotter_p != NULL) {
 	delete plotter_p;
 	plotter_p = NULL;
@@ -120,6 +141,30 @@ namespace CR { // Namespace CR -- begin
 			    Int col,
 			    Int style){
     try {
+#ifdef HAVE_PLPLOT
+      int i,npoints;
+      PLFLT *plxval, *plyval;
+
+      if (xvals.nelements() != yvals.nelements()){
+	cerr << "SimplePlot::PlotLine: " << "x- and y-vector of different length!" << endl;
+	return False;
+      };
+      npoints = xvals.nelements();
+      plxval = new PLFLT[npoints];
+      plyval = new PLFLT[npoints];
+
+      for (i=0; i<npoints; i++){
+	plxval[i] = xvals(i);
+	plyval[i] = yvals(i);
+      };
+
+      plcol0(col);
+      pllsty(style);
+      plline(npoints, plxval, plyval);
+
+      delete []plxval;
+      delete []plyval;
+#endif
 #ifdef HAVE_PGPLOT
        if (plotter_p == NULL){
 	cerr << "SimplePlot::PlotLine: " << "plotter not initialized!" << endl;
@@ -156,6 +201,57 @@ namespace CR { // Namespace CR -- begin
 				Int symbol,
 				Int ticklength){
     try {
+#ifdef HAVE_PLPLOT
+      int i,npoints;
+      PLFLT *plxval, *plyval, *plerrlow, *plerrhigh;
+
+      if (xvals.nelements() != yvals.nelements()){
+	cerr << "SimplePlot::PlotLine: " << "x- and y-vector of different length!" << endl;
+	return False;
+      };
+      npoints = xvals.nelements();
+      plxval = new PLFLT[npoints];
+      plyval = new PLFLT[npoints];
+      plerrlow = new PLFLT[npoints];
+      plerrhigh = new PLFLT[npoints];
+
+      for (i=0; i<npoints; i++){
+	plxval[i] = xvals(i);
+	plyval[i] = yvals(i);
+      };
+
+      plcol0(col);
+      plpoin(npoints, plxval, plyval, symbol);
+      if (yerrs.nelements() != 0) {
+	if (xvals.nelements() != yerrs.nelements()){
+	  cerr << "SimplePlot::PlotSymbols: " << "yerror-vector of different length!" << endl;
+	  return False;
+	}; 
+	for (i=0; i<npoints; i++){
+	  plerrlow[i] = yvals(i)-yerrs(i);
+	  plerrhigh[i] = yvals(i)+yerrs(i);
+	};
+	plsmin(0., ticklength);
+	plerry(npoints, plxval, plerrlow, plerrhigh);
+      };
+      if (xerrs.nelements() != 0) {
+	if (xvals.nelements() != xerrs.nelements()){
+	  cerr << "SimplePlot::PlotSymbols: " << "xerror-vector of different length!" << endl;
+	  return False;
+	}; 
+	for (i=0; i<npoints; i++){
+	  plerrlow[i] = xvals(i)-xerrs(i);
+	  plerrhigh[i] = xvals(i)+xerrs(i);
+	};
+	plsmin(0., ticklength);
+	plerrx(npoints, plerrlow, plerrhigh, plyval);
+      };
+      
+      delete []plxval;
+      delete []plyval;
+      delete []plerrlow;
+      delete []plerrhigh;
+#endif
 #ifdef HAVE_PGPLOT
        if (plotter_p == NULL){
 	cerr << "SimplePlot::PlotSymbols: " << "plotter not initialized!" << endl;
@@ -207,6 +303,10 @@ namespace CR { // Namespace CR -- begin
 			     String toplabel,
 			     Int col){
     try {
+#ifdef HAVE_PLPLOT
+      plcol0(col);
+      pllab(xlabel.c_str(), ylabel.c_str(), toplabel.c_str());
+#endif
 #ifdef HAVE_PGPLOT
        if (plotter_p == NULL){
 	cerr << "SimplePlot::AddLabels: " << "plotter not initialized!" << endl;
@@ -240,9 +340,8 @@ namespace CR { // Namespace CR -- begin
 			     Bool printingplot){
     Bool status=True;
     try {
-#ifdef HAVE_PGPLOT
-       if (logx || logy) {
-	cout  << "SimplePlot::quickPlots: " << "@orry, logarithmic axes are not implemented yet!" << endl;
+      if (logx || logy) {
+	cout  << "SimplePlot::quickPlots: " << "Sorry, logarithmic axes are not implemented yet!" << endl;
       }
       Double xmin,xmax,ymin,ymax,tmpval;
       xmin = min(xvals); xmax = max(xvals);
@@ -268,18 +367,17 @@ namespace CR { // Namespace CR -- begin
 	status = InitPlot(file, xmin, xmax, ymin, ymax);	
       };
       if (plotASline) {
-	status = status &&  PlotLine(xvals, yvals, linecol, style);
+	status = status && PlotLine(xvals, yvals, linecol, style);
       } else {
 	status = status && PlotSymbols(xvals, yvals, yerrs, xerrs, linecol, style);
       }
       status = status && AddLabels(xlabel, ylabel, toplabel);
-#endif
     } catch (AipsError x) {
       cerr << "SimplePlot::quickPlots: " << x.getMesg() << endl;
       return False;
     }; 
     return status;        
   };
-
-
+  
+  
 } // Namespace CR -- end

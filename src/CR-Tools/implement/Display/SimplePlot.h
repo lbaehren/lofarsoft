@@ -32,10 +32,23 @@
 #include <casa/aips.h>
 #include <casa/Arrays.h>
 #include <casa/Exceptions/Error.h>
-#ifdef HAVE_PGPLOT
- // #include <casa/System/PGPlotter.h>
-#include <Display/PGPlotterLocal.h>
+
+//use plplot as default
+#ifdef HAVE_PLPLOT
+  #include <plplot/plConfig.h>
+  #include <plplot/plplot.h>
+  #warning Using plplot for output
+  //this makes life easier!
+  #undef HAVE_PGPLOT
+#else
+  //use pgplot if plplot is not available
+  #ifdef HAVE_PGPLOT
+    // #include <casa/System/PGPlotter.h>
+    #include <Display/PGPlotterLocal.h>
+    #warning Using the old PGPlot for output
+  #endif
 #endif
+
 
 #include <casa/namespace.h>
 

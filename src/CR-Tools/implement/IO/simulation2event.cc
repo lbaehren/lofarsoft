@@ -107,7 +107,7 @@ namespace CR { // Namespace CR -- begin
       ApplyInstEff.setFreqAxis(sim2fft.getFrequency());
       FFT = ApplyInstEff.ApplyEffects(sim2fft.getfft());
       //FFT *= DComplex(1e0,0);
-      if ( FFT.nelements() <=  nAnt){
+      if ( FFT.nelements() <=  (uInt)nAnt){ //cast to get rid of a stupid waring...
 	cerr << "simulation2event::generateEvent: " << "Error in ApplyInstEff.ApplyEffects()!" << endl;
 	return False;
       };
