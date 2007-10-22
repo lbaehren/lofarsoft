@@ -6,7 +6,10 @@
 
 set (BUILD_SHARED_LIBS "0" CACHE BOOL "Build shared libraries?")
 set (ENABLE_DYNDRIVERS "0" CACHE BOOL "Enable dynamic drivers?")
+set (ENABLE_f95 OFF CACHE BOOL "Enable drivers for Fortran 95?")
 set (ENABLE_gnome2 OFF CACHE BOOL "Enable drivers for GNOME2?")
+set (ENABLE_itcl OFF CACHE BOOL "Enable drivers for [incr Tcl]?")
+set (ENABLE_itk OFF CACHE BOOL "Enable drivers for [incr Tk]?")
 
 ## disable individual drivers
 

@@ -47,6 +47,7 @@
   
   \return nofFailedTests -- The number of failed tests.
 */
+#ifdef HAVE_BLITZ
 int test_blitz ()
 {
   std::cout << "\n[test_blitz]\n" << std::endl;
@@ -96,6 +97,7 @@ int test_blitz ()
   
   return nofFailedTests;
 }
+#endif
 
 // -----------------------------------------------------------------------------
 
@@ -112,15 +114,18 @@ int test_convert2cartesian ()
   std::cout << "\n[test_convert2cartesian]\n" << std::endl;
 
   int nofFailedTests (0);
-  blitz::Array<double,1> xyz (3);
+  
+  double r (1.0);
+  double phi (CR::deg2rad(45.0));
+  double theta (CR::deg2rad(90));
+  double x (0);
+  double y (0);
+  double z (0);
 
+  std::cout << "[1] Test working with Blitz++ arrays ..." << std::endl;
+#ifdef HAVE_BLITZ
   try {
-    double r (1.0);
-    double phi (CR::deg2rad(45.0));
-    double theta (CR::deg2rad(90));
-    double x (0);
-    double y (0);
-    double z (0);
+    blitz::Array<double,1> xyz (3);
 
     CR::spherical2cartesian(x,y,z,r,phi,theta,false);
 
@@ -140,7 +145,8 @@ int test_convert2cartesian ()
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
-  }  
+  }
+#endif
   
   return nofFailedTests;
 }
@@ -156,13 +162,11 @@ int main ()
 {
   int nofFailedTests (0);
 
-  {
-    nofFailedTests += test_blitz ();
-  }
+#ifdef HAVE_BLITZ
+  nofFailedTests += test_blitz ();
+#endif
 
-  {
-    nofFailedTests += test_convert2cartesian ();
-  }
+  nofFailedTests += test_convert2cartesian ();
 
   return nofFailedTests;  
 }

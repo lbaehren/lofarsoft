@@ -76,8 +76,8 @@ namespace CR { // Namespace CR -- begin
     and (c) <a href="http://casa.nrao.edu">CASA</a> arrays.
 
     <ul>
-      <li>Common source of confusion can be the factor required to convert an angle 
-      to its radian measure:
+      <li>Common source of confusion can be the factor required to convert an
+      angle to its radian measure:
       \f[
       \frac{\alpha [^\circ]}{360 [^\circ]} = \frac{s}{ 2\pi}
       \qquad \longrightarrow \qquad
