@@ -250,7 +250,7 @@ install (TARGETS wcs
 
 ## Installation of header files
 
-install (FILES ${WCSLIB_headers}
+install (FILES ${WCSLIB_headers} ${WCSLIB_config}
   DESTINATION include/wcslib
   )
 

@@ -122,10 +122,3 @@ if (WCSLIB_INSTALL_PREFIX)
   message (STATUS "Installation area located for package WCSLIB.")
   set (CMAKE_INSTALL_PREFIX ${WCSLIB_INSTALL_PREFIX}) 
 endif (WCSLIB_INSTALL_PREFIX)
-
-## -----------------------------------------------------------------------------
-## Summary of settings
-
-message (STATUS "CFITSIO ............... = ${HAVE_CFITSIO}")
-message (STATUS "libm library .......... = ${libm}")
-message (STATUS "Flex lexical analyzer generator = ${flex_bin}")
