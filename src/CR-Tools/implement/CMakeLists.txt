@@ -82,33 +82,37 @@ if (X11_LIBRARIES)
   list (APPEND cr_link_libraries ${X11_LIBRARIES})
 endif (X11_LIBRARIES)
 
-if (HAVE_PGPLOT)
+if (PGPLOT_LIBRARIES)
   list (APPEND cr_link_libraries ${PGPLOT_LIBRARIES})
-endif (HAVE_PGPLOT)
+endif (PGPLOT_LIBRARIES)
 
-if (HAVE_PLPLOT)
+if (PLPLOT_LIBRARIES)
   list (APPEND cr_link_libraries ${PLPLOT_LIBRARIES})
-endif (HAVE_PLPLOT)
+endif (PLPLOT_LIBRARIES)
 
-if (HAVE_PNG)
-  list (APPEND cr_link_libraries ${PNG_LIBRARIES})
-endif (HAVE_PNG)
-
-if (HAVE_ROOT)
+if (ROOT_LIBRARIES)
   list (APPEND cr_link_libraries ${ROOT_LIBRARIES})
-endif (HAVE_ROOT)
+endif (ROOT_LIBRARIES)
 
-if (HAVE_TCL)
+if (TCL_LIBRARIES)
   list (APPEND cr_link_libraries ${TCL_LIBRARIES})
-endif (HAVE_TCL)
+endif (TCL_LIBRARIES)
 
-if (HAVE_TK)
+if (TK_LIBRARIES)
   list (APPEND cr_link_libraries ${TK_LIBRARIES})
-endif (HAVE_TK)
+endif (TK_LIBRARIES)
 
-if (HAVE_PostgreSQL)
+if (PostgreSQL_LIBRARIES)
   list (APPEND cr_link_libraries ${PostgreSQL_LIBRARIES})
-endif (HAVE_PostgreSQL)
+endif (PostgreSQL_LIBRARIES)
+
+if (PNG_LIBRARIES)
+  list (APPEND cr_link_libraries ${PNG_LIBRARIES})
+endif (PNG_LIBRARIES)
+
+if (GIF_LIBRARIES)
+  list (APPEND cr_link_libraries ${GIF_LIBRARIES})
+endif (GIF_LIBRARIES)
 
 if (libm)
   list (APPEND cr_link_libraries ${libm})

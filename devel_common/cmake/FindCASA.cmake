@@ -13,6 +13,11 @@
 ##  CASA_INCLUDES  = Path to the CASA header files
 ##  CASA_LIBRARIES = libraries of the CASA modules
 ##
+## __TODO__
+##
+##  * Use AIPSPATH environment variable to detect path to working AIPS++/CASA
+##    installation
+##
 
 set (lib_locations
   /usr/lib
@@ -26,6 +31,7 @@ set (casa_locations
   ## most Linux systems
   /aips++
   /casa
+  /opt/aips++/stable
   /opt/aips++/current
   /opt/aips++
   /opt/casa
