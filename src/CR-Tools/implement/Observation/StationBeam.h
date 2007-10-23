@@ -99,8 +99,10 @@ namespace CR { // Namespace CR -- begin
     
     StationBeam( const Double& source_declination,
                  const Double& source_hr_angle,
+		 const Double& sky_temp,
+		 const Double& moon_temp,
 		 const Vector<uint>& station_id,
-                 const Double& frequency,
+                 const Double& freq_init,
 		 const Double& bandwidth,
 		 const Double& station_radii,
 		 Vector<Double>& position_x,
@@ -177,26 +179,43 @@ namespace CR { // Namespace CR -- begin
 		     const Vector<Double>& legendre_weight ) ;
 		     
 
- Double integrate(  const Double& source_declination,
-		    const Double& source_hr_angle,
-		    const Double& station_radii,
-		    const Vector<uint>& station_id,
-		    Vector<Double>& position_x,
-		    Vector<Double>& position_y,
-		    const Vector<Double>& legendre_root,
-		    const Vector<Double>& legendre_weight )  ;
+ Double integrate_moon(  const Double& source_declination,
+		         const Double& source_hr_angle,
+		         const Double& station_radii,
+		         const Vector<uint>& station_id,
+		         const Double& freq_init,
+		         const Double& bandwidth,
+		         Vector<Double>& position_x,
+		         Vector<Double>& position_y,
+		         const Vector<Double>& legendre_root,
+		         const Vector<Double>& legendre_weight )  ;
+		    
+		    
+		    
+Double integrate_sky(  const Double& source_declination,
+	               const Double& source_hr_angle,
+	               const Double& station_radii,
+		       const Vector<uint>& station_id,
+		       const Double& freq_init,
+		       const Double& bandwidth,
+		       Vector<Double>& position_x,
+		       Vector<Double>& position_y,
+		       const Vector<Double>& legendre_root,
+		       const Vector<Double>& legendre_weight )  ;
+		    
 		    		     		     		     
- Double int_zenith( const Double& frequency,
-	            const Double& hr_angle,
-		    const Vector<Double>& declination,
-		    const Double& source_declination,
-		    const Double& source_hr_angle,
-		    const Double& station_radii,
-		    const Vector<uint>& station_id,
-		    Vector<Double>& position_x,
-		    Vector<Double>& position_y,
-		    const Vector<Double>& legendre_root,
-		    const Vector<Double>& legendre_weight )      ;
+ Double temp_final(    const Double& source_declination,
+                       const Double& source_hr_angle,
+		       const Double& sky_temp,
+		       const Double& moon_temp,
+		       const Vector<uint>& station_id,
+                       const Double& freq_init,
+		       const Double& bandwidth,
+		       const Double& station_radii,
+		       Vector<Double>& position_x,
+		       Vector<Double>& position_y,
+		       const Vector<Double>& legendre_root,
+		       const Vector<Double>& legendre_weight   )      ;
 		    
  Double int_azimuth( const Double& frequency,
 	             const Vector<Double>& hr_angle,
