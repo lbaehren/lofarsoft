@@ -154,6 +154,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
     uint nofAntennas_p;
     //! Buffer the values for the geometrical delay?
     bool bufferDelays_p;
+    // Show progress during computations?
+    bool showProgress_p;
     
   public:
     
@@ -254,6 +256,26 @@ namespace CR { // NAMESPACE CR -- BEGIN
       if (bufferDelays) {
 	setDelays();
       }
+    }
+
+    /*!
+      \brief Is the progress during the computation shown?
+
+      \return showProgress -- If set to <tt>true</tt> the progres during the
+              main computations is shown via a progress bar in the terminal.
+    */
+    inline bool showProgress () const {
+      return showProgress_p;
+    }
+
+    /*!
+      \brief Show the progress during the computation?
+
+      \param showProgress -- If set to <tt>true</tt> the progres during the
+             main computations is shown via a progress bar in the terminal
+    */
+    inline void showProgress (bool const &showProgress=false) {
+      showProgress_p = showProgress;
     }
     
     /*!

@@ -63,6 +63,10 @@
     </tr>
   </table>
 
+  <b>Coordinate systems</b>
+  Obviously there is quite a number of coordinate systems and reference frames,
+  within which positions and directions can be defined.
+
   <h3>Usage</h3>
 
   Use this file in order to import all the prototypes for functions and classes

@@ -167,6 +167,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     os << "-- buffer delays     : " << bufferDelays_p         << std::endl;
     os << "-- buffer phases     : " << bufferPhases_p         << std::endl;
     os << "-- buffer weights    : " << bufferWeights_p        << std::endl;
+    os << "-- show progress     : " << showProgress_p         << std::endl;
   }
   
   // ============================================================================
@@ -253,7 +254,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
 					   sin(phases(ant,sky,freq)));
  	}  // end loop: ant
       }  // end loop: sky
-      progress.update(freq);
+      if (showProgress_p) {
+	progress.update(freq);
+      }
     }  // end loop: freq
 
     std::cout << " --> Computation of weights completed." << std::endl;

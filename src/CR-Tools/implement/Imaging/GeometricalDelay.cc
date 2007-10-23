@@ -41,6 +41,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_CASA
   GeometricalDelay::GeometricalDelay ()
     : nofAntennas_p (1),
+      showProgress_p (false),
       bufferDelays_p (false)
   {
     casa::IPosition shape(2,nofAntennas_p,3);
@@ -58,6 +59,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_BLITZ
   GeometricalDelay::GeometricalDelay ()
     : nofAntennas_p (1),
+      showProgress_p (false),
       bufferDelays_p (false)
   {
     antPositions_p.resize(nofAntennas_p,3);
@@ -78,7 +80,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
 				      casa::Matrix<double> const &skyPositions,
 				      bool const &bufferDelays,
 				      bool const &antennaIndexFirst)
-    : bufferDelays_p (false)
+    : showProgress_p (false),
+      bufferDelays_p (false)
   {
     cout << "[GeometricalDelay::GeometricalDelay]" << endl;
     if (!setAntPositions (antPositions,false,antennaIndexFirst)) {
@@ -110,7 +113,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
 				      blitz::Array<double,2> const &skyPositions,
 				      bool const &bufferDelays,
 				      bool const &antennaIndexFirst)
-    : bufferDelays_p (false)
+    : showProgress_p (false),
+      bufferDelays_p (false)
   {
     bool status (true);
 
@@ -197,6 +201,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
     skyPositions_p = other.skyPositions_p;
 
     nofAntennas_p = other.nofAntennas_p;
+
+    showProgress_p = other.showProgress_p;
 
     bufferDelays_p  = other.bufferDelays_p;
     
