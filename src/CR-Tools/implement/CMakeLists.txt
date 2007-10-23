@@ -114,13 +114,17 @@ if (GIF_LIBRARIES)
   list (APPEND cr_link_libraries ${GIF_LIBRARIES})
 endif (GIF_LIBRARIES)
 
-if (libm)
-  list (APPEND cr_link_libraries ${libm})
-endif (libm)
+if (libgd)
+  list (APPEND cr_link_libraries ${libgd})
+endif (libgd)
 
 if (libutil)
   list (APPEND cr_link_libraries ${libutil})
 endif (libutil)
+
+if (libm)
+  list (APPEND cr_link_libraries ${libm})
+endif (libm)
 
 ## ------------------------------------------------------------------------------
 ## Create the library

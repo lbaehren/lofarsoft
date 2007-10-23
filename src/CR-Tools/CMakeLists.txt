@@ -13,11 +13,11 @@ cmake_minimum_required (VERSION 2.4)
 ## User defined build/install options
 
 option (CR_BUILD_TESTS "Build the test programs?" 1)
-option (CR_ENABLE_TESTING "Build the test programs?" 1)
+option (CR_ENABLE_TESTING "Enable running the test programs?" 1)
 option (CR_DEBUGGING_MESSAGES "Print debugging information?" 0)
 option (CR_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
 option (CR_GLISH_SUPPORT "Activate support for Glish applications?" 0)
-option (CR_PYTHON_SUPPORT "Activate support for Glish applications?" 0)
+option (CR_PYTHON_SUPPORT "Activate support for Python applications?" 0)
 
 ## Handle option: testing mode on/off
 
@@ -69,6 +69,10 @@ find_library (libm m
   )
 
 find_library (libutil util
+  PATHS /usr/lib /usr/local/lib /sw/lib /opt/lib
+  )
+
+find_library (libgd gd
   PATHS /usr/lib /usr/local/lib /sw/lib /opt/lib
   )
 
