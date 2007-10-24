@@ -55,12 +55,15 @@ namespace CR {
       return;
     
     // Set elements to zero
-    for (uint i = 0; i < length_; i ++) {
+     for (uint i = 0; i < length_; i ++) {
       data_[i] = 0;
     }
   }
   
-  void Data::init(uint length, uint id) {
+  void Data::init(uint length,
+		  uint id)
+  {
+
     try {
       //cout << "Allocating memory (" << length*sizeof(short) << " bytes)..." << endl;
       data_   = new short[length];

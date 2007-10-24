@@ -69,10 +69,23 @@ string (REGEX REPLACE "include/gtk-2.0/gtk" "include/gtk-2.0" GTK_INCLUDES ${GTK
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-find_library (GTK_LIBRARIES gtk
+## [1] Locate the basic GTK library first
+
+find_library (GTK_LIBRARIES gtk gtk-2.0
   PATHS ${lib_locations}
   NO_DEFAULT_PATH
   )
+
+## [2] Check for libgtk-x11
+
+find_library (libgtk_x11 gtk-x11 gtk-x11-2.0
+  PATHS ${lib_locations}
+  NO_DEFAULT_PATH
+  )
+
+if (libgtk_x11)
+  list (APPEND GTK_LIBRARIES ${libgtk_x11})
+endif (libgtk_x11)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found

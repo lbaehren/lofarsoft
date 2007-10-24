@@ -80,6 +80,7 @@ set (libs
 #  ProofGui
 #  ProofPlayer
   PyROOT
+  Reflex
   RIO
   Rint
   Spectrum

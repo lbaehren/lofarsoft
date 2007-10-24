@@ -4,7 +4,7 @@
 import _ndarray
 import os
 
-include_dir = '/usr/local/include/python2.5/numarray'
+include_dir = '/usr/include/python2.4/numarray'
 version     = '1.5.2'
 hasUInt64   = _ndarray.hasUInt64()
 LP64        = _ndarray.lp64()

@@ -35,21 +35,21 @@ namespace CR { // Namespace CR -- begin
   {;}
   
   
-    StationBeam::StationBeam( const Double& source_declination,
-                 const Double& source_hr_angle,
-		 const Double& sky_temp,
-		 const Double& moon_temp,
-		 const Vector<uint>& station_id,
-                 const Double& freq_init,
-		 const Double& bandwidth,
-		 const Double& station_radii,
-		 Vector<Double>& position_x,
-		 Vector<Double>& position_y,
-		 const Vector<Double>& legendre_root,
-		 const Vector<Double>& legendre_weight ) 
-
- { ; }   
- 
+  StationBeam::StationBeam( const Double& source_declination,
+			    const Double& source_hr_angle,
+			    const Double& sky_temp,
+			    const Double& moon_temp,
+			    const Vector<uint>& station_id,
+			    const Double& freq_init,
+			    const Double& bandwidth,
+			    const Double& station_radii,
+			    Vector<Double>& position_x,
+			    Vector<Double>& position_y,
+			    const Vector<Double>& legendre_root,
+			    const Vector<Double>& legendre_weight ) 
+    
+  { ; }   
+  
   StationBeam::StationBeam (StationBeam const &other)
   {
     copy (other);
@@ -103,6 +103,7 @@ namespace CR { // Namespace CR -- begin
   //  Methods
   //
   // ============================================================================
+
   Double StationBeam::station_beam( const Double& frequency,
 				    const Double& hr_angle,
 			       	    const Double& declination,

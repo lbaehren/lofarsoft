@@ -48,24 +48,62 @@ using CR::Data;
 */
 int test_Data ()
 {
+  std::cout << "\n[test_Data]\n" << std::endl;
+  
   int nofFailedTests (0);
   int max (10);
-  
-  try {
-    Data d(50, 1200);
-    Data e(50, 1201);
-    Data f((uint)1e8, 1);
 
-    for (int a(0); a<max; a++) {
-      d[2] = 10;
-      e[2] = 12;
-      f = d;
-      cout << "d: " << d.id() << ", e: " << e.id() << ", f: " << f.id() << endl;
+  std::cout << "[1] Creating new Data object via default constructor ..." << std::endl;
+  try {
+    Data data1;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[2] Creating single new Data object ..." << std::endl;
+  try {
+    Data data2 (50, 1000);
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[3] Creating multiple new Data objects ..." << std::endl;
+  try {
+    uint maxLength (20);
+    uint nofPoints (0);
+
+    for (uint n (1); n<maxLength; n++) {
+      nofPoints = n*1e6;
+      std::cout << " --> length(data) = " << n
+		<< " = " << nofPoints*sizeof(short) << " bytes" << std::endl;
+      // create a new object
+      Data d (nofPoints, 1100);
+      // write a value into the first element
+      d[0] = 1;
     }
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
+  
+//   std::cout << "[4] Creating multiple new Data objects for manipulation ..." << std::endl;
+//   try {
+//     Data d(50, 1200);
+//     Data e(50, 1201);
+//     Data f((uint)1e8, 1);
+
+//     for (int a(0); a<max; a++) {
+//       d[2] = 10;
+//       e[2] = 12;
+//       f = d;
+//       cout << "d: " << d.id() << ", e: " << e.id() << ", f: " << f.id() << endl;
+//     }
+//   } catch (std::string message) {
+//     std::cerr << message << std::endl;
+//     nofFailedTests++;
+//   }
   
   return nofFailedTests;
 }
@@ -75,10 +113,8 @@ int test_Data ()
 int main ()
 {
   int nofFailedTests (0);
-
-  {
-    nofFailedTests += test_Data ();
-  }
+  
+  nofFailedTests += test_Data ();
   
   return nofFailedTests;
 }

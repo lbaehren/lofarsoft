@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------*
- | $Id: template-tclass.cc,v 1.9 2007/06/13 09:41:37 bahren Exp $ |
+ | $Id: template-tclass.cc,v 1.9 2007/06/13 09:41:37 bahren Exp          $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Kalpana Singh (<k.singh@astro.ru.nl>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Kalpana Singh (<k.singh@astro.ru.nl>)                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -48,8 +48,8 @@ using CR::StationBeam;
   \date 2007/08/10
 */
 
-Double source_declination = 30 ;
-Double source_hr_angle = 30 ;
+Double source_declination (30);
+Double source_hr_angle (30) ;
 uint stationid[64]= {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64};
 
 
@@ -101,71 +101,71 @@ Bool test_StationBeams ()
  
  
  for(uint p=0; p<64; p++){
-     posit_x(p) = posi_x[p] ;
-     }
-     
+   posit_x(p) = posi_x[p] ;
+ }
+ 
  for(uint w=0; w<64; w++){
    posit_y(w) = posi_y[w];
-   }
+ }
  
  for(uint lr=0; lr<5; lr++){
-    legendre_root(lr)= l_root[ lr ];
-    }
-    
-  for(uint lw=0; lw <5; lw++ ){
-     legendre_weight(lw)= l_weight[lw] ;
-    }
+   legendre_root(lr)= l_root[ lr ];
+ }
  
-for(uint stid=0; stid<64; stid++){
+ for(uint lw=0; lw <5; lw++ ){
+   legendre_weight(lw)= l_weight[lw] ;
+ }
  
-    station_id(stid)=stationid[stid];
-    }
-  
-  Double frequency = 120e6 ;
-  Double sky_temp = 300 ;
-  Double moon_temp = 300 ;
-  Double freq_init =120e6 ;
-  StationBeam stbm ;
- 
-/*  ofstream logfile1 ;
+ for(uint stid=0; stid<64; stid++){
    
-  logfile1.open("power",ios::out);
-
-  for (uint i=0; i<90; i++){
-      
-      for( uint j=0; j<360; j++){*/
-       
-//         Double sing_sta_beam = stbm.station_beam( frequency,
-// 				                  j,
-// 			       	                  i,
-// 				                  source_declination,
-//       	       		                  source_hr_angle,
-// 			                          station_radii,
-// 			                          legendre_root,
-// 			                          legendre_weight )  ;
-// 	
-      						  					  
-/*  Double beam_value = stbm.tied_array( frequency,
-	                               j,
-		                       i,
-				       source_declination,
-				       source_hr_angle,
-				       station_radii,
-				       station_id,
-				       posit_x,
-				       posit_y,
-				       legendre_root,
-				       legendre_weight ) ;
-
-				       
-       logfile1 << j << "\t" << i << "\t" << beam_value << "\n" ;
-      }
-      logfile1 << "\n" ;
-   }
-   
+   station_id(stid)=stationid[stid];
+ }
+ 
+ Double frequency = 120e6 ;
+ Double sky_temp = 300 ;
+ Double moon_temp = 300 ;
+ Double freq_init =120e6 ;
+ StationBeam stbm ;
+ 
+ /*  ofstream logfile1 ;
+     
+ logfile1.open("power",ios::out);
+ 
+ for (uint i=0; i<90; i++){
+ 
+ for( uint j=0; j<360; j++){*/
+ 
+ //         Double sing_sta_beam = stbm.station_beam( frequency,
+ // 				                  j,
+ // 			       	                  i,
+ // 				                  source_declination,
+ //       	       		                  source_hr_angle,
+ // 			                          station_radii,
+ // 			                          legendre_root,
+ // 			                          legendre_weight )  ;
+ // 	
+ 
+ /*  Double beam_value = stbm.tied_array( frequency,
+     j,
+     i,
+     source_declination,
+     source_hr_angle,
+     station_radii,
+     station_id,
+     posit_x,
+     posit_y,
+     legendre_root,
+     legendre_weight ) ;
+     
+     
+     logfile1 << j << "\t" << i << "\t" << beam_value << "\n" ;
+     }
+     logfile1 << "\n" ;
+     }
+     
   logfile1.close();*/
-   
-				       
+ 
+ 
  Double beam_moon = stbm.integrate_moon( source_declination,
 		                         source_hr_angle,
 		                         station_radii,
@@ -176,51 +176,50 @@ for(uint stid=0; stid<64; stid++){
 		                         posit_y,
 		                         legendre_root,
 		                         legendre_weight ) ;
-
-cout << " integrated power of moon :" << beam_moon << endl ;					      			
-
-Double beam_sky = stbm.integrate_sky( source_declination,
-		                      source_hr_angle,
-		                      station_radii,
-		                      station_id,
-		                      freq_init,
-		                      bandwidth,
-		                      posit_x,
-		                      posit_y,
-		                      legendre_root,
-		                      legendre_weight ) ;	
-				     
+ 
+ cout << " integrated power of moon :" << beam_moon << endl ;					      			
+ 
+ Double beam_sky = stbm.integrate_sky( source_declination,
+				       source_hr_angle,
+				       station_radii,
+				       station_id,
+				       freq_init,
+				       bandwidth,
+				       posit_x,
+				       posit_y,
+				       legendre_root,
+				       legendre_weight ) ;	
+ 
  cout << " integrated power whole sky :" << beam_sky << endl ;				     			       
-//   ofstream logfile2 ;
-//  
-//  logfile2.open("power",ios::out);
-//  for(uint h=0; h<100; h++){
-//     logfile2 << input(h) << endl ;
-//     }
-//  
-//  logfile2.close();
+ //   ofstream logfile2 ;
+ //  
+ //  logfile2.open("power",ios::out);
+ //  for(uint h=0; h<100; h++){
+ //     logfile2 << input(h) << endl ;
+ //     }
+ //  
+ //  logfile2.close();
  } catch( AipsError x ){
- cerr <<x.getMesg() << endl ;
- ok = False;
+   cerr <<x.getMesg() << endl ;
+   ok = False;
  }
  return ok ;
- }
+}
 // -----------------------------------------------------------------------------
 
 int main ()
 {
-Bool ok (True) ;
-Int retval(0);
-
-if(ok){
- ok = test_StationBeams () ;
- 
-  if(!ok){
-  retval = 1;
-  cout << "Error ...........early exit "
-       <<endl ;
-     }
+  Bool ok (True) ;
+  Int retval(0);
+  
+  if(ok){
+    ok = test_StationBeams () ;
+    
+    if(!ok){
+      retval = 1;
+      cout << "Error ...........early exit "
+	   <<endl ;
+    }
   }
- return retval ;
+  return retval ;
 }
- 
