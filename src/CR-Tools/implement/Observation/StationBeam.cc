@@ -483,89 +483,89 @@ Double StationBeam::integrate_sky(  const Double& source_declination,
 	 ofstream logfile1 ;
 	  
 	 logfile1.open("powersky", ios::out) ;
-	 	 
+	 
 	 while(h1< declination_max){
-	         
-		 h2 = h1 + 0.25 ;
-		 cout << "declination angle :" <<h2 << endl ;
-		 h1_x = (h2-h1)/2. ;
-		 h2_x = (h2+h1)/2. ;
-		 x_inner_sum =0.0 ;
-		 
-		 for( uint i =0; i<nroots; i++){
-		 
-		     y_outer_sum =0.0 ;
-		     xx = h1_x*legendre_root(i)+h2_x ;
-		     
-		     while( k1 < hrangle_max){
-		     
-		           k2 = k1+ 5.0 ;
-			   k1_y = (k2-k1)/2.0 ;
-			   k2_y = (k2+k1)/2.0 ;
-			   y_inner_sum = 0.0 ;
-			   
-			   for( uint j=0; j<nroots; j++ ){
-			   
-			        f_outer_sum =0.0 ;
-				yy = k1_y*legendre_root(j)+ k2_y ;
-				
-				while(f1 < freq_final ){
-				
-				      f2 = f1+1e6 ;
-				      f1_f = (f2-f1)/2.;
-				      f2_f = (f2+f1)/2. ;
-				      f_inner_sum =0.0;
-				      
-				      for( uint g=0; g<nroots; g++){
-				      
-				          ff = f1_f*legendre_root(g)+f2_f ;
-					  power_beam = stbm.tied_array( ff,
-	                                                                yy,
-		                                                        xx,
-		                                                        source_declination,
-		                                                        source_hr_angle,
-		                                                        station_radii,
-			                                                station_id,
-		                                                        position_x,
-		                                                        position_y,
-		                                                        legendre_root,
-		                                                        legendre_weight ) ;
-					 
-					 f_inner_sum = f_inner_sum + legendre_weight(g)*power_beam ;
-				      }
-				      f_outer_sum = f_outer_sum + f1_f*f_inner_sum ;
-		                      f1 = f2 ;
-				      logfile1 << h1 << "\t" << k1 << "\t" << f_outer_sum << "\n" ;
-			        }
-			        f1 = freq_init ;
-				y_inner_sum = y_inner_sum + legendre_weight(j)*f_outer_sum ;
-			    }
-                            y_outer_sum = y_outer_sum + k1_y*y_inner_sum ;
-	                    k1 = k2 ;	      
-			    logfile1 << "\n" ;
-		      }
-		      
-		      k1 = hrangle_min ;
-		      x_inner_sum = x_inner_sum + legendre_weight(i)*y_outer_sum ;
-		}
-		
-		x_outer_sum = x_outer_sum + h1_x*x_inner_sum ;
-		h1 = h2 ;
-		
-	}			   
-        power_sky = power_sky + f_outer_sum ;      
-	logfile1.close() ;
-	    
-       return power_sky ;
-      }
-      
-      catch( AipsError x ){
-      cerr << "StationBeam::integrate_sky " << x.getMesg () << endl ;
-      return Double ();
-      }       
+	   
+	   h2 = h1 + 0.25 ;
+	   cout << "declination angle :" <<h2 << endl ;
+	   h1_x = (h2-h1)/2. ;
+	   h2_x = (h2+h1)/2. ;
+	   x_inner_sum =0.0 ;
+	   
+	   for( uint i =0; i<nroots; i++){
+	     
+	     y_outer_sum =0.0 ;
+	     xx = h1_x*legendre_root(i)+h2_x ;
+	     
+	     while( k1 < hrangle_max){
 	       
+	       k2 = k1+ 5.0 ;
+	       k1_y = (k2-k1)/2.0 ;
+	       k2_y = (k2+k1)/2.0 ;
+	       y_inner_sum = 0.0 ;
+	       
+	       for( uint j=0; j<nroots; j++ ){
+		 
+		 f_outer_sum =0.0 ;
+		 yy = k1_y*legendre_root(j)+ k2_y ;
+		 
+		 while(f1 < freq_final ){
+		   
+		   f2 = f1+1e6 ;
+		   f1_f = (f2-f1)/2.;
+		   f2_f = (f2+f1)/2. ;
+		   f_inner_sum =0.0;
+		   
+		   for( uint g=0; g<nroots; g++){
+		     
+		     ff = f1_f*legendre_root(g)+f2_f ;
+		     power_beam = stbm.tied_array( ff,
+						   yy,
+						   xx,
+						   source_declination,
+						   source_hr_angle,
+						   station_radii,
+						   station_id,
+						   position_x,
+						   position_y,
+						   legendre_root,
+						   legendre_weight ) ;
+		     
+		     f_inner_sum = f_inner_sum + legendre_weight(g)*power_beam ;
+		   }
+		   f_outer_sum = f_outer_sum + f1_f*f_inner_sum ;
+		   f1 = f2 ;
+		   logfile1 << h1 << "\t" << k1 << "\t" << f_outer_sum << "\n" ;
+		 }
+		 f1 = freq_init ;
+		 y_inner_sum = y_inner_sum + legendre_weight(j)*f_outer_sum ;
+	       }
+	       y_outer_sum = y_outer_sum + k1_y*y_inner_sum ;
+	       k1 = k2 ;	      
+	       logfile1 << "\n" ;
+	     }
+	     
+	     k1 = hrangle_min ;
+	     x_inner_sum = x_inner_sum + legendre_weight(i)*y_outer_sum ;
+	   }
+	   
+	   x_outer_sum = x_outer_sum + h1_x*x_inner_sum ;
+	   h1 = h2 ;
+	   
+	 }			   
+	 power_sky = power_sky + f_outer_sum ;      
+	 logfile1.close() ;
+	 
+	 return power_sky ;
+   }
+   
+   catch( AipsError x ){
+     cerr << "StationBeam::integrate_sky " << x.getMesg () << endl ;
+     return Double ();
+   }       
+   
  }			    
- 	
+  
 /*
 		    		     		     		     
  Double StationBeam::temp_final(  const Double& source_declination,

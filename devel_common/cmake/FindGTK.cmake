@@ -68,6 +68,11 @@ string (REGEX REPLACE "include/gtk-2.0/gtk" "include/gtk-2.0" GTK_INCLUDES ${GTK
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
+##
+## To get a list of libraries which need to be included into the linking stage,
+## run:
+##      pkg-config --cflags --libs gtk+-2.0
+##
 
 ## [1] Locate the basic GTK library first
 
@@ -86,6 +91,34 @@ find_library (libgtk_x11 gtk-x11 gtk-x11-2.0
 if (libgtk_x11)
   list (APPEND GTK_LIBRARIES ${libgtk_x11})
 endif (libgtk_x11)
+
+## [3] Check for libgdk-x11
+
+find_library (libgdk_x11 gdk-x11 gdk-x11-2.0
+  PATHS ${lib_locations}
+  NO_DEFAULT_PATH
+  )
+
+if (libgdk_x11)
+  list (APPEND GTK_LIBRARIES ${libgdk_x11})
+endif (libgdk_x11)
+
+## [4] Check for libatk
+
+find_library (libatk atk atk-1.0 atk-2.0
+  PATHS ${lib_locations}
+  NO_DEFAULT_PATH
+  )
+
+if (libatk)
+  list (APPEND GTK_LIBRARIES ${libatk})
+endif (libatk)
+
+## Once we are done, rearrange the order of the libraries in the list
+
+#if (GTK_LIBRARIES)
+#  list (REVERSE GTK_LIBRARIES)
+#endif (GTK_LIBRARIES)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
