@@ -20,6 +20,9 @@ project (casacore)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.4)
 
+## include the CTest environment
+include (CTest)
+
 ## -----------------------------------------------------------------------------
 ## User defined build/install options
 
@@ -32,8 +35,6 @@ option (casacore_SHARED_LIBRARIES "Build libraries as shared libraries?" 0)
 if (casacore_ENABLE_TESTING)
   ## enable building the tests, otherwise there is nothing to run
   set (casacore_BUILD_TESTS 1)
-  ## include the CTest environment
-  include (CTest)
   ## enable testing
   enable_testing()
 endif (casacore_ENABLE_TESTING)
