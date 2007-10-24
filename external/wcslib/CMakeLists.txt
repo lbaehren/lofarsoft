@@ -15,6 +15,8 @@ set (WCSLIB_VERSION_MAJOR 4)
 set (WCSLIB_VERSION_MINOR 2)
 set (WCSLIB_VERSION "${WCSLIB_VERSION_MAJOR}.${WCSLIB_VERSION_MINOR}")
 
+include (CTest)
+
 ## -----------------------------------------------------------------------------
 ## User defined build/install options
 

@@ -13,6 +13,12 @@ set (CFITSIO_VERSION_MINOR 4)
 set (CFITSIO_VERSION "${CFITSIO_VERSION_MAJOR}.${CFITSIO_VERSION_MINOR}")
 
 ## -----------------------------------------------------------------------------
+## Testing
+
+include (CTest)
+enable_testing()
+
+## -----------------------------------------------------------------------------
 ## Optional build settings
 
 option (CFITSIO_BUILD_TESTS "Build test programs for CFITSIO?" 1)
@@ -366,8 +372,12 @@ if (CFITSIO_BUILD_TESTS)
   ## build the test programs
 
   foreach (test ${cfitsio_tests})
+    ## compiler instructions
     add_executable (${test} ${test}.c)
+    ## linker instructions
     target_link_libraries (${test} cfitsio ${libm})
+    ## testing
+    add_test (${test} ${test})
   endforeach (test)
 
 endif (CFITSIO_BUILD_TESTS)
