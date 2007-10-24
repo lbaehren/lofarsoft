@@ -341,7 +341,7 @@ power_dish = abs(h1*power_sum/(2.*pi*(3e8/frequency)*(3e8/frequency)))*abs(h1*po
 	
 	 while( h1m < (source_declination+0.25)){
 		  
-		h2m= h1m+0.1 ;
+		h2m= h1m+0.05 ;
 		h1_xm =(h2m-h1m)/2. ;
 		h2_xm =(h2m+h1m)/2. ;
 		xm_inner_sum =0;
@@ -351,8 +351,8 @@ power_dish = abs(h1*power_sum/(2.*pi*(3e8/frequency)*(3e8/frequency)))*abs(h1*po
 		       
 		      xxm = h1_xm*legendre_root(im)+h2_xm ;
 		      
-		      k2m = 1/sin(0.0174533*xxm)*sqrt(0.25*0.25-(abs(xxm-source_declination))*(abs(xxm-source_declination)));
-		      k1m = -1/sin(0.0174533*xxm)*sqrt(0.25*0.25-(abs(xxm-source_declination))*(abs(xxm-source_declination)));
+        k2m = source_hr_angle +1/sin(0.0174533*xxm)*sqrt(0.25*0.25-(abs(xxm-source_declination))*(abs(xxm-source_declination)));
+	k1m = source_hr_angle -1/sin(0.0174533*xxm)*sqrt(0.25*0.25-(abs(xxm-source_declination))*(abs(xxm-source_declination)));
 			   
 		      k1_ym = (k2m-k1m)/2. ;
 		      k2_ym = (k2m+k1m)/2. ;
@@ -441,7 +441,7 @@ Double StationBeam::integrate_sky(  const Double& source_declination,
 	 Double h1_x(0.0);
 	 Double h2_x(0.0);
 	 Double xx(0.0);
-	 h1 = source_declination-0.25 ;
+	 //h1 = source_declination-0.25 ;
 	 	 	 
 	 Double k1(0.0) ;
 	 Double k2(0.0) ;
@@ -486,6 +486,7 @@ Double StationBeam::integrate_sky(  const Double& source_declination,
 	 while(h1< declination_max){
 	         
 		 h2 = h1 + 0.25 ;
+		 cout << "declination angle :" <<h2 << endl ;
 		 h1_x = (h2-h1)/2. ;
 		 h2_x = (h2+h1)/2. ;
 		 x_inner_sum =0.0 ;
