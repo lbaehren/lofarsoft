@@ -29,6 +29,8 @@
 
 // AIPS++/CASA header files
 #include <casa/aips.h>
+#include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/Vector.h>
 #include <casa/Exceptions/Error.h>
 
 #include <Analysis/SecondStagePipeline.h>
@@ -169,7 +171,9 @@ namespace CR { // Namespace CR -- begin
       
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
-    Bool setPhaseCenter(Double XC, Double YC, Bool rotate=False);
+    Bool setPhaseCenter(Double XC,
+			Double YC,
+			Bool rotate=False);
 
     /*!
       \brief Set the direction parameters
@@ -180,7 +184,9 @@ namespace CR { // Namespace CR -- begin
       
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
-    Bool setDirection(Double AZ, Double EL, Double Curvature=0);
+    Bool setDirection(Double AZ,
+		      Double EL,
+		      Double Curvature=0);
 
     /*!
       \brief Set the an additional dealy
@@ -189,7 +195,7 @@ namespace CR { // Namespace CR -- begin
       
       \return 
     */
-    inline void setExtraDelay(Double extraDelay) { ExtraDelay_p = extraDelay;};
+    inline void setExtraDelay (Double extraDelay) { ExtraDelay_p = extraDelay;};
 
     /*!
       \brief Get the shifted antenna positions (i.e. coordinate origin is the phase center)
@@ -208,7 +214,8 @@ namespace CR { // Namespace CR -- begin
 
       \return Matrix with the processed and shifted time series data
     */
-    Matrix<Double> GetTimeSeries(DataReader *dr, Vector<Bool> antennaSelection = Vector<Bool>());
+    Matrix<Double> GetTimeSeries(DataReader *dr, 
+				 Vector<Bool> antennaSelection = Vector<Bool>());
     
     /*!
       \brief Get the CCBeam
@@ -218,7 +225,8 @@ namespace CR { // Namespace CR -- begin
 
       \return The formed cc-beam
     */
-    Vector<Double> GetCCBeam(DataReader *dr, Vector<Bool> antennaSelection = Vector<Bool>());
+    Vector<Double> GetCCBeam(DataReader *dr,
+			     Vector<Bool> antennaSelection = Vector<Bool>());
     
     /*!
       \brief Get the XBeam
@@ -228,7 +236,8 @@ namespace CR { // Namespace CR -- begin
 
       \return The formed X-beam.
     */
-    Vector<Double> GetXBeam(DataReader *dr, Vector<Bool> antennaSelection = Vector<Bool>());
+    Vector<Double> GetXBeam (DataReader *dr,
+			     Vector<Bool> antennaSelection = Vector<Bool>());
 
     /*!
       \brief Get the PBeam 
@@ -238,7 +247,8 @@ namespace CR { // Namespace CR -- begin
 
       \return The formed Power-beam.
     */
-    Vector<Double> GetPBeam(DataReader *dr, Vector<Bool> antennaSelection = Vector<Bool>());
+    Vector<Double> GetPBeam (DataReader *dr,
+			     Vector<Bool> antennaSelection = Vector<Bool>());
 
     /*!
       \brief Get the time series, CCBeam and XBeam in one go
@@ -251,9 +261,11 @@ namespace CR { // Namespace CR -- begin
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
-    Bool GetTCXP(DataReader *dr, Matrix<Double> & TimeSeries, 
-		Vector<Double> & ccBeamData, Vector<Double> & xBeamData, 
-		Vector<Double> & pBeamData, Vector<Bool> antennaSelection = Vector<Bool>());
+    Bool GetTCXP (DataReader *dr, Matrix<Double> & TimeSeries, 
+		  Vector<Double> & ccBeamData,
+		  Vector<Double> & xBeamData, 
+		  Vector<Double> & pBeamData,
+		  Vector<Bool> antennaSelection = Vector<Bool>());
     
   private:
         

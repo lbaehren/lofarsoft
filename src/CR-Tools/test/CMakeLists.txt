@@ -66,7 +66,6 @@ else (HAVE_CASA)
       add_executable (${src} ${src}.cc)
       ## linker instructions ---------------------
       target_link_libraries (${src}
-	cr
 	${LAPACK_LIBRARIES}
 	${CASA_LIBRARIES}
 	${G2C_LIBRARIES}

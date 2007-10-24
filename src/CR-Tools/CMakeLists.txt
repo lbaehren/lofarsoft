@@ -62,18 +62,28 @@ endif (NOT CR_VERBOSE_CONFIGURE)
 ##
 ## =============================================================================
 
+set (lib_locations
+  ## local
+  ../../release/lib
+  ## system-wide
+  /usr/lib
+  /usr/local/lib
+  /sw/lib
+  /opt/lib
+  )
+
 ## system libraries
 
 find_library (libm m
-  PATHS /usr/lib /usr/local/lib /sw/lib /opt/lib
+  PATHS ${lib_locations}
   )
 
 find_library (libutil util
-  PATHS /usr/lib /usr/local/lib /sw/lib /opt/lib
+  PATHS ${lib_locations}
   )
 
 find_library (libgd gd
-  PATHS /usr/lib /usr/local/lib /sw/lib /opt/lib
+  PATHS ${lib_locations}
   )
 
 ## Standard CMake modules for location of packages
@@ -222,7 +232,7 @@ endif (CR_GLISH_SUPPORT)
 if (HAVE_CASA OR HAVE_CASACORE)
   add_definitions (
     -fPIC
-    -ftemplate-depth-100
+    -ftemplate-depth-20
     # -- compiler flags utilized in the source code --
     -DWITH_CASA
     -DAIPS_STDLIB

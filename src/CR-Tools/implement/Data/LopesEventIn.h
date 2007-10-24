@@ -26,6 +26,9 @@
 
 // AIPS++/CASA header files
 #include <casa/aips.h>
+#include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/Vector.h>
+#include <casa/BasicSL/String.h>
 #include <casa/Exceptions/Error.h>
 
 #include <casa/namespace.h>
@@ -43,7 +46,6 @@ namespace CR { // Namespace CR -- begin
 #define LOPES_SAMPLERATE 80e6 
   // LOPES and LORUN work in the 2nd Nyquist zone.
 #define LOPES_NYQUIST_ZONE 2
-  
   
   /*!
     \class LopesEventIn

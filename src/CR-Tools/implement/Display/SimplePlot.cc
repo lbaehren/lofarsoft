@@ -162,8 +162,8 @@ namespace CR { // Namespace CR -- begin
       pllsty(style);
       plline(npoints, plxval, plyval);
 
-      delete []plxval;
-      delete []plyval;
+      delete [] plxval;
+      delete [] plyval;
 #endif
 #ifdef HAVE_PGPLOT
        if (plotter_p == NULL){
@@ -254,11 +254,11 @@ namespace CR { // Namespace CR -- begin
 #endif
 #ifdef HAVE_PGPLOT
        if (plotter_p == NULL){
-	cerr << "SimplePlot::PlotSymbols: " << "plotter not initialized!" << endl;
+	cerr << "SimplePlot::PlotSymbols: plotter not initialized!" << endl;
 	return False;
       }; 
       if (xvals.nelements() != yvals.nelements()){
-	cerr << "SimplePlot::PlotSymbols: " << "x- and y-vector of different length!" << endl;
+	cerr << "SimplePlot::PlotSymbols: x- and y-vector of different length!" << endl;
 	return False;
       }; 
       Vector<Float> xval_(xvals.shape()),yval_(yvals.shape());
@@ -268,7 +268,7 @@ namespace CR { // Namespace CR -- begin
       plotter_p->pt(xval_, yval_, symbol);
       if (yerrs.nelements() != 0) {
 	if (xvals.nelements() != yerrs.nelements()){
-	  cerr << "SimplePlot::PlotSymbols: " << "yerror-vector of different length!" << endl;
+	  cerr << "SimplePlot::PlotSymbols: yerror-vector of different length!" << endl;
 	  return False;
 	}; 
 	Vector<Float> err1,err2,yerr_(yerrs.shape());
@@ -279,7 +279,7 @@ namespace CR { // Namespace CR -- begin
       }
       if (xerrs.nelements() != 0) {
 	if (xvals.nelements() != xerrs.nelements()){
-	  cerr << "SimplePlot::PlotSymbols: " << "xerror-vector of different length!" << endl;
+	  cerr << "SimplePlot::PlotSymbols: xerror-vector of different length!" << endl;
 	  return False;
 	}; 
 	Vector<Float> err1,err2,xerr_(xerrs.shape());

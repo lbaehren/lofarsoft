@@ -30,11 +30,11 @@
 
 // AIPS++/CASA header files
 #include <casa/aips.h>
-#include <casa/Exceptions/Error.h>
-
 #include <casa/Arrays.h>
+#include <casa/Arrays/Vector.h>
 #include <casa/Arrays/ArrayMath.h>
 #include <casa/Containers/Record.h>
+#include <casa/Exceptions/Error.h>
 
 #include <casa/namespace.h>
 
@@ -149,7 +149,8 @@ namespace CR { // Namespace CR -- begin
       
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
-    Bool setFitRangeSeconds(Double starttime, Double stoptime);
+    Bool setFitRangeSeconds (Double starttime,
+			     Double stoptime);
 
     /*!
       \brief Set the remote range
@@ -168,7 +169,8 @@ namespace CR { // Namespace CR -- begin
       
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
-    Bool setRemoteRangeSeconds(Double starttime, Double stoptime);
+    Bool setRemoteRangeSeconds (Double starttime,
+				Double stoptime);
 
     // ------------------------------------------------------------------ Methods
     
@@ -182,9 +184,10 @@ namespace CR { // Namespace CR -- begin
       
       \return Record with the fit results
     */
-    Record Fitgauss(Vector<Double> xBeam, Vector<Double> ccBeam, Bool EvalGauss=False, Double center=2e99);
-    
-    
+    Record Fitgauss (Vector<Double> xBeam,
+		     Vector<Double> ccBeam,
+		     Bool EvalGauss=False,
+		     Double center=2e99);
     
   private:
         

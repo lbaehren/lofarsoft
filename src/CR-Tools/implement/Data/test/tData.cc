@@ -49,9 +49,9 @@ using CR::Data;
 int test_Data ()
 {
   int nofFailedTests (0);
+  int max (10);
   
   try {
-    int max (10);
     Data d(50, 1200);
     Data e(50, 1201);
     Data f((uint)1e8, 1);

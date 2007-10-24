@@ -31,6 +31,10 @@
 // AIPS++/CASA header files
 #include <casa/aips.h>
 #include <casa/Arrays.h>
+#include <casa/Arrays/Array.h>
+#include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/Vector.h>
+#include <casa/BasicSL/String.h>
 #include <casa/Exceptions/Error.h>
 
 //use plplot as default
@@ -49,6 +53,9 @@
   #endif
 #endif
 
+using casa::Matrix;
+using casa::String;
+using casa::Vector;
 
 #include <casa/namespace.h>
 
@@ -85,8 +92,8 @@ namespace CR { // Namespace CR -- begin
     PGPlotterLocal *plotter_p;
 #endif
 
-    Int ppCharacterHeight, ppLineWidth;
-
+    Int ppCharacterHeight;
+    Int ppLineWidth;
 
   public:
     
@@ -146,8 +153,16 @@ namespace CR { // Namespace CR -- begin
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
-    Bool InitPlot(String file, Double xmin, Double xmax, Double ymin, Double ymax, 
-		  Int axis=0, Int just=0, Int col=1, Int cheight=1, Int linewidth=1);
+    Bool InitPlot (String file,
+		   Double xmin,
+		   Double xmax,
+		   Double ymin,
+		   Double ymax, 
+		   Int axis=0,
+		   Int just=0,
+		   Int col=1,
+		   Int cheight=1,
+		   Int linewidth=1);
 
     /*!
       \brief Plot a line into the current plot
@@ -159,7 +174,10 @@ namespace CR { // Namespace CR -- begin
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
-    Bool PlotLine(Vector<Double> xvals, Vector<Double> yvals, Int col=2, Int style=1);
+    Bool PlotLine(Vector<Double> xvals,
+		  Vector<Double> yvals,
+		  Int col=2,
+		  Int style=1);
 
     /*!
       \brief Plot symbols (and errorbars) into the current plot
@@ -174,11 +192,14 @@ namespace CR { // Namespace CR -- begin
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
-    Bool PlotSymbols(Vector<Double> xvals, Vector<Double> yvals, 
-		     Vector<Double> yerrs=Vector<Double>(),
-		     Vector<Double> xerrs=Vector<Double>(), Int col=2, 
-		     Int symbol=2, Int ticklength=1);
-
+    Bool PlotSymbols (Vector<Double> xvals,
+		      Vector<Double> yvals, 
+		      Vector<Double> yerrs=Vector<Double>(),
+		      Vector<Double> xerrs=Vector<Double>(),
+		      Int col=2, 
+		      Int symbol=2,
+		      Int ticklength=1);
+    
     /*!
       \brief Add labels to the plot
       
@@ -189,8 +210,10 @@ namespace CR { // Namespace CR -- begin
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
-    Bool AddLabels(String xlabel=String(), String ylabel=String(), 
-		   String toplabel=String(), Int col=1);
+    Bool AddLabels (String xlabel=String(),
+		    String ylabel=String(), 
+		    String toplabel=String(),
+		    Int col=1);
     
 
     /*!
@@ -214,11 +237,20 @@ namespace CR { // Namespace CR -- begin
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
 
-    Bool quickPlot(String file, Vector<Double> xvals, Vector<Double> yvals, 
-		   Vector<Double> yerrs=Vector<Double>(), Vector<Double> xerrs=Vector<Double>(),
-		   String xlabel=String(), String ylabel=String(), String toplabel=String(), 
-		   Int linecol=1, Bool plotASline=True, Int style=1, Bool logx=False, 
-		   Bool logy=False, Bool printingplot=False);
+    Bool quickPlot (String file,
+		    Vector<Double> xvals,
+		    Vector<Double> yvals, 
+		    Vector<Double> yerrs=Vector<Double>(),
+		    Vector<Double> xerrs=Vector<Double>(),
+		    String xlabel=String(),
+		    String ylabel=String(),
+		    String toplabel=String(), 
+		    Int linecol=1,
+		    Bool plotASline=True,
+		    Int style=1,
+		    Bool logx=False, 
+		    Bool logy=False,
+		    Bool printingplot=False);
 
   private:
         

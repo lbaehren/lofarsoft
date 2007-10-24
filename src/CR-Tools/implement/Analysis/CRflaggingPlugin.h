@@ -30,6 +30,7 @@
 
 // AIPS++/CASA header files
 #include <casa/aips.h>
+#include <casa/Arrays/Matrix.h>
 #include <casa/Exceptions/Error.h>
 
 #include <Calibration/PluginBase.h>
@@ -112,7 +113,7 @@ namespace CR { // Namespace CR -- begin
       
       \return ok -- Was operation successful? Returns <tt>True</tt> if yes.
     */
-    virtual Bool calcWeights(const Matrix<Double> &data);    
+    virtual Bool calcWeights (const Matrix<Double> &data);    
    
     
   private:
