@@ -19,6 +19,7 @@ basedir=`pwd`
 
 param_forceBuild=0;
 param_cleanBuild=0;
+param_reportBuild=0;
 
 ## -----------------------------------------------------------------------------
 ## Helper functions
@@ -50,6 +51,11 @@ print_help ()
     echo "    --clean-build  = Clean up the build directory before the configuration step;";
     echo "                     use this in order to erase previous configuration settings";
     echo "                     and start fresh.";
+    echo "";
+    echo "    --report-build = Relay the results from building and testing back to the";
+    echo "                     dashboard server for later instapection. This option is"
+    echo "                     useful especially when your build failed (in parts) and"
+    echo "                     you want help someone to track down the errors."
     echo "";
 }
 
@@ -83,7 +89,12 @@ build_package ()
 	if test -z "`make help | grep install`" ; then
 	    echo "[`date`] No target install for $buildDir."
 	else
-	    make install;
+	    if test -z param_reportBuild ; then
+		make install;
+	    else
+		make Experimental;
+		make install;
+	    fi
 	fi
 	}
     else 
@@ -169,6 +180,11 @@ while [ "$option_found" == "true" ]
       param_cleanBuild=1;
       shift;
       echo " -- Recognized build option; forcing build."; 
+      ;;
+      --report-build)
+      param_reportBuild=1;
+      shift;
+      echo " -- Recognized build option; reporting build/test results."; 
       ;;
       *)
       option_found=false
