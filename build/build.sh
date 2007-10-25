@@ -298,6 +298,9 @@ case $param_packageName in
 		echo "[`date`] Selected package WCSLIB"
 		build_package wcslib external/wcslib
     ;;
+    ## --------------------------------------------------------------------------
+    ## --- USG software packages ------------------------------------------------
+    ## --------------------------------------------------------------------------
     dal)
 		## external packages
 		echo "[`date`] Processing required packages ..."
@@ -329,21 +332,28 @@ case $param_packageName in
 		echo "[`date`] Building CR-Tools package ..."
 		build_package cr src/CR-Tools;
     ;;
-	config)
-		if test -d config ; then
-			cd config;
-			rm -rf *
-			cmake $basedir/../devel_common/cmake
-		else 
-			mkdir config
-			./build.sh config
-		fi
-	;;
+    bdsm)
+        echo "[`date`] Building CR-Tools package ..."
+	build_package bdsm src/BDSM;
+    ;;
+    ## --------------------------------------------------------------------------
+    ## --- General testing of environment ---------------------------------------
+    ## --------------------------------------------------------------------------
+    config)
+    if test -d config ; then
+	cd config;
+	rm -rf *
+	cmake $basedir/../devel_common/cmake
+    else 
+	mkdir config
+	./build.sh config
+    fi
+    ;;
     all)
-		echo "[`date`] Building external packages not build otherwise";
-		./build.sh bison;
-		./build.sh flex;
-		echo "[`date`] Building all USG packages";
-		./build.sh cr;
+    echo "[`date`] Building external packages not build otherwise";
+    ./build.sh bison;
+    ./build.sh flex;
+    echo "[`date`] Building all USG packages";
+    ./build.sh cr;
     ;;
 esac
