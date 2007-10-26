@@ -45,6 +45,16 @@ if (HAVE_POPT AND LAPACK_LIBRARIES)
   install (TARGETS trigrun RUNTIME DESTINATION bin)
 endif (HAVE_POPT AND LAPACK_LIBRARIES)
 
+## simStationBeam
+
+if (HAVE_CASA)
+  add_executable (simStationBeam simStationBeam.cc)
+  ## linker instructions
+  target_link_libraries (simStationBeam cr)
+  ## installation instructions
+  install (TARGETS simStationBeam RUNTIME DESTINATION bin)
+endif (HAVE_CASA)
+
 ## ------------------------------------------------------------------------------
 ## Glish client programs
 
