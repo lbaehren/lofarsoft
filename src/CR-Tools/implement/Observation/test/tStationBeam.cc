@@ -50,19 +50,25 @@ using CR::StationBeam;
 
 Double source_declination (30);
 Double source_hr_angle (30) ;
-uint stationid[64]= {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64};
-
-
+Double freq_init =120e6 ;
 Double bandwidth = 30e6 ;
 Double station_radii = 15. ;
-Vector<uint> station_id(64,0);
-Vector<Double> posit_x(64,0.0) ;
-Vector<Double> posit_y(64,0.0) ;
+
+uint n_stations = 12 ;
+
+uint stationid[12]= {6, 29, 30, 4, 3, 32, 31, 5, 27, 28, 1, 2 };
+
+Vector<Double> position_x(n_stations,0.0);
+Vector<Double> position_y(n_stations,0.0);
+
+Vector<Double> posit_x(48,0.0) ;
+Vector<Double> posit_y(48,0.0) ;
+
+Double posi_x[48] = { -37.39, -47.53, -88.10, -74.43, 25.96, 161., 51., 175.61, -246.7, -155.48, 277.36, 310.75, -406.28, -281.68, 270.69, 304.08, -635.31, -544.09, -767.31, -733.92, -706.7, -615.48, 817.7, 941.61, -188.95, -64.35, 64.16, 10.13, -131.49, -89.96, 32.82, -16.47, 752.02, 843.24, 688.87, 722.08, -179.36, -88.14, -84.69, 6.52, 175.67, 300.27, -303.97, -270.59, -1023.62, -899.01, -297.31, -263.92 };
+Double posi_y[48] = { -72.14, -117.04, -261.38, -217.43, -190.53, -114.0, 264.67, 231.28, 67.74, 158.96, -421.42, -546.03, -256.51, -289.9, -897.42, -1022.03, 696.92, 788.13, 196.59, 71.99, -527.59, -436.37, -393.99, -427.38, -1212.51, -1245.9, -138.09, -132.57, -148.34, -159.47, -255.05, -232.96, -4.42, 86.8, 718.58, 593.97, -645.59, -554.37, -484.92, -393.71, -263.33, -296.72, -68.76, -193.36, -282.51, -315.9, 1137.26, 1012.65 };
+
 Vector<Double> legendre_root(5,0.0);
 Vector<Double> legendre_weight(5,0.0);
-
-Double posi_x[64] = {120.,  270.,   -91.,    59.,  -171.,   -21.,  -95.,    55.,   20.,   170.,   62.,   212.,   -29.,   121.,   -51.,      99.,    97.,   247.,   -29.,   121.,   226.,   376.,   126.,   276.,  -189.,   -39.,  -246.,   -96.,   217., 367.,   291.,   441.,   499.,   649.,   521.,   671.,    15.,   165.,  -354.,  -204.,  -462.,  -312.,  -322.,  -172.,  -284.,  -134.,   403.,   553.,   683.,   833.,   821.,   971.,   712.,   862.,   374.,   524.,  -172.,   -22., -555.,  -405.,  -793.,  -643.,  -634.,  -484.  };
-Double posi_y[64] = { -597.,  -597.,  -50.,   -50.,  -198.,  -198.,  -148.,  -148.,  -140.,  -140.,  -70.,   -70.,  -246.,  -246.,  -314.,  -314.,  -236.,  -236.,  -412.,  -412.,  -214.,  -214.,   259.,   259.,   153.,   153.,  -108.,  -108.,  -710., -710.,  -412.,  -412.,   -60.,   -60.,   270.,   270.,   514.,   514.,   500.,   500.,   104.,   104.,  -241.,  -241.,  -892.,  -892.,  -962.,  -962.,  -525.,  -525.,    44.,    44.,   640.,   640.,   921.,   921.,   817.,   817., 787.,   787.,   123.,   123.,  -480.,  -480.  };
 
 Double l_root[5] = { 0.9064798459, 0.5384693101, 0.000000000, -0.5384693101, -0.9061798459 };
 
@@ -99,32 +105,42 @@ Bool test_StationBeams ()
  
  try{
  
- 
- for(uint p=0; p<64; p++){
-   posit_x(p) = posi_x[p] ;
- }
- 
- for(uint w=0; w<64; w++){
-   posit_y(w) = posi_y[w];
- }
- 
- for(uint lr=0; lr<5; lr++){
-   legendre_root(lr)= l_root[ lr ];
- }
- 
- for(uint lw=0; lw <5; lw++ ){
-   legendre_weight(lw)= l_weight[lw] ;
- }
- 
- for(uint stid=0; stid<64; stid++){
+ Vector<uint> station_id( n_stations,0);
+
+ for(uint stid=0; stid< n_stations; stid++){
    
    station_id(stid)=stationid[stid];
  }
  
+ for(uint p=0; p< 48; p++){
+   
+   posit_x(p) = posi_x[p] ;
+ 
+   posit_y(p) = posi_y[p];
+ }
+ 
+uint stationID(0) ;
+
+ for(uint id =0 ; id < n_stations; id++){
+
+     stationID = station_id(id) ;
+     position_x(id) = posit_x(stationID) ;
+     position_y(id) = posit_y(stationID) ;
+ }
+
+     
+ 
+for(uint lr=0; lr<5; lr++){
+   legendre_root(lr)= l_root[ lr ];
+
+   legendre_weight(lr)= l_weight[lr] ;
+ }
+
+ 
  Double frequency = 120e6 ;
  Double sky_temp = 300 ;
  Double moon_temp = 300 ;
- Double freq_init =120e6 ;
+
  StationBeam stbm ;
  
  /*  ofstream logfile1 ;
@@ -152,8 +168,8 @@ Bool test_StationBeams ()
      source_hr_angle,
      station_radii,
      station_id,
-     posit_x,
-     posit_y,
+     position_x,
+     position_y,
      legendre_root,
      legendre_weight ) ;
      
@@ -172,25 +188,56 @@ Bool test_StationBeams ()
 		                         station_id,
 		                         freq_init,
 		                         bandwidth,
-		                         posit_x,
-		                         posit_y,
+		                         position_x,
+		                         position_y,
 		                         legendre_root,
 		                         legendre_weight ) ;
  
- cout << " integrated power of moon :" << beam_moon << endl ;					      			
+ cout << " integrated power of  moon :" << beam_moon << endl ;					      			
  
- Double beam_sky = stbm.integrate_sky( source_declination,
+ Double beam_sky_1 = stbm.integrate_sky( source_declination,
 				       source_hr_angle,
 				       station_radii,
 				       station_id,
 				       freq_init,
 				       bandwidth,
-				       posit_x,
-				       posit_y,
+				       position_x,
+				       position_y,
 				       legendre_root,
 				       legendre_weight ) ;	
  
- cout << " integrated power whole sky :" << beam_sky << endl ;				     			       
+ cout << " integrated power in one part of the  sky :" << beam_sky_1 << endl ;
+
+ 
+//  Double beam_sky_2 = stbm.integrate_sky_otherside( source_declination,
+// 				       source_hr_angle,
+// 				       station_radii,
+// 				       station_id,
+// 				       freq_init,
+// 				       bandwidth,
+// 				       position_x,
+// 				       position_y,
+// 				       legendre_root,
+// 				       legendre_weight ) ;	
+ 
+//  cout << " integrated power in other part of  sky :" << beam_sky_2 << endl ;	
+
+
+ 
+//  Double beam_moonsky = stbm.integrate_moon_sky( source_declination,
+// 				       source_hr_angle,
+// 				       station_radii,
+// 				       station_id,
+// 				       freq_init,
+// 				       bandwidth,
+// 				       position_x,
+// 				       position_y,
+// 				       legendre_root,
+// 				       legendre_weight ) ;	
+ 
+//  cout << " integrated power over moon angle in  sky :" << beam_moonsky << endl ;		
+		     			       	
+		     			       
  //   ofstream logfile2 ;
  //  
  //  logfile2.open("power",ios::out);

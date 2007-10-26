@@ -25,6 +25,7 @@
 #define STATIONBEAM_H
 
 // Standard library header files
+#include <cmath>
 #include <iostream>
 #include <string>
 
@@ -37,6 +38,7 @@
 #include <casa/Arrays/Array.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/ArrayMath.h>
+#include <casa/Arrays/ArrayIO.h>
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicSL/Complex.h>
@@ -192,18 +194,29 @@ namespace CR { // Namespace CR -- begin
 		    
 		    
 		    
-Double integrate_sky(  const Double& source_declination,
-	               const Double& source_hr_angle,
-	               const Double& station_radii,
-		       const Vector<uint>& station_id,
-		       const Double& freq_init,
-		       const Double& bandwidth,
-		       Vector<Double>& position_x,
-		       Vector<Double>& position_y,
-		       const Vector<Double>& legendre_root,
-		       const Vector<Double>& legendre_weight )  ;
-		    
-		    		     		     		     
+ Double integrate_sky(  const Double& source_declination,
+	                const Double& source_hr_angle,
+	                const Double& station_radii,
+	                const Vector<uint>& station_id,
+		        const Double& freq_init,
+		        const Double& bandwidth,
+		        Vector<Double>& position_x,
+		        Vector<Double>& position_y,
+		        const Vector<Double>& legendre_root,
+		        const Vector<Double>& legendre_weight )  ;
+
+			    
+ Matrix<Double> beam_width(  const Double& source_declination,
+	                    const Double& source_hr_angle,
+	                    const Double& station_radii,
+		            const Vector<uint>& station_id,
+		            const Double& freq_init,
+		            const Double& bandwidth,
+		            Vector<Double>& position_x,
+		            Vector<Double>& position_y,
+		            const Vector<Double>& legendre_root,
+		            const Vector<Double>& legendre_weight ) ;    
+		       		    		     		     		     
  Double temp_final(    const Double& source_declination,
                        const Double& source_hr_angle,
 		       const Double& sky_temp,
@@ -226,7 +239,7 @@ Double integrate_sky(  const Double& source_declination,
 		     Vector<Double>& position_x,
 		     Vector<Double>& position_y,
 		     const Vector<Double>& legendre_root,
-		     const Vector<Double>& legendre_weight )      ;		    
+		     const Vector<Double>& legendre_weight )      ;    
 
 Double int_frequency( const Vector<Double>& frequency,
 	              const Double& source_declination,
@@ -236,7 +249,7 @@ Double int_frequency( const Vector<Double>& frequency,
 		      Vector<Double>& position_x,
 		      Vector<Double>& position_y,
 		      const Vector<Double>& legendre_root,
-		      const Vector<Double>& legendre_weight )      ;		    
+		      const Vector<Double>& legendre_weight )      ;	    
 		     
   private:
     
