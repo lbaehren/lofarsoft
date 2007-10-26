@@ -41,7 +41,9 @@
 #ifdef HAVE_PLPLOT
   #include <plplot/plConfig.h>
   #include <plplot/plplot.h>
-  #warning Using plplot for output
+  #ifdef DEBUGGING_MESSAGES
+    #warning Using plplot for output
+  #endif
   //this makes life easier!
   #undef HAVE_PGPLOT
 #else
@@ -49,7 +51,9 @@
   #ifdef HAVE_PGPLOT
     // #include <casa/System/PGPlotter.h>
     #include <Display/PGPlotterLocal.h>
-    #warning Using the old PGPlot for output
+    #ifdef DEBUGGING_MESSAGES
+      #warning Using the old PGPlot for output
+    #endif
   #endif
 #endif
 
