@@ -121,7 +121,7 @@ Matrix<Double> readAntennaPositions ()
           happen if we try to remove a file/directory which does not exist
 	  because the test creating it in the first place failed.
 */
-int cleanup_directory ()
+int cleanup_directory (bool const &test_putAt)
 {
   int nofFailedTests (0);
 
@@ -149,12 +149,14 @@ int cleanup_directory ()
     nofFailedTests++;
   }
   
-  try {
-    casa::Directory dir ("tPagedImage04.img");
-    dir.removeRecursive();
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
-    nofFailedTests++;
+  if (test_putAt) {
+    try {
+      casa::Directory dir ("tPagedImage04.img");
+      dir.removeRecursive();
+    } catch (AipsError x) {
+      cerr << x.getMesg() << endl;
+      nofFailedTests++;
+    }
   }
   
   return nofFailedTests;
@@ -274,7 +276,7 @@ int test_CoordinateSystem ()
   \endverbatim
 
 */
-int test_PagedImage (bool const &test_putAt=false)
+int test_PagedImage (bool const &test_putAt)
 {
   cout << "\n[test_PagedImage]\n" << endl;
 
@@ -666,14 +668,15 @@ int main (int argc,
   string metafile ("/data/ITS/exampledata.its/experiment.meta");
   string lopesData ("/data/LOPES/example.event");
   uint blocksize (1024);
+  bool test_putAt (false);
   
   nofFailedTests += test_CoordinateSystem ();
-  nofFailedTests += test_PagedImage ();
+  nofFailedTests += test_PagedImage (test_putAt);
   nofFailedTests += test_Skymapper ();
 //   nofFailedTests += test_processing (lopesData,
 // 				     blocksize);
 
-  nofFailedTests += cleanup_directory ();
+  nofFailedTests += cleanup_directory (test_putAt);
 
   return nofFailedTests;
 }
