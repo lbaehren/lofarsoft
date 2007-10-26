@@ -17,6 +17,7 @@ set (include_locations
   ./../release/include
   ./../../release/include
   ## source code
+  ./casacore
   ./../casacore
   ./../external/casacore
   ./../../casacore
@@ -337,6 +338,7 @@ endif (CASACORE_LIBRARIES)
 if (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
   set (HAVE_CASACORE TRUE)
 else (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
+  set (HAVE_CASACORE FALSE)
   if (NOT CASACORE_FIND_QUIETLY)
     if (NOT CASACORE_INCLUDES)
       message (STATUS "Unable to find CASACORE header files!")

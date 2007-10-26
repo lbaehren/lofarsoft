@@ -27,6 +27,7 @@
 #include <casa/Exceptions/Error.h>
 #include <casa/System/Aipsrc.h>
 #include <casa/System/ProgressMeter.h>
+#include <casa/OS/Directory.h>
 #include <images/Images/PagedImage.h>
 
 using casa::IPosition;
@@ -109,6 +110,54 @@ Matrix<Double> readAntennaPositions ()
   readAsciiMatrix (pos, "positionsLOPES08.data");
 
   return pos;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Clean up the directory once the tests have completed
+
+  \return nofFailedTests -- The number of failed operations; this e.g. might
+          happen if we try to remove a file/directory which does not exist
+	  because the test creating it in the first place failed.
+*/
+int cleanup_directory ()
+{
+  int nofFailedTests (0);
+
+  try {
+    casa::Directory dir ("tPagedImage01.img");
+    dir.removeRecursive();
+  } catch (AipsError x) {
+    cerr << x.getMesg() << endl;
+    nofFailedTests++;
+  }
+  
+  try {
+    casa::Directory dir ("tPagedImage02.img");
+    dir.removeRecursive();
+  } catch (AipsError x) {
+    cerr << x.getMesg() << endl;
+    nofFailedTests++;
+  }
+  
+  try {
+    casa::Directory dir ("tPagedImage03.img");
+    dir.removeRecursive();
+  } catch (AipsError x) {
+    cerr << x.getMesg() << endl;
+    nofFailedTests++;
+  }
+  
+  try {
+    casa::Directory dir ("tPagedImage04.img");
+    dir.removeRecursive();
+  } catch (AipsError x) {
+    cerr << x.getMesg() << endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
 }
 
 // -----------------------------------------------------------------------------
@@ -454,7 +503,7 @@ int test_PagedImage (bool const &test_putAt=false)
 	  progress.update(start(0)+1);
 	}
       }
-      
+
     } catch (AipsError x) {
       cerr << "[tSkymapper::test_PagedImage] " << x.getMesg() << endl;
       nofFailedTests++;
@@ -623,6 +672,8 @@ int main (int argc,
   nofFailedTests += test_Skymapper ();
 //   nofFailedTests += test_processing (lopesData,
 // 				     blocksize);
+
+  nofFailedTests += cleanup_directory ();
 
   return nofFailedTests;
 }

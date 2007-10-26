@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2007                                                    *
- *   Lars Baehren (bahren@astron.nl)                                       *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -27,15 +27,19 @@
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
+#else
+#ifdef HAVE_BLITZ
+using blitz::Array;
+using blitz::Range;
+#endif
 #endif
 
 #include <Imaging/GeometricalDelay.h>
 
 using std::endl;
-using blitz::Array;
-using blitz::Range;
 using CR::GeometricalDelay;
 using CR::L2Norm;
+
 
 //! Speed of light (Source: Wikipedia)
 const double lightspeed = 299792458;
@@ -47,7 +51,7 @@ const double lightspeed = 299792458;
 
   \brief A collection of test routines for GeometricalDelay
  
-  \author Lars Baehren
+  \author Lars B&auml;hren
  
   \date 2007/01/15
 */

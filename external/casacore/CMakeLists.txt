@@ -29,6 +29,7 @@ include (CTest)
 option (casacore_BUILD_TESTS "Build the test programs?" 0)
 option (casacore_ENABLE_TESTING "Enable running test programs?" 0)
 option (casacore_SHARED_LIBRARIES "Build libraries as shared libraries?" 0)
+option (casacore_MEASURES_DATA "Retrieve the measures data tables?" 1)
 
 ## Handle option: testing mode on/off
 
@@ -329,6 +330,89 @@ endif (prefix)
 
 ## =============================================================================
 ##
+##  Retrieve the measures data tables providing observatory info, ephimerides,
+##  etc.
+##
+## =============================================================================
+
+if (casacore_MEASURES_DATA)
+
+  set (measures_data_archive asap_data.tar.bz2)
+  set (measures_data_url ftp://ftp.atnf.csiro.au/pub/software/asap/data/${measures_data_archive})
+
+  ## Check if there is already some data directory
+
+  find_path (casacore_measures_data ephemerides
+    PATH ${casacore_SOURCE_DIR}/data
+    )
+
+  ## -------------------------------------------------------
+  ## Check if we have wget on the system
+  
+  find_program (WGET_EXECUTABLE wget
+    PATHS /usr/bin /usr/local/bin /opt/bin /opt/local/bin /sw/bin
+    NO_DEFAULT_PATH
+    )
+  
+  find_program (BUNZIP2_EXECUTABLE bunzip2
+    PATHS /usr/bin /usr/local/bin /opt/bin /opt/local/bin /sw/bin
+    NO_DEFAULT_PATH
+    )
+  
+  find_program (TAR_EXECUTABLE tar
+    PATHS /usr/bin /usr/local/bin /opt/bin /opt/local/bin /sw/bin
+    NO_DEFAULT_PATH
+    )
+  
+  ## -------------------------------------------------------
+  ## Download the data archive
+  
+  if (WGET_EXECUTABLE)
+    message (STATUS "[wget] Starting download of measures data tables ...")
+    execute_process (
+      WORKING_DIRECTORY ${casacore_SOURCE_DIR}
+      COMMAND ${WGET_EXECUTABLE} -c ${measures_data_url}
+      TIMEOUT 300
+      )
+  endif (WGET_EXECUTABLE)
+  
+  ## -------------------------------------------------------
+  ## Expand the archive
+  
+  if (BUNZIP2_EXECUTABLE)
+    message (STATUS "[bunzip2] Expanding archive ...")
+    execute_process (
+      WORKING_DIRECTORY ${casacore_SOURCE_DIR}
+      COMMAND ${BUNZIP2_EXECUTABLE} asap_data.tar.bz2
+      TIMEOUT 300
+      )
+  endif (BUNZIP2_EXECUTABLE)
+  
+  if (TAR_EXECUTABLE)
+    message (STATUS "[tar] Expanding archive ...")
+    execute_process (
+      WORKING_DIRECTORY ${casacore_SOURCE_DIR}
+      COMMAND ${TAR_EXECUTABLE} -xf asap_data.tar
+      TIMEOUT 120
+      )
+  endif (TAR_EXECUTABLE)
+
+  ## -------------------------------------------------------
+  ## Clean up
+
+  find_file (measures_data_tar asap_data.tar
+    PATH ${casacore_SOURCE_DIR}
+    )
+
+  if (measures_data_tar)
+    message (STATUS "Cleaning up temp data from measures tables...")
+    file (REMOVE ${measures_data_tar})
+  endif (measures_data_tar)
+  
+endif (casacore_MEASURES_DATA)
+
+## =============================================================================
+##
 ##  Summary of settings
 ##
 ## =============================================================================
@@ -348,6 +432,9 @@ message (STATUS "CMAKE_C_FLAGS .............. = ${CMAKE_C_FLAGS}")
 message (STATUS "CMAKE_CXX_FLAGS ............ = ${CMAKE_CXX_FLAGS}")
 message (STATUS "CMAKE_MODULE_LINKER_FLAGS .. = ${CMAKE_MODULE_LINKER_FLAGS}")
 message (STATUS "CMAKE_INSTALL_PREFIX ....... = ${CMAKE_INSTALL_PREFIX}")
+message (STATUS "Measures data directory .... = ${casacore_measures_data}")
+message (STATUS "Curl network downloader .... = ${curl_bin}")
+message (STATUS "Wget network downloader .... = ${WGET_EXECUTABLE}")
 message (STATUS "Bison lexical parser ....... = ${bison_bin}")
 message (STATUS "Flex lexical parser ........ = ${flex_bin}")
 message (STATUS "libm library ............... = ${libm}")
