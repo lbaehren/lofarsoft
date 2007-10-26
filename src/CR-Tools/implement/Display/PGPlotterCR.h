@@ -26,6 +26,8 @@
 #include <sstream>
 #include <Data/Data.h>
 
+#include <cpgplot.h>
+
 using namespace std;
 
 namespace CR { // Namespace CR -- begin

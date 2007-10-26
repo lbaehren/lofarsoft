@@ -91,7 +91,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     <b>Geometry.</b>
     The basic equation, for which the delays are computed, is documented in
     the GeometricalWeight class. The procedure to arrive at the geometrical
-    weights passed to the Beamform is divided into three steps, of which this
+    weights passed to the Beamformer is divided into three steps, of which this
     class implements the first one.
 
     For a sky position \f$ \vec\rho \f$ and antenna positions \f$ \vec x_j \f$
@@ -238,7 +238,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			      kept in memory; if set <i>no</i> only the input 
 			      parameters are stored an no further action is taken.
     */
-    inline bool bufferDelays () {
+    inline bool bufferDelays () const {
       return bufferDelays_p;
     }
     
@@ -285,12 +285,12 @@ namespace CR { // NAMESPACE CR -- BEGIN
                               [nofAntennas,3]
     */
 #ifdef HAVE_CASA
-    inline casa::Matrix<double> antPositions () {
+    inline casa::Matrix<double> antPositions () const {
       return antPositions_p;
     }
 #else
 #ifdef HAVE_BLITZ
-    inline blitz::Array<double,2> antPositions () {
+    inline blitz::Array<double,2> antPositions () const {
       return antPositions_p;
     }
 #endif
@@ -375,12 +375,12 @@ namespace CR { // NAMESPACE CR -- BEGIN
                              computed, [nofSkyPositions,3].
     */
 #ifdef HAVE_CASA
-    inline casa::Matrix<double> skyPositions () {
+    inline casa::Matrix<double> skyPositions () const {
       return skyPositions_p;
     }
 #else
 #ifdef HAVE_BLITZ
-    inline blitz::Array<double,2> skyPositions () {
+    inline blitz::Array<double,2> skyPositions () const {
       return skyPositions_p;
     }
 #endif
@@ -602,7 +602,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \return nofAntennaPositions -- The number of antenna positions, for which
                                      the geometrical delay is computed.
     */
-    inline uint nofAntennaPositions () {
+    inline uint nofAntennaPositions () const {
       return nofAntennas_p;
     }
     /*!
@@ -611,7 +611,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \return nofAntennas -- The number of antenna positions, for which the
                              geometrical delay is computed.
     */
-    inline uint nofAntennas () {
+    inline uint nofAntennas () const {
       return nofAntennas_p;
     }
     

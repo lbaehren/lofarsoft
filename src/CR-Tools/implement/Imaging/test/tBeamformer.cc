@@ -24,7 +24,7 @@
 #include <casa/BasicMath/Random.h>
 
 #include <Imaging/Beamformer.h>
-#include <create_data.h>
+#include "create_data.h"
 
 using casa::DComplex;
 using casa::Matrix;

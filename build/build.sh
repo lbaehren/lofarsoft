@@ -19,7 +19,7 @@ basedir=`pwd`
 
 param_forceBuild=0;
 param_cleanBuild=0;
-param_reportBuild=0;
+param_reportBuild='';
 
 ## -----------------------------------------------------------------------------
 ## Helper functions
@@ -73,6 +73,7 @@ build_package ()
     echo " -- Build directory ..... : $buildDir";
     echo " -- Source directory .... : $sourceDir";
     echo " -- Configuration options : $buildOptions";
+	echo " -- Send build log ...... : $param_reportBuild";
     # check if the build directory exists
     cd $basedir
     if test -d $buildDir ; then
@@ -89,7 +90,7 @@ build_package ()
 	if test -z "`make help | grep install`" ; then
 	    echo "[`date`] No target install for $buildDir."
 	else
-	    if test -z param_reportBuild ; then
+	    if test -z $param_reportBuild ; then
 		make install;
 	    else
 		make Experimental;
@@ -171,23 +172,23 @@ option_found=true
 while [ "$option_found" == "true" ]
   do
   case $2 in
-      --force-build)
+    --force-build)
       param_forceBuild=1;
       shift;
       echo " -- Recognized build option; forcing build."; 
-      ;;
-      --clean-build)
+    ;;
+    --clean-build)
       param_cleanBuild=1;
       shift;
       echo " -- Recognized build option; forcing build."; 
-      ;;
-      --report-build)
+    ;;
+    --report-build)
       param_reportBuild=1;
       shift;
       echo " -- Recognized build option; reporting build/test results."; 
-      ;;
-      *)
-      option_found=false
+    ;;
+    *)
+    option_found=false
   esac
 done
 

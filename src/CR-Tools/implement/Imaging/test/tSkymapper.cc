@@ -33,7 +33,7 @@ using casa::IPosition;
 
 #include <Imaging/Skymapper.h>
 #include <Utilities/ProgressBar.h>
-#include <create_data.h>
+#include "create_data.h"
 
 using CR::ObservationData;
 using CR::ProgressBar;

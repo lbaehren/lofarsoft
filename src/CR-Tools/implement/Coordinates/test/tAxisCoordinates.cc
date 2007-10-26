@@ -20,7 +20,15 @@
 
 /* $Id: tAxisCoordinates.cc,v 1.4 2006/08/24 13:55:12 bahren Exp $*/
 
+// Standard library
 #include <iostream>
+// CASA library
+#include <casa/aips.h>
+#include <casa/Arrays.h>
+#include <casa/Arrays/Array.h>
+#include <casa/Arrays/MaskedArray.h>
+#include <casa/Arrays/Vector.h>
+// CR-Tools
 #include <Coordinates/AxisCoordinates.h>
 
 /*!
@@ -35,9 +43,8 @@
   \date 2006/03/13
 */
 
-using casa::Double;
-using casa::Int;
-using casa::Vector;
+using std::cout;
+using std::endl;
 
 using CR::AxisCoordinates;
 
@@ -57,28 +64,28 @@ using CR::AxisCoordinates;
 */
 void show_parameters (AxisCoordinates& axis)
 {
-  std::cout << " - blocksize         [samples] = " << axis.blocksize() << std::endl;
-  std::cout << " - offset            [samples] = " << axis.offset() << std::endl;
-  std::cout << " - presync           [samples] = " << axis.presync() << std::endl;
-  std::cout << " - sample frequency  [Hz     ] = " << axis.sampleFrequency() << std::endl;
-  std::cout << " - frequency range   [Hz     ] = " << axis.frequencyRange() << std::endl;
-  std::cout << " - FFT output length [samples] = " << axis.fftLength() << std::endl;
-  std::cout << " - frequency bin     [Hz     ] = " << axis.frequencyBin() << std::endl;
+  cout << " - blocksize         [samples] = " << axis.blocksize()       << endl;
+  cout << " - offset            [samples] = " << axis.offset()          << endl;
+  cout << " - presync           [samples] = " << axis.presync()         << endl;
+  cout << " - sample frequency  [Hz     ] = " << axis.sampleFrequency() << endl;
+  cout << " - frequency range   [Hz     ] = " << axis.frequencyRange()  << endl;
+  cout << " - FFT output length [samples] = " << axis.fftLength()       << endl;
+  cout << " - frequency bin     [Hz     ] = " << axis.frequencyBin()    << endl;
 }
 
 // -----------------------------------------------------------------------------
 
 void show_axes (AxisCoordinates& axis)
 {
-  std::cout.precision(12);
-  std::cout << " - Pos                    = "
-       << axis.axisValues(AxisCoordinates::Pos) << std::endl;
-  std::cout << " - Time                   = "
-       << axis.axisValues(AxisCoordinates::Time) << std::endl;
-  std::cout << " - Frequency              = "
-       << axis.axisValues(AxisCoordinates::Frequency) << std::endl;
-  std::cout << " - Intermediate frequency = "
-       << axis.axisValues(AxisCoordinates::IntermedFreq) << std::endl;
+  cout.precision(12);
+  cout << " - Pos                    = "
+       << axis.axisValues(AxisCoordinates::Pos) << endl;
+  cout << " - Time                   = "
+       << axis.axisValues(AxisCoordinates::Time) << endl;
+  cout << " - Frequency              = "
+       << axis.axisValues(AxisCoordinates::Frequency) << endl;
+  cout << " - Intermediate frequency = "
+       << axis.axisValues(AxisCoordinates::IntermedFreq) << endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -88,21 +95,21 @@ void show_axes (AxisCoordinates& axis)
 
   \return nofFailedTests -- The number of failed tests.
 */
-Int test_AxisCoordinates ()
+int test_AxisCoordinates ()
 {
-  Int nofFailedTests (0);
-  Int blocksize (128);
-  Int offset (0);
-  Int presync (32768);
-  Double sampleFrequency (80e06);
-  Vector<Double> frequencyRange(2);
+  int nofFailedTests (0);
+  int blocksize (128);
+  int offset (0);
+  int presync (32768);
+  double sampleFrequency (80e06);
+  casa::Vector<double> frequencyRange(2);
 
   frequencyRange(0) = 40e06;
   frequencyRange(1) = 80e06;
 
-  std::cout << "\n[test_AxisCoordinates]\n" << std::endl;
+  cout << "\n[test_AxisCoordinates]\n" << endl;
 
-  std::cout << "[1] Testing default constructor ..." << std::endl;
+  cout << "[1] Testing default constructor ..." << endl;
   {
     AxisCoordinates axis;
     //
@@ -110,7 +117,7 @@ Int test_AxisCoordinates ()
     show_axes (axis);
   }
   
-  std::cout << "[2] Testing argumented constructor ..." << std::endl;
+  cout << "[2] Testing argumented constructor ..." << endl;
   {
     AxisCoordinates axis (blocksize,
 			  offset,
@@ -126,7 +133,7 @@ Int test_AxisCoordinates ()
     show_axes (axis);
   }
 
-  std::cout << "[3] Testing copy constructor" << std::endl;
+  cout << "[3] Testing copy constructor" << endl;
   {
     AxisCoordinates axis1 (blocksize,
 			   offset,
@@ -135,9 +142,9 @@ Int test_AxisCoordinates ()
 			   frequencyRange);
     AxisCoordinates axis2 (axis1);
 
-    std::cout << " - Parameters for object 1 ..." << std::endl;
+    cout << " - Parameters for object 1 ..." << endl;
     show_parameters (axis1);
-    std::cout << " - Parameters for object 2 ..." << std::endl;
+    cout << " - Parameters for object 2 ..." << endl;
     show_parameters (axis2);
   }
   
@@ -148,12 +155,10 @@ Int test_AxisCoordinates ()
 
 int main ()
 {
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
 
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_AxisCoordinates ();
-  }
+  nofFailedTests += test_AxisCoordinates ();
 
   return nofFailedTests;
 }
