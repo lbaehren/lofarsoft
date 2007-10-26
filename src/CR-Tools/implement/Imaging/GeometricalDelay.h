@@ -26,14 +26,14 @@
 
 #include <string>
 
-#ifdef HAVE_BLITZ
-#include <blitz/array.h>
-#endif
-
 #ifdef HAVE_CASA
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
+#else
+#ifdef HAVE_BLITZ
+#include <blitz/array.h>
+#endif
 #endif
 
 #include <Imaging/CoordinateConversion.h>

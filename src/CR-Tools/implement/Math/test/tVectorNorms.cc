@@ -39,7 +39,11 @@ using std::endl;
   \date 2007/01/22
  */
 
-// -----------------------------------------------------------------------------
+// ==============================================================================
+//
+//  Test functions working with Blitz++ array classes
+//
+// ==============================================================================
 
 #ifdef HAVE_BLITZ
 
@@ -105,10 +109,6 @@ int test_blitz_functions ()
   
   return nofFailedTests;
 }
-
-#endif
-
-// -----------------------------------------------------------------------------
 
 /*!
   \brief Test the functions for computation of the vector norms
@@ -201,7 +201,13 @@ int test_Norms ()
   return nofFailedTests;  
 }
 
-// -----------------------------------------------------------------------------
+#endif
+
+// ==============================================================================
+//
+//  Test functions working with CASA array classes
+//
+// ==============================================================================
 
 #ifdef HAVE_CASA
 
@@ -262,9 +268,7 @@ int main ()
 
 #ifdef HAVE_BLITZ
 
-  {
     nofFailedTests += test_blitz_functions ();
-  }
 
 #endif
 
