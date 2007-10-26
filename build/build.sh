@@ -32,15 +32,15 @@ print_help ()
     echo "";
     echo "SYNOPSIS";
     echo "    build.sh <package> [build-option]";
-    echo "    build.sh { -clean | clean }";
+    echo "    build.sh { clean | clean-all | clean-build | clean-release}";
     echo "    build.sh { -h | --h | -help | --help | help }";
     echo "";
     echo "DESCRIPTION";
     echo "    A simple shell script to configure and install as many as possible of";
     echo "    the packages in the LOFAR USG distribution.";
     echo "";
-    echo "    <package> = bison blitz boost casacore cfitsio cmake cr dal flex hdf5";
-    echo "                plplot python wcslib";
+    echo "    <package> = bdsm bison blitz boost casacore cfitsio cmake cr dal flex";
+    echo "                hdf5 plplot python wcslib";
     echo "";
     echo "    The following options are available:";
     echo "";
@@ -48,15 +48,18 @@ print_help ()
     echo "                     version exists; otherwise the system-wise version of a";
     echo "                     library/package/binary will be used.";
     echo "";
-    echo "    --clean-build  = Clean up the build directory before the configuration step;";
+    echo "    --new-build    = Clean up the build directory before the configuration step;";
     echo "                     use this in order to erase previous configuration settings";
     echo "                     and start fresh.";
     echo "";
     echo "    --report-build = Relay the results from building and testing back to the";
-    echo "                     dashboard server for later instapection. This option is"
+    echo "                     dashboard server for later inspection. This option is"
     echo "                     useful especially when your build failed (in parts) and"
     echo "                     you want help someone to track down the errors."
     echo "";
+    echo "    clean, clean-build = Clean out the build directory."
+    echo "    clean-release      = Clean out the release directory."
+    echo "    clean-all          = Do a clean-build and a clean-release."
 }
 
 # \param buildDir  -- directory in which to perform the build; this is a 
@@ -93,6 +96,7 @@ build_package ()
 	    if test -z $param_reportBuild ; then
 		make install;
 	    else
+		echo "##### Starting 'build Experimental'. Minimal output to the console"
 		make Experimental;
 		make install;
 	    fi
@@ -133,7 +137,7 @@ else
 	help)
 		print_help
 	;;
-	-clean)
+	-clean-build)
 		rm -f *~ *.log;
 		rm -rf bison blitz boost;
 		rm -rf casacore cfitsio cmake config cr; 
@@ -143,6 +147,9 @@ else
 		rm -rf plplot python;
 		rm -rf vtk;
 		rm -rf wcslib;
+	;;
+	clean-build)
+		./build.sh -clean-build;
 	;;
 	-clean-release)
 		rm -rf $basedir/../release/bin
@@ -155,6 +162,16 @@ else
 	;;
 	clean-release)
 		./build.sh -clean-release;
+	;;
+	-clean-all)
+		./build.sh -clean-build;
+		./build.sh -clean-release;
+	;;
+	clean-all)
+		./build.sh -clean-all;
+	;;
+	-clean)
+		./build.sh -clean-build;
 	;;
 	clean)
 		./build.sh -clean;
@@ -177,10 +194,10 @@ while [ "$option_found" == "true" ]
       shift;
       echo " -- Recognized build option; forcing build."; 
     ;;
-    --clean-build)
+    --new-build)
       param_cleanBuild=1;
       shift;
-      echo " -- Recognized build option; forcing build."; 
+      echo " -- Recognized clean-build option; forcing new configuration."; 
     ;;
     --report-build)
       param_reportBuild=1;
@@ -334,8 +351,8 @@ case $param_packageName in
 		build_package cr src/CR-Tools;
     ;;
     bdsm)
-        echo "[`date`] Building CR-Tools package ..."
-	build_package bdsm src/BDSM;
+		echo "[`date`] Building BDSM package ..."
+		build_package bdsm src/BDSM;
     ;;
     ## --------------------------------------------------------------------------
     ## --- General testing of environment ---------------------------------------
