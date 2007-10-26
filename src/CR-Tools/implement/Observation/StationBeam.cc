@@ -565,43 +565,99 @@ Double StationBeam::integrate_sky(  const Double& source_declination,
       return Double ();
       }       
 	       
- }			    
- 	
- Matrix<Double> Station::beam_width(  const Double& source_declination,
-	                              const Double& source_hr_angle,
-	                              const Double& station_radii,
-		                      const Vector<uint>& station_id,
-		                      const Double& freq_init,
-		                      const Double& bandwidth,
-		                      Vector<Double>& position_x,
-		                      Vector<Double>& position_y,
-                                      const Vector<Double>& legendre_root,
-             		             const Vector<Double>& legendre_weight )   
+ }	
 
- {
+		    
+ 	
+Double  Station::beam_width(  const Double& source_declination,
+	                       const Double& source_hr_angle,
+	                       const Double& station_radii,
+	                       const Vector<uint>& station_id,
+		               const Double& freq_init,
+		               const Double& bandwidth,
+		               Vector<Double>& position_x,
+		               Vector<Double>& position_y,
+                               const Vector<Double>& legendre_root,
+             		       const Vector<Double>& legendre_weight )   
+
+{
    try {
           StationBeam stbm ;
+         
+          Double freq_final = freq_init + bandwidth ;
+          Double freq_interval = (freq_final- freq_init)/5e6 ;
 
-	  Double declination_interval = 0.02 ;
-          Double hr_angle_interval = 0.5 ;
-
-          Double
-
-
+	  Double decl_interval = 0.02 ;
+          Double hr_interval = 0.1 ;
           
-         Vector<Double> declination	 
+          Double decl_min = source_declination - 0.5 ;
+          Double hr_min = source_hr_angle - 5 ;
 
+          uint decl_loop = ((source_declination+0.5)-(decl_min))/decl_inetrval ;
+          uint hr_loop = ((source_hr_angle+5)-(hr_min))/hr_interval ;
+          
+          Vector<Double> declination( decl_loop, 0.0);
+          Vector<Double> hrangle( hr_loop, 0.0) ;
+          
+      	 ofstream logfile1 ;
+	  
+	 logfile1.open("beamwidth", ios::out) ; 
 
+         for( uint d=0; d< decl_loop; d++ )  {
 
-       return power_sky_otherside ;
-      }
+	      Double decl_angle= decl_min + d*decl_interval ;
+              declination(d) = decl_angle ;
+
+              for( uint h=0; h< hr_loop; h++ )  {
+
+		  Double hr_angle = hr_min + h*hr_interval ;
+                  hrangle (h) = hr_angle ; 
+                  Double f1 = freq_min ;
+
+                  Double f2 = 0.0;
+                  Double f_inner_sum(0.0);
+                  Double f_outer_sum(0.0);
+                  Double f1_f(0.0);
+                  Double f2_f(0.0);
+
+                  while(f1 < freq_final )  { 
+				
+			f2 = f1+ freq_interval ;
+			f1_f = (f2-f1)/2.;
+			f2_f = (f2+f1)/2. ;
+			f_inner_sum =0.0;
+				      
+			for( uint g=0; g<nroots; g++)  {
+				      
+			     ff = f1_f*legendre_root(g)+f2_f ;
+			     power_beam = stbm.tied_array( ff,
+	                                                   hr_angle,
+		                                           decl_angle,
+		                                           source_declination,
+		                                           source_hr_angle,
+		                                           station_radii,
+			                                   station_id,
+		                                           position_x,
+		                                           position_y,
+		                                           legendre_root,
+		                                           legendre_weight ) ;
+					 
+					 f_inner_sum = f_inner_sum + legendre_weight(g)*power_beam ;
+			   }
+		       f_outer_sum = f_outer_sum + f1_f*f_inner_sum ;
+		 
+                       f1 = f2 ;
+		       logfile1 << decl_angle << "\t" <<  hr_angle << "\t" << f_outer_sum << "\n" ;
+		  }
+		       
+     return f_outer_sum ;
+   }
       
-      catch( AipsError x ){
-      cerr << "StationBeam::beam_width " << x.getMesg () << endl ;
-      return Double ();
-      }       
-	       
- }	
+   catch( AipsError x ){
+   cerr << "StationBeam::beam_width " << x.getMesg () << endl ;
+   return Double ();
+  }       
+}	
  
  
 Double StationBeam::integrate_moon_sky(  const Double& source_declination,
