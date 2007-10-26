@@ -569,7 +569,7 @@ Double StationBeam::integrate_sky(  const Double& source_declination,
 
 		    
  	
-Double  Station::beam_width(  const Double& source_declination,
+Double StationBeam::beam_width(  const Double& source_declination,
 	                       const Double& source_hr_angle,
 	                       const Double& station_radii,
 	                       const Vector<uint>& station_id,
@@ -583,7 +583,8 @@ Double  Station::beam_width(  const Double& source_declination,
 {
    try {
           StationBeam stbm ;
-         
+         	 
+          uint nroots = legendre_root.nelements() ;
           Double freq_final = freq_init + bandwidth ;
           Double freq_interval = (freq_final- freq_init)/5e6 ;
 
@@ -593,11 +594,13 @@ Double  Station::beam_width(  const Double& source_declination,
           Double decl_min = source_declination - 0.5 ;
           Double hr_min = source_hr_angle - 5 ;
 
-          uint decl_loop = ((source_declination+0.5)-(decl_min))/decl_inetrval ;
-          uint hr_loop = ((source_hr_angle+5)-(hr_min))/hr_interval ;
+          uint decl_loop = int(((source_declination+0.5)-(decl_min))/decl_interval) ;
+          uint hr_loop = int(((source_hr_angle+5)-(hr_min))/hr_interval) ;
           
           Vector<Double> declination( decl_loop, 0.0);
           Vector<Double> hrangle( hr_loop, 0.0) ;
+	  Double power_beam(0.0) ;
+           Double power_sum(0.0); 
           
       	 ofstream logfile1 ;
 	  
@@ -612,7 +615,7 @@ Double  Station::beam_width(  const Double& source_declination,
 
 		  Double hr_angle = hr_min + h*hr_interval ;
                   hrangle (h) = hr_angle ; 
-                  Double f1 = freq_min ;
+                  Double f1 = freq_init ;
 
                   Double f2 = 0.0;
                   Double f_inner_sum(0.0);
@@ -626,7 +629,9 @@ Double  Station::beam_width(  const Double& source_declination,
 			f1_f = (f2-f1)/2.;
 			f2_f = (f2+f1)/2. ;
 			f_inner_sum =0.0;
-				      
+			
+			Double ff(0.0) ;
+	      
 			for( uint g=0; g<nroots; g++)  {
 				      
 			     ff = f1_f*legendre_root(g)+f2_f ;
@@ -648,9 +653,13 @@ Double  Station::beam_width(  const Double& source_declination,
 		 
                        f1 = f2 ;
 		       logfile1 << decl_angle << "\t" <<  hr_angle << "\t" << f_outer_sum << "\n" ;
+	               power_sum = f_outer_sum ;	  
 		  }
+
+	      }                
+         }      
 		       
-     return f_outer_sum ;
+     return  power_sum ;
    }
       
    catch( AipsError x ){

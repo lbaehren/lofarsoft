@@ -204,7 +204,17 @@ namespace CR { // Namespace CR -- begin
 		        Vector<Double>& position_y,
 		        const Vector<Double>& legendre_root,
 		        const Vector<Double>& legendre_weight )  ;
-
+		    
+ Double integrate_moon_sky(  const Double& source_declination,
+	                const Double& source_hr_angle,
+	                const Double& station_radii,
+	                const Vector<uint>& station_id,
+		        const Double& freq_init,
+		        const Double& bandwidth,
+		        Vector<Double>& position_x,
+		        Vector<Double>& position_y,
+		        const Vector<Double>& legendre_root,
+		        const Vector<Double>& legendre_weight )  ;
 			    
 Double beam_width(  const Double& source_declination,
                     const Double& source_hr_angle,
