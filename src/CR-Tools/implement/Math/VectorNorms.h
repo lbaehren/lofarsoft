@@ -70,8 +70,13 @@ namespace CR { // namespace CR -- begin
 
   <ul>
     <li>All functions are templated to allow maximum flexibility.
-    <li>Most function support usage of: C++ arrays, STD vectors, Blitz++ arrays,
-    CASA arrays.
+    <li>Most function support usage of:
+    <ol>
+      <li>C++ arrays
+      <li>STD vectors
+      <li>Blitz++ arrays
+      <li>CASA arrays
+    </ol>
   </ul>
 
   <h3>Example(s)</h3>
@@ -83,6 +88,8 @@ namespace CR { // namespace CR -- begin
   //  Vector norms
   //
   // ============================================================================
+
+  // [1] Standard C/C++ array 
   
   /*!
     \brief Compute the L1-Norm of a vector
@@ -107,6 +114,8 @@ namespace CR { // namespace CR -- begin
   template <class T>
     T L2Norm (T const *vec,
 	      unsigned int const &nelem);
+
+  // [2] Standard library vector
   
   /*!
     \brief Compute the L1-Norm of a vector
@@ -127,6 +136,8 @@ namespace CR { // namespace CR -- begin
   */
   template <class T>
     T L2Norm (std::vector<T> const &vec);
+
+  // [3] Blitz++ arrays
   
 #ifdef HAVE_BLITZ
 
@@ -166,6 +177,8 @@ namespace CR { // namespace CR -- begin
     T L2Norm (blitz::Array<T,1> const &vec);
   
 #endif
+
+  // [4] CASA array classes
 
 #ifdef HAVE_CASA
 
