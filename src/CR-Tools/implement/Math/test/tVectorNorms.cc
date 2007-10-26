@@ -148,7 +148,7 @@ int test_Norms ()
   cout << "\n[test_Norms]\n" << endl;
 
   int nofFailedTests (0);
-  
+
   cout << "[1] Computation using Blitz++ arrays" << endl;
   try {
     blitz::Array<double,1> vec (3);
@@ -171,7 +171,7 @@ int test_Norms ()
     std::cerr << message << endl;
     nofFailedTests++;
   }
-  
+
   cout << "[2] Computation using C++ arrays" << endl;
   try {
     unsigned int nelem (3);
@@ -202,7 +202,7 @@ int test_Norms ()
 }
 
 #endif
-
+  
 // ==============================================================================
 //
 //  Test functions working with CASA array classes
@@ -262,14 +262,12 @@ int main ()
 {
   int nofFailedTests (0);
 
-  {
-    nofFailedTests += test_Norms ();
-  }
 
 #ifdef HAVE_BLITZ
-
-    nofFailedTests += test_blitz_functions ();
-
+  
+  nofFailedTests += test_Norms ();
+  nofFailedTests += test_blitz_functions ();
+  
 #endif
 
 #ifdef HAVE_CASA
