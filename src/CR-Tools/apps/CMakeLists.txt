@@ -3,6 +3,7 @@
 ## $Id:: CMakeLists.txt 575 2007-08-17 14:04:03Z baehren                        $
 ##-------------------------------------------------------------------------------
 
+## -------------------------------------------------------------------
 ## imagefromfits  WCSLIB MIRLIB LAPACK F77 CFITSIO
 
 #if (HAVE_CASACORE OR HAVE_CASA)
@@ -17,6 +18,7 @@
 #  endif (HAVE_CFITSIO)
 #endif (HAVE_CASACORE OR HAVE_CASA)
   
+## -------------------------------------------------------------------
 ## treetest  GLISH CFITSIO WCSLIB
 
 if (LAPACK_LIBRARIES AND G2C_LIBRARIES)
@@ -27,6 +29,7 @@ else (LAPACK_LIBRARIES AND G2C_LIBRARIES)
   message (STATUS "[cr] Unable to build executable treetest.")
 endif (LAPACK_LIBRARIES AND G2C_LIBRARIES)
 
+## -------------------------------------------------------------------
 ## trigrun   GLISH POPT LAPACK F77 CFITSIO WCSLIB
 
 if (HAVE_POPT AND LAPACK_LIBRARIES)
@@ -45,24 +48,25 @@ if (HAVE_POPT AND LAPACK_LIBRARIES)
   install (TARGETS trigrun RUNTIME DESTINATION bin)
 endif (HAVE_POPT AND LAPACK_LIBRARIES)
 
+## -------------------------------------------------------------------
 ## simStationBeam
 
-if (HAVE_CASA)
+if (HAVE_CASA OR HAVE_CASACORE)
   add_executable (simStationBeam simStationBeam.cc)
   ## linker instructions
   target_link_libraries (simStationBeam cr)
   ## installation instructions
   install (TARGETS simStationBeam RUNTIME DESTINATION bin)
-endif (HAVE_CASA)
+endif (HAVE_CASA OR HAVE_CASACORE)
 
-## ------------------------------------------------------------------------------
+## -------------------------------------------------------------------
 ## Glish client programs
 
 if (CR_GLISH_SUPPORT AND HAVE_GLISH)
   add_subdirectory (GlishClients)
 endif (CR_GLISH_SUPPORT AND HAVE_GLISH)
 
-## ------------------------------------------------------------------------------
+## -------------------------------------------------------------------
 ## LOPES-Star tools
 
 if (HAVE_ROOT AND HAVE_FFTW3)
