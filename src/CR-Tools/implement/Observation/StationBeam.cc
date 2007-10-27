@@ -586,7 +586,7 @@ Double StationBeam::beam_width(  const Double& source_declination,
          	 
           uint nroots = legendre_root.nelements() ;
           Double freq_final = freq_init + bandwidth ;
-          Double freq_interval = (freq_final- freq_init)/5e6 ;
+          Double freq_interval = (freq_final- freq_init)/10e6 ;
 
 	  Double decl_interval = 0.02 ;
           Double hr_interval = 0.1 ;
