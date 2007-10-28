@@ -54,9 +54,9 @@ Double freq_init =120e6 ;
 Double bandwidth = 30e6 ;
 Double station_radii = 15. ;
 
-uint n_stations = 12 ;
+uint n_stations = 2 ;
 
-uint stationid[12]= {6, 29, 30, 4, 3, 32, 31, 5, 27, 28, 1, 2 };
+uint stationid[12]= { 29, 30, };
 
 Vector<Double> position_x(n_stations,0.0);
 Vector<Double> position_y(n_stations,0.0);
@@ -143,25 +143,25 @@ for(uint lr=0; lr<5; lr++){
 
  StationBeam stbm ;
  
- /*  ofstream logfile1 ;
+ ofstream logfile1 ;
      
  logfile1.open("power",ios::out);
  
  for (uint i=0; i<90; i++){
  
- for( uint j=0; j<360; j++){*/
+     for( uint j=0; j<360; j++){
  
- //         Double sing_sta_beam = stbm.station_beam( frequency,
- // 				                  j,
- // 			       	                  i,
- // 				                  source_declination,
- //       	       		                  source_hr_angle,
- // 			                          station_radii,
- // 			                          legendre_root,
- // 			                          legendre_weight )  ;
- // 	
+         Double sing_sta_beam = stbm.station_beam( frequency,
+  				                  j,
+  			       	                  i,
+  				                  source_declination,
+        	       		                  source_hr_angle,
+  			                          station_radii,
+  			                          legendre_root,
+  			                          legendre_weight )  ;
+  	
  
- /*  Double beam_value = stbm.tied_array( frequency,
+  Double beam_value = stbm.tied_array( frequency,
      j,
      i,
      source_declination,
@@ -173,41 +173,54 @@ for(uint lr=0; lr<5; lr++){
      legendre_root,
      legendre_weight ) ;
      
-     
-     logfile1 << j << "\t" << i << "\t" << beam_value << "\n" ;
+    
+     logfile1 << j << "\t" << i << "\t" << sing_sta_beam << "\n" ;
      }
      logfile1 << "\n" ;
      }
      
-  logfile1.close();*/
- 
- 
- Double beam_moon = stbm.integrate_moon( source_declination,
-		                         source_hr_angle,
-		                         station_radii,
-		                         station_id,
-		                         freq_init,
-		                         bandwidth,
-		                         position_x,
-		                         position_y,
-		                         legendre_root,
-		                         legendre_weight ) ;
- 
- cout << " integrated power of  moon :" << beam_moon << endl ;					      			
- 
- Double beam_sky_1 = stbm.integrate_sky( source_declination,
-				       source_hr_angle,
-				       station_radii,
-				       station_id,
-				       freq_init,
-				       bandwidth,
-				       position_x,
-				       position_y,
-				       legendre_root,
-				       legendre_weight ) ;	
- 
- cout << " integrated power in one part of the  sky :" << beam_sky_1 << endl ;
+  logfile1.close();
 
+/*
+
+  Double beam_moon = stbm.beam_width(   source_declination,
+	                               source_hr_angle,
+	                               station_radii,
+	                               station_id,
+		                       freq_init,
+		                       bandwidth,
+		                       position_x,
+		                       position_y,
+                                       legendre_root,
+             		               legendre_weight )   ;
+*/
+/* 
+  Double beam_moon = stbm.integrate_moon( source_declination,
+ 		                         source_hr_angle,
+ 		                         station_radii,
+ 		                         station_id,
+ 		                         freq_init,
+ 		                         bandwidth,
+ 		                         position_x,
+ 		                         position_y,
+ 		                         legendre_root,
+ 		                         legendre_weight ) ;
+ 
+  cout << " integrated power of  moon :" << beam_moon << endl ;					      			
+ 
+  Double beam_sky_1 = stbm.integrate_sky( source_declination,
+ 				       source_hr_angle,
+ 				       station_radii,
+ 				       station_id,
+ 				       freq_init,
+ 				       bandwidth,
+ 				       position_x,
+ 				       position_y,
+ 				       legendre_root,
+ 				       legendre_weight ) ;	
+ 
+  cout << " integrated power in one part of the  sky :" << beam_sky_1 << endl ;
+*/
  
 //  Double beam_sky_2 = stbm.integrate_sky_otherside( source_declination,
 // 				       source_hr_angle,

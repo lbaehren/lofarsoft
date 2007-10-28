@@ -586,16 +586,16 @@ Double StationBeam::beam_width(  const Double& source_declination,
          	 
           uint nroots = legendre_root.nelements() ;
           Double freq_final = freq_init + bandwidth ;
-          Double freq_interval = (freq_final- freq_init)/10e6 ;
+          Double freq_interval = 1e6 ;
 
-	  Double decl_interval = 0.02 ;
-          Double hr_interval = 0.1 ;
+	  Double decl_interval = 0.01 ;
+          Double hr_interval = 0.05 ;
           
-          Double decl_min = source_declination - 0.5 ;
-          Double hr_min = source_hr_angle - 5 ;
+          Double decl_min = source_declination - 0.3 ;
+          Double hr_min = source_hr_angle - 8 ;
 
-          uint decl_loop = int(((source_declination+0.5)-(decl_min))/decl_interval) ;
-          uint hr_loop = int(((source_hr_angle+5)-(hr_min))/hr_interval) ;
+          uint decl_loop = int(((source_declination+0.3)-(decl_min))/decl_interval) ;
+          uint hr_loop = int(((source_hr_angle+8)-(hr_min))/hr_interval) ;
           
           Vector<Double> declination( decl_loop, 0.0);
           Vector<Double> hrangle( hr_loop, 0.0) ;
@@ -615,6 +615,7 @@ Double StationBeam::beam_width(  const Double& source_declination,
 
 		  Double hr_angle = hr_min + h*hr_interval ;
                   hrangle (h) = hr_angle ; 
+                  
                   Double f1 = freq_init ;
 
                   Double f2 = 0.0;
@@ -647,18 +648,19 @@ Double StationBeam::beam_width(  const Double& source_declination,
 		                                           legendre_root,
 		                                           legendre_weight ) ;
 					 
-					 f_inner_sum = f_inner_sum + legendre_weight(g)*power_beam ;
-			   }
+			   f_inner_sum = f_inner_sum + legendre_weight(g)*power_beam ;
+		       }
 		       f_outer_sum = f_outer_sum + f1_f*f_inner_sum ;
 		 
                        f1 = f2 ;
 		       logfile1 << decl_angle << "\t" <<  hr_angle << "\t" << f_outer_sum << "\n" ;
 	               power_sum = f_outer_sum ;	  
 		  }
-
+		  logfile1 << "\n" ; 
 	      }                
          }      
-		       
+	 logfile1.close();
+	       
      return  power_sum ;
    }
       
