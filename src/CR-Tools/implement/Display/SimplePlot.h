@@ -273,6 +273,10 @@ namespace CR { // Namespace CR -- begin
       \param nLevels  - number of different (color) levels to use
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
+
+      Generate a 2d color-map plot with the plplot library, i.e. no output with pgplot. 
+      Currently (29. Okt. 2007) only a simple black to white colormap is supported. <br>
+      <b>Note:</b> The <tt>plshades()</tt> function does a linear interpolation while plotting.
     */
 
     Bool quick2Dplot(String file, Matrix<Double> zvals, Double xmin, Double xmax, 
