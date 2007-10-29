@@ -76,7 +76,7 @@ build_package ()
     echo " -- Build directory ..... : $buildDir";
     echo " -- Source directory .... : $sourceDir";
     echo " -- Configuration options : $buildOptions";
-	echo " -- Send build log ...... : $param_reportBuild";
+    echo " -- Send build log ...... : $param_reportBuild";
     # check if the build directory exists
     cd $basedir
     if test -d $buildDir ; then
@@ -96,7 +96,6 @@ build_package ()
 	    if test -z $param_reportBuild ; then
 		make install;
 	    else
-		echo "##### Starting 'build Experimental'. Minimal output to the console"
 		make Experimental;
 		make install;
 	    fi
@@ -200,14 +199,21 @@ while [ "$option_found" == "true" ]
       echo " -- Recognized clean-build option; forcing new configuration."; 
     ;;
     --report-build)
-      param_reportBuild=1;
-      shift;
+      param_reportBuild="--report-build"
+      shift
       echo " -- Recognized build option; reporting build/test results."; 
     ;;
     *)
     option_found=false
   esac
 done
+
+## Summary of options
+
+#echo "packageName = $param_packageName"
+#echo "forceBuild  = $param_forceBuild"
+#echo "cleanBuild  = $param_cleanBuild"
+#echo "reportBuild = $param_reportBuild"
 
 ## -----------------------------------------------------------------------------
 ## Build individual/multiple packages
@@ -228,8 +234,8 @@ case $param_packageName in
     casacore)
 		echo "[`date`] Selected package CASACORE"
 		## -- build required packages
-		./build.sh wcslib
-		./build.sh cfitsio
+		./build.sh wcslib $param_reportBuild
+		./build.sh cfitsio $param_reportBuild
 		## -- build package
 		build_package casacore external/casacore
     ;;
@@ -325,10 +331,10 @@ case $param_packageName in
 		./build.sh cmake
 		./build.sh bison
 		./build.sh flex
-		./build.sh casacore --force-build
-		./build.sh python --force-build
-		./build.sh boost --force-build
-		./build.sh hdf5 --force-build
+		./build.sh casacore --force-build $param_reportBuild
+		./build.sh python --force-build $param_reportBuild
+		./build.sh boost --force-build $param_reportBuild
+		./build.sh hdf5 --force-build $param_reportBuild
 		## USG packages
 		echo "[`date`] Building Data Access Library ..."
 		build_package dal src/DAL
