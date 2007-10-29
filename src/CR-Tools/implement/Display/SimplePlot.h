@@ -256,6 +256,31 @@ namespace CR { // Namespace CR -- begin
 		    Bool logy=False,
 		    Bool printingplot=False);
 
+
+   /*!
+      \brief Do a complete 2-dimensional plot with one call
+      
+      \param file     - pathname of the file
+      \param zvals    - the data to be plotted (i.e. the z-values)
+      \param xmin     - minimum x-value (the column zvals.column(0) has x-value xmin)
+      \param xmax     - maximum x-value (the column zvals.column(zvals.ncolumn()-1) has x-value xmax)
+      \param ymin     - minimum y-value (the row zvals.row(0) has y-value ymin)
+      \param ymax     - maximum y-value (the row zvals.row(zvals.nrow()-1) has y-value ymax)
+      \param xlabel   - label of the x-axis
+      \param ylabel   - label of the y-axis
+      \param toplabel - label above the plot
+      \param printingplot - make a plot suitable for inclusion in talks or papers
+      \param nLevels  - number of different (color) levels to use
+
+      \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
+    */
+
+    Bool quick2Dplot(String file, Matrix<Double> zvals, Double xmin, Double xmax, 
+		     Double ymin, Double ymax,	     
+		     String xlabel=String(), String ylabel=String(), String toplabel=String(),
+		     Bool printingplot=False, int nLevels=20);
+
+
   private:
         
     /*!

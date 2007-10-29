@@ -63,6 +63,20 @@ int test_SimplePlot ()
     newObject.quickPlot("tSimplePlot-symbol.ps", xval, yval, errs, empty,
     			"X-axis", "Y-Axis", "plotting-test with symbols",
     			2, False, 2, False, False, False);
+
+    Matrix<Double> twoDvalues(3,10);
+    int x,y,z=0;
+    for (x=0; x<10; x++){
+      for (y=0; y<3; y++){
+	twoDvalues(y,x) = z++;
+      };
+    };
+
+    newObject.quick2Dplot("tSimplePlot-2d.ps", twoDvalues, 0., 1., 0., 1.,	     
+			  "X-axis", "Y-Axis", "2d plotting-test",
+			  False, 30);
+    
+
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;

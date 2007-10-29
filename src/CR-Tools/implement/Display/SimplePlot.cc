@@ -353,16 +353,7 @@ namespace CR { // Namespace CR -- begin
       ymin -= tmpval;
       ymax += tmpval;
       if (printingplot) {
-	status = InitPlot(file,
-			  xmin,
-			  xmax,
-			  ymin,
-			  ymax,
-			  0,
-			  0,
-			  1,
-			  ppCharacterHeight,
-			  ppLineWidth);
+	status = InitPlot(file, xmin, xmax, ymin, ymax, 0, 0, 1, ppCharacterHeight, ppLineWidth);
       } else {
 	status = InitPlot(file, xmin, xmax, ymin, ymax);	
       };
@@ -378,6 +369,86 @@ namespace CR { // Namespace CR -- begin
     }; 
     return status;        
   };
+
+  // ------------------------------------------------------------------ quickPlot
+
+  Bool SimplePlot::quick2Dplot(String file, Matrix<Double> zvals, Double xmin, Double xmax, 
+			       Double ymin, Double ymax, String xlabel, String ylabel, String toplabel,
+			       Bool printingplot, int nLevels){
+    Bool status=True;
+    try {
+#ifdef HAVE_PGPLOT
+      cerr << "SimplePlot::quick2Dplot: " << "Sorry, 2d-plotting with pgplotter not implemented!" << endl;
+      return False;
+#endif
+#ifdef HAVE_PLPLOT
+      // initialize the plot
+      if (printingplot) {
+	status = InitPlot(file, xmin, xmax, ymin, ymax, 0, 0, 1, ppCharacterHeight, ppLineWidth);
+      } else {
+	status = InitPlot(file, xmin, xmax, ymin, ymax);	
+      };
+      int i,j;
+      PLINT nx,ny;
+      PLFLT **z, zmin, zmax, *level_edges;
+      PLFLT *pos,*r,*g,*b;
+
+      //set the color-map
+      //currently only default black-white is supported
+      pos = new PLFLT[2];
+      r = new PLFLT[2];
+      g = new PLFLT[2];
+      b = new PLFLT[2];
+      pos[0] = 0.; pos[1] = 1.;
+      r[0] = 0.; r[1] = 1.;
+      g[0] = 0.; g[1] = 1.;
+      b[0] = 0.; b[1] = 1.;
+      plscmap1l( True, 2, pos, r, g, b, NULL);
+      delete [] pos;
+      delete [] r;
+      delete [] g;
+      delete [] b;
+
+      nx = zvals.ncolumn();
+      ny = zvals.nrow();
+      zmin = min(zvals);
+      zmax = max(zvals);
+      // allocate memory for the data
+      plAlloc2dGrid(&z, nx, ny);
+      level_edges = new PLFLT[(nLevels+1)];
+      level_edges = new PLFLT[(nLevels+1)];
+
+      // copy data from CASA-array to plplot-array
+      for (i = 0; i < nx; i++) {
+	for (j = 0; j < ny; j++) {
+	  z[i][j] = zvals(j,i); //CASA ordering is "FORTRAN-style"
+	};
+      };
+      // fill the level_edges array
+      for (i = 0; i <= nLevels; i++) {
+	level_edges[i] = zmin + i*(zmax-zmin)/(PLFLT)nLevels;
+      }
+    
+      // do the plot
+      plshades(z, nx, ny, NULL, xmin, xmax, ymin, ymax,
+	       level_edges, nLevels+1, 
+	       2, 0, 0, //fill_width, cont_color, cont_width 
+	       plfill, 1, pltr1, NULL);
+      
+      
+      // free the allocated memory
+      plFree2dGrid(z, nx, ny);
+      delete [] level_edges;
+
+      status = status && AddLabels(xlabel, ylabel, toplabel);
+#endif
+    } catch (AipsError x) {
+      cerr << "SimplePlot::quick2Dplot: " << x.getMesg() << endl;
+      return False;
+    }; 
+    return status;        
+  };
+
   
   
 } // Namespace CR -- end
