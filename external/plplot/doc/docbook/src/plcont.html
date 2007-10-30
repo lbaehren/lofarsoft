@@ -1,0 +1,531 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      plcont: Contour plot
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plcol1: Set color, map1
+    "
+HREF="plcol1.html"><LINK
+REL="NEXT"
+TITLE="
+      plcpstrm: Copy state parameters from the
+reference stream to the current stream
+    "
+HREF="plcpstrm.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plcol1.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plcpstrm.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plcont"
+><CODE
+CLASS="function"
+>plcont</CODE
+>: Contour plot</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN4400"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	  plcont
+	</CODE
+>(z, nx, ny, kx, lx, ky, ly, clevel, nlevel, pltr, pltr_data);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;      Draws a contour plot of the data in
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>z</CODE
+>[<CODE
+CLASS="parameter"
+>nx</CODE
+>][<CODE
+CLASS="parameter"
+>ny</CODE
+>]</TT
+>,
+      using the <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>nlevel</CODE
+></TT
+> contour
+      levels specified by <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>clevel</CODE
+></TT
+>.
+      Only the region of the array from
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>kx</CODE
+></TT
+> to
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>lx</CODE
+></TT
+> and from
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>ky</CODE
+></TT
+> to
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>ly</CODE
+></TT
+> is plotted out.  A
+      transformation routine pointed to by <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>pltr</CODE
+></TT
+>
+      with a pointer <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>pltr_data</CODE
+></TT
+>
+      for additional data required by the transformation routine
+      is used to map indices within the array
+      to the world coordinates.  See the following discussion of the
+      arguments and <A
+HREF="contour-plots.html"
+>the Section called <I
+>Contour and Shade Plots</I
+> in Chapter 3</A
+> for
+      more information.
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>z</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT **</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to a vectored two-dimensional array containing data to
+	    be contoured.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>nx, ny</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Physical dimensions of array
+	    <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>z</CODE
+></TT
+>.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>kx, lx</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Range of <TT
+CLASS="literal"
+>x</TT
+> indices to consider.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>ky, ly</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Range of <TT
+CLASS="literal"
+>y</TT
+> indices to consider.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>clevel</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to array specifying levels at which to draw contours.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>nlevel</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Number of contour levels to draw.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>pltr</CODE
+>
+	  (<TT
+CLASS="literal"
+>void (*) (PLFLT, PLFLT, PLFLT *, PLFLT *, PLPointer)
+           </TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to function that defines transformation between indices
+	    in array <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>z</CODE
+></TT
+> and the
+	    world coordinates (C only).  Transformation functions are
+	    provided in the PLplot library:
+	    <A
+HREF="pltr0.html"
+><CODE
+CLASS="function"
+>pltr0</CODE
+></A
+> for identity mapping, and <A
+HREF="pltr1.html"
+><CODE
+CLASS="function"
+>pltr1</CODE
+></A
+> and <A
+HREF="pltr2.html"
+><CODE
+CLASS="function"
+>pltr2</CODE
+></A
+> for
+	    arbitrary mappings respectively defined by one- and
+	    two-dimensional arrays.  In addition, user-supplied routines
+	    for the transformation can be used as well.  Examples of
+	    all of these approaches are given in
+	    <A
+HREF="contour-plots.html#contour-plots-c"
+>the Section called <I
+>Contour Plots from C</I
+> in Chapter 3</A
+>.
+	    The transformation function should
+	    have the form given by any of <A
+HREF="pltr0.html"
+><CODE
+CLASS="function"
+>pltr0</CODE
+></A
+>, <A
+HREF="pltr1.html"
+><CODE
+CLASS="function"
+>pltr1</CODE
+></A
+>, or <A
+HREF="pltr2.html"
+><CODE
+CLASS="function"
+>pltr2</CODE
+></A
+>.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>pltr_data</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLPointer</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Extra parameter to help
+	    pass information to <A
+HREF="pltr0.html"
+><CODE
+CLASS="function"
+>pltr0</CODE
+></A
+>, <A
+HREF="pltr1.html"
+><CODE
+CLASS="function"
+>pltr1</CODE
+></A
+>, <A
+HREF="pltr2.html"
+><CODE
+CLASS="function"
+>pltr2</CODE
+></A
+>, or whatever routine
+	    that is externally supplied.
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      Redacted form: [PLEASE UPDATE! ONLY PERL INFO IS LIKELY CORRECT!]
+      <P
+></P
+><UL
+><LI
+><P
+>&#13;	  F95: <CODE
+CLASS="function"
+>plcont(z, kx, lx, ky, ly, clevel, tr?)</CODE
+> or
+	  <CODE
+CLASS="function"
+>plcont(z, kx, lx, ky, ly, clevel, xgrid, ygrid)</CODE
+>
+          </P
+></LI
+><LI
+><P
+>&#13;	  Java: <CODE
+CLASS="function"
+>pls.cont(z, kx, lx, ky, ly, clevel, xgrid, ygrid)</CODE
+>
+          </P
+></LI
+><LI
+><P
+>&#13;          Perl/PDL: <CODE
+CLASS="function"
+>plcont(z, kx, lx, ky, ly, clevel, pltr, pltr_data)</CODE
+>
+          </P
+></LI
+><LI
+><P
+>&#13;	  Python: <CODE
+CLASS="function"
+>plcont2(z, kx, lx, ky, ly, clevel)</CODE
+>
+          </P
+></LI
+></UL
+>
+    </P
+><P
+>&#13;      This function is used in examples 9,14,16,22.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plcol1.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plcpstrm.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plcol1</CODE
+>: Set color, map1</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plcpstrm</CODE
+>: Copy state parameters from the
+reference stream to the current stream</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

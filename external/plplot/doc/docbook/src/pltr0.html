@@ -1,0 +1,310 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      pltr0: Identity transformation for grid to world
+mapping
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Specialized C API for PLplot"
+HREF="api-c.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plsfile: Set output file handle
+    "
+HREF="plsfile.html"><LINK
+REL="NEXT"
+TITLE="
+      pltr1: Linear interpolation for grid to world
+mapping using singly dimensioned coord arrays
+    "
+HREF="pltr1.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plsfile.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 18. The Specialized C API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="pltr1.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="pltr0"
+><CODE
+CLASS="function"
+>pltr0</CODE
+>: Identity transformation for grid to world
+mapping</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN11543"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	  pltr0
+	</CODE
+>(x, y, tx, ty, pltr_data);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;    Identity transformation for grid to world mapping.
+    This routine can be used both for <A
+HREF="plcont.html"
+><CODE
+CLASS="function"
+>plcont</CODE
+></A
+> and <A
+HREF="plshade.html"
+><CODE
+CLASS="function"
+>plshade</CODE
+></A
+>.
+    See also <A
+HREF="contour-plots.html#contour-plots-c"
+>the Section called <I
+>Contour Plots from C</I
+> in Chapter 3</A
+> and
+    <A
+HREF="contour-plots.html#shade-plots-c"
+>the Section called <I
+>Shade Plots from C</I
+> in Chapter 3</A
+>.
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>x</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    X-position in grid coordinates.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>y</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Y-position in grid coordinates.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>tx</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, output)</DT
+><DD
+><P
+>&#13;	    X-position in world coordinates.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>ty</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, output)</DT
+><DD
+><P
+>&#13;	    Y-position in world coordinates.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>pltr_data</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLPointer</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to additional input data that is passed as an argument
+	    to <A
+HREF="plcont.html"
+><CODE
+CLASS="function"
+>plcont</CODE
+></A
+> or <A
+HREF="plshade.html"
+><CODE
+CLASS="function"
+>plshade</CODE
+></A
+> and then on to the grid to world
+	    transformation routine.
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plsfile.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="pltr1.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plsfile</CODE
+>: Set output file handle</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api-c.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>pltr1</CODE
+>: Linear interpolation for grid to world
+mapping using singly dimensioned coord arrays</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

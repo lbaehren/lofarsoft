@@ -208,22 +208,15 @@ while [ "$option_found" == "true" ]
   esac
 done
 
-## Summary of options
-
-#echo "packageName = $param_packageName"
-#echo "forceBuild  = $param_forceBuild"
-#echo "cleanBuild  = $param_cleanBuild"
-#echo "reportBuild = $param_reportBuild"
-
 ## -----------------------------------------------------------------------------
 ## Build individual/multiple packages
 
 case $param_packageName in 
-    bison)
+	bison)
 		echo "[`date`] Selected package Bison"
 		build_package bison external/bison "-DBISON_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
-    blitz)
+	blitz)
 		echo "[`date`] Selected package Blitz++"
 		build_package blitz external/blitz "-DBLITZ_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
@@ -290,15 +283,15 @@ case $param_packageName in
     plplot)
 		echo "[`date`] Selected package Plplot"
 		if test -d $basedir/../external/plplot ; then
-		## first pass
-		mkdir $basedir/plplot 
-		cd $basedir/plplot 
-		cmake -C $basedir/../devel_common/cmake/SettingsPLplot.cmake $basedir/../external/plplot
-		## second pass
+			## first pass
+			mkdir $basedir/plplot 
+			cd $basedir/plplot 
+			cmake -C $basedir/../devel_common/cmake/SettingsPLplot.cmake $basedir/../external/plplot
+			## second pass
 	    	build_package plplot external/plplot
 		else
 		    cd $basedir/../external
-	    	## download the source tar-ball from source forge
+			## download the source tar-ball from source forge
 		    wget -c http://ovh.dl.sourceforge.net/sourceforge/plplot/plplot-5.7.4.tar.gz
 		    ## unpack the tar-ball and adjust the name of the newly created directory
 	    	tar -xvzf plplot-5.7.4.tar.gz
@@ -364,20 +357,20 @@ case $param_packageName in
     ## --- General testing of environment ---------------------------------------
     ## --------------------------------------------------------------------------
     config)
-    if test -d config ; then
-	cd config;
-	rm -rf *
-	cmake $basedir/../devel_common/cmake
-    else 
-	mkdir config
-	./build.sh config
-    fi
+	    if test -d config ; then
+			cd config;
+			rm -rf *
+			cmake $basedir/../devel_common/cmake
+		else 
+			mkdir config
+			./build.sh config
+	   	fi
     ;;
     all)
-    echo "[`date`] Building external packages not build otherwise";
-    ./build.sh bison;
-    ./build.sh flex;
-    echo "[`date`] Building all USG packages";
-    ./build.sh cr;
+	    echo "[`date`] Building external packages not build otherwise";
+	    ./build.sh bison;
+		./build.sh flex;
+		echo "[`date`] Building all USG packages";
+    	./build.sh cr;
     ;;
 esac

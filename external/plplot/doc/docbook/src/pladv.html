@@ -1,0 +1,292 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>pladv: Advance the (sub-)page</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="pl_setcontlabelparam: Set parameters of
+contour labelling other than format of numerical label"
+HREF="pl_setcontlabelparam.html"><LINK
+REL="NEXT"
+TITLE="
+      plaxes: Draw a box with axes, etc. with arbitrary
+origin
+    "
+HREF="plaxes.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="pl_setcontlabelparam.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plaxes.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="pladv"
+><CODE
+CLASS="function"
+>pladv</CODE
+>: Advance the (sub-)page</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN3577"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	  pladv
+	</CODE
+>(sub);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;      Advances to the next subpage if
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>sub</CODE
+>=0</TT
+>, performing a page
+      advance if there are no remaining subpages on the current page.  If
+      subpages aren't being used, <TT
+CLASS="literal"
+><A
+HREF="pladv.html"
+><CODE
+CLASS="function"
+>pladv</CODE
+></A
+>(0)</TT
+> will
+      always advance the page.  If
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>sub</CODE
+>&#62;0</TT
+>, PLplot switches
+      to the specified subpage.  Note that this allows you to overwrite a
+      plot on the specified subpage; if this is not what you intended, use
+      <A
+HREF="pleop.html"
+><CODE
+CLASS="function"
+>pleop</CODE
+></A
+> followed by <A
+HREF="plbop.html"
+><CODE
+CLASS="function"
+>plbop</CODE
+></A
+> to first advance the page.  This routine
+      is called automatically (with
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>sub</CODE
+>=0</TT
+>) by <A
+HREF="plenv.html"
+><CODE
+CLASS="function"
+>plenv</CODE
+></A
+>, but if
+      <A
+HREF="plenv.html"
+><CODE
+CLASS="function"
+>plenv</CODE
+></A
+> is not used, <A
+HREF="pladv.html"
+><CODE
+CLASS="function"
+>pladv</CODE
+></A
+> must be called after initializing PLplot
+      but before defining the viewport.
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>sub</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Specifies the subpage number (starting from 1 in the top left
+	    corner and increasing along the rows) to which to advance.  Set
+	    to zero to advance to the next subpage.
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      Redacted form: <CODE
+CLASS="function"
+>pladv(sub)</CODE
+>
+    </P
+><P
+>&#13;      This function is used in examples 1,2,4,6-12,14-18,20,21,23-27.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="pl_setcontlabelparam.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plaxes.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>pl_setcontlabelparam</CODE
+>: Set parameters of
+contour labelling other than format of numerical label</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plaxes</CODE
+>: Draw a box with axes, etc. with arbitrary
+origin</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

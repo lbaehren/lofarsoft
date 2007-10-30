@@ -1,0 +1,302 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      plgdiplt: Get parameters that define current
+      plot-space window
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plgdiori: Get plot orientation
+    "
+HREF="plgdiori.html"><LINK
+REL="NEXT"
+TITLE="
+      plgfam: Get family file parameters
+    "
+HREF="plgfam.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plgdiori.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plgfam.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plgdiplt"
+><CODE
+CLASS="function"
+>plgdiplt</CODE
+>: Get parameters that define current
+      plot-space window</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN5570"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;           plgdiplt
+        </CODE
+>(p_xmin, p_ymin, p_xmax, p_ymax);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;      Get relative minima and maxima that define current
+      plot-space window.
+      If <A
+HREF="plsdiplt.html"
+><CODE
+CLASS="function"
+>plsdiplt</CODE
+></A
+> has not been called the default values pointed to by
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>p_xmin</CODE
+></TT
+>,
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>p_ymin</CODE
+></TT
+>,
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>p_xmax</CODE
+></TT
+>, and
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>p_ymax</CODE
+></TT
+>
+      will be 0., 0., 1., and 1.
+
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>p_xmin</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, output)</DT
+><DD
+><P
+>&#13;            Pointer to relative minimum in x.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>p_ymin</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, output)</DT
+><DD
+><P
+>&#13;            Pointer to relative minimum in y.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>p_xmax</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, output)</DT
+><DD
+><P
+>&#13;            Pointer to relative maximum in x.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>p_ymax</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, output)</DT
+><DD
+><P
+>&#13;            Pointer to relative maximum in y.
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      Redacted form: <CODE
+CLASS="function"
+>plgdiplt(p_xmin, p_ymin, p_xmax, p_ymax)</CODE
+>
+    </P
+><P
+>&#13;      This function is not used in any examples.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plgdiori.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plgfam.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plgdiori</CODE
+>: Get plot orientation</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plgfam</CODE
+>: Get family file parameters</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

@@ -1,0 +1,247 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>The PLplot Display Driver Family</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE=" Programming "
+HREF="p162.html"><LINK
+REL="PREVIOUS"
+TITLE="Deploying programs that use PLplot"
+HREF="deploying.html"><LINK
+REL="NEXT"
+TITLE="The GCW Driver (Gnome 2)"
+HREF="gcw-driver.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="chapter"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="deploying.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+></TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="gcw-driver.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="chapter"
+><H1
+><A
+NAME="x-drivers"
+></A
+>Chapter 5. The PLplot Display Driver Family</H1
+><DIV
+CLASS="TOC"
+><DL
+><DT
+><B
+>Table of Contents</B
+></DT
+><DT
+><A
+HREF="x-drivers.html#xwin-driver"
+>The Xwin Driver (X-Windows)</A
+></DT
+><DT
+><A
+HREF="gcw-driver.html"
+>The GCW Driver (Gnome 2)</A
+></DT
+><DT
+><A
+HREF="tk-driver.html"
+>The Tk Driver</A
+></DT
+><DT
+><A
+HREF="aqt-driver.html"
+>The AquaTerm Driver (Mac OS X)</A
+></DT
+><DT
+><A
+HREF="wxwidgets-driver.html"
+>The wxWidgets Driver (Linux, Mac OS X, Windows)</A
+></DT
+></DL
+></DIV
+><P
+>&#13;  Drivers that provide screen displays are described in this chapter.  
+  Each of the drivers has a list of options, and these may be set as 
+  outlined in <A
+HREF="advanced.html#arguments"
+>the Section called <I
+>Command Line Arguments</I
+> in Chapter 3</A
+>.
+</P
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="xwin-driver"
+>The Xwin Driver (X-Windows)</A
+></H1
+><P
+> 
+    The Xwin driver draws plots in an X-window.  Although some of the
+    newer features are not supported, it remains the reference driver
+    for PLplot.
+  </P
+><P
+>&#13;    Plots are displayed one page at a time.  The pager is advanced by 
+    pressing the Enter key, and may only be advanced in the foreward
+    direction.
+  </P
+><P
+>&#13;    Anti-aliasing is not supported, and the Xwin driver is not 
+    unicode-enabled.
+  </P
+><P
+>&#13;    The available driver options are:
+    <P
+></P
+><UL
+><LI
+><P
+>&#13;        sync: Synchronized X server operation (0|1)
+      </P
+></LI
+><LI
+><P
+>&#13;        nobuffered: Sets unbuffered operation (0|1)
+      </P
+></LI
+><LI
+><P
+>&#13;        noinitcolors: Sets cmap0 allocation (0|1)
+      </P
+></LI
+><LI
+><P
+>&#13;        defvis: Use the Default Visual (0|1)
+      </P
+></LI
+><LI
+><P
+>&#13;          usepth: Use pthreads (0|1)
+        </P
+></LI
+></UL
+>
+  </P
+></DIV
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="deploying.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="gcw-driver.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Deploying programs that use PLplot</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="p162.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>The GCW Driver (Gnome 2)</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

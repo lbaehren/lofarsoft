@@ -1,0 +1,43 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLHLSRGB 3plplot  "August, 2007" "" "PLplot API"
+.SH NAME
+\fBplhlsrgb\fP - Convert HLS color to RGB 
+.SH SYNOPSIS
+\fBplhlsrgb\fP(\fIh\fP, \fIl\fP, \fIs\fP, \fIp_r\fP, \fIp_g\fP, \fIp_b\fP)
+.SH DESCRIPTION
+
+.P
+Convert HLS color coordinates to RGB 
+.P
+Redacted form:  General: \fBplhlsrgb(h, l, s, p_r, p_g, p_b)\fP
+Perl/PDL: Not available? Implemented as plhls? 
+
+.P
+This function is used in example 2. 
+.SH ARGUMENTS
+.TP
+\fIh\fP (PLFLT, input) 
+Hue, in degrees on the colour cone (0.0-360.0) 
+.TP
+\fIl\fP (PLFLT, input) 
+Lightness, expressed as a fraction of the axis of the colour cone (0.0-1.0) 
+.TP
+\fIs\fP (PLFLT, input) 
+Saturation, expressed as a fraction of the radius of the colour cone (0.0-1.0) 
+.TP
+\fIp_r\fP (PLFLT *, output) 
+Pointer to red intensity (0.0-1.0) of the colour 
+.TP
+\fIp_g\fP (PLFLT *, output) 
+Pointer to green intensity (0.0-1.0) of the colour 
+.TP
+\fIp_b\fP (PLFLT *, output) 
+Pointer to blue intensity (0.0-1.0) of the colour 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

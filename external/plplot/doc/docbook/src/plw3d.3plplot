@@ -1,0 +1,56 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLW3D 3plplot  "August, 2007" "" "PLplot API"
+.SH NAME
+\fBplw3d\fP - Set up window for 3-d plotting 
+.SH SYNOPSIS
+\fBplw3d\fP(\fIbasex\fP, \fIbasey\fP, \fIheight\fP, \fIxmin\fP, \fIxmax\fP, \fIymin\fP, \fIymax\fP, \fIzmin\fP, \fIzmax\fP, \fIalt\fP, \fIaz\fP)
+.SH DESCRIPTION
+
+.P
+Sets up a window for a three-dimensional surface plot within the currently defined two-dimensional window.  The enclosing box for the surface plot defined by \fIxmin\fP, \fIxmax\fP, \fIymin\fP, \fIymax\fP, \fIzmin\fP and \fIzmax\fP in user-coordinate space is mapped into a box of world coordinate size \fIbasex\fP by \fIbasey\fP by \fIheight\fP so that \fIxmin\fP maps to -\fIbasex\fP/2, \fIxmax\fP maps to \fIbasex\fP/2, \fIymin\fP maps to -\fIbasey\fP/2, \fIymax\fP maps to \fIbasey\fP/2, \fIzmin\fP maps to 0 and \fIzmax\fP maps to \fIheight\fP.  The resulting world-coordinate box is then viewed by an observer at altitude \fIalt\fP and azimuth \fIaz\fP.  This routine must be called before \fBplbox3\fP(3plplot) or \fBplot3d\fP(3plplot).  For a more complete description of three-dimensional plotting see the PLplot documentation. 
+.P
+Redacted form: \fBplw3d(basex, basey, height, xmin, xmax, ymin, ymax, zmin, zmax, alt, az)\fP
+.P
+This function is examples 8,11,18,21. 
+.SH ARGUMENTS
+.TP
+\fIbasex\fP (PLFLT, input) 
+The x coordinate size of the world-coordinate box. 
+.TP
+\fIbasey\fP (PLFLT, input) 
+The y coordinate size of the world-coordinate box. 
+.TP
+\fIheight\fP (PLFLT, input) 
+The z coordinate size of the world-coordinate box. 
+.TP
+\fIxmin\fP (PLFLT, input) 
+The minimum user x coordinate value. 
+.TP
+\fIxmax\fP (PLFLT, input) 
+The maximum user x coordinate value. 
+.TP
+\fIymin\fP (PLFLT, input) 
+The minimum user y coordinate value. 
+.TP
+\fIymax\fP (PLFLT, input) 
+The maximum user y coordinate value. 
+.TP
+\fIzmin\fP (PLFLT, input) 
+The minimum user z coordinate value. 
+.TP
+\fIzmax\fP (PLFLT, input) 
+The maximum user z coordinate value. 
+.TP
+\fIalt\fP (PLFLT, input) 
+The viewing altitude in degrees above the xy plane. 
+.TP
+\fIaz\fP (PLFLT, input) 
+The viewing azimuth in degrees.  When \fIaz\fP=0, the observer is looking face onto the zx plane, and as \fIaz\fP is increased, the observer moves clockwise around the box when viewed from above the xy plane. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

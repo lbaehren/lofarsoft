@@ -1,0 +1,32 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLGFAM 3plplot  "August, 2007" "" "PLplot API"
+.SH NAME
+\fBplgfam\fP - Get family file parameters 
+.SH SYNOPSIS
+\fBplgfam\fP(\fIfam\fP, \fInum\fP, \fIbmax\fP)
+.SH DESCRIPTION
+
+.P
+Gets information about current family file, if familying is enabled.  See the PLplot documentation for more information. 
+.P
+Redacted form: \fBplgfam(fam, num, bmax)\fP
+.P
+This function is not used in any examples. 
+.SH ARGUMENTS
+.TP
+\fIfam\fP (PLINT *, output) 
+Pointer to variable with the Boolean family flag value.  If nonzero, familying is enabled. 
+.TP
+\fInum\fP (PLINT *, output) 
+Pointer to variable with the current family file number. 
+.TP
+\fIbmax\fP (PLINT *, output) 
+Pointer to variable with the maximum file size (in bytes) for a family file. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

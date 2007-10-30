@@ -1,0 +1,418 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      plcalc_world: Calculate world coordinates and
+corresponding window index from relative device coordinates
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plbox3: Draw a box with axes, etc, in 3-d
+    "
+HREF="plbox3.html"><LINK
+REL="NEXT"
+TITLE="
+      plclear: Clear current (sub)page
+    "
+HREF="plclear.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plbox3.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plclear.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plcalc_world"
+><CODE
+CLASS="function"
+>plcalc_world</CODE
+>: Calculate world coordinates and
+corresponding window index from relative device coordinates</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN4207"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	  plcalc_world
+	</CODE
+>(rx, ry, wx, wy, window);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;Calculate world coordinates,
+<TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>wx</CODE
+></TT
+> and
+<TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>wy</CODE
+></TT
+>, and corresponding
+<TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>window</CODE
+></TT
+> index
+from relative device coordinates,
+<TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>rx</CODE
+></TT
+> and
+<TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>ry</CODE
+></TT
+>.
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>rx</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Input relative device coordinate (ranging from 0. to 1.) for the
+	    x coordinate.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>ry</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Input relative device coordinate (ranging from 0. to 1.) for the
+	    y coordinate.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>wx</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, output)</DT
+><DD
+><P
+>&#13;	    Pointer to the returned world coordinate for x corresponding
+	    to the relative device coordinates
+	    <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>rx</CODE
+></TT
+> and
+	    <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>ry</CODE
+></TT
+>.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>wy</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, output)</DT
+><DD
+><P
+>&#13;	    Pointer to the returned world coordinate for y corresponding
+	    to the relative device coordinates
+	    <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>rx</CODE
+></TT
+> and
+	    <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>ry</CODE
+></TT
+>.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>window</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT *</TT
+>, output)</DT
+><DD
+><P
+>&#13;	    Pointer to the returned last defined window index that corresponds to the
+	    input relative device coordinates (and the returned world
+	    coordinates).  To give some background on the window index,
+	    for each page the initial window index is set to
+	    zero, and each time <A
+HREF="plwind.html"
+><CODE
+CLASS="function"
+>plwind</CODE
+></A
+> is called within the page, world
+	    and device coordinates are stored for the window and the window
+	    index is incremented.  Thus, for a simple page layout with
+	    non-overlapping viewports and one window per viewport,
+	    <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>window</CODE
+></TT
+> corresponds to
+	    the viewport index (in the order which the viewport/windows
+	    were created) of the only viewport/window corresponding to
+	    <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>rx</CODE
+></TT
+> and
+	    <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>ry</CODE
+></TT
+>.  However, for
+	    more complicated layouts with potentially overlapping viewports
+	    and possibly more than one window (set of world coordinates) per
+	    viewport, <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>window</CODE
+></TT
+>
+	    and the corresponding output world coordinates
+	    corresponds to the last window created that fulfils the criterion
+	    that the relative device coordinates are inside it.  Finally, in
+	    all cases where the input relative device coordinates are not
+	    inside any viewport/window, then
+	    <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>window</CODE
+></TT
+> is set to -1.
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      Redacted form: 
+      <P
+></P
+><UL
+><LI
+><P
+>&#13;	  General: <CODE
+CLASS="function"
+>plcalc_world(rx, ry, wx, wy, window)</CODE
+>
+          </P
+></LI
+><LI
+><P
+>&#13;          Perl/PDL: Not available?
+          </P
+></LI
+></UL
+>
+    </P
+><P
+>&#13;      This function is not used in any examples.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plbox3.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plclear.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plbox3</CODE
+>: Draw a box with axes, etc, in 3-d</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plclear</CODE
+>: Clear current (sub)page</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

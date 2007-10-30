@@ -1,0 +1,307 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      plhlsrgb: Convert HLS color to RGB
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plhist: Plot a histogram from unbinned data
+    "
+HREF="plhist.html"><LINK
+REL="NEXT"
+TITLE="
+      plinit: Initialize PLplot
+    "
+HREF="plinit.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plhist.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plinit.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plhlsrgb"
+><CODE
+CLASS="function"
+>plhlsrgb</CODE
+>: Convert HLS color to RGB</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN6396"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;           plhlsrgb
+        </CODE
+>(h, l, s, p_r, p_g, p_b);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;      Convert HLS color coordinates to RGB
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>h</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;            Hue, in degrees on the colour cone (0.0-360.0)
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>l</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;            Lightness, expressed as a fraction of the axis of the colour
+            cone (0.0-1.0)
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>s</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;            Saturation, expressed as a fraction of the radius of the
+            colour cone (0.0-1.0)
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>p_r</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, output)</DT
+><DD
+><P
+>&#13;            Pointer to red intensity (0.0-1.0) of the colour
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>p_g</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, output)</DT
+><DD
+><P
+>&#13;            Pointer to green intensity (0.0-1.0) of the colour
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>p_b</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, output)</DT
+><DD
+><P
+>&#13;            Pointer to blue intensity (0.0-1.0) of the colour
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      Redacted form: 
+      <P
+></P
+><UL
+><LI
+><P
+>&#13;	  General: <CODE
+CLASS="function"
+>plhlsrgb(h, l, s, p_r, p_g, p_b)</CODE
+>
+          </P
+></LI
+><LI
+><P
+>&#13;          Perl/PDL: Not available? Implemented as plhls?
+          </P
+></LI
+></UL
+>
+    </P
+><P
+>&#13;      This function is used in example 2.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plhist.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plinit.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plhist</CODE
+>: Plot a histogram from unbinned data</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plinit</CODE
+>: Initialize PLplot</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

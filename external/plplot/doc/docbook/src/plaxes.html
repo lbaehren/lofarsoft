@@ -1,0 +1,538 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      plaxes: Draw a box with axes, etc. with arbitrary
+origin
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="pladv: Advance the (sub-)page"
+HREF="pladv.html"><LINK
+REL="NEXT"
+TITLE="
+      plbin: Plot a histogram from binned data
+    "
+HREF="plbin.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="pladv.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plbin.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plaxes"
+><CODE
+CLASS="function"
+>plaxes</CODE
+>: Draw a box with axes, etc. with arbitrary
+origin</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN3617"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;           plaxes
+        </CODE
+>(x0, y0, xopt, xtick, nxsub, yopt, ytick, nysub);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;      Draws a box around the currently defined viewport with arbitrary
+      world-coordinate origin specified by
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>x0</CODE
+></TT
+> and
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>y0</CODE
+></TT
+>
+      and labels it with world coordinate values appropriate to the
+      window.  Thus <A
+HREF="plaxes.html"
+><CODE
+CLASS="function"
+>plaxes</CODE
+></A
+> should only be called after defining both
+      viewport and window.  The character strings
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>xopt</CODE
+></TT
+> and
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>yopt</CODE
+></TT
+> specify how the box
+      should be drawn as described below.  If ticks and/or subticks are to
+      be drawn for a particular axis, the tick intervals and number of
+      subintervals may be specified explicitly, or they may be defaulted by
+      setting the appropriate arguments to zero. </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>x0</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;            World X coordinate of origin.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>y0</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;            World Y coordinate of origin.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>xopt</CODE
+>
+	  (<TT
+CLASS="literal"
+>const char *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to character string specifying options for horizontal
+	    axis.  The string can include any combination of the following
+	    letters (upper or lower case) in any order:
+	    <P
+></P
+><UL
+><LI
+><P
+>&#13;		  <TT
+CLASS="literal"
+>a</TT
+>: Draws axis, X-axis is horizontal
+		  line (<TT
+CLASS="literal"
+>y=0</TT
+>), and Y-axis is vertical
+		  line (<TT
+CLASS="literal"
+>x=0</TT
+>).
+		</P
+></LI
+><LI
+><P
+>&#13;		  <TT
+CLASS="literal"
+>b</TT
+>: Draws bottom (X) or left (Y) edge
+		  of frame.
+		</P
+></LI
+><LI
+><P
+>&#13;		  <TT
+CLASS="literal"
+>c</TT
+>: Draws top (X) or right (Y) edge of
+		  frame.
+		</P
+></LI
+><LI
+><P
+>&#13;		  <TT
+CLASS="literal"
+>f</TT
+>:  Always use fixed point numeric labels.
+		</P
+></LI
+><LI
+><P
+>&#13;		  <TT
+CLASS="literal"
+>g</TT
+>: Draws a grid at the major tick
+		  interval.
+		</P
+></LI
+><LI
+><P
+>&#13;		  <TT
+CLASS="literal"
+>h</TT
+>: Draws a grid at the minor tick
+		  interval.
+		</P
+></LI
+><LI
+><P
+>&#13;		  <TT
+CLASS="literal"
+>i</TT
+>: Inverts tick marks, so they are
+		  drawn outwards, rather than inwards.
+		</P
+></LI
+><LI
+><P
+>&#13;		  <TT
+CLASS="literal"
+>l</TT
+>: Labels axis logarithmically.  This
+		  only affects the labels, not the data, and so it is
+		  necessary to compute the logarithms of data points before
+		  passing them to any of the drawing routines.
+		</P
+></LI
+><LI
+><P
+>&#13;		  <TT
+CLASS="literal"
+>m</TT
+>: Writes numeric labels at major tick
+		  intervals in the unconventional location (above box for
+		  X, right of box for Y).
+		</P
+></LI
+><LI
+><P
+>&#13;		  <TT
+CLASS="literal"
+>n</TT
+>: Writes numeric labels at major tick
+		  intervals in the conventional location (below box for X,
+		  left of box for Y).
+		</P
+></LI
+><LI
+><P
+>&#13;		  <TT
+CLASS="literal"
+>s</TT
+>: Enables subticks between major
+		  ticks, only valid if <TT
+CLASS="literal"
+>t</TT
+> is also
+		  specified.
+		</P
+></LI
+><LI
+><P
+>&#13;		  <TT
+CLASS="literal"
+>t</TT
+>: Draws major ticks.
+		</P
+></LI
+></UL
+>
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>xtick</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    World coordinate interval between major ticks on the x axis.
+	    If it is set to zero, PLplot automatically generates a suitable
+	    tick interval.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>nxsub</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Number of subintervals between major x axis ticks for minor
+	    ticks.  If it is set to zero, PLplot automatically generates a
+	    suitable minor tick interval.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>yopt</CODE
+>
+	  (<TT
+CLASS="literal"
+>const char *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to character string specifying options for vertical
+	    axis.  The string can include any combination of the letters
+	    defined above for
+	    <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>xopt</CODE
+></TT
+>, and in addition
+	    may contain:
+	    <P
+></P
+><UL
+><LI
+><P
+>&#13;		  <TT
+CLASS="literal"
+>v</TT
+>: Write numeric labels for vertical
+		  axis parallel to the base of the graph, rather than
+		  parallel to the axis.
+		</P
+></LI
+></UL
+>
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>ytick</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    World coordinate interval between major ticks on the y axis.
+	    If it is set to zero, PLplot automatically generates a suitable
+	    tick interval.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>nysub</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Number of subintervals between major y axis ticks for minor
+	    ticks.  If it is set to zero, PLplot automatically generates a
+	    suitable minor tick interval.
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      Redacted form: 
+      <P
+></P
+><UL
+><LI
+><P
+>&#13;	  General: <CODE
+CLASS="function"
+>plaxes(x0, y0, xopt, xtick, nxsub, yopt, ytick, nysub)</CODE
+>
+          </P
+></LI
+><LI
+><P
+>&#13;          Perl/PDL: <CODE
+CLASS="function"
+>plaxes(x0, y0, xtick, nxsub, ytick, nysub, xopt, yopt)</CODE
+>
+          </P
+></LI
+></UL
+>
+    </P
+><P
+>&#13;      This function is not used in any examples.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="pladv.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plbin.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>pladv</CODE
+>: Advance the (sub-)page</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plbin</CODE
+>: Plot a histogram from binned data</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

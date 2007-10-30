@@ -1,0 +1,217 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>Initializing PLplot</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="Simple Use of PLplot"
+HREF="simple.html"><LINK
+REL="PREVIOUS"
+TITLE="Simple Use of PLplot"
+HREF="simple.html"><LINK
+REL="NEXT"
+TITLE="Defining Plot Scales and Axes"
+HREF="scales.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="simple.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 2. Simple Use of PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="scales.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="initializing"
+>Initializing PLplot</A
+></H1
+><P
+>&#13;      Before any actual plotting calls are made, a graphics program must
+      call <A
+HREF="plinit.html"
+><CODE
+CLASS="function"
+>plinit</CODE
+></A
+>, is the main initialization routine for PLplot.  It
+      sets up all internal data structures necessary for plotting and
+      initializes the output device driver.  If the output device has not
+      already been specified when <A
+HREF="plinit.html"
+><CODE
+CLASS="function"
+>plinit</CODE
+></A
+> is called, a list of valid
+      output devices is given and the user is prompted for a choice.
+      Either the device number or a device keyword is accepted.
+    </P
+><P
+>&#13;      There are several routines affecting the initialization that must
+      be called <SPAN
+CLASS="emphasis"
+><I
+CLASS="emphasis"
+>before</I
+></SPAN
+> <A
+HREF="plinit.html"
+><CODE
+CLASS="function"
+>plinit</CODE
+></A
+>, if they are used.  The
+      function <A
+HREF="plsdev.html"
+><CODE
+CLASS="function"
+>plsdev</CODE
+></A
+> allows you to set the device explicitly.  The
+      function <A
+HREF="plsetopt.html"
+><CODE
+CLASS="function"
+>plsetopt</CODE
+></A
+> allows you to set any command-line option
+      internally in your code.  The function <A
+HREF="plssub.html"
+><CODE
+CLASS="function"
+>plssub</CODE
+></A
+> may be called to
+      divide the output device plotting area into several subpages of equal
+      size, each of which can be used separately. </P
+><P
+>&#13;      One advances to the next page (or screen) via <A
+HREF="pladv.html"
+><CODE
+CLASS="function"
+>pladv</CODE
+></A
+>.  If subpages
+      are used, this can be used to advance to the next subpage or to a
+      particular subpage.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="simple.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="scales.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Simple Use of PLplot</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="simple.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Defining Plot Scales and Axes</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

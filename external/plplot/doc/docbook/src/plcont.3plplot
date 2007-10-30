@@ -1,0 +1,51 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLCONT 3plplot  "August, 2007" "" "PLplot API"
+.SH NAME
+\fBplcont\fP - Contour plot 
+.SH SYNOPSIS
+\fBplcont\fP(\fIz\fP, \fInx\fP, \fIny\fP, \fIkx\fP, \fIlx\fP, \fIky\fP, \fIly\fP, \fIclevel\fP, \fInlevel\fP, \fIpltr\fP, \fIpltr_data\fP)
+.SH DESCRIPTION
+
+.P
+Draws a contour plot of the data in \fIz\fP[\fInx\fP][\fIny\fP], using the \fInlevel\fP contour levels specified by \fIclevel\fP. Only the region of the array from \fIkx\fP to \fIlx\fP and from \fIky\fP to \fIly\fP is plotted out.  A transformation routine pointed to by \fIpltr\fP with a pointer \fIpltr_data\fP for additional data required by the transformation routine is used to map indices within the array to the world coordinates.  See the following discussion of the arguments and the PLplot documentation for more information. 
+.P
+Redacted form: [PLEASE UPDATE! ONLY PERL INFO IS LIKELY CORRECT!] F95: \fBplcont(z, kx, lx, ky, ly, clevel, tr?)\fP or \fBplcont(z, kx, lx, ky, ly, clevel, xgrid, ygrid)\fP
+Java: \fBpls.cont(z, kx, lx, ky, ly, clevel, xgrid, ygrid)\fP
+Perl/PDL: \fBplcont(z, kx, lx, ky, ly, clevel, pltr, pltr_data)\fP
+Python: \fBplcont2(z, kx, lx, ky, ly, clevel)\fP
+
+.P
+This function is used in examples 9,14,16,22. 
+.SH ARGUMENTS
+.TP
+\fIz\fP (PLFLT **, input) 
+Pointer to a vectored two-dimensional array containing data to be contoured. 
+.TP
+\fInx, ny\fP (PLINT, input) 
+Physical dimensions of array \fIz\fP. 
+.TP
+\fIkx, lx\fP (PLINT, input) 
+Range of x indices to consider. 
+.TP
+\fIky, ly\fP (PLINT, input) 
+Range of y indices to consider. 
+.TP
+\fIclevel\fP (PLFLT *, input) 
+Pointer to array specifying levels at which to draw contours. 
+.TP
+\fInlevel\fP (PLINT, input) 
+Number of contour levels to draw. 
+.TP
+\fIpltr\fP (void (*) (PLFLT, PLFLT, PLFLT *, PLFLT *, PLPointer) , input) 
+Pointer to function that defines transformation between indices in array \fIz\fP and the world coordinates (C only).  Transformation functions are provided in the PLplot library: \fBpltr0\fP(3plplot) for identity mapping, and \fBpltr1\fP(3plplot) and \fBpltr2\fP(3plplot) for arbitrary mappings respectively defined by one- and two-dimensional arrays.  In addition, user-supplied routines for the transformation can be used as well.  Examples of all of these approaches are given in the PLplot documentation. The transformation function should have the form given by any of \fBpltr0\fP(3plplot), \fBpltr1\fP(3plplot), or \fBpltr2\fP(3plplot). 
+.TP
+\fIpltr_data\fP (PLPointer, input) 
+Extra parameter to help pass information to \fBpltr0\fP(3plplot), \fBpltr1\fP(3plplot), \fBpltr2\fP(3plplot), or whatever routine that is externally supplied. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

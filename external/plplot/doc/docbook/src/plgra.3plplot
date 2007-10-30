@@ -1,0 +1,21 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLGRA 3plplot  "August, 2007" "" "PLplot API"
+.SH NAME
+\fBplgra\fP - Switch to graphics screen 
+.SH SYNOPSIS
+\fBplgra\fP()
+.SH DESCRIPTION
+
+.P
+Sets an interactive device to graphics mode, used in conjunction with \fBpltext\fP(3plplot) to allow graphics and text to be interspersed.  On a device which supports separate text and graphics windows, this command causes control to be switched to the graphics window.  If already in graphics mode, this command is ignored.  It is also ignored on devices which only support a single window or use a different method for shifting focus.  See also \fBpltext\fP(3plplot). 
+.P
+Redacted form: \fBplgra()\fP
+.P
+This function is used in example 1. 
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

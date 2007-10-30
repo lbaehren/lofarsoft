@@ -1,0 +1,1518 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>The Common API for PLplot</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE=" Reference "
+HREF="p3385.html"><LINK
+REL="PREVIOUS"
+TITLE="Bibliography"
+HREF="bibliography.html"><LINK
+REL="NEXT"
+TITLE="pl_setcontlabelparam: Set parameters of
+contour labelling other than format of numerical label"
+HREF="pl_setcontlabelparam.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="chapter"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="bibliography.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+></TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="pl_setcontlabelparam.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="chapter"
+><H1
+><A
+NAME="API"
+></A
+>Chapter 17. The Common API for PLplot</H1
+><DIV
+CLASS="TOC"
+><DL
+><DT
+><B
+>Table of Contents</B
+></DT
+><DT
+><A
+HREF="api.html#pl_setcontlabelformat"
+><CODE
+CLASS="function"
+>pl_setcontlabelformat</CODE
+>: Set
+format of numerical label for contours</A
+></DT
+><DT
+><A
+HREF="pl_setcontlabelparam.html"
+><CODE
+CLASS="function"
+>pl_setcontlabelparam</CODE
+>: Set parameters of
+contour labelling other than format of numerical label</A
+></DT
+><DT
+><A
+HREF="pladv.html"
+><CODE
+CLASS="function"
+>pladv</CODE
+>: Advance the (sub-)page</A
+></DT
+><DT
+><A
+HREF="plaxes.html"
+><CODE
+CLASS="function"
+>plaxes</CODE
+>: Draw a box with axes, etc. with arbitrary
+origin</A
+></DT
+><DT
+><A
+HREF="plbin.html"
+><CODE
+CLASS="function"
+>plbin</CODE
+>: Plot a histogram from binned data</A
+></DT
+><DT
+><A
+HREF="plbop.html"
+><CODE
+CLASS="function"
+>plbop</CODE
+>: Begin a new page</A
+></DT
+><DT
+><A
+HREF="plbox.html"
+><CODE
+CLASS="function"
+>plbox</CODE
+>: Draw a box with axes, etc</A
+></DT
+><DT
+><A
+HREF="plbox3.html"
+><CODE
+CLASS="function"
+>plbox3</CODE
+>: Draw a box with axes, etc, in 3-d</A
+></DT
+><DT
+><A
+HREF="plcalc_world.html"
+><CODE
+CLASS="function"
+>plcalc_world</CODE
+>: Calculate world coordinates and
+corresponding window index from relative device coordinates</A
+></DT
+><DT
+><A
+HREF="plclear.html"
+><CODE
+CLASS="function"
+>plclear</CODE
+>: Clear current (sub)page</A
+></DT
+><DT
+><A
+HREF="plcol0.html"
+><CODE
+CLASS="function"
+>plcol0</CODE
+>: Set color, map0</A
+></DT
+><DT
+><A
+HREF="plcol1.html"
+><CODE
+CLASS="function"
+>plcol1</CODE
+>: Set color, map1</A
+></DT
+><DT
+><A
+HREF="plcont.html"
+><CODE
+CLASS="function"
+>plcont</CODE
+>: Contour plot</A
+></DT
+><DT
+><A
+HREF="plcpstrm.html"
+><CODE
+CLASS="function"
+>plcpstrm</CODE
+>: Copy state parameters from the
+reference stream to the current stream</A
+></DT
+><DT
+><A
+HREF="plend.html"
+><CODE
+CLASS="function"
+>plend</CODE
+>: End plotting session</A
+></DT
+><DT
+><A
+HREF="plend1.html"
+><CODE
+CLASS="function"
+>plend1</CODE
+>: End plotting session for current stream</A
+></DT
+><DT
+><A
+HREF="plenv0.html"
+><CODE
+CLASS="function"
+>plenv0</CODE
+>: Same as <A
+HREF="plenv.html"
+><CODE
+CLASS="function"
+>plenv</CODE
+></A
+> but if in multiplot
+      mode does not advance the subpage, instead clears it.</A
+></DT
+><DT
+><A
+HREF="plenv.html"
+><CODE
+CLASS="function"
+>plenv</CODE
+>: Set up standard window and draw box</A
+></DT
+><DT
+><A
+HREF="pleop.html"
+><CODE
+CLASS="function"
+>pleop</CODE
+>: Eject current page</A
+></DT
+><DT
+><A
+HREF="plerrx.html"
+><CODE
+CLASS="function"
+>plerrx</CODE
+>: Draw x error bar</A
+></DT
+><DT
+><A
+HREF="plerry.html"
+><CODE
+CLASS="function"
+>plerry</CODE
+>: Draw y error bar</A
+></DT
+><DT
+><A
+HREF="plfamadv.html"
+><CODE
+CLASS="function"
+>plfamadv</CODE
+>: Advance to the next family file on the
+next new page</A
+></DT
+><DT
+><A
+HREF="plfill.html"
+><CODE
+CLASS="function"
+>plfill</CODE
+>: Draw filled polygon</A
+></DT
+><DT
+><A
+HREF="plfill3.html"
+><CODE
+CLASS="function"
+>plfill3</CODE
+>: Draw filled polygon in 3D</A
+></DT
+><DT
+><A
+HREF="plflush.html"
+><CODE
+CLASS="function"
+>plflush</CODE
+>: Flushes the output stream</A
+></DT
+><DT
+><A
+HREF="plfont.html"
+><CODE
+CLASS="function"
+>plfont</CODE
+>: Set character font</A
+></DT
+><DT
+><A
+HREF="plfontld.html"
+><CODE
+CLASS="function"
+>plfontld</CODE
+>: Load character font</A
+></DT
+><DT
+><A
+HREF="plgchr.html"
+><CODE
+CLASS="function"
+>plgchr</CODE
+>: Get character default height and current
+(scaled) height</A
+></DT
+><DT
+><A
+HREF="plgcol0.html"
+><CODE
+CLASS="function"
+>plgcol0</CODE
+>: Returns 8-bit RGB values for given color
+from color map0</A
+></DT
+><DT
+><A
+HREF="plgcolbg.html"
+><CODE
+CLASS="function"
+>plgcolbg</CODE
+>:  Returns the background color
+(cmap0[0]) by 8-bit RGB value</A
+></DT
+><DT
+><A
+HREF="plgcompression.html"
+><CODE
+CLASS="function"
+>plgcompression</CODE
+>: Get the current
+      device-compression setting</A
+></DT
+><DT
+><A
+HREF="plgdev.html"
+><CODE
+CLASS="function"
+>plgdev</CODE
+>: Get the current device (keyword) name</A
+></DT
+><DT
+><A
+HREF="plgdidev.html"
+><CODE
+CLASS="function"
+>plgdidev</CODE
+>: Get parameters that define current
+      device-space window</A
+></DT
+><DT
+><A
+HREF="plgdiori.html"
+><CODE
+CLASS="function"
+>plgdiori</CODE
+>: Get plot orientation</A
+></DT
+><DT
+><A
+HREF="plgdiplt.html"
+><CODE
+CLASS="function"
+>plgdiplt</CODE
+>: Get parameters that define current
+      plot-space window</A
+></DT
+><DT
+><A
+HREF="plgfam.html"
+><CODE
+CLASS="function"
+>plgfam</CODE
+>: Get family file parameters</A
+></DT
+><DT
+><A
+HREF="plgfci.html"
+><CODE
+CLASS="function"
+>plgfci</CODE
+>: Get FCI (font characterization integer)</A
+></DT
+><DT
+><A
+HREF="plgfnam.html"
+><CODE
+CLASS="function"
+>plgfnam</CODE
+>: Get output file name</A
+></DT
+><DT
+><A
+HREF="plglevel.html"
+><CODE
+CLASS="function"
+>plglevel</CODE
+>: Get the (current) run level</A
+></DT
+><DT
+><A
+HREF="plgpage.html"
+><CODE
+CLASS="function"
+>plgpage</CODE
+>: Get page parameters</A
+></DT
+><DT
+><A
+HREF="plgra.html"
+><CODE
+CLASS="function"
+>plgra</CODE
+>: Switch to graphics screen</A
+></DT
+><DT
+><A
+HREF="plgriddata.html"
+><CODE
+CLASS="function"
+>plgriddata</CODE
+>: Grid data from irregularly sampled
+      data</A
+></DT
+><DT
+><A
+HREF="plgspa.html"
+><CODE
+CLASS="function"
+>plgspa</CODE
+>: Get current subpage parameters</A
+></DT
+><DT
+><A
+HREF="plgstrm.html"
+><CODE
+CLASS="function"
+>plgstrm</CODE
+>: Get current stream number</A
+></DT
+><DT
+><A
+HREF="plgver.html"
+><CODE
+CLASS="function"
+>plgver</CODE
+>: Get the current library version number</A
+></DT
+><DT
+><A
+HREF="plgvpd.html"
+><CODE
+CLASS="function"
+>plgvpd</CODE
+>: Get viewport limits in normalized
+device coordinates</A
+></DT
+><DT
+><A
+HREF="plgvpw.html"
+><CODE
+CLASS="function"
+>plgvpw</CODE
+>: Get viewport limits in world coordinates</A
+></DT
+><DT
+><A
+HREF="plgxax.html"
+><CODE
+CLASS="function"
+>plgxax</CODE
+>: Get x axis parameters</A
+></DT
+><DT
+><A
+HREF="plgyax.html"
+><CODE
+CLASS="function"
+>plgyax</CODE
+>: Get y axis parameters</A
+></DT
+><DT
+><A
+HREF="plgzax.html"
+><CODE
+CLASS="function"
+>plgzax</CODE
+>: Get z axis parameters</A
+></DT
+><DT
+><A
+HREF="plhist.html"
+><CODE
+CLASS="function"
+>plhist</CODE
+>: Plot a histogram from unbinned data</A
+></DT
+><DT
+><A
+HREF="plhlsrgb.html"
+><CODE
+CLASS="function"
+>plhlsrgb</CODE
+>: Convert HLS color to RGB</A
+></DT
+><DT
+><A
+HREF="plinit.html"
+><CODE
+CLASS="function"
+>plinit</CODE
+>: Initialize PLplot</A
+></DT
+><DT
+><A
+HREF="pljoin.html"
+><CODE
+CLASS="function"
+>pljoin</CODE
+>: Draw a line between two points</A
+></DT
+><DT
+><A
+HREF="pllab.html"
+><CODE
+CLASS="function"
+>pllab</CODE
+>: Simple routine to write labels</A
+></DT
+><DT
+><A
+HREF="pllightsource.html"
+><CODE
+CLASS="function"
+>pllightsource</CODE
+>: Sets the 3D position of the light
+source</A
+></DT
+><DT
+><A
+HREF="plline.html"
+><CODE
+CLASS="function"
+>plline</CODE
+>: Draw a line</A
+></DT
+><DT
+><A
+HREF="plline3.html"
+><CODE
+CLASS="function"
+>plline3</CODE
+>: Draw a line in 3 space</A
+></DT
+><DT
+><A
+HREF="pllsty.html"
+><CODE
+CLASS="function"
+>pllsty</CODE
+>: Select line style</A
+></DT
+><DT
+><A
+HREF="plmap.html"
+><CODE
+CLASS="function"
+>plmap</CODE
+>: Plot continental outline in world coordinates.</A
+></DT
+><DT
+><A
+HREF="plmeridians.html"
+><CODE
+CLASS="function"
+>plmeridians</CODE
+>: Plot latitude and longitude lines.</A
+></DT
+><DT
+><A
+HREF="plmesh.html"
+><CODE
+CLASS="function"
+>plmesh</CODE
+>: Plot surface mesh</A
+></DT
+><DT
+><A
+HREF="plmeshc.html"
+><CODE
+CLASS="function"
+>plmeshc</CODE
+>: Magnitude colored plot surface mesh with contour.</A
+></DT
+><DT
+><A
+HREF="plmkstrm.html"
+><CODE
+CLASS="function"
+>plmkstrm</CODE
+>: Creates a new stream and makes it the
+default</A
+></DT
+><DT
+><A
+HREF="plmtex.html"
+><CODE
+CLASS="function"
+>plmtex</CODE
+>: Write text relative to viewport boundaries</A
+></DT
+><DT
+><A
+HREF="plmtex3.html"
+><CODE
+CLASS="function"
+>plmtex3</CODE
+>: Write text relative to viewport boundaries
+      in 3D plots.</A
+></DT
+><DT
+><A
+HREF="plot3d.html"
+><CODE
+CLASS="function"
+>plot3d</CODE
+>: Plot 3-d surface plot</A
+></DT
+><DT
+><A
+HREF="plot3dc.html"
+><CODE
+CLASS="function"
+>plot3dc</CODE
+>: Magnitude colored plot surface with contour.</A
+></DT
+><DT
+><A
+HREF="plparseopts.html"
+><CODE
+CLASS="function"
+>plparseopts</CODE
+>: Parse command-line arguments</A
+></DT
+><DT
+><A
+HREF="plpat.html"
+><CODE
+CLASS="function"
+>plpat</CODE
+>: Set area fill pattern</A
+></DT
+><DT
+><A
+HREF="plpoin.html"
+><CODE
+CLASS="function"
+>plpoin</CODE
+>: Plots a character at the specified points</A
+></DT
+><DT
+><A
+HREF="plpoin3.html"
+><CODE
+CLASS="function"
+>plpoin3</CODE
+>:  Plots a character at the specified
+      points in 3 space</A
+></DT
+><DT
+><A
+HREF="plpoly3.html"
+><CODE
+CLASS="function"
+>plpoly3</CODE
+>: Draw a polygon in 3 space</A
+></DT
+><DT
+><A
+HREF="plprec.html"
+><CODE
+CLASS="function"
+>plprec</CODE
+>: Set precision in numeric labels</A
+></DT
+><DT
+><A
+HREF="plpsty.html"
+><CODE
+CLASS="function"
+>plpsty</CODE
+>: Select area fill pattern</A
+></DT
+><DT
+><A
+HREF="plptex.html"
+><CODE
+CLASS="function"
+>plptex</CODE
+>: Write text inside the viewport</A
+></DT
+><DT
+><A
+HREF="plptex3.html"
+><CODE
+CLASS="function"
+>plptex3</CODE
+>: Write text inside the viewport of a 3D plot.</A
+></DT
+><DT
+><A
+HREF="plreplot.html"
+><CODE
+CLASS="function"
+>plreplot</CODE
+>: Replays contents of plot buffer to
+current device/file</A
+></DT
+><DT
+><A
+HREF="plrgbhls.html"
+><CODE
+CLASS="function"
+>plrgbhls</CODE
+>: Convert RGB color to HLS</A
+></DT
+><DT
+><A
+HREF="plschr.html"
+><CODE
+CLASS="function"
+>plschr</CODE
+>: Set character size</A
+></DT
+><DT
+><A
+HREF="plscmap0.html"
+><CODE
+CLASS="function"
+>plscmap0</CODE
+>: Set color map0 colors by 8-bit RGB
+values</A
+></DT
+><DT
+><A
+HREF="plscmap0n.html"
+><CODE
+CLASS="function"
+>plscmap0n</CODE
+>: Set number of colors in color map0</A
+></DT
+><DT
+><A
+HREF="plscmap1.html"
+><CODE
+CLASS="function"
+>plscmap1</CODE
+>: Set color map1 colors using 8-bit RGB
+values</A
+></DT
+><DT
+><A
+HREF="plscmap1l.html"
+><CODE
+CLASS="function"
+>plscmap1l</CODE
+>: Set color map1 colors using a
+piece-wise linear relationship</A
+></DT
+><DT
+><A
+HREF="plscmap1n.html"
+><CODE
+CLASS="function"
+>plscmap1n</CODE
+>: Set number of colors in color map1</A
+></DT
+><DT
+><A
+HREF="plscol0.html"
+><CODE
+CLASS="function"
+>plscol0</CODE
+>:  Set a given color from color map0 by 8
+bit RGB value</A
+></DT
+><DT
+><A
+HREF="plscolbg.html"
+><CODE
+CLASS="function"
+>plscolbg</CODE
+>: Set the background color
+by 8-bit RGB value</A
+></DT
+><DT
+><A
+HREF="plscolor.html"
+><CODE
+CLASS="function"
+>plscolor</CODE
+>: Used to globally turn color output on/off</A
+></DT
+><DT
+><A
+HREF="plscompression.html"
+><CODE
+CLASS="function"
+>plscompression</CODE
+>: Set device-compression level</A
+></DT
+><DT
+><A
+HREF="plsdev.html"
+><CODE
+CLASS="function"
+>plsdev</CODE
+>: Set the device (keyword) name</A
+></DT
+><DT
+><A
+HREF="plsdidev.html"
+><CODE
+CLASS="function"
+>plsdidev</CODE
+>: Set parameters that define current
+      device-space window</A
+></DT
+><DT
+><A
+HREF="plsdimap.html"
+><CODE
+CLASS="function"
+>plsdimap</CODE
+>: Set up transformation from metafile
+coordinates</A
+></DT
+><DT
+><A
+HREF="plsdiori.html"
+><CODE
+CLASS="function"
+>plsdiori</CODE
+>: Set plot orientation</A
+></DT
+><DT
+><A
+HREF="plsdiplt.html"
+><CODE
+CLASS="function"
+>plsdiplt</CODE
+>: Set parameters that define current
+      plot-space window</A
+></DT
+><DT
+><A
+HREF="plsdiplz.html"
+><CODE
+CLASS="function"
+>plsdiplz</CODE
+>: Set parameters incrementally (zoom mode)
+      that define current plot-space window</A
+></DT
+><DT
+><A
+HREF="plsesc.html"
+><CODE
+CLASS="function"
+>plsesc</CODE
+>: Set the escape character for text strings</A
+></DT
+><DT
+><A
+HREF="plsetopt.html"
+><CODE
+CLASS="function"
+>plsetopt</CODE
+>: Set any command-line option</A
+></DT
+><DT
+><A
+HREF="plsfam.html"
+><CODE
+CLASS="function"
+>plsfam</CODE
+>: Set family file parameters</A
+></DT
+><DT
+><A
+HREF="plsfci.html"
+><CODE
+CLASS="function"
+>plsfci</CODE
+>: Set FCI (font characterization integer)</A
+></DT
+><DT
+><A
+HREF="plsfnam.html"
+><CODE
+CLASS="function"
+>plsfnam</CODE
+>: Set output file name</A
+></DT
+><DT
+><A
+HREF="plshades.html"
+><CODE
+CLASS="function"
+>plshades</CODE
+>: Shade regions on the basis of value</A
+></DT
+><DT
+><A
+HREF="plshade.html"
+><CODE
+CLASS="function"
+>plshade</CODE
+>:  Shade individual region on the basis of value</A
+></DT
+><DT
+><A
+HREF="plshade1.html"
+><CODE
+CLASS="function"
+>plshade1</CODE
+>: Shade individual region on the basis of value</A
+></DT
+><DT
+><A
+HREF="plsmaj.html"
+><CODE
+CLASS="function"
+>plsmaj</CODE
+>: Set length of major ticks</A
+></DT
+><DT
+><A
+HREF="plsmem.html"
+><CODE
+CLASS="function"
+>plsmem</CODE
+>: Set the memory area to be plotted</A
+></DT
+><DT
+><A
+HREF="plsmin.html"
+><CODE
+CLASS="function"
+>plsmin</CODE
+>: Set length of minor ticks</A
+></DT
+><DT
+><A
+HREF="plsori.html"
+><CODE
+CLASS="function"
+>plsori</CODE
+>: Set orientation</A
+></DT
+><DT
+><A
+HREF="plspage.html"
+><CODE
+CLASS="function"
+>plspage</CODE
+>: Set page parameters</A
+></DT
+><DT
+><A
+HREF="plspause.html"
+><CODE
+CLASS="function"
+>plspause</CODE
+>: Set the pause (on end-of-page) status</A
+></DT
+><DT
+><A
+HREF="plsstrm.html"
+><CODE
+CLASS="function"
+>plsstrm</CODE
+>: Set current output stream</A
+></DT
+><DT
+><A
+HREF="plssub.html"
+><CODE
+CLASS="function"
+>plssub</CODE
+>: Set the number of subpages in x and y</A
+></DT
+><DT
+><A
+HREF="plssym.html"
+><CODE
+CLASS="function"
+>plssym</CODE
+>: Set symbol size</A
+></DT
+><DT
+><A
+HREF="plstar.html"
+><CODE
+CLASS="function"
+>plstar</CODE
+>: Initialization</A
+></DT
+><DT
+><A
+HREF="plstart.html"
+><CODE
+CLASS="function"
+>plstart</CODE
+>: Initialization</A
+></DT
+><DT
+><A
+HREF="plstripa.html"
+><CODE
+CLASS="function"
+>plstripa</CODE
+>: Add a point to a stripchart</A
+></DT
+><DT
+><A
+HREF="plstripc.html"
+><CODE
+CLASS="function"
+>plstripc</CODE
+>: Create a 4-pen stripchart</A
+></DT
+><DT
+><A
+HREF="plstripd.html"
+><CODE
+CLASS="function"
+>plstripd</CODE
+>: Deletes and releases memory used by a
+stripchart</A
+></DT
+><DT
+><A
+HREF="plstyl.html"
+><CODE
+CLASS="function"
+>plstyl</CODE
+>: Set line style</A
+></DT
+><DT
+><A
+HREF="plsurf3d.html"
+><CODE
+CLASS="function"
+>plsurf3d</CODE
+>: Plot shaded 3-d surface plot</A
+></DT
+><DT
+><A
+HREF="plsvect.html"
+><CODE
+CLASS="function"
+>plsvect</CODE
+>: Set arrow style for vector plots</A
+></DT
+><DT
+><A
+HREF="plsvpa.html"
+><CODE
+CLASS="function"
+>plsvpa</CODE
+>: Specify viewport in absolute coordinates</A
+></DT
+><DT
+><A
+HREF="plsxax.html"
+><CODE
+CLASS="function"
+>plsxax</CODE
+>: Set x axis parameters</A
+></DT
+><DT
+><A
+HREF="plsyax.html"
+><CODE
+CLASS="function"
+>plsyax</CODE
+>: Set y axis parameters</A
+></DT
+><DT
+><A
+HREF="plsym.html"
+><CODE
+CLASS="function"
+>plsym</CODE
+>: Plots a symbol at the specified points</A
+></DT
+><DT
+><A
+HREF="plszax.html"
+><CODE
+CLASS="function"
+>plszax</CODE
+>: Set z axis parameters</A
+></DT
+><DT
+><A
+HREF="pltext.html"
+><CODE
+CLASS="function"
+>pltext</CODE
+>: Switch to text screen</A
+></DT
+><DT
+><A
+HREF="plvasp.html"
+><CODE
+CLASS="function"
+>plvasp</CODE
+>: Specify viewport using aspect ratio only</A
+></DT
+><DT
+><A
+HREF="plvect.html"
+><CODE
+CLASS="function"
+>plvect</CODE
+>: Vector plot</A
+></DT
+><DT
+><A
+HREF="plvpas.html"
+><CODE
+CLASS="function"
+>plvpas</CODE
+>: Specify viewport using coordinates and aspect ratio</A
+></DT
+><DT
+><A
+HREF="plvpor.html"
+><CODE
+CLASS="function"
+>plvpor</CODE
+>: Specify viewport using coordinates</A
+></DT
+><DT
+><A
+HREF="plvsta.html"
+><CODE
+CLASS="function"
+>plvsta</CODE
+>: Select standard viewport</A
+></DT
+><DT
+><A
+HREF="plw3d.html"
+><CODE
+CLASS="function"
+>plw3d</CODE
+>: Set up window for 3-d plotting</A
+></DT
+><DT
+><A
+HREF="plwid.html"
+><CODE
+CLASS="function"
+>plwid</CODE
+>: Set pen width</A
+></DT
+><DT
+><A
+HREF="plwind.html"
+><CODE
+CLASS="function"
+>plwind</CODE
+>: Specify world coordinates of viewport boundaries</A
+></DT
+><DT
+><A
+HREF="plxormod.html"
+><CODE
+CLASS="function"
+>plxormod</CODE
+>: Enter or leave xor mode</A
+></DT
+></DL
+></DIV
+><P
+>&#13;    The purpose of this chapter is to document the API for every PLplot
+    function that should be available across all PLplot language bindings.
+    This common API between the various languages constitutes the
+    most important part of the PLplot API that programmers need to know.
+    Note that in C, these common API routines have a special 
+    <SPAN
+CLASS="QUOTE"
+>"c_"</SPAN
+> prefix name assigned to them in 
+    <TT
+CLASS="filename"
+>plplot.h</TT
+>.
+  </P
+><P
+>&#13;    What follows is a list of all common API functions of the current 
+    CVS HEAD with their arguments except for obsolete/deprecated API 
+    functions which are listed in <A
+HREF="api-obsolete.html"
+>Chapter 22</A
+>. The
+    following information is provided for each function:
+    <P
+></P
+><OL
+TYPE="1"
+><LI
+><P
+>&#13;           The function name and a brief description.
+         </P
+></LI
+><LI
+><P
+>&#13;         The function as it would be called from C.
+         </P
+></LI
+><LI
+><P
+>&#13;         A complete description of the function.
+         </P
+></LI
+><LI
+><P
+>&#13;         A description of each argument that the function takes.
+         </P
+></LI
+><LI
+><P
+>&#13;         The redacted argument form of the function, currently used 
+         by the programming languages Fortran95, Python, Java and 
+         Perl, as well as any language specific variations that 
+         might occur on the general calling scheme described in 
+         the following paragraph.
+         </P
+></LI
+><LI
+><P
+>&#13;         A list of PLplot examples that demonstrate how to use
+         the function.
+         </P
+></LI
+></OL
+>
+    Additional PLplot API specialized for each language binding is 
+    documented in <A
+HREF="api-c.html"
+>Chapter 18</A
+> and subsequent chapters.
+  </P
+><P
+>&#13;    The general calling scheme for the other languages supported
+    by PLplot is as follows, using the function 
+    <CODE
+CLASS="function"
+>plline</CODE
+> as an example.
+    <P
+></P
+><UL
+><LI
+><P
+>&#13;        C: <CODE
+CLASS="function"
+>plline(n,x,y)</CODE
+>
+        </P
+></LI
+><LI
+><P
+>&#13;        F77: <CODE
+CLASS="function"
+>plline(n,x,y)</CODE
+>
+        </P
+></LI
+><LI
+><P
+>&#13;        F95: <CODE
+CLASS="function"
+>plline(x,y)</CODE
+>
+        </P
+></LI
+><LI
+><P
+>&#13;        C++: <CODE
+CLASS="function"
+>pls-&#62;line(n,x,y)</CODE
+>
+        </P
+></LI
+><LI
+><P
+>&#13;        Java: <CODE
+CLASS="function"
+>pls.line(x,y)</CODE
+>
+        </P
+></LI
+><LI
+><P
+>&#13;        Perl/PDL: <CODE
+CLASS="function"
+>plline($x,$y)</CODE
+>
+        </P
+></LI
+><LI
+><P
+>&#13;        Python: <CODE
+CLASS="function"
+>plline(x,y)</CODE
+>
+        </P
+></LI
+><LI
+><P
+>&#13;        Tcl/Tk: <CODE
+CLASS="function"
+>$w cmd plline $n x y</CODE
+>
+        </P
+></LI
+></UL
+>
+    Note that in some languages the argument n (which specifies
+    the length of the arrays x and y) is not necessary, this
+    is what we refer to above as the <SPAN
+CLASS="QUOTE"
+>"redacted argument
+    form"</SPAN
+> of the function.
+  </P
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="pl_setcontlabelformat"
+><CODE
+CLASS="function"
+>pl_setcontlabelformat</CODE
+>: Set
+format of numerical label for contours</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN3501"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	  pl_setcontlabelformat
+	</CODE
+>(lexp, sigdig);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;     Set format of numerical label for contours.
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>lexp</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  If the contour numerical label is greater than 10^(lexp) or less
+	  than 10^(-lexp), then the
+	  exponential format is used.  Default value of lexp is 4.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>sigdig</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  Number of significant digits.  Default value is 2.
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      Redacted form: <CODE
+CLASS="function"
+>pl_setcontlabelformat(lexp, sigdig)</CODE
+>
+    </P
+><P
+>&#13;      This function is not used in any examples.
+    </P
+></DIV
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="bibliography.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="pl_setcontlabelparam.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Bibliography</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="p3385.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>pl_setcontlabelparam</CODE
+>: Set parameters of
+contour labelling other than format of numerical label</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

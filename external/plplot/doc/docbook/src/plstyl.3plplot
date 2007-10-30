@@ -1,0 +1,32 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLSTYL 3plplot  "August, 2007" "" "PLplot API"
+.SH NAME
+\fBplstyl\fP - Set line style 
+.SH SYNOPSIS
+\fBplstyl\fP(\fInels\fP, \fImark\fP, \fIspace\fP)
+.SH DESCRIPTION
+
+.P
+This sets up the line style for all lines subsequently drawn.  A line consists of segments in which the pen is alternately down and up. The lengths of these segments are passed in the arrays \fImark\fP and \fIspace\fP respectively.  The number of mark-space pairs is specified by \fInels\fP.  In order to return the line style to the default continuous line, \fBplstyl\fP(3plplot) should be called with \fInels\fP=0.(see also \fBpllsty\fP(3plplot)) 
+.P
+Redacted form: \fBplstyl(mark, space)\fP
+.P
+This function is used in examples 1,9,14. 
+.SH ARGUMENTS
+.TP
+\fInels\fP (PLINT, input) 
+The number of \fImark\fP and \fIspace\fP elements in a line.  Thus a simple broken line can be obtained by setting \fInels\fP=1.  A continuous line is specified by setting \fInels\fP=0. 
+.TP
+\fImark\fP (PLINT *, input) 
+Pointer to array with the lengths of the segments during which the pen is down, measured in micrometers. 
+.TP
+\fIspace\fP (PLINT *, input) 
+Pointer to array with the lengths of the segments during which the pen is up, measured in micrometers. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

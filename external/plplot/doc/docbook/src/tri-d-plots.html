@@ -1,0 +1,476 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>Three Dimensional Surface Plots</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="Advanced Use of PLplot"
+HREF="advanced.html"><LINK
+REL="PREVIOUS"
+TITLE="Setting Character Attributes"
+HREF="characters.html"><LINK
+REL="NEXT"
+TITLE="Contour and Shade Plots"
+HREF="contour-plots.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="characters.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 3. Advanced Use of PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="contour-plots.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="tri-d-plots"
+>Three Dimensional Surface Plots</A
+></H1
+><P
+>&#13;      PLplot includes routines that will represent a single-valued function
+      of two variables as a surface.  In this section, we shall assume that
+      the function to be plotted is <TT
+CLASS="literal"
+>Z[X][Y]</TT
+>, where
+      <TT
+CLASS="literal"
+>Z</TT
+> represents the dependent variable and
+      <TT
+CLASS="literal"
+>X</TT
+> and <TT
+CLASS="literal"
+>Y</TT
+> represent the
+      independent variables.
+    </P
+><P
+>&#13;      As usual, we would like to refer to a three dimensional point
+      <TT
+CLASS="literal"
+>(X, Y, Z)</TT
+> in terms of some meaningful
+      user-specified coordinate system.  These are called
+      <SPAN
+CLASS="emphasis"
+><I
+CLASS="emphasis"
+>three-dimensional world coordinates</I
+></SPAN
+>.  We need to
+      specify the ranges of these coordinates, so that the entire surface
+      is contained within the cuboid defined by <TT
+CLASS="literal"
+>xmin &#60; x &#60;
+      xmax</TT
+>, <TT
+CLASS="literal"
+>ymin &#60; y &#60; ymax</TT
+>, and
+      <TT
+CLASS="literal"
+>zmin &#60; z &#60; zmax</TT
+>.  Typically, we shall want
+      to view the surface from a variety of angles, and to facilitate this,
+      a two-stage mapping of the enclosing cuboid is performed.  Firstly,
+      it is mapped into another cuboid called the <SPAN
+CLASS="emphasis"
+><I
+CLASS="emphasis"
+>normalized
+      box</I
+></SPAN
+> whose size must also be specified by the user, and
+      secondly this normalized box is viewed from a particular azimuth and
+      elevation so that it can be projected onto the two-dimensional
+      window.
+    </P
+><P
+>&#13;      This two-stage transformation process allows considerable flexibility
+      in specifying how the surface is depicted.  The lengths of the sides
+      of the normalized box are independent of the world coordinate ranges
+      of each of the variables, making it possible to use
+      <SPAN
+CLASS="QUOTE"
+>"reasonable"</SPAN
+> viewing angles even if the ranges of the
+      world coordinates on the axes are very different.  The size of the
+      normalized box is determined essentially by the size of the
+      two-dimensional window into which it is to be mapped.  The normalized
+      box is centered about the origin in the <TT
+CLASS="literal"
+>x</TT
+> and
+      <TT
+CLASS="literal"
+>y</TT
+> directions, but rests on the plane <TT
+CLASS="literal"
+>z =
+      0</TT
+>.  It is viewed by an observer located at altitude
+      <TT
+CLASS="literal"
+>alt</TT
+> and azimuth <TT
+CLASS="literal"
+>az</TT
+>, where both
+      angles are measured in degrees.  The altitude should be restricted to
+      the range zero to ninety degrees for proper operation, and represents
+      the viewing angle above the xy plane.  The azimuth is defined so that
+      when <TT
+CLASS="literal"
+>az = 0</TT
+>, the observer sees the xz plane face
+      on, and as the angle is increased, the observer moves clockwise
+      around the box as viewed from above the xy plane.  The azimuth can
+      take on any value.
+    </P
+><P
+>&#13;      The first step in drawing a surface plot is to decide on the size of
+      the two-dimensional window and the normalized box.  For example, we
+      could choose the normalized box to have sides of length
+    </P
+><P
+>&#13;      <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>    basex = 2.0;
+    basey = 4.0;
+    height = 3.0;</PRE
+></TD
+></TR
+></TABLE
+>
+    </P
+><P
+>&#13;      A reasonable range for the x coordinate of the two-dimensional window
+      is -2.5 to +2.5, since the length of the diagonal across the base of
+      the normalized box is
+      sqrt(2<SUP
+>2</SUP
+>+4<SUP
+>2</SUP
+>) =
+      2 sqrt(5), which fits into this coordinate range.  A reasonable
+      range for the y coordinate of the two dimensional window in this case
+      is -2.5 to +4, as the the projection of the normalized box lies in
+      this range for the allowed range of viewing angles.
+    </P
+><P
+>&#13;      The routine <A
+HREF="plwind.html"
+><CODE
+CLASS="function"
+>plwind</CODE
+></A
+> or <A
+HREF="plenv.html"
+><CODE
+CLASS="function"
+>plenv</CODE
+></A
+> is used in the usual way to establish
+      the size of the two-dimensional window.  The routine <A
+HREF="plw3d.html"
+><CODE
+CLASS="function"
+>plw3d</CODE
+></A
+> must
+      then be called to establish the range of the three dimensional world
+      coordinates, the size of the normalized box and the viewing angles.
+      After calling <A
+HREF="plw3d.html"
+><CODE
+CLASS="function"
+>plw3d</CODE
+></A
+>, the actual surface is drawn by a call to
+      <A
+HREF="plot3d.html"
+><CODE
+CLASS="function"
+>plot3d</CODE
+></A
+>.
+    </P
+><P
+>&#13;      For example, if the three-dimensional world-coordinate ranges are
+      -10.0 &#8804; <TT
+CLASS="literal"
+>x</TT
+> &#8804; 10.0, -3.0 &#8804;
+      <TT
+CLASS="literal"
+>y</TT
+> &#8804; +7.0, and 0.0 &#8804; <TT
+CLASS="literal"
+>z</TT
+>
+      &#8804; 8.0, we could use the following statements:
+    </P
+><P
+>&#13;      <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>    xmin2d = -2.5;
+    xmax2d =  2.5;
+    ymin2d = -2.5;
+    ymax2d =  4.0;
+    plenv(xmin2d, xmax2d, ymin2d, ymax2d, 0, -2);
+    basex = 2.0;
+    basey = 4.0;
+    height = 3.0;
+    xmin = -10.0;
+    xmax = 10.0;
+    ymin = -3.0;
+    ymax = 7.0;
+    zmin = 0.0;
+    zmax = 8.0;
+    alt = 45.0;
+    az = 30.0;
+    side = 1;
+    plw3d(basex, basey, height, xmin, xmax, ymin, ymax, zmin, zmax, alt, az);
+    plot3d(x, y, z, nx, ny, opt, side);</PRE
+></TD
+></TR
+></TABLE
+>
+    </P
+><P
+>&#13;      The values of the function are stored in a two-dimensional array
+      <TT
+CLASS="literal"
+>z[][]</TT
+> where the array element
+      <TT
+CLASS="literal"
+>z[i][j]</TT
+> contains the value of the function at the
+      point x<SUB
+>i</SUB
+>, y<SUB
+>j</SUB
+>.  (The
+      two-dimensional array <TT
+CLASS="literal"
+>z</TT
+> is a vectored array
+      instead of a fixed size array.  <TT
+CLASS="literal"
+>z</TT
+> points to an
+      array of pointers which each point to a row of the matrix.)  Note
+      that the values of the independent variables
+      x<SUB
+>i</SUB
+> and y<SUB
+>j</SUB
+> do not need
+      to be equally spaced, but they must lie on a rectangular grid.  Thus
+      two further arrays <TT
+CLASS="literal"
+>x[nx]</TT
+> and
+      <TT
+CLASS="literal"
+>y[ny]</TT
+> are required as arguments to <A
+HREF="plot3d.html"
+><CODE
+CLASS="function"
+>plot3d</CODE
+></A
+> to
+      specify the values of the independent variables.  The values in the
+      arrays x and y must be strictly increasing with the index.  The
+      argument <TT
+CLASS="literal"
+>opt</TT
+> specifies how the surface is
+      outlined.  If <TT
+CLASS="literal"
+>opt = 1</TT
+>, a line is drawn
+      representing z as a function of x for each value of y, if
+      <TT
+CLASS="literal"
+>opt = 2</TT
+>, a line is drawn representing z as a
+      function of y for each value of x, and if <TT
+CLASS="literal"
+>opt = 3</TT
+>,
+      a net of lines is drawn.  The first two options may be preferable if
+      one of the independent variables is to be regarded as a parameter,
+      whilst the third is better for getting an overall picture of the
+      surface.  If side is equal to one then sides are drawn on the figure
+      so that the graph doesn't appear to float.
+    </P
+><P
+>&#13;      The routine <A
+HREF="plmesh.html"
+><CODE
+CLASS="function"
+>plmesh</CODE
+></A
+> is similar to <A
+HREF="plot3d.html"
+><CODE
+CLASS="function"
+>plot3d</CODE
+></A
+>, except that it is used
+      for drawing mesh plots.  Mesh plots allow you to see both the top and
+      bottom sides of a surface mesh, while 3D plots allow you to see the
+      top side only (like looking at a solid object).  The side option is
+      not available with <A
+HREF="plmesh.html"
+><CODE
+CLASS="function"
+>plmesh</CODE
+></A
+>.
+    </P
+><P
+>&#13;      Labeling a three-dimensional or mesh plot is somewhat more
+      complicated than a two dimensional plot due to the need for skewing
+      the characters in the label so that they are parallel to the
+      coordinate axes.  The routine <A
+HREF="plbox3.html"
+><CODE
+CLASS="function"
+> plbox3</CODE
+></A
+> thus combines the functions of
+      box drawing and labeling.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="characters.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="contour-plots.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Setting Character Attributes</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="advanced.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Contour and Shade Plots</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

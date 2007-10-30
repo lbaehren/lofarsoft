@@ -1,0 +1,351 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      plfill3: Draw filled polygon in 3D
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plfill: Draw filled polygon
+    "
+HREF="plfill.html"><LINK
+REL="NEXT"
+TITLE="
+      plflush: Flushes the output stream
+    "
+HREF="plflush.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plfill.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plflush.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plfill3"
+><CODE
+CLASS="function"
+>plfill3</CODE
+>: Draw filled polygon in 3D</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN5185"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	  plfill3
+	</CODE
+>(n, x, y, z);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;      Fills the 3D polygon defined by the
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>n</CODE
+></TT
+> points in the
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>x</CODE
+></TT
+>,
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>y</CODE
+></TT
+>, and
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>z</CODE
+></TT
+> arrays
+      using the pattern defined by
+      <A
+HREF="plpsty.html"
+><CODE
+CLASS="function"
+>plpsty</CODE
+></A
+> or <A
+HREF="plpat.html"
+><CODE
+CLASS="function"
+>plpat</CODE
+></A
+>.  The routine will automatically close the
+      polygon between the last and first vertices.  If multiple closed
+      polygons are passed in <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>x</CODE
+></TT
+>,
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>y</CODE
+></TT
+>,
+      and <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>z</CODE
+></TT
+> then <A
+HREF="plfill3.html"
+><CODE
+CLASS="function"
+>plfill3</CODE
+></A
+> will
+      fill in between them.
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>n</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Number of vertices in polygon.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>x</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to array with x coordinates of vertices.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>y</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to array with y coordinates of vertices.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>z</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to array with z coordinates of vertices.
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      Redacted form: 
+      <P
+></P
+><UL
+><LI
+><P
+>&#13;	  General: <CODE
+CLASS="function"
+>plfill3(x, y, z)</CODE
+>
+          </P
+></LI
+><LI
+><P
+>&#13;          Perl/PDL: <CODE
+CLASS="function"
+>plfill3(n, x, y, z)</CODE
+>
+          </P
+></LI
+></UL
+>
+    </P
+><P
+>&#13;      This function is not used in any examples.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plfill.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plflush.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plfill</CODE
+>: Draw filled polygon</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plflush</CODE
+>: Flushes the output stream</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

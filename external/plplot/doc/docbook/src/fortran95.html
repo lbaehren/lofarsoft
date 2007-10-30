@@ -1,0 +1,661 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>Fortran 95 Language</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE=" Language Bindings "
+HREF="p2493.html"><LINK
+REL="PREVIOUS"
+TITLE="C Language"
+HREF="c.html"><LINK
+REL="NEXT"
+TITLE="Fortran 77 Language"
+HREF="fortran77.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="chapter"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="c.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+></TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="fortran77.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="chapter"
+><H1
+><A
+NAME="fortran95"
+></A
+>Chapter 8. Fortran 95 Language</H1
+><P
+>&#13;As discussed in the preceding section, PLplot's integer representation is a
+PLINT and its floating point representation is a PLFLT.  To the
+Fortran 95 user, this most commonly translates to a type
+<TT
+CLASS="literal"
+>integer</TT
+> and
+type <TT
+CLASS="literal"
+>real</TT
+>, respectively.  This is somewhat system dependent (and up to
+the installer of the package) so you should check the release notes to be
+sure, or just try it and see what happens.
+  </P
+><P
+>&#13;Because the PLplot kernel is written in C, standard C syntax is used in the
+description of each PLplot function.  Thus to understand this manual it is
+helpful to know a little about C, but fortunately the translation is very
+easy and can be summarized here.  As an example, the routine
+<A
+HREF="plline.html"
+><CODE
+CLASS="function"
+>plline</CODE
+></A
+> call from C would look like:
+<TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>&#13;	plline(n,x,y);
+</PRE
+></TD
+></TR
+></TABLE
+>
+The argument <TT
+CLASS="literal"
+>n</TT
+> is the number of points that make
+up the line and the arguments <TT
+CLASS="literal"
+>x</TT
+> and <TT
+CLASS="literal"
+>y</TT
+>
+are arrays of floating-point numbers containing the x- and y-coordinates of the
+points.
+  </P
+><P
+>&#13;In C you need to specify the array dimensions explicitly, whereas in
+Fortran 95 the array dimension can be implicit, which leads to less
+mistakes. The interface to <TT
+CLASS="literal"
+>plline</TT
+> would ideally look
+like this:
+<TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>&#13;	interface
+		subroutine plline(x,y)
+		real, dimension(:) :: x, y
+		end subroutine plline
+	end interface
+</PRE
+></TD
+></TR
+></TABLE
+>
+This is the way of calling PLplot routines in Fortran 95 - it is less
+error-prone than the Fortran 77 way (see the chapter on Fortran 77).
+
+<A
+NAME="AEN2546"
+HREF="#FTN.AEN2546"
+><SPAN
+CLASS="footnote"
+>[1]</SPAN
+></A
+>
+
+  </P
+><P
+>&#13;There is one slight complication: PLplot can be compiled with either
+single-precision reals or double-precision reals. It is <SPAN
+CLASS="emphasis"
+><I
+CLASS="emphasis"
+>very
+important</I
+></SPAN
+> to keep the variables that are passed to PLplot in
+the same precision. Fortunately, Fortran 95 provides the
+<TT
+CLASS="literal"
+>KIND</TT
+> mechanism for this.
+  </P
+><P
+>&#13;The actual interface to <TT
+CLASS="literal"
+>plline</TT
+> therefore looks like:
+<TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>&#13;	interface
+		subroutine plline(x,y)
+		real(kind=plflt), dimension(:) :: x, y
+		end subroutine plline
+	end interface
+</PRE
+></TD
+></TR
+></TABLE
+>
+The parameter <TT
+CLASS="literal"
+>plflt</TT
+> is defined in the
+<TT
+CLASS="literal"
+>PLplot</TT
+> module and should be used consistently with
+all real variables that you pass to PLplot routines.
+  </P
+><P
+>&#13;Here is a short overview of how C data types correspond to Fortran 95
+data types:
+	<DIV
+CLASS="informaltable"
+><P
+></P
+><A
+NAME="AEN2559"
+></A
+><TABLE
+BORDER="0"
+FRAME="void"
+CLASS="CALSTABLE"
+><COL
+WIDTH="1*"
+ALIGN="center"><COL
+WIDTH="1*"
+ALIGN="center"><TBODY
+><TR
+><TD
+>PLFLT</TD
+><TD
+>real(kind=plflt)</TD
+></TR
+><TR
+><TD
+>PLINT</TD
+><TD
+>integer</TD
+></TR
+><TR
+><TD
+>char *</TD
+><TD
+>character</TD
+></TR
+><TR
+><TD
+>PLFLT *</TD
+><TD
+>real(kind=plflt) or real(kind=plflt), dimension(:)</TD
+></TR
+><TR
+><TD
+>PLFLT **</TD
+><TD
+>real(kind=plflt), dimension(:,:)</TD
+></TR
+><TR
+><TD
+><TT
+CLASS="literal"
+>"string"</TT
+></TD
+><TD
+><TT
+CLASS="literal"
+>'string'</TT
+></TD
+></TR
+><TR
+><TD
+>array[0]</TD
+><TD
+>array(1)</TD
+></TR
+></TBODY
+></TABLE
+><P
+></P
+></DIV
+>
+In C there are two ways to pass a variable --- by value (the default) or by
+reference (pointer), whereas only the latter is used by Fortran 95.
+Therefore when you see references in the text to <SPAN
+CLASS="emphasis"
+><I
+CLASS="emphasis"
+>either</I
+></SPAN
+> an ordinary
+argument or a pointer argument (e.g.  <TT
+CLASS="literal"
+>*data</TT
+>), you simply use an
+ordinary Fortran 95 variable or array name (the interfacing
+routines take care of any transformations that may be necessary).
+  </P
+><P
+>&#13;The PLplot library comes with a set of Fortran 95 interface routines that
+allow the same call semantics (usually) regardless of whether calling
+from C or Fortran 95.  In some cases, the Fortran 95 interface uses
+implicit array dimensions, so that it has fewer arguments than the C
+counterpart.
+  </P
+><P
+>&#13;These <SPAN
+CLASS="QUOTE"
+>"stub"</SPAN
+> routines handle transforming the data
+from the normal Fortran 95 representation to that typically used in C.  This
+includes:
+<P
+></P
+><UL
+><LI
+><P
+>&#13;Variables passed by value instead of by reference.
+  </P
+><P
+>&#13;Fortran 95 passes all subroutine arguments by reference, i.e., a pointer to the
+argument value is pushed on the stack.  In C all values, except for arrays
+(including char arrays), are passed by value, i.e., the argument value
+itself is pushed on the stack.  The stub routine converts the Fortran 95 call
+by reference to a call by value.  As an example, here is how the plpoin stub
+routine works.  In your Fortran 95 program you might have a call to plpoin that
+looks something like
+<TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>&#13;      real(kind=pllft), dimension(6) :: x, y
+      x = ...
+      y = ...
+      call plpoin(x,y,9)
+</PRE
+></TD
+></TR
+></TABLE
+>
+where x and y are arrays with 6 elements and you want to plot symbol 9.
+The routine <TT
+CLASS="literal"
+>plpoin</TT
+> calls the underlying routine
+<TT
+CLASS="literal"
+>plpoinf77</TT
+>:
+<TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>&#13;      subroutine plpoin( x, y, code )
+         integer                        :: code
+         real(kind=plflt), dimension(:) :: x, y
+
+         call plpoinf77( size(x), x, y, code )
+      end subroutine plpoin
+</PRE
+></TD
+></TR
+></TABLE
+>
+This takes care of the size of the arrays - it is not possible to
+transfer this information to C in an implicit way.
+   </P
+><P
+>&#13;The routine plpoinf77 is implemented in C to take care of the question
+pass by value or pass by reference:
+
+<A
+NAME="AEN2601"
+HREF="#FTN.AEN2601"
+><SPAN
+CLASS="footnote"
+>[2]</SPAN
+></A
+>
+
+<TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>&#13;#include "plplot/plstubs.h"
+
+void
+PLPOIN(n, x, y, code)
+PLINT *n, *code;
+PLFLT *x, *y;
+{
+    c_plpoin(*n, x, y, *code);
+}
+</PRE
+></TD
+></TR
+></TABLE
+>
+All this stub routine does is convert the number of points
+(<TT
+CLASS="literal"
+>*n</TT
+> and the
+symbol <TT
+CLASS="literal"
+>*code</TT
+> to call by value (i.e.  pushes their value on the stack)
+and then calls the C plpoin library routine.
+</P
+></LI
+><LI
+><P
+>&#13;Get mapping between Fortran 95 and C namespace right (system dependent).
+  </P
+><P
+>&#13;The external symbols (i.e. function and subroutine names) as you see them
+in your program often appear differently to the linker.  For example, the
+Fortran 95 routine names may be converted to uppercase or lowercase, and/or
+have an underscore appended or prepended.  This translation is handled
+entirely via redefinition of the stub routine names, which are macros.
+During the build process, the properties of the build environment are
+detected and the correct compiler options are used.
+  </P
+><P
+>&#13;Once the name translation is established during installation, name
+translation is completely transparent to the user.
+</P
+></LI
+><LI
+><P
+>&#13;Translation of character string format from Fortran 95 to C.
+  </P
+><P
+>&#13;Fortran 95 character strings are passed differently than other quantities, in
+that a string descriptor is pushed on the stack along with the string
+address.  C doesn't want the descriptor, it wants a NULL terminated string.
+For routines that handle strings two stub routines are necessary, one
+written in Fortran 95 and one written in C.  Your Fortran 95 program calls the
+Fortran 95 stub routine first.  This stub converts the character string to a
+null terminated integer array and then calls the C stub routine.  The C
+stub routine converts the integer array (type <TT
+CLASS="literal"
+>long</TT
+>) to the usual C
+string representation (which may be different, depending on whether your
+machine uses a big endian or little endian byte ordering; in any case the
+way it is done in PLplot is portable).  See the <TT
+CLASS="literal"
+>plmtex</TT
+> stubs for an
+example of this.
+  </P
+><P
+>&#13;Note that the portion of a Fortran 95 character string that exceeds 299
+characters will not be plotted by the text routines (<TT
+CLASS="literal"
+>plmtex</TT
+>
+and <TT
+CLASS="literal"
+>plptex</TT
+>).
+</P
+></LI
+><LI
+><P
+>&#13;Multidimensional array arguments are changed from row-dominant to
+column-dominant ordering through use of a temporary array.
+  </P
+><P
+>&#13;In Fortran 95, arrays are always stored so that the first index increases most
+rapidly as one steps through memory.  This is called
+<SPAN
+CLASS="QUOTE"
+>"row-dominant"</SPAN
+>
+storage.  In C, on the other hand, the first index increases
+<SPAN
+CLASS="emphasis"
+><I
+CLASS="emphasis"
+>least</I
+></SPAN
+>
+rapidly, i.e. <SPAN
+CLASS="QUOTE"
+>"column-dominant"</SPAN
+> ordering.  Thus, two dimensional arrays
+(e.g.  as passed to the contour or surface plotting routines) passed into
+PLplot must be transposed in order to get the proper two-dimensional
+relationship to the world coordinates.  This is handled in the C stub
+routines by dynamic memory allocation of a temporary array.  This is then set
+equal to the transpose of the passed in array and passed to the appropriate
+PLplot routine.  The overhead associated with this is normally not important
+but could be a factor if you are using very large 2d arrays.
+</P
+></LI
+></UL
+>
+  </P
+><P
+>&#13;This all seems a little messy, but is very user friendly.  Fortran 95 and C
+programmers can use the same basic interface to the library, which is a
+powerful plus for this method.  The fact that stub routines are being used
+is completely transparent to the Fortran 95 programmer.
+  </P
+><P
+>&#13;For more information on calling PLplot from Fortran 95, please see the
+example Fortran 95 programs (<TT
+CLASS="filename"
+>/examples/f95/x??f.f</TT
+>)
+distributed
+with PLplot.
+  </P
+></DIV
+><H3
+CLASS="FOOTNOTES"
+>Notes</H3
+><TABLE
+BORDER="0"
+CLASS="FOOTNOTES"
+WIDTH="100%"
+><TR
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+WIDTH="5%"
+><A
+NAME="FTN.AEN2546"
+HREF="fortran95.html#AEN2546"
+><SPAN
+CLASS="footnote"
+>[1]</SPAN
+></A
+></TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+WIDTH="95%"
+><P
+>&#13;The Fortran 77 way is still available: you can call the routine
+<TT
+CLASS="literal"
+>pllinef77</TT
+> that has the same argument list as the
+Fortran 77 routine <TT
+CLASS="literal"
+>plline</TT
+>. This is not documented,
+however, other than by this note.
+  </P
+></TD
+></TR
+><TR
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+WIDTH="5%"
+><A
+NAME="FTN.AEN2601"
+HREF="fortran95.html#AEN2601"
+><SPAN
+CLASS="footnote"
+>[2]</SPAN
+></A
+></TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+WIDTH="95%"
+><P
+>&#13;<TT
+CLASS="literal"
+>PLPOIN</TT
+> is a macro that get translated into the correct name
+for this routine - various Fortran compilers use different conventions, such as
+adding an underscore or translating the name into capitals.
+   </P
+></TD
+></TR
+></TABLE
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="c.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="fortran77.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>C Language</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="p2493.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Fortran 77 Language</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

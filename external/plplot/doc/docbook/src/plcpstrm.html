@@ -1,0 +1,290 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      plcpstrm: Copy state parameters from the
+reference stream to the current stream
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plcont: Contour plot
+    "
+HREF="plcont.html"><LINK
+REL="NEXT"
+TITLE="
+      plend: End plotting session
+    "
+HREF="plend.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plcont.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plend.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plcpstrm"
+><CODE
+CLASS="function"
+>plcpstrm</CODE
+>: Copy state parameters from the
+reference stream to the current stream</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN4542"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;           plcpstrm
+        </CODE
+>(iplsr, flags);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;      Copies state parameters from the reference stream to the current stream.
+      Tell driver interface to map device coordinates unless
+<TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>flags</CODE
+> == 1</TT
+>.
+    </P
+><P
+>&#13;      This function is used for making save files of selected plots (e.g.
+      from the TK driver).  After initializing, you can get a copy of the
+      current plot to the specified device by switching to this stream and
+      issuing a <A
+HREF="plcpstrm.html"
+><CODE
+CLASS="function"
+>plcpstrm</CODE
+></A
+> and a <A
+HREF="plreplot.html"
+><CODE
+CLASS="function"
+>plreplot</CODE
+></A
+>, with calls to <A
+HREF="plbop.html"
+><CODE
+CLASS="function"
+>plbop</CODE
+></A
+> and
+      <A
+HREF="pleop.html"
+><CODE
+CLASS="function"
+>pleop</CODE
+></A
+> as appropriate.  The plot buffer must have previously been
+      enabled (done automatically by some display drivers, such as X).
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>iplsr</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;            Number of reference stream.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>flags</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLBOOL</TT
+>, input)</DT
+><DD
+><P
+>&#13;            If <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>flags</CODE
+></TT
+> is set to true
+	    the device coordinates are <SPAN
+CLASS="emphasis"
+><I
+CLASS="emphasis"
+>not</I
+></SPAN
+> copied from the reference to current
+	    stream.
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      Redacted form: <CODE
+CLASS="function"
+>plcpstrm(iplsr, flags)</CODE
+>
+    </P
+><P
+>&#13;      This function is used in example 1,20.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plcont.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plend.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plcont</CODE
+>: Contour plot</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plend</CODE
+>: End plotting session</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

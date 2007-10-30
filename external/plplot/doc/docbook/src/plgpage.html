@@ -1,0 +1,293 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      plgpage: Get page parameters
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plglevel: Get the (current) run level
+    "
+HREF="plglevel.html"><LINK
+REL="NEXT"
+TITLE="
+      plgra: Switch to graphics screen
+    "
+HREF="plgra.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plglevel.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plgra.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plgpage"
+><CODE
+CLASS="function"
+>plgpage</CODE
+>: Get page parameters</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN5736"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	  plgpage
+	</CODE
+>(xp, yp, xleng, yleng, xoff, yoff);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;      Gets the current page configuration. The parameters are expressed
+      in units that are specific to the current driver. For instance:
+      screen drivers will usually interpret them as number of pixels,
+      whereas printer drivers will usually use mm.
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>xp</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, output)</DT
+><DD
+><P
+>&#13;	    Pointer to number of pixels in x.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>yp</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, output)</DT
+><DD
+><P
+>&#13;	    Pointer to number of pixels in y.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>xleng</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT *</TT
+>, output)</DT
+><DD
+><P
+>&#13;	    Pointer to x page length value.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>yleng</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT *</TT
+>, output)</DT
+><DD
+><P
+>&#13;	    Pointer to y page length value.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>xoff</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT *</TT
+>, output)</DT
+><DD
+><P
+>&#13;	    Pointer to x page offset.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>yoff</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT *</TT
+>, output)</DT
+><DD
+><P
+>&#13;	    Pointer to y page offset.
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      Redacted form: <CODE
+CLASS="function"
+>plgpage(xp, yp, xleng, yleng, xoff, yoff)</CODE
+>
+    </P
+><P
+>&#13;      This function is not used in any examples.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plglevel.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plgra.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plglevel</CODE
+>: Get the (current) run level</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plgra</CODE
+>: Switch to graphics screen</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

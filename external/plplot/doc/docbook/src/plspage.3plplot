@@ -1,0 +1,41 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLSPAGE 3plplot  "August, 2007" "" "PLplot API"
+.SH NAME
+\fBplspage\fP - Set page parameters 
+.SH SYNOPSIS
+\fBplspage\fP(\fIxp\fP, \fIyp\fP, \fIxleng\fP, \fIyleng\fP, \fIxoff\fP, \fIyoff\fP)
+.SH DESCRIPTION
+
+.P
+Sets the page configuration (optional).  Not all parameters are recognized by all drivers and the interpretation is device-dependent. The X-window driver uses the length and offset parameters to determine the window size and location.  This routine, if used, must be called before initializing PLplot. 
+.P
+Redacted form: \fBplspage(xp, yp, xleng, yleng, xoff, yoff)\fP
+.P
+This function is not used in any examples. 
+.SH ARGUMENTS
+.TP
+\fIxp\fP (PLFLT, input) 
+Number of pixels, x. 
+.TP
+\fIyp\fP (PLFLT, input) 
+Number of pixels, y. 
+.TP
+\fIxleng\fP (PLINT , input) 
+Page length, x. 
+.TP
+\fIyleng\fP (PLINT, input) 
+Page length, y. 
+.TP
+\fIxoff\fP (PLINT, input) 
+Page offset, x. 
+.TP
+\fIyoff\fP (PLINT, input) 
+Page offset, y. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

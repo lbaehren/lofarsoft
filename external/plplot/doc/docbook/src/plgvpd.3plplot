@@ -1,0 +1,38 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLGVPD 3plplot  "August, 2007" "" "PLplot API"
+.SH NAME
+\fBplgvpd\fP - Get viewport limits in normalized
+device coordinates 
+.SH SYNOPSIS
+\fBplgvpd\fP(\fIp_xmin\fP, \fIp_xmax\fP, \fIp_ymin\fP, \fIp_ymax\fP)
+.SH DESCRIPTION
+
+.P
+Get viewport limits in normalized device coordinates. 
+.P
+Redacted form:  General: \fBplgvpd(p_xmin, p_xmax, p_ymin, p_ymax)\fP
+Perl/PDL: Not available? 
+
+.P
+This function is not used in any examples. 
+.SH ARGUMENTS
+.TP
+\fIp_xmin\fP (PLFLT *, output) 
+Lower viewport limit of the normalized device coordinate in x. 
+.TP
+\fIp_xmax\fP (PLFLT *, output) 
+Upper viewport limit of the normalized device coordinate in x. 
+.TP
+\fIp_ymin\fP (PLFLT *, output) 
+Lower viewport limit of the normalized device coordinate in y. 
+.TP
+\fIp_ymax\fP (PLFLT *, output) 
+Upper viewport limit of the normalized device coordinate in y. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

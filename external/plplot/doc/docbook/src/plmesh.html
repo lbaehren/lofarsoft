@@ -1,0 +1,457 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      plmesh: Plot surface mesh
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="
+     plmeridians: Plot latitude and longitude lines.
+    "
+HREF="plmeridians.html"><LINK
+REL="NEXT"
+TITLE="
+      plmeshc: Magnitude colored plot surface mesh with contour.
+    "
+HREF="plmeshc.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plmeridians.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plmeshc.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plmesh"
+><CODE
+CLASS="function"
+>plmesh</CODE
+>: Plot surface mesh</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN6889"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	  plmesh
+	</CODE
+>(x, y, z, nx, ny, opt);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;      Plots a surface mesh within the environment set up by <A
+HREF="plw3d.html"
+><CODE
+CLASS="function"
+>plw3d</CODE
+></A
+>.  The
+      surface is defined by the two-dimensional array
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>z</CODE
+>[<CODE
+CLASS="parameter"
+>nx</CODE
+>][<CODE
+CLASS="parameter"
+>ny</CODE
+>]</TT
+>,
+      the point <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>z</CODE
+>[i][j]</TT
+> being the
+      value of the function at <TT
+CLASS="literal"
+>(<CODE
+CLASS="parameter"
+>x</CODE
+>[i],
+      <CODE
+CLASS="parameter"
+>y</CODE
+>[j])</TT
+>.  Note that the points in
+      arrays <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>x</CODE
+></TT
+> and
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>y</CODE
+></TT
+> do not need to be equally
+      spaced, but must be stored in ascending order.  The parameter
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>opt</CODE
+></TT
+> controls the way in
+      which the surface is displayed.  For further details see <A
+HREF="tri-d-plots.html"
+>the Section called <I
+>Three Dimensional Surface Plots</I
+> in Chapter 3</A
+>.
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>x</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to set of x coordinate values at which the function is
+	    evaluated.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>y</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to set of y coordinate values at which the function is
+	    evaluated.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>z</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT **</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to a vectored two-dimensional array with set of
+	    function values.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>nx</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Number of <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>x</CODE
+></TT
+> values at
+	    which function is evaluated.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>ny</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Number of <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>y</CODE
+></TT
+> values at
+	    which function is evaluated.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>opt</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Determines the way in which the surface is represented:
+	    <P
+></P
+><UL
+><LI
+><P
+>&#13;		  <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>opt</CODE
+>=DRAW_LINEX</TT
+>: Lines
+		  are drawn showing
+		  <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>z</CODE
+></TT
+> as a function
+		  of <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>x</CODE
+></TT
+> for each
+		  value of <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>y</CODE
+>[j]</TT
+>.
+		</P
+></LI
+><LI
+><P
+>&#13;		  <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>opt</CODE
+>=DRAW_LINEY</TT
+>: Lines
+		  are drawn showing
+		  <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>z</CODE
+></TT
+> as a function
+		  of <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>y</CODE
+></TT
+> for each
+		  value of <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>x</CODE
+>[i]</TT
+>.
+		</P
+></LI
+><LI
+><P
+>&#13;		  <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>opt</CODE
+>=DRAW_LINEXY</TT
+>: Network
+		  of lines is drawn connecting points at which function is
+		  defined.
+		</P
+></LI
+></UL
+>
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      Redacted form: <CODE
+CLASS="function"
+>plmesh(x, y, z, opt)</CODE
+>
+    </P
+><P
+>&#13;      This function is used in example 11.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plmeridians.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plmeshc.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plmeridians</CODE
+>: Plot latitude and longitude lines.</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plmeshc</CODE
+>: Magnitude colored plot surface mesh with contour.</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

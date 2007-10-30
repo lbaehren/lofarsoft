@@ -1,0 +1,455 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      plscmap1l: Set color map1 colors using a
+piece-wise linear relationship
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plscmap1: Set color map1 colors using 8-bit RGB
+values
+    "
+HREF="plscmap1.html"><LINK
+REL="NEXT"
+TITLE="
+      plscmap1n: Set number of colors in color map1
+    "
+HREF="plscmap1n.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plscmap1.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plscmap1n.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plscmap1l"
+><CODE
+CLASS="function"
+>plscmap1l</CODE
+>: Set color map1 colors using a
+piece-wise linear relationship</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN8373"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;           plscmap1l
+        </CODE
+>(itype, npts, pos, coord1, coord2, coord3, rev);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+> Set color map1 colors using a piece-wise linear relationship
+      between position in the color map (from 0 to 1) and position in HLS or
+      RGB color space (see <A
+HREF="color.html#color-map-1"
+>the Section called <I
+>Color Map1</I
+> in Chapter 3</A
+>).  May be called at
+      any time. </P
+><P
+>&#13;      The idea here is to specify a number of control points that define
+      the mapping between palette 1 input positions (intensities) and HLS (or RGB).  Between
+      these points, linear interpolation is used which
+      gives a smooth variation of
+      color with input position.  Any number of control points may be specified,
+      located at arbitrary positions, although typically 2 - 4
+      are enough. Another way of stating this is that we are traversing a
+      given number of lines through HLS (or RGB) space as we move through
+      color map1 entries.  The control points at the minimum and maximum
+      position (0 and 1) must always be specified.  By adding more control
+      points you can get more variation.  One good technique for plotting
+      functions that vary about some expected average is to use an
+      additional 2 control points in the center (position ~= 0.5) that are
+      the same lightness as the background (typically white for paper output,
+      black for crt), and same hue as the boundary control points.  This
+      allows the highs and lows to be very easily distinguished.
+    </P
+><P
+>&#13;      Each control point must specify the position in color map1 as well as
+      three coordinates in HLS or RGB space.  The first point
+      <SPAN
+CLASS="emphasis"
+><I
+CLASS="emphasis"
+>must</I
+></SPAN
+> correspond to position = 0, and the last to
+      position = 1.
+    </P
+><P
+> The hue is interpolated around the "front" of the color wheel
+      (red&#60;-&#62;green&#60;-&#62;blue&#60;-&#62;red) unless the "rev" flag is set to true,
+      in which case interpolation (between the <TT
+CLASS="literal"
+>i</TT
+> and
+      <TT
+CLASS="literal"
+>i + 1</TT
+> control point for <TT
+CLASS="literal"
+>rev[i]</TT
+>)
+      proceeds around the back (reverse) side.  Specifying rev=NULL is
+      equivalent to setting rev[]= false for every control point. </P
+><P
+>&#13;<DIV
+CLASS="table"
+><A
+NAME="AEN8401"
+></A
+><P
+><B
+>Table 17-1.  Bounds on coordinates</B
+></P
+><TABLE
+BORDER="0"
+FRAME="void"
+RULES="none"
+CLASS="CALSTABLE"
+><COL><COL><COL><COL><TBODY
+><TR
+><TD
+>RGB</TD
+><TD
+>R</TD
+><TD
+>[0, 1]</TD
+><TD
+>magnitude</TD
+></TR
+><TR
+><TD
+>RGB</TD
+><TD
+>G</TD
+><TD
+>[0, 1]</TD
+><TD
+>magnitude</TD
+></TR
+><TR
+><TD
+>RGB</TD
+><TD
+>B</TD
+><TD
+>[0, 1]</TD
+><TD
+>magnitude</TD
+></TR
+><TR
+><TD
+>HLS</TD
+><TD
+>hue</TD
+><TD
+>[0, 360]</TD
+><TD
+>degrees</TD
+></TR
+><TR
+><TD
+>HLS</TD
+><TD
+>lightness</TD
+><TD
+>[0, 1]</TD
+><TD
+>magnitude</TD
+></TR
+><TR
+><TD
+>HLS</TD
+><TD
+>saturation</TD
+><TD
+>[0, 1]</TD
+><TD
+>magnitude</TD
+></TR
+></TBODY
+></TABLE
+></DIV
+>
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>itype</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLBOOL</TT
+>, input)</DT
+><DD
+><P
+>&#13;            true: RGB, false: HLS.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>npts</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;            number of control points
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>pos</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;            position for each control point (between 0.0 and 1.0, in
+            ascending order)
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>coord1</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;            first coordinate (H or R) for each control point
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>coord2</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;            second coordinate (L or G) for each control point
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>coord3</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;            third coordinate (S or B) for each control point
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>rev</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLBOOL: *</TT
+>, input)</DT
+><DD
+><P
+>&#13;            reverse flag for each control point. (<TT
+CLASS="literal"
+>rev[i]</TT
+> 
+	    refers
+	    to the interpolation interval between the <TT
+CLASS="literal"
+>i</TT
+> and
+	    <TT
+CLASS="literal"
+>i + 1</TT
+> control points).
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      Redacted form: <CODE
+CLASS="function"
+>plscmap1l(itype, pos, coord1, coord2, coord3, rev)</CODE
+>
+    </P
+><P
+>&#13;      This function is used in examples 8,11,15,20,21.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plscmap1.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plscmap1n.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plscmap1</CODE
+>: Set color map1 colors using 8-bit RGB
+values</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plscmap1n</CODE
+>: Set number of colors in color map1</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

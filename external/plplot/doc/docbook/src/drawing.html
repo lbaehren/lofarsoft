@@ -1,0 +1,810 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>Drawing the Graph</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="Simple Use of PLplot"
+HREF="simple.html"><LINK
+REL="PREVIOUS"
+TITLE="Labeling the Graph"
+HREF="labelling.html"><LINK
+REL="NEXT"
+TITLE="Finishing Up"
+HREF="finishing.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="labelling.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 2. Simple Use of PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="finishing.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="drawing"
+>Drawing the Graph</A
+></H1
+><P
+>&#13;      PLplot can draw graphs consisting of points with optional error bars,
+      line segments or histograms.  Functions which perform each of these
+      actions may be called after setting up the plotting environment using
+      <A
+HREF="plenv.html"
+><CODE
+CLASS="function"
+>plenv</CODE
+></A
+>.  All of the following functions draw within the box defined
+      by <A
+HREF="plenv.html"
+><CODE
+CLASS="function"
+>plenv</CODE
+></A
+>, and any lines crossing the boundary are clipped.
+      Functions are also provided for drawing surface and contour
+      representations of multi-dimensional functions.  See <A
+HREF="advanced.html"
+>Chapter 3</A
+> for discussion of finer control of plot
+	generation.
+    </P
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="points"
+>Drawing Points</A
+></H2
+><P
+>&#13;	<A
+HREF="plpoin.html"
+><CODE
+CLASS="function"
+>plpoin</CODE
+></A
+> and <A
+HREF="plsym.html"
+><CODE
+CLASS="function"
+>plsym</CODE
+></A
+> mark out <TT
+CLASS="literal"
+>n</TT
+> points
+	<TT
+CLASS="literal"
+>(x[i], y[i])</TT
+> with the specified symbol.  The
+	routines differ only in the interpretation of the symbol codes.
+	<A
+HREF="plpoin.html"
+><CODE
+CLASS="function"
+>plpoin</CODE
+></A
+> uses an extended ASCII representation, with the printable
+	ASCII codes mapping to the respective characters in the current
+	font, and the codes from 0&#8211;31 mapping to various useful
+	symbols.  In <A
+HREF="plsym.html"
+><CODE
+CLASS="function"
+>plsym</CODE
+></A
+> however, the code is a Hershey font code
+	number.  Example programs are provided which display each of the
+	symbols available using these routines.
+      </P
+><P
+>&#13;	<DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN400"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	    plpoin</CODE
+>(n, x, y, code);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+      </P
+><P
+>&#13;	<DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN413"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	    plsym
+	  </CODE
+>(n, x, y, code);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+      </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>n</CODE
+> (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	      The number of points to plot.
+	    </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>x, y</CODE
+> (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	      Pointers to arrays of the coordinates of the
+	      <TT
+CLASS="literal"
+>n</TT
+> points.
+	    </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>code</CODE
+> (<TT
+CLASS="literal"
+>PLINT</TT
+>,
+	    input)</DT
+><DD
+><P
+>&#13;	      Code number of symbol to draw
+	    </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="lines"
+>Drawing Lines or Curves</A
+></H2
+><P
+>&#13;	PLplot provides two functions for drawing line graphs.  All lines are
+	drawn in the currently selected color, style and width.  See <A
+HREF="line-attributes.html"
+>the Section called <I
+>Setting Line Attributes</I
+> in Chapter 3</A
+> for information about changing these
+	  parameters.
+      </P
+><P
+>&#13;	<A
+HREF="plline.html"
+><CODE
+CLASS="function"
+>plline</CODE
+></A
+> draws a line or curve.  The curve consists of
+	<TT
+CLASS="literal"
+>n-1</TT
+> line segments joining the <TT
+CLASS="literal"
+>n</TT
+>
+	points in the input arrays.  For single line segments, <A
+HREF="pljoin.html"
+><CODE
+CLASS="function"
+>pljoin</CODE
+></A
+> is
+	used to join two points.
+      </P
+><P
+>&#13;	<DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN457"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	    plline
+	  </CODE
+>(n, x, y);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+      </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>n</CODE
+> (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	      The number of points.
+	    </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>x, y</CODE
+> (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	      Pointers to arrays with coordinates of the <TT
+CLASS="literal"
+>n</TT
+>
+	      points.
+	    </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;	<DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN482"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	    pljoin
+	  </CODE
+>(x1, y1, x2, y2);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+      </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>x1, y1</CODE
+> (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	      Coordinates of the first point.
+	    </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>x2, y2</CODE
+> (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	      Coordinates of the second point.
+	    </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="text"
+>Writing Text on a Graph</A
+></H2
+><P
+>&#13;	<A
+HREF="plptex.html"
+><CODE
+CLASS="function"
+>plptex</CODE
+></A
+> allows text to be written within the limits set by <A
+HREF="plenv.html"
+><CODE
+CLASS="function"
+>plenv</CODE
+></A
+>.
+	The reference point of a text string may be located anywhere along an
+	imaginary horizontal line passing through the string at half the
+	height of a capital letter.  The parameter
+	<CODE
+CLASS="parameter"
+>just</CODE
+> specifies where along this line the
+	reference point is located.  The string is then rotated about the
+	reference point through an angle specified by the parameters
+	<CODE
+CLASS="parameter"
+>dx</CODE
+> and <CODE
+CLASS="parameter"
+>dy</CODE
+>, so that the
+	string becomes parallel to a line joining <TT
+CLASS="literal"
+>(x, y)</TT
+>
+	to <TT
+CLASS="literal"
+>(x+dx, y+dy)</TT
+>.
+      </P
+><P
+>&#13;	<DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN520"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	    plptex
+	  </CODE
+>(x, y, dx, dy, just, text);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+      </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>x, y</CODE
+> (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	      Coordinates of the reference point.
+	    </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>dx, dy</CODE
+> (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	      These specify the angle at which the text is to be printed.
+	      The text is written parallel to a line joining the points
+	      <TT
+CLASS="literal"
+>(x, y)</TT
+> to <TT
+CLASS="literal"
+>(x+dx, y+dy)</TT
+>
+	      on the graph.
+	    </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>dx, dy</CODE
+> (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	      These specify the angle at which the text is to be printed.
+	      The text is written parallel to a line joining the points
+	      <TT
+CLASS="literal"
+>(x, y)</TT
+> to <TT
+CLASS="literal"
+>(x+dx, y+dy)</TT
+> on
+	      the graph.
+	    </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>just</CODE
+> (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	      Determines justification of the string by specifying which
+	      point within the string is placed at the reference point
+	      <TT
+CLASS="literal"
+>(x, y)</TT
+>.  This parameter is a fraction of the
+	      distance along the string.  Thus if
+	      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>just</CODE
+> = 0.0</TT
+>, the
+	      reference point is at the left-hand edge of the string.  If
+	      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>just</CODE
+> = 0.5</TT
+>, it is at
+	      the center and if <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>just</CODE
+> =
+		1.0</TT
+>, it is at the right-hand edge.
+	    </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>text</CODE
+> (<TT
+CLASS="literal"
+>char *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	      Pointer to the string of characters to be written.
+	    </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="fills"
+>Area Fills</A
+></H2
+><P
+>&#13;	Area fills are done in the currently selected color, line style, line
+	width and pattern style.
+      </P
+><P
+>&#13;	<A
+HREF="plfill.html"
+><CODE
+CLASS="function"
+>plfill</CODE
+></A
+> fills a polygon.  The polygon consists of
+	<TT
+CLASS="literal"
+>n</TT
+> vertices which define the polygon.
+      </P
+><P
+>&#13;	<DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN586"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	    plfill
+	  </CODE
+>(n, x, y);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+      </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>n</CODE
+> (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	      The number of vertices.
+	    </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>x, y</CODE
+> (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	      Pointers to arrays with coordinates of the <TT
+CLASS="literal"
+>n</TT
+>
+	      vertices.
+	    </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="complex"
+>More Complex Graphs</A
+></H2
+><P
+>&#13;	Functions <A
+HREF="plbin.html"
+><CODE
+CLASS="function"
+>plbin</CODE
+></A
+> and <A
+HREF="plhist.html"
+><CODE
+CLASS="function"
+>plhist</CODE
+></A
+> are provided for drawing histograms,
+	and functions <A
+HREF="plerrx.html"
+><CODE
+CLASS="function"
+>plerrx</CODE
+></A
+> and <A
+HREF="plerry.html"
+><CODE
+CLASS="function"
+>plerry</CODE
+></A
+> draw error bars about specified
+	points.  There are lots more too (see <A
+HREF="api.html"
+>Chapter 17</A
+>).
+      </P
+></DIV
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="labelling.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="finishing.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Labeling the Graph</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="simple.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Finishing Up</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

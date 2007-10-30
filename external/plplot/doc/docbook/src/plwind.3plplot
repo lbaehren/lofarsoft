@@ -1,0 +1,35 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLWIND 3plplot  "August, 2007" "" "PLplot API"
+.SH NAME
+\fBplwind\fP - Specify world coordinates of viewport boundaries 
+.SH SYNOPSIS
+\fBplwind\fP(\fIxmin\fP, \fIxmax\fP, \fIymin\fP, \fIymax\fP)
+.SH DESCRIPTION
+
+.P
+Sets up the world coordinates of the edges of the viewport. 
+.P
+Redacted form: \fBplwind(xmin, xmax, ymin, ymax)\fP
+.P
+This function is used in examples 1,2,4,6-12,14-16,18,21,23-27. 
+.SH ARGUMENTS
+.TP
+\fIxmin\fP (PLFLT, input) 
+The world x coordinate of the left-hand edge of the viewport. 
+.TP
+\fIxmax\fP (PLFLT, input) 
+The world x coordinate of the right-hand edge of the viewport. 
+.TP
+\fIymin\fP (PLFLT, input) 
+The world y coordinate of the bottom edge of the viewport. 
+.TP
+\fIymax\fP (PLFLT, input) 
+The world y coordinate of the top edge of the viewport. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

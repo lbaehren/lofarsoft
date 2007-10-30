@@ -1,0 +1,72 @@
+typedef struct {
+    char *opt;
+    int  (*handler)	(char *, char *, void *);
+    void *client_data;
+    void *var;
+    long mode;
+    char *syntax;
+    char *desc;
+} PLOptionTable;
+
+typedef struct {
+    int type;			/* of event (CURRENTLY UNUSED) */
+    unsigned int state;		/* key or button mask */
+    unsigned int keysym;	/* key selected */
+    unsigned int button;	/* mouse button selected */
+    PLINT subwindow;            /* subwindow (alias subpage, alias subplot) number */
+    char string[PL_MAXKEY];	/* translated string */
+    int pX, pY;			/* absolute device coordinates of pointer */
+    PLFLT dX, dY;		/* relative device coordinates of pointer */
+    PLFLT wX, wY;		/* world coordinates of pointer */
+} PLGraphicsIn;
+
+typedef struct {
+    PLFLT dxmi, dxma, dymi, dyma;	/* min, max window rel dev coords */
+    PLFLT wxmi, wxma, wymi, wyma;	/* min, max window world coords */
+} PLWindow;
+
+typedef struct {
+    unsigned int x, y;			/* upper left hand corner */
+    unsigned int width, height;		/* window dimensions */
+} PLDisplay;
+
+typedef struct {
+    PLFLT *f;
+    PLINT nx, ny, nz;
+} PLfGrid;
+
+typedef struct {
+    PLFLT **f;
+    PLINT nx, ny;
+} PLfGrid2;
+
+typedef struct {
+    PLFLT *xg, *yg, *zg;
+    PLINT nx, ny, nz;
+} PLcGrid;
+
+typedef struct {
+    PLFLT **xg, **yg, **zg;
+    PLINT nx, ny;
+} PLcGrid2;
+
+typedef struct {
+    unsigned char r;		/* red */
+    unsigned char g;		/* green */
+    unsigned char b;		/* blue */
+    char *name;
+} PLColor;
+
+typedef struct {
+    PLFLT h;			/* hue */
+    PLFLT l;			/* lightness */
+    PLFLT s;			/* saturation */
+    PLFLT p;			/* position */
+    int rev;			/* if set, interpolate through h=0 */
+} PLControlPt;
+
+typedef struct {
+    PLINT cmd;
+    PLINT result;
+} PLBufferingCB;
+

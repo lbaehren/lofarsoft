@@ -1,0 +1,35 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLGDIDEV 3plplot  "August, 2007" "" "PLplot API"
+.SH NAME
+\fBplgdidev\fP - Get parameters that define current device-space window 
+.SH SYNOPSIS
+\fBplgdidev\fP(\fIp_mar\fP, \fIp_aspect\fP, \fIp_jx\fP, \fIp_jy\fP)
+.SH DESCRIPTION
+
+.P
+Get relative margin width, aspect ratio, and relative justification that define current device-space window. If \fBplsdidev\fP(3plplot) has not been called the default values pointed to by \fIp_mar\fP, \fIp_aspect\fP, \fIp_jx\fP, and \fIp_jy\fP will all be 0. 
+.P
+Redacted form: \fBplgdidev(p_mar, p_aspect, p_jx, p_jy)\fP
+.P
+This function is not used in any examples. 
+.SH ARGUMENTS
+.TP
+\fIp_mar\fP (PLFLT *, output) 
+Pointer to relative margin width. 
+.TP
+\fIp_aspect\fP (PLFLT *, output) 
+Pointer to aspect ratio. 
+.TP
+\fIp_jx\fP (PLFLT *, output) 
+Pointer to relative justification in x. 
+.TP
+\fIp_jy\fP (PLFLT *, output) 
+Pointer to relative justification in y. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

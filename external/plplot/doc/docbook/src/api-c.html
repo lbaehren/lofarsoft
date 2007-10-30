@@ -1,0 +1,383 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>The Specialized C API for PLplot</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE=" Reference "
+HREF="p3385.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plxormod: Enter or leave xor mode
+    "
+HREF="plxormod.html"><LINK
+REL="NEXT"
+TITLE="
+      plP_getinitdriverlist: Get the initialized-driver
+      list
+    "
+HREF="plp_getinitdriverlist.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="chapter"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plxormod.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+></TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plp_getinitdriverlist.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="chapter"
+><H1
+><A
+NAME="API-C"
+></A
+>Chapter 18. The Specialized C API for PLplot</H1
+><DIV
+CLASS="TOC"
+><DL
+><DT
+><B
+>Table of Contents</B
+></DT
+><DT
+><A
+HREF="api-c.html#plP_checkdriverinit"
+><CODE
+CLASS="function"
+>plP_checkdriverinit</CODE
+>: Checks to see if any
+      of the specified drivers have been initialized</A
+></DT
+><DT
+><A
+HREF="plp_getinitdriverlist.html"
+><CODE
+CLASS="function"
+>plP_getinitdriverlist</CODE
+>: Get the initialized-driver
+      list</A
+></DT
+><DT
+><A
+HREF="plabort.html"
+><CODE
+CLASS="function"
+>plabort</CODE
+>: Error abort</A
+></DT
+><DT
+><A
+HREF="plexit.html"
+><CODE
+CLASS="function"
+>plexit</CODE
+>: Error exit</A
+></DT
+><DT
+><A
+HREF="plgfile.html"
+><CODE
+CLASS="function"
+>plgfile</CODE
+>: Get output file handle</A
+></DT
+><DT
+><A
+HREF="plsabort.html"
+><CODE
+CLASS="function"
+>plsabort</CODE
+>: Set abort handler</A
+></DT
+><DT
+><A
+HREF="plsexit.html"
+><CODE
+CLASS="function"
+>plsexit</CODE
+>: Set exit handler</A
+></DT
+><DT
+><A
+HREF="plsfile.html"
+><CODE
+CLASS="function"
+>plsfile</CODE
+>: Set output file handle</A
+></DT
+><DT
+><A
+HREF="pltr0.html"
+><CODE
+CLASS="function"
+>pltr0</CODE
+>: Identity transformation for grid to world
+mapping</A
+></DT
+><DT
+><A
+HREF="pltr1.html"
+><CODE
+CLASS="function"
+>pltr1</CODE
+>: Linear interpolation for grid to world
+mapping using singly dimensioned coord arrays</A
+></DT
+><DT
+><A
+HREF="pltr2.html"
+><CODE
+CLASS="function"
+>pltr2</CODE
+>: Linear interpolation for grid to world
+      mapping using doubly dimensioned coord arrays (column
+      dominant, as per normal C 2d arrays)</A
+></DT
+></DL
+></DIV
+><P
+>&#13;  The purpose of this chapter is to document the API for every C function
+  in PLplot (other than language bindings) that
+  is <SPAN
+CLASS="emphasis"
+><I
+CLASS="emphasis"
+>not</I
+></SPAN
+> part of the common API that has already been
+  documented in <A
+HREF="api.html"
+>Chapter 17</A
+>.
+  </P
+><P
+>&#13;  This chapter is a work that is just starting.  There are many C functions
+  in the code base that are not part of the common API, and we haven't even
+  gotten to the point of listing them all.  What gets documented here now
+  is whatever C-explicit code we are trying to understand at the time.
+  </P
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plP_checkdriverinit"
+><CODE
+CLASS="function"
+>plP_checkdriverinit</CODE
+>: Checks to see if any
+      of the specified drivers have been initialized</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN11373"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	  plP_checkdriverinit
+	</CODE
+>(list);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+> Checks to see if any of the specified drivers have been
+     initialized. Function tests a space-delimited list of driver names to
+     see how many of the given drivers have been initialized, and how often.
+     The return code of the function is: <TT
+CLASS="literal"
+>0</TT
+> if no matching
+     drivers were found to have been initialized; <TT
+CLASS="literal"
+>-1</TT
+> if
+     an error occurred allocating the internal buffer; or, a positive number
+     indicating the number of streams encountered that belong to drivers on
+     the provided list. This function invokes <A
+HREF="plp_getinitdriverlist.html"
+><CODE
+CLASS="function"
+>plP_getinitdriverlist</CODE
+></A
+>
+     internally to get a <SPAN
+CLASS="emphasis"
+><I
+CLASS="emphasis"
+>complete</I
+></SPAN
+> list of drivers that have been initialized
+     in order to compare with the driver names specified in the argument list
+     to <A
+HREF="api-c.html#plP_checkdriverinit"
+><CODE
+CLASS="function"
+>plP_checkdriverinit</CODE
+></A
+>.
+     </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>list</CODE
+>
+	  (<TT
+CLASS="literal"
+>char *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	   Pointer to character string specifying a space-delimited
+	   list of driver names, e.g., <TT
+CLASS="literal"
+>"bmp jpeg tiff"</TT
+>.
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+></DIV
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plxormod.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plp_getinitdriverlist.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plxormod</CODE
+>: Enter or leave xor mode</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="p3385.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plP_getinitdriverlist</CODE
+>: Get the initialized-driver
+      list</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

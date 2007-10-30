@@ -1,0 +1,247 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      plparseopts: parse arguments for Fortran 95
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Specialized Fortran 95 API for PLplot"
+HREF="api-fortran-95.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plot3d: Plot 3-d surface plot for Fortran 95
+    "
+HREF="plot3dfortran95.html"><LINK
+REL="NEXT"
+TITLE="
+      plsesc: Set the escape character for text strings
+for Fortran 95
+    "
+HREF="plsescfortran95.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plot3dfortran95.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 19. The Specialized Fortran 95 API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plsescfortran95.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plparseoptsfortran95"
+><CODE
+CLASS="function"
+>plparseopts</CODE
+>: parse arguments for Fortran 95</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN11877"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	  plparseopts
+	</CODE
+>(mode);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+> When called from Fortran 95, this routine has the same effect as
+      when invoked from C (see <A
+HREF="plparseopts.html"
+><CODE
+CLASS="function"
+>plparseopts</CODE
+></A
+>) except that the argument list
+      just contains the parsing mode and the Fortran 95 system routines
+      <CODE
+CLASS="function"
+>iargc</CODE
+> and <CODE
+CLASS="function"
+>getarg</CODE
+>
+      are used internally to obtain the number of arguments and
+      argument values.  (Note, during configuration, the user's
+      Fortran 95 compiler
+      is checked to see whether it supports
+      <CODE
+CLASS="function"
+>iargc</CODE
+> and <CODE
+CLASS="function"
+>getarg</CODE
+>.  If it
+      does not, the Fortran 95 plparseopts simply writes a warning message
+      and returns.
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>mode</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Parsing mode; see <A
+HREF="plparseopts.html"
+><CODE
+CLASS="function"
+>plparseopts</CODE
+></A
+> for details.
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plot3dfortran95.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plsescfortran95.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plot3d</CODE
+>: Plot 3-d surface plot for Fortran 95</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api-fortran-95.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plsesc</CODE
+>: Set the escape character for text strings
+for Fortran 95</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

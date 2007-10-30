@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>The wxWidgets Driver (Linux, Mac OS X, Windows)</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The PLplot Display Driver Family"
+HREF="x-drivers.html"><LINK
+REL="PREVIOUS"
+TITLE="The AquaTerm Driver (Mac OS X)"
+HREF="aqt-driver.html"><LINK
+REL="NEXT"
+TITLE="The PLplot Output Driver Family"
+HREF="output-drivers.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="aqt-driver.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 5. The PLplot Display Driver Family</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="output-drivers.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="wxWidgets-driver"
+>The wxWidgets Driver (Linux, Mac OS X, Windows)</A
+></H1
+><P
+>&#13;   The basic wxWidgets driver's features and user interface are described 
+   in the section called 'Driver Basics'. The file 
+   drivers/README.wxwidgets describes how you can use the PLplot library 
+   within your wxWidgets application.
+   </P
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="wxWidgets-driver-basics"
+>wxWidgets Driver Basics</A
+></H2
+><P
+>&#13;      The wxWidgets driver plots in a Frame provided by the wxWidgets 
+      library. The driver is quite complete but lacks many of the GUI 
+      features of the TK or GCW drivers. All plots are available at once 
+      an one can switch between all plots by pressing Alt-n. The 
+      application can be quit with Alt-x. These functions are also 
+      available in the menu. After the last plot one will advance again 
+      to the first plot. Anti-aliasing is supported and and the wxWidgets 
+      driver is unicode enabled. It is also possible to address the 
+      wxWidgets driver from within a wxWidgets application - this is 
+      described in the next section.
+      </P
+><P
+>&#13;      The available driver options (used with the
+      <CODE
+CLASS="parameter"
+>-drvopt</CODE
+> command-line argument) are:
+     <P
+></P
+><UL
+><LI
+><P
+>&#13;		text: Use TrueType fonts (0|1); default 1
+        </P
+></LI
+><LI
+><P
+>&#13;        smooth: switch on/off anti-aliasing (0|1); default 1
+        </P
+></LI
+></UL
+>
+     </P
+><P
+>&#13;     The text option toggles between TrueType and Hershey fonts. The 
+     Hershey fonts provide a reference implementation for text 
+     representation in PLplot.
+     </P
+><P
+>&#13;     The smooth option will turn on or off text smoothing for True 
+     Type fonts. This will increase the time for a plot considerably.
+     </P
+></DIV
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="aqt-driver.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="output-drivers.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>The AquaTerm Driver (Mac OS X)</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="x-drivers.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>The PLplot Output Driver Family</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

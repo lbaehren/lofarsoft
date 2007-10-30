@@ -1,0 +1,35 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLSDIPLZ 3plplot  "August, 2007" "" "PLplot API"
+.SH NAME
+\fBplsdiplz\fP - Set parameters incrementally (zoom mode) that define current plot-space window 
+.SH SYNOPSIS
+\fBplsdiplz\fP(\fIxmin\fP, \fIymin\fP, \fIxmax\fP, \fIymax\fP)
+.SH DESCRIPTION
+
+.P
+Set relative minima and maxima incrementally (zoom mode) that define the current plot-space window.  This function has the same effect as \fBplsdiplt\fP(3plplot) if that function has not been previously called.  Otherwise, this function implements zoom mode using the transformation min_used = old_min + old_length*min  and max_used = old_min + old_length*max  for each axis.  For example, if min = 0.05 and max = 0.95 for each axis, repeated calls to \fBplsdiplz\fP(3plplot) will zoom in by 10 per cent for each call. 
+.P
+Redacted form: \fBplsdiplz(xmin, ymin, xmax, ymax)\fP
+.P
+This function is not used in any examples. 
+.SH ARGUMENTS
+.TP
+\fIxmin\fP (PLFLT, input) 
+Relative (incremental) minimum in x. 
+.TP
+\fIymin\fP (PLFLT, input) 
+Relative (incremental) minimum in y. 
+.TP
+\fIxmax\fP (PLFLT, input) 
+Relative (incremental) maximum in x. 
+.TP
+\fIymax\fP (PLFLT, input) 
+Relative (incremental) maximum in y. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

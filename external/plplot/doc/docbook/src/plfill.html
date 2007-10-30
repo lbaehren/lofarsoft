@@ -1,0 +1,303 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      plfill: Draw filled polygon
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plfamadv: Advance to the next family file on the
+next new page
+    "
+HREF="plfamadv.html"><LINK
+REL="NEXT"
+TITLE="
+      plfill3: Draw filled polygon in 3D
+    "
+HREF="plfill3.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plfamadv.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plfill3.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plfill"
+><CODE
+CLASS="function"
+>plfill</CODE
+>: Draw filled polygon</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN5133"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	  plfill
+	</CODE
+>(n, x, y);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;      Fills the polygon defined by the
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>n</CODE
+></TT
+> points
+      <TT
+CLASS="literal"
+>(<CODE
+CLASS="parameter"
+>x</CODE
+>[i],
+      <CODE
+CLASS="parameter"
+>y</CODE
+>[i])</TT
+> using the pattern defined by
+      <A
+HREF="plpsty.html"
+><CODE
+CLASS="function"
+>plpsty</CODE
+></A
+> or <A
+HREF="plpat.html"
+><CODE
+CLASS="function"
+>plpat</CODE
+></A
+>.  The routine will automatically close the
+      polygon between the last and first vertices.  If multiple closed
+      polygons are passed in <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>x</CODE
+></TT
+>
+      and <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>y</CODE
+></TT
+> then <A
+HREF="plfill.html"
+><CODE
+CLASS="function"
+>plfill</CODE
+></A
+> will
+      fill in between them.
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>n</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Number of vertices in polygon.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>x</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to array with x coordinates of vertices.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>y</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to array with y coordinates of vertices.
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      Redacted form: <CODE
+CLASS="function"
+>plfill(x,y)</CODE
+>
+    </P
+><P
+>&#13;      This function is used in examples 12,13,15,16,21,24,25.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plfamadv.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plfill3.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plfamadv</CODE
+>: Advance to the next family file on the
+next new page</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plfill3</CODE
+>: Draw filled polygon in 3D</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

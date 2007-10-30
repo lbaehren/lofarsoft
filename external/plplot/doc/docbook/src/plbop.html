@@ -1,0 +1,252 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>plbop: Begin a new page</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plbin: Plot a histogram from binned data
+    "
+HREF="plbin.html"><LINK
+REL="NEXT"
+TITLE="plbox: Draw a box with axes, etc"
+HREF="plbox.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plbin.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plbox.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plbop"
+><CODE
+CLASS="function"
+>plbop</CODE
+>: Begin a new page</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN3857"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	  plbop
+	</CODE
+>();</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;      Begins a new page.  For a file driver, the output file is opened if
+      necessary.  Advancing the page via <A
+HREF="pleop.html"
+><CODE
+CLASS="function"
+>pleop</CODE
+></A
+> and <A
+HREF="plbop.html"
+><CODE
+CLASS="function"
+>plbop</CODE
+></A
+> is useful when
+      a page break is desired at a particular point when plotting to
+      subpages.  Another use for <A
+HREF="pleop.html"
+><CODE
+CLASS="function"
+>pleop</CODE
+></A
+> and <A
+HREF="plbop.html"
+><CODE
+CLASS="function"
+>plbop</CODE
+></A
+> is when plotting pages
+      to different files, since you can manually set the file name
+      by calling <A
+HREF="plsfnam.html"
+><CODE
+CLASS="function"
+>plsfnam</CODE
+></A
+> after the call to <A
+HREF="pleop.html"
+><CODE
+CLASS="function"
+>pleop</CODE
+></A
+>.
+      (In fact some drivers may only support a single page per file, making
+      this a necessity.)  One way to handle this case automatically is to
+      page advance via <A
+HREF="pladv.html"
+><CODE
+CLASS="function"
+>pladv</CODE
+></A
+>, but enable familying (see <A
+HREF="plsfam.html"
+><CODE
+CLASS="function"
+>plsfam</CODE
+></A
+>) with a
+      small limit on the file size so that a new family member file will be
+      created on each page break.
+    </P
+><P
+>&#13;      Redacted form: <CODE
+CLASS="function"
+>plbop()</CODE
+>
+    </P
+><P
+>&#13;      This function is used in examples 2,20.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plbin.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plbox.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plbin</CODE
+>: Plot a histogram from binned data</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plbox</CODE
+>: Draw a box with axes, etc</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

@@ -1,0 +1,456 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      plbin: Plot a histogram from binned data
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plaxes: Draw a box with axes, etc. with arbitrary
+origin
+    "
+HREF="plaxes.html"><LINK
+REL="NEXT"
+TITLE="plbop: Begin a new page"
+HREF="plbop.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plaxes.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plbop.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plbin"
+><CODE
+CLASS="function"
+>plbin</CODE
+>: Plot a histogram from binned data</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN3756"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;           plbin
+        </CODE
+>(nbin, x, y, opt);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;      Plots a histogram consisting of
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>nbin</CODE
+></TT
+> bins.  The value
+      associated with the <TT
+CLASS="literal"
+>i</TT
+>'th bin is placed in
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>x</CODE
+>[i]</TT
+>, and the number of
+      points in the bin is placed in
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>y</CODE
+>[i]</TT
+>.  For proper
+      operation, the values in
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>x</CODE
+>[i]</TT
+> must form a strictly
+      increasing sequence.  By default,
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>x</CODE
+>[i]</TT
+> is the left-hand edge
+      of the <TT
+CLASS="literal"
+>i</TT
+>'th bin. If
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>opt</CODE
+>=PL_BIN_CENTRED</TT
+> is
+      used, the bin boundaries are placed midway between the values in the
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>x</CODE
+></TT
+> array.  Also see <A
+HREF="plhist.html"
+><CODE
+CLASS="function"
+>plhist</CODE
+></A
+>
+      for drawing histograms from unbinned data.
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>nbin</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Number of bins (i.e., number of values in
+	    <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>x</CODE
+></TT
+> and
+	    <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>y</CODE
+></TT
+> arrays.)
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>x</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to array containing values associated with bins.  These
+	    must form a strictly increasing sequence.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>y</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to array containing number of points in bin.  This is a
+	    <TT
+CLASS="literal"
+>PLFLT</TT
+> (instead of <TT
+CLASS="literal"
+>PLINT</TT
+>)
+	    array so as to allow histograms of probabilities, etc.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>opt</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Is a combination of several flags:
+	    <P
+></P
+><UL
+><LI
+><P
+>&#13;	          <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>opt</CODE
+>=PL_BIN_DEFAULT</TT
+>:
+	            The <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>x</CODE
+></TT
+> represent the lower
+	            bin boundaries, the outer bins are expanded to fill up the
+	            entire x-axis and bins of zero height are simply drawn.
+	        </P
+></LI
+><LI
+><P
+>&#13;	          <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>opt</CODE
+>=PL_BIN_CENTRED|...</TT
+>:
+	            The bin boundaries are to be midway between the
+	            <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>x</CODE
+></TT
+> values. If the
+	            values in <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>x</CODE
+></TT
+> are
+	            equally spaced, the values are the center values of the bins.
+	        </P
+></LI
+><LI
+><P
+>&#13;	          <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>opt</CODE
+>=PL_BIN_NOEXPAND|...</TT
+>:
+	            The outer bins are drawn with equal size as the ones inside.
+	        </P
+></LI
+><LI
+><P
+>&#13;	          <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>opt</CODE
+>=PL_BIN_NOEMPTY|...</TT
+>:
+	            Bins with zero height are not drawn (there is a gap for
+	            such bins).
+	        </P
+></LI
+></UL
+>
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      Redacted form: 
+      <P
+></P
+><UL
+><LI
+><P
+>&#13;	  General: <CODE
+CLASS="function"
+>plbin(x, y, opt)</CODE
+>
+          </P
+></LI
+><LI
+><P
+>&#13;          Perl/PDL: <CODE
+CLASS="function"
+>plbin(nbin, x, y, opt)</CODE
+>
+          </P
+></LI
+><LI
+><P
+>&#13;          Python: <CODE
+CLASS="function"
+>plbin(nbin, x, y, opt)</CODE
+>
+          </P
+></LI
+></UL
+>
+    </P
+><P
+>&#13;      This function is not used in any examples.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plaxes.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plbop.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plaxes</CODE
+>: Draw a box with axes, etc. with arbitrary
+origin</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plbop</CODE
+>: Begin a new page</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

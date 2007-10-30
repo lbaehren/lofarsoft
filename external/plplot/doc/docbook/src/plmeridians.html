@@ -1,0 +1,334 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;     plmeridians: Plot latitude and longitude lines.
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plmap: Plot continental outline in world coordinates.
+    "
+HREF="plmap.html"><LINK
+REL="NEXT"
+TITLE="
+      plmesh: Plot surface mesh
+    "
+HREF="plmesh.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plmap.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plmesh.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plmeridians"
+><CODE
+CLASS="function"
+>plmeridians</CODE
+>: Plot latitude and longitude lines.</A
+></H3
+><P
+>&#13;     <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN6815"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	    plmeridians
+	   </CODE
+>(mapform, dlong, dlat, minlong, maxlong, minlat, maxlat);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;     Displays latitude and longitude on the current plot.  The lines
+     are plotted in the current color and line style.
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>mapform</CODE
+>
+	   (<TT
+CLASS="literal"
+>void (*) (PLINT, PLFLT *, PLFLT *)</TT
+>, input)</DT
+><DD
+><P
+>&#13;      A user supplied function to transform the coordinate 
+      longitudes and latitudes to a plot coordinate system.  
+      By using this transform, we can change from a longitude, 
+      latitude coordinate to a polar stereographic project, for 
+      example.  Initially, x[0]..[n-1] are the longitudes and y[0]..y[n-1] 
+      are the corresponding latitudes.  After the call to mapform(), x[] 
+      and y[] should be replaced by the corresponding plot coordinates.  
+      If no transform is desired, mapform can be replaced by NULL.
+	   </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>dlong</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;       The interval in degrees at which the longitude lines are to be plotted.
+	   </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>dlat</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;       The interval in degrees at which the latitude lines are to be plotted.
+	   </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>minlong</CODE
+>
+	   (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;      The value of the longitude on the left side of the plot. 
+      The value of minlong must be less than the value of maxlong, and the 
+      quantity maxlong-minlong must be less than or equal to 360.
+	   </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>maxlong</CODE
+>
+	   (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;      The value of the longitude on the right side of the plot.
+	   </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>minlat</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;      The minimum latitude to be plotted on the background.  
+      One can always use -90.0 as the boundary outside the plot window 
+      will be automatically eliminated.  However, the program will be 
+      faster if one can reduce the size of the background plotted.
+	   </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>maxlat</CODE
+>
+	   (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;      The maximum latitudes to be plotted on the background.  
+      One can always use 90.0 as the boundary outside the plot window 
+      will be automatically eliminated.
+	   </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      Redacted form: 
+      <P
+></P
+><UL
+><LI
+><P
+>&#13;	  General: <CODE
+CLASS="function"
+>plmeridians(mapform, dlong, dlat, minlong, maxlong, minlat, maxlat)</CODE
+>
+          </P
+></LI
+><LI
+><P
+>&#13;          F95, Java, Perl/PDL, Python: Not implemented?
+          </P
+></LI
+></UL
+>
+    </P
+><P
+>&#13;      This function is used in example 19.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plmap.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plmesh.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plmap</CODE
+>: Plot continental outline in world coordinates.</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plmesh</CODE
+>: Plot surface mesh</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>
