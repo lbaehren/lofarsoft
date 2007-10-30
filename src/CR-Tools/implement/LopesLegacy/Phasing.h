@@ -145,16 +145,16 @@ namespace LOPES {  // Namespace LOPES -- begin
       compute the (complex) phase delay factor for all frequencies, \f$ \nu \f$,
       at a supplied antenna position, \f$ \vec x_i \f$.
       
-      \param frequencies      - Vector of frequency values, [Hz].
-      \param directions       - Matrix of directions of the beam,
-                                \f$ (\phi, \theta) \f$.
-      \param antennaPosition  - Vector with the 3-dim antenna position.
+      \param frequencies  - Vector of frequency values, [Hz].
+      \param directions   - Matrix of directions of the beam,
+                            \f$ (\phi, \theta) \f$.
+      \param antPositions - Vector with the 3-dim antenna position.
       
       \return gradients - Array with the phase gradients, [nofFreq,nofDirections]
     */
-    static Matrix<DComplex> phaseGradient (const Vector<Double>&,
-					   const Matrix<Double>&,
-					   const Vector<Double>&);
+    static Matrix<DComplex> phaseGradient (const Vector<Double> &frequencies,
+					   const Matrix<Double> &directions,
+					   const Vector<Double> &antPositions);
     
     /*!
       \brief Phase gradients for a single direction; all frequencies & antennae.
@@ -163,15 +163,15 @@ namespace LOPES {  // Namespace LOPES -- begin
     (complex) phase delay factor for each supplied antenna position,
     \f$ \vec x_i \f$, and frequency, \f$ \nu \f$.
     
-    \param frequencies      - Frequency values, [Hz].
-    \param direction        - Direction of the beam, \f$ (\phi, \theta) \f$.
-    \param antennaPositions - 3dim antenna positions, \f$ [N_{\rm Ant} \times 3] \f$
+    \param frequencies  - Frequency values, [Hz].
+    \param direction    - Direction of the beam, \f$ (\phi, \theta) \f$.
+    \param antPositions - 3dim antenna positions, \f$ [N_{\rm Ant} \times 3] \f$
     
     \return gradients - Array with the phase gradients, [nofFreq,nofAntennae]
     */
-    static Matrix<DComplex> phaseGradient (const Vector<Double>&,
-					   const Vector<Double>&,
-					   const Matrix<Double>&);
+    static Matrix<DComplex> phaseGradient (const Vector<Double> &frequencies,
+					   const Vector<Double> &direction,
+					   const Matrix<Double> &antPositions);
     
     /*!
       \brief Phase gradients for a single frequency & direction; all antennae.
@@ -179,15 +179,15 @@ namespace LOPES {  // Namespace LOPES -- begin
       Given a direction for the array beam, \f$ (\phi, \theta) \f$, compute the
       (complex) phase delay factor for each supplied antenna position.
       
-      \param frequency        - Frequency, [Hz].
-      \param direction        - Direction of the beam, \f$ (\phi, \theta) \f$.
-      \param antennaPositions - 3dim antenna positions, \f$ [N_{\rm Ant} \times 3] \f$
+      \param frequency    - Frequency, [Hz].
+      \param direction    - Direction of the beam, \f$ (\phi, \theta) \f$.
+      \param antPositions - 3dim antenna positions, \f$ [N_{\rm Ant} \times 3] \f$
       
       \return gradients - Vector with the phase gradients, [nofAntennae]
     */
-    static Vector<DComplex> phaseGradient (const Double,
-					   const Vector<Double>&,
-					   const Matrix<Double>&);
+    static Vector<DComplex> phaseGradient (const Double frequency,
+					   const Vector<Double> &direction,
+					   const Matrix<Double> &antPositions);
     
     /*!
       \brief Phase gradients for a single frequency, direction and antenna.

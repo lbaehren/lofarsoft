@@ -123,6 +123,26 @@ namespace CR { // NAMESPACE CR -- BEGIN
     #endif
     #endif
     \endcode
+
+    <b>Past implementation</b>
+    The first implementation of the routines for thhe computation of the
+    geometrical delay and the subsequent compuation of beamformer weights was
+    handled in Phasing:
+    \code
+    const Double c = QC::c.getValue();
+    Vector<Double> rho = CR::azel2cartesian (azel);
+    Double delay;
+    
+    if (nearField && azel.nelements() == 3) {
+      Vector<Double> diff = rho-baseline;
+      delay = (CR::L2Norm(diff)-CR::L2Norm(rho))/c;
+    } else {
+      Vector<Double> product = rho*baseline;
+      delay = -sum(product)/c;
+    }
+    
+    return delay;
+    \endcode
     
     <h3>Example(s)</h3>
     

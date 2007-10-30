@@ -325,9 +325,10 @@ case $param_packageName in
 		./build.sh bison
 		./build.sh flex
 		./build.sh casacore --force-build $param_reportBuild
-		./build.sh python --force-build $param_reportBuild
-		./build.sh boost --force-build $param_reportBuild
 		./build.sh hdf5 --force-build $param_reportBuild
+		./build.sh plplot $param_reportBuild
+		./build.sh python $param_reportBuild
+		./build.sh boost --force-build $param_reportBuild
 		## USG packages
 		echo "[`date`] Building Data Access Library ..."
 		build_package dal src/DAL
@@ -345,7 +346,6 @@ case $param_packageName in
     cr)
 		echo "[`date`] Processing required packages ..."
 		./build.sh dal  $param_reportBuild
-		./build.sh plplot  $param_reportBuild
 		echo "[`date`] Building CR-Tools package ..."
 		build_package cr src/CR-Tools;
     ;;

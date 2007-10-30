@@ -26,6 +26,68 @@ namespace CR { // Namespace CR -- begin
   
   // ============================================================================
   // 
+  //  Conversion: Azimuth,Elevation -> Other
+  //
+  // ============================================================================
+
+  // ------------------------------------------------------------- azel2cartesian
+
+  bool azel2cartesian (double &x,
+		       double &y,
+		       double &z,
+		       double const &az,
+		       double const &el,
+		       double const &r,
+		       bool const &anglesInDegrees,
+		       bool const &lastIsRadius)
+  {
+    bool status (true);
+
+    try {
+      if (anglesInDegrees) {
+	double elRadian = deg2rad(el);
+	double azRadian = deg2rad(az);
+	//
+	x = r*cos(elRadian)*cos(azRadian);
+	y = r*cos(elRadian)*sin(azRadian);
+	z = r*sin(elRadian);
+      } else {
+	x = r*cos(el)*cos(az);
+	y = r*cos(el)*sin(az);
+	z = r*sin(el);
+      }
+    } catch (std::string message) {
+      std::cerr << "[azel2cartesian] " << message << std::endl;
+      status = false;
+    }
+    
+    return status;
+  }
+  
+  // ------------------------------------------------------------- azel2cartesian
+
+  bool azel2cartesian (std::vector<double> &cartesian,
+		       std::vector<double> const &azel,
+		       bool const &anglesInDegrees,
+		       bool const &lastIsRadius)
+  {
+    if (azel.size() == 3) {
+      cartesian.resize(3);
+      return azel2cartesian (cartesian[0],
+			     cartesian[1],
+			     cartesian[2],
+			     azel[0],
+			     azel[1],
+			     azel[2],
+			     anglesInDegrees,
+			     lastIsRadius);
+    } else {
+      return false;
+    }
+  }
+
+  // ============================================================================
+  // 
   //  Conversion: Cartesian (x,y,z) -> Other
   //
   // ============================================================================
@@ -430,75 +492,10 @@ namespace CR { // Namespace CR -- begin
 
   // ============================================================================
   //
-  //  Elementary conversion function, only using functionality of the standard
-  //  library.
+  //  Various - not yet properly sorted - conversion functions
   //
   // ============================================================================
 
-  // ------------------------------------------------------------------- azel2xyz
-
-  bool azel2xyz (double &x,
-		 double &y,
-		 double &z,
-		 double const &r,
-		 double const &az,
-		 double const &el,
-		 bool const &anglesInDegrees)
-  {
-    bool status (true);
-
-    try {
-      if (anglesInDegrees) {
-	spherical2cartesian (x,
-			     y,
-			     z,
-			     r,
-			     deg2rad(az),
-			     deg2rad(el),
-			     false);
-      } else {
-	x = r*cos(el)*cos(az);
-	y = r*cos(el)*sin(az);
-	z = r*sin(el);
-      }
-    } catch (std::string message) {
-      std::cerr << "[azel2xyz]" << message << std::endl;
-      status = false;
-    }
-
-    return status;
-  }
-  
-  vector<double> azel2xyz (vector<double> const &azel,
-			   bool const &anglesInDegrees)
-  {
-    uint nelem (azel.size());
-    vector<double> xyz (3);
-
-    if (nelem == 3) {
-      azel2xyz (xyz[0],
-		xyz[1],
-		xyz[2],
-		azel[0],
-		azel[1],
-		azel[2],
-		anglesInDegrees);      
-    } else if (nelem == 2) {
-      azel2xyz (xyz[0],
-		xyz[1],
-		xyz[2],
-		1.0,
-		azel[1],
-		azel[2],
-		anglesInDegrees);      
-    } else {
-      std::cerr << "[azel2xyz] Unable to convert; too few elements!"
-		<< std::endl;
-    }
-
-    return xyz;
-  }
-  
   // ------------------------------------------------------------------- azze2xyz
 
   void azze2xyz (double &x,
@@ -619,13 +616,14 @@ namespace CR { // Namespace CR -- begin
     }
     
     // Coordinate transformation from (az,el) to cartesian (x,y,z)
-    azel2xyz (cartesian(0),
-	      cartesian(1),
-	      cartesian(2),
-	      radius,
-	      az,
-	      el,
-	      false);
+    azel2cartesian (cartesian(0),
+		    cartesian(1),
+		    cartesian(2),
+		    az,
+		    el,
+		    radius,
+		    false,
+		    true);
     
     return cartesian;
   }

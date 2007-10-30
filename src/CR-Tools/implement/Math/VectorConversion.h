@@ -84,19 +84,6 @@ namespace CR { // Namespace CR -- begin
     should always be checked before using the formulas and equations of that
     author. [from Wikipedia, english version]
 
-    <center>
-    <table border="0">
-      <tr>
-	<td>\image html Spherical_Coordinates_Wikipedia.png</td>
-	<td>\image html Cylindrical_Coordinates_Wikipedia.png</td>
-      </tr>
-      <tr bgcolor="#dddddd">
-        <td>Convention used for spherical coordinates</td>
-        <td>Convention used for cylindrical coordinates</td>
-      </tr>
-    </table>
-    </center>
-
     We here use the three coordinates \f$(r,\phi,\theta)\f$ according to the
     following convention:
     <ul>
@@ -116,78 +103,156 @@ namespace CR { // Namespace CR -- begin
     the case of spherical coordinates (and thereby reflection the relation of
     the cylindrical coordinates to polar coordinates in the plain).
 
+    <h3>Conversion relations</h3>
+
     <center>
-    <table>
-      <tr>
-        <td>from / to</td>
-        <td class="indexkey">cartesian <br> \f$ (x,y,z) \f$ </td>
-        <td class="indexkey">spherical <br> \f$ (r,\phi,\theta) \f$ </td>
-        <td class="indexkey">cylindrical <br> \f$ (\rho,\phi,z) \f$ </td>
-        <td class="indexkey">AzElHeight <br> \f$ (Az,El,H) \f$ </td>
-        <td class="indexkey">AzElRadius <br> \f$ (Az,El,R) \f$ </td>
-      </tr>
-      <tr>
-        <td class="indexkey">cartesian <br> \f$ (x,y,z) \f$</td>
-        <td align="center">---</td>
-        <td>\f$ \left[ \begin{array}{l}
+      <table>
+        <tr>
+	  <td class="indexkey">Target</td>
+	  <td class="indexkey">... as function of</td>
+	  <td class="indexkey">Relation</td>
+	  <td class="indexkey">Inversion</td>
+	</tr>
+	<tr>
+          <td>cartesian <br> \f$ (x,y,z) \f$</td>
+	  <td>spherical <br> \f$ (r,\phi,\theta) \f$</td>
+	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
+	  \left[ \begin{array}{l}
+	  r \sin(\phi) \cos(\theta) \\
+	  r \sin(\phi) \sin(\theta) \\
+	  r \cos(\phi) \end{array} \right] \f$</td>
+	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
+	  = \left[ \begin{array}{l}
 	  \sqrt{x^2 + y^2 + z^2} \\
 	  \mathrm{atan} (y/x) \\ 
 	  \mathrm{acos \left( \sqrt{\frac{x^2 + y^2}{x^2 + y^2 + z^2}} \right)}
 	  \end{array} \right] \f$</td>
-        <td>\f$ \left[ \begin{array}{l}
-	  \sqrt{x^2 + y^2} \\
-	  \mathrm{atan} (y/x) \\
-	  z \end{array} \right] \f$</td>
-        <td></td>
-      </tr>
-      <tr>
-        <td class="indexkey">spherical <br> \f$ (r,\phi,\theta) \f$</td>
-        <td>\f$ \left[ \begin{array}{l}
-	  r \sin(\phi) \cos(\theta) \\
-	  r \sin(\phi) \sin(\theta) \\
-	  r \cos(\phi) \end{array} \right] \f$</td>
-        <td align="center">---</td>
-        <td>\f$ \left[  \begin{array}{c}
-	  r \sin(\theta) \\
-	  \phi \\
-	  r \cos(\phi)
-	  \end{array} \right] \f$</td>
-        <td></td>
-      </tr>
-      <tr>
-        <td class="indexkey">cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
-        <td>\f$ \left[ \begin{array}{l}
+	</tr>
+	<tr>
+          <td>cartesian <br> \f$ (x,y,z) \f$</td>
+	  <td>cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
+	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
+	    \left[ \begin{array}{l}
 	  \rho \cos(\phi) \\
 	  \rho \sin(\phi) \\
 	  z \end{array} \right] \f$</td>
-        <td>\f$  \left[ \begin{array}{c}
-	  \sqrt{\rho^2 + z^2} \\
-	  \phi \\
-	  \mathrm{asin} \left( \frac{\rho}{\sqrt{\rho^2 + z^2}} \right)
-	\end{array} \right] \f$</td>
-        <td align="center">---</td>
-        <td></td>
-      </tr>
-      <tr>
-        <td class="indexkey">AzElHeight <br> \f$ (Az,El,H) \f$</td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-      </tr>
-      <tr>
-        <td class="indexkey">AzElRadius <br> \f$ (Az,El,R) \f$</td>
-        <td>\f$ \left[ \begin{array}{l}
-	  R \cos(El) \cos(Az) \\
-	  R \cos(El) \sin(Az) \\
-	  R \sin(El) \end{array} \right] \f$</td>
-        <td></td>
-        <td></td>
-        <td></td>
-      </tr>
-    </table>
+	  <td>\f$ \left[ \begin{array}{l} \rho \\ \phi \\ z \end{array} \right]
+	    = \left[ \begin{array}{l}
+	    \sqrt{x^2 + y^2} \\
+	    \mathrm{atan} (y/x) \\
+	    z \end{array} \right] \f$</td>
+	</tr>
+	<tr>
+	  <td>cartesian <br> \f$ (x,y,z) \f$</td>
+          <td>AzElHeight <br> \f$ (Az,El,H) \f$</td>
+	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
+	    \left[ \begin{array}{l}
+	    H \cos(Az)/\tan(El) \\
+	    H \sin(Az)/\tan(El) \\
+	    H
+	    \end{array} \right] \f$</td>
+	  <td></td>
+	</tr>
+	<tr>
+	  <td>cartesian <br> \f$ (x,y,z) \f$</td>
+          <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
+	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
+	  \left[ \begin{array}{l}
+	    R \cos(El) \cos(Az) \\
+	    R \cos(El) \sin(Az) \\
+	    R \sin(El) \end{array} \right] \f$</td>
+	  <td></td>
+	</tr>
+        <tr>
+	  <td class="indexkey">Target</td>
+	  <td class="indexkey">... as function of</td>
+	  <td class="indexkey">Relation</td>
+	  <td class="indexkey">Inversion</td>
+	</tr>
+	<tr>
+	  <td>spherical <br> \f$ (r,\phi,\theta) \f$</td>
+          <td>cartesian <br> \f$ (x,y,z) \f$</td>
+	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
+	  = \left[ \begin{array}{l}
+	  \sqrt{x^2 + y^2 + z^2} \\
+	  \mathrm{atan} (y/x) \\ 
+	  \mathrm{acos \left( \sqrt{\frac{x^2 + y^2}{x^2 + y^2 + z^2}} \right)}
+	  \end{array} \right] \f$</td>
+	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
+	  \left[ \begin{array}{l}
+	  r \sin(\phi) \cos(\theta) \\
+	  r \sin(\phi) \sin(\theta) \\
+	  r \cos(\phi) \end{array} \right] \f$</td>
+	</tr>
+	<tr>
+	  <td>spherical <br> \f$ (r,\phi,\theta) \f$</td>
+          <td>cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
+	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
+	    = \left[ \begin{array}{c}
+	    \sqrt{\rho^2 + z^2} \\
+	    \phi \\
+	    \mathrm{asin} \left( \frac{\rho}{\sqrt{\rho^2 + z^2}} \right)
+	    \end{array} \right] \f$</td>
+	  <td></td>
+	</tr>
+        <tr>
+	  <td class="indexkey">Target</td>
+	  <td class="indexkey">... as function of</td>
+	  <td class="indexkey">Relation</td>
+	  <td class="indexkey">Inversion</td>
+	</tr>
+	<tr>
+	  <td>cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
+          <td>cartesian <br> \f$ (x,y,z) \f$</td>
+	  <td>\f$ \left[ \begin{array}{l} \rho \\ \phi \\ z \end{array} \right]
+	    = \left[ \begin{array}{l}
+	    \sqrt{x^2 + y^2} \\
+	    \mathrm{atan} (y/x) \\
+	    z \end{array} \right] \f$</td>
+	  <td></td>
+	</tr>
+	<tr>
+          <td>cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
+	  <td>spherical <br> \f$ (r,\phi,\theta) \f$</td>
+	  <td>\f$ \left[ \begin{array}{l} \rho \\ \phi \\ z \end{array} \right]
+	    =  \left[  \begin{array}{c}
+	    r \sin(\theta) \\
+	    \phi \\
+	    r \cos(\phi)
+	  \end{array} \right] \f$</td>
+	  <td></td>
+	</tr>
+        <tr>
+	  <td class="indexkey">Target</td>
+	  <td class="indexkey">... as function of</td>
+	  <td class="indexkey">Relation</td>
+	  <td class="indexkey">Inversion</td>
+	</tr>
+	<tr>
+	  <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
+          <td>AzElHeight <br> \f$ (Az,El,H) \f$</td>
+	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ R \end{array} \right]
+	    = \left[ \begin{array}{l} Az \\ El \\ H/\sin(El)
+	    \end{array} \right] \f$</td>
+	  <td></td>
+	</tr>
+        <tr>
+	  <td class="indexkey">Target</td>
+	  <td class="indexkey">... as function of</td>
+	  <td class="indexkey">Relation</td>
+	  <td class="indexkey">Inversion</td>
+	</tr>
+	<tr>
+	  <td>AzElHeight <br> \f$ (Az,El,H) \f$</td>
+          <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
+	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ H \end{array} \right]
+	    = \left[ \begin{array}{l} Az \\ El \\ R \sin(El)
+	    \end{array} \right] \f$</td>
+	  <td></td>
+	</tr>
+      </table>
     </center>
-    
+
     <ul>
       <li>Common source of confusion can be the factor required to convert an
       angle to its radian measure:
@@ -391,6 +456,59 @@ namespace CR { // Namespace CR -- begin
   }
 #endif
 
+  // ============================================================================
+  // 
+  //  Conversion: Azimuth,Elevation -> Other
+  //
+  // ============================================================================
+
+  bool AzElRadius2cartesian (double &x,
+			     double &y,
+			     double &z,
+			     double const &az,
+			     double const &el,
+			     double const &r,
+			     bool const &anglesInDegrees=false);
+
+  /*!
+    \brief Conversion from Azimuth,Elevetion to cartesian coordinates
+
+    \retval x  -- \f$x\f$-component of the vector in cartesian coordinates
+    \retval y  -- \f$y\f$-component of the vector in cartesian coordinates
+    \retval z  -- \f$z\f$-component of the vector in cartesian coordinates
+    \param az  -- 
+    \param el  -- 
+    \param r   -- 
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+           <i>true</i> angles will be converted to radians before the 
+	   conversion.
+    \param lastIsRadius    -- As there are two different flavors of
+           Azimuth,Elevation coordinates, this switch can be used for further
+	   specification. If <tt>lastIsRadius=true</tt> the origin vector is
+	   considered as (Az,El,Radius), thereby redirecting the actual
+	   evaluation to AzElRadius2cartesian.
+  */
+  bool azel2cartesian (double &x,
+		       double &y,
+		       double &z,
+		       double const &az,
+		       double const &el,
+		       double const &r,
+		       bool const &anglesInDegrees=false,
+		       bool const &lastIsRadius=true);
+  
+  bool azel2cartesian (std::vector<double> &cartesian,
+		       std::vector<double> const &azel,
+		       bool const &anglesInDegrees=false,
+		       bool const &lastIsRadius=true);
+
+#ifdef HAVE_CASA  
+  bool azel2cartesian (casa::Vector<double> &cartesian,
+		       casa::Vector<double> const &azel,
+		       bool const &anglesInDegrees=false,
+		       bool const &lastIsRadius=true);
+#endif
+  
   // ============================================================================
   // 
   //  Conversion: Cartesian (x,y,z) -> Other
@@ -733,62 +851,6 @@ namespace CR { // Namespace CR -- begin
   //  library.
   //
   // ============================================================================
-
-  /*!
-    \brief Convert position in Azimuth-Elevation to Cartesian coordinates
-    
-    \retval x -- x-component of the vector in cartesian coordinates
-    \retval y -- y-component of the vector in cartesian coordinates
-    \retval z -- z-component of the vector in cartesian coordinates
-
-    \param r               -- Radius
-    \param az              -- Azimuth angle
-    \param el              -- Elevation angle
-    \param anglesInDegrees -- Are the angles in the input vector are provided in
-                              degrees? If yes, then an additional conversion step
-			      is performed.
-  */
-  bool azel2xyz (double &x,
-		 double &y,
-		 double &z,
-		 double const &r,
-		 double const &az,
-		 double const &el,
-		 bool const &anglesInDegrees);
-  
-  /*!
-    \brief Convert position in Azimuth-Elevation to Cartesian coordinates
-
-    Internal check is performed on the completeness of the provides (az,el) 
-    coordinates; if only two elements can be found we assume to be provided
-    (az,el) whereas for three elements we assume (r,az,el).
-
-    \param azel          -- \f$ (r,\phi,\theta) \f$
-    \param inputInDegree -- Are the angles in the input vector are provided in
-                            degrees? If yes, then an additional conversion step
-			    is performed.
-
-    \return xyz -- \f$ (x,y,z) \f$
-  */
-  vector<double> azel2xyz (vector<double> const &azel,
-			   bool const &anglesInDegrees);
-  
-  /*!
-    \brief Convert position in Azimuth-Elevation to Cartesian coordinates
-
-    \retval xyz -- \f$ (x,y,z) \f$
-
-    \param azel          -- \f$ (r,\phi,\theta) \f$
-    \param inputInDegree -- Are the angles in the input vector are provided in
-                            degrees? If yes, then an additional conversion step
-			    is performed.
-  */
-  inline void azel2xyz (vector<double> &xyz,
-			vector<double> const &azel,
-			bool const &anglesInDegrees) {
-    xyz = azel2xyz (azel,
-		    anglesInDegrees);
-  }
   
   /*!
     \brief Convert position in Azimuth-Zenith to Cartesian coordinates
