@@ -6,7 +6,7 @@ set(WCSLIB_wrapper_sources wrapper.cc)
 
 include_directories(
   ${WCSLIB_SOURCE_DIR}/C
-  ${BOOST_INCLUDES}/..
+  ${BOOST_INCLUDES}
   ${PYTHON_INCLUDES}
 )
 
