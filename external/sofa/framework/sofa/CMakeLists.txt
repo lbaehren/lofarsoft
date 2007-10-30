@@ -1,6 +1,0 @@
-
-subdirs (
-  defaulttype
-  helper
-  core
-)
