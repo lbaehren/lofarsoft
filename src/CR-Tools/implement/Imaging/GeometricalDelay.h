@@ -36,7 +36,6 @@
 #endif
 #endif
 
-#include <Imaging/CoordinateConversion.h>
 #include <Math/VectorConversion.h>
 #include <Math/VectorNorms.h>
 

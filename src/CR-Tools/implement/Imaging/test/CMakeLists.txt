@@ -8,7 +8,6 @@
 set (tests
   tAntenna
   tBeamformer
-  tCoordinateConversion
   tFeed
   tGeometricalDelay
   tGeometricalPhase

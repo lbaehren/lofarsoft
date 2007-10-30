@@ -21,8 +21,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
 #ifndef VECTORCONVERSION_H
 #define VECTORCONVERSION_H
 
@@ -51,6 +49,7 @@ using std::vector;
 namespace CR { // Namespace CR -- begin
   
   /*!
+    \file VectorConversion.h
     \ingroup Math
     
     \brief Functions to handle conversions between vector representations
@@ -70,11 +69,125 @@ namespace CR { // Namespace CR -- begin
     
     <h3>Synopsis</h3>
 
-    In order to provide maximal usability, most of the conversion routines have
-    been implemented to work with (a) standard C++ variables and containers of
-    the STDL, (b) <a href="http://www.oonumerics.org/blitz">Blitz++</a> arrays
-    and (c) <a href="http://casa.nrao.edu">CASA</a> arrays.
+    The <b>spherical coordinate</b> system represents points as a tuple of three
+    components. For use in physical sciences and technology, the recommended
+    international standard notation is \f$ r,\vartheta,\phi \f$ for distance,
+    zenith and azimuth (ISO 31-11). (In the standard \f$\vartheta\f$ is preferred
+    to \f$\theta\f$, although it is the same Greek letter). Otherwise, in America
+    the components are typically notated as \f$(\rho,\phi,\theta)\f$ for
+    distance, zenith and azimuth, while elsewhere the notation is reversed for
+    zenith and azimuth as \f$(\rho,\theta,\phi)\f$. The former has the advantage
+    of being most compatible with the notation for the two-dimensional polar
+    coordinate system and the three-dimensional cylindrical coordinate system,
+    while the latter has the broader acceptance geographically. The notation
+    convention of the author of any work pertaining to spherical coordinates
+    should always be checked before using the formulas and equations of that
+    author. [from Wikipedia, english version]
 
+    <center>
+    <table border="0">
+      <tr>
+	<td>\image html Spherical_Coordinates_Wikipedia.png</td>
+	<td>\image html Cylindrical_Coordinates_Wikipedia.png</td>
+      </tr>
+      <tr bgcolor="#dddddd">
+        <td>Convention used for spherical coordinates</td>
+        <td>Convention used for cylindrical coordinates</td>
+      </tr>
+    </table>
+    </center>
+
+    We here use the three coordinates \f$(r,\phi,\theta)\f$ according to the
+    following convention:
+    <ul>
+      <li>\f$r\f$ (radius) is the distance of a point P from the origin O of the
+      coordinate system, i.e. the length of the vector \f$\vec r\f$;
+      <li>\f$\phi\f$ (azimuth angle) is the angle between the positive x-axis and
+      \f$\vec r_{xy}\f$ (i.e. the projection of the vector \f$\vec r\f$ onto the
+      x-y-plane), with values running from 0 to \f$2\pi\f$ (\f$0^\circ\f$ to
+      \f$360^\circ\f$) counted counter-clockwise
+      <li>\f$\theta\f$ (polar angle) is the angle between the positive z-axis
+      and the vector \f$\vec r\f$, with values running from 0 to \f$\pi\f$
+      (\f$0^\circ\f$ to \f$180^\circ\f$)
+    </ul>
+
+    For <b>cylindrical coordinates</b> we closely follow the above convention,
+    such that the azmiuthal angle \f$\phi\f$ in the x-y-plane is the same as for
+    the case of spherical coordinates (and thereby reflection the relation of
+    the cylindrical coordinates to polar coordinates in the plain).
+
+    <center>
+    <table>
+      <tr>
+        <td>from / to</td>
+        <td class="indexkey">cartesian <br> \f$ (x,y,z) \f$ </td>
+        <td class="indexkey">spherical <br> \f$ (r,\phi,\theta) \f$ </td>
+        <td class="indexkey">cylindrical <br> \f$ (\rho,\phi,z) \f$ </td>
+        <td class="indexkey">AzElHeight <br> \f$ (Az,El,H) \f$ </td>
+        <td class="indexkey">AzElRadius <br> \f$ (Az,El,R) \f$ </td>
+      </tr>
+      <tr>
+        <td class="indexkey">cartesian <br> \f$ (x,y,z) \f$</td>
+        <td align="center">---</td>
+        <td>\f$ \left[ \begin{array}{l}
+	  \sqrt{x^2 + y^2 + z^2} \\
+	  \mathrm{atan} (y/x) \\ 
+	  \mathrm{acos \left( \sqrt{\frac{x^2 + y^2}{x^2 + y^2 + z^2}} \right)}
+	  \end{array} \right] \f$</td>
+        <td>\f$ \left[ \begin{array}{l}
+	  \sqrt{x^2 + y^2} \\
+	  \mathrm{atan} (y/x) \\
+	  z \end{array} \right] \f$</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="indexkey">spherical <br> \f$ (r,\phi,\theta) \f$</td>
+        <td>\f$ \left[ \begin{array}{l}
+	  r \sin(\phi) \cos(\theta) \\
+	  r \sin(\phi) \sin(\theta) \\
+	  r \cos(\phi) \end{array} \right] \f$</td>
+        <td align="center">---</td>
+        <td>\f$ \left[  \begin{array}{c}
+	  r \sin(\theta) \\
+	  \phi \\
+	  r \cos(\phi)
+	  \end{array} \right] \f$</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="indexkey">cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
+        <td>\f$ \left[ \begin{array}{l}
+	  \rho \cos(\phi) \\
+	  \rho \sin(\phi) \\
+	  z \end{array} \right] \f$</td>
+        <td>\f$  \left[ \begin{array}{c}
+	  \sqrt{\rho^2 + z^2} \\
+	  \phi \\
+	  \mathrm{asin} \left( \frac{\rho}{\sqrt{\rho^2 + z^2}} \right)
+	\end{array} \right] \f$</td>
+        <td align="center">---</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="indexkey">AzElHeight <br> \f$ (Az,El,H) \f$</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="indexkey">AzElRadius <br> \f$ (Az,El,R) \f$</td>
+        <td>\f$ \left[ \begin{array}{l}
+	  R \cos(El) \cos(Az) \\
+	  R \cos(El) \sin(Az) \\
+	  R \sin(El) \end{array} \right] \f$</td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+    </table>
+    </center>
+    
     <ul>
       <li>Common source of confusion can be the factor required to convert an
       angle to its radian measure:
@@ -85,31 +198,49 @@ namespace CR { // Namespace CR -- begin
       \qquad \hbox{and} \qquad
       s = \frac{\pi}{180 [^\circ]} \cdot \alpha [^\circ]
       \f]
-      <li>Conversion from spherical to cartesian coordinates:
-      \f[
-        (r,\phi,\theta) \rightarrow (x,y,z)
-	\quad : \qquad
-        \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
-	\left[ \begin{array}{c}
-	  r \sin(\phi) \cos(\theta) \\
-	  r \sin(\phi) \sin(\theta) \\
-	  r \cos(\phi)
-	\end{array} \right]
-      \f]
-      <b>Note:</b> With the azimuth angle defined from South towards East, an
-      (Az,Ze) system corresponds to the standard setup for spherical coordinates.
-      <li>Conversion from (Az,El) to cartesian coordinates:
-      \f[
-        (r,az,el) \rightarrow (x,y,z)
-	\quad : \qquad
-        \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
-	\left[ \begin{array}{c}
-	  r \cos(El) \cos(Az) \\
-	  r \cos(El) \sin(Az) \\
-	  r \sin(El)
-	\end{array} \right]
-      \f]
+      <li>With the azimuth angle defined from South towards East, an
+      (Az,Ze) system corresponds to the standard setup for spherical
+      coordinates.
     </ul>
+
+    <h3>Implementation</h3>
+
+    In order to provide maximal usability, most of the conversion routines
+    have been implemented to work with:
+    <ol>
+      <li>Standard C++ variables
+      \code
+      bool cartesian2spherical (double &r,
+                                double &phi,
+				double &theta,
+				const double &x,
+				const double &y,
+				const double &z,
+				bool const &anglesInDegrees=false);
+      \endcode
+      <li>Vectors of the C++ STDL
+      \code
+      bool cartesian2spherical (std::vector<double> &spherical,
+                                std::vector<double> const &cartesian,
+				bool const &anglesInDegrees=false);
+      \endcode
+      <li>Blitz++ arrays 
+      \code
+      #ifdef HAVE_BLITZ
+      bool cartesian2spherical (blitz::Array<double,1> &spherical,
+                                blitz::Array<double,1> const &cartesian,
+				bool const &anglesInDegrees=false);
+      #endif
+      \endcode
+      <li>CASA arrays
+      \code
+      #ifdef HAVE_CASA
+      bool cartesian2spherical (casa::Vector<double> &spherical,
+                                casa::Vector<double> const &cartesian,
+				bool const &anglesInDegrees=false);
+      #endif
+      \endcode
+    </ol>
     
     <h3>Example(s)</h3>
 
@@ -139,7 +270,9 @@ namespace CR { // Namespace CR -- begin
     //! Spherical coordinates, \f$ \vec x = (r,\phi,\theta) \f$
     Spherical,
     //! Cylindrical coordinates, \f$ \vec x = (r,\phi,h) \f$
-    Cylindrical
+    Cylindrical,
+    //! Azimuth-Elevation-Height
+    AzElHeight
   } CoordinateTypes;
   
 
@@ -159,7 +292,8 @@ namespace CR { // Namespace CR -- begin
 
     \return rad -- Angle in radian
   */
-  inline double deg2rad (double const &deg) {
+  inline double deg2rad (double const &deg)
+ {
     return deg*CR::pi/180.0;
   }
 
@@ -256,7 +390,343 @@ namespace CR { // Namespace CR -- begin
     return deg;
   }
 #endif
+
+  // ============================================================================
+  // 
+  //  Conversion: Cartesian (x,y,z) -> Other
+  //
+  // ============================================================================
+
+  // ----------------------------------------------------------------------------
+  // Cartesian (x,y,z) -> Cylindrical (rho,phi,z)
+
+  /*!
+    \brief Conversion from cartesian to cylindrical coordinates
+
+    \retval rho   -- \f$\rho\f$-component of the vector in cylindrical coordinates
+    \retval phi   -- \f$\phi\f$-component of the vector in cylindrical coordinates
+    \retval z     -- \f$z\f$-component of the vector in cylindrical coordinates
+    \param x      -- \f$x\f$-component of the vector in cartesian coordinates
+    \param y      -- \f$y\f$-component of the vector in cartesian coordinates
+    \param z      -- \f$z\f$-component of the vector in cartesian coordinates
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+                    <i>yes</i> angles will be converted to radians before the 
+		    conversion.
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool cartesian2cylindrical (double &rho,
+			      double &phi,
+			      double &z_cyl,
+			      const double &x=0.0,
+			      const double &y=0.0,
+			      const double &z=0.0,
+			      bool const &anglesInDegrees=false);
+
+  /*!
+    \brief Conversion from cartesian to cylindrical coordinates
+
+    \retval cylindrical -- Vector in cylindrical coordinates,
+                           \f$ (\rho,\phi,z) \f$
+    \param cartesian    -- Vector in cartesian coordinates, \f$ (x,y,z) \f$
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+                    <i>yes</i> angles will be converted to radians before the 
+		    conversion.
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool cartesian2cylindrical (std::vector<double> &cylindrical,
+			      std::vector<double> const &cartesian,
+			      bool const &anglesInDegrees=false);
+
+#ifdef HAVE_CASA
+  bool cartesian2cylindrical (casa::Vector<double> &cylindrical,
+			      casa::Vector<double> const &cartesian,
+			      bool const &anglesInDegrees=false);
+#endif
   
+#ifdef HAVE_BLITZ
+  bool cartesian2cylindrical (blitz::Array<double,1> &cylindrical,
+			      blitz::Array<double,1> const &cartesian,
+			      bool const &anglesInDegrees=false);
+#endif
+  
+  // ----------------------------------------------------------------------------
+  // Cartesian (x,y,z) -> Spherical (r,phi,theta)
+
+  /*!
+    \brief Conversion from cartesian to spherical coordinates
+
+    \retval r     -- \f$r\f$-component of the vector in spherical coordinates
+    \retval phi   -- \f$\phi\f$-component of the vector in spherical coordinates
+    \retval theta -- \f$\theta\f$-component of the vector in spherical coordinates
+    \param x      -- \f$x\f$-component of the vector in cartesian coordinates
+    \param y      -- \f$y\f$-component of the vector in cartesian coordinates
+    \param z      -- \f$z\f$-component of the vector in cartesian coordinates
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+                    <i>yes</i> angles will be converted to radians before the 
+		    conversion.
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool cartesian2spherical (double &r,
+			    double &phi,
+			    double &theta,
+			    const double &x,
+			    const double &y,
+			    const double &z,
+			    bool const &anglesInDegrees=false);
+
+  /*!
+    \brief Conversion from cartesian to spherical coordinates
+
+    \retval spherical -- Vector in spherical coordinates, \f$ (r,\phi,\theta) \f$
+    \param cartesian  -- Vector in cartesian coordinates, \f$ (x,y,z) \f$
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+                    <i>yes</i> angles will be converted to radians before the 
+		    conversion.
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool cartesian2spherical (std::vector<double> &spherical,
+			    std::vector<double> const &cartesian,
+			    bool const &anglesInDegrees=false);
+
+#ifdef HAVE_CASA
+  bool cartesian2spherical (casa::Vector<double> &spherical,
+			    casa::Vector<double> const &cartesian,
+			    bool const &anglesInDegrees=false);
+#endif
+  
+#ifdef HAVE_BLITZ
+  bool cartesian2spherical (blitz::Array<double,1> &spherical,
+			    blitz::Array<double,1> const &cartesian,
+			    bool const &anglesInDegrees=false);
+#endif
+  
+  // ============================================================================
+  // 
+  //  Conversion: Cylindrical (rho,phi,z) -> Other
+  //
+  // ============================================================================
+
+  // ----------------------------------------------------------------------------
+  // Cylindrical (rho,phi,z) -> Cartesian (x,y,z)
+
+  /*!
+    \brief Conversion from cylindrical to cartesian coordinates
+
+    \retval x  -- \f$x\f$-component of the vector in cartesian coordinates
+    \retval y  -- \f$y\f$-component of the vector in cartesian coordinates
+    \retval z  -- \f$z\f$-component of the vector in cartesian coordinates
+    \param rho -- \f$rho\f$-component of the vector in cylindrical coordinates
+    \param phi -- \f$phi\f$-component of the vector in cylindrical coordinates
+    \param z   -- \f$z\f$-component of the vector in cylindrical coordinates
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool cylindrical2cartesian (double &x,
+			      double &y,
+			      double &z,
+			      double const &rho,
+			      double const &phi,
+			      double const &z_cyl,
+			      bool const &anglesInDegrees=false);
+  
+  /*!
+    \brief Conversion from cylindrical to cartesian coordinates
+  */
+  bool cylindrical2cartesian (std::vector<double> &cartesian,
+			      std::vector<double> const &cylindrical,
+			      bool const &anglesInDegrees=false);
+
+#ifdef HAVE_CASA
+  bool cylindrical2cartesian (casa::Vector<double> &cartesian,
+			      casa::Vector<double> const &cylindrical,
+			      bool const &anglesInDegrees=false);
+#endif
+  
+#ifdef HAVE_BLITZ
+  bool cylindrical2cartesian (blitz::Array<double,1> &cartesian,
+			      blitz::Array<double,1> const &cylindrical,
+			      bool const &anglesInDegrees=false);
+#endif
+
+  // ----------------------------------------------------------------------------
+  // Cylindrical (rho,phi,z) -> Spherical (r,phi,theta)
+  
+  /*!
+    \brief Conversion from cylindrical to spherical coordinates
+
+    \retval r     -- \f$r\f$ component of the vector in spherical coordinates
+    \retval phi   -- \f$\phi\f$ component of the vector in spherical coordinates
+    \retval theta -- \f$\theta\f$ component of the vector in spherical coordinates
+    \param rho -- \f$rho\f$-component of the vector in cylindrical coordinates
+    \param phi -- \f$phi\f$-component of the vector in cylindrical coordinates
+    \param z   -- \f$z\f$-component of the vector in cylindrical coordinates
+  */
+  bool cylindrical2spherical (double &r,
+			      double &phi,
+			      double &theta,
+			      double const &rho,
+			      double const &phi_cyl,
+			      double const &z,
+			      bool const &anglesInDegrees=false);
+  
+  /*!
+    \brief Conversion from cylindrical to spherical coordinates
+  */
+  bool cylindrical2spherical (std::vector<double> &spherical,
+			      std::vector<double> const &cylindrical,
+			      bool const &anglesInDegrees=false);
+  
+#ifdef HAVE_CASA
+  /*!
+    \brief Conversion from cylindrical to spherical coordinates
+  */
+  bool cylindrical2spherical (casa::Vector<double> &spherical,
+			      casa::Vector<double> const &cylindrical,
+			      bool const &anglesInDegrees=false);
+#endif
+  
+#ifdef HAVE_BLITZ
+  /*!
+    \brief Conversion from cylindrical to spherical coordinates
+  */
+  bool cylindrical2spherical (blitz::Array<double,1> &spherical,
+			      blitz::Array<double,1> const &cylindrical,
+			      bool const &anglesInDegrees=false);
+#endif
+  
+  // ============================================================================
+  // 
+  //  Conversion: Spherical (r,phi,theta) -> other
+  //
+  // ============================================================================
+
+  // ----------------------------------------------------------------------------
+  // Spherical (r,phi,theta) -> Cartesian (x,y,z)
+
+  /*!
+    \brief Conversion from spherical to cartesian coordinates
+
+    \retval x    -- \f$x\f$-component of the vector in cartesian coordinates
+    \retval y    -- \f$y\f$-component of the vector in cartesian coordinates
+    \retval z    -- \f$z\f$-component of the vector in cartesian coordinates
+    \param r     -- \f$r\f$-component of the vector in spherical coordinates
+    \param phi   -- \f$\phi\f$-component of the vector in spherical coordinates
+    \param theta -- \f$\theta\f$-component of the vector in spherical coordinates
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+                    <i>yes</i> angles will be converted to radians before the 
+		    conversion.
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool spherical2cartesian (double &x,
+			    double &y,
+			    double &z,
+			    const double &r=1.0,
+			    const double &phi=0.0,
+			    const double &theta=0.0,
+			    const bool &anglesInDegrees=false);
+
+  /*!
+    \brief Conversion from spherical to cartesian coordinates
+
+    \retval cartesian -- Vector in cartesian coordinates, \f$ (x,y,z) \f$
+    \param spherical  -- Vector in spherical coordinates, \f$ (r,\phi,\theta) \f$
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+           <i>yes</i> angles will be converted to radians before the conversion.
+
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool spherical2cartesian (std::vector<double> &cartesian,
+			      std::vector<double> const &spherical,
+			      bool const &anglesInDegrees=false);
+  
+#ifdef HAVE_CASA
+  bool spherical2cartesian (casa::Vector<double> &cartesian,
+			    casa::Vector<double> const &spherical,
+			    bool const &anglesInDegrees=false);
+#endif
+
+#ifdef HAVE_BLITZ
+  bool spherical2cartesian (blitz::Array<double,1> &cartesian,
+			    blitz::Array<double,1> const &spherical,
+			    bool const &anglesInDegrees=false);
+
+#endif
+
+  /*!
+    \brief Convert position in Spherical to Cartesian coordinates
+
+    Converts 3D vector representation from \f$ (r,\phi,\theta) \f$ to
+    \f$ (x,y,z) \f$
+    
+    \param spherical      -- The 3D position in spherical coordinates,
+                             \f$ (r,\phi,\theta) \f$; if only two elements
+			     are provided, we consider them to be the two angles
+			     and perform the conversion for a position on a
+			     unit sphere (i.e. \f$ r=1 \f$).
+    \param anglesInDegrees -- 
+
+    \return cartesian -- Representation of the vector in cartesian coordinates,
+                         \f$ (x,y,z) \f$
+  */
+  vector<double> spherical2cartesian (vector<double> const &spherical,
+				      bool const &anglesInDegrees);
+#ifdef HAVE_CASA
+  casa::Vector<double> spherical2cartesian (casa::Vector<double> const &spherical,
+					    bool const &anglesInDegrees);
+#endif
+  
+
+  // ----------------------------------------------------------------------------
+  // Spherical (r,phi,theta) -> Cylindrical (rho,phi,z)
+
+  /*!
+    \brief Conversion from spherical to cylindrical coordinates
+
+    \retval rho  --
+    \retval phi  -- 
+    \retval z    -- 
+    \param r     -- \f$r\f$-component of the vector in spherical coordinates
+    \param phi   -- \f$\phi\f$-component of the vector in spherical coordinates
+    \param theta -- \f$\theta\f$-component of the vector in spherical coordinates
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+                    <i>yes</i> angles will be converted to radians before the 
+		    conversion.
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool spherical2cylindrical (double &rho,
+			      double &phi_cyl,
+			      double &z,
+			      double const &r=1.0,
+			      double const &phi=0.0,
+			      double const &theta=0.0,
+			      bool const &anglesInDegrees=false);
+
+  /*!
+    \brief Conversion from spherical to cylindrical coordinates
+
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool spherical2cylindrical (std::vector<double> &cylindrical,
+			      std::vector<double> const &spherical,
+			      bool const &anglesInDegrees=false);
+
+  /*!
+    \brief Conversion from spherical to cylindrical coordinates
+
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+#ifdef HAVE_CASA
+  bool spherical2cylindrical (casa::Vector<double> &cylindrical,
+			      casa::Vector<double> const &spherical,
+			      bool const &anglesInDegrees=false);
+#endif
+
   // ============================================================================
   //
   //  Elementary conversion function, only using functionality of the standard
@@ -363,106 +833,6 @@ namespace CR { // Namespace CR -- begin
     xyz = azze2xyz (azze,
 		    anglesInDegrees);
   }
-  
-  // -------------------------------------------------------- cartesian2spherical
-  
-  /*!
-    \brief Conversion from cartesian to spherical coordinates
-
-    \retval r     -- \f$r\f$-component of the vector in spherical coordinates
-    \retval phi   -- \f$\phi\f$-component of the vector in spherical coordinates
-    \retval theta -- \f$\theta\f$-component of the vector in spherical coordinates
-    \param x      -- \f$x\f$-component of the vector in cartesian coordinates
-    \param y      -- \f$y\f$-component of the vector in cartesian coordinates
-    \param z      -- \f$z\f$-component of the vector in cartesian coordinates
-    \param anglesInDegrees -- Are the angles given in units of degrees? If
-                    <i>yes</i> angles will be converted to radians before the 
-		    conversion.
-    
-    \return status -- Set to <i>false</i> if an error was encountered.
-  */
-  bool cartesian2spherical (double &r,
-			    double &phi,
-			    double &theta,
-			    const double &x,
-			    const double &y,
-			    const double &z,
-			    const bool &anglesInDegrees=false);
-  
-  // -------------------------------------------------------- spherical2cartesian
-  
-  /*!
-    \brief Conversion from cartesian to spherical coordinates
-
-    \retval x    -- \f$x\f$-component of the vector in cartesian coordinates
-    \retval y    -- \f$y\f$-component of the vector in cartesian coordinates
-    \retval z    -- \f$z\f$-component of the vector in cartesian coordinates
-    \param r     -- \f$r\f$-component of the vector in spherical coordinates
-    \param phi   -- \f$\phi\f$-component of the vector in spherical coordinates
-    \param theta -- \f$\theta\f$-component of the vector in spherical coordinates
-    \param anglesInDegrees -- Are the angles given in units of degrees? If
-                    <i>yes</i> angles will be converted to radians before the 
-		    conversion.
-    
-    \return status -- Set to <i>false</i> if an error was encountered.
-  */
-  bool spherical2cartesian (double &x,
-			    double &y,
-			    double &z,
-			    const double &r,
-			    const double &phi,
-			    const double &theta,
-			    const bool &anglesInDegrees=false);
-  
-  /*!
-    \brief Convert position in Spherical to Cartesian coordinates
-
-    Converts 3D vector representation from \f$ (r,\phi,\theta) \f$ to
-    \f$ (x,y,z) \f$
-    
-    \param spherical      -- The 3D position in spherical coordinates,
-                             \f$ (r,\phi,\theta) \f$; if only two elements
-			     are provided, we consider them to be the two angles
-			     and perform the conversion for a position on a
-			     unit sphere (i.e. \f$ r=1 \f$).
-    \param anglesInDegrees -- 
-
-    \return cartesian -- Representation of the vector in cartesian coordinates,
-                         \f$ (x,y,z) \f$
-  */
-  vector<double> spherical2cartesian (vector<double> const &spherical,
-				      bool const &anglesInDegrees);
-#ifdef HAVE_CASA
-  casa::Vector<double> spherical2cartesian (casa::Vector<double> const &spherical,
-					    bool const &anglesInDegrees);
-#endif
-  
-  /*!
-    \brief Convert position in Spherical to Cartesian coordinates
-
-    Converts 3D vector representation from \f$ (r,\phi,\theta) \f$ to
-    \f$ (x,y,z) \f$
-
-    \retval cartesian -- Representation of the vector in cartesian coordinates,
-                         \f$ (x,y,z) \f$
-    
-    \param spherical      -- 
-    \param anglesInDegrees -- 
-  */
-  inline void spherical2cartesian (vector<double> &cartesian,
-				   vector<double> const &spherical,
-				   bool const &anglesInDegrees) {
-    cartesian = spherical2cartesian (spherical,
-				     anglesInDegrees);
-  }
-#ifdef HAVE_CASA
-  inline void spherical2cartesian (casa::Vector<double> &cartesian,
-				   casa::Vector<double> const &spherical,
-				   bool const &anglesInDegrees) {
-    cartesian = spherical2cartesian (spherical,
-				     anglesInDegrees);
-  }
-#endif
   
   /*!
     \brief Convert positions from Spherical to Cartesian coordinates

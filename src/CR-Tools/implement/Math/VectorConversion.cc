@@ -25,6 +25,410 @@
 namespace CR { // Namespace CR -- begin
   
   // ============================================================================
+  // 
+  //  Conversion: Cartesian (x,y,z) -> Other
+  //
+  // ============================================================================
+
+  // ------------------------------------------------------ cartesian2cylindrical
+
+  bool cartesian2cylindrical (double &rho,
+			      double &phi,
+			      double &z_cyl,
+			      const double &x,
+			      const double &y,
+			      const double &z,
+			      bool const &anglesInDegrees)
+  {
+    bool status (true);
+
+    try {
+      if (anglesInDegrees) {
+	rho   = sqrt(x*x*+y*y);
+	phi   = rad2deg(atan2(y,x));
+	z_cyl = z;
+      } else {
+	rho   = sqrt(x*x*+y*y);
+	phi   = atan2(y,x);
+	z_cyl = z;
+      }
+    } catch (std::string message) {
+      std::cerr << "[cartesian2cylindrical] " << message << std::endl;
+      status = false;
+    }
+
+    return status;
+  }
+
+  // ------------------------------------------------------ cartesian2cylindrical
+
+  bool cartesian2cylindrical (std::vector<double> &cylindrical,
+			      std::vector<double> const &cartesian,
+			      bool const &anglesInDegrees)
+  {
+    return cartesian2cylindrical (cylindrical[0],
+				  cylindrical[1],
+				  cylindrical[2],
+				  cartesian[0],
+				  cartesian[1],
+				  cartesian[2],
+				  anglesInDegrees);
+  }
+
+#ifdef HAVE_CASA
+  bool cartesian2cylindrical (casa::Vector<double> &cylindrical,
+			      casa::Vector<double> const &cartesian,
+			      bool const &anglesInDegrees)
+  {
+    return cartesian2cylindrical (cylindrical(0),
+				  cylindrical(1),
+				  cylindrical(2),
+				  cartesian(0),
+				  cartesian(1),
+				  cartesian(2),
+				  anglesInDegrees);
+  }
+#endif
+  
+#ifdef HAVE_BLITZ
+  bool cartesian2cylindrical (blitz::Array<double,1> &cylindrical,
+			      blitz::Array<double,1> const &cartesian,
+			      bool const &anglesInDegrees)
+  {
+    return cartesian2cylindrical (cylindrical(0),
+				  cylindrical(1),
+				  cylindrical(2),
+				  cartesian(0),
+				  cartesian(1),
+				  cartesian(2),
+				  anglesInDegrees);
+  }
+#endif
+
+  // -------------------------------------------------------- cartesian2spherical
+  
+  bool cartesian2spherical (double &r,
+			    double &phi,
+			    double &theta,
+			    const double &x,
+			    const double &y,
+			    const double &z,
+			    bool const &anglesInDegrees)
+  {
+    bool status (true);
+
+    try {
+      if (anglesInDegrees) {
+	r     = sqrt(x*x + y*y + z*z);
+ 	phi   = rad2deg(atan2(y,x));
+	theta = rad2deg(acos(sqrt((x*x+y*y)/(x*x+y*y+z*z))));
+      } else {
+	r     = sqrt(x*x + y*y + z*z);
+ 	phi   = atan2(y,x);
+	theta = acos(sqrt((x*x+y*y)/(x*x+y*y+z*z)));
+      }
+    } catch (std::string message) {
+      std::cerr << "[cartesian2spherical] " << message << std::endl;
+      status = false;
+    }
+
+    return status;
+  }
+
+  // -------------------------------------------------------- cartesian2spherical
+  
+  bool cartesian2spherical (std::vector<double> &spherical,
+			    std::vector<double> const &cartesian,
+			    bool const &anglesInDegrees)
+  {
+    return cartesian2spherical (spherical[0],
+				spherical[1],
+				spherical[2],
+				cartesian[0],
+				cartesian[1],
+				cartesian[2],
+				anglesInDegrees);
+  }
+  
+#ifdef HAVE_CASA
+  bool cartesian2spherical (casa::Vector<double> &spherical,
+			    casa::Vector<double> const &cartesian,
+			    bool const &anglesInDegrees)
+  {
+    return cartesian2spherical (spherical(0),
+				spherical(1),
+				spherical(2),
+				cartesian(0),
+				cartesian(1),
+				cartesian(2),
+				anglesInDegrees);
+  }
+#endif
+  
+#ifdef HAVE_BLITZ
+  bool cartesian2spherical (blitz::Array<double,1> &spherical,
+			    blitz::Array<double,1> const &cartesian,
+			    bool const &anglesInDegrees)
+  {
+    return cartesian2spherical (spherical(0),
+				spherical(1),
+				spherical(2),
+				cartesian(0),
+				cartesian(1),
+				cartesian(2),
+				anglesInDegrees);
+  }
+#endif
+
+  // ============================================================================
+  // 
+  //  Conversion: Cylindrical (rho,phi,z) -> Other
+  //
+  // ============================================================================
+
+  // ------------------------------------------------------ cylindrical2cartesian
+
+  bool cylindrical2cartesian (double &x,
+			      double &y,
+			      double &z,
+			      double const &rho,
+			      double const &phi,
+			      double const &z_cyl,
+			      bool const &anglesInDegrees)
+  {
+    bool status (true);
+
+    try {
+      if (anglesInDegrees) {
+	x = rho*cos(deg2rad(phi));
+	y = rho*sin(deg2rad(phi));
+	z = z_cyl;
+      } else {
+	x = rho*cos(phi);
+	y = rho*sin(phi);
+	z = z_cyl;
+      }
+    } catch (std::string message) {
+      std::cerr << "[cylindrical2cartesian] " << message << std::endl;
+      status = false;
+    }
+
+    return status;
+  }
+  
+  // ------------------------------------------------------ cylindrical2cartesian
+
+  bool cylindrical2cartesian (std::vector<double> &cartesian,
+			      std::vector<double> const &cylindrical,
+			      bool const &anglesInDegrees)
+  {
+    return cylindrical2cartesian (cartesian[0],
+				  cartesian[1],
+				  cartesian[2],
+				  cylindrical[0],
+				  cylindrical[1],
+				  cylindrical[2],
+				  anglesInDegrees);
+  }
+
+  // ------------------------------------------------------ cylindrical2cartesian
+
+#ifdef HAVE_CASA
+  bool cylindrical2cartesian (casa::Vector<double> &cartesian,
+			      casa::Vector<double> const &cylindrical,
+			      bool const &anglesInDegrees)
+  {
+    return cylindrical2cartesian (cartesian(0),
+				  cartesian(1),
+				  cartesian(2),
+				  cylindrical(0),
+				  cylindrical(1),
+				  cylindrical(2),
+				  anglesInDegrees);
+  }
+#endif
+  
+  // ------------------------------------------------------ cylindrical2cartesian
+
+#ifdef HAVE_BLITZ
+  bool cylindrical2cartesian (blitz::Array<double,1> &cartesian,
+			      blitz::Array<double,1> const &cylindrical,
+			      bool const &anglesInDegrees)
+  {
+    return cylindrical2cartesian (cartesian(0),
+				  cartesian(1),
+				  cartesian(2),
+				  cylindrical(0),
+				  cylindrical(1),
+				  cylindrical(2),
+				  anglesInDegrees);
+  }
+#endif
+
+  // ------------------------------------------------------ cylindrical2spherical
+
+  bool cylindrical2spherical (double &r,
+			      double &phi,
+			      double &theta,
+			      double const &rho,
+			      double const &phi_cyl,
+			      double const &z,
+			      bool const &anglesInDegrees)
+  {
+    bool status (true);
+
+    try {
+      if (anglesInDegrees) {
+	r = sqrt(rho*rho+z*z);
+	phi = phi_cyl;
+	theta = rad2deg(asin(rho/(r)));
+      } else {
+	r = sqrt(rho*rho+z*z);
+	phi = phi_cyl;
+	theta = asin(rho/(r));
+      }
+    } catch (std::string message) {
+      std::cerr << "[cylindrical2cartesian] " << message << std::endl;
+      status = false;
+    }
+
+    return status;
+  }
+
+  // ============================================================================
+  // 
+  //  Conversion: Spherical (r,phi,theta) -> other
+  //
+  // ============================================================================
+
+  // ----------------------------------------------------- spherical -> cartesian
+
+  bool spherical2cartesian (double &x,
+			    double &y,
+			    double &z,
+			    double const &r,
+			    double const &phi,
+			    double const &theta,
+			    bool const &anglesInDegrees)
+  {
+    bool status (true);
+
+    try {
+      if (anglesInDegrees) {
+	spherical2cartesian (x,
+			     y,
+			     z,
+			     r,
+			     deg2rad(phi),
+			     deg2rad(theta),
+			     false);
+      } else {
+	x = r*sin(phi)*cos(theta);
+	y = r*sin(phi)*sin(theta);
+	z = r*cos(phi); 
+      }
+    } catch (std::string message) {
+      std::cerr << "[spherical2cartesian]" << message << std::endl;
+      status = false;
+    }
+    
+    return status;
+  }
+
+  
+#ifdef HAVE_CASA
+  bool spherical2cartesian (casa::Vector<double> &cartesian,
+			    casa::Vector<double> const &spherical,
+			    bool const &anglesInDegrees)
+  {
+    bool status (true);
+
+    return status;
+  }
+#endif
+
+  // --------------------------------------------------- spherical -> cylindrical
+
+  bool spherical2cylindrical (double &rho,
+			      double &phi_cyl,
+			      double &z,
+			      double const &r,
+			      double const &phi,
+			      double const &theta,
+			      bool const &anglesInDegrees)
+  {
+    bool status (true);
+    
+    try {
+      if (anglesInDegrees) {
+	// conversion: deg -> rad
+	spherical2cylindrical(rho,
+			      phi_cyl,
+			      z,
+			      r,
+			      deg2rad(phi),
+			      deg2rad(theta),
+			      false);
+      } else {
+	rho     = r*sin(theta);
+	phi_cyl = phi;
+	z       = r*cos(phi);
+      }
+    } catch (std::string message) {
+      std::cerr << "[spherical2cylindrical] " << message << std::endl;
+      status = false;
+    }
+
+    return status;
+  }
+
+  // --------------------------------------------------- spherical -> cylindrical
+
+  bool spherical2cylindrical (std::vector<double> &cylindrical,
+			      std::vector<double> const &spherical,
+			      bool const &anglesInDegrees)
+  {
+    return spherical2cylindrical (cylindrical[0],
+				  cylindrical[1],
+				  cylindrical[2],
+				  spherical[0],
+				  spherical[1],
+				  spherical[2],
+				  anglesInDegrees);
+  }
+  
+  // --------------------------------------------------- spherical -> cylindrical
+
+#ifdef HAVE_CASA
+  bool spherical2cylindrical (casa::Vector<double> &cylindrical,
+			      casa::Vector<double> const &spherical,
+			      bool const &anglesInDegrees)
+  {
+    bool status (true);
+
+    if (anglesInDegrees) {
+      spherical2cylindrical (cylindrical(0),
+			     cylindrical(1),
+			     cylindrical(2),
+			     spherical(0),
+			     deg2rad(spherical(1)),
+			     deg2rad(spherical(2)),
+			     false);
+    } else {
+      spherical2cylindrical (cylindrical(0),
+			     cylindrical(1),
+			     cylindrical(2),
+			     spherical(0),
+			     spherical(1),
+			     spherical(2),
+			     false);
+    }
+
+    return status;
+  }
+#endif
+
+  // ============================================================================
   //
   //  Elementary conversion function, only using functionality of the standard
   //  library.
@@ -58,7 +462,7 @@ namespace CR { // Namespace CR -- begin
 	z = r*sin(el);
       }
     } catch (std::string message) {
-      std::cerr << message << std::endl;
+      std::cerr << "[azel2xyz]" << message << std::endl;
       status = false;
     }
 
@@ -116,55 +520,8 @@ namespace CR { // Namespace CR -- begin
     return spherical2cartesian (azze,anglesInDegrees);
   }
   
-  // -------------------------------------------------------- cartesian2spherical
-  
-  bool cartesian2spherical (double &r,
-			    double &phi,
-			    double &theta,
-			    const double &x,
-			    const double &y,
-			    const double &z,
-			    const bool &anglesInDegrees)
-  {
-    bool status (true);
-
-    return status;
-  }
-  
   // -------------------------------------------------------- spherical2cartesian
   
-  bool spherical2cartesian (double &x,
-			    double &y,
-			    double &z,
-			    double const &r,
-			    double const &phi,
-			    double const &theta,
-			    bool const &anglesInDegrees)
-  {
-    bool status (true);
-
-    try {
-      if (anglesInDegrees) {
-	spherical2cartesian (x,
-			     y,
-			     z,
-			     r,
-			     deg2rad(phi),
-			     deg2rad(theta),
-			     false);
-      } else {
-	x = r*sin(phi)*cos(theta);
-	y = r*sin(phi)*sin(theta);
-	z = r*cos(phi); 
-      }
-    } catch (std::string message) {
-      std::cerr << message << std::endl;
-      status = false;
-    }
-    
-    return status;
-  }
-
   vector<double> spherical2cartesian (vector<double> const &spherical,
 				      bool const &anglesInDegrees)
   {
