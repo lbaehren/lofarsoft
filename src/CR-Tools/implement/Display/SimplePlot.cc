@@ -467,6 +467,75 @@ namespace CR { // Namespace CR -- begin
     }; 
     return status;        
   };
+
+
+  // ------------------------------------------------------------------ quickPlot
+
+  Bool SimplePlot::addContourLines(Matrix<Double> zvals, Double xmin, Double xmax, 
+				   Double ymin, Double ymax, int nClevels, int cCol){
+    Bool status=True;
+    try {
+      if (nClevels<1) {
+	cout << "SimplePlot::addContourLines: " << "Not plotting less than one contour lines." << endl;
+	return False;
+      };
+#ifdef HAVE_PGPLOT
+      cerr << "SimplePlot::addContourLines: " << "Sorry, 2d-plotting with pgplotter not implemented!" << endl;
+      return False;
+#endif
+#ifdef HAVE_PLPLOT
+      int i,j;
+      PLINT nx,ny;
+      PLFLT **z, zmin, zmax;
+      PLFLT *Clevels;
+      PLcGrid  cgrid; //data for the pltr1 function
+
+      nx = zvals.ncolumn();
+      ny = zvals.nrow();
+      zmin = min(zvals);
+      zmax = max(zvals);
+      // allocate memory for the data
+      plAlloc2dGrid(&z, nx, ny);
+      Clevels = new PLFLT[nClevels];
+      cgrid.nx = nx; cgrid.xg = new PLFLT[nx];
+      cgrid.ny = ny; cgrid.yg = new PLFLT[ny];
+      
+      // fill the coordinate-conversion array
+      for (i = 0; i < nx; i++) { cgrid.xg[i] = xmin + i*(xmax-xmin)/(nx-1.); };
+      for (i = 0; i < ny; i++) { cgrid.yg[i] = ymin + i*(ymax-ymin)/(ny-1.); };
+
+      // copy data from CASA-array to plplot-array
+      for (i = 0; i < nx; i++) {
+	for (j = 0; j < ny; j++) {
+	  z[i][j] = zvals(j,i); //CASA ordering is "FORTRAN-style"
+	};
+      };
+      
+      // calculate the contour levels
+      for (i = 0; i < nClevels; i++) {
+	Clevels[i] = zmin + (i+0.5)*(zmax-zmin)/(PLFLT)nClevels;
+      }
+
+      // set the contour color
+      plcol0(cCol);
+
+      // plot the contours
+      plcont(z, nx, ny, 1, nx, 1, ny, Clevels, nClevels, pltr1, &cgrid);   
+      
+      // free the allocated memory
+      plFree2dGrid(z, nx, ny);
+      delete [] cgrid.xg;
+      delete [] cgrid.yg;
+      delete [] Clevels;
+      
+#endif
+    } catch (AipsError x) {
+      cerr << "SimplePlot::addContourLines: " << x.getMesg() << endl;
+      return False;
+    }; 
+    return status;        
+  };
+
   
   
 } // Namespace CR -- end
