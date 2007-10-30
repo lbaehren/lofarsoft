@@ -82,6 +82,7 @@ find_path (NUM_UTIL_INSTALL_PREFIX release_area.txt
   PATH_SUFFIXES
   ../release
   ../../release
+  ../../../release
   NO_DEFAULT_PATH
   )
 
@@ -103,7 +104,7 @@ set (NUM_UTIL_sources num_util.cpp)
 set (NUM_UTIL_headers num_util.h)
 
 include_directories (
-  ${BOOST_INCLUDES}/..
+  ${BOOST_INCLUDES}
   ${PYTHON_INCLUDES}
   ${PYTHON_INCLUDES}/../../lib/python2.5/site-packages/numpy/core/include
 )
