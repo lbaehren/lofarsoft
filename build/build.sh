@@ -351,8 +351,8 @@ case $param_packageName in
     ;;
     cr)
 		echo "[`date`] Processing required packages ..."
-		./build.sh dal;
-		./build.sh plplot;
+		./build.sh dal  $param_reportBuild
+		./build.sh plplot  $param_reportBuild
 		echo "[`date`] Building CR-Tools package ..."
 		build_package cr src/CR-Tools;
     ;;
