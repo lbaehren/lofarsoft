@@ -374,7 +374,7 @@ namespace CR { // Namespace CR -- begin
 
   Bool SimplePlot::quick2Dplot(String file, Matrix<Double> zvals, Double xmin, Double xmax, 
 			       Double ymin, Double ymax, String xlabel, String ylabel, String toplabel,
-			       Bool printingplot, int nLevels){
+			       Bool printingplot, int nLevels, int nClevels, int cCol){
     Bool status=True;
     try {
 #ifdef HAVE_PGPLOT
@@ -392,6 +392,7 @@ namespace CR { // Namespace CR -- begin
       PLINT nx,ny;
       PLFLT **z, zmin, zmax, *level_edges;
       PLFLT *pos,*r,*g,*b;
+      PLcGrid  cgrid; //data for the pltr1 function
 
       //set the color-map
       //currently only default black-white is supported
@@ -416,8 +417,13 @@ namespace CR { // Namespace CR -- begin
       // allocate memory for the data
       plAlloc2dGrid(&z, nx, ny);
       level_edges = new PLFLT[(nLevels+1)];
-      level_edges = new PLFLT[(nLevels+1)];
+      cgrid.nx = nx; cgrid.xg = new PLFLT[nx];
+      cgrid.ny = ny; cgrid.yg = new PLFLT[ny];
 
+      // fill the coordinate-conversion array
+      for (i = 0; i < nx; i++) { cgrid.xg[i] = xmin + i*(xmax-xmin)/(nx-1.); };
+      for (i = 0; i < ny; i++) { cgrid.yg[i] = ymin + i*(ymax-ymin)/(ny-1.); };
+ 
       // copy data from CASA-array to plplot-array
       for (i = 0; i < nx; i++) {
 	for (j = 0; j < ny; j++) {
@@ -428,17 +434,30 @@ namespace CR { // Namespace CR -- begin
       for (i = 0; i <= nLevels; i++) {
 	level_edges[i] = zmin + i*(zmax-zmin)/(PLFLT)nLevels;
       }
-    
-      // do the plot
-      plshades(z, nx, ny, NULL, xmin, xmax, ymin, ymax,
-	       level_edges, nLevels+1, 
-	       2, 0, 0, //fill_width, cont_color, cont_width 
-	       plfill, 1, pltr1, NULL);
       
+      // do the raster-plot
+      plshades(z, nx, ny, NULL, xmin, xmax, ymin, ymax,
+      	       level_edges, nLevels+1, 
+      	       2, 0, 0, //fill_width, cont_color, cont_width 
+      	       plfill, 1, pltr1, &cgrid); // I think the last two parameters aren't used...
+
+      //do the contour-plot
+      if (nClevels>0) {
+	PLFLT *Clevels;
+	Clevels = new PLFLT[nClevels];
+	for (i = 0; i < nClevels; i++) {
+	  Clevels[i] = zmin + (i+0.5)*(zmax-zmin)/(PLFLT)nClevels;
+	}
+	plcol0(cCol);
+	plcont(z, nx, ny, 1, nx, 1, ny, Clevels, nClevels, pltr1, &cgrid);   
+	delete [] Clevels;
+      };
       
       // free the allocated memory
       plFree2dGrid(z, nx, ny);
       delete [] level_edges;
+      delete [] cgrid.xg;
+      delete [] cgrid.yg;
 
       status = status && AddLabels(xlabel, ylabel, toplabel);
 #endif
@@ -448,7 +467,6 @@ namespace CR { // Namespace CR -- begin
     }; 
     return status;        
   };
-
   
   
 } // Namespace CR -- end

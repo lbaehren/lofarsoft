@@ -74,7 +74,7 @@ int test_SimplePlot ()
 
     newObject.quick2Dplot("tSimplePlot-2d.ps", twoDvalues, 0., 1., 0., 1.,	     
 			  "X-axis", "Y-Axis", "2d plotting-test",
-			  False, 30);
+			  False, 30, 4, 3);
     
 
   } catch (std::string message) {

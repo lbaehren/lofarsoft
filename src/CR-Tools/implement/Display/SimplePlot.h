@@ -271,6 +271,8 @@ namespace CR { // Namespace CR -- begin
       \param toplabel - label above the plot
       \param printingplot - make a plot suitable for inclusion in talks or papers
       \param nLevels  - number of different (color) levels to use
+      \param nCLevels - number of contour lines to plot (<tt>nCLevels<=0</tt> means no contours)
+      \param cCol     - color index for the contour lines 
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
 
@@ -282,7 +284,7 @@ namespace CR { // Namespace CR -- begin
     Bool quick2Dplot(String file, Matrix<Double> zvals, Double xmin, Double xmax, 
 		     Double ymin, Double ymax,	     
 		     String xlabel=String(), String ylabel=String(), String toplabel=String(),
-		     Bool printingplot=False, int nLevels=20);
+		     Bool printingplot=False, int nLevels=20, int nClevels=0, int cCol=2);
 
 
   private:
@@ -297,7 +299,7 @@ namespace CR { // Namespace CR -- begin
     */
     void init(void);
 
-  };
+  }; // class SimplePlot -- end
   
 } // Namespace CR -- end
 
