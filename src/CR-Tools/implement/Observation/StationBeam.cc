@@ -152,9 +152,9 @@ namespace CR { // Namespace CR -- begin
 	 h1 = (b-a)/2 ;
 	 h2 = (b+a)/2 ;
 	 
-cos_z_f_term = cos(pi/180.*source_hr_angle)*sin(pi/180.*source_declination)*cos(pi/180.*hr_angle)*sin(pi/180.*declination);
-cos_z_s_term = sin(pi/180.*source_hr_angle)*sin(pi/180.*source_declination)*sin(pi/180.*hr_angle)*sin(pi/180.*declination) ;
-cos_z_t_term = cos(pi/180.*source_declination)*cos(pi/180.*declination) ;
+         cos_z_f_term = cos(pi/180.*source_hr_angle)*sin(pi/180.*source_declination)*cos(pi/180.*hr_angle)*sin(pi/180.*declination);
+         cos_z_s_term = sin(pi/180.*source_hr_angle)*sin(pi/180.*source_declination)*sin(pi/180.*hr_angle)*sin(pi/180.*declination) ;
+         cos_z_t_term = cos(pi/180.*source_declination)*cos(pi/180.*declination) ;
 
         cos_zenith = cos_z_f_term + cos_z_s_term + cos_z_t_term ;
 	
