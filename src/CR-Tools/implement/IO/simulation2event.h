@@ -144,7 +144,8 @@ namespace CR { // Namespace CR -- begin
       \param AntListName   -- name of the antenna list file (without extension
                             <tt>.list</tt>)
       \param path="."      -- directory in which the simulation data lies (without <tt>/</tt> at end)
-      \param date=1104580800 -- Date for which to get the calibration data (default = 1.1.2005)
+      \param date=1104580800 -- "Observation" date of the event. Used to get the calibration data
+                                and written into the event-file. (Default: 1. Jan. 2005 12:00 UTC)
       \param presync=32768 -- Number of samples before the "trigger" (default = LOPES default)
       \param AddTV=True    -- Add mockup-signals of the TV-transmitter
       \param AddNoise=True -- Add "Galactic" noise to the data
