@@ -89,8 +89,9 @@ namespace CR { // namespace CR -- begin
   //
   // ============================================================================
 
-  // [1] Standard C/C++ array 
-  
+  // ----------------------------------------------------------------------------
+  // L1-Norm
+
   /*!
     \brief Compute the L1-Norm of a vector
 
@@ -104,20 +105,6 @@ namespace CR { // namespace CR -- begin
 	      unsigned int const &nelem);
   
   /*!
-    \brief Compute the L2-Norm of a vector
-
-    \param vec   -- Vector for which to comput the norm.
-    \param nelem -- Number of elements in the vector.
-
-    \return norm -- L2-norm of the vector
-  */
-  template <class T>
-    T L2Norm (T const *vec,
-	      unsigned int const &nelem);
-
-  // [2] Standard library vector
-  
-  /*!
     \brief Compute the L1-Norm of a vector
 
     \param vec   -- Vector for which to comput the norm.
@@ -126,21 +113,8 @@ namespace CR { // namespace CR -- begin
   */
   template <class T>
     T L1Norm (std::vector<T> const &vec);
-  
-  /*!
-    \brief Compute the L2-Norm of a vector
 
-    \param vec   -- Vector for which to comput the norm.
-
-    \return norm -- L2-norm of the vector
-  */
-  template <class T>
-    T L2Norm (std::vector<T> const &vec);
-
-  // [3] Blitz++ arrays
-  
 #ifdef HAVE_BLITZ
-
   /*!
     \brief Compute the L1-Norm of a vector
 
@@ -155,7 +129,51 @@ namespace CR { // namespace CR -- begin
   */
   template <class T>
     T L1Norm (blitz::Array<T,1> const &vec);
+#endif
   
+#ifdef HAVE_CASA
+  /*!
+    \brief Compute the L1-Norm of a vector
+    
+    The <a href="http://mathworld.wolfram.com/L1-Norm.html">L1-Norm</a> is a
+    vector norm defined for a vector \f$ \vec x = [x_1,x_2,...,x_N]^T \f$ with
+    complex entries by 
+    \f[ |\vec x|_{1} = \sum_{i=1}^{N} |x_i| \f]
+    
+    \param vec -- The input vector
+    
+    \return norm -- The L1-Norm for the vector
+  */
+  template <class T>
+    T L1Norm (casa::Vector<T> const &vec);
+#endif
+  
+  // ----------------------------------------------------------------------------
+  // L2-Norm
+
+  /*!
+    \brief Compute the L2-Norm of a vector
+
+    \param vec   -- Vector for which to comput the norm.
+    \param nelem -- Number of elements in the vector.
+
+    \return norm -- L2-norm of the vector
+  */
+  template <class T>
+    T L2Norm (T const *vec,
+	      unsigned int const &nelem);
+
+  /*!
+    \brief Compute the L2-Norm of a vector
+
+    \param vec   -- Vector for which to comput the norm.
+
+    \return norm -- L2-norm of the vector
+  */
+  template <class T>
+    T L2Norm (std::vector<T> const &vec);
+
+#ifdef HAVE_BLITZ
   /*!
     \brief Compute the L2-Norm of a vector
 
@@ -175,28 +193,10 @@ namespace CR { // namespace CR -- begin
   */
   template <class T>
     T L2Norm (blitz::Array<T,1> const &vec);
-  
 #endif
-
-  // [4] CASA array classes
 
 #ifdef HAVE_CASA
 
-  /*!
-    \brief Compute the L1-Norm of a vector
-
-    The <a href="http://mathworld.wolfram.com/L1-Norm.html">L1-Norm</a> is a
-    vector norm defined for a vector \f$ \vec x = [x_1,x_2,...,x_N]^T \f$ with
-    complex entries by 
-    \f[ |\vec x|_{1} = \sum_{i=1}^{N} |x_i| \f]
-
-    \param vec -- The input vector
-
-    \return norm -- The L1-Norm for the vector
-  */
-  template <class T>
-    T L1Norm (casa::Vector<T> const &vec);
-  
   /*!
     \brief Compute the L2-Norm of a vector
 
@@ -216,7 +216,6 @@ namespace CR { // namespace CR -- begin
   */
   template <class T>
     T L2Norm (casa::Vector<T> const &vec);
-  
 #endif
 
   // ============================================================================
@@ -246,7 +245,6 @@ namespace CR { // namespace CR -- begin
     std::vector<T> sign (std::vector<T> const &x);
   
 #ifdef HAVE_CASA
-  
   /*!
     \brief Determine the sign of a set of real-valued numbers
     
@@ -262,7 +260,6 @@ namespace CR { // namespace CR -- begin
   */
   template <class T>
     casa::Vector<T> invertOrder (casa::Vector<T> const &vec);
-
 #endif
 
 } // namespace CR -- end

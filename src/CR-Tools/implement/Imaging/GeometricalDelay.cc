@@ -41,6 +41,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_CASA
   GeometricalDelay::GeometricalDelay ()
     : nofAntennas_p (1),
+      nearField_p (true),
       bufferDelays_p (false),
       showProgress_p (false)
   {
@@ -59,6 +60,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_BLITZ
   GeometricalDelay::GeometricalDelay ()
     : nofAntennas_p (1),
+      nearField_p (true),
       bufferDelays_p (false),
       showProgress_p (false)
   {
@@ -80,7 +82,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
 				      casa::Matrix<double> const &skyPositions,
 				      bool const &bufferDelays,
 				      bool const &antennaIndexFirst)
-    : bufferDelays_p (false),
+    : nearField_p (true),
+      bufferDelays_p (false),
       showProgress_p (false)
   {
     cout << "[GeometricalDelay::GeometricalDelay]" << endl;
@@ -113,7 +116,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
 				      blitz::Array<double,2> const &skyPositions,
 				      bool const &bufferDelays,
 				      bool const &antennaIndexFirst)
-    : bufferDelays_p (false),
+    : nearField_p (true),
+      bufferDelays_p (false),
       showProgress_p (false)
   {
     bool status (true);
@@ -200,7 +204,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     skyPositions_p.resize (other.skyPositions_p.shape());
     skyPositions_p = other.skyPositions_p;
 
-    nofAntennas_p  = other.nofAntennas_p;
+    nearField_p    = other.nearField_p;
     bufferDelays_p = other.bufferDelays_p;
     showProgress_p = other.showProgress_p;
 
@@ -208,6 +212,10 @@ namespace CR { // NAMESPACE CR -- BEGIN
       delays_p.resize(other.delays_p.shape());
       delays_p        = other.delays_p;
     }
+
+    // book-keeping variables
+
+    nofAntennas_p  = other.nofAntennas_p;
   }
   
   // ============================================================================
@@ -681,10 +689,11 @@ namespace CR { // NAMESPACE CR -- BEGIN
   void GeometricalDelay::summary (std::ostream &os)
   {
     os << "[GeometricalDelay] Summary of object" << std::endl;
-    os << "-- Sky positions     : " << skyPositions_p.shape() << std::endl;
-    os << "-- Antenna positions : " << antPositions_p.shape() << std::endl;
-    os << "-- nof. Baselines    : " << nofBaselines()         << std::endl;
-    os << "-- buffer delays     : " << bufferDelays_p         << std::endl;
+    os << "-- Sky positions       : " << skyPositions_p.shape() << std::endl;
+    os << "-- Antenna positions   : " << antPositions_p.shape() << std::endl;
+    os << "-- nof. Baselines      : " << nofBaselines()         << std::endl;
+    os << "-- near field geometry : " << nearField_p            << std::endl;
+    os << "-- buffer delays       : " << bufferDelays_p         << std::endl;
     
     if (bufferDelays_p) {
       os << "-- Delays            : " << delays_p.shape()     << std::endl;
@@ -712,9 +721,19 @@ namespace CR { // NAMESPACE CR -- BEGIN
     diff(0) = xSky-xAntenna;
     diff(1) = ySky-yAntenna;
     diff(2) = zSky-zAntenna;
-    
-    delay = (CR::L2Norm(diff)-CR::L2Norm(skyPosition))/lightspeed;
-    
+
+    /*
+      At this position we now need to distinguish between considering a source
+      in the near-field or in the far field. For a source in the far-field we 
+      can use the simplified calculation, whereas for the near-field we need
+      to carry out the calculation using the proper 3-dim geometry.
+     */
+    if (nearField_p) {
+      delay = (CR::L2Norm(diff)-CR::L2Norm(skyPosition))/lightspeed;
+    } else {
+      delay = -(xSky*xAntenna+ySky*yAntenna+zSky*zAntenna)/lightspeed;
+    }
+      
     return delay;
   }
 #else
