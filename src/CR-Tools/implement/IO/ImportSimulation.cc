@@ -34,7 +34,9 @@ namespace CR { // Namespace CR -- begin
     : itsAzimuthAngle(0.0),
       itsElevationAngle(0.0),
       itsShowerTheta(0.0),
-      itsShowerPhi(0.0)
+      itsShowerPhi(0.0),
+      itsLowerWindowBoundary(1e10),
+      itsUpperWindowBoundary(-1e10)
   {
   }
   
@@ -211,8 +213,8 @@ namespace CR { // Namespace CR -- begin
     }  
 
     // find common time window between all of the antennas
-    Double lowestWindowBoundary = 1.e10;	// dummy value
-    Double highestWindowBoundary = -1.e10;	// dummy value
+    Double lowestWindowBoundary = itsLowerWindowBoundary;	// start value
+    Double highestWindowBoundary = itsUpperWindowBoundary;	// start value
     for (vector<ImportAntenna>::const_iterator i=itsAntennaList.begin(); i!=itsAntennaList.end(); ++i)
       {
         if (i->getSimulatedWindowStart() < lowestWindowBoundary) { lowestWindowBoundary = i->getSimulatedWindowStart(); }

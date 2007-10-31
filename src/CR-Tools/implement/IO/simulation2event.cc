@@ -83,8 +83,10 @@ namespace CR { // Namespace CR -- begin
       TSmatrix2Event TS2Event;
       Vector<int> AntIDs;
       Matrix<DComplex> FFT;
+      Double WindowStart;
       int i,nAnt;
      
+      Sim.setWindowBoundaries(-3e-6,3e-6); //set the window boundaries to 2*MaxDelay
       success = success && Sim.openNewSimulation(SimulationName, AntListName, path);
       if (!success){
 	cerr << "simulation2event::generateEvent: " << "Error in Sim.openNewSimulation()!" << endl;
@@ -106,13 +108,15 @@ namespace CR { // Namespace CR -- begin
       ApplyInstEff.setAntennaIDs(AntIDs);
       ApplyInstEff.setFreqAxis(sim2fft.getFrequency());
       FFT = ApplyInstEff.ApplyEffects(sim2fft.getfft());
-      //FFT *= DComplex(1e0,0);
+      //FFT *= DComplex(1e2,0); //use this to enhance the simulated pulse
       if ( FFT.nelements() <=  (uInt)nAnt){ //cast to get rid of a stupid waring...
 	cerr << "simulation2event::generateEvent: " << "Error in ApplyInstEff.ApplyEffects()!" << endl;
 	return False;
       };
 
-      success = success && toGrid.AddFFTData(FFT,  sim2fft.getBlocklen(), sim2fft.getFrequency());
+      WindowStart = Sim.getSamplingWindowStart();
+      WindowStart -= 18.8e-6; //trial and error number, good for the test event...
+      success = success && toGrid.AddFFTData(FFT,  sim2fft.getBlocklen(), sim2fft.getFrequency(), False, WindowStart);
       if (!success){
 	cerr << "simulation2event::generateEvent: " << "Error in toGrid.AddFFTData()!" << endl;
 	return False;
@@ -150,7 +154,7 @@ namespace CR { // Namespace CR -- begin
 	  ApplyInstEff2Noise.setAntennaIDs(AntIDs);
 	  ApplyInstEff2Noise.setFreqAxis(frequency);
 	  inFFT = ApplyInstEff2Noise.ApplyEffects(nFFT);
-	  inFFT *= DComplex(1e-2);
+	  inFFT *= DComplex(1e-2); // ugly normalization hack!
 	  success = success && toGrid.AddFFTData(inFFT, blocksize, frequency );
 	  if (!success){
 	    cerr << "simulation2event::generateEvent: " << "Error while generating noise!" << endl;

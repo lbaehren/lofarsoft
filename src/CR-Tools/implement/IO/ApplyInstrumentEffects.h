@@ -39,7 +39,7 @@ namespace CR { // Namespace CR -- begin
     
     \ingroup IO
     
-    \brief Brief description for class ApplyInstrumentEffects
+    \brief Apply the effects of the LOPES electronics to (simulated) data
     
     \author Andreas Horneffer
 
@@ -50,10 +50,19 @@ namespace CR { // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[start filling in your text here]
+      <li> initialized CalTableReader
     </ul>
     
     <h3>Synopsis</h3>
+
+    This class applies the effects of the electronics to a set of frequency domain 
+    data. It takes into account the:
+    <ul>
+    <li> phases of the Wainwright filter
+    <li> measures gain of the electronics (amplification values)
+    <li> relative phases
+    <li> relative delays
+    </ul>
     
     <h3>Example(s)</h3>
     
@@ -189,7 +198,7 @@ namespace CR { // Namespace CR -- begin
     
     
     /*!
-      \brief initialize the interpolaters
+      \brief initialize the gain, phase, and filter interpolaters
     */    
     Bool InitGPFInterpolaters();   
 

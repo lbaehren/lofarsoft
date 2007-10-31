@@ -84,7 +84,7 @@ namespace CR { // Namespace CR -- begin
       Vector<DComplex> tmpCvec;
       Vector<DComplex> FilterVec,PhaseVec,GainVec,DelayVec;
       DComplex tmpComp;
-      Double delay;
+      Double delay,maxdelay=0., timerange;
 
       nAnts = input.ncolumn();
       nFreq = input.nrow();
@@ -126,11 +126,17 @@ namespace CR { // Namespace CR -- begin
 	tmpComp = DComplex(0.,-1.);
 	tmpComp *= 2*PI;
         CTRead->GetData(date_p, AntIDs_p(i), "Delay", &delay);
+	if (abs(delay) > maxdelay) {maxdelay=delay;};
 	convertArray(tmpCvec,frequency_p);
 	DelayVec=exp(tmpComp*delay*tmpCvec);
 
 	output.column(i) = input.column(i)*FilterVec*GainVec*PhaseVec*DelayVec;
       };      
+      timerange = nFreq/(max(frequency_p)*2.); //the sampled data can span the range [-timerange:+timerange]
+      if (maxdelay >= timerange) {
+	cout  << "ApplyInstrumentEffects::ApplyEffects: " << "Sample timerange smaller than maxdelay!" << endl 
+	      << "                                      " << "Aliasing is probable!" << endl;
+      };
       
     } catch (AipsError x) {
       cerr << "ApplyInstrumentEffects::ApplyEffects: " << x.getMesg() << endl;

@@ -41,7 +41,7 @@ namespace CR { // Namespace CR -- begin
     
     \ingroup IO
     
-    \brief Brief description for class simulation2event
+    \brief Generate a LOPES event file from reas simulation data
     
     \author Andreas Horneffer
 
@@ -52,10 +52,28 @@ namespace CR { // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[start filling in your text here]
+      <li> ImportSimulation 
+      <li> Simulation2fftMatrix
+      <li> ApplyInstrumentEffects
+      <li> toLOPESgrid
+      <li> genTVSpec
+      <li> FalckeGorhamGalacticNoise
+      <li> TSmatrix2Event
     </ul>
     
     <h3>Synopsis</h3>
+
+    This class incorporates all the standard steps for the conversion of reas
+    simulation data into a LOPES event file. It:
+    <ol>
+    <li> imports the simulation
+    <li> applies the effects of the antenna (combines polarisation, applies frequency dependent gain)
+    <li> applies the effects of the electronics (frequency dependent gain/phases, delays etc.)
+    <li> interpolates the data onto the LOPES sampling grid
+    <li> adds simulated TV-transmitter data (if requested)
+    <li> adds simulated noise (if requested)
+    <li> converts the data into a LOPES event file
+    </ol>
     
     <h3>Example(s)</h3>
     

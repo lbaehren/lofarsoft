@@ -42,7 +42,7 @@ namespace CR { // Namespace CR -- begin
     
     \ingroup IO
     
-    \brief Brief description for class genTVSpec
+    \brief Generate a mock spectrum of the "LOPES TV-transmitter"
     
     \author Andreas Horneffer
 
@@ -53,10 +53,15 @@ namespace CR { // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[start filling in your text here]
+      <li>initialized CalTableReader
     </ul>
     
     <h3>Synopsis</h3>
+
+    This class generates a mock spectrum of the "LOPES TV-transmitter" by setting one
+    bin (in frequency space) for each "carrier frequency" to a given amplitude and the 
+    correct phase. Before it can be used it needs an initialized CalTableReader, the
+    needed AntennaIDs and the frequency values for the frequency space data.
     
     <h3>Example(s)</h3>
     

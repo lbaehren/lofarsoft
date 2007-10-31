@@ -42,7 +42,7 @@ namespace CR { // Namespace CR -- begin
     
     \ingroup IO
     
-    \brief Brief description for class toLOPESgrid
+    \brief Interpolate (simulation-)data to the sampling grid as used e.g. by LOPES
     
     \author Andreas Horneffer
 
@@ -53,10 +53,16 @@ namespace CR { // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[start filling in your text here]
+      <li>casacore or CASA
     </ul>
     
     <h3>Synopsis</h3>
+
+    This class generates an empty dataset that can then be filled with, e.g., simulated 
+    pulse data, noise, TV-transmitter data etc. The input data is interpolated to the 
+    sampling grid as, e.g., used by LOPES (the default) and added to the internal dataset.
+    This internal dataset can then be extracted and, e.g., with TSmatrix2Event converted
+    into a LOPES event file.
     
     <h3>Example(s)</h3>
     

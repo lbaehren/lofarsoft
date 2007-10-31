@@ -162,12 +162,26 @@ namespace CR { // Namespace CR -- begin
     */
     inline Double getSamplingWindowStart() const { return itsAntennaList.front().getWindowStart(); } 	// take value from first antenna, is constant for all of them
 
+    /*!
+      \brief set the minimal start and stop boundaries for the window (in seconds)
+
+      \param LowerBoundary - maximal value for the lower window boundary, the actual boundary might be lower (in seconds)
+      \param UpperBoundary - minimal value for the upper window boundary, the actual boundary might be larger (in seconds)
+
+      The default values are dummy values. Use <tt>setWindowBoundaries()</tt> to reset a previously defined window.
+    */
+    void setWindowBoundaries(Double LowerBoundary=1e10, Double UpperBoundary=-1e10) {
+      itsLowerWindowBoundary = LowerBoundary; itsUpperWindowBoundary = UpperBoundary;
+    }
+
   private:
     
     Double itsAzimuthAngle;
     Double itsElevationAngle;
     Double itsShowerTheta;
     Double itsShowerPhi;
+    Double itsLowerWindowBoundary;
+    Double itsUpperWindowBoundary;
     vector<ImportAntenna> itsAntennaList;
     vector<ImportAntenna>::const_iterator iNextAntennaToReturn;
   };
