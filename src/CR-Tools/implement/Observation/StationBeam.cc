@@ -134,7 +134,10 @@ namespace CR { // Namespace CR -- begin
 	 Double new_azimuth(0.0);
 	 Double L_cosine(0.0);
 	 Double M_cosine(0.0);
-	
+	 Double sourceHrAngle = pi/180.*source_hr_angle ;
+         Double sourceDeclination = pi/180.*source_declination ;
+         Double hrAngle = pi/180.*hr_angle ;
+         Double decAngle = pi/180.*declination ;
 	 	 
 	 Double power_dish(0.0);
 	 Double xx(0.0);
@@ -152,25 +155,25 @@ namespace CR { // Namespace CR -- begin
 	 h1 = (b-a)/2 ;
 	 h2 = (b+a)/2 ;
 	 
-         cos_z_f_term = cos(pi/180.*source_hr_angle)*sin(pi/180.*source_declination)*cos(pi/180.*hr_angle)*sin(pi/180.*declination);
-         cos_z_s_term = sin(pi/180.*source_hr_angle)*sin(pi/180.*source_declination)*sin(pi/180.*hr_angle)*sin(pi/180.*declination) ;
-         cos_z_t_term = cos(pi/180.*source_declination)*cos(pi/180.*declination) ;
+         cos_z_f_term = cos(sourceHrAngle)*sin(sourceDeclination)*cos(hrAngle)*sin(decAngle);
+         cos_z_s_term = sin(sourceHrAngle)*sin(sourceDeclination)*sin(hrAngle)*sin(decAngle) ;
+         cos_z_t_term = cos(sourceDeclination)*cos(decAngle) ;
 
         cos_zenith = cos_z_f_term + cos_z_s_term + cos_z_t_term ;
 	
 	new_zenith = acos(cos_zenith) ;
 	
-	if (declination > source_declination)
-	   new_azimuth = abs(hr_angle-source_hr_angle) ;
+	if (decAngle > sourceDeclination)
+	   new_azimuth = abs(hrAngle-sourceHrAngle) ;
 	   else 
-	   	  if(declination < source_declination)
-		              new_azimuth = 180 -abs(source_hr_angle-hr_angle) ;
-			                if ((declination < source_declination) && (hr_angle >180))
-						   new_azimuth = 180 + (source_hr_angle - hr_angle) ;
+	   	  if(decAngle < sourceDeclination)
+		              new_azimuth = pi -abs(sourceHrAngle-hrAngle) ;
+			                if ((decAngle < sourceDeclination) && (hrAngle >pi))
+						   new_azimuth = pi + (sourceHrAngle - hrAngle) ;
          
-	  L_cosine = sin(new_zenith)*cos(pi/180.*new_azimuth) ;
+	  L_cosine = sin(new_zenith)*cos(new_azimuth) ;
 	  
-	  M_cosine = sin(new_zenith)*sin(pi/180.*new_azimuth) ;
+	  M_cosine = sin(new_zenith)*sin(new_azimuth) ;
 	  
         for( uint r =0; r <n_roots; r++ ){
 	
@@ -179,9 +182,9 @@ namespace CR { // Namespace CR -- begin
 	     
 	     xx = h1*legendre_root(r)+h2 ;
 	    
-	     d1 = station_radii*cos(pi/180.*source_declination)*sqrt(1.-(xx/station_radii)*(xx/station_radii)) ;
+	     d1 = station_radii*cos(pi/180.*sourceDeclination)*sqrt(1.-(xx/station_radii)*(xx/station_radii)) ;
 	     
-	     c1 = -station_radii*cos(pi/180.*source_declination)*sqrt(1.-(xx/station_radii)*(xx/station_radii)) ;
+	     c1 = -station_radii*cos(pi/180.*sourceDeclination)*sqrt(1.-(xx/station_radii)*(xx/station_radii)) ;
 	     
 	     k1 =(d1-c1)/2. ;
 	     
@@ -201,7 +204,7 @@ namespace CR { // Namespace CR -- begin
         }
 	power_final = h1*power_sum ;    
 	
-power_dish = abs(h1*power_sum/(2.*pi*(3e8/frequency)*(3e8/frequency)))*abs(h1*power_sum/(2.*pi*(3e8/frequency)*(3e8/frequency))) ;
+       power_dish = abs(h1*power_sum/(2.*pi*(3e8/frequency)*(3e8/frequency)))*abs(h1*power_sum/(2.*pi*(3e8/frequency)*(3e8/frequency))) ;
 	
        return power_dish ;
       }
@@ -243,17 +246,22 @@ power_dish = abs(h1*power_sum/(2.*pi*(3e8/frequency)*(3e8/frequency)))*abs(h1*po
 	Double observed_N(0.0) ;
 	Double pos_new_x(0.0) ;
 	Double pos_new_y(0.0) ;
-	//Double mul_sum(0.0) ;
+
 	Double position_new_x(0.0);
 	Double position_new_y(0.0);
 	Double position_new_y1(0.0);
 	Double position_new_y2(0.0);
 	
-	observed_L = sin(pi/180.*(declination-source_declination))*cos(pi/180.*(hr_angle-source_hr_angle)) ;
+        Double sourceHrAngle = pi/180.*source_hr_angle ;
+        Double sourceDeclination = pi/180.*source_declination ;
+        Double hrAngle = pi/180.*hr_angle ;
+        Double decAngle = pi/180.*declination ;
+
+	observed_L = sin(decAngle-sourceDeclination)*cos(hrAngle-sourceHrAngle) ;
 	
-	observed_M = sin(pi/180.*(declination-source_declination))*sin(pi/180.*(hr_angle-source_hr_angle)) ;
+	observed_M = sin(decAngle-sourceDeclination)*sin(hrAngle-sourceHrAngle) ;
 		
-	observed_N = cos(pi/180.*(declination-source_declination)) ;
+	observed_N = cos(decAngle-sourceDeclination) ;
 		
 	Double stationbeam = stbm.station_beam( frequency,
 				                hr_angle,
@@ -270,16 +278,16 @@ power_dish = abs(h1*power_sum/(2.*pi*(3e8/frequency)*(3e8/frequency)))*abs(h1*po
 	     pos_new_x = position_x(n_stat) ;
 	     pos_new_y = position_y(n_stat) ;
 	     
-	     position_new_x = pos_new_x*cos(pi/180.*source_hr_angle)-pos_new_y*sin(pi/180.*source_hr_angle) ;
-	     position_new_y1 = pos_new_x*cos(pi/180.*source_declination)*sin(pi/180.*source_hr_angle) ;
-	     position_new_y2 = pos_new_y*cos(pi/180.*source_hr_angle)*cos(pi/180.*source_declination) ;
+	     position_new_x = pos_new_x*cos(sourceHrAngle)-pos_new_y*sin(sourceHrAngle) ;
+	     position_new_y1 = pos_new_x*cos(pi/180.*sourceDeclination)*sin(pi/180.*sourceHrAngle) ;
+	     position_new_y2 = pos_new_y*cos(pi/180.*sourceHrAngle)*cos(pi/180.*sourceDeclination) ;
 	     
 	     position_new_y = position_new_y1 +position_new_y2 ;
              
-	    sum_tied_array = sum_tied_array +stationbeam*exp(2*pi*j*frequency/3e8*(position_new_x*observed_L+position_new_y*observed_M));
+	    sum_tied_array = sum_tied_array +stationbeam*exp(2*pi*j*(frequency/3e8)*(position_new_x*observed_L+position_new_y*observed_M));
 	  }
        
-       integral_value = (abs(sum_tied_array)*abs(sum_tied_array));	     	     
+       integral_value = abs(sum_tied_array)*abs(sum_tied_array);	     	     
 													
        return integral_value ;
       }
@@ -291,593 +299,492 @@ power_dish = abs(h1*power_sum/(2.*pi*(3e8/frequency)*(3e8/frequency)))*abs(h1*po
 	       
  }
  
-  
-  Double StationBeam::integrate_moon(  const Double& source_declination,
-		                       const Double& source_hr_angle,
-		                       const Double& station_radii,
-		                       const Vector<uint>& station_id,
-		                       const Double& freq_init,
-		                       const Double& bandwidth,
-		                       Vector<Double>& position_x,
-		                       Vector<Double>& position_y,
-		                       const Vector<Double>& legendre_root,
-		                       const Vector<Double>& legendre_weight )   
  
-{
-   try {
-         StationBeam stbm ;
-	 
-	 uint nroots = legendre_root.nelements() ;
-	 
-	 Double f1m (0.0) ;
-	 Double f2m (0.0) ;
-	 Double f1_fm(0.0) ;
-	 Double f2_fm(0.0);
-	 Double ffm(0.0);
-	 Double freq_final(0.0);
-	 f1m = freq_init ;
-	 freq_final = freq_init +bandwidth ;
-	 	 
-	 Double h1m(0.0) ;
-	 Double h2m(0.0) ;
-	 Double h1_xm (0.0);
-	 Double h2_xm (0.0);
-	 Double xxm(0.0);
-	 h1m = source_declination-0.25 ;
-	 	 	 
-	 Double k1m(0.0) ;
-	 Double k2m(0.0) ;
-	 Double k1_ym(0.0);
-	 Double k2_ym(0.0);
-	 Double yym(0.0);
-	 
-	 Double fm_outer_sum(0.0) ;
-	 Double fm_inner_sum(0.0) ;
-	 Double xm_outer_sum(0.0) ;
-	 Double xm_inner_sum(0.0) ;
-	 Double ym_outer_sum(0.0) ;
-	 Double ym_inner_sum(0.0) ;     
-	 
-	 Double power_moon(0.0);
-	
-	 while( h1m < (source_declination+0.25)) {
-		  
-		h2m= h1m+0.25 ;
-		h1_xm =(h2m-h1m)/2. ;
-		h2_xm =(h2m+h1m)/2. ;
-		xm_inner_sum =0;
-		ym_outer_sum = 0.0 ;
-		       
-		for( uint im=0; im<nroots; im++) {
-		       
-		      xxm = h1_xm*legendre_root(im)+h2_xm ;
-		      
-        k2m = source_hr_angle + 1/sin(0.0174533*xxm)*sqrt(0.25*0.25-(abs(xxm-source_declination))*(abs(xxm-source_declination)));
-	k1m = source_hr_angle -1/sin(0.0174533*xxm)*sqrt(0.25*0.25-(abs(xxm-source_declination))*(abs(xxm-source_declination)));
-			   
-		      k1_ym = (k2m-k1m)/2. ;
-		      k2_ym = (k2m+k1m)/2. ;
-		      
-                      ym_inner_sum = 0.0 ;
-		      
-		      for( uint jm =0; jm <nroots; jm++) {
-		      
-		           fm_outer_sum =0.0;
-			   yym = k1_ym* legendre_root(jm)+ k2_ym ;
-			   
-			   while(f1m < freq_final ) {
-		               
-			        f2m = f1m+1e6 ;
-			        f1_fm = (f2m-f1m)/2. ;	      
-			        f2_fm = (f2m+f1m)/2. ;
-			        fm_inner_sum =0.0;
-	       
-	                       for(uint gm=0; gm<nroots; gm++ ) {
-	      
-	                           ffm = f1_fm*legendre_root(gm)+f2_fm ;
-		             	 
-				   power_moon = stbm.tied_array( ffm,
-	                                                         yym,
-		                                                 xxm,
-		                                                 source_declination,
-		                                                 source_hr_angle,
-		                                                 station_radii,
-				                                 station_id,
-		                                                 position_x,
-		                                                 position_y,
-		                                                 legendre_root,
-		                                                 legendre_weight ) ;
-							     
-                                 fm_inner_sum = fm_inner_sum + legendre_weight(gm)*power_moon ;
-			       }
-			    
-			   fm_outer_sum = fm_outer_sum + f1_fm*fm_inner_sum ;	
-			   f1m = f2m ;
-			   }
-		       
-			f1m = freq_init ;
-			ym_inner_sum = ym_inner_sum + legendre_weight(jm)*fm_outer_sum ;
-		      }
-		      
-		      ym_outer_sum = ym_outer_sum + k1_ym*ym_inner_sum ;
-		      xm_inner_sum =  xm_inner_sum + k1_ym*ym_outer_sum ;
-          }
-	  xm_outer_sum = xm_outer_sum + h1_xm*xm_inner_sum ;
-	  h1m = h2m ;
-	}
-			    
-	power_moon = xm_outer_sum ;       
-	
-	return power_moon ;
-      }
-      
-      catch( AipsError x ){
-      cerr << "StationBeam::integrate_moon " << x.getMesg () << endl ;
-      return Double ();
-      }       
-	       
- }
- 
- 
-  
-Double StationBeam::integrate_sky(  const Double& source_declination,
-		                    const Double& source_hr_angle,
-		                    const Double& station_radii,
-		                    const Vector<uint>& station_id,
+ 	
+Double StationBeam::integrate_freq( const Double& hr_angle,
+                                    const Double& declination,
+                                    const Double& source_declination,
+	                            const Double& source_hr_angle,
+	                            const Double& station_radii,
+	                            const Vector<uint>& station_id,
 		                    const Double& freq_init,
 		                    const Double& bandwidth,
+                                    const Double& freq_interval,
 		                    Vector<Double>& position_x,
 		                    Vector<Double>& position_y,
-		                    const Vector<Double>& legendre_root,
-		                    const Vector<Double>& legendre_weight )      
-
- {
-   try {
-         StationBeam stbm ;
-	 
-	 Double power_beam(0.0);
-         
-	 Double declination_interval(5.0) ;
-	 Double hr_angle_interval(10.);
-	 Double freq_interval(5e6);
-	
-	 Double declination_min(0.0) ;
-	 Double declination_max(90.0) ;	 	 
-	 Double h1(0.0) ;
-	 Double h2(0.0) ;
-	 Double h1_x(0.0);
-	 Double h2_x(0.0);
-	 Double xx(0.0);
-	 //declination_min = source_declination - 0.25 ;
-	 // declination_max = source_declination - 0.5 ;
-	  	 	 
-	 Double k1(0.0) ;
-	 Double k2(0.0) ;
-	 Double k1_y(0.0);
-	 Double k2_y(0.0);
-	 Double yy(0.0);
-	 Double hr_angle_min = 0. ;
-	 //  k1 = hr_angle_min ;
-	 Double hr_angle_max(360.0);// = source_hr_angle -1. ;
-	 
-	 Double f_outer_sum(0.0) ;
-	 Double f_inner_sum(0.0);
-	 Double x_outer_sum(0.0) ;
-	 Double x_inner_sum(0.0);
-	 Double y_inner_sum(0.0);
-	 Double y_outer_sum(0.0) ;
-	 
-	 Double f1(0.0) ;
-	 Double f2(0.0) ;
-	 Double f1_f(0.0) ;
-	 Double f2_f(0.0);
-	 Double ff(0.0);
-	 Double freq_final(0.0);
-	 f1 = freq_init ;
-	 freq_final = freq_init +bandwidth ;
-	 	 
-	 Double power_sky_oneside(0.0);	 
-		 
-	 uint nroots = legendre_root.nelements() ;
-	 
-	 ofstream logfile1 ;
-	  
-	 logfile1.open("powersky1", ios::out) ;
-	 	 
-	 while(h1< declination_max){
-	         
-		 h2 = h1 + declination_interval ;
-//		 cout << "declination angle :" <<h2 << endl ;
-		 h1_x = (h2-h1)/2. ;
-		 h2_x = (h2+h1)/2. ;
-		 x_inner_sum =0.0 ;
-		 
-		 for( uint i =0; i<nroots; i++){
-		 
-		     y_outer_sum =0.0 ;
-		     xx = h1_x*legendre_root(i)+h2_x ;
-		     
-		     while( k1 < hr_angle_max){
-		     
-		           k2 = k1+ hr_angle_interval ;
-			   k1_y = (k2-k1)/2.0 ;
-			   k2_y = (k2+k1)/2.0 ;
-			   y_inner_sum = 0.0 ;
-			   
-			   for( uint j=0; j<nroots; j++ ){
-			   
-			        f_outer_sum =0.0 ;
-				yy = k1_y*legendre_root(j)+ k2_y ;
-				
-				while(f1 < freq_final ){
-				
-				      f2 = f1+ freq_interval ;
-				      f1_f = (f2-f1)/2.;
-				      f2_f = (f2+f1)/2. ;
-				      f_inner_sum =0.0;
-				      
-				      for( uint g=0; g<nroots; g++){
-				      
-				          ff = f1_f*legendre_root(g)+f2_f ;
-					  power_beam = stbm.tied_array( ff,
-	                                                                yy,
-		                                                        xx,
-		                                                        source_declination,
-		                                                        source_hr_angle,
-		                                                        station_radii,
-			                                                station_id,
-		                                                        position_x,
-		                                                        position_y,
-		                                                        legendre_root,
-		                                                        legendre_weight ) ;
-					 
-					 f_inner_sum = f_inner_sum + legendre_weight(g)*power_beam ;
-				      }
-				      f_outer_sum = f_outer_sum + f1_f*f_inner_sum ;
-		                      f1 = f2 ;
-				      logfile1 << h1 << "\t" << k1 << "\t" << f_outer_sum << "\n" ;
-			        }
-			        f1 = freq_init ;
-				y_inner_sum = y_inner_sum + legendre_weight(j)*f_outer_sum ;
-                                logfile1 << "\n" ;
-			    }
-                            y_outer_sum = y_outer_sum + k1_y*y_inner_sum ;
-	                    k1 = k2 ;	      
-			  
-		      }
-		      
-		      k1 = hr_angle_min ;
-		      x_inner_sum = x_inner_sum + legendre_weight(i)*y_outer_sum ;
-		}
-		
-		x_outer_sum = x_outer_sum + x_inner_sum ;
-		h1 = h2 ;
-		
-	}			   
-        power_sky_oneside = power_sky_oneside + x_outer_sum ;      
-	logfile1.close() ;
-	    
-       return power_sky_oneside ;
-      }
-      
-      catch( AipsError x ){
-      cerr << "StationBeam::integrate_sky_oneside " << x.getMesg () << endl ;
-      return Double ();
-      }       
-	       
- }	
-
-		    
- 	
-Double StationBeam::beam_width(  const Double& source_declination,
-	                       const Double& source_hr_angle,
-	                       const Double& station_radii,
-	                       const Vector<uint>& station_id,
-		               const Double& freq_init,
-		               const Double& bandwidth,
-		               Vector<Double>& position_x,
-		               Vector<Double>& position_y,
-                               const Vector<Double>& legendre_root,
-             		       const Vector<Double>& legendre_weight )   
+                                    const Vector<Double>& legendre_root,
+             		            const Vector<Double>& legendre_weight )   
 
 {
    try {
           StationBeam stbm ;
          	 
           uint nroots = legendre_root.nelements() ;
+          
           Double freq_final = freq_init + bandwidth ;
-          Double freq_interval = 1e6 ;
-
-	  Double decl_interval = 0.01 ;
-          Double hr_interval = 0.05 ;
+     
+          Double power_beam(0.0) ;
+          Double power_sum(0.0); 
           
-          Double decl_min = source_declination - 0.3 ;
-          Double hr_min = source_hr_angle - 8 ;
+      	  Double k1_freq(0.0) ;
+          Double k2_freq(0.0) ;
+          Double k1_f(0.0);
+          Double k2_f(0.0);
+          Double freq(0.0);
+          Double y_outer_sum(0.0);
+          Double y_inner_sum(0.0);
 
-          uint decl_loop = int(((source_declination+0.3)-(decl_min))/decl_interval) ;
-          uint hr_loop = int(((source_hr_angle+8)-(hr_min))/hr_interval) ;
-          
-          Vector<Double> declination( decl_loop, 0.0);
-          Vector<Double> hrangle( hr_loop, 0.0) ;
-	  Double power_beam(0.0) ;
-           Double power_sum(0.0); 
-          
-      	 ofstream logfile1 ;
-	  
-	 logfile1.open("beamwidth", ios::out) ; 
+          while( k1_freq < freq_final ) {
 
-         for( uint d=0; d< decl_loop; d++ )  {
+	      k2_freq = k1_freq + freq_interval ;
+              k1_f = (k2_freq - k1_freq)/2. ;
+              k2_f = (k2_freq +k1_freq )/2. ;
+             
+              y_inner_sum = 0;
 
-	      Double decl_angle= decl_min + d*decl_interval ;
-              declination(d) = decl_angle ;
+              for(uint ff=0; ff< nroots; ff++ ) {
+  
+		  freq = k1_f*legendre_root(ff)+k2_f ;
+		                    
+                  power_beam = stbm.tied_array( freq,
+	                                        hr_angle,
+		                                declination,
+		                                source_declination,
+		                                source_hr_angle,
+		                                station_radii,
+				                station_id,
+		                                position_x,
+		                                position_y,
+		                                legendre_root,
+		                                legendre_weight ) ;
+       
+		  y_inner_sum = y_inner_sum + legendre_weight(ff)*power_beam ;
+	      }
 
-              for( uint h=0; h< hr_loop; h++ )  {
-
-		  Double hr_angle = hr_min + h*hr_interval ;
-                  hrangle (h) = hr_angle ; 
-                  
-                  Double f1 = freq_init ;
-
-                  Double f2 = 0.0;
-                  Double f_inner_sum(0.0);
-                  Double f_outer_sum(0.0);
-                  Double f1_f(0.0);
-                  Double f2_f(0.0);
-
-                  while(f1 < freq_final )  { 
-				
-			f2 = f1+ freq_interval ;
-			f1_f = (f2-f1)/2.;
-			f2_f = (f2+f1)/2. ;
-			f_inner_sum =0.0;
-			
-			Double ff(0.0) ;
-	      
-			for( uint g=0; g<nroots; g++)  {
-				      
-			     ff = f1_f*legendre_root(g)+f2_f ;
-			     power_beam = stbm.tied_array( ff,
-	                                                   hr_angle,
-		                                           decl_angle,
-		                                           source_declination,
-		                                           source_hr_angle,
-		                                           station_radii,
-			                                   station_id,
-		                                           position_x,
-		                                           position_y,
-		                                           legendre_root,
-		                                           legendre_weight ) ;
-					 
-			   f_inner_sum = f_inner_sum + legendre_weight(g)*power_beam ;
-		       }
-		       f_outer_sum = f_outer_sum + f1_f*f_inner_sum ;
-		 
-                       f1 = f2 ;
-		       logfile1 << decl_angle << "\t" <<  hr_angle << "\t" << f_outer_sum << "\n" ;
-	               power_sum = f_outer_sum ;	  
-		  }
-		  logfile1 << "\n" ; 
-	      }                
-         }      
-	 logfile1.close();
-	       
-     return  power_sum ;
+              y_outer_sum = y_outer_sum + k1_f*y_inner_sum ;
+              k1_freq = k2_freq ;
+	  }
+            
+     return y_outer_sum ;
    }
       
    catch( AipsError x ){
-   cerr << "StationBeam::beam_width " << x.getMesg () << endl ;
+   cerr << "StationBeam::integrate_freq " << x.getMesg () << endl ;
    return Double ();
   }       
 }	
- 
- 
-Double StationBeam::integrate_moon_sky(  const Double& source_declination,
-		                              const Double& source_hr_angle,
-		                              const Double& station_radii,
-		                              const Vector<uint>& station_id,
-		                              const Double& freq_init,
-		                              const Double& bandwidth,
-		                              Vector<Double>& position_x,
-		                              Vector<Double>& position_y,
-		                              const Vector<Double>& legendre_root,
-		                              const Vector<Double>& legendre_weight )      
 
- {
+
+Double StationBeam::beamwidth(  const Double& source_declination,
+                                const Double& source_hr_angle,
+	                        const Double& station_radii,
+	                        const Vector<uint>& station_id,
+	                        const Double& freq_init,
+		                const Double& bandwidth,
+                                const Double& freq_interval,
+		                Vector<Double>& position_x,
+		                Vector<Double>& position_y,
+                                const Vector<Double>& legendre_root,
+             	                const Vector<Double>& legendre_weight )   
+
+{
    try {
-         StationBeam stbm ;
-	 
-	 Double power_beam(0.0);
-         
-	 Double declination_interval(0.25) ;
-	 Double hr_angle_interval(0.5);
-	 Double freq_interval(5e6);
-	
-	 Double declination_min(0.0) ;
-	 Double declination_max(0.0) ;	 	 
-	 Double h1(0.0) ;
-	 Double h2(0.0) ;
-	 Double h1_x(0.0);
-	 Double h2_x(0.0);
-	 Double xx(0.0);
-	 declination_min = source_declination - 0.5 ;
-         h1 = declination_min ;
-	 declination_max =source_declination +0.5 ;
-	  	 	 
-	 Double k1(0.0) ;
-	 Double k2(0.0) ;
-	 Double k1_y(0.0);
-	 Double k2_y(0.0);
-	 Double yy(0.0);
-	 Double hr_angle_min(0.0);
-	 hr_angle_min = source_hr_angle -1.0 ;
-         k1 = hr_angle_min ;
-	 Double hr_angle_max = source_hr_angle+1.0 ;
-	 
-	 Double f_outer_sum(0.0) ;
-	 Double f_inner_sum(0.0);
-	 Double x_outer_sum(0.0) ;
-	 Double x_inner_sum(0.0);
-	 Double y_inner_sum(0.0);
-	 Double y_outer_sum(0.0) ;
-	 
-	 Double f1(0.0) ;
-	 Double f2(0.0) ;
-	 Double f1_f(0.0) ;
-	 Double f2_f(0.0);
-	 Double ff(0.0);
-	 Double freq_final(0.0);
-	 f1 = freq_init ;
-	 freq_final = freq_init +bandwidth ;
-	 	 
-	 Double power_moon_sky(0.0);	 
-		 
-	 uint nroots = legendre_root.nelements() ;
-	 
-	 ofstream logfile1 ;
+          StationBeam stbm ;
+          
+          Double pi = 3.1416 ;	 
+          uint nroots = legendre_root.nelements() ;
+          
+          Double decAngle_min = (source_declination - 0.6);
+          Double decAngle_max = (source_declination + 0.6) ;
+  
+          Double interval = 0.005;
+          
+          uint loop_dec = int((decAngle_max - decAngle_min)/interval) ;
+          Double decAngle( 0.0 ) ;
+
+          Vector<Double> power(loop_dec, 0.0) ;
+          Vector<Double> power_normalized( loop_dec, 0.0);
+
+          Vector<Double> dec_vector( loop_dec,0.0 );
+          Vector<Double> selected_declinations( loop_dec,0.0 );
+          
+          Double declination_min(0.0);
+          Double declination_max(0.0);
+	  Double declination_width(0.0);
+
+         for( uint i=0; i<loop_dec; i++) {
+
+              decAngle =  decAngle_min + i*interval ;
+              dec_vector(i) = decAngle ;
+
+              power(i)= stbm.integrate_freq( source_hr_angle,
+                                             decAngle,
+                                             source_declination,
+	                                     source_hr_angle,
+	                                     station_radii,
+	                                     station_id,
+		                             freq_init,
+		                             bandwidth,
+                                             freq_interval,
+		                             position_x,
+		                             position_y,
+                                             legendre_root,
+             		                     legendre_weight ) ;
+	  }   
 	  
-	 logfile1.open("powersky2", ios::out) ;
-	 	 
-	 while(h1< declination_max){
-	         
-		 h2 = h1 + declination_interval ;
-//		 cout << "declination angle :" <<h2 << endl ;
-		 h1_x = (h2-h1)/2. ;
-		 h2_x = (h2+h1)/2. ;
-		 x_inner_sum =0.0 ;
-		 
-		 for( uint i =0; i<nroots; i++){
-		 
-		     y_outer_sum =0.0 ;
-		     xx = h1_x*legendre_root(i)+h2_x ;
-		     
-		     while( k1 < hr_angle_max){
-		     
-		           k2 = k1+ hr_angle_interval ;
-			   k1_y = (k2-k1)/2.0 ;
-			   k2_y = (k2+k1)/2.0 ;
-			   y_inner_sum = 0.0 ;
-			   
-			   for( uint j=0; j<nroots; j++ ){
-			   
-			        f_outer_sum =0.0 ;
-				yy = k1_y*legendre_root(j)+ k2_y ;
-				
-				while(f1 < freq_final ){
-				
-				      f2 = f1+ freq_interval ;
-				      f1_f = (f2-f1)/2.;
-				      f2_f = (f2+f1)/2. ;
-				      f_inner_sum =0.0;
-				      
-				      for( uint g=0; g<nroots; g++){
-				      
-				          ff = f1_f*legendre_root(g)+f2_f ;
-					  power_beam = stbm.tied_array( ff,
-	                                                                yy,
-		                                                        xx,
-		                                                        source_declination,
-		                                                        source_hr_angle,
-		                                                        station_radii,
-			                                                station_id,
-		                                                        position_x,
-		                                                        position_y,
-		                                                        legendre_root,
-		                                                        legendre_weight ) ;
-					 
-					 f_inner_sum = f_inner_sum + legendre_weight(g)*power_beam ;
-				      }
-				      f_outer_sum = f_outer_sum + f1_f*f_inner_sum ;
-		                      f1 = f2 ;
-				      logfile1 << h1 << "\t" << k1 << "\t" << f_outer_sum << "\n" ;
-			        }
-			        f1 = freq_init ;
-				y_inner_sum = y_inner_sum + legendre_weight(j)*f_outer_sum ;
-			    }
-                            y_outer_sum = y_outer_sum + k1_y*y_inner_sum ;
-	                    k1 = k2 ;	      
-			    logfile1 << "\n" ;
-		      }
-		      
-		      k1 = hr_angle_min ;
-		      x_inner_sum = x_inner_sum + legendre_weight(i)*y_outer_sum ;
-		}
-		
-		x_outer_sum = x_outer_sum + h1_x*x_inner_sum ;
-		h1 = h2 ;
-		
-	}			   
-        power_moon_sky = power_moon_sky + x_outer_sum ;      
-	logfile1.close() ;
-	    
-       return power_moon_sky ;
+          Double power_max = max(power) ;
+	 
+          Double power_min = min(power) ;
+                           
+          power_normalized = power/power_max ;
+         
+          Double power_norm_min = min(power_normalized) ;
+         
+          Double power_norm_max = max(power_normalized) ;
+         
+          Double half_power =(power_norm_max -power_norm_min)/2 ;
+          
+          Double power_optimum = power_norm_max - half_power ;
+
+          selected_declinations.resize(ntrue( power_normalized >power_optimum ));
+         
+          selected_declinations = dec_vector(power_normalized >power_optimum).getCompressedArray();
+
+          uint n_elements = selected_declinations.nelements() ;
+
+          declination_min = selected_declinations(0);
+          
+          declination_max = selected_declinations(n_elements-1);
+          
+          declination_width = (declination_max - declination_min) ;
+
+          return declination_width ;
       }
       
       catch( AipsError x ){
-      cerr << "StationBeam::integrate_moon_sky " << x.getMesg () << endl ;
+      cerr << "StationBeam::beamwidth " << x.getMesg () << endl ;
       return Double ();
       }       
 	       
- }	
- 			    
-  
-/*
-		    		     		     		     
->>>>>>> .r950
- Double StationBeam::temp_final(  const Double& source_declination,
-                                  const Double& source_hr_angle,
-		                  const Double& sky_temp,
-		                  const Double& moon_temp,
-		                  const Vector<uint>& station_id,
-                                  const Double& freq_init,
-		                  const Double& bandwidth,
-		                  const Double& station_radii,
-		                  Vector<Double>& position_x,
-		                  Vector<Double>& position_y,
-		                  const Vector<Double>& legendre_root,
-		                  const Vector<Double>& legendre_weight  )   
+ }
+
+          
+         
+
+Double StationBeam::power_moon( const Double& source_declination,
+	                        const Double& source_hr_angle,
+	                        const Double& station_radii,
+	                        const Vector<uint>& station_id,
+		                const Double& freq_init,
+		                const Double& bandwidth,
+                                const Double& freq_interval,
+		                Vector<Double>& position_x,
+		                Vector<Double>& position_y,
+                                const Vector<Double>& legendre_root,
+             		        const Vector<Double>& legendre_weight )
 {
- try{
-     StationBeam stbm ;
+
+  try {
+       StationBeam stbm ;
+
+       Double power_moon(0.0);
      
-     Double pi = 3.1416 ;
+       Double pi = 3.1416 ;	 
+       uint nroots = legendre_root.nelements() ;
+
+       Double max_power = stbm.integrate_freq( source_hr_angle,
+                                               source_declination,
+                                               source_declination,
+	                                       source_hr_angle,
+	                                       station_radii,
+	                                       station_id,
+		                               freq_init,
+		                               bandwidth,
+                                               freq_interval,
+		                               position_x,
+		                               position_y,
+                                               legendre_root,
+             		                       legendre_weight )   ;
      
-//      Double power_sky = stbm.integrate_sky( source_declination,
-// 		                            source_hr_angle,
-// 		                            station_radii,
-// 		                            station_id,
-// 		                            freq_init,
-// 		                            bandwidth,
-// 		                            position_x,
-// 		                            position_y,
-// 		                            legendre_root,
-// 		                            legendre_weight )   ;
-//  	
-     Double power_moon = stbm.integrate_moon( source_declination,
-		                       source_hr_angle,
-		                       station_radii,
-		                       station_id,
-		                       freq_init,
-		                       bandwidth,
-		                       position_x,
-		                       position_y,
-		                       legendre_root,
-		                       legendre_weight ) ;
-				       
-//     Matrix<Double> ppfcoeff(16384) ;
-//     readAsciiMatrix (ppfcoeff,"Coeffs16384Kaiser-quant.dat");				       
-//     
-    				       			       					    			 
-    return power_moon ;
-      }
+       Double declination_min = source_declination - 0.25 ;
+       Double declination_max = source_declination + 0.25 ;
+       
+       Double declination_interval = (declination_max - declination_min)/100 ;
+
+       Double decli_1 = declination_min ;
+       Double decli_2(0.0) ;
+       Double declination( 0.0);
+
+       Double hr_1(0.0) ;
+       Double hr_2(0.0) ;
+
+       while( decli_1 < declination_max ) {
+             
+	   decli_2 = decli_1 + declination_interval ;
+           Double decli_1x = (decli_2 - decli_1)/2 ;
+           Double decli_2x = (decli_2 + decli_1)/2 ;
+           Double hr_outer_sum =0.0 ;
+
+           for( uint dd =0; dd <nroots; dd++ ) {
+
+	      declination = decli_1x*legendre_root(dd) + decli_2x ;
+        hr_2 = source_hr_angle + 1/sin(declination*pi/180.)*sqrt(0.25*0.25-(abs(declination-source_declination))*(abs(declination-source_declination)));
+	hr_1 = source_hr_angle - 1/sin(declination*pi/180.)*sqrt(0.25*0.25-(abs(declination-source_declination))*(abs(declination-source_declination)));
+             
+              Double hr_1y = (hr_2 -hr_1)/2 ;
+              Double hr_2y = (hr_2 +hr_1)/2 ;
+              Double hr_inner_sum =0.0 ;
+              Double sum_freq(0.0);
+
+              for( uint hh =0; hh <nroots; hh++ ) {
+
+		  Double hr_angle = hr_1y*legendre_root(hh)+ hr_2y ;
+
+                  sum_freq = stbm.integrate_freq( hr_angle,
+                                                  declination,
+                                                  source_declination,
+	                                          source_hr_angle,
+	                                          station_radii,
+	                                          station_id,
+		                                  freq_init,
+		                                  bandwidth,
+                                                  freq_interval,
+		                                  position_x,
+		                                  position_y,
+                                                  legendre_root,
+             		                          legendre_weight ) ;
+
+		  hr_inner_sum = hr_inner_sum + legendre_weight(hh)*(sum_freq/max_power)*sin(pi/180.*declination) ;
+              }
+	      hr_outer_sum = hr_outer_sum + legendre_weight(dd)*hr_1y*(pi/180.)*hr_inner_sum ;
+
+	   }
+           power_moon = power_moon + decli_1x*(pi/180.)* hr_outer_sum ;
+          
+           decli_1 = decli_2 ;   
+        }
+      return power_moon ;
+    }
       
-      catch( AipsError x ){
-      cerr << "StationBeam::temp_final " << x.getMesg () << endl ;
-      return Double ();
-      }       
-}
+    catch( AipsError x ){
+    cerr << "StationBeam::power_moon " << x.getMesg () << endl ;
+    return Double ();
+  }       
+	       
+ }
+
+
+
+
+Double StationBeam::min_power_moon( const Double& source_declination,
+	                            const Double& source_hr_angle,
+	                            const Double& station_radii,
+	                           const Vector<uint>& station_id,
+		                   const Double& freq_init,
+		                   const Double& bandwidth,
+                                   const Double& freq_interval,
+		                   Vector<Double>& position_x,
+		                   Vector<Double>& position_y,
+                                   const Vector<Double>& legendre_root,
+             		           const Vector<Double>& legendre_weight )
+{
+
+  try {
+       StationBeam stbm ;
+
+       Double min_power_moon(1e20);
+       Double min_d_position(0.0);
+       Double min_h_position(0.0);
+
+       Double pi = 3.1416 ;	 
+       uint nroots = legendre_root.nelements() ;
+
+       Double declination_min = source_declination - 0.25 ;
+       Double declination_max = source_declination + 0.25 ;
+       uint declination_loop = 20 ;
+       Double declination_interval = (declination_max - declination_min)/declination_loop ;
+
+       Double decli_1 = declination_min ;
+       Double decli_2(0.0) ;
+       Double declination( 0.0);
+
+       Double hr_1(0.0) ;
+       Double hr_2(0.0) ;
+
+       Double sum_freq(0.0) ;
+
+       for( uint dd =0; dd< declination_loop ; dd++ ) {
+
+	  declination = declination_min +dd*declination_interval ;
+
+          hr_2 = source_hr_angle + 1/sin(declination*pi/180.)*sqrt(0.25*0.25-(abs(declination-source_declination))*(abs(declination-source_declination)));
+	  hr_1 = source_hr_angle - 1/sin(declination*pi/180.)*sqrt(0.25*0.25-(abs(declination-source_declination))*(abs(declination-source_declination)));
+             
+          uint hrangle_loop = 10 ;
+
+          Double hrangle_interval = (hr_2 - hr_1)/hrangle_loop ;
+
+	  Double hrangle(0.0) ;
+
+          for( uint hh =0; hh < hrangle_loop; hh++ ) {
+
+	      hrangle = hr_1 + hh*hrangle_interval ;
+
+	          sum_freq = stbm.integrate_freq( hrangle,
+                                                  declination,
+                                                  source_declination,
+	                                          source_hr_angle,
+	                                          station_radii,
+	                                          station_id,
+		                                  freq_init,
+		                                  bandwidth,
+                                                  freq_interval,
+		                                  position_x,
+		                                  position_y,
+                                                  legendre_root,
+             		                          legendre_weight ) ;
+
+		  if( sum_freq < min_power_moon ) {
+
+                      min_power_moon = sum_freq ;
+                      min_h_position = hrangle ;
+                      min_d_position = declination ;
+		  }
+
+	  }
+
+       }
+
+       cout << " minimum declination position : " << min_d_position << endl ;
+       cout << "minimum hr angle position :" << min_h_position << endl ;
      
+      return min_power_moon ;
+    }
+      
+    catch( AipsError x ){
+    cerr << "StationBeam::power_moon " << x.getMesg () << endl ;
+    return Double ();
+  }       
+	       
+ }
+
+
+
+ Double StationBeam::power_sky(  const Double& source_declination,
+	                         const Double& source_hr_angle,
+	                         const Double& station_radii,
+	                         const Vector<uint>& station_id,
+		                 const Double& freq_init,
+		                 const Double& bandwidth,
+                                 const Double& freq_interval,
+		                 Vector<Double>& position_x,
+		                 Vector<Double>& position_y,
+                                 const Vector<Double>& legendre_root,
+             	                 const Vector<Double>& legendre_weight )
+{
+
+  try {
+       StationBeam stbm ;
+
+       Double power_sky(0.0);
+     
+       Double pi = 3.1416 ;	 
+       uint nroots = legendre_root.nelements() ;
+
+       Double max_power = stbm.integrate_freq( source_hr_angle,
+                                               source_declination,
+                                               source_declination,
+	                                       source_hr_angle,
+	                                       station_radii,
+	                                       station_id,
+		                               freq_init,
+		                               bandwidth,
+                                               freq_interval,
+		                               position_x,
+		                               position_y,
+                                               legendre_root,
+             		                       legendre_weight )   ;
+     
+       Double declination_min = 0.0 ;
+       Double declination_max = 90.0 ;
+       
+       Double declination_interval = (declination_max - declination_min)/450 ;
+
+       Double decli_1 = declination_min ;
+       Double decli_2(0.0) ;
+       Double declination( 0.0);
+       
+       Double hrangle_min = 0.0;
+       Double hrangle_max = 360.0 ;
+
+       Double hr_angle_interval = 2.0 ;
+
+       Double hr_1(0.0)  ;
+       Double hr_2(0.0) ;
+
+       while( decli_1 < declination_max ) {
+             
+	   decli_2 = decli_1 + declination_interval ;
+           Double decli_1x = (decli_2 - decli_1)/2 ;
+           Double decli_2x = (decli_2 + decli_1)/2 ;
+           
+           Double decli_inner_sum =0.0 ;
+
+           for( uint dd =0; dd <nroots; dd++ ) {
+
+	      declination = decli_1x*legendre_root(dd) + decli_2x ;
+              Double hr_outer_sum = 0.0 ;
+              
+              while( hr_1< hrangle_max ) {
+
+		  hr_2 = hr_1 + hr_angle_interval ;
+                  Double hr_1y = (hr_2 - hr_1)/2 ;
+                  Double hr_2y = (hr_2 + hr_1)/2 ;
+
+		  Double hr_inner_sum = 0.0 ;
+                  Double sum_freq = 0.0 ;
  
-*/	         
+                  for( uint hh=0; hh <nroots; hh++ ) {
+
+		      Double hr_angle = hr_1y*legendre_root(hh) + hr_2y ;
+
+                      sum_freq = stbm.integrate_freq( hr_angle,
+                                                      declination,
+                                                      source_declination,
+	                                              source_hr_angle,
+	                                              station_radii,
+	                                              station_id,
+		                                      freq_init,
+		                                      bandwidth,
+                                                      freq_interval,
+		                                      position_x,
+		                                      position_y,
+                                                      legendre_root,
+             		                              legendre_weight ) ;
+
+		      hr_inner_sum = hr_inner_sum + legendre_weight(hh)*(sum_freq/max_power)*sin(pi/180.*declination) ;
+                }
+	        hr_outer_sum = hr_outer_sum + hr_1y*(pi/180.)*hr_inner_sum ;
+	        hr_1 = hr_2 ;
+	     }
+             hr_1 = hrangle_min ; 
+             decli_inner_sum = decli_inner_sum + legendre_weight(dd)*hr_outer_sum ; 
+             
+          }
+	  power_sky = power_sky + decli_1x*(pi/180.)*decli_inner_sum ;
+          decli_1 = decli_2 ;   
+	  cout << " declination angle for the integration over sky : " <<  decli_1 << " power sky " << power_sky << endl ;           
+      }
+      return power_sky ;
+    }
+      
+    catch( AipsError x ) {
+    cerr << "StationBeam::power_sky " << x.getMesg () << endl ;
+    return Double ();
+  }    
+}
+
+	         
     
 
 } // Namespace CR -- end
