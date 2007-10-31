@@ -118,14 +118,14 @@ namespace CR { // Namespace CR -- begin
 	  <td>spherical <br> \f$ (r,\phi,\theta) \f$</td>
 	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
 	  \left[ \begin{array}{l}
-	  r \sin(\phi) \cos(\theta) \\
-	  r \sin(\phi) \sin(\theta) \\
-	  r \cos(\phi) \end{array} \right] \f$</td>
+	    r \sin(\theta) \cos(\phi) \\
+	    r \sin(\theta) \sin(\phi) \\
+	    r \cos(\theta) \end{array} \right] \f$</td>
 	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
 	  = \left[ \begin{array}{l}
 	  \sqrt{x^2 + y^2 + z^2} \\
 	  \mathrm{atan} (y/x) \\ 
-	  \mathrm{acos \left( \sqrt{\frac{x^2 + y^2}{x^2 + y^2 + z^2}} \right)}
+	  \mathrm{acos} \left( \frac{z}{\sqrt{x^2 + y^2 + z^2}} \right)
 	  \end{array} \right] \f$</td>
 	</tr>
 	<tr>
@@ -176,24 +176,27 @@ namespace CR { // Namespace CR -- begin
 	  = \left[ \begin{array}{l}
 	  \sqrt{x^2 + y^2 + z^2} \\
 	  \mathrm{atan} (y/x) \\ 
-	  \mathrm{acos \left( \sqrt{\frac{x^2 + y^2}{x^2 + y^2 + z^2}} \right)}
+	  \mathrm{acos} \left( \frac{z}{\sqrt{x^2 + y^2 + z^2}} \right)
 	  \end{array} \right] \f$</td>
 	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
 	  \left[ \begin{array}{l}
-	  r \sin(\phi) \cos(\theta) \\
-	  r \sin(\phi) \sin(\theta) \\
-	  r \cos(\phi) \end{array} \right] \f$</td>
+	    r \sin(\theta) \cos(\phi) \\
+	    r \sin(\theta) \sin(\phi) \\
+	    r \cos(\theta) \end{array} \right] \f$</td>
 	</tr>
 	<tr>
 	  <td>spherical <br> \f$ (r,\phi,\theta) \f$</td>
           <td>cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
 	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
-	    = \left[ \begin{array}{c}
+	    = \left[ \begin{array}{l} 
 	    \sqrt{\rho^2 + z^2} \\
 	    \phi \\
 	    \mathrm{asin} \left( \frac{\rho}{\sqrt{\rho^2 + z^2}} \right)
 	    \end{array} \right] \f$</td>
-	  <td></td>
+	  <td>\f$ \left[ \begin{array}{l} \rho \\ \phi \\ z \end{array} \right]
+	    = \left[ \begin{array}{l} 
+	    r \sin(\theta) \\ \phi \\ r \cos(\theta)
+	    \end{array} \right] \f$</td>
 	</tr>
         <tr>
 	  <td class="indexkey">Target</td>
@@ -209,18 +212,25 @@ namespace CR { // Namespace CR -- begin
 	    \sqrt{x^2 + y^2} \\
 	    \mathrm{atan} (y/x) \\
 	    z \end{array} \right] \f$</td>
-	  <td></td>
+	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
+	    \left[ \begin{array}{l}
+	  \rho \cos(\phi) \\
+	  \rho \sin(\phi) \\
+	  z \end{array} \right] \f$</td>
 	</tr>
 	<tr>
           <td>cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
 	  <td>spherical <br> \f$ (r,\phi,\theta) \f$</td>
 	  <td>\f$ \left[ \begin{array}{l} \rho \\ \phi \\ z \end{array} \right]
-	    =  \left[  \begin{array}{c}
-	    r \sin(\theta) \\
+	    = \left[ \begin{array}{l} 
+	    r \sin(\theta) \\ \phi \\ r \cos(\theta)
+	    \end{array} \right] \f$</td>
+	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
+	    = \left[ \begin{array}{l} 
+	    \sqrt{\rho^2 + z^2} \\
 	    \phi \\
-	    r \cos(\phi)
-	  \end{array} \right] \f$</td>
-	  <td></td>
+	    \mathrm{asin} \left( \frac{\rho}{\sqrt{\rho^2 + z^2}} \right)
+	    \end{array} \right] \f$</td>
 	</tr>
         <tr>
 	  <td class="indexkey">Target</td>

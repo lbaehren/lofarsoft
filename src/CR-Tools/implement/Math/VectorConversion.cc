@@ -183,11 +183,11 @@ namespace CR { // Namespace CR -- begin
       if (anglesInDegrees) {
 	r     = sqrt(x*x + y*y + z*z);
  	phi   = rad2deg(atan2(y,x));
-	theta = rad2deg(acos(sqrt((x*x+y*y)/(x*x+y*y+z*z))));
+	theta = rad2deg(acos(z/r));
       } else {
 	r     = sqrt(x*x + y*y + z*z);
  	phi   = atan2(y,x);
-	theta = acos(sqrt((x*x+y*y)/(x*x+y*y+z*z)));
+	theta = acos(z/r);
       }
     } catch (std::string message) {
       std::cerr << "[cartesian2spherical] " << message << std::endl;
@@ -385,9 +385,9 @@ namespace CR { // Namespace CR -- begin
 			     deg2rad(theta),
 			     false);
       } else {
-	x = r*sin(phi)*cos(theta);
-	y = r*sin(phi)*sin(theta);
-	z = r*cos(phi); 
+	x = r*sin(theta)*cos(phi);
+	y = r*sin(theta)*sin(phi);
+	z = r*cos(theta); 
       }
     } catch (std::string message) {
       std::cerr << "[spherical2cartesian]" << message << std::endl;
@@ -434,7 +434,7 @@ namespace CR { // Namespace CR -- begin
       } else {
 	rho     = r*sin(theta);
 	phi_cyl = phi;
-	z       = r*cos(phi);
+	z       = r*cos(theta);
       }
     } catch (std::string message) {
       std::cerr << "[spherical2cylindrical] " << message << std::endl;
