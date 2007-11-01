@@ -1,11 +1,11 @@
 #define PY_ARRAY_UNIQUE_SYMBOL PyArrayHandle
 #define NO_IMPORT_ARRAY
 
-#include <cfloat>
-#include <boost/python.hpp>
-#include <num_util.h>
-
+#include "aux.h"
 #include "stat.h"
+
+#include <num_util.h>
+#include <cfloat>
 
 using namespace boost::python;
 using namespace std;
@@ -148,10 +148,8 @@ static object _bstat(numeric::array arr, object mask, double kappa)
     res = _stat<T>(arr, mask, mean.back(), kappa*dev.back());
   } while (res.second != dev.back() && cnt < max_iter);
 
-  if (res.second != dev.back()) {
-    PyErr_SetString(PyExc_RuntimeError, "clipped RMS calculation does not converge");
-    throw error_already_set();
-  }
+  py_assert(res.second == dev.back(),
+	    PyExc_RuntimeError, "clipped RMS calculation does not converge");
 
   return make_tuple(mean[1], dev[1], mean.back(), dev.back());
 }
@@ -187,7 +185,7 @@ object bstat(numeric::array arr, object mask, double kappa)
   }
 
  fail:
-  PyErr_SetString(PyExc_RuntimeError, 
-		  "bstat dispatch failed: not implemented for this datatype/layout");
-  throw error_already_set();
+  py_assert(false, 
+	    PyExc_RuntimeError, "bstat dispatch failed: not implemented for this datatype/layout");
+  return tuple(); // this is fake return-statement to silence the compiler
 }
