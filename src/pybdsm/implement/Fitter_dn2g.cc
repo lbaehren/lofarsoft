@@ -31,11 +31,12 @@ void divset_(const int &alg, int *iv, int &liv, int &lv, double *v);
 
 
 // user functions
-extern "C"
+// FIXME: these should have been declared "extern "C" static ...", but gcc 4.2.2 rejects such declarations
+static
 void dn2g_f(int &n, int &p, double *x, int &nf, double *F,
 	    void *uiparm, void *urparm, void *ufparm);
 
-extern "C"
+static
 void dn2g_df(int &n, int &p, double *x, int &nf, double *J,
 	     void *uiparm, void *urparm, void *ufparm);
 
@@ -114,7 +115,6 @@ bool dn2g_fit(MGFunction &fcn, bool final, int verbose)
 }
 
 // user-supplied functions
-extern "C"
 static void dn2g_f(int &n, int &p, double *x, int &nf, double *F,
 		   void *uiparm, void *urparm, void *ufparm)
 {
@@ -123,7 +123,6 @@ static void dn2g_f(int &n, int &p, double *x, int &nf, double *F,
   fcn->fcn_diff(F);
 }
 
-extern "C"
 static void dn2g_df(int &n, int &p, double *x, int &nf, double *J,
 		    void *uiparm, void *urparm, void *ufparm)
 {

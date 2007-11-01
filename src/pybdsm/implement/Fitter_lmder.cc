@@ -30,7 +30,8 @@ void lmder_(void *fcn, int &m, int &n, double *x, double *F, double *J, int &ldf
 	    void *userpar);
 
 // user function
-extern "C" 
+// FIXME: these should have been declared "extern "C" static ...", but gcc 4.2.2 rejects such declarations
+static
 void lmder_fcn(int &m, int &n, double *x, double *F, double *J, int &ldfjac, 
 	       int &iflag, void *userpar);
 
@@ -89,7 +90,6 @@ bool lmder_fit(MGFunction &fcn, bool final, int verbose)
 }
 
 // user-supplied function
-extern "C"
 static void lmder_fcn(int &m, int &n, double *x, double *F, double *J, int &ldfjac, 
 		       int &iflag, void *userpar)
 {
