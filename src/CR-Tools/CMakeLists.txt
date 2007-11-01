@@ -317,6 +317,11 @@ if (PGPLOT_INCLUDES)
   add_definitions (-DHAVE_PGPLOT)
 endif (PGPLOT_INCLUDES)
 
+if (FFTW3_INCLUDES)
+  include_directories (${FFTW3_INCLUDES})
+  add_definitions (-DHAVE_FFTW3)
+endif (FFTW3_INCLUDES)
+
 if (GIF_INCLUDES)
   include_directories (${GIF_INCLUDES})
 endif (GIF_INCLUDES)

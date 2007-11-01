@@ -5,12 +5,14 @@
 #include <libpq-fe.h>
 #endif
 
-//! FFTW3
+#ifdef HAVE_FFTW3
 #include <fftw3.h>
+#endif
 
-//!root 
+#ifdef HAVE_ROOT
 #include <TROOT.h>
 #include <TChain.h>
+#endif
 
 //!star tool headers
 #include <LopesStar/trigger.h>
