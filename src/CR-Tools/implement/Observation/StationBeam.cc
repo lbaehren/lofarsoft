@@ -23,6 +23,10 @@
 
 #include <Observation/StationBeam.h>
  
+#ifndef HAVE_CASACORE
+  #warning StationBeam.cc needs casacore as CASA is broken. Not doing anything
+#else
+
 namespace CR { // Namespace CR -- begin
   
   // ============================================================================
@@ -788,3 +792,5 @@ Double StationBeam::min_power_moon( const Double& source_declination,
     
 
 } // Namespace CR -- end
+
+#endif

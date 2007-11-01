@@ -26,6 +26,7 @@
 #ifndef HAVE_CASACORE
 #include <casa/BasicMath/Functional.cc> 
 #include <casa/Arrays/ArrayIO.cc>
+#include <casa/Arrays/ArrayMath.cc>
 #include <casa/Arrays/ArrayLogical.cc>
 #include <casa/Arrays/Vector.cc>
 #include <casa/Utilities/BinarySearch.cc>
@@ -105,6 +106,10 @@ namespace casa {
   template void writeAsciiMatrix(Matrix<Int> const &, Char const *);
   template void writeAsciiMatrix(Matrix<Double> const &, Char const *);
   template void writeAsciiVector(Vector<Double> const &, Char const *);
+
+  // casa/Arrays/ArrayMath
+
+  template Array<DComplex> fabs(Array<DComplex> const &);
 
   // casa/Arrays/ArrayLogical
 
