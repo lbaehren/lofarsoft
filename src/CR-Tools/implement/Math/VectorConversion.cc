@@ -24,6 +24,102 @@
 
 namespace CR { // Namespace CR -- begin
   
+  bool convertVector (double &xTarget,
+		      double &yTarget,
+		      double &zTarget,
+		      CR::CoordinateType const &targetCoordinate,
+		      double const &xSource,
+		      double const &ySource,
+		      double const &zSource,
+		      CR::CoordinateType const &sourceCoordinate,
+		      bool const &anglesInDegrees)
+  {
+    bool status (false);
+
+    switch (sourceCoordinate) {
+    case CR::Cartesian:
+      // ---------------------------------------------------
+      // Conversion: Cartesian (x,y,z) -> Other
+      switch (targetCoordinate) {
+      case CR::Cylindrical:
+	// Conversion: Cartesian (x,y,z) -> Cylindrical (rho,phi,z)
+	return cartesian2cylindrical (xTarget,
+				      yTarget,
+				      zTarget,
+				      xSource,
+				      ySource,
+				      zSource,
+				      anglesInDegrees);
+	break;
+      case CR::Spherical:
+	// Conversion: Cartesian (x,y,z) -> Spherical (r,phi,theta)
+	return cartesian2spherical (xTarget,
+				    yTarget,
+				    zTarget,
+				    xSource,
+				    ySource,
+				    zSource,
+				    anglesInDegrees);
+	break;
+      }
+      break;
+    case CR::Cylindrical:
+      // ---------------------------------------------------
+      // Conversion: Cylindrical (rho,phi,z) -> Other
+      switch (targetCoordinate) {
+      case CR::Cartesian:
+	// Conversion: Cylindrical (rho,phi,z) -> Cartesian (x,y,z)
+	return cylindrical2cartesian (xTarget,
+				      yTarget,
+				      zTarget,
+				      xSource,
+				      ySource,
+				      zSource,
+				      anglesInDegrees);
+	break;
+      case CR::Spherical:
+	// Conversion: Cylindrical (rho,phi,z) -> Spherical (rho,phi,z)
+	return cylindrical2spherical (xTarget,
+				      yTarget,
+				      zTarget,
+				      xSource,
+				      ySource,
+				      zSource,
+				      anglesInDegrees);
+	break;
+      }
+      break;
+    case CR::Spherical:
+      // ---------------------------------------------------
+      // Conversion: Spherical (r,phi,theta) -> Other
+      switch (targetCoordinate) {
+      case CR::Cartesian:
+	// Conversion: Spherical (r,phi,theta) -> Cartesian (x,y,z)
+	return spherical2cartesian (xTarget,
+				    yTarget,
+				    zTarget,
+				    xSource,
+				    ySource,
+				    zSource,
+				    anglesInDegrees);
+	break;
+      case CR::Cylindrical:
+	// Conversion: Spherical (r,phi,theta) -> Spherical (rho,phi,z)
+	return spherical2cylindrical (xTarget,
+				      yTarget,
+				      zTarget,
+				      xSource,
+				      ySource,
+				      zSource,
+				      anglesInDegrees);
+	break;
+      }
+      break;
+    }
+
+    return status;
+  }
+
   // ============================================================================
   // 
   //  Conversion: Azimuth,Elevation -> Other

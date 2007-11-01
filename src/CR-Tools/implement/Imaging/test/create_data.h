@@ -96,6 +96,52 @@ Matrix<double> get_skyPositions (uint const &nofDirections=3,
 // -----------------------------------------------------------------------------
 
 /*!
+  \brief Create some sky/pointing positions
+
+  \param start     -- 
+  \param increment -- 
+  \param nofSteps  -- 
+
+  \return positions -- [position,coordinate] Sky positions, \f$ \vec\rho \f$
+*/
+Matrix<double> get_skyPositions (Vector<double> const &start,
+				 Vector<double> const &increment,
+				 Vector<int> const &nofSteps)
+{
+  if (start.shape() == increment.shape() &&
+      start.shape() == nofSteps.shape()) {
+    uint nofCoordinates (start.nelements());
+    uint nofPositions (1);
+    uint coord(0);
+    uint step (0);
+    uint pos (0);
+    // how many positions will there be?
+    for (coord=0; coord<nofCoordinates; coord++) {
+      nofPositions *= nofSteps(coord);
+    }
+    // set up the matrix holding the generated position values
+    Matrix<double> positions (nofCoordinates,nofPositions);
+    // generate the position values based on the input parameters
+    for (coord=0; coord<nofCoordinates; coord++) {
+      for (step=0; step<nofSteps(coord); step++) {
+      }
+    }
+    return positions;
+  } else {
+    // throw error message
+    std::cerr << "Error; inconsistent shape of parameter vectors!" << std::endl;
+    std::cerr << " -- shape(start)     = " << start.shape() << std::endl;
+    std::cerr << " -- shape(increment) = " << increment.shape() << std::endl;
+    // return some output
+    Matrix<double> positions (1,3);
+    positions = 0.0;
+    return positions;
+  }
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
   \brief Create frequency band values for the Beamformer
 
   \param freqMin     -- Lower limit of the frequency band, [Hz]

@@ -2,6 +2,7 @@
 ## ------------------------------------------------------------------------------
 ## Additional settings to build and install PLplot
 
+## -------------------------------------------------------------------
 ## General settings for the drivers
 
 set (BUILD_SHARED_LIBS "0" CACHE BOOL "Build shared libraries?")
@@ -12,6 +13,7 @@ set (ENABLE_gnome2 OFF CACHE BOOL "Enable drivers for GNOME2?")
 set (ENABLE_itcl OFF CACHE BOOL "Enable drivers for [incr Tcl]?")
 set (ENABLE_itk OFF CACHE BOOL "Enable drivers for [incr Tk]?")
 
+## -------------------------------------------------------------------
 ## disable individual drivers
 
 set (PLD_aqt OFF CACHE BOOL "Enable driver aqt")
@@ -24,6 +26,12 @@ if (APPLE)
   set (PLD_wxwidgets OFF CACHE BOOL "Enable driver wxwidgets")
 endif (APPLE)
 
+## -------------------------------------------------------------------
+## Testing
+
+set (BUILD_TEST ON CACHE BOOL "Build test programs?")
+
+## -------------------------------------------------------------------
 ## Installation
 
 find_path (prefix release_area.txt

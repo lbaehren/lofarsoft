@@ -347,8 +347,10 @@ namespace CR { // Namespace CR -- begin
     //! Cylindrical coordinates, \f$ \vec x = (r,\phi,h) \f$
     Cylindrical,
     //! Azimuth-Elevation-Height
-    AzElHeight
-  } CoordinateTypes;
+    AzElHeight,
+    //! Azimuth-Elevation-Radius
+    AzElRadius
+  } CoordinateType;
   
 
   // ============================================================================
@@ -465,6 +467,43 @@ namespace CR { // Namespace CR -- begin
     return deg;
   }
 #endif
+
+  // ============================================================================
+  // 
+  //  Conversion: generic interface
+  //
+  // ============================================================================
+
+  /*!
+    \brief Convert vector from one coordinate system to another
+
+    \retval xTarget -- First component of the vector in the target coordinate
+                       system
+    \retval yTarget -- Second component of the vector in the target coordinate
+                       system
+    \retval zTarget -- Third component of the vector in the target coordinate
+                       system
+    \param targetCoordinate -- CR::CoordinateType of the target coordinate system
+    \param xSource -- First component of the vector in the source coordinate
+                      system
+    \param ySource -- Second component of the vector in the source coordinate
+                      system
+    \param zSource -- Third component of the vector in the source coordinate
+                      system
+    \param sourceCoordinate -- CR::CoordinateType of the source coordinate system
+    \param anglesInDegrees  -- Are the angles given in units of degrees? If
+                               <i>true</i> angles will be converted to radians
+			       before the conversion.
+  */
+  bool convertVector (double &xTarget,
+		      double &yTarget,
+		      double &zTarget,
+		      CR::CoordinateType const &targetCoordinate,
+		      double const &xSource,
+		      double const &ySource,
+		      double const &zSource,
+		      CR::CoordinateType const &sourceCoordinate,
+		      bool const &anglesInDegrees=false);
 
   // ============================================================================
   // 

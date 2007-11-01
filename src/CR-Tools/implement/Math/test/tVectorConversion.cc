@@ -134,6 +134,87 @@ int test_angleConversion ()
 // -----------------------------------------------------------------------------
 
 /*!
+  \brief Test the generic interface to the vector conversion functions
+
+  \return nofFailedTests -- Number of failed tests within this function
+*/
+int test_vectorConversion ()
+{
+  std::cout << "\n[test_vectorConversion]\n" << std::endl;
+
+  int nofFailedTests (0);
+
+  double xSource (0.0);
+  double ySource (0.0);
+  double zSource (0.0);
+  double xTarget (0.0);
+  double yTarget (0.0);
+  double zTarget (0.0);
+  bool status (true);
+
+  std::cout << "[1] Conversion from cartesian to other" << std::endl;
+  try {
+    xSource = 1.0;
+    ySource = 1.0;
+    zSource = 1.0;
+    
+    std::cout << "-- cartesian -> cylindrical" << std::endl;
+    status = CR::convertVector (xTarget,
+				yTarget,
+				zTarget,
+				CR::Cylindrical,
+				xSource,
+				ySource,
+				zSource,
+				CR::Cartesian,
+				true);
+    show_conversion(xSource,ySource,zSource,xTarget,yTarget,zTarget);
+    
+    std::cout << "-- cartesian -> spherical" << std::endl;
+    status = CR::convertVector (xTarget,
+				yTarget,
+				zTarget,
+				CR::Spherical,
+				xSource,
+				ySource,
+				zSource,
+				CR::Cartesian,
+				true);
+    show_conversion(xSource,ySource,zSource,xTarget,yTarget,zTarget);
+    
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[2] Conversion from cylindrical to other" << std::endl;
+  try {
+    xSource =  1.0;  // rho
+    ySource = 40.0;  // phi
+    zSource =  1.0;  // z
+    
+    std::cout << "-- cylindrical -> cartesian" << std::endl;
+    status = CR::convertVector (xTarget,
+				yTarget,
+				zTarget,
+				CR::Cartesian,
+				xSource,
+				ySource,
+				zSource,
+				CR::Cylindrical,
+				true);
+    show_conversion(xSource,ySource,zSource,xTarget,yTarget,zTarget);
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
   \brief Test conversion from cartesian to cylindrical coordinates
 
   \return nofFailedTests -- Number of failed tests within this function
@@ -527,6 +608,8 @@ int main ()
   int nofFailedTests (0);
 
   nofFailedTests += test_angleConversion ();
+
+  nofFailedTests += test_vectorConversion ();
 
   nofFailedTests += test_cartesian2cylindrical ();
   nofFailedTests += test_cartesian2spherical ();

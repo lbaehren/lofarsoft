@@ -378,7 +378,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   
 #ifdef HAVE_CASA
   bool GeometricalDelay::setSkyPositions (casa::Matrix<double> const &skyPositions,
-					  CR::CoordinateTypes const &coordType,
+					  CR::CoordinateType const &coordType,
 					  bool const &anglesInDegrees,
 					  bool const &bufferDelays)
   {
@@ -431,7 +431,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #else
 #ifdef HAVE_BLITZ
   bool GeometricalDelay::setSkyPositions (blitz::Array<double,2> const &skyPositions,
-					  CR::CoordinateTypes const &coordType,
+					  CR::CoordinateType const &coordType,
 					  bool const &anglesInDegrees,
 					  bool const &bufferDelays)
   {
@@ -465,7 +465,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   bool GeometricalDelay::setSkyPositions (casa::Vector<double> const &xValues,
 					  casa::Vector<double> const &yValues,
 					  casa::Vector<double> const &zValues,
-					  CR::CoordinateTypes const &coordType,
+					  CR::CoordinateType const &coordType,
 					  bool const &anglesInDegrees,
 					  bool const &bufferDelays)
   {
@@ -502,7 +502,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   bool GeometricalDelay::setSkyPositions (blitz::Array<double,1> const &xValues,
 					  blitz::Array<double,1> const &yValues,
 					  blitz::Array<double,1> const &zValues,
-					  CR::CoordinateTypes const &coordType,
+					  CR::CoordinateType const &coordType,
 					  bool const &anglesInDegrees,
 					  bool const &bufferDelays)
   {
@@ -543,7 +543,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   bool GeometricalDelay::setSkyPositions (casa::Matrix<double> const &xyValues,
 					  casa::Vector<double> const &zValues,
 					  casa::Vector<int> const &axisOrder,
-					  CR::CoordinateTypes const &coordType,
+					  CR::CoordinateType const &coordType,
 					  bool const &anglesInDegrees,
 					  bool const &bufferDelays)
   {
@@ -593,7 +593,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   bool GeometricalDelay::setSkyPositions (blitz::Array<double,1> const &xyValues,
 					  blitz::Array<double,1> const &zValues,
 					  blitz::Array<int,1> const &axisOrder,
-					  CR::CoordinateTypes const &coordType,
+					  CR::CoordinateType const &coordType,
 					  bool const &anglesInDegrees,
 					  bool const &bufferDelays)
   {

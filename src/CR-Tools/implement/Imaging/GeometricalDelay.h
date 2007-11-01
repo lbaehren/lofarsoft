@@ -479,13 +479,13 @@ namespace CR { // NAMESPACE CR -- BEGIN
     */
 #ifdef HAVE_CASA
     bool setSkyPositions (casa::Matrix<double> const &skyPositions,
-			  CR::CoordinateTypes const &coordType,
+			  CR::CoordinateType const &coordType,
 			  bool const &anglesInDegrees=false,
 			  bool const &bufferDelays=false);
 #else
 #ifdef HAVE_BLITZ
     bool setSkyPositions (blitz::Array<double,2> const &skyPositions,
-			  CR::CoordinateTypes const &coordType,
+			  CR::CoordinateType const &coordType,
 			  bool const &anglesInDegrees=false,
 			  bool const &bufferDelays=false);
 #endif
@@ -514,7 +514,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     bool setSkyPositions (casa::Vector<double> const &xValues,
 			  casa::Vector<double> const &yValues,
 			  casa::Vector<double> const &zValues,
-			  CR::CoordinateTypes const &coordType,
+			  CR::CoordinateType const &coordType,
 			  bool const &anglesInDegrees=false,
 			  bool const &bufferDelays=false);
 #else
@@ -522,7 +522,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     bool setSkyPositions (blitz::Array<double,1> const &xValues,
 			  blitz::Array<double,1> const &yValues,
 			  blitz::Array<double,1> const &zValues,
-			  CR::CoordinateTypes const &coordType,
+			  CR::CoordinateType const &coordType,
 			  bool const &anglesInDegrees=false,
 			  bool const &bufferDelays=false);
 #endif
@@ -561,7 +561,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     bool setSkyPositions (casa::Matrix<double> const &xyValues,
 			  casa::Vector<double> const &zValues,
 			  casa::Vector<int> const &axisOrder,
-			  CR::CoordinateTypes const &coordType,
+			  CR::CoordinateType const &coordType,
 			  bool const &anglesInDegrees=false,
 			  bool const &bufferDelays=false);
 #else
@@ -569,7 +569,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     bool setSkyPositions (blitz::Array<double,1> const &xyValues,
 			  blitz::Array<double,1> const &zValues,
 			  blitz::Array<int,1> const &axisOrder,
-			  CR::CoordinateTypes const &coordType,
+			  CR::CoordinateType const &coordType,
 			  bool const &anglesInDegrees=false,
 			  bool const &bufferDelays=false);
 #endif
