@@ -60,6 +60,17 @@ if (HAVE_CASA OR HAVE_CASACORE)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
+## reas2event
+
+if (HAVE_CASA OR HAVE_CASACORE)
+  add_executable (reas2event reas2event.cc)
+  ## linker instructions
+  target_link_libraries (reas2event cr)
+  ## installation instructions
+  install (TARGETS reas2event RUNTIME DESTINATION bin)
+endif (HAVE_CASA OR HAVE_CASACORE)
+## -------------------------------------------------------------------
+
 ## Glish client programs
 
 if (CR_GLISH_SUPPORT AND HAVE_GLISH)
