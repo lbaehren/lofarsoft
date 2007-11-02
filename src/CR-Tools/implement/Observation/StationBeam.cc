@@ -379,17 +379,17 @@ Double StationBeam::integrate_freq( const Double& hr_angle,
 }	
 
 
-Double StationBeam::beamwidth(  const Double& source_declination,
-                                const Double& source_hr_angle,
-	                        const Double& station_radii,
-	                        const Vector<uint>& station_id,
-	                        const Double& freq_init,
-		                const Double& bandwidth,
-                                const Double& freq_interval,
-		                Vector<Double>& position_x,
-		                Vector<Double>& position_y,
-                                const Vector<Double>& legendre_root,
-             	                const Vector<Double>& legendre_weight )   
+Double StationBeam::beamwidth_decli(  const Double& source_declination,
+                                      const Double& source_hr_angle,
+	                              const Double& station_radii,
+	                              const Vector<uint>& station_id,
+	                              const Double& freq_init,
+		                      const Double& bandwidth,
+                                      const Double& freq_interval,
+		                      Vector<Double>& position_x,
+		                      Vector<Double>& position_y,
+                                      const Vector<Double>& legendre_root,
+             	                      const Vector<Double>& legendre_weight )   
 
 {
    try {
@@ -398,30 +398,55 @@ Double StationBeam::beamwidth(  const Double& source_declination,
           Double pi = 3.1416 ;	 
           uint nroots = legendre_root.nelements() ;
           
-          Double decAngle_min = (source_declination - 0.6);
-          Double decAngle_max = (source_declination + 0.6) ;
+          
+       Double max_power = stbm.integrate_freq( source_hr_angle,
+                                               source_declination,
+                                               source_declination,
+	                                       source_hr_angle,
+	                                       station_radii,
+	                                       station_id,
+		                               freq_init,
+		                               bandwidth,
+                                               freq_interval,
+		                               position_x,
+		                               position_y,
+                                               legendre_root,
+             		                       legendre_weight )   ;
+
+          Double decAngle_min = (source_declination );
+          Double decAngle_max = (source_declination + 2.0) ;
   
           Double interval = 0.005;
           
           uint loop_dec = int((decAngle_max - decAngle_min)/interval) ;
           Double decAngle( 0.0 ) ;
 
-          Vector<Double> power(loop_dec, 0.0) ;
+          Double power_cal( 0.0) ;
+          Vector<Double> power(loop_dec,0.0);
+          power_cal = max_power ;
+          Double power_compare(0.0);
+
           Vector<Double> power_normalized( loop_dec, 0.0);
 
-          Vector<Double> dec_vector( loop_dec,0.0 );
+	  Vector<Double> dec_vector( loop_dec, 0.0 );
           Vector<Double> selected_declinations( loop_dec,0.0 );
           
           Double declination_min(0.0);
           Double declination_max(0.0);
 	  Double declination_width(0.0);
+          dec_vector(0)=decAngle_min ;
+          power(0)=power_cal;
+          uint i =1 ;
 
-         for( uint i=0; i<loop_dec; i++) {
+          do
+	   {
+              power_compare = power_cal ;
+    
+              decAngle =  decAngle_min + (i+1)*interval ;
+              
+	      dec_vector(i) = decAngle ;
 
-              decAngle =  decAngle_min + i*interval ;
-              dec_vector(i) = decAngle ;
-
-              power(i)= stbm.integrate_freq( source_hr_angle,
+              power_cal = stbm.integrate_freq( source_hr_angle,
                                              decAngle,
                                              source_declination,
 	                                     source_hr_angle,
@@ -434,45 +459,191 @@ Double StationBeam::beamwidth(  const Double& source_declination,
 		                             position_y,
                                              legendre_root,
              		                     legendre_weight ) ;
-	  }   
+              
+              power(i)= power_cal ;
+      
+	      i = i+1 ;
 	  
-          Double power_max = max(power) ;
+	   }
+
+	  while( power_compare > power_cal ) ;
+          
+	  Double power_max = max_power ;
 	 
-          Double power_min = min(power) ;
+          Double power_min = power_cal ;
                            
           power_normalized = power/power_max ;
          
-          Double power_norm_min = min(power_normalized) ;
-         
-          Double power_norm_max = max(power_normalized) ;
-         
+          Double power_norm_min = power_min/max_power ;
+   
+          Double power_norm_max = power_max/max_power ;
+ 
           Double half_power =(power_norm_max -power_norm_min)/2 ;
-          
+  
           Double power_optimum = power_norm_max - half_power ;
-
-          selected_declinations.resize(ntrue( power_normalized >power_optimum ));
+          
+           selected_declinations.resize(ntrue( power_normalized >half_power));
          
-          selected_declinations = dec_vector(power_normalized >power_optimum).getCompressedArray();
+           selected_declinations = dec_vector(power_normalized >half_power).getCompressedArray();
 
           uint n_elements = selected_declinations.nelements() ;
-
-          declination_min = selected_declinations(0);
-          
+      
           declination_max = selected_declinations(n_elements-1);
+          cout << "declination maximum : " << declination_max << endl ;
+
+          declination_min = selected_declinations(0) ;
+          cout << " declination minimum : " << declination_min << endl ;
+
+//          Double d_max = 
           
-          declination_width = (declination_max - declination_min) ;
+          Double x_width = cos(pi/180.*source_hr_angle)*sin(pi/180.*declination_min)*cos(pi/180.*source_hr_angle)*sin(pi/180.*declination_max) ;
+          Double y_width = sin(pi/180.*source_hr_angle)*sin(pi/180.*declination_min)*sin(pi/180.*source_hr_angle)*sin(pi/180.*declination_max) ;
+          Double z_width = cos(pi/180.*declination_min)*cos(pi/180.*declination_max);
+
+          declination_width = 180./pi*acos(x_width+ y_width+ z_width) ;
 
           return declination_width ;
       }
       
       catch( AipsError x ){
-      cerr << "StationBeam::beamwidth " << x.getMesg () << endl ;
+      cerr << "StationBeam::beamwidth_decli " << x.getMesg () << endl ;
       return Double ();
       }       
 	       
  }
 
+ 
+Double StationBeam::beamwidth_hr(  const Double& source_declination,
+                                      const Double& source_hr_angle,
+	                              const Double& station_radii,
+	                              const Vector<uint>& station_id,
+	                              const Double& freq_init,
+		                      const Double& bandwidth,
+                                      const Double& freq_interval,
+		                      Vector<Double>& position_x,
+		                      Vector<Double>& position_y,
+                                      const Vector<Double>& legendre_root,
+             	                      const Vector<Double>& legendre_weight )   
+
+{
+   try {
+          StationBeam stbm ;
           
+          Double pi = 3.1416 ;	 
+          uint nroots = legendre_root.nelements() ;
+          
+          
+          Double max_power = stbm.integrate_freq( source_hr_angle,
+                                               source_declination,
+                                               source_declination,
+	                                       source_hr_angle,
+	                                       station_radii,
+	                                       station_id,
+		                               freq_init,
+		                               bandwidth,
+                                               freq_interval,
+		                               position_x,
+		                               position_y,
+                                               legendre_root,
+             		                       legendre_weight )   ;
+
+          Double hrAngle_min = (source_hr_angle );
+          Double hrAngle_max = (source_hr_angle + 15.0) ;
+  
+          Double interval = 0.1;
+          
+          uint loop_hr = int((hrAngle_max - hrAngle_min)/interval) ;
+          Double hrAngle( 0.0 ) ;
+
+          Double power_cal( 0.0) ;
+          Vector<Double> power(loop_hr,0.0);
+          power_cal = max_power ;
+          Double power_compare(0.0);
+
+          Vector<Double> power_normalized( loop_hr, 0.0);
+
+	  Vector<Double> hr_vector( loop_hr, 0.0 );
+          Vector<Double> selected_hrangles(loop_hr,0.0 );
+          
+          Double hr_min(0.0);
+          Double hr_max(0.0);
+	  Double hr_width(0.0);
+          hr_vector(0) =hrAngle_min ;
+          power(0)=power_cal;
+          uint i =1 ;
+
+          do
+	   {
+              power_compare = power_cal ;
+              hrAngle =  hrAngle_min + (i+1)*interval ;
+              
+	      hr_vector(i) = hrAngle ;
+
+              power_cal = stbm.integrate_freq( hrAngle,
+                                               source_declination,
+                                             source_declination,
+	                                     source_hr_angle,
+	                                     station_radii,
+	                                     station_id,
+		                             freq_init,
+		                             bandwidth,
+                                             freq_interval,
+		                             position_x,
+		                             position_y,
+                                             legendre_root,
+             		                     legendre_weight ) ;
+              
+              power(i)= power_cal ;
+      
+	      i = i+1 ;
+	  
+	   }
+
+	  while( power_compare > power_cal ) ;
+          
+	  Double power_max = max_power ;
+	 
+          Double power_min = power_cal ;
+                           
+          power_normalized = power/power_max ;
+         
+          Double power_norm_min = power_min/max_power ;
+  
+          Double power_norm_max = power_max/max_power ;
+    
+          Double half_power =(power_norm_max -power_norm_min)/2 ;
+       
+          Double power_optimum = power_norm_max - half_power ;
+          
+           selected_hrangles.resize(ntrue( power_normalized >half_power));
+         
+           selected_hrangles = hr_vector(power_normalized >half_power).getCompressedArray();
+
+          uint n_elements = selected_hrangles.nelements() ;
+    
+          hr_max = selected_hrangles(n_elements-1);
+          cout << "hr angle  maximum : " << hr_max << endl ;
+
+          hr_min = selected_hrangles(0) ;
+          cout << " hr angle minimum : " << hr_min << endl ;
+
+//          Double d_max = 
+          
+          Double x_width = cos(pi/180.*hr_max)*sin(pi/180.*source_declination)*cos(pi/180.*hr_min)*sin(pi/180.*source_declination) ;
+          Double y_width = sin(pi/180.*hr_max)*sin(pi/180.*source_declination)*sin(pi/180.*hr_min)*sin(pi/180.*source_declination) ;
+          Double z_width = cos(pi/180.*source_declination)*cos(pi/180.*source_declination);
+
+          hr_width = 180./pi*acos(x_width+ y_width+ z_width) ;
+
+          return hr_width ;
+      }
+      
+      catch( AipsError x ){
+      cerr << "StationBeam::beamwidth_hr " << x.getMesg () << endl ;
+      return Double ();
+      }       
+	       
+ }         
          
 
 Double StationBeam::power_moon( const Double& source_declination,
@@ -509,7 +680,7 @@ Double StationBeam::power_moon( const Double& source_declination,
 		                               position_y,
                                                legendre_root,
              		                       legendre_weight )   ;
-     
+       cout << " maximum power at the source location :" << max_power << endl ;
        Double declination_min = source_declination - 0.25 ;
        Double declination_max = source_declination + 0.25 ;
        
@@ -712,7 +883,7 @@ Double StationBeam::min_power_moon( const Double& source_declination,
        Double declination_min = 0.0 ;
        Double declination_max = 90.0 ;
        
-       Double declination_interval = (declination_max - declination_min)/450 ;
+       Double declination_interval = (declination_max - declination_min)/360 ;
 
        Double decli_1 = declination_min ;
        Double decli_2(0.0) ;
@@ -721,7 +892,7 @@ Double StationBeam::min_power_moon( const Double& source_declination,
        Double hrangle_min = 0.0;
        Double hrangle_max = 360.0 ;
 
-       Double hr_angle_interval = 2.0 ;
+       Double hr_angle_interval = 5.0 ;
 
        Double hr_1(0.0)  ;
        Double hr_2(0.0) ;
@@ -777,7 +948,7 @@ Double StationBeam::min_power_moon( const Double& source_declination,
           }
 	  power_sky = power_sky + decli_1x*(pi/180.)*decli_inner_sum ;
           decli_1 = decli_2 ;   
-	  cout << " declination angle for the integration over sky : " <<  decli_1 << " power sky " << power_sky << endl ;           
+//	  cout << " declination angle for the integration over sky : " <<  decli_1 << " power sky " << power_sky << endl ;           
       }
       return power_sky ;
     }

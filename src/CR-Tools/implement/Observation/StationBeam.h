@@ -195,7 +195,7 @@ namespace CR { // Namespace CR -- begin
                         const Vector<Double>& legendre_root,
                         const Vector<Double>& legendre_weight );
  
- Double beamwidth(  const Double& source_declination,
+ Double beamwidth_decli(  const Double& source_declination,
                     const Double& source_hr_angle,
 	            const Double& station_radii,
 	            const Vector<uint>& station_id,
@@ -207,6 +207,18 @@ namespace CR { // Namespace CR -- begin
                     const Vector<Double>& legendre_root,
              	    const Vector<Double>& legendre_weight ) ;
 
+ 
+Double beamwidth_hr(  const Double& source_declination,
+                      const Double& source_hr_angle,
+	              const Double& station_radii,
+	              const Vector<uint>& station_id,
+	              const Double& freq_init,
+		      const Double& bandwidth,
+                      const Double& freq_interval,
+		      Vector<Double>& position_x,
+		      Vector<Double>& position_y,
+                      const Vector<Double>& legendre_root,
+             	      const Vector<Double>& legendre_weight )  ;
 
  Double power_moon( const Double& source_declination,
 	            const Double& source_hr_angle,
