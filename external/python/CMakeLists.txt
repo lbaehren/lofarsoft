@@ -1,10 +1,34 @@
 
+project (PYTHON_MODULES)
+
+## ------------------------------------------------------------------------------
+## Selection of available Python modules
+
+option (module_numarray "Build numarray module?" ON)
+option (module_matplotlib "Build matplotlib module?" ON)
+option (module_numeric "Build numeric module?" ON)
+
+## ------------------------------------------------------------------------------
+## check where to find the CMake scripts
+
+find_path (PYTHON_MODULES_cmake FindPython.cmake
+  PATHS 
+  ${PYTHON_MODULES_SOURCE_DIR}
+  ${PYTHON_MODULES_SOURCE_DIR}/..
+  ${PYTHON_MODULES_SOURCE_DIR}/../..
+  ${PYTHON_MODULES_SOURCE_DIR}/../../..
+  PATH_SUFFIXES
+  devel_common/cmake
+  )
+
 ## ------------------------------------------------------------------------------
 ## Configuration and build
 
 ## [1] numarray
 
-add_subdirectory (numarray)
+if (module_numarray)
+  add_subdirectory (numarray)
+endif (module_numarray)
 
 ## [2] matplotlib
 
@@ -16,7 +40,15 @@ add_subdirectory (numarray)
 #  with matplotlib, it is important that you have *both* present and in
 #  your PYTHONPATH when you compile matplotlib.
 
-add_subdirectory (matplotlib)
+if (module_matplotlib)
+  add_subdirectory (matplotlib)
+endif (module_matplotlib)
+
+## [3] numeric
+
+if (module_numeric)
+  add_subdirectory (numeric)
+endif (module_numeric)
 
 ## ------------------------------------------------------------------------------
 ## Installation option for Python packages

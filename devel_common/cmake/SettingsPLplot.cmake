@@ -1,20 +1,45 @@
 
-## ------------------------------------------------------------------------------
-## Additional settings to build and install PLplot
+## -------------------------------------------------------------------
+## Search for external components
+
+find_path (plplot_cmake FindNumeric.cmake
+  PATHS 
+  .
+  ./..
+  ./../..
+  ./../../..
+  PATH_SUFFIXES
+  devel_common/cmake
+  )
+
+if (plplot_cmake)
+  ## Python.Numeric
+  include (${plplot_cmake}/FindNumeric.cmake)
+  if (NUMERIC_INCLUDES)
+    include_directories (${NUMERIC_INCLUDES})
+  endif (NUMERIC_INCLUDES)
+endif (plplot_cmake)
 
 ## -------------------------------------------------------------------
-## General settings for the drivers
+## Language bindings
 
-set (BUILD_SHARED_LIBS "0" CACHE BOOL "Build shared libraries?")
-set (ENABLE_DYNDRIVERS "0" CACHE BOOL "Enable dynamic drivers?")
-set (ENABLE_f77 OFF CACHE BOOL "Enable drivers for Fortran 77?")
-set (ENABLE_f95 OFF CACHE BOOL "Enable drivers for Fortran 95?")
-set (ENABLE_gnome2 OFF CACHE BOOL "Enable drivers for GNOME2?")
-set (ENABLE_itcl OFF CACHE BOOL "Enable drivers for [incr Tcl]?")
-set (ENABLE_itk OFF CACHE BOOL "Enable drivers for [incr Tk]?")
+## building of dynamic libraries needs to be enabled to create Python
+## bindings; otherwise the Python bindings are disabled
+set (BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries?")
+
+set (ENABLE_f77 OFF CACHE BOOL "Enable bindings for Fortran 77?")
+set (ENABLE_f95 OFF CACHE BOOL "Enable bindings for Fortran 95?")
+set (ENABLE_gnome2 OFF CACHE BOOL "Enable bindings for GNOME2?")
+set (ENABLE_itcl OFF CACHE BOOL "Enable bindings for [incr Tcl]?")
+set (ENABLE_itk OFF CACHE BOOL "Enable bindings for [incr Tk]?")
+set (ENABLE_python ON CACHE BOOL "Enable bindings for Python?")
+set (ENABLE_java OFF CACHE BOOL "Enable bindings for Java?")
+set (ENABLE_pygcw OFF CACHE BOOL "Enable bindings for Python.gcw?")
 
 ## -------------------------------------------------------------------
-## disable individual drivers
+## Device drivers
+
+set (ENABLE_DYNDRIVERS OFF CACHE BOOL "Enable dynamic drivers?")
 
 set (PLD_aqt OFF CACHE BOOL "Enable driver aqt")
 set (PLD_hp7470 OFF CACHE BOOL "Enable driver hp7470")
@@ -46,6 +71,8 @@ if (prefix)
   message (STATUS "Installation area located for package PLplot.")
   get_filename_component (tmp ${prefix} ABSOLUTE)
   set (CMAKE_INSTALL_PREFIX ${tmp} CACHE STRING "Installation prefix") 
+  ## Additional setting for Python bindings
+  set (PYTHON_INSTDIR "${prefix}/lib/python")
 endif (prefix)
 
 set (CMAKE_INSTALL_BINDIR "bin")

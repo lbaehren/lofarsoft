@@ -43,7 +43,7 @@ namespace CR { // Namespace CR -- begin
       switch (targetCoordinate) {
       case CR::Cylindrical:
 	// Conversion: Cartesian (x,y,z) -> Cylindrical (rho,phi,z)
-	return cartesian2cylindrical (xTarget,
+	return Cartesian2Cylindrical (xTarget,
 				      yTarget,
 				      zTarget,
 				      xSource,
@@ -53,7 +53,7 @@ namespace CR { // Namespace CR -- begin
 	break;
       case CR::Spherical:
 	// Conversion: Cartesian (x,y,z) -> Spherical (r,phi,theta)
-	return cartesian2spherical (xTarget,
+	return Cartesian2Spherical (xTarget,
 				    yTarget,
 				    zTarget,
 				    xSource,
@@ -69,7 +69,7 @@ namespace CR { // Namespace CR -- begin
       switch (targetCoordinate) {
       case CR::Cartesian:
 	// Conversion: Cylindrical (rho,phi,z) -> Cartesian (x,y,z)
-	return cylindrical2cartesian (xTarget,
+	return Cylindrical2Cartesian (xTarget,
 				      yTarget,
 				      zTarget,
 				      xSource,
@@ -79,7 +79,7 @@ namespace CR { // Namespace CR -- begin
 	break;
       case CR::Spherical:
 	// Conversion: Cylindrical (rho,phi,z) -> Spherical (rho,phi,z)
-	return cylindrical2spherical (xTarget,
+	return Cylindrical2Spherical (xTarget,
 				      yTarget,
 				      zTarget,
 				      xSource,
@@ -95,7 +95,7 @@ namespace CR { // Namespace CR -- begin
       switch (targetCoordinate) {
       case CR::Cartesian:
 	// Conversion: Spherical (r,phi,theta) -> Cartesian (x,y,z)
-	return spherical2cartesian (xTarget,
+	return Spherical2Cartesian (xTarget,
 				    yTarget,
 				    zTarget,
 				    xSource,
@@ -105,7 +105,7 @@ namespace CR { // Namespace CR -- begin
 	break;
       case CR::Cylindrical:
 	// Conversion: Spherical (r,phi,theta) -> Spherical (rho,phi,z)
-	return spherical2cylindrical (xTarget,
+	return Spherical2Cylindrical (xTarget,
 				      yTarget,
 				      zTarget,
 				      xSource,
@@ -126,9 +126,9 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
-  // ------------------------------------------------------------- azel2cartesian
+  // ------------------------------------------------------------- azel2Cartesian
 
-  bool azel2cartesian (double &x,
+  bool azel2Cartesian (double &x,
 		       double &y,
 		       double &z,
 		       double const &az,
@@ -153,23 +153,23 @@ namespace CR { // Namespace CR -- begin
 	z = r*sin(el);
       }
     } catch (std::string message) {
-      std::cerr << "[azel2cartesian] " << message << std::endl;
+      std::cerr << "[azel2Cartesian] " << message << std::endl;
       status = false;
     }
     
     return status;
   }
   
-  // ------------------------------------------------------------- azel2cartesian
+  // ------------------------------------------------------------- azel2Cartesian
 
-  bool azel2cartesian (std::vector<double> &cartesian,
+  bool azel2Cartesian (std::vector<double> &cartesian,
 		       std::vector<double> const &azel,
 		       bool const &anglesInDegrees,
 		       bool const &lastIsRadius)
   {
     if (azel.size() == 3) {
       cartesian.resize(3);
-      return azel2cartesian (cartesian[0],
+      return azel2Cartesian (cartesian[0],
 			     cartesian[1],
 			     cartesian[2],
 			     azel[0],
@@ -188,9 +188,88 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
-  // ------------------------------------------------------ cartesian2cylindrical
+  // ------------------------------------------------------- Cartesian2AzElRadius
 
-  bool cartesian2cylindrical (double &rho,
+  bool Cartesian2AzElRadius (double &az,
+			     double &el,
+			     double &radius,
+			     double const &x,
+			     double const &y,
+			     double const &z,
+			     bool const &anglesInDegrees)
+  {
+    bool status (true);
+
+    try {
+      if (anglesInDegrees) {
+	radius  = sqrt(x*x+y*y+z*z);
+	az      = rad2deg(atan2(x,y));
+	el      = rad2deg(acos(sqrt(sqrt(x*x+y*y))/radius));
+      } else {
+	radius  = sqrt(x*x+y*y+z*z);
+	az      = atan2(x,y);
+	el      = acos(sqrt(sqrt(x*x+y*y))/radius);
+      }
+    } catch (std::string message) {
+      std::cerr << "[Cartesian2AzElRadius] " << message << std::endl;
+      status = false;
+    }
+
+    return status;
+  }
+  
+  // ------------------------------------------------------- Cartesian2AzElRadius
+
+  bool Cartesian2AzElRadius (std::vector<double> &AzElRadius,
+			     std::vector<double> const &cartesian,
+			     bool const &anglesInDegrees)
+  {
+    return Cartesian2AzElRadius (AzElRadius[0],
+				 AzElRadius[1],
+				 AzElRadius[2],
+				 cartesian[0],
+				 cartesian[1],
+				 cartesian[2],
+				 anglesInDegrees);
+  }
+  
+  // ------------------------------------------------------- Cartesian2AzElRadius
+
+#ifdef HAVE_CASA
+  bool Cartesian2AzElRadius (casa::Vector<double> &AzElRadius,
+			     casa::Vector<double> const &cartesian,
+			     bool const &anglesInDegrees)
+  {
+    return Cartesian2AzElRadius (AzElRadius(0),
+				 AzElRadius(1),
+				 AzElRadius(2),
+				 cartesian(0),
+				 cartesian(1),
+				 cartesian(2),
+				 anglesInDegrees);
+  }
+#endif
+  
+  // ------------------------------------------------------- Cartesian2AzElRadius
+
+#ifdef HAVE_BLITZ
+  bool Cartesian2AzElRadius (blitz::Array<double,1> &AzElRadius,
+			     blitz::Array<double,1> const &cartesian,
+			     bool const &anglesInDegrees)
+  {
+    return Cartesian2AzElRadius (AzElRadius(0),
+				 AzElRadius(1),
+				 AzElRadius(2),
+				 cartesian(0),
+				 cartesian(1),
+				 cartesian(2),
+				 anglesInDegrees);
+  }
+#endif
+
+  // ------------------------------------------------------ Cartesian2Cylindrical
+
+  bool Cartesian2Cylindrical (double &rho,
 			      double &phi,
 			      double &z_cyl,
 			      const double &x,
@@ -211,20 +290,20 @@ namespace CR { // Namespace CR -- begin
 	z_cyl = z;
       }
     } catch (std::string message) {
-      std::cerr << "[cartesian2cylindrical] " << message << std::endl;
+      std::cerr << "[Cartesian2Cylindrical] " << message << std::endl;
       status = false;
     }
 
     return status;
   }
 
-  // ------------------------------------------------------ cartesian2cylindrical
+  // ------------------------------------------------------ Cartesian2Cylindrical
 
-  bool cartesian2cylindrical (std::vector<double> &cylindrical,
+  bool Cartesian2Cylindrical (std::vector<double> &cylindrical,
 			      std::vector<double> const &cartesian,
 			      bool const &anglesInDegrees)
   {
-    return cartesian2cylindrical (cylindrical[0],
+    return Cartesian2Cylindrical (cylindrical[0],
 				  cylindrical[1],
 				  cylindrical[2],
 				  cartesian[0],
@@ -234,11 +313,11 @@ namespace CR { // Namespace CR -- begin
   }
 
 #ifdef HAVE_CASA
-  bool cartesian2cylindrical (casa::Vector<double> &cylindrical,
+  bool Cartesian2Cylindrical (casa::Vector<double> &cylindrical,
 			      casa::Vector<double> const &cartesian,
 			      bool const &anglesInDegrees)
   {
-    return cartesian2cylindrical (cylindrical(0),
+    return Cartesian2Cylindrical (cylindrical(0),
 				  cylindrical(1),
 				  cylindrical(2),
 				  cartesian(0),
@@ -249,11 +328,11 @@ namespace CR { // Namespace CR -- begin
 #endif
   
 #ifdef HAVE_BLITZ
-  bool cartesian2cylindrical (blitz::Array<double,1> &cylindrical,
+  bool Cartesian2Cylindrical (blitz::Array<double,1> &cylindrical,
 			      blitz::Array<double,1> const &cartesian,
 			      bool const &anglesInDegrees)
   {
-    return cartesian2cylindrical (cylindrical(0),
+    return Cartesian2Cylindrical (cylindrical(0),
 				  cylindrical(1),
 				  cylindrical(2),
 				  cartesian(0),
@@ -263,9 +342,9 @@ namespace CR { // Namespace CR -- begin
   }
 #endif
 
-  // -------------------------------------------------------- cartesian2spherical
+  // -------------------------------------------------------- Cartesian2Spherical
   
-  bool cartesian2spherical (double &r,
+  bool Cartesian2Spherical (double &r,
 			    double &phi,
 			    double &theta,
 			    const double &x,
@@ -286,20 +365,20 @@ namespace CR { // Namespace CR -- begin
 	theta = acos(z/r);
       }
     } catch (std::string message) {
-      std::cerr << "[cartesian2spherical] " << message << std::endl;
+      std::cerr << "[Cartesian2Spherical] " << message << std::endl;
       status = false;
     }
 
     return status;
   }
 
-  // -------------------------------------------------------- cartesian2spherical
+  // -------------------------------------------------------- Cartesian2Spherical
   
-  bool cartesian2spherical (std::vector<double> &spherical,
+  bool Cartesian2Spherical (std::vector<double> &spherical,
 			    std::vector<double> const &cartesian,
 			    bool const &anglesInDegrees)
   {
-    return cartesian2spherical (spherical[0],
+    return Cartesian2Spherical (spherical[0],
 				spherical[1],
 				spherical[2],
 				cartesian[0],
@@ -309,11 +388,11 @@ namespace CR { // Namespace CR -- begin
   }
   
 #ifdef HAVE_CASA
-  bool cartesian2spherical (casa::Vector<double> &spherical,
+  bool Cartesian2Spherical (casa::Vector<double> &spherical,
 			    casa::Vector<double> const &cartesian,
 			    bool const &anglesInDegrees)
   {
-    return cartesian2spherical (spherical(0),
+    return Cartesian2Spherical (spherical(0),
 				spherical(1),
 				spherical(2),
 				cartesian(0),
@@ -324,11 +403,11 @@ namespace CR { // Namespace CR -- begin
 #endif
   
 #ifdef HAVE_BLITZ
-  bool cartesian2spherical (blitz::Array<double,1> &spherical,
+  bool Cartesian2Spherical (blitz::Array<double,1> &spherical,
 			    blitz::Array<double,1> const &cartesian,
 			    bool const &anglesInDegrees)
   {
-    return cartesian2spherical (spherical(0),
+    return Cartesian2Spherical (spherical(0),
 				spherical(1),
 				spherical(2),
 				cartesian(0),
@@ -344,9 +423,9 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
-  // ------------------------------------------------------ cylindrical2cartesian
+  // ------------------------------------------------------ Cylindrical2Cartesian
 
-  bool cylindrical2cartesian (double &x,
+  bool Cylindrical2Cartesian (double &x,
 			      double &y,
 			      double &z,
 			      double const &rho,
@@ -367,20 +446,20 @@ namespace CR { // Namespace CR -- begin
 	z = z_cyl;
       }
     } catch (std::string message) {
-      std::cerr << "[cylindrical2cartesian] " << message << std::endl;
+      std::cerr << "[Cylindrical2Cartesian] " << message << std::endl;
       status = false;
     }
 
     return status;
   }
   
-  // ------------------------------------------------------ cylindrical2cartesian
+  // ------------------------------------------------------ Cylindrical2Cartesian
 
-  bool cylindrical2cartesian (std::vector<double> &cartesian,
+  bool Cylindrical2Cartesian (std::vector<double> &cartesian,
 			      std::vector<double> const &cylindrical,
 			      bool const &anglesInDegrees)
   {
-    return cylindrical2cartesian (cartesian[0],
+    return Cylindrical2Cartesian (cartesian[0],
 				  cartesian[1],
 				  cartesian[2],
 				  cylindrical[0],
@@ -389,14 +468,14 @@ namespace CR { // Namespace CR -- begin
 				  anglesInDegrees);
   }
 
-  // ------------------------------------------------------ cylindrical2cartesian
+  // ------------------------------------------------------ Cylindrical2Cartesian
 
 #ifdef HAVE_CASA
-  bool cylindrical2cartesian (casa::Vector<double> &cartesian,
+  bool Cylindrical2Cartesian (casa::Vector<double> &cartesian,
 			      casa::Vector<double> const &cylindrical,
 			      bool const &anglesInDegrees)
   {
-    return cylindrical2cartesian (cartesian(0),
+    return Cylindrical2Cartesian (cartesian(0),
 				  cartesian(1),
 				  cartesian(2),
 				  cylindrical(0),
@@ -406,14 +485,14 @@ namespace CR { // Namespace CR -- begin
   }
 #endif
   
-  // ------------------------------------------------------ cylindrical2cartesian
+  // ------------------------------------------------------ Cylindrical2Cartesian
 
 #ifdef HAVE_BLITZ
-  bool cylindrical2cartesian (blitz::Array<double,1> &cartesian,
+  bool Cylindrical2Cartesian (blitz::Array<double,1> &cartesian,
 			      blitz::Array<double,1> const &cylindrical,
 			      bool const &anglesInDegrees)
   {
-    return cylindrical2cartesian (cartesian(0),
+    return Cylindrical2Cartesian (cartesian(0),
 				  cartesian(1),
 				  cartesian(2),
 				  cylindrical(0),
@@ -423,9 +502,9 @@ namespace CR { // Namespace CR -- begin
   }
 #endif
 
-  // ------------------------------------------------------ cylindrical2spherical
+  // ------------------------------------------------------ Cylindrical2Spherical
 
-  bool cylindrical2spherical (double &r,
+  bool Cylindrical2Spherical (double &r,
 			      double &phi,
 			      double &theta,
 			      double const &rho,
@@ -446,7 +525,7 @@ namespace CR { // Namespace CR -- begin
 	theta = asin(rho/(r));
       }
     } catch (std::string message) {
-      std::cerr << "[cylindrical2cartesian] " << message << std::endl;
+      std::cerr << "[Cylindrical2Cartesian] " << message << std::endl;
       status = false;
     }
 
@@ -461,7 +540,7 @@ namespace CR { // Namespace CR -- begin
 
   // ----------------------------------------------------- spherical -> cartesian
 
-  bool spherical2cartesian (double &x,
+  bool Spherical2Cartesian (double &x,
 			    double &y,
 			    double &z,
 			    double const &r,
@@ -473,7 +552,7 @@ namespace CR { // Namespace CR -- begin
 
     try {
       if (anglesInDegrees) {
-	spherical2cartesian (x,
+	Spherical2Cartesian (x,
 			     y,
 			     z,
 			     r,
@@ -486,7 +565,7 @@ namespace CR { // Namespace CR -- begin
 	z = r*cos(theta); 
       }
     } catch (std::string message) {
-      std::cerr << "[spherical2cartesian]" << message << std::endl;
+      std::cerr << "[Spherical2Cartesian]" << message << std::endl;
       status = false;
     }
     
@@ -495,7 +574,7 @@ namespace CR { // Namespace CR -- begin
 
   
 #ifdef HAVE_CASA
-  bool spherical2cartesian (casa::Vector<double> &cartesian,
+  bool Spherical2Cartesian (casa::Vector<double> &cartesian,
 			    casa::Vector<double> const &spherical,
 			    bool const &anglesInDegrees)
   {
@@ -507,7 +586,7 @@ namespace CR { // Namespace CR -- begin
 
   // --------------------------------------------------- spherical -> cylindrical
 
-  bool spherical2cylindrical (double &rho,
+  bool Spherical2Cylindrical (double &rho,
 			      double &phi_cyl,
 			      double &z,
 			      double const &r,
@@ -520,7 +599,7 @@ namespace CR { // Namespace CR -- begin
     try {
       if (anglesInDegrees) {
 	// conversion: deg -> rad
-	spherical2cylindrical(rho,
+	Spherical2Cylindrical(rho,
 			      phi_cyl,
 			      z,
 			      r,
@@ -533,7 +612,7 @@ namespace CR { // Namespace CR -- begin
 	z       = r*cos(theta);
       }
     } catch (std::string message) {
-      std::cerr << "[spherical2cylindrical] " << message << std::endl;
+      std::cerr << "[Spherical2Cylindrical] " << message << std::endl;
       status = false;
     }
 
@@ -542,11 +621,11 @@ namespace CR { // Namespace CR -- begin
 
   // --------------------------------------------------- spherical -> cylindrical
 
-  bool spherical2cylindrical (std::vector<double> &cylindrical,
+  bool Spherical2Cylindrical (std::vector<double> &cylindrical,
 			      std::vector<double> const &spherical,
 			      bool const &anglesInDegrees)
   {
-    return spherical2cylindrical (cylindrical[0],
+    return Spherical2Cylindrical (cylindrical[0],
 				  cylindrical[1],
 				  cylindrical[2],
 				  spherical[0],
@@ -558,14 +637,14 @@ namespace CR { // Namespace CR -- begin
   // --------------------------------------------------- spherical -> cylindrical
 
 #ifdef HAVE_CASA
-  bool spherical2cylindrical (casa::Vector<double> &cylindrical,
+  bool Spherical2Cylindrical (casa::Vector<double> &cylindrical,
 			      casa::Vector<double> const &spherical,
 			      bool const &anglesInDegrees)
   {
     bool status (true);
 
     if (anglesInDegrees) {
-      spherical2cylindrical (cylindrical(0),
+      Spherical2Cylindrical (cylindrical(0),
 			     cylindrical(1),
 			     cylindrical(2),
 			     spherical(0),
@@ -573,7 +652,7 @@ namespace CR { // Namespace CR -- begin
 			     deg2rad(spherical(2)),
 			     false);
     } else {
-      spherical2cylindrical (cylindrical(0),
+      Spherical2Cylindrical (cylindrical(0),
 			     cylindrical(1),
 			     cylindrical(2),
 			     spherical(0),
@@ -602,7 +681,7 @@ namespace CR { // Namespace CR -- begin
 		 double const &ze,
 		 bool const &anglesInDegrees)
   {
-    spherical2cartesian (x,y,z,r,az,ze,anglesInDegrees);
+    Spherical2Cartesian (x,y,z,r,az,ze,anglesInDegrees);
   }
   
   // ------------------------------------------------------------------- azze2xyz
@@ -610,19 +689,19 @@ namespace CR { // Namespace CR -- begin
   vector<double> azze2xyz (vector<double> const &azze,
 			   bool const &anglesInDegrees)
   {
-    return spherical2cartesian (azze,anglesInDegrees);
+    return Spherical2Cartesian (azze,anglesInDegrees);
   }
   
-  // -------------------------------------------------------- spherical2cartesian
+  // -------------------------------------------------------- Spherical2Cartesian
   
-  vector<double> spherical2cartesian (vector<double> const &spherical,
+  vector<double> Spherical2Cartesian (vector<double> const &spherical,
 				      bool const &anglesInDegrees)
   {
     uint nelem (spherical.size());
     vector<double> cartesian (3);
 
     if (nelem == 3) {
-      spherical2cartesian (cartesian[0],
+      Spherical2Cartesian (cartesian[0],
 			   cartesian[1],
 			   cartesian[2],
 			   spherical[0],
@@ -630,7 +709,7 @@ namespace CR { // Namespace CR -- begin
 			   spherical[2],
 			   anglesInDegrees);      
     } else if (nelem == 2) {
-      spherical2cartesian (cartesian[0],
+      Spherical2Cartesian (cartesian[0],
 			   cartesian[1],
 			   cartesian[2],
 			   1.0,
@@ -638,7 +717,7 @@ namespace CR { // Namespace CR -- begin
 			   spherical[2],
 			   anglesInDegrees);      
     } else {
-      std::cerr << "[spherical2cartesian] Unable to convert; too few elements!"
+      std::cerr << "[Spherical2Cartesian] Unable to convert; too few elements!"
 		<< std::endl;
     }
 
@@ -646,14 +725,14 @@ namespace CR { // Namespace CR -- begin
   }
   
 #ifdef HAVE_CASA
-  casa::Vector<double> spherical2cartesian (casa::Vector<double> const &spherical,
+  casa::Vector<double> Spherical2Cartesian (casa::Vector<double> const &spherical,
 					    bool const &anglesInDegrees)
   {
     uint nelem (spherical.nelements());
     casa::Vector<double> cartesian (3);
 
     if (nelem == 3) {
-      spherical2cartesian (cartesian(0),
+      Spherical2Cartesian (cartesian(0),
 			   cartesian(1),
 			   cartesian(2),
 			   spherical(0),
@@ -661,9 +740,9 @@ namespace CR { // Namespace CR -- begin
 			   spherical(2),
 			   anglesInDegrees);      
     } else if (nelem == 2) {
-      std::cerr << "[spherical2cartesian] Only two input elements; assuming r=1"
+      std::cerr << "[Spherical2Cartesian] Only two input elements; assuming r=1"
 		<< std::endl;
-      spherical2cartesian (cartesian(0),
+      Spherical2Cartesian (cartesian(0),
 			   cartesian(1),
 			   cartesian(2),
 			   1.0,
@@ -671,7 +750,7 @@ namespace CR { // Namespace CR -- begin
 			   spherical(2),
 			   anglesInDegrees);      
     } else {
-      std::cerr << "[spherical2cartesian] Unable to convert; too few elements!"
+      std::cerr << "[Spherical2Cartesian] Unable to convert; too few elements!"
 		<< std::endl;
     }
 
@@ -687,9 +766,9 @@ namespace CR { // Namespace CR -- begin
 
 #ifdef HAVE_CASA
 
-  // ------------------------------------------------------------- azel2cartesian
+  // ------------------------------------------------------------- azel2Cartesian
   
-  casa::Vector<double> azel2cartesian (const casa::Vector<double>& azel,
+  casa::Vector<double> azel2Cartesian (const casa::Vector<double>& azel,
 				       bool const &anglesInDegrees)
   {
     casa::Vector<double> cartesian(3);
@@ -712,7 +791,7 @@ namespace CR { // Namespace CR -- begin
     }
     
     // Coordinate transformation from (az,el) to cartesian (x,y,z)
-    azel2cartesian (cartesian(0),
+    azel2Cartesian (cartesian(0),
 		    cartesian(1),
 		    cartesian(2),
 		    az,
@@ -724,9 +803,9 @@ namespace CR { // Namespace CR -- begin
     return cartesian;
   }
 
-  // ------------------------------------------------------------ polar2cartesian
+  // ------------------------------------------------------------ polar2Cartesian
 
-  casa::Vector<double> polar2cartesian (casa::Vector<double> const &polar)
+  casa::Vector<double> polar2Cartesian (casa::Vector<double> const &polar)
   {
     casa::Vector<double> cartesian(3);
     double radius = 1.0;
@@ -754,10 +833,10 @@ namespace CR { // Namespace CR -- begin
 
 #ifdef HAVE_BLITZ
   
-  // ------------------------------------------------------------- azel2cartesian
+  // ------------------------------------------------------------- azel2Cartesian
 
   template <class T>
-  blitz::Array<T,1> azel2cartesian (const blitz::Array<T,1>& azel)
+  blitz::Array<T,1> azel2Cartesian (const blitz::Array<T,1>& azel)
   {
     blitz::Array<T,1> cartesian(3);
     unsigned int shape = azel.numElements();
@@ -776,10 +855,10 @@ namespace CR { // Namespace CR -- begin
     return cartesian;
   }
 
-  // ------------------------------------------------------------ polar2cartesian
+  // ------------------------------------------------------------ polar2Cartesian
   
   template <class T>
-  blitz::Array<T,1> polar2cartesian (blitz::Array<T,1> const &polar)
+  blitz::Array<T,1> polar2Cartesian (blitz::Array<T,1> const &polar)
   {
     blitz::Array<T,1> cartesian(3);
     T radius = 1.0;
@@ -797,11 +876,11 @@ namespace CR { // Namespace CR -- begin
     return cartesian;
   }
 
-  template blitz::Array<float,1> azel2cartesian (const blitz::Array<float,1>& azel);
-  template blitz::Array<double,1> azel2cartesian (const blitz::Array<double,1>& azel);
+  template blitz::Array<float,1> azel2Cartesian (const blitz::Array<float,1>& azel);
+  template blitz::Array<double,1> azel2Cartesian (const blitz::Array<double,1>& azel);
 
-  template blitz::Array<float,1> polar2cartesian (blitz::Array<float,1> const &polar);
-  template blitz::Array<double,1> polar2cartesian (blitz::Array<double,1> const &polar);
+  template blitz::Array<float,1> polar2Cartesian (blitz::Array<float,1> const &polar);
+  template blitz::Array<double,1> polar2Cartesian (blitz::Array<double,1> const &polar);
 
 #endif
   

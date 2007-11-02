@@ -92,17 +92,18 @@ cplplotcanvasmodule.c
 )
 ### cplplotcanvasmodule_SRCS now prepared.
 
-set_source_files_properties(
-${gcwmodule_SRCS} ${cplplotcanvasmodule_SRCS}
-PROPERTIES COMPILE_FLAGS 
-"${gcw_COMPILE_FLAGS} ${PYGCW_CFLAGS}"
-)
-
 include_directories(
 ${CMAKE_SOURCE_DIR}/include
 ${CMAKE_BINARY_DIR}
 ${CMAKE_BINARY_DIR}/include
 ${PYTHON_INCLUDE_PATH}
+${NUMERIC_INCLUDES}
+)
+
+set_source_files_properties(
+${gcwmodule_SRCS} ${cplplotcanvasmodule_SRCS}
+PROPERTIES COMPILE_FLAGS 
+"${gcw_COMPILE_FLAGS} ${PYGCW_CFLAGS}"
 )
 
 ### Build and install the gcw module

@@ -62,31 +62,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     <h3>Synopsis</h3>
 
-    <table border="0">
-      <tr>
-        <td class="indexkey">Quantity</td>
-        <td class="indexkey">implemented in</td>
-        <td class="indexkey">Relation</td>
-      </tr>
-      <tr>
-        <td>gemoetrical delay</td>
-        <td>GeometricalDelay</td>
-        <td>\f$ \tau_j = \frac{1}{c} \left( |\vec \rho - \vec x_j| - |\vec \rho|
-	\right) \f$</td>
-      </tr>
-      <tr>
-        <td>geometrical phase</td>
-        <td>GeometricalPhase</td>
-        <td>\f$ \phi (\vec x_j, \vec \rho, \nu) = 2 \pi \nu \tau_{\rm geom} \f$</td>
-      </tr>
-      <tr>
-        <td>geometrical weight</td>
-        <td>GeometricalWeight</td>
-        <td>\f$ w (\vec x_j, \vec \rho, \nu) = \exp \Bigl( i\, \phi (\vec x_j,
-	\vec \rho, \nu) \Bigr) \f$</td>
-      </tr>
-    </table>
-    
     <b>Geometry.</b>
     The basic equation, for which the delays are computed, is documented in
     the GeometricalWeight class. The procedure to arrive at the geometrical
@@ -193,7 +168,66 @@ namespace CR { // NAMESPACE CR -- BEGIN
     GeometricalDelay ();
     
     /*!
-      \brief Argumented constructor (using Blitz arrays)
+      \brief Argumented constructor
+
+      If an error is encountered processing the input parameters, we revert to
+      the individual default settings used with the default constructor; at least
+      this way we end up with an operational object.
+
+      Internally assigned variables:
+      - bufferDelay (false)
+      - antennaIndexFirst (true)
+
+      \param antPositions -- [nofAntennas,3] Antenna positions for which the
+                             delay is computed, \f$ (x,y,z) \f$
+      \param skyPositions -- [nofSkyPositions,3] Positions in the sky towards
+                             which to point, given in the same reference frame
+			     as the antenna positions, \f$ (x,y,z) \f$
+    */
+#ifdef HAVE_CASA
+    GeometricalDelay (casa::Matrix<double> const &antPositions,
+		      casa::Matrix<double> const &skyPositions);
+#else 
+#ifdef HAVE_BLITZ
+    GeometricalDelay (blitz::Array<double,2> const &antPositions,
+		      blitz::Array<double,2> const &skyPositions);
+#endif
+#endif
+
+    /*!
+      \brief Argumented constructor
+
+      If an error is encountered processing the input parameters, we revert to
+      the individual default settings used with the default constructor; at least
+      this way we end up with an operational object.
+
+      Internally assigned variables:
+      - bufferDelay (false)
+      - antennaIndexFirst (true)
+
+      \param antPositions -- [nofAntennas,3] Antenna positions for which the
+                             delay is computed, \f$ (x,y,z) \f$
+      \param skyPositions -- [nofSkyPositions,3] Positions in the sky towards
+                             which to point, given in the same reference frame
+			     as the antenna positions, though not necessarily
+			     using the same type of coordinates (e.g. might be
+			     given in spherical coordinates).
+      \param coordType    -- CR::CoordinateType of the sky position coordinates
+    */
+#ifdef HAVE_CASA
+    GeometricalDelay (casa::Matrix<double> const &antPositions,
+		      casa::Matrix<double> const &skyPositions,
+		      CR::CoordinateType const &coordType);
+#else 
+#ifdef HAVE_BLITZ
+    GeometricalDelay (blitz::Array<double,2> const &antPositions,
+		      blitz::Array<double,2> const &skyPositions,
+		      CR::CoordinateType const &coordType);
+#endif
+#endif
+
+    /*!
+      \brief Argumented constructor
 
       If an error is encountered processing the input parameters, we revert to
       the individual default settings used with the default constructor; at least
@@ -213,14 +247,14 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_CASA
     GeometricalDelay (casa::Matrix<double> const &antPositions,
 		      casa::Matrix<double> const &skyPositions,
-		      bool const &bufferDelay=false,
-		      bool const &antennaIndexFirst=true);
+		      bool const &bufferDelay,
+		      bool const &antennaIndexFirst);
 #else 
 #ifdef HAVE_BLITZ
     GeometricalDelay (blitz::Array<double,2> const &antPositions,
 		      blitz::Array<double,2> const &skyPositions,
-		      bool const &bufferDelay=false,
-		      bool const &antennaIndexFirst=true);
+		      bool const &bufferDelay,
+		      bool const &antennaIndexFirst);
 #endif
 #endif
 
@@ -740,6 +774,20 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \brief Store the geometrical delays in the internal buffer
     */
     void setDelays ();
+
+#ifdef HAVE_CASA
+    void init (casa::Matrix<double> const &antPositions,
+	       casa::Matrix<double> const &skyPositions,
+	       bool const &bufferDelay=false,
+	       bool const &antennaIndexFirst=true);
+#else
+#ifdef HAVE_BLITZ
+    void init (blitz::Array<double,2> const &antPositions,
+	       blitz::Array<double,2> const &skyPositions,
+	       bool const &bufferDelay=false,
+	       bool const &antennaIndexFirst=true);
+#endif
+#endif
     
     /*!
       \brief Compute the geometrical delays

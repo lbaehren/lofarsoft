@@ -219,9 +219,9 @@ int test_vectorConversion ()
 
   \return nofFailedTests -- Number of failed tests within this function
 */
-int test_cartesian2cylindrical ()
+int test_Cartesian2Cylindrical ()
 {
-  std::cout << "\n[test_cartesian2cylindrical]\n" << std::endl;
+  std::cout << "\n[test_Cartesian2Cylindrical]\n" << std::endl;
 
   int nofFailedTests (0);
   bool status (true);
@@ -235,7 +235,7 @@ int test_cartesian2cylindrical ()
     double cyl_phi;
     double cyl_z;
     // angles in radian
-    status = CR::cartesian2cylindrical (cyl_rho,
+    status = CR::Cartesian2Cylindrical (cyl_rho,
 					cyl_phi,
 					cyl_z,
 					x,
@@ -251,7 +251,7 @@ int test_cartesian2cylindrical ()
 		       cyl_z);
     }
     // angles in degrees
-    status = CR::cartesian2cylindrical (cyl_rho,
+    status = CR::Cartesian2Cylindrical (cyl_rho,
 					cyl_phi,
 					cyl_z,
 					x,
@@ -280,7 +280,7 @@ int test_cartesian2cylindrical ()
     cartesian[1] = 1.0;
     cartesian[2] = 1.0;
     // angles in radian
-    status = CR::cartesian2cylindrical (cylindrical,
+    status = CR::Cartesian2Cylindrical (cylindrical,
 					cartesian,
 					false);
     if (status) {
@@ -288,7 +288,7 @@ int test_cartesian2cylindrical ()
 		       cylindrical);
     }
     // angles in degrees
-    status = CR::cartesian2cylindrical (cylindrical,
+    status = CR::Cartesian2Cylindrical (cylindrical,
 					cartesian,
 					true);
     if (status) {
@@ -308,14 +308,14 @@ int test_cartesian2cylindrical ()
     //
     cartesian = 1.0;
     // angles in radian
-    status = CR::cartesian2cylindrical (cylindrical,
+    status = CR::Cartesian2Cylindrical (cylindrical,
 					cartesian,
 					false);
     if (status) {
       std::cout << cartesian << "  ->  " << cylindrical << std::endl;
     }
     // angles in degrees
-    status = CR::cartesian2cylindrical (cylindrical,
+    status = CR::Cartesian2Cylindrical (cylindrical,
 					cartesian,
 					true);
     if (status) {
@@ -335,7 +335,7 @@ int test_cartesian2cylindrical ()
     //
     cartesian = 1.0,1.0,1.0;
     // angles in radian
-    status = CR::cartesian2cylindrical (cylindrical,
+    status = CR::Cartesian2Cylindrical (cylindrical,
 					cartesian,
 					false);
     if (status) {
@@ -343,7 +343,7 @@ int test_cartesian2cylindrical ()
 		       cylindrical);
     }
     // angles in degrees
-    status = CR::cartesian2cylindrical (cylindrical,
+    status = CR::Cartesian2Cylindrical (cylindrical,
 					cartesian,
 					true);
     if (status) {
@@ -366,9 +366,9 @@ int test_cartesian2cylindrical ()
 
   \return nofFailedTests -- Number of failed tests within this function
 */
-int test_cartesian2spherical ()
+int test_Cartesian2Spherical ()
 {
-  std::cout << "\n[test_cartesian2spherical]\n" << std::endl;
+  std::cout << "\n[test_Cartesian2Spherical]\n" << std::endl;
 
   int nofFailedTests (0);
   bool status (true);
@@ -382,7 +382,7 @@ int test_cartesian2spherical ()
     double phi;
     double theta;
     // angles in radian
-    status = CR::cartesian2spherical (r,
+    status = CR::Cartesian2Spherical (r,
 				      phi,
 				      theta,
 				      x,
@@ -398,7 +398,7 @@ int test_cartesian2spherical ()
 		       theta);
     }
     // angles in degrees
-    status = CR::cartesian2spherical (r,
+    status = CR::Cartesian2Spherical (r,
 				      phi,
 				      theta,
 				      x,
@@ -427,7 +427,7 @@ int test_cartesian2spherical ()
     cartesian[1] = 1.0;
     cartesian[2] = 1.0;
     // angles in radian
-    status = CR::cartesian2spherical (spherical,
+    status = CR::Cartesian2Spherical (spherical,
 				      cartesian,
 				      false);
     if (status) {
@@ -435,7 +435,7 @@ int test_cartesian2spherical ()
 		       spherical);
     }
     // angles in degrees
-    status = CR::cartesian2spherical (spherical,
+    status = CR::Cartesian2Spherical (spherical,
 				      cartesian,
 				      true);
     if (status) {
@@ -455,14 +455,14 @@ int test_cartesian2spherical ()
     //
     cartesian = 1.0;
     // angles in radian
-    status = CR::cartesian2spherical (spherical,
+    status = CR::Cartesian2Spherical (spherical,
 				      cartesian,
 				      false);
     if (status) {
       std::cout << cartesian << "  ->  " << spherical << std::endl;
     }
     // angles in degrees
-    status = CR::cartesian2spherical (spherical,
+    status = CR::Cartesian2Spherical (spherical,
 				      cartesian,
 				      true);
     if (status) {
@@ -482,7 +482,7 @@ int test_cartesian2spherical ()
     //
     cartesian = 1.0,1.0,1.0;
     // angles in radian
-    status = CR::cartesian2spherical (spherical,
+    status = CR::Cartesian2Spherical (spherical,
 				      cartesian,
 				      false);
     if (status) {
@@ -490,7 +490,7 @@ int test_cartesian2spherical ()
 		       spherical);
     }
     // angles in degrees
-    status = CR::cartesian2spherical (spherical,
+    status = CR::Cartesian2Spherical (spherical,
 				      cartesian,
 				      true);
     if (status) {
@@ -508,9 +508,9 @@ int test_cartesian2spherical ()
 
 // -----------------------------------------------------------------------------
 
-int test_cylindrical2cartesian ()
+int test_Cylindrical2Cartesian ()
 {
-  std::cout << "\n[test_cylindrical2cartesian]\n" << std::endl;
+  std::cout << "\n[test_Cylindrical2Cartesian]\n" << std::endl;
 
   int nofFailedTests (0);
   bool status (true);
@@ -524,7 +524,7 @@ int test_cylindrical2cartesian ()
     double y;
     double z;
     // angles in radian
-    status = CR::cylindrical2cartesian (x,
+    status = CR::Cylindrical2Cartesian (x,
 					y,
 					z,
 					rho,
@@ -540,7 +540,7 @@ int test_cylindrical2cartesian ()
 		       z);
     }
     // angles in degrees
-    status = CR::cylindrical2cartesian (x,
+    status = CR::Cylindrical2Cartesian (x,
 					y,
 					z,
 					rho,
@@ -569,7 +569,7 @@ int test_cylindrical2cartesian ()
     cylindrical[1] = 0.0;
     cylindrical[2] = 1.0;
     //
-    status = CR::cylindrical2cartesian (cartesian,
+    status = CR::Cylindrical2Cartesian (cartesian,
 					cylindrical,
 					false);
     if (status) {
@@ -577,7 +577,7 @@ int test_cylindrical2cartesian ()
 		       cartesian);
     }
     //
-    status = CR::cylindrical2cartesian (cartesian,
+    status = CR::Cylindrical2Cartesian (cartesian,
 					cylindrical,
 					true);
     if (status) {
@@ -594,7 +594,7 @@ int test_cylindrical2cartesian ()
 
 // -----------------------------------------------------------------------------
 
-int test_cylindrical2spherical ()
+int test_Cylindrical2Spherical ()
 {
   int nofFailedTests (0);
 
@@ -611,11 +611,11 @@ int main ()
 
   nofFailedTests += test_vectorConversion ();
 
-  nofFailedTests += test_cartesian2cylindrical ();
-  nofFailedTests += test_cartesian2spherical ();
+  nofFailedTests += test_Cartesian2Cylindrical ();
+  nofFailedTests += test_Cartesian2Spherical ();
 
-  nofFailedTests += test_cylindrical2cartesian ();
-  nofFailedTests += test_cylindrical2spherical ();
+  nofFailedTests += test_Cylindrical2Cartesian ();
+  nofFailedTests += test_Cylindrical2Spherical ();
 
   return nofFailedTests;
 }

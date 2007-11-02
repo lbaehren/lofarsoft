@@ -40,37 +40,38 @@ namespace CR { // NAMESPACE CR -- BEGIN
   
 #ifdef HAVE_CASA
   GeometricalDelay::GeometricalDelay ()
-    : nofAntennas_p (1),
-      nearField_p (true),
-      bufferDelays_p (false),
-      showProgress_p (false)
   {
-    casa::IPosition shape(2,nofAntennas_p,3);
-    antPositions_p.resize(shape);
-    skyPositions_p.resize(shape);
-    
-    antPositions_p = 0.0;
+    casa::Matrix<double> antennaPositions (1,3);
+    casa::Matrix<double> skyPositions (1,3);
+    bool antennaIndexFirst (true);
+    bool bufferDelays (false);
 
-    skyPositions_p      = 0.0;
-    skyPositions_p(0,2) = 1.0;
+    antennaPositions  = 0.0;
 
-    setDelays();
+    skyPositions      = 0.0;
+    skyPositions(0,2) = 1.0;
+
+    init (antennaPositions,
+	  skyPositions,
+	  bufferDelays,
+	  antennaIndexFirst);
   }
 #else 
 #ifdef HAVE_BLITZ
   GeometricalDelay::GeometricalDelay ()
-    : nofAntennas_p (1),
-      nearField_p (true),
-      bufferDelays_p (false),
-      showProgress_p (false)
   {
-    antPositions_p.resize(nofAntennas_p,3);
-    skyPositions_p.resize(nofAntennas_p,3);
-    
-    antPositions_p = 0.0, 0.0, 0.0;
-    skyPositions_p = 0.0, 0.0, 1.0;
+    blitz::Array<double,2> antPositions (1,3);
+    blitz::Array<double,2> skyPositions (1,3);
+    bool antennaIndexFirst (true);
+    bool bufferDelays (false);
 
-    setDelays();
+    antPositions = 0.0, 0.0, 0.0;
+    skyPositions = 0.0, 0.0, 1.0;
+    
+    init (antPositions,
+	  skyPositions,
+	  bufferDelays,
+	  antennaIndexFirst);  
   }
 #endif
 #endif
@@ -79,14 +80,83 @@ namespace CR { // NAMESPACE CR -- BEGIN
   
 #ifdef HAVE_CASA
   GeometricalDelay::GeometricalDelay (casa::Matrix<double> const &antPositions,
+				      casa::Matrix<double> const &skyPositions)
+  {
+    bool antennaIndexFirst (true);
+    bool bufferDelays (false);
+
+    init (antPositions,
+	  skyPositions,
+	  bufferDelays,
+	  antennaIndexFirst);
+  }
+#else 
+#ifdef HAVE_BLITZ
+  GeometricalDelay::GeometricalDelay (blitz::Array<double,2> const &antPositions,
+				      blitz::Array<double,2> const &skyPositions)
+  {
+    bool antennaIndexFirst (true);
+    bool bufferDelays (false);
+    
+    init (antPositions,
+	  skyPositions,
+	  bufferDelays,
+	  antennaIndexFirst);
+  }
+#endif
+#endif
+
+  // ----------------------------------------------------------- GeometricalDelay
+  
+#ifdef HAVE_CASA
+  GeometricalDelay::GeometricalDelay (casa::Matrix<double> const &antPositions,
 				      casa::Matrix<double> const &skyPositions,
 				      bool const &bufferDelays,
 				      bool const &antennaIndexFirst)
-    : nearField_p (true),
-      bufferDelays_p (false),
-      showProgress_p (false)
   {
-    cout << "[GeometricalDelay::GeometricalDelay]" << endl;
+    init (antPositions,
+	  skyPositions,
+	  bufferDelays,
+	  antennaIndexFirst);
+  }
+#else
+#ifdef HAVE_BLITZ
+  GeometricalDelay::GeometricalDelay (blitz::Array<double,2> const &antPositions,
+				      blitz::Array<double,2> const &skyPositions,
+				      bool const &bufferDelays,
+				      bool const &antennaIndexFirst)
+  {
+    init (antPositions,
+	  skyPositions,
+	  bufferDelays,
+	  antennaIndexFirst);
+  }
+#endif
+#endif
+  
+  // ----------------------------------------------------------- GeometricalDelay
+  
+  GeometricalDelay::GeometricalDelay (GeometricalDelay const &other)
+  {
+    copy (other);
+  }
+
+  // ============================================================================
+  //
+  //  Initialization
+  //
+  // ============================================================================
+  
+#ifdef HAVE_CASA
+  void GeometricalDelay::init (casa::Matrix<double> const &antPositions,
+			       casa::Matrix<double> const &skyPositions,
+			       bool const &bufferDelays,
+			       bool const &antennaIndexFirst)
+  {
+    showProgress_p = false;
+    nearField_p    = true;
+    
+    cout << "[GeometricalDelay::init]" << endl;
     if (!setAntPositions (antPositions,false,antennaIndexFirst)) {
       cerr << "-- There was an error setting the ant positions" << endl;
       // use defaults
@@ -102,7 +172,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       skyPositions_p      = 0.0;
       skyPositions_p(0,2) = 1.0;
     }
-  
+    
     // once all the input parameters have been stored we can compute the delays
     bufferDelays_p = bufferDelays;
     if (bufferDelays_p) {
@@ -112,18 +182,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
   }
 #else
 #ifdef HAVE_BLITZ
-  GeometricalDelay::GeometricalDelay (blitz::Array<double,2> const &antPositions,
-				      blitz::Array<double,2> const &skyPositions,
-				      bool const &bufferDelays,
-				      bool const &antennaIndexFirst)
-    : nearField_p (true),
-      bufferDelays_p (false),
-      showProgress_p (false)
+  void GeometricalDelay::init (blitz::Array<double,2> const &antPositions,
+			       blitz::Array<double,2> const &skyPositions,
+			       bool const &bufferDelays,
+			       bool const &antennaIndexFirst)
+    
   {
     bool status (true);
 
-    // [1] Store the antenna positions
-
+    showProgress_p = false;
+    nearField_p    = true;
+    
     try {
       status = setAntPositions (antPositions,false,antennaIndexFirst);
     } catch (std::string message) {
@@ -155,13 +224,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
   }
 #endif
 #endif
-  
-  // ----------------------------------------------------------- GeometricalDelay
-  
-  GeometricalDelay::GeometricalDelay (GeometricalDelay const &other)
-  {
-    copy (other);
-  }
   
   // ============================================================================
   //
@@ -411,7 +473,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       skyPositions_p.resize(nofPositions,3);
       // conversion of the 
       for (n=0; n<nofPositions; n++) {
-	skyPositions_p.row(n) = spherical2cartesian (skyPositions.row(n),
+	skyPositions_p.row(n) = Spherical2Cartesian (skyPositions.row(n),
 						     anglesInDegrees);
       }
       break;

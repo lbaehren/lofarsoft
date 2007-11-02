@@ -44,7 +44,7 @@ basedir=`pwd`
 $basedir/build.sh cr --force-build
 
 ##------------------------------------------------------------------------------
-## Required environment variables to set
+## Feedback on post-install user activities
 
 cd $basedir/..
 

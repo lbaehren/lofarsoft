@@ -83,7 +83,10 @@ namespace CR { // NAMESPACE CR -- BEGIN
 				      casa::Vector<double> const &frequencies,
 				      bool const &bufferDelays,
 				      bool const &bufferPhases)
-    : GeometricalDelay (antPositions,skyPositions,bufferDelays)
+    : GeometricalDelay (antPositions,
+			skyPositions,
+			bufferDelays,
+			true)
   {
     setFrequencies (frequencies,bufferPhases);
   }
@@ -94,7 +97,10 @@ namespace CR { // NAMESPACE CR -- BEGIN
 				      blitz::Array<double,1> const &frequencies,
 				      const bool &bufferDelays,
 				      bool const &bufferPhases)
-    : GeometricalDelay (antPositions,skyPositions,bufferDelays)
+    : GeometricalDelay (antPositions,
+			skyPositions,
+			bufferDelays,
+			true)
   {
     setFrequencies (frequencies,bufferPhases);
   }

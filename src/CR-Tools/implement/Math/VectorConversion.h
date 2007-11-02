@@ -103,19 +103,21 @@ namespace CR { // Namespace CR -- begin
     the case of spherical coordinates (and thereby reflection the relation of
     the cylindrical coordinates to polar coordinates in the plain).
 
-    <h3>Conversion relations</h3>
+    <h3>Conversion relations/functions</h3>
 
     <center>
       <table>
         <tr>
 	  <td class="indexkey">Target</td>
 	  <td class="indexkey">... as function of</td>
+	  <td class="indexkey">Function</td>
 	  <td class="indexkey">Relation</td>
 	  <td class="indexkey">Inversion</td>
 	</tr>
 	<tr>
-          <td>cartesian <br> \f$ (x,y,z) \f$</td>
-	  <td>spherical <br> \f$ (r,\phi,\theta) \f$</td>
+          <td>Cartesian <br> \f$ (x,y,z) \f$</td>
+	  <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
+	  <td>CR::Spherical2Cartesian</td>
 	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
 	  \left[ \begin{array}{l}
 	    r \sin(\theta) \cos(\phi) \\
@@ -129,8 +131,9 @@ namespace CR { // Namespace CR -- begin
 	  \end{array} \right] \f$</td>
 	</tr>
 	<tr>
-          <td>cartesian <br> \f$ (x,y,z) \f$</td>
+          <td>Cartesian <br> \f$ (x,y,z) \f$</td>
 	  <td>cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
+	  <td>CR::Cylindrical2Cartesian</td>
 	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
 	    \left[ \begin{array}{l}
 	  \rho \cos(\phi) \\
@@ -143,35 +146,49 @@ namespace CR { // Namespace CR -- begin
 	    z \end{array} \right] \f$</td>
 	</tr>
 	<tr>
-	  <td>cartesian <br> \f$ (x,y,z) \f$</td>
+	  <td>Cartesian <br> \f$ (x,y,z) \f$</td>
           <td>AzElHeight <br> \f$ (Az,El,H) \f$</td>
-	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
-	    \left[ \begin{array}{l}
-	    H \cos(Az)/\tan(El) \\
-	    H \sin(Az)/\tan(El) \\
-	    H
-	    \end{array} \right] \f$</td>
+	  <td>CR::AzElHeight2Cartesian</td>
+	  <td></td>
 	  <td></td>
 	</tr>
 	<tr>
-	  <td>cartesian <br> \f$ (x,y,z) \f$</td>
+	  <td>Cartesian <br> \f$ (x,y,z) \f$</td>
           <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
-	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
-	  \left[ \begin{array}{l}
-	    R \cos(El) \cos(Az) \\
+	  <td>CR::AzElRadius2Cartesian</td>
+	  <td>\f$ \left[ \begin{array}{l} x \\ y \\ z \end{array} \right]
+	    = \left[ \begin{array}{l}
 	    R \cos(El) \sin(Az) \\
-	    R \sin(El) \end{array} \right] \f$</td>
-	  <td></td>
+	    R \cos(El) \cos(Az) \\
+	    R \sin(El)
+	    \end{array} \right] \f$</td>
+	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ R \end{array} \right]
+	    = \left[ \begin{array}{l}
+	    \mathrm{atan} \left( x/y \right) \\
+	    \mathrm{acos} \left( \sqrt{\frac{x^2+y^2}{x^2+y^2+z^2}} \right) \\
+	    \sqrt{x^2+y^2+z^2}
+	    \end{array} \right] \f$</td>
+	</tr>
+	<tr>
+	  <td>Cartesian <br> \f$ (x,y,z) \f$</td>
+          <td>NorthEastHeight <br> \f$ (N,E,H) \f$</td>
+	  <td>CR::NorthEastHeight2Cartesian</td>
+	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
+	  \left[ \begin{array}{l} E \\ N \\ H \end{array} \right] \f$</td>
+	  <td>\f$ \left[ \begin{array}{c} N \\ E \\ H \end{array} \right] =
+	  \left[ \begin{array}{l} y \\ x \\ z \end{array} \right] \f$</td>
 	</tr>
         <tr>
 	  <td class="indexkey">Target</td>
 	  <td class="indexkey">... as function of</td>
+	  <td class="indexkey">Function</td>
 	  <td class="indexkey">Relation</td>
 	  <td class="indexkey">Inversion</td>
 	</tr>
 	<tr>
-	  <td>spherical <br> \f$ (r,\phi,\theta) \f$</td>
-          <td>cartesian <br> \f$ (x,y,z) \f$</td>
+	  <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
+          <td>Cartesian <br> \f$ (x,y,z) \f$</td>
+	  <td>CR::Cartesian2Spherical</td>
 	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
 	  = \left[ \begin{array}{l}
 	  \sqrt{x^2 + y^2 + z^2} \\
@@ -185,8 +202,9 @@ namespace CR { // Namespace CR -- begin
 	    r \cos(\theta) \end{array} \right] \f$</td>
 	</tr>
 	<tr>
-	  <td>spherical <br> \f$ (r,\phi,\theta) \f$</td>
+	  <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
           <td>cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
+	  <td>CR::Cylindrical2Spherical</td>
 	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
 	    = \left[ \begin{array}{l} 
 	    \sqrt{\rho^2 + z^2} \\
@@ -201,12 +219,14 @@ namespace CR { // Namespace CR -- begin
         <tr>
 	  <td class="indexkey">Target</td>
 	  <td class="indexkey">... as function of</td>
+	  <td class="indexkey">Function</td>
 	  <td class="indexkey">Relation</td>
 	  <td class="indexkey">Inversion</td>
 	</tr>
 	<tr>
 	  <td>cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
-          <td>cartesian <br> \f$ (x,y,z) \f$</td>
+          <td>Cartesian <br> \f$ (x,y,z) \f$</td>
+	  <td>CR::Cartesian2Cylindrical</td>
 	  <td>\f$ \left[ \begin{array}{l} \rho \\ \phi \\ z \end{array} \right]
 	    = \left[ \begin{array}{l}
 	    \sqrt{x^2 + y^2} \\
@@ -220,7 +240,8 @@ namespace CR { // Namespace CR -- begin
 	</tr>
 	<tr>
           <td>cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
-	  <td>spherical <br> \f$ (r,\phi,\theta) \f$</td>
+	  <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
+	  <td>CR::Spherical2Cylindrical</td>
 	  <td>\f$ \left[ \begin{array}{l} \rho \\ \phi \\ z \end{array} \right]
 	    = \left[ \begin{array}{l} 
 	    r \sin(\theta) \\ \phi \\ r \cos(\theta)
@@ -235,30 +256,63 @@ namespace CR { // Namespace CR -- begin
         <tr>
 	  <td class="indexkey">Target</td>
 	  <td class="indexkey">... as function of</td>
+	  <td class="indexkey">Function</td>
 	  <td class="indexkey">Relation</td>
 	  <td class="indexkey">Inversion</td>
 	</tr>
 	<tr>
 	  <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
           <td>AzElHeight <br> \f$ (Az,El,H) \f$</td>
-	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ R \end{array} \right]
-	    = \left[ \begin{array}{l} Az \\ El \\ H/\sin(El)
-	    \end{array} \right] \f$</td>
+	  <td>CR::AzElHeight2AzElRadius</td>
+	  <td></td>
 	  <td></td>
 	</tr>
         <tr>
 	  <td class="indexkey">Target</td>
 	  <td class="indexkey">... as function of</td>
+	  <td class="indexkey">Function</td>
 	  <td class="indexkey">Relation</td>
 	  <td class="indexkey">Inversion</td>
 	</tr>
 	<tr>
 	  <td>AzElHeight <br> \f$ (Az,El,H) \f$</td>
           <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
-	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ H \end{array} \right]
-	    = \left[ \begin{array}{l} Az \\ El \\ R \sin(El)
-	    \end{array} \right] \f$</td>
+	  <td>CR::AzElRadius2AzElHeight</td>
 	  <td></td>
+	  <td></td>
+	</tr>
+        <tr>
+	  <td class="indexkey">Target</td>
+	  <td class="indexkey">... as function of</td>
+	  <td class="indexkey">Function</td>
+	  <td class="indexkey">Relation</td>
+	  <td class="indexkey">Inversion</td>
+	</tr>
+	<tr>
+	  <td>NorthEastHeight <br> \f$ (N,E,H) \f$</td>
+          <td>Cartesian <br> \f$ (x,y,z) \f$</td>
+	  <td>CR::Cartesian2NorthEastHeight</td>
+	  <td>\f$ \left[ \begin{array}{c} N \\ E \\ H \end{array} \right] =
+	  \left[ \begin{array}{l} y \\ x \\ z \end{array} \right] \f$</td>
+	  <td>\f$ \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
+	  \left[ \begin{array}{l} E \\ N \\ H \end{array} \right] \f$</td>
+	</tr>
+	<tr>
+	  <td>NorthEastHeight <br> \f$ (N,E,H) \f$</td>
+          <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
+	  <td>CR::AzElRadius2NorthEastHeight</td>
+	  <td>\f$ \left[ \begin{array}{l} N \\ E \\ H \end{array} \right]
+	    = \left[ \begin{array}{l}
+	    R \cos(El) \cos(Az) \\
+	    R \cos(El) \sin(Az) \\
+	    R \sin(El)
+	    \end{array} \right] \f$</td>
+	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ R \end{array} \right]
+	    = \left[ \begin{array}{l}
+	    \mathrm{atan} \left( E/N \right) \\
+	    \mathrm{acos} \left( \sqrt{\frac{N^2+E^2}{N^2+E^2+H^2}} \right) \\
+	    \sqrt{N^2+E^2+H^2}
+	    \end{array} \right] \f$</td>
 	</tr>
       </table>
     </center>
@@ -285,7 +339,7 @@ namespace CR { // Namespace CR -- begin
     <ol>
       <li>Standard C++ variables
       \code
-      bool cartesian2spherical (double &r,
+      bool Cartesian2Spherical (double &r,
                                 double &phi,
 				double &theta,
 				const double &x,
@@ -295,14 +349,14 @@ namespace CR { // Namespace CR -- begin
       \endcode
       <li>Vectors of the C++ STDL
       \code
-      bool cartesian2spherical (std::vector<double> &spherical,
+      bool Cartesian2Spherical (std::vector<double> &spherical,
                                 std::vector<double> const &cartesian,
 				bool const &anglesInDegrees=false);
       \endcode
       <li>Blitz++ arrays 
       \code
       #ifdef HAVE_BLITZ
-      bool cartesian2spherical (blitz::Array<double,1> &spherical,
+      bool Cartesian2Spherical (blitz::Array<double,1> &spherical,
                                 blitz::Array<double,1> const &cartesian,
 				bool const &anglesInDegrees=false);
       #endif
@@ -310,7 +364,7 @@ namespace CR { // Namespace CR -- begin
       <li>CASA arrays
       \code
       #ifdef HAVE_CASA
-      bool cartesian2spherical (casa::Vector<double> &spherical,
+      bool Cartesian2Spherical (casa::Vector<double> &spherical,
                                 casa::Vector<double> const &cartesian,
 				bool const &anglesInDegrees=false);
       #endif
@@ -349,7 +403,9 @@ namespace CR { // Namespace CR -- begin
     //! Azimuth-Elevation-Height
     AzElHeight,
     //! Azimuth-Elevation-Radius
-    AzElRadius
+    AzElRadius,
+    //! North-East-Height
+    NorthEastHeight
   } CoordinateType;
   
 
@@ -511,7 +567,7 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
-  bool AzElRadius2cartesian (double &x,
+  bool AzElRadius2Cartesian (double &x,
 			     double &y,
 			     double &z,
 			     double const &az,
@@ -535,9 +591,9 @@ namespace CR { // Namespace CR -- begin
            Azimuth,Elevation coordinates, this switch can be used for further
 	   specification. If <tt>lastIsRadius=true</tt> the origin vector is
 	   considered as (Az,El,Radius), thereby redirecting the actual
-	   evaluation to AzElRadius2cartesian.
+	   evaluation to AzElRadius2Cartesian.
   */
-  bool azel2cartesian (double &x,
+  bool azel2Cartesian (double &x,
 		       double &y,
 		       double &z,
 		       double const &az,
@@ -546,13 +602,13 @@ namespace CR { // Namespace CR -- begin
 		       bool const &anglesInDegrees=false,
 		       bool const &lastIsRadius=true);
   
-  bool azel2cartesian (std::vector<double> &cartesian,
+  bool azel2Cartesian (std::vector<double> &cartesian,
 		       std::vector<double> const &azel,
 		       bool const &anglesInDegrees=false,
 		       bool const &lastIsRadius=true);
 
 #ifdef HAVE_CASA  
-  bool azel2cartesian (casa::Vector<double> &cartesian,
+  bool azel2Cartesian (casa::Vector<double> &cartesian,
 		       casa::Vector<double> const &azel,
 		       bool const &anglesInDegrees=false,
 		       bool const &lastIsRadius=true);
@@ -582,7 +638,7 @@ namespace CR { // Namespace CR -- begin
     
     \return status -- Set to <i>false</i> if an error was encountered.
   */
-  bool cartesian2cylindrical (double &rho,
+  bool Cartesian2Cylindrical (double &rho,
 			      double &phi,
 			      double &z_cyl,
 			      const double &x=0.0,
@@ -602,18 +658,18 @@ namespace CR { // Namespace CR -- begin
     
     \return status -- Set to <i>false</i> if an error was encountered.
   */
-  bool cartesian2cylindrical (std::vector<double> &cylindrical,
+  bool Cartesian2Cylindrical (std::vector<double> &cylindrical,
 			      std::vector<double> const &cartesian,
 			      bool const &anglesInDegrees=false);
 
 #ifdef HAVE_CASA
-  bool cartesian2cylindrical (casa::Vector<double> &cylindrical,
+  bool Cartesian2Cylindrical (casa::Vector<double> &cylindrical,
 			      casa::Vector<double> const &cartesian,
 			      bool const &anglesInDegrees=false);
 #endif
   
 #ifdef HAVE_BLITZ
-  bool cartesian2cylindrical (blitz::Array<double,1> &cylindrical,
+  bool Cartesian2Cylindrical (blitz::Array<double,1> &cylindrical,
 			      blitz::Array<double,1> const &cartesian,
 			      bool const &anglesInDegrees=false);
 #endif
@@ -636,7 +692,7 @@ namespace CR { // Namespace CR -- begin
     
     \return status -- Set to <i>false</i> if an error was encountered.
   */
-  bool cartesian2spherical (double &r,
+  bool Cartesian2Spherical (double &r,
 			    double &phi,
 			    double &theta,
 			    const double &x,
@@ -655,21 +711,91 @@ namespace CR { // Namespace CR -- begin
     
     \return status -- Set to <i>false</i> if an error was encountered.
   */
-  bool cartesian2spherical (std::vector<double> &spherical,
+  bool Cartesian2Spherical (std::vector<double> &spherical,
 			    std::vector<double> const &cartesian,
 			    bool const &anglesInDegrees=false);
 
 #ifdef HAVE_CASA
-  bool cartesian2spherical (casa::Vector<double> &spherical,
+  /*!
+    \brief Conversion from cartesian to spherical coordinates
+
+    \retval spherical -- Vector in spherical coordinates, \f$ (r,\phi,\theta) \f$
+    \param cartesian  -- Vector in cartesian coordinates, \f$ (x,y,z) \f$
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+                    <i>yes</i> angles will be converted to radians before the 
+		    conversion.
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool Cartesian2Spherical (casa::Vector<double> &spherical,
 			    casa::Vector<double> const &cartesian,
 			    bool const &anglesInDegrees=false);
 #endif
   
 #ifdef HAVE_BLITZ
-  bool cartesian2spherical (blitz::Array<double,1> &spherical,
+  /*!
+    \brief Conversion from cartesian to spherical coordinates
+
+    \retval spherical -- Vector in spherical coordinates, \f$ (r,\phi,\theta) \f$
+    \param cartesian  -- Vector in cartesian coordinates, \f$ (x,y,z) \f$
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+                    <i>yes</i> angles will be converted to radians before the 
+		    conversion.
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool Cartesian2Spherical (blitz::Array<double,1> &spherical,
 			    blitz::Array<double,1> const &cartesian,
 			    bool const &anglesInDegrees=false);
 #endif
+
+  // ----------------------------------------------------------------------------
+  // Cartesian (x,y,z) -> AzElRadius (Az,El,Radius)
+  
+  /*!
+    \brief Conversion from cartesian to spherical coordinates
+
+    \retval Az     -- Azimuth component of the vector, i.e. the angle running
+                      from North (0 deg) to East (90 deg) clock-wise
+    \retval El     -- Elevation component of the vector, i.e. the angle running
+                      from the horizon (0 deg) to the zenith (90 deg)
+    \retval Radius -- Radial distance from the coordinate origin
+    \param x       -- \f$x\f$-component of the vector in cartesian coordinates
+    \param y       -- \f$y\f$-component of the vector in cartesian coordinates
+    \param z       -- \f$z\f$-component of the vector in cartesian coordinates
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+                    <i>yes</i> angles will be converted to radians before the 
+		    conversion.
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool Cartesian2AzElRadius (double &az,
+			     double &el,
+			     double &radius,
+			     double const &x,
+			     double const &y,
+			     double const &z,
+			     bool const &anglesInDegrees=false);
+  
+  bool Cartesian2AzElRadius (std::vector<double> &AzElRadius,
+			     std::vector<double> const &cartesian,
+			     bool const &anglesInDegrees=false);
+  
+#ifdef HAVE_CASA
+  bool Cartesian2AzElRadius (casa::Vector<double> &AzElRadius,
+			     casa::Vector<double> const &cartesian,
+			     bool const &anglesInDegrees=false);
+#endif
+  
+#ifdef HAVE_BLITZ
+  bool Cartesian2AzElRadius (blitz::Array<double,1> &AzElRadius,
+			     blitz::Array<double,1> const &cartesian,
+			     bool const &anglesInDegrees=false);
+#endif
+  
+  // ----------------------------------------------------------------------------
+  // Cartesian (x,y,z) -> 
+
   
   // ============================================================================
   // 
@@ -692,7 +818,7 @@ namespace CR { // Namespace CR -- begin
     
     \return status -- Set to <i>false</i> if an error was encountered.
   */
-  bool cylindrical2cartesian (double &x,
+  bool Cylindrical2Cartesian (double &x,
 			      double &y,
 			      double &z,
 			      double const &rho,
@@ -703,18 +829,18 @@ namespace CR { // Namespace CR -- begin
   /*!
     \brief Conversion from cylindrical to cartesian coordinates
   */
-  bool cylindrical2cartesian (std::vector<double> &cartesian,
+  bool Cylindrical2Cartesian (std::vector<double> &cartesian,
 			      std::vector<double> const &cylindrical,
 			      bool const &anglesInDegrees=false);
 
 #ifdef HAVE_CASA
-  bool cylindrical2cartesian (casa::Vector<double> &cartesian,
+  bool Cylindrical2Cartesian (casa::Vector<double> &cartesian,
 			      casa::Vector<double> const &cylindrical,
 			      bool const &anglesInDegrees=false);
 #endif
   
 #ifdef HAVE_BLITZ
-  bool cylindrical2cartesian (blitz::Array<double,1> &cartesian,
+  bool Cylindrical2Cartesian (blitz::Array<double,1> &cartesian,
 			      blitz::Array<double,1> const &cylindrical,
 			      bool const &anglesInDegrees=false);
 #endif
@@ -732,7 +858,7 @@ namespace CR { // Namespace CR -- begin
     \param phi -- \f$phi\f$-component of the vector in cylindrical coordinates
     \param z   -- \f$z\f$-component of the vector in cylindrical coordinates
   */
-  bool cylindrical2spherical (double &r,
+  bool Cylindrical2Spherical (double &r,
 			      double &phi,
 			      double &theta,
 			      double const &rho,
@@ -743,7 +869,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \brief Conversion from cylindrical to spherical coordinates
   */
-  bool cylindrical2spherical (std::vector<double> &spherical,
+  bool Cylindrical2Spherical (std::vector<double> &spherical,
 			      std::vector<double> const &cylindrical,
 			      bool const &anglesInDegrees=false);
   
@@ -751,7 +877,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \brief Conversion from cylindrical to spherical coordinates
   */
-  bool cylindrical2spherical (casa::Vector<double> &spherical,
+  bool Cylindrical2Spherical (casa::Vector<double> &spherical,
 			      casa::Vector<double> const &cylindrical,
 			      bool const &anglesInDegrees=false);
 #endif
@@ -760,11 +886,50 @@ namespace CR { // Namespace CR -- begin
   /*!
     \brief Conversion from cylindrical to spherical coordinates
   */
-  bool cylindrical2spherical (blitz::Array<double,1> &spherical,
+  bool Cylindrical2Spherical (blitz::Array<double,1> &spherical,
 			      blitz::Array<double,1> const &cylindrical,
 			      bool const &anglesInDegrees=false);
 #endif
   
+  // ============================================================================
+  // 
+  //  Conversion: North,East -> Other
+  //
+  // ============================================================================
+
+  /*!
+    \brief Conversion from North-East-Height to cartesian coordinates
+
+    \retval x  -- \f$x\f$-component of the vector in cartesian coordinates
+    \retval y  -- \f$y\f$-component of the vector in cartesian coordinates
+    \retval z  -- \f$z\f$-component of the vector in cartesian coordinates
+    \param N   -- North component of the input vector
+    \param E   -- East component of the input vector
+    \param H   -- Height component of the input vector
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  inline bool NorthEastHeight2Cartesian (double &x,
+					 double &y,
+					 double &z,
+					 double const &N,
+					 double const &E,
+					 double const &H)
+    {
+      bool status (true);
+
+      try {
+	x = E;
+	y = N;
+	z = H;
+      } catch (std::string message) {
+	std::cerr << "[NorthEastHeight2Cartesian] " << message << std::endl;
+	status = false;
+      }
+      
+      return status;
+    }
+
   // ============================================================================
   // 
   //  Conversion: Spherical (r,phi,theta) -> other
@@ -789,7 +954,7 @@ namespace CR { // Namespace CR -- begin
     
     \return status -- Set to <i>false</i> if an error was encountered.
   */
-  bool spherical2cartesian (double &x,
+  bool Spherical2Cartesian (double &x,
 			    double &y,
 			    double &z,
 			    const double &r=1.0,
@@ -807,18 +972,18 @@ namespace CR { // Namespace CR -- begin
 
     \return status -- Set to <i>false</i> if an error was encountered.
   */
-  bool spherical2cartesian (std::vector<double> &cartesian,
+  bool Spherical2Cartesian (std::vector<double> &cartesian,
 			      std::vector<double> const &spherical,
 			      bool const &anglesInDegrees=false);
   
 #ifdef HAVE_CASA
-  bool spherical2cartesian (casa::Vector<double> &cartesian,
+  bool Spherical2Cartesian (casa::Vector<double> &cartesian,
 			    casa::Vector<double> const &spherical,
 			    bool const &anglesInDegrees=false);
 #endif
 
 #ifdef HAVE_BLITZ
-  bool spherical2cartesian (blitz::Array<double,1> &cartesian,
+  bool Spherical2Cartesian (blitz::Array<double,1> &cartesian,
 			    blitz::Array<double,1> const &spherical,
 			    bool const &anglesInDegrees=false);
 
@@ -840,10 +1005,10 @@ namespace CR { // Namespace CR -- begin
     \return cartesian -- Representation of the vector in cartesian coordinates,
                          \f$ (x,y,z) \f$
   */
-  vector<double> spherical2cartesian (vector<double> const &spherical,
+  vector<double> Spherical2Cartesian (vector<double> const &spherical,
 				      bool const &anglesInDegrees);
 #ifdef HAVE_CASA
-  casa::Vector<double> spherical2cartesian (casa::Vector<double> const &spherical,
+  casa::Vector<double> Spherical2Cartesian (casa::Vector<double> const &spherical,
 					    bool const &anglesInDegrees);
 #endif
   
@@ -866,7 +1031,7 @@ namespace CR { // Namespace CR -- begin
     
     \return status -- Set to <i>false</i> if an error was encountered.
   */
-  bool spherical2cylindrical (double &rho,
+  bool Spherical2Cylindrical (double &rho,
 			      double &phi_cyl,
 			      double &z,
 			      double const &r=1.0,
@@ -879,7 +1044,7 @@ namespace CR { // Namespace CR -- begin
 
     \return status -- Set to <i>false</i> if an error was encountered.
   */
-  bool spherical2cylindrical (std::vector<double> &cylindrical,
+  bool Spherical2Cylindrical (std::vector<double> &cylindrical,
 			      std::vector<double> const &spherical,
 			      bool const &anglesInDegrees=false);
 
@@ -889,7 +1054,7 @@ namespace CR { // Namespace CR -- begin
     \return status -- Set to <i>false</i> if an error was encountered.
   */
 #ifdef HAVE_CASA
-  bool spherical2cylindrical (casa::Vector<double> &cylindrical,
+  bool Spherical2Cylindrical (casa::Vector<double> &cylindrical,
 			      casa::Vector<double> const &spherical,
 			      bool const &anglesInDegrees=false);
 #endif
@@ -958,13 +1123,13 @@ namespace CR { // Namespace CR -- begin
     \param anglesInDegrees -- Are the angles given in degrees?
   */
 #ifdef HAVE_CASA
-  inline void spherical2cartesian (casa::Matrix<double> &cartesian,
+  inline void Spherical2Cartesian (casa::Matrix<double> &cartesian,
 				   casa::Matrix<double> const &spherical,
 				   bool const &anglesInDegrees) {
     casa::IPosition shape (spherical.shape());
     cartesian.resize(shape);
     for (int n(0); n<shape(0); n++) {
-      cartesian.row(n) = spherical2cartesian (spherical.row(n),
+      cartesian.row(n) = Spherical2Cartesian (spherical.row(n),
 					      anglesInDegrees);
     }
   }
@@ -1006,7 +1171,7 @@ namespace CR { // Namespace CR -- begin
 
     \return xyz -- Vector in cartesian coordinates
    */
-  casa::Vector<double> azel2cartesian (const casa::Vector<double>& azel,
+  casa::Vector<double> azel2Cartesian (const casa::Vector<double>& azel,
 				       bool const &anglesInDegrees=false);  
   
   /*!
@@ -1021,7 +1186,7 @@ namespace CR { // Namespace CR -- begin
       z = \rho\, \cos(\theta)
     \f]
   */
-  casa::Vector<double> polar2cartesian (casa::Vector<double> const &polar);
+  casa::Vector<double> polar2Cartesian (casa::Vector<double> const &polar);
 
 #endif
   
@@ -1043,10 +1208,10 @@ namespace CR { // Namespace CR -- begin
     \return xyz -- Vector in cartesian coordinates
    */
   template <class T>
-    blitz::Array<T,1> azel2cartesian (const blitz::Array<T,1>& azel);  
+    blitz::Array<T,1> azel2Cartesian (const blitz::Array<T,1>& azel);  
 
   template <class T>
-    blitz::Array<T,1> polar2cartesian (blitz::Array<T,1> const &polar);
+    blitz::Array<T,1> polar2Cartesian (blitz::Array<T,1> const &polar);
 
 #endif
   
