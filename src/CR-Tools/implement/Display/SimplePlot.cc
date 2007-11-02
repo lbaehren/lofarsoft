@@ -484,34 +484,43 @@ namespace CR { // Namespace CR -- begin
 #ifdef HAVE_PLPLOT
       PLFLT *pos,*r,*g,*b;
       PLINT npos;
+      //define standard values
+      PLFLT c01[2] = {0.,1.};
+      PLFLT c10[2] = {1.,0.};
+      PLFLT c71[2] = {0.7,1.};
+      PLFLT c00[2] = {0.,0.};
+      PLFLT c051[3] = {0.,0.5,1.};
+      PLFLT c010[3] = {0.,1.,0.};
+      PLFLT c011[3] = {0.,1.,1.};
+      PLFLT c110[3] = {1.,1.,0.};
       switch (ColMapIndex) {
-      case 1:
+      case 1: 
 	npos = 2;
-	pos = {0. , 1.};
-	r = {0. , 1.};
-	g = {0. , 1.};
-	b = {0. , 1.};
+	pos = c01;
+	r = c01;
+        g = c01;
+	b = c01;
 	break; 
       case 2:
 	npos = 2;
-	pos = {0. , 1.};
-	r = {1. , 0.};
-	g = {1. , 0.};
-	b = {1. , 0.};
+	pos = c01;
+	r = c10;
+	g = c10;
+	b = c10;
 	break; 
       case 3:
 	npos = 2;
-	pos = {0. , 1.};
-	r = {7. , 1.};
-	g = {0. , 1.};
-	b = {0. , 0.};
+	pos = c01;
+	r = c71;
+	g = c01;
+	b = c00;
 	break; 
       case 4:
 	npos = 3;
-	pos = {0. , 0.5 , 1.};
-	r = {0. , 1. , 1.};
-	g = {0. , 1. , 0.};
-	b = {1. , 1. , 0.};
+	pos = c051;
+	r = c011;
+	g = c010;
+	b = c110;
 	break; 
       default:
 	npos=0;
@@ -612,16 +621,17 @@ namespace CR { // Namespace CR -- begin
 				   int cCol, int style){
     Bool status=True;
     try {
-      if (nClevels<1) {
-	cout << "SimplePlot::addContourLines: " << "Not plotting less than one contour lines." << endl;
-	return False;
-      };
 #ifdef HAVE_PGPLOT
       cerr << "SimplePlot::addContourLines: " << "Sorry, 2d-plotting with pgplotter not implemented!" << endl;
       return False;
 #endif
 #ifdef HAVE_PLPLOT
       int i,j, nClevels=CLevels.nelements();
+      if (nClevels<1) {
+	cout << "SimplePlot::addContourLines: " << "Not plotting less than one contour lines." << endl;
+	return False;
+      };
+
       PLINT nx,ny;
       PLFLT **z, zmin, zmax;
       PLFLT *plClevels;
