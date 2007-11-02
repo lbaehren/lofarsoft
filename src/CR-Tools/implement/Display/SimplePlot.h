@@ -257,6 +257,18 @@ namespace CR { // Namespace CR -- begin
 		    Bool printingplot=False);
 
 
+
+   /*!
+      \brief Set the color map for the 2-dimensional plots to a predifined value
+      
+      \param ColMapIndex     - Color map index
+      
+      \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
+   */
+
+    Bool SetColorMapIndex(int ColMapIndex=1);
+
+
    /*!
       \brief Do a complete 2-dimensional plot with one call
       
@@ -296,13 +308,33 @@ namespace CR { // Namespace CR -- begin
       \param ymax     - maximum y-value (the row zvals.row(zvals.nrow()-1) has y-value ymax)
       \param nCLevels - number of contour lines to plot 
       \param cCol     - color index for the contour lines 
+      \param style    - line style index for the contour lines 
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
 
       Uses the plplot library, i.e. no output with pgplot. 
     */
     Bool addContourLines(Matrix<Double> zvals, Double xmin, Double xmax, Double ymin, Double ymax,
-			 int nClevels, int cCol=2);
+			 int nClevels, int cCol=2, int style=1);
+
+   /*!
+      \brief Add contour lines to an existing 2d plot
+      
+      \param zvals    - the data to be plotted (i.e. the z-values)
+      \param xmin     - minimum x-value (the column zvals.column(0) has x-value xmin)
+      \param xmax     - maximum x-value (the column zvals.column(zvals.ncolumn()-1) has x-value xmax)
+      \param ymin     - minimum y-value (the row zvals.row(0) has y-value ymin)
+      \param ymax     - maximum y-value (the row zvals.row(zvals.nrow()-1) has y-value ymax)
+      \param CLevels  - vector with the z-values at which contour lines are to be plotted
+      \param cCol     - color index for the contour lines 
+      \param style    - line style index for the contour lines 
+
+      \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
+
+      Uses the plplot library, i.e. no output with pgplot. 
+    */
+    Bool addContourLines(Matrix<Double> zvals, Double xmin, Double xmax, Double ymin, Double ymax,
+			 Vector<double> CLevels, int cCol=2, int style=1);
 
 
   private:
