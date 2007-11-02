@@ -11,9 +11,11 @@
 #include "aux.h"
 #include "MGFunction.h"
 
+#include <ext/algorithm>
 #include <num_util.h>
 #include <cfloat>
 
+using namespace __gnu_cxx;
 using namespace std;
 namespace n = num_util;
 
@@ -31,37 +33,45 @@ static const double deg = M_PI/180;
 /// copy all tunable parameters to buf
 void MGFunction::get_parameters(double *buf) const
 {
+  double *chk = buf;
   for (unsigned i = 0; i < m_gaul.size(); ++i) {
-    copy(m_parameters[i].begin(), m_parameters[i].end(), buf);
+    copy_n(m_parameters[i].begin(), m_gaul[i], buf);
     buf += m_gaul[i];
   }
+  assert(buf - chk == (int)m_npar);
 }
 
 /// set all tunable parameters from buf
 void MGFunction::set_parameters(const double *buf)
 {
+  const double *chk = buf;
   for(unsigned i = 0; i < m_gaul.size(); ++i) {
-    copy(buf, buf + m_gaul[i], m_parameters[i].begin());
+    copy_n(buf, m_gaul[i], m_parameters[i].begin());
     buf += m_gaul[i];
   }
+  assert(buf - chk == (int)m_npar);
 }
 
 /// copy all tunable non-linear parameters to buf
 void MGFunction::get_nlin_parameters(double *buf) const
 {
+  double *chk = buf;
   for (unsigned i = 0; i < m_gaul.size(); ++i) {
-    copy(m_parameters[i].begin() + 1, m_parameters[i].end(), buf);
+    copy_n(m_parameters[i].begin() + 1, m_gaul[i] - 1, buf);
     buf += m_gaul[i] - 1;
   }
+  assert(buf - chk == (int)(m_npar - m_gaul.size()));
 }
 
 /// set all tunable non-linear parameters from buf
 void MGFunction::set_nlin_parameters(const double *buf)
 {
+  const double *chk = buf;
   for(unsigned i = 0; i < m_gaul.size(); ++i) {
-    copy(buf, buf + m_gaul[i] - 1, m_parameters[i].begin() + 1);
+    copy_n(buf, m_gaul[i] - 1, m_parameters[i].begin() + 1);
     buf += m_gaul[i] - 1 ;
   }
+  assert(buf - chk == (int)(m_npar - m_gaul.size()));
 }
 
 /// set all tunable linear parameters from buf
@@ -75,15 +85,18 @@ void MGFunction::set_lin_parameters(const double *buf)
 void MGFunction::data(double *buf) const
 {
   _update_fcache();
+  double *chk = buf;
 
   for (dcache_it d = mm_data.begin(); d != mm_data.end(); ++d, ++buf)
     *buf = d->d;
+  assert(buf - chk == (int)m_ndata);
 }
 
 /// evaluate mgfunction (unmasked pixels only) and store it in buf
 void MGFunction::fcn_value(double *buf) const
 {
   _update_fcache();
+  double *chk = buf;
 
   fcache_it f = mm_fcn.begin();
   for (unsigned didx = 0; didx < m_ndata; ++didx, ++buf) {
@@ -91,12 +104,14 @@ void MGFunction::fcn_value(double *buf) const
     for (unsigned gidx = 0; gidx < m_gaul.size(); ++gidx, ++f)
       *buf += m_parameters[gidx][0] * f->val;
   }
+  assert(buf - chk == (int)m_ndata);
 }
 
 /// evaluate (data - mgfunction) and store it in buf
 void MGFunction::fcn_diff(double *buf) const
 {
   _update_fcache();
+  double *chk = buf;
 
   fcache_it f = mm_fcn.begin();
   for (dcache_it d = mm_data.begin(); d != mm_data.end(); ++d, ++buf) {
@@ -104,6 +119,7 @@ void MGFunction::fcn_diff(double *buf) const
     for (unsigned gidx = 0; gidx < m_gaul.size(); ++gidx, ++f)
       *buf -= m_parameters[gidx][0] * f->val;
   }
+  assert(buf - chk == (int)m_ndata);
 }
 
 /// evaluate non-linear part of mgfunction
@@ -113,16 +129,19 @@ void MGFunction::fcn_partial_value(double *buf) const
   _update_fcache();
 
   fcache_it f = mm_fcn.begin();
-  for (unsigned didx = 0; didx < m_ndata; ++didx) {
-    for (unsigned gidx = 0; gidx < m_gaul.size(); ++gidx, ++f)
+  unsigned didx, gidx;
+  for (didx = 0; didx < m_ndata; ++didx) {
+    for (gidx = 0; gidx < m_gaul.size(); ++gidx, ++f)
       buf[gidx * m_ndata + didx] = f->val;
   }
+  assert((gidx - 1) * m_ndata + didx == m_ndata * m_gaul.size());
 }
 
 /// gradient of fcn_value; all derivatives are evaluated for each data point and stored all together
 void MGFunction::fcn_gradient(double *buf) const
 {
   _update_fcache();
+  double *chk = buf;
 
   fcache_it f = mm_fcn.begin();
   for (unsigned didx = 0; didx < m_ndata; ++didx)
@@ -143,12 +162,14 @@ void MGFunction::fcn_gradient(double *buf) const
 	*(buf++) = (V * deg * f1 * f2 * (p[3]/p[4] - p[4]/p[3]));
       }
     }
+  assert(buf - chk == (int)(m_ndata * m_npar));
 }
 
 /// gradient of fcn_diff; all derivatives are evaluated for each data point and stored all together
 void MGFunction::fcn_diff_gradient(double *buf) const
 {
   _update_fcache();
+  double *chk = buf;
 
   fcache_it f = mm_fcn.begin();
   for (unsigned didx = 0; didx < m_ndata; ++didx)
@@ -169,6 +190,7 @@ void MGFunction::fcn_diff_gradient(double *buf) const
 	*(buf++) = (V * deg * f1 * f2 * (p[3]/p[4] - p[4]/p[3]));
       }
     }
+  assert(buf - chk == (int)(m_ndata * m_npar));
 }
 
 /// gradient of fcn_value; each derivative is evaluated for all datapoints and stored contiguously
@@ -177,9 +199,10 @@ void MGFunction::fcn_transposed_gradient(double *buf) const
   _update_fcache();
 
   fcache_it f = mm_fcn.begin();
-  for (unsigned didx = 0; didx < m_ndata; ++didx) {
-    int ggidx = 0;
-    for (unsigned gidx = 0; gidx < m_gaul.size(); ++gidx, ++f) {
+  unsigned didx, gidx, ggidx;
+  for (didx = 0; didx < m_ndata; ++didx) {
+    ggidx = 0;
+    for (gidx = 0; gidx < m_gaul.size(); ++gidx, ++f) {
       const vector<double> &p = m_parameters[gidx];
       double cs = f->cs;
       double sn = f->sn;
@@ -198,6 +221,7 @@ void MGFunction::fcn_transposed_gradient(double *buf) const
       ggidx += m_gaul[gidx];
     }
   }
+  assert(ggidx * m_ndata == m_ndata * m_npar);
 }
 
 /// gradient of fcn_diff; each derivative is evaluated for all datapoints and stored contiguously
@@ -206,9 +230,10 @@ void MGFunction::fcn_diff_transposed_gradient(double *buf) const
   _update_fcache();
 
   fcache_it f = mm_fcn.begin();
-  for (unsigned didx = 0; didx < m_ndata; ++didx) {
-    int ggidx = 0;
-    for (unsigned gidx = 0; gidx < m_gaul.size(); ++gidx, ++f) {
+  unsigned didx, gidx, ggidx;
+  for (didx = 0; didx < m_ndata; ++didx) {
+    ggidx = 0;
+    for (gidx = 0; gidx < m_gaul.size(); ++gidx, ++f) {
       const vector<double> &p = m_parameters[gidx];
       double cs = f->cs;
       double sn = f->sn;
@@ -227,17 +252,20 @@ void MGFunction::fcn_diff_transposed_gradient(double *buf) const
       ggidx += m_gaul[gidx];
     }
   }
+  assert(ggidx * m_ndata == m_ndata * m_npar);
 }
 
 /// gradient of fcn_partial_value; each derivative is evaluated for all datapoints and stored contiguously
 void MGFunction::fcn_partial_gradient(double *buf) const
 {
   _update_fcache();
+  double *chk = buf;
 
   fcache_it f = mm_fcn.begin();
-  for (unsigned didx = 0; didx < m_ndata; ++didx) {
-    int ggidx = 0;
-    for (unsigned gidx = 0; gidx < m_gaul.size(); ++gidx, ++f) {
+  unsigned didx, gidx, ggidx;
+  for (didx = 0; didx < m_ndata; ++didx) {
+    ggidx = 0;
+    for (gidx = 0; gidx < m_gaul.size(); ++gidx, ++f) {
       const vector<double> &p = m_parameters[gidx];
       double cs = f->cs;
       double sn = f->sn;
@@ -255,6 +283,7 @@ void MGFunction::fcn_partial_gradient(double *buf) const
       ggidx += m_gaul[gidx] - 1;
     }
   }
+  assert(ggidx * m_ndata == m_ndata * (m_npar - m_gaul.size()));
 }
 
 double MGFunction::chi2() const
