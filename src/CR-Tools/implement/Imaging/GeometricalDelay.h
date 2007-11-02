@@ -207,22 +207,26 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
       \param antPositions -- [nofAntennas,3] Antenna positions for which the
                              delay is computed, \f$ (x,y,z) \f$
+      \param antCoordType -- CR::CoordinateType of the antenna position
+                             coordinates
       \param skyPositions -- [nofSkyPositions,3] Positions in the sky towards
                              which to point, given in the same reference frame
 			     as the antenna positions, though not necessarily
 			     using the same type of coordinates (e.g. might be
 			     given in spherical coordinates).
-      \param coordType    -- CR::CoordinateType of the sky position coordinates
+      \param skyCoordType -- CR::CoordinateType of the sky position coordinates
     */
 #ifdef HAVE_CASA
     GeometricalDelay (casa::Matrix<double> const &antPositions,
+		      CR::CoordinateType const &antCoordType,
 		      casa::Matrix<double> const &skyPositions,
-		      CR::CoordinateType const &coordType);
+		      CR::CoordinateType const &skyCoordType);
 #else 
 #ifdef HAVE_BLITZ
     GeometricalDelay (blitz::Array<double,2> const &antPositions,
+		      CR::CoordinateType const &antCoordType,
 		      blitz::Array<double,2> const &skyPositions,
-		      CR::CoordinateType const &coordType);
+		      CR::CoordinateType const &skyCoordType);
 #endif
 #endif
 
@@ -776,15 +780,36 @@ namespace CR { // NAMESPACE CR -- BEGIN
     void setDelays ();
 
 #ifdef HAVE_CASA
+    /*!
+      \param antPositions -- [nofAntennas,3] Antenna positions for which the
+                             delay is computed, \f$ (x,y,z) \f$
+      \param antCoordType -- CR::CoordinateType of the antenna position
+                             coordinates
+      \param skyPositions -- [nofSkyPositions,3] Positions in the sky towards
+                             which to point, given in the same reference frame
+			     as the antenna positions, though not necessarily
+			     using the same type of coordinates (e.g. might be
+			     given in spherical coordinates).
+      \param skyCoordType -- CR::CoordinateType of the sky position coordinates
+      \param bufferDelays -- Buffer the values for the geometrical delay? If
+                             set <i>true</i> the delays will be computed and
+			     afterwards kept in memory; if set <i>false</i>
+			     only the input parameters are stored an no
+			     further action is taken.
+    */
     void init (casa::Matrix<double> const &antPositions,
+	       CR::CoordinateType const &antCoordType,
 	       casa::Matrix<double> const &skyPositions,
-	       bool const &bufferDelay=false,
+	       CR::CoordinateType const &skyCoordType,
+	       bool const &bufferDelays=false,
 	       bool const &antennaIndexFirst=true);
 #else
 #ifdef HAVE_BLITZ
     void init (blitz::Array<double,2> const &antPositions,
+	       CR::CoordinateType const &antCoordType,
 	       blitz::Array<double,2> const &skyPositions,
-	       bool const &bufferDelay=false,
+	       CR::CoordinateType const &skyCoordType,
+	       bool const &bufferDelays=false,
 	       bool const &antennaIndexFirst=true);
 #endif
 #endif

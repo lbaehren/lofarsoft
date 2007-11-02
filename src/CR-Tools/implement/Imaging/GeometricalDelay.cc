@@ -52,7 +52,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
     skyPositions(0,2) = 1.0;
 
     init (antennaPositions,
+	  CR::Cartesian,
 	  skyPositions,
+	  CR::Cartesian,
 	  bufferDelays,
 	  antennaIndexFirst);
   }
@@ -69,7 +71,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
     skyPositions = 0.0, 0.0, 1.0;
     
     init (antPositions,
+	  CR::Cartesian,
 	  skyPositions,
+	  CR::Cartesian,
 	  bufferDelays,
 	  antennaIndexFirst);  
   }
@@ -86,7 +90,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
     bool bufferDelays (false);
 
     init (antPositions,
+	  CR::Cartesian,
 	  skyPositions,
+	  CR::Cartesian,
 	  bufferDelays,
 	  antennaIndexFirst);
   }
@@ -99,7 +105,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
     bool bufferDelays (false);
     
     init (antPositions,
+	  CR::Cartesian,
 	  skyPositions,
+	  CR::Cartesian,
 	  bufferDelays,
 	  antennaIndexFirst);
   }
@@ -110,12 +118,52 @@ namespace CR { // NAMESPACE CR -- BEGIN
   
 #ifdef HAVE_CASA
   GeometricalDelay::GeometricalDelay (casa::Matrix<double> const &antPositions,
+				      CR::CoordinateType const &antCoordType,
+				      casa::Matrix<double> const &skyPositions,
+				      CR::CoordinateType const &skyCoordType)
+  {
+    bool antennaIndexFirst (true);
+    bool bufferDelays (false);
+    
+    init (antPositions,
+	  antCoordType,
+	  skyPositions,
+	  skyCoordType,
+	  bufferDelays,
+	  antennaIndexFirst);
+  }
+#else 
+#ifdef HAVE_BLITZ
+  GeometricalDelay::GeometricalDelay (blitz::Array<double,2> const &antPositions,
+				      CR::CoordinateType const &antCoordType,
+				      blitz::Array<double,2> const &skyPositions,
+				      CR::CoordinateType const &skyCoordType)
+  {
+    bool antennaIndexFirst (true);
+    bool bufferDelays (false);
+    
+    init (antPositions,
+	  antCoordType,
+	  skyPositions,
+	  skyCoordType,
+	  bufferDelays,
+	  antennaIndexFirst);
+  }
+#endif
+#endif
+  
+  // ----------------------------------------------------------- GeometricalDelay
+  
+#ifdef HAVE_CASA
+  GeometricalDelay::GeometricalDelay (casa::Matrix<double> const &antPositions,
 				      casa::Matrix<double> const &skyPositions,
 				      bool const &bufferDelays,
 				      bool const &antennaIndexFirst)
   {
     init (antPositions,
+	  CR::Cartesian,
 	  skyPositions,
+	  CR::Cartesian,
 	  bufferDelays,
 	  antennaIndexFirst);
   }
@@ -127,7 +175,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
 				      bool const &antennaIndexFirst)
   {
     init (antPositions,
+	  CR::Cartesian,
 	  skyPositions,
+	  CR::Cartesian,
 	  bufferDelays,
 	  antennaIndexFirst);
   }
@@ -149,7 +199,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
   
 #ifdef HAVE_CASA
   void GeometricalDelay::init (casa::Matrix<double> const &antPositions,
+			       CR::CoordinateType const &antCoordType,
 			       casa::Matrix<double> const &skyPositions,
+			       CR::CoordinateType const &skyCoordType,
 			       bool const &bufferDelays,
 			       bool const &antennaIndexFirst)
   {
@@ -183,9 +235,11 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #else
 #ifdef HAVE_BLITZ
   void GeometricalDelay::init (blitz::Array<double,2> const &antPositions,
-			       blitz::Array<double,2> const &skyPositions,
-			       bool const &bufferDelays,
-			       bool const &antennaIndexFirst)
+	       CR::CoordinateType const &antCoordType,
+	       blitz::Array<double,2> const &skyPositions,
+	       CR::CoordinateType const &skyCoordType,
+	       bool const &bufferDelays,
+	       bool const &antennaIndexFirst)
     
   {
     bool status (true);
