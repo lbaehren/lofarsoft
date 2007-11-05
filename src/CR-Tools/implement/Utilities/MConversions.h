@@ -44,6 +44,8 @@ using casa::String;
 namespace CR { // Namespace CR -- begin
   
   /*!
+    \file MConversions.h
+
     \ingroup Utilities
     
     \brief A set of functions for conversions of CASA Measures
@@ -59,6 +61,15 @@ namespace CR { // Namespace CR -- begin
     <h3>Synopsis</h3>
     
     <h3>Example(s)</h3>
+
+    <ol>
+      <li>Get the MDirection type from the reference code of a coordinate
+      system:
+      \code
+      casa::MDirection::Types mtype;
+      mtype = MDirectionType ("B1950");
+      \endcode
+    </ol>
     
   */  
 
@@ -79,6 +90,21 @@ namespace CR { // Namespace CR -- begin
     \return tp -- Projection type
   */
   casa::Projection::Type ProjectionType (String const &refcode);
+
+  /*!
+    \brief Retrieve the position of an observatory from the measures data
+
+    \todo Replace all calls of ObservationData::observatoryPosition with this
+          function to remove the need of creating an object first.
+
+    \param observatory -- Name of the observatory for which to look up the
+           position in the measures data tables.
+
+    \return obsPosition -- The position of the observatory/telescope, 
+            encapsulated in a casa::MPosition object, as e.g. used to create
+	    a reference frame or a conversion engine.
+   */
+  casa::MPosition ObservatoryPosition (String const &observatory);
   
 } // Namespace CR -- end
 

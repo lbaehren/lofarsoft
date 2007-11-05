@@ -24,6 +24,8 @@
 
 #include <Imaging/GeometricalPhase.h>
 
+using std::cout;
+
 using CR::GeometricalPhase;
 
 /*!
@@ -43,10 +45,10 @@ using CR::GeometricalPhase;
 
 void summary (GeometricalPhase &phase)
 {
-  std::cout << "-- Frequencies       : " << phase.frequencies()  << std::endl;
-  std::cout << "-- Antenna positions : " << phase.antPositions() << std::endl;
-  std::cout << "-- Sky positions     : " << phase.skyPositions() << std::endl;
-  std::cout << "-- Phases            : " << phase.phases()       << std::endl;
+  cout << "-- Frequencies       : " << phase.frequencies()      << std::endl;
+  cout << "-- Antenna positions : " << phase.antennaPositions() << std::endl;
+  cout << "-- Sky positions     : " << phase.skyPositions()     << std::endl;
+  cout << "-- Phases            : " << phase.phases()           << std::endl;
 }
 
 // -----------------------------------------------------------------------------

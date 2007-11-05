@@ -57,5 +57,33 @@ namespace CR { // Namespace CR -- begin
     
     return tp;
   }
+
+  // -------------------------------------------------------- ObservatoryPosition
+
+  casa::MPosition ObservatoryPosition (String const &telescope)
+  {
+    bool ok (true);
+    casa::MPosition obsPosition;
+    
+    try {
+      casa::MeasTable::initObservatories ();
+    } catch (casa::AipsError x) {
+      std::cerr << "[SkymapGrid::grid] " << x.getMesg() << std::endl;
+    }
+    
+    ok = casa::MeasTable::Observatory(obsPosition,
+				      telescope);
+    
+    if (!ok) {
+      std::cerr << "[ObservationData] Observatory"
+	   << telescope
+	   << "not found in database"
+		<< std::endl;
+      // get the list of available observatories
+      std::cerr << casa::MeasTable::Observatories() << std::endl;
+    }
+    
+    return obsPosition;
+  }
   
 } // Namespace CR -- end

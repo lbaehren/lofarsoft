@@ -100,7 +100,7 @@ int test_StationBeam ()
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
    StationBeam stbm ;
-   SimplePlot smplt ;
+//    SimplePlot smplt ;
 
   } catch (std::string message) {
     std::cerr << message << std::endl;
@@ -150,7 +150,7 @@ for(uint lr=0; lr<5; lr++){
 
 
  StationBeam stbm ;
- SimplePlot smplt ;
+//  SimplePlot smplt ;
 
 // ofstream logfile1 ;
      

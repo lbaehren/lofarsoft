@@ -165,7 +165,7 @@ int test_parameters ()
   }
 
   std::cout << "[2] Setting antenna positions..." << std::endl;
-  w.setAntPositions (antennaPositions,false);
+  w.setAntennaPositions (antennaPositions,false);
   w.summary();
   {
     casa::Cube<casa::DComplex> weights = w.weights();

@@ -84,7 +84,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
 				      bool const &bufferDelays,
 				      bool const &bufferPhases)
     : GeometricalDelay (antPositions,
+			CR::Cartesian,
 			skyPositions,
+			CR::Cartesian,
 			bufferDelays,
 			true)
   {
@@ -98,7 +100,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
 				      const bool &bufferDelays,
 				      bool const &bufferPhases)
     : GeometricalDelay (antPositions,
+			CR::Cartesian,
 			skyPositions,
+			CR::Cartesian,
 			bufferDelays,
 			true)
   {

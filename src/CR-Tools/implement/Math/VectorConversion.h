@@ -149,8 +149,18 @@ namespace CR { // Namespace CR -- begin
 	  <td>Cartesian <br> \f$ (x,y,z) \f$</td>
           <td>AzElHeight <br> \f$ (Az,El,H) \f$</td>
 	  <td>CR::AzElHeight2Cartesian</td>
-	  <td></td>
-	  <td></td>
+	  <td>\f$ \left[ \begin{array}{l} x \\ y \\ z \end{array} \right]
+	    = \left[ \begin{array}{l} 
+	    H \frac{\sin(Az)}{\tan(El)} \\
+	    H \frac{\cos(Az)}{\tan(El)} \\
+	    H
+	    \end{array} \right] \f$</td>
+	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ H \end{array} \right]
+	    = \left[ \begin{array}{l}
+	    \mathrm{atan} \left( \frac{x}{y} \right) \\
+	    \mathrm{atan} \left( \frac{z}{\sqrt{x^2+y^2}} \right) \\
+	    z
+	    \end{array} \right] \f$</td>
 	</tr>
 	<tr>
 	  <td>Cartesian <br> \f$ (x,y,z) \f$</td>
@@ -561,12 +571,126 @@ namespace CR { // Namespace CR -- begin
 		      CR::CoordinateType const &sourceCoordinate,
 		      bool const &anglesInDegrees=false);
 
+  /*!
+    \brief Convert vector from one coordinate system to another
+
+    \retval source -- Vector in the source coordinate system
+    \param targetCoordinate -- CR::CoordinateType of the target coordinate system
+    \param xSource -- Vector in the target coordinate system
+    \param sourceCoordinate -- CR::CoordinateType of the source coordinate system
+    \param anglesInDegrees  -- Are the angles given in units of degrees? If
+                               <i>true</i> angles will be converted to radians
+			       before the conversion.
+  */
+  bool convertVector (vector<double> &target,
+		      CR::CoordinateType const &targetCoordinate,
+		      vector<double> &source,
+		      CR::CoordinateType const &sourceCoordinate,
+		      bool const &anglesInDegrees=false);
+
+#ifdef HAVE_CASA
+  /*!
+    \brief Convert vector from one coordinate system to another
+
+    \retval source -- Vector in the source coordinate system
+    \param targetCoordinate -- CR::CoordinateType of the target coordinate system
+    \param xSource -- Vector in the target coordinate system
+    \param sourceCoordinate -- CR::CoordinateType of the source coordinate system
+    \param anglesInDegrees  -- Are the angles given in units of degrees? If
+                               <i>true</i> angles will be converted to radians
+			       before the conversion.
+  */
+  bool convertVector (casa::Vector<double> &target,
+		      CR::CoordinateType const &targetCoordinate,
+		      casa::Vector<double> &source,
+		      CR::CoordinateType const &sourceCoordinate,
+		      bool const &anglesInDegrees=false);
+#endif
+
+#ifdef HAVE_BLITZ
+  /*!
+    \brief Convert vector from one coordinate system to another
+
+    \retval source -- Vector in the source coordinate system
+    \param targetCoordinate -- CR::CoordinateType of the target coordinate system
+    \param xSource -- Vector in the target coordinate system
+    \param sourceCoordinate -- CR::CoordinateType of the source coordinate system
+    \param anglesInDegrees  -- Are the angles given in units of degrees? If
+                               <i>true</i> angles will be converted to radians
+			       before the conversion.
+  */
+  bool convertVector (blitz::Array<double,1> &target,
+		      CR::CoordinateType const &targetCoordinate,
+		      blitz::Array<double,1> &source,
+		      CR::CoordinateType const &sourceCoordinate,
+		      bool const &anglesInDegrees=false);
+#endif
+
   // ============================================================================
   // 
   //  Conversion: Azimuth,Elevation -> Other
   //
   // ============================================================================
 
+  /*!
+    \brief Conversion from Az,El,Height to Cartesian coordinates
+
+    \retval x  -- \f$x\f$-component of the vector in cartesian coordinates
+    \retval y  -- \f$y\f$-component of the vector in cartesian coordinates
+    \retval z  -- \f$z\f$-component of the vector in cartesian coordinates
+    \param az  -- 
+    \param el  -- 
+    \param h   -- 
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+           <i>true</i> angles will be converted to radians before the 
+	   conversion.
+  */
+  bool AzElHeight2Cartesian (double &x,
+			     double &y,
+			     double &z,
+			     double const &az,
+			     double const &el,
+			     double const &h,
+			     bool const &anglesInDegrees=false);
+
+  /*!
+    \brief Conversion from Az,El,Height to Cartesian coordinates
+
+    \retval Cartesian -- Vector in cartesian coordinates, \f$ (x,y,z) \f$
+    \param AzElHeight -- Vector in Azimuth-Elevation-Height coordinates
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+           <i>true</i> angles will be converted to radians before the 
+	   conversion.
+  */
+  bool AzElHeight2Cartesian (vector<double> &Cartesian,
+			     vector<double> const &AzElHeight,
+			     bool const &anglesInDegrees=false);
+
+#ifdef HAVE_CASA
+  bool AzElHeight2Cartesian (casa::Vector<double> &Cartesian,
+			     casa::Vector<double> const &AzElHeight,
+			     bool const &anglesInDegrees=false);
+#endif
+
+#ifdef HAVE_BLITZ
+  bool AzElHeight2Cartesian (blitz::Array<double,1> &Cartesian,
+			     blitz::Array<double,1> const &AzElHeight,
+			     bool const &anglesInDegrees=false);
+#endif
+
+  /*!
+    \brief Conversion from Az,El,Radius to Cartesian coordinates
+
+    \retval x  -- \f$x\f$-component of the vector in cartesian coordinates
+    \retval y  -- \f$y\f$-component of the vector in cartesian coordinates
+    \retval z  -- \f$z\f$-component of the vector in cartesian coordinates
+    \param az  -- 
+    \param el  -- 
+    \param r   -- 
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+           <i>true</i> angles will be converted to radians before the 
+	   conversion.
+  */
   bool AzElRadius2Cartesian (double &x,
 			     double &y,
 			     double &z,
@@ -576,7 +700,7 @@ namespace CR { // Namespace CR -- begin
 			     bool const &anglesInDegrees=false);
 
   /*!
-    \brief Conversion from Azimuth,Elevetion to cartesian coordinates
+    \brief Conversion from Azimuth,Elevation to cartesian coordinates
 
     \retval x  -- \f$x\f$-component of the vector in cartesian coordinates
     \retval y  -- \f$y\f$-component of the vector in cartesian coordinates
@@ -620,6 +744,50 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
+  // ----------------------------------------------------------------------------
+  // Cartesian (x,y,z) -> Azimuth-Elevation-Height (Az,El,H)
+
+  /*!
+    \brief Conversion from cartesian to Azimuth-Elevation-Height coordinates
+
+    \retval Az -- Azimuth component of the vector, i.e. the angle running
+                  from North (0 deg) to East (90 deg) clock-wise
+    \retval El -- Elevation component of the vector, i.e. the angle running
+                  from the horizon (0 deg) to the zenith (90 deg)
+    \retval H  -- Height above the x-y plane
+    \param x   -- \f$x\f$-component of the vector in cartesian coordinates
+    \param y   -- \f$y\f$-component of the vector in cartesian coordinates
+    \param z   -- \f$z\f$-component of the vector in cartesian coordinates
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+                    <i>yes</i> angles will be converted to radians before the 
+		    conversion.
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool Cartesian2AzElHeight (double &az,
+			     double &el,
+			     double &h,
+			     const double &x=0.0,
+			     const double &y=0.0,
+			     const double &z=0.0,
+			     bool const &anglesInDegrees=false);
+
+  bool Cartesian2AzElHeight (std::vector<double> &AzElHeight,
+			     std::vector<double> const &cartesian,
+			     bool const &anglesInDegrees=false);
+  
+#ifdef HAVE_CASA
+  bool Cartesian2AzElHeight (casa::Vector<double> &AzElHeight,
+			     casa::Vector<double> const &cartesian,
+			     bool const &anglesInDegrees=false);
+#endif
+  
+#ifdef HAVE_BLITZ
+  bool Cartesian2AzElHeight (blitz::Array<double,1> &AzElHeight,
+			     blitz::Array<double,1> const &cartesian,
+			     bool const &anglesInDegrees=false);
+#endif
+  
   // ----------------------------------------------------------------------------
   // Cartesian (x,y,z) -> Cylindrical (rho,phi,z)
 

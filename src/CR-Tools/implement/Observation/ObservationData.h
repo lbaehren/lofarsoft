@@ -56,35 +56,35 @@ using casa::Quantity;
 using casa::String;
 using casa::Time;
 
-/*!
-  \class ObservationData
-
-  \ingroup Observation
-
-  \brief Store information describing an observation.
-  
-  \author Lars B&auml;hren
-
-  \date 2005/04/15
-
-  \test tObservationData.cc
-
-  \attention This class is soon -- in combination with SkymapGrid -- 
-  to replace ObservationFrame, CoordinatesWCS and SkymapGrids.
-
-  <h3>Prerequisite</h3>
-
-  <ul type="square">
-    <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/measures/implement/Measures/MDirection.html">MDirection</a> -- A Measure: astronomical direction.
-    <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/measures/implement/Measures/MEpoch.html">MEpoch</a> -- A Measure: instant in time.
-    <li>[AIPS++] MPosition -- A Measure: position on Earth.
-    <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/measures/implement/Measures/MeasRef.html">MeasRef</a> -- Reference frame for physical measures.
-    <li>[AIPS++] <a href="http://aips2.nrao.edu/docs/coordinates/implement/Coordinates/ObsInfo.html">ObsInfo</a> -- Store miscellaneous information related to an
-        observation.
-  </ul>
- */
-
 namespace CR {  // Namespace CR -- begin
+  
+  /*!
+    \class ObservationData
+    
+    \ingroup Observation
+    
+    \brief Store information describing an observation.
+    
+    \author Lars B&auml;hren
+    
+    \date 2005/04/15
+    
+    \test tObservationData.cc
+    
+    \attention This class is soon -- in combination with SkymapGrid -- 
+    to replace ObservationFrame, CoordinatesWCS and SkymapGrids.
+    
+    <h3>Prerequisite</h3>
+    
+    <ul type="square">
+      <li>[CASA] MDirection -- A Measure: astronomical direction.
+      <li>[CASA] MEpoch -- A Measure: instant in time.
+      <li>[CASA] MPosition -- A Measure: position on Earth.
+      <li>[CASA] MeasRef -- Reference frame for physical measures.
+      <li>[CASA] ObsInfo -- Store miscellaneous information related to an
+      observation.
+    </ul>
+  */
   
   class ObservationData {
     

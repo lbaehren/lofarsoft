@@ -69,6 +69,18 @@ if (HAVE_CASA OR HAVE_CASACORE)
   ## installation instructions
   install (TARGETS reas2event RUNTIME DESTINATION bin)
 endif (HAVE_CASA OR HAVE_CASACORE)
+
+## -------------------------------------------------------------------
+## calcSourcePosition
+
+if (HAVE_CASA OR HAVE_CASACORE)
+  add_executable (calcSourcePosition calcSourcePosition.cc)
+  ## linker instructions
+  target_link_libraries (calcSourcePosition cr)
+  ## installation instructions
+  install (TARGETS calcSourcePosition RUNTIME DESTINATION bin)
+endif (HAVE_CASA OR HAVE_CASACORE)
+
 ## -------------------------------------------------------------------
 
 ## Glish client programs

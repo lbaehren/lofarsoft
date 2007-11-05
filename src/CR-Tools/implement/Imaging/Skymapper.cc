@@ -70,7 +70,7 @@ namespace CR {  // Namespace CR -- begin
 			Matrix<double> const &antPositions)
   {
     Beamformer beamformer;
-    beamformer.setAntPositions (antPositions);
+    beamformer.setAntennaPositions (antPositions);
     //
     init (0,
 	  false,
@@ -202,7 +202,7 @@ namespace CR {  // Namespace CR -- begin
   
   bool Skymapper::setAntennaPositions (Matrix<double> const &antPositions)
   {
-    return beamformer_p.setAntPositions (antPositions);
+    return beamformer_p.setAntennaPositions (antPositions);
   }
 
   // ------------------------------------------------------- setSkymapCoordinates

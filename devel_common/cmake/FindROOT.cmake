@@ -142,39 +142,10 @@ endif (HAVE_ROOT)
 mark_as_advanced (
   ROOT_INCLUDES
   ROOT_LIBRARIES
-  rootCint
-  rootCintex
-  rootCore
-  rootEG
-  rootFitPanel
-  rootFoam
-  rootFFTW
-  rootGed
-  rootGeom
-  rootGeomBuilder
-  rootGeomPainter
-  rootGpad
-  rootGraf
-  rootGraf3d
-  rootGui
-  rootGX11
-  rootHbook
-  rootHist
-  rootHistPainter
-  rootMathCore
-  rootMatrix
-  rootMinuit
-  rootNet
-  rootPhysics
-  rootPostscript
-  rootProof
-  rootProofGui
-  rootProofPlayer
-  rootPyROOT
-  rootRIO
-  rootRint
-  rootthread
-  rootTree
-  rootTreePlayer
-  rootTreeViewer
   )
+
+foreach (lib ${libs})
+    if (root${lib})
+      mark_as_advanced (root${lib})
+  endif (root${lib})
+endforeach (lib)

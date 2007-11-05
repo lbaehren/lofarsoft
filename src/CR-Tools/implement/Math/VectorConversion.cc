@@ -37,28 +37,44 @@ namespace CR { // Namespace CR -- begin
     bool status (false);
 
     switch (sourceCoordinate) {
+    case CR::AzElHeight:
+      break;
+      // ---------------------------------------------------
+      // Conversion: AzEl,Height (Az,El,R) - Other
+      switch (targetCoordinate) {
+      case CR::Cartesian:
+	// Conversion: AzEl,Height (Az,El,R) - Cartesian (x,y,z)
+	return AzElHeight2Cartesian (xTarget,yTarget,zTarget,
+				     xSource,ySource,zSource,
+				     anglesInDegrees);
+	break;
+      }
+    case CR::AzElRadius:
+      break;
+      // ---------------------------------------------------
+      // Conversion: AzEl,Radius (Az,El,R) - Other
+      switch (targetCoordinate) {
+      case CR::Cartesian:
+	// Conversion: AzEl,Radius (Az,El,R) - Cartesian (x,y,z)
+	return AzElRadius2Cartesian (xTarget,yTarget,zTarget,
+				     xSource,ySource,zSource,
+				     anglesInDegrees);
+	break;
+      }
     case CR::Cartesian:
       // ---------------------------------------------------
       // Conversion: Cartesian (x,y,z) -> Other
       switch (targetCoordinate) {
       case CR::Cylindrical:
 	// Conversion: Cartesian (x,y,z) -> Cylindrical (rho,phi,z)
-	return Cartesian2Cylindrical (xTarget,
-				      yTarget,
-				      zTarget,
-				      xSource,
-				      ySource,
-				      zSource,
+	return Cartesian2Cylindrical (xTarget,yTarget,zTarget,
+				      xSource,ySource,zSource,
 				      anglesInDegrees);
 	break;
       case CR::Spherical:
 	// Conversion: Cartesian (x,y,z) -> Spherical (r,phi,theta)
-	return Cartesian2Spherical (xTarget,
-				    yTarget,
-				    zTarget,
-				    xSource,
-				    ySource,
-				    zSource,
+	return Cartesian2Spherical (xTarget,yTarget,zTarget,
+				    xSource,ySource,zSource,
 				    anglesInDegrees);
 	break;
       }
@@ -69,22 +85,14 @@ namespace CR { // Namespace CR -- begin
       switch (targetCoordinate) {
       case CR::Cartesian:
 	// Conversion: Cylindrical (rho,phi,z) -> Cartesian (x,y,z)
-	return Cylindrical2Cartesian (xTarget,
-				      yTarget,
-				      zTarget,
-				      xSource,
-				      ySource,
-				      zSource,
+	return Cylindrical2Cartesian (xTarget,yTarget,zTarget,
+				      xSource,ySource,zSource,
 				      anglesInDegrees);
 	break;
       case CR::Spherical:
 	// Conversion: Cylindrical (rho,phi,z) -> Spherical (rho,phi,z)
-	return Cylindrical2Spherical (xTarget,
-				      yTarget,
-				      zTarget,
-				      xSource,
-				      ySource,
-				      zSource,
+	return Cylindrical2Spherical (xTarget,yTarget,zTarget,
+				      xSource,ySource,zSource,
 				      anglesInDegrees);
 	break;
       }
@@ -95,22 +103,14 @@ namespace CR { // Namespace CR -- begin
       switch (targetCoordinate) {
       case CR::Cartesian:
 	// Conversion: Spherical (r,phi,theta) -> Cartesian (x,y,z)
-	return Spherical2Cartesian (xTarget,
-				    yTarget,
-				    zTarget,
-				    xSource,
-				    ySource,
-				    zSource,
+	return Spherical2Cartesian (xTarget,yTarget,zTarget,
+				    xSource,ySource,zSource,
 				    anglesInDegrees);
 	break;
       case CR::Cylindrical:
 	// Conversion: Spherical (r,phi,theta) -> Spherical (rho,phi,z)
-	return Spherical2Cylindrical (xTarget,
-				      yTarget,
-				      zTarget,
-				      xSource,
-				      ySource,
-				      zSource,
+	return Spherical2Cylindrical (xTarget,yTarget,zTarget,
+				      xSource,ySource,zSource,
 				      anglesInDegrees);
 	break;
       }
@@ -120,12 +120,133 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
 
+  bool convertVector (vector<double> &target,
+		      CR::CoordinateType const &targetCoordinate,
+		      vector<double> &source,
+		      CR::CoordinateType const &sourceCoordinate,
+		      bool const &anglesInDegrees)
+  {
+    return convertVector (target[0],
+			  target[1],
+			  target[2],
+			  targetCoordinate,
+			  source[0],
+			  source[1],
+			  source[2],
+			  sourceCoordinate,
+			  anglesInDegrees);
+  }
+
+#ifdef HAVE_CASA
+  bool convertVector (casa::Vector<double> &target,
+		      CR::CoordinateType const &targetCoordinate,
+		      casa::Vector<double> &source,
+		      CR::CoordinateType const &sourceCoordinate,
+		      bool const &anglesInDegrees)
+  {
+    return convertVector (target(0),
+			  target(1),
+			  target(2),
+			  targetCoordinate,
+			  source(0),
+			  source(1),
+			  source(2),
+			  sourceCoordinate,
+			  anglesInDegrees);
+  }
+#endif
+
   // ============================================================================
   // 
   //  Conversion: Azimuth,Elevation -> Other
   //
   // ============================================================================
 
+  // ------------------------------------------------------- AzElHeight2Cartesian
+
+  bool AzElHeight2Cartesian (double &x,
+			     double &y,
+			     double &z,
+			     double const &az,
+			     double const &el,
+			     double const &h,
+			     bool const &anglesInDegrees)
+  {
+    bool status (true);
+    
+    try {
+      if (anglesInDegrees) {
+	return AzElHeight2Cartesian (x,
+				     y,
+				     z,
+				     deg2rad(az),
+				     deg2rad(el),
+				     h,
+				     false);
+      } else {
+	double tanEl (tan(el));
+	if (tanEl != 0) {
+	  x = h*sin(az)/tanEl;
+	  y = h*cos(az)/tanEl;
+	  z = h;
+	}
+      }
+    } catch (std::string message) {
+      std::cerr << "[AzElHeight2Cartesian]" << message << std::endl;
+      status = false;
+    }
+    
+    return true;
+  }
+
+  // ------------------------------------------------------- AzElHeight2Cartesian
+
+  bool AzElHeight2Cartesian (vector<double> &Cartesian,
+			     vector<double> const &AzElHeight,
+			     bool const &anglesInDegrees)
+  {
+    return AzElHeight2Cartesian (Cartesian[0],
+				 Cartesian[1],
+				 Cartesian[2],
+				 AzElHeight[0],
+				 AzElHeight[1],
+				 AzElHeight[2],
+				 anglesInDegrees);
+  }
+
+  // ------------------------------------------------------- AzElHeight2Cartesian
+
+#ifdef HAVE_CASA
+  bool AzElHeight2Cartesian (casa::Vector<double> &Cartesian,
+			     casa::Vector<double> const &AzElHeight,
+			     bool const &anglesInDegrees)
+  {
+    return AzElHeight2Cartesian (Cartesian(0),
+				 Cartesian(1),
+				 Cartesian(2),
+				 AzElHeight(0),
+				 AzElHeight(1),
+				 AzElHeight(2),
+				 anglesInDegrees);
+  }
+#endif
+
+  // ------------------------------------------------------- AzElHeight2Cartesian
+
+#ifdef HAVE_BLITZ
+  bool AzElHeight2Cartesian (blitz::Array<double,1> &Cartesian,
+			     blitz::Array<double,1> const &AzElHeight,
+			     bool const &anglesInDegrees)
+  {
+    return AzElHeight2Cartesian (Cartesian(0),
+				 Cartesian(1),
+				 Cartesian(2),
+				 AzElHeight(0),
+				 AzElHeight(1),
+				 AzElHeight(2),
+				 anglesInDegrees);
+  }
+#endif
   // ------------------------------------------------------------- azel2Cartesian
 
   bool azel2Cartesian (double &x,
@@ -187,6 +308,85 @@ namespace CR { // Namespace CR -- begin
   //  Conversion: Cartesian (x,y,z) -> Other
   //
   // ============================================================================
+
+  // ------------------------------------------------------- Cartesian2AzElHeight
+
+  bool Cartesian2AzElHeight (double &az,
+			     double &el,
+			     double &h,
+			     const double &x,
+			     const double &y,
+			     const double &z,
+			     bool const &anglesInDegrees)
+  {
+    bool status (true);
+
+    try {
+      if (anglesInDegrees) {
+	az = rad2deg(atan2(x,y));
+	el = rad2deg(atan2(z,sqrt(x*x+y*y)));
+	h = z;
+      } else {
+	az = atan2(x,y);
+	el = atan2(z,sqrt(x*x+y*y));
+	h = z;
+      }
+    } catch (std::string message) {
+      std::cerr << "[Cartesian2AzElRadius] " << message << std::endl;
+      status = false;
+    }
+
+    return status;
+  }
+
+  // ------------------------------------------------------- Cartesian2AzElHeight
+
+  bool Cartesian2AzElHeight (std::vector<double> &AzElHeight,
+			     std::vector<double> const &cartesian,
+			     bool const &anglesInDegrees)
+  {
+    return Cartesian2AzElHeight (AzElHeight[0],
+				 AzElHeight[1],
+				 AzElHeight[2],
+				 cartesian[0],
+				 cartesian[1],
+				 cartesian[2],
+				 anglesInDegrees);
+  }
+  
+  // ------------------------------------------------------- Cartesian2AzElHeight
+
+#ifdef HAVE_CASA
+  bool Cartesian2AzElHeight (casa::Vector<double> &AzElHeight,
+			     casa::Vector<double> const &cartesian,
+			     bool const &anglesInDegrees)
+  {
+    return Cartesian2AzElHeight (AzElHeight(0),
+				 AzElHeight(1),
+				 AzElHeight(2),
+				 cartesian(0),
+				 cartesian(1),
+				 cartesian(2),
+				 anglesInDegrees);
+  }
+#endif
+  
+  // ------------------------------------------------------- Cartesian2AzElHeight
+
+#ifdef HAVE_BLITZ
+  bool Cartesian2AzElHeight (blitz::Array<double,1> &AzElHeight,
+			     blitz::Array<double,1> const &cartesian,
+			     bool const &anglesInDegrees)
+  {
+    return Cartesian2AzElHeight (AzElHeight(0),
+				 AzElHeight(1),
+				 AzElHeight(2),
+				 cartesian(0),
+				 cartesian(1),
+				 cartesian(2),
+				 anglesInDegrees);
+  }
+#endif
 
   // ------------------------------------------------------- Cartesian2AzElRadius
 

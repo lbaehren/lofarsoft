@@ -60,8 +60,18 @@ const double lightspeed = 299792458;
 // -----------------------------------------------------------------------------
 
 #ifdef HAVE_CASA
-void getPositions (casa::Matrix<double> &skyPositions,
-		   casa::Matrix<double> &antPositions)
+/*!
+  \brief 
+
+  \retval skyPositions     -- Pointing positions on the sky
+  \retval antPositions     -- Antenna positions
+  \param antennaIndexFirst -- How to organize the matrix with the antenna
+         positions? If <tt>antennaIndexFirst=true</tt> then the positions are
+	 organized as [antenna,3], otherwise [3,antenna]
+*/
+void get_positions (casa::Matrix<double> &skyPositions,
+		    casa::Matrix<double> &antPositions,
+		    bool const &antennaIndexFirst)
 {
   int nofCoordinates (3);
   int nofAntennas (2);
@@ -69,14 +79,18 @@ void getPositions (casa::Matrix<double> &skyPositions,
 
   // Antenna positions
 
-  antPositions.resize(nofAntennas,nofCoordinates);
-
-  antPositions(0,0) = -100.0;
-  antPositions(0,1) = 0.0;
-  antPositions(0,2) = 0.0;
-  antPositions(1,0) = 100.0;
-  antPositions(1,1) = 0.0;
-  antPositions(1,2) = 0.0;
+  if (antennaIndexFirst) {
+    antPositions.resize(nofAntennas,nofCoordinates);
+    
+    antPositions(0,0) = -100.0;
+    antPositions(0,1) = 0.0;
+    antPositions(0,2) = 0.0;
+    antPositions(1,0) = 100.0;
+    antPositions(1,1) = 0.0;
+    antPositions(1,2) = 0.0;
+  } else {
+    antPositions.resize(nofCoordinates,nofAntennas);
+  }
 
   // Pointing directions (sky positions)
   
@@ -107,7 +121,7 @@ int test_formula ()
   casa::Matrix<double> skyPositions;
   double delay (.0);
   
-  getPositions (skyPositions, antPositions);
+  get_positions (skyPositions, antPositions,true);
 
   /*!
     Standard version for the computation of the delay
@@ -236,7 +250,9 @@ int test_GeometricalDelay ()
   casa::Matrix<double> antPositions;
   casa::Matrix<double> skyPositions;
 
-  getPositions (skyPositions, antPositions);
+  get_positions (skyPositions,
+		 antPositions,
+		 true);
 
   std::cout << "[1] Testing default constructor ..." << endl;
   try {

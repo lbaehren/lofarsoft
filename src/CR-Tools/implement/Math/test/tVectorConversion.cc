@@ -55,6 +55,7 @@ void show_conversion (double const &a1,
 		      double const &b2,
 		      double const &b3)
 {
+  std::cout << "\t";
   std::cout << "[" << a1 << "," << a2 << "," << a3 << "]";
   std::cout << "  ->  ";
   std::cout << "[" << b1 << "," << b2 << "," << b3 << "]";
@@ -64,6 +65,7 @@ void show_conversion (double const &a1,
 void show_conversion (std::vector<double> const &a,
 		      std::vector<double> const &b)
 {
+  std::cout << "\t";
   std::cout << "[" << a[0] << "," << a[1] << "," << a[2] << "]";
   std::cout << "  ->  ";
   std::cout << "[" << b[0] << "," << b[1] << "," << b[2] << "]";
@@ -204,6 +206,163 @@ int test_vectorConversion ()
 				CR::Cylindrical,
 				true);
     show_conversion(xSource,ySource,zSource,xTarget,yTarget,zTarget);
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Test conversion from cartesian to other coordinates
+
+  \return nofFailedTests -- Number of failed tests within this function
+*/
+int test_Cartesian2Other ()
+{
+  std::cout << "\n[test_Cartesian2Other]\n" << std::endl;
+
+  int nofFailedTests (0);
+  bool status (true);
+  vector<double> cartesian (3);
+  vector<double> other (3);
+
+  cartesian[2] = 1.0;
+
+  std::cout << "[1] Cartesian (x,y,z) -> Spherical (r,phi,theta)" << std::endl;
+  try {
+    cartesian[0] = 1.0;
+    cartesian[1] = 0.0; 
+    status = CR::Cartesian2Spherical (other,
+				      cartesian,
+				      true);
+    show_conversion (cartesian,other);
+
+    cartesian[0] = 0.0;
+    cartesian[1] = 1.0; 
+    status = CR::Cartesian2Spherical (other,
+				      cartesian,
+				      true);
+    show_conversion (cartesian,other);
+
+    cartesian[0] = -1.0;
+    cartesian[1] = 0.0; 
+    status = CR::Cartesian2Spherical (other,
+				      cartesian,
+				      true);
+    show_conversion (cartesian,other);
+    //
+    cartesian[0] = 0.0;
+    cartesian[1] = -1.0; 
+    status = CR::Cartesian2Spherical (other,
+				      cartesian,
+				      true);
+    show_conversion (cartesian,other);
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[2] Cartesian (x,y,z) -> Cylindrical (r,phi,z)" << std::endl;
+  try {
+    cartesian[0] = 1.0;
+    cartesian[1] = 0.0; 
+    status = CR::Cartesian2Cylindrical (other,
+				      cartesian,
+				      true);
+    show_conversion (cartesian,other);
+
+    cartesian[0] = 0.0;
+    cartesian[1] = 1.0; 
+    status = CR::Cartesian2Cylindrical (other,
+				      cartesian,
+				      true);
+    show_conversion (cartesian,other);
+
+    cartesian[0] = -1.0;
+    cartesian[1] = 0.0; 
+    status = CR::Cartesian2Cylindrical (other,
+				      cartesian,
+				      true);
+    show_conversion (cartesian,other);
+    //
+    cartesian[0] = 0.0;
+    cartesian[1] = -1.0; 
+    status = CR::Cartesian2Cylindrical (other,
+				      cartesian,
+				      true);
+    show_conversion (cartesian,other);
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[3] Cartesian (x,y,z) -> AzElHeight (Az,El,H)" << std::endl;
+  try {
+    cartesian[0] = 1.0;
+    cartesian[1] = 0.0; 
+    status = CR::Cartesian2AzElHeight (other,
+				      cartesian,
+				      true);
+    show_conversion (cartesian,other);
+
+    cartesian[0] = 0.0;
+    cartesian[1] = 1.0; 
+    status = CR::Cartesian2AzElHeight (other,
+				      cartesian,
+				      true);
+    show_conversion (cartesian,other);
+
+    cartesian[0] = -1.0;
+    cartesian[1] = 0.0; 
+    status = CR::Cartesian2AzElHeight (other,
+				      cartesian,
+				      true);
+    show_conversion (cartesian,other);
+    //
+    cartesian[0] = 0.0;
+    cartesian[1] = -1.0; 
+    status = CR::Cartesian2AzElHeight (other,
+				      cartesian,
+				      true);
+    show_conversion (cartesian,other);
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[4] Cartesian (x,y,z) -> AzElRadius (Az,El,R)" << std::endl;
+  try {
+    cartesian[0] = 1.0;
+    cartesian[1] = 0.0; 
+    status = CR::Cartesian2AzElRadius (other,
+				      cartesian,
+				      true);
+    show_conversion (cartesian,other);
+
+    cartesian[0] = 0.0;
+    cartesian[1] = 1.0; 
+    status = CR::Cartesian2AzElRadius (other,
+				      cartesian,
+				      true);
+    show_conversion (cartesian,other);
+
+    cartesian[0] = -1.0;
+    cartesian[1] = 0.0; 
+    status = CR::Cartesian2AzElRadius (other,
+				      cartesian,
+				      true);
+    show_conversion (cartesian,other);
+    //
+    cartesian[0] = 0.0;
+    cartesian[1] = -1.0; 
+    status = CR::Cartesian2AzElRadius (other,
+				      cartesian,
+				      true);
+    show_conversion (cartesian,other);
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -609,13 +768,15 @@ int main ()
 
   nofFailedTests += test_angleConversion ();
 
-  nofFailedTests += test_vectorConversion ();
+  nofFailedTests += test_Cartesian2Other ();
 
-  nofFailedTests += test_Cartesian2Cylindrical ();
-  nofFailedTests += test_Cartesian2Spherical ();
+//   nofFailedTests += test_vectorConversion ();
 
-  nofFailedTests += test_Cylindrical2Cartesian ();
-  nofFailedTests += test_Cylindrical2Spherical ();
+//   nofFailedTests += test_Cartesian2Cylindrical ();
+//   nofFailedTests += test_Cartesian2Spherical ();
+
+//   nofFailedTests += test_Cylindrical2Cartesian ();
+//   nofFailedTests += test_Cylindrical2Spherical ();
 
   return nofFailedTests;
 }
