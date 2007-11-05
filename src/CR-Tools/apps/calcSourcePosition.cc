@@ -25,9 +25,11 @@
 
 #include <casa/aips.h>
 #include <casa/Arrays/Vector.h>
+#include <casa/BasicSL/String.h>
 #include <casa/Inputs/Input.h>
 #include <casa/OS/Time.h>
 #include <casa/Quanta/MVTime.h>
+#include <casa/Quanta/MVPosition.h>
 #include <coordinates/Coordinates/ObsInfo.h>
 #include <measures/Measures.h>
 #include <measures/Measures/MDirection.h>
@@ -43,6 +45,7 @@ using std::cout;
 using std::endl;
 
 using casa::MDirection;
+using casa::MPosition;
 using casa::Quantity;
 
 /*!
@@ -228,11 +231,11 @@ bool test_Convert ()
   casa::MEpoch date (epoch);
   
   // Location of the observatory
-  casa::MPosition obs (casa::MVPosition (Quantity(10,"m"),
-					 Quantity(-6,"deg"),
-					 Quantity(50,"deg")),
-		       casa::MPosition::Ref(casa::MPosition::WGS84));
-
+  MPosition obs (casa::MVPosition (Quantity(10,"m"),
+				   Quantity(-6,"deg"),
+				   Quantity(50,"deg")),
+		 MPosition::Ref(MPosition::WGS84));
+  
   // Set up frame with the observatory position
   casa::MeasFrame frame (obs);
   frame.set(date);
