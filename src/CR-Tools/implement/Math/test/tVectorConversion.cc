@@ -219,6 +219,12 @@ int test_vectorConversion ()
 /*!
   \brief Test conversion from cartesian to other coordinates
 
+  This will run a number of very basic tests for the following routines:
+  - CR::Cartesian2Spherical
+  - CR::Cartesian2Cylindrical
+  - CR::Cartesian2AzElHeight
+  - CR::Cartesian2AzElRadius
+
   \return nofFailedTests -- Number of failed tests within this function
 */
 int test_Cartesian2Other ()
@@ -360,6 +366,40 @@ int test_Cartesian2Other ()
     cartesian[0] = 0.0;
     cartesian[1] = -1.0; 
     status = CR::Cartesian2AzElRadius (other,
+				      cartesian,
+				      true);
+    show_conversion (cartesian,other);
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[5] Cartesian (x,y,z) -> North-East-Height" << std::endl;
+  try {
+    cartesian[0] = 1.0;
+    cartesian[1] = 0.0;
+    status = CR::Cartesian2NorthEastHeight (other,
+				      cartesian,
+				      true);
+    show_conversion (cartesian,other);
+
+    cartesian[0] = 0.0;
+    cartesian[1] = 1.0; 
+    status = CR::Cartesian2NorthEastHeight (other,
+				      cartesian,
+				      true);
+    show_conversion (cartesian,other);
+
+    cartesian[0] = -1.0;
+    cartesian[1] = 0.0; 
+    status = CR::Cartesian2NorthEastHeight (other,
+				      cartesian,
+				      true);
+    show_conversion (cartesian,other);
+    //
+    cartesian[0] = 0.0;
+    cartesian[1] = -1.0; 
+    status = CR::Cartesian2NorthEastHeight (other,
 				      cartesian,
 				      true);
     show_conversion (cartesian,other);

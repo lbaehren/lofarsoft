@@ -962,8 +962,70 @@ namespace CR { // Namespace CR -- begin
 #endif
   
   // ----------------------------------------------------------------------------
-  // Cartesian (x,y,z) -> 
+  // Cartesian (x,y,z) -> North-East-Height (N,E,H)
 
+  /*!
+    \brief Conversion from cartesian to North-East-Height coordinates
+
+    \retval north  -- 
+    \retval east   -- 
+    \retval height -- 
+    \param x  -- \f$x\f$-component of the vector in cartesian coordinates
+    \param y  -- \f$y\f$-component of the vector in cartesian coordinates
+    \param z  -- \f$z\f$-component of the vector in cartesian coordinates
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+           <i>true</i> angles will be converted to radians before the 
+	   conversion.
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  inline bool Cartesian2NorthEastHeight (double &north,
+					 double &east,
+					 double &height,
+					 double const &x,
+					 double const &y,
+					 double const &z,
+					 bool const &anglesInDegrees=false) {
+    north  = y;
+    east   = x;
+    height = z;
+    
+    return true;
+  }
+  
+  inline bool Cartesian2NorthEastHeight (std::vector<double> &northEastHeight,
+					 std::vector<double> const &cartesian,
+					 bool const &anglesInDegrees=false) {
+    northEastHeight[0] = cartesian[1];
+    northEastHeight[1] = cartesian[0];
+    northEastHeight[2] = cartesian[2];
+    
+    return true;  
+  }
+  
+#ifdef HAVE_CASA
+  inline bool Cartesian2NorthEastHeight (casa::Vector<double> &northEastHeight,
+					 casa::Vector<double> const &cartesian,
+					 bool const &anglesInDegrees=false) {
+    northEastHeight(0) = cartesian(1);
+    northEastHeight(1) = cartesian(0);
+    northEastHeight(2) = cartesian(2);
+    
+    return true;  
+  }
+#endif
+  
+#ifdef HAVE_BLITZ
+  inline bool Cartesian2NorthEastHeight (blitz::Array<double,1> &northEastHeight,
+					 blitz::Array<double,1> const &cartesian,
+					 bool const &anglesInDegrees=false) {
+    northEastHeight(0) = cartesian(1);
+    northEastHeight(1) = cartesian(0);
+    northEastHeight(2) = cartesian(2);
+    
+    return true;  
+  }
+#endif
   
   // ============================================================================
   // 

@@ -22,10 +22,10 @@ set (cr_modules
 
 ## (optional) support for applications requiring additional external components
 
-if (HAVE_PGPLOT)
+if (HAVE_PGPLOT OR HAVE_PLPLOT)
   list (APPEND cr_modules Display)
   add_definitions (-DNEED_FORTRAN_UNDERSCORES)
-endif (HAVE_PGPLOT)
+endif (HAVE_PGPLOT OR HAVE_PLPLOT)
 
 if (CR_GLISH_SUPPORT)
   list (APPEND cr_modules ApplicationSupport)

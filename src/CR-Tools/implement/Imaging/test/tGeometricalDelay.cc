@@ -74,22 +74,35 @@ void get_positions (casa::Matrix<double> &skyPositions,
 		    bool const &antennaIndexFirst)
 {
   int nofCoordinates (3);
-  int nofAntennas (2);
+  int nofAntennas (4);
   int nofDirections (3);
 
   // Antenna positions
 
   if (antennaIndexFirst) {
     antPositions.resize(nofAntennas,nofCoordinates);
-    
-    antPositions(0,0) = -100.0;
-    antPositions(0,1) = 0.0;
-    antPositions(0,2) = 0.0;
-    antPositions(1,0) = 100.0;
-    antPositions(1,1) = 0.0;
-    antPositions(1,2) = 0.0;
+    antPositions = 0.0;
+
+    // [100,0,0]
+    antPositions(0,0) = 100;
+    // [0,100,0]
+    antPositions(1,1) = 100;
+    // [-100,0,0]
+    antPositions(2,0) = -100;
+    // [0,-100,0]
+    antPositions(3,1) = -100;
   } else {
     antPositions.resize(nofCoordinates,nofAntennas);
+    antPositions = 0.0;
+
+    // [100,0,0]
+    antPositions(0,0) = 100;
+    // [0,100,0]
+    antPositions(1,1) = 100;
+    // [-100,0,0]
+    antPositions(0,2) = -100;
+    // [0,-100,0]
+    antPositions(1,3) = -100;
   }
 
   // Pointing directions (sky positions)
@@ -100,6 +113,53 @@ void get_positions (casa::Matrix<double> &skyPositions,
   skyPositions.diagonal() = 100.0;
 
 }
+#else
+#ifdef HAVE_BLITZ
+void get_positions (blitz::Array<double,2> &skyPositions,
+		    blitz::Array<double,2> &antPositions,
+		    bool const &antennaIndexFirst)
+{
+  int nofCoordinates (3);
+  int nofAntennas (4);
+  int nofDirections (3);
+
+  // Antenna positions
+
+  if (antennaIndexFirst) {
+    antPositions.resize(nofAntennas,nofCoordinates);
+    antPositions = 0.0;
+
+    // [100,0,0]
+    antPositions(0,0) = 100;
+    // [0,100,0]
+    antPositions(1,1) = 100;
+    // [-100,0,0]
+    antPositions(2,0) = -100;
+    // [0,-100,0]
+    antPositions(3,1) = -100;
+  } else {
+    antPositions.resize(nofCoordinates,nofAntennas);
+    antPositions = 0.0;
+
+    // [100,0,0]
+    antPositions(0,0) = 100;
+    // [0,100,0]
+    antPositions(1,1) = 100;
+    // [-100,0,0]
+    antPositions(0,2) = -100;
+    // [0,-100,0]
+    antPositions(1,3) = -100;
+  }
+
+  // Pointing directions (sky positions)
+  
+  skyPositions.resize(nofDirections,nofCoordinates);
+
+  skyPositions            = 0.0;
+  skyPositions.diagonal() = 100.0;
+
+}
+#endif
 #endif
 
 // -----------------------------------------------------------------------------
