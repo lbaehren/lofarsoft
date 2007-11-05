@@ -231,9 +231,10 @@ bool test_Convert ()
   casa::MEpoch date (epoch);
   
   // Location of the observatory
-  MPosition obs (casa::MVPosition (Quantity(10,"m"),
-				   Quantity(-6,"deg"),
-				   Quantity(50,"deg")),
+  casa::MVPosition obsMVPosition (Quantity(10,"m"),
+				  Quantity(-6,"deg"),
+				  Quantity(50,"deg"));
+  MPosition obs (obsMVPosition,
 		 MPosition::Ref(MPosition::WGS84));
   
   // Set up frame with the observatory position
