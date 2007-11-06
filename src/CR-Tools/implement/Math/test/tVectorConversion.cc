@@ -810,13 +810,13 @@ int main ()
 
   nofFailedTests += test_Cartesian2Other ();
 
-//   nofFailedTests += test_vectorConversion ();
+  nofFailedTests += test_vectorConversion ();
 
-//   nofFailedTests += test_Cartesian2Cylindrical ();
-//   nofFailedTests += test_Cartesian2Spherical ();
-
-//   nofFailedTests += test_Cylindrical2Cartesian ();
-//   nofFailedTests += test_Cylindrical2Spherical ();
-
+  nofFailedTests += test_Cartesian2Cylindrical ();
+  nofFailedTests += test_Cartesian2Spherical ();
+  
+  nofFailedTests += test_Cylindrical2Cartesian ();
+  nofFailedTests += test_Cylindrical2Spherical ();
+  
   return nofFailedTests;
 }

@@ -156,11 +156,62 @@ namespace CR { // Namespace CR -- begin
   }
 #endif
 
+#ifdef HAVE_BLITZ
+  bool convertVector (blitz::Array<double,1> &target,
+		      CR::CoordinateType const &targetCoordinate,
+		      blitz::Array<double,1> &source,
+		      CR::CoordinateType const &sourceCoordinate,
+		      bool const &anglesInDegrees)
+  {
+    return convertVector (target(0),
+			  target(1),
+			  target(2),
+			  targetCoordinate,
+			  source(0),
+			  source(1),
+			  source(2),
+			  sourceCoordinate,
+			  anglesInDegrees);
+  }
+#endif
+
   // ============================================================================
   // 
   //  Conversion: Azimuth,Elevation -> Other
   //
   // ============================================================================
+  
+  bool AzEl2Cartesian (double &x,
+		       double &y,
+		       double &z,
+		       double const &az,
+		       double const &el,
+		       double const &r,
+		       bool const &anglesInDegrees,
+		       bool const &lastIsRadius)
+  {
+    bool status (true);
+    
+    try {
+      if (anglesInDegrees) {
+	double elRadian = deg2rad(el);
+	double azRadian = deg2rad(az);
+	//
+	x = r*cos(elRadian)*cos(azRadian);
+	y = r*cos(elRadian)*sin(azRadian);
+	z = r*sin(elRadian);
+      } else {
+	x = r*cos(el)*cos(az);
+	y = r*cos(el)*sin(az);
+	z = r*sin(el);
+      }
+    } catch (std::string message) {
+      std::cerr << "[azel2Cartesian] " << message << std::endl;
+      status = false;
+    }
+
+    return status;
+  }
 
   // ------------------------------------------------------- AzElHeight2Cartesian
 
@@ -247,61 +298,6 @@ namespace CR { // Namespace CR -- begin
 				 anglesInDegrees);
   }
 #endif
-  // ------------------------------------------------------------- azel2Cartesian
-
-  bool azel2Cartesian (double &x,
-		       double &y,
-		       double &z,
-		       double const &az,
-		       double const &el,
-		       double const &r,
-		       bool const &anglesInDegrees,
-		       bool const &lastIsRadius)
-  {
-    bool status (true);
-
-    try {
-      if (anglesInDegrees) {
-	double elRadian = deg2rad(el);
-	double azRadian = deg2rad(az);
-	//
-	x = r*cos(elRadian)*cos(azRadian);
-	y = r*cos(elRadian)*sin(azRadian);
-	z = r*sin(elRadian);
-      } else {
-	x = r*cos(el)*cos(az);
-	y = r*cos(el)*sin(az);
-	z = r*sin(el);
-      }
-    } catch (std::string message) {
-      std::cerr << "[azel2Cartesian] " << message << std::endl;
-      status = false;
-    }
-    
-    return status;
-  }
-  
-  // ------------------------------------------------------------- azel2Cartesian
-
-  bool azel2Cartesian (std::vector<double> &cartesian,
-		       std::vector<double> const &azel,
-		       bool const &anglesInDegrees,
-		       bool const &lastIsRadius)
-  {
-    if (azel.size() == 3) {
-      cartesian.resize(3);
-      return azel2Cartesian (cartesian[0],
-			     cartesian[1],
-			     cartesian[2],
-			     azel[0],
-			     azel[1],
-			     azel[2],
-			     anglesInDegrees,
-			     lastIsRadius);
-    } else {
-      return false;
-    }
-  }
 
   // ============================================================================
   // 
@@ -968,7 +964,7 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------- azel2Cartesian
   
-  casa::Vector<double> azel2Cartesian (const casa::Vector<double>& azel,
+  casa::Vector<double> AzEl2Cartesian (const casa::Vector<double>& azel,
 				       bool const &anglesInDegrees)
   {
     casa::Vector<double> cartesian(3);
@@ -991,7 +987,7 @@ namespace CR { // Namespace CR -- begin
     }
     
     // Coordinate transformation from (az,el) to cartesian (x,y,z)
-    azel2Cartesian (cartesian(0),
+    AzEl2Cartesian (cartesian(0),
 		    cartesian(1),
 		    cartesian(2),
 		    az,

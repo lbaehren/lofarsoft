@@ -67,7 +67,7 @@ if (UNIX)
 endif (UNIX)
 
 find_library (G2C_LIBRARIES
-  NAMES g2c gcc
+  NAMES gfortran g2c gcc
   PATHS ${lib_locations}
   NO_DEFAULT_PATH
   )

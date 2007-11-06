@@ -633,6 +633,48 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
 
   /*!
+    \brief Conversion from Azimuth,Elevation to cartesian coordinates
+
+    \retval x  -- \f$x\f$-component of the vector in cartesian coordinates
+    \retval y  -- \f$y\f$-component of the vector in cartesian coordinates
+    \retval z  -- \f$z\f$-component of the vector in cartesian coordinates
+    \param az  -- 
+    \param el  -- 
+    \param r   -- 
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+           <i>true</i> angles will be converted to radians before the 
+	   conversion.
+    \param lastIsRadius    -- As there are two different flavors of
+           Azimuth,Elevation coordinates, this switch can be used for further
+	   specification. If <tt>lastIsRadius=true</tt> the origin vector is
+	   considered as (Az,El,Radius), thereby redirecting the actual
+	   evaluation to AzElRadius2Cartesian.
+  */
+  bool AzEl2Cartesian (double &x,
+		       double &y,
+		       double &z,
+		       double const &az,
+		       double const &el,
+		       double const &r,
+		       bool const &anglesInDegrees=false,
+		       bool const &lastIsRadius=true);
+  
+  bool AzEl2Cartesian (std::vector<double> &cartesian,
+		       std::vector<double> const &azel,
+		       bool const &anglesInDegrees=false,
+		       bool const &lastIsRadius=true);
+
+#ifdef HAVE_CASA  
+  bool AzEl2Cartesian (casa::Vector<double> &cartesian,
+		       casa::Vector<double> const &azel,
+		       bool const &anglesInDegrees=false,
+		       bool const &lastIsRadius=true);
+
+  casa::Vector<double> AzEl2Cartesian (const casa::Vector<double>& azel,
+				       bool const &anglesInDegrees=false);  
+#endif
+  
+  /*!
     \brief Conversion from Az,El,Height to Cartesian coordinates
 
     \retval x  -- \f$x\f$-component of the vector in cartesian coordinates
@@ -699,45 +741,6 @@ namespace CR { // Namespace CR -- begin
 			     double const &r,
 			     bool const &anglesInDegrees=false);
 
-  /*!
-    \brief Conversion from Azimuth,Elevation to cartesian coordinates
-
-    \retval x  -- \f$x\f$-component of the vector in cartesian coordinates
-    \retval y  -- \f$y\f$-component of the vector in cartesian coordinates
-    \retval z  -- \f$z\f$-component of the vector in cartesian coordinates
-    \param az  -- 
-    \param el  -- 
-    \param r   -- 
-    \param anglesInDegrees -- Are the angles given in units of degrees? If
-           <i>true</i> angles will be converted to radians before the 
-	   conversion.
-    \param lastIsRadius    -- As there are two different flavors of
-           Azimuth,Elevation coordinates, this switch can be used for further
-	   specification. If <tt>lastIsRadius=true</tt> the origin vector is
-	   considered as (Az,El,Radius), thereby redirecting the actual
-	   evaluation to AzElRadius2Cartesian.
-  */
-  bool azel2Cartesian (double &x,
-		       double &y,
-		       double &z,
-		       double const &az,
-		       double const &el,
-		       double const &r,
-		       bool const &anglesInDegrees=false,
-		       bool const &lastIsRadius=true);
-  
-  bool azel2Cartesian (std::vector<double> &cartesian,
-		       std::vector<double> const &azel,
-		       bool const &anglesInDegrees=false,
-		       bool const &lastIsRadius=true);
-
-#ifdef HAVE_CASA  
-  bool azel2Cartesian (casa::Vector<double> &cartesian,
-		       casa::Vector<double> const &azel,
-		       bool const &anglesInDegrees=false,
-		       bool const &lastIsRadius=true);
-#endif
-  
   // ============================================================================
   // 
   //  Conversion: Cartesian (x,y,z) -> Other
@@ -1372,38 +1375,7 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
 
 #ifdef HAVE_CASA
-  
-  /*!
-    \brief Conversion from (AZ,EL) to (x,y,z)
-
-    Conversion of a source position from azimuth-elevation coordinates, 
-    \f$ (\phi, \theta) \f$, to cartesian coordinates, \f$ (x, y, z) \f$:
-    \f[
-      \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
-      \left[ \begin{array}{c}
-        -\cos(\theta) \cos(\phi) \\
-	-\cos(\theta) \sin(\phi) \\
-	\sin(\theta)
-      \end{array} \right]
-    \f]
-    If the source is located within the near-field of the array, we have 
-    to take into account the distance:
-    \f[
-      \left[ \begin{array}{c} x \\ y \\ z \end{array} \right] =
-      \left[ \begin{array}{c}
-        - r\, \cos(\theta) \cos(\phi) \\
-	- r\, \cos(\theta) \sin(\phi) \\
-	  r\, \sin(\theta)
-      \end{array} \right]
-    \f]
-
-    \param azel -- (az,el) coordinates
-
-    \return xyz -- Vector in cartesian coordinates
-   */
-  casa::Vector<double> azel2Cartesian (const casa::Vector<double>& azel,
-				       bool const &anglesInDegrees=false);  
-  
+    
   /*!
     \brief Convert polar spherical coordinates to cartesian coordinates
 

@@ -164,7 +164,7 @@ namespace LOPES {  // Namespace LOPES -- begin
 				    Bool nearField=False)
   {
     const Double c = QC::c.getValue();
-    Vector<Double> rho = CR::azel2Cartesian (azel);
+    Vector<Double> rho = CR::AzEl2Cartesian (azel);
     Double delay;
     
     if (nearField && azel.nelements() == 3) {
