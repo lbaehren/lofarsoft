@@ -119,6 +119,10 @@ static void dn2g_f(int &n, int &p, double *x, int &nf, double *F,
 		   void *uiparm, void *urparm, void *ufparm)
 {
   MGFunction *fcn = (MGFunction *)ufparm;
+
+  assert(n == fcn->data_size());
+  assert(p == fcn->parameters_size());
+
   fcn->set_parameters(x);
   fcn->fcn_diff(F);
 }
@@ -127,6 +131,10 @@ static void dn2g_df(int &n, int &p, double *x, int &nf, double *J,
 		    void *uiparm, void *urparm, void *ufparm)
 {
   MGFunction *fcn = (MGFunction *)ufparm;
+
+  assert(n == fcn->data_size());
+  assert(p == fcn->parameters_size());
+
   fcn->set_parameters(x);
   fcn->fcn_diff_transposed_gradient(J);
 }

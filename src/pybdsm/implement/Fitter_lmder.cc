@@ -95,6 +95,9 @@ static void lmder_fcn(int &m, int &n, double *x, double *F, double *J, int &ldfj
 {
   MGFunction *fcn = (MGFunction *)userpar;
 
+  assert(m == fcn->data_size());
+  assert(n == fcn->parameters_size());
+
   fcn->set_parameters(x);
 
   switch (iflag) {

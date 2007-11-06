@@ -136,6 +136,11 @@ static void dnsg_f(int &n, int &p, int &l, double *alf, int &nf, double *phi,
 		   void *uiparm, void *urparm, void *ufparm)
 {
   MGFunction *fcn = (MGFunction *)ufparm;
+
+  assert(n == fcn->data_size());
+  assert(p == fcn->parameters_size() - fcn->gaul_size());
+  assert(l == fcn->gaul_size());
+
   fcn->set_nlin_parameters(alf);
   fcn->fcn_partial_value(phi);
 }
@@ -144,6 +149,11 @@ static void dnsg_df(int &n, int &p, int &l, double *alf, int &nf, double *der,
 		    void *uiparm, void *urparm, void *ufparm)
 {
   MGFunction *fcn = (MGFunction *)ufparm;
+
+  assert(n == fcn->data_size());
+  assert(p == fcn->parameters_size() - fcn->gaul_size());
+  assert(l == fcn->gaul_size());
+
   fcn->set_nlin_parameters(alf);
   fcn->fcn_partial_gradient(der);
 }
