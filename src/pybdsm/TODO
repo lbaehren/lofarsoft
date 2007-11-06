@@ -4,9 +4,6 @@
 
 - Optimize python version of the fitting
 
-- Implement C fitting: gsl fitters, minuit, fumili, netlib:opt:varpro, lmfit(numerical recipies)
-  see SEAL/minuit for the minimization interface
-
 - Investigate the possibility to use momenta analysis to speed up fitting.
 
 - visualizers: fityk, veusz, hippodraw, qtiplot
