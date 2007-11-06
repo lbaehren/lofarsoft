@@ -24,10 +24,6 @@
 
 #define PI 3.1415926536
 
-/*!
-  \class FirstStagePipeline
-*/
-
 namespace CR { // Namespace CR -- begin
   
   // ============================================================================

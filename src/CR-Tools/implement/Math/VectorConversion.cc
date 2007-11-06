@@ -180,6 +180,8 @@ namespace CR { // Namespace CR -- begin
   //  Conversion: Azimuth,Elevation -> Other
   //
   // ============================================================================
+
+  // ------------------------------------------------------------- AzEl2Cartesian
   
   bool AzEl2Cartesian (double &x,
 		       double &y,
@@ -192,27 +194,61 @@ namespace CR { // Namespace CR -- begin
   {
     bool status (true);
     
-    try {
-      if (anglesInDegrees) {
-	double elRadian = deg2rad(el);
-	double azRadian = deg2rad(az);
-	//
-	x = r*cos(elRadian)*cos(azRadian);
-	y = r*cos(elRadian)*sin(azRadian);
-	z = r*sin(elRadian);
-      } else {
-	x = r*cos(el)*cos(az);
-	y = r*cos(el)*sin(az);
-	z = r*sin(el);
-      }
-    } catch (std::string message) {
-      std::cerr << "[azel2Cartesian] " << message << std::endl;
-      status = false;
+    if (lastIsRadius) {
+      return AzElRadius2Cartesian (x,
+				   y,
+				   z,
+				   az,
+				   el,
+				   r,
+				   anglesInDegrees);
+    } else {
+      return AzElHeight2Cartesian (x,
+				   y,
+				   z,
+				   az,
+				   el,
+				   r,
+				   anglesInDegrees);
     }
 
     return status;
   }
 
+  // ------------------------------------------------------------- AzEl2Cartesian
+  
+  bool AzEl2Cartesian (std::vector<double> &cartesian,
+		       std::vector<double> const &azel,
+		       bool const &anglesInDegrees,
+		       bool const &lastIsRadius)
+  {
+    // check the length of the AzEl-Vector
+    uint nelem (azel.size());
+
+    if (lastIsRadius) {
+      if (nelem == 2) {
+	return AzElRadius2Cartesian (cartesian[0],
+				     cartesian[1],
+				     cartesian[2],
+				     azel[0],
+				     azel[1],
+				     1.0,
+				     anglesInDegrees);
+      } else if (nelem == 3) {
+	return AzElRadius2Cartesian (cartesian[0],
+				     cartesian[1],
+				     cartesian[2],
+				     azel[0],
+				     azel[1],
+				     azel[2],
+				     anglesInDegrees);
+      } else {
+	return false;
+      }
+    } else {
+    }
+  }
+  
   // ------------------------------------------------------- AzElHeight2Cartesian
 
   bool AzElHeight2Cartesian (double &x,
@@ -298,6 +334,39 @@ namespace CR { // Namespace CR -- begin
 				 anglesInDegrees);
   }
 #endif
+
+  // ------------------------------------------------------- AzElRadius2Cartesian
+
+  bool AzElRadius2Cartesian (double &x,
+			     double &y,
+			     double &z,
+			     double const &az,
+			     double const &el,
+			     double const &r,
+			     bool const &anglesInDegrees)
+  {
+    bool status (true);
+
+    try {
+      if (anglesInDegrees) {
+	return AzElRadius2Cartesian (x,
+				     y,
+				     z,
+				     deg2rad(az),
+				     deg2rad(el),
+				     r);
+      } else {
+	x = r*cos(el)*sin(az);
+	y = r*cos(el)*cos(az);
+	z = r*sin(el);
+      }
+    } catch (std::string message) {
+      std::cerr << "[AzElRadius2Cartesian]" << message << std::endl;
+      status = false;
+    }
+    
+    return status;
+  }
 
   // ============================================================================
   // 
