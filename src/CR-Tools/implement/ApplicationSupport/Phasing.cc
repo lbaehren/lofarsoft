@@ -21,7 +21,6 @@
 /* $Id */
 
 #include <ApplicationSupport/Phasing.h>
-#include <Math/VectorNorms.h>
 
 Double Phasing::PI_p = 3.1415926535897932384626433832795;
 
@@ -153,7 +152,9 @@ Double Phasing::geometricalDelay (const Vector<Double>& azel,
     nearField = True;
   }
 
-  return Phasing::geometricalDelay (azel,antennaPosition,nearField);
+  return Phasing::geometricalDelay (azel,
+				    antennaPosition,
+				    nearField);
 }
 
 // ------------------------------------------------------------- geometricalDelay

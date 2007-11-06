@@ -38,7 +38,7 @@ endif (HAVE_ROOT AND HAVE_FFTW3)
 ## -----------------------------------------------------------------------------
 ## Build "libcr"
 
-## Assemble list of source files
+## [1] Assemble list of source files
 
 foreach (cr_module ${cr_modules})
   ## list of source files for this module
@@ -49,6 +49,11 @@ endforeach (cr_module)
 if (CR_GLISH_SUPPORT AND HAVE_CASA)
   list (APPEND cr_sources templates.cc)
 endif (CR_GLISH_SUPPORT AND HAVE_CASA)
+
+if (NOT HAVE_PGPLOT)
+  list (REMOVE_ITEM cr_sources Display/PGPlotterCR.cc)
+  list (REMOVE_ITEM cr_sources Display/PGPlotterLocal.cc)
+endif (NOT HAVE_PGPLOT)
 
 ## Optional (pre-)compiler settings
 

@@ -26,6 +26,8 @@
 //#
 //# $Id: PGPlotterLocal.cc,v 19.6 2004/11/30 17:50:25 ddebonis Exp $
 
+#ifdef HAVE_PGPLOT
+
 #include <casa/BasicSL/String.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
@@ -825,3 +827,4 @@ void PGPlotterLocal::wedg(const String &side, Float disp, Float width,
 
 } //# NAMESPACE CASA - END
 
+#endif

@@ -18,6 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#ifdef HAVE_PGPLOT
+
 #include <iostream>
 #include <string>
 #include <Data/Data.h>
@@ -60,3 +62,5 @@ namespace CR { // Namespace CR -- begin
   }
   
 } // Namespace CR -- end
+
+#endif

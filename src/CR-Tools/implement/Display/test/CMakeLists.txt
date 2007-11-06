@@ -2,40 +2,41 @@
 ## $Id::                                                                       $
 ##------------------------------------------------------------------------------
 
-include_directories (
-  .
-  ..
-  ../..
-  )
-
 ## -----------------------------------------------------------------------------
-## Set up the list with test program sources
-
-set (tests
-  tSimplePlot
-  )
+## tPGPlotterCR
 
 if (HAVE_PGPLOT)
-  list (APPEND tests tPGPlotterCR)
+  ## compiler instructions
+  add_executable (tPGPlotterCR tPGPlotterCR.cc)
+  ## linker instructions
+  target_link_libraries (tPGPlotterCR cr ${PGPLOT_LIBRARIES} ${X11_LIBRARIES})
+  ## testing
+  add_test (tPGPlotterCR tPGPlotterCR)
+  ## installation
+  install (
+    TARGETS tPGPlotterCR
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    )
 endif (HAVE_PGPLOT)
 
 ## -----------------------------------------------------------------------------
-## Build the test programs
+## tSimplePlot
 
-foreach (src ${tests})
-  ## build executable
-  add_executable (${src} ${src}.cc)
-  target_link_libraries (${src} cr ${PGPLOT_LIBRARIES} ${X11_LIBRARIES})
+if (HAVE_PLPLOT)
+  ## compiler instructions
+  add_executable (tSimplePlot tSimplePlot.cc)
+  ## linker instructions
+  target_link_libraries (tSimplePlot cr ${PLPLOT_LIBRARIES} ${X11_LIBRARIES})
   ## testing
-  add_test (${src} ${src})
-endforeach (src)
+  add_test (tSimplePlot tSimplePlot)
+  ## installation
+  install (
+    TARGETS tSimplePlot
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    )
+endif (HAVE_PLPLOT)
 
-## -----------------------------------------------------------------------------
-## Installation
-
-install (
-  TARGETS ${tests}
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-)
