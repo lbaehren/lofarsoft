@@ -377,7 +377,7 @@ namespace CR { // Namespace CR -- begin
 
   Bool SimplePlot::quick2Dplot(String file, Matrix<Double> zvals, Double xmin, Double xmax, 
 			       Double ymin, Double ymax, String xlabel, String ylabel, String toplabel,
-			       Bool printingplot, int nLevels, int nClevels, int cCol){
+			       Bool printingplot, int nLevels, int nClevels, int cCol, int ColMapIndex){
     Bool status=True;
     try {
 #ifdef HAVE_PGPLOT
@@ -394,24 +394,9 @@ namespace CR { // Namespace CR -- begin
       int i,j;
       PLINT nx,ny;
       PLFLT **z, zmin, zmax, *level_edges;
-      PLFLT *pos,*r,*g,*b;
       PLcGrid  cgrid; //data for the pltr1 function
 
-//       //set the color-map
-//       //currently only default black-white is supported
-//       pos = new PLFLT[2];
-//       r = new PLFLT[2];
-//       g = new PLFLT[2];
-//       b = new PLFLT[2];
-//       pos[0] = 0.; pos[1] = 1.;
-//       r[0] = 0.; r[1] = 1.;
-//       g[0] = 0.; g[1] = 1.;
-//       b[0] = 0.; b[1] = 1.;
-//       plscmap1l( True, 2, pos, r, g, b, NULL);
-//       delete [] pos;
-//       delete [] r;
-//       delete [] g;
-//       delete [] b;
+      SetColorMapIndex(ColMapIndex);
 
       nx = zvals.ncolumn();
       ny = zvals.nrow();
@@ -487,7 +472,7 @@ namespace CR { // Namespace CR -- begin
       //define standard values
       PLFLT c01[2] = {0.,1.};
       PLFLT c10[2] = {1.,0.};
-      PLFLT c71[2] = {0.7,1.};
+      PLFLT c41[2] = {0.4,1.};
       PLFLT c00[2] = {0.,0.};
       PLFLT c051[3] = {0.,0.5,1.};
       PLFLT c010[3] = {0.,1.,0.};
@@ -511,7 +496,7 @@ namespace CR { // Namespace CR -- begin
       case 3:
 	npos = 2;
 	pos = c01;
-	r = c71;
+	r = c41;
 	g = c01;
 	b = c00;
 	break; 

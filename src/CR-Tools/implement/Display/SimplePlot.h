@@ -256,19 +256,6 @@ namespace CR { // Namespace CR -- begin
 		    Bool logy=False,
 		    Bool printingplot=False);
 
-
-
-   /*!
-      \brief Set the color map for the 2-dimensional plots to a predifined value
-      
-      \param ColMapIndex     - Color map index
-      
-      \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
-   */
-
-    Bool SetColorMapIndex(int ColMapIndex=1);
-
-
    /*!
       \brief Do a complete 2-dimensional plot with one call
       
@@ -285,6 +272,7 @@ namespace CR { // Namespace CR -- begin
       \param nLevels  - number of different (color) levels to use
       \param nCLevels - number of contour lines to plot (<tt>nCLevels<=0</tt> means no contours)
       \param cCol     - color index for the contour lines 
+      \param ColMapIndex - Index of the color map to use
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
 
@@ -296,7 +284,7 @@ namespace CR { // Namespace CR -- begin
     Bool quick2Dplot(String file, Matrix<Double> zvals, Double xmin, Double xmax, 
 		     Double ymin, Double ymax,	     
 		     String xlabel=String(), String ylabel=String(), String toplabel=String(),
-		     Bool printingplot=False, int nLevels=20, int nClevels=0, int cCol=2);
+		     Bool printingplot=False, int nLevels=20, int nClevels=0, int cCol=2, int ColMapIndex=1);
 
    /*!
       \brief Add contour lines to an existing 2d plot
@@ -336,6 +324,17 @@ namespace CR { // Namespace CR -- begin
     Bool addContourLines(Matrix<Double> zvals, Double xmin, Double xmax, Double ymin, Double ymax,
 			 Vector<double> CLevels, int cCol=2, int style=1);
 
+  protected:
+
+   /*!
+      \brief Set the color map for the 2-dimensional plots to a predifined value
+      
+      \param ColMapIndex     - Color map index
+      
+      \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
+   */
+
+    Bool SetColorMapIndex(int ColMapIndex=1);
 
   private:
         
