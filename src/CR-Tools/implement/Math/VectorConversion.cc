@@ -246,6 +246,25 @@ namespace CR { // Namespace CR -- begin
 	return false;
       }
     } else {
+      if (nelem == 2) {
+	return AzElHeight2Cartesian (cartesian[0],
+				     cartesian[1],
+				     cartesian[2],
+				     azel[0],
+				     azel[1],
+				     0.0,
+				     anglesInDegrees);
+      } else if (nelem == 3) {
+	return AzElHeight2Cartesian (cartesian[0],
+				     cartesian[1],
+				     cartesian[2],
+				     azel[0],
+				     azel[1],
+				     azel[2],
+				     anglesInDegrees);
+      } else {
+	return false;
+      }
     }
   }
   

@@ -639,13 +639,14 @@ int main ()
 {
   int nofFailedTests (0);
   
-  nofFailedTests += test_formula ();
+//   nofFailedTests += test_formula ();
+
   // Test for the constructor(s)
   nofFailedTests += test_GeometricalDelay ();
   // Test access to the internal parameters
-  nofFailedTests += test_skyPositions ();
+//   nofFailedTests += test_skyPositions ();
   // Test for the computation of the actual geometrical delay
-  nofFailedTests += test_delayComputation ();
+//   nofFailedTests += test_delayComputation ();
   
   return nofFailedTests;
 }
