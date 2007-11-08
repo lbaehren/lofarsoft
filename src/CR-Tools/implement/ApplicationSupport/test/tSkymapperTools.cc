@@ -26,6 +26,7 @@
 #include <images/Images/PagedImage.h>
 
 #include <ApplicationSupport/SkymapperTools.h>
+#include <Utilities/MConversions.h>
 
 /*!
   \file tSkymapperTools.cc
@@ -167,11 +168,11 @@ int test_coordinateSystem ()
     cout << " - projection : "
 	 << projection
 	 << "\t= "
-	 << SkymapperTools::ProjectionType (projection) << endl;
+	 << CR::ProjectionType (projection) << endl;
     cout << " - direction  : "
 	 << direction
 	 << "\t= "
-	 << SkymapperTools::MDirectionType (direction) << endl;
+	 << CR::MDirectionType (direction) << endl;
   } catch (AipsError x) {
     cerr << x.getMesg() << endl;
     nofFailedTests++;
