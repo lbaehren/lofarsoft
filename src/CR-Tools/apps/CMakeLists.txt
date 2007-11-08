@@ -51,13 +51,13 @@ endif (HAVE_POPT AND LAPACK_LIBRARIES)
 ## -------------------------------------------------------------------
 ## simStationBeam
 
-if (HAVE_CASA OR HAVE_CASACORE)
+if (HAVE_CASACORE)
   add_executable (simStationBeam simStationBeam.cc)
   ## linker instructions
   target_link_libraries (simStationBeam cr)
   ## installation instructions
   install (TARGETS simStationBeam RUNTIME DESTINATION bin)
-endif (HAVE_CASA OR HAVE_CASACORE)
+endif (HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
 ## reas2event

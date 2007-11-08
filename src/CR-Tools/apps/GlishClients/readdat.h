@@ -41,10 +41,10 @@
 #include <ApplicationSupport/Glish.h>
 #include <ApplicationSupport/GlishEvent.h>
 #include <ApplicationSupport/GlishRecord.h>
-#include <Data/DataCC.h>
+#include <ApplicationSupport/DataCC.h>
 #include <Utilities/StringTools.h>
 #include <Utilities/Masking.h>
-#include <Observation/ObservationMeta.h>
+#include <ApplicationSupport/ObservationMeta.h>
 
 #include <casa/namespace.h>
 

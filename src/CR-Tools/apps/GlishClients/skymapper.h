@@ -55,10 +55,10 @@
 #include <ApplicationSupport/ParameterFromRecord.h>
 #include <ApplicationSupport/Skymap.h>
 #include <ApplicationSupport/SkymapperTools.h>
-#include <Data/DataCC.h>
+#include <ApplicationSupport/DataCC.h>
 #include <IO/DataReader.h>
 #include <IO/LogfileName.h>
-#include <LopesLegacy/DataFrequency.h>
+#include <ApplicationSupport/DataFrequency.h>
 #include <Observation/ObservationData.h>
 
 using casa::String;

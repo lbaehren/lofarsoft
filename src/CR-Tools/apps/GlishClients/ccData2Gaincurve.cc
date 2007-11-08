@@ -51,9 +51,9 @@ using namespace std;
 
 #include <ApplicationSupport/Glish.h>
 #include <Data/ITSCorrelation.h>
-#include <LopesLegacy/DataFrequency.h>
+#include <ApplicationSupport/DataFrequency.h>
 #include <Math.h>
-#include <Observation/ObservationMeta.h>
+#include <ApplicationSupport/ObservationMeta.h>
 
 using casa::String;
 
