@@ -53,16 +53,24 @@ endif (ROOT_LIBRARIES AND PYTHON_LIBRARIES)
 ##     for plotting the results, so it only makes sense building the executable
 ##     if both are available on the system
 
-if (PGPLOT_LIBRARIES AND X11_LIBRARIES)
+if (HAVE_PLPLOT OR HAVE_PGPLOT)
   ## build instructions
   add_executable (tanalyseLOPESevent tanalyseLOPESevent.cc)
-  ## link instructions
-  target_link_libraries (tanalyseLOPESevent cr ${X11_LIBRARIES} ${PGPLOT_LIBRARIES})
+  ## [1] When using PLplot that is the only additional library we need to link against
+  if (HAVE_PLPLOT)
+    ## link instructions
+    target_link_libraries (tanalyseLOPESevent cr ${PLPLOT_LIBRARIES})
+  endif (HAVE_PLPLOT)
+  # [2] When using PGPlot, we also require the X11 libraries
+  if (PGPLOT_LIBRARIES AND X11_LIBRARIES)
+    ## link instructions
+    target_link_libraries (tanalyseLOPESevent cr ${X11_LIBRARIES} ${PGPLOT_LIBRARIES})
+  endif (PGPLOT_LIBRARIES AND X11_LIBRARIES)
   ## testing
   add_test (tanalyseLOPESevent tanalyseLOPESevent)
   ## installation instructions
   list (APPEND tests tanalyseLOPESevent)
-endif (PGPLOT_LIBRARIES AND X11_LIBRARIES)
+endif (HAVE_PLPLOT OR HAVE_PGPLOT)
 
 ## -----------------------------------------------------------------------------
 ## Installation
