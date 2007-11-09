@@ -15,6 +15,7 @@ set (tests
   tLopesEventIn
   tNDABeam
   tTIM40Header
+  ttbbctlIn
   )
 
 ## -----------------------------------------------------------------------------
