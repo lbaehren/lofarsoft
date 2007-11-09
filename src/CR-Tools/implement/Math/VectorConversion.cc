@@ -707,6 +707,166 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
+  // ----------------------------------------------------- Cylindrical2AzElHeight
+
+  bool Cylindrical2AzElHeight (double &az,
+			       double &el,
+			       double &h,
+			       double const &rho,
+			       double const &phi,
+			       double const &z,
+			       bool const &anglesInDegrees)
+  {
+    bool status (true);
+
+    try {
+      if (anglesInDegrees) {
+	az = phi - 90.0;
+	el = rad2deg(atan2(z,rho));
+	h  = z;
+      } else {
+	az = phi - deg2rad(90);
+	el = atan2 (z,rho);
+	h  = z;
+      }
+      az *= -1;
+    } catch (std::string message) {
+      std::cerr << "[Cylindrical2AzElHeight] " << message << std::endl;
+      status = false;
+    }
+    
+    return status;
+  }
+
+  // ----------------------------------------------------- Cylindrical2AzElHeight
+
+  bool Cylindrical2AzElHeight (std::vector<double> &azElHeight,
+			       std::vector<double> const &cylindrical,
+			       bool const &anglesInDegrees)
+  {
+    return Cylindrical2AzElHeight (azElHeight[0],
+				   azElHeight[1],
+				   azElHeight[2],
+				   cylindrical[0],
+				   cylindrical[1],
+				   cylindrical[2],
+				   anglesInDegrees);
+  }
+
+  // ----------------------------------------------------- Cylindrical2AzElHeight
+
+#ifdef HAVE_CASA
+  bool Cylindrical2AzElHeight (casa::Vector<double> &azElHeight,
+			       casa::Vector<double> const &cylindrical,
+			       bool const &anglesInDegrees)
+  {
+    return Cylindrical2AzElHeight (azElHeight(0),
+				   azElHeight(1),
+				   azElHeight(2),
+				   cylindrical(0),
+				   cylindrical(1),
+				   cylindrical(2),
+				   anglesInDegrees);
+  }
+#endif
+
+  // ----------------------------------------------------- Cylindrical2AzElHeight
+
+#ifdef HAVE_BLITZ
+  bool Cylindrical2AzElHeight (blitz::Array<double,1> &azElHeight,
+			       blitz::Array<double,1> const &cylindrical,
+			       bool const &anglesInDegrees)
+  {
+    return Cylindrical2AzElHeight (azElHeight(0),
+				   azElHeight(1),
+				   azElHeight(2),
+				   cylindrical(0),
+				   cylindrical(1),
+				   cylindrical(2),
+				   anglesInDegrees);
+  }
+#endif
+
+  // ----------------------------------------------------- Cylindrical2AzElRadius
+
+  bool Cylindrical2AzElRadius (double &az,
+			       double &el,
+			       double &r,
+			       double const &rho,
+			       double const &phi,
+			       double const &z,
+			       bool const &anglesInDegrees)
+  {
+    bool status (true);
+
+    try {
+      if (anglesInDegrees) {
+	r  = sqrt(rho*rho+z*z);
+	az = phi - 90.0;
+	el = rad2deg(acos(rho/r));
+      } else {
+	r  = sqrt(rho*rho+z*z);
+	az = phi - deg2rad(90.0);
+	el = acos(rho/r);
+      }
+      az *= -1;
+    } catch (std::string message) {
+      std::cerr << "[Cylindrical2AzElRadius] " << message << std::endl;
+      status = false;
+    }
+    
+    return status;
+  }
+
+  // ----------------------------------------------------- Cylindrical2AzElRadius
+
+  bool Cylindrical2AzElRadius (std::vector<double> &azElRadius,
+			       std::vector<double> const &cylindrical,
+			       bool const &anglesInDegrees)
+  {
+    return Cylindrical2AzElRadius (azElRadius[0],
+				   azElRadius[1],
+				   azElRadius[2],
+				   cylindrical[0],
+				   cylindrical[1],
+				   cylindrical[2],
+				   anglesInDegrees);
+  }
+
+  // ----------------------------------------------------- Cylindrical2AzElRadius
+
+#ifdef HAVE_CASA
+  bool Cylindrical2AzElRadius (casa::Vector<double> &azElRadius,
+			       casa::Vector<double> const &cylindrical,
+			       bool const &anglesInDegrees)
+  {
+    return Cylindrical2AzElRadius (azElRadius(0),
+				   azElRadius(1),
+				   azElRadius(2),
+				   cylindrical(0),
+				   cylindrical(1),
+				   cylindrical(2),
+				   anglesInDegrees);
+  }
+#endif
+
+  // ----------------------------------------------------- Cylindrical2AzElRadius
+
+#ifdef HAVE_BLITZ
+  bool Cylindrical2AzElRadius (blitz::Array<double,1> &azElRadius,
+			       blitz::Array<double,1> const &cylindrical,
+			       bool const &anglesInDegrees)
+  {
+    return Cylindrical2AzElRadius (azElRadius(0),
+				   azElRadius(1),
+				   azElRadius(2),
+				   cylindrical(0),
+				   cylindrical(1),
+				   cylindrical(2),
+				   anglesInDegrees);
+  }
+#endif
+
   // ------------------------------------------------------ Cylindrical2Cartesian
 
   bool Cylindrical2Cartesian (double &x,
@@ -814,6 +974,21 @@ namespace CR { // Namespace CR -- begin
     }
 
     return status;
+  }
+
+  // ------------------------------------------------------ Cylindrical2Spherical
+
+  bool Cylindrical2Spherical (std::vector<double> &spherical,
+			      std::vector<double> const &cylindrical,
+			      bool const &anglesInDegrees)
+  {
+    return Cylindrical2Spherical (spherical[0],
+				  spherical[1],
+				  spherical[2],
+				  cylindrical[0],
+				  cylindrical[1],
+				  cylindrical[2],
+				  anglesInDegrees);
   }
 
   // ============================================================================

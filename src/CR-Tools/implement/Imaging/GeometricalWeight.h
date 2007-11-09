@@ -42,6 +42,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
     \date 2007/01/15
 
     \test tGeometricalWeight.cc
+
+    \todo Change ordering of the array axes, to be aligned with the way handed over from
+    DataReader: [freq,antenna,sky], such that we can multiply full cubes directly
     
     <h3>Prerequisite</h3>
 

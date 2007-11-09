@@ -218,9 +218,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
     if (bufferWeights_p) {
       IPosition shape (3);
 
+      shape(2) = GeometricalPhase::nofFrequencies();
       shape(0) = GeometricalDelay::nofAntennaPositions();
       shape(1) = GeometricalDelay::nofSkyPositions();
-      shape(2) = GeometricalPhase::nofFrequencies();
 
       // adjust the shape of the array storing the weights
       weights_p.resize (shape);

@@ -66,7 +66,7 @@ namespace CR {  // Namespace CR -- begin
     The above described access scheme is illustrated in the figure below (note
     that \f$ N_{Stride} > 0 \f$):
     
-    +++ figure still missing +++
+    \image html DataIterator.png
   */
   
   class DataIterator {

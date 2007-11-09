@@ -103,6 +103,8 @@ namespace CR { // Namespace CR -- begin
     the case of spherical coordinates (and thereby reflection the relation of
     the cylindrical coordinates to polar coordinates in the plain).
 
+    \image html coordinates.png
+
     <h3>Conversion relations/functions</h3>
 
     <center>
@@ -274,6 +276,45 @@ namespace CR { // Namespace CR -- begin
 	  <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
           <td>AzElHeight <br> \f$ (Az,El,H) \f$</td>
 	  <td>CR::AzElHeight2AzElRadius</td>
+	  <td></td>
+	  <td></td>
+	</tr>
+	<tr>
+	  <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
+          <td>Cartesian <br> \f$ (x,y,z) \f$</td>
+	  <td>CR::Cartesian2AzElRadius</td>
+	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ R \end{array} \right]
+	    = \left[ \begin{array}{l}
+	    \mathrm{atan} \left( x/y \right) \\
+	    \mathrm{acos} \left( \sqrt{\frac{x^2+y^2}{x^2+y^2+z^2}} \right) \\
+	    \sqrt{x^2+y^2+z^2}
+	    \end{array} \right] \f$</td>
+	  <td>\f$ \left[ \begin{array}{l} x \\ y \\ z \end{array} \right]
+	    = \left[ \begin{array}{l}
+	    R \cos(El) \sin(Az) \\
+	    R \cos(El) \cos(Az) \\
+	    R \sin(El)
+	    \end{array} \right] \f$</td>
+	</tr>
+	<tr>
+	  <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
+          <td>Cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
+	  <td>CR::Cylindrical2AzElRadius</td>
+	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ R \end{array} \right]
+	    = \left[ \begin{array}{l}
+	    \mathrm{atan} \left( \frac{1}{\tan{\phi}} \right) \\
+	    \mathrm{acos} \left( \frac{\rho}{\sqrt{\rho^2+z^2}} \right) \\
+	    \sqrt{\rho^2+z^2}
+	    \end{array} \right] \f$</td>
+	  <td>\f$ \left[ \begin{array}{l} \rho \\ \phi \\ z \end{array} \right]
+	    = \left[ \begin{array}{l}
+	    \mathrm{atan} \left( \frac{1}{\tan{Az}} \right)
+	    \end{array} \right] \f$</td>
+	</tr>
+	<tr>
+	  <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
+          <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
+	  <td>CR::Spherical2AzElRadius</td>
 	  <td></td>
 	  <td></td>
 	</tr>
@@ -1122,6 +1163,102 @@ namespace CR { // Namespace CR -- begin
   bool Cylindrical2Spherical (blitz::Array<double,1> &spherical,
 			      blitz::Array<double,1> const &cylindrical,
 			      bool const &anglesInDegrees=false);
+#endif
+  
+  // ----------------------------------------------------------------------------
+  // Cylindrical (rho,phi,z) -> Azimuth-Elevation-Height (Az,El,H)
+
+  /*!
+    \brief Conversion from cylindrical to Azimuth-Elevation-Height coordinates
+
+    \retval az -- 
+    \retval el -- 
+    \retval h  -- 
+    \param rho -- \f$rho\f$-component of the vector in cylindrical coordinates
+    \param phi -- \f$phi\f$-component of the vector in cylindrical coordinates
+    \param z   -- \f$z\f$-component of the vector in cylindrical coordinates
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool Cylindrical2AzElHeight (double &az,
+			       double &el,
+			       double &h,
+			       double const &rho,
+			       double const &phi,
+			       double const &z,
+			       bool const &anglesInDegrees=false);
+  
+  /*!
+    \brief Conversion from cylindrical to Azimuth-Elevation-Height coordinates
+  */
+  bool Cylindrical2AzElHeight (std::vector<double> &azElHeight,
+			       std::vector<double> const &cylindrical,
+			       bool const &anglesInDegrees=false);
+  
+#ifdef HAVE_CASA
+  /*!
+    \brief Conversion from cylindrical to Azimuth-Elevation-Height coordinates
+  */
+  bool Cylindrical2AzElHeight (casa::Vector<double> &azElHeight,
+			       casa::Vector<double> const &cylindrical,
+			       bool const &anglesInDegrees=false);
+#endif
+  
+#ifdef HAVE_BLITZ
+  /*!
+    \brief Conversion from cylindrical to Azimuth-Elevation-Height coordinates
+  */
+  bool Cylindrical2AzElHeight (blitz::Array<double,1> &azElHeight,
+			       blitz::Array<double,1> const &cylindrical,
+			       bool const &anglesInDegrees=false);
+#endif
+  
+  // ----------------------------------------------------------------------------
+  // Cylindrical (rho,phi,z) -> Azimuth-Elevation-Radius (Az,El,R)
+
+  /*!
+    \brief Conversion from cylindrical to Azimuth-Elevation-Radius coordinates
+
+    \retval az -- Azimuth component of the vector
+    \retval el -- Elevation component of the vector
+    \retval r  -- 
+    \param rho -- \f$rho\f$-component of the vector in cylindrical coordinates
+    \param phi -- \f$phi\f$-component of the vector in cylindrical coordinates
+    \param z   -- \f$z\f$-component of the vector in cylindrical coordinates
+    
+    \return status -- Set to <i>false</i> if an error was encountered.
+  */
+  bool Cylindrical2AzElRadius (double &az,
+			       double &el,
+			       double &r,
+			       double const &rho,
+			       double const &phi,
+			       double const &z,
+			       bool const &anglesInDegrees=false);
+  
+  /*!
+    \brief Conversion from cylindrical to Azimuth-Elevation-Radius coordinates
+  */
+  bool Cylindrical2AzElRadius (std::vector<double> &azElRadius,
+			       std::vector<double> const &cylindrical,
+			       bool const &anglesInDegrees=false);
+  
+#ifdef HAVE_CASA
+  /*!
+    \brief Conversion from cylindrical to Azimuth-Elevation-Radius coordinates
+  */
+  bool Cylindrical2AzElRadius (casa::Vector<double> &azElRadius,
+			       casa::Vector<double> const &cylindrical,
+			       bool const &anglesInDegrees=false);
+#endif
+  
+#ifdef HAVE_BLITZ
+  /*!
+    \brief Conversion from cylindrical to Azimuth-Elevation-Radius coordinates
+  */
+  bool Cylindrical2AzElRadius (blitz::Array<double,1> &azElRadius,
+			       blitz::Array<double,1> const &cylindrical,
+			       bool const &anglesInDegrees=false);
 #endif
   
   // ============================================================================

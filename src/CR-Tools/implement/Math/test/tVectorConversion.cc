@@ -414,294 +414,148 @@ int test_Cartesian2Other ()
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test conversion from cartesian to cylindrical coordinates
+  \brief Test conversion from cylindrical to other coordinates
+
+  This will run a number of very basic tests for the following routines:
+  - CR::Cylindrical2Cartesian
+  - CR::Cylindrical2Spherical
+  - CR::Cylindrical2AzElHeight
+  - CR::Cylindrical2AzElRadius
 
   \return nofFailedTests -- Number of failed tests within this function
 */
-int test_Cartesian2Cylindrical ()
+int test_Cylindrical2Other ()
 {
-  std::cout << "\n[test_Cartesian2Cylindrical]\n" << std::endl;
+  std::cout << "\n[test_Cylindrical2Other]\n" << std::endl;
 
   int nofFailedTests (0);
   bool status (true);
+  vector<double> cylindrical (3);
+  vector<double> other (3);
 
-  std::cout << "-- Passing of atomic parameters ..." << std::endl;
+  cylindrical[0] = 1.0;
+  cylindrical[2] = 0.0;
+
+  std::cout << "[1] Cylindrical (rho,phi,h) -> Cartesian (x,y,z)" << std::endl;
   try {
-    double x (1.0);
-    double y (1.0);
-    double z (1.0);
-    double cyl_rho;
-    double cyl_phi;
-    double cyl_z;
-    // angles in radian
-    status = CR::Cartesian2Cylindrical (cyl_rho,
-					cyl_phi,
-					cyl_z,
-					x,
-					y,
-					z,
-					false);
-    if (status) {
-      show_conversion (x,
-		       y,
-		       z,
-		       cyl_rho,
-		       cyl_phi,
-		       cyl_z);
-    }
-    // angles in degrees
-    status = CR::Cartesian2Cylindrical (cyl_rho,
-					cyl_phi,
-					cyl_z,
-					x,
-					y,
-					z,
+    cylindrical[1] = 0.0;
+    status = CR::Cylindrical2Cartesian (other,
+					cylindrical,
 					true);
-    if (status) {
-      show_conversion (x,
-		       y,
-		       z,
-		       cyl_rho,
-		       cyl_phi,
-		       cyl_z);
-    }
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
+    show_conversion (cylindrical,other);
 
-  std::cout << "-- Passing of STDL vectors ..." << std::endl;
-  try {
-    std::vector<double> cartesian(3);
-    std::vector<double> cylindrical (3);
+    cylindrical[1] = 90.0;
+    status = CR::Cylindrical2Cartesian (other,
+				      cylindrical,
+				      true);
+    show_conversion (cylindrical,other);
+
+    cylindrical[1] = 180;
+    status = CR::Cylindrical2Cartesian (other,
+				      cylindrical,
+				      true);
+    show_conversion (cylindrical,other);
     //
-    cartesian[0] = 1.0;
-    cartesian[1] = 1.0;
-    cartesian[2] = 1.0;
-    // angles in radian
-    status = CR::Cartesian2Cylindrical (cylindrical,
-					cartesian,
-					false);
-    if (status) {
-      show_conversion (cartesian,
-		       cylindrical);
-    }
-    // angles in degrees
-    status = CR::Cartesian2Cylindrical (cylindrical,
-					cartesian,
+    cylindrical[1] = 270;
+    status = CR::Cylindrical2Cartesian (other,
+					cylindrical,
 					true);
-    if (status) {
-      show_conversion (cartesian,
-		       cylindrical);
-    }
+    show_conversion (cylindrical,other);
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
 
-#ifdef HAVE_CASA
-  std::cout << "-- Passing of CASA vectors ..." << std::endl;
+  std::cout << "[2] Cylindrical (rho,phi,h) -> Spherical (r,phi,theta)" << std::endl;
   try {
-    casa::Vector<double> cartesian(3);
-    casa::Vector<double> cylindrical (3);
-    //
-    cartesian = 1.0;
-    // angles in radian
-    status = CR::Cartesian2Cylindrical (cylindrical,
-					cartesian,
-					false);
-    if (status) {
-      std::cout << cartesian << "  ->  " << cylindrical << std::endl;
-    }
-    // angles in degrees
-    status = CR::Cartesian2Cylindrical (cylindrical,
-					cartesian,
+    cylindrical[1] = 0.0;
+    status = CR::Cylindrical2Spherical (other,
+					cylindrical,
 					true);
-    if (status) {
-      std::cout << cartesian << "  ->  " << cylindrical << std::endl;
-    }
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-#endif
+    show_conversion (cylindrical,other);
 
-#ifdef HAVE_BLITZ
-  std::cout << "-- Passing of Blitz++ vectors ..." << std::endl;
-  try {
-    blitz::Array<double,1> cartesian(3);
-    blitz::Array<double,1> cylindrical (3);
+    cylindrical[1] = 90.0;
+    status = CR::Cylindrical2Spherical (other,
+				      cylindrical,
+				      true);
+    show_conversion (cylindrical,other);
+
+    cylindrical[1] = 180.0;
+    status = CR::Cylindrical2Spherical (other,
+				      cylindrical,
+				      true);
+    show_conversion (cylindrical,other);
     //
-    cartesian = 1.0,1.0,1.0;
-    // angles in radian
-    status = CR::Cartesian2Cylindrical (cylindrical,
-					cartesian,
-					false);
-    if (status) {
-      show_conversion (cartesian,
-		       cylindrical);
-    }
-    // angles in degrees
-    status = CR::Cartesian2Cylindrical (cylindrical,
-					cartesian,
+    cylindrical[1] = 270.0;
+    status = CR::Cylindrical2Spherical (other,
+					cylindrical,
 					true);
-    if (status) {
-      show_conversion (cartesian,
-		       cylindrical);
-    }
+    show_conversion (cylindrical,other);
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
-#endif
 
-  return nofFailedTests;
-}
-
-// -----------------------------------------------------------------------------
-
-/*!
-  \brief Test conversion from cartesian to spherical coordinates
-
-  \return nofFailedTests -- Number of failed tests within this function
-*/
-int test_Cartesian2Spherical ()
-{
-  std::cout << "\n[test_Cartesian2Spherical]\n" << std::endl;
-
-  int nofFailedTests (0);
-  bool status (true);
-
-  std::cout << "-- Passing of atomic parameters ..." << std::endl;
+  std::cout << "[3] Cylindrical (rho,phi,h) -> Az-El-Height" << std::endl;
   try {
-    double x (1.0);
-    double y (1.0);
-    double z (1.0);
-    double r;
-    double phi;
-    double theta;
-    // angles in radian
-    status = CR::Cartesian2Spherical (r,
-				      phi,
-				      theta,
-				      x,
-				      y,
-				      z,
-				      false);
-    if (status) {
-      show_conversion (x,
-		       y,
-		       z,
-		       r,
-		       phi,
-		       theta);
-    }
-    // angles in degrees
-    status = CR::Cartesian2Spherical (r,
-				      phi,
-				      theta,
-				      x,
-				      y,
-				      z,
+    cylindrical[1] = 0.0;
+    status = CR::Cylindrical2AzElHeight (other,
+					cylindrical,
+					true);
+    show_conversion (cylindrical,other);
+
+    cylindrical[1] = 90.0;
+    status = CR::Cylindrical2AzElHeight (other,
+				      cylindrical,
 				      true);
-    if (status) {
-      show_conversion (x,
-		       y,
-		       z,
-		       r,
-		       phi,
-		       theta);
-    }
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-  
-  std::cout << "-- Passing of STDL vectors ..." << std::endl;
-  try {
-    std::vector<double> cartesian(3);
-    std::vector<double> spherical (3);
+    show_conversion (cylindrical,other);
+
+    cylindrical[1] = 180;
+    status = CR::Cylindrical2AzElHeight (other,
+				      cylindrical,
+				      true);
+    show_conversion (cylindrical,other);
     //
-    cartesian[0] = 1.0;
-    cartesian[1] = 1.0;
-    cartesian[2] = 1.0;
-    // angles in radian
-    status = CR::Cartesian2Spherical (spherical,
-				      cartesian,
-				      false);
-    if (status) {
-      show_conversion (cartesian,
-		       spherical);
-    }
-    // angles in degrees
-    status = CR::Cartesian2Spherical (spherical,
-				      cartesian,
-				      true);
-    if (status) {
-      show_conversion (cartesian,
-		       spherical);
-    }
+    cylindrical[1] = 270;
+    status = CR::Cylindrical2AzElHeight (other,
+					cylindrical,
+					true);
+    show_conversion (cylindrical,other);
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
-  
-#ifdef HAVE_CASA
-  std::cout << "-- Passing of CASA vectors ..." << std::endl;
+
+  std::cout << "[4] Cylindrical (rho,phi,h) -> Az-El-Radius" << std::endl;
   try {
-    casa::Vector<double> cartesian(3);
-    casa::Vector<double> spherical (3);
-    //
-    cartesian = 1.0;
-    // angles in radian
-    status = CR::Cartesian2Spherical (spherical,
-				      cartesian,
-				      false);
-    if (status) {
-      std::cout << cartesian << "  ->  " << spherical << std::endl;
-    }
-    // angles in degrees
-    status = CR::Cartesian2Spherical (spherical,
-				      cartesian,
+    cylindrical[1] = 0.0;
+    status = CR::Cylindrical2AzElRadius (other,
+					cylindrical,
+					true);
+    show_conversion (cylindrical,other);
+
+    cylindrical[1] = 90.0;
+    status = CR::Cylindrical2AzElRadius (other,
+				      cylindrical,
 				      true);
-    if (status) {
-      std::cout << cartesian << "  ->  " << spherical << std::endl;
-    }
+    show_conversion (cylindrical,other);
+
+    cylindrical[1] = 180;
+    status = CR::Cylindrical2AzElRadius (other,
+				      cylindrical,
+				      true);
+    show_conversion (cylindrical,other);
+    //
+    cylindrical[1] = 270;
+    status = CR::Cylindrical2AzElRadius (other,
+					cylindrical,
+					true);
+    show_conversion (cylindrical,other);
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
-#endif
-  
-#ifdef HAVE_BLITZ
-  std::cout << "-- Passing of Blitz++ vectors ..." << std::endl;
-  try {
-    blitz::Array<double,1> cartesian(3);
-    blitz::Array<double,1> spherical (3);
-    //
-    cartesian = 1.0,1.0,1.0;
-    // angles in radian
-    status = CR::Cartesian2Spherical (spherical,
-				      cartesian,
-				      false);
-    if (status) {
-      show_conversion (cartesian,
-		       spherical);
-    }
-    // angles in degrees
-    status = CR::Cartesian2Spherical (spherical,
-				      cartesian,
-				      true);
-    if (status) {
-      show_conversion (cartesian,
-		       spherical);
-    }
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-#endif
-  
+
   return nofFailedTests;
 }
 
@@ -809,12 +663,10 @@ int main ()
   nofFailedTests += test_angleConversion ();
 
   nofFailedTests += test_Cartesian2Other ();
+  nofFailedTests += test_Cylindrical2Other ();
 
   nofFailedTests += test_vectorConversion ();
 
-  nofFailedTests += test_Cartesian2Cylindrical ();
-  nofFailedTests += test_Cartesian2Spherical ();
-  
   nofFailedTests += test_Cylindrical2Cartesian ();
   nofFailedTests += test_Cylindrical2Spherical ();
   

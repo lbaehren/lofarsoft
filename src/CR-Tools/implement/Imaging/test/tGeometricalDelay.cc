@@ -310,10 +310,6 @@ int test_GeometricalDelay ()
   casa::Matrix<double> antPositions;
   casa::Matrix<double> skyPositions;
 
-  get_positions (skyPositions,
-		 antPositions,
-		 true);
-
   std::cout << "[1] Testing default constructor ..." << endl;
   try {
     GeometricalDelay delay;
@@ -323,8 +319,13 @@ int test_GeometricalDelay ()
     nofFailedTests++;
   }
   
-  std::cout << "[2] Testing argumented constructor ..." << endl;
+  std::cout << "[2] Testing simplest argumented constructor ..." << endl;
   try {
+    // retrieve arrays with the positions
+    get_positions (skyPositions,
+		   antPositions,
+		   true);
+    // construct new object
     GeometricalDelay delay (antPositions,
 			    skyPositions);
     delay.summary();
@@ -333,8 +334,40 @@ int test_GeometricalDelay ()
     nofFailedTests++;
   }
   
-  std::cout << "[3] Testing copy constructor ..." << endl;
+  std::cout << "[3] Testing argumented constructor specifying coordinates ..." << endl;
   try {
+    // retrieve arrays with the positions
+    get_positions (skyPositions,
+		   antPositions,
+		   true);
+    std::cout << "-- Antenna positions in cartesian coordinates ..." << std::endl;
+    GeometricalDelay delay1 (antPositions,
+			     CR::Cartesian,
+			     skyPositions,
+			     CR::Cartesian);
+    std::cout << delay1.antennaPositions() << std::endl;
+    std::cout << "-- Antenna positions in cylindrical coordinates ..." << std::endl;
+    antPositions = 0.0;
+    antPositions.column(0) = 100.0;
+    antPositions(1,1) = CR::deg2rad(90);
+    antPositions(2,1) = CR::deg2rad(180);
+    antPositions(3,1) = CR::deg2rad(270);
+    GeometricalDelay delay2 (antPositions,
+			     CR::Cylindrical,
+			     skyPositions,
+			     CR::Cartesian);
+    std::cout << delay2.antennaPositions() << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[4] Testing copy constructor ..." << endl;
+  try {
+    get_positions (skyPositions,
+		   antPositions,
+		   true);
+    // construct new object
     GeometricalDelay delay (antPositions,
 			    skyPositions);
     delay.summary();
