@@ -85,6 +85,16 @@ namespace CR { // Namespace CR -- begin
     RFIMitigationPlugin rfiM_p;
 
     /*!
+      \brief Do the phase calibration (default=True)
+    */
+    Bool DoPhaseCal_p;
+
+    /*!
+      \brief Do the RFI mitigation (default=True)
+    */
+    Bool DoRFImitigation_p;
+
+    /*!
       \brief Store the data once it is calculated.
     */
     Matrix<DComplex> CachedData_p;
@@ -127,6 +137,30 @@ namespace CR { // Namespace CR -- begin
     */
     std::string className () const {
       return "SecondStagePipeline";
+    }
+
+    /*!
+      \brief Enable/disable doing the phase calibration
+
+      \param DoPhaseCal - do the phase calibration?
+    */
+    inline void doPhaseCal(Bool const &DoPhaseCal=True) {
+      DoPhaseCal_p = DoPhaseCal;
+      if (verbose && !DoPhaseCal){
+	cout << "SecondStagePipeline:: switched off phase calibration." << endl;
+      };
+    }
+
+    /*!
+      \brief Enable/disable doing the RFI mitigation
+
+      \param DoPhaseCal - do the phase calibration?
+    */
+    inline void doRFImitigation(Bool const &DoRFImitigation=True) {
+      DoRFImitigation_p = DoRFImitigation;
+      if (verbose && !DoRFImitigation){
+	cout << "SecondStagePipeline:: switched off RFI mitigation." << endl;
+      };
     }
     
     // ------------------------------------------------------------------ Methods

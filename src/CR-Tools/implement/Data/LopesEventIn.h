@@ -78,7 +78,7 @@ namespace CR { // Namespace CR -- begin
     
     // ------------------------------------------------------------- Data
     
-    enum EvType {
+    enum EvClass {
       //! Unspecified event
       Unspecified,
       //! Cosmic ray

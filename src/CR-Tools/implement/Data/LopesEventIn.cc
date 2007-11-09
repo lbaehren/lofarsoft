@@ -217,6 +217,7 @@ namespace CR { // Namespace CR -- begin
       header_p.define("presync",headerpoint_p->presync);
       header_p.define("TL",(Int)headerpoint_p->TL);
       header_p.define("LTL",(Int)headerpoint_p->LTL);
+      header_p.define("EventClass",(Int)headerpoint_p->evclass);
     } catch (AipsError x) {
       cerr << "LOPESEventIn:generateHeaderRecord: " << x.getMesg() << endl;
       return False;

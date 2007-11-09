@@ -183,6 +183,7 @@ namespace CR { // Namespace CR -- begin
       \param verbose - produce verbose output on the commandline.
       \param simplexFit - fir the direction with a simple simplex fit
       \param ExtraDelay - additional delay to shift the data in time.
+      \param doTVcal - perform the phase calibration on the TV transmitter (1: yes, 0: no, -1: use default)
 
       \return Record with the results.
     */
@@ -193,12 +194,13 @@ namespace CR { // Namespace CR -- begin
 			Double XC, 
 			Double YC,
 			Bool RotatePos,
-			String PlotPrefix,
-			Bool generatePlots,
+			String PlotPrefix=String(),
+			Bool generatePlots=False,
 			Vector<Int> FlaggedAntIDs=Vector<Int>(),
 			Bool verbose=False,
 			Bool simplexFit=False,
-			Double ExtraDelay=0.);
+			Double ExtraDelay=0.,
+			int doTVcal=-1);
 
     /*
       \brief Fit the position with a simplex fit

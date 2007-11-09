@@ -112,7 +112,8 @@ namespace CR { // Namespace CR -- begin
 					 Vector<Int> FlaggedAntIDs, 
 					 Bool verbose,
 					 Bool simplexFit,
-					 Double ExtraDelay){
+					 Double ExtraDelay,
+					 int doTVcal){
     Record erg;
     try {
       Int nsamples;
@@ -131,6 +132,28 @@ namespace CR { // Namespace CR -- begin
 	return Record();
       };
       
+      //  Enable/disable doing the phase calibration as requested
+      switch (doTVcal){
+      case 0:
+	pipeline_p->doPhaseCal(False);
+	break;
+      case 1:
+	pipeline_p->doPhaseCal(True);
+	break;
+      default:
+	if ( lev_p->header().isDefined("EventClass") &&
+	     lev_p->header().asInt("EventClass") == LopesEventIn::Simulation ){
+	  if (verbose){
+	    cout << "Simulation event: ";
+	  };
+	  pipeline_p->doPhaseCal(False);
+	} else {
+	  pipeline_p->doPhaseCal(True);
+	};
+	break;
+      };
+
+
       // Generate the antenna selection
       Vector <Bool> AntennaSelection;
       Int i,j,id,nants,nselants, nflagged=FlaggedAntIDs.nelements();

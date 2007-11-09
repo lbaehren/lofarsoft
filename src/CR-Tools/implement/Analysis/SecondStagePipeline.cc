@@ -40,6 +40,8 @@ namespace CR { // Namespace CR -- begin
   };
   
   void SecondStagePipeline::init(){
+    DoRFImitigation_p = True;
+    DoPhaseCal_p = True;
     cachedDate_p = 0;
 
     // Initialize standard values of the PhaseCalibration Plugin
@@ -94,19 +96,24 @@ namespace CR { // Namespace CR -- begin
   
   Bool SecondStagePipeline::updateCache(DataReader *dr){
     try {
-      AntennaMask_p.resize(0);
+      AntennaMask_p.resize(dr->nofAntennas());
+      AntennaMask_p = True;
       Matrix<DComplex> data;
       data = dr->calfft();
 
-      InitPhaseCal(dr);
-      // Do the phase calibration
-      pCal_p.calcWeights(dr->fft());
-      pCal_p.apply(data,False);
-      pCal_p.parameters().get("AntennaMask",AntennaMask_p);
+      if (DoPhaseCal_p){
+	InitPhaseCal(dr);
+	// Do the phase calibration
+	pCal_p.calcWeights(dr->fft());
+	pCal_p.apply(data,False);
+	pCal_p.parameters().get("AntennaMask",AntennaMask_p);
+      };
 
-      rfiM_p.parameters().define("dataBlockSize",(Int)dr->blocksize());
-      // Do the RFI mitigation
-      rfiM_p.apply(data,True);
+      if (DoRFImitigation_p) {
+	rfiM_p.parameters().define("dataBlockSize",(Int)dr->blocksize());
+	// Do the RFI mitigation
+	rfiM_p.apply(data,True);
+      };
 
       CachedData_p.reference(data);
     } catch (AipsError x) {
