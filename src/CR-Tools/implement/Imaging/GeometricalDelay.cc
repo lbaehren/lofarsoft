@@ -483,6 +483,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 	 already, we can simply pass them along; otherwise we need to insert
 	 a coordinate conversion step before storing the values. */
       if (antCoordType == CR::Cartesian) {
+	std::cout << "-- Coordinate system is cartesian." << std::endl;
 	return setAntennaPositions (antPositions,
 				    bufferDelays);
       } else {
@@ -604,8 +605,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
        already, we can simply pass them along; otherwise we need to insert
        a coordinate conversion step before storing the values. */
     if (skyCoordType == CR::Cartesian) {
-      return setAntennaPositions (skyPositions,
-				  bufferDelays);
+      return setSkyPositions (skyPositions,
+			      bufferDelays);
     } else {
       // convert sky positions to cartesian coordinates first
       Matrix<double> skyPositionsCartesian (shape);
@@ -621,8 +622,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
 				    anglesInDegrees);
       }
       // pass on the adjusted antenna positions
-      return setAntennaPositions (skyPositionsCartesian,
-				  bufferDelays);
+      return setSkyPositions (skyPositionsCartesian,
+			      bufferDelays);
     }
     
     return status;

@@ -37,6 +37,7 @@ using blitz::Range;
 
 #include <Imaging/GeometricalDelay.h>
 
+using std::cout;
 using std::endl;
 using CR::GeometricalDelay;
 using CR::L2Norm;
@@ -165,7 +166,7 @@ void get_positions (blitz::Array<double,2> &skyPositions,
 #ifdef HAVE_CASA
 int test_formula ()
 {
-  std::cout << "\n[test_formula] (CASA arrays)\n" << endl;
+  cout << "\n[test_formula] (CASA arrays)\n" << endl;
   
   int nofFailedTests (0);
   
@@ -179,7 +180,7 @@ int test_formula ()
   /*!
     Standard version for the computation of the delay
    */
-  std::cout << "[1] Far-field geometry" << endl;
+  cout << "[1] Far-field geometry" << endl;
   try {
     double scalarProduct (.0);
 
@@ -188,7 +189,7 @@ int test_formula ()
     }
     delay = scalarProduct/lightspeed;
     
-    std::cout << "delay(FF)     = " << delay         << endl;
+    cout << "delay(FF)     = " << delay         << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -200,7 +201,7 @@ int test_formula ()
 #ifdef HAVE_BLITZ
 int test_formula ()
 {
-  std::cout << "\n[test_formula] (Blitz++ arrays)\n" << endl;
+  cout << "\n[test_formula] (Blitz++ arrays)\n" << endl;
 
   int nofFailedTests (0);
 
@@ -212,13 +213,13 @@ int test_formula ()
   antPositions = -100.0, 0.0, 0.0, 100.0, 0.0, 0.0;
   skyPositions = 100.0, 100.0, 100.0;
 
-  std::cout << "sky positions = " << skyPositions  << endl;
-  std::cout << "ant positions = " << antPositions  << endl;
+  cout << "sky positions = " << skyPositions  << endl;
+  cout << "ant positions = " << antPositions  << endl;
 
   /*!
     Standard version for the computation of the delay
    */
-  std::cout << "[1] Far-field geometry" << endl;
+  cout << "[1] Far-field geometry" << endl;
   try {
     double scalarProduct (.0);
 
@@ -227,7 +228,7 @@ int test_formula ()
     }
     delay = scalarProduct/lightspeed;
     
-    std::cout << "delay(FF)     = " << delay         << endl;
+    cout << "delay(FF)     = " << delay         << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -236,7 +237,7 @@ int test_formula ()
   /*!
     Computation of the delay based on the full 3-dim geometry
   */
-  std::cout << "\n[2] Compute delay for full geometry\n" << endl;
+  cout << "\n[2] Compute delay for full geometry\n" << endl;
   try {
     Array<double,1> diff0 (nofCoordinates);
     Array<double,1> diff1 (nofCoordinates);
@@ -247,7 +248,7 @@ int test_formula ()
     }
     delay = (L2Norm(diff1)-L2Norm(diff0))/lightspeed;
     
-    std::cout << "delay(NF)     = " << delay         << endl;
+    cout << "delay(NF)     = " << delay         << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -256,7 +257,7 @@ int test_formula ()
   /*
     Variation of the source position
   */
-  std::cout << "\n[3] Variation of the source position\n" << endl;
+  cout << "\n[3] Variation of the source position\n" << endl;
   try {
     double zmin (100.0);
     double zmax (1000.0);
@@ -275,7 +276,7 @@ int test_formula ()
       }
       delay = (L2Norm(diff1)-L2Norm(diff0))/lightspeed;
       // dispay the result
-      std::cout << "\t" << z << "\t" << delay << endl;
+      cout << "\t" << z << "\t" << delay << endl;
     }
   } catch (std::string message) {
     std::cerr << message << endl;
@@ -297,13 +298,13 @@ int test_formula ()
 #ifdef HAVE_CASA
 int test_GeometricalDelay ()
 {
-  std::cout << "\n[test_GeometricalDelay] (CASA arrays)\n" << endl;
+  cout << "\n[test_GeometricalDelay] (CASA arrays)\n" << endl;
 
   int nofFailedTests (0);
   casa::Matrix<double> antPositions;
   casa::Matrix<double> skyPositions;
 
-  std::cout << "[1] Testing default constructor ..." << endl;
+  cout << "[1] Testing default constructor ..." << endl;
   try {
     GeometricalDelay delay;
     delay.summary();
@@ -312,7 +313,7 @@ int test_GeometricalDelay ()
     nofFailedTests++;
   }
   
-  std::cout << "[2] Testing simplest argumented constructor ..." << endl;
+  cout << "[2] Testing simplest argumented constructor ..." << endl;
   try {
     // retrieve arrays with the positions
     get_positions (skyPositions,
@@ -327,18 +328,18 @@ int test_GeometricalDelay ()
     nofFailedTests++;
   }
   
-  std::cout << "[3] Testing argumented constructor specifying coordinates ..." << endl;
+  cout << "[3] Testing argumented constructor specifying coordinates ..." << endl;
   try {
     // retrieve arrays with the positions
     get_positions (skyPositions,
 		   antPositions,
 		   true);
-    std::cout << "-- Antenna positions in cartesian coordinates ..." << std::endl;
+    cout << "-- Antenna positions in cartesian coordinates ..." << std::endl;
     GeometricalDelay delay1 (antPositions,
 			     CR::Cartesian,
 			     skyPositions,
 			     CR::Cartesian);
-    std::cout << "-- Antenna positions in cylindrical coordinates ..." << std::endl;
+    cout << "-- Antenna positions in cylindrical coordinates ..." << std::endl;
     antPositions = 0.0;
     antPositions.column(0) = 100.0;
     antPositions(1,1) = CR::deg2rad(90);
@@ -348,7 +349,7 @@ int test_GeometricalDelay ()
 			     CR::Cylindrical,
 			     skyPositions,
 			     CR::Cartesian);
-    std::cout << "-- Antenna positions in spherical coordinates ..." << std::endl;
+    cout << "-- Antenna positions in spherical coordinates ..." << std::endl;
     antPositions = 0.0;
     antPositions.column(0) = 100.0;
     antPositions(1,1) = CR::deg2rad(90);
@@ -364,7 +365,7 @@ int test_GeometricalDelay ()
     nofFailedTests++;
   }
   
-  std::cout << "[4] Testing fully argumented constructor ..." << endl;
+  cout << "[4] Testing fully argumented constructor ..." << endl;
   try {
     bool bufferDelays (false);
     bool antennaIndexFirst (false);
@@ -386,7 +387,7 @@ int test_GeometricalDelay ()
     nofFailedTests++;
   }
 
-  std::cout << "[5] Testing copy constructor ..." << endl;
+  cout << "[5] Testing copy constructor ..." << endl;
   try {
     get_positions (skyPositions,
 		   antPositions,
@@ -409,7 +410,7 @@ int test_GeometricalDelay ()
 #ifdef HAVE_BLITZ
 int test_GeometricalDelay ()
 {
-  std::cout << "\n[test_GeometricalDelay] (Blitz++ arrays)\n" << endl;
+  cout << "\n[test_GeometricalDelay] (Blitz++ arrays)\n" << endl;
 
   int nofFailedTests (0);
   uint nofCoordinates (3);
@@ -419,7 +420,7 @@ int test_GeometricalDelay ()
   antPositions = -100.0, 0.0, 0.0, 100.0, 0.0, 0.0;
   skyPositions = 100.0, 0.0, 0.0, 0.0, 100.0, 0.0, 0.0, 0.0, 100.0;
   
-  std::cout << "[1] Testing default constructor ..." << endl;
+  cout << "[1] Testing default constructor ..." << endl;
   try {
     GeometricalDelay delay;
     delay.summary();
@@ -428,7 +429,7 @@ int test_GeometricalDelay ()
     nofFailedTests++;
   }
   
-  std::cout << "[2] Testing argumented constructor ..." << endl;
+  cout << "[2] Testing argumented constructor ..." << endl;
   try {
     GeometricalDelay delay (antPositions,
 			    skyPositions);
@@ -438,7 +439,7 @@ int test_GeometricalDelay ()
     nofFailedTests++;
   }
   
-  std::cout << "[3] Testing copy constructor ..." << endl;
+  cout << "[3] Testing copy constructor ..." << endl;
   try {
     GeometricalDelay delay (antPositions,
 			    skyPositions);
@@ -465,10 +466,11 @@ int test_GeometricalDelay ()
 */
 int test_antennaPositions ()
 {
-  std::cout << "\n[test_antennaPositions]\n" << endl;
+  cout << "\n[test_antennaPositions]\n" << endl;
   
   int nofFailedTests (0);
   bool status (true);
+  bool antennaIndexFirst (true);
   bool bufferDelays (false);
   uint nofAntennas (9);
 
@@ -476,9 +478,10 @@ int test_antennaPositions ()
   
   CR::GeometricalDelay delay;
 
-  std::cout << "[1] Setting antenna positions with cartesian coordinates " << endl;
+  cout << "[1] Setting antenna positions with cartesian coordinates " << endl;
   try {
     Matrix<double> pos (nofAntennas,3,0.0);
+    // set up positions
     pos(0,0) = -100;  pos(0,1) = 100;
     pos(1,0) = 0;     pos(1,1) = 100;
     pos(2,0) = 100;   pos(2,1) = 100;
@@ -500,8 +503,28 @@ int test_antennaPositions ()
     nofFailedTests++;
   }
 
-  std::cout << "[2]" << std::endl;
+  cout << "[2] Setting antenna positions with cylindrical coordinates" << endl;
   try {
+    Matrix<double> pos (nofAntennas,3,0.0);
+    double incr (360/nofAntennas);
+    // set up positions
+    for (uint antenna(0); antenna<nofAntennas; antenna++) {
+      pos(antenna,0) = 100;
+      pos(antenna,1) = incr*antenna;
+    }
+    // summary before changes
+    delay.summary();
+    // set new antenna positions
+    antennaIndexFirst = true;
+    bufferDelays      = false;
+    status = delay.setAntennaPositions (pos,
+					antennaIndexFirst,
+					CR::Cylindrical,
+					true,
+					bufferDelays);
+    // summary after changes
+    delay.summary();
+    cout << delay.antennaPositions() << std::endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -519,7 +542,7 @@ int test_antennaPositions ()
 */
 int test_skyPositions ()
 {
-  std::cout << "\n[test_skyPositions]\n" << endl;
+  cout << "\n[test_skyPositions]\n" << endl;
   
   int nofFailedTests (0);
   GeometricalDelay delay;
@@ -527,23 +550,83 @@ int test_skyPositions ()
   bool status (true);
 
 #ifdef HAVE_CASA  
-  std::cout << "[1] Set new values via (Matrix) ..." << endl;
-  try {  
-    casa::Matrix<double> skyPositions (nofSkyPositions,3);
-
-    indgen(skyPositions);
-
-    status = delay.setSkyPositions(skyPositions,false);
-
-    if (status) {
-      std::cout << delay.skyPositions() << endl;
-    }
+  cout << "[1] Setting sky positions with cartesian coordinates, Matrix<double>"
+	    << endl;
+  try {
+    uint nofPositions (9);
+    Matrix<double> pos (nofPositions,3,100.0);
+    // set up positions
+    pos(0,0) = -100;  pos(0,1) = 100;
+    pos(1,0) = 0;     pos(1,1) = 100;
+    pos(2,0) = 100;   pos(2,1) = 100;
+    pos(3,0) = -100;  pos(3,1) = 0;
+    pos(4,0) = 0;     pos(4,1) = 0;
+    pos(5,0) = 100;   pos(5,1) = 0;
+    pos(6,0) = -100;  pos(6,1) = -100;
+    pos(7,0) = 0;     pos(7,1) = -100;
+    pos(8,0) = 100;   pos(8,1) = -100;
+    // set new antenna positions
+    status = delay.setSkyPositions (pos,
+				    false);
+    // summary after changes
+    delay.summary();
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }  
 
-  std::cout << "[2] Set new values via (Vector,Vector,Vector) ..." << endl;
+  cout << "[2] Setting sky positions with cylindrical coordinates, Matrix<double>"
+       << endl;
+  try {
+    uint nofPositions (9);
+    double incr (360/nofPositions);
+    Matrix<double> pos (nofPositions,3,100.0);
+    // set up positions
+    for (uint position(0); position<nofPositions; position++) {
+      pos(position,1) = incr*position;
+    }
+    // set new sky positions
+    status = delay.setSkyPositions (pos,
+				    CR::Cylindrical,
+				    true,
+				    false);
+    // summary after changes
+    delay.summary();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[3] Setting sky positions with Az-El-Radius coordinates, Matrix<double>"
+	    << endl;
+  try {
+    uint nofPositions (9);
+    Matrix<double> pos (nofPositions,3,100.0);
+    // set up positions
+    pos(0,0) = -10;  pos(0,1) = 10;
+    pos(1,0) = 0;    pos(1,1) = 10;
+    pos(2,0) = 10;   pos(2,1) = 10;
+    pos(3,0) = -10;  pos(3,1) = 0;
+    pos(4,0) = 0;    pos(4,1) = 0;
+    pos(5,0) = 10;   pos(5,1) = 0;
+    pos(6,0) = -10;  pos(6,1) = -10;
+    pos(7,0) = 0;    pos(7,1) = -10;
+    pos(8,0) = 10;   pos(8,1) = -10;
+    //
+    cout << pos << endl;
+    // set new antenna positions
+    status = delay.setSkyPositions (pos,
+				    CR::AzElRadius,
+				    true,
+				    false);
+    // summary after changes
+    delay.summary();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[3] Set new values via (Vector,Vector,Vector) ..." << endl;
   try {
     casa::Vector<double> xValues (2);
     casa::Vector<double> yValues (2);
@@ -558,16 +641,12 @@ int test_skyPositions ()
 				    zValues,
 				    CR::Cartesian);
     
-    if (status) {
-      std::cout << delay.skyPositions() << endl;
-    }
-    
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }  
 
-  std::cout << "[3] Set new values via (Matrix,Vector) ..." << endl;
+  cout << "[4] Set new values via (Matrix,Vector) ..." << endl;
   try {
     casa::Matrix<double> xyValues (2,2);
     casa::Vector<double> zValues (3);
@@ -585,8 +664,8 @@ int test_skyPositions ()
 				    CR::Cartesian);
     
     if (status) {
-      std::cout << "-- Axis ordering = " << axisOrder << endl;
-      std::cout << "-- Sky positions = " << delay.skyPositions() << endl;
+      cout << "-- Axis ordering = " << axisOrder << endl;
+      cout << "-- Sky positions = " << delay.skyPositions() << endl;
     }
 
     // inverted axis ordering: [2,1,0]
@@ -601,8 +680,8 @@ int test_skyPositions ()
 				    CR::Cartesian);
     
     if (status) {
-      std::cout << "-- Axis ordering = " << axisOrder << endl;
-      std::cout << "-- Sky positions = " << delay.skyPositions() << endl;
+      cout << "-- Axis ordering = " << axisOrder << endl;
+      cout << "-- Sky positions = " << delay.skyPositions() << endl;
     }
 
     // axis ordering: [2,0,1]
@@ -617,8 +696,8 @@ int test_skyPositions ()
 				    CR::Cartesian);
     
     if (status) {
-      std::cout << "-- Axis ordering = " << axisOrder << endl;
-      std::cout << "-- Sky positions = " << delay.skyPositions() << endl;
+      cout << "-- Axis ordering = " << axisOrder << endl;
+      cout << "-- Sky positions = " << delay.skyPositions() << endl;
     }
 
   } catch (std::string message) {
@@ -635,59 +714,55 @@ int test_skyPositions ()
 /*!
   \brief Test actual computation of the geometrical delay
 
-  In order to plot the data in the exported table, run
-  \verbatim
-  set grid
-  set xlabel 'Source distance, (0,0,z), from phase center [m]'
-  set ylabel 'Geometrical delay [sec]'
-  plot 'delays.data' u 2:3 t 'Antenna 1 [100,100,0]' w l, 'delays.data' u 2:4 t 'Antenna 1 [200,200,0]' w l
-  \endverbatim
-
   \return nofFailedTests -- Number of failed tests
 
 */
 #ifdef HAVE_CASA
 int test_delayComputation ()
 {
-  std::cout << "\n[test_delayComputation]\n" << endl;
+  cout << "\n[test_delayComputation]\n" << endl;
 
   int nofFailedTests (0);
-  uint nofCoordinates (3);
-  int nofAntennas (2);
-  int nofPositions (100);
-  double stepwidth (100);
-  casa::Matrix<double> antPositions (nofAntennas,nofCoordinates);
-  casa::Matrix<double> skyPositions (nofPositions,nofCoordinates);
+  bool antennaIndexFirst (true);
+  casa::Matrix<double> antPositions;
+  casa::Matrix<double> skyPositions;
 
-  // assign positions of the antennas
-  antPositions = 0.0;
-  antPositions(0,0) = -100;
-  antPositions(1,0) = 100;
+  // get the default values for antenna and sky positions
 
-  // assign the values for the sky positions
-  for (int n (0); n<nofPositions; n++) {
-    skyPositions.row(n) = stepwidth*n;
+  get_positions (skyPositions,
+		 antPositions,
+		 antennaIndexFirst);
+
+  // adjust the sky positions
+  {
+    uint nofPositions (100);
+    double incr (100);
+
+    skyPositions.resize (nofPositions,3);
+    skyPositions.column(0) = 45;
+    skyPositions.column(1) = 45;
+
+    for (uint radius (0); radius<nofPositions; radius++) {
+      skyPositions(radius,2) = radius*incr;
+    }
+    
+    // create GeometricalDelay object
+    GeometricalDelay delay (antPositions,
+			    CR::Cartesian,
+			    skyPositions,
+			    CR::Spherical);
+    delay.summary();
+
+    // retrieve the delay values
+    casa::Matrix<double> delays = delay.delays();
+    
+    // export the delays for later plotting
+    std::ofstream outfile ("delays.data",std::ios::out);
+    for (uint coord (0); coord<nofPositions; coord++) {
+      outfile << skyPositions(coord,2) << "\t" << delays(0,coord) << endl;
+    }
+    outfile.close();
   }
-
-  GeometricalDelay delay (antPositions,
-			  skyPositions);
-  delay.summary();
-  
-  casa::Matrix<double> delays = delay.delays();
-
-  // export the computed values
-  std::ofstream outfile;
-  outfile.open("delays.data");
-  for (int n (0); n<nofPositions; n++) {
-    outfile << "\t" << n
-	    << "\t" << skyPositions(n,0)
-	    << "\t" << skyPositions(n,1)
-	    << "\t" << skyPositions(n,2)
-	    << "\t" << delays(0,n)       // delay for antenna 1 @ [-100,0,0]
-	    << "\t" << delays(1,n)       // delay for antenna 2 @ [100,0,0]
-	    << endl;
-  }
-  outfile.close();
   
   return nofFailedTests;
 }
@@ -695,7 +770,7 @@ int test_delayComputation ()
 #ifdef HAVE_BLITZ
 int test_delayComputation ()
 {
-  std::cout << "\n[test_delayComputation]\n" << endl;
+  cout << "\n[test_delayComputation]\n" << endl;
 
   int nofFailedTests (0);
   uint nofCoordinates (3);
@@ -757,9 +832,9 @@ int main ()
   // Test manipulation of the antenna positions
   nofFailedTests += test_antennaPositions ();
   // Test manipulation of the sky positions
-//   nofFailedTests += test_skyPositions ();
+  nofFailedTests += test_skyPositions ();
   // Test for the computation of the actual geometrical delay
-//   nofFailedTests += test_delayComputation ();
+  nofFailedTests += test_delayComputation ();
   
   return nofFailedTests;
 }

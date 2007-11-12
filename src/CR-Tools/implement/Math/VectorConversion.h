@@ -228,6 +228,23 @@ namespace CR { // Namespace CR -- begin
 	    r \sin(\theta) \\ \phi \\ r \cos(\theta)
 	    \end{array} \right] \f$</td>
 	</tr>
+	<tr>
+	  <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
+          <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
+	  <td>CR::AzElRadius2Spherical</td>
+	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
+	  = \left[ \begin{array}{l}
+	  R \\
+	  90^{\circ} - Az \\
+	  90^{\circ} - El
+	  \end{array} \right] \f$</td>
+	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ R \end{array} \right]
+	  = \left[ \begin{array}{l}
+	  90^{\circ} - \phi \\
+	  90^{\circ} - \theta \\
+	  r
+	  \end{array} \right] \f$</td>
+	</tr>
         <tr>
 	  <td class="indexkey">Target</td>
 	  <td class="indexkey">... as function of</td>
@@ -236,7 +253,7 @@ namespace CR { // Namespace CR -- begin
 	  <td class="indexkey">Inversion</td>
 	</tr>
 	<tr>
-	  <td>cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
+	  <td>Cylindrical <br> \f$ (\rho,\phi,z) \f$</td>
           <td>Cartesian <br> \f$ (x,y,z) \f$</td>
 	  <td>CR::Cartesian2Cylindrical</td>
 	  <td>\f$ \left[ \begin{array}{l} \rho \\ \phi \\ z \end{array} \right]
@@ -308,7 +325,9 @@ namespace CR { // Namespace CR -- begin
 	    \end{array} \right] \f$</td>
 	  <td>\f$ \left[ \begin{array}{l} \rho \\ \phi \\ z \end{array} \right]
 	    = \left[ \begin{array}{l}
-	    \mathrm{atan} \left( \frac{1}{\tan{Az}} \right)
+	    ... \\
+	    90^{\circ} - Az \\
+	    ...
 	    \end{array} \right] \f$</td>
 	</tr>
 	<tr>
@@ -316,9 +335,17 @@ namespace CR { // Namespace CR -- begin
           <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
 	  <td>CR::Spherical2AzElRadius</td>
 	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ R \end{array} \right]
-	  = \left[  \right] \f$</td>
+	  = \left[ \begin{array}{l}
+	  90^{\circ} - \phi \\
+	  90^{\circ} - \theta \\
+	  r
+	  \end{array} \right] \f$</td>
 	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
-	  = \left[  \right] \f$</td>
+	  = \left[ \begin{array}{l}
+	  R \\
+	  90^{\circ} - Az \\
+	  90^{\circ} - El
+	  \end{array} \right] \f$</td>
 	</tr>
         <tr>
 	  <td class="indexkey">Target</td>
@@ -783,6 +810,59 @@ namespace CR { // Namespace CR -- begin
 			     double const &el,
 			     double const &r,
 			     bool const &anglesInDegrees=false);
+
+  bool AzElRadius2Cartesian (vector<double> &Cartesian,
+			     vector<double> const &AzElRadius,
+			     bool const &anglesInDegrees=false);
+
+#ifdef HAVE_CASA
+  bool AzElRadius2Cartesian (casa::Vector<double> &Cartesian,
+			     casa::Vector<double> const &AzElRadius,
+			     bool const &anglesInDegrees=false);
+#endif
+
+#ifdef HAVE_BLITZ
+  bool AzElRadius2Cartesian (blitz::Array<double,1> &Cartesian,
+			     blitz::Array<double,1> const &AzElRadius,
+			     bool const &anglesInDegrees=false);
+#endif
+
+  /*!
+    \brief Conversion from Az,El,Radius to Spherical coordinates
+
+    \retval r     -- \f$r\f$-component of the vector in spherical coordinates
+    \retval phi   -- \f$\phi\f$-component of the vector in spherical coordinates
+    \retval theta -- \f$\theta\f$-component of the vector in spherical coordinates
+    \param az     -- 
+    \param el     -- 
+    \param radius -- 
+    \param anglesInDegrees -- Are the angles given in units of degrees? If
+           <i>true</i> angles will be converted to radians before the 
+	   conversion.
+  */
+  bool AzElRadius2Spherical (double &r,
+			     double &phi,
+			     double &theta,
+			     double const &az,
+			     double const &el,
+			     double const &radius,
+			     bool const &anglesInDegrees=false);
+  
+  bool AzElRadius2Spherical (vector<double> &Spherical,
+			     vector<double> const &AzElRadius,
+			     bool const &anglesInDegrees=false);
+
+#ifdef HAVE_CASA
+  bool AzElRadius2Spherical (casa::Vector<double> &Spherical,
+			     casa::Vector<double> const &AzElRadius,
+			     bool const &anglesInDegrees=false);
+#endif
+
+#ifdef HAVE_BLITZ
+  bool AzElRadius2Spherical (blitz::Array<double,1> &Spherical,
+			     blitz::Array<double,1> const &AzElRadius,
+			     bool const &anglesInDegrees=false);
+#endif
 
   // ============================================================================
   // 

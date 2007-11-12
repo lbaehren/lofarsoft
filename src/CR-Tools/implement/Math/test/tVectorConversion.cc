@@ -561,6 +561,143 @@ int test_Cylindrical2Other ()
 
 // -----------------------------------------------------------------------------
 
+/*!
+  \brief Test conversion from Azimuth-Elevation-Radius to other coordinates
+
+  This will run a number of very basic tests for the following routines:
+  - CR::AzElRadius2Cartesian
+  - CR::AzElRadius2Spherical
+
+  \return nofFailedTests -- Number of failed tests within this function
+*/
+int test_AzElRadius2Other ()
+{
+  std::cout << "\n[test_AzElRadius2Other]\n" << std::endl;
+
+  int nofFailedTests (0);
+  bool status (true);
+  vector<double> azElRadius (3);
+  vector<double> other (3);
+
+  azElRadius[2] = 1.0;
+
+  std::cout << "[1] Azimuth-Elevation-Radius -> Cartesian (x,y,z)" << std::endl;
+  try {
+    
+    std::cout << "-- Unit circle in the (x,y) plane ..." << std::endl;
+    azElRadius[1] = 0.0;
+    
+    azElRadius[0] = 0.0;
+    status = CR::AzElRadius2Cartesian (other,
+				       azElRadius,
+				       true);
+    show_conversion (azElRadius,other);
+    
+    azElRadius[0] = 90.0;
+    status = CR::AzElRadius2Cartesian (other,
+				       azElRadius,
+				       true);
+    show_conversion (azElRadius,other);
+    
+    azElRadius[0] = 180;
+    status = CR::AzElRadius2Cartesian (other,
+				       azElRadius,
+				       true);
+    show_conversion (azElRadius,other);
+    //
+    azElRadius[0] = 270;
+    status = CR::AzElRadius2Cartesian (other,
+				       azElRadius,
+				       true);
+    show_conversion (azElRadius,other);
+
+    std::cout << "-- Unit circle in the (x,z) plane ..." << std::endl;
+    azElRadius[0] = 0.0;
+    
+    azElRadius[1] = -90;
+    status = CR::AzElRadius2Cartesian (other,
+				       azElRadius,
+				       true);
+    show_conversion (azElRadius,other);
+    
+    azElRadius[1] = 0.0;
+    status = CR::AzElRadius2Cartesian (other,
+				       azElRadius,
+				       true);
+    show_conversion (azElRadius,other);
+    
+    azElRadius[1] = 90;
+    status = CR::AzElRadius2Cartesian (other,
+				       azElRadius,
+				       true);
+    show_conversion (azElRadius,other);
+
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[2] Azimuth-Elevation-Radius -> Spherical (r,phi,theta)" << std::endl;
+  try {
+    
+    std::cout << "-- Unit circle in the (x,y) plane ..." << std::endl;
+    azElRadius[1] = 0.0;
+    
+    azElRadius[0] = 0.0;
+    status = CR::AzElRadius2Spherical (other,
+				       azElRadius,
+				       true);
+    show_conversion (azElRadius,other);
+    
+    azElRadius[0] = 90.0;
+    status = CR::AzElRadius2Spherical (other,
+				       azElRadius,
+				       true);
+    show_conversion (azElRadius,other);
+    
+    azElRadius[0] = 180;
+    status = CR::AzElRadius2Spherical (other,
+				       azElRadius,
+				       true);
+    show_conversion (azElRadius,other);
+    //
+    azElRadius[0] = 270;
+    status = CR::AzElRadius2Spherical (other,
+				       azElRadius,
+				       true);
+    show_conversion (azElRadius,other);
+
+    std::cout << "-- Unit circle in the (x,z) plane ..." << std::endl;
+    azElRadius[0] = 0.0;
+    
+    azElRadius[1] = -90;
+    status = CR::AzElRadius2Spherical (other,
+				       azElRadius,
+				       true);
+    show_conversion (azElRadius,other);
+    
+    azElRadius[1] = 0.0;
+    status = CR::AzElRadius2Spherical (other,
+				       azElRadius,
+				       true);
+    show_conversion (azElRadius,other);
+    
+    azElRadius[1] = 90;
+    status = CR::AzElRadius2Spherical (other,
+				       azElRadius,
+				       true);
+    show_conversion (azElRadius,other);
+
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
 int test_Cylindrical2Cartesian ()
 {
   std::cout << "\n[test_Cylindrical2Cartesian]\n" << std::endl;
@@ -664,6 +801,7 @@ int main ()
 
   nofFailedTests += test_Cartesian2Other ();
   nofFailedTests += test_Cylindrical2Other ();
+  nofFailedTests += test_AzElRadius2Other ();
 
   nofFailedTests += test_vectorConversion ();
 

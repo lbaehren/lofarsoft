@@ -38,7 +38,6 @@ namespace CR { // Namespace CR -- begin
 
     switch (sourceCoordinate) {
     case CR::AzElHeight:
-      break;
       // ---------------------------------------------------
       // Conversion: AzEl,Height (Az,El,R) - Other
       switch (targetCoordinate) {
@@ -49,8 +48,8 @@ namespace CR { // Namespace CR -- begin
 				     anglesInDegrees);
 	break;
       }
-    case CR::AzElRadius:
       break;
+    case CR::AzElRadius:
       // ---------------------------------------------------
       // Conversion: AzEl,Radius (Az,El,R) - Other
       switch (targetCoordinate) {
@@ -60,7 +59,14 @@ namespace CR { // Namespace CR -- begin
 				     xSource,ySource,zSource,
 				     anglesInDegrees);
 	break;
+      case CR::Spherical:
+	// Conversion: AzEl,Radius (Az,El,R) - Spherical (r,phi,theta)
+	return AzElRadius2Spherical (xTarget,yTarget,zTarget,
+				     xSource,ySource,zSource,
+				     anglesInDegrees);
+	break;
       }
+      break;
     case CR::Cartesian:
       // ---------------------------------------------------
       // Conversion: Cartesian (x,y,z) -> Other
@@ -368,12 +374,11 @@ namespace CR { // Namespace CR -- begin
 
     try {
       if (anglesInDegrees) {
-	return AzElRadius2Cartesian (x,
-				     y,
-				     z,
-				     deg2rad(az),
-				     deg2rad(el),
-				     r);
+	double radAz (deg2rad(az));
+	double radEl (deg2rad(el));
+	x = r*cos(radEl)*sin(radAz);
+	y = r*cos(radEl)*cos(radAz);
+	z = r*sin(radEl);
       } else {
 	x = r*cos(el)*sin(az);
 	y = r*cos(el)*cos(az);
@@ -386,6 +391,127 @@ namespace CR { // Namespace CR -- begin
     
     return status;
   }
+
+  // ------------------------------------------------------- AzElRadius2Cartesian
+
+  bool AzElRadius2Cartesian (vector<double> &Cartesian,
+			     vector<double> const &AzElRadius,
+			     bool const &anglesInDegrees)
+  {
+    return AzElRadius2Cartesian (Cartesian[0],
+				 Cartesian[1],
+				 Cartesian[2],
+				 AzElRadius[0],
+				 AzElRadius[1],
+				 AzElRadius[2],
+				 anglesInDegrees);
+  }
+
+  // ------------------------------------------------------- AzElRadius2Cartesian
+
+#ifdef HAVE_CASA
+  bool AzElRadius2Cartesian (casa::Vector<double> &Cartesian,
+			     casa::Vector<double> const &AzElRadius,
+			     bool const &anglesInDegrees)
+  {
+    return AzElRadius2Cartesian (Cartesian(0),
+				 Cartesian(1),
+				 Cartesian(2),
+				 AzElRadius(0),
+				 AzElRadius(1),
+				 AzElRadius(2),
+				 anglesInDegrees);
+  }
+#endif
+
+  // ------------------------------------------------------- AzElRadius2Cartesian
+
+#ifdef HAVE_BLITZ
+  bool AzElRadius2Cartesian (blitz::Array<double,1> &Cartesian,
+			     blitz::Array<double,1> const &AzElRadius,
+			     bool const &anglesInDegrees)
+  {
+    return AzElRadius2Cartesian (Cartesian(0),
+				 Cartesian(1),
+				 Cartesian(2),
+				 AzElRadius(0),
+				 AzElRadius(1),
+				 AzElRadius(2),
+				 anglesInDegrees);
+  }
+#endif
+
+  // ------------------------------------------------------- AzElRadius2Spherical
+  
+  bool AzElRadius2Spherical (double &r,
+			     double &phi,
+			     double &theta,
+			     double const &az,
+			     double const &el,
+			     double const &radius,
+			     bool const &anglesInDegrees)
+  {
+    if (anglesInDegrees) {
+      r     = radius;
+      phi   = 90 - az;
+      theta = 90 - el;
+    } else {
+      r     = radius;
+      phi   = deg2rad(90) - az;
+      theta = deg2rad(90) - el;
+    }
+
+    return true;
+  }
+  
+  // ------------------------------------------------------- AzElRadius2Spherical
+
+  bool AzElRadius2Spherical (vector<double> &Spherical,
+			     vector<double> const &AzElRadius,
+			     bool const &anglesInDegrees)
+  {
+    return AzElRadius2Spherical (Spherical[0],
+				 Spherical[1],
+				 Spherical[2],
+				 AzElRadius[0],
+				 AzElRadius[1],
+				 AzElRadius[2],
+				 anglesInDegrees);
+  }
+
+  // ------------------------------------------------------- AzElRadius2Spherical
+
+#ifdef HAVE_CASA
+  bool AzElRadius2Spherical (casa::Vector<double> &Spherical,
+			     casa::Vector<double> const &AzElRadius,
+			     bool const &anglesInDegrees)
+  {
+    return AzElRadius2Spherical (Spherical(0),
+				 Spherical(1),
+				 Spherical(2),
+				 AzElRadius(0),
+				 AzElRadius(1),
+				 AzElRadius(2),
+				 anglesInDegrees);
+  }
+#endif
+
+  // ------------------------------------------------------- AzElRadius2Spherical
+
+#ifdef HAVE_BLITZ
+  bool AzElRadius2Spherical (blitz::Array<double,1> &Spherical,
+			     blitz::Array<double,1> const &AzElRadius,
+			     bool const &anglesInDegrees)
+  {
+    return AzElRadius2Spherical (Spherical(0),
+				 Spherical(1),
+				 Spherical(2),
+				 AzElRadius(0),
+				 AzElRadius(1),
+				 AzElRadius(2),
+				 anglesInDegrees);
+  }
+#endif
 
   // ============================================================================
   // 
