@@ -302,7 +302,7 @@ namespace CR { // Namespace CR -- begin
 	  <td>CR::Cylindrical2AzElRadius</td>
 	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ R \end{array} \right]
 	    = \left[ \begin{array}{l}
-	    \mathrm{atan} \left( \frac{1}{\tan{\phi}} \right) \\
+	    90^{\circ} - \phi \\
 	    \mathrm{acos} \left( \frac{\rho}{\sqrt{\rho^2+z^2}} \right) \\
 	    \sqrt{\rho^2+z^2}
 	    \end{array} \right] \f$</td>
@@ -315,8 +315,10 @@ namespace CR { // Namespace CR -- begin
 	  <td>AzElRadius <br> \f$ (Az,El,R) \f$</td>
           <td>Spherical <br> \f$ (r,\phi,\theta) \f$</td>
 	  <td>CR::Spherical2AzElRadius</td>
-	  <td></td>
-	  <td></td>
+	  <td>\f$ \left[ \begin{array}{l} Az \\ El \\ R \end{array} \right]
+	  = \left[  \right] \f$</td>
+	  <td>\f$ \left[ \begin{array}{l} r \\ \phi \\ \theta \end{array} \right]
+	  = \left[  \right] \f$</td>
 	</tr>
         <tr>
 	  <td class="indexkey">Target</td>
@@ -451,9 +453,9 @@ namespace CR { // Namespace CR -- begin
     Spherical,
     //! Cylindrical coordinates, \f$ \vec x = (r,\phi,h) \f$
     Cylindrical,
-    //! Azimuth-Elevation-Height
+    //! Azimuth-Elevation-Height, \f$ \vec x = (Az,El,H) \f$
     AzElHeight,
-    //! Azimuth-Elevation-Radius
+    //! Azimuth-Elevation-Radius, \f$ \vec x = (Az,El,R) \f$
     AzElRadius,
     //! North-East-Height
     NorthEastHeight

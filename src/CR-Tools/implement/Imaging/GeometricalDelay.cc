@@ -52,13 +52,10 @@ namespace CR { // NAMESPACE CR -- BEGIN
     skyPositions(0,2) = 1.0;
 
 #ifdef DEBUGGING_MESSAGES
-    std::cout << "[GeometricalDelay::GeometricalDelay]" << std::endl;
-    std::cout << "-- antenna index first?    = " << antennaIndexFirst
-	      << std::endl;
-    std::cout << "-- shape(antennaPositions) = " << antennaPositions.shape()
-	      << std::endl;
-    std::cout << "-- shape(skyPositions) ... = " << skyPositions.shape()
-	      << std::endl;
+    cout << "[GeometricalDelay::GeometricalDelay]" << endl;
+    cout << "-- antenna index first?    = " << antennaIndexFirst << endl;
+    cout << "-- shape(antennaPositions) = " << antennaPositions.shape() << endl;
+    cout << "-- shape(skyPositions) ... = " << skyPositions.shape() << endl;
 #endif
 
     init (antennaPositions,
@@ -224,15 +221,16 @@ namespace CR { // NAMESPACE CR -- BEGIN
     nearField_p    = true;
     
 #ifdef DEBUGGING_MESSAGES
-    std::cout << "[GeometricalDelay::init]" << std::endl;
-    std::cout << "-- shape(antPositions) = " << antPositions.shape() << std::endl;
-    std::cout << "-- shape(skyPositions) = " << skyPositions.shape() << std::endl;
-    std::cout << "-- buffer delay values = " << bufferDelays         << std::endl;
+    cout << "[GeometricalDelay::init]" << endl;
+    cout << "-- shape(antPositions) = " << antPositions.shape() << endl;
+    cout << "-- shape(skyPositions) = " << skyPositions.shape() << endl;
+    cout << "-- buffer delay values = " << bufferDelays         << endl;
 #endif
     
     status = setAntennaPositions (antPositions,
-				  antCoordType,
 				  antennaIndexFirst,
+				  antCoordType,
+				  false,
 				  false);
     
     if (!status) {
@@ -271,14 +269,16 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
   {
     bool status (true);
+    bool anglesInDegrees (false);
 
     showProgress_p = false;
     nearField_p    = true;
     
     try {
       status = setAntennaPositions (antPositions,
+				    antennaIndexFirst,
 				    antCoordType,
-				    false,
+				    anglesInDegrees,
 				    antennaIndexFirst);
     } catch (std::string message) {
       std::cerr << "[GeometricalDelay::GeometricalDelay] " << message << endl;
@@ -382,8 +382,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
     IPosition shape (antPositions.shape());
 
 #ifdef DEBUGGING_MESSAGES
-    std::cout << "[GeometricalDelay::setAntennaPositions]" << std::endl;
-    std::cout << "-- shape(antPositions) = " << shape << std::endl;
+    cout << "[GeometricalDelay::setAntennaPositions]" << endl;
+    cout << "-- shape(antPositions) = " << shape << endl;
 #endif
 
     /* Just to be on the save side: if the antenna number is given through the
@@ -396,7 +396,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 	// update the number of antennas
 	nofAntennas_p = shape(0);
       } catch (std::string message) {
-	std::cerr << "[setAntennaPositions] " << message << std::endl;
+	std::cerr << "[setAntennaPositions] " << message << endl;
 	status = false;
       }
     } 
@@ -468,8 +468,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_CASA
   bool
   GeometricalDelay::setAntennaPositions (const Matrix<double> &antPositions,
-					 CR::CoordinateType const &antCoordType,
 					 bool const &antennaIndexFirst,
+					 CR::CoordinateType const &antCoordType,
+					 bool const &anglesInDegrees,
 					 bool const &bufferDelays)
   {
     bool status (true);
@@ -496,16 +497,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
 				      antPositions(antenna,1),
 				      antPositions(antenna,2),
 				      antCoordType,
-				      false);
+				      anglesInDegrees);
 	}
 	// pass on the adjusted antenna positions
-	return setAntennaPositions (antPositions,
+	return setAntennaPositions (antPositionsCartesian,
 				    bufferDelays);
       }
     } else {
       return setAntennaPositions (transpose(antPositions),
-				  antCoordType,
 				  true,
+				  antCoordType,
+				  anglesInDegrees,
 				  bufferDelays);
     }
     
@@ -532,20 +534,25 @@ namespace CR { // NAMESPACE CR -- BEGIN
 					  const bool &bufferDelays)
   {
     bool status (true);
-    
-    // check the shape of the array
-    if (skyPositions.ncolumn() == 3) {
-      // store the array
-      skyPositions_p.resize (skyPositions.shape());
-      skyPositions_p = skyPositions;
-      // update the values of the geometrical delays
-      if (bufferDelays) {
-	bufferDelays_p = bufferDelays;
-	setDelays();
+    IPosition shape (skyPositions.shape());
+
+    /* Just to be on the save side: if the position number is given through the
+       first index of the array, then the second axis should consist of three
+       elements. */
+    if (shape(1) == 3) {
+      try {
+	skyPositions_p.resize (shape);
+	skyPositions_p = skyPositions;
+      } catch (std::string message) {
+	std::cerr << "[GeometricalDelay::setSkyPositions] " << message << endl;
+	status = false;
       }
-    } else {
-      cerr << "Wrong number of array colums; must be 3!" << endl;
-      status  = false;
+    } 
+    
+    // handle optional buffering of delays
+    if (status && bufferDelays) {
+      bufferDelays_p = bufferDelays;
+      setDelays();
     }
     
     return status;
@@ -556,20 +563,25 @@ namespace CR { // NAMESPACE CR -- BEGIN
 					  const bool &bufferDelays)
   {
     bool status (true);
+    blitz::TinyVector<int,2> shape (skyPositions.shape());
 
-    // check the shape of the array
-    if (skyPositions.cols() == 3) {
-      // store the array
-      skyPositions_p.resize (skyPositions.shape());
-      skyPositions_p = skyPositions;
-      // update the values of the geometrical delays
-      if (bufferDelays) {
-	bufferDelays_p = bufferDelays;
-	setDelays();
+    /* Just to be on the save side: if the position number is given through the
+       first index of the array, then the second axis should consist of three
+       elements. */
+    if (shape(1) == 3) {
+      try {
+	skyPositions_p.resize (shape);
+	skyPositions_p = skyPositions;
+      } catch (std::string message) {
+	std::cerr << "[GeometricalDelay::setSkyPositions] " << message << endl;
+	status = false;
       }
-    } else {
-      cerr << "Wrong number of array colums; must be 3!" << endl;
-      status  = false;
+    } 
+    
+    // handle optional buffering of delays
+    if (status && bufferDelays) {
+      bufferDelays_p = bufferDelays;
+      setDelays();
     }
     
     return status;
@@ -581,52 +593,36 @@ namespace CR { // NAMESPACE CR -- BEGIN
   
 #ifdef HAVE_CASA
   bool GeometricalDelay::setSkyPositions (Matrix<double> const &skyPositions,
-					  CR::CoordinateType const &coordType,
+					  CR::CoordinateType const &skyCoordType,
 					  bool const &anglesInDegrees,
 					  bool const &bufferDelays)
   {
     bool status (true);
+    IPosition shape (skyPositions.shape());
 
-    /*
-      Check if the number of coordinates per point is correct
-    */
-    if (skyPositions.ncolumn() != 3) {
-      cerr << "Wrong number of array colums; must be 3!" << endl;
-      return false;
-    }
-
-    /*
-      The whole point behind the "coordType" parameter is to enable providing
-      the positions as something else but cartesian coordinates (e.g. 
-      shells of a sphere in spherical coordinates).
-    */
-
-    int nofPositions (skyPositions.nrow());
-    int n (0);
-    
-    switch (coordType) {
-      case CR::Cartesian:
-	skyPositions_p.resize(skyPositions.shape());
-	skyPositions_p = skyPositions;
-	break;
-    case CR::Spherical:
-      // adjust the size in the internal array storing the positions
-      skyPositions_p.resize(nofPositions,3);
-      // conversion of the 
-      for (n=0; n<nofPositions; n++) {
-	skyPositions_p.row(n) = Spherical2Cartesian (skyPositions.row(n),
-						     anglesInDegrees);
+    /* If the sky position coordinates are provided in cartesian coordinates
+       already, we can simply pass them along; otherwise we need to insert
+       a coordinate conversion step before storing the values. */
+    if (skyCoordType == CR::Cartesian) {
+      return setAntennaPositions (skyPositions,
+				  bufferDelays);
+    } else {
+      // convert sky positions to cartesian coordinates first
+      Matrix<double> skyPositionsCartesian (shape);
+      for (int antenna(0); antenna<shape(0); antenna++) {
+	status = CR::convertVector (skyPositionsCartesian(antenna,0),
+				    skyPositionsCartesian(antenna,1),
+				    skyPositionsCartesian(antenna,2),
+				    CR::Cartesian,
+				    skyPositions(antenna,0),
+				    skyPositions(antenna,1),
+				    skyPositions(antenna,2),
+				    skyCoordType,
+				    anglesInDegrees);
       }
-      break;
-    case CR::Cylindrical:
-      status = false;
-      break;
-    }
-
-    // update the values of the geometrical delays
-    if (bufferDelays) {
-      bufferDelays_p = bufferDelays;
-      setDelays();
+      // pass on the adjusted antenna positions
+      return setAntennaPositions (skyPositionsCartesian,
+				  bufferDelays);
     }
     
     return status;
@@ -757,12 +753,12 @@ namespace CR { // NAMESPACE CR -- BEGIN
     */
     if (axisOrder.nelements() < 3) {
       std::cerr << "[GeometricalDelay::setSkyPositions] Ordering of axis incomplete!"
-		<< std::endl;
+		<< endl;
       return false;
     } else if (min(axisOrder) < 0 || max(axisOrder) > 2) {
       std::cerr << "[GeometricalDelay::setSkyPositions] Index outside valid range!"
-		<< std::endl;
-      std::cerr << "\t" << axisOrder << std::endl;
+		<< endl;
+      std::cerr << "\t" << axisOrder << endl;
       return false;
     }
 
@@ -807,12 +803,12 @@ namespace CR { // NAMESPACE CR -- BEGIN
     */
     if (axisOrder.numElements() < 3) {
       std::cerr << "[GeometricalDelay::setSkyPositions] Ordering of axis incomplete!"
-		<< std::endl;
+		<< endl;
       return false;
     } else if (min(axisOrder) < 0 || max(axisOrder) > 2) {
       std::cerr << "[GeometricalDelay::setSkyPositions] Index outside valid range!"
-		<< std::endl;
-      std::cerr << "\t" << axisOrder << std::endl;
+		<< endl;
+      std::cerr << "\t" << axisOrder << endl;
 
       return false;
     }
@@ -891,15 +887,15 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
   void GeometricalDelay::summary (std::ostream &os)
   {
-    os << "[GeometricalDelay] Summary of object" << std::endl;
-    os << "-- Sky positions       : " << skyPositions_p.shape() << std::endl;
-    os << "-- Antenna positions   : " << antPositions_p.shape() << std::endl;
-    os << "-- nof. Baselines      : " << nofBaselines()         << std::endl;
-    os << "-- near field geometry : " << nearField_p            << std::endl;
-    os << "-- buffer delays       : " << bufferDelays_p         << std::endl;
+    os << "[GeometricalDelay] Summary of object" << endl;
+    os << "-- Sky positions       : " << skyPositions_p.shape() << endl;
+    os << "-- Antenna positions   : " << antPositions_p.shape() << endl;
+    os << "-- nof. Baselines      : " << nofBaselines()         << endl;
+    os << "-- near field geometry : " << nearField_p            << endl;
+    os << "-- buffer delays       : " << bufferDelays_p         << endl;
     
     if (bufferDelays_p) {
-      os << "-- Delays            : " << delays_p.shape()     << std::endl;
+      os << "-- Delays            : " << delays_p.shape()     << endl;
     }
   }
 

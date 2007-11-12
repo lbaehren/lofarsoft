@@ -178,10 +178,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
       the individual default settings used with the default constructor; at least
       this way we end up with an operational object.
 
-      Internally assigned variables:
-      - bufferDelays (false)
-      - antennaIndexFirst (true)
-
       \param antPositions -- [nofAntennas,3] Antenna positions for which the
                              delay is computed, \f$ (x,y,z) \f$
       \param skyPositions -- [nofSkyPositions,3] Positions in the sky towards
@@ -205,14 +201,12 @@ namespace CR { // NAMESPACE CR -- BEGIN
       the individual default settings used with the default constructor; at least
       this way we end up with an operational object.
 
-      Internally assigned variables:
-      - bufferDelay (false)
-      - antennaIndexFirst (true)
-
       \param antPositions -- [nofAntennas,3] Antenna positions for which the
-                             delay is computed, \f$ (x,y,z) \f$
+                             delay is computed
       \param antCoordType -- CR::CoordinateType of the antenna position
-                             coordinates
+                             coordinates; if the coordinates are non-cartesian
+			     and thereby include anglular components, the values
+			     must be provided in radians.
       \param skyPositions -- [nofSkyPositions,3] Positions in the sky towards
                              which to point, given in the same reference frame
 			     as the antenna positions, though not necessarily
@@ -435,12 +429,15 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
       \param antPositions -- The antenna positions for which the delay is
              computed
-      \param antCoordType -- CR::CoordinateType of the antenna position
-             coordinates
       \param antennaIndexFirst -- Is the antenna index first in the matrix with
              antenna positions? 
 	     - <tt>antennaIndexFirst=true</tt> -> shape(antPositions)=[antenna,3]
 	     - <tt>antennaIndexFirst=false</tt> -> shape(antPositions)=[3,antenna]
+      \param antCoordType -- CR::CoordinateType of the antenna position
+             coordinates
+      \param anglesInDegrees -- If the coordinates are non-Cartesian, are the 
+             angles given in degrees? If <tt>false</tt> the angles are considered
+	     to be provided in radians.
       \param bufferDelays -- Buffer the values for the geometrical delay? If set
              <i>yes</i> the delays will be computed from the provided antenna
 	     and sky positions and afterwards kept in memory; if set <i>false</i>
@@ -448,14 +445,16 @@ namespace CR { // NAMESPACE CR -- BEGIN
     */
 #ifdef HAVE_CASA
     bool setAntennaPositions (const Matrix<double> &antPositions,
+			      bool const &antennaIndexFirst,
 			      CR::CoordinateType const &antCoordType,
-			      bool const &antennaIndexFirst=true,
+			      bool const &anglesInDegrees=false,
 			      bool const &bufferDelays=false);
 #else
 #ifdef HAVE_BLITZ
     bool setAntennaPositions (const blitz::Array<double,2> &antPositions,
+			      bool const &antennaIndexFirst,
 			      CR::CoordinateType const &antCoordType,
-			      bool const &antennaIndexFirst=true,
+			      bool const &anglesInDegrees=false,
 			      bool const &bufferDelays=false);
 #endif
 #endif
