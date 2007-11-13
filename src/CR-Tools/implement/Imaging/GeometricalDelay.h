@@ -122,6 +122,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     return delay;
     \endcode
+
+    \image html GeometricalDelay.png
     
     <h3>Example(s)</h3>
     

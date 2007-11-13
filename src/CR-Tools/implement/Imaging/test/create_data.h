@@ -43,6 +43,12 @@ using CR::TimeFreq;
   \author Lars B&auml;hren
  
   \date 2007/07/12
+
+  <h3>Synopsis</h3>
+
+  As there are a number of basic test data required by the various test programs
+  for the classes of the Imaging module, it does make sense to collect the
+  functions dealing with this is a single place.
 */
 
 // -----------------------------------------------------------------------------
@@ -51,17 +57,36 @@ using CR::TimeFreq;
   \brief Create some antenna positions for the Beamformer
 
   \param nofAntennas -- The number of antennas
+  \param antennaIndexFirst -- Is the antenna index the first index of the array?
+         If <tt>true</tt>, then the returned array is of shape [nofAntennas,3],
+	 otherwise -- if <tt>antennaIndexFirst=false</tt> -- the returned array
+	 if of shape [3,nofAntennas].
 
   \return positions -- [antenna,coordinate] Antenna positions, \f$ \vec x \f$
 */
-Matrix<double> get_antennaPositions (uint const &nofAntennas=3)
+Matrix<double> get_antennaPositions (uint const &nofAntennas=3,
+				     bool const &antennaIndexFirst=true,
+				     CR::CoordinateType const &which=CR::Cartesian)
 {
   uint nofAxes (3);
-  Matrix<double> positions (nofAntennas,nofAxes,0.0);
+  Matrix<double> positions;
 
-  for (uint n(0); n<nofAntennas; n++) {
-    positions(n,0) = positions(n,1) = n*100;
+  if (antennaIndexFirst) {
+    // adjust array size
+    positions.resize(nofAntennas,nofAxes,0.0);
+    // fill in data
+    for (uint n(0); n<nofAntennas; n++) {
+      positions(n,0) = positions(n,1) = n*100;
+    }
+  } else {
+    // adjust array size
+    positions.resize(nofAxes,nofAntennas,0.0);
+    // fill in data
+    for (uint n(0); n<nofAntennas; n++) {
+      positions(0,n) = positions(1,n) = n*100;
+    }
   }
+
 
   return positions;
 }
@@ -144,16 +169,15 @@ Matrix<double> get_skyPositions (Vector<double> const &start,
 /*!
   \brief Create frequency band values for the Beamformer
 
+  \param nofChannels -- Number of frequency channels
   \param freqMin     -- Lower limit of the frequency band, [Hz]
   \param freqMax     -- Upper limit of the frequency band, [Hz]
-  \param nofChannels -- Number of frequency channels, into which the band is
-                        split.
 
   \return frequencies -- 
 */
-Vector<double> get_frequencies (double const &freqMin=40e06,
-				double const &freqMax=80e06,
-				uint const &nofChannels=4096)
+Vector<double> get_frequencies (uint const &nofChannels=4096,
+				double const &freqMin=40e06,
+				double const &freqMax=80e06)
 {
   Vector<double> channels (nofChannels);
   double incr ((freqMax-freqMin)/(nofChannels+1));

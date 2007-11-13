@@ -24,9 +24,7 @@
 #ifndef GEOMETRICALPHASE_H
 #define GEOMETRICALPHASE_H
 
-#ifdef HAVE_CASA
 #include <casa/Arrays/Cube.h>
-#endif
 
 // Custom header files
 #include <Imaging/GeometricalDelay.h>
@@ -93,23 +91,11 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
   protected:
 
-#ifdef HAVE_CASA
     //! The frequency values for which the phases are computed
     casa::Vector<double> frequencies_p;
     //! Array with the geometrical phases
     casa::Cube<double> phases_p;
-#else 
-#ifdef HAVE_BLITZ
-    //! The frequency values for which the phases are computed
-    blitz::Array<double,1> frequencies_p;
-    //! Array with the geometrical phases
-    blitz::Array<double,3> phases_p;
-#else 
-    std::vector<double> frequencies_p;
-#endif
-#endif
-
-    // Buffer the values for the geometrical phases?
+    //! Buffer the values for the geometrical phases?
     bool bufferPhases_p;
     
   public:
@@ -130,15 +116,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
                              converted into phases
       \param bufferPhases -- Buffer the values of the phases?
     */
-#ifdef HAVE_CASA
     GeometricalPhase (casa::Vector<double> const &frequencies,
 		      bool const &bufferPhases=false);
-#else
-#ifdef HAVE_BLITZ
-    GeometricalPhase (blitz::Array<double,1> const &frequencies,
-		      bool const &bufferPhases=false);
-#endif
-#endif
     
     /*!
       \brief Argumented constructor
@@ -157,21 +136,11 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			     parameters are stored an no further action is taken.
       \param bufferPhases -- Buffer the values of the phases?
     */
-#ifdef HAVE_CASA
     GeometricalPhase (casa::Matrix<double> const &antPositions,
 		      casa::Matrix<double> const &skyPositions,
 		      casa::Vector<double> const &frequencies,
 		      bool const &bufferDelays=false,
 		      bool const &bufferPhases=false);
-#else
-#ifdef HAVE_BLITZ
-    GeometricalPhase (const blitz::Array<double,2> &antPositions,
-		      const blitz::Array<double,2> &skyPositions,
-		      blitz::Array<double,1> const &frequencies,
-		      const bool &bufferDelays=false,
-		      bool const &bufferPhases=false);
-#endif
-#endif
     
     /*!
       \brief Argumented constructor
@@ -236,13 +205,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
                                 phases are computed
     */
     inline int nofFrequencies () {
-#ifdef HAVE_CASA
       return frequencies_p.nelements();
-#else
-#ifdef HAVE_BLITZ
-      return frequencies_p.numElements();
-#endif
-#endif
     }
     
     /*!
@@ -251,17 +214,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \return frequencies -- The frequency values for which the phases are
                              computed.
     */
-#ifdef HAVE_CASA
     inline casa::Vector<double> frequencies () {
       return frequencies_p;
     }
-#else
-#ifdef HAVE_BLITZ
-    inline blitz::Array<double,1> frequencies () {
-      return frequencies_p;
-    }
-#endif
-#endif
     
     /*!
       \brief Set the frequencies values for which the phases are computed
@@ -273,34 +228,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \return status -- Status of the operation; returns <tt>false</tt> if an
                         error was encountered.
     */
-#ifdef HAVE_CASA
     virtual bool setFrequencies (const casa::Vector<double> &frequencies,
 				 bool const &bufferPhases=false);
-#else
-#ifdef HAVE_BLITZ
-    virtual bool setFrequencies (const blitz::Array<double,1> &frequencies,
-				 bool const &bufferPhases=false);
-#else
-    virtual bool setFrequencies (const std::vector<double> &frequencies,
-				 bool const &bufferPhases=false);
-#endif
-#endif
 
     /*!
       \brief Get the geometrical phase(s)
 
-      \return delay -- [antenna,skyPosition,frequency]
-                       Array with the geometrical phase(s) for a combination
-                       of antenna positions, pointing positions and observation
-		       frequencies.
+      \return delay -- [frequency,antenna,skyPosition] Array with the
+              geometrical phase(s) for a combination of antenna positions,
+	      pointing positions and observation frequencies.
     */
-#ifdef HAVE_CASA
     casa::Cube<double> phases ();
-#else
-#ifdef HAVE_BLITZ
-    blitz::Array<double,3> phases ();
-#endif
-#endif
 
     // ------------------------------------------------------------------ Methods
     
@@ -340,15 +278,15 @@ namespace CR { // NAMESPACE CR -- BEGIN
     void destroy(void);
 
     void setPhases ();
-    
-#ifdef HAVE_CASA
-    casa::Cube<double> calcPhases ();
-#else
-#ifdef HAVE_BLITZ
-    blitz::Array<double,3> calcPhases ();
-#endif
-#endif
+  
+    /*!
+      \brief Calculate the geometrical phases
 
+      \return phases -- [frequency,antenna,direction] Array with the
+              geometrical phases
+    */
+    casa::Cube<double> calcPhases ();
+    
   };  // CLASS GEOMETRICALPHASE -- END
   
 }  // NAMESPACE CR -- END

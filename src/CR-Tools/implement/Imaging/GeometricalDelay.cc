@@ -976,7 +976,15 @@ namespace CR { // NAMESPACE CR -- BEGIN
       skyPos = skyPositions_p.row(nSky);
       for (nAnt=0; nAnt<nofAntennas_p; nAnt++) {
  	diff = skyPos - antPositions_p.row(nAnt);
- 	delays(nAnt,nSky) = (L2Norm(diff)-L2Norm(skyPos))/lightspeed;
+	//
+//  	delays(nAnt,nSky) = (L2Norm(diff)-L2Norm(skyPos))/lightspeed;
+	/* Forward the computation to properly take care of the geometry */
+ 	delays(nAnt,nSky) = calcDelay(skyPositions_p(nSky,0),
+				      skyPositions_p(nSky,1),
+				      skyPositions_p(nSky,2),
+				      antPositions_p(nAnt,0),
+				      antPositions_p(nAnt,1),
+				      antPositions_p(nAnt,2));
       }
     }
     

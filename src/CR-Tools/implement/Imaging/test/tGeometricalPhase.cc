@@ -22,6 +22,7 @@
 
 #include <iostream>
 
+#include "create_data.h"
 #include <Imaging/GeometricalPhase.h>
 
 using std::cout;
@@ -68,61 +69,32 @@ int test_GeometricalPhase ()
   try {
     GeometricalPhase phase;
     phase.summary();
-    summary(phase);
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
   
-  std::cout << "[2] Testing argumented constructor ..." << std::endl;
-#ifdef HAVE_CASA
+  std::cout << "[2] Testing simple argumented constructor ..." << std::endl;
   try {
-    unsigned int nofChannels (10);
-    casa::Vector<double> frequencies (nofChannels);
-
-    for (unsigned int n(0); n<nofChannels; n++) {
-      frequencies(n) = n*1.0e06;
-    }
+    casa::Vector<double> frequencies = get_frequencies (20);
 
     GeometricalPhase phase (frequencies);
     phase.summary();
+    //
+    std::cout << phase.phases() << std::endl;
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
-#else 
-#ifdef HAVE_BLITZ
-  try {
-    unsigned int nofChannels (10);
-    blitz::Array<double,1> frequencies (nofChannels);
-
-    for (unsigned int n(0); n<nofChannels; n++) {
-      frequencies(n) = n*1.0e06;
-    }
-
-    GeometricalPhase phase (frequencies);
-    phase.summary();
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-#endif
-#endif
 
   std::cout << "[3] Testing argumented constructor ..." << std::endl;
-#ifdef HAVE_CASA
   try {
     unsigned int nofCoordinates (3);
     unsigned int nofAntennas (2);
     unsigned int nofPositions (2);
-    unsigned int nofChannels (10);
     casa::Matrix<double> antennaPositions (nofAntennas,nofCoordinates);
     casa::Matrix<double> skyPositions (nofPositions,nofCoordinates);
-    casa::Vector<double> frequencies (nofChannels);
-
-    for (unsigned int n(0); n<nofChannels; n++) {
-      frequencies(n) = n*1.0e06;
-    }
+    casa::Vector<double> frequencies = get_frequencies (20);
 
     GeometricalPhase phase (frequencies);
     phase.summary();
@@ -130,7 +102,6 @@ int test_GeometricalPhase ()
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
-#endif
   
   return nofFailedTests;
 }

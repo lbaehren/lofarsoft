@@ -735,7 +735,7 @@ int test_delayComputation ()
 
   // adjust the sky positions
   {
-    uint nofPositions (100);
+    uint nofPositions (200);
     double incr (100);
 
     skyPositions.resize (nofPositions,3);
@@ -753,13 +753,25 @@ int test_delayComputation ()
 			    CR::Spherical);
     delay.summary();
 
-    // retrieve the delay values
-    casa::Matrix<double> delays = delay.delays();
+    // retrieve the delay values for the near-field geometry
+    delay.setNearField (true,
+			false);
+    casa::Matrix<double> delaysNearField = delay.delays();
+
+    // retrieve the delay values for the far-field geometry
+    std::cout << "-- switching to far-field geometry" << std::endl;
+    delay.setNearField (false,
+			false);
+    delay.summary();
+    casa::Matrix<double> delaysFarField = delay.delays();
     
     // export the delays for later plotting
     std::ofstream outfile ("delays.data",std::ios::out);
     for (uint coord (0); coord<nofPositions; coord++) {
-      outfile << skyPositions(coord,2) << "\t" << delays(0,coord) << endl;
+      outfile << skyPositions(coord,2)
+	      << "\t" << delaysNearField(0,coord)
+	      << "\t" << delaysFarField(0,coord)
+	      << endl;
     }
     outfile.close();
   }

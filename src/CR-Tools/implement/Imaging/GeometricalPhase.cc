@@ -23,6 +23,7 @@
 
 #include <Imaging/GeometricalPhase.h>
 #include <Math/Constants.h>
+#include <casa/Arrays/Slicer.h>
 
 namespace CR { // NAMESPACE CR -- BEGIN
   
@@ -38,46 +39,24 @@ namespace CR { // NAMESPACE CR -- BEGIN
     : GeometricalDelay (),
       bufferPhases_p(false)
   {
-#ifdef HAVE_CASA
-    casa::Vector<double> frequencies (1);
-    frequencies = 0.0;
-#else
-#ifdef HAVE_BLITZ
-    blitz::Array<double,1> frequencies (1);
-    frequencies = 0.0;
-#else
-    std::vector<double> frequencies (1);
-    frequencies[0] = 0.0;
-#endif
-#endif
-    setFrequencies (frequencies,false);
+    casa::Vector<double> frequencies (1,0.0);
+    setFrequencies (frequencies,
+		    false);
   }
   
   // ----------------------------------------------------------- GeometricalPhase
   
-#ifdef HAVE_CASA
   GeometricalPhase::GeometricalPhase (casa::Vector<double> const &frequencies,
 				      bool const &bufferPhases)
     : GeometricalDelay (),
       bufferPhases_p(false)
   {
-    setFrequencies (frequencies,bufferPhases);
+    setFrequencies (frequencies,
+		    bufferPhases);
   }
-#else
-#ifdef HAVE_BLITZ
-  GeometricalPhase::GeometricalPhase (blitz::Array<double,1> const &frequencies,
-				      bool const &bufferPhases)
-    : GeometricalDelay (),
-      bufferPhases_p(false)
-  {
-    setFrequencies (frequencies,bufferPhases);
-  }
-#endif
-#endif
   
   // ----------------------------------------------------------- GeometricalPhase
 
-#ifdef HAVE_CASA
   GeometricalPhase::GeometricalPhase (casa::Matrix<double> const &antPositions,
 				      casa::Matrix<double> const &skyPositions,
 				      casa::Vector<double> const &frequencies,
@@ -90,44 +69,16 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			bufferDelays,
 			true)
   {
-    setFrequencies (frequencies,bufferPhases);
+    setFrequencies (frequencies,
+		    bufferPhases);
   }
-#else
-#ifdef HAVE_BLITZ
-  GeometricalPhase::GeometricalPhase (const blitz::Array<double,2> &antPositions,
-				      const blitz::Array<double,2> &skyPositions,
-				      blitz::Array<double,1> const &frequencies,
-				      const bool &bufferDelays,
-				      bool const &bufferPhases)
-    : GeometricalDelay (antPositions,
-			CR::Cartesian,
-			skyPositions,
-			CR::Cartesian,
-			bufferDelays,
-			true)
-  {
-    setFrequencies (frequencies,bufferPhases);
-  }
-#endif
-#endif
 
   // ----------------------------------------------------------- GeometricalPhase
 
   GeometricalPhase::GeometricalPhase (GeometricalDelay const &delay)
     : GeometricalDelay (delay)
   {
-#ifdef HAVE_CASA
-    casa::Vector<double> frequencies (1);
-    frequencies = 0.0;
-#else
-#ifdef HAVE_BLITZ
-    blitz::Array<double,1> frequencies (1);
-    frequencies = 0.0;
-#else
-    std::vector<double> frequencies (1);
-    frequencies[0] = 0.0;
-#endif
-#endif
+    casa::Vector<double> frequencies (1,0.0);
     setFrequencies (frequencies,false);
   }
 
@@ -191,7 +142,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
   // ------------------------------------------------------------- setFrequencies
 
-#ifdef HAVE_CASA
   bool GeometricalPhase::setFrequencies (const casa::Vector<double> &frequencies,
 					 bool const &bufferPhases)
   {
@@ -208,36 +158,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     return status;
   }
-#else
-#ifdef HAVE_BLITZ
-  bool GeometricalPhase::setFrequencies (const blitz::Array<double,1> &frequencies,
-					 bool const &bufferPhases)
-  {
-    bool status (true);
-    
-    frequencies_p.resize (frequencies.shape());
-    frequencies_p = frequencies;
-
-    bufferPhases_p = bufferPhases;
-    
-    if (bufferPhases_p) {
-      setPhases();
-    }
-    
-    return status;
-  }
-#else
-  bool GeometricalPhase::setFrequencies (const std::vector<double> &frequencies,
-					 bool const &bufferPhases)
-  {
-    bool status (true);
-
-
-    return status;
-  }
-#endif
-#endif
-  
   
   // ============================================================================
   //
@@ -247,7 +167,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
   
   // --------------------------------------------------------------------- phases
 
-#ifdef HAVE_CASA
   casa::Cube<double> GeometricalPhase::phases ()
   {
     if (bufferPhases_p) {
@@ -256,34 +175,21 @@ namespace CR { // NAMESPACE CR -- BEGIN
       return calcPhases();
     }
   }
-#else
-#ifdef HAVE_BLITZ
-  blitz::Array<double,3> GeometricalPhase::phases ()
-  {
-    if (bufferPhases_p) {
-      return phases_p;
-    } else {
-      return calcPhases();
-    }
-  }
-#endif
-#endif
   
   // ------------------------------------------------------------------ setPhases
 
   void GeometricalPhase::setPhases ()
   {
     if (bufferPhases_p) {
-      delays_p.resize (GeometricalDelay::nofAntennaPositions(),
-		       GeometricalDelay::nofSkyPositions(),
-		       nofFrequencies());
+      delays_p.resize (nofFrequencies(),
+		       GeometricalDelay::nofAntennaPositions(),
+		       GeometricalDelay::nofSkyPositions());
       phases_p = calcPhases ();
     }
   }
 
   // ----------------------------------------------------------------- calcPhases
 
-#ifdef HAVE_CASA
   casa::Cube<double> GeometricalPhase::calcPhases ()
   {
     int nofChannels (nofFrequencies());
@@ -294,40 +200,47 @@ namespace CR { // NAMESPACE CR -- BEGIN
     casa::IPosition shape       = delays.shape();
     
     // array with the computed phases, [antenna,skyPosition,frequency]
-    casa::Cube<double> phases (shape(0),shape(1),nofChannels);
+    casa::Cube<double> phases (nofChannels,
+			       shape(0),
+			       shape(1));
 
-    // compute the phases
+    /* Use a Slicer object to directly insert the array with the delays into
+       the array holding the phases. */
+
+    casa::IPosition end (3,1,shape(0),shape(1));
+    casa::IPosition incr (3,1,1,1);
+    casa::Cube<double> tmp;
+
+#ifdef DEBUGGING_MESSAGES
+    std::cout << "[GeometricalPhase::calcPhases]" << std::endl;
+    std::cout << "-- frequency values       = " << frequencies_p  << std::endl;
+    std::cout << "-- geometrical delays     = " << delays         << std::endl;
+    std::cout << "-- nof frequency channels = " << nofChannels    << std::endl;
+    std::cout << "-- shape of delays array  = " << shape          << std::endl;
+    std::cout << "-- shape of phases array  = " << phases.shape() << std::endl;
+    std::cout << "-- Slicer: end specifier  = " << end            << std::endl;
+    std::cout << "-- Slicer: incr specifier = " << incr           << std::endl;
+#endif
+    
     for (nChannel=0; nChannel<nofChannels; nChannel++) {
-      phases.xyPlane(nChannel) = CR::_2pi*frequencies_p(nChannel)*delays;
+      // create Slicer object to address the target array
+//       casa::Slicer slice (casa::IPosition(3,nChannel,0,0),
+// 			  end,
+// 			  incr,
+// 			  casa::Slicer::endIsLength);
+      tmp.reference (phases(nChannel,
+			    casa::Slice(),
+			    casa::Slice()));
+      // calculate phases from the delays and store them
+      tmp = CR::_2pi*frequencies_p(nChannel)*delays;
     }
+
+#ifdef DEBUGGING_MESSAGES
+    std::cout << "-- shape of tmp array     = " << tmp.shape()    << std::endl;
+#endif
 
     return phases;
   }
-#else
-#ifdef HAVE_BLITZ
-  blitz::Array<double,3> GeometricalPhase::calcPhases ()
-  {
-
-    // get the geometrical delays
-    blitz::Array<double,2> delays = GeometricalDelay::delays();
-    
-    
-    // array with the computed phases
-    int nofAntennas (delays.rows());
-    int nofPointings (delays.cols());
-    int nofChannels (nofFrequencies());
-    int nChannel (0);
-    blitz::Array<double,3> phases (nofAntennas,nofPointings,nofChannels);
-
-    // compute the phases
-    for (nChannel=0; nChannel<nofChannels; nChannel++) {
-      phases(Range::all(),Range::all(),nChannel) = CR::_2pi*frequencies_p(nChannel)*delays;
-    }
-
-    return phases;
-  }
-#endif
-#endif
   
   void GeometricalPhase::summary (std::ostream &os)
   {
