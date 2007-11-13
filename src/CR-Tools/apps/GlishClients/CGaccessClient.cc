@@ -25,11 +25,15 @@
 using CR::DataReader;
 using CR::LopesEventIn;
 
-// global Variable that actually contains all the data
+// global Variable for LOPES events that actually contains all the data
 CR::analyseLOPESevent pipeline;
+
+// global Variable for tbbctl data that actually contains all the data
+CR::tbbctlIn tbbIn;
+
 // local copies (of the pointers) to access the stuff.
 CR::CRinvFFT *pipeline_p;    
-DataReader * DataReader_p;
+DataReader *DataReader_p;
 
 //---------------------------------------------------------------------   initPipeline
 
@@ -74,13 +78,13 @@ Bool initPipeline(GlishSysEvent &event, void *){
   return True;
 };
 
-//---------------------------------------------------------------------   LoadEvent
-Bool LoadEvent(GlishSysEvent &event, void *){
+//----------------------------------------------------------------   LoadLOPESEvent
+Bool LoadLOPESEvent(GlishSysEvent &event, void *){
   GlishSysEventSource *glishBus = event.glishSource();
   try {
     String evname;
     if (event.val().type() != GlishValue::ARRAY) {
-      cerr << "CGaccessClient:LoadEvent: " << "Need the path to the file!" 
+      cerr << "CGaccessClient:LoadLOPESEvent: " << "Need the path to the file!" 
 	   << endl;
       if (glishBus->replyPending()) {
 	glishBus->reply(GlishArray(False));
@@ -92,19 +96,20 @@ Bool LoadEvent(GlishSysEvent &event, void *){
     LopesEventIn *lev_p=pipeline.GetDataReader();
     // initialize the Data Reader
     if (! lev_p->attachFile(evname) ){
-      cerr << "CGaccessClient:LoadEvent: " << "Failed to attach file: " << evname << endl;
+      cerr << "CGaccessClient:LoadLOPESEvent: " << "Failed to attach file: " << evname << endl;
       if (glishBus->replyPending()) {
 	glishBus->reply(GlishArray(False));
       };
       return True;
     };
     if (! pipeline_p->InitEvent(lev_p)){
-      cerr << "CGaccessClient:LoadEvent: " << "Failed to initialize the DataReader!" << endl;
+      cerr << "CGaccessClient:LoadLOPESEvent: " << "Failed to initialize the DataReader!" << endl;
       if (glishBus->replyPending()) {
 	glishBus->reply(GlishArray(False));
       };
       return True;
     };
+    DataReader_p = lev_p;
     Record outrec;
     outrec.merge(lev_p->header(),RecordInterface::OverwriteDuplicates);
     pipeline_p->setPhaseCenter(0.,0.);
@@ -117,7 +122,7 @@ Bool LoadEvent(GlishSysEvent &event, void *){
       glishBus->reply(grec);
     };
   } catch (AipsError x) {
-    cerr << "CGaccessClient:LoadEvent: " << x.getMesg() << endl;
+    cerr << "CGaccessClient:LoadLOPESEvent: " << x.getMesg() << endl;
     if (glishBus->replyPending()) {
       glishBus->reply(GlishArray(False));
     };
@@ -125,6 +130,64 @@ Bool LoadEvent(GlishSysEvent &event, void *){
   };   
   return True;
 };
+
+
+//----------------------------------------------------------------   LoadTBBCTLEvent
+Bool LoadTBBCTLEvent(GlishSysEvent &event, void *){
+  GlishSysEventSource *glishBus = event.glishSource();
+  try {
+    Vector<String> evnames;
+    if (event.val().type() != GlishValue::ARRAY) {
+      cerr << "CGaccessClient:LoadTBBCTLEvent: " << "Need the path to the files!" 
+	   << endl;
+      if (glishBus->replyPending()) {
+	glishBus->reply(GlishArray(False));
+      };
+      return True;
+    };
+    GlishArray gtmp = event.val();
+    gtmp.get(evnames);
+
+    // initialize the Data Reader
+    if (! tbbIn.attachFile(evnames) ){
+      cerr << "CGaccessClient:LoadTBBCTLEvent: " << "Failed to attach files: " << evnames << endl;
+      if (glishBus->replyPending()) {
+	glishBus->reply(GlishArray(False));
+      };
+      return True;
+    };
+    if (! pipeline_p->InitEvent(&tbbIn)){
+      cerr << "CGaccessClient:LoadTBBCTLEvent: " << "Failed to initialize the DataReader!" << endl;
+      if (glishBus->replyPending()) {
+	glishBus->reply(GlishArray(False));
+      };
+      return True;
+    };
+    DataReader_p = &tbbIn;
+    Record outrec;
+    outrec.merge(tbbIn.header(),RecordInterface::OverwriteDuplicates);
+    pipeline_p->setPhaseCenter(0.,0.);
+    pipeline_p->GetTimeSeries(DataReader_p);
+    outrec.define("AntPos",pipeline_p->GetAntPositions());
+
+    if (glishBus->replyPending()) {
+      GlishRecord grec;
+      grec.fromRecord(outrec);
+      glishBus->reply(grec);
+    };
+  } catch (AipsError x) {
+    cerr << "CGaccessClient:LoadTBBCTLEvent: " << x.getMesg() << endl;
+    if (glishBus->replyPending()) {
+      glishBus->reply(GlishArray(False));
+    };
+    return False;
+  };   
+  return True;
+};
+
+
+
+
 
 //---------------------------------------------------------------------  GetTime 
 Bool GetTime(GlishSysEvent &event, void *){
@@ -259,7 +322,7 @@ Bool GetFilteredFFT(GlishSysEvent &event, void *){
 Bool GetTCXP(GlishSysEvent &event, void *){
   GlishSysEventSource *glishBus = event.glishSource();
   try {
-    Double Az, El, distance=4000, XC, YC, ExtraDelay=0.; 
+    Double Az, El, distance=1e37, XC, YC, ExtraDelay=0.; 
     Bool RotatePos=False;
     Vector<Bool> FlaggedAnts; 
     if (event.val().type() != GlishValue::RECORD) {
@@ -394,7 +457,9 @@ int main(int argc, char *argv[])
   DataReader_p = NULL;
 
   glishStream.addTarget(initPipeline,"initPipeline");
-  glishStream.addTarget(LoadEvent,"LoadEvent");
+  glishStream.addTarget(LoadLOPESEvent,"LoadLOPESEvent");
+  glishStream.addTarget(LoadTBBCTLEvent,"LoadTBBCTLEvent");
+
   glishStream.addTarget(GetTime,"GetTime");
   glishStream.addTarget(GetFrequency,"GetFrequency");
   glishStream.addTarget(GetFX,"GetFX");

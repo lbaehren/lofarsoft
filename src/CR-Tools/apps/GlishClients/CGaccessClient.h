@@ -35,6 +35,7 @@
 #include <sstream>
 
 #include <Analysis/analyseLOPESevent.h>
+#include <Data/tbbctlIn.h>
 #include <ApplicationSupport/Glish.h>
 
 /*!
