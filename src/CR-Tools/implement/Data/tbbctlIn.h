@@ -88,7 +88,7 @@ namespace CR { // Namespace CR -- begin
   private:
 
     //! filename (incl. path) of the file to be read
-    String filename_p;
+    Vector<String> filenames_p;
 
     //! Is this object attached to a file?
     Bool attached_p;
@@ -98,6 +98,9 @@ namespace CR { // Namespace CR -- begin
 
     //! Number of antennas in the event
     Int NumAntennas_p;
+
+    //! size of the data in memory
+    Int datasize_p;
     
     //! Matrix with the data itself
     Matrix<short> channeldata_p;
@@ -119,7 +122,7 @@ namespace CR { // Namespace CR -- begin
       
       \param filename -- name (incl. path) of the lopes-eventfile to be read.
     */
-    tbbctlIn (String const &filename);
+    tbbctlIn(Vector<String> const &filenames);
 
     // -------------------------------------------------------------- Destruction
     
@@ -162,7 +165,7 @@ namespace CR { // Namespace CR -- begin
 
       \return ok -- True if successfull
     */
-    Bool attachFile(String filename);
+    Bool attachFile(Vector<String> filenames);
 
     /*!
       \brief return the raw ADC time series, in ADC-counts
@@ -170,11 +173,28 @@ namespace CR { // Namespace CR -- begin
       \return Matrix with the data
     */
     Matrix<Double> fx();
+
+
+  protected:
+    /*!
+      \brief Connect the data streams used for reading in the data i.e. set up the DataReader
+      
+      \return status -- Status of the operation; returns <i>true</i> if everything
+      went fine.
+    */
+    Bool setStreams();
+    
+    /*!
+      \brief Fill the header information from the into a header record.
+      
+      \return status -- Status of the operation; returns <i>true</i> if everything
+      went fine.
+    */
+    Bool generateHeaderRecord();
     
     
   private:
-    
-    
+        
     /*!
       \brief Unconditional deletion 
     */

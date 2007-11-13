@@ -40,6 +40,21 @@ using CR::tbbctlIn;  // Namespace usage
 // -----------------------------------------------------------------------------
 
 /*!
+  \brief Show the contents of the data array
+
+  \param data -- Array with the ADC or voltage data per antenna
+*/
+void show_data (Matrix<Double> const &data)
+{
+  std::cout << "  Data shape : " << data.shape() << std::endl;
+  std::cout << "  Data ..... : "
+	    << data(1,1) << " "
+	    << data(2,1) << " "
+	    << data(3,1)
+	    << std::endl;
+}
+
+/*!
   \brief Test constructors for a new tbbctlIn object
 
   \return nofFailedTests -- The number of failed tests.
@@ -55,7 +70,38 @@ int test_tbbctlIn ()
     tbbctlIn newtbbctlIn;
     //
 
-    newtbbctlIn.attachFile("/home/horneff/rw_20071102_122549_0100.dat");
+    Vector<String> filenames(2);
+    filenames(0) = "/mnt/lofar/CS1_tbb/20071112_145210/rw_20071112_145210_0100.dat";
+    filenames(1) = "/mnt/lofar/CS1_tbb/20071112_145210/rw_20071112_145210_0101.dat";
+    //    filenames(2) = "/mnt/lofar/CS1_tbb/20071112_145210/rw_20071112_145210_0106.dat";
+    //    filenames(3) = "/mnt/lofar/CS1_tbb/20071112_145210/rw_20071112_145210_0107.dat";
+    //    filenames(4) = "/mnt/lofar/CS1_tbb/20071112_145210/rw_20071112_145210_0108.dat";
+
+    std::cout << "[2] Testing attaching a file ..." << std::endl;
+    if (! newtbbctlIn.attachFile(filenames) ){
+      std::cout << "  Failed to attach file(s)!" << std::endl;
+      nofFailedTests++;
+      return nofFailedTests;
+    };
+    
+
+    std::cout << "[3] Testing retrieval of fx() data ..." << std::endl;
+    Matrix<Double> data;
+    data = newtbbctlIn.fx();
+    show_data (data);
+    
+    std::cout << "[4] Testing retrieval of Voltage data ..." << std::endl;
+    data = newtbbctlIn.voltage();
+    show_data(data);
+
+
+    std::cout << "[5] Testing header record ..." << std::endl;
+    for (uint i=0; i<newtbbctlIn.header().nfields(); i++) {
+      std::cout << "  Field No: " << i << " Name: " << newtbbctlIn.header().name(i) << std::endl;
+    };
+    std::cout << "  Values:\n    Date: " << newtbbctlIn.header().asuInt("Date") << std::endl;
+    std::cout << "    Observatory: " << newtbbctlIn.header().asString("Observatory") << std::endl;
+    std::cout << "    IDs: " << newtbbctlIn.header().asArrayInt("AntennaIDs") << std::endl;
 
     newtbbctlIn.summary(); 
   } catch (std::string message) {

@@ -131,7 +131,7 @@ namespace CR { // Namespace CR -- begin
       };
       if (newCTR){
 	if (CTRead!=NULL) delete CTRead;
-	CTRead = new CalTableReader(ObsToCTPath.asString("LOPES"));
+	CTRead = new CalTableReader(ObsToCTPath.asString(obsstring));
       };
       if ((newCTR) || (blocksize!=dr->blocksize()) || (samplerate!=dr->sampleFrequency())){
 	blocksize = dr->blocksize();
