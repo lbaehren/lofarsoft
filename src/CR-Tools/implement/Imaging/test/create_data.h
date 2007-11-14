@@ -61,34 +61,47 @@ using CR::TimeFreq;
          If <tt>true</tt>, then the returned array is of shape [nofAntennas,3],
 	 otherwise -- if <tt>antennaIndexFirst=false</tt> -- the returned array
 	 if of shape [3,nofAntennas].
+  \param coordType -- CR::CoordinateType as which the antenna positions are
+         returned.
 
   \return positions -- [antenna,coordinate] Antenna positions, \f$ \vec x \f$
 */
-Matrix<double> get_antennaPositions (uint const &nofAntennas=3,
-				     bool const &antennaIndexFirst=true,
-				     CR::CoordinateType const &which=CR::Cartesian)
+Matrix<double>
+get_antennaPositions (uint const &nofAntennas=4,
+		      bool const &antennaIndexFirst=true,
+		      CR::CoordinateType const &coordType=CR::Cartesian)
 {
   uint nofAxes (3);
-  Matrix<double> positions;
+  double incr (100);
+  Matrix<double> antPositions (nofAntennas,nofAxes,0.0);
 
+  switch (coordType) {
+  case CR::Cartesian:
+    if (nofAntennas == 4) {
+      // [100,0,0]
+      antPositions(0,0) = incr;
+      // [0,100,0]
+      antPositions(1,1) = incr;
+      // [-100,0,0]
+      antPositions(2,0) = -incr;
+      // [0,-100,0]
+      antPositions(3,1) = -incr;
+    } else {
+      for (uint n(0); n<nofAntennas; n++) {
+	antPositions(n,0) = antPositions(n,1) = n*incr;
+      }
+    }
+    break;
+  case CR::Spherical:
+    break;
+  }
+  
   if (antennaIndexFirst) {
-    // adjust array size
-    positions.resize(nofAntennas,nofAxes,0.0);
-    // fill in data
-    for (uint n(0); n<nofAntennas; n++) {
-      positions(n,0) = positions(n,1) = n*100;
-    }
+    return antPositions;
   } else {
-    // adjust array size
-    positions.resize(nofAxes,nofAntennas,0.0);
-    // fill in data
-    for (uint n(0); n<nofAntennas; n++) {
-      positions(0,n) = positions(1,n) = n*100;
-    }
+    return transpose(antPositions);
   }
 
-
-  return positions;
 }
 
 // -----------------------------------------------------------------------------

@@ -35,6 +35,7 @@ using blitz::Range;
 #endif
 #endif
 
+#include "create_data.h"
 #include <Imaging/GeometricalDelay.h>
 
 using std::cout;
@@ -79,25 +80,8 @@ void get_positions (casa::Matrix<double> &skyPositions,
   int nofDirections (3);
 
   // Antenna positions
-  
-  antPositions.resize(nofAntennas,nofCoordinates);
-  antPositions = 0.0;
-  
-  // [100,0,0]
-  antPositions(0,0) = 100;
-  // [0,100,0]
-  antPositions(1,1) = 100;
-  // [-100,0,0]
-  antPositions(2,0) = -100;
-  // [0,-100,0]
-  antPositions(3,1) = -100;
-  
-  if (!antennaIndexFirst) {
-    Matrix<double> tmp = transpose(antPositions);
-    //
-    antPositions.resize (tmp.shape());
-    antPositions = tmp;
-  }
+
+  antPositions = get_antennaPositions();
   
   // Pointing directions (sky positions)
   
@@ -844,9 +828,9 @@ int main ()
   // Test manipulation of the antenna positions
   nofFailedTests += test_antennaPositions ();
   // Test manipulation of the sky positions
-  nofFailedTests += test_skyPositions ();
+//   nofFailedTests += test_skyPositions ();
   // Test for the computation of the actual geometrical delay
-  nofFailedTests += test_delayComputation ();
+//   nofFailedTests += test_delayComputation ();
   
   return nofFailedTests;
 }
