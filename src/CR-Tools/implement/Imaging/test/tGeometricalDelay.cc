@@ -23,17 +23,9 @@
 #include <iostream>
 #include <fstream>
 
-#ifdef HAVE_CASA
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
-#else
-#ifdef HAVE_BLITZ
-#include <blitz/array.h>
-using blitz::Array;
-using blitz::Range;
-#endif
-#endif
 
 #include "create_data.h"
 #include <Imaging/GeometricalDelay.h>
@@ -61,7 +53,6 @@ const double lightspeed = 299792458;
 
 // -----------------------------------------------------------------------------
 
-#ifdef HAVE_CASA
 /*!
   \brief Get arrays with the antenna and sky positions
 
@@ -75,70 +66,14 @@ void get_positions (casa::Matrix<double> &skyPositions,
 		    casa::Matrix<double> &antPositions,
 		    bool const &antennaIndexFirst)
 {
-  int nofCoordinates (3);
-  int nofAntennas (4);
-  int nofDirections (3);
-
   // Antenna positions
 
   antPositions = get_antennaPositions();
   
   // Pointing directions (sky positions)
   
-  skyPositions.resize(nofDirections,nofCoordinates);
-
-  skyPositions            = 0.0;
-  skyPositions.diagonal() = 100.0;
-
+  skyPositions = get_skyPositions ();
 }
-#else
-#ifdef HAVE_BLITZ
-void get_positions (blitz::Array<double,2> &skyPositions,
-		    blitz::Array<double,2> &antPositions,
-		    bool const &antennaIndexFirst)
-{
-  int nofCoordinates (3);
-  int nofAntennas (4);
-  int nofDirections (3);
-
-  // Antenna positions
-
-  if (antennaIndexFirst) {
-    antPositions.resize(nofAntennas,nofCoordinates);
-    antPositions = 0.0;
-
-    // [100,0,0]
-    antPositions(0,0) = 100;
-    // [0,100,0]
-    antPositions(1,1) = 100;
-    // [-100,0,0]
-    antPositions(2,0) = -100;
-    // [0,-100,0]
-    antPositions(3,1) = -100;
-  } else {
-    antPositions.resize(nofCoordinates,nofAntennas);
-    antPositions = 0.0;
-
-    // [100,0,0]
-    antPositions(0,0) = 100;
-    // [0,100,0]
-    antPositions(1,1) = 100;
-    // [-100,0,0]
-    antPositions(0,2) = -100;
-    // [0,-100,0]
-    antPositions(1,3) = -100;
-  }
-
-  // Pointing directions (sky positions)
-  
-  skyPositions.resize(nofDirections,nofCoordinates);
-
-  skyPositions            = 0.0;
-  skyPositions.diagonal() = 100.0;
-
-}
-#endif
-#endif
 
 // -----------------------------------------------------------------------------
 
@@ -147,7 +82,6 @@ void get_positions (blitz::Array<double,2> &skyPositions,
 
   \return nofFailedTests -- The number of failed tests.
 */
-#ifdef HAVE_CASA
 int test_formula ()
 {
   cout << "\n[test_formula] (CASA arrays)\n" << endl;
@@ -181,96 +115,6 @@ int test_formula ()
   
   return nofFailedTests;
 }
-#else
-#ifdef HAVE_BLITZ
-int test_formula ()
-{
-  cout << "\n[test_formula] (Blitz++ arrays)\n" << endl;
-
-  int nofFailedTests (0);
-
-  int nofCoordinates (3);
-  Array<double,1> skyPositions (nofCoordinates);
-  Array<double,2> antPositions (2,nofCoordinates);
-  double delay (.0);
-
-  antPositions = -100.0, 0.0, 0.0, 100.0, 0.0, 0.0;
-  skyPositions = 100.0, 100.0, 100.0;
-
-  cout << "sky positions = " << skyPositions  << endl;
-  cout << "ant positions = " << antPositions  << endl;
-
-  /*!
-    Standard version for the computation of the delay
-   */
-  cout << "[1] Far-field geometry" << endl;
-  try {
-    double scalarProduct (.0);
-
-    for (int n(0); n<nofCoordinates; n++) {
-      scalarProduct += (antPositions(1,n)-antPositions(0,n))*skyPositions(n);
-    }
-    delay = scalarProduct/lightspeed;
-    
-    cout << "delay(FF)     = " << delay         << endl;
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-  
-  /*!
-    Computation of the delay based on the full 3-dim geometry
-  */
-  cout << "\n[2] Compute delay for full geometry\n" << endl;
-  try {
-    Array<double,1> diff0 (nofCoordinates);
-    Array<double,1> diff1 (nofCoordinates);
-    
-    for (int n(0); n<nofCoordinates; n++) {
-      diff0(n) = skyPositions(n)-antPositions(0,n);
-      diff1(n) = skyPositions(n)-antPositions(1,n);
-    }
-    delay = (L2Norm(diff1)-L2Norm(diff0))/lightspeed;
-    
-    cout << "delay(NF)     = " << delay         << endl;
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-
-  /*
-    Variation of the source position
-  */
-  cout << "\n[3] Variation of the source position\n" << endl;
-  try {
-    double zmin (100.0);
-    double zmax (1000.0);
-    double zstep (100.0);
-    Array<double,1> diff0 (nofCoordinates);
-    Array<double,1> diff1 (nofCoordinates);
-
-    // go through the distance steps
-    for (double z(zmin); z<=zmax; z+=zstep) {
-      // set the z-coordinate of the sky position
-      skyPositions(2) = z;
-      // compute the geometrical delay
-      for (int n(0); n<nofCoordinates; n++) {
-	diff0(n) = skyPositions(n)-antPositions(0,n);
-	diff1(n) = skyPositions(n)-antPositions(1,n);
-      }
-      delay = (L2Norm(diff1)-L2Norm(diff0))/lightspeed;
-      // dispay the result
-      cout << "\t" << z << "\t" << delay << endl;
-    }
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-  
-  return nofFailedTests;
-}
-#endif
-#endif
 
 // -----------------------------------------------------------------------------
 
@@ -279,7 +123,6 @@ int test_formula ()
 
   \return nofFailedTests -- The number of failed tests.
 */
-#ifdef HAVE_CASA
 int test_GeometricalDelay ()
 {
   cout << "\n[test_GeometricalDelay] (CASA arrays)\n" << endl;
@@ -299,13 +142,11 @@ int test_GeometricalDelay ()
   
   cout << "[2] Testing simplest argumented constructor ..." << endl;
   try {
-    // retrieve arrays with the positions
-    get_positions (skyPositions,
-		   antPositions,
-		   true);
+    casa::Matrix<double> positions_antennas = get_antennaPositions();
+    casa::Matrix<double> positions_sky      = get_skyPositions();
     // construct new object
-    GeometricalDelay delay (antPositions,
-			    skyPositions);
+    GeometricalDelay delay (positions_antennas,
+			    positions_sky);
     delay.summary();
   } catch (std::string message) {
     std::cerr << message << endl;
@@ -390,56 +231,6 @@ int test_GeometricalDelay ()
   
   return nofFailedTests;
 }
-#else
-#ifdef HAVE_BLITZ
-int test_GeometricalDelay ()
-{
-  cout << "\n[test_GeometricalDelay] (Blitz++ arrays)\n" << endl;
-
-  int nofFailedTests (0);
-  uint nofCoordinates (3);
-  Array<double,2> antPositions (2,nofCoordinates);
-  Array<double,2> skyPositions (3,nofCoordinates);
-  
-  antPositions = -100.0, 0.0, 0.0, 100.0, 0.0, 0.0;
-  skyPositions = 100.0, 0.0, 0.0, 0.0, 100.0, 0.0, 0.0, 0.0, 100.0;
-  
-  cout << "[1] Testing default constructor ..." << endl;
-  try {
-    GeometricalDelay delay;
-    delay.summary();
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-  
-  cout << "[2] Testing argumented constructor ..." << endl;
-  try {
-    GeometricalDelay delay (antPositions,
-			    skyPositions);
-    delay.summary();
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-  
-  cout << "[3] Testing copy constructor ..." << endl;
-  try {
-    GeometricalDelay delay (antPositions,
-			    skyPositions);
-    delay.summary();
-
-    GeometricalDelay delay_copy (delay);
-    delay_copy.summary();
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-  
-  return nofFailedTests;
-}
-#endif
-#endif
 
 // -----------------------------------------------------------------------------
 
@@ -533,7 +324,6 @@ int test_skyPositions ()
   int nofSkyPositions (5);
   bool status (true);
 
-#ifdef HAVE_CASA  
   cout << "[1] Setting sky positions with cartesian coordinates, Matrix<double>"
 	    << endl;
   try {
@@ -688,7 +478,6 @@ int test_skyPositions ()
     std::cerr << message << endl;
     nofFailedTests++;
   }
-#endif
 
   return nofFailedTests;
 }
@@ -701,7 +490,6 @@ int test_skyPositions ()
   \return nofFailedTests -- Number of failed tests
 
 */
-#ifdef HAVE_CASA
 int test_delayComputation ()
 {
   cout << "\n[test_delayComputation]\n" << endl;
@@ -762,53 +550,6 @@ int test_delayComputation ()
   
   return nofFailedTests;
 }
-#else
-#ifdef HAVE_BLITZ
-int test_delayComputation ()
-{
-  cout << "\n[test_delayComputation]\n" << endl;
-
-  int nofFailedTests (0);
-  uint nofCoordinates (3);
-  int nofAntennas (3);
-  int nofPositions (1000);
-  double offset (1000);
-  double stepwidth (100);
-  Array<double,2> antPositions (nofAntennas,nofCoordinates);
-  Array<double,2> skyPositions (nofPositions,nofCoordinates);
-  
-  antPositions = 100,100,0, 200,200,0,-100,-100,0;
-
-  // assign the values for the sky positions
-  for (int n (0); n<nofPositions; n++) {
-    skyPositions(n,0) = 0.0;
-    skyPositions(n,1) = 0.0;
-    skyPositions(n,2) = offset+stepwidth*n;
-  }
-
-  GeometricalDelay delay (antPositions,
-			  skyPositions);
-  delay.summary();
-  
-  Array<double,2> delays = delay.delays();
-
-  // export the computed values
-  std::ofstream outfile;
-  outfile.open("delays.data");
-  for (int n (0); n<nofPositions; n++) {
-    outfile << "\t" << n
-	    << "\t" << skyPositions(n,2)
-	    << "\t" << delays(0,n)       // delay for antenna 1 @ [100,100,0]
-	    << "\t" << delays(1,n)       // delay for antenna 2 @ [200,200,0]
-	    << "\t" << delays(2,n)       // delay for antenna 3 @ [-100,-100,0]
-	    << endl;
-  }
-  outfile.close();
-  
-  return nofFailedTests;
-}
-#endif
-#endif
 
 // -----------------------------------------------------------------------------
 

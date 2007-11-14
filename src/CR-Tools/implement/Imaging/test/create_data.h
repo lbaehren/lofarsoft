@@ -109,23 +109,32 @@ get_antennaPositions (uint const &nofAntennas=4,
 /*!
   \brief Create some sky/pointing positions for the Beamformer
 
-  \param nofDirections -- Number of \f$ (\theta,\phi) \f$ directions
-  \param nofDistances  -- Number of distance steps.
+  \param nofPositions -- Number of sky positions for which to generate coordinates
+  \param coordType    -- CR::CoordinateType as which the antenna positions are
+         returned.
 
   \return positions -- [position,coordinate] Sky positions, \f$ \vec\rho \f$
 */
-Matrix<double> get_skyPositions (uint const &nofDirections=3,
-				 uint const &nofDistances=1)
+Matrix<double> get_skyPositions (uint const &nofPositions=2,
+				 CR::CoordinateType const &coordType=CR::Cartesian)
 {
+  uint n (0);
   uint nofAxes (3);
-  uint nofPositions (nofDirections*nofDistances);
-  uint direction(0);
-  uint distance(0);
+  double incr (100);
   Matrix<double> positions (nofPositions,nofAxes,0.0);
 
-  for (direction=0; direction<nofDirections; direction++) {
-    for (distance=0; distance<nofDistances; distance++) {
+  switch (coordType) {
+  case CR::Cartesian:
+    for (n=0; n<nofPositions; n++) {
+      positions(n,0) = positions(n,1) = positions(n,2) = n*incr;
     }
+    break;
+  case CR::Spherical:
+    positions.column(1) = positions.column(2) = CR::deg2rad(45);
+    for (n=0; n<nofPositions; n++) {
+      positions(n,0) = n*incr;
+    }
+    break;
   }
 
   return positions;

@@ -68,8 +68,12 @@ int test_GeometricalPhase ()
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
     GeometricalPhase phase;
+    // summary of object's internal settings
     phase.summary();
-  } catch (std::string message) {
+    // retrieve phases
+    std::cout << phase.delays() << std::endl; 
+    std::cout << phase.phases() << std::endl; 
+ } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
@@ -79,8 +83,10 @@ int test_GeometricalPhase ()
     casa::Vector<double> frequencies = get_frequencies (20);
 
     GeometricalPhase phase (frequencies);
+    // summary of object's internal settings
     phase.summary();
-    //
+    // retrieve phases
+    std::cout << phase.delays() << std::endl; 
     std::cout << phase.phases() << std::endl;
   } catch (std::string message) {
     std::cerr << message << std::endl;
@@ -89,15 +95,23 @@ int test_GeometricalPhase ()
 
   std::cout << "[3] Testing argumented constructor ..." << std::endl;
   try {
-    unsigned int nofCoordinates (3);
-    unsigned int nofAntennas (2);
-    unsigned int nofPositions (2);
-    casa::Matrix<double> antennaPositions (nofAntennas,nofCoordinates);
-    casa::Matrix<double> skyPositions (nofPositions,nofCoordinates);
+    casa::Matrix<double> antennaPositions = get_antennaPositions();
+    casa::Matrix<double> skyPositions = get_skyPositions();
     casa::Vector<double> frequencies = get_frequencies (20);
 
-    GeometricalPhase phase (frequencies);
+    std::cout << "-- antenna positions array = " << antennaPositions.shape()
+	      << std::endl;
+    std::cout << "-- sky positions array     = " << skyPositions.shape() << std::endl;
+    std::cout << "-- frequency array         = " << frequencies.shape()  << std::endl;
+
+    GeometricalPhase phase (antennaPositions,
+			    skyPositions,
+			    frequencies);
+    // summary of object's internal settings
     phase.summary();
+    // show geometrical phases for closer inspection
+    std::cout << phase.delays() << std::endl; 
+    std::cout << phase.phases() << std::endl;
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;

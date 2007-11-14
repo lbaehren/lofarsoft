@@ -209,7 +209,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
     casa::IPosition end (3,1,shape(0),shape(1));
     casa::IPosition incr (3,1,1,1);
-    casa::Cube<double> tmp;
+    casa::Array<double> tmp;
 
 #ifdef DEBUGGING_MESSAGES
     std::cout << "[GeometricalPhase::calcPhases]" << std::endl;
@@ -222,22 +222,30 @@ namespace CR { // NAMESPACE CR -- BEGIN
     std::cout << "-- Slicer: incr specifier = " << incr           << std::endl;
 #endif
     
-    for (nChannel=0; nChannel<nofChannels; nChannel++) {
-      // create Slicer object to address the target array
-//       casa::Slicer slice (casa::IPosition(3,nChannel,0,0),
-// 			  end,
-// 			  incr,
-// 			  casa::Slicer::endIsLength);
-      tmp.reference (phases(nChannel,
-			    casa::Slice(),
-			    casa::Slice()));
-      // calculate phases from the delays and store them
-      tmp = CR::_2pi*frequencies_p(nChannel)*delays;
+    if (nofChannels == 1) {
+      phases.yzPlane(0) =  CR::_2pi*frequencies_p(0)*delays;
+    } 
+    else if (shape(0) == 1) {
+      for (nChannel=0; nChannel<nofChannels; nChannel++) {
+	phases.yzPlane(nChannel) =  CR::_2pi*frequencies_p(nChannel)*delays;
+      }
     }
-
+    else {
+      for (nChannel=0; nChannel<nofChannels; nChannel++) {
+	// create Slicer object to address the target array
+	casa::Slicer slice (casa::IPosition(3,nChannel,0,0),
+			    end,
+			    incr,
+			    casa::Slicer::endIsLength);
+	// have the Slicer object reference the target region in the output array
+	tmp.reference (phases(slice).nonDegenerate());
+	// calculate phases from the delays and store them
+	tmp = CR::_2pi*frequencies_p(nChannel)*delays;
+      }
 #ifdef DEBUGGING_MESSAGES
     std::cout << "-- shape of tmp array     = " << tmp.shape()    << std::endl;
 #endif
+    }
 
     return phases;
   }

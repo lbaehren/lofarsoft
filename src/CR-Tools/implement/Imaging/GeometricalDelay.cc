@@ -483,7 +483,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
 	 already, we can simply pass them along; otherwise we need to insert
 	 a coordinate conversion step before storing the values. */
       if (antCoordType == CR::Cartesian) {
-	std::cout << "-- Coordinate system is cartesian." << std::endl;
 	return setAntennaPositions (antPositions,
 				    bufferDelays);
       } else {
