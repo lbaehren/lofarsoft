@@ -54,30 +54,6 @@ const double lightspeed = 299792458;
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Get arrays with the antenna and sky positions
-
-  \retval skyPositions     -- Pointing positions on the sky
-  \retval antPositions     -- Antenna positions
-  \param antennaIndexFirst -- How to organize the matrix with the antenna
-         positions? If <tt>antennaIndexFirst=true</tt> then the positions are
-	 organized as <tt>[antenna,3]</tt>, otherwise <tt>[3,antenna]</tt>
-*/
-void get_positions (casa::Matrix<double> &skyPositions,
-		    casa::Matrix<double> &antPositions,
-		    bool const &antennaIndexFirst)
-{
-  // Antenna positions
-
-  antPositions = get_antennaPositions();
-  
-  // Pointing directions (sky positions)
-  
-  skyPositions = get_skyPositions ();
-}
-
-// -----------------------------------------------------------------------------
-
-/*!
   \brief Fundamental testing on the different formulae for delay computation
 
   \return nofFailedTests -- The number of failed tests.
@@ -89,12 +65,10 @@ int test_formula ()
   int nofFailedTests (0);
   
   int nofCoordinates (3);
-  casa::Matrix<double> antPositions;
-  casa::Matrix<double> skyPositions;
+  casa::Matrix<double> antPositions = get_antennaPositions();
+  casa::Matrix<double> skyPositions = get_skyPositions();
   double delay (.0);
   
-  get_positions (skyPositions, antPositions,true);
-
   /*!
     Standard version for the computation of the delay
    */
@@ -128,8 +102,6 @@ int test_GeometricalDelay ()
   cout << "\n[test_GeometricalDelay] (CASA arrays)\n" << endl;
 
   int nofFailedTests (0);
-  casa::Matrix<double> antPositions;
-  casa::Matrix<double> skyPositions;
 
   cout << "[1] Testing default constructor ..." << endl;
   try {
@@ -142,11 +114,11 @@ int test_GeometricalDelay ()
   
   cout << "[2] Testing simplest argumented constructor ..." << endl;
   try {
-    casa::Matrix<double> positions_antennas = get_antennaPositions();
-    casa::Matrix<double> positions_sky      = get_skyPositions();
+    casa::Matrix<double> antPositions = get_antennaPositions();
+    casa::Matrix<double> skyPositions = get_skyPositions();
     // construct new object
-    GeometricalDelay delay (positions_antennas,
-			    positions_sky);
+    GeometricalDelay delay (antPositions,
+			    skyPositions);
     delay.summary();
   } catch (std::string message) {
     std::cerr << message << endl;
@@ -156,9 +128,8 @@ int test_GeometricalDelay ()
   cout << "[3] Testing argumented constructor specifying coordinates ..." << endl;
   try {
     // retrieve arrays with the positions
-    get_positions (skyPositions,
-		   antPositions,
-		   true);
+    casa::Matrix<double> antPositions = get_antennaPositions();
+    casa::Matrix<double> skyPositions = get_skyPositions();
     cout << "-- Antenna positions in cartesian coordinates ..." << std::endl;
     GeometricalDelay delay1 (antPositions,
 			     CR::Cartesian,
@@ -192,12 +163,15 @@ int test_GeometricalDelay ()
   
   cout << "[4] Testing fully argumented constructor ..." << endl;
   try {
+    uint nofAntennas (4);
     bool bufferDelays (false);
     bool antennaIndexFirst (false);
     // retrieve arrays with the positions
-    get_positions (skyPositions,
-		   antPositions,
-		   antennaIndexFirst);
+    std::cout << "-- getting antenna positions ..." << std::endl;
+    casa::Matrix<double> antPositions = get_antennaPositions(nofAntennas,
+							     antennaIndexFirst);
+    std::cout << "-- getting sky positions ..." << std::endl;
+    casa::Matrix<double> skyPositions = get_skyPositions();
     // create new object
     GeometricalDelay delay (antPositions,
 			    CR::Cartesian,
@@ -214,9 +188,8 @@ int test_GeometricalDelay ()
 
   cout << "[5] Testing copy constructor ..." << endl;
   try {
-    get_positions (skyPositions,
-		   antPositions,
-		   true);
+    casa::Matrix<double> antPositions = get_antennaPositions();
+    casa::Matrix<double> skyPositions = get_skyPositions();
     // construct new object
     GeometricalDelay delay (antPositions,
 			    skyPositions);
@@ -496,14 +469,10 @@ int test_delayComputation ()
 
   int nofFailedTests (0);
   bool antennaIndexFirst (true);
-  casa::Matrix<double> antPositions;
-  casa::Matrix<double> skyPositions;
-
+  casa::Matrix<double> antPositions = get_antennaPositions();
+  casa::Matrix<double> skyPositions = get_skyPositions();
+  
   // get the default values for antenna and sky positions
-
-  get_positions (skyPositions,
-		 antPositions,
-		 antennaIndexFirst);
 
   // adjust the sky positions
   {
