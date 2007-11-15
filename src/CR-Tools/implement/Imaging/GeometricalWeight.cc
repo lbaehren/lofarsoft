@@ -196,9 +196,10 @@ namespace CR { // NAMESPACE CR -- BEGIN
     if (bufferWeights_p) {
       IPosition shape (3);
 
-      shape(2) = GeometricalPhase::nofFrequencies();
-      shape(0) = GeometricalDelay::nofAntennaPositions();
-      shape(1) = GeometricalDelay::nofSkyPositions();
+      // Array axes: [frequency,antenna,skyPosition]
+      shape(0) = GeometricalPhase::nofFrequencies();
+      shape(1) = GeometricalDelay::nofAntennaPositions();
+      shape(2) = GeometricalDelay::nofSkyPositions();
 
       // adjust the shape of the array storing the weights
       weights_p.resize (shape);
@@ -211,10 +212,10 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
   casa::Cube<DComplex> GeometricalWeight::calcWeights ()
   {
+    int freq (0);
     int ant (0);
     int sky (0);
-    int freq (0);
-    // get the geometrical phases
+    // get the geometrical phases, [frequency,antenna,position]
     casa::Cube<double> phases = GeometricalPhase::phases();
     casa::IPosition shape     = phases.shape();
     // array to store the computed weights
@@ -224,18 +225,20 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
     std::cout << "[GeometricalWeight::calcWeights]" << std::endl;
 
-    for (freq=0; freq<shape(2); freq++) {
-      for (sky=0; sky<shape(1); sky++) {
- 	for (ant=0; ant<shape(0); ant++) {
-	  weights(ant,sky,freq) = DComplex(cos(phases(ant,sky,freq)),
-					   sin(phases(ant,sky,freq)));
+//     weights = casa::Cube<DComplex> (cos(phases),sin(phases));
+
+    for (sky=0; sky<shape(2); sky++) {
+      for (ant=0; ant<shape(1); ant++) {
+	for (freq=0; freq<shape(0); freq++) {
+	  weights(freq,ant,sky) = DComplex(cos(phases(freq,ant,sky)),
+					   sin(phases(freq,ant,sky)));
  	}  // end loop: ant
       }  // end loop: sky
       if (showProgress_p) {
 	progress.update(freq);
       }
     }  // end loop: freq
-
+    
     std::cout << " --> Computation of weights completed." << std::endl;
     
     return weights;

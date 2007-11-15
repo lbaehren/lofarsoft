@@ -43,9 +43,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
     \test tGeometricalWeight.cc
 
-    \todo Change ordering of the array axes, to be aligned with the way handed over from
-    DataReader: [freq,antenna,sky], such that we can multiply full cubes directly
-    
     <h3>Prerequisite</h3>
 
     <h3>Synopsis</h3>
@@ -195,8 +192,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
     /*!
       \brief Get the geometrical weights
 
-      \return weights -- [nofAntennas,nofPositions,nofFrequencies] Array with the
-                         values of the geometrical weights.
+      \return weights -- [frequency,antenna,skyPosition] Array with the values
+              of the geometrical weights.
     */
     casa::Cube<DComplex> weights ();
     
@@ -235,8 +232,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
     /*!
       /\brief Compute the values of the geometrical weights
 
-      \return weights -- [nofAntennas,nofPositions,nofFrequencies] Array with the
-                         values of the geometrical weights.
+      \return weights -- [frequency,antenna,skyPosition] Array with the values
+              of the geometrical weights.
      */
     casa::Cube<DComplex> calcWeights ();
 
@@ -255,4 +252,3 @@ namespace CR { // NAMESPACE CR -- BEGIN
 }  // NAMESPACE CR -- END
 
 #endif /* GEOMETRICALWEIGHT_H */
-
