@@ -27,6 +27,7 @@
 
 using std::cout;
 
+using CR::GeometricalDelay;
 using CR::GeometricalPhase;
 
 /*!
@@ -41,16 +42,6 @@ using CR::GeometricalPhase;
  
   \date 2007/01/15
 */
-
-// -----------------------------------------------------------------------------
-
-void summary (GeometricalPhase &phase)
-{
-  cout << "-- Frequencies       : " << phase.frequencies()      << std::endl;
-  cout << "-- Antenna positions : " << phase.antennaPositions() << std::endl;
-  cout << "-- Sky positions     : " << phase.skyPositions()     << std::endl;
-  cout << "-- Phases            : " << phase.phases()           << std::endl;
-}
 
 // -----------------------------------------------------------------------------
 
@@ -117,6 +108,91 @@ int test_GeometricalPhase ()
     nofFailedTests++;
   }
   
+  std::cout << "[4] Testing argumented constructor ..." << std::endl;
+  try {
+    uint nofAntennas (4);
+    uint nofSkyPositions (5);
+    bool antennaIndexFirst (true);
+    CR::CoordinateType antCoordType (CR::Spherical);
+    CR::CoordinateType skyCoordType (CR::Spherical);
+    std::cout << "-- getting antenna positions ..." << std::endl;
+    casa::Matrix<double> antennaPositions = get_antennaPositions(nofAntennas,
+								 antennaIndexFirst,
+								 antCoordType);
+    std::cout << "-- getting sky positions ..." << std::endl;
+    casa::Matrix<double> skyPositions = get_skyPositions(nofSkyPositions,
+							 skyCoordType);
+    std::cout << "-- getting frequency values ..." << std::endl;
+    casa::Vector<double> frequencies = get_frequencies (20);
+    std::cout << "-- creating GeometricalPhase object ..." << std::endl;
+    GeometricalPhase phase (antennaPositions,
+			    antCoordType,
+			    skyPositions,
+			    skyCoordType,
+			    frequencies);
+    // summary of object's internal settings
+    phase.summary();
+    // show geometrical phases for closer inspection
+//     std::cout << phase.delays() << std::endl; 
+//     std::cout << phase.phases() << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[5] Testing constructor using GeometricalDelay object ..." << std::endl;
+  try {
+    uint nofAntennas (4);
+    uint nofSkyPositions (5);
+    bool antennaIndexFirst (true);
+    CR::CoordinateType antCoordType (CR::Spherical);
+    CR::CoordinateType skyCoordType (CR::Spherical);
+    std::cout << "-- getting antenna positions ..." << std::endl;
+    casa::Matrix<double> antennaPositions = get_antennaPositions(nofAntennas,
+								 antennaIndexFirst,
+								 antCoordType);
+    std::cout << "-- getting sky positions ..." << std::endl;
+    casa::Matrix<double> skyPositions = get_skyPositions(nofSkyPositions,
+							 skyCoordType);
+    std::cout << "-- getting frequency values ..." << std::endl;
+    casa::Vector<double> frequencies = get_frequencies (20);
+    std::cout << "-- creating GeometricalPhase object ..." << std::endl;
+    GeometricalDelay delay (antennaPositions,
+			    antCoordType,
+			    skyPositions,
+			    skyCoordType);
+    delay.summary();
+    std::cout << "-- creating GeometricalPhase object ..." << std::endl;
+    GeometricalPhase phase (delay,
+			    frequencies);
+    // summary of object's internal settings
+    phase.summary();
+    // show geometrical phases for closer inspection
+//     std::cout << phase.delays() << std::endl; 
+//     std::cout << phase.phases() << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[6] Testing copy constructor ..." << std::endl;
+  try {
+    casa::Matrix<double> antennaPositions = get_antennaPositions();
+    casa::Matrix<double> skyPositions     = get_skyPositions();
+    casa::Vector<double> frequencies      = get_frequencies (20);
+
+    GeometricalPhase phase (antennaPositions,
+			    skyPositions,
+			    frequencies);
+    // summary of object's internal settings
+    phase.summary();
+    // create new object from already existing one
+    GeometricalPhase phaseCopy (phase);
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
   return nofFailedTests;
 }
 
@@ -127,9 +203,7 @@ int main ()
   int nofFailedTests (0);
 
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_GeometricalPhase ();
-  }
+  nofFailedTests += test_GeometricalPhase ();
 
   return nofFailedTests;
 }

@@ -31,15 +31,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
   //  Construction
   //
   // ============================================================================
+
+  // ---------------------------------------------------------- GeometricalWeight
   
   GeometricalWeight::GeometricalWeight ()
-    : GeometricalPhase (),
-      bufferWeights_p (false)
+    : GeometricalPhase ()
   {
-    // nothing else to do here, since we do not buffer the weights by default
+    bufferWeights_p = false;
   }
   
-#ifdef HAVE_CASA
+  // ---------------------------------------------------------- GeometricalWeight
+  
   GeometricalWeight::GeometricalWeight (casa::Matrix<double> const &antPositions,
 					casa::Matrix<double> const &skyPositions,
 					casa::Vector<double> const &frequencies,
@@ -57,28 +59,31 @@ namespace CR { // NAMESPACE CR -- BEGIN
       setWeights();
     }
   }
-#else
-#ifdef HAVE_BLITZ
-  GeometricalWeight::GeometricalWeight (const blitz::Array<double,2> &antPositions,
-					const blitz::Array<double,2> &skyPositions,
-					blitz::Array<double,1> const &frequencies,
-					bool const &bufferDelays,
+
+  // ---------------------------------------------------------- GeometricalWeight
+  
+  GeometricalWeight::GeometricalWeight (GeometricalDelay const &delay,
+					casa::Vector<double> const &frequencies,
 					bool const &bufferPhases,
 					bool const &bufferWeights)
-    : GeometricalPhase (antPositions,
-			skyPositions,
+    : GeometricalPhase (delay,
 			frequencies,
-			bufferDelays,
-			bufferPhases),
-      bufferWeights_p (bufferWeights)
+			bufferPhases)
   {
-    if (bufferWeights) {
-      setWeights();
-    }
+    bufferWeights_p = bufferWeights;
   }
-#endif
-#endif
-
+  
+  // ---------------------------------------------------------- GeometricalWeight
+  
+  GeometricalWeight::GeometricalWeight (GeometricalPhase const &phase,
+					bool const &bufferWeights)
+    : GeometricalPhase (phase)
+  {
+    bufferWeights_p = bufferWeights;
+  }
+  
+  // ---------------------------------------------------------- GeometricalWeight
+  
   GeometricalWeight::GeometricalWeight (GeometricalWeight const &other)
   {
     copy (other);
@@ -132,7 +137,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
   //
   // ============================================================================
   
-#ifdef HAVE_CASA
   casa::Cube<DComplex> GeometricalWeight::weights ()
   {
     if (bufferWeights_p) {
@@ -143,20 +147,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
       return calcWeights();
     }
   }
-#else
-#ifdef HAVE_BLITZ
-  blitz::Array<complex<double>,3> GeometricalWeight::weights ()
-  {
-    if (bufferWeights_p) {
-      std::cout << "-- Returning buffered weights..." << std::endl;
-      return weights_p;
-    } else {
-      std::cout << "-- Returning recomputed weights..." << std::endl;
-      return calcWeights();
-    }
-  }
-#endif
-#endif  
   
   void GeometricalWeight::summary (std::ostream &os)
   {
@@ -178,7 +168,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
   // ------------------------------------------------------------- setFrequencies
 
-#ifdef HAVE_CASA
   bool GeometricalWeight::setFrequencies (const casa::Vector<double> &frequencies,
 					  bool const &bufferPhases)
   {
@@ -193,17 +182,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     return ok;
   }
-#else
-#ifdef HAVE_BLITZ
-  bool GeometricalWeight::setFrequencies (const blitz::Array<double,1> &frequencies,
-					  bool const &bufferPhases)
-  {
-    bool ok (true);
-    
-    return ok;
-  }
-#endif
-#endif
 
   // ============================================================================
   //
@@ -231,7 +209,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
   // ---------------------------------------------------------------- calcWeights
 
-#ifdef HAVE_CASA
   casa::Cube<DComplex> GeometricalWeight::calcWeights ()
   {
     int ant (0);
@@ -263,32 +240,5 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     return weights;
   }
-#else
-#ifdef HAVE_BLITZ
-  blitz::Array<complex<double>,3> GeometricalWeight::calcWeights ()
-  { 
-    int ant (0);
-    int sky (0);
-    int freq (0);
-    // get the geometrical phases
-    blitz::Array<double,3> phases = GeometricalPhase::phases();
-    blitz::TinyVector shape       = phases.shape();
-    // array to store the computed weights
-    blitz::Array<complex<double>,3> weights (phases.shape());
-    
-    for (freq=0; freq<shape(2); freq++) {
-      for (sky=0; sky<shape(1); sky++) {
- 	for (ant=0; ant<shape(0); ant++) {
-	  weights(ant,sky,freq) = DComplex(cos(phases(ant,sky,freq)),
-					   sin(phases(ant,sky,freq)));
- 	}
-      }
-    }
-    
-    return weights;
-  }
-#endif
-#endif
-  
   
 } // NAMESPACE CR -- END

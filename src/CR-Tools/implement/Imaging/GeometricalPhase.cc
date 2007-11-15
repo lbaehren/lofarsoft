@@ -75,11 +75,33 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
   // ----------------------------------------------------------- GeometricalPhase
 
-  GeometricalPhase::GeometricalPhase (GeometricalDelay const &delay)
+  GeometricalPhase::GeometricalPhase (casa::Matrix<double> const &antPositions,
+				      CR::CoordinateType const &antCoordType,
+				      casa::Matrix<double> const &skyPositions,
+				      CR::CoordinateType const &skyCoordType,
+				      casa::Vector<double> const &frequencies,
+				      bool const &bufferDelays,
+				      bool const &bufferPhases)
+    : GeometricalDelay (antPositions,
+			antCoordType,
+			skyPositions,
+			skyCoordType,
+			bufferDelays,
+			true)
+  {
+    setFrequencies (frequencies,
+		    bufferPhases);
+  }
+
+  // ----------------------------------------------------------- GeometricalPhase
+  
+  GeometricalPhase::GeometricalPhase (GeometricalDelay const &delay,
+				      casa::Vector<double> const &frequencies,
+				      bool const &bufferPhases)
     : GeometricalDelay (delay)
   {
-    casa::Vector<double> frequencies (1,0.0);
-    setFrequencies (frequencies,false);
+    setFrequencies (frequencies,
+		    bufferPhases);
   }
 
   // ----------------------------------------------------------- GeometricalPhase

@@ -62,7 +62,8 @@ using CR::TimeFreq;
 	 otherwise -- if <tt>antennaIndexFirst=false</tt> -- the returned array
 	 if of shape [3,nofAntennas].
   \param coordType -- CR::CoordinateType as which the antenna positions are
-         returned.
+         returned. If a coordinate type other but Cartesian is chosen, the angular
+	 components will be given in radian (and not in degrees).
 
   \return positions -- [antenna,coordinate] Antenna positions, \f$ \vec x \f$
 */
@@ -93,6 +94,14 @@ get_antennaPositions (uint const &nofAntennas=4,
     }
     break;
   case CR::Spherical:
+    // Set radial and zenith angle component
+    antPositions.column(0) = incr;
+    antPositions.column(2) = 0.0;
+    // Set the stepping width along the circle
+    incr = 360/nofAntennas;
+    for (uint n(0); n<nofAntennas; n++) {
+      antPositions(n,1) = n*incr;
+    }
     break;
   }
   

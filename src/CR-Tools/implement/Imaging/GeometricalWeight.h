@@ -50,31 +50,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
     <h3>Synopsis</h3>
     
-    <table border="0">
-      <tr>
-        <td class="indexkey">Quantity</td>
-        <td class="indexkey">implemented in</td>
-        <td class="indexkey">Relation</td>
-      </tr>
-      <tr>
-        <td>gemoetrical delay</td>
-        <td>GeometricalDelay</td>
-        <td>\f$ \tau_j = \frac{1}{c} \left( |\vec \rho - \vec x_j| - |\vec \rho|
-	\right) \f$</td>
-      </tr>
-      <tr>
-        <td>geometrical phase</td>
-        <td>GeometricalPhase</td>
-        <td>\f$ \phi (\vec x_j, \vec \rho, \nu) = 2 \pi \nu \tau_{\rm geom} \f$</td>
-      </tr>
-      <tr>
-        <td>geometrical weight</td>
-        <td>GeometricalWeight</td>
-        <td>\f$ w (\vec x_j, \vec \rho, \nu) = \exp \Bigl( i\, \phi (\vec x_j,
-	\vec \rho, \nu) \Bigr) \f$</td>
-      </tr>
-    </table>
-    
     The basic equation, by which the geometrical weights for the beamforming
     are computed, is given by
     \f[ A_{\rm geom} = \exp \left( i \Phi \right) = \exp \left( i \frac{2\pi\nu}{c}
@@ -92,16 +67,10 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
   protected:
 
-    // Buffer the values of the geometrical weights?
-    bool bufferWeights_p;
-
-#ifdef HAVE_CASA
+    //! Array storing the values of the geometrical weights, [freq,ant,sky]
     casa::Cube<DComplex> weights_p;
-#else
-#ifdef HAVE_BLITZ
-    blitz::Array<complex<double> > weights_p;
-#endif
-#endif
+    //! Buffer the values of the geometrical weights?
+    bool bufferWeights_p;
     
   public:
     
@@ -130,24 +99,38 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \param bufferPhases  -- Buffer the values of the phases?
       \param bufferWeights -- Buffer the values of the geometrical weights?
     */
-#ifdef HAVE_CASA
     GeometricalWeight (casa::Matrix<double> const &antPositions,
 		       casa::Matrix<double> const &skyPositions,
 		       casa::Vector<double> const &frequencies,
 		       bool const &bufferDelays=false,
 		       bool const &bufferPhases=false,
 		       bool const &bufferWeights=false);
-#else
-#ifdef HAVE_BLITZ
-    GeometricalWeight (const blitz::Array<double,2> &antPositions,
-		       const blitz::Array<double,2> &skyPositions,
-		       blitz::Array<double,1> const &frequencies,
-		       bool const &bufferDelays=false,
+
+    /*!
+      \brief Argumented constructor using existing GeometricalDelay object
+      
+      \param delay -- GeometricalDelay object encapsulating the functionality
+             on top of which this class builds.
+      \param frequencies  -- Frequencies for which the geometrical delays are
+             converted into phases, [Hz]
+      \param bufferPhases -- Buffer the values of the phases?
+      \param bufferWeights -- Buffer the values of the geometrical weights?
+    */
+    GeometricalWeight (GeometricalDelay const &delay,
+		       casa::Vector<double> const &frequencies,
 		       bool const &bufferPhases=false,
 		       bool const &bufferWeights=false);
-#endif
-#endif
-
+    
+    /*!
+      \brief Argumented constructor using existing GeometricalPhase object
+      
+      \param phase -- GeometricalPhase object encapsulating the functionality
+             on top of which this class builds.
+      \param bufferWeights -- Buffer the values of the geometrical weights?
+    */
+    GeometricalWeight (GeometricalPhase const &phase,
+		       bool const &bufferWeights=false);
+    
     /*!
       \brief Copy constructor
       
@@ -206,15 +189,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \return status -- Status of the operation; returns <tt>false</tt> if an
                         error was encountered.
     */
-#ifdef HAVE_CASA
     bool setFrequencies (const casa::Vector<double> &frequencies,
 			 bool const &bufferPhases=false);
-#else
-#ifdef HAVE_BLITZ
-    bool setFrequencies (const blitz::Array<double,1> &frequencies,
-			 bool const &bufferPhases=false);
-#endif
-#endif
     
     /*!
       \brief Get the geometrical weights
@@ -222,13 +198,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \return weights -- [nofAntennas,nofPositions,nofFrequencies] Array with the
                          values of the geometrical weights.
     */
-#ifdef HAVE_CASA
     casa::Cube<DComplex> weights ();
-#else
-#ifdef HAVE_BLITZ
-    blitz::Array<complex<double>,3> weights ();
-#endif
-#endif
     
     /*!
       \brief Get the name of the class
@@ -268,13 +238,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \return weights -- [nofAntennas,nofPositions,nofFrequencies] Array with the
                          values of the geometrical weights.
      */
-#ifdef HAVE_CASA
     casa::Cube<DComplex> calcWeights ();
-#else
-#ifdef HAVE_BLITZ
-    blitz::Array<complex<double>,3> calcWeights ();
-#endif
-#endif
 
     /*!
       \brief Unconditional copying
@@ -291,4 +255,4 @@ namespace CR { // NAMESPACE CR -- BEGIN
 }  // NAMESPACE CR -- END
 
 #endif /* GEOMETRICALWEIGHT_H */
-  
+

@@ -123,17 +123,16 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \brief Argumented constructor
       
       \param antPositions -- [nofAntennas,3] Antenna positions for which the
-                             delay is computed, \f$ (x,y,z) \f$
+             delay is computed, given in Cartesian coordinates \f$ (x,y,z) \f$
       \param skyPositions -- [nofSkyPositions,3] Positions in the sky towards
-                             which to point, given in the same reference frame
-			     as the antenna positions, \f$ (x,y,z) \f$
+             which to point, given in the same reference frame as the antenna
+	     positions, \f$ (x,y,z) \f$
       \param frequencies  -- Frequencies for which the geometrical delays are
-                             converted into phases
+             converted into phases
       \param bufferDelays -- Buffer the values for the geometrical delay? If set
-                             <i>yes</i> the delays will be computed from the 
-			     provided antenna and sky positions and afterwards
-			     kept in memory; if set <i>no</i> only the input 
-			     parameters are stored an no further action is taken.
+             <i>yes</i> the delays will be computed from the provided antenna and
+	     sky positions and afterwards kept in memory; if set <i>no</i> only
+	     the input parameters are stored an no further action is taken.
       \param bufferPhases -- Buffer the values of the phases?
     */
     GeometricalPhase (casa::Matrix<double> const &antPositions,
@@ -144,11 +143,46 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     /*!
       \brief Argumented constructor
+      
+      \param antPositions -- [nofAntennas,3] Antenna positions for which the
+             delay is computed, given in Cartesian coordinates \f$ (x,y,z) \f$
+      \param antCoordType -- CR::CoordinateType of the antenna position
+             coordinates; if the coordinates are non-cartesian and thereby
+	     include anglular components, the values must be provided in radians.
+      \param skyPositions -- [nofSkyPositions,3] Positions in the sky towards
+             which to point, given in the same reference frame as the antenna
+	     positions, \f$ (x,y,z) \f$
+      \param skyCoordType -- CR::CoordinateType of the sky position coordinates;
+             if the coordinates are non-cartesian and thereby include anglular
+	     components, the values must be provided in radians.
+      \param frequencies  -- Frequencies for which the geometrical delays are
+             converted into phases
+      \param bufferDelays -- Buffer the values for the geometrical delay? If set
+             <i>yes</i> the delays will be computed from the provided antenna and
+	     sky positions and afterwards kept in memory; if set <i>no</i> only
+	     the input parameters are stored an no further action is taken.
+      \param bufferPhases -- Buffer the values of the phases?
+    */
+    GeometricalPhase (casa::Matrix<double> const &antPositions,
+		      CR::CoordinateType const &antCoordType,
+		      casa::Matrix<double> const &skyPositions,
+		      CR::CoordinateType const &skyCoordType,
+		      casa::Vector<double> const &frequencies,
+		      bool const &bufferDelays=false,
+		      bool const &bufferPhases=false);
+    
+    /*!
+      \brief Argumented constructor
 
       \param delay -- GeometricalDelay object encapsulating the functionality
-                      on top of which this class builds.
+             on top of which this class builds.
+      \param frequencies  -- Frequencies for which the geometrical delays are
+             converted into phases, [Hz]
+      \param bufferPhases -- Buffer the values of the phases?
     */
-    GeometricalPhase (GeometricalDelay const &delay);
+    GeometricalPhase (GeometricalDelay const &delay,
+		      casa::Vector<double> const &frequencies,
+		      bool const &bufferPhases=false);
     
     /*!
       \brief Copy constructor
