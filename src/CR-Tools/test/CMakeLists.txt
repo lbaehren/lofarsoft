@@ -106,9 +106,11 @@ if (HAVE_CASACORE)
     add_executable (${test} ${test}.cc)
     ## linker instructions
     target_link_libraries (${test}
+      ${LAPACK_LIBRARIES}
       ${CASA_LIBRARIES}
       ${WCSLIB_LIBRARIES}
-      ${LAPACK_LIBRARIES}
+      ${G2C_LIBRARIES}
+      ${libm}
       )
     ## testing
     add_test (${test} ${test})

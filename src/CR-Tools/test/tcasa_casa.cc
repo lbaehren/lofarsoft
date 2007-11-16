@@ -21,8 +21,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <ctime>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <assert.h>
 #include <casa/aips.h>
@@ -42,6 +44,8 @@
 #include <casa/Exceptions/Error.h>
 #include <casa/Utilities/Assert.h>
 
+#include "tests_common.h"
+
 using casa::Array;
 using casa::Block;
 using casa::IPosition;
@@ -51,6 +55,16 @@ using casa::Cube;
 
 using std::cout;
 using std::endl;
+
+/*!
+  \file tcasa_casa.cc
+
+  \brief A number of tests for clases in the casacore casa module
+
+  \ingroup CR
+
+  \author Lars B&auml;hren
+*/
 
 // ==============================================================================
 //
@@ -64,6 +78,20 @@ using std::endl;
   \return nofFailedTests -- The number of failed test within this function
 */
 int test_Arrays ();
+
+/*!
+  \brief Test for casa/Arrays/Matrix class
+
+  \return nofFailedTests -- The number of failed test within this function
+*/
+int test_Arrays_Matrix (std::vector<int> const &nelem);
+
+/*!
+  \brief Test for casa/Arrays/Cube class
+
+  \return nofFailedTests -- The number of failed test within this function
+*/
+int test_Arrays_Cube ();
 
 /*!
   \brief Tests for classes in casa/BasicMath
@@ -216,6 +244,62 @@ int test_Arrays ()
     cout << "-- shape of the sub array      = " << subArray.shape() << endl;
     // manipulate the selected elements in the original array
     subArray = 10;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
+// ------------------------------------------------------------------------------
+
+int test_Arrays_Matrix (std::vector<int> const &nelem)
+{
+  cout << "\nTesting casa/Arrays/Matrix ...\n" << endl;
+
+  int nofFailedTests (0);
+  clock_t start;
+  clock_t end;
+  double runtimes[2];
+  IPosition shape (2);
+  IPosition pos(2);
+
+  std::cout << "[1] Element-wise addressing ..." << std::endl;
+  try {
+    for (uint n(0); n<nelem.size(); n++) {
+      /* Create the matrix */
+      shape = IPosition (2,nelem[n],nelem[n]);
+      Matrix<double> arr (shape);
+      
+      /* Element-wise addressing in axis order */
+      
+      start = clock();
+      for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
+	for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
+	  arr(pos) = 1.0;
+	}
+      }
+      end = clock();
+      runtimes[0] = runtime (start,end);
+      
+      /* Element-wise addressing in opposite axis order */
+      
+      start = clock();
+      for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
+	for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
+	  arr(pos) = 1.0;
+	}
+      }
+      end = clock();
+      runtimes[1] = runtime (start,end);
+      
+      /* Show timing information */
+      
+      std::cout << "\t" << nelem[n]
+		<< "\t" << runtimes[0]
+		<< "\t" << runtimes[1] << std::endl;
+    }
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -396,11 +480,17 @@ int test_Containers ()
 
 // ------------------------------------------------------------------------------
 
+/*!
+  \return nofFailedTests -- The number of failed tests we havve encountered
+*/
 int main ()
 {
   int nofFailedTests (0);
+  std::vector<int> nelem = nof_array_elements ();
 
   nofFailedTests += test_Arrays();
+  nofFailedTests += test_Arrays_Matrix (nelem);
+
   nofFailedTests += test_BasicMath();
   nofFailedTests += test_BasicSL();
   nofFailedTests += test_Containers();

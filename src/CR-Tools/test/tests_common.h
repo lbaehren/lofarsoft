@@ -21,43 +21,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <cmath>
 #include <iostream>
-#include <string>
-
-using std::cout;
-using std::endl;
-
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/Matrix.h>
-#include <casa/Arrays/Cube.h>
-#include <casa/Arrays/ArrayMath.h>
-#include <casa/Arrays/ArrayLogical.h>
-#include <casa/Arrays/ArrayUtil.h>
-#include <casa/Arrays/ArrayIO.h>
-#include <casa/Arrays/Slicer.h>
-#include <casa/Arrays/Slice.h>
-#include <casa/Exceptions/Error.h>
-#include <casa/OS/RegularFile.h>
-#include <casa/Utilities/Sort.h>
-#include <casa/Utilities/Assert.h>
-#include <tables/Tables/TableDesc.h>
-#include <tables/Tables/SetupNewTab.h>
-#include <tables/Tables/Table.h>
-#include <tables/Tables/TableLock.h>
-#include <tables/Tables/ScaColDesc.h>
-#include <tables/Tables/ArrColDesc.h>
-#include <tables/Tables/ScalarColumn.h>
-#include <tables/Tables/ArrayColumn.h>
-#include <tables/Tables/StManAipsIO.h>
-#include <tables/Tables/ExprNode.h>
-#include <tables/Tables/ExprNodeSet.h>
-
-using casa::MVTime;
+#include <vector>
 
 /*!
-  \file tcasa_tables.cc
+  \file tests_common.h
 
-  \brief A number of tests for clases in the casacore tables module
+  \brief A set of common functions used by the various test programs
 
   \ingroup CR
 
@@ -66,25 +37,43 @@ using casa::MVTime;
 
 // ------------------------------------------------------------------------------
 
-int main ()
-{
-  int nofFailedTests (0);
-
-  std::cout << "[1] Testing classes in casa/LogTables ..." << std::endl;
-  try {
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-
-  std::cout << "[2] Testing classes in casa/Tables ..." << std::endl;
-  try {
-    // create default Table object
-    casa::Table newTable;
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
+/*!
+  \brief Compute runtime of an operation based on start and end time
   
-  return nofFailedTests;
+  \param start -- 
+  \param end   -- 
+
+  \return runtime -- Time-interval between the moments the two values
+          <tt>start</tt> and <tt>end</tt> were extracted.
+*/
+double runtime (clock_t const &start,
+		clock_t const &end)
+{
+  return ((double)( end - start ) / (double)CLOCKS_PER_SEC );
+}
+
+// ------------------------------------------------------------------------------
+
+/*!
+  \brief Get a list of array sidelength values for setting up array shapes
+
+  \return nelem -- Vector with a list of values used to set the size of an array,
+          something like <tt>[10,20,50,100,200,500,1000,2000,5000,10000]</tt>
+*/
+std::vector<int> nof_array_elements ()
+{
+  std::vector<int> nelem (10);
+
+  nelem[0] = 10;
+  nelem[1] = 20;
+  nelem[2] = 50;
+  nelem[3] = 100;
+  nelem[4] = 200;
+  nelem[5] = 500;
+  nelem[6] = 1000;
+  nelem[7] = 2000;
+  nelem[8] = 5000;
+  nelem[9] = 10000;
+
+  return nelem;
 }

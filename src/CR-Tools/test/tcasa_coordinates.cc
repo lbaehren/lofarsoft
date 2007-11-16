@@ -46,6 +46,18 @@ using casa::Projection;
 using casa::Quantum;
 using casa::Vector;
 
+/*!
+  \file tcasa_coordinates.cc
+
+  \brief A number of tests for clases in the casacore tables module
+
+  \ingroup CR
+
+  \author Lars B&auml;hren
+*/
+
+// ------------------------------------------------------------------------------
+
 int test_Coordinates ()
 {
   cout << "\n[test_Coordinates]\n" << endl;
