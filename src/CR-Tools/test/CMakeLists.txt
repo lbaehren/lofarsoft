@@ -88,6 +88,33 @@ else (HAVE_CASA)
   endif (HAVE_CASACORE)
 endif (HAVE_CASA)
 
+## -------------------------------------------------------------------
+## Tests for working with casacore
+
+set (tests_casacore
+  tcasa_casa
+  tcasa_tables
+#  tcasa_scimath
+  tcasa_coordinates
+#  tcasa_images
+#  tcasa_measures
+  )
+
+if (HAVE_CASACORE)
+  foreach (test ${tests_casacore})
+    ## compiler instructions
+    add_executable (${test} ${test}.cc)
+    ## linker instructions
+    target_link_libraries (${test}
+      ${CASA_LIBRARIES}
+      ${WCSLIB_LIBRARIES}
+      ${LAPACK_LIBRARIES}
+      )
+    ## testing
+    add_test (${test} ${test})
+  endforeach (test ${tests_casacore})
+endif (HAVE_CASACORE)
+
 ## -----------------------------------------------------------------------------
 ## Test(s) for Blitz++
 
