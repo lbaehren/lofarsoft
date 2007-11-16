@@ -244,14 +244,18 @@ namespace CR { // NAMESPACE CR -- BEGIN
     std::cout << "-- Slicer: incr specifier = " << incr           << std::endl;
 #endif
     
-    if (nofChannels == 1) {
-      phases.yzPlane(0) =  CR::_2pi*frequencies_p(0)*delays;
-    } 
-    else if (shape(0) == 1) {
-      for (nChannel=0; nChannel<nofChannels; nChannel++) {
-	phases.yzPlane(nChannel) =  CR::_2pi*frequencies_p(nChannel)*delays;
+    if (nofChannels == 1 || shape(0) == 1) {
+      uint freq (0);
+      uint ant (0);
+      uint pos (0);
+      for (pos=0; pos<shape(1); pos++) {
+	for (ant=0; ant<shape(0); ant++) {
+	  for (freq=0; freq<nofChannels; freq++) {
+	    phases(freq,ant,pos) =  CR::_2pi*frequencies_p(freq)*delays(ant,pos);
+	  }
+	}
       }
-    }
+    } 
     else {
       for (nChannel=0; nChannel<nofChannels; nChannel++) {
 	// create Slicer object to address the target array
