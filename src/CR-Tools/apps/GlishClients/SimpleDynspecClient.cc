@@ -170,7 +170,7 @@ Bool GenDynSpec(GlishSysEvent &event, void *){
       };
       Vector<Double> tmpvec(fftsize,0.);
       for (i=0; i<numblocks; i++){
-	tbbIn.setBlock(i);
+	tbbIn.setBlock(i+1);
 	tmpvec += amplitude(tbbIn.calfft().column(0));
       };
       data.column(fnum) = tmpvec/(Double)numblocks;      

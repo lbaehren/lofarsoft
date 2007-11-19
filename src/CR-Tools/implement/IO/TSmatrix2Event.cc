@@ -140,7 +140,7 @@ namespace CR { // Namespace CR -- begin
       int blocksize,nAnt;
       blocksize = data_p.nrow();
       nAnt = data_p.ncolumn();
-      if (blocksize != eventheader_p->blocksize ) {
+      if ((uint)blocksize != eventheader_p->blocksize ) {
 	cerr << "TSmatrix2Event::WriteEvent: " << "Inconsitent data: (blocksize != eventheader_p->blocksize)!" << endl;
 	return False;	
       };
@@ -175,14 +175,14 @@ namespace CR { // Namespace CR -- begin
       short int *datapoint;
       datapoint = tmpevent->data;
       // copy that data into the temporary storage
-      for (chan=0; chan < nAnt; chan++) {
+      for (chan=0; chan < (uint)nAnt; chan++) {
 	// Some dirty typecasting and pointer calculations! 
 	// If you know a better way -> tell me!
 	*((unsigned int *)datapoint) =  AntIDs_p(chan);
 	datapoint += sizeof(int)/sizeof(short);
 	*((unsigned int *)datapoint) = blocksize;
 	datapoint += sizeof(int)/sizeof(short);
-	for (i=0; i<blocksize; i++) {
+	for (i=0; i<(uint)blocksize; i++) {
 	  //	  *datapoint = data_p.column(chan)(i);
 	  *datapoint = data_p(i,chan);
 	  datapoint++;
