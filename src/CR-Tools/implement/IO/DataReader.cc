@@ -547,16 +547,17 @@ namespace CR {  //  Namespace CR -- begin
   void DataReader::setBlocksize (uint const &blocksize,
 				 Matrix<double> const &adc2voltage)
   {
-    /*
-      First of all we forward the value to the base class, as this will also take
-      care of keeping other values consistent.
-    */
+    /* First of all we forward the value to the base class, as this will also take
+       care of keeping other values consistent. */
     TimeFreq::setBlocksize (blocksize);
+
+    /* Update the blocksize parameter for the set of DataIterators. */
+    for (unsigned int n(0); n<nofStreams_p; n++) {
+      iterator_p[n].setBlocksize(blocksize);
+    }
     
-    /*
-      The adc2voltage array only should be accepted if its shape matches the 
-      updated blocksize.
-    */
+    /* The adc2voltage array only should be accepted if its shape matches the 
+      updated blocksize. */
     try {
       // get the shape of the conversion array ...
       IPosition shape = adc2voltage.shape();
