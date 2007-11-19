@@ -51,18 +51,15 @@ using CR::SimplePlot;
 
 // Dynamic variables -----------------------------
 
-Double source_declination (15);
-Double source_hr_angle (120) ;
+Double source_declination (1);
+Double source_hr_angle (120);
 
-Double sky_temp = 300 ;
-Double moon_temp = 300 ;
-
-Double freq_init =120e6 ;
+Double freq_init =120e6 ; 
 Double bandwidth = 30e6 ;
 Double freq_interval = 10e6 ;
 
-uint stationid[4]={37,39,38,40};                 //{3, 4,5, 6, 29, 30, 2,1, 28, 27};
-uint n_stations = 4 ;
+uint stationid[48]= {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48} ;
+uint n_stations = 48 ;
 
 // Static variables -------------------------------
 
@@ -131,14 +128,14 @@ Bool test_StationBeams ()
    posit_y(p) = posi_y[p];
  }
  
-// uint stationID(0) ;
+uint stationID(0) ;
 
-//  for(uint id =0 ; id < n_stations; id++){
+ for(uint id =0 ; id < n_stations; id++){
 
-//      stationID = station_id(id) ;
-//      position_x(id) = posit_x(stationID) ;
-//      position_y(id) = posit_y(stationID) ;
-//  }
+     stationID = station_id(id) ;
+     position_x(id) = posit_x(stationID) ;
+     position_y(id) = posit_y(stationID) ;
+ }
 
      
  
@@ -148,16 +145,17 @@ for(uint lr=0; lr<5; lr++){
    legendre_weight(lr)= l_weight[lr] ;
  }
 
+ Double pi = 3.1416 ;
 
  StationBeam stbm ;
 //  SimplePlot smplt ;
 
 // ofstream logfile1 ;
-     
+//      
 // logfile1.open("power",ios::out);
 
- Double zenith_min = 43.0 ;
- Double zenith_max = 48.0 ;
+ Double zenith_min = source_declination -1.0 ;
+ Double zenith_max = source_declination + 1.0 ;
  Double declination(0.0);
 
  Double zenith_interval = 0.05 ;
@@ -165,8 +163,8 @@ for(uint lr=0; lr<5; lr++){
  uint zenith_loop = int((zenith_max-zenith_min)/zenith_interval) ;
  Vector<Double> zenithAngle(zenith_loop, 0.0);
 
- Double hrangle_min = 100.0 ;
- Double hrangle_max = 140.0 ;
+ Double hrangle_min = source_hr_angle -5.0 ;
+ Double hrangle_max = source_hr_angle +5.0  ;
  Double hrangle (0.0);
  
  Double hrangle_interval = 0.1 ;
@@ -177,70 +175,24 @@ for(uint lr=0; lr<5; lr++){
 
  Matrix<Double> single_stat_beam( hrangle_loop, zenith_loop,0.0 );
  Matrix<Double> tied_array_beam( hrangle_loop,zenith_loop,0.0 );
- Matrix<Double> integrate_freq( hrangle_loop,zenith_loop,0.0 ) ;
+ Matrix<Double> integrate_freq( hrangle_loop+1, zenith_loop+1,0.0 ) ;
  
-//  for (uint i=0; i<zenith_loop; i++){
+/*
+ stbm.plot_2dimen( source_declination,
+	           source_hr_angle,
+	           station_radii,
+	           station_id,
+		   freq_init,
+		   bandwidth,
+                   freq_interval,
+		   posit_x,
+		   posit_y,
+                   legendre_root,
+                   legendre_weight )  ;
+		   */
+    			   
 
-//      declination = zenith_min + i*zenith_interval ;
-
-//      zenithAngle(i) = declination ;
- 
-//      for( uint j=0; j<hrangle_loop; j++){
-
-//           hrangle = hrangle_min + j*hrangle_interval ;
-
-//           hrAngle (j) =hrangle ;
- 
-//          tied_array_beam(j,i) = stbm.tied_array( freq_init,
-//                                                 hrangle,
-//                                              declination,
-//                                              source_declination,
-//                                              source_hr_angle,
-//                                              station_radii,
-//                                              station_id,
-//                                              posit_x,
-//                                              posit_y,
-//                                              legendre_root,
-//                                              legendre_weight);
-
-
-// 	  single_stat_beam(j,i) = stbm.station_beam( frequency,
-//    			                             hrangle,
-//    			                             declination,
-//    				                     source_declination,
-//          	       		                     source_hr_angle,
-//    			                             station_radii,
-//    			                             legendre_root,
-//    			                             legendre_weight )  ;
-	 
-
-          
-//    integrate_freq(j,i) = stbm.integrate_freq( hrangle,
-//                                               declination,
-//                                               source_declination,
-// 	                                      source_hr_angle,
-// 	                                      station_radii,
-// 	                                      station_id,
-// 		                              freq_init,
-// 		                              bandwidth,
-//                                               freq_interval,
-// 		                              posit_x,
-// 		                              posit_y,
-//                                               legendre_root,
-//              		                      legendre_weight )   ;
-   
-//       }
-//  }
-
-//    smplt.quick2Dplot("integrate_check.ps", integrate_freq, zenith_min, zenith_max, hrangle_min, hrangle_max,	     
-// 			  "X-axis", "Y-Axis", "2d plotting-test",
-// 			  False, 30);
-//    smplt.addContourLines(integrate_freq, zenith_min, zenith_max, hrangle_min, hrangle_max,1)	;
-
-
-Double beam_width_decli = stbm.beamwidth_decli( source_declination,
-                                    source_hr_angle,
-	                            station_radii,
+     stbm.generate_statistics_table( station_radii,
 	                            station_id,
 	                            freq_init,
 		                    bandwidth,
@@ -250,70 +202,71 @@ Double beam_width_decli = stbm.beamwidth_decli( source_declination,
                                     legendre_root,
              	                    legendre_weight )   ;
 
- cout << " Beam width of declination in degrees :" << beam_width_decli << endl ;
-
-Double beam_width_hr = stbm.beamwidth_hr( source_declination,
-                                    source_hr_angle,
-	                            station_radii,
-	                            station_id,
-	                            freq_init,
-		                    bandwidth,
-                                    freq_interval,
-		                    posit_x,
-		                    posit_y,
-                                    legendre_root,
-             	                    legendre_weight )   ;
-
- cout << " Beam width of hr angle in degrees :" << beam_width_hr << endl ;
-
-// Double powermoon = stbm.power_moon( source_declination,
-// 	                            source_hr_angle,
-// 	                            station_radii,
-// 	                            station_id,
-// 		                    freq_init,
-// 		                    bandwidth,
-//                                     freq_interval,
-// 		                    position_x,
-// 		                    position_y,
-//                                     legendre_root,
-//              		            legendre_weight );
-
-//  cout << " power integrated over moon : " << powermoon << endl ;
 
 
-//  Double powersky = stbm.power_sky( source_declination,
-// 	                           source_hr_angle,
-// 	                           station_radii,
-// 	                           station_id,
-// 		                   freq_init,
-// 		                    bandwidth,
-//                                    freq_interval,
-// 		                    position_x,
-// 		                    position_y,
-//                                    legendre_root,
-//              	                   legendre_weight );
+/*
+Double beamwidth_hrangle = stbm.beamwidth_hr(  source_declination,
+                                                source_hr_angle,
+	                                        station_radii,
+	                                        station_id,
+	                                        freq_init,
+		                                bandwidth,
+                                                freq_interval,
+		                                posit_x,
+		                                posit_y,
+                                                legendre_root,
+             	                                legendre_weight )   ;
+												
+					
+Double beamwidth_decli = stbm.beamwidth_decli(  source_declination,
+                                                source_hr_angle,
+	                                        station_radii,
+	                                        station_id,
+	                                        freq_init,
+		                                bandwidth,
+                                                freq_interval,
+		                                posit_x,
+		                                posit_y,
+                                                legendre_root,
+             	                                legendre_weight )   ;
+						*/
 
-//  cout << " power integrated over all sky : "<< powersky << endl ;
+// Double power_sky = stbm.integrate_decli( source_declination,
+// 	                                  source_hr_angle,
+// 	                                 station_radii,
+//                                            station_id,
+//                                           freq_init,
+// 		                           bandwidth,
+//                                            freq_interval,
+// 		                           position_x,
+// 		                           position_y,
+//                                            legendre_root,
+// 					 legendre_weight )   ;
+// 
+//  cout << " power integrated over sky : " << power_sky << endl;
 
-// Double min_power = stbm.min_power_moon( source_declination,
-//                                         source_hr_angle,
-//                                         station_radii,
-//                                         station_id,
-//                                         freq_init,
-//                                         bandwidth,
-//                                         freq_interval,
-//                                         position_x,
-//                                         position_y,
-//                                         legendre_root,
-//                                         legendre_weight );
+/*
+Double min_power = stbm.min_power_moon( source_declination,
+                                        source_hr_angle,
+                                        station_radii,
+                                        station_id,
+                                        freq_init,
+                                        bandwidth,
+                                        freq_interval,
+                                        position_x,
+                                        position_y,
+                                        legendre_root,
+                                        legendre_weight );
 
-// cout << " min power of moon " << min_power << endl ;
+cout << " min power of moon " << min_power << endl ;*/
+
 //  ofstream logfile1 ;
      
 //  logfile1.open("power",ios::out);
    
-//    logfile1 << powermoon << endl;
-//    logfile1 << powersky << endl ;
+//  //  logfile1 << powermoon << endl;
+//    logfile1 << power_sky << endl ;
+//    logfile1 << min_power << endl;
 //    logfile1.close() ;
        
  } catch( AipsError x ){
