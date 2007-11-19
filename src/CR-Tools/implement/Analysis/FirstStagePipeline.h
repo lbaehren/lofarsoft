@@ -79,6 +79,12 @@ namespace CR { // Namespace CR -- begin
       \brief Have the CalTableInterpolator objects been initialized?
     */
     Bool InterpInit;
+
+    //! Is the data cache from the SecondStagePipeline up to date?
+    Bool SecondStageCacheValid_p;
+
+    //! Has the antenna gain interpolater from CRinvFFT been initialized?
+    Bool AntGainInterpInit_p;
     
     /*!
       \brief The CalTableInterpolator objects for the different fields

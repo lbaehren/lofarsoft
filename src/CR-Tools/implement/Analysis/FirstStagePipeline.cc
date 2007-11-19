@@ -136,6 +136,8 @@ namespace CR { // Namespace CR -- begin
       if ((newCTR) || (blocksize!=dr->blocksize()) || (samplerate!=dr->sampleFrequency())){
 	blocksize = dr->blocksize();
 	samplerate = dr->sampleFrequency();
+	SecondStageCacheValid_p = False;
+	AntGainInterpInit_p = False;
 	if (! Init_CalTableInter(dr) ){
 	  cerr << "FirstStagePipeline::InitEvent: Failed to initialize CalTableInterpolaters " << endl;
 	  return False;	

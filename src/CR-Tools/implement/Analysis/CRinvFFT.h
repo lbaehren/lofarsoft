@@ -99,9 +99,6 @@ namespace CR { // Namespace CR -- begin
     //! Interpolater for the antenna gain
     CalTableInterpolater<casa::Double> *InterAntGain_p;
 
-    //! Has the antenna gain interpolater been initialized?
-    Bool AntGainInterpInit_p;
-
     //! Value of the extra delay
     Double ExtraDelay_p;
  

@@ -41,6 +41,7 @@ namespace CR { // Namespace CR -- begin
   
   void SecondStagePipeline::init(){
     DoRFImitigation_p = True;
+    SecondStageCacheValid_p = False;
     DoPhaseCal_p = True;
     cachedDate_p = 0;
 
@@ -80,11 +81,12 @@ namespace CR { // Namespace CR -- begin
 
   Matrix<DComplex> SecondStagePipeline::GetData(DataReader *dr){
     try {
-      if (cachedDate_p != dr->header().asuInt("Date")) {
+      if ( (!SecondStageCacheValid_p)  || (cachedDate_p != dr->header().asuInt("Date")) ) {
 	if (!updateCache(dr)) {
 	  cerr << "SecondStagePipeline::GetData: " << "updateCache failed!" << endl;
 	  return Matrix<DComplex>();
 	};
+	SecondStageCacheValid_p = True;
 	cachedDate_p = dr->header().asuInt("Date");
       };
     } catch (AipsError x) {

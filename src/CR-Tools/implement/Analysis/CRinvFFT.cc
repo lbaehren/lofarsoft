@@ -216,7 +216,7 @@ namespace CR { // Namespace CR -- begin
       //      phaseGradients = bf_p.phaseGradients().nonDegenerate();
 #endif
       /* ---- new version ---- */
-/*      CR::GeometricalWeight geomWeight;
+      /*      CR::GeometricalWeight geomWeight;
       geomWeight.showProgress(verbose); 
       geomWeight.setAntennaPositions(tmpAntPos,CR::NorthEastHeight); 
       geomWeight.setSkyPositions(Vector<Double>(1,DirParams_p.asDouble("Az")),
@@ -231,12 +231,14 @@ namespace CR { // Namespace CR -- begin
       phaseGradients = Matrix<DComplex>(geomWeight.weights().nonDegenerate());
       
       // ***** getting the antenna gain calibration
-      // initialize the caltable interpolater (if needed)
-      if (!(AntGainInterpInit_p || initGainInterp(dr) )) {
-	cerr << "CRinvFFT::GetShiftedFFT: " << "Error while initializing the CalTableInterpolater." << endl;
-	return Matrix<DComplex>();
+      // initialize the caltable interpolater (if needed)      
+      if (!AntGainInterpInit_p) { //AntGainInterpInit_p is defined in FirstStagePipeline.h and reset in InitEvent()
+	if (!initGainInterp(dr)){
+	  cerr << "CRinvFFT::GetShiftedFFT: " << "Error while initializing the CalTableInterpolater." << endl;
+	  return Matrix<DComplex>();
+	};
       }
-      // Set the direction in the caltable interpolater
+            // Set the direction in the caltable interpolater
       tmpvec.resize(1);
       tmpvec(0) = DirParams_p.asDouble("Az");
       InterAntGain_p->SetAxisValue(2,tmpvec);
