@@ -6,23 +6,24 @@
 ##-------------------------------------------------------------------------------
 ## Clients which need libglish only
 
-# antennaflagger    GLISH LAPACK F77 GLISH CFITSIO WCSLIB
-# antennagaincurve  GLISH LAPACK F77 CFITSIO WCSLIB
-# ccData2Gaincurve  GLISH LAPACK F77 CFITSIO WCSLIB
-# dstb              LAPACK F77 GLISH CFITSIO WCSLIB
-# dynamicspectrum   WCSLIB LAPACK F77 GLISH CFITSIO
-# eventsaveclient   GLISH CFITSIO WCSLIB
-# fits2wf           GLISH CFITSIO WCSLIB
-# glempf            GLISH CFITSIO WCSLIB
-# glsender          GLISH CFITSIO WCSLIB
-# lopestools        GLISH CFITSIO WCSLIB LAPACK F77
-# moviemaker        GLISH
-# ppsync            GLISH
-# readdat           WCSLIB LAPACK F77 GLISH CFITSIO
-# skymapper         WCSLIB LAPACK F77 GLISH CFITSIO
-# timclient         GLISH
-# timebeam          WCSLIB LAPACK F77 GLISH CFITSIO
-# CalTableClient    WCSLIB LAPACK F77 GLISH CFITSIO
+# antennaflagger      GLISH LAPACK F77 GLISH CFITSIO WCSLIB
+# antennagaincurve    GLISH LAPACK F77 CFITSIO WCSLIB
+# ccData2Gaincurve    GLISH LAPACK F77 CFITSIO WCSLIB
+# dstb                LAPACK F77 GLISH CFITSIO WCSLIB
+# dynamicspectrum     WCSLIB LAPACK F77 GLISH CFITSIO
+# eventsaveclient     GLISH CFITSIO WCSLIB
+# fits2wf             GLISH CFITSIO WCSLIB
+# glempf              GLISH CFITSIO WCSLIB
+# glsender            GLISH CFITSIO WCSLIB
+# lopestools          GLISH CFITSIO WCSLIB LAPACK F77
+# moviemaker          GLISH
+# ppsync              GLISH
+# readdat             WCSLIB LAPACK F77 GLISH CFITSIO
+# skymapper           WCSLIB LAPACK F77 GLISH CFITSIO
+# timclient           GLISH
+# timebeam            WCSLIB LAPACK F77 GLISH CFITSIO
+# CalTableClient      WCSLIB LAPACK F77 GLISH CFITSIO
+# SimpleDynspecClient WCSLIB LAPACK F77 GLISH CFITSIO
 
 set (glish_clients
   antennaflagger
@@ -42,6 +43,7 @@ set (glish_clients
   timclient
   timebeam
   CalTableClient
+  SimpleDynspecClient
 )
 
 foreach (client ${glish_clients})
