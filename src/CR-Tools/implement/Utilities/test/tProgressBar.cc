@@ -28,6 +28,8 @@ using CR::ProgressBar;
 
 /*!
   \file tProgressBar.cc
+  
+  \ingroup CR_Utilities
 
   \brief A collection of test routines for ProgressBar.
 

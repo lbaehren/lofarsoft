@@ -31,7 +31,7 @@ namespace CR {  // Namespace CR -- begin
   /*!
     \class TIM40
     
-    \ingroup Data
+    \ingroup CR_Data
     
     \brief Data and functions for the 40 MHz bandwidth TIM-Board
     

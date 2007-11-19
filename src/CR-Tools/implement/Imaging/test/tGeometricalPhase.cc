@@ -33,7 +33,6 @@ using CR::GeometricalPhase;
 /*!
   \file tGeometricalPhase.cc
 
-  \ingroup CR
   \ingroup Imaging
 
   \brief A collection of test routines for GeometricalPhase

@@ -47,7 +47,7 @@ namespace CR {
 /*!
   \class ProgressBar
 
-  \ingroup Utilities
+  \ingroup CR_Utilities
   
   \brief A simple ASCII progress bar in the terminal window.
 

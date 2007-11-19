@@ -26,7 +26,6 @@
 /*!
   \file tMDirection.cc
   
-  \ingroup CR
   \ingroup Imaging
   
   \brief A number of tests to work with the CASA MDirection classes

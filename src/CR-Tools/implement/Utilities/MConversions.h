@@ -46,7 +46,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \file MConversions.h
 
-    \ingroup Utilities
+    \ingroup CR_Utilities
     
     \brief A set of functions for conversions of CASA Measures
     

@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <string>
 
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>
@@ -50,6 +51,49 @@ const double lightspeed = 299792458;
  
   \date 2007/01/15
 */
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Export the positions and delays to an ASCII table
+
+  \param antPositions -- [antenna,3] Three-dimensional positions of the antennas.
+  \param skyPositions -- [position,3] Three-dimensional positions towards which
+         the delays are computed.
+  \param delays       -- [antenna,sky] Array storing the values of the
+         geometrical delays.
+  \param filename     -- Name of the file to which the data will be written
+*/
+void export_delays (casa::Matrix<double> const &antPositions,
+		    casa::Matrix<double> const &skyPositions,
+		    casa::Matrix<double> const &delays,
+		    std::string const &filename="tGeometricalDelay.data")
+{
+  int numAntenna(0);
+  int numSky (0);
+  int coord(0);
+  casa::IPosition shape(delays.shape());
+
+  std::ofstream outfile (filename.c_str(),std::ios::out);
+
+  for (numAntenna=0; numAntenna<shape(0); numAntenna++) {
+    for (numSky=0; numSky<shape(1); numSky++) {
+      // export antenna position
+      outfile << antPositions(numAntenna,0) << "  "
+	      << antPositions(numAntenna,1) << "  "
+	      << antPositions(numAntenna,2) << "  ";
+      // export sky position
+      outfile << skyPositions(numSky,0) << "  "
+	      << skyPositions(numSky,1) << "  "
+	      << skyPositions(numSky,2) << "  ";
+      // export geometrical delay
+      outfile << delays(numAntenna,numSky) << std::endl;
+    }
+    outfile << std::endl;
+  }
+  
+  outfile.close();
+}
 
 // -----------------------------------------------------------------------------
 
@@ -494,27 +538,25 @@ int test_delayComputation ()
 			    CR::Spherical);
     delay.summary();
 
-    // retrieve the delay values for the near-field geometry
+    /* Set geometry to near-field */
     delay.setNearField (true,
 			false);
-    casa::Matrix<double> delaysNearField = delay.delays();
+    /* Export positions and computed delays */
+    export_delays (delay.antennaPositions(),
+		   delay.skyPositions(),
+		   delay.delays(),
+		   "tGeometricalDelay-near.data");
 
     // retrieve the delay values for the far-field geometry
     std::cout << "-- switching to far-field geometry" << std::endl;
     delay.setNearField (false,
 			false);
-    delay.summary();
-    casa::Matrix<double> delaysFarField = delay.delays();
-    
-    // export the delays for later plotting
-    std::ofstream outfile ("delays.data",std::ios::out);
-    for (uint coord (0); coord<nofPositions; coord++) {
-      outfile << skyPositions(coord,2)
-	      << "\t" << delaysNearField(0,coord)
-	      << "\t" << delaysFarField(0,coord)
-	      << endl;
-    }
-    outfile.close();
+    /* Export positions and computed delays */
+    export_delays (delay.antennaPositions(),
+		   delay.skyPositions(),
+		   delay.delays(),
+		   "tGeometricalDelay-far.data");
+
   }
   
   return nofFailedTests;
@@ -540,7 +582,7 @@ int main ()
   // Test manipulation of the sky positions
 //   nofFailedTests += test_skyPositions ();
   // Test for the computation of the actual geometrical delay
-//   nofFailedTests += test_delayComputation ();
+  nofFailedTests += test_delayComputation ();
   
   return nofFailedTests;
 }

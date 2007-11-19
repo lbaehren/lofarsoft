@@ -62,7 +62,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class tbbctlIn
     
-    \ingroup Data
+    \ingroup CR_Data
     
     \brief Class to read in 
     

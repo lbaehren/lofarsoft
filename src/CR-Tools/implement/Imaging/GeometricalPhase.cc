@@ -243,7 +243,17 @@ namespace CR { // NAMESPACE CR -- BEGIN
     std::cout << "-- Slicer: end specifier  = " << end            << std::endl;
     std::cout << "-- Slicer: incr specifier = " << incr           << std::endl;
 #endif
+
+    /*
+      We need to distinguish between casacore and CASA at this point; there are 
+      a number of methods available in casacore which do not show up in CASA.
+     */
     
+#ifdef HAVE_CASACORE
+    for (nChannel=0; nChannel<nofChannels; nChannel++) {
+      phases.yzPlane(nChannel) =  CR::_2pi*frequencies_p(nChannel)*delays;
+    }
+#else
     if (nofChannels == 1 || shape(0) == 1) {
       uint freq (0);
       uint ant (0);
@@ -268,10 +278,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
 	// calculate phases from the delays and store them
 	tmp = CR::_2pi*frequencies_p(nChannel)*delays;
       }
-#ifdef DEBUGGING_MESSAGES
-    std::cout << "-- shape of tmp array     = " << tmp.shape()    << std::endl;
-#endif
     }
+#endif
 
     return phases;
   }

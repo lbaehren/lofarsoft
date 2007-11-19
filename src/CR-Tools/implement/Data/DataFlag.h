@@ -43,7 +43,7 @@ namespace CR {  //  Namespace CR -- begin
   /*!
     \class DataFlag
     
-    \ingroup Data
+    \ingroup CR_Data
     
     \brief Flags for a number of data sets.
     

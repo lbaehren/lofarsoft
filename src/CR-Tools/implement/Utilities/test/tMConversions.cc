@@ -28,7 +28,7 @@ using CR::MConversions;  // Namespace usage
 /*!
   \file tMConversions.cc
 
-  \ingroup Utilities
+  \ingroup CR_Utilities
 
   \brief A collection of test routines for the MConversions class
  

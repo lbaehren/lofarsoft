@@ -32,7 +32,7 @@ using CR::Data;
 /*!
   \file tData.cc
 
-  \ingroup Data
+  \ingroup CR_Data
   
   \brief A collection of test routines for Data
 

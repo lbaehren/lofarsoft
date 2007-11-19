@@ -24,7 +24,7 @@
 /*!
   \file Utilities.h
 
-  \defgroup Utilities CR-Pipeline: Utilities collection
+  \defgroup CR_Utilities CR-Pipeline: Utilities collection
   \ingroup CR
 
   \brief Utilities collection for the CR-pipeline

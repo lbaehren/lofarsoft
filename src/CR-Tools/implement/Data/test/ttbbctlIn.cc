@@ -28,7 +28,7 @@ using CR::tbbctlIn;  // Namespace usage
 /*!
   \file ttbbctlIn.cc
 
-  \ingroup Data
+  \ingroup CR_Data
 
   \brief A collection of test routines for the tbbctlIn class
  

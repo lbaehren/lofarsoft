@@ -28,7 +28,7 @@
 /*!
   \file tNDABeam.cc
 
-  \ingroup Data
+  \ingroup CR_Data
 
   \brief A collection of test routines for NDABeam
  

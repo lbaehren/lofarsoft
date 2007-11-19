@@ -44,7 +44,7 @@ namespace CR {  //  Namespace CR -- begin
   /*!
     \class LopesEvent
     
-    \ingroup Data
+    \ingroup CR_Data
     
     \brief Class for dealing with LOPES event files
     

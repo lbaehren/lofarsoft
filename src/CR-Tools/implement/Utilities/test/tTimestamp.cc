@@ -28,7 +28,7 @@ using CR::Timestamp;
 /*!
   \file tTimestamp.cc
 
-  \ingroup Utilities
+  \ingroup CR_Utilities
 
   \brief A collection of test routines for Timestamp
  

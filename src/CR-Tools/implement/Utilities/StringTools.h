@@ -52,7 +52,7 @@ namespace CR {
   /*!
     \file StringTools.h
 
-    \ingroup Utilities
+    \ingroup CR_Utilities
     
     \brief A collection of routines for the manipulation of strings
     

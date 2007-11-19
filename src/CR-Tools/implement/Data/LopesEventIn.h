@@ -50,7 +50,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class LopesEventIn
     
-    \ingroup Data
+    \ingroup CR_Data
     
     \brief Read in LOPES event files via the DataReader
     

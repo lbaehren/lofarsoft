@@ -24,8 +24,6 @@
 /*!
   \file Math.h
   
-  \ingroup CR
-
   \defgroup Math CR-Pipeline: Math module
   \ingroup CR
 

@@ -35,7 +35,7 @@ namespace CR {
 /*!
   \class Timestamp
 
-  \ingroup Utilities
+  \ingroup CR_Utilities
 
   \brief Wrapper for the time information in its various formats
 

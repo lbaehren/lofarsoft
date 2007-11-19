@@ -39,7 +39,7 @@ namespace CR {  //  Namespace CR -- begin
   /*!
     \class TIM40Header
     
-    \ingroup Data
+    \ingroup CR_Data
     
     \brief Brief description for class TIM40Header
     

@@ -36,7 +36,7 @@ using CR::DataReader;
 /*!
   \class ITSBeam
 
-  \ingroup Data
+  \ingroup CR_Data
 
   \brief Beamformed ITS waveform data 
 

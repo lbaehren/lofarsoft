@@ -35,7 +35,7 @@ using CR::DataReader;
 /*!
   \class ITSCapture
 
-  \ingroup Data
+  \ingroup CR_Data
 
   \brief Brief description for class ITSCapture
 

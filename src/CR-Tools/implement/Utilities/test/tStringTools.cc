@@ -22,6 +22,12 @@
 
 #include <Utilities/StringTools.h>
 
+/*!
+  \file tStringTools.cc
+  
+  \ingroup CR_Utilities
+*/
+
 // ------------------------------------------------------------------ string2char
 
 int string2char ()

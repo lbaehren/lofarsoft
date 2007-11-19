@@ -27,7 +27,7 @@ using CR::TIM40Header;
 /*!
   \file tTIM40Header.cc
 
-  \ingroup Data
+  \ingroup CR_Data
   
   \brief A collection of test routines for TIM40Header
  

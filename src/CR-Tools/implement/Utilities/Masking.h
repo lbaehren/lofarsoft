@@ -49,7 +49,7 @@ using casa::Vector;
 namespace CR {
 
   /*!
-    \ingroup Utilities
+    \ingroup CR_Utilities
     
     \brief Collection of methods for masking of data arrays.
     

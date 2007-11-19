@@ -31,7 +31,7 @@ using CR::DataReader;
 /*!
   \class ITSCorrelation
 
-  \ingroup Data
+  \ingroup CR_Data
 
   \brief Brief description for class ITSCorrelation
 

@@ -33,7 +33,7 @@ using CR::LopesEvent;
 /*!
   \file tLopesEvent.cc
 
-  \ingroup Data
+  \ingroup CR_Data
   
   \brief A collection of test routines for LopesEvent
  

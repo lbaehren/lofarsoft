@@ -28,7 +28,7 @@ using casa::Vector;
 /*!
  \file tArrays.cc
 
- \ingroup Data
+ \ingroup CR_Data
  
  \brief A set of test for working with AIPS++ Arrays
  

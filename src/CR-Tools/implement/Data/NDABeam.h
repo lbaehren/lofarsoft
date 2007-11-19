@@ -36,7 +36,7 @@ using CR::DataReader;
 /*!
   \class NDABeam
 
-  \ingroup Data
+  \ingroup CR_Data
 
   \brief Beamformed NDA waveform data 
 

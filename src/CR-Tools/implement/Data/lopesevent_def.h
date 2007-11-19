@@ -2,7 +2,7 @@
 /*!
   \file lopesevent.h
  
-  \ingroup Data
+  \ingroup CR_Data
  
   \brief Include-file with the descriptions of the lopesevent datastructure
 

@@ -13,6 +13,7 @@ cmake_minimum_required (VERSION 2.4)
 ## User defined build/install options
 
 option (CR_BUILD_TESTS "Build the test programs?" 1)
+option (CR_BUILD_EXTERNAL_TESTS "Build the test programs for external packages?" 0)
 option (CR_ENABLE_TESTING "Enable running the test programs?" 1)
 option (CR_DEBUGGING_MESSAGES "Print debugging information?" 0)
 option (CR_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
@@ -22,8 +23,12 @@ option (CR_PYTHON_SUPPORT "Activate support for Python applications?" 0)
 ## Handle option: testing mode on/off
 
 if (CR_ENABLE_TESTING)
+  # CMake/CTest settings
   include (CTest)
   enable_testing()
+  # enable building test programs
+  set (CR_BUILD_TESTS ON)
+  set (CR_BUILD_EXTERNAL_TESTS ON)
 endif (CR_ENABLE_TESTING)
 
 ## Handle option: verbose mode on/off
@@ -391,9 +396,9 @@ endif (prefix)
 add_subdirectory (implement)  # Sources to build the library
 add_subdirectory (apps)       # Applications
 
-if (CR_BUILD_TESTS)
+if (CR_BUILD_EXTERNAL_TESTS)
   add_subdirectory (test)
-endif (CR_BUILD_TESTS)
+endif (CR_BUILD_EXTERNAL_TESTS)
 
 ## ------------------------------------------------------------------------------
 ## Configuration summary

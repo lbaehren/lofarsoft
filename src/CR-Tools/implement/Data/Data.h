@@ -32,7 +32,7 @@ namespace CR {
   /*!
     \class Data
     
-    \ingroup Data
+    \ingroup CR_Data
     
     \brief Class for dealing with data
     

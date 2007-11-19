@@ -24,7 +24,7 @@
 /*!
   \file Data.h
 
-  \defgroup Data CR-Pipeline: Data module
+  \defgroup CR_Data CR-Pipeline: Data module
   \ingroup CR
 
   \brief Data module for the CR-pipeline

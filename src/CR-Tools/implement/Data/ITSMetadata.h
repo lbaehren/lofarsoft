@@ -41,7 +41,7 @@
 /*!
   \class ITSMetadata
 
-  \ingroup Data
+  \ingroup CR_Data
 
   \brief Storage of meta information from an ITS experiment
 

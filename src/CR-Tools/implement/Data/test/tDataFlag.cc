@@ -26,7 +26,7 @@ using CR::DataFlag;
 /*!
   \file tDataFlag.cc
 
-  \ingroup Data
+  \ingroup CR_Data
   
   \brief A collection of test routines for the DataFlag class
 

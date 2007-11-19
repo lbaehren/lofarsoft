@@ -30,7 +30,7 @@
 /*!
   \file tLopesEventIn.cc
 
-  \ingroup Data
+  \ingroup CR_Data
 
   \brief A collection of test routines for LopesEventIn
  
