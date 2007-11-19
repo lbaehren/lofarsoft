@@ -46,8 +46,10 @@ namespace CR { // NAMESPACE CR -- BEGIN
     bool antennaIndexFirst (true);
     bool bufferDelays (false);
 
+    // (x,y,z) = (0,0,0)
     antennaPositions  = 0.0;
-
+    
+    // (x,y,z) = (0,0,1)
     skyPositions      = 0.0;
     skyPositions(0,2) = 1.0;
 
@@ -219,13 +221,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
     bool status (true);
     showProgress_p = false;
     nearField_p    = true;
-    
-#ifdef DEBUGGING_MESSAGES
-    cout << "[GeometricalDelay::init]" << endl;
-    cout << "-- shape(antPositions) = " << antPositions.shape() << endl;
-    cout << "-- shape(skyPositions) = " << skyPositions.shape() << endl;
-    cout << "-- buffer delay values = " << bufferDelays         << endl;
-#endif
+
+    /* Set the values for the antenna positions */
     
     status = setAntennaPositions (antPositions,
 				  antennaIndexFirst,
@@ -242,7 +239,14 @@ namespace CR { // NAMESPACE CR -- BEGIN
       nofAntennas_p  = 1;
     }
     
-    if (!setSkyPositions (skyPositions,false)) {
+    /* Set the values for the sky positions */
+
+    status = setSkyPositions (skyPositions,
+			      skyCoordType,
+			      false,
+			      false);
+
+    if (!status) {
       cerr << "[GeometricalDelay::init] There was an error setting the sky positions"
 	   << endl;
       // use defaults

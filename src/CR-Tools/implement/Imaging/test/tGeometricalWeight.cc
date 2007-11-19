@@ -182,12 +182,12 @@ int test_parameters ()
 int main ()
 {
   int nofFailedTests (0);
-
+  
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_GeometricalWeight ();
-  }
+  nofFailedTests += test_GeometricalWeight ();
 
+  /* if construction work we can continue with the rest */
+  
   if (!nofFailedTests) {
     nofFailedTests += test_parameters ();
   } 
