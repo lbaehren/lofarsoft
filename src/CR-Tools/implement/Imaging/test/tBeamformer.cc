@@ -29,6 +29,10 @@
 using casa::DComplex;
 using casa::Matrix;
 using casa::Vector;
+
+using CR::GeometricalDelay;
+using CR::GeometricalPhase;
+using CR::GeometricalWeight;
 using CR::Beamformer;
 
 /*!
@@ -69,10 +73,44 @@ int test_Beamformer ()
     nofFailedTests++;
   }
   
-  std::cout << "[2] Testing argumented constructor ..." << std::endl;
+  std::cout << "[2] Testing construction with GeometricalWeight ..." << std::endl;
   try {
-    Beamformer bf (get_antennaPositions(),
-		   get_skyPositions(),
+    std::cout << "-- creating GeometricalWeight object ..." << std::endl;
+    GeometricalWeight weight (get_antennaPositions(),
+			      get_skyPositions(),
+			      get_frequencies());
+    
+    std::cout << "-- creating Beamformer object ..." << std::endl;
+    Beamformer bf (weight);
+    bf.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[3] Testing construction with GeometricalPhase ..." << std::endl;
+  try {
+    std::cout << "-- creating GeometricalPhase object ..." << std::endl;
+    GeometricalPhase phase (get_antennaPositions(),
+			    get_skyPositions(),
+			    get_frequencies());
+    
+    std::cout << "-- creating Beamformer object ..." << std::endl;
+    Beamformer bf (phase);
+    bf.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[4] Testing construction with GeometricalDelay ..." << std::endl;
+  try {
+    std::cout << "-- creating GeometricalDelay object ..." << std::endl;
+    GeometricalDelay delay (get_antennaPositions(),
+			    get_skyPositions());
+    
+    std::cout << "-- creating Beamformer object ..." << std::endl;
+    Beamformer bf (delay,
 		   get_frequencies());
     bf.summary();
   } catch (std::string message) {
@@ -80,16 +118,33 @@ int test_Beamformer ()
     nofFailedTests++;
   }
   
-  std::cout << "[3] Testing copy constructor ..." << std::endl;
+  std::cout << "[5] Testing argumented constructor ..." << std::endl;
   try {
-    Beamformer bf1 (get_antennaPositions(),
-		    get_skyPositions(),
-		    get_frequencies());
+    Beamformer bf (get_antennaPositions(),
+		   CR::Cartesian,
+		   get_skyPositions(),
+		   CR::Cartesian,
+		   get_frequencies());
+    bf.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[4] Testing copy constructor ..." << std::endl;
+  try {
+    std::cout << "-- creating original Beamformer object ..." << std::endl;
+    Beamformer bf (get_antennaPositions(),
+		   CR::Cartesian,
+		   get_skyPositions(),
+		   CR::Cartesian,
+		   get_frequencies());
     //
-    bf1.bufferDelays (true);
+    bf.bufferDelays (true);
     //
-    Beamformer bf2 (bf1);
-    bf2.summary();
+    std::cout << "-- creating new Beamformer object as copy ..." << std::endl;
+    Beamformer bfCopy (bf);
+    bfCopy.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -114,7 +169,9 @@ int test_beamType ()
 
   // Create Beamformer object for testing its functionality
   Beamformer bf (get_antennaPositions(),
+		 CR::Cartesian,
 		 get_skyPositions(),
+		 CR::Cartesian,
 		 get_frequencies());
 
   std::cout << "[1] Field in the frequency domain..." << std::endl;
@@ -160,7 +217,9 @@ int test_processing ()
   Matrix<double> beam;
   // Beamformer object for the subsequent testing
   Beamformer bf (get_antennaPositions(),
+		 CR::Cartesian,
 		 get_skyPositions(),
+		 CR::Cartesian,
 		 get_frequencies());
   bf.summary();
   // Some data to test the processing

@@ -22,15 +22,11 @@
  ***************************************************************************/
 
 // CASA header files
-#ifdef HAVE_CASA
 #include <scimath/Mathematics.h>
 #include <scimath/Mathematics/FFTServer.h>
 using casa::IPosition;
 using casa::FFTServer;
-using casa::Matrix;
 using casa::Slicer;
-using casa::Vector;
-#endif
 // Custom header files
 #include <Imaging/Beamformer.h>
 
@@ -52,35 +48,55 @@ namespace CR { // Namespace CR -- begin
   
   // ----------------------------------------------------------------- Beamformer
   
-#ifdef HAVE_CASA
-  Beamformer::Beamformer (Matrix<double> const &antPositions,
-			  Matrix<double> const &skyPositions,
-			  Vector<double> const &frequencies)
-    : GeometricalWeight(antPositions,
-			skyPositions,
-			frequencies,
-			false,
-			false,
-			true)
+  Beamformer::Beamformer (GeometricalWeight const &weights)
+    : GeometricalWeight (weights)
   {
     init ();
   }
-#else
-#ifdef HAVE_BLITZ
-  Beamformer::Beamformer (const blitz::Array<double,2> &antPositions,
-			  const blitz::Array<double,2> &skyPositions,
-			  blitz::Array<double,1> const &frequencies)
-    : GeometricalWeight(antPositions,
-			skyPositions,
-			frequencies,
-			false,
-			false,
-			true)
+  
+  // ----------------------------------------------------------------- Beamformer
+  
+  Beamformer::Beamformer (GeometricalPhase const &phase,
+			  bool const &bufferWeights)
+    : GeometricalWeight (phase,
+			 bufferWeights)
   {
     init ();
   }
-#endif
-#endif
+
+  Beamformer::Beamformer (GeometricalDelay const &delay,
+			  casa::Vector<double> const &frequencies,
+			  bool const &bufferPhases,
+			  bool const &bufferWeights)
+    : GeometricalWeight (delay,
+			 frequencies,
+			 bufferPhases,
+			 bufferWeights)
+  {
+    init ();
+  }
+  
+  // ----------------------------------------------------------------- Beamformer
+  
+  Beamformer::Beamformer (casa::Matrix<double> const &antPositions,
+			  CR::CoordinateType const &antCoordType,
+			  casa::Matrix<double> const &skyPositions,
+			  CR::CoordinateType const &skyCoordType,
+			  casa::Vector<double> const &frequencies,
+			  bool const &bufferDelays,
+			  bool const &bufferPhases,
+			  bool const &bufferWeights)
+    : GeometricalWeight (antPositions,
+			 antCoordType,
+			 skyPositions,
+			 skyCoordType,
+			 frequencies,
+			 bufferDelays,
+			 bufferPhases,
+			 bufferWeights)
+  {
+    init ();
+  }
   
   Beamformer::Beamformer (Beamformer const &other)
   {
@@ -261,7 +277,6 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------------ checkData
 
-#ifdef HAVE_CASA
   bool Beamformer::checkData (casa::Matrix<double> &beam,
 			      const casa::Matrix<DComplex> &data)
   {
@@ -303,21 +318,9 @@ namespace CR { // Namespace CR -- begin
       return true;
     }
   }
-#else
-#ifdef HAVE_BLITZ
-  bool Beamformer::checkData (blitz::Array<double,2> &beam,
-			      const blitz::Array<complex<double>,2> &data)
-  {
-    bool ok (true);
-    
-    return ok;
-  }
-#endif
-#endif
   
   // ---------------------------------------------------------------- processData
   
-#ifdef HAVE_CASA
   bool Beamformer::processData (casa::Matrix<double> &beam,
 				const casa::Matrix<DComplex> &data)
   {
@@ -327,25 +330,11 @@ namespace CR { // Namespace CR -- begin
       return false;
     }
   }
-#else
-#ifdef HAVE_BLITZ
-  bool Beamformer::processData (blitz::Array<double,2> &beam,
-				const blitz::Array<complex<double>,2> &data)
-  {
-    if (checkData(beam,data)) {
-      return (this->*processData_p) (beam,data);
-    } else {
-      return false;
-    }
-  }
-#endif
-#endif
   
   // ----------------------------------------------------------------- freq_field
   
-#ifdef HAVE_CASA
-  bool Beamformer::freq_field (Matrix<DComplex> &beam,
-			       const Matrix<DComplex> &data)
+  bool Beamformer::freq_field (casa::Matrix<DComplex> &beam,
+			       const casa::Matrix<DComplex> &data)
   {
     bool status (true);
     int nofSkyPositions (skyPositions_p.nrow());
@@ -387,23 +376,11 @@ namespace CR { // Namespace CR -- begin
 
     return status;
   }
-#else
-#ifdef HAVE_BLITZ
-  bool Beamformer::freq_field (blitz::Array<complex<double>,2> &beam,
-			       const blitz::Array<complex<double>,2> &data)
-  {
-    bool status (true);
-
-    return status;
-  }
-#endif
-#endif
   
   // ----------------------------------------------------------------- freq_power
 
-#ifdef HAVE_CASA
-  bool Beamformer::freq_power (Matrix<double> &beam,
-			       const Matrix<DComplex> &data)
+  bool Beamformer::freq_power (casa::Matrix<double> &beam,
+			       const casa::Matrix<DComplex> &data)
   {
     bool status (true);
     int nofSkyPositions (skyPositions_p.nrow());
@@ -433,82 +410,21 @@ namespace CR { // Namespace CR -- begin
 
     return status;
   }
-#else
-#ifdef HAVE_BLITZ
-  bool Beamformer::freq_power (blitz::Array<double,2> &beam,
-			       const blitz::Array<complex<double>,2> &data)
-  {
-    bool status (true);
-    
-    return status;
-  }
-#endif
-#endif
   
   // ----------------------------------------------------------------- time_power
 
-#ifdef HAVE_CASA
-  bool Beamformer::time_power (Matrix<double> &beam,
-			       const Matrix<DComplex> &data)
+  bool Beamformer::time_power (casa::Matrix<double> &beam,
+			       const casa::Matrix<DComplex> &data)
   {
     bool status (true);
 
     return status;
   }
-#else
-#ifdef HAVE_BLITZ
-  bool Beamformer::time_power (blitz::Array<double,2> &beam,
-			       const blitz::Array<complex<double>,2> &data)
-  {
-    bool status (true);
-    int nofSkyPositions (skyPositions_p.nrow());
-    int nofFrequencies (frequencies_p.nelements());
-    IPosition shapeData (data.shape());
-
-    /*
-      Check if the shape of the array with the input data matched the internal
-      parameters.
-    */
-    if (shapeData(0) == nofSkyPositions &&
-	shapeData(1) == nofFrequencies) {
-      // additional local variables
-      int direction (0);
-      uint antenna (0);
-      int freq (0);
-      int blocksize (2*(nofFrequencies-1));
-      Vector<DComplex> vectFreq (nofFrequencies);
-
-      std::cout << "[Beamformer::time_power] Processing data..." << std::endl;
-
-      for (direction=0; direction<nofSkyPositions; direction++) {
-	for (antenna=0; antenna<nofAntennas_p; antenna++) {
-	  // (1) Assemble the beamformed spectrum
-	  for (freq=0; freq<nofFrequencies; freq++) {
-	    vectFreq(freq) = data(antenna,freq)*weights_p(antenna,direction,freq);
-	  }
-	  // (2) Inverse Fourier transform back to the time domain
-	  // (3) Assemble power time-series
-	}
-      }
-
-    } else {
-      std::cerr << "[Beamformer::time_power]" << std::endl;
-      std::cerr << "-- Wrong shape of array with input data!" << std::endl;
-      std::cerr << "--> shape(data)    = " << data.shape()      << std::endl;
-      std::cerr << "--> shape(weights) = " << weights_p.shape() << std::endl;
-      status = false;
-    }
-
-    return status;
-  }
-#endif
-#endif
 
   // -------------------------------------------------------------------- time_cc
 
-#ifdef HAVE_CASA
-  bool Beamformer::time_cc (Matrix<double> &beam,
-			    const Matrix<DComplex> &data)
+  bool Beamformer::time_cc (casa::Matrix<double> &beam,
+			    const casa::Matrix<DComplex> &data)
   {
     bool status (true);
     int nofSkyPositions (skyPositions_p.nrow());
@@ -528,9 +444,9 @@ namespace CR { // Namespace CR -- begin
       uint ant1 (0);
       uint ant2 (0);
       int freq (0);
-      Vector<DComplex> tmpFreq (nofFrequencies,0.0);
-      Vector<double>   tmpTime (blocksize,0.0);
-      Matrix<double>   tmpData (nofAntennas_p,blocksize);
+      casa::Vector<DComplex> tmpFreq (nofFrequencies,0.0);
+      casa::Vector<double>   tmpTime (blocksize,0.0);
+      casa::Matrix<double>   tmpData (nofAntennas_p,blocksize);
 
       /*
 	Set up the casa::FFTServer which is t handle the inverse Fourier
@@ -576,60 +492,25 @@ namespace CR { // Namespace CR -- begin
 
     return status;
   }
-#else
-#ifdef HAVE_BLITZ
-  bool Beamformer::time_cc (blitz::Array<double,2> &beam,
-			    const blitz::Array<conplex<double>,2> &data)
-  {
-    bool status (true);
-    
-    return status;
-  }
-#endif
-#endif
   
   // --------------------------------------------------------------------- time_p
   
-#ifdef HAVE_CASA
-  bool Beamformer::time_p (Matrix<double> &beam,
-			   const Matrix<DComplex> &data)
+  bool Beamformer::time_p (casa::Matrix<double> &beam,
+			   const casa::Matrix<DComplex> &data)
   {
     bool status (true);
     
     return status;
   }
-#else
-#ifdef HAVE_BLITZ
-  bool Beamformer::time_p (blitz::Array<double,2> &beam,
-			   const blitz::Array<conplex<double>,2> &data)
-  {
-    bool status (true);
-    
-    return status;
-  }
-#endif
-#endif
   
   // --------------------------------------------------------------------- time_x
   
-#ifdef HAVE_CASA
-  bool Beamformer::time_x (Matrix<double> &beam,
-			   const Matrix<DComplex> &data)
+  bool Beamformer::time_x (casa::Matrix<double> &beam,
+			   const casa::Matrix<DComplex> &data)
   {
     bool status (true);
     
     return status;
   }
-#else
-#ifdef HAVE_BLITZ
-  bool Beamformer::time_x (blitz::Array<double,2> &beam,
-			   const blitz::Array<conplex<double>,2> &data)
-  {
-    bool status (true);
-    
-    return status;
-  }
-#endif
-#endif
   
 } // Namespace CR -- end

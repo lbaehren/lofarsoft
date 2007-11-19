@@ -66,33 +66,12 @@ namespace CR { // Namespace CR -- begin
     \test tBeamformer.cc
     
     <h3>Prerequisite</h3>
-    
-    The underlying geometrical framework utilized by the Beamformer is
-    implemented in the following classes:
-    <table border="0">
-      <tr>
-        <td class="indexkey">Quantity</td>
-        <td class="indexkey">implemented in</td>
-        <td class="indexkey">Relation</td>
-      </tr>
-      <tr>
-        <td>gemoetrical delay</td>
-        <td>GeometricalDelay</td>
-        <td>\f$ \tau_j = \frac{1}{c} \left( |\vec \rho - \vec x_j| - |\vec \rho|
-	\right) \f$</td>
-      </tr>
-      <tr>
-        <td>geometrical phase</td>
-        <td>GeometricalPhase</td>
-        <td>\f$ \phi (\vec x_j, \vec \rho, \nu) = 2 \pi \nu \tau_{\rm geom} \f$</td>
-      </tr>
-      <tr>
-        <td>geometrical weight</td>
-        <td>GeometricalWeight</td>
-        <td>\f$ w (\vec x_j, \vec \rho, \nu) = \exp \Bigl( i\, \phi (\vec x_j,
-	\vec \rho, \nu) \Bigr) \f$</td>
-      </tr>
-    </table>
+
+    <ul>
+      <li>GeometricalDelay
+      <li>GeometricalPhase
+      <li>GeometricalWeight
+    </ul>
     
     <h3>Synopsis</h3>
 
@@ -172,17 +151,10 @@ namespace CR { // Namespace CR -- begin
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered
     */
-#ifdef HAVE_CASA
     bool (Beamformer::*processData_p) (casa::Matrix<double> &beam,
 				       const casa::Matrix<DComplex> &data);
-#else
-#ifdef HAVE_BLITZ
-    bool (Beamformer::*processData_p) (blitz:Array<double,2> &beam,
-				       const blitz:Array<complex<double>,2> &data);
-#endif
-#endif
     
-  public:
+    public:
     
     // ------------------------------------------------------------- Construction
     
@@ -193,26 +165,68 @@ namespace CR { // Namespace CR -- begin
     
     /*!
       \brief Argumented constructor
-      
-      \param antPositions  -- [nofAntennas,3] Antenna positions for which the
-                              delay is computed, \f$ (x,y,z) \f$
-      \param skyPositions  -- [nofSkyPositions,3] Positions in the sky towards
-                              which to point, given in the same reference frame
-			      as the antenna positions, \f$ (x,y,z) \f$
-      \param frequencies   -- Frequencies for which the geometrical delays are
-                              converted into phases
+
+      \param weights -- Object storing the geometrical weights which are required
+             for the Beamformer
     */
-#ifdef HAVE_CASA
+    Beamformer (GeometricalWeight const &weights);
+    
+    /*!
+      \brief Argumented constructor using existing GeometricalPhase object
+      
+      \param phase -- GeometricalPhase object encapsulating the functionality
+             on top of which this class builds.
+      \param bufferWeights -- Buffer the values of the geometrical weights?
+    */
+    Beamformer (GeometricalPhase const &phase,
+		bool const &bufferWeights=false);
+    
+    /*!
+      \brief Argumented constructor using existing GeometricalDelay object
+      
+      \param delay -- GeometricalDelay object encapsulating the functionality
+             on top of which this class builds.
+      \param frequencies  -- Frequencies for which the geometrical delays are
+             converted into phases, [Hz]
+      \param bufferPhases -- Buffer the values of the phases?
+      \param bufferWeights -- Buffer the values of the geometrical weights?
+    */
+    Beamformer (GeometricalDelay const &delay,
+		casa::Vector<double> const &frequencies,
+		bool const &bufferPhases=false,
+		bool const &bufferWeights=false);
+    
+    /*!
+      \brief Argumented constructor
+      
+      \param antPositions -- [nofAntennas,3] Antenna positions for which the
+             delay is computed, given in Cartesian coordinates \f$ (x,y,z) \f$
+      \param antCoordType -- CR::CoordinateType of the antenna position
+             coordinates; if the coordinates are non-cartesian and thereby
+	     include anglular components, the values must be provided in radians.
+      \param skyPositions -- [nofSkyPositions,3] Positions in the sky towards
+             which to point, given in the same reference frame as the antenna
+	     positions, \f$ (x,y,z) \f$
+      \param skyCoordType -- CR::CoordinateType of the sky position coordinates;
+             if the coordinates are non-cartesian and thereby include anglular
+	     components, the values must be provided in radians.
+      \param frequencies  -- Frequencies for which the geometrical delays are
+             converted into phases
+      \param bufferDelays -- Buffer the values for the geometrical delay? If set
+             <i>yes</i> the delays will be computed from the provided antenna and
+	     sky positions and afterwards kept in memory; if set <i>no</i> only
+	     the input parameters are stored an no further action is taken.
+      \param bufferPhases -- Buffer the values of the phases?
+      \param bufferWeights -- Buffer the values of the geometrical weights?
+    */
     Beamformer (casa::Matrix<double> const &antPositions,
+		CR::CoordinateType const &antCoordType,
 		casa::Matrix<double> const &skyPositions,
-		casa::Vector<double> const &frequencies);
-#else
-#ifdef HAVE_BLITZ
-    Beamformer (const blitz::Array<double,2> &antPositions,
-		const blitz::Array<double,2> &skyPositions,
-		blitz::Array<double,1> const &frequencies);
-#endif
-#endif
+		CR::CoordinateType const &skyCoordType,
+		casa::Vector<double> const &frequencies,
+		bool const &bufferDelays=false,
+		bool const &bufferPhases=false,
+		bool const &bufferWeights=false);
     
     /*!
       \brief Copy constructor
@@ -398,15 +412,8 @@ namespace CR { // Namespace CR -- begin
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered
     */
-#ifdef HAVE_CASA
     bool processData (casa::Matrix<double> &beam,
 		      const casa::Matrix<DComplex> &data);
-#else
-#ifdef HAVE_BLITZ
-    bool processData (blitz::Array<double,2> &beam,
-		      const blitz::Array<complex<double>,2> &data);
-#endif
-#endif
     
     /*!
       \brief Directed field as function of frequency, \f$ \widetilde S (\vec\rho,\nu) \f$
@@ -422,15 +429,8 @@ namespace CR { // Namespace CR -- begin
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered
     */
-#ifdef HAVE_CASA
     bool freq_field (casa::Matrix<DComplex> &beam,
 		     const casa::Matrix<DComplex> &data);
-#else
-#ifdef HAVE_BLITZ
-    bool freq_field (blitz::Array<complex<double>,2> &beam,
-		     const blitz::Array<complex<double>,2> &data);
-#endif
-#endif
     
     /*!
       \brief Form a cross-correlation beam
@@ -443,15 +443,8 @@ namespace CR { // Namespace CR -- begin
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered
     */
-#ifdef HAVE_CASA
     bool time_cc (casa::Matrix<double> &beam,
 		  const casa::Matrix<DComplex> &data);
-#else
-#ifdef HAVE_BLITZ
-    bool time_cc (blitz::Array<double,2> &beam,
-		  const blitz::Array<conplex<double>,2> &data);
-#endif
-#endif
     
     /*!
       \brief Form a power-beam (p-beam)
@@ -464,15 +457,8 @@ namespace CR { // Namespace CR -- begin
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered
     */
-#ifdef HAVE_CASA
     bool time_p (casa::Matrix<double> &beam,
 		 const casa::Matrix<DComplex> &data);
-#else
-#ifdef HAVE_BLITZ
-    bool time_p (blitz::Array<double,2> &beam,
-		 const blitz::Array<complex<double>,2> &data);
-#endif
-#endif
     
     /*!
       \brief Form an excess-beam (x-beam)
@@ -485,15 +471,8 @@ namespace CR { // Namespace CR -- begin
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered
     */
-#ifdef HAVE_CASA
     bool time_x (casa::Matrix<double> &beam,
 		 const casa::Matrix<DComplex> &data);
-#else
-#ifdef HAVE_BLITZ
-    bool time_x (blitz::Array<double,2> &beam,
-		 const blitz::Array<complex<double>,2> &data);
-#endif
-#endif
     
   private:
     
@@ -523,15 +502,8 @@ namespace CR { // Namespace CR -- begin
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered
     */
-#ifdef HAVE_CASA
     bool checkData (casa::Matrix<double> &beam,
 		    const casa::Matrix<DComplex> &data);
-#else
-#ifdef HAVE_BLITZ
-    bool checkData (blitz::Array<double,2> &beam,
-		    const blitz::Array<complex<double>,2> &data);
-#endif
-#endif
     
     /*!
       \brief Directed spectral power, \f$ \widetilde P (\vec\rho,\nu) \f$
@@ -544,15 +516,8 @@ namespace CR { // Namespace CR -- begin
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered
     */
-#ifdef HAVE_CASA
     bool freq_power (casa::Matrix<double> &beam,
 		     const casa::Matrix<DComplex> &data);
-#else
-#ifdef HAVE_BLITZ
-    bool freq_power (blitz::Array<double,2> &beam,
-		     const blitz::Array<complex<double>,2> &data);
-#endif
-#endif
     
     /*!
       \brief Directed power time series, \f$ S (\vec\rho,t) \f$
@@ -565,15 +530,8 @@ namespace CR { // Namespace CR -- begin
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered
     */
-#ifdef HAVE_CASA
     bool time_power (casa::Matrix<double> &beam,
 		     const casa::Matrix<DComplex> &data);
-#else
-#ifdef HAVE_BLITZ
-    bool time_power (blitz::Array<double,2> &beam,
-		     const blitz::Array<complex<double>,2> &data);
-#endif
-#endif
     
   };
   

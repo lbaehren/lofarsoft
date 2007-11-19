@@ -62,6 +62,27 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
   // ---------------------------------------------------------- GeometricalWeight
   
+  GeometricalWeight::GeometricalWeight (casa::Matrix<double> const &antPositions,
+					CR::CoordinateType const &antCoordType,
+					casa::Matrix<double> const &skyPositions,
+					CR::CoordinateType const &skyCoordType,
+					casa::Vector<double> const &frequencies,
+					bool const &bufferDelays,
+					bool const &bufferPhases,
+					bool const &bufferWeights)
+    : GeometricalPhase (antPositions,
+			antCoordType,
+			skyPositions,
+			skyCoordType,
+			frequencies,
+			bufferDelays,
+			bufferPhases),
+      bufferWeights_p (bufferWeights)
+  {
+  }
+  
+  // ---------------------------------------------------------- GeometricalWeight
+  
   GeometricalWeight::GeometricalWeight (GeometricalDelay const &delay,
 					casa::Vector<double> const &frequencies,
 					bool const &bufferPhases,
