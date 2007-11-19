@@ -24,7 +24,7 @@
 /*!
   \file tUseROOT.cc
   
-  \ingroup CR-Pipeline
+  \ingroup CR_test
 
   \brief A number of tests working with ROOT
 

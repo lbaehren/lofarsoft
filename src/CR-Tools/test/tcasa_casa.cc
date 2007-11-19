@@ -35,6 +35,7 @@
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Cube.h>
 #include <casa/Arrays/MaskedArray.h>
+#include <casa/Arrays/Slice.h>
 #include <casa/Containers/Block.h>
 #include <casa/Containers/Record.h>
 #include <casa/Containers/RecordField.h>
@@ -52,6 +53,7 @@ using casa::IPosition;
 using casa::Vector;
 using casa::Matrix;
 using casa::Cube;
+using casa::Slice;
 
 using std::cout;
 using std::endl;
@@ -61,9 +63,12 @@ using std::endl;
 
   \brief A number of tests for clases in the casacore casa module
 
-  \ingroup CR
+  \ingroup CR_test
 
   \author Lars B&auml;hren
+
+  <u>Note:</u> A number of the tests performed will not work with the original CASA
+  libraries.
 */
 
 // ==============================================================================
@@ -82,6 +87,11 @@ int test_Arrays ();
 /*!
   \brief Test for casa/Arrays/Matrix class
 
+  [1] Element-wise writing <br>
+  [2] Column-/Row-wise writing <br>
+  [3] Column-/Row-wise writing of a vector <br>
+  [4] Column-/Row-wise writing using Slicer
+
   \return nofFailedTests -- The number of failed test within this function
 */
 int test_Arrays_Matrix (std::vector<int> const &nelem);
@@ -91,7 +101,14 @@ int test_Arrays_Matrix (std::vector<int> const &nelem);
 
   \return nofFailedTests -- The number of failed test within this function
 */
-int test_Arrays_Cube ();
+int test_Arrays_Cube (std::vector<int> const &nelem);
+
+/*!
+  \brief Test for casa/Arrays/Array class
+
+  \return nofFailedTests -- The number of failed test within this function
+*/
+int test_Arrays_Array (std::vector<int> const &nelem);
 
 /*!
   \brief Tests for classes in casa/BasicMath
@@ -107,6 +124,13 @@ int test_BasicMath ();
 */
 int test_BasicSL ();
 
+/*!
+  \brief Tests for classes in casa/Containers
+
+  \return nofFailedTests -- The number of failed test within this function
+*/
+int test_Containers ();
+
 // ==============================================================================
 //
 //  Implementation of the functions
@@ -120,7 +144,7 @@ int test_Arrays ()
   cout << "\nTesting classes in casa/Arrays ...\n" << endl;
 
   int nofFailedTests (0);
-  uint nelem (10);
+  uint nelem (20);
 
   cout << "[1] Testing casa/Arrays/IPosition ..." << endl;
   try {
@@ -265,7 +289,7 @@ int test_Arrays_Matrix (std::vector<int> const &nelem)
   IPosition shape (2);
   IPosition pos(2);
 
-  std::cout << "[1] Element-wise addressing ..." << std::endl;
+  std::cout << "[1] Element-wise writing ..." << std::endl;
   try {
     for (uint n(0); n<nelem.size(); n++) {
       /* Create the matrix */
@@ -305,6 +329,442 @@ int test_Arrays_Matrix (std::vector<int> const &nelem)
     nofFailedTests++;
   }
   
+  std::cout << "[2] Column-/Row-wise writing ..." << std::endl;
+  try {
+    for (uint n(0); n<nelem.size(); n++) {
+      /* Create the matrix */
+      shape = IPosition (2,nelem[n],nelem[n]);
+      Matrix<double> arr (shape);
+
+      // looping over matrix rows
+
+      start = clock();
+      for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
+	arr.row(pos(0)) = 1.0;
+      }
+      end = clock();
+      runtimes[0] = runtime (start,end);
+
+      // looping over matrix columns
+
+      start = clock();
+      for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
+	arr.column(pos(1)) = 1.0;
+      }
+      end = clock();
+      runtimes[1] = runtime (start,end);
+
+      /* Show timing information */
+      
+      std::cout << "\t" << nelem[n]
+		<< "\t" << runtimes[0]
+		<< "\t" << runtimes[1] << std::endl;
+    }
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[3] Column-/Row-wise writing of a vector ..." << std::endl;
+  try {
+    for (uint n(0); n<nelem.size(); n++) {
+      /* Create the matrix */
+      shape = IPosition (2,nelem[n],nelem[n]);
+      Matrix<double> arr (shape);
+      Vector<double> vec (nelem[n],1.0);
+
+      // looping over matrix rows
+
+      start = clock();
+      for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
+	arr.row(pos(0)) = vec;
+      }
+      end = clock();
+      runtimes[0] = runtime (start,end);
+
+      // looping over matrix columns
+
+      start = clock();
+      for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
+	arr.column(pos(1)) = vec;
+      }
+      end = clock();
+      runtimes[1] = runtime (start,end);
+
+      /* Show timing information */
+      
+      std::cout << "\t" << nelem[n]
+		<< "\t" << runtimes[0]
+		<< "\t" << runtimes[1] << std::endl;
+    }
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[4] Column-/Row-wise writing using Slicer ..." << std::endl;
+  try {
+    for (uint n(0); n<nelem.size(); n++) {
+      /* Set matrix shape */
+      shape = IPosition (2,nelem[n],nelem[n]);
+      /* Create the matrix */
+      Matrix<double> arr (shape);
+    }
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
+// ------------------------------------------------------------------------------
+
+int test_Arrays_Cube (std::vector<int> const &nelem)
+{
+  cout << "\nTesting casa/Arrays/Cube ...\n" << endl;
+
+  int nofFailedTests (0);
+  uint nelemMax (6);
+  clock_t start;
+  clock_t end;
+  double runtimes[6];
+  IPosition shape (3);
+  IPosition pos(3);
+
+  std::cout << "[1] Element-wise writing ..." << std::endl;
+  std::cout << "\tnelem" 
+	    << "\t(0,1,2)\t(0,2,1)"
+	    << "\t(1,0,2)\t(1,2,0)"
+	    << "\t(2,0,1)\t(2,1,0)"
+	    << std::endl;
+  try {
+    for (uint n(0); n<nelemMax; n++) {
+      /* Set shape of the array */
+      shape = IPosition (3,nelem[n],nelem[n],nelem[n]);
+      /* Create Cube object */
+      Cube<double> arr (shape);
+      
+      /* Axis/Loop order: 0,1,2 -- loops in order of array axes */
+      
+      start = clock();
+      for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
+	for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
+	  for (pos(2)=0; pos(2)<shape(2); pos(2)++) {
+	    arr(pos) = 1.0;
+	  }
+	}
+      }
+      end = clock();
+      runtimes[0] = runtime (start,end);
+      
+      /* Axis/Loop order: 0,2,1 */
+      
+      start = clock();
+      for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
+	for (pos(2)=0; pos(2)<shape(2); pos(2)++) {
+	  for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
+	    arr(pos) = 1.0;
+	  }
+	}
+      }
+      end = clock();
+      runtimes[1] = runtime (start,end);
+      
+      /* Axis/Loop order: 1,0,2 */
+      
+      start = clock();
+      for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
+	for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
+	  for (pos(2)=0; pos(2)<shape(2); pos(2)++) {
+	    arr(pos) = 1.0;
+	  }
+	}
+      }
+      end = clock();
+      runtimes[2] = runtime (start,end);
+      
+      /* Axis/Loop order: 1,2,0 */
+      
+      start = clock();
+      for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
+	for (pos(2)=0; pos(2)<shape(2); pos(2)++) {
+	  for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
+	    arr(pos) = 1.0;
+	  }
+	}
+      }
+      end = clock();
+      runtimes[3] = runtime (start,end);
+      
+      /* Axis/Loop order: 2,0,1 */
+      
+      start = clock();
+      for (pos(2)=0; pos(2)<shape(2); pos(2)++) {
+	for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
+	  for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
+	    arr(pos) = 1.0;
+	  }
+	}
+      }
+      end = clock();
+      runtimes[4] = runtime (start,end);
+      
+      /* Axis/Loop order: 2,1,0 -- loops in inverted order of array axes */
+      
+      start = clock();
+      for (pos(2)=0; pos(2)<shape(2); pos(2)++) {
+	for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
+	  for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
+	    arr(pos) = 1.0;
+	  }
+	}
+      }
+      end = clock();
+      runtimes[5] = runtime (start,end);
+      
+      /* Show timing information */
+      
+      std::cout << "\t" << nelem[n]
+		<< "\t" << runtimes[0]
+		<< "\t" << runtimes[1]
+		<< "\t" << runtimes[2]
+		<< "\t" << runtimes[3]
+		<< "\t" << runtimes[4]
+		<< "\t" << runtimes[5]
+		<< std::endl;
+    }
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[2] Write values to planes of the cube ..." << std::endl;
+  std::cout << "\tnelem"
+	    << "\t(y-z)"
+	    << "\t(x-z)"
+	    << "\t(x-y)"
+	    << std::endl;
+  try {
+    uint i (0);
+    for (uint n(0); n<nelemMax; n++) {
+      /* Create the matrix */
+      shape = IPosition (3,nelem[n],nelem[n],nelem[n]);
+      Cube<double> arr (shape);
+
+      /* Write values y-z-planes */
+
+      start = clock();
+      for (i=0; i<nelem[n]; i++) {
+	arr.yzPlane(i) = 1.0;
+      }
+      end = clock();
+      runtimes[0] = runtime(start,end);
+
+      /* Write values x-z-planes */
+
+      start = clock();
+      for (i=0; i<nelem[n]; i++) {
+	arr.xzPlane(i) = 1.0;
+      }
+      end = clock();
+      runtimes[1] = runtime(start,end);
+
+      /* Write values x-y-planes */
+
+      start = clock();
+      for (i=0; i<nelem[n]; i++) {
+	arr.xyPlane(i) = 1.0;
+      }
+      end = clock();
+      runtimes[2] = runtime(start,end);
+
+      /* Summary */
+      
+      std::cout << "\t" << nelem[n]
+		<< "\t" << runtimes[0]
+		<< "\t" << runtimes[1]
+		<< "\t" << runtimes[2]
+		<< std::endl;
+
+    }
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[3] Insert values of Matrix into y-z planes ..." << std::endl;
+  std::cout << "\tnelem"
+	    << "\t(2,1,0)"
+	    << "\t(0,2,1)"
+	    << "\t(y-z)"
+	    << std::endl;
+  try {
+
+    for (uint n(0); n<nelemMax; n++) {
+      /* Set shape of the array */
+      shape = IPosition (3,nelem[n],nelem[n],nelem[n]);
+      /* Create Matrix object */
+      Matrix<double> mat (nelem[n],nelem[n],0.0);
+      /* Create Cube object */
+      Cube<double> arr (shape); 
+      
+      /* write values into y-z planes */
+      
+      start = clock();
+      for (pos(2)=0; pos(2)<shape(2); pos(2)++) {
+	for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
+	  for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
+	    arr(pos) = mat(pos(1),pos(2));
+	  }
+	}
+      }
+      end = clock();
+      runtimes[0] = runtime (start,end);
+      
+      start = clock();
+      for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
+	for (pos(2)=0; pos(2)<shape(2); pos(2)++) {
+	  for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
+	    arr(pos) = mat(pos(1),pos(2));
+	  }
+	}
+      }
+      end = clock();
+      runtimes[1] = runtime (start,end);
+      
+      start = clock();
+      for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
+	arr.yzPlane(pos(0)) = mat;
+      }
+      end = clock();
+      runtimes[2] = runtime (start,end);
+
+      /* Summary */
+      
+      std::cout << "\t" << nelem[n]
+		<< "\t" << runtimes[0]
+		<< "\t" << runtimes[1]
+		<< "\t" << runtimes[2]
+		<< std::endl;
+
+    }
+    
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[4] Insert values of Matrix into x-z planes ..." << std::endl;
+  std::cout << "\tnelem"
+	    << "\t(2,0,1)"
+	    << "\t(1,2,0)"
+	    << "\t(x-z)"
+	    << std::endl;
+  try {
+
+    for (uint n(0); n<nelemMax; n++) {
+      /* Set shape of the array */
+      shape = IPosition (3,nelem[n],nelem[n],nelem[n]);
+      /* Create Matrix object */
+      Matrix<double> mat (nelem[n],nelem[n],0.0);
+      /* Create Cube object */
+      Cube<double> arr (shape); 
+      
+      /* write values into x-z planes - iteration axis last */
+      
+      start = clock();
+      for (pos(2)=0; pos(2)<shape(2); pos(2)++) {
+	for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
+	  for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
+	    arr(pos) = mat(pos(0),pos(2));
+	  }
+	}
+      }
+      end = clock();
+      runtimes[0] = runtime (start,end);
+      
+      /* write values into x-z planes - iteration axis first */
+      
+      start = clock();
+      for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
+	for (pos(2)=0; pos(2)<shape(2); pos(2)++) {
+	  for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
+	    arr(pos) = mat(pos(0),pos(2));
+	  }
+	}
+      }
+      end = clock();
+      runtimes[1] = runtime (start,end);
+      
+      /* write values using Plane() method */
+
+      start = clock();
+      for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
+	arr.xzPlane(pos(1)) = mat;
+      }
+      end = clock();
+      runtimes[2] = runtime (start,end);
+
+      /* Summary */
+      
+      std::cout << "\t" << nelem[n]
+		<< "\t" << runtimes[0]
+		<< "\t" << runtimes[1]
+		<< "\t" << runtimes[2]
+		<< std::endl;
+
+    }
+    
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
+// ------------------------------------------------------------------------------
+
+int test_Arrays_Array (std::vector<int> const &nelem)
+{
+    cout << "\nTesting casa/Arrays/Cube ...\n" << endl;
+
+  int nofFailedTests (0);
+  uint maxDimensions (5);
+  uint dim (0);
+  uint n(0);
+  clock_t start;
+  clock_t end;
+  double runtimes[2];
+
+  cout << "[1] Construct Array via IPosition shape ..." << endl;
+  try {
+    
+    for (dim=1; dim<maxDimensions; dim++) {
+      for (n=0; n<4; n++) {
+	start = clock();
+	Array<double> arr (IPosition(dim,nelem[n]));
+	end = clock();
+	runtimes[0] = runtime (start,end);
+	//
+	start = clock();
+	arr = 1.0;
+	end = clock();
+	runtimes[1] = runtime (start,end);
+	//
+	std::cout << "\t" << runtimes[0]
+		  << "\t" << runtimes[1]
+		  << "\t" << arr.shape()
+		  << std::endl;
+      }
+    }
+    
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
   return nofFailedTests;
 }
 
@@ -385,18 +845,11 @@ int test_BasicSL ()
 
 // ------------------------------------------------------------------------------
 
-/*!
-  \brief Tests for classes in casa/Containers
-
-  \return nofFailedTests -- The number of failed test within this function
-*/
 int test_Containers ()
 {
-  cout << "\nTesting classes in casa/Containers ...\n" << endl;
-
   int nofFailedTests (0);
 
-  cout << "[1] Testing casa/Containers/Block ..." << endl;
+    cout << "[1] Testing casa/Containers/Block ..." << endl;
   try {
     Block<int> bi1;                   // Block::Block()
     assert(bi1.nelements() == 0);     // Block::nelements()
@@ -474,7 +927,7 @@ int test_Containers ()
     std::cerr << message << endl;
     nofFailedTests++;
   }
-
+  
   return nofFailedTests;
 }
 
@@ -490,6 +943,8 @@ int main ()
 
   nofFailedTests += test_Arrays();
   nofFailedTests += test_Arrays_Matrix (nelem);
+  nofFailedTests += test_Arrays_Cube (nelem);
+  nofFailedTests += test_Arrays_Array (nelem);
 
   nofFailedTests += test_BasicMath();
   nofFailedTests += test_BasicSL();

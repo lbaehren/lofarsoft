@@ -31,7 +31,7 @@ using std::vector;
 /*!
   \file tUseVector.cc
   
-  \ingroup CR-Pipeline
+  \ingroup CR_test
 
   \brief A number of simple tests for working with vectors
 

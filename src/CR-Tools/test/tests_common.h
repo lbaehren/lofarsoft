@@ -30,6 +30,7 @@
 
   \brief A set of common functions used by the various test programs
 
+  \defgroup CR_test CR-Pipeline: Tests for required external components
   \ingroup CR
 
   \author Lars B&auml;hren

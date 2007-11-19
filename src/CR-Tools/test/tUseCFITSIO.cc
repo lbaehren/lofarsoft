@@ -30,7 +30,7 @@
 /*!
   \file tUseCFITSIO.cc
 
-  \ingroup CR-Pipeline
+  \ingroup CR_test
 
   \brief A simple test for external build against libcfitsio
 

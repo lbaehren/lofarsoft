@@ -30,7 +30,7 @@
 /*!
   \file tUseWCS.cc
   
-  \inroup CR-Pipeline
+  \inroup CR_test
 
   \brief A simple test for external build against libwcs
 

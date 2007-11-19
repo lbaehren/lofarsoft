@@ -51,9 +51,12 @@ using casa::Vector;
 
   \brief A number of tests for clases in the casacore tables module
 
-  \ingroup CR
+  \ingroup CR_test
 
   \author Lars B&auml;hren
+
+  <u>Note:</u> A number of the tests performed will not work with the original CASA
+  libraries.
 */
 
 // ------------------------------------------------------------------------------

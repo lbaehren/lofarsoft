@@ -53,7 +53,7 @@ using casa::Vector;
 /*!
   \file tUseArrays.cc
 
-  \ingroup CR-Pipeline
+  \ingroup CR_test
 
   \brief Test various operations on CASA arrays
 
@@ -84,40 +84,7 @@ int test_construction ()
   int nofFailedTests (0);
   int nelem (10);
   
-  cout << "[1] Construct Array via IPosition shape ..." << endl;
-  try {
-    Array<double> arr1D (IPosition(1,nelem));
-    cout << " --> Array<double> = " << arr1D.shape() << endl;
-    Array<double> arr2D (IPosition(2,nelem));
-    cout << " --> Array<double> = " << arr2D.shape() << endl;
-    Array<double> arr3D (IPosition(3,nelem));
-    cout << " --> Array<double> = " << arr3D.shape() << endl;
-    Array<double> arr4D (IPosition(4,nelem));
-    cout << " --> Array<double> = " << arr4D.shape() << endl;
-    Array<double> arr5D (IPosition(5,nelem));
-    cout << " --> Array<double> = " << arr5D.shape() << endl;
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-
-  cout << "[2] Construct Array from specialized objects ..." << endl;
-  try {
-    Vector<double> vector (nelem);
-    Matrix<double> matrix (nelem,nelem);
-    Cube<double> cube (nelem,nelem,nelem);
-    cout << " -- Creating Array from Vector ..." << endl;
-    Array<double> arr1D (vector);
-    cout << " -- Creating Array from Matrix ..." << endl;
-    Array<double> arr2D (matrix);
-    cout << " -- Creating Array from Cube ..." << endl;
-    Array<double> arr3D (cube);
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-
-  cout << "[3] Construct Array from slicing another one ..." << endl;
+  cout << "[1] Construct Array from slicing another one ..." << endl;
   try {
     // the original array
     Array<double> arr5D (IPosition(5,nelem));

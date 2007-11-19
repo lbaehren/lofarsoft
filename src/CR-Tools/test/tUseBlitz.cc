@@ -24,7 +24,7 @@
 /*!
   \file tUseBlitz.cc
 
-  \ingroup CR-Pipeline
+  \ingroup CR_test
 
   \brief A collection of tests for working with the Blitz++ library
 

@@ -32,7 +32,7 @@ using std::string;
 /*!
   \file tObjects.cc
 
-  \ingroup CR-Pipeline
+  \ingroup CR_test
 
   \brief A number of simple tests for inheritance relationships between objects
 

@@ -32,8 +32,6 @@ endforeach (test)
 set (tests
   tUseArrays
   tUseCASA
-  tUseTables
-  tUseScimath
   tUseMeasures
   tUseLattices
   tUseImages
@@ -61,7 +59,7 @@ else (HAVE_CASA)
   if (HAVE_CASACORE)
     message (STATUS "Enabling test programs using casacore ...")
     ## build the executables ---------------------
-    foreach (src tUseCasacore tUseArrays tUseTables)
+    foreach (src tUseCasacore tUseArrays)
       ## compiler instructions -------------------
       add_executable (${src} ${src}.cc)
       ## linker instructions ---------------------
@@ -91,16 +89,14 @@ endif (HAVE_CASA)
 ## -------------------------------------------------------------------
 ## Tests for working with casacore
 
-set (tests_casacore
-  tcasa_casa
-  tcasa_tables
-#  tcasa_scimath
-  tcasa_coordinates
-#  tcasa_images
-#  tcasa_measures
-  )
-
 if (HAVE_CASACORE)
+  
+  set (tests_casacore
+    tcasa_casa
+    tcasa_tables
+    tcasa_coordinates
+    )
+  
   foreach (test ${tests_casacore})
     ## compiler instructions
     add_executable (${test} ${test}.cc)
@@ -115,6 +111,7 @@ if (HAVE_CASACORE)
     ## testing
     add_test (${test} ${test})
   endforeach (test ${tests_casacore})
+
 endif (HAVE_CASACORE)
 
 ## -----------------------------------------------------------------------------
