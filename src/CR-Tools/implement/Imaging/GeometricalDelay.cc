@@ -845,6 +845,27 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #endif
 #endif
 
+#ifdef HAVE_CASA
+  bool GeometricalDelay::setSkyPosition (double const &x1,
+					 double const &x2,
+					 double const &x3,
+					 CR::CoordinateType const &coordType,
+					 bool const &anglesInDegrees,
+					 bool const &bufferDelays)
+  {
+    casa::Matrix<double> pos (1,3);
+    
+    pos(0,0) = x1;
+    pos(0,1) = x2;
+    pos(0,2) = x3;
+    
+    return setSkyPositions (pos,
+			    coordType,
+			    anglesInDegrees,
+			    bufferDelays);
+  }
+#endif
+  
   // ---------------------------------------------------------------------- delay
 
 #ifdef HAVE_CASA

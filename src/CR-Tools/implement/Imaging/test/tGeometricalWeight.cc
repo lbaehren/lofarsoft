@@ -204,42 +204,57 @@ int test_parameters ()
   cout << "\n[test_parameters]\n" << endl;
 
   int nofFailedTests (0);
-  casa::Matrix<double> antennaPositions = get_antennaPositions();
-  casa::Matrix<double> skyPositions     = get_skyPositions();
-  casa::Vector<double> frequencies      = get_frequencies();
-  
-  cout << "[1] Creating new object via default constructor..." << endl;
+  bool status (true);
+
+  /* Create GeometricalWeight object to work with */
+
   GeometricalWeight w;
   w.summary();
-  {
-    casa::Cube<casa::DComplex> weights = w.weights();
-    cout << "-- Weighting factors : " << weights.shape() << endl;
-  }
 
-  cout << "[2] Setting antenna positions..." << endl;
-  w.setAntennaPositions (antennaPositions,false);
-  w.summary();
-  {
-    casa::Cube<casa::DComplex> weights = w.weights();
-    cout << "-- Weighting factors : " << weights.shape() << endl;
+  cout << "[1] Setting antenna positions..." << endl;
+  try {
+    status = w.setAntennaPositions (get_antennaPositions(),
+				    false);
+    w.summary();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
   }
   
-  cout << "[3] Setting sky positions..." << endl;
-  w.setSkyPositions (skyPositions,false);
-  w.summary();
-  {
-    casa::Cube<casa::DComplex> weights = w.weights();
-    cout << "-- Weighting factors : " << weights.shape() << endl;
+  cout << "[2] Setting sky positions..." << endl;
+  try {
+    status = w.setSkyPositions (get_skyPositions(),
+				false);
+    w.summary();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
   }
 
-  cout << "[4] Setting frequency values..." << endl;
-  w.setFrequencies (frequencies,false);
-  w.summary();
-  {
-    casa::Cube<casa::DComplex> weights = w.weights();
-    cout << "-- Weighting factors : " << weights.shape() << endl;
+  cout << "[3] Setting frequency values..." << endl;
+  try {
+    status = w.setFrequencies (get_frequencies(),
+			       false);
+    w.summary();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
   }
   
+  return nofFailedTests;
+}
+
+// ------------------------------------------------------------------------------
+
+/*!
+  \brief Test some more realistic usage as taking place e.g. with the pipeline
+
+  \return nofFailedTests -- The number of failed tests within the function.
+*/
+int test_processing ()
+{
+  int nofFailedTests (0);
+
   return nofFailedTests;
 }
 
@@ -254,9 +269,9 @@ int main ()
 
   /* if construction work we can continue with the rest */
   
-//   if (!nofFailedTests) {
-//     nofFailedTests += test_parameters ();
-//   } 
+  if (!nofFailedTests) {
+    nofFailedTests += test_parameters ();
+  } 
 
   return nofFailedTests;
 }

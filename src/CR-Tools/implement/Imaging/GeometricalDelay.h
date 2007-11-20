@@ -505,16 +505,15 @@ namespace CR { // NAMESPACE CR -- BEGIN
     /*!
       \brief Set the sky positions, for which the delay is computed
       
-      \param skyPositions -- The sky positions, for which the delay is computed,
-                             [nofSources,3]
+      \param skyPositions -- [nofSources,3], The sky positions, for which the
+             delay is computed
       \param coordType    -- Coordinate type, as which the position is provided;
-                             if position not provided in cartesian coordinates,
-			     transformation will be performed
+             if position not provided in cartesian coordinates, transformation
+	     will be performed
       \param bufferDelays  -- Buffer the values for the geometrical delay? If set
-                             <i>yes</i> the delays will be computed from the 
-			     provided antenna and sky positions and afterwards
-			     kept in memory; if set <i>no</i> only the input 
-			     parameters are stored an no further action is taken.
+             <i>yes</i> the delays will be computed from the provided antenna and
+	     sky positions and afterwards kept in memory; if set <i>no</i> only
+	     the input parameters are stored an no further action is taken.
     */
 #ifdef HAVE_CASA
     bool setSkyPositions (Matrix<double> const &skyPositions,
@@ -613,7 +612,46 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			  bool const &bufferDelays=false);
 #endif
 #endif
+    
+    /*!
+      \brief Set an individual sky positions
 
+      Whereas of course the more general case is that we are dealing with multiple
+      pointing directions, there are also cases where on want a single direction;
+      this method is geared toward exactly such a case.
+
+      \param x1 -- First component of the position coordinate
+      \param x2 -- Second component of the position coordinate
+      \param x3 -- Third component of the position coordinate
+      \param coordType -- Coordinate type, as which the position is provided;
+             if position not provided in cartesian coordinates, transformation
+	     will be performed
+      \param anglesInDegrees -- If the coordinates contain angular components,
+             these given in degrees?
+      \param bufferDelays -- Buffer the values for the geometrical delay? If set
+             <i>yes</i> the delays will be computed from the provided antenna and
+	     sky positions and afterwards kept in memory; if set <i>no</i> only
+	     the input parameters are stored an no further action is taken.
+
+      \return status -- Success or failure of the operation; returns
+              <t>false</tt> if an error was encountered
+    */
+#ifdef HAVE_CASA
+    bool setSkyPosition (double const &x1,
+			 double const &x2,
+			 double const &x3,
+			 CR::CoordinateType const &coordType,
+			 bool const &anglesInDegrees=false,
+			 bool const &bufferDelays=false);
+#else
+#ifdef HAVE_BLITZ
+    bool setSkyPosition (blitz::Array<double,2> const &skyPositions,
+			 CR::CoordinateType const &coordType,
+			 bool const &anglesInDegrees=false,
+			 bool const &bufferDelays=false);
+#endif
+#endif
+    
     /*!
       \brief Get the values of the geometrical delay
 
