@@ -24,7 +24,10 @@
 if (LAPACK_LIBRARIES AND G2C_LIBRARIES)
   add_executable (treetest treetest.cc)
   target_link_libraries (treetest cr)
-  install (TARGETS treetest RUNTIME DESTINATION bin)
+  install (TARGETS treetest
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib)
 else (LAPACK_LIBRARIES AND G2C_LIBRARIES)
   message (STATUS "[cr] Unable to build executable treetest.")
 endif (LAPACK_LIBRARIES AND G2C_LIBRARIES)
@@ -40,12 +43,11 @@ if (HAVE_POPT AND LAPACK_LIBRARIES)
     cr
     ${POPT_LIBRARIES}
     )
-#  set_target_properties (trigrun
-#    PROPERTIES
-#    COMPILE_FLAGS -fPIC -O2 -fPIC
-#    )
   ## installation instructions
-  install (TARGETS trigrun RUNTIME DESTINATION bin)
+  install (TARGETS trigrun
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib)
 endif (HAVE_POPT AND LAPACK_LIBRARIES)
 
 ## -------------------------------------------------------------------
@@ -56,7 +58,11 @@ if (HAVE_CASACORE)
   ## linker instructions
   target_link_libraries (simStationBeam cr)
   ## installation instructions
-  install (TARGETS simStationBeam RUNTIME DESTINATION bin)
+  install (TARGETS simStationBeam
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    )
 endif (HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
@@ -66,8 +72,16 @@ if (HAVE_CASA OR HAVE_CASACORE)
   add_executable (reas2event reas2event.cc)
   ## linker instructions
   target_link_libraries (reas2event cr)
+  ## additional properties to consider
+  set_target_properties (reas2event
+    PROPERTIES
+    BUILD_WITH_INSTALL_RPATH TRUE
+    )
   ## installation instructions
-  install (TARGETS reas2event RUNTIME DESTINATION bin)
+  install (TARGETS reas2event
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
@@ -78,7 +92,10 @@ if (HAVE_CASA OR HAVE_CASACORE)
   ## linker instructions
   target_link_libraries (calcSourcePosition cr)
   ## installation instructions
-  install (TARGETS calcSourcePosition RUNTIME DESTINATION bin)
+  install (TARGETS calcSourcePosition
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
