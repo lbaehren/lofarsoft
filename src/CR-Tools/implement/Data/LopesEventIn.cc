@@ -191,6 +191,7 @@ namespace CR { // Namespace CR -- begin
       DataReader::init(headerpoint_p->blocksize,
 		       adc2voltage,
 		       fft2calfft);
+      setReferenceTime(-headerpoint_p->presync/LOPES_SAMPLERATE);
 
     } catch (AipsError x) {
       cerr << "LOPESEventIn:setStreams: " << x.getMesg() << endl;
