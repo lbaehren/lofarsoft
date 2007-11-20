@@ -529,10 +529,12 @@ namespace CR {  //  Namespace CR -- begin
       TimeFreq::setBlocksize (blocksize);
     } else {
       // report what we are about to do
+#ifdef DEBUGGING_MESSAGES
       cerr << "[DataReader::setBlocksize] WARNING!"
 	   << " Need to re-adjust adc2voltage array to keep internals consistent."
 	   << " The previously assigned values will be lost!"
 	   << endl;
+#endif
       // adjust the first axis of the array ...
       shape(0) = blocksize;
       // ... and forward the operation
@@ -566,10 +568,12 @@ namespace CR {  //  Namespace CR -- begin
 	setADC2Voltage (adc2voltage);
       } else {
 	// report what we are about to do
+#ifdef DEBUGGING_MESSAGES
 	cerr << "[DataReader::setBlocksize] WARNING!"
 	     << " Need to re-adjust adc2voltage array to keep internals consistent."
 	     << " The previously assigned values will be lost!"
 	     << endl;
+#endif
 	// adjust the first axis of the array ...
 	shape(0) = blocksize_p;
 	// ... and store it
@@ -587,10 +591,12 @@ namespace CR {  //  Namespace CR -- begin
       IPosition shape = fft2calfft_p.shape();
       if (uint(shape(0)) != fftLength_p) {
 	// report what we are about to do
+#ifdef DEBUGGING_MESSAGES
 	cerr << "[DataReader::setBlocksize] WARNING!"
 	     << " Need to re-adjust fft2calfft array to keep internals consistent."
 	     << " The previously assigned values will be lost!"
 	     << endl;
+#endif
 	// adjust the first axis of the array
 	shape(0) = fftLength_p;
 	Matrix<DComplex> fft2calfftNew (shape,1.0);
@@ -983,10 +989,12 @@ void DataReader::setFFT2calFFT (Matrix<DComplex> const &fft2calfft)
   
   if (uint(shape(0)) < nofSelectedChannels) {
     // report what we are about to to
+#ifdef DEBUGGING_MESSAGES
     cerr << "[DataReader::setFFT2calFFT] WARNING!"
 	 << " Need to re-adjust frequencySelection array to keep internals consistent."
 	 << " The previously assigned values will be lost!"
 	 << endl;
+#endif
     // correct the channel selection array ...
     Vector<bool> frequencySelection (shape(0),true);
     setSelectedChannels(frequencySelection);
