@@ -72,7 +72,7 @@ namespace CR { // Namespace CR -- begin
   void CRinvFFT::destroy () {
     AntGainInterpInit_p = False;
     if (InterAntGain_p != NULL) {
-      delete [] InterAntGain_p;
+      delete InterAntGain_p;
     }
   }
   
@@ -216,18 +216,21 @@ namespace CR { // Namespace CR -- begin
       //      phaseGradients = bf_p.phaseGradients().nonDegenerate();
 #endif
       /* ---- new version ---- */
-      /*      CR::GeometricalWeight geomWeight;
+      CR::GeometricalWeight geomWeight;
       geomWeight.showProgress(verbose); 
       geomWeight.setAntennaPositions(tmpAntPos,CR::NorthEastHeight); 
-      geomWeight.setSkyPositions(Vector<Double>(1,DirParams_p.asDouble("Az")),
-				 Vector<Double>(1,DirParams_p.asDouble("El")),
-				 Vector<Double>(1,DirParams_p.asDouble("Curvature")),
-				 CR::AzElRadius,True);
+      //      geomWeight.setSkyPositions(Vector<Double>(1,DirParams_p.asDouble("Az")),
+      //				 Vector<Double>(1,DirParams_p.asDouble("El")),
+      //				 Vector<Double>(1,DirParams_p.asDouble("Curvature")),
+      //				 CR::AzElRadius,True);
+      geomWeight.setSkyPosition(DirParams_p.asDouble("Az"),DirParams_p.asDouble("El"),
+				DirParams_p.asDouble("Curvature"), CR::AzElRadius, True);
       geomWeight.setFrequencies(dr->frequencyValues());
-
+#ifdef DEBUGGING_MESSAGES      
+      geomWeight.summary();
+#endif
       Cube<DComplex> tmpCcube;
       tmpCcube = geomWeight.weights();
-      cout << "CRinvFFT::GetShiftedFFT: tmpCcube (i.e. geomWeight.weights()):" << tmpCcube.shape()<<endl;
       phaseGradients = Matrix<DComplex>(geomWeight.weights().nonDegenerate());
       
       // ***** getting the antenna gain calibration
@@ -255,8 +258,8 @@ namespace CR { // Namespace CR -- begin
       for (i=0;i<AntennaIDs.nelements();i++){
 	InterAntGain_p->GetValues(date, AntennaIDs(i), &tmparr);
 	CTRead->GetData(date, AntennaIDs(i), "FrequencyBand", &tmpvec);
-	cout << "CRinvFFT::GetShiftedFFT: tmpCvec:" << tmpCvec.shape() << " tmparr:"<<tmparr.shape()
-	     << " phaseGradients:"<< phaseGradients.shape() << endl;
+	//cout << "CRinvFFT::GetShiftedFFT: tmpCvec:" << tmpCvec.shape() << " tmparr:"<<tmparr.shape()
+	//     << " phaseGradients:"<< phaseGradients.shape() << endl;
 	convertArray(tmpCvec,Vector<Double>(tmparr));
 	// compute 1.947/delta_nu/sqrt(Gain)
 	//   1.947        = constant (at least for LOPES)
@@ -265,12 +268,12 @@ namespace CR { // Namespace CR -- begin
 	tmpCval = 1.947*1e6/(tmpvec(1)-tmpvec(0));
 	AntGainFactors.column(i) = tmpCvec*tmpCval;
       };
-      cout << "CRinvFFT::GetShiftedFFT: AntGainFactors:" << AntGainFactors.shape()
-	   << " phaseGradients:"<< phaseGradients.shape() << endl;
+      //cout << "CRinvFFT::GetShiftedFFT: AntGainFactors:" << AntGainFactors.shape()
+      //     << " phaseGradients:"<< phaseGradients.shape() << endl;
       FFTdata = phaseGradients*AntGainFactors*GetData(dr);
-*/
+
 // Dummy until the GeometricalWeight class works as it is supposed to...
-      FFTdata = GetData(dr);
+//      FFTdata = GetData(dr);
 
       // add extra delay to compensate for trigger etc.
       CRdelayPlugin crdel;
