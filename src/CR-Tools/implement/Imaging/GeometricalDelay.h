@@ -740,6 +740,19 @@ namespace CR { // NAMESPACE CR -- BEGIN
 		      double const &yAntenna,
 		      double const &zAntenna);
     
+    /*
+      \brief Compute an individual delay
+
+      \param skyPosition     -- 
+      \param antennaPosition -- 
+
+      \return delay -- Geometrical delay \f$ \tau \f$
+    */
+#ifdef HAVE_CASA
+    double calcDelay (casa::Vector<double> const &skyPosition,
+		      casa::Vector<double> const &antennaPosition);
+#endif
+    
     /*!
       \brief Get the name of the class
       

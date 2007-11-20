@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id$ |
+ | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -24,11 +24,12 @@
 // CASA header files
 #include <scimath/Mathematics.h>
 #include <scimath/Mathematics/FFTServer.h>
+// Custom header files
+#include <Imaging/Beamformer.h>
+
 using casa::IPosition;
 using casa::FFTServer;
 using casa::Slicer;
-// Custom header files
-#include <Imaging/Beamformer.h>
 
 namespace CR { // Namespace CR -- begin
   

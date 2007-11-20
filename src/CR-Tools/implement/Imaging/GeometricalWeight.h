@@ -50,14 +50,44 @@ namespace CR { // NAMESPACE CR -- BEGIN
     The basic equation, by which the geometrical weights for the beamforming
     are computed, is given by
     \f[ A_{\rm geom} = \exp \left( i \Phi \right) = \exp \left( i \frac{2\pi\nu}{c}
-    R L^{T} \right) \f]
+    \tau (R,L) \right) \f]
     where \f$ \nu \f$ is the observation frequency, \f$ c \f$ the speed of light,
     \f$ \mathbf{R} \f$ is a matrix collecting the positions of the \f$ 2p \f$
     array elements and \f$ L \f$ is a matrix collecting the \f$ q \f$ source
-    positions. The geometrical delay \f$ \tau = R L^{T} \f$ is computed in the
-    class GeometricalDelay.
+    positions. The geometrical delay \f$ \tau = \tau (R,L) \f$ is computed via the
+    class GeometricalDelay, which also provides the mean to select between near-field
+    and far-field geometry.
     
     <h3>Example(s)</h3>
+
+    <ol>
+      <li>Since most of the time you won't be dealing with the default constructor,
+      but rather want to create a new object with some custom settings for the
+      antenna positions, sky positions and frequency values, here is a simple
+      example:
+      \code
+      // Get the various input parameters
+      casa::Matrix<double> antennaPositions = get_antennaPositions();
+      casa::Matrix<double> skyPositions     = get_skyPositions();
+      casa::Vector<double> frequencies      = get_frequencies();
+
+      // Create new object
+      GeometricalWeight weight (antennaPositions,
+                                skyPositions,
+				frequencies);
+      \endcode
+      As pointed out in the API documentation below, the coordinate values in both
+      <tt>antennaPositions</tt> and <tt>skyPositions</tt> need to be given in
+      cartesian coordinates, \f$ (x,y,z) \f$, placing all positions withtin a
+      common frame already.
+      <li>Consider the following setup: using two antennas placed on a 200m
+      baseline along the x-axis (located at \f$ (-100,0,0) \f$ and \f$ (100,0,0)
+      \f$) you want to point towards the local zenith, i.e. \f$
+      (0^{\circ},90^{\circ}) \f$ in Azimuth-Elevation coordinates.
+      \code
+      
+      \endcode
+    </ol>
     
   */  
   class GeometricalWeight : public GeometricalPhase {

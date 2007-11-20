@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id$ |
+ | $Id::Beamformer.h 1068 2007-11-19 19:27:09Z baehren                   $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -36,15 +36,64 @@ namespace CR { // Namespace CR -- begin
       \brief List of implemented and supported beam types.
     */
     typedef enum {
-      //! Electric field strength as function of frequency
+      /*!
+	Electric field strength as function of frequency,
+	\f$\widetilde S (\vec\rho,\nu)  \f$
+      */
       FREQ_FIELD,
-      //! Power of the electric field as function of frequency
+      /*!
+	<b>Directed spectral power</b> (power of the electric field as function
+	of frequency) <br>
+	\f[ \widetilde P (\vec\rho,\nu) = \overline{\widetilde S (\vec\rho,\nu)}
+	\cdot \widetilde S (\vec\rho,\nu) \f]
+	where 
+	\f[ \widetilde S (\vec\rho,\nu) = \frac{1}{N_{\rm Ant}}
+	\sum_{j=1}^{N_{\rm Ant}} \widetilde S_{j} (\vec\rho,\nu) =
+	\frac{1}{N_{\rm Ant}} \sum_{j=1}^{N_{\rm Ant}} w (\vec x_j, \vec \rho, \nu)
+	\widetilde s_{j} (\nu) \f]
+	in which \f$ w \f$ is the weighting factor for each combination of antenna,
+	pointing direction and frequency and \f$ \widetilde s_j \f$ is the Fourier
+	transform of the data from antenna \f$ j \f$.
+      */
       FREQ_POWER,
-      //! Electric field strength as function of time (sample resolution)
+      /*!
+	Electric field strength as function of time (sample resolution)
+      */
       TIME_FIELD,
-      //! Power of the electric field as function of time
+      /*!
+	Power of the electric field as function of time
+      */
       TIME_POWER,
-      //! Cross-correlation beam (cc-beam)
+      /*!
+	<b>Cross-correlation beam</b> (cc-beam)<br>
+	The data from each unique pair of antennas is multiplied, the resulting
+	values are averaged, and then the square root is taken while preserving
+	the sign.
+	\f[
+	cc(\vec \rho)[t] = \, ^+_- \sqrt{\left| \frac{1}{N_{Pairs}} \sum^{N-1}_{i=1}
+	\sum^{N}_{j>i} s_i(\vec\rho)[t] s_j(\vec\rho)[t] \right|}
+	\f]
+	where 
+	\f[
+	s_j(\vec\rho)[t]
+	= \mathcal{F}^{-1} \left\{ \tilde s_j(\vec\rho)[k] \right\}
+	= \mathcal{F}^{-1} \left\{ w_j(\vec\rho)[k] \cdot \tilde s_j[k]\right\}
+	\f]
+	is the time shifted field strength of the single antennas for a direction
+	\f$\vec \rho \f$. \f$ N \f$ is the number of antennas, \f$t\f$ the time or
+	pixel index and \f$N_{Pairs}\f$ the number of unique pairs of antennas.
+	The negative sign is taken if the sum had a negative sign before taking the
+	absolute values, and the positive sign otherwise.
+	Computation - for each direction in the sky - is performed as follows:
+	<ol>
+        <li>Compute the shifted time-series for all antennas,
+	\f$ s_j (\vec\rho,t) \f$, by first applying the weights to the Fourier
+	transformed data and thereafter transforming back to time domain.
+	<li>Sum over unique products from all antenna pairs and normalize by
+	the number of such pairs.
+	<li>Take the square root of the sum and multiply with the sign of the
+	some.
+	</ol>       */
       TIME_CC,
       //! Power-beam (p-beam)
       TIME_P,
@@ -85,53 +134,6 @@ namespace CR { // Namespace CR -- begin
           the new beam type.
     </ol>
 
-    Beamforming methods:
-    <ol>
-      <li><b>Directed spectral power</b>
-      \f[ \widetilde P (\vec\rho,\nu) = \overline{\widetilde S (\vec\rho,\nu)}
-      \cdot \widetilde S (\vec\rho,\nu) \f]
-      where 
-      \f[ \widetilde S (\vec\rho,\nu) = \frac{1}{N_{\rm Ant}}
-      \sum_{j=1}^{N_{\rm Ant}} \widetilde S_{j} (\vec\rho,\nu) =
-      \frac{1}{N_{\rm Ant}} \sum_{j=1}^{N_{\rm Ant}} w (\vec x_j, \vec \rho, \nu)
-      \widetilde s_{j} (\nu) \f]
-      in which \f$ w \f$ is the weighting factor for each combination of antenna,
-      pointing direction and frequency and \f$ \widetilde s_j \f$ is the Fourier
-      transform of the data from antenna \f$ j \f$.
-      <li><b>Directed power time series</b>, \f$ S (\vec\rho,t) \f$
-      <li><b>Cross-correlation beam</b> (cc-beam)
-      The data from each unique pair of antennas is multiplied, the resulting
-      values are averaged, and then the square root is taken while preserving
-      the sign.
-      \f[
-      cc(\vec \rho)[t] = \, ^+_- \sqrt{\left| \frac{1}{N_{Pairs}} \sum^{N-1}_{i=1}
-      \sum^{N}_{j>i} s_i(\vec\rho)[t] s_j(\vec\rho)[t] \right|}
-      \f]
-      where 
-      \f[
-      s_j(\vec\rho)[t]
-      = \mathcal{F}^{-1} \left\{ \tilde s_j(\vec\rho)[k] \right\}
-      = \mathcal{F}^{-1} \left\{ w_j(\vec\rho)[k] \cdot \tilde s_j[k]\right\}
-      \f]
-      is the time shifted field strength of the single antennas for a direction
-      \f$\vec \rho \f$. \f$ N \f$ is the number of antennas, \f$t\f$ the time or
-      pixel index and \f$N_{Pairs}\f$ the number of unique pairs of antennas.
-      The negative sign is taken if the sum had a negative sign before taking the
-      absolute values, and the positive sign otherwise.
-      Computation - for each direction in the sky - is performed as follows:
-      <ol>
-        <li>Compute the shifted time-series for all antennas,
-	\f$ s_j (\vec\rho,t) \f$, by first applying the weights to the Fourier
-	transformed data and thereafter transforming back to time domain.
-	<li>Sum over unique products from all antenna pairs and normalize by
-	the number of such pairs.
-	<li>Take the square root of the sum and multiply with the sign of the
-	some.
-      </ol>
-
-
-    </ol>
-    
     <h3>Example(s)</h3>
     
   */  

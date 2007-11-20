@@ -962,6 +962,25 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #endif
 #endif
 
+  // ------------------------------------------------------------------ calcDelay
+
+#ifdef HAVE_CASA
+  double GeometricalDelay::calcDelay (casa::Vector<double> const &skyPosition,
+				      casa::Vector<double> const &antennaPosition)
+  {
+    double delay (0.);
+    casa::Vector<double> diff = skyPosition-antennaPosition;
+    
+    if (nearField_p) {
+      delay = (CR::L2Norm(diff)-CR::L2Norm(skyPosition))/lightspeed;
+    } else {
+      delay = -sum(skyPosition*antennaPosition)/lightspeed;
+    }
+
+    return delay;
+  }
+#endif
+  
   // ----------------------------------------------------------------- calcDelays
 
 #ifdef HAVE_CASA
@@ -971,23 +990,15 @@ namespace CR { // NAMESPACE CR -- BEGIN
     int nSky (0);
     int nofSky (nofSkyPositions());
     Vector<double> skyPos (3);
-    Vector<double> diff (3);
     Matrix<double> delays (nofAntennas_p,nofSky);
 
     // computation of the geometrical delays
     for (nSky=0; nSky<nofSky; nSky++) {
       skyPos = skyPositions_p.row(nSky);
       for (nAnt=0; nAnt<nofAntennas_p; nAnt++) {
- 	diff = skyPos - antPositions_p.row(nAnt);
-	//
-//  	delays(nAnt,nSky) = (L2Norm(diff)-L2Norm(skyPos))/lightspeed;
-	/* Forward the computation to properly take care of the geometry */
- 	delays(nAnt,nSky) = calcDelay(skyPositions_p(nSky,0),
-				      skyPositions_p(nSky,1),
-				      skyPositions_p(nSky,2),
-				      antPositions_p(nAnt,0),
-				      antPositions_p(nAnt,1),
-				      antPositions_p(nAnt,2));
+	// compute delay for current combination of antenna and sky position
+ 	delays(nAnt,nSky) = calcDelay(skyPositions_p.row(nSky),
+				      antPositions_p.row(nAnt));
       }
     }
     

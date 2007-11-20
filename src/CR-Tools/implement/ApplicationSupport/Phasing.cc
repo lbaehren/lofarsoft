@@ -59,8 +59,8 @@ Matrix<DComplex> Phasing::phaseGradient (const Vector<Double>& frequencies,
 
 /* Phase gradients for a single direction; all frequencies & antennae. */
 Matrix<DComplex> Phasing::phaseGradient (const Vector<Double>& frequencies,
-					const Vector<Double>& direction,
-					const Matrix<Double>& antennaPositions)
+					 const Vector<Double>& direction,
+					 const Matrix<Double>& antennaPositions)
 {
   IPosition shapeDirection = direction.shape();
   IPosition shapeAntpos = antennaPositions.shape();
@@ -81,8 +81,8 @@ Matrix<DComplex> Phasing::phaseGradient (const Vector<Double>& frequencies,
 
 /* Phase gradients for a single frequency & direction; all antennae. */
 Vector<DComplex> Phasing::phaseGradient (const Double frequency,
-					const Vector<Double>& direction,
-					const Matrix<Double>& antennaPositions)
+					 const Vector<Double>& direction,
+					 const Matrix<Double>& antennaPositions)
 {
   IPosition shapeDirection = direction.shape();
   IPosition shapeAntpos = antennaPositions.shape();
@@ -101,20 +101,20 @@ Vector<DComplex> Phasing::phaseGradient (const Double frequency,
 
 /* Phase gradients for a single frequency, direction and antenna. */
 DComplex Phasing::phaseGradient (const Double frequency,
-				const Vector<Double>& azel,
-				const Vector<Double>& antpos)
+				 const Vector<Double>& azel,
+				 const Vector<Double>& antpos)
 {
   Double phi;
   DComplex grad;
-
+  
   // delay phase
- // sign of phase is still under debate: possible (-1) here
+  // sign of phase is still under debate: possible (-1) here
   phi  = 2*PI_p*frequency*Phasing::geometricalDelay(azel,antpos);
   grad = DComplex(cos(phi),sin(phi));
-
+  
   // phase factor
   return grad;
- }
+}
 
 // =============================================================================
 //
@@ -130,14 +130,16 @@ Vector<Double> Phasing::geometricalDelay (const Vector<Double>& azel,
   Bool nearField = False;
   IPosition shape = antennaPositions.shape();
   Vector<Double> delays(shape(0));
-
-  if (azel.nelements() == 3) nearField = True;
-
+  
+  if (azel.nelements() == 3) {
+    nearField = True;
+  }
+  
   for (int ant=0; ant<shape(0); ant++) {
     Vector<Double> antennaPosition = antennaPositions.row(ant);
     delays(ant) = Phasing::geometricalDelay (azel,antennaPosition,nearField);
   }
-
+  
   return delays;
 }
 

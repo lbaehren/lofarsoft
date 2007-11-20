@@ -43,6 +43,56 @@ using std::endl;
   \date 2007/01/15
 */
 
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Export the positions and weights to an ASCII table
+
+  \param weight  -- GeometricalWeight object for which the data are exported.
+  \param filename -- Name of the file to which the data will be written
+*/
+void export_weights (GeometricalWeight &weight,
+		     std::string const &filename="tGeometricalWeight.data")
+{
+  int freq (0);
+  int numAntenna(0);
+  int numSky (0);
+  int coord(0);
+  casa::Matrix<double> antPositions  = weight.antennaPositions();
+  casa::Matrix<double> skyPositions  = weight.skyPositions();
+  casa::Vector<double> frequencies   = weight.frequencies();
+  casa::Cube<casa::DComplex> weights = weight.weights();
+
+  casa::IPosition shape(weights.shape());
+  
+  std::ofstream outfile (filename.c_str(),std::ios::out);
+  
+  for (numAntenna=0; numAntenna<shape(1); numAntenna++) {
+    for (numSky=0; numSky<shape(2); numSky++) {
+      for (freq=0; freq<shape(0); freq++) {
+	// export antenna position
+	outfile << antPositions(numAntenna,0) << "  "
+		<< antPositions(numAntenna,1) << "  "
+		<< antPositions(numAntenna,2) << "  ";
+	// export sky position
+	outfile << skyPositions(numSky,0) << "  "
+		<< skyPositions(numSky,1) << "  "
+		<< skyPositions(numSky,2) << "  ";
+	// export frequency value & geometrical phase
+	outfile << frequencies(freq) << "  " 
+		<< weights(freq,numAntenna,numSky)
+		<< std::endl;
+      }
+      // insert newline after set of frequency channels
+      outfile << std::endl;
+    }
+    // insert newline after set of sky positions
+    outfile << std::endl;
+  }
+
+  outfile.close();
+}
+
 // ------------------------------------------------------------------------------
 
 /*!
@@ -57,12 +107,16 @@ int test_GeometricalWeight ()
   int nofFailedTests (0);
   casa::Matrix<double> antennaPositions = get_antennaPositions();
   casa::Matrix<double> skyPositions     = get_skyPositions();
-  casa::Vector<double> frequencies;
+  casa::Vector<double> frequencies      = get_frequencies();
   
   cout << "[1] Testing default constructor ..." << endl;
   try {
     GeometricalWeight weight;
+    // get summary of object properties
     weight.summary();
+    // retrieve geometrical weights
+    casa::Cube<casa::DComplex> weights = weight.weights();
+    std::cout << "-- shape (weights)   = " << weights.shape() << std::endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -74,7 +128,11 @@ int test_GeometricalWeight ()
     GeometricalWeight weight (antennaPositions,
 			      skyPositions,
 			      frequencies);
+    // get summary of object properties
     weight.summary();
+    // retrieve geometrical weights
+    casa::Cube<casa::DComplex> weights = weight.weights();
+    std::cout << "-- shape (weights)   = " << weights.shape() << std::endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -88,7 +146,11 @@ int test_GeometricalWeight ()
     cout << "-- creating GeometricalWeights object ..." << endl;
     GeometricalWeight weight (delay,
 			      frequencies);
+    // get summary of object properties
     weight.summary();
+    // retrieve geometrical weights
+    casa::Cube<casa::DComplex> weights = weight.weights();
+    std::cout << "-- shape (weights)   = " << weights.shape() << std::endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -102,7 +164,11 @@ int test_GeometricalWeight ()
 			    frequencies);
     cout << "-- creating GeometricalWeights object ..." << endl;
     GeometricalWeight weight (phase);
+    // get summary of object properties
     weight.summary();
+    // retrieve geometrical weights
+    casa::Cube<casa::DComplex> weights = weight.weights();
+    std::cout << "-- shape (weights)   = " << weights.shape() << std::endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -110,12 +176,12 @@ int test_GeometricalWeight ()
   
   cout << "[5] Testing copy constructor ..." << endl;
   try {
-    cout << "-- creating original GeometricalWeights object ..." << endl;
-    GeometricalPhase weights (antennaPositions,
-			      skyPositions,
-			      frequencies);
+    cout << "-- creating original GeometricalWeight object ..." << endl;
+    GeometricalWeight weights (antennaPositions,
+			       skyPositions,
+			       frequencies);
     weights.summary();
-    cout << "-- creating GeometricalWeights object as copy ..." << endl;
+    cout << "-- creating GeometricalWeight object as copy ..." << endl;
     GeometricalWeight weightsCopy (weights);
     weightsCopy.summary();
   } catch (std::string message) {
@@ -188,9 +254,9 @@ int main ()
 
   /* if construction work we can continue with the rest */
   
-  if (!nofFailedTests) {
-    nofFailedTests += test_parameters ();
-  } 
+//   if (!nofFailedTests) {
+//     nofFailedTests += test_parameters ();
+//   } 
 
   return nofFailedTests;
 }

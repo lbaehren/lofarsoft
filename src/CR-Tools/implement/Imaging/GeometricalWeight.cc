@@ -161,10 +161,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
   casa::Cube<DComplex> GeometricalWeight::weights ()
   {
     if (bufferWeights_p) {
-      std::cout << "-- Returning buffered weights..." << std::endl;
       return weights_p;
     } else {
-      std::cout << "-- Returning recomputed weights..." << std::endl;
       return calcWeights();
     }
   }
@@ -244,8 +242,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
     // progress bar
     CR::ProgressBar progress (shape(2)-1);
 
-    std::cout << "[GeometricalWeight::calcWeights]" << std::endl;
-
 //     weights = casa::Cube<DComplex> (cos(phases),sin(phases));
 
     for (sky=0; sky<shape(2); sky++) {
@@ -259,8 +255,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
 	progress.update(freq);
       }
     }  // end loop: freq
-    
-    std::cout << " --> Computation of weights completed." << std::endl;
     
     return weights;
   }

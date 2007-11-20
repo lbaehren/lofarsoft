@@ -29,10 +29,12 @@
 #include <assert.h>
 #include <casa/aips.h>
 #include <casa/Arrays/Array.h>
+#include <casa/Arrays/ArrayIO.h>
 #include <casa/Arrays/ArrayError.h>
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/MatrixMath.h>
 #include <casa/Arrays/Cube.h>
 #include <casa/Arrays/MaskedArray.h>
 #include <casa/Arrays/Slice.h>
