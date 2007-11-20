@@ -122,7 +122,7 @@ Bool GenDynSpec(GlishSysEvent &event, void *){
     return True;
   };
   try {
-    Int blocksize=2048,maxsize=20480000;
+    Int blocksize=2048,maxsize = (10000000); // 10 000 000 
     Vector<String> files;
     if (event.val().type() != GlishValue::RECORD) {
       cerr << "SimpleDynspecClient:GenDynSpec: Need record with: files (blocksize, maxsize)!" 
@@ -173,7 +173,11 @@ Bool GenDynSpec(GlishSysEvent &event, void *){
 	tbbIn.setBlock(i+1);
 	tmpvec += amplitude(tbbIn.calfft().column(0));
       };
-      data.column(fnum) = tmpvec/(Double)numblocks;      
+      data.column(fnum) = tmpvec/(Double)numblocks;    
+      if (((fnum+1)%50)==0) {
+	cout << "SimpleDynspecClient:GenDynSpec: processed " << fnum+1 << " files out of " 
+	     << numFiles << "!" << endl;
+      };
     };
     glishBus->reply(GlishArray(data));
   } catch (AipsError x) {
