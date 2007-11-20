@@ -249,7 +249,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       a number of methods available in casacore which do not show up in CASA.
     */
     
-    if (nofChannels==1 || shape(0)==1 || shape(1)==1) {
+    if (nofChannels==1 || shape(0)*shape(1)==1) {
       uint freq (0);
       uint ant (0);
       uint pos (0);
@@ -269,7 +269,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			    incr,
 			    casa::Slicer::endIsLength);
 	// have the Slicer object reference the target region in the output array
-	tmp.reference (phases(slice).nonDegenerate());
+	tmp.reference (phases(slice).nonDegenerate(casa::IPosition(2,1,2)));
 	// calculate phases from the delays and store them
 	tmp = CR::_2pi*frequencies_p(nChannel)*delays;
       }
