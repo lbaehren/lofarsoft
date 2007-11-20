@@ -165,8 +165,16 @@ namespace CR { // Namespace CR -- begin
       }; // END: for (fnum=0;fnum<numchannels;fnum++)
       tmpdouble = (stopdate-startdate)*sampleFreq+stopsample-startsample;
       noSamples = (uint)tmpdouble;
+#ifdef DEBUGGING_MESSAGES
       cout << "tbbctlIn:attachFile: " << "Files " << filenames << " spans a range of " 
-	   << noSamples << " samples" << endl;
+      	   << noSamples << " samples" << endl;
+#endif
+      if ((noSamples*numchannels) > 16777216){
+	cout << "tbbctlIn:attachFile: " << "Files " << filenames 
+	     << " contain more than 16777216 samples! Truncating to " << 16777216/numchannels 
+	     << " samples/channel!" << endl;
+	noSamples = 16777216;
+      }
       //Allocate memory
       channeldata_p.resize(noSamples,numchannels);
       channeldata_p=0;
@@ -183,8 +191,10 @@ namespace CR { // Namespace CR -- begin
 	  fread(headerpoint_p, 1, sizeof(tbbctl_head), fd);
 	  start = (uint)((headerpoint_p->Date-startdate)*sampleFreq + 
 			 headerpoint_p->SampleNr-startsample);
-	  fread(tmppoint, sizeof(short),headerpoint_p->NoSamples, fd); 
-	  channeldata_p.column(fnum)(Slice(start,headerpoint_p->NoSamples)) = Vector<short>(IPosition(1,headerpoint_p->NoSamples),tmppoint,SHARE);
+	  if ( (start+headerpoint_p->NoSamples) <= noSamples) {
+	    fread(tmppoint, sizeof(short),headerpoint_p->NoSamples, fd); 
+	    channeldata_p.column(fnum)(Slice(start,headerpoint_p->NoSamples)) = Vector<short>(IPosition(1,headerpoint_p->NoSamples),tmppoint,SHARE);
+	  };
 	};
 	fclose(fd);
       };
