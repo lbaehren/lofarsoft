@@ -249,7 +249,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       a number of methods available in casacore which do not show up in CASA.
     */
     
-    if (nofChannels == 1 || shape(0)*shape(1) == 1) {
+    if (nofChannels==1 || shape(0)==1 || shape(1)==1) {
       uint freq (0);
       uint ant (0);
       uint pos (0);

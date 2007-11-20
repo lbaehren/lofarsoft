@@ -121,6 +121,17 @@ namespace CR { // Namespace CR -- begin
 	break;
       }
       break;
+    case CR::NorthEastHeight:
+      // ---------------------------------------------------
+      // Conversion: North-East-Height -> Other
+      switch (targetCoordinate) {
+      case CR::Cartesian:
+	// Conversion: North-East-Height -> Cartesian (x,y,z)
+	return NorthEastHeight2Cartesian (xTarget,yTarget,zTarget,
+					  xSource,ySource,zSource);
+	break;
+      }
+      break;
     }
 
     return status;

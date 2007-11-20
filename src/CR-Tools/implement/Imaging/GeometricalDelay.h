@@ -156,6 +156,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
     uint nofAntennas_p;
     //! Buffer the values for the geometrical delay?
     bool bufferDelays_p;
+    //! Are the buffered values in sync? 
+    bool delaysInSync_p;
     // Show progress during computations?
     bool showProgress_p;
     
