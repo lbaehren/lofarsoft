@@ -218,11 +218,7 @@ namespace CR { // Namespace CR -- begin
       /* ---- new version ---- */
       CR::GeometricalWeight geomWeight;
       geomWeight.showProgress(verbose); 
-      geomWeight.setAntennaPositions(tmpAntPos,CR::NorthEastHeight); 
-      //      geomWeight.setSkyPositions(Vector<Double>(1,DirParams_p.asDouble("Az")),
-      //				 Vector<Double>(1,DirParams_p.asDouble("El")),
-      //				 Vector<Double>(1,DirParams_p.asDouble("Curvature")),
-      //				 CR::AzElRadius,True);
+      geomWeight.setAntennaPositions(tmpAntPos,True,CR::NorthEastHeight); 
       geomWeight.setSkyPosition(DirParams_p.asDouble("Az"),DirParams_p.asDouble("El"),
 				DirParams_p.asDouble("Curvature"), CR::AzElRadius, True);
       geomWeight.setFrequencies(dr->frequencyValues());
@@ -231,8 +227,10 @@ namespace CR { // Namespace CR -- begin
 #endif
       Cube<DComplex> tmpCcube;
       tmpCcube = geomWeight.weights();
+#ifdef DEBUGGING_MESSAGES      
+      cout << "CRinvFFT::GetShiftedFFT: delays: " <<geomWeight.delays() << endl;
+#endif
       phaseGradients = Matrix<DComplex>(geomWeight.weights().nonDegenerate());
-      
       // ***** getting the antenna gain calibration
       // initialize the caltable interpolater (if needed)      
       if (!AntGainInterpInit_p) { //AntGainInterpInit_p is defined in FirstStagePipeline.h and reset in InitEvent()
@@ -270,7 +268,7 @@ namespace CR { // Namespace CR -- begin
       };
       //cout << "CRinvFFT::GetShiftedFFT: AntGainFactors:" << AntGainFactors.shape()
       //     << " phaseGradients:"<< phaseGradients.shape() << endl;
-      FFTdata = phaseGradients*AntGainFactors*GetData(dr);
+      FFTdata = phaseGradients*AntGainFactors*GetData(dr);      
 
 // Dummy until the GeometricalWeight class works as it is supposed to...
 //      FFTdata = GetData(dr);
