@@ -781,7 +781,9 @@ int test_Arrays_Slice (std::vector<int> const &nelem)
     for (n=0; n<nelem[0]; n+=2) {
       mat (Slice(n,2,1),Slice(n,2,1)) = n+1;
     }
+#ifdef DEBUGGING_MESSAGES
     std::cout << mat << std::endl;
+#endif
 
     std::cout << "-- write vectors per row ..." << std::endl;
 
@@ -789,7 +791,9 @@ int test_Arrays_Slice (std::vector<int> const &nelem)
     for (n=0; n<nelem[0]; n++) {
       mat (Slice(n,1,1),Slice(0,n+1,1)) = n+10;
     }
+#ifdef DEBUGGING_MESSAGES
     std::cout << mat << std::endl;
+#endif
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -840,21 +844,27 @@ int test_Arrays_Slice (std::vector<int> const &nelem)
     for (k=0; k<nelem[0]; k++) {
       arr (k,Slice(),Slice()) = 1.0*k;
     }
+#ifdef DEBUGGING_MESSAGES
     std::cout << arr.yzPlane(0) << std::endl;
+#endif
 
     /* Assign value per (x,z)-plane */
 
     for (k=0; k<nelem[1]; k++) {
       arr (Slice(),k,Slice()) = 1.0*k;
     }
+#ifdef DEBUGGING_MESSAGES
     std::cout << arr.xzPlane(1) << std::endl;
+#endif
 
     /* Assign value per (x,y)-plane */
 
     for (k=0; k<nelem[2]; k++) {
       arr (Slice(),Slice(),k) = 1.0*k;
     }
+#ifdef DEBUGGING_MESSAGES
     std::cout << arr.xyPlane(2) << std::endl;
+#endif
 
   } catch (std::string message) {
     std::cerr << message << endl;
