@@ -694,17 +694,17 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
 */
 int test_Arrays_Array (std::vector<int> const &nelem)
 {
-    cout << "\nTesting casa/Arrays/Cube ...\n" << endl;
+    cout << "\nTesting casa/Arrays/Array ...\n" << endl;
 
   int nofFailedTests (0);
-  uint maxDimensions (5);
+  uint maxDimensions (6);
   uint dim (0);
   uint n(0);
   clock_t start;
   clock_t end;
   double runtimes[2];
 
-  cout << "[1] Construct Array via IPosition shape ..." << endl;
+  cout << "[1] Construct Array via IPosition shape and assign value ..." << endl;
   try {
     
     for (dim=1; dim<maxDimensions; dim++) {
@@ -748,16 +748,18 @@ int test_Arrays_Array (std::vector<int> const &nelem)
     rank of the array (i.e. the number of axes).
     <li>Extract smaller sub-array from larger original array, decreasing the
     rank of the array (e.g. extracting a plane from a cube into a matrix).
+    <li>Insert a lower-dimensional array into a higher-dimensional one, e.g.
+    writing the contents of a matrix into planes of a cube.
   </ol>
 
-   To fully specify a subarray, one must supply three pieces of information for
-   each axis of the subarray:
-   <ol>
-     <li>where to start
-     <li>how many elements to extract
-     <li>what stride (or "increment" or "interval") to use: a stride of "n"
-     means pick extract only every "nth" element along an axis 
-   </ol>
+  To fully specify a subarray, one must supply three pieces of information for
+  each axis of the subarray:
+  <ol>
+    <li>where to start
+    <li>how many elements to extract
+    <li>what stride (or "increment" or "interval") to use: a stride of "n"
+    means pick extract only every "nth" element along an axis 
+  </ol>
 
   \return nofFailedTests -- The number of failed test within this function
 */
@@ -768,13 +770,14 @@ int test_Arrays_Slice (std::vector<int> const &nelem)
   int nofFailedTests (0);
   uint k (0);
   uint n(0);
+  uint maxDimension (9);
   clock_t start;
   clock_t end;
   double runtimes[2];
 
   std::cout << "[1] Assign values to parts of a matrix ..." << std::endl;
   try {
-    Matrix<int> mat (nelem[0],nelem[1],0.0);
+    Matrix<int> mat (nelem[0],nelem[1],0);
 
     std::cout << "-- writing sub-matrices ..." << std::endl;
 
@@ -787,7 +790,7 @@ int test_Arrays_Slice (std::vector<int> const &nelem)
 
     std::cout << "-- write vectors per row ..." << std::endl;
 
-    mat = 0.0;
+    mat = 0;
     for (n=0; n<nelem[0]; n++) {
       mat (Slice(n,1,1),Slice(0,n+1,1)) = n+10;
     }
@@ -872,24 +875,43 @@ int test_Arrays_Slice (std::vector<int> const &nelem)
   }
 
   std::cout << "[4] Write Matrix to planes of a Cube ..." << std::endl;
+  std::cout << "\t" << "nelem"
+	    << "\t" << "xyPlane(n)"
+	    << "\t" << "Slice()"
+	    << std::endl;
   try {
-    Matrix<double> mat (nelem[0],nelem[1]);
-    Cube<double> cube (nelem[0],nelem[1],nelem[2]);
-    
-    cout << "-- writing x-y planes via xyPlane() function ..." << endl;
+    for (uint ndim(0); ndim<maxDimension; ndim++) {
+      Matrix<double> mat (nelem[ndim],nelem[ndim]);
+      Cube<double> cube (nelem[ndim],nelem[ndim],nelem[ndim]);
+      
+      /* writing x-y planes via xyPlane() function */
+      
+      start = clock();
+      for (n=0; n<nelem[ndim]; n++) {
+	mat = double(n);
+	cube.xyPlane(n) = mat;
+      }
+      end = clock();
+      runtimes[0] = runtime (start,end);
+      
+      /* writing x-y planes via default Slice objects */
+      
+      start = clock();
+      for (n=0; n<nelem[ndim]; n++) {
+	mat = double(n);
+	cube (Slice(), Slice(), n) = mat;
+      }
+      end = clock();
+      runtimes[1] = runtime (start,end);
 
-    for (n=0; n<nelem[2]; n++) {
-      mat = double(n);
-      cube.xyPlane(n) = mat;
+      /* print summary */
+      
+      std::cout << "\t" << nelem[ndim]
+		<< "\t" << runtimes[0]
+		<< "\t" << runtimes[1]
+		<< std::endl;
+      
     }
-    
-    cout << "-- writing x-y planes via default Slice objects ..." << endl;
-
-    for (n=0; n<nelem[2]; n++) {
-      mat = double(n);
-      cube (Slice(), Slice(), n) = mat;
-    }
-    
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -1092,10 +1114,10 @@ int main ()
   int nofFailedTests (0);
   std::vector<int> nelem = nof_array_elements ();
 
-  nofFailedTests += test_Arrays();
+//   nofFailedTests += test_Arrays();
   nofFailedTests += test_Arrays_Matrix (nelem);
   nofFailedTests += test_Arrays_Cube (nelem);
-  nofFailedTests += test_Arrays_Array (nelem);
+//   nofFailedTests += test_Arrays_Array (nelem);
   nofFailedTests += test_Arrays_Slice (nelem);
 
   nofFailedTests += test_BasicMath();

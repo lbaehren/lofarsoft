@@ -63,18 +63,21 @@ double runtime (clock_t const &start,
 */
 std::vector<int> nof_array_elements ()
 {
-  std::vector<int> nelem (10);
+  std::vector<int> nelem;
 
-  nelem[0] = 10;
-  nelem[1] = 20;
-  nelem[2] = 50;
-  nelem[3] = 100;
-  nelem[4] = 200;
-  nelem[5] = 500;
-  nelem[6] = 1000;
-  nelem[7] = 2000;
-  nelem[8] = 5000;
-  nelem[9] = 10000;
+/*   nelem.push_back(1); */
+  nelem.push_back(2);
+  nelem.push_back(5);
+  nelem.push_back(10);
+  nelem.push_back(20);
+  nelem.push_back(50);
+  nelem.push_back(100);
+  nelem.push_back(200);
+  nelem.push_back(500);
+  nelem.push_back(1000);
+  nelem.push_back(2000);
+  nelem.push_back(5000);
+  nelem.push_back(10000);
 
   return nelem;
 }
