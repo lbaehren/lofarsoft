@@ -30,7 +30,7 @@
 /*!
   \file tUsePGPLOT.cc
 
-  \ingroup CR-Pipeline
+  \ingroup CR_test
 
   \brief A simple test for working with the PGPlot library
 

@@ -30,7 +30,6 @@ endforeach (test)
 ## casacore - if it is not available, we switch to CASA.
 
 set (tests
-  tUseArrays
   tUseCASA
   tUseMeasures
   tUseLattices
@@ -55,35 +54,6 @@ if (HAVE_CASA)
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     )
-else (HAVE_CASA)
-  if (HAVE_CASACORE)
-    message (STATUS "Enabling test programs using casacore ...")
-    ## build the executables ---------------------
-    foreach (src tUseCasacore tUseArrays)
-      ## compiler instructions -------------------
-      add_executable (${src} ${src}.cc)
-      ## linker instructions ---------------------
-      target_link_libraries (${src}
-	${LAPACK_LIBRARIES}
-	${CASA_LIBRARIES}
-	${G2C_LIBRARIES}
-	${libm}
-	)
-      set_target_properties (${src}
-	PROPERTIES
-	COMPILE_FLAGS -fPIC -O2 -fPIC
-	)
-      ## testing ---------------------------------
-      add_test (${src} ${src})
-      ## installation locations ------------------
-      install (
-	TARGETS ${src}
-	RUNTIME DESTINATION bin
-	LIBRARY DESTINATION lib
-	ARCHIVE DESTINATION lib
-	)
-    endforeach (src)
-  endif (HAVE_CASACORE)
 endif (HAVE_CASA)
 
 ## -------------------------------------------------------------------

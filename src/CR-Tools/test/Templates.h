@@ -34,6 +34,8 @@ using std::vector;
 /*!
   \file Templates.h
   
+  \ingroup CR_test
+  
   \brief Brief description for class Templates
   
   \author Lars B&auml;hren
@@ -62,6 +64,9 @@ using std::vector;
 
 // ------------------------------------------------------------ Class declaration
 
+/*!
+	\class VectorList
+*/
 template<class T> class VectorList {
   
   vector<T> elements_p;

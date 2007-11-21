@@ -21,6 +21,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+/*!
+	\file tUseGDF5.cc
+	
+	\ingroup CR_test
+	
+	\author Lars B&auml;hren
+*/
+
 #include <iostream>
 #include <string>
 #include <H5LT.h>

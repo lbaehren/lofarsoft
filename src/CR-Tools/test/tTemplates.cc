@@ -29,6 +29,8 @@
 
 /*!
   \file tTemplates.cc
+  
+  \ingroup CR_test
 
   \brief A collection of test routines for working with templates
  

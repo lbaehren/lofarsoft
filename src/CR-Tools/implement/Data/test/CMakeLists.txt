@@ -6,7 +6,6 @@
 ## Set up the list with test program sources
 
 set (tests
-  tArrays
   tData
   tDataFlag
   tITSBeam

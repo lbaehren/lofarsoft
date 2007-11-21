@@ -63,9 +63,9 @@ using std::endl;
 /*!
   \file tcasa_casa.cc
 
-  \brief A number of tests for clases in the casacore casa module
-
   \ingroup CR_test
+
+  \brief A number of tests for clases in the casacore casa module
 
   \author Lars B&auml;hren
 
@@ -73,9 +73,10 @@ using std::endl;
   libraries.
 */
 
+
 // ==============================================================================
 //
-//  Function declarations
+//  casa/Arrays
 //
 // ==============================================================================
 
@@ -84,63 +85,6 @@ using std::endl;
 
   \return nofFailedTests -- The number of failed test within this function
 */
-int test_Arrays ();
-
-/*!
-  \brief Test for casa/Arrays/Matrix class
-
-  [1] Element-wise writing <br>
-  [2] Column-/Row-wise writing <br>
-  [3] Column-/Row-wise writing of a vector <br>
-  [4] Column-/Row-wise writing using Slicer
-
-  \return nofFailedTests -- The number of failed test within this function
-*/
-int test_Arrays_Matrix (std::vector<int> const &nelem);
-
-/*!
-  \brief Test for casa/Arrays/Cube class
-
-  \return nofFailedTests -- The number of failed test within this function
-*/
-int test_Arrays_Cube (std::vector<int> const &nelem);
-
-/*!
-  \brief Test for casa/Arrays/Array class
-
-  \return nofFailedTests -- The number of failed test within this function
-*/
-int test_Arrays_Array (std::vector<int> const &nelem);
-
-/*!
-  \brief Tests for classes in casa/BasicMath
-
-  \return nofFailedTests -- The number of failed test within this function
-*/
-int test_BasicMath ();
-
-/*!
-  \brief Tests for classes in casa/BasicSL
-
-  \return nofFailedTests -- The number of failed test within this function
-*/
-int test_BasicSL ();
-
-/*!
-  \brief Tests for classes in casa/Containers
-
-  \return nofFailedTests -- The number of failed test within this function
-*/
-int test_Containers ();
-
-// ==============================================================================
-//
-//  Implementation of the functions
-//
-// ==============================================================================
-
-// ------------------------------------------------------------------------------
-
 int test_Arrays ()
 {
   cout << "\nTesting classes in casa/Arrays ...\n" << endl;
@@ -280,6 +224,16 @@ int test_Arrays ()
 
 // ------------------------------------------------------------------------------
 
+/*!
+  \brief Test for casa/Arrays/Matrix class
+
+  [1] Element-wise writing <br>
+  [2] Column-/Row-wise writing <br>
+  [3] Column-/Row-wise writing of a vector <br>
+  [4] Column-/Row-wise writing using Slicer
+
+  \return nofFailedTests -- The number of failed test within this function
+*/
 int test_Arrays_Matrix (std::vector<int> const &nelem)
 {
   cout << "\nTesting casa/Arrays/Matrix ...\n" << endl;
@@ -422,6 +376,11 @@ int test_Arrays_Matrix (std::vector<int> const &nelem)
 
 // ------------------------------------------------------------------------------
 
+/*!
+  \brief Test for casa/Arrays/Cube class
+
+  \return nofFailedTests -- The number of failed test within this function
+*/
 int test_Arrays_Cube (std::vector<int> const &nelem)
 {
   cout << "\nTesting casa/Arrays/Cube ...\n" << endl;
@@ -728,6 +687,11 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
 
 // ------------------------------------------------------------------------------
 
+/*!
+  \brief Test for casa/Arrays/Array class
+
+  \return nofFailedTests -- The number of failed test within this function
+*/
 int test_Arrays_Array (std::vector<int> const &nelem)
 {
     cout << "\nTesting casa/Arrays/Cube ...\n" << endl;
@@ -772,6 +736,169 @@ int test_Arrays_Array (std::vector<int> const &nelem)
 
 // ------------------------------------------------------------------------------
 
+/*!
+  \brief Test for casa/Arrays/Slice class
+
+  While sliced reading turns out to be rather straight-forward, sliced
+  writes prove to be more troublesome; as we want to be able to do both this
+  routines goes through a number of forseeable test-cases:
+  <ol>
+    <li>Extract a sequence of values from a vector
+    <li>Extract smaller sub-array from larger original array, keeping the
+    rank of the array (i.e. the number of axes).
+    <li>Extract smaller sub-array from larger original array, decreasing the
+    rank of the array (e.g. extracting a plane from a cube into a matrix).
+  </ol>
+
+   To fully specify a subarray, one must supply three pieces of information for
+   each axis of the subarray:
+   <ol>
+     <li>where to start
+     <li>how many elements to extract
+     <li>what stride (or "increment" or "interval") to use: a stride of "n"
+     means pick extract only every "nth" element along an axis 
+   </ol>
+
+  \return nofFailedTests -- The number of failed test within this function
+*/
+int test_Arrays_Slice (std::vector<int> const &nelem)
+{
+  cout << "\nTesting casa/Arrays/Slice ...\n" << endl;
+
+  int nofFailedTests (0);
+  uint k (0);
+  uint n(0);
+  clock_t start;
+  clock_t end;
+  double runtimes[2];
+
+  std::cout << "[1] Assign values to parts of a matrix ..." << std::endl;
+  try {
+    Matrix<int> mat (nelem[0],nelem[1],0.0);
+
+    std::cout << "-- writing sub-matrices ..." << std::endl;
+
+    for (n=0; n<nelem[0]; n+=2) {
+      mat (Slice(n,2,1),Slice(n,2,1)) = n+1;
+    }
+    std::cout << mat << std::endl;
+
+    std::cout << "-- write vectors per row ..." << std::endl;
+
+    mat = 0.0;
+    for (n=0; n<nelem[0]; n++) {
+      mat (Slice(n,1,1),Slice(0,n+1,1)) = n+10;
+    }
+    std::cout << mat << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+ 
+  std::cout << "[2] Extract planes from a Cube ..." << std::endl;
+  try {
+    IPosition shape(3,nelem[0],nelem[1],nelem[2]);
+    Cube<double> arr (shape,0.0);
+    Matrix<double> mat;
+
+    /* Extract planes orthogonal to the x-axis (y-z-planes) */
+
+    mat.resize(nelem[1],nelem[2]);
+    for (k=0; k<nelem[0]; k++) {
+      mat = arr (k,Slice(),Slice()).nonDegenerate();
+    }
+    std::cout << "\t" << shape << "\t->\t(y,z) = " << mat.shape() << std::endl;
+    
+    /* Extract planes orthogonal to the y-axis (y-z-planes) */
+
+    mat.resize(nelem[0],nelem[2]);
+    for (k=0; k<nelem[1]; k++) {
+      mat = arr (Slice(),k,Slice()).nonDegenerate();
+    }
+    std::cout << "\t" << shape << "\t->\t(x,z) = " << mat.shape() << std::endl;
+    
+    /* Extract planes orthogonal to the z-axis (x-y-planes) */
+
+    mat.resize(nelem[0],nelem[1]);
+    for (k=0; k<nelem[2]; k++) {
+      mat = arr (Slice(),Slice(),k).nonDegenerate();
+    }
+    std::cout << "\t" << shape << "\t->\t(x,y) = " << mat.shape() << std::endl;
+    
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+ 
+  std::cout << "[3] Assign value to planes of a cube ..." << std::endl;
+  try {
+    IPosition shape(3,nelem[0],nelem[1],nelem[2]);
+    Cube<double> arr (shape,0.0);
+
+    /* Assign value per (y,z)-plane */
+
+    for (k=0; k<nelem[0]; k++) {
+      arr (k,Slice(),Slice()) = 1.0*k;
+    }
+    std::cout << arr.yzPlane(0) << std::endl;
+
+    /* Assign value per (x,z)-plane */
+
+    for (k=0; k<nelem[1]; k++) {
+      arr (Slice(),k,Slice()) = 1.0*k;
+    }
+    std::cout << arr.xzPlane(1) << std::endl;
+
+    /* Assign value per (x,y)-plane */
+
+    for (k=0; k<nelem[2]; k++) {
+      arr (Slice(),Slice(),k) = 1.0*k;
+    }
+    std::cout << arr.xyPlane(2) << std::endl;
+
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[4] Write Matrix to planes of a Cube ..." << std::endl;
+  try {
+    Matrix<double> mat (nelem[0],nelem[1]);
+    Cube<double> cube (nelem[0],nelem[1],nelem[2]);
+    
+    cout << "-- writing x-y planes via xyPlane() function ..." << endl;
+
+    for (n=0; n<nelem[2]; n++) {
+      mat = double(n);
+      cube.xyPlane(n) = mat;
+    }
+    
+    cout << "-- writing x-y planes via default Slice objects ..." << endl;
+
+    for (n=0; n<nelem[2]; n++) {
+      mat = double(n);
+      cube (Slice(), Slice(), n) = mat;
+    }
+    
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+// ==============================================================================
+//
+//  casa/BasicMath
+//
+// ==============================================================================
+
+/*!
+  \brief Tests for classes in casa/BasicMath
+
+  \return nofFailedTests -- The number of failed test within this function
+*/
 int test_BasicMath ()
 {
   cout << "\nTesting classes in casa/BasicMath ...\n" << endl;
@@ -792,7 +919,7 @@ int test_BasicMath ()
     std::cerr << message << endl;
     nofFailedTests++;
   }
-
+  
   cout << "[2]" << endl;
   try {
     y = casa::sqrt(x);
@@ -807,6 +934,11 @@ int test_BasicMath ()
 
 // ------------------------------------------------------------------------------
 
+/*!
+  \brief Tests for classes in casa/BasicSL
+
+  \return nofFailedTests -- The number of failed test within this function
+*/
 int test_BasicSL ()
 {
   cout << "\nTesting classes in casa/BasicSL ...\n" << endl;
@@ -847,6 +979,11 @@ int test_BasicSL ()
 
 // ------------------------------------------------------------------------------
 
+/*!
+  \brief Tests for classes in casa/Containers
+
+  \return nofFailedTests -- The number of failed test within this function
+*/
 int test_Containers ()
 {
   int nofFailedTests (0);
@@ -936,7 +1073,9 @@ int test_Containers ()
 // ------------------------------------------------------------------------------
 
 /*!
-  \return nofFailedTests -- The number of failed tests we havve encountered
+  \brief Main method
+
+  \return nofFailedTests -- The number of failed tests we have encountered
 */
 int main ()
 {
@@ -947,6 +1086,7 @@ int main ()
   nofFailedTests += test_Arrays_Matrix (nelem);
   nofFailedTests += test_Arrays_Cube (nelem);
   nofFailedTests += test_Arrays_Array (nelem);
+  nofFailedTests += test_Arrays_Slice (nelem);
 
   nofFailedTests += test_BasicMath();
   nofFailedTests += test_BasicSL();
