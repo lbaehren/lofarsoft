@@ -386,7 +386,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
   cout << "\nTesting casa/Arrays/Cube ...\n" << endl;
 
   int nofFailedTests (0);
-  uint nelemMax (6);
+  uint nelemMax (8);
   clock_t start;
   clock_t end;
   double runtimes[6];
@@ -394,15 +394,15 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
   IPosition pos(3);
 
   std::cout << "[1] Element-wise writing ..." << std::endl;
-  std::cout << "\tnelem" 
+  std::cout << "\tnelem\t" 
 	    << "\t(0,1,2)\t(0,2,1)"
 	    << "\t(1,0,2)\t(1,2,0)"
 	    << "\t(2,0,1)\t(2,1,0)"
 	    << std::endl;
   try {
-    for (uint n(0); n<nelemMax; n++) {
+    for (uint n(2); n<nelemMax; n++) {
       /* Set shape of the array */
-      shape = IPosition (3,nelem[n],nelem[n],nelem[n]);
+      shape = IPosition (3,nelem[n-2],nelem[n-1],nelem[n]);
       /* Create Cube object */
       Cube<double> arr (shape);
       
@@ -486,7 +486,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
       
       /* Show timing information */
       
-      std::cout << "\t" << nelem[n]
+      std::cout << "\t" << shape
 		<< "\t" << runtimes[0]
 		<< "\t" << runtimes[1]
 		<< "\t" << runtimes[2]
@@ -501,22 +501,22 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
   }
 
   std::cout << "[2] Write values to planes of the cube ..." << std::endl;
-  std::cout << "\tnelem"
+  std::cout << "\tnelem\t"
 	    << "\t(y-z)"
 	    << "\t(x-z)"
 	    << "\t(x-y)"
 	    << std::endl;
   try {
     uint i (0);
-    for (uint n(0); n<nelemMax; n++) {
+    for (uint n(2); n<nelemMax; n++) {
       /* Create the matrix */
-      shape = IPosition (3,nelem[n],nelem[n],nelem[n]);
+      shape = IPosition (3,nelem[n-2],nelem[n-1],nelem[n]);
       Cube<double> arr (shape);
 
       /* Write values y-z-planes */
 
       start = clock();
-      for (i=0; i<nelem[n]; i++) {
+      for (i=0; i<shape(0); i++) {
 	arr.yzPlane(i) = 1.0;
       }
       end = clock();
@@ -525,7 +525,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
       /* Write values x-z-planes */
 
       start = clock();
-      for (i=0; i<nelem[n]; i++) {
+      for (i=0; i<shape(1); i++) {
 	arr.xzPlane(i) = 1.0;
       }
       end = clock();
@@ -534,7 +534,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
       /* Write values x-y-planes */
 
       start = clock();
-      for (i=0; i<nelem[n]; i++) {
+      for (i=0; i<shape(2); i++) {
 	arr.xyPlane(i) = 1.0;
       }
       end = clock();
@@ -542,7 +542,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
 
       /* Summary */
       
-      std::cout << "\t" << nelem[n]
+      std::cout << "\t" << shape
 		<< "\t" << runtimes[0]
 		<< "\t" << runtimes[1]
 		<< "\t" << runtimes[2]
@@ -555,22 +555,25 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
   }
 
   std::cout << "[3] Insert values of Matrix into y-z planes ..." << std::endl;
-  std::cout << "\tnelem"
+  std::cout << "\tnelem\t"
 	    << "\t(2,1,0)"
 	    << "\t(0,2,1)"
 	    << "\t(y-z)"
 	    << std::endl;
   try {
 
-    for (uint n(0); n<nelemMax; n++) {
+    for (uint n(2); n<nelemMax; n++) {
       /* Set shape of the array */
-      shape = IPosition (3,nelem[n],nelem[n],nelem[n]);
+      shape = IPosition (3,nelem[n-2],nelem[n-1],nelem[n]);
       /* Create Matrix object */
-      Matrix<double> mat (nelem[n],nelem[n],0.0);
+      Matrix<double> mat;
       /* Create Cube object */
       Cube<double> arr (shape); 
       
       /* write values into y-z planes */
+
+      mat.resize(shape(1),shape(2));
+      mat = 0.0;
       
       start = clock();
       for (pos(2)=0; pos(2)<shape(2); pos(2)++) {
@@ -603,7 +606,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
 
       /* Summary */
       
-      std::cout << "\t" << nelem[n]
+      std::cout << "\t" << shape
 		<< "\t" << runtimes[0]
 		<< "\t" << runtimes[1]
 		<< "\t" << runtimes[2]
@@ -617,23 +620,25 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
   }
   
   std::cout << "[4] Insert values of Matrix into x-z planes ..." << std::endl;
-  std::cout << "\tnelem"
+  std::cout << "\tnelem\t"
 	    << "\t(2,0,1)"
 	    << "\t(1,2,0)"
 	    << "\t(x-z)"
 	    << std::endl;
   try {
 
-    for (uint n(0); n<nelemMax; n++) {
+    for (uint n(2); n<nelemMax; n++) {
       /* Set shape of the array */
-      shape = IPosition (3,nelem[n],nelem[n],nelem[n]);
-      /* Create Matrix object */
-      Matrix<double> mat (nelem[n],nelem[n],0.0);
+      shape = IPosition (3,nelem[n-2],nelem[n-1],nelem[n]);
       /* Create Cube object */
       Cube<double> arr (shape); 
+      /* Create Matrix object */
+      Matrix<double> mat (shape(0),shape(2));
+      
+      mat = 0.0;
       
       /* write values into x-z planes - iteration axis last */
-      
+
       start = clock();
       for (pos(2)=0; pos(2)<shape(2); pos(2)++) {
 	for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
@@ -669,7 +674,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
 
       /* Summary */
       
-      std::cout << "\t" << nelem[n]
+      std::cout << "\t" << shape
 		<< "\t" << runtimes[0]
 		<< "\t" << runtimes[1]
 		<< "\t" << runtimes[2]
@@ -770,10 +775,10 @@ int test_Arrays_Slice (std::vector<int> const &nelem)
   int nofFailedTests (0);
   uint k (0);
   uint n(0);
-  uint maxDimension (9);
+  uint maxDimension (8);
   clock_t start;
   clock_t end;
-  double runtimes[2];
+  double runtimes[4];
 
   std::cout << "[1] Assign values to parts of a matrix ..." << std::endl;
   try {
@@ -847,27 +852,18 @@ int test_Arrays_Slice (std::vector<int> const &nelem)
     for (k=0; k<nelem[0]; k++) {
       arr (k,Slice(),Slice()) = 1.0*k;
     }
-#ifdef DEBUGGING_MESSAGES
-    std::cout << arr.yzPlane(0) << std::endl;
-#endif
 
     /* Assign value per (x,z)-plane */
 
     for (k=0; k<nelem[1]; k++) {
       arr (Slice(),k,Slice()) = 1.0*k;
     }
-#ifdef DEBUGGING_MESSAGES
-    std::cout << arr.xzPlane(1) << std::endl;
-#endif
 
     /* Assign value per (x,y)-plane */
 
     for (k=0; k<nelem[2]; k++) {
       arr (Slice(),Slice(),k) = 1.0*k;
     }
-#ifdef DEBUGGING_MESSAGES
-    std::cout << arr.xyPlane(2) << std::endl;
-#endif
 
   } catch (std::string message) {
     std::cerr << message << endl;
@@ -875,43 +871,133 @@ int test_Arrays_Slice (std::vector<int> const &nelem)
   }
 
   std::cout << "[4] Write Matrix to planes of a Cube ..." << std::endl;
-  std::cout << "\t" << "nelem"
-	    << "\t" << "xyPlane(n)"
-	    << "\t" << "Slice()"
-	    << std::endl;
   try {
-    for (uint ndim(0); ndim<maxDimension; ndim++) {
-      Matrix<double> mat (nelem[ndim],nelem[ndim]);
-      Cube<double> cube (nelem[ndim],nelem[ndim],nelem[ndim]);
+    std::cout << "\t" << "shape\t"
+	      << "\t" << "xyPlane"
+	      << "\t" << "Slice"
+	      << "\t" << "xzPlane"
+	      << "\t" << "Slice"
+	      << std::endl;
+    for (uint ndim(2); ndim<maxDimension; ndim++) {
+      /* shape of the target cube */
+      IPosition shape (3,nelem[ndim-2],nelem[ndim-1],nelem[ndim]);
+      /* create cube */
+      Cube<double> cube (shape);
+      /* create matrix */
+      Matrix<double> mat;
+
+      /* write (y,z)-planes */
       
-      /* writing x-y planes via xyPlane() function */
-      
+      mat.resize(shape(1),shape(2));
+
       start = clock();
-      for (n=0; n<nelem[ndim]; n++) {
-	mat = double(n);
-	cube.xyPlane(n) = mat;
+      for (n=0; n<shape(0); n++) {
+	mat = 1.0*n;
+	cube.yzPlane(n) = mat;
       }
       end = clock();
       runtimes[0] = runtime (start,end);
       
-      /* writing x-y planes via default Slice objects */
-      
       start = clock();
-      for (n=0; n<nelem[ndim]; n++) {
-	mat = double(n);
-	cube (Slice(), Slice(), n) = mat;
+      for (n=0; n<shape(0); n++) {
+	mat = 1.0*n;
+	cube (n,Slice(),Slice()).nonDegenerate() = mat;
       }
       end = clock();
       runtimes[1] = runtime (start,end);
 
+      /* write (x,z)-planes */
+      
+      mat.resize(shape(0),shape(2));
+
+      start = clock();
+      for (n=0; n<shape(1); n++) {
+	mat = 1.0*n;
+	cube.xzPlane(n) = mat;
+      }
+      end = clock();
+      runtimes[2] = runtime (start,end);
+      
+      start = clock();
+      for (n=0; n<shape(1); n++) {
+	mat = 1.0*n;
+	cube (Slice(),n,Slice()).nonDegenerate() = mat;
+      }
+      end = clock();
+      runtimes[3] = runtime (start,end);
+
       /* print summary */
       
-      std::cout << "\t" << nelem[ndim]
+      std::cout << "\t" << shape
 		<< "\t" << runtimes[0]
 		<< "\t" << runtimes[1]
+		<< "\t" << runtimes[2]
+		<< "\t" << runtimes[3]
 		<< std::endl;
       
     }
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[5] Write Matrix to planes of a Cube - special cases"
+	    << std::endl;
+  try {
+    IPosition shape(3,5,10,20);
+    Cube<double> cube;
+    Matrix<double> mat;
+    
+    std::cout << "-- write (y,z)-plane ..." << std::endl;
+    // all axes > 1
+    cube.resize(shape);
+    cube = 0.0;
+    mat.resize(shape(1),shape(2));
+    mat  = 1.0;
+    cube (1,Slice(),Slice()).nonDegenerate() = mat;
+    std::cout << "\t" << mat.shape() << "  ->  " << shape << std::endl;
+    // last two axes of equal length, but still > 1
+    shape = IPosition (3,5,10,10);
+    cube.resize(shape);
+    cube = 0.0;
+    mat.resize(shape(1),shape(2));
+    mat  = 1.0;
+    cube (1,Slice(),Slice()).nonDegenerate() = mat;
+    std::cout << "\t" << mat.shape() << "  ->  " << shape << std::endl;
+    // length of last axis = 1
+    shape = IPosition (3,5,10,1);
+    cube.resize(shape);
+    cube = 0.0;
+    mat.resize(shape(1),shape(2));
+    mat  = 1.0;
+    cube.yzPlane(1) = mat;
+    std::cout << "\t" << mat.shape() << "  ->  " << shape << std::endl;
+    // set both of the last last axes = 1
+    shape = IPosition (3,5,1,1);
+    cube.resize(shape);
+    cube = 0.0;
+    mat.resize(shape(1),shape(2));
+    mat  = 1.0;
+    cube.yzPlane(1) = mat;
+    std::cout << "\t" << mat.shape() << "  ->  " << shape << std::endl;
+
+    std::cout << "-- write (x,z)-plane ..." << std::endl;
+    shape = IPosition (3,5,10,20);
+    cube.resize(shape);
+    cube = 0.0;
+    mat.resize(shape(0),shape(2));
+    mat  = 1.0;
+    cube (Slice(),1,Slice()).nonDegenerate() = mat;
+    std::cout << "\t" << mat.shape() << "  ->  " << shape << std::endl;
+    
+    std::cout << "-- write (x,y)-plane ..." << std::endl;
+    cube.resize(shape);
+    cube = 0.0;
+    mat.resize(shape(0),shape(1));
+    mat  = 1.0;
+    cube (Slice(),Slice(),1).nonDegenerate() = mat;
+    std::cout << "\t" << mat.shape() << "  ->  " << shape << std::endl;
+
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -1115,8 +1201,8 @@ int main ()
   std::vector<int> nelem = nof_array_elements ();
 
 //   nofFailedTests += test_Arrays();
-  nofFailedTests += test_Arrays_Matrix (nelem);
-  nofFailedTests += test_Arrays_Cube (nelem);
+//   nofFailedTests += test_Arrays_Matrix (nelem);
+//   nofFailedTests += test_Arrays_Cube (nelem);
 //   nofFailedTests += test_Arrays_Array (nelem);
   nofFailedTests += test_Arrays_Slice (nelem);
 

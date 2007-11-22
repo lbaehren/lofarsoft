@@ -231,7 +231,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
     casa::IPosition end (3,1,shape(0),shape(1));
     casa::IPosition incr (3,1,1,1);
-    casa::Array<double> tmp;
 
 #ifdef DEBUGGING_MESSAGES
     std::cout << "[GeometricalPhase::calcPhases]" << std::endl;
@@ -244,12 +243,26 @@ namespace CR { // NAMESPACE CR -- BEGIN
     std::cout << "-- Slicer: incr specifier = " << incr           << std::endl;
 #endif
     
-    /*
-      We need to distinguish between casacore and CASA at this point; there are 
-      a number of methods available in casacore which do not show up in CASA.
+    /*!
+      Computation by looping over the individual elements in both the array
+      storing the geometrical delays and the resulting phases is the most 
+      efficient method here; we rather would like to treat the geometrical
+      delays as a whole per frequency channel, effectively inserting slices
+      into the cube storing the values of the phases. While the cassacore 
+      libraries provide methods to perform such operations, for all three
+      possible plains parallel to the Cube axes, this is (current) not the
+      case for the CASA libraries as required to provide the Glish support.
+      To allow for the usage of the more efficient methods we here make a
+      distinction between the two variants of the arrays classes and their
+      methods.
     */
     
-    if (nofChannels==1 || shape(0)*shape(1)==1) {
+#ifdef HAVE_CASACORE
+    for (nChannel=0; nChannel<nofChannels; nChannel++) {
+      phases.yzPlane(nChannel) = CR::_2pi*frequencies_p(nChannel)*delays;
+    }
+#else 
+    if (nofChannels==1 || shape(0)==1 || shape(1)==1) {
       uint freq (0);
       uint ant (0);
       uint pos (0);
@@ -262,6 +275,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
       }
     } 
     else {
+      // temporary array for referencing
+      casa::Array<double> tmp;
+      // go through the frequency channels
       for (nChannel=0; nChannel<nofChannels; nChannel++) {
 	// create Slicer object to address the target array
 	casa::Slicer slice (casa::IPosition(3,nChannel,0,0),
@@ -274,6 +290,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 	tmp = CR::_2pi*frequencies_p(nChannel)*delays;
       }
     }
+#endif
 
     return phases;
   }
