@@ -53,11 +53,11 @@ int main(int argc, char** argv){
   cout << "\nreas2event V1.0 by Andreas Horneffer & Tim Huege\n";
   if ((argc < 6) || (argc >10))
   {
-    cout << "\nUsage: reas2event <outfile> <simpath> <simname> <antlist> <date> [<caltabpath> <presync> <addnoise> <addtv>]<\n\n" 
+    cout << "\nUsage: reas2event <outfile> <simpath> <simname> <antlist> <date> [<caltabpath> <presync> <addnoise> <addtv>]\n\n" 
          << "outfile:     filename to write event to, e.g. newevent.event\n"
          << "simpath:     path where REAS simulation lies, e.g. /home/huege/sims\n"
-         << "simname:     name of REAS simulation, e.g. 30deg1e17_all\n"
-         << "antlist:     name of antenna list, e.g. lopes30\n"
+         << "simname:     name of REAS parameter file (without extension), e.g. event15\n"
+         << "antlist:     name of antenna list (without extension), e.g. lopes30\n"
 	 << "date:        unique event date, e.g. 1136116800\n"
 	 << "caltabpath:  path to caltables, defaults to /home/huege/lopescasa/data/LOPES/LOPES-CalTable\n"
 	 << "presync:     number of samples in presync, defaults to 32768\n"
