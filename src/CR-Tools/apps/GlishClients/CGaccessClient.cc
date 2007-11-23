@@ -102,6 +102,8 @@ Bool LoadLOPESEvent(GlishSysEvent &event, void *){
       };
       return True;
     };
+    //Replace this with better defaults
+    pipeline_p->doPhaseCal(True);
     if (! pipeline_p->InitEvent(lev_p)){
       cerr << "CGaccessClient:LoadLOPESEvent: " << "Failed to initialize the DataReader!" << endl;
       if (glishBus->replyPending()) {
@@ -156,6 +158,7 @@ Bool LoadTBBCTLEvent(GlishSysEvent &event, void *){
       };
       return True;
     };
+    pipeline_p->doPhaseCal(False);
     if (! pipeline_p->InitEvent(&tbbIn)){
       cerr << "CGaccessClient:LoadTBBCTLEvent: " << "Failed to initialize the DataReader!" << endl;
       if (glishBus->replyPending()) {
