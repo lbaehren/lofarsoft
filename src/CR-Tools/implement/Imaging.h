@@ -67,6 +67,33 @@
   Obviously there is quite a number of coordinate systems and reference frames,
   within which positions and directions can be defined.
 
+  \image html beamforming-geometry.png
+
+  <b>Basic geometry and conventions</b>
+
+  For the beamforming process we adopt the geometry as shown in the figure above,
+  from this we derive the following fundamental statements:
+  <ol>
+    <li>Coordinates are given within a cartesian coordinate system frame 
+    tied to the center of the array; its origin is designated by
+    \f$\vec O = (0,0,0)\f$.
+    <li>\f$ \vec x_i \f$ is the  three-dimensional position vector of the
+    i-th array antenna, pointing away from the coordinate system origin.
+    <li>\f$ \vec \rho_i \f$ denotes the direction vector from the position of
+    the i-th antenna towards the position of the source.
+    <li>Baseline vectors originate from the chosen phase center; the baseline
+    vector between a pair of antennae <i>i</i> and <i>j</i> as therefore is
+    given by
+    \f[ \vec B_{ij} = \vec x_{j} - \vec x_{i} \f]
+    The coordinates of the default array phase center are \f$\vec O = (0,0,0)\f$,
+    hence \f$\vec B_j = \vec x_j\f$.
+    <li>The light travel time delay, \f$\tau_{ij}\f$, between two antennae
+    <i>i</i> and <i>j</i> is defined following the convention for the baselines,
+    \f[ \tau_{ij} = \frac{1}{c}\, \Bigl( |\vec \rho_j| - |\vec \rho_i| \Bigr) \f]
+    thus \f$\tau_{ij} > 0\f$ if the signal arrives at antenna $i$ before arriving
+    at antenna <i>j</i>.
+  </ol>
+
   <h3>Usage</h3>
 
   Use this file in order to import all the prototypes for functions and classes

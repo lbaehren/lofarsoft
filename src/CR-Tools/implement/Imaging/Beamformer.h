@@ -32,75 +32,78 @@
 
 namespace CR { // Namespace CR -- begin
   
+  /*!
+    \brief List of implemented and supported beam types.
+
+    The Beamformer is designed such that a number of different beamforming
+    methods can be provided.
+  */
+  typedef enum {
     /*!
-      \brief List of implemented and supported beam types.
+      Electric field strength as function of frequency,
+      \f$\widetilde S (\vec\rho,\nu)  \f$
     */
-    typedef enum {
-      /*!
-	Electric field strength as function of frequency,
-	\f$\widetilde S (\vec\rho,\nu)  \f$
-      */
-      FREQ_FIELD,
-      /*!
-	<b>Directed spectral power</b> (power of the electric field as function
-	of frequency) <br>
-	\f[ \widetilde P (\vec\rho,\nu) = \overline{\widetilde S (\vec\rho,\nu)}
-	\cdot \widetilde S (\vec\rho,\nu) \f]
-	where 
-	\f[ \widetilde S (\vec\rho,\nu) = \frac{1}{N_{\rm Ant}}
-	\sum_{j=1}^{N_{\rm Ant}} \widetilde S_{j} (\vec\rho,\nu) =
-	\frac{1}{N_{\rm Ant}} \sum_{j=1}^{N_{\rm Ant}} w (\vec x_j, \vec \rho, \nu)
-	\widetilde s_{j} (\nu) \f]
-	in which \f$ w \f$ is the weighting factor for each combination of antenna,
-	pointing direction and frequency and \f$ \widetilde s_j \f$ is the Fourier
-	transform of the data from antenna \f$ j \f$.
-      */
-      FREQ_POWER,
-      /*!
-	Electric field strength as function of time (sample resolution)
-      */
-      TIME_FIELD,
-      /*!
-	Power of the electric field as function of time
-      */
-      TIME_POWER,
-      /*!
-	<b>Cross-correlation beam</b> (cc-beam)<br>
-	The data from each unique pair of antennas is multiplied, the resulting
-	values are averaged, and then the square root is taken while preserving
-	the sign.
-	\f[
-	cc(\vec \rho)[t] = \, ^+_- \sqrt{\left| \frac{1}{N_{Pairs}} \sum^{N-1}_{i=1}
-	\sum^{N}_{j>i} s_i(\vec\rho)[t] s_j(\vec\rho)[t] \right|}
-	\f]
-	where 
-	\f[
-	s_j(\vec\rho)[t]
-	= \mathcal{F}^{-1} \left\{ \tilde s_j(\vec\rho)[k] \right\}
-	= \mathcal{F}^{-1} \left\{ w_j(\vec\rho)[k] \cdot \tilde s_j[k]\right\}
-	\f]
-	is the time shifted field strength of the single antennas for a direction
-	\f$\vec \rho \f$. \f$ N \f$ is the number of antennas, \f$t\f$ the time or
-	pixel index and \f$N_{Pairs}\f$ the number of unique pairs of antennas.
-	The negative sign is taken if the sum had a negative sign before taking the
-	absolute values, and the positive sign otherwise.
-	Computation - for each direction in the sky - is performed as follows:
-	<ol>
-        <li>Compute the shifted time-series for all antennas,
-	\f$ s_j (\vec\rho,t) \f$, by first applying the weights to the Fourier
-	transformed data and thereafter transforming back to time domain.
-	<li>Sum over unique products from all antenna pairs and normalize by
-	the number of such pairs.
-	<li>Take the square root of the sum and multiply with the sign of the
-	some.
-	</ol>       */
-      TIME_CC,
-      //! Power-beam (p-beam)
-      TIME_P,
-      //! Excess-beam (x-beam)
-      TIME_X
-    } BeamType;
-    
+    FREQ_FIELD,
+    /*!
+      <b>Directed spectral power</b> (power of the electric field as function
+      of frequency) <br>
+      \f[ \widetilde P (\vec\rho,\nu) = \overline{\widetilde S (\vec\rho,\nu)}
+      \cdot \widetilde S (\vec\rho,\nu) \f]
+      where 
+      \f[ \widetilde S (\vec\rho,\nu) = \frac{1}{N_{\rm Ant}}
+      \sum_{j=1}^{N_{\rm Ant}} \widetilde S_{j} (\vec\rho,\nu) =
+      \frac{1}{N_{\rm Ant}} \sum_{j=1}^{N_{\rm Ant}} w (\vec x_j, \vec \rho, \nu)
+      \widetilde s_{j} (\nu) \f]
+      in which \f$ w \f$ is the weighting factor for each combination of antenna,
+      pointing direction and frequency and \f$ \widetilde s_j \f$ is the Fourier
+      transform of the data from antenna \f$ j \f$.
+    */
+    FREQ_POWER,
+    /*!
+      Electric field strength as function of time (sample resolution)
+    */
+    TIME_FIELD,
+    /*!
+      Power of the electric field as function of time
+    */
+    TIME_POWER,
+    /*!
+      <b>Cross-correlation beam</b> (cc-beam)<br>
+      The data from each unique pair of antennas is multiplied, the resulting
+      values are averaged, and then the square root is taken while preserving
+      the sign.
+      \f[
+      cc(\vec \rho)[t] = \, ^+_- \sqrt{\left| \frac{1}{N_{Pairs}} \sum^{N-1}_{i=1}
+      \sum^{N}_{j>i} s_i(\vec\rho)[t] s_j(\vec\rho)[t] \right|}
+      \f]
+      where 
+      \f[
+      s_j(\vec\rho)[t]
+      = \mathcal{F}^{-1} \left\{ \tilde s_j(\vec\rho)[k] \right\}
+      = \mathcal{F}^{-1} \left\{ w_j(\vec\rho)[k] \cdot \tilde s_j[k]\right\}
+      \f]
+      is the time shifted field strength of the single antennas for a direction
+      \f$\vec \rho \f$. \f$ N \f$ is the number of antennas, \f$t\f$ the time or
+      pixel index and \f$N_{Pairs}\f$ the number of unique pairs of antennas.
+      The negative sign is taken if the sum had a negative sign before taking the
+      absolute values, and the positive sign otherwise.
+      Computation - for each direction in the sky - is performed as follows:
+      <ol>
+      <li>Compute the shifted time-series for all antennas,
+      \f$ s_j (\vec\rho,t) \f$, by first applying the weights to the Fourier
+      transformed data and thereafter transforming back to time domain.
+      <li>Sum over unique products from all antenna pairs and normalize by
+      the number of such pairs.
+      <li>Take the square root of the sum and multiply with the sign of the
+      some.
+      </ol>       */
+    TIME_CC,
+    //! Power-beam (p-beam)
+    TIME_P,
+    //! Excess-beam (x-beam)
+    TIME_X
+  } BeamType;
+  
   /*!
     \class Beamformer
 
@@ -124,17 +127,79 @@ namespace CR { // Namespace CR -- begin
     
     <h3>Synopsis</h3>
 
+    <h3>Adding new beamforming methods</h3>
+
     Implementation of a new beamforming methods requires three entries within
     this class:
     <ol>
-      <li>Add an entry to the enumeration of the beam-types
+      <li>Add an entry to the CR::BeamType enumeration, as this will be used
+      internally for managing function calls and redirection from the generic
+      interface.
+      \code
+      typedef enum {
+        // some entries
+	TIME_CC,
+	// some more entries
+      } BeamType;
+      \endcode
       <li>The function implementing the new beam type, using the interface
-          of Beamformer::processData.
+      of Beamformer::processData.
+      \code
+      bool time_cc (casa::Matrix<double> &beam,
+                    const casa::Matrix<DComplex> &data);
+      \endcode
       <li>Add entry to Beamformer::setBeamType in order to be able to selected
-          the new beam type.
+      the new beam type.
+      \code
+      bool Beamformer::setBeamType (BeamType const &beam)
+      {
+        bool status (true);
+	
+	switch (beam) {
+	case TIME_CC:
+	  beamType_p    = beam;
+	  processData_p = &Beamformer::time_cc;
+	  break;
+	}
+
+	return status;
+      }
+      \endcode
+      <li><i>(Optional, but recommended)</i> Register the new BeamType with the
+      Beamformer::beamTypeName function; this will enable retriving the name
+      of newly implemented beamforming method instead only the number from the
+      CR::BeamType enumeration.
+      \code
+      static std::string beamTypeName (BeamType const &beamType)
+      {
+        std::string name;
+      
+	switch (beamType) {
+	  case TIME_CC:
+	  name = "TIME_CC";
+	  break;
+	}
+
+	return name;
+      }
+      \endcode
     </ol>
 
     <h3>Example(s)</h3>
+
+    <ol>
+      <li>Use and existing object handling the geometrical weights in order
+      to set up a new Beamformer:
+      \code
+      // [1] create an object handling the geometrical weights
+      GeometricalWeight weight (get_antennaPositions(),
+                                get_skyPositions(),
+				get_frequencies());
+
+      // [2] create new Beamformer from the previously created GeometricalWeights
+      Beamformer bf (weight);
+      \endcode
+    </ol>
     
   */  
   class Beamformer : public GeometricalWeight {
@@ -145,13 +210,13 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Pointer to the function performing the beamforming
      
-      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
-                      input data.
-      \param  data -- [nofDatasets,nofChannels] Input data which will be
-                      processed to form a given type of beam.
+      \retval beam -- [frequency,position] Beam formed from the provided input data.
+      \param  data -- [frequency,antenna] Input data which will be processed to
+              form a given type of beam; array containing the input data is
+	      organized according to what is provided by the DataReader framework
 
       \return status   -- Status of the operation; returns <i>false</i> if an
-                          an error was encountered
+              an error was encountered
     */
     bool (Beamformer::*processData_p) (casa::Matrix<double> &beam,
 				       const casa::Matrix<DComplex> &data);
@@ -311,18 +376,23 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Set the type of beam to be used at data processing
       
-      \param beam    -- 
+      \param beam -- The BeamType to be used at data processing
       
-      \return status -- 
+      \return status -- Status of the operation; returns <i>false</i> if an
+              an error was encountered
     */
     bool setBeamType (BeamType const &beam);
     
     /*!
       \brief Convert combination of domain and quantity label to BeamType
       
-      \retval beamType -- 
-      \param domain    -- 
-      \param quantity  --
+      \retval beamType -- BeamType identifier
+      \param domain -- Domain (time, freq) in which the beamformed data will
+             reside.
+      \param quantity -- (EM) Quanity the beamformed data are going to represent
+
+      \return status -- Status of the operation; returns <i>false</i> if an
+              an error was encountered
     */
     static bool beamType (BeamType &beamType,
 			  string const &domain,
@@ -334,6 +404,9 @@ namespace CR { // Namespace CR -- begin
       \retval domain   -- 
       \retval quantity -- 
       \param beamType  -- 
+
+      \return status -- Status of the operation; returns <i>false</i> if an
+              an error was encountered
     */
     static bool beamType (std::string &domain,
 			  std::string &quantity,
@@ -406,10 +479,10 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Beamforming of the data, returning real-valued result
 
-      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
-                      input data.
-      \param  data -- [nofDatasets,nofChannels] Input data which will be
-                      processed to form a given type of beam.
+      \retval beam -- [frequency,position] Beam formed from the provided input data.
+      \param  data -- [frequency,antenna] Input data which will be processed to
+              form a given type of beam; array containing the input data is
+	      organized according to what is provided by the DataReader framework
 
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered
@@ -423,10 +496,10 @@ namespace CR { // Namespace CR -- begin
       <b>Note:</b> This function cannot be called via the <tt>processData</tt>
       method, since the returned array consists of complex values.
       
-      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
-                      input data.
-      \param  data -- [nofDatasets,nofChannels] Input data which will be
-                      processed to form a given type of beam.
+      \retval beam -- [frequency,position] Beam formed from the provided input data.
+      \param  data -- [frequency,antenna] Input data which will be processed to
+              form a given type of beam; array containing the input data is
+	      organized according to what is provided by the DataReader framework
 
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered
@@ -437,10 +510,10 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Form a cross-correlation beam
       
-      \retval beam -- [nofSkyPosition,blocksize] Beam formed from the provided
-                      input data.
-      \param  data -- [nofDatasets,nofChannels] Input data which will be
-                      processed to form a given type of beam.
+      \retval beam -- [frequency,position] Beam formed from the provided input data.
+      \param  data -- [frequency,antenna] Input data which will be processed to
+              form a given type of beam; array containing the input data is
+	      organized according to what is provided by the DataReader framework
 
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered
@@ -451,10 +524,10 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Form a power-beam (p-beam)
 
-      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
-                      input data.
-      \param  data -- [nofDatasets,nofChannels] Input data which will be
-                      processed to form a given type of beam.
+      \retval beam -- [frequency,position] Beam formed from the provided input data.
+      \param  data -- [frequency,antenna] Input data which will be processed to
+              form a given type of beam; array containing the input data is
+	      organized according to what is provided by the DataReader framework
 
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered
@@ -465,10 +538,10 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Form an excess-beam (x-beam)
 
-      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
-                      input data.
-      \param  data -- [nofDatasets,nofChannels] Input data which will be
-                      processed to form a given type of beam.
+      \retval beam -- [frequency,position] Beam formed from the provided input data.
+      \param  data -- [frequency,antenna] Input data which will be processed to
+              form a given type of beam; array containing the input data is
+	      organized according to what is provided by the DataReader framework
 
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered

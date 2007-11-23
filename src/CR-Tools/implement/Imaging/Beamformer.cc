@@ -384,26 +384,40 @@ namespace CR { // Namespace CR -- begin
 			       const casa::Matrix<DComplex> &data)
   {
     bool status (true);
-    int nofSkyPositions (skyPositions_p.nrow());
-    int nofFrequencies (frequencies_p.nelements());
-    int direction (0);
+    casa::Cube<DComplex> weights;
+    uint freq (0);
     uint antenna (0);
-    int freq (0);
+    uint direction (0);
     casa::DComplex tmp;
+
+    /*
+      We need the weights in order to apply them to the data; if the weights
+      are buffered, we set up a reference to the array storing them, otherwise
+      we will have to retrieve them from the GeometricalWeights class first.
+     */
+
+    if (bufferWeights_p) {
+      weights.reference(weights_p);
+    } else {
+      weights = GeometricalWeight::weights();
+    }
+
     
     try {
+      // Get the shape of the beamformer weights, [freq,antenna,sky]
+      casa::IPosition shape = weights.shape();
       // Resize the array returning the beamformed data
-      beam.resize (nofSkyPositions,nofFrequencies,0.0);
-      
-      // Iteration over the set of directions in the sky
-      for (direction=0; direction<nofSkyPositions; direction++) {
-	for (antenna=0; antenna<nofAntennas_p; antenna++) {
-	  for (freq=0; freq<nofFrequencies; freq++) {
-	    tmp = data(antenna,freq)*weights_p(antenna,direction,freq);
-	    beam(direction,freq) += real(tmp*conj(tmp));
+      beam.resize (shape(0),shape(2),0.0);
+
+      for (direction=0; direction<shape(2); direction++) {
+	for (freq=0; freq<shape(0); freq++) {
+	  for (antenna=0; antenna<shape(1); antenna++) {
+	    tmp = data(freq,antenna)*weights(freq,antenna,direction);
+	    beam(freq,direction) += real(tmp*conj(tmp));
 	  }
 	}
       }
+      
     } catch (std::string message) {
       std::cerr << "[Beamformer::freq_power] " << message << std::endl;
       status = false;
