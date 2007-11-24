@@ -1,4 +1,4 @@
-from Image import Op
+from image import Op
 
 class Op_outlist(Op):
     """Write out list of gaussians"""
@@ -64,16 +64,19 @@ class Op_outlist(Op):
         f.write("### KVis annotation file\n\n")
 	f.write("color green\n\n")
 
-        for isl in img.islands:
+        for idx, isl in enumerate(img.islands):
             for gaus in isl.gaul:
                 ### convert to canonical units
                 ra, dec = img.opts.xy2radec(gaus[1:3])
                 shape = img.opts.pix2beam(gaus[3:6])
                 cross = (3*img.fits_hdr['cdelt1'], 3*img.fits_hdr['cdelt2'])
 
+                str = 'text   %10.5f %10.5f   %d\n' % \
+                    (ra, dec, idx)
+                f.write(str)
                 str = 'cross   %10.5f %10.5f   %10.7f %10.7f\n' % \
                     (ra, dec, abs(cross[0]), abs(cross[1]))
-                f.write(str)
+                #f.write(str)
                 str = 'ellipse %10.5f %10.5f   %10.7f %10.7f %10.4f\n' % \
                     (ra, dec, shape[0], shape[1], shape[2])
                 f.write(str)

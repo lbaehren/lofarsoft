@@ -1,36 +1,15 @@
-import math
 import numpy as N
-import numpy.core.ma as M
-from Image import Op
-import _cbdsm
+from image import Op
 
 class Op_bstat(Op):
-    def stat(self, arr):
-        N = arr.count()
-        return arr.mean(), arr.std() * math.sqrt(N/(N-1.))
-
-    def clip_stat(self, arr, mean, sigma, kappa=3):
-        nmean = nsigma = None; cnt = 0
-        while sigma != nsigma and cnt < 100:
-            cnt += 1
-            if nsigma:
-                sigma = nsigma
-                mean  = nmean
-            mask = (abs(arr - mean) > kappa*sigma).filled(fill_value = True)
-            narr = M.array(arr.data, mask = mask, copy = False)
-            nmean, nsigma = self.stat(narr)
-
-        if sigma != nsigma:
-            raise RuntimeError("Sigma-clipped RMS calculation does not converge")
-        return nmean, nsigma
-
+    """Calculate image statistics
+    """
     def __call__(self, img):
-        data = img.img
+        import _cbdsm
         opts = img.opts
 
-        #mean, rms   = self.stat(data)
-        #cmean, crms = self.clip_stat(data, mean, rms, kappa=opts.rms_clip)
-        mean, rms, cmean, crms = _cbdsm.bstat(data.data, data.mask, opts.rms_clip)
+        mask = (False if img.img_mask is img.nomask else img.img_mask)
+        mean, rms, cmean, crms = _cbdsm.bstat(img.img, mask, opts.rms_clip)
 
         opts.mean  = cmean
         opts.rms   = crms
@@ -41,6 +20,8 @@ class Op_bstat(Op):
 
 
 class Op_thresholds(Op):
+    """Compute thresholds
+    """
     def __call__(self, img):
         opts = img.opts
 

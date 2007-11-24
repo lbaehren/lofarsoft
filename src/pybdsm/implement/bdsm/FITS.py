@@ -1,7 +1,5 @@
-import pyfits, wcslib
 import numpy as N
-import numpy.core.ma as M
-from Image import Op
+from image import Op
 
 class Op_loadFITS(Op):
     """FITS file loader
@@ -11,6 +9,8 @@ class Op_loadFITS(Op):
     """
     
     def __call__(self, img):
+        import pyfits
+
         fits = pyfits.open(img.opts.fits_name, mode = "readonly")
         fits.info()
         
@@ -19,28 +19,33 @@ class Op_loadFITS(Op):
         if len(fits) != 1:
             print "WARNING: only the primary extent will be considered"
         if hdr['NAXIS'] != 2 and (hdr['NAXIS'] != 3 or hdr['NAXIS3'] != 1):
-            raise RuntimeError('Incorrect image format: currently supported are NxM and NxMx1 images')
+            raise RuntimeError('Incorrect image format: currently supported ' \
+                               'are NxM and NxMx1 images')
 
-        img.fits_hdr = fits[0].header
         data    = fits[0].data
         if len(data.shape) == 3: ### cut out extra unity dimension
             data.shape = data.shape[1:]
-        ### FIXME: forcibly convert to the native layout & byteorder
+        ### convert to proper data order and byteorder
         data = N.array(data.transpose(), order='C',
                        dtype=data.dtype.newbyteorder('='))
         
-        img.img = M.array(data, copy = False)
         fits.close()
+
+        img.fits_hdr = hdr
+        img.img = data
+        img.img_mask = img.nomask
 
         ### set up conversion routines
         self.init_wcs(img.opts, img.fits_hdr)
 
         ### set up beam parameters
         self.init_beam(img.opts, img.fits_hdr)
-        
+
         return img
 
     def init_wcs(self, opts, hdr):
+        import wcslib
+
         t = wcslib.wcs()
         t.crval = (hdr['crval1'], hdr['crval2'])
         t.crpix = (hdr['crpix1'], hdr['crpix2'])
@@ -83,7 +88,9 @@ class Op_loadFITS(Op):
             opts.beam = (hdr['bmaj'], hdr['bmin'], hdr['bpa'])
 
         opts.pix2beam = pix2beam
-        ### now convert beam into pixels
+        opts.beam2pix = beam2pix
+
+        ### convert beam into pixels
         opts.beam = beam2pix(opts.beam)
         ### force asymmetric beam shape
         if abs(opts.beam[0]/opts.beam[1]) < 1.1:
