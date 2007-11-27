@@ -28,20 +28,20 @@
 #include <iostream>
 #include <string>
 
+#include <casa/Arrays/Array.h>
+
 #include <Imaging/GeometricalWeight.h>
 
 namespace CR { // Namespace CR -- begin
   
   /*!
     \brief List of implemented and supported beam types.
-
-    The Beamformer is designed such that a number of different beamforming
-    methods can be provided.
   */
   typedef enum {
     /*!
       Electric field strength as function of frequency,
-      \f$\widetilde S (\vec\rho,\nu)  \f$
+      \f[ \widetilde S (\vec\rho,\nu) = \frac{1}{N} \sum_{j=1}^{N}
+      w_{j}(\vec \rho,\nu) \widetilde{s_{j}}(\nu) \f]
     */
     FREQ_FIELD,
     /*!
@@ -57,14 +57,34 @@ namespace CR { // Namespace CR -- begin
       in which \f$ w \f$ is the weighting factor for each combination of antenna,
       pointing direction and frequency and \f$ \widetilde s_j \f$ is the Fourier
       transform of the data from antenna \f$ j \f$.
+      
+      While in the above step the beam beam is computed by summation over all 
+      selected antennas, there also is the option to sum over antenna pairs,
+      i.e. baselines
+      \f[ \widetilde P (\vec\rho,\nu) = \left( \frac{N^2-N}{2} \right)^{-1}
+      \sum_{j=1}^{N} \sum_{k>j}^{N} \overline{w_{j}(\vec\rho,\nu)
+      \widetilde s_{j}(\nu)} w_{k}(\vec\rho,\nu) \widetilde s_{k}(\nu) \f]
+
+      Instead of computing the beam from the spectra \f$ \widetile s_j (\nu) \f$
+      of the individual antennas, the directed power also can be computed from
+      the array correlation matrix (ACM), \f$ C_{jk}(\nu) =
+      \overline{\widetilde s_j(\nu)} \widetilde s_k(\nu) \f$.
+      \f[ \widetilde P (\vec\rho,\nu) = \left( \frac{N^2-N}{2} \right)^{-1}
+      \sum_{j=1}^{N} \sum_{k>j}^{N} \overline{w_{j}(\vec\rho,\nu)}
+      w_{k}(\vec\rho,\nu) \, C_{jk}(\nu) \f]
     */
     FREQ_POWER,
     /*!
       Electric field strength as function of time (sample resolution)
+
+      \f[ S (\vec\rho,t) = \mathcal{F}^{-1} \left\{ \widetilde S(\vec\rho,\nu)
+      \right\} \f]
     */
     TIME_FIELD,
     /*!
       Power of the electric field as function of time
+
+      \f[ P (\vec\rho,\nu) = \left| S (\vec\rho,t) \right|^{2} \f]
     */
     TIME_POWER,
     /*!
@@ -127,6 +147,25 @@ namespace CR { // Namespace CR -- begin
     
     <h3>Synopsis</h3>
 
+    The Beamformer is designed such that a number of different beamforming
+    methods can be provided. Starting with the calibrated antenna spectra --
+    i.e. the Fourier transform of the antenna time-series after gain and phase
+    calibration -- we get a sort of dependency tree for further quantities
+    computed thereof:
+
+    \f[
+    \begin{array}{lll}
+    \widetilde s_j (\nu) \\
+    \downarrow \\
+    \widetilde s_j (\vec\rho,\nu) = w_j(\vec\rho,\nu) s_j(\nu) \\
+    \downarrow \\
+    \widetilde S (\vec\rho,\nu) = \frac{1}{N} \sum_j \widetilde s_j (\vec\rho,\nu) \\
+    \downarrow \\
+    \widetilde P (\vec\rho,\nu) = \overline{\widetilde S (\vec\rho,\nu)}
+    \widetilde S (\vec\rho,\nu)
+    \end{array}
+    \f]
+
     <h3>Adding new beamforming methods</h3>
 
     Implementation of a new beamforming methods requires three entries within
@@ -146,7 +185,7 @@ namespace CR { // Namespace CR -- begin
       of Beamformer::processData.
       \code
       bool time_cc (casa::Matrix<double> &beam,
-                    const casa::Matrix<DComplex> &data);
+                    const casa::Array<DComplex> &data);
       \endcode
       <li>Add entry to Beamformer::setBeamType in order to be able to selected
       the new beam type.
@@ -199,8 +238,7 @@ namespace CR { // Namespace CR -- begin
       // [2] create new Beamformer from the previously created GeometricalWeights
       Beamformer bf (weight);
       \endcode
-    </ol>
-    
+    </ol>    
   */  
   class Beamformer : public GeometricalWeight {
     
@@ -219,7 +257,7 @@ namespace CR { // Namespace CR -- begin
               an error was encountered
     */
     bool (Beamformer::*processData_p) (casa::Matrix<double> &beam,
-				       const casa::Matrix<DComplex> &data);
+				       const casa::Array<DComplex> &data);
     
     public:
     
@@ -488,7 +526,7 @@ namespace CR { // Namespace CR -- begin
                           an error was encountered
     */
     bool processData (casa::Matrix<double> &beam,
-		      const casa::Matrix<DComplex> &data);
+		      const casa::Array<DComplex> &data);
     
     /*!
       \brief Directed field as function of frequency, \f$ \widetilde S (\vec\rho,\nu) \f$
@@ -505,7 +543,7 @@ namespace CR { // Namespace CR -- begin
                           an error was encountered
     */
     bool freq_field (casa::Matrix<DComplex> &beam,
-		     const casa::Matrix<DComplex> &data);
+		     const casa::Array<DComplex> &data);
     
     /*!
       \brief Form a cross-correlation beam
@@ -519,7 +557,7 @@ namespace CR { // Namespace CR -- begin
                           an error was encountered
     */
     bool time_cc (casa::Matrix<double> &beam,
-		  const casa::Matrix<DComplex> &data);
+		  const casa::Array<DComplex> &data);
     
     /*!
       \brief Form a power-beam (p-beam)
@@ -533,7 +571,7 @@ namespace CR { // Namespace CR -- begin
                           an error was encountered
     */
     bool time_p (casa::Matrix<double> &beam,
-		 const casa::Matrix<DComplex> &data);
+		 const casa::Array<DComplex> &data);
     
     /*!
       \brief Form an excess-beam (x-beam)
@@ -547,7 +585,7 @@ namespace CR { // Namespace CR -- begin
                           an error was encountered
     */
     bool time_x (casa::Matrix<double> &beam,
-		 const casa::Matrix<DComplex> &data);
+		 const casa::Array<DComplex> &data);
     
   private:
     
@@ -569,44 +607,44 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Check if the input data are consistent with the internal settings
 
-      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
-                      input data.
-      \param  data -- [nofDatasets,nofChannels] Input data which will be
-                      processed to form a given type of beam.
+      \retval beam -- [frequency,position] Beam formed from the provided input data.
+      \param  data -- [frequency,antenna] Input data which will be processed to
+              form a given type of beam; array containing the input data is
+	      organized according to what is provided by the DataReader framework
 
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered
     */
     bool checkData (casa::Matrix<double> &beam,
-		    const casa::Matrix<DComplex> &data);
+		    const casa::Array<DComplex> &data);
     
     /*!
       \brief Directed spectral power, \f$ \widetilde P (\vec\rho,\nu) \f$
 
-      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
-                      input data.
-      \param  data -- [nofDatasets,nofChannels] Input data which will be
-                      processed to form a given type of beam.
+      \retval beam -- [frequency,position] Beam formed from the provided input data.
+      \param  data -- [frequency,antenna] Input data which will be processed to
+              form a given type of beam; array containing the input data is
+	      organized according to what is provided by the DataReader framework
 
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered
     */
     bool freq_power (casa::Matrix<double> &beam,
-		     const casa::Matrix<DComplex> &data);
+		     const casa::Array<DComplex> &data);
     
     /*!
       \brief Directed power time series, \f$ S (\vec\rho,t) \f$
 
-      \retval beam -- [nofSkyPosition,nofChannels] Beam formed from the provided
-                      input data.
-      \param  data -- [nofDatasets,nofChannels] Input data which will be
-                      processed to form a given type of beam.
+      \retval beam -- [frequency,position] Beam formed from the provided input data.
+      \param  data -- [frequency,antenna] Input data which will be processed to
+              form a given type of beam; array containing the input data is
+	      organized according to what is provided by the DataReader framework
 
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered
     */
     bool time_power (casa::Matrix<double> &beam,
-		     const casa::Matrix<DComplex> &data);
+		     const casa::Array<DComplex> &data);
     
   };
   

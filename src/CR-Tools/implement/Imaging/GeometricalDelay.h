@@ -129,6 +129,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
   */  
   class GeometricalDelay {
+
+    //! Are the buffered values in sync? 
+    bool bufferInSync_p;
     
   protected:
     
@@ -156,8 +159,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
     uint nofAntennas_p;
     //! Buffer the values for the geometrical delay?
     bool bufferDelays_p;
-    //! Are the buffered values in sync? 
-    bool delaysInSync_p;
     // Show progress during computations?
     bool showProgress_p;
     
@@ -707,6 +708,18 @@ namespace CR { // NAMESPACE CR -- BEGIN
 	return delays ();
       }
 #endif
+#endif
+
+#ifdef HAVE_CASA
+    /*!
+      \brief Get the shape of the array storing the geometrical weights
+      
+      \return shape -- [nofAntennas,nofSkyPositions] The shape of the array
+              storing the values of the geometrical weights
+    */
+    inline casa::IPosition shape () {
+      return casa::IPosition(2,nofAntennaPositions(),nofSkyPositions());
+    }
 #endif
     
     /*!

@@ -231,28 +231,36 @@ Vector<double> get_frequencies (uint const &nofChannels=4096,
 
   \return data -- [antenna,channel]
 */
-Matrix<DComplex> get_data (uint const &nofAntennas=3,
-			   uint const &nofChannels=4096)
+Matrix<DComplex> get_data (uint const &nofAntennas=4,
+			   uint const &nofChannels=4096,
+			   bool const &antennaIndexFirst=false)
 {
   // Indices
   uint antenna (0);
   uint channel (0);
   // Array of generated data
-  Matrix<DComplex> data (nofAntennas,nofChannels,0.0);
+  Matrix<DComplex> data;
   // Random number generator from CASA scimath/Mathematics module
   casa::ACG gen(10, 20);
   casa::Uniform random (&gen);
 
-  for (antenna=0; antenna<nofAntennas; antenna++) {
+  if (antennaIndexFirst) {
+    // set the shape of the array returning the data
+    data.resize(nofAntennas,nofChannels,0.0);
     for (channel=0; channel<nofChannels; channel++) {
-      data(antenna,channel) = DComplex(random(),random());
+      for (antenna=0; antenna<nofAntennas; antenna++) {
+	data(antenna,channel) = DComplex(random(),random());
+      }
+    }
+  } else {
+    // set the shape of the array returning the data
+    data.resize(nofChannels,nofAntennas,0.0);
+    for (antenna=0; antenna<nofAntennas; antenna++) {
+      for (channel=0; channel<nofChannels; channel++) {
+	data(channel,antenna) = DComplex(random(),random());
+      }
     }
   }
-
-/*   std::cout << "[get_data]" <<  std::endl; */
-/*   std::cout << "-- nof. antennas = " << nofAntennas  << std::endl; */
-/*   std::cout << "-- nof. channels = " << nofChannels  << std::endl; */
-/*   std::cout << "-- shape(data)   = " << data.shape() << std::endl; */
   
   return data;
 }

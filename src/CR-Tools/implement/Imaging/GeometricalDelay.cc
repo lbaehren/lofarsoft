@@ -258,7 +258,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
     // once all the input parameters have been stored we can compute the delays
     bufferDelays_p = bufferDelays;
     if (bufferDelays_p) {
-      cout << "-- buffering geometrical delays..." << endl;
       setDelays();
     }
   }
@@ -307,7 +306,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
     // once all the input parameters have been stored we can compute the delays
     bufferDelays_p = bufferDelays;
     if (bufferDelays_p) {
-      cout << "-- buffering geometrical delays..." << endl;
       setDelays();
     }
   }
@@ -873,7 +871,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
   {
     // if the delays are buffered internally, we just need to return the array
     if (bufferDelays_p) {
-      cout << "-- returning buffered geometrical delays..." << endl;
       return delays_p;
     } else {
       return calcDelays();
@@ -885,7 +882,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
   {
     // if the delays are buffered internally, we just need to return the array
     if (bufferDelays_p) {
-      cout << "-- returning buffered geometrical delays..." << endl;
       return delays_p;
     } else {
       return calcDelays();

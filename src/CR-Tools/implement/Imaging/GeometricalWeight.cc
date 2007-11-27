@@ -37,7 +37,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   GeometricalWeight::GeometricalWeight ()
     : GeometricalPhase ()
   {
-    bufferWeights_p = false;
+    init (false);
   }
   
   // ---------------------------------------------------------- GeometricalWeight
@@ -52,12 +52,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			skyPositions,
 			frequencies,
 			bufferDelays,
-			bufferPhases),
-      bufferWeights_p (bufferWeights)
+			bufferPhases)
   {
-    if (bufferWeights) {
-      setWeights();
-    }
+    init (bufferWeights);
   }
 
   // ---------------------------------------------------------- GeometricalWeight
@@ -76,9 +73,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			skyCoordType,
 			frequencies,
 			bufferDelays,
-			bufferPhases),
-      bufferWeights_p (bufferWeights)
+			bufferPhases)
   {
+    init (bufferWeights);
   }
   
   // ---------------------------------------------------------- GeometricalWeight
@@ -91,7 +88,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 			frequencies,
 			bufferPhases)
   {
-    bufferWeights_p = bufferWeights;
+    init (bufferWeights);
   }
   
   // ---------------------------------------------------------- GeometricalWeight
@@ -100,7 +97,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 					bool const &bufferWeights)
     : GeometricalPhase (phase)
   {
-    bufferWeights_p = bufferWeights;
+    init (bufferWeights);
   }
   
   // ---------------------------------------------------------- GeometricalWeight
@@ -108,6 +105,21 @@ namespace CR { // NAMESPACE CR -- BEGIN
   GeometricalWeight::GeometricalWeight (GeometricalWeight const &other)
   {
     copy (other);
+  }
+  
+  // ============================================================================
+  //
+  //  Initialization
+  //
+  // ============================================================================
+  
+  void GeometricalWeight::init (bool const &bufferWeights)
+  {
+    bufferWeights_p = bufferWeights;
+    
+    if (bufferWeights_p == true) {
+      setWeights();
+    }
   }
   
   // ============================================================================
@@ -157,15 +169,19 @@ namespace CR { // NAMESPACE CR -- BEGIN
   //  Parameters
   //
   // ============================================================================
+
+  // -------------------------------------------------------------------- weights
   
   casa::Cube<DComplex> GeometricalWeight::weights ()
   {
-    if (bufferWeights_p) {
+    if (bufferWeights_p == true) {
       return weights_p;
     } else {
       return calcWeights();
     }
   }
+
+  // -------------------------------------------------------------------- summary
   
   void GeometricalWeight::summary (std::ostream &os)
   {
@@ -212,7 +228,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
   void GeometricalWeight::setWeights ()
   {
-    if (bufferWeights_p) {
+    if (bufferWeights_p == true) {
       IPosition shape (3);
 
       // Array axes: [frequency,antenna,skyPosition]
@@ -242,7 +258,11 @@ namespace CR { // NAMESPACE CR -- BEGIN
     // progress bar
     CR::ProgressBar progress (shape(2)-1);
 
-//     weights = casa::Cube<DComplex> (cos(phases),sin(phases));
+#ifdef DEBUGGING_MESSAGES
+    std::cout << "[GeometricalWeight::calcWeights]"        << std::endl;
+    std::cout << "-- shape(phases)  = " << shape           << std::endl;
+    std::cout << "-- shape(weights) = " << weights.shape() << std::endl;
+#endif
 
     for (sky=0; sky<shape(2); sky++) {
       for (ant=0; ant<shape(1); ant++) {

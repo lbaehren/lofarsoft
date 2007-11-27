@@ -96,7 +96,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
     //! Array storing the values of the geometrical weights, [freq,ant,sky]
     casa::Cube<DComplex> weights_p;
-    //! Buffer the values of the geometrical weights?
+    //! Bufferthe values of the geometrical weights?
     bool bufferWeights_p;
     
   public:
@@ -232,10 +232,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \param bufferWeights -- Buffer the values for the geometrical weights?
     */
     inline void bufferWeights (bool const &bufferWeights=false) {
-      bufferWeights_p = bufferWeights;
-      if (bufferWeights) {
-	setWeights();
-      }
+      init (bufferWeights);
     }
 
     /*!
@@ -285,7 +282,14 @@ namespace CR { // NAMESPACE CR -- BEGIN
     // ------------------------------------------------------------------ Methods
     
   private:
-    
+
+    /*!
+      \brief Initialize the internal setting of the object
+
+      \param bufferWeights -- Buffer the values of the geometrical weights?
+     */
+    void init (bool const &bufferWeights=false);
+
     /*!
       \brief Set the values of the geometrical weights
     */

@@ -214,16 +214,21 @@ int test_processing ()
 
   int nofFailedTests (0);
   bool status (true);
-  Matrix<double> beam;
+
+  uint nofAntennas (4);
+
   // Beamformer object for the subsequent testing
-  Beamformer bf (get_antennaPositions(),
+  Beamformer bf (get_antennaPositions(nofAntennas),
 		 CR::Cartesian,
 		 get_skyPositions(),
 		 CR::Cartesian,
 		 get_frequencies());
   bf.summary();
+
   // Some data to test the processing
-  Matrix<DComplex> data (get_data());
+  Matrix<DComplex> data (get_data(nofAntennas));
+  // Array to store the beamformed data
+  Matrix<double> beam;
 
   std::cout << "[1] Power in the frequency domain (FREQ_POWER)" << std::endl;
   try {

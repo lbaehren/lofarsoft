@@ -116,7 +116,6 @@ int test_GeometricalWeight ()
     weight.summary();
     // retrieve geometrical weights
     casa::Cube<casa::DComplex> weights = weight.weights();
-    std::cout << "-- shape (weights)   = " << weights.shape() << std::endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -132,7 +131,6 @@ int test_GeometricalWeight ()
     weight.summary();
     // retrieve geometrical weights
     casa::Cube<casa::DComplex> weights = weight.weights();
-    std::cout << "-- shape (weights)   = " << weights.shape() << std::endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -150,7 +148,6 @@ int test_GeometricalWeight ()
     weight.summary();
     // retrieve geometrical weights
     casa::Cube<casa::DComplex> weights = weight.weights();
-    std::cout << "-- shape (weights)   = " << weights.shape() << std::endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -168,7 +165,6 @@ int test_GeometricalWeight ()
     weight.summary();
     // retrieve geometrical weights
     casa::Cube<casa::DComplex> weights = weight.weights();
-    std::cout << "-- shape (weights)   = " << weights.shape() << std::endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -241,6 +237,15 @@ int test_parameters ()
     nofFailedTests++;
   }
   
+  cout << "[4] Switch on buffering of weights ..." << endl;
+  try {
+    w.bufferWeights(true);
+    w.summary();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
   return nofFailedTests;
 }
 
@@ -271,6 +276,7 @@ int main ()
   
   if (!nofFailedTests) {
     nofFailedTests += test_parameters ();
+//     nofFailedTests += test_processing ();
   } 
 
   return nofFailedTests;
