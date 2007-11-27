@@ -7,19 +7,19 @@ class Op_gausfit(Op):
     def __call__(self, img):
         for idx, isl in enumerate(img.islands):
             print "Fitting isl #", idx
-            t = self.fit_island(isl, img.opts.beam, img.opts.thresh_isl)
+            t = self.fit_island(isl, img.opts.beam, img.opts.thresh_isl, img.opts.rms)
             isl.gaus_fcn = t
             isl.gaul = self._parameters_to_global(isl, t.parameters)
 
         return img
 
-    def fit_island(self, isl, beam, thr):
+    def fit_island(self, isl, beam, thr, norm=1):
         """Fit island"""
         from _cbdsm import MGFunction, Gtype, lmder_fit
 
         beam = list(beam)
         dof = isl.size # number of active pixels
-        fcn = MGFunction(isl.img, isl.noisy_mask, 1)
+        fcn = MGFunction(isl.img, isl.noisy_mask, norm)
         fit = lmder_fit
 
         while True:

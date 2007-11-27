@@ -13,7 +13,7 @@ class Op_islands(Op):
         ### islands detection
         islands = _isl_list()
         for idx in xrange(data.shape[0]):
-            mask = data[idx] > opts.thresh_isl
+            mask = data[idx] - opts.mean > opts.thresh_isl
             if img.img_mask is not img.nomask:
                 mask[img.img_mask[idx]] = False
             runs = _split(mask, idx)
@@ -25,7 +25,7 @@ class Op_islands(Op):
         for i in isl:
             if self.isl_size(i) > opts.isl_min_size:
                 t = Island(img, i)
-                if t.img[N.logical_not(t.isl_mask)].max() > opts.thresh_isl2:
+                if t.img[N.logical_not(t.isl_mask)].max() - opts.mean> opts.thresh_isl2:
                     res.append(t)
 
         img.islands = res
@@ -65,7 +65,7 @@ class Island:
         data = img.img[slices]
 
         ### create masks
-        noise_mask = data > img.opts.thresh_isl
+        noise_mask = data - img.opts.mean > img.opts.thresh_isl
         if img.img_mask is not img.nomask:
             noise_mask[img.img_mask[slices]] = True
         isl_mask = N.ones(data.shape, dtype=bool)

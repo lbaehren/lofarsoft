@@ -43,7 +43,7 @@ bool lmder_fit(MGFunction &fcn, bool final, int verbose)
   int npar = fcn.parameters_size();
 
   // working variables
-  int m = dsize, n = npar, ldfjac = m, maxfev = 1000, 
+  int m = dsize, n = npar, ldfjac = m, maxfev = 200,
     mode = 1, nprint = 0, info, nfev, njev;
   double ftol, xtol, gtol, factor = 10;
   vector<double> x(n), F(m), J(ldfjac * n), diag(n),
@@ -51,11 +51,11 @@ bool lmder_fit(MGFunction &fcn, bool final, int verbose)
   vector<int> ipvt(n);
 
   // set run-time parameters
-  ftol = gtol = 0;
+  gtol = 0;
   if (final)
-    xtol = 1e-8;
+    ftol = xtol = 1e-8;
   else
-    xtol = 1e-4;
+    ftol = xtol = 1e-4;
 
   fcn.get_parameters(&x[0]);
 
