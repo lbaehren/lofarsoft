@@ -41,7 +41,7 @@ void dn2g_df(int &n, int &p, double *x, int &nf, double *J,
 	     void *uiparm, void *urparm, void *ufparm);
 
 
-// lmder driver
+// dn2g driver
 bool dn2g_fit(MGFunction &fcn, bool final, int verbose)
 {
   int dsize = fcn.data_size();
