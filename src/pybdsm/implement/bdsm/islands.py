@@ -241,21 +241,18 @@ def _split(arr, idx):
         return [(idx, 0, len(arr))]
 
     ### now start splitting
-    res = []; i = 0
+    res = []; i = 0; st = 200
     while i < len(arr):
-        if not arr[i:i+10].any():
-            i += 10; continue
-        for j in xrange(i, i+10):	# find first active pixel
+        if not arr[i:i+st].any():
+            i += st; continue
+        for j in xrange(i, i+st):	# find first active pixel
             if arr[j]:
                 i = j; break
         j = i + 1			# now look for the end of run
-        while j <= len(arr):
-            if arr[i:j+5].all():
-                j += 5; continue
-            for j in xrange(j, j+5):
-                if j == len(arr) or not arr[j]:
-                    break
-            break
+        for j in xrange(j, j+len(arr)):
+            if j == len(arr) or not arr[j]:
+                break
         res.append((idx, i, min(j, len(arr))))
         i = j
+
     return res
