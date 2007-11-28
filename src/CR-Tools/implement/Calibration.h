@@ -41,7 +41,6 @@
   in the <i>Calibration</i> module.
 */
 
-#include <Calibration/AntennaGain.h>
 #include <Calibration/AverageGain.h>
 #include <Calibration/BaselineGain.h>
 #include <Calibration/CalTableCreator.h>

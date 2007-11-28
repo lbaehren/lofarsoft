@@ -101,6 +101,7 @@
 */
 
 #include <Imaging/Antenna.h>
+#include <Imaging/AntennaGain.h>
 #include <Imaging/Beam.h>
 #include <Imaging/Beamformer.h>
 #include <Imaging/Beamshape.h>

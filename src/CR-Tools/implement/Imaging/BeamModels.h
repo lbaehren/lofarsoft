@@ -21,8 +21,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef BEAMSHAPES_H
-#define BEAMSHAPES_H
+#ifndef BEAMMODELS_H
+#define BEAMMODELS_H
 
 // Standard library header files
 #include <iostream>
@@ -35,17 +35,17 @@ using std::complex;
 namespace CR { // Namespace CR -- begin
   
   /*!
-    \class Beamshapes
+    \class BeamModels
 
     \ingroup Imaging
     
-    \brief Analystic expressions for LOFAR-CS1 beamshapes
+    \brief Analytic expressions for beam-shape models
     
     \author Lars B&auml;hren
 
     \date 2007/08/02
 
-    \test tBeamshapes.cc
+    \test tBeamModels.cc
     
     <h3>Prerequisite</h3>
     
@@ -55,7 +55,7 @@ namespace CR { // Namespace CR -- begin
     the beamshape of individual LOFAR dipoles and therewith later on the proper
     synthesized beam of a station.
   */  
-  class Beamshapes {
+  class BeamModels {
 
   public:
 

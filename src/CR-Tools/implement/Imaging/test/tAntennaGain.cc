@@ -1,4 +1,7 @@
-/***************************************************************************
+/*-------------------------------------------------------------------------*
+ | $Id                                                                     |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
  *   Copyright (C) 2007                                                  *
  *   Lars Baehren (<mail>)                                                     *
  *                                                                         *
@@ -18,38 +21,40 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
+#include <Imaging/AntennaGain.h>
 
-#include <Imaging/Beamshape.h>
+using CR::AntennaGain;  // Namespace usage
 
 /*!
-  \file tBeamshape.cc
+  \file tAntennaGain.cc
 
   \ingroup Imaging
 
-  \brief A collection of test routines for Beamshape
+  \brief A collection of test routines for the AntennaGain class
  
   \author Lars Baehren
  
-  \date 2007/04/04
+  \date 2007/11/27
 */
 
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test constructors for a new Beamshape object
+  \brief Test constructors for a new AntennaGain object
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_Beamshape ()
+int test_AntennaGain ()
 {
   int nofFailedTests (0);
   
-  std::cout << "\n[test_Beamshape]\n" << std::endl;
+  std::cout << "\n[test_AntennaGain]\n" << std::endl;
 
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
-    Beamshape newObject;
+    AntennaGain newAntennaGain;
+    //
+    newAntennaGain.summary(); 
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -66,7 +71,7 @@ int main ()
 
   // Test for the constructor(s)
   {
-    nofFailedTests += test_Beamshape ();
+    nofFailedTests += test_AntennaGain ();
   }
 
   return nofFailedTests;

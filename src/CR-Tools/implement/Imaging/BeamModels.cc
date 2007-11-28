@@ -21,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Imaging/Beamshapes.h>
+#include <Imaging/BeamModels.h>
 
 namespace CR { // Namespace CR -- begin
 
@@ -29,7 +29,7 @@ namespace CR { // Namespace CR -- begin
 
   // ---------------------------------------------------------------- test_double
   
-  double Beamshapes::test_double (const double *par,
+  double BeamModels::test_double (const double *par,
 				  const double *x)
   {
     // check if we try to point below the horizon
@@ -49,7 +49,7 @@ namespace CR { // Namespace CR -- begin
 
   // --------------------------------------------------------------------- Gamma1
 
-  complex<double> Beamshapes::Gamma1 (double tan_al,
+  complex<double> BeamModels::Gamma1 (double tan_al,
 				      double sin_al,
 				      double sin_th,
 				      double cos_th,
@@ -77,7 +77,7 @@ namespace CR { // Namespace CR -- begin
 
   // --------------------------------------------------------------------- Gamma2
 
-  complex<double> Beamshapes::Gamma2 (double tan_al,
+  complex<double> BeamModels::Gamma2 (double tan_al,
 				      double sin_al,
 				      double sin_th,
 				      double cos_th,
@@ -106,7 +106,7 @@ namespace CR { // Namespace CR -- begin
 
   // --------------------------------------------------------------------- Gamma3
 
-  complex<double> Beamshapes::Gamma3 (double tan_al,
+  complex<double> BeamModels::Gamma3 (double tan_al,
 				      double sin_al,
 				      double sin_th,
 				      double cos_th,
@@ -135,7 +135,7 @@ namespace CR { // Namespace CR -- begin
   
   // --------------------------------------------------------------------- Gamma4
 
-  complex<double> Beamshapes::Gamma4 (double tan_al,
+  complex<double> BeamModels::Gamma4 (double tan_al,
 				      double sin_al,
 				      double sin_th,
 				      double cos_th,
@@ -164,7 +164,7 @@ namespace CR { // Namespace CR -- begin
 
   // -------------------------------------------------------------- droopy_dipole
 
-  double Beamshapes::droopy_dipole (const double *par,
+  double BeamModels::droopy_dipole (const double *par,
 				    const double *x)
   {
     // Check if we are below the horizon
