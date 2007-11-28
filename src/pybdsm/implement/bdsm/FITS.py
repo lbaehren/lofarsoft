@@ -94,4 +94,4 @@ class Op_loadFITS(Op):
         opts.beam = beam2pix(opts.beam)
         ### force asymmetric beam shape
         if abs(opts.beam[0]/opts.beam[1]) < 1.1:
-            opts.beam = (opts.beam[0], 1.1*opts.beam[0], opts.beam[2])
+            opts.beam = (1.1*opts.beam[0], opts.beam[0], opts.beam[2])
