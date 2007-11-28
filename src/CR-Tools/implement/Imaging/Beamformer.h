@@ -65,7 +65,7 @@ namespace CR { // Namespace CR -- begin
       \sum_{j=1}^{N} \sum_{k>j}^{N} \overline{w_{j}(\vec\rho,\nu)
       \widetilde s_{j}(\nu)} w_{k}(\vec\rho,\nu) \widetilde s_{k}(\nu) \f]
 
-      Instead of computing the beam from the spectra \f$ \widetile s_j (\nu) \f$
+      Instead of computing the beam from the spectra \f$ \widetilde s_j (\nu) \f$
       of the individual antennas, the directed power also can be computed from
       the array correlation matrix (ACM), \f$ C_{jk}(\nu) =
       \overline{\widetilde s_j(\nu)} \widetilde s_k(\nu) \f$.
@@ -100,7 +100,7 @@ namespace CR { // Namespace CR -- begin
       \f[
       s_j(\vec\rho)[t]
       = \mathcal{F}^{-1} \left\{ \tilde s_j(\vec\rho)[k] \right\}
-      = \mathcal{F}^{-1} \left\{ w_j(\vec\rho)[k] \cdot \tilde s_j[k]\right\}
+      = \mathcal{F}^{-1} \Bigl\{ w_j(\vec\rho)[k] \cdot \tilde s_j[k] \Bigr\}
       \f]
       is the time shifted field strength of the single antennas for a direction
       \f$\vec \rho \f$. \f$ N \f$ is the number of antennas, \f$t\f$ the time or
@@ -118,9 +118,26 @@ namespace CR { // Namespace CR -- begin
       some.
       </ol>       */
     TIME_CC,
-    //! Power-beam (p-beam)
+    /*!
+      <b>Power-beam</b> (p-beam)
+      \f[
+      P (\vec\rho,\nu)
+      \ = \ \sqrt{\frac{1}{N} \sum_{j=1}^{N} \left( s_{j}(\vec\rho,\nu) \right)^2}
+      \ = \ \sqrt{\frac{1}{N} \sum_{j=1}^{N} \left( \mathcal{F}^{-1} \Bigl\{
+      \widetilde s_{j}(\vec\rho,\nu) \Bigr\} \right)^{2}} 
+      \ = \ \sqrt{\frac{1}{N} \sum_{j=1}^{N} \left( \mathcal{F}^{-1} \Bigl\{
+      w_{j}(\vec\rho,\nu) \widetilde s_{j}(\nu) \Bigr\} \right)^{2}} 
+      \f]
+    */
     TIME_P,
-    //! Excess-beam (x-beam)
+    /*!
+      <b>Excess-beam</b> (x-beam)
+      
+      \f[
+      P_{x}(\vec\rho,t) = P_{cc}(\vec\rho,t) \cdot \left| \frac{\langle
+      P_{cc}(\vec\rho,t) \rangle}{\langle P(\vec\rho,t) \rangle} \right|
+      \f]
+    */
     TIME_X
   } BeamType;
   
@@ -617,6 +634,53 @@ namespace CR { // Namespace CR -- begin
     */
     bool checkData (casa::Matrix<double> &beam,
 		    const casa::Array<DComplex> &data);
+
+    /*!
+      \brief Compute single beam in frequency space
+
+      \f[
+      \widetilde S (\vec\rho,\nu)
+      = \frac{1}{N} \sum_{j=1}^{N} \widetilde s_{j}(\vec\rho,\nu)
+      = \frac{1}{N} \sum_{j=1}^{N} w_{j}(\vec\rho,\nu) \widetilde s_{j}(\nu)
+      \f]
+
+      \retval beamFreq -- [freq] Vector with the frequency channels for a single
+              beam towards the sky position \f$ \vec\rho \f$.
+      \param data      -- 
+      \param weights   -- 
+      \param direction -- 
+      \param normalize -- Normalize the values by the number of combined data
+             channels? If set to <tt>true</tt> an additional factor of \f$1/N\f$
+	     will be applied to the beamformed data.
+    */
+    void beam_freq (casa::Vector<DComplex> &beamFreq,
+		    casa::Array<DComplex> const &data,
+		    casa::Cube<DComplex> const &weights,
+		    uint const &direction,
+		    bool const &normalize=true);
+    
+    /*!
+      \brief Compute single beam in the time domain
+
+      \f[
+      S (\vec\rho,t)
+      = \mathcal{F}^{-1} \Bigl\{ \widetilde S (\vec\rho,\nu) \Bigr\}
+      \f]
+      
+      \retval beamTime -- [sample] Vector with the time-series samples for a
+              single beam towards the sky position \f$ \vec\rho \f$.
+      \param data      -- 
+      \param weights   -- 
+      \param direction -- 
+      \param normalize -- Normalize the values by the number of combined data
+             channels? If set to <tt>true</tt> an additional factor of \f$1/N\f$
+	     will be applied to the beamformed data.
+    */
+    void beam_time (casa::Vector<double> &beamTime,
+		    casa::Array<DComplex> const &data,
+		    casa::Cube<DComplex> const &weights,
+		    uint const &direction,
+		    bool const &normalize=true);
     
     /*!
       \brief Directed spectral power, \f$ \widetilde P (\vec\rho,\nu) \f$

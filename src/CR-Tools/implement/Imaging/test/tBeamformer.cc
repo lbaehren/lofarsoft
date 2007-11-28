@@ -248,6 +248,15 @@ int test_processing ()
     nofFailedTests++;
   }
   
+  std::cout << "[3] powerbeam in the time domain (TIME_P)" << std::endl;
+  try {
+    bf.setBeamType(CR::TIME_P);
+    status = bf.processData (beam,data);
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
   return nofFailedTests;
 }
 

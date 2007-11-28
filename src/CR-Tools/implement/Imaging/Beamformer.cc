@@ -337,6 +337,58 @@ namespace CR { // Namespace CR -- begin
       return false;
     }
   }
+
+  // ------------------------------------------------------------------ beam_freq
+  
+  void Beamformer::beam_freq (casa::Vector<DComplex> &beamFreq,
+			      casa::Array<DComplex> const &data,
+			      casa::Cube<DComplex> const &weights,
+			      uint const &direction,
+			      bool const &normalize)
+  {
+    IPosition shape = data.shape();    // [freq,antenna,(antenna)]
+    IPosition pos (shape.nelements()); // [freq,antenna,(antenna)]
+
+    // loop over antennas
+    for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
+      // loop over frequency channels
+      for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
+	beamFreq(pos(0)) = data(pos)*weights(pos(1),direction,pos(0));
+      }
+    }
+
+    /*
+      (Optional) normalization step
+    */
+    if (normalize) {
+      beamFreq /= DComplex(pos(1));
+    }
+  }
+  
+  // ------------------------------------------------------------------ beam_time
+  
+  void Beamformer::beam_time (casa::Vector<double> &beamTime,
+			      casa::Array<DComplex> const &data,
+			      casa::Cube<DComplex> const &weights,
+			      uint const &direction,
+			      bool const &normalize)
+  {
+    IPosition shape = data.shape();    // [freq,antenna,(antenna)]
+    int blocksize   = 2*(shape(0)-1);
+    casa::Vector<DComplex> beamFreq (shape(0));
+    
+    /* get the beam in the frequency domain */
+    beam_freq (beamFreq,
+	       data,
+	       weights,
+	       direction,
+	       normalize);
+    
+    /* inverse Fourier transform to obtain the beam in the time domain */
+    FFTServer<double,std::complex<double> > server(IPosition(1,blocksize),
+						   casa::FFTEnums::REALTOCOMPLEX);
+    server.fft (beamTime,beamFreq);
+  }
   
   // ----------------------------------------------------------------- freq_field
   
@@ -344,8 +396,8 @@ namespace CR { // Namespace CR -- begin
 			       const casa::Array<DComplex> &data)
   {
     bool status (true);
-    int nofSkyPositions (skyPositions_p.nrow());
-    int nofFrequencies (frequencies_p.nelements());
+    uint nofSkyPositions (skyPositions_p.nrow());
+    uint nofFrequencies (frequencies_p.nelements());
     IPosition shapeData (data.shape());
 
     /*
@@ -356,9 +408,8 @@ namespace CR { // Namespace CR -- begin
 	shapeData(1) == nofFrequencies) {
       // additional local variables
       IPosition pos (2);
-      int direction (0);
-      uint antenna (0);
-      int freq (0);
+      uint direction (0);
+      bool normalize (true);
       // resize array returning the beamformed data
       beam.resize (nofSkyPositions,nofFrequencies,0.0);
       /*
@@ -370,7 +421,7 @@ namespace CR { // Namespace CR -- begin
       for (direction=0; direction<nofSkyPositions; direction++) {
 	for (pos(1)=0; pos(1)<nofAntennas_p; pos(1)++) {
 	  for (pos(0)=0; pos(0)<nofFrequencies; pos(0)++) {
-	    beam(direction,pos(0)) = data(pos)*weights_p(antenna,direction,freq);
+	    beam(direction,pos(0)) = data(pos)*weights_p(pos(1),direction,pos(0));
 	  }
 	}
       }
@@ -460,14 +511,12 @@ namespace CR { // Namespace CR -- begin
 	
 	casa::Cube<DComplex> weights;
 	if (bufferWeights_p) {
-	  std::cout << "-- referencing buffered beamformer weights." << std::endl;
 	  weights.reference(weights_p);
 	} else {
-	  std::cout << "-- retrieving beamformer weights ..." << std::endl;
 	  weights = GeometricalWeight::weights();
 	}
 	
-	casa::IPosition shape = weights.shape();
+	casa::IPosition shape = weights.shape();  //  [freq,antenna,direction]
 	int blocksize         = 2*(shape(0)-1);
 	double nofBaselines   = GeometricalDelay::nofBaselines();
 	int direction (0);
@@ -477,13 +526,15 @@ namespace CR { // Namespace CR -- begin
 	casa::Vector<double>   tmpTime (blocksize,0.0);
 	casa::Matrix<double>   tmpData (shape(1),blocksize);
 
+#ifdef DEBUGGING_MESSAGES
 	std::cout << "-- shape(weights) = " << shape << std::endl;
 	std::cout << "-- shape(tmpFreq) = " << tmpFreq.shape() << std::endl;
 	std::cout << "-- shape(tmpTime) = " << tmpTime.shape() << std::endl;	
-	std::cout << "-- shape(tmpData) = " << tmpData.shape() << std::endl;	
+	std::cout << "-- shape(tmpData) = " << tmpData.shape() << std::endl;
+#endif
 	
 	/*
-	  Set up the casa::FFTServer which is t handle the inverse Fourier
+	  Set up the casa::FFTServer which is to handle the inverse Fourier
 	  transform taking place before the summation step.
 	*/
 	FFTServer<double,std::complex<double> > server(IPosition(1,blocksize),
@@ -496,7 +547,7 @@ namespace CR { // Namespace CR -- begin
 	  for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
 	    // --- Apply the beamformer weights to the Fourier-transformed data
 	    for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
-	      tmpFreq(pos(0)) = data(pos)*weights_p(pos(0),pos(1),direction);
+	      tmpFreq(pos(0)) = data(pos)*weights(pos(0),pos(1),direction);
 	    }
 	    // --- Inverse Fourier transform back to time domain
 	    server.fft (tmpTime,tmpFreq);
@@ -506,6 +557,7 @@ namespace CR { // Namespace CR -- begin
 	    Once we have precomputed all the shifted time-series, we go through
 	    all baselines and add up antenna combinations.
 	  */
+	  tmpTime = 0.0;
 	  for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
 	    for (ant2=pos(1)+1; ant2<shape(1); ant2++) {
 	      tmpTime += tmpData.row(pos(1))*tmpData.row(ant2);
@@ -516,16 +568,14 @@ namespace CR { // Namespace CR -- begin
 	  //
 	  beam.row(direction) = CR::sign(tmpTime)*sqrt(abs(tmpTime));
 	}
-	} catch (std::string message) {
-	  std::cerr << "[Beamformer::time_cc] " << message << std::endl;
-	  status = false;
-	} 
-	
-      
+      } catch (std::string message) {
+	std::cerr << "[Beamformer::time_cc] " << message << std::endl;
+	status = false;
+      } 
     }
-  
-  return status;
-}
+    
+    return status;
+  }
   
   // --------------------------------------------------------------------- time_p
   
@@ -533,7 +583,48 @@ namespace CR { // Namespace CR -- begin
 			   const casa::Array<DComplex> &data)
   {
     bool status (true);
-    
+
+    if (checkData (beam,data)) {
+      
+      casa::Cube<DComplex> weights;
+      
+      if (bufferWeights_p) {
+	weights.reference(weights_p);
+      } else {
+	weights = GeometricalWeight::weights();
+      }
+
+      uint direction(0);
+      casa::IPosition pos(2);                   // [freq,antenna]
+      casa::IPosition shape = weights.shape();  // [freq,antenna,direction]
+      int blocksize         = 2*(shape(0)-1);
+      casa::Vector<DComplex> tmpFreq (shape(0));
+      casa::Vector<double> tmpTime (blocksize);
+      casa::Vector<double> sum (blocksize);
+      FFTServer<double,DComplex> server(casa::IPosition(1,blocksize),
+					casa::FFTEnums::REALTOCOMPLEX);
+
+      /* loop over sky positions */
+      for (direction=0; direction<shape(2); direction++) {
+	sum = 0.0;
+	/* loop over antennas */
+	for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
+	  /* loop over frequency channels */
+	  for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
+	    tmpFreq = data(pos)*weights(pos(0),pos(1),direction);
+	  }
+	  /* perform inverse Fourier transform on the beam to get back to time
+	     domain */
+	  server.fft (tmpTime,tmpFreq);
+	  sum += tmpTime*tmpTime;
+	} // end loop: antenna
+	/* normalize with the number of antennas */
+	beam.row(direction) = sqrt(sum/double(shape(1)));
+      } // end loop: direction
+    } else {
+      status = false;
+    }
+        
     return status;
   }
   
