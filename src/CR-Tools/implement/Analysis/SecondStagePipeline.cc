@@ -22,10 +22,6 @@
 
 #include <Analysis/SecondStagePipeline.h>
 
-/*!
-  \class SecondStagePipeline
-*/
-
 namespace CR { // Namespace CR -- begin
   
   // ============================================================================

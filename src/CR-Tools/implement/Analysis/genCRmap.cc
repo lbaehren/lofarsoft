@@ -1,6 +1,9 @@
-/***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+/*-------------------------------------------------------------------------*
+ | $Id:: Imaging.h 1097 2007-11-28 10:51:59Z baehren                     $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2007                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,8 +20,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-/* $Id: genCRmap.cc,v 1.1 2007/04/19 14:23:30 horneff Exp $*/
 
 #include <Analysis/genCRmap.h>
 

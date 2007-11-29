@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------*
- | $Id                                                                   $ |
+ | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Lars Baehren (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -84,6 +84,18 @@ namespace CR { // Namespace CR -- begin
     }
     
     return obsPosition;
+  }
+
+  // --------------------------------------------------------------- LOPES2MEpoch
+
+  MEpoch LOPES2MEpoch(casa::uInt JDR,
+		      int TL)
+  {
+    double offset (3506716800.);
+
+    return MEpoch(casa::MVEpoch(Quantity(((double)JDR+((double)TL/5e6)+offset),
+					 "s")),
+		  casa::MEpoch::Ref(casa::MEpoch::UTC));
   }
   
 } // Namespace CR -- end

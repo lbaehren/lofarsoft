@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id                                                                   $ |
+ | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -39,7 +39,9 @@
 #include <measures/Measures/MeasRef.h>
 #include <measures/Measures/MeasTable.h>
 
+using casa::MEpoch;
 using casa::String;
+using casa::Quantity;
 
 namespace CR { // Namespace CR -- begin
   
@@ -103,8 +105,19 @@ namespace CR { // Namespace CR -- begin
     \return obsPosition -- The position of the observatory/telescope, 
             encapsulated in a casa::MPosition object, as e.g. used to create
 	    a reference frame or a conversion engine.
-   */
+  */
   casa::MPosition ObservatoryPosition (String const &observatory);
+
+  /*!
+    \brief Convert LOPES-type timestamp for observation epoch to measure
+
+    \param JDR -- KASCADE-style timestamp (JDR)
+    \param TL  -- KASCADE-style timestamp (TL)
+
+    \return epoch -- Observation epoch as casa::MEpoch measures object
+  */
+  MEpoch LOPES2MEpoch(casa::uInt JDR,
+		      int TL=0);
   
 } // Namespace CR -- end
 
