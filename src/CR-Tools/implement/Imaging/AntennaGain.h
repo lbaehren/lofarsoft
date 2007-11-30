@@ -70,7 +70,7 @@ namespace CR { // Namespace CR -- begin
 
   protected:
 
-    casa::Cube<casa::DComplex> gains_p;
+    casa::Array<casa::DComplex> gains_p;
     
   public:
     
