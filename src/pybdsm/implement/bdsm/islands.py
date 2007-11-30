@@ -1,46 +1,87 @@
 import numpy as N
 from image import Op
 
+try:
+    import scipy.ndimage as nd
+    _use_ndimage = False
+except ImportError:
+    _use_ndimage = False
+
 class Op_islands(Op):
     """Detect islands of emission in the image
 
     Adds to the image attribute 'islands' with the list of detected islands
     """
     def __call__(self, img):
+        data_mask = (None if img.img_mask is img.nomask else img.img_mask)
+        parameters = (img.opts.mean, img.opts.thresh_isl, img.opts.thresh_isl2,
+                      img.opts.isl_min_size)
+
+        if _use_ndimage:
+            islands = self.ndimage_alg(img, data_mask, *parameters)
+        else:
+            islands = self.pixel_runs_alg(img, data_mask, *parameters)
+
+        img.islands = islands
+        print "Islands found: " + str(len(islands))
+        return img
+
+    def ndimage_alg(self, img,  data_mask, mean, thresh1, thresh2, minsize):
+        """Island detection algorithm using image manipulation routines 
+        from scipy.ndimage.measurements package.
+        """
         data = img.img
-        opts = img.opts
+
+        ### islands detection
+        mask = data - mean > thresh1
+        if data_mask is not None:
+            mask[data_mask] = False
+        labels, count = nd.label(mask, nd.generate_binary_structure(2,2))
+        slices = nd.find_objects(labels)
+
+        ### filter out noise and convert to 'real' islands
+        res = []
+        for idx, s in enumerate(slices):
+            idx += 1            # indices are counted from 1
+            if (labels[s] == idx).sum() >= minsize and \
+                    nd.maximum(data[s], labels[s], idx) - mean > thresh2:
+                res.append(Island(img, labels=(labels, s, idx)))
+
+        return res
+
+    def pixel_runs_alg(self, img, data_mask, mean, thresh1, thresh2, minsize):
+        """Island detection algorithm using pixel runs. It's somewhat slower
+        that ndimage_alg, but is more memory efficient.
+        """
+        data = img.img
 
         ### islands detection
         islands = _isl_list()
         for idx in xrange(data.shape[0]):
-            mask = data[idx] - opts.mean > opts.thresh_isl
-            if img.img_mask is not img.nomask:
-                mask[img.img_mask[idx]] = False
+            mask = data[idx] - mean > thresh1
+            if data_mask is not None:
+                mask[data_mask[idx]] = False
             runs = _split(mask, idx)
             islands.add_line(runs)
 
-        ### convert to 'real' islands and store
+        ### filter out noise and convert to 'real' islands
         isl = islands.flatten()
         res = []
         for i in isl:
-            if self.isl_size(i) > opts.isl_min_size:
-                t = Island(img, i)
-                if t.img[N.logical_not(t.isl_mask)].max() - opts.mean> opts.thresh_isl2:
+            if self._runs_size(i) >= minsize:
+                t = Island(img, runs=i)
+                if t.img[N.logical_not(t.isl_mask)].max() - mean > thresh2:
                     res.append(t)
 
-        img.islands = res
+        return res
 
-        print "Total islands found: " + str(len(isl))
-        print "Large islands found: " + str(len(res))
-
-        return img
-
-    def isl_size(self, isl):
-        """Calculate number of pixels covered by runs in isl"""
+    def _runs_size(self, runs):
+        """Calculate number of pixels covered by runs"""
         size = 0
-        for run in isl:
+        for run in runs:
             size += run[2] - run[1]
         return size
+
 
 
 class Island:
@@ -48,45 +89,83 @@ class Island:
 
     Most usefull attributes:
       bbox      : bounding box of the island (in the image coordinates)
-                  (x0min, x0max, x1min, x1max)
+                  (slice(x0min, x0max), slice(x1min, x1max))
+      origin    : coordinates of the lower-left corner of the island
       img       : image of the islands
       isl_mask  : mask, where all but 'active' pixels are flagged
       noisy_mask: mask including active pixels and surrounding noise.
                   i.e. accidental active pixel or neighbour islands are masked out
       shape     : shape of the island
       size      : number of active pixels in the island
-      runs      : runs corresponding to the island
       opts      : reference to image's options
-
+      runs      : pixel runs comprising the island (present only when pixel-runs
+                  algorithm is used for island detection)
     """
-    def __init__(self, img, runs):
-        bb = self._bbox(runs, img.img.shape)
-        slices = (slice(bb[0], bb[1]), slice(bb[2], bb[3]))
-        data = img.img[slices]
+    def __init__(self, img, **args):
+        if 'runs' in args:
+            self._init_from_runs(img, args['runs'])
+        elif 'labels' in args:
+            self._init_from_labels(img, args['labels'])
+        else:
+            raise ValueError('Not enough data to initialize Island')
+    
+    def _init_from_labels(self, img, args):
+        labels, bbox, idx = args
+
+        bbox = self._expand_bbox(bbox, img.img.shape)
+        origin = (bbox[0].start, bbox[1].start)
+        data = img.img[bbox]
+
+        ### create (inverted) masks
+        isl_mask = (labels[bbox] == idx)
+        noise_mask = (labels[bbox] == 0)
+        N.logical_or(noise_mask, isl_mask, noise_mask)
+
+        isl_size = isl_mask.sum()
+
+        ### invert masks
+        N.logical_not(isl_mask, isl_mask)
+        N.logical_not(noise_mask, noise_mask)
+        if img.img_mask is not img.nomask:
+            noise_mask[img.img_mask[bbox]] = True
+
+        self.bbox = bbox
+        self.origin = origin
+        self.img  = data
+        self.isl_mask = isl_mask
+        self.noisy_mask = noise_mask
+        self.shape = data.shape
+        self.size = isl_size
+        self.opts = img.opts
+
+    def _init_from_runs(self, img, runs):
+        bbox = self._bbox_from_runs(runs, img.img.shape)
+        origin = (bbox[0].start, bbox[1].start)
+        data = img.img[bbox]
 
         ### create masks
         noise_mask = data - img.opts.mean > img.opts.thresh_isl
-        if img.img_mask is not img.nomask:
-            noise_mask[img.img_mask[slices]] = True
         isl_mask = N.ones(data.shape, dtype=bool)
         size = 0
-        x1o = bb[0]; x2o = bb[2]
+        x1o, x2o = origin
         for r in runs:
             size += r[2]-r[1]
             noise_mask[r[0]-x1o, (r[1]-x2o):(r[2]-x2o)] = False
             isl_mask  [r[0]-x1o, (r[1]-x2o):(r[2]-x2o)] = False
+        if img.img_mask is not img.nomask:
+            noise_mask[img.img_mask[bbox]] = True
 
-
-        self.bbox = bb
+        self.bbox = bbox
+        self.origin = origin
         self.img  = data
         self.isl_mask = isl_mask
         self.noisy_mask = noise_mask
         self.shape = data.shape
         self.size = size
-        self.runs = runs
         self.opts = img.opts
+        self.runs = runs
 
-    def _bbox(self, runs, shape):
+    def _bbox_from_runs(self, runs, shape):
         x1min = x1max = runs[0][0]
         x2min = x2max = runs[0][1]
         for r in runs:
@@ -95,12 +174,12 @@ class Island:
             x2min = min(x2min, r[1])
             x2max = max(x2max, r[2])
           ## add one extra pixel on each side of the island
-        return (max(0, x1min-1), min(shape[0], x1max+2),
-                max(0, x2min-1), min(shape[1], x2max+1))
+        return (slice(max(0, x1min-1), min(shape[0], x1max+2)),
+                slice(max(0, x2min-1), min(shape[1], x2max+1)))
 
-
-
-
+    def _expand_bbox(self, bbox, shape):
+        return (slice(max(0, bbox[0].start - 1), min(shape[0], bbox[0].stop + 1)),
+                slice(max(0, bbox[1].start - 1), min(shape[1], bbox[1].stop + 1)))
 
 class _isl:
     """Island class used by the island-detection algorithm.

@@ -47,6 +47,7 @@ class Op_gausfit(Op):
         res = []
         for p in par:
             npar = list(p)
-            npar[1] += isl.bbox[0]
-            npar[2] += isl.bbox[2]
+            npar[1] += isl.origin[0]
+            npar[2] += isl.origin[1]
             res.append(npar)
+        return res
