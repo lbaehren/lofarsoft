@@ -28,6 +28,8 @@
 #include <iostream>
 #include <string>
 
+#include <Imaging/GeometricalDelay.h>
+#include <Imaging/GeometricalPhase.h>
 #include <Imaging/GeometricalWeight.h>
 
 namespace CR { // Namespace CR -- begin
@@ -79,8 +81,8 @@ namespace CR { // Namespace CR -- begin
   */  
   class BeamformerWeights : public GeometricalWeight {
 
-    //! Buffer the beamformer weights?
-    bool bufferWeights_p;
+    //! Do we have antenna gains?
+    bool haveAntennaGains_p;
 
   protected:
 
@@ -112,22 +114,34 @@ namespace CR { // Namespace CR -- begin
 	     components, the values must be provided in radians.
       \param frequencies  -- Frequencies for which the geometrical delays are
              converted into phases
-      \param bufferDelays -- Buffer the values for the geometrical delay? If set
-             <i>yes</i> the delays will be computed from the provided antenna and
-	     sky positions and afterwards kept in memory; if set <i>no</i> only
-	     the input parameters are stored an no further action is taken.
-      \param bufferPhases -- Buffer the values of the phases?
-      \param bufferWeights -- Buffer the values of the geometrical weights?
-    */
-    BeamformerWeights(casa::Matrix<double> const &antPositions,
-		      CR::CoordinateType const &antCoordType,
-		      casa::Matrix<double> const &skyPositions,
-		      CR::CoordinateType const &skyCoordType,
-		      casa::Vector<double> const &frequencies,
-		      bool const &bufferDelays=false,
-		      bool const &bufferPhases=false,
-		      bool const &bufferWeights=false);
 
+      Internally assigned parameters:
+      - bufferDelays  = false
+      - bufferPhases  = false
+      - bufferWeights = false
+    */
+    BeamformerWeights (casa::Matrix<double> const &antPositions,
+		       CR::CoordinateType const &antCoordType,
+		       casa::Matrix<double> const &skyPositions,
+		       CR::CoordinateType const &skyCoordType,
+		       casa::Vector<double> const &frequencies);
+    
+    /*!
+      \brief Argumented constructor
+
+      \param weights -- Object storing the geometrical weights which are required
+             for the Beamformer
+    */
+    BeamformerWeights (GeometricalWeight const &weights);
+    
+    /*!
+      \brief Argumented constructor using existing GeometricalPhase object
+      
+      \param phase -- GeometricalPhase object encapsulating the functionality
+             on top of which this class builds.
+    */
+    BeamformerWeights (GeometricalPhase const &phase);
+    
     /*!
       \brief Copy constructor
       
@@ -153,7 +167,17 @@ namespace CR { // Namespace CR -- begin
     BeamformerWeights& operator= (BeamformerWeights const &other); 
     
     // --------------------------------------------------------------- Parameters
-    
+
+    /*!
+      \brief Do we have values to describe the antenna gain patterns?
+
+      \return haveAntennaGains -- Returns <tt>true</tt> if the we have a valid
+              set of antenna gain values, describing the 
+    */
+    inline bool haveAntennaGains () {
+      return haveAntennaGains_p;
+  }
+
     /*!
       \brief Get the name of the class
       
@@ -177,10 +201,39 @@ namespace CR { // Namespace CR -- begin
 
     // ------------------------------------------------------------------ Methods
     
+    /*!
+      \brief Set values for the antenna gains, \f$ w_{j,\rm gain} (\vec\rho,\nu) \f$
+
+      \param gains -- [freq,antenna,direction] Array with the complex antenna
+             gains, \f$ w_{j,\rm gain} (\vec\rho,\nu) \f$, describing the beam
+	     pattern of the antennas as fucntions of direction and frequency
+    */
+    bool setAntennaGains (casa::Cube<DComplex> const &gains);
     
+    /*!
+      \brief Unset the values for the antenna gains
+      
+      Calling this function will remove the effect of the antenna gain calibration,
+      i.e. restricting the beamformer weights to the geometrical weights only.
+    */
+    bool unsetAntennaGains ();    
     
   private:
+
+    /*
+      \brief Set the values of the Beamformer weights
+    */
+    bool setBeamformerWeights ();
     
+    /*
+      \brief Set the values of the Beamformer weights
+
+      \param gains -- [freq,antenna,direction] Array with the complex antenna
+             gains, \f$ w_{j,\rm gain} (\vec\rho,\nu) \f$, describing the beam
+	     pattern of the antennas as fucntions of direction and frequency
+    */
+    bool setBeamformerWeights (casa::Cube<DComplex> const &gains);
+
     /*!
       \brief Unconditional copying
     */

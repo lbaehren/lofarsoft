@@ -204,7 +204,7 @@ Matrix<double> get_skyPositions (Vector<double> const &start,
   \param freqMin     -- Lower limit of the frequency band, [Hz]
   \param freqMax     -- Upper limit of the frequency band, [Hz]
 
-  \return frequencies -- 
+  \return frequencies -- Vector with the frequency values, [Hz]
 */
 Vector<double> get_frequencies (uint const &nofChannels=4096,
 				double const &freqMin=40e06,
@@ -223,13 +223,43 @@ Vector<double> get_frequencies (uint const &nofChannels=4096,
 // -----------------------------------------------------------------------------
 
 /*!
+  \brief Get array with the complex antenna gains
+
+  \param nofFrequencies -- Number of frequency channels
+  \param nofAntennas    -- The number of antennas
+  \param nofPositions   -- Number of sky positions towards which to point
+
+  \return gains -- [freq,antenna,position] Array with the complex antenna gains
+          \f$ w_{j,\rm gain} (\vec\rho,\nu) \f$ as function of sky position
+	  \f$ \vec\rho \f$ and frequency \f$ \nu \f$
+*/
+casa::Cube<DComplex> get_antennaGains (uint const &nofFrequencies=4096,
+				       uint const &nofAntennas=4,
+				       uint const &nofPositions=2)
+{
+  casa::IPosition shape (3,nofFrequencies,nofAntennas,nofPositions);
+  casa::Cube<DComplex> gains (shape);
+
+  gains = DComplex (1,0);
+
+  return gains;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
   \brief Create some data for the Beamformer to process
 
   \param nofAntennas -- The number of antennas
   \param nofChannels -- Number of frequency channels, into which the band is
                         split.
+  \param antennaIndexFirst -- How to organize the axes in the returned data 
+         array; if <tt>antennaIndexFirst=false</tt> then the data are organized
+	 as [freq,antenna], if <tt>antennaIndexFirst=true</tt> then we have
+	 [antenna,freq].
 
-  \return data -- [antenna,channel]
+  \return data -- Array with the created data; the organization of the array
+          depends on the value of the <tt>antennaIndexFirst</tt> parameter.
 */
 Matrix<DComplex> get_data (uint const &nofAntennas=4,
 			   uint const &nofChannels=4096,

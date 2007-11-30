@@ -65,6 +65,8 @@ namespace CR { // Namespace CR -- begin
     init ();
   }
 
+  // ----------------------------------------------------------------- Beamformer
+  
   Beamformer::Beamformer (GeometricalDelay const &delay,
 			  casa::Vector<double> const &frequencies,
 			  bool const &bufferPhases,

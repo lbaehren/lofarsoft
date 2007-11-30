@@ -281,6 +281,19 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     // ------------------------------------------------------------------ Methods
     
+    /*
+      \brief Get the shape of the array storing the geometrical weights
+
+      \return shape -- [freq,antenna,directions] The shape of the array storing
+              the values of the geometrical weights.
+    */
+    inline casa::IPosition shape () {
+      return casa::IPosition (3,
+			      GeometricalPhase::nofFrequencies(),
+			      GeometricalDelay::nofAntennaPositions(),
+			      GeometricalDelay::nofSkyPositions());
+    }
+    
   private:
 
     /*!

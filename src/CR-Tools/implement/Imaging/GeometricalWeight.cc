@@ -185,14 +185,15 @@ namespace CR { // NAMESPACE CR -- BEGIN
   
   void GeometricalWeight::summary (std::ostream &os)
   {
-    os << "[GeometricalWeight] Summary of object"             << std::endl;
-    os << "-- Sky positions     : " << skyPositions_p.shape() << std::endl;
-    os << "-- Antenna positions : " << antPositions_p.shape() << std::endl;
-    os << "-- Frequency values  : " << frequencies_p.shape()  << std::endl;
-    os << "-- buffer delays     : " << bufferDelays_p         << std::endl;
-    os << "-- buffer phases     : " << bufferPhases_p         << std::endl;
-    os << "-- buffer weights    : " << bufferWeights_p        << std::endl;
-    os << "-- show progress     : " << showProgress_p         << std::endl;
+    os << "[GeometricalWeight] Summary of object"                   << std::endl;
+    os << "-- Sky positions       : " << skyPositions_p.shape()     << std::endl;
+    os << "-- Antenna positions   : " << antPositions_p.shape()     << std::endl;
+    os << "-- Frequency values    : " << frequencies_p.shape()      << std::endl;
+    os << "-- Geometrical weights : " << GeometricalWeight::shape() << std::endl;
+    os << "-- buffer delays       : " << bufferDelays_p             << std::endl;
+    os << "-- buffer phases       : " << bufferPhases_p             << std::endl;
+    os << "-- buffer weights      : " << bufferWeights_p            << std::endl;
+    os << "-- show progress       : " << showProgress_p             << std::endl;
   }
   
   // ============================================================================
@@ -229,12 +230,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   void GeometricalWeight::setWeights ()
   {
     if (bufferWeights_p == true) {
-      IPosition shape (3);
-
-      // Array axes: [frequency,antenna,skyPosition]
-      shape(0) = GeometricalPhase::nofFrequencies();
-      shape(1) = GeometricalDelay::nofAntennaPositions();
-      shape(2) = GeometricalDelay::nofSkyPositions();
+      IPosition shape = GeometricalWeight::shape();
 
       // adjust the shape of the array storing the weights
       weights_p.resize (shape);

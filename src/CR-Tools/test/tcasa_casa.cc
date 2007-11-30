@@ -101,6 +101,23 @@ int test_Arrays ()
     cout << " -- IPosition(1) = " << shapeVector << endl;
     cout << " -- IPosition(2) = " << shapeMatrix << endl;
     cout << " -- IPosition(3) = " << shapeCube   << endl;
+    
+    /* Test comparing of IPositions */ 
+    IPosition ip1 (3,nelem,nelem,nelem);
+    IPosition ip2 (3,nelem,nelem,nelem+1);
+    IPosition ip3 (3,nelem,nelem,nelem+1);
+
+    if (ip1 == ip2) {
+      cout << "-- Comparison of IPositions : equal" << endl;
+    } else {
+      cout << "-- Comparison of IPositions : not equal" << endl;
+    }
+
+    if (ip2 == ip3) {
+      cout << "-- Comparison of IPositions : equal" << endl;
+    } else {
+      cout << "-- Comparison of IPositions : not equal" << endl;
+    }
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -1200,7 +1217,7 @@ int main ()
   int nofFailedTests (0);
   std::vector<int> nelem = nof_array_elements ();
 
-//   nofFailedTests += test_Arrays();
+  nofFailedTests += test_Arrays();
 //   nofFailedTests += test_Arrays_Matrix (nelem);
 //   nofFailedTests += test_Arrays_Cube (nelem);
 //   nofFailedTests += test_Arrays_Array (nelem);

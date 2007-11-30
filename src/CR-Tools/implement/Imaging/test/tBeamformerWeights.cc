@@ -2,8 +2,8 @@
  | $Id                                                                     |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Lars Baehren (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Lars Baehren (<mail>)                                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,10 +21,15 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <Imaging/GeometricalDelay.h>
+#include <Imaging/GeometricalPhase.h>
+#include <Imaging/GeometricalWeight.h>
 #include <Imaging/BeamformerWeights.h>
 #include "create_data.h"
 
-using CR::BeamformerWeights;  // Namespace usage
+using CR::GeometricalPhase;
+using CR::GeometricalWeight;
+using CR::BeamformerWeights;
 
 /*!
   \file tBeamformerWeights.cc
@@ -70,12 +75,57 @@ int test_BeamformerWeights ()
 			 CR::Cartesian,
 			 skyPositions,
 			 CR::Cartesian,
-			 frequencies,
-			 false,
-			 false,
-			 false);
+			 frequencies);
     //
     w.summary(); 
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[3] Testing construction with GeometricalPhase ..." << std::endl;
+  try {
+    /* create GeometricalPhase object */
+    GeometricalPhase phase (antennaPositions,
+			    skyPositions,
+			    frequencies);
+    /* create BeamformerWeights using phases */
+    BeamformerWeights w (phase);
+    /* summarize object internals */
+    w.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[4] Testing construction with GeometricalWeight ..." << std::endl;
+  try {
+    /* create GeometricalWeight object */
+    GeometricalWeight weight (antennaPositions,
+			      skyPositions,
+			      frequencies);
+    /* create BeamformerWeights using weights */
+    BeamformerWeights w (weight);
+    /* summarize object internals */
+    w.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[5] Testing copy constructor ..." << std::endl;
+  try {
+    BeamformerWeights w (antennaPositions,
+			 CR::Cartesian,
+			 skyPositions,
+			 CR::Cartesian,
+			 frequencies);
+    //
+    w.summary(); 
+    //
+    BeamformerWeights wCopy (w);
+    //
+    wCopy.summary();
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
