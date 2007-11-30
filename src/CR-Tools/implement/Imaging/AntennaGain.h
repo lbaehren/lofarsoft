@@ -65,9 +65,12 @@ namespace CR { // Namespace CR -- begin
   */  
   class AntennaGain {
 
+    //! Buffer the antenna gains?
+    bool bufferAntennaGains_p;
+
   protected:
 
-    casa::Array<casa::DComplex> gains_p;
+    casa::Cube<casa::DComplex> gains_p;
     
   public:
     
