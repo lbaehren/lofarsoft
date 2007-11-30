@@ -34,7 +34,7 @@
 /*!
   \file tAxisCoordinates.cc
 
-  \ingroup Coordinates
+  \ingroup CR_Coordinates
 
   \brief A collection of test routines for AxisCoordinates
  

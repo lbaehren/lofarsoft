@@ -171,18 +171,19 @@ namespace CR { // Namespace CR -- begin
     
     switch (beam) {
     case FREQ_FIELD:
-      std::cerr << "[Beamformer::setBeamType] FREQ_FIELD not yet supported!"
-		<< std::endl;
+      std::cerr << "[Beamformer::setBeamType]" << std::endl;
+      std::cerr << " Beam type FREQ_FIELD not yet supported!" << std::endl;
       status = false;
+//       beamType_p    = beam;
+//       processData_p = &Beamformer::freq_field;
       break;
     case FREQ_POWER:
       beamType_p    = beam;
       processData_p = &Beamformer::freq_power;
       break;
     case TIME_FIELD:
-      std::cerr << "[Beamformer::setBeamType] TIME_FIELD not yet supported!"
-		<< std::endl;
-      status = false;
+      beamType_p    = beam;
+      processData_p = &Beamformer::time_field;
       break;
     case TIME_POWER:
       beamType_p    = beam;
@@ -206,12 +207,37 @@ namespace CR { // Namespace CR -- begin
   }
 
   // --------------------------------------------------------------- beamTypeName
-
-  std::string Beamformer::beamTypeName ()
+  
+  std::string Beamformer::beamTypeName (BeamType const &beamType)
   {
-    return beamTypeName(beamType_p);
+    std::string name;
+    
+    switch (beamType) {
+    case FREQ_FIELD:
+      name = "FREQ_FIELD";
+      break;
+    case FREQ_POWER:
+      name = "FREQ_POWER";
+      break;
+    case TIME_FIELD:
+      name = "TIME_FIELD";
+      break;
+    case TIME_POWER:
+      name = "TIME_POWER";
+      break;
+    case TIME_CC:
+      name = "TIME_CC";
+      break;
+    case TIME_P:
+      name = "TIME_P";
+      break;
+    case TIME_X:
+      name = "TIME_X";
+	break;
+    }
+    return name;
   }
-
+  
   // ------------------------------------------------------------------- beamType
 
   bool Beamformer::beamType (BeamType &beamType,
@@ -278,8 +304,9 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------------ checkData
 
-  bool Beamformer::checkData (casa::Matrix<double> &beam,
-			      const casa::Array<DComplex> &data)
+  template <class T>
+  bool Beamformer::checkData (casa::Matrix<T> &beam,
+			      casa::Array<DComplex> const &data)
   {
     uint nofFailedChecks (0);
     IPosition shape    = data.shape();
@@ -294,7 +321,7 @@ namespace CR { // Namespace CR -- begin
       beam    = [channel,direction]
     */
 
-    // Check the number of frequency channels
+    // Check the number of frequency channels in the data array
 
     if (shape(0) != nofFrequencies) {
       std::cerr << "[Beamformer::checkData] Mismatch in number of frequencies"
@@ -306,8 +333,8 @@ namespace CR { // Namespace CR -- begin
     }
 
     /*
-      Check the number of antennas; be aware that we might need to do some
-      additional checking in case we are working with ACM data
+      Check the number of antennas in the data array; be aware that we might
+      need to do some additional checking in case we are working with ACM data
     */
 
     if (shape(1) != nofAntennas) {
@@ -328,7 +355,8 @@ namespace CR { // Namespace CR -- begin
   
   // ---------------------------------------------------------------- processData
   
-  bool Beamformer::processData (casa::Matrix<double> &beam,
+  template <class T>
+  bool Beamformer::processData (casa::Matrix<T> &beam,
 				const casa::Array<DComplex> &data)
   {
     if (checkData(beam,data)) {
@@ -396,41 +424,33 @@ namespace CR { // Namespace CR -- begin
 			       const casa::Array<DComplex> &data)
   {
     bool status (true);
-    uint nofSkyPositions (skyPositions_p.nrow());
-    uint nofFrequencies (frequencies_p.nelements());
-    IPosition shapeData (data.shape());
 
-    /*
-      Check if the shape of the array with the input data matched the internal
-      parameters.
-    */
-    if (shapeData(0) == nofSkyPositions &&
-	shapeData(1) == nofFrequencies) {
-      // additional local variables
-      IPosition pos (2);
-      uint direction (0);
-      bool normalize (true);
-      // resize array returning the beamformed data
-      beam.resize (nofSkyPositions,nofFrequencies,0.0);
-      /*
-	Compute the beams for all combinations of sky positions and frequency
-	values. We unfortunately need the innermost loop over the frequencies,
-	since the CASA Array module appears not to support the "+=" operator
-	for sub-arrays (e.g. to process all values along the frequency axis).
-      */
-      for (direction=0; direction<nofSkyPositions; direction++) {
-	for (pos(1)=0; pos(1)<nofAntennas_p; pos(1)++) {
-	  for (pos(0)=0; pos(0)<nofFrequencies; pos(0)++) {
-	    beam(direction,pos(0)) = data(pos)*weights_p(pos(1),direction,pos(0));
-	  }
-	}
+    if (checkData(beam,data)) {
+
+      casa::Cube<DComplex> weights;
+      
+      if (bufferWeights_p) {
+	weights.reference(weights_p);
+      } else {
+	weights = GeometricalWeight::weights();
       }
+
+      uint direction(0);
+      casa::IPosition pos(2);                   // [freq,antenna]
+      casa::IPosition shape = weights.shape();  // [freq,antenna,direction]
+      casa::Vector<DComplex> tmp (shape(0));
+
+      for (direction=0; direction<shape(2); direction++) {
+	beam_freq (tmp,
+		   data,
+		   weights,
+		   direction,
+		   true);
+	beam.column(direction) = tmp;
+      }
+
     } else {
-      std::cerr << "[Beamformer::freq_field]" << std::endl;
-      std::cerr << "-- Wrong shape of array with input data!" << std::endl;
-      std::cerr << "--> shape(data)    = " << data.shape()      << std::endl;
-      std::cerr << "--> shape(weights) = " << weights_p.shape() << std::endl;
-      status = false;
+      return false;
     }
 
     return status;
@@ -484,6 +504,19 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
   
+  // ----------------------------------------------------------------- time_field
+
+  bool Beamformer::time_field (casa::Matrix<double> &beam,
+			       const casa::Array<DComplex> &data)
+  {
+    bool status (true);
+
+    std::cerr << "[Beamformer::time_field] Method not yet implemented!"
+	      << std::endl;
+    
+    return status;
+  }
+  
   // ----------------------------------------------------------------- time_power
 
   bool Beamformer::time_power (casa::Matrix<double> &beam,
@@ -491,6 +524,9 @@ namespace CR { // Namespace CR -- begin
   {
     bool status (true);
 
+    std::cerr << "[Beamformer::time_power] Method not yet implemented!"
+	      << std::endl;
+    
     return status;
   }
 
@@ -501,12 +537,8 @@ namespace CR { // Namespace CR -- begin
   {
     bool status (true);
 
-    std::cout << "[Beamformer::time_cc]" << std::endl;
-    
     if (checkData (beam,data)) {
 
-      std::cout << "-- check of input data passed." << std::endl;
-      
       try {
 	
 	casa::Cube<DComplex> weights;
@@ -540,7 +572,7 @@ namespace CR { // Namespace CR -- begin
 	FFTServer<double,std::complex<double> > server(IPosition(1,blocksize),
 						       casa::FFTEnums::REALTOCOMPLEX);
 	// resize array returning the beamformed data
-	beam.resize (shape(2),blocksize,0.0);
+	beam.resize (blocksize,shape(2),0.0);
 	
 	for (direction=0; direction<shape(2); direction++) {
 	  // Precompute the shifted time series for a given sky position
@@ -566,7 +598,7 @@ namespace CR { // Namespace CR -- begin
 	  // normalization w.r.t. the number of baselines
 	  tmpTime /= nofBaselines;
 	  //
-	  beam.row(direction) = CR::sign(tmpTime)*sqrt(abs(tmpTime));
+	  beam.column(direction) = CR::sign(tmpTime)*sqrt(abs(tmpTime));
 	}
       } catch (std::string message) {
 	std::cerr << "[Beamformer::time_cc] " << message << std::endl;
@@ -604,6 +636,16 @@ namespace CR { // Namespace CR -- begin
       FFTServer<double,DComplex> server(casa::IPosition(1,blocksize),
 					casa::FFTEnums::REALTOCOMPLEX);
 
+#ifdef DEBUGGING_MESSAGES
+      std::cout << "[Beamformer::time_p]" << std::endl;
+      std::cout << "- shape(data)    = " << data.shape()    << std::endl;
+      std::cout << "- shape(beam)    = " << beam.shape()    << std::endl;
+      std::cout << "- shape(weights) = " << shape           << std::endl;
+      std::cout << "- shape(tmpFreq) = " << tmpFreq.shape() << std::endl;
+      std::cout << "- shape(tmpTime) = " << tmpTime.shape() << std::endl;
+      std::cout << "- shape(sum)     = " << sum.shape()     << std::endl;
+#endif
+
       /* loop over sky positions */
       for (direction=0; direction<shape(2); direction++) {
 	sum = 0.0;
@@ -611,7 +653,7 @@ namespace CR { // Namespace CR -- begin
 	for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
 	  /* loop over frequency channels */
 	  for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
-	    tmpFreq = data(pos)*weights(pos(0),pos(1),direction);
+	    tmpFreq(pos(0)) = data(pos)*weights(pos(0),pos(1),direction);
 	  }
 	  /* perform inverse Fourier transform on the beam to get back to time
 	     domain */
@@ -619,7 +661,7 @@ namespace CR { // Namespace CR -- begin
 	  sum += tmpTime*tmpTime;
 	} // end loop: antenna
 	/* normalize with the number of antennas */
-	beam.row(direction) = sqrt(sum/double(shape(1)));
+	beam.column(direction) = sqrt(sum/double(shape(1)));
       } // end loop: direction
     } else {
       status = false;
@@ -634,8 +676,26 @@ namespace CR { // Namespace CR -- begin
 			   const casa::Array<DComplex> &data)
   {
     bool status (true);
+
+    std::cerr << "[Beamformer::time_x] Method not yet implemented!" << std::endl;
     
     return status;
   }
+
+  // ============================================================================
+  //
+  //  Template instantiation
+  //
+  // ============================================================================
+
+  template bool Beamformer::processData (casa::Matrix<double> &beam,
+					 const casa::Array<DComplex> &data);
+//   template bool Beamformer::processData (casa::Matrix<DComplex> &beam,
+// 					 const casa::Array<DComplex> &data);
+//   template bool Beamformer::checkData (casa::Matrix<double> &beam,
+// 				       casa::Array<double> const &data);
+//   template bool Beamformer::checkData (casa::Matrix<double> &beam,
+// 				       casa::Array<DComplex> const &data);
+  
   
 } // Namespace CR -- end

@@ -39,7 +39,7 @@ namespace CR {  // Namespace CR -- begin
   /*!
     \class AxisCoordinates
     
-    \ingroup Coordinates
+    \ingroup CR_Coordinates
     
     \brief Coordinates associated with the data samples axis
     

@@ -33,7 +33,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class AxisIterator
     
-    \ingroup Coordinates
+    \ingroup CR_Coordinates
     
     \brief Navigation along the main data axis.
     

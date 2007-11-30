@@ -42,7 +42,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class PolarCoordinate
     
-    \ingroup Coordinates
+    \ingroup CR_Coordinates
     
     \brief A polar coordinate
     

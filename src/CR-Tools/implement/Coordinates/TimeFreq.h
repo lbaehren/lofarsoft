@@ -47,7 +47,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class TimeFreq
     
-    \ingroup Coordinates
+    \ingroup CR_Coordinates
     
     \brief Container for the basic parameters in the time-frequency domain
     

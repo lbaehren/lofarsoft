@@ -25,6 +25,8 @@
 /*!
   \file tPolarCoordinate.cc
 
+  \ingroup CR_Coordinates
+
   \brief A collection of test routines for PolarCoordinate
  
   \author Lars B&auml;hren

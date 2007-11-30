@@ -46,7 +46,7 @@ namespace CR {  // Namespace CR -- begin
   /*!
     \class CoordinateGrid
     
-    \ingroup Coordinates
+    \ingroup CR_Coordinates
     
     \brief Generation of N-dimension regular coordinate grids
     

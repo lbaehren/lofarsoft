@@ -6,6 +6,8 @@
 /*!
   \file tCoordinateGrid.cc
   
+  \ingroup CR_Coordinates
+
   \brief A collection of tests for CoordinateGrid
   
   \author Lars B&auml;hren

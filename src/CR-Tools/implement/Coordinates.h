@@ -24,7 +24,7 @@
 /*!
   \file Coordinates.h
 
-  \defgroup Coordinates CR-Pipeline: Coordinates module
+  \defgroup CR_Coordinates CR-Pipeline: Coordinates module
   \ingroup CR
 
   \brief Coordinates module for the CR-pipeline

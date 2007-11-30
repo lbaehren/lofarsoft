@@ -26,6 +26,8 @@
 /*!
   \file tAxisIterator.cc
 
+  \ingroup CR_Coordinates
+
   \brief A collection of test routines for AxisIterator
  
   \author Lars Bahren

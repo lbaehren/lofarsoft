@@ -233,6 +233,7 @@ int test_processing ()
   std::cout << "[1] Power in the frequency domain (FREQ_POWER)" << std::endl;
   try {
     bf.setBeamType(CR::FREQ_POWER);
+    bf.summary();
     status = bf.processData (beam,data);
   } catch (std::string message) {
     std::cerr << message << std::endl;
@@ -242,6 +243,7 @@ int test_processing ()
   std::cout << "[2] cc-beam in the time domain (TIME_CC)" << std::endl;
   try {
     bf.setBeamType(CR::TIME_CC);
+    bf.summary();
     status = bf.processData (beam,data);
   } catch (std::string message) {
     std::cerr << message << std::endl;
@@ -251,6 +253,7 @@ int test_processing ()
   std::cout << "[3] powerbeam in the time domain (TIME_P)" << std::endl;
   try {
     bf.setBeamType(CR::TIME_P);
+    bf.summary();
     status = bf.processData (beam,data);
   } catch (std::string message) {
     std::cerr << message << std::endl;

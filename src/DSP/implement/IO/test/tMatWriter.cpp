@@ -1,3 +1,26 @@
+/*-------------------------------------------------------------------------*
+ | $Id:: tBeamformer.cc 1099 2007-11-28 18:28:47Z baehren                $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2007                                                    *
+ *   Adriaan Renting (renting@astron.nl)                                   *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -8,6 +31,12 @@
 #include <casa/Arrays.h>
 
 using namespace std;
+
+/*!
+  \file tMatWriter.cpp
+
+  \author Adriaan Renting
+*/
 
 int main(int argc, char ** argv){
 	string msFileName("/dop156_0/jeurink/L2007_01575_SB0-1.MS");

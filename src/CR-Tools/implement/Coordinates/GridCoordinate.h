@@ -45,7 +45,7 @@ namespace CR {  // Namespace CR -- begin
   /*!
     \class GridCoordinate
     
-    \ingroup Coordinates
+    \ingroup CR_Coordinates
     
     \brief A linear coordinate, which is defined for a certain range of values.
     

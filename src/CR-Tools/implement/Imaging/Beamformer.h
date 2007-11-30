@@ -390,7 +390,9 @@ namespace CR { // Namespace CR -- begin
 
       \return beamType -- The type of beam to be used at data processing
      */
-    std::string beamTypeName ();
+    inline std::string beamTypeName () {
+      return beamTypeName(beamType_p);
+    }
     
     /*!
       \brief Get the name of the beam type to be used at processing
@@ -399,34 +401,7 @@ namespace CR { // Namespace CR -- begin
       
       \return name -- The name of the beam type to be used at data processing
     */
-    static std::string beamTypeName (BeamType const &beamType) {
-      std::string name;
-      
-      switch (beamType) {
-      case FREQ_FIELD:
-	name = "FREQ_FIELD";
-	break;
-      case FREQ_POWER:
-	name = "FREQ_POWER";
-	break;
-      case TIME_FIELD:
-	name = "TIME_FIELD";
-	break;
-      case TIME_POWER:
-	name = "TIME_POWER";
-	break;
-      case TIME_CC:
-	name = "TIME_CC";
-	break;
-      case TIME_P:
-	name = "TIME_P";
-	break;
-      case TIME_X:
-	name = "TIME_X";
-	break;
-      }
-      return name;
-    }
+    static std::string beamTypeName (BeamType const &beamType);
     
     /*!
       \brief Set the type of beam to be used at data processing
@@ -542,7 +517,8 @@ namespace CR { // Namespace CR -- begin
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered
     */
-    bool processData (casa::Matrix<double> &beam,
+    template <class T>
+    bool processData (casa::Matrix<T> &beam,
 		      const casa::Array<DComplex> &data);
     
     /*!
@@ -624,6 +600,12 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Check if the input data are consistent with the internal settings
 
+      Currently the checking is restricted to the data array; to also check the 
+      shape of the array returning the beamformed data, we need to take into
+      consideration the beamforming method, because depending on whether the 
+      result is in the frequency or time domain, the length of the first axis
+      will vary.
+
       \retval beam -- [frequency,position] Beam formed from the provided input data.
       \param  data -- [frequency,antenna] Input data which will be processed to
               form a given type of beam; array containing the input data is
@@ -632,8 +614,9 @@ namespace CR { // Namespace CR -- begin
       \return status   -- Status of the operation; returns <i>false</i> if an
                           an error was encountered
     */
-    bool checkData (casa::Matrix<double> &beam,
-		    const casa::Array<DComplex> &data);
+    template <class T>
+    bool checkData (casa::Matrix<T> &beam,
+		    casa::Array<DComplex> const &data);
 
     /*!
       \brief Compute single beam in frequency space
@@ -694,6 +677,12 @@ namespace CR { // Namespace CR -- begin
                           an error was encountered
     */
     bool freq_power (casa::Matrix<double> &beam,
+		     const casa::Array<DComplex> &data);
+
+    /*!
+      \brief Directed field strength time-series, \f$ S (\vec\rho,t) \f$
+    */
+    bool time_field (casa::Matrix<double> &beam,
 		     const casa::Array<DComplex> &data);
     
     /*!

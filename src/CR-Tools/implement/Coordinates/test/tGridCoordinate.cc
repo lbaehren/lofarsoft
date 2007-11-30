@@ -36,6 +36,8 @@
 /*!
   \file tGridCoordinate.cc
 
+  \ingroup CR_Coordinates
+
   \brief A collection of test routines for GridCoordinate
  
   \author Lars B&auml;hren

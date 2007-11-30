@@ -48,7 +48,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class GeodeticEllipsoid
     
-    \ingroup Coordinates
+    \ingroup CR_Coordinates
     
     \brief Geodetic coordinate conversions.
     
