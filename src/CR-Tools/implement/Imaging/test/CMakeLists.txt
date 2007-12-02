@@ -8,7 +8,6 @@
 set (tests
   tAntenna
   tBeamformer
-  tBeamformerWeights
   tFeed
   tGeometricalDelay
   tGeometricalPhase

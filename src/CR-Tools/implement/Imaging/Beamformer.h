@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id::Beamformer.h 1068 2007-11-19 19:27:09Z baehren                   $ |
+ | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -156,7 +156,7 @@ namespace CR { // Namespace CR -- begin
     
     <h3>Prerequisite</h3>
 
-    <ul>
+    <ul type="square">
       <li>GeometricalDelay
       <li>GeometricalPhase
       <li>GeometricalWeight
@@ -164,24 +164,26 @@ namespace CR { // Namespace CR -- begin
     
     <h3>Synopsis</h3>
 
-    The Beamformer is designed such that a number of different beamforming
-    methods can be provided. Starting with the calibrated antenna spectra --
-    i.e. the Fourier transform of the antenna time-series after gain and phase
-    calibration -- we get a sort of dependency tree for further quantities
-    computed thereof:
-
-    \f[
-    \begin{array}{lll}
-    \widetilde s_j (\nu) \\
-    \downarrow \\
-    \widetilde s_j (\vec\rho,\nu) = w_j(\vec\rho,\nu) s_j(\nu) \\
-    \downarrow \\
-    \widetilde S (\vec\rho,\nu) = \frac{1}{N} \sum_j \widetilde s_j (\vec\rho,\nu) \\
-    \downarrow \\
-    \widetilde P (\vec\rho,\nu) = \overline{\widetilde S (\vec\rho,\nu)}
-    \widetilde S (\vec\rho,\nu)
-    \end{array}
-    \f]
+    <ul type="square">
+      <li><b>Beamformer weights</b>
+      In order to phase up the signal \f$ s_j(t) \f$ from antenna \f$j\f$ located
+      at position \f$ \vec x_j \f$, we multiply its Fourier transform 
+      \f$ \widetilde s_j (\nu) \f$ with a complex weight factor
+      \f$ w_j (\vec\rho,\nu) \f$ (corresponding to a shift in the time domain):
+      \f[ w_{j} (\vec\rho,\nu) = w_{\rm geom} (\vec x_j,\vec\rho,\nu) \cdot
+      w_{j,\rm gain} (\vec\rho,\nu) \f]
+      In this \f$ w_{\rm geom} (\vec x_j,\vec\rho,\nu) \f$ is the component which
+      is defined completely by the geometrical setup -- antenna position and pointing
+      position -- and the observation frequency. The additional factor
+      \f$ w_{j,\rm gain} (\vec\rho,\nu) \f$ accounts for the direction- and
+      frequency-dependent reception pattern of the antena, which is either known
+      EM simulation of the antenna or calibration measurements.
+      
+      In the default case -- where no antenna gains,
+      \f$ w_{j,\rm gain} (\vec\rho,\nu) \f$, are provided -- this class will do
+      nothing else but buffer the calculated geometrical weights
+      \f$ w_{\rm geom} (\vec x_j,\vec\rho,\nu) \f$.
+    </ul>
 
     <h3>Adding new beamforming methods</h3>
 
@@ -276,6 +278,9 @@ namespace CR { // Namespace CR -- begin
     bool (Beamformer::*processData_p) (casa::Matrix<double> &beam,
 				       const casa::Array<DComplex> &data);
     
+    //! The weights applied by the Beamformer
+    casa::Cube<DComplex> bfWeights_p;
+
     public:
     
     // ------------------------------------------------------------- Construction
@@ -507,6 +512,23 @@ namespace CR { // Namespace CR -- begin
     // ------------------------------------------------------------------ Methods
 
     /*!
+      \brief Set values for the antenna gains, \f$ w_{j,\rm gain} (\vec\rho,\nu) \f$
+
+      \param gains -- [freq,antenna,direction] Array with the complex antenna
+             gains, \f$ w_{j,\rm gain} (\vec\rho,\nu) \f$, describing the beam
+	     pattern of the antennas as fucntions of direction and frequency
+    */
+    bool setAntennaGains (casa::Cube<DComplex> const &gains);
+    
+    /*!
+      \brief Unset the values for the antenna gains
+      
+      Calling this function will remove the effect of the antenna gain calibration,
+      i.e. restricting the beamformer weights to the geometrical weights only.
+    */
+    bool unsetAntennaGains ();    
+    
+    /*!
       \brief Beamforming of the data, returning real-valued result
 
       \retval beam -- [frequency,position] Beam formed from the provided input data.
@@ -597,6 +619,20 @@ namespace CR { // Namespace CR -- begin
     */
     void init ();
 
+    /*
+      \brief Set the values of the Beamformer weights
+    */
+    bool setBeamformerWeights ();
+    
+    /*
+      \brief Set the values of the Beamformer weights
+
+      \param gains -- [freq,antenna,direction] Array with the complex antenna
+             gains, \f$ w_{j,\rm gain} (\vec\rho,\nu) \f$, describing the beam
+	     pattern of the antennas as fucntions of direction and frequency
+    */
+    bool setBeamformerWeights (casa::Cube<DComplex> const &gains);
+
     /*!
       \brief Check if the input data are consistent with the internal settings
 
@@ -630,7 +666,6 @@ namespace CR { // Namespace CR -- begin
       \retval beamFreq -- [freq] Vector with the frequency channels for a single
               beam towards the sky position \f$ \vec\rho \f$.
       \param data      -- 
-      \param weights   -- 
       \param direction -- 
       \param normalize -- Normalize the values by the number of combined data
              channels? If set to <tt>true</tt> an additional factor of \f$1/N\f$
@@ -638,7 +673,6 @@ namespace CR { // Namespace CR -- begin
     */
     void beam_freq (casa::Vector<DComplex> &beamFreq,
 		    casa::Array<DComplex> const &data,
-		    casa::Cube<DComplex> const &weights,
 		    uint const &direction,
 		    bool const &normalize=true);
     
@@ -653,7 +687,6 @@ namespace CR { // Namespace CR -- begin
       \retval beamTime -- [sample] Vector with the time-series samples for a
               single beam towards the sky position \f$ \vec\rho \f$.
       \param data      -- 
-      \param weights   -- 
       \param direction -- 
       \param normalize -- Normalize the values by the number of combined data
              channels? If set to <tt>true</tt> an additional factor of \f$1/N\f$
@@ -661,7 +694,6 @@ namespace CR { // Namespace CR -- begin
     */
     void beam_time (casa::Vector<double> &beamTime,
 		    casa::Array<DComplex> const &data,
-		    casa::Cube<DComplex> const &weights,
 		    uint const &direction,
 		    bool const &normalize=true);
     

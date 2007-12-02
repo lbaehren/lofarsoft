@@ -40,7 +40,7 @@ using CR::Beamformer;
 
   \ingroup Imaging
 
-  \brief A collection of test routines for Beamformer
+  \brief A collection of test routines for the Beamformer class
  
   \author Lars B&auml;hren
  
@@ -195,6 +195,51 @@ int test_beamType ()
   std::cout << "[7] Excess-beam in the time domain..." << std::endl;
   ok = bf.setBeamType (CR::TIME_X);
   
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Test modification of the Beamformer weights
+
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_weights ()
+{
+  std::cout << "\n[test_weights]\n" << std::endl;
+
+  int nofFailedTests (0);
+
+  /* Create beamformer object to work with */
+  Beamformer bf (get_antennaPositions(),
+		 CR::Cartesian,
+		 get_skyPositions(),
+		 CR::Cartesian,
+		 get_frequencies());
+  
+  /* Work with default settings (geometrical weights only) */
+  try {
+    bf.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  /* Redo computation after setting vales for the antenna gains */
+  try {
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  /* Unset effect of the antenna gains, reverting to geometrical weights only */
+  try {
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
   return nofFailedTests;
 }
 

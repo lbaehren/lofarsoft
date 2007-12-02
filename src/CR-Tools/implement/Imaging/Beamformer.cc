@@ -146,6 +146,9 @@ namespace CR { // Namespace CR -- begin
 
     // copy settings to handle the type of beam
     setBeamType (other.beamType_p);
+
+    bfWeights_p.resize(other.bfWeights_p.shape());
+    bfWeights_p = other.bfWeights_p;
   }
 
   // ============================================================================
@@ -163,6 +166,8 @@ namespace CR { // Namespace CR -- begin
     GeometricalWeight::bufferWeights (true);
     // default setting for the used beamforming method
     status = setBeamType (FREQ_POWER);
+    /* set the weights used in the beamforming */
+    status = setBeamformerWeights ();
   }
   
   // ---------------------------------------------------------------- setBeamType
@@ -288,14 +293,17 @@ namespace CR { // Namespace CR -- begin
   void Beamformer::summary (std::ostream &os)
   {
     os << "[Beamformer] Summary of object"                     << std::endl;
-    os << "-- Sky positions      : " << skyPositions_p.shape() << std::endl;
-    os << "-- Antenna positions  : " << antPositions_p.shape() << std::endl;
-    os << "-- Frequency values   : " << frequencies_p.shape()  << std::endl;
-    os << "-- Buffer delays?     : " << bufferDelays_p         << std::endl;
-    os << "-- Buffer phases?     : " << bufferPhases_p         << std::endl;
-    os << "-- Buffer weights?    : " << bufferWeights_p        << std::endl;
-    os << "-- Beamforming method : " << beamType_p
+    os << "-- Sky positions       : " << skyPositions_p.shape()     << std::endl;
+    os << "-- Antenna positions   : " << antPositions_p.shape()     << std::endl;
+    os << "-- Frequency values    : " << frequencies_p.shape()      << std::endl;
+    os << "-- Geometrical weights : " << GeometricalWeight::shape() << std::endl;
+    os << "-- buffer delays       : " << bufferDelays_p             << std::endl;
+    os << "-- buffer phases       : " << bufferPhases_p             << std::endl;
+    os << "-- buffer weights      : " << bufferWeights_p            << std::endl;
+    os << "-- show progress       : " << showProgress_p             << std::endl;
+    os << "-- Beamforming method  : " << beamType_p
        << " / " << beamTypeName() << std::endl;
+    os << "-- Beamformer weights  : " << bfWeights_p.shape()        << std::endl;
   }
   
   // ============================================================================
@@ -303,6 +311,100 @@ namespace CR { // Namespace CR -- begin
   //  Methods
   //
   // ============================================================================
+
+  // ------------------------------------------------------- setBeamformerWeights
+
+  bool Beamformer::setBeamformerWeights ()
+  {
+    bool status (true);
+    
+    /*
+      In the simplest case no antenna gain corrections are applied, so the
+      weights simply consist of the weights calculated from the geometrical 
+      phases.
+    */
+    try {
+      bfWeights_p.resize (GeometricalWeight::shape());
+      bfWeights_p = GeometricalWeight::weights();
+    } catch (std::string message) {
+      std::cerr << "[Beamformer::setBeamformerWeights] "
+		<< message
+		<< std::endl;
+      status = false;
+    }
+    
+    return status;
+  }
+  
+  // ------------------------------------------------------- setBeamformerWeights
+  
+  bool Beamformer::setBeamformerWeights (casa::Cube<DComplex> const &gains)
+  {
+    bool status (true);
+    
+    /*
+      No array shape checking required at this point, this this is handled in
+      the function accepting the antenna gains.
+    */
+    status = setBeamformerWeights();
+    
+    if (status) {
+      bfWeights_p *= gains;
+    }
+    
+    return status;
+  }
+  
+  // ------------------------------------------------------------ setAntennaGains
+
+  bool Beamformer::setAntennaGains (casa::Cube<DComplex> const &gains)
+  {
+    bool status (true);
+
+    /*
+      Check if the provided array has the correct shape; for the time being we
+      simply reject the provided data, if they to not match -- no interpolation
+      is attempted for mitigation (this would require some additional information
+      anyway, as we would need to know about the coordinate axes).
+    */
+    try {
+      /* extract shape information first */
+      casa::IPosition shapeGains       = gains.shape();
+      casa::IPosition shapeGeomWeights = GeometricalWeight::shape();
+      /* check if the shapes agree */
+      if (shapeGains == shapeGeomWeights) {
+	status = setBeamformerWeights (gains);
+      } else {
+	std::cerr << "[Beamformer::setAntennaGains] "
+		  << "Mismatching array shapes!" 
+		  << std::endl;
+	status = false;
+      }
+    } catch (std::string message) {
+      std::cerr << "[Beamformer::setAntennaGains] " << message << std::endl;
+      status = false;
+    }
+
+    return status;
+  }
+
+  // ---------------------------------------------------------- unsetAntennaGains
+  
+  bool Beamformer::unsetAntennaGains ()
+  {
+    bool status (true);
+
+    try {
+      status = setBeamformerWeights ();
+    } catch (std::string message) {
+      std::cerr << "[Beamformer::unsetAntennaGains]"
+		<< message
+		<< std::endl;
+      status = false;
+    }
+      
+    return status;
+  }
 
   // ------------------------------------------------------------------ checkData
 
@@ -372,7 +474,6 @@ namespace CR { // Namespace CR -- begin
   
   void Beamformer::beam_freq (casa::Vector<DComplex> &beamFreq,
 			      casa::Array<DComplex> const &data,
-			      casa::Cube<DComplex> const &weights,
 			      uint const &direction,
 			      bool const &normalize)
   {
@@ -383,7 +484,7 @@ namespace CR { // Namespace CR -- begin
     for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
       // loop over frequency channels
       for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
-	beamFreq(pos(0)) = data(pos)*weights(pos(1),direction,pos(0));
+	beamFreq(pos(0)) = data(pos)*bfWeights_p(pos(1),direction,pos(0));
       }
     }
 
@@ -399,7 +500,6 @@ namespace CR { // Namespace CR -- begin
   
   void Beamformer::beam_time (casa::Vector<double> &beamTime,
 			      casa::Array<DComplex> const &data,
-			      casa::Cube<DComplex> const &weights,
 			      uint const &direction,
 			      bool const &normalize)
   {
@@ -410,7 +510,6 @@ namespace CR { // Namespace CR -- begin
     /* get the beam in the frequency domain */
     beam_freq (beamFreq,
 	       data,
-	       weights,
 	       direction,
 	       normalize);
     
@@ -429,28 +528,19 @@ namespace CR { // Namespace CR -- begin
 
     if (checkData(beam,data)) {
 
-      casa::Cube<DComplex> weights;
-      
-      if (bufferWeights_p) {
-	weights.reference(weights_p);
-      } else {
-	weights = GeometricalWeight::weights();
-      }
-
       uint direction(0);
-      casa::IPosition pos(2);                   // [freq,antenna]
-      casa::IPosition shape = weights.shape();  // [freq,antenna,direction]
+      casa::IPosition pos(2);                       // [freq,antenna]
+      casa::IPosition shape = bfWeights_p.shape();  // [freq,antenna,direction]
       casa::Vector<DComplex> tmp (shape(0));
 
       for (direction=0; direction<shape(2); direction++) {
 	beam_freq (tmp,
 		   data,
-		   weights,
 		   direction,
 		   true);
 	beam.column(direction) = tmp;
       }
-
+      
     } else {
       return false;
     }
@@ -464,35 +554,22 @@ namespace CR { // Namespace CR -- begin
 			       const casa::Array<DComplex> &data)
   {
     bool status (true);
-    casa::Cube<DComplex> weights;
     uint freq (0);
     uint antenna (0);
     uint direction (0);
     casa::IPosition pos (2);
     casa::DComplex tmp;
 
-    /*
-      We need the weights in order to apply them to the data; if the weights
-      are buffered, we set up a reference to the array storing them, otherwise
-      we will have to retrieve them from the GeometricalWeights class first.
-     */
-
-    if (bufferWeights_p) {
-      weights.reference(weights_p);
-    } else {
-      weights = GeometricalWeight::weights();
-    }
-    
     try {
       // Get the shape of the beamformer weights, [freq,antenna,sky]
-      casa::IPosition shape = weights.shape();
+      casa::IPosition shape = bfWeights_p.shape();
       // Resize the array returning the beamformed data
       beam.resize (shape(0),shape(2),0.0);
-
+      
       for (direction=0; direction<shape(2); direction++) {
 	for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
 	  for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
-	    tmp = data(pos)*weights(pos(0),pos(1),direction);
+	    tmp = data(pos)*bfWeights_p(pos(0),pos(1),direction);
 	    beam(pos(0),direction) += real(tmp*conj(tmp));
 	  }
 	}
@@ -543,14 +620,7 @@ namespace CR { // Namespace CR -- begin
 
       try {
 	
-	casa::Cube<DComplex> weights;
-	if (bufferWeights_p) {
-	  weights.reference(weights_p);
-	} else {
-	  weights = GeometricalWeight::weights();
-	}
-	
-	casa::IPosition shape = weights.shape();  //  [freq,antenna,direction]
+	casa::IPosition shape = bfWeights_p.shape();  //  [freq,antenna,direction]
 	int blocksize         = 2*(shape(0)-1);
 	double nofBaselines   = GeometricalDelay::nofBaselines();
 	int direction (0);
@@ -581,7 +651,7 @@ namespace CR { // Namespace CR -- begin
 	  for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
 	    // --- Apply the beamformer weights to the Fourier-transformed data
 	    for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
-	      tmpFreq(pos(0)) = data(pos)*weights(pos(0),pos(1),direction);
+	      tmpFreq(pos(0)) = data(pos)*bfWeights_p(pos(0),pos(1),direction);
 	    }
 	    // --- Inverse Fourier transform back to time domain
 	    server.fft (tmpTime,tmpFreq);
@@ -620,17 +690,9 @@ namespace CR { // Namespace CR -- begin
 
     if (checkData (beam,data)) {
       
-      casa::Cube<DComplex> weights;
-      
-      if (bufferWeights_p) {
-	weights.reference(weights_p);
-      } else {
-	weights = GeometricalWeight::weights();
-      }
-
       uint direction(0);
-      casa::IPosition pos(2);                   // [freq,antenna]
-      casa::IPosition shape = weights.shape();  // [freq,antenna,direction]
+      casa::IPosition pos(2);                       // [freq,antenna]
+      casa::IPosition shape = bfWeights_p.shape();  // [freq,antenna,direction]
       int blocksize         = 2*(shape(0)-1);
       casa::Vector<DComplex> tmpFreq (shape(0));
       casa::Vector<double> tmpTime (blocksize);
@@ -655,7 +717,7 @@ namespace CR { // Namespace CR -- begin
 	for (pos(1)=0; pos(1)<shape(1); pos(1)++) {
 	  /* loop over frequency channels */
 	  for (pos(0)=0; pos(0)<shape(0); pos(0)++) {
-	    tmpFreq(pos(0)) = data(pos)*weights(pos(0),pos(1),direction);
+	    tmpFreq(pos(0)) = data(pos)*bfWeights_p(pos(0),pos(1),direction);
 	  }
 	  /* perform inverse Fourier transform on the beam to get back to time
 	     domain */
