@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id: analyseLOPESevent.h,v 1.8 2007/08/03 12:27:24 horneff Exp $ |
+ | $Id:: analyseLOPESevent.h,v 1.8 2007/08/03 12:27:24 horneff Exp       $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -76,7 +76,7 @@ namespace CR { // Namespace CR -- begin
     <ol>
       <li>Set custom values for the various intervals:
       \code
-      analyseLOPESEvent event;
+      analyseLOPESevent event;
       
       // set the interval considered in the analysis
       event.setRemoteInterval(1./3.,
@@ -84,6 +84,9 @@ namespace CR { // Namespace CR -- begin
       // set the interval considered in the fitting
       event.setFitInterval(-2e-6,
                            -1.7e-6);
+      // set the interval displayed in the generated plot
+      event.setPlotInterval(-2.05e-6,
+                            -1.55e-6);
       \endcode
     </ol>
     
@@ -123,7 +126,26 @@ namespace CR { // Namespace CR -- begin
       \brief Default constructor
     */
     analyseLOPESevent ();
-        
+    
+    /*!
+      \brief Argumented constructor
+
+      \param remoteStart - Start of the interval considered in the analysis,
+             fraction of data length
+      \param remoteStop - Stop of the interval considered in the analysis,
+             fraction of data length
+      \param fitStart  -- The start of the interval to be considered in the fit
+      \param fitStop   -- The stop of the interval to be considered in the fit
+      \param plotStart -- Start time of the interval diplayed in the plot
+      \param plotStop  -- Stop time of the interval diplayed in the plot
+    */
+    analyseLOPESevent (double const &remoteStart,
+		       double const &remoteStop,
+		       double const &fitStart,
+		       double const &fitStop,
+		       double const &plotStart,
+		       double const &plotStop);
+    
     // -------------------------------------------------------------- Destruction
 
     /*!
@@ -230,7 +252,7 @@ namespace CR { // Namespace CR -- begin
       \param fitStop  - The stop of the interval to be considered in the fit
     */
     inline void setFitInterval (double const &fitStart,
-				   double const &fitStop) {
+				double const &fitStop) {
       fitStart_p = fitStart;
       fitStop_p  = fitStop;
     }
@@ -269,6 +291,18 @@ namespace CR { // Namespace CR -- begin
     */
     inline void setPlotStop (double const &plotStop) {
       plotStop_p = plotStop;
+    }
+
+    /*!
+      \brief Set the interval diplayed in the plot
+
+      \param plotStart -- Start time of the interval diplayed in the plot
+      \param plotStop  -- Stop time of the interval diplayed in the plot
+    */
+    inline void setPlotInterval (double const &plotStart,
+				 double const &plotStop) {
+      plotStart_p = plotStart;
+      plotStop_p  = plotStop;
     }
     
     /*!

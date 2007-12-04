@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id: analyseLOPESevent.cc,v 1.13 2007/08/03 12:27:24 horneff Exp $ |
+ | $Id:: analyseLOPESevent.cc,v 1.13 2007/08/03 12:27:24 horneff Exp     $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -33,6 +33,8 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
+  // ---------------------------------------------------------- analyseLOPESevent
+
   analyseLOPESevent::analyseLOPESevent(){
     pipeline_p    = NULL;
     lev_p         = NULL;
@@ -46,6 +48,29 @@ namespace CR { // Namespace CR -- begin
     clear();
   };
   
+  // ---------------------------------------------------------- analyseLOPESevent
+
+  analyseLOPESevent::analyseLOPESevent (double const &remoteStart,
+					double const &remoteStop,
+					double const &fitStart,
+					double const &fitStop,
+					double const &plotStart,
+					double const &plotStop)
+  {
+    pipeline_p    = NULL;
+    lev_p         = NULL;
+    remoteStart_p = remoteStart;
+    remoteStop_p  = remoteStop;
+    fitStart_p    = fitStart;
+    fitStop_p     = fitStop;
+    plotStart_p   = plotStart;
+    plotStop_p    = plotStop;
+    
+    clear();
+  }
+  
+  // ---------------------------------------------------------------------- clear
+
   void analyseLOPESevent::clear() {
     if (pipeline_p != NULL) {
       delete pipeline_p;

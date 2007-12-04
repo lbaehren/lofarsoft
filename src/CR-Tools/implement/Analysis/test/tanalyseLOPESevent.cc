@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id                                                                   $ |
+ | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -75,6 +75,26 @@ int test_analyseLOPESevent ()
 				     273.46,  53.32, 4000., -32.07,  46.60, True, 
 				     "tanalyseLOPESevent3", True, flagged , True, True);
 
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[2] Testing argumented constructor ..." << std::endl;
+  try {
+    double remoteStart (1./4.);
+    double remoteStop (3./4.);
+    double fitStart (-2e-06);
+    double fitStop (-1.5e-06);
+    double plotStart;
+    double plotStop;
+
+    analyseLOPESevent event (remoteStart,
+			     remoteStop,
+			     fitStart,
+			     fitStop,
+			     plotStart,
+			     plotStop);
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
