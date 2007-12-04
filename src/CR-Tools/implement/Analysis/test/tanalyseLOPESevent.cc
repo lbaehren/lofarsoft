@@ -31,7 +31,7 @@ using CR::LopesEventIn;
 
   \ingroup Analysis
 
-  \brief A collection of test routines for analyseLOPESevent
+  \brief A collection of test routines for the analyseLOPESevent class
  
   \author Andreas Horneffer
  

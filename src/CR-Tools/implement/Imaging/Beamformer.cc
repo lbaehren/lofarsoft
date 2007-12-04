@@ -413,9 +413,8 @@ namespace CR { // Namespace CR -- begin
 			      casa::Array<DComplex> const &data)
   {
     uint nofFailedChecks (0);
-    IPosition shape    = data.shape();
-    int nofFrequencies = GeometricalPhase::nofFrequencies();
-    int nofAntennas    = GeometricalDelay::nofAntennas();
+    IPosition shapeData    = data.shape();
+    IPosition shapeWeights = bfWeights_p.shape();
     
     /*
       delays  = [antenna,direction]
@@ -427,11 +426,11 @@ namespace CR { // Namespace CR -- begin
 
     // Check the number of frequency channels in the data array
 
-    if (shape(0) != nofFrequencies) {
+    if (shapeData(0) != shapeWeights(0)) {
       std::cerr << "[Beamformer::checkData] Mismatch in number of frequencies"
 		<< std::endl;
-      std::cerr << "-- data    : " << shape(0)       << std::endl;
-      std::cerr << "-- weights : " << nofFrequencies << std::endl;
+      std::cerr << "-- data    : " << shapeData(0)    << std::endl;
+      std::cerr << "-- weights : " << shapeWeights(0) << std::endl;
       // increment error counter
       nofFailedChecks++;
     }
@@ -441,11 +440,11 @@ namespace CR { // Namespace CR -- begin
       need to do some additional checking in case we are working with ACM data
     */
 
-    if (shape(1) != nofAntennas) {
+    if (shapeData(1) != shapeWeights(1)) {
       std::cerr << "[Beamformer::checkData] Mismatch in number of antennas"
 		<< std::endl;
-      std::cerr << "-- data    : " << shape(1)    << std::endl;
-      std::cerr << "-- weights : " << nofAntennas << std::endl;
+      std::cerr << "-- data    : " << shapeData(1)    << std::endl;
+      std::cerr << "-- weights : " << shapeWeights(1) << std::endl;
       // increment error counter
       nofFailedChecks++;
     }

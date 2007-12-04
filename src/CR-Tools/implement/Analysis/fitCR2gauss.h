@@ -66,13 +66,13 @@ namespace CR { // Namespace CR -- begin
     // \brief time range in which the fit is performed ([startsample, stopsample])
     Vector<uInt> fitRange_p;
 
-    // \brief standard time axis values
+    //! standard time axis values
     Vector<Double> timeAxis_p;
 
-    // \brief start center for the fit
+    //! start center for the fit
     Double defCenter_p;
 
-    // \brief start width for the fit
+    //! start width for the fit
     Double defWidth_p;
     
   public:

@@ -34,14 +34,14 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   analyseLOPESevent::analyseLOPESevent(){
-    pipeline_p  = NULL;
-    lev_p       = NULL;
-    remoteStart = 1./4.;
-    remoteStop  = 4./9.;
-    fitstart    = -2e-6;
-    fitstop     = -1.7e-6;
-    plotstart   = -2.05e-6;
-    plotstop    = -1.55e-6;
+    pipeline_p    = NULL;
+    lev_p         = NULL;
+    remoteStart_p = 1./4.;
+    remoteStop_p  = 4./9.;
+    fitStart_p    = -2e-6;
+    fitStop_p     = -1.7e-6;
+    plotStart_p   = -2.05e-6;
+    plotStop_p    = -1.55e-6;
 
     clear();
   };
@@ -78,13 +78,19 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   void analyseLOPESevent::summary (std::ostream &os)
-  {;}
+  {
+    os << "[analyseLOPESevent] Summary of object properties" << std::endl;
+    os << "-- remoteStart = " << remoteStart_p << std::endl;
+    os << "-- remoteStop  = " << remoteStop_p  << std::endl;
+  }
    
   // ============================================================================
   //
   //  Methods
   //
   // ============================================================================
+
+  // --------------------------------------------------------------- initPipeline
   
   Bool analyseLOPESevent::initPipeline(Record ObsRecord){
     try {
@@ -99,6 +105,8 @@ namespace CR { // Namespace CR -- begin
     }; 
     return True;
   };
+
+  // --------------------------------------------------------------- ProcessEvent
 
   Record analyseLOPESevent::ProcessEvent(String evname,
 					 Double Az,
@@ -194,11 +202,11 @@ namespace CR { // Namespace CR -- begin
 
       //initialize the fitter
       Vector<uInt> remoteRange(2,0);
-      remoteRange(0) = (uInt)(nsamples*remoteStart);
-      remoteRange(1) = (uInt)(nsamples*remoteStop);
+      remoteRange(0) = (uInt)(nsamples*remoteStart_p);
+      remoteRange(1) = (uInt)(nsamples*remoteStop_p);
       fitObject.setTimeAxis(Times);
       fitObject.setRemoteRange(remoteRange);
-      fitObject.setFitRangeSeconds(fitstart,fitstop);
+      fitObject.setFitRangeSeconds(fitStart_p,fitStop_p);
 
       //perform the position fitting
       Double center;
@@ -308,8 +316,8 @@ namespace CR { // Namespace CR -- begin
 
       // Generate the plots
       if (generatePlots) {
-	i = ntrue(Times<plotstart);
-	j = ntrue(Times<plotstop);
+	i = ntrue(Times<plotStart_p);
+	j = ntrue(Times<plotStop_p);
 	Slice plotRegion(i,(j-i));
 	Matrix<Double> parts((j-i),nselants);
 	Vector<Double> xarr, yarr, empty, gauss;
@@ -375,6 +383,8 @@ namespace CR { // Namespace CR -- begin
     }; 
     return erg;
   }
+
+  // ------------------------------------------------------------------- toShower
 
   Matrix<Double> analyseLOPESevent::toShower (Matrix<Double> & pos,
 					      Double Az,
@@ -652,7 +662,7 @@ namespace CR { // Namespace CR -- begin
 	*centerp = ergrec.asDouble("CCcenter");
       };
       if (!ergrec.asBool("CCconverged") || 
-	  (ergrec.asDouble("CCcenter") < fitstart) || (ergrec.asDouble("CCcenter") > fitstop) ||
+	  (ergrec.asDouble("CCcenter") < fitStart_p) || (ergrec.asDouble("CCcenter") > fitStop_p) ||
 	  (ergrec.asDouble("CCwidth")>1e-7)) { 
 	pb = lev_p->timeValues();
 	erg = mean(ccb(Slice(ntrue(pb<-1.83e-6),5)))*1e6;
