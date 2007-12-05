@@ -69,6 +69,7 @@ table24 = msds.openTable( tablename );
 # get times
 time_col = table12.getColumn("TIME")
 time = time_col.data()
+time = time/(24*3600)    # convert from MJD in seconds to days
 
 # get data
 data_col12 = table12.getColumn(data_name)
@@ -116,7 +117,7 @@ if (range_plot != -1):
 		title("Time vs. Closure Amplitude, Baseline " + \
 		      sys.argv[2] + '-' + sys.argv[3] + '-' + sys.argv[4] +  '-' + sys.argv[5] + ", Sub-band(" + sys.argv[6] +
 		      ") " + " Channel(" + str(range_plot) + ")\n" + sys.argv[1] )
-		xlabel("Time (s)")
+		xlabel("Time (MJD)")
 
 	elif quantity_plot == 'time':
 		# plot intensity of given data vs. channel
@@ -124,7 +125,7 @@ if (range_plot != -1):
 		if pol2:  plot( closure_2[:,range_plot], "," )
 		title("Channel vs. Closure Amplitude, Baseline " + \
 		      sys.argv[2] + '-' + sys.argv[3] + '-' + sys.argv[4] +  '-' + sys.argv[5] + ", Sub-band(" + sys.argv[6] +
-		      ") " + " Time(" + str(time[range_plot]) + ")\n" + sys.argv[1] )
+		      ") " + " Time(" + str(time[range_plot]) + " MJD)\n" + sys.argv[1] )
 		xlabel("Channel")
 
 # otherwise, plot all channels/times
@@ -137,7 +138,7 @@ else:
 			title("Time vs. Closure Amplitude, Baseline " + \
 			      sys.argv[2] + '-' + sys.argv[3] + '-' + sys.argv[4] +  '-' + sys.argv[5] + ", Sub-band(" + sys.argv[6] +
 			      ") " + str(data12.shape[1]) + " channels" + '\n' + sys.argv[1] )
-		xlabel("Time (s)")
+		xlabel("Time (MJD)")
 	if quantity_plot == 'time':
 		# plot intensity at each time vs. channel
 		for t in range( len(time) ):

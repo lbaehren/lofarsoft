@@ -16,7 +16,7 @@ if len(sys.argv) < 7 or len(sys.argv) > 10:
 	print "\tChannel and Time in relative bin coordinates;"
 	print "\tPolarization 0-3 plots individually, 4 plots xx and xy, 5 plots xx and yx, 6 plots xx and yy."
 	print "\t-1 means plot all.  Default plots the phase difference of the xx for all channels as function of time."
-	print "\tNote that antenna numbers are zero-based and paired antenna numbers must be given in order from lowest to highest."
+	print "\tNote that antenna numbers are zero-based and numbers for each antenna pair must be given in order from lowest to highest."
 	print ""
 	sys.exit(1)
 
@@ -58,6 +58,7 @@ table34 = msds.openTable( tablename );
 # get times
 time_col = table12.getColumn("TIME")
 time = time_col.data()
+time = time/(24*3600)    # convert from MJD in seconds to days
 
 # get data
 data_col12 = table12.getColumn(data_name)
@@ -67,18 +68,11 @@ data34 = data_col34.data()
 nchannels = data12.shape[1] # second element of the data shape i.e. (4,256,nrows)
 
 # calculate phases
-if quantity_plot == 'channel':       
-	phase12 = arctan2((data12[pol,:,:]).real,(data12[pol,:,:]).imag)
-        phase34 = arctan2((data34[pol,:,:]).real,(data34[pol,:,:]).imag)
-	if pol2:
-		phase12_2 = arctan2((data12[pol2,:,:]).real,(data12[pol2,:,:]).imag)
-		phase34_2 = arctan2((data34[pol2,:,:]).real,(data34[pol2,:,:]).imag)
-elif quantity_plot == 'time':
-	phase12 = arctan2((data12[pol,:,:]).real,(data12[pol,:,:]).imag)
-        phase34 = arctan2((data34[pol,:,:]).real,(data34[pol,:,:]).imag)
-	if pol2:
-		phase12_2 = arctan2((data12[pol2,:,:]).real,(data12[pol2,:,:]).imag)
-		phase34_2 = arctan2((data34[pol2,:,:]).real,(data34[pol2,:,:]).imag)
+phase12 = arctan2((data12[pol,:,:]).imag,(data12[pol,:,:]).real)
+phase34 = arctan2((data34[pol,:,:]).imag,(data34[pol,:,:]).real)
+if pol2:
+	phase12_2 = arctan2((data12[pol2,:,:]).imag,(data12[pol2,:,:]).real)
+	phase34_2 = arctan2((data34[pol2,:,:]).imag,(data34[pol2,:,:]).real)
 
 difference = (phase12 - phase34)
 # normalize range to -pi to +pi
@@ -89,17 +83,24 @@ if pol2:
 	difference_2[where(difference_2 > pi)] = difference_2[where(difference_2 > pi)] - 2*pi
 	difference_2[where(difference_2 < -pi)] = difference_2[where(difference_2 < -pi)] + 2*pi
 	
+figure(1)
 # if the optional channel argument is present
 #  plot for this channel/time
 if (range_plot != -1):
 	if quantity_plot == 'channel':
 		# plot data of given data vs. time
+		subplot(212)
                 plot( time, difference[range_plot,:], ',')
 		if pol2: plot( time, difference_2[range_plot,:], "," )
+		xlabel("Time (MJD)")
+		ylabel("Phase difference (rad)")
+		subplot(211)
+		plot( time, phase12[range_plot,:], ',', time, phase34[range_plot,:], ',')
+		if pol2: plot( time, phase12_2[range_plot,:], ',', time, phase34_2[range_plot,:], ',')
+		ylabel("Phase (rad)")
 		title("Time vs. Phase Difference, Antennas " + \
 		      sys.argv[2] + '-' + sys.argv[3] + '/' + sys.argv[4] + '-' + sys.argv[5] + ", Sub-band(" + sys.argv[6] +
 		      ") " + " Channel(" + str(range_plot) + ")\n" + sys.argv[1] )
-		xlabel("Time (s)")
 
 	elif quantity_plot == 'time':
 		# plot intensity of given data vs. channel
@@ -107,8 +108,9 @@ if (range_plot != -1):
 		if pol2: plot( difference_2[:,range_plot], "," )
 		title("Channel vs. Phase Difference, Antennas " + \
 		      sys.argv[2] + '-' + sys.argv[3] + '/' + sys.argv[4] + '-' + sys.argv[5] + ", Sub-band(" + sys.argv[6] +
-		      ") " + " Time(" + str(time[range_plot]) + ")\n" + sys.argv[1] )
+		      ") " + " Time(" + str(time[range_plot]) + " MJD)\n" + sys.argv[1] )
 		xlabel("Channel")
+		ylabel("Phase difference (rad)")
 
 # otherwise, plot all channels/times
 else:
@@ -120,7 +122,8 @@ else:
 			title("Channel vs. Phase Difference, Antennas " + \
 			      sys.argv[2] + '-' + sys.argv[3] + '/' + sys.argv[4] + '-' + sys.argv[5] + ", Sub-band(" + sys.argv[6] +
 			      ") " + " Channel(" + str(range_plot) + ")\n" + sys.argv[1] )
-		xlabel("Time (s)")
+		xlabel("Time (MJD)")
+		ylabel("Phase difference (rad)")
 	if quantity_plot == 'time':
 		# plot intensity at each time vs. channel
 		for t in range( len(time) ):
@@ -130,8 +133,7 @@ else:
 			      sys.argv[2] + '-' + sys.argv[3] + '/' + sys.argv[4] + '-' + sys.argv[5] + ", Sub-band(" + sys.argv[6] +
 			      ") " + str(len(time)) + " times" + '\n' + sys.argv[1] )
 		xlabel("Channel")
-
-ylabel("Phase difference (rad)")
+		ylabel("Phase difference (rad)")
 
 show()
 

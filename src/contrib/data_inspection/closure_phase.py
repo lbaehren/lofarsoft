@@ -63,6 +63,7 @@ table13 = msds.openTable( tablename );
 # get times
 time_col = table12.getColumn("TIME")
 time = time_col.data()
+time = time/(24*3600)    # convert from MJD in seconds to days
 
 # get data
 data_col12 = table12.getColumn(data_name)
@@ -75,21 +76,21 @@ nchannels = data12.shape[1] # second element of the data shape i.e. (4,256,nrows
 
 # calculate phases
 if quantity_plot == 'channel':       
-	phase12 = arctan2((data12[pol,:,:]).real,(data12[pol,:,:]).imag)
-	phase23 = arctan2((data23[pol,:,:]).real,(data23[pol,:,:]).imag)
-	phase13 = arctan2((data13[pol,:,:]).real,(data13[pol,:,:]).imag)
+	phase12 = arctan2((data12[pol,:,:]).imag,(data12[pol,:,:]).real)
+	phase23 = arctan2((data23[pol,:,:]).imag,(data23[pol,:,:]).real)
+	phase13 = arctan2((data13[pol,:,:]).imag,(data13[pol,:,:]).real)
 	if pol2:
-		phase12_2 = arctan2((data12[pol2,:,:]).real,(data12[pol2,:,:]).imag)
-		phase23_2 = arctan2((data23[pol2,:,:]).real,(data23[pol2,:,:]).imag)
-		phase13_2 = arctan2((data13[pol2,:,:]).real,(data13[pol2,:,:]).imag)
+		phase12_2 = arctan2((data12[pol2,:,:]).imag,(data12[pol2,:,:]).real)
+		phase23_2 = arctan2((data23[pol2,:,:]).imag,(data23[pol2,:,:]).real)
+		phase13_2 = arctan2((data13[pol2,:,:]).imag,(data13[pol2,:,:]).real)
 elif quantity_plot == 'time':
-	phase12 = arctan2((data12[pol,:,:]).real,(data12[pol,:,:]).imag)
-        phase23 = arctan2((data23[pol,:,:]).real,(data23[pol,:,:]).imag)
-        phase13 = arctan2((data13[pol,:,:]).real,(data13[pol,:,:]).imag)
+	phase12 = arctan2((data12[pol,:,:]).imag,(data12[pol,:,:]).real)
+        phase23 = arctan2((data23[pol,:,:]).imag,(data23[pol,:,:]).real)
+        phase13 = arctan2((data13[pol,:,:]).imag,(data13[pol,:,:]).real)
 	if pol2:
-		phase12_2 = arctan2((data12[pol2,:,:]).real,(data12[pol2,:,:]).imag)
-		phase23_2 = arctan2((data23[pol2,:,:]).real,(data23[pol2,:,:]).imag)
-		phase13_2 = arctan2((data13[pol2,:,:]).real,(data13[pol2,:,:]).imag)
+		phase12_2 = arctan2((data12[pol2,:,:]).imag,(data12[pol2,:,:]).real)
+		phase23_2 = arctan2((data23[pol2,:,:]).imag,(data23[pol2,:,:]).real)
+		phase13_2 = arctan2((data13[pol2,:,:]).imag,(data13[pol2,:,:]).real)
 
 closure = (phase12 + phase23 - phase13)%2*pi-pi
 if pol2: closure_2 = (phase12_2 + phase23_2 - phase13_2)%2*pi-pi
@@ -105,7 +106,7 @@ if (range_plot != -1):
 		title("Time vs. Closure Phase, Antennas " + \
 		      sys.argv[2] + '-' + sys.argv[3] + '-' + sys.argv[4] + ", Sub-band(" + sys.argv[5] +
 		      ") " + " Channel(" + str(range_plot) + ")\n" + sys.argv[1] )
-		xlabel("Time (s)")
+		xlabel("Time (MJD)")
 
 	elif quantity_plot == 'time':
 		# plot intensity of given data vs. channel
@@ -113,7 +114,7 @@ if (range_plot != -1):
 		if pol2: plot( closure_2[:,range_plot], "," )
 		title("Channel vs. Closure Phase, Antennas " + \
 		      sys.argv[2] + '-' + sys.argv[3] + '-' + sys.argv[4] + ", Sub-band(" + sys.argv[5] +
-		      ") " + " Time(" + str(time[range_plot]) + ")\n" + sys.argv[1] )
+		      ") " + " Time(" + str(time[range_plot]) + " MJD)\n" + sys.argv[1] )
 		xlabel("Channel")
 
 # otherwise, plot all channels/times
@@ -126,7 +127,7 @@ else:
 			title("Channel vs. Closure Phase, Antennas " + \
 			      sys.argv[2] + '-' + sys.argv[3] + '-' + sys.argv[4] + ", Sub-band(" + sys.argv[5] +
 			      ") " + " Channel(" + str(range_plot) + ")\n" + sys.argv[1] )
-		xlabel("Time (s)")
+		xlabel("Time (MJD)")
 	if quantity_plot == 'time':
 		# plot intensity at each time vs. channel
 		for t in range( len(time) ):
