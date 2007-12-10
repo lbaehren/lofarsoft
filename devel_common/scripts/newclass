@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # ------------------------------------------------------------------------------
-# $Id                                                                          $
+# $Id::                                                                        $
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -308,6 +308,10 @@ case $var_yn in
 	  svn add implement/$var_module/$var_class.h
 	  svn add implement/$var_module/$var_class.cc
 	  svn add implement/$var_module/test/t$var_class.cc
+	  # activate keyword substitution
+	  svn propset svn:keyword Id implement/$var_module/$var_class.h
+	  svn propset svn:keyword Id implement/$var_module/$var_class.cc
+	  svn propset svn:keyword Id implement/$var_module/test/t$var_class.cc
     ;;
     n)
 	echo " --> Please remember adding the new files to the CVS repository!!";
