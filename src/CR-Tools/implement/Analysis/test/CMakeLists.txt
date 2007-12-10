@@ -42,7 +42,7 @@ if (ROOT_LIBRARIES AND PYTHON_LIBRARIES)
   ## build instructions
   add_executable (tHistograms tHistograms.cc)
   ## link instructions
-  target_link_libraries (tHistograms ${ROOT_LIBRARIES} ${PYTHON_LIBRARIES} util)
+  target_link_libraries (tHistograms ${ROOT_LIBRARIES} ${PYTHON_LIBRARIES})
   ## testing
   add_test (tHistograms tHistograms)
   ## installation instructions
