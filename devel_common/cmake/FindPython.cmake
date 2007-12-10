@@ -9,6 +9,7 @@
 #                          have been found.
 #  PYTHON_EXECUTABLE = Location of the Python executable
 #  PYTHON_INCLUDES   = Include path for the header files of PYTHON
+#  NUMPY_INCLUDES    = Include path for the header files of NUMPY
 #  PYTHON_LIBRARIES  = Link these to use PYTHON
 #  PYTHON_LFGLAS     = Linker flags (optional)
 
@@ -38,6 +39,7 @@ set (lib_locations
   )
 
 set (include_locations
+  /usr/lib
   ../release/include
   ../../release/include
   /usr/include
@@ -60,11 +62,19 @@ foreach (python_version 2.6 2.5 2.4 2.3)
     NO_DEFAULT_PATH
     )
   
-  ## Check for the header files
+  ## Check for the PYTHON header files
 
   find_path (PYTHON_INCLUDES Python.h
     PATHS ${include_locations}
     PATH_SUFFIXES python${python_version}
+    NO_DEFAULT_PATH
+    )
+
+  ## Check for the NUMPY header files
+
+  find_path (NUMPY_INCLUDES numpy/arrayobject.h
+    PATHS ${include_locations}
+    PATH_SUFFIXES python${python_version}/site-packages/numpy/core/include
     NO_DEFAULT_PATH
     )
 
