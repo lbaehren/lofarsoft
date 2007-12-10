@@ -128,6 +128,10 @@ if (cr_cmake)
     include_directories (${CFITSIO_INCLUDES})
     add_definitions (-DHAVE_CFITSIO)
   endif (CFITSIO_INCLUDES)
+  ## --- Data Access Library (DAL) ---------------
+  if (NOT HAVE_DAL)
+    include (${cr_cmake}/FindDAL.cmake)
+  endif (NOT HAVE_DAL)
   ## --- FFTW3 -----------------------------------
   if (NOT HAVE_FFTW3)
     include (${cr_cmake}/FindFFTW3.cmake)
@@ -289,17 +293,6 @@ if (HAVE_CASA OR HAVE_CASACORE)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ## ------------------------------------------------------------------------------
-## Check for the presence of further USG comonents
-
-find_path (DAL_INCLUDES dal.h lopesevent.h
-  PATHS
-  ${CR_SOURCE_DIR}/..
-  ${CR_SOURCE_DIR}/../..
-  PATH_SUFFIXES
-  DAL/implement
-  )
-
-## ------------------------------------------------------------------------------
 ## Where to find the header files
 
 include_directories (
@@ -321,6 +314,11 @@ endif (CASA_INCLUDES)
 if (CASACORE_INCLUDES)
   include_directories (${CASACORE_INCLUDES})
 endif (CASACORE_INCLUDES)
+
+if (DAL_INCLUDES)
+  include_directories (${DAL_INCLUDES})
+  add_definitions (-DHAVE_DAL)
+endif (DAL_INCLUDES)
 
 if (PGPLOT_INCLUDES)
   include_directories (${PGPLOT_INCLUDES})
