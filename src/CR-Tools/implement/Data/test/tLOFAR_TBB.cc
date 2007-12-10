@@ -2,8 +2,8 @@
  | $Id::                                                                   |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) <year>                                                  *
- *   <author> (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (<mail>)                                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,40 +21,40 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <<newModule>/<newClass>.h>
+#include <Data/LOFAR_TBB.h>
 
-using <newNamespace>::<newClass>;  // Namespace usage
+using CR::LOFAR_TBB;  // Namespace usage
 
 /*!
-  \file t<newClass>.cc
+  \file tLOFAR_TBB.cc
 
-  \ingroup <newModule>
+  \ingroup CR_Data
 
-  \brief A collection of test routines for the <newClass> class
+  \brief A collection of test routines for the LOFAR_TBB class
  
-  \author <author>
+  \author Lars B&auml;hren
  
-  \date <date>
+  \date 2007/12/07
 */
 
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test constructors for a new <newClass> object
+  \brief Test constructors for a new LOFAR_TBB object
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_<newClass> ()
+int test_LOFAR_TBB (std::string const &filename)
 {
   int nofFailedTests (0);
   
-  std::cout << "\n[test_<newClass>]\n" << std::endl;
+  std::cout << "\n[test_LOFAR_TBB]\n" << std::endl;
 
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
-    <newClass> new<newClass>;
+    LOFAR_TBB data (filename);
     //
-    new<newClass>.summary(); 
+    data.summary(); 
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -65,14 +65,27 @@ int test_<newClass> ()
 
 // -----------------------------------------------------------------------------
 
-int main ()
+int main (int argc,
+	  char *argv[])
 {
   int nofFailedTests (0);
 
-  // Test for the constructor(s)
-  {
-    nofFailedTests += test_<newClass> ();
+  /*
+    Check if filename of the dataset is provided on the command line; if not
+    exit the program.
+  */
+  if (argc < 2) {
+    std::cerr << "[tLOFAR_TBB] Too few parameters!" << std::endl;
+    std::cerr << "" << std::endl;
+    std::cerr << "  tLOFAR_TBB <filename>" << std::endl;
+    std::cerr << "" << std::endl;
+    return -1;
   }
 
+  std::string filename = argv[1];
+
+  // Test for the constructor(s)
+  nofFailedTests += test_LOFAR_TBB (filename);
+  
   return nofFailedTests;
 }

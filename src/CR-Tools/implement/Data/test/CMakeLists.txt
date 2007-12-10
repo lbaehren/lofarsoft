@@ -8,7 +8,7 @@
 set (tests
   tData
   tDataFlag
-  tITSBeam
+  tITS_Beam
   tITSMetadata
   tLopesEvent
   tLopesEventIn
@@ -27,6 +27,25 @@ foreach (src ${tests})
   ## testing
   add_test (${src} ${src})
 endforeach (src)
+
+## -----------------------------------------------------------------------------
+## Build the test programs working with input data sets
+
+add_executable (tLOFAR_TBB tLOFAR_TBB.cc)
+target_link_libraries (tLOFAR_TBB cr)
+
+find_file (tbb_dataset tbb_test_file_v2.h5
+  PATHS
+  ${CR_SOURCE_DIR}/data
+  ${CR_SOURCE_DIR}/../data
+  ${CR_SOURCE_DIR}/../../data
+  )
+
+if (tbb_dataset)
+  add_test (tLOFAR_TBB tLOFAR_TBB ${tbb_dataset})
+else (tbb_dataset)
+  message (STATUS "Unable to run tLOFAR_TBB; no dataset found!")
+endif (tbb_dataset)
 
 ## -----------------------------------------------------------------------------
 ## Installation

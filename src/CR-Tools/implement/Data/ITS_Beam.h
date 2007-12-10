@@ -1,4 +1,7 @@
-/***************************************************************************
+/*-------------------------------------------------------------------------*
+ | $Id:: Beamformer.h 1111 2007-12-02 21:02:39Z baehren                  $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
  *   Copyright (C) 2006                                                    *
  *   Lars B"ahren (bahren@astron.nl)                                       *
  *   Andreas Nigl (anigl@astron.nl)                                        *
@@ -19,10 +22,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: ITSBeam.h,v 1.8 2006/10/31 18:24:08 bahren Exp $*/
-
-#ifndef ITSBEAM_H
-#define ITSBEAM_H
+#ifndef ITS_BEAM_H
+#define ITS_BEAM_H
 
 #include <casa/aips.h>
 #include <casa/Arrays.h>
@@ -34,7 +35,7 @@ using CR::DataReader;
 
 
 /*!
-  \class ITSBeam
+  \class ITS_Beam
 
   \ingroup CR_Data
 
@@ -44,7 +45,7 @@ using CR::DataReader;
 
   \date 2006/08/04
 
-  \test tITSBeam.cc
+  \test tITS_Beam.cc
 
   <h3>Prerequisite</h3>
 
@@ -99,12 +100,12 @@ using CR::DataReader;
   <h3>Example(s)</h3>
 
   <ol>
-    <li>Direct usage of an ITSBeam object in application code:
+    <li>Direct usage of an ITS_Beam object in application code:
     \code
     uint blocksize (8192);
     String metafile ("/data/ITS/jupX9tb/experiment.meta");
     
-    ITSBeam beam (metafile, blocksize);
+    ITS_Beam beam (metafile, blocksize);
     
     Matrix<Double> fx = beam.fx();
     Matrix<DComplex> fft = beam.fft();
@@ -115,7 +116,7 @@ using CR::DataReader;
     String metafile ("/data/ITS/jupX9tb/experiment.meta");
 
     DataReader *dr;
-    ITSBeam *beam = new ITSBeam (metafile, blocksize);
+    ITS_Beam *beam = new ITS_Beam (metafile, blocksize);
     
     dr = beam;
     
@@ -125,7 +126,7 @@ using CR::DataReader;
   </ol>
 */
 
-class ITSBeam : public DataReader {
+class ITS_Beam : public DataReader {
 
   //! Information contained in experiment.meta are stored in their own object
   ITSMetadata metadata_p;
@@ -140,14 +141,14 @@ class ITSBeam : public DataReader {
   /*!
     \brief Default constructor
    */
-  ITSBeam ();
+  ITS_Beam ();
 
   /*!
     \brief Argumented constructor
 
     \param metafile -- Name of the file from which to read in the data
   */
-  ITSBeam (String const &metafile);
+  ITS_Beam (String const &metafile);
 
   /*!
     \brief Argumented constructor
@@ -155,8 +156,8 @@ class ITSBeam : public DataReader {
     \param metafile -- Name of the file from which to read in the data
     \param blocksize   -- Size of a block of data, [samples]
   */
-  ITSBeam (String const &metafile,
-	   uint const &blocksize);
+  ITS_Beam (String const &metafile,
+	    uint const &blocksize);
   
   /*!
     \brief Argumented constructor
@@ -168,33 +169,33 @@ class ITSBeam : public DataReader {
     \param fft2calfft  -- Multiplication factors for conversion from raw to
                           calibrated FFT
   */
-  ITSBeam (String const &metafile,
-	   uint const &blocksize,
-	   Vector<Double> const &adc2voltage,
-	   Matrix<DComplex> const &fft2calfft);
+  ITS_Beam (String const &metafile,
+	    uint const &blocksize,
+	    Vector<Double> const &adc2voltage,
+	    Matrix<DComplex> const &fft2calfft);
   /*!
     \brief Copy constructor
 
-    \param other -- Another ITSBeam object from which to create this new
+    \param other -- Another ITS_Beam object from which to create this new
                     one.
   */
-  ITSBeam (ITSBeam const &other);
+  ITS_Beam (ITS_Beam const &other);
 
   // ---------------------------------------------------------------- Destruction
 
   /*!
     \brief Destructor
   */
-  ~ITSBeam ();
+  ~ITS_Beam ();
 
   // ------------------------------------------------------------------ Operators
 
   /*!
     \brief Overloading of the copy operator
 
-    \param other -- Another ITSBeam object from which to make a copy.
+    \param other -- Another ITS_Beam object from which to make a copy.
   */
-  ITSBeam& operator= (ITSBeam const &other); 
+  ITS_Beam& operator= (ITS_Beam const &other); 
 
   // ----------------------------------------------------------------- Parameters
 
@@ -203,7 +204,7 @@ class ITSBeam : public DataReader {
     
     \return metafile -- Name of the metafile
   */
-  String metafile () const {
+  inline String metafile () const {
     return metadata_p.metafile();
   }
   
@@ -223,7 +224,7 @@ class ITSBeam : public DataReader {
     \return directory -- Path to the directory in which the metafile and the
                          datafiles are
   */
-  String directory () const {
+  inline String directory () const {
     return metadata_p.directory();
   }
 
@@ -235,7 +236,7 @@ class ITSBeam : public DataReader {
     \return datafiles -- The names of the files, in which the actual data are
                          stored
    */
-  Vector<String> datafiles (bool const &fullPath=true) const {
+  inline Vector<String> datafiles (bool const &fullPath=true) const {
     return metadata_p.datafiles(fullPath);
   }  
 
@@ -247,7 +248,7 @@ class ITSBeam : public DataReader {
 
     \return antennas -- Numbers of the antennas included in the experiment
   */
-  Vector<uint> antennas (bool const &validDataOnly=true) const {
+  inline Vector<uint> antennas (bool const &validDataOnly=true) const {
     return metadata_p.antennas (validDataOnly);
   }
 
@@ -265,7 +266,7 @@ class ITSBeam : public DataReader {
   /*!
     \brief Unconditional copying
   */
-  void copy (ITSBeam const &other);
+  void copy (ITS_Beam const &other);
 
   /*!
     \brief Unconditional deletion 
@@ -284,4 +285,4 @@ class ITSBeam : public DataReader {
 
 };
 
-#endif /* ITSBEAM_H */
+#endif /* ITS_BEAM_H */

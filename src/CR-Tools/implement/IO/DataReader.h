@@ -130,10 +130,10 @@ namespace CR {  //  Namespace CR -- begin
 	     // initialize the internals of the underlying DataReader object
 	     DataReader::init (nofSamples,
 	                       antennas,
-						   adc2voltage,
-						   fft2calfft,
-						   filenames,
-						   iterator);
+			       adc2voltage,
+			       fft2calfft,
+			       filenames,
+			       iterator);
 	
 	     return status;
        }
@@ -250,7 +250,8 @@ namespace CR {  //  Namespace CR -- begin
     /*!
       \brief Set up the streams for reading in the data
       
-      \return status -- 
+      \return status -- Status of the operation; returns <tt>false</tt> if an
+              error was encountered.
     */
     virtual Bool setStreams () {
       std::cout << "[DataReader::setStreams]" << std::endl;

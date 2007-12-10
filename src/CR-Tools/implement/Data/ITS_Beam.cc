@@ -1,4 +1,7 @@
-/***************************************************************************
+/*-------------------------------------------------------------------------*
+ | $Id:: Beamformer.h 1111 2007-12-02 21:02:39Z baehren                  $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
  *   Copyright (C) 2006                                                    *
  *   Lars Bahren (bahren@astron.nl)                                        *
  *   Andreas Nigl (anigl@astron.nl)                                        *
@@ -19,9 +22,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: ITSBeam.cc,v 1.6 2006/10/31 18:24:08 bahren Exp $*/
-
-#include <Data/ITSBeam.h>
+#include <Data/ITS_Beam.h>
 
 // ==============================================================================
 //
@@ -29,28 +30,36 @@
 //
 // ==============================================================================
 
-ITSBeam::ITSBeam ()
+// --------------------------------------------------------------------- ITS_Beam
+
+ITS_Beam::ITS_Beam ()
 {
   ITSMetadata meta;
   metadata_p = meta;
 }
 
-ITSBeam::ITSBeam (String const &metafile)
+// --------------------------------------------------------------------- ITS_Beam
+
+ITS_Beam::ITS_Beam (String const &metafile)
 {
   setMetafile (metafile);
 }
 
-ITSBeam::ITSBeam (String const &metafile,
-		  uint const &blocksize)
+// --------------------------------------------------------------------- ITS_Beam
+
+ITS_Beam::ITS_Beam (String const &metafile,
+		    uint const &blocksize)
   : DataReader (blocksize)
 {
   setMetafile (metafile);
 }
 
-ITSBeam::ITSBeam (String const &metafile,
-		  uint const &blocksize,
-		  Vector<Double> const &adc2voltage,
-		  Matrix<DComplex> const &fft2calfft)
+// --------------------------------------------------------------------- ITS_Beam
+
+ITS_Beam::ITS_Beam (String const &metafile,
+		    uint const &blocksize,
+		    Vector<Double> const &adc2voltage,
+		    Matrix<DComplex> const &fft2calfft)
   : DataReader (blocksize,
 		adc2voltage,
 		fft2calfft)
@@ -58,7 +67,9 @@ ITSBeam::ITSBeam (String const &metafile,
   setMetafile (metafile);
 }
 
-ITSBeam::ITSBeam (ITSBeam const &other)
+// --------------------------------------------------------------------- ITS_Beam
+
+ITS_Beam::ITS_Beam (ITS_Beam const &other)
 {
   copy (other);
 }
@@ -69,12 +80,12 @@ ITSBeam::ITSBeam (ITSBeam const &other)
 //
 // ==============================================================================
 
-ITSBeam::~ITSBeam ()
+ITS_Beam::~ITS_Beam ()
 {
   destroy();
 }
 
-void ITSBeam::destroy ()
+void ITS_Beam::destroy ()
 {;}
 
 // ==============================================================================
@@ -83,7 +94,7 @@ void ITSBeam::destroy ()
 //
 // ==============================================================================
 
-ITSBeam& ITSBeam::operator= (ITSBeam const &other)
+ITS_Beam& ITS_Beam::operator= (ITS_Beam const &other)
 {
   if (this != &other) {
     destroy ();
@@ -92,7 +103,7 @@ ITSBeam& ITSBeam::operator= (ITSBeam const &other)
   return *this;
 }
 
-void ITSBeam::copy (ITSBeam const &other)
+void ITS_Beam::copy (ITS_Beam const &other)
 {
   metadata_p = other.metadata_p;
 }
@@ -103,7 +114,7 @@ void ITSBeam::copy (ITSBeam const &other)
 //
 // ==============================================================================
 
-void ITSBeam::setMetafile (String const &metafile)
+void ITS_Beam::setMetafile (String const &metafile)
 {
   bool status (true);
   
@@ -111,7 +122,7 @@ void ITSBeam::setMetafile (String const &metafile)
   try {
     metadata_p.setMetafile (metafile);
   } catch (AipsError x) {
-    cerr << "[ITSBeam::setMetafile] " << x.getMesg() << endl;
+    cerr << "[ITS_Beam::setMetafile] " << x.getMesg() << endl;
     status = false;
   }
   
@@ -129,7 +140,7 @@ void ITSBeam::setMetafile (String const &metafile)
 
 // ------------------------------------------------------------------- setStreams
 
-Bool ITSBeam::setStreams ()
+Bool ITS_Beam::setStreams ()
 {
   bool status (true);
 
@@ -141,7 +152,7 @@ Bool ITSBeam::setStreams ()
   DataIterator *iterator;
   
   /*
-    Configure the DataIterator objects: for ITSBeam data, the values are
+    Configure the DataIterator objects: for ITS_Beam data, the values are
     stored as short integer without any header information preceeding the
     data within the data file.
   */
@@ -191,7 +202,7 @@ Bool ITSBeam::setStreams ()
 
 // --------------------------------------------------------------------------- fx
 
-Matrix<Double> ITSBeam::fx ()
+Matrix<Double> ITS_Beam::fx ()
 {
   uint i (0);
   int errstat(0);
@@ -209,7 +220,7 @@ Matrix<Double> ITSBeam::fx ()
     try{
       fileStream_p[selectedAntennas_p(file)].seekg(iterator_p[selectedAntennas_p(file)].position(), ios::beg);
     } catch (AipsError x) {
-      cerr << "[ITSBeam::fx] " << x.getMesg() << endl;
+      cerr << "[ITS_Beam::fx] " << x.getMesg() << endl;
       errstat = 1;
     }
     
@@ -218,7 +229,7 @@ Matrix<Double> ITSBeam::fx ()
 						   sizeof (datatype_p)*blocksize_p);
     } catch (AipsError x) {
       errstat = 2;
-      cerr << "[ITSBeam::fx] " << x.getMesg() << endl;
+      cerr << "[ITS_Beam::fx] " << x.getMesg() << endl;
     }
     
     if (errstat == 0) {
