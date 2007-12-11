@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Creates a ps from a tex file containig all the single .ps - plots
+# comming out of the Event-Pipeline
+#
+# author: Frank Schröder
+#
+# code was taken from "maketexCG" and modified
+
+# Create header of tex file
+cat >> results.tex << EOF
+\documentclass[a4paper]{article}
+\usepackage{psfig,a4wide}
+\setlength{\textheight}{24cm}
+\setlength{\topmargin}{0.0cm}
+\parindent=0pt
+\begin{document}
+EOF
+
+# event number (loop counter)
+f=$(0)
+
+# loop through all event-output plots
+for filename in *-all.ps; do
+
+# increase loop counter
+f=$((f + 1))
+
+# find prefix of the 3 plots of the same event   
+prefix=${filename%-all.ps}
+
+# Add one line for the three plots of each event
+cat >> results.tex << EOF
+$f\quad\begin{minipage}[h]{0.32\textwidth}\psfig{figure=$prefix-all.ps,width=\textwidth,angle=-90}\end{minipage}
+\$\;\$\begin{minipage}[h]{0.32\textwidth}\psfig{figure=$prefix-CC.ps,width=\textwidth,angle=-90}\end{minipage}
+\$\;\$\begin{minipage}[h]{0.32\textwidth}\psfig{figure=$prefix-X.ps,width=\textwidth,angle=-90}\end{minipage}\\
+EOF
+
+
+done
+
+# finish tex file
+cat >> results.tex << EOF
+\end{document}
+EOF
+
+# run latex and create ps-file results.ps
+latex results.tex ; dvips results 
+
+
