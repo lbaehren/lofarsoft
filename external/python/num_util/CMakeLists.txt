@@ -75,6 +75,8 @@ include_directories (
   ${NUM_UTIL_SOURCE_DIR}/../../../release/lib/python2.4/site-packages/numpy/core/include
   )
 
+add_definitions (-fPIC)
+
 add_library (num_util
   num_util.cpp
   )
