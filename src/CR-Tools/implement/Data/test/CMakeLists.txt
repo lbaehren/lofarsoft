@@ -31,6 +31,9 @@ endforeach (src)
 ## -----------------------------------------------------------------------------
 ## Build the test programs working with input data sets
 
+add_executable (tLOFAR_StationGroup tLOFAR_StationGroup.cc)
+target_link_libraries (tLOFAR_StationGroup cr)
+
 add_executable (tLOFAR_TBB tLOFAR_TBB.cc)
 target_link_libraries (tLOFAR_TBB cr)
 
@@ -43,6 +46,7 @@ find_file (tbb_dataset tbb_test_file_v2.h5
 
 if (tbb_dataset)
   add_test (tLOFAR_TBB tLOFAR_TBB ${tbb_dataset})
+  add_test (tLOFAR_StationGroup tLOFAR_StationGroup ${tbb_dataset})
 else (tbb_dataset)
   message (STATUS "Unable to run tLOFAR_TBB; no dataset found!")
 endif (tbb_dataset)

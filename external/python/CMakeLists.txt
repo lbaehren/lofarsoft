@@ -4,9 +4,15 @@ project (PYTHON_MODULES)
 ## ------------------------------------------------------------------------------
 ## Selection of available Python modules
 
-option (module_numarray "Build numarray module?" ON)
 option (module_matplotlib "Build matplotlib module?" ON)
-option (module_numeric "Build numeric module?" ON)
+option (nodule_numpy "Build numpy module?" ON)
+option (module_num_util "Build num_util module?" ON)
+
+## the following modules are outdated and have become replaced by newer ones; 
+## we might want to removed them completely at some point in the future.
+
+option (module_numarray "Build numarray module?" OFF)
+option (module_numeric "Build numeric module?" OFF)
 
 ## ------------------------------------------------------------------------------
 ## check where to find the CMake scripts
@@ -49,6 +55,25 @@ endif (module_matplotlib)
 if (module_numeric)
   add_subdirectory (numeric)
 endif (module_numeric)
+
+## [3] NumPy
+
+# NumPy is a replacement of Numeric Python that adds the features of numarray.  
+# To install:
+#   python setup.py install
+# The setup.py script will take advantage of fast BLAS on your system if it can
+# find it.  You can help the process with a site.cfg file.
+# If fast BLAS and LAPACK cannot be found, then a slower default version is used. 
+
+if (nodule_numpy)
+  add_subdirectory (numpy)
+endif (nodule_numpy)
+
+## [5] num_util
+
+if (module_num_util)
+  add_subdirectory (num_util)
+endif (module_num_util)
 
 ## ------------------------------------------------------------------------------
 ## Installation option for Python packages

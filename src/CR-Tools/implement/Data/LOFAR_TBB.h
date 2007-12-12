@@ -35,6 +35,7 @@
 #include <dal/dal.h>
 #include <dal/dalDataset.h>
 
+#include <Data/LOFAR_StationGroup.h>
 #include <IO/DataReader.h>
 
 namespace CR { // Namespace CR -- begin
@@ -65,6 +66,18 @@ namespace CR { // Namespace CR -- begin
     This class encapsulates the required functionality to connect the DataReader
     framework of the CR-Tools to the lower-level functionality of the Data Access
     Library (DAL), which handles the access to the standard LOFAR data products.
+
+    <ul>
+      <li><b>Signal channel ID</b> <br> 
+      The signal channel for an individual reception element (dipole) can be
+      uniquely identified through a combination of the following three separate
+      identifiers:
+      <ol>
+        <li>Station ID
+	<li>RSP ID
+	<li>RCU ID
+      </ol>
+    </ul>
     
     <h3>Example(s)</h3>
     
@@ -75,6 +88,9 @@ namespace CR { // Namespace CR -- begin
     std::string filename_p;
     //! DAL Dataset object to handle the basic I/O
     dalDataset *dataset_p;
+
+    //! Set of station groups within the data set
+    std::vector<CR::LOFAR_StationGroup> stationGroups_p;
 
     //! Name of the telescope
     std::string telescope_p;

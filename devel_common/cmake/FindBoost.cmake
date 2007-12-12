@@ -19,6 +19,7 @@ set (include_locations
   ## local installation
   ../release/include
   ../../release/include
+  ../../../release/include
   ## system-wide installation
   /include
   /usr/include

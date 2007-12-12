@@ -59,6 +59,7 @@ find_path (NUMARRAY_INCLUDES numarray.h libnumarray.h
   PATH_SUFFIXES
   python
   python/numarray
+  python/numarray/Include/numarray/arrayobject.h
   NO_DEFAULT_PATH
   )
 

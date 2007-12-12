@@ -186,6 +186,7 @@ namespace CR { // Namespace CR -- begin
     bool status (true);
     dalGroup * group = new dalGroup();
 
+    std::cout << "-> Extracting group of name " << groupName << std::endl;
     try {
       group = dataset_p->openGroup(groupName);
     } catch (std::string message) {

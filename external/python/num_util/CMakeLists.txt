@@ -1,5 +1,5 @@
 ##------------------------------------------------------------------------------
-## $Id$
+## $Id::                                                                       $
 ##------------------------------------------------------------------------------
 
 ## -----------------------------------------------------------------------------
@@ -11,46 +11,12 @@ project (NUM_UTIL)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.4)
 
-set (NUM_UTIL_VERSION_MAJOR 2)
-set (NUM_UTIL_VERSION_MINOR 1)
-set (NUM_UTIL_VERSION "${WCSLIB_VERSION_MAJOR}.${WCSLIB_VERSION_MINOR}")
-
-## -----------------------------------------------------------------------------
-## Standard locations where to look for required components
-
-set (bin_locations
-  /usr/bin
-  /usr/local/bin
-  /sw/bin
-  ${NUM_UTIL_SOURCE_DIR}/../release/bin
-  ${NUM_UTIL_SOURCE_DIR}/../../release/bin
-  )
-
-set (include_locations
-  /usr/include
-  /usr/local/include
-  /Developer/SDKs/MacOSX10.4u.sdk/usr/include/c++/4.0.0
-  /sw/include
-  /sw/lib/gcc4.2/include/c++/4.2.1
-)
-
-set (lib_locations
-  /usr/lib
-  /usr/local/lib
-  /sw/lib
-)
-
-##include (CheckFunctionExists)
-##include (CheckIncludeFiles)
-##include (CheckLibraryExists)
-include (CPack)
-
 ## -----------------------------------------------------------------------------
 ## Check for required external libraries
 
 ## Locate additional CMake find scripts
 
-find_path (NUM_UTIL_cmake FindCFITSIO.cmake FindG2C.cmake FindLAPACK.cmake
+find_path (NUM_UTIL_cmake FindBoost.cmake FindPython.cmake FindNumarray.cmake
   PATHS 
   ${NUM_UTIL_SOURCE_DIR}
   ${NUM_UTIL_SOURCE_DIR}/..
@@ -63,15 +29,55 @@ find_path (NUM_UTIL_cmake FindCFITSIO.cmake FindG2C.cmake FindLAPACK.cmake
 ## locate external packages
 
 if (NUM_UTIL_cmake)
-  ## Boost
+  ## --- Boost -----------------------------------
   set (BOOST_FIND_QUIETLY 1)
   include (${NUM_UTIL_cmake}/FindBoost.cmake)
-  ## Python
+  ## --- Python ----------------------------------
   set (PYTHON_FIND_QUIETLY 1)
   include (${NUM_UTIL_cmake}/FindPython.cmake)
 else (NUM_UTIL_cmake)
-  message (SEND_ERROR "Unable to locate additional CMake find scripts!")
+  message (SEND_ERROR "[NUM_UTIL] Unable to locate CMake find scripts!")
 endif (NUM_UTIL_cmake)
+
+## Set location of the header files
+
+if (BOOST_INCLUDES)
+  include_directories (${BOOST_INCLUDES})
+endif (BOOST_INCLUDES)
+
+if (PYTHON_INCLUDES)
+  include_directories (${PYTHON_INCLUDES})
+endif (PYTHON_INCLUDES)
+
+if (NUMPY_INCLUDES)
+  include_directories (${NUMPY_INCLUDES})
+endif (NUMPY_INCLUDES)
+
+## -----------------------------------------------------------------------------
+## Compilation targets
+#
+# all: num_py_test.py simpletest.py
+# num_py_test.py : num_test_ext.so
+# 	$(PYTHON_DIR)/bin/python num_py_test.py
+# simpletest.py : simple_ext.so
+# 	$(PYTHON_DIR)/bin/python simpletest.py
+# num_test_ext.so: num_util.o num_test.o num_test_ext.o
+# num_test_ext.o : num_test_ext.cpp num_test.h
+# simple_ext.so : num_util.o simpletest.o
+# 	g++ -$(LDFLAGS) -o $@  $(LIBDIRS)  $(PYLIBS)  $^
+# num_test.o  : num_test.cpp num_util.o num_test.h
+# num_util.o  : num_util.cpp  num_util.h
+# simpletest.o  : num_util.o num_util.h simpletest.cpp
+
+include_directories (
+  ${NUM_UTIL_SOURCE_DIR}/../../../release/include
+  ${NUM_UTIL_SOURCE_DIR}/../../../release/lib/python2.5/site-packages/numpy/core/include
+  ${NUM_UTIL_SOURCE_DIR}/../../../release/lib/python2.4/site-packages/numpy/core/include
+  )
+
+add_library (num_util
+  num_util.cpp
+  )
 
 ## -----------------------------------------------------------------------------
 ## Installation
@@ -88,34 +94,14 @@ find_path (NUM_UTIL_INSTALL_PREFIX release_area.txt
 
 if (NUM_UTIL_INSTALL_PREFIX)
   message (STATUS "Installation area located for package NUM_UTIL.")
-  set (CMAKE_INSTALL_PREFIX ${NUM_UTIL_INSTALL_PREFIX}) 
+  ## Installation of the library
+  install (TARGETS num_util
+    DESTINATION ${NUM_UTIL_INSTALL_PREFIX}/lib
+    )
+  ## Installation of the header files
+  install (FILES num_util.h
+    DESTINATION ${NUM_UTIL_INSTALL_PREFIX}/include/python/num_util
+    )
+else (NUM_UTIL_INSTALL_PREFIX)
+  message (STATUS "Unable to locate installation area for package NUM_UTIL.")
 endif (NUM_UTIL_INSTALL_PREFIX)
-
-## -----------------------------------------------------------------------------
-## Summary of settings
-
-#message (STATUS "CFITSIO ............... = ${HAVE_CFITSIO}")
-
-
-## -----------------------------------------------------------------------------
-## Compilation targets
-
-set (NUM_UTIL_sources num_util.cpp)
-set (NUM_UTIL_headers num_util.h)
-
-include_directories (
-  ${BOOST_INCLUDES}
-  ${PYTHON_INCLUDES}
-  ${PYTHON_INCLUDES}/../../lib/python2.5/site-packages/numpy/core/include
-)
-
-add_library (num_util STATIC ${NUM_UTIL_sources})
-
-install (TARGETS num_util DESTINATION lib)
-install (FILES ${NUM_UTIL_headers} DESTINATION include)
-
-## this is how one should use it
-#add_library (simple_ext MODULE simpletest.cpp)
-#target_link_libraries (simple_ext num_util ${BOOST_boost_python})
-#set_target_properties (simple_ext PROPERTIES PREFIX "")
-#set_target_properties(simple_ext PROPERTIES LINK_FLAGS "-bundle_loader ${PYTHON_EXECUTABLE}")
