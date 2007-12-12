@@ -84,25 +84,25 @@ nchannels = data12.shape[1] # second element of the data shape i.e. (4,256,nrows
 
 # calculate phases
 if quantity_plot == 'channel':       
-	ampl12 = hypot((data12[pol,:,:]).real,(data12[pol,:,:]).imag)
-        ampl34 = hypot((data34[pol,:,:]).real,(data34[pol,:,:]).imag)
-        ampl13 = hypot((data13[pol,:,:]).real,(data13[pol,:,:]).imag)
-        ampl24 = hypot((data24[pol,:,:]).real,(data24[pol,:,:]).imag)
+	ampl12 = hypot((data12[:,:,pol]).real,(data12[:,:,pol]).imag)
+        ampl34 = hypot((data34[:,:,pol]).real,(data34[:,:,pol]).imag)
+        ampl13 = hypot((data13[:,:,pol]).real,(data13[:,:,pol]).imag)
+        ampl24 = hypot((data24[:,:,pol]).real,(data24[:,:,pol]).imag)
 	if pol2:
-		ampl12_2 = hypot((data12[pol2,:,:]).real,(data12[pol2,:,:]).imag)
-		ampl34_2 = hypot((data34[pol2,:,:]).real,(data34[pol2,:,:]).imag)
-		ampl13_2 = hypot((data13[pol2,:,:]).real,(data13[pol2,:,:]).imag)
-		ampl24_2 = hypot((data24[pol2,:,:]).real,(data24[pol2,:,:]).imag)
+		ampl12_2 = hypot((data12[:,:,pol2]).real,(data12[:,:,pol2]).imag)
+		ampl34_2 = hypot((data34[:,:,pol2]).real,(data34[:,:,pol2]).imag)
+		ampl13_2 = hypot((data13[:,:,pol2]).real,(data13[:,:,pol2]).imag)
+		ampl24_2 = hypot((data24[:,:,pol2]).real,(data24[:,:,pol2]).imag)
 elif quantity_plot == 'time':
-	ampl12 = hypot((data12[pol,:,:]).real,(data12[pol,:,:]).imag)
-        ampl34 = hypot((data34[pol,:,:]).real,(data34[pol,:,:]).imag)
-        ampl13 = hypot((data13[pol,:,:]).real,(data13[pol,:,:]).imag)
-        ampl24 = hypot((data24[pol,:,:]).real,(data24[pol,:,:]).imag)
+	ampl12 = hypot((data12[:,:,pol]).real,(data12[:,:,pol]).imag)
+        ampl34 = hypot((data34[:,:,pol]).real,(data34[:,:,pol]).imag)
+        ampl13 = hypot((data13[:,:,pol]).real,(data13[:,:,pol]).imag)
+        ampl24 = hypot((data24[:,:,pol]).real,(data24[:,:,pol]).imag)
 	if pol2:
-		ampl12_2 = hypot((data12[pol2,:,:]).real,(data12[pol2,:,:]).imag)
-		ampl34_2 = hypot((data34[pol2,:,:]).real,(data34[pol2,:,:]).imag)
-		ampl13_2 = hypot((data13[pol2,:,:]).real,(data13[pol2,:,:]).imag)
-		ampl24_2 = hypot((data24[pol2,:,:]).real,(data24[pol2,:,:]).imag)
+		ampl12_2 = hypot((data12[:,:,pol2]).real,(data12[:,:,pol2]).imag)
+		ampl34_2 = hypot((data34[:,:,pol2]).real,(data34[:,:,pol2]).imag)
+		ampl13_2 = hypot((data13[:,:,pol2]).real,(data13[:,:,pol2]).imag)
+		ampl24_2 = hypot((data24[:,:,pol2]).real,(data24[:,:,pol2]).imag)
 
 closure = (ampl12*ampl34)/(ampl13*ampl24)
 if pol2: closure_2 = (ampl12_2*ampl34_2)/(ampl13_2*ampl24_2)
@@ -112,8 +112,8 @@ if pol2: closure_2 = (ampl12_2*ampl34_2)/(ampl13_2*ampl24_2)
 if (range_plot != -1):
 	if quantity_plot == 'channel':
 		# plot data of given data vs. time
-		plot( time, closure[range_plot,:], "," )
-		if pol2: plot( time, closure_2[range_plot,:], "," )
+		plot( time, closure[:,range_plot], "," )
+		if pol2: plot( time, closure_2[:,range_plot], "," )
 		title("Time vs. Closure Amplitude, Baseline " + \
 		      sys.argv[2] + '-' + sys.argv[3] + '-' + sys.argv[4] +  '-' + sys.argv[5] + ", Sub-band(" + sys.argv[6] +
 		      ") " + " Channel(" + str(range_plot) + ")\n" + sys.argv[1] )
@@ -121,8 +121,8 @@ if (range_plot != -1):
 
 	elif quantity_plot == 'time':
 		# plot intensity of given data vs. channel
-		plot( closure[:,range_plot], "," )
-		if pol2:  plot( closure_2[:,range_plot], "," )
+		plot( closure[range_plot,:], "," )
+		if pol2:  plot( closure_2[range_plot,:], "," )
 		title("Channel vs. Closure Amplitude, Baseline " + \
 		      sys.argv[2] + '-' + sys.argv[3] + '-' + sys.argv[4] +  '-' + sys.argv[5] + ", Sub-band(" + sys.argv[6] +
 		      ") " + " Time(" + str(time[range_plot]) + " MJD)\n" + sys.argv[1] )
@@ -133,8 +133,8 @@ else:
 	if quantity_plot == 'channel':
 		# plot intensity of each channel vs. time
 		for channel in range( nchannels ):
-			plot( closure[channel,:], "," )
-			if pol2: plot( closure_2[channel,:], "," )
+			plot( closure[:,channel], "," )
+			if pol2: plot( closure_2[:,channel], "," )
 			title("Time vs. Closure Amplitude, Baseline " + \
 			      sys.argv[2] + '-' + sys.argv[3] + '-' + sys.argv[4] +  '-' + sys.argv[5] + ", Sub-band(" + sys.argv[6] +
 			      ") " + str(data12.shape[1]) + " channels" + '\n' + sys.argv[1] )
@@ -142,8 +142,8 @@ else:
 	if quantity_plot == 'time':
 		# plot intensity at each time vs. channel
 		for t in range( len(time) ):
-			plot( closure[:,t], "," )
-			if pol2:  plot( closure_2[:,t], "," )
+			plot( closure[t,:], "," )
+			if pol2:  plot( closure_2[t,:], "," )
 			title("Time vs. Closure Amplitude, Baseline " + \
 			      sys.argv[2] + '-' + sys.argv[3] +  '-' + sys.argv[4] +  '-' + sys.argv[5] + ", Sub-band(" + sys.argv[6] +
 			      ") " + str(len(time)) + " times" + '\n' + sys.argv[1] )

@@ -68,11 +68,11 @@ data34 = data_col34.data()
 nchannels = data12.shape[1] # second element of the data shape i.e. (4,256,nrows)
 
 # calculate phases
-phase12 = arctan2((data12[pol,:,:]).imag,(data12[pol,:,:]).real)
-phase34 = arctan2((data34[pol,:,:]).imag,(data34[pol,:,:]).real)
+phase12 = arctan2((data12[:,:,pol]).imag,(data12[:,:,pol]).real)
+phase34 = arctan2((data34[:,:,pol]).imag,(data34[:,:,pol]).real)
 if pol2:
-	phase12_2 = arctan2((data12[pol2,:,:]).imag,(data12[pol2,:,:]).real)
-	phase34_2 = arctan2((data34[pol2,:,:]).imag,(data34[pol2,:,:]).real)
+	phase12_2 = arctan2((data12[:,:,pol2]).imag,(data12[:,:,pol2]).real)
+	phase34_2 = arctan2((data34[:,:,pol2]).imag,(data34[:,:,pol2]).real)
 
 difference = (phase12 - phase34)
 # normalize range to -pi to +pi
@@ -90,13 +90,13 @@ if (range_plot != -1):
 	if quantity_plot == 'channel':
 		# plot data of given data vs. time
 		subplot(212)
-                plot( time, difference[range_plot,:], ',')
-		if pol2: plot( time, difference_2[range_plot,:], "," )
+                plot( time, difference[:,range_plot], ',')
+		if pol2: plot( time, difference_2[:,range_plot], "," )
 		xlabel("Time (MJD)")
 		ylabel("Phase difference (rad)")
 		subplot(211)
-		plot( time, phase12[range_plot,:], ',', time, phase34[range_plot,:], ',')
-		if pol2: plot( time, phase12_2[range_plot,:], ',', time, phase34_2[range_plot,:], ',')
+		plot( time, phase12[:,range_plot], ',', time, phase34[:,range_plot], ',')
+		if pol2: plot( time, phase12_2[:,range_plot], ',', time, phase34_2[:,range_plot], ',')
 		ylabel("Phase (rad)")
 		title("Time vs. Phase Difference, Antennas " + \
 		      sys.argv[2] + '-' + sys.argv[3] + '/' + sys.argv[4] + '-' + sys.argv[5] + ", Sub-band(" + sys.argv[6] +
@@ -104,8 +104,8 @@ if (range_plot != -1):
 
 	elif quantity_plot == 'time':
 		# plot intensity of given data vs. channel
-		plot( difference[:,range_plot], "," )
-		if pol2: plot( difference_2[:,range_plot], "," )
+		plot( difference[range_plot,:], "," )
+		if pol2: plot( difference_2[range_plot,:], "," )
 		title("Channel vs. Phase Difference, Antennas " + \
 		      sys.argv[2] + '-' + sys.argv[3] + '/' + sys.argv[4] + '-' + sys.argv[5] + ", Sub-band(" + sys.argv[6] +
 		      ") " + " Time(" + str(time[range_plot]) + " MJD)\n" + sys.argv[1] )
@@ -117,8 +117,8 @@ else:
 	if quantity_plot == 'channel':
 		# plot intensity of each channel vs. time
 		for channel in range( nchannels ):
-			plot( difference[channel,:], "," )
-			if pol2:  plot( difference_2[channel,:], "," )
+			plot( difference[:,channel], "," )
+			if pol2:  plot( difference_2[:,channel], "," )
 			title("Channel vs. Phase Difference, Antennas " + \
 			      sys.argv[2] + '-' + sys.argv[3] + '/' + sys.argv[4] + '-' + sys.argv[5] + ", Sub-band(" + sys.argv[6] +
 			      ") " + " Channel(" + str(range_plot) + ")\n" + sys.argv[1] )
@@ -127,8 +127,8 @@ else:
 	if quantity_plot == 'time':
 		# plot intensity at each time vs. channel
 		for t in range( len(time) ):
-			plot( difference[:,t], "," )
-			if pol2:  plot( difference_2[:,t], "," )
+			plot( difference[t,:], "," )
+			if pol2:  plot( difference_2[t,:], "," )
 			title("Time vs. Phase Difference, Antennas " + \
 			      sys.argv[2] + '-' + sys.argv[3] + '/' + sys.argv[4] + '-' + sys.argv[5] + ", Sub-band(" + sys.argv[6] +
 			      ") " + str(len(time)) + " times" + '\n' + sys.argv[1] )

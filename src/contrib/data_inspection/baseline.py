@@ -85,11 +85,11 @@ if (range_plot != -1):
 	if quantity_plot == 'channel':
 		# plot data of given data vs. time
 		if data_plot == 'a':
-			current_value = hypot((data[pol,range_plot,:]).real,(data[pol,range_plot,:]).imag)
-			if pol2:  current_value2 = hypot((data[pol2,range_plot,:]).real,(data[pol2,range_plot,:]).imag)
+			current_value = hypot((data[:,range_plot,pol]).real,(data[:,range_plot,pol]).imag)
+			if pol2:  current_value2 = hypot((data[:,range_plot,pol2]).real,(data[:,range_plot,pol2]).imag)
                 elif data_plot == 'p':
-			current_value = arctan2((data[pol,range_plot,:]).imag,(data[pol,range_plot,:]).real)%2*pi-pi
-			if pol2:  current_value2 = arctan2((data[pol2,range_plot,:]).imag,(data[pol2,range_plot,:]).real)%2*pi-pi
+			current_value = arctan2((data[:,range_plot,pol]).imag,(data[:,range_plot,pol]).real)%2*pi-pi
+			if pol2:  current_value2 = arctan2((data[:,range_plot,pol2]).imag,(data[:,range_plot,pol2]).real)%2*pi-pi
 		plot( time, current_value, "," )
 		if pol2:  plot( time, current_value2, "," )
 		if axis_range:  axis(axis_range)
@@ -102,11 +102,11 @@ if (range_plot != -1):
 	elif quantity_plot == 'time':
 		# plot intensity of given data vs. channel
 		if data_plot == 'a':
-			current_value = hypot(array((data[pol,:,range_plot]).real),array((data[pol,:,range_plot]).imag))
-			if pol2:  current_value2 = hypot(array((data[pol2,:,range_plot]).real),array((data[pol2,:,range_plot]).imag))
+			current_value = hypot((data[range_plot,:,pol]).real,(data[range_plot,:,pol]).imag)
+			if pol2:  current_value2 = hypot((data[range_plot,:,pol2]).real,(data[range_plot,:,pol2]).imag)
                 elif data_plot == 'p':
-			current_value = arctan2(array((data[pol,:,range_plot]).imag),array((data[pol,:,range_plot]).real))%2*pi-pi
-			if pol2: current_value2 = arctan2(array((data[pol2,:,range_plot]).imag),array((data[pol2,:,range_plot]).real))%2*pi-pi
+			current_value = arctan2((data[range_plot,:,pol]).imag,(data[range_plot,:,pol]).real)%2*pi-pi
+			if pol2: current_value2 = arctan2((data[range_plot,:,pol2]).imag,(data[range_plot,:,pol2]).real)%2*pi-pi
 		plot( current_value, "," )
 		if pol2: plot( current_value2, "," )
 		if axis_range:  axis(axis_range)
@@ -123,13 +123,13 @@ else:
 		# plot intensity of each channel vs. time
 		for channel in range( nchannels ):
 			if data_plot == 'a':
-				current_value = hypot(array((data[pol,channel,:]).real),array((data[pol,channel,:]).imag))
-				if pol2: current_value2 = hypot(array((data[pol2,channel,:]).real),array((data[pol2,channel,:]).imag))
+				current_value = hypot((data[:,channel,pol]).real,(data[:,channel,pol]).imag)
+				if pol2: current_value2 = hypot((data[:,channel,pol2]).real,(data[:,channel,pol2]).imag)
 				current_value_min = min(current_value_min,min(current_value))
 				current_value_max = max(current_value_max,max(current_value))
                         elif data_plot == 'p':
-				current_value = arctan2(array((data[pol,channel,:]).imag),array((data[pol,channel,:]).real))%2*pi-pi
-				if pol2: current_value2 = arctan2(array((data[pol2,channel,:]).imag),array((data[pol2,channel,:]).real))%2*pi-pi
+				current_value = arctan2((data[:,channel,pol]).imag),array((data[:,channel,pol]).real)%2*pi-pi
+				if pol2: current_value2 = arctan2((data[:,channel,pol2]).imag,(data[:,channel,pol2]).real)%2*pi-pi
 			plot( time, current_value, "," )
 			if pol2: plot ( time, current_value2, ",")
 			if axis_range:  axis(axis_range)
@@ -143,11 +143,11 @@ else:
 		# plot intensity at each time vs. channel
 		for t in range( len(time) ):
                         if data_plot == 'a':
-				current_value = hypot(array((data[pol,:,t]).real),array((data[pol,:,t]).imag))
-				if pol2: current_value2 = hypot(array((data[pol2,:,t]).real),array((data[pol2,:,t]).imag))
+				current_value = hypot((data[t,:,pol]).real,(data[t,:,pol]).imag)
+				if pol2: current_value2 = hypot((data[t,:,pol2]).real,(data[t,:,pol2]).imag)
                         elif data_plot == 'p':
-				current_value = arctan2(array((data[pol,:,t]).imag),array((data[pol,:,t]).real))%2*pi-pi
-				if pol2: current_value2 = arctan2(array((data[pol2,:,t]).imag),array((data[pol2,:,t]).real))%2*pi-pi
+				current_value = arctan2((data[t,:,pol]).imag,(data[t,:,pol]).real)%2*pi-pi
+				if pol2: current_value2 = arctan2((data[t,:,pol2]).imag,(data[t,:,pol2]).real)%2*pi-pi
 			plot( current_value, "," )
 			if pol2: plot( current_value2, ",")
 			if axis_range:  axis(axis_range)

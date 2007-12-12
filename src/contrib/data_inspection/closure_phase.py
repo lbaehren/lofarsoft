@@ -76,21 +76,21 @@ nchannels = data12.shape[1] # second element of the data shape i.e. (4,256,nrows
 
 # calculate phases
 if quantity_plot == 'channel':       
-	phase12 = arctan2((data12[pol,:,:]).imag,(data12[pol,:,:]).real)
-	phase23 = arctan2((data23[pol,:,:]).imag,(data23[pol,:,:]).real)
-	phase13 = arctan2((data13[pol,:,:]).imag,(data13[pol,:,:]).real)
+	phase12 = arctan2((data12[:,:,pol]).imag,(data12[:,:,pol]).real)
+	phase23 = arctan2((data23[:,:,pol]).imag,(data23[:,:,pol]).real)
+	phase13 = arctan2((data13[:,:,pol]).imag,(data13[:,:,pol]).real)
 	if pol2:
-		phase12_2 = arctan2((data12[pol2,:,:]).imag,(data12[pol2,:,:]).real)
-		phase23_2 = arctan2((data23[pol2,:,:]).imag,(data23[pol2,:,:]).real)
-		phase13_2 = arctan2((data13[pol2,:,:]).imag,(data13[pol2,:,:]).real)
+		phase12_2 = arctan2((data12[:,:,pol2]).imag,(data12[:,:,pol2]).real)
+		phase23_2 = arctan2((data23[:,:,pol2]).imag,(data23[:,:,pol2]).real)
+		phase13_2 = arctan2((data13[:,:,pol2]).imag,(data13[:,:,pol2]).real)
 elif quantity_plot == 'time':
-	phase12 = arctan2((data12[pol,:,:]).imag,(data12[pol,:,:]).real)
-        phase23 = arctan2((data23[pol,:,:]).imag,(data23[pol,:,:]).real)
-        phase13 = arctan2((data13[pol,:,:]).imag,(data13[pol,:,:]).real)
+	phase12 = arctan2((data12[:,:,pol]).imag,(data12[:,:,pol]).real)
+        phase23 = arctan2((data23[:,:,pol]).imag,(data23[:,:,pol]).real)
+        phase13 = arctan2((data13[:,:,pol]).imag,(data13[:,:,pol]).real)
 	if pol2:
-		phase12_2 = arctan2((data12[pol2,:,:]).imag,(data12[pol2,:,:]).real)
-		phase23_2 = arctan2((data23[pol2,:,:]).imag,(data23[pol2,:,:]).real)
-		phase13_2 = arctan2((data13[pol2,:,:]).imag,(data13[pol2,:,:]).real)
+		phase12_2 = arctan2((data12[:,:,pol2]).imag,(data12[:,:,pol2]).real)
+		phase23_2 = arctan2((data23[:,:,pol2]).imag,(data23[:,:,pol2]).real)
+		phase13_2 = arctan2((data13[:,:,pol2]).imag,(data13[:,:,pol2]).real)
 
 closure = (phase12 + phase23 - phase13)%2*pi-pi
 if pol2: closure_2 = (phase12_2 + phase23_2 - phase13_2)%2*pi-pi
@@ -101,8 +101,8 @@ closure[where(closure > pi)] = closure[where(closure > pi)] - 2*pi
 if (range_plot != -1):
 	if quantity_plot == 'channel':
 		# plot data of given data vs. time
-		plot( time, closure[range_plot,:], "," )
-		if pol2: plot( time, closure_2[range_plot,:], "," )
+		plot( time, closure[:,range_plot], "," )
+		if pol2: plot( time, closure_2[:,range_plot], "," )
 		title("Time vs. Closure Phase, Antennas " + \
 		      sys.argv[2] + '-' + sys.argv[3] + '-' + sys.argv[4] + ", Sub-band(" + sys.argv[5] +
 		      ") " + " Channel(" + str(range_plot) + ")\n" + sys.argv[1] )
@@ -110,8 +110,8 @@ if (range_plot != -1):
 
 	elif quantity_plot == 'time':
 		# plot intensity of given data vs. channel
-		plot( closure[:,range_plot], "," )
-		if pol2: plot( closure_2[:,range_plot], "," )
+		plot( closure[range_plot,:], "," )
+		if pol2: plot( closure_2[range_plot,:], "," )
 		title("Channel vs. Closure Phase, Antennas " + \
 		      sys.argv[2] + '-' + sys.argv[3] + '-' + sys.argv[4] + ", Sub-band(" + sys.argv[5] +
 		      ") " + " Time(" + str(time[range_plot]) + " MJD)\n" + sys.argv[1] )
@@ -122,8 +122,8 @@ else:
 	if quantity_plot == 'channel':
 		# plot intensity of each channel vs. time
 		for channel in range( nchannels ):
-			plot( closure[channel,:], "," )
-			if pol2:  plot( closure_2[channel,:], "," )
+			plot( closure[:,channel], "," )
+			if pol2:  plot( closure_2[:,channel], "," )
 			title("Channel vs. Closure Phase, Antennas " + \
 			      sys.argv[2] + '-' + sys.argv[3] + '-' + sys.argv[4] + ", Sub-band(" + sys.argv[5] +
 			      ") " + " Channel(" + str(range_plot) + ")\n" + sys.argv[1] )
@@ -131,8 +131,8 @@ else:
 	if quantity_plot == 'time':
 		# plot intensity at each time vs. channel
 		for t in range( len(time) ):
-			plot( closure[:,t], "," )
-			if pol2:  plot( closure_2[:,t], "," )
+			plot( closure[t,:], "," )
+			if pol2:  plot( closure_2[t,:], "," )
 			title("Time vs. Closure Phase, Antennas " + \
 			      sys.argv[2] + '-' + sys.argv[3] + '-' + sys.argv[4] + ", Sub-band(" + sys.argv[5] +
 			      ") " + str(len(time)) + " times" + '\n' + sys.argv[1] )
