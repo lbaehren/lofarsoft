@@ -56,7 +56,10 @@ namespace CR { // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[CR] DataReader
+      <li>[CR] DataReader -- Base class of CR-Tools data I/O framework.
+      <li>[CR] LOFAR_StationGroup -- Container for the data in the StationGroup
+      of LOFAR times-series data, essentially a wrapper for the special case of
+      a dalGroup object.
       <li>[DAL] dalDataset
       <li>[DAL] dalGroup
     </ul>
@@ -92,21 +95,6 @@ namespace CR { // Namespace CR -- begin
     //! Set of station groups within the data set
     std::vector<CR::LOFAR_StationGroup> stationGroups_p;
 
-    //! Name of the telescope
-    std::string telescope_p;
-    //! Name of the observer
-    std::string observer_p;
-    //! Project name/description
-    std::string project_p;
-    //! Observation ID
-    std::string observationID_p;
-    //! Observation mode
-    std::string observationMode_p;
-    //! Trigger type
-    std::string triggerType_p;
-    //! Trigger offset
-    double triggerOffset_p;
-    
     //! Identifiers for the individual channels/dipoles
     std::vector<std::string> channelID_p;
 
@@ -155,70 +143,27 @@ namespace CR { // Namespace CR -- begin
     }
 
     /*!
-      \brief Get the name of the telescope
-      
-      \return telescope -- The name of the telescope with which the data were
-              recorded.
+      \brief Get station groups embedded within the dataset
+
+      \return stationGroups -- Vector with a set of LOFAR_StationGroup objects,
+              encapsulating the contents of the groups within the dataset.
     */
-    inline std::string telescope () const {
-      return telescope_p;
+    inline std::vector<CR::LOFAR_StationGroup> stationGroups () const {
+      return stationGroups_p;
     }
 
     /*!
-      \brief Get the name of the observer
-      
-      \return observer -- The name of the observer.
-    */
-    inline std::string observer () const {
-      return observer_p;
-    }
-    
-    /*!
-      \brief Get the project name/description
-      
-      \return project -- Name/Description of the project for which this 
-              observation was carried out.
-    */
-    inline std::string project () const {
-      return project_p;
-    }
+      \brief Get the object encapsulating the data group for a specific station
 
-    /*!
-      \brief Get the observation ID
+      \param id -- Identifier for the station (group).
+      \param isStationID -- 
 
-      \return observationID -- The observation ID.
+      \return group -- LOFAR_StationGroup object encapsulating the contents of
+              a specific StationGroup within the dalDataset.
     */
-    inline std::string observationID () const {
-      return observationID_p;
-    }
-    
-    /*!
-      \brief Get the description of the observation mode
+    LOFAR_StationGroup stationGroup (uint const &id,
+				     bool const &isStationID=false);
 
-      \return observationMode -- Description/type of observation mode
-    */
-    inline std::string observationMode () const {
-      return observationMode_p;
-    }
-    
-    /*!
-      \brief Get the trigger type which cause recording this data
-
-      \return triggerType -- The trigger type which cause recording this data
-    */
-    inline std::string triggerType () const {
-      return triggerType_p;
-    }
-
-    /*!
-      \brief Get the trigger offset
-
-      \return triggerOffset -- The trigger offset.
-    */
-    inline double triggerOffset () const {
-      return triggerOffset_p;
-    }
-    
     /*!
       \brief Get the name of the class
       
@@ -230,15 +175,20 @@ namespace CR { // Namespace CR -- begin
 
     /*!
       \brief Provide a summary of the internal status
+      
+      \param listStationGroups -- Recursive summary of the embedded
+             LOFAR_StationGroup objects?
     */
-    inline void summary () {
-      summary (std::cout);
+    inline void summary (bool const &listStationGroups=false) {
+      summary (std::cout,
+	       listStationGroups);
     }
 
     /*!
       \brief Provide a summary of the internal status
     */
-    void summary (std::ostream &os);    
+    void summary (std::ostream &os,
+		  bool const &listStationGroups=false);    
 
     // ------------------------------------------------------------------ Methods
     
@@ -258,17 +208,6 @@ namespace CR { // Namespace CR -- begin
       \brief Get the list of available station groups within the data file
      */
     std::vector<std::string> getStationGroups ();
-
-    /*!
-      \brief Extract the keywords from the station group
-
-      \param groupName -- Name of the station group from which to extract the
-             keyword values.
-
-      \return status -- Status of the operation; returns <tt>false</tt> if an
-              error was encountered.
-     */
-    bool getStationGroupKeywords (std::string const &groupName);
 
     /*!
       \brief Unconditional copying

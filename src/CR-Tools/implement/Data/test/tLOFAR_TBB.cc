@@ -54,7 +54,7 @@ int test_LOFAR_TBB (std::string const &filename)
   try {
     LOFAR_TBB data (filename);
     //
-    data.summary(); 
+    data.summary(true); 
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;

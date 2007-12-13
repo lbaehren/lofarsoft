@@ -82,9 +82,8 @@ namespace CR { // Namespace CR -- begin
 
     /* Copy operations for this class*/
     filename_p  = other.filename_p;
-    telescope_p = other.telescope_p;
-    observer_p  = other.observer_p;
-    project_p   = other.project_p;
+
+    channelID_p.resize (other.channelID_p.size());
     channelID_p = other.channelID_p;
   }
 
@@ -94,18 +93,23 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  void LOFAR_TBB::summary (std::ostream &os)
+  void LOFAR_TBB::summary (std::ostream &os,
+			   bool const &listStationGroups)
   {
     os << "[LOFAR_TBB] Summar of object properties" << endl;
     os << "-- Name of data file . : " << filename_p              << endl;
     os << "-- Dataset type ...... : " << dataset_p->getType()    << endl;
-    os << "-- Telesope .......... : " << telescope_p             << endl;
-    os << "-- Observer .......... : " << observer_p              << endl;
-    os << "-- Project description : " << project_p               << endl;
-    os << "-- Observation ID .... : " << observationID_p         << endl;
-    os << "-- Observation mode .. : " << observationMode_p       << endl;
-    os << "-- Trigger type ...... : " << triggerType_p           << endl;
-    os << "-- Trigger offset .... : " << triggerOffset_p         << endl;
+    os << "-- Dataset name ...... : " << dataset_p->getName()    << endl;
+    os << "-- nof. station groups : " << stationGroups_p.size()  << endl;
+
+    /* The rest of the summary output is conditional, because given the number
+       station it might get quite a lot. */
+    
+    if (listStationGroups) {
+      for (uint station(0); station<stationGroups_p.size(); station++) {
+	stationGroups_p[station].summary();
+      }
+    }
   }  
   
   // ============================================================================
@@ -119,13 +123,6 @@ namespace CR { // Namespace CR -- begin
   bool LOFAR_TBB::init ()
   {
     bool status (true);
-
-    /* Initialize keywords/metadata */
-
-    telescope_p     = "UNDEFINED";
-    observer_p      = "UNDEFINED";
-    project_p       = "UNDEFINED";
-    observationID_p = "UNDEFINED";
 
     /* Connection to dataset via DAL layer */
 
@@ -144,12 +141,14 @@ namespace CR { // Namespace CR -- begin
 
     std::vector<std::string> stationGroups = getStationGroups();
 
-    if (stationGroups.size() == 1) {
-      status = getStationGroupKeywords(stationGroups[0]);
-    } else {
-      std::cerr << "[LOFAR_TBB] "
-		<< "Handling of multiple station groups not yet implemented!"
+    for (uint station(0); station<stationGroups.size(); station++) {
+      std::cout << "-- storing information for group "
+		<< stationGroups[station]
 		<< endl;
+      //
+      LOFAR_StationGroup group ((*dataset_p),
+				stationGroups[station]);
+      stationGroups_p.push_back(group);
     }
     
     return status;
@@ -177,47 +176,6 @@ namespace CR { // Namespace CR -- begin
     std::cout << stationGroups.size() << " station group(s) found." << endl;
 
     return stationGroups;
-  }
-  
-  // ---------------------------------------------------- getStationGroupKeywords
-
-  bool LOFAR_TBB::getStationGroupKeywords (std::string const &groupName)
-  {
-    bool status (true);
-    dalGroup * group = new dalGroup();
-
-    std::cout << "-> Extracting group of name " << groupName << std::endl;
-    try {
-      group = dataset_p->openGroup(groupName);
-    } catch (std::string message) {
-      std::cerr << "[LOFAR_TBB::getStationGroupKeywords] " 
-		<< message << endl;
-      return false;
-    }
-
-    /* Extract name of telescope */
-    char *telescope = (char*)(group->getAttribute("TELESCOPE"));
-    telescope_p = telescope;
-    /* Extract name of the observer */
-    char *observer = (char*)(group->getAttribute("OBSERVER"));
-    observer_p = observer;
-    /* Extract name/description of the project */
-    char *project = (char*)(group->getAttribute("PROJECT"));
-    project_p = project;
-    /* Extract observation ID */
-    char *observationID = (char*)(group->getAttribute("OBS_ID"));
-    observationID_p = observationID;      
-    /* Extract observation mode */
-    char *observationMode = (char*)(group->getAttribute("OBS_MODE"));
-    observationMode_p = observationMode;
-    /* Extract trigger type */
-    char *triggerType = (char*)(group->getAttribute("TRIG_TYPE"));
-    triggerType_p = triggerType;
-    /* Extract trigger offset */
-    double *triggerOffset = (double*)(group->getAttribute("TRIG_OFST"));
-    triggerOffset_p = (*triggerOffset);
-    
-    return status;
   }
   
   // ------------------------------------------------------------------------- fx

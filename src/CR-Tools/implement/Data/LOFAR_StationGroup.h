@@ -63,6 +63,9 @@ namespace CR { // Namespace CR -- begin
 
     //! Group object of the Data Access Library 
     dalGroup *group_p;
+    //! HDF5 file handle required to probe further into the group
+    hid_t h5file_p;
+
     
     //! Name of the telescope
     std::string telescope_p;
@@ -78,6 +81,8 @@ namespace CR { // Namespace CR -- begin
     std::string triggerType_p;
     //! Trigger offset
     double triggerOffset_p;
+    //! If detection was done inside a beam, what was its (local) direction
+    std::vector<double> beamDirection_p;
     
   public:
     
@@ -124,6 +129,18 @@ namespace CR { // Namespace CR -- begin
     LOFAR_StationGroup& operator= (LOFAR_StationGroup const &other); 
     
     // --------------------------------------------------------------- Parameters
+
+    /*!
+      \brief Get the name of the group encapsulated by this class
+
+      \return groupName -- The name of the group encapsulated by this class;
+              this is the same name as used to identify the group within the
+	      dalDataset object, which forms the next-higher entity of a data
+	      object within the DAL.
+    */
+    inline std::string groupName () const {
+      group_p->getName();
+    }
     
     /*!
       \brief Get the name of the telescope
@@ -189,6 +206,16 @@ namespace CR { // Namespace CR -- begin
     inline double triggerOffset () const {
       return triggerOffset_p;
     }
+
+    /*!
+      \brief Local direction of the beam if one was used for detection within
+
+      \return beamDirection -- Local [Azimuth,Elevation] direction coordinates
+              of the beam, in case peak detection was performed in-beam.
+    */
+    inline std::vector<double> beamDirection () const {
+      return beamDirection_p;
+    }
     
     /*!
       \brief Get the name of the class
@@ -240,7 +267,15 @@ namespace CR { // Namespace CR -- begin
       \return status -- Status of the operation; returns <tt>false</tt> if an 
               error was encountered.
     */
-    bool extractKeywords ();
+    bool extractAttributes ();
+    
+    /*!
+      \brief Extract the attributes from the HDF5 dataset
+      
+      \return status -- Status of the operation; returns <tt>false</tt> if an 
+              error was encountered.
+    */
+    bool extractDatasetAttributes ();
     
     /*!
       \brief Unconditional copying

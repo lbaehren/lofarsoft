@@ -110,7 +110,10 @@ namespace CR { // Namespace CR -- begin
   void LOFAR_StationGroup::summary (std::ostream &os)
   {
     os << "[LOFAR_StationGroup] Summar of object properties"     << endl;
-    os << "-- Name of the group . : " << group_p->getName()      << endl;
+
+    os << "-- dalGroup name ..... : " << group_p->getName()      << endl;
+    os << "-- dalGroup ID ....... : " << group_p->getId()        << endl;
+
     os << "-- Telesope .......... : " << telescope_p             << endl;
     os << "-- Observer .......... : " << observer_p              << endl;
     os << "-- Project description : " << project_p               << endl;
@@ -149,7 +152,6 @@ namespace CR { // Namespace CR -- begin
   {
     bool status (true);
 
-    std::cout << "-- opening group " << name << " inside dataset" << endl;
     try {
       group_p = dataset.openGroup(name);
     } catch (std::string message) {
@@ -158,20 +160,17 @@ namespace CR { // Namespace CR -- begin
     }
 
     if (status) {
-      std::cout << "-- extracting keywords from group " << group_p->getName()
-		<< endl;
-      status = extractKeywords ();
+      status = extractAttributes ();
     }
 
     return status;
   }
   
-  // ------------------------------------------------------------ extractKeywords
+  // ---------------------------------------------------------- extractAttributes
 
-  bool LOFAR_StationGroup::extractKeywords ()
+  bool LOFAR_StationGroup::extractAttributes ()
   {
     bool status (true);
-    char *buffer;
 
     /* Extract name of telescope */
     try {
@@ -211,9 +210,8 @@ namespace CR { // Namespace CR -- begin
     
     /* Extract observation mode */
     try {
-      buffer = (char*)(group_p->getAttribute("OBS_MODE"));
-      observationMode_p = buffer;
-      delete [] buffer;
+      char *observationMode = (char*)(group_p->getAttribute("OBS_MODE"));
+      observationMode_p = observationMode;
     } catch (std::string message) {
       std::cerr << "-- Error extracting observation mode" << endl;
       status = false;
@@ -238,6 +236,21 @@ namespace CR { // Namespace CR -- begin
       status = false;
     }
     
+    return status;
+  }
+
+  // --------------------------------------------------- extractDatasetAttributes
+
+  bool LOFAR_StationGroup::extractDatasetAttributes ()
+  {
+    bool status (true);
+
+    uint max_station (100);
+    uint max_rsp (10);
+    uint max_rcu (10);
+
+//     hid_t dataset = H5Dopen( h5fh, datasetname );
+
     return status;
   }
 
