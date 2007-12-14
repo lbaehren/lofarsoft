@@ -24,11 +24,12 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: Memory.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: Memory.h 20142 2007-11-06 22:35:21Z Malte.Marquarding $
 
 #ifndef CASA_MEMORY_H
 #define CASA_MEMORY_H
 
+#include <casa/aips.h>
 //# The following is used to get size_t.
 #include <casa/stdlib.h>
 

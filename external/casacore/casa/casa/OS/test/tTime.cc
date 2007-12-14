@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tTime.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tTime.cc 20173 2007-11-22 01:22:30Z Malte.Marquarding $
 
 #include <casa/OS/Time.h>
 #include <casa/iostream.h>
@@ -31,7 +31,7 @@
 #include <casa/math.h>
 
 #include <casa/namespace.h>
-main() {
+int main() {
 
   Time t;
   cout<<"now "<<t.dayOfMonth()<<" "<<t.month()<<" "<<t.year()<<"\n";

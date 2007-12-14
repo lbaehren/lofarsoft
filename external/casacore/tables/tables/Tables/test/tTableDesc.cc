@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tTableDesc.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tTableDesc.cc 20177 2007-11-22 03:27:05Z Malte.Marquarding $
 
 #include <tTableDesc.h>
 #include <tables/Tables/TableDesc.h>
@@ -433,7 +433,7 @@ void e (Bool)
 }
 
 
-main (int argc)
+int main (int argc)
 {
     try {
 	d ( (argc<2));

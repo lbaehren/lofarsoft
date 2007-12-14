@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tRecordDesc.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tRecordDesc.cc 20170 2007-11-22 00:28:11Z Malte.Marquarding $
 
 #include <casa/Containers/RecordDesc.h>
 #include <casa/IO/AipsIO.h>
@@ -34,7 +34,7 @@
 #include <casa/namespace.h>
 void doIt (Bool doExcp);
 
-main (int argc)
+int main (int argc)
 {
     try {
 	doIt ( (argc<2));

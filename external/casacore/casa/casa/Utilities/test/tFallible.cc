@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tFallible.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tFallible.cc 20173 2007-11-22 01:22:30Z Malte.Marquarding $
 
 #if !defined(AIPS_DEBUG)
 #define AIPS_DEBUG
@@ -66,7 +66,8 @@ int main()
     AlwaysAssertExit(caught);
     caught = False;
     try {
-	Int x = fi5.value();
+      Int x;
+      x = fi5.value();
     } catch (AipsError x) {
 	caught = True;
     } 

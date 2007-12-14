@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tTSMShape.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tTSMShape.cc 20177 2007-11-22 03:27:05Z Malte.Marquarding $
 
 #include <tables/Tables/TSMShape.h>
 #include <casa/iostream.h>
@@ -64,7 +64,7 @@ void check (const IPosition& shape, const IPosition& offsetIncr,
     }
 }
 
-main()
+int main()
 {
   {
     IPosition shape (3,4,5,6);

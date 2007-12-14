@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MDirection.cc 20117 2007-09-05 04:38:35Z Malte.Marquarding $
+//# $Id: MDirection.cc 20124 2007-10-02 01:17:34Z Malte.Marquarding $
 
 //# Includes
 #include <casa/Exceptions.h>
@@ -312,6 +312,7 @@ Bool MDirection::giveMe(MDirection::Ref &mr, const String &in) {
 MDirection::GlobalTypes MDirection::globalType(uInt tp) {
 
     static const MDirection::GlobalTypes oname[MDirection::N_Types] = {
+	MDirection::GRADEC,
 	MDirection::GRADEC,
 	MDirection::GRADEC,
 	MDirection::GRADEC,

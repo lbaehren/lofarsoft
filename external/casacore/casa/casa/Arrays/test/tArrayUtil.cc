@@ -23,17 +23,18 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tArrayUtil.cc 19855 2007-02-13 02:23:52Z Malte.Marquarding $
+//# $Id: tArrayUtil.cc 20146 2007-11-07 01:16:17Z Malte.Marquarding $
 
+#include <casa/Arrays/ArrayIO.h>
 #include <casa/Arrays/ArrayMath.h>
 #include <casa/Arrays/ArrayError.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
-#include <casa/Arrays/ArrayUtil.h>
 #include <casa/Utilities/Regex.h>
 #include <casa/OS/Timer.h>
 #include <casa/iostream.h>
 
+#include <casa/Arrays/ArrayUtil.h>
 
 #include <casa/namespace.h>
 // <summary>

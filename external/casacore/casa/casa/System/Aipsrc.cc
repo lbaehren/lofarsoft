@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Aipsrc.cc 18197 2004-12-28 10:33:08Z wbrouw $
+//# $Id: Aipsrc.cc 20148 2007-11-07 02:52:31Z Malte.Marquarding $
 
 //# Includes
 
@@ -158,11 +158,16 @@ const String &Aipsrc::fillAips(const String &nam) {
     String aipsPath;
     if (extAipsPath.empty()) {
       aipsPath = EnvironmentVariable::get("AIPSPATH");
-    } else aipsPath = extAipsPath;
-    if (aipsPath.empty())
-      throw(AipsError(String("The AIPSPATH environment variable has not been "
-			     "set or setAipsPath has not been used") +
-		      "\n\t(see system administrator)"));
+    } else { 
+      aipsPath = extAipsPath;
+    }
+    if (aipsPath.empty()) {
+      //      throw(AipsError(String("The AIPSPATH environment variable has not been "
+      //			     "set or setAipsPath has not been used") +
+      //		      "\n\t(see system administrator)"));
+      setAipsPath(uhome);
+      aipsPath = extAipsPath;
+    }
     Int n = aipsPath.freq(' ') + aipsPath.freq('	') + 4;
     String *newdir = new String[n];
     n = split(aipsPath, newdir, n, Regex("[ 	]"));

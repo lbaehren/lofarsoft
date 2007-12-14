@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tTableInfo.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tTableInfo.cc 20177 2007-11-22 03:27:05Z Malte.Marquarding $
 
 
 //# Includes
@@ -63,7 +63,7 @@ void readInfo()
 }
 
 
-main ()
+int main()
 {
     try {
 	writeInfo();

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: aipsenv.h 19848 2007-02-12 04:43:35Z Malte.Marquarding $
+//# $Id: aipsenv.h 20145 2007-11-07 01:15:06Z Malte.Marquarding $
 
 // this file contains all the compiler specific defines
 
@@ -69,7 +69,6 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 #endif
 
 // Alternate project compiler 
-// Note we only support 64bit builds on SGI
 #if defined(AIPS_SGI)
 #undef AIPS_SGI
 #endif
@@ -111,6 +110,13 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 #define AIPS_64B
 #endif
 
+#if defined(AIPS_LINUX)
+#undef AIPS_LINUX
+#endif
+#if defined(__linux)
+#define AIPS_LINUX
+#endif
+
 #if defined(AIPS_KAI)
 #undef AIPS_KAI
 #endif
@@ -137,6 +143,12 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 #endif
 #if defined(__QK_USER__)
 #define AIPS_CRAY_PGI
+#if !defined(AIPS_NOLARGEFILE)
+#define AIPS_NOLARGEFILE
+#endif
+#if !defined(AIPS_NO_LEA_MALLOC)
+#define AIPS_NO_LEA_MALLOC
+#endif
 #endif
 
 #if defined(AIPS_CRAY_CATAMOUNT)
@@ -146,8 +158,10 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 #define AIPS_CRAY_CATAMOUNT
 #endif
 
-#if defined(__ia64)
-#define AIPS_64B
+#if (defined(__ia64) || defined(__x86_64__))
+# if !defined(AIPS_64B)
+# define AIPS_64B
+# endif
 #endif
 
 #if defined(AIPS_I386)
@@ -159,16 +173,22 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 
 #if defined(AIPS_DARWIN)
 #undef AIPS_DARWIN
-#if defined(__APPLE_CC__)
+#endif
+#if defined(__APPLE__)
 #define AIPS_DARWIN
 //  No need for largefile definition as it is the default under DARWIN
 #define AIPS_NOLARGEFILE
-#endif
+  // Don't use AIPS_LITTLE_ENDIAN as this would prevent universal builds
+  // from working. Auto-detect from AIPS_I386 for intel Macs
+#define AIPS_NO_LEA_MALLOC 
+# if defined(AIPS_LITTLE_ENDIAN)
+# undef AIPS_LITTLE_ENDIAN
+# endif
 #endif
 
 //  Automatically configure for known LITTLE ENDIAN systems
 #if !(defined(AIPS_LITTLE_ENDIAN))
-#if (defined(AIPS_ALPHA) || defined(AIPS_I386))
+#if (defined(AIPS_ALPHA) || defined(AIPS_I386) || defined(__x86_64__))
 #define AIPS_LITTLE_ENDIAN
 #endif
 #endif
@@ -184,6 +204,16 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 # ifndef _LARGEFILE64_SOURCE
 #  define _LARGEFILE64_SOURCE
 # endif
+#endif
+
+// Add other platforms here
+#if (defined(AIPS_LINUX) || defined(AIPS_DARWIN))
+#if !defined(AIPS_AUTO_STL)
+#define AIPS_AUTO_STL
+#endif
+#if !defined(AIPS_STDLIB)
+#define AIPS_STDLIB
+#endif
 #endif
 
 } //# NAMESPACE CASA - END

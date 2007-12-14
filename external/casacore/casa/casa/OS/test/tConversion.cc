@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tConversion.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tConversion.cc 20173 2007-11-22 01:22:30Z Malte.Marquarding $
 
 
 #include <casa/aips.h>
@@ -37,7 +37,7 @@
 // This program tests the class Conversion.
 
 
-main()
+int main()
 {
     uInt nbool = 100;
     uInt nbyte = (100 + 7) / 8;

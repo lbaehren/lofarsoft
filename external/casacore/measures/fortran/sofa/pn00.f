@@ -6,8 +6,8 @@
 *  - - - - - - - - -
 *
 *  Precession-nutation, IAU 2000 model; a multi-purpose routine,
-*  supporting classical, equinox-based, use_directly and CEO-based
-*  use_indirectly.
+*  supporting classical, equinox-based, use directly and CEO-based
+*  use indirectly.
 *
 *  This routine is part of the International Astronomical Union's
 *  SOFA (Standards of Fundamental Astronomy) software collection.
@@ -40,7 +40,7 @@
 *         2400000.5D0     50123.2D0     (MJD method)
 *         2450123.5D0       0.2D0       (date & time method)
 *
-*     The JD method is the most natural and convenient to use_in
+*     The JD method is the most natural and convenient to use in
 *     cases where the loss of several decimal digits of resolution
 *     is acceptable.  The J2000 method is best matched to the way
 *     the argument is handled internally and will deliver the
@@ -138,14 +138,14 @@
 *
 *  1. The Software is owned by the IAU SOFA Review Board ("the Board").
 *
-*  2. The Software is made available free of charge for use_by:
+*  2. The Software is made available free of charge for use by:
 *
 *     a) private individuals for non-profit research; and
 *
 *     b) non-profit educational, academic and research institutions.
 *
-*  3. Commercial use_of the Software is specifically excluded from the
-*     terms and conditions of this license.  Commercial use_of the
+*  3. Commercial use of the Software is specifically excluded from the
+*     terms and conditions of this license.  Commercial use of the
 *     Software is subject to the prior written agreement of the Board on
 *     terms to be agreed.
 *
@@ -169,18 +169,18 @@
 *
 *  7. The user may incorporate or embed the Software into other software
 *     products which he/she may then give away free of charge but not
-*     sell provided the user makes due acknowledgement of the use_which
+*     sell provided the user makes due acknowledgement of the use which
 *     he/she has made of the Software in creating such software
 *     products.  Any redistribution of the Software in this way shall be
 *     made under the same terms and conditions under which the user
 *     received it from the SOFA Center.
 *
-*  8. The user shall not cause_the Software to be brought into
-*     disrepute, either by misuse, or use_for inappropriate tasks, or by
+*  8. The user shall not cause the Software to be brought into
+*     disrepute, either by misuse, or use for inappropriate tasks, or by
 *     inappropriate modification.
 *
 *  9. The Software is provided to the user "as is" and the Board makes
-*     no warranty as to its use_or performance.   The Board does not and
+*     no warranty as to its use or performance.   The Board does not and
 *     cannot warrant the performance or results which the user may
 *     obtain by using the Software.  The Board makes no warranties,
 *     express or implied, as to non-infringement of third party rights,

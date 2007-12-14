@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Exceptions.h 19848 2007-02-12 04:43:35Z Malte.Marquarding $
+//# $Id: Exceptions.h 20153 2007-11-07 08:47:51Z gervandiepen $
 
 #ifndef CASA_EXCEPTIONS_H
 #define CASA_EXCEPTIONS_H
@@ -61,7 +61,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // a more general exception:</em>
 // <srcblock>
 //     #include <casa/Exceptions.h>
-// #include <iostream>
+//     #include <iostream>
 //     main() {
 //         try {
 //             throw(indexError<int>(5,"Dummy error"));

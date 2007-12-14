@@ -13,14 +13,13 @@ def generate(env):
     env.CustomCasaCom = CustomCasaCom
 
     def AddCasaPlatform():
-	pd = { "darwin": ["-DAIPS_DARWIN"],
-	       "64bit": ["-D__x86_64__", "-DAIPS_64B"],
-	       "linux": ["-DAIPS_LINUX"],
-	       "cray": ["-DAIPS_LINUX", "-DAIPS_NOLARGEFILE", 
-			"-DAIPS_NO_LEA_MALLOC" ,"-Minform=severe"]
+	pd = { "darwin": [],
+	       "64bit": [],
+	       "linux": [],
+	       "cray": ["-Minform=severe"]
 	       }
 	# -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE
-	platfdefs = ["-DAIPS_STDLIB", "-DAIPS_AUTO_STL"]
+	platfdefs = []
 	sysplf = sys.platform
 	# do some dodgey cray detection...
 	if os.environ.has_key("CATAMOUNT_DIR"):
@@ -40,20 +39,25 @@ def generate(env):
 	    # had a go at this, but it seem to need a whole lot
 	    # of environment variables
 	    # probably nedd a pgi builder
-	    print "Currently not supported"
-	    sys.exit()
-	    env["CXX"] = "CC"
-	    platfdefs += pd["xt3"]
+	    #print "Currently not supported"
+	    #sys.exit()
+	    #env["CXX"] = "CC"
+	    platfdefs += pd["cray"]
+            #platfdefs += ["-fPIC"]
 	else:
 	    platfdefs += pd[sysplf]
-	if sys.byteorder == "little":
-	    platfdefs += ["-DAIPS_LITTLE_ENDIAN"]
+#	if sys.byteorder == "little":
+#	    platfdefs += ["-DAIPS_LITTLE_ENDIAN"]
         env.AppendUnique(CPPFLAGS=platfdefs)
 	if env["PLATFORM"] == 'darwin':
 	    # otherwise darwin puts builddir into the name
+            env.Append(CPPFLAGS=['-arch', 'ppc', '-arch', 'i386', '-isysroot', '/Developer/SDKs/MacOSX10.4u.sdk'])
+            env.Append(FORTRANFLAGS=['-arch', 'ppc', '-arch', 'i386', '-isysroot', '/Developer/SDKs/MacOSX10.4u.sdk'])
+            env.Append(SHLINKFLAGS=['-arch', 'ppc', '-arch', 'i386', '-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk'])
+            env.Append(LINKFLAGS=['-arch', 'ppc', '-arch', 'i386', '-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk'])
 	    env.Append(SHLINKFLAGS=["-install_name", "${TARGET.file}"])
 	    env.Append(SHLINKFLAGS=["-single_module"])
-
+            
     AddCasaPlatform()
 
     def CheckCasaLib(context, lib):

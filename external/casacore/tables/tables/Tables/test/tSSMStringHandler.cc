@@ -24,7 +24,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tSSMStringHandler.cc 19858 2007-02-13 02:42:36Z Malte.Marquarding $
+//# $Id: tSSMStringHandler.cc 20177 2007-11-22 03:27:05Z Malte.Marquarding $
 
 #include <tables/Tables/Table.h>
 #include <tables/Tables/TableDesc.h>
@@ -85,7 +85,7 @@ void replaceStrings();
 // show table info
 void info(const Table aTable);
 
-main (int argc, char** argv) {
+int main (int argc, char** argv) {
     uInt aNr = 500;
     if (argc > 1) {
 	istringstream anIstr(argv[1]);

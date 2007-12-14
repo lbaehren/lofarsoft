@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tScalarRecordColumn.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tScalarRecordColumn.cc 20177 2007-11-22 03:27:05Z Malte.Marquarding $
 
 #include <tables/Tables/TableDesc.h>
 #include <tables/Tables/SetupNewTab.h>
@@ -189,7 +189,7 @@ void b()
     }
 }
 
-main()
+int main()
 {
     try {
 	a();

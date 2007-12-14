@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Aipsrc.h 18197 2004-12-28 10:33:08Z wbrouw $
+//# $Id: Aipsrc.h 20148 2007-11-07 02:52:31Z Malte.Marquarding $
 
 #ifndef CASA_AIPSRC_H
 #define CASA_AIPSRC_H
@@ -220,7 +220,7 @@ public:
 
   //# Member functions
   // <thrown>
-  // <li> AipsError if HOME or AIPSPATH environment variable not set
+  // <li> AipsError if HOME environment variable not set
   // </thrown> 
   // The <src>find()</src> functions will, given a keyword, return the value
   // with a matched keyword found in the files. If no match found the

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MCBaseline.cc 20117 2007-09-05 04:38:35Z Malte.Marquarding $
+//# $Id: MCBaseline.cc 20124 2007-10-02 01:17:34Z Malte.Marquarding $
 
 //# Includes
 #include <casa/Exceptions.h>
@@ -268,8 +268,21 @@ void MCBaseline::doConvert(MVBaseline &in,
       break;
 
     case B1950_B1950_VLA:
+      in.adjust(g2);
+      measMath.deapplyJ2000toB1950(in, False);
+      in.readjust(g2);
+      in.adjust(g2);
+      measMath.applyJ2000toB1950_VLA(in, False);
+      in.readjust(g2);
+      break;
 
     case B1950_VLA_B1950:
+      in.adjust(g2);
+      measMath.deapplyJ2000toB1950_VLA(in, False);
+      in.readjust(g2);
+      in.adjust(g2);
+      measMath.applyJ2000toB1950(in, False);
+      in.readjust(g2);
       break;
     
     case J2000_JMEAN:

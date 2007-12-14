@@ -24,9 +24,11 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: Memory.cc 19846 2007-02-12 03:11:58Z Malte.Marquarding $
+//# $Id: Memory.cc 20142 2007-11-06 22:35:21Z Malte.Marquarding $
 
 //# MH 97/11/24 Stop attempt to use mallinfo from stdlib.h for HPUX
+#include <casa/aips.h>
+
 #if defined(__hpux__) && !defined(AIPS_NO_LEA_MALLOC)
 #define _STRUCT_MALLINFO
 #endif

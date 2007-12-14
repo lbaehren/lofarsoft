@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tCopy.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tCopy.cc 20173 2007-11-22 01:22:30Z Malte.Marquarding $
 
 //# Includes
 
@@ -46,7 +46,7 @@
 // To complete the tests, they are also done for data types Block<uInt>
 // and void*.
 
-main()
+int main()
 {
     Int size=100;             // should be a multiple of 4
     Int* ia = new int[size];

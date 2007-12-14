@@ -52,7 +52,7 @@
 *     Given:
 *          NVALS    I     The number of points to be gridded.
 *          START    I     The starting location in GRID and WEIGHT.
-*          INCR     I     The increment to use_between successive
+*          INCR     I     The increment to use between successive
 *                         locations in GRID and WEIGHT.
 *          CELLWT   x     A global weight.  Applied to all data values.
 *          DATA(2*NVALS)

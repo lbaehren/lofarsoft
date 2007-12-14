@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Regex.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: Regex.cc 20142 2007-11-06 22:35:21Z Malte.Marquarding $
 
 // Regex class implementation
 
@@ -76,12 +76,17 @@ void Regex::create(const String& exp, Int fast, Int bufsize,
 }
 
 void Regex::dealloc() {
-  free(buf->buffer);
-  delete [] buf->fastmap;
-  delete buf;
-  delete reg;
-  delete str;
-  delete [] trans;
+  if ( buf != 0 ) {
+    free(buf->buffer);
+    delete [] buf->fastmap;
+    delete buf; buf= 0;
+  }
+  if (reg != 0) delete reg;
+  reg=0;
+  if (str != 0) delete str;
+  str=0;
+  if (trans != 0) delete [] trans;
+  trans=0;
 }
 
 Int Regex::match_info(Int& start, Int& length, Int nth) const {
@@ -155,7 +160,7 @@ Regex::~Regex() {
   dealloc();
 }
 
-Regex::Regex(const Regex &that) {
+Regex::Regex(const Regex &that) : RegexBase() {
   create(*that.str, that.fastval, that.bufsz, that.trans);
 }
 

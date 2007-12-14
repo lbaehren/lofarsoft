@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tOrdMap.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tOrdMap.cc 20170 2007-11-22 00:28:11Z Malte.Marquarding $
 
 //# Includes
 
@@ -36,7 +36,7 @@
 #include <casa/namespace.h>
 //template<class key,class value> void print(const OrderedMap<key,value> &);
 
-main() {
+int main() {
   OrderedMap<int,int> map(-1);
   OrderedMap<String,OrderedPair<String,uInt> > smap(OrderedPair<String,uInt>("dummy",0));
 

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tPtrHolder.cc 18769 2005-06-20 12:31:04Z gvandiep $
+//# $Id: tPtrHolder.cc 20173 2007-11-22 01:22:30Z Malte.Marquarding $
 
 //# Includes
 
@@ -72,7 +72,7 @@ void tSPtr()
     }
 }
 
-main()
+int main()
 {
     {
 	PtrHolder<Int> ph;               // PtrHolder()

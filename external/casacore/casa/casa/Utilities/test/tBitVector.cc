@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tBitVector.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tBitVector.cc 20173 2007-11-22 01:22:30Z Malte.Marquarding $
 
 //# Includes
 #include <casa/Utilities/BitVector.h>
@@ -140,7 +140,7 @@ void doIt()
 }
 
 
-main () {
+int main () {
     try {
 	doIt();
     } catch (AipsError x) {

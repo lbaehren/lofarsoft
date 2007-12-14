@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tParam.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tParam.cc 20170 2007-11-22 00:28:11Z Malte.Marquarding $
 
 #include <casa/aips.h>
 #include <casa/Inputs/Param.h>
@@ -33,7 +33,7 @@
 #include <casa/iostream.h>
 
 #include <casa/namespace.h>
-main()
+int main()
 {
   try {
 

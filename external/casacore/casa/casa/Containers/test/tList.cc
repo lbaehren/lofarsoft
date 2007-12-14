@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tList.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tList.cc 20170 2007-11-22 00:28:11Z Malte.Marquarding $
 
 //# Includes
 
@@ -34,7 +34,7 @@
 #include <casa/namespace.h>
 static void show(const ConstListIter<int> &);
 static void dump(const ConstListIter<int> *);
-main() {
+int main() {
 
   List<int> one;
   ListIter<int> onePa(one);

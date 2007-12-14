@@ -23,7 +23,9 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: malloc.cc 18142 2004-12-13 14:25:46Z gvandiep $
+//# $Id: malloc.cc 20142 2007-11-06 22:35:21Z Malte.Marquarding $
+
+#include <casa/aips.h>
 
 #if !defined(AIPS_NO_LEA_MALLOC)
 

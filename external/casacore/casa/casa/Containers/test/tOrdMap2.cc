@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tOrdMap2.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tOrdMap2.cc 20170 2007-11-22 00:28:11Z Malte.Marquarding $
 
 //# Includes
 
@@ -36,7 +36,7 @@
 // disk and read back. It outputs to stdout. A script executing
 // this test program makes a diff of the output and a reference output.
 
-main () {
+int main () {
     Int i;
     i=-32768;
     OrderedMap<Int,Int> Name(i);

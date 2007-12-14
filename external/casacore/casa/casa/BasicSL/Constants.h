@@ -23,10 +23,12 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Constants.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: Constants.h 20165 2007-11-20 03:27:02Z Malte.Marquarding $
 
 #ifndef CASA_CONSTANTS_H
 #define CASA_CONSTANTS_H
+
+#include <casa/aips.h>
 
 #if defined (sun) && ! defined (AIPS_SOLARIS) 
 #   include <sys/limits.h>
@@ -43,7 +45,6 @@
 #   define LN_MAXFLOAT (M_LN2 * FMAXEXP)
 #   define LN_MINFLOAT (M_LN2 * (FMINEXP -1))
 #endif
-#include <casa/aips.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 

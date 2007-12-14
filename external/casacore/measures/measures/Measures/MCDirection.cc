@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MCDirection.cc 20117 2007-09-05 04:38:35Z Malte.Marquarding $
+//# $Id: MCDirection.cc 20124 2007-10-02 01:17:34Z Malte.Marquarding $
 
 //# Includes
 #include <casa/Exceptions.h>
@@ -338,8 +338,13 @@ void MCDirection::doConvert(MVDirection &in,
       break;
 
     case B1950_B1950_VLA:
+      measMath.deapplyJ2000toB1950(in);
+      measMath.applyJ2000toB1950_VLA(in);
+      break;
 
     case B1950_VLA_B1950:
+      measMath.deapplyJ2000toB1950_VLA(in);
+      measMath.applyJ2000toB1950(in);
       break;
     
     case J2000_JMEAN:

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tTiledStMan.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tTiledStMan.cc 20177 2007-11-22 03:27:05Z Malte.Marquarding $
 
 #include <tables/Tables/TiledStMan.h>
 #include <casa/Arrays/Vector.h>
@@ -45,7 +45,7 @@
 void doIt (uInt tileSize);
 IPosition getVec (uInt nrdim, const String& prompt);
 
-main (int argc, char** argv)
+int main (int argc, char** argv)
 {
     // Get the command line arguments as cube shape, tile shape.
     if (argc < 2) {

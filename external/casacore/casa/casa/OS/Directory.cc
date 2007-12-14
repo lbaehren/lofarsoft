@@ -23,8 +23,10 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Directory.cc 19846 2007-02-12 03:11:58Z Malte.Marquarding $
+//# $Id: Directory.cc 20142 2007-11-06 22:35:21Z Malte.Marquarding $
 
+// we NEED to include aips(env).h before using any AIPS_xyz defines
+#include <casa/OS/Directory.h>
 
 #if defined(AIPS_SOLARIS) || defined(AIPS_OSF)
 #  if defined(AIPS_OSF)
@@ -50,7 +52,6 @@
 #  endif
 #endif
 
-#include <casa/OS/Directory.h>
 #include <casa/OS/DirectoryIterator.h>
 #include <casa/OS/RegularFile.h>
 #include <casa/OS/SymLink.h>

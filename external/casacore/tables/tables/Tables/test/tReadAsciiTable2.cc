@@ -23,14 +23,14 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tReadAsciiTable2.cc 19768 2006-11-24 05:16:51Z gvandiep $
+//# $Id: tReadAsciiTable2.cc 20177 2007-11-22 03:27:05Z Malte.Marquarding $
 
 #include <tables/Tables/ReadAsciiTable.h>
 #include <iostream>
 
 using namespace casa;
 
-int main(int argc)
+int main()
 {
   char buf[32768];
   while (cin.getline (buf, sizeof(buf))) {

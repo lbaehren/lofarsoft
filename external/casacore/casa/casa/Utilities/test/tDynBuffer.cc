@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tDynBuffer.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tDynBuffer.cc 20173 2007-11-22 01:22:30Z Malte.Marquarding $
 
 //# Includes
 
@@ -35,7 +35,7 @@
 // It allocates buffers, stores data in it and reads it back.
 // The results are written to stdout. A script executes this test program.
 
-main () {
+int main () {
     uInt nrval,n;
     union {
         Char* ptr;

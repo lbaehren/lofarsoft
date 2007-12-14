@@ -23,14 +23,20 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tables.dox 20088 2007-06-05 03:57:23Z Malte.Marquarding $
+//# $Id: tables.dox 20158 2007-11-08 00:15:26Z Malte.Marquarding $
+
+namespace casa {
 
 // \defgroup tables tables package (libcasa_tables)
 //
 // The tables package contains the core modules for the AIPS++ Table System:
 // <ul>
-//  <li> Tables: data base like tables
-//  <li> TablePlot: table plotting facilities
-//  <li> LogTables: logging tables
+//  <li> <a href="group__Tables.html">Tables</a>:
+//   data base like tables with an advanced query language (TaQL).
+//  <li> <a href="group__TablePlot.html">TablePlot</a>:
+//   plot table columns or expressions of them.
+//  <li> <a href="group__LogTables.html">LogTables</a>:
+//   store log messages in tables.
 // </ul>
 
+}
