@@ -46,7 +46,7 @@
 *  3) Refer to the routine iau_JD2CAL.
 *
 *  4) NDP should be 4 or less if internal overflows are to be
-*     avoided on machines which use 16-bit integers.
+*     avoided on machines which use_16-bit integers.
 *
 *  Called:
 *     iau_JD2CAL  JD to Gregorian calendar
@@ -131,14 +131,14 @@
 *
 *  1. The Software is owned by the IAU SOFA Review Board ("the Board").
 *
-*  2. The Software is made available free of charge for use by:
+*  2. The Software is made available free of charge for use_by:
 *
 *     a) private individuals for non-profit research; and
 *
 *     b) non-profit educational, academic and research institutions.
 *
-*  3. Commercial use of the Software is specifically excluded from the
-*     terms and conditions of this license.  Commercial use of the
+*  3. Commercial use_of the Software is specifically excluded from the
+*     terms and conditions of this license.  Commercial use_of the
 *     Software is subject to the prior written agreement of the Board on
 *     terms to be agreed.
 *
@@ -162,18 +162,18 @@
 *
 *  7. The user may incorporate or embed the Software into other software
 *     products which he/she may then give away free of charge but not
-*     sell provided the user makes due acknowledgement of the use which
+*     sell provided the user makes due acknowledgement of the use_which
 *     he/she has made of the Software in creating such software
 *     products.  Any redistribution of the Software in this way shall be
 *     made under the same terms and conditions under which the user
 *     received it from the SOFA Center.
 *
-*  8. The user shall not cause the Software to be brought into
-*     disrepute, either by misuse, or use for inappropriate tasks, or by
+*  8. The user shall not cause_the Software to be brought into
+*     disrepute, either by misuse, or use_for inappropriate tasks, or by
 *     inappropriate modification.
 *
 *  9. The Software is provided to the user "as is" and the Board makes
-*     no warranty as to its use or performance.   The Board does not and
+*     no warranty as to its use_or performance.   The Board does not and
 *     cannot warrant the performance or results which the user may
 *     obtain by using the Software.  The Board makes no warranties,
 *     express or implied, as to non-infringement of third party rights,
