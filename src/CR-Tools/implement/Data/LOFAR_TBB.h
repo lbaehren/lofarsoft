@@ -206,16 +206,19 @@ namespace CR { // Namespace CR -- begin
       \param listStationGroups -- Recursive summary of the embedded
              LOFAR_StationGroup objects?
     */
-    inline void summary (bool const &listStationGroups=false) {
+    inline void summary (bool const &listStationGroups=false,
+			 bool const &listChannelIDs=false) {
       summary (std::cout,
-	       listStationGroups);
+	       listStationGroups,
+	       listChannelIDs);
     }
 
     /*!
       \brief Provide a summary of the internal status
     */
     void summary (std::ostream &os,
-		  bool const &listStationGroups=false);    
+		  bool const &listStationGroups=false,
+		  bool const &listChannelIDs=false);    
 
     // ------------------------------------------------------------------ Methods
     

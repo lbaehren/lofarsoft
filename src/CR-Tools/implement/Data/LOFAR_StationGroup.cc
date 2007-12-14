@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include <Data/LOFAR_StationGroup.h>
+#include <Utilities/StringTools.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -243,15 +244,44 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
 
+  // ---------------------------------------------------------------- channelsIDs
+
+  std::vector<std::string> LOFAR_StationGroup::channelIDs ()
+  {
+    std::string id;
+    std::string channelName;
+    std::vector<std::string> IDs;
+    uint station;
+    uint rsp;
+    uint rcu;
+
+    std::string groupName = group_p->getName();
+    uint max_station (100);
+    uint max_rsp (10);
+    uint max_rcu (10);
+
+    for (station=0; station<max_station; station++) {
+      for (rsp=0; rsp<max_rsp; rsp++) {
+	for (rcu=0; rcu<max_rcu; rcu++) {
+	  // convert the individual ID number of a joint ID string
+	  channelName = channelID (station,rsp,rcu);
+	  id = groupName + "/" + channelName;
+	  // probe the HDF5 file for the presence of a dataset with the given ID
+	  if (H5Dopen(H5fileID_p, CR::string2char(id)) > 0) {
+	    IDs.push_back(channelName);
+	  }
+	}
+      }
+    }
+
+    return IDs;
+  }
+
   // --------------------------------------------------- extractDatasetAttributes
 
   bool LOFAR_StationGroup::extractDatasetAttributes ()
   {
     bool status (true);
-
-    uint max_station (100);
-    uint max_rsp (10);
-    uint max_rcu (10);
 
     return status;
   }

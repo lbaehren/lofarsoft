@@ -29,7 +29,10 @@
 #include <Data/LOFAR_StationGroup.h>
 #include <Utilities/StringTools.h>
 
-using CR::LOFAR_StationGroup;  // Namespace usage
+// Namespace usage
+using std::cout;
+using std::endl;
+using CR::LOFAR_StationGroup;
 
 /*!
   \file tLOFAR_StationGroup.cc
@@ -48,14 +51,16 @@ using CR::LOFAR_StationGroup;  // Namespace usage
 /*!
   \brief Test constructors for a new LOFAR_StationGroup object
 
+  \param filename -- Data file used for testing
+
   \return nofFailedTests -- The number of failed tests.
 */
 int test_LOFAR_StationGroup (std::string const &filename)
 {
+  cout << "\n[test_LOFAR_StationGroup]\n" << endl;
+
   int nofFailedTests (0);
   
-  std::cout << "\n[test_LOFAR_StationGroup]\n" << std::endl;
-
   // DAL Dataset object to handle the basic I/O
   dalDataset dataset;
   
@@ -64,26 +69,85 @@ int test_LOFAR_StationGroup (std::string const &filename)
     nofFailedTests++;
   } else {
     
-    std::cout << "[1] Testing default constructor ..." << std::endl;
+    cout << "[1] Testing default constructor ..." << endl;
     try {
       LOFAR_StationGroup group;
       //
       group.summary(); 
     } catch (std::string message) {
-      std::cerr << message << std::endl;
+      std::cerr << message << endl;
       nofFailedTests++;
     }
     
-    std::cout << "[2] Testing argumented constructor ..." << std::endl;
+    cout << "[2] Testing argumented constructor ..." << endl;
     try {
       LOFAR_StationGroup group (dataset,"Station001");
       //
       group.summary(); 
     } catch (std::string message) {
-      std::cerr << message << std::endl;
+      std::cerr << message << endl;
       nofFailedTests++;
     }
     
+  }
+  
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Test the various methods provided by the class
+
+  \param filename -- Data file used for testing
+
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_methods (std::string const &filename)
+{
+  cout << "\n[test_methods]\n" << endl;
+
+  int nofFailedTests (0);
+  dalDataset dataset;
+
+  // open file into dataset object
+  cout << "-- opening dataset via DAL ... " << std::flush;
+  dataset.open(CR::string2char(filename));
+  cout << "OK" << endl;
+  // create LOFAR_StationGroup object to continue working with
+  LOFAR_StationGroup group (dataset,"Station001");
+
+  cout << "[1] Convert individual ID numbers to channel ID" << endl;
+  try {
+    uint station_id (0);
+    uint rsp_id (0);
+    uint rcu_id (0);
+    
+    for (rcu_id=0; rcu_id<12; rcu_id++) {
+      cout << "\t[" << station_id << "," << rsp_id << "," << rcu_id
+		<< "] \t->\t"
+		<< group.channelID(station_id,rsp_id,rcu_id)
+		<< endl;
+    }
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[2] Retrieve the list of channels IDs" << endl;
+  try {
+    std::vector<std::string> channelIDs = group.channelIDs();
+    uint nofChannels = channelIDs.size();
+
+    cout << "-- nof. channel IDs = " << nofChannels    << endl;
+    cout << "-- Channel IDs      = [";
+    for (uint channel(0); channel<nofChannels; channel++) {
+      cout << channelIDs[channel] << " ";
+    }
+    cout << "]" << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
   }
   
   return nofFailedTests;
@@ -101,10 +165,10 @@ int main (int argc,
     exit the program.
   */
   if (argc < 2) {
-    std::cerr << "[tLOFAR_TBB] Too few parameters!" << std::endl;
-    std::cerr << "" << std::endl;
-    std::cerr << "  tLOFAR_TBB <filename>" << std::endl;
-    std::cerr << "" << std::endl;
+    std::cerr << "[tLOFAR_TBB] Too few parameters!" << endl;
+    std::cerr << "" << endl;
+    std::cerr << "  tLOFAR_TBB <filename>" << endl;
+    std::cerr << "" << endl;
     return -1;
   }
 
@@ -112,6 +176,10 @@ int main (int argc,
 
   // Test for the constructor(s)
   nofFailedTests += test_LOFAR_StationGroup (filename);
+
+  if (nofFailedTests == 0) {
+    nofFailedTests += test_methods (filename);
+  }
 
   return nofFailedTests;
 }

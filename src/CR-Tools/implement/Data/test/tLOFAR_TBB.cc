@@ -175,15 +175,17 @@ int test_dal (std::string const &filename)
 */
 int test_LOFAR_TBB (std::string const &filename)
 {
-  int nofFailedTests (0);
-  
   cout << "\n[test_LOFAR_TBB]\n" << endl;
 
-  cout << "[1] Testing default constructor ..." << endl;
+  int nofFailedTests (0);
+  bool listStationGroups (true);
+  bool listChannelIDs (true);
+  
+  cout << "[1] Testing argumented constructor ..." << endl;
   try {
     LOFAR_TBB data (filename);
     //
-    data.summary(true); 
+    data.summary(listStationGroups,listChannelIDs); 
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;

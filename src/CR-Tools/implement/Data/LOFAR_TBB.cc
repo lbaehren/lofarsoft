@@ -94,7 +94,8 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   void LOFAR_TBB::summary (std::ostream &os,
-			   bool const &listStationGroups)
+			   bool const &listStationGroups,
+			   bool const &listChannelIDs)
   {
     os << "[LOFAR_TBB] Summar of object properties" << endl;
     os << "-- Name of data file . : " << filename_p                 << endl;
@@ -102,9 +103,18 @@ namespace CR { // Namespace CR -- begin
     os << "-- Dataset name ...... : " << dataset_p->getName()       << endl;
     os << "-- HDF5 file handle ID : " << dataset_p->getFileHandle() << endl;
     os << "-- nof. station groups : " << stationGroups_p.size()     << endl;
+    os << "-- nof. data channels  : " << channelID_p.size()         << endl;
 
     /* The rest of the summary output is conditional, because given the number
        station it might get quite a lot. */
+
+    if (listChannelIDs) {
+      os << "-- Data channel IDs .. : [" << channelID_p[0];
+      for (uint channel(1); channel<channelID_p.size(); channel++) {
+	os << " " << channelID_p[channel];
+      }
+      os << "]" << endl;
+    }
     
     if (listStationGroups) {
       for (uint station(0); station<stationGroups_p.size(); station++) {
@@ -136,23 +146,36 @@ namespace CR { // Namespace CR -- begin
     }
     
     /*
-      If opening the data file was successful, we can continue. First we scan for
-      the station groups available in the file, since this is the basic unit
+      [1] If opening the data file was successful, we can continue. First we scan
+      for the station groups available in the file, since this is the basic unit
       within which the actual data for the individual dipoles are stored.
+      [2] Once we are done getting the list of station groups, we can assemble
+      the list of channel IDs, which are required for accessing the raw data of
+      each individual dipole.
     */
     
     std::vector<std::string> stationGroups = getStationGroups();
-    
-    for (uint station(0); station<stationGroups.size(); station++) {
-      std::cout << "-- storing information for group "
-		<< stationGroups[station]
-		<< endl;
-      //
-      LOFAR_StationGroup group ((*dataset_p),
-				stationGroups[station]);
-      stationGroups_p.push_back(group);
+    uint channel (0);
+
+    /* Always check if actually a list of groups has been extracted */
+    if (stationGroups.size() > 0) {
+
+      for (uint station(0); station<stationGroups.size(); station++) {
+	// assemble internal list of station groups
+	LOFAR_StationGroup group ((*dataset_p),
+				  stationGroups[station]);
+	stationGroups_p.push_back(group);
+	//
+	std::vector<std::string> channel_ids = group.channelIDs();
+	for (channel=0; channel<channel_ids.size(); channel++) {
+	  channelID_p.push_back(channel_ids[channel]);
+	}
+      }
+      
+    } else {
     }
-    
+
+
     return status;
   }
 
@@ -175,8 +198,6 @@ namespace CR { // Namespace CR -- begin
       }
     }
     
-    std::cout << stationGroups.size() << " station group(s) found." << endl;
-
     return stationGroups;
   }
   

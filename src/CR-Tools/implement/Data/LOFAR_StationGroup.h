@@ -254,6 +254,14 @@ namespace CR { // Namespace CR -- begin
     // ------------------------------------------------------------------ Methods
 
     /*!
+      \brief Retrieve the list of channels IDs contained within this group
+
+      \return channelIDs -- A list of the channel IDs for all the dipoles within
+              this LOFAR station.
+     */
+    std::vector<std::string> channelIDs ();
+
+    /*!
       \brief Convert individual ID number to joint unique ID
 
       \param station_id -- Identification number of the LOFAR station within the
