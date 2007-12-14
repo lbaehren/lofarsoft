@@ -409,7 +409,7 @@ c
       P(1) = 0.5D0
       RETURN
       END
-* Linear Algebra: use LAPACK routines
+* Linear Algebra: use_LAPACK routines
 *<FF>
       SUBROUTINE MTH_DPOTRF (NAME, UPLO, N, A, LDA, INFO)
       CHARACTER*(*)      NAME, UPLO
@@ -1202,7 +1202,7 @@ C      CALL MTH_FAIL(NAME,'MTH_DPBTRS',INFO,ERROR)
          ENDIF
       ENDDO
 *
-* Use the method of convex combinations to compute  S(X).
+* Use_the method of convex combinations to compute  S(X).
       K1 = K(J+1)
       K2 = K(J+2)
       K3 = K(J+3)
