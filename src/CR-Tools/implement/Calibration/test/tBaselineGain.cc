@@ -42,7 +42,7 @@
 #include <casa/BasicSL/Complex.h>
 
 #include <Calibration/BaselineGain.h>
-#include <Data/ITSCapture.h>
+#include <Data/ITS_Capture.h>
 #include <IO/DataReader.h>
 
 // --- Function prototypes -----------------------------------------------------

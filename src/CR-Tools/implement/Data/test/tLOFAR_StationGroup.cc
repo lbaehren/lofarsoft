@@ -46,61 +46,6 @@ using CR::LOFAR_StationGroup;  // Namespace usage
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test some basic operations using the Data Access Library
-
-  \return nofFailedTests -- The number of failed tests.
-*/
-int test_dal (std::string const &filename)
-{
-  std::cout << "\n[test_dal]\n" << std::endl;
-
-  int nofFailedTests (0);
-  int retval (0);
-  std::string groupname ("Station001");
-  
-  std::cout << "[1] Open dataset using DAL::Dataset object" << std::endl;
-  try {
-    dalDataset dataset;
-    retval = dataset.open(CR::string2char(filename));
-    std::cout << "-- Data type = " << dataset.getType() << std::endl;
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-  
-  std::cout << "[2] Open dataset using DAL::Dataset object pointer" << std::endl;
-  try {
-    dalDataset *dataset;
-    dataset = new dalDataset();
-    retval = dataset->open(CR::string2char(filename));
-    std::cout << "-- Data type = " << dataset->getType() << std::endl;
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-  
-  std::cout << "[3] Extract group from dalDataset" << std::endl;
-  try {
-    dalDataset dataset;
-    retval = dataset.open(CR::string2char(filename));
-
-    dalGroup *group;
-    group = dataset.openGroup(groupname);
-
-    std::cout << "-- Data type  = " << dataset.getType() << std::endl;
-    std::cout << "-- Group name = " << groupname         << std::endl;
-    std::cout << "              = " << group->getName()  << std::endl;
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-  
-  return nofFailedTests;
-}
-
-// -----------------------------------------------------------------------------
-
-/*!
   \brief Test constructors for a new LOFAR_StationGroup object
 
   \return nofFailedTests -- The number of failed tests.
@@ -164,11 +109,6 @@ int main (int argc,
   }
 
   std::string filename = argv[1];
-
-  std::cout << "-- Test dataset : " << filename << std::endl;
-
-  // Perform some basic tests using the DAL
-  nofFailedTests += test_dal(filename);
 
   // Test for the constructor(s)
   nofFailedTests += test_LOFAR_StationGroup (filename);

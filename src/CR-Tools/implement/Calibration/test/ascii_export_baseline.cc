@@ -31,7 +31,7 @@
 #include <Calibration/BaselineGain.h>
 #include <Calibration/AverageGain.h>
 #include <IO/DataReader.h>
-#include <Data/ITSCapture.h>
+#include <Data/ITS_Capture.h>
 #include <Utilities/ProgressBar.h>
 
 using casa::Matrix;
@@ -543,7 +543,7 @@ int main()
   setParameters();
   // Construct DataReader object; stride default is zero
   DataReader *dr;
-  ITSCapture *capture = new ITSCapture (makeFilenamesVector(),
+  ITS_Capture *capture = new ITS_Capture (makeFilenamesVector(),
 					blocksize );
   dr = capture;
   // dimensions of the spectra (2D)

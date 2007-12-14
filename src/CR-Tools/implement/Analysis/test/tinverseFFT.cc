@@ -29,7 +29,7 @@
 #include <casa/Exceptions/Error.h>
 
 #include <Analysis/inverseFFT.h>
-#include <Data/ITSCapture.h>
+#include <Data/ITS_Capture.h>
 #include <Data/LopesEvent.h>
 #include <IO/DataReader.h>
 
@@ -44,7 +44,7 @@ using CR::inverseFFT;
 
   \ingroup Analysis
 
-  \brief A collection of test routines for inverseFFT
+  \brief A collection of test routines for the inverseFFT class
  
   \author Kalpana Singh
  

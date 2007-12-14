@@ -25,7 +25,7 @@
 #include <Math/BasicFilter.h>
 #include <Math/HanningFilter.h>
 #include <IO/DataReader.h>
-#include <Data/ITSCapture.h>
+#include <Data/ITS_Capture.h>
 
 /*!
   \file tHanningFilter.cc
@@ -401,10 +401,10 @@ int test_processing ()
     ok = true;
     uint channel (0);
     DataReader *dr;
-    ITSCapture *capture;
+    ITS_Capture *capture;
 
     try {
-      capture = new ITSCapture (basefile,
+      capture = new ITS_Capture (basefile,
 				blocksize);
       dr = capture;
     } catch (std::string message) {
@@ -448,7 +448,7 @@ int test_processing ()
     DataReader *dr;
 
     try {
-      ITSCapture *capture = new ITSCapture (basefile,
+      ITS_Capture *capture = new ITS_Capture (basefile,
 					    blocksize);
       dr = capture;
     } catch (std::string message) {

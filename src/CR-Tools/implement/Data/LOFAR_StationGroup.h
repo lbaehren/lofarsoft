@@ -50,6 +50,8 @@ namespace CR { // Namespace CR -- begin
     
     <ul type="square">
       <li>Definition of the LOFAR time-series data format
+      <li>[CR] LOFAR_TBB -- Interface between Data Access Library (DAL) and
+      DataReader framework
       <li>[DAL] dalDataset
       <li>[DAL] dalGroup
     </ul>
@@ -61,11 +63,10 @@ namespace CR { // Namespace CR -- begin
   */
   class LOFAR_StationGroup {
 
+    //! HDF5 file handle ID
+    hid_t H5fileID_p;
     //! Group object of the Data Access Library 
     dalGroup *group_p;
-    //! HDF5 file handle required to probe further into the group
-    hid_t h5file_p;
-
     
     //! Name of the telescope
     std::string telescope_p;
@@ -140,6 +141,18 @@ namespace CR { // Namespace CR -- begin
     */
     inline std::string groupName () const {
       group_p->getName();
+    }
+
+    /*!
+      \brief Get the file handle ID for the underlying HDF5 data file
+
+      \return H5fileID -- The file handle ID for the underlying HDF5 data file;
+              given this ID we can directly access the contents of the opened
+	      HDF5 file through the functionality of the HDF5 library, thereby
+	      bypassing the DAL layer.
+    */
+    inline hid_t fileID () const {
+      return H5fileID_p;
     }
     
     /*!
@@ -241,6 +254,29 @@ namespace CR { // Namespace CR -- begin
     // ------------------------------------------------------------------ Methods
 
     /*!
+      \brief Convert individual ID number to joint unique ID
+
+      \param station_id -- Identification number of the LOFAR station within the
+             complete array.
+      \param rsp_id -- Identification number of a Remote Station Processing
+             (RSP) board within a given LOFAR station.
+      \param rcu_id -- Identification number of a Receiver Unit (RCU) attached to
+             a given RSP board.
+
+      \return channel_id -- Unique identifier string for an individual dipole 
+              within the full LOFAR array.
+    */
+    inline std::string channelID (unsigned int const &station_id,
+				  unsigned int const &rsp_id,
+				  unsigned int const &rcu_id) {
+      char uid[10];
+      sprintf(uid, "%03d%03d%03d",
+	      station_id,rsp_id,rcu_id);
+      std::string channel_id (uid);
+      return channel_id;
+    }
+    
+    /*!
       \brief Extract the dalGroup object of a given name from a dalDataset
     
       \param dataset -- Dataset containing the group to be encapsulated using
@@ -252,7 +288,7 @@ namespace CR { // Namespace CR -- begin
               error was encountered.
      */
     bool setStationGroup (dalDataset &dataset,
-			  std::string const &name);    
+			  std::string const &name);
     
   private:
 

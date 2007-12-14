@@ -36,7 +36,7 @@
 #include <scimath/Mathematics.h>
 #include <scimath/Mathematics/FFTServer.h>
 
-#include <Data/ITSCapture.h>
+#include <Data/ITS_Capture.h>
 #include <IO/DataReader.h>
 
 #include <casa/namespace.h>
@@ -99,7 +99,7 @@ int test_invers (String const &filename,
   int nofFailedTests (0);
   
   DataReader *dr;
-  ITSCapture *capture = new ITSCapture (filename, blocksize);
+  ITS_Capture *capture = new ITS_Capture (filename, blocksize);
   dr = capture;
   
   uInt nofFiles (dr->nofSelectedAntennas());

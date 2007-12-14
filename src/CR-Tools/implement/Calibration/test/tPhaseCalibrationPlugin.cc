@@ -32,7 +32,7 @@
 #include <Calibration/PhaseCalibrationPlugin.h>
 #include <Data/LopesEventIn.h>
 #include <IO/DataReader.h>
-#include <Data/ITSCapture.h>
+#include <Data/ITS_Capture.h>
 #include <Data/LopesEvent.h>
 
 using namespace CR;

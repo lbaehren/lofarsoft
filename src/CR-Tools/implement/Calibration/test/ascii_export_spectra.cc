@@ -38,7 +38,7 @@
 #include <casa/Arrays/Matrix.h>
 
 // LOPES-tools header files
-#include <Data/ITSCapture.h>
+#include <Data/ITS_Capture.h>
 #include <IO/DataReader.h>
 #include <Utilities/ProgressBar.h>
 
@@ -233,7 +233,7 @@ int main()
   // Construct DataReader object; stride default is zero
   setParameters();
   DataReader *dr;
-  ITSCapture *capture = new ITSCapture ( makeFilenamesVector(),
+  ITS_Capture *capture = new ITS_Capture ( makeFilenamesVector(),
 					 blocksize );
   dr = capture;
   int fileNumber ( 1 ); // number of the file (and block to be exported)

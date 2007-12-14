@@ -44,13 +44,13 @@ namespace CR { // Namespace CR -- begin
 					  std::string const &name)
   {
     bool status (true);
-
+    
     init ();
-
+    
     status = setStationGroup (dataset,
 			      name);
   }
-
+  
   // --------------------------------------------------------- LOFAR_StationGroup
   
   LOFAR_StationGroup::LOFAR_StationGroup (LOFAR_StationGroup const &other)
@@ -93,6 +93,7 @@ namespace CR { // Namespace CR -- begin
   
   void LOFAR_StationGroup::copy (LOFAR_StationGroup const &other)
   {
+    H5fileID_p      = other.H5fileID_p;
     group_p         = other.group_p;
     
     telescope_p     = other.telescope_p;
@@ -112,7 +113,8 @@ namespace CR { // Namespace CR -- begin
     os << "[LOFAR_StationGroup] Summar of object properties"     << endl;
 
     os << "-- dalGroup name ..... : " << group_p->getName()      << endl;
-    os << "-- dalGroup ID ....... : " << group_p->getId()        << endl;
+    os << "-- dalGroup ID   ..... : " << group_p->getId()        << endl;
+    os << "-- HDF5 file handle ID : " << H5fileID_p              << endl;
 
     os << "-- Telesope .......... : " << telescope_p             << endl;
     os << "-- Observer .......... : " << observer_p              << endl;
@@ -133,6 +135,7 @@ namespace CR { // Namespace CR -- begin
 
   void LOFAR_StationGroup::init ()
   {
+    H5fileID_p        = -1;
     group_p           = new dalGroup();
     group_p->setName ("UNDEFINED");
 
@@ -153,7 +156,8 @@ namespace CR { // Namespace CR -- begin
     bool status (true);
 
     try {
-      group_p = dataset.openGroup(name);
+      H5fileID_p = dataset.getFileHandle();
+      group_p    = dataset.openGroup(name);
     } catch (std::string message) {
       std::cerr << "[LOFAR_StationGroup::setStationGroup] " << message << endl;
       status = false;
@@ -248,8 +252,6 @@ namespace CR { // Namespace CR -- begin
     uint max_station (100);
     uint max_rsp (10);
     uint max_rcu (10);
-
-//     hid_t dataset = H5Dopen( h5fh, datasetname );
 
     return status;
   }

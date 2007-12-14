@@ -40,7 +40,7 @@
 
 #include <Calibration/PluginBase.h>
 #include <Calibration/RFIMitigation.h>
-#include <Data/ITSCapture.h>
+#include <Data/ITS_Capture.h>
 #include <Data/LopesEvent.h>
 #include <IO/DataReader.h>
 
@@ -182,7 +182,7 @@ Vector<String> filenamesVector()
   
   // to read raw data after application of Hanning Filter
   DataReader *dr;
-  ITSCapture *capture = new ITSCapture (filenames(0),
+  ITS_Capture *capture = new ITS_Capture (filenames(0),
 					dataBlockSize );
   dr = capture;
   dr->setHanningFilter (alpha);

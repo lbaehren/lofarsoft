@@ -71,16 +71,43 @@ namespace CR { // Namespace CR -- begin
     Library (DAL), which handles the access to the standard LOFAR data products.
 
     <ul>
+      <li><b>Structure of the data set</b> <br>
+      \verbatim
+      /                        ...  GROUP
+      |-- Station001           ...  GROUP
+      |   |-- TELESCOPE        ...  ATTRIBUTE
+      |   |-- OBSERVER         ...  ATTRIBUTE
+      |   |-- PROJECT          ...  ATTRIBUTE
+      |   |
+      |   |-- 001000000        ...  DATASET
+      |   |   |-- STATION_ID   ...  ATTRIBUTE
+      |   |   |-- RSP_ID       ...  ATTRIBUTE
+      |   |   |-- RCU_ID       ...  ATTRIBUTE
+      |   |   |-- SAMPLE_FREQ  ...  ATTRIBUTE
+      |   |-- 001000001
+      |   |-- 001000002
+      |   |-- 001000003
+      |   |-- 001000004
+      |   |
+      |   |-- 001001000
+      |   |-- 001001001
+      |   |
+      |
+      \endverbatim
       <li><b>Signal channel ID</b> <br> 
       The signal channel for an individual reception element (dipole) can be
       uniquely identified through a combination of the following three separate
       identifiers:
       <ol>
-        <li>Station ID
-	<li>RSP ID
-	<li>RCU ID
+        <li>STATION_ID  -- Identification number of the LOFAR station within the
+	complete array.
+	<li>RSP_ID -- Identification number of a Remote Station Processing (RSP)
+	board within a given LOFAR station.
+	<li>RCU_ID -- Identification number of a Receiver Unit (RCU) attached to
+	a given RSP board.
       </ol>
     </ul>
+
     
     <h3>Example(s)</h3>
     

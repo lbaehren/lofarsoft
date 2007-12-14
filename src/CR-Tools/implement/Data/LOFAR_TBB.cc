@@ -97,10 +97,11 @@ namespace CR { // Namespace CR -- begin
 			   bool const &listStationGroups)
   {
     os << "[LOFAR_TBB] Summar of object properties" << endl;
-    os << "-- Name of data file . : " << filename_p              << endl;
-    os << "-- Dataset type ...... : " << dataset_p->getType()    << endl;
-    os << "-- Dataset name ...... : " << dataset_p->getName()    << endl;
-    os << "-- nof. station groups : " << stationGroups_p.size()  << endl;
+    os << "-- Name of data file . : " << filename_p                 << endl;
+    os << "-- Dataset type ...... : " << dataset_p->getType()       << endl;
+    os << "-- Dataset name ...... : " << dataset_p->getName()       << endl;
+    os << "-- HDF5 file handle ID : " << dataset_p->getFileHandle() << endl;
+    os << "-- nof. station groups : " << stationGroups_p.size()     << endl;
 
     /* The rest of the summary output is conditional, because given the number
        station it might get quite a lot. */
@@ -127,20 +128,21 @@ namespace CR { // Namespace CR -- begin
     /* Connection to dataset via DAL layer */
 
     dataset_p = new dalDataset();
-
+    
     if (dataset_p->open(string2char(filename_p))) {
-      std::cerr << "[LOFAR_TBB::init] Error opening datafile." << endl;
+      std::cerr << "[LOFAR_TBB::init] Error opening file into dalDataset!"
+		<< std::endl;
       return false;
     }
-
-    /* If opening the data file was successful, we can continued. First we
-       scan for the station groups available in the file, since this is the
-       basic unit within which the actual data for the individual dipoles are
-       stored.
+    
+    /*
+      If opening the data file was successful, we can continue. First we scan for
+      the station groups available in the file, since this is the basic unit
+      within which the actual data for the individual dipoles are stored.
     */
-
+    
     std::vector<std::string> stationGroups = getStationGroups();
-
+    
     for (uint station(0); station<stationGroups.size(); station++) {
       std::cout << "-- storing information for group "
 		<< stationGroups[station]
@@ -182,8 +184,25 @@ namespace CR { // Namespace CR -- begin
 
   casa::Matrix<double> LOFAR_TBB::fx ()
   {
-    casa::Matrix<double> data;
+    uint sample (0);
+    uint nofSelectedAntennas (DataReader::nofSelectedAntennas());
+    short buffer[blocksize_p];
+    casa::Matrix<double> data (blocksize_p,nofSelectedAntennas);
 
+    for (uint antenna (0); antenna<nofSelectedAntennas; antenna++) {
+      /* Read the TBB data for the specified channel from the file. */
+      dataset_p->read_tbb(channelID_p[antenna],
+			  iterator_p[selectedAntennas_p(antenna)].position(),
+			  blocksize_p,
+			  buffer);
+      /* Copy the retrieved data values to the array returned by this function;
+	 there might be a more efficient way to do this (e.g. via slicing) but
+	 for now this is a working solution.  */
+      for (sample=0; sample<blocksize_p; sample++) {
+	data(sample,antenna) = buffer[sample];
+      }      
+    }
+    
     return data;
   }
 

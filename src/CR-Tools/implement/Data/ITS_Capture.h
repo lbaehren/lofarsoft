@@ -1,4 +1,7 @@
-/***************************************************************************
+/*-------------------------------------------------------------------------*
+ | $Id::                                                                 $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
  *   Copyright (C) 2006                                                    *
  *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
@@ -18,10 +21,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: ITSCapture.h,v 1.2 2006/10/31 18:24:08 bahren Exp $*/
-
-#ifndef ITSCAPTURE_H
-#define ITSCAPTURE_H
+#ifndef ITS_CAPTURE_H
+#define ITS_CAPTURE_H
 
 #include <casa/aips.h>
 #include <casa/Arrays.h>
@@ -33,17 +34,17 @@
 using CR::DataReader;
 
 /*!
-  \class ITSCapture
+  \class ITS_Capture
 
   \ingroup CR_Data
 
-  \brief Brief description for class ITSCapture
+  \brief Brief description for class ITS_Capture
 
   \author Lars B&auml;hren
 
   \date 2006/05/16
 
-  \test tITSCapture.cc
+  \test tITS_Capture.cc
 
   <h3>Prerequisite</h3>
 
@@ -58,7 +59,7 @@ using CR::DataReader;
 
 */
 
-class ITSCapture : public DataReader {
+class ITS_Capture : public DataReader {
 
   //! Information contained in experiment.meta are stored in their own object
   ITSMetadata metadata_p;
@@ -73,14 +74,14 @@ class ITSCapture : public DataReader {
   /*!
     \brief Default constructor
    */
-  ITSCapture ();
+  ITS_Capture ();
 
   /*!
     \brief Argumented constructor
 
     \param metafile -- Name of the file from which to read in the data
   */
-  ITSCapture (String const &metafile);
+  ITS_Capture (String const &metafile);
 
   /*!
     \brief Argumented constructor
@@ -88,8 +89,8 @@ class ITSCapture : public DataReader {
     \param metafile -- Name of the file from which to read in the data
     \param blocksize   -- Size of a block of data, [samples]
   */
-  ITSCapture (String const &metafile,
-	      uint const &blocksize);
+  ITS_Capture (String const &metafile,
+	       uint const &blocksize);
   
   /*!
     \brief Argumented constructor
@@ -101,33 +102,33 @@ class ITSCapture : public DataReader {
     \param fft2calfft  -- Multiplication factors for conversion from raw to
                           calibrated FFT
   */
-  ITSCapture (String const &metafile,
-	      uint const &blocksize,
-	      Vector<Double> const &adc2voltage,
-	      Matrix<DComplex> const &fft2calfft);
+  ITS_Capture (String const &metafile,
+	       uint const &blocksize,
+	       Vector<Double> const &adc2voltage,
+	       Matrix<DComplex> const &fft2calfft);
   /*!
     \brief Copy constructor
 
-    \param other -- Another ITSCapture object from which to create this new
+    \param other -- Another ITS_Capture object from which to create this new
                     one.
   */
-  ITSCapture (ITSCapture const &other);
+  ITS_Capture (ITS_Capture const &other);
 
   // ---------------------------------------------------------------- Destruction
 
   /*!
     \brief Destructor
   */
-  ~ITSCapture ();
+  ~ITS_Capture ();
 
   // ------------------------------------------------------------------ Operators
 
   /*!
     \brief Overloading of the copy operator
 
-    \param other -- Another ITSCapture object from which to make a copy.
+    \param other -- Another ITS_Capture object from which to make a copy.
   */
-  ITSCapture& operator= (ITSCapture const &other); 
+  ITS_Capture& operator= (ITS_Capture const &other); 
 
   // ----------------------------------------------------------------- Parameters
 
@@ -136,7 +137,7 @@ class ITSCapture : public DataReader {
     
     \return metafile -- Name of the metafile
   */
-  String metafile () const {
+  inline String metafile () const {
     return metadata_p.metafile();
   }
   
@@ -156,7 +157,7 @@ class ITSCapture : public DataReader {
     \return directory -- Path to the directory in which the metafile and the
                          datafiles are
   */
-  String directory () const {
+  inline String directory () const {
     return metadata_p.directory();
   }
 
@@ -168,7 +169,7 @@ class ITSCapture : public DataReader {
     \return datafiles -- The names of the files, in which the actual data are
                          stored
    */
-  Vector<String> datafiles (bool const &fullPath=true) const {
+  inline Vector<String> datafiles (bool const &fullPath=true) const {
     return metadata_p.datafiles(fullPath);
   }  
 
@@ -180,7 +181,7 @@ class ITSCapture : public DataReader {
 
     \return antennas -- Numbers of the antennas included in the experiment
   */
-  Vector<uint> antennas (bool const &validDataOnly=true) const {
+  inline Vector<uint> antennas (bool const &validDataOnly=true) const {
     return metadata_p.antennas (validDataOnly);
   }
 
@@ -198,7 +199,7 @@ class ITSCapture : public DataReader {
   /*!
     \brief Unconditional copying
   */
-  void copy (ITSCapture const &other);
+  void copy (ITS_Capture const &other);
 
   /*!
     \brief Unconditional deletion 

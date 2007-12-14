@@ -1,4 +1,7 @@
-/***************************************************************************
+/*-------------------------------------------------------------------------*
+ | $Id::                                                                 $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
  *   Copyright (C) 2006                                                    *
  *   Lars Bahren (bahren@astron.nl)                                        *
  *                                                                         *
@@ -18,9 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: ITSCapture.cc,v 1.3 2006/10/31 18:24:08 bahren Exp $*/
-
-#include <Data/ITSCapture.h>
+#include <Data/ITS_Capture.h>
 
 // ==============================================================================
 //
@@ -28,36 +29,36 @@
 //
 // ==============================================================================
 
-// ------------------------------------------------------------------- ITSCapture
+// ------------------------------------------------------------------ ITS_Capture
 
-ITSCapture::ITSCapture ()
+ITS_Capture::ITS_Capture ()
 {
   ITSMetadata meta;
   metadata_p = meta;
 }
 
-// ------------------------------------------------------------------- ITSCapture
+// ------------------------------------------------------------------ ITS_Capture
 
-ITSCapture::ITSCapture (String const &metafile)
+ITS_Capture::ITS_Capture (String const &metafile)
 {
   setMetafile (metafile);
 }
 
-// ------------------------------------------------------------------- ITSCapture
+// ------------------------------------------------------------------ ITS_Capture
 
-ITSCapture::ITSCapture (String const &metafile,
-			uint const &blocksize)
+ITS_Capture::ITS_Capture (String const &metafile,
+			  uint const &blocksize)
   : DataReader (blocksize)
 {
   setMetafile (metafile);
 }
 
-// ------------------------------------------------------------------- ITSCapture
+// ------------------------------------------------------------------ ITS_Capture
 
-ITSCapture::ITSCapture (String const &metafile,
-			uint const &blocksize,
-			Vector<Double> const &adc2voltage,
-			Matrix<DComplex> const &fft2calfft)
+ITS_Capture::ITS_Capture (String const &metafile,
+			  uint const &blocksize,
+			  Vector<Double> const &adc2voltage,
+			  Matrix<DComplex> const &fft2calfft)
   : DataReader (blocksize,
 		adc2voltage,
 		fft2calfft)
@@ -65,9 +66,9 @@ ITSCapture::ITSCapture (String const &metafile,
   setMetafile (metafile);
 }
 
-// ------------------------------------------------------------------- ITSCapture
+// ------------------------------------------------------------------ ITS_Capture
 
-ITSCapture::ITSCapture (ITSCapture const &other)
+ITS_Capture::ITS_Capture (ITS_Capture const &other)
 {
   copy (other);
 }
@@ -78,16 +79,16 @@ ITSCapture::ITSCapture (ITSCapture const &other)
 //
 // ==============================================================================
 
-// ------------------------------------------------------------------ ~ITSCapture
+// ----------------------------------------------------------------- ~ITS_Capture
 
-ITSCapture::~ITSCapture ()
+ITS_Capture::~ITS_Capture ()
 {
   destroy();
 }
 
 // ---------------------------------------------------------------------- destroy
 
-void ITSCapture::destroy ()
+void ITS_Capture::destroy ()
 {;}
 
 // ==============================================================================
@@ -96,7 +97,7 @@ void ITSCapture::destroy ()
 //
 // ==============================================================================
 
-ITSCapture& ITSCapture::operator= (ITSCapture const &other)
+ITS_Capture& ITS_Capture::operator= (ITS_Capture const &other)
 {
   if (this != &other) {
     destroy ();
@@ -107,7 +108,7 @@ ITSCapture& ITSCapture::operator= (ITSCapture const &other)
 
 // ------------------------------------------------------------------------- copy
 
-void ITSCapture::copy (ITSCapture const &other)
+void ITS_Capture::copy (ITS_Capture const &other)
 {
   metadata_p = other.metadata_p;
   datatype_p = other.datatype_p;
@@ -119,7 +120,7 @@ void ITSCapture::copy (ITSCapture const &other)
 //
 // ==============================================================================
 
-void ITSCapture::setMetafile (String const &metafile)
+void ITS_Capture::setMetafile (String const &metafile)
 {
   bool status (true);
   
@@ -127,7 +128,7 @@ void ITSCapture::setMetafile (String const &metafile)
   try {
     metadata_p.setMetafile (metafile);
   } catch (AipsError x) {
-    cerr << "[ITSCapture::setMetafile] " << x.getMesg() << endl;
+    cerr << "[ITS_Capture::setMetafile] " << x.getMesg() << endl;
     status = false;
   }
   
@@ -145,7 +146,7 @@ void ITSCapture::setMetafile (String const &metafile)
 
 // ------------------------------------------------------------------- setStreams
 
-Bool ITSCapture::setStreams ()
+Bool ITS_Capture::setStreams ()
 {
   bool status (true);
   short var (0);
@@ -158,7 +159,7 @@ Bool ITSCapture::setStreams ()
   DataIterator *iterator;
   
   /*
-    Configure the DataIterator objects: for ITSCapture data, the values are
+    Configure the DataIterator objects: for ITS_Capture data, the values are
     stored as short integer without any header information preceeding the
     data within the data file.
   */
@@ -208,7 +209,7 @@ Bool ITSCapture::setStreams ()
 
 // --------------------------------------------------------------------------- fx
 
-Matrix<Double> ITSCapture::fx ()
+Matrix<Double> ITS_Capture::fx ()
 {
   uint i (0);
   int errstat(0);
@@ -216,7 +217,7 @@ Matrix<Double> ITSCapture::fx ()
   uint nofSelectedAntennas (DataReader::nofSelectedAntennas());
   // Data vector returned after reading is completed
   Matrix<Double> data (blocksize_p,
-		      nofSelectedAntennas);
+		       nofSelectedAntennas);
   
   // -----------------------------------------------------------------
   // Go to the position in the file, from to start reading data
@@ -226,16 +227,16 @@ Matrix<Double> ITSCapture::fx ()
     try{
       fileStream_p[selectedAntennas_p(file)].seekg(iterator_p[selectedAntennas_p(file)].position(), ios::beg);
     } catch (AipsError x) {
-      cerr << "[ITSCapture::fx] " << x.getMesg() << endl;
+      cerr << "[ITS_Capture::fx] " << x.getMesg() << endl;
       errstat = 1;
     }
     
     try{
       fileStream_p[selectedAntennas_p(file)].read ((char*)tmpData,
-			       sizeof (datatype_p)*blocksize_p);
+						   sizeof (datatype_p)*blocksize_p);
     } catch (AipsError x) {
       errstat = 2;
-      cerr << "[ITSCapture::fx] " << x.getMesg() << endl;
+      cerr << "[ITS_Capture::fx] " << x.getMesg() << endl;
     }
     
     if (errstat == 0) {
@@ -246,6 +247,6 @@ Matrix<Double> ITSCapture::fx ()
       data = 0.0;
     }
   }
-
+  
   return data;
 }

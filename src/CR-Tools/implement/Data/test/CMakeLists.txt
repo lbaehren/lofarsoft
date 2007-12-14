@@ -29,13 +29,7 @@ foreach (src ${tests})
 endforeach (src)
 
 ## -----------------------------------------------------------------------------
-## Build the test programs working with input data sets
-
-add_executable (tLOFAR_StationGroup tLOFAR_StationGroup.cc)
-target_link_libraries (tLOFAR_StationGroup cr)
-
-add_executable (tLOFAR_TBB tLOFAR_TBB.cc)
-target_link_libraries (tLOFAR_TBB cr)
+## Build the test programs working with the Data Access Library (DAL)
 
 find_file (tbb_dataset tbb_test_file_v2.h5
   PATHS
@@ -44,12 +38,18 @@ find_file (tbb_dataset tbb_test_file_v2.h5
   ${CR_SOURCE_DIR}/../../data
   )
 
-if (tbb_dataset)
-  add_test (tLOFAR_TBB tLOFAR_TBB ${tbb_dataset})
-  add_test (tLOFAR_StationGroup tLOFAR_StationGroup ${tbb_dataset})
-else (tbb_dataset)
-  message (STATUS "Unable to run tLOFAR_TBB; no dataset found!")
-endif (tbb_dataset)
+foreach (src tLOFAR_StationGroup tLOFAR_TBB) 
+  ## compiler instructions
+  add_executable (${src} ${src}.cc)
+  ## linker instructions
+  target_link_libraries (${src} cr)
+  ## testing
+  if (tbb_dataset)
+    add_test (${src} ${src} ${tbb_dataset})
+  else (tbb_dataset)
+    message (STATUS "Unable to run test ${src}; missing input data file.")
+  endif (tbb_dataset)
+endforeach (src)
 
 ## -----------------------------------------------------------------------------
 ## Installation
