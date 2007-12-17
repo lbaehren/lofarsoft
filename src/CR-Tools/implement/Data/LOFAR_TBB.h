@@ -131,8 +131,19 @@ namespace CR { // Namespace CR -- begin
     
     /*!
       \brief Argumented constructor
+
+      \param filename -- Name of the file from which to read in the data
     */
     LOFAR_TBB (std::string const &filename);
+    
+    /*!
+      \brief Argumented constructor
+
+      \param filename -- Name of the file from which to read in the data
+      \param blocksize -- Size of a block of data, [samples]
+    */
+    LOFAR_TBB (std::string const &filename,
+	       uint const &blocksize);
     
     /*!
       \brief Copy constructor

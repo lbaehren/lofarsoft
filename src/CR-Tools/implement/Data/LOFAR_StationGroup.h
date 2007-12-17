@@ -68,20 +68,6 @@ namespace CR { // Namespace CR -- begin
     //! Group object of the Data Access Library 
     dalGroup *group_p;
     
-    //! Name of the telescope
-    std::string telescope_p;
-    //! Name of the observer
-    std::string observer_p;
-    //! Project name/description
-    std::string project_p;
-    //! Observation ID
-    std::string observationID_p;
-    //! Observation mode
-    std::string observationMode_p;
-    //! Trigger type
-    std::string triggerType_p;
-    //! Trigger offset
-    double triggerOffset_p;
     //! If detection was done inside a beam, what was its (local) direction
     std::vector<double> beamDirection_p;
     
@@ -159,66 +145,56 @@ namespace CR { // Namespace CR -- begin
       \brief Get the name of the telescope
       
       \return telescope -- The name of the telescope with which the data were
-              recorded.
+              recorded; returns an empty string in case no keyword value could
+	      be extracted.
     */
-    inline std::string telescope () const {
-      return telescope_p;
-    }
+    std::string telescope ();
 
     /*!
       \brief Get the name of the observer
       
-      \return observer -- The name of the observer.
+      \return observer -- The name of the observer; returns an empty string in
+              case no keyword value could be extracted.
     */
-    inline std::string observer () const {
-      return observer_p;
-    }
+    std::string observer ();
     
     /*!
       \brief Get the project name/description
       
       \return project -- Name/Description of the project for which this 
-              observation was carried out.
+              observation was carried out; returns an empty string in case no
+	      keyword value could be extracted.
     */
-    inline std::string project () const {
-      return project_p;
-    }
+    std::string project ();
 
     /*!
       \brief Get the observation ID
 
-      \return observationID -- The observation ID.
+      \return observationID -- The observation ID; returns an empty string in
+              case no keyword value could be extracted.
     */
-    inline std::string observationID () const {
-      return observationID_p;
-    }
+    std::string observationID ();
     
     /*!
       \brief Get the description of the observation mode
 
       \return observationMode -- Description/type of observation mode
     */
-    inline std::string observationMode () const {
-      return observationMode_p;
-    }
+    std::string observationMode ();
     
     /*!
       \brief Get the trigger type which cause recording this data
 
       \return triggerType -- The trigger type which cause recording this data
     */
-    inline std::string triggerType () const {
-      return triggerType_p;
-    }
+    std::string triggerType ();
 
     /*!
       \brief Get the trigger offset
 
       \return triggerOffset -- The trigger offset.
     */
-    inline double triggerOffset () const {
-      return triggerOffset_p;
-    }
+    double triggerOffset ();
 
     /*!
       \brief Local direction of the beam if one was used for detection within
@@ -306,20 +282,10 @@ namespace CR { // Namespace CR -- begin
     void init ();
 
     /*!
-      \brief Extract the keywords values from the station group
-      
-      \return status -- Status of the operation; returns <tt>false</tt> if an 
-              error was encountered.
+      \brief Get the value of a given attribute
     */
-    bool extractAttributes ();
-    
-    /*!
-      \brief Extract the attributes from the HDF5 dataset
-      
-      \return status -- Status of the operation; returns <tt>false</tt> if an 
-              error was encountered.
-    */
-    bool extractDatasetAttributes ();
+    void getAttribute (std::string &value,
+		       std::string const &keyword);
     
     /*!
       \brief Unconditional copying

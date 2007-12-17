@@ -33,6 +33,8 @@ namespace CR { // Namespace CR -- begin
   //  Construction
   //
   // ============================================================================
+
+  // ------------------------------------------------------------------ LOFAR_TBB
   
   LOFAR_TBB::LOFAR_TBB (std::string const &filename)
     : DataReader (),
@@ -40,6 +42,18 @@ namespace CR { // Namespace CR -- begin
   {
     init ();
   }
+  
+  // ------------------------------------------------------------------ LOFAR_TBB
+  
+  LOFAR_TBB::LOFAR_TBB (std::string const &filename,
+			uint const &blocksize)
+    : DataReader (blocksize),
+      filename_p(filename)
+  {
+    init ();
+  }
+  
+  // ------------------------------------------------------------------ LOFAR_TBB
   
   LOFAR_TBB::LOFAR_TBB (LOFAR_TBB const &other)
   {

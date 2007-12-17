@@ -96,11 +96,6 @@ namespace CR { // Namespace CR -- begin
   {
     H5fileID_p      = other.H5fileID_p;
     group_p         = other.group_p;
-    
-    telescope_p     = other.telescope_p;
-    observer_p      = other.observer_p;
-    project_p       = other.project_p;
-    observationID_p = other.observationID_p;
   }
 
   // ============================================================================
@@ -108,6 +103,141 @@ namespace CR { // Namespace CR -- begin
   //  Parameters
   //
   // ============================================================================
+
+  // ------------------------------------------------------------------ telescope
+
+  std::string LOFAR_StationGroup::telescope ()
+  {
+    std::string attribute_telescope ("");
+    
+    if (group_p->getName() != "UNDEFINED") {
+      try {
+	char *telescope = (char*)(group_p->getAttribute("TELESCOPE"));
+	attribute_telescope = telescope;
+      } catch (std::string message) {
+	std::cerr << "-- Error extracting attribute telescope" << endl;
+	attribute_telescope = "";
+      }
+    }
+    
+    return attribute_telescope;
+  }
+
+  // ------------------------------------------------------------------- observer
+
+  std::string LOFAR_StationGroup::observer ()
+  {
+    std::string attribute_observer ("");
+    
+    if (group_p->getName() != "UNDEFINED") {
+      try {
+	char *observer = (char*)(group_p->getAttribute("OBSERVER"));
+	attribute_observer = observer;
+      } catch (std::string message) {
+	std::cerr << "-- Error extracting attribute OBSERVER" << endl;
+	attribute_observer = "";
+      }
+    }
+    
+    return attribute_observer;
+  }
+
+  // -------------------------------------------------------------------- project
+
+  std::string LOFAR_StationGroup::project ()
+  {
+    std::string tmp ("");
+    
+    if (group_p->getName() != "UNDEFINED") {
+      try {
+	char *buffer = (char*)(group_p->getAttribute("PROJECT"));
+	tmp = buffer;
+      } catch (std::string message) {
+	std::cerr << "-- Error extracting attribute PROJECT" << endl;
+	tmp = "";
+      }
+    }
+    
+    return tmp;
+  }
+
+  // -------------------------------------------------------------- observationID
+
+  std::string LOFAR_StationGroup::observationID ()
+  {
+    std::string tmp ("");
+    
+    if (group_p->getName() != "UNDEFINED") {
+      try {
+	char *buffer = (char*)(group_p->getAttribute("OBS_ID"));
+	tmp = buffer;
+      } catch (std::string message) {
+	std::cerr << "-- Error extracting attribute OBS_ID" << endl;
+	tmp = "";
+      }
+    }
+    
+    return tmp;
+  }
+
+  // ------------------------------------------------------------ observationMode
+
+  std::string LOFAR_StationGroup::observationMode ()
+  {
+    std::string tmp ("");
+    
+    if (group_p->getName() != "UNDEFINED") {
+      try {
+	char *buffer = (char*)(group_p->getAttribute("OBS_MODE"));
+	tmp = buffer;
+      } catch (std::string message) {
+	std::cerr << "-- Error extracting attribute OBS_MODE" << endl;
+	tmp = "";
+      }
+    }
+    
+    return tmp;
+  }
+
+  // ---------------------------------------------------------------- triggerType
+
+  std::string LOFAR_StationGroup::triggerType ()
+  {
+    std::string tmp ("");
+    
+    if (group_p->getName() != "UNDEFINED") {
+      try {
+	char *buffer = (char*)(group_p->getAttribute("TRIG_TYPE"));
+	tmp = buffer;
+      } catch (std::string message) {
+	std::cerr << "-- Error extracting attribute TRIG_TYPE" << endl;
+	tmp = "";
+      }
+    }
+    
+    return tmp;
+  }
+
+  // -------------------------------------------------------------- triggerOffset
+
+  double LOFAR_StationGroup::triggerOffset ()
+  {
+    double tmp (0.0);
+    
+    if (group_p->getName() != "UNDEFINED") {
+      try {
+	double *buffer = (double*)(group_p->getAttribute("TRIG_OFST"));
+	tmp = (*buffer);
+      } catch (std::string message) {
+	std::cerr << "-- Error extracting attribute TRIG_TYPE" << endl;
+	tmp = 0.0;
+      }
+    }
+    
+    return tmp;
+  }
+
+  // -------------------------------------------------------------------- summary
   
   void LOFAR_StationGroup::summary (std::ostream &os)
   {
@@ -117,13 +247,13 @@ namespace CR { // Namespace CR -- begin
     os << "-- dalGroup ID   ..... : " << group_p->getId()        << endl;
     os << "-- HDF5 file handle ID : " << H5fileID_p              << endl;
 
-    os << "-- Telesope .......... : " << telescope_p             << endl;
-    os << "-- Observer .......... : " << observer_p              << endl;
-    os << "-- Project description : " << project_p               << endl;
-    os << "-- Observation ID .... : " << observationID_p         << endl;
-    os << "-- Observation mode .. : " << observationMode_p       << endl;
-    os << "-- Trigger type ...... : " << triggerType_p           << endl;
-    os << "-- Trigger offset .... : " << triggerOffset_p         << endl;
+    os << "-- Telesope .......... : " << telescope()             << endl;
+    os << "-- Observer .......... : " << observer()              << endl;
+    os << "-- Project description : " << project()               << endl;
+    os << "-- Observation ID .... : " << observationID()         << endl;
+    os << "-- Observation mode .. : " << observationMode()       << endl;
+    os << "-- Trigger type ...... : " << triggerType()           << endl;
+    os << "-- Trigger offset .... : " << triggerOffset()         << endl;
   }
   
   // ============================================================================
@@ -139,14 +269,6 @@ namespace CR { // Namespace CR -- begin
     H5fileID_p        = -1;
     group_p           = new dalGroup();
     group_p->setName ("UNDEFINED");
-
-    telescope_p       = "UNDEFINED";
-    observer_p        = "UNDEFINED";
-    project_p         = "UNDEFINED";
-    observationID_p   = "UNDEFINED";
-    observationMode_p = "UNDEFINED";
-    triggerType_p     = "UNDEFINED";
-    triggerOffset_p   = 0.0;
   }
 
   // ------------------------------------------------------------ setStationGroup
@@ -164,86 +286,23 @@ namespace CR { // Namespace CR -- begin
       status = false;
     }
 
-    if (status) {
-      status = extractAttributes ();
-    }
-
     return status;
+  }
+
+  // ------------------------------------------------------------------ attribute
+  
+  void LOFAR_StationGroup::getAttribute (std::string &value,
+					 std::string const &keyword)
+  {
+    try {
+      char *buffer = (char*)(group_p->getAttribute(keyword));
+      value = buffer;
+    } catch (std::string message) {
+      std::cerr << "-- Error extracting attribute " << keyword << endl;
+      value = "";
+    }
   }
   
-  // ---------------------------------------------------------- extractAttributes
-
-  bool LOFAR_StationGroup::extractAttributes ()
-  {
-    bool status (true);
-
-    /* Extract name of telescope */
-    try {
-      char *telescope = (char*)(group_p->getAttribute("TELESCOPE"));
-      telescope_p = telescope;
-    } catch (std::string message) {
-      std::cerr << "-- Error extracting name of telescope" << endl;
-      status = false;
-    }
-    
-    /* Extract name of the observer */
-    try {
-      char *observer = (char*)(group_p->getAttribute("OBSERVER"));
-      observer_p = observer;
-    } catch (std::string message) {
-      std::cerr << "-- Error extracting name of the observer" << endl;
-      status = false;
-    }
-
-    /* Extract name/description of the project */
-    try {
-      char *project = (char*)(group_p->getAttribute("PROJECT"));
-      project_p = project;
-    } catch (std::string message) {
-      std::cerr << "-- Error extracting name/description of the project" << endl;
-      status = false;
-    }
-    
-    /* Extract observation ID */
-    try {
-      char *observationID = (char*)(group_p->getAttribute("OBS_ID"));
-      observationID_p = observationID;
-    } catch (std::string message) {
-      std::cerr << "-- Error extracting observation ID" << endl;
-      status = false;
-    }
-    
-    /* Extract observation mode */
-    try {
-      char *observationMode = (char*)(group_p->getAttribute("OBS_MODE"));
-      observationMode_p = observationMode;
-    } catch (std::string message) {
-      std::cerr << "-- Error extracting observation mode" << endl;
-      status = false;
-    }
-
-    /* Extract trigger type */
-    try {
-      char *triggerType = (char*)(group_p->getAttribute("TRIG_TYPE"));
-      triggerType_p = triggerType;
-    } catch (std::string message) {
-      std::cerr << "-- Error extracting trigger type" << endl;
-      status = false;
-    }
-    
-    /* Extract trigger offset */
-    try {
-      double *triggerOffset = (double*)(group_p->getAttribute("TRIG_OFST"));
-      triggerOffset_p = (*triggerOffset);
-    } catch (std::string message) {
-      std::cerr << "-- Error extracting trigger offset" << endl;
-      triggerOffset_p = 0.0;
-      status = false;
-    }
-    
-    return status;
-  }
-
   // ---------------------------------------------------------------- channelsIDs
 
   std::vector<std::string> LOFAR_StationGroup::channelIDs ()
@@ -275,15 +334,6 @@ namespace CR { // Namespace CR -- begin
     }
 
     return IDs;
-  }
-
-  // --------------------------------------------------- extractDatasetAttributes
-
-  bool LOFAR_StationGroup::extractDatasetAttributes ()
-  {
-    bool status (true);
-
-    return status;
   }
 
 } // Namespace CR -- end
