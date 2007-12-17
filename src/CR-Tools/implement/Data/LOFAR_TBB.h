@@ -234,6 +234,10 @@ namespace CR { // Namespace CR -- begin
     // ------------------------------------------------------------------ Methods
     
     casa::Matrix<double> fx ();
+
+  protected:
+
+    bool setStreams ();
     
   private:
 

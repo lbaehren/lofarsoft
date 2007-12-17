@@ -98,7 +98,7 @@ namespace CR {  //  Namespace CR -- begin
     <h3>Synopsis</h3>
     
     The functionality and logic for dealing with a certain data set is distributed
-    over the base class (DataReader) and the derived classes (e.g. ITSCapture,
+    over the base class (DataReader) and the derived classes (e.g. ITS_Capture,
     LopesEvent).
     
     <table border="0" cellpadding="3">

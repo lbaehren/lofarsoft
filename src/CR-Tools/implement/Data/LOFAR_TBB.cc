@@ -118,6 +118,7 @@ namespace CR { // Namespace CR -- begin
     os << "-- HDF5 file handle ID : " << dataset_p->getFileHandle() << endl;
     os << "-- nof. station groups : " << stationGroups_p.size()     << endl;
     os << "-- nof. data channels  : " << channelID_p.size()         << endl;
+    os << "-- blocksize [samples] : " << blocksize_p                << endl;
 
     /* The rest of the summary output is conditional, because given the number
        station it might get quite a lot. */
@@ -187,12 +188,69 @@ namespace CR { // Namespace CR -- begin
       }
       
     } else {
+      std::cerr << "[LOFAR_TBB::init] No station group found in data set!"
+		<< std::endl;
+      status = false;
     }
 
+    if (status) {
+      return setStreams();
+    }
 
     return status;
   }
 
+  // ----------------------------------------------------------------- setStreams
+
+  bool LOFAR_TBB::setStreams ()
+  {
+    bool status (true);
+    
+    std::cout << "[LOFAR_TBB::setStreams]" << std::endl;
+
+    /*
+      Set up the iterators to navigate through the data volume and the selection
+      of data input channels.
+    */
+
+    uint blocksize (blocksize_p);
+    nofStreams_p = channelID_p.size();
+
+    std::cout << "-- blocksize         = " << blocksize << std::endl;
+    std::cout << "-- nof. streams      = " << nofStreams_p << std::endl;
+
+    iterator_p = new DataIterator[nofStreams_p];
+    selectedAntennas_p.resize(nofStreams_p);
+
+    for (uint antenna(0); antenna<nofStreams_p; antenna++) {
+      iterator_p[antenna].setDataStart(0);
+      iterator_p[antenna].setStride(0);
+      iterator_p[antenna].setShift(0);
+      iterator_p[antenna].setStepWidthToSample();
+      iterator_p[antenna].setBlocksize(blocksize);
+      // keep track of the antennas/data channels selected
+      selectedAntennas_p(antenna) = antenna;
+    }
+
+    /*
+      Set the conversion arrays: adc2voltage & fft2calfft
+    */
+    try {
+      // create arrays with default values
+      casa::Vector<double> adc2voltage (nofStreams_p,1.0);
+      casa::Matrix<casa::DComplex> fft2calfft (DataReader::fftLength(),nofStreams_p,1.0);
+      // set values through the init function of the DataReader class
+      DataReader::init (blocksize,
+			adc2voltage,
+			fft2calfft);
+    } catch (std::string message) {
+      std::cerr << "[LOFAR_TBB::setStreams]" << message << endl;
+      status = false;
+    }
+    
+    return status;
+  }
+  
   // ----------------------------------------------------------- getStationGroups
 
   std::vector<std::string> LOFAR_TBB::getStationGroups ()

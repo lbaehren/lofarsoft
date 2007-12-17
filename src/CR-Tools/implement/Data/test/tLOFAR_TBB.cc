@@ -24,6 +24,9 @@
 #include <Data/LOFAR_TBB.h>
 #include <Utilities/StringTools.h>
 
+#include <casa/aips.h>
+#include <casa/Arrays/Matrix.h>
+
 /* Namespace usage */
 using std::cout;
 using std::endl;
@@ -34,7 +37,7 @@ using CR::LOFAR_TBB;
 
   \ingroup CR_Data
 
-  \brief A collection of test routines for the LOFAR_TBB class
+  \brief A collection of test routines for the CR::LOFAR_TBB class
  
   \author Lars B&auml;hren
  
@@ -173,9 +176,9 @@ int test_dal (std::string const &filename)
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_LOFAR_TBB (std::string const &filename)
+int test_construction (std::string const &filename)
 {
-  cout << "\n[test_LOFAR_TBB]\n" << endl;
+  cout << "\n[test_construction]\n" << endl;
 
   int nofFailedTests (0);
   bool listStationGroups (true);
@@ -186,6 +189,115 @@ int test_LOFAR_TBB (std::string const &filename)
     LOFAR_TBB data (filename);
     //
     data.summary(listStationGroups,listChannelIDs); 
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[2] Testing argumented constructor ..." << endl;
+  try {
+    uint blocksize (1024);
+    LOFAR_TBB data (filename,blocksize);
+    //
+    data.summary(listStationGroups,listChannelIDs); 
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Test reading in the data from the data set on disk
+
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_io (std::string const &filename)
+{
+  cout << "\n[test_io]\n" << endl;
+  
+  int nofFailedTests (0);
+  uint blocksize (1024);
+  LOFAR_TBB data (filename,blocksize);
+  
+  cout << "[1] Reading one block of ADC values ..." << endl;
+  try {
+    casa::Matrix<double> fx = data.fx();
+
+    cout << "-- shape (fx)     = " << fx.shape() << endl;
+    cout << "-- ADC values [0] = ["
+	 << fx(0,0) << " "
+	 << fx(1,0) << " "
+	 << fx(2,0) << " "
+	 << fx(3,0) << " .. ]" << endl;
+    cout << "-- ADC values [1] = ["
+	 << fx(0,1) << " "
+	 << fx(1,1) << " "
+	 << fx(2,1) << " "
+	 << fx(3,1) << " .. ]" << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[2] Reading one block of voltage values ..." << endl;
+  try {
+    casa::Matrix<double> voltage = data.voltage();
+
+    cout << "-- shape (voltage)    = " << voltage.shape() << endl;
+    cout << "-- Voltage values [0] = ["
+	 << voltage(0,0) << " "
+	 << voltage(1,0) << " "
+	 << voltage(2,0) << " "
+	 << voltage(3,0) << " .. ]" << endl;
+    cout << "-- Voltage values [1] = ["
+	 << voltage(0,1) << " "
+	 << voltage(1,1) << " "
+	 << voltage(2,1) << " "
+	 << voltage(3,1) << " .. ]" << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[3] Reading FFT for one block of data ..." << endl;
+  try {
+    casa::Matrix<DComplex> fft = data.fft();
+
+    cout << "-- shape (fft)    = " << fft.shape() << endl;
+    cout << "-- FFT values [0] = ["
+	 << fft(0,0) << " "
+	 << fft(1,0) << " "
+	 << fft(2,0) << " "
+	 << fft(3,0) << " .. ]" << endl;
+    cout << "-- FFT values [1] = ["
+	 << fft(0,1) << " "
+	 << fft(1,1) << " "
+	 << fft(2,1) << " "
+	 << fft(3,1) << " .. ]" << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[4] Reading calibrated FFT for one block of data ..." << endl;
+  try {
+    casa::Matrix<DComplex> calfft = data.calfft();
+
+    cout << "-- shape (calfft)      = " << calfft.shape() << endl;
+    cout << "-- Cal. FFT values [0] = ["
+	 << calfft(0,0) << " "
+	 << calfft(1,0) << " "
+	 << calfft(2,0) << " "
+	 << calfft(3,0) << " .. ]" << endl;
+    cout << "-- Cal. FFT values [1] = ["
+	 << calfft(0,1) << " "
+	 << calfft(1,1) << " "
+	 << calfft(2,1) << " "
+	 << calfft(3,1) << " .. ]" << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -219,7 +331,11 @@ int main (int argc,
   nofFailedTests += test_dal(filename);
 
   // Test for the constructor(s)
-  nofFailedTests += test_LOFAR_TBB (filename);
+  nofFailedTests += test_construction (filename);
+  
+  if (nofFailedTests == 0) {
+    nofFailedTests += test_io (filename);
+  }
   
   return nofFailedTests;
 }
