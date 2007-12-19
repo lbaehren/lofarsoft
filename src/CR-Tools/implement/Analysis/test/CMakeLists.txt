@@ -42,11 +42,11 @@ if (ROOT_LIBRARIES AND PYTHON_LIBRARIES)
   ## build instructions
   add_executable (tHistograms tHistograms.cc)
   ## link instructions
-  if (NOT APPLE)
-    target_link_libraries (tHistograms ${ROOT_LIBRARIES} ${PYTHON_LIBRARIES} util)
-  else (NOT APPLE)
+  if (libutil)
+    target_link_libraries (tHistograms ${ROOT_LIBRARIES} ${PYTHON_LIBRARIES} ${libutil})
+  else (libutil)
     target_link_libraries (tHistograms ${ROOT_LIBRARIES} ${PYTHON_LIBRARIES})
-  endif (NOT APPLE)
+  endif (libutil)
   ## testing
   add_test (tHistograms tHistograms)
   ## installation instructions
