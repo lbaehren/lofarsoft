@@ -112,13 +112,18 @@ namespace CR { // Namespace CR -- begin
 			   bool const &listChannelIDs)
   {
     os << "[LOFAR_TBB] Summar of object properties" << endl;
-    os << "-- Name of data file . : " << filename_p                 << endl;
-    os << "-- Dataset type ...... : " << dataset_p->getType()       << endl;
-    os << "-- Dataset name ...... : " << dataset_p->getName()       << endl;
-    os << "-- HDF5 file handle ID : " << dataset_p->getFileHandle() << endl;
-    os << "-- nof. station groups : " << stationGroups_p.size()     << endl;
-    os << "-- nof. data channels  : " << channelID_p.size()         << endl;
-    os << "-- blocksize [samples] : " << blocksize_p                << endl;
+
+    /* Variables describing the dataset itself */
+    os << "-- Name of data file ... : " << filename_p                 << endl;
+    os << "-- Dataset type ........ : " << dataset_p->getType()       << endl;
+    os << "-- Dataset name ........ : " << dataset_p->getName()       << endl;
+    os << "-- HDF5 file handle ID . : " << dataset_p->getFileHandle() << endl;
+    os << "-- nof. station groups . : " << stationGroups_p.size()     << endl;
+    os << "-- nof. data channels .. : " << channelID_p.size()         << endl;
+
+    /* Variables describing the setup of the DataReader */
+    os << "-- blocksize  [samples ] : " << blocksize_p                << endl;
+    os << "-- FFT length [channels] : " << DataReader::fftLength()    << endl;
 
     /* The rest of the summary output is conditional, because given the number
        station it might get quite a lot. */
@@ -206,8 +211,6 @@ namespace CR { // Namespace CR -- begin
   {
     bool status (true);
     
-    std::cout << "[LOFAR_TBB::setStreams]" << std::endl;
-
     /*
       Set up the iterators to navigate through the data volume and the selection
       of data input channels.
@@ -215,9 +218,6 @@ namespace CR { // Namespace CR -- begin
 
     uint blocksize (blocksize_p);
     nofStreams_p = channelID_p.size();
-
-    std::cout << "-- blocksize         = " << blocksize << std::endl;
-    std::cout << "-- nof. streams      = " << nofStreams_p << std::endl;
 
     iterator_p = new DataIterator[nofStreams_p];
     selectedAntennas_p.resize(nofStreams_p);

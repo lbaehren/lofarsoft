@@ -28,7 +28,12 @@
 #include <string>
 #include <vector>
 
+#include <casa/aips.h>
+#include <casa/Arrays/Vector.h>
+#include <casa/BasicSL/Complex.h>
+
 #include <Imaging/Feed.h>
+#include <Imaging/GeometricalDelay.h>
 
 using std::vector;
 
@@ -166,7 +171,18 @@ namespace CR { // Namespace CR -- begin
 
     // ------------------------------------------------------------------ Methods
     
-    
+    /*!
+      \brief 
+      
+      \param position -- 
+      \param antCoordType --
+      \param frequency -- 
+
+      \return gain --
+    */
+    casa::DComplex antennaGain (casa::Vector<double> const &position,
+				CR::CoordinateType const &antCoordType,
+				double const &frequency);
     
   private:
     
@@ -185,4 +201,3 @@ namespace CR { // Namespace CR -- begin
 } // Namespace CR -- end
 
 #endif /* ANTENNA_H */
-  

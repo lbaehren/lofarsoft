@@ -31,26 +31,30 @@ endforeach (src)
 ## -----------------------------------------------------------------------------
 ## Build the test programs working with the Data Access Library (DAL)
 
-find_file (tbb_dataset tbb_test_file_v2.h5
-  PATHS
-  ${CR_SOURCE_DIR}/data
-  ${CR_SOURCE_DIR}/../data
-  ${CR_SOURCE_DIR}/../../data
-  )
+if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+  
+  find_file (tbb_dataset tbb_test_file_v2.h5
+    PATHS
+    ${CR_SOURCE_DIR}/data
+    ${CR_SOURCE_DIR}/../data
+    ${CR_SOURCE_DIR}/../../data
+    )
+  
+  foreach (src tLOFAR_StationGroup tLOFAR_TBB) 
+    ## compiler instructions
+    add_executable (${src} ${src}.cc)
+    ## linker instructions
+    target_link_libraries (${src} cr ${DAL_LIBRARIES} ${HDF5_LIBRARIES})
+    ## testing
+    if (tbb_dataset)
+      add_test (${src} ${src} ${tbb_dataset})
+    else (tbb_dataset)
+      message (STATUS "Unable to run test ${src}; missing input data file.")
+    endif (tbb_dataset)
+  endforeach (src)
 
-foreach (src tLOFAR_StationGroup tLOFAR_TBB) 
-  ## compiler instructions
-  add_executable (${src} ${src}.cc)
-  ## linker instructions
-  target_link_libraries (${src} cr)
-  ## testing
-  if (tbb_dataset)
-    add_test (${src} ${src} ${tbb_dataset})
-  else (tbb_dataset)
-    message (STATUS "Unable to run test ${src}; missing input data file.")
-  endif (tbb_dataset)
-endforeach (src)
-
+endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
+  
 ## -----------------------------------------------------------------------------
 ## Installation
 

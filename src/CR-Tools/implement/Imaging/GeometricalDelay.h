@@ -323,11 +323,11 @@ namespace CR { // NAMESPACE CR -- BEGIN
                              using the proper relation for a source in the
 			     near-field; if <tt>false</tt> the far-field
 			     approximation is used.
-      \param bufferDelays -- Buffer the values for the geometrical delay? If set
-                             <i>yes</i> the delays will be computed from the 
-			     provided antenna and sky positions and afterwards
-			     kept in memory; if set <i>no</i> only the input 
-			     parameters are stored an no further action is taken.
+      \return bufferDelays -- Are the values for the geometrical delay buffered?
+              If set <i>yes</i> the delays will be computed from the provided
+	      antenna and sky positions and afterwards kept in memory; if set
+	      <i>no</i> only the input parameters are stored an no further
+	      action is taken.
     */
     inline void setNearField (bool const &nearField=true,
 			      bool const &bufferDelays=false) {
@@ -340,12 +340,12 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
     /*!
       \brief Are the values for the geometrical delay buffered?
-
+      
       \return bufferDelays -- Are the values for the geometrical delay buffered?
-                              If set <i>yes</i> the delays will be computed from
-			      the provided antenna and sky positions and afterwards
-			      kept in memory; if set <i>no</i> only the input 
-			      parameters are stored an no further action is taken.
+              If set <i>yes</i> the delays will be computed from the provided
+	      antenna and sky positions and afterwards kept in memory; if set
+	      <i>no</i> only the input parameters are stored an no further
+	      action is taken.
     */
     inline bool bufferDelays () const {
       return bufferDelays_p;
@@ -354,11 +354,11 @@ namespace CR { // NAMESPACE CR -- BEGIN
     /*!
       \brief Enable/disable buffering of the values for the geometrical delay
 
-      \param bufferDelays -- Buffer the values for the geometrical delay? If set
-                             <i>yes</i> the delays will be computed from the 
-			     provided antenna and sky positions and afterwards
-			     kept in memory; if set <i>no</i> only the input 
-			     parameters are stored an no further action is taken.
+      \return bufferDelays -- Are the values for the geometrical delay buffered?
+              If set <i>yes</i> the delays will be computed from the provided
+	      antenna and sky positions and afterwards kept in memory; if set
+	      <i>no</i> only the input parameters are stored an no further
+	      action is taken.
     */
     inline void bufferDelays (bool const &bufferDelays=false) {
       bufferDelays_p = bufferDelays;

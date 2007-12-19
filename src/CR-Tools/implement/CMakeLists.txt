@@ -63,10 +63,10 @@ endif (CR_DEBUGGING_MESSAGES)
 
 ## Assemble list of external libraries against which to link
 
-if (DAL_LIBRARIES AND HDF5_LIBRARIES)
-  list (APPEND cr_link_libraries ${DAL_LIBRARIES})
-  list (APPEND cr_link_libraries ${HDF5_LIBRARIES})
-endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
+#if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+#  list (APPEND cr_link_libraries ${DAL_LIBRARIES})
+#  list (APPEND cr_link_libraries ${HDF5_LIBRARIES})
+#endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
 
 if (CASA_LIBRARIES)
   list (APPEND cr_link_libraries ${CASA_LIBRARIES})

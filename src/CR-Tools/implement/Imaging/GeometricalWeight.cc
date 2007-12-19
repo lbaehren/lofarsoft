@@ -22,7 +22,6 @@
  ***************************************************************************/
 
 #include <Imaging/GeometricalWeight.h>
-#include <Utilities/ProgressBar.h>
 
 namespace CR { // NAMESPACE CR -- BEGIN
   
@@ -193,7 +192,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
     os << "-- buffer delays       : " << bufferDelays_p             << std::endl;
     os << "-- buffer phases       : " << bufferPhases_p             << std::endl;
     os << "-- buffer weights      : " << bufferWeights_p            << std::endl;
-    os << "-- show progress       : " << showProgress_p             << std::endl;
   }
   
   // ============================================================================
@@ -251,8 +249,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
     casa::IPosition shape     = phases.shape();
     // array to store the computed weights
     casa::Cube<DComplex> weights (shape);
-    // progress bar
-    CR::ProgressBar progress (shape(2)-1);
 
 #ifdef DEBUGGING_MESSAGES
     std::cout << "[GeometricalWeight::calcWeights]"        << std::endl;
@@ -267,9 +263,6 @@ namespace CR { // NAMESPACE CR -- BEGIN
 					   sin(phases(freq,ant,sky)));
  	}  // end loop: ant
       }  // end loop: sky
-      if (showProgress_p) {
-	progress.update(freq);
-      }
     }  // end loop: freq
     
     return weights;
