@@ -22,11 +22,13 @@
  ***************************************************************************/
 
 /*!
-	\file tUseGDF5.cc
-	
-	\ingroup CR_test
-	
-	\author Lars B&auml;hren
+  \file tUseGDF5.cc
+  
+  \ingroup CR_test
+
+  \brief A number of test to work with the HDF5 library and its routines
+  
+  \author Lars B&auml;hren
 */
 
 #include <iostream>

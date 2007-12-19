@@ -21,3 +21,27 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <iostream>
+
+#include <casa/aips.h>
+#include <images/Images/PagedImage.h>
+
+int main (int argc,
+	  char *argv[])
+{
+  int nofFailedTests (0);
+
+  /* check the input parameters first */
+
+  if (argc < 2) {
+    std::cout << "[tcasa_image] No path to image provided." << std::endl;
+  } else {
+    std::string filename = argv[1];
+    std::cout << "[tcasa_image] Path to test image = " << filename << std::endl;
+  }
+
+  /* Everything from here on does not rely on the existance of an already
+     pre-existing image. */
+
+  return nofFailedTests;
+}

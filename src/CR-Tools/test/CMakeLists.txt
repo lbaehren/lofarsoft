@@ -65,6 +65,7 @@ if (HAVE_CASACORE)
     tcasa_casa
     tcasa_tables
     tcasa_coordinates
+    tcasa_images
     )
   
   foreach (test ${tests_casacore})
