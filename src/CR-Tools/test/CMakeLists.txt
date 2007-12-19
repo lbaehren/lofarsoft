@@ -30,7 +30,6 @@ endforeach (test)
 ## casacore - if it is not available, we switch to CASA.
 
 set (tests
-  tUseCASA
   tUseMeasures
   tUseLattices
   tUseImages

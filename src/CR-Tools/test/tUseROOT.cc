@@ -354,19 +354,26 @@ int test_processing (std::string const &infile)
 
 // ------------------------------------------------------------------------------
 
-int main ()
+int main (int argc,
+	  char *argv[])
 {
   int nofFailedTests (0);
+ 
+  if (argc < 2) {
+    std::cerr << "[tUseROOT] Missing name of input data file!" << std::endl;
+    std::cerr << "" << std::endl;    
+    std::cerr << "\ttUseROOT <eventfile>" << std::endl;    
+    std::cerr << "" << std::endl;    
+    return -1;
+  }
   
-  // Test dataset to work with
-  
-  std::string LopesEventFile ("/home/lars/data/lopes/2007-01-31/2007.01.31.23:59:33.960.event");
+  std::string filename = argv[1];
   
   // Tests
   
   //   nofFailedTests += test_histogram2file();
-  //   nofFailedTests += test_lopesevent2hist (LopesEventFile);
-  nofFailedTests += test_processing (LopesEventFile);
+  //   nofFailedTests += test_lopesevent2hist (filename);
+  nofFailedTests += test_processing (filename);
   
   cout << nofFailedTests << " failed tests." << endl;
   
