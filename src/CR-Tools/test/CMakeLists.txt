@@ -32,7 +32,6 @@ endforeach (test)
 set (tests
   tUseMeasures
   tUseLattices
-  tUseImages
 )
 
 if (HAVE_CASA)

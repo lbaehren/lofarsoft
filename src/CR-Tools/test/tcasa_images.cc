@@ -23,7 +23,7 @@
 
 #include <iostream>
 
-
+#include <casa/aips.h>
 #include <casa/Arrays/Array.h>
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>
@@ -39,13 +39,23 @@ using casa::Matrix;
 using casa::String;
 using casa::Vector;
 
+/*!
+  \file tcasa_images.cc
+
+  \ingroup CR_test
+
+  \brief A number of tests for clases in the casacore images module
+
+  \author Lars B&auml;hren
+*/
+
 // ------------------------------------------------------------------------------
 
 /*!
   \brief Create the shape information for the created image
   
-  \return tiledShape -- A TiledShape object, used to discribe the internal shape
-                        of the image
+  \return shape -- The shape of the image, i.e. the number of axes and their
+          respective lengths: [25,25,10,50,128]
 */
 casa::IPosition image_shape ()
 {
@@ -58,6 +68,8 @@ casa::IPosition image_shape ()
 
 /*!
   \brief Create the coordinate system attached to the image
+
+  This function creates a coordinate system object 
   
   \return cs -- Coordinate system tool
 */
@@ -140,6 +152,121 @@ casa::CoordinateSystem image_csys ()
 
 // ------------------------------------------------------------------------------
 
+/*!
+  \brief Provide a summary of the image's properties
+
+  \param image -- PagedImage object
+*/
+template <class T>
+void image_summary (casa::PagedImage<T> &image)
+{
+  std::cout << "-- Image type ....... : " << image.imageType() << std::endl;
+  std::cout << "-- Table name ....... : " << image.name()      << std::endl;
+  std::cout << "-- Image shape ...... : " << image.shape()     << std::endl;
+  std::cout << "-- Maximum cache size : " << image.maximumCacheSize() << std::endl;
+}
+
+template void image_summary (casa::PagedImage<float> &image);
+template void image_summary (casa::PagedImage<double> &image);
+template void image_summary (casa::PagedImage<casa::Complex> &image);
+template void image_summary (casa::PagedImage<casa::DComplex> &image);
+
+// ------------------------------------------------------------------------------
+
+/*
+  \brief Test opening an existing image and try working with it
+
+  \param infile -- Name of the image file stored on disk
+
+  \return nofFailedTests -- The number of failed tests in this function
+*/
+int test_openImage (std::string const &infile)
+{
+  std::cout << "\n[test_openImage]\n" << std::endl;
+
+  int nofFailedTests (0);
+
+  std::cout << "[1] Opening existing image ..." << std::endl;
+  try {
+    
+  } catch (std::string message) {
+    std::cerr << "" << std::endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+// ------------------------------------------------------------------------------
+
+/*!
+  \brief Test the creation of an image
+
+  \return nofFailedTests -- The number of failed tests in this function
+*/
+int test_createImage ()
+{
+  std::cout << "\n[test_createImage]\n" << std::endl;
+
+  int nofFailedTests (0);
+
+  casa::IPosition shape (image_shape());
+  casa::TiledShape tshape (shape);
+  casa::String filename;
+    
+  std::cout << "[1] Creating new PagedImage<T> ..." << std::endl;
+  try {
+    std::cout << "-> PagedImage<float>" << std::endl;
+    casa::PagedImage<float> imageFloat (tshape,
+					image_csys(),
+					"testimage01f.img");
+    image_summary (imageFloat);
+    
+    std::cout << "-> PagedImage<float>" << std::endl;
+    casa::PagedImage<double> imageDouble (tshape,
+					  image_csys(),
+					  "testimage01d.img");
+    image_summary (imageDouble);
+  } catch (std::string message) {
+    std::cerr << "" << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[2] Creating new PagedImage<float> ..." << std::endl;
+  try {
+    filename = "testimage02.img";
+    shape(0) = shape(1) = 200;
+    //
+    casa::PagedImage<float> image (tshape,
+				   image_csys(),
+				   filename);
+    //
+    image_summary (image);    
+  } catch (std::string message) {
+    std::cerr << "" << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[3] Creating new PagedImage<float> ..." << std::endl;
+  try {
+    filename = "testimage03.img";
+    shape = casa::IPosition (5,512,512,100,512,128);
+    //
+    casa::PagedImage<float> image (tshape,
+				   image_csys(),
+				   filename);
+    //
+    image_summary (image);    
+  } catch (std::string message) {
+    std::cerr << "" << std::endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+// ------------------------------------------------------------------------------
+
 int main (int argc,
 	  char *argv[])
 {
@@ -150,12 +277,16 @@ int main (int argc,
   if (argc < 2) {
     std::cout << "[tcasa_image] No path to image provided." << std::endl;
   } else {
+    // get the name of the image file ...
     std::string filename = argv[1];
-    std::cout << "[tcasa_image] Path to test image = " << filename << std::endl;
+    // .. and try to open it
+    nofFailedTests += test_openImage (filename);
   }
 
   /* Everything from here on does not rely on the existance of an already
      pre-existing image. */
+
+  nofFailedTests += test_createImage();
 
   return nofFailedTests;
 }
