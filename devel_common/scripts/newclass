@@ -304,14 +304,15 @@ read var_yn;
 
 case $var_yn in
     y)
-	  svn add implement/$var_module
-	  svn add implement/$var_module/$var_class.h
-	  svn add implement/$var_module/$var_class.cc
-	  svn add implement/$var_module/test/t$var_class.cc
-	  # activate keyword substitution
-	  svn propset svn:keyword Id implement/$var_module/$var_class.h
-	  svn propset svn:keyword Id implement/$var_module/$var_class.cc
-	  svn propset svn:keyword Id implement/$var_module/test/t$var_class.cc
+	echo " --> Adding new source files to the repository ...";
+	svn add implement/$var_module
+	svn add implement/$var_module/$var_class.h
+	svn add implement/$var_module/$var_class.cc
+	svn add implement/$var_module/test/t$var_class.cc
+	echo " --> Activating keywords substitution for the new source files ...";
+	svn propset svn:keywords Id implement/$var_module/$var_class.h
+	svn propset svn:keywords Id implement/$var_module/$var_class.cc
+	svn propset svn:keywords Id implement/$var_module/test/t$var_class.cc
     ;;
     n)
 	echo " --> Please remember adding the new files to the CVS repository!!";
