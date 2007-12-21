@@ -47,7 +47,7 @@ set (LAPACK_LIBRARIES "")
 
 foreach (lib ${libs})
   ## try to locate the library
-  find_library (LAPACK_${lib} ${lib}
+  find_library (LAPACK_${lib} ${lib} ${lib}_LINUX
     PATHS ${lib_locations}
     PATH_SUFFIXES lapack
     NO_DEFAULT_PATH
