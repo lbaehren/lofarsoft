@@ -73,17 +73,30 @@ namespace CR { // Namespace CR -- begin
     <ul>
       <li><b>Structure of the data set</b> <br>
       \verbatim
-      /                        ...  GROUP
-      |-- Station001           ...  GROUP
-      |   |-- TELESCOPE        ...  ATTRIBUTE
-      |   |-- OBSERVER         ...  ATTRIBUTE
-      |   |-- PROJECT          ...  ATTRIBUTE
-      |   |
-      |   |-- 001000000        ...  DATASET
-      |   |   |-- STATION_ID   ...  ATTRIBUTE
-      |   |   |-- RSP_ID       ...  ATTRIBUTE
-      |   |   |-- RCU_ID       ...  ATTRIBUTE
-      |   |   |-- SAMPLE_FREQ  ...  ATTRIBUTE
+      /                             ... Group
+      |-- Station001                ... Group
+      |   |-- TELESCOPE             ... Attribute       ... string
+      |   |-- OBSERVER              ... Attribute       ... string
+      |   |-- PROJECT               ... Attribute       ... string
+      |   |-- OBS_ID                ... Attribute       ... string
+      |   |-- OBS_MODE              ... Attribute       ... string
+      |   |-- TRIG_TYPE             ... Attribute       ... string
+      |   |-- TRIG_OFST             ... Attribute       ... string
+      |   |-- TRIG_ANTS             ... Attribute       ... array<int,1>
+      |   |-- BEAM_DIR              ... Attribute       ... array<double,2>
+      |   |-- 001000000             ... Dataset         ... array<uint,1>
+      |   |   |-- STATION_ID        ... Attribute       ... uint
+      |   |   |-- RSP_ID            ... Attribute       ... uint 
+      |   |   |-- RCU_ID            ... Attribute       ... uint
+      |   |   |-- SAMPLE_FREQ       ... Attribute       ... double
+      |   |   |-- TIME              ... Attribute       ... uint
+      |   |   |-- SAMPLE_NR         ... Attribute       ... uint
+      |   |   |-- SAMPLES_PER_FRAME ... Attribute       ... uint
+      |   |   |-- DATA_LENGTH       ... Attribute       ... uint
+      |   |   |-- NYQUIST_ZONE      ... Attribute       ... uint
+      |   |   |-- FEED              ... Attribute       ... string
+      |   |   |-- ANT_POSITION      ... Attribute       ... array<double,1>
+      |   |   `-- ANT_ORIENTATION   ... Attribute       ... array<double,1>
       |   |-- 001000001
       |   |-- 001000002
       |   |-- 001000003
