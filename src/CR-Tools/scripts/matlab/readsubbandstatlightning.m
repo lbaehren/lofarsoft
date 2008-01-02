@@ -10,11 +10,11 @@ cs='cs1';
 %cs='cs16';
 dirname = ['d:\data',cs,'\20070518\']
 
-fs          = 160e6;      % Sample rate [MHz]
-intperiod   = 10;         % interval between snapshots [sec]
-nyquistzone = 1;          % Nyquist zone 1=0-100MHz,2=100-200MHz,3=300-400MHz
-nch         = 512;        % # subbands for CEP
-npoints     = 21000*nch;  % points to plot
+fs=160e6;% Sample rate in MHz 
+intperiod=10; %in seconds
+nyquistzone=1; %Nyquist zone 1=0-100MHz,2=100-200MHz,3=300-400MHz
+nch = 512; %# subbands for CEP
+npoints=21000*nch; %points to plot
 
 %subbandoffset=255; %starting subband number
 freqnop=512;

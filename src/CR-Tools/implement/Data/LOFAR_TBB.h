@@ -78,12 +78,12 @@ namespace CR { // Namespace CR -- begin
       |   |-- TELESCOPE             ... Attribute       ... string
       |   |-- OBSERVER              ... Attribute       ... string
       |   |-- PROJECT               ... Attribute       ... string
-      |   |-- OBS_ID                ... Attribute       ... string
-      |   |-- OBS_MODE              ... Attribute       ... string
-      |   |-- TRIG_TYPE             ... Attribute       ... string
-      |   |-- TRIG_OFST             ... Attribute       ... string
+      |   |-- OBSERVATION_IS        ... Attribute       ... string
+      |   |-- OBSERVATION_MODE      ... Attribute       ... string
+      |   |-- TRIGGER_TYPE          ... Attribute       ... string
+      |   |-- TRIGGER_OFFSET        ... Attribute       ... string
       |   |-- TRIG_ANTS             ... Attribute       ... array<int,1>
-      |   |-- BEAM_DIR              ... Attribute       ... array<double,2>
+      |   |-- BEAM_DIRECTION        ... Attribute       ... array<double,2>
       |   |-- 001000000             ... Dataset         ... array<uint,1>
       |   |   |-- STATION_ID        ... Attribute       ... uint
       |   |   |-- RSP_ID            ... Attribute       ... uint 

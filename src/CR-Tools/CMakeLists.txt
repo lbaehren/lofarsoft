@@ -112,83 +112,156 @@ find_path (cr_cmake FindBlitz.cmake FindCASA.cmake FindCFITSIO.cmake
   )
 
 if (cr_cmake)
+
   ## --- Blitz++ ---------------------------------
+
   if (NOT HAVE_BLITZ)
     include (${cr_cmake}/FindBlitz.cmake)
   endif (NOT HAVE_BLITZ)
-  if (BLITZ_INCLUDES)
-    include_directories (${BLITZ_INCLUDES})
+
+  if (HAVE_BLITZ)
     add_definitions (-DHAVE_BLITZ)
-  endif (BLITZ_INCLUDES)
+    include_directories (${BLITZ_INCLUDES})
+  endif (HAVE_BLITZ)
+
   ## --- CFITSIO ---------------------------------
+
   if (NOT HAVE_CFITSIO)
     include (${cr_cmake}/FindCFITSIO.cmake)
   endif (NOT HAVE_CFITSIO)
-  if (CFITSIO_INCLUDES)
-    include_directories (${CFITSIO_INCLUDES})
+
+  if (HAVE_CFITSIO)
     add_definitions (-DHAVE_CFITSIO)
-  endif (CFITSIO_INCLUDES)
+    include_directories (${CFITSIO_INCLUDES})
+  endif (HAVE_CFITSIO)
+
+  ## --- CASA / casacore -------------------------
+
+  ## this is handled further below, as this also depends
+  ## on whether Glish is available/required.
+
   ## --- Data Access Library (DAL) ---------------
+
   if (NOT HAVE_DAL)
     include (${cr_cmake}/FindDAL.cmake)
   endif (NOT HAVE_DAL)
+
+  if (HAVE_DAL)
+    add_definitions (-DHAVE_DAL)
+    include_directories (${DAL_INCLUDES})
+  endif (HAVE_DAL)
+
   ## --- FFTW3 -----------------------------------
+
   if (NOT HAVE_FFTW3)
     include (${cr_cmake}/FindFFTW3.cmake)
   endif (NOT HAVE_FFTW3)
+
+  if (HAVE_FFTW3)
+    add_definitions (-DHAVE_FFTW3)
+    include_directories (${FFTW3_INCLUDES})
+  endif (HAVE_FFTW3)
+
   ## --- G2C -------------------------------------
+
   if (NOT HAVE_G2C)
     include (${cr_cmake}/FindG2C.cmake)
   endif (NOT HAVE_G2C)
+
   ## --- GIF -------------------------------------
+
   if (NOT HAVE_GIF)
     include (${cr_cmake}/FindGIF.cmake)
   endif (NOT HAVE_GIF)
-  ## Glish ---------------------------------------
+
+  if (HAVE_GIF)
+    add_definitions (-DHAVE_GIF)
+    include_directories (${GIF_INCLUDES})
+  endif (HAVE_GIF)
+
+  ## --- Glish -----------------------------------
+
   if (NOT HAVE_GLISH)
     include (${cr_cmake}/FindGlish.cmake)
   endif (NOT HAVE_GLISH)
+
   ## --- GNU Scientific Library (GSL) ------------
+
   if (NOT HAVE_GSL)
     include (${cr_cmake}/FindGSL.cmake)
   endif (NOT HAVE_GSL)
+
+  if (HAVE_GSL)
+    add_definitions (-DHAVE_GSL)
+    include_directories (${GSL_INCLUDES})
+  endif (HAVE_GSL)
+
   ## --- GTK -------------------------------------
+
   if (NOT HAVE_GTK)
     include (${cr_cmake}/FindGTK.cmake)
   endif (NOT HAVE_GTK)
-  ## HDF5 ----------------------------------------
+
+  if (HAVE_GTK)
+    add_definitions (-DHAVE_GTK)
+    include_directories (${GTK_INCLUDES})
+  endif (HAVE_GTK)
+
+  ## --- HDF5 ------------------------------------
+
   if (NOT HAVE_HDF5)
     include (${cr_cmake}/FindHDF5.cmake)
   endif (NOT HAVE_HDF5)
-  ## LAPACK
+
+  if (HAVE_HDF5)
+    add_definitions (-DHAVE_HDF5)
+    include_directories (${HDF5_INCLUDES})
+  endif (HAVE_HDF5)
+
+  ## LAPACK --------------------------------------
+
   if (NOT HAVE_LAPACK)
     include (${cr_cmake}/FindLAPACK.cmake)
   endif (NOT HAVE_LAPACK)
+
   ## -- PGPlot -----------------------------------
+
   if (NOT HAVE_PGPLOT)
     include (${cr_cmake}/FindPGPLOT.cmake)
   endif (NOT HAVE_PGPLOT)
+
   ## -- PLplot -----------------------------------
+
   if (NOT HAVE_PLPLOT)
     include (${cr_cmake}/FindPLplot.cmake)
   endif (NOT HAVE_PLPLOT)
+
   ## -- PNG --------------------------------------
+
   if (NOT HAVE_PNG)
     include (${cr_cmake}/FindPNG.cmake)
   endif (NOT HAVE_PNG)
+
   ## -- popt -------------------------------------
+
   if (NOT HAVE_POPT)
     include (${cr_cmake}/FindPOPT.cmake)
   endif (NOT HAVE_POPT)
+
   ## -- PostgreSQL -------------------------------
+
   if (NOT HAVE_PostgreSQL)
     include (${cr_cmake}/FindPostgreSQL.cmake)
   endif (NOT HAVE_PostgreSQL)
+
   ## -- Python -----------------------------------
+
   if (NOT HAVE_PYTHON)
     include (${cr_cmake}/FindPython.cmake)
   endif (NOT HAVE_PYTHON)
+
   ## -- ROOT -------------------------------------
+
   if (NOT HAVE_ROOT)
     include (${cr_cmake}/FindROOT.cmake)
   endif (NOT HAVE_ROOT)
@@ -196,7 +269,9 @@ if (cr_cmake)
     include_directories (${ROOT_INCLUDES})
     add_definitions (-DHAVE_ROOT)
   endif (ROOT_INCLUDES)
+
   ## --- Tcl/Tk ----------------------------------  
+
   if (NOT HAVE_TCL)
     include (${cr_cmake}/FindTCL.cmake)
   endif (NOT HAVE_TCL)
@@ -264,7 +339,6 @@ if (HAVE_CASA OR HAVE_CASACORE)
     -DWITH_CASA
     -DAIPS_STDLIB
     -DAIPS_AUTO_STL
-    -DAIPS_NO_LEA_MALLOC
     )
   IF (APPLE)
     ## definition common to apple architectures
@@ -295,15 +369,13 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 ## ------------------------------------------------------------------------------
 ## Where to find the header files
 
+## this package
+
 include_directories (
   ${CR_SOURCE_DIR}/implement
   ${CR_SOURCE_DIR}/apps
   ${CR_SOURCE_DIR}/test
   )
-
-if (DAL_INCLUDES)
-  include_directories (${DAL_INCLUDES})
-endif (DAL_INCLUDES)
 
 ## external components
 
@@ -315,39 +387,10 @@ if (CASACORE_INCLUDES)
   include_directories (${CASACORE_INCLUDES})
 endif (CASACORE_INCLUDES)
 
-if (DAL_INCLUDES)
-  include_directories (${DAL_INCLUDES})
-  add_definitions (-DHAVE_DAL)
-endif (DAL_INCLUDES)
-
 if (PGPLOT_INCLUDES)
   include_directories (${PGPLOT_INCLUDES})
   add_definitions (-DHAVE_PGPLOT)
 endif (PGPLOT_INCLUDES)
-
-if (FFTW3_INCLUDES)
-  include_directories (${FFTW3_INCLUDES})
-  add_definitions (-DHAVE_FFTW3)
-endif (FFTW3_INCLUDES)
-
-if (GIF_INCLUDES)
-  include_directories (${GIF_INCLUDES})
-endif (GIF_INCLUDES)
-
-if (GSL_INCLUDES)
-  include_directories (${GSL_INCLUDES})
-  add_definitions (-DHAVE_GSL)
-endif (GSL_INCLUDES)
-
-if (GTK_INCLUDES)
-  include_directories (${GTK_INCLUDES})
-  add_definitions (-DHAVE_GTK)
-endif (GTK_INCLUDES)
-
-if (HDF5_INCLUDES)
-  include_directories (${HDF5_INCLUDES})
-  add_definitions (-DHAVE_HDF5)
-endif (HDF5_INCLUDES)
 
 if (PLPLOT_INCLUDES)
   include_directories (${PLPLOT_INCLUDES})
@@ -425,11 +468,11 @@ message (STATUS " CMAKE_SYSTEM ........... : ${CMAKE_SYSTEM}")
 message (STATUS " CMAKE_SYSTEM_PROCESSOR . : ${CMAKE_SYSTEM_PROCESSOR}")
 message (STATUS " CMAKE_SYSTEM_64BIT ......: ${CMAKE_SYSTEM_64BIT}")
 message (STATUS " CMAKE_SYSTEM_BIG_ENDIAN  : ${CMAKE_SYSTEM_BIG_ENDIAN}")
+message (STATUS "+------------------------------------------------------------+")
 message (STATUS " BLITZ .................. : ${HAVE_BLITZ}")
 message (STATUS " CASA ................... : ${HAVE_CASA}")
 message (STATUS " CASACORE ............... : ${HAVE_CASACORE}")
 message (STATUS " CFITSIO ................ : ${HAVE_CFITSIO}")
-message (STATUS " DAL .................... : ${HAVE_DAL}")
 message (STATUS " FFTW3 .................. : ${HAVE_FFTW3}")
 message (STATUS " G2C .................... : ${HAVE_G2C}")
 message (STATUS " GIF .................... : ${HAVE_GIF}")
@@ -447,6 +490,8 @@ message (STATUS " Python ................. : ${HAVE_PYTHON}")
 message (STATUS " ROOT ................... : ${HAVE_ROOT}")
 message (STATUS " Tcl / Tk  .............. : ${HAVE_TCL} / ${HAVE_TK}")
 message (STATUS " WCSLIB ................. : ${HAVE_WCSLIB}")
+message (STATUS "+------------------------------------------------------------+")
+message (STATUS " DAL .................... : ${HAVE_DAL}")
 message (STATUS "+------------------------------------------------------------+")
 message (STATUS " Source directory ....... : ${CR_SOURCE_DIR}")
 message (STATUS " Installation location .. : ${CMAKE_INSTALL_PREFIX}")

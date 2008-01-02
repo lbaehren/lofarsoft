@@ -205,7 +205,7 @@ namespace CR { // Namespace CR -- begin
     inline std::vector<double> beamDirection () const {
       return beamDirection_p;
     }
-    
+
     /*!
       \brief Get the name of the class
       
@@ -229,6 +229,30 @@ namespace CR { // Namespace CR -- begin
 
     // ------------------------------------------------------------------ Methods
 
+    /*!
+      \brief Retrieve the station IDs from the antenna datasets within this group
+
+      \return stationIDs -- The station IDs from the antenna datasets within this
+              group
+    */
+    std::vector<uint> stationIDs ();
+    
+    /*!
+      \brief Retrieve the RSP IDs from the antenna datasets within this group
+
+      \return rspIDs -- The RSP IDs from the antenna datasets within this
+              group
+    */
+    std::vector<uint> rspIDs ();
+    
+    /*!
+      \brief Retrieve the RCU IDs from the antenna datasets within this group
+
+      \return rcuIDs -- The RCU IDs from the antenna datasets within this
+              group
+    */
+    std::vector<uint> rcuIDs ();
+    
     /*!
       \brief Retrieve the list of channels IDs contained within this group
 
