@@ -143,27 +143,27 @@ DataReader* DataReaderTools::assignFromRecord (GlishRecord &rec,
 	     << x.getMesg() << endl;
       }
     }
-    else if (datatype == "ITSCapture") {
+    else if (datatype == "ITS_Capture") {
       try {
-	ITSCapture *capture = new ITSCapture (basefile,
+	ITS_Capture *capture = new ITS_Capture (basefile,
 					      blocksize,
 					      adc2voltage,
 					      fft2calfft);
 	dr = capture;
       } catch (AipsError x) {
-	cerr << "[DataReaderTools::assignFromRecord] ITSCapture: "
+	cerr << "[DataReaderTools::assignFromRecord] ITS_Capture: "
 	     << x.getMesg() << endl;
       }
     }
-    else if (datatype == "ITSBeam") {
+    else if (datatype == "ITS_Beam") {
       try {
-	ITSBeam *beam = new ITSBeam (basefile,
+	ITS_Beam *beam = new ITS_Beam (basefile,
 				     blocksize,
 				     adc2voltage,
 				     fft2calfft);
 	dr = beam;
       } catch (AipsError x) {
-	cerr << "[DataReaderTools::assignFromRecord] ITSBeam: "
+	cerr << "[DataReaderTools::assignFromRecord] ITS_Beam: "
 	     << x.getMesg() << endl;
       }
     }

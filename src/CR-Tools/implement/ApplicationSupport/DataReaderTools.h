@@ -39,8 +39,8 @@
 #include <ApplicationSupport/Glish.h>
 #include <ApplicationSupport/GlishRecord.h>
 #include <Data/LopesEvent.h>
-#include <Data/ITSBeam.h>
-#include <Data/ITSCapture.h>
+#include <Data/ITS_Beam.h>
+#include <Data/ITS_Capture.h>
 #include <Data/NDABeam.h>
 #include <IO/DataReader.h>
 
