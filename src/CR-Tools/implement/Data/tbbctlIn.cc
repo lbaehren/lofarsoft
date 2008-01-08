@@ -137,7 +137,8 @@ namespace CR { // Namespace CR -- begin
 	  maxblock = headerpoint_p->NoSamples;
 	  sampleFreq = headerpoint_p->sampleFreq*1e6;
 	};
-	AntIDs(fnum) = (headerpoint_p->station*256+headerpoint_p->RSP)*256+headerpoint_p->RCU;
+	//AntIDs(fnum) = (headerpoint_p->station*256+headerpoint_p->RSP)*256+headerpoint_p->RCU;
+	AntIDs(fnum) = (1*256+headerpoint_p->RSP)*256+headerpoint_p->RCU;
 	for (block=0; block<numblocks(fnum); block++){
 	  fseek(fd, (block*(long)TBBCTL_BLOCK_SIZE), SEEK_SET); 
 	  ui = fread(headerpoint_p, 1, sizeof(tbbctl_head), fd);
