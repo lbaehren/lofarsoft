@@ -901,13 +901,22 @@ namespace CR {  //  Namespace CR -- begin
   void setHanningFilter (const Double &alpha,
 			 const uint &beta);
   
- private:
-
+  /*!
+    \brief Get the name of the class
+    
+    \return className -- The name of the class, DataReader.
+  */
+  virtual std::string className () const {
+    return "DataReader";
+  }
+  
+  private:
+  
   /*!
     \brief Unconditional copying
   */
   void copy (DataReader const &other);
-
+  
   /*!
     \brief Unconditional deletion 
   */
