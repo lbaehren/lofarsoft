@@ -126,7 +126,7 @@ namespace CR { // Namespace CR -- begin
 	      object within the DAL.
     */
     inline std::string groupName () const {
-      group_p->getName();
+      return group_p->getName();
     }
 
     /*!

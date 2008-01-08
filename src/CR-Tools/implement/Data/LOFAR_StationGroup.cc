@@ -241,9 +241,9 @@ namespace CR { // Namespace CR -- begin
   
   void LOFAR_StationGroup::summary (std::ostream &os)
   {
-    os << "[LOFAR_StationGroup] Summar of object properties"     << endl;
+    os << "[LOFAR_StationGroup] Summary of object properties"     << endl;
 
-    os << "-- dalGroup name ..... : " << group_p->getName()      << endl;
+    os << "-- dalGroup name ..... : " << groupName()             << endl;
     os << "-- dalGroup ID   ..... : " << group_p->getId()        << endl;
     os << "-- HDF5 file handle ID : " << H5fileID_p              << endl;
 
