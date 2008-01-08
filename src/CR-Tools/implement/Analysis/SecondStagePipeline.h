@@ -146,6 +146,7 @@ namespace CR { // Namespace CR -- begin
     */
     inline void doPhaseCal(Bool const &DoPhaseCal=True) {
       DoPhaseCal_p = DoPhaseCal;
+      SecondStageCacheValid_p = False;
       if (verbose && !DoPhaseCal){
 	cout << "SecondStagePipeline:: switched off phase calibration." << endl;
       };
@@ -158,6 +159,7 @@ namespace CR { // Namespace CR -- begin
     */
     inline void doRFImitigation(Bool const &DoRFImitigation=True) {
       DoRFImitigation_p = DoRFImitigation;
+      SecondStageCacheValid_p = False;
       if (verbose && !DoRFImitigation){
 	cout << "SecondStagePipeline:: switched off RFI mitigation." << endl;
       };

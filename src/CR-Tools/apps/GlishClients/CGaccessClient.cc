@@ -35,6 +35,8 @@ CR::tbbctlIn tbbIn;
 CR::CRinvFFT *pipeline_p;    
 DataReader *DataReader_p;
 
+Bool doTVcal=True, doRFImitigation=True;
+
 //---------------------------------------------------------------------   initPipeline
 
 Bool initPipeline(GlishSysEvent &event, void *){
@@ -78,6 +80,50 @@ Bool initPipeline(GlishSysEvent &event, void *){
   return True;
 };
 
+//---------------------------------------------------------------------   setStatus
+Bool setStatus(GlishSysEvent &event, void *){
+  GlishSysEventSource *glishBus = event.glishSource();
+  try {
+    if (event.val().type() != GlishValue::RECORD) {
+      cerr << "CGaccessClient:initPipeline: " << "Need a record!" 
+	   << endl;
+      if (glishBus->replyPending()) {
+	glishBus->reply(GlishArray(False));
+      };
+      return True;
+    };
+    GlishRecord  grec = event.val();
+    Record inrec,outrec;
+    grec.toRecord(inrec);
+    if (inrec.isDefined("RFIMitigation")) {
+      doRFImitigation = inrec.asBool("RFIMitigation");
+    };
+    if (inrec.isDefined("TVCalibration")) {
+      doTVcal = inrec.asBool("TVCalibration");
+    };
+    if (DataReader_p->className().compare("LopesEventIn") != 0){
+      doTVcal = False;
+    };
+    pipeline_p->doPhaseCal(doTVcal);
+    pipeline_p->doRFImitigation(doRFImitigation);
+    if (glishBus->replyPending()) {    
+      outrec.define("TVCalibration",doTVcal);
+      outrec.define("RFIMitigation",doRFImitigation);
+      GlishRecord output;
+      output.fromRecord(outrec);
+      glishBus->reply(output);
+    };
+  } catch (AipsError x) {
+    cerr << "CGaccessClient:initPipeline: " << x.getMesg() << endl;
+    if (glishBus->replyPending()) {
+      glishBus->reply(GlishArray(False));
+    };
+    return False;
+  };   
+  return True;
+};
+
+
 //----------------------------------------------------------------   LoadLOPESEvent
 Bool LoadLOPESEvent(GlishSysEvent &event, void *){
   GlishSysEventSource *glishBus = event.glishSource();
@@ -102,8 +148,8 @@ Bool LoadLOPESEvent(GlishSysEvent &event, void *){
       };
       return True;
     };
-    //Replace this with better defaults
-    pipeline_p->doPhaseCal(True);
+    pipeline_p->doPhaseCal(doTVcal);
+    pipeline_p->doRFImitigation(doRFImitigation);
     if (! pipeline_p->InitEvent(lev_p)){
       cerr << "CGaccessClient:LoadLOPESEvent: " << "Failed to initialize the DataReader!" << endl;
       if (glishBus->replyPending()) {
@@ -158,7 +204,9 @@ Bool LoadTBBCTLEvent(GlishSysEvent &event, void *){
       };
       return True;
     };
-    pipeline_p->doPhaseCal(False);
+    doTVcal = False; // TV-calibration is useless for tbbctl data
+    pipeline_p->doPhaseCal(doTVcal);
+    pipeline_p->doRFImitigation(doRFImitigation);
     if (! pipeline_p->InitEvent(&tbbIn)){
       cerr << "CGaccessClient:LoadTBBCTLEvent: " << "Failed to initialize the DataReader!" << endl;
       if (glishBus->replyPending()) {
@@ -460,6 +508,7 @@ int main(int argc, char *argv[])
   DataReader_p = NULL;
 
   glishStream.addTarget(initPipeline,"initPipeline");
+  glishStream.addTarget(setStatus,"setStatus");
   glishStream.addTarget(LoadLOPESEvent,"LoadLOPESEvent");
   glishStream.addTarget(LoadTBBCTLEvent,"LoadTBBCTLEvent");
 

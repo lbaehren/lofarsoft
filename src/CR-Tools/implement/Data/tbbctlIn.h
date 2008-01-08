@@ -140,7 +140,7 @@ namespace CR { // Namespace CR -- begin
       
       \return className -- The name of the class, tbbctlIn.
     */
-    std::string className () const {
+    virtual std::string className () const {
       return "tbbctlIn";
     }
 

@@ -75,6 +75,16 @@
 Bool initPipeline(GlishSysEvent &event, void *);
 
 /*!
+  \brief Set and get the status 
+
+  \return status -- Status of the operation; return <tt>false</tt> if an error
+                    was encountered
+
+   Currently controls if RFI-mitigation and/or TV-calibration is done
+*/
+Bool setStatus(GlishSysEvent &event, void *);
+
+/*!
   \brief process one event
 
   \return status -- Status of the operation; return <tt>false</tt> if an error
