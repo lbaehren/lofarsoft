@@ -42,7 +42,163 @@ using CR::LOFAR_TBB;
   \author Lars B&auml;hren
  
   \date 2007/12/07
+
+  <h3>Usage</h3>
+
+  \verbatim
+  tLOFAR_TBB <filename>
+  \endverbatim
+  where <tt>filename</tt> points to a existing LOFAR TBB data set in HDF5
+  format.
 */
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Access contents of the time-series datset directly via the HDF5 library
+
+  While typically the interaction to the HDF5-based LOFAR time-series datasets
+  is to take place via the DAL, once the data format is known this operation
+  also can be carried out directly using the functionality of the HDF5 library
+  routines. Since not all the required functionality is provided by the DAL (at
+  least not at this point in time), we need to be able to access some of the 
+  datasets contents directly; this function collects a number of calls to
+  explore how this is done and what might need to be added to the DAL at some
+  point to properly map the dataset structure onto a set of C++ objects.
+
+  \param filename -- Test HDF5 time-series dataset to work with
+
+  \return nofFailedTests -- The number of failed tests within this function.
+*/
+int test_hdf5 (std::string const &filename)
+{
+  cout << "\n[test_hdf5]\n" << endl;
+
+  int nofFailedTests (0);
+  char *h5filename = CR::string2char(filename);
+
+  herr_t h5error;
+  hid_t file_id;
+  hid_t stationGroup_id;
+  hid_t channelDataset_id;
+  int nofStationGroupAttributes (0);
+  int nofDatasetAttributes (0);
+
+  /*
+   * Open the HDF5 file; the library function returns a file handler which 
+   * is to be used in subsequent interactions with the data.
+   */
+  cout << "--> Opening file ..." << endl;
+  file_id = H5Fopen (h5filename,
+		     H5F_ACC_RDONLY,
+		     H5P_DEFAULT);
+
+  /*
+   * Open station group; is this was successful, retrieve the number of 
+   * attributes attached to the group.
+   */
+  if (file_id > 0) {
+    cout << "--> Opening StationGroup ..." << endl;
+    stationGroup_id = H5Gopen (file_id,
+			       "Station001");
+  } else {
+    nofFailedTests++;
+  }
+
+  if (stationGroup_id > 0) {
+    nofStationGroupAttributes = H5Aget_num_attrs (stationGroup_id);
+  }
+
+  /*
+   * Open dataset for an individual signal channel (dipole); f this was 
+   * successful, retrieve the number of attributes attached to the dataset
+   */
+  if (stationGroup_id > 0) {
+    cout << "--> Opening dipole dataset ..." << endl;
+    channelDataset_id = H5Dopen (stationGroup_id,
+				 "001002021");
+  } else {
+    nofFailedTests++;
+  }
+  
+  if (channelDataset_id > 0) {
+    nofDatasetAttributes = H5Aget_num_attrs (channelDataset_id);
+  } else {
+    nofFailedTests++;
+  }
+
+  /*
+   * Retrieve the attributes attachted to the dataset
+   */
+  
+  hid_t attribute_id;
+  uint station_id (0);
+  uint rsp_id (0);
+  uint rcu_id (0);
+  std::vector<double> beam_direction;
+  
+  if (channelDataset_id > 0) {
+
+    cout << "--> Reading in STATION_ID attribute ..." << endl;
+    attribute_id = H5Aopen_name(channelDataset_id,"STATION_ID");
+    // retrieve the value of the attribute
+    if (attribute_id > 0) {
+      h5error = H5Aread(attribute_id,
+			H5T_NATIVE_UINT,
+			&station_id);
+    }
+
+    cout << "--> Reading in RSP_ID attribute ..." << endl;
+    attribute_id = H5Aopen_name(channelDataset_id,"RSP_ID");
+    // retrieve the value of the attribute
+    if (attribute_id > 0) {
+      h5error = H5Aread(attribute_id,
+			H5T_NATIVE_UINT,
+			&rsp_id);
+    }
+
+    cout << "--> Reading in RCU_ID attribute ..." << endl;
+    attribute_id = H5Aopen_name(channelDataset_id,"RCU_ID");
+    // retrieve the value of the attribute
+    if (attribute_id > 0) {
+      h5error = H5Aread(attribute_id,
+			H5T_NATIVE_UINT,
+			&rcu_id);
+    }
+    
+//     cout << "--> Reading in BEAM_DIR attribute ..." << endl;
+//     attribute_id = H5Aopen_name(channelDataset_id,"BEAM_DIR");
+//     // retrieve the value of the attribute
+//     if (attribute_id > 0) {
+//       // local variables
+//       ssize_t nelem;
+//       size_t buffer_size;
+//       char *buffer;
+//       // query attribute properties
+//       nelem = H5Aget_name (attribute_id,
+//  			   buffer_size,
+//  			   buffer);
+//     }
+
+  }
+  
+  /*
+   * Summary of the file properties/contents 
+   */
+  cout << "Summary of the file properties/contents:" << endl;
+  cout << "-- File name            = " << filename                  << endl;
+  cout << "-- File ID              = " << file_id                   << endl;
+  cout << "-- Station group ID     = " << stationGroup_id           << endl;
+  cout << "--- # of attributes     = " << nofStationGroupAttributes << endl;
+  cout << "-- Dipole data channel:   " << endl;
+  cout << "--- Dataset ID          = " << channelDataset_id         << endl;
+  cout << "--- nof. attributes     = " << nofDatasetAttributes      << endl;
+  cout << "--- Station ID          = " << station_id                << endl;
+  cout << "--- RSP ID              = " << rsp_id                    << endl;
+  cout << "--- RCU ID              = " << rcu_id                    << endl;
+  
+  return nofFailedTests;
+}
 
 // -----------------------------------------------------------------------------
 
@@ -51,6 +207,8 @@ using CR::LOFAR_TBB;
 
   This function runs a few basic tests on how to work with various objects of
   the Data Acces Library (DAL), such as dalDataset, dalGroup and dalArray.
+
+  \param filename -- Test HDF5 time-series dataset to work with
 
   \return nofFailedTests -- The number of failed tests.
 */
@@ -326,6 +484,9 @@ int main (int argc,
   }
 
   std::string filename = argv[1];
+
+  // Perform some basic tests using the HDF5 library directly
+  nofFailedTests += test_hdf5(filename);
 
   // Perform some basic tests using the DAL
   nofFailedTests += test_dal(filename);

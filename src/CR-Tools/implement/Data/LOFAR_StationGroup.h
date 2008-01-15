@@ -31,6 +31,8 @@
 #include <dal/dal.h>
 #include <dal/dalDataset.h>
 
+#include <Data/LOFAR_DipoleDataset.h>
+
 namespace CR { // Namespace CR -- begin
   
   /*!
@@ -63,13 +65,21 @@ namespace CR { // Namespace CR -- begin
   */
   class LOFAR_StationGroup {
 
+    /* Basic handlers for the HDF5 dataset */
+
     //! HDF5 file handle ID
     hid_t H5fileID_p;
     //! Group object of the Data Access Library 
     dalGroup *group_p;
+
+    /* Atrribute values */
     
     //! If detection was done inside a beam, what was its (local) direction
     std::vector<double> beamDirection_p;
+
+    /* Substructure */
+
+    std::vector<LOFAR_DipoleDataset> datasets_p;
     
   public:
     
@@ -207,6 +217,14 @@ namespace CR { // Namespace CR -- begin
     }
 
     /*!
+      \brief Get the values of the TIME attribute for all present datasets
+      
+      \return times -- Values of the TIME attribute for all datasets present in
+              this station group
+    */
+    std::vector<uint> time ();
+
+    /*!
       \brief Get the name of the class
       
       \return className -- The name of the class, LOFAR_StationGroup.
@@ -283,6 +301,14 @@ namespace CR { // Namespace CR -- begin
       std::string channel_id (uid);
       return channel_id;
     }
+
+    /*!
+      \brief Get identifiers to the datasets within the station group
+
+      \return dataset_ids -- Vector with a list of the identifiers to the
+              HDF5 dataset objects within this station group.
+    */
+    std::vector<hid_t> datasetIDs ();
     
     /*!
       \brief Extract the dalGroup object of a given name from a dalDataset
@@ -310,7 +336,7 @@ namespace CR { // Namespace CR -- begin
     */
     void getAttribute (std::string &value,
 		       std::string const &keyword);
-    
+
     /*!
       \brief Unconditional copying
     */

@@ -101,19 +101,21 @@ namespace CR {  //  Namespace CR -- begin
     over the base class (DataReader) and the derived classes (e.g. ITS_Capture,
     LopesEvent).
     
-    <table border="0" cellpadding="3">
-      <tr bgcolor="silver">
-        <td width="15%">Function</td>
-        <td>Description</td>
-      </tr>
-      <tr valign="top">
-       <td bgcolor="orange">DataReader::setStreams()</td>
-       <td>
-       This function serves as the central point where the input streams are
-       set up to read in the data (from disk); a function prototype is
-       provided in the base class as a virtual function, but then needs to
-       be reimplemented in the derived classes to actually set the streams
-       \code
+    <ul>
+      <li><b>Functions required in derived classes</b>
+      <table border="0" cellpadding="3">
+        <tr bgcolor="silver">
+	  <td width="15%">Function</td>
+	  <td>Description</td>
+	</tr>
+	<tr valign="top">
+	  <td bgcolor="orange">DataReader::setStreams()</td>
+	  <td>
+	  This function serves as the central point where the input streams are
+	  set up to read in the data (from disk); a function prototype is
+	  provided in the base class as a virtual function, but then needs to
+	  be reimplemented in the derived classes to actually set the streams
+	  \code
        Bool LopesEvent::setStreams ()
        {
          bool status (true);
@@ -168,6 +170,39 @@ namespace CR {  //  Namespace CR -- begin
       </td>
     </tr>
   </table>
+    <li><b>Fields in the Header Record.</b><br>
+    This is the list of (mandatory) fields in the header record (as accessed with
+    <tt>dr.header()</tt>) of a DataReader object. The mandatory fields have to be
+    set by all child classes of the DataReader in order to be usable by the
+    (upcoming) standard tools.
+    <table>
+      <tr>
+        <td class="indexkey">Field Name
+	<td class="indexkey">mandatory?
+	<td class="indexkey">Data Type
+	<td class="indexkey">Desctription
+      </tr>
+      <tr>
+        <td class="indexkey">Date
+	<td>yes
+	<td>uInt
+	<td>Date of the observation. Standard unix date i.e. (GMT-)seconds since
+	1.1.1970
+      </tr>
+      <tr>
+	<td class="indexkey">AntennaIDs
+	<td>yes
+	<td>Vector<Int>
+	<td>The IDs of the antennas, i.e. an unique number for each channel.
+      </tr>
+      <tr>
+	<td class="indexkey">Observatory
+	<td>yes
+	<td>String
+	<td>Name of the Observatory, e.g. LOPES, LORUN, ITS, etc.
+      </tr>
+    </table>
+  </ul>
 
   <h3>Example(s)</h3>
 

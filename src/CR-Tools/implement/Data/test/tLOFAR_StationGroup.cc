@@ -44,6 +44,14 @@ using CR::LOFAR_StationGroup;
   \author Lars B&auml;hren
  
   \date 2007/12/10
+
+  <h3>Usage</h3>
+  
+  To run the test program use:
+  \verbatim
+  tLOFAR_TBB <filename>
+  \endverbatim
+  where the <i>filename</i> points to an existing HDF5 time-series dataset.
 */
 
 // -----------------------------------------------------------------------------

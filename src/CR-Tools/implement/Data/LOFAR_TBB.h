@@ -60,6 +60,7 @@ namespace CR { // Namespace CR -- begin
       <li>[CR] LOFAR_StationGroup -- Container for the data in the StationGroup
       of LOFAR times-series data, essentially a wrapper for the special case of
       a dalGroup object.
+      <li>[CR] LOFAR_DipoleDataset
       <li>[DAL] dalDataset
       <li>[DAL] dalGroup
     </ul>
@@ -70,7 +71,7 @@ namespace CR { // Namespace CR -- begin
     framework of the CR-Tools to the lower-level functionality of the Data Access
     Library (DAL), which handles the access to the standard LOFAR data products.
 
-    <ul>
+    <ol>
       <li><b>Structure of the data set</b> <br>
       \verbatim
       /                             ... Group
@@ -78,7 +79,7 @@ namespace CR { // Namespace CR -- begin
       |   |-- TELESCOPE             ... Attribute       ... string
       |   |-- OBSERVER              ... Attribute       ... string
       |   |-- PROJECT               ... Attribute       ... string
-      |   |-- OBSERVATION_IS        ... Attribute       ... string
+      |   |-- OBSERVATION_ID        ... Attribute       ... string
       |   |-- OBSERVATION_MODE      ... Attribute       ... string
       |   |-- TRIGGER_TYPE          ... Attribute       ... string
       |   |-- TRIGGER_OFFSET        ... Attribute       ... string
@@ -119,7 +120,7 @@ namespace CR { // Namespace CR -- begin
 	<li>RCU_ID -- Identification number of a Receiver Unit (RCU) attached to
 	a given RSP board.
       </ol>
-    </ul>
+    </ol>
 
     
     <h3>Example(s)</h3>
@@ -264,8 +265,19 @@ namespace CR { // Namespace CR -- begin
 
     /*!
       \brief Get the list of available station groups within the data file
-     */
+
+      \return stationGroups -- Vector with the HDF5-internal IDs of the station
+              groups.
+    */
     std::vector<std::string> getStationGroups ();
+
+    /*!
+      \brief Fill the relevant metadata into the header record
+
+      \return status -- Status of the operation; returns <tt>false</tt> if an
+              error was encountered.
+    */
+    bool setHeaderRecord ();
 
     /*!
       \brief Unconditional copying

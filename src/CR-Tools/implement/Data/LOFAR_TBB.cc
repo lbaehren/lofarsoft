@@ -251,28 +251,6 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
   
-  // ----------------------------------------------------------- getStationGroups
-
-  std::vector<std::string> LOFAR_TBB::getStationGroups ()
-  {
-    unsigned int nofStations (100);
-    char stationstr[10];
-    std::vector<std::string> stationGroups;
-
-    for (unsigned int station(0); station<nofStations; station++) {
-      /* create ID string for the group */
-      sprintf( stationstr, "Station%03d", station );
-      /* Check if group of given name exists in the file; according to the
-	 documentation of the DAL, the openGroup() function returns a NULL
-	 pointer in case no group of the given name exists. */
-      if (dataset_p->openGroup(stationstr) != NULL) {
-	stationGroups.push_back(stationstr);
-      }
-    }
-    
-    return stationGroups;
-  }
-  
   // ------------------------------------------------------------------------- fx
 
   casa::Matrix<double> LOFAR_TBB::fx ()
@@ -298,5 +276,59 @@ namespace CR { // Namespace CR -- begin
     
     return data;
   }
+
+  // ----------------------------------------------------------- getStationGroups
+
+  std::vector<std::string> LOFAR_TBB::getStationGroups ()
+  {
+    unsigned int nofStations (100);
+    char stationstr[10];
+    std::vector<std::string> stationGroups;
+
+    for (unsigned int station(0); station<nofStations; station++) {
+      /* create ID string for the group */
+      sprintf( stationstr, "Station%03d", station );
+      /* Check if group of given name exists in the file; according to the
+	 documentation of the DAL, the openGroup() function returns a NULL
+	 pointer in case no group of the given name exists. */
+      if (dataset_p->openGroup(stationstr) != NULL) {
+	stationGroups.push_back(stationstr);
+      }
+    }
+    
+    return stationGroups;
+  }
+
+  // ------------------------------------------------------------ setHeaderRecord
+
+  bool LOFAR_TBB::setHeaderRecord ()
+  {
+    bool status (true);
+    uint nofStationGroups (stationGroups_p.size());
+
+    /*
+     * Basic check: are there at least data for a single station within the
+     * dataset?
+     */
+
+    if (nofStationGroups) {
+
+      try {
+	// Name of the observatory
+	header_p.define("Observatory",stationGroups_p[0].telescope());
+      } catch (std::string message) {
+	std::cerr << "[LOFAR_TBB::setHeaderRecord] " << message << std::endl;
+	status = false;
+      }
+      
+    } else {
+      std::cerr << "[LOFAR_TBB::setHeaderRecord] No station group present!"
+		<< std::endl;
+      status = false;
+    }
+    
+    return status;
+  }
+  
 
 } // Namespace CR -- end

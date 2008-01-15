@@ -237,6 +237,47 @@ namespace CR { // Namespace CR -- begin
     return tmp;
   }
 
+  // ----------------------------------------------------------------------- time
+
+  std::vector<uint> LOFAR_StationGroup::time ()
+  {
+    hid_t attribute_id;
+    hid_t dataset_id;
+    uint tmp (0);
+    std::string id;
+    std::vector<uint> attrTime;
+    std::vector<std::string> channel_ids (channelIDs ());
+
+    /*
+     * Go through the list of available data channels to extract the time-stamps
+     */
+    for (uint channel (0); channel<channel_ids.size(); channel++) {
+      id = groupName() + "/" + channel_ids[channel];
+      // get the identifier for the dataset
+      dataset_id = H5Dopen(H5fileID_p, CR::string2char(id));
+      // get the identifier for the attribute
+      attribute_id = H5Aopen_name (dataset_id,
+				   "TIME");
+      // If the attribute could be located, we can retrieve its value
+      if (attribute_id > 0) {
+	if (H5Aread(attribute_id,
+		    H5T_NATIVE_UINT,
+		    &tmp) ==  0) {
+	  attrTime.push_back(tmp);
+	}
+      }
+      // Feedback
+//       std::cout << channel << "\t"
+// 		<< id << "\t"
+// 		<< dataset_id << "\t"
+// 		<< attribute_id << "\t"
+// 		<< tmp
+// 		<< std::endl;
+    }
+
+    return attrTime;
+  }
+  
   // -------------------------------------------------------------------- summary
   
   void LOFAR_StationGroup::summary (std::ostream &os)
@@ -316,8 +357,8 @@ namespace CR { // Namespace CR -- begin
 
     std::string groupName = group_p->getName();
     uint max_station (100);
-    uint max_rsp (10);
-    uint max_rcu (10);
+    uint max_rsp (100);
+    uint max_rcu (100);
 
     for (station=0; station<max_station; station++) {
       for (rsp=0; rsp<max_rsp; rsp++) {
@@ -334,6 +375,32 @@ namespace CR { // Namespace CR -- begin
     }
 
     return IDs;
+  }
+
+  // ----------------------------------------------------------------- datasetIDs
+
+  std::vector<hid_t> LOFAR_StationGroup::datasetIDs ()
+  {
+    std::vector<hid_t> dataset_ids;
+    std::string groupName = group_p->getName();
+    std::vector<std::string> dataset_names = channelIDs ();
+
+    // get the group ID
+    hid_t group_id = H5Gopen (H5fileID_p,CR::string2char(groupName));
+
+    if (group_id > 0) {
+      for (uint channel (0); channel<dataset_names.size(); channel++) {
+	dataset_ids[channel] = H5Dopen (group_id,
+					CR::string2char(dataset_names[channel]));
+      }
+    } else {
+      std::cerr << "[LOFAR_StationGroup::datasetIDs] Unable to access group "
+		<< groupName
+		<< " in current data file."
+		<< std::endl;
+    }
+
+    return dataset_ids;
   }
 
 } // Namespace CR -- end
