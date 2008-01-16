@@ -108,7 +108,7 @@ int main ()
     flagged(23) = 90101;
     flagged(24) = 90102;
     
-    eventPipeline.setTVAutoFlag(false);
+
     results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2007.09.01.09:22:35.310.event", 354.55215, 63.882182, distance_default, 8.6060886, -368.0933, True, "1188638555", True, flagged, True, False); 
   
   } catch (std::string message) {
