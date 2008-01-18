@@ -22,7 +22,6 @@
  ***************************************************************************/
 
 #include <Data/HDF5Common.h>
-#include <Utilities/StringTools.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -31,6 +30,37 @@ namespace CR { // Namespace CR -- begin
   //  Access to attributes
   //
   // ============================================================================
+
+  void h5attribute_summary (std::ostream &os,
+			    hid_t const &attribute_id)
+  {
+    hid_t dataspace_id = H5Aget_space(attribute_id);
+    hid_t datatype_id  = H5Aget_type(attribute_id);
+    hssize_t nofSelectedElements (0);
+    int dataspaceDimensions (0);
+    hsize_t *dimensions;
+    hsize_t *maxDimensions;
+    
+    /* Probe the attribute's dataspace */
+    if (dataspace_id > 0) {
+      nofSelectedElements = H5Sget_select_npoints (dataspace_id);
+      dataspaceDimensions = H5Sget_simple_extent_dims (dataspace_id,
+						       dimensions,
+						       maxDimensions);
+    }
+    
+    os << "\tAttribute ID              = " << attribute_id << endl;
+    os << "\tDataspace ID              = " << dataspace_id << endl;
+    os << "\t-- nof. selected elements = " << nofSelectedElements << endl;
+    os << "\t-- Dataspace dimensions   = " << dataspaceDimensions << endl;
+    if (dataspaceDimensions > 0) {
+      os << "[ ";
+      for (int n(0);n<dataspaceDimensions; n++) {
+	os << dimensions[n] << " ";
+      }
+    }
+    cout << "\tDatatype ID               = " << datatype_id  << endl;    
+  }
   
   // ----------------------------------------------------- h5get_attribute (uint)
   
@@ -60,7 +90,7 @@ namespace CR { // Namespace CR -- begin
     
     // get the identifier for the attribute
     attribute_id = H5Aopen_name(locationID,
-				CR::string2char(name));
+				name.c_str());
     
     if (attribute_id > 0) {
       return h5get_attribute (value,
@@ -101,7 +131,7 @@ namespace CR { // Namespace CR -- begin
     
     // get the identifier for the attribute
     attribute_id = H5Aopen_name(locationID,
-				CR::string2char(name));
+				name.c_str());
 
     if (attribute_id > 0) {
       return h5get_attribute (value,
@@ -142,7 +172,7 @@ namespace CR { // Namespace CR -- begin
     
     // get the identifier for the attribute
     attribute_id = H5Aopen_name(locationID,
-				CR::string2char(name));
+				name.c_str());
     
     if (attribute_id > 0) {
       return h5get_attribute (value,
@@ -165,10 +195,10 @@ namespace CR { // Namespace CR -- begin
     
     h5error = H5Aread(attribute_id,
 		      H5T_NATIVE_CHAR,
-		      &buffer);
+		      buffer);
 
     if (h5error == 0) {
-      value = buffer;
+//       value = buffer;
       return true;
     } else {
       value = "";

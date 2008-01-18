@@ -54,38 +54,6 @@ using CR::LOFAR_TBB;
 
 // -----------------------------------------------------------------------------
 
-void show_attribute (hid_t const &attribute_id)
-{
-  hid_t dataspace_id = H5Aget_space(attribute_id);
-  hid_t datatype_id  = H5Aget_type(attribute_id);
-  hssize_t nofSelectedElements (0);
-  int dataspaceDimensions (0);
-  hsize_t *dimensions;
-  hsize_t *maxDimensions;
-
-  /* Probe the attribute's dataspace */
-  if (dataspace_id > 0) {
-    nofSelectedElements = H5Sget_select_npoints (dataspace_id);
-    dataspaceDimensions = H5Sget_simple_extent_dims (dataspace_id,
-						     dimensions,
-						     maxDimensions);
-  }
-
-  cout << "\tAttribute ID              = " << attribute_id << endl;
-  cout << "\tDataspace ID              = " << dataspace_id << endl;
-  cout << "\t-- nof. selected elements = " << nofSelectedElements << endl;
-  cout << "\t-- Dataspace dimensions   = " << dataspaceDimensions << endl;
-  if (dataspaceDimensions > 0) {
-    cout << "[ ";
-    for (int n(0);n<dataspaceDimensions; n++) {
-      cout << dimensions[n] << " ";
-    }
-  }
-  cout << "\tDatatype ID               = " << datatype_id  << endl;
-}
-
-// -----------------------------------------------------------------------------
-
 /*!
   \brief Access contents of the time-series datset directly via the HDF5 library
 
@@ -177,7 +145,7 @@ int test_hdf5 (std::string const &filename)
     attribute_id = H5Aopen_name(channelDataset_id,"STATION_ID");
     // retrieve the value of the attribute
     if (attribute_id > 0) {
-      show_attribute(attribute_id);
+      CR::h5attribute_summary (std::cout,attribute_id);
       // retrive value
       h5error = H5Aread(attribute_id,
 			H5T_NATIVE_UINT,
@@ -190,7 +158,7 @@ int test_hdf5 (std::string const &filename)
     attribute_id = H5Aopen_name(channelDataset_id,"RSP_ID");
     // retrieve the value of the attribute
     if (attribute_id > 0) {
-      show_attribute(attribute_id);
+      CR::h5attribute_summary (std::cout,attribute_id);
       // retrive value
       h5error = H5Aread(attribute_id,
 			H5T_NATIVE_UINT,
@@ -203,7 +171,7 @@ int test_hdf5 (std::string const &filename)
     attribute_id = H5Aopen_name(channelDataset_id,"RCU_ID");
     // retrieve the value of the attribute
     if (attribute_id > 0) {
-      show_attribute(attribute_id);
+      CR::h5attribute_summary (std::cout,attribute_id);
       // retrive value
       h5error = H5Aread(attribute_id,
 			H5T_NATIVE_UINT,
@@ -212,39 +180,39 @@ int test_hdf5 (std::string const &filename)
       h5error = H5Aclose (attribute_id);
     }
     
-    cout << "--> Reading in FEED attribute ..." << endl;
-    attribute_id = H5Aopen_name(channelDataset_id,"FEED");
-    // retrieve the value of the attribute
-    if (attribute_id > 0) {
-      show_attribute(attribute_id);
+//     cout << "--> Reading in FEED attribute ..." << endl;
+//     attribute_id = H5Aopen_name(channelDataset_id,"FEED");
+//     // retrieve the value of the attribute
+//     if (attribute_id > 0) {
+//       CR::h5attribute_summary (std::cout,attribute_id);
 //       // retrive value
 //       h5error = H5Aread(attribute_id,
 // 			H5T_NATIVE_UINT,
 // 			&feed);
 //       // release the attribute ID
-      h5error = H5Aclose (attribute_id);
-    }
+//       h5error = H5Aclose (attribute_id);
+//     }
     
-    cout << "--> Reading in ANTENNA_POSITION attribute ..." << endl;
-    attribute_id = H5Aopen_name(channelDataset_id,"ANT_POSITION");
-    // retrieve the value of the attribute
-    if (attribute_id > 0) {
-      show_attribute(attribute_id);
-      // retrive value
-      h5error = H5Aread(attribute_id,
-			H5T_NATIVE_DOUBLE,
-			&antenna_position);
-      // release the attribute ID
-      h5error = H5Aclose (attribute_id);
-    }
+//     cout << "--> Reading in ANTENNA_POSITION attribute ..." << endl;
+//     attribute_id = H5Aopen_name(channelDataset_id,"ANT_POSITION");
+//     // retrieve the value of the attribute
+//     if (attribute_id > 0) {
+//       CR::h5attribute_summary (std::cout,attribute_id);
+//       // retrive value
+//       h5error = H5Aread(attribute_id,
+// 			H5T_NATIVE_DOUBLE,
+// 			&antenna_position);
+//       // release the attribute ID
+//       h5error = H5Aclose (attribute_id);
+//     }
 
-    cout << "--> Reading in ANTENNA_ORIENTATION attribute ..." << endl;
-    attribute_id = H5Aopen_name(channelDataset_id,"ANT_ORIENTATION");
-    if (attribute_id > 0) {
-      show_attribute(attribute_id);
-      // release the attribute ID
-      h5error = H5Aclose (attribute_id);
-    }
+//     cout << "--> Reading in ANTENNA_ORIENTATION attribute ..." << endl;
+//     attribute_id = H5Aopen_name(channelDataset_id,"ANT_ORIENTATION");
+//     if (attribute_id > 0) {
+//       CR::h5attribute_summary (std::cout,attribute_id);
+//       // release the attribute ID
+//       h5error = H5Aclose (attribute_id);
+//     }
 
   }
   
@@ -287,19 +255,7 @@ int test_dal (std::string const &filename)
   std::string groupname ("Station001");
   char *h5filename = CR::string2char(filename);
   
-  cout << "[1] Open dataset using DAL::Dataset object" << endl;
-  try {
-    dalDataset dataset;
-    retval = dataset.open(h5filename);
-    cout << "-- dalDataset type   = " << dataset.getType() << endl;
-    cout << "-- dalDataset name   = " << dataset.getName() << endl;
-    cout << "-- dalDataset tables = "; dataset.listTables();
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-  
-  cout << "[2] Open dataset using DAL::Dataset object pointer" << endl;
+  cout << "[1] Open dataset using DAL::Dataset object pointer" << endl;
   try {
     dalDataset *dataset;
     dataset = new dalDataset();
@@ -310,7 +266,7 @@ int test_dal (std::string const &filename)
     nofFailedTests++;
   }
   
-  cout << "[3] Extract group from dalDataset" << endl;
+  cout << "[2] Extract group from dalDataset" << endl;
   try {
     dalDataset dataset;
     retval = dataset.open(h5filename);
@@ -555,7 +511,7 @@ int main (int argc,
   nofFailedTests += test_hdf5(filename);
 
   // Perform some basic tests using the DAL
-  nofFailedTests += test_dal(filename);
+//   nofFailedTests += test_dal(filename);
 
   // Test for the constructor(s)
   nofFailedTests += test_construction (filename);

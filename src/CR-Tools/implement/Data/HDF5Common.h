@@ -69,6 +69,13 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
+  void h5attribute_summary (std::ostream &os,
+			    hid_t const &attribute_id);
+
+  void h5attribute_summary (std::ostream &os,
+			    std::string const &name,
+			    hid_t const &attribute_id);
+
   //@{
   /*!
     \brief Get the value of an attribute attached to a group or dataset

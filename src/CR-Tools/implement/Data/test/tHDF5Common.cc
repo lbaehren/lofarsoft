@@ -37,6 +37,116 @@
 
 // -----------------------------------------------------------------------------
 
+/*
+  \brief Test accessing the HDF5 file using the Data Access Library (DAL)
+
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_dal ()
+{
+  int nofFailedTests (0);
+  
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+int get_attribute_id (hid_t const &file_id)
+{
+  int nofFailedTests (0);
+   hid_t attribute_id (0);
+
+  /*
+   * Get the ID of the station group
+   */
+  hid_t group_id = H5Gopen (file_id,
+			    "Station001");
+  
+  if (group_id > 0) {
+
+    std::cout << "-- Retrieving IDs of group attributes..." << std::endl;
+
+    attribute_id = H5Aopen_name(group_id,"TELESCOPE");
+    std::cout << "--> TELESCOPE = " << attribute_id << std::endl;
+
+    attribute_id = H5Aopen_name(group_id,"OBSERVER");
+    std::cout << "--> OBSERVER  = " << attribute_id << std::endl;
+
+    attribute_id = H5Aopen_name(group_id,"PROJECT");
+    std::cout << "--> PROJECT   = " << attribute_id << std::endl;
+
+    attribute_id = H5Aopen_name(group_id,"OBS_ID");
+    std::cout << "--> OBS_ID    = " << attribute_id << std::endl;
+
+    attribute_id = H5Aopen_name(group_id,"OBS_MODE");
+    std::cout << "--> OBS_MODE  = " << attribute_id << std::endl;
+
+    attribute_id = H5Aopen_name(group_id,"TRIG_TYPE");
+    std::cout << "--> TRIG_TYPE = " << attribute_id << std::endl;
+
+    attribute_id = H5Aopen_name(group_id,"TRIG_OFST");
+    std::cout << "--> TRIG_OFST = " << attribute_id << std::endl;
+
+    attribute_id = H5Aopen_name(group_id,"TRIG_ANTS");
+    std::cout << "--> TRIG_ANTS = " << attribute_id << std::endl;
+
+    attribute_id = H5Aopen_name(group_id,"BEAM_DIR");
+    std::cout << "--> BEAM_DIR  = " << attribute_id << std::endl;
+  }
+
+  /*
+   * Get ID of the first dataset in the first station group
+   */
+  hid_t dataset_id = H5Dopen (file_id,
+			      "Station001/001000000");
+
+  if (dataset_id > 0) {
+
+    std::cout << "-- Retrieving IDs of dataset attributes..." << std::endl;
+
+    attribute_id = H5Aopen_name(dataset_id,"STATION_ID");
+    std::cout << "--> STATION_ID        = " << attribute_id << std::endl;
+    
+    attribute_id = H5Aopen_name(dataset_id,"RSP_ID");
+    std::cout << "--> RSP_ID            = " << attribute_id << std::endl;
+    
+    attribute_id = H5Aopen_name(dataset_id,"RCU_ID");
+    std::cout << "--> RCU_ID            = " << attribute_id << std::endl;
+    
+    attribute_id = H5Aopen_name(dataset_id,"SAMPLE_FREQ");
+    std::cout << "--> SAMPLE_FREQ       = " << attribute_id << std::endl;
+    
+    attribute_id = H5Aopen_name(dataset_id,"TIME");
+    std::cout << "--> TIME              = " << attribute_id << std::endl;
+    
+    attribute_id = H5Aopen_name(dataset_id,"SAMPLE_NR");
+    std::cout << "--> SAMPLE_NR         = " << attribute_id << std::endl;
+    
+    attribute_id = H5Aopen_name(dataset_id,"SAMPLES_PER_FRAME");
+    std::cout << "--> SAMPLES_PER_FRAME = " << attribute_id << std::endl;
+    
+    attribute_id = H5Aopen_name(dataset_id,"DATA_LENGTH");
+    std::cout << "--> DATA_LENGTH       = " << attribute_id << std::endl;
+    
+    attribute_id = H5Aopen_name(dataset_id,"NYQUIST_ZONE");
+    std::cout << "--> NYQUIST_ZONE      = " << attribute_id << std::endl;
+    
+    attribute_id = H5Aopen_name(dataset_id,"FEED");
+    std::cout << "--> FEED              = " << attribute_id << std::endl;
+    
+    attribute_id = H5Aopen_name(dataset_id,"ANT_POSITION");
+    std::cout << "--> ANT_POSITION      = " << attribute_id << std::endl;
+    
+    attribute_id = H5Aopen_name(dataset_id,"ANT_ORIENTATION");
+    std::cout << "--> ANT_ORIENTATION   = " << attribute_id << std::endl;
+    
+  }
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
 /*!
   \brief Test extracting the values of attributes attached to a group or dataset
 
@@ -49,9 +159,9 @@ int get_attributes (hid_t const &file_id)
   int nofFailedTests (0);
 
   bool status (true);
-  std::string telescope;
-  std::string observer;
-  std::string project;
+  std::string telescope ("UNDEFINED");
+  std::string observer ("UNDEFINED");
+  std::string project ("UNDEFINED");
 
   /*
    * Get the ID of the station group
@@ -125,7 +235,8 @@ int main (int argc,
   
   if (file_id > 0) {
     std::cout << "[tHDF5Common] Successfully opened HDF5 file." << std::endl;
-    nofFailedTests += get_attributes(file_id);
+    nofFailedTests += get_attribute_id (file_id);
+    nofFailedTests += get_attributes (file_id);
   } else {
     std::cerr << "[tHDF5Common] Error opening HDF5 file!" << std::endl;
     return -1;
