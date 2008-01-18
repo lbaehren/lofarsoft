@@ -92,54 +92,6 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
-  // -------------------------------------------------------------- get_attribute
-
-  bool LOFAR_DipoleDataset::get_attribute (uint &value,
-					   std::string const &name,
-					   hid_t const &locationID)
-  {
-    bool status (true);
-    herr_t h5error (0);
-    uint attribute_id (0);
-
-    // get the identifier for the attribute
-    attribute_id = H5Aopen_name(locationID,
-				CR::string2char(name));
-
-    // retrieve the value of the attribute
-    if (attribute_id > 0) {
-      h5error = H5Aread(attribute_id,
-			H5T_NATIVE_UINT,
-			&value);
-    }
-
-    return status;
-  }
-  
-  // -------------------------------------------------------------- get_attribute
-
-  bool LOFAR_DipoleDataset::get_attribute (double &value,
-					   std::string const &name,
-					   hid_t const &locationID)
-  {
-    bool status (true);
-    herr_t h5error (0);
-    uint attribute_id (0);
-
-    // get the identifier for the attribute
-    attribute_id = H5Aopen_name(locationID,
-				CR::string2char(name));
-
-    // retrieve the value of the attribute
-    if (attribute_id > 0) {
-      h5error = H5Aread(attribute_id,
-			H5T_NATIVE_DOUBLE,
-			&value);
-    }
-
-    return status;
-  }
-  
   // --------------------------------------------------------------- attribute_id
   
   hid_t LOFAR_DipoleDataset::attribute_id (std::string const &name)
@@ -162,7 +114,7 @@ namespace CR { // Namespace CR -- begin
   {
     uint id (0);
 
-    if (get_attribute(id,"STATION_ID",H5datasetID_p)) {
+    if (h5get_attribute(id,"STATION_ID",H5datasetID_p)) {
       return id;
     } else {
       return 0;
@@ -175,7 +127,7 @@ namespace CR { // Namespace CR -- begin
   {
     uint id (0);
 
-    if (get_attribute(id,"RSP_ID",H5datasetID_p)) {
+    if (h5get_attribute(id,"RSP_ID",H5datasetID_p)) {
       return id;
     } else {
       return 0;
@@ -188,7 +140,7 @@ namespace CR { // Namespace CR -- begin
   {
     uint val (0);
 
-    if (get_attribute(val,"RCU_ID",H5datasetID_p)) {
+    if (h5get_attribute(val,"RCU_ID",H5datasetID_p)) {
       return val;
     } else {
       return 0;
@@ -201,7 +153,7 @@ namespace CR { // Namespace CR -- begin
   {
     uint val (0);
 
-    if (get_attribute(val,"TIME",H5datasetID_p)) {
+    if (h5get_attribute(val,"TIME",H5datasetID_p)) {
       return val;
     } else {
       return 0;
@@ -214,7 +166,7 @@ namespace CR { // Namespace CR -- begin
   {
     double val (0);
 
-    if (get_attribute(val,"SAMPLE_FREQ",H5datasetID_p)) {
+    if (h5get_attribute(val,"SAMPLE_FREQ",H5datasetID_p)) {
       return val;
     } else {
       return 0;
@@ -227,7 +179,7 @@ namespace CR { // Namespace CR -- begin
   {
     uint val (0);
 
-    if (get_attribute(val,"NYQUIST_ZONE",H5datasetID_p)) {
+    if (h5get_attribute(val,"NYQUIST_ZONE",H5datasetID_p)) {
       return val;
     } else {
       return 0;
@@ -240,7 +192,7 @@ namespace CR { // Namespace CR -- begin
   {
     uint val (0);
 
-    if (get_attribute(val,"SAMPLE_NR",H5datasetID_p)) {
+    if (h5get_attribute(val,"SAMPLE_NR",H5datasetID_p)) {
       return val;
     } else {
       return 0;
@@ -253,7 +205,7 @@ namespace CR { // Namespace CR -- begin
   {
     uint val (0);
 
-    if (get_attribute(val,"SAMPLES_PER_FRAME",H5datasetID_p)) {
+    if (h5get_attribute(val,"SAMPLES_PER_FRAME",H5datasetID_p)) {
       return val;
     } else {
       return 0;
@@ -266,11 +218,24 @@ namespace CR { // Namespace CR -- begin
   {
     uint val (0);
 
-    if (get_attribute(val,"DATA_LENGTH",H5datasetID_p)) {
+    if (h5get_attribute(val,"DATA_LENGTH",H5datasetID_p)) {
       return val;
     } else {
       return 0;
     }
   }
   
+  // ----------------------------------------------------------------------- feed
+
+  std::string LOFAR_DipoleDataset::feed ()
+  {
+    std::string val;
+
+    if (h5get_attribute(val,"FEED",H5datasetID_p)) {
+      return val;
+    } else {
+      return std::string ("");
+    }
+  }
+
 } // Namespace CR -- end

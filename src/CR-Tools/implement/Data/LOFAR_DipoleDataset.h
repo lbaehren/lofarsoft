@@ -24,12 +24,7 @@
 #ifndef LOFAR_DIPOLEDATASET_H
 #define LOFAR_DIPOLEDATASET_H
 
-// Standard library header files
-#include <iostream>
-#include <string>
-#include <vector>
-
-#include <dal/dal.h>
+#include <Data/HDF5Common.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -270,7 +265,7 @@ namespace CR { // Namespace CR -- begin
     void destroy(void);
 
     /*!
-      \brief Get the value of an attribute of type uint
+      \brief Get the value of an attribute
 
       \retval value -- The value of the attribute
       \param name -- The name the attribute
@@ -280,12 +275,6 @@ namespace CR { // Namespace CR -- begin
       \return status -- Status of the operation; returns <tt>false</tt> in 
               case an error was encountered
     */
-    bool get_attribute (uint &value,
-			std::string const &name,
-			hid_t const &locationID);
-    bool get_attribute (double &value,
-			std::string const &name,
-			hid_t const &locationID);
     bool get_attribute (std::string &value,
 			std::string const &name,
 			hid_t const &locationID);
@@ -293,6 +282,9 @@ namespace CR { // Namespace CR -- begin
 			std::string const &name,
 			hid_t const &locationID);
     bool get_attribute (std::vector<double> &value,
+			std::string const &name,
+			hid_t const &locationID);
+    bool get_attribute (std::vector<string> &value,
 			std::string const &name,
 			hid_t const &locationID);
     

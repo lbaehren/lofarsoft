@@ -54,6 +54,38 @@ using CR::LOFAR_TBB;
 
 // -----------------------------------------------------------------------------
 
+void show_attribute (hid_t const &attribute_id)
+{
+  hid_t dataspace_id = H5Aget_space(attribute_id);
+  hid_t datatype_id  = H5Aget_type(attribute_id);
+  hssize_t nofSelectedElements (0);
+  int dataspaceDimensions (0);
+  hsize_t *dimensions;
+  hsize_t *maxDimensions;
+
+  /* Probe the attribute's dataspace */
+  if (dataspace_id > 0) {
+    nofSelectedElements = H5Sget_select_npoints (dataspace_id);
+    dataspaceDimensions = H5Sget_simple_extent_dims (dataspace_id,
+						     dimensions,
+						     maxDimensions);
+  }
+
+  cout << "\tAttribute ID              = " << attribute_id << endl;
+  cout << "\tDataspace ID              = " << dataspace_id << endl;
+  cout << "\t-- nof. selected elements = " << nofSelectedElements << endl;
+  cout << "\t-- Dataspace dimensions   = " << dataspaceDimensions << endl;
+  if (dataspaceDimensions > 0) {
+    cout << "[ ";
+    for (int n(0);n<dataspaceDimensions; n++) {
+      cout << dimensions[n] << " ";
+    }
+  }
+  cout << "\tDatatype ID               = " << datatype_id  << endl;
+}
+
+// -----------------------------------------------------------------------------
+
 /*!
   \brief Access contents of the time-series datset directly via the HDF5 library
 
@@ -135,7 +167,9 @@ int test_hdf5 (std::string const &filename)
   uint station_id (0);
   uint rsp_id (0);
   uint rcu_id (0);
-  std::vector<double> beam_direction;
+  std::string feed;
+  double *antenna_position;
+  double *antenna_orientation;
   
   if (channelDataset_id > 0) {
 
@@ -143,42 +177,74 @@ int test_hdf5 (std::string const &filename)
     attribute_id = H5Aopen_name(channelDataset_id,"STATION_ID");
     // retrieve the value of the attribute
     if (attribute_id > 0) {
+      show_attribute(attribute_id);
+      // retrive value
       h5error = H5Aread(attribute_id,
 			H5T_NATIVE_UINT,
 			&station_id);
+      // release the attribute ID
+      h5error = H5Aclose (attribute_id);
     }
 
     cout << "--> Reading in RSP_ID attribute ..." << endl;
     attribute_id = H5Aopen_name(channelDataset_id,"RSP_ID");
     // retrieve the value of the attribute
     if (attribute_id > 0) {
+      show_attribute(attribute_id);
+      // retrive value
       h5error = H5Aread(attribute_id,
 			H5T_NATIVE_UINT,
 			&rsp_id);
+      // release the attribute ID
+      h5error = H5Aclose (attribute_id);
     }
 
     cout << "--> Reading in RCU_ID attribute ..." << endl;
     attribute_id = H5Aopen_name(channelDataset_id,"RCU_ID");
     // retrieve the value of the attribute
     if (attribute_id > 0) {
+      show_attribute(attribute_id);
+      // retrive value
       h5error = H5Aread(attribute_id,
 			H5T_NATIVE_UINT,
 			&rcu_id);
+      // release the attribute ID
+      h5error = H5Aclose (attribute_id);
     }
     
-//     cout << "--> Reading in BEAM_DIR attribute ..." << endl;
-//     attribute_id = H5Aopen_name(channelDataset_id,"BEAM_DIR");
-//     // retrieve the value of the attribute
-//     if (attribute_id > 0) {
-//       // local variables
-//       ssize_t nelem;
-//       size_t buffer_size;
-//       char *buffer;
-//       // query attribute properties
-//       nelem = H5Aget_name (attribute_id,
-//  			   buffer_size,
-//  			   buffer);
-//     }
+    cout << "--> Reading in FEED attribute ..." << endl;
+    attribute_id = H5Aopen_name(channelDataset_id,"FEED");
+    // retrieve the value of the attribute
+    if (attribute_id > 0) {
+      show_attribute(attribute_id);
+//       // retrive value
+//       h5error = H5Aread(attribute_id,
+// 			H5T_NATIVE_UINT,
+// 			&feed);
+//       // release the attribute ID
+      h5error = H5Aclose (attribute_id);
+    }
+    
+    cout << "--> Reading in ANTENNA_POSITION attribute ..." << endl;
+    attribute_id = H5Aopen_name(channelDataset_id,"ANT_POSITION");
+    // retrieve the value of the attribute
+    if (attribute_id > 0) {
+      show_attribute(attribute_id);
+      // retrive value
+      h5error = H5Aread(attribute_id,
+			H5T_NATIVE_DOUBLE,
+			&antenna_position);
+      // release the attribute ID
+      h5error = H5Aclose (attribute_id);
+    }
+
+    cout << "--> Reading in ANTENNA_ORIENTATION attribute ..." << endl;
+    attribute_id = H5Aopen_name(channelDataset_id,"ANT_ORIENTATION");
+    if (attribute_id > 0) {
+      show_attribute(attribute_id);
+      // release the attribute ID
+      h5error = H5Aclose (attribute_id);
+    }
 
   }
   

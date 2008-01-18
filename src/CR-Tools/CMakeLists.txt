@@ -34,15 +34,18 @@ endif (CR_ENABLE_TESTING)
 ## Handle option: verbose mode on/off
 
 if (NOT CR_VERBOSE_CONFIGURE)
+  ## output of the find scripts
   set (BLITZ_FIND_QUIETLY 1)
   set (CASA_FIND_QUIETLY 1)
   set (CASACORE_FIND_QUIETLY 1)
   set (CFITSIO_FIND_QUIETLY 1)
+  set (DAL_FIND_QUIETLY 1)
   set (FFTW3_FIND_QUIETLY 1)
   set (G2C_FIND_QUIETLY 1)
   set (GIF_FIND_QUIETLY 1)
   set (GLISH_FIND_QUIETLY 1)
   set (GSL_FIND_QUIETLY 1)
+  set (GTK_FIND_QUIETLY 1)
   set (HDF5_FIND_QUIETLY 1)
   set (LAPACK_FIND_QUIETLY 1)
   set (PGPLOT_FIND_QUIETLY 1)
@@ -55,11 +58,33 @@ if (NOT CR_VERBOSE_CONFIGURE)
   set (TCL_FIND_QUIETLY 1)
   set (TK_FIND_QUIETLY 1)
   set (WCSLIB_FIND_QUIETLY 1)
+  ## output of the generated makefile
+  set (CMAKE_VERBOSE_MAKEFILE 0)
 endif (NOT CR_VERBOSE_CONFIGURE)
 
 ## Handle option: Activate support for Glish applications on/off
 
 # --> handled below
+
+## -----------------------------------------------------------------------------
+## Locate additional CMake find scripts
+
+find_path (cr_cmake FindBlitz.cmake FindCASA.cmake FindCFITSIO.cmake
+  PATHS 
+  ${CR_SOURCE_DIR}
+  ${CR_SOURCE_DIR}/..
+  ${CR_SOURCE_DIR}/../..
+  ${CR_SOURCE_DIR}/../../..
+  PATH_SUFFIXES
+  devel_common/cmake
+  )
+
+## If we are unable to locate the CMake find scripts, we need to abort here;
+## otherwise we do not know from where to include the files further down.
+
+if (NOT cr_cmake)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+endif (NOT cr_cmake)
 
 ## =============================================================================
 ##
@@ -98,200 +123,214 @@ find_package (TCL)
 find_package (X11)
 find_package (ZLIB)
 
-## -----------------------------------------------------------------------------
-## Locate additional CMake find scripts
-
-find_path (cr_cmake FindBlitz.cmake FindCASA.cmake FindCFITSIO.cmake
-  PATHS 
-  ${CR_SOURCE_DIR}
-  ${CR_SOURCE_DIR}/..
-  ${CR_SOURCE_DIR}/../..
-  ${CR_SOURCE_DIR}/../../..
-  PATH_SUFFIXES
-  devel_common/cmake
-  )
+## Search using custom CMake find scripts
 
 if (cr_cmake)
-
+  
   ## --- Blitz++ ---------------------------------
-
+  
   if (NOT HAVE_BLITZ)
     include (${cr_cmake}/FindBlitz.cmake)
   endif (NOT HAVE_BLITZ)
-
+  
   if (HAVE_BLITZ)
     add_definitions (-DHAVE_BLITZ)
     include_directories (${BLITZ_INCLUDES})
   endif (HAVE_BLITZ)
-
+  
   ## --- CFITSIO ---------------------------------
-
+  
   if (NOT HAVE_CFITSIO)
     include (${cr_cmake}/FindCFITSIO.cmake)
   endif (NOT HAVE_CFITSIO)
-
+  
   if (HAVE_CFITSIO)
     add_definitions (-DHAVE_CFITSIO)
     include_directories (${CFITSIO_INCLUDES})
   endif (HAVE_CFITSIO)
-
+  
   ## --- CASA / casacore -------------------------
-
+  
   ## this is handled further below, as this also depends
   ## on whether Glish is available/required.
-
+  
   ## --- Data Access Library (DAL) ---------------
-
+  
   if (NOT HAVE_DAL)
     include (${cr_cmake}/FindDAL.cmake)
   endif (NOT HAVE_DAL)
-
+  
   if (HAVE_DAL)
     add_definitions (-DHAVE_DAL)
     include_directories (${DAL_INCLUDES})
   endif (HAVE_DAL)
-
+  
   ## --- FFTW3 -----------------------------------
-
+  
   if (NOT HAVE_FFTW3)
     include (${cr_cmake}/FindFFTW3.cmake)
   endif (NOT HAVE_FFTW3)
-
+  
   if (HAVE_FFTW3)
     add_definitions (-DHAVE_FFTW3)
     include_directories (${FFTW3_INCLUDES})
   endif (HAVE_FFTW3)
-
+  
   ## --- G2C -------------------------------------
-
+  
   if (NOT HAVE_G2C)
     include (${cr_cmake}/FindG2C.cmake)
   endif (NOT HAVE_G2C)
-
-  ## --- GIF -------------------------------------
-
+  
+  ## --- GIF ---------------------------------------
+  
   if (NOT HAVE_GIF)
     include (${cr_cmake}/FindGIF.cmake)
   endif (NOT HAVE_GIF)
-
+  
   if (HAVE_GIF)
     add_definitions (-DHAVE_GIF)
     include_directories (${GIF_INCLUDES})
   endif (HAVE_GIF)
-
-  ## --- Glish -----------------------------------
-
+  
+  ## --- Glish -------------------------------------
+  
   if (NOT HAVE_GLISH)
     include (${cr_cmake}/FindGlish.cmake)
   endif (NOT HAVE_GLISH)
-
-  ## --- GNU Scientific Library (GSL) ------------
-
+  
+  if (HAVE_GLISH)
+    add_definitions (-DHAVE_GLISH)
+    include_directories (${GLISH_INCLUDES})
+  endif (HAVE_GLISH)
+  
+  ## --- GNU Scientific Library (GSL) --------------
+  
   if (NOT HAVE_GSL)
     include (${cr_cmake}/FindGSL.cmake)
   endif (NOT HAVE_GSL)
-
+  
   if (HAVE_GSL)
     add_definitions (-DHAVE_GSL)
     include_directories (${GSL_INCLUDES})
   endif (HAVE_GSL)
-
-  ## --- GTK -------------------------------------
-
+  
+  ## --- GTK ---------------------------------------
+  
   if (NOT HAVE_GTK)
     include (${cr_cmake}/FindGTK.cmake)
   endif (NOT HAVE_GTK)
-
+  
   if (HAVE_GTK)
     add_definitions (-DHAVE_GTK)
     include_directories (${GTK_INCLUDES})
   endif (HAVE_GTK)
-
+  
   ## --- HDF5 ------------------------------------
-
+  
   if (NOT HAVE_HDF5)
     include (${cr_cmake}/FindHDF5.cmake)
   endif (NOT HAVE_HDF5)
-
+  
   if (HAVE_HDF5)
     add_definitions (-DHAVE_HDF5)
     include_directories (${HDF5_INCLUDES})
   endif (HAVE_HDF5)
-
+  
   ## LAPACK --------------------------------------
-
+  
   if (NOT HAVE_LAPACK)
     include (${cr_cmake}/FindLAPACK.cmake)
   endif (NOT HAVE_LAPACK)
-
+  
+  if (HAVE_LAPACK)
+    add_definitions (-DHAVE_LAPACK)
+    include_directories (${LAPACK_INCLUDES})
+  endif (HAVE_LAPACK)
+  
   ## -- PGPlot -----------------------------------
-
+  
   if (NOT HAVE_PGPLOT)
     include (${cr_cmake}/FindPGPLOT.cmake)
   endif (NOT HAVE_PGPLOT)
-
+  
   ## -- PLplot -----------------------------------
-
+  
   if (NOT HAVE_PLPLOT)
     include (${cr_cmake}/FindPLplot.cmake)
   endif (NOT HAVE_PLPLOT)
-
+  
   ## -- PNG --------------------------------------
-
+  
   if (NOT HAVE_PNG)
     include (${cr_cmake}/FindPNG.cmake)
   endif (NOT HAVE_PNG)
-
+  
+  if (HAVE_PNG)
+    add_definitions (-DHAVE_PNG)
+    include_directories (${PNG_INCLUDES})
+  endif (HAVE_PNG)
+  
   ## -- popt -------------------------------------
-
+  
   if (NOT HAVE_POPT)
     include (${cr_cmake}/FindPOPT.cmake)
   endif (NOT HAVE_POPT)
-
+  
   ## -- PostgreSQL -------------------------------
-
+  
   if (NOT HAVE_PostgreSQL)
     include (${cr_cmake}/FindPostgreSQL.cmake)
   endif (NOT HAVE_PostgreSQL)
-
+  
   ## -- Python -----------------------------------
-
+  
   if (NOT HAVE_PYTHON)
     include (${cr_cmake}/FindPython.cmake)
   endif (NOT HAVE_PYTHON)
-
+  
   ## -- ROOT -------------------------------------
-
+  
   if (NOT HAVE_ROOT)
     include (${cr_cmake}/FindROOT.cmake)
   endif (NOT HAVE_ROOT)
-  if (ROOT_INCLUDES)
-    include_directories (${ROOT_INCLUDES})
+  
+  if (HAVE_ROOT)
     add_definitions (-DHAVE_ROOT)
-  endif (ROOT_INCLUDES)
-
-  ## --- Tcl/Tk ----------------------------------  
-
+    include_directories (${ROOT_INCLUDES})
+  endif (HAVE_ROOT)
+  
+  ## --- Tcl -------------------------------------
+  
   if (NOT HAVE_TCL)
     include (${cr_cmake}/FindTCL.cmake)
   endif (NOT HAVE_TCL)
+
+  if (HAVE_TCL)
+    add_definitions (-DHAVE_TCL)
+    include_directories (${TCL_INCLUDES})
+  endif (HAVE_TCL)
+  
+  ## --- Tk --------------------------------------
+  
   if (NOT HAVE_TK)
     include (${cr_cmake}/FindTK.cmake)
   endif (NOT HAVE_TK)
+
+  if (HAVE_TK)
+    add_definitions (-DHAVE_TK)
+    include_directories (${TK_INCLUDES})
+  endif (HAVE_TK)
+  
   ## -- WCSLIB -----------------------------------
+
   if (NOT HAVE_WCSLIB) 
     include (${cr_cmake}/FindWCS.cmake)
   endif (NOT HAVE_WCSLIB)
-  if (WCSLIB_INCLUDES)
-    include_directories (${WCSLIB_INCLUDES})
-    add_definitions (-DHAVE_WCSLIB)
-  endif (WCSLIB_INCLUDES)
-  ## ---------------------------------------------
-elseif (cr_cmake)
-  message (SEND_ERROR "Unable to locate additional CMake scripts!")
-endif (cr_cmake)
 
-## Handle option: Activate support for Glish applications on/off
+endif (cr_cmake)
+  
+  ## Handle option: Activate support for Glish applications on/off
 
 # If there is no Glish on the system, there is no use in trying to activate
 # the support for Glish applications
@@ -332,6 +371,9 @@ else (CR_GLISH_SUPPORT)
 endif (CR_GLISH_SUPPORT)
 
 if (HAVE_CASA OR HAVE_CASACORE)
+  ## location of the header files
+  include_directories (${CASA_INCLUDES})
+  ## compiler flags
   add_definitions (
     -fPIC
     -ftemplate-depth-20
@@ -369,23 +411,7 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 ## ------------------------------------------------------------------------------
 ## Where to find the header files
 
-## this package
-
-include_directories (
-  ${CR_SOURCE_DIR}/implement
-  ${CR_SOURCE_DIR}/apps
-  ${CR_SOURCE_DIR}/test
-  )
-
 ## external components
-
-if (CASA_INCLUDES)
-  include_directories (${CASA_INCLUDES})
-endif (CASA_INCLUDES)
-
-if (CASACORE_INCLUDES)
-  include_directories (${CASACORE_INCLUDES})
-endif (CASACORE_INCLUDES)
 
 if (PGPLOT_INCLUDES)
   include_directories (${PGPLOT_INCLUDES})
@@ -402,21 +428,11 @@ if (HAVE_PostgreSQL)
   add_definitions (-DHAVE_POSTGRESQL=1)
 endif (HAVE_PostgreSQL)
 
-if (TCL_INCLUDES)
-  include_directories (${TCL_INCLUDES})
-endif (TCL_INCLUDES)
-
-if (TK_INCLUDES)
-  include_directories (${TK_INCLUDES})
-endif (TK_INCLUDES)
-
-## ------------------------------------------------------------------------------
-## Verbose level
-
-SET (CMAKE_VERBOSE_MAKEFILE 0)
-
-## ------------------------------------------------------------------------------
-## Installation
+## =============================================================================
+##
+##  Installation
+##
+## =============================================================================
 
 find_path (prefix release_area.txt
   PATHS
@@ -448,18 +464,34 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 # which point to directories outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-## ------------------------------------------------------------------------------
-## Subdirectories
+## =============================================================================
+##
+##  Configuration for the subdirectories
+##
+## =============================================================================
 
-add_subdirectory (implement)  # Sources to build the library
-add_subdirectory (apps)       # Applications
+## header files
+
+include_directories (
+  ${CR_SOURCE_DIR}/implement
+  ${CR_SOURCE_DIR}/apps
+  ${CR_SOURCE_DIR}/test
+  )
+
+## source code
+
+add_subdirectory (implement)
+add_subdirectory (apps)
 
 if (CR_BUILD_EXTERNAL_TESTS)
   add_subdirectory (test)
 endif (CR_BUILD_EXTERNAL_TESTS)
 
-## ------------------------------------------------------------------------------
-## Configuration summary
+## =============================================================================
+##
+##  Configuration summary
+##
+## =============================================================================
 
 message (STATUS "+============================================================+")
 message (STATUS "| CR-Tools: Summary of configuration settings                |")
@@ -502,3 +534,5 @@ message (STATUS " Support for Python ..... : ${CR_PYTHON_SUPPORT}")
 message (STATUS " Print debugging messages : ${CR_DEBUGGING_MESSAGES}")
 message (STATUS " Verbose configuration .. : ${CR_VERBOSE_CONFIGURE}")
 message (STATUS "+============================================================+")
+
+message (STATUS "CASA/casacore includes = ${CASA_INCLUDES}")
