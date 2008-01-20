@@ -12,7 +12,7 @@
 #include "MGFunction.h"
 
 #include <ext/algorithm>
-#include <num_util.h>
+#include <num_util/num_util.h>
 #include <cfloat>
 
 using namespace __gnu_cxx;

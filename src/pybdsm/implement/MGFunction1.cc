@@ -11,7 +11,7 @@
 #include "aux.h"
 #include "MGFunction.h"
 
-#include <num_util.h>
+#include <num_util/num_util.h>
 #include <cfloat>
 
 using namespace std;

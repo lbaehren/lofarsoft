@@ -4,7 +4,7 @@
 #include "aux.h"
 #include "stat.h"
 
-#include <num_util.h>
+#include <num_util/num_util.h>
 #include <cfloat>
 
 using namespace boost::python;

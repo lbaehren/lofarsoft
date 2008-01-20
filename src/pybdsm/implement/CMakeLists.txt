@@ -29,7 +29,7 @@ set_target_properties (_cbdsm PROPERTIES PREFIX ""
 
 if (APPLE)
   set_target_properties(_cbdsm PROPERTIES 
-      LINK_FLAGS "-bundle_loader ${PYTHON_EXECUTABLE}")
+      LINK_FLAGS "-undefined dynamic_lookup")
 endif (APPLE)
 
 

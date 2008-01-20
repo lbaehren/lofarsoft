@@ -4,7 +4,7 @@
 #include "MGFunction.h"
 #include "Fitters.h"
 
-#include <num_util.h>
+#include <num_util/num_util.h>
 
 using namespace boost::python;
 
