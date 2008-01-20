@@ -129,7 +129,7 @@ void MGFunction::fcn_partial_value(double *buf) const
   _update_fcache();
 
   fcache_it f = mm_fcn.begin();
-  unsigned didx, gidx;
+  unsigned didx, gidx = 0;
   for (didx = 0; didx < m_ndata; ++didx) {
     for (gidx = 0; gidx < m_gaul.size(); ++gidx, ++f)
       buf[gidx * m_ndata + didx] = f->val;
@@ -199,7 +199,7 @@ void MGFunction::fcn_transposed_gradient(double *buf) const
   _update_fcache();
 
   fcache_it f = mm_fcn.begin();
-  unsigned didx, gidx, ggidx;
+  unsigned didx, gidx = 0, ggidx = 0;
   for (didx = 0; didx < m_ndata; ++didx) {
     ggidx = 0;
     for (gidx = 0; gidx < m_gaul.size(); ++gidx, ++f) {
@@ -230,7 +230,7 @@ void MGFunction::fcn_diff_transposed_gradient(double *buf) const
   _update_fcache();
 
   fcache_it f = mm_fcn.begin();
-  unsigned didx, gidx, ggidx;
+  unsigned didx, gidx = 0, ggidx = 0;
   for (didx = 0; didx < m_ndata; ++didx) {
     ggidx = 0;
     for (gidx = 0; gidx < m_gaul.size(); ++gidx, ++f) {
@@ -262,7 +262,7 @@ void MGFunction::fcn_partial_gradient(double *buf) const
   double *chk = buf;
 
   fcache_it f = mm_fcn.begin();
-  unsigned didx, gidx, ggidx;
+  unsigned didx, gidx = 0, ggidx = 0;
   for (didx = 0; didx < m_ndata; ++didx) {
     ggidx = 0;
     for (gidx = 0; gidx < m_gaul.size(); ++gidx, ++f) {
