@@ -9,8 +9,8 @@ add_subdirectory (port3)
 include_directories (
   ${BOOST_INCLUDES}
   ${PYTHON_INCLUDES}
-  ${NUM_UTIL_INCLUDES}
-  ${PYTHON_INCLUDES}/../../lib/python2.5/site-packages/numpy/core/include)
+  ${NUMPY_INCLUDES}
+  ${NUM_UTIL_INCLUDES})
 
 set (cbdsm_wrapper_sources cbdsm_main.cc 
     stat.cc
