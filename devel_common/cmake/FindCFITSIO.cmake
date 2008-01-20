@@ -17,6 +17,7 @@ set (include_locations
   /usr/include
   /usr/local/include
   /sw/include
+  /dp/include
   /opt/casa/local/include
 )
 
@@ -27,6 +28,7 @@ set (lib_locations
   /usr/lib
   /usr/local/lib
   /sw/lib
+  /dp/lib
   /opt/casa/local/lib
 )
 
@@ -39,13 +41,6 @@ FIND_PATH (CFITSIO_INCLUDES
   PATH_SUFFIXES cfitsio
   NO_DEFAULT_PATH
   )
-
-## correct the include path (this could be used if we want to enforce include via
-## <cfitsio/fitsio.h>)
-
-#if (CFITSIO_INCLUDES)
-#  string (REGEX REPLACE cfitsio "" CFITSIO_INCLUDES ${CFITSIO_INCLUDES})
-#endif (CFITSIO_INCLUDES)
 
 ## -----------------------------------------------------------------------------
 ## Check for the parts of the library

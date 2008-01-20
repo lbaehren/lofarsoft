@@ -27,13 +27,15 @@ set (bin_locations
   ## local installation
   ../release/bin
   ../../release/bin
+  ../../../release/bin
   ## system-wide installation
-  /usr/bin
-  /usr/local/bin
-  /usr/X11R6/bin
   /opt/bin
   /opt/local/bin
   /sw/bin
+  /dp/bin
+  /usr/bin
+  /usr/local/bin
+  /usr/X11R6/bin
   )
 
 set (lib_locations
@@ -42,12 +44,13 @@ set (lib_locations
   ../../release/lib
   ../../../release/lib
   ## system-wide installation
-  /usr/lib
-  /usr/local/lib
-  /usr/X11R6/lib
   /opt/lib
   /opt/local/lib
   /sw/lib
+  /dp/lib
+  /usr/lib
+  /usr/local/lib
+  /usr/X11R6/lib
   )
 
 set (include_locations
@@ -55,17 +58,14 @@ set (include_locations
   ../release/include
   ../../release/include
   ../../../release/include
-  ../release/lib
-  ../../release/lib
-  ../../../release/lib
   ## system-wide installation
-  /usr/lib
-  /usr/include
-  /usr/local/include
-  /usr/X11R6/include
   /opt/include
   /opt/local/include
   /sw/include
+  /dp/include
+  /usr/include
+  /usr/local/include
+  /usr/X11R6/include
   )
 
 ## -----------------------------------------------------------------------------
@@ -76,7 +76,6 @@ foreach (python_version 2.6 2.5 2.4 2.3)
   
   find_program (PYTHON_EXECUTABLE python${python_version}
     PATHS ${bin_locations}
-    PATH_SUFFIXES python${python_version}
     NO_DEFAULT_PATH
     )
   
@@ -91,7 +90,7 @@ foreach (python_version 2.6 2.5 2.4 2.3)
   ## Check for the NUMPY header files
 
   find_path (NUMPY_INCLUDES numpy/arrayobject.h
-    PATHS ${include_locations}
+    PATHS ${lib_locations} ${include_locations}
     PATH_SUFFIXES
     python
     python${python_version}
@@ -99,14 +98,18 @@ foreach (python_version 2.6 2.5 2.4 2.3)
     NO_DEFAULT_PATH
     )
 
-  ## Check for the NUM_UTIL header files
+  ## Check for the NUM_UTIL header files and libraries
 
   find_path (NUM_UTIL_INCLUDES num_util/num_util.h
     PATHS ${include_locations}
     PATH_SUFFIXES
     python
     python${python_version}
-    python${python_version}/site-packages/numpy/core/include
+    NO_DEFAULT_PATH
+    )
+
+  find_library (NUM_UTIL_LIBRARIES num_util
+    PATHS ${lib_locations}
     NO_DEFAULT_PATH
     )
 
@@ -114,7 +117,7 @@ foreach (python_version 2.6 2.5 2.4 2.3)
 
   find_library (PYTHON_LIBRARIES python${python_version}
     PATHS ${lib_locations}
-    PATH_SUFFIXES python${python_version}/config
+    PATH_SUFFIXES . python${python_version}/config
     NO_DEFAULT_PATH
     )
 

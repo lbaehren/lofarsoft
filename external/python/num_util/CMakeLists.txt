@@ -69,17 +69,9 @@ endif (NUMPY_INCLUDES)
 # num_util.o  : num_util.cpp  num_util.h
 # simpletest.o  : num_util.o num_util.h simpletest.cpp
 
-include_directories (
-  ${NUM_UTIL_SOURCE_DIR}/../../../release/include
-  ${NUM_UTIL_SOURCE_DIR}/../../../release/lib/python2.5/site-packages/numpy/core/include
-  ${NUM_UTIL_SOURCE_DIR}/../../../release/lib/python2.4/site-packages/numpy/core/include
-  )
-
 add_definitions (-fPIC)
 
-add_library (num_util
-  num_util.cpp
-  )
+add_library (num_util STATIC num_util.cpp)
 
 ## -----------------------------------------------------------------------------
 ## Installation

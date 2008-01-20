@@ -26,6 +26,8 @@ set (include_locations
   /usr/local/include
   /opt/include
   /sw/include
+  /dp/include
+  /opt/local/include
   )
 
 set (lib_locations
@@ -38,6 +40,8 @@ set (lib_locations
   /usr/local/lib
   /opt/lib
   /sw/lib
+  /dp/lib
+  /opt/local/lib
   )
 
 ## -----------------------------------------------------------------------------
@@ -129,22 +133,13 @@ foreach (boost_version 1_34_1 1_33_1)
   ## Check for the header files ------------------
 
   ## <boost/config.hpp>
-  find_path (BOOST_INCLUDES config.hpp python.hpp
+  find_path (BOOST_INCLUDES boost/config.hpp boost/python.hpp
     PATHS ${include_locations}
     PATH_SUFFIXES
     boost-${boost_version}
-    boost-${boost_version}/boost
     boost
-    boost/boost
     NO_DEFAULT_PATH
     )
-  ## adjust the include path
-  if (BOOST_INCLUDES)
-    ## remove versioned include path
-    string (REPLACE include/boost-${boost_version}/boost include/boost-${boost_version} BOOST_INCLUDES ${BOOST_INCLUDES})
-    ## adjust path to enable e.g. <boost/python/def.hpp>
-    string (REPLACE include/boost include BOOST_INCLUDES ${BOOST_INCLUDES})
-  endif (BOOST_INCLUDES)
 
   ## Check for the module libraries --------------
   
@@ -161,8 +156,6 @@ foreach (boost_version 1_34_1 1_33_1)
       set (continue_search 0)
     endif (BOOST_${lib})
   endforeach (lib)
-  
-  ## Check for symbols in the library
   
 endforeach (boost_version)
 

@@ -23,36 +23,6 @@ include (CTest)
 option (WCSLIB_PYTHON_WRAPPER "Generate Python wrapper for WCSLIB?" 0)
 
 ## -----------------------------------------------------------------------------
-## Standard locations where to look for required components
-
-set (bin_locations
-  /usr/bin
-  /usr/local/bin
-  /sw/bin
-  ${WCSLIB_SOURCE_DIR}/../release/bin
-  ${WCSLIB_SOURCE_DIR}/../../release/bin
-  )
-
-set (include_locations
-  /usr/include
-  /usr/local/include
-  /Developer/SDKs/MacOSX10.4u.sdk/usr/include/c++/4.0.0
-  /sw/include
-  /sw/lib/gcc4.2/include/c++/4.2.1
-)
-
-set (lib_locations
-  /usr/lib
-  /usr/local/lib
-  /sw/lib
-)
-
-include (CheckFunctionExists)
-include (CheckIncludeFiles)
-include (CheckLibraryExists)
-include (CPack)
-
-## -----------------------------------------------------------------------------
 ## Check for required external libraries
 
 ## Locate additional CMake find scripts
@@ -88,14 +58,12 @@ endif (WCSLIB_cmake)
 
 ## libm -----------------------------------------
 
-find_library (libm m ${lib_locations})
+find_library (libm m)
 
 ## -----------------------------------------------------------------------------
 ## Check for additional tools which are required
 
-find_program (flex_bin flex
-  PATHS ${bin_locations}
-)
+find_program (flex_bin flex)
 
 ## -----------------------------------------------------------------------------
 ## Subdirectories

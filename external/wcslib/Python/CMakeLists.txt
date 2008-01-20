@@ -21,7 +21,7 @@ endif (BOOST_boost_python AND PYTHON_EXECUTABLE)
 ## Linking loadable modules on Mac is slightly more trickier
 if(APPLE)
   set_target_properties(wcslib PROPERTIES 
-      LINK_FLAGS "-bundle_loader ${PYTHON_EXECUTABLE}")
+      LINK_FLAGS "-undefined dynamic_lookup")
 endif(APPLE)
 
 ## -----------------------------------------------------------------------------
