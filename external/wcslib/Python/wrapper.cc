@@ -1,5 +1,6 @@
 #include <vector>
 #include <boost/python.hpp>
+#include <boost/python/detail/api_placeholder.hpp>
 #include <wcs.h>
 
 using namespace boost::python;

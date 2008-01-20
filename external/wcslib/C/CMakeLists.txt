@@ -238,6 +238,8 @@ include_directories (
   ${HAVE_STDLIB_H}
 )
 
+add_definitions (-fPIC)
+
 add_library (wcs ${WCSLIB_sources})
 target_link_libraries (wcs ${libm})
 

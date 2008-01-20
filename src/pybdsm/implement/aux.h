@@ -6,6 +6,7 @@
 */
 
 #include <boost/python.hpp>
+#include <boost/python/detail/api_placeholder.hpp>
 
 inline void py_assert(bool cond, PyObject *exc, const char *msg)
 {
