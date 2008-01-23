@@ -33,7 +33,7 @@ using blitz::shape;
 /*!
   \file tBlitz.cc
 
-  \ingroup Imaging
+  \ingroup CR_Imaging
 
   \brief A number of tests for working with the Blitz++ library
 

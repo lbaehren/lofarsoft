@@ -34,7 +34,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   /*!
     \class GeometricalPhase
     
-    \ingroup Imaging
+    \ingroup CR_Imaging
     
     \brief Brief description for class GeometricalPhase
     

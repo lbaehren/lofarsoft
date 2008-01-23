@@ -23,6 +23,9 @@
 
 #include <Data/HDF5Common.h>
 
+using std::cerr;
+using std::endl;
+
 /*!
   \file tHDF5Common.cc
 
@@ -51,10 +54,19 @@ int test_dal ()
 
 // -----------------------------------------------------------------------------
 
+/*
+  \brief Test retrieval of an attribute's identifier within the HDF5 file
+
+  \param file_id --
+  
+  \return nofFailedTests -- The number of failed tests within this function 
+*/
 int get_attribute_id (hid_t const &file_id)
 {
+  std::cout << "\n[get_attribute_id]\n" << endl;
+
   int nofFailedTests (0);
-   hid_t attribute_id (0);
+  hid_t attribute_id (0);
 
   /*
    * Get the ID of the station group
@@ -64,34 +76,36 @@ int get_attribute_id (hid_t const &file_id)
   
   if (group_id > 0) {
 
-    std::cout << "-- Retrieving IDs of group attributes..." << std::endl;
+    std::cout << "[1] Retrieving IDs of group attributes..." << endl;
 
     attribute_id = H5Aopen_name(group_id,"TELESCOPE");
-    std::cout << "--> TELESCOPE = " << attribute_id << std::endl;
+    std::cout << "-- TELESCOPE = " << attribute_id << endl;
 
     attribute_id = H5Aopen_name(group_id,"OBSERVER");
-    std::cout << "--> OBSERVER  = " << attribute_id << std::endl;
+    std::cout << "-- OBSERVER  = " << attribute_id << endl;
 
     attribute_id = H5Aopen_name(group_id,"PROJECT");
-    std::cout << "--> PROJECT   = " << attribute_id << std::endl;
+    std::cout << "-- PROJECT   = " << attribute_id << endl;
 
     attribute_id = H5Aopen_name(group_id,"OBS_ID");
-    std::cout << "--> OBS_ID    = " << attribute_id << std::endl;
+    std::cout << "-- OBS_ID    = " << attribute_id << endl;
 
     attribute_id = H5Aopen_name(group_id,"OBS_MODE");
-    std::cout << "--> OBS_MODE  = " << attribute_id << std::endl;
+    std::cout << "-- OBS_MODE  = " << attribute_id << endl;
 
     attribute_id = H5Aopen_name(group_id,"TRIG_TYPE");
-    std::cout << "--> TRIG_TYPE = " << attribute_id << std::endl;
+    std::cout << "-- TRIG_TYPE = " << attribute_id << endl;
 
     attribute_id = H5Aopen_name(group_id,"TRIG_OFST");
-    std::cout << "--> TRIG_OFST = " << attribute_id << std::endl;
+    std::cout << "-- TRIG_OFST = " << attribute_id << endl;
 
     attribute_id = H5Aopen_name(group_id,"TRIG_ANTS");
-    std::cout << "--> TRIG_ANTS = " << attribute_id << std::endl;
+    std::cout << "-- TRIG_ANTS = " << attribute_id << endl;
 
     attribute_id = H5Aopen_name(group_id,"BEAM_DIR");
-    std::cout << "--> BEAM_DIR  = " << attribute_id << std::endl;
+    std::cout << "-- BEAM_DIR  = " << attribute_id << endl;
+    CR::h5attribute_summary (std::cout,
+			     attribute_id);
   }
 
   /*
@@ -102,43 +116,43 @@ int get_attribute_id (hid_t const &file_id)
 
   if (dataset_id > 0) {
 
-    std::cout << "-- Retrieving IDs of dataset attributes..." << std::endl;
+    std::cout << "[2] Retrieving IDs of dataset attributes..." << endl;
 
     attribute_id = H5Aopen_name(dataset_id,"STATION_ID");
-    std::cout << "--> STATION_ID        = " << attribute_id << std::endl;
+    std::cout << "-- STATION_ID        = " << attribute_id << endl;
     
     attribute_id = H5Aopen_name(dataset_id,"RSP_ID");
-    std::cout << "--> RSP_ID            = " << attribute_id << std::endl;
+    std::cout << "-- RSP_ID            = " << attribute_id << endl;
     
     attribute_id = H5Aopen_name(dataset_id,"RCU_ID");
-    std::cout << "--> RCU_ID            = " << attribute_id << std::endl;
+    std::cout << "-- RCU_ID            = " << attribute_id << endl;
     
     attribute_id = H5Aopen_name(dataset_id,"SAMPLE_FREQ");
-    std::cout << "--> SAMPLE_FREQ       = " << attribute_id << std::endl;
+    std::cout << "-- SAMPLE_FREQ       = " << attribute_id << endl;
     
     attribute_id = H5Aopen_name(dataset_id,"TIME");
-    std::cout << "--> TIME              = " << attribute_id << std::endl;
+    std::cout << "-- TIME              = " << attribute_id << endl;
     
     attribute_id = H5Aopen_name(dataset_id,"SAMPLE_NR");
-    std::cout << "--> SAMPLE_NR         = " << attribute_id << std::endl;
+    std::cout << "-- SAMPLE_NR         = " << attribute_id << endl;
     
     attribute_id = H5Aopen_name(dataset_id,"SAMPLES_PER_FRAME");
-    std::cout << "--> SAMPLES_PER_FRAME = " << attribute_id << std::endl;
+    std::cout << "-- SAMPLES_PER_FRAME = " << attribute_id << endl;
     
     attribute_id = H5Aopen_name(dataset_id,"DATA_LENGTH");
-    std::cout << "--> DATA_LENGTH       = " << attribute_id << std::endl;
+    std::cout << "-- DATA_LENGTH       = " << attribute_id << endl;
     
     attribute_id = H5Aopen_name(dataset_id,"NYQUIST_ZONE");
-    std::cout << "--> NYQUIST_ZONE      = " << attribute_id << std::endl;
+    std::cout << "-- NYQUIST_ZONE      = " << attribute_id << endl;
     
     attribute_id = H5Aopen_name(dataset_id,"FEED");
-    std::cout << "--> FEED              = " << attribute_id << std::endl;
+    std::cout << "-- FEED              = " << attribute_id << endl;
     
     attribute_id = H5Aopen_name(dataset_id,"ANT_POSITION");
-    std::cout << "--> ANT_POSITION      = " << attribute_id << std::endl;
+    std::cout << "-- ANT_POSITION      = " << attribute_id << endl;
     
     attribute_id = H5Aopen_name(dataset_id,"ANT_ORIENTATION");
-    std::cout << "--> ANT_ORIENTATION   = " << attribute_id << std::endl;
+    std::cout << "-- ANT_ORIENTATION   = " << attribute_id << endl;
     
   }
 
@@ -152,56 +166,197 @@ int get_attribute_id (hid_t const &file_id)
 
   \param file_id -- Identifier for the HDF5 file
 
-  \return nofFailedTests -- The number of failed tests.
+  \return nofFailedTests -- The number of failed tests within this function.
 */
 int get_attributes (hid_t const &file_id)
 {
+  std::cout << "\n[get_attributes]\n" << endl;
+  
   int nofFailedTests (0);
 
   bool status (true);
-  std::string telescope ("UNDEFINED");
-  std::string observer ("UNDEFINED");
-  std::string project ("UNDEFINED");
 
   /*
    * Get the ID of the station group
    */
   hid_t group_id = H5Gopen (file_id,
 			    "Station001");
+  hid_t dataset_id = H5Dopen (file_id,
+			      "Station001/001002021");
   
   if (group_id > 0) {
-    std::cout << "[get_attributes] Successfully opened station group." << std::endl;
+    std::cout << "[1] Retrieve attributes of type std::string" << endl;
+
+    std::string telescope ("UNDEFINED");
+    std::string observer ("UNDEFINED");
+    std::string project ("UNDEFINED");
+    std::string observation_id ("UNDEFINED");
+    std::string observation_mode ("UNDEFINED");
+    
+    try {
+      status = CR::h5get_attribute (telescope,"TELESCOPE",group_id);
+    } catch (std::string message) {
+      cerr << message << endl;
+      nofFailedTests++;
+    }
+    
+    try {
+      status = CR::h5get_attribute (observer,"OBSERVER",group_id);
+    } catch (std::string message) {
+      cerr << message << endl;
+      nofFailedTests++;
+    }
+    
+    try {
+      status = CR::h5get_attribute (project,"PROJECT",group_id);
+    } catch (std::string message) {
+      cerr << message << endl;
+      nofFailedTests++;
+    }
+    
+    try {
+      status = CR::h5get_attribute (observation_id,"OBS_ID",group_id);
+    } catch (std::string message) {
+      cerr << message << endl;
+      nofFailedTests++;
+    }
+    
+    try {
+      status = CR::h5get_attribute (observation_mode,"OBS_MODE",group_id);
+    } catch (std::string message) {
+      cerr << message << endl;
+      nofFailedTests++;
+    }
+    
+    std::cout << "-- TELESCOPE        = " << telescope        << endl;
+    std::cout << "-- OBSERVER         = " << observer         << endl;
+    std::cout << "-- PROJECT          = " << project          << endl;
+    std::cout << "-- OBSERVATION_ID   = " << observation_id   << endl;
+    std::cout << "-- OBSERVATION_MODE = " << observation_mode << endl;
+
   } else {
-    std::cerr << "[get_attributes] Unable to open station group!" << std::endl;
-    return 1;
+    cerr << "[get_attributes] Unable to open station group!" << endl;
+    nofFailedTests++;
   }
 
-  /* [1] Retrieve attributes of type std::string */
-  
-  try {
-    status = CR::h5get_attribute (telescope,"TELESCOPE",group_id);
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
+  if (dataset_id > 0) {
+    std::cout << "[2] Retrieving attributes from dipole dataset ..." << endl;
+
+    uint station_id (0);
+    uint rsp_id (0);
+    uint rcu_id (0);
+    double sample_frequency (0);
+    uint time (0);
+    uint sample_number (0);
+    uint samples_per_frame (0);
+    uint data_length (0);
+    uint nyquist_zone (0);
+
+    try {
+      status = CR::h5get_attribute (station_id,"STATION_ID",dataset_id);
+    } catch (std::string message) {
+      cerr << message << endl;
+      nofFailedTests++;
+    }
+    
+    try {
+      status = CR::h5get_attribute (rsp_id,"RSP_ID",dataset_id);
+    } catch (std::string message) {
+      cerr << message << endl;
+      nofFailedTests++;
+    }
+    
+    try {
+      status = CR::h5get_attribute (rcu_id,"RCU_ID",dataset_id);
+    } catch (std::string message) {
+      cerr << message << endl;
+      nofFailedTests++;
+    }
+    
+    try {
+      status = CR::h5get_attribute (sample_frequency,"SAMPLE_FREQ",dataset_id);
+    } catch (std::string message) {
+      cerr << message << endl;
+      nofFailedTests++;
+    }
+    
+    try {
+      status = CR::h5get_attribute (time,"TIME",dataset_id);
+    } catch (std::string message) {
+      cerr << message << endl;
+      nofFailedTests++;
+    }
+    
+    try {
+      status = CR::h5get_attribute (sample_number,"SAMPLE_NR",dataset_id);
+    } catch (std::string message) {
+      cerr << message << endl;
+      nofFailedTests++;
+    }
+    
+    try {
+      status = CR::h5get_attribute (samples_per_frame,"SAMPLES_PER_FRAME",dataset_id);
+    } catch (std::string message) {
+      cerr << message << endl;
+      nofFailedTests++;
+    }
+    
+    try {
+      status = CR::h5get_attribute (data_length,"DATA_LENGTH",dataset_id);
+    } catch (std::string message) {
+      cerr << message << endl;
+      nofFailedTests++;
+    }
+    
+    try {
+      status = CR::h5get_attribute (nyquist_zone,"NYQUIST_ZONE",dataset_id);
+    } catch (std::string message) {
+      cerr << message << endl;
+      nofFailedTests++;
+    }
+    
+    std::cout << "-- STATION_ID        = " << station_id        << endl;
+    std::cout << "-- RSP_ID            = " << rsp_id            << endl;
+    std::cout << "-- RCU_ID            = " << rcu_id            << endl;
+    std::cout << "-- SAMPLE_FREQ       = " << sample_frequency  << endl;
+    std::cout << "-- TIME              = " << time              << endl;
+    std::cout << "-- SAMPLE_NUMBER     = " << sample_number     << endl;
+    std::cout << "-- SAMPLES_PER_FRAME = " << samples_per_frame << endl;
+    std::cout << "-- DATA_LENGTH       = " << data_length       << endl;
+    std::cout << "-- NYQUIST_ZONE      = " << nyquist_zone      << endl;
+    
+  } else {
+    cerr << "[get_attributes] Unable to open dipole dataset!" << endl;
     nofFailedTests++;
   }
   
-  try {
-    status = CR::h5get_attribute (telescope,"OBSERVER",group_id);
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*
+  \brief Test printing of a summary of an attribute's properties
+
+  \param file_id -- Identifier for the HDF5 file.
+
+  \return nofFailedTests -- The number of failed tests in this function.
+*/
+int attribute_summary (hid_t const &file_id)
+{
+  int nofFailedTests (0);
+
+  // Open group containing the attributes we want to test
+  hid_t group_id = H5Gopen (file_id,
+			    "Station001");
+  
+  if (group_id > 0) {
+
+    hid_t attribute_id;
+    
+  } else {
     nofFailedTests++;
   }
-  
-  try {
-    status = CR::h5get_attribute (telescope,"PROJECT",group_id);
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-  
-  std::cout << "-- TELESCOPE = " << telescope << std::endl;
-  std::cout << "-- OBSERVER  = " << observer  << std::endl;
-  std::cout << "-- PROJECT   = " << project   << std::endl;
   
   return nofFailedTests;
 }
@@ -218,10 +373,10 @@ int main (int argc,
     exit the program.
   */
   if (argc < 2) {
-    std::cerr << "[tHDF5Common] Too few parameters!" << endl;
-    std::cerr << "" << endl;
-    std::cerr << "  tHDF5Common <filename>" << endl;
-    std::cerr << "" << endl;
+    cerr << "[tHDF5Common] Too few parameters!" << endl;
+    cerr << "" << endl;
+    cerr << "  tHDF5Common <filename>" << endl;
+    cerr << "" << endl;
     return -1;
   }
 
@@ -234,11 +389,12 @@ int main (int argc,
 			   H5P_DEFAULT);
   
   if (file_id > 0) {
-    std::cout << "[tHDF5Common] Successfully opened HDF5 file." << std::endl;
+    std::cout << "[tHDF5Common] Successfully opened HDF5 file." << endl;
     nofFailedTests += get_attribute_id (file_id);
     nofFailedTests += get_attributes (file_id);
+    nofFailedTests += attribute_summary (file_id);
   } else {
-    std::cerr << "[tHDF5Common] Error opening HDF5 file!" << std::endl;
+    cerr << "[tHDF5Common] Error opening HDF5 file!" << endl;
     return -1;
   }
 

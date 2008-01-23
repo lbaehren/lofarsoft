@@ -76,12 +76,13 @@ int test_hdf5 (std::string const &filename)
 
   int nofFailedTests (0);
   char *h5filename = CR::string2char(filename);
+  std::string dataset_name ("001002021");
 
   herr_t h5error;
   hid_t file_id;
+  hid_t attribute_id;
   hid_t stationGroup_id;
   hid_t channelDataset_id;
-  int nofStationGroupAttributes (0);
   int nofDatasetAttributes (0);
 
   /*
@@ -105,8 +106,62 @@ int test_hdf5 (std::string const &filename)
     nofFailedTests++;
   }
 
+  /*
+   * Retrieve Attributes attached to the station group
+   */
+
+  std::string telescope ("UNDEFINED");
+  std::string observer ("UNDEFINED");
+  std::string project ("UNDEFINED");
+
   if (stationGroup_id > 0) {
-    nofStationGroupAttributes = H5Aget_num_attrs (stationGroup_id);
+
+    cout << "--> Reading in TELESCOPE attribute ..." << endl;
+    try {
+      // get the identifier for the attribute
+      attribute_id = H5Aopen_name(stationGroup_id,
+				  "TELESCOPE");
+      if (attribute_id > 0) {
+	// dataspace of the attribute
+	hid_t dataspace_id       = H5Aget_space (attribute_id);
+	bool dataspace_is_simple = H5Sis_simple(dataspace_id);
+	// datatype of the attribute
+	hid_t datatype_id        = H5Aget_type (attribute_id);
+	hsize_t datatype_size    = H5Tget_size (datatype_id);
+	bool datatype_is_integer = H5Tdetect_class (datatype_id,H5T_INTEGER);
+	bool datatype_is_float   = H5Tdetect_class (datatype_id,H5T_FLOAT);
+	bool datatype_is_string  = H5Tdetect_class (datatype_id,H5T_STRING);
+	// read the value of the attribute
+	if (H5Tget_class (datatype_id) == H5T_STRING) {
+	  char* data;
+	  data = new char[datatype_size];
+	  h5error = H5Aread(attribute_id,
+			    datatype_id,
+			    data);
+	  telescope = data;
+	}
+// 	herr_t H5Aread(hid_t attr_id, hid_t mem_type_id, void *buf );
+	// display atrribute properties
+	cout << "\t-- Attribute value         = " << telescope << endl;
+	cout << "\t-- Attribute ID            = " << attribute_id << endl;
+	cout << "\t-- Dataspace ID            = " << dataspace_id << endl;
+	cout << "\t-- Dataspace is simple?    = " << dataspace_is_simple << endl;
+	cout << "\t-- Datatype ID             = " << datatype_id  << endl;
+	cout << "\t-- Datatype size [Bytes]   = " << datatype_size << endl;
+	cout << "\t-- Datatype is H5T_INTEGER = " << datatype_is_integer << endl;
+	cout << "\t-- Datatype is H5T_FLOAT   = " << datatype_is_float << endl;
+	cout << "\t-- Datatype is H5T_STRING  = " << datatype_is_string << endl;
+	// release identifiers
+	H5Sclose (dataspace_id);
+	H5Tclose (datatype_id);
+      }
+      // Release identifiers
+      H5Aclose (attribute_id);
+    } catch (std::string message) {
+      std::cerr << message << std::endl;
+      nofFailedTests++;
+    }
+
   }
 
   /*
@@ -116,7 +171,7 @@ int test_hdf5 (std::string const &filename)
   if (stationGroup_id > 0) {
     cout << "--> Opening dipole dataset ..." << endl;
     channelDataset_id = H5Dopen (stationGroup_id,
-				 "001002021");
+				 dataset_name.c_str());
   } else {
     nofFailedTests++;
   }
@@ -128,71 +183,44 @@ int test_hdf5 (std::string const &filename)
   }
 
   /*
-   * Retrieve the attributes attachted to the dataset
+   * Retrieve the attributes attached to the dataset
    */
   
-  hid_t attribute_id;
+  bool status (true);
   uint station_id (0);
   uint rsp_id (0);
   uint rcu_id (0);
-  std::string feed;
+  std::string feed ("UNDEFINED");
   double *antenna_position;
   double *antenna_orientation;
   
   if (channelDataset_id > 0) {
 
     cout << "--> Reading in STATION_ID attribute ..." << endl;
-    attribute_id = H5Aopen_name(channelDataset_id,"STATION_ID");
-    // retrieve the value of the attribute
-    if (attribute_id > 0) {
-      CR::h5attribute_summary (std::cout,attribute_id);
-      // retrive value
-      h5error = H5Aread(attribute_id,
-			H5T_NATIVE_UINT,
-			&station_id);
-      // release the attribute ID
-      h5error = H5Aclose (attribute_id);
+    try {
+      status = CR::h5get_attribute (station_id,"STATION_ID",channelDataset_id);
+    } catch (std::string message) {
+      std::cerr << message << std::endl;
+      nofFailedTests++;
     }
 
     cout << "--> Reading in RSP_ID attribute ..." << endl;
-    attribute_id = H5Aopen_name(channelDataset_id,"RSP_ID");
-    // retrieve the value of the attribute
-    if (attribute_id > 0) {
-      CR::h5attribute_summary (std::cout,attribute_id);
-      // retrive value
-      h5error = H5Aread(attribute_id,
-			H5T_NATIVE_UINT,
-			&rsp_id);
-      // release the attribute ID
-      h5error = H5Aclose (attribute_id);
+    try {
+      status = CR::h5get_attribute (rsp_id,"RSP_ID",channelDataset_id);
+    } catch (std::string message) {
+      std::cerr << message << std::endl;
+      nofFailedTests++;
     }
 
     cout << "--> Reading in RCU_ID attribute ..." << endl;
-    attribute_id = H5Aopen_name(channelDataset_id,"RCU_ID");
-    // retrieve the value of the attribute
-    if (attribute_id > 0) {
-      CR::h5attribute_summary (std::cout,attribute_id);
-      // retrive value
-      h5error = H5Aread(attribute_id,
-			H5T_NATIVE_UINT,
-			&rcu_id);
-      // release the attribute ID
-      h5error = H5Aclose (attribute_id);
+    try {
+      status = CR::h5get_attribute (rcu_id,"RCU_ID",channelDataset_id);
+    } catch (std::string message) {
+      std::cerr << message << std::endl;
+      nofFailedTests++;
     }
     
-//     cout << "--> Reading in FEED attribute ..." << endl;
-//     attribute_id = H5Aopen_name(channelDataset_id,"FEED");
-//     // retrieve the value of the attribute
-//     if (attribute_id > 0) {
-//       CR::h5attribute_summary (std::cout,attribute_id);
-//       // retrive value
-//       h5error = H5Aread(attribute_id,
-// 			H5T_NATIVE_UINT,
-// 			&feed);
-//       // release the attribute ID
-//       h5error = H5Aclose (attribute_id);
-//     }
-    
+   
 //     cout << "--> Reading in ANTENNA_POSITION attribute ..." << endl;
 //     attribute_id = H5Aopen_name(channelDataset_id,"ANT_POSITION");
 //     // retrieve the value of the attribute
@@ -206,7 +234,7 @@ int test_hdf5 (std::string const &filename)
 //       h5error = H5Aclose (attribute_id);
 //     }
 
-//     cout << "--> Reading in ANTENNA_ORIENTATION attribute ..." << endl;
+//     cout << "--> Reading in ANTENH5Tget_class (atype)NA_ORIENTATION attribute ..." << endl;
 //     attribute_id = H5Aopen_name(channelDataset_id,"ANT_ORIENTATION");
 //     if (attribute_id > 0) {
 //       CR::h5attribute_summary (std::cout,attribute_id);
@@ -223,13 +251,14 @@ int test_hdf5 (std::string const &filename)
   cout << "-- File name            = " << filename                  << endl;
   cout << "-- File ID              = " << file_id                   << endl;
   cout << "-- Station group ID     = " << stationGroup_id           << endl;
-  cout << "--- # of attributes     = " << nofStationGroupAttributes << endl;
   cout << "-- Dipole data channel:   " << endl;
-  cout << "--- Dataset ID          = " << channelDataset_id         << endl;
-  cout << "--- nof. attributes     = " << nofDatasetAttributes      << endl;
-  cout << "--- Station ID          = " << station_id                << endl;
-  cout << "--- RSP ID              = " << rsp_id                    << endl;
-  cout << "--- RCU ID              = " << rcu_id                    << endl;
+  cout << "\t-- Dataset name       = " << dataset_name              << endl;
+  cout << "\t-- Dataset ID         = " << channelDataset_id         << endl;
+  cout << "\t-- nof. attributes    = " << nofDatasetAttributes      << endl;
+  cout << "\t-- Station ID         = " << station_id                << endl;
+  cout << "\t-- RSP ID             = " << rsp_id                    << endl;
+  cout << "\t-- RCU ID             = " << rcu_id                    << endl;
+  cout << "\t-- Feed type          = " << feed                      << endl;
   
   return nofFailedTests;
 }
@@ -514,11 +543,11 @@ int main (int argc,
 //   nofFailedTests += test_dal(filename);
 
   // Test for the constructor(s)
-  nofFailedTests += test_construction (filename);
+//   nofFailedTests += test_construction (filename);
   
-  if (nofFailedTests == 0) {
-    nofFailedTests += test_io (filename);
-  }
+//   if (nofFailedTests == 0) {
+//     nofFailedTests += test_io (filename);
+//   }
   
   return nofFailedTests;
 }

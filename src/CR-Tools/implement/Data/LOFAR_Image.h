@@ -33,7 +33,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class LOFAR_Image
     
-    \ingroup Data
+    \ingroup CR_Data
     
     \brief Brief description for class LOFAR_Image
     

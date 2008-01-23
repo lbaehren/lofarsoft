@@ -48,7 +48,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   /*!
     \class GeometricalDelay
     
-    \ingroup Imaging
+    \ingroup CR_Imaging
     
     \brief Geometrical delay for a set of antenna and source positions
     

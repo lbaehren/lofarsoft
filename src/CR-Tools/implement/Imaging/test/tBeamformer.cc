@@ -38,7 +38,7 @@ using CR::Beamformer;
 /*!
   \file tBeamformer.cc
 
-  \ingroup Imaging
+  \ingroup CR_Imaging
 
   \brief A collection of test routines for the Beamformer class
  

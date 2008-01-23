@@ -28,7 +28,7 @@ using CR::AntennaGain;  // Namespace usage
 /*!
   \file tAntennaGain.cc
 
-  \ingroup Imaging
+  \ingroup CR_Imaging
 
   \brief A collection of test routines for the AntennaGain class
  

@@ -24,7 +24,7 @@
 /*!
   \file Imaging.h
 
-  \defgroup Imaging CR-Pipeline: Imaging module
+  \defgroup CR_Imaging CR-Pipeline: Imaging module
   \ingroup CR
 
   \brief Imaging module for the CR-pipeline

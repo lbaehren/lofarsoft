@@ -39,7 +39,7 @@ using CR::SkymapGrid;
 /*!
   \file tSkymapGrid.cc
 
-  \ingroup Imaging
+  \ingroup CR_Imaging
 
   \brief A collection of test for SkymapGrid
 

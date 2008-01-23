@@ -29,7 +29,7 @@
 /*!
   \file tMDirection.cc
   
-  \ingroup Imaging
+  \ingroup CR_Imaging
   
   \brief A number of tests to work with the CASA MDirection classes
   

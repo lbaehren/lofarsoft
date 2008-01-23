@@ -37,7 +37,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class BeamModels
 
-    \ingroup Imaging
+    \ingroup CR_Imaging
     
     \brief Analytic expressions for beam-shape models
     

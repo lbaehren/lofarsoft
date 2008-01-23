@@ -34,7 +34,7 @@ using std::endl;
 /*!
   \file tGeometricalWeight.cc
 
-  \ingroup Imaging
+  \ingroup CR_Imaging
 
   \brief A collection of test routines for GeometricalWeight
  

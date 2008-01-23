@@ -33,7 +33,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   /*!
     \class GeometricalWeight
     
-    \ingroup Imaging
+    \ingroup CR_Imaging
     
     \brief Brief description for class GeometricalWeight
     

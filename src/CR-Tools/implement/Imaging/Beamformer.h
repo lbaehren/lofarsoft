@@ -144,7 +144,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class Beamformer
 
-    \ingroup Imaging
+    \ingroup CR_Imaging
     
     \brief Brief description for class Beamformer
     

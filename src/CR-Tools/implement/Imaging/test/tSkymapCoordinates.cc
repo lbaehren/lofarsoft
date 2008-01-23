@@ -40,7 +40,7 @@ using CR::SkymapCoordinates;
 /*!
   \file tSkymapCoordinates.cc
 
-  \ingroup Imaging
+  \ingroup CR_Imaging
 
   \brief A collection of test routines for CR::SkymapCoordinates
  

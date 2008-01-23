@@ -48,7 +48,7 @@ using CR::TimeFreq;
 /*!
   \file tSkymapper.cc
 
-  \ingroup Imaging
+  \ingroup CR_Imaging
 
   \brief A collection of test routines for Skymapper
  

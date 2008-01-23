@@ -24,6 +24,7 @@
 #ifndef LOFAR_DIPOLEDATASET_H
 #define LOFAR_DIPOLEDATASET_H
 
+#include <string>
 #include <Data/HDF5Common.h>
 
 namespace CR { // Namespace CR -- begin
@@ -284,7 +285,7 @@ namespace CR { // Namespace CR -- begin
     bool get_attribute (std::vector<double> &value,
 			std::string const &name,
 			hid_t const &locationID);
-    bool get_attribute (std::vector<string> &value,
+    bool get_attribute (std::vector<std::string> &value,
 			std::string const &name,
 			hid_t const &locationID);
     

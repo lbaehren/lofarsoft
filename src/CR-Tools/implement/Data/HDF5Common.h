@@ -29,7 +29,7 @@
 #include <string>
 #include <vector>
 
-#include <dal/dal.h>
+#include <hdf5/H5LT.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -69,12 +69,27 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
+  /*!
+    \brief Provide a summary of an attribute's internal structure
+
+    \param os           -- Output stream to which the summary is written
+    \param attribute_id -- 
+  */
   void h5attribute_summary (std::ostream &os,
 			    hid_t const &attribute_id);
 
+  /*!
+    \brief Provide a summary of an attribute's internal structure
+
+    \param os          -- Output stream to which the summary is written
+    \param name        -- Name of the attribute, as which it is attached to
+           another structure within the file
+    \param location_id -- Identifier of the structure within the file, to which 
+           the attribut is attached to.
+  */
   void h5attribute_summary (std::ostream &os,
 			    std::string const &name,
-			    hid_t const &attribute_id);
+			    hid_t const &location_id);
 
   //@{
   /*!
@@ -123,6 +138,12 @@ namespace CR { // Namespace CR -- begin
   bool h5get_attribute (std::string &value,
 			std::string const &name,
 			hid_t const &location_id);
+
+  // ============================================================================
+  //
+  //  Dataspaces and Datatypes
+  //
+  // ============================================================================
 
 } // Namespace CR -- end
 

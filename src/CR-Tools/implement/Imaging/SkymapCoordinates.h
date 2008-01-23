@@ -68,7 +68,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class SkymapCoordinates
     
-    \ingroup Imaging
+    \ingroup CR_Imaging
     
     \brief Handling of the various coordinates involved in the creation of a skymap
     

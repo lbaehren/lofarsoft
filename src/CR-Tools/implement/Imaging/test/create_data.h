@@ -36,7 +36,7 @@ using CR::TimeFreq;
 /*!
   \file create_data.h
 
-  \ingroup Imaging
+  \ingroup CR_Imaging
 
   \brief A collection of routines to generate data for the various test programs
  

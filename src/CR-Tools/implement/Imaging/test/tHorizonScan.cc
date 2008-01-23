@@ -31,7 +31,7 @@
 /*!
   \file tHorizonScan.cc
 
-  \ingroup Imaging
+  \ingroup CR_Imaging
 
   \brief A collection of test routines for HorizonScan
  

@@ -28,7 +28,7 @@ using CR::Feed;
 /*!
   \file tFeed.cc
 
-  \ingroup Imaging
+  \ingroup CR_Imaging
 
   \brief A collection of test routines for Feed
  

@@ -37,7 +37,7 @@
 /*!
   \class SkymapQuantity
 
-  \ingroup Skymap
+  \ingroup CR_Imaging
 
   \brief Brief description for class SkymapQuantity
 

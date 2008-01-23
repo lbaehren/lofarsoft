@@ -35,7 +35,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   /*!
     \class HorizonScan
     
-    \ingroup Imaging
+    \ingroup CR_Imaging
     
     \brief Wrapper for scanning locations on the horizon as function of frequency
     

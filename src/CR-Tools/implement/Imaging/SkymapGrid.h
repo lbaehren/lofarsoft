@@ -65,7 +65,7 @@ namespace CR {  // Namespace CR -- begin
 /*!
   \class SkymapGrid
 
-  \ingroup Imaging
+  \ingroup CR_Imaging
 
   \brief (Regular) Coordinate grids for the creation of a Skymap.
 

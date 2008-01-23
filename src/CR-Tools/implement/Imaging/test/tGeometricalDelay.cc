@@ -46,7 +46,7 @@ const double lightspeed = 299792458;
 /*!
   \file tGeometricalDelay.cc
 
-  \ingroup Imaging
+  \ingroup CR_Imaging
 
   \brief A collection of test routines for GeometricalDelay
  

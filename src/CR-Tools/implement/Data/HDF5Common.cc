@@ -23,6 +23,9 @@
 
 #include <Data/HDF5Common.h>
 
+using std::cout;
+using std::endl;
+
 namespace CR { // Namespace CR -- begin
   
   // ============================================================================
@@ -34,32 +37,40 @@ namespace CR { // Namespace CR -- begin
   void h5attribute_summary (std::ostream &os,
 			    hid_t const &attribute_id)
   {
-    hid_t dataspace_id = H5Aget_space(attribute_id);
-    hid_t datatype_id  = H5Aget_type(attribute_id);
-    hssize_t nofSelectedElements (0);
-    int dataspaceDimensions (0);
+    /*
+     * Dataspace of the attribute
+     */
+    hid_t dataspace_id       = H5Aget_space (attribute_id);
+    bool dataspace_is_simple = H5Sis_simple(dataspace_id);
+    
+    cout << "\t-- Dataspace ID            = " << dataspace_id << endl;
+    cout << "\t-- Dataspace is simple?    = " << dataspace_is_simple << endl;
+    
+    H5Sclose (dataspace_id);
+
+    /*
+     * Datatype of the attribute
+     */
+    hid_t datatype_id        = H5Aget_type (attribute_id);
+    hsize_t datatype_size    = H5Tget_size (datatype_id);
+    bool datatype_is_integer = H5Tdetect_class (datatype_id,H5T_INTEGER);
+    bool datatype_is_float   = H5Tdetect_class (datatype_id,H5T_FLOAT);
+    bool datatype_is_string  = H5Tdetect_class (datatype_id,H5T_STRING);
+    
+    cout << "\t-- Datatype ID             = " << datatype_id  << endl;
+    cout << "\t-- Datatype size [Bytes]   = " << datatype_size << endl;
+    cout << "\t-- Datatype is H5T_INTEGER = " << datatype_is_integer << endl;
+    cout << "\t-- Datatype is H5T_FLOAT   = " << datatype_is_float << endl;
+    cout << "\t-- Datatype is H5T_STRING  = " << datatype_is_string << endl;
+
+    /*
+     * Dataspace of the attribute
+     */
+    int rank (0);
     hsize_t *dimensions;
     hsize_t *maxDimensions;
-    
-    /* Probe the attribute's dataspace */
-    if (dataspace_id > 0) {
-      nofSelectedElements = H5Sget_select_npoints (dataspace_id);
-      dataspaceDimensions = H5Sget_simple_extent_dims (dataspace_id,
-						       dimensions,
-						       maxDimensions);
-    }
-    
-    os << "\tAttribute ID              = " << attribute_id << endl;
-    os << "\tDataspace ID              = " << dataspace_id << endl;
-    os << "\t-- nof. selected elements = " << nofSelectedElements << endl;
-    os << "\t-- Dataspace dimensions   = " << dataspaceDimensions << endl;
-    if (dataspaceDimensions > 0) {
-      os << "[ ";
-      for (int n(0);n<dataspaceDimensions; n++) {
-	os << dimensions[n] << " ";
-      }
-    }
-    cout << "\tDatatype ID               = " << datatype_id  << endl;    
+
+    H5Tclose (datatype_id);
   }
   
   // ----------------------------------------------------- h5get_attribute (uint)
@@ -127,6 +138,7 @@ namespace CR { // Namespace CR -- begin
 			std::string const &name,
 			hid_t const &locationID)
   {
+    bool status (true);
     hid_t attribute_id (0);
     
     // get the identifier for the attribute
@@ -134,14 +146,17 @@ namespace CR { // Namespace CR -- begin
 				name.c_str());
 
     if (attribute_id > 0) {
-      return h5get_attribute (value,
-			      attribute_id);
+      status = h5get_attribute (value,
+				attribute_id);
+      H5Aclose (attribute_id);
     } else {
       std::cerr << "[h5get_attribute] No valid ID for attribute "
 		<< name 
 		<< std::endl;
-      return false;
+      status = false;
     }
+
+    return status;
   }  
 
   // --------------------------------------------------- h5get_attribute (double)
@@ -168,6 +183,7 @@ namespace CR { // Namespace CR -- begin
 			std::string const &name,
 			hid_t const &locationID)
   {
+    bool status (true);
     hid_t attribute_id (0);
     
     // get the identifier for the attribute
@@ -175,14 +191,17 @@ namespace CR { // Namespace CR -- begin
 				name.c_str());
     
     if (attribute_id > 0) {
-      return h5get_attribute (value,
-			      attribute_id);
+      status = h5get_attribute (value,
+				attribute_id);
+      H5Aclose (attribute_id);
     } else {
       std::cerr << "[h5get_attribute] No valid ID for attribute "
 		<< name 
 		<< std::endl;
-      return false;
+      status = false;
     }
+
+    return status;
   }  
 
   // --------------------------------------------------- h5get_attribute (string)
@@ -190,20 +209,36 @@ namespace CR { // Namespace CR -- begin
   bool h5get_attribute (std::string &value,
 			hid_t const &attribute_id)
   {
+    bool status (true);
     herr_t h5error (0);
-    char *buffer;
+    hid_t dataspace_id = H5Aget_space (attribute_id);
+    hid_t datatype_id  = H5Aget_type (attribute_id);
     
-    h5error = H5Aread(attribute_id,
-		      H5T_NATIVE_CHAR,
-		      buffer);
-
-    if (h5error == 0) {
-//       value = buffer;
-      return true;
+    if (datatype_id > 0) {
+      if (H5Tget_class (datatype_id) == H5T_STRING) {
+	char* data;
+	hsize_t datatype_size = H5Tget_size (datatype_id);
+	data = new char[datatype_size];
+	h5error = H5Aread(attribute_id,
+			  datatype_id,
+			  data);
+	if (h5error == 0) {
+	  value = data;
+	} else {
+	  value  = "";      
+	  status = false;
+	}
+      }
     } else {
-      value = "";
-      return false;
+      value  = "";      
+      status = false;
     }
+    
+    // Release identifiers
+    H5Tclose (datatype_id);
+    H5Sclose (dataspace_id);
+
+    return status;
   }
   
   // --------------------------------------------------- h5get_attribute (string)
@@ -212,6 +247,7 @@ namespace CR { // Namespace CR -- begin
 			std::string const &name,
 			hid_t const &locationID)
   {
+    bool status (true);
     hid_t attribute_id (0);
     
     // get the identifier for the attribute
@@ -219,15 +255,25 @@ namespace CR { // Namespace CR -- begin
 				name.c_str());
     
     if (attribute_id > 0) {
-      return h5get_attribute (value,
-			      attribute_id);
+      status = h5get_attribute (value,
+				attribute_id);
+      H5Aclose(attribute_id);
     } else {
       std::cerr << "[h5get_attribute] No valid ID for attribute "
 		<< name 
 		<< std::endl;
-      return false;
+      status = false;
     }
+    
+    return status;
   }  
 
+  // ============================================================================
+  //
+  //  Dataspaces and Datatypes
+  //
+  // ============================================================================
+
+  
 
 } // Namespace CR -- end

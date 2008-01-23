@@ -37,7 +37,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class AntennaGain
     
-    \ingroup Imaging
+    \ingroup CR_Imaging
     
     \brief Brief description for class AntennaGain
     

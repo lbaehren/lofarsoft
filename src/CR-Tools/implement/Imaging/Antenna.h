@@ -42,7 +42,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class Antenna
 
-    \ingroup Imaging
+    \ingroup CR_Imaging
     
     \brief Brief description for class Antenna
     
