@@ -38,7 +38,7 @@ if (NOT CR_VERBOSE_CONFIGURE)
   set (BLITZ_FIND_QUIETLY 1)
   set (CASA_FIND_QUIETLY 1)
   set (CASACORE_FIND_QUIETLY 1)
-  set (CFITSIO_FIND_QUIETLY 1)
+ set (CFITSIO_FIND_QUIETLY 1)
   set (DAL_FIND_QUIETLY 1)
   set (FFTW3_FIND_QUIETLY 1)
   set (G2C_FIND_QUIETLY 1)
@@ -243,10 +243,10 @@ if (cr_cmake)
     include (${cr_cmake}/FindLAPACK.cmake)
   endif (NOT HAVE_LAPACK)
   
-  if (HAVE_LAPACK)
+  if (LAPACK_INCLUDES)
     add_definitions (-DHAVE_LAPACK)
     include_directories (${LAPACK_INCLUDES})
-  endif (HAVE_LAPACK)
+  endif (LAPACK_INCLUDES)
   
   ## -- PGPlot -----------------------------------
   

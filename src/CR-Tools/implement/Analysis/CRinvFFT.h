@@ -36,10 +36,6 @@
 #include <Analysis/SecondStagePipeline.h>
 #include <Calibration/CalTableInterpolater.h>
 #include <Imaging/GeometricalWeight.h>
-// --> needs to be replaced by GeometricalDelay
-#ifdef HAVE_GLISH
-#include <ApplicationSupport/Beamformer.h>
-#endif
 
 #include <casa/namespace.h>
 
@@ -90,11 +86,6 @@ namespace CR { // Namespace CR -- begin
 
     //! For which event (observation time) was the antenna position data cached
     uInt posCachedDate_p;   
-
-#ifdef HAVE_GLISH
-    //! local instance of a beamformer object
-    LOPES::Beamformer bf_p;
-#endif
 
     //! Interpolater for the antenna gain
     CalTableInterpolater<casa::Double> *InterAntGain_p;
