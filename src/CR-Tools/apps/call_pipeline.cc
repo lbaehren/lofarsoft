@@ -21,96 +21,553 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Analysis/analyseLOPESevent.h>
+#include <iostream>
+#include <string>
+#include <fstream>
+
+#include "Analysis/analyseLOPESevent.h"
 
 using CR::analyseLOPESevent;
-
 using CR::LopesEventIn;
 
 /*!
-  \file tanalyseLOPESevent.cc
+  \file call_pipeline.cc
 
   \ingroup apps
 
-  \brief Calls the LOPES analysis pipline in  "analyseLOPESevent"
+  \brief Calls the LOPES analysis pipeline in "analyseLOPESevent"
  
   \author Frank Schröder
  
-  \date 2007/04/12
+  \date 2008/23/01
+
+  <h3>Motivation</h3>
+
+  The aim of this short application is to provide a tool which
+  makes the LOPES-analysis-pipeline usable without changing any
+  code. Any information about the LOPES-events you want to analyse
+  and any configurations how to analyse the should be provide
+  be external, humand readable files.
+
+  <h3>Prerequisites</h3>
+
+  You need at least one event list file of the following format:
+
+
+  Example event list
+
+  filename(event) azimuth[°] zenith[°] distance(radius of curvature)[m] core_x[m] core_y[m]
+  =========================================================================================
+  /home/schroeder/data/lopesstar/first.event 354.55215 63.882182 2750 8.6060886 -368.0933
+  /home/schroeder/data/lopesstar/second.event 354.55215 63.882182 2750 8.6060886 -368.0933
+  /home/schroeder/data/lopesstar/third.event 354.55215 63.882182 2750 8.6060886 -368.0933
+
+
+  If you don't want to process the events in the default manner
+  you can also provide a config file of the following format:
+
+
+  example configuration file
+
+  ===================
+  caltablepath = /home/horneff/lopescasa/data/LOPES/LOPES-CalTable
+  RotatePos = true
+  GeneratePlots = true
+  verbose = true
+  simplexFit = true
+  doTVcal = default
+  flagged = 10101
+  flagged = 10102
+
+  <h3>Example</h3>
+
+  \verbatim
+  call_pipeline eventlist.txt configs.txt
+  \endverbatim
+
 */
 
 
 
 // -----------------------------------------------------------------------------
 
-int main ()
+int main (int argc, char *argv[])
 {
-  std::cout << "\nStarting Program \"call_pipline\".\n\n" << std::endl;
-  
+  string eventfilelistname, configfilename;	// Files to be read in
+  bool configfile_exists = false;		// Set to true if name of config file was passed as parameter
+
   try {
+    std::cout << "\nStarting Program \"call_pipline\".\n\n" << std::endl;
+
+    // Check correct number of arguments (1 or 2 + program name = 2 or 3)
+    if ((argc < 2) || (argc >3))
+    {
+      std::cerr << "Wrong number of arguments in call of \"call_pipeline\". The correct format is:\n";
+      std::cerr << "call_pipeline eventfilelist [configfile]\n" << std::endl;
+      return 1;				// Exit the program
+    }
+
+    // First argument should be the name of the file containing the list of event files
+    eventfilelistname.assign(argv[1]);
+    std::cout << "File containing list of event files: " << eventfilelistname << std::endl;
+
+    // If a second argument is available it sould contain the name of the config file
+    if (argc == 3) 
+    {
+      configfilename.assign(argv[2]);
+      configfile_exists = true;
+      std::cout << "Reading config data from file: " << configfilename << std::endl;
+    }
+
+
+    // Set default configuration values for the pipeline
+    bool generatePlots = true;		// the plot prefix will be the name of the event file
+    bool RotatePos = true; 		// should be true if coordinates are given in KASKADE frame
+    bool verbose = true;
+    bool simplexFit = true;
+    int doTVcal = -1;			// 1: yes, 0: no, -1: use default	
+    vector<Int> flagged;		// use of STL-vector instead of CASA-vector due to support of push_back()
+    string caltablepath = "/home/horneff/lopescasa/data/LOPES/LOPES-CalTable";
+
+
+    // Open config file if passed by programm call
+    if (configfile_exists)
+    {
+      ifstream configfile;
+      configfile.open (configfilename.c_str(), ifstream::in);
+
+      // check if file could be opened
+      if (!(configfile.is_open()))
+      {
+        std::cerr << "Failed to open file \"" << configfilename <<"\"." << std::endl;
+        return 1;		// exit program
+      }
+
+      // look for the beginnig of the config data (after a line containing only and at least three '-' or '='	
+      string temp_read;
+      bool configs_found = false;
+      while ((configs_found == false) && (configfile.good()))
+      {
+	configfile >> temp_read;
+        if ((temp_read.find("---") != string::npos) || (temp_read.find("===") != string::npos))
+        {
+	  configs_found = true;
+        }
+      }
+	
+      // print warning if no configs were found and countinue program using default values
+      if (configs_found == false)
+      {
+        configfile.close();  // close file
+        std::cerr << "\nWarning!";
+        std::cerr << "\nNo config information was foung in file \"" << configfilename <<"\".\n" ;
+        std::cerr << "Use the following file format ('=' seperated by spaces): \n\n";
+        std::cerr << "some lines of text\n";
+        std::cerr << "===================================\n";
+        std::cerr << "caltablepath = /home/horneff/lopescasa/data/LOPES/LOPES-CalTable\n";
+        std::cerr << "RotatePos = true\n";
+        std::cerr << "GeneratePlots = true\n";
+        std::cerr << "verbose = true\n";
+        std::cerr << "simplexFit = true\n";
+        std::cerr << "doTVcal = default\n";
+        std::cerr << "flagged = 10101\n";
+        std::cerr << "flagged = 10102\n";
+        std::cerr << "... \n";
+        std::cerr << "\nProgram will continue using default configuration values." << std::endl;
+      }
+      else while(configfile.good()) // read configurations if configs_found
+      {
+        string keyword, value, equal_token;
+
+        // read in first keyword, then a token that should be '=' and afterward the value for the keyword
+        if (configfile.good()) configfile >> keyword;
+        if (configfile.good()) configfile >> equal_token;
+        if (configfile.good()) configfile >> value;
+
+        // check if syntax ("=") is correct		
+        if (equal_token.compare("=") != 0)
+        {
+          std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+          std::cerr << "No '=' was found after \"" << keyword << "\".\n";
+          std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+        }
+
+        // check keywords an set appropriate configurations
+
+        if ( (keyword.compare("generateplots")==0) || (keyword.compare("GeneratePlots")==0) ||
+             (keyword.compare("generatePlots")==0))
+        {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
+	  {
+	    generatePlots = true;
+	    std::cout << "GeneratePlots set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
+	  {
+	    generatePlots = false;
+	    std::cout << "GeneratePlots set to 'false'.\n";
+          } else
+          {
+            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "GeneratePlots must be either 'true' or 'false'.\n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+        }	
+
+        if ( (keyword.compare("rotatepos")==0) || (keyword.compare("RotatePos")==0))
+        {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
+	  {
+	    RotatePos = true;
+	    std::cout << "RotatePos set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
+	  {
+	    RotatePos = false;
+	    std::cout << "RotatePos set to 'false'.\n";
+          } else
+          {
+            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "RotatePos must be either 'true' or 'false'.\n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+        }	
+
+        if ( (keyword.compare("verbose")==0) || (keyword.compare("Verbose")==0))
+        {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
+	  {
+	    verbose = true;
+	    std::cout << "Verbose set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
+	  {
+	    verbose = false;
+	    std::cout << "Verbose set to 'false'.\n";
+	  } else
+          {
+            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "Verbose must be either 'true' or 'false'.\n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+        }	
+
+        if ( (keyword.compare("simplexfit")==0) || (keyword.compare("simplexFit")==0) || (keyword.compare("SimplexFit")==0))
+        {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
+	  {
+	    simplexFit = true;
+	    std::cout << "SimplexFit set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
+	  {
+	    simplexFit = false;
+	    std::cout << "SimplexFit set to 'false'.\n";
+	  } else
+          {
+            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "SimplexFit must be either 'true' or 'false'.\n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+	}
+      
+        if ( (keyword.compare("dotvcal")==0) || (keyword.compare("doTVcal")==0) || (keyword.compare("DoTVCal")==0))
+        {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
+	  {
+	    doTVcal = 1;
+	    std::cout << "doTVcal set to 1 (TV calibration will be done.).\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
+	  {
+	    doTVcal = 0;
+	    std::cout << "doTVcal set to 0 (TV calibration won't be done.).\n";
+	  } else
+	  if ( (value.compare("default")==0) || (value.compare("Default")==0) || (value.compare("-1")==0) )
+	  {
+	    doTVcal = -1;
+	    std::cout << "doTVcal set to -1 (default will be used).\n";
+	  } else
+          {
+            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "doTVcal must be either -1 ('default'), 0 ('false') or 1 ('true').\n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+        }
+
+	// flagg antennas
+        if ( (keyword.compare("flagged")==0) || (keyword.compare("Flagged")==0))
+        {
+          if ( (value.compare("10101")==0) || (value.compare("1")==0) )
+	  {
+	    flagged.push_back(10101);
+	    std::cout << "Flagged antenna 1 (id = 10101).\n";
+	  } else
+          if ( (value.compare("10102")==0) || (value.compare("2")==0) )
+	  {
+	    flagged.push_back(10102);
+	    std::cout << "Flagged antenna 2 (id = 10102).\n";
+	  } else
+          if ( (value.compare("10201")==0) || (value.compare("3")==0) )
+	  {
+	    flagged.push_back(10201);
+	    std::cout << "Flagged antenna 3 (id = 10201).\n";
+	  } else
+          if ( (value.compare("10202")==0) || (value.compare("4")==0) )
+	  {
+	    flagged.push_back(10202);
+	    std::cout << "Flagged antenna 4 (id = 10202).\n";
+	  } else
+          if ( (value.compare("20101")==0) || (value.compare("5")==0) )
+	  {
+	    flagged.push_back(20101);
+	    std::cout << "Flagged antenna 5 (id = 20101).\n";
+	  } else
+          if ( (value.compare("20102")==0) || (value.compare("6")==0) )
+	  {
+	    flagged.push_back(20102);
+	    std::cout << "Flagged antenna 6 (id = 20102).\n";
+	  } else
+          if ( (value.compare("20201")==0) || (value.compare("7")==0) )
+	  {
+	    flagged.push_back(20201);
+	    std::cout << "Flagged antenna 7 (id = 20201).\n";
+	  } else
+          if ( (value.compare("20202")==0) || (value.compare("8")==0) )
+	  {
+	    flagged.push_back(20202);
+	    std::cout << "Flagged antenna 8 (id = 20202).\n";
+	  } else
+          if ( (value.compare("30101")==0) || (value.compare("9")==0) )
+	  {
+	    flagged.push_back(30101);
+	    std::cout << "Flagged antenna 9 (id = 30101).\n";
+	  } else
+          if ( (value.compare("30102")==0) || (value.compare("10")==0) )
+	  {
+	    flagged.push_back(30102);
+	    std::cout << "Flagged antenna 10 (id = 30102).\n";
+	  } else
+          if ( (value.compare("40101")==0) || (value.compare("11")==0) )
+	  {
+	    flagged.push_back(40101);
+	    std::cout << "Flagged antenna 11 (id = 40101).\n";
+	  } else
+          if ( (value.compare("40102")==0) || (value.compare("12")==0) )
+	  {
+	    flagged.push_back(40102);
+	    std::cout << "Flagged antenna 12 (id = 40102).\n";
+	  } else
+          if ( (value.compare("40201")==0) || (value.compare("13")==0) )
+	  {
+	    flagged.push_back(40201);
+	    std::cout << "Flagged antenna 13 (id = 40201).\n";
+	  } else
+          if ( (value.compare("40202")==0) || (value.compare("14")==0) )
+	  {
+	    flagged.push_back(40202);
+	    std::cout << "Flagged antenna 14 (id = 40202).\n";
+	  } else
+          if ( (value.compare("50101")==0) || (value.compare("15")==0) )
+	  {
+	    flagged.push_back(50101);
+	    std::cout << "Flagged antenna 15 (id = 50101).\n";
+	  } else
+          if ( (value.compare("50102")==0) || (value.compare("16")==0) )
+	  {
+	    flagged.push_back(50102);
+	    std::cout << "Flagged antenna 16 (id = 50102).\n";
+	  } else
+          if ( (value.compare("50201")==0) || (value.compare("17")==0) )
+	  {
+	    flagged.push_back(50201);
+	    std::cout << "Flagged antenna 17 (id = 50201).\n";
+	  } else
+          if ( (value.compare("50202")==0) || (value.compare("18")==0) )
+	  {
+	    flagged.push_back(50202);
+	    std::cout << "Flagged antenna 18 (id = 50202).\n";
+	  } else
+          if ( (value.compare("60101")==0) || (value.compare("19")==0) )
+	  {
+	    flagged.push_back(60101);
+	    std::cout << "Flagged antenna 19 (id = 60101).\n";
+	  } else
+          if ( (value.compare("60102")==0) || (value.compare("20")==0) )
+	  {
+	    flagged.push_back(60102);
+	    std::cout << "Flagged antenna 20 (id = 60102).\n";
+	  } else
+          if ( (value.compare("70101")==0) || (value.compare("21")==0) )
+	  {
+	    flagged.push_back(70101);
+	    std::cout << "Flagged antenna 21 (id = 70101).\n";
+	  } else
+          if ( (value.compare("70102")==0) || (value.compare("22")==0) )
+	  {
+	    flagged.push_back(70102);
+	    std::cout << "Flagged antenna 22 (id = 70102).\n";
+	  } else
+          if ( (value.compare("70201")==0) || (value.compare("23")==0) )
+	  {
+	    flagged.push_back(70201);
+	    std::cout << "Flagged antenna 23 (id = 70201).\n";
+	  } else
+          if ( (value.compare("70202")==0) || (value.compare("24")==0) )
+	  {
+	    flagged.push_back(70202);
+	    std::cout << "Flagged antenna 24 (id = 70202).\n";
+	  } else
+          if ( (value.compare("80101")==0) || (value.compare("25")==0) )
+	  {
+	    flagged.push_back(80101);
+	    std::cout << "Flagged antenna 25 (id = 80101).\n";
+	  } else
+          if ( (value.compare("80102")==0) || (value.compare("26")==0) )
+	  {
+	    flagged.push_back(80102);
+	    std::cout << "Flagged antenna 26 (id = 80102).\n";
+	  } else
+          if ( (value.compare("80201")==0) || (value.compare("27")==0) )
+	  {
+	    flagged.push_back(80201);
+	    std::cout << "Flagged antenna 27 (id = 80201).\n";
+	  } else
+          if ( (value.compare("80202")==0) || (value.compare("28")==0) )
+	  {
+	    flagged.push_back(80202);
+	    std::cout << "Flagged antenna 28 (id = 80202).\n";
+	  } else
+          if ( (value.compare("90101")==0) || (value.compare("29")==0) )
+	  {
+	    flagged.push_back(90101);
+	    std::cout << "Flagged antenna 29 (id = 90101).\n";
+	  } else
+          if ( (value.compare("90102")==0) || (value.compare("30")==0) )
+	  {
+	    flagged.push_back(90102);
+	    std::cout << "Flagged antenna 30 (id = 90102).\n";
+	  } else
+          {
+            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "'Flagged = ' must be followed by a valid antenna id.\n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+        }
+
+        if ( (keyword.compare("caltablepath")==0) || (keyword.compare("CalTablePath")==0) )
+        {
+	  caltablepath = value;
+	  std::cout << "CalTablePath set to \"" << caltablepath << "\".\n";
+	}
+ 
+      }	// while(configfile.good())
+
+      // close config file
+      configfile.close();
+    } //if (configfile_exists)
+
+
+    // open event file list
+    ifstream eventfilelist;
+    eventfilelist.open (eventfilelistname.c_str(), ifstream::in);
+
+    // check if file could be opened
+    if (!(eventfilelist.is_open()))
+    {
+      std::cerr << "Failed to open file \"" << eventfilelistname <<"\"." << std::endl;
+      return 1;		// exit program
+    }
+
+    // look for the beginnig of the data (after a line containing only and at least three '-' or '='	
+    string temp_read;
+    bool data_found = false;
+    while ((data_found == false) && (eventfilelist.good()))
+    {
+      eventfilelist >> temp_read;
+      if ((temp_read.find("---") != string::npos) || (temp_read.find("===") != string::npos))
+      {
+	data_found = true;
+      }
+    }
+	
+    // exit program if no data are found	
+    if (data_found == false)
+    {
+      eventfilelist.close();  // close file
+      std::cerr << "\nNo list of event files found in file \"" << eventfilelistname <<"\".\n" ;
+      std::cerr << "Use the following file format: \n\n";
+      std::cerr << "some lines of text\n";
+      std::cerr << "===================================\n";
+      std::cerr << "eventfile1 azimuth[°] zenith[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n";
+      std::cerr << "eventfile2 azimuth[°] zenith[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n";
+      std::cerr << "... \n" << std::endl;
+      return 1;		// exit program
+    }
+
+
+    // Initialize the pipeline
     analyseLOPESevent eventPipeline;
-    Double distance_default = 2000.;
-    
-    // Define ranges for analysis
-
     Record obsrec,results;
-    obsrec.define("LOPES","/home/horneff/lopescasa/data/LOPES/LOPES-CalTable");
-
+    obsrec.define("LOPES",caltablepath);
     eventPipeline.initPipeline(obsrec);
 
-/*    
-    results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2006.12.16.16:58:28.978.event", 46.068481, 37.849694, distance_default, -253.7422, -157.5188, True, "1166288308", True, Vector<Int>(), True, True);
-    results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2006.12.25.11:39:55.591.event", 295.23156, 45.872063, distance_default, -276.1272, -617.7156, True, "1167046795", True, Vector<Int>(), True, True);
-    results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2006.12.27.03:41:26.891.event", 264.83871, 28.021416, distance_default, -605.1727, -422.9571, True, "1167190886", True, Vector<Int>(), True, True);
-    results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2006.12.27.06:05:44.608.event", 297.65505, 70.533686, distance_default, -130.4875, -445.2277, True, "1167199544", True, Vector<Int>(), True, True);
-    results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2007.01.04.21:17:08.671.event", 333.68807, 65.201293, distance_default, -267.8873, -543.7399, True, "1167945428", True, Vector<Int>(), True, True);
-    results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2007.01.30.11:10:43.476.event", 135.76542, 36.719426, distance_default, -153.6049, -471.7555, True, "1170155443", True, Vector<Int>(), True, True);
-    results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2007.02.06.22:38:47.920.event", 232.77142, 43.180691, distance_default, -308.7891, -428.9539, True, "1170801527", True, Vector<Int>(), True, True);
-    results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2007.02.22.13:58:40.599.event", 49.042778, 46.421811, distance_default, -46.60105, -359.3270, True, "1172152720", True, Vector<Int>(), True, True);
-    results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2007.03.12.03:10:42.794.event", 75.794883, 27.425511, distance_default, 498.99288, -16.57129, True, "1173669042", True, Vector<Int>(), True, True);
-    results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2007.04.14.18:03:17.670.event", 41.265552, 47.338051, distance_default, -340.6271, -341.0849, True, "1176573797", True, Vector<Int>(), True, True);
-    results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2007.05.03.14:48:37.531.event", 38.445480, 65.825177, distance_default, -275.6237, -396.2462, True, "1178203717", True, Vector<Int>(), True, True);
-    results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2007.05.11.03:20:32.653.event", 345.02893, 46.582676, distance_default, -6.843671, -213.6873, True, "1178853632", True, Vector<Int>(), True, True);
-    results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2007.05.19.08:51:03.744.event", 356.73330, 49.430722, distance_default, -341.4511, -304.2343, True, "1179564663", True, Vector<Int>(), True, True);
-    results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2007.05.20.11:54:02.486.event", 28.040967, 37.852490, distance_default, -353.5362, -499.5422, True, "1179662042", True, Vector<Int>(), True, True);
-    results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2007.06.21.05:09:15.933.event", 330.87347, 50.935879, distance_default, -7.644770, -606.1799, True, "1182402555", True, Vector<Int>(), True, True);
-    results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2007.07.08.22:32:04.957.event", 294.92861, 59.583537, distance_default, -41.45113, -459.4186, True, "1183933924", True, Vector<Int>(), True, True);
-    results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2007.08.17.23:31:55.678.event", 283.68139, 23.477967, distance_default, -387.2282, -215.3353, True, "1187393515", True, Vector<Int>(), True, True); 
-    results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2007.09.01.09:22:35.310.event", 354.55215, 63.882182, distance_default, 8.6060886, -368.0933, True, "1188638555", True, Vector<Int>(), True, True); 
-    results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2007.09.14.18:24:56.014.event", 327.52468, 39.627625, distance_default, -461.4557, -578.3245, True, "1189794296", True, Vector<Int>(), True, True);*/
 
-    Vector<Int> flagged(25);
-    flagged(0)  = 10101; 
-    flagged(1)  = 10102;
-    flagged(2)  = 10201;
-    flagged(3)  = 10202;
-    flagged(4)  = 20101;
-    flagged(5)  = 20102;
-    flagged(6)  = 20201;
-    flagged(7)  = 20202;
-    flagged(8)  = 30101;
-    flagged(9)  = 30102;
-    
-    flagged(10) = 40101; 
-    flagged(11) = 40202;
-    flagged(12) = 50101;
-    flagged(13) = 50202;
-    flagged(14) = 60102;
-    
-    flagged(15) = 70102;
-    flagged(16) = 70201;
-    flagged(17) = 70202;
-    flagged(18) = 70101;
-    flagged(19) = 80101;
-    flagged(20) = 80102; 
-    flagged(21) = 80201;
-    flagged(22) = 80202;
-    flagged(23) = 90101;
-    flagged(24) = 90102;
-    
+    // Process events from event file list
+    string filename, plotprefix;
+    double azimuth, zenith, distance, core_x, core_y;
+    bool read_in_error = false;
 
-    results = eventPipeline.ProcessEvent("/home/schroeder/data/lopesstar/2007.09.01.09:22:35.310.event", 354.55215, 63.882182, distance_default, 8.6060886, -368.0933, True, "1188638555", True, flagged, True, False); 
-  
+    while (eventfilelist.good())
+    {	
+      // read in filename, azimuth, zenith, distance and log_energy	
+      if (eventfilelist.good()) eventfilelist >> filename;
+	else read_in_error = true;	
+      if (eventfilelist.good()) eventfilelist >> azimuth;
+	else read_in_error = true;	
+      if (eventfilelist.good()) eventfilelist >> zenith;
+	else read_in_error = true;	
+      if (eventfilelist.good()) eventfilelist >> distance;
+	else read_in_error = true;	
+      if (eventfilelist.good()) eventfilelist >> core_x;
+	else read_in_error = true;	
+      if (eventfilelist.good()) eventfilelist >> core_y;
+	else read_in_error = true;	
+
+      // exit program if error occured
+      if (read_in_error)		
+      {
+        eventfilelist.close();  // close file
+	std::cerr << "\nError processing file \"" << eventfilelistname <<"\".\n" ;
+	std::cerr << "Use the following file format: \n\n";
+	std::cerr << "some lines of text\n";
+	std::cerr << "===================================\n";
+	std::cerr << "eventfile1 azimuth[°] zenith[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n";
+	std::cerr << "eventfile2 azimuth[°] zenith[°] distance(radius of curvature)[m] core_x[m] core_y[m]]\n";
+	std::cerr << "... \n" << std::endl;
+	return 1;		// exit program
+      }
+		
+      // Create a plotprefix using the filename
+      plotprefix = filename;
+      // delete the file ending
+      if (plotprefix.find(".event") != string::npos)
+        plotprefix.erase(plotprefix.find_last_of('.'));	
+      // deletes the file path, if it exists	
+      if (plotprefix.find("/") != string::npos)
+       plotprefix.erase(0,plotprefix.find_last_of('/')+1);
+
+      // print information and process the event
+      std::cout << "\nProcessing event \"" << filename << "\"\nwith azimuth " << azimuth << " °, zenith " << zenith
+	<< " °, distance (radius of curvature) " << distance << " m, core position X " << core_x
+	<< " m and core position Y " << core_y << " m.\n" << std::endl;
+
+      results = eventPipeline.ProcessEvent(filename, azimuth, zenith, distance, core_x, core_y, RotatePos, 
+		plotprefix, generatePlots, (Vector<int>)flagged, verbose, simplexFit, doTVcal); 
+    }
+
+    // close file
+    eventfilelist.close();
   } catch (std::string message) {
     std::cerr << message << std::endl;
   }
