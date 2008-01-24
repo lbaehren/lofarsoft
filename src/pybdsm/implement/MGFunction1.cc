@@ -141,8 +141,8 @@ tuple MGFunction::py_find_peak()
   vector<double> buf(data_size());
   fcn_diff(&buf.front());
 
-  double peak = -DBL_MAX;
-  unsigned pidx = -1;
+  double peak = buf[0];
+  unsigned pidx = 0;
 
   for (unsigned i = 0; i < buf.size(); ++i)
     if (buf[i] > peak) {
