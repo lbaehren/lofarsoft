@@ -190,6 +190,85 @@ Bool GenDynSpec(GlishSysEvent &event, void *){
   return True;
 };
 
+//-----------------------------------------------------------  GenInputStatistics
+Bool GenInputStatistics(GlishSysEvent &event, void *){
+  GlishSysEventSource *glishBus = event.glishSource();
+  if (!glishBus->replyPending()) {
+    cerr << "SimpleDynspecClient:GenInputStatistics: Not much use to call GenInputStatistics without waiting for a reply!" 
+	 << endl;
+    return True;
+  };
+  try {
+    Int maxsize = (10000000); // 10 000 000 
+    Vector<String> files;
+    if (event.val().type() != GlishValue::RECORD) {
+      cerr << "SimpleDynspecClient:GenInputStatistics: Need record with: files (maxsize)!" 
+	   << endl;
+      glishBus->reply(GlishArray(False));
+      return True;
+    };
+    GlishRecord  inrec = event.val(),outrec;
+    Record input, output;
+    inrec.toRecord(input);
+    if (!(input.isDefined("files")  )) {
+      cerr << "SimpleDynspecClient:GenInputStatistics: Need record with: files (maxsize)!" 
+	   << endl;
+      glishBus->reply(GlishArray(False));
+      return True;
+    };
+    files = input.asArrayString("files");
+    if (input.isDefined("maxsize")){
+      maxsize = input.asInt("maxsize");
+    };
+    Int fnum,numFiles=files.nelements();
+    Vector<Double> data,means(numFiles,0.),stddevs(numFiles,0.),mins(numFiles,0.),maxs(numFiles,0.);
+    Double dmin,dmax;
+    for (fnum=0; fnum<numFiles; fnum++){
+      // initialize the Data Reader
+      if (! tbbIn.attachFile(files(Slice(fnum,1))) ){
+	cerr << "SimpleDynspecClient:GenInputStatistics: " << "Failed to attach file: " << files(fnum) << endl;
+	glishBus->reply(GlishArray(False));
+	return True;
+      };
+      if (tbbIn.blocksize() > (uint)maxsize){
+	cerr << "SimpleDynspecClient:GenInputStatistics: " << "File: " << files(fnum) 
+	     << " spans too large a range! (Hole inside?)" << endl;
+	continue;
+      };
+      if (! pipeline_p->InitEvent(&tbbIn)){
+	cerr << "SimpleDynspecClient:GenInputStatistics: "  << "File: " << files(fnum)
+	     << " failed to initialize the DataReader!" << endl;
+	continue;
+      };
+      //dmin = mean(tbbIn.fx().column(0));
+      //data = abs(tbbIn.fx().column(0)-dmin);
+      data = abs(tbbIn.fx().column(0));
+      minMax(dmin, dmax, data);
+      mins(fnum)    = dmin;
+      maxs(fnum)    = dmax;
+      means(fnum)   = mean(data);
+      stddevs(fnum) = stddev(data);
+      if (((fnum+1)%50)==0) {
+	cout << "SimpleDynspecClient:GenInputStatistics: processed " << fnum+1 << " files out of " 
+	     << numFiles << "!" << endl;
+      };
+    };
+    output.define("mins",mins);
+    output.define("maxs",maxs);
+    output.define("means",means);
+    output.define("stddevs",stddevs);
+    outrec.fromRecord(output);
+    glishBus->reply(outrec);
+  } catch (AipsError x) {
+    cerr << "SimpleDynspecClient:GenInputStatistics: " << x.getMesg() << endl;
+    if (glishBus->replyPending()) {
+      glishBus->reply(GlishArray(False));
+    };
+    return False;
+  };   
+  return True;
+};
+
 
 //------------------------------------------------------------------------------------
 
@@ -199,6 +278,7 @@ int main(int argc, char *argv[])
 
   glishStream.addTarget(initPipeline,"initPipeline");
   glishStream.addTarget(GenDynSpec,"GenDynSpec");
+  glishStream.addTarget(GenInputStatistics,"GenInputStatistics");
 
   glishStream.loop();
   return 0;
