@@ -37,17 +37,8 @@ namespace CR { // Namespace CR -- begin
   void h5attribute_summary (std::ostream &os,
 			    hid_t const &attribute_id)
   {
-    /*
-     * Dataspace of the attribute
-     */
-    hid_t dataspace_id       = H5Aget_space (attribute_id);
-    bool dataspace_is_simple = H5Sis_simple(dataspace_id);
+    bool status (true);
     
-    cout << "\t-- Dataspace ID            = " << dataspace_id << endl;
-    cout << "\t-- Dataspace is simple?    = " << dataspace_is_simple << endl;
-    
-    H5Sclose (dataspace_id);
-
     /*
      * Datatype of the attribute
      */
@@ -63,14 +54,30 @@ namespace CR { // Namespace CR -- begin
     cout << "\t-- Datatype is H5T_FLOAT   = " << datatype_is_float << endl;
     cout << "\t-- Datatype is H5T_STRING  = " << datatype_is_string << endl;
 
+    H5Tclose (datatype_id);
+
     /*
      * Dataspace of the attribute
      */
     int rank (0);
     hsize_t *dimensions;
     hsize_t *maxDimensions;
+    hid_t dataspace_id       = H5Aget_space (attribute_id);
+    bool dataspace_is_simple = H5Sis_simple(dataspace_id);
 
-    H5Tclose (datatype_id);
+    try {
+      rank = H5Sget_simple_extent_ndims (dataspace_id);
+    } catch (std::string message) {
+      std::cerr << "[h5attribute_summary] " << message << endl;
+      status = false;
+    }
+    
+    cout << "\t-- Dataspace ID            = " << dataspace_id << endl;
+    cout << "\t-- Dataspace is simple?    = " << dataspace_is_simple << endl;
+    cout << "\t-- Rank of the data array  = " << rank << endl;
+    
+    H5Sclose (dataspace_id);
+
   }
   
   // ----------------------------------------------------- h5get_attribute (uint)

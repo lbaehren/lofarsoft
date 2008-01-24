@@ -75,7 +75,6 @@ int test_hdf5 (std::string const &filename)
   cout << "\n[test_hdf5]\n" << endl;
 
   int nofFailedTests (0);
-  char *h5filename = CR::string2char(filename);
   std::string dataset_name ("001002021");
 
   herr_t h5error;
@@ -90,7 +89,7 @@ int test_hdf5 (std::string const &filename)
    * is to be used in subsequent interactions with the data.
    */
   cout << "--> Opening file ..." << endl;
-  file_id = H5Fopen (h5filename,
+  file_id = H5Fopen (filename.c_str(),
 		     H5F_ACC_RDONLY,
 		     H5P_DEFAULT);
 

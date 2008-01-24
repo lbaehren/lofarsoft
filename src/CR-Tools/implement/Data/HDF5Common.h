@@ -49,6 +49,13 @@ namespace CR { // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
+      <li>HDF5 Library
+      <ul>
+        <li><a href="http://hdfgroup.com/HDF5/doc/RM_H5Front.html">API
+	Specification</a>
+	<li><a href="http://hdf.ncsa.uiuc.edu/HDF5/doc/UG/index.html">User's
+	Guide</a>
+      </ul>
       <li>Classes to handle the interaction with LOFAR time-series datasets
       <ul>
         <li>CR::LOFAR_TBB
