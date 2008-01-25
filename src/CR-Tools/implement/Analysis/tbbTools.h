@@ -102,7 +102,7 @@ namespace CR { // Namespace CR -- begin
       
       \return ok -- True if successfull
     */
-    Bool meanFPGAtrigger(Vector<Double>, int level, int start, int stop, int window
+    Bool meanFPGAtrigger(Vector<Double>, int level, int start, int stop, int window,
 			 Vector<Int> &index, Vector<Int> &sum, Vector<Int> &width, 
 			 Vector<Int> &peak);
 
