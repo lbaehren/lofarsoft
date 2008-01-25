@@ -54,7 +54,7 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  Bool tbbTools::meanFPGAtrigger(Vector<Double>, int level, int start, int stop, int window
+  Bool tbbTools::meanFPGAtrigger(Vector<Double>, int level, int start, int stop, int window,
 				 Vector<Int> &index, Vector<Int> &sum, Vector<Int> &width, 
 				 Vector<Int> &peak){
     
