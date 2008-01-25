@@ -226,8 +226,22 @@ namespace CR { // Namespace CR -- begin
     */
     uint nyquist_zone ();
 
+    /*!
+      \brief Get the (UNIX) time at which the data were recorded
+
+      \return time -- The (UNIX) time at which the data were recorded.
+     */
     uint time ();
 
+    /*!
+      \brief Get the timespan in samples since the last full second
+
+      \return sample_number -- The timespan in samples since the last full
+              second, as stored in <i>time</i>; the absolute time for this 
+	      dataset thus is obtained by adding
+	      <i>sample_number</i>/<i>sample_frequency</i> to the value of 
+	      <i>time</i>.
+    */
     uint sample_number ();
 
     /*!

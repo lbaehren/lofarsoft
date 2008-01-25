@@ -41,20 +41,6 @@ using std::endl;
 // -----------------------------------------------------------------------------
 
 /*
-  \brief Test accessing the HDF5 file using the Data Access Library (DAL)
-
-  \return nofFailedTests -- The number of failed tests.
-*/
-int test_dal ()
-{
-  int nofFailedTests (0);
-  
-  return nofFailedTests;
-}
-
-// -----------------------------------------------------------------------------
-
-/*
   \brief Test retrieval of an attribute's identifier within the HDF5 file
 
   \param file_id --

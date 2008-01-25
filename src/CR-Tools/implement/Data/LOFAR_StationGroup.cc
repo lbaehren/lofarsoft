@@ -22,7 +22,6 @@
  ***************************************************************************/
 
 #include <Data/LOFAR_StationGroup.h>
-#include <Utilities/StringTools.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -254,7 +253,7 @@ namespace CR { // Namespace CR -- begin
     for (uint channel (0); channel<channel_ids.size(); channel++) {
       id = groupName() + "/" + channel_ids[channel];
       // get the identifier for the dataset
-      dataset_id = H5Dopen(H5fileID_p, CR::string2char(id));
+      dataset_id = H5Dopen(H5fileID_p, id.c_str());
       // get the identifier for the attribute
       attribute_id = H5Aopen_name (dataset_id,
 				   "TIME");
@@ -367,7 +366,7 @@ namespace CR { // Namespace CR -- begin
 	  channelName = channelID (station,rsp,rcu);
 	  id = groupName + "/" + channelName;
 	  // probe the HDF5 file for the presence of a dataset with the given ID
-	  if (H5Dopen(H5fileID_p, CR::string2char(id)) > 0) {
+	  if (H5Dopen(H5fileID_p, id.c_str()) > 0) {
 	    IDs.push_back(channelName);
 	  }
 	}
@@ -386,12 +385,12 @@ namespace CR { // Namespace CR -- begin
     std::vector<std::string> dataset_names = channelIDs ();
 
     // get the group ID
-    hid_t group_id = H5Gopen (H5fileID_p,CR::string2char(groupName));
+    hid_t group_id = H5Gopen (H5fileID_p,groupName.c_str());
 
     if (group_id > 0) {
       for (uint channel (0); channel<dataset_names.size(); channel++) {
 	dataset_ids[channel] = H5Dopen (group_id,
-					CR::string2char(dataset_names[channel]));
+					dataset_names[channel].c_str());
       }
     } else {
       std::cerr << "[LOFAR_StationGroup::datasetIDs] Unable to access group "

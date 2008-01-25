@@ -72,7 +72,7 @@ namespace CR { // Namespace CR -- begin
 
   // ============================================================================
   //
-  //  Access to attributes
+  //  Inspection and Feedback
   //
   // ============================================================================
 
@@ -98,6 +98,25 @@ namespace CR { // Namespace CR -- begin
 			    std::string const &name,
 			    hid_t const &location_id);
 
+  /*!
+    \brief Get the shape of the dataspace associated with the attribute
+
+    \reval shape -- The shape of the dataspace attached to the attribute, i.e.
+           the length of the array axes in case of multidimensional data
+    \param attribute_id -- Identifier of the attribute within the HDF5 file
+    
+    \return status -- Status of the operation; returns <tt>false</tt> in case
+            an error was encountered
+  */
+  bool h5get_dataspace_shape (std::vector<uint> &shape,
+			      hid_t const &attribute_id);
+
+  // ============================================================================
+  //
+  //  Access to attributes
+  //
+  // ============================================================================
+
   //@{
   /*!
     \brief Get the value of an attribute attached to a group or dataset
@@ -114,12 +133,12 @@ namespace CR { // Namespace CR -- begin
 			hid_t const &attribute_id);
   bool h5get_attribute (double &value,
 			hid_t const &attribute_id);
-  bool h5get_attribute (std::vector<uint> &value,
+  bool h5get_attribute (std::string &value,
 			hid_t const &attribute_id);
-  bool h5get_attribute (std::vector<int> &value,
-			hid_t const &attribute_id);
-  bool h5get_attribute (std::vector<double> &value,
-			hid_t const &attribute_id);
+
+/*   template <class T> */
+/*     bool h5get_attribute (std::vector<T> &value, */
+/* 			  hid_t const &attribute_id); */
   //@}
 
   /*!
@@ -133,18 +152,10 @@ namespace CR { // Namespace CR -- begin
     \return status -- Status of the operation; returns <tt>false</tt> in case
             an error was encountered
   */
-  bool h5get_attribute (uint &value,
-			std::string const &name,
-			hid_t const &location_id);  
-  bool h5get_attribute (int &value,
-			std::string const &name,
-			hid_t const &location_id);  
-  bool h5get_attribute (double &value,
-			std::string const &name,
-			hid_t const &location_id);
-  bool h5get_attribute (std::string &value,
-			std::string const &name,
-			hid_t const &location_id);
+  template <class T>
+    bool h5get_attribute (T &value,
+			  std::string const &name,
+			  hid_t const &location_id);
 
   // ============================================================================
   //

@@ -22,7 +22,6 @@
  ***************************************************************************/
 
 #include <Data/LOFAR_DipoleDataset.h>
-#include <Utilities/StringTools.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -102,7 +101,7 @@ namespace CR { // Namespace CR -- begin
      * First check if the attribute actually exists
      */
     id = H5Aopen_name(H5datasetID_p,
-		      CR::string2char(name));
+		      name.c_str());
 
     
     return id;
