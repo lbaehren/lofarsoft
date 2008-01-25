@@ -64,7 +64,7 @@ namespace CR { // Namespace CR -- begin
     
     \ingroup CR_Data
     
-    \brief Class to read in 
+    \brief Class to read in the data-dump file format of the tbbctl programm
     
     \author Andreas Horneffer
 
