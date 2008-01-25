@@ -10,11 +10,11 @@ from scipy import *
 if len(sys.argv) < 5 or len(sys.argv) > 10:
 	print "Usage:"
 	print "\tbaseline.py <file> <antenna1> <antenna2> " + \
-	      "<sub-band> ['channel' or 'time'] [number of channel/time] " + \
+	      "<sub-band> ['channel' or 'time'] [channel/time range] " + \
 	      "['p'hase or 'a'mplitude] [polarization (0-3,4-6)] [plot range xmin,xmax,ymin,ymax (no spaces)]"
 	print "\t<> required"
-	print "\t E.g., baseline.py /lifs006/SB3.MS 1 10 0 channel 3 a 6 4.69e9,4.7e9,0,0.001"
-	print "\tChannel and Time in relative bin coordinates;"
+	print "\t E.g., baseline.py /lifs006/SB3.MS 1 10 0 channel 3:10 a 6 4.69e9,4.7e9,0,0.001"
+	print "\tSingle or range of channels and times for averaging (in relative bin coordinates; ranges colon-delimited);"
 	print "\tPolarization 0-3 plots individually, 4 plots xx and xy, 5 plots xx and yx, 6 plots xx and yy."
 	print "\t-1 means plot all.  Default plots the closure phase of the xx for all channels as function of time."
 	print "Note that antenna numbers are zero-based and must be given in order from lowest to highest."
@@ -28,7 +28,9 @@ data_name = "DATA"
 if len(sys.argv) < 6:  quantity_plot = 'channel'
 else: quantity_plot = sys.argv[5]
 if len(sys.argv) < 7:  range_plot = -1
-else: range_plot = int(sys.argv[6])
+elif len((sys.argv[6]).split(':')) > 1:
+	range_plot = range(int((sys.argv[6]).split(':')[0]),int((sys.argv[6]).split(':')[1]))
+else: range_plot = [int(sys.argv[6])]
 if len(sys.argv) < 8:  data_plot = 'a'
 else:	data_plot = sys.argv[7]
 if len(sys.argv) < 9:  pol = 0
@@ -77,42 +79,43 @@ event_time = 0
 # get data
 data_col = maintable.getColumn(data_name)
 data = data_col.data()
-nchannels = data.shape[1] # second element of the data shape i.e. (4,256,nrows)
+nchannels = data.shape[1] # second element of the data shape i.e. (nrows,256,4)
 
 # if the optional channel argument is present
 #  plot for this channel/time
 if (range_plot != -1):
 	if quantity_plot == 'channel':
+		data_reduce = add.reduce(array=data[:,range_plot,:],axis=1)/len(range_plot)
 		# plot data of given data vs. time
 		if data_plot == 'a':
-			current_value = hypot((data[:,range_plot,pol]).real,(data[:,range_plot,pol]).imag)
-			if pol2:  current_value2 = hypot((data[:,range_plot,pol2]).real,(data[:,range_plot,pol2]).imag)
+			current_value = hypot((data_reduce[:,pol]).real,(data_reduce[:,pol]).imag)
+			if pol2:  current_value2 = hypot((data_reduce[:,pol2]).real,(data_reduce[:,pol2]).imag)
                 elif data_plot == 'p':
-			current_value = arctan2((data[:,range_plot,pol]).imag,(data[:,range_plot,pol]).real)%2*pi-pi
-			if pol2:  current_value2 = arctan2((data[:,range_plot,pol2]).imag,(data[:,range_plot,pol2]).real)%2*pi-pi
+			current_value = arctan2((data_reduce[:,pol]).imag,(data_reduce[:,pol]).real)%2*pi-pi
+			if pol2:  current_value2 = arctan2((data_reduce[:,pol2]).imag,(data_reduce[:,pol2]).real)%2*pi-pi
 		plot( time, current_value, "," )
 		if pol2:  plot( time, current_value2, "," )
 		if axis_range:  axis(axis_range)
 		title("Time vs. Amplitude, Baseline " + \
 		      sys.argv[2] + '-' + sys.argv[3] + ", Sub-band(" + sys.argv[4] +
-		      ") " + " Channel(" + str(range_plot) + ")\n" + sys.argv[1] )
+		      ") " + " Chan0(" + str(range_plot[0]) + "), Nchan(" + str(len(range_plot)) + ")\n" + sys.argv[1] )
 		xlabel("Time (MJD)")
 		if event_time:  plot( event_time*ones(2), array([min(current_value),max(current_value)]))
 
 	elif quantity_plot == 'time':
+		data_reduce = add.reduce(array=data[range_plot,:,:],axis=0)/len(range_plot)
 		# plot intensity of given data vs. channel
 		if data_plot == 'a':
-			current_value = hypot((data[range_plot,:,pol]).real,(data[range_plot,:,pol]).imag)
-			if pol2:  current_value2 = hypot((data[range_plot,:,pol2]).real,(data[range_plot,:,pol2]).imag)
+			current_value = hypot((data_reduce[:,pol]).real,(data_reduce[:,pol]).imag)
+			if pol2:  current_value2 = hypot((data_reduce[:,pol2]).real,(data_reduce[:,pol2]).imag)
                 elif data_plot == 'p':
-			current_value = arctan2((data[range_plot,:,pol]).imag,(data[range_plot,:,pol]).real)%2*pi-pi
-			if pol2: current_value2 = arctan2((data[range_plot,:,pol2]).imag,(data[range_plot,:,pol2]).real)%2*pi-pi
+			current_value = arctan2((data_reduce[:,pol]).imag,(data_reduce[:,pol]).real)%2*pi-pi
+			if pol2: current_value2 = arctan2((data_reduce[:,pol2]).imag,(data_reduce[:,pol2]).real)%2*pi-pi
 		plot( current_value, "," )
 		if pol2: plot( current_value2, "," )
 		if axis_range:  axis(axis_range)
-		title("Channel vs. Amplitude, Baseline " + \
-		      sys.argv[2] + '-' + sys.argv[3] + ", Sub-band(" + sys.argv[4] +
-		      ") " + " Time(" + str(time[range_plot]) + " MJD)\n" + sys.argv[1] )
+		title("Channel vs. Amplitude, Baseline " + sys.argv[2] + '-' + sys.argv[3] + ", Sub-band(" + sys.argv[4] + "), " + \
+		      " Time(" + str(time[range_plot[0]]) + " MJD) \n dtime(" + str(len(range_plot)) + " ints), " + sys.argv[1] )
 		xlabel("Channel")
 
 # otherwise, plot all channels/times
