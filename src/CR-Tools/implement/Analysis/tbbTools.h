@@ -28,6 +28,10 @@
 #include <iostream>
 #include <string>
 
+#include <casa/Arrays/Vector.h>
+
+#include <casa/namespace.h>
+
 namespace CR { // Namespace CR -- begin
   
   /*!
