@@ -27,6 +27,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#define TBBCTLIN_MAXSAMPLES 0x800000
+
 namespace CR { // Namespace CR -- begin
   
   // ============================================================================
@@ -170,11 +172,11 @@ namespace CR { // Namespace CR -- begin
       cout << "tbbctlIn:attachFile: " << "Files " << filenames << " spans a range of " 
       	   << noSamples << " samples" << endl;
 #endif
-      if ((noSamples*numchannels) > 16777216){
+      if ((noSamples*numchannels) > TBBCTLIN_MAXSAMPLES){
 	cout << "tbbctlIn:attachFile: " << "Files " << filenames 
-	     << " contain more than 16777216 samples! Truncating to " << 16777216/numchannels 
+	     << " contain more than "<< TBBCTLIN_MAXSAMPLES <<" samples! Truncating to " << TBBCTLIN_MAXSAMPLES/numchannels 
 	     << " samples/channel!" << endl;
-	noSamples = 16777216;
+	noSamples = TBBCTLIN_MAXSAMPLES/numchannels;
       }
       //Allocate memory
       channeldata_p.resize(noSamples,numchannels);

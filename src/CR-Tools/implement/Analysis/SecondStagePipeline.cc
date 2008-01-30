@@ -82,8 +82,6 @@ namespace CR { // Namespace CR -- begin
 	  cerr << "SecondStagePipeline::GetData: " << "updateCache failed!" << endl;
 	  return Matrix<DComplex>();
 	};
-	SecondStageCacheValid_p = True;
-	cachedDate_p = dr->header().asuInt("Date");
       };
     } catch (AipsError x) {
       cerr << "SecondStagePipeline::GetData: " << x.getMesg() << endl;
@@ -114,6 +112,8 @@ namespace CR { // Namespace CR -- begin
       };
 
       CachedData_p.reference(data);
+      SecondStageCacheValid_p = True;
+      cachedDate_p = dr->header().asuInt("Date");
     } catch (AipsError x) {
       cerr << "SecondStagePipeline::updateCache: " << x.getMesg() << endl;
       return False;
@@ -123,12 +123,11 @@ namespace CR { // Namespace CR -- begin
   
   Vector<Bool> SecondStagePipeline::GetAntennaMask(DataReader *dr){
     try {
-      if (cachedDate_p != dr->header().asuInt("Date")) {
+      if ( (!SecondStageCacheValid_p)  || (cachedDate_p != dr->header().asuInt("Date")) ) {
 	if (!updateCache(dr)) {
 	  cerr << "SecondStagePipeline::GetAntennaMask: " << "updateCache failed!" << endl;
 	  return AntennaMask_p;
 	};
-	cachedDate_p = dr->header().asuInt("Date");
       };
     } catch (AipsError x) {
       cerr << "SecondStagePipeline::GetAntennaMask: " << x.getMesg() << endl;

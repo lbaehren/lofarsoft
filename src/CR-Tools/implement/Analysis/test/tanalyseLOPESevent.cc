@@ -57,23 +57,54 @@ int test_analyseLOPESevent ()
     obsrec.define("LOPES","/home/horneff/lopescasa/data/LOPES/LOPES-CalTable");
 
     newObject.initPipeline(obsrec);
-    
-    results = newObject.ProcessEvent("/data/LOPES/cr/sel/2004.01.12.00:28:11.577.event", 
-				     41.9898208, 64.70544, 1750., -25.44, 8.94, True, 
-				     "tanalyseLOPESevent", True, Vector<Int>(), True);
+
+    std::cout << "  1) Testing on big LOPES10 event" << std::endl;
+    results = newObject.ProcessEvent("/data/LOPES/cr/sel/2004.01.12.00:28:11.577.event", //evname
+				     41.9898208,           // Az
+				     64.70544,             // El
+				     1750.,                // distance
+				     -25.44,               // XC
+				     8.94,                 // YC
+				     True,                 // RotatePos
+				     "tanalyseLOPESevent", // PlotPrefix
+				     True,                 // generatePlots
+				     Vector<Int>(),        // FlaggedAntIDs
+				     True);                // verbose
     Vector<Int> flagged(5);
     flagged(0) = 70202; 
     flagged(1) = 80201;
     flagged(2) = 80202;
     flagged(3) = 90101;
     flagged(4) = 90102;
-    results = newObject.ProcessEvent("/data/LOPES/cr/LOPES30_sel/2006.02.23.04:02:50.283.event", 
-				     276.113703, 53.2910653 , 4750., -32.07,  46.60, True, 
-				     "tanalyseLOPESevent2", True, flagged , True);
+    std::cout << "  2) Testing on big LOPES30 event w/o direction-fit & w/o TV-Calib" << std::endl;
+    results = newObject.ProcessEvent("/data/LOPES/cr/LOPES30_sel/2006.02.23.04:02:50.283.event", //evname
+				     276.113703,            // Az
+				     53.2910653,            // El
+				     4750.,                 // distance
+				     -32.07,                // XC
+				     46.60,                 // YC
+				     True,                  // RotatePos
+				     "tanalyseLOPESevent2", // PlotPrefix
+				     True,                  // generatePlots
+				     flagged ,              // FlaggedAntIDs
+				     True,                  // verbose
+				     False,                 // simplexFit
+				     0.,                    // ExtraDelay
+				     False);                // doTVcal
 
-    results = newObject.ProcessEvent("/data/LOPES/cr/LOPES30_sel/2006.02.23.04:02:50.283.event", 
-				     273.46,  53.32, 4000., -32.07,  46.60, True, 
-				     "tanalyseLOPESevent3", True, flagged , True, True);
+    std::cout << "  3) Testing on big LOPES30 event with simplex-fit" << std::endl;
+    results = newObject.ProcessEvent("/data/LOPES/cr/LOPES30_sel/2006.02.23.04:02:50.283.event", //evname
+				     273.46,                // Az
+				     53.32,                 // El
+				     4000.,                 // distance
+				     -32.07,                // XC
+				     46.60,                 // YC
+				     True,                  // RotatePos
+				     "tanalyseLOPESevent3", // PlotPrefix
+				     True,                  // generatePlots
+				     flagged ,              // FlaggedAntIDs
+				     True,                  // verbose
+				     True);                 //simplexFit
 
   } catch (std::string message) {
     std::cerr << message << std::endl;

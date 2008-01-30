@@ -155,16 +155,17 @@ namespace CR { // Namespace CR -- begin
       Record fiterg;
       
       pipeline_p->setVerbosity(verbose);
-      // initialize the Data Reader
+      // Generate the Data Reader
       if (! lev_p->attachFile(evname) ){
 	cerr << "analyseLOPESevent::ProcessEvent: " << "Failed to attach file: " << evname << endl;
 	return Record();
       };
+      // initialize the Data Reader
       if (! pipeline_p->InitEvent(lev_p)){
 	cerr << "analyseLOPESevent::ProcessEvent: " << "Failed to initialize the DataReader!" << endl;
 	return Record();
       };
-      
+
       //  Enable/disable doing the phase calibration as requested
       switch (doTVcal){
       case 0:
@@ -185,8 +186,8 @@ namespace CR { // Namespace CR -- begin
 	};
 	break;
       };
-
-
+      
+      
       // Generate the antenna selection
       Vector <Bool> AntennaSelection;
       Int i,j,id,nants,nselants, nflagged=FlaggedAntIDs.nelements();
