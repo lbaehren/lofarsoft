@@ -106,7 +106,7 @@ namespace CR { // Namespace CR -- begin
       Vector<Double> freqs(nFreqs);
       for (freqInd=0; freqInd<nFreqs; freqInd++) { freqs(freqInd) = frequencyValues(peakPos(freqInd)); };
 
-      //calculate phase differences
+      //calculate relative phases
       Matrix<Double> relPhases(nFreqs,nAntennas);
       Vector<Double> refAntPhases(nFreqs);
       for (freqInd=0; freqInd<nFreqs; freqInd++) {
@@ -115,7 +115,7 @@ namespace CR { // Namespace CR -- begin
       refAntPhases = relPhases.column(refAnt);
       for (freqInd=0; freqInd<nFreqs; freqInd++) {
 	relPhases.row(freqInd) = relPhases.row(freqInd) - refAntPhases(freqInd);
-      };      
+      }; // relPhases now holds the phases relative to the phases of the reference antenna
 
       //Calculate the phase differences
       Matrix<Double> PhaseDiffs;
