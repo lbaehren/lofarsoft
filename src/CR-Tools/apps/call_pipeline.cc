@@ -39,7 +39,7 @@ using CR::LopesEventIn;
  
   \author Frank Schröder
  
-  \date 2008/23/01
+  \date 2008/29/01
 
   <h3>Motivation</h3>
 
@@ -47,7 +47,7 @@ using CR::LopesEventIn;
   makes the LOPES-analysis-pipeline usable without changing any
   code. Any information about the LOPES-events you want to analyse
   and any configurations how to analyse the should be provide
-  be external, humand readable files.
+  be external, human readable files.
 
   <h3>Prerequisites</h3>
 
@@ -69,7 +69,7 @@ using CR::LopesEventIn;
 
   example configuration file
 
-  ===================
+  =================================================================
   caltablepath = /home/horneff/lopescasa/data/LOPES/LOPES-CalTable
   RotatePos = true
   GeneratePlots = true
@@ -562,8 +562,9 @@ int main (int argc, char *argv[])
 	<< " °, distance (radius of curvature) " << distance << " m, core position X " << core_x
 	<< " m and core position Y " << core_y << " m.\n" << std::endl;
 
+      // call the pipeline with an extra delay = 0.
       results = eventPipeline.ProcessEvent(filename, azimuth, zenith, distance, core_x, core_y, RotatePos, 
-		plotprefix, generatePlots, (Vector<int>)flagged, verbose, simplexFit, doTVcal); 
+		plotprefix, generatePlots, (Vector<int>)flagged, verbose, simplexFit, 0., doTVcal); 
     }
 
     // close file

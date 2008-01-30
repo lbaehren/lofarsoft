@@ -89,7 +89,9 @@ namespace CR { // Namespace CR -- begin
     try {
       if (rotate) {
 	Double XCn,YCn;
-	// Rotation by 15 degrees; 
+	// Rotation by 15.0 degrees; remark: the exact value is 15.7 but in the
+	// value used in the KRETA-evaluation is 15.0, too.
+	// cos 15° = 0.965925826  ;  sin 15° = 0.258819045
 	XCn = XC*0.965925826+YC*0.258819045;
 	YCn = XC*-0.258819045+YC*0.965925826;
 	DirParams_p.define("Xpos",XCn);
