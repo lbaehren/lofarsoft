@@ -34,6 +34,17 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
+  template<class T>
+  void show_vector (std::ostream& os,
+		    std::vector<T> &vec)
+  {
+    os << "[";
+    for (uint n(0); n<vec.size(); n++) {
+      os << " " << vec[n];
+    }
+    os << " ]";
+  }
+
   // -------------------------------------------------------- h5attribute_summary
 
   void h5attribute_summary (std::ostream &os,
@@ -111,6 +122,39 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
   
+  // ------------------------------------------------------ h5get_dataspace_shape
+
+#ifdef HAVE_CASA
+  bool h5get_dataspace_shape (casa::IPosition &shape,
+			      hid_t const &attribute_id)
+  {
+    bool status (true);
+
+    hid_t dataspace_id       = H5Aget_space (attribute_id);
+    bool dataspace_is_simple = H5Sis_simple(dataspace_id);
+    int rank                 = H5Sget_simple_extent_ndims (dataspace_id);
+    hsize_t *dimensions;
+
+    if (rank > 0) {
+      herr_t ret;
+      dimensions = new hsize_t[rank];
+      ret = H5Sget_simple_extent_dims(dataspace_id,
+				      dimensions,
+				      NULL);
+      shape.resize(rank);
+      for (int n(0); n<rank; n++) {
+	shape(n) = dimensions[n];
+      }
+
+    } else {
+      std::cerr << "[h5get_dataspace_shape] Error, rank of dataspace < 0"
+		<< std::endl;
+    }
+
+    return status;
+  }
+#endif
+  
   // ============================================================================
   //
   //  Access attribute values
@@ -145,53 +189,78 @@ namespace CR { // Namespace CR -- begin
     return status;
   }  
 
-  // ----------------------------------------------------- h5get_attribute (uint)
-  
-  bool h5get_attribute (uint &value,
-			hid_t const &attribute_id)
-  {
-    herr_t h5error (0);
-    
-    h5error = H5Aread(attribute_id,
-		      H5T_NATIVE_UINT,
-		      &value);
+  // ------------------------------------------------------------ h5get_attribute
 
-    if (h5error == 0) {
-      return true;
+  template <class T>
+  bool h5get_attribute (std::vector<T> &value,
+			std::string const &name,
+			hid_t const &locationID)
+  {
+    bool status (true);
+    hid_t attribute_id (0);
+    
+    // get the identifier for the attribute
+    attribute_id = H5Aopen_name(locationID,
+				name.c_str());
+    
+    if (attribute_id > 0) {
+      status = h5get_attribute (value,
+				attribute_id);
+      H5Aclose (attribute_id);
     } else {
-      return false;
+      std::cerr << "[h5get_attribute] No valid ID for attribute "
+		<< name 
+		<< std::endl;
+      status = false;
     }
-  }
-  
-  // ------------------------------------------------------ h5get_attribute (int)
-  
-  bool h5get_attribute (int &value,
-			hid_t const &attribute_id)
-  {
-    herr_t h5error (0);
-    
-    h5error = H5Aread(attribute_id,
-		      H5T_NATIVE_INT,
-		      &value);
 
-    if (h5error == 0) {
-      return true;
+    return status;
+  }  
+
+  // ------------------------------------------------------------ h5get_attribute
+
+#ifdef HAVE_CASA
+  template <class T>
+  bool h5get_attribute (casa::Vector<T> &value,
+			std::string const &name,
+			hid_t const &locationID)
+  {
+    bool status (true);
+    hid_t attribute_id (0);
+    
+    // get the identifier for the attribute
+    attribute_id = H5Aopen_name(locationID,
+				name.c_str());
+    
+    if (attribute_id > 0) {
+      status = h5get_attribute (value,
+				attribute_id);
+      H5Aclose (attribute_id);
     } else {
-      return false;
+      std::cerr << "[h5get_attribute] No valid ID for attribute "
+		<< name 
+		<< std::endl;
+      status = false;
     }
-  }
+
+    return status;
+  }  
+#endif
+
+  // -------------------------------------------------------- h5get_attribute (T)
   
-  // --------------------------------------------------- h5get_attribute (double)
-  
-  bool h5get_attribute (double &value,
+  template <class T>
+  bool h5get_attribute (T &value,
 			hid_t const &attribute_id)
   {
-    herr_t h5error (0);
+    // Get the datatype of the attribute's value
+    hid_t datatype_id (H5Aget_type (attribute_id));
     
-    h5error = H5Aread(attribute_id,
-		      H5T_NATIVE_DOUBLE,
-		      &value);
-
+    // read attribute value into buffer
+    herr_t h5error = H5Aread (attribute_id,
+			      datatype_id,
+			      &value);
+    
     if (h5error == 0) {
       return true;
     } else {
@@ -249,23 +318,27 @@ namespace CR { // Namespace CR -- begin
     status = h5get_dataspace_shape (shape,attribute_id);
 
     if (shape.size() == 1) {
+      // adjust size of vector returning the result
+      value.resize(shape[0]);
       // additional local variables
       herr_t h5error (0);
-      hid_t dataspace_id  = H5Aget_space (attribute_id);
+      hid_t dataspace_id = H5Aget_space (attribute_id);
+      hid_t datatype_id  = H5Aget_type (attribute_id);
       T *buffer;
       // allocate buffer memory
       buffer = new T [shape[0]];
       // read attribute value into buffer
       h5error = H5Aread (attribute_id,
-			 dataspace_id,
+			 datatype_id,
 			 buffer);
       // copy retrieved data to returned vector
-      if (!h5error) {
-	value.resize(shape[0]);
+      if (h5error == 0) {
 	for (uint n(0); n<shape[0]; n++) {
 	  value[n] = buffer[n];
 	}
       } else {
+	std::cerr << "[h5get_attribute] Error reading value of attribute."
+		  << std::endl;
 	status = false;
       }
     } else {
@@ -276,6 +349,54 @@ namespace CR { // Namespace CR -- begin
 
     return status;
   }
+
+  // ------------------------------------------ h5get_attribute (casa::Vector<T>)
+
+#ifdef HAVE_CASA
+  template <class T>
+  bool h5get_attribute (casa::Vector<T> &value,
+			hid_t const &attribute_id)
+  {
+    bool status (true);
+    casa::IPosition shape;
+
+    // get the shape of the dataspace
+    status = h5get_dataspace_shape (shape,
+				    attribute_id);
+
+    if (shape.nelements() == 1) {
+      // adjust size of vector returning the result
+      value.resize(shape);
+      // additional local variables
+      herr_t h5error (0);
+      hid_t dataspace_id = H5Aget_space (attribute_id);
+      hid_t datatype_id  = H5Aget_type (attribute_id);
+      T *buffer;
+      // allocate buffer memory
+      buffer = new T [shape(0)];
+      // read attribute value into buffer
+      h5error = H5Aread (attribute_id,
+			 datatype_id,
+			 buffer);
+      // copy retrieved data to returned vector
+      if (h5error == 0) {
+	for (uint n(0); n<shape(0); n++) {
+	  value(n) = buffer[n];
+	}
+      } else {
+	std::cerr << "[h5get_attribute] Error reading value of attribute."
+		  << std::endl;
+	status = false;
+      }
+    } else {
+      std::cerr << "[h5get_attribute] Wrong shape of attribute dataspace!"
+		<< std::endl;
+      status = false;
+    }
+
+    return status;
+  }
+#endif
 
   // ============================================================================
   //
@@ -290,6 +411,19 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
+  template void show_vector (std::ostream& os,
+			     std::vector<uint> &vec);
+  template void show_vector (std::ostream& os,
+			     std::vector<int> &vec);
+  template void show_vector (std::ostream& os,
+			     std::vector<long> &vec);
+  template void show_vector (std::ostream& os,
+			     std::vector<float> &vec);
+  template void show_vector (std::ostream& os,
+			     std::vector<double> &vec);
+  template void show_vector (std::ostream& os,
+			     std::vector<std::string> &vec);
+  
   template bool h5get_attribute (uint &value,
 				 std::string const &name,
 				 hid_t const &locationID);
@@ -302,6 +436,15 @@ namespace CR { // Namespace CR -- begin
   template bool h5get_attribute (std::string &value,
 				 std::string const &name,
 				 hid_t const &locationID);
-    
+
+  template bool h5get_attribute (std::vector<uint> &value,
+				 std::string const &name,
+				 hid_t const &location_id);
+  template bool h5get_attribute (std::vector<int> &value,
+				 std::string const &name,
+				 hid_t const &location_id);
+  template bool h5get_attribute (std::vector<double> &value,
+				 std::string const &name,
+				 hid_t const &location_id);
 
 } // Namespace CR -- end

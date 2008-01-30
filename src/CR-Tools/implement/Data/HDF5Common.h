@@ -29,6 +29,11 @@
 #include <string>
 #include <vector>
 
+#ifdef HAVE_CASA
+#include <casa/Arrays/IPosition.h>
+#include <casa/Arrays/Vector.h>
+#endif
+
 #include <hdf5/H5LT.h>
 
 namespace CR { // Namespace CR -- begin
@@ -68,6 +73,14 @@ namespace CR { // Namespace CR -- begin
     
     <h3>Example(s)</h3>
     
+    <h3>Missing features</h3>
+
+    <ol>
+      <li>We need to account for the fact, that certain data - most likely
+      attributes though - can show up at different lovels within the
+      file-structure.
+    </ol>
+    
   */  
 
   // ============================================================================
@@ -75,6 +88,18 @@ namespace CR { // Namespace CR -- begin
   //  Inspection and Feedback
   //
   // ============================================================================
+
+  /*!
+    \brief Write vector to an output stream
+
+    \param os  -- Stream to which the output is written
+    \param vec -- Vector to be written to the designated output stream
+
+    \return os 
+  */
+  template<class T>
+    void show_vector (std::ostream& os,
+		      std::vector<T> &vec);
 
   /*!
     \brief Provide a summary of an attribute's internal structure
@@ -98,6 +123,7 @@ namespace CR { // Namespace CR -- begin
 			    std::string const &name,
 			    hid_t const &location_id);
 
+  //@{
   /*!
     \brief Get the shape of the dataspace associated with the attribute
 
@@ -110,6 +136,11 @@ namespace CR { // Namespace CR -- begin
   */
   bool h5get_dataspace_shape (std::vector<uint> &shape,
 			      hid_t const &attribute_id);
+#ifdef HAVE_CASA
+  bool h5get_dataspace_shape (casa::IPosition &shape,
+			      hid_t const &attribute_id);
+#endif
+  //@}
 
   // ============================================================================
   //
@@ -127,20 +158,21 @@ namespace CR { // Namespace CR -- begin
     \return status -- Status of the operation; returns <tt>false</tt> in case
             an error was encountered
   */
-  bool h5get_attribute (uint &value,
-			hid_t const &attribute_id);
-  bool h5get_attribute (int &value,
-			hid_t const &attribute_id);
-  bool h5get_attribute (double &value,
-			hid_t const &attribute_id);
-  bool h5get_attribute (std::string &value,
-			hid_t const &attribute_id);
-
-/*   template <class T> */
-/*     bool h5get_attribute (std::vector<T> &value, */
-/* 			  hid_t const &attribute_id); */
+  template <class T>
+    bool h5get_attribute (T &value,
+			  hid_t const &attribute_id);
+  template <class T>
+    bool h5get_attribute (std::vector<T> &value,
+			  hid_t const &attribute_id);
+#ifdef HAVE_CASA
+  template <class T>
+    bool h5get_attribute (casa::Vector<T> &value,
+			  hid_t const &attribute_id);
+#endif
   //@}
 
+  
+  //@{
   /*!
     \brief Get the value of an attribute attached to a group or dataset
 
@@ -156,6 +188,17 @@ namespace CR { // Namespace CR -- begin
     bool h5get_attribute (T &value,
 			  std::string const &name,
 			  hid_t const &location_id);
+  template <class T>
+    bool h5get_attribute (std::vector<T> &value,
+			  std::string const &name,
+			  hid_t const &location_id);
+#ifdef HAVE_CASA
+  template <class T>
+    bool h5get_attribute (casa::Vector<T> &value,
+			  std::string const &name,
+			  hid_t const &location_id);
+#endif
+  //@}
 
   // ============================================================================
   //

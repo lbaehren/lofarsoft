@@ -56,6 +56,8 @@ namespace CR { // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
+      <li>[CR] HDF5Common.h -- A collection of functions to work with HDF5-based
+      datafiles.
       <li>[CR] DataReader -- Base class of CR-Tools data I/O framework.
       <li>[CR] LOFAR_StationGroup -- Container for the data in the StationGroup
       of LOFAR times-series data, essentially a wrapper for the special case of
@@ -75,6 +77,9 @@ namespace CR { // Namespace CR -- begin
       <li><b>Structure of the data set</b> <br>
       \verbatim
       /                             ... Group
+      |-- TELESCOPE                 ... Attribute       ... string
+      |-- OBSERVER                  ... Attribute       ... string
+      |-- PROJECT                   ... Attribute       ... string
       |-- Station001                ... Group
       |   |-- TELESCOPE             ... Attribute       ... string
       |   |-- OBSERVER              ... Attribute       ... string
@@ -108,6 +113,211 @@ namespace CR { // Namespace CR -- begin
       |   |
       |
       \endverbatim
+      As can be read from the above listing, the internal structure of a LOFAR
+      time-series dataset is made up of a number of sub-components, each of them
+      representing a hierarchical level in the setup of the telecope.
+      <ol>
+        <li>Root group
+	  <table>
+	    <tr>
+	    <td class="indexkey">Field Name
+	    <td class="indexkey">Type
+	    <td class="indexkey">Status
+	    <td class="indexkey">Default
+	    <td class="indexkey">Desctription
+	    </tr>
+	    <tr>
+	      <td>TELESCOPE
+	      <td>string
+	      <td>mandatory
+	      <td>LOFAR
+	      <td>Name of the telescope with which the observation has been 
+	      performed.
+	    </tr>
+	    <tr>
+	      <td>OBSERVER
+	      <td>string
+	      <td>mandatory
+	      <td>LOFAR/CR
+	      <td>Name of the person either responsible for carrying out the 
+	      observation or having requested the observation; combination of 
+	      both possible.
+	    </tr>
+	    <tr>
+	      <td>PROJECT
+	      <td>string
+	      <td>mandatory
+	      <td>LOFAR/CR
+	      <td>Name of the project for which this observation has been 
+	      carried out.
+	    </tr>
+	    <tr>
+	      <td>OBSERVATION_ID
+	      <td>string
+	      <td>mandatory
+	      <td>
+	      <td>Unique identifier for this observation.
+	    </tr>
+	  </table>
+	  <br>
+        <li>Station group
+	  <table>
+	    <tr>
+	    <td class="indexkey">Field Name
+	    <td class="indexkey">Type
+	    <td class="indexkey">Status
+	    <td class="indexkey">Default
+	    <td class="indexkey">Desctription
+	    </tr>
+	    <tr>
+	      <td>STATION_ID
+	      <td>uint
+	      <td>mandatory
+	      <td>
+	      <td>Identifier of the LOFAR station at which this dipole is
+	      located.
+	    </tr>
+	    <tr>
+	      <td>STATION_POSITION
+	      <td>uint
+	      <td>mandatory
+	      <td>
+	      <td>Position of the LOFAR station in the coordinate reference frame
+	      specified by <tt>REFERENCE_FRAME</tt>
+	    </tr>
+	    <tr>
+	      <td>REFERENCE_FRAME
+	      <td>uint
+	      <td>mandatory
+	      <td>
+	      <td>Reference frame for the position cordinates of this station.
+	    </tr>
+	    <tr>
+	      <td>TELESCOPE
+	      <td>string
+	      <td>optional
+	      <td>LOFAR
+	      <td>Name of the telescope with which the observation has been 
+	      performed.
+	    </tr>
+	    <tr>
+	      <td>OBSERVER
+	      <td>string
+	      <td>optional
+	      <td>LOFAR/CR
+	      <td>Name of the person either responsible for carrying out the 
+	      observation or having requested the observation; combination of 
+	      both possible.
+	    </tr>
+	    <tr>
+	      <td>PROJECT
+	      <td>string
+	      <td>optional
+	      <td>LOFAR/CR
+	      <td>Name of the project for which this observation has been 
+	      carried out.
+	    </tr>
+	    <tr>
+	      <td>OBSERVATION_ID
+	      <td>string
+	      <td>optional
+	      <td>
+	      <td>Unique identifier for this observation.
+	    </tr>
+	    <tr>
+	      <td>OBSERVATION_MODE
+	      <td>string
+	      <td>mandatory
+	      <td>
+	      <td>Description of the telescope mode in which this observation
+	      was carried out.
+	    </tr>
+	    <tr>
+	      <td>TRIGGER_TYPE
+	      <td>string
+	      <td>mandatory
+	      <td>
+	      <td>
+	    </tr>
+	    <tr>
+	      <td>TRIGGER_OFFSET
+	      <td>string
+	      <td>mandatory
+	      <td>
+	      <td>
+	    </tr>
+	    <tr>
+	      <td>TRIGGERED_ANTENNAS
+	      <td>array<int,1>
+	      <td>optional
+	      <td>
+	      <td>
+	    </tr>
+	  </table>
+	  <br>
+	<li>Dipole dataset
+	  <table>
+	    <tr>
+	    <td class="indexkey">Field Name
+	    <td class="indexkey">Type
+	    <td class="indexkey">Status
+	    <td class="indexkey">Default
+	    <td class="indexkey">Desctription
+	    </tr>
+	    <tr>
+	      <td class="indexkey">STATION_ID
+	      <td>uint
+	      <td>optional
+	      <td>
+	      <td>Identifier of the LOFAR station at which this dipole is
+	      located.
+	    </tr>
+	    <tr>
+	      <td class="indexkey">RSP_ID
+	      <td>uint
+	      <td>mandatory
+	      <td>
+	      <td>Identifier of the RSP board, via which this dipole is connected.
+	    </tr>
+	    <tr>
+	      <td class="indexkey">RCU_ID
+	      <td>uint
+	      <td>mandatory
+	      <td>
+	      <td>Identifier of the receiver unit (RCU), to which this dipole
+	      is connected.
+	    </tr>
+	    <tr>
+	      <td class="indexkey">TIME
+	      <td>uint
+	      <td>mandatory
+	      <td>
+	      <td>
+	    </tr>
+	    <tr>
+	      <td class="indexkey">SAMPLE_NUMBER
+	      <td>uint
+	      <td>mandatory
+	      <td>
+	      <td>
+	    </tr>
+	    <tr>
+	      <td class="indexkey">SAMPLE_FREQUENCY
+	      <td>uint
+	      <td>mandatory
+	      <td>
+	      <td>
+	    </tr>
+	    <tr>
+	      <td class="indexkey">NYQUIST_ZONE
+	      <td>uint
+	      <td>mandatory
+	      <td>
+	      <td>
+	    </tr>
+	  </table>
+	  <br>
+      </ol>
       <li><b>Signal channel ID</b> <br> 
       The signal channel for an individual reception element (dipole) can be
       uniquely identified through a combination of the following three separate

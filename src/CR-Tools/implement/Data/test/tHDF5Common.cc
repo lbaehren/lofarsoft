@@ -24,6 +24,7 @@
 #include <Data/HDF5Common.h>
 
 using std::cerr;
+using std::cout;
 using std::endl;
 
 /*!
@@ -37,6 +38,51 @@ using std::endl;
  
   \date 2008/01/17
 */
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Test the additional methods to go along with the HDF5 functionality
+
+  \return nofFailedTests -- The number of failed tests in this function.
+*/
+int test_support_methods ()
+{
+  cout << "\n[test_support_methods]\n" << endl;
+
+  int nofFailedTests (0);
+  uint nofElements (10);
+
+  try {
+    std::vector<int> vec (nofElements);
+    //
+    for (uint n(0); n<vec.size(); n++) {
+      vec[n] = int(n);
+    }
+    //
+    CR::show_vector(std::cout,vec);
+    cout << endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  try {
+    std::vector<double> vec (nofElements);
+    //
+    for (uint n(0); n<vec.size(); n++) {
+      vec[n] = 0.5*n;
+    }
+    //
+    CR::show_vector(std::cout,vec);
+    cout << endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
 
 // -----------------------------------------------------------------------------
 
@@ -90,8 +136,6 @@ int get_attribute_id (hid_t const &file_id)
 
     attribute_id = H5Aopen_name(group_id,"BEAM_DIR");
     std::cout << "-- BEAM_DIR  = " << attribute_id << endl;
-    CR::h5attribute_summary (std::cout,
-			     attribute_id);
   }
 
   /*
@@ -178,6 +222,10 @@ int get_attributes (hid_t const &file_id)
     std::string project ("UNDEFINED");
     std::string observation_id ("UNDEFINED");
     std::string observation_mode ("UNDEFINED");
+    std::string trigger_type ("UNDEFINED");
+    double trigger_offset (0);
+    std::vector<int> triggered_antennas;
+    std::vector<double> beam_direction;
     
     try {
       status = CR::h5get_attribute (telescope,"TELESCOPE",group_id);
@@ -214,11 +262,47 @@ int get_attributes (hid_t const &file_id)
       nofFailedTests++;
     }
     
-    std::cout << "-- TELESCOPE        = " << telescope        << endl;
-    std::cout << "-- OBSERVER         = " << observer         << endl;
-    std::cout << "-- PROJECT          = " << project          << endl;
-    std::cout << "-- OBSERVATION_ID   = " << observation_id   << endl;
-    std::cout << "-- OBSERVATION_MODE = " << observation_mode << endl;
+    try {
+      status = CR::h5get_attribute (trigger_type,"TRIG_TYPE",group_id);
+    } catch (std::string message) {
+      cerr << message << endl;
+      nofFailedTests++;
+    }
+    
+    try {
+      status = CR::h5get_attribute (trigger_offset,"TRIG_OFST",group_id);
+    } catch (std::string message) {
+      cerr << message << endl;
+      nofFailedTests++;
+    }
+    
+    try {
+      status = CR::h5get_attribute (triggered_antennas,"TRIG_ANTS",group_id);
+    } catch (std::string message) {
+      cerr << message << endl;
+      nofFailedTests++;
+    }
+    
+    try {
+      status = CR::h5get_attribute (beam_direction,"BEAM_DIR",group_id);
+    } catch (std::string message) {
+      cerr << message << endl;
+      nofFailedTests++;
+    }
+    
+    std::cout << "-- TELESCOPE          = " << telescope        << endl;
+    std::cout << "-- OBSERVER           = " << observer         << endl;
+    std::cout << "-- PROJECT            = " << project          << endl;
+    std::cout << "-- OBSERVATION_ID     = " << observation_id   << endl;
+    std::cout << "-- OBSERVATION_MODE   = " << observation_mode << endl;
+    std::cout << "-- TRIGGER_TYPE       = " << trigger_type     << endl;
+    std::cout << "-- TRIGGER_OFFSET     = " << trigger_offset   << endl;
+    std::cout << "-- TRIGGERED_ANTENNAS = "; CR::show_vector(std::cout,
+							     triggered_antennas);
+    std::cout << std::endl;
+    std::cout << "-- BEAM_DIRECTION     = "; CR::show_vector(std::cout,
+							   beam_direction);
+    std::cout << std::endl;
 
   } else {
     cerr << "[get_attributes] Unable to open station group!" << endl;
@@ -237,6 +321,8 @@ int get_attributes (hid_t const &file_id)
     uint samples_per_frame (0);
     uint data_length (0);
     uint nyquist_zone (0);
+    std::vector<double> antenna_position;
+    std::vector<double> antenna_orientation;
 
     try {
       status = CR::h5get_attribute (station_id,"STATION_ID",dataset_id);
@@ -301,6 +387,20 @@ int get_attributes (hid_t const &file_id)
       nofFailedTests++;
     }
     
+    try {
+      status = CR::h5get_attribute (antenna_position,"ANT_POSITION",dataset_id);
+    } catch (std::string message) {
+      cerr << message << endl;
+      nofFailedTests++;
+    }
+    
+    try {
+      status = CR::h5get_attribute (antenna_orientation,"ANT_ORIENTATION",dataset_id);
+    } catch (std::string message) {
+      cerr << message << endl;
+      nofFailedTests++;
+    }
+    
     std::cout << "-- STATION_ID        = " << station_id        << endl;
     std::cout << "-- RSP_ID            = " << rsp_id            << endl;
     std::cout << "-- RCU_ID            = " << rcu_id            << endl;
@@ -355,6 +455,11 @@ int main (int argc,
   int nofFailedTests (0);
 
   /*
+    Some tests do not require any external data input
+  */
+  nofFailedTests += test_support_methods ();
+
+  /*
     Check if filename of the dataset is provided on the command line; if not
     exit the program.
   */
@@ -375,7 +480,6 @@ int main (int argc,
 			   H5P_DEFAULT);
   
   if (file_id > 0) {
-    std::cout << "[tHDF5Common] Successfully opened HDF5 file." << endl;
     nofFailedTests += get_attribute_id (file_id);
     nofFailedTests += get_attributes (file_id);
     nofFailedTests += attribute_summary (file_id);

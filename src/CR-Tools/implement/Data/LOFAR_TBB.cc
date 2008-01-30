@@ -316,6 +316,11 @@ namespace CR { // Namespace CR -- begin
       try {
 	// Name of the observatory
 	header_p.define("Observatory",stationGroups_p[0].telescope());
+	header_p.define("Observer",stationGroups_p[0].observer());
+	header_p.define("Project",stationGroups_p[0].project());
+	header_p.define("ObservationID",stationGroups_p[0].observationID());
+	header_p.define("ObservationMode",stationGroups_p[0].observationMode());
+	header_p.define("TriggerType",stationGroups_p[0].triggerType());
       } catch (std::string message) {
 	std::cerr << "[LOFAR_TBB::setHeaderRecord] " << message << std::endl;
 	status = false;

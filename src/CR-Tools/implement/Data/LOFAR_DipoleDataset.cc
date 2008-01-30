@@ -237,4 +237,56 @@ namespace CR { // Namespace CR -- begin
     }
   }
 
+  // ----------------------------------------------------------- antenna_position
+
+  std::vector<double> LOFAR_DipoleDataset::antenna_position ()
+  {
+    std::vector<double> val;
+
+    if (h5get_attribute(val,"ANTENNA_POSITION",H5datasetID_p)) {
+      return val;
+    } else {
+      return std::vector<double> (1);
+    }
+  }
+
+  // -------------------------------------------------------- antenna_orientation
+
+  std::vector<double> LOFAR_DipoleDataset::antenna_orientation ()
+  {
+    std::vector<double> val;
+
+    if (h5get_attribute(val,"ANTENNA_ORIENTATION",H5datasetID_p)) {
+      return val;
+    } else {
+      return std::vector<double> (1);
+    }
+  }
+
+  // ---------------------------------------------------------- attributes2record
+
+  casa::Record LOFAR_DipoleDataset::attributes2record ()
+  {
+    casa::Record rec;
+
+    try {
+      rec.define("STATION_ID",station_id());
+      rec.define("RSP_ID",rsp_id());
+      rec.define("RCU_ID",rcu_id());
+      rec.define("TIME",time());
+      rec.define("SAMPLE_FREQUENCY",sample_frequency());
+      rec.define("NYQUIST_ZONE",nyquist_zone());
+      rec.define("FEED",feed());
+//       rec.define("ANTENNA_POSITION",antenna_position());
+//       rec.define("ANTENNA_ORIENTATION",antenna_orientation());
+    } catch (std::string message) {
+      std::cerr << "[LOFAR_DipoleDataset::attributes2record] "
+		<< "Error filling the record with attribute values!\n"
+		<< message
+		<< std::endl;
+    }
+
+    return rec;
+  }
+
 } // Namespace CR -- end

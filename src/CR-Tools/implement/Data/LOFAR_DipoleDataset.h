@@ -27,6 +27,9 @@
 #include <string>
 #include <Data/HDF5Common.h>
 
+#include <casa/aips.h>
+#include <casa/Containers/Record.h>
+
 namespace CR { // Namespace CR -- begin
   
   /*!
@@ -261,11 +264,30 @@ namespace CR { // Namespace CR -- begin
     */
     uint data_length ();
 
+    /*!
+      \brief Get the type of feed for this dipole
+
+      \return feed -- The type of antenna feed of this dipole
+    */
     std::string feed ();
 
+    /*!
+      \brief Get the antenna position w.r.t. the center of the station
+
+      \return position -- The three-dimension antenna position w.r.t. to the 
+              absolute reference position (typically the center of the station).
+    */
     std::vector<double> antenna_position ();
 
     std::vector<double> antenna_orientation ();
+
+    /*!
+      \brief Get a casa::Record containing the values of the attributes
+
+      \return record -- A casa::Record container holding the values of the 
+              attributes attached to the dataset for this dipole
+    */
+    casa::Record attributes2record ();
     
   private:
     
