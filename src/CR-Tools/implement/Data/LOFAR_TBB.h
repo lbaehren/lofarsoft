@@ -35,11 +35,12 @@
 #include <dal/dal.h>
 #include <dal/dalDataset.h>
 
+#include <Data/LOFAR_Attributes.h>
 #include <Data/LOFAR_StationGroup.h>
 #include <IO/DataReader.h>
 
 namespace CR { // Namespace CR -- begin
-  
+
   /*!
     \class LOFAR_TBB
     
@@ -58,6 +59,7 @@ namespace CR { // Namespace CR -- begin
     <ul type="square">
       <li>[CR] HDF5Common.h -- A collection of functions to work with HDF5-based
       datafiles.
+      <li>[CR] CR::Attributes
       <li>[CR] DataReader -- Base class of CR-Tools data I/O framework.
       <li>[CR] LOFAR_StationGroup -- Container for the data in the StationGroup
       of LOFAR times-series data, essentially a wrapper for the special case of
@@ -292,7 +294,8 @@ namespace CR { // Namespace CR -- begin
 	      <td>uint
 	      <td>mandatory
 	      <td>
-	      <td>
+	      <td>Date of the observation. Standard unix date i.e. (GMT-)seconds
+	      since 1.1.1970
 	    </tr>
 	    <tr>
 	      <td class="indexkey">SAMPLE_NUMBER
