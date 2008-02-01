@@ -93,6 +93,7 @@ namespace CR { // Namespace CR -- begin
   */  
   class analyseLOPESevent {
     
+  protected: //variables are protected to make them available in child class
     //! the pipeline object
     CRinvFFT *pipeline_p;
 
@@ -453,7 +454,7 @@ namespace CR { // Namespace CR -- begin
 			    Double Az,
 			    Double El);
 
-  private:
+  protected: //this methods are protected to make them available in child class
     
     /*!
       \brief Unconditional deletion 

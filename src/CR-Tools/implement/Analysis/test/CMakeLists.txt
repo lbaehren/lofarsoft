@@ -19,6 +19,7 @@ set (tests
   tppfinversion
   tSecondStagePipeline
   tSubbandID
+  tCompletePipeline
   )
 
 ## -----------------------------------------------------------------------------
@@ -60,20 +61,25 @@ endif (ROOT_LIBRARIES AND PYTHON_LIBRARIES)
 if (HAVE_PLPLOT OR HAVE_PGPLOT)
   ## build instructions
   add_executable (tanalyseLOPESevent tanalyseLOPESevent.cc)
+  add_executable (tanalyseLOPESevent2 tanalyseLOPESevent2.cc)
   ## [1] When using PLplot that is the only additional library we need to link against
   if (HAVE_PLPLOT)
     ## link instructions
     target_link_libraries (tanalyseLOPESevent cr ${PLPLOT_LIBRARIES})
+    target_link_libraries (tanalyseLOPESevent2 cr ${PLPLOT_LIBRARIES})
   endif (HAVE_PLPLOT)
   # [2] When using PGPlot, we also require the X11 libraries
   if (PGPLOT_LIBRARIES AND X11_LIBRARIES)
     ## link instructions
     target_link_libraries (tanalyseLOPESevent cr ${X11_LIBRARIES} ${PGPLOT_LIBRARIES})
+    target_link_libraries (tanalyseLOPESevent2 cr ${X11_LIBRARIES} ${PGPLOT_LIBRARIES})
   endif (PGPLOT_LIBRARIES AND X11_LIBRARIES)
   ## testing
   add_test (tanalyseLOPESevent tanalyseLOPESevent)
+  add_test (tanalyseLOPESevent2 tanalyseLOPESevent2)
   ## installation instructions
   list (APPEND tests tanalyseLOPESevent)
+  list (APPEND tests tanalyseLOPESevent2)
 endif (HAVE_PLPLOT OR HAVE_PGPLOT)
 
 ## -----------------------------------------------------------------------------
