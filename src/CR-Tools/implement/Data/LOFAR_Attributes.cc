@@ -52,12 +52,6 @@ namespace LOFAR { // Namespace LOFAR -- begin
     case OBSERVATION_MODE:
       name = "OBSERVATION_MODE";
       break;
-    case TIME:
-      name = "TIME";
-      break;
-    case SAMPLE_NUMBER:
-      name = "SAMPLE_NUMBER";
-      break;
       // --- Attributes for an individual LOFAR station --------------
     case STATION_ID:
       name = "STATION_ID";
@@ -69,11 +63,32 @@ namespace LOFAR { // Namespace LOFAR -- begin
     case RCU_ID:
       name = "RCU_ID";
       break;
+    case TIME:
+      name = "TIME";
+      break;
+    case SAMPLE_NUMBER:
+      name = "SAMPLE_NUMBER";
+      break;
     case SAMPLE_FREQUENCY:
       name = "SAMPLE_FREQUENCY";
       break;
     case NYQUIST_ZONE:
       name = "NYQUIST_ZONE";
+      break;
+    case SAMPLES_PER_FRAME:
+      name = "SAMPLES_PER_FRAME";
+      break;
+    case DATA_LENGTH:
+      name = "DATA_LENGTH";
+      break;
+    case FEED:
+      name = "FEED";
+      break;
+    case ANTENNA_POSITION:
+      name = "ANTENNA_POSITION";
+      break;
+    case ANTENNA_ORIENTATION:
+      name = "ANTENNA_ORIENTATION";
       break;
       // --- Trigger algorithm ---------------------------------------
     case TRIGGER_TYPE:

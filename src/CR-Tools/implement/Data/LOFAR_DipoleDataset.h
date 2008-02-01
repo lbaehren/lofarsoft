@@ -28,6 +28,7 @@
 #include <Data/HDF5Common.h>
 
 #include <casa/aips.h>
+#include <casa/Arrays/Vector.h>
 #include <casa/Containers/Record.h>
 
 namespace LOFAR { // Namespace LOFAR -- begin
@@ -277,9 +278,9 @@ namespace LOFAR { // Namespace LOFAR -- begin
       \return position -- The three-dimension antenna position w.r.t. to the 
               absolute reference position (typically the center of the station).
     */
-    std::vector<double> antenna_position ();
+    casa::Vector<double> antenna_position ();
 
-    std::vector<double> antenna_orientation ();
+    casa::Vector<double> antenna_orientation ();
 
     /*!
       \brief Get a casa::Record containing the values of the attributes

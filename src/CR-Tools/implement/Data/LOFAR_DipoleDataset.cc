@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include <Data/LOFAR_DipoleDataset.h>
+#include <Data/LOFAR_Attributes.h>
 
 namespace LOFAR { // Namespace LOFAR -- begin
   
@@ -113,7 +114,9 @@ namespace LOFAR { // Namespace LOFAR -- begin
   {
     uint id (0);
 
-    if (h5get_attribute(id,"STATION_ID",H5datasetID_p)) {
+    if (h5get_attribute(id,
+			attribute_name(LOFAR::STATION_ID),
+			H5datasetID_p)) {
       return id;
     } else {
       return 0;
@@ -126,7 +129,9 @@ namespace LOFAR { // Namespace LOFAR -- begin
   {
     uint id (0);
 
-    if (h5get_attribute(id,"RSP_ID",H5datasetID_p)) {
+    if (h5get_attribute(id,
+			attribute_name(LOFAR::RSP_ID),
+			H5datasetID_p)) {
       return id;
     } else {
       return 0;
@@ -139,7 +144,9 @@ namespace LOFAR { // Namespace LOFAR -- begin
   {
     uint val (0);
 
-    if (h5get_attribute(val,"RCU_ID",H5datasetID_p)) {
+    if (h5get_attribute(val,
+			attribute_name(LOFAR::RCU_ID),
+			H5datasetID_p)) {
       return val;
     } else {
       return 0;
@@ -152,7 +159,9 @@ namespace LOFAR { // Namespace LOFAR -- begin
   {
     uint val (0);
 
-    if (h5get_attribute(val,"TIME",H5datasetID_p)) {
+    if (h5get_attribute(val,
+			attribute_name(LOFAR::TIME),
+			H5datasetID_p)) {
       return val;
     } else {
       return 0;
@@ -165,7 +174,9 @@ namespace LOFAR { // Namespace LOFAR -- begin
   {
     double val (0);
 
-    if (h5get_attribute(val,"SAMPLE_FREQ",H5datasetID_p)) {
+    if (h5get_attribute(val,
+			attribute_name(LOFAR::SAMPLE_FREQUENCY),
+			H5datasetID_p)) {
       return val;
     } else {
       return 0;
@@ -178,7 +189,9 @@ namespace LOFAR { // Namespace LOFAR -- begin
   {
     uint val (0);
 
-    if (h5get_attribute(val,"NYQUIST_ZONE",H5datasetID_p)) {
+    if (h5get_attribute(val,
+			attribute_name(LOFAR::NYQUIST_ZONE),
+			H5datasetID_p)) {
       return val;
     } else {
       return 0;
@@ -191,7 +204,9 @@ namespace LOFAR { // Namespace LOFAR -- begin
   {
     uint val (0);
 
-    if (h5get_attribute(val,"SAMPLE_NR",H5datasetID_p)) {
+    if (h5get_attribute(val,
+			attribute_name(LOFAR::SAMPLE_NUMBER),
+			H5datasetID_p)) {
       return val;
     } else {
       return 0;
@@ -204,7 +219,9 @@ namespace LOFAR { // Namespace LOFAR -- begin
   {
     uint val (0);
 
-    if (h5get_attribute(val,"SAMPLES_PER_FRAME",H5datasetID_p)) {
+    if (h5get_attribute(val,
+			attribute_name(LOFAR::SAMPLES_PER_FRAME),
+			H5datasetID_p)) {
       return val;
     } else {
       return 0;
@@ -217,7 +234,9 @@ namespace LOFAR { // Namespace LOFAR -- begin
   {
     uint val (0);
 
-    if (h5get_attribute(val,"DATA_LENGTH",H5datasetID_p)) {
+    if (h5get_attribute(val,
+			attribute_name(LOFAR::DATA_LENGTH),
+			H5datasetID_p)) {
       return val;
     } else {
       return 0;
@@ -230,7 +249,9 @@ namespace LOFAR { // Namespace LOFAR -- begin
   {
     std::string val;
 
-    if (h5get_attribute(val,"FEED",H5datasetID_p)) {
+    if (h5get_attribute(val,
+			attribute_name(LOFAR::FEED),
+			H5datasetID_p)) {
       return val;
     } else {
       return std::string ("");
@@ -239,27 +260,31 @@ namespace LOFAR { // Namespace LOFAR -- begin
 
   // ----------------------------------------------------------- antenna_position
 
-  std::vector<double> LOFAR_DipoleDataset::antenna_position ()
+  casa::Vector<double> LOFAR_DipoleDataset::antenna_position ()
   {
-    std::vector<double> val;
+    casa::Vector<double> val;
 
-    if (h5get_attribute(val,"ANTENNA_POSITION",H5datasetID_p)) {
+    if (h5get_attribute(val,
+			attribute_name(LOFAR::ANTENNA_POSITION),
+			H5datasetID_p)) {
       return val;
     } else {
-      return std::vector<double> (1);
+      return casa::Vector<double> (1);
     }
   }
 
   // -------------------------------------------------------- antenna_orientation
 
-  std::vector<double> LOFAR_DipoleDataset::antenna_orientation ()
+  casa::Vector<double> LOFAR_DipoleDataset::antenna_orientation ()
   {
-    std::vector<double> val;
+    casa::Vector<double> val;
 
-    if (h5get_attribute(val,"ANTENNA_ORIENTATION",H5datasetID_p)) {
+    if (h5get_attribute(val,
+			attribute_name(LOFAR::ANTENNA_ORIENTATION),
+			H5datasetID_p)) {
       return val;
     } else {
-      return std::vector<double> (1);
+      return casa::Vector<double> (1);
     }
   }
 
@@ -270,15 +295,15 @@ namespace LOFAR { // Namespace LOFAR -- begin
     casa::Record rec;
 
     try {
-      rec.define("STATION_ID",station_id());
-      rec.define("RSP_ID",rsp_id());
-      rec.define("RCU_ID",rcu_id());
-      rec.define("TIME",time());
-      rec.define("SAMPLE_FREQUENCY",sample_frequency());
-      rec.define("NYQUIST_ZONE",nyquist_zone());
-      rec.define("FEED",feed());
-//       rec.define("ANTENNA_POSITION",antenna_position());
-//       rec.define("ANTENNA_ORIENTATION",antenna_orientation());
+      rec.define(attribute_name(LOFAR::STATION_ID),station_id());
+      rec.define(attribute_name(LOFAR::RSP_ID),rsp_id());
+      rec.define(attribute_name(LOFAR::RCU_ID),rcu_id());
+      rec.define(attribute_name(LOFAR::TIME),time());
+      rec.define(attribute_name(LOFAR::SAMPLE_FREQUENCY),sample_frequency());
+      rec.define(attribute_name(LOFAR::NYQUIST_ZONE),nyquist_zone());
+      rec.define(attribute_name(LOFAR::FEED),feed());
+      rec.define(attribute_name(LOFAR::ANTENNA_POSITION),antenna_position());
+      rec.define(attribute_name(LOFAR::ANTENNA_ORIENTATION),antenna_orientation());
     } catch (std::string message) {
       std::cerr << "[LOFAR_DipoleDataset::attributes2record] "
 		<< "Error filling the record with attribute values!\n"

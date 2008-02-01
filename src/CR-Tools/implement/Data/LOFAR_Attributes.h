@@ -46,8 +46,9 @@ namespace LOFAR { // Namespace LOFAR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[CR] LOFAR_TBB
-      <li>[CR] LOFAR_StationGroup
+      <li>CR::LOFAR_TBB
+      <li>LOFAR::LOFAR_StationGroup
+      <li>LOFAR::LOFAR_DipoleDataset
     </ul>
     
     <h3>Synopsis</h3>
@@ -108,10 +109,19 @@ namespace LOFAR { // Namespace LOFAR -- begin
       Sample frequency in the analog-digital conversion step
     */
     SAMPLE_FREQUENCY,
+    SAMPLES_PER_FRAME,
+    DATA_LENGTH,
+    FEED,
+    ANTENNA_POSITION,
+    ANTENNA_ORIENTATION,
     /*!
       Nyquist zone within which the analog-digital conversion step is performed
     */
     NYQUIST_ZONE,
+    // ---------------------------------------------------------------
+    //  Attributes associated with the trigger algorithm running on
+    //  on the FPGA or the local control unit (LCU)
+    // ---------------------------------------------------------------
     TRIGGER_TYPE,
     TRIGGER_OFFSET,
     /*!
@@ -136,4 +146,4 @@ namespace LOFAR { // Namespace LOFAR -- begin
 } // Namespace LOFAR -- end
 
 #endif /* LOFAR_ATTRIBUTES_H */
-  
+

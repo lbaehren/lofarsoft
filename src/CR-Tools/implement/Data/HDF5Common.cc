@@ -447,4 +447,16 @@ namespace LOFAR { // Namespace LOFAR -- begin
 				 std::string const &name,
 				 hid_t const &location_id);
 
+#ifdef HAVE_CASA
+  template bool h5get_attribute (casa::Vector<uint> &value,
+				 std::string const &name,
+				 hid_t const &location_id);
+  template bool h5get_attribute (casa::Vector<int> &value,
+				 std::string const &name,
+				 hid_t const &location_id);
+  template bool h5get_attribute (casa::Vector<double> &value,
+				 std::string const &name,
+				 hid_t const &location_id);
+#endif
+
 } // Namespace LOFAR -- end

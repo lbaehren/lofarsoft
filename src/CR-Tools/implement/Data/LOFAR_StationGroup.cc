@@ -21,6 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <Data/LOFAR_Attributes.h>
 #include <Data/LOFAR_StationGroup.h>
 
 namespace LOFAR { // Namespace LOFAR -- begin
@@ -256,7 +257,7 @@ namespace LOFAR { // Namespace LOFAR -- begin
       dataset_id = H5Dopen(H5fileID_p, id.c_str());
       // get the identifier for the attribute
       attribute_id = H5Aopen_name (dataset_id,
-				   "TIME");
+				   attribute_name(LOFAR::TIME).c_str());
       // If the attribute could be located, we can retrieve its value
       if (attribute_id > 0) {
 	if (H5Aread(attribute_id,

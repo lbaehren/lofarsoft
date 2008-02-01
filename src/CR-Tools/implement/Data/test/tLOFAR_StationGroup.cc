@@ -23,6 +23,8 @@
 
 #include <iostream>
 
+#include <casa/Arrays/Vector.h>
+
 #include <dal/dal.h>
 #include <dal/dalDataset.h>
 
