@@ -30,12 +30,12 @@
 #include <casa/aips.h>
 #include <casa/Containers/Record.h>
 
-namespace CR { // Namespace CR -- begin
+namespace LOFAR { // Namespace LOFAR -- begin
   
   /*!
     \class LOFAR_DipoleDataset
     
-    \ingroup CR_Data
+    \ingroup LOFAR
     
     \brief Container for dipole-based data in a LOFAR TBB time-series dataset
     
@@ -327,7 +327,7 @@ namespace CR { // Namespace CR -- begin
     
   };
   
-} // Namespace CR -- end
+} // Namespace LOFAR -- end
 
 #endif /* LOFAR_DIPOLEDATASET_H */
   

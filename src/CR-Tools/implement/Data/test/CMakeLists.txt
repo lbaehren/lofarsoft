@@ -10,6 +10,7 @@ set (tests
   tDataFlag
   tITS_Beam
   tITSMetadata
+  tLOFAR_Attributes
   tLopesEvent
   tLopesEventIn
   tNDABeam

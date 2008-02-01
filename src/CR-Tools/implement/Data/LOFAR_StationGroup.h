@@ -33,12 +33,12 @@
 
 #include <Data/LOFAR_DipoleDataset.h>
 
-namespace CR { // Namespace CR -- begin
+namespace LOFAR { // Namespace LOFAR -- begin
   
   /*!
     \class LOFAR_StationGroup
     
-    \ingroup CR_Data
+    \ingroup LOFAR
     
     \brief Container for the data in the StationGroup of LOFAR times-series data
     
@@ -349,7 +349,7 @@ namespace CR { // Namespace CR -- begin
     
   };
   
-} // Namespace CR -- end
+} // Namespace LOFAR -- end
 
 #endif /* LOFAR_STATIONGROUP_H */
   

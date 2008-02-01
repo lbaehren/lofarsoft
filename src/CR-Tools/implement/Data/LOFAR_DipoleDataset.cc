@@ -23,7 +23,7 @@
 
 #include <Data/LOFAR_DipoleDataset.h>
 
-namespace CR { // Namespace CR -- begin
+namespace LOFAR { // Namespace LOFAR -- begin
   
   // ============================================================================
   //
@@ -289,4 +289,4 @@ namespace CR { // Namespace CR -- begin
     return rec;
   }
 
-} // Namespace CR -- end
+} // Namespace LOFAR -- end

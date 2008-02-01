@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2008                                                  *
- *   Lars Baehren (<mail>)                                                     *
+ *   Copyright (C) 2008                                                    *
+ *   Lars B"ahren (lbaehren@gmail.com)                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,14 +21,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <iostream>
+#include <string>
+
 #include <Data/LOFAR_Attributes.h>
 
-using CR::LOFAR_Attributes;  // Namespace usage
+using std::cout;
+using std::endl;
 
 /*!
   \file tLOFAR_Attributes.cc
 
-  \ingroup Data
+  \ingroup LOFAR
 
   \brief A collection of test routines for the LOFAR_Attributes class
  
@@ -48,15 +52,17 @@ int test_LOFAR_Attributes ()
 {
   int nofFailedTests (0);
   
-  std::cout << "\n[test_LOFAR_Attributes]\n" << std::endl;
+  cout << "\n[test_LOFAR_Attributes]\n" << endl;
 
-  std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
-    LOFAR_Attributes newLOFAR_Attributes;
-    //
-    newLOFAR_Attributes.summary(); 
+    cout << "-- " << LOFAR::attribute_name (LOFAR::TELESCOPE)        << endl;
+    cout << "-- " << LOFAR::attribute_name (LOFAR::OBSERVER)         << endl;
+    cout << "-- " << LOFAR::attribute_name (LOFAR::PROJECT)          << endl;
+    cout << "-- " << LOFAR::attribute_name (LOFAR::OBSERVATION_ID)   << endl;
+    cout << "-- " << LOFAR::attribute_name (LOFAR::OBSERVATION_MODE) << endl;
+    cout << "-- " << LOFAR::attribute_name (LOFAR::TIME)             << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
@@ -68,11 +74,8 @@ int test_LOFAR_Attributes ()
 int main ()
 {
   int nofFailedTests (0);
-
-  // Test for the constructor(s)
-  {
-    nofFailedTests += test_LOFAR_Attributes ();
-  }
+  
+  nofFailedTests += test_LOFAR_Attributes ();
 
   return nofFailedTests;
 }

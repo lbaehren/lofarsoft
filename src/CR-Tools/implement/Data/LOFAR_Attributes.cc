@@ -23,7 +23,7 @@
 
 #include <Data/LOFAR_Attributes.h>
 
-namespace CR { // Namespace CR -- begin
+namespace LOFAR { // Namespace LOFAR -- begin
   
   // ============================================================================
   //
@@ -44,32 +44,51 @@ namespace CR { // Namespace CR -- begin
       name = "OBSERVER";
       break;
     case PROJECT:
-      return "PROJECT";
+      name = "PROJECT";
       break;
     case OBSERVATION_ID:
-      return "OBSERVATION_ID";
+      name = "OBSERVATION_ID";
       break;
     case OBSERVATION_MODE:
-      return "OBSERVATION_MODE";
+      name = "OBSERVATION_MODE";
       break;
     case TIME:
-      return "TIME";
+      name = "TIME";
+      break;
+    case SAMPLE_NUMBER:
+      name = "SAMPLE_NUMBER";
       break;
       // --- Attributes for an individual LOFAR station --------------
     case STATION_ID:
-      return "STATION_ID";
+      name = "STATION_ID";
       break;
       // --- Attributes for an individual signal channel (dipole) ----
     case RSP_ID:
-      return "RSP_ID";
+      name = "RSP_ID";
       break;
     case RCU_ID:
-      return "RCU_ID";
+      name = "RCU_ID";
+      break;
+    case SAMPLE_FREQUENCY:
+      name = "SAMPLE_FREQUENCY";
+      break;
+    case NYQUIST_ZONE:
+      name = "NYQUIST_ZONE";
+      break;
+      // --- Trigger algorithm ---------------------------------------
+    case TRIGGER_TYPE:
+      name = "TRIGGER_TYPE";
+      break;
+    case TRIGGER_OFFSET:
+      name = "TRIGGER_OFFSET";
+      break;
+    case TRIGGERED_ANTENNAS:
+      name = "TRIGGERED_ANTENNAS";
       break;
     }
-
+    
     return name;
   }
-
-
-} // Namespace CR -- end
+  
+  
+} // Namespace LOFAR -- end

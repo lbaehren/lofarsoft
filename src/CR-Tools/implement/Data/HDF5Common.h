@@ -36,12 +36,12 @@
 
 #include <hdf5/H5LT.h>
 
-namespace CR { // Namespace CR -- begin
+namespace LOFAR { // Namespace LOFAR -- begin
   
   /*!
     \file HDF5Common.h
   
-    \ingroup CR_Data
+    \ingroup LOFAR
     
     \brief A collection of routines to work with HDF5 datasets
     
@@ -65,7 +65,7 @@ namespace CR { // Namespace CR -- begin
       <ul>
         <li>CR::LOFAR_TBB
         <li>CR::LOFAR_StationGroup
-        <li>CR::LOFAR_DipoleDataset
+        <li>LOFAR::LOFAR_DipoleDataset
       </ul>
     </ul>
     
@@ -206,7 +206,7 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
-} // Namespace CR -- end
+} // Namespace LOFAR -- end
 
 #endif /* HDF5COMMON_H */
   

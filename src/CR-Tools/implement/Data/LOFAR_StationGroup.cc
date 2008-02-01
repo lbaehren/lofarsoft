@@ -23,7 +23,7 @@
 
 #include <Data/LOFAR_StationGroup.h>
 
-namespace CR { // Namespace CR -- begin
+namespace LOFAR { // Namespace LOFAR -- begin
   
   // ============================================================================
   //
@@ -402,4 +402,4 @@ namespace CR { // Namespace CR -- begin
     return dataset_ids;
   }
 
-} // Namespace CR -- end
+} // Namespace LOFAR -- end

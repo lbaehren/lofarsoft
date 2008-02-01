@@ -28,12 +28,12 @@
 #include <iostream>
 #include <string>
 
-namespace CR { // Namespace CR -- begin
+namespace LOFAR { // Namespace LOFAR -- begin
   
   /*!
-    \enum LOFAR_Attributes
+    \file LOFAR_Attributes.h
     
-    \ingroup CR_Data
+    \ingroup LOFAR
     
     \brief List of attributes used within a LOFAR time-series dataset
     
@@ -46,24 +46,24 @@ namespace CR { // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[start filling in your text here]
+      <li>[CR] LOFAR_TBB
+      <li>[CR] LOFAR_StationGroup
     </ul>
     
     <h3>Synopsis</h3>
     
     <h3>Example(s)</h3>
     
-  */  
+  */
+
   enum Attributes {
+    // ---------------------------------------------------------------
+    //  General attributes for telescope and observation
+    // ---------------------------------------------------------------
     /*!
-      Unique identifier for this observation.
-     */
-    OBSERVATION_ID,
-    /*!
-      Description of the telescope mode in which this observation was carried
-      out.
-     */
-    OBSERVATION_MODE,
+      Name of the telescope with which the observation has been performed.
+    */
+    TELESCOPE,
     /*!
       Name of the person either responsible for carrying out the observation
       or having requested the observation; combination of both possible.
@@ -74,9 +74,14 @@ namespace CR { // Namespace CR -- begin
     */
     PROJECT,
     /*!
-      Name of the telescope with which the observation has been performed.
-    */
-    TELESCOPE,
+      Unique identifier for this observation.
+     */
+    OBSERVATION_ID,
+    /*!
+      Description of the telescope mode in which this observation was carried
+      out.
+     */
+    OBSERVATION_MODE,
     /*!
       Identifier for the LOFAR station
     */
@@ -108,7 +113,11 @@ namespace CR { // Namespace CR -- begin
     */
     NYQUIST_ZONE,
     TRIGGER_TYPE,
-    TRIGGER_OFFSET
+    TRIGGER_OFFSET,
+    /*!
+      List of antennas from which a trigger originated
+    */
+    TRIGGERED_ANTENNAS
   };
 
   // -------------------------------------------------------------------- Methods
@@ -124,7 +133,7 @@ namespace CR { // Namespace CR -- begin
   std::string attribute_name (Attributes const &num);
   
   
-} // Namespace CR -- end
+} // Namespace LOFAR -- end
 
 #endif /* LOFAR_ATTRIBUTES_H */
   

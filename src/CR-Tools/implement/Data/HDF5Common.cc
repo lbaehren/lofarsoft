@@ -26,7 +26,7 @@
 using std::cout;
 using std::endl;
 
-namespace CR { // Namespace CR -- begin
+namespace LOFAR { // Namespace LOFAR -- begin
   
   // ============================================================================
   //
@@ -447,4 +447,4 @@ namespace CR { // Namespace CR -- begin
 				 std::string const &name,
 				 hid_t const &location_id);
 
-} // Namespace CR -- end
+} // Namespace LOFAR -- end

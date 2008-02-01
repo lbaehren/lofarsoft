@@ -23,12 +23,12 @@
 
 #include <Data/LOFAR_DipoleDataset.h>
 
-using CR::LOFAR_DipoleDataset;  // Namespace usage
+using LOFAR::LOFAR_DipoleDataset;  // Namespace usage
 
 /*!
   \file tLOFAR_DipoleDataset.cc
 
-  \ingroup Data
+  \ingroup LOFAR
 
   \brief A collection of test routines for the LOFAR_DipoleDataset class
  

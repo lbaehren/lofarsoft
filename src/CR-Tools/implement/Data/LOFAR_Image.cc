@@ -23,7 +23,7 @@
 
 #include <Data/LOFAR_Image.h>
 
-namespace CR { // Namespace CR -- begin
+namespace LOFAR { // Namespace LOFAR -- begin
   
   // ============================================================================
   //
@@ -90,4 +90,4 @@ namespace CR { // Namespace CR -- begin
   
   
 
-} // Namespace CR -- end
+} // Namespace LOFAR -- end

@@ -182,8 +182,8 @@ namespace CR { // Namespace CR -- begin
 
       for (uint station(0); station<stationGroups.size(); station++) {
 	// assemble internal list of station groups
-	LOFAR_StationGroup group ((*dataset_p),
-				  stationGroups[station]);
+	LOFAR::LOFAR_StationGroup group ((*dataset_p),
+					 stationGroups[station]);
 	stationGroups_p.push_back(group);
 	//
 	std::vector<std::string> channel_ids = group.channelIDs();

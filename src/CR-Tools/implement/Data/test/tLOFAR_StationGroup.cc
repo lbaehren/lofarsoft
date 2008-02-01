@@ -32,7 +32,7 @@
 // Namespace usage
 using std::cout;
 using std::endl;
-using CR::LOFAR_StationGroup;
+using LOFAR::LOFAR_StationGroup;
 
 /*!
   \file tLOFAR_StationGroup.cc

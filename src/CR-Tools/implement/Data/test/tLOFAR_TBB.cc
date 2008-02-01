@@ -197,7 +197,7 @@ int test_hdf5 (std::string const &filename)
 
     cout << "--> Reading in STATION_ID attribute ..." << endl;
     try {
-      status = CR::h5get_attribute (station_id,"STATION_ID",channelDataset_id);
+      status = LOFAR::h5get_attribute (station_id,"STATION_ID",channelDataset_id);
     } catch (std::string message) {
       std::cerr << message << std::endl;
       nofFailedTests++;
@@ -205,7 +205,7 @@ int test_hdf5 (std::string const &filename)
 
     cout << "--> Reading in RSP_ID attribute ..." << endl;
     try {
-      status = CR::h5get_attribute (rsp_id,"RSP_ID",channelDataset_id);
+      status = LOFAR::h5get_attribute (rsp_id,"RSP_ID",channelDataset_id);
     } catch (std::string message) {
       std::cerr << message << std::endl;
       nofFailedTests++;
@@ -213,7 +213,7 @@ int test_hdf5 (std::string const &filename)
 
     cout << "--> Reading in RCU_ID attribute ..." << endl;
     try {
-      status = CR::h5get_attribute (rcu_id,"RCU_ID",channelDataset_id);
+      status = LOFAR::h5get_attribute (rcu_id,"RCU_ID",channelDataset_id);
     } catch (std::string message) {
       std::cerr << message << std::endl;
       nofFailedTests++;
@@ -224,7 +224,7 @@ int test_hdf5 (std::string const &filename)
 //     attribute_id = H5Aopen_name(channelDataset_id,"ANT_POSITION");
 //     // retrieve the value of the attribute
 //     if (attribute_id > 0) {
-//       CR::h5attribute_summary (std::cout,attribute_id);
+//       LOFAR::h5attribute_summary (std::cout,attribute_id);
 //       // retrive value
 //       h5error = H5Aread(attribute_id,
 // 			H5T_NATIVE_DOUBLE,
@@ -236,7 +236,7 @@ int test_hdf5 (std::string const &filename)
 //     cout << "--> Reading in ANTENH5Tget_class (atype)NA_ORIENTATION attribute ..." << endl;
 //     attribute_id = H5Aopen_name(channelDataset_id,"ANT_ORIENTATION");
 //     if (attribute_id > 0) {
-//       CR::h5attribute_summary (std::cout,attribute_id);
+//       LOFAR::h5attribute_summary (std::cout,attribute_id);
 //       // release the attribute ID
 //       h5error = H5Aclose (attribute_id);
 //     }

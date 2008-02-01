@@ -60,7 +60,7 @@ int test_support_methods ()
       vec[n] = int(n);
     }
     //
-    CR::show_vector(std::cout,vec);
+    LOFAR::show_vector(std::cout,vec);
     cout << endl;
   } catch (std::string message) {
     std::cerr << message << std::endl;
@@ -74,7 +74,7 @@ int test_support_methods ()
       vec[n] = 0.5*n;
     }
     //
-    CR::show_vector(std::cout,vec);
+    LOFAR::show_vector(std::cout,vec);
     cout << endl;
   } catch (std::string message) {
     std::cerr << message << std::endl;
@@ -228,63 +228,63 @@ int get_attributes (hid_t const &file_id)
     std::vector<double> beam_direction;
     
     try {
-      status = CR::h5get_attribute (telescope,"TELESCOPE",group_id);
+      status = LOFAR::h5get_attribute (telescope,"TELESCOPE",group_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = CR::h5get_attribute (observer,"OBSERVER",group_id);
+      status = LOFAR::h5get_attribute (observer,"OBSERVER",group_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = CR::h5get_attribute (project,"PROJECT",group_id);
+      status = LOFAR::h5get_attribute (project,"PROJECT",group_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = CR::h5get_attribute (observation_id,"OBS_ID",group_id);
+      status = LOFAR::h5get_attribute (observation_id,"OBS_ID",group_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = CR::h5get_attribute (observation_mode,"OBS_MODE",group_id);
+      status = LOFAR::h5get_attribute (observation_mode,"OBS_MODE",group_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = CR::h5get_attribute (trigger_type,"TRIG_TYPE",group_id);
+      status = LOFAR::h5get_attribute (trigger_type,"TRIG_TYPE",group_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = CR::h5get_attribute (trigger_offset,"TRIG_OFST",group_id);
+      status = LOFAR::h5get_attribute (trigger_offset,"TRIG_OFST",group_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = CR::h5get_attribute (triggered_antennas,"TRIG_ANTS",group_id);
+      status = LOFAR::h5get_attribute (triggered_antennas,"TRIG_ANTS",group_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = CR::h5get_attribute (beam_direction,"BEAM_DIR",group_id);
+      status = LOFAR::h5get_attribute (beam_direction,"BEAM_DIR",group_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
@@ -297,10 +297,10 @@ int get_attributes (hid_t const &file_id)
     std::cout << "-- OBSERVATION_MODE   = " << observation_mode << endl;
     std::cout << "-- TRIGGER_TYPE       = " << trigger_type     << endl;
     std::cout << "-- TRIGGER_OFFSET     = " << trigger_offset   << endl;
-    std::cout << "-- TRIGGERED_ANTENNAS = "; CR::show_vector(std::cout,
+    std::cout << "-- TRIGGERED_ANTENNAS = "; LOFAR::show_vector(std::cout,
 							     triggered_antennas);
     std::cout << std::endl;
-    std::cout << "-- BEAM_DIRECTION     = "; CR::show_vector(std::cout,
+    std::cout << "-- BEAM_DIRECTION     = "; LOFAR::show_vector(std::cout,
 							   beam_direction);
     std::cout << std::endl;
 
@@ -325,77 +325,77 @@ int get_attributes (hid_t const &file_id)
     std::vector<double> antenna_orientation;
 
     try {
-      status = CR::h5get_attribute (station_id,"STATION_ID",dataset_id);
+      status = LOFAR::h5get_attribute (station_id,"STATION_ID",dataset_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = CR::h5get_attribute (rsp_id,"RSP_ID",dataset_id);
+      status = LOFAR::h5get_attribute (rsp_id,"RSP_ID",dataset_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = CR::h5get_attribute (rcu_id,"RCU_ID",dataset_id);
+      status = LOFAR::h5get_attribute (rcu_id,"RCU_ID",dataset_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = CR::h5get_attribute (sample_frequency,"SAMPLE_FREQ",dataset_id);
+      status = LOFAR::h5get_attribute (sample_frequency,"SAMPLE_FREQ",dataset_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = CR::h5get_attribute (time,"TIME",dataset_id);
+      status = LOFAR::h5get_attribute (time,"TIME",dataset_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = CR::h5get_attribute (sample_number,"SAMPLE_NR",dataset_id);
+      status = LOFAR::h5get_attribute (sample_number,"SAMPLE_NR",dataset_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = CR::h5get_attribute (samples_per_frame,"SAMPLES_PER_FRAME",dataset_id);
+      status = LOFAR::h5get_attribute (samples_per_frame,"SAMPLES_PER_FRAME",dataset_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = CR::h5get_attribute (data_length,"DATA_LENGTH",dataset_id);
+      status = LOFAR::h5get_attribute (data_length,"DATA_LENGTH",dataset_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = CR::h5get_attribute (nyquist_zone,"NYQUIST_ZONE",dataset_id);
+      status = LOFAR::h5get_attribute (nyquist_zone,"NYQUIST_ZONE",dataset_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = CR::h5get_attribute (antenna_position,"ANT_POSITION",dataset_id);
+      status = LOFAR::h5get_attribute (antenna_position,"ANT_POSITION",dataset_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = CR::h5get_attribute (antenna_orientation,"ANT_ORIENTATION",dataset_id);
+      status = LOFAR::h5get_attribute (antenna_orientation,"ANT_ORIENTATION",dataset_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;

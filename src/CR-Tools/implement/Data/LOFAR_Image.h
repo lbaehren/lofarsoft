@@ -28,12 +28,12 @@
 #include <iostream>
 #include <string>
 
-namespace CR { // Namespace CR -- begin
+namespace LOFAR { // Namespace LOFAR -- begin
   
   /*!
     \class LOFAR_Image
     
-    \ingroup CR_Data
+    \ingroup LOFAR_Data
     
     \brief Brief description for class LOFAR_Image
     
@@ -130,7 +130,7 @@ namespace CR { // Namespace CR -- begin
     
   };
   
-} // Namespace CR -- end
+} // Namespace LOFAR -- end
 
 #endif /* LOFAR_IMAGE_H */
   

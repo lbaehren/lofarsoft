@@ -61,10 +61,10 @@ namespace CR { // Namespace CR -- begin
       datafiles.
       <li>[CR] CR::Attributes
       <li>[CR] DataReader -- Base class of CR-Tools data I/O framework.
-      <li>[CR] LOFAR_StationGroup -- Container for the data in the StationGroup
+      <li>[LOFAR] LOFAR_StationGroup -- Container for the data in the StationGroup
       of LOFAR times-series data, essentially a wrapper for the special case of
       a dalGroup object.
-      <li>[CR] LOFAR_DipoleDataset
+      <li>[LOFAR] LOFAR_DipoleDataset
       <li>[DAL] dalDataset
       <li>[DAL] dalGroup
     </ul>
@@ -347,7 +347,7 @@ namespace CR { // Namespace CR -- begin
     dalDataset *dataset_p;
 
     //! Set of station groups within the data set
-    std::vector<CR::LOFAR_StationGroup> stationGroups_p;
+    std::vector<LOFAR::LOFAR_StationGroup> stationGroups_p;
 
     //! Identifiers for the individual channels/dipoles
     std::vector<std::string> channelID_p;
@@ -413,7 +413,7 @@ namespace CR { // Namespace CR -- begin
       \return stationGroups -- Vector with a set of LOFAR_StationGroup objects,
               encapsulating the contents of the groups within the dataset.
     */
-    inline std::vector<CR::LOFAR_StationGroup> stationGroups () const {
+    inline std::vector<LOFAR::LOFAR_StationGroup> stationGroups () const {
       return stationGroups_p;
     }
 
@@ -426,8 +426,8 @@ namespace CR { // Namespace CR -- begin
       \return group -- LOFAR_StationGroup object encapsulating the contents of
               a specific StationGroup within the dalDataset.
     */
-    LOFAR_StationGroup stationGroup (uint const &id,
-				     bool const &isStationID=false);
+    LOFAR::LOFAR_StationGroup stationGroup (uint const &id,
+					    bool const &isStationID=false);
 
     /*!
       \brief Get the name of the class
