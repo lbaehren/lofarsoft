@@ -25,9 +25,9 @@
 #include <string>
 #include <fstream>
 
-#include "Analysis/analyseLOPESevent.h"
+#include "Analysis/analyseLOPESevent2.h"
 
-using CR::analyseLOPESevent;
+using CR::analyseLOPESevent2;
 using CR::LopesEventIn;
 
 /*!
@@ -507,7 +507,7 @@ int main (int argc, char *argv[])
 
 
     // Initialize the pipeline
-    analyseLOPESevent eventPipeline;
+    analyseLOPESevent2 eventPipeline;
     Record obsrec,results;
     obsrec.define("LOPES",caltablepath);
     eventPipeline.initPipeline(obsrec);
