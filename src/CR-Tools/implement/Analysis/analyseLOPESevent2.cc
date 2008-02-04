@@ -320,8 +320,10 @@ namespace CR { // Namespace CR -- begin
         pipeline_p->setPlotInterval(-2.05e-6,-1.6e-6);
         pipeline_p->plotCCbeam(PlotPrefix + "-CC", lev_p, AntennaSelection);
         pipeline_p->plotXbeam(PlotPrefix + "-X", lev_p, AntennaSelection);
+        // Plot of all antenna traces together
         pipeline_p->plotAllAntennas(PlotPrefix + "-all", lev_p, AntennaSelection, false);
-        pipeline_p->plotAllAntennas(PlotPrefix, lev_p, AntennaSelection, true);
+        // Plot of upsampled antenna traces (seperated)
+        pipeline_p->plotAllAntennas(PlotPrefix, lev_p, AntennaSelection, true, 1);
       };
     } catch (AipsError x) 
     {

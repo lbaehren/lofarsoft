@@ -24,6 +24,7 @@
 #include <Analysis/CompletePipeline.h>
 
 namespace CR { // Namespace CR -- begin
+
   
   // ============================================================================
   //
@@ -208,7 +209,8 @@ namespace CR { // Namespace CR -- begin
   void CompletePipeline::plotAllAntennas(const string filename,
 					 DataReader *dr,
 					 Vector<Bool> antennaSelection,
-					 bool seperated)
+					 bool seperated,
+					 int upsampling_exp)
   {
     try 
     {
@@ -224,15 +226,77 @@ namespace CR { // Namespace CR -- begin
       }
 
       // Get the time axis
-      xaxis = (Vector<Double>)(dr->timeValues()); 
+      xaxis = static_cast< Vector<Double> >(dr->timeValues()); 
+
+      // Get the fieldstrength of all antennas
+      fieldstrength = GetTimeSeries(dr);
+
+      // do upsampling of all the antenna traces
+      if (upsampling_exp > 0) 
+      {
+        // create upsampling factor by upsampling exponent
+        unsigned int upsampled = pow(2,upsampling_exp);
+
+        // get length of trace
+        int tracelength = fieldstrength.column(0).size();
+        // allocate memory for original and upsampled traces
+        float originalTrace[tracelength];
+        float upsampledTrace[tracelength * upsampled];
+
+        for (int i = 0; i < antennaSelection.nelements(); i++)
+        {
+          std::cout << "\nUpsampling the data of antenna " << i+1 << "by a factor of " << upsampled << " ...\n";
+	  // copy the trace into the array
+	  for (int j = 0; j < tracelength; j++) originalTrace[j] = fieldstrength.column(i)(j);
+	  // do upsampling by factor #upsampled (--> NoZeros = upsampled -1)
+//          ZeroPaddingFFT(tracelength, originalTrace, upsampled, upsampledTrace);
+          std::cout << "End of original trace:\n" << originalTrace[tracelength-4] << "   " << originalTrace[tracelength-3] <<
+"   " <<  originalTrace[tracelength-2] << "   " << originalTrace[tracelength-1] << "\n";
+          std::cout << "End of upsampled trace:\n" << upsampledTrace[tracelength-8] << "   "<< upsampledTrace[tracelength-7] << "   "<< upsampledTrace[tracelength-6] << "   "<< upsampledTrace[tracelength-5] << "   "<< upsampledTrace[tracelength-4] << "   "<< upsampledTrace[tracelength-4] << "   "<< upsampledTrace[tracelength-2] << "   "<< upsampledTrace[tracelength-1] << "   " << "\n";
+
+        }
+
+        // stretch x-axis:
+int temp = xaxis.size();
+std::cout << "End of old x-axis: \n" << xaxis(temp-4) << "   " << xaxis(temp-3) << "   " << xaxis(temp-2) << "   "
+ << xaxis(temp-1) << "\n";
+
+        // calculate time between two samples
+        double sampleTime = 1/(dr->sampleFrequency() * upsampled);  
+        std::cout << "SampleTime = " << sampleTime << " s\n\n.";
+
+        // get the length of the x-axis and check if consistent
+        int x_length = xaxis.size();
+        if (x_length != tracelength)
+          std::cerr << "CompletePipeline:plotAllAntennas: WARNING: Length of time axis differs from length of the antenna traces!\n"
+           << std::endl;
+
+        // resize x-axis and copy values
+        xaxis.resize(x_length*upsampled, true);
+
+        // copy old values to the right place and fill space inbetween 
+        for (unsigned int i = x_length-1; i > 0; i--)
+        {
+          // move existing time value to the right place
+          xaxis(i*upsampled) = xaxis(i);
+          // create new values
+          for (unsigned int j = 1; j < upsampled; j++) 
+            xaxis(i*upsampled+j) = xaxis(i*upsampled) + j*sampleTime;
+        }
+
+
+
+temp = xaxis.size();
+std::cout << "End of new x-axis: \n" << xaxis(temp-8) << "   " << xaxis(temp-7) << "   " << xaxis(temp-6) << "   "
+ << xaxis(temp-5) << "   " << xaxis(temp-4) << "   "<< xaxis(temp-3) << "   "<< xaxis(temp-2) << 
+"   "<< xaxis(temp-1) << "   "<< "\n";
+
+      }	
 
       // Define plotrange
       int startsample = ntrue(xaxis<plotStart_p); //number of elements smaller then starting value of plot range
       int stopsample = ntrue(xaxis<plotStop_p);  //number of elements smaller then end of plot range
       Slice plotRange(startsample,(stopsample-startsample));
-
-      // Get the fieldstrength of all antennas
-      fieldstrength = GetTimeSeries(dr);	
 
       // conversion to micro
       xaxis *= 1e6;

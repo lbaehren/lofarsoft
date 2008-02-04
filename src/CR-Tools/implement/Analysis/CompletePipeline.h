@@ -27,10 +27,16 @@
 // Standard library header files
 #include <iostream>
 #include <string>
+// For pow-function
+#include <cmath>
 
 // This class is derived form CRinvFFT an adds upsampling
 #include "Analysis/CRinvFFT.h"
+// For Plots:
 #include "Display/SimplePlot.h"
+// For Upsampling:
+#include "LopesStar/reconstruction.h"
+
 
 
 namespace CR { // Namespace CR -- begin
@@ -185,8 +191,9 @@ namespace CR { // Namespace CR -- begin
       \param antennaSelection -- Selection of antennas considered for the plot
     */
 
-    void plotCCbeam(const string filename, DataReader *dr,
- 			     Vector<Bool> antennaSelection = Vector<Bool>());
+    void plotCCbeam (const string filename, 
+                     DataReader *dr,
+                     Vector<Bool> antennaSelection = Vector<Bool>());
 
     /*!
       \brief Plots the X-beam
@@ -196,8 +203,9 @@ namespace CR { // Namespace CR -- begin
       \param antennaSelection -- Selection of antennas considered for the plot
     */
 
-    void plotXbeam(const string filename, DataReader *dr,
- 			     Vector<Bool> antennaSelection = Vector<Bool>());
+    void plotXbeam (const string filename, 
+                    DataReader *dr,
+                    Vector<Bool> antennaSelection = Vector<Bool>());
 
     /*!
       \brief Plots the fieldstrength of all antennas after beam forming
@@ -207,10 +215,15 @@ namespace CR { // Namespace CR -- begin
       \param antennaSelection -- Selection of antennas considered for the plot
       \param seperated        -- true = an individual plot for each antenna will be created
                                  (the antenna number serves as file name appendix).
+      \param upsampling_exp   -- a value > 0 means that data are upsampled by a factor of 2^upsampling_exp
+                                 use e.g. uspampling_exp = 1 to have twice as many points plotted.
     */
 
-    void plotAllAntennas(const string filename, DataReader *dr,
- 			     Vector<Bool> antennaSelection = Vector<Bool>(), bool seperated = false);
+    void plotAllAntennas (const string filename,
+                          DataReader *dr,
+                          Vector<Bool> antennaSelection = Vector<Bool>(),
+                          bool seperated = false,
+                          int upsampling_exp = 0);
 
     
     
