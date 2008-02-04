@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2008                                                  *
- *   Frank Schroeder (<mail>)                                                     *
+ *   Copyright (C) 2008                                                    *
+ *   Frank Schroeder (<mail>)                                              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -90,8 +90,9 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
 
-  void CompletePipeline::plotCCbeam(const string filename, DataReader *dr,
-			     Vector<Bool> antennaSelection)
+  void CompletePipeline::plotCCbeam(const string filename,
+				    DataReader *dr,
+				    Vector<Bool> antennaSelection)
   {
     try 
     {
@@ -146,8 +147,9 @@ namespace CR { // Namespace CR -- begin
   }
 
 
-  void CompletePipeline::plotXbeam(const string filename, DataReader *dr,
-			     Vector<Bool> antennaSelection)
+  void CompletePipeline::plotXbeam(const string filename,
+				   DataReader *dr,
+				   Vector<Bool> antennaSelection)
   {
     try 
     {
@@ -203,8 +205,10 @@ namespace CR { // Namespace CR -- begin
 
 
   // Plot the time shifed (= after beamforming) filedstrength of all antennas
-  void CompletePipeline::plotAllAntennas(const string filename, DataReader *dr,
- 			     Vector<Bool> antennaSelection, bool seperated)
+  void CompletePipeline::plotAllAntennas(const string filename,
+					 DataReader *dr,
+					 Vector<Bool> antennaSelection,
+					 bool seperated)
   {
     try 
     {
@@ -215,7 +219,9 @@ namespace CR { // Namespace CR -- begin
       int color = 1;				// starting color
 
       // Get the antenna selection from the DataReader if no selction was chosen 	
-      if (antennaSelection.nelements() == 0) antennaSelection = GetAntennaMask(dr);
+      if (antennaSelection.nelements() == 0) {
+	antennaSelection = GetAntennaMask(dr);
+      }
 
       // Get the time axis
       xaxis = (Vector<Double>)(dr->timeValues()); 
@@ -240,8 +246,12 @@ namespace CR { // Namespace CR -- begin
       for (int i = 0; i < antennaSelection.nelements(); i++)
         if (antennaSelection(i))		// consider only selected antennas
         {
-          if ( ymin > min(fieldstrength.column(i)(plotRange)) ) ymin = min(fieldstrength.column(i)(plotRange));
-          if ( ymax < max(fieldstrength.column(i)(plotRange)) ) ymax = max(fieldstrength.column(i)(plotRange));
+          if ( ymin > min(fieldstrength.column(i)(plotRange)) ) {
+	    ymin = min(fieldstrength.column(i)(plotRange));
+	  }
+          if ( ymax < max(fieldstrength.column(i)(plotRange)) ) {
+	    ymax = max(fieldstrength.column(i)(plotRange));
+	  }
         }
 
       // multiply ymin and ymax by 105% to have some space at the bottom and the top of the plot
@@ -254,7 +264,9 @@ namespace CR { // Namespace CR -- begin
         // add the ".ps" to the filename
         string plotfilename = filename + ".ps";
        
-    	std::cout <<"Plotting the fieldstrenth of all antennas to file: " << plotfilename << std::endl;
+    	std::cout <<"Plotting the fieldstrenth of all antennas to file: "
+		  << plotfilename
+		  << std::endl;
 
         // Initialize the plot giving xmin, xmax, ymin and ymax
         plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);

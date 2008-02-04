@@ -90,6 +90,9 @@ namespace LOFAR { // Namespace LOFAR -- begin
     case ANTENNA_ORIENTATION:
       name = "ANTENNA_ORIENTATION";
       break;
+    case BEAM_DIRECTION:
+      name = "BEAM_DIRECTION";
+      break;
       // --- Trigger algorithm ---------------------------------------
     case TRIGGER_TYPE:
       name = "TRIGGER_TYPE";

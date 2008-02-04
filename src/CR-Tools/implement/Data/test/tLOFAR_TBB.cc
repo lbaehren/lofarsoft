@@ -119,7 +119,7 @@ int test_hdf5 (std::string const &filename)
     try {
       // get the identifier for the attribute
       attribute_id = H5Aopen_name(stationGroup_id,
-				  "TELESCOPE");
+				  LOFAR::attribute_name(LOFAR::TELESCOPE).c_str());
       if (attribute_id > 0) {
 	// dataspace of the attribute
 	hid_t dataspace_id       = H5Aget_space (attribute_id);
@@ -197,7 +197,9 @@ int test_hdf5 (std::string const &filename)
 
     cout << "--> Reading in STATION_ID attribute ..." << endl;
     try {
-      status = LOFAR::h5get_attribute (station_id,"STATION_ID",channelDataset_id);
+      status = LOFAR::h5get_attribute (station_id,
+				       LOFAR::attribute_name(LOFAR::STATION_ID),
+				       channelDataset_id);
     } catch (std::string message) {
       std::cerr << message << std::endl;
       nofFailedTests++;
@@ -205,7 +207,9 @@ int test_hdf5 (std::string const &filename)
 
     cout << "--> Reading in RSP_ID attribute ..." << endl;
     try {
-      status = LOFAR::h5get_attribute (rsp_id,"RSP_ID",channelDataset_id);
+      status = LOFAR::h5get_attribute (rsp_id,
+				       LOFAR::attribute_name(LOFAR::RSP_ID),
+				       channelDataset_id);
     } catch (std::string message) {
       std::cerr << message << std::endl;
       nofFailedTests++;
@@ -213,7 +217,9 @@ int test_hdf5 (std::string const &filename)
 
     cout << "--> Reading in RCU_ID attribute ..." << endl;
     try {
-      status = LOFAR::h5get_attribute (rcu_id,"RCU_ID",channelDataset_id);
+      status = LOFAR::h5get_attribute (rcu_id,
+				       LOFAR::attribute_name(LOFAR::RCU_ID),
+				       channelDataset_id);
     } catch (std::string message) {
       std::cerr << message << std::endl;
       nofFailedTests++;

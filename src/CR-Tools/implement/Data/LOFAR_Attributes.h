@@ -114,6 +114,7 @@ namespace LOFAR { // Namespace LOFAR -- begin
     FEED,
     ANTENNA_POSITION,
     ANTENNA_ORIENTATION,
+    BEAM_DIRECTION,
     /*!
       Nyquist zone within which the analog-digital conversion step is performed
     */

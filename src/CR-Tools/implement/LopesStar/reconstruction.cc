@@ -20,19 +20,29 @@ using namespace TMath;
 
 /**********************************************************************************************/
 
-void ZeroPaddingFFT(int window_size, short int *trace, int NoZeros, float* ZPTrace){
+void ZeroPaddingFFT(int window_size,
+		    short int *trace,
+		    int NoZeros,
+		    float* ZPTrace){
   ZeroPaddingFFTCore( window_size, trace, true, NoZeros, ZPTrace);
 }
 
 /**********************************************************************************************/
 
-void ZeroPaddingFFT(int window_size, float *trace, int NoZeros, float* ZPTrace){
+void ZeroPaddingFFT(int window_size,
+		    float *trace,
+		    int NoZeros,
+		    float* ZPTrace){
   ZeroPaddingFFTCore( window_size, trace, false, NoZeros, ZPTrace);
 }
 
 /**********************************************************************************************/
 
-void ZeroPaddingFFTCore(int window_size, void *trace, bool Flag, int NoZeros, float* ZPTrace){
+void ZeroPaddingFFTCore(int window_size,
+			void *trace,
+			bool Flag,
+			int NoZeros,
+			float* ZPTrace){
   
   float *FFTdata = new float [window_size*2];
   float *Amp = new float [window_size/2];
@@ -70,13 +80,17 @@ void ZeroPaddingFFTCore(int window_size, void *trace, bool Flag, int NoZeros, fl
 
 /**********************************************************************************************/
 
-void RFISuppressionSimple(int window_size, short int* trace, float *TraceOut){
+void RFISuppressionSimple(int window_size,
+			  short int* trace,
+			  float *TraceOut){
   RFISuppressionSimpleCore(window_size, trace, true, TraceOut);
 }
 
 /**********************************************************************************************/
 
-void RFISuppressionSimple(int window_size, float *trace, float *TraceOut){
+void RFISuppressionSimple(int window_size,
+			  float *trace,
+			  float *TraceOut){
   RFISuppressionSimpleCore(window_size, trace, false, TraceOut);
 }
 
@@ -154,7 +168,10 @@ void RFISuppressionSimpleCore(int window_size, void* trace, bool Flag, float *Tr
 
 /**********************************************************************************************/
 
-void RFISuppression(int window_size, float *trace, float *trace_suppressed, int NoZeros){
+void RFISuppression (int window_size,
+		     float *trace,
+		     float *trace_suppressed,
+		     int NoZeros){
 
   float PHASE[window_size/2];
   float AMP[window_size/2];
@@ -254,7 +271,13 @@ void RFISuppression(int window_size, float *trace, float *trace_suppressed, int 
 
 /**********************************************************************************************/
 
-void PulseLengthEstimate(int window_size, const float *trace, float *PulseLength, float *PulsePosition, float *Integral, bool RFISupp, bool dynamic_thres){
+void PulseLengthEstimate(int window_size,
+			 const float *trace,
+			 float *PulseLength,
+			 float *PulsePosition,
+			 float *Integral,
+			 bool RFISupp,
+			 bool dynamic_thres){
   
   bool debug = false;
   
@@ -341,7 +364,13 @@ void PulseLengthEstimate(int window_size, const float *trace, float *PulseLength
 
 /**********************************************************************************************/
 
-void EstimatePulseParameter(int window_size, const float *trace, float *PulseLength, float *PulsePosition, float *Maximum, float *Integral, float threshold){
+void EstimatePulseParameter(int window_size,
+			    const float *trace,
+			    float *PulseLength,
+			    float *PulsePosition,
+			    float *Maximum,
+			    float *Integral,
+			    float threshold){
   
   bool debug = false;
   
@@ -426,7 +455,12 @@ void EstimatePulseParameter(int window_size, const float *trace, float *PulseLen
 
 /**********************************************************************************************/
 
-void SNR(int window_size, const float *trace, float *snr, float *mean, float *rms, bool debug){
+void SNR(int window_size,
+	 const float *trace,
+	 float *snr,
+	 float *mean,
+	 float *rms,
+	 bool debug){
   float max=0;
   float tmpTrace[window_size];
   
@@ -454,7 +488,9 @@ void SNR(int window_size, const float *trace, float *snr, float *mean, float *rm
 
 /**********************************************************************************************/
 
-void GetAntPos(const char *AntPos, const int daq_id, float *AntCoordinate){
+void GetAntPos(const char *AntPos,
+	       const int daq_id,
+	       float *AntCoordinate){
 // AntCoordinate[0] : X value in m
 // AntCoordinate[1] : Y value in m
 // AntCoordinate[2] : Z value in m
@@ -497,7 +533,10 @@ void GetAntPos(const char *AntPos, const int daq_id, float *AntCoordinate){
 
 /**********************************************************************************************/
 
-void GetBaryCenter(const int NoChannels, float **AntCoordinate, const float *PulseAmp, float *b){
+void GetBaryCenter(const int NoChannels,
+		   float **AntCoordinate,
+		   const float *PulseAmp,
+		   float *b){
  float sum = 0, sumx = 0, sumy = 0, sumz = 0;
  
  for(int i=0; i<NoChannels; i++){
@@ -515,8 +554,13 @@ void GetBaryCenter(const int NoChannels, float **AntCoordinate, const float *Pul
 
 /**********************************************************************************************/
 
-void PlaneFit(const int NoChannels, char **AntPos, const int daq_id, const float *PulseAmp, float *PulseTime,
-              float *Zenith, float *Azimuth){
+void PlaneFit (const int NoChannels,
+	       char **AntPos,
+	       const int daq_id,
+	       const float *PulseAmp,
+	       float *PulseTime,
+	       float *Zenith,
+	       float *Azimuth){
   bool debug = false;
 	      
   double c = 2.99*pow(10.0,8);

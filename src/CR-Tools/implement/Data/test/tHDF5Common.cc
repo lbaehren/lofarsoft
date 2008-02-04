@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include <Data/HDF5Common.h>
+#include <Data/LOFAR_Attributes.h>
 
 using std::cerr;
 using std::cout;
@@ -110,31 +111,40 @@ int get_attribute_id (hid_t const &file_id)
 
     std::cout << "[1] Retrieving IDs of group attributes..." << endl;
 
-    attribute_id = H5Aopen_name(group_id,"TELESCOPE");
+    attribute_id = H5Aopen_name(group_id,
+				LOFAR::attribute_name(LOFAR::TELESCOPE).c_str());
     std::cout << "-- TELESCOPE = " << attribute_id << endl;
 
-    attribute_id = H5Aopen_name(group_id,"OBSERVER");
+    attribute_id = H5Aopen_name(group_id,
+				LOFAR::attribute_name(LOFAR::OBSERVER).c_str());
     std::cout << "-- OBSERVER  = " << attribute_id << endl;
 
-    attribute_id = H5Aopen_name(group_id,"PROJECT");
+    attribute_id = H5Aopen_name(group_id,
+				LOFAR::attribute_name(LOFAR::PROJECT).c_str());
     std::cout << "-- PROJECT   = " << attribute_id << endl;
 
-    attribute_id = H5Aopen_name(group_id,"OBS_ID");
+    attribute_id = H5Aopen_name(group_id,
+				LOFAR::attribute_name(LOFAR::OBSERVATION_ID).c_str());
     std::cout << "-- OBS_ID    = " << attribute_id << endl;
 
-    attribute_id = H5Aopen_name(group_id,"OBS_MODE");
+    attribute_id = H5Aopen_name(group_id,
+				LOFAR::attribute_name(LOFAR::OBSERVATION_MODE).c_str());
     std::cout << "-- OBS_MODE  = " << attribute_id << endl;
 
-    attribute_id = H5Aopen_name(group_id,"TRIG_TYPE");
+    attribute_id = H5Aopen_name(group_id,
+				LOFAR::attribute_name(LOFAR::TRIGGER_TYPE).c_str());
     std::cout << "-- TRIG_TYPE = " << attribute_id << endl;
 
-    attribute_id = H5Aopen_name(group_id,"TRIG_OFST");
+    attribute_id = H5Aopen_name(group_id,
+				LOFAR::attribute_name(LOFAR::TRIGGER_OFFSET).c_str());
     std::cout << "-- TRIG_OFST = " << attribute_id << endl;
 
-    attribute_id = H5Aopen_name(group_id,"TRIG_ANTS");
+    attribute_id = H5Aopen_name(group_id,
+				LOFAR::attribute_name(LOFAR::TRIGGERED_ANTENNAS).c_str());
     std::cout << "-- TRIG_ANTS = " << attribute_id << endl;
 
-    attribute_id = H5Aopen_name(group_id,"BEAM_DIR");
+    attribute_id = H5Aopen_name(group_id,
+				LOFAR::attribute_name(LOFAR::BEAM_DIRECTION).c_str());
     std::cout << "-- BEAM_DIR  = " << attribute_id << endl;
   }
 
