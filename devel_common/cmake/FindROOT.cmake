@@ -22,6 +22,7 @@ set (include_locations
   /sw/share
   /opt
   /opt/include
+  /opt/root/include
 )
 
 set (lib_locations
@@ -34,6 +35,7 @@ set (lib_locations
   /sw/share
   /opt
   /opt/lib
+  /opt/root/lib
 )
 
 ## -----------------------------------------------------------------------------
