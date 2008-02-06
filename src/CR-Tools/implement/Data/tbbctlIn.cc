@@ -269,6 +269,8 @@ namespace CR { // Namespace CR -- begin
       header_p.define("Filesize",datasize_p);
       header_p.define("SampleFreq",headerpoint_p->sampleFreq);
       header_p.define("StartSample",headerpoint_p->SampleNr);
+      header_p.define("dDate",(Double)headerpoint_p->Date + 
+		      (Double)headerpoint_p->SampleNr/(Double)headerpoint_p->sampleFreq/1e6);
     } catch (AipsError x) {
       cerr << "tbbctlIn:generateHeaderRecord: " << x.getMesg() << endl;
       return False;
