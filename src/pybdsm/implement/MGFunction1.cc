@@ -204,10 +204,10 @@ void MGFunction::register_class()
     .def("fitted_parameters", &MGFunction::parameters_size,
 	 "total number of fitted parameters")
 
-    .add_property("parameters", &MGFunction::py_get_parameters, &MGFunction::py_set_parameters,
+    ADD_PROPERTY2("parameters", &MGFunction::py_get_parameters, &MGFunction::py_set_parameters,
 		  "get/set parameters of all gaussians together")
 
-    .add_property("errors", &MGFunction::py_get_errors,
+    ADD_PROPERTY1("errors", &MGFunction::py_get_errors,
 		  "get error bounds")
     ;
 }
