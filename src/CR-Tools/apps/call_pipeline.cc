@@ -67,17 +67,20 @@ using CR::LopesEventIn;
   you can also provide a config file of the following format:
 
 
-  example configuration file
-
-  =================================================================
-  caltablepath = /home/horneff/lopescasa/data/LOPES/LOPES-CalTable
-  RotatePos = true
-  GeneratePlots = true
-  verbose = true
-  simplexFit = true
-  doTVcal = default
-  flagged = 10101
-  flagged = 10102
+  example configuration file<br>
+<br>
+  =================================================================<br>  
+  caltablepath = /home/horneff/lopescasa/data/LOPES/LOPES-CalTable<br>
+  RotatePos = true<br>
+  GeneratePlots = true<br>
+  verbose = true<br>
+  simplexFit = true<br>
+  doTVcal = default<br>
+  plotStart = -2.05e-6<br>
+  plotEnd = -1.60e-6<br>
+  upsamplingExponent = 1<br>
+  flagged = 10101<br>
+  flagged = 10102<br>
 
   <h3>Example</h3>
 
@@ -126,6 +129,9 @@ int main (int argc, char *argv[])
     bool verbose = true;
     bool simplexFit = true;
     int doTVcal = -1;			// 1: yes, 0: no, -1: use default	
+    double plotStart = -2.05e-6;	// in seconds
+    double plotEnd = -1.60e-6;		// in seconds
+    unsigned int upsamplingExponent = 0;// by default no upsampling will be done
     vector<Int> flagged;		// use of STL-vector instead of CASA-vector due to support of push_back()
     string caltablepath = "/home/horneff/lopescasa/data/LOPES/LOPES-CalTable";
 
@@ -170,6 +176,9 @@ int main (int argc, char *argv[])
         std::cerr << "verbose = true\n";
         std::cerr << "simplexFit = true\n";
         std::cerr << "doTVcal = default\n";
+        std::cerr << "plotBegin = -2.05e-6\n";
+        std::cerr << "plotEnd = -1.60e-6\n";
+        std::cerr << "upsamplingExponent = 1\n";
         std::cerr << "flagged = 10101\n";
         std::cerr << "flagged = 10102\n";
         std::cerr << "... \n";
@@ -294,6 +303,60 @@ int main (int argc, char *argv[])
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
         }
+
+        if ( (keyword.compare("plotStart")==0) || (keyword.compare("PlotStart")==0) || (keyword.compare("plotstart")==0))
+        {
+          double temp = 9999999;
+          stringstream(value) >> temp; 
+
+          if (temp != 9999999)  // will be false, if value is not of typ "double"
+	  {
+            plotStart = temp; 
+	    std::cout << "PlotStart set to " << plotStart << " seconds.\n";
+	  } else
+          {
+            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "PlotStart must be of typ 'double'. \n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+        }
+
+        if ( (keyword.compare("plotEnd")==0) || (keyword.compare("PlotEnd")==0) || (keyword.compare("plotend")==0))
+        {
+          double temp = 9999999;
+          stringstream(value) >> temp; 
+
+          if (temp != 9999999)  // will be false, if value is not of typ "double"
+	  {
+            plotEnd = temp; 
+	    std::cout << "PlotEnd set to " << plotEnd << " seconds.\n";
+	  } else
+          {
+            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "PlotEnd must be of typ 'double'. \n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+        }
+
+        if ( (keyword.compare("upsamplingExponent")==0) || (keyword.compare("UpsamplingExponent")==0) 
+	  || (keyword.compare("upsamplingexponent")==0))
+        {
+          unsigned int temp = 9999999;
+          stringstream(value) >> temp; 
+
+          if (temp != 9999999)  // will be false, if value is not of typ "int"
+	  {
+            upsamplingExponent = temp; 
+	    std::cout << "UpsamplingExponent set to " << upsamplingExponent<< ".\n";
+	  } else
+          {
+            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "UpsamplingExponent must be of typ 'unsignend int'. \n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+        }
+
+
 
 	// flagg antennas
         if ( (keyword.compare("flagged")==0) || (keyword.compare("Flagged")==0))
@@ -561,6 +624,12 @@ int main (int argc, char *argv[])
       std::cout << "\nProcessing event \"" << filename << "\"\nwith azimuth " << azimuth << " °, zenith " << zenith
 	<< " °, distance (radius of curvature) " << distance << " m, core position X " << core_x
 	<< " m and core position Y " << core_y << " m.\n" << std::endl;
+
+      // set plot range
+      eventPipeline.setPlotInterval(plotStart,plotEnd);
+   
+      // set the upsampling coefficient (upsampling factor = 2^upsamplingExponent
+      eventPipeline.setUpsamplingExponent(upsamplingExponent);
 
       // call the pipeline with an extra delay = 0.
       results = eventPipeline.ProcessEvent(filename, azimuth, zenith, distance, core_x, core_y, RotatePos, 

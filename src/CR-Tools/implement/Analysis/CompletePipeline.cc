@@ -36,7 +36,8 @@ namespace CR { // Namespace CR -- begin
     plotStart_p(-2.05e-6), plotStop_p(-1.55e-6)
   {;}
   
-  CompletePipeline::CompletePipeline (CompletePipeline const &other)
+  CompletePipeline::CompletePipeline (CompletePipeline const &other):
+    plotStart_p(-2.05e-6), plotStop_p(-1.55e-6)
   {
     copy (other);
   }
@@ -218,7 +219,7 @@ namespace CR { // Namespace CR -- begin
       Vector<Double> xaxis;			// xaxis
       double xmax,xmin,ymin=0,ymax=0;		// Plotrange
       Matrix<Double> fieldstrength;		// y-values
-      int color = 1;				// starting color
+      int color = 3;				// starting color
 
       // Get the antenna selection from the DataReader if no selction was chosen 	
       if (antennaSelection.nelements() == 0) {
@@ -231,8 +232,13 @@ namespace CR { // Namespace CR -- begin
       // Get the fieldstrength of all antennas
       fieldstrength = GetTimeSeries(dr);
 
+      // Upsampled FieldStrength
+      Matrix<Double> upfieldstrength = fieldstrength;
+      // Upsampled x-axis
+      Vector<Double> upxaxis = xaxis;
+
       // do upsampling of all the antenna traces
-      if (upsampling_exp > 0) 
+      if (upsampling_exp >= 0) 
       {
         // create upsampling factor by upsampling exponent
         unsigned int upsampled = pow(2,upsampling_exp);
@@ -243,23 +249,37 @@ namespace CR { // Namespace CR -- begin
         float originalTrace[tracelength];
         float upsampledTrace[tracelength * upsampled];
 
+        // resize matrix with traces without copying the old values
+        upfieldstrength.resize(tracelength * upsampled, antennaSelection.nelements(), false);
+
         for (int i = 0; i < antennaSelection.nelements(); i++)
         {
-          std::cout << "\nUpsampling the data of antenna " << i+1 << "by a factor of " << upsampled << " ...\n";
+          std::cout << "\nUpsampling the data of antenna " << i+1 << " by a factor of " << upsampled << " ...\n";
 	  // copy the trace into the array
-	  for (int j = 0; j < tracelength; j++) originalTrace[j] = fieldstrength.column(i)(j);
-	  // do upsampling by factor #upsampled (--> NoZeros = upsampled -1)
-//          ZeroPaddingFFT(tracelength, originalTrace, upsampled, upsampledTrace);
-          std::cout << "End of original trace:\n" << originalTrace[tracelength-4] << "   " << originalTrace[tracelength-3] <<
-"   " <<  originalTrace[tracelength-2] << "   " << originalTrace[tracelength-1] << "\n";
-          std::cout << "End of upsampled trace:\n" << upsampledTrace[tracelength-8] << "   "<< upsampledTrace[tracelength-7] << "   "<< upsampledTrace[tracelength-6] << "   "<< upsampledTrace[tracelength-5] << "   "<< upsampledTrace[tracelength-4] << "   "<< upsampledTrace[tracelength-4] << "   "<< upsampledTrace[tracelength-2] << "   "<< upsampledTrace[tracelength-1] << "   " << "\n";
+	  for (int j = 0; j < tracelength; j++) 
+          {
+            originalTrace[j] = fieldstrength.column(i)(j);
+          }
 
+	  // do upsampling by factor #upsampled (--> NoZeros = upsampled -1)
+
+          // calcutlate Offset:
+          float before = originalTrace[0];
+
+          ZeroPaddingFFT(tracelength, originalTrace, upsampled-1, upsampledTrace);
+
+	  double offset = before - originalTrace[0];
+	  // correct data for offset
+          for (int j = 0; j < tracelength; j++) fieldstrength.column(i)(j) -= offset;
+          std::cout << "Corrected Offset: " << offset << "\n";
+
+	  // copy upsampled trace int Matrix with antenna traces
+	  for (int j = 0; j < tracelength*upsampled; j++) upfieldstrength.column(i)(j) = upsampledTrace[j];
+
+          
         }
 
         // stretch x-axis:
-int temp = xaxis.size();
-std::cout << "End of old x-axis: \n" << xaxis(temp-4) << "   " << xaxis(temp-3) << "   " << xaxis(temp-2) << "   "
- << xaxis(temp-1) << "\n";
 
         // calculate time between two samples
         double sampleTime = 1/(dr->sampleFrequency() * upsampled);  
@@ -272,25 +292,17 @@ std::cout << "End of old x-axis: \n" << xaxis(temp-4) << "   " << xaxis(temp-3) 
            << std::endl;
 
         // resize x-axis and copy values
-        xaxis.resize(x_length*upsampled, true);
+        upxaxis.resize(x_length*upsampled, false);
 
         // copy old values to the right place and fill space inbetween 
-        for (unsigned int i = x_length-1; i > 0; i--)
+        for (int i = x_length-1; i >= 0; i--)
         {
           // move existing time value to the right place
-          xaxis(i*upsampled) = xaxis(i);
+          upxaxis(i*upsampled) = xaxis(i);
           // create new values
-          for (unsigned int j = 1; j < upsampled; j++) 
-            xaxis(i*upsampled+j) = xaxis(i*upsampled) + j*sampleTime;
+          for (int j = 1; j < upsampled; j++) 
+            upxaxis(i*upsampled+j) = upxaxis(i*upsampled) + j*sampleTime;
         }
-
-
-
-temp = xaxis.size();
-std::cout << "End of new x-axis: \n" << xaxis(temp-8) << "   " << xaxis(temp-7) << "   " << xaxis(temp-6) << "   "
- << xaxis(temp-5) << "   " << xaxis(temp-4) << "   "<< xaxis(temp-3) << "   "<< xaxis(temp-2) << 
-"   "<< xaxis(temp-1) << "   "<< "\n";
-
       }	
 
       // Define plotrange
@@ -298,15 +310,34 @@ std::cout << "End of new x-axis: \n" << xaxis(temp-8) << "   " << xaxis(temp-7) 
       int stopsample = ntrue(xaxis<plotStop_p);  //number of elements smaller then end of plot range
       Slice plotRange(startsample,(stopsample-startsample));
 
+      // Define plotrange for upsampled data
+      startsample = ntrue(upxaxis<plotStart_p); //number of elements smaller then starting value of plot range
+      stopsample = ntrue(upxaxis<plotStop_p);  //number of elements smaller then end of plot range
+      Slice upplotRange(startsample,(stopsample-startsample));
+
       // conversion to micro
       xaxis *= 1e6;
       fieldstrength *= 1e6;
+      upxaxis *= 1e6;
+      upfieldstrength *= 1e6;
 
       // define Plotrange
       xmin = min(xaxis(plotRange));
       xmax = max(xaxis(plotRange));
 
       // find the minimal and maximal y values for the plot
+      for (int i = 0; i < antennaSelection.nelements(); i++)
+        if (antennaSelection(i))		// consider only selected antennas
+        {
+          if ( ymin > min(upfieldstrength.column(i)(upplotRange)) ) {
+	    ymin = min(upfieldstrength.column(i)(upplotRange));
+	  }
+          if ( ymax < max(upfieldstrength.column(i)(upplotRange)) ) {
+	    ymax = max(upfieldstrength.column(i)(upplotRange));
+	  }
+        }
+
+//again for the not upsampled values (should not be avoidable)
       for (int i = 0; i < antennaSelection.nelements(); i++)
         if (antennaSelection(i))		// consider only selected antennas
         {
@@ -328,7 +359,7 @@ std::cout << "End of new x-axis: \n" << xaxis(temp-8) << "   " << xaxis(temp-7) 
         // add the ".ps" to the filename
         string plotfilename = filename + ".ps";
        
-    	std::cout <<"Plotting the fieldstrenth of all antennas to file: "
+    	std::cout <<"Plotting the fieldstrength of all antennas to file: "
 		  << plotfilename
 		  << std::endl;
 
@@ -370,11 +401,22 @@ std::cout << "End of new x-axis: \n" << xaxis(temp-8) << "   " << xaxis(temp-7) 
 
           // Initialize the plot giving xmin, xmax, ymin and ymax
           plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
+
           // Add labels
           plotter.AddLabels("Time [microseconds]", "fieldstrength [microV/m/MHz]",label);
 
-          plotter.PlotLine(xaxis(plotRange),fieldstrength.column(i)(plotRange),color,1);
+          Vector<Double> empty;
+          if (upsampling_exp >= 0)
+          {
+            plotter.PlotLine(upxaxis(upplotRange),upfieldstrength.column(i)(upplotRange),color,1);
+          } else
+          {
+            plotter.PlotLine(xaxis(plotRange),fieldstrength.column(i)(plotRange),color,1);
+          }
+          plotter.PlotSymbols(xaxis(plotRange),fieldstrength.column(i)(plotRange),empty, empty, color, 2, 5);
           color++;					// another color for the next antenna
+          if (color >= 13) color = 3;			// there are only 16 colors available, 
+							// use only ten as there are 3x10 antennas
         }
       }
 

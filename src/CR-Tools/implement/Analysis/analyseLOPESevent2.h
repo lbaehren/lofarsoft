@@ -120,9 +120,40 @@ class analyseLOPESevent2 : public analyseLOPESevent{
     */
     void summary (std::ostream &os);    
 
+
     // ------------------------------------------------------------------ Methods
     
+    /*!
+      \brief Get the upsampling exponent
+
+      \return upsamplingExponent -- The upsampling factor is 2^upsamplingExponent
+    */
+    inline unsigned int getUpsamplingExponent () {
+      return upsamplingExponent;
+    }
     
+    
+    /*!
+      \brief Set the upsampling exponent
+
+      \param upExp -- The upsampling factor is 2^upExp (0 = no upsampling)
+    */
+    inline void setUpsamplingExponent (unsigned int const &upExp) {
+      upsamplingExponent = upExp;
+    }
+
+
+    /*!
+      \brief Set the stop time of the interval diplayed in the plot
+
+      \param plotStop -- Stop time of the interval diplayed in the plot
+    */
+    inline void setPlotStop (double const &plotStop) {
+      plotStop_p = plotStop;
+    }
+    
+
+
     /*!
       \brief Initialize the pipeline
       
@@ -178,6 +209,9 @@ class analyseLOPESevent2 : public analyseLOPESevent{
     
     
   private:
+   
+    // upsampling will be done by a factor of 2^upsamplingExponent
+    unsigned int upsamplingExponent;
     
     /*!
       \brief Unconditional copying
