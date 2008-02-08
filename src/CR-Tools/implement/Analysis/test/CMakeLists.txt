@@ -19,7 +19,6 @@ set (tests
   tppfinversion
   tSecondStagePipeline
   tSubbandID
-  tCompletePipeline
   )
 
 ## -----------------------------------------------------------------------------
@@ -81,6 +80,22 @@ if (HAVE_PLPLOT OR HAVE_PGPLOT)
   list (APPEND tests tanalyseLOPESevent)
   list (APPEND tests tanalyseLOPESevent2)
 endif (HAVE_PLPLOT OR HAVE_PGPLOT)
+
+## [3] Test programs for programs using functionality of LopesStar
+
+if (HAVE_ROOT AND HAVE_FFTW3)
+  ## build executable
+  add_executable (tCompletePipeline tCompletePipeline.cc)
+  target_link_libraries (tCompletePipeline
+    cr
+    ${FFTW3_LIBRARIES}
+    ${ROOT_LIBRARIES}
+    ${PYTHON_LIBRARIES}
+    )
+  ## testing
+  add_test (tCompletePipeline tCompletePipeline)
+endif (HAVE_ROOT AND HAVE_FFTW3)
+
 
 ## -----------------------------------------------------------------------------
 ## Installation
