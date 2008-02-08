@@ -398,6 +398,40 @@ namespace LOFAR { // Namespace LOFAR -- begin
   }
 #endif
 
+  // ------------------------------------------------------------ h5set_attribute
+
+  bool h5set_attribute (hid_t const &location_id,
+			std::string const &name,
+			uint const &val)
+  {
+    bool status (true);
+    hid_t attribute_id (0);
+    hid_t dataspace_id (0);
+    
+
+    /* [1] Check if the attribute already exists */
+    try {
+      attribute_id = H5Aopen_name(location_id,
+				  name.c_str());
+    } catch (std::string message) {
+      std::cerr << "[h5set_attribute] " << message << std::endl;
+      status = false;
+    }
+
+    /* [2] If the attribute does not exist yet, we need to create it first */
+    
+    if (attribute_id > 0) {
+      std::cout << "-- Attribute " << name << " already exists." << endl;
+    } else {
+      std::cout << "-- Attribute "
+		<< name
+		<< " does not exist yet; creating it now"
+		<< std::endl;
+    }
+    
+    return status;
+  }
+
   // ============================================================================
   //
   //  Dataspaces and Datatypes

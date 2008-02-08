@@ -64,7 +64,7 @@ int test_support_methods ()
     LOFAR::show_vector(std::cout,vec);
     cout << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    cerr << message << endl;
     nofFailedTests++;
   }
 
@@ -78,10 +78,78 @@ int test_support_methods ()
     LOFAR::show_vector(std::cout,vec);
     cout << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    cerr << message << endl;
     nofFailedTests++;
   }
 
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Test the basic steps for the creation of a new HDF5 file
+  
+  \return nofFailedTests -- The number of failed tests within this function 
+*/
+int test_create_file ()
+{
+  cout << "\n[test_create_file]\n" << endl;
+
+  int nofFailedTests (0);
+
+  std::string outfile ("testfile.h5");
+  std::string attribute_name ("TELESCOPE");
+  herr_t status;
+  hid_t file_id (0);
+  hid_t dataspace_id (0);
+  hid_t attribute_id (0);
+  
+  try {
+    file_id = H5Fcreate ("testfile.h5",
+			 H5F_ACC_TRUNC,
+			 H5P_DEFAULT,
+			 H5P_DEFAULT);
+  } catch (std::string message ) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  // check if file creation was succesfull
+  if (file_id > 0) {
+    cout << "-- Successfully created HDF5 file." << endl;
+    cout << "--> ID = " << file_id << endl;
+
+    dataspace_id = H5Screate(H5S_SCALAR);
+    
+    if (dataspace_id > 0) {
+      std::cout << "-- Successfully created dataspace for attribute." << endl;
+      std::cout << "--> ID = " << dataspace_id << endl;
+
+      attribute_id = H5Acreate (file_id,
+				attribute_name.c_str(),
+				H5T_STD_I32BE,
+				dataspace_id,
+				H5P_DEFAULT);
+      
+      if (attribute_id > 0) {
+	std::cout << "-- Successfully created attribute." << endl;
+	std::cout << "--> ID = " << attribute_id << endl;
+      
+// 	status = H5Awrite ();
+
+      } else {
+	cerr << "-- Error creating attribute!" << endl;
+      }
+      
+    } else {
+      cerr << "-- Error creating dataspace for attribute!" << endl;
+    }
+
+  } else {
+    cout << "-- Error creating HDF5 file." << endl;
+  }
+  
   return nofFailedTests;
 }
 
@@ -309,10 +377,10 @@ int get_attributes (hid_t const &file_id)
     std::cout << "-- TRIGGER_OFFSET     = " << trigger_offset   << endl;
     std::cout << "-- TRIGGERED_ANTENNAS = "; LOFAR::show_vector(std::cout,
 							     triggered_antennas);
-    std::cout << std::endl;
+    std::cout << endl;
     std::cout << "-- BEAM_DIRECTION     = "; LOFAR::show_vector(std::cout,
 							   beam_direction);
-    std::cout << std::endl;
+    std::cout << endl;
 
   } else {
     cerr << "[get_attributes] Unable to open station group!" << endl;
@@ -468,6 +536,7 @@ int main (int argc,
     Some tests do not require any external data input
   */
   nofFailedTests += test_support_methods ();
+  nofFailedTests += test_create_file ();
 
   /*
     Check if filename of the dataset is provided on the command line; if not

@@ -295,15 +295,24 @@ namespace LOFAR { // Namespace LOFAR -- begin
     casa::Record rec;
 
     try {
-      rec.define(attribute_name(LOFAR::STATION_ID),station_id());
-      rec.define(attribute_name(LOFAR::RSP_ID),rsp_id());
-      rec.define(attribute_name(LOFAR::RCU_ID),rcu_id());
-      rec.define(attribute_name(LOFAR::TIME),time());
-      rec.define(attribute_name(LOFAR::SAMPLE_FREQUENCY),sample_frequency());
-      rec.define(attribute_name(LOFAR::NYQUIST_ZONE),nyquist_zone());
-      rec.define(attribute_name(LOFAR::FEED),feed());
-      rec.define(attribute_name(LOFAR::ANTENNA_POSITION),antenna_position());
-      rec.define(attribute_name(LOFAR::ANTENNA_ORIENTATION),antenna_orientation());
+      rec.define(casa::RecordFieldId(attribute_name(LOFAR::STATION_ID)),
+		 station_id());
+      rec.define(casa::RecordFieldId(attribute_name(LOFAR::RSP_ID)),
+		 rsp_id());
+      rec.define(casa::RecordFieldId(attribute_name(LOFAR::RCU_ID)),
+		 rcu_id());
+      rec.define(casa::RecordFieldId(attribute_name(LOFAR::TIME)),
+		 time());
+      rec.define(casa::RecordFieldId(attribute_name(LOFAR::SAMPLE_FREQUENCY)),
+		 sample_frequency());
+      rec.define(casa::RecordFieldId(attribute_name(LOFAR::NYQUIST_ZONE)),
+		 nyquist_zone());
+      rec.define(casa::RecordFieldId(attribute_name(LOFAR::FEED)),
+		 feed());
+      rec.define(casa::RecordFieldId(attribute_name(LOFAR::ANTENNA_POSITION)),
+		 antenna_position());
+      rec.define(casa::RecordFieldId(attribute_name(LOFAR::ANTENNA_ORIENTATION)),
+		 antenna_orientation());
     } catch (std::string message) {
       std::cerr << "[LOFAR_DipoleDataset::attributes2record] "
 		<< "Error filling the record with attribute values!\n"

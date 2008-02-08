@@ -35,6 +35,7 @@
 #endif
 
 #include <hdf5/H5LT.h>
+#include <hdf5/H5TA.h>
 
 namespace LOFAR { // Namespace LOFAR -- begin
   
@@ -60,11 +61,17 @@ namespace LOFAR { // Namespace LOFAR -- begin
 	Specification</a>
 	<li><a href="http://hdf.ncsa.uiuc.edu/HDF5/doc/UG/index.html">User's
 	Guide</a>
+	<li><a href="http://hdfgroup.org/HDF5/hdf5_hl/doc/RM_hdf5lt.html">HDF5
+	Lite API</a> - higher-level functions which do more operations per call
+	than the basic HDF5 interface. The purpose is to wrap intuitive
+	functions around certain sets of features in the existing APIs. This
+	version of the API has two sets of functions: dataset and attribute
+	related functions.
       </ul>
       <li>Classes to handle the interaction with LOFAR time-series datasets
       <ul>
         <li>CR::LOFAR_TBB
-        <li>CR::LOFAR_StationGroup
+        <li>LOFAR::LOFAR_StationGroup
         <li>LOFAR::LOFAR_DipoleDataset
       </ul>
     </ul>
@@ -171,6 +178,22 @@ namespace LOFAR { // Namespace LOFAR -- begin
 #endif
   //@}
 
+  /*!
+    \brief Set the value of an attribute attached to a group or dataset
+
+    \param location_id -- Identifier for the HDF5 object - file, group, dataset,
+           array - the attribute is attached to.
+    \param name        -- Name of the attribute
+    \param val         -- Value stored as attribute
+
+    \return status -- Status of the operation; returns <tt>false</tt> in case
+            an error was encountered
+  */
+  template <class T>
+    bool h5set_attribute (hid_t const &location_id,
+			  std::string const &name,
+			  T const &val);
+  
   
   //@{
   /*!
