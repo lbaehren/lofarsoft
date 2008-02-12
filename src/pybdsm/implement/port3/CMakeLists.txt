@@ -15,3 +15,8 @@ set (port3_sources
 
 ## FIXME: there should be better way that creating shared library
 add_library (port3 SHARED ${port3_sources})
+
+## ----------------------------------------------------------------------
+## Installation
+install (TARGETS port3 DESTINATION lib)
+
