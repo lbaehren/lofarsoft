@@ -67,10 +67,10 @@ namespace LOFAR { // Namespace LOFAR -- begin
       name = "TIME";
       break;
     case SAMPLE_NUMBER:
-      name = "SAMPLE_NUMBER";
+      name = "SAMPLE_NR";
       break;
     case SAMPLE_FREQUENCY:
-      name = "SAMPLE_FREQUENCY";
+      name = "SAMPLE_FREQ";
       break;
     case NYQUIST_ZONE:
       name = "NYQUIST_ZONE";
@@ -85,10 +85,10 @@ namespace LOFAR { // Namespace LOFAR -- begin
       name = "FEED";
       break;
     case ANTENNA_POSITION:
-      name = "ANTENNA_POSITION";
+      name = "ANT_POSITION";
       break;
     case ANTENNA_ORIENTATION:
-      name = "ANTENNA_ORIENTATION";
+      name = "ANT_ORIENTATION";
       break;
     case BEAM_DIRECTION:
       name = "BEAM_DIRECTION";

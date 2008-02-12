@@ -403,4 +403,32 @@ namespace LOFAR { // Namespace LOFAR -- begin
     return dataset_ids;
   }
 
+  // ---------------------------------------------------------- attributes2record
+
+  casa::Record LOFAR_StationGroup::attributes2record ()
+  {
+    casa::Record rec;
+
+    try {
+      rec.define(casa::RecordFieldId(attribute_name(LOFAR::TELESCOPE)),
+		 telescope());
+      rec.define(casa::RecordFieldId(attribute_name(LOFAR::OBSERVER)),
+		 observer());
+      rec.define(casa::RecordFieldId(attribute_name(LOFAR::PROJECT)),
+		 project());
+      rec.define(casa::RecordFieldId(attribute_name(LOFAR::OBSERVATION_ID)),
+		 observationID());
+      rec.define(casa::RecordFieldId(attribute_name(LOFAR::OBSERVATION_MODE)),
+		 observationMode());
+//       rec.define(casa::RecordFieldId(attribute_name(LOFAR::TIME)),
+// 		 time());
+    } catch (std::string message) {
+      std::cerr << "[LOFAR_StationGroup::attributes2record] "
+		<< "Error filling the record with attribute values!\n"
+		<< message
+		<< std::endl;
+    }
+
+    return rec;
+  }
 } // Namespace LOFAR -- end

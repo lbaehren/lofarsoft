@@ -102,14 +102,20 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 ## call_pipeline
 
 if (HAVE_CASA OR HAVE_CASACORE)
-  add_executable (call_pipeline call_pipeline.cc)
-  ## linker instructions
-  target_link_libraries (call_pipeline cr)
-  ## installation instructions
-  install (TARGETS call_pipeline
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib)
+  if (HAVE_ROOT AND HAVE_FFTW3)
+    add_executable (call_pipeline call_pipeline.cc)
+    ## linker instructions
+    target_link_libraries (call_pipeline
+      cr
+      ${FFTW3_LIBRARIES}
+      ${ROOT_LIBRARIES}
+      )
+    ## installation instructions
+    install (TARGETS call_pipeline
+      RUNTIME DESTINATION bin
+      LIBRARY DESTINATION lib
+      ARCHIVE DESTINATION lib)
+  endif (HAVE_ROOT AND HAVE_FFTW3)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ## -------------------------------------------------------------------

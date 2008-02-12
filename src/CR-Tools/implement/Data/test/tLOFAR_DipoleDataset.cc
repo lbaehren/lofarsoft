@@ -2,8 +2,8 @@
  | $Id:: tNewClass.cc 1159 2007-12-21 15:40:14Z baehren                  $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2008                                                  *
- *   Lars Baehren (<mail>)                                                     *
+ *   Copyright (C) 2008                                                    *
+ *   Lars B"ahren (lbaehren@gmail.com)                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -23,6 +23,9 @@
 
 #include <Data/LOFAR_DipoleDataset.h>
 
+using std::cerr;
+using std::endl;
+
 using LOFAR::LOFAR_DipoleDataset;  // Namespace usage
 
 /*!
@@ -41,20 +44,33 @@ using LOFAR::LOFAR_DipoleDataset;  // Namespace usage
 
 /*!
   \brief Test constructors for a new LOFAR_DipoleDataset object
+  
+  \param filename -- Name of the HDF5 file, within which the dataset is located
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_LOFAR_DipoleDataset ()
+int test_LOFAR_DipoleDataset (std::string const &filename)
 {
-  int nofFailedTests (0);
-  
   std::cout << "\n[test_LOFAR_DipoleDataset]\n" << std::endl;
 
+  int nofFailedTests (0);
+  
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
-    LOFAR_DipoleDataset newLOFAR_DipoleDataset;
+    LOFAR_DipoleDataset dataset;
     //
-    newLOFAR_DipoleDataset.summary(); 
+    dataset.summary(); 
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[2] Testing argumented constructor ..." << std::endl;
+  try {
+    LOFAR_DipoleDataset dataset (filename,
+				 "Station001/001000000");
+    //
+    dataset.summary(); 
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -65,14 +81,23 @@ int test_LOFAR_DipoleDataset ()
 
 // -----------------------------------------------------------------------------
 
-int main ()
+int main (int argc,
+	  char *argv[])
 {
   int nofFailedTests (0);
 
-  // Test for the constructor(s)
-  {
-    nofFailedTests += test_LOFAR_DipoleDataset ();
+  if (argc < 2) {
+    cerr << "[tHDF5Common] Too few parameters!" << endl;
+    cerr << "" << endl;
+    cerr << "  tHDF5Common <filename>" << endl;
+    cerr << "" << endl;
+    return -1;
   }
 
+  std::string filename (argv[1]);
+  
+  // Test for the constructor(s)
+  nofFailedTests += test_LOFAR_DipoleDataset (filename);
+  
   return nofFailedTests;
 }

@@ -89,6 +89,16 @@ int test_support_methods ()
 
 /*!
   \brief Test the basic steps for the creation of a new HDF5 file
+
+  Even though the creation of standard LOFAR datasets basd on the HDF5 library 
+  should be handled by the DAL, some basic understanding of the steps involved
+  seems to be a reasonable thing; therefore we are doing some of this on our
+  own at this point.
+
+  \verbatim
+  /
+  |-- TELESCOPE               Attribute
+  \endverbatim
   
   \return nofFailedTests -- The number of failed tests within this function 
 */

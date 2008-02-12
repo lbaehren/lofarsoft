@@ -82,15 +82,13 @@ namespace LOFAR { // Namespace LOFAR -- begin
   */  
   class LOFAR_DipoleDataset {
     
-    //! HDF5 file handle ID
-    hid_t H5fileID_p;
     //! Identifier for this dataset within the HDF5 file
-    hid_t H5datasetID_p;
+    hid_t datasetID_p;
     
   public:
     
     // ------------------------------------------------------------- Construction
-    
+     
     /*!
       \brief Default constructor
     */
@@ -99,21 +97,20 @@ namespace LOFAR { // Namespace LOFAR -- begin
     /*!
       \brief Argumented constructor
 
-      \param fileID -- HDF5 file handle ID
-      \param datasetID -- Identifier for this dataset within the HDF5 file
+      \param filename -- 
+      \param dataset  -- 
     */
-    LOFAR_DipoleDataset (hid_t const &fileID,
-			 hid_t const &datasetID);
+    LOFAR_DipoleDataset (std::string const &filename,
+			 std::string const &dataset);
     
     /*!
       \brief Argumented constructor
 
-      \param fileID -- HDF5 file handle ID
-      \param datasetName -- Path/Absolute name of the dataset within the HDF5
-             file
+      \param location -- 
+      \param dataset  -- 
     */
-    LOFAR_DipoleDataset (hid_t const &fileID,
-			 std::string const &datasetName);
+    LOFAR_DipoleDataset (hid_t const &location,
+			 std::string const &dataset);
     
     /*!
       \brief Copy constructor
@@ -142,21 +139,12 @@ namespace LOFAR { // Namespace LOFAR -- begin
     // --------------------------------------------------------------- Parameters
     
     /*!
-      \brief Get the HDF5 file handle ID
-
-      \return H5fileID -- HDF5 file handle ID
-    */
-    inline hid_t file_id () const {
-      return H5fileID_p;
-    }
-
-    /*!
       \brief Get the identifier for this dataset within the HDF5 file
 
       \return H5datasetID -- The identifier for this dataset within the HDF5 file
     */
     inline hid_t dataset_id () const {
-      return H5datasetID_p;
+      return datasetID_p;
     }
 
     /*!
@@ -291,6 +279,16 @@ namespace LOFAR { // Namespace LOFAR -- begin
     casa::Record attributes2record ();
     
   private:
+    
+    /*!
+      \brief Initialize the internal dataspace
+
+      \param location -- Location below which the dataset is found within the
+             file.
+      \param dataset  -- Name of the dataset which this object if to encapsulate.
+     */
+    void init (hid_t const &location,
+	       std::string const &dataset);
     
     /*!
       \brief Unconditional copying

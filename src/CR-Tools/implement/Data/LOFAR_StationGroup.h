@@ -28,6 +28,10 @@
 #include <iostream>
 #include <string>
 
+#include <casa/aips.h>
+#include <casa/Arrays/Vector.h>
+#include <casa/Containers/Record.h>
+
 #include <dal/dal.h>
 #include <dal/dalDataset.h>
 
@@ -69,6 +73,8 @@ namespace LOFAR { // Namespace LOFAR -- begin
 
     //! HDF5 file handle ID
     hid_t H5fileID_p;
+    //! Identifier for this group within the HDF5 file
+    hid_t H5groupID_p;
     //! Group object of the Data Access Library 
     dalGroup *group_p;
 
@@ -126,6 +132,24 @@ namespace LOFAR { // Namespace LOFAR -- begin
     LOFAR_StationGroup& operator= (LOFAR_StationGroup const &other); 
     
     // --------------------------------------------------------------- Parameters
+    
+    /*!
+      \brief Get the HDF5 file handle ID
+      
+      \return H5fileID -- HDF5 file handle ID
+    */
+    inline hid_t file_id () const {
+      return H5fileID_p;
+    }
+    
+    /*!
+      \brief Get the identifier for this group within the HDF5 file
+      
+      \return H5groupID -- The identifier for this group within the HDF5 file
+    */
+    inline hid_t group_id () const {
+      return H5groupID_p;
+    }
 
     /*!
       \brief Get the name of the group encapsulated by this class
@@ -323,6 +347,14 @@ namespace LOFAR { // Namespace LOFAR -- begin
      */
     bool setStationGroup (dalDataset &dataset,
 			  std::string const &name);
+    
+    /*!
+      \brief Get a casa::Record containing the values of the attributes
+
+      \return record -- A casa::Record container holding the values of the 
+              attributes attached to the dataset for this dipole
+    */
+    casa::Record attributes2record ();
     
   private:
 

@@ -41,7 +41,7 @@ if (DAL_LIBRARIES AND HDF5_LIBRARIES)
     ${CR_SOURCE_DIR}/../../data
     )
   
-  foreach (src tHDF5Common tLOFAR_StationGroup tLOFAR_TBB) 
+  foreach (src tHDF5Common tLOFAR_StationGroup tLOFAR_DipoleDataset tLOFAR_TBB) 
     ## compiler instructions
     add_executable (${src} ${src}.cc)
     ## linker instructions

@@ -32,12 +32,51 @@ namespace LOFAR { // Namespace LOFAR -- begin
   //
   // ============================================================================
   
+  // -------------------------------------------------------- LOFAR_DipoleDataset
+
   LOFAR_DipoleDataset::LOFAR_DipoleDataset ()
   {
-    H5fileID_p    = 0;
-    H5datasetID_p = 0;
+    datasetID_p = 0;
   }
   
+  // -------------------------------------------------------- LOFAR_DipoleDataset
+  
+  LOFAR_DipoleDataset::LOFAR_DipoleDataset (std::string const &filename,
+					    std::string const &dataset)
+  {
+    hid_t file_id (0);
+
+    // open the file
+    file_id = H5Fopen (filename.c_str(),
+		       H5F_ACC_RDONLY,
+		       H5P_DEFAULT);
+
+    // if opening of file was successfull, try to open dataset
+    if (file_id > 0) {
+      init (file_id,
+	    dataset);
+    } else {
+      std::cerr << "[LOFAR_DipoleDataset] Error opening HDF5 file "
+		<< filename 
+		<< " !"
+		<< std::endl;
+    }
+
+    // release the global file handle
+    herr_t h5error = H5Fclose (file_id);
+  }
+
+  // -------------------------------------------------------- LOFAR_DipoleDataset
+
+  LOFAR_DipoleDataset::LOFAR_DipoleDataset (hid_t const &location,
+					    std::string const &dataset)
+  {
+    init (location,
+	  dataset);
+  }
+  
+  // -------------------------------------------------------- LOFAR_DipoleDataset
+
   LOFAR_DipoleDataset::LOFAR_DipoleDataset (LOFAR_DipoleDataset const &other)
   {
     copy (other);
@@ -53,9 +92,19 @@ namespace LOFAR { // Namespace LOFAR -- begin
   {
     destroy();
   }
+
+  // -------------------------------------------------------------------- destroy
   
   void LOFAR_DipoleDataset::destroy ()
-  {;}
+  {
+    /*
+      If an identifier to the dataset was assigned, we need to release it; if
+      no assignment was done, there is nothing else to be done here.
+    */
+    if (datasetID_p) {
+      herr_t h5error = H5Dclose (datasetID_p);
+    }
+  }
   
   // ============================================================================
   //
@@ -72,9 +121,13 @@ namespace LOFAR { // Namespace LOFAR -- begin
     return *this;
   }
   
-  void LOFAR_DipoleDataset::copy (LOFAR_DipoleDataset const &other)
-  {;}
+  // ----------------------------------------------------------------------- copy
 
+  void LOFAR_DipoleDataset::copy (LOFAR_DipoleDataset const &other)
+  {
+    datasetID_p = other.datasetID_p;
+  }
+  
   // ============================================================================
   //
   //  Parameters
@@ -82,9 +135,21 @@ namespace LOFAR { // Namespace LOFAR -- begin
   // ============================================================================
   
   void LOFAR_DipoleDataset::summary (std::ostream &os)
-  {;}
+  {
+    os << "[LOFAR_DipoleDataset::summary]"   << std::endl;
+    os << "-- Dataset ID        = " << datasetID_p  << std::endl;
   
-  
+    if (datasetID_p) {
+      os << "-- STATION_ID        = " << station_id()        << std::endl;
+      os << "-- RSP_ID            = " << rsp_id()            << std::endl;
+      os << "-- RCU_ID            = " << rcu_id()            << std::endl;
+      os << "-- SAMPLE_FREQUENCY  = " << sample_frequency()  << std::endl;
+      os << "-- NYQUIST_ZONE      = " << nyquist_zone()      << std::endl;
+      os << "-- TIME              = " << time()              << std::endl;
+      os << "-- SAMPLE_NUMBER     = " << sample_number()     << std::endl;
+      os << "-- SAMPLES_PER_FRAME = " << samples_per_frame() << std::endl;
+    }
+  }
   
   // ============================================================================
   //
@@ -92,6 +157,34 @@ namespace LOFAR { // Namespace LOFAR -- begin
   //
   // ============================================================================
 
+  // ----------------------------------------------------------------------- init
+
+  void LOFAR_DipoleDataset::init (hid_t const &location,
+				  std::string const &dataset)
+  {
+    bool status (true);
+    hid_t dataset_id (0);
+
+    /*
+      Try to open the dataset within the HDF5 file; the dataset is expected
+      to reside below the object identified by "location".
+    */
+    try {
+      dataset_id = H5Dopen (location,
+			    dataset.c_str());
+    } catch (std::string message) {
+      std::cerr << "[LOFAR_DipoleDataset::init] " << message << std::endl;
+      status = false;
+    }
+
+    if (dataset_id > 0) {
+      datasetID_p = dataset_id;
+    } else {
+      datasetID_p = 0;
+    }
+    
+  }
+  
   // --------------------------------------------------------------- attribute_id
   
   hid_t LOFAR_DipoleDataset::attribute_id (std::string const &name)
@@ -101,7 +194,7 @@ namespace LOFAR { // Namespace LOFAR -- begin
     /*
      * First check if the attribute actually exists
      */
-    id = H5Aopen_name(H5datasetID_p,
+    id = H5Aopen_name(datasetID_p,
 		      name.c_str());
 
     
@@ -116,7 +209,7 @@ namespace LOFAR { // Namespace LOFAR -- begin
 
     if (h5get_attribute(id,
 			attribute_name(LOFAR::STATION_ID),
-			H5datasetID_p)) {
+			datasetID_p)) {
       return id;
     } else {
       return 0;
@@ -131,7 +224,7 @@ namespace LOFAR { // Namespace LOFAR -- begin
 
     if (h5get_attribute(id,
 			attribute_name(LOFAR::RSP_ID),
-			H5datasetID_p)) {
+			datasetID_p)) {
       return id;
     } else {
       return 0;
@@ -146,7 +239,7 @@ namespace LOFAR { // Namespace LOFAR -- begin
 
     if (h5get_attribute(val,
 			attribute_name(LOFAR::RCU_ID),
-			H5datasetID_p)) {
+			datasetID_p)) {
       return val;
     } else {
       return 0;
@@ -161,7 +254,7 @@ namespace LOFAR { // Namespace LOFAR -- begin
 
     if (h5get_attribute(val,
 			attribute_name(LOFAR::TIME),
-			H5datasetID_p)) {
+			datasetID_p)) {
       return val;
     } else {
       return 0;
@@ -176,7 +269,7 @@ namespace LOFAR { // Namespace LOFAR -- begin
 
     if (h5get_attribute(val,
 			attribute_name(LOFAR::SAMPLE_FREQUENCY),
-			H5datasetID_p)) {
+			datasetID_p)) {
       return val;
     } else {
       return 0;
@@ -191,7 +284,7 @@ namespace LOFAR { // Namespace LOFAR -- begin
 
     if (h5get_attribute(val,
 			attribute_name(LOFAR::NYQUIST_ZONE),
-			H5datasetID_p)) {
+			datasetID_p)) {
       return val;
     } else {
       return 0;
@@ -206,7 +299,7 @@ namespace LOFAR { // Namespace LOFAR -- begin
 
     if (h5get_attribute(val,
 			attribute_name(LOFAR::SAMPLE_NUMBER),
-			H5datasetID_p)) {
+			datasetID_p)) {
       return val;
     } else {
       return 0;
@@ -221,7 +314,7 @@ namespace LOFAR { // Namespace LOFAR -- begin
 
     if (h5get_attribute(val,
 			attribute_name(LOFAR::SAMPLES_PER_FRAME),
-			H5datasetID_p)) {
+			datasetID_p)) {
       return val;
     } else {
       return 0;
@@ -236,7 +329,7 @@ namespace LOFAR { // Namespace LOFAR -- begin
 
     if (h5get_attribute(val,
 			attribute_name(LOFAR::DATA_LENGTH),
-			H5datasetID_p)) {
+			datasetID_p)) {
       return val;
     } else {
       return 0;
@@ -251,7 +344,7 @@ namespace LOFAR { // Namespace LOFAR -- begin
 
     if (h5get_attribute(val,
 			attribute_name(LOFAR::FEED),
-			H5datasetID_p)) {
+			datasetID_p)) {
       return val;
     } else {
       return std::string ("");
@@ -266,7 +359,7 @@ namespace LOFAR { // Namespace LOFAR -- begin
 
     if (h5get_attribute(val,
 			attribute_name(LOFAR::ANTENNA_POSITION),
-			H5datasetID_p)) {
+			datasetID_p)) {
       return val;
     } else {
       return casa::Vector<double> (1);
@@ -281,7 +374,7 @@ namespace LOFAR { // Namespace LOFAR -- begin
 
     if (h5get_attribute(val,
 			attribute_name(LOFAR::ANTENNA_ORIENTATION),
-			H5datasetID_p)) {
+			datasetID_p)) {
       return val;
     } else {
       return casa::Vector<double> (1);
