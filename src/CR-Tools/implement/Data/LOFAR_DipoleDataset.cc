@@ -75,13 +75,6 @@ namespace LOFAR { // Namespace LOFAR -- begin
 	  dataset);
   }
   
-  // -------------------------------------------------------- LOFAR_DipoleDataset
-
-  LOFAR_DipoleDataset::LOFAR_DipoleDataset (LOFAR_DipoleDataset const &other)
-  {
-    copy (other);
-  }
-  
   // ============================================================================
   //
   //  Destruction
@@ -108,46 +101,29 @@ namespace LOFAR { // Namespace LOFAR -- begin
   
   // ============================================================================
   //
-  //  Operators
-  //
-  // ============================================================================
-  
-  LOFAR_DipoleDataset& LOFAR_DipoleDataset::operator= (LOFAR_DipoleDataset const &other)
-  {
-    if (this != &other) {
-      destroy ();
-      copy (other);
-    }
-    return *this;
-  }
-  
-  // ----------------------------------------------------------------------- copy
-
-  void LOFAR_DipoleDataset::copy (LOFAR_DipoleDataset const &other)
-  {
-    datasetID_p = other.datasetID_p;
-  }
-  
-  // ============================================================================
-  //
   //  Parameters
   //
   // ============================================================================
+
+  // -------------------------------------------------------------------- summary
   
   void LOFAR_DipoleDataset::summary (std::ostream &os)
   {
     os << "[LOFAR_DipoleDataset::summary]"   << std::endl;
-    os << "-- Dataset ID        = " << datasetID_p  << std::endl;
+    os << "-- Dataset ID          = " << datasetID_p  << std::endl;
   
     if (datasetID_p) {
-      os << "-- STATION_ID        = " << station_id()        << std::endl;
-      os << "-- RSP_ID            = " << rsp_id()            << std::endl;
-      os << "-- RCU_ID            = " << rcu_id()            << std::endl;
-      os << "-- SAMPLE_FREQUENCY  = " << sample_frequency()  << std::endl;
-      os << "-- NYQUIST_ZONE      = " << nyquist_zone()      << std::endl;
-      os << "-- TIME              = " << time()              << std::endl;
-      os << "-- SAMPLE_NUMBER     = " << sample_number()     << std::endl;
-      os << "-- SAMPLES_PER_FRAME = " << samples_per_frame() << std::endl;
+      os << "-- STATION_ID          = " << station_id()          << std::endl;
+      os << "-- RSP_ID              = " << rsp_id()              << std::endl;
+      os << "-- RCU_ID              = " << rcu_id()              << std::endl;
+      os << "-- SAMPLE_FREQUENCY    = " << sample_frequency()    << std::endl;
+      os << "-- NYQUIST_ZONE        = " << nyquist_zone()        << std::endl;
+      os << "-- TIME                = " << time()                << std::endl;
+      os << "-- SAMPLE_NUMBER       = " << sample_number()       << std::endl;
+      os << "-- SAMPLES_PER_FRAME   = " << samples_per_frame()   << std::endl;
+      os << "-- FEED                = " << feed()                << std::endl;
+//       os << "-- ANTENNA_POSITION    = " << antenna_position()    << std::endl;
+//       os << "-- ANTENNA_ORIENTATION = " << antenna_orientation() << std::endl;
     }
   }
   

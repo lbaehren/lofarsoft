@@ -76,6 +76,26 @@ int test_LOFAR_DipoleDataset (std::string const &filename)
     nofFailedTests++;
   }
   
+  std::cout << "[3] Testing argumented constructor ..." << std::endl;
+  try {
+    hid_t file_id = H5Fopen (filename.c_str(),
+			     H5F_ACC_RDONLY,
+			     H5P_DEFAULT);
+
+    if (file_id > 0) {
+      LOFAR_DipoleDataset dataset (file_id,
+				 "Station001/001000000");
+      dataset.summary(); 
+      herr_t h5error = H5Fclose (file_id);
+    } else {
+      std::cerr << "-- Error opening HDF5 file " << filename << std::endl;
+      nofFailedTests++;
+    }
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
   return nofFailedTests;
 }
 

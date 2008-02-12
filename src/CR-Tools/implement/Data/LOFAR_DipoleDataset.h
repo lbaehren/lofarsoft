@@ -49,8 +49,8 @@ namespace LOFAR { // Namespace LOFAR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[CR] LOFAR_TBB
-      <li>[CR] LOFAR_StationGroup
+      <li>[LOFAR] LOFAR_TBB
+      <li>[LOFAR] LOFAR_StationGroup
     </ul>
     
     <h3>Synopsis</h3>
@@ -76,6 +76,10 @@ namespace LOFAR { // Namespace LOFAR -- begin
       |   |   `-- ANT_ORIENTATION   ... Attribute       ... array<double,1>
       \endverbatim
     </ol>
+
+    <u>Note:</u> No copy syntax is supported as part of this class, since
+    destroying one object would render the other inoperational, as both would
+    be sharing the same file handler. 
     
     <h3>Example(s)</h3>
     
@@ -112,29 +116,12 @@ namespace LOFAR { // Namespace LOFAR -- begin
     LOFAR_DipoleDataset (hid_t const &location,
 			 std::string const &dataset);
     
-    /*!
-      \brief Copy constructor
-      
-      \param other -- Another LOFAR_DipoleDataset object from which to create
-             this new one.
-    */
-    LOFAR_DipoleDataset (LOFAR_DipoleDataset const &other);
-    
     // -------------------------------------------------------------- Destruction
 
     /*!
       \brief Destructor
     */
     ~LOFAR_DipoleDataset ();
-    
-    // ---------------------------------------------------------------- Operators
-    
-    /*!
-      \brief Overloading of the copy operator
-      
-      \param other -- Another LOFAR_DipoleDataset object from which to make a copy.
-    */
-    LOFAR_DipoleDataset& operator= (LOFAR_DipoleDataset const &other); 
     
     // --------------------------------------------------------------- Parameters
     
@@ -268,6 +255,13 @@ namespace LOFAR { // Namespace LOFAR -- begin
     */
     casa::Vector<double> antenna_position ();
 
+    /*!
+      \brief Get the antenna orientation w.r.t. to the station reference frame
+
+      \return orientation -- The three Euler angles to specify a possible 
+              deviation of the antenna's orientation w.r.t. to the reference
+	      frame set for the station.
+    */
     casa::Vector<double> antenna_orientation ();
 
     /*!
@@ -291,39 +285,10 @@ namespace LOFAR { // Namespace LOFAR -- begin
 	       std::string const &dataset);
     
     /*!
-      \brief Unconditional copying
-    */
-    void copy (LOFAR_DipoleDataset const &other);
-    
-    /*!
       \brief Unconditional deletion 
     */
     void destroy(void);
 
-    /*!
-      \brief Get the value of an attribute
-
-      \retval value -- The value of the attribute
-      \param name -- The name the attribute
-      \param locationID -- HDF5 identifier of the structure to which the
-             attribute is attached
-
-      \return status -- Status of the operation; returns <tt>false</tt> in 
-              case an error was encountered
-    */
-    bool get_attribute (std::string &value,
-			std::string const &name,
-			hid_t const &locationID);
-    bool get_attribute (std::vector<uint> &value,
-			std::string const &name,
-			hid_t const &locationID);
-    bool get_attribute (std::vector<double> &value,
-			std::string const &name,
-			hid_t const &locationID);
-    bool get_attribute (std::vector<std::string> &value,
-			std::string const &name,
-			hid_t const &locationID);
-    
   };
   
 } // Namespace LOFAR -- end

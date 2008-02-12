@@ -28,8 +28,8 @@
 #include <iostream>
 #include <string>
 
-#include "Analysis/analyseLOPESevent.h"
-#include "Analysis/CompletePipeline.h"
+#include <Analysis/analyseLOPESevent.h>
+#include <Analysis/CompletePipeline.h>
 
 
 namespace CR { // Namespace CR -- begin
@@ -76,8 +76,8 @@ class analyseLOPESevent2 : public analyseLOPESevent{
     /*!
       \brief Copy constructor
       
-      \param other -- Another analyseLOPESevent2 object from which to create this new
-      one.
+      \param other -- Another analyseLOPESevent2 object from which to create
+             this new one.
     */
     analyseLOPESevent2 (analyseLOPESevent2 const &other);
     

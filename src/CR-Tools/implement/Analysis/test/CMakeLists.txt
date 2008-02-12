@@ -43,9 +43,16 @@ if (ROOT_LIBRARIES AND PYTHON_LIBRARIES)
   add_executable (tHistograms tHistograms.cc)
   ## link instructions
   if (libutil)
-    target_link_libraries (tHistograms ${ROOT_LIBRARIES} ${PYTHON_LIBRARIES} ${libutil})
+    target_link_libraries (tHistograms
+      ${ROOT_LIBRARIES}
+      ${PYTHON_LIBRARIES}
+      ${libutil}
+      )
   else (libutil)
-    target_link_libraries (tHistograms ${ROOT_LIBRARIES} ${PYTHON_LIBRARIES})
+    target_link_libraries (tHistograms
+      ${ROOT_LIBRARIES}
+      ${PYTHON_LIBRARIES}
+      )
   endif (libutil)
   ## testing
   add_test (tHistograms tHistograms)
