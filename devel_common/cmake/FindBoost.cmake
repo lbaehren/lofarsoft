@@ -34,6 +34,7 @@ set (lib_locations
   ## local installation
   ../release/lib
   ../../release/lib
+  ../../../release/lib
   ## system-wide installation
   /lib
   /usr/lib
@@ -138,6 +139,7 @@ foreach (boost_version 1_34_1 1_33_1)
     PATH_SUFFIXES
     boost-${boost_version}
     boost
+    .
     NO_DEFAULT_PATH
     )
 
