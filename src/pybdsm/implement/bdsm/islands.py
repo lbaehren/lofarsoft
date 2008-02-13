@@ -3,7 +3,7 @@ from image import Op
 
 try:
     import scipy.ndimage as nd
-    _use_ndimage = False
+    _use_ndimage = True
 except ImportError:
     _use_ndimage = False
 

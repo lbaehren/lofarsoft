@@ -6,14 +6,15 @@ class Op_gausfit(Op):
 
     def __call__(self, img):
         for idx, isl in enumerate(img.islands):
-            print "Fitting isl #", idx
-            t = self.fit_island(isl, img.opts.beam, img.opts.thresh_isl, img.opts.rms)
+            if img.opts.verbose_fitting:
+                print "Fitting isl #", idx
+            t = self.fit_island(isl, img.opts.beam, img.opts.thresh_isl, img.opts.rms, img.opts.verbose_fitting)
             isl.gaus_fcn = t
             isl.gaul = self._parameters_to_global(isl, t.parameters)
 
         return img
 
-    def fit_island(self, isl, beam, thr, norm=1):
+    def fit_island(self, isl, beam, thr, norm=1, verbose=1):
         """Fit island"""
         from _cbdsm import MGFunction, Gtype, lmder_fit
 
@@ -36,10 +37,10 @@ class Op_gausfit(Op):
             else:
                 break
             
-            if not fit(fcn, final=0, verbose=1):
+            if not fit(fcn, final=0, verbose=verbose):
                 break
 
-        fit(fcn, final=1, verbose=1)
+        fit(fcn, final=1, verbose=verbose)
         return fcn
 
     def _parameters_to_global(self, isl, par):

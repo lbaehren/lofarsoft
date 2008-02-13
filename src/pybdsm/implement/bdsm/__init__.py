@@ -12,6 +12,7 @@ bdsm_default_opts = {'rms_clip': 3,       ### sigma's for hard threshold
                      'isl_peak_clip': 5,  ### sigma's for island peak
                      'isl_clip': 3,       ### sigma's for island boundary
                      'print_timing': True,### print basic timing information
+                     'verbose_fitting': 1,### print out extra information during fitting
                      }
 
 
