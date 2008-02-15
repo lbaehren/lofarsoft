@@ -3,7 +3,6 @@
 
 //!std c++
 #include <iostream>
-#include <fstream>
 #include <time.h>
 #include <math.h>
 #include <libgen.h>
@@ -26,6 +25,8 @@
 
 using namespace std;
 using namespace TMath;
+
+using TMath::Median;
 
 /**********************************************************************************************/
 
@@ -146,11 +147,8 @@ void CreateTAnaFlag(TChain *TFlag, struct AnaFlag *AnaFlag){
   TFlag->SetBranchAddress("snr_rms",&AnaFlag->snr_rms);
   TFlag->SetBranchAddress("L1trigger",&AnaFlag->L1Trigger);
   TFlag->SetBranchAddress("Int_Env",&AnaFlag->Int_Env);
-  TFlag->SetBranchAddress("Int_Pre",&AnaFlag->Int_Pre);
-  TFlag->SetBranchAddress("Int_Post",&AnaFlag->Int_Post);
   TFlag->SetBranchAddress("Int_Raw",&AnaFlag->Int_Raw);
   TFlag->SetBranchAddress("Int_RawSq",&AnaFlag->Int_RawSq);
-  TFlag->SetBranchAddress("Int_Pulse",&AnaFlag->Int_Pulse);
   TFlag->SetBranchAddress("FWHM",&AnaFlag->FWHM);
   TFlag->SetBranchAddress("DynThreshold",&AnaFlag->DynThreshold);
   TFlag->SetBranchAddress("CoincTime",&AnaFlag->CoincTime);
@@ -158,64 +156,6 @@ void CreateTAnaFlag(TChain *TFlag, struct AnaFlag *AnaFlag){
   TFlag->SetBranchAddress("Azimuth_err",&AnaFlag->Azimuth_err);
   TFlag->SetBranchAddress("Zenith",&AnaFlag->Zenith);    
   TFlag->SetBranchAddress("Zenith_err",&AnaFlag->Zenith_err); 
-  TFlag->SetBranchAddress("BAngle",&AnaFlag->BAngle);   
-  TFlag->SetBranchAddress("timestamp",&AnaFlag->timestamp);
-  TFlag->SetBranchAddress("NoCross00",&AnaFlag->NoCross00);   
-  TFlag->SetBranchAddress("NoCross01",&AnaFlag->NoCross01);   
-  TFlag->SetBranchAddress("NoCross02",&AnaFlag->NoCross02);   
-  TFlag->SetBranchAddress("NoCross03",&AnaFlag->NoCross03);   
-  TFlag->SetBranchAddress("NoCross04",&AnaFlag->NoCross04);   
-  TFlag->SetBranchAddress("NoCross05",&AnaFlag->NoCross05);   
-  TFlag->SetBranchAddress("NoCross06",&AnaFlag->NoCross06);   
-  TFlag->SetBranchAddress("NoCross07",&AnaFlag->NoCross07);   
-  TFlag->SetBranchAddress("NoCross08",&AnaFlag->NoCross08);   
-  TFlag->SetBranchAddress("NoCross09",&AnaFlag->NoCross09);   
-  TFlag->SetBranchAddress("ThresCross00",&AnaFlag->ThresCross00);
-  TFlag->SetBranchAddress("ThresCross01",&AnaFlag->ThresCross01);  
-  TFlag->SetBranchAddress("ThresCross02",&AnaFlag->ThresCross02);
-  TFlag->SetBranchAddress("ThresCross03",&AnaFlag->ThresCross03);
-  TFlag->SetBranchAddress("ThresCross04",&AnaFlag->ThresCross04);
-  TFlag->SetBranchAddress("ThresCross05",&AnaFlag->ThresCross05);
-  TFlag->SetBranchAddress("ThresCross06",&AnaFlag->ThresCross06);
-  TFlag->SetBranchAddress("ThresCross07",&AnaFlag->ThresCross07);
-  TFlag->SetBranchAddress("ThresCross08",&AnaFlag->ThresCross08);
-  TFlag->SetBranchAddress("ThresCross09",&AnaFlag->ThresCross09);
-  TFlag->SetBranchAddress("MaxCrossDelay",&AnaFlag->MaxCrossDelay);
-}
-
-/**********************************************************************************************/
-
-void SetStruct2Zero(struct AnaFlag *AnaFlag){
-  AnaFlag->event_id = 0;
-  AnaFlag->DetCh = 1;
-  AnaFlag->channel_id[0] = 0;
-  AnaFlag->ana_index = 0;
-  strcpy(AnaFlag->description,"null");
-  AnaFlag->run_id = 0;
-  AnaFlag->daq_id = 0;
-  AnaFlag->tot_events = 0;
-  AnaFlag->PulseLength[0] = 0;
-  AnaFlag->PulsePosition[0] = 0;
-  AnaFlag->PulseMax[0] = 0;
-  AnaFlag->NoPulses[0] = 0;
-  AnaFlag->snr[0] = 0;
-  AnaFlag->snr_mean[0] = 0;
-  AnaFlag->snr_rms[0] = 0;
-  AnaFlag->L1Trigger = 0;
-  AnaFlag->Int_Env[0] = 0;
-  AnaFlag->Int_Pre[0] = 0;
-  AnaFlag->Int_Post[0] = 0;
-  AnaFlag->Int_Raw[0] = 0;
-  AnaFlag->Int_RawSq[0] = 0;
-  AnaFlag->Int_Pulse[0] = 0;
-  AnaFlag->FWHM[0] = 0;
-  AnaFlag->DynThreshold[0] = 0;
-  AnaFlag->CoincTime = 0;
-  AnaFlag->Azimuth = 0;
-  AnaFlag->Azimuth_err = 0;
-  AnaFlag->Zenith = 0;
-  AnaFlag->Zenith_err = 0;
-  strcpy(AnaFlag->timestamp,"null");
 
 }
 
@@ -227,142 +167,6 @@ void CreateTselftrigger(TChain *Tselftrigger, struct selftrigger *selftrigger){
   Tselftrigger->SetBranchAddress("trigger", &selftrigger->trigger);  
   Tselftrigger->SetBranchAddress("event_id", &selftrigger->event_id);  
   Tselftrigger->SetBranchAddress("channel_profile_id", &selftrigger->channel_profile_id);
-}
-
-/**********************************************************************************************/
-
-void CreateTGrande(TChain *TGrande, struct h3 *h3, bool Grande_orig){
-    TGrande->SetBranchAddress("Gt",&h3->Gt);
-    TGrande->SetBranchAddress("Mmn",&h3->Mmn);
-    TGrande->SetBranchAddress("Fanka",&h3->Fanka);
-    TGrande->SetBranchAddress("Hit7",&h3->Hit7);
-    TGrande->SetBranchAddress("Nflg",&h3->Nflg);
-    TGrande->SetBranchAddress("Ageg",&h3->Ageg);
-    TGrande->SetBranchAddress("Sizeg",&h3->Sizeg);
-    TGrande->SetBranchAddress("Sizmg",&h3->Sizmg);
-    TGrande->SetBranchAddress("Zeg",&h3->Zeg);
-    TGrande->SetBranchAddress("Idmx",&h3->Idmx);
-    TGrande->SetBranchAddress("Ieve",&h3->Ieve);
-    TGrande->SetBranchAddress("Irun",&h3->Irun);
-    TGrande->SetBranchAddress("Ifil",&h3->Ifil);   
-    TGrande->SetBranchAddress("Ngrs",&h3->Ngrs);
-    TGrande->SetBranchAddress("Iact",&h3->Iact);
-    TGrande->SetBranchAddress("Xcg",&h3->Xcg);
-    TGrande->SetBranchAddress("Ycg",&h3->Ycg);
-    TGrande->SetBranchAddress("Azg",&h3->Azg);
-    TGrande->SetBranchAddress("Ymd",&h3->Ymd);
-    TGrande->SetBranchAddress("Hms",&h3->Hms);
-    if(!Grande_orig) TGrande->SetBranchAddress("Eg",&h3->Eg);
-}   
-
-/**********************************************************************************************/
-
-void SetStruct2Zero(struct h3 *h3){
-    h3->Gt = 0;
-    h3->Mmn = 0;
-    h3->Fanka = 0;
-    h3->Hit7 = 0;
-    h3->Nflg = 0;
-    h3->Ageg = 0;
-    h3->Sizeg = 0;
-    h3->Sizmg = 0;
-    h3->Zeg = 0;
-    h3->Idmx = 0;
-    h3->Ieve = 0;
-    h3->Irun = 0;
-    h3->Ifil = 0;
-    h3->Ngrs = 0;
-    h3->Iact = 0;
-    h3->Xcg = 0;
-    h3->Ycg = 0;
-    h3->Azg = 0;
-    h3->Ymd = 0;
-    h3->Hms = 0;
-    h3->Eg = 0;
-}   
-
-/**********************************************************************************************/
-
-void CreateTRecEvent(TChain *TRecEvent, struct RecEvent *RecEvent){
-   TRecEvent->SetBranchAddress("event_id",&RecEvent->event_id);
-   TRecEvent->SetBranchAddress("DetCh",&RecEvent->DetCh);
-   TRecEvent->SetBranchAddress("run_id",&RecEvent->run_id);
-   TRecEvent->SetBranchAddress("daq_id",&RecEvent->daq_id);
-   TRecEvent->SetBranchAddress("channel_id",&RecEvent->channel_id);
-   TRecEvent->SetBranchAddress("Azimuth1Third",&RecEvent->Azimuth1Third);
-   TRecEvent->SetBranchAddress("Azimuth1Third_err",&RecEvent->Azimuth1Third_err);
-   TRecEvent->SetBranchAddress("Zenith1Third",&RecEvent->Zenith1Third);
-   TRecEvent->SetBranchAddress("Zenith1Third_err",&RecEvent->Zenith1Third_err);
-   TRecEvent->SetBranchAddress("AzimuthFWHM",&RecEvent->AzimuthFWHM);
-   TRecEvent->SetBranchAddress("AzimuthFWHM_err",&RecEvent->AzimuthFWHM_err);
-   TRecEvent->SetBranchAddress("ZenithFWHM",&RecEvent->ZenithFWHM);
-   TRecEvent->SetBranchAddress("ZenithFWHM_err",&RecEvent->ZenithFWHM_err);
-   TRecEvent->SetBranchAddress("AzimuthMax",&RecEvent->AzimuthMax);
-   TRecEvent->SetBranchAddress("AzimuthMax_err",&RecEvent->AzimuthMax_err);
-   TRecEvent->SetBranchAddress("ZenithMax",&RecEvent->ZenithMax);
-   TRecEvent->SetBranchAddress("ZenithMax_err",&RecEvent->ZenithMax_err);
-   TRecEvent->SetBranchAddress("AzimuthGrande",&RecEvent->AzimuthGrande);
-   TRecEvent->SetBranchAddress("ZenithGrande",&RecEvent->ZenithGrande);
-   TRecEvent->SetBranchAddress("BAngle",&RecEvent->BAngle);
-   TRecEvent->SetBranchAddress("EPhi",&RecEvent->EPhi);
-   TRecEvent->SetBranchAddress("ETheta",&RecEvent->ETheta);
-   TRecEvent->SetBranchAddress("timestamp",&RecEvent->timestamp);
-   TRecEvent->SetBranchAddress("description",RecEvent->description);
-   TRecEvent->SetBranchAddress("PulseLength1Third",&RecEvent->PulseLength1Third);
-   TRecEvent->SetBranchAddress("PulseLengthFWHM",&RecEvent->PulseLengthFWHM);
-   TRecEvent->SetBranchAddress("PulsePosMax",&RecEvent->PulsePosMax);
-   TRecEvent->SetBranchAddress("PulsePos1Third",&RecEvent->PulsePos1Third);
-   TRecEvent->SetBranchAddress("PulsePosFWHM",&RecEvent->PulsePosFWHM);
-   TRecEvent->SetBranchAddress("SNR",&RecEvent->SNR);
-   TRecEvent->SetBranchAddress("CoreDistance",&RecEvent->CoreDistance);
-   TRecEvent->SetBranchAddress("ShowerCoreXRadio",&RecEvent->ShowerCoreXRadio);
-   TRecEvent->SetBranchAddress("ShowerCoreYRadio",&RecEvent->ShowerCoreYRadio);
-   TRecEvent->SetBranchAddress("ShowerCoreXGrande",&RecEvent->ShowerCoreXGrande);
-   TRecEvent->SetBranchAddress("ShowerCoreYGrande",&RecEvent->ShowerCoreYGrande);
-   TRecEvent->SetBranchAddress("FieldStrengthChannel",&RecEvent->FieldStrengthChannel);
-   TRecEvent->SetBranchAddress("FieldStrengthAntenna",&RecEvent->FieldStrengthAntenna);
-}
-
-/**********************************************************************************************/
-
-void SetStruct2Zero(struct RecEvent *RecEvent){
-   RecEvent->event_id = 0;
-   RecEvent->DetCh = 0;
-   RecEvent->run_id = 0;
-   RecEvent->daq_id = 0;
-   RecEvent->channel_id[0] = 0;
-   RecEvent->Azimuth1Third = 0;
-   RecEvent->Azimuth1Third_err = 0;
-   RecEvent->Zenith1Third = 0;
-   RecEvent->Zenith1Third_err = 0;
-   RecEvent->AzimuthFWHM = 0;
-   RecEvent->AzimuthFWHM_err = 0;
-   RecEvent->ZenithFWHM = 0;
-   RecEvent->ZenithFWHM_err = 0;
-   RecEvent->AzimuthMax = 0;
-   RecEvent->AzimuthMax_err = 0;
-   RecEvent->ZenithMax = 0;
-   RecEvent->ZenithMax_err = 0;
-   RecEvent->AzimuthGrande = 0;
-   RecEvent->ZenithGrande = 0;
-   RecEvent->BAngle = 0;
-   RecEvent->EPhi[0] = 0;
-   RecEvent->ETheta[0] = 0;
-   strcpy(RecEvent->timestamp,"null");
-   RecEvent->PulseLength1Third[0] = 0;
-   RecEvent->PulseLengthFWHM[0] = 0;
-   RecEvent->PulsePosMax[0] = 0;
-   RecEvent->PulsePos1Third[0] = 0;
-   RecEvent->PulsePosFWHM[0] = 0;
-   RecEvent->SNR[0] = 0;
-   RecEvent->CoreDistance[0] = 0;
-   RecEvent->ShowerCoreXRadio = 0;
-   RecEvent->ShowerCoreYRadio = 0;
-   RecEvent->ShowerCoreXGrande = 0;
-   RecEvent->ShowerCoreYGrande = 0;
-   RecEvent->FieldStrengthChannel[0] = 0;
-   RecEvent->FieldStrengthAntenna[0] = 0;
-
 }
 
 /**********************************************************************************************/
@@ -405,20 +209,6 @@ void CreateTChain(TChain *Tevent, char *FileName){
     else break;
   }
 
-}
-
-/**********************************************************************************************/
-
-void CreateTGrandeChain(TChain *TGrande, char *FileName){
-  ifstream in;
-  in.open(FileName);
-  char tmpFile[2048];
-  while (1) {
-     in >> tmpFile;
-     if (!in.good()) break;
-     TGrande->Add(tmpFile);
-     cout << "added " << basename(tmpFile) << " to TGrande chain." << endl;
-  }
 }
 
 /**********************************************************************************************/
@@ -519,20 +309,26 @@ int ConvertTimeStamp(char *Timestamp, int  *Sec, int *Nanosec, double Timeshift)
 
 }
 
-/**********************************************************************************************/
-#ifdef __compile
+/*******************************************************************************/
+
+#ifdef HAVE_POSTGRESQL
+
 void ResCheck( PGresult *res){
-   if(PQresultStatus(res)>5){
+  if(PQresultStatus(res)>5){
     cerr << PQresStatus(PQresultStatus(res)) << endl;
     cerr << "Program terminated ... "<< endl;
     exit(1);
-   }
-
+  }
+  
 }
-#endif
-/**********************************************************************************************/
 
-void SubtractPedestal(int window_size, short int *trace, int start, int stop){
+#endif
+
+/*******************************************************************************/
+
+void SubtractPedestal (int window_size,
+		       short int *trace,
+		       int start, int stop) {
 
    int TraceMean=0;
    if(stop==-1) stop = window_size/2-100;
@@ -578,21 +374,21 @@ void SubtractPedestal(int window_size, float *trace, int start, int stop){
 
 /**********************************************************************************************/
 
-void TraceFFT(int window_size, short int *trace, float *Amp, float *Phase, float *RawFFT, bool data_window, bool power, bool bSubtractPedestal){
+void TraceFFT(int window_size, short int *trace, float *Amp, float *Phase, float *RawFFT, bool data_window){
    
-   TraceFFTCore(window_size, trace, true , Amp, Phase, RawFFT, data_window, power, bSubtractPedestal);
+   TraceFFTCore(window_size, trace, true , Amp, Phase, RawFFT, data_window);
 };
 
 /**********************************************************************************************/
 
-void TraceFFT(int window_size, float *trace, float *Amp, float *Phase, float *RawFFT, bool data_window, bool power, bool bSubtractPedestal){
+void TraceFFT(int window_size, float *trace, float *Amp, float *Phase, float *RawFFT, bool data_window){
 
-   TraceFFTCore(window_size, trace, false , Amp, Phase, RawFFT, data_window, power, bSubtractPedestal);
+   TraceFFTCore(window_size, trace, false , Amp, Phase, RawFFT, data_window);
 };
 
 /**********************************************************************************************/
 
-void TraceFFTCore(int window_size, void *trace, bool Flag, float *Amp, float *Phase, float *RawFFT, bool data_window, bool power, bool bSubtractPedestal){
+void TraceFFTCore(int window_size, void *trace, bool Flag, float *Amp, float *Phase, float *RawFFT, bool data_window){
 
    fftw_complex *in, *out;
    fftw_plan p;
@@ -615,8 +411,8 @@ void TraceFFTCore(int window_size, void *trace, bool Flag, float *Amp, float *Ph
    p = fftw_plan_dft_1d(window_size, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
    
 
-   if(Flag == true  && !power && bSubtractPedestal) SubtractPedestal(window_size, (short int*)trace);
-   if(Flag == false && !power && bSubtractPedestal) SubtractPedestal(window_size, (float*)trace);
+   if(Flag == true)  SubtractPedestal(window_size, (short int*)trace);
+   if(Flag == false) SubtractPedestal(window_size, (float*)trace);
    
    for(int j=0; j<window_size; j++) {
      if(Flag ==  true) in[j][0] = ((short int*)trace)[j];
@@ -701,21 +497,6 @@ void TraceFFTCore(int window_size, void *trace, bool Flag, float *Amp, float *Ph
      
    }
    
-   if(power){
-     float *tmp_amp = new float [window_size/2];
-     float *tmp_phase = new float [window_size/2];
-     for(int j=0; j<window_size/2; j++){
-       tmp_amp[j] = Amp[j];
-       tmp_phase[j] = Phase[j];
-     }
-     for(int j=0; j<window_size/2; j++){
-       Amp[j] = tmp_amp[window_size/2-1-j];
-       Phase[j] = tmp_phase[window_size/2-1-j];
-     }
-     delete[] tmp_amp;
-     delete[] tmp_phase;
-   }
-   
    fftw_free(in);
    fftw_free(out);
 
@@ -765,7 +546,7 @@ void TraceiFFT(int window_size,  float *RawFFT, float *trace, int NoZeros){
 /**********************************************************************************************/
 
 void AmpPhase2Trace(int window_size,  float *Amp, float *Phase, float *trace, float *fft_data, int NoZeros){
-  float *RawFFT = new float [window_size*2];
+  float RawFFT[window_size*2];
   for(int i=0;  i<window_size*2; i++) RawFFT[i]=0;
   
   for(int i=1; i<((window_size/2)+1); i++){
@@ -783,9 +564,67 @@ void AmpPhase2Trace(int window_size,  float *Amp, float *Phase, float *trace, fl
   
   TraceiFFT(window_size, RawFFT, trace, NoZeros);	
   //for(int i=0; i<window_size*2; i++)trace[i] = RawFFT[i];
+}
+
+/**********************************************************************************************/
+
+int PulseCount(unsigned int window_size, const float *Trace, double *Mean, double *Sigma, double *Max, bool debug){
+   
+   int no_peaks=0;
+   float Sum=0;
+   float SumSqr=0;
+//   double Mean=0;
+   float N=0;
+//   double Sigma=0;
+//   double Max=0;
+   bool peak_detected = false;
+   float TraceDummy[window_size];
+   for(unsigned int i=0; i<window_size; i++) TraceDummy[i] = Trace[i];
+   
+   *Mean=0;
+   *Sigma=0;
+   *Max=0;
+   
+   SubtractPedestal(window_size, TraceDummy);
+   
+   //square the trace
+   for(unsigned int j=0; j<window_size; j++) TraceDummy[j] = pow(TraceDummy[j],2);
+   
+   //make a smooth curve
+   for(unsigned int j=3; j<window_size-3; j++) TraceDummy[j] = (TraceDummy[j-3] + TraceDummy[j-2] + TraceDummy[j-1] + TraceDummy[j] + TraceDummy[j+1] + TraceDummy[j+2] + TraceDummy[j+3]) / 7.0;
+
+   //preparation for sigma calculation
+   for(unsigned int j=3; j<(window_size-3); j++){
+     SumSqr += pow((double)TraceDummy[j],2.0);
+     Sum += TraceDummy[j];
+     *Mean += TraceDummy[j];
+     if(*Max < TraceDummy[j]) *Max = TraceDummy[j];
+   }
+
+   N = window_size-3-3;
+   *Mean /= N;
+   *Sigma = sqrt(  SumSqr/(N-1) - pow((double)Sum,2.0)/(N*(N-1)));
   
-  //clean up
-  delete[] RawFFT;
+   if(debug) cout << "Mean = " << *Mean << " - Sigma = " << *Sigma << " - Max = " << *Max << endl;
+   
+   double threshold=*Mean+2**Sigma + (*Max-(*Mean+2**Sigma))/4;
+
+   if(debug) cout << "Threshold = " << threshold << endl;
+   
+   if(no_peaks==0){
+     for(unsigned int j=3; j<window_size-3; j++){
+       if(TraceDummy[j] > threshold && !peak_detected){
+         no_peaks++;
+	 peak_detected = true;
+       }
+       if(peak_detected && TraceDummy[j] < threshold){
+         peak_detected = false;
+       }
+     }
+   }
+   
+   
+  return no_peaks;
 }
 
 /**********************************************************************************************/
@@ -797,9 +636,9 @@ void BandFilterFFT(int window_size, float *trace, float start_freq, float stop_f
     exit (1);
   }
   
-  float *Amp = new float [window_size/2];
-  float *Phase = new float [window_size/2];
-  float *RawFFT = new float [window_size*2];
+  float Amp[window_size/2];
+  float Phase[window_size/2];
+  float RawFFT[window_size*2];
   
   TraceFFT(window_size, trace, Amp, Phase, RawFFT);
  
@@ -822,11 +661,7 @@ void BandFilterFFT(int window_size, float *trace, float start_freq, float stop_f
   
   //inverse FFT
   TraceiFFT(window_size, RawFFT, trace_out);	
-  
-  //clean up
-  delete[] Amp;
-  delete[] Phase;
-  delete[] RawFFT;
+
 }
 
 /**********************************************************************************************/
@@ -838,9 +673,9 @@ void FrequencyFilter(int window_size, float *trace, float freq, float *trace_out
     exit (1);
   }
   
-  float *Amp = new float [window_size/2];
-  float *Phase = new float [window_size/2];
-  float *RawFFT = new float [window_size*2];
+  float Amp[window_size/2];
+  float Phase[window_size/2];
+  float RawFFT[window_size*2];
   int position_range = 1;
   
   
@@ -859,11 +694,6 @@ void FrequencyFilter(int window_size, float *trace, float freq, float *trace_out
   }
   
   AmpPhase2Trace(window_size, Amp, Phase, trace_out, RawFFT, 0);
-
-  //clean up
-  delete[] Amp;
-  delete[] Phase;
-  delete[] RawFFT;
 }
 
 /**********************************************************************************************/
@@ -884,7 +714,7 @@ bool TraceCheck(struct event *event) {
 
 void TraceFFTReal(int window_size, short int *trace, float *Amp, float *Phase, float *RawFFT, bool data_window){
 
-  double *in = new double [window_size];
+  double in[window_size];
   fftw_complex *out;
   char name[1024];
   char name2[1024]; 
@@ -976,15 +806,13 @@ void TraceFFTReal(int window_size, short int *trace, float *Amp, float *Phase, f
 
   fftw_free(out);
   
-  //clean up
-  delete[] in; 
 }
 
 /**********************************************************************************************/
 
 void TraceiFFTReal(int window_size,  float *RawFFT, float *trace, int NoZeros){
    fftw_complex *in;
-   double *out = new double [window_size];
+   double out[window_size];
    fftw_plan p;
    in =  (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * window_size);
    
@@ -1012,9 +840,7 @@ void TraceiFFTReal(int window_size,  float *RawFFT, float *trace, int NoZeros){
    }
    
    fftw_free(in);
-   
-   //clean up
-   delete[] out;
+
 }
 
 /**********************************************************************************************/

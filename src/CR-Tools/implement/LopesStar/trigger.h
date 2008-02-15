@@ -45,9 +45,8 @@ void HPFilter(int NoZero, int order, int frequency, double *coeff);
 void BandFilterFunc(int NoZero, int order, int start_freq, int stop_freq, double *coeff);
 
 
-//! rectifier of HF signal to calculate the envelope signal
+//! simple rectifier of HF signal
 /*!
-The given data are squared, high and low pass filtered
 \param NoZero number of inserted zeros for interpolation
 \param window_size the length of the trace
 \param trace the array to the HF signal
@@ -55,16 +54,13 @@ The given data are squared, high and low pass filtered
 void Rectifier(int NoZero, int window_size, float *trace);
 
 
-//! rectifier of HF signal to calculate the envelope signal
+//! simple rectifier of HF signal like the hardware do it
 /*!
-The given data are squared and filtered in the frequency domain.
 \param NoZero number of inserted zeros for interpolation
-\param window_size the length of the trace array
+\param window_size the length of the trace
 \param trace the array to the HF signal
-\param HighFilterFreq all frequencies below are rejected, input n MHz
-\param LowFilterFreq all frequencies above are rejected, input in MHz
 */
-void RectifierFFT(int NoZeros, int window_size, float *trace, float HighFilterFreq=.0, float LowFilterFreq=40.);
+void RectifierHardware(int NoZero, int window_size, float *trace);
 
 
 //! video filter
@@ -129,9 +125,8 @@ defines the threshold per channel by analysing the raw upsampled trace, do not u
 \param window_size length of the trace array
 \param trace array for the adc data of length window_size
 \param threshold dynamically found threshold
-\param NoZeros number of zeros which are used to up-sample the raw data
 */
-void DynamicThreshold(int window_size, float *trace, float *threshold, int NoZeros=7, bool DoRectifier=true);
+void DynamicThreshold(int window_size, float *trace, float *threshold);
 
 //! coincidence check: like hardware
 /*!
@@ -154,9 +149,8 @@ Trace has to put without RFISup, otherwise the calculated threshold is wrong
 \param ant_pos
 \param daq_id
 \param coincidence_time is the coincidence time between all detected signals, the time have to be in units of ns
-\param NoZeros up-sampling factor minus 1
 */
-bool L0Decide(int NoCh, int window_size, float **trace, char **ant_pos, int daq_id, float *coincidence_time, int NoZeros=7);
+bool L0Decide(int NoCh, int window_size, float **trace, char **ant_pos, int daq_id, float *coincidence_time);
 
 
 //! Integral over the calculated envelope signal
@@ -187,10 +181,8 @@ float IntegralRawSquareData(int window_size, float *trace);
 /*!
 \param window_size
 \param trace
-\param NoZeros factor +1 for up-sampling internal, set to null if trace is already up-sampled
-\param RaisingEdge position of the FWHM peak
 */
-float FWHMPeak(int window_size, float *trace, int *RaisingEdge, int NoZeros=7);
+float FWHMPeak(int window_size, float *trace);
 
 
 //! Give you the width of a peak defined by the fraction * height of the peak
@@ -198,113 +190,7 @@ float FWHMPeak(int window_size, float *trace, int *RaisingEdge, int NoZeros=7);
 \param window_size
 \param trace
 \param fraction
-\param NoZeros factor +1 for up-sampling internal, set to null if trace is already up-sampled
-\param RaisingEdge position of the chosen peak
-\param ExpectedPosition of the pulse
-\param DoRectifier switch to disable the rectifier
 */
-float VarPeakWidth(int window_size, float *trace, float fraction, float *RaisingEdge, int *ExpectedPosition, int NoZeros=7, bool DoRectifier=true);
-
-//! Signal to Noise Ratio
-/*
-The raw trace is squared and the ratio of the max to mean value is calculated. Also the rms and mean is given back.
-\param window_size is the length of the trace array
-\param trace is the pointer to the raw data array
-\param snr signal to noise ratio
-\param mean mean value over the squared trace
-\param rms root mean square of the trace
-\param debug enables the debug info
-*/
-void SNR(int window_size, const float *trace, float *snr, float *mean, float *rms, bool debug=false);
-
-
-//! Counts the pulses of raw ADC trace over a threshold
-/*!
-The raw, under-sampled ADC trace is squared and smoothed. After that the mean and its sigma is calculated. 
-All pulses above a calculated threshold are detected and counted
-When the algorithm detects a pulse, the next search bin will 30 bins later.
-\param window_size defines the length of the ADC trace.
-\param Trace is the pointer to the data array (type: float). It is overwritten by the power spectrum of the trace!
-\param Mean
-\param Sigma
-\param Max
-\param debug enable degub output, default disable
-\return The number of peaks over the given threshold, if no peak is found, 0 is returned. If a problem happens -1 is given back.
-*/
-int PulseCount(unsigned int window_size, const float *Trace, double *Mean, double *Sigma, double *Max, bool debug=false);
-
-
-//! SNR and number of pulses for the channel trigger
-/*!
-\param window_size length of trace
-\param trace pointer to the adc data
-\param SNR signal to noise ratio
-\param NoPulses number of found pulses
-\param debug enable degub output, default disable
-*/
-void SNRandNoPulses(int window_size, const float *trace, float *SNR, int *NoPulses, bool debug=false);
-
-
-//! Hilbert Transformation
-/*!
-Calculates the hilbert transformation of the given signal -> complex part of a real signal
-\param window_size length of the given array
-\param data pointer with length window_size of the data
-\param result pointer with length windwo_size where the result is written in
-\param data_window switch to disable or enable a window function of the data
-*/
-void hilbert(int window_size, float *data, float *result, bool data_window=true);
-
-
-//! Envelope with Hilbert Trafo
-/*!
-calculated is the envelope signal by using the hilbert transformation
-\param NoZeros number of values to up-sample the raw data
-\param window_size length of the sub-sampled trace
-\param sub_trace pointer with length window_size with the raw sup-sampled data
-\param up_trace pointer with the length window_size * (NoZeros+1) with the calculated envelope signal
-*/
-void RectifierHilbert(int NoZeros, int window_size, const float* sub_trace, float* up_trace);
-
-
-//! Squared envelope with Hilbert Trafo
-/*!
-\param window_size length of the trace
-\param trace pointer to the data
-*/
-void RectifierHilbertSquare(int window_size, float *trace);
-
-
-//! Envelope with Hilbert Trafo
-/*!
-No up-sampling is done!
-\param window_size length of the trace
-\param trace pointer to the data
-*/
-void RectifierHilbert(int window_size, float* trace);
-
-
-//! calculate the coincidence time for given zenith angle  and daq id
-/*!
-\param ID daq_id of the used antenna array
-\param MaxZenith maximal zenith angle which is allowed, units in degree!
-\return the given time is in units of ns
-*/
-float GetCoincidenceTime(short int ID, float MaxZenith=60);
-
-
-//! count the crossing points of the RF signal with a dynamic thresold
-/*!
-The time differences between the crossing point are calculated in nano seconds.
-Internal up sampling is applied.
-\param window_size length of the Trace array
-\param Trace pointer to the sub sampled data
-\param ChannelID of the channel
-\param AnaFlag pointer to the AnaFlag struct
-\param NoZeros number of zeros for up sampling
-\return gives the maximal found delay between two threshold crossing points in nanoseconds back
-*/
-float MaxThresholdCrossingDelay(int window_size, float *Trace, int ChannelID, struct AnaFlag *AnaFlag, int NoZeros=7);
+float VarPeakWidth(int window_size, float *trace, float fraction);
 
 #endif
-
