@@ -182,6 +182,38 @@ namespace CR { // Namespace CR -- begin
       plotStop_p  = plotStop;
     }
 
+    /*!
+      \brief Gets the upsampled fieldstrength of selected antennas
+
+      \param DataReader       -- DataReader (LopesEventIn)
+      \param upsampling_exp   -- a value > 0 means that data are upsampled by a factor of 2^upsampling_exp
+                                 use e.g. uspampling_exp = 1 to have twice as many points plotted.
+      \param antennaSelection -- Selection of antennas
+
+      \return UpsampledFieldstrength -- Contains the upsampled time series of the selected antennas in colums of matrix
+                                        (number of columns = number of elements in the antennaSelection, but columns
+                                         corresponding to not selected antennas will not contain meaningless values.)
+    */
+    Matrix<Double> getUpsampledFieldstrength (DataReader *dr,
+					      int upsampling_exp,
+				 	      Vector<Bool> antennaSelection = Vector<Bool>());
+
+    /*!
+      \brief Gets the time axis for upsampled data
+
+      \param DataReader       -- DataReader (LopesEventIn)
+      \param upsampling_exp   -- a value > 0 means that there are 2^upsampling_exp data points
+                                 use e.g. uspampling_exp = 1 to have twice as many points plotted.
+
+
+      \return UpsampledTime Axis -- The extended time axis containing new time values between the old ones.
+                                    The first time value is the same as the first value of the original time axis.
+                                    This means, that there are 2^upsampling_exp -1 data points attached after the
+                                    last time value of the original axis.
+    */
+    Vector<Double> getUpsampledTimeAxis (DataReader *dr,
+					 int upsampling_exp);
+
 
     /*!
       \brief Plots the CC-beam
