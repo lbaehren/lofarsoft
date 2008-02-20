@@ -129,33 +129,18 @@ int test_create_file ()
   if (file_id > 0) {
     cout << "-- Successfully created HDF5 file." << endl;
     cout << "--> ID = " << file_id << endl;
-
-    dataspace_id = H5Screate(H5S_SCALAR);
     
-    if (dataspace_id > 0) {
-      std::cout << "-- Successfully created dataspace for attribute." << endl;
-      std::cout << "--> ID = " << dataspace_id << endl;
-
-      attribute_id = H5Acreate (file_id,
-				attribute_name.c_str(),
-				H5T_STD_I32BE,
-				dataspace_id,
-				H5P_DEFAULT);
-      
-      if (attribute_id > 0) {
-	std::cout << "-- Successfully created attribute." << endl;
-	std::cout << "--> ID = " << attribute_id << endl;
-      
-// 	status = H5Awrite ();
-
-      } else {
-	cerr << "-- Error creating attribute!" << endl;
-      }
-      
+    std::string attribute_name ("ATTR");
+    uint attribute_value (1);
+    
+    if (LOFAR::h5set_attribute (file_id,
+				attribute_name,
+				attribute_value)) {
+      cout << "-- Successfully created attribute." << endl;
     } else {
-      cerr << "-- Error creating dataspace for attribute!" << endl;
+      cerr << "-- There was an error creating the attribute!" << endl;
     }
-
+    
   } else {
     cout << "-- Error creating HDF5 file." << endl;
   }
@@ -178,12 +163,13 @@ int get_attribute_id (hid_t const &file_id)
 
   int nofFailedTests (0);
   hid_t attribute_id (0);
+  hid_t group_id (0);
 
   /*
    * Get the ID of the station group
    */
-  hid_t group_id = H5Gopen (file_id,
-			    "Station001");
+  group_id = H5Gopen (file_id,
+		      "Station001");
   
   if (group_id > 0) {
 
@@ -236,22 +222,28 @@ int get_attribute_id (hid_t const &file_id)
 
     std::cout << "[2] Retrieving IDs of dataset attributes..." << endl;
 
-    attribute_id = H5Aopen_name(dataset_id,"STATION_ID");
+    attribute_id = H5Aopen_name(dataset_id,
+				LOFAR::attribute_name(LOFAR::STATION_ID).c_str());
     std::cout << "-- STATION_ID        = " << attribute_id << endl;
     
-    attribute_id = H5Aopen_name(dataset_id,"RSP_ID");
+    attribute_id = H5Aopen_name(dataset_id,
+				LOFAR::attribute_name(LOFAR::RSP_ID).c_str());
     std::cout << "-- RSP_ID            = " << attribute_id << endl;
     
-    attribute_id = H5Aopen_name(dataset_id,"RCU_ID");
+    attribute_id = H5Aopen_name(dataset_id,
+				LOFAR::attribute_name(LOFAR::RCU_ID).c_str());
     std::cout << "-- RCU_ID            = " << attribute_id << endl;
     
-    attribute_id = H5Aopen_name(dataset_id,"SAMPLE_FREQ");
+    attribute_id = H5Aopen_name(dataset_id,
+				LOFAR::attribute_name(LOFAR::SAMPLE_FREQUENCY).c_str());
     std::cout << "-- SAMPLE_FREQ       = " << attribute_id << endl;
     
-    attribute_id = H5Aopen_name(dataset_id,"TIME");
+    attribute_id = H5Aopen_name(dataset_id,
+				LOFAR::attribute_name(LOFAR::TIME).c_str());
     std::cout << "-- TIME              = " << attribute_id << endl;
     
-    attribute_id = H5Aopen_name(dataset_id,"SAMPLE_NR");
+    attribute_id = H5Aopen_name(dataset_id,
+				LOFAR::attribute_name(LOFAR::SAMPLE_NUMBER).c_str());
     std::cout << "-- SAMPLE_NR         = " << attribute_id << endl;
     
     attribute_id = H5Aopen_name(dataset_id,"SAMPLES_PER_FRAME");
@@ -263,7 +255,8 @@ int get_attribute_id (hid_t const &file_id)
     attribute_id = H5Aopen_name(dataset_id,"NYQUIST_ZONE");
     std::cout << "-- NYQUIST_ZONE      = " << attribute_id << endl;
     
-    attribute_id = H5Aopen_name(dataset_id,"FEED");
+    attribute_id = H5Aopen_name(dataset_id,
+				LOFAR::attribute_name(LOFAR::FEED).c_str());
     std::cout << "-- FEED              = " << attribute_id << endl;
     
     attribute_id = H5Aopen_name(dataset_id,"ANT_POSITION");
@@ -316,63 +309,81 @@ int get_attributes (hid_t const &file_id)
     std::vector<double> beam_direction;
     
     try {
-      status = LOFAR::h5get_attribute (telescope,"TELESCOPE",group_id);
+      status = LOFAR::h5get_attribute (telescope,
+				       LOFAR::attribute_name(LOFAR::TELESCOPE),
+				       group_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = LOFAR::h5get_attribute (observer,"OBSERVER",group_id);
+      status = LOFAR::h5get_attribute (observer,
+				       LOFAR::attribute_name(LOFAR::OBSERVER),
+				       group_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = LOFAR::h5get_attribute (project,"PROJECT",group_id);
+      status = LOFAR::h5get_attribute (project,
+				       LOFAR::attribute_name(LOFAR::PROJECT),
+				       group_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = LOFAR::h5get_attribute (observation_id,"OBS_ID",group_id);
+      status = LOFAR::h5get_attribute (observation_id,
+				       LOFAR::attribute_name(LOFAR::OBSERVATION_ID),
+				       group_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = LOFAR::h5get_attribute (observation_mode,"OBS_MODE",group_id);
+      status = LOFAR::h5get_attribute (observation_mode,
+				       LOFAR::attribute_name(LOFAR::OBSERVATION_MODE),
+				       group_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = LOFAR::h5get_attribute (trigger_type,"TRIG_TYPE",group_id);
+      status = LOFAR::h5get_attribute (trigger_type,
+				       LOFAR::attribute_name(LOFAR::TRIGGER_TYPE),
+				       group_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = LOFAR::h5get_attribute (trigger_offset,"TRIG_OFST",group_id);
+      status = LOFAR::h5get_attribute (trigger_offset,
+				       LOFAR::attribute_name(LOFAR::TRIGGER_OFFSET),
+				       group_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = LOFAR::h5get_attribute (triggered_antennas,"TRIG_ANTS",group_id);
+      status = LOFAR::h5get_attribute (triggered_antennas,
+				       LOFAR::attribute_name(LOFAR::TRIGGERED_ANTENNAS),
+				       group_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
     }
     
     try {
-      status = LOFAR::h5get_attribute (beam_direction,"BEAM_DIR",group_id);
+      status = LOFAR::h5get_attribute (beam_direction,
+				       LOFAR::attribute_name(LOFAR::BEAM_DIRECTION),
+				       group_id);
     } catch (std::string message) {
       cerr << message << endl;
       nofFailedTests++;
@@ -510,25 +521,61 @@ int get_attributes (hid_t const &file_id)
 // -----------------------------------------------------------------------------
 
 /*
-  \brief Test printing of a summary of an attribute's properties
+  \brief Test retrieval of an objects name based on its identifier
 
   \param file_id -- Identifier for the HDF5 file.
 
   \return nofFailedTests -- The number of failed tests in this function.
 */
-int attribute_summary (hid_t const &file_id)
+int get_name (hid_t const &file_id)
 {
   int nofFailedTests (0);
+  std::string name ("UNDEFINED");
+  bool status;
 
-  // Open group containing the attributes we want to test
-  hid_t group_id = H5Gopen (file_id,
-			    "Station001");
-  
-  if (group_id > 0) {
+  cout << "[1] Retrieve name of the HDF5 file ..." << endl;
+  try {
+    status = LOFAR::h5get_name (name,file_id);
+    if (status) {
+      cout << "-- File ID   = " << file_id << endl;
+      cout << "-- File name = " << name    << endl;
+    }
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
 
-    hid_t attribute_id;
-    
-  } else {
+  cout << "[2] Retrieve name of the station group ..." << endl;
+  try {
+    // open group
+    hid_t group_id = H5Gopen (file_id,
+			      "Station001");
+    // retrieve name of group
+    status = LOFAR::h5get_name (name,group_id);
+    // feedback
+    if (status) {
+      cout << "-- Group ID   = " << group_id << endl;
+      cout << "-- Group name = " << name     << endl;
+    }
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[3] Retrieve name of dipole dataset ..." << endl;
+  try {
+    // open dataset
+    hid_t dataset_id = H5Dopen (file_id,
+				"Station001/001002021");
+    // retrieve name of dataset
+    status = LOFAR::h5get_name (name,dataset_id);
+    // feedback
+    if (status) {
+      cout << "-- Dataset ID   = " << dataset_id << endl;
+      cout << "-- Dataset name = " << name       << endl;
+    }
+  } catch (std::string message) {
+    cerr << message << endl;
     nofFailedTests++;
   }
   
@@ -545,8 +592,10 @@ int main (int argc,
   /*
     Some tests do not require any external data input
   */
-  nofFailedTests += test_support_methods ();
+//   nofFailedTests += test_support_methods ();
   nofFailedTests += test_create_file ();
+
+  return 0;
 
   /*
     Check if filename of the dataset is provided on the command line; if not
@@ -571,10 +620,15 @@ int main (int argc,
   if (file_id > 0) {
     nofFailedTests += get_attribute_id (file_id);
     nofFailedTests += get_attributes (file_id);
-    nofFailedTests += attribute_summary (file_id);
+    nofFailedTests += get_name (file_id);
   } else {
     cerr << "[tHDF5Common] Error opening HDF5 file!" << endl;
     return -1;
+  }
+
+  /* Clean release of opened HDF5 file */
+  if (file_id > 0) {
+    herr_t h5error = H5Fclose (file_id);
   }
 
   return nofFailedTests;
