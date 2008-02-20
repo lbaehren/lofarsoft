@@ -47,10 +47,10 @@ namespace LOFAR { // Namespace LOFAR -- begin
       name = "PROJECT";
       break;
     case OBSERVATION_ID:
-      name = "OBSERVATION_ID";
+      name = "OBS_ID";
       break;
     case OBSERVATION_MODE:
-      name = "OBSERVATION_MODE";
+      name = "OBS_MODE";
       break;
       // --- Attributes for an individual LOFAR station --------------
     case STATION_ID:
@@ -91,17 +91,17 @@ namespace LOFAR { // Namespace LOFAR -- begin
       name = "ANT_ORIENTATION";
       break;
     case BEAM_DIRECTION:
-      name = "BEAM_DIRECTION";
+      name = "BEAM_DIR";
       break;
       // --- Trigger algorithm ---------------------------------------
     case TRIGGER_TYPE:
-      name = "TRIGGER_TYPE";
+      name = "TRIG_TYPE";
       break;
     case TRIGGER_OFFSET:
-      name = "TRIGGER_OFFSET";
+      name = "TRIG_OFST";
       break;
     case TRIGGERED_ANTENNAS:
-      name = "TRIGGERED_ANTENNAS";
+      name = "TRIG_ANTS";
       break;
     }
     
