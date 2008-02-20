@@ -36,7 +36,7 @@ using std::endl;
 
   \brief A collection of test routines for the LOFAR_Attributes class
  
-  \author Lars Baehren
+  \author Lars B&auml;hren
  
   \date 2008/01/31
 */
@@ -44,7 +44,17 @@ using std::endl;
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test constructors for a new LOFAR_Attributes object
+  \brief Test the output of the routines to provide the attribute names
+
+  Retrieve the names of the various attributes:
+  \verbatim
+  -- TELESCOPE        = TELESCOPE
+  -- OBSERVER         = OBSERVER
+  -- PROJECT          = PROJECT
+  -- OBSERVATION_ID   = OBS_ID
+  -- OBSERVATION_MODE = OBS_MODE
+  -- TIME             = TIME
+  \endverbatim
 
   \return nofFailedTests -- The number of failed tests.
 */
@@ -55,12 +65,18 @@ int test_LOFAR_Attributes ()
   cout << "\n[test_LOFAR_Attributes]\n" << endl;
 
   try {
-    cout << "-- " << LOFAR::attribute_name (LOFAR::TELESCOPE)        << endl;
-    cout << "-- " << LOFAR::attribute_name (LOFAR::OBSERVER)         << endl;
-    cout << "-- " << LOFAR::attribute_name (LOFAR::PROJECT)          << endl;
-    cout << "-- " << LOFAR::attribute_name (LOFAR::OBSERVATION_ID)   << endl;
-    cout << "-- " << LOFAR::attribute_name (LOFAR::OBSERVATION_MODE) << endl;
-    cout << "-- " << LOFAR::attribute_name (LOFAR::TIME)             << endl;
+    cout << "-- TELESCOPE        = "
+	 << LOFAR::attribute_name (LOFAR::TELESCOPE) << endl;
+    cout << "-- OBSERVER         = "
+	 << LOFAR::attribute_name (LOFAR::OBSERVER) << endl;
+    cout << "-- PROJECT          = "
+	 << LOFAR::attribute_name (LOFAR::PROJECT) << endl;
+    cout << "-- OBSERVATION_ID   = "
+	 << LOFAR::attribute_name (LOFAR::OBSERVATION_ID) << endl;
+    cout << "-- OBSERVATION_MODE = "
+	 << LOFAR::attribute_name (LOFAR::OBSERVATION_MODE) << endl;
+    cout << "-- TIME             = "
+	 << LOFAR::attribute_name (LOFAR::TIME) << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
