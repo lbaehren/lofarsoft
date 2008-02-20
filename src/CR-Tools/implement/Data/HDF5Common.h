@@ -84,8 +84,13 @@ namespace LOFAR { // Namespace LOFAR -- begin
 
     <ol>
       <li>We need to account for the fact, that certain data - most likely
-      attributes though - can show up at different lovels within the
-      file-structure.
+      attributes though - can show up at different levels within the
+      file-structure; it might be desirable to directly support vertical search
+      for such attributes.
+      <li>When using the CASA array classes (Array, Vector, Matrix, Cube), we
+      need to be able to properly read and write their contents. Most likely
+      this can be done in a straight-forward manner wrapping some of the
+      underlying functions of the HDF5 library.
     </ol>
     
   */  
@@ -149,6 +154,19 @@ namespace LOFAR { // Namespace LOFAR -- begin
 #endif
   //@}
 
+  /*!
+    \brief Retrieve the name of an object based on the object identifier
+
+    \retval name     -- Name of the object (if set or defined).
+    \param object_id -- Identifier for the objects of which to retrieve the
+           name.
+
+    \return status -- Status of the operation; returns <tt>false</tt> in case
+            an error was encountered
+  */
+  bool h5get_name (std::string &name,
+		   hid_t const &object_id);
+
   // ============================================================================
   //
   //  Access to attributes
@@ -173,6 +191,12 @@ namespace LOFAR { // Namespace LOFAR -- begin
 			  hid_t const &attribute_id);
 #ifdef HAVE_CASA
   template <class T>
+    bool h5get_attribute (casa::Array<T> &value,
+			  hid_t const &attribute_id);
+  template <class T>
+    bool h5get_attribute (casa::Matrix<T> &value,
+			  hid_t const &attribute_id);
+  template <class T>
     bool h5get_attribute (casa::Vector<T> &value,
 			  hid_t const &attribute_id);
 #endif
@@ -193,6 +217,9 @@ namespace LOFAR { // Namespace LOFAR -- begin
     bool h5set_attribute (hid_t const &location_id,
 			  std::string const &name,
 			  T const &val);
+  bool h5set_attribute (hid_t const &location_id,
+			std::string const &name,
+			uint const &val);
   
   
   //@{
@@ -216,6 +243,14 @@ namespace LOFAR { // Namespace LOFAR -- begin
 			  std::string const &name,
 			  hid_t const &location_id);
 #ifdef HAVE_CASA
+  template <class T>
+    bool h5get_attribute (casa::Array<T> &value,
+			  std::string const &name,
+			  hid_t const &location_id);
+  template <class T>
+    bool h5get_attribute (casa::Matrix<T> &value,
+			  std::string const &name,
+			  hid_t const &location_id);
   template <class T>
     bool h5get_attribute (casa::Vector<T> &value,
 			  std::string const &name,

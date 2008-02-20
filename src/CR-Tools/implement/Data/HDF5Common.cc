@@ -97,28 +97,32 @@ namespace LOFAR { // Namespace LOFAR -- begin
 			      hid_t const &attribute_id)
   {
     bool status (true);
-
+    herr_t h5error;
     hid_t dataspace_id       = H5Aget_space (attribute_id);
     bool dataspace_is_simple = H5Sis_simple(dataspace_id);
     int rank                 = H5Sget_simple_extent_ndims (dataspace_id);
     hsize_t *dimensions;
 
     if (rank > 0) {
-      herr_t ret;
       dimensions = new hsize_t[rank];
-      ret = H5Sget_simple_extent_dims(dataspace_id,
-				      dimensions,
-				      NULL);
+      h5error = H5Sget_simple_extent_dims(dataspace_id,
+					  dimensions,
+					  NULL);
       shape.resize(rank);
       for (int n(0); n<rank; n++) {
 	shape[n] = dimensions[n];
       }
-
     } else {
-      std::cerr << "[h5get_dataspace_shape] Error, rank of dataspace < 0"
-		<< std::endl;
+      shape.resize(1);
+      shape[0] = 0;
+      status   = false;
     }
-
+    
+    // release allocated identifiers
+    if (dataspace_id > 0) {
+      h5error = H5Sclose (dataspace_id);
+    }
+    
     return status;
   }
   
@@ -129,32 +133,84 @@ namespace LOFAR { // Namespace LOFAR -- begin
 			      hid_t const &attribute_id)
   {
     bool status (true);
-
+    herr_t h5error;
     hid_t dataspace_id       = H5Aget_space (attribute_id);
     bool dataspace_is_simple = H5Sis_simple(dataspace_id);
     int rank                 = H5Sget_simple_extent_ndims (dataspace_id);
     hsize_t *dimensions;
-
+    
     if (rank > 0) {
-      herr_t ret;
       dimensions = new hsize_t[rank];
-      ret = H5Sget_simple_extent_dims(dataspace_id,
-				      dimensions,
-				      NULL);
+      h5error = H5Sget_simple_extent_dims(dataspace_id,
+					  dimensions,
+					  NULL);
       shape.resize(rank);
       for (int n(0); n<rank; n++) {
 	shape(n) = dimensions[n];
       }
 
     } else {
-      std::cerr << "[h5get_dataspace_shape] Error, rank of dataspace < 0"
-		<< std::endl;
+      shape.resize(1);
+      shape(0) = 0;
+      status = false;
     }
-
+    
+    // release allocated identifiers
+    if (dataspace_id > 0) {
+      h5error = H5Sclose (dataspace_id);
+    }
+    
     return status;
   }
 #endif
+
+  // ----------------------------------------------------------------- h5get_name
   
+  bool h5get_name (std::string &name,
+		   hid_t const &object_id)
+  {
+    /*
+     * [1] Check if the provided identifier is a valid pointer to an object
+     *     within in the file.
+     */
+    H5I_type_t object_type = H5Iget_type (object_id);
+    
+    if (object_type == H5I_BADID) {
+      return false;
+    }
+    
+    /*
+     * [2] If the object ID is valid, we try to retrieve its name
+     */
+
+    ssize_t name_length (0);
+    size_t buffer_size (10);
+    char *buffer;
+
+    buffer = new char[buffer_size];
+    
+    name_length = H5Iget_name (object_id,
+			       buffer,
+			       buffer_size);
+
+    if (name_length > 0) {
+      // release the previously allocated buffer ...
+      delete [] buffer;
+      // ... and readjust it to the proper values retrieved above
+      buffer_size = name_length+1;
+      buffer      = new char[buffer_size];
+      // second function call to retrieve the object's name
+      name_length = H5Iget_name (object_id,
+				 buffer,
+				 buffer_size);
+      name = buffer;
+    } else {
+      return false;
+    }
+    
+    return true;
+  }
+
   // ============================================================================
   //
   //  Access attribute values
@@ -407,7 +463,7 @@ namespace LOFAR { // Namespace LOFAR -- begin
     bool status (true);
     hid_t attribute_id (0);
     hid_t dataspace_id (0);
-    
+    herr_t h5error;
 
     /* [1] Check if the attribute already exists */
     try {
@@ -421,12 +477,38 @@ namespace LOFAR { // Namespace LOFAR -- begin
     /* [2] If the attribute does not exist yet, we need to create it first */
     
     if (attribute_id > 0) {
-      std::cout << "-- Attribute " << name << " already exists." << endl;
+      cout << "-- Attribute " << name << " already exists." << endl;
+      // Retrieve the ID of the associated dataspace
+      dataspace_id = H5Aget_space (attribute_id);
+      // Check if the value matches the type of the existing dataspace
     } else {
-      std::cout << "-- Attribute "
-		<< name
-		<< " does not exist yet; creating it now"
-		<< std::endl;
+      cout << "-- Attribute "
+	   << name
+	   << " does not exist yet; creating it now ..."
+	   << endl;
+      // Create dataspace associated with the attribute 
+      dataspace_id = H5Screate (H5S_SCALAR);
+      // Create the attribute itself
+      attribute_id = H5Acreate (location_id,
+				name.c_str(),
+				H5T_NATIVE_UINT,
+				dataspace_id,
+				H5P_DEFAULT);
+    }
+
+    // Summary
+    cout << "-- Location ID    = " << location_id  << std::endl;
+    cout << "-- Attribute name = " << name         << std::endl;
+    cout << "-- Attribute ID   = " << attribute_id << std::endl;
+    cout << "-- Dataspace ID   = " << dataspace_id << std::endl;
+
+    // Close dataspace and attribute
+    if (dataspace_id > 0) {
+      h5error = H5Dclose (dataspace_id);
+    }
+
+    if (attribute_id > 0) {
+      h5error = H5Aclose (attribute_id);
     }
     
     return status;
