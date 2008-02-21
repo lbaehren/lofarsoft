@@ -24,18 +24,20 @@ endif (HAVE_PostgreSQL)
 ## -----------------------------------------------------------------------------
 ## Build the test programs
 
-foreach (src ${tests})
-  ## build executable
-  add_executable (${src} ${src}.cc)
-  target_link_libraries (${src}
-    cr
-    ${FFTW3_LIBRARIES}
-    ${ROOT_LIBRARIES}
-    ${PYTHON_LIBRARIES}
-    )
-  ## testing
-  add_test (${src} ${src})
-endforeach (src)
+if (CR_PYTHON_SUPPORT)
+  foreach (src ${tests})
+    ## build executable
+    add_executable (${src} ${src}.cc)
+    target_link_libraries (${src}
+      cr
+      ${FFTW3_LIBRARIES}
+      ${ROOT_LIBRARIES}
+      ${PYTHON_LIBRARIES}
+      )
+    ## testing
+    add_test (${src} ${src})
+  endforeach (src)
+endif (CR_PYTHON_SUPPORT)
 
 ## -----------------------------------------------------------------------------
 ## Installation

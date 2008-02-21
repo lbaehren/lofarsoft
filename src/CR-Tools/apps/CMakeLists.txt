@@ -129,6 +129,6 @@ endif (CR_GLISH_SUPPORT AND HAVE_GLISH)
 ## -------------------------------------------------------------------
 ## LOPES-Star tools
 
-if (HAVE_ROOT AND HAVE_FFTW3)
+if (CR_PYTHON_SUPPORT AND HAVE_ROOT AND HAVE_FFTW3 AND HAVE_PYTHON)
   add_subdirectory (LopesStar)
-endif (HAVE_ROOT AND HAVE_FFTW3)
+endif (CR_PYTHON_SUPPORT AND HAVE_ROOT AND HAVE_FFTW3 AND HAVE_PYTHON)

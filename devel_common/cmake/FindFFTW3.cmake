@@ -21,6 +21,7 @@ set (include_locations
   /opt/local/include
   /sw/include
   ## extra locations
+  /opt/aips++/local/include
   /var/chroot/meqtrees/usr/include/fftw3.h
 )
 
@@ -36,6 +37,7 @@ set (lib_locations
   /opt/local/lib
   /sw/lib
   ## extra locations
+  /opt/aips++/local/lib
   /var/chroot/meqtrees/usr/lib
 )
 

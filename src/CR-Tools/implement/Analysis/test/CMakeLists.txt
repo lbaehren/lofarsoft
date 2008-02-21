@@ -103,7 +103,7 @@ endif (HAVE_PLPLOT OR HAVE_PGPLOT)
 
 ## [3] Test programs for programs using functionality of LopesStar
 
-if (HAVE_ROOT AND HAVE_FFTW3)
+if (HAVE_ROOT AND HAVE_FFTW3 AND HAVE_PYTHON)
   ## build executable
   add_executable (tCompletePipeline tCompletePipeline.cc)
   target_link_libraries (tCompletePipeline
@@ -114,7 +114,7 @@ if (HAVE_ROOT AND HAVE_FFTW3)
     )
   ## testing
   add_test (tCompletePipeline tCompletePipeline)
-endif (HAVE_ROOT AND HAVE_FFTW3)
+endif (HAVE_ROOT AND HAVE_FFTW3 AND HAVE_PYTHON)
 
 
 ## -----------------------------------------------------------------------------
