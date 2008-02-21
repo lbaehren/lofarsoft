@@ -6,7 +6,7 @@
 ## Set up the list with test program sources
 
 set (tests
-  root2csv
+#  root2csv
   timestamp_compare
   timestamp_parse
   chplot4root
@@ -42,9 +42,11 @@ endif (CR_PYTHON_SUPPORT)
 ## -----------------------------------------------------------------------------
 ## Installation
 
-install (
-  TARGETS ${tests}
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  )
+if (CR_PYTHON_SUPPORT)
+  install (
+    TARGETS ${tests}
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    )
+endif (CR_PYTHON_SUPPORT)
