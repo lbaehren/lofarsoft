@@ -23,6 +23,7 @@
 #include <Analysis/analyseLOPESevent.h>
 #include <Data/tbbctlIn.h>
 #include <Analysis/tbbTools.h>
+#include <Calibration/RFIMitigationPlugin.h>
 #include <ApplicationSupport/Glish.h>
 
 // Glish includes
@@ -30,6 +31,7 @@
 #include <casa/string.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/ArrayMath.h>
+#include <scimath/Mathematics/FFTServer.h>
 
 // general includes
 #include <iostream>
@@ -60,6 +62,7 @@
 
 using CR::analyseLOPESevent;
 using CR::LopesEventIn;
+using CR::tbbTools;
 
 analyseLOPESevent pipeline;
 
@@ -69,6 +72,10 @@ CR::tbbctlIn tbbIn;
 // local copies (of the pointers) to access the stuff.
 CR::CRinvFFT *pipeline_p;    
 DataReader *DataReader_p;
+
+
+// Local RFI mitigation object
+CR::RFIMitigationPlugin rfiM_p;
 
 //---------------------------------------------------------------------   initPipeline
 
@@ -200,7 +207,7 @@ Bool GenInputStatistics(GlishSysEvent &event, void *){
     return True;
   };
   try {
-    Int maxsize = (10000000); // 10 000 000 
+    Int maxsize = (5000000); // 5 000 000 
     Vector<String> files;
     if (event.val().type() != GlishValue::RECORD) {
       cerr << "SimpleDynspecClient:GenInputStatistics: Need record with: files (maxsize)!" 
@@ -279,10 +286,13 @@ Bool SimTBBTrigger(GlishSysEvent &event, void *){
     return True;
   };
   try {
-    Int maxsize = (10000000); // 10 000 000 
+    tbbTools tbbtool;
+    Int maxsize = (5000000); // 5 000 000 
     Vector<String> files;
+    Int level=8, start=5, stop=2, window=4096, afterwindow=0;
+    Bool doRFImitigation=False;
     if (event.val().type() != GlishValue::RECORD) {
-      cerr << "SimpleDynspecClient:SimTBBTrigger: Need record with: files (maxsize)!" 
+      cerr << "SimpleDynspecClient:SimTBBTrigger: Need record with: files (level, start, stop, window, maxsize, RFImitigation, afterwindow)!" 
 	   << endl;
       glishBus->reply(GlishArray(False));
       return True;
@@ -291,18 +301,42 @@ Bool SimTBBTrigger(GlishSysEvent &event, void *){
     Record input, output;
     inrec.toRecord(input);
     if (!(input.isDefined("files")  )) {
-      cerr << "SimpleDynspecClient:SimTBBTrigger: Need record with: files (maxsize)!" 
+      cerr << "SimpleDynspecClient:SimTBBTrigger: Need record with: files (level, start, stop, window, maxsize, RFImitigation, afterwindow)!" 
 	   << endl;
       glishBus->reply(GlishArray(False));
       return True;
     };
     files = input.asArrayString("files");
+    if (input.isDefined("level")){
+      level = input.asInt("level");
+    };
+    if (input.isDefined("start")){
+      start = input.asInt("start");
+    };
+    if (input.isDefined("stop")){
+      stop = input.asInt("stop");
+    };
+    if (input.isDefined("window")){
+      window = input.asInt("window");
+    };
+    if (input.isDefined("afterwindow")){
+      afterwindow = input.asInt("afterwindow");
+    };
     if (input.isDefined("maxsize")){
       maxsize = input.asInt("maxsize");
     };
+    if (input.isDefined("RFImitigation")){
+      doRFImitigation = input.asBool("RFImitigation");
+    };
+    
     Int fnum,numFiles=files.nelements();
-    Vector<Double> data,means(numFiles,0.),stddevs(numFiles,0.),mins(numFiles,0.),maxs(numFiles,0.);
-    Double dmin,dmax;
+    Int numpulses=0, vecsize=100, newpeaks;
+    Vector<Int> gesindex(100),gessum(100),geswidth(100),gespeak(100),gesmeanval(100),gesafterval(100);
+    Vector<String> filenames(100);
+    Vector<Double> dates(100);
+    Vector<Int> index,sum,width,peak,meanval,afterval;
+    Vector<Double> data;
+    
     for (fnum=0; fnum<numFiles; fnum++){
       // initialize the Data Reader
       if (! tbbIn.attachFile(files(Slice(fnum,1))) ){
@@ -312,7 +346,7 @@ Bool SimTBBTrigger(GlishSysEvent &event, void *){
       };
       if (tbbIn.blocksize() > (uint)maxsize){
 	cerr << "SimpleDynspecClient:SimTBBTrigger: " << "File: " << files(fnum) 
-	     << " spans too large a range! (Hole inside?)" << endl;
+	     << " spans too large a range! (>"<< maxsize <<",Hole inside?)" << endl;
 	continue;
       };
       if (! pipeline_p->InitEvent(&tbbIn)){
@@ -320,23 +354,73 @@ Bool SimTBBTrigger(GlishSysEvent &event, void *){
 	     << " failed to initialize the DataReader!" << endl;
 	continue;
       };
-      //dmin = mean(tbbIn.fx().column(0));
-      //data = abs(tbbIn.fx().column(0)-dmin);
-      data = abs(tbbIn.fx().column(0));
-      minMax(dmin, dmax, data);
-      mins(fnum)    = dmin;
-      maxs(fnum)    = dmax;
-      means(fnum)   = mean(data);
-      stddevs(fnum) = stddev(data);
+      if (doRFImitigation){
+	tbbIn.setHanningFilter(0.);
+	Matrix<DComplex> fdata;
+	Int blocksize=tbbIn.blocksize();
+	fdata = tbbIn.fft();
+	rfiM_p.parameters().define("dataBlockSize",blocksize);
+	// Do the RFI mitigation
+	rfiM_p.apply(fdata,True);
+	FFTServer<Double,DComplex> server(IPosition(1,blocksize),
+					  FFTEnums::REALTOCOMPLEX);
+	data.resize(0);
+	server.fft(data,fdata.column(0));
+      } else {
+	data = tbbIn.fx().column(0);
+      };
+      if (! tbbtool.meanFPGAtrigger(data,
+				    level, start, stop, window, afterwindow,
+				    index, sum, width, peak, meanval, afterval)) {
+	cerr << "SimpleDynspecClient:SimTBBTrigger: "  << "File: " << files(fnum)
+	     << " failed during meanFPGAtrigger!" << endl;
+	continue;
+      };
+
+      //      cout << "file: " << files(fnum) << " Date: " << tbbIn.header().asuInt("Date") <<" dDate: " << tbbIn.header().asDouble("dDate") << endl;
+      newpeaks = index.nelements();
+      if (numpulses+newpeaks > vecsize) {
+	vecsize = numpulses+newpeaks+100;
+	filenames.resize(vecsize,True);
+	dates.resize(vecsize,True);
+	gesindex.resize(vecsize,True);
+	gessum.resize(vecsize,True);
+	geswidth.resize(vecsize,True);
+	gespeak.resize(vecsize,True);
+	gesmeanval.resize(vecsize,True);
+	gesafterval.resize(vecsize,True);
+      };
+      filenames(Slice(numpulses,newpeaks))   = files(fnum);
+      dates(Slice(numpulses,newpeaks))       = tbbIn.header().asDouble("dDate");
+      gesindex(Slice(numpulses,newpeaks))    = index;
+      gessum(Slice(numpulses,newpeaks))      = sum;
+      geswidth(Slice(numpulses,newpeaks))    = width;
+      gespeak(Slice(numpulses,newpeaks))     = peak;
+      gesmeanval(Slice(numpulses,newpeaks))  = meanval;
+      gesafterval(Slice(numpulses,newpeaks)) = afterval;
+      numpulses += newpeaks;
       if (((fnum+1)%50)==0) {
 	cout << "SimpleDynspecClient:SimTBBTrigger: processed " << fnum+1 << " files out of " 
 	     << numFiles << "!" << endl;
       };
     };
-    output.define("mins",mins);
-    output.define("maxs",maxs);
-    output.define("means",means);
-    output.define("stddevs",stddevs);
+    filenames.resize(numpulses,True);
+    dates.resize(numpulses,True);
+    gesindex.resize(numpulses,True);
+    gessum.resize(numpulses,True);
+    geswidth.resize(numpulses,True);
+    gespeak.resize(numpulses,True);
+    gesmeanval.resize(numpulses,True);
+    gesafterval.resize(numpulses,True);
+    
+    output.define("filename",filenames);
+    output.define("date",dates);
+    output.define("index",gesindex);
+    output.define("sum",gessum);
+    output.define("width",geswidth);
+    output.define("peak",gespeak);
+    output.define("meanval",gesmeanval);
+    output.define("afterval",gesafterval);
     outrec.fromRecord(output);
     glishBus->reply(outrec);
   } catch (AipsError x) {

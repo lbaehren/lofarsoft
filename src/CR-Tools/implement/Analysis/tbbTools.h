@@ -29,6 +29,8 @@
 #include <string>
 
 #include <casa/Arrays/Vector.h>
+#include <casa/Exceptions/Error.h>
+#include <casa/Arrays/ArrayMath.h>
 
 #include <casa/namespace.h>
 
@@ -106,10 +108,14 @@ namespace CR { // Namespace CR -- begin
       
       \return ok -- True if successfull
     */
-    Bool meanFPGAtrigger(Vector<Double>, int level, int start, int stop, int window,
+    Bool meanFPGAtrigger(Vector<Double> inary, int level, int start, int stop, int window,
+			 int afterwindow,
+			 Vector<Int> &index, Vector<Int> &sum, Vector<Int> &width, 
+			 Vector<Int> &peak, Vector<Int> &meanval, Vector<Int> &afterval);
+    
+    Bool meanFPGAtrigger(Vector<Double> inary, int level, int start, int stop, int window,
 			 Vector<Int> &index, Vector<Int> &sum, Vector<Int> &width, 
 			 Vector<Int> &peak);
-
     
   private:
         
