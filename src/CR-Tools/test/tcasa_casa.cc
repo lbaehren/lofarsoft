@@ -242,6 +242,59 @@ int test_Arrays ()
 // ------------------------------------------------------------------------------
 
 /*!
+  \brief A few additional tests for the casa/Arrays/Matrix class
+  
+  \return nofFailedTests -- The number of failed test within this function
+*/
+int test_Vector ()
+{
+  cout << "\nTesting casa/Arrays/Vector ...\n" << endl;
+
+  int nofFailedTests (0);
+  int nelem (5);
+
+  cout << "[1] Testing behaviour of copy operation ..." << endl;
+  try {
+    Vector<double> vec1 (nelem,0);
+    Vector<double> vec2 (nelem,0);
+
+    /* Explicit assignment of values in first vector */
+
+    for (int n(0); n<nelem; n++) {
+      vec1(n) = 10*n;
+    }
+    cout << "-- Vectors after creation: " << endl;
+    cout << "--> vec1 = " << vec1 << endl;
+    cout << "--> vec2 = " << vec2 << endl;
+
+    /* Assign second vector the values of the first one */
+
+    vec2 = vec1;
+
+    cout << "-- Vectors after assignment 1 -> 2: " << endl;
+    cout << "--> vec1 = " << vec1 << endl;
+    cout << "--> vec2 = " << vec2 << endl;
+
+    /* Modify individual elements in the original vector */
+
+    vec1(0) = 1;
+    vec1(1) = 2;
+
+    cout << "-- Vectors after explicit modification of original: " << endl;
+    cout << "--> vec1 = " << vec1 << endl;
+    cout << "--> vec2 = " << vec2 << endl;
+
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests; 
+}
+
+// ------------------------------------------------------------------------------
+
+/*!
   \brief Test for casa/Arrays/Matrix class
 
   [1] Element-wise writing <br>
@@ -262,7 +315,7 @@ int test_Arrays_Matrix (std::vector<int> const &nelem)
   IPosition shape (2);
   IPosition pos(2);
 
-  std::cout << "[1] Element-wise writing ..." << std::endl;
+  cout << "[1] Element-wise writing ..." << std::endl;
   try {
     for (uint n(0); n<nelem.size(); n++) {
       /* Create the matrix */
@@ -1218,6 +1271,7 @@ int main ()
   std::vector<int> nelem = nof_array_elements ();
 
   nofFailedTests += test_Arrays();
+  nofFailedTests += test_Vector();
 //   nofFailedTests += test_Arrays_Matrix (nelem);
 //   nofFailedTests += test_Arrays_Cube (nelem);
 //   nofFailedTests += test_Arrays_Array (nelem);
