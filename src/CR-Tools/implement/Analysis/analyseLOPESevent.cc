@@ -235,7 +235,7 @@ namespace CR { // Namespace CR -- begin
       fitObject.setFitRangeSeconds(fitStart_p,fitStop_p);
 
       //perform the position fitting
-      Double center;
+      Double center=-1.8e-6;
       if (simplexFit) {
 	if (verbose) { cout << "analyseLOPESevent::ProcessEvent: starting evaluateGrid()." << endl;};
 	if (! evaluateGrid(Az, El, distance, AntennaSelection, &center) ){

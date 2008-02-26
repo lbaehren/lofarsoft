@@ -172,7 +172,7 @@ namespace CR { // Namespace CR -- begin
       yval = xBeam(fitregion)-meanval;	
       // set the initial state
       staterec.define("height",max(yval));
-      if (center >= 1e99) {
+      if (!(center < 1e99)) {
 	staterec.define("center",defCenter_p);
       } else {
 	staterec.define("center",center);
@@ -200,8 +200,12 @@ namespace CR { // Namespace CR -- begin
 	tmp = staterec.asArrayDouble("center");
 	newfitstop = ntrue(timeAxis_p<=(tmp(0)+3.75e-8));
 	newfitlen = newfitstop-fitRange_p(0);
-	if (newfitlen>5){
+	if ((newfitlen>5) && (newfitlen<(fitregion.length()-1))){
 	  fitregion = Slice(fitRange_p(0),newfitlen);
+#ifdef DEBUGGING_MESSAGES   
+	} else {
+	  cout << "fitCR2gauss::Fitgauss: " << "fitregion not changed because newfitlen=" << newfitlen << endl;
+#endif
 	};
       };
 
