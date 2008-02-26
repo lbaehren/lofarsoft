@@ -74,7 +74,20 @@ namespace CR { // Namespace CR -- begin
     double plotStart_p;
     //! Stop time of the interval diplayed in the plot
     double plotStop_p;
-    
+    //! File names of created plots 
+    vector <string> plotlist;
+    //! Last upsampling exponent (-1 if no upsampling was done so far)
+    int lastUpsamplingExponent;
+    //! Contains the upsampled fieldstrength
+    Matrix<Double> upFieldStrength;
+    //! Selection of upsampled antennas
+    vector<bool> upsampledAntennas; 		// warning: don't use CasaCore-Vector as it makes only a flat copy using '='
+    //! Last time upsampling exponent (-1 if no upsampling was done so far)
+    int lastTimeUpsamplingExponent;
+    //! Contains inerpolated time axis for upsampled fieldstrength
+    Vector<Double> upTimeValues;
+
+
   public:
     
     // ------------------------------------------------------------- Construction
@@ -181,6 +194,16 @@ namespace CR { // Namespace CR -- begin
       plotStart_p = plotStart;
       plotStop_p  = plotStop;
     }
+
+    /*!
+      \brief Get the list of the file names of all created plots
+
+      \return plotlist -- list of created plots
+    */
+    inline vector<string> getPlotList () {
+      return plotlist;
+    }
+
 
     /*!
       \brief Gets the upsampled fieldstrength of selected antennas

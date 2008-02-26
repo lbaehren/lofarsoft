@@ -33,11 +33,17 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   CompletePipeline::CompletePipeline():
-    plotStart_p(-2.05e-6), plotStop_p(-1.55e-6)
+    plotStart_p(-2.05e-6), plotStop_p(-1.55e-6),
+    plotlist(),
+    lastUpsamplingExponent(-1),
+    lastTimeUpsamplingExponent(-1)
   {;}
   
   CompletePipeline::CompletePipeline (CompletePipeline const &other):
-    plotStart_p(-2.05e-6), plotStop_p(-1.55e-6)
+    plotStart_p(-2.05e-6), plotStop_p(-1.55e-6),
+    plotlist(),
+    lastUpsamplingExponent(-1),
+    lastTimeUpsamplingExponent(-1)
   {
     copy (other);
   }
@@ -98,16 +104,42 @@ namespace CR { // Namespace CR -- begin
     try 
     {
       // check if upsampling shoud be done at all (if not, return not upsampled data)
-      if (upsampling_exp < 1) return GetTimeSeries(dr); // don't pass antennaSelection to get full number of columns in the Matrix
+      if (upsampling_exp < 1) return GetTimeSeries(dr).copy(); 
 
       // Get the antenna selection from the DataReader if no selction was chosen 	
       if (antennaSelection.nelements() == 0) {
 	antennaSelection = GetAntennaMask(dr);
       }
 
+      // check if upsampling is done for the first time
+      if (lastUpsamplingExponent == -1)
+      {
+        //create vector for flags showing which antenna is allready upsampled
+        upsampledAntennas.assign(GetAntennaMask(dr).nelements(),false);	// at the moment there are no upsampled antennas
+      } 
+
+      // consistency check: number of elements in antennaSelction and upsampledAntennas must be equal
+      if ( upsampledAntennas.size() != antennaSelection.nelements() )
+      {
+        std::cerr << "CompletePipeline:getUpsampledFieldstrength: Number of elements in \"antennaSelection\" is inconsistent.\n" 
+		<< std::endl;
+        return upFieldStrength.copy();
+      }
+
+      // check if there are allready upsampled values and create todo-list
+      vector<bool> upsamplingToDo;
+      upsamplingToDo.assign(upsampledAntennas.size(),true);		// form Vector of correct size
+      // maximum to do is the whole antenna selction
+      for (int i=0; i < upsamplingToDo.size(); i++) upsamplingToDo[i] = antennaSelection(i);
+
+      // if the last upsampling exponent is the same es the current, there might be somthing done allready
+      // if not, clear the upsampled flags
+      if (lastUpsamplingExponent != upsampling_exp) upsampledAntennas.assign(upsampledAntennas.size(),false);
+       else for (int i=0; i < upsamplingToDo.size(); i++)
+         if (upsampledAntennas[i]) upsamplingToDo[i] = false;
+
       // Get the (not yet upsampled) fieldstrength of all antennas
       Matrix<Double> fieldstrength = GetTimeSeries(dr);  // don't pass antennaSelection to get full number of columns in the Matrix
-
       // create upsampling factor by upsampling exponent
       unsigned int upsampled = pow(2,upsampling_exp);
 
@@ -117,12 +149,16 @@ namespace CR { // Namespace CR -- begin
       float originalTrace[tracelength];
       float upsampledTrace[tracelength * upsampled];
 
-      // create matrix for upsampled values
-      Matrix<Double> upfieldstrength;
-      upfieldstrength.resize(tracelength * upsampled, antennaSelection.nelements(), false);
+      // resize Matrix for upsampled traces if the last upsampling exponent is different from the new one
+      if (lastUpsamplingExponent != upsampling_exp)
+      {
+        upFieldStrength.resize(tracelength * upsampled, antennaSelection.nelements(), false);	// no need to copy old values
+        // set all traces initially to zero (not neccessary but makes the detection of errors easier)
+        upFieldStrength.set(0);	
+      } 
 
-      // do upsampling for each antenna in the antennaSelection
-      for (int i = 0; i < antennaSelection.nelements(); i++) if (antennaSelection(i))
+      // do upsampling for each antenna in the todo-list
+      for (int i = 0; i < antennaSelection.nelements(); i++) if (upsamplingToDo[i])
       {
         std::cout << "Upsampling the data of antenna " << i+1 << " by a factor of " << upsampled << " ...\n";
 	// copy the trace into the array
@@ -143,20 +179,20 @@ namespace CR { // Namespace CR -- begin
 	// copy upsampled trace into Matrix with antenna traces and subtract offset
         // remark: as there is no offset in the original data, this step should be avoided
         // as soon as upsampling without pedestal correction is available
-	for (int j = 0; j < tracelength*upsampled; j++) upfieldstrength.column(i)(j) = upsampledTrace[j] - offset;
+	for (int j = 0; j < tracelength*upsampled; j++) upFieldStrength.column(i)(j) = upsampledTrace[j] - offset;
 
         // remark: tried to fasten data transfer from the array to the Matrix but did not work because arrays are
         // of typ float but not double.
-      }
-      else // if antenna was not selected
-      {
-        upfieldstrength.column(i) = Vector<Double> (tracelength*upsampled, 0);
-      }
 
-      std::cout << "Upsampling finished.\n" << std::endl;
+        // set flag, that data for this antenna are upsampled
+        upsampledAntennas[i] = true;
+      } 
+
+      // set last upsampling exponent to current value
+      lastUpsamplingExponent = upsampling_exp;
 
       // Return upsampled traces 
-      return upfieldstrength;
+      return upFieldStrength.copy();
     } catch (AipsError x) 
       {
         std::cerr << "CompletePipeline:getUpsampledFieldstrength: " << x.getMesg() << std::endl;
@@ -168,11 +204,16 @@ namespace CR { // Namespace CR -- begin
   {
     try 
     {
-      // Get the time axis
-      Vector<Double> xaxis = static_cast< Vector<Double> >(dr->timeValues()); 
+      // Check if upsampling shoud be done at all (if not, return not upsampled time axis)
+      if (upsampling_exp < 1) return static_cast< Vector<Double> >(dr->timeValues());
 
-      // check if upsampling shoud be done at all (if not, return not upsampled time axis)
-      if (upsampling_exp < 1) return xaxis; 
+      // Check if upampling should be done be the same factor as last time
+      // in this case, return the old values
+      if (lastTimeUpsamplingExponent == upsampling_exp)
+        return upTimeValues.copy();
+
+      // Get the not interpolated time axis
+      Vector<Double> timeaxis = static_cast< Vector<Double> >(dr->timeValues()); 
 
       // create upsampling factor by upsampling exponent
       unsigned int upsampled = pow(2,upsampling_exp);
@@ -181,24 +222,26 @@ namespace CR { // Namespace CR -- begin
       double sampleTime = 1/(dr->sampleFrequency() * upsampled);
 
       // get the length of the x-axis 
-      long int x_length = xaxis.size();
+      long int time_length = timeaxis.size();
 
-      // Create new Vector for upsampled xaxis
-      Vector<Double> upxaxis;
-      upxaxis.resize(x_length*upsampled, false);
+      // Resize the time Vector for the new upsampled xaxis
+      upTimeValues.resize(time_length*upsampled, false);
 
       // copy old values to the right place and fill space inbetween 
-      for (int i = x_length-1; i >= 0; i--)
+      for (int i = time_length-1; i >= 0; i--)
       {
         // move existing time value to the right place
-        upxaxis(i*upsampled) = xaxis(i);
+        upTimeValues(i*upsampled) = timeaxis(i);
         // create new values
         for (int j = 1; j < upsampled; j++) 
-          upxaxis(i*upsampled+j) = upxaxis(i*upsampled) + j*sampleTime;
+          upTimeValues(i*upsampled+j) = upTimeValues(i*upsampled) + j*sampleTime;
       }
 
+      // set last upsampling exponent to current value
+      lastTimeUpsamplingExponent = upsampling_exp;
+
       // Return upsampled xaxis
-      return upxaxis;
+      return upTimeValues.copy();
     } catch (AipsError x) 
       {
         std::cerr << "CompletePipeline:getUpsampledTimeAxis: " << x.getMesg() << std::endl;
@@ -232,8 +275,8 @@ namespace CR { // Namespace CR -- begin
       Slice plotRange(startsample,(stopsample-startsample)); 
 
       // Get the CC-beam and the power-beam
-      ccbeam = GetCCBeam(dr, antennaSelection);
-      pbeam = GetPBeam(dr, antennaSelection);
+      ccbeam = GetCCBeam(dr, antennaSelection).copy();
+      pbeam = GetPBeam(dr, antennaSelection).copy();
 
 
       // conversion to micro
@@ -257,6 +300,9 @@ namespace CR { // Namespace CR -- begin
       plotter.PlotLine(xaxis(plotRange),ccbeam(plotRange),4,1);
       // Add Power-beam
       plotter.PlotLine(xaxis(plotRange),pbeam(plotRange),5,1);
+
+      // Add filename to list of created plots
+      plotlist.push_back(plotfilename);
 
     } catch (AipsError x) 
       {
@@ -289,8 +335,8 @@ namespace CR { // Namespace CR -- begin
       Slice plotRange(startsample,(stopsample-startsample)); 
 
       // Get the X-beam and the power-beam
-      xbeam = GetXBeam(dr, antennaSelection);
-      pbeam = GetPBeam(dr, antennaSelection);
+      xbeam = GetXBeam(dr, antennaSelection).copy();
+      pbeam = GetPBeam(dr, antennaSelection).copy();
 
 
       // conversion to micro
@@ -314,6 +360,9 @@ namespace CR { // Namespace CR -- begin
       plotter.PlotLine(xaxis(plotRange),xbeam(plotRange),4,1);
       // Add Power-beam
       plotter.PlotLine(xaxis(plotRange),pbeam(plotRange),5,1);
+
+      // Add filename to list of created plots
+      plotlist.push_back(plotfilename);
 
     } catch (AipsError x) 
       {
@@ -346,7 +395,7 @@ namespace CR { // Namespace CR -- begin
       xaxis = static_cast< Vector<Double> >(dr->timeValues());
 
       // Get the fieldstrength of all antennas
-      fieldstrength = GetTimeSeries(dr);  // don't use the antennaSelection to get the full number of columns in the Matrix
+      fieldstrength = GetTimeSeries(dr).copy();  // don't use the antennaSelection to get the full number of columns in the Matrix
 
       // Upsampled FieldStrength
       Matrix<Double> upfieldstrength = getUpsampledFieldstrength(dr,upsampling_exp, antennaSelection);
@@ -373,7 +422,7 @@ namespace CR { // Namespace CR -- begin
       xaxis *= 1e6;
       fieldstrength *= 1e6;
       upxaxis *= 1e6;
-      upfieldstrength *= 1e6;
+      upfieldstrength *= 1e6;  
 
       // define Plotrange
       xmin = min(xaxis(plotRange));
@@ -401,7 +450,7 @@ namespace CR { // Namespace CR -- begin
       {
         // add the ".ps" to the filename
         string plotfilename = filename + ".ps";
-       
+
     	std::cout <<"Plotting the fieldstrength of all antennas to file: "
 		  << plotfilename
 		  << std::endl;
@@ -415,9 +464,16 @@ namespace CR { // Namespace CR -- begin
         for (int i = 0; i < antennaSelection.nelements(); i++)
         if (antennaSelection(i))			// consider only selected antennas
         {
-          plotter.PlotLine(xaxis(plotRange),fieldstrength.column(i)(plotRange),color,1);
+          // Plot (upsampled) trace
+          plotter.PlotLine(upxaxis(upplotRange),upfieldstrength.column(i)(upplotRange),color,1);
+
           color++;					// another color for the next antenna
+          if (color >= 13) color = 3;			// there are only 16 colors available, 
+							// use only ten as there are 3x10 antennas
         }
+
+        // Add filename to list of created plots
+        plotlist.push_back(plotfilename);
       } else	// seperated == true
       {
         string plotfilename;
@@ -431,6 +487,8 @@ namespace CR { // Namespace CR -- begin
         dr->header().get("AntennaIDs",AntennaIDs);
 
         // Create the plots for each individual antenna looping through antennas
+
+
         for (int i = 0; i < antennaSelection.nelements(); i++)
         if (antennaSelection(i))			// consider only selected antennas
         {
@@ -453,7 +511,13 @@ namespace CR { // Namespace CR -- begin
 
           // Plot (upsampled) trace and original data points.
           plotter.PlotLine(upxaxis(upplotRange),upfieldstrength.column(i)(upplotRange),color,1);
+
+	  // Known bug: Symbols are plotted with y = 0 if the same plot should be created for a second time
+          // Even though in SimplePlot::PlotSymbols, plpoin(npoints, plxval, plyval, symbol); is called
+          // exactly with the same values.
           plotter.PlotSymbols(xaxis(plotRange),fieldstrength.column(i)(plotRange),empty, empty, color, 2, 5);
+          // Add filename to list of created plots
+          plotlist.push_back(plotfilename);
 
           color++;					// another color for the next antenna
           if (color >= 13) color = 3;			// there are only 16 colors available, 
