@@ -121,9 +121,11 @@ namespace CR { // Namespace CR -- begin
 					  Bool verbose,
 					  Bool simplexFit,
 					  Double ExtraDelay,
-					  int doTVcal){
+					  int doTVcal,
+					  bool SinglePlots){
     Record erg;
     try {
+//      ofstream latexfile;			// WARNING: causes problem in fitCR2gauss.cc line 200
       Int nsamples;
       Vector<Double> Times, ccBeam, xBeam, pBeam, tmpvec;
       Matrix<Double> TimeSeries;
@@ -319,21 +321,89 @@ namespace CR { // Namespace CR -- begin
       // Generate the plots
       if (generatePlots)
       {
-          pipeline_p->setPlotInterval(plotStart(),plotStop());
-//        pipeline_p->plotCCbeam(PlotPrefix + "-CC", lev_p, AntennaSelection);
-//        pipeline_p->plotXbeam(PlotPrefix + "-X", lev_p, AntennaSelection);
+        pipeline_p->setPlotInterval(plotStart(),plotStop());
+        pipeline_p->plotCCbeam(PlotPrefix + "-CC", lev_p, AntennaSelection);
+        pipeline_p->plotXbeam(PlotPrefix + "-X", lev_p, AntennaSelection);
         // Plot of all antenna traces together
-//        pipeline_p->plotAllAntennas(PlotPrefix + "-all", lev_p, AntennaSelection, false);
+        pipeline_p->plotAllAntennas(PlotPrefix + "-all", lev_p, AntennaSelection, false, getUpsamplingExponent());
         // Plot of upsampled antenna traces (seperated)
-        pipeline_p->plotAllAntennas(PlotPrefix, lev_p, AntennaSelection, true, getUpsamplingExponent());
+        if (SinglePlots)
+	  pipeline_p->plotAllAntennas(PlotPrefix, lev_p, AntennaSelection, true, getUpsamplingExponent());
+
+        if (verbose)		// give out the names of the created plots
+        {
+          vector<string> plotlist = pipeline_p->getPlotList();
+          std::cout <<"\nList of generated plots:\n";
+          for (int i = 0; i < plotlist.size(); i++) std::cout << plotlist[i] << "\n";
+          std::cout << std::endl;
+        }
       };
     } catch (AipsError x) 
     {
       std::cerr << "analyseLOPESevent2::ProcessEvent: " << x.getMesg() << std::endl;
       return Record();
-    }; 
+    } 
     return erg;
   }
 
+  void analyseLOPESevent2::summaryPlot(string filename,
+                                       unsigned int columns)
+  {
+    try 
+    {
+      // check if anything should be done (means columns must be > 0)
+      if (columns <= 0) return;
+
+      // create latexfilename
+      string latexfilename = filename + ".tex";
+
+      // open latexfile
+      ofstream latexfile;
+      latexfile.open(latexfilename.c_str(), ofstream::out);
+
+      // check if file could be opened
+      if (!(latexfile.is_open()))
+      {
+        std::cerr << "Failed to write to file \"" << latexfilename <<"\"." << std::endl;
+      } else 
+      {
+        // Create header for latex file
+        latexfile << "\\documentclass[a4paper]{article}\n";
+        latexfile << "\\usepackage{psfig,a4wide}\n";
+        latexfile << "\\setlength{\\textheight}{24cm}\n";
+        latexfile << "\\setlength{\\topmargin}{0.0cm}\n";
+        latexfile << "\\parindent=0pt\n";
+        latexfile << "\\begin{document}\n";
+
+        // get list of generated plots and loop through the list
+        vector<string> plotlist = pipeline_p->getPlotList();
+
+        for (int i = 0; i < plotlist.size(); i++)
+        {
+          // line break after #columns plots
+          if ( (i > 0) && ((i % columns) == 0) ) latexfile << "\\newline\n";
+
+          // add plot to latexfile
+          latexfile << "\\begin{minipage}[h]{" << (0.999/columns) << "\\textwidth}\\psfig{figure="
+              << plotlist[i] << ",width=\\textwidth,angle=-90}\\end{minipage}\n";
+        }
+        // finish the latex file and close it
+        latexfile << "\\end{document}\n";
+        latexfile.close();
+
+        std::cout << "Created latex file: " << latexfilename << std::endl;
+
+        // execute latex without creating output at the term
+        string shellCommand = "latex " + latexfilename +" > /dev/null";
+        system(shellCommand.c_str());
+
+	// execute dvips to create postscript file
+        shellCommand = "dvips " + filename + " > /dev/null";
+        system(shellCommand.c_str());
+      }
+    } catch (AipsError x) {
+      cerr << "analyseLOPESevent2::summaryPlot: " << x.getMesg() << endl;
+    }
+  }
 
 } // Namespace CR -- end

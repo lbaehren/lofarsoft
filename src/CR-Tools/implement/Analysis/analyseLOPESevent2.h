@@ -26,6 +26,7 @@
 
 // Standard library header files
 #include <iostream>
+#include <fstream>
 #include <string>
 
 #include <Analysis/analyseLOPESevent.h>
@@ -184,6 +185,7 @@ class analyseLOPESevent2 : public analyseLOPESevent{
       \param ExtraDelay - additional delay to shift the data in time.
       \param doTVcal - perform the phase calibration on the TV transmitter
              (1: yes, 0: no, -1: use default)
+      \param SinglePlots - makes a plot for each antenna
 
       \return Record with the results.
     */
@@ -200,7 +202,17 @@ class analyseLOPESevent2 : public analyseLOPESevent{
 			Bool verbose=False,
 			Bool simplexFit=False,
 			Double ExtraDelay=0.,
-			int doTVcal=-1);
+			int doTVcal=-1,
+                        bool SinglePlots=false);
+
+    /*!
+      \brief Creates a summary postscript of all created plots (uses LaTeX)
+      
+      \param filename - name of the file for the summary plot (without final ".ps").
+      \param columns - number of columns in the summary (if columns=0, nothing is done)
+    */
+    void summaryPlot(string filename,
+                     unsigned int columns = 3);
 
   protected:
 

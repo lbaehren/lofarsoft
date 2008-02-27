@@ -294,7 +294,7 @@ namespace CR { // Namespace CR -- begin
       plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
       // Create the Plot
-      plotter.AddLabels("Time [microseconds]", "CC-Beam [microV/m/MHz]","");
+      plotter.AddLabels("Time [microseconds]", "CC-Beam [microV/m/MHz]","CC-Beam and Power");
     
       // Add CC-beam
       plotter.PlotLine(xaxis(plotRange),ccbeam(plotRange),4,1);
@@ -354,7 +354,7 @@ namespace CR { // Namespace CR -- begin
       plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
       // Create the Plot
-      plotter.AddLabels("Time [microseconds]", "X-Beam [microV/m/MHz]","");
+      plotter.AddLabels("Time [microseconds]", "X-Beam [microV/m/MHz]","X-Beam and Power");
     
       // Add X-beam
       plotter.PlotLine(xaxis(plotRange),xbeam(plotRange),4,1);
@@ -371,7 +371,7 @@ namespace CR { // Namespace CR -- begin
   }
 
 
-  // Plot the time shifed (= after beamforming) filedstrength of all antennas
+  // Plot the timeshifted (= after beamforming) filedstrength of all antennas
   void CompletePipeline::plotAllAntennas(const string filename,
 					 DataReader *dr,
 					 Vector<Bool> antennaSelection,
@@ -458,7 +458,7 @@ namespace CR { // Namespace CR -- begin
         // Initialize the plot giving xmin, xmax, ymin and ymax
         plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
         // Add labels
-        plotter.AddLabels("Time [microseconds]", "fieldstrength [microV/m/MHz]","");
+        plotter.AddLabels("Time [microseconds]", "fieldstrength [microV/m/MHz]","All selected Antennas");
 
         // Create the plots looping through antennas
         for (int i = 0; i < antennaSelection.nelements(); i++)

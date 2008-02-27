@@ -73,14 +73,30 @@ using CR::LopesEventIn;
   caltablepath = /home/horneff/lopescasa/data/LOPES/LOPES-CalTable<br>
   RotatePos = true<br>
   GeneratePlots = true<br>
+  SinglePlots = true<br>
   verbose = true<br>
   simplexFit = true<br>
   doTVcal = default<br>
   plotStart = -2.05e-6<br>
   plotEnd = -1.60e-6<br>
   upsamplingExponent = 1<br>
+  summaryColumns = 3<br>
   flagged = 10101<br>
   flagged = 10102<br>
+  <br>
+  This example means:
+  the caltables are in /home/horneff/lopescasa/data/LOPES/LOPES-CalTable,
+  the given positions are in the Kascade coordinate system and must be rotated to the LOPES system,
+  there will be generated plots of the analaysed event,
+  produces a plot for each antenna,
+  there will be more text output during the analysis,
+  the simplex fit of the arrival direction and radius of curvature is done,
+  the TV calibration will be done by default,
+  the plots start at -2.05 micro seconds and end at -1.60 micro seconds,
+  the upsampling of the calibrated antenna fieldstrengthes will be done by a factor of 2^1 = 2,
+  there will by a summary postscript of all created plots,
+  the antennas 10101 and 10102 are not considered in the analysis.
+  
 
   <h3>Example</h3>
 
@@ -125,6 +141,7 @@ int main (int argc, char *argv[])
 
     // Set default configuration values for the pipeline
     bool generatePlots = true;		// the plot prefix will be the name of the event file
+    bool singlePlots = false;		// by default there are no single plots for each antenna
     bool RotatePos = true; 		// should be true if coordinates are given in KASKADE frame
     bool verbose = true;
     bool simplexFit = true;
@@ -134,6 +151,7 @@ int main (int argc, char *argv[])
     unsigned int upsamplingExponent = 0;// by default no upsampling will be done
     vector<Int> flagged;		// use of STL-vector instead of CASA-vector due to support of push_back()
     string caltablepath = "/home/horneff/lopescasa/data/LOPES/LOPES-CalTable";
+    unsigned int summaryColumns = 0;	// be default no summary of all plots
 
 
     // Open config file if passed by programm call
@@ -173,12 +191,14 @@ int main (int argc, char *argv[])
         std::cerr << "caltablepath = /home/horneff/lopescasa/data/LOPES/LOPES-CalTable\n";
         std::cerr << "RotatePos = true\n";
         std::cerr << "GeneratePlots = true\n";
+        std::cerr << "SinglePlots = true\n";
         std::cerr << "verbose = true\n";
         std::cerr << "simplexFit = true\n";
         std::cerr << "doTVcal = default\n";
         std::cerr << "plotBegin = -2.05e-6\n";
         std::cerr << "plotEnd = -1.60e-6\n";
         std::cerr << "upsamplingExponent = 1\n";
+        std::cerr << "summaryColumns = 3\n";
         std::cerr << "flagged = 10101\n";
         std::cerr << "flagged = 10102\n";
         std::cerr << "... \n";
@@ -219,6 +239,26 @@ int main (int argc, char *argv[])
           {
             std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
             std::cerr << "GeneratePlots must be either 'true' or 'false'.\n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+        }	
+
+        if ( (keyword.compare("singleplots")==0) || (keyword.compare("SinglePlots")==0) ||
+             (keyword.compare("singlePlots")==0))
+        {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
+	  {
+	    singlePlots = true;
+	    std::cout << "SinglePlots set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
+	  {
+	    singlePlots = false;
+	    std::cout << "SinglePlots set to 'false'.\n";
+          } else
+          {
+            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "SinglePlots must be either 'true' or 'false'.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
         }	
@@ -356,6 +396,24 @@ int main (int argc, char *argv[])
           }
         }
 
+        if ( (keyword.compare("summarycolumns")==0) || (keyword.compare("summaryColumns")==0) 
+	  || (keyword.compare("SummaryColumns")==0))
+        {
+          unsigned int temp = 9999999;
+          stringstream(value) >> temp; 
+
+          if (temp != 9999999)  // will be false, if value is not of typ "int"
+	  {
+            summaryColumns = temp; 
+	    std::cout << "SummaryColumns set to " << summaryColumns << ".\n";
+	  } else
+          {
+            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "SummaryColumns must be of typ 'unsignend int'. \n";
+            std::cerr << "Use 'summaryColumns = 0' if you don't want to hava a summary postscrict.\n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+        }
 
 
 	// flagg antennas
@@ -633,7 +691,11 @@ int main (int argc, char *argv[])
 
       // call the pipeline with an extra delay = 0.
       results = eventPipeline.ProcessEvent(filename, azimuth, zenith, distance, core_x, core_y, RotatePos, 
-		plotprefix, generatePlots, (Vector<int>)flagged, verbose, simplexFit, 0., doTVcal); 
+		plotprefix, generatePlots, (Vector<int>)flagged, verbose, simplexFit, 0., doTVcal, singlePlots); 
+
+      // make a postscript with a summary of all plots
+      // if summaryColumns = 0 the method does not create a summary.
+      eventPipeline.summaryPlot(plotprefix+"-summary",summaryColumns);
     }
 
     // close file
