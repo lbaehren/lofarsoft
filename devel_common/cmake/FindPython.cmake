@@ -51,6 +51,7 @@ set (lib_locations
   /usr/lib
   /usr/local/lib
   /usr/X11R6/lib
+  /opt/aips++/local/lib
   )
 
 set (include_locations
@@ -66,6 +67,7 @@ set (include_locations
   /usr/include
   /usr/local/include
   /usr/X11R6/include
+  /opt/aips++/local/include
   )
 
 ## -----------------------------------------------------------------------------
