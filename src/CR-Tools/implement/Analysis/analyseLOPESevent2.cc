@@ -391,8 +391,6 @@ namespace CR { // Namespace CR -- begin
         latexfile << "\\end{document}\n";
         latexfile.close();
 
-        std::cout << "Created latex file: " << latexfilename << std::endl;
-
         // execute latex without creating output at the term
         string shellCommand = "latex " + latexfilename +" > /dev/null";
         system(shellCommand.c_str());
@@ -400,6 +398,8 @@ namespace CR { // Namespace CR -- begin
 	// execute dvips to create postscript file
         shellCommand = "dvips " + filename + " > /dev/null";
         system(shellCommand.c_str());
+
+        std::cout << "Created postscript summary: " << filename << ".ps" << std::endl;
       }
     } catch (AipsError x) {
       cerr << "analyseLOPESevent2::summaryPlot: " << x.getMesg() << endl;

@@ -626,14 +626,6 @@ int main (int argc, char *argv[])
       return 1;		// exit program
     }
 
-
-    // Initialize the pipeline
-    analyseLOPESevent2 eventPipeline;
-    Record obsrec,results;
-    obsrec.define("LOPES",caltablepath);
-    eventPipeline.initPipeline(obsrec);
-
-
     // Process events from event file list
     string filename, plotprefix;
     double azimuth, zenith, distance, core_x, core_y;
@@ -682,6 +674,12 @@ int main (int argc, char *argv[])
       std::cout << "\nProcessing event \"" << filename << "\"\nwith azimuth " << azimuth << " °, zenith " << zenith
 	<< " °, distance (radius of curvature) " << distance << " m, core position X " << core_x
 	<< " m and core position Y " << core_y << " m.\n" << std::endl;
+
+      // Initialize the pipeline
+      analyseLOPESevent2 eventPipeline;
+      Record obsrec,results;
+      obsrec.define("LOPES",caltablepath);
+      eventPipeline.initPipeline(obsrec);
 
       // set plot range
       eventPipeline.setPlotInterval(plotStart,plotEnd);
