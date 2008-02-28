@@ -249,9 +249,16 @@ namespace CR { // Namespace CR -- begin
   }
 
 
+  Slice CompletePipeline::calculatePlotRange (const Vector<Double>& xaxis) const
+  {
+    int startsample = ntrue(xaxis<plotStart_p);            //number of elements smaller then starting value of plot range
+    int stopsample = ntrue(xaxis<plotStop_p);              //number of elements smaller then end of plot range
+    Slice plotRange(startsample,(stopsample-startsample)); // create Slice with plotRange
+    return plotRange;
+  }
 
 
-  void CompletePipeline::plotCCbeam(const string filename,
+  void CompletePipeline::plotCCbeam(const string& filename,
 				    DataReader *dr,
 				    Vector<Bool> antennaSelection)
   {
@@ -270,9 +277,7 @@ namespace CR { // Namespace CR -- begin
       xaxis = (Vector<Double>)(dr->timeValues()); 
 
       // Define plotrange
-      int startsample = ntrue(xaxis<plotStart_p); //number of elements smaller then starting value of plot range
-      int stopsample = ntrue(xaxis<plotStop_p);  //number of elements smaller then end of plot range
-      Slice plotRange(startsample,(stopsample-startsample)); 
+      Slice plotRange = calculatePlotRange(xaxis); 
 
       // Get the CC-beam and the power-beam
       ccbeam = GetCCBeam(dr, antennaSelection).copy();
@@ -311,7 +316,7 @@ namespace CR { // Namespace CR -- begin
   }
 
 
-  void CompletePipeline::plotXbeam(const string filename,
+  void CompletePipeline::plotXbeam(const string& filename,
 				   DataReader *dr,
 				   Vector<Bool> antennaSelection)
   {
@@ -330,9 +335,7 @@ namespace CR { // Namespace CR -- begin
       xaxis = (Vector<Double>)(dr->timeValues()); 
 
       // Define plotrange
-      int startsample = ntrue(xaxis<plotStart_p); //number of elements smaller then starting value of plot range
-      int stopsample = ntrue(xaxis<plotStop_p);  //number of elements smaller then end of plot range
-      Slice plotRange(startsample,(stopsample-startsample)); 
+      Slice plotRange = calculatePlotRange(xaxis); 
 
       // Get the X-beam and the power-beam
       xbeam = GetXBeam(dr, antennaSelection).copy();
@@ -372,7 +375,7 @@ namespace CR { // Namespace CR -- begin
 
 
   // Plot the timeshifted (= after beamforming) filedstrength of all antennas
-  void CompletePipeline::plotAllAntennas(const string filename,
+  void CompletePipeline::plotAllAntennas(const string& filename,
 					 DataReader *dr,
 					 Vector<Bool> antennaSelection,
 					 bool seperated,
@@ -408,15 +411,9 @@ namespace CR { // Namespace CR -- begin
            << std::endl;
 
 
-      // Define plotrange for not upsampled data
-      int startsample = ntrue(xaxis<plotStart_p); //number of elements smaller then starting value of plot range
-      int stopsample = ntrue(xaxis<plotStop_p);  //number of elements smaller then end of plot range
-      Slice plotRange(startsample,(stopsample-startsample));
-
-      // Define plotrange for upsampled data
-      startsample = ntrue(upxaxis<plotStart_p); //number of elements smaller then starting value of plot range
-      stopsample = ntrue(upxaxis<plotStop_p);  //number of elements smaller then end of plot range
-      Slice upplotRange(startsample,(stopsample-startsample));
+      // Define plotrange for not upsampled and upsampled data
+      Slice plotRange = calculatePlotRange(xaxis);
+      Slice upplotRange = calculatePlotRange(upxaxis);
 
       // conversion to micro
       xaxis *= 1e6;
@@ -446,35 +443,7 @@ namespace CR { // Namespace CR -- begin
       ymax *= 1.05;
 
       // Make the plots (either all antennas together or seperated)
-      if (seperated == false)
-      {
-        // add the ".ps" to the filename
-        string plotfilename = filename + ".ps";
-
-    	std::cout <<"Plotting the fieldstrength of all antennas to file: "
-		  << plotfilename
-		  << std::endl;
-
-        // Initialize the plot giving xmin, xmax, ymin and ymax
-        plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
-        // Add labels
-        plotter.AddLabels("Time [microseconds]", "fieldstrength [microV/m/MHz]","All selected Antennas");
-
-        // Create the plots looping through antennas
-        for (int i = 0; i < antennaSelection.nelements(); i++)
-        if (antennaSelection(i))			// consider only selected antennas
-        {
-          // Plot (upsampled) trace
-          plotter.PlotLine(upxaxis(upplotRange),upfieldstrength.column(i)(upplotRange),color,1);
-
-          color++;					// another color for the next antenna
-          if (color >= 13) color = 3;			// there are only 16 colors available, 
-							// use only ten as there are 3x10 antennas
-        }
-
-        // Add filename to list of created plots
-        plotlist.push_back(plotfilename);
-      } else	// seperated == true
+      if (seperated)
       {
         string plotfilename;
         string label;
@@ -511,20 +480,44 @@ namespace CR { // Namespace CR -- begin
 
           // Plot (upsampled) trace and original data points.
           plotter.PlotLine(upxaxis(upplotRange),upfieldstrength.column(i)(upplotRange),color,1);
-
-	  // Known bug: Symbols are plotted with y = 0 if the same plot should be created for a second time
-          // Even though in SimplePlot::PlotSymbols, plpoin(npoints, plxval, plyval, symbol); is called
-          // exactly with the same values.
           plotter.PlotSymbols(xaxis(plotRange),fieldstrength.column(i)(plotRange),empty, empty, color, 2, 5);
+
           // Add filename to list of created plots
           plotlist.push_back(plotfilename);
 
           color++;					// another color for the next antenna
           if (color >= 13) color = 3;			// there are only 16 colors available, 
+							// use only ten as there are 3x10 antenna
+        }
+      } else	// if (seperated)
+      {
+        // add the ".ps" to the filename
+        string plotfilename = filename + ".ps";
+
+    	std::cout <<"Plotting the fieldstrength of all antennas to file: "
+		  << plotfilename
+		  << std::endl;
+
+        // Initialize the plot giving xmin, xmax, ymin and ymax
+        plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
+        // Add labels
+        plotter.AddLabels("Time [microseconds]", "fieldstrength [microV/m/MHz]","All selected Antennas");
+
+        // Create the plots looping through antennas
+        for (int i = 0; i < antennaSelection.nelements(); i++)
+        if (antennaSelection(i))			// consider only selected antennas
+        {
+          // Plot (upsampled) trace
+          plotter.PlotLine(upxaxis(upplotRange),upfieldstrength.column(i)(upplotRange),color,1);
+
+          color++;					// another color for the next antenna
+          if (color >= 13) color = 3;			// there are only 16 colors available, 
 							// use only ten as there are 3x10 antennas
         }
-      }
 
+        // Add filename to list of created plots
+        plotlist.push_back(plotfilename);
+      }
 
     } catch (AipsError x) 
       {

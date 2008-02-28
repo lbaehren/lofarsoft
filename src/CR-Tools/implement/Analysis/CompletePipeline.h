@@ -239,6 +239,17 @@ namespace CR { // Namespace CR -- begin
 
 
     /*!
+      \brief Gets a Slice with the plot interval for the given xaxis
+
+      \param xaxis            -- a time axis (may be upsampled or not)
+
+      \return plotRange       -- A Slice containing the indices of the xaxis interval corresponding to the
+                                 class variables plotStart_p and plotStop_p
+    */
+    Slice calculatePlotRange (const Vector<Double>& xaxis) const;
+
+
+    /*!
       \brief Plots the CC-beam
 
       \param filename         -- Name of the .ps file (without ".ps") the plot will be written to
@@ -246,7 +257,7 @@ namespace CR { // Namespace CR -- begin
       \param antennaSelection -- Selection of antennas considered for the plot
     */
 
-    void plotCCbeam (const string filename, 
+    void plotCCbeam (const string& filename, 
                      DataReader *dr,
                      Vector<Bool> antennaSelection = Vector<Bool>());
 
@@ -258,7 +269,7 @@ namespace CR { // Namespace CR -- begin
       \param antennaSelection -- Selection of antennas considered for the plot
     */
 
-    void plotXbeam (const string filename, 
+    void plotXbeam (const string& filename, 
                     DataReader *dr,
                     Vector<Bool> antennaSelection = Vector<Bool>());
 
@@ -274,7 +285,7 @@ namespace CR { // Namespace CR -- begin
                                  use e.g. uspampling_exp = 1 to have twice as many points plotted.
     */
 
-    void plotAllAntennas (const string filename,
+    void plotAllAntennas (const string& filename,
                           DataReader *dr,
                           Vector<Bool> antennaSelection = Vector<Bool>(),
                           bool seperated = false,
