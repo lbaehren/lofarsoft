@@ -166,6 +166,7 @@ namespace CR { // Namespace CR -- begin
       Vector<Double> xval,yval,tmp;
       Double meanval;
       Record staterec;
+
       xval = timeAxis_p(fitregion);
       meanval = mean(xBeam(remoteregion));
       yval = xBeam(fitregion)-meanval;	
@@ -198,7 +199,6 @@ namespace CR { // Namespace CR -- begin
 	uInt newfitstop,newfitlen;
 	tmp = staterec.asArrayDouble("center");
 	newfitstop = ntrue(timeAxis_p<=(tmp(0)+3.75e-8));
-std::cout << "\nfitCR2gauss::Fitgauss:newfitstop at line 201 = " << newfitstop << "\n" << std::endl;
 	newfitlen = newfitstop-fitRange_p(0);
 	if ((newfitlen>5) && (newfitlen<(fitregion.length()-1))){
 	  fitregion = Slice(fitRange_p(0),newfitlen);
