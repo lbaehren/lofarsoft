@@ -457,11 +457,6 @@ namespace CR { // Namespace CR -- begin
   protected: //this methods are protected to make them available in child class
     
     /*!
-      \brief Unconditional deletion 
-    */
-    void destroy(void);
-
-    /*!
       \brief clear the object
     */
     void clear(void);

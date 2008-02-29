@@ -67,7 +67,8 @@ namespace CR { // Namespace CR -- begin
       }
       
       // now perform the fit
-      Vector<Double> solution = state_.fitter().fit(x, y, sigma);
+      Vector<Double> solution; 
+      solution = state_.fitter().fit(x, y, sigma);
 
       state_.fitter().setParameterValues(solution);
       

@@ -90,11 +90,8 @@ namespace CR { // Namespace CR -- begin
   
   analyseLOPESevent::~analyseLOPESevent ()
   {
-    destroy();
+    clear();
   }
-  
-  void analyseLOPESevent::destroy ()
-  {;}
   
   // ============================================================================
   //
@@ -326,7 +323,8 @@ namespace CR { // Namespace CR -- begin
       // calculate other stuff
       erg.define("rmsC",stddev(ccBeam(remoteRegion)));
       erg.define("rmsX",stddev(xBeam(remoteRegion)));
-      Matrix<Double> AntPos=pipeline_p->GetAntPositions();
+      Matrix<Double> AntPos; 
+      AntPos=pipeline_p->GetAntPositions();
       AntPos = toShower(AntPos, Az, El);
       Vector<Double> distances(nants);
       for (i=0; i<nants; i++) {

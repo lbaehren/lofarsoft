@@ -153,7 +153,8 @@ namespace CR { // Namespace CR -- begin
       Vector<DComplex> phasecal,tempComplexVec1,tempComplexVec2;
       DComplex tmpcomp(0.,1.);
       tmpcomp *= 2*PI;
-      Vector<Double> freqVals = dr->frequencyValues();
+      Vector<Double> freqVals; 
+      freqVals = dr->frequencyValues(); // work around a bug in casa(core) 
       Double delay;
       for (i=0; i<nAnt ; i++){
 	InterElGainCal_p->GetValues(date, AntennaIDs(i), &elgain);
