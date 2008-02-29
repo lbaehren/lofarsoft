@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id::                                                                 $ |
+ | $Id:: CompletePipeline.cc 1261 2008-02-28 10:30:11Z schroeder         $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2008                                                    *
@@ -36,14 +36,20 @@ namespace CR { // Namespace CR -- begin
     plotStart_p(-2.05e-6), plotStop_p(-1.55e-6),
     plotlist(),
     lastUpsamplingExponent(-1),
-    lastTimeUpsamplingExponent(-1)
+    lastTimeUpsamplingExponent(-1),
+    upFieldStrength(),
+    upsampledAntennas(),
+    upTimeValues()
   {;}
   
   CompletePipeline::CompletePipeline (CompletePipeline const &other):
     plotStart_p(-2.05e-6), plotStop_p(-1.55e-6),
     plotlist(),
     lastUpsamplingExponent(-1),
-    lastTimeUpsamplingExponent(-1)
+    lastTimeUpsamplingExponent(-1),
+    upFieldStrength(),
+    upsampledAntennas(),
+    upTimeValues()
   {
     copy (other);
   }

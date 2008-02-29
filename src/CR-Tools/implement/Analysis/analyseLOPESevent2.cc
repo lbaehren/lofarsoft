@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id::                                                                 $ |
+ | $Id:: analyseLOPESevent2.cc 1260 2008-02-27 16:07:55Z schroeder       $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2008                                                  *
@@ -49,6 +49,9 @@ namespace CR { // Namespace CR -- begin
   
   analyseLOPESevent2::~analyseLOPESevent2 ()
   {
+    // free memory that was possibly allocated
+    delete pipeline_p;
+    delete lev_p;
     destroy();
   }
   
@@ -392,11 +395,11 @@ namespace CR { // Namespace CR -- begin
         latexfile.close();
 
         // execute latex without creating output at the term
-        string shellCommand = "latex " + latexfilename +" > /dev/null";
+        string shellCommand = "latex " + latexfilename +" > /dev/null";  // don't show the output to stdout
         system(shellCommand.c_str());
 
 	// execute dvips to create postscript file
-        shellCommand = "dvips " + filename + " > /dev/null";
+        shellCommand = "dvips " + filename + " 2> /dev/null"; // don't show the output to stderr
         system(shellCommand.c_str());
 
         std::cout << "Created postscript summary: " << filename << ".ps" << std::endl;
