@@ -206,7 +206,7 @@ namespace CR { // Namespace CR -- begin
 
 
     /*!
-      \brief Gets the upsampled fieldstrength of selected antennas
+      \brief Gets the upsampled fieldstrength of selected antennas (data are stored for reuse)
 
       \param DataReader       -- DataReader (LopesEventIn)
       \param upsampling_exp   -- a value > 0 means that data are upsampled by a factor of 2^upsampling_exp
@@ -218,11 +218,28 @@ namespace CR { // Namespace CR -- begin
                                          corresponding to not selected antennas will not contain meaningless values.)
     */
     Matrix<Double> getUpsampledFieldstrength (DataReader *dr,
-					      int upsampling_exp,
+					      const int& upsampling_exp,
 				 	      Vector<Bool> antennaSelection = Vector<Bool>());
 
     /*!
-      \brief Gets the time axis for upsampled data
+      \brief Gets the upsampled raw data FX of selected antennas (data are not stored for reuse)
+
+      \param DataReader       -- DataReader (LopesEventIn)
+      \param upsampling_exp   -- a value > 0 means that data are upsampled by a factor of 2^upsampling_exp
+                                 use e.g. uspampling_exp = 1 to have twice as many points plotted.
+      \param antennaSelection -- Selection of antennas
+
+      \return UpsampledFX     -- Contains the upsampled time series of the selected antennas in colums of matrix
+                                 (number of columns = number of elements in the antennaSelection, but columns
+                                 corresponding to not selected antennas will not contain meaningless values.)
+    */
+    Matrix<Double> getUpsampledFX (DataReader *dr,
+				   const int& upsampling_exp,
+		                   Vector<Bool> antennaSelection = Vector<Bool>(),
+				   const bool& offsetSubstraction = false);
+
+    /*!
+      \brief Gets the time axis for upsampled data (data are stored for reuse)
 
       \param DataReader       -- DataReader (LopesEventIn)
       \param upsampling_exp   -- a value > 0 means that there are 2^upsampling_exp data points
@@ -235,7 +252,7 @@ namespace CR { // Namespace CR -- begin
                                     last time value of the original axis.
     */
     Vector<Double> getUpsampledTimeAxis (DataReader *dr,
-					 int upsampling_exp);
+					 const int& upsampling_exp);
 
 
     /*!
@@ -283,14 +300,30 @@ namespace CR { // Namespace CR -- begin
                                  (the antenna number serves as file name appendix).
       \param upsampling_exp   -- a value > 0 means that data are upsampled by a factor of 2^upsampling_exp
                                  use e.g. uspampling_exp = 1 to have twice as many points plotted.
+      \param rawData          -- plot the raw ADC data instead of the calibrated fieldstrength
     */
 
     void plotAllAntennas (const string& filename,
                           DataReader *dr,
                           Vector<Bool> antennaSelection = Vector<Bool>(),
-                          bool seperated = false,
-                          int upsampling_exp = 0);
+                          const bool& seperated = false,
+                          const int& upsampling_exp = 0,
+                          const bool& rawData = false);
 
+    /*!
+      \brief Prints the height of the maximum and the corresponding time in the plot range
+
+      \param DataReader       -- DataReader (LopesEventIn)
+      \param antennaSelection -- Selection of antennas
+      \param upsampling_exp   -- a value > 0 means that data are upsampled by a factor of 2^upsampling_exp
+                                 use e.g. uspampling_exp = 1 to have twice as many points plotted.
+      \param rawData          -- uses the raw ADC data instead of the calibrated fieldstrength
+    */
+
+    void calculateMaxima (DataReader *dr,
+                          Vector<Bool> antennaSelection = Vector<Bool>(),
+                          const int& upsampling_exp = 0,
+                          const bool& rawData = false);
     
     
     

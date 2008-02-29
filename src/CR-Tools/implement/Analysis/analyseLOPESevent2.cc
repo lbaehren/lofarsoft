@@ -35,12 +35,6 @@ namespace CR { // Namespace CR -- begin
     upsamplingExponent(0)
   {;}
   
-  analyseLOPESevent2::analyseLOPESevent2 (analyseLOPESevent2 const &other):
-    upsamplingExponent(0)
-  {
-    copy (other);
-  }
-  
   // ============================================================================
   //
   //  Destruction
@@ -49,32 +43,8 @@ namespace CR { // Namespace CR -- begin
   
   analyseLOPESevent2::~analyseLOPESevent2 ()
   {
-    // free memory that was possibly allocated
-    delete pipeline_p;
-    delete lev_p;
-    destroy();
+    clear();
   }
-  
-  void analyseLOPESevent2::destroy ()
-  {;}
-  
-  // ============================================================================
-  //
-  //  Operators
-  //
-  // ============================================================================
-  
-  analyseLOPESevent2& analyseLOPESevent2::operator= (analyseLOPESevent2 const &other)
-  {
-    if (this != &other) {
-      destroy ();
-      copy (other);
-    }
-    return *this;
-  }
-  
-  void analyseLOPESevent2::copy (analyseLOPESevent2 const &other)
-  {;}
 
   // ============================================================================
   //
@@ -85,8 +55,7 @@ namespace CR { // Namespace CR -- begin
   void analyseLOPESevent2::summary (std::ostream &os)
   {;}
   
-  
-  
+ 
   // ============================================================================
   //
   //  Methods
@@ -111,7 +80,7 @@ namespace CR { // Namespace CR -- begin
 
   // --------------------------------------------------------------- ProcessEvent
 
-  Record analyseLOPESevent2::ProcessEvent(String evname,
+  Record analyseLOPESevent2::ProcessEvent(const string& evname,
 					  Double Az,
 					  Double El,
 					  Double distance, 
@@ -125,7 +94,8 @@ namespace CR { // Namespace CR -- begin
 					  Bool simplexFit,
 					  Double ExtraDelay,
 					  int doTVcal,
-					  bool SinglePlots){
+					  bool SinglePlots,
+					  bool PlotRawData){
     Record erg;
     try {
 //      ofstream latexfile;			// WARNING: causes problem in fitCR2gauss.cc line 200
@@ -322,16 +292,39 @@ namespace CR { // Namespace CR -- begin
       erg.define("Distance",distance);
 
       // Generate the plots
-      if (generatePlots)
+      if ( (generatePlots) || (PlotRawData) )
       {
+        // Set Plot Interval
         pipeline_p->setPlotInterval(plotStart(),plotStop());
-        pipeline_p->plotCCbeam(PlotPrefix + "-CC", lev_p, AntennaSelection);
-        pipeline_p->plotXbeam(PlotPrefix + "-X", lev_p, AntennaSelection);
-        // Plot of all antenna traces together
-        pipeline_p->plotAllAntennas(PlotPrefix + "-all", lev_p, AntennaSelection, false, getUpsamplingExponent());
-        // Plot of upsampled antenna traces (seperated)
-        if (SinglePlots)
-	  pipeline_p->plotAllAntennas(PlotPrefix, lev_p, AntennaSelection, true, getUpsamplingExponent());
+
+        if (generatePlots)
+        {
+          // Plot x-beam and CC-beam
+          pipeline_p->plotCCbeam(PlotPrefix + "-CC", lev_p, AntennaSelection);
+          pipeline_p->plotXbeam(PlotPrefix + "-X", lev_p, AntennaSelection);
+          // Plot of all antenna traces together
+          pipeline_p->plotAllAntennas(PlotPrefix + "-all", lev_p, AntennaSelection, false, getUpsamplingExponent(),false);
+
+          // Plot of upsampled antenna traces (seperated) 
+          if (SinglePlots)
+            pipeline_p->plotAllAntennas(PlotPrefix, lev_p, AntennaSelection, true, getUpsamplingExponent(),false);
+
+          // calculate the maxima
+          pipeline_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false);
+        }
+
+        if (PlotRawData)       
+        {
+          // plot upsampled raw data: either in seperated plots seperated or all traces in one plot
+          if (SinglePlots)
+            pipeline_p->plotAllAntennas(PlotPrefix+ "-raw", lev_p, AntennaSelection, true, getUpsamplingExponent(),true);
+          else
+            pipeline_p->plotAllAntennas(PlotPrefix + "-raw", lev_p, AntennaSelection, false, getUpsamplingExponent(), true);
+
+          // calculate the maxima
+          pipeline_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), true);
+        }
+
 
         if (verbose)		// give out the names of the created plots
         {

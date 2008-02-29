@@ -104,7 +104,7 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   Matrix<Double> CompletePipeline::getUpsampledFieldstrength (DataReader *dr,
-							      int upsampling_exp,
+							      const int& upsampling_exp,
 							      Vector<Bool> antennaSelection)
   {
     try 
@@ -166,7 +166,7 @@ namespace CR { // Namespace CR -- begin
       // do upsampling for each antenna in the todo-list
       for (int i = 0; i < antennaSelection.nelements(); i++) if (upsamplingToDo[i])
       {
-        std::cout << "Upsampling the data of antenna " << i+1 << " by a factor of " << upsampled << " ...\n";
+        std::cout << "Upsampling the calibrated data of antenna " << i+1 << " by a factor of " << upsampled << " ...\n";
 	// copy the trace into the array
 	for (int j = 0; j < tracelength; j++) 
         {
@@ -185,7 +185,7 @@ namespace CR { // Namespace CR -- begin
 	// copy upsampled trace into Matrix with antenna traces and subtract offset
         // remark: as there is no offset in the original data, this step should be avoided
         // as soon as upsampling without pedestal correction is available
-	for (int j = 0; j < tracelength*upsampled; j++) upFieldStrength.column(i)(j) = upsampledTrace[j] - offset;
+	for (int j = 0; j < tracelength*upsampled; j++) upFieldStrength.column(i)(j) = upsampledTrace[j] + offset;
 
         // remark: tried to fasten data transfer from the array to the Matrix but did not work because arrays are
         // of typ float but not double.
@@ -205,8 +205,90 @@ namespace CR { // Namespace CR -- begin
       }; 
   }
 
+ 
+  Matrix<Double> CompletePipeline::getUpsampledFX (DataReader *dr,
+						   const int& upsampling_exp,
+						   Vector<Bool> antennaSelection,
+						   const bool& offsetSubstraction)
+  {
+    try 
+    {
+      // Get the (not yet upsampled) raw data of all antennas
+      Matrix<Double> rawData = dr->fx(); 
+
+      // check if upsampling shoud be done at all (if not, return not upsampled data)
+      if (upsampling_exp < 1) return rawData.copy(); 
+
+      // Get the antenna selection from the DataReader if no selction was chosen 	
+      if (antennaSelection.nelements() == 0) {
+	antennaSelection = GetAntennaMask(dr);
+      }
+
+      // consistency check: number of elements in antennaSelction and rawData must be equal
+      if ( rawData.ncolumn() != antennaSelection.nelements() )
+      {
+        std::cerr << "CompletePipeline:getUpsampledFX: Number of elements in \"antennaSelection\" is inconsistent.\n" 
+		<< std::endl;
+        return rawData.copy();
+      }
+
+      // create upsampling factor by upsampling exponent
+      unsigned int upsampled = pow(2,upsampling_exp);
+
+      // get length of trace
+      int tracelength = rawData.column(0).size();
+
+      // allocate memory for original and upsampled traces
+      float originalTrace[tracelength];
+      float upsampledTrace[tracelength * upsampled];
+
+      // Create Matrix for usampled values
+      Matrix<Double> upData(tracelength * upsampled, antennaSelection.nelements(), 0);
+
+      // do upsampling for each antenna in the antennaSelection
+      for (int i = 0; i < antennaSelection.nelements(); i++) if (antennaSelection(i))
+      {
+        std::cout << "Upsampling the raw data of antenna " << i+1 << " by a factor of " << upsampled << " ...\n";
+	// copy the trace into the array
+	for (int j = 0; j < tracelength; j++) 
+        {
+          originalTrace[j] = rawData.column(i)(j);
+        }
+
+	// do upsampling by factor #upsampled (--> NoZeros = upsampled -1)
+
+        // calcutlate Offset:
+        float before = originalTrace[0];
+
+        ZeroPaddingFFT(tracelength, originalTrace, upsampled-1, upsampledTrace);
+
+	double offset = before - originalTrace[0];
+	
+	// copy upsampled trace into Matrix with antenna traces and subtract offset
+        // if no offset correction is wanted
+        // remember: ZeroPaddingFFT removes the offset automatically
+        if (offsetSubstraction)
+	  for (int j = 0; j < tracelength*upsampled; j++) upData.column(i)(j) = upsampledTrace[j];
+        else
+	  for (int j = 0; j < tracelength*upsampled; j++) upData.column(i)(j) = upsampledTrace[j] + offset;
+
+        // remark: tried to fasten data transfer from the array to the Matrix but did not work because arrays are
+        // of typ float but not double.
+      } 
+
+      // Return upsampled traces 
+      return upData.copy();
+
+    } catch (AipsError x) 
+      {
+        std::cerr << "CompletePipeline:getUpsampledFX: " << x.getMesg() << std::endl;
+      }; 
+  }
+
+
+
   Vector<Double> CompletePipeline::getUpsampledTimeAxis (DataReader *dr,
-							 int upsampling_exp)
+							 const int& upsampling_exp)
   {
     try 
     {
@@ -257,10 +339,22 @@ namespace CR { // Namespace CR -- begin
 
   Slice CompletePipeline::calculatePlotRange (const Vector<Double>& xaxis) const
   {
-    int startsample = ntrue(xaxis<plotStart_p);            //number of elements smaller then starting value of plot range
-    int stopsample = ntrue(xaxis<plotStop_p);              //number of elements smaller then end of plot range
-    Slice plotRange(startsample,(stopsample-startsample)); // create Slice with plotRange
-    return plotRange;
+    try
+    {
+      // check if plotStart is <= plotStop
+      if (plotStop_p < plotStart_p)
+      {
+        std::cerr << "CompletePipeline:calculatePlotRange: Error: plotStop_p is greater than plotStart_p!" << std::endl;
+        return Slice(0,0);
+      }
+      int startsample = ntrue(xaxis<plotStart_p);            //number of elements smaller then starting value of plot range
+      int stopsample = ntrue(xaxis<plotStop_p);              //number of elements smaller then end of plot range
+      Slice plotRange(startsample,(stopsample-startsample)); // create Slice with plotRange
+      return plotRange;
+    } catch (AipsError x) 
+    {
+        std::cerr << "CompletePipeline:calculatePlotRange: " << x.getMesg() << std::endl;
+    }; 
   }
 
 
@@ -384,15 +478,17 @@ namespace CR { // Namespace CR -- begin
   void CompletePipeline::plotAllAntennas(const string& filename,
 					 DataReader *dr,
 					 Vector<Bool> antennaSelection,
-					 bool seperated,
-					 int upsampling_exp)
+					 const bool& seperated,
+					 const int& upsampling_exp,
+					 const bool& rawData)
   {
     try 
     {
       SimplePlot plotter;    			// define plotter
       Vector<Double> xaxis;			// xaxis
       double xmax,xmin,ymin=0,ymax=0;		// Plotrange
-      Matrix<Double> fieldstrength;		// y-values
+      Matrix<Double> yValues;			// y-values
+      Matrix<Double> upYvalues;			// upsampled y-values
       int color = 3;				// starting color
 
       // Get the antenna selection from the DataReader if no selction was chosen 	
@@ -400,19 +496,31 @@ namespace CR { // Namespace CR -- begin
 	antennaSelection = GetAntennaMask(dr);
       }
 
-      // Get the time (upsampled) time axis
+      // Get the (not upsampled) time axis
       xaxis = static_cast< Vector<Double> >(dr->timeValues());
 
-      // Get the fieldstrength of all antennas
-      fieldstrength = GetTimeSeries(dr).copy();  // don't use the antennaSelection to get the full number of columns in the Matrix
+      // Get the yValues of all antennas (raw data or fieldstrength)
+      if (rawData)
+      {
+        // get not upsampled data
+        yValues = dr->fx().copy();
+        // Upsampled yValues (ADC offset will not be substracted)
+        upYvalues = getUpsampledFX(dr,upsampling_exp, antennaSelection, false);
+      }
+      else
+      {
+        yValues = GetTimeSeries(dr).copy();  // don't use the antennaSelection to get the full number of columns in the Matrix
 
-      // Upsampled FieldStrength
-      Matrix<Double> upfieldstrength = getUpsampledFieldstrength(dr,upsampling_exp, antennaSelection);
+        // Upsampled yValues
+        upYvalues = getUpsampledFieldstrength(dr,upsampling_exp, antennaSelection);
+      }
+
+
       // Upsampled x-axis
       Vector<Double> upxaxis = getUpsampledTimeAxis(dr,upsampling_exp);
 
-      // check length of time axis and fieldstrength traces for consistency
-      if (upxaxis.size() != upfieldstrength.column(0).size())
+      // check length of time axis and yValues traces for consistency
+      if (upxaxis.size() != upYvalues.column(0).size())
         std::cerr << "CompletePipeline:plotAllAntennas: WARNING: Length of time axis differs from length of the antenna traces!\n"
            << std::endl;
 
@@ -423,9 +531,9 @@ namespace CR { // Namespace CR -- begin
 
       // conversion to micro
       xaxis *= 1e6;
-      fieldstrength *= 1e6;
+      yValues *= 1e6;
       upxaxis *= 1e6;
-      upfieldstrength *= 1e6;  
+      upYvalues *= 1e6;  
 
       // define Plotrange
       xmin = min(xaxis(plotRange));
@@ -436,11 +544,11 @@ namespace CR { // Namespace CR -- begin
       for (int i = 0; i < antennaSelection.nelements(); i++)
         if (antennaSelection(i))		// consider only selected antennas
         {
-          if ( ymin > min(upfieldstrength.column(i)(upplotRange)) ) {
-	    ymin = min(upfieldstrength.column(i)(upplotRange));
+          if ( ymin > min(upYvalues.column(i)(upplotRange)) ) {
+	    ymin = min(upYvalues.column(i)(upplotRange));
 	  }
-          if ( ymax < max(upfieldstrength.column(i)(upplotRange)) ) {
-	    ymax = max(upfieldstrength.column(i)(upplotRange));
+          if ( ymax < max(upYvalues.column(i)(upplotRange)) ) {
+	    ymax = max(upYvalues.column(i)(upplotRange));
 	  }
         }
 
@@ -475,18 +583,25 @@ namespace CR { // Namespace CR -- begin
           plotfilename = filename + "-" + antennanumber.str() + ".ps";
 	  label = "Antenna " + antennanumber.str() + " (ID = " + antennaid.str() + ")";
 
-    	  std::cout <<"Plotting the fieldstrength of antenna " << (i+1) << " (ID = " << AntennaIDs(i) 
-			<< ") to file: " << plotfilename << std::endl;
+          if (rawData)
+	    std::cout <<"Plotting the raw data FX of antenna " << (i+1) << " (ID = " << AntennaIDs(i) 
+		      << ") to file: " << plotfilename << std::endl;
+          else
+	    std::cout <<"Plotting the fieldstrength of antenna " << (i+1) << " (ID = " << AntennaIDs(i) 
+		      << ") to file: " << plotfilename << std::endl;
 
           // Initialize the plot giving xmin, xmax, ymin and ymax
           plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
           // Add labels
-          plotter.AddLabels("Time [microseconds]", "fieldstrength [microV/m/MHz]",label);
+          if (rawData)
+            plotter.AddLabels("Time [microseconds]", "FX",label);
+          else
+            plotter.AddLabels("Time [microseconds]", "Fieldstrength [microV/m/MHz]",label);
 
           // Plot (upsampled) trace and original data points.
-          plotter.PlotLine(upxaxis(upplotRange),upfieldstrength.column(i)(upplotRange),color,1);
-          plotter.PlotSymbols(xaxis(plotRange),fieldstrength.column(i)(plotRange),empty, empty, color, 2, 5);
+          plotter.PlotLine(upxaxis(upplotRange),upYvalues.column(i)(upplotRange),color,1);
+          plotter.PlotSymbols(xaxis(plotRange),yValues.column(i)(plotRange),empty, empty, color, 2, 5);
 
           // Add filename to list of created plots
           plotlist.push_back(plotfilename);
@@ -500,21 +615,27 @@ namespace CR { // Namespace CR -- begin
         // add the ".ps" to the filename
         string plotfilename = filename + ".ps";
 
-    	std::cout <<"Plotting the fieldstrength of all antennas to file: "
-		  << plotfilename
-		  << std::endl;
+        if (rawData)
+    	  std::cout <<"Plotting the raw data FX of all antennas to file: "
+	            << plotfilename << std::endl;
+        else
+    	  std::cout <<"Plotting the fieldstrength of all antennas to file: "
+	            << plotfilename << std::endl;
 
         // Initialize the plot giving xmin, xmax, ymin and ymax
         plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
         // Add labels
-        plotter.AddLabels("Time [microseconds]", "fieldstrength [microV/m/MHz]","All selected Antennas");
+        if (rawData)
+          plotter.AddLabels("Time [microseconds]", "FX","All selected Antennas");
+        else
+          plotter.AddLabels("Time [microseconds]", "fieldstrength [microV/m/MHz]","All selected Antennas");
 
         // Create the plots looping through antennas
         for (int i = 0; i < antennaSelection.nelements(); i++)
         if (antennaSelection(i))			// consider only selected antennas
         {
           // Plot (upsampled) trace
-          plotter.PlotLine(upxaxis(upplotRange),upfieldstrength.column(i)(upplotRange),color,1);
+          plotter.PlotLine(upxaxis(upplotRange),upYvalues.column(i)(upplotRange),color,1);
 
           color++;					// another color for the next antenna
           if (color >= 13) color = 3;			// there are only 16 colors available, 
@@ -530,6 +651,80 @@ namespace CR { // Namespace CR -- begin
         std::cerr << "CompletePipeline:plotAllAntennas: " << x.getMesg() << std::endl;
       }; 
   }
+
+  
+  void CompletePipeline::calculateMaxima(DataReader *dr,
+					 Vector<Bool> antennaSelection,
+					 const int& upsampling_exp,
+					 const bool& rawData)
+  {
+    try 
+    {
+      Vector<Double> timeValues;		// time values
+      Vector<Double> timeRange;			// time values
+      Matrix<Double> yValues;			// y-values
+      Vector<Double> trace;			// trace currently processed
+
+      if (rawData)
+        std::cout << "\nLooking for maxima in the raw data FX: \n";
+      else
+        std::cout << "\nLooking for maxima in the calibrated fieldstrength: \n";
+  
+      // Get the antenna selection from the DataReader if no selction was chosen 	
+      if (antennaSelection.nelements() == 0) {
+	antennaSelection = GetAntennaMask(dr);
+      }
+
+ 
+      // Get the (upsampled) time axis
+      timeValues = getUpsampledTimeAxis(dr,upsampling_exp);
+
+      // Get the yValues of all selected antennas (raw data or fieldstrength)
+      if (rawData)
+        yValues = getUpsampledFX(dr,upsampling_exp, antennaSelection, true);  // true means: offset will be substracted
+      else
+        yValues = getUpsampledFieldstrength(dr,upsampling_exp, antennaSelection);
+
+      // check length of time axis and yValues traces for consistency
+      if (timeValues.size() != yValues.column(0).size())
+        std::cerr << "CompletePipeline:calculateMaxima: WARNING: Length of time axis differs from length of the antenna traces!\n"
+           << std::endl;
+
+
+      // Define the time range considered (the same as the plot range)
+      Slice range = calculatePlotRange(timeValues);
+
+      // cut time values
+      timeRange = timeValues(range);
+
+      // find the maximal y values for all selected antennas
+      for (int i = 0; i < antennaSelection.nelements(); i++) if (antennaSelection(i))
+      {
+        // Start with height 0 and search for heigher values
+        double maximum = 0;
+        int timevalue = 0;
+
+        // get current trace
+        trace = yValues.column(i)(range);
+
+        // loop through the values and search for the heighest one
+        for(int j = 0; j < timeRange.nelements(); j++)
+          if ( maximum <= abs(trace(j)) ) 
+          {
+            timevalue = j;
+            maximum = abs(trace(j));
+          } 
+
+        std::cout << "Antenna " << i+1 << ": \t maximum[micro] = " << maximum*1e6 
+                  << "\t at time[micro s] = " << timeRange(timevalue)*1e6 << "\n";
+      }
+
+    } catch (AipsError x) 
+      {
+        std::cerr << "CompletePipeline:caclulateMaxima: " << x.getMesg() << std::endl;
+      }; 
+  }
+
 
 
 } // Namespace CR -- end

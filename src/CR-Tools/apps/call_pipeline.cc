@@ -50,30 +50,31 @@ using CR::LopesEventIn;
   be external, human readable files.
 
   <h3>Prerequisites</h3>
-
-  You need at least one event list file of the following format:
-
-
-  Example event list
-
-  filename(event) azimuth[°] zenith[°] distance(radius of curvature)[m] core_x[m] core_y[m]
-  =========================================================================================
-  /home/schroeder/data/lopesstar/first.event 354.55215 63.882182 2750 8.6060886 -368.0933
-  /home/schroeder/data/lopesstar/second.event 354.55215 63.882182 2750 8.6060886 -368.0933
-  /home/schroeder/data/lopesstar/third.event 354.55215 63.882182 2750 8.6060886 -368.0933
-
-
-  If you don't want to process the events in the default manner
-  you can also provide a config file of the following format:
-
-
+  <br>
+  You need at least one event list file of the following format:<br>
+  <br>
+  <br>
+  Example event list<br>
+  <br>
+  filename(event) azimuth[°] zenith[°] distance(radius of curvature)[m] core_x[m] core_y[m]<br>
+  =========================================================================================<br>
+  /home/schroeder/data/lopesstar/first.event 354.55215 63.882182 2750 8.6060886 -368.0933<br>
+  /home/schroeder/data/lopesstar/second.event 354.55215 63.882182 2750 8.6060886 -368.0933<br>
+  /home/schroeder/data/lopesstar/third.event 354.55215 63.882182 2750 8.6060886 -368.0933<br>
+  <br>
+  <br>
+  If you don't want to process the events in the default manner<br>
+  you can also provide a config file of the following format:<br>
+  <br>
+  <br>
   example configuration file<br>
-<br>
+  <br>
   =================================================================<br>  
   caltablepath = /home/horneff/lopescasa/data/LOPES/LOPES-CalTable<br>
   RotatePos = true<br>
   GeneratePlots = true<br>
   SinglePlots = true<br>
+  PlotRawData = false<br>
   verbose = true<br>
   simplexFit = true<br>
   doTVcal = default<br>
@@ -84,19 +85,20 @@ using CR::LopesEventIn;
   flagged = 10101<br>
   flagged = 10102<br>
   <br>
-  This example means:
-  the caltables are in /home/horneff/lopescasa/data/LOPES/LOPES-CalTable,
-  the given positions are in the Kascade coordinate system and must be rotated to the LOPES system,
-  there will be generated plots of the analaysed event,
-  produces a plot for each antenna,
-  there will be more text output during the analysis,
-  the simplex fit of the arrival direction and radius of curvature is done,
-  the TV calibration will be done by default,
-  the plots start at -2.05 micro seconds and end at -1.60 micro seconds,
-  the upsampling of the calibrated antenna fieldstrengthes will be done by a factor of 2^1 = 2,
-  there will by a summary postscript of all created plots,
-  the antennas 10101 and 10102 are not considered in the analysis.
-  
+  This example means:<br>
+  the caltables are in /home/horneff/lopescasa/data/LOPES/LOPES-CalTable,<br>
+  the given positions are in the Kascade coordinate system and must be rotated to the LOPES system,<br>
+  there will be generated plots of the analaysed event,<br>
+  produces a plot for each antenna,<br>
+  the raw ADC values (FX) are not plotted,<br>
+  there will be more text output during the analysis,<br>
+  the simplex fit of the arrival direction and radius of curvature is done,<br>
+  the TV calibration will be done by default,<br>
+  the plots start at -2.05 micro seconds and end at -1.60 micro seconds,<br>
+  the upsampling of the calibrated antenna fieldstrengthes will be done by a factor of 2^1 = 2,<br>
+  there will by a summary postscript of all created plots,<br>
+  the antennas 10101 and 10102 are not considered in the analysis.<br>
+  <br>
 
   <h3>Example</h3>
 
@@ -142,6 +144,7 @@ int main (int argc, char *argv[])
     // Set default configuration values for the pipeline
     bool generatePlots = true;		// the plot prefix will be the name of the event file
     bool singlePlots = false;		// by default there are no single plots for each antenna
+    bool PlotRawData = false;		// by default there the raw data are not plotted
     bool RotatePos = true; 		// should be true if coordinates are given in KASKADE frame
     bool verbose = true;
     bool simplexFit = true;
@@ -192,6 +195,7 @@ int main (int argc, char *argv[])
         std::cerr << "RotatePos = true\n";
         std::cerr << "GeneratePlots = true\n";
         std::cerr << "SinglePlots = true\n";
+        std::cerr << "PlotRawData = false\n";
         std::cerr << "verbose = true\n";
         std::cerr << "simplexFit = true\n";
         std::cerr << "doTVcal = default\n";
@@ -259,6 +263,26 @@ int main (int argc, char *argv[])
           {
             std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
             std::cerr << "SinglePlots must be either 'true' or 'false'.\n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+        }	
+
+        if ( (keyword.compare("plotrawdata")==0) || (keyword.compare("PlotRawData")==0) ||
+             (keyword.compare("plotRawdata")==0) || (keyword.compare("plotRawData")==0) )
+        {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
+	  {
+	    PlotRawData = true;
+	    std::cout << "PlotRawData set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
+	  {
+	    PlotRawData = false;
+	    std::cout << "PlotRawData set to 'false'.\n";
+          } else
+          {
+            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "PlotRawData must be either 'true' or 'false'.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
         }	
@@ -688,8 +712,9 @@ int main (int argc, char *argv[])
       eventPipeline.setUpsamplingExponent(upsamplingExponent);
 
       // call the pipeline with an extra delay = 0.
-      results = eventPipeline.ProcessEvent(filename, azimuth, zenith, distance, core_x, core_y, RotatePos, 
-		plotprefix, generatePlots, (Vector<int>)flagged, verbose, simplexFit, 0., doTVcal, singlePlots); 
+      results = eventPipeline.ProcessEvent(filename, azimuth, zenith, distance, core_x, core_y, RotatePos,
+                                           plotprefix, generatePlots, static_cast< Vector<int> >(flagged), verbose, 
+                                           simplexFit, 0., doTVcal, singlePlots, PlotRawData); 
 
       // make a postscript with a summary of all plots
       // if summaryColumns = 0 the method does not create a summary.

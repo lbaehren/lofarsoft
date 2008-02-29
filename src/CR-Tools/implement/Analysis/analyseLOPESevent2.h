@@ -186,10 +186,11 @@ class analyseLOPESevent2 : public analyseLOPESevent{
       \param doTVcal - perform the phase calibration on the TV transmitter
              (1: yes, 0: no, -1: use default)
       \param SinglePlots - makes a plot for each antenna
+      \param PlotRawData - Plots the raw data FX
 
       \return Record with the results.
     */
-    Record ProcessEvent(String evname,
+    Record ProcessEvent(const string& evname,
 			Double Az,
 			Double El,
 			Double distance,
@@ -203,7 +204,8 @@ class analyseLOPESevent2 : public analyseLOPESevent{
 			Bool simplexFit=False,
 			Double ExtraDelay=0.,
 			int doTVcal=-1,
-                        bool SinglePlots=false);
+			bool SinglePlots=false,
+			bool PlotRawData=false);
 
     /*!
       \brief Creates a summary postscript of all created plots (uses LaTeX)
@@ -219,21 +221,10 @@ class analyseLOPESevent2 : public analyseLOPESevent{
     //! the new pipeline object (like CRinvFFT + upsampling)
     CompletePipeline *pipeline_p;
     
-    
   private:
    
     // upsampling will be done by a factor of 2^upsamplingExponent
     unsigned int upsamplingExponent;
-    
-    /*!
-      \brief Unconditional copying
-    */
-    void copy (analyseLOPESevent2 const &other);
-    
-    /*!
-      \brief Unconditional deletion 
-    */
-    void destroy(void);
     
   };
   
