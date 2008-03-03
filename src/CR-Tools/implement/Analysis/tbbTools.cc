@@ -23,6 +23,8 @@
 
 #include <Analysis/tbbTools.h>
 
+#define PI 3.1415926536
+
 namespace CR { // Namespace CR -- begin
   
   // ============================================================================
@@ -158,5 +160,58 @@ namespace CR { // Namespace CR -- begin
 			   index, sum, width, peak, tmpvec, tmpvec);
   };
 
+
+  Vector<Double> tbbTools::FPGAfilter(Vector<Double> &inary, int B0B2, int B1A1, int A2, Double resolution){
+    Vector<Double> outdata;
+    try {
+      int len=inary.nelements();
+      int i;
+      
+      if (len < 10) {
+	cerr << "tbbTools::FPGAfilter: " << "input array too small (len<10)!";
+	return inary;
+      };
+
+      outdata.resize(len,0.);
+      for (i=2; i<len; i++){
+	outdata(i) = floor((inary(i)*B0B2 + inary(i-1)*B1A1 + inary(i-2)*B0B2 
+			    - outdata(i-1)*B1A1 - outdata(i-2)*A2)/resolution);
+      };
+      
+    } catch (AipsError x) {
+      cerr << "tbbTools::FPGAfilter: " << x.getMesg() << endl;
+      return Vector<Double>();
+    }; 
+    return outdata;
+  }
+
+  Vector<Double> tbbTools::FPGAfilter(Vector<Double> &inary, Double Fc, Double BW, Double SR, Double resolution){
+    Double B0B2,B1A1,A0,A2;
+    try {
+      Double Q, w0, alpha;
+
+      Q = Fc/(2.*PI*BW);
+      w0 = 2*PI*Fc/SR;
+      alpha = sin(w0)/(2*Q);
+      
+      B0B2 = 1;
+      B1A1 = -2.*cos(w0);
+      A0 = 1+alpha;
+      A2 = 1-alpha;
+
+      B0B2 = B0B2/A0*resolution;
+      B1A1 = B1A1/A0*resolution;
+      A2 = A2/A0*resolution;
+      
+      cout <<  "tbbTools::FPGAfilter: " << "Set parameters: B0B2: " << (int)B0B2 
+	   << " B1A1: " << (int)B1A1 << " A2: " << (int)A2 << endl;
+ 
+    } catch (AipsError x) {
+      cerr << "tbbTools::FPGAfilter: " << x.getMesg() << endl;
+      return Vector<Double>();
+    }; 
+    return FPGAfilter(inary, (int)B0B2, (int)B1A1, (int)A2, resolution);
+  }
+  
 
 } // Namespace CR -- end

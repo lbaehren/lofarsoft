@@ -117,6 +117,32 @@ namespace CR { // Namespace CR -- begin
 			 Vector<Int> &index, Vector<Int> &sum, Vector<Int> &width, 
 			 Vector<Int> &peak);
     
+    /*!
+      \brief Apply a single notch-filter to the data
+      
+      \param inary[in]      - input data that is to be filtered
+      \param B0B2[in]       - Input parameters B0 and B2 for the filter
+      \param B1A1[in]       - Input parameters B1 and A1 for the filter
+      \param A2[in]         - Input parameter B2 for the filter
+      \param resolution[in] - "integer resolution" of the parameters
+      
+      \return the filtered data
+    */
+    Vector<Double> FPGAfilter(Vector<Double> &inary, int B0B2, int B1A1, int A2, Double resolution=1024.);
+ 
+    /*!
+      \brief Apply a single notch-filter to the data
+      
+      \param inary[in]      - input data that is to be filtered
+      \param FC[in]         - Center frequency of the filter
+      \param BW[in]         - Bandwidth of the filter
+      \param SR[in]         - Sample frequency on the input data
+      \param resolution[in] - "integer resolution" of the parameters
+            
+      \return the filtered data
+    */
+    Vector<Double> FPGAfilter(Vector<Double> &inary, Double Fc, Double BW, Double SR, Double resolution=1024.);
+
   private:
         
     /*!

@@ -287,10 +287,12 @@ Bool SimTBBTrigger(GlishSysEvent &event, void *){
   };
   try {
     tbbTools tbbtool;
-    Int maxsize = (5000000); // 5 000 000 
+    Int i,maxsize = (5000000); // 5 000 000 
     Vector<String> files;
     Int level=8, start=5, stop=2, window=4096, afterwindow=0;
-    Bool doRFImitigation=False;
+    Bool doRFImitigation=False, doFiltering=False,returnFiltered=False;
+    Vector<Double> Fc,BW;
+    Double resolution=1024.;
     if (event.val().type() != GlishValue::RECORD) {
       cerr << "SimpleDynspecClient:SimTBBTrigger: Need record with: files (level, start, stop, window, maxsize, RFImitigation, afterwindow)!" 
 	   << endl;
@@ -327,6 +329,21 @@ Bool SimTBBTrigger(GlishSysEvent &event, void *){
     };
     if (input.isDefined("RFImitigation")){
       doRFImitigation = input.asBool("RFImitigation");
+    };
+    if (input.isDefined("doFiltering")){
+      doFiltering = input.asBool("doFiltering");
+      if (input.isDefined("FC")){
+	Fc = input.toArrayDouble("FC");
+      };
+      if (input.isDefined("BW")){
+	BW = input.toArrayDouble("BW");
+      };
+      if (input.isDefined("resolution")){
+	resolution = input.asDouble("resolution");
+      };
+      if (input.isDefined("returnFiltered")){
+	returnFiltered = input.asBool("returnFiltered");
+      };
     };
     
     Int fnum,numFiles=files.nelements();
@@ -366,6 +383,25 @@ Bool SimTBBTrigger(GlishSysEvent &event, void *){
 					  FFTEnums::REALTOCOMPLEX);
 	data.resize(0);
 	server.fft(data,fdata.column(0));
+      } else if (doFiltering){
+	int numFilters;
+	data = tbbIn.fx().column(0);
+	numFilters = Fc.nelements();
+	if ((numFilters<1)||(numFilters != (int)BW.nelements())) {
+	  cerr << "SimpleDynspecClient:SimTBBTrigger: "  << "\"doFiltering\" with inconsistend parameters!" 
+	       << endl;
+	  if ((numFilters<1))
+	    cerr << "                                   "  << "empty \"Fc\" paramter-vector." << endl;
+	  if (numFilters != (int)BW.nelements())
+	    cerr << "                                   "  << "different length of parameters" << endl;
+	} else {
+	  for (i=0; i<numFilters; i++){
+	    data = tbbtool.FPGAfilter(data, Fc(i), BW(i), 200., resolution); //Hardcode sample-rate of 200MHz (Fc and BW in MHZ!)
+	  };
+	  if (returnFiltered) {
+	    output.define("FilteredData",data);
+	  };
+	};	
       } else {
 	data = tbbIn.fx().column(0);
       };
