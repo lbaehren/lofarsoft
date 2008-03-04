@@ -214,7 +214,7 @@ namespace CR { // Namespace CR -- begin
   }
 
   Vector<Double> tbbTools::FPGAfilterLPF(Vector<Double> &inary, Double F0, Double BW, Double SR, Double resolution){
-    Double B0B2,B1A1,B1,A1,A0,A2;
+    Double B0B2,B1,A1,A0,A2;
     try {
       Double Q, w0, alpha;
 
@@ -229,7 +229,8 @@ namespace CR { // Namespace CR -- begin
       A2 = 1-alpha;
 
       B0B2 = B0B2/A0*resolution;
-      B1A1 = B1A1/A0*resolution;
+      B1 = B1/A0*resolution;
+      A1 = A1/A0*resolution;
       A2 = A2/A0*resolution;
       
       cout <<  "tbbTools::FPGAfilterLPF: " << "Set parameters: B0B2: " << (int)B0B2 
@@ -243,7 +244,7 @@ namespace CR { // Namespace CR -- begin
   }
 
   Vector<Double> tbbTools::FPGAfilterHPF(Vector<Double> &inary, Double F0, Double BW, Double SR, Double resolution){
-    Double B0B2,B1A1,B1,A1,A0,A2;
+    Double B0B2,B1,A1,A0,A2;
     try {
       Double Q, w0, alpha;
 
@@ -258,7 +259,8 @@ namespace CR { // Namespace CR -- begin
       A2 = 1-alpha;
 
       B0B2 = B0B2/A0*resolution;
-      B1A1 = B1A1/A0*resolution;
+      B1 = B1/A0*resolution;
+      A1 = A1/A0*resolution;
       A2 = A2/A0*resolution;
       
       cout <<  "tbbTools::FPGAfilterHPF: " << "Set parameters: B0B2: " << (int)B0B2 

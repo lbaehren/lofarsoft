@@ -292,6 +292,7 @@ Bool SimTBBTrigger(GlishSysEvent &event, void *){
     Int level=8, start=5, stop=2, window=4096, afterwindow=0;
     Bool doRFImitigation=False, doFiltering=False,returnFiltered=False;
     Vector<Double> Fc,BW;
+    Vector<Int> FilterTypes;
     Double resolution=1024.;
     if (event.val().type() != GlishValue::RECORD) {
       cerr << "SimpleDynspecClient:SimTBBTrigger: Need record with: files (level, start, stop, window, maxsize, RFImitigation, afterwindow)!" 
@@ -340,6 +341,9 @@ Bool SimTBBTrigger(GlishSysEvent &event, void *){
       };
       if (input.isDefined("resolution")){
 	resolution = input.asDouble("resolution");
+      };
+      if (input.isDefined("FilterTypes")){
+	FilterTypes = input.toArrayInt("FilterTypes");
       };
       if (input.isDefined("returnFiltered")){
 	returnFiltered = input.asBool("returnFiltered");
@@ -396,7 +400,18 @@ Bool SimTBBTrigger(GlishSysEvent &event, void *){
 	    cerr << "                                   "  << "different length of parameters" << endl;
 	} else {
 	  for (i=0; i<numFilters; i++){
-	    data = tbbtool.FPGAfilter(data, Fc(i), BW(i), 200., resolution); //Hardcode sample-rate of 200MHz (Fc and BW in MHZ!)
+	    if ((FilterTypes.nelements()<uInt(i+1))||(FilterTypes(i) == 1)){
+	      data = tbbtool.FPGAfilterNotch(data, Fc(i), BW(i), 200., resolution); //Hardcode sample-rate of 200MHz (Fc and BW in MHZ!)
+	    } else if (FilterTypes(i) == 2) {
+	      data = tbbtool.FPGAfilterLPF(data, Fc(i), BW(i), 200., resolution);
+	    } else if (FilterTypes(i) == 3){
+	      data = tbbtool.FPGAfilterHPF(data, Fc(i), BW(i), 200., resolution);
+	    } else {
+	      cout << "SimpleDynspecClient:SimTBBTrigger: " << 
+		"Unknown FilterTypes value:" << FilterTypes(i) << endl;
+	      cout << "                                   " << 
+		" 1: Notch ; 2: LPF ; 3: HPF; " << endl;
+	    };
 	  };
 	  if (returnFiltered) {
 	    output.define("FilteredData",data);
