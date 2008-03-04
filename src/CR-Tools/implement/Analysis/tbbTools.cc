@@ -214,7 +214,7 @@ namespace CR { // Namespace CR -- begin
   }
 
   Vector<Double> tbbTools::FPGAfilterLPF(Vector<Double> &inary, Double F0, Double BW, Double SR, Double resolution){
-    Double B0B2,B1,A1,A0,A2;
+    Double B0B2,B1A1,B1,A1,A0,A2;
     try {
       Double Q, w0, alpha;
 
@@ -243,7 +243,7 @@ namespace CR { // Namespace CR -- begin
   }
 
   Vector<Double> tbbTools::FPGAfilterHPF(Vector<Double> &inary, Double F0, Double BW, Double SR, Double resolution){
-    Double B0B2,B1,A1,A0,A2;
+    Double B0B2,B1A1,B1,A1,A0,A2;
     try {
       Double Q, w0, alpha;
 
