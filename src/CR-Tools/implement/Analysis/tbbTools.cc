@@ -161,7 +161,7 @@ namespace CR { // Namespace CR -- begin
   };
 
 
-  Vector<Double> tbbTools::FPGAfilter(Vector<Double> &inary, int B0B2, int B1A1, int A2, Double resolution){
+  Vector<Double> tbbTools::FPGAfilter(Vector<Double> &inary, int B0B2, int B1, int A1, int A2, Double resolution){
     Vector<Double> outdata;
     try {
       int len=inary.nelements();
@@ -174,8 +174,8 @@ namespace CR { // Namespace CR -- begin
 
       outdata.resize(len,0.);
       for (i=2; i<len; i++){
-	outdata(i) = floor((inary(i)*B0B2 + inary(i-1)*B1A1 + inary(i-2)*B0B2 
-			    - outdata(i-1)*B1A1 - outdata(i-2)*A2)/resolution);
+	outdata(i) = floor((inary(i)*B0B2 + inary(i-1)*B1 + inary(i-2)*B0B2 
+			    - outdata(i-1)*A1 - outdata(i-2)*A2)/resolution);
       };
       
     } catch (AipsError x) {
@@ -185,13 +185,13 @@ namespace CR { // Namespace CR -- begin
     return outdata;
   }
 
-  Vector<Double> tbbTools::FPGAfilter(Vector<Double> &inary, Double Fc, Double BW, Double SR, Double resolution){
+  Vector<Double> tbbTools::FPGAfilterNotch(Vector<Double> &inary, Double F0, Double BW, Double SR, Double resolution){
     Double B0B2,B1A1,A0,A2;
     try {
       Double Q, w0, alpha;
 
-      Q = Fc/(2.*PI*BW);
-      w0 = 2*PI*Fc/SR;
+      Q = F0/(2.*PI*BW);
+      w0 = 2*PI*F0/SR;
       alpha = sin(w0)/(2*Q);
       
       B0B2 = 1;
@@ -203,14 +203,72 @@ namespace CR { // Namespace CR -- begin
       B1A1 = B1A1/A0*resolution;
       A2 = A2/A0*resolution;
       
-      cout <<  "tbbTools::FPGAfilter: " << "Set parameters: B0B2: " << (int)B0B2 
+      cout <<  "tbbTools::FPGAfilterNotch: " << "Set parameters: B0B2: " << (int)B0B2 
 	   << " B1A1: " << (int)B1A1 << " A2: " << (int)A2 << endl;
  
     } catch (AipsError x) {
-      cerr << "tbbTools::FPGAfilter: " << x.getMesg() << endl;
+      cerr << "tbbTools::FPGAfilterNotch: " << x.getMesg() << endl;
       return Vector<Double>();
     }; 
-    return FPGAfilter(inary, (int)B0B2, (int)B1A1, (int)A2, resolution);
+    return FPGAfilter(inary, (int)B0B2, (int)B1A1, (int)B1A1, (int)A2, resolution);
+  }
+
+  Vector<Double> tbbTools::FPGAfilterLPF(Vector<Double> &inary, Double F0, Double BW, Double SR, Double resolution){
+    Double B0B2,B1,A1,A0,A2;
+    try {
+      Double Q, w0, alpha;
+
+      Q = F0/(2.*PI*BW);
+      w0 = 2*PI*F0/SR;
+      alpha = sin(w0)/(2*Q);
+      
+      B0B2 = (1-cos(w0))/2.;
+      B1 = 1-cos(w0);
+      A1 = -2.*cos(w0);
+      A0 = 1+alpha;
+      A2 = 1-alpha;
+
+      B0B2 = B0B2/A0*resolution;
+      B1A1 = B1A1/A0*resolution;
+      A2 = A2/A0*resolution;
+      
+      cout <<  "tbbTools::FPGAfilterLPF: " << "Set parameters: B0B2: " << (int)B0B2 
+	   << " B1: " << (int)B1 << " A1: " << (int)A1 << " A2: " << (int)A2 << endl;
+ 
+    } catch (AipsError x) {
+      cerr << "tbbTools::FPGAfilterLPF: " << x.getMesg() << endl;
+      return Vector<Double>();
+    }; 
+    return FPGAfilter(inary, (int)B0B2, (int)B1, (int)A1, (int)A2, resolution);
+  }
+
+  Vector<Double> tbbTools::FPGAfilterHPF(Vector<Double> &inary, Double F0, Double BW, Double SR, Double resolution){
+    Double B0B2,B1,A1,A0,A2;
+    try {
+      Double Q, w0, alpha;
+
+      Q = F0/(2.*PI*BW);
+      w0 = 2*PI*F0/SR;
+      alpha = sin(w0)/(2*Q);
+      
+      B0B2 = (1+cos(w0))/2.;
+      B1 = -(1+cos(w0));
+      A1 = -2.*cos(w0);
+      A0 = 1+alpha;
+      A2 = 1-alpha;
+
+      B0B2 = B0B2/A0*resolution;
+      B1A1 = B1A1/A0*resolution;
+      A2 = A2/A0*resolution;
+      
+      cout <<  "tbbTools::FPGAfilterHPF: " << "Set parameters: B0B2: " << (int)B0B2 
+	   << " B1: " << (int)B1 << " A1: " << (int)A1 << " A2: " << (int)A2 << endl;
+ 
+    } catch (AipsError x) {
+      cerr << "tbbTools::FPGAfilterHPF: " << x.getMesg() << endl;
+      return Vector<Double>();
+    }; 
+    return FPGAfilter(inary, (int)B0B2, (int)B1, (int)A1, (int)A2, resolution);
   }
   
 
