@@ -28,7 +28,7 @@ using LOFAR::LOFAR_Image;  // Namespace usage
 /*!
   \file tLOFAR_Image.cc
 
-  \ingroup Data
+  \ingroup CR_Data
 
   \brief A collection of test routines for the LOFAR_Image class
  

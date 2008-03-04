@@ -2,8 +2,8 @@
  | $Id:: NewClass.h 1159 2007-12-21 15:40:14Z baehren                    $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2008                                                  *
- *   Lars Baehren (<mail>)                                                     *
+ *   Copyright (C) 2008                                                    *
+ *   Lars B"ahren (lbaehren@gmail.com)                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -33,11 +33,11 @@ namespace LOFAR { // Namespace LOFAR -- begin
   /*!
     \class LOFAR_Image
     
-    \ingroup LOFAR_Data
+    \ingroup CR_Data
     
     \brief Brief description for class LOFAR_Image
     
-    \author Lars Baehren
+    \author Lars B&auml;hren
 
     \date 2008/01/15
 
@@ -55,6 +55,8 @@ namespace LOFAR { // Namespace LOFAR -- begin
     
   */  
   class LOFAR_Image {
+
+    std::string filename_p;
     
   public:
     
@@ -64,6 +66,13 @@ namespace LOFAR { // Namespace LOFAR -- begin
       \brief Default constructor
     */
     LOFAR_Image ();
+    
+    /*!
+      \brief Argumented constructor
+
+      \param filename -- Name of the file into which the image is stored.
+    */
+    LOFAR_Image (std::string const &filename);
     
     /*!
       \brief Copy constructor

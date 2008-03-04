@@ -10,7 +10,6 @@ set (tests
   tDataFlag
   tITS_Beam
   tITSMetadata
-  tLOFAR_Attributes
   tLopesEvent
   tLopesEventIn
   tNDABeam
@@ -41,11 +40,15 @@ if (DAL_LIBRARIES AND HDF5_LIBRARIES)
     ${CR_SOURCE_DIR}/../../data
     )
   
-  foreach (src tHDF5Common tLOFAR_StationGroup tLOFAR_DipoleDataset tLOFAR_TBB) 
+  foreach (src tLOFAR_StationGroup tLOFAR_DipoleDataset tLOFAR_Timeseries) 
     ## compiler instructions
     add_executable (${src} ${src}.cc)
     ## linker instructions
-    target_link_libraries (${src} cr ${DAL_LIBRARIES} ${HDF5_LIBRARIES})
+    target_link_libraries (${src}
+      cr
+      ${DAL_LIBRARIES}
+      ${HDF5_LIBRARIES}
+      )
     ## testing
     if (tbb_dataset)
       add_test (${src} ${src} ${tbb_dataset})

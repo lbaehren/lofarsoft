@@ -3,7 +3,7 @@
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
- *   Lars Baehren (<mail>)                                                 *
+ *   Lars B"ahren (lbaehren@gmail.com)                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -34,12 +34,12 @@
 // Namespace usage
 using std::cout;
 using std::endl;
-using LOFAR::LOFAR_StationGroup;
+using DAL::LOFAR_StationGroup;
 
 /*!
   \file tLOFAR_StationGroup.cc
 
-  \ingroup Data
+  \ingroup CR_Data
 
   \brief A collection of test routines for the LOFAR_StationGroup class
  
@@ -51,7 +51,7 @@ using LOFAR::LOFAR_StationGroup;
   
   To run the test program use:
   \verbatim
-  tLOFAR_TBB <filename>
+  tLOFAR_StationGroup <filename>
   \endverbatim
   where the <i>filename</i> points to an existing HDF5 time-series dataset.
 */
@@ -59,47 +59,270 @@ using LOFAR::LOFAR_StationGroup;
 // -----------------------------------------------------------------------------
 
 /*!
-  \brief Test constructors for a new LOFAR_StationGroup object
+  \brief Test localization and handling of datasets inside the group
 
   \param filename -- Data file used for testing
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_LOFAR_StationGroup (std::string const &filename)
+int test_datasets (std::string const &filename)
 {
-  cout << "\n[test_LOFAR_StationGroup]\n" << endl;
+  cout << "\n[test_construction]\n" << endl;
 
   int nofFailedTests (0);
-  
-  // DAL Dataset object to handle the basic I/O
-  dalDataset dataset;
-  
-  if (dataset.open(CR::string2char(filename))) {
-    std::cerr << "Error opening datafile." << endl;
+  herr_t h5error (0);
+  hid_t fileID (0);
+  hid_t groupID (0);
+
+  try {
+    cout << "-- opening HDF5 file ..." << endl;
+    fileID = H5Fopen (filename.c_str(),
+		      H5F_ACC_RDONLY,
+		      H5P_DEFAULT);
+  } catch (std::string message) {
+    std::cerr << message << endl;
     nofFailedTests++;
-  } else {
-    
-    cout << "[1] Testing default constructor ..." << endl;
-    try {
-      LOFAR_StationGroup group;
-      //
-      group.summary(); 
-    } catch (std::string message) {
-      std::cerr << message << endl;
-      nofFailedTests++;
-    }
-    
-    cout << "[2] Testing argumented constructor ..." << endl;
-    try {
-      LOFAR_StationGroup group (dataset,"Station001");
-      //
-      group.summary(); 
-    } catch (std::string message) {
-      std::cerr << message << endl;
-      nofFailedTests++;
-    }
-    
   }
+  
+  if (fileID > 0) {
+    
+    cout << "-- opening HDF5 group ..." << endl;
+    groupID = H5Gopen (fileID,
+		       "Station001");
+    
+    if (groupID > 0) {
+      hsize_t nofObjects;
+      // feedback
+      cout << "--> successfully opened HDF5 group" << endl;
+      // Number of objects in the group specified by its identifier
+      h5error = H5Gget_num_objs(groupID,
+				&nofObjects);
+      cout << "--> " << nofObjects << " objects found in group." << endl;
+      // go through the list of objects and extract the datasets
+      for (hsize_t n(0); n<nofObjects; n++) {
+	if (H5G_DATASET == H5Gget_objtype_by_idx (groupID,n)) {
+	  cout << "\tObject " << n << " is a dataset" << endl;
+	}
+      }
+      // close HDF5 group
+      h5error = H5Gclose (groupID);
+    } else {
+      std::cerr << "--> Unable to perform test; invalid group ID!" << endl;
+    }
+    
+    // close file
+    h5error = H5Fclose (fileID);
+    
+  } else {
+    std::cerr << "--> Unable to perform test; invalid file ID!" << endl;
+  }
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Test constructors for a new LOFAR_StationGroup object
+
+  This function should provide tests for all the available constructors to a 
+  new DAL::LOFAR_StationGroup object:
+  \code
+    LOFAR_StationGroup ();
+
+    LOFAR_StationGroup (std::string const &filename,
+			std::string const &group);
+
+    LOFAR_StationGroup (hid_t const &location,
+			std::string const &group);
+
+    LOFAR_StationGroup (hid_t const &group_id);
+
+    LOFAR_StationGroup (LOFAR_StationGroup const &other);
+  \endcode
+  
+  \param filename -- Data file used for testing
+
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_construction (std::string const &filename)
+{
+  cout << "\n[test_construction]\n" << endl;
+
+  int nofFailedTests (0);
+  herr_t h5error (0);
+  
+  // open the HDF5 for further access
+  hid_t file_id = H5Fopen (filename.c_str(),
+			   H5F_ACC_RDONLY,
+			   H5P_DEFAULT);
+
+  /*
+   * TEST: Default constructor
+   */
+  
+  cout << "[1] Testing default constructor ..." << endl;
+  try {
+    LOFAR_StationGroup group;
+    //
+    group.summary(); 
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  h5error = H5Eclear();
+
+  /*
+   * TEST: Argumented constructor using filename and name of the group as
+   *       input parameters.
+   */
+  
+  cout << "[2] Testing argumented constructor ..." << endl;
+  try {
+    LOFAR_StationGroup group (filename,
+			      "Station001");
+    //
+    group.summary(); 
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  h5error = H5Eclear();
+  
+  /*
+   * TEST: Argumented constructor using file identifier (as obtained from 
+   *       previous call to HDF5 library) and group name as input parameters.
+   */  
+  
+  cout << "[3] Testing argumented constructor ..." << endl;
+  try {    
+    if (file_id > 0) {
+      LOFAR_StationGroup group (file_id,
+				"Station001");
+      group.summary(); 
+    } else {
+      std::cerr << "--> Unable to perform test; invalid file ID!" << endl;
+    }
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  h5error = H5Eclear();
+
+  /*
+   * TEST: Argumented constructor using object identifier for the group as
+   *       input parameter.
+   */
+
+  cout << "[4] Testing argumented constructor ..." << endl;
+  try {
+    if (file_id > 0) {
+      // retrieve the group ID 
+      hid_t groupID = H5Gopen (file_id,
+			       "Station001");
+      // contiue if group successfully opened
+      if (groupID > 0) {
+	// feedback
+	cout << "--> Passed group ID = " << groupID << endl;
+	// create new object
+	LOFAR_StationGroup group (groupID);
+	group.summary(); 
+      } else {
+	std::cerr << "--> Unable to perform test; invalid group ID!" << endl;
+      }
+    } else {
+      std::cerr << "--> Unable to perform test; invalid file ID!" << endl;
+    }
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  h5error = H5Eclear();
+
+  /*
+   * TEST: 
+   */
+
+  cout << "[5] Testing copy constructor ..." << endl;
+  try {
+    cout << "--> creating original object ..." << endl;
+    LOFAR_StationGroup group (filename,
+			      "Station001");
+    group.summary();
+    //
+    cout << "--> creating new object as copy ..." << endl;
+    LOFAR_StationGroup groupCopy (group);
+    groupCopy.summary();
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+  h5error = H5Eclear();
+
+  // release file identifier
+  h5error = H5Fclose (file_id);
+  
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Test identification and access of groups a root level of the HDF5 file
+  
+  \param filename -- Data file used for testing
+  
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_groups (std::string const &filename)
+{
+  cout << "\n[test_groups]\n" << endl;
+
+  bool status        = true;
+  int nofFailedTests = 0;
+  hsize_t nofObjects = 0;
+  int objectType     = 0;
+  std::string name;
+  herr_t h5error     = 0;
+  
+  // open the HDF5 for further access
+  hid_t fileID = H5Fopen (filename.c_str(),
+			  H5F_ACC_RDONLY,
+			  H5P_DEFAULT);
+  
+  h5error = H5Gget_num_objs(fileID,
+			    &nofObjects);
+
+  std::cout << "-- File ID      = " << fileID     << std::endl;
+  std::cout << "-- nof. objects = " << nofObjects << std::endl;
+
+  for (hsize_t n(0); n<nofObjects; n++) {
+    // retrieve the object type
+    objectType = H5Gget_objtype_by_idx (fileID,
+					n);
+    // ... and report the finding
+    switch (objectType) {
+    case H5G_DATASET:
+      std::cout << "--> Object " << n << " is of type H5G_DATASET." << std::endl;
+      break;
+    case H5G_GROUP:
+      std::cout << "--> Object " << n << " is of type H5G_GROUP." << std::endl;
+      // get the name of the group
+      status = DAL::h5get_name (name,
+				fileID,
+				n);
+      if (status) {
+	std::cout << "--> Group name = " << name << std::endl;
+      }
+      break;
+    case H5G_LINK:
+      std::cout << "--> Object " << n << " is of type H5G_LINK." << std::endl;
+      break;
+    }
+  }
+  
+  // release the file ID
+  h5error = H5Fclose (fileID);
   
   return nofFailedTests;
 }
@@ -125,7 +348,7 @@ int test_methods (std::string const &filename)
   dataset.open(CR::string2char(filename));
   cout << "OK" << endl;
   // create LOFAR_StationGroup object to continue working with
-  LOFAR_StationGroup group (dataset,"Station001");
+  LOFAR_StationGroup group (filename,"Station001");
 
   cout << "[1] Convert individual ID numbers to channel ID" << endl;
   try {
@@ -175,21 +398,25 @@ int main (int argc,
     exit the program.
   */
   if (argc < 2) {
-    std::cerr << "[tLOFAR_TBB] Too few parameters!" << endl;
+    std::cerr << "[tLOFAR_StationGroup] Too few parameters!" << endl;
     std::cerr << "" << endl;
-    std::cerr << "  tLOFAR_TBB <filename>" << endl;
+    std::cerr << "  tLOFAR_StationGroup <filename>" << endl;
     std::cerr << "" << endl;
     return -1;
   }
 
   std::string filename = argv[1];
 
-  // Test for the constructor(s)
-  nofFailedTests += test_LOFAR_StationGroup (filename);
+  // Test localization and handling of datasets inside the group
+  nofFailedTests += test_datasets (filename);
 
+  // Test for the constructor(s)
+  nofFailedTests += test_construction (filename);
+  
   if (nofFailedTests == 0) {
-    nofFailedTests += test_methods (filename);
-  }
+    nofFailedTests += test_groups(filename);
+//     nofFailedTests += test_methods (filename);
+   }
 
   return nofFailedTests;
 }

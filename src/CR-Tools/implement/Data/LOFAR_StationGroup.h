@@ -3,7 +3,7 @@
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
- *   Lars B"ahren (bahren@astron.nl)                                       *
+ *   Lars B"ahren (lbaehren@gmail.com)                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -37,12 +37,13 @@
 
 #include <Data/LOFAR_DipoleDataset.h>
 
-namespace LOFAR { // Namespace LOFAR -- begin
+namespace DAL { // Namespace DAL -- begin
   
   /*!
     \class LOFAR_StationGroup
     
-    \ingroup LOFAR
+    \ingroup CR_Data
+    \ingroup DAL
     
     \brief Container for the data in the StationGroup of LOFAR times-series data
     
@@ -56,35 +57,43 @@ namespace LOFAR { // Namespace LOFAR -- begin
     
     <ul type="square">
       <li>Definition of the LOFAR time-series data format
-      <li>[CR] LOFAR_TBB -- Interface between Data Access Library (DAL) and
-      DataReader framework
-      <li>[DAL] dalDataset
-      <li>[DAL] dalGroup
+      <li>[DAL] DAL::LOFAR_Timeseries
+      <li>[DAL] DAL::LOFAR_DipoleDataset
+      <li>[CR] CR::LOFAR_TBB -- Interface between Data Access Library (DAL) and
+      CR::DataReader framework
     </ul>
     
     <h3>Synopsis</h3>
     
+    <ol>
+      <li>Structure of the HDF5 group inside the time-series data format:
+      \verbatim
+      /
+      |-- Station001                ... Group
+      |   |-- TELESCOPE             ... Attribute       ... string
+      |   |-- OBSERVER              ... Attribute       ... string
+      |   |-- PROJECT               ... Attribute       ... string
+      |   |-- OBSERVATION_ID        ... Attribute       ... string
+      |   |-- OBSERVATION_MODE      ... Attribute       ... string
+      |   |-- TRIGGER_TYPE          ... Attribute       ... string
+      |   |-- TRIGGER_OFFSET        ... Attribute       ... string
+      |   |-- TRIGGERED_ANTENNAS    ... Attribute       ... array<int,1>
+      |   |-- BEAM_DIRECTION        ... Attribute       ... array<double,2>
+      |   |-- 001000000             ... Dataset         ... array<uint,1>
+      |   |   `-- 
+      |   |-- 001000001             ... Dataset         ... array<uint,1>
+      |   |   `-- 
+      \endverbatim
+    </ol>
+
     <h3>Example(s)</h3>
     
   */
   class LOFAR_StationGroup {
 
-    /* Basic handlers for the HDF5 dataset */
-
-    //! HDF5 file handle ID
-    hid_t H5fileID_p;
     //! Identifier for this group within the HDF5 file
-    hid_t H5groupID_p;
-    //! Group object of the Data Access Library 
-    dalGroup *group_p;
-
-    /* Atrribute values */
-    
-    //! If detection was done inside a beam, what was its (local) direction
-    std::vector<double> beamDirection_p;
-
-    /* Substructure */
-
+    hid_t groupID_p;
+    //! Datasets contained within this group
     std::vector<LOFAR_DipoleDataset> datasets_p;
     
   public:
@@ -95,18 +104,36 @@ namespace LOFAR { // Namespace LOFAR -- begin
       \brief Default constructor
     */
     LOFAR_StationGroup ();
-
+    
     /*!
       \brief Argumented constructor
 
-      \param dataset -- Dataset containing the group to be encapsulated using
-             this class.
-      \param name    -- Name of the group within the dalDataset object to be
-             extracted.
+      \param filename -- Name of the HDF5 file within which the group is
+             contained.
+      \param group    -- Name of the group, in this case the full path from
+             the base of the hierarchical structure within the HDF5 file.
     */
-    LOFAR_StationGroup (dalDataset &dataset,
-			std::string const &name);
+    LOFAR_StationGroup (std::string const &filename,
+			std::string const &group);
+    
+    /*!
+      \brief Argumented constructor
 
+      \param location -- Identifier for the location within the HDF5 file, below
+             which the group is placed.
+      \param group    -- Name of the group.
+    */
+    LOFAR_StationGroup (hid_t const &location,
+			std::string const &group);
+    
+    /*!
+      \brief Argumented constructor
+
+      \param group_id -- Identifier for the group contained within the HDF5
+             file
+    */
+    LOFAR_StationGroup (hid_t const &group_id);
+    
     /*!
       \brief Copy constructor
       
@@ -127,54 +154,22 @@ namespace LOFAR { // Namespace LOFAR -- begin
     /*!
       \brief Overloading of the copy operator
       
-      \param other -- Another LOFAR_StationGroup object from which to make a copy.
+      \param other -- Another LOFAR_StationGroup object from which to make a
+             copy.
     */
     LOFAR_StationGroup& operator= (LOFAR_StationGroup const &other); 
     
     // --------------------------------------------------------------- Parameters
     
     /*!
-      \brief Get the HDF5 file handle ID
-      
-      \return H5fileID -- HDF5 file handle ID
-    */
-    inline hid_t file_id () const {
-      return H5fileID_p;
-    }
-    
-    /*!
       \brief Get the identifier for this group within the HDF5 file
       
-      \return H5groupID -- The identifier for this group within the HDF5 file
+      \return groupID -- The identifier for this group within the HDF5 file
     */
     inline hid_t group_id () const {
-      return H5groupID_p;
+      return groupID_p;
     }
 
-    /*!
-      \brief Get the name of the group encapsulated by this class
-
-      \return groupName -- The name of the group encapsulated by this class;
-              this is the same name as used to identify the group within the
-	      dalDataset object, which forms the next-higher entity of a data
-	      object within the DAL.
-    */
-    inline std::string groupName () const {
-      return group_p->getName();
-    }
-
-    /*!
-      \brief Get the file handle ID for the underlying HDF5 data file
-
-      \return H5fileID -- The file handle ID for the underlying HDF5 data file;
-              given this ID we can directly access the contents of the opened
-	      HDF5 file through the functionality of the HDF5 library, thereby
-	      bypassing the DAL layer.
-    */
-    inline hid_t fileID () const {
-      return H5fileID_p;
-    }
-    
     /*!
       \brief Get the name of the telescope
       
@@ -204,49 +199,55 @@ namespace LOFAR { // Namespace LOFAR -- begin
     /*!
       \brief Get the observation ID
 
-      \return observationID -- The observation ID; returns an empty string in
+      \return observation_id -- The observation ID; returns an empty string in
               case no keyword value could be extracted.
     */
-    std::string observationID ();
+    std::string observation_id ();
     
     /*!
       \brief Get the description of the observation mode
 
-      \return observationMode -- Description/type of observation mode
+      \return observation_mode -- Description/type of observation mode
     */
-    std::string observationMode ();
+    std::string observation_mode ();
     
     /*!
       \brief Get the trigger type which cause recording this data
 
-      \return triggerType -- The trigger type which cause recording this data
+      \return trigger_type -- The trigger type which cause recording this data
     */
-    std::string triggerType ();
+    std::string trigger_type ();
 
     /*!
       \brief Get the trigger offset
 
-      \return triggerOffset -- The trigger offset.
+      \return trigger_offset -- The trigger offset.
     */
-    double triggerOffset ();
+    double trigger_offset ();
 
     /*!
-      \brief Local direction of the beam if one was used for detection within
+      \brief Get the list of triggered antennas
 
-      \return beamDirection -- Local [Azimuth,Elevation] direction coordinates
-              of the beam, in case peak detection was performed in-beam.
+      \return triggered_antennas -- List of antennas, for which the trigger
+              condition was fullfilled.
     */
-    inline std::vector<double> beamDirection () const {
-      return beamDirection_p;
-    }
+#ifdef HAVE_CASA
+    casa::Vector<uint> triggered_antennas ();
+#else 
+    std::vector<uint> triggered_antennas ();
+#endif
 
     /*!
-      \brief Get the values of the TIME attribute for all present datasets
-      
-      \return times -- Values of the TIME attribute for all datasets present in
-              this station group
+      \brief Get the direction of the station beam
+
+      \return beam_direction -- The direction towards which a station beam is
+              formed before forwarding the data to central processing
     */
-    std::vector<uint> time ();
+#ifdef HAVE_CASA
+    casa::Vector<double> beam_direction ();
+#else 
+    std::vector<double> beam_direction ();
+#endif
 
     /*!
       \brief Get the name of the class
@@ -270,6 +271,28 @@ namespace LOFAR { // Namespace LOFAR -- begin
     void summary (std::ostream &os);    
 
     // ------------------------------------------------------------------ Methods
+
+    /*!
+      \brief Get the number of dipole datasets within this station group
+      
+      \return nofDipoleDatasets -- The number of dipole datasets contained with
+              this station group.
+    */
+    inline uint nofDipoleDatasets () {
+      return datasets_p.size();
+    }
+
+    /*!
+      \brief Get the values of the TIME attribute for all present datasets
+      
+      \return times -- Values of the TIME attribute for all datasets present in
+              this station group
+    */
+#ifdef HAVE_CASA
+    casa::Vector<uint> times ();
+#else
+    std::vector<uint> times ();
+#endif
 
     /*!
       \brief Retrieve the station IDs from the antenna datasets within this group
@@ -335,20 +358,6 @@ namespace LOFAR { // Namespace LOFAR -- begin
     std::vector<hid_t> datasetIDs ();
     
     /*!
-      \brief Extract the dalGroup object of a given name from a dalDataset
-    
-      \param dataset -- Dataset containing the group to be encapsulated using
-             this class.
-      \param name    -- Name of the group within the dalDataset object to be
-             extracted.
-
-      \return status -- Status of the operation; returns <tt>false</tt> if an 
-              error was encountered.
-     */
-    bool setStationGroup (dalDataset &dataset,
-			  std::string const &name);
-    
-    /*!
       \brief Get a casa::Record containing the values of the attributes
 
       \return record -- A casa::Record container holding the values of the 
@@ -359,18 +368,42 @@ namespace LOFAR { // Namespace LOFAR -- begin
   private:
 
     /*!
-      \brief Initialize the object's internal parameters
+      \brief Initialize the internal dataspace
     */
     void init ();
-
+    
     /*!
-      \brief Get the value of a given attribute
-    */
-    void getAttribute (std::string &value,
-		       std::string const &keyword);
+      \brief Initialize the internal dataspace
 
+      \param dataset_id -- Identifier for the group within the HDF5 file
+     */
+    void init (hid_t const &group_id);
+    
+    /*!
+      \brief Initialize the internal dataspace
+
+      \param filename -- HDF5 file within which the dataset in question is
+             contained
+      \param group    -- Name of the group which this object is to encapsulate.
+     */
+    void init (std::string const &filename,
+	       std::string const &group);
+    
+    /*!
+      \brief Initialize the internal dataspace
+
+      \param location -- Location below which the group is found within the
+             file.
+      \param group  -- Name of the group which this object is to encapsulate.
+     */
+    void init (hid_t const &location,
+	       std::string const &group);
+    
     /*!
       \brief Unconditional copying
+
+      \param other -- Another LOFAR_StationGroup object from which to create
+             this new one.
     */
     void copy (LOFAR_StationGroup const &other);
     
@@ -379,9 +412,24 @@ namespace LOFAR { // Namespace LOFAR -- begin
     */
     void destroy(void);
     
+    /*!
+      \brief Set up the list of dipole datasets contained within this group
+
+      Essentially there are two ways by which to construct the list of dipole
+      datasets contained within this station group:
+      <ol>
+        <li>Test if the possible names for the datasets belong to a valid 
+	object.
+      </ol>
+
+      \return status -- Status of the operation; returns <tt>false</tt> in case
+              an error was encountered.
+    */
+    bool setDipoleDatasets ();
+
   };
   
-} // Namespace LOFAR -- end
+} // Namespace DAL -- end
 
 #endif /* LOFAR_STATIONGROUP_H */
   

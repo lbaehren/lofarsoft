@@ -3,7 +3,7 @@
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
- *   Lars B"ahren (bahren@astron.nl)                                       *
+ *   Lars B"ahren (lbaehren@gmail.com)                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,10 +21,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Data/LOFAR_Attributes.h>
+#include <casa/Arrays/ArrayIO.h>
+#include <dal/Enumerations.h>
 #include <Data/LOFAR_StationGroup.h>
 
-namespace LOFAR { // Namespace LOFAR -- begin
+namespace DAL { // Namespace DAL -- begin
   
   // ============================================================================
   //
@@ -41,21 +42,39 @@ namespace LOFAR { // Namespace LOFAR -- begin
   
   // --------------------------------------------------------- LOFAR_StationGroup
   
-  LOFAR_StationGroup::LOFAR_StationGroup (dalDataset &dataset,
-					  std::string const &name)
+  LOFAR_StationGroup::LOFAR_StationGroup (std::string const &filename,
+					  std::string const &group)
   {
-    bool status (true);
+    init (filename,
+	  group);
+  }
+  
+  // --------------------------------------------------------- LOFAR_StationGroup
+  
+  LOFAR_StationGroup::LOFAR_StationGroup (hid_t const &location,
+					  std::string const &group)
+  {
+    // Initialize internal variables
+    groupID_p = 0;
     
-    init ();
+    init (location,
+	  group);
+  }
     
-    status = setStationGroup (dataset,
-			      name);
+  // --------------------------------------------------------- LOFAR_StationGroup
+  
+  LOFAR_StationGroup::LOFAR_StationGroup (hid_t const &group_id)
+  {
+    init (group_id);
   }
   
   // --------------------------------------------------------- LOFAR_StationGroup
   
   LOFAR_StationGroup::LOFAR_StationGroup (LOFAR_StationGroup const &other)
   {
+    // Initialize internal variables
+    groupID_p = 0;
+    
     copy (other);
   }
   
@@ -71,7 +90,11 @@ namespace LOFAR { // Namespace LOFAR -- begin
   }
   
   void LOFAR_StationGroup::destroy ()
-  {;}
+  {
+    if (groupID_p > 0) {
+      herr_t h5error = H5Gclose (groupID_p);
+    }
+  }
   
   // ============================================================================
   //
@@ -89,13 +112,20 @@ namespace LOFAR { // Namespace LOFAR -- begin
     }
     return *this;
   }
-
-  // ----------------------------------------------------------------------- copy
   
+  // ----------------------------------------------------------------------- copy
+
   void LOFAR_StationGroup::copy (LOFAR_StationGroup const &other)
   {
-    H5fileID_p      = other.H5fileID_p;
-    group_p         = other.group_p;
+    if (other.groupID_p > 0) {
+      init (other.groupID_p);
+    } else {
+      /*
+       * if previous operation failed, at least ensure internal handling remains
+       * consistent
+       */
+      groupID_p = 0;
+    }
   }
 
   // ============================================================================
@@ -108,193 +138,192 @@ namespace LOFAR { // Namespace LOFAR -- begin
 
   std::string LOFAR_StationGroup::telescope ()
   {
-    std::string attribute_telescope ("");
+    std::string val;
     
-    if (group_p->getName() != "UNDEFINED") {
-      try {
-	char *telescope = (char*)(group_p->getAttribute("TELESCOPE"));
-	attribute_telescope = telescope;
-      } catch (std::string message) {
-	std::cerr << "-- Error extracting attribute telescope" << endl;
-	attribute_telescope = "";
-      }
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::TELESCOPE),
+			     groupID_p)) {
+      return val;
+    } else {
+      return std::string ("");
     }
-    
-    return attribute_telescope;
   }
-
+  
   // ------------------------------------------------------------------- observer
-
+  
   std::string LOFAR_StationGroup::observer ()
   {
-    std::string attribute_observer ("");
+    std::string val;
     
-    if (group_p->getName() != "UNDEFINED") {
-      try {
-	char *observer = (char*)(group_p->getAttribute("OBSERVER"));
-	attribute_observer = observer;
-      } catch (std::string message) {
-	std::cerr << "-- Error extracting attribute OBSERVER" << endl;
-	attribute_observer = "";
-      }
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::OBSERVER),
+			     groupID_p)) {
+      return val;
+    } else {
+      return std::string ("");
     }
-    
-    return attribute_observer;
   }
-
+  
   // -------------------------------------------------------------------- project
-
+  
   std::string LOFAR_StationGroup::project ()
   {
-    std::string tmp ("");
+    std::string val;
     
-    if (group_p->getName() != "UNDEFINED") {
-      try {
-	char *buffer = (char*)(group_p->getAttribute("PROJECT"));
-	tmp = buffer;
-      } catch (std::string message) {
-	std::cerr << "-- Error extracting attribute PROJECT" << endl;
-	tmp = "";
-      }
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::PROJECT),
+			     groupID_p)) {
+      return val;
+    } else {
+      return std::string ("");
     }
-    
-    return tmp;
   }
-
-  // -------------------------------------------------------------- observationID
-
-  std::string LOFAR_StationGroup::observationID ()
+  
+  // ------------------------------------------------------------- observation_id
+  
+  std::string LOFAR_StationGroup::observation_id ()
   {
-    std::string tmp ("");
+    std::string val;
     
-    if (group_p->getName() != "UNDEFINED") {
-      try {
-	char *buffer = (char*)(group_p->getAttribute("OBS_ID"));
-	tmp = buffer;
-      } catch (std::string message) {
-	std::cerr << "-- Error extracting attribute OBS_ID" << endl;
-	tmp = "";
-      }
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::OBSERVATION_ID),
+			     groupID_p)) {
+      return val;
+    } else {
+      return std::string ("");
     }
-    
-    return tmp;
   }
-
-  // ------------------------------------------------------------ observationMode
-
-  std::string LOFAR_StationGroup::observationMode ()
+  
+  // ----------------------------------------------------------- observation_mode
+  
+  std::string LOFAR_StationGroup::observation_mode ()
   {
-    std::string tmp ("");
+    std::string val;
     
-    if (group_p->getName() != "UNDEFINED") {
-      try {
-	char *buffer = (char*)(group_p->getAttribute("OBS_MODE"));
-	tmp = buffer;
-      } catch (std::string message) {
-	std::cerr << "-- Error extracting attribute OBS_MODE" << endl;
-	tmp = "";
-      }
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::OBSERVATION_MODE),
+			     groupID_p)) {
+      return val;
+    } else {
+      return std::string ("");
     }
-    
-    return tmp;
   }
-
-  // ---------------------------------------------------------------- triggerType
-
-  std::string LOFAR_StationGroup::triggerType ()
+  
+  // --------------------------------------------------------------- trigger_type
+  
+  std::string LOFAR_StationGroup::trigger_type ()
   {
-    std::string tmp ("");
+    std::string val;
     
-    if (group_p->getName() != "UNDEFINED") {
-      try {
-	char *buffer = (char*)(group_p->getAttribute("TRIG_TYPE"));
-	tmp = buffer;
-      } catch (std::string message) {
-	std::cerr << "-- Error extracting attribute TRIG_TYPE" << endl;
-	tmp = "";
-      }
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::TRIGGER_TYPE),
+			     groupID_p)) {
+      return val;
+    } else {
+      return std::string ("");
     }
-    
-    return tmp;
   }
-
-  // -------------------------------------------------------------- triggerOffset
-
-  double LOFAR_StationGroup::triggerOffset ()
+  
+  // ------------------------------------------------------------- trigger_offset
+  
+  double LOFAR_StationGroup::trigger_offset ()
   {
-    double tmp (0.0);
+    double val (0);
     
-    if (group_p->getName() != "UNDEFINED") {
-      try {
-	double *buffer = (double*)(group_p->getAttribute("TRIG_OFST"));
-	tmp = (*buffer);
-      } catch (std::string message) {
-	std::cerr << "-- Error extracting attribute TRIG_TYPE" << endl;
-	tmp = 0.0;
-      }
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::TRIGGER_OFFSET),
+			     groupID_p)) {
+      return val;
+    } else {
+      return 0.0;
     }
-    
-    return tmp;
   }
-
-  // ----------------------------------------------------------------------- time
-
-  std::vector<uint> LOFAR_StationGroup::time ()
+  
+  // --------------------------------------------------------- triggered_antennas
+  
+#ifdef HAVE_CASA
+  casa::Vector<uint> LOFAR_StationGroup::triggered_antennas ()
   {
-    hid_t attribute_id;
-    hid_t dataset_id;
-    uint tmp (0);
-    std::string id;
-    std::vector<uint> attrTime;
-    std::vector<std::string> channel_ids (channelIDs ());
-
-    /*
-     * Go through the list of available data channels to extract the time-stamps
-     */
-    for (uint channel (0); channel<channel_ids.size(); channel++) {
-      id = groupName() + "/" + channel_ids[channel];
-      // get the identifier for the dataset
-      dataset_id = H5Dopen(H5fileID_p, id.c_str());
-      // get the identifier for the attribute
-      attribute_id = H5Aopen_name (dataset_id,
-				   attribute_name(LOFAR::TIME).c_str());
-      // If the attribute could be located, we can retrieve its value
-      if (attribute_id > 0) {
-	if (H5Aread(attribute_id,
-		    H5T_NATIVE_UINT,
-		    &tmp) ==  0) {
-	  attrTime.push_back(tmp);
-	}
-      }
-      // Feedback
-//       std::cout << channel << "\t"
-// 		<< id << "\t"
-// 		<< dataset_id << "\t"
-// 		<< attribute_id << "\t"
-// 		<< tmp
-// 		<< std::endl;
+    casa::Vector<uint> val;
+    
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::TRIGGERED_ANTENNAS),
+			     groupID_p)) {
+      return val;
+    } else {
+      return casa::Vector<uint> (1,0);
     }
-
-    return attrTime;
   }
+#else 
+  std::vector<uint> LOFAR_StationGroup::triggered_antennas ()
+  {
+    std::vector<uint> val;
+    
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::TRIGGERED_ANTENNAS),
+			     groupID_p)) {
+      return val;
+    } else {
+      return std::vector<uint> (1,0);
+    }
+  }
+#endif
+  
+  // ------------------------------------------------------------- beam_direction
+  
+#ifdef HAVE_CASA
+  casa::Vector<double> LOFAR_StationGroup::beam_direction ()
+  {
+    casa::Vector<double> val;
+    
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::BEAM_DIRECTION),
+			     groupID_p)) {
+      return val;
+    } else {
+      return casa::Vector<double> (1,0);
+    }
+  }
+#else 
+  std::vector<double> LOFAR_StationGroup::beam_direction ()
+  {
+    std::vector<double> val;
+    
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::BEAM_DIRECTION),
+			     groupID_p)) {
+      return val;
+    } else {
+      return std::vector<double> (1,0);
+    }
+  }
+#endif
   
   // -------------------------------------------------------------------- summary
   
   void LOFAR_StationGroup::summary (std::ostream &os)
   {
     os << "[LOFAR_StationGroup] Summary of object properties"     << endl;
+    
+    os << "-- Group ID      ...... : " << groupID_p           << endl;
+    os << "-- nof. dipole datasets : " << nofDipoleDatasets() << endl;
 
-    os << "-- dalGroup name ..... : " << groupName()             << endl;
-    os << "-- dalGroup ID   ..... : " << group_p->getId()        << endl;
-    os << "-- HDF5 file handle ID : " << H5fileID_p              << endl;
+    if (groupID_p > 0) {
+      os << "-- Telesope .......... : " << telescope()             << endl;
+      os << "-- Observer .......... : " << observer()              << endl;
+      os << "-- Project description : " << project()               << endl;
+      os << "-- Observation ID .... : " << observation_id()        << endl;
+      os << "-- Observation mode .. : " << observation_mode()      << endl;
+      os << "-- Trigger type ...... : " << trigger_type()          << endl;
+      os << "-- Trigger offset .... : " << trigger_offset()        << endl;
+    }
 
-    os << "-- Telesope .......... : " << telescope()             << endl;
-    os << "-- Observer .......... : " << observer()              << endl;
-    os << "-- Project description : " << project()               << endl;
-    os << "-- Observation ID .... : " << observationID()         << endl;
-    os << "-- Observation mode .. : " << observationMode()       << endl;
-    os << "-- Trigger type ...... : " << triggerType()           << endl;
-    os << "-- Trigger offset .... : " << triggerOffset()         << endl;
+#ifdef HAVE_CASA
+    if (groupID_p > 0) {
+      os << "-- Triggered antennas  : " << triggered_antennas()     << endl;
+      os << "-- Beam direction .... : " << beam_direction()         << endl;
+    }
+#endif
   }
   
   // ============================================================================
@@ -302,79 +331,161 @@ namespace LOFAR { // Namespace LOFAR -- begin
   //  Methods
   //
   // ============================================================================
-  
+
   // ----------------------------------------------------------------------- init
 
   void LOFAR_StationGroup::init ()
   {
-    H5fileID_p        = -1;
-    group_p           = new dalGroup();
-    group_p->setName ("UNDEFINED");
+    groupID_p = 0;
   }
+  
+  // ----------------------------------------------------------------------- init
 
-  // ------------------------------------------------------------ setStationGroup
+  void LOFAR_StationGroup::init (hid_t const &group_id)
+  {
+      bool status (true);
+      std::string filename;
+      std::string group;
 
-  bool LOFAR_StationGroup::setStationGroup (dalDataset &dataset,
-					    std::string const &name)
+      //  group ID -> file name
+      status = DAL::h5get_filename (filename,
+				    group_id);
+      //  group ID -> group name
+      if (status) {
+	status = DAL::h5get_name (group,
+				  group_id);
+      }
+      /*
+       * Forward the reverse engineered information to the init() function to 
+       * set up a new object identifier for the group in question.
+       */
+      if (status) {
+	init (filename,
+	      group);
+      }
+  }
+  
+  // ----------------------------------------------------------------------- init
+
+  void LOFAR_StationGroup::init (std::string const &filename,
+				 std::string const &group)
+  {
+    hid_t file_id (0);
+    herr_t h5error (0);
+    
+    // Initialize internal variables
+    groupID_p = 0;
+    
+    // open the file
+    file_id = H5Fopen (filename.c_str(),
+		       H5F_ACC_RDONLY,
+		       H5P_DEFAULT);
+    
+    // if opening of file was successfull, try to open group
+    if (file_id > 0) {
+      init (file_id,
+	    group);
+    } else {
+      std::cerr << "[LOFAR_StationGroup::init] Error opening HDF5 file "
+		<< filename 
+		<< " !"
+		<< std::endl;
+    }
+    
+    // release the global file handle and clear the error stack
+    if (file_id > 0) {
+      h5error = H5Fclose (file_id);
+      h5error = H5Eclear ();
+    }
+  }
+  
+  // ----------------------------------------------------------------------- init
+
+  void LOFAR_StationGroup::init (hid_t const &location,
+				 std::string const &group)
   {
     bool status (true);
+    hid_t group_id (0);
 
+    /*
+      Try to open the group within the HDF5 file; the group is expected
+      to reside below the object identified by "location".
+    */
     try {
-      H5fileID_p = dataset.getFileHandle();
-      group_p    = dataset.openGroup(name);
+      group_id = H5Gopen (location,
+			  group.c_str());
     } catch (std::string message) {
-      std::cerr << "[LOFAR_StationGroup::setStationGroup] " << message << endl;
+      std::cerr << "[LOFAR_StationGroup::init] " << message << std::endl;
       status = false;
     }
 
-    return status;
+    if (group_id > 0) {
+      groupID_p = group_id;
+    } else {
+      groupID_p = 0;
+    }
+
+    /* Set up the list of dipole datasets contained within this group */
+    status = setDipoleDatasets ();    
   }
 
-  // ------------------------------------------------------------------ attribute
-  
-  void LOFAR_StationGroup::getAttribute (std::string &value,
-					 std::string const &keyword)
+  // ---------------------------------------------------------- setDipoleDatasets
+
+  bool LOFAR_StationGroup::setDipoleDatasets ()
   {
-    try {
-      char *buffer = (char*)(group_p->getAttribute(keyword));
-      value = buffer;
-    } catch (std::string message) {
-      std::cerr << "-- Error extracting attribute " << keyword << endl;
-      value = "";
+    /* Check minimal condition for operations below. */
+    if (groupID_p < 1) {
+      return false;
     }
+
+    /* Local variables. */
+
+    bool status (true);
+    std::string datasetName;
+    hid_t datasetID (0);
+    hsize_t nofObjects (0);
+    herr_t h5error (0);
+
+    try {
+      // Number of objects in the group specified by its identifier
+      h5error = H5Gget_num_objs(groupID_p,
+				&nofObjects);
+      // go throught the list of objects to identify the datasets
+      for (hsize_t idx (0); idx<nofObjects; idx++) {
+	// get the type of the object
+	if (H5G_DATASET == H5Gget_objtype_by_idx (groupID_p,idx)) {
+	  // get the name of the dataset
+	  status = DAL::h5get_name (datasetName,
+				    groupID_p,
+				    idx);
+	  // if name retrieval was successful, create new LOFAR_DipoleDataset
+	  if (status) {
+	    datasets_p.push_back(DAL::LOFAR_DipoleDataset (groupID_p,
+							   datasetName));
+	  }
+	}
+      }
+    } catch (std::string message) {
+      std::cerr << "[LOFAR_StationGroup::setDipoleDatasets] "
+		<< message
+		<< std::endl;
+      return false;
+    }
+    
+    return true;
   }
   
   // ---------------------------------------------------------------- channelsIDs
 
   std::vector<std::string> LOFAR_StationGroup::channelIDs ()
   {
-    std::string id;
-    std::string channelName;
-    std::vector<std::string> IDs;
-    uint station;
-    uint rsp;
-    uint rcu;
+    std::vector<std::string> channels_ids;
 
-    std::string groupName = group_p->getName();
-    uint max_station (100);
-    uint max_rsp (100);
-    uint max_rcu (100);
-
-    for (station=0; station<max_station; station++) {
-      for (rsp=0; rsp<max_rsp; rsp++) {
-	for (rcu=0; rcu<max_rcu; rcu++) {
-	  // convert the individual ID number of a joint ID string
-	  channelName = channelID (station,rsp,rcu);
-	  id = groupName + "/" + channelName;
-	  // probe the HDF5 file for the presence of a dataset with the given ID
-	  if (H5Dopen(H5fileID_p, id.c_str()) > 0) {
-	    IDs.push_back(channelName);
-	  }
-	}
-      }
+    for (uint n(0); datasets_p.size(); n++) {
+      channels_ids.push_back(datasets_p[n].channel_id());
     }
 
-    return IDs;
+    return channels_ids;
   }
 
   // ----------------------------------------------------------------- datasetIDs
@@ -382,22 +493,9 @@ namespace LOFAR { // Namespace LOFAR -- begin
   std::vector<hid_t> LOFAR_StationGroup::datasetIDs ()
   {
     std::vector<hid_t> dataset_ids;
-    std::string groupName = group_p->getName();
-    std::vector<std::string> dataset_names = channelIDs ();
 
-    // get the group ID
-    hid_t group_id = H5Gopen (H5fileID_p,groupName.c_str());
-
-    if (group_id > 0) {
-      for (uint channel (0); channel<dataset_names.size(); channel++) {
-	dataset_ids[channel] = H5Dopen (group_id,
-					dataset_names[channel].c_str());
-      }
-    } else {
-      std::cerr << "[LOFAR_StationGroup::datasetIDs] Unable to access group "
-		<< groupName
-		<< " in current data file."
-		<< std::endl;
+    for (uint n(0); n<datasets_p.size(); n++) {
+      dataset_ids.push_back(datasets_p[n].dataset_id());
     }
 
     return dataset_ids;
@@ -410,18 +508,24 @@ namespace LOFAR { // Namespace LOFAR -- begin
     casa::Record rec;
 
     try {
-      rec.define(casa::RecordFieldId(attribute_name(LOFAR::TELESCOPE)),
+      rec.define(casa::RecordFieldId(attribute_name(DAL::TELESCOPE)),
 		 telescope());
-      rec.define(casa::RecordFieldId(attribute_name(LOFAR::OBSERVER)),
+      rec.define(casa::RecordFieldId(attribute_name(DAL::OBSERVER)),
 		 observer());
-      rec.define(casa::RecordFieldId(attribute_name(LOFAR::PROJECT)),
+      rec.define(casa::RecordFieldId(attribute_name(DAL::PROJECT)),
 		 project());
-      rec.define(casa::RecordFieldId(attribute_name(LOFAR::OBSERVATION_ID)),
-		 observationID());
-      rec.define(casa::RecordFieldId(attribute_name(LOFAR::OBSERVATION_MODE)),
-		 observationMode());
-//       rec.define(casa::RecordFieldId(attribute_name(LOFAR::TIME)),
-// 		 time());
+      rec.define(casa::RecordFieldId(attribute_name(DAL::OBSERVATION_ID)),
+		 observation_id());
+      rec.define(casa::RecordFieldId(attribute_name(DAL::OBSERVATION_MODE)),
+		 observation_mode());
+      rec.define(casa::RecordFieldId(attribute_name(DAL::TRIGGER_TYPE)),
+		 trigger_type());
+      rec.define(casa::RecordFieldId(attribute_name(DAL::TRIGGER_OFFSET)),
+		 trigger_offset());
+      rec.define(casa::RecordFieldId(attribute_name(DAL::TRIGGERED_ANTENNAS)),
+ 		 triggered_antennas());
+      rec.define(casa::RecordFieldId(attribute_name(DAL::BEAM_DIRECTION)),
+ 		 beam_direction());
     } catch (std::string message) {
       std::cerr << "[LOFAR_StationGroup::attributes2record] "
 		<< "Error filling the record with attribute values!\n"
@@ -431,4 +535,4 @@ namespace LOFAR { // Namespace LOFAR -- begin
 
     return rec;
   }
-} // Namespace LOFAR -- end
+} // Namespace DAL -- end

@@ -33,12 +33,16 @@
 #include <hdf5/H5LT.h>
 #include <hdf5/H5TA.h>
 
-namespace LOFAR { // Namespace LOFAR -- begin
+// Header files of CR-Tools
+#include <Data/LOFAR_StationGroup.h>
+
+namespace DAL { // Namespace DAL -- begin
   
   /*!
     \class LOFAR_Timeseries
     
-    \ingroup LOFAR
+    \ingroup CR_Data
+    \ingroup DAL
     
     \brief Brief description for class LOFAR_Timeseries
     
@@ -51,20 +55,303 @@ namespace LOFAR { // Namespace LOFAR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[start filling in your text here]
+      <li>Definition of the LOFAR time-series data format
+      <li>Classes handling the entities further down in the hierarchy of the
+      dataset:
+      <ul>
+        <li>[DAL] LOFAR_StationGroup
+	<li>[DAL] LOFAR_DipoleDataset
+      </ul>
+      Some of the direct interaction with a HDF5 dataset is implemented in
+      HDF5Common.h
     </ul>
     
     <h3>Synopsis</h3>
+
+    This class provides the top-level interface to a standard dataset of LOFAR
+    time-series data, as obtained from dumping the contents of the cyclic 
+    buffers of the transient buffer boards (TBB).
     
+    <ol>
+      <li><b>Structure of the data set</b> <br>
+      \verbatim
+      /                             ... Group
+      |-- TELESCOPE                 ... Attribute       ... string
+      |-- OBSERVER                  ... Attribute       ... string
+      |-- PROJECT                   ... Attribute       ... string
+      |-- Station001                ... Group
+      |   |-- TELESCOPE             ... Attribute       ... string
+      |   |-- OBSERVER              ... Attribute       ... string
+      |   |-- PROJECT               ... Attribute       ... string
+      |   |-- OBSERVATION_ID        ... Attribute       ... string
+      |   |-- OBSERVATION_MODE      ... Attribute       ... string
+      |   |-- TRIGGER_TYPE          ... Attribute       ... string
+      |   |-- TRIGGER_OFFSET        ... Attribute       ... string
+      |   |-- TRIG_ANTS             ... Attribute       ... array<int,1>
+      |   |-- BEAM_DIRECTION        ... Attribute       ... array<double,2>
+      |   |-- 001000000             ... Dataset         ... array<uint,1>
+      |   |   |-- STATION_ID        ... Attribute       ... uint
+      |   |   |-- RSP_ID            ... Attribute       ... uint 
+      |   |   |-- RCU_ID            ... Attribute       ... uint
+      |   |   |-- SAMPLE_FREQ       ... Attribute       ... double
+      |   |   |-- TIME              ... Attribute       ... uint
+      |   |   |-- SAMPLE_NR         ... Attribute       ... uint
+      |   |   |-- SAMPLES_PER_FRAME ... Attribute       ... uint
+      |   |   |-- DATA_LENGTH       ... Attribute       ... uint
+      |   |   |-- NYQUIST_ZONE      ... Attribute       ... uint
+      |   |   |-- FEED              ... Attribute       ... string
+      |   |   |-- ANT_POSITION      ... Attribute       ... array<double,1>
+      |   |   `-- ANT_ORIENTATION   ... Attribute       ... array<double,1>
+      |   |-- 001000001
+      |   |-- 001000002
+      |   |-- 001000003
+      |   |-- 001000004
+      |   |
+      |   |-- 001001000
+      |   |-- 001001001
+      |   |
+      |
+      \endverbatim
+      As can be read from the above listing, the internal structure of a LOFAR
+      time-series dataset is made up of a number of sub-components, each of them
+      representing a hierarchical level in the setup of the telecope.
+      <ol>
+        <li>Root group
+	  <table>
+	    <tr>
+	    <td class="indexkey">Field Name
+	    <td class="indexkey">Type
+	    <td class="indexkey">Status
+	    <td class="indexkey">Default
+	    <td class="indexkey">Desctription
+	    </tr>
+	    <tr>
+	      <td>TELESCOPE
+	      <td>string
+	      <td>mandatory
+	      <td>LOFAR
+	      <td>Name of the telescope with which the observation has been 
+	      performed.
+	    </tr>
+	    <tr>
+	      <td>OBSERVER
+	      <td>string
+	      <td>mandatory
+	      <td>LOFAR/CR
+	      <td>Name of the person either responsible for carrying out the 
+	      observation or having requested the observation; combination of 
+	      both possible.
+	    </tr>
+	    <tr>
+	      <td>PROJECT
+	      <td>string
+	      <td>mandatory
+	      <td>LOFAR/CR
+	      <td>Name of the project for which this observation has been 
+	      carried out.
+	    </tr>
+	    <tr>
+	      <td>OBSERVATION_ID
+	      <td>string
+	      <td>mandatory
+	      <td>
+	      <td>Unique identifier for this observation.
+	    </tr>
+	  </table>
+	  <br>
+        <li>Station group
+	  <table>
+	    <tr>
+	    <td class="indexkey">Field Name
+	    <td class="indexkey">Type
+	    <td class="indexkey">Status
+	    <td class="indexkey">Default
+	    <td class="indexkey">Desctription
+	    </tr>
+	    <tr>
+	      <td>STATION_ID
+	      <td>uint
+	      <td>mandatory
+	      <td>
+	      <td>Identifier of the LOFAR station at which this dipole is
+	      located.
+	    </tr>
+	    <tr>
+	      <td>STATION_POSITION
+	      <td>uint
+	      <td>mandatory
+	      <td>
+	      <td>Position of the LOFAR station in the coordinate reference frame
+	      specified by <tt>REFERENCE_FRAME</tt>
+	    </tr>
+	    <tr>
+	      <td>REFERENCE_FRAME
+	      <td>uint
+	      <td>mandatory
+	      <td>
+	      <td>Reference frame for the position cordinates of this station.
+	    </tr>
+	    <tr>
+	      <td>TELESCOPE
+	      <td>string
+	      <td>optional
+	      <td>LOFAR
+	      <td>Name of the telescope with which the observation has been 
+	      performed.
+	    </tr>
+	    <tr>
+	      <td>OBSERVER
+	      <td>string
+	      <td>optional
+	      <td>LOFAR/CR
+	      <td>Name of the person either responsible for carrying out the 
+	      observation or having requested the observation; combination of 
+	      both possible.
+	    </tr>
+	    <tr>
+	      <td>PROJECT
+	      <td>string
+	      <td>optional
+	      <td>LOFAR/CR
+	      <td>Name of the project for which this observation has been 
+	      carried out.
+	    </tr>
+	    <tr>
+	      <td>OBSERVATION_ID
+	      <td>string
+	      <td>optional
+	      <td>
+	      <td>Unique identifier for this observation.
+	    </tr>
+	    <tr>
+	      <td>OBSERVATION_MODE
+	      <td>string
+	      <td>mandatory
+	      <td>
+	      <td>Description of the telescope mode in which this observation
+	      was carried out.
+	    </tr>
+	    <tr>
+	      <td>TRIGGER_TYPE
+	      <td>string
+	      <td>mandatory
+	      <td>
+	      <td>
+	    </tr>
+	    <tr>
+	      <td>TRIGGER_OFFSET
+	      <td>string
+	      <td>mandatory
+	      <td>
+	      <td>
+	    </tr>
+	    <tr>
+	      <td>TRIGGERED_ANTENNAS
+	      <td>array<int,1>
+	      <td>optional
+	      <td>
+	      <td>
+	    </tr>
+	  </table>
+	  <br>
+	<li>Dipole dataset
+	  <table>
+	    <tr>
+	    <td class="indexkey">Field Name
+	    <td class="indexkey">Type
+	    <td class="indexkey">Status
+	    <td class="indexkey">Default
+	    <td class="indexkey">Desctription
+	    </tr>
+	    <tr>
+	      <td>STATION_ID
+	      <td>uint
+	      <td>optional
+	      <td>
+	      <td>Identifier of the LOFAR station at which this dipole is
+	      located.
+	    </tr>
+	    <tr>
+	      <td>RSP_ID
+	      <td>uint
+	      <td>mandatory
+	      <td>
+	      <td>Identifier of the RSP board, via which this dipole is connected.
+	    </tr>
+	    <tr>
+	      <td>RCU_ID
+	      <td>uint
+	      <td>mandatory
+	      <td>
+	      <td>Identifier of the receiver unit (RCU), to which this dipole
+	      is connected.
+	    </tr>
+	    <tr>
+	      <td>TIME
+	      <td>uint
+	      <td>mandatory
+	      <td>
+	      <td>Date of the observation. Standard unix date i.e. (GMT-)seconds
+	      since 1.1.1970
+	    </tr>
+	    <tr>
+	      <td>SAMPLE_NUMBER
+	      <td>uint
+	      <td>mandatory
+	      <td>
+	      <td>
+	    </tr>
+	    <tr>
+	      <td>SAMPLE_FREQUENCY
+	      <td>uint
+	      <td>mandatory
+	      <td>
+	      <td>
+	    </tr>
+	    <tr>
+	      <td>NYQUIST_ZONE
+	      <td>uint
+	      <td>mandatory
+	      <td>
+	      <td>
+	    </tr>
+	    <tr>
+	      <td>FEED
+	      <td>string
+	      <td>mandatory
+	      <td>
+	      <td>
+	    </tr>
+	  </table>
+	  <br>
+      </ol>
+      <li><b>Signal channel ID</b> <br> 
+      The signal channel for an individual reception element (dipole) can be
+      uniquely identified through a combination of the following three separate
+      identifiers:
+      <ol>
+        <li>STATION_ID  -- Identification number of the LOFAR station within the
+	complete array.
+	<li>RSP_ID -- Identification number of a Remote Station Processing (RSP)
+	board within a given LOFAR station.
+	<li>RCU_ID -- Identification number of a Receiver Unit (RCU) attached to
+	a given RSP board.
+      </ol>
+    </ol>
+
     <h3>Example(s)</h3>
     
   */  
   class LOFAR_Timeseries {
 
+  protected:
+    
     //! Name of the data file
     std::string filename_p;
     //! File handle identifier
     hid_t fileID_p;
+    //! Station groups contained within this file
+    std::vector<LOFAR_StationGroup> groups_p;
     
   public:
     
@@ -72,6 +359,9 @@ namespace LOFAR { // Namespace LOFAR -- begin
     
     /*!
       \brief Default constructor
+
+      A minimal setup of the internal dataspace is performed, but since no
+      data file is provided, no inspection of the data structure is carried out.
     */
     LOFAR_Timeseries ();
     
@@ -85,8 +375,8 @@ namespace LOFAR { // Namespace LOFAR -- begin
     /*!
       \brief Copy constructor
       
-      \param other -- Another LOFAR_Timeseries object from which to create this new
-      one.
+      \param other -- Another LOFAR_Timeseries object from which to create
+             this new one.
     */
     LOFAR_Timeseries (LOFAR_Timeseries const &other);
     
@@ -102,12 +392,67 @@ namespace LOFAR { // Namespace LOFAR -- begin
     /*!
       \brief Overloading of the copy operator
       
-      \param other -- Another LOFAR_Timeseries object from which to make a copy.
+      \param other -- Another LOFAR_Timeseries object from which to make a
+             copy.
     */
     LOFAR_Timeseries& operator= (LOFAR_Timeseries const &other); 
     
     // --------------------------------------------------------------- Parameters
+
+    /*!
+      \brief Get the name of the data file
+
+      \return filename -- The name of the data file.
+    */
+    inline std::string filename () const {
+      return filename_p;
+    }
+
+    /*!
+      \brief Get the object identifier for the data file
+      
+      \return file_id -- The object identifier for the data file
+    */
+    inline hid_t file_id () const {
+      return fileID_p;
+    }
+
+    /*!
+      \brief Get station groups embedded within the dataset
+
+      \return stationGroups -- Vector with a set of LOFAR_StationGroup objects,
+              encapsulating the contents of the groups within the dataset.
+    */
+    inline std::vector<LOFAR_StationGroup> stationGroups () const {
+      return groups_p;
+    }
+
+    /*!
+      \brief Get the name of the telescope
+      
+      \return telescope -- The name of the telescope with which the data were
+              recorded; returns an empty string in case no keyword value could
+	      be extracted.
+    */
+    std::string telescope ();
+
+    /*!
+      \brief Get the name of the observer
+      
+      \return observer -- The name of the observer; returns an empty string in
+              case no keyword value could be extracted.
+    */
+    std::string observer ();
     
+    /*!
+      \brief Get the project name/description
+      
+      \return project -- Name/Description of the project for which this 
+              observation was carried out; returns an empty string in case no
+	      keyword value could be extracted.
+    */
+    std::string project ();
+
     /*!
       \brief Get the name of the class
       
@@ -131,14 +476,62 @@ namespace LOFAR { // Namespace LOFAR -- begin
 
     // ------------------------------------------------------------------ Methods
     
-    
+    /*!
+      \brief Get the number of station groups collected into this file
+
+      \return nofStationGroups -- The number of station groups collected into
+              this file
+    */
+    inline uint nofStationGroups () {
+      return groups_p.size();
+    }
+
+    /*!
+      \brief Get the number of dipole datasets collected into this file
+      
+      \return nofDipoleDatasets -- The number of dipole datasets collected into
+              this file.
+    */
+    inline uint nofDipoleDatasets () {
+      uint nofDatasets (0);
+      for (uint n(0); n<groups_p.size(); n++) {
+	nofDatasets += groups_p[n].nofDipoleDatasets();
+      }
+      return nofDatasets;
+    }
+
+    /*!
+      \brief Retrieve the list of channels IDs
+
+      \return channelIDs -- A list of the channel IDs for all the dipoles within
+              this data set.
+     */
+    std::vector<std::string> channelIDs ();
     
   private:
     
     /*!
       \brief Unconditional copying
+
+      \param other -- Another LOFAR_Timeseries object from which to create
+             this new one.
     */
     void copy (LOFAR_Timeseries const &other);
+    
+    /*!
+      \brief Initialize the internal dataspace of the object
+
+      \param filename -- Name of the data file
+    */
+    void init (std::string const &filename);
+
+    /*!
+      \brief Locate and register the station groups contained within the file
+
+      \return status -- Status of the operation; returns <tt>false</tt> in case
+              an error was encountered.
+    */
+    bool setStationGroups ();
     
     /*!
       \brief Unconditional deletion 
@@ -147,7 +540,7 @@ namespace LOFAR { // Namespace LOFAR -- begin
     
   };
   
-} // Namespace LOFAR -- end
+} // Namespace DAL -- end
 
 #endif /* LOFAR_TIMESERIES_H */
   

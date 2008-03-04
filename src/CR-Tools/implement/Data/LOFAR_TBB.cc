@@ -21,9 +21,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Data/LOFAR_TBB.h>
+#include "LOFAR_TBB.h"
 #include <Utilities/StringTools.h>
 
+using std::cout;
 using std::endl;
 
 namespace CR { // Namespace CR -- begin
@@ -37,8 +38,8 @@ namespace CR { // Namespace CR -- begin
   // ------------------------------------------------------------------ LOFAR_TBB
   
   LOFAR_TBB::LOFAR_TBB (std::string const &filename)
-    : DataReader (),
-      filename_p(filename)
+    : LOFAR_Timeseries (filename),
+      DataReader ()
   {
     init ();
   }
@@ -47,10 +48,19 @@ namespace CR { // Namespace CR -- begin
   
   LOFAR_TBB::LOFAR_TBB (std::string const &filename,
 			uint const &blocksize)
-    : DataReader (blocksize),
-      filename_p(filename)
+    : LOFAR_Timeseries (filename),
+      DataReader (blocksize)
   {
     init ();
+  }
+  
+  // ------------------------------------------------------------------ LOFAR_TBB
+
+  LOFAR_TBB::LOFAR_TBB (LOFAR_Timeseries const &timeseries)
+    : LOFAR_Timeseries (timeseries),
+      DataReader ()
+  {
+    init();
   }
   
   // ------------------------------------------------------------------ LOFAR_TBB
@@ -70,6 +80,8 @@ namespace CR { // Namespace CR -- begin
   {
     destroy();
   }
+
+  // -------------------------------------------------------------------- destroy
   
   void LOFAR_TBB::destroy ()
   {;}
@@ -80,6 +92,8 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
+  // ------------------------------------------------------------------ operator=
+
   LOFAR_TBB& LOFAR_TBB::operator= (LOFAR_TBB const &other)
   {
     if (this != &other) {
@@ -89,16 +103,14 @@ namespace CR { // Namespace CR -- begin
     return *this;
   }
   
+  // ----------------------------------------------------------------------- copy
+
   void LOFAR_TBB::copy (LOFAR_TBB const &other)
   {
-    /* Copy operations for the base class */
+    /* Copy operations for the base classes */
+    LOFAR_Timeseries::operator= (other);
     DataReader::operator= (other);
 
-    /* Copy operations for this class*/
-    filename_p  = other.filename_p;
-
-    channelID_p.resize (other.channelID_p.size());
-    channelID_p = other.channelID_p;
   }
 
   // ============================================================================
@@ -114,31 +126,25 @@ namespace CR { // Namespace CR -- begin
     os << "[LOFAR_TBB] Summar of object properties" << endl;
 
     /* Variables describing the dataset itself */
-    os << "-- Name of data file ... : " << filename_p                 << endl;
-    os << "-- Dataset type ........ : " << dataset_p->getType()       << endl;
-    os << "-- Dataset name ........ : " << dataset_p->getName()       << endl;
-    os << "-- HDF5 file handle ID . : " << dataset_p->getFileHandle() << endl;
-    os << "-- nof. station groups . : " << stationGroups_p.size()     << endl;
-    os << "-- nof. data channels .. : " << channelID_p.size()         << endl;
+    os << "-- Name of data file ... : " << filename_p            << endl;
+    os << "-- nof. station groups . : " << groups_p.size()       << endl;
+    os << "-- nof. data channels .. : " << nofDipoleDatasets()   << endl;
 
     /* Variables describing the setup of the DataReader */
-    os << "-- blocksize  [samples ] : " << blocksize_p                << endl;
-    os << "-- FFT length [channels] : " << DataReader::fftLength()    << endl;
+    os << "-- blocksize  [samples ] : " << blocksize_p              << endl;
+    os << "-- FFT length [channels] : " << DataReader::fftLength()  << endl;
 
     /* The rest of the summary output is conditional, because given the number
        station it might get quite a lot. */
 
     if (listChannelIDs) {
-      os << "-- Data channel IDs .. : [" << channelID_p[0];
-      for (uint channel(1); channel<channelID_p.size(); channel++) {
-	os << " " << channelID_p[channel];
-      }
-      os << "]" << endl;
+      /* [1] Retrieve the channel IDs */
+      /* [2] Display the channel IDs  */
     }
     
     if (listStationGroups) {
-      for (uint station(0); station<stationGroups_p.size(); station++) {
-	stationGroups_p[station].summary();
+      for (uint station(0); station<groups_p.size(); station++) {
+	groups_p[station].summary();
       }
     }
   }  
@@ -154,49 +160,6 @@ namespace CR { // Namespace CR -- begin
   bool LOFAR_TBB::init ()
   {
     bool status (true);
-
-    /* Connection to dataset via DAL layer */
-
-    dataset_p = new dalDataset();
-    
-    if (dataset_p->open(string2char(filename_p))) {
-      std::cerr << "[LOFAR_TBB::init] Error opening file into dalDataset!"
-		<< std::endl;
-      return false;
-    }
-    
-    /*
-      [1] If opening the data file was successful, we can continue. First we scan
-      for the station groups available in the file, since this is the basic unit
-      within which the actual data for the individual dipoles are stored.
-      [2] Once we are done getting the list of station groups, we can assemble
-      the list of channel IDs, which are required for accessing the raw data of
-      each individual dipole.
-    */
-    
-    std::vector<std::string> stationGroups = getStationGroups();
-    uint channel (0);
-
-    /* Always check if actually a list of groups has been extracted */
-    if (stationGroups.size() > 0) {
-
-      for (uint station(0); station<stationGroups.size(); station++) {
-	// assemble internal list of station groups
-	LOFAR::LOFAR_StationGroup group ((*dataset_p),
-					 stationGroups[station]);
-	stationGroups_p.push_back(group);
-	//
-	std::vector<std::string> channel_ids = group.channelIDs();
-	for (channel=0; channel<channel_ids.size(); channel++) {
-	  channelID_p.push_back(channel_ids[channel]);
-	}
-      }
-      
-    } else {
-      std::cerr << "[LOFAR_TBB::init] No station group found in data set!"
-		<< std::endl;
-      status = false;
-    }
 
     if (status) {
       return setStreams();
@@ -262,78 +225,13 @@ namespace CR { // Namespace CR -- begin
 
     for (uint antenna (0); antenna<nofSelectedAntennas; antenna++) {
       /* Read the TBB data for the specified channel from the file. */
-      dataset_p->read_tbb(channelID_p[antenna],
-			  iterator_p[selectedAntennas_p(antenna)].position(),
-			  blocksize_p,
-			  buffer);
+
       /* Copy the retrieved data values to the array returned by this function;
 	 there might be a more efficient way to do this (e.g. via slicing) but
 	 for now this is a working solution.  */
-      for (sample=0; sample<blocksize_p; sample++) {
-	data(sample,antenna) = buffer[sample];
-      }      
     }
     
     return data;
   }
-
-  // ----------------------------------------------------------- getStationGroups
-
-  std::vector<std::string> LOFAR_TBB::getStationGroups ()
-  {
-    unsigned int nofStations (100);
-    char stationstr[10];
-    std::vector<std::string> stationGroups;
-
-    for (unsigned int station(0); station<nofStations; station++) {
-      /* create ID string for the group */
-      sprintf( stationstr, "Station%03d", station );
-      /* Check if group of given name exists in the file; according to the
-	 documentation of the DAL, the openGroup() function returns a NULL
-	 pointer in case no group of the given name exists. */
-      if (dataset_p->openGroup(stationstr) != NULL) {
-	stationGroups.push_back(stationstr);
-      }
-    }
-    
-    return stationGroups;
-  }
-
-  // ------------------------------------------------------------ setHeaderRecord
-
-  bool LOFAR_TBB::setHeaderRecord ()
-  {
-    bool status (true);
-    uint nofStationGroups (stationGroups_p.size());
-
-    /*
-     * Basic check: are there at least data for a single station within the
-     * dataset?
-     */
-
-    if (nofStationGroups) {
-
-      try {
-	// Name of the observatory
-	header_p.define("Observatory",stationGroups_p[0].telescope());
-	header_p.define("Observer",stationGroups_p[0].observer());
-	header_p.define("Project",stationGroups_p[0].project());
-	header_p.define("ObservationID",stationGroups_p[0].observationID());
-	header_p.define("ObservationMode",stationGroups_p[0].observationMode());
-	header_p.define("TriggerType",stationGroups_p[0].triggerType());
-      } catch (std::string message) {
-	std::cerr << "[LOFAR_TBB::setHeaderRecord] " << message << std::endl;
-	status = false;
-      }
-      
-    } else {
-      std::cerr << "[LOFAR_TBB::setHeaderRecord] No station group present!"
-		<< std::endl;
-      status = false;
-    }
-    
-    return status;
-  }
-  
 
 } // Namespace CR -- end

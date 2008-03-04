@@ -25,18 +25,20 @@
 #define LOFAR_DIPOLEDATASET_H
 
 #include <string>
-#include <Data/HDF5Common.h>
 
 #include <casa/aips.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/Containers/Record.h>
 
-namespace LOFAR { // Namespace LOFAR -- begin
+#include <dal/HDF5Common.h>
+
+namespace DAL { // Namespace DAL -- begin
   
   /*!
     \class LOFAR_DipoleDataset
     
-    \ingroup LOFAR
+    \ingroup CR_Data
+    \ingroup DAL
     
     \brief Container for dipole-based data in a LOFAR TBB time-series dataset
     
@@ -49,8 +51,8 @@ namespace LOFAR { // Namespace LOFAR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[LOFAR] LOFAR_TBB
-      <li>[LOFAR] LOFAR_StationGroup
+      <li>[CR] CR::LOFAR_TBB
+      <li>[DAL] DAL::LOFAR_StationGroup
     </ul>
     
     <h3>Synopsis</h3>
@@ -76,10 +78,6 @@ namespace LOFAR { // Namespace LOFAR -- begin
       |   |   `-- ANT_ORIENTATION   ... Attribute       ... array<double,1>
       \endverbatim
     </ol>
-
-    <u>Note:</u> No copy syntax is supported as part of this class, since
-    destroying one object would render the other inoperational, as both would
-    be sharing the same file handler. 
     
     <h3>Example(s)</h3>
     
@@ -101,8 +99,10 @@ namespace LOFAR { // Namespace LOFAR -- begin
     /*!
       \brief Argumented constructor
 
-      \param filename -- 
-      \param dataset  -- 
+      \param filename -- Name of the HDF5 file within which the dataset is
+             contained.
+      \param dataset  -- Name of the dataset, in this case the full path from
+             the base of the hierarchical structure within the HDF5 file.
     */
     LOFAR_DipoleDataset (std::string const &filename,
 			 std::string const &dataset);
@@ -110,11 +110,28 @@ namespace LOFAR { // Namespace LOFAR -- begin
     /*!
       \brief Argumented constructor
 
-      \param location -- 
-      \param dataset  -- 
+      \param location -- Identifier for the location within the HDF5 file, below
+             which the dataset is placed.
+      \param dataset  -- Name of the dataset.
     */
     LOFAR_DipoleDataset (hid_t const &location,
 			 std::string const &dataset);
+    
+    /*!
+      \brief Argumented constructor
+
+      \param dataset_id -- Identifier for the dataset contained within the HDF5
+             file
+    */
+    LOFAR_DipoleDataset (hid_t const &dataset_id);
+    
+    /*!
+      \brief Copy constructor
+      
+      \param other -- Another LOFAR_DipoleDataset object from which to create
+             this new one.
+    */
+    LOFAR_DipoleDataset (LOFAR_DipoleDataset const &other);
     
     // -------------------------------------------------------------- Destruction
 
@@ -122,6 +139,16 @@ namespace LOFAR { // Namespace LOFAR -- begin
       \brief Destructor
     */
     ~LOFAR_DipoleDataset ();
+    
+    // ---------------------------------------------------------------- Operators
+    
+    /*!
+      \brief Overloading of the copy operator
+      
+      \param other -- Another LOFAR_DipoleDataset object from which to make a
+             copy.
+    */
+    LOFAR_DipoleDataset& operator= (LOFAR_DipoleDataset const &other); 
     
     // --------------------------------------------------------------- Parameters
     
@@ -135,37 +162,15 @@ namespace LOFAR { // Namespace LOFAR -- begin
     }
 
     /*!
-      \brief Get the name of the class
-      
-      \return className -- The name of the class, LOFAR_DipoleDataset.
+      \brief Get the number of attributes attached to the dataset
+
+      \return nofAttributes -- The number of attributes attached to the dataset;
+              if the dataset ID is properly connected to a dataset within the 
+	      HDF5 file, the returned value will be zero or greater. If a
+	      negative value is returned, most likely te connection with the
+	      file is broken.
     */
-    std::string className () const {
-      return "LOFAR_DipoleDataset";
-    }
-
-    /*!
-      \brief Provide a summary of the internal status
-    */
-    inline void summary () {
-      summary (std::cout);
-    }
-
-    /*!
-      \brief Provide a summary of the internal status
-    */
-    void summary (std::ostream &os);    
-
-    // ------------------------------------------------------------------ Methods
-
-    /*!
-      \brief Get the internal HDF5 intentifier for an attribute to the dataset
-
-      \param name -- The name of the attribute attached to the dataset.
-
-      \return attribute_id -- The internal HDF5 identifier of the attribute;
-              returns 0 in case no attribute of the given name can be found.
-    */
-    hid_t attribute_id (std::string const &name);
+    int nofAttributes ();
 
     /*!
       \brief Get the ID of the LOFAR station this dipole belongs to
@@ -207,11 +212,11 @@ namespace LOFAR { // Namespace LOFAR -- begin
 
     /*!
       \brief Get the (UNIX) time at which the data were recorded
-
+      
       \return time -- The (UNIX) time at which the data were recorded.
-     */
+    */
     uint time ();
-
+    
     /*!
       \brief Get the timespan in samples since the last full second
 
@@ -230,8 +235,8 @@ namespace LOFAR { // Namespace LOFAR -- begin
               per frame of data sent from TBB to RSP.
     */
     uint samples_per_frame ();
-
-    /*
+    
+    /*!
       \brief Get the number of samples stored in this dataset
 
       \return dataLength -- The number of samples stored in this dataset; this
@@ -265,6 +270,67 @@ namespace LOFAR { // Namespace LOFAR -- begin
     casa::Vector<double> antenna_orientation ();
 
     /*!
+      \brief Get the name of the class
+      
+      \return className -- The name of the class, LOFAR_DipoleDataset.
+    */
+    std::string className () const {
+      return "LOFAR_DipoleDataset";
+    }
+
+    /*!
+      \brief Provide a summary of the internal status
+    */
+    inline void summary () {
+      summary (std::cout);
+    }
+
+    /*!
+      \brief Provide a summary of the internal status
+    */
+    void summary (std::ostream &os);    
+
+    // ------------------------------------------------------------------ Methods
+
+    /*!
+      \brief Get the unique channel/dipole identifier
+      
+      \return channel_id -- The unique identifier for a signal channel/dipole
+              within the whole LOFAR array; this ID is created from a combination
+	      of station ID, RSP ID and RCU ID.
+    */
+    std::string channel_id ();
+
+    /*!
+      \brief Get a number of data values as recorded for this dipole
+      
+      \param start      -- Number of the sample at which to start reading
+      \param nofSamples -- Number of samples to read, starting from the position
+             given by <tt>start</tt>.
+      \retval data       -- [nofSamples] Array with the raw ADC samples
+              representing the electric field strength as function of time.
+	      
+      \return status -- Status of the operation; returns <tt>false</tt> in case
+              an error was encountered.
+    */
+    bool fx (int const &start,
+	     int const &nofSamples,
+	     short data[]);
+    
+    /*!
+      \brief Get a number of data values as recorded for this dipole
+
+      \param start      -- Number of the sample at which to start reading
+      \param nofSamples -- Number of samples to read, starting from the position
+             given by <tt>start</tt>.
+
+      \return fx -- [nofSamples] Vector of raw ADC samples representing the 
+              electric field strength as function of time.
+     */
+    casa::Vector<uint> fx (int const &start=0,
+			   int const &nofSamples=1);
+
+    /*!
       \brief Get a casa::Record containing the values of the attributes
 
       \return record -- A casa::Record container holding the values of the 
@@ -273,6 +339,28 @@ namespace LOFAR { // Namespace LOFAR -- begin
     casa::Record attributes2record ();
     
   private:
+    
+    /*!
+      \brief Initialize the internal dataspace
+    */
+    void init ();
+    
+    /*!
+      \brief Initialize the internal dataspace
+
+      \param dataset_id -- Identifier for the dataset within the HDF5 file
+     */
+    void init (hid_t const &dataset_id);
+    
+    /*!
+      \brief Initialize the internal dataspace
+
+      \param filename -- HDF5 file within which the dataset in question is
+             contained
+      \param dataset  -- Name of the dataset which this object is to encapsulate.
+     */
+    void init (std::string const &filename,
+	       std::string const &dataset);
     
     /*!
       \brief Initialize the internal dataspace
@@ -285,13 +373,21 @@ namespace LOFAR { // Namespace LOFAR -- begin
 	       std::string const &dataset);
     
     /*!
+      \brief Unconditional copying
+
+      \param other -- Another LOFAR_DipoleDataset object from which to create
+             this new one.
+    */
+    void copy (LOFAR_DipoleDataset const &other);
+    
+    /*!
       \brief Unconditional deletion 
     */
     void destroy(void);
 
   };
   
-} // Namespace LOFAR -- end
+} // Namespace DAL -- end
 
 #endif /* LOFAR_DIPOLEDATASET_H */
   
