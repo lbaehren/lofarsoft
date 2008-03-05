@@ -55,3 +55,22 @@
   in the <i>Data</i> module.
 */
 
+#include <Data/Data.h>
+#include <Data/DataFlag.h>
+#include <Data/ITSCorrelation.h>
+#include <Data/ITSMetadata.h>
+#include <Data/ITS_Beam.h>
+#include <Data/ITS_Capture.h>
+#include <Data/LOFAR_DipoleDataset.h>
+#include <Data/LOFAR_Image.h>
+#include <Data/LOFAR_StationGroup.h>
+#include <Data/LOFAR_TBB.h>
+#include <Data/LOFAR_Timeseries.h>
+#include <Data/LopesEvent.h>
+#include <Data/LopesEventIn.h>
+#include <Data/NDABeam.h>
+#include <Data/NuMoonHeader.h>
+#include <Data/TIM40.h>
+#include <Data/TIM40Header.h>
+#include <Data/lopesevent_def.h>
+#include <Data/tbbctlIn.h>

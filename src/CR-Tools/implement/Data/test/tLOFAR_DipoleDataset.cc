@@ -487,6 +487,81 @@ int test_parameters (std::string const &filename)
 // -----------------------------------------------------------------------------
 
 /*!
+  \brief Test the retrieval of the actual TBB data contained within the dataset
+  
+  \param filename -- Name of the HDF5 file, within which the dataset is located
+
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_data (std::string const &filename)
+{
+  cout << "\n[test_data]\n" << endl;
+
+  int nofFailedTests (0);
+  bool status (true);
+  int start (0);
+  int blocksize (10);
+
+  // open dataset
+  LOFAR_DipoleDataset dataset (filename,
+			       "Station001/001000001");
+  
+  std::cout << "[1] Retrieve data via pointer to array ..." << std::endl;
+  try {
+    short *dataBuffer;
+
+    dataBuffer = new short [blocksize];
+
+    status = dataset.fx(start,
+			blocksize,
+			dataBuffer);
+    
+    if (status) {
+      std::cout << "-- Channel ID   = " << dataset.channel_id() << std::endl;
+      std::cout << "-- Data start   = " << start     << std::endl;
+      std::cout << "-- Blocksize    = " << blocksize << std::endl;
+      std::cout << "-- Channel data = ["
+		<< dataBuffer[0] << ", "
+		<< dataBuffer[1] << ", "
+		<< dataBuffer[2] << ", "
+		<< dataBuffer[3] << ", .. "
+		<< dataBuffer[blocksize-1] << " ]"
+		<< std::endl;
+    } else {
+      std::cerr << "--> Error retrieving time-series data!" << std::endl;
+      nofFailedTests++;
+    }
+
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[2] Retrieve data into casa::Vector ..." << std::endl;
+  try {
+    casa::Vector<short> data = dataset.fx (start,blocksize);
+
+    if (data.size() == blocksize) {
+      std::cout << "-- Channel ID   = " << dataset.channel_id() << std::endl;
+      std::cout << "-- Data start   = " << start     << std::endl;
+      std::cout << "-- Blocksize    = " << blocksize << std::endl;
+      std::cout << "-- Channel data = " << data << std::endl;
+    } else {
+      std::cerr << "--> Error retrieving time-series data!" << std::endl;
+      nofFailedTests++;
+    }
+
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
   \brief Test export of the attribute values to a casa::Record object
   
   \param filename -- Name of the HDF5 file, within which the dataset is located
@@ -523,6 +598,8 @@ int main (int argc,
   nofFailedTests += test_datasets (filename);
   // Test retrieval of parameters/attributes attached to the dataset
   nofFailedTests += test_parameters (filename);
+  // Test retrieval of the actual TBB time-series values
+  nofFailedTests += test_data (filename);
   
   return nofFailedTests;
 }

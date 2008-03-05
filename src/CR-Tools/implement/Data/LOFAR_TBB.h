@@ -133,6 +133,11 @@ namespace CR { // Namespace CR -- begin
   public:
     
     // ------------------------------------------------------------- Construction
+
+    /*!
+      \brief Default constructor
+    */
+    LOFAR_TBB ();
     
     /*!
       \brief Argumented constructor
@@ -218,6 +223,9 @@ namespace CR { // Namespace CR -- begin
     
     /*!
       \brief Get a block of raw time-series data for the available data channels
+
+      \return fx -- [sample,antenna] 2-dim array with a block of time-series
+              values for the selected data channels (dipoles).
     */
     casa::Matrix<double> fx ();
 

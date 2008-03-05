@@ -523,7 +523,7 @@ namespace DAL { // Namespace DAL -- begin
   
   bool LOFAR_DipoleDataset::fx (int const &start,
 				int const &nofSamples,
-				short data[])
+				short *data)
   {
     if (datasetID_p > 0) {
       herr_t h5error (0);
@@ -599,14 +599,12 @@ namespace DAL { // Namespace DAL -- begin
 
       /* Retrieve the actual data from the file */
 
-      short dataBuffer[nofSamples];
-
       h5error = H5Dread (datasetID_p,
 			 H5T_NATIVE_SHORT,
 			 memspace,
 			 filespaceID,
 			 H5P_DEFAULT,
-			 dataBuffer);
+			 data);
       
       if (h5error < 0) {
 	std::cerr << "[LOFAR_DipoleDataset::fx]"
@@ -626,12 +624,14 @@ namespace DAL { // Namespace DAL -- begin
   
   // ------------------------------------------------------------------------- fx
   
-  casa::Vector<uint> LOFAR_DipoleDataset::fx (int const &start,
-					      int const &nofSamples)
+  casa::Vector<short> LOFAR_DipoleDataset::fx (int const &start,
+					       int const &nofSamples)
   {
     if (datasetID_p > 0) {
       bool status (true);
-      short dataBuffer[nofSamples];
+      short *dataBuffer;
+
+      dataBuffer = new short [nofSamples];
 
       /* Retrieve the data from the file */
       
@@ -642,17 +642,21 @@ namespace DAL { // Namespace DAL -- begin
       /* Copy the data from the buffer into the vector returned by this function */
       
       if (status) {
-	casa::Vector<uint> data (nofSamples);
+	casa::Vector<short> data (nofSamples);
+	// copy values to returned vector
 	for (int sample(0); sample<nofSamples; sample++) {
 	  data(sample) = dataBuffer[sample];
 	}
+	// clean up memory
+	delete [] dataBuffer;
+	// return data
 	return data;
       } else {
-	return casa::Vector<uint> (1,0);
+	return casa::Vector<short> (1,0);
       }
       
     } else {
-      return casa::Vector<uint> (1,0);
+      return casa::Vector<short> (1,0);
     }
   }
   

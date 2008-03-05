@@ -508,6 +508,19 @@ namespace DAL { // Namespace DAL -- begin
      */
     std::vector<std::string> channelIDs ();
     
+    /*!
+      \brief Retrieve a block of ADC values for the dipoles in this station
+
+      \param start      -- Number of the sample at which to start reading
+      \param nofSamples -- Number of samples to read, starting from the position
+             given by <tt>start</tt>.
+
+      \return fx -- [nofSamples,dipole] Array of raw ADC samples representing
+              the electric field strength as function of time.
+     */
+    casa::Matrix<short> fx (int const &start=0,
+			    int const &nofSamples=1);
+    
   private:
     
     /*!

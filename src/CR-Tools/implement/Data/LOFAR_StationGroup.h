@@ -87,6 +87,39 @@ namespace DAL { // Namespace DAL -- begin
     </ol>
 
     <h3>Example(s)</h3>
+
+    <ol>
+      <li>Object construction using filename and full name/path of the group
+      within the file:
+      \code
+      std::string filename = "data.h5";
+      std::string group    = "Station001";
+
+      LOFAR_StationGroup group (filename,
+                                group);
+      \endcode
+      <li>Retrieve the list of channels IDs contained within this group:
+      \code
+      std::string <std::vector> channelIDs = group.channelIDs();
+      \endcode
+      which will return something along the lines of
+      \verbatim
+      [ 001000000 001000001 .. 001002003 ]
+      \endverbatim
+      <li>Retrieve a block of samples from the data channels (i.e. dipoles) 
+      belonging to this station:
+      \code
+      // LOFAR_StationGroup constructed somewhere above...
+      
+      // set sample at which to start reading
+      int start      = 0;
+      // set the number of samples to read per data channel (dipole)
+      int nofSamples = 1024;
+
+      casa::Matrix<short> data = group.fx (start,
+                                           nofSamples);
+      \endcode
+    </ol>
     
   */
   class LOFAR_StationGroup {
@@ -95,13 +128,16 @@ namespace DAL { // Namespace DAL -- begin
     hid_t groupID_p;
     //! Datasets contained within this group
     std::vector<LOFAR_DipoleDataset> datasets_p;
-    
+
   public:
     
     // ------------------------------------------------------------- Construction
     
     /*!
       \brief Default constructor
+
+      Default constructor does not connect to a file, but simply sets up internal
+      parameters.
     */
     LOFAR_StationGroup ();
     
@@ -356,6 +392,35 @@ namespace DAL { // Namespace DAL -- begin
               HDF5 dataset objects within this station group.
     */
     std::vector<hid_t> datasetIDs ();
+    
+    /*!
+      \brief Retrieve a block of ADC values for the dipoles in this station
+
+      \param start      -- Number of the sample at which to start reading
+      \param nofSamples -- Number of samples to read, starting from the position
+             given by <tt>start</tt>.
+
+      \return fx -- [nofSamples,dipole] Array of raw ADC samples representing
+              the electric field strength as function of time.
+     */
+    casa::Matrix<short> fx (int const &start=0,
+			    int const &nofSamples=1);
+    
+    /*!
+      \brief Retrieve a block of ADC values for the dipoles in this station
+
+      \param start      -- Number of the sample at which to start reading
+      \param nofSamples -- Number of samples to read, starting from the position
+             given by <tt>start</tt>.
+      \param dipoleSelection -- Selection of dipoles, for which to retrieve the
+             data.
+
+      \return fx -- [nofSamples,dipole] Vector of raw ADC samples representing
+              the electric field strength as function of time.
+    */
+    casa::Matrix<short> fx (int const &start,
+			    int const &nofSamples,
+			    std::vector<uint> const &dipoleSelection);
     
     /*!
       \brief Get a casa::Record containing the values of the attributes

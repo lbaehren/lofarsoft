@@ -315,7 +315,7 @@ namespace DAL { // Namespace DAL -- begin
     */
     bool fx (int const &start,
 	     int const &nofSamples,
-	     short data[]);
+	     short *data);
     
     /*!
       \brief Get a number of data values as recorded for this dipole
@@ -327,8 +327,8 @@ namespace DAL { // Namespace DAL -- begin
       \return fx -- [nofSamples] Vector of raw ADC samples representing the 
               electric field strength as function of time.
      */
-    casa::Vector<uint> fx (int const &start=0,
-			   int const &nofSamples=1);
+    casa::Vector<short> fx (int const &start=0,
+			    int const &nofSamples=1);
 
     /*!
       \brief Get a casa::Record containing the values of the attributes

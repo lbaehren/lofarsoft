@@ -46,9 +46,9 @@ using DAL::LOFAR_Timeseries;  // Namespace usage
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_LOFAR_Timeseries (std::string const &filename)
+int test_construction (std::string const &filename)
 {
-  std::cout << "\n[test_LOFAR_Timeseries]\n" << std::endl;
+  std::cout << "\n[test_construction]\n" << std::endl;
 
   int nofFailedTests (0);
   
@@ -91,6 +91,43 @@ int test_LOFAR_Timeseries (std::string const &filename)
 
 // -----------------------------------------------------------------------------
 
+/*!
+  \brief Test retrieval of TBB data
+
+  \param filename -- Name of the HDF5 file used for testing
+
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_data (std::string const &filename)
+{
+  std::cout << "\n[test_data]\n" << std::endl;
+
+  int nofFailedTests = 0;
+  int start          = 0;
+  int nofSamples     = 1024;
+  LOFAR_Timeseries timeseries (filename);
+
+  std::cout << "[1] Retrieve time-series data without channel selection"
+	    << std::endl;
+  try {
+    casa::Matrix<short> data = timeseries.fx (start,
+					      nofSamples);
+    // feedback 
+    std::cout << "-- Data start     = " << start        << std::endl;
+    std::cout << "-- Data blocksize = " << nofSamples   << std::endl;
+    std::cout << "-- Data array     = " << data.shape() << std::endl;
+    std::cout << "-- Data [0,]      = " << data.row(0)  << std::endl;
+    std::cout << "-- Data [1,]      = " << data.row(1)  << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
 int main (int argc,
 	  char *argv[])
 {
@@ -111,7 +148,15 @@ int main (int argc,
   std::string filename = argv[1];
 
   // Test for the constructor(s)
-  nofFailedTests += test_LOFAR_Timeseries (filename);
+  nofFailedTests += test_construction (filename);
+
+  if (nofFailedTests == 0) {
+    nofFailedTests += test_data (filename);
+  } else {
+    std::cerr << "[tLOFAR_StationGroup]"
+	      << " Skipping tests after testing constructors returned errors!"
+	      << std::endl;
+  }
   
   return nofFailedTests;
 }

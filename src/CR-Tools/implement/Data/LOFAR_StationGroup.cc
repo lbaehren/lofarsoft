@@ -501,6 +501,61 @@ namespace DAL { // Namespace DAL -- begin
     return dataset_ids;
   }
 
+  // ------------------------------------------------------------------------- fx
+
+  casa::Matrix<short> LOFAR_StationGroup::fx (int const &start,
+					      int const &nofSamples)
+  {
+    /* Check minimal condition for operations below. */
+    if (groupID_p < 1) {
+      return casa::Matrix<short> (1,1,0);
+    }
+
+    uint nofDipoles = nofDipoleDatasets();
+    casa::Matrix<short> data (nofSamples,nofDipoles);
+
+    /* Go through the set of dipole datasets and retrieve the data */
+
+    casa::Vector<short> tmp (nofSamples);
+
+    for (uint n(0); n<nofDipoles; n++) {
+      // get the channel data ...
+      tmp = datasets_p[n].fx(start,nofSamples);
+      // ... and add them to the returned array
+      data.column(n) = tmp;
+    }
+
+    return data;
+  }
+
+  // ------------------------------------------------------------------------- fx
+  
+  casa::Matrix<short> LOFAR_StationGroup::fx (int const &start,
+					      int const &nofSamples,
+					      std::vector<uint> const &dipoleSelection)
+  {
+    /* Check minimal condition for operations below. */
+    if (groupID_p < 1) {
+      return casa::Matrix<short> (1,1,0);
+    }
+
+    uint nofDipoles = dipoleSelection.size();
+    casa::Matrix<short> data (nofSamples,nofDipoles);
+
+    /* Go through the set of dipole datasets and retrieve the data */
+
+    casa::Vector<short> tmp (nofSamples);
+
+    for (uint n(0); n<nofDipoles; n++) {
+      // get the channel data ...
+      tmp = datasets_p[dipoleSelection[n]].fx(start,nofSamples);
+      // ... and add them to the returned array
+      data.column(n) = tmp;
+    }
+
+    return data;
+  }
+  
   // ---------------------------------------------------------- attributes2record
 
   casa::Record LOFAR_StationGroup::attributes2record ()

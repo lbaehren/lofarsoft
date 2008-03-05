@@ -37,6 +37,15 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------------ LOFAR_TBB
   
+  LOFAR_TBB::LOFAR_TBB ()
+    : LOFAR_Timeseries (),
+      DataReader ()
+  {
+    init ();
+  }
+  
+  // ------------------------------------------------------------------ LOFAR_TBB
+  
   LOFAR_TBB::LOFAR_TBB (std::string const &filename)
     : LOFAR_Timeseries (filename),
       DataReader ()

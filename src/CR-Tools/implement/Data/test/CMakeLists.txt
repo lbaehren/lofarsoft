@@ -40,7 +40,7 @@ if (DAL_LIBRARIES AND HDF5_LIBRARIES)
     ${CR_SOURCE_DIR}/../../data
     )
   
-  foreach (src tLOFAR_StationGroup tLOFAR_DipoleDataset tLOFAR_Timeseries) 
+  foreach (src tLOFAR_StationGroup tLOFAR_DipoleDataset tLOFAR_Timeseries tLOFAR_TBB) 
     ## compiler instructions
     add_executable (${src} ${src}.cc)
     ## linker instructions

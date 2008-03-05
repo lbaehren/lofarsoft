@@ -388,6 +388,62 @@ int test_methods (std::string const &filename)
 
 // -----------------------------------------------------------------------------
 
+/*!
+  \brief Test retrieval of the actual time-series data form the dipoles
+
+  \param filename -- Data file used for testing
+
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_data (std::string const &filename)
+{
+  cout << "\n[test_data]\n" << endl;
+
+  int nofFailedTests (0);
+  LOFAR_StationGroup group (filename,"Station001");
+  int start (0);
+  int blocksize (1024);
+
+  std::cout << "[1] Retrieve data for all dipoles ..." << std::endl;
+  try {
+    casa::Matrix<short> data = group.fx (start,blocksize);
+    // feedback 
+    std::cout << "-- Data start     = " << start        << std::endl;
+    std::cout << "-- Data blocksize = " << blocksize    << std::endl;
+    std::cout << "-- Data array     = " << data.shape() << std::endl;
+    std::cout << "-- Data [0,]      = " << data.row(0)  << std::endl;
+    std::cout << "-- Data [1,]      = " << data.row(1)  << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[2] Retrieve data for selected dipoles ..." << std::endl;
+  try {
+    // set up the dipole selection
+    std::vector<uint> selection;
+    selection.push_back(0);
+    selection.push_back(1);
+    selection.push_back(2);
+    casa::Matrix<short> data = group.fx (start,
+					 blocksize,
+					 selection);
+    // feedback 
+    std::cout << "-- Data start     = " << start        << std::endl;
+    std::cout << "-- Data blocksize = " << blocksize    << std::endl;
+    std::cout << "-- Data array     = " << data.shape() << std::endl;
+    std::cout << "-- Data [0,]      = " << data.row(0)  << std::endl;
+    std::cout << "-- Data [1,]      = " << data.row(1)  << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
 int main (int argc,
 	  char *argv[])
 {
@@ -416,6 +472,7 @@ int main (int argc,
   if (nofFailedTests == 0) {
     nofFailedTests += test_groups(filename);
 //     nofFailedTests += test_methods (filename);
+    nofFailedTests += test_data(filename);
    }
 
   return nofFailedTests;

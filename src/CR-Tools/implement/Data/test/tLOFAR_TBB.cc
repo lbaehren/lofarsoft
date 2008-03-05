@@ -3,7 +3,7 @@
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
- *   Lars B"ahren (bahren@astron.nl)                                       *
+ *   Lars B"ahren (lbaehren@gmail.com)                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -119,7 +119,7 @@ int test_hdf5 (std::string const &filename)
     try {
       // get the identifier for the attribute
       attribute_id = H5Aopen_name(stationGroup_id,
-				  LOFAR::attribute_name(LOFAR::TELESCOPE).c_str());
+				  DAL::attribute_name(DAL::TELESCOPE).c_str());
       if (attribute_id > 0) {
 	// dataspace of the attribute
 	hid_t dataspace_id       = H5Aget_space (attribute_id);
@@ -197,8 +197,8 @@ int test_hdf5 (std::string const &filename)
 
     cout << "--> Reading in STATION_ID attribute ..." << endl;
     try {
-      status = LOFAR::h5get_attribute (station_id,
-				       LOFAR::attribute_name(LOFAR::STATION_ID),
+      status = DAL::h5get_attribute (station_id,
+				       DAL::attribute_name(DAL::STATION_ID),
 				       channelDataset_id);
     } catch (std::string message) {
       std::cerr << message << std::endl;
@@ -207,8 +207,8 @@ int test_hdf5 (std::string const &filename)
 
     cout << "--> Reading in RSP_ID attribute ..." << endl;
     try {
-      status = LOFAR::h5get_attribute (rsp_id,
-				       LOFAR::attribute_name(LOFAR::RSP_ID),
+      status = DAL::h5get_attribute (rsp_id,
+				       DAL::attribute_name(DAL::RSP_ID),
 				       channelDataset_id);
     } catch (std::string message) {
       std::cerr << message << std::endl;
@@ -217,36 +217,14 @@ int test_hdf5 (std::string const &filename)
 
     cout << "--> Reading in RCU_ID attribute ..." << endl;
     try {
-      status = LOFAR::h5get_attribute (rcu_id,
-				       LOFAR::attribute_name(LOFAR::RCU_ID),
+      status = DAL::h5get_attribute (rcu_id,
+				       DAL::attribute_name(DAL::RCU_ID),
 				       channelDataset_id);
     } catch (std::string message) {
       std::cerr << message << std::endl;
       nofFailedTests++;
     }
-    
    
-//     cout << "--> Reading in ANTENNA_POSITION attribute ..." << endl;
-//     attribute_id = H5Aopen_name(channelDataset_id,"ANT_POSITION");
-//     // retrieve the value of the attribute
-//     if (attribute_id > 0) {
-//       LOFAR::h5attribute_summary (std::cout,attribute_id);
-//       // retrive value
-//       h5error = H5Aread(attribute_id,
-// 			H5T_NATIVE_DOUBLE,
-// 			&antenna_position);
-//       // release the attribute ID
-//       h5error = H5Aclose (attribute_id);
-//     }
-
-//     cout << "--> Reading in ANTENH5Tget_class (atype)NA_ORIENTATION attribute ..." << endl;
-//     attribute_id = H5Aopen_name(channelDataset_id,"ANT_ORIENTATION");
-//     if (attribute_id > 0) {
-//       LOFAR::h5attribute_summary (std::cout,attribute_id);
-//       // release the attribute ID
-//       h5error = H5Aclose (attribute_id);
-//     }
-
   }
   
   /*
@@ -394,15 +372,16 @@ int test_construction (std::string const &filename)
 {
   cout << "\n[test_construction]\n" << endl;
 
-  int nofFailedTests (0);
-  bool listStationGroups (true);
-  bool listChannelIDs (true);
+  int nofFailedTests     = 0;
+  bool listStationGroups = true;
+  bool listChannelIDs    = true;
+  uint blocksize         = 1024;
   
-  cout << "[1] Testing argumented constructor ..." << endl;
+  cout << "[1] Testing default constructor ..." << endl;
   try {
-    LOFAR_TBB data (filename);
+    LOFAR_TBB tbb;
     //
-    data.summary(listStationGroups,listChannelIDs); 
+    tbb.summary(); 
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -410,10 +389,35 @@ int test_construction (std::string const &filename)
   
   cout << "[2] Testing argumented constructor ..." << endl;
   try {
-    uint blocksize (1024);
-    LOFAR_TBB data (filename,blocksize);
+    LOFAR_TBB data (filename);
     //
-    data.summary(listStationGroups,listChannelIDs); 
+    data.summary(); 
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[3] Testing argumented constructor ..." << endl;
+  try {
+    LOFAR_TBB data (filename,
+		    blocksize);
+    //
+    data.summary(); 
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[4] Testing copy constructor ..." << endl;
+  try {
+    std::cout << "--> creating original object ..." << std::endl;
+    LOFAR_TBB data (filename,
+		    blocksize);
+    data.summary();
+    //
+    std::cout << "--> creating new object as copy ..." << std::endl;
+    LOFAR_TBB dataCopy (data);
+    dataCopy.summary();
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -542,13 +546,13 @@ int main (int argc,
   std::string filename = argv[1];
 
   // Perform some basic tests using the HDF5 library directly
-  nofFailedTests += test_hdf5(filename);
+//   nofFailedTests += test_hdf5(filename);
 
   // Perform some basic tests using the DAL
 //   nofFailedTests += test_dal(filename);
 
   // Test for the constructor(s)
-//   nofFailedTests += test_construction (filename);
+  nofFailedTests += test_construction (filename);
   
 //   if (nofFailedTests == 0) {
 //     nofFailedTests += test_io (filename);
