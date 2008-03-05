@@ -171,8 +171,9 @@ namespace CR { // Namespace CR -- begin
 	cerr << "tbbTools::FPGAfilter: " << "input array too small (len<10)!";
 	return inary;
       };
-
-      outdata.resize(len,0.);
+      
+      outdata.resize(len);
+      outdata(0) = outdata(1) = 0.;
       for (i=2; i<len; i++){
 	outdata(i) = floor((inary(i)*B0B2 + inary(i-1)*B1 + inary(i-2)*B0B2 
 			    - outdata(i-1)*A1 - outdata(i-2)*A2)/resolution);
