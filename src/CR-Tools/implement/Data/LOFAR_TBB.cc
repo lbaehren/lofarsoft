@@ -170,6 +170,17 @@ namespace CR { // Namespace CR -- begin
   {
     bool status (true);
 
+    /*
+     *  Set up the vector collecting the IDs for the individual dipoles
+     */
+
+    channelID_p.resize (LOFAR_Timeseries::nofDipoleDatasets());
+
+    /*
+     * Connect the streams (or at least the pointers normally connected to a
+     * stream)
+     */
+
     if (status) {
       return setStreams();
     }
@@ -227,20 +238,10 @@ namespace CR { // Namespace CR -- begin
 
   casa::Matrix<double> LOFAR_TBB::fx ()
   {
-    uint sample (0);
-    uint nofSelectedAntennas (DataReader::nofSelectedAntennas());
-    short buffer[blocksize_p];
-    casa::Matrix<double> data (blocksize_p,nofSelectedAntennas);
+    int start = iterator_p[0].position();
 
-    for (uint antenna (0); antenna<nofSelectedAntennas; antenna++) {
-      /* Read the TBB data for the specified channel from the file. */
-
-      /* Copy the retrieved data values to the array returned by this function;
-	 there might be a more efficient way to do this (e.g. via slicing) but
-	 for now this is a working solution.  */
-    }
-    
-    return data;
+    return LOFAR_Timeseries::fx (start,
+				 blocksize_p);
   }
-
+  
 } // Namespace CR -- end

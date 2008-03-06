@@ -624,15 +624,15 @@ namespace DAL { // Namespace DAL -- begin
   
   // ------------------------------------------------------------------------- fx
   
-  casa::Vector<short> LOFAR_DipoleDataset::fx (int const &start,
+  casa::Vector<double> LOFAR_DipoleDataset::fx (int const &start,
 					       int const &nofSamples)
   {
     if (datasetID_p > 0) {
       bool status (true);
       short *dataBuffer;
-
+      
       dataBuffer = new short [nofSamples];
-
+      
       /* Retrieve the data from the file */
       
       status = fx (start,
@@ -642,21 +642,21 @@ namespace DAL { // Namespace DAL -- begin
       /* Copy the data from the buffer into the vector returned by this function */
       
       if (status) {
-	casa::Vector<short> data (nofSamples);
+	casa::Vector<double> data (nofSamples);
 	// copy values to returned vector
 	for (int sample(0); sample<nofSamples; sample++) {
-	  data(sample) = dataBuffer[sample];
+	  data(sample) = double(dataBuffer[sample]);
 	}
 	// clean up memory
 	delete [] dataBuffer;
 	// return data
 	return data;
       } else {
-	return casa::Vector<short> (1,0);
+	return casa::Vector<double> (1,0);
       }
       
     } else {
-      return casa::Vector<short> (1,0);
+      return casa::Vector<double> (1,0);
     }
   }
   

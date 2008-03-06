@@ -518,8 +518,8 @@ namespace DAL { // Namespace DAL -- begin
       \return fx -- [nofSamples,dipole] Array of raw ADC samples representing
               the electric field strength as function of time.
      */
-    casa::Matrix<short> fx (int const &start=0,
-			    int const &nofSamples=1);
+    casa::Matrix<double> fx (int const &start=0,
+			     int const &nofSamples=1);
     
   private:
     

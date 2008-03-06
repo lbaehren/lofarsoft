@@ -403,8 +403,8 @@ namespace DAL { // Namespace DAL -- begin
       \return fx -- [nofSamples,dipole] Array of raw ADC samples representing
               the electric field strength as function of time.
      */
-    casa::Matrix<short> fx (int const &start=0,
-			    int const &nofSamples=1);
+    casa::Matrix<double> fx (int const &start=0,
+			     int const &nofSamples=1);
     
     /*!
       \brief Retrieve a block of ADC values for the dipoles in this station
@@ -418,9 +418,9 @@ namespace DAL { // Namespace DAL -- begin
       \return fx -- [nofSamples,dipole] Vector of raw ADC samples representing
               the electric field strength as function of time.
     */
-    casa::Matrix<short> fx (int const &start,
-			    int const &nofSamples,
-			    std::vector<uint> const &dipoleSelection);
+    casa::Matrix<double> fx (int const &start,
+			     int const &nofSamples,
+			     std::vector<uint> const &dipoleSelection);
     
     /*!
       \brief Get a casa::Record containing the values of the attributes

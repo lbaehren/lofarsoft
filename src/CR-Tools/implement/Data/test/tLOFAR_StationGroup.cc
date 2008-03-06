@@ -406,7 +406,8 @@ int test_data (std::string const &filename)
 
   std::cout << "[1] Retrieve data for all dipoles ..." << std::endl;
   try {
-    casa::Matrix<short> data = group.fx (start,blocksize);
+    casa::Matrix<double> data = group.fx (start,
+					  blocksize);
     // feedback 
     std::cout << "-- Data start     = " << start        << std::endl;
     std::cout << "-- Data blocksize = " << blocksize    << std::endl;
@@ -425,9 +426,9 @@ int test_data (std::string const &filename)
     selection.push_back(0);
     selection.push_back(1);
     selection.push_back(2);
-    casa::Matrix<short> data = group.fx (start,
-					 blocksize,
-					 selection);
+    casa::Matrix<double> data = group.fx (start,
+					  blocksize,
+					  selection);
     // feedback 
     std::cout << "-- Data start     = " << start        << std::endl;
     std::cout << "-- Data blocksize = " << blocksize    << std::endl;

@@ -42,10 +42,10 @@
     <li>The structure of a dataset containing a dump from the LOFAR transient 
     buffer boards (TBBs) is mapped onto a hierarchy of C++ classes:
     <ul>
-      <li>LOFAR::LOFAR_Timeseries -- Top-level structure of a time-series dataset
-      <li>LOFAR::LOFAR_StationGroup -- Group collecting the data for an individual
+      <li>DAL::LOFAR_Timeseries -- Top-level structure of a time-series dataset
+      <li>DAL::LOFAR_StationGroup -- Group collecting the data for an individual
       LOFAR station.
-      <li>LOFAR::LOFAR_DipoleDataset
+      <li>DAL::LOFAR_DipoleDataset
     </ul>
   </ul>
   

@@ -718,6 +718,10 @@ namespace CR {  //  Namespace CR -- begin
     Matrix<Double> out (blocksize_p,nofSelectedAntennas());
     
     out = 0.0;
+
+    std::cout << "[DataReader::fx]" << std::endl;
+    std::cout << "-- blocksize = " << blocksize_p << std::endl;
+    std::cout << "-- shape(fx) = " << out.shape()  << std::endl;
     
     return out;
   }
@@ -728,6 +732,12 @@ namespace CR {  //  Namespace CR -- begin
   {
     Matrix<Double> in (fx());
     Matrix<Double> out (in);
+
+#ifdef DEBUGGING_MESSAGES
+    std::cout << "[DataReader::voltage]" << std::endl;
+    std::cout << "-- blocksize = " << blocksize_p << std::endl;
+    std::cout << "-- shape(fx) = " << in.shape()  << std::endl;
+#endif
     
     /*
       Keep in mind here, that there might be a set of antennas selected
@@ -759,6 +769,13 @@ namespace CR {  //  Namespace CR -- begin
     FFTServer<Double,DComplex> server(IPosition(1,blocksize_p),
 				      FFTEnums::REALTOCOMPLEX);
     IPosition shape (out.shape());
+
+#ifdef DEBUGGING_MESSAGES
+    std::cout << "[DataReader::fft]" << std::endl;
+    std::cout << "-- blocksize      = " << blocksize_p << std::endl;
+    std::cout << "-- shape(voltage) = " << in.shape()  << std::endl;
+    std::cout << "-- shape(fft)     = " << out.shape() << std::endl;
+#endif
     
     for (int antenna(0); antenna<shape(1); antenna++) {
       inColumn = in.column(antenna);

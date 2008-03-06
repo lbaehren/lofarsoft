@@ -327,9 +327,9 @@ namespace DAL { // Namespace DAL -- begin
       \return fx -- [nofSamples] Vector of raw ADC samples representing the 
               electric field strength as function of time.
      */
-    casa::Vector<short> fx (int const &start=0,
-			    int const &nofSamples=1);
-
+    casa::Vector<double> fx (int const &start=0,
+			     int const &nofSamples=1);
+    
     /*!
       \brief Get a casa::Record containing the values of the attributes
 

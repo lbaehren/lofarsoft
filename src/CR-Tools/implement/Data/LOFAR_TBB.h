@@ -224,7 +224,11 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get a block of raw time-series data for the available data channels
 
-      \return fx -- [sample,antenna] 2-dim array with a block of time-series
+      \todo We still need to implement the support for the selection of dipoles
+      within this framework; the arrays originally set up by the DataReader class
+      are not yet being used here.
+      
+      \return fx -- [sample,dipole] 2-dim array with a block of time-series
               values for the selected data channels (dipoles).
     */
     casa::Matrix<double> fx ();

@@ -212,23 +212,23 @@ namespace DAL { // Namespace DAL -- begin
   
   // ------------------------------------------------------------------------- fx
 
-  casa::Matrix<short> LOFAR_Timeseries::fx (int const &start,
-					    int const &nofSamples)
+  casa::Matrix<double> LOFAR_Timeseries::fx (int const &start,
+					     int const &nofSamples)
   {
     /* Check minimal condition for operations below. */
     if (fileID_p < 1) {
-      return casa::Matrix<short> (1,1,0);
+      return casa::Matrix<double> (1,1,0);
     }
-
+    
     uint n (0);
     uint station(0);
     uint dipole(0);
     std::vector<uint> selection (1);
     uint nofStations = groups_p.size();
     uint nofDipoles  = nofDipoleDatasets();
-    casa::Matrix<short> data (nofSamples,nofDipoles);
-    casa::Vector<short> tmp (nofSamples);
-    
+    casa::Matrix<double> data (nofSamples,nofDipoles);
+    casa::Vector<double> tmp (nofSamples);
+
     for (station=0; station<nofStations; station++) {
       // get the number dipoles 
       nofDipoles = groups_p[station].nofDipoleDatasets();

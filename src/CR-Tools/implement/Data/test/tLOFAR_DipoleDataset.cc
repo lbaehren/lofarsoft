@@ -539,7 +539,7 @@ int test_data (std::string const &filename)
   
   std::cout << "[2] Retrieve data into casa::Vector ..." << std::endl;
   try {
-    casa::Vector<short> data = dataset.fx (start,blocksize);
+    casa::Vector<double> data = dataset.fx (start,blocksize);
 
     if (data.size() == blocksize) {
       std::cout << "-- Channel ID   = " << dataset.channel_id() << std::endl;

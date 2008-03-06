@@ -110,8 +110,8 @@ int test_data (std::string const &filename)
   std::cout << "[1] Retrieve time-series data without channel selection"
 	    << std::endl;
   try {
-    casa::Matrix<short> data = timeseries.fx (start,
-					      nofSamples);
+    casa::Matrix<double> data = timeseries.fx (start,
+					       nofSamples);
     // feedback 
     std::cout << "-- Data start     = " << start        << std::endl;
     std::cout << "-- Data blocksize = " << nofSamples   << std::endl;

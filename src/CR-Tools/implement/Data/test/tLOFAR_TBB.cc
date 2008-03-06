@@ -433,13 +433,16 @@ int test_construction (std::string const &filename)
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_io (std::string const &filename)
+int test_data (std::string const &filename)
 {
-  cout << "\n[test_io]\n" << endl;
+  cout << "\n[test_data]\n" << endl;
   
   int nofFailedTests (0);
   uint blocksize (1024);
-  LOFAR_TBB data (filename,blocksize);
+
+  // create object to handle the data
+  LOFAR_TBB data (filename,
+		  blocksize);
   
   cout << "[1] Reading one block of ADC values ..." << endl;
   try {
@@ -483,7 +486,7 @@ int test_io (std::string const &filename)
   
   cout << "[3] Reading FFT for one block of data ..." << endl;
   try {
-    casa::Matrix<DComplex> fft = data.fft();
+    casa::Matrix<casa::DComplex> fft = data.fft();
 
     cout << "-- shape (fft)    = " << fft.shape() << endl;
     cout << "-- FFT values [0] = ["
@@ -554,9 +557,10 @@ int main (int argc,
   // Test for the constructor(s)
   nofFailedTests += test_construction (filename);
   
-//   if (nofFailedTests == 0) {
-//     nofFailedTests += test_io (filename);
-//   }
+  if (nofFailedTests == 0) {
+    // Test reading in the data from a file
+    nofFailedTests += test_data (filename);
+  }
   
   return nofFailedTests;
 }
