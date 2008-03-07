@@ -577,7 +577,6 @@ namespace DAL { // Namespace DAL -- begin
 					 shape,
 					 NULL);
       hsize_t offset[1];
-      hsize_t offset_out[1];
 
       if (filespaceID < 0) {
 	std::cerr << "[LOFAR_DipoleDataset::fx]"
@@ -665,6 +664,25 @@ namespace DAL { // Namespace DAL -- begin
     } else {
       return casa::Vector<double> (1,0);
     }
+  }
+
+  // ---------------------------------------------------------- recordDescription
+
+  casa::RecordDesc LOFAR_DipoleDataset::recordDescription ()
+  {
+    casa::RecordDesc desc;
+
+    desc.addField (DAL::attribute_name(DAL::STATION_ID),casa::TpUInt);
+    desc.addField (DAL::attribute_name(DAL::RSP_ID),casa::TpUInt);
+    desc.addField (DAL::attribute_name(DAL::RCU_ID),casa::TpUInt);
+    desc.addField (DAL::attribute_name(DAL::TIME),casa::TpUInt);
+    desc.addField (DAL::attribute_name(DAL::SAMPLE_FREQUENCY),casa::TpDouble);
+    desc.addField (DAL::attribute_name(DAL::NYQUIST_ZONE),casa::TpUInt);
+    desc.addField (DAL::attribute_name(DAL::SAMPLE_NUMBER),casa::TpUInt);
+    desc.addField (DAL::attribute_name(DAL::SAMPLES_PER_FRAME),casa::TpUInt);
+    desc.addField (DAL::attribute_name(DAL::FEED),casa::TpString);
+
+    return desc;
   }
   
   // ---------------------------------------------------------- attributes2record

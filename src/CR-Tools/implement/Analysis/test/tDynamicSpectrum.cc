@@ -1,6 +1,9 @@
-/***************************************************************************
- *   Copyright (C) 2006                                                  *
- *   Lars Bahren (<mail>)                                                     *
+/*-------------------------------------------------------------------------*
+ | $Id:: tNewClass.cc 1159 2007-12-21 15:40:14Z baehren                  $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2008                                                    *
+ *   Lars B"ahren (lbaehren@gmail.com)                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,18 +21,21 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tDynamicSpectrum.cc,v 1.1 2006/02/22 18:53:34 bahren Exp $*/
-
 #include <Analysis/DynamicSpectrum.h>
+
+// Namespace usage
+using CR::DynamicSpectrum;
 
 /*!
   \file tDynamicSpectrum.cc
 
-  \brief A collection of test routines for DynamicSpectrum
+  \ingroup CR_Analysis
+
+  \brief A collection of test routines for the DynamicSpectrum class
  
-  \author Lars Bahren
+  \author <author>
  
-  \date 2006/02/22
+  \date <date>
 */
 
 // -----------------------------------------------------------------------------
@@ -39,9 +45,21 @@
 
   \return nofFailedTests -- The number of failed tests.
 */
-Int test_DynamicSpectrum ()
+int test_DynamicSpectrum ()
 {
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
+  
+  std::cout << "\n[test_DynamicSpectrum]\n" << std::endl;
+
+  std::cout << "[1] Testing default constructor ..." << std::endl;
+  try {
+    DynamicSpectrum newDynamicSpectrum;
+    //
+    newDynamicSpectrum.summary(); 
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
   
   return nofFailedTests;
 }
@@ -50,7 +68,7 @@ Int test_DynamicSpectrum ()
 
 int main ()
 {
-  Int nofFailedTests (0);
+  int nofFailedTests (0);
 
   // Test for the constructor(s)
   {

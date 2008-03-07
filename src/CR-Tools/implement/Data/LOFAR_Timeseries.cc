@@ -135,8 +135,6 @@ namespace DAL { // Namespace DAL -- begin
   
   void LOFAR_Timeseries::init (std::string const &filename)
   {
-    herr_t h5error (0);
-
     // try to open the HDF5 file
     fileID_p = H5Fopen (filename.c_str(),
 			H5F_ACC_RDONLY,

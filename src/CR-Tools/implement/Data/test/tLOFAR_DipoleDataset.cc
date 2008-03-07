@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include <casa/Arrays/ArrayIO.h>
+#include <dal/Enumerations.h>
 #include <Data/LOFAR_DipoleDataset.h>
 
 using std::cerr;
@@ -574,15 +575,36 @@ int test_export2record (std::string const &filename)
 
   int nofFailedTests (0);
 
-  // open dataset
-  LOFAR_DipoleDataset dataset (filename,
-			       "Station001/001000001");
-
   cout << "[1] Retrieve attributes of dataset into record ..." << endl;
   try {
+    // open dataset
+    LOFAR_DipoleDataset dataset (filename,
+				 "Station001/001000001");
+    // retrieve attributes into record
     casa::Record record = dataset.attributes2record ();
-
+    // feedback
     cout << "-- nof. attributes    = " << dataset.nofAttributes() << endl;
+    cout << "-- nof. record fields = " << record.nfields() << endl;
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[2] Combine records from multiple dipole datasets ..." << endl;
+  try {
+    // open datasets from which to extract records
+    LOFAR_DipoleDataset dataset1 (filename,
+				  "Station001/001000001");
+    LOFAR_DipoleDataset dataset2 (filename,
+				  "Station001/001000002");
+    // description of the record's structure
+    casa::RecordDesc descriptionRecord;
+    casa::RecordDesc descriptionSubRecord = dataset1.recordDescription();
+    descriptionRecord.addField ("001000001",descriptionSubRecord);
+    descriptionRecord.addField ("001000002",descriptionSubRecord);
+    // create the record
+    casa::Record record(descriptionRecord);
+    // feedback
     cout << "-- nof. record fields = " << record.nfields() << endl;
   } catch (std::string message) {
     cerr << message << endl;

@@ -91,8 +91,10 @@ namespace DAL { // Namespace DAL -- begin
   
   void LOFAR_StationGroup::destroy ()
   {
+    herr_t h5error (0);
+    
     if (groupID_p > 0) {
-      herr_t h5error = H5Gclose (groupID_p);
+      h5error = H5Gclose (groupID_p);
     }
   }
   
@@ -442,7 +444,6 @@ namespace DAL { // Namespace DAL -- begin
 
     bool status (true);
     std::string datasetName;
-    hid_t datasetID (0);
     hsize_t nofObjects (0);
     herr_t h5error (0);
 

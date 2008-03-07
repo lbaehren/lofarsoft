@@ -51,8 +51,8 @@ namespace DAL { // Namespace DAL -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>casa::Record -- A hierarchical collection of named fields of various
-      types.
+      <li><a href="http://www.atnf.csiro.au/computing/software/casacore/classcasa_1_1Record.html">casa::Record</a>
+      -- A hierarchical collection of named fields of various types.
       <li>DAL::LOFAR_StationGroup
       <li>DAL::LOFAR_Timeseries
     </ul>
@@ -341,6 +341,15 @@ namespace DAL { // Namespace DAL -- begin
      */
     casa::Vector<double> fx (int const &start=0,
 			     int const &nofSamples=1);
+
+    /*!
+      \brief Get a casa::RecordDesc object describing the structure of the record
+
+      \return recDesc -- Record descriptor containing the information on how to
+              structure the record as which the attributes attached to the dataset
+	      can be retrieved.
+    */
+    casa::RecordDesc recordDescription ();
     
     /*!
       \brief Get a casa::Record containing the values of the attributes
