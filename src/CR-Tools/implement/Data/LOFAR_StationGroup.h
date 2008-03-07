@@ -29,6 +29,7 @@
 #include <string>
 
 #include <casa/aips.h>
+#include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/Containers/Record.h>
 
