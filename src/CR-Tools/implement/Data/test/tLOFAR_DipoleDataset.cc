@@ -517,7 +517,7 @@ int test_data (std::string const &filename)
 			dataBuffer);
     
     if (status) {
-      std::cout << "-- Channel ID   = " << dataset.channel_id() << std::endl;
+      std::cout << "-- Channel name = " << dataset.channelName() << std::endl;
       std::cout << "-- Data start   = " << start     << std::endl;
       std::cout << "-- Blocksize    = " << blocksize << std::endl;
       std::cout << "-- Channel data = ["
@@ -542,10 +542,10 @@ int test_data (std::string const &filename)
     casa::Vector<double> data = dataset.fx (start,blocksize);
 
     if (data.size() == blocksize) {
-      std::cout << "-- Channel ID   = " << dataset.channel_id() << std::endl;
-      std::cout << "-- Data start   = " << start     << std::endl;
-      std::cout << "-- Blocksize    = " << blocksize << std::endl;
-      std::cout << "-- Channel data = " << data << std::endl;
+      std::cout << "-- Channel name = " << dataset.channelName() << std::endl;
+      std::cout << "-- Data start   = " << start                 << std::endl;
+      std::cout << "-- Blocksize    = " << blocksize             << std::endl;
+      std::cout << "-- Channel data = " << data                  << std::endl;
     } else {
       std::cerr << "--> Error retrieving time-series data!" << std::endl;
       nofFailedTests++;
@@ -570,7 +570,20 @@ int test_data (std::string const &filename)
 */
 int test_export2record (std::string const &filename)
 {
+  cout << "\n[test_export2record]\n" << endl;
+
   int nofFailedTests (0);
+
+  // open dataset
+  LOFAR_DipoleDataset dataset (filename,
+			       "Station001/001000001");
+
+  try {
+    casa::Record record = dataset.attributes2record ();
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
 
   return nofFailedTests;
 }
@@ -600,6 +613,8 @@ int main (int argc,
   nofFailedTests += test_parameters (filename);
   // Test retrieval of the actual TBB time-series values
   nofFailedTests += test_data (filename);
-  
+  // Test exporting the attributes to a casa::Record
+  nofFailedTests += test_export2record (filename);
+
   return nofFailedTests;
 }

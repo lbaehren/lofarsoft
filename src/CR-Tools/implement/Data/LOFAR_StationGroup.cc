@@ -477,15 +477,28 @@ namespace DAL { // Namespace DAL -- begin
   
   // ---------------------------------------------------------------- channelsIDs
 
-  std::vector<std::string> LOFAR_StationGroup::channelIDs ()
+  std::vector<int> LOFAR_StationGroup::channelIDs ()
   {
-    std::vector<std::string> channels_ids;
+    std::vector<int> channels_ids;
 
     for (uint n(0); datasets_p.size(); n++) {
-      channels_ids.push_back(datasets_p[n].channel_id());
+      channels_ids.push_back(datasets_p[n].channelID());
     }
 
     return channels_ids;
+  }
+
+  // --------------------------------------------------------------- channelNames
+
+  std::vector<std::string> LOFAR_StationGroup::channelNames ()
+  {
+    std::vector<std::string> names;
+
+    for (uint n(0); datasets_p.size(); n++) {
+      names.push_back(datasets_p[n].channelName());
+    }
+
+    return names;
   }
 
   // ----------------------------------------------------------------- datasetIDs

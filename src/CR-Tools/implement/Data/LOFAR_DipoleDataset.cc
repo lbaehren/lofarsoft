@@ -171,7 +171,7 @@ namespace DAL { // Namespace DAL -- begin
 	os << "-- STATION_ID          = " << station_id()          << std::endl;
 	os << "-- RSP_ID              = " << rsp_id()              << std::endl;
 	os << "-- RCU_ID              = " << rcu_id()              << std::endl;
-	os << "-- CHANNEL_ID          = " << channel_id()          << std::endl;
+	os << "-- CHANNEL_ID          = " << channelName()         << std::endl;
 	os << "-- SAMPLE_FREQUENCY    = " << sample_frequency()    << std::endl;
 	os << "-- NYQUIST_ZONE        = " << nyquist_zone()        << std::endl;
 	os << "-- TIME                = " << time()                << std::endl;
@@ -506,7 +506,14 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------------------- channel_id
   
-  std::string LOFAR_DipoleDataset::channel_id ()
+  int LOFAR_DipoleDataset::channelID ()
+  {
+    return rcu_id() + 1000*rsp_id() + 1000000*station_id();
+  }
+
+  // ---------------------------------------------------------------- channelName
+  
+  std::string LOFAR_DipoleDataset::channelName ()
   {
     char uid[10];
     sprintf(uid,
@@ -679,6 +686,10 @@ namespace DAL { // Namespace DAL -- begin
 		 sample_frequency());
       rec.define(casa::RecordFieldId(attribute_name(DAL::NYQUIST_ZONE)),
 		 nyquist_zone());
+      rec.define(casa::RecordFieldId(attribute_name(DAL::SAMPLE_NUMBER)),
+		 sample_number());
+      rec.define(casa::RecordFieldId(attribute_name(DAL::SAMPLES_PER_FRAME)),
+		 samples_per_frame());
       rec.define(casa::RecordFieldId(attribute_name(DAL::FEED)),
 		 feed());
       rec.define(casa::RecordFieldId(attribute_name(DAL::ANTENNA_POSITION)),

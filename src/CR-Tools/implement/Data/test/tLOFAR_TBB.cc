@@ -523,6 +523,35 @@ int test_data (std::string const &filename)
     std::cerr << message << endl;
     nofFailedTests++;
   }
+
+  cout << "[5] Read multiple blocks of ADC values ..." << endl;
+  try {
+    uint nofBlocks (10);
+    uint nofDipoles = data.nofDipoleDatasets();
+    casa::Matrix<double> fx (data.blocksize(),
+			     nofDipoles);
+
+    cout << "-- blocksize    = " << blocksize  << endl;
+    cout << "-- nof. dipoles = " << nofDipoles << endl;
+    cout << "-- shape(fx)    = " << fx.shape() << endl;
+
+    for (uint block(0); block<nofBlocks; block++) {
+      // get the data for the current block
+      fx = data.fx();
+      // feedback
+      cout << "\t" << block << "/" << nofBlocks
+	   << "\t" << min(fx)
+	   << "\t" << mean(fx)
+	   << "\t" << max(fx)
+	   << endl;
+      // increment the block-counter
+      data.nextBlock();
+    }
+
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
   
   return nofFailedTests;
 }

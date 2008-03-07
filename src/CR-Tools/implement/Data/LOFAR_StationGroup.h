@@ -359,8 +359,16 @@ namespace DAL { // Namespace DAL -- begin
 
       \return channelIDs -- A list of the channel IDs for all the dipoles within
               this LOFAR station.
-     */
-    std::vector<std::string> channelIDs ();
+    */
+    std::vector<int> channelIDs ();
+
+    /*!
+      \brief Retrieve the list of channels names contained within this group
+
+      \return channelNames -- A list of the channel names for all the dipoles
+              within this LOFAR station.
+    */
+    std::vector<std::string> channelNames ();
 
     /*!
       \brief Convert individual ID number to joint unique ID

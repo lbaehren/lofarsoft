@@ -295,11 +295,21 @@ namespace DAL { // Namespace DAL -- begin
     /*!
       \brief Get the unique channel/dipole identifier
       
+      \return channelID -- The unique identifier for a signal channel/dipole
+              within the whole LOFAR array; this ID is created from a combination
+	      of station ID, RSP ID and RCU ID:
+	      \f$ N_{\rm RCU} + 10^{3} \times N_{\rm RSP} + 10^{6} N_{\rm Station} \f$
+    */
+    int channelID ();
+
+    /*!
+      \brief Get the unique channel/dipole identifier
+      
       \return channel_id -- The unique identifier for a signal channel/dipole
               within the whole LOFAR array; this ID is created from a combination
 	      of station ID, RSP ID and RCU ID.
     */
-    std::string channel_id ();
+    std::string channelName ();
 
     /*!
       \brief Get a number of data values as recorded for this dipole

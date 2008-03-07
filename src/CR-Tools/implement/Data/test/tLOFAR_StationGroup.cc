@@ -367,15 +367,16 @@ int test_methods (std::string const &filename)
     nofFailedTests++;
   }
   
-  cout << "[2] Retrieve the list of channels IDs" << endl;
+  cout << "[2] Retrieve the list of channels names and IDs" << endl;
   try {
-    std::vector<std::string> channelIDs = group.channelIDs();
-    uint nofChannels = channelIDs.size();
-
-    cout << "-- nof. channel IDs = " << nofChannels    << endl;
-    cout << "-- Channel IDs      = [";
+    std::vector<std::string> channelNames = group.channelNames();
+    std::vector<int> channelIDs           = group.channelIDs();
+    uint nofChannels = channelNames.size();
+    
+    cout << "-- nof. channels = " << nofChannels    << endl;
+    cout << "-- Channel names = [";
     for (uint channel(0); channel<nofChannels; channel++) {
-      cout << channelIDs[channel] << " ";
+      cout << channelNames[channel] << " ";
     }
     cout << "]" << endl;
   } catch (std::string message) {
