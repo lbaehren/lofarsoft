@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006                                                    *
- *   Kalpana Singh (<mail>)                                                *
+ *   Kalpana Singh (<k.singh@astro.ru.nl>)                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -97,13 +97,34 @@ namespace CR {  // Namespace CR -- begin
     /*!
       \brief Argumented constructor
 
-      \param samples         -- 
-      \param ppfCoefficients -- 
-      \param dataBlocksize   -- 
+      \param F107  -- F107 is the 10.7 cm flux on previous day (1e-22 W/m^2/Hz )
+      \param mea_F107 -- average F107 over three solar rotations (81 days)
+      \param tableno  -- modelcoefficients table has to be used
+      \param col -- whether coefficients are called for temperature or for number density
+      \param t_day -- day of the year like 20th day or 200th day of the year
+      \param tau -- local time in hrs
+      \param t -- UT in seconds
+      \param Ap -- daily magnetic index
+      \param latitude -- geographic latitude
+      \param longitude -- geographic longitude (eastward positive)
+      \param altitude -- height in Km
+      \param molecular weight -- molecular weight of the molecule (just like N2= 28)
+      \param n_l_average -- average density at height zl =120 km.
     */
-    inverseFFT (const Vector<Double>& samples,
-                const Vector<Double>& ppfCoefficients,
-		const uint& dataBlocksize);
+
+    inverseFFT (const Double& F107,
+                const Double& mean_F107,
+		const uint& tableno,
+                const uint& col,
+                const uint& t_d,
+                const Double& tau,
+                const Double& t,
+                const Double& Ap,
+                const Double& latitude,
+                const Double& longitude,
+                const Double& altitude,
+                const Double& molecular_weight,
+                const Double& n_l_average );
 	
     /*!
       \brief Copy constructor 
@@ -123,51 +144,244 @@ namespace CR {  // Namespace CR -- begin
    
 
     /*!
-      \brief Get the coefficients of the poly-phase filter
+      \brief derivatives of associated legendre polynomial functions
       
-      \param ppfCoefficients -- 
-      \param dataBlockSize   -- 
-
-      \return ppfCoefficients -- 
     */
-    Matrix<Double> ppfCoefficients(const Vector<Double>& ppfCoefficients,
-				   const uint& dataBlockSize);
+    Double diff_legendre( const Double& latitude,
+                          const uint& degree,
+                          const uint& order ) ;
+
+
+      /*!
+      \brief value of associated legendre polynomial functions
+      
+    */
+    Double legendre( const Double& latitude,
+                     const uint& degree,
+                     const uint& order ) ;
+
+   
+     /*!
+      \brief value of solar activity function
+      
+    */
+
+    Double solar_activity( const Double& F107,
+                           const Double& mean_F107,
+                           const uint& tableno,
+                           const uint& col,
+                           const Double& latitude ) ;
+
+      
+     /*!
+      \brief value of symmetrical function
+      
+    */
+
+    Double symmetrical( const uint& tableno,
+                        const uint& col,
+                        const Double& t_d,
+                        const Double& latitude ) ;
 
     /*!
-      \param samples       -- 
-      \param dataBlockSize -- 
-
-      \return blockSamples -- 
+      \brief value of asymmetrical function
+      
     */
-    Matrix<Double> blockSamples (const Vector<Double>& samples,
-				 const uint& dataBlockSize);
+
+    Double asymmetrical( const Double& F107,
+                         const Double& mean_F107,
+                         const uint& tableno,
+                         const uint& col,
+                         const Double& t_d,
+                         const Double& latitude ) ;
 
     /*!
-      \param waveSamples -- 
-      \param ppfCoff     -- 
-
-      \return multipliedVector -- 
+      \brief value of diurnal function
+      
     */
-    Vector<Double> multipliedVector(const Vector<Double>& waveSamples,
-    				    const Matrix<Double>& ppfCoff);
+   
+    Double diurnal( const Double& F107,
+                    const Double& mean_F107,
+                    const uint& tableno,
+                    const uint& col,
+                    const Double& t_d,
+                    const Double& tau,
+                    const Double& latitude ) ; 
 
     /*!
-      \param FIRimplemented -- 
-      \param dataBlockSize  -- 
-
-      \return FFTVector -- 
+      \brief value of semidiurnal function
+      
     */
-    Vector<DComplex> FFTVector(const Vector<Double>& FIRimplemented,
-			       const uint& dataBlockSize );
+   
+    Double semidiurnal( const Double& F107,
+                        const Double& mean_F107,
+                        const uint& tableno,
+                        const uint& col,
+                        const Double& t_d,
+                        const Double& tau,
+                        const Double& latitude ) ; 
+  
+   /*!
+      \brief value of terdiurnal function
+      
+    */
+   
+    Double semidiurnal( const Double& F107,
+                        const Double& mean_F107,
+                        const uint& tableno,
+                        const uint& col,
+                        const Double& t_d,
+                        const Double& tau,
+                        const Double& latitude ) ; 
+
+   
+   /*!
+      \brief value of magnetic function
+      
+    */
+   
+    Double magnetic( const uint& tableno,
+                     const uint& col,
+                     const Double& t_d,
+                     const Double& tau,
+                     const Double& Ap,
+                     const Double& latitude ) ; 
+ 
+    /*!
+      \brief value of longitudinal function
+      
+    */
+   
+    Double longitudinal( const Double& F107,
+                         const Double& mean_F107,
+                         const uint& tableno,
+                         const uint& col,
+                         const Double& t_d,
+                         const Double& tau,
+                         const Double& latitude,
+                         const Double& longitude ) ; 
+    /*!
+      \brief value of UT function
+      
+    */
+   
+    Double UT( const Double& F107,
+               const Double& mean_F107,
+               const uint& tableno,
+               const uint& col,
+               const Double& t_d,
+               const Double& tau,
+               const Double& t,
+               const Double& latitude,
+               const Double& longitude ) ;
+
+    /*!
+      \brief value of combined function
+      
+    */
+   
+    Double combined( const Double& F107,
+                     const Double& mean_F107,
+                     const uint& tableno,
+                     const uint& col,
+                     const Double& t_d,
+                     const Double& tau,
+                     const Double& t,
+                     const Double& Ap,
+                     const Double& latitude,
+                     const Double& longitude ) ;
+
+    /*!
+      \brief value of expansion function
+      
+    */
+   
+    Double expansion( const Double& F107,
+                      const Double& mean_F107,
+                      const uint& tableno,
+                      const uint& col,
+                      const Double& t_d,
+                      const Double& tau,
+                      const Double& t,
+                      const Double& Ap,
+                      const Double& latitude,
+                      const Double& longitude ) ;
+		     
+    /*!
+      \brief value of temperature profile      
+    */
+   
+    Double temperature( const Double& F107,
+                        const Double& mean_F107,
+                        const uint& tableno,
+                        const uint& col,
+                        const Double& t_d,
+                        const Double& tau,
+                        const Double& t,
+                        const Double& Ap,
+                        const Double& latitude,
+                        const Double& longitude,
+                        const Double& altitude ) ;
+
+
+    /*!
+      \brief value of D profile      
+    */
+   
+    Double Dprofile( const Double& F107,
+                     const Double& mean_F107,
+                     const uint& tableno,
+                     const uint& col,
+                     const Double& t_d,
+                     const Double& tau,
+                     const Double& t,
+                     const Double& Ap,
+                     const Double& latitude,
+                     const Double& longitude,
+                     const Double& altitude,
+                     const Double& molecular_weight ) ;
     
-    Vector<Double> IFFTVector(Vector<DComplex> const &fourierTransformed,
-    			      uint const &dataBlockSize) ;
-    
-    Matrix<Double> matchingValues( const Vector<Double>& samples,
-                                  const Vector<Double>& ppfCoefficients,
-			          const uint& dataBlockSize ) ;
-    
-     
+    /*!
+      \brief value of density profile of Nitrogen molecule   
+    */
+   
+    Double N2densityprofile( const Double& F107,
+                             const Double& mean_F107,
+                             const Double& t_d,
+                             const Double& tau,
+                             const Double& t,
+                             const Double& Ap,
+                             const Double& latitude,
+                             const Double& longitude,
+                             const Double& altitude ) ;
+   
+   /*!
+      \brief value of density profile of Oxygen molecule   
+    */			     
+ 
+  Double O2densityprofile( const Double& F107,
+                           const Double& mean_F107,
+                           const Double& t_d,
+                           const Double& tau,
+                           const Double& t,
+                           const Double& Ap,
+                           const Double& latitude,
+                           const Double& longitude,
+                           const Double& altitude ) ;
+     			   
+     /*!
+      \brief value of density profile of Argon atom 
+    */			     
+  Double Ardensityprofile( const Double& F107,
+                           const Double& mean_F107,
+                           const Double& t_d,
+                           const Double& tau,
+                           const Double& t,
+                           const Double& Ap,
+                           const Double& latitude,
+                           const Double& longitude,
+                           const Double& altitude ) ;
+ 
     /*!
       \brief Overloading of the copy operator
       
