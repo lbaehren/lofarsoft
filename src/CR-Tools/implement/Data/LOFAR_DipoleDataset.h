@@ -51,8 +51,10 @@ namespace DAL { // Namespace DAL -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[CR] CR::LOFAR_TBB
-      <li>[DAL] DAL::LOFAR_StationGroup
+      <li>casa::Record -- A hierarchical collection of named fields of various
+      types.
+      <li>DAL::LOFAR_StationGroup
+      <li>DAL::LOFAR_Timeseries
     </ul>
     
     <h3>Synopsis</h3>

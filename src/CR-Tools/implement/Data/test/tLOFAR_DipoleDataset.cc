@@ -578,8 +578,12 @@ int test_export2record (std::string const &filename)
   LOFAR_DipoleDataset dataset (filename,
 			       "Station001/001000001");
 
+  cout << "[1] Retrieve attributes of dataset into record ..." << endl;
   try {
     casa::Record record = dataset.attributes2record ();
+
+    cout << "-- nof. attributes    = " << dataset.nofAttributes() << endl;
+    cout << "-- nof. record fields = " << record.nfields() << endl;
   } catch (std::string message) {
     cerr << message << endl;
     nofFailedTests++;

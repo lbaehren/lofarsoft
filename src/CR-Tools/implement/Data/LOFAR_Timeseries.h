@@ -29,6 +29,10 @@
 #include <string>
 #include <vector>
 
+// casacore header files
+#include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/Vector.h>
+
 // Header files of the HDF5 library
 #include <hdf5/H5LT.h>
 #include <hdf5/H5TA.h>

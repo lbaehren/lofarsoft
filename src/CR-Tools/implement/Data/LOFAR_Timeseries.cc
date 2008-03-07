@@ -147,6 +147,11 @@ namespace DAL { // Namespace DAL -- begin
       filename_p = filename;
       // locate and register the station groups
       bool status = setStationGroups ();
+      // feedback
+      if (!status) {
+	std::cerr << "[LOFAR_Timeseries::init] Error setting up the station groups!"
+		  << std::endl;
+      }
     } else {
       std::cerr << "[LOFAR_Timeseries::init] Error opening file "
 		<< filename
