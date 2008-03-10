@@ -26,6 +26,7 @@
 
 #include <gsl/gsl_sf_bessel.h>
 #include <gsl/gsl_sf_exp.h>
+#include <gsl/gsl_sf_legendre.h>
 
 /*!
   \file tUseGSL.cc
@@ -37,6 +38,16 @@
   \author Lars B&auml;hren
 
   \date 2007/09/06
+
+  Tests:
+  <ul>
+    <li>Special functions:
+      <ul>
+        <li>Bessel function
+	<li>Exponential function
+	<li>Legendre polynomial
+      </ul>
+  </ul>
 */
 
 /*!
@@ -89,6 +100,26 @@ int main ()
   }
   
   // --------------------------------------------------------------------- Test 3
+  
+  std::cout << "[2] GSL :: Special functions :: Legendre" << std::endl;
+  try {
+    int order    = 0;
+    int maxOrder = 5;
+    double y     = 0;
+
+    for (order=0; order<maxOrder; order++) {
+      for (int n(0); n<nofSamplePoints; n++) {
+	x = n*1.0/nofSamplePoints;
+	y = gsl_sf_legendre_Pl (order,x);
+	std::cout << "\t" << order << "\t" << x << "\t" << y << std::endl;
+      }
+    }
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  // --------------------------------------------------------------------- Test 4
   
 //   try {
 //   } catch (std::string message) {

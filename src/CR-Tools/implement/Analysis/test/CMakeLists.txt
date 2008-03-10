@@ -13,7 +13,7 @@ set (tests
   tFirstStagePipeline
   tfitCR2gauss
   tgenCRmap
-  tinverseFFT
+#  tinverseFFT
   tionoCalibration
   tppfimplement
   tppfinversion

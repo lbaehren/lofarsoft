@@ -202,7 +202,7 @@ namespace DAL { // Namespace DAL -- begin
       \return SAMPLE_FREQ -- The sampling frequency of the analog-to-digital
               conversion; [Hz]
     */
-    double sample_frequency ();
+    double sample_frequency (std::string const &unit="Hz");
 
     /*!
       \brief Get the Nyquist zone in which the ADC is performed

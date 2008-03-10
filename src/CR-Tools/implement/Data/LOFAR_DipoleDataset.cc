@@ -267,14 +267,30 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------------- sample_frequency
   
-  double LOFAR_DipoleDataset::sample_frequency ()
+  double LOFAR_DipoleDataset::sample_frequency (std::string const &unit)
   {
     if (datasetID_p > 0) {
       double val (0);
       if (DAL::h5get_attribute(val,
 			       attribute_name(DAL::SAMPLE_FREQUENCY),
 			       datasetID_p)) {
-	return val;
+	/*
+	 * Check the value stored in the dataset; we expect the sample frequency
+	 * be be stored in Hz, but this might not be the case.
+	 */
+	if (val < 1e06) {
+	  std::cerr << "[LOFAR_DipoleDataset::sample_frequency]"
+		    << " Suspecting improper units for sample frequency."
+		    << " Attempting conversion to Hz..."
+		    << std::endl;
+	  val *= 1e06;
+	}
+	/* Conversion to proper units */
+	if (unit == "Hz") {
+	  return val;
+	} else if (unit == "MHz") {
+	  return val/1e06;
+	}
       } else {
 	return 0;
       }

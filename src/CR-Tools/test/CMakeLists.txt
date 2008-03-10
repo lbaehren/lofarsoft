@@ -2,6 +2,24 @@
 ## $Id::                                                                       $
 ##------------------------------------------------------------------------------
 
+## try to locate the test data sets required by some of the programs
+
+find_file (dataset_tbb tbb_test_file_v2.h5
+  PATHS
+  ${CR_SOURCE_DIR}/data
+  ${CR_SOURCE_DIR}/../data
+  ${CR_SOURCE_DIR}/../../data
+  )
+
+find_file (dataset_event 2007.01.31.23:59:33.960.event
+  PATHS
+  ${CR_SOURCE_DIR}/data
+  ${CR_SOURCE_DIR}/../data
+  ${CR_SOURCE_DIR}/../../data
+  PATH_SUFFIXES
+  lopes
+  )
+
 ## -----------------------------------------------------------------------------
 ## Tests within the framework of the C++ standard library; this should be
 ## working in any case.
@@ -184,10 +202,24 @@ endif (HAVE_WCSLIB)
 ## -----------------------------------------------------------------------------
 ## Test for working with ROOT (includes working with the DAL)
 
-if (HAVE_ROOT AND HAVE_BLITZ AND dal)
-  ## build test program
-  add_executable (tUseROOT tUseROOT.cc)
-  target_link_libraries (tUseROOT dal ${ROOT_LIBRARIES} ${BLITZ_LIBRARIES})
-  ## testing
-  add_test (tUseROOT tUseROOT)
-endif (HAVE_ROOT AND HAVE_BLITZ AND dal)
+if (HAVE_ROOT AND HAVE_CASACORE)
+  if (HAVE_DAL)
+    ## compiler instructions
+    add_executable (tUseROOT tUseROOT.cc)
+    ## linker instructions
+    target_link_libraries (tUseROOT
+      ${DAL_LIBRARIES}
+      ${ROOT_LIBRARIES}
+      ${CASA_LIBRARIES}
+      ${LAPACK_LIBRARIES}
+      )
+    ## testing
+    if (dataset_event)
+      add_test (tUseROOT tUseROOT ${dataset_event})
+    else (dataset_event)
+      message (STATUS "[CR-Tools] Unable to run test tUseROOT; missing dataset.")
+    endif (dataset_event)
+  else (HAVE_DAL)
+    message (STATUS "[CR-Tools] Unable to build test program tUseROOT.")
+  endif (HAVE_DAL)
+endif (HAVE_ROOT AND HAVE_CASACORE)

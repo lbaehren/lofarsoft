@@ -556,6 +556,23 @@ int test_data (std::string const &filename)
     cerr << message << endl;
     nofFailedTests++;
   }
+
+  std::cout << "[3] Retrieve multiple blocks of data ..." << std::endl;
+  try {
+    uint nofBlocks (15);
+    casa::Vector<double> data (blocksize);
+
+    for (uint n(0); n<nofBlocks; n++) {
+      data = dataset.fx (start,blocksize);
+      // feedback
+      std::cout << "\t" << n << "\t" << start << "\t" << data << std::endl;
+      // increment pointer to start of data block
+      start += blocksize;
+    }
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
   
   return nofFailedTests;
 }

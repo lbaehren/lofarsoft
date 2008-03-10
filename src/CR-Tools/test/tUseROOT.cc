@@ -57,17 +57,17 @@
 #include <TObjArray.h>
 #include <TSpectrum.h>
 #include <TVirtualFFT.h>
+// -- casacore header files --------------------------------
+#include <casa/Arrays/ArrayMath.h>
+#include <casa/Arrays/Matrix.h>
 // --- CR-Pipeline header files ----------------------------
 #include <Utilities/ProgressBar.h>
 // --- DAL header files ------------------------------------
-#include <dalLopesEvent.h>
-// --- Blitz++ header files --------------------------------
-#include <blitz/array.h>
+#include <dal/dalLopesEvent.h>
 
 using std::cerr;
 using std::cout;
 using std::endl;
-using blitz::Array;
 
 // ------------------------------------------------------------------------------
 
@@ -89,7 +89,7 @@ int test_lopesevent2hist (std::string const &infile)
   int blocksize (le.blocksize());
 
   cout << "-- Retrieve antenna data from file ..." << endl;
-  Array<short,2> data = le.channeldata();
+  casa::Matrix<short> data = le.channeldata();
   
   /*
     Fill the data from the file into a set of histogram, which then can be fitted
@@ -243,7 +243,7 @@ int test_processing (std::string const &infile)
 
   cout << "-- Retrieve antenna data from file ..." << endl;
 
-  Array<short,2> data = le.channeldata();
+  casa::Matrix<short> data = le.channeldata();
   int nofAntennas (le.nofAntennas());
   int blocksize (le.blocksize());
   int fftLength (blocksize/2+1);
@@ -371,9 +371,9 @@ int main (int argc,
   
   // Tests
   
-  //   nofFailedTests += test_histogram2file();
-  //   nofFailedTests += test_lopesevent2hist (filename);
-  nofFailedTests += test_processing (filename);
+  nofFailedTests += test_histogram2file();
+  nofFailedTests += test_lopesevent2hist (filename);
+//   nofFailedTests += test_processing (filename);
   
   cout << nofFailedTests << " failed tests." << endl;
   

@@ -22,14 +22,14 @@
 ## treetest  GLISH CFITSIO WCSLIB
 
 if (LAPACK_LIBRARIES AND G2C_LIBRARIES)
+  ## compiler instructions
   add_executable (treetest treetest.cc)
+  ## linker instructions
   target_link_libraries (treetest cr)
-  install (TARGETS treetest
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib)
+  ## installation instructions
+  list (APPEND cr_apps treetest)
 else (LAPACK_LIBRARIES AND G2C_LIBRARIES)
-  message (STATUS "[cr] Unable to build executable treetest.")
+  message (STATUS "[CR-Tools] Unable to build executable treetest.")
 endif (LAPACK_LIBRARIES AND G2C_LIBRARIES)
 
 ## -------------------------------------------------------------------
@@ -44,10 +44,7 @@ if (HAVE_POPT AND LAPACK_LIBRARIES)
     ${POPT_LIBRARIES}
     )
   ## installation instructions
-  install (TARGETS trigrun
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib)
+  list (APPEND cr_apps trigrun)
 endif (HAVE_POPT AND LAPACK_LIBRARIES)
 
 ## -------------------------------------------------------------------
@@ -58,11 +55,7 @@ if (HAVE_CASACORE)
   ## linker instructions
   target_link_libraries (simStationBeam cr)
   ## installation instructions
-  install (TARGETS simStationBeam
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    )
+  list (APPEND cr_apps simStationBeam)
 endif (HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
@@ -78,10 +71,7 @@ if (HAVE_CASA OR HAVE_CASACORE)
     BUILD_WITH_INSTALL_RPATH TRUE
     )
   ## installation instructions
-  install (TARGETS reas2event
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib)
+  list (APPEND cr_apps reas2event)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
@@ -92,10 +82,7 @@ if (HAVE_CASA OR HAVE_CASACORE)
   ## linker instructions
   target_link_libraries (calcSourcePosition cr)
   ## installation instructions
-  install (TARGETS calcSourcePosition
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib)
+  list (APPEND cr_apps calcSourcePosition)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
@@ -111,11 +98,28 @@ if (HAVE_CASA OR HAVE_CASACORE)
       ${ROOT_LIBRARIES}
       )
     ## installation instructions
-    install (TARGETS call_pipeline
-      RUNTIME DESTINATION bin
-      LIBRARY DESTINATION lib
-      ARCHIVE DESTINATION lib)
+  list (APPEND cr_apps call_pipeline)
   endif (HAVE_ROOT AND HAVE_FFTW3)
+endif (HAVE_CASA OR HAVE_CASACORE)
+
+## -------------------------------------------------------------------
+## tbbStatistics
+
+if (HAVE_CASA OR HAVE_CASACORE)
+  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    ## compiler instructions
+    add_executable (tbbStatistics tbbStatistics.cc)
+    ## linker instructions
+    target_link_libraries (tbbStatistics
+      cr
+      ${DAL_LIBRARIES}
+      ${HDF5_LIBRARIES}
+      )
+    ## installation instructions
+    list (APPEND cr_apps tbbStatistics)
+  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    message (STATUS "[CR-Tools] Unable to build executable tbbStatistics.")
+  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
@@ -132,3 +136,16 @@ endif (CR_GLISH_SUPPORT AND HAVE_GLISH)
 if (CR_PYTHON_SUPPORT AND HAVE_ROOT AND HAVE_FFTW3 AND HAVE_PYTHON)
   add_subdirectory (LopesStar)
 endif (CR_PYTHON_SUPPORT AND HAVE_ROOT AND HAVE_FFTW3 AND HAVE_PYTHON)
+
+
+## ==============================================================================
+##
+##  Installation
+##
+## ==============================================================================
+
+install (TARGETS ${cr_apps}
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )
