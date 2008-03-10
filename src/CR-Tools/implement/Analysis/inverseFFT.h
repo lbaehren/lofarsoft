@@ -341,6 +341,7 @@ namespace CR {  // Namespace CR -- begin
                      const Double& altitude,
                      const Double& molecular_weight ) ;
     
+		     
     /*!
       \brief value of density profile of Nitrogen molecule   
     */
@@ -355,6 +356,7 @@ namespace CR {  // Namespace CR -- begin
                              const Double& longitude,
                              const Double& altitude ) ;
    
+			     
    /*!
       \brief value of density profile of Oxygen molecule   
     */			     
@@ -369,6 +371,7 @@ namespace CR {  // Namespace CR -- begin
                            const Double& longitude,
                            const Double& altitude ) ;
      			   
+			   
      /*!
       \brief value of density profile of Argon atom 
     */			     
@@ -381,7 +384,76 @@ namespace CR {  // Namespace CR -- begin
                            const Double& latitude,
                            const Double& longitude,
                            const Double& altitude ) ;
- 
+      
+      
+      /*!
+      \brief value of density profile of Oxygen atom 
+    */			     
+  Double Odensityprofile( const Double& F107,
+                          const Double& mean_F107,
+                          const Double& t_d,
+                          const Double& tau,
+                          const Double& t,
+                          const Double& Ap,
+                          const Double& latitude,
+                          const Double& longitude,
+                          const Double& altitude ) ;
+    
+    
+    
+      
+      
+      /*!
+      \brief value of density profile of Nitrogen atom 
+    */			     
+  Double Ndensityprofile( const Double& F107,
+                          const Double& mean_F107,
+                          const Double& t_d,
+                          const Double& tau,
+                          const Double& t,
+                          const Double& Ap,
+                          const Double& latitude,
+                          const Double& longitude,
+                          const Double& altitude ) ;
+    
+    
+      
+      
+      /*!
+      \brief value of density profile of Helium atom 
+    */			     
+    
+  Double Hedensityprofile( const Double& F107,
+                           const Double& mean_F107,
+                           const Double& t_d,
+                           const Double& tau,
+                           const Double& t,
+                           const Double& Ap,
+                           const Double& latitude,
+                           const Double& longitude,
+                           const Double& altitude ) ;
+    
+    
+        
+      
+      /*!
+      \brief value of density profile of Hydrogen atom 
+    */			     
+  Double Hdensityprofile( const Double& F107,
+                          const Double& mean_F107,
+                          const Double& t_d,
+                          const Double& tau,
+                          const Double& t,
+                          const Double& Ap,
+                          const Double& latitude,
+                          const Double& longitude,
+                          const Double& altitude ) ;
+    
+    
+        
+    
+    
+    
     /*!
       \brief Overloading of the copy operator
       
