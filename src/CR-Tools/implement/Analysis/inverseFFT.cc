@@ -51,9 +51,10 @@ namespace CR {  // Namespace CR -- begin
                           const Double& longitude,
                           const Double& altitude,
                           const Double& molecular_weight,
-                          const Double& n_l_average );
+                          const Double& n_l_average )
+  
   {
-
+  ;
   }
   
   // ----------------------------------------------------------------- inverseFFT
@@ -176,13 +177,13 @@ namespace CR {  // Namespace CR -- begin
 	    else if((degree==6) && (order==1) )
 	    
 	    derivative =3991680.*square(arguement)*cube(arguement) -2592000.*cube(arguement)-604800.*arguement-1036800. ; 
-	         
+	   
+	   return derivative ; 
     } catch( AipsError x ) {
       cerr << "inverseFFT::diff_legendre" <<x.getMesg() << endl ;
     } 
     
-    return derivative ;
-  }
+   }
   
   
     Double inverseFFT::legendre( const Double& latitude,
@@ -216,12 +217,12 @@ namespace CR {  // Namespace CR -- begin
 	  Double first_factor = pow( pow_arguement, pow_order) ;
 	  
 	  legendre_fun = first_factor/pow_degree*factorial*derivative ;
-	  	  
+	  return legendre_fun ;	  
       } catch( AipsError x ) {
       cerr << "inverseFFT::legendre" <<x.getMesg() << endl ;
     } 
     
-    return legendre_fun ;
+    //return legendre_fun ;
   }	 
   
   
@@ -245,8 +246,8 @@ namespace CR {  // Namespace CR -- begin
 	readAsciiMatrix( mcoeff1, "modelcoeff1.dat" ) ;
 	readAsciiMatrix( mcoeff2, "modelcoeff2.dat" ) ;
 	
-	Double coeff1 = mcoeff1.column(col) ;
-	Double coeff2 = mcoeff2.column(col) ;
+	Vector<Double> coeff1 = mcoeff1.column(col) ;
+	Vector<Double> coeff2 = mcoeff2.column(col) ;
 	
 	Double as_legendre = inFFT.legendre(latitude, 2, 0) ;
 	
@@ -256,13 +257,15 @@ solar_act=coeff1(7)*del_mean_F+coeff1(8)*square(del_mean_F)+coeff1(5)*del_F+coef
     
         else
              if(tableno==2)
-solar_act=coeff2(4)*del_mean_F+0*square(del_mean_8)+0*del_F+0*square(del_F)+0*as_legendre*del_mean_F ;
-    
+solar_act=coeff2(4)*del_mean_F+0*square(del_mean_F)+0*del_F+0*square(del_F)+0*as_legendre*del_mean_F ;
+     
+     return solar_act ;
+     
       } catch( AipsError x ) {
       cerr << "inverseFFT::solar_activity" <<x.getMesg() << endl ;
     } 
     
-    return solar_act ;
+  //  return solar_act ;
   }
   
       
@@ -287,8 +290,8 @@ solar_act=coeff2(4)*del_mean_F+0*square(del_mean_8)+0*del_F+0*square(del_F)+0*as
 	readAsciiMatrix( mcoeff1, "modelcoeff1.dat" ) ;
 	readAsciiMatrix( mcoeff2, "modelcoeff2.dat" ) ;
 	
-	Double coeff1 = mcoeff1.column(col) ;
-	Double coeff2 = mcoeff2.column(col) ;
+	Vector<Double> coeff1 = mcoeff1.column(col) ;
+	Vector<Double> coeff2 = mcoeff2.column(col) ;
 	
 	Double as_legendre = inFFT.legendre(latitude, 2, 0) ;
 	
@@ -299,13 +302,15 @@ solar_act=coeff2(4)*del_mean_F+0*square(del_mean_8)+0*del_F+0*square(del_F)+0*as
 	else
              if(tableno ==2)     
 	
-        sym_func = coeff2(9)*cos(omega_d*(t_d-coeff2(10)))+(coeff2(11)+0*as_legendre)*cos(2*omega_d*(t_d-coeff_2(12))) ;     
+        sym_func = coeff2(9)*cos(omega_d*(t_d-coeff2(10)))+(coeff2(11)+0*as_legendre)*cos(2*omega_d*(t_d-coeff2(12))) ;     
    
+        return sym_func ;
+	
     } catch( AipsError x ) {
       cerr << "inverseFFT::symmetrical" <<x.getMesg() << endl ;
     } 
     
-    return sym_func ;
+  //  return sym_func ;
  }
   
   
@@ -334,13 +339,13 @@ solar_act=coeff2(4)*del_mean_F+0*square(del_mean_8)+0*del_F+0*square(del_F)+0*as
 	 readAsciiMatrix( mcoeff1, "modelcoeff1.dat" ) ;
 	 readAsciiMatrix( mcoeff2, "modelcoeff2.dat" ) ;
 	
-	 Double coeff1 = mcoeff1.column(col) ;
-	 Double coeff2 = mcoeff2.column(col) ;
+	 Vector<Double> coeff1 = mcoeff1.column(col) ;
+	 Vector<Double> coeff2 = mcoeff2.column(col) ;
 	
 	 Double F1 = 1+coeff1(9)*del_mean_F +coeff1(5)*del_F +coeff1(6)*square(del_F) ;
 	
-	 Double as1_10 = inFFT.legendre(latitude, 3, 0) ;
-	 Double asl_30 = inFFT.legendre(latitude, 1, 0) ;
+	 Double asl_30 = inFFT.legendre(latitude, 3, 0) ;
+	 Double asl_10 = inFFT.legendre(latitude, 1, 0) ;
 	
 	 if( tableno ==1)
 	
@@ -350,12 +355,14 @@ asym_func=(coeff1(28)*asl_10+coeff1(29)*asl_30)*F1*cos(omega_d*(t_d-coeff1(30)))
              if(tableno ==2)     
 	
 asym_func =(coeff2(13)*asl_10+coeff2(14)*asl_30)*F1*cos(omega_d*(t_d-coeff2(15)))+0*asl_10*cos(2*omega_d*(t_d-coeff2(12))) ;
-   
+      
+      return asym_func ;
+     
      } catch( AipsError x ) {
       cerr << "inverseFFT::asymmetrical" <<x.getMesg() << endl ;
     } 
     
-    return asym_func ;
+ //   return asym_func ;
  }
      
         
@@ -375,7 +382,7 @@ asym_func =(coeff2(13)*asl_10+coeff2(14)*asl_30)*F1*cos(omega_d*(t_d-coeff2(15))
          inverseFFT inFFT ; 
 	 
 	 Double diurnal_func1(0.0) ;
-	 Double diurnal_func1(0.0) ;
+	 Double diurnal_func2(0.0) ;
 	 Double diurnal_func(0.0) ;
 	 
 	 Double pi = 3.1416 ;
@@ -391,34 +398,36 @@ asym_func =(coeff2(13)*asl_10+coeff2(14)*asl_30)*F1*cos(omega_d*(t_d-coeff2(15))
 	 readAsciiMatrix( mcoeff1, "modelcoeff1.dat" ) ;
 	 readAsciiMatrix( mcoeff2, "modelcoeff2.dat" ) ;
 
-	 Double coeff1 = mcoeff1.column(col) ;
-	 Double coeff2 = mcoeff2.column(col) ;
+	 Vector<Double> coeff1 = mcoeff1.column(col) ;
+	 Vector<Double> coeff2 = mcoeff2.column(col) ;
 	
 	 Double F2 = 1+coeff1(10)*del_mean_F +coeff1(5)*del_F +coeff1(6)*square(del_F) ;
 	
-	 Double as1_11 = inFFT.legendre(latitude, 1, 1) ;
+	 Double asl_11 = inFFT.legendre(latitude, 1, 1) ;
 	 Double asl_31 = inFFT.legendre(latitude, 3, 1) ;
-	 Double as1_51 = inFFT.legendre(latitude, 5, 1) ;
+	 Double asl_51 = inFFT.legendre(latitude, 5, 1) ;
 	 Double asl_21 = inFFT.legendre(latitude, 2, 1) ;
 	
 	 if( tableno ==1)
-	
-diurnal_func1=(coeff1(33)*asl_11+coeff1(34)*asl_31+coeff1(51)*asl_51+coeff(36)*asl_21*cos(omega_d*(t_d-coeff1(30))))*F2*cos(omega*tau) ;
-diurnal_func2=(coeff1(37)*asl_11+coeff1(38)*asl_31+coeff1(39)*asl_51+coeff(40)*asl_21*cos(omega_d*(t_d-coeff1(30))))*F2*sin(omega*tau) ;
+	{
+diurnal_func1=(coeff1(33)*asl_11+coeff1(34)*asl_31+coeff1(51)*asl_51+coeff1(36)*asl_21*cos(omega_d*(t_d-coeff1(30))))*F2*cos(omega*tau) ;
+diurnal_func2=(coeff1(37)*asl_11+coeff1(38)*asl_31+coeff1(39)*asl_51+coeff1(40)*asl_21*cos(omega_d*(t_d-coeff1(30))))*F2*sin(omega*tau) ;
 	 diurnal_func = diurnal_func1+ diurnal_func2 ;
-	 
-	 else
+	  }
+	  else
              if(tableno ==2)     
-	
+	{
 diurnal_func1=(coeff2(16)*asl_11+0*asl_31+0*asl_51+0*asl_21*cos(omega_d*(t_d-coeff2(15))))*F2*cos(omega*tau);
 diurnal_func2=(coeff2(17)*asl_11+0*asl_31+0*asl_51+0*asl_21*cos(omega_d*(t_d-coeff2(15))))*F2*sin(omega*tau);
 	 diurnal_func =diurnal_func1 +diurnal_func2 ;          
-       
+        }
+	return diurnal_func ;
+	
      } catch( AipsError x ) {
       cerr << "inverseFFT::diurnal" <<x.getMesg() << endl ;
     } 
     
-    return diurnal_func ;
+  //  return diurnal_func ;
  }
  
  			     
@@ -455,34 +464,36 @@ diurnal_func2=(coeff2(17)*asl_11+0*asl_31+0*asl_51+0*asl_21*cos(omega_d*(t_d-coe
 	  readAsciiMatrix( mcoeff1, "modelcoeff1.dat" ) ;
 	  readAsciiMatrix( mcoeff2, "modelcoeff2.dat" ) ;
 	
-	  Double coeff1 = mcoeff1.column(col) ;
-	  Double coeff2 = mcoeff2.column(col) ;
+	  Vector<Double> coeff1 = mcoeff1.column(col) ;
+	  Vector<Double> coeff2 = mcoeff2.column(col) ;
 	
 	  Double F2 = 1+coeff1(10)*del_mean_F +coeff1(5)*del_F +coeff1(6)*square(del_F) ;
 	
-	  Double as1_22 = inFFT.legendre(latitude, 2, 2) ;
+	  Double asl_22 = inFFT.legendre(latitude, 2, 2) ;
 	  Double asl_42 = inFFT.legendre(latitude, 4, 2) ;
-	  Double as1_32 = inFFT.legendre(latitude, 3, 2) ;
+	  Double asl_32 = inFFT.legendre(latitude, 3, 2) ;
 	  Double asl_52 = inFFT.legendre(latitude, 5, 2) ;
 	
 	  if( tableno ==1)
-	
+	  {
 semidiurnal1=(coeff1(41)*asl_22+coeff1(42)*asl_42+(coeff1(43)*asl_32+coeff1(91)*asl_52)*cos(o_d*(t_d-coeff1(30))))*F2*cos(2*omega*tau);
 semidiurnal2=(coeff1(44)*asl_22+coeff1(45)*asl_42+(coeff1(46)*asl_32+coeff1(92)*asl_52)*cos(o_d*(t_d-coeff1(30))))*F2*sin(2*omega*tau);
           semidiurnal_func= semidiurnal1 +semidiurnal2 ;
-	  
+	  }
 	  else
              if(tableno ==2)     
-
+          {
 semidiurnal1=(coeff2(18)*asl_22+coeff2(19)*asl_42+(coeff2(20)*asl_32+coeff2(21)*asl_52)*cos(o_d*(t_d-coeff2(15))))*F2*cos(2*omega*tau);
 semidiurnal2=(coeff2(22)*asl_22+coeff2(23)*asl_42+(coeff2(24)*asl_32+coeff2(25)*asl_52)*cos(o_d*(t_d-coeff2(15))))*F2*sin(2*omega*tau);
           semidiurnal_func= semidiurnal1 +semidiurnal2 ;
-          
+          }
+	  return semidiurnal_func ;
+	  
       } catch( AipsError x ) {
        cerr << "inverseFFT::semidiurnal" <<x.getMesg() << endl ;
     } 
     
-    return semidiurnal_func ;
+  //  return semidiurnal_func ;
  }
  
  
@@ -519,33 +530,35 @@ semidiurnal2=(coeff2(22)*asl_22+coeff2(23)*asl_42+(coeff2(24)*asl_32+coeff2(25)*
 	  readAsciiMatrix( mcoeff1, "modelcoeff1.dat" ) ;
 	  readAsciiMatrix( mcoeff2, "modelcoeff2.dat" ) ;
 	
-	  Double coeff1 = mcoeff1.column(col) ;
-	  Double coeff2 = mcoeff2.column(col) ;
+	  Vector<Double> coeff1 = mcoeff1.column(col) ;
+	  Vector<Double> coeff2 = mcoeff2.column(col) ;
 	
 	  Double F2 = 1+coeff1(10)*del_mean_F +coeff1(5)*del_F +coeff1(6)*square(del_F) ;
 	
-	  Double as1_33 = inFFT.legendre(latitude, 3, 3) ;
+	  Double asl_33 = inFFT.legendre(latitude, 3, 3) ;
 	  Double asl_43 = inFFT.legendre(latitude, 4, 3) ;
-	  Double as1_63 = inFFT.legendre(latitude, 6, 3) ;
+	  Double asl_63 = inFFT.legendre(latitude, 6, 3) ;
 	
 	  if( tableno ==1)
-	
+	    {
 terdiurnal1=(coeff1(47)*asl_33+(coeff1(48)*asl_43+coeff1(49)*asl_63)*cos(o_d*(t_d-coeff1(30))))*F2*cos(3*omega*tau) ;
 terdiurnal2=(coeff1(50)*asl_33+(coeff1(51)*asl_43+coeff1(52)*asl_63)*cos(o_d*(t_d-coeff1(30))))*F2*sin(3*omega*tau) ;
           terdiurnal_func= terdiurnal1 +terdiurnal2 ;
-	  
+	  }
 	  else
              if(tableno ==2)     
-
+          {
 terdiurnal1=(coeff2(26)*asl_33+(0*asl_43+0*asl_63)*cos(o_d*(t_d-coeff2(15))))*F2*cos(3*omega*tau) ;
 terdiurnal2=(coeff2(27)*asl_33+(0*asl_43+0*asl_63)*cos(o_d*(t_d-coeff2(15))))*F2*sin(3*omega*tau) ;
           terdiurnal_func= terdiurnal1 +terdiurnal2 ;
-          
+          }
+	  return terdiurnal_func ;
+	  
       } catch( AipsError x ) {
        cerr << "inverseFFT::semidiurnal" <<x.getMesg() << endl ;
     } 
     
-    return terdiurnal_func ;
+   // return terdiurnal_func ;
  }
  
  
@@ -568,53 +581,51 @@ terdiurnal2=(coeff2(27)*asl_33+(0*asl_43+0*asl_63)*cos(o_d*(t_d-coeff2(15))))*F2
 	  Double o_d = 2*pi/365. ;
 	  Double omega = 2*pi/24. ;
 	 
-          Double del_F = F107 -mean_F107 ;
-	  Double del_mean_F = mean_F107 -150 ;
-		
-	  Matrix<Double> mcoeff1( 106, 7, 0.0) ;
+          Matrix<Double> mcoeff1( 106, 7, 0.0) ;
 	  Matrix<Double> mcoeff2( 27, 6, 0.0 ) ;
 	
 	  readAsciiMatrix( mcoeff1, "modelcoeff1.dat" ) ;
 	  readAsciiMatrix( mcoeff2, "modelcoeff2.dat" ) ;
 	
-	  Double coeff1 = mcoeff1.column(col) ;
-	  Double coeff2 = mcoeff2.column(col) ;
+	  Vector<Double> coeff1 = mcoeff1.column(col) ;
+	  Vector<Double> coeff2 = mcoeff2.column(col) ;
 	
 	  Double del_A(0.0);
 	  
-	  Double as1_20 = inFFT.legendre(latitude, 2, 0) ;
+	  Double asl_20 = inFFT.legendre(latitude, 2, 0) ;
 	  Double asl_40 = inFFT.legendre(latitude, 4, 0) ;
-	  Double as1_10 = inFFT.legendre(latitude, 1, 0) ;
-	  Double as1_11 = inFFT.legendre(latitude, 1, 1) ;
+	  Double asl_10 = inFFT.legendre(latitude, 1, 0) ;
+	  Double asl_11 = inFFT.legendre(latitude, 1, 1) ;
 	  Double asl_30 = inFFT.legendre(latitude, 3, 0) ;
-	  Double as1_31 = inFFT.legendre(latitude, 3, 1) ;
-	  Double as1_50 = inFFT.legendre(latitude, 5, 0) ;
+	  Double asl_31 = inFFT.legendre(latitude, 3, 1) ;
+	  Double asl_50 = inFFT.legendre(latitude, 5, 0) ;
 	  Double asl_51 = inFFT.legendre(latitude, 5, 1) ;
 	  
 	
 	  if( tableno ==1)
-	  
+	  {
 	  del_A = (Ap-4)+(coeff1(94)-1)*(Ap-4+(exp(-coeff1(93)*(Ap-4))-1)/coeff1(93)) ;
 	  
 mag1 =(coeff1(12)*asl_20+coeff1(13)*asl_40+(coeff1(14)*asl_10+coeff1(15)*asl_30+coeff1(60)*asl_50)*cos(o_d*(t_d-coeff1(30))))*del_A ;
 mag2 =(coeff1(11)+(coeff1(17)*asl_11+coeff1(18)*asl_31+coeff1(19)*asl_51)*cos(omega*(tau-coeff1(20))))*del_A ;
           magnetic_func= mag1 +mag2 ;
-	  
+	  }
 	  else
              if(tableno ==2)     
-             
+            { 
 	     del_A = (Ap-4)+(coeff2(8)-1)*(Ap-4+ (exp(-coeff2(7)*(Ap-4))-1)/coeff2(7)) ;
 	     
-mag1=(coeff2(5)+coeff2(6)*asl_20+0*asl_40+(0*asl_10+0*asl_30+0*asl_50)*cos(o_d*(t_d-coeff2(15))))*del_A ;
-mag2=0 ;
+             mag1=(coeff2(5)+coeff2(6)*asl_20+0*asl_40+(0*asl_10+0*asl_30+0*asl_50)*cos(o_d*(t_d-coeff2(15))))*del_A ;
+             mag2=0 ;
            magnetic_func= mag1 +mag2 ;
-          
-         
+          }
+         return magnetic_func ;
+	 
      } catch( AipsError x ) {
       cerr << "inverseFFT::magnetic" <<x.getMesg() << endl ;
     } 
     
-    return magnetic_func ;
+   // return magnetic_func ;
  }
  
  
@@ -655,37 +666,39 @@ mag2=0 ;
 	  readAsciiMatrix( mcoeff1, "modelcoeff1.dat" ) ;
 	  readAsciiMatrix( mcoeff2, "modelcoeff2.dat" ) ;
 	
-	  Double coeff1 = mcoeff1.column(col) ;
-	  Double coeff2 = mcoeff2.column(col) ;
+	  Vector<Double> coeff1 = mcoeff1.column(col) ;
+	  Vector<Double> coeff2 = mcoeff2.column(col) ;
 	
 	  Double del_A(0.0);
 	  
-	  Double as1_21 = inFFT.legendre(latitude, 2, 1) ;
+	  Double asl_21 = inFFT.legendre(latitude, 2, 1) ;
 	  Double asl_41 = inFFT.legendre(latitude, 4, 1) ;
-	  Double as1_61 = inFFT.legendre(latitude, 6, 1) ;
-	  Double as1_11 = inFFT.legendre(latitude, 1, 1) ;
-	  Double as1_31 = inFFT.legendre(latitude, 3, 1) ;
+	  Double asl_61 = inFFT.legendre(latitude, 6, 1) ;
+	  Double asl_11 = inFFT.legendre(latitude, 1, 1) ;
+	  Double asl_31 = inFFT.legendre(latitude, 3, 1) ;
 	  Double asl_51 = inFFT.legendre(latitude, 5, 1) ;
 	  
 	
 	  if( tableno ==1)
-	
+	     {
 long1=(coeff1(59)*asl_11+coeff1(60)*asl_31)*cos(omega*(t_d-coeff1(30))) ;	    
 long2= coeff1(53)*asl_21+coeff1(54)*asl_41+coeff1(55)*asl_61+coeff1(56)*asl_11+coeff1(57)*asl_31+coeff1(58)*asl_51 ;
 long3= coeff1(61)*asl_21+coeff1(62)*asl_41+coeff1(63)*asl_61+coeff1(64)*asl_11+coeff1(65)*asl_31+coeff1(66)*asl_51 ;
 long4= (coeff1(67)*asl_11+coeff1(68)*asl_31)*cos(o_d*(t_d-coeff1(30))) ;
 long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+long4)*(1+coeff1(69)*del_mean_F)*sin(longitude*pi/180.) ;
-	  
+	   }
 	  else
              if(tableno ==2)     
-             
+             { 
 	     long_func =0.0 ;
-          
+          }
+	  return long_func ;
+	  
      } catch( AipsError x ) {
       cerr << "inverseFFT::longitudinal" <<x.getMesg() << endl ;
     } 
     
-    return long_func ;
+  //  return long_func ;
  }
  
  
@@ -725,35 +738,37 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	  readAsciiMatrix( mcoeff1, "modelcoeff1.dat" ) ;
 	  readAsciiMatrix( mcoeff2, "modelcoeff2.dat" ) ;
 	
-	  Double coeff1 = mcoeff1.column(col) ;
-	  Double coeff2 = mcoeff2.column(col) ;
+	  Vector<Double> coeff1 = mcoeff1.column(col) ;
+	  Vector<Double> coeff2 = mcoeff2.column(col) ;
 	
 	  Double del_A(0.0);
 	  
-	  Double as1_10 = inFFT.legendre(latitude, 1, 0) ;
+	  Double asl_10 = inFFT.legendre(latitude, 1, 0) ;
 	  Double asl_30 = inFFT.legendre(latitude, 3, 0) ;
-	  Double as1_50 = inFFT.legendre(latitude, 5, 0) ;
-	  Double as1_32 = inFFT.legendre(latitude, 3, 2) ;
-	  Double as1_52 = inFFT.legendre(latitude, 5, 2) ;
+	  Double asl_50 = inFFT.legendre(latitude, 5, 0) ;
+	  Double asl_32 = inFFT.legendre(latitude, 3, 2) ;
+	  Double asl_52 = inFFT.legendre(latitude, 5, 2) ;
 	   
 	
 	  if( tableno ==1)
-	
+	    {
            UT1=(coeff1(70)*asl_10+coeff1(71)*asl_30+coeff1(72)*asl_50)*(1+coeff1(95)*del_mean_F)*(1+coeff1(74)*asl_10) ;
            UT2= (1+coeff1(75)*cos(o_d*(t_d-coeff1(30))))*cos(omega_dash*(t-coeff1(73))) ;
            UT3= (coeff1(76)*asl_32+coeff1(77)*asl_52)*cos(omega_dash*(t-coeff1(78))+2*longitude*pi/180.) ;
            UT_func= UT1*UT2 +UT3 ;
-	  
+	  }
 	  else
              if(tableno ==2)     
-             
+             {  
 	     UT_func =0.0 ;
+	     }
+	     return UT_func ;
 	     
      } catch( AipsError x ) {
       cerr << "inverseFFT::UT" <<x.getMesg() << endl ;
     } 
     
-    return UT_func ;
+  //  return UT_func ;
  }
  
  	
@@ -794,37 +809,40 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	  readAsciiMatrix( mcoeff1, "modelcoeff1.dat" ) ;
 	  readAsciiMatrix( mcoeff2, "modelcoeff2.dat" ) ;
 	
-	  Double coeff1 = mcoeff1.column(col) ;
-	  Double coeff2 = mcoeff2.column(col) ;
+	  Vector<Double> coeff1 = mcoeff1.column(col) ;
+	  Vector<Double> coeff2 = mcoeff2.column(col) ;
 	
 	  Double del_A(0.0);
 	  
-	  Double as1_21 = inFFT.legendre(latitude, 2, 1) ;
+	  Double asl_21 = inFFT.legendre(latitude, 2, 1) ;
 	  Double asl_41 = inFFT.legendre(latitude, 4, 1) ;
-	  Double as1_61 = inFFT.legendre(latitude, 6, 1) ;
-	  Double as1_10 = inFFT.legendre(latitude, 1, 0) ;
-	  Double as1_11 = inFFT.legendre(latitude, 1, 1) ;
-	  Double as1_30 = inFFT.legendre(latitude, 3, 0) ; 
-	  Double as1_50 = inFFT.legendre(latitude, 5, 0) ;
+	  Double asl_61 = inFFT.legendre(latitude, 6, 1) ;
+	  Double asl_10 = inFFT.legendre(latitude, 1, 0) ;
+	  Double asl_11 = inFFT.legendre(latitude, 1, 1) ;
+	  Double asl_30 = inFFT.legendre(latitude, 3, 0) ; 
+	  Double asl_50 = inFFT.legendre(latitude, 5, 0) ;
 	  
 	  if( tableno ==1)
+	   {
 	   del_A = (Ap-4)+(coeff2(8)-1)*(Ap-4+ (exp(-coeff2(7)*(Ap-4))-1)/coeff2(7)) ;
 	   
            com1=(coeff1(96)*asl_21+coeff1(97)*asl_41+coeff1(98)*asl_61)*(1+coeff1(100)*asl_10)*del_A*cos((longitude-coeff1(99))*pi/180.) ;
-           com2=coeff1(101)*asl_11*cos(omega_d*(t_d-coeff1(30)))*del_A*cos((longitude-coeff1(106))*pi/180.) ;
+           com2=coeff1(101)*asl_11*cos(o_d*(t_d-coeff1(30)))*del_A*cos((longitude-coeff1(106))*pi/180.) ;
            com3=(coeff1(101)*asl_10+coeff1(102)*asl_30+coeff1(103)*asl_50)*del_A*cos(omega_dash*(t-coeff1(104))) ;
            combined_func= com1+com2 +com3 ;
-	  
+	  }
 	  else
              if(tableno ==2)     
-             
+             {
 	     combined_func =0.0 ;
+	     }
+	     return combined_func ;
 	     
      } catch( AipsError x ) {
       cerr << "inverseFFT::combined" <<x.getMesg() << endl ;
     } 
     
-    return combined_func ;
+ //   return combined_func ;
  }
  
  	
@@ -845,7 +863,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
      try {
           inverseFFT inFFT ; 
 	  
-	  Double eapansion1(0.0) ;
+	  Double expansion1(0.0) ;
 	  Double expansion2(0.0) ;
 	      
 	  Double expansion_func(0.0) ;
@@ -856,12 +874,12 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	  readAsciiMatrix( mcoeff1, "modelcoeff1.dat" ) ;
 	  readAsciiMatrix( mcoeff2, "modelcoeff2.dat" ) ;
 	
-	  Double coeff1 = mcoeff1.column(col) ;
-	  Double coeff2 = mcoeff2.column(col) ;
+	  Vector<Double> coeff1 = mcoeff1.column(col) ;
+	  Vector<Double> coeff2 = mcoeff2.column(col) ;
 	
-	  Double as1_10 = inFFT.legendre(latitude, 1, 0) ;
-	  Double as1_20 = inFFT.legendre(latitude, 2, 0) ; 
-	  Double as1_40 = inFFT.legendre(latitude, 4, 0) ;
+	  Double asl_10 = inFFT.legendre(latitude, 1, 0) ;
+	  Double asl_20 = inFFT.legendre(latitude, 2, 0) ; 
+	  Double asl_40 = inFFT.legendre(latitude, 4, 0) ;
 	  
 	  Double solar_fun = inFFT.solar_activity(F107, mean_F107, tableno, col, latitude) ;
 	  Double sym_fun = inFFT.symmetrical(tableno, col, t_d, latitude ) ;
@@ -875,23 +893,25 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	  Double combined_fun = inFFT.combined( F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude ) ;
 	  
 	  if( tableno ==1)
-	   
+	   {
 	   expansion1 = coeff1(2)*asl_10+coeff1(3)*asl_20+coeff1(4)*asl_40+solar_fun+sym_fun+asym_fun ;
 	   expansion2 = diurnal_fun+semidiurnal_fun+terdiurnal_fun+magnetic_fun+longitudinal_fun+UT_fun+combined_fun ;
            expansion_func= expansion1+expansion2 ;
-	  
+	   }
 	  else
              if(tableno ==2)     
-             
+             {
 	     expansion1 = 0*asl_10+coeff2(2)*asl_20+coeff2(3)*asl_40+solar_fun+sym_fun+asym_fun ;
 	     expansion2 = diurnal_fun+semidiurnal_fun+terdiurnal_fun+magnetic_fun ;
              expansion_func= expansion1+expansion2 ;
+	     }
+	  return expansion_func ;
 	  
      } catch( AipsError x ) {
       cerr << "inverseFFT::expansion" <<x.getMesg() << endl ;
     } 
     
-    return expansion_func ;
+  //  return expansion_func ;
  }
  
  
@@ -923,8 +943,8 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	  readAsciiMatrix( mcoeff1, "modelcoeff1.dat" ) ;
 	  readAsciiMatrix( mcoeff2, "modelcoeff2.dat" ) ;
 	
-	  Double coeff1 = mcoeff1.column(col) ;
-	  Double coeff2 = mcoeff2.column(col) ;
+	  Vector<Double> coeff1 = mcoeff1.column(col) ;
+	  Vector<Double> coeff2 = mcoeff2.column(col) ;
 	  
 	  Double temp_l_dash_G_L = inFFT.expansion(F107, mean_F107, 2, 5, t_d, tau, t, Ap, latitude, longitude) ;
 	  Double temp_inf_G_L = inFFT.expansion(F107, mean_F107, 1, 0, t_d, tau, t, Ap, latitude, longitude) ;
@@ -962,12 +982,13 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	  
 	  temp_profile =1./(1./temp_0+temp_B*square(x)+temp_C*square(x)*square(x)+temp_D*cube(x)*cube(x)) ;
 	  
+	  return temp_profile ;
 	  
      } catch( AipsError x ) {
       cerr << "inverseFFT::temperature" <<x.getMesg() << endl ;
     } 
     
-    return temp_profile ;
+  //  return temp_profile ;
  }
  
  	
@@ -1011,8 +1032,8 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	   readAsciiMatrix( mcoeff1, "modelcoeff1.dat" ) ;
 	   readAsciiMatrix( mcoeff2, "modelcoeff2.dat" ) ;
 	
-	   Double coeff1 = mcoeff1.column(col) ;
-	   Double coeff2 = mcoeff2.column(col) ;
+	   Vector<Double> coeff1 = mcoeff1.column(col) ;
+	   Vector<Double> coeff2 = mcoeff2.column(col) ;
 	   
 	   Double temp_l_dash_G_L = inFFT.expansion(F107, mean_F107, 2, 5, t_d, tau, t, Ap, latitude, longitude) ;
 	   Double temp_inf_G_L = inFFT.expansion(F107, mean_F107, 1, 0, t_d, tau, t, Ap, latitude, longitude) ;
@@ -1038,8 +1059,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	   Double temp_zl =inFFT.temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zl) ;
 	   Double temp_za =inFFT.temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, za) ;
 	   Double temp_z =inFFT.temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, altitude) ; 
-	   Double temp_0 =mcoeff2(1,3)*(1+temp_0_G_L) ;
-	   
+	   	   
 	   Double sigma = temp_l_dash/(temp_inf -temp_l ) ;
 	   Double temp_a = temp_inf -(temp_inf-temp_l)*exp(-sigma*eta_za_zl);
 	   Double temp_a_dash =(temp_inf-temp_a)*sigma*square((Rp+zl)/(Rp+za)) ;
@@ -1057,7 +1077,8 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	      alpha = 0.4 ;
 	      
 	      else
-	          alpha = 0.0 ;
+	          
+		  alpha = 0.0 ;
 		  
           Double arguement = (temp_zl/temp_z) ;  
           
@@ -1067,12 +1088,13 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 		  
  D_function = D_B_z_M*exp(gamma_1*((x-1)/temp_0+temp_B*(cube(x)-1)/3+temp_C*(square(x)*cube(x)-1)/5+temp_D*(cube(x)*cube(x)*x-1)/7)) ;
 	  
-                
+         return D_function ; 
+	 
      } catch( AipsError x ) {
       cerr << "inverseFFT::Dprofile" <<x.getMesg() << endl ;
     } 
     
-    return D_function ;
+ //   return D_function ;
  }
  
  	
@@ -1125,7 +1147,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	
 	Double nd_z_M = n_l*D_z_M*pow_factor1 ;   // Diffusive profile
 	
-	D_zh_M = inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
+	Double D_zh_M = inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
 	
 	//mixing profile
 	Double D_zh_M0 =inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
@@ -1142,11 +1164,13 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	 
 	 N2densityprofile = pow((power_diffusive+power_mixing),(1/A)) ;
 	 
+	 return N2densityprofile ;
+	 
      } catch( AipsError x ) {
       cerr << "inverseFFT::N2densityprofile" <<x.getMesg() << endl ;
     } 
     
-    return N2densityprofile ;
+  //  return N2densityprofile ;
  }
  
  	
@@ -1200,7 +1224,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	
 	Double nd_z_M = n_l*D_z_M*pow_factor1 ;   // Diffusive profile
 	
-	D_zh_M = inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
+	Double D_zh_M = inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
 	
 	//mixing profile
 	Double D_zh_M0 =inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
@@ -1216,12 +1240,14 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	 Double power_mixing = pow(nm_z_M, A) ;
 	 
 	 O2densityprofile = pow((power_diffusive+power_mixing),(1/A)) ;
-       
+        
+	return O2densityprofile ;
+	
      } catch( AipsError x ) {
       cerr << "inverseFFT::O2densityprofile" <<x.getMesg() << endl ;
     } 
     
-    return O2densityprofile ;
+  //  return O2densityprofile ;
  }
  
  	
@@ -1275,7 +1301,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	
 	Double nd_z_M = n_l*D_z_M*pow_factor1 ;   // Diffusive profile
 	
-	D_zh_M = inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
+	Double D_zh_M = inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
 	
 	//mixing profile
 	Double D_zh_M0 =inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
@@ -1291,12 +1317,14 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	 Double power_mixing = pow(nm_z_M, A) ;
 	 
 	 Ardensityprofile = pow((power_diffusive+power_mixing),(1/A)) ;
-       
+        
+	return Ardensityprofile ;
+	
      } catch( AipsError x ) {
       cerr << "inverseFFT::Ardensityprofile" <<x.getMesg() << endl ;
     } 
     
-    return Ardensityprofile ;
+ //   return Ardensityprofile ;
  }
  
  	
@@ -1349,7 +1377,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	
 	Double nd_z_M = n_l*D_z_M*pow_factor1 ;   // Diffusive profile
 	
-	D_zh_M = inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
+	Double D_zh_M = inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
 	
 	//mixing profile
 	Double D_zh_M0 =inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
@@ -1366,11 +1394,13 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	 
 	 Odensityprofile = pow((power_diffusive+power_mixing),(1/A)) ;
        
+       return Odensityprofile ;
+       
      } catch( AipsError x ) {
       cerr << "inverseFFT::Odensityprofile" <<x.getMesg() << endl ;
     } 
     
-    return Odensityprofile ;
+   // return Odensityprofile ;
  }
  
  
@@ -1422,7 +1452,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	
 	Double nd_z_M = n_l*D_z_M*pow_factor1 ;   // Diffusive profile
 	
-	D_zh_M = inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
+	Double D_zh_M = inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
 	
 	//mixing profile
 	Double D_zh_M0 =inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
@@ -1438,12 +1468,14 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	 Double power_mixing = pow(nm_z_M, A) ;
 	 
 	 Ndensityprofile = pow((power_diffusive+power_mixing),(1/A)) ;
-       
+        
+	return Ndensityprofile ;
+	
      } catch( AipsError x ) {
       cerr << "inverseFFT::Ndensityprofile" <<x.getMesg() << endl ;
     } 
     
-    return Ndensityprofile ;
+ //   return Ndensityprofile ;
  }
  
     
@@ -1496,7 +1528,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	
 	Double nd_z_M = n_l*D_z_M*pow_factor1 ;   // Diffusive profile
 	
-	D_zh_M = inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
+	Double D_zh_M = inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
 	
 	//mixing profile
 	Double D_zh_M0 =inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
@@ -1512,12 +1544,14 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	 Double power_mixing = pow(nm_z_M, A) ;
 	 
 	 Hedensityprofile = pow((power_diffusive+power_mixing),(1/A)) ;
-       
+        
+	return Hedensityprofile ;
+	
      } catch( AipsError x ) {
       cerr << "inverseFFT::Hedensityprofile" <<x.getMesg() << endl ;
     } 
     
-    return Hedensityprofile ;
+   // return Hedensityprofile ;
  }
   
   
@@ -1565,7 +1599,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	
 	 Double nd_z_M = n_l*D_z_M*pow_factor1 ;   // Diffusive profile
 	
-	 D_zh_M = inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
+	 Double D_zh_M = inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
 	
 	//mixing profile
 	 Double D_zh_M0 =inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
@@ -1582,11 +1616,13 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	 
 	 Hdensityprofile = pow((power_diffusive+power_mixing),(1/A)) ;
        
+       return Hdensityprofile ;
+       
      } catch( AipsError x ) {
       cerr << "inverseFFT::Hdensityprofile" <<x.getMesg() << endl ;
     } 
     
-    return Hdensityprofile ;
+ //   return Hdensityprofile ;
  }
  
  

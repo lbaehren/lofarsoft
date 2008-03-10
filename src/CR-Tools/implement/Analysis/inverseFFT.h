@@ -226,7 +226,7 @@ namespace CR {  // Namespace CR -- begin
       
     */
    
-    Double semidiurnal( const Double& F107,
+    Double terdiurnal( const Double& F107,
                         const Double& mean_F107,
                         const uint& tableno,
                         const uint& col,
