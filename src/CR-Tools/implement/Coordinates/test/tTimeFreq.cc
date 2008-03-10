@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------*
- | $Id: template-class.h,v 1.20 2007/06/13 09:41:37 bahren Exp           $ |
+ | $Id:: LOFAR_StationGroup.h 1291 2008-03-07 14:22:33Z baehren          $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
- *   Lars B"ahren (bahren@astron.nl)                                       *
+ *   Lars B"ahren (lbaehren@gmail.com)                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *

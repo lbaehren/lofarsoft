@@ -1,6 +1,9 @@
-/***************************************************************************
- *   Copyright (C) 2006                                                    *
- *   Lars B"ahren (bahren@astron.nl)                                       *
+/*-------------------------------------------------------------------------*
+ | $Id:: LOFAR_StationGroup.h 1291 2008-03-07 14:22:33Z baehren          $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (lbaehren@gmail.com)                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,8 +20,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-/* $Id: tAxisIterator.cc,v 1.1 2006/07/05 16:01:08 bahren Exp $*/
 
 #include <iostream>
 #include <Coordinates/AxisIterator.h>
