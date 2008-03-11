@@ -93,7 +93,6 @@ set (libs
   Tree
   TreePlayer
   TreeViewer
-  TMVA
   )
 
 foreach (lib ${libs})
