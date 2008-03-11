@@ -2,24 +2,6 @@
 ## $Id::                                                                       $
 ##------------------------------------------------------------------------------
 
-## try to locate the test data sets required by some of the programs
-
-find_file (dataset_tbb tbb_test_file_v2.h5
-  PATHS
-  ${CR_SOURCE_DIR}/data
-  ${CR_SOURCE_DIR}/../data
-  ${CR_SOURCE_DIR}/../../data
-  )
-
-find_file (dataset_event 2007.01.31.23:59:33.960.event
-  PATHS
-  ${CR_SOURCE_DIR}/data
-  ${CR_SOURCE_DIR}/../data
-  ${CR_SOURCE_DIR}/../../data
-  PATH_SUFFIXES
-  lopes
-  )
-
 ## -----------------------------------------------------------------------------
 ## Tests within the framework of the C++ standard library; this should be
 ## working in any case.
@@ -212,6 +194,11 @@ if (HAVE_ROOT AND HAVE_CASACORE)
       ${ROOT_LIBRARIES}
       ${CASA_LIBRARIES}
       ${LAPACK_LIBRARIES}
+      )
+    ## extra properties to take care of
+    set_target_properties (tUseROOT
+      PROPERTIES
+      LINK_FLAGS "-bind_at_load"
       )
     ## testing
     if (dataset_event)

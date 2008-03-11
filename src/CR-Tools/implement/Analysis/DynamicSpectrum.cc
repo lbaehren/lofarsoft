@@ -33,7 +33,9 @@ namespace CR {  // Namespace CR -- begin
   // ------------------------------------------------------------ DynamicSpectrum
   
   DynamicSpectrum::DynamicSpectrum ()
-  {;}
+  {
+    dynamicSpectrum_p.resize(1,1);
+  }
   
   // ------------------------------------------------------------ DynamicSpectrum
   
@@ -41,13 +43,17 @@ namespace CR {  // Namespace CR -- begin
 				    const Vector<double>& cdelt,
 				    const Vector<String>& units)
   {
+    dynamicSpectrum_p.resize(1,1);
+
+    setFrequencyAxis (crval(0),cdelt(0),units(0));
+    setTimeAxis      (crval(1),cdelt(1),units(1));
   }
   
   // ------------------------------------------------------------ DynamicSpectrum
   
   DynamicSpectrum::DynamicSpectrum (casa::ObsInfo obsInfo,
-				    LinearCoordinate timeAxis,
-				    SpectralCoordinate freqAxis)
+				    casa::LinearCoordinate timeAxis,
+				    casa::SpectralCoordinate freqAxis)
   {
     obsInfo_p  = obsInfo;
     timeAxis_p = timeAxis;
@@ -133,7 +139,7 @@ namespace CR {  // Namespace CR -- begin
     Vector<Quantum<double> > refVal (1);
     Vector<Quantum<double> > increment (1);
     Vector<double> refPix (1,0.0);
-    Matrix<double> pc(1,1);
+    casa::Matrix<double> pc(1,1);
     Vector<String> name(1);
     
     // set proper values
@@ -143,11 +149,11 @@ namespace CR {  // Namespace CR -- begin
     pc.diagonal() = 1.0;
     name          = "time";
     
-    LinearCoordinate lc (name,
-			 refVal,
-			 increment,
-			 pc,
-			 refPix);
+    casa::LinearCoordinate lc (name,
+			       refVal,
+			       increment,
+			       pc,
+			       refPix);
     timeAxis_p = lc;
   }
   
@@ -172,11 +178,11 @@ namespace CR {  // Namespace CR -- begin
     double crpix (0.0);
     Quantum<double> restfreq (0.0,"Hz");
     
-    SpectralCoordinate sc (casa::MFrequency::TOPO,
-			   crval,
-			   cdelt,
-			   crpix,
-			   restfreq);
+    casa::SpectralCoordinate sc (casa::MFrequency::TOPO,
+				 crval,
+				 cdelt,
+				 crpix,
+				 restfreq);
     freqAxis_p = sc;
   }
   
@@ -213,10 +219,10 @@ namespace CR {  // Namespace CR -- begin
   {
     casa::IPosition shape (dynamicSpectrum_p.shape());
     Vector<float> averageSpectrum (shape(0));
-    
-    // do something
+
+    /* Collapse the dynamic spectrum along the time-axis */
     for (int freq(0); freq<shape(0); freq++) {
-      averageSpectrum(freq) = abs(sum(conj(dynamicSpectrum_p.column(freq))
+      averageSpectrum(freq) = abs(sum(dynamicSpectrum_p.column(freq)
 				      *dynamicSpectrum_p.column(freq)));
     }
     
@@ -230,15 +236,48 @@ namespace CR {  // Namespace CR -- begin
   {
     casa::IPosition shape (dynamicSpectrum_p.shape());
     Vector<float> totalPower (shape(0));
-    
-    // compute
+
+    /* Collapse the dynamic spectrum along the frequency axis */
     for (int n(0); n<shape(0); n++) {
-      totalPower(n) = abs(sum(conj(dynamicSpectrum_p.row(n))
+      totalPower(n) = abs(sum(dynamicSpectrum_p.row(n)
 			      *dynamicSpectrum_p.row(n)));
     }
     
     // return the result
     return totalPower;
   }
+
+  // ---------------------------------------------------------------------- toImage
+
+  bool DynamicSpectrum::toImage ()
+  {
+    return true;
+  }
+
+  // ----------------------------------------------------------------------- toFITS
+
+#ifdef HAVE_CFITSIO
+  bool DynamicSpectrum::toFITS ()
+  {
+    casa::IPosition shape = dynamicSpectrum_p.shape();
+    int status            = 0;
+    long naxis            = shape.nelements();
+    long nelements        = dynamicSpectrum_p.nelements();
+    long naxes[2]         = { shape(1), shape(0)};
+    std::string outfile;
+    fitsfile *fptr;
+    
+    /* Adjust the filename such that existing data are overwritten */
+    outfile = "!" + filename_p + ".fits";
+    
+    /* Create FITS file on disk */
+    fits_create_file (&fptr, outfile.c_str(), &status);
+    
+    /* Create primary array to take up the image data */
+    fits_create_img (fptr, FLOAT_IMG, naxis, naxes, &status);
+    
+    return true;
+  }
+#endif
   
 }  // Namespace CR -- end

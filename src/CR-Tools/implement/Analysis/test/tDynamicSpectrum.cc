@@ -33,9 +33,9 @@ using CR::DynamicSpectrum;
 
   \brief A collection of test routines for the DynamicSpectrum class
  
-  \author <author>
+  \author Lars B&auml;hren
  
-  \date <date>
+  \date 2008/03/10
 */
 
 // -----------------------------------------------------------------------------
@@ -45,17 +45,38 @@ using CR::DynamicSpectrum;
 
   \return nofFailedTests -- The number of failed tests.
 */
-int test_DynamicSpectrum ()
+int test_construction ()
 {
+  std::cout << "\n[test_construction]\n" << std::endl;
+  
   int nofFailedTests (0);
   
-  std::cout << "\n[test_DynamicSpectrum]\n" << std::endl;
-
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
-    DynamicSpectrum newDynamicSpectrum;
+    DynamicSpectrum ds;
     //
-    newDynamicSpectrum.summary(); 
+    ds.summary(); 
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[2] Testing argumented constructor ..." << std::endl;
+  try {
+    // Coordinate axes
+    uint nofAxes (2);
+    casa::Vector<double> crval (2);
+    casa::Vector<double> cdelt (2);
+    casa::Vector<casa::String> units (2);
+
+    crval    = 0.0;
+    cdelt    = 1.0;
+    units(0) = "Hz";
+    units(1) = "s";
+    // create object
+    DynamicSpectrum ds (crval,cdelt,units);
+    //
+    ds.summary(); 
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -71,9 +92,7 @@ int main ()
   int nofFailedTests (0);
 
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_DynamicSpectrum ();
-  }
-
+  nofFailedTests += test_construction ();
+  
   return nofFailedTests;
 }

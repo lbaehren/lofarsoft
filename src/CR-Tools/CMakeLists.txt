@@ -38,7 +38,7 @@ if (NOT CR_VERBOSE_CONFIGURE)
   set (BLITZ_FIND_QUIETLY 1)
   set (CASA_FIND_QUIETLY 1)
   set (CASACORE_FIND_QUIETLY 1)
- set (CFITSIO_FIND_QUIETLY 1)
+  set (CFITSIO_FIND_QUIETLY 1)
   set (DAL_FIND_QUIETLY 1)
   set (FFTW3_FIND_QUIETLY 1)
   set (G2C_FIND_QUIETLY 1)
@@ -466,6 +466,28 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 ## =============================================================================
 ##
+##  Datasets for the test programs
+##
+## =============================================================================
+
+find_file (dataset_tbb tbb_test_file_v2.h5
+  PATHS
+  ${CR_SOURCE_DIR}/data
+  ${CR_SOURCE_DIR}/../data
+  ${CR_SOURCE_DIR}/../../data
+  )
+
+find_file (dataset_event 2007.01.31.23:59:33.960.event
+  PATHS
+  ${CR_SOURCE_DIR}/data
+  ${CR_SOURCE_DIR}/../data
+  ${CR_SOURCE_DIR}/../../data
+  PATH_SUFFIXES
+  lopes
+  )
+
+## =============================================================================
+##
 ##  Configuration for the subdirectories
 ##
 ## =============================================================================
@@ -534,5 +556,3 @@ message (STATUS " Support for Python ..... : ${CR_PYTHON_SUPPORT}")
 message (STATUS " Print debugging messages : ${CR_DEBUGGING_MESSAGES}")
 message (STATUS " Verbose configuration .. : ${CR_VERBOSE_CONFIGURE}")
 message (STATUS "+============================================================+")
-
-message (STATUS "CASA/casacore includes = ${CASA_INCLUDES}")

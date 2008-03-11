@@ -23,6 +23,12 @@
 #ifndef _DYNAMICSPECTRUM_H_
 #define _DYNAMICSPECTRUM_H_
 
+#ifdef HAVE_CFITSIO
+extern "C" {
+#include <cfitsio/fitsio.h>
+}
+#endif
+
 #include <casa/aips.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/Array.h>
@@ -33,10 +39,7 @@
 #include <coordinates/Coordinates/SpectralCoordinate.h>
 #include <coordinates/Coordinates/CoordinateSystem.h>
 
-using casa::LinearCoordinate;
-using casa::Matrix;
 using casa::Quantum;
-using casa::SpectralCoordinate;
 using casa::String;
 using casa::Vector;
 
@@ -70,14 +73,17 @@ namespace CR {  // Namespace CR -- begin
   class DynamicSpectrum {
     
     //! Array storing the pixel values of the dynamic spectrum, [freq,time]
-    Matrix<casa::Complex> dynamicSpectrum_p;
+    casa::Matrix<double> dynamicSpectrum_p;
+
+    //! Base name of the file to which the data can be exported
+    std::string filename_p;
     
     //! Observation information
     casa::ObsInfo obsInfo_p;
     //! Time axis of the dynamic spectrum
-    LinearCoordinate timeAxis_p;
+    casa::LinearCoordinate timeAxis_p;
     //! Frequency axis of the dynamic spectrum 
-    SpectralCoordinate freqAxis_p;
+    casa::SpectralCoordinate freqAxis_p;
     
   public:
     
@@ -117,8 +123,8 @@ namespace CR {  // Namespace CR -- begin
       \param freqAxis -- 
     */
     DynamicSpectrum (casa::ObsInfo obsInfo,
-		     LinearCoordinate timeAxis,
-		     SpectralCoordinate freqAxis);
+		     casa::LinearCoordinate timeAxis,
+		     casa::SpectralCoordinate freqAxis);
     
     /*!
       \brief Copy constructor
@@ -145,6 +151,14 @@ namespace CR {  // Namespace CR -- begin
     DynamicSpectrum &operator= (DynamicSpectrum const &other); 
     
     // --------------------------------------------------------------- Parameters
+
+    inline std::string filename () {
+      return filename_p;
+    }
+
+    inline bool setFilename (std::string const &filename) {
+      filename_p = filename;
+    }
     
     void setDynamicSpectrum ();
     
@@ -234,11 +248,22 @@ namespace CR {  // Namespace CR -- begin
     Vector<float> totalPower ();
     
     /*!
-      \brief Export the dynamic spectrum to FITS
+      \brief Export the dynamic spectrum to AIPS++ image
       
-      \todo Still needs to be implemented
+      \return status -- Status of the operation; returns <tt>false</tt> in case
+              an error was encountered.
     */
-    void toFITS (const string& outfile);
+    bool toImage ();
+
+#ifdef HAVE_CFITSIO
+    /*!
+      \brief Export the dynamic spectrum to FITS
+
+      \return status -- Status of the operation; returns <tt>false</tt> in case
+              an error was encountered.
+    */
+    bool toFITS ();
+#endif
     
   private:
     

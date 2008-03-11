@@ -1,6 +1,5 @@
 #include <LopesStar/trigger.h>
 
-
 //!std c++
 #include <iostream>
 #include <math.h>
@@ -27,9 +26,13 @@
 using namespace std;
 using namespace TMath;
 
-/**********************************************************************************************/
+// --------------------------------------------------------------------- LPFilter
 
-void LPFilter(int NoZero, int order, int frequency, double *coeff){
+void LPFilter (int NoZero,
+	       int order,
+	       int frequency,
+	       double *coeff)
+{
    char win[2048];
    char name[1024];
    
@@ -50,9 +53,13 @@ void LPFilter(int NoZero, int order, int frequency, double *coeff){
    
 }
 
-/**********************************************************************************************/
+// --------------------------------------------------------------------- HPFilter
 
-void HPFilter(int NoZero, int order, int frequency, double *coeff){
+void HPFilter (int NoZero,
+	       int order,
+	       int frequency,
+	       double *coeff)
+{
    char win[2048];
    char name[1024];
    

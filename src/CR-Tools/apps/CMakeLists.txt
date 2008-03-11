@@ -117,6 +117,10 @@ if (HAVE_CASA OR HAVE_CASACORE)
       )
     ## installation instructions
     list (APPEND cr_apps tbbStatistics)
+    ## automated execution within test environment
+    if (dataset_tbb)
+      add_test (tbbStatistics tbbStatistics ${dataset_tbb})
+    endif (dataset_tbb)
   else (DAL_LIBRARIES AND HDF5_LIBRARIES)
     message (STATUS "[CR-Tools] Unable to build executable tbbStatistics.")
   endif (DAL_LIBRARIES AND HDF5_LIBRARIES)

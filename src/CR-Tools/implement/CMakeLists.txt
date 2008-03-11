@@ -95,6 +95,10 @@ if (PLPLOT_LIBRARIES)
   list (APPEND cr_link_libraries ${PLPLOT_LIBRARIES})
 endif (PLPLOT_LIBRARIES)
 
+if (FFTW3_LIBRARIES)
+  list (APPEND cr_link_libraries ${FFTW3_LIBRARIES})
+endif (FFTW3_LIBRARIES)
+
 if (ROOT_LIBRARIES)
   list (APPEND cr_link_libraries ${ROOT_LIBRARIES})
 endif (ROOT_LIBRARIES)
@@ -140,6 +144,7 @@ if (NOT APPLE)
   set_target_properties (cr
     PROPERTIES
     COMPILE_FLAGS "${CASACORE_COMPILE_FLAGS} -fPIC -O2 -fPIC"
+    LINK_FLAGS "-bind_at_load"
     )
 endif (NOT APPLE)
 

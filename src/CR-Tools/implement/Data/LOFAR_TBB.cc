@@ -140,8 +140,10 @@ namespace CR { // Namespace CR -- begin
     os << "-- nof. data channels .. : " << nofDipoleDatasets()   << endl;
 
     /* Variables describing the setup of the DataReader */
-    os << "-- blocksize  [samples ] : " << blocksize_p              << endl;
-    os << "-- FFT length [channels] : " << DataReader::fftLength()  << endl;
+    os << "-- blocksize  [samples ] : " << blocksize_p                   << endl;
+    os << "-- FFT length [channels] : " << DataReader::fftLength()       << endl;
+    os << "-- Sample frequency [Hz] : " << DataReader::sampleFrequency() << endl;
+    os << "-- Nyquist zone ........ : " << DataReader::nyquistZone()     << endl;
 
     /* The rest of the summary output is conditional, because given the number
        station it might get quite a lot. */
@@ -170,11 +172,12 @@ namespace CR { // Namespace CR -- begin
   {
     bool status (true);
 
-    /*
-     *  Set up the vector collecting the IDs for the individual dipoles
-     */
+    /* Set up the vector collecting the IDs for the individual dipoles */
 
     channelID_p.resize (LOFAR_Timeseries::nofDipoleDatasets());
+
+    /* Set the correct data for the time and frequency axis */
+
 
     /*
      * Connect the streams (or at least the pointers normally connected to a

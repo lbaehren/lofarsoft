@@ -27,17 +27,17 @@
 // Standard library header files
 #include <iostream>
 #include <string>
-// For pow-function
 #include <cmath>
 
+// ROOT header files
+#include <TMath.h>
+
 // This class is derived form CRinvFFT an adds upsampling
-#include "Analysis/CRinvFFT.h"
+#include <Analysis/CRinvFFT.h>
 // For Plots:
-#include "Display/SimplePlot.h"
+#include <Display/SimplePlot.h>
 // For Upsampling:
-#include "LopesStar/reconstruction.h"
-
-
+#include <LopesStar/reconstruction.h>
 
 namespace CR { // Namespace CR -- begin
   

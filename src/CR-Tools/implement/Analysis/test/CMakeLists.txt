@@ -104,18 +104,23 @@ endif (HAVE_PLPLOT OR HAVE_PGPLOT)
 ## [3] Test programs for programs using functionality of LopesStar
 
 if (HAVE_ROOT AND HAVE_FFTW3 AND HAVE_PYTHON)
-  ## build executable
+  ## compiler instructions
   add_executable (tCompletePipeline tCompletePipeline.cc)
+  ## linker instructions
   target_link_libraries (tCompletePipeline
     cr
     ${FFTW3_LIBRARIES}
     ${ROOT_LIBRARIES}
     ${PYTHON_LIBRARIES}
     )
+  ## extra properties to take care of
+  set_target_properties (tCompletePipeline
+    PROPERTIES
+    LINK_FLAGS "-bind_at_load"
+    )
   ## testing
   add_test (tCompletePipeline tCompletePipeline)
 endif (HAVE_ROOT AND HAVE_FFTW3 AND HAVE_PYTHON)
-
 
 ## -----------------------------------------------------------------------------
 ## Installation
