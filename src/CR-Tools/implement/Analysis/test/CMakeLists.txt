@@ -114,10 +114,10 @@ if (HAVE_ROOT AND HAVE_FFTW3 AND HAVE_PYTHON)
     ${PYTHON_LIBRARIES}
     )
   ## extra properties to take care of
-  set_target_properties (tCompletePipeline
-    PROPERTIES
-    LINK_FLAGS "-bind_at_load"
-    )
+#  set_target_properties (tCompletePipeline
+#    PROPERTIES
+#    LINK_FLAGS "-bind_at_load"
+#    )
   ## testing
   add_test (tCompletePipeline tCompletePipeline)
 endif (HAVE_ROOT AND HAVE_FFTW3 AND HAVE_PYTHON)
