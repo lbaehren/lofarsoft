@@ -192,6 +192,7 @@ if (HAVE_ROOT AND HAVE_CASACORE)
     target_link_libraries (tUseROOT
       ${FFTW3_LIBRARIES}
       ${ROOT_LIBRARIES}
+      ${PYTHON_LIBRARIES}
       ${CASA_LIBRARIES}
       ${DAL_LIBRARIES}
       )
