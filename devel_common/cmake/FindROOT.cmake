@@ -73,6 +73,7 @@ set (libs
   Hist
   HistPainter
   MathCore
+  MathMore
   Matrix
   Minuit
   Net
@@ -92,6 +93,7 @@ set (libs
   Tree
   TreePlayer
   TreeViewer
+  TMVA
   )
 
 foreach (lib ${libs})

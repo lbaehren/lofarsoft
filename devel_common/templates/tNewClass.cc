@@ -23,7 +23,8 @@
 
 #include <<newModule>/<newClass>.h>
 
-using <newNamespace>::<newClass>;  // Namespace usage
+// Namespace usage
+using <newNamespace>::<newClass>;
 
 /*!
   \file t<newClass>.cc
