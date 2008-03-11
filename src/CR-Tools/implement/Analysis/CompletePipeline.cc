@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id:: CompletePipeline.cc 1261 2008-02-28 10:30:11Z schroeder         $ |
+ | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2008                                                    *
@@ -498,7 +498,7 @@ namespace CR { // Namespace CR -- begin
 
       // Get the (not upsampled) time axis
       xaxis = static_cast< Vector<Double> >(dr->timeValues());
-
+      
       // Get the yValues of all antennas (raw data or fieldstrength)
       if (rawData)
       {
@@ -514,8 +514,7 @@ namespace CR { // Namespace CR -- begin
         // Upsampled yValues
         upYvalues = getUpsampledFieldstrength(dr,upsampling_exp, antennaSelection);
       }
-
-
+    
       // Upsampled x-axis
       Vector<Double> upxaxis = getUpsampledTimeAxis(dr,upsampling_exp);
 
@@ -529,11 +528,11 @@ namespace CR { // Namespace CR -- begin
       Slice plotRange = calculatePlotRange(xaxis);
       Slice upplotRange = calculatePlotRange(upxaxis);
 
-      // conversion to micro
+      // conversion to micro (no conversion for height of raw data)
       xaxis *= 1e6;
-      yValues *= 1e6;
+      if (!rawData) yValues *= 1e6;
       upxaxis *= 1e6;
-      upYvalues *= 1e6;  
+      if (!rawData) upYvalues *= 1e6;  
 
       // define Plotrange
       xmin = min(xaxis(plotRange));
@@ -700,23 +699,34 @@ namespace CR { // Namespace CR -- begin
       // find the maximal y values for all selected antennas
       for (int i = 0; i < antennaSelection.nelements(); i++) if (antennaSelection(i))
       {
-        // Start with height 0 and search for heigher values
+        // Start with height 0 and search for heigher and lower values
         double maximum = 0;
-        int timevalue = 0;
+	double minimum = 0;
+        int maxtimevalue = 0;
+        int mintimevalue = 0;
 
         // get current trace
         trace = yValues.column(i)(range);
 
-        // loop through the values and search for the heighest one
+        // loop through the values and search for the heighest and lowest one
         for(int j = 0; j < timeRange.nelements(); j++)
-          if ( maximum <= abs(trace(j)) ) 
+	{
+          if ( maximum < trace(j)) 
           {
-            timevalue = j;
-            maximum = abs(trace(j));
+            maxtimevalue = j;
+            maximum = trace(j);
           } 
+          if ( minimum > trace(j)) 
+          {
+            mintimevalue = j;
+            minimum = trace(j);
+          } 
+	}  
 
         std::cout << "Antenna " << i+1 << ": \t maximum[micro] = " << maximum*1e6 
-                  << "\t at time[micro s] = " << timeRange(timevalue)*1e6 << "\n";
+                  << "\t at time[micro s] = " << timeRange(maxtimevalue)*1e6 << "\n";
+        std::cout << "Antenna " << i+1 << ": \t minimum[micro] = " << minimum*1e6 
+                  << "\t at time[micro s] = " << timeRange(mintimevalue)*1e6 << "\n";
       }
 
     } catch (AipsError x) 
