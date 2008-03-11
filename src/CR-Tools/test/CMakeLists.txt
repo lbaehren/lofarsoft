@@ -196,10 +196,12 @@ if (HAVE_ROOT AND HAVE_CASACORE)
       ${LAPACK_LIBRARIES}
       )
     ## extra properties to take care of
-    set_target_properties (tUseROOT
-      PROPERTIES
-      LINK_FLAGS "-bind_at_load"
-      )
+    if (APPLE)
+      set_target_properties (tUseROOT
+	PROPERTIES
+	LINK_FLAGS "-bind_at_load"
+	)
+    endif (APPLE)
     ## testing
     if (dataset_event)
       add_test (tUseROOT tUseROOT ${dataset_event})
