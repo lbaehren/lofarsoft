@@ -190,10 +190,10 @@ if (HAVE_ROOT AND HAVE_CASACORE)
     add_executable (tUseROOT tUseROOT.cc)
     ## linker instructions
     target_link_libraries (tUseROOT
-      ${DAL_LIBRARIES}
+      ${FFTW3_LIBRARIES}
       ${ROOT_LIBRARIES}
       ${CASA_LIBRARIES}
-      ${LAPACK_LIBRARIES}
+      ${DAL_LIBRARIES}
       )
     ## extra properties to take care of
     if (APPLE)
