@@ -22,6 +22,8 @@
  ***************************************************************************/
 
 #include <casa/Arrays/ArrayIO.h>
+#include <casa/Arrays/Vector.h>
+
 #include <dal/Enumerations.h>
 #include <Data/LOFAR_DipoleDataset.h>
 

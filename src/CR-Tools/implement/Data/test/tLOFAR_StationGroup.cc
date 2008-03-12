@@ -341,44 +341,36 @@ int test_methods (std::string const &filename)
   cout << "\n[test_methods]\n" << endl;
 
   int nofFailedTests (0);
-  dalDataset dataset;
 
-  // open file into dataset object
-  cout << "-- opening dataset via DAL ... " << std::flush;
-  dataset.open(CR::string2char(filename));
-  cout << "OK" << endl;
   // create LOFAR_StationGroup object to continue working with
   LOFAR_StationGroup group (filename,"Station001");
 
-  cout << "[1] Convert individual ID numbers to channel ID" << endl;
+  cout << "[1] Retrieve list of sampling freqencies ..." << endl;
   try {
-    uint station_id (0);
-    uint rsp_id (0);
-    uint rcu_id (0);
-    
-    for (rcu_id=0; rcu_id<12; rcu_id++) {
-      cout << "\t[" << station_id << "," << rsp_id << "," << rcu_id
-		<< "] \t->\t"
-		<< group.channelID(station_id,rsp_id,rcu_id)
-		<< endl;
-    }
+  std:string units ("MHz");
+#ifdef HAVE_CASA
+    // retrieve the values ...
+    casa::Vector<double> sampleFrequencies = group.sample_frequencies();
+    // .. and display them 
+    cout << "-- Sample frequencies [ Hz] = " << sampleFrequencies << endl;
+    cout << "-- Sample frequencies [MHz] = " << group.sample_frequencies(units)
+	 << endl;
+#else
+    std::vector<double> sampleFrequencies = group.sample_frequencies();
+#endif    
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
-  
-  cout << "[2] Retrieve the list of channels names and IDs" << endl;
+
+  cout << "[2] Retrieve list of data lengths ..." << endl;
   try {
-    std::vector<std::string> channelNames = group.channelNames();
-    std::vector<int> channelIDs           = group.channelIDs();
-    uint nofChannels = channelNames.size();
-    
-    cout << "-- nof. channels = " << nofChannels    << endl;
-    cout << "-- Channel names = [";
-    for (uint channel(0); channel<nofChannels; channel++) {
-      cout << channelNames[channel] << " ";
-    }
-    cout << "]" << endl;
+#ifdef HAVE_CASA
+    casa::Vector<uint> dataLengths = group.data_lengths();
+    cout << "-- Data lengths = " << dataLengths << endl;
+#else 
+    std::vector<uint> dataLenghts = group.data_lengths();
+#endif
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -473,7 +465,7 @@ int main (int argc,
   
   if (nofFailedTests == 0) {
     nofFailedTests += test_groups(filename);
-//     nofFailedTests += test_methods (filename);
+    nofFailedTests += test_methods (filename);
     nofFailedTests += test_data(filename);
    }
 

@@ -279,10 +279,12 @@ namespace DAL { // Namespace DAL -- begin
 	 * be be stored in Hz, but this might not be the case.
 	 */
 	if (val < 1e06) {
+#ifdef DEBUGGING_MESSAGES
 	  std::cerr << "[LOFAR_DipoleDataset::sample_frequency]"
 		    << " Suspecting improper units for sample frequency."
 		    << " Attempting conversion to Hz..."
 		    << std::endl;
+#endif
 	  val *= 1e06;
 	}
 	/* Conversion to proper units */

@@ -132,10 +132,13 @@ namespace CR { // Namespace CR -- begin
 			   bool const &listStationGroups,
 			   bool const &listChannelIDs)
   {
-    os << "[LOFAR_TBB] Summar of object properties" << endl;
+    os << "[LOFAR_TBB] Summary of object properties" << endl;
 
     /* Variables describing the dataset itself */
     os << "-- Name of data file ... : " << filename_p            << endl;
+    os << "-- Telescope ........... : " << telescope()           << endl;
+    os << "-- Observer ............ : " << observer()            << endl;
+    os << "-- Project ............. : " << project()             << endl;
     os << "-- nof. station groups . : " << groups_p.size()       << endl;
     os << "-- nof. data channels .. : " << nofDipoleDatasets()   << endl;
 
@@ -177,8 +180,28 @@ namespace CR { // Namespace CR -- begin
     channelID_p.resize (LOFAR_Timeseries::nofDipoleDatasets());
 
     /* Set the correct data for the time and frequency axis */
-
-
+#ifdef HAVE_CASA
+    // retrieve the values
+    casa::Vector<double> sampleFreq = sample_frequencies();
+    // adjust internal settings
+    if (sampleFreq.nelements() > 0) {
+      sampleFrequency_p = sampleFreq(0);
+    } else {
+      std::cerr << "[LOFAR_TBB::init] Error retrieving sample frequency!"
+		<< std::endl;
+    }
+#else
+    // retrieve the values
+    std::vector<double> sampleFreq = sample_frequencies();
+    // adjust internal settings
+    if (sampleFreq.size() > 0) {
+      sampleFrequency_p = sampleFreq[0];
+    } else {
+      std::cerr << "[LOFAR_TBB::init] Error retrieving sample frequency!"
+		<< std::endl;
+    }
+#endif
+    
     /*
      * Connect the streams (or at least the pointers normally connected to a
      * stream)

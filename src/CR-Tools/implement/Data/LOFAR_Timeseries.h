@@ -513,6 +513,30 @@ namespace DAL { // Namespace DAL -- begin
     std::vector<std::string> channelIDs ();
     
     /*!
+      \brief Get the values of TIME for all present datasets
+      
+      \return times -- Values of the TIME attribute for all datasets present in
+              this station group
+    */
+#ifdef HAVE_CASA
+    casa::Vector<uint> times ();
+#else
+    std::vector<uint> times ();
+#endif
+
+    /*!
+      \brief Get the values of SAMPLE_FREQUENCY for all present datasets
+      
+      \return sample_frequencies -- Values of the SAMPLE_FREQUENCY attribute
+              for all datasets present in this station group
+    */
+#ifdef HAVE_CASA
+    casa::Vector<double> sample_frequencies (std::string const &units="Hz");
+#else
+    std::vector<double> sample_frequencies (std::string const &units="Hz");
+#endif
+
+    /*!
       \brief Retrieve a block of ADC values per dipole
 
       \param start      -- Number of the sample at which to start reading

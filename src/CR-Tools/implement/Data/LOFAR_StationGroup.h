@@ -320,7 +320,7 @@ namespace DAL { // Namespace DAL -- begin
     }
 
     /*!
-      \brief Get the values of the TIME attribute for all present datasets
+      \brief Get the values of TIME for all present datasets
       
       \return times -- Values of the TIME attribute for all datasets present in
               this station group
@@ -329,6 +329,30 @@ namespace DAL { // Namespace DAL -- begin
     casa::Vector<uint> times ();
 #else
     std::vector<uint> times ();
+#endif
+
+    /*!
+      \brief Get the values of SAMPLE_FREQUENCY for all present datasets
+      
+      \return sample_frequencies -- Values of the SAMPLE_FREQUENCY attribute
+              for all datasets present in this station group
+    */
+#ifdef HAVE_CASA
+    casa::Vector<double> sample_frequencies (std::string const &units="Hz");
+#else
+    std::vector<double> sample_frequencies (std::string const &units="Hz");
+#endif
+
+    /*!
+      \brief Get the values of DATA_LENGTH for all present datasets
+      
+      \return data_lengths -- Values of the DATA_LENGTH attribute for all
+              datasets present in this station group
+    */
+#ifdef HAVE_CASA
+    casa::Vector<uint> data_lengths ();
+#else
+    std::vector<uint> data_lengths ();
 #endif
 
     /*!

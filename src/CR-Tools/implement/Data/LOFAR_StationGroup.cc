@@ -515,6 +515,87 @@ namespace DAL { // Namespace DAL -- begin
     return dataset_ids;
   }
 
+  // ---------------------------------------------------------------------- times
+
+#ifdef HAVE_CASA
+    casa::Vector<uint> LOFAR_StationGroup::times ()
+    {
+      uint nofDatasets (datasets_p.size());
+      casa::Vector<uint> time (nofDatasets);
+      
+      for (uint n(0); n<nofDatasets; n++) {
+	time(n) = datasets_p[n].time();
+      }
+      
+      return time;
+    }
+#else
+    std::vector<uint> LOFAR_StationGroup::times ()
+    {
+      std::vector<uint> time;
+      
+      for (uint n(0); n<datasets_p.size(); n++) {
+	time.push_back(datasets_p[n].time());
+      }
+      
+      return time;
+    }
+#endif
+
+  // --------------------------------------------------------- sample_frequencies
+
+#ifdef HAVE_CASA
+    casa::Vector<double> LOFAR_StationGroup::sample_frequencies (std::string const &units)
+    {
+      uint nofDatasets (datasets_p.size());
+      casa::Vector<double> sample_frequency (nofDatasets);
+      
+      for (uint n(0); n<nofDatasets; n++) {
+	sample_frequency(n) = datasets_p[n].sample_frequency(units);
+      }
+      
+      return sample_frequency;
+    }
+#else
+    std::vector<double> LOFAR_StationGroup::sample_frequencies (std::string const &units)
+    {
+      std::vector<double> sample_frequency;
+      
+      for (uint n(0); n<datasets_p.size(); n++) {
+	sample_frequency.push_back(datasets_p[n].sample_frequency(units));
+      }
+      
+      return sample_frequency;
+    }
+#endif
+
+  // --------------------------------------------------------------- data_lengths
+
+#ifdef HAVE_CASA
+    casa::Vector<uint> LOFAR_StationGroup::data_lengths ()
+    {
+      uint nofDatasets (datasets_p.size());
+      casa::Vector<uint> data_length (nofDatasets);
+      
+      for (uint n(0); n<nofDatasets; n++) {
+	data_length(n) = datasets_p[n].data_length();
+      }
+      
+      return data_length;
+    }
+#else
+    std::vector<uint> LOFAR_StationGroup::data_lengths ()
+    {
+      std::vector<uint> data_length;
+      
+      for (uint n(0); n<datasets_p.size(); n++) {
+	data_length.push_back(datasets_p[n].data_length());
+      }
+      
+      return data_length;
+    }
+#endif
+
   // ------------------------------------------------------------------------- fx
 
   casa::Matrix<double> LOFAR_StationGroup::fx (int const &start,

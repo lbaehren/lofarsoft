@@ -92,6 +92,55 @@ int test_construction (std::string const &filename)
 // -----------------------------------------------------------------------------
 
 /*!
+  \brief Test the various methods of the class
+
+  \param filename -- Name of the HDF5 file used for testing
+
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_methods (std::string const &filename)
+{
+  std::cout << "\n[test_methods]\n" << std::endl;
+
+  int nofFailedTests = 0;
+  LOFAR_Timeseries timeseries (filename);
+
+  cout << "[1] Retrieving sample frequencies ..." << endl;
+  try {
+#ifdef HAVE_CASA
+    casa::Vector<double> sampleFreq = timeseries.sample_frequencies();
+    cout << "-- nof. values        = " << sampleFreq.nelements() << endl;
+    cout << "-- Sample frequencies = " << sampleFreq << endl;
+#else 
+    std::vector<double> sampleFreq = timeseries.sample_frequencies();
+    cout << "-- nof. values        = " << sampleFreq.size() << endl;
+#endif
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[2] Retrieve recording times ..." << endl;
+  try {
+#ifdef HAVE_CASA
+    casa::Vector<uint> times = timeseries.times();
+    cout << "-- nof. values        = " << times.nelements() << endl;
+    cout << "-- Sample frequencies = " << times << endl;
+#else 
+    std::vector<uint> times = timeseries.times();
+    cout << "-- nof. values        = " << times.size() << endl;
+#endif
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
   \brief Test retrieval of TBB data
 
   \param filename -- Name of the HDF5 file used for testing
@@ -151,6 +200,7 @@ int main (int argc,
   nofFailedTests += test_construction (filename);
 
   if (nofFailedTests == 0) {
+    nofFailedTests += test_methods (filename);
     nofFailedTests += test_data (filename);
   } else {
     std::cerr << "[tLOFAR_StationGroup]"

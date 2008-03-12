@@ -105,6 +105,35 @@ namespace DAL { // Namespace DAL -- begin
   //  Parameters
   //
   // ============================================================================
+
+  std::string LOFAR_Timeseries::telescope ()
+  {
+    if (fileID_p > 0 && groups_p.size() > 0) {
+      return groups_p[0].telescope();
+    } else {
+      return std::string ("UNDEFINED");
+    }
+  }
+
+  std::string LOFAR_Timeseries::observer ()
+  {
+    if (fileID_p > 0 && groups_p.size() > 0) {
+      return groups_p[0].observer();
+    } else {
+      return std::string ("UNDEFINED");
+    }
+  }
+
+  std::string LOFAR_Timeseries::project ()
+  {
+    if (fileID_p > 0 && groups_p.size() > 0) {
+      return groups_p[0].project();
+    } else {
+      return std::string ("UNDEFINED");
+    }
+  }
+
+  // -------------------------------------------------------------------- summary
   
   void LOFAR_Timeseries::summary (std::ostream &os)
   {
@@ -118,6 +147,9 @@ namespace DAL { // Namespace DAL -- begin
     */
 
     if (fileID_p > 0) {
+      os << "-- Telescope            : " << telescope()         << endl;
+      os << "-- Observer             : " << observer()          << endl;
+      os << "-- Project              : " << project()           << endl;
       os << "-- nof. station groups  : " << groups_p.size()     << endl;
       os << "-- nof. dipole datasets : " << nofDipoleDatasets() << endl;
     }
@@ -213,6 +245,102 @@ namespace DAL { // Namespace DAL -- begin
     return true;
   }
   
+  // ---------------------------------------------------------------------- times
+
+#ifdef HAVE_CASA
+  casa::Vector<uint> LOFAR_Timeseries::times ()
+  {
+    uint n           = 0;
+    uint station     = 0;
+    uint dipole      = 0;
+    uint nofDipoles  = nofDipoleDatasets();
+    uint nofStations = nofStationGroups();
+    casa::Vector<uint> UnixTimes (nofDipoles);
+    casa::Vector<uint> tmp;
+    
+    for (station=0; station<nofStations; station++) {
+      tmp        = groups_p[n].times();
+      nofDipoles = groups_p[station].nofDipoleDatasets();
+      for (dipole=0; dipole<nofDipoles; dipole++) {
+	UnixTimes(n) = tmp(dipole);
+	n++;
+      }
+    }
+    
+    return UnixTimes;
+  }
+#else
+  std::vector<uint> LOFAR_Timeseries::times (std::string const &units)
+  {
+    uint n           = 0;
+    uint station     = 0;
+    uint dipole      = 0;
+    uint nofDipoles  = nofDipoleDatasets();
+    uint nofStations = nofStationGroups();
+    std::vector<uint> UnixTimes (nofDipoles);
+    std::vector<uint> tmp;
+    
+    for (station=0; station<nofStations; station++) {
+      tmp        = groups_p[n].times();
+      nofDipoles = groups_p[station].nofDipoleDatasets();
+      for (dipole=0; dipole<nofDipoles; dipole++) {
+	UnixTimes[n] = tmp[dipole];
+	n++;
+      }
+    }
+    
+    return UnixTimes;
+  }
+#endif
+
+  // --------------------------------------------------------- sample_frequencies
+
+#ifdef HAVE_CASA
+  casa::Vector<double> LOFAR_Timeseries::sample_frequencies (std::string const &units)
+  {
+    uint n           = 0;
+    uint station     = 0;
+    uint dipole      = 0;
+    uint nofDipoles  = nofDipoleDatasets();
+    uint nofStations = nofStationGroups();
+    casa::Vector<double> sampleFrequencies (nofDipoles);
+    casa::Vector<double> tmp;
+    
+    for (station=0; station<nofStations; station++) {
+      tmp = groups_p[n].sample_frequencies(units);
+      nofDipoles = groups_p[station].nofDipoleDatasets();
+      for (dipole=0; dipole<nofDipoles; dipole++) {
+	sampleFrequencies(n) = tmp(dipole);
+	n++;
+      }
+    }
+    
+    return sampleFrequencies;
+  }
+#else
+  std::vector<double> LOFAR_Timeseries::sample_frequencies (std::string const &units)
+  {
+    uint n           = 0;
+    uint station     = 0;
+    uint dipole      = 0;
+    uint nofDipoles  = nofDipoleDatasets();
+    uint nofStations = nofStationGroups();
+    std::vector<double> sampleFrequencies (nofDipoles);
+    std::vector<double> tmp;
+    
+    for (station=0; station<nofStations; station++) {
+      tmp = groups_p[n].sample_frequencies(units);
+      nofDipoles = groups_p[station].nofDipoleDatasets();
+      for (dipole=0; dipole<nofDipoles; dipole++) {
+	sampleFrequencies[n] = tmp[dipole];
+	n++;
+      }
+    }
+    
+    return sampleFrequencies;
+  }
+#endif
+
   // ------------------------------------------------------------------------- fx
 
   casa::Matrix<double> LOFAR_Timeseries::fx (int const &start,
