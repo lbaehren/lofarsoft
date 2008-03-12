@@ -23,6 +23,7 @@ set (include_locations
   /opt
   /opt/include
   /opt/root/include
+  /usr/local
 )
 
 set (lib_locations
@@ -36,6 +37,7 @@ set (lib_locations
   /opt
   /opt/lib
   /opt/root/lib
+  /usr/local
 )
 
 ## -----------------------------------------------------------------------------
