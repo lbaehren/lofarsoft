@@ -37,8 +37,6 @@ if [ $tmp != $LOFARSOFT/release/bin ] ; then
     export PATH=$PATH:$LOFARSOFT/release/bin
 fi
 
-exit
-
 ## -----------------------------------------------------------------------------
 ## Helper functions
 
