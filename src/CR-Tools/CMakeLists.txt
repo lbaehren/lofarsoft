@@ -9,8 +9,11 @@ project (CR)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.4)
 
-## ------------------------------------------------------------------------------
-## User defined build/install options
+## =============================================================================
+##
+##  User defined build/install options
+##
+## =============================================================================
 
 option (CR_BUILD_TESTS "Build the test programs?" 1)
 option (CR_BUILD_EXTERNAL_TESTS "Build the test programs for external packages?" 0)
@@ -19,17 +22,6 @@ option (CR_DEBUGGING_MESSAGES "Print debugging information?" 0)
 option (CR_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
 option (CR_GLISH_SUPPORT "Activate support for Glish applications?" 0)
 option (CR_PYTHON_SUPPORT "Activate support for Python applications?" 0)
-
-## Handle option: testing mode on/off
-
-if (CR_ENABLE_TESTING)
-  # CMake/CTest settings
-  include (CTest)
-  enable_testing()
-  # enable building test programs
-  set (CR_BUILD_TESTS ON)
-  set (CR_BUILD_EXTERNAL_TESTS ON)
-endif (CR_ENABLE_TESTING)
 
 ## Handle option: verbose mode on/off
 
@@ -61,10 +53,6 @@ if (NOT CR_VERBOSE_CONFIGURE)
   ## output of the generated makefile
   set (CMAKE_VERBOSE_MAKEFILE 0)
 endif (NOT CR_VERBOSE_CONFIGURE)
-
-## Handle option: Activate support for Glish applications on/off
-
-# --> handled below
 
 ## -----------------------------------------------------------------------------
 ## Locate additional CMake find scripts
@@ -129,20 +117,25 @@ if (cr_cmake)
   
   ## --- Blitz++ ---------------------------------
   
-  if (NOT HAVE_BLITZ)
-    include (${cr_cmake}/FindBlitz.cmake)
-  endif (NOT HAVE_BLITZ)
+  include (${cr_cmake}/FindBlitz.cmake)
   
   if (HAVE_BLITZ)
     add_definitions (-DHAVE_BLITZ)
     include_directories (${BLITZ_INCLUDES})
   endif (HAVE_BLITZ)
   
+  ## --- BOOST -----------------------------------
+  
+  include (${cr_cmake}/FindBoost.cmake)
+  
+  if (HAVE_BOOST)
+    add_definitions (-DHAVE_BOOST)
+    include_directories (${BOOST_INCLUDES})
+  endif (HAVE_BOOST)
+  
   ## --- CFITSIO ---------------------------------
   
-  if (NOT HAVE_CFITSIO)
-    include (${cr_cmake}/FindCFITSIO.cmake)
-  endif (NOT HAVE_CFITSIO)
+  include (${cr_cmake}/FindCFITSIO.cmake)
   
   if (HAVE_CFITSIO)
     add_definitions (-DHAVE_CFITSIO)
@@ -151,14 +144,56 @@ if (cr_cmake)
   
   ## --- CASA / casacore -------------------------
   
-  ## this is handled further below, as this also depends
-  ## on whether Glish is available/required.
+  include (${cr_cmake}/FindCASACORE.cmake)
+  
+  if (HAVE_CASACORE)
+    add_definitions (-DHAVE_CASACORE)
+    add_definitions (-DHAVE_CASA)
+    include_directories (${CASA_INCLUDES})
+  endif (HAVE_CASACORE)
+  
+  if (APPLE)
+    ## this surely is not the best solution, but for the time being I am 
+    ## using the configuration here which I have worked out in order to build
+    ## the code outside the USG framework
+    if (HAVE_CASA OR HAVE_CASACORE)
+      add_definitions (
+	-DWITH_CASA
+	# -- compiler flags utilized in the source code --
+	-DAIPS_STDLIB
+	-DAIPS_AUTO_STL
+	)
+      IF (APPLE)
+	## definition common to apple architectures
+	add_definitions (
+	  -DAIPS_DARWIN
+	  )
+      ELSE (APPLE)
+	ADD_DEFINITIONS (-DAIPS_LINUX)
+      ENDIF (APPLE)
+      ## Platform test 32/64 bit ------------------------------
+      set (CMAKE_SYSTEM_64BIT 0)
+      if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
+	if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
+	  if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+            set (CMAKE_SYSTEM_64BIT 1)
+            add_definitions (-DAIPS_64B)
+	  endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+	endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
+      endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
+      if (APPLE)
+	if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+	  set (CMAKE_SYSTEM_64BIT 1)
+	  add_definitions (-DAIPS_64B)
+	endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+      endif (APPLE)
+    endif (HAVE_CASA OR HAVE_CASACORE)
+  else (APPLE)
+  endif (APPLE)
   
   ## --- Data Access Library (DAL) ---------------
   
-  if (NOT HAVE_DAL)
-    include (${cr_cmake}/FindDAL.cmake)
-  endif (NOT HAVE_DAL)
+  include (${cr_cmake}/FindDAL.cmake)
   
   if (HAVE_DAL)
     add_definitions (-DHAVE_DAL)
@@ -167,9 +202,7 @@ if (cr_cmake)
   
   ## --- FFTW3 -----------------------------------
   
-  if (NOT HAVE_FFTW3)
-    include (${cr_cmake}/FindFFTW3.cmake)
-  endif (NOT HAVE_FFTW3)
+  include (${cr_cmake}/FindFFTW3.cmake)
   
   if (HAVE_FFTW3)
     add_definitions (-DHAVE_FFTW3)
@@ -178,15 +211,16 @@ if (cr_cmake)
   
   ## --- G2C -------------------------------------
   
-  if (NOT HAVE_G2C)
-    include (${cr_cmake}/FindG2C.cmake)
-  endif (NOT HAVE_G2C)
+  include (${cr_cmake}/FindG2C.cmake)
+  
+  if (HAVE_G2C)
+    add_definitions (-DHAVE_G2C)
+    include_directories (${G2C_INCLUDES})
+  endif (HAVE_G2C)
   
   ## --- GIF ---------------------------------------
   
-  if (NOT HAVE_GIF)
-    include (${cr_cmake}/FindGIF.cmake)
-  endif (NOT HAVE_GIF)
+  include (${cr_cmake}/FindGIF.cmake)
   
   if (HAVE_GIF)
     add_definitions (-DHAVE_GIF)
@@ -195,9 +229,7 @@ if (cr_cmake)
   
   ## --- Glish -------------------------------------
   
-  if (NOT HAVE_GLISH)
-    include (${cr_cmake}/FindGlish.cmake)
-  endif (NOT HAVE_GLISH)
+  include (${cr_cmake}/FindGlish.cmake)
   
   if (HAVE_GLISH)
     add_definitions (-DHAVE_GLISH)
@@ -206,9 +238,7 @@ if (cr_cmake)
   
   ## --- GNU Scientific Library (GSL) --------------
   
-  if (NOT HAVE_GSL)
-    include (${cr_cmake}/FindGSL.cmake)
-  endif (NOT HAVE_GSL)
+  include (${cr_cmake}/FindGSL.cmake)
   
   if (HAVE_GSL)
     add_definitions (-DHAVE_GSL)
@@ -217,9 +247,7 @@ if (cr_cmake)
   
   ## --- GTK ---------------------------------------
   
-  if (NOT HAVE_GTK)
-    include (${cr_cmake}/FindGTK.cmake)
-  endif (NOT HAVE_GTK)
+  include (${cr_cmake}/FindGTK.cmake)
   
   if (HAVE_GTK)
     add_definitions (-DHAVE_GTK)
@@ -228,9 +256,7 @@ if (cr_cmake)
   
   ## --- HDF5 ------------------------------------
   
-  if (NOT HAVE_HDF5)
-    include (${cr_cmake}/FindHDF5.cmake)
-  endif (NOT HAVE_HDF5)
+  include (${cr_cmake}/FindHDF5.cmake)
   
   if (HAVE_HDF5)
     add_definitions (-DHAVE_HDF5)
@@ -239,9 +265,7 @@ if (cr_cmake)
   
   ## LAPACK --------------------------------------
   
-  if (NOT HAVE_LAPACK)
-    include (${cr_cmake}/FindLAPACK.cmake)
-  endif (NOT HAVE_LAPACK)
+  include (${cr_cmake}/FindLAPACK.cmake)
   
   if (LAPACK_INCLUDES)
     add_definitions (-DHAVE_LAPACK)
@@ -250,21 +274,25 @@ if (cr_cmake)
   
   ## -- PGPlot -----------------------------------
   
-  if (NOT HAVE_PGPLOT)
-    include (${cr_cmake}/FindPGPLOT.cmake)
-  endif (NOT HAVE_PGPLOT)
+  include (${cr_cmake}/FindPGPLOT.cmake)
+  
+  if (PGPLOT_INCLUDES)
+    include_directories (${PGPLOT_INCLUDES})
+    add_definitions (-DHAVE_PGPLOT)
+  endif (PGPLOT_INCLUDES)
   
   ## -- PLplot -----------------------------------
   
-  if (NOT HAVE_PLPLOT)
-    include (${cr_cmake}/FindPLplot.cmake)
-  endif (NOT HAVE_PLPLOT)
+  include (${cr_cmake}/FindPLplot.cmake)
+  
+  if (PLPLOT_INCLUDES)
+    include_directories (${PLPLOT_INCLUDES})
+    add_definitions (-DHAVE_PLPLOT)
+  endif (PLPLOT_INCLUDES)
   
   ## -- PNG --------------------------------------
   
-  if (NOT HAVE_PNG)
-    include (${cr_cmake}/FindPNG.cmake)
-  endif (NOT HAVE_PNG)
+  include (${cr_cmake}/FindPNG.cmake)
   
   if (HAVE_PNG)
     add_definitions (-DHAVE_PNG)
@@ -273,27 +301,34 @@ if (cr_cmake)
   
   ## -- popt -------------------------------------
   
-  if (NOT HAVE_POPT)
-    include (${cr_cmake}/FindPOPT.cmake)
-  endif (NOT HAVE_POPT)
+  include (${cr_cmake}/FindPOPT.cmake)
+  
+  if (HAVE_POPT)
+    add_definitions (-DHAVE_POPT)
+    include_directories (${POPT_INCLUDES})
+  endif (HAVE_POPT)
   
   ## -- PostgreSQL -------------------------------
   
-  if (NOT HAVE_PostgreSQL)
-    include (${cr_cmake}/FindPostgreSQL.cmake)
-  endif (NOT HAVE_PostgreSQL)
+  include (${cr_cmake}/FindPostgreSQL.cmake)
+  
+  if (HAVE_PostgreSQL)
+    add_definitions (-DHAVE_POSTGRESQL)
+    include_directories (${PostgreSQL_INCLUDES})
+  endif (HAVE_PostgreSQL)
   
   ## -- Python -----------------------------------
   
-  if (NOT HAVE_PYTHON)
-    include (${cr_cmake}/FindPython.cmake)
-  endif (NOT HAVE_PYTHON)
+  include (${cr_cmake}/FindPython.cmake)
+  
+  if (HAVE_PYTHON)
+    add_definitions (-DHAVE_PYTHON)
+    include_directories (${PYTHON_INCLUDES})
+  endif (HAVE_PYTHON)
   
   ## -- ROOT -------------------------------------
   
-  if (NOT HAVE_ROOT)
-    include (${cr_cmake}/FindROOT.cmake)
-  endif (NOT HAVE_ROOT)
+  include (${cr_cmake}/FindROOT.cmake)
   
   if (HAVE_ROOT)
     add_definitions (-DHAVE_ROOT)
@@ -302,10 +337,8 @@ if (cr_cmake)
   
   ## --- Tcl -------------------------------------
   
-  if (NOT HAVE_TCL)
-    include (${cr_cmake}/FindTCL.cmake)
-  endif (NOT HAVE_TCL)
-
+  include (${cr_cmake}/FindTCL.cmake)
+  
   if (HAVE_TCL)
     add_definitions (-DHAVE_TCL)
     include_directories (${TCL_INCLUDES})
@@ -313,21 +346,22 @@ if (cr_cmake)
   
   ## --- Tk --------------------------------------
   
-  if (NOT HAVE_TK)
-    include (${cr_cmake}/FindTK.cmake)
-  endif (NOT HAVE_TK)
-
+  include (${cr_cmake}/FindTK.cmake)
+  
   if (HAVE_TK)
     add_definitions (-DHAVE_TK)
     include_directories (${TK_INCLUDES})
   endif (HAVE_TK)
   
   ## -- WCSLIB -----------------------------------
-
-  if (NOT HAVE_WCSLIB) 
-    include (${cr_cmake}/FindWCS.cmake)
-  endif (NOT HAVE_WCSLIB)
-
+  
+  include (${cr_cmake}/FindWCS.cmake)
+  
+  if (HAVE_WCS)
+    add_definitions (-DHAVE_WCS)
+    include_directories (${WCS_INCLUDES})
+  endif (HAVE_WCS)
+  
 endif (cr_cmake)
   
   ## Handle option: Activate support for Glish applications on/off
@@ -408,25 +442,25 @@ if (HAVE_CASA OR HAVE_CASACORE)
   endif (APPLE)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
-## ------------------------------------------------------------------------------
-## Where to find the header files
+## =============================================================================
+##
+##  Handling of configuration/build/install options
+##
+## =============================================================================
 
-## external components
+## Handle option: testing mode on/off
 
-if (PGPLOT_INCLUDES)
-  include_directories (${PGPLOT_INCLUDES})
-  add_definitions (-DHAVE_PGPLOT)
-endif (PGPLOT_INCLUDES)
+if (CR_ENABLE_TESTING)
+  # CMake/CTest settings
+  include (CTest)
+  enable_testing()
+  # enable building test programs
+  set (CR_BUILD_TESTS ON)
+  set (CR_BUILD_EXTERNAL_TESTS ON)
+endif (CR_ENABLE_TESTING)
 
-if (PLPLOT_INCLUDES)
-  include_directories (${PLPLOT_INCLUDES})
-  add_definitions (-DHAVE_PLPLOT)
-endif (PLPLOT_INCLUDES)
+## Handle option: Activate support for Glish applications on/off
 
-if (HAVE_PostgreSQL)
-  include_directories (${PostgreSQL_INCLUDES})
-  add_definitions (-DHAVE_POSTGRESQL=1)
-endif (HAVE_PostgreSQL)
 
 ## =============================================================================
 ##
@@ -524,6 +558,7 @@ message (STATUS " CMAKE_SYSTEM_64BIT ......: ${CMAKE_SYSTEM_64BIT}")
 message (STATUS " CMAKE_SYSTEM_BIG_ENDIAN  : ${CMAKE_SYSTEM_BIG_ENDIAN}")
 message (STATUS "+------------------------------------------------------------+")
 message (STATUS " BLITZ .................. : ${HAVE_BLITZ}")
+message (STATUS " BOOST .................. : ${HAVE_BOOST}")
 message (STATUS " CASA ................... : ${HAVE_CASA}")
 message (STATUS " CASACORE ............... : ${HAVE_CASACORE}")
 message (STATUS " CFITSIO ................ : ${HAVE_CFITSIO}")
