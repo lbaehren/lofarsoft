@@ -22,6 +22,24 @@ param_cleanBuild=0;
 param_reportBuild='';
 
 ## -----------------------------------------------------------------------------
+## Environment variables; in particular we need to ensure, that CMake binary
+
+cd $basedir/..
+export LOFARSOFT=`pwd`
+
+## check if $LOFARSOFT/release/bin is in the PATH already; if not we need to
+## add it 
+
+tmp=`echo $PATH | tr ':' '\n' | grep $LOFARSOFT`
+
+if [ $tmp != $LOFARSOFT/release/bin ] ; then
+    echo "-- Adding release/bin to PATH..."
+    export PATH=$PATH:$LOFARSOFT/release/bin
+fi
+
+exit
+
+## -----------------------------------------------------------------------------
 ## Helper functions
 
 print_help ()
