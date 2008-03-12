@@ -24,6 +24,8 @@ param_reportBuild='';
 ## -----------------------------------------------------------------------------
 ## Environment variables; in particular we need to ensure, that CMake binary
 
+## move one directory up to get a clean result when setting LOFARSOFT
+
 cd $basedir/..
 export LOFARSOFT=`pwd`
 
@@ -36,6 +38,10 @@ if [ $tmp != $LOFARSOFT/release/bin ] ; then
     echo "-- Adding release/bin to PATH..."
     export PATH=$PATH:$LOFARSOFT/release/bin
 fi
+
+## move back into $LOFARSOFT/build
+
+cd $basedir
 
 ## -----------------------------------------------------------------------------
 ## Helper functions
