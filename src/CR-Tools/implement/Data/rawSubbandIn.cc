@@ -157,7 +157,9 @@ namespace CR { // Namespace CR -- begin
 	};
       };
       blockdates.resize(numblocks,True);
-
+      lastdate = max(blockdates)+FHead.nrSamplesPerBeamlet/FHead.sampleRate;
+      OpenedFile = Filename;
+      fclose(fd);
     } catch (AipsError x) {
       cerr << "rawSubbandIn:attachFile: " << x.getMesg() << endl;
       return False;
@@ -166,22 +168,83 @@ namespace CR { // Namespace CR -- begin
   };
 
   Matrix<DComplex> rawSubbandIn::getData(Double startdate, int nSamples, int pol){
-    Matrix<DComplex> data(nSamples,FHead.nrBeamlets);
+    Matrix<DComplex> data(nSamples,FHead.nrBeamlets,0.);
     try {
-      int bnum;
-      for (bnum=0; bnum<numblocks; bnum++){
-
+      int bnum,datalen,sample,beamlet,sindex,ui;
+      Double stopdate;
+      struct BlockHeader BHead;
+      
+      stopdate = startdate + nSamples/FHead.sampleRate;
+      if (stopdate >= lastdate){
+	cerr << "rawSubbandIn:getData: " << "Too many samples requested! (stopdate >= lastdate)" << endl;
+	return Matrix<DComplex>();
+      }
+      
+      FILE *fd = fopen(OpenedFile.c_str(),"r");
+      if (fd == NULL) {
+	cerr << "rawSubbandIn:getData: Can't open file: " << OpenedFile << endl;
+	return False;
       };
+      fseek(fd, sizeof(struct FileHeader), SEEK_CUR);
 
+      datalen = 2*2*FHead.nrPolarizations*FHead.nrBeamlets*FHead.nrSamplesPerBeamlet;
+      short *datap;
+      datap = malloc(datalen);
+      if (datap == NULL){
+	cerr << "rawSubbandIn:getData: " << "Unable to allocate temporary memory" << endl;
+	fclose(fd);
+	return Matrix<DComplex>();
+      }
+
+      for (bnum=0; bnum<numblocks; bnum++){
+	if (blockdates(bnum+1) < startdate){
+	  //current block is before the requested part
+	  fseek(fd, sizeof(struct BlockHeader), SEEK_CUR);
+	  fseek(fd, datasize, SEEK_CUR);
+	} else if (blockdates(bnum) >stopdate) {
+	  //current block is after the requested part
+	  break;
+	} else {
+	  fseek(fd, sizeof(struct BlockHeader), SEEK_CUR);
+	  if (blockdates(bnum) != BHead.time[0]/FHead.sampleRate) {
+	    cerr << "rawSubbandIn:getData: " << "Inconsistent state: blockdates != BHead.time" << endl;
+	  };
+	  ui = fread(datap, 1, datalen, fd);
+	  if ( ui != datalen ) {
+	    cerr << "rawSubbandIn:getData: Failed to read in full datablock. "  << endl;
+	  };
+	  for (sample=0; sample<FHead.nrSamplesPerBeamlet; sample++){
+	    sindex = ceil((blockdates(bnum)-startdate)*FHead.sampleRate)+sample;
+	    if (sindex>0 && sindex<nSamples){
+	      for (beamlet=0; beamlet<FHead.nrBeamlets; beamlet++){
+		data(sindex,beamlet) = DComplex(ntohs(datap[0]),ntohs([1]));
+	      };
+	    };
+	  };
+	};
+      };
+      free(datap);
+      fclose(fd);
     } catch (AipsError x) {
-      cerr << "rawSubbandIn:attachFile: " << x.getMesg() << endl;
+      cerr << "rawSubbandIn:getData: " << x.getMesg() << endl;
       return Matrix<DComplex>();
     }; 
     return data;
   }
 
+  Vector<Int> rawSubbandIn::getSubbandIndices(){
+    Vector<Int> out(36);
+    out(00) = 256; out(01) = 259; out(02) = 262; out(03) = 265; out(04) = 268;
+    out(05) = 271; out(06) = 274; out(07) = 277; out(08) = 280; out(09) = 283;
+    out(10) = 286; out(11) = 289; out(12) = 292; out(13) = 295; out(14) = 298;
+    out(15) = 301; out(16) = 304; out(17) = 307; out(18) = 310; out(19) = 313; 
+    out(20) = 316; out(21) = 319; out(22) = 322; out(23) = 325; out(24) = 328; 
+    out(25) = 331; out(26) = 334; out(27) = 337; out(28) = 340; out(29) = 343; 
+    out(30) = 346; out(31) = 349; out(32) = 352; out(33) = 355; out(34) = 358; 
+    out(35) = 361;
 
-
+    return out;
+  };
 
   Bool rawSubbandIn::readFileHeader(FILE *fd, FileHeader &FHead){
     int ui,i;

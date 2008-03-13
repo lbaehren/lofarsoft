@@ -107,7 +107,8 @@ namespace CR { // Namespace CR -- begin
 
     int numblocks;
     double firstdate,lastdate;
-    Vector<Double> blockdates;    
+    Vector<Double> blockdates;   
+    String OpenedFile;
     
   public:
     
@@ -167,8 +168,18 @@ namespace CR { // Namespace CR -- begin
       \param startdate -- date/timestamp of the first sample in the data
       \param nSamples  -- number of samples to return
       \param pol       -- polarization (0 or 1)
+
+      \return Matrix with the data
     */
     Matrix<DComplex> getData(Double startdate, int nSamples, int pol);
+
+
+    /*!
+      \brief Get the subband indices
+
+      \return Vector with the indices.
+    */
+    Vector<Int> getSubbandIndices();
     
     
   protected:
