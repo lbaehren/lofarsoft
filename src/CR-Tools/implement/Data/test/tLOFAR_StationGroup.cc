@@ -347,7 +347,7 @@ int test_methods (std::string const &filename)
 
   cout << "[1] Retrieve list of sampling freqencies ..." << endl;
   try {
-  std:string units ("MHz");
+  std::string units ("MHz");
 #ifdef HAVE_CASA
     // retrieve the values ...
     casa::Vector<double> sampleFrequencies = group.sample_frequencies();
