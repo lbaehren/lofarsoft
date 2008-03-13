@@ -28,6 +28,7 @@ option (CR_PYTHON_SUPPORT "Activate support for Python applications?" 0)
 if (NOT CR_VERBOSE_CONFIGURE)
   ## output of the find scripts
   set (BLITZ_FIND_QUIETLY 1)
+  set (BOOST_FIND_QUIETLY 1)
   set (CASA_FIND_QUIETLY 1)
   set (CASACORE_FIND_QUIETLY 1)
   set (CFITSIO_FIND_QUIETLY 1)
@@ -143,14 +144,49 @@ if (cr_cmake)
   endif (HAVE_CFITSIO)
   
   ## --- CASA / casacore -------------------------
+
+  if (CR_GLISH_SUPPORT)
+    ## load find script
+    include (${cr_cmake}/FindGlish.cmake)
+    ## process outcome 
+    if (HAVE_GLISH)
+      add_definitions (-DHAVE_GLISH)
+      include_directories (${GLISH_INCLUDES})
+    else (HAVE_GLISH)
+      message (STATUS "[CR] Disabling Glish support - missing Glish components.")
+      set (CR_GLISH_SUPPORT FALSE)
+    endif (HAVE_GLISH)
+  endif (CR_GLISH_SUPPORT)
+
+  ## keep in mind, that we only are going to need the
+  ## fully-blown CASA installation if we want the Glish
+  ## support; otherwise we use casacore
   
-  include (${cr_cmake}/FindCASACORE.cmake)
-  
-  if (HAVE_CASACORE)
-    add_definitions (-DHAVE_CASACORE)
-    add_definitions (-DHAVE_CASA)
-    include_directories (${CASA_INCLUDES})
-  endif (HAVE_CASACORE)
+  if (CR_GLISH_SUPPORT)
+    message (STATUS "[CR] Configuration with Glish support -- CASA")
+    ## load find script
+    include (${cr_cmake}/FindCASA.cmake)
+    ## process outcome
+    if (HAVE_CASA)
+      add_definitions (-DHAVE_CASA)
+      include_directories (${CASA_INCLUDES})
+    else (HAVE_CASA)
+      set (CR_GLISH_SUPPORT 0)
+    endif (HAVE_CASA)
+  else (CR_GLISH_SUPPORT)
+    message (STATUS "[CR] Configuration without Glish support -- casacore")
+    ## load find script
+    include (${cr_cmake}/FindCASACORE.cmake)
+    ## process outcome
+    if (HAVE_CASACORE)
+      add_definitions (-DHAVE_CASACORE)
+      add_definitions (-DHAVE_CASA)
+      include_directories (${CASA_INCLUDES})
+    endif (HAVE_CASACORE)
+    ## CMake variables
+    set (HAVE_CASA FALSE)
+    set (HAVE_GLISH FALSE)
+  endif (CR_GLISH_SUPPORT)
   
   if (APPLE)
     ## this surely is not the best solution, but for the time being I am 
@@ -189,6 +225,39 @@ if (cr_cmake)
       endif (APPLE)
     endif (HAVE_CASA OR HAVE_CASACORE)
   else (APPLE)
+    ## compiler flags
+    add_definitions (
+      -fPIC
+      -ftemplate-depth-20
+      # -- compiler flags utilized in the source code --
+      -DWITH_CASA
+      -DAIPS_STDLIB
+      -DAIPS_AUTO_STL
+      )
+    IF (APPLE)
+      ## definition common to apple architectures
+      add_definitions (
+	-DAIPS_DARWIN
+	)
+    ELSE (APPLE)
+      add_definitions (-DAIPS_LINUX)
+    ENDIF (APPLE)
+    ## Platform test 32/64 bit ------------------------------
+    set (CMAKE_SYSTEM_64BIT 0)
+    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
+      if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
+	if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+          set (CMAKE_SYSTEM_64BIT 1)
+          add_definitions (-DAIPS_64B)
+	endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+      endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
+    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
+    if (APPLE)
+      if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+	set (CMAKE_SYSTEM_64BIT 1)
+	add_definitions (-DAIPS_64B)
+      endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+    endif (APPLE)
   endif (APPLE)
   
   ## --- Data Access Library (DAL) ---------------
@@ -226,15 +295,6 @@ if (cr_cmake)
     add_definitions (-DHAVE_GIF)
     include_directories (${GIF_INCLUDES})
   endif (HAVE_GIF)
-  
-  ## --- Glish -------------------------------------
-  
-  include (${cr_cmake}/FindGlish.cmake)
-  
-  if (HAVE_GLISH)
-    add_definitions (-DHAVE_GLISH)
-    include_directories (${GLISH_INCLUDES})
-  endif (HAVE_GLISH)
   
   ## --- GNU Scientific Library (GSL) --------------
   
@@ -364,83 +424,6 @@ if (cr_cmake)
   
 endif (cr_cmake)
   
-  ## Handle option: Activate support for Glish applications on/off
-
-# If there is no Glish on the system, there is no use in trying to activate
-# the support for Glish applications
-
-if (NOT HAVE_GLISH)
-  set (CR_GLISH_SUPPORT FALSE)
-endif (NOT HAVE_GLISH)
-
-if (CR_GLISH_SUPPORT)
-  ## --- Support for Glish applications requires full CASA installation
-  if (NOT HAVE_CASA)
-    message (STATUS "[CR] Configuration to use CASA ...")
-    include (${cr_cmake}/FindCASA.cmake)
-  endif (NOT HAVE_CASA)
-  ## Compiler flags for CASA
-  if (HAVE_CASA)
-    set (HAVE_CASACORE FALSE)
-    add_definitions (-DHAVE_CASA)
-  else (HAVE_CASA)
-    message (STATUS "[CR] Failed to configure using CASA !")
-  endif (HAVE_CASA)
-  ## Compiler flags for Glish
-  if (HAVE_GLISH)
-    add_definitions (-DHAVE_GLISH)
-  elseif (HAVE_GLISH)
-    message (STATUS "[CR] Failed to locate Glish!")
-    message (STATUS "     CR-Tools will be build without Glish Support!")
-  endif (HAVE_GLISH)
-else (CR_GLISH_SUPPORT)
-  ## --- Without support for Glish applications we can/must use casacore
-  message (STATUS "[CR] Configuration to use CASACORE ...")
-  include (${cr_cmake}/FindCASACORE.cmake)
-  if (HAVE_CASACORE)
-    set (HAVE_CASA FALSE)
-    add_definitions (-DHAVE_CASA)
-    add_definitions (-DHAVE_CASACORE)
-  endif (HAVE_CASACORE)
-endif (CR_GLISH_SUPPORT)
-
-if (HAVE_CASA OR HAVE_CASACORE)
-  ## location of the header files
-  include_directories (${CASA_INCLUDES})
-  ## compiler flags
-  add_definitions (
-    -fPIC
-    -ftemplate-depth-20
-    # -- compiler flags utilized in the source code --
-    -DWITH_CASA
-    -DAIPS_STDLIB
-    -DAIPS_AUTO_STL
-    )
-  IF (APPLE)
-    ## definition common to apple architectures
-    add_definitions (
-      -DAIPS_DARWIN
-      )
-  ELSE (APPLE)
-    add_definitions (-DAIPS_LINUX)
-  ENDIF (APPLE)
-  ## Platform test 32/64 bit ------------------------------
-  set (CMAKE_SYSTEM_64BIT 0)
-  if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
-    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
-      if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-        set (CMAKE_SYSTEM_64BIT 1)
-        add_definitions (-DAIPS_64B)
-      endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
-  endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
-  if (APPLE)
-    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-      set (CMAKE_SYSTEM_64BIT 1)
-      add_definitions (-DAIPS_64B)
-    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-  endif (APPLE)
-endif (HAVE_CASA OR HAVE_CASACORE)
 
 ## =============================================================================
 ##
@@ -459,8 +442,11 @@ if (CR_ENABLE_TESTING)
   set (CR_BUILD_EXTERNAL_TESTS ON)
 endif (CR_ENABLE_TESTING)
 
-## Handle option: Activate support for Glish applications on/off
+## Handle option: debugging messages on/off
 
+if (CR_DEBUGGING_MESSAGES)
+  add_definitions (-DDEBUGGING_MESSAGES)
+endif (CR_DEBUGGING_MESSAGES)
 
 ## =============================================================================
 ##

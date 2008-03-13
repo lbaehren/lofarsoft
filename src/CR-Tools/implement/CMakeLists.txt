@@ -55,12 +55,6 @@ if (NOT HAVE_PGPLOT)
   list (REMOVE_ITEM cr_sources Display/PGPlotterLocal.cc)
 endif (NOT HAVE_PGPLOT)
 
-## Optional (pre-)compiler settings
-
-if (CR_DEBUGGING_MESSAGES)
-  add_definitions (-DDEBUGGING_MESSAGES)
-endif (CR_DEBUGGING_MESSAGES)
-
 ## Assemble list of external libraries against which to link
 
 if (CASA_LIBRARIES)
@@ -148,7 +142,9 @@ if (NOT APPLE)
     )
 endif (NOT APPLE)
 
-target_link_libraries (cr ${cr_link_libraries})
+target_link_libraries (cr
+  ${cr_link_libraries}
+  )
 
 ## ------------------------------------------------------------------------------
 ## Test programs
