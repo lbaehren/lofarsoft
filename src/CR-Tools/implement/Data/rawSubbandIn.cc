@@ -183,13 +183,16 @@ namespace CR { // Namespace CR -- begin
       FILE *fd = fopen(OpenedFile.c_str(),"r");
       if (fd == NULL) {
 	cerr << "rawSubbandIn:getData: Can't open file: " << OpenedFile << endl;
-	return False;
+	return Matrix<DComplex>();
       };
       fseek(fd, sizeof(struct FileHeader), SEEK_CUR);
 
       datalen = 2*2*FHead.nrPolarizations*FHead.nrBeamlets*FHead.nrSamplesPerBeamlet;
+      if (datalen%8 !=0) {
+	datalen = datalen + (8-datalen%8);
+      };
       short *datap;
-      datap = malloc(datalen);
+      datap = (short int *)malloc(datalen);
       if (datap == NULL){
 	cerr << "rawSubbandIn:getData: " << "Unable to allocate temporary memory" << endl;
 	fclose(fd);
@@ -200,7 +203,7 @@ namespace CR { // Namespace CR -- begin
 	if (blockdates(bnum+1) < startdate){
 	  //current block is before the requested part
 	  fseek(fd, sizeof(struct BlockHeader), SEEK_CUR);
-	  fseek(fd, datasize, SEEK_CUR);
+	  fseek(fd, datalen, SEEK_CUR);
 	} else if (blockdates(bnum) >stopdate) {
 	  //current block is after the requested part
 	  break;
@@ -214,10 +217,10 @@ namespace CR { // Namespace CR -- begin
 	    cerr << "rawSubbandIn:getData: Failed to read in full datablock. "  << endl;
 	  };
 	  for (sample=0; sample<FHead.nrSamplesPerBeamlet; sample++){
-	    sindex = ceil((blockdates(bnum)-startdate)*FHead.sampleRate)+sample;
+	    sindex = (int)ceil((blockdates(bnum)-startdate)*FHead.sampleRate)+sample;
 	    if (sindex>0 && sindex<nSamples){
 	      for (beamlet=0; beamlet<FHead.nrBeamlets; beamlet++){
-		data(sindex,beamlet) = DComplex(ntohs(datap[0]),ntohs([1]));
+		data(sindex,beamlet) = DComplex(ntohs(datap[0]),ntohs(datap[1]));
 	      };
 	    };
 	  };
@@ -234,8 +237,8 @@ namespace CR { // Namespace CR -- begin
 
   Vector<Int> rawSubbandIn::getSubbandIndices(){
     Vector<Int> out(36);
-    out(00) = 256; out(01) = 259; out(02) = 262; out(03) = 265; out(04) = 268;
-    out(05) = 271; out(06) = 274; out(07) = 277; out(08) = 280; out(09) = 283;
+    out(0) = 256; out(1) = 259; out(2) = 262; out(3) = 265; out(4) = 268;
+    out(5) = 271; out(6) = 274; out(7) = 277; out(8) = 280; out(9) = 283;
     out(10) = 286; out(11) = 289; out(12) = 292; out(13) = 295; out(14) = 298;
     out(15) = 301; out(16) = 304; out(17) = 307; out(18) = 310; out(19) = 313; 
     out(20) = 316; out(21) = 319; out(22) = 322; out(23) = 325; out(24) = 328; 

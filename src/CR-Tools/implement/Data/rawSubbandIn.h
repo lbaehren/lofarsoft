@@ -36,6 +36,7 @@
 #include <casa/aips.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
+#include <casa/Arrays/ArrayMath.h>
 #include <casa/BasicSL/String.h>
 #include <casa/Exceptions/Error.h>
 
