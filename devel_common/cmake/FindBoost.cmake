@@ -64,8 +64,10 @@ set (BOOST_FIND_unit_test_framework ON)
 set (BOOST_FIND_wave ON)
 
 if (BOOST_FIND_python_ONLY)
-
-  message (STATUS "[FindBoost] Configuration for boost_python only.")
+  
+  if (NOT BOOST_FIND_QUIETLY)
+    message (STATUS "[FindBoost] Configuration for boost_python only.")
+  endif (NOT BOOST_FIND_QUIETLY)
 
   set (BOOST_FIND_python ON)
 
