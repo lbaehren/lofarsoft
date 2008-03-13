@@ -42,17 +42,31 @@ fieldtab = msds.openTable('FIELD')
 phasedircol = fieldtab.getColumn('PHASE_DIR')
 phasedir = phasedircol.data()[0][0]
 
+# get antenna names
+anttab = msds.openTable('ANTENNA')
+namecol = anttab.getColumn('NAME')
+name = namecol.data()
+num_ants = len(name)
+
 # get ints/time
-# what table?
+msds.setFilter( "EXPOSURE, DATA", "ANTENNA1 = 0 AND ANTENNA2 = 0" )
+datatab = msds.openTable('MAIN')
+expcol = datatab.getColumn('EXPOSURE')
+exp = expcol.data()
+num_ints = len(exp)
+# get processing history?
 
 # print
 print ''
 print '\tSummary of UV data for ' + file
 print ''
-print 'Phase center: ' + str(phasedir)
+print 'Phase center (deg): (' + str(phasedir[0]*180/3.1415) + ',' + str(phasedir[1]*180/3.1415) + ')'
 print 'Frequency range (MHz): (' + str(min(freq/1e6)) + ', ' + str(max(freq/1e6)) + ')'
 print 'Wavelength range (m): (' + str(min(299792458.0/freq)) + ', ' + str(max(299792458.0/freq)) + ')'
-print 'Time range (MJs): (' + str(time[0]) + ', ' + str(time[1]) + ') or ' + str((time[1]-time[0])/3600) + ' hrs'
-#print 'Integrations, Size: ' + str(num_ints) + ', ' + str(time_bin) + ' s'
+print 'Time range (MJD): (' + str(time[0]) + ', ' + str(time[1]) + ') s or ' + str((time[1]-time[0])/3600) + ' hrs'
+print 'Integrations, Time bin size: ' + str(num_ints) + ', ' + str(exp[0]) + ' s'
 print 'Channels, Width: ' + str(numchan) + ', ' + str(chan_width/1e3) + ' kHz'
 print 'Polarizations: ' + str(num_pols)
+print ''
+print 'Number of antennas: ' + str(num_ants)
+print name
