@@ -38,6 +38,8 @@ set (lib_locations
   /opt/lib
   /opt/local/lib
   /sw/lib
+  /usr/lib64
+  /usr/local/lib64
   )
 
 set (include_locations
@@ -79,6 +81,7 @@ find_library (NUMERIC_LIBRARIES _numpy
   python
   python/numeric
   python/Numeric
+  python/site-packages/Numeric
   NO_DEFAULT_PATH
   )
 

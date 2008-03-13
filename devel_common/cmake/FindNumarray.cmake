@@ -38,6 +38,8 @@ set (lib_locations
   /opt/lib
   /opt/local/lib
   /sw/lib
+  /usr/lib64
+  /usr/local/lib64
   )
 
 set (include_locations
@@ -60,6 +62,9 @@ find_path (NUMARRAY_INCLUDES numarray.h libnumarray.h
   python
   python/numarray
   python/numarray/Include/numarray/arrayobject.h
+  python/site-packages
+  python/site-packages/numpy
+  python/site-packages/numpy/numarray
   NO_DEFAULT_PATH
   )
 
