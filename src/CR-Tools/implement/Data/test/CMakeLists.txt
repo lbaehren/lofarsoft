@@ -15,6 +15,7 @@ set (tests
   tNDABeam
   tTIM40Header
   ttbbctlIn
+  trawSubbandIn
   )
 
 ## -----------------------------------------------------------------------------
