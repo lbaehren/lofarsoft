@@ -222,8 +222,8 @@ namespace CR {  // Namespace CR -- begin
 
     /* Collapse the dynamic spectrum along the time-axis */
     for (int freq(0); freq<shape(0); freq++) {
-      averageSpectrum(freq) = abs(sum(dynamicSpectrum_p.column(freq)
-				      *dynamicSpectrum_p.column(freq)));
+      averageSpectrum(freq) = fabs(sum(dynamicSpectrum_p.column(freq)
+				       *dynamicSpectrum_p.column(freq)));
     }
     
     // return the result
@@ -239,8 +239,8 @@ namespace CR {  // Namespace CR -- begin
 
     /* Collapse the dynamic spectrum along the frequency axis */
     for (int n(0); n<shape(0); n++) {
-      totalPower(n) = abs(sum(dynamicSpectrum_p.row(n)
-			      *dynamicSpectrum_p.row(n)));
+      totalPower(n) = fabs(sum(dynamicSpectrum_p.row(n)
+			       *dynamicSpectrum_p.row(n)));
     }
     
     // return the result
