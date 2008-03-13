@@ -55,7 +55,7 @@ int test_rawSubbandIn ()
     rawSubbandIn newrawSubbandIn;
     //
 
-    newrawSubbandIn.attachFile("/mnt/lofar/kalpana/raw.out");
+    newrawSubbandIn.attachFile("/mnt/lofar/kalpana/raw1.out");
     
 
     /*    rawSubbandIn::FileHeader FileHead;

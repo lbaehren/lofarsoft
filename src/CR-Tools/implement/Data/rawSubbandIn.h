@@ -73,9 +73,8 @@ namespace CR { // Namespace CR -- begin
   */  
   class rawSubbandIn {
 
-    //  protected:
-  public:
-
+  protected:
+    
     struct FileHeader {
       uint32_t   magic;        // 0x3F8304EC, also determines endianness
       uint8_t    bitsPerSample;
@@ -106,9 +105,9 @@ namespace CR { // Namespace CR -- begin
 
     struct FileHeader FHead;
 
+    int numblocks;
     double firstdate,lastdate;
-    Vector<Double> blockdates;
-    
+    Vector<Double> blockdates;    
     
   public:
     
@@ -118,9 +117,9 @@ namespace CR { // Namespace CR -- begin
       \brief Default constructor
     */
     rawSubbandIn ();
-        
+    
     // -------------------------------------------------------------- Destruction
-
+    
     /*!
       \brief Destructor
     */
@@ -148,13 +147,31 @@ namespace CR { // Namespace CR -- begin
       \brief Provide a summary of the internal status
     */
     void summary (std::ostream &os);    
-
+    
     // ------------------------------------------------------------------ Methods
     
+    /*!
+      \brief Get some data from the file
+      
+      \param Filename -- path to the file that is to be read in.
+      
+      \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
+      
+      Currently generates one bogous "error message" when it has scanned the whole file...
+    */
     Bool attachFile(String Filename);
-
     
-    //  protected:
+    /*!
+      \brief Get some data from the file
+      
+      \param startdate -- date/timestamp of the first sample in the data
+      \param nSamples  -- number of samples to return
+      \param pol       -- polarization (0 or 1)
+    */
+    Matrix<DComplex> getData(Double startdate, int nSamples, int pol);
+    
+    
+  protected:
 
     double ntohd(double in);
 

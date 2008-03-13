@@ -103,7 +103,7 @@ namespace CR { // Namespace CR -- begin
   
   Bool rawSubbandIn::attachFile(String Filename){
     try {
-      int numblocks=0,veclen=0;
+      int veclen=0;
       size_t datalen,datasize;
       uint ui;
       Bool ok;
@@ -127,14 +127,23 @@ namespace CR { // Namespace CR -- begin
 	datasize = datalen;
       };
       cout << "rawSubbandIn:attachFile: datalen: " << dec << datalen << " datasize: " << datasize <<endl;
-      
+
+      numblocks=0;
       veclen = 1000;
       blockdates.resize(veclen);
+      firstdate = 1e99; lastdate =0;
       while (!feof(fd)){
 	ok = readBlockHeader(fd, BHead); 
 	if (ok) {
 	  numblocks++;
 	  blockdates(numblocks-1) = BHead.time[0]/FHead.sampleRate;
+	  fseek(fd, datasize, SEEK_CUR);
+	  if (blockdates(numblocks-1) < firstdate) {
+	    firstdate = blockdates(numblocks-1);
+	  };
+	  
+	  cout << "block: " << numblocks  << " position: " << ftell(fd) 
+	       << " date: " << blockdates(numblocks-1) - firstdate <<endl;
 	} else {
 	  cout << "rawSubbandIn:attachFile: Failed to read block-header " << dec << numblocks+1 
 	       << " of file " << Filename << " (end of file?)." << endl;
@@ -147,13 +156,32 @@ namespace CR { // Namespace CR -- begin
 	       << " blocks." << endl;
 	};
       };
-      
+      blockdates.resize(numblocks,True);
+
     } catch (AipsError x) {
       cerr << "rawSubbandIn:attachFile: " << x.getMesg() << endl;
       return False;
     }; 
     return True;
   };
+
+  Matrix<DComplex> rawSubbandIn::getData(Double startdate, int nSamples, int pol){
+    Matrix<DComplex> data(nSamples,FHead.nrBeamlets);
+    try {
+      int bnum;
+      for (bnum=0; bnum<numblocks; bnum++){
+
+      };
+
+    } catch (AipsError x) {
+      cerr << "rawSubbandIn:attachFile: " << x.getMesg() << endl;
+      return Matrix<DComplex>();
+    }; 
+    return data;
+  }
+
+
+
 
   Bool rawSubbandIn::readFileHeader(FILE *fd, FileHeader &FHead){
     int ui,i;
