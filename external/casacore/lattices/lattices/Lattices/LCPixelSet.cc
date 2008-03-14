@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LCPixelSet.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: LCPixelSet.cc 20279 2008-02-29 16:52:56Z gervandiepen $
 
 #include <lattices/Lattices/LCPixelSet.h>
 #include <tables/Tables/TableRecord.h>
@@ -117,7 +117,7 @@ LCPixelSet* LCPixelSet::fromRecord (const TableRecord& rec,
 {
     LCBox* boxPtr = (LCBox*)(LCRegion::fromRecord (rec.asRecord("box"),
 						   tableName));
-    LCPixelSet* regPtr = new LCPixelSet (rec.asArrayBool ("mask"), *boxPtr);
+    LCPixelSet* regPtr = new LCPixelSet (rec.toArrayBool ("mask"), *boxPtr);
     delete boxPtr;
     return regPtr;
 }

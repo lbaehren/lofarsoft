@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: ConvolveGridder.tcc 19879 2007-02-15 03:52:50Z Malte.Marquarding $
+//# $Id: ConvolveGridder.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 #include <scimath/Mathematics/ConvolveGridder.h>
 #include <casa/BasicSL/Constants.h>
@@ -298,7 +298,7 @@ ConvolveGridder<Domain, Range>::ConvolveGridder(const IPosition& shape,
   loc=0;
   supportVec.resize(ndim);
   supportVec=support;
-};
+}
 
 template <class Domain, class Range>
 Bool ConvolveGridder<Domain, Range>::grid(Array<Range> &gridded,
@@ -337,7 +337,7 @@ Bool ConvolveGridder<Domain, Range>::grid(Array<Range> &gridded,
     cout<<"Off grid"<<endl;
     return False;
   }
-};
+}
 
 template <class Domain, class Range>
 Bool ConvolveGridder<Domain, Range>::degrid(const Array<Range> &gridded,
@@ -374,7 +374,7 @@ Bool ConvolveGridder<Domain, Range>::degrid(const Array<Range> &gridded,
   else {
     return False;
   }
-};
+}
 
 template <class Domain, class Range>
 Range ConvolveGridder<Domain, Range>::correctionFactor1D(Int loc, Int len)

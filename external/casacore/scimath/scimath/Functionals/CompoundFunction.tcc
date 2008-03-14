@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: CompoundFunction.tcc 19879 2007-02-15 03:52:50Z Malte.Marquarding $
+//# $Id: CompoundFunction.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 //# Includes
 #include <scimath/Functionals/CompoundFunction.h>
@@ -49,8 +49,8 @@ void CompoundFunction<T>::fromParam_p() const {
     for (uInt i=0; i<nparameters(); ++i) {
       (*functionPtr_p[funpar_p[i]])[locpar_p[i]] = param_p[i];
       functionPtr_p[funpar_p[i]]->mask(locpar_p[i]) = param_p.mask(i);
-    };
-  };
+    }
+  }
 }
 
 template <class T>
@@ -58,7 +58,7 @@ void CompoundFunction<T>::toParam_p() {
   for (uInt i=0; i<nparameters(); ++i) {
     param_p[i] = (*functionPtr_p[funpar_p[i]])[locpar_p[i]];
     param_p.mask(i) = functionPtr_p[funpar_p[i]]->mask(locpar_p[i]);
-  };
+  }
 }
 
 } //# NAMESPACE CASA - END

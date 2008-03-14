@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: CombiFunction.tcc 19879 2007-02-15 03:52:50Z Malte.Marquarding $
+//# $Id: CombiFunction.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 //# Includes
 #include <scimath/Functionals/CombiFunction.h>
@@ -38,7 +38,7 @@ T CombiFunction<T>::eval(typename Function<T>::FunctionArg x) const {
   T tmp(0);
   for (uInt i = 0; i< this->nFunctions(); ++i) {
     tmp += this->param_p[i]*(this->function(i))(x);
-  };
+  }
   return tmp;
 }
 

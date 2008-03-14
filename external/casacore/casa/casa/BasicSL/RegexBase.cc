@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: RegexBase.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: RegexBase.cc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 //# Includes
 #include <casa/BasicSL/RegexBase.h>
@@ -43,7 +43,7 @@ String::size_type RegexBase::rfind(const Char *s, String::size_type len,
   if (xpos > pos) xpos = pos;
   for (++xpos; xpos-- > 0; ) {
     if (find(s, len, matchlen, xpos)) return xpos;
-  };
+  }
   return String::npos;
 }
 
@@ -59,7 +59,7 @@ String::size_type RegexBase::match(const Char *s,
   Int matchlen;
   if (find(s, len, matchlen, pos) == pos && matchlen == Int(len-pos)) {
     return len-pos;
-  };
+  }
   return String::npos;
 }
 

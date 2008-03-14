@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tCombiFunction.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tCombiFunction.cc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 #include <scimath/Functionals/CombiFunction.h>
 
@@ -100,7 +100,7 @@ int main() {
     combination[i] = i+10;
     AlwaysAssertExit(combination[i] == Double(i+10));
     v(i) = i+10;
-  };
+  }
 
   // Set all coefficients at once. 
   combination.parameters().setParameters(v);

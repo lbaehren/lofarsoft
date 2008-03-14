@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LSQaips.h 19880 2007-02-15 04:10:07Z Malte.Marquarding $
+//# $Id: LSQaips.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef SCIMATH_LSQAIPS_H
 #define SCIMATH_LSQAIPS_H
@@ -200,7 +200,7 @@ private:
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <scimath/Fitting/LSQaips.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

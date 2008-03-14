@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LELFunction.h 20123 2007-09-05 07:55:22Z gervandiepen $
+//# $Id: LELFunction.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef LATTICES_LELFUNCTION_H
 #define LATTICES_LELFUNCTION_H
@@ -865,7 +865,7 @@ private:
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <lattices/Lattices/LELFunction.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

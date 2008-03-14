@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LatticeCleanProgress.cc 19133 2005-12-06 20:18:51Z wyoung $
+//# $Id: LatticeCleanProgress.cc 20256 2008-02-23 20:28:24Z gervandiepen $
 
 
 //# Includes
@@ -195,7 +195,7 @@ Bool LatticeCleanProgress::info(const Bool lastcall,
   }
   os << "Total flux = " << myTotalFlux << " Jy" << LogIO::POST;
   return False;
-};
+}
 
 
 void  LatticeCleanProgress::basicSetUp(Bool doPlot)
@@ -278,7 +278,7 @@ void  LatticeCleanProgress::basicSetUp(Bool doPlot)
   }
 
   
-};
+}
 
 void  LatticeCleanProgress::plotOne(const Int iteration, 
 					 const Vector<Float>& resid, 
@@ -323,7 +323,7 @@ void  LatticeCleanProgress::plotOne(const Int iteration,
   itsPgplotter->sci(1);
   y(0) = sumf;
   itsPgplotter->pt(x,y,2);
-};
+}
 
 
 void LatticeCleanProgress::resizeDataStorage()
@@ -365,7 +365,7 @@ void LatticeCleanProgress::resizeDataStorage()
       totalFluxesPer(j,i) = tfpr(j,i);
     }
   }
-};
+}
 
 
 
@@ -399,7 +399,7 @@ void LatticeCleanProgress::initialize(const uInt nScales,
     basicSetUp(numberIterations);
     
   }
-};
+}
 
 
 

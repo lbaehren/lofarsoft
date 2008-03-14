@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MatrixSolver.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: MatrixSolver.cc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 #include <casa/aips.h>
 #include <casa/Exceptions.h>
@@ -96,7 +96,7 @@ MatrixSolver & MatrixSolver::operator=(const MatrixSolver & other) {
 }    
 
 // Virtual destructor
-MatrixSolver::~MatrixSolver() {};
+MatrixSolver::~MatrixSolver() {}
 
 // Virtual solve method
 Bool MatrixSolver::solve() {return False;}

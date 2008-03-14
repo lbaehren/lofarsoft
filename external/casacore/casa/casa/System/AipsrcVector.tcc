@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: AipsrcVector.tcc 19846 2007-02-12 03:11:58Z Malte.Marquarding $
+//# $Id: AipsrcVector.tcc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 //# Includes
 
@@ -64,9 +64,9 @@ Bool AipsrcVector<T>::find(Vector<T> &value,
     for (Int i=0; i<m; i++) {
       istringstream instr(nres[i]);
       instr >> value(i);
-    };
+    }
     delete [] nres;
-  };
+  }
   return x;
 }
 
@@ -95,9 +95,9 @@ Bool AipsrcVector<T>::find(Vector<T> &value,
       instr >> qres;
       if (qres.check(UnitVal::NODIM)) qres.setUnit(defun);
       value(i) = (T) qres.getValue(resun);
-    };
+    }
     delete [] nres;
-  };
+  }
   return x;
 }
 

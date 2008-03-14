@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: FunctionalProxy.cc 19660 2006-09-29 09:07:58Z mmarquar $
+//# $Id: FunctionalProxy.cc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 //# Includes
 #include <scimath/Functionals/FunctionalProxy.h>
@@ -39,7 +39,7 @@ FunctionalProxy::FunctionalProxy(const Record& rec, Int type) : type_(type)
     rec2fhdc(rec);
 }
 
-FunctionalProxy::~FunctionalProxy() {;}
+FunctionalProxy::~FunctionalProxy() {}
 
 
 Record FunctionalProxy::fhd2rec()

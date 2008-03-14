@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tLatticeConcat.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tLatticeConcat.cc 20256 2008-02-23 20:28:24Z gervandiepen $
 
 
 #include <casa/aips.h>
@@ -752,7 +752,7 @@ int main() {
   } 
   cout << "OK" << endl;
   exit(0);
-};
+}
 
 
 void check (uInt axis, MaskedLattice<Float>& ml,

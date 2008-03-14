@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: Gridder.tcc 19879 2007-02-15 03:52:50Z Malte.Marquarding $
+//# $Id: Gridder.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 #include <scimath/Mathematics/Gridder.h>
 #include <casa/Containers/Block.h>
@@ -42,10 +42,10 @@
 namespace casa { //# NAMESPACE CASA - BEGIN
 
 template <class Domain, class Range>
-Gridder<Domain, Range>::Gridder() {};
+Gridder<Domain, Range>::Gridder() {}
 
 template <class Domain, class Range>
-Gridder<Domain, Range>::~Gridder() {};
+Gridder<Domain, Range>::~Gridder() {}
 
 template <class Domain, class Range>
 Gridder<Domain, Range>::Gridder(const IPosition& ishape,

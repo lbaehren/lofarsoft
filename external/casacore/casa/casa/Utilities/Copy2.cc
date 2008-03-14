@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Copy2.cc 18645 2005-05-11 19:32:02Z wbrouw $
+//# $Id: Copy2.cc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 #include <casa/Utilities/Copy.h>
 #include <casa/Exceptions/Error.h>
@@ -104,7 +104,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 	    // Determine the crosspoint.
 	    nLeft = fromMto;
 	    if (nLeft > n) nLeft = n;
-	  };
+	  }
 	} else {
 	  // This case is the opposite from the previous one.
 	  // However, the first part has to be moved from the right
@@ -116,10 +116,10 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 	    if (startRight > n) startRight = n;
 	    startLeft = startRight;
 	    nLeft = n - startRight;
-	  };
-	};
-      };
-    };
+	  }
+	}
+      }
+    }
   }
  
 } //# NAMESPACE CASA - END

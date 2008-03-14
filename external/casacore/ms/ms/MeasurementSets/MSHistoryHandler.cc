@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSHistoryHandler.cc 19944 2007-02-27 11:14:34Z Malte.Marquarding $
+//# $Id: MSHistoryHandler.cc 20266 2008-02-26 00:43:05Z gervandiepen $
 
 #include <ms/MeasurementSets/MSHistoryHandler.h>
 #include <casa/Logging/LogIO.h>
@@ -68,7 +68,7 @@ void MSHistoryHandler::addMessage(MeasurementSet& ms, String message,
     // No need to record an entry.
     return;
   }
-  MSHistory histTable=ms.history();
+  MSHistory &histTable=ms.history();
   Int row = histTable.nrow();
   MSHistoryColumns msHistCol(histTable);
   histTable.addRow();
@@ -76,7 +76,7 @@ void MSHistoryHandler::addMessage(MeasurementSet& ms, String message,
   MEpoch now(MVEpoch(date.modifiedJulianDay()), MEpoch::Ref(MEpoch::UTC));
   msHistCol.timeMeas().put(row, now);
   msHistCol.observationId().put(row,-1);
-  msHistCol.priority().put(row,"NORMAL");
+  msHistCol.priority().put(row,"INFO");
   if (origin.length() != 0) {
     msHistCol.origin().put(row,origin);
   } else {
@@ -89,6 +89,7 @@ void MSHistoryHandler::addMessage(MeasurementSet& ms, String message,
   msHistCol.cliCommand().put(row, cliseq);
   cliseq[0]="";
   msHistCol.appParams().put(row, cliseq);
+  histTable.flush();
 }
 
 
@@ -107,7 +108,7 @@ void MSHistoryHandler::addMessage(String message, String cliComm,
   MEpoch now(MVEpoch(date.modifiedJulianDay()), MEpoch::Ref(MEpoch::UTC));
   msHistCol_p->timeMeas().put(row, now);
   msHistCol_p->observationId().put(row,-1);
-  msHistCol_p->priority().put(row,"NORMAL");
+  msHistCol_p->priority().put(row,"INFO");
   if (origin.length() != 0) {
     msHistCol_p->origin().put(row,origin);
   } else {
@@ -120,6 +121,7 @@ void MSHistoryHandler::addMessage(String message, String cliComm,
   msHistCol_p->cliCommand().put(row, cliseq);
   cliseq[0]="";
   msHistCol_p->appParams().put(row, cliseq);
+  histTable_p.flush();
 }
 
 void MSHistoryHandler::addMessage(LogSinkInterface& sink, String cliComm){
@@ -153,15 +155,12 @@ void MSHistoryHandler::addMessage(LogSinkInterface& sink, String cliComm){
   }
 
   sink.clearLocally();
-
-
+  histTable_p.flush();
 }
 
 void MSHistoryHandler::addMessage(LogIO& os, String cliComm){
 
   addMessage(os.localSink(), cliComm);
-  
-
 }
 
 void MSHistoryHandler::cliCommand(String& cliComm){
@@ -200,10 +199,7 @@ void MSHistoryHandler::cliCommand(LogSinkInterface& sink){
  msHistCol_p->appParams().put(row, dum);
 
  sink.clearLocally();
- 
-
-
-
+ histTable_p.flush();
 }
 
 } //# NAMESPACE CASA - END

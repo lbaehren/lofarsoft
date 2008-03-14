@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LSQMatrix2.cc 19267 2006-02-17 12:36:34Z gvandiep $
+//# $Id: LSQMatrix2.cc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 //# Includes
 #include <scimath/Fitting/LSQMatrix.h>
@@ -50,7 +50,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
     } else {
       error += String("No triangular matrix length present");
       return False;
-    };
+    }
     set(vlen);
     return getCArray(error, in, tmatdat, len_p, trian_p);
   }
@@ -77,8 +77,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
       } else {
 	error += String("No data for non-empty ") + fname + "vector";
 	return False;
-      };
-    };
+      }
+    }
     return True;
   }
 
@@ -95,9 +95,9 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 	error += String("Inconsistency between lengths in " + fname +
 			"field in record");
 	return False;
-      };
+      }
       std::copy(vt.data(), vt.data()+len, out); 
-    };
+    }
     return True;
   }
 
@@ -112,8 +112,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
       } else {
 	error += String("No data for non-empty ") + fname + "vector";
 	return False;
-      };
-    };
+      }
+    }
     return True;
   }
 
@@ -130,9 +130,9 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 	error += String("Inconsistency between lengths in " + fname +
 			"field in record");
 	return False;
-      };
+      }
       std::copy(vt.data(), vt.data()+len, out); 
-    };
+    }
     return True;
   }
 

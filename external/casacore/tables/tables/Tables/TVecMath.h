@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TVecMath.h 19858 2007-02-13 02:42:36Z Malte.Marquarding $
+//# $Id: TVecMath.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef TABLES_TVECMATH_H
 #define TABLES_TVECMATH_H
@@ -264,7 +264,7 @@ template<class T> TabVecRep<T>& tabVecRepcrossproduct (const TabVecRep<T>&,
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <tables/Tables/TVecMath.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

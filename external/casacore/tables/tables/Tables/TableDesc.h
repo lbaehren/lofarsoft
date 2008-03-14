@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TableDesc.h 18456 2005-03-14 07:00:46Z gvandiep $
+//# $Id: TableDesc.h 20236 2008-02-07 17:08:15Z gervandiepen $
 
 #ifndef TABLES_TABLEDESC_H
 #define TABLES_TABLEDESC_H
@@ -245,7 +245,7 @@ public:
 
     // Get access to the set of column descriptions.
     // In this way const <linkto class=ColumnDescSet>ColumnDescSet</linkto>
-    // (e.g. isDisjoint) can be used.
+    // functions (e.g. isDisjoint) can be used.
     const ColumnDescSet& columnDescSet() const;
 
     // Add another table description to this table description.

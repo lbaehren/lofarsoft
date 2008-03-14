@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tSimButterworthBandpass.cc 18746 2005-06-10 22:05:21Z wyoung $
+//# $Id: tSimButterworthBandpass.cc 20211 2008-01-18 03:29:02Z Malte.Marquarding $
 
 #define DIAGNOSTICS
 #ifdef DEBUG 
@@ -40,7 +40,7 @@
 
 #include <casa/namespace.h>
 int main() {
-    SimButterworthBandpass<Double> butt(1.0,1.0,-1.0,1.0,0.0,1.0);
+    SimButterworthBandpass<Double> butt(1,1,-1.0,1.0,0.0,1.0);
 
     AlwaysAssertExit(butt.getCenter()    ==  0.0 &&
 		     butt.getPeak()      ==  1.0   );
@@ -60,10 +60,10 @@ int main() {
     AlwaysAssertExit(butt.getPeak() == 10.0);
     butt.setCenter(5.0);
     AlwaysAssertExit(butt.getCenter() == 5.0);
-    butt.setMinOrder(4.0);
-    AlwaysAssertExit(butt.getMinOrder() == 4.0);
-    butt.setMaxOrder(5.0);
-    AlwaysAssertExit(butt.getMaxOrder() == 5.0);
+    butt.setMinOrder(4);
+    AlwaysAssertExit(butt.getMinOrder() == 4);
+    butt.setMaxOrder(5);
+    AlwaysAssertExit(butt.getMaxOrder() == 5);
     butt.setMinCutoff(1.0);
     AlwaysAssertExit(butt.getMinCutoff() == 1.0);
     butt.setMaxCutoff(9.0);

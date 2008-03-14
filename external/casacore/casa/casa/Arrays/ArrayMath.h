@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ArrayMath.h 19846 2007-02-12 03:11:58Z Malte.Marquarding $
+//# $Id: ArrayMath.h 20254 2008-02-23 16:37:46Z gervandiepen $
 
 #ifndef CASA_ARRAYMATH_H
 #define CASA_ARRAYMATH_H
@@ -453,6 +453,17 @@ template<class T> Array<T> partialFractiles (const Array<T>& array,
 					     Bool inPlace=False);
 // </group>
 
+// Methods for element-by-element scaling of Complex by Float
+//<group>
+void operator*= (Array<Complex> &left, const Array<Float> &other);
+void operator*= (Array<Complex> &left, const Float &other);
+void operator/= (Array<Complex> &left, const Array<Float> &other);
+void operator/= (Array<Complex> &left, const Float &other);
+Array<Complex> operator* (const Array<Complex> &left, const Array<Float> &right);
+Array<Complex> operator* (const Array<Complex> &left, const Float &right);
+Array<Complex> operator/ (const Array<Complex> &left, const Array<Float> &right);
+Array<Complex> operator/ (const Array<Complex> &left, const Float &right);
+// </group>
 
 // Returns the complex conjugate of a complex array.
 //<group>
@@ -593,7 +604,7 @@ template<class T> inline Array<T> cube(const Array<T> &val)
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <casa/Arrays/ArrayMath.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

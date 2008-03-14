@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: MSFieldIndex.h 19652 2006-09-28 07:07:49Z sbhatnag $
+//# $Id: MSFieldIndex.h 20266 2008-02-26 00:43:05Z gervandiepen $
 
 #ifndef MS_MSFIELDINDEX_H
 #define MS_MSFIELDINDEX_H
@@ -32,6 +32,7 @@
 //# includes
 #include <casa/aips.h>
 #include <ms/MeasurementSets/MSField.h>
+#include <ms/MeasurementSets/MSSelectionError.h>
 #include <ms/MeasurementSets/MSFieldColumns.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicSL/String.h>
@@ -110,6 +111,8 @@ public:
 
   // Add for field code selection
   Vector<Int> matchFieldCode(const String& code);
+
+  Vector<Int> maskFieldIDs(const Vector<Int>& ids);
 
   Vector<Int> matchFieldIDLT(const Int n);
   Vector<Int> matchFieldIDGT(const Int n);

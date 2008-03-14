@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tString.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tString.cc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 //# Includes
 
@@ -290,7 +290,7 @@ void splittest() {
   cout << "from split(z, RXwhite, w, 10), n words = " << nw << ":\n";
   for (Int i = 0; i < nw; ++i) {
     cout << w[i] << endl;
-  };
+  }
   assert(w[0] == "This");
   assert(w[1] == "string");
   assert(w[2] == "has");
@@ -347,7 +347,7 @@ void identitytest(String a, String b) {
     x += x;
     assert(x == reverse(x));
     assert(x.index(y) == 0);
-  };
+  }
 }
 
 

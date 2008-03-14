@@ -23,14 +23,14 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tLatticeUtilities.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tLatticeUtilities.cc 20256 2008-02-23 20:28:24Z gervandiepen $
 
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
 #include <casa/Arrays/IPosition.h>
+#include <casa/Arrays/MaskArrLogi.h>
 #include <casa/Arrays/ArrayLogical.h>
 #include <casa/Arrays/ArrayMath.h>
-#include <casa/Arrays/MaskedArray.h>
 #include <casa/Arrays/Slicer.h>
 #include <casa/BasicMath/Math.h>
 #include <casa/Logging/LogIO.h>
@@ -85,7 +85,7 @@ int main()
   } 
   cout<< "OK"<< endl;
   return 0;
-};
+}
 
 
 

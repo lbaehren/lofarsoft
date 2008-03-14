@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tCOWPtr.cc 20173 2007-11-22 01:22:30Z Malte.Marquarding $
+//# $Id: tCOWPtr.cc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 #include <casa/aips.h>
 
@@ -185,7 +185,7 @@ static Bool testFunc(Array<Float> *ptr, const Array<Float> &array,
   }
 
   return True;
-};
+}
 
 int main()
 {
@@ -235,4 +235,4 @@ int main()
   } 
   
   return 0;
-};
+}

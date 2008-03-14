@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: GenSort.h 19846 2007-02-12 03:11:58Z Malte.Marquarding $
+//# $Id: GenSort.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef CASA_GENSORT_H
 #define CASA_GENSORT_H
@@ -552,7 +552,7 @@ inline int GenSortIndirect<T>::isDescending (const T* data, Int i, Int j)
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <casa/Utilities/GenSort.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Gaussian1DParam.tcc 19879 2007-02-15 03:52:50Z Malte.Marquarding $
+//# $Id: Gaussian1DParam.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 //# Includes
 #include <scimath/Functionals/Gaussian1DParam.h>
@@ -89,7 +89,7 @@ Gaussian1DParam<T>::operator=(const Gaussian1DParam<T> &other) {
   if (this != &other) {
     fwhm2int = other.fwhm2int;
     Function1D<T>::operator=(other);
-  };
+  }
   return *this;
 }
 

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: AutoDiffRep.tcc 19879 2007-02-15 03:52:50Z Malte.Marquarding $
+//# $Id: AutoDiffRep.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 //# Includes
 #include <scimath/Mathematics/AutoDiffRep.h>
@@ -93,7 +93,7 @@ AutoDiffRep<T> &AutoDiffRep<T>::operator=(const AutoDiffRep<T> &other) {
     nd_p = other.nd_p;
     grad_p.resize(nd_p);
     grad_p = other.grad_p;
-  };
+  }
   return *this;
 }
 

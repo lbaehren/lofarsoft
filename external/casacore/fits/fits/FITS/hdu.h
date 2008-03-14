@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: hdu.h 19914 2007-02-23 03:04:46Z Malte.Marquarding $
+//# $Id: hdu.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef FITS_HDU_H
 #define FITS_HDU_H
@@ -1135,7 +1135,7 @@ class AsciiTableExtension : public BinaryTableExtension {
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <fits/FITS/hdu.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 # endif

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tArrayIter.cc 19894 2007-02-19 04:25:10Z gervandiepen $
+//# $Id: tArrayIter.cc 20234 2008-02-07 16:53:38Z gervandiepen $
 
 //# Includes
 
@@ -75,6 +75,13 @@ int main()
         arr (index) = 4 * iloop;
         cout << iloop << " [ " << index (0) << " " << index (1) << " ] "
              << arr (index) << "\n";
+    }
+    ai.set (IPosition(1,4));
+    AlwaysAssertExit (ai.pos() == IPosition(2,0,4));
+    ai.set (IPosition(2,2,3));
+    AlwaysAssertExit (ai.pos() == IPosition(2,0,3));
+    for ( iloop = 0; ! ai.pastEnd(); ai.next(), iloop++ ) {
+        cout << ai.pos() << endl;
     }
     cout << "END.  Testing ArrayPositionIterator.  1 dim. ......\n";
 
@@ -224,6 +231,15 @@ int main()
 	}
       }
       AlwaysAssertExit(iter.pastEnd());
+      // Check if set works correctly.
+      iter.set (IPosition(3,3,1,2));
+      AlwaysAssertExit(iter.pos() == IPosition(5,0,1,0,2,3));
+      Array<Int> tmparr1 (ai(iter.pos(), iter.endPos()).nonDegenerate());
+      AlwaysAssertExit(allEQ (iter.array(), tmparr1));
+      iter.next();
+      AlwaysAssertExit(iter.pos() == IPosition(5,0,1,0,2,4));
+      Array<Int> tmparr2 (ai(iter.pos(), iter.endPos()).nonDegenerate());
+      AlwaysAssertExit(allEQ (iter.array(), tmparr2));
     }
     {
       ReadOnlyArrayIterator<Int> iter(ai, IPosition(3,4,1,3));
@@ -300,6 +316,21 @@ int main()
       }
       AlwaysAssertExit (nstep==0);
     }
+  }
+  {
+    // Test the virtual iteration function.
+    cout << "\nBEGIN.  Testing makeIterator.  1 dim. ......\n";
+    Array<Int> arr(IPosition(2,4,5));
+    indgen (arr);
+    ArrayPositionIterator* iter = arr.makeIterator(1);
+    while (!iter->pastEnd()) {
+      ArrayBase& subarrb = iter->getArray();
+      Array<Int>& subarr = dynamic_cast<Array<Int>&>(subarrb);
+      cout << subarr << endl;
+      iter->next();
+    }
+    delete iter;
+    cout << "END.  Testing makeIterator.  1 dim. ......\n";
   }
 
   return 0;

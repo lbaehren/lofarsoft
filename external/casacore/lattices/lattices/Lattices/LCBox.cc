@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LCBox.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: LCBox.cc 20279 2008-02-29 16:52:56Z gervandiepen $
 
 #include <lattices/Lattices/LCBox.h>
 #include <casa/BasicMath/Math.h>
@@ -206,10 +206,10 @@ LCBox* LCBox::fromRecord (const TableRecord& rec, const String&)
     // If 1-relative, subtract 1 from blc and trc.
     Bool oneRel = rec.asBool ("oneRel");
     Float off = (oneRel ? 1:0);
-    Array<Float> blc (rec.asArrayFloat ("blc"));
-    Array<Float> trc (rec.asArrayFloat ("trc"));
+    Array<Float> blc (rec.toArrayFloat ("blc"));
+    Array<Float> trc (rec.toArrayFloat ("trc"));
     return new LCBox (blc-off, trc-off,
-		      Vector<Int>(rec.asArrayInt ("shape")));
+		      Vector<Int>(rec.toArrayInt ("shape")));
 }
 
 void LCBox::setSlicerBox (const IPosition& blc, const IPosition& trc)

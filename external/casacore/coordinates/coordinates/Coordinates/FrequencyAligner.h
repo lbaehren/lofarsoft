@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: FrequencyAligner.h 19931 2007-02-27 04:59:23Z Malte.Marquarding $
+//# $Id: FrequencyAligner.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef COORDINATES_FREQUENCYALIGNER_H
 #define COORDINATES_FREQUENCYALIGNER_H
@@ -203,7 +203,7 @@ private:
 
 
 } //# End namespace casa
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <coordinates/Coordinates/FrequencyAligner.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

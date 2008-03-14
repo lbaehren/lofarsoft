@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LELInterface.h 20123 2007-09-05 07:55:22Z gervandiepen $
+//# $Id: LELInterface.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef LATTICES_LELINTERFACE_H
 #define LATTICES_LELINTERFACE_H
@@ -220,7 +220,7 @@ private:
 //# fails to compile, because the LELUnary declarations are not seen yet.
 //# Therefore LELUnary.h is included here, while LELUnary.h includes
 //# LELInterface.tcc.
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <lattices/Lattices/LELUnary.h>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

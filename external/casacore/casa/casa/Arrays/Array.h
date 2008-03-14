@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Array.h 20113 2007-08-28 11:12:18Z gervandiepen $
+//# $Id: Array.h 20283 2008-03-12 11:59:55Z gervandiepen $
 
 #ifndef CASA_ARRAY_H
 #define CASA_ARRAY_H
@@ -346,7 +346,8 @@ public:
     // startingAxis exceeds the array's dimensionality.
     // <br>
     // The functions with argument <src>ignoreAxes</src> do
-    // not consider the axes given in that argument.
+    // not consider the axes given in that argument. In this way it can be
+    // achieved that degenerate axes are kept.
     // <note role=caution> When the two functions returning void throw
     // are invoked on a derived object (e.g. Matrix), an exception is
     // thrown if removing the degenerate axes from other does not result
@@ -411,6 +412,10 @@ public:
 
     // Get a reference to an array using a Slicer.
     Array<T> operator()(const Slicer&);
+
+    // Get a reference to a section of an array.
+    // This is the same as operator().
+    virtual ArrayBase* getSection (const Slicer&);
 
 
     // The array is masked by the input LogicalArray.
@@ -507,6 +512,9 @@ public:
     // MatrixIterator are probably more useful.
     friend class ArrayIterator<T>;
 
+    // Create an ArrayIterator object of the correct type.
+    virtual ArrayPositionIterator* makeIterator (uInt byDim);
+
     // Needed to be a friend for Matrix<T>::reference()
     friend class Matrix<T>;
 
@@ -599,10 +607,13 @@ public:
 
       T& operator*()
         { return *this->getPos(); }
+      T* operator->()
+        { return this->getPos(); }
     };
 
   class ConstIteratorSTL: public BaseIteratorSTL
     {
+    public:
       // <group name=STL-iterator-typedefs>
       typedef T                 value_type;
       typedef const value_type* pointer;
@@ -612,7 +623,6 @@ public:
       typedef std::forward_iterator_tag iterator_category;
       // </group>
 
-    public:
       // Create the begin const_iterator object for an Array.
       explicit ConstIteratorSTL (const Array<T>& arr)
 	: BaseIteratorSTL (arr) {}
@@ -638,6 +648,8 @@ public:
 
       const T& operator*() const
         { return *this->itsPos; }
+      const T* operator->()
+        { return this->itsPos; }
 
       const T* pos() const
         { return this->itsPos; }
@@ -733,7 +745,7 @@ protected:
 };
 
 }//#End casa namespace
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <casa/Arrays/Array.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

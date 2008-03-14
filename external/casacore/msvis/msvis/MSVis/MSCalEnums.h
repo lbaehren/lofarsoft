@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: MSCalEnums.h 18726 2005-05-31 14:16:26Z sbhatnag $
+//# $Id: MSCalEnums.h 20267 2008-02-26 00:49:30Z gervandiepen $
 
 #ifndef MSVIS_MSCALENUMS_H
 #define MSVIS_MSCALENUMS_H
@@ -185,6 +185,10 @@ class MSCalEnums
   FIT = 404,
   // Sum of fit weights (per solution)
   FIT_WEIGHT = 405,
+  // Solution FLAG (!SOLUTION_OK)
+  FLAG = 406,
+  // Solution SNR
+  SNR = 407,
   
   // Calibration description columns
   //

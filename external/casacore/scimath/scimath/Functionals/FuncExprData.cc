@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: FuncExprData.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: FuncExprData.cc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 //# Includes
 #include <scimath/Functionals/FuncExprData.h>
@@ -130,7 +130,7 @@ FuncExprData::FuncExprData() :
       break;
     }
     allop_p[olist[i].code] = olist[i];
-  };
+  }
   spop_p[olist[i].name] = olist[i];
   allop_p[olist[i].code] = olist[i];
 }

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TableProxy.h 19728 2006-11-08 00:14:37Z gvandiep $
+//# $Id: TableProxy.h 20238 2008-02-11 13:44:45Z gervandiepen $
 
 #ifndef TABLES_TABLEPROXY_H
 #define TABLES_TABLEPROXY_H
@@ -130,7 +130,25 @@ public:
   	      const Record& tableDesc,
   	      const Record& dmInfo);
 
-  // Creeate a table object from a table command (as defined in TableGram).
+  // Create a table object to concatenate a number of similar tables.
+  // The keyword set of the first table is take as the keyword set of the
+  // entire concatenation. However, it can be specified which subtables
+  // have to be concatenated as well which means that for each subtable name
+  // the subtable in the keywordsets are concatenated.
+  // <note>For Boost-Python the constructors must have different nr of arguments.
+  // Hence some dummy arguments are added.
+  //</note>
+  // <group>
+  TableProxy (const Vector<String>& tableNames,
+	      const Vector<String>& concatenateSubTableNames, 
+	      const Record& lockOptions,
+	      int option);
+  TableProxy (const std::vector<TableProxy>& tables,
+	      const Vector<String>& concatenateSubTableNames,
+	      int dummy1=0, int dummy2=0, int dummy3=0);
+  // </group>
+
+  // Create a table object from a table command (as defined in TableGram).
   // <br>If a CALC command was given, the resulting values are stored in
   // the a record and a null TableProxy object is returned.
   // The result can be obtained using getCalcResult.

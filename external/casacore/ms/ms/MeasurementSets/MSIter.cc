@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSIter.cc 19290 2006-02-28 04:42:01Z mvoronko $
+//# $Id: MSIter.cc 20266 2008-02-26 00:43:05Z gervandiepen $
 
 #include <ms/MeasurementSets/MSIter.h>
 #include <casa/Arrays/ArrayMath.h>
@@ -35,6 +35,7 @@
 #include <casa/Utilities/GenSort.h>
 #include <casa/Arrays/Slicer.h>
 #include <ms/MeasurementSets/MSColumns.h>
+#include <ms/MeasurementSets/MSSpwIndex.h>
 #include <measures/Measures.h>
 #include <measures/Measures/MeasTable.h>
 #include <measures/Measures/MPosition.h>
@@ -657,5 +658,50 @@ void MSIter::setFieldInfo()
   }
 }
 
+
+void  MSIter::getSpwInFreqRange(Block<Vector<Int> >& spw, 
+				Block<Vector<Int> >& start, 
+				Block<Vector<Int> >& nchan, 
+				Double freqStart, Double freqEnd, 
+				Double freqStep){
+
+  spw.resize(nMS_p, True, False);
+  start.resize(nMS_p, True, False);
+  nchan.resize(nMS_p, True, False);
+
+  for (Int k=0; k < nMS_p; ++k){
+    MSSpwIndex spwIn(bms_p[k].spectralWindow());
+    
+    spwIn.matchFrequencyRange(freqStart-0.5*freqStep, freqEnd+0.5*freqStep, spw[k], start[k], nchan[k]); 
+    /*
+    Vector<Float> freqlist(4);
+    freqlist(0)=freqStart-freqStep;
+    freqlist(1)=freqEnd+freqStep;
+    freqlist(2)=freqStep;
+    freqlist(3)=MSSpwIndex::MSSPW_UNITHZ;
+    Int numSpec;
+    spw[k].resize();
+    spw[k]=spwIn.convertToSpwIndex(freqlist, numSpec);
+    Vector<Int> retchanlist=
+      spwIn.convertToChannelIndex(spw[k], freqlist, numSpec);
+    cout << "retchanlist " << retchanlist << endl;
+    if((retchanlist.nelements()%3) != 0){
+      cout << "Error in getting channel out " << endl;
+    }
+    else{
+      start[k].resize(spw[k].nelements());
+      nchan[k].resize(spw[k].nelements());
+      for (uInt j=0; j < retchanlist.nelements()/3; ++j){
+	//convert to channe returns start, stop...change to start, nchan
+	start[k][j]=retchanlist[j*3];
+	nchan[k][j]=retchanlist[j*3+1]-retchanlist[j*3]+1;
+      }
+
+    }
+    */
+
+
+  }
+}
 } //# NAMESPACE CASA - END
 

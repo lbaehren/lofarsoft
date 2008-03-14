@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ArrayBase.cc 19957 2007-02-28 03:15:48Z gervandiepen $
+//# $Id: ArrayBase.cc 20234 2008-02-07 16:53:38Z gervandiepen $
 
 #include <casa/Arrays/ArrayBase.h>
 #include <casa/Arrays/ArrayError.h>
@@ -591,6 +591,16 @@ void ArrayBase::checkCubeShape()
     baseMakeSteps();
   }
 }
+
+ArrayPositionIterator* ArrayBase::makeIterator (uInt)
+{
+  throw ArrayError ("ArrayBase::makeIterator cannot be used");
+}
+ArrayBase* ArrayBase::getSection (const Slicer&)
+{
+  throw ArrayError ("ArrayBase::getSection cannot be used");
+}
+
 
 } //# NAMESPACE CASA - END
 

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: dFunction.cc 19952 2007-02-28 03:01:50Z gervandiepen $
+//# $Id: dFunction.cc 20253 2008-02-23 15:15:00Z gervandiepen $
 //
 
 //# Includes
@@ -125,7 +125,7 @@ int main(int argc, char **argv) {
   // Inputs
   cout << ">>>" << endl;
   Input inputs(1);
-  inputs.version("$Id: dFunction.cc 19952 2007-02-28 03:01:50Z gervandiepen $");
+  inputs.version("$Id: dFunction.cc 20253 2008-02-23 15:15:00Z gervandiepen $");
   inputs.create("n", "100000", "n"); 
   inputs.readArguments(argc, argv);
   Int N = inputs.getInt("n"); 
@@ -217,7 +217,7 @@ int main(int argc, char **argv) {
   for (Int i=0; i<N; i++) {
     Double res = a0(par, x);
     res *= 1.0;
-  };
+  }
   cout << "g0: ";
   tim.show();
 
@@ -225,7 +225,7 @@ int main(int argc, char **argv) {
   for (Int i=0; i<N; i++) {
     Double res = a1(par, x);
     res *= 1.0;
-  };
+  }
   cout << "g1: ";
   tim.show();
 
@@ -233,7 +233,7 @@ int main(int argc, char **argv) {
   for (Int i=0; i<N; i++) {
     Double res = a2(par, x);
     res *= 1.0;
-  };
+  }
   cout << "g2: ";
   tim.show();
 
@@ -241,14 +241,14 @@ int main(int argc, char **argv) {
   for (Int i=0; i<N; i++) {
     Double res = mv(va, par, x);
     if (False) res=1;
-  };
+  }
   cout << "mv: ";
   tim.show();
 
   tim.mark();
   for (Int i=0; i<N; i++) {
     g1d(x);
-  };
+  }
   cout << "ao: ";
   tim.show();
 
@@ -275,7 +275,7 @@ int main(int argc, char **argv) {
       para(0) = AutoDiff<Double>(1000, 3, 0);
       para(1) = AutoDiff<Double>(2, 3, 1);
       para(2) = AutoDiff<Double>(3, 3, 2);
-    };
+    }
     cout << "N = " << N << " (at x=Double)" << endl;
 
     tim.mark();
@@ -301,7 +301,7 @@ int main(int argc, char **argv) {
       tim.mark();
       for (Int i=0; i<N; i++) resa = a2(para, xa);
       cout << "a2: "; tim.show();
-    }; ///
-  };
+    } ///
+  }
 
 }

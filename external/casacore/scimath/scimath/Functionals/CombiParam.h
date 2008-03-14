@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: CombiParam.h 19880 2007-02-15 04:10:07Z Malte.Marquarding $
+//# $Id: CombiParam.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef SCIMATH_COMBIPARAM_H
 #define SCIMATH_COMBIPARAM_H
@@ -194,7 +194,7 @@ public:
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <scimath/Functionals/CombiParam.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

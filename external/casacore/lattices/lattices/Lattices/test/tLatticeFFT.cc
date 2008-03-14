@@ -23,10 +23,10 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tLatticeFFT.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tLatticeFFT.cc 20211 2008-01-18 03:29:02Z Malte.Marquarding $
 
 #include <casa/aips.h>
-#include <casa/Arrays/ArrayLogical.h>
+#include <casa/Arrays/MaskArrLogi.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/Exceptions/Error.h>
 #include <casa/Arrays/IPosition.h>

@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: SubLattice.h 19909 2007-02-23 02:08:02Z Malte.Marquarding $
+//# $Id: SubLattice.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef LATTICES_SUBLATTICE_H
 #define LATTICES_SUBLATTICE_H
@@ -316,7 +316,7 @@ private:
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <lattices/Lattices/SubLattice.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

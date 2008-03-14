@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: LogIO.h 19763 2006-11-24 04:07:49Z gvandiep $
+//# $Id: LogIO.h 20259 2008-02-25 23:28:59Z gervandiepen $
 
 #ifndef CASA_LOGIO_H
 #define CASA_LOGIO_H
@@ -172,7 +172,14 @@ public:
 	WARN, 
 	// Change the message priority to NORMAL.
 	NORMAL, 
+	NORMAL1, 
+	NORMAL2, 
+	NORMAL3, 
+	NORMAL4, 
+	NORMAL5, 
 	// Change the message priority to DEBUGGING.
+	DEBUG1,
+	DEBUG2,
 	DEBUGGING};
 
     // Attach this LogIO object to the global sink with no origin information.
@@ -201,6 +208,7 @@ public:
     // only locally to the sink.
     // After the post the priority is reset to NORMAL.
     void post();
+    void post(LogMessage &amess);
 
     // Post the accumulated message locally.
     // After the post the priority is reset to NORMAL.
@@ -214,6 +222,7 @@ public:
     // Change the priority of the message. It does NOT post the accumulated
     // message at the old priority first.
     void priority(LogMessage::Priority which);
+    LogMessage::Priority priority();
     // Change the location in the origin. Almost always this is called with the
     // macro WHERE as its argument.
     void sourceLocation(const SourceLocation *where);

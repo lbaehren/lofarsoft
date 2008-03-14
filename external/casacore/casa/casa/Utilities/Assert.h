@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Assert.h 19846 2007-02-12 03:11:58Z Malte.Marquarding $
+//# $Id: Assert.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef CASA_ASSERT_H
 #define CASA_ASSERT_H
@@ -155,7 +155,7 @@ public:
 // <src>exit(0)</src>.
 
 #define AlwaysAssert(expr, exception) \
-    {assert_<exception > dummy_(expr, "Failed AlwaysAssertExit " #expr,__FILE__,(Int)__LINE__); dummy_.null(); }
+    {assert_<exception > dummy_(expr, "Failed AlwaysAssert " #expr,__FILE__,(Int)__LINE__); dummy_.null(); }
 #define AlwaysAssertExit(expr) \
     {assert_<AbortError> dummy_(expr, "Unrecoverable AlwaysAssertExit: " #expr,__FILE__,(Int)__LINE__); dummy_.null();}
 
@@ -190,7 +190,7 @@ public:
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <casa/Utilities/Assert.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSIter.h 19290 2006-02-28 04:42:01Z mvoronko $
+//# $Id: MSIter.h 20266 2008-02-26 00:43:05Z gervandiepen $
 
 #ifndef MS_MSITER_H
 #define MS_MSITER_H
@@ -322,6 +322,15 @@ public:
 
   // True if all elements of the cube returned by getBeamOffsets are zero
   Bool allBeamOffsetsZero() const;
+
+  // Get the spw, start  and nchan for all the ms's is this msiter that 
+  // match the frequecy "freqstart-freqStep" and "freqEnd+freqStep" range
+  
+  void getSpwInFreqRange(Block<Vector<Int> >& spw, 
+			 Block<Vector<Int> >& start, 
+			 Block<Vector<Int> >& nchan, 
+			 Double freqStart, Double freqEnd, 
+			 Double freqStep);
 
 protected:
   // handle the construction details

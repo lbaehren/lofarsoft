@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: OddPolynomial.tcc 19879 2007-02-15 03:52:50Z Malte.Marquarding $
+//# $Id: OddPolynomial.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 //# Includes
 #include <scimath/Functionals/OddPolynomial.h>
@@ -41,7 +41,7 @@ T OddPolynomial<T>::eval(typename Function1D<T>::FunctionArg x) const {
     accum *= x[0];
     accum += param_p[j];
     accum *= x[0];
-  };
+  }
   return accum;
 }
 

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MeasIERS.cc 20109 2007-08-22 00:57:43Z Malte.Marquarding $
+//# $Id: MeasIERS.cc 20227 2008-01-25 14:46:07Z gervandiepen $
 
 //# Includes
 #include <measures/Measures/MeasIERS.h>
@@ -93,7 +93,7 @@ Bool MeasIERS::get(Double &returnValue,
 			   String("fillMeas(MeasIERS::Files, Double)"),
 			   WHERE));
 	os << LogIO::WARN <<
-	  String("Requested JD") << date << String(" is outside "
+	  String("Requested JD ") << date << String(" is outside "
 		 "the IERS table data range"
 		 "\nCalculations will proceed with less precision") << 
 	  LogIO::POST;
@@ -294,7 +294,7 @@ Bool MeasIERS::getTable(Table &table, TableRecord &kws, ROTableRow &row,
 			 String("fillMeas(MeasIERS::Files, Double)"),
 			 WHERE));
       os << LogIO::WARN <<
-	String("Requested data table") << name <<
+	String("Requested data table ") << name <<
 	String(" cannot be found in the searched directories:\n");
       for (uInt i=0; i<searched.nelements(); ++i) os << searched[i] << "\n";
       os << LogIO::POST;

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Cube.h 20105 2007-07-16 05:41:29Z Malte.Marquarding $
+//# $Id: Cube.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef CASA_CUBE_H
 #define CASA_CUBE_H
@@ -295,7 +295,7 @@ private:
 };
 
 } //#End casa namespace
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <casa/Arrays/Cube.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

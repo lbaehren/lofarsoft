@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ImageExprParse.h 19817 2006-12-22 05:24:00Z gvandiep $
+//# $Id: ImageExprParse.h 20287 2008-03-13 13:20:30Z gervandiepen $
 
 #ifndef IMAGES_IMAGEEXPRPARSE_H
 #define IMAGES_IMAGEEXPRPARSE_H
@@ -35,6 +35,8 @@
 #include <casa/BasicSL/String.h>
 #include <casa/Utilities/DataType.h>
 #include <casa/stdvector.h>
+#include <casa/Utilities/CountedPtr.h>
+#include <casa/HDF5/HDF5File.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
@@ -298,6 +300,11 @@ public:
     // Callback function for RegionHandlerTable to get the table to be used.
     static Table& getRegionTable (void*, Bool);
 
+#ifdef HAVE_HDF5
+    // Callback function for RegionHandlerHDF5 to get the file to be used.
+    static const CountedPtr<HDF5File>& getRegionHDF5 (void*);
+#endif
+
     //# A 'global' node object to hold the resulting expression.
     static LatticeExprNode theirNode;
 
@@ -310,7 +317,6 @@ public:
     DComplex itsDCval;             //# DComplex literal
     String   itsSval;              //# lattice name; function name
 };
-
 
 
 } //# NAMESPACE CASA - END

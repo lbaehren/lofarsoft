@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LCStretch.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: LCStretch.cc 20279 2008-02-29 16:52:56Z gervandiepen $
 
 
 #include <lattices/Lattices/LCStretch.h>
@@ -154,7 +154,7 @@ LCStretch* LCStretch::fromRecord (const TableRecord& rec,
     LCBox* boxPtr = 0;
     boxPtr = (LCBox*)(LCRegion::fromRecord (rec.asRecord("box"), tableName));
     LCStretch* extPtr = new LCStretch (True, regPtr,
-				       Vector<Int>(rec.asArrayInt ("axes")),
+				       Vector<Int>(rec.toArrayInt ("axes")),
 				       *boxPtr);
     delete boxPtr;
     return extPtr;

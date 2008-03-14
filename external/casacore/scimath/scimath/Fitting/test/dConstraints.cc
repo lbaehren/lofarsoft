@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: dConstraints.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: dConstraints.cc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 #include <scimath/Fitting/NonLinearFitLM.h>
 #include <casa/Arrays/ArrayIO.h>
@@ -166,14 +166,14 @@ int main (Int argc, Char** argv) {
       cout << "Expected, Computed Parameter " << v[i];
       cout << ", " << solution[i] << " Std Dev " <<
 	errors[i] << endl;
-    };
+    }
     
     delete gauss;
 
     cout << "---------------------------------------------------" << endl;
   } catch (AipsError x) {
     cout << x.getMesg() << endl;
-  };
+  }
   
   exit(0);
 }

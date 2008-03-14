@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LCExtension.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: LCExtension.cc 20279 2008-02-29 16:52:56Z gervandiepen $
 
 
 #include <lattices/Lattices/LCExtension.h>
@@ -165,7 +165,7 @@ LCExtension* LCExtension::fromRecord (const TableRecord& rec,
     LCBox* boxPtr = 0;
     boxPtr = (LCBox*)(LCRegion::fromRecord (rec.asRecord("box"), tableName));
     LCExtension* extPtr = new LCExtension (True, regPtr,
-					  Vector<Int>(rec.asArrayInt ("axes")),
+					  Vector<Int>(rec.toArrayInt ("axes")),
 					  *boxPtr);
     delete boxPtr;
     return extPtr;

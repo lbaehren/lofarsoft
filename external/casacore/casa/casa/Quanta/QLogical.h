@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: QLogical.h 19846 2007-02-12 03:11:58Z Malte.Marquarding $
+//# $Id: QLogical.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef CASA_QLOGICAL_H
 #define CASA_QLOGICAL_H
@@ -210,7 +210,7 @@ Bool QMakeBool(const LogicalArray &val);
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <casa/Quanta/QLogical.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

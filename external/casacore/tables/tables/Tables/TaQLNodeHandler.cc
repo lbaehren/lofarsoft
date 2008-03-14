@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TaQLNodeHandler.cc 19796 2006-12-19 05:12:59Z gvandiep $
+//# $Id: TaQLNodeHandler.cc 20252 2008-02-23 15:05:34Z gervandiepen $
 
 #include <tables/Tables/TaQLNodeHandler.h>
 #include <tables/Tables/TableError.h>
@@ -151,6 +151,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
       return new TaQLNodeHRValue (left * right);
     case TaQLBinaryNodeRep::B_DIVIDE:
       return new TaQLNodeHRValue (left / right);
+    case TaQLBinaryNodeRep::B_DIVIDETRUNC:
+      return new TaQLNodeHRValue (floor(left / right));
     case TaQLBinaryNodeRep::B_MODULO:
       return new TaQLNodeHRValue (left % right);
     case TaQLBinaryNodeRep::B_POWER:

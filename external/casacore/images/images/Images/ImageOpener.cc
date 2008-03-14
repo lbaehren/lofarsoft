@@ -23,21 +23,20 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ImageOpener.cc 19940 2007-02-27 05:35:22Z Malte.Marquarding $
+//# $Id: ImageOpener.cc 20287 2008-03-13 13:20:30Z gervandiepen $
 //
 
 #include <images/Images/ImageOpener.h>
-
 #include <tables/Tables/Table.h>
 #include <tables/Tables/TableInfo.h>
 #include <images/Images/PagedImage.h>
+#include <casa/HDF5/HDF5File.h>
 #include <casa/Arrays/ArrayIO.h>
 #include <casa/OS/File.h>
 #include <casa/OS/RegularFile.h>
 #include <casa/IO/RegularFileIO.h>
 #include <casa/BasicSL/String.h>
 #include <casa/Utilities/Regex.h>
-
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
@@ -59,6 +58,9 @@ void ImageOpener::registerOpenImageFunction (ImageTypes type,
 
 ImageOpener::ImageTypes ImageOpener::imageType (const String& name)
 {
+  if (HDF5File::isHDF5(name)) {
+    return HDF5;
+  }
   File file(name);
   if (file.isDirectory()) {
     if (Table::isReadable(name)) {
@@ -151,4 +153,3 @@ LatticeBase* ImageOpener::openImage (const String& fileName,
 
 
 } //# NAMESPACE CASA - END
-

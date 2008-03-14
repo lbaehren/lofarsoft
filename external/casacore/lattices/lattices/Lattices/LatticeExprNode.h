@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LatticeExprNode.h 20123 2007-09-05 07:55:22Z gervandiepen $
+//# $Id: LatticeExprNode.h 20286 2008-03-13 13:02:22Z gervandiepen $
 
 #ifndef LATTICES_LATTICEEXPRNODE_H
 #define LATTICES_LATTICEEXPRNODE_H
@@ -196,8 +196,8 @@ class LatticeExprNode;
   // Results in a scalar Float.
   // The 2nd expression (giving the axis number) has to be a real scalar.
   // <note role=caution>
-  // Axes start counting at 1.
-  // If the axis is a number < 1, an exception is thrown.
+  // Axes start counting at 0.
+  // If the axis is a number < 0, an exception is thrown.
   // If the axis is a number exceeding the dimensionality, 1 is returned.
   // </note>
    LatticeExprNode length (const LatticeExprNode& expr,
@@ -209,8 +209,8 @@ class LatticeExprNode;
   // For indices >= vector_length, the 2nd argument defaults to False.
   // Results in a Bool array.
   // <note role=caution>
-  // Axes start counting at 1.
-  // If the axis is a number < 1 or > ndim, an exception is thrown.
+  // Axes start counting at 0.
+  // If the axis is a number < 0 or >= ndim, an exception is thrown.
   // </note>
    LatticeExprNode indexin (const LatticeExprNode& axis,
 			    const LatticeExprNode& indexFlags);
@@ -289,6 +289,11 @@ class LatticeExprNode;
    LatticeExprNode toComplex (const LatticeExprNode& expr);
    LatticeExprNode toDComplex(const LatticeExprNode& expr);
    LatticeExprNode toBool    (const LatticeExprNode& expr);
+   LatticeExprNode convertType (const LatticeExprNode& expr, const Float*);
+   LatticeExprNode convertType (const LatticeExprNode& expr, const Double*);
+   LatticeExprNode convertType (const LatticeExprNode& expr, const Complex*);
+   LatticeExprNode convertType (const LatticeExprNode& expr, const DComplex*);
+   LatticeExprNode convertType (const LatticeExprNode& expr, const Bool*);
   // </group>
 // </group>
 
@@ -831,6 +836,16 @@ inline LatticeExprNode operator^ (const LatticeExprNode& left,
 				  const LatticeExprNode& right)
   { return pow (left, right); }
 
+inline LatticeExprNode convertType(const LatticeExprNode& expr, const Float*)
+  { return toFloat (expr); }
+inline LatticeExprNode convertType(const LatticeExprNode& expr, const Double*)
+  { return toDouble (expr); }
+inline LatticeExprNode convertType(const LatticeExprNode& expr, const Complex*)
+  { return toComplex (expr); }
+inline LatticeExprNode convertType(const LatticeExprNode& expr, const DComplex*)
+  { return toDComplex (expr); }
+inline LatticeExprNode convertType(const LatticeExprNode& expr, const Bool*)
+  { return toBool (expr); }
 
 } //# NAMESPACE CASA - END
 

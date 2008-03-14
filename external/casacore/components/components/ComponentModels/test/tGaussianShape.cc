@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tGaussianShape.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tGaussianShape.cc 20262 2008-02-25 23:32:52Z gervandiepen $
 
 #include <casa/aips.h>
 #include <components/ComponentModels/ComponentType.h>
@@ -462,6 +462,7 @@ void pixelWorldConversion ()
 {
          
 // Make DirectionCoordinate
+    cout << "bbb1" << endl;
        
       Matrix<Double> xform(2,2);
       xform = 0.0; xform.diagonal() = 1.0;
@@ -472,15 +473,18 @@ void pixelWorldConversion ()
       rp(1) = 37.0;
       rv(0) = 0.0;
       rv(1) = 0.0;
+    cout << "bbb2" << endl;
       DirectionCoordinate dirCoord(MDirection::J2000, Projection::SIN,
                                    rv(0), rv(1),
                                    incr(0), incr(1),   
                                    xform, rp(0), rp(1)); 
+    cout << "bbb3" << endl;
 // Now shape
          
       Quantum<Double> majorAxis(72.0, String("arcsec"));
       Quantum<Double> minorAxis(60.0, String("arcsec"));
       Quantum<Double> pa(111.0, String("deg"));
+    cout << "bbb4" << endl;
        
 // Try reflection test for a few directions
 

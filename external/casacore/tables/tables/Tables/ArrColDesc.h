@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ArrColDesc.h 19858 2007-02-13 02:42:36Z Malte.Marquarding $
+//# $Id: ArrColDesc.h 20238 2008-02-11 13:44:45Z gervandiepen $
 
 #ifndef TABLES_ARRCOLDESC_H
 #define TABLES_ARRCOLDESC_H
@@ -260,7 +260,7 @@ public:
 
     // Create a Column object out of this.
     // This is used by class ColumnSet to construct a table column object.
-    PlainColumn* makeColumn (ColumnSet*) const;
+    virtual PlainColumn* makeColumn (ColumnSet*) const;
 
     // Show the column.
     void show (ostream& os) const;
@@ -285,7 +285,7 @@ protected:
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <tables/Tables/ArrColDesc.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

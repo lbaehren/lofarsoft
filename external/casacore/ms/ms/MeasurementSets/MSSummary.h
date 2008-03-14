@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSSummary.h 18442 2005-03-04 22:17:14Z rrusk $
+//# $Id: MSSummary.h 20266 2008-02-26 00:43:05Z gervandiepen $
 //#
 #ifndef MS_MSSUMMARY_H
 #define MS_MSSUMMARY_H
@@ -93,6 +93,7 @@ class MSSummary
 public:
 // Constructor
    MSSummary (const MeasurementSet&);
+   MSSummary (const MeasurementSet*);
 
 // Destructor
   ~MSSummary();

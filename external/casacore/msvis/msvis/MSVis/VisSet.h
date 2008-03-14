@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: VisSet.h 19237 2006-02-02 22:51:35Z kgolap $
+//# $Id: VisSet.h 20267 2008-02-26 00:49:30Z gervandiepen $
 
 #ifndef MSVIS_VISSET_H
 #define MSVIS_VISSET_H
@@ -169,6 +169,9 @@ public:
   // Note: this calls origin on the iterator.
   void selectChannel(Int nGroup,Int start, Int width, Int increment, 
 		     Int spectralWindow);
+  // call to VisIter origin optional:
+  void selectChannel(Int nGroup,Int start, Int width, Int increment, 
+		     Int spectralWindow, Bool callOrigin);
 
   // number of antennas
   Int numberAnt();
@@ -211,6 +214,7 @@ private:
   VisIter* iter_p;
   Matrix<Int> selection_p;
   Block<MeasurementSet> *blockOfMS_p;
+  Bool multims_p;
 
 };
 

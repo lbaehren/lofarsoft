@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: NonLinearFit.tcc 19879 2007-02-15 03:52:50Z Malte.Marquarding $
+//# $Id: NonLinearFit.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 #include <scimath/Fitting/NonLinearFit.h>
 #include <scimath/Mathematics/AutoDiffIO.h>
@@ -72,7 +72,7 @@ NonLinearFit<T> &NonLinearFit<T>::operator=(const NonLinearFit &other) {
     curiter_p = other.curiter_p;
     criterium_p = other.criterium_p;
     converge_p = other.converge_p;
-  };
+  }
   return *this;
 }
 

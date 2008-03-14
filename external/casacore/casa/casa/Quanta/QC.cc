@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: QC.cc 19927 2007-02-27 02:35:01Z Malte.Marquarding $
+//# $Id: QC.cc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 //# Includes
 #include <casa/Quanta/QC.h>
@@ -56,13 +56,13 @@ QC_init::QC_init() {
     if (count++ == 0) {
         UnitMap::clearCache();
 	QC::init();		// make sure statics initialized
-    };
+    }
 }
 
 QC_init::~QC_init() {
     if (--count == 0) {
       UnitMap::releaseUM();	// make sure UnitMaps released
-    };
+    }
 }
 
 void QC::init() {

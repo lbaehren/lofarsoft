@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ArrayColumn.h 20025 2007-03-14 23:34:38Z gervandiepen $
+//# $Id: ArrayColumn.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef TABLES_ARRAYCOLUMN_H
 #define TABLES_ARRAYCOLUMN_H
@@ -537,7 +537,7 @@ private:
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <tables/Tables/ArrayColumn.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ArrColDesc.tcc 19858 2007-02-13 02:42:36Z Malte.Marquarding $
+//# $Id: ArrColDesc.tcc 20238 2008-02-11 13:44:45Z gervandiepen $
 
 #include <tables/Tables/ArrColDesc.h>
 #include <tables/Tables/ArrColData.h>
@@ -260,6 +260,7 @@ PlainColumn* ArrayColumnDesc<T>::makeColumn (ColumnSet* csp) const
     }
     return bcp;
 }
+
 
 } //# NAMESPACE CASA - END
 

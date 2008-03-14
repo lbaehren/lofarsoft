@@ -23,11 +23,11 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tImageFFT.cc 20048 2007-03-19 05:46:10Z Malte.Marquarding $
+//# $Id: tImageFFT.cc 20213 2008-01-18 03:37:33Z Malte.Marquarding $
 // 
 //
 #include <casa/aips.h>
-#include <casa/Arrays/ArrayLogical.h>
+#include <casa/Arrays/MaskArrLogi.h>
 #include <casa/Arrays/ArrayMath.h>
 #include <scimath/Mathematics/FFTServer.h>
 #include <casa/BasicMath/Math.h>
@@ -67,7 +67,7 @@ int main (int argc, char **argv)
 try {
 
    Input inputs(1);
-   inputs.version ("$Revision: 20048 $");
+   inputs.version ("$Revision: 20213 $");
 
 
 // Get inputs

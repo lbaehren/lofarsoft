@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tArrayLattice.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tArrayLattice.cc 20256 2008-02-23 20:28:24Z gervandiepen $
 
 #include <casa/aips.h>
 
@@ -48,12 +48,12 @@
 Int const_arg_func(const Int &val)
 {
   return 3*val;
-};
+}
 
 Int func(Int val)
 {
   return 2*val*val;
-};
+}
 
 int main()
 {
@@ -881,4 +881,4 @@ int main()
   } 
   cout << "OK" << endl; 
   return 0;
-};
+}

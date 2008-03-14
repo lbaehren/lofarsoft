@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TSMCube.cc 19576 2006-08-29 06:31:10Z gvandiep $
+//# $Id: TSMCube.cc 20250 2008-02-23 14:58:08Z gervandiepen $
 
 
 //# Includes
@@ -889,9 +889,9 @@ void TSMCube::resizeTileSections()
     startPixelInFirstTile_p.resize(nrdim_p);
     endPixelInFirstTile_p.resize(nrdim_p);
     endPixelInLastTile_p.resize(nrdim_p);
-  };
+  }
   return;
-};
+}
 
 void TSMCube::accessSection (const IPosition& start, const IPosition& end,
                              char* section, uInt colnr,

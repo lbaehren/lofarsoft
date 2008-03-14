@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TabVecLogic.h 19961 2007-02-28 03:25:59Z gervandiepen $
+//# $Id: TabVecLogic.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef TABLES_TABVECLOGIC_H
 #define TABLES_TABVECLOGIC_H
@@ -247,7 +247,7 @@ Bool anyNE (const T &val, const ROTableVector<T>& tv)
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <tables/Tables/TabVecLogic.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

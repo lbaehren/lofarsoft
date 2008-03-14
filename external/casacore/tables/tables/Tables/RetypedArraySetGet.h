@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: RetypedArraySetGet.h 19858 2007-02-13 02:42:36Z Malte.Marquarding $
+//# $Id: RetypedArraySetGet.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef TABLES_RETYPEDARRAYSETGET_H
 #define TABLES_RETYPEDARRAYSETGET_H
@@ -155,7 +155,7 @@ void retypedArrayEngineGet (Array<TargetType>& out,
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <tables/Tables/RetypedArraySetGet.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

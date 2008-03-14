@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSParse.h 19350 2006-04-05 22:23:37Z sbhatnag $
+//# $Id: MSParse.h 20266 2008-02-26 00:43:05Z gervandiepen $
 
 #ifndef MS_MSPARSE_H
 #define MS_MSPARSE_H
@@ -31,6 +31,8 @@
 //# Includes
 #include <casa/aips.h>
 #include <tables/Tables/ExprNode.h>
+#include <tables/Tables/ExprNodeSet.h>
+
 #include <ms/MeasurementSets/MeasurementSet.h>
 #include <casa/BasicSL/String.h>
 
@@ -115,11 +117,12 @@ public:
     String& shorthand();
 
     // Get ms object.
-    const MeasurementSet* ms();
+    MeasurementSet* ms();
 
+  void setMS(MeasurementSet* ms) {ms_p=ms;};
+  static MeasurementSet *ms_p;
 private:
     String shorthand_p;
-    static const MeasurementSet *ms_p;
 };
 
 } //# NAMESPACE CASA - END

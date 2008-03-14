@@ -24,9 +24,9 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: tCoordinateUtil.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tCoordinateUtil.cc 20211 2008-01-18 03:29:02Z Malte.Marquarding $
 
-#include <casa/Arrays/ArrayLogical.h> 
+#include <casa/Arrays/MaskArrLogi.h>
 #include <coordinates/Coordinates.h>
 #include <coordinates/Coordinates/CoordinateUtil.h>
 #include <casa/BasicSL/Constants.h>

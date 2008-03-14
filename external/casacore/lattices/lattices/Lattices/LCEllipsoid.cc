@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LCEllipsoid.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: LCEllipsoid.cc 20279 2008-02-29 16:52:56Z gervandiepen $
 
 
 #include <lattices/Lattices/LCEllipsoid.h>
@@ -193,10 +193,10 @@ LCEllipsoid* LCEllipsoid::fromRecord (const TableRecord& rec,
     // If 1-relative, subtract 1 from center.
     Bool oneRel = rec.asBool ("oneRel");
     Float off = (oneRel ? 1:0);
-    Array<Float> center (rec.asArrayFloat ("center"));
+    Array<Float> center (rec.toArrayFloat ("center"));
     return new LCEllipsoid (center-off,
-			    Vector<Float>(rec.asArrayFloat ("radii")),
-			    Vector<Int>(rec.asArrayInt ("shape")));
+			    Vector<Float>(rec.toArrayFloat ("radii")),
+			    Vector<Int>(rec.toArrayInt ("shape")));
 }
 
 void LCEllipsoid::fillCenter (const IPosition& center)

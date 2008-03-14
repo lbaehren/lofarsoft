@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Sinusoid1D.h 19880 2007-02-15 04:10:07Z Malte.Marquarding $
+//# $Id: Sinusoid1D.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef SCIMATH_SINUSOID1D_H
 #define SCIMATH_SINUSOID1D_H
@@ -253,8 +253,8 @@ protected:
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <scimath/Functionals/Sinusoid1D.tcc>
 #include <scimath/Functionals/Sinusoid1D2.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

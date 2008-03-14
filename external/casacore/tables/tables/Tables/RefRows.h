@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: RefRows.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: RefRows.h 20238 2008-02-11 13:44:45Z gervandiepen $
 
 #ifndef TABLES_REFROWS_H
 #define TABLES_REFROWS_H
@@ -112,6 +112,10 @@ public:
     // It is used to convert the RefRows object with row numbers in a
     // RefTable to row numbers in the original root table.
     Vector<uInt> convert (const Vector<uInt>& rootRownrs) const;
+
+    // Convert this object to a Vector<uInt> by de-slicing it.
+    // I.e. it linearizes the row numbers.
+    Vector<uInt> convert() const;
 
     // Return the number of rows given by this object.
     // If the object contains slices, it counts the number of rows

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LCRegion2.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: LCRegion2.cc 20286 2008-03-13 13:02:22Z gervandiepen $
 
 #include <lattices/Lattices/LCRegion.h>
 #include <lattices/Lattices/RegionType.h>
@@ -39,6 +39,7 @@
 #include <lattices/Lattices/LCDifference.h>
 #include <lattices/Lattices/LCExtension.h>
 #include <lattices/Lattices/LCStretch.h>
+#include <lattices/Lattices/LCHDF5Mask.h>
 #include <tables/Tables/TableRecord.h>
 #include <casa/Exceptions/Error.h>
 
@@ -79,6 +80,10 @@ LCRegion* LCRegion::fromRecord (const TableRecord& rec,
         regPtr = LCExtension::fromRecord (rec, tableName);
     } else if (name == LCStretch::className()) {
         regPtr = LCStretch::fromRecord (rec, tableName);
+#ifdef HAVE_HDF5
+    } else if (name == LCHDF5Mask::className()) {
+      	regPtr = LCHDF5Mask::fromRecord (rec, tableName);
+#endif
     } else {
 	throw (AipsError ("LCRegion::fromRecord - " + name +
 			  " is unknown derived LCRegion class"));

@@ -24,7 +24,7 @@
                            520 Edgemont Road
                            Charlottesville, VA 22903-2475 USA
 
-    $Id: TableGram.ll 19860 2007-02-13 02:55:39Z Malte.Marquarding $
+    $Id: TableGram.ll 20252 2008-02-23 15:05:34Z gervandiepen $
 */
 
 %{
@@ -64,7 +64,7 @@ FLINTUNIT {FLINT}[a-zA-Z]+
 
 MONTH     ("-"{INT}?"-")|("-"?[A-Za-z]+"-"?)
 DATEH     {INT}{MONTH}{INT}
-DATES     {INT}"/"{INT}?"/"{INT}
+DATES     {INT}"/"{INT}"/"{INT}
 DATE      {DATEH}|{DATES}
 DTIMEHM   {INT}[hH]({INT}?([mM]({FLINT})?)?)?
 DTIMEC    {INT}":"({INT}?(":"({FLINT})?)?)?
@@ -337,7 +337,9 @@ PATT      {PATT1}|{PATT2}|{PATT3}
 "!"       { tableGramPosition() += yyleng; return NOT; }
 {NOT}     { tableGramPosition() += yyleng; return NOT; }
 "^"       { tableGramPosition() += yyleng; return POWER; }
+"**"      { tableGramPosition() += yyleng; return POWER; }
 "*"       { tableGramPosition() += yyleng; return TIMES; }
+"//"      { tableGramPosition() += yyleng; return DIVIDETRUNC; }
 "/"       { tableGramPosition() += yyleng; return DIVIDE; }
 "%"       { tableGramPosition() += yyleng; return MODULO; }
 "+"       { tableGramPosition() += yyleng; return PLUS; }

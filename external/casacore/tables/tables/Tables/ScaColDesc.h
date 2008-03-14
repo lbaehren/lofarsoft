@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ScaColDesc.h 19858 2007-02-13 02:42:36Z Malte.Marquarding $
+//# $Id: ScaColDesc.h 20238 2008-02-11 13:44:45Z gervandiepen $
 
 #ifndef TABLES_SCACOLDESC_H
 #define TABLES_SCACOLDESC_H
@@ -203,11 +203,9 @@ public:
     // Assignment (copy semantics);
     ScalarColumnDesc<T>& operator= (const ScalarColumnDesc<T>&);
 
-    //*display 4
     // Clone this column description.
     BaseColumnDesc* clone() const;
 
-    //*display 4
     // Get the name of this class. It is used by the registration process.
     // The template argument gets part of the name.
     String className() const;
@@ -220,12 +218,13 @@ public:
     const T& defaultValue() const
 	{ return defaultVal_p; }
 
-    //*display 4
     // Create a Column object out of this.
     // This is used by class ColumnSet to construct a table column object.
-    PlainColumn* makeColumn (ColumnSet*) const;
+    virtual PlainColumn* makeColumn (ColumnSet*) const;
 
-    //*display 4
+    // Make a ConcatColumn object out of the description.
+    virtual ConcatColumn* makeConcatColumn (ConcatTable*) const;
+
     // Show the column.
     void show (ostream& os) const;
 
@@ -253,7 +252,7 @@ public:
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <tables/Tables/ScaColDesc.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

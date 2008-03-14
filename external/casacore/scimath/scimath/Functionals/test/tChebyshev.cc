@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tChebyshev.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tChebyshev.cc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 #ifdef DEBUG 
 #define DIAGNOSTICS
@@ -119,7 +119,7 @@ int main() {
     for (uInt i=0; i<4; ++i) chebad[i] = cheb[i];
     for (AutoDiffA<Double> x(xmin, 1, 0); x <= xmax; x += 0.1) {
       AlwaysAssertExit(nearAbs(chebp(x.value()), chebad(x).deriv(0), 1.0e-14));
-    };
+    }
 
     // test out-of-interval modes
     AlwaysAssertExit(0 == cheb.getDefault());

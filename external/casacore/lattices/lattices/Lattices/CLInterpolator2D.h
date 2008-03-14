@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: CLInterpolator2D.h 19909 2007-02-23 02:08:02Z Malte.Marquarding $
+//# $Id: CLInterpolator2D.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef LATTICES_CLINTERPOLATOR2D_H
 #define LATTICES_CLINTERPOLATOR2D_H
@@ -144,7 +144,7 @@ protected:
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <lattices/Lattices/CLInterpolator2D.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif 

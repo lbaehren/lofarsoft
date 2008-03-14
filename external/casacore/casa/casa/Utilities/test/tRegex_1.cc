@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tRegex_1.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tRegex_1.cc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 #include <casa/BasicSL/String.h>
 #include <casa/Utilities/Regex.h>
@@ -68,18 +68,18 @@ int main () {
     int i;
     for (i=0; i<ntests; i++) {
 	cout << p[i] << " --> " << Regex::fromPattern(p[i]) << endl;
-    };
+    }
 
     cout << endl << "SQLPattern --> Regular Expression" << endl;
     cout << "---------------------------------" << endl;
     for (i=0; i<ntests; i++) {
 	cout << p[i] << " --> " << Regex::fromSQLPattern(p[i]) << endl;
-    };
+    }
 
     cout << endl << "String --> Regular Expression" << endl;
     cout << "-----------------------------" << endl;
     for (i=0; i<ntests; i++) {
 	cout << p[i] << " --> " << Regex::fromString(p[i]) << endl;
-    };
+    }
     return 0;
 }

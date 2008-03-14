@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tCompositeNumber.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tCompositeNumber.cc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 #include <casa/iostream.h>
 #include <casa/aips.h>
@@ -110,4 +110,4 @@ int main()
     cout << "Is 1026 composite? " << cn.isComposite(1026) << endl;
     cout << "Is 1027 composite? " << cn.isComposite(1027) << endl;
   }
-};
+}

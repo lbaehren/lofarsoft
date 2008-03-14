@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: MSAntennaIndex.h 19651 2006-09-28 07:05:02Z sbhatnag $
+//# $Id: MSAntennaIndex.h 20266 2008-02-26 00:43:05Z gervandiepen $
 
 #ifndef MS_MSANTENNAINDEX_H
 #define MS_MSANTENNAINDEX_H
@@ -101,6 +101,7 @@ public:
   Vector<Int> matchAntennaNameAndStation(const String& name,
 					 const String& station);
 
+  Vector<Int> matchId(const Vector<Int>& sourceId);
 private:
   // Default constructor
   MSAntennaIndex();

@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: Record2Interface.cc 19846 2007-02-12 03:11:58Z Malte.Marquarding $
+//# $Id: Record2Interface.cc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 
 #include <casa/Containers/RecordInterface.h>
@@ -39,7 +39,21 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 
 Array<Bool> RecordInterface::toArrayBool (const RecordFieldId& id) const
 {
-  return asArrayBool(id).copy();
+  Array<Bool> arr;
+  Int whichField = idToNumber (id);
+  switch (type(whichField)) {
+  case TpInt:
+  case TpArrayInt:
+    {
+      Array<Int> tmp = asArrayInt (id);
+      arr.resize (tmp.shape());
+      convertArray (arr, tmp);
+      break;
+    }
+  default:
+    arr = asArrayBool(id).copy();
+  }
+  return arr;
 }
 
 Array<uChar> RecordInterface::toArrayuChar (const RecordFieldId& id) const

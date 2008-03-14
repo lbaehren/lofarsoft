@@ -24,7 +24,7 @@
                            520 Edgemont Road
                            Charlottesville, VA 22903-2475 USA
 
-    $Id: TableGram.yy 19860 2007-02-13 02:55:39Z Malte.Marquarding $
+    $Id: TableGram.yy 20252 2008-02-23 15:05:34Z gervandiepen $
 */
 
 /*
@@ -162,7 +162,7 @@ using namespace casa;
 %left AND
 %nonassoc EQ EQASS GT GE LT LE NE
 %left PLUS MINUS
-%left TIMES DIVIDE MODULO
+%left TIMES DIVIDE DIVIDETRUNC MODULO
 %nonassoc UNARY
 %nonassoc NOT
 %right POWER
@@ -948,6 +948,11 @@ arithexpr: inxexpr {
          | arithexpr DIVIDE arithexpr {
 	       $$ = new TaQLNode(
 	            new TaQLBinaryNodeRep (TaQLBinaryNodeRep::B_DIVIDE, *$1, *$3));
+	       TaQLNode::theirNodesCreated.push_back ($$);
+	   }
+         | arithexpr DIVIDETRUNC arithexpr {
+	       $$ = new TaQLNode(
+	            new TaQLBinaryNodeRep (TaQLBinaryNodeRep::B_DIVIDETRUNC, *$1, *$3));
 	       TaQLNode::theirNodesCreated.push_back ($$);
 	   }
          | arithexpr MODULO arithexpr {

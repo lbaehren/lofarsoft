@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TaQLNodeDer.cc 19796 2006-12-19 05:12:59Z gvandiep $
+//# $Id: TaQLNodeDer.cc 20252 2008-02-23 15:05:34Z gervandiepen $
 
 //# Includes
 #include <tables/Tables/TaQLNodeDer.h>
@@ -231,6 +231,9 @@ void TaQLBinaryNodeRep::show (std::ostream& os) const
     break;
   case B_DIVIDE:
     os << '/';
+    break;
+  case B_DIVIDETRUNC:
+    os << "//";
     break;
   case B_MODULO:
     os << '%';

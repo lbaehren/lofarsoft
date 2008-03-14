@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: VisSet.cc 19280 2006-02-23 08:15:19Z gvandiep $
+//# $Id: VisSet.cc 20267 2008-02-26 00:49:30Z gervandiepen $
 
 #include <msvis/MSVis/VisSet.h>
 #include <msvis/MSVis/VisBuffer.h>
@@ -68,9 +68,12 @@ namespace casa { //# NAMESPACE CASA - BEGIN
     blockOfMS_p= new Block<MeasurementSet> ();
     blockOfMS_p->resize(1);
     (*blockOfMS_p)[0]=ms_p;
+    multims_p=False;
     // sort out the channel selection
     Int nSpw=ms_p.spectralWindow().nrow();
     MSSpWindowColumns msSpW(ms_p.spectralWindow());
+    if(nSpw==0)
+      throw(AipsError(String("There is no valid spectral windows in "+ms_p.tableName())));
     selection_p.resize(2,nSpw);
     // fill in default selection
     selection_p.row(0)=0; //start
@@ -133,7 +136,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 		 Bool compress)
   {
     
-    
+    multims_p=True;
     blockOfMS_p = &mss;
     Int numMS=mss.nelements();
     ms_p=mss[numMS-1];
@@ -150,6 +153,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
     for (Int k=0; k < numMS; ++k){
       // sort out the channel selection
       Int nSpw=mss[k].spectralWindow().nrow();
+      if(nSpw==0)
+      throw(AipsError(String("There is no valid spectral windows in "+mss[k].tableName())));
       blockNGroup[k]=Vector<Int> (nSpw,1);
       blockIncr[k]=Vector<Int> (nSpw,1);
       // At this stage select all spw
@@ -201,7 +206,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 
 VisSet::VisSet(MeasurementSet& ms, const Matrix<Int>& chanSelection, 
 	       Double timeInterval)
-:ms_p(ms)
+  :ms_p(ms)
 {
     LogSink logSink;
     LogMessage message(LogOrigin("VisSet","VisSet"));
@@ -209,9 +214,11 @@ VisSet::VisSet(MeasurementSet& ms, const Matrix<Int>& chanSelection,
     blockOfMS_p= new Block<MeasurementSet> ();
     blockOfMS_p->resize(1);
     (*blockOfMS_p)[0]=ms_p;
-
+    multims_p=False;
     // sort out the channel selection
     Int nSpw=ms_p.spectralWindow().nrow();
+    if(nSpw==0)
+      throw(AipsError(String("There is no valid spectral windows in "+ms_p.tableName())));
     MSSpWindowColumns msSpW(ms_p.spectralWindow());
     selection_p.resize(2,nSpw);
     // fill in default selection
@@ -246,6 +253,7 @@ VisSet::VisSet(const VisSet& vs,const Block<Int>& columns,
     blockOfMS_p=new Block<MeasurementSet>();
     blockOfMS_p->resize(1);
     (*blockOfMS_p)[0]=ms_p;
+    multims_p=False;
     selection_p.resize(vs.selection_p.shape());
     selection_p=vs.selection_p;
 
@@ -273,9 +281,14 @@ VisSet& VisSet::operator=(const VisSet& other)
 
 VisSet::~VisSet() {
   ms_p.flush();
-  delete iter_p; iter_p=0;
-};
+  ms_p=MeasurementSet();// breaking reference
 
+  delete iter_p; iter_p=0;
+  //Only one ms then most probably did not use the multi ms constructor
+  if(!multims_p){
+    (*blockOfMS_p)[0]=MeasurementSet();//breaking reference
+  }
+};
 
 void VisSet::resetVisIter(const Block<Int>& columns, Double timeInterval) 
 {
@@ -343,15 +356,25 @@ VisIter& VisSet::iter() { return *iter_p; }
 
 // Set or reset the channel selection on all iterators
 void VisSet::selectChannel(Int nGroup,Int start, Int width, Int increment, 
-			   Int spectralWindow)
+			   Int spectralWindow) {
+
+  // Delegate, with callOrigin=True:
+  VisSet::selectChannel(nGroup,start,width,increment,spectralWindow,True);
+
+}
+
+void VisSet::selectChannel(Int nGroup,Int start, Int width, Int increment, 
+			   Int spectralWindow,
+			   Bool callOrigin)
 {
   iter_p->selectChannel(nGroup,start,width,increment,spectralWindow); 
-  iter_p->origin();
+  if (callOrigin) iter_p->origin();
 
   selection_p(0,spectralWindow) = start;
   selection_p(1,spectralWindow) = width;
 
 }
+
 Int VisSet::numberAnt()  
 {  
   if(iter_p->newMS()){
@@ -385,182 +408,6 @@ Int VisSet::numberCoh() const
     numcoh+=(*blockOfMS_p)[k].nrow();
   }
   return numcoh;
-}
-
-void VisSet::addCalSet(MeasurementSet& ms, Bool compress) {
-  // Add a calibration set (comprising a set of CORRECTED_DATA, 
-  // MODEL_DATA and IMAGING_WEIGHT columns) to the MeasurementSet.
-  
-  // Define a column accessor to the observed data
-  ROTableColumn* data;
-  if (ms.tableDesc().isColumn(MS::columnName(MS::FLOAT_DATA))) {
-    data = new ROArrayColumn<Float> (ms, MS::columnName(MS::FLOAT_DATA));
-  } else {
-    data = new ROArrayColumn<Complex> (ms, MS::columnName(MS::DATA));
-  };
-
-  // Check if the data column is tiled and, if so, the
-  // smallest tile shape used.
-  TableDesc td = ms.actualTableDesc();
-  const ColumnDesc& cdesc = td[data->columnDesc().name()];
-  String dataManType = cdesc.dataManagerType();
-  String dataManGroup = cdesc.dataManagerGroup();
-  IPosition dataTileShape;
-  Bool tiled = (dataManType.contains("Tiled"));
-  Bool simpleTiling = False;
-
-  if (tiled) {
-    ROTiledStManAccessor tsm(ms, dataManGroup);
-    uInt nHyper = tsm.nhypercubes();
-    // Find smallest tile shape
-    Int lowestProduct = 0;
-    Int lowestId = 0;
-    Bool firstFound = False;
-    for (uInt id=0; id < nHyper; id++) {
-      Int product = tsm.getTileShape(id).product();
-      if (product > 0 && (!firstFound || product < lowestProduct)) {
-	lowestProduct = product;
-	lowestId = id;
-	if (!firstFound) firstFound = True;
-      };
-    };
-    dataTileShape = tsm.getTileShape(lowestId);
-    simpleTiling = (dataTileShape.nelements() == 3);
-  };
-
-  if (!tiled || !simpleTiling) {
-    // Untiled, or tiled at a higher than expected dimensionality
-    // Use a canonical tile shape of 128 kB size
-    cout << "VisSet: untiled or not simple tiling" << endl;
-
-    Int maxNchan = max (numberChan());
-    Int tileSize = maxNchan/10 + 1;
-    Int nCorr = data->shape(0)(0);
-    dataTileShape = IPosition(3, nCorr, tileSize, 16384/nCorr/tileSize);
-  };
-  
-  // Add the MODEL_DATA column
-  TableDesc tdModel, tdModelComp, tdModelScale;
-  CompressComplex* ccModel=NULL;
-  String colModel=MS::columnName(MS::MODEL_DATA);
-
-  tdModel.addColumn(ArrayColumnDesc<Complex>(colModel,"model data", 2));
-  IPosition modelTileShape = dataTileShape;
-  if (compress) {
-    tdModelComp.addColumn(ArrayColumnDesc<Int>(colModel+"_COMPRESSED",
-					       "model data compressed",2));
-    tdModelScale.addColumn(ScalarColumnDesc<Float>(colModel+"_SCALE"));
-    tdModelScale.addColumn(ScalarColumnDesc<Float>(colModel+"_OFFSET"));
-    ccModel = new CompressComplex(colModel, colModel+"_COMPRESSED",
-				  colModel+"_SCALE", colModel+"_OFFSET", True);
-
-    StandardStMan modelScaleStMan("ModelScaleOffset");
-    ms.addColumn(tdModelScale, modelScaleStMan);
-
-    TiledShapeStMan modelCompStMan("", modelTileShape);
-    ms.addColumn(tdModelComp, modelCompStMan);
-    ms.addColumn(tdModel, *ccModel);
-
-  } else {
-    TiledShapeStMan modelStMan("", modelTileShape);
-    ms.addColumn(tdModel, modelStMan);
-  };
-
-  // Add the CORRECTED_DATA column
-  TableDesc tdCorr, tdCorrComp, tdCorrScale;
-  CompressComplex* ccCorr=NULL;
-  String colCorr=MS::columnName(MS::CORRECTED_DATA);
-
-  tdCorr.addColumn(ArrayColumnDesc<Complex>(colCorr,"corrected data", 2));
-  IPosition corrTileShape = dataTileShape;
-  if (compress) {
-    tdCorrComp.addColumn(ArrayColumnDesc<Int>(colCorr+"_COMPRESSED",
-					      "corrected data compressed",2));
-    tdCorrScale.addColumn(ScalarColumnDesc<Float>(colCorr+"_SCALE"));
-    tdCorrScale.addColumn(ScalarColumnDesc<Float>(colCorr+"_OFFSET"));
-    ccCorr = new CompressComplex(colCorr, colCorr+"_COMPRESSED",
-				 colCorr+"_SCALE", colCorr+"_OFFSET", True);
-
-    StandardStMan corrScaleStMan("CorrScaleOffset");
-    ms.addColumn(tdCorrScale, corrScaleStMan);
-
-    TiledShapeStMan corrCompStMan("", corrTileShape);
-    ms.addColumn(tdCorrComp, corrCompStMan);
-    ms.addColumn(tdCorr, *ccCorr);
-
-  } else {
-    TiledShapeStMan corrStMan("", corrTileShape);
-    ms.addColumn(tdCorr, corrStMan);
-  };
-
-  // Add the IMAGING_WEIGHT column
-  TableDesc tdImWgt, tdImWgtComp, tdImWgtScale;
-  CompressFloat* ccImWgt=NULL;
-  String colImWgt=MS::columnName(MS::IMAGING_WEIGHT);
-
-  tdImWgt.addColumn(ArrayColumnDesc<Float>(colImWgt,"imaging weight", 1));
-  IPosition imwgtTileShape = dataTileShape.getLast(2);
-  if (compress) {
-    tdImWgtComp.addColumn(ArrayColumnDesc<Short>(colImWgt+"_COMPRESSED",
-						 "imaging weight compressed",
-						 1));
-    tdImWgtScale.addColumn(ScalarColumnDesc<Float>(colImWgt+"_SCALE"));
-    tdImWgtScale.addColumn(ScalarColumnDesc<Float>(colImWgt+"_OFFSET"));
-    ccImWgt = new CompressFloat(colImWgt, colImWgt+"_COMPRESSED",
-				colImWgt+"_SCALE", colImWgt+"_OFFSET", True);
-
-    StandardStMan imwgtScaleStMan("ImWgtScaleOffset");
-    ms.addColumn(tdImWgtScale, imwgtScaleStMan);
-
-    TiledShapeStMan imwgtCompStMan("", imwgtTileShape);
-    ms.addColumn(tdImWgtComp, imwgtCompStMan);
-    ms.addColumn(tdImWgt, *ccImWgt);
-
-  } else {
-    TiledShapeStMan imwgtStMan("", imwgtTileShape);
-    ms.addColumn(tdImWgt, imwgtStMan);
-  };
-
-  if (ccModel) delete ccModel;
-  if (ccCorr) delete ccCorr;
-  if (ccImWgt) delete ccImWgt;
-
-  // Set the shapes for each row
-  ArrayColumn<Complex> modelData(ms, "MODEL_DATA");
-  ArrayColumn<Complex> correctedData(ms, "CORRECTED_DATA");
-  ArrayColumn<Float> imagingWeight(ms, "IMAGING_WEIGHT");
-  for (uInt row=0; row < ms.nrow(); row++) {
-    IPosition rowShape=data->shape(row);
-    modelData.setShape(row,rowShape);
-    correctedData.setShape(row,rowShape);
-    imagingWeight.setShape(row,rowShape.getLast(1));
-  };
-  delete data;
-}
-
-void VisSet::removeCalSet(MeasurementSet& ms) {
-  // Remove an existing calibration set (comprising a set of CORRECTED_DATA, 
-  // MODEL_DATA and IMAGING_WEIGHT columns) from the MeasurementSet.
-
-  Vector<String> colNames(3);
-  colNames(0)=MS::columnName(MS::MODEL_DATA);
-  colNames(1)=MS::columnName(MS::CORRECTED_DATA);
-  colNames(2)=MS::columnName(MS::IMAGING_WEIGHT);
-
-  for (uInt j=0; j<colNames.nelements(); j++) {
-    if (ms.tableDesc().isColumn(colNames(j))) {
-      ms.removeColumn(colNames(j));
-    };
-    if (ms.tableDesc().isColumn(colNames(j)+"_COMPRESSED")) {
-      ms.removeColumn(colNames(j)+"_COMPRESSED");
-    };
-    if (ms.tableDesc().isColumn(colNames(j)+"_SCALE")) {
-      ms.removeColumn(colNames(j)+"_SCALE");
-    };
-    if (ms.tableDesc().isColumn(colNames(j)+"_OFFSET")) {
-      ms.removeColumn(colNames(j)+"_OFFSET");
-    };
-  };
 }
 
 void VisSet::addScratchCols(MeasurementSet& ms, Bool compress){
@@ -619,6 +466,31 @@ String VisSet::msName(){
 
   String a=ms_p.antenna().tableName();
   return a.before("/ANTENNA");
+}
+
+void VisSet::removeCalSet(MeasurementSet& ms) {
+  // Remove an existing calibration set (comprising a set of CORRECTED_DATA, 
+  // MODEL_DATA and IMAGING_WEIGHT columns) from the MeasurementSet.
+
+  Vector<String> colNames(3);
+  colNames(0)=MS::columnName(MS::MODEL_DATA);
+  colNames(1)=MS::columnName(MS::CORRECTED_DATA);
+  colNames(2)=MS::columnName(MS::IMAGING_WEIGHT);
+
+  for (uInt j=0; j<colNames.nelements(); j++) {
+    if (ms.tableDesc().isColumn(colNames(j))) {
+      ms.removeColumn(colNames(j));
+    };
+    if (ms.tableDesc().isColumn(colNames(j)+"_COMPRESSED")) {
+      ms.removeColumn(colNames(j)+"_COMPRESSED");
+    };
+    if (ms.tableDesc().isColumn(colNames(j)+"_SCALE")) {
+      ms.removeColumn(colNames(j)+"_SCALE");
+    };
+    if (ms.tableDesc().isColumn(colNames(j)+"_OFFSET")) {
+      ms.removeColumn(colNames(j)+"_OFFSET");
+    };
+  };
 }
 
 

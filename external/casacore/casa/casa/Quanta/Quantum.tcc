@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Quantum.tcc 20054 2007-03-21 23:02:20Z Malte.Marquarding $
+//# $Id: Quantum.tcc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 //# Includes
 #include <casa/Quanta/Quantum.h>
@@ -229,7 +229,7 @@ Qtype Quantum<Qtype>::getValue(const Unit &other) const {
     } else if (qUnit.getValue() == UnitVal::TIME) {
       if (other.getValue() == UnitVal::ANGLE)
 	d1 *= C::day/C::circle;
-    };
+    }
     return (Qtype)(qVal/d1);
 }
 
@@ -312,9 +312,9 @@ void Quantum<Qtype>::convert(const Unit &s) {
 	  qUnit = String(oss);
 	} else {
 	  qUnit = Unit(s.getName() + '.' + String(oss).after(0));
-	};
-      };
-    };
+	}
+      }
+    }
 }
 
 template <class Qtype>

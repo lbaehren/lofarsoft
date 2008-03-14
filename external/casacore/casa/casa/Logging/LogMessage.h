@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: LogMessage.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: LogMessage.h 20259 2008-02-25 23:28:59Z gervandiepen $
 
 #ifndef CASA_LOGMESSAGE_H
 #define CASA_LOGMESSAGE_H
@@ -106,9 +106,16 @@ public:
         // Low priority - primarily used for findding problems or tracing
         // execution.
         DEBUGGING, 
+        DEBUG2, 
+        DEBUG1, 
 	// Most messages users see should have this priority. Use for 
 	// "interesting" informational messages from normally executing
 	// software.
+	NORMAL5, 
+	NORMAL4, 
+	NORMAL3, 
+	NORMAL2, 
+	NORMAL1, 
 	NORMAL, 
 	// Use messages of warning level to flag things that are unusual and
 	// might well be errors. Normally the software should proceed anyway

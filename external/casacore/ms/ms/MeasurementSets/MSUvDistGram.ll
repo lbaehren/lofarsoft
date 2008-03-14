@@ -24,7 +24,7 @@
                            520 Edgemont Road
                            Charlottesville, VA 22903-2475 USA
 
-    $Id: MSUvDistGram.ll 19948 2007-02-27 11:53:51Z Malte.Marquarding $
+    $Id: MSUvDistGram.ll 20266 2008-02-26 00:43:05Z gervandiepen $
 */
 
 %{
@@ -65,7 +65,7 @@ UNIT      ({DISTANCEUNIT}|{WAVELENGTHUNIT})
 
                   return UNIT;
                 }
-"-"       { msUvDistGramPosition() += yyleng;
+"~"       { msUvDistGramPosition() += yyleng;
             return DASH; }
 ":"       { msUvDistGramPosition() += yyleng;
             return COLON; }

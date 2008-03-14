@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: ImageOpener.h 18462 2005-03-16 15:02:18Z gvandiep $
+//# $Id: ImageOpener.h 20287 2008-03-13 13:20:30Z gervandiepen $
 
 #ifndef IMAGES_IMAGEOPENER_H
 #define IMAGES_IMAGEOPENER_H
@@ -75,6 +75,10 @@ public:
     GIPSY,
     // Classic AIPS
     CAIPS,
+    // Newstar
+    NEWSTAR,
+    // HDF5
+    HDF5,
     // Unknown
     UNKNOWN
    };

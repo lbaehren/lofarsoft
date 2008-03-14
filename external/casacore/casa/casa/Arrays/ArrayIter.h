@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ArrayIter.h 19846 2007-02-12 03:11:58Z Malte.Marquarding $
+//# $Id: ArrayIter.h 20234 2008-02-07 16:53:38Z gervandiepen $
 
 #ifndef CASA_ARRAYITER_H
 #define CASA_ARRAYITER_H
@@ -97,6 +97,16 @@ public:
     // Move the cursor to the next position.
     virtual void next();
 
+    // Set the cursor to the given position.
+    // The position can only contain the iteration axes or it can be the full
+    // position.
+    // <br>In the first case the position must to be given in the order
+    // of the iteration axes as given in the constructor.
+    // In the latter case the position must be given in natural order
+    // (as given by function <src>pos</src> and only the cursor axes are taken
+    // into account.
+    virtual void set (const IPosition& cursorPos);
+
     // Reset the cursor to the beginning.
     // <group>
     virtual void reset();
@@ -104,7 +114,11 @@ public:
 
     // Return the cursor. (Perhaps we should have a fn() that returns a
     // reference to the original array as well?)
+    // <group>
     Array<T> &array() {return *ap_p;}
+    virtual ArrayBase& getArray();
+    // </group>
+
 
 protected:
     // A pointer to the cursor.
@@ -173,6 +187,16 @@ public:
     // Move the cursor to the next position.
     void next() {ai.next();}
 
+    // Set the cursor to the given position.
+    // The position can only contain the iteration axes or it can be the full
+    // position.
+    // <br>In the first case the position must to be given in the order
+    // of the iteration axes as given in the constructor.
+    // In the latter case the position must be given in natural order
+    // (as given by function <src>pos</src> and only the cursor axes are taken
+    // into account.
+    void set (const IPosition& cursorPos) {ai.set(cursorPos);}
+
     // Reset the cursor to the beginning.
     // <group>
     void reset() {ai.origin();}
@@ -205,7 +229,7 @@ private:
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <casa/Arrays/ArrayIter.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

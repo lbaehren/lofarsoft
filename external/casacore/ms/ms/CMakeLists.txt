@@ -27,6 +27,7 @@ endforeach (ms_module)
 
 set (parser_inputs
   MSAntennaGram
+  MSArrayGram
   MSCorrGram
   MSFieldGram
   MSScanGram
@@ -80,7 +81,13 @@ endif (flex_bin)
 add_library (casa_ms
   ${ms_sources}
 )
-target_link_libraries (casa_ms casa_measures casa_tables casa_scimath casa_casa ${LAPACK_LIBRARIES})
+target_link_libraries (casa_ms
+  casa_measures
+  casa_tables
+  casa_scimath
+  casa_casa
+  ${LAPACK_LIBRARIES}
+  )
 
 ## -----------------------------------------------------------------------------
 ## Directories containing the test programs

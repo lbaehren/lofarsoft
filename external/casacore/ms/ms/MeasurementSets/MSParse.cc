@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSParse.cc 18800 2005-06-30 18:57:05Z ddebonis $
+//# $Id: MSParse.cc 20266 2008-02-26 00:43:05Z gervandiepen $
 
 #include <ms/MeasurementSets/MSParse.h>
 #include <casa/Exceptions/Error.h>
@@ -32,7 +32,7 @@
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
-const MeasurementSet* MSParse::ms_p = 0x0;
+MeasurementSet *MSParse::ms_p = 0;
 
 //# Default constructor.
 MSParse::MSParse ()
@@ -42,7 +42,7 @@ MSParse::MSParse ()
 MSParse::MSParse (const MeasurementSet* ms, const String& shorthand)
 : shorthand_p (shorthand)
 {
-  ms_p = ms;
+  ms_p = const_cast<MeasurementSet *>(ms);
 }
 
 MSParse::MSParse (const MSParse& that)
@@ -67,7 +67,7 @@ String& MSParse::shorthand()
     return shorthand_p;
 }
 
-const MeasurementSet* MSParse::ms()
+MeasurementSet* MSParse::ms()
 {
     return ms_p;
 }

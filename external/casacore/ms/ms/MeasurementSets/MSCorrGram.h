@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSCorrGram.h 18319 2005-01-26 05:32:57Z ddebonis $
+//# $Id: MSCorrGram.h 20266 2008-02-26 00:43:05Z gervandiepen $
 
 #ifndef MS_MSCORRGRAM_H
 #define MS_MSCORRGRAM_H
@@ -78,6 +78,7 @@ void MSCorrGramerror (char*);
 
 // Give the table expression node.
 const TableExprNode *msCorrGramParseNode();
+const void msCorrGramParseDeleteNode();
 
 // Give the current position in the string.
 // This can be used when parse errors occur.

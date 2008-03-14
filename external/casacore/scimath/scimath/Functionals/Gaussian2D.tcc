@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Gaussian2D.tcc 19879 2007-02-15 03:52:50Z Malte.Marquarding $
+//# $Id: Gaussian2D.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 //# Includes
 #include <scimath/Functionals/Gaussian2D.h>
@@ -42,7 +42,7 @@ T Gaussian2D<T>::eval(typename Function<T>::FunctionArg x) const {
     thePA = param_p[PANGLE];
     theCpa = cos(thePA);
     theSpa = sin(thePA);
-  };
+  }
   const T temp(xnorm);
   xnorm =   theCpa*temp  + theSpa*ynorm;
   ynorm = - theSpa*temp  + theCpa*ynorm;

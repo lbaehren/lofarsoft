@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MaskedArray.tcc 19846 2007-02-12 03:11:58Z Malte.Marquarding $
+//# $Id: MaskedArray.tcc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 #include <casa/Arrays/MaskedArray.h>
 #include <casa/Arrays/Array.h>
@@ -38,7 +38,7 @@ template<class T>
 MaskedArray<T>::MaskedArray ()
 : pArray (0), pMask (0), nelemValid (0), nelemValidIsOK (False), 
   isRO (False){
-};
+}
 
 template<class T> void
 MaskedArray<T>::setData (const Array<T> &data,

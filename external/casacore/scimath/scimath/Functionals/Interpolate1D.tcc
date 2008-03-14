@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Interpolate1D.tcc 19879 2007-02-15 03:52:50Z Malte.Marquarding $
+//# $Id: Interpolate1D.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 #include <scimath/Functionals/Interpolate1D.h>
 #include <scimath/Functionals/SampledFunctional.h>
@@ -108,8 +108,8 @@ setData(const SampledFunctional<Domain> &x,
       if (nearAbs(xValues[i], xValues[i+1])) {
 	throw(AipsError("Interpolate1D::setData"
 			" data has repeated x values"));
-      };
-    };
+      }
+    }
   //  I will not initialise the y2Values as they are not used unless the
   //  interpolation method is changed to spline. The y2Values are hence
   //  initialised by method.
@@ -250,13 +250,13 @@ template <class Domain, class Range> Vector<Domain> Interpolate1D<Domain, Range>
 getX() const{
   Vector<Domain> x(xValues, nElements);
   return x;
-};
+}
 
 template <class Domain, class Range> Vector<Range> Interpolate1D<Domain, Range>::
 getY() const {
   Vector<Range> y(yValues, nElements);
   return y;
-};
+}
 
 template <class Domain, class Range> Range Interpolate1D<Domain, Range>::
 eval(typename Function1D<Domain, Range>::FunctionArg x) const {

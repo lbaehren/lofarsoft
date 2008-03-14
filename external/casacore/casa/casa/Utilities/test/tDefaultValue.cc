@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tDefaultValue.cc 20173 2007-11-22 01:22:30Z Malte.Marquarding $
+//# $Id: tDefaultValue.cc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 #include <casa/aips.h>
 
@@ -40,7 +40,7 @@
 static void defaultValue(String &val)
 {
   val = "defaultval";
-};
+}
 
 int main()
 {

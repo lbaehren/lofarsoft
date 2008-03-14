@@ -30,6 +30,7 @@ option (casacore_BUILD_TESTS "Build the test programs?" 0)
 option (casacore_ENABLE_TESTING "Enable running test programs?" 0)
 option (casacore_SHARED_LIBRARIES "Build libraries as shared libraries?" 0)
 option (casacore_MEASURES_DATA "Retrieve the measures data tables?" 0)
+option (casacore_WITH_G2C "Use g2c for compiling Fortran code?")
 
 ## Handle option: testing mode on/off
 

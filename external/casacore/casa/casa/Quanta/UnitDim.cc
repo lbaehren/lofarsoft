@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: UnitDim.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: UnitDim.cc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 //# Includes
 
@@ -154,10 +154,10 @@ ostream& operator<< (ostream &os, const UnitDim &du) {
 		os << chck << UnitDim::dimName(i);
 	    } else {
 		os << chck << UnitDim::dimName(i) << Int(du.unitDim[i]);
-	    };
+	    }
 	    chck = ".";
-	};
-    };
+	}
+    }
     return os;
 }
 

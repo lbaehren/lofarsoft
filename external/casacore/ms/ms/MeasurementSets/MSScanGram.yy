@@ -24,38 +24,33 @@
                            520 Edgemont Road
                            Charlottesville, VA 22903-2475 USA
 
-    $Id: MSScanGram.yy 19948 2007-02-27 11:53:51Z Malte.Marquarding $
+    $Id: MSScanGram.yy 20266 2008-02-26 00:43:05Z gervandiepen $
 */
 
 %{
-using namespace casa;
+#include <errno.h>
+  using namespace casa;
 %}
 
 %pure_parser                /* make parser re-entrant */
 
 %union {
-  const MEpoch *tval;
   const TableExprNode* node;
   Block<TableExprNode>* exprb;
   TableExprNodeSetElem* elem;
   TableExprNodeSet* settp;
-  Int ival;
-  Double dval[2];
+  Int ival[2];
+  char * str;
+  Double dval;
+  Vector<Int>* iv;
+  Vector<String>* is;
 }
+
 
 %token EQASS
 %token SQUOTE
-%token <ival> NUMBER
-%token <ival> INDEX
-%token <dval> FNUMBER
-%token DASH
-%token LT
-%token GT
-%token COLON
+%token <str> IDENTIFIER
 %token COMMA
-%token SLASH
-%token DOT
-%token PERCENT
 
 %token LBRACKET
 %token LPAREN
@@ -63,39 +58,102 @@ using namespace casa;
 %token RPAREN
 %token LBRACE
 %token RBRACE
+%token WHITE
+
+%token <str> INT
+%token <str> QSTRING
+%token <str> REGEX
+
+%token COLON
+%token SEMICOLON
 
 %type <node> scanstatement
-%type <node> scanexpr
+%type <node> indexcombexpr
+%type <node> scanidrange
+%type <node> scanidbounds
 
-%left OR
-%left AND
-%nonassoc EQ EQASS GT GE LT LE NE
-%left PLUS MINUS
-%left TIMES DIVIDE MODULO
-%nonassoc UNARY
-%nonassoc NOT
-%right POWER
+%nonassoc EQ EQASS GT GE LT LE NE COMMA DASH AMPERSAND
 
 %{
-int MSScanGramlex (YYSTYPE*);
+  int MSScanGramlex (YYSTYPE*);
 %}
 
 %%
-scanstatement: scanexpr {
-                 $$ = $1;
-               }
+scanstatement: indexcombexpr 
+                  {
+                    $$ = $1;
+                  }
+                 | LPAREN indexcombexpr RPAREN //Parenthesis are syntactically 
+		                               // not useful here
+                  {
+		    $$ = $2;
+		  }
+                ;
+indexcombexpr  : scanidrange                       {$$=$1;}
+                | scanidbounds                     {$$=$1;}
+                | scanidrange COMMA indexcombexpr  {$$=$1;}
+                | scanidbounds COMMA indexcombexpr {$$=$1;}
+	       ;
+
+
+scanidbounds: LT INT // <ID
+                {
+		  const Vector<Int> idv(1,atoi($2));
+		  $$ = MSScanParse().selectScanIdsLT(idv);
+		  free($2);
+		}
+              | GT INT // >ID
+                {
+		  const Vector<Int> idv(1,atoi($2));
+		  $$ = MSScanParse().selectScanIdsGT(idv);
+		  free($2);
+		}
+              | LE INT // <=ID
+                {
+		  const Vector<Int> idv(1,atoi($2));
+		  $$ = MSScanParse().selectScanIdsLTEQ(idv);
+		  free($2);
+		}
+              | GE INT // >=ID
+                {
+		  const Vector<Int> idv(1,atoi($2));
+		  $$ = MSScanParse().selectScanIdsGTEQ(idv);
+		  free($2);
+		}
+              | GE INT AMPERSAND LE INT // >=ID & <=ID
+                {
+		  Int n0=atoi($2), n1=atoi($5);
+		  $$ = MSScanParse().selectRangeGEAndLE(n0,n1);
+
+		  free($2); free($5);
+		}
+              | GT INT AMPERSAND LT INT // >ID & <ID
+                {
+		  Int n0=atoi($2), n1=atoi($5);
+		  $$ = MSScanParse().selectRangeGTAndLT(n0,n1);
+
+		  free($2); free($5);
+		}
              ;
 
-scanexpr: INDEX {
-            Vector<Int> scanids(1);
-            scanids[0] = $1;
-            $$ = MSScanParse().selectScanIds(scanids);
-          }
-        | scanexpr COMMA INDEX {
-            Vector<Int> scanids(1);
-            scanids[0] = $3;
-            $$ = MSScanParse().selectScanIds(scanids);
-          }
-        ;
-
+scanidrange: INT // A single scan index
+            {
+	      const Vector<Int> idv(1,atoi($1));
+	      $$ = MSScanParse().selectScanIds(idv);
+	      free($1);
+	    }
+           | INT DASH INT // A range of integer scan indices
+            {
+              Int start = atoi($1);
+              Int end   = atoi($3);
+              Int len = end - start + 1;
+              Vector<Int> scanids(len);
+              for(Int i = 0; i < len; i++) {
+                scanids[i] = start + i;
+              }
+	      $$ = MSScanParse().selectScanIds(scanids);
+	      free($1); free($3);
+            }
+          ;
 %%
+

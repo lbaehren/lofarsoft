@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ArrayPosIter.h 18115 2004-12-06 07:15:43Z gvandiep $
+//# $Id: ArrayPosIter.h 20234 2008-02-07 16:53:38Z gervandiepen $
 
 #ifndef CASA_ARRAYPOSITER_H
 #define CASA_ARRAYPOSITER_H
@@ -34,11 +34,15 @@
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
-// 
+//# Forward Declarations
+class ArrayBase;
+
+
 // <summary> Iterate an IPosition through the shape of an Array </summary>
 // <reviewed reviewer="UNKNOWN" date="before2004/08/25" tests="" demos="">
 // </reviewed>
-//
+
+// <synopsis>
 // ArrayPositionIterator manipulates an IPosition "cursor" through some
 // volume defined by an origin and shape. This position can in turn be
 // used to index into, or otherwise define a position in, an Array. Normally
@@ -72,10 +76,13 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // Class <linkto class=ArrayLattice>ArrayLattice</linkto> in the lattices
 // package can be used to iterate with partial volumes.
 //
-// <note role=tip>
-// All the array iterator classes should probably be reimplemented;
-// their implementation is a bit ugly.
-// </note>
+// <p>
+// ArrayPositionIterator also serves as the base class of ArrayIterator.
+// Function <src>makeIterator</src> in class ArrayBase can be used to make an
+// ArrayIterator without having to know the template type. Function
+// <src>getArray</src> in this class can be used to obtain the current
+// contents of the cursor as an ArrayBase object.
+// </synopsis>
 
 class ArrayPositionIterator
 {
@@ -130,6 +137,7 @@ public:
     Bool pastEnd() const;
 
     // Return the position of the cursor.
+    // This include all axes
     const IPosition &pos() const {return Cursor;}
 
     // Return the end position of the cursor.
@@ -137,6 +145,16 @@ public:
 
     // Advance the cursor to its next position.
     virtual void next();
+
+    // Set the cursor to the given position.
+    // The position can only contain the iteration axes or it can be the full
+    // position.
+    // <br>In the first case the position must to be given in the order
+    // of the iteration axes as given in the constructor.
+    // In the latter case the position must be given in natural order
+    // (as given by function <src>pos</src> and only the cursor axes are taken
+    // into account.
+    virtual void set (const IPosition& cursorPos);
 
     // What is the dimensionality of the volume we are iterating through?
     uInt ndim() const;
@@ -146,6 +164,11 @@ public:
 
     // Return the cursor axes.
     const IPosition &cursorAxes() const {return cursAxes;}
+
+    // Get the array in the cursor.
+    // This is only implemented in the derived ArrayIterator class.
+    // By default it throws an exception.
+    virtual ArrayBase& getArray();
 
 protected:
     // Advance cursor to its next position and tell which dimension stepped.

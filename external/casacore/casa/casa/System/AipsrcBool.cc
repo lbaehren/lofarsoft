@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: AipsrcBool.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: AipsrcBool.cc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 //# Includes
 
@@ -82,7 +82,7 @@ void AipsrcValue<Bool>::save(uInt keyword) {
     oss << "true";
   } else {
     oss << "false";
-  };
+  }
   Aipsrc::save((myp_p.ntlst)[keyword-1], String(oss));
 }
 

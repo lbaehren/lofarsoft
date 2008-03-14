@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: MSSelUtil.h 19950 2007-02-27 12:25:11Z Malte.Marquarding $
+//# $Id: MSSelUtil.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef MS_MSSELUTIL_H
 #define MS_MSSELUTIL_H
@@ -64,7 +64,7 @@ public:
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <ms/MeasurementSets/MSSelUtil.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

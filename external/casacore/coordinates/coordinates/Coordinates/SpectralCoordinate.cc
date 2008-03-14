@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: SpectralCoordinate.cc 18898 2005-08-17 05:18:53Z nkilleen $
+//# $Id: SpectralCoordinate.cc 20261 2008-02-25 23:31:51Z gervandiepen $
 
 
 
@@ -2167,24 +2167,26 @@ void SpectralCoordinate::copy (const SpectralCoordinate &other)
        set_wcs(wcs_p);
     }
 
-// Machines
-
     conversionType_p = other.conversionType_p;
     direction_p = other.direction_p;
     position_p = other.position_p;
     epoch_p = other.epoch_p;
-    makeConversionMachines(type_p, conversionType_p, epoch_p, position_p, direction_p);
-//
-    deleteVelocityMachine();
-    if (other.pVelocityMachine_p) {
-       pVelocityMachine_p = new VelocityMachine(*(other.pVelocityMachine_p));
-    }
 //
     velType_p = other.velType_p;
     velUnit_p = other.velUnit_p;
     unit_p = other.unit_p;
     axisName_p = other.axisName_p;
     formatUnit_p = other.formatUnit_p;
+
+// Machines
+
+    makeConversionMachines(type_p, conversionType_p, epoch_p, position_p,
+                           direction_p);
+//
+    deleteVelocityMachine();
+    if (other.pVelocityMachine_p) {
+       pVelocityMachine_p = new VelocityMachine(*(other.pVelocityMachine_p));
+    }
 }
 
 } //# NAMESPACE CASA - END

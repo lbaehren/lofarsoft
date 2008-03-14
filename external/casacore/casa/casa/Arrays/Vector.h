@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Vector.h 19957 2007-02-28 03:15:48Z gervandiepen $
+//# $Id: Vector.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef CASA_VECTOR_H
 #define CASA_VECTOR_H
@@ -306,8 +306,8 @@ private:
 
 } //#End namespace casa
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <casa/Arrays/Vector.tcc>
 #include <casa/Arrays/Vector2.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: GaussianND.tcc 19879 2007-02-15 03:52:50Z Malte.Marquarding $
+//# $Id: GaussianND.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 #include <scimath/Functionals/GaussianND.h>
 #include <casa/Arrays/ArrayMath.h>
@@ -43,13 +43,13 @@ T GaussianND<T>::eval(typename Function<T>::FunctionArg x) const {
   for (uInt i=0, k=0; i<itsDim; i++) {
     for (uInt j=i+1; j<itsDim; j++) {
       exponent += norm[i]*norm[j]*param_p[CENTER+itsDim+itsDim+k++];
-    };
-  };
+    }
+  }
   exponent *= 2;
 
   for (uInt i=0; i<itsDim; i++) {
     exponent += norm[i]*norm[i]*param_p[CENTER+itsDim+i];
-  };
+  }
   return param_p[HEIGHT] * exp(-exponent/T(2));
 }
 

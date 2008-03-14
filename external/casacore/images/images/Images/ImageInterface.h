@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ImageInterface.h 19940 2007-02-27 05:35:22Z Malte.Marquarding $
+//# $Id: ImageInterface.h 20287 2008-03-13 13:20:30Z gervandiepen $
 
 #ifndef IMAGES_IMAGEINTERFACE_H
 #define IMAGES_IMAGEINTERFACE_H
@@ -366,6 +366,10 @@ protected:
   void setMiscInfoMember (const RecordInterface& rec)
     { miscInfo_p.assign (rec); }
 
+  // Get access to the region handler.
+  RegionHandler* getRegionHandler()
+    { return regHandPtr_p; }
+
 private:
   // It is the job of the derived class to make these variables valid.
   CoordinateSystem coords_p;
@@ -383,7 +387,7 @@ private:
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <images/Images/ImageInterface.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

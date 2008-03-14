@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Lattices.h 20123 2007-09-05 07:55:22Z gervandiepen $
+//# $Id: Lattices.h 20288 2008-03-13 13:32:49Z gervandiepen $
 
 #ifndef LATTICES_LATTICES_H
 #define LATTICES_LATTICES_H
@@ -129,7 +129,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // </srcblock>
 //
 //   <li>The <linkto class="PagedArray">PagedArray</linkto> class stores its
-//   data on disk and pages it into random access memory for use.  Paging is
+//   data on disk in the Table format
+//   and pages it into random access memory for use.  Paging is
 //   used here to describe the process of getting pieces of data small
 //   enough to fit into active memory even if the whole data set is much too
 //   large.  This class "feels" like an array but may hold very large amounts 
@@ -169,6 +170,9 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 //   dSum += sum(iter.cursor());
 // }
 // </srcblock>
+//
+//   <li>The <linkto class="HDF5Lattice">HDF5Lattice</linkto> class stores its
+//   data on disk in HDF5 format. It works in the same way as PagedArray.
 //
 //  </ul>
 //

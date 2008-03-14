@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: SPolynomial.tcc 19879 2007-02-15 03:52:50Z Malte.Marquarding $
+//# $Id: SPolynomial.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 //# Includes
 #include <scimath/Functionals/SPolynomial.h>
@@ -40,7 +40,7 @@ T SPolynomial<T>::eval(typename Function<T>::FunctionArg x) const {
   while (--j >= 3) {
     accum *= (x[0]-param_p[1])/param_p[2];
     accum += param_p[j];
-  };
+  }
   return param_p[0]*accum;
 }
 

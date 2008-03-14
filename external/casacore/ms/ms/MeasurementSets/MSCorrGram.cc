@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSCorrGram.cc 18319 2005-01-26 05:32:57Z ddebonis $
+//# $Id: MSCorrGram.cc 20266 2008-02-26 00:43:05Z gervandiepen $
 
 // MSCorrGram; grammar for corr command lines
 
@@ -75,6 +75,10 @@ int msCorrGramParseCommand (const MeasurementSet* ms, const String& command)
 const TableExprNode* msCorrGramParseNode()
 {
     return MSCorrParse::node();
+}
+const void msCorrGramParseDeleteNode()
+{
+    return MSCorrParse::cleanup();
 }
 
 //# Give the string position.

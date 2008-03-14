@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Matrix.h 19957 2007-02-28 03:15:48Z gervandiepen $
+//# $Id: Matrix.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef CASA_MATRIX_H
 #define CASA_MATRIX_H
@@ -330,7 +330,7 @@ private:
 };
 
 } //#End casa namespace
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <casa/Arrays/Matrix.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tQuantum.cc 19846 2007-02-12 03:11:58Z Malte.Marquarding $
+//# $Id: tQuantum.cc 20211 2008-01-18 03:29:02Z Malte.Marquarding $
 
 
 #include <casa/aips.h>
@@ -186,7 +186,7 @@ try {
     
     cout << endl << "--------------------------" << endl;
     
-    Quantum<Int> ll5(5.,Quantum<Double>(7.,"mm/s"));
+    Quantum<Int> ll5(5,Quantum<Double>(7.,"mm/s"));
     cout << "Mixed Quantity/Quantum<Int>  " << ll5 << endl;
     
 } catch (AipsError x) {

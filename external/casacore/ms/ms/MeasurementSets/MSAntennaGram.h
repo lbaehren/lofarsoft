@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSAntennaGram.h 18319 2005-01-26 05:32:57Z ddebonis $
+//# $Id: MSAntennaGram.h 20266 2008-02-26 00:43:05Z gervandiepen $
 
 #ifndef MS_MSANTENNAGRAM_H
 #define MS_MSANTENNAGRAM_H
@@ -31,6 +31,7 @@
 
 //# Includes
 #include <casa/BasicSL/String.h>
+#include <casa/Arrays/Matrix.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
@@ -70,7 +71,9 @@ class TableExprNode;
 // <group name=MSAntennaGramFunctions>
 
 // Declare the bison parser (is implemented by bison command).
-int msAntennaGramParseCommand (const MeasurementSet *ms, const String& command);
+  int msAntennaGramParseCommand (const MeasurementSet *ms, const String& command,
+				 Vector<Int>& selectedAnt1, Vector<Int>& selectedAnt2,
+				 Matrix<Int>& selectedBaselines);
 
 // The yyerror function for the parser.
 // It throws an exception with the current token.
@@ -78,6 +81,7 @@ void MSAntennaGramerror (char*);
 
 // Give the table expression node.
 const TableExprNode *msAntennaGramParseNode();
+const void msAntennaGramParseDeleteNode();
 
 // Give the current position in the string.
 // This can be used when parse errors occur.
@@ -87,10 +91,10 @@ Int& msAntennaGramPosition();
 int msAntennaGramInput (char* buf, int max_size);
 
 // A function to remove escaped characters.
-String msAntennaGramRemoveEscapes (const String& in);
+//String msAntennaGramRemoveEscapes (const String& in);
 
 // A function to remove quotes from a quoted string.
-String msAntennaGramRemoveQuotes (const String& in);
+//String msAntennaGramRemoveQuotes (const String& in);
 
 // </group>
 

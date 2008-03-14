@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: AipsrcVString.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: AipsrcVString.cc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 //# Includes
 
@@ -58,9 +58,9 @@ Bool AipsrcVector<String>::find(Vector<String> &value,
     value = Vector<String>(m);
     for (Int i=0; i<m; i++) {
       value(i) = nres[i];
-    };
+    }
     delete [] nres;
-  };
+  }
   return x;
 }
 

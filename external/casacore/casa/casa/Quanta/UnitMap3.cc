@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: UnitMap3.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: UnitMap3.cc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 //# Includes
 
@@ -49,8 +49,8 @@ void UnitMap::initUMSI1() {
 			      UnitName(UnitDim::dimName(i),
 				       UnitVal(1.0,i),
 				       UnitDim::dimFull(i))));
-    };
-  };
+    }
+  }
   
   UnitMap::mapSI->insert(map<String, UnitName>::value_type
 			 ("$",	UnitName("$",

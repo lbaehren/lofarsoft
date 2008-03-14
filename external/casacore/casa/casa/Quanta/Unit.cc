@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Unit.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: Unit.cc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 //# Includes
 
@@ -109,7 +109,7 @@ void Unit::check() {
     if (!UnitVal::check(uName, uVal)) {
 	throw (AipsError("Unit::check Illegal unit string '" +
 			 uName + "'"));
-    };
+    }
     uName.gsub(sp, ssp);
     uName.gsub(pd, spd);
     uName.gsub(bp, sbp);

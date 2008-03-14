@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tMSSimulator.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tMSSimulator.cc 20258 2008-02-25 21:16:47Z gervandiepen $
 
 #include <ms/MeasurementSets/MSSimulator.h>
 #include <ms/MeasurementSets/MeasurementSet.h>
@@ -175,8 +175,8 @@ int main()
 
 	// NOW:  make and write the MS tables========================================
 	cout << "Write MS with no obs.params!"<<endl;
-	sim2.writeMS("fakems");
-	cout << "MS in fakems" << endl;
+	sim2.writeMS("tMSSimulator_tmp.ms");
+	cout << "MS in tMSSimulator_tmp.ms" << endl;
 
     } catch (AipsError x) {
 	cout << "Caught exception " << endl;

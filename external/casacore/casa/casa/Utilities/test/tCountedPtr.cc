@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tCountedPtr.cc 20173 2007-11-22 01:22:30Z Malte.Marquarding $
+//# $Id: tCountedPtr.cc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 //# Includes
 
@@ -36,7 +36,7 @@
 
 const char *prt(CountedConstPtr<myobj> &obj) {
   return obj->name();
-};
+}
 
 int main() {
   CountedPtr<myobj> var = new myobj("fred");

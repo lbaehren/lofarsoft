@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tParam.cc 20170 2007-11-22 00:28:11Z Malte.Marquarding $
+//# $Id: tParam.cc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 #include <casa/aips.h>
 #include <casa/Inputs/Param.h>
@@ -132,6 +132,6 @@ int main()
     cout << "Caught exception" << endl;
     cout << "Message is: " << x.getMesg() << endl;
   }    
-};
+}
 
 

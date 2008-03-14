@@ -24,7 +24,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LinearFit.tcc 19879 2007-02-15 03:52:50Z Malte.Marquarding $
+//# $Id: LinearFit.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 //# Includes
 #include <scimath/Fitting/LinearFit.h>
@@ -48,7 +48,7 @@ template<class T>
 LinearFit<T> &LinearFit<T>::operator=(const LinearFit &other) {
   if (this != &other) {
     GenericL2Fit<T>::operator=(other);
-  };
+  }
   return *this;
 }
 
@@ -67,7 +67,7 @@ fitIt(Vector<typename FunctionTraits<T>::BaseType> &sol,
   for (uInt i=0, k=0; i<pCount_p; ++i) {
     sol[i] = (*ptr_derive_p)[i].value();
     if (ptr_derive_p->mask(i)) sol_p[k++] = sol[i];
-  };
+  }
   // Build normal equations
   buildMatrix(x, y, sigma, mask);
   // Build constraint equations
@@ -83,8 +83,8 @@ fitIt(Vector<typename FunctionTraits<T>::BaseType> &sol,
     for (uInt i=0, k=0; i<pCount_p; i++) {
       if (ptr_derive_p->mask(i)) sol[i] = sol_p[k++];
       (*ptr_derive_p)[i].value() = sol[i];
-    };
-  };
+    }
+  }
   return solved_p;
 }
 

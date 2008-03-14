@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ArrayIter.tcc 19850 2007-02-12 04:49:39Z Malte.Marquarding $
+//# $Id: ArrayIter.tcc 20234 2008-02-07 16:53:38Z gervandiepen $
 
 #include <casa/Arrays/ArrayIter.h>
 #include <casa/Arrays/ArrayError.h>
@@ -132,6 +132,27 @@ template<class T> void ArrayIterator<T>::next()
 {
     Int stepDim = ArrayPositionIterator::nextStep();
     apSetPointer(stepDim);
+}
+
+  
+template<class T> void ArrayIterator<T>::set (const IPosition& cursorPos)
+{
+    ArrayPositionIterator::set (cursorPos);
+    if (ap_p == 0)
+	throw(ArrayIteratorError("ArrayIterator<T>::apSetPointer()"
+				 " - no iteration array!"));
+    if (pastEnd()) {
+	ap_p->begin_p = 0;  // Mark it "invalid"
+    } else {
+        dataPtr_p = &((*pOriginalArray_p)(pos()));
+	ap_p->begin_p = dataPtr_p;
+	ap_p->setEndIter();
+    }  
+}
+
+template<class T> ArrayBase& ArrayIterator<T>::getArray()
+{
+    return array();
 }
 
 } //# NAMESPACE CASA - END

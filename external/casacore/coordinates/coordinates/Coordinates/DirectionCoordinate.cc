@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: DirectionCoordinate.cc 19930 2007-02-27 03:56:36Z Malte.Marquarding $
+//# $Id: DirectionCoordinate.cc 20261 2008-02-25 23:31:51Z gervandiepen $
 
 
 #include <coordinates/Coordinates/DirectionCoordinate.h>
@@ -361,6 +361,7 @@ Bool DirectionCoordinate::toMix(Vector<Double>& worldOut,
 //
    const uInt nWorld = worldAxes.nelements();
    const uInt nPixel = pixelAxes.nelements();
+   if(nWorld == nWorld);      // (turn off stupid compiler warning...).
    DebugAssert(nWorld==nWorldAxes(), AipsError);
    DebugAssert(nPixel==nPixelAxes(), AipsError);
    DebugAssert(worldIn.nelements()==nWorld, AipsError);

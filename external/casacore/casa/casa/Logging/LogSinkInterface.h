@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: LogSinkInterface.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: LogSinkInterface.h 20259 2008-02-25 23:28:59Z gervandiepen $
 
 #ifndef CASA_LOGSINKINTERFACE_H
 #define CASA_LOGSINKINTERFACE_H
@@ -152,9 +152,13 @@ public:
   static String localId( );
   // Returns the id of the LogSink in use...
   virtual String id( ) const = 0;
-
+  // Write to cerr too
+  virtual void cerrToo(bool cerr2);
+  void setTaskName(const String &theTask){taskName=theTask;}
 private:
   LogFilterInterface* filter_p;
+protected:
+  String taskName;
 };
 
 

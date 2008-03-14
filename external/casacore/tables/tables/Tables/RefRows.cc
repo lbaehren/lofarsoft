@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: RefRows.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: RefRows.cc 20238 2008-02-11 13:44:45Z gervandiepen $
 
 
 #include <tables/Tables/RefRows.h>
@@ -182,6 +182,28 @@ Vector<uInt> RefRows::convert (const Vector<uInt>& rootRownrs) const
 	    DebugAssert (itsRows(i) <= rootRownrs.nelements(), AipsError);
 	    rownrs(i) = rootRownrs(itsRows(i));
 	}
+    }
+    return rownrs;
+}
+
+Vector<uInt> RefRows::convert() const
+{
+    if (!itsSliced) {
+        return itsRows;
+    }
+    uInt n = nrow();
+    Vector<uInt> rownrs(n);
+    uInt nr = 0;
+    RefRowsSliceIter iter(*this);
+    while (! iter.pastEnd()) {
+        uInt rownr = iter.sliceStart();
+	uInt end = iter.sliceEnd();
+	uInt incr = iter.sliceIncr();
+	while (rownr <= end) {
+	    rownrs(nr++) = rownr;
+	    rownr += incr;
+	}
+	iter++;
     }
     return rownrs;
 }

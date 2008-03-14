@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Sinusoid1D2.tcc 19879 2007-02-15 03:52:50Z Malte.Marquarding $
+//# $Id: Sinusoid1D2.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 //# Includes
 #include <scimath/Functionals/Sinusoid1D.h>
@@ -63,7 +63,7 @@ eval(typename Function<AutoDiff<T> >::FunctionArg x) const {
       static_cast<typename AutoDiff<T>::value_type>(C::_2pi) *
       sinarg / this->param_p[Sinusoid1DParam<AutoDiff<T> >::PERIOD].value();
     if (this->param_p.mask(Sinusoid1DParam<AutoDiff<T> >::X0)) tmp.deriv(Sinusoid1DParam<AutoDiff<T> >::X0) = dev;
-  };
+  }
   return tmp;
 }
 

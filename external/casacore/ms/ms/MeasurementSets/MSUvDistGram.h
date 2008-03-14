@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSUvDistGram.h 18319 2005-01-26 05:32:57Z ddebonis $
+//# $Id: MSUvDistGram.h 20266 2008-02-26 00:43:05Z gervandiepen $
 
 #ifndef MS_MSUVDISTGRAM_H
 #define MS_MSUVDISTGRAM_H
@@ -31,6 +31,7 @@
 
 //# Includes
 #include <casa/BasicSL/String.h>
+#include <casa/Arrays/Matrix.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
@@ -72,6 +73,8 @@ class TableExprNode;
 
 // Declare the bison parser (is implemented by bison command).
 int msUvDistGramParseCommand (const MeasurementSet *ms, const String& command);
+int msUvDistGramParseCommand (const MeasurementSet* ms, const String& command,
+			      Matrix<Double>& selectedUV, Vector<Bool>& units);
 
 // The yyerror function for the parser.
 // It throws an exception with the current token.
@@ -79,6 +82,7 @@ void MSUvDistGramerror (char*);
 
 // Give the table expression node.
 const TableExprNode *msUvDistGramParseNode();
+const void msUvDistGramParseDeleteNode();
 
 // Give the current position in the string.
 // This can be used when parse errors occur.
@@ -88,10 +92,10 @@ Int& msUvDistGramPosition();
 int msUvDistGramInput (char* buf, int max_size);
 
 // A function to remove escaped characters.
-String msUvDistGramRemoveEscapes (const String& in);
+//String msUvDistGramRemoveEscapes (const String& in);
 
 // A function to remove quotes from a quoted string.
-String msUvDistGramRemoveQuotes (const String& in);
+//String msUvDistGramRemoveQuotes (const String& in);
 
 // </group>
 

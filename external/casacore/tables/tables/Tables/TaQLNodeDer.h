@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TaQLNodeDer.h 19796 2006-12-19 05:12:59Z gvandiep $
+//# $Id: TaQLNodeDer.h 20252 2008-02-23 15:05:34Z gervandiepen $
 
 #ifndef TABLES_TAQLNODEDER_H
 #define TABLES_TAQLNODEDER_H
@@ -189,7 +189,8 @@ public:
 	     B_OR    =12,
 	     B_AND   =13,
 	     B_IN    =14,
-	     B_INDEX =15};
+	     B_INDEX =15,
+	     B_DIVIDETRUNC=16};
   TaQLBinaryNodeRep (Type type, const TaQLNode& left, const TaQLNode& right)
     : TaQLNodeRep (TaQLNode_Binary),
       itsType(type), itsLeft(left), itsRight(right) {}

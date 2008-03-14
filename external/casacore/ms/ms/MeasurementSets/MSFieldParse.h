@@ -23,14 +23,14 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSFieldParse.h 19652 2006-09-28 07:07:49Z sbhatnag $
+//# $Id: MSFieldParse.h 20266 2008-02-26 00:43:05Z gervandiepen $
 
 #ifndef MS_MSFIELDPARSE_H
 #define MS_MSFIELDPARSE_H
 
 //# Includes
 #include <ms/MeasurementSets/MSParse.h>
-
+#include <ms/MeasurementSets/MSSelectionError.h>
 namespace casa { //# NAMESPACE CASA - BEGIN
 
 //# Forward Declarations
@@ -89,20 +89,25 @@ class MSFieldParse : public MSParse
 public:
     // Default constructor
     MSFieldParse ();
-
+  //  ~MSFieldParse() {idList.resize(0);};
     // Associate the ms and the shorthand.
     MSFieldParse (const MeasurementSet* ms);
+  //~MSFieldParse() {if (node_p) delete node_p;node_p=0x0;};
 
-    const TableExprNode *selectFieldIds(const Vector<Int>& fieldIds);
+  const TableExprNode *selectFieldIds(const Vector<Int>& fieldIds);
   //    const TableExprNode *selectFieldOrSource(const String& fieldName);
 
     // Get table expression node object.
     static const TableExprNode* node();
     static MSFieldParse* thisMSFParser;
-
+    static Vector<Int> selectedIDs() {return idList;};
+    static void reset(){idList.resize(0);};
+    static void cleanup() {if (node_p) delete node_p;node_p=0x0;}
 private:
     static TableExprNode* node_p;
     const String colName;
+    static  Vector<Int> idList;
+
 };
 
 } //# NAMESPACE CASA - END

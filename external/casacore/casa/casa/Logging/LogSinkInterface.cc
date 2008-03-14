@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: LogSinkInterface.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: LogSinkInterface.cc 20259 2008-02-25 23:28:59Z gervandiepen $
 
 #include <casa/Logging/LogSinkInterface.h>
 #include <casa/Logging/LogFilter.h>
@@ -114,6 +114,11 @@ LogSinkInterface &LogSinkInterface::filter(const LogFilterInterface &filter)
 }
 
 void LogSinkInterface::flush(Bool)
+{
+    // Defult implementation is to do nothing.
+}
+
+void LogSinkInterface::cerrToo(Bool)
 {
     // Defult implementation is to do nothing.
 }

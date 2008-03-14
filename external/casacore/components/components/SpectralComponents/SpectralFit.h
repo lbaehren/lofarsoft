@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: SpectralFit.h 19933 2007-02-27 05:04:51Z Malte.Marquarding $
+//# $Id: SpectralFit.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef COMPONENTS_SPECTRALFIT_H
 #define COMPONENTS_SPECTRALFIT_H
@@ -175,7 +175,7 @@ class SpectralFit {
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <components/SpectralComponents/SpectralFit2.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

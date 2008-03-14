@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LockFile.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: LockFile.cc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 
 #include <casa/IO/LockFile.h>
@@ -226,7 +226,7 @@ Bool LockFile::inspect (Bool always)
       //# Only inspect if time interval has passed.
       if (itsInterval > 0  &&  itsLastTime.age() < itsInterval) {
 	return False;
-      };
+      }
     }
 
     //# Get the number of request id's and reset the time.

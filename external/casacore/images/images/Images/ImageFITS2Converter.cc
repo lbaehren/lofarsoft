@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: ImageFITS2Converter.cc 19974 2007-02-28 05:26:06Z Malte.Marquarding $
+//# $Id: ImageFITS2Converter.cc 20265 2008-02-25 23:42:27Z gervandiepen $
 
 #include <images/Images/ImageFITSConverter.h>
 #include <images/Images/PagedImage.h>
@@ -1384,7 +1384,7 @@ Unit ImageFITSConverter::getBrightnessUnit (RecordInterface& header, LogIO& os)
                 
              u = UnitMap::fromFITS(Unit(unitString));
          } else {
-             os << "FITS unit " << unitString << " unknown to AIPS++ - ignoring."
+             os << "FITS unit " << unitString << " unknown to CASA - ignoring."
                 << LogIO::POST;
          }
       }
@@ -1409,7 +1409,7 @@ Unit ImageFITSConverter::getBrightnessUnitOld (RecordInterface& header, LogIO& o
 
           u = UnitMap::fromFITS(Unit(unitString));
       } else {
-          os << "FITS unit " << unitString << " unknown to AIPS++ - ignoring."
+          os << "FITS unit " << unitString << " unknown to CASA - ignoring."
              << LogIO::POST;
       }
    }

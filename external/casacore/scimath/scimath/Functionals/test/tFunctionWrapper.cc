@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tFunctionWrapper.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tFunctionWrapper.cc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 #include <scimath/Functionals/FunctionWrapper.h>
 #include <casa/Arrays/ArrayLogical.h>
@@ -38,13 +38,13 @@
 
 #include <casa/namespace.h>
 // Some C++ functions
-static Double func0(const Vector<Double> &) {return 1;};            // 1
-static Double func1(const Vector<Double> &x) {return x(0);};         // x
-static Double func2(const Vector<Double> &x) {return sin(x(1));};    // sin(y)
-static Double func3(const Vector<Double> &x) {return x(0)*x(0);};    // x^2
+static Double func0(const Vector<Double> &) {return 1;}            // 1
+static Double func1(const Vector<Double> &x) {return x(0);}         // x
+static Double func2(const Vector<Double> &x) {return sin(x(1));}    // sin(y)
+static Double func3(const Vector<Double> &x) {return x(0)*x(0);}    // x^2
 /*static void myfnc(Vector<Double> &y, const Double x) {
   y(0) = 1;
-  for (uInt i=1; i<y.nelements(); i++) y(i) = y(i-1)*x; };
+  for (uInt i=1; i<y.nelements(); i++) y(i) = y(i-1)*x; }
 */
 
 int main() {

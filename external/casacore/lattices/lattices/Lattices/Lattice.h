@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Lattice.h 19909 2007-02-23 02:08:02Z Malte.Marquarding $
+//# $Id: Lattice.h 20286 2008-03-13 13:02:22Z gervandiepen $
 
 #ifndef LATTICES_LATTICE_H
 #define LATTICES_LATTICE_H
@@ -237,7 +237,10 @@ public:
   // Make a copy of the derived object (reference semantics).
   virtual Lattice<T>* clone() const = 0;
 
-    // Return the value of the single element located at the argument
+  // Get the data type of the lattice.
+  virtual DataType dataType() const;
+
+  // Return the value of the single element located at the argument
   // IPosition.  
   // <br> The default implementation uses getSlice.
   // <group>
@@ -433,7 +436,7 @@ void Lattice<Bool>::handleMathTo (Lattice<Bool>& to, int oper) const
 //# to compile, because the LatticeIterator declarations are not seen yet.
 //# Therefore LatticeIterator.h is included here, while LatticeIterator.h
 //# includes Lattice.tcc.
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <lattices/Lattices/LatticeIterator.h>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

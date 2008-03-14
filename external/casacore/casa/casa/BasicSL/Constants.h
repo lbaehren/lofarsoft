@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Constants.h 20165 2007-11-20 03:27:02Z Malte.Marquarding $
+//# $Id: Constants.h 20254 2008-02-23 16:37:46Z gervandiepen $
 
 #ifndef CASA_CONSTANTS_H
 #define CASA_CONSTANTS_H
@@ -586,7 +586,7 @@ namespace C {
   //#--------------------------------------------------------------------
   //# <group>
   
-};
+}
 
 
 } //# NAMESPACE CASA - END

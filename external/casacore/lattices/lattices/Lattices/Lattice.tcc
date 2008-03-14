@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Lattice.tcc 19909 2007-02-23 02:08:02Z Malte.Marquarding $
+//# $Id: Lattice.tcc 20286 2008-03-13 13:02:22Z gervandiepen $
 
 #include <lattices/Lattices/Lattice.h>
 #include <lattices/Lattices/LatticeIterator.h>
@@ -47,6 +47,13 @@ Lattice<T>::~Lattice()
 {
   // does nothing
 }
+
+template <class T>
+DataType Lattice<T>::dataType() const
+{
+  return whatType ((T*)0);
+}
+
 
 // rvalue subscript operator for const objects
 template <class T>

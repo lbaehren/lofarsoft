@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: MeasurementSet.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: MeasurementSet.h 20266 2008-02-26 00:43:05Z gervandiepen $
 
 #ifndef MS_MEASUREMENTSET_H
 #define MS_MEASUREMENTSET_H
@@ -60,7 +60,7 @@ class MDirection;
 class MEpoch;
 class MFrequency;
 class MPosition;
-
+class Record;
 
 //# forward declared so that the following typedef is up-front
 class MeasurementSet;
@@ -343,6 +343,12 @@ public:
   // main table and all the standard subtables including optional
   // subtables. See the Table class for a description of the sync argument.
   void flush(Bool sync=False);
+
+  // Return a record of the indices that the msselection selection selected
+  Record msseltoindex(const String& spw="", const String& field="", 
+		      const String& baseline="", const String& time="", 
+		      const String& scan="", const String& uvrange="", 
+		      const String& taql="");
 
 private:
 

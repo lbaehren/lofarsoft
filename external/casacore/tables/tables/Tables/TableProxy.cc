@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TableProxy.cc 20093 2007-06-06 22:53:53Z gervandiepen $
+//# $Id: TableProxy.cc 20238 2008-02-11 13:44:45Z gervandiepen $
 
 
 #include <tables/Tables/TableProxy.h>
@@ -109,6 +109,34 @@ TableProxy::TableProxy (const String& tableName,
   newtab.bindCreate (dmInfo);
   table_p = Table (newtab, type, makeLockOptions(lockOptions),
 		   nrow, False, endOpt);
+}
+
+TableProxy::TableProxy (const Vector<String>& tableNames,
+			const Vector<String>& concatenateSubTableNames, 
+			const Record& lockOptions,
+			int option)
+{
+  Block<String> names(tableNames.size());
+  std::copy (tableNames.begin(), tableNames.end(), names.begin());
+  Block<String> subNames(concatenateSubTableNames.size());
+  std::copy (concatenateSubTableNames.begin(), concatenateSubTableNames.end(),
+	     subNames.begin());
+  table_p = Table (names, subNames, makeLockOptions(lockOptions),
+		   Table::TableOption(option));
+}
+ 
+TableProxy::TableProxy (const std::vector<TableProxy>& tables,
+			const Vector<String>& concatenateSubTableNames,
+			int, int, int)
+{
+  Block<Table> tabs(tables.size());
+  for (uInt i=0; i<tables.size(); ++i) {
+    tabs[i] = tables[i].table();
+  }
+  Block<String> subNames(concatenateSubTableNames.size());
+  std::copy (concatenateSubTableNames.begin(), concatenateSubTableNames.end(),
+	     subNames.begin());
+  table_p = Table (tabs, subNames);
 }
 
 TableProxy::TableProxy (const String& command,

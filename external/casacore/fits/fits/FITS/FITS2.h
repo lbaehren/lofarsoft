@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: FITS2.h 19914 2007-02-23 03:04:46Z Malte.Marquarding $
+//# $Id: FITS2.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef FITS_FITS2_H
 #define FITS_FITS2_H
@@ -63,7 +63,7 @@ void ReadFITSin(PrimaryArray<StorageType> &fitsdata,
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <fits/FITS/FITS2.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

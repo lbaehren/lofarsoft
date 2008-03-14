@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: StreamLogSink.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: StreamLogSink.cc 20259 2008-02-25 23:28:59Z gervandiepen $
 
 #include <casa/Logging/StreamLogSink.h>
 #include <casa/Logging/LogFilter.h>
@@ -90,16 +90,18 @@ Bool StreamLogSink::postLocally(const LogMessage &message)
 {
     Bool doPost = filter().pass(message);
     if (doPost) {
+	LogOrigin theOrigin(message.origin());
+	theOrigin.taskName(LogSinkInterface::taskName);
+	const_cast<LogMessage &>(message).origin(theOrigin);
         // Cast away const
-        ostream &os = *((ostream *)stream_p);
-	os << message << endl;
+	*stream_p << message;
     }
     return doPost;
 }
 
 void StreamLogSink::flush(Bool)
 {
-    stream_p->flush();
+    if(stream_p) stream_p->flush();
 }
 
 } //# NAMESPACE CASA - END

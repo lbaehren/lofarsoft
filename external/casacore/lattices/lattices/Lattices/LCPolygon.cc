@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LCPolygon.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: LCPolygon.cc 20279 2008-02-29 16:52:56Z gervandiepen $
 
 
 #include <lattices/Lattices/LCPolygon.h>
@@ -173,10 +173,10 @@ LCPolygon* LCPolygon::fromRecord (const TableRecord& rec,
     // If 1-relative, subtract 1 from x and y.
     Bool oneRel = rec.asBool ("oneRel");
     Float off = (oneRel ? 1:0);
-    Array<Float> x (rec.asArrayFloat ("x"));
-    Array<Float> y (rec.asArrayFloat ("y"));
+    Array<Float> x (rec.toArrayFloat ("x"));
+    Array<Float> y (rec.toArrayFloat ("y"));
     return new LCPolygon (x-off, y-off,
-                          Vector<Int>(rec.asArrayInt ("shape")));
+                          Vector<Int>(rec.toArrayInt ("shape")));
 }
 
 void LCPolygon::defineBox()

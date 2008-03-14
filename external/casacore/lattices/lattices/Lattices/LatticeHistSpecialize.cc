@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LatticeHistSpecialize.cc 19133 2005-12-06 20:18:51Z wyoung $
+//# $Id: LatticeHistSpecialize.cc 20256 2008-02-23 20:28:24Z gervandiepen $
 //
 
 #include <lattices/Lattices/LatticeHistSpecialize.h>
@@ -245,19 +245,19 @@ void LatticeHistSpecialize::makeLogarithmic (Vector<Complex>& counts,
 ///     if (imag(counts(i)) > 0.0) counts(i).imag() = log10(counts(i).imag());
      if (real(counts(i)) > 0.0) {
        counts(i) = Complex(log10(counts(i).real()), counts(i).imag());
-     };
+     }
      if (imag(counts(i)) > 0.0) {
        counts(i) = Complex(counts(i).real(), log10(counts(i).imag()));
-     };
+     }
 //
      ///     if (real(counts(i)) > real(yMax)) yMax.real() = real(counts(i));
      ///     if (imag(counts(i)) > imag(yMax)) yMax.imag() = imag(counts(i));
      if (real(counts(i)) > real(yMax)) {
        yMax = Complex(real(counts(i)), yMax.imag());
-     };
+     }
      if (imag(counts(i)) > imag(yMax)) {
        yMax = Complex(yMax.real(), imag(counts(i)));
-     };
+     }
    }
 }
 

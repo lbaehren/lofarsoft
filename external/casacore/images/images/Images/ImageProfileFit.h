@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//#   $Id: ImageProfileFit.h 19524 2006-07-24 05:27:40Z mmarquar $
+//#   $Id: ImageProfileFit.h 20274 2008-02-28 03:53:32Z gervandiepen $
 
 #ifndef IMAGES_IMAGEPROFILEFIT_H
 #define IMAGES_IMAGEPROFILEFIT_H
@@ -266,7 +266,6 @@ private:
 // Convert SE
    SpectralElement convertSpectralElement (const SpectralElement& elIn,
                                            Bool xAbsIn, Bool xAbsOut,
-                                           Bool oneRelIn, Bool oneRelOut,
                                            const String& xUnitIn,
                                            const String& xUnitOut,
                                            const String& dopplerIn,
@@ -282,9 +281,7 @@ private:
                                   const String& unitIn,
                                   const String& unitOut,
                                   const String& dopplerIn,
-                                  const String& dopplerOut,
-                                  Bool oneRelIn,
-                                  Bool oneRelOut);
+                                  const String& dopplerOut);
 
 // 
    SpectralList filterList (const SpectralList& listIn) const;

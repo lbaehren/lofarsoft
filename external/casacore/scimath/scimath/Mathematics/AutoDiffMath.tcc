@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: AutoDiffMath.tcc 19879 2007-02-15 03:52:50Z Malte.Marquarding $
+//# $Id: AutoDiffMath.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 //# Includes
 #include <scimath/Mathematics/AutoDiffMath.h>
@@ -253,7 +253,7 @@ AutoDiff<T> pow(const AutoDiff<T> &a, const AutoDiff<T> &b) {
   tmp.theRep()->grad_p *= value * T(log(ta));
   for (uInt i=0; i<a.theRep()->nd_p; i++) {
     tmp.theRep()->grad_p[i] += a.theRep()->grad_p[i]*temp2;
-  };
+  }
   tmp.theRep()->val_p = value;
   return tmp.ref();
 }
@@ -560,12 +560,12 @@ Bool allnearAbs(const AutoDiff<T> &left, const T &right, const Double tol) {
 template<class T>
 Bool isNaN (const AutoDiff<T> &val) {
   return isNaN(val.theRep()->val_p);
-};
+}
 
 template<class T>
 Bool isInf(AutoDiff<T> &val) {
   return isInf(val.theRep()->val_p);
-};
+}
 
 template<class T>
 AutoDiff<T> min(const AutoDiff<T> &left,

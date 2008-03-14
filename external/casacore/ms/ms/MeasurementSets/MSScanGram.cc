@@ -23,14 +23,12 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSScanGram.cc 18795 2005-06-29 22:41:25Z ddebonis $
+//# $Id: MSScanGram.cc 20266 2008-02-26 00:43:05Z gervandiepen $
 
 // MSScanGram; grammar for scan command lines
 
 // This file includes the output files of bison and flex for
-// parsing command lines operating on lattices.
-// This is a preliminary version; eventually it has to be incorporated
-// in the AIPS++ command language.
+// parsing command lines.
 
 #include <tables/Tables/ExprNode.h>
 #include <tables/Tables/ExprNodeSet.h>
@@ -61,20 +59,41 @@ static Int                   posMSScanGram = 0;
 
 //# Parse the command.
 //# Do a yyrestart(yyin) first to make the flex scanner reentrant.
-int msScanGramParseCommand (const MeasurementSet* ms, const String& command) 
+  int msScanGramParseCommand (const MeasurementSet* ms, const String& command, Vector<Int>& selectedIDs,
+			      Int maxScans) 
 {
-    MSScanGramrestart (MSScanGramin);
-    yy_start = 1;
-    strpMSScanGram = command.chars();     // get pointer to command string
-    posMSScanGram  = 0;                   // initialize string position
-    MSScanParse parser(ms);               // setup measurement set
-    return MSScanGramparse();             // parse command string
+  try
+    {
+      MSScanGramrestart (MSScanGramin);
+      yy_start = 1;
+      strpMSScanGram = command.chars();     // get pointer to command string
+      posMSScanGram  = 0;                   // initialize string position
+      MSScanParse parser(ms);               // setup measurement set
+      MSScanParse::thisMSSParser = &parser; // The global pointer to the parser
+      parser.reset();
+      parser.setMaxScan(maxScans);
+      int ret=MSScanGramparse();                // parse command string
+
+      selectedIDs=parser.selectedIDs();
+      return ret;
+    }
+  catch (MSSelectionScanError &x)
+    {
+      String newMesgs;
+      newMesgs = constructMessage(msScanGramPosition(), command);
+      x.addMessage(newMesgs);
+      throw;
+    }
 }
 
 //# Give the table expression node
 const TableExprNode* msScanGramParseNode()
 {
     return MSScanParse::node();
+}
+const void msScanGramParseDeleteNode()
+{
+    return MSScanParse::cleanup();
 }
 
 //# Give the string position.
@@ -96,44 +115,44 @@ int msScanGramInput (char* buf, int max_size)
     return nr;
 }
 
-void MSScanGramerror (char*)
+void MSScanGramerror (char* t)
 {
-    throw (AipsError ("Scan Expression: Parse error at or near '" +
-		      String(MSScanGramtext) + "'"));
+  throw (MSSelectionScanError ("Scan Expression: Parse error at or near '" +
+			       String(MSScanGramtext) + "'"));
 }
 
-String msScanGramRemoveEscapes (const String& in)
-{
-    String out;
-    int leng = in.length();
-    for (int i=0; i<leng; i++) {
-	if (in[i] == '\\') {
-	    i++;
-	}
-	out += in[i];
-    }
-    return out;
-}
+// String msScanGramRemoveEscapes (const String& in)
+// {
+//     String out;
+//     int leng = in.length();
+//     for (int i=0; i<leng; i++) {
+// 	if (in[i] == '\\') {
+// 	    i++;
+// 	}
+// 	out += in[i];
+//     }
+//     return out;
+// }
 
-String msScanGramRemoveQuotes (const String& in)
-{
-    //# A string is formed as "..."'...''...' etc.
-    //# All ... parts will be extracted and concatenated into an output string.
-    String out;
-    String str = in;
-    int leng = str.length();
-    int pos = 0;
-    while (pos < leng) {
-	//# Find next occurrence of leading ' or ""
-	int inx = str.index (str[pos], pos+1);
-	if (inx < 0) {
-	    throw (AipsError ("MSScanParse - Ill-formed quoted string: " +
-			      str));
-	}
-	out += str.at (pos+1, inx-pos-1);             // add substring
-	pos = inx+1;
-    }
-    return out;
-}
+// String msScanGramRemoveQuotes (const String& in)
+// {
+//     //# A string is formed as "..."'...''...' etc.
+//     //# All ... parts will be extracted and concatenated into an output string.
+//     String out;
+//     String str = in;
+//     int leng = str.length();
+//     int pos = 0;
+//     while (pos < leng) {
+// 	//# Find next occurrence of leading ' or ""
+// 	int inx = str.index (str[pos], pos+1);
+// 	if (inx < 0) {
+// 	    throw (AipsError ("MSScanParse - Ill-formed quoted string: " +
+// 			      str));
+// 	}
+// 	out += str.at (pos+1, inx-pos-1);             // add substring
+// 	pos = inx+1;
+//     }
+//     return out;
+// }
 
 } //# NAMESPACE CASA - END

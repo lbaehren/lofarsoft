@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: FFTServer.tcc 19879 2007-02-15 03:52:50Z Malte.Marquarding $
+//# $Id: FFTServer.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 #include <scimath/Mathematics/FFTServer.h>
 #include <casa/Arrays/Array.h>
@@ -625,7 +625,7 @@ determineShape(const IPosition & rShape, const Array<S> & cData){
   IPosition defShape(cShape);
   defShape(0) = 2*cShape(0) - 2;
   return defShape;
-};
+}
 
 template<class T, class S> void FFTServer<T,S>::
 flip(Array<S> & cData, const Bool toZero, const Bool isHermitian) {

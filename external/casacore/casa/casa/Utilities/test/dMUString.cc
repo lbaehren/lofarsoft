@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: dMUString.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: dMUString.cc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 //# Includes
 #include <casa/aips.h>
@@ -110,7 +110,7 @@ int main()
 	 instr >> bb;
 	 cout << "Pos1: " << instr.tellg()-stt << endl;
 	 cout << in << " = " << res << " : " << bb << endl;
-       };
+       }
      } catch (AipsError x) {
 	cout << x.getMesg() << endl;
     } 

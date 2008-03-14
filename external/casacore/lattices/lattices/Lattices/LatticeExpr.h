@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LatticeExpr.h 20123 2007-09-05 07:55:22Z gervandiepen $
+//# $Id: LatticeExpr.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef LATTICES_LATTICEEXPR_H
 #define LATTICES_LATTICEEXPR_H
@@ -248,7 +248,7 @@ void LatticeExpr<Bool>::handleMathTo (Lattice<Bool>& to, int oper) const
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <lattices/Lattices/LatticeExpr.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

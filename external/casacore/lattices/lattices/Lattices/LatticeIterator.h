@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LatticeIterator.h 19909 2007-02-23 02:08:02Z Malte.Marquarding $
+//# $Id: LatticeIterator.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef LATTICES_LATTICEITERATOR_H
 #define LATTICES_LATTICEITERATOR_H
@@ -522,8 +522,8 @@ protected:
 } //# NAMESPACE CASA - END
 
 //# See comments in Lattice.h why Lattice.tcc is included here.
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <lattices/Lattices/Lattice.tcc>
 #include <lattices/Lattices/LatticeIterator.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

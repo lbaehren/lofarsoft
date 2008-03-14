@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Function.tcc 19879 2007-02-15 03:52:50Z Malte.Marquarding $
+//# $Id: Function.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 //# Includes
 #include <scimath/Functionals/Function.h>
@@ -41,7 +41,7 @@ U Function<T,U>::operator()(const Vector<ArgType> &x) const {
   arg_p.resize(j);
   for (uInt i=0; i<j; ++i) arg_p[i] = x[i];
   return this->eval(&(arg_p[0]));
-};
+}
 
 template<class T, class U>
 U Function<T,U>::operator()(const ArgType &x, const ArgType &y) const {

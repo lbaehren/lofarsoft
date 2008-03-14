@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Cube.tcc 20105 2007-07-16 05:41:29Z Malte.Marquarding $
+//# $Id: Cube.tcc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 #include <casa/Arrays/Cube.h>
 #include <casa/Arrays/Matrix.h>
@@ -292,9 +292,9 @@ template<class T> Matrix<T> Cube<T>::xzPlane(uInt which)
 	throw(ArrayConformanceError("Cube<T>::xzPlane - plane > end"));
     }
     Cube<T> tmp((*this)(Slice(), which, Slice()));
-    return tmp.nonDegenerate(); // should match Matrix<T>(const Array<T> &)
+    // Keep axes 0 and 2, even if they have length 1.
+    return tmp.nonDegenerate(IPosition(2,0,2));
 }
-
 
 template<class T> const Matrix<T> Cube<T>::xzPlane(uInt which) const
 {
@@ -312,7 +312,8 @@ template<class T> Matrix<T> Cube<T>::yzPlane(uInt which)
 	throw(ArrayConformanceError("Cube<T>::yzPlane - plane > end"));
     }
     Cube<T> tmp((*this)(which, Slice(), Slice()));
-    return tmp.nonDegenerate(); // should match Matrix<T>(const Array<T> &)
+    // Keep axes 1 and 2, even if they have length 1.
+    return tmp.nonDegenerate(IPosition(2,1,2));
 }
 
 

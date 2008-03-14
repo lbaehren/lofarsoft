@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: NNGridder.tcc 19879 2007-02-15 03:52:50Z Malte.Marquarding $
+//# $Id: NNGridder.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 #include <scimath/Mathematics/NNGridder.h>
 #include <casa/BasicSL/Constants.h>
@@ -42,7 +42,7 @@ NNGridder<Domain, Range>::NNGridder(const IPosition& shape,
   fillCorrectionVectors();
   loc.resize(ndim);
   loc=0;
-};
+}
 
 // Grid a value by moving to nearest neighbour
 template <class Domain, class Range>
@@ -59,7 +59,7 @@ Bool NNGridder<Domain, Range>::grid(Array<Range> &gridded,
   else {
     return False;
   }
-};
+}
 
 // Degrid a value by taking value of nearest neighbour
 template <class Domain, class Range>
@@ -76,7 +76,7 @@ Bool NNGridder<Domain, Range>::degrid(const Array<Range>& gridded,
   else {
     return False;
   }
-};
+}
 
 // Correction factor for 1 dimension. This is the value that
 // must be divided to get a correct flux.

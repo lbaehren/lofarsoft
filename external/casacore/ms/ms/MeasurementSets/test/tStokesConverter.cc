@@ -24,9 +24,9 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: tStokesConverter.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tStokesConverter.cc 20215 2008-01-18 04:11:36Z Malte.Marquarding $
 
-#include <casa/Arrays/ArrayLogical.h>
+#include <casa/Arrays/MaskArrLogi.h>
 #include <casa/Arrays/ArrayIO.h>
 #include <casa/Exceptions/Error.h>
 #include <ms/MeasurementSets/StokesConverter.h>

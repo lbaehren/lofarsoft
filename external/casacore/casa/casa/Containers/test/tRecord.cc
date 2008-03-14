@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tRecord.cc 19846 2007-02-12 03:11:58Z Malte.Marquarding $
+//# $Id: tRecord.cc 20254 2008-02-23 16:37:46Z gervandiepen $
 
 #include <casa/Containers/Record.h>
 #include <casa/Containers/RecordField.h>
@@ -358,6 +358,8 @@ void doIt (Bool doExcp)
 
     // Define a scalar using an array.
     AlwaysAssertExit (record.asInt("TpInt2") == 3);
+    AlwaysAssertExit (record.asBool("TpInt2"));
+    AlwaysAssertExit (allEQ (record.toArrayBool("TpInt2"), True));
     AlwaysAssertExit (record.asuInt("TpUInt2") == 4);
     AlwaysAssertExit (allEQ (record.asArrayuInt("TpUInt2"), uInt(4)));
     record.define ("TpInt2", Vector<Int>(1,6));

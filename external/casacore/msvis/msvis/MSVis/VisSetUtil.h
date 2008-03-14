@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: VisSetUtil.h 18843 2005-07-18 01:29:23Z tcornwel $
+//# $Id: VisSetUtil.h 20267 2008-02-26 00:49:30Z gervandiepen $
 
 #ifndef MSVIS_VISSETUTIL_H
 #define MSVIS_VISSETUTIL_H
@@ -95,6 +95,12 @@ public:
   // Calculate sensitivity
   static void Sensitivity(VisSet &vs, Quantity& pointsourcesens, Double& relativesens,
 			  Double& sumwt);
+
+  // Hanning smoothing of spectral channels
+  static void HanningSmooth(VisSet &vs);
+
+  // Subtract/add model from/to corrected visibility data
+  static void UVSub(VisSet &vs, Bool reverse=False);
 
 };
 

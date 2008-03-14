@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//#   $Id: Fit2D.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//#   $Id: Fit2D.cc 20256 2008-02-23 20:28:24Z gervandiepen $
 
 #include <lattices/LatticeMath/Fit2D.h>
 
@@ -739,7 +739,7 @@ void Fit2D::setParams(const Vector<Double> &params, uInt which)
 {
   for (uInt i=0; i<params.nelements(); i++) {
     itsFunction[itsFunction.parameterOffset(which)+i].value() = params[i];
-  };
+  }
 }
 
 

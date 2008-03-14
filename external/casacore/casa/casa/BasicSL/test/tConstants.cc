@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tConstants.cc 19854 2007-02-13 02:22:09Z Malte.Marquarding $
+//# $Id: tConstants.cc 20218 2008-01-23 10:18:30Z gervandiepen $
 
 //# Includes
 
@@ -111,10 +111,10 @@ main()
         << "MINDOUBLE.............  " << MINDOUBLE          << endl
         << "MAXFLOAT..............  " << MAXFLOAT           << endl
         << "MAXDOUBLE.............  " << MAXDOUBLE          << endl;
-
+#endif
    cout << endl
         << "<<< End of machine constants." << endl;
-#endif
+
    cout << endl
         << "Irrationals:"                                   << endl
         << "C::sqrt2..............  " << C::sqrt2           << endl

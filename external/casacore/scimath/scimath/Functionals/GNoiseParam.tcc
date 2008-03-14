@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: GNoiseParam.tcc 19879 2007-02-15 03:52:50Z Malte.Marquarding $
+//# $Id: GNoiseParam.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 //# Includes
 #include <scimath/Functionals/GNoiseParam.h>
@@ -53,7 +53,7 @@ GNoiseParam<T> &GNoiseParam<T>::operator=(const GNoiseParam<T> &other) {
     Function<T>::operator=(other);
     genit_p = other.genit_p;
     noise_p = Normal(&genit_p, other.noise_p.mean(), other.noise_p.variance());
-  };
+  }
   return *this;
 }
 

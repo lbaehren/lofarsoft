@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: COWPtr.h 19846 2007-02-12 03:11:58Z Malte.Marquarding $
+//# $Id: COWPtr.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef CASA_COWPTR_H
 #define CASA_COWPTR_H
@@ -345,7 +345,7 @@ template <class T> inline Bool COWPtr<T>::isUnique() const
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <casa/Utilities/COWPtr.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

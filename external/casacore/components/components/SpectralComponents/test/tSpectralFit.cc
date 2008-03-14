@@ -23,11 +23,11 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tSpectralFit.cc 19933 2007-02-27 05:04:51Z Malte.Marquarding $
+//# $Id: tSpectralFit.cc 20211 2008-01-18 03:29:02Z Malte.Marquarding $
 
 //# Includes
 #include <casa/aips.h>
-#include <casa/Arrays/ArrayLogical.h>
+#include <casa/Arrays/MaskArrLogi.h>
 #include <casa/Arrays/ArrayMath.h>
 #include <casa/Arrays/ArrayIO.h>
 #include <casa/Arrays/Vector.h>

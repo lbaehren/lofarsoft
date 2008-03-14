@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Combi2Function.tcc 19879 2007-02-15 03:52:50Z Malte.Marquarding $
+//# $Id: Combi2Function.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 //# Includes
 #include <scimath/Functionals/CombiFunction.h>
@@ -41,8 +41,8 @@ eval(typename Function<AutoDiff<T> >::FunctionArg x) const {
     if (this->param_p[i].nDerivatives() > 0) {
       tmp = this->param_p[i];
       break;
-    };
-  };
+    }
+  }
   for (uInt j=0; j<tmp.nDerivatives(); j++) tmp.deriv(j) = 0.0;
   tmp.value() = 0.0;
   // function value
@@ -51,7 +51,7 @@ eval(typename Function<AutoDiff<T> >::FunctionArg x) const {
     tmp.value() += this->param_p[i].value()*v;
     // get derivatives (assuming either all or none)
     if (tmp.nDerivatives()>0 && this->param_p.mask(i)) tmp.deriv(i) = v;
-  };
+  }
   return tmp;
 }
 

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Gaussian1D2.tcc 20042 2007-03-19 04:00:05Z Malte.Marquarding $
+//# $Id: Gaussian1D2.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 //# Includes
 #include <scimath/Functionals/Gaussian1D.h>
@@ -59,7 +59,7 @@ eval(typename Function<AutoDiff<T> >::FunctionArg x) const {
     // derivative wrt width
     if (this->param_p.mask(this->WIDTH)) tmp.deriv(this->WIDTH) = dev*
 			       x_norm*this->fwhm2int.value();
-  };
+  }
   return tmp;
 }
 

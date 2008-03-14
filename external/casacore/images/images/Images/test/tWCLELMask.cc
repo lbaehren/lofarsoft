@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tWCLELMask.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tWCLELMask.cc 20274 2008-02-28 03:53:32Z gervandiepen $
 
 #include <casa/aips.h>
 #include <images/Images/WCLELMask.h>
@@ -150,7 +150,7 @@ int main ()
     }
     {
       // Test if it works fine for an expression without shape.
-      WCLELMask mask("index1 in [1:4]");
+      WCLELMask mask("index0 in [0:3]");
       AlwaysAssertExit (mask.ndim() == 0);
       LCRegion* lc = mask.toLCRegion (cSys, latticeShape);
       AlwaysAssertExit (lc->hasMask());
@@ -162,7 +162,7 @@ int main ()
     }
     {
       // Test if it works fine for an expression without shape.
-      WCLELMask mask("indexnotin(2,[2:8:2])");
+      WCLELMask mask("indexnotin(1,[1:7:2])");
       AlwaysAssertExit (mask.ndim() == 0);
       LCRegion* lc = mask.toLCRegion (cSys, latticeShape);
       AlwaysAssertExit (lc->hasMask());

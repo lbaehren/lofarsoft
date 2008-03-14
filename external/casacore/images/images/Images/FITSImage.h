@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: FITSImage.h 19949 2007-02-27 12:20:55Z Malte.Marquarding $
+//# $Id: FITSImage.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef IMAGES_FITSIMAGE_H
 #define IMAGES_FITSIMAGE_H
@@ -298,7 +298,7 @@ private:
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <images/Images/FITS2Image.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

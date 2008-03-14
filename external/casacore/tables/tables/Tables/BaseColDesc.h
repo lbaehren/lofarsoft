@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: BaseColDesc.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: BaseColDesc.h 20238 2008-02-11 13:44:45Z gervandiepen $
 
 #ifndef TABLES_BASECOLDESC_H
 #define TABLES_BASECOLDESC_H
@@ -34,6 +34,7 @@
 #include <casa/Utilities/DataType.h>
 #include <casa/Arrays/IPosition.h>
 #include <casa/BasicSL/String.h>
+#include <casa/iosfwd.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
@@ -46,9 +47,10 @@ class BaseColumn;
 class PlainColumn;
 class RefTable;
 class RefColumn;
+class ConcatTable;
+class ConcatColumn;
 class TableDesc;
 class ColumnSet;
-#include <casa/iosfwd.h>
 
 
 // <summary>
@@ -285,6 +287,11 @@ protected:
 
     // Make a RefColumn object out of the description.
     RefColumn* makeRefColumn (RefTable*, BaseColumn*) const;
+
+    // Make a ConcatColumn object out of the description.
+    // The default makes a ConcatColumn object.
+    // Derived classes (ScalarColumnDesc) can make more specialized objects.
+    virtual ConcatColumn* makeConcatColumn (ConcatTable*) const;
 
 private:
     // Check if a column can be handled by ColumnDescSet.

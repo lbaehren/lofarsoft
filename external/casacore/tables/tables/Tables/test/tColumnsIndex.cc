@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tColumnsIndex.cc 19873 2007-02-15 00:22:41Z Malte.Marquarding $
+//# $Id: tColumnsIndex.cc 20235 2008-02-07 17:06:27Z gervandiepen $
 
 #include <tables/Tables/TableDesc.h>
 #include <tables/Tables/SetupNewTab.h>
@@ -334,6 +334,7 @@ int main()
 	d();
     } catch (AipsError x) {
         cout << "Exception caught: " << x.getMesg() << endl;
+	return 1;
     } 
     return 0;
 }

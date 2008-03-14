@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Gaussian2D2.tcc 20042 2007-03-19 04:00:05Z Malte.Marquarding $
+//# $Id: Gaussian2D2.tcc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 //# Includes
 #include <scimath/Functionals/Gaussian2D.h>
@@ -51,7 +51,7 @@ eval(typename Function<AutoDiff<T> >::FunctionArg x) const {
     this->thePA = this->param_p[this->PANGLE];
     this->theCpa = cos(this->thePA);
     this->theSpa = sin(this->thePA);
-  };
+  }
   T xnorm = x2mean*this->theCpa.value() + y2mean*this->theSpa.value();
   T ynorm = -x2mean*this->theSpa.value() + y2mean*this->theCpa.value();
   T xnorm2 = xnorm*xnorm;
@@ -94,7 +94,7 @@ eval(typename Function<AutoDiff<T> >::FunctionArg x) const {
 				      y2mean*this->theCpa.value()) +
 				 y2w*(-x2mean*this->theCpa.value() -
 				      y2mean*this->theSpa.value()));
-  };
+  }
   return tmp;
 }
 

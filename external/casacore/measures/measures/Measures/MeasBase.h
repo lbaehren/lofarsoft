@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: MeasBase.h 19918 2007-02-23 03:29:05Z Malte.Marquarding $
+//# $Id: MeasBase.h 20229 2008-01-29 15:19:06Z gervandiepen $
 
 #ifndef MEASURES_MEASBASE_H
 #define MEASURES_MEASBASE_H
@@ -173,7 +173,7 @@ private:
 
 } //# NAMESPACE CASA - END
 
-#ifndef AIPS_NO_TEMPLATE_SRC
+#ifndef CASACORE_NO_AUTO_TEMPLATES
 #include <measures/Measures/MeasBase.tcc>
-#endif //# AIPS_NO_TEMPLATE_SRC
+#endif //# CASACORE_NO_AUTO_TEMPLATES
 #endif

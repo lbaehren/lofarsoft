@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tFunctionHolder.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tFunctionHolder.cc 20253 2008-02-23 15:15:00Z gervandiepen $
 
 #include <scimath/Functionals/FunctionHolder.h>
 
@@ -53,7 +53,7 @@ AutoDiff<Double> Y(AutoDiff<Double> in) {
   in.value() = Y(in.value());
   for (uInt i=0; i<in.nDerivatives(); ++i) {
     in.deriv(i) = Y(in.deriv(i));
-  };
+  }
   return in;
 }
 

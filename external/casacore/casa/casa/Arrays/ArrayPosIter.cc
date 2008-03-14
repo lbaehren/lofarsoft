@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ArrayPosIter.cc 19894 2007-02-19 04:25:10Z gervandiepen $
+//# $Id: ArrayPosIter.cc 20234 2008-02-07 16:53:38Z gervandiepen $
 
 #include <casa/Arrays/ArrayPosIter.h>
 #include <casa/Arrays/ArrayError.h>
@@ -129,6 +129,28 @@ void ArrayPositionIterator::next()
     nextStep();
 }
 
+void ArrayPositionIterator::set (const IPosition& cursorPos)
+{
+    Bool all = False;
+    if (cursorPos.nelements() != iterationAxes.nelements()) {
+        all = True;
+	if (cursorPos.nelements() != ndim()) {
+	    throw ArrayIteratorError ("ArrayPositionIterator::set - "
+				      "length of cursorPos is invalid");
+	}
+    }
+    atOrBeyondEnd = False;
+    for (uInt i=0; i<cursorPos.nelements(); ++i) {
+        Int axis = iterationAxes(i);
+	Int cpaxis = i;
+	if (all) cpaxis=axis;
+	Cursor[axis] = cursorPos[cpaxis];
+	if (Cursor[axis] > End[axis]) {
+	    atOrBeyondEnd = True;
+	}
+    }
+}
+
 uInt ArrayPositionIterator::nextStep()
 {
     // This could and should be made more efficient. 
@@ -176,6 +198,11 @@ IPosition ArrayPositionIterator::endPos() const
     endp(axis) = Shape(axis)-1;
   }
   return endp;
+}
+
+ArrayBase& ArrayPositionIterator::getArray()
+{
+  throw ArrayIteratorError ("ArrayPositionIterator::getArray cannot be used");
 }
 
 } //# NAMESPACE CASA - END

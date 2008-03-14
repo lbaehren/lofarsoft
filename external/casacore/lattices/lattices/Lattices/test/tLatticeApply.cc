@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tLatticeApply.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tLatticeApply.cc 20256 2008-02-23 20:28:24Z gervandiepen $
 
 #include <lattices/Lattices/LatticeApply.h>
 #include <lattices/Lattices/LineCollapser.h>
@@ -55,7 +55,7 @@
 class MyLineCollapser : public LineCollapser<Int>
 {
 public:
-    MyLineCollapser() {};
+    MyLineCollapser() {}
     virtual void init (uInt nOutPixelsPerCollapse);
     virtual Bool canHandleNullMask() const;
     virtual void process (Int& result, Bool& resultMask,
@@ -120,7 +120,7 @@ void MyLineCollapser::multiProcess (Vector<Int>& result,
 class MyTiledCollapser : public TiledCollapser<Int>
 {
 public:
-    MyTiledCollapser() : itsSum1(0),itsSum2(0),itsNpts(0) {};
+    MyTiledCollapser() : itsSum1(0),itsSum2(0),itsNpts(0) {}
     virtual ~MyTiledCollapser();
     virtual void init (uInt nOutPixelsPerCollapse);
     virtual Bool canHandleNullMask() const;
@@ -227,7 +227,7 @@ void MyTiledCollapser::endAccumulator (Array<Int>& result,
 class MyLatticeProgress : public LatticeProgress
 {
 public:
-    MyLatticeProgress() : itsMeter(0) {};
+    MyLatticeProgress() : itsMeter(0) {}
     virtual ~MyLatticeProgress();
     virtual void initDerived();
     virtual void nstepsDone (uInt nsteps);
