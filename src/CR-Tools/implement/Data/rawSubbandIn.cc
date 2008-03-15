@@ -218,7 +218,7 @@ namespace CR { // Namespace CR -- begin
 	    cerr << "rawSubbandIn:getData: " << "Failed to read header of Block "<<  bnum << endl;
 	    break;
 	  };
-	  if (blockdates(bnum) != BHead.time[0]/FHead.sampleRate) {
+	  if (abs(blockdates(bnum)-BHead.time[0]/FHead.sampleRate)>1e-7) {
 	    cerr << "rawSubbandIn:getData: " << "Inconsistent state: blockdates != BHead.time" << endl;
 	    cerr << "blockdates: " << blockdates(bnum)-firstdate 
 		 << " BHead.time: " << (BHead.time[0]/FHead.sampleRate)-firstdate 
@@ -231,11 +231,11 @@ namespace CR { // Namespace CR -- begin
 	  };
 	  for (sample=0; sample<FHead.nrSamplesPerBeamlet; sample++){
 	    sindex = (int)ceil((blockdates(bnum)-startdate)*FHead.sampleRate)+sample;
-	    if (sindex>0 && sindex<nSamples){
+	    if (sindex>=0 && sindex<nSamples){
 	      for (beamlet=0; beamlet<FHead.nrBeamlets; beamlet++){
 		data(sindex,beamlet) = DComplex(
-				ntohs(datap[((beamlet*nsamples+sample)*npol+pol)*2+0]),
-				ntohs(datap[((beamlet*nsamples+sample)*npol+pol)*2+1]));
+				(short)ntohs(datap[((beamlet*nsamples+sample)*npol+pol)*2+0]),
+				(short)ntohs(datap[((beamlet*nsamples+sample)*npol+pol)*2+1]));
 	      };
 	    };
 	  };
