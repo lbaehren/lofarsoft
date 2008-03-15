@@ -261,6 +261,8 @@ namespace CR { // Namespace CR -- begin
     out(30) = 346; out(31) = 349; out(32) = 352; out(33) = 355; out(34) = 358; 
     out(35) = 361;
 
+    out.resize(18,True);
+
     return out;
   };
 
