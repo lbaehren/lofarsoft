@@ -126,7 +126,7 @@ namespace CR { // Namespace CR -- begin
       } else {
 	datasize = datalen;
       };
-      cout << "rawSubbandIn:attachFile: datalen: " << dec << datalen << " datasize: " << datasize <<endl;
+      //cout << "rawSubbandIn:attachFile: datalen: " << dec << datalen << " datasize: " << datasize <<endl;
 
       numblocks=0;
       veclen = 1000;
@@ -142,11 +142,13 @@ namespace CR { // Namespace CR -- begin
 	    firstdate = blockdates(numblocks-1);
 	  };
 	  
-	  cout << "block: " << numblocks  << " position: " << ftell(fd) 
-	       << " date: " << blockdates(numblocks-1) - firstdate <<endl;
+	  //cout << "block: " << numblocks  << " position: " << ftell(fd) 
+	  //     << " date: " << blockdates(numblocks-1) - firstdate <<endl;
 	} else {
-	  cout << "rawSubbandIn:attachFile: Failed to read block-header " << dec << numblocks+1 
-	       << " of file " << Filename << " (end of file?)." << endl;
+// 	  cout << "rawSubbandIn:attachFile: Failed to read block-header " << dec << numblocks+1 
+// 	       << " of file " << Filename << " (end of file?)." << endl;
+	  cout << "rawSubbandIn:attachFile: Found: " << dec << numblocks << " Blocks in File: "
+	       << Filename << endl;
 	  break;
 	};
 	if (numblocks >= veclen){
@@ -170,9 +172,12 @@ namespace CR { // Namespace CR -- begin
   Matrix<DComplex> rawSubbandIn::getData(Double startdate, int nSamples, int pol){
     Matrix<DComplex> data(nSamples,FHead.nrBeamlets,0.);
     try {
-      int bnum,datalen,sample,beamlet,sindex,ui;
+      int bnum,datalen,sample,beamlet,nsamples,npol,sindex,ui;
       Double stopdate;
       struct BlockHeader BHead;
+      Bool ok;
+
+      nsamples=FHead.nrSamplesPerBeamlet; npol=FHead.nrPolarizations;
       
       stopdate = startdate + nSamples/FHead.sampleRate;
       if (stopdate >= lastdate){
@@ -208,9 +213,17 @@ namespace CR { // Namespace CR -- begin
 	  //current block is after the requested part
 	  break;
 	} else {
-	  fseek(fd, sizeof(struct BlockHeader), SEEK_CUR);
+	  ok = readBlockHeader(fd, BHead); 
+	  if (!ok) {
+	    cerr << "rawSubbandIn:getData: " << "Failed to read header of Block "<<  bnum << endl;
+	    break;
+	  };
 	  if (blockdates(bnum) != BHead.time[0]/FHead.sampleRate) {
 	    cerr << "rawSubbandIn:getData: " << "Inconsistent state: blockdates != BHead.time" << endl;
+	    cerr << "blockdates: " << blockdates(bnum)-firstdate 
+		 << " BHead.time: " << (BHead.time[0]/FHead.sampleRate)-firstdate 
+		 << " bnum "<< bnum << endl;
+	    break;
 	  };
 	  ui = fread(datap, 1, datalen, fd);
 	  if ( ui != datalen ) {
@@ -220,7 +233,9 @@ namespace CR { // Namespace CR -- begin
 	    sindex = (int)ceil((blockdates(bnum)-startdate)*FHead.sampleRate)+sample;
 	    if (sindex>0 && sindex<nSamples){
 	      for (beamlet=0; beamlet<FHead.nrBeamlets; beamlet++){
-		data(sindex,beamlet) = DComplex(ntohs(datap[0]),ntohs(datap[1]));
+		data(sindex,beamlet) = DComplex(
+				ntohs(datap[((beamlet*nsamples+sample)*npol+pol)*2+0]),
+				ntohs(datap[((beamlet*nsamples+sample)*npol+pol)*2+1]));
 	      };
 	    };
 	  };
@@ -291,7 +306,7 @@ namespace CR { // Namespace CR -- begin
     
     ui = fread(&tmphead, 1, sizeof(BlockHeader), fd);
     if ( (ui != sizeof(BlockHeader) )  ) {
-      cerr << "rawSubbandIn::readBlockHeader: Inconsitent file: too small. "  << endl;
+      cerr << "rawSubbandIn::readBlockHeader: File too small, or last block found."  << endl;
       return False;
     };
     BHead.magic = ntohl(tmphead.magic);

@@ -74,6 +74,7 @@ namespace CR { // Namespace CR -- begin
   */  
   class rawSubbandIn {
 
+    //public:
   protected:
     
     struct FileHeader {
@@ -183,7 +184,7 @@ namespace CR { // Namespace CR -- begin
     Vector<Int> getSubbandIndices();
     
     
-  protected:
+    protected:
 
     double ntohd(double in);
 

@@ -57,11 +57,15 @@ int test_rawSubbandIn ()
 
     newrawSubbandIn.attachFile("/mnt/lofar/kalpana/raw1.out");
     
+    Matrix<DComplex> data;
+    data = newrawSubbandIn.getData(1.204812466000e+09,10,0);
 
-    /*    rawSubbandIn::FileHeader FileHead;
+    cout << endl << data(0,0) << ";" << data(0,1) << ";" << data(1,0) << endl;
+    
+    /*        rawSubbandIn::FileHeader FileHead;
     rawSubbandIn::BlockHeader BlockHead;
 
-    FILE *fd = fopen("/mnt/lofar/kalpana/raw.out","r");
+    FILE *fd = fopen("/mnt/lofar/kalpana/raw1.out","r");
 
     Bool ok;
 
@@ -102,6 +106,7 @@ int test_rawSubbandIn ()
 	 << BlockHead.fineDelayRemainingAfterEnd[3] << endl;    
     cout << "BlockHead.time: " << hex <<BlockHead.time[0] << endl 
 	 << "Seq-No: " << dec << BlockHead.time[0] *(1./195312.5) << endl;
+    printf("Time: %20.12e \n",BlockHead.time[0]/FileHead.sampleRate);
     //    cout << "BlockHead.: " << BlockHead. << endl;
     //    cout << "BlockHead.: " << BlockHead. << endl;
     */
