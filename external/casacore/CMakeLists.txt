@@ -30,7 +30,8 @@ option (casacore_BUILD_TESTS "Build the test programs?" 0)
 option (casacore_ENABLE_TESTING "Enable running test programs?" 0)
 option (casacore_SHARED_LIBRARIES "Build libraries as shared libraries?" 0)
 option (casacore_MEASURES_DATA "Retrieve the measures data tables?" 0)
-option (casacore_WITH_G2C "Use g2c for compiling Fortran code?")
+option (casacore_WITH_G2C "Use g2c for compiling Fortran code?" 0)
+option (casacore_HDF5_SUPPORT "Enable support for HDF5?" 0)
 
 ## Handle option: testing mode on/off
 
@@ -154,12 +155,20 @@ if (casacore_cmake)
   include (${casacore_cmake}/FindG2C.cmake)
   include (${casacore_cmake}/FindLAPACK.cmake)
   include (${casacore_cmake}/FindWCS.cmake)
+  ## optional components
+  if (casacore_HDF5_SUPPORT) 
+    include (${casacore_cmake}/FindHDF5.cmake)
+  endif (casacore_HDF5_SUPPORT)
 elseif (casacore_cmake)
   message (STATUS "[casacore] Using local CMake find scripts")
   include (./FindCFITSIO.cmake)
   include (./FindG2C.cmake)
   include (./FindLAPACK.cmake)
   include (./FindWCS.cmake)
+  ## optional components
+  if (casacore_HDF5_SUPPORT) 
+    include (./FindHDF5.cmake)
+  endif (casacore_HDF5_SUPPORT)
 endif (casacore_cmake)
 
 ## --- libm -----------------------------------------------
@@ -215,6 +224,13 @@ find_program (uname_bin uname ${bin_locations})
 ##  Compiler and Linker options
 ##
 ## =============================================================================
+
+if (HAVE_HDF5)
+  add_definitions (-DHAVE_HDF5)
+  include_directories (${HDF5_INCLUDES})
+else (HAVE_HDF5)
+  set (casacore_HDF5_SUPPORT FALSE)
+endif (HAVE_HDF5)
 
 ## -----------------------------------------------------------------------------
 ## Location of the header files

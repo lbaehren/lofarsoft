@@ -11,6 +11,7 @@ SET (casa_modules
   BasicSL
   Containers
   Exceptions
+  HDF5
   IO
   Inputs
   Logging
