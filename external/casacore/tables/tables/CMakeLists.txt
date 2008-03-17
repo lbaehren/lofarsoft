@@ -17,7 +17,7 @@ SET (tables_modules
 ##  for FILE in $FILES ; { flex -t -P$FILE $FILE.l > $FILE.lcc ; }
 
 if (flex_bin)
-  message (STATUS "Processing flex input files...")
+  message (STATUS "[tables/tables] Processing flex input files...")
   # Tables/RecordGram.ll
   execute_process (
     WORKING_DIRECTORY ${casacore_SOURCE_DIR}/tables/tables/Tables
@@ -45,7 +45,7 @@ if (flex_bin)
     message (SEND_ERROR ${flex_error})
   endif (flex_error)
 else (flex_bin)
-  message (SEND_ERROR "Unable to process flex input files!")
+  message (SEND_ERROR "[tables/tables] Unable to process flex input files!")
 endif (flex_bin)
 
 ## -----------------------------------------------------------------------------
@@ -55,7 +55,7 @@ endif (flex_bin)
 ## for FILE in $FILES ; { bison -p $FILE -o $FILE.ycc $FILE.y ; }
 
 if (bison_bin)
-  message (STATUS "Processing bison input files...")
+  message (STATUS "[tables/tables] Processing bison input files...")
   # Tables/RecordGram.yy
   execute_process (
     WORKING_DIRECTORY ${casacore_SOURCE_DIR}/tables/tables/Tables

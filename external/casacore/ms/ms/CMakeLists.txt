@@ -37,7 +37,7 @@ set (parser_inputs
   )
 
 if (bison_bin)
-  message (STATUS "Processing bison input files...")
+  message (STATUS "[ms/ms] Processing bison input files...")
   foreach (src ${parser_inputs})
     execute_process (
       WORKING_DIRECTORY ${casacore_SOURCE_DIR}/ms/ms/MeasurementSets
@@ -52,11 +52,11 @@ if (bison_bin)
 #    endif (bison_error)
   endforeach (src)
 else (bison_bin)
-  message (SEND_ERROR "Unable to process bison input files!")
+  message (SEND_ERROR "[ms/ms] Unable to process bison input files!")
 endif (bison_bin)
 
 if (flex_bin)
-  message (STATUS "Processing flex input files...")
+  message (STATUS "[ms/ms] Processing flex input files...")
   foreach (src ${parser_inputs})
     execute_process (
       WORKING_DIRECTORY ${casacore_SOURCE_DIR}/ms/ms/MeasurementSets
@@ -72,7 +72,7 @@ if (flex_bin)
     endif (flex_error)
   endforeach (src)
 else (flex_bin)
-  message (SEND_ERROR "Unable to process flex input files!")
+  message (SEND_ERROR "[ms/ms] Unable to process flex input files!")
 endif (flex_bin)
 
 ## -----------------------------------------------------------------------------

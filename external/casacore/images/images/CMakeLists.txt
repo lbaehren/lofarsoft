@@ -13,7 +13,7 @@ set (parser_inputs
   )
 
 if (bison_bin)
-  message (STATUS "Processing bison input files...")
+  message (STATUS "[images/images] Processing bison input files...")
   foreach (src ${parser_inputs})
     execute_process (
       WORKING_DIRECTORY ${casacore_SOURCE_DIR}/images/images/Images
@@ -32,7 +32,7 @@ else (bison_bin)
 endif (bison_bin)
 
 if (flex_bin)
-  message (STATUS "Processing flex input files...")
+  message (STATUS "[images/images] Processing flex input files...")
   foreach (src ${parser_inputs})
     execute_process (
       WORKING_DIRECTORY ${casacore_SOURCE_DIR}/images/images/Images
