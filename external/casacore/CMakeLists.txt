@@ -274,7 +274,6 @@ IF (UNIX)
       )
   ELSE (APPLE)
     ADD_DEFINITIONS (
-      -fno-implicit-templates
       -DAIPS_LINUX
       )
   ENDIF (APPLE)
