@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id                                                                   $ |
+ | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -25,7 +25,7 @@
 #include <string>
 #include <fstream>
 
-#include "Analysis/analyseLOPESevent2.h"
+#include <Analysis/analyseLOPESevent2.h>
 
 using CR::analyseLOPESevent2;
 using CR::LopesEventIn;
@@ -33,11 +33,11 @@ using CR::LopesEventIn;
 /*!
   \file call_pipeline.cc
 
-  \ingroup apps
+  \ingroup CR_Applications
 
   \brief Calls the LOPES analysis pipeline in "analyseLOPESevent"
  
-  \author Frank Schröder
+  \author Frank Schr&ouml;der
  
   \date 2008/29/01
 
@@ -55,50 +55,55 @@ using CR::LopesEventIn;
   <br>
   <br>
   Example event list<br>
-  <br>
-  filename(event) azimuth[°] zenith[°] distance(radius of curvature)[m] core_x[m] core_y[m]<br>
-  =========================================================================================<br>
-  /home/schroeder/data/lopesstar/first.event 354.55215 63.882182 2750 8.6060886 -368.0933<br>
-  /home/schroeder/data/lopesstar/second.event 354.55215 63.882182 2750 8.6060886 -368.0933<br>
-  /home/schroeder/data/lopesstar/third.event 354.55215 63.882182 2750 8.6060886 -368.0933<br>
-  <br>
+  \verbatim
+  filename(event) azimuth[°] zenith[°] distance(radius of curvature)[m] core_x[m] core_y[m]
+  =========================================================================================
+  /home/schroeder/data/lopesstar/first.event 354.55215 63.882182 2750 8.6060886 -368.0933
+  /home/schroeder/data/lopesstar/second.event 354.55215 63.882182 2750 8.6060886 -368.0933
+  /home/schroeder/data/lopesstar/third.event 354.55215 63.882182 2750 8.6060886 -368.0933
+  \endverbatim
   <br>
   If you don't want to process the events in the default manner<br>
   you can also provide a config file of the following format:<br>
-  <br>
-  <br>
-  example configuration file<br>
-  <br>
-  =================================================================<br>  
-  caltablepath = /home/horneff/lopescasa/data/LOPES/LOPES-CalTable<br>
-  RotatePos = true<br>
-  GeneratePlots = true<br>
-  SinglePlots = true<br>
-  PlotRawData = false<br>
-  verbose = true<br>
-  simplexFit = true<br>
-  doTVcal = default<br>
-  plotStart = -2.05e-6<br>
-  plotEnd = -1.60e-6<br>
-  upsamplingExponent = 1<br>
-  summaryColumns = 3<br>
-  flagged = 10101<br>
-  flagged = 10102<br>
-  <br>
-  This example means:<br>
-  the caltables are in /home/horneff/lopescasa/data/LOPES/LOPES-CalTable,<br>
-  the given positions are in the Kascade coordinate system and must be rotated to the LOPES system,<br>
-  there will be generated plots of the analaysed event,<br>
-  produces a plot for each antenna,<br>
-  the raw ADC values (FX) are not plotted,<br>
-  there will be more text output during the analysis,<br>
-  the simplex fit of the arrival direction and radius of curvature is done,<br>
-  the TV calibration will be done by default,<br>
-  the plots start at -2.05 micro seconds and end at -1.60 micro seconds,<br>
-  the upsampling of the calibrated antenna fieldstrengthes will be done by a factor of 2^1 = 2,<br>
-  there will by a summary postscript of all created plots,<br>
-  the antennas 10101 and 10102 are not considered in the analysis.<br>
-  <br>
+  \verbatim
+  +++ not yet available +++
+  \endverbatim
+  example configuration file
+  \verbatim
+  =================================================================  
+  caltablepath  = /home/horneff/lopescasa/data/LOPES/LOPES-CalTable
+  RotatePos     = true
+  GeneratePlots = true
+  SinglePlots   = true
+  PlotRawData   = false
+  verbose       = true
+  simplexFit    = true
+  doTVcal       = default
+  plotStart     = -2.05e-6
+  plotEnd       = -1.60e-6
+  upsamplingExponent = 1
+  summaryColumns = 3
+  flagged = 10101
+  flagged = 10102
+  \endverbatim
+  This example means:
+  <ul>
+    <li>the caltables are in /home/horneff/lopescasa/data/LOPES/LOPES-CalTable,
+    <li>the given positions are in the Kascade coordinate system and must be
+    rotated to the LOPES system,
+    <li>there will be generated plots of the analaysed event,
+    <li>produces a plot for each antenna,
+    <li>the raw ADC values (FX) are not plotted,
+    <li>there will be more text output during the analysis,
+    <li>the simplex fit of the arrival direction and radius of curvature is
+    done,
+    <li>the TV calibration will be done by default,
+    <li>the plots start at -2.05 micro seconds and end at -1.60 micro seconds,
+    <li>the upsampling of the calibrated antenna fieldstrengthes will be done by
+    a factor of 2^1 = 2,
+    <li>there will by a summary postscript of all created plots,
+    <li>the antennas 10101 and 10102 are not considered in the analysis.
+  </ul>
 
   <h3>Example</h3>
 

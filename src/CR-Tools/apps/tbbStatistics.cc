@@ -129,8 +129,8 @@ int dynamic_spectrum (std::string const &filename,
   CR::LOFAR_TBB dataset (filename,blocksize);
   dataset.summary();
 
-  uint block   = 0;
-  uint channel = 0;
+  uint block       = 0;
+  uint channel     = 0;
   uint nofDipoles  = dataset.nofDipoleDatasets();
   uint nofChannels = dataset.fftLength();
   casa::Matrix<casa::DComplex> spectra (nofChannels,
@@ -179,6 +179,7 @@ int main (int argc,
     return -1;
   }
 
+  /* Extract the filename from the argument list */
   std::string filename (argv[1]);
 
   // Create dynamic spectrum
