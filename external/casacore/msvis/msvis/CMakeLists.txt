@@ -43,3 +43,19 @@ install (TARGETS casa_msvis
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   )
+
+## Header files
+
+FILE (GLOB msvis_headers *.h)
+install (FILES ${msvis_headers}
+  DESTINATION include/casacore/msvis
+  )
+
+foreach (msvis_module ${msvis_modules})
+  ## assemble list of header files
+  FILE (GLOB msvis_headers ${msvis_module}/*.h)
+  ## set installation location
+  install (FILES ${msvis_headers}
+    DESTINATION include/casacore/msvis/${msvis_module}
+    )
+endforeach (msvis_module)

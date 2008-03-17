@@ -273,7 +273,10 @@ IF (UNIX)
       -DAIPS_DARWIN
       )
   ELSE (APPLE)
-    ADD_DEFINITIONS (-DAIPS_LINUX)
+    ADD_DEFINITIONS (
+      -fno-implicit-templates
+      -DAIPS_LINUX
+      )
   ENDIF (APPLE)
   ##
   ## Platform test Big/Little Endian ------------------------------------
