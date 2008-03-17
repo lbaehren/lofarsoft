@@ -61,7 +61,8 @@ int test_rawSubbandIn ()
     data = newrawSubbandIn.getData(1.204812466000e+09,10,0);
 
     cout << endl << data(0,0) << ";" << data(0,1) << ";" << data(1,0) << endl;
-cout << endl << data << endl;
+    // This works with casa, but not with casacore
+    //cout << endl << data << endl;
     
     /*        rawSubbandIn::FileHeader FileHead;
     rawSubbandIn::BlockHeader BlockHead;
