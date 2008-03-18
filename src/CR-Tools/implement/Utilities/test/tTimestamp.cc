@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (C) 2006                                                    *
- *   Lars B"ahren (lbaehren@yahoo.de)                                      *
+ *   Lars B"ahren (lbaehren@gmail.com)                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -30,23 +30,12 @@ using CR::Timestamp;
 
   \ingroup CR_Utilities
 
-  \brief A collection of test routines for Timestamp
+  \brief A collection of test routines for tne Timestamp class
  
   \author Lars B&auml;hren
  
   \date 2006/07/16
 */
-
-// -----------------------------------------------------------------------------
-
-void showTime (Timestamp &nb)
-{
-  std::cout << " -- ymd         = " << nb.ymd()         << std::endl;
-  std::cout << " -- hms         = " << nb.hms()         << std::endl;
-  std::cout << " -- iso8601     = " << nb.iso8601()     << std::endl;
-  std::cout << " -- Unix time   = " << nb.timer()       << std::endl;
-  std::cout << " -- Nanoblogger = " << nb.nanoblogger() << std::endl;
-}
 
 // -----------------------------------------------------------------------------
 
@@ -57,14 +46,21 @@ void showTime (Timestamp &nb)
 */
 int test_time ()
 {
+  std::cout << "\n[test_time]\n" << std::endl;
+  
   int nofFailedTests (0);
 
-  {
+
+  std::cout << "[1] New time construct from scratch ..." << std::endl;
+  try {
     time_t rawtime;
     time (&rawtime);
 
     std::cout << " - rawtime = " << rawtime         << std::endl;
     std::cout << " - ctime   = " << ctime(&rawtime) << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
   }
   
   return nofFailedTests;
@@ -75,7 +71,7 @@ int test_time ()
 /*!
   \brief Test constructors for a new Timestamp object
 
-  \return nofFailedTests -- The number of failed tests.
+  \return nofFailedTests -- The number of failed tests in this function.
 */
 int test_Timestamp ()
 {
@@ -86,8 +82,7 @@ int test_Timestamp ()
   std::cout << "[1] Testing default constructor ..." << std::endl;
   {
     Timestamp nb;
-    //
-    showTime (nb);
+    nb.summary();
   }
   
   std::cout << "[2] Testing copy constructor ..." << std::endl;
@@ -95,12 +90,12 @@ int test_Timestamp ()
     Timestamp nb;
     //
     std::cout << " - Original object:" << std::endl;
-    showTime (nb);
+    nb.summary();
     //
     Timestamp nb2 (nb);
     //
     std::cout << " - Copied object:" << std::endl;
-    showTime (nb2);
+    nb2.summary();
   }
   
   return nofFailedTests;
@@ -115,9 +110,7 @@ int test_setTime ()
   int nofFailedTests (0);
   
   Timestamp nb;
-  //
-  std::cout << " - Object from default constructor:" << std::endl;
-  showTime (nb);
+  nb.summary();
   
   return nofFailedTests;
 }
@@ -125,25 +118,21 @@ int test_setTime ()
 
 /*!
   \brief Main function
+
+  \return nofFailedTests -- The number of failed test encountered throughout this
+          program.
 */
 int main ()
 {
   int nofFailedTests (0);
 
   // Test working with the timer
-//   {
-//     nofFailedTests += test_time ();
-//   }
-
+  nofFailedTests += test_time ();
+  
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_Timestamp ();
-  }
-
+  nofFailedTests += test_Timestamp ();
   // Test assignment of time
-  {
-    nofFailedTests += test_setTime ();
-  }
-
+  nofFailedTests += test_setTime ();
+  
   return nofFailedTests;
 }

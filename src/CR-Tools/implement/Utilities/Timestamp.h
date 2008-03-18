@@ -3,7 +3,7 @@
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2006                                                    *
- *   Lars B"ahren (lbaehren@yahoo.de)                                      *
+ *   Lars B"ahren (lbaehren@gmail.com)                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -20,8 +20,6 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-
-/* $Id$*/
 
 #ifndef TIMESTAMP_H
 #define TIMESTAMP_H
@@ -79,17 +77,24 @@ namespace CR {
 
 class Timestamp {
 
+  //! Time structure
   time_t time_p;
-  
+
+  //! The year, yyyy
   std::string year_p;
+  //! The month of the year, mm
   std::string month_p;
+  //! The day of the month, dd
   std::string day_p;
-
+  //! The hour of day, HH
   std::string hour_p;
+  //! The minute of the hour, MM
   std::string minute_p;
+  //! The second of the minute, SS
   std::string second_p;
-
+  //! The day of the week
   std::string dayOfWeek_p;
+  //! The name of the month
   std::string nameOfMonth_p;
 
  public:
@@ -100,7 +105,7 @@ class Timestamp {
     \brief Default constructor
   */
   Timestamp ();
-
+  
   /*!
     \brief Copy constructor
 
@@ -127,7 +132,7 @@ class Timestamp {
 
   // ----------------------------------------------------------------- Parameters
 
-/*   void setTime (long const &unixTime); */
+  /*   void setTime (long const &unixTime); */
 
   /*!
     \brief Set the time
@@ -150,7 +155,10 @@ class Timestamp {
     
     \param year -- The year, <tt>yyyy</tt>.
    */
-  void setYear (std::string const &year);
+  inline void setYear (std::string const &year) {
+    year_p = year;
+  }
+
 
   /*!
     \brief Get the month
@@ -187,7 +195,7 @@ class Timestamp {
 
     \return day -- The day of the month, <tt>dd</tt>.
   */
-  std::string day () const {
+  inline std::string day () const {
     return day_p;
   }
   
@@ -196,14 +204,16 @@ class Timestamp {
 
     \param day -- The day of the month, <tt>dd</tt>.
   */
-  void setDay (std::string const &day);
+  inline void setDay (std::string const &day) {
+    day_p = day;
+  }
   
   /*!
     \brief Get the hour of day
 
     \return hour -- The hour of day, <tt>hh</tt>.
   */
-  std::string hour () const {
+  inline std::string hour () const {
     return hour_p;
   }
 
@@ -212,14 +222,16 @@ class Timestamp {
 
     \param hour -- The hour of day, <tt>hh</tt>.
   */
-  void setHour (std::string const &hour);
+  inline void setHour (std::string const &hour) {
+    hour_p = hour;
+  }
   
   /*!
     \brief Get the minutes within the hour
 
     \return minute -- The minutes within the hour, <tt>mm</tt>.
   */
-  std::string minute () const {
+  inline std::string minute () const {
     return minute_p;
   }
 
@@ -228,14 +240,16 @@ class Timestamp {
 
     \param minute -- The minutes within the hour, <tt>mm</tt>.
   */
-  void setMinute (std::string const &minute);
+  inline void setMinute (std::string const &minute) {
+    minute_p = minute;
+  }
   
   /*!
     \brief Get the seconds within the minute
 
     \return second -- The seconds within the minute, <tt>ss</tt>.
   */
-  std::string second () const {
+  inline std::string second () const {
     return second_p;
   }
 
@@ -244,10 +258,24 @@ class Timestamp {
 
     \param second -- The seconds within the minute, <tt>ss</tt>.
   */
-  void setSecond (std::string const &second);
+  inline void setSecond (std::string const &second) {
+    second_p = second;
+  }
+  
+  /*!
+    \brief Provide a summary of the internal status
+  */
+  inline void summary () {
+    summary (std::cout);
+  }
+  
+  /*!
+    \brief Provide a summary of the internal status
+  */
+  void summary (std::ostream &os);    
   
   // -------------------------------------------------------------------- Methods
-
+  
   /*!
     \brief Get the time as <tt>timer</tt> object
 
