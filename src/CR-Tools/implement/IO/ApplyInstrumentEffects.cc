@@ -88,7 +88,7 @@ namespace CR { // Namespace CR -- begin
 
       nAnts = input.ncolumn();
       nFreq = input.nrow();
-      if ((nAnts != AntIDs_p.nelements()) || (nFreq != frequency_p.nelements())){
+      if ((nAnts != (int)AntIDs_p.nelements()) || (nFreq != (int)frequency_p.nelements())){
 	cerr << "ApplyInstrumentEffects::ApplyEffects: " << 
 	  "Shape of input matrix does not match AntIDs or frequencies!!" << endl;
 	return Matrix<DComplex>();

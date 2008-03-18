@@ -71,7 +71,7 @@ namespace CR { // Namespace CR -- begin
   {
     noise.resize(frequencies.nelements()); // delete potential entries in result vector
     Double bandwidth = frequencies(frequencies.nelements()-1)-frequencies(0);
-    for (long i=0; i<frequencies.nelements(); ++i)
+    for (long i=0; i<(int)frequencies.nelements(); ++i)
     {
       Double T = 0.0;
       if (frequencies(i) > 0.0)					// set DC term or negative frequencies to zero

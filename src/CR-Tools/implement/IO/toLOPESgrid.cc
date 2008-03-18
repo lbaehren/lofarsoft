@@ -100,12 +100,12 @@ namespace CR { // Namespace CR -- begin
       
       niAnts = inFFT.ncolumn();
       niFreq = inFFT.nrow();
-      if (niAnts != data_p.ncolumn()){
+      if (niAnts != (int)data_p.ncolumn()){
 	cerr << "toLOPESgrid::AddFFTData: " << "Different number of channels in input and stored data!" 
 	     << endl;
 	return False;
       };
-      if (niFreq != frequency.nelements()){
+      if (niFreq != (int)frequency.nelements()){
 	cerr << "toLOPESgrid::AddFFTData: " << "Inconsistent data: inFFT.nrow() != len(frequency)" 
 	     << endl;
 	return False;

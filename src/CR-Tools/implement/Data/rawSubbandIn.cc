@@ -105,7 +105,6 @@ namespace CR { // Namespace CR -- begin
     try {
       int veclen=0;
       size_t datalen,datasize;
-      uint ui;
       Bool ok;
       struct BlockHeader BHead;
 
@@ -229,7 +228,7 @@ namespace CR { // Namespace CR -- begin
 	  if ( ui != datalen ) {
 	    cerr << "rawSubbandIn:getData: Failed to read in full datablock. "  << endl;
 	  };
-	  for (sample=0; sample<FHead.nrSamplesPerBeamlet; sample++){
+	  for (sample=0; sample<(int)FHead.nrSamplesPerBeamlet; sample++){
 	    sindex = (int)ceil((blockdates(bnum)-startdate)*FHead.sampleRate)+sample;
 	    if (sindex>=0 && sindex<nSamples){
 	      for (beamlet=0; beamlet<FHead.nrBeamlets; beamlet++){
