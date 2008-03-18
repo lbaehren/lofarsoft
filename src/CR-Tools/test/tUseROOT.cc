@@ -53,6 +53,9 @@
 #include <TH1F.h>
 #include <TFile.h>
 #include <TGraph.h>
+#include <TMatrixF.h>
+#include <TMatrixD.h>
+#include <TMath.h>
 #include <TRandom.h>
 #include <TObjArray.h>
 #include <TSpectrum.h>
@@ -68,6 +71,110 @@
 using std::cerr;
 using std::cout;
 using std::endl;
+
+// ------------------------------------------------------------------------------
+
+/*!
+  \brief Test classes and operations contained in TMatrix
+
+  \return nofFailedTests -- The number of failed tests within this function
+*/
+int test_TMatrix () 
+{
+  cout << "\n[test_TMatrix]\n" << endl;
+
+  int nofFailedTests (0);
+
+  cout << "[1] Testing TMatrixF ..." << endl;
+  try {
+    TMatrixF b(2,3);
+    TMatrixF a(4,4);
+    b.ResizeTo(a);
+    b = a;
+  } catch (std::string message) {
+    cerr << "[test_TMatrix] " << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[2] Testing TMatrixD ..." << endl;
+  try {
+    TMatrixD b(2,3);
+    TMatrixD a(4,4);
+    //
+    b.ResizeTo(a);
+    b = a;
+    //
+    a.Invert();
+  } catch (std::string message) {
+    cerr << "[test_TMatrix] " << message << endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+// ------------------------------------------------------------------------------
+
+/*!
+  \brief Test classes and operations contained in TMath
+
+  \return nofFailedTests -- The number of failed tests within this function
+*/
+int test_TMath () 
+{
+  cout << "\n[test_TMath]\n" << endl;
+
+  int nofFailedTests (0);
+
+  cout << "[1] Round to nearest integer ..." << endl;
+  try {
+    Int_t intValue;
+    Float_t floatValue (1.4);
+    Double_t doubleValue (1.6);
+    
+    intValue = TMath::Nint (floatValue);
+    intValue = TMath::Nint (doubleValue);
+  } catch (std::string message) {
+    cerr << "[test_TMath] " << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[2] Special functions ..." << endl;
+  try {
+    Double_t x (0.5);
+    //
+    cout << "-- DiLog(x)      = " << TMath::DiLog(x) << endl;
+    cout << "-- Erf(x)        = " << TMath::Erf(x) << endl;
+    cout << "-- Erfc(x)       = " << TMath::Erfc(x) << endl;
+    cout << "-- ErfInverse(x) = " << TMath::ErfInverse(x) << endl;
+  } catch (std::string message) {
+    cerr << "[test_TMath] " << message << endl;
+    nofFailedTests++;
+  }  
+
+  cout << "[3] Array operations ..." << endl;
+  try {
+    Long64_t nelem (20);
+    Double_t *array;
+    // adjust array size
+    array = new Double_t [nelem];
+    // fill the array with some values
+    for (Long64_t n(0); n<nelem; n++) {
+      array[n] = 0.5*n;
+    }
+    // do something with the array
+    cout << "-- nof. array elements = " << nelem << endl;
+//     cout << "-- min. array value    = " << TMath::MinElement(nelem,array) << endl;
+//     cout << "-- max. array value    = " << TMath::MaxElement(nelem,array) << endl;
+    // release allocated memory
+    delete [] array;
+  } catch (std::string message) {
+    cerr << "[test_TMath] " << message << endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
 
 // ------------------------------------------------------------------------------
 
@@ -358,22 +465,34 @@ int main (int argc,
 	  char *argv[])
 {
   int nofFailedTests (0);
+  bool haveData (false);
  
   if (argc < 2) {
-    std::cerr << "[tUseROOT] Missing name of input data file!" << std::endl;
-    std::cerr << "" << std::endl;    
-    std::cerr << "\ttUseROOT <eventfile>" << std::endl;    
-    std::cerr << "" << std::endl;    
-    return -1;
+    cerr << "[tUseROOT] Missing name of input data file!" << std::endl;
+    cerr << "" << std::endl;    
+    cerr << "\ttUseROOT <eventfile>" << std::endl;    
+    cerr << "" << std::endl;    
+    cerr << "Omitting tests working on external data." << std::endl;    
+    cerr << "" << std::endl;    
+    //
+    haveData = false;
   }
   
-  std::string filename = argv[1];
+  /* Basic tests for working with ROOT classes */
   
-  // Tests
+  nofFailedTests += test_TMatrix ();
+  nofFailedTests += test_TMath ();
+
+  /* Operational tests working on external data */
   
-  nofFailedTests += test_histogram2file();
-  nofFailedTests += test_lopesevent2hist (filename);
-//   nofFailedTests += test_processing (filename);
+  if (haveData) {
+    // get filename from argument list
+    std::string filename = argv[1];
+    // run the tests
+    nofFailedTests += test_histogram2file();
+    nofFailedTests += test_lopesevent2hist (filename);
+    nofFailedTests += test_processing (filename);
+  }
   
   cout << nofFailedTests << " failed tests." << endl;
   
