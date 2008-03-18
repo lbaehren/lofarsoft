@@ -71,20 +71,21 @@ using CR::LopesEventIn;
   example configuration file
   \verbatim
   =================================================================  
-  caltablepath  = /home/horneff/lopescasa/data/LOPES/LOPES-CalTable
-  RotatePos     = true
-  GeneratePlots = true
-  SinglePlots   = true
-  PlotRawData   = false
-  verbose       = true
-  simplexFit    = true
-  doTVcal       = default
-  plotStart     = -2.05e-6
-  plotEnd       = -1.60e-6
+  caltablepath       = /home/horneff/lopescasa/data/LOPES/LOPES-CalTable
+  RotatePos          = true
+  GeneratePlots      = true
+  SinglePlots        = true
+  PlotRawData        = false
+  CalculateMaxima    = false
+  verbose            = true
+  simplexFit         = true
+  doTVcal            = default
+  plotStart          = -2.05e-6
+  plotEnd            = -1.60e-6
   upsamplingExponent = 1
-  summaryColumns = 3
-  flagged = 10101
-  flagged = 10102
+  summaryColumns     = 3
+  flagged            = 10101
+  flagged            = 10102
   \endverbatim
   This example means:
   <ul>
@@ -94,6 +95,7 @@ using CR::LopesEventIn;
     <li>there will be generated plots of the analaysed event,
     <li>produces a plot for each antenna,
     <li>the raw ADC values (FX) are not plotted,
+    <li>calcutlates the time and the height of the maximum and the minimum in the plot range 
     <li>there will be more text output during the analysis,
     <li>the simplex fit of the arrival direction and radius of curvature is
     done,
@@ -150,6 +152,7 @@ int main (int argc, char *argv[])
     bool generatePlots = true;		// the plot prefix will be the name of the event file
     bool singlePlots = false;		// by default there are no single plots for each antenna
     bool PlotRawData = false;		// by default there the raw data are not plotted
+    bool CalculateMaxima = false;	// by default the maxima are not calculated
     bool RotatePos = true; 		// should be true if coordinates are given in KASKADE frame
     bool verbose = true;
     bool simplexFit = true;
@@ -201,6 +204,7 @@ int main (int argc, char *argv[])
         std::cerr << "GeneratePlots = true\n";
         std::cerr << "SinglePlots = true\n";
         std::cerr << "PlotRawData = false\n";
+        std::cerr << "CalculateMaxima = false\n";
         std::cerr << "verbose = true\n";
         std::cerr << "simplexFit = true\n";
         std::cerr << "doTVcal = default\n";
@@ -288,6 +292,26 @@ int main (int argc, char *argv[])
           {
             std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
             std::cerr << "PlotRawData must be either 'true' or 'false'.\n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+        }	
+
+        if ( (keyword.compare("calculatemaxima")==0) || (keyword.compare("CalculateMaxima")==0) ||
+             (keyword.compare("Calculatemaxima")==0) )
+        {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
+	  {
+	    CalculateMaxima = true;
+	    std::cout << "CalculateMaxima set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
+	  {
+	    CalculateMaxima = false;
+	    std::cout << "CalculateMaxima set to 'false'.\n";
+          } else
+          {
+            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "CalculateMaxima must be either 'true' or 'false'.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
         }	
@@ -719,7 +743,7 @@ int main (int argc, char *argv[])
       // call the pipeline with an extra delay = 0.
       results = eventPipeline.ProcessEvent(filename, azimuth, zenith, distance, core_x, core_y, RotatePos,
                                            plotprefix, generatePlots, static_cast< Vector<int> >(flagged), verbose, 
-                                           simplexFit, 0., doTVcal, singlePlots, PlotRawData); 
+                                           simplexFit, 0., doTVcal, singlePlots, PlotRawData, CalculateMaxima); 
 
       // make a postscript with a summary of all plots
       // if summaryColumns = 0 the method does not create a summary.

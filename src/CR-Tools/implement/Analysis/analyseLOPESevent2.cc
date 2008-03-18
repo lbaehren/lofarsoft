@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id:: analyseLOPESevent2.cc 1260 2008-02-27 16:07:55Z schroeder       $ |
+ | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2008                                                  *
@@ -95,7 +95,8 @@ namespace CR { // Namespace CR -- begin
 					  Double ExtraDelay,
 					  int doTVcal,
 					  bool SinglePlots,
-					  bool PlotRawData){
+					  bool PlotRawData,
+					  bool CalculateMaxima){
     Record erg;
     try {
 //      ofstream latexfile;			// WARNING: causes problem in fitCR2gauss.cc line 200
@@ -310,7 +311,7 @@ namespace CR { // Namespace CR -- begin
             pipeline_p->plotAllAntennas(PlotPrefix, lev_p, AntennaSelection, true, getUpsamplingExponent(),false);
 
           // calculate the maxima
-          pipeline_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false);
+          if (CalculateMaxima) pipeline_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false);
         }
 
         if (PlotRawData)       
@@ -322,7 +323,7 @@ namespace CR { // Namespace CR -- begin
             pipeline_p->plotAllAntennas(PlotPrefix + "-raw", lev_p, AntennaSelection, false, getUpsamplingExponent(), true);
 
           // calculate the maxima
-          pipeline_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), true);
+          if (CalculateMaxima) pipeline_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), true);
         }
 
 
