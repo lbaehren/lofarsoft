@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id::                                                                 $ |
+ | $Id:: NewClass.h 1159 2007-12-21 15:40:14Z baehren                    $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -70,8 +70,13 @@ using std::endl;
 
   \author Lars B&auml;hren
 
-  <u>Note:</u> A number of the tests performed will not work with the original CASA
-  libraries.
+  <h3>Notes</h3>
+
+  <ol>
+    <li>Due to the split of the code base and the discontinued developement of
+    the original CASA libraries, some of the test might work with <i>casacore</i>
+    only; this needs to be handled by precompiler statements.
+  </ol>
 */
 
 
@@ -1264,6 +1269,17 @@ int test_Containers ()
 /*!
   \brief Tests for classes in casa/Quanta
 
+  Create various quantities, e.g. like
+  \code
+  casa::Quantity time (0.5,"s");
+  casa::Quantity length (100,"m");
+  casa::Quantity freq (200.0,"MHz");
+  \endcode
+  and test conversion or combination.
+  \code
+  casa::Quantity velocity = length/time;
+  \endcode
+  
   \return nofFailedTests -- The number of failed test within this function
 */
 int test_Quanta ()
@@ -1319,6 +1335,21 @@ int test_Quanta ()
     cout << "-- Freq [MHz] = " << freq.get(casa::Unit("MHz")) << endl;
     cout << "-- Freq [kHz] = " << freq.get(casa::Unit("kHz")) << endl;
     cout << "-- Freq [ Hz] = " << freq.get(casa::Unit("Hz")) << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[4] Operations with two quantities ..." << endl;
+  try {
+    casa::Quantity length (100.0,"m");
+    casa::Quantity time (2,"s");
+    //
+    casa::Quantity velocity = length/time;
+    //
+    cout << "-- Length   = " << length << endl;
+    cout << "-- Time     = " << time   << endl;
+    cout << "-- Velocity = " << velocity << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
