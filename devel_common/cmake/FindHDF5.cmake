@@ -97,7 +97,13 @@ FIND_LIBRARY (libhdf5_hl
 
 if (libhdf5_hl)
   list (APPEND HDF5_LIBRARIES ${libhdf5_hl})
+else (libhdf5_hl)
+  message (SEND_ERROR "[FindHDF5] Unable to locate libhdf5_hl!")
 endif (libhdf5_hl)
+
+## -----------------------------------------------------------------------------
+## Determine library version
+
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
