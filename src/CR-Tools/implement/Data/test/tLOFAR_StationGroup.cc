@@ -32,6 +32,7 @@
 #include <Utilities/StringTools.h>
 
 // Namespace usage
+using std::cerr;
 using std::cout;
 using std::endl;
 using DAL::LOFAR_StationGroup;
@@ -80,7 +81,7 @@ int test_datasets (std::string const &filename)
 		      H5F_ACC_RDONLY,
 		      H5P_DEFAULT);
   } catch (std::string message) {
-    std::cerr << message << endl;
+    cerr << message << endl;
     nofFailedTests++;
   }
   
@@ -107,14 +108,14 @@ int test_datasets (std::string const &filename)
       // close HDF5 group
       h5error = H5Gclose (groupID);
     } else {
-      std::cerr << "--> Unable to perform test; invalid group ID!" << endl;
+      cerr << "--> Unable to perform test; invalid group ID!" << endl;
     }
     
     // close file
     h5error = H5Fclose (fileID);
     
   } else {
-    std::cerr << "--> Unable to perform test; invalid file ID!" << endl;
+    cerr << "--> Unable to perform test; invalid file ID!" << endl;
   }
 
   return nofFailedTests;
@@ -167,7 +168,7 @@ int test_construction (std::string const &filename)
     //
     group.summary(); 
   } catch (std::string message) {
-    std::cerr << message << endl;
+    cerr << message << endl;
     nofFailedTests++;
   }
   h5error = H5Eclear();
@@ -184,7 +185,7 @@ int test_construction (std::string const &filename)
     //
     group.summary(); 
   } catch (std::string message) {
-    std::cerr << message << endl;
+    cerr << message << endl;
     nofFailedTests++;
   }
   h5error = H5Eclear();
@@ -201,10 +202,10 @@ int test_construction (std::string const &filename)
 				"Station001");
       group.summary(); 
     } else {
-      std::cerr << "--> Unable to perform test; invalid file ID!" << endl;
+      cerr << "--> Unable to perform test; invalid file ID!" << endl;
     }
   } catch (std::string message) {
-    std::cerr << message << endl;
+    cerr << message << endl;
     nofFailedTests++;
   }
   h5error = H5Eclear();
@@ -228,13 +229,13 @@ int test_construction (std::string const &filename)
 	LOFAR_StationGroup group (groupID);
 	group.summary(); 
       } else {
-	std::cerr << "--> Unable to perform test; invalid group ID!" << endl;
+	cerr << "--> Unable to perform test; invalid group ID!" << endl;
       }
     } else {
-      std::cerr << "--> Unable to perform test; invalid file ID!" << endl;
+      cerr << "--> Unable to perform test; invalid file ID!" << endl;
     }
   } catch (std::string message) {
-    std::cerr << message << endl;
+    cerr << message << endl;
     nofFailedTests++;
   }
   h5error = H5Eclear();
@@ -344,10 +345,25 @@ int test_methods (std::string const &filename)
 
   // create LOFAR_StationGroup object to continue working with
   LOFAR_StationGroup group (filename,"Station001");
-
-  cout << "[1] Retrieve list of sampling freqencies ..." << endl;
+  
+  cout << "[1] Retrieve list of UNIX times ..." << endl;
   try {
-  std::string units ("MHz");
+#ifdef HAVE_CASA
+    // retrieve the values ...
+    casa::Vector<uint> times = group.times();
+    // .. and display them 
+    cout << "-- UNIX times = " << times << endl;
+#else
+    std::vector<uint> times = group.times();
+#endif
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[2] Retrieve list of sampling freqencies ..." << endl;
+  try {
+    std::string units ("MHz");
 #ifdef HAVE_CASA
     // retrieve the values ...
     casa::Vector<double> sampleFrequencies = group.sample_frequencies();
@@ -359,11 +375,11 @@ int test_methods (std::string const &filename)
     std::vector<double> sampleFrequencies = group.sample_frequencies();
 #endif    
   } catch (std::string message) {
-    std::cerr << message << endl;
+    cerr << message << endl;
     nofFailedTests++;
   }
 
-  cout << "[2] Retrieve list of data lengths ..." << endl;
+  cout << "[3] Retrieve list of data lengths ..." << endl;
   try {
 #ifdef HAVE_CASA
     casa::Vector<uint> dataLengths = group.data_lengths();
@@ -372,7 +388,7 @@ int test_methods (std::string const &filename)
     std::vector<uint> dataLenghts = group.data_lengths();
 #endif
   } catch (std::string message) {
-    std::cerr << message << endl;
+    cerr << message << endl;
     nofFailedTests++;
   }
   
@@ -408,7 +424,7 @@ int test_data (std::string const &filename)
     std::cout << "-- Data [0,]      = " << data.row(0)  << std::endl;
     std::cout << "-- Data [1,]      = " << data.row(1)  << std::endl;
   } catch (std::string message) {
-    std::cerr << message << endl;
+    cerr << message << endl;
     nofFailedTests++;
   }
 
@@ -429,7 +445,7 @@ int test_data (std::string const &filename)
     std::cout << "-- Data [0,]      = " << data.row(0)  << std::endl;
     std::cout << "-- Data [1,]      = " << data.row(1)  << std::endl;
   } catch (std::string message) {
-    std::cerr << message << endl;
+    cerr << message << endl;
     nofFailedTests++;
   }
 
@@ -448,10 +464,10 @@ int main (int argc,
     exit the program.
   */
   if (argc < 2) {
-    std::cerr << "[tLOFAR_StationGroup] Too few parameters!" << endl;
-    std::cerr << "" << endl;
-    std::cerr << "  tLOFAR_StationGroup <filename>" << endl;
-    std::cerr << "" << endl;
+    cerr << "[tLOFAR_StationGroup] Too few parameters!" << endl;
+    cerr << "" << endl;
+    cerr << "  tLOFAR_StationGroup <filename>" << endl;
+    cerr << "" << endl;
     return -1;
   }
 

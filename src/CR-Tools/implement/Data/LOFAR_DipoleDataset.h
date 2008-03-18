@@ -300,7 +300,8 @@ namespace DAL { // Namespace DAL -- begin
       \return channelID -- The unique identifier for a signal channel/dipole
               within the whole LOFAR array; this ID is created from a combination
 	      of station ID, RSP ID and RCU ID:
-	      \f$ N_{\rm RCU} + 10^{3} \times N_{\rm RSP} + 10^{6} N_{\rm Station} \f$
+	      \f$ N_{\rm RCU} + 10^{3} \times N_{\rm RSP} + 10^{6} \times
+	      N_{\rm Station} \f$
     */
     int channelID ();
 

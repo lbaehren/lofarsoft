@@ -422,6 +422,22 @@ int test_construction (std::string const &filename)
     std::cerr << message << endl;
     nofFailedTests++;
   }
+
+  cout << "[5] Test construction using pointer to DataReader object ..." << endl;
+  try {
+    cout << "-- creating pointer to DataReader object" << endl;
+    CR::DataReader *dr;
+    cout << "-- creating pointer to LOFAR_TBB object" << endl;
+    CR::LOFAR_TBB *tbb = new CR::LOFAR_TBB (filename,
+					    blocksize);
+    cout << "-- assigning pointers from one object to the other" << endl;
+    dr = tbb;
+    // display summary
+    tbb->summary();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
   
   return nofFailedTests;
 }

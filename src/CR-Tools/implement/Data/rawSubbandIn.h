@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2008                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2008                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -34,6 +34,7 @@
 
 // AIPS++/CASA header files
 #include <casa/aips.h>
+#include <casa/Arrays/ArrayIO.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/Arrays/ArrayMath.h>
@@ -51,7 +52,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class rawSubbandIn
     
-    \ingroup Data
+    \ingroup CR_Data
     
     \brief Read in the raw dump of subband data
     
@@ -148,6 +149,8 @@ namespace CR { // Namespace CR -- begin
 
     /*!
       \brief Provide a summary of the internal status
+
+      \param os -- Output stream to which the summary is written.
     */
     void summary (std::ostream &os);    
     
@@ -160,7 +163,8 @@ namespace CR { // Namespace CR -- begin
       
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
       
-      Currently generates one bogous "error message" when it has scanned the whole file...
+      Currently generates one bogous "error message" when it has scanned the
+      whole file...
     */
     Bool attachFile(String Filename);
     
@@ -173,7 +177,7 @@ namespace CR { // Namespace CR -- begin
 
       \return Matrix with the data
     */
-    Matrix<DComplex> getData(Double startdate, int nSamples, int pol);
+    Matrix<DComplex> getData (Double startdate, int nSamples, int pol);
 
 
     /*!
@@ -184,14 +188,30 @@ namespace CR { // Namespace CR -- begin
     Vector<Int> getSubbandIndices();
     
     
-    protected:
-
+  protected:
+    
     double ntohd(double in);
-
+    
     Int64 ntohll(Int64 in);
+    
+    /*!
+      \brief Read the header from the file
+      
+      \param fd     -- File pointer
+      \retval FHead -- File header structure
 
+      \return status -- Status of the operation
+    */
     Bool readFileHeader(FILE *fd, FileHeader &FHead);
+    
+    /*!
+      \brief Read the block header from the file
+      
+      \param fd     -- File pointer
+      \retval BHead -- Block header structure
 
+      \return status -- Status of the operation
+    */
     Bool readBlockHeader(FILE *fd, BlockHeader &BHead);
 
   private:
