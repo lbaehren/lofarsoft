@@ -46,7 +46,6 @@
 #include <casa/Containers/OrderedMap.h>
 #include <casa/Exceptions/Error.h>
 #include <casa/Utilities/Assert.h>
-#include <casa/Quanta/Quantum.h>
 
 #include "tests_common.h"
 
@@ -1266,98 +1265,6 @@ int test_Containers ()
 
 // ------------------------------------------------------------------------------
 
-/*!
-  \brief Tests for classes in casa/Quanta
-
-  Create various quantities, e.g. like
-  \code
-  casa::Quantity time (0.5,"s");
-  casa::Quantity length (100,"m");
-  casa::Quantity freq (200.0,"MHz");
-  \endcode
-  and test conversion or combination.
-  \code
-  casa::Quantity velocity = length/time;
-  \endcode
-  
-  \return nofFailedTests -- The number of failed test within this function
-*/
-int test_Quanta ()
-{
-  cout << "\nTesting classes in casa/Quanta ...\n" << endl;
-  
-  int nofFailedTests (0);
-
-  cout << "[1] Create Quantum<t> ..." << endl;
-  try {
-    casa::Quantum<int> quantInt (1,"s");
-    casa::Quantum<float> quantFloat (2.,"s");
-    casa::Quantum<double> quantDouble (3.,"s");
-    //
-    cout << "-- Quantum<int>    = " << quantInt    << endl;
-    cout << "-- Quantum<float>  = " << quantFloat  << endl;
-    cout << "-- Quantum<double> = " << quantDouble << endl;
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-
-  cout << "[2] Create Quantity = Quantum<Double> ..." << endl;
-  try {
-    casa::Quantity quantTime (0.5,"s");
-    casa::Quantity quantLength (100,"m");
-    casa::Quantity quantFreq (200.0,"MHz");
-    //
-    cout << "-- time      = " << quantTime   << endl;
-    cout << "-- length    = " << quantLength << endl;
-    cout << "-- frequency = " << quantFreq   << endl;
-    //
-    uint nelem (3);
-    casa::String unit ("deg");
-    casa::Vector<double> angles (nelem);
-    angles(0) = 0;
-    angles(1) = 45;
-    angles(2) = 90;
-    for (uint n(0); n<nelem; n++) {
-      casa::Quantity deg (angles(n),unit);
-      cout << "-- (" << angles(n) << "," << unit << ") -> " << deg << endl;
-    }
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-
-  cout << "[3] Conversion between units ..." << endl;
-  try {
-    casa::Quantity freq (200.0,"MHz");
-    // 
-    cout << "-- Freq [GHz] = " << freq.get(casa::Unit("GHz")) << endl;
-    cout << "-- Freq [MHz] = " << freq.get(casa::Unit("MHz")) << endl;
-    cout << "-- Freq [kHz] = " << freq.get(casa::Unit("kHz")) << endl;
-    cout << "-- Freq [ Hz] = " << freq.get(casa::Unit("Hz")) << endl;
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-
-  cout << "[4] Operations with two quantities ..." << endl;
-  try {
-    casa::Quantity length (100.0,"m");
-    casa::Quantity time (2,"s");
-    //
-    casa::Quantity velocity = length/time;
-    //
-    cout << "-- Length   = " << length << endl;
-    cout << "-- Time     = " << time   << endl;
-    cout << "-- Velocity = " << velocity << endl;
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-
-  return nofFailedTests;
-}
-
 // ------------------------------------------------------------------------------
 
 /*!
@@ -1380,10 +1287,6 @@ int main ()
   nofFailedTests += test_BasicMath();
   nofFailedTests += test_BasicSL();
   nofFailedTests += test_Containers();
-//   nofFailedTests += test_IO();
-//   nofFailedTests += test_Inputs();
-//   nofFailedTests += test_Logging();
-  nofFailedTests += test_Quanta();
 
   return nofFailedTests;
 }
