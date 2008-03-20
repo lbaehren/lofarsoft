@@ -383,6 +383,10 @@ namespace CR { // Namespace CR -- begin
       ccbeam = GetCCBeam(dr, antennaSelection).copy();
       pbeam = GetPBeam(dr, antennaSelection).copy();
 
+      // smooth the data
+      StatisticsFilter<Double> mf(3,FilterType::MEAN);
+      ccbeam = mf.filter(ccbeam);
+      pbeam = mf.filter(pbeam);
 
       // conversion to micro
       xaxis *= 1e6;
@@ -441,6 +445,10 @@ namespace CR { // Namespace CR -- begin
       xbeam = GetXBeam(dr, antennaSelection).copy();
       pbeam = GetPBeam(dr, antennaSelection).copy();
 
+      // smooth the data
+      StatisticsFilter<Double> mf(3,FilterType::MEAN);
+      xbeam = mf.filter(xbeam);
+      pbeam = mf.filter(pbeam);
 
       // conversion to micro
       xaxis *= 1e6;

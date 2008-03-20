@@ -116,7 +116,7 @@ namespace CR { // Namespace CR -- begin
 	cerr << "analyseLOPESevent2::ProcessEvent: " << "Failed to initialize the DataReader!" << endl;
 	return Record();
       };
-
+         
       //  Enable/disable doing the phase calibration as requested
       switch (doTVcal){
       case 0:
@@ -163,6 +163,24 @@ namespace CR { // Namespace CR -- begin
 	};
       };
 
+      
+      // Plot the raw data, if desired
+      if (PlotRawData)       
+      {
+        // Set Plot Interval
+        pipeline_p->setPlotInterval(plotStart(),plotStop());
+        
+	// plot upsampled raw data: either in seperated plots seperated or all traces in one plot
+        if (SinglePlots)
+          pipeline_p->plotAllAntennas(PlotPrefix+ "-raw", lev_p, AntennaSelection, true, getUpsamplingExponent(),true);
+        else
+          pipeline_p->plotAllAntennas(PlotPrefix + "-raw", lev_p, AntennaSelection, false, getUpsamplingExponent(), true);
+          
+	// calculate the maxima
+        if (CalculateMaxima) pipeline_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), true);
+      }
+
+      
       //initialize the pipeline
       Times = lev_p->timeValues();
       nsamples = Times.nelements();
@@ -186,7 +204,7 @@ namespace CR { // Namespace CR -- begin
       fitObject.setFitRangeSeconds(fitStart_p,fitStop_p);
 
       //perform the position fitting
-      Double center;
+      Double center=-1.8e-6;
       if (simplexFit) {
 	if (verbose) { cout << "analyseLOPESevent2::ProcessEvent: starting evaluateGrid()." << endl;};
 	if (! evaluateGrid(Az, El, distance, AntennaSelection, &center) ){
@@ -214,6 +232,7 @@ namespace CR { // Namespace CR -- begin
 	cerr << "analyseLOPESevent2::ProcessEvent: " << "Error during GetTCXP()!" << endl;
 	return Record();
       };
+      
       // smooth the data
       StatisticsFilter<Double> mf(3,FilterType::MEAN);
       ccBeam = mf.filter(ccBeam);
@@ -225,6 +244,11 @@ namespace CR { // Namespace CR -- begin
       xBeam = xBeam - mean(xBeam(remoteRegion));
       pBeam = pBeam - mean(pBeam(remoteRegion));
 
+      std::cout << "\nMean in the remote region should be low, as no substraction correction is done at the moment: ";
+      std::cout << "\nmean(ccBeam(remoteRegion)) = " << mean(ccBeam(remoteRegion));
+      std::cout << "\nmean(xBeam(remoteRegion)) = " << mean(xBeam(remoteRegion));
+      std::cout << "\nmean(pBeam(remoteRegion)) = " << mean(pBeam(remoteRegion)) << std::endl;
+      
       // do the fitting
       fiterg = fitObject.Fitgauss(xBeam, ccBeam, True, center);
       if ( !fiterg.isDefined("Xconverged") || !fiterg.isDefined("CCconverged") ){
@@ -277,7 +301,8 @@ namespace CR { // Namespace CR -- begin
       // calculate other stuff
       erg.define("rmsC",stddev(ccBeam(remoteRegion)));
       erg.define("rmsX",stddev(xBeam(remoteRegion)));
-      Matrix<Double> AntPos=pipeline_p->GetAntPositions();
+      Matrix<Double> AntPos; 
+      AntPos=pipeline_p->GetAntPositions();
       AntPos = toShower(AntPos, Az, El);
       Vector<Double> distances(nants);
 
@@ -293,40 +318,24 @@ namespace CR { // Namespace CR -- begin
       erg.define("Distance",distance);
 
       // Generate the plots
-      if ( (generatePlots) || (PlotRawData) )
+      if (generatePlots)
       {
         // Set Plot Interval
         pipeline_p->setPlotInterval(plotStart(),plotStop());
 
-        if (generatePlots)
-        {
-          // Plot x-beam and CC-beam
-          pipeline_p->plotCCbeam(PlotPrefix + "-CC", lev_p, AntennaSelection);
-          pipeline_p->plotXbeam(PlotPrefix + "-X", lev_p, AntennaSelection);
-          // Plot of all antenna traces together
-          pipeline_p->plotAllAntennas(PlotPrefix + "-all", lev_p, AntennaSelection, false, getUpsamplingExponent(),false);
+        // Plot x-beam and CC-beam
+        pipeline_p->plotCCbeam(PlotPrefix + "-CC", lev_p, AntennaSelection);
+        pipeline_p->plotXbeam(PlotPrefix + "-X", lev_p, AntennaSelection);
+        // Plot of all antenna traces together
+        pipeline_p->plotAllAntennas(PlotPrefix + "-all", lev_p, AntennaSelection, false, getUpsamplingExponent(),false);
+        
+	// Plot of upsampled antenna traces (seperated) 
+        if (SinglePlots)
+          pipeline_p->plotAllAntennas(PlotPrefix, lev_p, AntennaSelection, true, getUpsamplingExponent(),false);
 
-          // Plot of upsampled antenna traces (seperated) 
-          if (SinglePlots)
-            pipeline_p->plotAllAntennas(PlotPrefix, lev_p, AntennaSelection, true, getUpsamplingExponent(),false);
-
-          // calculate the maxima
-          if (CalculateMaxima) pipeline_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false);
-        }
-
-        if (PlotRawData)       
-        {
-          // plot upsampled raw data: either in seperated plots seperated or all traces in one plot
-          if (SinglePlots)
-            pipeline_p->plotAllAntennas(PlotPrefix+ "-raw", lev_p, AntennaSelection, true, getUpsamplingExponent(),true);
-          else
-            pipeline_p->plotAllAntennas(PlotPrefix + "-raw", lev_p, AntennaSelection, false, getUpsamplingExponent(), true);
-
-          // calculate the maxima
-          if (CalculateMaxima) pipeline_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), true);
-        }
-
-
+        // calculate the maxima
+        if (CalculateMaxima) pipeline_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false);
+        
         if (verbose)		// give out the names of the created plots
         {
           vector<string> plotlist = pipeline_p->getPlotList();
