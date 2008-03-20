@@ -167,7 +167,7 @@ class analyseLOPESevent2 : public analyseLOPESevent{
     
 
     /*!
-      \brief Process one event
+      \brief Process one event using the CompletePipeline class
 
       \param evname - path to the eventfile to be processed
       \param Az - value for the azimuth direction [in deg] (e.g. from KASCADE)
@@ -191,7 +191,7 @@ class analyseLOPESevent2 : public analyseLOPESevent{
 
       \return Record with the results.
     */
-    Record ProcessEvent(const string& evname,
+    Record RunPipeline (const string& evname,
 			Double Az,
 			Double El,
 			Double distance,
@@ -221,7 +221,7 @@ class analyseLOPESevent2 : public analyseLOPESevent{
   protected:
 
     //! the new pipeline object (like CRinvFFT + upsampling)
-    CompletePipeline *pipeline_p;
+    CompletePipeline pipeline;
     
   private:
    

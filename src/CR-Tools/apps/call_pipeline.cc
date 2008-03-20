@@ -35,11 +35,11 @@ using CR::LopesEventIn;
 
   \ingroup CR_Applications
 
-  \brief Calls the LOPES analysis pipeline in "analyseLOPESevent"
+  \brief Calls the LOPES analysis pipeline in "analyseLOPESevent2"
  
   \author Frank Schr&ouml;der
  
-  \date 2008/29/01
+  \date 2008/20/03
 
   <h3>Motivation</h3>
 
@@ -51,11 +51,12 @@ using CR::LopesEventIn;
 
   <h3>Prerequisites</h3>
   <br>
-  You need at least one event list file of the following format:<br>
+  You need at least one event list file (textfile) like the following example:<br>
   <br>
   <br>
-  Example event list<br>
   \verbatim
+  Example event list<br>
+  some lines of comments here<br>
   filename(event) azimuth[°] zenith[°] distance(radius of curvature)[m] core_x[m] core_y[m]
   =========================================================================================
   /home/schroeder/data/lopesstar/first.event 354.55215 63.882182 2750 8.6060886 -368.0933
@@ -64,14 +65,12 @@ using CR::LopesEventIn;
   \endverbatim
   <br>
   If you don't want to process the events in the default manner<br>
-  you can also provide a config file of the following format:<br>
+  you can also provide a config file (textfile), e.g. config.txt:<br>
   \verbatim
-  +++ not yet available +++
-  \endverbatim
-  example configuration file
-  \verbatim
+  example configuration file:
+  some lines of text above a line of '='
   =================================================================  
-  caltablepath       = /home/horneff/lopescasa/data/LOPES/LOPES-CalTable
+  caltablepath       = /home/schroeder/usg/data/lopes/LOPES-CalTable
   RotatePos          = true
   GeneratePlots      = true
   SinglePlots        = true
@@ -110,7 +109,7 @@ using CR::LopesEventIn;
   <h3>Example</h3>
 
   \verbatim
-  call_pipeline eventlist.txt configs.txt
+  ./call_pipeline eventlist.txt configs.txt
   \endverbatim
 
 */
@@ -199,7 +198,7 @@ int main (int argc, char *argv[])
         std::cerr << "Use the following file format ('=' seperated by spaces): \n\n";
         std::cerr << "some lines of text\n";
         std::cerr << "===================================\n";
-        std::cerr << "caltablepath = /home/horneff/lopescasa/data/LOPES/LOPES-CalTable\n";
+        std::cerr << "caltablepath = /home/schroeder/usg/data/lopes/LOPES-CalTable\n";
         std::cerr << "RotatePos = true\n";
         std::cerr << "GeneratePlots = true\n";
         std::cerr << "SinglePlots = true\n";
@@ -741,7 +740,7 @@ int main (int argc, char *argv[])
       eventPipeline.setUpsamplingExponent(upsamplingExponent);
 
       // call the pipeline with an extra delay = 0.
-      results = eventPipeline.ProcessEvent(filename, azimuth, zenith, distance, core_x, core_y, RotatePos,
+      results = eventPipeline.RunPipeline (filename, azimuth, zenith, distance, core_x, core_y, RotatePos,
                                            plotprefix, generatePlots, static_cast< Vector<int> >(flagged), verbose, 
                                            simplexFit, 0., doTVcal, singlePlots, PlotRawData, CalculateMaxima); 
 

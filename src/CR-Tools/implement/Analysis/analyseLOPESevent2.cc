@@ -43,7 +43,8 @@ namespace CR { // Namespace CR -- begin
   
   analyseLOPESevent2::~analyseLOPESevent2 ()
   {
-    clear();
+    // Set pipeline_p back to NULL (to avoid that analyseLOPESevent deletes pipeline)
+    pipeline_p = NULL;
   }
 
   // ============================================================================
@@ -66,9 +67,9 @@ namespace CR { // Namespace CR -- begin
   Bool analyseLOPESevent2::initPipeline(Record ObsRecord){
     try {
       clear();
-      pipeline_p= new CompletePipeline();
+      pipeline_p = &pipeline;
       lev_p = new LopesEventIn();
-      pipeline_p->SetObsRecord(ObsRecord);
+      pipeline.SetObsRecord(ObsRecord);
       cout << "\nPipeline initialised." << endl;
       
     } catch (AipsError x) {
@@ -80,7 +81,7 @@ namespace CR { // Namespace CR -- begin
 
   // --------------------------------------------------------------- ProcessEvent
 
-  Record analyseLOPESevent2::ProcessEvent(const string& evname,
+  Record analyseLOPESevent2::RunPipeline(const string& evname,
 					  Double Az,
 					  Double El,
 					  Double distance, 
@@ -99,20 +100,20 @@ namespace CR { // Namespace CR -- begin
 					  bool CalculateMaxima){
     Record erg;
     try {
-//      ofstream latexfile;			// WARNING: causes problem in fitCR2gauss.cc line 200
+      //      ofstream latexfile;	// WARNING: causes problem in fitCR2gauss.cc line 200, left here for future tests
       Int nsamples;
       Vector<Double> Times, ccBeam, xBeam, pBeam, tmpvec;
       Matrix<Double> TimeSeries;
       Record fiterg;
       
-      pipeline_p->setVerbosity(verbose);
+      pipeline.setVerbosity(verbose);
       // Generate the Data Reader
       if (! lev_p->attachFile(evname) ){
 	cerr << "analyseLOPESevent2::ProcessEvent: " << "Failed to attach file: " << evname << endl;
 	return Record();
       };
       // initialize the Data Reader
-      if (! pipeline_p->InitEvent(lev_p)){
+      if (! pipeline.InitEvent(lev_p)){
 	cerr << "analyseLOPESevent2::ProcessEvent: " << "Failed to initialize the DataReader!" << endl;
 	return Record();
       };
@@ -120,10 +121,10 @@ namespace CR { // Namespace CR -- begin
       //  Enable/disable doing the phase calibration as requested
       switch (doTVcal){
       case 0:
-	pipeline_p->doPhaseCal(False);
+	pipeline.doPhaseCal(False);
 	break;
       case 1:
-	pipeline_p->doPhaseCal(True);
+	pipeline.doPhaseCal(True);
 	break;
       default:
 	if ( lev_p->header().isDefined("EventClass") &&
@@ -131,9 +132,9 @@ namespace CR { // Namespace CR -- begin
 	  if (verbose){
 	    cout << "Simulation event: ";
 	  };
-	  pipeline_p->doPhaseCal(False);
+	  pipeline.doPhaseCal(False);
 	} else {
-	  pipeline_p->doPhaseCal(True);
+	  pipeline.doPhaseCal(True);
 	};
 	break;
       };
@@ -142,7 +143,7 @@ namespace CR { // Namespace CR -- begin
       // Generate the antenna selection
       Vector <Bool> AntennaSelection;
       Int i,j,id,nants,nselants, nflagged=FlaggedAntIDs.nelements();
-      AntennaSelection = pipeline_p->GetAntennaMask(lev_p);
+      AntennaSelection = pipeline.GetAntennaMask(lev_p);
       nants = AntennaSelection.nelements();
       Vector<Int> AntennaIDs,selAntIDs;
       lev_p->header().get("AntennaIDs",AntennaIDs);
@@ -168,29 +169,29 @@ namespace CR { // Namespace CR -- begin
       if (PlotRawData)       
       {
         // Set Plot Interval
-        pipeline_p->setPlotInterval(plotStart(),plotStop());
+        pipeline.setPlotInterval(plotStart(),plotStop());
         
 	// plot upsampled raw data: either in seperated plots seperated or all traces in one plot
         if (SinglePlots)
-          pipeline_p->plotAllAntennas(PlotPrefix+ "-raw", lev_p, AntennaSelection, true, getUpsamplingExponent(),true);
+          pipeline.plotAllAntennas(PlotPrefix+ "-raw", lev_p, AntennaSelection, true, getUpsamplingExponent(),true);
         else
-          pipeline_p->plotAllAntennas(PlotPrefix + "-raw", lev_p, AntennaSelection, false, getUpsamplingExponent(), true);
+          pipeline.plotAllAntennas(PlotPrefix + "-raw", lev_p, AntennaSelection, false, getUpsamplingExponent(), true);
           
 	// calculate the maxima
-        if (CalculateMaxima) pipeline_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), true);
+        if (CalculateMaxima) pipeline.calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), true);
       }
 
       
       //initialize the pipeline
       Times = lev_p->timeValues();
       nsamples = Times.nelements();
-      if (! pipeline_p->setPhaseCenter(XC, YC, RotatePos)){
+      if (! pipeline.setPhaseCenter(XC, YC, RotatePos)){
 	cerr << "analyseLOPESevent2::ProcessEvent: " << "Error during setPhaseCenter()!" << endl;
 	return Record();
       };
 
       //Flagg antennas
-      flagger.calcWeights(pipeline_p->GetTimeSeries(lev_p));
+      flagger.calcWeights(pipeline.GetTimeSeries(lev_p));
       AntennaSelection = AntennaSelection && flagger.parameters().asArrayBool("AntennaMask");
       nselants = ntrue(AntennaSelection);
 
@@ -220,15 +221,15 @@ namespace CR { // Namespace CR -- begin
 	  cerr << "analyseLOPESevent2::ProcessEvent: " << "Error during SimplexFit()!" << endl;
 	  return Record();
 	};
-	pipeline_p->setVerbosity(verbose);
+	pipeline.setVerbosity(verbose);
       };
       
       // Get the beam-formed data
-      if (! pipeline_p->setDirection(Az, El, distance)){
+      if (! pipeline.setDirection(Az, El, distance)){
 	cerr << "analyseLOPESevent2::ProcessEvent: " << "Error during setDirection()!" << endl;
 	return Record();
       };
-      if (! pipeline_p->GetTCXP(lev_p, TimeSeries, ccBeam, xBeam, pBeam, AntennaSelection)){
+      if (! pipeline.GetTCXP(lev_p, TimeSeries, ccBeam, xBeam, pBeam, AntennaSelection)){
 	cerr << "analyseLOPESevent2::ProcessEvent: " << "Error during GetTCXP()!" << endl;
 	return Record();
       };
@@ -302,7 +303,7 @@ namespace CR { // Namespace CR -- begin
       erg.define("rmsC",stddev(ccBeam(remoteRegion)));
       erg.define("rmsX",stddev(xBeam(remoteRegion)));
       Matrix<Double> AntPos; 
-      AntPos=pipeline_p->GetAntPositions();
+      AntPos=pipeline.GetAntPositions();
       AntPos = toShower(AntPos, Az, El);
       Vector<Double> distances(nants);
 
@@ -321,24 +322,24 @@ namespace CR { // Namespace CR -- begin
       if (generatePlots)
       {
         // Set Plot Interval
-        pipeline_p->setPlotInterval(plotStart(),plotStop());
+        pipeline.setPlotInterval(plotStart(),plotStop());
 
         // Plot x-beam and CC-beam
-        pipeline_p->plotCCbeam(PlotPrefix + "-CC", lev_p, AntennaSelection);
-        pipeline_p->plotXbeam(PlotPrefix + "-X", lev_p, AntennaSelection);
+        pipeline.plotCCbeam(PlotPrefix + "-CC", lev_p, AntennaSelection);
+        pipeline.plotXbeam(PlotPrefix + "-X", lev_p, AntennaSelection);
         // Plot of all antenna traces together
-        pipeline_p->plotAllAntennas(PlotPrefix + "-all", lev_p, AntennaSelection, false, getUpsamplingExponent(),false);
+        pipeline.plotAllAntennas(PlotPrefix + "-all", lev_p, AntennaSelection, false, getUpsamplingExponent(),false);
         
 	// Plot of upsampled antenna traces (seperated) 
         if (SinglePlots)
-          pipeline_p->plotAllAntennas(PlotPrefix, lev_p, AntennaSelection, true, getUpsamplingExponent(),false);
+          pipeline.plotAllAntennas(PlotPrefix, lev_p, AntennaSelection, true, getUpsamplingExponent(),false);
 
         // calculate the maxima
-        if (CalculateMaxima) pipeline_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false);
+        if (CalculateMaxima) pipeline.calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false);
         
         if (verbose)		// give out the names of the created plots
         {
-          vector<string> plotlist = pipeline_p->getPlotList();
+          vector<string> plotlist = pipeline.getPlotList();
           std::cout <<"\nList of generated plots:\n";
           for (int i = 0; i < plotlist.size(); i++) std::cout << plotlist[i] << "\n";
           std::cout << std::endl;
@@ -382,7 +383,7 @@ namespace CR { // Namespace CR -- begin
         latexfile << "\\begin{document}\n";
 
         // get list of generated plots and loop through the list
-        vector<string> plotlist = pipeline_p->getPlotList();
+        vector<string> plotlist = pipeline.getPlotList();
 
         for (int i = 0; i < plotlist.size(); i++)
         {
