@@ -272,11 +272,15 @@ namespace CR { // Namespace CR -- begin
       \param filename         -- Name of the .ps file (without ".ps") the plot will be written to
       \param DataReader       -- DataReader (LopesEventIn)
       \param antennaSelection -- Selection of antennas considered for the plot
+      \param ccBeamOffset      -- Constant noise (mean) of the cc-beam will be subtracted
+      \param pBeamOffset      -- Constant noise (mean) of the power beam will be subtracted
     */
 
     void plotCCbeam (const string& filename, 
                      DataReader *dr,
-                     Vector<Bool> antennaSelection = Vector<Bool>());
+                     Vector<Bool> antennaSelection = Vector<Bool>(),
+ 	 	     const double& ccBeamOffset = 0,
+ 	 	     const double& pBeamOffset = 0);
 
     /*!
       \brief Plots the X-beam
@@ -284,11 +288,15 @@ namespace CR { // Namespace CR -- begin
       \param filename         -- Name of the .ps file (without ".ps") the plot will be written to
       \param DataReader       -- DataReader (LopesEventIn)
       \param antennaSelection -- Selection of antennas considered for the plot
+      \param xBeamOffset      -- Constant noise (mean) of the x-beam will be subtracted
+      \param pBeamOffset      -- Constant noise (mean) of the power beam will be subtracted
     */
 
     void plotXbeam (const string& filename, 
                     DataReader *dr,
-                    Vector<Bool> antennaSelection = Vector<Bool>());
+                    Vector<Bool> antennaSelection = Vector<Bool>(),
+		    const double& xBeamOffset = 0,
+		    const double& pBeamOffset = 0);
 
     /*!
       \brief Plots the fieldstrength of all antennas after beam forming

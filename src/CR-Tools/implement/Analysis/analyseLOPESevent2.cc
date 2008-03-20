@@ -67,6 +67,7 @@ namespace CR { // Namespace CR -- begin
   Bool analyseLOPESevent2::initPipeline(Record ObsRecord){
     try {
       clear();
+      // To use the methods of analyseLOPESevent, a pointer to the pipeline is needed.
       pipeline_p = &pipeline;
       lev_p = new LopesEventIn();
       pipeline.SetObsRecord(ObsRecord);
@@ -240,15 +241,15 @@ namespace CR { // Namespace CR -- begin
       xBeam = mf.filter(xBeam);
       pBeam = mf.filter(pBeam);
 
+      // Calculate noise in the beamforming direction and store it for later subtraction
       Slice remoteRegion(remoteRange(0),(remoteRange(1)-remoteRange(0)));
-      ccBeam = ccBeam - mean(ccBeam(remoteRegion));
-      xBeam = xBeam - mean(xBeam(remoteRegion));
-      pBeam = pBeam - mean(pBeam(remoteRegion));
+      double ccBeamMean = mean(ccBeam(remoteRegion));
+      double xBeamMean = mean(xBeam(remoteRegion));
+      double pBeamMean = mean(pBeam(remoteRegion));
+      ccBeam -= ccBeamMean;
+      xBeam -= xBeamMean;
+      pBeam -= pBeamMean;
 
-      std::cout << "\nMean in the remote region should be low, as no substraction correction is done at the moment: ";
-      std::cout << "\nmean(ccBeam(remoteRegion)) = " << mean(ccBeam(remoteRegion));
-      std::cout << "\nmean(xBeam(remoteRegion)) = " << mean(xBeam(remoteRegion));
-      std::cout << "\nmean(pBeam(remoteRegion)) = " << mean(pBeam(remoteRegion)) << std::endl;
       
       // do the fitting
       fiterg = fitObject.Fitgauss(xBeam, ccBeam, True, center);
@@ -325,8 +326,8 @@ namespace CR { // Namespace CR -- begin
         pipeline.setPlotInterval(plotStart(),plotStop());
 
         // Plot x-beam and CC-beam
-        pipeline.plotCCbeam(PlotPrefix + "-CC", lev_p, AntennaSelection);
-        pipeline.plotXbeam(PlotPrefix + "-X", lev_p, AntennaSelection);
+        pipeline.plotCCbeam(PlotPrefix + "-CC", lev_p, AntennaSelection, ccBeamMean, pBeamMean);
+        pipeline.plotXbeam(PlotPrefix + "-X", lev_p, AntennaSelection, xBeamMean, pBeamMean);
         // Plot of all antenna traces together
         pipeline.plotAllAntennas(PlotPrefix + "-all", lev_p, AntennaSelection, false, getUpsamplingExponent(),false);
         

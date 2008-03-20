@@ -360,7 +360,9 @@ namespace CR { // Namespace CR -- begin
 
   void CompletePipeline::plotCCbeam(const string& filename,
 				    DataReader *dr,
-				    Vector<Bool> antennaSelection)
+				    Vector<Bool> antennaSelection,
+				    const double& ccBeamOffset,
+				    const double& pBeamOffset)
   {
     try 
     {
@@ -383,10 +385,10 @@ namespace CR { // Namespace CR -- begin
       ccbeam = GetCCBeam(dr, antennaSelection).copy();
       pbeam = GetPBeam(dr, antennaSelection).copy();
 
-      // smooth the data
+      // smooth the data and substract Offset
       StatisticsFilter<Double> mf(3,FilterType::MEAN);
-      ccbeam = mf.filter(ccbeam);
-      pbeam = mf.filter(pbeam);
+      ccbeam = mf.filter(ccbeam) - ccBeamOffset;
+      pbeam = mf.filter(pbeam) - pBeamOffset;
 
       // conversion to micro
       xaxis *= 1e6;
@@ -422,7 +424,9 @@ namespace CR { // Namespace CR -- begin
 
   void CompletePipeline::plotXbeam(const string& filename,
 				   DataReader *dr,
-				   Vector<Bool> antennaSelection)
+				   Vector<Bool> antennaSelection,
+				   const double& xBeamOffset,
+				   const double& pBeamOffset)
   {
     try 
     {
@@ -447,8 +451,8 @@ namespace CR { // Namespace CR -- begin
 
       // smooth the data
       StatisticsFilter<Double> mf(3,FilterType::MEAN);
-      xbeam = mf.filter(xbeam);
-      pbeam = mf.filter(pbeam);
+      xbeam = mf.filter(xbeam) - xBeamOffset;
+      pbeam = mf.filter(pbeam) - pBeamOffset;
 
       // conversion to micro
       xaxis *= 1e6;
