@@ -464,6 +464,14 @@ namespace CR { // Namespace CR -- begin
       Double meanaz, meanel, meandist, vecaz, vecel, vecdist;
       Bool running=True;
       
+      if (pipeline_p == NULL){
+	cerr << "analyseLOPESevent:SimplexFit: " << "Error: pipeline_p == NULL " << endl;
+	return False;	
+      };
+      if (lev_p == NULL){
+	cerr << "analyseLOPESevent:SimplexFit: " << "Error: lev_p == NULL " << endl;
+	return False;	
+      };
       pipeline_p->setVerbosity(False);
 
       // set start values
@@ -616,6 +624,16 @@ namespace CR { // Namespace CR -- begin
       Double maxaz=Az,maxel=El,maxheight=0.,maxcenter=-1.8e-6;
       Double az_,el_,height_,center_;
       Double stepfactor=1.;
+
+      if (pipeline_p == NULL){
+	cerr << "analyseLOPESevent:evaluateGrid: " << "Error: pipeline_p == NULL " << endl;
+	return False;	
+      };
+      if (lev_p == NULL){
+	cerr << "analyseLOPESevent:evaluateGrid: " << "Error: lev_p == NULL " << endl;
+	return False;	
+      };
+
 
       pipeline_p->setVerbosity(False);
 
