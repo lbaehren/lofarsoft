@@ -13,6 +13,9 @@ bdsm_default_opts = {'rms_clip': 3,       ### sigma's for hard threshold
                      'isl_clip': 3,       ### sigma's for island boundary
                      'print_timing': True,### print basic timing information
                      'verbose_fitting': 1,### print out extra information during fitting
+                     'noise_map': True,   ### calculate mean/rms map
+                     'bstat_box': (50,25),### box size and step for statistics calculations
+                     'spline_rank': 1,    ### rank of the interpolating function for rms/mean map
                      }
 
 

@@ -8,16 +8,11 @@ class Image:
       opts     : image options
       img_mask : image mask (or nomask)
 
-      nomask   : constant meaning that mask is absent
-
     Some Op's you apply to Image create additional attributes (such as island list)
     """
 
     img  = None
     opts = None
-    ### we use this fancy definition of nomask to simplify checking for it's 
-    ### presence and to ensure that arr[nomask] is empty array
-    nomask = N.array([False])
 
     def __init__(self, opts):
         self.opts = Opts(opts)

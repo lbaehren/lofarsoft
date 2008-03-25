@@ -8,7 +8,8 @@ class Op_gausfit(Op):
         for idx, isl in enumerate(img.islands):
             if img.opts.verbose_fitting:
                 print "Fitting isl #", idx
-            t = self.fit_island(isl, img.opts.beam, img.opts.thresh_isl, img.opts.rms, img.opts.verbose_fitting)
+            t = self.fit_island(isl, img.opts.beam, isl.mean + isl.rms*img.opts.isl_clip,
+                                isl.rms, img.opts.verbose_fitting)
             isl.gaus_fcn = t
             isl.gaul = self._normalize_parameters(isl, t.parameters)
 

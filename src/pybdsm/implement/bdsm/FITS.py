@@ -33,7 +33,8 @@ class Op_loadFITS(Op):
 
         img.fits_hdr = hdr
         img.img = data
-        img.img_mask = img.nomask
+        img.opts.masked = False
+        img.img_mask = False
 
         ### set up conversion routines
         self.init_wcs(img.opts, img.fits_hdr)
