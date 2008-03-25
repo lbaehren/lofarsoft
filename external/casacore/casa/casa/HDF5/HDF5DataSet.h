@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: HDF5DataSet.h 20284 2008-03-13 12:58:07Z gervandiepen $
+//# $Id: HDF5DataSet.h 20290 2008-03-20 15:25:20Z gervandiepen $
 
 #ifndef CASA_HDF5DATASET_H
 #define CASA_HDF5DATASET_H
@@ -47,7 +47,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
   // A class representing an HDF5 data set.
   // </summary>
 
-  // <use visibility=local>
+  // <use visibility=export>
 
   // <reviewed reviewer="" date="" tests="tHDF5DataSet.cc">
   // </reviewed>
