@@ -58,8 +58,6 @@ class Island:
       opts      : reference to image's options
       mean      : average mean for island
       rms       : average rms for island
-      runs      : pixel runs comprising the island (present only when pixel-runs
-                  algorithm is used for island detection)
     """
     def __init__(self, img, labels, bbox, idx):
         bbox = self._expand_bbox(bbox, img.img.shape)
