@@ -22,7 +22,6 @@ if len(sys.argv) < 2 or len(sys.argv) > 6:
 # other customizations
 nbins = 100
 plots_per_page = 4      # probably needs to be even number
-antenna_numbers = range(16)
 data_name = "DATA"
 
 # try to find MS name from input string.  later used to name output plots
@@ -43,6 +42,13 @@ else: range_plot = int(sys.argv[5])
 msds= dal.dalDataset()
 if ( msds.open(sys.argv[1]) ):
 	sys.exit(1)
+
+# get antenna names
+anttab = msds.openTable('ANTENNA')
+namecol = anttab.getColumn('NAME')
+name = namecol.data()
+num_ants = len(name)
+antenna_numbers = range(num_ants)
 
 # open table with filter set to get autocorrelations
 tablename = "MAIN";
@@ -92,9 +98,9 @@ elif quantity_plot == 'time':
 for i in antenna_range:
 	if antenna_range.index(i)%plots_per_page == 0:
 		if i > 0:
-			savefig('plot' + msname + '_' + str(antenna_range.index(i)/plots_per_page) + '.jpg')
+			savefig('vv' + msname + '_' + str(antenna_range.index(i)/plots_per_page) + 'hist.jpg')
 			close()
-			print 'saved figure as ' + 'plot' + msname + '_' + str(antenna_range.index(i)/plots_per_page) + '.jpg'
+			print 'saved figure as ' + 'vv' + msname + '_' + str(antenna_range.index(i)/plots_per_page) + 'hist.jpg'
 		fig = figure(antenna_range.index(i)/plots_per_page+1)
 		axis('off')
 		title(title_string)      # plot title on each new figure
@@ -143,7 +149,7 @@ for i in antenna_range:
 		if ax.is_first_row() and ax.is_first_col():
 			legend(('xx','xy','yx','yy'),4,numpoints=4)
 
-savefig('plot' + msname + '_' + str((antenna_range.index(i)+1)/plots_per_page) + '.jpg')
+savefig('vv' + msname + '_' + str((antenna_range.index(i)+1)/plots_per_page) + 'hist.jpg')
 close()
-print 'saved figure as ' + 'plot' + msname + '_' + str((antenna_range.index(i)+1)/plots_per_page) + '.jpg'
+print 'saved figure as ' + 'vv' + msname + '_' + str((antenna_range.index(i)+1)/plots_per_page) + 'hist.jpg'
 clf()
