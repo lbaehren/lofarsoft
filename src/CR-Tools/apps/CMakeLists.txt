@@ -103,6 +103,23 @@ if (HAVE_CASA OR HAVE_CASACORE)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
+## readLopesCalTable
+
+if (HAVE_CASA OR HAVE_CASACORE)
+  if (HAVE_ROOT AND HAVE_FFTW3)
+    add_executable (readLopesCalTable readLopesCalTable.cc)
+    ## linker instructions
+    target_link_libraries (readLopesCalTable
+      cr
+      ${FFTW3_LIBRARIES}
+      ${ROOT_LIBRARIES}
+      )
+    ## installation instructions
+  list (APPEND cr_apps readLopesCalTable)
+  endif (HAVE_ROOT AND HAVE_FFTW3)
+endif (HAVE_CASA OR HAVE_CASACORE)
+
+## -------------------------------------------------------------------
 ## tbbStatistics
 
 if (HAVE_CASA OR HAVE_CASACORE)
