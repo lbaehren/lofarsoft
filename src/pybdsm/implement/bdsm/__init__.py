@@ -2,10 +2,11 @@ from FITS import Op_loadFITS
 from bstat import Op_bstat, Op_thresholds
 from islands import Op_islands
 from gausfit import Op_gausfit
+from fittedimage import Op_fittedimage
 from output import Op_outlist
 
 fits_chain = [Op_loadFITS(), Op_bstat(), Op_thresholds(), Op_islands(),
-              Op_gausfit(), Op_outlist()]
+              Op_gausfit(), Op_fittedimage(), Op_outlist()]
 
 bdsm_default_opts = {'rms_clip': 3,       ### sigma's for hard threshold
                      'isl_min_size': 4,   ### minimal island size, pixels
@@ -16,6 +17,7 @@ bdsm_default_opts = {'rms_clip': 3,       ### sigma's for hard threshold
                      'noise_map': True,   ### calculate mean/rms map
                      'bstat_box': (50,25),### box size and step for statistics calculations
                      'spline_rank': 1,    ### rank of the interpolating function for rms/mean map
+                     'fittedimage_clip': .1### sigma's for clipping gaussians while creating fittedimage
                      }
 
 
