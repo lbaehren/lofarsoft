@@ -24,6 +24,7 @@ set (include_locations
   /opt/include
   /opt/root/include
   /usr/local
+  /opt/auger/root-v5.18.00
 )
 
 set (lib_locations
@@ -38,6 +39,7 @@ set (lib_locations
   /opt/lib
   /opt/root/lib
   /usr/local
+  /opt/auger/root-v5.18.00
 )
 
 ## -----------------------------------------------------------------------------
@@ -48,6 +50,7 @@ find_path (ROOT_INCLUDES tCanvas.h TCint.h TObject.h
   PATH_SUFFIXES
   root
   root/include
+  include
   NO_DEFAULT_PATH
   )
 
@@ -104,6 +107,7 @@ foreach (lib ${libs})
     PATH_SUFFIXES
     root
     root/lib
+    lib
     NO_DEFAULT_PATH
     )
   ## if the library could be located, it is added to the list
