@@ -10,7 +10,7 @@
 # Create header of tex file
 cat >> results.tex << EOF
 \documentclass[a4paper]{article}
-\usepackage{psfig,a4wide}
+\usepackage{graphicx,a4wide}
 \setlength{\textheight}{24cm}
 \setlength{\topmargin}{0.0cm}
 \parindent=0pt
@@ -31,9 +31,9 @@ prefix=${filename%-all.ps}
 
 # Add one line for the three plots of each event
 cat >> results.tex << EOF
-$f\quad\begin{minipage}[h]{0.32\textwidth}\psfig{figure=$prefix-all.ps,width=\textwidth,angle=-90}\end{minipage}
-\$\;\$\begin{minipage}[h]{0.32\textwidth}\psfig{figure=$prefix-CC.ps,width=\textwidth,angle=-90}\end{minipage}
-\$\;\$\begin{minipage}[h]{0.32\textwidth}\psfig{figure=$prefix-X.ps,width=\textwidth,angle=-90}\end{minipage}\\
+$f\quad\begin{minipage}[h]{0.32\textwidth}\includegraphics[angle=-90,width=\textwidth]{$prefix-all.ps}\end{minipage}
+\$\;\$\begin{minipage}[h]{0.32\textwidth}\includegraphics[angle=-90,width=\textwidth]{$prefix-CC.ps}\end{minipage}
+\$\;\$\begin{minipage}[h]{0.32\textwidth}\includegraphics[angle=-90,width=\textwidth]{$prefix-X.ps}\end{minipage}\\
 EOF
 
 
@@ -46,5 +46,3 @@ EOF
 
 # run latex and create ps-file results.ps
 latex results.tex ; dvips results 
-
-
