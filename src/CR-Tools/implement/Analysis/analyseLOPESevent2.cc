@@ -182,7 +182,19 @@ namespace CR { // Namespace CR -- begin
         if (CalculateMaxima) pipeline.calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), true);
       }
 
-      
+      // if there are no plots and now fits requested, stop here
+      if (!generatePlots && !simplexFit)
+      {
+        if (verbose)		// give out the names of the created plots
+        {
+          vector<string> plotlist = pipeline.getPlotList();
+          std::cout <<"\nList of generated plots:\n";
+          for (int i = 0; i < plotlist.size(); i++) std::cout << plotlist[i] << "\n";
+          std::cout << std::endl;
+        }
+        return Record();
+      }
+
       //initialize the pipeline
       Times = lev_p->timeValues();
       nsamples = Times.nelements();
@@ -208,7 +220,6 @@ namespace CR { // Namespace CR -- begin
       //perform the position fitting
       Double center=-1.8e-6;
       if (simplexFit) {
-	if (verbose) { cout << "analyseLOPESevent2::ProcessEvent: starting evaluateGrid()." << endl;};
 	if (! evaluateGrid(Az, El, distance, AntennaSelection, &center) ){
 	  cerr << "analyseLOPESevent2::ProcessEvent: " << "Error during evaluateGrid()!" << endl;
 	  return Record();
@@ -377,7 +388,7 @@ namespace CR { // Namespace CR -- begin
       {
         // Create header for latex file
         latexfile << "\\documentclass[a4paper]{article}\n";
-        latexfile << "\\usepackage{psfig,a4wide}\n";
+        latexfile << "\\usepackage{graphicx,a4wide}\n";
         latexfile << "\\setlength{\\textheight}{24cm}\n";
         latexfile << "\\setlength{\\topmargin}{0.0cm}\n";
         latexfile << "\\parindent=0pt\n";
@@ -392,8 +403,9 @@ namespace CR { // Namespace CR -- begin
           if ( (i > 0) && ((i % columns) == 0) ) latexfile << "\\newline\n";
 
           // add plot to latexfile
-          latexfile << "\\begin{minipage}[h]{" << (0.999/columns) << "\\textwidth}\\psfig{figure="
-              << plotlist[i] << ",width=\\textwidth,angle=-90}\\end{minipage}\n";
+          latexfile << "\\begin{minipage}[h]{" << (0.999/columns) 
+                    << "\\textwidth}\\includegraphics[angle=-90,width=\\textwidth]{"
+                    << plotlist[i] << "}\\end{minipage}\n";	
         }
         // finish the latex file and close it
         latexfile << "\\end{document}\n";

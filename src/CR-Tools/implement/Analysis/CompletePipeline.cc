@@ -675,6 +675,10 @@ namespace CR { // Namespace CR -- begin
       Vector<Double> timeRange;			// time values
       Matrix<Double> yValues;			// y-values
       Vector<Double> trace;			// trace currently processed
+      vector<double> maxima;			// Stores the calculated maxima
+      vector<double> minima;			// Stores the calculated minima
+      vector<double> maxima_time;		// Stores the calculated time of the maxima
+      vector<double> minima_time;		// Stores the calculated time of the minima
 
       if (rawData)
         std::cout << "\nLooking for maxima in the raw data FX: \n";
@@ -735,10 +739,38 @@ namespace CR { // Namespace CR -- begin
           } 
 	}  
 
+        // store the calculated values for later calculation of the mean
+	// multiply by 1e6 for conversion to micro
+        maxima.push_back(maximum*1e6);
+        maxima_time.push_back(timeRange(maxtimevalue)*1e6);
+        minima.push_back(minimum*1e6);
+        minima_time.push_back(timeRange(mintimevalue)*1e6);
+
+
+        // print the calculated values
         std::cout << "Antenna " << i+1 << ": \t maximum[micro] = " << maximum*1e6 
                   << "\t at time[micro s] = " << timeRange(maxtimevalue)*1e6 << "\n";
         std::cout << "Antenna " << i+1 << ": \t minimum[micro] = " << minimum*1e6 
                   << "\t at time[micro s] = " << timeRange(mintimevalue)*1e6 << "\n";
+      }
+
+      // calculate the averages and the range if there is more than one value
+      if (maxima.size() > 1)
+      {
+        std::cout << "Summary for the maxima:\n" 
+                  << "Amplitude range [micro]:   " << min(static_cast< Vector<Double> >(maxima)) 
+                  << " to " << max(static_cast< Vector<Double> >(maxima)) << "\n"
+                  << "Amplitude average [micro]: " << mean(static_cast< Vector<Double> >(maxima)) << "\n"
+                  << "Time range [micro s]:      " << min(static_cast< Vector<Double> >(maxima_time))
+                  << " to " << max(static_cast< Vector<Double> >(maxima_time)) << "\n"
+                  << "Time average [micro s]:    " << mean(static_cast< Vector<Double> >(maxima_time)) << std::endl;
+        std::cout << "Summary for the minima:\n" 
+                  << "Amplitude range [micro]:   " << min(static_cast< Vector<Double> >(minima)) 
+                  << " to " << max(static_cast< Vector<Double> >(minima)) << "\n"
+                  << "Amplitude average [micro]: " << mean(static_cast< Vector<Double> >(minima)) << "\n"
+                  << "Time range [micro s]:      " << min(static_cast< Vector<Double> >(minima_time))
+                  << " to " << max(static_cast< Vector<Double> >(minima_time)) << "\n"
+                  << "Time average [micro s]:    " << mean(static_cast< Vector<Double> >(minima_time)) << std::endl;
       }
 
     } catch (AipsError x) 
