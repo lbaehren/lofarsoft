@@ -1,3 +1,178 @@
+Changes in CMake 2.4.8
+* MSVC90 now defined for vs 9
+Changes in CMake 2.4.8 RC 13
+* fix vs 9 so it works, again...
+* fix bug 6150, working directory can now change drives with vs custom commands
+* fix windows vista elevation issue with CMakeSetup.exe
+Changes in CMake 2.4.8 RC 12
+* Fix vs 9 so cmake can find it
+* Fix bug 6230 MODULE install with versions was broken
+Changes in CMake 2.4.8 RC 11
+* Remove ability to select install location for mac (it does not work)
+Changes in CMake 2.4.8 RC 10
+* Fix for FindQt4 and glib and gthread, if not found don't use
+Changes in CMake 2.4.8 RC 9
+* add some descriptive text to the mac installer
+Changes in CMake 2.4.8 RC 8
+* Add ability to select install location for mac
+* Add list(FIND) because it is used in new FindQt4.cmake
+Changes in CMake 2.4.8 RC 7
+* Fix tar long file path issue with cpack
+* Add beta support for VS 9 
+* Fix variable name in docs for FindPkgConfig bug 5722
+* Fix for bug 5645 ifort bad pic flag on linux
+Changes in CMake 2.4.8 RC 6
+* Fix for bug 6006 INSTALL DIRECTORY signature problem
+* Update FindQt4 from CVS Head for many bug fixes
+* Fix bug 5638 CMAKE_INSTALL_PREFIX not working on SunOS with CC
+* Fix bug 6117 FindPkgConfig can run twice now
+* Fix bug 6124 touch.exe was required for fortran
+Changes in CMake 2.4.8 RC 5
+* Fix bug 6106 FindPerlLibs.cmake missing escaped $
+* Allow NODEFAULTLIBS to have more than one value bug 5455
+* Suppress regeneration of makefiles during try compile avoid infinite
+  loop in trycompile with some vs 2005 builds.
+* Rest of Fix for fix 5363, removes warning on vs 6
+* Allow for debug libraries in InstallRequiredSystemLibraries.cmake for vs8
+* Fix for bug 4605 JavaEmbedding.framework should not be used.
+Changes in CMake 2.4.8 RC 4
+* fix for cpack and messing up PATH with NSIS
+Changes in CMake 2.4.8 RC 3
+* fix for bug 5363: GET_TARGET_PROPERTY(... DEBUG_LOCATION) 
+  returns value containing $(OutDir)
+* Better error from ctest if nightly time not set
+* Fix for exception handling flags in VS 2003 and up
+* Avoid relinking exclude-from-all directory targets before install
+Changes in CMake 2.4.8 RC 2
+* fix for bug 5590 relative paths in windows not working across drives
+* fix warning/error with TAR_VERBOSE flag
+Changes in CMake 2.4.8 RC 1
+* Fix for kde4-config location 
+* Fix for self extracting .sh files on solaris
+* Remove KDE3_ENABLE_FINAL (did not work)
+* KDE3 fix for 64 bit location of plugins
+* mark PYTHON_EXECUTABLE as advanced
+* Fix for version numbers on NetBSD
+* Add more search directories (install prefix and cmake location)
+* include WindowsPaths in Windows.cmake not just Windows-cl.cmake
+* documentation fix for file, find_package, try_run
+* add IS_ABSOLUTE to if
+* INSTALL() everything which doesn't have a COMPONENT set, is assigned 
+  to the COMPONENT "Unspecified"
+* make #cmakedefine output match autoconf when undefined
+* document cmake remove -f
+* document order of -D and -P
+* add support for DragonFly and GNU hurd
+* fix for fortran depends doing too many scans
+Changes in CMake 2.4.7
+--- RC 11 ----
+* Fix bug 5238 for cygwin versioned executables 
+* Fix bug 4805 Allow for platform choice of executable
+   shared libs install
+* Fix @ONLY issues with RC 10
+* Add -E make_directory to cmake executable
+--- RC 10 ----
+* Fix rebuild problem with makefiles and cmake vs CMakeSetup 
+--- RC 9 ---
+* Fix problem with \@ in configure files bug# 5130 
+--- RC 8 ---
+* Fix bug 5121 crash with build test on and vs 
+
+* Fix bug 5096 add_library and EXCLUDE_FROM_ALL not working 
+--- RC 7 ---
+* Fix @ in Xcode projects
+
+* add some fixes for FindSWIG.cmake
+
+* Fix new line stuff in UsePkgConfig.cmake
+
+* Add new FindPkgConfig.cmake from CVS 
+
+* improve docs for try_compile and list commands
+
+* fix for bug 4384, preserve sym links in install directory
+
+* Use platform variable for link path exclusion added in RC6
+
+--- RC 6 ---
+* Fix stack reporting bug in macros and include
+
+* Fix double quote in -D flags for vs broken in RC 5
+
+* Fix problem with newer curl and curl_getdate changes
+
+* Do not emit link paths /usr/lib32 and /usr/lib64 with -L
+
+---RC 5 ----
+* Fix for bug# 4423, LANGUAGE property now works in VS IDE
+
+* Fix for RUN_TESTS running the tests twice in VS IDE
+
+* Do not create import libraries for modules on borland
+
+* Fix for FILE(RELATIVE_PATH) # 4482
+
+* Fix for apple lack of support for isystem flag
+
+* Fix for Borland skipping make rules with no depends
+
+* Fix for bug #4423 set source file properties LANGUAGE not always working
+
+* Fix for bug #4462 isystem not supported on OSX
+
+* Fix bug in save of resize of CMakeSetup
+
+* Fix for @@ in file names
+
+* Fix for if command scope issues
+
+* Fix for relative path issue with paths ending in /.
+
+* CMakeSetup saves the size of the dialog from the last run
+
+* Fix for bug 4399, find qt designer on mac
+
+* Fix for bug 4420 include unicode libs in cpack for vs8
+
+* Fix for bug 4414 add_dependencies and set_target_properties can set any target not just the ones in the current directory.
+
+* Add support for cygwin setup packages to setup
+
+* Fix uninstall with DESTDIR
+
+* If COMPILE_FLAGS is changed on a target the object files will now recompile
+
+* Fix Bug 3512 - precompiled header flag mapping on VS.
+
+* Do not run custom commands with relative paths if the working directory is set.
+
+* Fix bugs 3277, 4341, 4341 make pdb files match the target name correctly
+
+* handle user set NODEFAULTLIB correctly in VS projects
+
+* Fix external project for VS 2005 service pack 1 GUID not set correctly
+
+* Fix Kdevelop problem where files could end up duplicated
+
+Changes in CMake 2.4.6
+
+* Remove svn test in ctestctest3 
+
+* Fix for FIND_* order and framworks with PREFIX usage.
+
+* Fix for FindDoxygen and quiet mode.
+
+* Find JavaVM as well as jvm
+
+* Look for ruby1.8 and ruby
+
+* Fix for cpack .tgz.sh and dash
+
+* Fix for finding custom commands from a full path with CMAKE_CFG_INTDIR.
+
+* Fix for Borland make and custom commands that do nothing
+
+
 Changes in CMake 2.4.5
 * Fix for seg fault when a macro runs a bad command BUG# 3815
 
@@ -245,7 +420,7 @@ default.
 
 * Add target/fast rules in the sub directories
 
-* Fix Visual stuido C and C++ targets to not add /TP and /TC
+* Fix Visual studio C and C++ targets to not add /TP and /TC
 
 * print a context when cmake errors occur
 

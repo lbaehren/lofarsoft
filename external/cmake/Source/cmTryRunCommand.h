@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmTryRunCommand.h,v $
   Language:  C++
-  Date:      $Date: 2005/12/13 20:12:37 $
-  Version:   $Revision: 1.9 $
+  Date:      $Date: 2007/10/25 18:03:48 $
+  Version:   $Revision: 1.9.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -61,16 +61,15 @@ public:
     {
     return
       "  TRY_RUN(RUN_RESULT_VAR COMPILE_RESULT_VAR\n"
-      "          bindir srcfile <CMAKE_FLAGS <Flags>>\n"
-      "          <COMPILE_DEFINITIONS <flags>>\n"
-      "          <OUTPUT_VARIABLE var>\n"
-      "          <ARGS <arg1> <arg2>...>)\n"
-      "Try compiling a srcfile.  Return the success or failure in "
-      "COMPILE_RESULT_VAR.  Then if the compile succeeded, run the "
-      "executable and return the result in RUN_RESULT_VAR. "
-      "If the executable was built, but failed for to run for some "
-      "reason, then RUN_RESULT_VAR will be set to FAILED_TO_RUN, and "
-      "the output will be in the COMPILE_RESULT_VAR. OUTPUT_VARIABLE "
+      "          bindir srcfile [CMAKE_FLAGS <Flags>]\n"
+      "          [COMPILE_DEFINITIONS <flags>]\n"
+      "          [OUTPUT_VARIABLE var]\n"
+      "          [ARGS <arg1> <arg2>...])\n"
+      "Try compiling a srcfile.  Return TRUE or FALSE for success or failure "
+      "in COMPILE_RESULT_VAR.  Then if the compile succeeded, run the "
+      "executable and return its exit code in RUN_RESULT_VAR. "
+      "If the executable was built, but failed to run, then RUN_RESULT_VAR "
+      "will be set to FAILED_TO_RUN. OUTPUT_VARIABLE "
       "specifies the name of the variable to put all of the standard "
       "output and standard error into.";
     }

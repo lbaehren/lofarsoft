@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator3
   Module:    $RCSfile: cmGlobalUnixMakefileGenerator3.h,v $
   Language:  C++
-  Date:      $Date: 2006/10/13 14:52:02 $
-  Version:   $Revision: 1.27.2.5 $
+  Date:      $Date: 2007/01/03 15:19:03 $
+  Version:   $Revision: 1.27.2.6 $
 
   Copyright (c) 2005 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -115,6 +115,9 @@ public:
       no rule.  This is used for multiple output dependencies.  */
   std::string GetEmptyCommandHack() { return this->EmptyCommandsHack; }
 
+  /** Get the fake dependency to use when a rule has no real commands
+      or dependencies.  */
+  std::string GetEmptyRuleHackDepends() { return this->EmptyRuleHackDepends; }
 
   // change the build command for speed
   virtual std::string GenerateBuildCommand

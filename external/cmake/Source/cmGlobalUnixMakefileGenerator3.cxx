@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator3
   Module:    $RCSfile: cmGlobalUnixMakefileGenerator3.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/10/13 14:52:02 $
-  Version:   $Revision: 1.56.2.9 $
+  Date:      $Date: 2007/12/04 22:14:05 $
+  Version:   $Revision: 1.56.2.10 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -861,11 +861,15 @@ cmGlobalUnixMakefileGenerator3
           lg->WriteMakeRule(ruleFileStream, 
                             "Pre-install relink rule for target.",
                           localName.c_str(), depends, commands, true);
-        depends.clear();
-        depends.push_back(localName);
-        commands.clear();
-        lg->WriteMakeRule(ruleFileStream, "Prepare target for install.",
-                          "preinstall", depends, commands, true);
+
+        if (!exclude && t->second.IsInAll())
+          {
+          depends.clear();
+          depends.push_back(localName);
+          commands.clear();
+          lg->WriteMakeRule(ruleFileStream, "Prepare target for install.",
+                            "preinstall", depends, commands, true);
+          }
         }
 
       // add the clean rule

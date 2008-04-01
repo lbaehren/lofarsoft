@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmIfCommand.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/10/27 20:01:47 $
-  Version:   $Revision: 1.62.2.4 $
+  Date:      $Date: 2007/10/25 18:03:48 $
+  Version:   $Revision: 1.62.2.6 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -22,10 +22,24 @@
 bool cmIfFunctionBlocker::
 IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf)
 {
-  // always let if statements through
+  // if we are blocking then all we need to do is keep track of 
+  // scope depth of nested if statements
+  if (this->IsBlocking)
+    {
   if (!cmSystemTools::Strucmp(lff.Name.c_str(),"if"))
     {
-    return false;
+      this->ScopeDepth++;
+      return true;
+      }
+    }
+
+  if (this->IsBlocking && this->ScopeDepth)
+    {
+    if (!cmSystemTools::Strucmp(lff.Name.c_str(),"endif"))
+      {
+      this->ScopeDepth--;
+      }
+    return true;
     }
   
   // watch for our ELSE or ENDIF
@@ -277,6 +291,22 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
       if (*arg == "IS_DIRECTORY" && argP1  != newArgs.end())
         {
         if(cmSystemTools::FileIsDirectory((argP1)->c_str()))
+          {
+          *arg = "1";
+          }
+        else 
+          {
+          *arg = "0";
+          }
+        newArgs.erase(argP1);
+        argP1 = arg;
+        IncrementArguments(newArgs,argP1,argP2);
+        reducible = 1;
+        }
+      // is the given path an absolute path ?
+      if (*arg == "IS_ABSOLUTE" && argP1  != newArgs.end())
+        {
+        if(cmSystemTools::FileIsFullPath((argP1)->c_str()))
           {
           *arg = "1";
           }

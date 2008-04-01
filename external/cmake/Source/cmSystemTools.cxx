@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmSystemTools.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/10/27 20:01:48 $
-  Version:   $Revision: 1.327.2.3 $
+  Date:      $Date: 2007/10/27 02:57:00 $
+  Version:   $Revision: 1.327.2.6 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -21,6 +21,7 @@
 
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Directory.hxx>
+#include <cmsys/System.h>
 
 // support for realpath call
 #ifndef _WIN32
@@ -368,6 +369,95 @@ bool cmSystemTools::IsOff(const char* val)
     }
   return (v == "OFF" || v == "0" || v == "NO" || v == "FALSE" || 
           v == "N" || cmSystemTools::IsNOTFOUND(v.c_str()) || v == "IGNORE");
+}
+
+//----------------------------------------------------------------------------
+void cmSystemTools::ParseWindowsCommandLine(const char* command,
+                                            std::vector<std::string>& args)
+{
+  // See the MSDN document "Parsing C Command-Line Arguments" at
+  // http://msdn2.microsoft.com/en-us/library/a1y7w461.aspx for rules
+  // of parsing the windows command line.
+
+  bool in_argument = false;
+  bool in_quotes = false;
+  int backslashes = 0;
+  std::string arg;
+  for(const char* c = command;*c; ++c)
+    {
+    if(*c == '\\')
+      {
+      ++backslashes;
+      in_argument = true;
+      }
+    else if(*c == '"')
+      {
+      int backslash_pairs  = backslashes >> 1;
+      int backslash_escaped = backslashes & 1;
+      arg.append(backslash_pairs, '\\');
+      backslashes = 0;
+      if(backslash_escaped)
+        {
+        /* An odd number of backslashes precede this quote.
+           It is escaped.  */
+        arg.append(1, '"');
+        }
+      else
+        {
+        /* An even number of backslashes precede this quote.
+           It is not escaped.  */
+        in_quotes = !in_quotes;
+        }
+      in_argument = true;
+      }
+    else
+      {
+      arg.append(backslashes, '\\');
+      backslashes = 0;
+      if(isspace(*c))
+        {
+        if(in_quotes)
+          {
+          arg.append(1, *c);
+          }
+        else if(in_argument)
+          {
+          args.push_back(arg);
+          arg = "";
+          in_argument = false;
+          }
+        }
+      else
+        {
+        in_argument = true;
+        arg.append(1, *c);
+        }
+      }
+    }
+  arg.append(backslashes, '\\');
+  if(in_argument)
+    {
+    args.push_back(arg);
+    }
+}
+
+std::string cmSystemTools::EscapeWindowsShellArgument(const char* arg,
+                                                      int shell_flags)
+{
+  char local_buffer[1024];
+  char* buffer = local_buffer;
+  int size = cmsysSystem_Shell_GetArgumentSizeForWindows(arg, shell_flags);
+  if(size > 1024)
+    {
+    buffer = new char[size];
+    }
+  cmsysSystem_Shell_GetArgumentForWindows(arg, buffer, shell_flags);
+  std::string result(buffer);
+  if(buffer != local_buffer)
+    {
+    delete [] buffer;
+    }
+  return result;
 }
 
 std::vector<cmStdString> cmSystemTools::ParseArguments(const char* command)
@@ -1492,11 +1582,18 @@ bool cmSystemTools::CreateTar(const char* outFileName,
   char* realName = new char[ strlen(outFileName) + 1 ];
   std::auto_ptr<char> realNamePtr(realName);
   strcpy(realName, outFileName);
+  int options = 0;
+  if(verbose)
+    {
+    options |= TAR_VERBOSE;
+    }
+#ifdef __CYGWIN__
+  options |= TAR_GNU;
+#endif 
   if (tar_open(&t, realName,
       (gzip? &gztype : NULL),
       O_WRONLY | O_CREAT, 0644,
-      (verbose?TAR_VERBOSE:0)
-      | 0) == -1)
+      options) == -1)
     {
     cmSystemTools::Error("Problem with tar_open(): ", strerror(errno));
     return false;

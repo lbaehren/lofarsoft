@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmGlobalGenerator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/11/10 15:54:35 $
-  Version:   $Revision: 1.137.2.10 $
+  Date:      $Date: 2007/06/01 15:18:49 $
+  Version:   $Revision: 1.137.2.12 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -1276,83 +1276,6 @@ void cmGlobalGenerator::SetCMakeInstance(cmake* cm)
   this->CMakeInstance = cm;
 }
 
-void cmGlobalGenerator::SetupTests()
-{
-  std::string ctest = this->LocalGenerators[0]->GetMakefile()->
-    GetRequiredDefinition("CMAKE_COMMAND");
-  ctest = removeQuotes(ctest);
-  ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
-  ctest += "/";
-  ctest += "ctest";
-  ctest += cmSystemTools::GetExecutableExtension();
-  if(!cmSystemTools::FileExists(ctest.c_str()))
-    {
-    ctest = this->LocalGenerators[0]->GetMakefile()->
-      GetRequiredDefinition("CMAKE_COMMAND");
-    ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
-    ctest += "/Debug/";
-    ctest += "ctest";
-    ctest += cmSystemTools::GetExecutableExtension();
-    }
-  if(!cmSystemTools::FileExists(ctest.c_str()))
-    {
-    ctest = this->LocalGenerators[0]->GetMakefile()->
-      GetRequiredDefinition("CMAKE_COMMAND");
-    ctest = cmSystemTools::GetFilenamePath(ctest.c_str());
-    ctest += "/Release/";
-    ctest += "ctest";
-    ctest += cmSystemTools::GetExecutableExtension();
-    }
-  // if we found ctest
-  if (cmSystemTools::FileExists(ctest.c_str()))
-    {
-    // Create a full path filename for output Testfile
-    std::string fname;
-    fname = this->CMakeInstance->GetStartOutputDirectory();
-    fname += "/";
-    if ( this->LocalGenerators[0]->GetMakefile()->IsSet("CTEST_NEW_FORMAT") )
-      {
-      fname += "CTestTestfile.txt";
-      }
-    else
-      {
-      fname += "DartTestfile.txt";
-      }
-
-    // Add run_test only if any tests are foun
-    size_t total_tests = 0;
-    size_t i;
-    for (i = 0; i < this->LocalGenerators.size(); ++i)
-      {
-      total_tests += 
-        this->LocalGenerators[i]->GetMakefile()->GetTests()->size();
-      }
-
-    // If the file doesn't exist, then ENABLE_TESTING hasn't been run
-    if (total_tests > 0)
-      {
-      const char* no_working_dir = 0;
-      std::vector<std::string> no_depends;
-      std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
-      for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
-        {
-        std::vector<cmLocalGenerator*>& gen = it->second;
-        // add the RUN_TESTS to the first local generator of each project
-        if(gen.size())
-          {
-          cmMakefile* mf = gen[0]->GetMakefile();
-          if(const char* outDir = mf->GetDefinition("CMAKE_CFG_INTDIR"))
-            {
-            mf->AddUtilityCommand("RUN_TESTS", false, no_depends,
-                                  no_working_dir, 
-                                  ctest.c_str(), "-C", outDir);
-            }
-          }
-        }
-      }
-    }
-}
-
 void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
 {
   cmMakefile* mf = this->LocalGenerators[0]->GetMakefile();
@@ -1423,7 +1346,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     if(cmakeCfgIntDir && *cmakeCfgIntDir && cmakeCfgIntDir[0] != '.')
       {
       singleLine.push_back("-C");
-      singleLine.push_back(mf->GetDefinition("CMAKE_CFG_INTDIR"));
+      singleLine.push_back(cmakeCfgIntDir);
       }
     else // TODO: This is a hack. Should be something to do with the generator
       {

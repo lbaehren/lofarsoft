@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmGlobalVisualStudio7Generator.h,v $
   Language:  C++
-  Date:      $Date: 2006/11/10 15:12:55 $
-  Version:   $Revision: 1.34.2.5 $
+  Date:      $Date: 2007/03/16 22:05:42 $
+  Version:   $Revision: 1.34.2.6 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -20,6 +20,7 @@
 #include "cmGlobalGenerator.h"
 
 class cmTarget;
+struct cmVS7FlagTable;
 
 /** \class cmGlobalVisualStudio7Generator
  * \brief Write a Unix makefiles.
@@ -97,6 +98,7 @@ public:
   virtual const char* GetCMakeCFGInitDirectory()  { return "$(OutDir)"; }
 
 protected:
+  static cmVS7FlagTable const* GetExtraFlagTableVS7();
   virtual void OutputSLNFile(cmLocalGenerator* root, 
                              std::vector<cmLocalGenerator*>& generators);
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,

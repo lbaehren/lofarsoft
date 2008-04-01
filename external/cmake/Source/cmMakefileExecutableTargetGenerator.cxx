@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmMakefileExecutableTargetGenerator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/10/27 20:01:48 $
-  Version:   $Revision: 1.12.2.7 $
+  Date:      $Date: 2007/02/05 18:21:32 $
+  Version:   $Revision: 1.12.2.9 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -17,7 +17,7 @@
 #include "cmMakefileExecutableTargetGenerator.h"
 
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
+#include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
@@ -110,8 +110,9 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // Get the name of the executable to generate.
   std::string targetName;
   std::string targetNameReal;
+  std::string targetNamePDB;
   this->Target->GetExecutableNames
-    (targetName, targetNameReal,
+    (targetName, targetNameReal, targetNamePDB,
                                    this->LocalGenerator->ConfigurationName.c_str());
 
   // Construct the full path version of the names.
@@ -187,8 +188,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     }
   std::string targetFullPath = outpath + targetName;
   std::string targetFullPathReal = outpath + targetNameReal;
-  std::string targetFullPathPDB = outpath + this->Target->GetName();
-  targetFullPathPDB += ".pdb";
+  std::string targetFullPathPDB = outpath + targetNamePDB;
   std::string targetOutPathPDB = 
     this->Convert(targetFullPathPDB.c_str(),
                   cmLocalGenerator::FULL,
@@ -269,12 +269,14 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   {
   std::string cleanName;
   std::string cleanRealName;
+  std::string cleanPDBName;
   this->Target->GetExecutableCleanNames
-    (cleanName, cleanRealName,
+    (cleanName, cleanRealName, cleanPDBName,
                                         this->LocalGenerator->ConfigurationName.c_str());
 
   std::string cleanFullName = outpath + cleanName;
   std::string cleanFullRealName = outpath + cleanRealName;
+  std::string cleanFullPDBName = outpath + cleanPDBName;
   exeCleanFiles.push_back(this->Convert(cleanFullName.c_str(),
                                         cmLocalGenerator::START_OUTPUT,
                                         cmLocalGenerator::UNCHANGED));
@@ -291,6 +293,14 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
                                           cmLocalGenerator::START_OUTPUT,
                                           cmLocalGenerator::UNCHANGED));
     }
+
+  // List the PDB for cleaning only when the whole target is
+  // cleaned.  We do not want to delete the .pdb file just before
+  // linking the target.
+  this->CleanFiles.push_back
+    (this->Convert(cleanFullPDBName.c_str(),
+                                        cmLocalGenerator::START_OUTPUT,
+                                        cmLocalGenerator::UNCHANGED));
   }
 
   // Add a command to remove any existing files for this executable.

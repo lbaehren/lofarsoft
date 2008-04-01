@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmMakefileTargetGenerator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/11/28 19:19:44 $
-  Version:   $Revision: 1.16.2.8 $
+  Date:      $Date: 2007/02/05 18:21:32 $
+  Version:   $Revision: 1.16.2.10 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -65,7 +65,8 @@ cmMakefileTargetGenerator::New(cmLocalUnixMakefileGenerator3 *lg,
   result->TargetName = tgtName;
   result->Target = tgt;
   result->LocalGenerator = lg;
-  result->GlobalGenerator = lg->GetGlobalGenerator();
+  result->GlobalGenerator =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(lg->GetGlobalGenerator());
   result->Makefile = lg->GetMakefile();
   return result;
 }
@@ -278,6 +279,15 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
 
     *this->FlagFileStream << lang << "_FLAGS = " << flags << "\n\n";
     }
+
+  // Add target-specific flags.
+  if(this->Target->GetProperty("COMPILE_FLAGS"))
+    {
+    std::string flags;    
+    this->LocalGenerator->AppendFlags
+      (flags, this->Target->GetProperty("COMPILE_FLAGS"));
+    *this->FlagFileStream << "# TARGET_FLAGS = " << flags << "\n\n";
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -456,15 +466,29 @@ cmMakefileTargetGenerator
     this->Makefile->GetRequiredDefinition(compileRuleVar.c_str());
   cmSystemTools::ExpandListArgument(compileRule, commands);
 
-  std::string outpath = this->Makefile->GetStartOutputDirectory();
-  outpath += "/";
-  outpath += this->Target->GetName();
-  outpath += ".pdb";
-  outpath = this->Convert(outpath.c_str(), cmLocalGenerator::FULL,
+  std::string targetOutPathPDB;
+  {
+  std::string targetFullPathPDB;
+  const char* configName = this->LocalGenerator->ConfigurationName.c_str();
+  if(this->Target->GetType() == cmTarget::EXECUTABLE)
+    {
+    targetFullPathPDB = this->LocalGenerator->ExecutableOutputPath;
+    targetFullPathPDB += this->Target->GetPDBName(configName);
+    }
+  else if(this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
+          this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
+          this->Target->GetType() == cmTarget::MODULE_LIBRARY)
+    {
+    targetFullPathPDB = this->LocalGenerator->LibraryOutputPath;
+    targetFullPathPDB += this->Target->GetPDBName(configName);
+    }
+  targetOutPathPDB =
+    this->Convert(targetFullPathPDB.c_str(),cmLocalGenerator::FULL,
                           cmLocalGenerator::MAKEFILE);
+  }
   cmLocalGenerator::RuleVariables vars;
   vars.Language = lang;
-  vars.TargetPDB = outpath.c_str();
+  vars.TargetPDB = targetOutPathPDB.c_str();
   vars.Source = sourceFile.c_str();
   vars.Object = relativeObj.c_str();
   std::string objdir = this->LocalGenerator->GetHomeRelativeOutputPath();
@@ -891,9 +915,7 @@ void cmMakefileTargetGenerator
   depends.clear();
   depends.push_back(*o);
   commands.clear();
-  cmGlobalUnixMakefileGenerator3* gg =
-    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
-  std::string emptyCommand = gg->GetEmptyCommandHack();
+  std::string emptyCommand = this->GlobalGenerator->GetEmptyCommandHack();
   if(!emptyCommand.empty())
     {
     commands.push_back(emptyCommand);
@@ -911,7 +933,8 @@ void cmMakefileTargetGenerator
     this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
                                         o->c_str(), depends, commands,
                                         symbolic);
-    gg->AddMultipleOutputPair(o->c_str(), depends[0].c_str());
+    this->GlobalGenerator->AddMultipleOutputPair(o->c_str(),
+                                                 depends[0].c_str());
     }
 }
 

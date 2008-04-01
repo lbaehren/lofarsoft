@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmIfCommand.h,v $
   Language:  C++
-  Date:      $Date: 2006/10/27 20:01:47 $
-  Version:   $Revision: 1.32.2.4 $
+  Date:      $Date: 2007/10/25 18:03:48 $
+  Version:   $Revision: 1.32.2.7 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -28,7 +28,7 @@
 class cmIfFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  cmIfFunctionBlocker() {this->HasRun = false;}
+  cmIfFunctionBlocker() {this->HasRun = false; this->ScopeDepth = 0;}
   virtual ~cmIfFunctionBlocker() {}
   virtual bool IsFunctionBlocked(const cmListFileFunction& lff,
                                  cmMakefile &mf);
@@ -39,6 +39,7 @@ public:
   std::vector<cmListFileArgument> Args;
   bool IsBlocking;
   bool HasRun;
+  unsigned int ScopeDepth;
 };
 
 /** \class cmIfCommand
@@ -98,6 +99,11 @@ public:
       "    COMMAND1(ARGS ...)\n"
       "    COMMAND2(ARGS ...)\n"
       "    ...\n"
+      "  ELSEIF(expression2)\n"
+      "    # ELSEIF section.\n"
+      "    COMMAND1(ARGS ...)\n"
+      "    COMMAND2(ARGS ...)\n"
+      "    ...\n"
       "  ELSE(expression)\n"
       "    # ELSE section.\n"
       "    COMMAND1(ARGS ...)\n"
@@ -106,8 +112,9 @@ public:
       "  ENDIF(expression)\n"
       "Evaluates the given expression.  If the result is true, the commands "
       "in the THEN section are invoked.  Otherwise, the commands in the "
-      "ELSE section are invoked.  The ELSE section is optional.  Note that "
-      "the same expression must be given to IF, ELSE, and ENDIF.  Long "
+      "ELSE section are invoked.  The ELSEIF and ELSE sections are "
+      "optional. You may have multiple ELSEIF clauses. Note that "
+      "the same expression must be given to IF, and ENDIF.  Long "
       "expressions can be used and the order or precedence is that the "
       "EXISTS, COMMAND, and DEFINED operators will be evaluated first. "
       "Then any EQUAL, LESS, GREATER, STRLESS, STRGREATER, STREQUAL, MATCHES "
@@ -136,6 +143,8 @@ public:
       "  IF(IS_DIRECTORY directory-name)\n"
       "True if the given name is a directory.  "
       "Behavior is well-defined only for full paths.\n"
+      "  IF(IS_ABSOLUTE path)\n"
+      "True if the given path is an absolute path.\n "
       "  IF(variable MATCHES regex)\n"
       "  IF(string MATCHES regex)\n"
       "True if the given string or variable's value matches the given "

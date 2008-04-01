@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmGlobalVisualStudio6Generator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/10/13 14:52:02 $
-  Version:   $Revision: 1.58.2.4 $
+  Date:      $Date: 2007/03/16 22:05:42 $
+  Version:   $Revision: 1.58.2.5 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -177,9 +177,6 @@ void cmGlobalVisualStudio6Generator::Generate()
                           "echo", "Build all projects");
       }
     }
-  
-  // add the Run Tests command
-  this->SetupTests();
   
   // first do the superclass method
   this->cmGlobalGenerator::Generate();

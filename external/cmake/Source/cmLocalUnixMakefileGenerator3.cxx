@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmLocalUnixMakefileGenerator3.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/10/27 20:01:48 $
-  Version:   $Revision: 1.128.2.9 $
+  Date:      $Date: 2007/03/16 22:05:42 $
+  Version:   $Revision: 1.128.2.11 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -739,6 +739,16 @@ cmLocalUnixMakefileGenerator3
                         "$(VERBOSE).SILENT",
                         no_depends,
                         no_commands, false);
+    }
+
+  // Work-around for makes that drop rules that have no dependencies
+  // or commands.
+  cmGlobalUnixMakefileGenerator3* gg =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+  std::string hack = gg->GetEmptyRuleHackDepends();
+  if(!hack.empty())
+    {
+    no_depends.push_back(hack);
     }
 
   // Special symbolic target that never exists to force dependers to
@@ -1690,8 +1700,9 @@ cmLocalUnixMakefileGenerator3
     objectName = cmSystemTools::GetFilenameName(objectName.c_str());
     std::string targetName;
     std::string targetNameReal;
+    std::string targetNamePDB;
     target.GetExecutableNames(targetName, targetNameReal,
-                                   this->ConfigurationName.c_str());
+                              targetNamePDB, this->ConfigurationName.c_str());
     if ( target.GetPropertyAsBool("MACOSX_BUNDLE") )
       {
       // Construct the full path version of the names.

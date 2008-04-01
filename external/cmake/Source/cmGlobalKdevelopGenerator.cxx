@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmGlobalKdevelopGenerator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/10/13 14:52:02 $
-  Version:   $Revision: 1.10.2.5 $
+  Date:      $Date: 2007/02/05 18:21:32 $
+  Version:   $Revision: 1.10.2.6 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   Copyright (c) 2004 Alexander Neundorf neundorf@kde.org, All rights reserved.
@@ -17,7 +17,7 @@
 =========================================================================*/
 
 #include "cmGlobalKdevelopGenerator.h"
-#include "cmLocalKdevelopGenerator.h"
+#include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmake.h"
 #include "cmSourceFile.h"
@@ -36,7 +36,8 @@ cmGlobalKdevelopGenerator::cmGlobalKdevelopGenerator()
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalKdevelopGenerator::CreateLocalGenerator()
 {
-  cmLocalGenerator *lg = new cmLocalKdevelopGenerator;
+  cmLocalUnixMakefileGenerator3 *lg = new cmLocalUnixMakefileGenerator3;
+  lg->SetForceVerboseMakefiles(true);
   lg->SetGlobalGenerator(this);
   return lg;
 }
@@ -185,6 +186,7 @@ bool cmGlobalKdevelopGenerator
             hname += *ext;
             if(cmSystemTools::FileExists(hname.c_str()))
               {
+              cmSystemTools::ReplaceString(hname, projectDir.c_str(), "");
               files.insert(hname);
               break;
               }

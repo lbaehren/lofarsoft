@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmMakefileUtilityTargetGenerator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/06/30 17:48:46 $
-  Version:   $Revision: 1.2.2.1 $
+  Date:      $Date: 2007/01/03 15:19:03 $
+  Version:   $Revision: 1.2.2.2 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -17,7 +17,7 @@
 #include "cmMakefileUtilityTargetGenerator.h"
 
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalGenerator.h"
+#include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
@@ -57,6 +57,17 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
   std::string objTarget = relPath;
   objTarget += this->BuildFileName;
   this->LocalGenerator->AppendRuleDepend(depends, objTarget.c_str());
+
+  // If the rule is empty add the special empty rule dependency needed
+  // by some make tools.
+  if(depends.empty() && commands.empty())
+    {
+    std::string hack = this->GlobalGenerator->GetEmptyRuleHackDepends();
+    if(!hack.empty())
+      {
+      depends.push_back(hack);
+      }
+    }
 
   // Write the rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,

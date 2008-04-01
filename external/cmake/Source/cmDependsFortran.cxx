@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmDependsFortran.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/05/11 02:15:09 $
-  Version:   $Revision: 1.18.2.1 $
+  Date:      $Date: 2007/12/17 22:40:58 $
+  Version:   $Revision: 1.18.2.3 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -139,7 +139,6 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
   makeDepends << std::endl;
 
   // Write module requirements to the output stream.
-  internalDepends << obj << ".requires" << std::endl;
   for(std::set<cmStdString>::const_iterator i = parser.Requires.begin();
       i != parser.Requires.end(); ++i)
     {
@@ -149,18 +148,15 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
       // since we require some things add them to our list of requirements
       makeDepends << obj << ".requires: " << i->c_str() << ".mod.proxy"
          << std::endl;
-      internalDepends << " " << i->c_str() << ".mod.proxy" << std::endl;
       }
     }
 
   // Write provided modules to the output stream.
-  internalDepends << obj << ".mod.proxy" << std::endl;
   for(std::set<cmStdString>::const_iterator i = parser.Provides.begin();
       i != parser.Provides.end(); ++i)
     {
     makeDepends << i->c_str() << ".mod.proxy: " << obj
       << ".provides" << std::endl;
-    internalDepends << " " << i->c_str() << ".provides" << std::endl;
     }
   
   // If any modules are provided then they must be converted to stamp files.
@@ -177,7 +173,8 @@ bool cmDependsFortran::WriteDependencies(const char *src, const char *obj,
       makeDepends << "\t$(CMAKE_COMMAND) -E cmake_copy_f90_mod "
          << i->c_str() << " " << m.c_str() << ".mod.stamp\n";
       }
-    makeDepends << "\t@touch " << obj << ".provides.build\n";
+    makeDepends << "\t$(CMAKE_COMMAND) -E touch " << obj 
+                << ".provides.build\n";
     }
 
   /*

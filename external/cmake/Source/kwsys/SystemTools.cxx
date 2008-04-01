@@ -64,6 +64,11 @@
 # include <windows.h>
 #endif
 
+#ifdef _MSC_VER
+#include <sys/utime.h>
+#else
+#include <utime.h>
+#endif
 // This is a hack to prevent warnings about these functions being
 // declared but not referenced.
 #if defined(__sgi) && !defined(__GNUC__)
@@ -124,6 +129,11 @@ inline const char* Getcwd(char* buf, unsigned int len)
     {
     fprintf(stderr, "No current working directory.\n");
     abort();
+    }
+  // make sure the drive letter is capital
+  if(strlen(buf) > 1 && buf[1] == ':')
+    {
+    buf[0] = toupper(buf[0]);
     }
   return ret;
 }
@@ -764,6 +774,36 @@ bool SystemTools::FileExists(const char* filename)
     }
 }
 
+bool SystemTools::Touch(const char* filename, bool create)
+{
+  if(create && !SystemTools::FileExists(filename))
+    {
+    FILE* file = fopen(filename, "a+b");
+    if(file)
+      {
+      fclose(file);
+      return true;
+      }
+    return false;
+    }
+#ifdef _MSC_VER
+#define utime _utime
+#define utimbuf _utimbuf
+#endif
+  struct stat fromStat;
+  if(stat(filename, &fromStat) < 0)
+    {
+    return false;
+    }
+  struct utimbuf buf;
+  buf.actime = fromStat.st_atime;
+  buf.modtime = static_cast<time_t>(SystemTools::GetTime());
+  if(utime(filename, &buf) < 0)
+    {
+    return false;
+    }
+  return true;
+}
 
 bool SystemTools::FileTimeCompare(const char* f1, const char* f2,
                                   int* result)
@@ -1464,10 +1504,33 @@ kwsys_stl::string SystemTools::ConvertToWindowsOutputPath(const char* path)
 bool SystemTools::CopyFileIfDifferent(const char* source,
                                       const char* destination)
 {
+  // special check for a destination that is a directory
+  // FilesDiffer does not handle file to directory compare
+  if(SystemTools::FileIsDirectory(destination))
+    {
+    kwsys_stl::string new_destination = destination;
+    SystemTools::ConvertToUnixSlashes(new_destination);
+    new_destination += '/';
+    kwsys_stl::string source_name = source;
+    new_destination += SystemTools::GetFilenameName(source_name);
+    if(SystemTools::FilesDiffer(source, new_destination.c_str()))
+      {
+      return SystemTools::CopyFileAlways(source, destination);
+      }
+    else
+      {
+      // the files are the same so the copy is done return
+      // true
+      return true;
+      }
+    }
+  // source and destination are files so do a copy if they
+  // are different
   if(SystemTools::FilesDiffer(source, destination))
     {
     return SystemTools::CopyFileAlways(source, destination);
     }
+  // at this point the files must be the same so return true
   return true;
 }
 
@@ -1556,7 +1619,6 @@ bool SystemTools::CopyFileAlways(const char* source, const char* destination)
     {
     return true;
     }
-
   mode_t perm = 0;
   bool perms = SystemTools::GetPermissions(source, perm);
 
@@ -2304,6 +2366,44 @@ bool SystemTools::FileIsSymlink(const char* name)
 #endif
 }
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
+bool SystemTools::CreateSymlink(const char*, const char*)
+{
+  return false;
+}
+#else
+bool SystemTools::CreateSymlink(const char* origName, const char* newName)
+{
+  return symlink(origName, newName) >= 0;
+}
+#endif
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+bool SystemTools::ReadSymlink(const char*, kwsys_stl::string&)
+{
+  return false;
+}
+#else
+bool SystemTools::ReadSymlink(const char* newName,
+                              kwsys_stl::string& origName)
+{
+  char buf[KWSYS_SYSTEMTOOLS_MAXPATH+1];
+  int count =
+    static_cast<int>(readlink(newName, buf, KWSYS_SYSTEMTOOLS_MAXPATH));
+  if(count >= 0)
+    {
+    // Add null-terminator.
+    buf[count] = 0;
+    origName = buf;
+    return true;
+    }
+  else
+    {
+    return false;
+    }
+}
+#endif
+
 int SystemTools::ChangeDirectory(const char *dir)
 {
   return Chdir(dir);
@@ -2577,8 +2677,20 @@ kwsys_stl::string SystemTools::CollapseFullPath(const char* in_path,
   // Transform the path back to a string.
   kwsys_stl::string newPath = SystemTools::JoinPath(out_components);
 
-  // Update the translation table with this potentially new path.
-  SystemTools::AddTranslationPath(newPath.c_str(), in_path);
+  // Update the translation table with this potentially new path.  I am not
+  // sure why this line is here, it seems really questionable, but yet I
+  // would put good money that if I remove it something will break, basically
+  // from what I can see it created a mapping from the collapsed path, to be
+  // replaced by the input path, which almost completely does the opposite of
+  // this function, the only thing preventing this from happening a lot is
+  // that if the in_path has a .. in it, then it is not added to the
+  // translation table. So for most calls this either does nothing due to the
+  // ..  or it adds a translation between identical paths as nothing was
+  // collapsed, so I am going to try to comment it out, and see what hits the
+  // fan, hopefully quickly.
+  // Commented out line below:
+  //SystemTools::AddTranslationPath(newPath.c_str(), in_path);
+
   SystemTools::CheckTranslationPath(newPath);
 #ifdef _WIN32
   newPath = SystemTools::GetActualCaseForPath(newPath.c_str());
@@ -2626,13 +2738,17 @@ kwsys_stl::string SystemTools::RelativePath(const char* local, const char* remot
     remoteSplit[sameCount] = "";
     sameCount++;
     }
-  // If there is nothing in common but the root directory, then just
-  // return the full path.
-  if(sameCount <= 1)
+
+  // If there is nothing in common at all then just return the full
+  // path.  This is the case only on windows when the paths have
+  // different drive letters.  On unix two full paths always at least
+  // have the root "/" in common so we will return a relative path
+  // that passes through the root directory.
+  if(sameCount == 0)
     {
     return remote;
     }
-  
+
   // for each entry that is not common in the local path
   // add a ../ to the finalpath array, this gets us out of the local
   // path into the remote dir
@@ -2758,6 +2874,11 @@ kwsys_stl::string SystemTools::GetActualCaseForPath(const char* p)
   if(len == 0 || len > MAX_PATH+1)
     {
     return p;
+    }
+  // make sure drive letter is always upper case
+  if(longPath.size() > 1 && longPath[1] == ':')
+    {
+    longPath[0] = toupper(longPath[0]);
     }
   return longPath;
 #endif  

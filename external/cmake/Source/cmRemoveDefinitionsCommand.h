@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmRemoveDefinitionsCommand.h,v $
   Language:  C++
-  Date:      $Date: 2006/03/10 16:13:14 $
-  Version:   $Revision: 1.3 $
+  Date:      $Date: 2007/10/25 18:03:48 $
+  Version:   $Revision: 1.3.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -66,7 +66,7 @@ public:
       "  REMOVE_DEFINITIONS(-DFOO -DBAR ...)\n"
       "Removes flags from command line of C and C++ compilers.  "
       "This command can be used to remove any flag from a compile line, "
-      "but the -D flag is accepted most C/C++ compilers.  "
+      "but the -D flag is accepted by most C/C++ compilers.  "
       "Other flags may not be as portable.";
     }
   

@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmAddDependenciesCommand.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/03/15 16:01:58 $
-  Version:   $Revision: 1.13 $
+  Date:      $Date: 2007/02/15 17:45:07 $
+  Version:   $Revision: 1.13.2.1 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -15,6 +15,8 @@
 
 =========================================================================*/
 #include "cmAddDependenciesCommand.h"
+#include "cmLocalGenerator.h"
+#include "cmGlobalGenerator.h"
 
 // cmDependenciesCommand
 bool cmAddDependenciesCommand::InitialPass(
@@ -28,14 +30,16 @@ bool cmAddDependenciesCommand::InitialPass(
 
   std::string target_name = args[0];
 
-  cmTargets &tgts = this->Makefile->GetTargets();
-  if (tgts.find(target_name) != tgts.end())
+  cmTarget* target = 
+    this->GetMakefile()->GetLocalGenerator()->
+    GetGlobalGenerator()->FindTarget(0, target_name.c_str());
+  if(target)
     {
     std::vector<std::string>::const_iterator s = args.begin();
-    ++s;
+    ++s; // skip over target_name
     for (; s != args.end(); ++s)
       {
-      tgts[target_name].AddUtility(s->c_str());
+      target->AddUtility(s->c_str());
       }
     }
   else
@@ -45,7 +49,6 @@ bool cmAddDependenciesCommand::InitialPass(
     this->SetError(error.c_str());
     return false;
     }
-
 
   return true;
 }

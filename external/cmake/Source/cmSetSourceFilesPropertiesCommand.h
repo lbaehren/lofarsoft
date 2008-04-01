@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmSetSourceFilesPropertiesCommand.h,v $
   Language:  C++
-  Date:      $Date: 2006/10/13 14:52:06 $
-  Version:   $Revision: 1.9.2.2 $
+  Date:      $Date: 2007/08/09 19:31:35 $
+  Version:   $Revision: 1.9.2.3 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -74,7 +74,10 @@ public:
         "only used by Makefiles).  "
         "OBJECT_DEPENDS (string) adds dependencies to the object file.  "
         "COMPILE_FLAGS (string) is passed to the compiler as additional "
-        "command line arguments when the source file is compiled.  "
+        "command line arguments when the source file is compiled.  " 
+        "LANGUAGE (string) CXX|C will change the default compiler used "
+        "to compile the source file. The languages used need to be enabled " 
+        "in the PROJECT command. "
         "If SYMBOLIC (boolean) is set to true the build system will be "
         "informed that the source file is not actually created on disk but "
         "instead used as a symbolic name for a build rule.";

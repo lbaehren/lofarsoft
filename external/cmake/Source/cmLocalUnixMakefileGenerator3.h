@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmLocalUnixMakefileGenerator3.h,v $
   Language:  C++
-  Date:      $Date: 2006/10/27 20:01:48 $
-  Version:   $Revision: 1.45.2.4 $
+  Date:      $Date: 2007/02/05 19:05:32 $
+  Version:   $Revision: 1.45.2.5 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -50,18 +50,6 @@ public:
    */
   virtual void Generate();
 
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
   // this returns the relative path between the HomeOutputDirectory and this
   // local generators StartOutputDirectory
@@ -134,6 +122,15 @@ public:
    * be not end with :  i.e. .SILENT: or .SILENT
    */
   void SetSilentNoColon(bool v)  {this->SilentNoColon = v;}
+
+  /**
+   * If set to true, the CMake variable CMAKE_VERBOSE_MAKEFILES doesn't have
+   * anymore. Set it to true when writing a generator where short output
+   * doesn't make sense, e.g. because the full output is parsed by an
+   * IDE/editor.
+   */
+  void SetForceVerboseMakefiles(bool enable) 
+    {this->ForceVerboseMakefiles=enable;}
 
   /**
    * Set the command to use for native make shell echo.  The value
@@ -265,19 +262,6 @@ protected:
 
   // this method Writes the Directory informaiton files
   void WriteDirectoryInformationFile();
-
-
-  
-
-
-
-
-
-
-
-
-
-
 
 
   // write the depend info 

@@ -1,19 +1,20 @@
 # Find KDE4 and provide all necessary variables and macros to compile software for it.
 # It looks for KDE 4 in the following directories in the given order:
 # - CMAKE_INSTALL_PREFIX
-# - KDEDIR
+# - KDEDIRS
 # - /opt/kde4
 # - /opt/kde
 #
 # Please look in FindKDE4Internal.cmake and KDE4Macros.cmake for more information.
-# They are installed with the KDE 4 libraries in $KDEDIR/share/apps/cmake/modules/.
+# They are installed with the KDE 4 libraries in $KDEDIRS/share/apps/cmake/modules/.
 #
 # Author: Alexander Neundorf <neundorf@kde.org>
 
 FILE(TO_CMAKE_PATH "$ENV{KDEDIRS}" _KDEDIRS)
 
 # For KDE4 kde-config has been renamed to kde4-config
-FIND_PROGRAM(KDE4_KDECONFIG_EXECUTABLE NAMES kde4-config
+FIND_PROGRAM(KDE4_KDECONFIG_EXECUTABLE NAMES kde4-config 
+   PATH_SUFFIXES bin    # the suffix is for the paths coming from KDEDIRS
    PATHS
    ${CMAKE_INSTALL_PREFIX}/bin
    ${_KDEDIRS}
@@ -22,9 +23,7 @@ FIND_PROGRAM(KDE4_KDECONFIG_EXECUTABLE NAMES kde4-config
    )
 
 
-IF (NOT KDE4_KDECONFIG_EXECUTABLE)
-   FIND_PROGRAM(KDE4_KDECONFIG_EXECUTABLE NAMES kde4-config )
-ENDIF (NOT KDE4_KDECONFIG_EXECUTABLE)
+FIND_PROGRAM(KDE4_KDECONFIG_EXECUTABLE NAMES kde4-config )
 
 IF (KDE4_KDECONFIG_EXECUTABLE)
    # then ask kde4-config for the kde data dirs

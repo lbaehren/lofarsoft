@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCPackTarCompressGenerator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/10/30 16:36:07 $
-  Version:   $Revision: 1.3.2.4 $
+  Date:      $Date: 2007/10/27 02:57:00 $
+  Version:   $Revision: 1.3.2.7 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -175,15 +175,21 @@ int cmCPackTarCompressGenerator::CompressFiles(const char* outFileName,
   std::auto_ptr<char> realNamePtr(realName);
   strcpy(realName, outFileName);
   int flags = O_WRONLY | O_CREAT;
+  int options = 0;
+  if(this->GeneratorVerbose)
+    {
+    options |= TAR_VERBOSE;
+    }
+#ifdef __CYGWIN__
+  options |= TAR_GNU;
+#endif
   if (tar_open(&t, realName,
-      &compressType,
-      flags, 0644,
-      (this->GeneratorVerbose?TAR_VERBOSE:0)
-      | 0) == -1)
+               &compressType,
+               flags, 0644, options) == -1)
       {
-    cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_open(): "
-      << strerror(errno) << std::endl);
-    return 0;
+      cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_open(): "
+                    << strerror(errno) << std::endl);
+      return 0;
       }
 
   std::vector<std::string>::const_iterator fileIt;
@@ -225,15 +231,18 @@ int cmCPackTarCompressGenerator::CompressFiles(const char* outFileName,
 int cmCPackTarCompress_Compress_Output(void* client_data,
   const char* data, int data_length)
 {
+  if(!client_data)
+    {
+    return 0;
+    }
   cmcompress_stream *cstream = static_cast<cmcompress_stream*>(client_data);
   cmCPackTarCompress_Data *mydata
     = static_cast<cmCPackTarCompress_Data*>(cstream->client_data);
-  mydata->OutputStream->write(data, data_length);
-
   if ( !mydata->OutputStream )
     {
     return 0;
     }
+  mydata->OutputStream->write(data, data_length);
   return data_length;
 }
 

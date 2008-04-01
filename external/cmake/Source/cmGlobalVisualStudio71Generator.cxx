@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmGlobalVisualStudio71Generator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/11/10 15:12:55 $
-  Version:   $Revision: 1.30.2.4 $
+  Date:      $Date: 2007/03/16 22:05:42 $
+  Version:   $Revision: 1.30.2.5 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -35,6 +35,7 @@ cmLocalGenerator *cmGlobalVisualStudio71Generator::CreateLocalGenerator()
 {
   cmLocalVisualStudio7Generator *lg = new cmLocalVisualStudio7Generator;
   lg->SetVersion71();
+  lg->SetExtraFlagTable(this->GetExtraFlagTableVS7());
   lg->SetGlobalGenerator(this);
   return lg;
 }

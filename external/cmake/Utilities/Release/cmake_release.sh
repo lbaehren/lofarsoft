@@ -4,8 +4,8 @@
 # Program:   CMake - Cross-Platform Makefile Generator
 # Module:    $RCSfile: cmake_release.sh,v $
 # Language:  C++
-# Date:      $Date: 2006/07/31 15:00:31 $
-# Version:   $Revision: 1.35.2.4 $
+# Date:      $Date: 2007/01/12 14:18:57 $
+# Version:   $Revision: 1.35.2.6 $
 #
 # Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
 # See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -23,8 +23,8 @@
 #
 
 # Release version number.
-TAG="CMake-2-4-3"
-VERSION="2.4.3"
+TAG="CMake-2-4-6"
+VERSION="2.4.6"
 CMAKE_VERSION="2.4"
 RELEASE="1"
 PREVIOUS_VERSION="2.2.3"
@@ -607,7 +607,7 @@ EOF
             cat > cmake-${VERSION}/CYGWIN-PATCHES/setup.hint <<EOF
 # CMake setup.hint file for cygwin setup.exe program
 category: Devel 
-requires: libncurses7 cygwin
+requires: libncurses8 cygwin
 sdesc: "A cross platform build manager" 
 ldesc: "CMake is a cross platform build manager. It allows you to specify build parameters for C and C++ programs in a cross platform manner. For cygwin Makefiles will be generated. CMake is also capable of generating microsoft project files, nmake, and borland makefiles. CMake can also perform system inspection operations like finding installed libraries and header files." 
 EOF

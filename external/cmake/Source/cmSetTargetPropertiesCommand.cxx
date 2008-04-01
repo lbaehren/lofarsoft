@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmSetTargetPropertiesCommand.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/05/14 19:22:43 $
-  Version:   $Revision: 1.3.2.1 $
+  Date:      $Date: 2007/02/15 17:45:07 $
+  Version:   $Revision: 1.3.2.2 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -15,6 +15,8 @@
 
 =========================================================================*/
 #include "cmSetTargetPropertiesCommand.h"
+#include "cmLocalGenerator.h"
+#include "cmGlobalGenerator.h"
 
 // cmSetTargetPropertiesCommand
 bool cmSetTargetPropertiesCommand::InitialPass(
@@ -71,25 +73,26 @@ bool cmSetTargetPropertiesCommand::InitialPass(
      return false;
     }
   
-  cmTargets& targets = this->Makefile->GetTargets();
   // now loop over all the targets
   int i;
-  unsigned int k;
   for(i = 0; i < numFiles; ++i)
     {   
     // if the file is already in the makefile just set properites on it
-    cmTargets::iterator t = targets.find(args[i]);
-    if ( t != targets.end())
+    cmTarget* target = 
+      this->GetMakefile()
+      ->GetLocalGenerator()->GetGlobalGenerator()->FindTarget(0, 
+                                                              args[i].c_str());
+    if ( target )
       {
-      cmTarget& target = t->second;
       // now loop through all the props and set them
+      unsigned int k;
       for (k = 0; k < propertyPairs.size(); k = k + 2)
         {
-        target.SetProperty(propertyPairs[k].c_str(),
-                           propertyPairs[k+1].c_str());
+        target->SetProperty(propertyPairs[k].c_str(),
+                            propertyPairs[k+1].c_str());
         }
       }
-    // if file is not already in the makefile, then add it
+    // if file is not already in the makefile, then report error
     else
       { 
       std::string message = "Can not find target to add properties to: ";

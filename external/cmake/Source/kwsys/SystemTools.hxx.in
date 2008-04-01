@@ -280,6 +280,11 @@ public:
   static unsigned long FileLength(const char *filename);
 
   /**
+     Change the modification time or create a file
+  */
+  static bool Touch(const char* filename, bool create);
+  
+  /**
    *  Compare file modification times.
    *  Return true for successful comparison and false for error.
    *  When true is returned, result has -1, 0, +1 for
@@ -586,6 +591,18 @@ public:
     const char* filename, 
     unsigned long length = 256, 
     double percent_bin = 0.05);
+
+  /**
+   * Create a symbolic link if the platform supports it.  Returns whether
+   * creation succeded.
+   */
+  static bool CreateSymlink(const char* origName, const char* newName);
+
+  /**
+   * Read the contents of a symbolic link.  Returns whether reading
+   * succeded.
+   */
+  static bool ReadSymlink(const char* newName, kwsys_stl::string& origName);
 
   /**
    * Try to locate the file 'filename' in the directory 'dir'.

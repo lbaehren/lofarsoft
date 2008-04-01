@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCPackZIPGenerator.h,v $
   Language:  C++
-  Date:      $Date: 2006/04/15 17:02:18 $
-  Version:   $Revision: 1.2 $
+  Date:      $Date: 2007/02/05 18:21:32 $
+  Version:   $Revision: 1.2.2.1 $
 
   Copyright (c) 2002 Kitware, Inc. All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -48,7 +48,7 @@ protected:
   virtual int InitializeInternal();
   int CompressFiles(const char* outFileName, const char* toplevel,
     const std::vector<std::string>& files);
-  virtual const char* GetOutputExtension() { return "zip"; }
+  virtual const char* GetOutputExtension() { return ".zip"; }
 
   int ZipStyle;
 };

@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmLocalGenerator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/11/28 19:19:44 $
-  Version:   $Revision: 1.132.2.9 $
+  Date:      $Date: 2007/06/29 16:58:18 $
+  Version:   $Revision: 1.132.2.14 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -385,6 +385,18 @@ void cmLocalGenerator::GenerateInstallRules()
     "  ENDIF(COMPONENT)\n"
     "ENDIF(NOT CMAKE_INSTALL_COMPONENT)\n"
     "\n";
+
+  // Copy user-specified install options to the install code.
+  if(const char* so_no_exe =
+     this->Makefile->GetDefinition("CMAKE_INSTALL_SO_NO_EXE"))
+    {
+    fout <<
+      "# Install shared libraries without execute permission?\n"
+      "IF(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)\n"
+      "  SET(CMAKE_INSTALL_SO_NO_EXE \"" << so_no_exe << "\")\n"
+      "ENDIF(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)\n"
+      "\n";
+    }
 
   // Ask each install generator to write its code.
   std::vector<cmInstallGenerator*> const& installers =
@@ -1466,7 +1478,17 @@ void cmLocalGenerator::OutputLinkLibraries(std::ostream& fout,
 
   // Some search paths should never be emitted
   emitted.insert("");
-  emitted.insert("/usr/lib");
+  if(const char* implicitLinks =
+     (this->Makefile->GetDefinition
+      ("CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES")))
+    {
+    std::vector<std::string> implicitLinkVec;
+    cmSystemTools::ExpandListArgument(implicitLinks, implicitLinkVec);
+    for(unsigned int k = 0; k < implicitLinkVec.size(); ++k)
+      {
+      emitted.insert(implicitLinkVec[k]);
+      }
+    }
   std::string libPathFlag = 
     this->Makefile->GetRequiredDefinition("CMAKE_LIBRARY_PATH_FLAG");
   std::string libLinkFlag = 
@@ -1865,6 +1887,8 @@ std::string cmLocalGenerator::GetRealDependency(const char* inName,
       tLocation = cmSystemTools::GetFilenamePath(tLocation);
       std::string depLocation = cmSystemTools::GetFilenamePath(
         std::string(inName));
+      depLocation = cmSystemTools::CollapseFullPath(depLocation.c_str());
+      tLocation = cmSystemTools::CollapseFullPath(tLocation.c_str());
       if(depLocation != tLocation)
         {
         // it is a full path to a depend that has the same name
@@ -2282,6 +2306,16 @@ cmLocalGenerator::GetObjectFileNameWithoutTarget(const cmSourceFile& source)
        !relFromSource.empty() && relFromSource[0] != '.')
       {
       objectName = relFromSource;
+      }
+    }
+  // if it is still a full path check for the try compile case
+  // try compile never have in source sources, and should not
+  // have conflicting source file names in the same target
+  if(cmSystemTools::FileIsFullPath(objectName.c_str()))
+    {
+    if(this->GetGlobalGenerator()->GetCMakeInstance()->GetIsInTryCompile())
+      {
+      objectName = cmSystemTools::GetFilenameName(source.GetFullPath());
       }
     }
 

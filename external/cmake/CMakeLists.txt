@@ -5,9 +5,9 @@ MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
 # The CMake version number.
 SET(CMake_VERSION_MAJOR 2)
 SET(CMake_VERSION_MINOR 4)
-SET(CMake_VERSION_PATCH 5)
+SET(CMake_VERSION_PATCH 8)
 # for an actual release this should not be defined
-#SET(CMake_VERSION_RC 4)
+#SET(CMake_VERSION_RC 13)
 SET(CMake_VERSION "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
 SET(CMake_VERSION_FULL "${CMake_VERSION}.${CMake_VERSION_PATCH}")
 
@@ -390,10 +390,87 @@ IF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     SET(CPACK_SOURCE_STRIP_FILES "")
     SET(CPACK_PACKAGE_EXECUTABLES "ccmake" "CMake")
   ENDIF(WIN32 AND NOT UNIX)
+# cygwin specific packaging stuff
+  IF(CYGWIN)
+    SET(CPACK_PACKAGE_NAME cmake)
+    # setup the name of the package for cygwin cmake-2.4.3
+    SET(CPACK_PACKAGE_FILE_NAME
+      "${CPACK_PACKAGE_NAME}-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}")
+    # the source has the same name as the binary
+    SET(CPACK_SOURCE_PACKAGE_FILE_NAME ${CPACK_PACKAGE_FILE_NAME})
+    # Create a cygwin version number in case there are changes for cygwin
+    # that are not reflected upstream in CMake
+    SET(CPACK_CYGWIN_PATCH_NUMBER 1)
+    # if we are on cygwin and have cpack, then force the 
+    # doc, data and man dirs to conform to cygwin style directories
+    SET(CMAKE_DOC_DIR "/share/doc/${CPACK_PACKAGE_FILE_NAME}")
+    SET(CMAKE_DATA_DIR "/share/${CPACK_PACKAGE_FILE_NAME}")
+    SET(CMAKE_MAN_DIR "/share/man")
+    # let the user know we just forced these values
+    MESSAGE(STATUS "Setup for Cygwin packaging")
+    MESSAGE(STATUS "Override cache CMAKE_DOC_DIR = ${CMAKE_DOC_DIR}")
+    MESSAGE(STATUS "Override cache CMAKE_DATA_DIR = ${CMAKE_DATA_DIR}")
+    MESSAGE(STATUS "Override cache CMAKE_MAN_DIR = ${CMAKE_MAN_DIR}")
+    # These files are required by the cmCPackCygwinSourceGenerator and the files
+    # put into the release tar files.
+    SET(CPACK_CYGWIN_BUILD_SCRIPT 
+      "${CMake_BINARY_DIR}/@CPACK_PACKAGE_FILE_NAME@-@CPACK_CYGWIN_PATCH_NUMBER@.sh")
+    SET(CPACK_CYGWIN_PATCH_FILE 
+      "${CMake_BINARY_DIR}/@CPACK_PACKAGE_FILE_NAME@-@CPACK_CYGWIN_PATCH_NUMBER@.patch")
+    # include the sub directory for cygwin releases
+    SUBDIRS(Utilities/Release/Cygwin)
+    # when packaging source make sure the .build directory is not included
+    SET(CPACK_SOURCE_IGNORE_FILES
+      "/CVS/" "/\\\\.build/" "/\\\\.svn/" "\\\\.swp$" "\\\\.#" "/#" "~$")
+  ENDIF(CYGWIN)
+  # include CPack model once all variables are set
   INCLUDE(CPack)
 ENDIF(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
 
+# configure the CTestScript.cmake file into the binary directory
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/Templates/CTestScript.cmake.in"
   "${CMAKE_CURRENT_BINARY_DIR}/CTestScript.cmake"
   @ONLY IMMEDIATE)
 
+# Testing
+IF (NOT DART_ROOT)
+  SET(MAKEPROGRAM ${CMAKE_MAKE_PROGRAM})
+ENDIF (NOT DART_ROOT)
+
+IF(BUILD_TESTING)
+  SET(CMAKE_TEST_GENERATOR "" CACHE STRING "Generator used when running tests")
+  SET(CMAKE_TEST_MAKEPROGRAM "" CACHE FILEPATH "Generator used when running tests")
+  IF(NOT CMAKE_TEST_GENERATOR)
+    SET(CMAKE_TEST_GENERATOR "${CMAKE_GENERATOR}")
+    SET(CMAKE_TEST_MAKEPROGRAM "${MAKEPROGRAM}")
+  ELSE(NOT CMAKE_TEST_GENERATOR)
+    SET(CMAKE_TEST_DIFFERENT_GENERATOR TRUE)
+  ENDIF(NOT CMAKE_TEST_GENERATOR)
+
+  # Are we testing with the MSVC compiler?
+  SET(CMAKE_TEST_MSVC 0)
+  IF(MSVC AND NOT CMAKE_TEST_DIFFERENT_GENERATOR)
+    SET(CMAKE_TEST_MSVC 1)
+  ELSE(MSVC AND NOT CMAKE_TEST_DIFFERENT_GENERATOR)
+    IF("${CMAKE_TEST_GENERATOR}" MATCHES "NMake" OR
+        "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio")
+      SET(CMAKE_TEST_MSVC 1)
+    ENDIF("${CMAKE_TEST_GENERATOR}" MATCHES "NMake" OR
+      "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio")
+  ENDIF(MSVC AND NOT CMAKE_TEST_DIFFERENT_GENERATOR)
+
+  SET(CMAKE_TEST_SYSTEM_LIBRARIES 0)
+  FOREACH(util CURL EXPAT XMLRPC ZLIB)
+    IF(CMAKE_USE_SYSTEM_${util})
+      SET(CMAKE_TEST_SYSTEM_LIBRARIES 1)
+    ENDIF(CMAKE_USE_SYSTEM_${util})
+  ENDFOREACH(util)
+
+  # This variable is set by cmake, however to
+  # test cmake we want to make sure that
+  # the ctest from this cmake is used for testing
+  # and not the ctest from the cmake building and testing
+  # cmake.
+  SET(CMAKE_CTEST_COMMAND "${EXECUTABLE_OUTPUT_PATH}/ctest")
+  SET(CMAKE_CMAKE_COMMAND "${EXECUTABLE_OUTPUT_PATH}/cmake")
+ENDIF(BUILD_TESTING)

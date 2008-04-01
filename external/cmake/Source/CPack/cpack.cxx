@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cpack.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/10/27 20:01:49 $
-  Version:   $Revision: 1.16.2.6 $
+  Date:      $Date: 2007/10/25 18:03:49 $
+  Version:   $Revision: 1.16.2.7 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -253,7 +253,7 @@ int main (int argc, char *argv[])
       if ( !globalMF->ReadListFile(0, cpackConfigFile.c_str()) )
         {
         cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-          "Problem reding CPack config file: \""
+          "Problem reading CPack config file: \""
           << cpackConfigFile.c_str() << "\"" << std::endl);
         return 1;
         }

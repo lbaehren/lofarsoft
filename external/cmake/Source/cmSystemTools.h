@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmSystemTools.h,v $
   Language:  C++
-  Date:      $Date: 2006/05/14 19:22:43 $
-  Version:   $Revision: 1.133.2.1 $
+  Date:      $Date: 2007/02/05 18:21:32 $
+  Version:   $Revision: 1.133.2.2 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -212,6 +212,15 @@ public:
    */
   static std::vector<cmStdString> ParseArguments(const char* command);
     
+  /** Parse arguments out of a windows command line string.  */
+  static void ParseWindowsCommandLine(const char* command,
+                                      std::vector<std::string>& args);
+
+  /** Compute an escaped version of the given argument for use in a
+      windows shell.  See kwsys/System.h.in for details.  */
+  static std::string EscapeWindowsShellArgument(const char* arg,
+                                                int shell_flags);
+
   static void EnableMessages() { s_DisableMessages = false; }
   static void DisableMessages() { s_DisableMessages = true; }
   static void DisableRunCommandOutput() {s_DisableRunCommandOutput = true; }

@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmFileCommand.h,v $
   Language:  C++
-  Date:      $Date: 2006/06/30 17:48:43 $
-  Version:   $Revision: 1.16.2.2 $
+  Date:      $Date: 2007/10/25 18:03:48 $
+  Version:   $Revision: 1.16.2.5 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -70,9 +70,9 @@ public:
       "  FILE(GLOB variable [RELATIVE path] [globbing expressions]...)\n"
       "  FILE(GLOB_RECURSE variable [RELATIVE path] \n"
       "       [globbing expressions]...)\n"
-      "  FILE(REMOVE [directory]...)\n"
-      "  FILE(REMOVE_RECURSE [directory]...)\n"
-      "  FILE(MAKE_DIRECTORY [directory]...)\n"
+      "  FILE(REMOVE [file1 ...])\n"
+      "  FILE(REMOVE_RECURSE [file1 ...])\n"
+      "  FILE(MAKE_DIRECTORY [directory1 directory2 ...])\n"
       "  FILE(RELATIVE_PATH variable directory file)\n"
       "  FILE(TO_CMAKE_PATH path result)\n"
       "  FILE(TO_NATIVE_PATH path result)\n"
@@ -101,10 +101,14 @@ public:
       "match the files.\n"
       "Examples of recursive globbing include:\n"
       "   /dir/*.py  - match all python files in /dir and subdirectories\n"
-      "MAKE_DIRECTORY will create a directory at the specified location\n"
+      "MAKE_DIRECTORY will create the given directories, also if their parent "
+      "directories don't exist yet\n"
+      "REMOVE will remove the given files, also in subdirectories\n"
+      "REMOVE_RECURSE will remove the given files and directories, also "
+      "non-empty directories\n"
       "RELATIVE_PATH will determine relative path from directory to the given"
       " file.\n"
-      "TO_CMAKE_PATH will convert path into a cmake sytle path with unix /. "
+      "TO_CMAKE_PATH will convert path into a cmake style path with unix /. "
       " The input can be a single path or a system path like \"$ENV{PATH}\". "
       " Note the double quotes around the ENV call TO_CMAKE_PATH only takes "
       " one argument.\n"
@@ -125,7 +129,8 @@ protected:
   bool HandleRelativePathCommand(std::vector<std::string> const& args);
   bool HandleCMakePathCommand(std::vector<std::string> const& args,
                               bool nativePath);
-  void ComputeVersionedName(std::string& name, const char* version);
+  void ComputeVersionedLibName(std::string& name, const char* version);
+  void ComputeVersionedExeName(std::string& name, const char* version);
 };
 
 

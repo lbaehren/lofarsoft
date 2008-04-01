@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmGlobalVisualStudio8Generator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/11/10 15:12:55 $
-  Version:   $Revision: 1.10.2.4 $
+  Date:      $Date: 2007/12/04 22:14:05 $
+  Version:   $Revision: 1.10.2.6 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -36,6 +36,7 @@ cmLocalGenerator *cmGlobalVisualStudio8Generator::CreateLocalGenerator()
 {
   cmLocalVisualStudio7Generator *lg = new cmLocalVisualStudio7Generator;
   lg->SetVersion8();
+  lg->SetExtraFlagTable(this->GetExtraFlagTableVS8());
   lg->SetGlobalGenerator(this);
   return lg;
 }
@@ -244,4 +245,28 @@ cmGlobalVisualStudio8Generator
              << *i << "|" << this->PlatformName << "\n";
       }
     }
+}
+
+//----------------------------------------------------------------------------
+static cmVS7FlagTable cmVS8ExtraFlagTable[] =
+{
+  // Precompiled header and related options.  Note that the
+  // UsePrecompiledHeader entries are marked as "Continue" so that the
+  // corresponding PrecompiledHeaderThrough entry can be found.
+  {"UsePrecompiledHeader", "Yu", "Use Precompiled Header", "2",
+   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
+  {"PrecompiledHeaderThrough", "Yu", "Precompiled Header Name", "",
+   cmVS7FlagTable::UserValueRequired},
+  // There is no YX option in the VS8 IDE.
+
+  // Exception handling mode.  If no entries match, it will be FALSE.
+  {"ExceptionHandling", "GX", "enable c++ exceptions", "1", 0},
+  {"ExceptionHandling", "EHsc", "enable c++ exceptions", "1", 0},
+  {"ExceptionHandling", "EHa", "enable SEH exceptions", "2", 0},
+
+  {0,0,0,0,0}
+};
+cmVS7FlagTable const* cmGlobalVisualStudio8Generator::GetExtraFlagTableVS8()
+{
+  return cmVS8ExtraFlagTable;
 }

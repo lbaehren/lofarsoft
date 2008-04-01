@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmAddLibraryCommand.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/10/13 14:52:02 $
-  Version:   $Revision: 1.24.2.1 $
+  Date:      $Date: 2007/06/01 15:18:49 $
+  Version:   $Revision: 1.24.2.2 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -38,8 +38,8 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
   
   // If the second argument is "SHARED" or "STATIC", then it controls
   // the type of library.  Otherwise, it is treated as a source or
-  // source list name.
-  if(s != args.end())
+  // source list name. There man be two keyword arguments, check for them
+  while ( s != args.end() )
     {
     std::string libType = *s;
     if(libType == "STATIC")
@@ -61,6 +61,10 @@ bool cmAddLibraryCommand::InitialPass(std::vector<std::string> const& args)
       {
       ++s;
       in_all = false;
+      }
+    else
+      {
+      break;
       }
     }
 

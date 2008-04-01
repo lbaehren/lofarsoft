@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmInstallTargetGenerator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/10/13 14:52:02 $
-  Version:   $Revision: 1.12.2.4 $
+  Date:      $Date: 2008/01/11 13:30:18 $
+  Version:   $Revision: 1.12.2.6 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -79,6 +79,7 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
   switch(type)
     {
     case cmTarget::SHARED_LIBRARY:
+    case cmTarget::MODULE_LIBRARY:
       {
       // Add shared library installation properties if this platform
       // supports them.
@@ -146,8 +147,7 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
       }
       break;
     case cmTarget::STATIC_LIBRARY:
-    case cmTarget::MODULE_LIBRARY:
-      // Nothing special for modules or static libraries.
+      // Nothing special for static libraries.
       break;
     default:
       break;
@@ -208,8 +208,9 @@ cmInstallTargetGenerator
     std::string targetNameSO;
     std::string targetNameReal;
     std::string targetNameImport;
+    std::string targetNamePDB;
     target->GetLibraryNames(targetName, targetNameSO, targetNameReal,
-                            targetNameImport, i->c_str());
+                            targetNameImport, targetNamePDB, i->c_str());
     if(this->ImportLibrary)
       {
       // Use the import library name.
@@ -245,8 +246,10 @@ std::string cmInstallTargetGenerator::GetScriptReference(cmTarget* target,
     std::string targetNameSO;
     std::string targetNameReal;
     std::string targetNameImport;
+    std::string targetNamePDB;
     target->GetLibraryNames(targetName, targetNameSO, targetNameReal,
-                            targetNameImport, this->ConfigurationName);
+                            targetNameImport, targetNamePDB,
+                            this->ConfigurationName);
     if(this->ImportLibrary)
       {
       // Use the import library name.

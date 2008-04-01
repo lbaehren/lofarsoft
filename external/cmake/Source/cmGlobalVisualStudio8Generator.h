@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmGlobalVisualStudio8Generator.h,v $
   Language:  C++
-  Date:      $Date: 2006/11/10 15:12:55 $
-  Version:   $Revision: 1.4.2.4 $
+  Date:      $Date: 2007/03/16 22:05:42 $
+  Version:   $Revision: 1.4.2.5 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -50,6 +50,7 @@ public:
   virtual void Configure();
   virtual void Generate();
 protected:
+  static cmVS7FlagTable const* GetExtraFlagTableVS8();
   virtual void AddPlatformDefinitions(cmMakefile* mf);
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators);

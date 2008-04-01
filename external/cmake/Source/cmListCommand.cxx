@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmListCommand.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/10/13 14:52:02 $
-  Version:   $Revision: 1.4.2.5 $
+  Date:      $Date: 2007/12/19 15:43:44 $
+  Version:   $Revision: 1.4.2.6 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -41,6 +41,10 @@ bool cmListCommand::InitialPass(std::vector<std::string> const& args)
   if(subCommand == "APPEND")
     {
     return this->HandleAppendCommand(args);
+    }
+  if(subCommand == "FIND")
+    {
+    return this->HandleFindCommand(args);
     }
   if(subCommand == "INSERT")
     {
@@ -196,6 +200,43 @@ bool cmListCommand::HandleAppendCommand(std::vector<std::string> const& args)
     }
 
   this->Makefile->AddDefinition(listName.c_str(), listString.c_str());
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmListCommand::HandleFindCommand(std::vector<std::string> const& args)
+{
+  if(args.size() != 4)
+    {
+    this->SetError("sub-command FIND requires three arguments.");
+    return false;
+    }
+
+  const std::string& listName = args[1];
+  const std::string& variableName = args[args.size() - 1];
+  // expand the variable
+  std::vector<std::string> varArgsExpanded;
+  if ( !this->GetList(varArgsExpanded, listName.c_str()) )
+    {
+    this->Makefile->AddDefinition(variableName.c_str(), "-1");
+    return true;
+    }
+
+  std::vector<std::string>::iterator it;
+  unsigned int index = 0;
+  for ( it = varArgsExpanded.begin(); it != varArgsExpanded.end(); ++ it )
+    {
+    if ( *it == args[2] )
+      {
+      char indexString[32];
+      sprintf(indexString, "%d", index);
+      this->Makefile->AddDefinition(variableName.c_str(), indexString);
+      return true;
+      }
+    index++;
+    }
+
+  this->Makefile->AddDefinition(variableName.c_str(), "-1");
   return true;
 }
 

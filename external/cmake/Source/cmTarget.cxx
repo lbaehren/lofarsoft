@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmTarget.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/11/30 23:13:49 $
-  Version:   $Revision: 1.96.2.7 $
+  Date:      $Date: 2007/12/04 22:14:05 $
+  Version:   $Revision: 1.96.2.10 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -253,6 +253,8 @@ void cmTarget::TraceVSDependencies(std::string projFile,
             tLocation = cmSystemTools::GetFilenamePath(tLocation);
             std::string depLocation = cmSystemTools::GetFilenamePath(
               std::string(fullName));
+            depLocation = cmSystemTools::CollapseFullPath(depLocation.c_str());
+            tLocation = cmSystemTools::CollapseFullPath(tLocation.c_str());
             if(depLocation == tLocation)
               {
               isUtility = true;
@@ -913,16 +915,22 @@ const char* cmTarget::GetDirectory(const char* config)
 
 const char* cmTarget::GetLocation(const char* config)
 {
-  this->Location = this->GetDirectory();
+  this->Location = this->GetDirectory(config);
   if(!this->Location.empty())
     {
     this->Location += "/";
     }
-  const char* cfgid = this->Makefile->GetDefinition("CMAKE_CFG_INTDIR");
-  if(cfgid && strcmp(cfgid, ".") != 0)
+  if(!config)
     {
-    this->Location += cfgid;
-    this->Location += "/";
+     // No specific configuration was given so it will not appear on
+     // the result of GetDirectory.  Add a name here to be replaced at
+     // build time.
+    const char* cfgid = this->Makefile->GetDefinition("CMAKE_CFG_INTDIR");
+    if(cfgid && strcmp(cfgid, ".") != 0)
+      {
+      this->Location += cfgid;
+      this->Location += "/";
+       }
     }
   this->Location += this->GetFullName(config, false);
   return this->Location.c_str();
@@ -1170,6 +1178,17 @@ const char* cmTarget::GetPrefixVariableInternal(TargetType type,
 }
 
 //----------------------------------------------------------------------------
+std::string cmTarget::GetPDBName(const char* config)
+{
+  std::string prefix;
+  std::string base;
+  std::string suffix;
+  this->GetFullNameInternal(this->GetType(), config, false,
+                            prefix, base, suffix);
+  return prefix+base+".pdb";
+}
+
+//----------------------------------------------------------------------------
 std::string cmTarget::GetFullName(const char* config, bool implib)
 {
   return this->GetFullNameInternal(this->GetType(), config, implib);
@@ -1335,10 +1354,11 @@ void cmTarget::GetLibraryNames(std::string& name,
                                std::string& soName,
                                std::string& realName,
                                std::string& impName,
+                               std::string& pdbName,
                                const char* config)
 {
   // Get the names based on the real type of the library.
-  this->GetLibraryNamesInternal(name, soName, realName, impName,
+  this->GetLibraryNamesInternal(name, soName, realName, impName, pdbName,
                                 this->GetType(), config);
 }
 
@@ -1347,6 +1367,7 @@ void cmTarget::GetLibraryCleanNames(std::string& staticName,
                                     std::string& sharedSOName,
                                     std::string& sharedRealName,
                                     std::string& importName,
+                                    std::string& pdbName,
                                     const char* config)
 {
   // Get the name as if this were a static library.
@@ -1354,7 +1375,7 @@ void cmTarget::GetLibraryCleanNames(std::string& staticName,
   std::string realName;
   std::string impName;
   this->GetLibraryNamesInternal(staticName, soName, realName, impName,
-                                cmTarget::STATIC_LIBRARY, config);
+                                pdbName, cmTarget::STATIC_LIBRARY, config);
 
   // Get the names as if this were a shared library.
   if(this->GetType() == cmTarget::STATIC_LIBRARY)
@@ -1365,14 +1386,15 @@ void cmTarget::GetLibraryCleanNames(std::string& staticName,
     // type will never be MODULE.  Either way the only names that
     // might have to be cleaned are the shared library names.
     this->GetLibraryNamesInternal(sharedName, sharedSOName, sharedRealName,
-                                  importName, cmTarget::SHARED_LIBRARY,
-                                  config);
+                                  importName, pdbName,
+                                  cmTarget::SHARED_LIBRARY, config);
     }
   else
     {
     // Use the name of the real type of the library (shared or module).
     this->GetLibraryNamesInternal(sharedName, sharedSOName, sharedRealName,
-                                  importName, this->GetType(), config);
+                                  importName, pdbName, this->GetType(),
+                                  config);
     }
 }
 
@@ -1380,6 +1402,7 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
                                        std::string& soName,
                                        std::string& realName,
                                        std::string& impName,
+                                       std::string& pdbName,
                                        TargetType type,
                                        const char* config)
 {
@@ -1466,27 +1489,34 @@ void cmTarget::GetLibraryNamesInternal(std::string& name,
     {
     impName = "";
     }
+
+  // The program database file name.
+  pdbName = prefix+base+".pdb";
 }
 
 void cmTarget::GetExecutableNames(std::string& name,
                                   std::string& realName,
+                                  std::string& pdbName,
                                   const char* config)
 {
   // Get the names based on the real type of the executable.
-  this->GetExecutableNamesInternal(name, realName, this->GetType(), config);
+  this->GetExecutableNamesInternal(name, realName, pdbName,
+                                   this->GetType(), config);
 }
 
 void cmTarget::GetExecutableCleanNames(std::string& name,
                                        std::string& realName,
+                                       std::string& pdbName,
                                        const char* config)
 {
   // Get the name and versioned name of this executable.
-  this->GetExecutableNamesInternal(name, realName, cmTarget::EXECUTABLE,
-                                   config);
+  this->GetExecutableNamesInternal(name, realName, pdbName,
+                                   cmTarget::EXECUTABLE, config);
 }
 
 void cmTarget::GetExecutableNamesInternal(std::string& name,
                                           std::string& realName,
+                                          std::string& pdbName,
                                           TargetType type,
                                           const char* config)
 {
@@ -1526,6 +1556,9 @@ void cmTarget::GetExecutableNamesInternal(std::string& name,
 #if defined(__CYGWIN__)
   realName += suffix;
 #endif
+
+  // The program database file name.
+  pdbName = prefix+base+".pdb";
 }
 
 //----------------------------------------------------------------------------

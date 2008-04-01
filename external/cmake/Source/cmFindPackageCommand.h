@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmFindPackageCommand.h,v $
   Language:  C++
-  Date:      $Date: 2006/10/27 20:01:47 $
-  Version:   $Revision: 1.10.2.1 $
+  Date:      $Date: 2007/10/25 18:03:48 $
+  Version:   $Revision: 1.10.2.2 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -66,7 +66,7 @@ public:
     {
     return
       "  FIND_PACKAGE(<name> [major.minor] [QUIET] [NO_MODULE]\n"
-      "               [[REQUIRED|COMPONENTS] [componets...]])\n"
+      "               [[REQUIRED|COMPONENTS] [components...]])\n"
       "Finds and loads settings from an external project.  <name>_FOUND will "
       "be set to indicate whether the package was found.  Settings that "
       "can be used when <name>_FOUND is true are package-specific.  The "

@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmGlobalGenerator.h,v $
   Language:  C++
-  Date:      $Date: 2006/11/10 15:12:55 $
-  Version:   $Revision: 1.58.2.5 $
+  Date:      $Date: 2007/03/16 22:05:42 $
+  Version:   $Revision: 1.58.2.6 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -210,8 +210,6 @@ protected:
 
   void ConfigureRelativePaths();
   bool RelativePathsConfigured;
-  void SetupTests();
-
   void CreateDefaultGlobalTargets(cmTargets* targets);
   cmTarget CreateGlobalTarget(const char* name, const char* message,
     const cmCustomCommandLines* commandLines,

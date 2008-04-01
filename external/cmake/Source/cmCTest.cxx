@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCTest.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/10/27 20:01:47 $
-  Version:   $Revision: 1.300.2.4 $
+  Date:      $Date: 2007/12/04 22:14:05 $
+  Version:   $Revision: 1.300.2.6 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -57,6 +57,12 @@ struct tm* cmCTest::GetNightlyTime(std::string str,
 {
   struct tm* lctime;
   time_t tctime = time(0);
+  lctime = gmtime(&tctime);
+  char buf[1024];
+  // add todays year day and month to the time in str because
+  // curl_getdate no longer assumes the day is today
+  sprintf(buf, "%d%02d%02d %s", lctime->tm_year+1900, lctime->tm_mday,
+          lctime->tm_mon, str.c_str());
   cmCTestLog(this, OUTPUT, "Determine Nightly Start Time" << std::endl
     << "   Specified time: " << str.c_str() << std::endl);
   //Convert the nightly start time to seconds. Since we are
@@ -308,9 +314,12 @@ int cmCTest::Initialize(const char* binary_dir, bool new_tag,
       << "   Build name: " << this->GetCTestConfiguration("BuildName")
       << std::endl);
     cmCTestLog(this, DEBUG, "Produce XML is on" << std::endl);
-    if ( this->GetCTestConfiguration("NightlyStartTime").empty() )
+    if ( this->TestModel == cmCTest::NIGHTLY &&
+         this->GetCTestConfiguration("NightlyStartTime").empty() )
       {
-      cmCTestLog(this, DEBUG, "No nightly start time" << std::endl);
+      cmCTestLog(this, WARNING,
+                 "WARNING: No nightly start time found please set in"
+                 " CTestConfig.cmake or DartConfig.cmake" << std::endl);
   cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
       return 0;
       }
@@ -1185,6 +1194,13 @@ int cmCTest::RunTest(std::vector<const char*> argv,
 //----------------------------------------------------------------------
 void cmCTest::StartXML(std::ostream& ostr)
 {
+  if(this->CurrentTag.empty())
+    {
+    cmCTestLog(this, ERROR_MESSAGE,
+               "Current Tag empty, this may mean"
+               " NightlStartTime was not set correctly." << std::endl);
+    cmSystemTools::SetFatalErrorOccured();
+    }
   ostr << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
     << "<Site BuildName=\"" << this->GetCTestConfiguration("BuildName")
     << "\" BuildStamp=\"" << this->CurrentTag << "-"

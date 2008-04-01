@@ -167,8 +167,7 @@ SET(SRCS
 # Kdevelop only works on UNIX and not windows
 IF(UNIX)
   SET(SRCS ${SRCS}
-    cmGlobalKdevelopGenerator.cxx
-    cmLocalKdevelopGenerator.cxx)
+    cmGlobalKdevelopGenerator.cxx)
 ENDIF(UNIX)
 # XCode only works on apple
 IF(APPLE)
@@ -201,8 +200,12 @@ IF (WIN32)
       cmGlobalVisualStudio7Generator.h
       cmGlobalVisualStudio8Generator.cxx
       cmGlobalVisualStudio8Generator.h
+      cmGlobalVisualStudio9Generator.cxx
+      cmGlobalVisualStudio9Generator.h
       cmGlobalVisualStudio8Win64Generator.cxx
       cmGlobalVisualStudio8Win64Generator.h
+      cmGlobalVisualStudio9Win64Generator.cxx
+      cmGlobalVisualStudio9Win64Generator.h
       cmGlobalWatcomWMakeGenerator.cxx
       cmLocalVisualStudio6Generator.cxx
       cmLocalVisualStudio6Generator.h
@@ -278,15 +281,17 @@ TARGET_LINK_LIBRARIES(CTestLib CMakeLib ${CMAKE_CURL_LIBRARIES} ${CMAKE_XMLRPC_L
 #
 SET(CPACK_SRCS
   CPack/cmCPackGenerators.cxx
-  CPack/cmCPackSTGZGenerator.cxx
-  CPack/cmCPackTGZGenerator.cxx
-  CPack/cmCPackNSISGenerator.cxx
-  CPack/cmCPackPackageMakerGenerator.cxx
-  CPack/cmCPackZIPGenerator.cxx
-  CPack/cmCPackTarBZip2Generator.cxx
-  CPack/cmCPackTarCompressGenerator.cxx
   CPack/cmCPackGenericGenerator.cxx
   CPack/cmCPackLog.cxx
+  CPack/cmCPackNSISGenerator.cxx
+  CPack/cmCPackPackageMakerGenerator.cxx
+  CPack/cmCPackSTGZGenerator.cxx
+  CPack/cmCPackTGZGenerator.cxx
+  CPack/cmCPackTarBZip2Generator.cxx
+  CPack/cmCPackTarCompressGenerator.cxx
+  CPack/cmCPackZIPGenerator.cxx
+  CPack/cmCPackCygwinBinaryGenerator.cxx
+  CPack/cmCPackCygwinSourceGenerator.cxx
   )
 # Build CPackLib
 ADD_LIBRARY(CPackLib ${CPACK_SRCS})
@@ -308,6 +313,7 @@ IF(WIN32)
   IF(NOT UNIX)
     ADD_EXECUTABLE(cmw9xcom cmw9xcom.cxx)
     TARGET_LINK_LIBRARIES(cmw9xcom CMakeLib)
+    INSTALL_TARGETS(/bin cmw9xcom)
   ENDIF(NOT UNIX)
 ENDIF(WIN32)
 
@@ -343,34 +349,17 @@ IF (NOT DART_ROOT)
 ENDIF (NOT DART_ROOT)
 
 IF(BUILD_TESTING)
-  SET(CMAKE_TEST_GENERATOR "" CACHE STRING "Generator used when running tests")
-  SET(CMAKE_TEST_MAKEPROGRAM "" CACHE FILEPATH "Generator used when running tests")
-  IF(NOT CMAKE_TEST_GENERATOR)
-    SET(CMAKE_TEST_GENERATOR "${CMAKE_GENERATOR}")
-    SET(CMAKE_TEST_MAKEPROGRAM "${MAKEPROGRAM}")
-  ELSE(NOT CMAKE_TEST_GENERATOR)
-    SET(CMAKE_TEST_DIFFERENT_GENERATOR TRUE)
-  ENDIF(NOT CMAKE_TEST_GENERATOR)
-
-  SET(CMAKE_TEST_SYSTEM_LIBRARIES 0)
-  FOREACH(util CURL EXPAT XMLRPC ZLIB)
-    IF(CMAKE_USE_SYSTEM_${util})
-      SET(CMAKE_TEST_SYSTEM_LIBRARIES 1)
-    ENDIF(CMAKE_USE_SYSTEM_${util})
-  ENDFOREACH(util)
-
-  # This variable is set by cmake, however to
-  # test cmake we want to make sure that 
-  # the ctest from this cmake is used for testing
-  # and not the ctest from the cmake building and testing
-  # cmake.
-  SET(CMAKE_CTEST_COMMAND "${EXECUTABLE_OUTPUT_PATH}/ctest")
-  SET(CMAKE_CMAKE_COMMAND "${EXECUTABLE_OUTPUT_PATH}/cmake")
-
   # Should the long tests be run?
   OPTION(CMAKE_RUN_LONG_TESTS "Should the long tests be run (such as Bootstrap)." ON)
   MARK_AS_ADVANCED(CMAKE_RUN_LONG_TESTS)
 
+  IF (CMAKE_RUN_LONG_TESTS)
+    OPTION(CTEST_TEST_CTEST 
+      "Should the tests that run a full sub ctest process be run?" 
+      OFF)
+    MARK_AS_ADVANCED(CTEST_TEST_CTEST)
+  ENDIF (CMAKE_RUN_LONG_TESTS)
+    
   ADD_TEST(CommandLineTest ${CMAKE_CTEST_COMMAND}
     --build-and-test 
     "${CMake_SOURCE_DIR}/Tests/CommandLineTest"
@@ -402,6 +391,7 @@ IF(BUILD_TESTING)
     --test-command ${CMAKE_CMAKE_COMMAND} -E compare_files 
     ${CMake_SOURCE_DIR}/Tests/TargetName/scripts/hello_world
     ${CMake_BINARY_DIR}/Tests/TargetName/scripts/hello_world)
+
   ADD_TEST(LibName ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/LibName"
@@ -412,6 +402,18 @@ IF(BUILD_TESTING)
     --build-project LibName 
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/LibName/lib"
     --test-command foobar
+    )
+
+  ADD_TEST(CustComDepend ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/CustComDepend"
+    "${CMake_BINARY_DIR}/Tests/CustComDepend"
+    --build-two-config
+    --build-generator ${CMAKE_TEST_GENERATOR}
+    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+    --build-project CustComDepend 
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/CustComDepend/bin"
+    --test-command foo bar.c
     )
 
   ADD_TEST(CustomCommand  ${CMAKE_CTEST_COMMAND}
@@ -649,6 +651,27 @@ IF(BUILD_TESTING)
       -DCMAKE_TEST_DIFFERENT_GENERATOR:BOOL=${CMAKE_TEST_DIFFERENT_GENERATOR}
       -DCMAKE_TEST_SYSTEM_LIBRARIES:BOOL=${CMAKE_TEST_SYSTEM_LIBRARIES}
       --test-command complex)
+
+    ADD_TEST(SetLang ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/SetLang"
+      "${CMake_BINARY_DIR}/Tests/SetLang"
+      --build-two-config
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-project SetLang
+      --test-command bar)
+
+#     ADD_TEST(ConvLibrary ${CMAKE_CTEST_COMMAND}
+#       --build-and-test
+#       "${CMake_SOURCE_DIR}/Tests/ConvLibrary"
+#       "${CMake_BINARY_DIR}/Tests/ConvLibrary"
+#       --build-two-config
+#       --build-generator ${CMAKE_TEST_GENERATOR}
+#       --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+#       --build-project ConvLibrary
+#       --test-command bartest)
+
 
 #    ADD_TEST(complexRelativePaths  ${CMAKE_CTEST_COMMAND}
 #      --build-and-test
@@ -972,6 +995,18 @@ IF(BUILD_TESTING)
       "${CMake_BINARY_DIR}/Tests/SubDir/testfromsubdir.o"
       )
   ENDIF (WIN32)    
+
+  IF(CMAKE_TEST_MSVC)
+    ADD_TEST(PrecompiledHeader ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/PrecompiledHeader"
+      "${CMake_BINARY_DIR}/Tests/PrecompiledHeader"
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-project PrecompiledHeader
+      --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+      --build-two-config
+      --test-command foo)
+  ENDIF(CMAKE_TEST_MSVC)
 
   IF("${CMAKE_TEST_GENERATOR}" MATCHES "Makefile")
     ADD_TEST(MakeClean ${CMAKE_CTEST_COMMAND}

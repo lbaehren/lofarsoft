@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmLocalVisualStudio7Generator.h,v $
   Language:  C++
-  Date:      $Date: 2006/10/27 20:01:48 $
-  Version:   $Revision: 1.22.2.4 $
+  Date:      $Date: 2007/12/18 20:02:08 $
+  Version:   $Revision: 1.22.2.8 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -25,6 +25,8 @@ class cmSourceFile;
 class cmCustomCommand;
 class cmSourceGroup;
 struct cmVS7FlagTable;
+
+class cmLocalVisualStudio7GeneratorOptions;
 
 /** \class cmLocalVisualStudio7Generator
  * \brief Write Visual Studio .NET project files.
@@ -62,13 +64,16 @@ public:
     }
   void SetVersion71() {this->Version = 71;}
   void SetVersion8() {this->Version = 8;}
+  void SetVersion9() {this->Version = 9;}
   void SetPlatformName(const char* n) { this->PlatformName = n;}
   virtual void ConfigureFinalPass();
+  
+  void SetExtraFlagTable(cmVS7FlagTable const* table)
+    { this->ExtraFlagTable = table; }
 private:
-  void FillFlagMapFromCommandFlags(std::map<cmStdString, 
-                                   cmStdString>& flagMap,
-                                   cmVS7FlagTable* flagTable,
-                                   std::string& flags);
+  typedef cmLocalVisualStudio7GeneratorOptions Options;
+  void ReadAndStoreExternalGUID(const char* name,
+                                const char* path);
   std::string GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
                                       const char* configName);
   void FixGlobalTargets();
@@ -88,12 +93,10 @@ private:
   std::string EscapeForXML(const char* s);
   std::string ConvertToXMLOutputPath(const char* path);
   std::string ConvertToXMLOutputPathSingle(const char* path);
-  void OutputDefineFlags(const char* flags,
-                         std::ostream& fout);
   void OutputTargetRules(std::ostream& fout, cmTarget &target, 
                          const char *libName);
   void OutputBuildTool(std::ostream& fout, const char* configName,
-                       const char* libname, cmTarget& t);
+                       cmTarget& t);
   void OutputLibraries(std::ostream& fout,
                        std::vector<cmStdString> const& libs);
   void OutputLibraryDirectories(std::ostream& fout,
@@ -119,12 +122,37 @@ private:
                   const char *libName, std::vector<std::string> *configs);
   virtual std::string GetTargetDirectory(cmTarget&);
 
+  cmVS7FlagTable const* ExtraFlagTable;
   std::vector<std::string> CreatedProjectNames;
   std::string LibraryOutputPath;
   std::string ExecutableOutputPath;
   std::string ModuleDefinitionFile;
   int Version;
   std::string PlatformName; // Win32 or x64 
+};
+
+// This is a table mapping XML tag IDE names to command line options
+struct cmVS7FlagTable
+{
+  const char* IDEName;  // name used in the IDE xml file
+  const char* commandFlag; // command line flag
+  const char* comment;     // comment
+  const char* value; // string value
+  unsigned int special; // flags for special handling requests
+  enum
+  {
+    UserValue    = (1<<0), // flag contains a user-specified value
+    UserIgnored  = (1<<1), // ignore any user value
+    UserRequired = (1<<2), // match only when user value is non-empty
+    Continue     = (1<<3), // continue looking for matching entries
+    SemicolonAppendable = (1<<4), // a flag that if specified multiple times
+                                  // should have its value appended to the
+                                  // old value with semicolons (e.g.
+                                  // /NODEFAULTLIB: => 
+                                  // IgnoreDefaultLibraryNames)
+    UserValueIgnored  = UserValue | UserIgnored,
+    UserValueRequired = UserValue | UserRequired
+  };
 };
 
 #endif

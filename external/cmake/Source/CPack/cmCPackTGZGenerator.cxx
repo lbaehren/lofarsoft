@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmCPackTGZGenerator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/10/30 16:36:07 $
-  Version:   $Revision: 1.13.2.3 $
+  Date:      $Date: 2007/10/27 02:57:00 $
+  Version:   $Revision: 1.13.2.5 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -228,17 +228,23 @@ int cmCPackTGZGenerator::CompressFiles(const char* outFileName,
   std::auto_ptr<char> realNamePtr(realName);
   strcpy(realName, outFileName);
   int flags = O_WRONLY | O_CREAT;
+  int options = 0;
+  if(this->GeneratorVerbose)
+    {
+    options |= TAR_VERBOSE;
+    }
+#ifdef __CYGWIN__
+  options |= TAR_GNU;
+#endif 
   if (tar_open(&t, realName,
       &gztype,
       flags, 0644,
-      (this->GeneratorVerbose?TAR_VERBOSE:0)
-      | 0) == -1)
+      options) == -1)
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem with tar_open(): "
       << strerror(errno) << std::endl);
     return 0;
     }
-
   std::vector<std::string>::const_iterator fileIt;
   for ( fileIt = files.begin(); fileIt != files.end(); ++ fileIt )
     {

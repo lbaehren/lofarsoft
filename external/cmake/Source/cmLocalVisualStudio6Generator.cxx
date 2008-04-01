@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmLocalVisualStudio6Generator.cxx,v $
   Language:  C++
-  Date:      $Date: 2006/10/27 20:01:48 $
-  Version:   $Revision: 1.100.2.5 $
+  Date:      $Date: 2007/12/12 03:28:45 $
+  Version:   $Revision: 1.100.2.9 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -421,12 +421,19 @@ void cmLocalVisualStudio6Generator
       compileFlags += cflags;
       }
 
-    const char* lang = this->GlobalGenerator->
-      GetLanguageFromExtension((*sf)->GetSourceExtension().c_str());
-    if(lang && strcmp(lang, "CXX") == 0)
+    const char* lang = this->GetSourceFileLanguage(*(*sf));
+    if(lang)
       {
-      // force a C++ file type
-      compileFlags += " /TP ";
+      if(strcmp(lang, "CXX") == 0)
+        {
+        // force a C++ file type
+        compileFlags += " /TP ";
+        }
+      else if(strcmp(lang, "C") == 0)
+        {
+        // force to c file type
+        compileFlags += " /TC ";
+        }
       }
       
     // Check for extra object-file dependencies.
@@ -581,6 +588,11 @@ cmLocalVisualStudio6Generator
   std::vector<std::string>::iterator i;
   for(i = this->Configurations.begin(); i != this->Configurations.end(); ++i)
     {
+    // Strip the subdirectory name out of the configuration name.
+    std::string config = *i;
+    std::string::size_type pos = config.find_last_of(" ");
+    config = config.substr(pos+1, std::string::npos);
+    config = config.substr(0, config.size()-1);
     if (i == this->Configurations.begin())
       {
       fout << "!IF  \"$(CFG)\" == " << i->c_str() << std::endl;
@@ -599,7 +611,8 @@ cmLocalVisualStudio6Generator
         d != depends.end(); ++d)
       {
       // Lookup the real name of the dependency in case it is a CMake target.
-      std::string dep = this->GetRealDependency(d->c_str(), i->c_str());
+      std::string dep = this->GetRealDependency(d->c_str(),
+                                                config.c_str());
       fout << "\\\n\t" <<
         this->ConvertToOptionallyRelativeOutputPath(dep.c_str());
       }

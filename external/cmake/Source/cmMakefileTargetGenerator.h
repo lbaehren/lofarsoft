@@ -3,8 +3,8 @@
   Program:   CMake - Cross-Platform Makefile Generator
   Module:    $RCSfile: cmMakefileTargetGenerator.h,v $
   Language:  C++
-  Date:      $Date: 2006/10/13 14:52:06 $
-  Version:   $Revision: 1.6.2.3 $
+  Date:      $Date: 2007/01/03 15:19:03 $
+  Version:   $Revision: 1.6.2.4 $
 
   Copyright (c) 2002 Kitware, Inc., Insight Consortium.  All rights reserved.
   See Copyright.txt or http://www.cmake.org/HTML/Copyright.html for details.
@@ -23,7 +23,7 @@ class cmCustomCommand;
 class cmDependInformation;
 class cmDepends;
 class cmGeneratedFileStream;
-class cmGlobalGenerator;
+class cmGlobalUnixMakefileGenerator3;
 class cmLocalUnixMakefileGenerator3;
 class cmMakeDepend;
 class cmMakefile;
@@ -121,7 +121,7 @@ protected:
   cmStdString TargetName;
   cmTarget *Target;
   cmLocalUnixMakefileGenerator3 *LocalGenerator;
-  cmGlobalGenerator *GlobalGenerator;
+  cmGlobalUnixMakefileGenerator3 *GlobalGenerator;
   cmMakefile *Makefile;
 
   bool DriveCustomCommandsOnDepends;
