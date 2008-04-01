@@ -27,6 +27,26 @@ find_path (PYTHON_MODULES_cmake FindPython.cmake
   devel_common/cmake
   )
 
+if (PYTHON_MODULES_cmake)
+  ## --- set verbosity during configuration ------
+  set (BOOST_FIND_QUIETLY ON)
+  set (PYTHON_FIND_QUIETLY ON)
+  ## --- Python ----------------------------------
+  include (${PYTHON_MODULES_cmake}/FindPython.cmake)
+  ## --- Boost -----------------------------------
+  set (BOOST_pythonOnly ON)
+  set (BOOST_test_exec_monitor OFF)
+  include (${PYTHON_MODULES_cmake}/FindBoost.cmake)
+else (PYTHON_MODULES_cmake)
+endif (PYTHON_MODULES_cmake)
+
+message (STATUS "--------------------------------------------------")
+message (STATUS "BOOST          = ${HAVE_BOOST}")
+message (STATUS "BOOST includes = ${BOOST_INCLUDES}")
+message (STATUS "BOOST libs     = ${BOOST_LIBRARIES}")
+message (STATUS "NumPy includes = ${NUMPY_INCLUDES}")
+message (STATUS "--------------------------------------------------")
+
 ## ------------------------------------------------------------------------------
 ## Configuration and build
 

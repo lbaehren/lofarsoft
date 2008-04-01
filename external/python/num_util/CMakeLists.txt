@@ -12,66 +12,45 @@ project (NUM_UTIL)
 cmake_minimum_required (VERSION 2.4)
 
 ## -----------------------------------------------------------------------------
-## Check for required external libraries
+## Compilation targets
 
-## Locate additional CMake find scripts
+#  simple_ext.so
+#  |-- num_util.o
+#  `-- simpletest.o           [T]
+#      |-- num_util.o         [T]
+#      |   |-- num_util.cpp
+#      |   `-- num_util.h
+#      |-- num_util.h
+#      `-- simpletest.cpp
 
-find_path (NUM_UTIL_cmake FindBoost.cmake FindPython.cmake FindNumarray.cmake
-  PATHS 
-  ${NUM_UTIL_SOURCE_DIR}
-  ${NUM_UTIL_SOURCE_DIR}/..
-  ${NUM_UTIL_SOURCE_DIR}/../..
-  ${NUM_UTIL_SOURCE_DIR}/../../..
-  PATH_SUFFIXES
-  devel_common/cmake
+include_directories (
+  ${BOOST_INCLUDES}
+  ${PYTHON_INCLUDES}
+  ${NUMPY_INCLUDES}
   )
 
-## locate external packages
+add_library (num_util STATIC
+  simpletest.cpp
+  num_util.cpp
+  )
 
-if (NUM_UTIL_cmake)
-  ## --- Boost -----------------------------------
-  set (BOOST_FIND_QUIETLY 1)
-  include (${NUM_UTIL_cmake}/FindBoost.cmake)
-  ## --- Python ----------------------------------
-  set (PYTHON_FIND_QUIETLY 1)
-  include (${NUM_UTIL_cmake}/FindPython.cmake)
-else (NUM_UTIL_cmake)
-  message (SEND_ERROR "[NUM_UTIL] Unable to locate CMake find scripts!")
-endif (NUM_UTIL_cmake)
-
-## Set location of the header files
-
-if (BOOST_INCLUDES)
-  include_directories (${BOOST_INCLUDES})
-endif (BOOST_INCLUDES)
-
-if (PYTHON_INCLUDES)
-  include_directories (${PYTHON_INCLUDES})
-endif (PYTHON_INCLUDES)
-
-if (NUMPY_INCLUDES)
-  include_directories (${NUMPY_INCLUDES})
-endif (NUMPY_INCLUDES)
-
-## -----------------------------------------------------------------------------
-## Compilation targets
-#
-# all: num_py_test.py simpletest.py
-# num_py_test.py : num_test_ext.so
-# 	$(PYTHON_DIR)/bin/python num_py_test.py
-# simpletest.py : simple_ext.so
-# 	$(PYTHON_DIR)/bin/python simpletest.py
-# num_test_ext.so: num_util.o num_test.o num_test_ext.o
-# num_test_ext.o : num_test_ext.cpp num_test.h
-# simple_ext.so : num_util.o simpletest.o
-# 	g++ -$(LDFLAGS) -o $@  $(LIBDIRS)  $(PYLIBS)  $^
-# num_test.o  : num_test.cpp num_util.o num_test.h
-# num_util.o  : num_util.cpp  num_util.h
-# simpletest.o  : num_util.o num_util.h simpletest.cpp
-
-add_definitions (-fPIC)
-
-add_library (num_util STATIC num_util.cpp)
+if (APPLE)
+  set_target_properties (num_util
+    PROPERTIES
+    PREFIX ""
+    SUFFIX .so
+    COMPILE_FLAGS "-DPYTHON -fpermissive"
+    LINK_FLAGS "-fPIC -flat_namespace"
+    )
+else (APPLE)
+  set_target_properties (num_util
+    PROPERTIES
+    PREFIX ""
+    SUFFIX .so
+    COMPILE_FLAGS -DPYTHON
+    LINK_FLAGS "-fPIC -shared"
+    )
+endif (APPLE)
 
 ## -----------------------------------------------------------------------------
 ## Installation
