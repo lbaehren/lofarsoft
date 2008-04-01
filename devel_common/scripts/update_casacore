@@ -60,19 +60,36 @@ for module in $casacore_modules
     FILES=`find $module -name *.h`
     for FILE in $FILES 
     {
-	cp $sourceDir/$FILE $targetDir/$FILE
+		cp $sourceDir/$FILE $targetDir/$FILE
+		svn add $targetDir/$FILE
     }
     ## [2] Implementation files
     FILES=`find $module -name *.cc`
     for FILE in $FILES 
     {
-	cp $sourceDir/$FILE $targetDir/$FILE
+		cp $sourceDir/$FILE $targetDir/$FILE
+		svn add $targetDir/$FILE
     }
     ## [3] Template instantiation files
     FILES=`find $module -name *.tcc`
     for FILE in $FILES 
     {
-	cp $sourceDir/$FILE $targetDir/$FILE
+		cp $sourceDir/$FILE $targetDir/$FILE
+		svn add $targetDir/$FILE
+    }
+    ## [4] Bison input files (yy -> ycc)
+    FILES=`find $module -name *.yy`
+    for FILE in $FILES 
+    {
+		cp $sourceDir/$FILE $targetDir/$FILE
+		svn add $targetDir/$FILE
+    }
+    ## [4] Flex input files (ll -> lcc)
+    FILES=`find $module -name *.ll`
+    for FILE in $FILES 
+    {
+		cp $sourceDir/$FILE $targetDir/$FILE
+		svn add $targetDir/$FILE
     }
     echo "done."
 }

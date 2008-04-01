@@ -109,6 +109,8 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
 
     /*!
       \brief Provide a summary of the internal status
+
+      \param os -- Output stream to which the summary is written.
     */
     void summary (std::ostream &os);    
 

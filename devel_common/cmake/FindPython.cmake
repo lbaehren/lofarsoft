@@ -91,7 +91,7 @@ foreach (python_version 2.6 2.5 2.4 2.3)
 
   ## Check for the NUMPY header files
 
-  find_path (NUMPY_INCLUDES numpy/arrayobject.h
+  find_path (NUMPY_INCLUDES_tmp numpy/arrayobject.h
     PATHS ${lib_locations} ${include_locations}
     PATH_SUFFIXES
     python
@@ -99,6 +99,10 @@ foreach (python_version 2.6 2.5 2.4 2.3)
     python${python_version}/site-packages/numpy/core/include
     NO_DEFAULT_PATH
     )
+
+  if (NUMPY_INCLUDES_tmp)
+    get_filename_component (NUMPY_INCLUDES ${NUMPY_INCLUDES_tmp} ABSOLUTE)
+  endif (NUMPY_INCLUDES_tmp)
 
   ## Check for the NUM_UTIL header files and libraries
 

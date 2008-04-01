@@ -137,7 +137,7 @@ foreach (boost_version 1_34_1 1_33_1)
   ## Check for the header files ------------------
 
   ## <boost/config.hpp>
-  find_path (BOOST_INCLUDES boost/config.hpp boost/python.hpp
+  find_path (BOOST_INCLUDES_tmp boost/config.hpp boost/python.hpp
     PATHS ${include_locations}
     PATH_SUFFIXES
     boost-${boost_version}
@@ -145,6 +145,10 @@ foreach (boost_version 1_34_1 1_33_1)
     .
     NO_DEFAULT_PATH
     )
+
+  if (BOOST_INCLUDES_tmp)
+    get_filename_component (BOOST_INCLUDES ${BOOST_INCLUDES_tmp} ABSOLUTE)
+  endif (BOOST_INCLUDES_tmp)
 
   ## Check for the module libraries --------------
   
