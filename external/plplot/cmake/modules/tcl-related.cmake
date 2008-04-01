@@ -66,9 +66,19 @@ if(ENABLE_tcl)
     include(FindTclsh)
     if(TCL_TCLSH)
       message(STATUS "Looking for tclsh - found")
+      message(STATUS "TCL_TCLSH = ${TCL_TCLSH}")
+      # test to determine HAVE_TCL_GT_84
+      execute_process(
+      COMMAND ${TCL_TCLSH} CheckTCL_GT_84.tcl
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/cmake/modules
+      OUTPUT_VARIABLE HAVE_TCL_GT_84
+      )
     else(TCL_TCLSH)
       message(STATUS "Looking for tclsh - not found")
+      # Fall back to user option for determining HAVE_TCL_GT_84.
+      option(HAVE_TCL_GT_84 "if Tcl version is greater than 8.4" OFF)
     endif(TCL_TCLSH)
+    message(STATUS "HAVE_TCL_GT_84 = ${HAVE_TCL_GT_84}")
   else(TCL_FOUND)
     message(STATUS
     "Looking for include paths and libraries for Tcl/Tk - not found"
@@ -84,7 +94,7 @@ if(ENABLE_tcl)
         message(STATUS "Looking for itcl.h - found")
         message(STATUS "Looking for itcl library")
 	get_filename_component(TCL_LIBRARY_PATH ${TCL_LIBRARY} PATH)
-        set(itcl_library_versions 3.3 3.2 3.1 3.0 2.1 2.0)
+        set(itcl_library_versions 3.4 3.3 3.2 3.1 3.0 2.1 2.0)
         foreach(version ${itcl_library_versions})
           find_library(ITCL_LIBRARY itcl${version} PATHS ${TCL_LIBRARY_PATH}
                        PATH_SUFFIXES itcl${version})
@@ -145,7 +155,7 @@ if(ENABLE_tcl)
       if(ITK_INCLUDE_PATH)
         message(STATUS "Looking for itk.h - found")
         message(STATUS "Looking for itk library")
-        set(itk_library_versions 3.3 3.2 3.1 3.0 2.1 2.0)
+        set(itk_library_versions 3.4 3.3 3.2 3.1 3.0 2.1 2.0)
         foreach(version ${itk_library_versions})
           find_library(ITK_LIBRARY itk${version} ${TK_LIBRARY}
                        PATH_SUFFIXES itk${version})

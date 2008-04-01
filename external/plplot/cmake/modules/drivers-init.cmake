@@ -66,49 +66,66 @@ endif(DEFAULT_NO_DEVICES AND DEFAULT_ALL_DEVICES)
 # "ON" or "OFF" and this will reflect in inclusion/exclusion by default
 # (as shown by ccmake).
 #
-# Ordered alphabetically by second in each pair (the driver) for human
+# Ordered alphabetically by second in each pair (the driver) and then
+# alphabetically by device (the first in each pair) for human
 # consumption, but this is not necessary.
 
 set(DRIVERS_DEVICE_LIST
 "aqt:aqt:ON"
+# memcairo does not work so turn it off by default.
+# The remaining cairo devices work well so turn them on by default.
+"memcairo:cairo:OFF"
+"pdfcairo:cairo:ON"
+"pngcairo:cairo:ON"
+"pscairo:cairo:ON"
+"svgcairo:cairo:ON"
+"xcairo:cairo:ON"
 "cgm:cgm:ON"
 "dg300:dg300:OFF"
-"png:gd:ON" "jpeg:gd:ON" "gif:gd:ON"
+"gif:gd:ON"
+"jpeg:gd:ON"
+"png:gd:ON" 
+"gcw:gcw:ON"
 # Do not implement gnome which is superseded by gcw
 #"gnome:gnome:OFF"
-"hp7470:hpgl:ON" "hp7580:hpgl:ON" "lj_hpgl:hpgl:ON"
+"hp7470:hpgl:ON"
+"hp7580:hpgl:ON"
+"lj_hpgl:hpgl:ON"
 "imp:impress:OFF"
-"gcw:gcw:ON"
 # Default off because poorly maintained (colours are incorrect)
 # must use software fill, and must run as root.
 "linuxvga:linuxvga:OFF"
 "ljii:ljii:OFF"
 "ljiip:ljiip:OFF"
 "mem:mem:ON"
-"memcairo:cairo:OFF"
 "ntk:ntk:OFF"
 "null:null:ON"
 "pbm:pbm:ON"
 "pdf:pdf:OFF"
-"pdfcairo:cairo:OFF"
-"plmeta:plmeta:ON"
-"pngcairo:cairo:OFF"
+# (2007-09-01) As discussed on list, don't enable plmeta until we sort
+# out the known issues (e.g., strings, aspect ratio, and TrueType fonts).
+# This is going to take time/energy for some volunteer who has not volunteered
+# yet.... :-)
+"plmeta:plmeta:OFF"
 "ps:ps:ON"
-"pscairo:cairo:OFF"
-# Default OFF because this device is not well maintained (it currently
-# segfaults).
+# No longer segfaults, but still default OFF because cleaner/better ways 
+# (psttf and pscairo) to get modern fonts for postscript results.
 "pstex:pstex:OFF"
 "psttf:psttf:ON"
-"xterm:tek:OFF" "tek4010:tek:OFF" "tek4107:tek:OFF" "mskermit:tek:OFF"
-"versaterm:tek:OFF" "vlt:tek:OFF" "conex:tek:OFF" "tek4010f:tek:OFF"
 "svg:svg:ON"
-"svgcairo:cairo:OFF"
+"conex:tek:OFF" 
+"mskermit:tek:OFF"
+"tek4010:tek:OFF"
+"tek4010f:tek:OFF"
+"tek4107:tek:OFF"
 "tek4107f:tek:OFF"
+"versaterm:tek:OFF"
+"vlt:tek:OFF"
+"xterm:tek:OFF" 
 "tk:tk:ON"
 "tkwin:tkwin:ON"
 "wingcc:wingcc:ON"
 "wxwidgets:wxwidgets:ON"
-"xcairo:cairo:OFF"
 "xfig:xfig:ON"
 "xwin:xwin:ON"
 )

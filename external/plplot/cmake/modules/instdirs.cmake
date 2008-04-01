@@ -30,7 +30,7 @@
 # install locations).
 
 set(
-CMAKE_INSTALL_EXEC_PREFIX 
+CMAKE_INSTALL_EXEC_PREFIX
 ${CMAKE_INSTALL_PREFIX}
 CACHE PATH "install location for architecture-dependent files"
 )
@@ -86,8 +86,19 @@ set(INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR}/${PACKAGE})
 # Binaries.
 set(BIN_DIR ${CMAKE_INSTALL_BINDIR})
 
+# Shared library path.
+set(SHLIB_DIR ${CMAKE_INSTALL_LIBDIR})
+
 # Tcl files.
 set(TCL_DIR ${CMAKE_INSTALL_DATADIR}/${PACKAGE}${VERSION}/tcl)
+
+# Ada source files (*.adb, *.ads) (following recommendations in
+# http://www.ada-france.org/debian/debian-ada-policy.html
+set(ADA_INCLUDE_DIR ${CMAKE_INSTALL_DATADIR}/ada/adainclude/plplotada${LIB_TAG})
+
+# Ada library information files (*.ali) (following recommendations in
+# http://www.ada-france.org/debian/debian-ada-policy.html
+set(ADA_LIB_DIR ${CMAKE_INSTALL_LIBDIR}/ada/adalib/plplotada${LIB_TAG})
 
 # Drivers.
 set(DRV_DIR ${CMAKE_INSTALL_LIBDIR}/${PACKAGE}${VERSION}/drivers${LIB_TAG})
@@ -106,7 +117,7 @@ set(MAN_DIR ${CMAKE_INSTALL_MANDIR})
 # Absolute path of top-level build directory.
 set(BUILD_DIR ${CMAKE_BINARY_DIR})
 
-# The following *_CMD variables are needed in 
+# The following *_CMD variables are needed in
 # examples/*/Makefile.examples.cmake
 
 set(LIB_DIR_CMD "-L${LIB_DIR}")
