@@ -58,9 +58,13 @@ endif (HAVE_CASA)
 ## Tests for working with casacore
 
 if (HAVE_CASACORE)
+
+  message (STATUS "[CR] Tests for casacore enabled.")
   
   set (tests_casacore
     tcasa_casa
+    tcasa_casa_Quanta
+    tcasa_casa_Containers
     tcasa_tables
     tcasa_coordinates
     tcasa_images
@@ -87,11 +91,18 @@ endif (HAVE_CASACORE)
 ## Test(s) for Blitz++
 
 if (HAVE_BLITZ)
-  ## buid test program
+  ## compiler instructions
   add_executable (tUseBlitz tUseBlitz.cc)
+  set_target_properties (tUseBlitz
+    PROPERTIES
+    COMPILE_FLAGS "-DHAVE_BLITZ -I${BLITZ_INCLUDES}"
+    )
+  ## linker instructions
   target_link_libraries (tUseBlitz ${BLITZ_LIBRARIES})
   ## testing
-  add_test (tUseBlitz tUseBlitz)
+  if (CR_ENABLE_TESTING) 
+    add_test (tUseBlitz tUseBlitz)
+  endif (CR_ENABLE_TESTING)
   ## installation
   install (
     TARGETS tUseBlitz
@@ -103,12 +114,12 @@ endif (HAVE_BLITZ)
 ## Test for CFITSIO
 
 if (HAVE_CFITSIO)
-  ## optional compiler settings
-  if (HAVE_WCSLIB)
-    add_definitions (-DHAVE_WCSLIB)
-  endif (HAVE_WCSLIB)
   ## build test program
   add_executable (tUseCFITSIO tUseCFITSIO.cc)
+  set_target_properties (tUseCFITSIO
+    PROPERTIES
+    COMPILE_FLAGS "-DHAVE_CFITSIO -I${CFITSIO_INCLUDES}"
+    )
   target_link_libraries (tUseCFITSIO ${CFITSIO_LIBRARIES})
   ## testing
   add_test (tUseCFITSIO tUseCFITSIO)

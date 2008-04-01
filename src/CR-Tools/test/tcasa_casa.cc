@@ -1173,101 +1173,6 @@ int test_BasicSL ()
 // ------------------------------------------------------------------------------
 
 /*!
-  \brief Tests for classes in casa/Containers
-
-  \return nofFailedTests -- The number of failed test within this function
-*/
-int test_Containers ()
-{
-  int nofFailedTests (0);
-
-    cout << "[1] Testing casa/Containers/Block ..." << endl;
-  try {
-    Block<int> bi1;                   // Block::Block()
-    assert(bi1.nelements() == 0);     // Block::nelements()
-    Block<int> bi2(100);              // Block::Block(uInt)
-    assert(bi2.nelements() == 100);
-    Block<int> bi7(0);
-    assert(bi7.nelements() == 0);
-    Block<int> bi3(200,5);            // Block::Block(uInt, T)
-    assert(bi3.nelements() == 200);
-    Block<int> bi6(0, 5);
-    assert(bi6.nelements() == 0);
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-
-  cout << "[2] Testing casa/Containers/Record ..." << endl;
-  try {
-    int extraArgument=0;
-    casa::RecordDesc rd;
-    rd.addField ("TpBool", casa::TpBool);
-    rd.setComment (0, "comment for field TpBool");
-    rd.addField ("TpUChar", casa::TpUChar);
-    rd.addField ("TpShort", casa::TpShort);
-    rd.addField ("TpInt", casa::TpInt);
-    rd.addField ("TpUInt", casa::TpUInt);
-    rd.addField ("TpFloat", casa::TpFloat);
-    rd.addField ("TpDouble", casa::TpDouble);
-    rd.addField ("TpComplex", casa::TpComplex);
-    rd.addField ("TpDComplex", casa::TpDComplex);
-    rd.addField ("TpString", casa::TpString);
-    rd.addField ("TpArrayBool", casa::TpArrayBool, IPosition(1,1));
-    rd.addField ("TpArrayUChar", casa::TpArrayUChar, IPosition(1,1));
-    rd.addField ("TpArrayShort", casa::TpArrayShort, IPosition(1,1));
-    rd.addField ("TpArrayInt", casa::TpArrayInt, IPosition(1,1));
-    rd.addField ("TpArrayUInt", casa::TpArrayUInt, IPosition(1,1));
-    rd.addField ("TpArrayFloat", casa::TpArrayFloat, IPosition(1,1));
-    rd.addField ("TpArrayDouble", casa::TpArrayDouble, IPosition(1,1));
-    rd.addField ("TpArrayComplex", casa::TpArrayComplex, IPosition(1,1));
-    rd.addField ("TpArrayDComplex", casa::TpArrayDComplex, IPosition(1,1));
-    rd.addField ("TpArrayString", casa::TpArrayString);
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-  
-  cout << "[3] Testing casa/Containers/List ..." << endl;
-  try {
-    casa::List<int> one;
-    casa::ListIter<int> onePa(one);
-    casa::ListIter<int> onePb(one);
-    //
-    onePa.addRight(3);
-    onePa.addRight(72);
-    onePa.addRight(16);
-    onePa.addRight(7);
-    onePa.addRight(31);
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-
-  cout << "[4] Testing casa/Containers/OrderedMap ..." << endl;
-  try {
-    casa::OrderedMap<int,int> map(-1);
-    
-    map(2)  = 90;
-    map(8)  = 82;
-    map(7)  = 72;
-    map(3)  = 51;
-    map(10) = 34;
-    map(15) = 79;
-    map(21) = map(27) = map(24) = 104;
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-  
-  return nofFailedTests;
-}
-
-// ------------------------------------------------------------------------------
-
-// ------------------------------------------------------------------------------
-
-/*!
   \brief Main method
 
   \return nofFailedTests -- The number of failed tests we have encountered
@@ -1286,7 +1191,6 @@ int main ()
 
   nofFailedTests += test_BasicMath();
   nofFailedTests += test_BasicSL();
-  nofFailedTests += test_Containers();
 
   return nofFailedTests;
 }

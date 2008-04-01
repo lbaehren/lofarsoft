@@ -63,8 +63,6 @@
 // -- casacore header files --------------------------------
 #include <casa/Arrays/ArrayMath.h>
 #include <casa/Arrays/Matrix.h>
-// --- CR-Pipeline header files ----------------------------
-#include <Utilities/ProgressBar.h>
 // --- DAL header files ------------------------------------
 #include <dal/dalLopesEvent.h>
 

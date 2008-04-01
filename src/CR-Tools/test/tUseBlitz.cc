@@ -410,7 +410,7 @@ int test_cppArrays ()
 
   cout << "[3] Construct 2-dim Blitz array from C++ array..." << endl;
   try {
-    Array<double,2> array1D (data, blitz::shape(3,2), blitz::neverDeleteData);
+    blitz::Array<double,2> array1D (data, blitz::shape(3,2), blitz::neverDeleteData);
     // display the newly created array
     std::cout << array1D << endl;
   } catch (std::string message) {

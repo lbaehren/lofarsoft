@@ -38,8 +38,10 @@
 #include <casa/Arrays/Cube.h>
 #include <casa/Arrays/MaskedArray.h>
 #include <casa/Arrays/Slice.h>
+#include <casa/OS/Time.h>
 #include <casa/Quanta/Quantum.h>
 #include <casa/Quanta/MVEpoch.h>
+#include <casa/Quanta/MVTime.h>
 
 #include "tests_common.h"
 
@@ -71,6 +73,7 @@ using std::endl;
     <li>Due to the split of the code base and the discontinued developement of
     the original CASA libraries, some of the test might work with <i>casacore</i>
     only; this needs to be handled by precompiler statements.
+    <li><a href="http://www.fourmilab.ch/documents/calendar">Calendar converter</a>
   </ol>
 */
 
@@ -220,12 +223,19 @@ int test_time ()
 
   try {
     time_t rawtime;
-    casa::MVEpoch epoch (rawtime);
+    casa::Time systemTime;
+    casa::MVTime mvTime (systemTime);
+    casa::MVEpoch epoch (mvTime);
     //
     rawtime = time (NULL);
     //
     cout << "-- UNIX seconds = " << rawtime << endl;
-    cout << "-- Normal time  = " << ctime (&rawtime) << endl;
+    cout << "--> Normal time = " << ctime (&rawtime);
+    cout << "--> JD          = " << rawtime/86400+2440587.5 << endl;
+    cout << "-- casa::Time   = " << systemTime       << endl;
+    cout << "--> JD          = " << systemTime.julianDay() << endl;
+    cout << "--> MJD         = " << systemTime.modifiedJulianDay() << endl;
+    cout << "-- casa::MVTime = " << mvTime << endl;
     cout << "-- MVEpoch      = " << epoch            << endl;
 
   } catch (std::string message) {
