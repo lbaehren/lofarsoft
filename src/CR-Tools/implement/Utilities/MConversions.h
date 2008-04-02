@@ -61,6 +61,24 @@ namespace CR { // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <h3>Synopsis</h3>
+
+    <ul>
+      <li>The Modified Julian Day (MJD) is the number of days (with decimal
+      fraction of the day) that have elapsed since midnight at the beginning of
+      Wednesday November 17, 1858. In terms of the Julian day:
+      \f[ \hbox{MJD} = \hbox{JD} - 2,400,000.5 \f]
+      The day is found by rounding downward, currently giving 54543. This number
+      changes at midnight UT or TT. It is 2,400,001 less than the Julian day
+      number of the afternoon half of the same day (which is the same as the JD
+      at noon). It is a multiple of 7 on Wednesdays.<br>
+      The MJD was introduced by the Smithsonian Astrophysical Observatory in 1957
+      to record the orbit of Sputnik via an IBM 704 (36-bit machine) and using
+      only 18 bits until 2576-08-07. MJD is the epoch of OpenVMS, using 63-bit
+      date/time postponing the next Y2K campaign to 31-JUL-31086 02:48:05.47.
+      <li>Unix Time uses January 1, 1970 as the epoch, but counts by the second,
+      not by the day.
+      \f[ \hbox{Unix Time} = (JD - 2440587.5) \times 86400 \f]
+    </ul>
     
     <h3>Example(s)</h3>
 
@@ -73,7 +91,13 @@ namespace CR { // Namespace CR -- begin
       \endcode
     </ol>
     
-  */  
+  */
+
+  // ============================================================================
+  //
+  //  Directions
+  //
+  // ============================================================================
 
   /*!
     \brief Get MDirection type from reference code of the coordinate frame
@@ -93,6 +117,12 @@ namespace CR { // Namespace CR -- begin
   */
   casa::Projection::Type ProjectionType (String const &refcode);
 
+  // ============================================================================
+  //
+  //  Locations
+  //
+  // ============================================================================
+
   /*!
     \brief Retrieve the position of an observatory from the measures data
 
@@ -108,15 +138,47 @@ namespace CR { // Namespace CR -- begin
   */
   casa::MPosition ObservatoryPosition (String const &observatory);
 
+  // ============================================================================
+  //
+  //  Times/Epochs
+  //
+  // ============================================================================
+  
+  /*!
+    \brief Convert UNIX seconds (since Jan 1, 1970) to Julian Day
+
+    \f[ \hbox{JD} = \frac{\hbox{UNIX}}{86400} + 2440587.5 \f]
+    
+    \param seconds -- UNIX seconds, as elapsed since Jan 1, 1970
+
+    \return jd -- Julian Day
+  */
+  inline double unix2julianDay (uint const &seconds=0) {
+    return seconds/86400+2440587.5;
+  }
+  
+  /*!
+    \brief Convert Julian Day into UNIX seconds
+    
+    \f[ \hbox{Unix Time} = (JD - 2440587.5) \times 86400 \f]
+    
+    \param jd -- Time as a Julian Day
+    
+    \return seconds -- Time as seconds elapsed since Jan 1, 1970.
+  */
+  inline uint julianDay2unix (double const &jd=0.0) {
+    return uint((jd - 2440587.5)*86400);
+  }
+  
   /*!
     \brief Convert LOPES-type timestamp for observation epoch to measure
 
     \param JDR -- KASCADE-style timestamp (JDR)
     \param TL  -- KASCADE-style timestamp (TL)
-
+    
     \return epoch -- Observation epoch as casa::MEpoch measures object
   */
-  MEpoch LOPES2MEpoch(casa::uInt JDR,
+  MEpoch LOPES2MEpoch(casa::uInt JDR=0,
 		      int TL=0);
   
 } // Namespace CR -- end

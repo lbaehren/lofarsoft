@@ -33,9 +33,6 @@
 #include <casa/Arrays/Vector.h>
 #include <casa/Containers/Record.h>
 
-#include <dal/dal.h>
-#include <dal/dalDataset.h>
-
 #include <Data/LOFAR_DipoleDataset.h>
 
 namespace DAL { // Namespace DAL -- begin

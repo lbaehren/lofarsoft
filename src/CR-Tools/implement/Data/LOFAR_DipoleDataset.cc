@@ -22,8 +22,11 @@
  ***************************************************************************/
 
 #include <casa/Arrays/ArrayIO.h>
+
+#ifndef ENUMERATIONS_H
 #include <dal/Enumerations.h>
-#include <dal/HDF5Common.h>
+#endif
+
 #include <Data/LOFAR_DipoleDataset.h>
 
 namespace DAL { // Namespace DAL -- begin
@@ -174,7 +177,8 @@ namespace DAL { // Namespace DAL -- begin
 	os << "-- CHANNEL_ID          = " << channelName()         << std::endl;
 	os << "-- SAMPLE_FREQUENCY    = " << sample_frequency()    << std::endl;
 	os << "-- NYQUIST_ZONE        = " << nyquist_zone()        << std::endl;
-	os << "-- TIME                = " << time()                << std::endl;
+	os << "-- TIME [Unix seconds] = " << time()                << std::endl;
+	os << "-- TIME [  Julian Day] = " << julianDay()           << std::endl;
 	os << "-- SAMPLE_NUMBER       = " << sample_number()       << std::endl;
 	os << "-- SAMPLES_PER_FRAME   = " << samples_per_frame()   << std::endl;
 	os << "-- FEED                = " << feed()                << std::endl;
@@ -263,6 +267,28 @@ namespace DAL { // Namespace DAL -- begin
     } else {
       return 0;
     }
+  }
+
+  // ------------------------------------------------------------------ julianDay
+
+  double LOFAR_DipoleDataset::julianDay (bool const &onlySeconds)
+  {
+    uint seconds = time ();
+    double jd    = 0.0;
+
+    if (onlySeconds) {
+      jd = seconds/86400+2440587.5;
+    } else {
+      // retrieve additional information
+      uint samplesSinceSecond = sample_number();
+      double sampleFrequency  = sample_frequency ();
+      // conversion
+      if (sampleFrequency > 0) {
+	jd = (seconds+samplesSinceSecond/sampleFrequency)/86400+2440587.5;
+      }
+    }
+    
+    return jd;
   }
   
   // ----------------------------------------------------------- sample_frequency

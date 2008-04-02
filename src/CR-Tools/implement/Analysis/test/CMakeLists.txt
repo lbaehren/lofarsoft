@@ -38,6 +38,7 @@ endforeach (src)
 ## [1] Test working with ROOT histograms; this requires ROOT to be installed on
 ##     the system
 
+if (NOT APPLE)
 if (ROOT_LIBRARIES AND PYTHON_LIBRARIES)
   ## build instructions
   add_executable (tHistograms tHistograms.cc)
@@ -100,27 +101,43 @@ if (HAVE_PLPLOT OR HAVE_PGPLOT)
   list (APPEND tests tanalyseLOPESevent)
   list (APPEND tests tanalyseLOPESevent2)
 endif (HAVE_PLPLOT OR HAVE_PGPLOT)
+endif (NOT APPLE)
 
 ## [3] Test programs for programs using functionality of LopesStar
 
+if (NOT APPLE)
 if (HAVE_ROOT AND HAVE_FFTW3 AND HAVE_PYTHON)
   ## compiler instructions
   add_executable (tCompletePipeline tCompletePipeline.cc)
   ## linker instructions
-  target_link_libraries (tCompletePipeline
-    cr
-    ${FFTW3_LIBRARIES}
-    ${ROOT_LIBRARIES}
-    ${PYTHON_LIBRARIES}
-    )
+  if (libm AND libutil)
+    target_link_libraries (tCompletePipeline
+      cr
+      ${FFTW3_LIBRARIES}
+      ${ROOT_LIBRARIES}
+      ${PYTHON_LIBRARIES}
+      ${libutil}
+      ${libm}
+      )
+  else (libm AND libutil)
+    target_link_libraries (tCompletePipeline
+      cr
+      ${FFTW3_LIBRARIES}
+      ${ROOT_LIBRARIES}
+      ${PYTHON_LIBRARIES}
+      )
+  endif (libm AND libutil)
   ## extra properties to take care of
-#  set_target_properties (tCompletePipeline
-#    PROPERTIES
-#    LINK_FLAGS "-bind_at_load"
-#    )
+  if (APPLE)
+    set_target_properties (tCompletePipeline
+      PROPERTIES
+      LINK_FLAGS "-bind_at_load"
+      )
+  endif (APPLE)
   ## testing
   add_test (tCompletePipeline tCompletePipeline)
 endif (HAVE_ROOT AND HAVE_FFTW3 AND HAVE_PYTHON)
+endif (NOT APPLE)
 
 ## -----------------------------------------------------------------------------
 ## Installation

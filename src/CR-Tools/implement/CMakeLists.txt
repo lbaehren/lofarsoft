@@ -31,9 +31,9 @@ if (CR_GLISH_SUPPORT)
   list (APPEND cr_modules ApplicationSupport)
 endif (CR_GLISH_SUPPORT)
 
-if (HAVE_ROOT AND HAVE_FFTW3)
+if (CR_WITH_LOPESSTAR)
   list (APPEND cr_modules LopesStar)
-endif (HAVE_ROOT AND HAVE_FFTW3)
+endif (CR_WITH_LOPESSTAR)
 
 ## -----------------------------------------------------------------------------
 ## Build "libcr"
@@ -132,6 +132,8 @@ endif (libm)
 ## ------------------------------------------------------------------------------
 ## Create the library
 
+include_directories (${CR_SOURCE_DIR}/implement)
+
 add_library (cr ${cr_sources})
 
 if (NOT APPLE)
@@ -145,6 +147,48 @@ endif (NOT APPLE)
 target_link_libraries (cr
   ${cr_link_libraries}
   )
+
+## ------------------------------------------------------------------------------
+## Create Python bindings for the library
+
+if (CR_PYTHON_BINDINGS)
+  
+  ## compiler instructions
+  add_library (pycr MODULE
+    ${cr_sources}
+    PythonBindings.cc
+    )
+  ## linker instructions
+  target_link_libraries(pycr
+    ${PYTHON_LIBRARIES}
+    ${BOOST_LIBRARIES}
+    ${cr_link_libraries}
+    )
+  ## additional target properties
+  if (APPLE)
+    set_target_properties (pycr
+      PROPERTIES
+      PREFIX ""
+      SUFFIX .so
+      COMPILE_FLAGS "-DPYTHON -fpermissive"
+      LINK_FLAGS "-fPIC -flat_namespace"
+      )
+  else (APPLE)
+    set_target_properties (pycr
+      PROPERTIES
+      PREFIX ""
+      SUFFIX .so
+      COMPILE_FLAGS -DPYTHON
+      LINK_FLAGS "-fPIC -shared"
+      )
+  endif (APPLE)
+  ## installation
+  install (
+    TARGETS pycr
+    LIBRARY DESTINATION lib/python
+    )
+  
+endif (CR_PYTHON_BINDINGS)
 
 ## ------------------------------------------------------------------------------
 ## Test programs

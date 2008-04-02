@@ -23,6 +23,8 @@ option (CR_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
 option (CR_GLISH_SUPPORT "Activate support for Glish applications?" 0)
 option (CR_PYTHON_SUPPORT "Activate support for Python applications?" 0)
 
+set (CR_WITH_LOPESSTAR 1)
+
 ## Handle option: verbose mode on/off
 
 if (NOT CR_VERBOSE_CONFIGURE)
@@ -120,11 +122,6 @@ if (cr_cmake)
   
   include (${cr_cmake}/FindBlitz.cmake)
   
-  if (HAVE_BLITZ)
-    add_definitions (-DHAVE_BLITZ)
-    include_directories (${BLITZ_INCLUDES})
-  endif (HAVE_BLITZ)
-  
   ## --- BOOST -----------------------------------
   
   include (${cr_cmake}/FindBoost.cmake)
@@ -140,9 +137,8 @@ if (cr_cmake)
   
   if (HAVE_CFITSIO)
     add_definitions (-DHAVE_CFITSIO)
-    include_directories (${CFITSIO_INCLUDES})
   endif (HAVE_CFITSIO)
-  
+
   ## --- CASA / casacore -------------------------
 
   if (CR_GLISH_SUPPORT)
@@ -153,7 +149,7 @@ if (cr_cmake)
       add_definitions (-DHAVE_GLISH)
       include_directories (${GLISH_INCLUDES})
     else (HAVE_GLISH)
-      message (STATUS "[CR] Disabling Glish support - missing Glish components.")
+      message (STATUS "[CR-Tools] Disabling Glish support - missing Glish components.")
       set (CR_GLISH_SUPPORT FALSE)
     endif (HAVE_GLISH)
   endif (CR_GLISH_SUPPORT)
@@ -163,18 +159,15 @@ if (cr_cmake)
   ## support; otherwise we use casacore
   
   if (CR_GLISH_SUPPORT)
-    message (STATUS "[CR] Configuration with Glish support -- CASA")
+    message (STATUS "[CR-Tools] Configuration with Glish support -- CASA")
     ## load find script
     include (${cr_cmake}/FindCASA.cmake)
     ## process outcome
-    if (HAVE_CASA)
-      add_definitions (-DHAVE_CASA)
-      include_directories (${CASA_INCLUDES})
-    else (HAVE_CASA)
+    if (NOT HAVE_CASA)
       set (CR_GLISH_SUPPORT 0)
-    endif (HAVE_CASA)
+    endif (NOT HAVE_CASA)
   else (CR_GLISH_SUPPORT)
-    message (STATUS "[CR] Configuration without Glish support -- casacore")
+    message (STATUS "[CR-Tools] Configuration without Glish support -- casacore")
     ## load find script
     include (${cr_cmake}/FindCASACORE.cmake)
     ## process outcome
@@ -189,6 +182,7 @@ if (cr_cmake)
   endif (CR_GLISH_SUPPORT)
   
   if (APPLE)
+    message (STATUS "[CR-Tools] casacore configuration for MAC OS X")
     ## this surely is not the best solution, but for the time being I am 
     ## using the configuration here which I have worked out in order to build
     ## the code outside the USG framework
@@ -417,11 +411,6 @@ if (cr_cmake)
   
   include (${cr_cmake}/FindWCS.cmake)
   
-  if (HAVE_WCS)
-    add_definitions (-DHAVE_WCS)
-    include_directories (${WCS_INCLUDES})
-  endif (HAVE_WCS)
-  
 endif (cr_cmake)
   
 
@@ -447,6 +436,15 @@ endif (CR_ENABLE_TESTING)
 if (CR_DEBUGGING_MESSAGES)
   add_definitions (-DDEBUGGING_MESSAGES)
 endif (CR_DEBUGGING_MESSAGES)
+
+## Handle option: build components from LOPES-Star module
+
+if (HAVE_ROOT AND HAVE_FFTW3)
+  set (CR_WITH_LOPESSTAR TRUE)
+else (HAVE_ROOT AND HAVE_FFTW3)
+  set (CR_WITH_LOPESSTAR FALSE)
+endif (HAVE_ROOT AND HAVE_FFTW3)
+
 
 ## =============================================================================
 ##
@@ -508,26 +506,34 @@ find_file (dataset_event 2007.01.31.23:59:33.960.event
 
 ## =============================================================================
 ##
+##  Location of (external) header files
+##
+## =============================================================================
+
+if (CASA_INCLUDES)
+  add_definitions (-DHAVE_CASA)
+  include_directories (${CASA_INCLUDES})
+endif (CASA_INCLUDES)
+
+if (WCS_INCLUDES)
+  add_definitions (-DHAVE_WCS)
+  include_directories (${WCS_INCLUDES})
+endif (WCS_INCLUDES)
+  
+## =============================================================================
+##
 ##  Configuration for the subdirectories
 ##
 ## =============================================================================
 
-## header files
-
-include_directories (
-  ${CR_SOURCE_DIR}/implement
-  ${CR_SOURCE_DIR}/apps
-  ${CR_SOURCE_DIR}/test
-  )
+if (CR_BUILD_EXTERNAL_TESTS)
+  add_subdirectory (test)
+endif (CR_BUILD_EXTERNAL_TESTS)
 
 ## source code
 
 add_subdirectory (implement)
 add_subdirectory (apps)
-
-if (CR_BUILD_EXTERNAL_TESTS)
-  add_subdirectory (test)
-endif (CR_BUILD_EXTERNAL_TESTS)
 
 ## =============================================================================
 ##

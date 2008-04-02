@@ -30,7 +30,9 @@
 #include <casa/Arrays/Vector.h>
 #include <casa/Containers/Record.h>
 
+#ifndef HDF5COMMON_H
 #include <dal/HDF5Common.h>
+#endif
 
 namespace DAL { // Namespace DAL -- begin
   
@@ -218,6 +220,15 @@ namespace DAL { // Namespace DAL -- begin
       \return time -- The (UNIX) time at which the data were recorded.
     */
     uint time ();
+
+    /*!
+      \brief Get the time as Julian Day
+
+      \param onlySeconds -- Fully quallified timestamp for the first sample? If
+             set to <tt>true</tt> only the UNIX time -- qualifying the full
+	     seconds -- will be returned.
+    */
+    double julianDay (bool const &onlySeconds=false);
     
     /*!
       \brief Get the timespan in samples since the last full second

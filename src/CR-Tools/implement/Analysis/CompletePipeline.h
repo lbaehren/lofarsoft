@@ -29,9 +29,6 @@
 #include <string>
 #include <cmath>
 
-// ROOT header files
-#include <TMath.h>
-
 // This class is derived form CRinvFFT an adds upsampling
 #include <Analysis/CRinvFFT.h>
 // For Plots:

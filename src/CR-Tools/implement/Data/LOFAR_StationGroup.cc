@@ -25,6 +25,9 @@
 #include <dal/Enumerations.h>
 #include <Data/LOFAR_StationGroup.h>
 
+using std::cout;
+using std::endl;
+
 namespace DAL { // Namespace DAL -- begin
   
   // ============================================================================

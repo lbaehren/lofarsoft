@@ -88,19 +88,17 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 ## -------------------------------------------------------------------
 ## call_pipeline
 
-if (HAVE_CASA OR HAVE_CASACORE)
-  if (HAVE_ROOT AND HAVE_FFTW3)
-    add_executable (call_pipeline call_pipeline.cc)
-    ## linker instructions
-    target_link_libraries (call_pipeline
-      cr
-      ${FFTW3_LIBRARIES}
-      ${ROOT_LIBRARIES}
-      )
-    ## installation instructions
+if (CR_WITH_LOPESSTAR)
+  add_executable (call_pipeline call_pipeline.cc)
+  ## linker instructions
+  target_link_libraries (call_pipeline
+    cr
+    ${FFTW3_LIBRARIES}
+    ${ROOT_LIBRARIES}
+    )
+  ## installation instructions
   list (APPEND cr_apps call_pipeline)
-  endif (HAVE_ROOT AND HAVE_FFTW3)
-endif (HAVE_CASA OR HAVE_CASACORE)
+endif (CR_WITH_LOPESSTAR)
 
 ## -------------------------------------------------------------------
 ## readLopesCalTable
@@ -154,9 +152,9 @@ endif (CR_GLISH_SUPPORT AND HAVE_GLISH)
 ## -------------------------------------------------------------------
 ## LOPES-Star tools
 
-if (CR_PYTHON_SUPPORT AND HAVE_ROOT AND HAVE_FFTW3 AND HAVE_PYTHON)
+if (CR_WITH_LOPESSTAR)
   add_subdirectory (LopesStar)
-endif (CR_PYTHON_SUPPORT AND HAVE_ROOT AND HAVE_FFTW3 AND HAVE_PYTHON)
+endif (CR_WITH_LOPESSTAR)
 
 
 ## ==============================================================================

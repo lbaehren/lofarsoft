@@ -48,6 +48,10 @@
 
 #include <casa/namespace.h>
 
+using casa::Bool;
+using casa::Double;
+using casa::Vector;
+
 namespace CR { // Namespace CR -- begin
   
   /*!
@@ -96,16 +100,16 @@ namespace CR { // Namespace CR -- begin
   protected: //variables are protected to make them available in child class
     //! the pipeline object
     CRinvFFT *pipeline_p;
-
+    
     //! the DataReader object to read in LOPES events
     LopesEventIn *lev_p;
-
+    
     //! the used fitobject
     fitCR2gauss fitObject;
-
+    
     //! the flagging object
     CRflaggingPlugin flagger;
-
+    
     //! Start of the interval considered in the analysis, fraction of data length
     Double remoteStart_p;
     //! Stop of the interval considered in the analysis, fraction of data length
@@ -118,7 +122,7 @@ namespace CR { // Namespace CR -- begin
     Double plotStart_p;
     //! Stop time of the interval diplayed in the plot
     Double plotStop_p;
-
+    
   public:
     
     // ------------------------------------------------------------- Construction

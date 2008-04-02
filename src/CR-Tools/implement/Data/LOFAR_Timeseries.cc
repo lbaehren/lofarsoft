@@ -23,6 +23,9 @@
 
 #include <Data/LOFAR_Timeseries.h>
 
+using std::cout;
+using std::endl;
+
 namespace DAL { // Namespace DAL -- begin
   
   // ============================================================================

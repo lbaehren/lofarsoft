@@ -64,7 +64,7 @@ using CR::LopesEvent;
   <h3>Prerequisite</h3>
 
   <ul type="square">
-    <li>DataReader
+    <li>CR::DataReader
   </ul>
 
   <h3>Synopsis</h3>

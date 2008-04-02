@@ -456,15 +456,18 @@ int test_parameters (std::string const &filename)
     uint time               = dataset.time();
     uint sample_number      = dataset.sample_number();
     uint samples_per_frame  = dataset.samples_per_frame();
+    // extra values derived from attributes
+    double julianDay        = dataset.julianDay();
     // 
-    cout << "-- STATION_ID        = " << station_id        << endl;
-    cout << "-- RSP_ID            = " << rsp_id            << endl;
-    cout << "-- RCU_ID            = " << rcu_id            << endl;
-    cout << "-- SAMPLE_FREQUENCY  = " << sample_frequency  << endl;
-    cout << "-- NYQUIST_ZONE      = " << nyquist_zone      << endl;
-    cout << "-- TIME              = " << time              << endl;
-    cout << "-- SAMPLE_NUMBER     = " << sample_number     << endl;
-    cout << "-- SAMPLES_PER_FRAME = " << samples_per_frame << endl;
+    cout << "-- STATION_ID          = " << station_id        << endl;
+    cout << "-- RSP_ID              = " << rsp_id            << endl;
+    cout << "-- RCU_ID              = " << rcu_id            << endl;
+    cout << "-- SAMPLE_FREQUENCY    = " << sample_frequency  << endl;
+    cout << "-- NYQUIST_ZONE        = " << nyquist_zone      << endl;
+    cout << "-- TIME [Unix seconds] = " << time              << endl;
+    cout << "-- TIME [Julian Day  ] = " << julianDay         << endl;
+    cout << "-- SAMPLE_NUMBER       = " << sample_number     << endl;
+    cout << "-- SAMPLES_PER_FRAME   = " << samples_per_frame << endl;
   } catch (std::string message) {
     cerr << message << endl;
     nofFailedTests++;

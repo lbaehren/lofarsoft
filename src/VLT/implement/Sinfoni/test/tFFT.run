@@ -1,6 +1,0 @@
-#!/bin/sh
-\cp ../../../test/fft*.{in,ref} .
-tFFT
-STATUS=$?
-\rm fft*.{in,ref}
-exit $STATUS
