@@ -34,24 +34,6 @@ add_library (num_util STATIC
   num_util.cpp
   )
 
-if (APPLE)
-  set_target_properties (num_util
-    PROPERTIES
-    PREFIX ""
-    SUFFIX .so
-    COMPILE_FLAGS "-DPYTHON -fpermissive"
-    LINK_FLAGS "-fPIC -flat_namespace"
-    )
-else (APPLE)
-  set_target_properties (num_util
-    PROPERTIES
-    PREFIX ""
-    SUFFIX .so
-    COMPILE_FLAGS -DPYTHON
-    LINK_FLAGS "-fPIC -shared"
-    )
-endif (APPLE)
-
 ## -----------------------------------------------------------------------------
 ## Installation
 
