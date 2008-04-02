@@ -116,6 +116,9 @@ foreach (python_version 2.6 2.5 2.4 2.3)
 
   find_library (NUM_UTIL_LIBRARIES num_util
     PATHS ${lib_locations}
+    PATH_SUFFIXES
+    python
+    python${python_version}
     NO_DEFAULT_PATH
     )
 

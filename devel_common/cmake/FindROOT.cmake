@@ -47,12 +47,15 @@ set (lib_locations
 
 find_path (ROOT_INCLUDES tCanvas.h TCint.h TObject.h
   PATHS ${include_locations}
+  ENV ROOTSYS
   PATH_SUFFIXES
   root
   root/include
   include
   NO_DEFAULT_PATH
   )
+
+get_filename_component (ROOT_INCLUDES ${ROOT_INCLUDES} ABSOLUTE)
 
 ## -----------------------------------------------------------------------------
 ## Check for the libraries
@@ -82,6 +85,7 @@ foreach (lib ${libs})
   ## try to locate the library
   find_library (root${lib} ${lib}
     PATHS ${lib_locations}
+    ENV ROOTSYS
     PATH_SUFFIXES
     root
     root/lib
