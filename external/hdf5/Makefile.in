@@ -85,7 +85,6 @@ install-all:
 	  fi;								      \
 	done
 	@$(MAKE) install
-	@$(MAKE) install-doc
 	@$(LT) --mode=finish $(libdir)
 
 uninstall-all:
