@@ -23,8 +23,6 @@ option (CR_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
 option (CR_GLISH_SUPPORT "Activate support for Glish applications?" 0)
 option (CR_PYTHON_SUPPORT "Activate support for Python applications?" 0)
 
-set (CR_WITH_LOPESSTAR 1)
-
 ## Handle option: verbose mode on/off
 
 if (NOT CR_VERBOSE_CONFIGURE)

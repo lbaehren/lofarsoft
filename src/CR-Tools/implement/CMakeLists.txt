@@ -5,7 +5,7 @@
 ## -----------------------------------------------------------------------------
 ## Modules inside the "CR-Pipeline" package
 
-## Core modules
+## Core modules which should be included in any case
 
 set (cr_modules
   Analysis
@@ -20,16 +20,23 @@ set (cr_modules
   Utilities
   )
 
-## (optional) support for applications requiring additional external components
+## optional modules (added depending on requested features and installed packages)
+
+# (a) Display modules requires at least one of the external plotting libraries to
+#     be available
 
 if (HAVE_PGPLOT OR HAVE_PLPLOT)
   list (APPEND cr_modules Display)
   add_definitions (-DNEED_FORTRAN_UNDERSCORES)
 endif (HAVE_PGPLOT OR HAVE_PLPLOT)
 
+# (b) Support for usage of Glish objects and communication bus
+
 if (CR_GLISH_SUPPORT)
   list (APPEND cr_modules ApplicationSupport)
 endif (CR_GLISH_SUPPORT)
+
+# (c) Data processing routines written for the LOPES-Star experiment
 
 if (CR_WITH_LOPESSTAR)
   list (APPEND cr_modules LopesStar)
@@ -54,6 +61,11 @@ if (NOT HAVE_PGPLOT)
   list (REMOVE_ITEM cr_sources Display/PGPlotterCR.cc)
   list (REMOVE_ITEM cr_sources Display/PGPlotterLocal.cc)
 endif (NOT HAVE_PGPLOT)
+
+if (NOT CR_WITH_LOPESSTAR)
+  list (REMOVE_ITEM cr_sources Analysis/CompletePipeline.cc)
+  list (REMOVE_ITEM cr_sources Analysis/analyseLOPESevent2.cc)
+endif (NOT CR_WITH_LOPESSTAR)
 
 ## Assemble list of external libraries against which to link
 
