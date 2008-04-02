@@ -48,6 +48,8 @@ using casa::MDirection;
 using casa::MPosition;
 using casa::Quantity;
 
+using CR::ObservationData;
+
 /*!
   \file calcSourcePosition.cc
   
@@ -251,7 +253,7 @@ bool test_Convert ()
     casa::MVDirection MVDirectionFROM;
     casa::Vector<Quantity> QDirectionTO(2);
     // set up conversion engine (J2000 -> AZEL)
-    CR::ObservationData obsData (epoch,"WSRT");
+    ObservationData obsData (epoch,"WSRT");
     MDirection::Convert conv = obsData.conversionEngine ("AZEL",
 							 "J2000");
     MVDirectionFROM = casa::MVDirection (Quantity( 20,"deg"),

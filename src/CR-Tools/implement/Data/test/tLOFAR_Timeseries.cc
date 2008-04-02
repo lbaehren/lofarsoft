@@ -23,6 +23,11 @@
 
 #include <Data/LOFAR_Timeseries.h>
 
+#include <casa/Arrays/ArrayIO.h>
+
+using std::cerr;
+using std::cout;
+using std::endl;
 using DAL::LOFAR_Timeseries;  // Namespace usage
 
 /*!

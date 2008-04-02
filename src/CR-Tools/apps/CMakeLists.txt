@@ -78,6 +78,8 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 ## calcSourcePosition
 
 if (HAVE_CASA OR HAVE_CASACORE)
+  include_directories (${CR_SOURCE_DIR}/implement)
+  ## compiler instructions
   add_executable (calcSourcePosition calcSourcePosition.cc)
   ## linker instructions
   target_link_libraries (calcSourcePosition cr)
