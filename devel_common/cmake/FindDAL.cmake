@@ -61,6 +61,8 @@ find_path (DAL_INCLUDES dal.h dalData.h dalFilter.h
   NO_DEFAULT_PATH
   )
 
+get_filename_component (DAL_INCLUDES ${DAL_INCLUDES} ABSOLUTE)
+
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
