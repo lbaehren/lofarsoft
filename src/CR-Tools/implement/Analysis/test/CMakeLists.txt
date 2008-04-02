@@ -39,28 +39,28 @@ endforeach (src)
 ##     the system
 
 if (NOT APPLE)
-if (ROOT_LIBRARIES AND PYTHON_LIBRARIES)
-  ## build instructions
-  add_executable (tHistograms tHistograms.cc)
-  ## link instructions
-  if (libutil)
-    target_link_libraries (tHistograms
-      ${ROOT_LIBRARIES}
-      ${PYTHON_LIBRARIES}
-      ${libutil}
-      )
-  else (libutil)
-    target_link_libraries (tHistograms
-      ${ROOT_LIBRARIES}
-      ${PYTHON_LIBRARIES}
-      )
-  endif (libutil)
-  ## testing
-  add_test (tHistograms tHistograms)
-  ## installation instructions
-  list (APPEND tests tHistograms)
-endif (ROOT_LIBRARIES AND PYTHON_LIBRARIES)
-
+  if (HAVE_ROOT AND PYTHON_LIBRARIES)
+    ## build instructions
+    add_executable (tHistograms tHistograms.cc)
+    ## link instructions
+    if (libutil)
+      target_link_libraries (tHistograms
+	${ROOT_LIBRARIES}
+	${PYTHON_LIBRARIES}
+	${libutil}
+	)
+    else (libutil)
+      target_link_libraries (tHistograms
+	${ROOT_LIBRARIES}
+	${PYTHON_LIBRARIES}
+	)
+    endif (libutil)
+    ## testing
+    add_test (tHistograms tHistograms)
+    ## installation instructions
+    list (APPEND tests tHistograms)
+  endif (HAVE_ROOT AND PYTHON_LIBRARIES)
+  
 ## [2] Test analysis of a LOPES-event; the programs requires both PGPlot and X11
 ##     for plotting the results, so it only makes sense building the executable
 ##     if both are available on the system
