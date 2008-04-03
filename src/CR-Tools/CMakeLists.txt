@@ -59,7 +59,7 @@ endif (NOT CR_VERBOSE_CONFIGURE)
 ## -----------------------------------------------------------------------------
 ## Locate additional CMake find scripts
 
-find_path (cr_cmake FindBlitz.cmake FindCASA.cmake FindCFITSIO.cmake
+find_path (cr_cmake CMakeSettings.cmake
   PATHS 
   ${CR_SOURCE_DIR}
   ${CR_SOURCE_DIR}/..
@@ -73,25 +73,17 @@ find_path (cr_cmake FindBlitz.cmake FindCASA.cmake FindCFITSIO.cmake
 ## If we are unable to locate the CMake find scripts, we need to abort here;
 ## otherwise we do not know from where to include the files further down.
 
-if (NOT cr_cmake)
+if (cr_cmake)
+  list (APPEND CMAKE_MODULE_PATH ${cr_cmake})
+else (cr_cmake)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (NOT cr_cmake)
+endif (cr_cmake)
 
 ## =============================================================================
 ##
 ##  External dependencies
 ##
 ## =============================================================================
-
-set (lib_locations
-  ## local
-  ../../release/lib
-  ## system-wide
-  /usr/lib
-  /usr/local/lib
-  /sw/lib
-  /opt/lib
-  )
 
 ## system libraries
 
@@ -118,13 +110,8 @@ find_package (ZLIB)
 
 if (cr_cmake)
   
-  ## --- Blitz++ ---------------------------------
-  
-  include (${cr_cmake}/FindBlitz.cmake)
-  
-  ## --- BOOST -----------------------------------
-  
-  include (${cr_cmake}/FindBoost.cmake)
+  include (FindBlitz)
+  include (FindBoost)
   
   if (HAVE_BOOST)
     add_definitions (-DHAVE_BOOST)
@@ -547,6 +534,7 @@ message (STATUS " CMAKE_SYSTEM_VERSION ..... : ${CMAKE_SYSTEM_VERSION}")
 message (STATUS " CMAKE_SYSTEM_PROCESSOR ... : ${CMAKE_SYSTEM_PROCESSOR}")
 message (STATUS " CMAKE_SYSTEM_64BIT ........: ${CMAKE_SYSTEM_64BIT}")
 message (STATUS " CMAKE_SYSTEM_BIG_ENDIAN .. : ${CMAKE_SYSTEM_BIG_ENDIAN}")
+message (STATUS " CMAKE_MODULE_PATH ........ : ${CMAKE_MODULE_PATH}")
 message (STATUS "+------------------------------------------------------------+")
 message (STATUS " BLITZ .................... : ${HAVE_BLITZ}")
 message (STATUS " BOOST .................... : ${HAVE_BOOST}")

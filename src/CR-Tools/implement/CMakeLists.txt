@@ -171,11 +171,14 @@ target_link_libraries (cr
 ## ------------------------------------------------------------------------------
 ## Create Python bindings for the library
 
-if (CR_PYTHON_BINDINGS)
+if (CR_PYTHON_SUPPORT)
+
+  message (STATUS "[CR-Tools] Generation of Python bindings enabled.")
   
   ## compiler instructions
   add_library (pycr MODULE
-    ${cr_sources}
+    Coordinates/TimeFreq.cc
+    IO/DataIterator.cc
     BindingsBoostPython.cc
     )
   ## linker instructions
@@ -208,7 +211,7 @@ if (CR_PYTHON_BINDINGS)
     LIBRARY DESTINATION lib/python
     )
   
-endif (CR_PYTHON_BINDINGS)
+endif (CR_PYTHON_SUPPORT)
 
 ## ------------------------------------------------------------------------------
 ## Test programs

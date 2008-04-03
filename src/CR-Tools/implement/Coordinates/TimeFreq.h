@@ -222,7 +222,7 @@ namespace CR { // Namespace CR -- begin
 
       \return blocksize -- Blocksize, [samples]
     */
-    inline uint blocksize () {
+    inline uint blocksize () const {
       return blocksize_p;
     }
 
@@ -240,7 +240,7 @@ namespace CR { // Namespace CR -- begin
 
       \return sampleFrequency -- Sample frequency in the ADC, [Hz]
     */
-    inline double sampleFrequency () {
+    inline double sampleFrequency () const {
       return sampleFrequency_p;
     }
 
@@ -286,7 +286,7 @@ namespace CR { // Namespace CR -- begin
 
       \return nyquistZone -- Nyquist zone,  [1]
     */
-    inline uint nyquistZone () {
+    inline uint nyquistZone () const {
       return nyquistZone_p;
     }
 
@@ -307,7 +307,7 @@ namespace CR { // Namespace CR -- begin
       \return referenceTime -- The reference time, \f$ t_0 \f$, marking the
               start of the time axis
     */
-    inline double referenceTime () {
+    inline double referenceTime () const {
       return referenceTime_p;
     }
 
@@ -331,7 +331,7 @@ namespace CR { // Namespace CR -- begin
 			   of a data block of \f$ N_{\rm Blocksize} \f$
 			   samples.
     */
-    inline uint fftLength () {
+    inline uint fftLength () const {
       return fftLength_p;
     }
 
@@ -353,7 +353,7 @@ namespace CR { // Namespace CR -- begin
                                     \f[ \delta \nu =
 				    \frac{\nu_{\rm Sample}}{N_{\rm Blocksize}} \f]
     */
-    inline double frequencyIncrement () {
+    inline double frequencyIncrement () const {
       return sampleFrequency_p/blocksize_p;
     }
 
