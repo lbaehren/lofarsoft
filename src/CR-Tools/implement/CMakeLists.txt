@@ -38,9 +38,9 @@ endif (CR_GLISH_SUPPORT)
 
 # (c) Data processing routines written for the LOPES-Star experiment
 
-if (CR_WITH_LOPESSTAR)
+if (CR_ENABLE_LOPESSTAR)
   list (APPEND cr_modules LopesStar)
-endif (CR_WITH_LOPESSTAR)
+endif (CR_ENABLE_LOPESSTAR)
 
 ## -----------------------------------------------------------------------------
 ## Build "libcr"
@@ -62,10 +62,10 @@ if (NOT HAVE_PGPLOT)
   list (REMOVE_ITEM cr_sources Display/PGPlotterLocal.cc)
 endif (NOT HAVE_PGPLOT)
 
-if (NOT CR_WITH_LOPESSTAR)
+if (NOT CR_ENABLE_LOPESSTAR)
   list (REMOVE_ITEM cr_sources Analysis/CompletePipeline.cc)
   list (REMOVE_ITEM cr_sources Analysis/analyseLOPESevent2.cc)
-endif (NOT CR_WITH_LOPESSTAR)
+endif (NOT CR_ENABLE_LOPESSTAR)
 
 ## Assemble list of external libraries against which to link
 
@@ -144,7 +144,15 @@ endif (libm)
 ## ------------------------------------------------------------------------------
 ## Create the library
 
-include_directories (${CR_SOURCE_DIR}/implement)
+include_directories (
+  ${CR_SOURCE_DIR}/implement
+  ${CASA_INCLUDES}
+  )
+
+add_definitions (
+  -fPIC
+  -ftemplate-depth-100
+  )
 
 add_library (cr ${cr_sources})
 
@@ -168,7 +176,7 @@ if (CR_PYTHON_BINDINGS)
   ## compiler instructions
   add_library (pycr MODULE
     ${cr_sources}
-    PythonBindings.cc
+    BindingsBoostPython.cc
     )
   ## linker instructions
   target_link_libraries(pycr

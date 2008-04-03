@@ -65,7 +65,7 @@ if (NOT APPLE)
   endif (HAVE_PLPLOT OR HAVE_PGPLOT)
 endif (NOT APPLE)
 
-if (CR_WITH_LOPESSTAR)
+if (CR_ENABLE_LOPESSTAR)
   ## compiler instructions
   add_executable (tanalyseLOPESevent2 tanalyseLOPESevent2.cc)
   ## linker instructions
@@ -85,7 +85,7 @@ if (CR_WITH_LOPESSTAR)
   add_test (tanalyseLOPESevent2 tanalyseLOPESevent2)
   ## installation
   list (APPEND tests tanalyseLOPESevent2)
-endif (CR_WITH_LOPESSTAR)
+endif (CR_ENABLE_LOPESSTAR)
     
 ## [3] Test programs for programs using functionality of LopesStar
 
