@@ -10,8 +10,6 @@
 
 if (NOT bin_locations)
   set (bin_locations
-    ## local installation
-    ${CMAKE_MODULE_PATH}/../../release/bin
     ## system-wide installation
     /opt/bin
     /opt/local/bin
@@ -22,6 +20,10 @@ if (NOT bin_locations)
     /usr/X11R6/bin
     /sw/lib/gcc4.2/bin
     )
+
+  foreach (location ${CMAKE_MODULE_PATH})
+    list (APPEND bin_locations ${location}/../../release/bin)
+  endforeach (location)
 endif (NOT bin_locations)
 
 ## -----------------------------------------------------------------------------
@@ -29,8 +31,6 @@ endif (NOT bin_locations)
 
 if (NOT include_locations)  
   set (include_locations
-    ## local installation
-    ${CMAKE_MODULE_PATH}/../../release/include
     ## system-wide installation
     /opt/include
     /opt/local/include
@@ -44,6 +44,10 @@ if (NOT include_locations)
     /sw/lib/gcc4.2/include
     /opt/gcc-4.2.1/include/c++/4.2.1
     )
+  
+  foreach (location ${CMAKE_MODULE_PATH})
+    list (APPEND include_locations ${location}/../../release/include)
+  endforeach (location)
 endif (NOT include_locations)
 
 ## -----------------------------------------------------------------------------
@@ -51,8 +55,6 @@ endif (NOT include_locations)
 
 if (NOT lib_locations)
   set (lib_locations
-    ## local installation
-    ${CMAKE_MODULE_PATH}/../../release/lib
     ## system-wide installation
     /opt/lib
     /opt/local/lib
@@ -66,4 +68,9 @@ if (NOT lib_locations)
     /opt/gcc-4.2.1/lib
     /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
     )
+
+  foreach (location ${CMAKE_MODULE_PATH})
+    list (APPEND lib_locations ${location}/../../release/lib)
+  endforeach (location)
+  
 endif (NOT lib_locations)
