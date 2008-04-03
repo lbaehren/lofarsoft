@@ -37,7 +37,7 @@ option (BOOST_LIB_WAVE "Build libboost_wave" 0)
 
 ## check where to find the CMake scripts
 
-find_path (BOOST_cmake FindBOOST.cmake FindPython.cmake
+find_path (BOOST_cmake CMakeSettings.cmake
   PATHS 
   ${BOOST_SOURCE_DIR}
   ${BOOST_SOURCE_DIR}/..
@@ -48,10 +48,14 @@ find_path (BOOST_cmake FindBOOST.cmake FindPython.cmake
   )
 
 if (BOOST_cmake)
-  set (BOOST_FIND_python_ONLY ON)
-  include (${BOOST_cmake}/FindBoost.cmake)
-  include (${BOOST_cmake}/FindPython.cmake)
+  list (APPEND CMAKE_MODULE_PATH ${BOOST_cmake})
+else (BOOST_cmake)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (BOOST_cmake)
+
+set (BOOST_FIND_python_ONLY ON)
+include (FindBoost)
+include (FindPython)
 
 ## <-- begin build condition --------------------------------------------------->
 
