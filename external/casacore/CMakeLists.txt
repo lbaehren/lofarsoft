@@ -89,37 +89,6 @@ include (TestBigEndian)
 ## use the CMake build-in macro, but in a number of cases those will not yield
 ## proper results - where therefore run an explicit check.
 
-set (bin_locations
-  ${casacore_SOURCE_DIR}/../release/bin
-  ${casacore_SOURCE_DIR}/../../release/bin
-  /usr/bin
-  /usr/local/bin
-  /sw/bin
-  /sw/lib/gcc4.2/bin
-  )
-
-set (include_locations
-  ${casacore_SOURCE_DIR}/../release/include
-  ${casacore_SOURCE_DIR}/../../release/include
-  /usr/include
-  /usr/local/include
-  /sw/include
-  /sw/lib/gcc4.2/include
-  /opt/casa/local/include
-  /opt/gcc-4.2.1/include/c++/4.2.1
-)
-
-set (lib_locations
-  ${casacore_SOURCE_DIR}/../release/lib
-  ${casacore_SOURCE_DIR}/../../release/lib
-  /usr/lib
-  /usr/local/lib
-  /sw/lib
-  /sw/lib/gcc4.2/lib
-  /opt/gcc-4.2.1/lib
-  /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
-  )
-
 check_include_files (assert.h HAVE_ASSERT_H)
 check_include_files (ctype.h HAVE_CTYPE_H)
 check_include_files (fcntl.h HAVE_FCNTL_H)
@@ -139,22 +108,27 @@ check_type_size ("long long" SIZEOF_LONG_LONG)
 
 ## Locate additional CMake find scripts
 
-find_path (casacore_cmake FindCFITSIO.cmake FindG2C.cmake FindLAPACK.cmake
-  PATHS 
+find_path (casacore_cmake CMakeSettings.cmake
+  PATHS
   ${casacore_SOURCE_DIR}
   ${casacore_SOURCE_DIR}/..
   ${casacore_SOURCE_DIR}/../..
-  ${casacore_SOURCE_DIR}/../../..
   PATH_SUFFIXES
   devel_common/cmake
   )
 
 if (casacore_cmake)
+  list (APPEND CMAKE_MODULE_PATH ${casacore_cmake})
+else (casacore_cmake)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+endif (casacore_cmake)
+
+if (casacore_cmake)
   message (STATUS "[casacore] Using USG CMake find scripts")
-  include (${casacore_cmake}/FindCFITSIO.cmake)
-  include (${casacore_cmake}/FindG2C.cmake)
-  include (${casacore_cmake}/FindLAPACK.cmake)
-  include (${casacore_cmake}/FindWCS.cmake)
+  include (FindCFITSIO.cmake)
+  include (FindG2C.cmake)
+  include (FindLAPACK.cmake)
+  include (FindWCS.cmake)
   ## optional components
   if (casacore_HDF5_SUPPORT) 
     include (${casacore_cmake}/FindHDF5.cmake)

@@ -29,9 +29,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.4.5 FATAL_ERROR)
 # one file so I use the overall variable CMAKE_USER_MAKE_RULES_OVERRIDE
 # instead.
 set(
-CMAKE_USER_MAKE_RULES_OVERRIDE
-${CMAKE_SOURCE_DIR}/cmake/UserOverride.cmake
-)
+  CMAKE_USER_MAKE_RULES_OVERRIDE
+  ${CMAKE_SOURCE_DIR}/cmake/UserOverride.cmake
+  )
 
 project(plplot)
 

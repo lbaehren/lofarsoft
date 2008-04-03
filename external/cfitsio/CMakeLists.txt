@@ -32,7 +32,7 @@ option (CFITSIO_FORCE_BUILD "Force rebuild and local installation" 0)
 
 ## check where to find the CMake scripts
 
-find_path (CFITSIO_cmake FindCFITSIO.cmake
+find_path (CFITSIO_cmake CMakeSettings.cmake
   PATHS 
   ${CFITSIO_SOURCE_DIR}
   ${CFITSIO_SOURCE_DIR}/..
@@ -43,8 +43,15 @@ find_path (CFITSIO_cmake FindCFITSIO.cmake
   )
 
 if (CFITSIO_cmake)
-  include (${CFITSIO_cmake}/FindCFITSIO.cmake)
+  list (APPEND CMAKE_MODULE_PATH ${CFITSIO_cmake})
+else (CFITSIO_cmake)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (CFITSIO_cmake)
+
+## load CMake modules to search for external components
+
+set (CFITSIO_FIND_QUIETLY 1)
+include (FindCFITSIO)
 
 ## <-- begin build condition --------------------------------------------------->
 
@@ -54,26 +61,11 @@ endif (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
 ## -----------------------------------------------------------------------------
 ## Standard locations where to look for required components
 
-set (bin_locations
-  /usr/bin
-  /usr/local/bin
-  /sw/bin
-)
-
-set (include_locations
-  /usr/include
-  /usr/local/include
-  /sw/include
+list (APPEND include_locations
   /sw/lib/gcc4.2/include/c++/4.2.1
   /Developer/SDKs/MacOSX10.4u.sdk/usr/include
   /Developer/SDKs/MacOSX10.4u.sdk/usr/include/c++/4.0.0
-)
-
-set (lib_locations
-  /usr/lib
-  /usr/local/lib
-  /sw/lib
-)
+  )
 
 include (CheckIncludeFiles)
 include (CheckLibraryExists)

@@ -17,7 +17,7 @@ option (HDF5_FORCE_BUILD "Force rebuild and local installation" 0)
 
 ## check where to find the CMake scripts
 
-find_path (HDF5_cmake FindHDF5.cmake
+find_path (HDF5_cmake CMakeSettings.cmake
   PATHS 
   ${HDF5_SOURCE_DIR}
   ${HDF5_SOURCE_DIR}/..
@@ -28,8 +28,15 @@ find_path (HDF5_cmake FindHDF5.cmake
   )
 
 if (HDF5_cmake)
-  include (${HDF5_cmake}/FindHDF5.cmake)
+  list (APPEND CMAKE_MODULE_PATH ${HDF5_cmake})
+else (HDF5_cmake)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (HDF5_cmake)
+
+## load CMake modules to search for external components
+
+set (HDF5_FIND_QUIETLY 1)
+include (FindHDF5)
 
 ## <-- begin build condition --------------------------------------------------->
 

@@ -27,34 +27,34 @@ option (WCSLIB_PYTHON_WRAPPER "Generate Python wrapper for WCSLIB?" 0)
 
 ## Locate additional CMake find scripts
 
-find_path (WCSLIB_cmake FindCFITSIO.cmake FindG2C.cmake FindLAPACK.cmake
+find_path (WCSLIB_cmake CMakeSettings.cmake
   PATHS 
   ${WCSLIB_SOURCE_DIR}
   ${WCSLIB_SOURCE_DIR}/..
   ${WCSLIB_SOURCE_DIR}/../..
   ${WCSLIB_SOURCE_DIR}/../../..
+  ENV LOFARSOFT
   PATH_SUFFIXES
   devel_common/cmake
   )
 
+if (WCSLIB_cmake)
+  list (APPEND CMAKE_MODULE_PATH ${WCSLIB_cmake})
+else (WCSLIB_cmake)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+endif (WCSLIB_cmake)
+
 ## locate external packages
 
-if (WCSLIB_cmake)
-  ## CFITSIO
-  set (CFITSIO_FIND_QUIETLY 1)
-  include (${WCSLIB_cmake}/FindCFITSIO.cmake)
-  ## PGPLOT
-  set (PGPLOT_FIND_QUIETLY 1)
-#  include (${WCSLIB_cmake}/FindPGPLOT.cmake)
-  ## Boost
-  set (BOOST_FIND_QUIETLY 1)
-  include (${WCSLIB_cmake}/FindBoost.cmake)
-  ## Python
-  set (PYTHON_FIND_QUIETLY 1)
-  include (${WCSLIB_cmake}/FindPython.cmake)
-else (WCSLIB_cmake)
-  message (SEND_ERROR "Unable to locate additional CMake find scripts!")
-endif (WCSLIB_cmake)
+set (CFITSIO_FIND_QUIETLY 1)
+set (PGPLOT_FIND_QUIETLY 1)
+set (BOOST_FIND_QUIETLY 1)
+set (PYTHON_FIND_QUIETLY 1)
+
+include (FindCFITSIO)
+#  include (FindPGPLOT)
+include (FindBoost)
+include (FindPython)
 
 ## libm -----------------------------------------
 

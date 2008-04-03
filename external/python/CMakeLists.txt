@@ -17,7 +17,7 @@ option (module_numeric "Build numeric module?" OFF)
 ## ------------------------------------------------------------------------------
 ## check where to find the CMake scripts
 
-find_path (PYTHON_MODULES_cmake FindPython.cmake
+find_path (PYTHON_MODULES_cmake CMakeSettings.cmake
   PATHS 
   ${PYTHON_MODULES_SOURCE_DIR}
   ${PYTHON_MODULES_SOURCE_DIR}/..
@@ -28,17 +28,19 @@ find_path (PYTHON_MODULES_cmake FindPython.cmake
   )
 
 if (PYTHON_MODULES_cmake)
-  ## --- set verbosity during configuration ------
-  set (BOOST_FIND_QUIETLY ON)
-  set (PYTHON_FIND_QUIETLY ON)
-  ## --- Python ----------------------------------
-  include (${PYTHON_MODULES_cmake}/FindPython.cmake)
-  ## --- Boost -----------------------------------
-  set (BOOST_pythonOnly ON)
-  set (BOOST_test_exec_monitor OFF)
-  include (${PYTHON_MODULES_cmake}/FindBoost.cmake)
+  list (APPEND CMAKE_MODULE_PATH ${PYTHON_MODULES_cmake})
 else (PYTHON_MODULES_cmake)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (PYTHON_MODULES_cmake)
+
+## --- set verbosity during configuration ------
+set (BOOST_FIND_QUIETLY ON)
+set (BOOST_pythonOnly ON)
+set (BOOST_test_exec_monitor OFF)
+set (PYTHON_FIND_QUIETLY ON)
+
+include (FindPython)
+include (FindBoost)
 
 message (STATUS "--------------------------------------------------")
 message (STATUS "BOOST          = ${HAVE_BOOST}")
