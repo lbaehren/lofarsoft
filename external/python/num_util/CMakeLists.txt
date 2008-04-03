@@ -29,6 +29,10 @@ include_directories (
   ${NUMPY_INCLUDES}
   )
 
+add_definitions (
+  -fPIC
+  )
+
 add_library (num_util STATIC
   simpletest.cpp
   num_util.cpp
