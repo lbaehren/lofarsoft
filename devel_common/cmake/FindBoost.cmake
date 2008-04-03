@@ -15,36 +15,7 @@ include (CheckTypeSize)
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-set (include_locations
-  ## local installation
-  ../release/include
-  ../../release/include
-  ../../../release/include
-  ## system-wide installation
-  /include
-  /usr/include
-  /usr/local/include
-  /opt/include
-  /sw/include
-  /dp/include
-  /opt/local/include
-  )
-
-set (lib_locations
-  ## local installation
-  ../release/lib
-  ../../release/lib
-  ../../../release/lib
-  ## system-wide installation
-  /lib
-  /usr/lib
-  /usr/local/lib
-  /opt/lib
-  /sw/lib
-  /dp/lib
-  /opt/local/lib
-  /usr/lib64
-  )
+include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files and the various module libraries

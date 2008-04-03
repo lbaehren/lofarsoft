@@ -13,31 +13,7 @@
 ## -----------------------------------------------------------------------------
 ## Standard locations where to look for required components
 
-set (lib_locations
-  ## local installation
-  ./../release/lib
-  ./../../release/lib
-  ## system-wide installation
-  /usr/local/lib
-  /usr/lib
-  /usr/X11R6/lib
-  /opt/lib
-  /opt/local/lib
-  /sw/lib
-  )
-
-set (include_locations
-  ## local installation
-  ./../release/include
-  ./../../release/include
-  ## system-wide installation
-  /usr/include
-  /usr/local/include
-  /usr/X11R6/include
-  /opt/include
-  /opt/local/include
-  /sw/include
-  )
+include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files

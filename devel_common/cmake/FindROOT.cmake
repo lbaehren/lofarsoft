@@ -13,34 +13,17 @@
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-set (include_locations
-  ../release/include
-  ../../release/include
-  /usr/include
-  /usr/local/include
-  /sw/include
-  /sw/share
-  /opt
-  /opt/include
-  /opt/root/include
-  /usr/local
-  /opt/auger/root-v5.18.00
-)
+include (CMakeSettings)
 
-set (lib_locations
-  ../release/lib
-  ../../release/lib
-  /lib
-  /usr/lib
-  /usr/local/lib
-  /sw/lib
-  /sw/share
-  /opt
-  /opt/lib
-  /opt/root/lib
-  /usr/local
+list (APPEND include_locations
+  /opt/root/include
   /opt/auger/root-v5.18.00
-)
+  )
+
+list (APPEND lib_locations
+  /opt/root/lib
+  /opt/auger/root-v5.18.00
+  )
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files

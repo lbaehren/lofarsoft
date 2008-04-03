@@ -20,55 +20,8 @@
 #  NUM_UTIL_INCLUDES = Include path for the header files of NUM_UTIL package
 #
 
-## -----------------------------------------------------------------------------
 ## Standard locations where to look for required components
-
-set (bin_locations
-  ## local installation
-  ../release/bin
-  ../../release/bin
-  ../../../release/bin
-  ## system-wide installation
-  /opt/bin
-  /opt/local/bin
-  /sw/bin
-  /dp/bin
-  /usr/bin
-  /usr/local/bin
-  /usr/X11R6/bin
-  )
-
-set (lib_locations
-  ## local installation
-  ../release/lib
-  ../../release/lib
-  ../../../release/lib
-  ## system-wide installation
-  /opt/lib
-  /opt/local/lib
-  /sw/lib
-  /dp/lib
-  /usr/lib
-  /usr/local/lib
-  /usr/X11R6/lib
-  /opt/aips++/local/lib
-  )
-
-set (include_locations
-  ## local installation
-  ../release/include
-  ../../release/include
-  ../../../release/include
-  ## system-wide installation
-  /opt/include
-  /opt/local/include
-  /sw/include
-  /dp/include
-  /usr/include
-  /usr/local/include
-  /usr/X11R6/include
-  /opt/aips++/local/include
-  )
+include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 

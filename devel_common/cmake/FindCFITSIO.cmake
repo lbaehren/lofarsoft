@@ -11,26 +11,7 @@
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-set (include_locations
-  ../release/include
-  ../../release/include
-  /usr/include
-  /usr/local/include
-  /sw/include
-  /dp/include
-  /opt/casa/local/include
-)
-
-set (lib_locations
-  ../release/lib
-  ../../release/lib
-  /lib
-  /usr/lib
-  /usr/local/lib
-  /sw/lib
-  /dp/lib
-  /opt/casa/local/lib
-)
+include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files

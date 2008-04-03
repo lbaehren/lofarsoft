@@ -15,25 +15,7 @@
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-set (include_locations
-  /include
-  /usr/include
-  /usr/local/include
-  /opt/include
-  /sw/include
-  ../release/include
-  ../../release/include
-  )
-
-set (lib_locations
-  /lib
-  /usr/lib
-  /usr/local/lib
-  /opt/lib
-  /sw/lib
-  ../release/lib
-  ../../release/lib
-  )
+include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files; the include statement in the code should be e.g.

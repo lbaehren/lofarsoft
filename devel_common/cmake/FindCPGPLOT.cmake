@@ -9,11 +9,16 @@
 #  CPGPLOT_INCLUDE_DIR -- Directory containing the CPGPLOT header files
 
 ## -----------------------------------------------------------------------------
+## Search locations
+
+include (CMakeSettings)
+
+## -----------------------------------------------------------------------------
 ## Check for the library
 
 FIND_LIBRARY (CPGPLOT_LIBRARY
   NAMES cpgplot
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib
+  PATHS ${lib_locations}
   PATH_SUFFIXES pgplot
 )
 
@@ -22,7 +27,7 @@ FIND_LIBRARY (CPGPLOT_LIBRARY
 
 FIND_PATH (CPGPLOT_INCLUDE_DIR
 	cpgplot.h
-	PATHS /usr/local /usr /sw
+	PATHS ${include_locations}
 	PATH_SUFFIXES include/pgplot lib/pgplot
 )
 

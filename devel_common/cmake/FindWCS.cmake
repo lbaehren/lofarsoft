@@ -9,25 +9,8 @@
 #  WCSLIB_INCLUDES   = Include path for the header files of WCS
 #  WCSLIB_LIBRARIES  = Link these to use WCS
 
-## -----------------------------------------------------------------------------
 ## Search locations
-
-set (include_locations
-  ../release/include
-  ../../release/include
-  /usr/include
-  /usr/local/include
-  /sw/include
-)
-
-set (lib_locations
-  ../release/lib
-  ../../release/lib
-  /lib
-  /usr/lib
-  /usr/local/lib
-  /sw/lib
-)
+include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files

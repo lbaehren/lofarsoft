@@ -14,33 +14,7 @@
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-set (bin_locations
-  ../release/bin
-  ../../release/bin
-  /usr/bin
-  /usr/local/bin
-  /sw/bin
-  /opt/casa/local/bin
-)
-
-set (include_locations
-  ../release/include
-  ../../release/include
-  /usr/include
-  /usr/local/include
-  /sw/include
-  /opt/casa/local/include
-)
-
-set (lib_locations
-  ../release/lib
-  ../../release/lib
-  /lib
-  /usr/lib
-  /usr/local/lib
-  /sw/lib
-  /opt/casa/local/lib
-)
+include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Find executable

@@ -12,11 +12,12 @@
 ##  CASACORE_COMPILE_FLAGS = 
 ##
 
-set (include_locations
-  ## local installation
-  ./../release/include
-  ./../../release/include
-  ## source code
+## -----------------------------------------------------------------------------
+## Search locations
+
+include (CMakeSettings)
+
+list (APPEND include_locations
   ./casacore
   ./../casacore
   ./../external/casacore
@@ -28,13 +29,7 @@ set (include_locations
   /sw/include/casacore
 )
 
-set (lib_locations
-  ## local installation
-  ./../release/lib
-  ./../../release/lib
-  ## source code
-  ./../lib
-  ./../../lib
+list (APPEND lib_locations
   ## system-wide installation
   /usr/lib
   /usr/local/lib

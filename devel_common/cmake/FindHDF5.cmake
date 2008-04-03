@@ -12,30 +12,7 @@
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-set (include_locations
-  ## local installation
-  ../release/include
-  ../../release/include
-  ## system-wide installation
-  /usr/include
-  /usr/local/include
-  /sw/include
-  /opt
-  /opt/include
-)
-
-set (lib_locations
-  ## local installation
-  ../release/lib
-  ../../release/lib
-  ## system-wide installation
-  /lib
-  /usr/lib
-  /usr/local/lib
-  /sw/lib
-  /opt
-  /opt/lib
-)
+include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
