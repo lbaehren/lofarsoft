@@ -95,6 +95,10 @@ find_library (libutil util
   PATHS ${lib_locations}
   )
 
+find_library (libdl dl
+  PATHS ${lib_locations}
+  )
+
 find_library (libgd gd
   PATHS ${lib_locations}
   )
@@ -112,97 +116,57 @@ include (FindBlitz)
 include (FindBoost)
 include (FindCFITSIO)
 
-  ## --- CFITSIO ---------------------------------
-  
-  
-  if (HAVE_CFITSIO)
-    add_definitions (-DHAVE_CFITSIO)
-  endif (HAVE_CFITSIO)
+## --- CASA / casacore -------------------------
 
-  ## --- CASA / casacore -------------------------
+if (CR_GLISH_SUPPORT)
+  ## load find script
+  include (${cr_cmake}/FindGlish.cmake)
+  ## process outcome 
+  if (HAVE_GLISH)
+    add_definitions (-DHAVE_GLISH)
+    include_directories (${GLISH_INCLUDES})
+  else (HAVE_GLISH)
+    message (STATUS "[CR-Tools] Disabling Glish support - missing Glish components.")
+    set (CR_GLISH_SUPPORT FALSE)
+  endif (HAVE_GLISH)
+endif (CR_GLISH_SUPPORT)
 
-  if (CR_GLISH_SUPPORT)
-    ## load find script
-    include (${cr_cmake}/FindGlish.cmake)
-    ## process outcome 
-    if (HAVE_GLISH)
-      add_definitions (-DHAVE_GLISH)
-      include_directories (${GLISH_INCLUDES})
-    else (HAVE_GLISH)
-      message (STATUS "[CR-Tools] Disabling Glish support - missing Glish components.")
-      set (CR_GLISH_SUPPORT FALSE)
-    endif (HAVE_GLISH)
-  endif (CR_GLISH_SUPPORT)
+## keep in mind, that we only are going to need the
+## fully-blown CASA installation if we want the Glish
+## support; otherwise we use casacore
 
-  ## keep in mind, that we only are going to need the
-  ## fully-blown CASA installation if we want the Glish
-  ## support; otherwise we use casacore
-  
-  if (CR_GLISH_SUPPORT)
-    message (STATUS "[CR-Tools] Configuration with Glish support -- CASA")
-    ## load find script
-    include (${cr_cmake}/FindCASA.cmake)
-    ## process outcome
-    if (NOT HAVE_CASA)
-      set (CR_GLISH_SUPPORT 0)
-    endif (NOT HAVE_CASA)
-  else (CR_GLISH_SUPPORT)
-    message (STATUS "[CR-Tools] Configuration without Glish support -- casacore")
-    ## load find script
-    include (${cr_cmake}/FindCASACORE.cmake)
-    ## process outcome
-    if (HAVE_CASACORE)
-      add_definitions (-DHAVE_CASACORE)
-      add_definitions (-DHAVE_CASA)
-      include_directories (${CASA_INCLUDES})
-    endif (HAVE_CASACORE)
-    ## CMake variables
-    set (HAVE_CASA FALSE)
-    set (HAVE_GLISH FALSE)
-  endif (CR_GLISH_SUPPORT)
-  
-  if (APPLE)
-    message (STATUS "[CR-Tools] casacore configuration for MAC OS X")
-    ## this surely is not the best solution, but for the time being I am 
-    ## using the configuration here which I have worked out in order to build
-    ## the code outside the USG framework
-    if (HAVE_CASA OR HAVE_CASACORE)
-      add_definitions (
-	-DWITH_CASA
-	# -- compiler flags utilized in the source code --
-	-DAIPS_STDLIB
-	-DAIPS_AUTO_STL
-	)
-      IF (APPLE)
-	## definition common to apple architectures
-	add_definitions (
-	  -DAIPS_DARWIN
-	  )
-      ELSE (APPLE)
-	ADD_DEFINITIONS (-DAIPS_LINUX)
-      ENDIF (APPLE)
-      ## Platform test 32/64 bit ------------------------------
-      set (CMAKE_SYSTEM_64BIT 0)
-      if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
-	if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
-	  if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-            set (CMAKE_SYSTEM_64BIT 1)
-            add_definitions (-DAIPS_64B)
-	  endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-	endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
-      endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
-      if (APPLE)
-	if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-	  set (CMAKE_SYSTEM_64BIT 1)
-	  add_definitions (-DAIPS_64B)
-	endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-      endif (APPLE)
-    endif (HAVE_CASA OR HAVE_CASACORE)
-  else (APPLE)
-    ## compiler flags
+if (CR_GLISH_SUPPORT)
+  message (STATUS "[CR-Tools] Configuration with Glish support -- CASA")
+  ## load find script
+  include (${cr_cmake}/FindCASA.cmake)
+  ## process outcome
+  if (NOT HAVE_CASA)
+    set (CR_GLISH_SUPPORT 0)
+  endif (NOT HAVE_CASA)
+else (CR_GLISH_SUPPORT)
+  message (STATUS "[CR-Tools] Configuration without Glish support -- casacore")
+  ## load find script
+  include (${cr_cmake}/FindCASACORE.cmake)
+  ## process outcome
+  if (HAVE_CASACORE)
+    add_definitions (-DHAVE_CASACORE)
+    add_definitions (-DHAVE_CASA)
+    include_directories (${CASA_INCLUDES})
+  endif (HAVE_CASACORE)
+  ## CMake variables
+  set (HAVE_CASA FALSE)
+  set (HAVE_GLISH FALSE)
+endif (CR_GLISH_SUPPORT)
+
+if (APPLE)
+  message (STATUS "[CR-Tools] casacore configuration for MAC OS X")
+  ## this surely is not the best solution, but for the time being I am 
+  ## using the configuration here which I have worked out in order to build
+  ## the code outside the USG framework
+  if (HAVE_CASA OR HAVE_CASACORE)
     add_definitions (
-      # -- compiler flags utilized in the source code --
       -DWITH_CASA
+      # -- compiler flags utilized in the source code --
       -DAIPS_STDLIB
       -DAIPS_AUTO_STL
       )
@@ -212,7 +176,7 @@ include (FindCFITSIO)
 	-DAIPS_DARWIN
 	)
     ELSE (APPLE)
-      add_definitions (-DAIPS_LINUX)
+      ADD_DEFINITIONS (-DAIPS_LINUX)
     ENDIF (APPLE)
     ## Platform test 32/64 bit ------------------------------
     set (CMAKE_SYSTEM_64BIT 0)
@@ -230,36 +194,69 @@ include (FindCFITSIO)
 	add_definitions (-DAIPS_64B)
       endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
     endif (APPLE)
+  endif (HAVE_CASA OR HAVE_CASACORE)
+else (APPLE)
+  ## compiler flags
+  add_definitions (
+    # -- compiler flags utilized in the source code --
+    -DWITH_CASA
+    -DAIPS_STDLIB
+    -DAIPS_AUTO_STL
+    )
+  IF (APPLE)
+    ## definition common to apple architectures
+    add_definitions (
+      -DAIPS_DARWIN
+      )
+  ELSE (APPLE)
+    add_definitions (-DAIPS_LINUX)
+  ENDIF (APPLE)
+  ## Platform test 32/64 bit ------------------------------
+  set (CMAKE_SYSTEM_64BIT 0)
+  if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
+    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
+      if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+        set (CMAKE_SYSTEM_64BIT 1)
+        add_definitions (-DAIPS_64B)
+      endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
+  endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
+  if (APPLE)
+    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+      set (CMAKE_SYSTEM_64BIT 1)
+      add_definitions (-DAIPS_64B)
+    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
   endif (APPLE)
-  
-  ## --- Data Access Library (DAL) ---------------
-  
-  include (${cr_cmake}/FindDAL.cmake)
-  
-  if (HAVE_DAL)
-    add_definitions (-DHAVE_DAL)
-    include_directories (${DAL_INCLUDES})
-  endif (HAVE_DAL)
-  
-  ## --- FFTW3 -----------------------------------
-  
-  include (${cr_cmake}/FindFFTW3.cmake)
-  
-  if (HAVE_FFTW3)
-    add_definitions (-DHAVE_FFTW3)
-    include_directories (${FFTW3_INCLUDES})
-  endif (HAVE_FFTW3)
-  
-  ## --- G2C -------------------------------------
-  
-  include (${cr_cmake}/FindG2C.cmake)
-  
-  if (HAVE_G2C)
-    add_definitions (-DHAVE_G2C)
-    include_directories (${G2C_INCLUDES})
-  endif (HAVE_G2C)
-  
-  ## --- GIF ---------------------------------------
+endif (APPLE)
+
+## --- Data Access Library (DAL) ---------------
+
+include (${cr_cmake}/FindDAL.cmake)
+
+if (HAVE_DAL)
+  add_definitions (-DHAVE_DAL)
+  include_directories (${DAL_INCLUDES})
+endif (HAVE_DAL)
+
+## --- FFTW3 -----------------------------------
+
+include (${cr_cmake}/FindFFTW3.cmake)
+
+if (HAVE_FFTW3)
+  add_definitions (-DHAVE_FFTW3)
+  include_directories (${FFTW3_INCLUDES})
+endif (HAVE_FFTW3)
+
+## --- G2C -------------------------------------
+
+include (${cr_cmake}/FindG2C.cmake)
+
+if (HAVE_G2C)
+  add_definitions (-DHAVE_G2C)
+  include_directories (${G2C_INCLUDES})
+endif (HAVE_G2C)
+
+## --- GIF ---------------------------------------
   
   include (${cr_cmake}/FindGIF.cmake)
   
@@ -496,6 +493,10 @@ if (CASA_INCLUDES)
   add_definitions (-DHAVE_CASA)
   include_directories (${CASA_INCLUDES})
 endif (CASA_INCLUDES)
+
+if (HAVE_CFITSIO)
+  add_definitions (-DHAVE_CFITSIO)
+endif (HAVE_CFITSIO)
 
 if (WCS_INCLUDES)
   add_definitions (-DHAVE_WCS)
