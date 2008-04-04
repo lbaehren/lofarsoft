@@ -131,6 +131,7 @@ if (HAVE_CASA OR HAVE_CASACORE)
       cr
       ${DAL_LIBRARIES}
       ${HDF5_LIBRARIES}
+      ${CFITSIO_LIBRARIES}
       )
     ## installation instructions
     list (APPEND cr_apps tbbStatistics)

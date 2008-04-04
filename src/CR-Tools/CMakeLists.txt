@@ -494,10 +494,11 @@ if (CASA_INCLUDES)
   include_directories (${CASA_INCLUDES})
 endif (CASA_INCLUDES)
 
-if (HAVE_CFITSIO)
+if (CFITSIO_INCLUDES)
   add_definitions (-DHAVE_CFITSIO)
-endif (HAVE_CFITSIO)
-
+  include_directories (${CFITSIO_INCLUDES})
+endif (CFITSIO_INCLUDES)
+  
 if (WCS_INCLUDES)
   add_definitions (-DHAVE_WCS)
   include_directories (${WCS_INCLUDES})

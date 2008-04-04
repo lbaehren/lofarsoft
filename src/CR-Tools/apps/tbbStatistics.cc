@@ -23,6 +23,10 @@
 
 #include <Data/LOFAR_TBB.h>
 
+#ifdef HAVE_CFITSIO
+#include <fitsio.h>
+#endif
+
 using std::cerr;
 using std::cout;
 using std::endl;
@@ -52,6 +56,7 @@ using std::endl;
   \return status -- Status of the operation; returns <tt>false</tt> in case an 
           error was encountered.
 */
+#ifdef HAVE_CFITSIO
 bool export2fits (casa::Matrix<double> const &spectrum,
 		  std::string const &outfile="dynamicspectrum.fits")
 {
@@ -64,7 +69,7 @@ bool export2fits (casa::Matrix<double> const &spectrum,
   float pixels[shape(0)][shape(1)];
   std::string filename;
   fitsfile *fptr;
-
+  
   /* Provide some basic feedback before starting export of data */
   cout << "[tbbStatistics::export2fits]"               << endl;
   cout << "-- Output file       = " << outfile          << endl;
@@ -106,6 +111,7 @@ bool export2fits (casa::Matrix<double> const &spectrum,
   
   return true;
 }
+#endif
 
 // -----------------------------------------------------------------------------
 
@@ -157,9 +163,11 @@ int dynamic_spectrum (std::string const &filename,
   }
 
   /* export of the dynamic spectrum to a FITS file */
+#ifdef HAVE_CFITSIO
   if (status) {
     return export2fits (dynamicSpectrum);
   }
+#endif
 
   return status;
 }
