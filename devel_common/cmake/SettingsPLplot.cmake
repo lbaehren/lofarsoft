@@ -2,7 +2,7 @@
 ## -------------------------------------------------------------------
 ## Search for external components
 
-find_path (plplot_cmake FindNumeric.cmake
+find_path (plplot_cmake CMakeSettings.cmake
   PATHS 
   .
   ./..
@@ -13,12 +13,18 @@ find_path (plplot_cmake FindNumeric.cmake
   )
 
 if (plplot_cmake)
-  ## Python.Numeric
-  include (${plplot_cmake}/FindNumeric.cmake)
-  if (NUMERIC_INCLUDES)
-    include_directories (${NUMERIC_INCLUDES})
-  endif (NUMERIC_INCLUDES)
+  list (APPEND CMAKE_MODULE_PATH ${plplot_cmake})
+else (plplot_cmake)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (plplot_cmake)
+
+## Python.Numeric
+
+include (${plplot_cmake}/FindNumeric.cmake)
+
+if (NUMERIC_INCLUDES)
+  include_directories (${NUMERIC_INCLUDES})
+endif (NUMERIC_INCLUDES)
 
 ## -------------------------------------------------------------------
 ## Language bindings
