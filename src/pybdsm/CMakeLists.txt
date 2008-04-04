@@ -16,7 +16,7 @@ cmake_minimum_required (VERSION 2.4)
 
 ## Locate additional CMake find scripts
 
-find_path (PYBDSM_cmake FindCFITSIO.cmake FindG2C.cmake FindLAPACK.cmake
+find_path (PYBDSM_cmake CMakeSettings.cmake
   PATHS 
   ${PYBDSM_SOURCE_DIR}
   ${PYBDSM_SOURCE_DIR}/..
@@ -25,6 +25,12 @@ find_path (PYBDSM_cmake FindCFITSIO.cmake FindG2C.cmake FindLAPACK.cmake
   PATH_SUFFIXES
   devel_common/cmake
   )
+
+if (PYBDSM_cmake)
+  list (APPEND CMAKE_MODULE_PATH ${PYBDSM_cmake})
+else (PYBDSM_cmake)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+endif (PYBDSM_cmake)
 
 ## locate external packages
 

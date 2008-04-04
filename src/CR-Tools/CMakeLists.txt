@@ -108,19 +108,12 @@ find_package (ZLIB)
 
 ## Search using custom CMake find scripts
 
-if (cr_cmake)
-  
-  include (FindBlitz)
-  include (FindBoost)
-  
-  if (HAVE_BOOST)
-    add_definitions (-DHAVE_BOOST)
-    include_directories (${BOOST_INCLUDES})
-  endif (HAVE_BOOST)
-  
+include (FindBlitz)
+include (FindBoost)
+include (FindCFITSIO)
+
   ## --- CFITSIO ---------------------------------
   
-  include (${cr_cmake}/FindCFITSIO.cmake)
   
   if (HAVE_CFITSIO)
     add_definitions (-DHAVE_CFITSIO)
@@ -396,8 +389,6 @@ if (cr_cmake)
   
   include (${cr_cmake}/FindWCS.cmake)
   
-endif (cr_cmake)
-  
 
 ## =============================================================================
 ##
@@ -424,12 +415,13 @@ endif (CR_DEBUGGING_MESSAGES)
 
 ## Handle option: build components from LOPES-Star module
 
-if (HAVE_ROOT AND HAVE_FFTW3)
-  set (CR_ENABLE_LOPESSTAR ON)
-else (HAVE_ROOT AND HAVE_FFTW3)
+if (NOT HAVE_ROOT)
   set (CR_ENABLE_LOPESSTAR OFF)
-endif (HAVE_ROOT AND HAVE_FFTW3)
+endif (NOT HAVE_ROOT)
 
+if (NOT HAVE_FFTW3)
+  set (CR_ENABLE_LOPESSTAR OFF)
+endif (NOT HAVE_FFTW3)
 
 ## =============================================================================
 ##
@@ -494,6 +486,11 @@ find_file (dataset_event 2007.01.31.23:59:33.960.event
 ##  Location of (external) header files
 ##
 ## =============================================================================
+
+if (BOOST_INCLUDES)
+  add_definitions (-DHAVE_BOOST)
+  include_directories (${BOOST_INCLUDES})
+endif (BOOST_INCLUDES)
 
 if (CASA_INCLUDES)
   add_definitions (-DHAVE_CASA)
