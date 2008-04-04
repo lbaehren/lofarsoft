@@ -16,12 +16,18 @@ include (CMakeSettings)
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-FIND_PATH (CFITSIO_INCLUDES
-  fitsio.h longnam.h
+set (CFITSIO_INCLUDES "")
+
+FIND_PATH (HAVE_FITSIO_H
+  fitsio.h
   PATHS ${include_locations}
   PATH_SUFFIXES cfitsio
   NO_DEFAULT_PATH
   )
+
+if (HAVE_FITSIO_H)
+  list (APPEND CFITSIO_INCLUDES ${HAVE_FITSIO_H})
+endif (HAVE_FITSIO_H)
 
 ## -----------------------------------------------------------------------------
 ## Check for the parts of the library
