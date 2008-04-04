@@ -6,7 +6,11 @@
 #
 ## ------------------------------------------------------------------------------
 
+## Name of the project
 project (BISON)
+
+## Minimum required version of CMake to configure the project
+cmake_minimum_required (VERSION 2.4)
 
 ## -----------------------------------------------------------------------------
 ## Only force rebuild of the tool, if it cannot be found on the system.
