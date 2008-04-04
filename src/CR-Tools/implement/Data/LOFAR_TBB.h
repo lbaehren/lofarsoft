@@ -32,8 +32,6 @@
 #include <casa/aips.h>
 #include <casa/Arrays/Matrix.h>
 
-#include <dal/dal.h>
-#include <dal/dalDataset.h>
 #include <dal/Enumerations.h>
 
 #include <Data/LOFAR_Timeseries.h>
