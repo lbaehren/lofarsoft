@@ -235,3 +235,24 @@ if (HAVE_ROOT AND HAVE_CASACORE)
     message (STATUS "[CR-Tools] Unable to build test program tUseROOT.")
   endif (HAVE_DAL)
 endif (HAVE_ROOT AND HAVE_CASACORE)
+
+## -----------------------------------------------------------------------------
+## Test working with the Data Access Library (DAL)
+
+if (HAVE_DAL AND HAVE_CASACORE)
+  ## compiler instructions
+  add_executable (tUseDAL tUseDAL.cc)
+  ## linker instructions
+  target_link_libraries (tUseDAL
+    cr
+    ${DAL_LIBRARIES}
+    ${HDF5_LIBRARIES}
+    ${CASA_LIBRARIES}
+    ${CFITSIO_LIBRARIES}
+    )
+  ## additional properties
+  set_target_properties (tUseDAL
+    PROPERTIES
+    COMPILE_FLAGS "-DHAVE_DAL -I${DAL_INCLUDES} -I${CR_SOURCE_DIR}/implement"
+    )
+endif (HAVE_DAL AND HAVE_CASACORE)
