@@ -46,7 +46,7 @@ option (MATPLOTLIB_CMAKE_BUILD "Use CMake port to configure and build Boost?" 0)
 
 ## check where to find the CMake scripts
 
-find_path (MATPLOTLIB_cmake FindPython.cmake
+find_path (MATPLOTLIB_cmake CMakeSettings.cmake
   PATHS 
   ${MATPLOTLIB_SOURCE_DIR}
   ${MATPLOTLIB_SOURCE_DIR}/..

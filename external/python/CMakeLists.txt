@@ -1,5 +1,24 @@
 
+##-------------------------------------------------------------------------------
+## $Id:: CMakeLists.txt 1393 2008-04-03 13:58:05Z baehren                       $
+##-------------------------------------------------------------------------------
+
+#
+# usg
+# `-- external
+#     `-- python
+#         |-- matplotlib
+#         |-- num_util
+#         |-- numarray
+#         |-- numeric
+#         `-- numpy
+#
+
+## Name of the project
 project (PYTHON_MODULES)
+
+## Minimum required version of CMake to configure the project
+cmake_minimum_required (VERSION 2.4)
 
 ## ------------------------------------------------------------------------------
 ## Selection of available Python modules
@@ -43,10 +62,10 @@ include (FindPython)
 include (FindBoost)
 
 message (STATUS "--------------------------------------------------")
-message (STATUS "BOOST          = ${HAVE_BOOST}")
-message (STATUS "BOOST includes = ${BOOST_INCLUDES}")
-message (STATUS "BOOST libs     = ${BOOST_LIBRARIES}")
-message (STATUS "NumPy includes = ${NUMPY_INCLUDES}")
+message (STATUS "matplotlib   > ${module_matplotlib}")
+message (STATUS "numpy        > ${nodule_numpy}")
+message (STATUS "BOOST        = ${HAVE_BOOST}")
+message (STATUS "Python       = ${HAVE_PYTHON}")
 message (STATUS "--------------------------------------------------")
 
 ## ------------------------------------------------------------------------------
