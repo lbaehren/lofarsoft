@@ -42,7 +42,7 @@
  
   <h3>Usage</h3>
   \verbatim
-  ./gePhases eventfile frequency output-file [path]
+  ./getPhases eventfile frequency output-file [path]
   \endverbatim
   
   <ul>
@@ -166,7 +166,7 @@ int main (int argc, char *argv[])
       cout << "Appending phases to file: " << outputfile << endl;
 
       // Write the output (name of eventfile and phases in columns)
-      outputfile_stream << "\"" << outputfile << "\"";
+      outputfile_stream << "\"" << eventfile << "\"";
 
       // loop through antennas and write the pases (seperated by space)
       for (int i = 0; i < phases.size(); i++)
