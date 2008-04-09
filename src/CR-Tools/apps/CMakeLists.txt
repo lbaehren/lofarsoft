@@ -120,6 +120,18 @@ if (HAVE_CASA OR HAVE_CASACORE)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
+## getPhases
+
+if (HAVE_CASA OR HAVE_CASACORE)
+    add_executable (getPhases getPhases.cc)
+    ## linker instructions
+    target_link_libraries (getPhases cr)
+    ## installation instructions
+  list (APPEND cr_apps getPhases)
+endif (HAVE_CASA OR HAVE_CASACORE)
+
+
+## -------------------------------------------------------------------
 ## tbbStatistics
 
 if (HAVE_CASA OR HAVE_CASACORE)
