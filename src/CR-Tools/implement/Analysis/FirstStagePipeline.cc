@@ -165,6 +165,22 @@ namespace CR { // Namespace CR -- begin
 	tempComplexVec2.resize(freqVals.shape());
 	convertArray(tempComplexVec2,freqVals);
 	fftCal.column(i) = phasecal*tempComplexVec1*exp(tmpcomp*delay*tempComplexVec2);
+        // Comment added by Frank Schröder to understand, what is done:
+        //
+        // phasecal = PhaseCal values (e.g. filter characteristics) from CalTables
+        // (the correction is relativly small: for arround 60-70 MHZ in the order of 10 degrees)
+        //
+        // tempComplexVec1 = electrical gain calibration values per frequency (from CalTables) 
+        // (corrected by the amplitude of the phase calibration, which is ~ 1)
+        //
+        // tmpcomp = 2*pi*i
+        // delay = delay from CalTables (= delay in seconds relative to antenna 1)
+        // tempComplexVec2 = frequency axis
+        // so the factor exp(tmpcomp*delay*tempComplexVec2) shifts the data by the 
+        // antenna delays of the CalTables
+        //
+        // the total factor fftCal will be multiplied to the fft() of the voltage series
+        // if the calibrated fft is requested.
       };
       dr->setFFT2calFFT(fftCal);
       dr->setHanningFilter(0.5,(fftlen/2));
