@@ -11,6 +11,31 @@ project (NUM_UTIL)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.4)
 
+## Locate additional CMake find scripts
+find_path (NUM_UTIL_cmake CMakeSettings.cmake
+  PATHS 
+  ${NUM_UTIL_SOURCE_DIR}
+  ${NUM_UTIL_SOURCE_DIR}/..
+  ${NUM_UTIL_SOURCE_DIR}/../..
+  ${NUM_UTIL_SOURCE_DIR}/../../..
+  ENV LOFARSOFT
+  PATH_SUFFIXES
+  devel_common/cmake
+  )
+
+if (NUM_UTIL_cmake)
+  list (APPEND CMAKE_MODULE_PATH ${NUM_UTIL_cmake})
+else (NUM_UTIL_cmake)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+endif (NUM_UTIL_cmake)
+
+## locate external packages
+set (BOOST_FIND_QUIETLY 1)
+set (PYTHON_FIND_QUIETLY 1)
+
+include (FindBoost)
+include (FindPython)
+
 ## -----------------------------------------------------------------------------
 ## Compilation targets
 
@@ -34,7 +59,6 @@ add_definitions (
   )
 
 add_library (num_util STATIC
-  simpletest.cpp
   num_util.cpp
   )
 
