@@ -362,6 +362,7 @@ namespace CR { // Namespace CR -- begin
 
   void CompletePipeline::plotCCbeam(const string& filename,
 				    DataReader *dr,
+				    Vector<Double> fittedCCbeam,
 				    Vector<Bool> antennaSelection,
 				    const double& ccBeamOffset,
 				    const double& pBeamOffset)
@@ -410,9 +411,17 @@ namespace CR { // Namespace CR -- begin
       plotter.AddLabels("Time t [#gmsec]", "CC-Beam [#gmV/m/MHz]","CC-Beam and Power");
     
       // Add CC-beam
-      plotter.PlotLine(xaxis(plotRange),ccbeam(plotRange),4,1);
+      plotter.PlotLine(xaxis(plotRange),ccbeam(plotRange),9,1);
       // Add Power-beam
-      plotter.PlotLine(xaxis(plotRange),pbeam(plotRange),5,1);
+      plotter.PlotLine(xaxis(plotRange),pbeam(plotRange),8,1);
+
+      // Add fitted beam, if supplied (must have correct length)
+      if (fittedCCbeam.size() == xaxis.size())
+      {
+        fittedCCbeam.unique();
+        fittedCCbeam *= 1e6;
+        plotter.PlotLine(xaxis(plotRange),fittedCCbeam(plotRange),4,1);
+      }
 
       // Add filename to list of created plots
       plotlist.push_back(plotfilename);
@@ -426,6 +435,7 @@ namespace CR { // Namespace CR -- begin
 
   void CompletePipeline::plotXbeam(const string& filename,
 				   DataReader *dr,
+				   Vector<Double> fittedXbeam,
 				   Vector<Bool> antennaSelection,
 				   const double& xBeamOffset,
 				   const double& pBeamOffset)
@@ -474,9 +484,17 @@ namespace CR { // Namespace CR -- begin
       plotter.AddLabels("Time t [#gmsec]", "X-Beam [#gmV/m/MHz]","X-Beam and Power");
     
       // Add X-beam
-      plotter.PlotLine(xaxis(plotRange),xbeam(plotRange),4,1);
+      plotter.PlotLine(xaxis(plotRange),xbeam(plotRange),9,1);
       // Add Power-beam
-      plotter.PlotLine(xaxis(plotRange),pbeam(plotRange),5,1);
+      plotter.PlotLine(xaxis(plotRange),pbeam(plotRange),8,1);
+
+      // Add fitted beam, if supplied (must have correct length)
+      if (fittedXbeam.size() == xaxis.size())
+      {
+        fittedXbeam.unique();
+        fittedXbeam *= 1e6;
+        plotter.PlotLine(xaxis(plotRange),fittedXbeam(plotRange),4,1);
+      }
 
       // Add filename to list of created plots
       plotlist.push_back(plotfilename);
@@ -523,7 +541,8 @@ namespace CR { // Namespace CR -- begin
       }
       else
       {
-        yValues = GetTimeSeries(dr).copy();  // don't use the antennaSelection to get the full number of columns in the Matrix
+        yValues = GetTimeSeries(dr).copy();  
+        // don't use the antennaSelection to get the full number of columns in the Matrix
 
         // Upsampled yValues
         upYvalues = getUpsampledFieldstrength(dr,upsampling_exp, antennaSelection);

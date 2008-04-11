@@ -99,7 +99,8 @@ namespace CR { // Namespace CR -- begin
 					  bool SinglePlots,
 					  bool PlotRawData,
   					  bool CalculateMaxima,
-					  bool listCalcMaxima){
+					  bool listCalcMaxima,
+					  bool printShowerCoordinates){
     Record erg;
     try {
       //      ofstream latexfile;	// WARNING: causes problem in fitCR2gauss.cc line 200, left here for future tests
@@ -320,6 +321,8 @@ namespace CR { // Namespace CR -- begin
       AntPos = toShower(AntPos, Az, El);
       Vector<Double> distances(nants);
 
+      // print distances in shower coordinates if requested
+      if (printShowerCoordinates)
       for (i=0; i<nants; i++) {
 	distances(i) = sqrt( square(AntPos.row(i)(0)) + square(AntPos.row(i)(1)) );
         // output of shower coordinates
@@ -339,9 +342,18 @@ namespace CR { // Namespace CR -- begin
         // Set Plot Interval
         pipeline.setPlotInterval(plotStart(),plotStop());
 
-        // Plot x-beam and CC-beam
-        pipeline.plotCCbeam(PlotPrefix + "-CC", lev_p, AntennaSelection, ccBeamMean, pBeamMean);
-        pipeline.plotXbeam(PlotPrefix + "-X", lev_p, AntennaSelection, xBeamMean, pBeamMean);
+        // Plot CC-beam; if fit has converged, then also plot the result of the fit
+    	if (fiterg.asBool("CCconverged"))
+          pipeline.plotCCbeam(PlotPrefix + "-CC", lev_p, fiterg.asArrayDouble("Cgaussian"), AntennaSelection, ccBeamMean, pBeamMean);
+        else
+          pipeline.plotCCbeam(PlotPrefix + "-CC", lev_p, Vector<Double>(), AntennaSelection, ccBeamMean, pBeamMean);
+
+        // Plot X-beam; if fit has converged, then also plot the result of the fit
+    	if (fiterg.asBool("Xconverged"))
+          pipeline.plotXbeam(PlotPrefix + "-X", lev_p, fiterg.asArrayDouble("Xgaussian"), AntennaSelection, xBeamMean, pBeamMean);
+        else
+          pipeline.plotXbeam(PlotPrefix + "-X", lev_p, Vector<Double>(), AntennaSelection, xBeamMean, pBeamMean);
+
         // Plot of all antenna traces together
         pipeline.plotAllAntennas(PlotPrefix + "-all", lev_p, AntennaSelection, false, getUpsamplingExponent(),false);
         
@@ -352,7 +364,7 @@ namespace CR { // Namespace CR -- begin
         // calculate the maxima
 	if (CalculateMaxima) pipeline.calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false);
         // user friendly list of calculated maxima
-        if (CalculateMaxima) pipeline.listCalcMaxima(lev_p, AntennaSelection, getUpsamplingExponent(),pBeam, false);
+        if (listCalcMaxima) pipeline.listCalcMaxima(lev_p, AntennaSelection, getUpsamplingExponent(),pBeam, false);
         
         if (verbose)		// give out the names of the created plots
         {

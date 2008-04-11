@@ -268,13 +268,15 @@ namespace CR { // Namespace CR -- begin
 
       \param filename         -- Name of the .ps file (without ".ps") the plot will be written to
       \param DataReader       -- DataReader (LopesEventIn)
+      \param fittedCCbeam     -- If supplied, the result of the fit will be plotted
       \param antennaSelection -- Selection of antennas considered for the plot
-      \param ccBeamOffset      -- Constant noise (mean) of the cc-beam will be subtracted
+      \param ccBeamOffset     -- Constant noise (mean) of the cc-beam will be subtracted
       \param pBeamOffset      -- Constant noise (mean) of the power beam will be subtracted
     */
 
     void plotCCbeam (const string& filename, 
                      DataReader *dr,
+                     Vector<Double> fittedCCbeam = Vector<Double>(),
                      Vector<Bool> antennaSelection = Vector<Bool>(),
  	 	     const double& ccBeamOffset = 0,
  	 	     const double& pBeamOffset = 0);
@@ -284,6 +286,7 @@ namespace CR { // Namespace CR -- begin
 
       \param filename         -- Name of the .ps file (without ".ps") the plot will be written to
       \param DataReader       -- DataReader (LopesEventIn)
+      \param fittedXbeam      -- If supplied, the result of the fit will be plotted
       \param antennaSelection -- Selection of antennas considered for the plot
       \param xBeamOffset      -- Constant noise (mean) of the x-beam will be subtracted
       \param pBeamOffset      -- Constant noise (mean) of the power beam will be subtracted
@@ -291,6 +294,7 @@ namespace CR { // Namespace CR -- begin
 
     void plotXbeam (const string& filename, 
                     DataReader *dr,
+                    Vector<Double> fittedXbeam = Vector<Double>(),
                     Vector<Bool> antennaSelection = Vector<Bool>(),
 		    const double& xBeamOffset = 0,
 		    const double& pBeamOffset = 0);
@@ -332,6 +336,12 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief same as calculateMaxima, but different output form
 
+      \param DataReader       -- DataReader (LopesEventIn)
+      \param antennaSelection -- Selection of antennas
+      \param upsampling_exp   -- a value > 0 means that data are upsampled by a factor of 2^upsampling_exp
+                                 use e.g. uspampling_exp = 1 to have twice as many points plotted.
+      \param pbeam_offset     -- offset of power beam
+      \param rawData          -- uses the raw ADC data instead of the calibrated fieldstrength
     */
     void listCalcMaxima (DataReader *dr,
                          Vector<Bool> antennaSelection = Vector<Bool>(),
