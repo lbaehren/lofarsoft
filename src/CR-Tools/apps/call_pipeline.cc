@@ -57,7 +57,7 @@ using CR::LopesEventIn;
   \verbatim
   Example event list<br>
   some lines of comments here<br>
-  filename(event) azimuth[°] zenith[°] distance(radius of curvature)[m] core_x[m] core_y[m]
+  filename(event) azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]
   =========================================================================================
   /home/schroeder/data/lopesstar/first.event 354.55215 63.882182 2750 8.6060886 -368.0933
   /home/schroeder/data/lopesstar/second.event 354.55215 63.882182 2750 8.6060886 -368.0933
@@ -672,25 +672,25 @@ int main (int argc, char *argv[])
       std::cerr << "Use the following file format: \n\n";
       std::cerr << "some lines of text\n";
       std::cerr << "===================================\n";
-      std::cerr << "eventfile1 azimuth[°] zenith[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n";
-      std::cerr << "eventfile2 azimuth[°] zenith[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n";
+      std::cerr << "eventfile1 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n";
+      std::cerr << "eventfile2 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n";
       std::cerr << "... \n" << std::endl;
       return 1;		// exit program
     }
 
     // Process events from event file list
     string filename, plotprefix;
-    double azimuth, zenith, distance, core_x, core_y;
+    double azimuth, elevation, distance, core_x, core_y;
     bool read_in_error = false;
 
     while (eventfilelist.good())
     {	
-      // read in filename, azimuth, zenith, distance and log_energy	
+      // read in filename, azimuth, elevation, distance and log_energy	
       if (eventfilelist.good()) eventfilelist >> filename;
 	else read_in_error = true;	
       if (eventfilelist.good()) eventfilelist >> azimuth;
 	else read_in_error = true;	
-      if (eventfilelist.good()) eventfilelist >> zenith;
+      if (eventfilelist.good()) eventfilelist >> elevation;
 	else read_in_error = true;	
       if (eventfilelist.good()) eventfilelist >> distance;
 	else read_in_error = true;	
@@ -707,8 +707,8 @@ int main (int argc, char *argv[])
 	std::cerr << "Use the following file format: \n\n";
 	std::cerr << "some lines of text\n";
 	std::cerr << "===================================\n";
-	std::cerr << "eventfile1 azimuth[°] zenith[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n";
-	std::cerr << "eventfile2 azimuth[°] zenith[°] distance(radius of curvature)[m] core_x[m] core_y[m]]\n";
+	std::cerr << "eventfile1 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n";
+	std::cerr << "eventfile2 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]]\n";
 	std::cerr << "... \n" << std::endl;
 	return 1;		// exit program
       }
@@ -723,7 +723,7 @@ int main (int argc, char *argv[])
        plotprefix.erase(0,plotprefix.find_last_of('/')+1);
 
       // print information and process the event
-      std::cout << "\nProcessing event \"" << filename << "\"\nwith azimuth " << azimuth << " °, zenith " << zenith
+      std::cout << "\nProcessing event \"" << filename << "\"\nwith azimuth " << azimuth << " °, elevation " << elevation
 	<< " °, distance (radius of curvature) " << distance << " m, core position X " << core_x
 	<< " m and core position Y " << core_y << " m.\n" << std::endl;
 
@@ -740,7 +740,7 @@ int main (int argc, char *argv[])
       eventPipeline.setUpsamplingExponent(upsamplingExponent);
 
       // call the pipeline with an extra delay = 0.
-      results = eventPipeline.RunPipeline (filename, azimuth, zenith, distance, core_x, core_y, RotatePos,
+      results = eventPipeline.RunPipeline (filename, azimuth, elevation, distance, core_x, core_y, RotatePos,
                                            plotprefix, generatePlots, static_cast< Vector<int> >(flagged), verbose, 
                                            simplexFit, 0., doTVcal, singlePlots, PlotRawData, CalculateMaxima); 
 
