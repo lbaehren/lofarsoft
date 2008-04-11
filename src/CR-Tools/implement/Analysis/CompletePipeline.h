@@ -329,6 +329,15 @@ namespace CR { // Namespace CR -- begin
                           Vector<Bool> antennaSelection = Vector<Bool>(),
                           const int& upsampling_exp = 0,
                           const bool& rawData = false);
+    /*!
+      \brief same as calculateMaxima, but different output form
+
+    */
+    void listCalcMaxima (DataReader *dr,
+                         Vector<Bool> antennaSelection = Vector<Bool>(),
+                         const int& upsampling_exp = 0,
+                         Vector<Double> pbeam_offset = Vector<Double>(),
+                         const bool& rawData = false);
     
     
     

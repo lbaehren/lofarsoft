@@ -98,7 +98,8 @@ namespace CR { // Namespace CR -- begin
 					  int doTVcal,
 					  bool SinglePlots,
 					  bool PlotRawData,
-					  bool CalculateMaxima){
+  					  bool CalculateMaxima,
+					  bool listCalcMaxima){
     Record erg;
     try {
       //      ofstream latexfile;	// WARNING: causes problem in fitCR2gauss.cc line 200, left here for future tests
@@ -321,6 +322,8 @@ namespace CR { // Namespace CR -- begin
 
       for (i=0; i<nants; i++) {
 	distances(i) = sqrt( square(AntPos.row(i)(0)) + square(AntPos.row(i)(1)) );
+        // output of shower coordinates
+	std::cout << i+1 << " " << AntPos.row(i)(0) << " " << AntPos.row(i)(1) << " " <<distances(i)<<std::endl;
       };
       erg.define("distances",distances);
       tmpvec.resize(nselants);
@@ -347,7 +350,9 @@ namespace CR { // Namespace CR -- begin
           pipeline.plotAllAntennas(PlotPrefix, lev_p, AntennaSelection, true, getUpsamplingExponent(),false);
 
         // calculate the maxima
-        if (CalculateMaxima) pipeline.calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false);
+	if (CalculateMaxima) pipeline.calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false);
+        // user friendly list of calculated maxima
+        if (CalculateMaxima) pipeline.listCalcMaxima(lev_p, AntennaSelection, getUpsamplingExponent(),pBeam, false);
         
         if (verbose)		// give out the names of the created plots
         {

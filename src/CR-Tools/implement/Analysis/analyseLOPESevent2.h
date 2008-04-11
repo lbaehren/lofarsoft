@@ -187,6 +187,7 @@ class analyseLOPESevent2 : public analyseLOPESevent{
       \param SinglePlots - makes a plot for each antenna
       \param PlotRawData - Plots the raw data FX
       \param CalculateMaxima - Finds the maximum and the minimum of the trace in the plot range
+      \param listCalcMaxima - output version of CalculateMaxima
 
       \return Record with the results.
     */
@@ -206,7 +207,8 @@ class analyseLOPESevent2 : public analyseLOPESevent{
 			int doTVcal=-1,
 			bool SinglePlots=false,
 			bool PlotRawData=false,
-			bool CalculateMaxima=false);
+			bool CalculateMaxima=false,
+			bool listCalcMaxima=false);
 
     /*!
       \brief Creates a summary postscript of all created plots (uses LaTeX)

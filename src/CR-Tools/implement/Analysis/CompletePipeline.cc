@@ -164,36 +164,38 @@ namespace CR { // Namespace CR -- begin
       } 
 
       // do upsampling for each antenna in the todo-list
-      for (int i = 0; i < antennaSelection.nelements(); i++) if (upsamplingToDo[i])
-      {
-        std::cout << "Upsampling the calibrated data of antenna " << i+1 << " by a factor of " << upsampled << " ...\n";
-	// copy the trace into the array
-	for (int j = 0; j < tracelength; j++) 
-        {
-          originalTrace[j] = fieldstrength.column(i)(j);
-        }
+      std::cout << "Upsampling the calibrated data by a factor of " << upsampled << " ...\nAntenna:";
+      for (int i = 0; i < antennaSelection.nelements(); i++) {
+        if (upsamplingToDo[i]){
+          std::cout << " " << i+1;
+ 	  // copy the trace into the array
+	  for (int j = 0; j < tracelength; j++) 
+          {
+            originalTrace[j] = fieldstrength.column(i)(j);
+          }
 
-	// do upsampling by factor #upsampled (--> NoZeros = upsampled -1)
+	  // do upsampling by factor #upsampled (--> NoZeros = upsampled -1)
 
-        // calcutlate Offset:
-        float before = originalTrace[0];
+          // calcutlate Offset:
+          float before = originalTrace[0];
 
-        ZeroPaddingFFT(tracelength, originalTrace, upsampled-1, upsampledTrace);
-
-	double offset = before - originalTrace[0];
+          ZeroPaddingFFT(tracelength, originalTrace, upsampled-1, upsampledTrace);
+ 
+	  double offset = before - originalTrace[0];
 	
-	// copy upsampled trace into Matrix with antenna traces and subtract offset
-        // remark: as there is no offset in the original data, this step should be avoided
-        // as soon as upsampling without pedestal correction is available
-	for (int j = 0; j < tracelength*upsampled; j++) upFieldStrength.column(i)(j) = upsampledTrace[j] + offset;
+  	  // copy upsampled trace into Matrix with antenna traces and subtract offset
+          // remark: as there is no offset in the original data, this step should be avoided
+          // as soon as upsampling without pedestal correction is available
+	  for (int j = 0; j < tracelength*upsampled; j++) upFieldStrength.column(i)(j) = upsampledTrace[j] + offset;
 
-        // remark: tried to fasten data transfer from the array to the Matrix but did not work because arrays are
-        // of typ float but not double.
+          // remark: tried to fasten data transfer from the array to the Matrix but did not work because arrays are
+          // of typ float but not double.
 
-        // set flag, that data for this antenna are upsampled
-        upsampledAntennas[i] = true;
+          // set flag, that data for this antenna are upsampled
+          upsampledAntennas[i] = true;
+        } 
       } 
-
+      std::cout << " ... done\n";
       // set last upsampling exponent to current value
       lastUpsamplingExponent = upsampling_exp;
 
@@ -405,7 +407,7 @@ namespace CR { // Namespace CR -- begin
       plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
       // Create the Plot
-      plotter.AddLabels("Time [microseconds]", "CC-Beam [microV/m/MHz]","CC-Beam and Power");
+      plotter.AddLabels("Time t [#gmsec]", "CC-Beam [#gmV/m/MHz]","CC-Beam and Power");
     
       // Add CC-beam
       plotter.PlotLine(xaxis(plotRange),ccbeam(plotRange),4,1);
@@ -469,7 +471,7 @@ namespace CR { // Namespace CR -- begin
       plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
       // Create the Plot
-      plotter.AddLabels("Time [microseconds]", "X-Beam [microV/m/MHz]","X-Beam and Power");
+      plotter.AddLabels("Time t [#gmsec]", "X-Beam [#gmV/m/MHz]","X-Beam and Power");
     
       // Add X-beam
       plotter.PlotLine(xaxis(plotRange),xbeam(plotRange),4,1);
@@ -581,48 +583,50 @@ namespace CR { // Namespace CR -- begin
         dr->header().get("AntennaIDs",AntennaIDs);
 
         // Create the plots for each individual antenna looping through antennas
+        if (rawData)
+            std::cout <<"Plotting the raw data FX\nAntenna ... ";
+        else
+	    std::cout <<"Plotting the fieldstrength\n Antenna ..." ;
 
 
-        for (int i = 0; i < antennaSelection.nelements(); i++)
-        if (antennaSelection(i))			// consider only selected antennas
-        {
-	  // create filename and label
-          stringstream antennanumber, antennaid;
-          antennanumber << (i+1);
-          antennaid << AntennaIDs(i);
+        for (int i = 0; i < antennaSelection.nelements(); i++){
+          // consider only selected antennas
+          if (antennaSelection(i)){
+            // create filename and label
+            stringstream antennanumber, antennaid;
+            antennanumber << (i+1);
+            antennaid << AntennaIDs(i);
 
-          plotfilename = filename + "-" + antennanumber.str() + ".ps";
-	  label = "Antenna " + antennanumber.str() + " (ID = " + antennaid.str() + ")";
+            //plotfilename = filename + "-" + antennanumber.str() + ".ps";
+            plotfilename = filename + "-" + antennanumber.str() + ".ps";
+	    //            label = "Antenna " + antennanumber.str() + " (ID = " + antennaid.str() + ")";
+            //  alternative label "GT - Ant.Nr"
+            label = "GT " + filename + " - Antenna " + antennanumber.str();
 
-          if (rawData)
-	    std::cout <<"Plotting the raw data FX of antenna " << (i+1) << " (ID = " << AntennaIDs(i) 
-		      << ") to file: " << plotfilename << std::endl;
-          else
-	    std::cout <<"Plotting the fieldstrength of antenna " << (i+1) << " (ID = " << AntennaIDs(i) 
-		      << ") to file: " << plotfilename << std::endl;
+            // Initialize the plot giving xmin, xmax, ymin and ymax
+            plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
-          // Initialize the plot giving xmin, xmax, ymin and ymax
-          plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
+            // Add labels
+            if (rawData)
+              plotter.AddLabels("Time t [#gmsec]", "Counts",label);
+            else
+              plotter.AddLabels("Time t [#gmsec]", "Fieldstrength #ge#d0#u [#gmV/m/MHz]",label);
+  
+            // Plot (upsampled) trace and original data points.
+            plotter.PlotLine(upxaxis(upplotRange),upYvalues.column(i)(upplotRange),color,1);
+            plotter.PlotSymbols(xaxis(plotRange),yValues.column(i)(plotRange),empty, empty, color, 2, 5);
 
-          // Add labels
-          if (rawData)
-            plotter.AddLabels("Time [microseconds]", "FX",label);
-          else
-            plotter.AddLabels("Time [microseconds]", "Fieldstrength [microV/m/MHz]",label);
-
-          // Plot (upsampled) trace and original data points.
-          plotter.PlotLine(upxaxis(upplotRange),upYvalues.column(i)(upplotRange),color,1);
-          plotter.PlotSymbols(xaxis(plotRange),yValues.column(i)(plotRange),empty, empty, color, 2, 5);
-
-          // Add filename to list of created plots
-          plotlist.push_back(plotfilename);
-
-          color++;					// another color for the next antenna
-          if (color >= 13) color = 3;			// there are only 16 colors available, 
+            // Add filename to list of created plots
+            plotlist.push_back(plotfilename);
+  	    std::cout << " " << (i+1);
+            color++;					// another color for the next antenna
+            if (color >= 13) color = 3;			// there are only 16 colors available, 
 							// use only ten as there are 3x10 antenna
-        }
-      } else	// if (seperated)
-      {
+          }
+	}
+        std::cout << std::endl;
+      // if (seperated) else
+      }else {
         // add the ".ps" to the filename
         string plotfilename = filename + ".ps";
 
@@ -635,11 +639,16 @@ namespace CR { // Namespace CR -- begin
 
         // Initialize the plot giving xmin, xmax, ymin and ymax
         plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
-        // Add labels
+        // Add labels 
+        string label;
+        stringstream antennanum;
+        antennanum << (antennaSelection.nelements()-1);
+        label = "GT " + filename + " - " + antennanum.str() + " Antennas";
+
         if (rawData)
-          plotter.AddLabels("Time [microseconds]", "FX","All selected Antennas");
+          plotter.AddLabels("Time t [#gmsec]", "Counts",label);
         else
-          plotter.AddLabels("Time [microseconds]", "fieldstrength [microV/m/MHz]","All selected Antennas");
+          plotter.AddLabels("Time t [#gmsec]", "Fieldstrength #ge#d0#u [#gmV/m/MHz]",label);
 
         // Create the plots looping through antennas
         for (int i = 0; i < antennaSelection.nelements(); i++)
@@ -773,6 +782,104 @@ namespace CR { // Namespace CR -- begin
                   << "Time average [micro s]:    " << mean(static_cast< Vector<Double> >(minima_time)) << std::endl;
       }
 
+    } catch (AipsError x) 
+      {
+        std::cerr << "CompletePipeline:caclulateMaxima: " << x.getMesg() << std::endl;
+      }; 
+  }
+
+
+
+  void CompletePipeline::listCalcMaxima(DataReader *dr,
+					 Vector<Bool> antennaSelection,
+					 const int& upsampling_exp,
+					 Vector<Double> pbeam_offset,
+					 const bool& rawData)
+  {
+    try 
+    {
+      Vector<Double> timeValues;		// time values
+      Vector<Double> timeRange;			// time values
+      Matrix<Double> yValues;			// y-values
+      Vector<Double> trace;			// trace currently processed
+      vector<double> maxima;			// Stores the calculated maxima
+      vector<double> minima;			// Stores the calculated minima
+      vector<double> maxima_time;		// Stores the calculated time of the maxima
+      vector<double> minima_time;		// Stores the calculated time of the minima
+
+      // Get the antenna selection from the DataReader if no selction was chosen 	
+      if (antennaSelection.nelements() == 0) {
+	antennaSelection = GetAntennaMask(dr);
+      }
+
+ 
+      // Get the (upsampled) time axis
+      timeValues = getUpsampledTimeAxis(dr,upsampling_exp);
+
+      // Get the yValues of all selected antennas (raw data or fieldstrength)
+      if (rawData)
+        yValues = getUpsampledFX(dr,upsampling_exp, antennaSelection, true);  // true means: offset will be substracted
+      else
+        yValues = getUpsampledFieldstrength(dr,upsampling_exp, antennaSelection);
+
+      // check length of time axis and yValues traces for consistency
+      if (timeValues.size() != yValues.column(0).size())
+        std::cerr << "CompletePipeline:calculateMaxima: WARNING: Length of time axis differs from length of the antenna traces!\n"
+           << std::endl;
+
+
+      // Define the time range considered (the same as the plot range)
+      Slice range = calculatePlotRange(timeValues);
+
+      // cut time values
+      timeRange = timeValues(range);
+
+      // find the maximal y values for all selected antennas
+      for (int i = 0; i < antennaSelection.nelements(); i++) if (antennaSelection(i))
+      {
+        // Start with height 0 and search for heigher and lower values
+        double maximum = 0;
+	double minimum = 0;
+        double extrema =0;
+        int maxtimevalue = 0;
+        int mintimevalue = 0;
+
+        // get current trace
+        trace = yValues.column(i)(range);
+
+        // loop through the values and search for the heighest and lowest one
+        for(int j = 0; j < timeRange.nelements(); j++)
+	{
+          if ( maximum < trace(j)) 
+          {
+            maxtimevalue = j;
+            maximum = trace(j);
+          } 
+          if ( minimum > trace(j)) 
+          {
+            mintimevalue = j;
+            minimum = trace(j);
+          } 
+
+          if ( extrema < maximum ) 
+             extrema = maximum;
+          if (extrema < abs(minimum))
+             extrema = abs(minimum);
+            
+	}  
+
+        // store the calculated values for later calculation of the mean
+	// multiply by 1e6 for conversion to micro
+        maxima.push_back(maximum*1e6);
+        maxima_time.push_back(timeRange(maxtimevalue)*1e6);
+        minima.push_back(minimum*1e6);
+        minima_time.push_back(timeRange(mintimevalue)*1e6);
+
+
+        // print the calculated values
+        std::cout <<  i+1 <<" " <<extrema*1e6 << "\n";
+      }// end for loop over selected antennas
+      std::cout << " ... done."<< std::endl;
     } catch (AipsError x) 
       {
         std::cerr << "CompletePipeline:caclulateMaxima: " << x.getMesg() << std::endl;
