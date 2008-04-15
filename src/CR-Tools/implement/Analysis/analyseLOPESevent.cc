@@ -680,7 +680,7 @@ namespace CR { // Namespace CR -- begin
       Vector<Double> ccb,xb,pb;
       Matrix<Double> ts;
       Record ergrec;
-      Bool clipping=True;
+      Bool clipping=True, goodfit=True;
       while (clipping){
 	if (az>360.) { az-=360.; continue;};
 	if (az<0.) { az+=360.; continue;};
@@ -705,7 +705,11 @@ namespace CR { // Namespace CR -- begin
       };
       if (!ergrec.asBool("CCconverged") || 
 	  (ergrec.asDouble("CCcenter") < fitStart_p) || (ergrec.asDouble("CCcenter") > fitStop_p) ||
-	  (ergrec.asDouble("CCwidth")>1e-7)) { 
+	  (ergrec.asDouble("CCwidth")>1e-7) || (ergrec.asDouble("CCwidth")<1e-9) ||
+	  (ergrec.asDouble("CCcenter_error")>(fitStop_p-fitStart_p))||
+	  (ergrec.asDouble("CCwidth_error")>1e-7)||
+	  ((ergrec.asDouble("CCheight_error")/ergrec.asDouble("CCheight"))>10) ) { 
+	goodfit=False;
 	pb = lev_p->timeValues();
 	erg = mean(ccb(Slice(ntrue(pb<-1.83e-6),5)))*1e6;
 	if (centerp != NULL) {
@@ -713,7 +717,7 @@ namespace CR { // Namespace CR -- begin
 	};
       };
       cout << "getHeight: Az:"<<az<<" El:"<<el<<" Dist:"<<dist<<" Height:"<< erg << " conv:"<<
-	ergrec.asBool("Xconverged")<<ergrec.asBool("CCconverged")<< " Center:"<< ergrec.asDouble("CCcenter")<<endl;
+	ergrec.asBool("Xconverged")<<ergrec.asBool("CCconverged")<<goodfit<< " Center:"<< ergrec.asDouble("CCcenter")<<endl;
     } catch (AipsError x) {
       cerr << "analyseLOPESevent:getHeight: " << x.getMesg() << endl;
       return 0.;
