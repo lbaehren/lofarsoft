@@ -213,6 +213,9 @@ namespace CR {  // Namespace CR -- begin
 			       Int const AntID,
 			       String const FieldName,
 			       String *result) {
+#ifdef DEBUGGING_MESSAGES      
+    cout << "CalTableReader::GetData[String] called for " << FieldName << endl;
+#endif
     try {
       Int rowNr;
       Table subtab;
@@ -248,6 +251,9 @@ namespace CR {  // Namespace CR -- begin
 			       Int const AntID,
 			       String const FieldName,
 			       Double *result) {
+#ifdef DEBUGGING_MESSAGES      
+    cout << "CalTableReader::GetData[Double] called for " << FieldName << endl;
+#endif
     try {
       Int rowNr;
       Table subtab;
@@ -283,6 +289,9 @@ namespace CR {  // Namespace CR -- begin
 			       Int const AntID,
 			       String const FieldName,
 			       DComplex *result) {
+#ifdef DEBUGGING_MESSAGES      
+    cout << "CalTableReader::GetData[DComplex] called for " << FieldName << endl;
+#endif
     try {
       Int rowNr;
       Table subtab;
@@ -318,6 +327,9 @@ namespace CR {  // Namespace CR -- begin
 			       Int const AntID,
 			       String const FieldName,
 			       Array<Double> *result) {
+#ifdef DEBUGGING_MESSAGES      
+    cout << "CalTableReader::GetData[Array<Double>] called for " << FieldName << endl;
+#endif
     try {
       Int rowNr;
       Table subtab;
@@ -353,6 +365,9 @@ namespace CR {  // Namespace CR -- begin
 			       Int const AntID,
 			       String const FieldName,
 			       Array<DComplex> *result) {
+#ifdef DEBUGGING_MESSAGES      
+    cout << "CalTableReader::GetData[Array<DComplex>] called for " << FieldName << endl;
+#endif
     try {
       Int rowNr;
       Table subtab;
@@ -393,6 +408,9 @@ namespace CR {  // Namespace CR -- begin
 				   uInt const date2,
 				   Int const AntID, 
 				   String const FieldName) {
+#ifdef DEBUGGING_MESSAGES      
+    cout << "CalTableReader::isIdentical called for " << FieldName << endl;
+#endif
     try {  
       Int rowNr;
       Table subtab;
@@ -446,6 +464,9 @@ namespace CR {  // Namespace CR -- begin
   // (Unfortunately every type needs its own implementation)
   // ==============================================================================
   Bool CalTableReader::GetKeyword(String const KeywordName, String *result){
+#ifdef DEBUGGING_MESSAGES      
+    cout << "CalTableReader::GetKeyword called for " << KeywordName << endl;
+#endif
     try {  
       if (!masterTable_p->keywordSet().isDefined(KeywordName)) {
 	cerr << "CalTableReader::GetKeyword: Keyword named \"" << KeywordName << 
@@ -460,6 +481,9 @@ namespace CR {  // Namespace CR -- begin
     return True;
   }
   Bool CalTableReader::GetKeyword(String const KeywordName, Double *result){
+#ifdef DEBUGGING_MESSAGES      
+    cout << "CalTableReader::GetKeyword called for " << KeywordName << endl;
+#endif
     try {  
       if (!masterTable_p->keywordSet().isDefined(KeywordName)) {
 	cerr << "CalTableReader::GetKeyword: Keyword named \"" << KeywordName << 
@@ -474,6 +498,9 @@ namespace CR {  // Namespace CR -- begin
     return True;
   }
   Bool CalTableReader::GetKeyword(String const KeywordName, DComplex *result){
+#ifdef DEBUGGING_MESSAGES      
+    cout << "CalTableReader::GetKeyword called for " << KeywordName << endl;
+#endif
     try {  
       if (!masterTable_p->keywordSet().isDefined(KeywordName)) {
 	cerr << "CalTableReader::GetKeyword: Keyword named \"" << KeywordName << 
@@ -488,6 +515,9 @@ namespace CR {  // Namespace CR -- begin
     return True;
   }
   Bool CalTableReader::GetKeyword(String const KeywordName, Array<Double> *result){
+#ifdef DEBUGGING_MESSAGES      
+    cout << "CalTableReader::GetKeyword called for " << KeywordName << endl;
+#endif
     try {  
       if (!masterTable_p->keywordSet().isDefined(KeywordName)) {
 	cerr << "CalTableReader::GetKeyword: Keyword named \"" << KeywordName << 
@@ -502,6 +532,9 @@ namespace CR {  // Namespace CR -- begin
     return True;
   }
   Bool CalTableReader::GetKeyword(String const KeywordName, Array<DComplex> *result){
+#ifdef DEBUGGING_MESSAGES      
+    cout << "CalTableReader::GetKeyword called for " << KeywordName << endl;
+#endif
     try {  
       if (!masterTable_p->keywordSet().isDefined(KeywordName)) {
 	cerr << "CalTableReader::GetKeyword: Keyword named \"" << KeywordName << 

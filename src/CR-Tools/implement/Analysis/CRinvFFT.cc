@@ -190,6 +190,12 @@ namespace CR { // Namespace CR -- begin
 	  CTRead->GetData(date, AntennaIDs(i), "Position", &tmpvec);
 	  AntPositions_p.column(i) = tmpvec;
 	};
+	tmpvec.resize(2);
+	FrequencyBands_p.resize(2,AntennaIDs.nelements());
+	for (i=0;i<AntennaIDs.nelements();i++){
+	  CTRead->GetData(date, AntennaIDs(i), "FrequencyBand", &tmpvec);
+	  FrequencyBands_p.column(i) = tmpvec;
+	};
 	AntPosValid_p = True;
 	posCachedDate_p = dr->header().asuInt("Date");
       };
@@ -247,15 +253,15 @@ namespace CR { // Namespace CR -- begin
       tmparr.resize(tmpCvec.shape());
       for (i=0;i<AntennaIDs.nelements();i++){
 	InterAntGain_p->GetValues(date, AntennaIDs(i), &tmparr);
-	CTRead->GetData(date, AntennaIDs(i), "FrequencyBand", &tmpvec);
+	//CTRead->GetData(date, AntennaIDs(i), "FrequencyBand", &tmpvec);
 	//cout << "CRinvFFT::GetShiftedFFT: tmpCvec:" << tmpCvec.shape() << " tmparr:"<<tmparr.shape()
 	//     << " phaseGradients:"<< phaseGradients.shape() << endl;
 	convertArray(tmpCvec,Vector<Double>(tmparr));
 	// compute 1.947/delta_nu/sqrt(Gain)
 	//   1.947        = constant (at least for LOPES)
-	//   delta_nu     = (tmpvec(1)-tmpvec(0))/1e6 [in MHz]
+	//   delta_nu     = (FreqBand(1)-FreqBand(0))/1e6 [in MHz]
 	//   1/sqrt(Gain) = tmpCvec
-	tmpCval = 1.947*1e6/(tmpvec(1)-tmpvec(0));
+	tmpCval = 1.947*1e6/(FrequencyBands_p(1,i)-FrequencyBands_p(0,i));
 	AntGainFactors.column(i) = tmpCvec*tmpCval;
       };
       //cout << "CRinvFFT::GetShiftedFFT: AntGainFactors:" << AntGainFactors.shape()
