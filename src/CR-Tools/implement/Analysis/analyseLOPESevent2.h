@@ -26,6 +26,7 @@
 
 // Standard library header files
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <string>
 
@@ -188,7 +189,7 @@ class analyseLOPESevent2 : public analyseLOPESevent{
       \param PlotRawData - Plots the raw data FX
       \param CalculateMaxima - Finds the maximum and the minimum of the trace in the plot range
       \param listCalcMaxima - output version of CalculateMax
-      \param printShowerCoordinates -	 print the distance between antenna and shower core
+      \param printShowerCoordinates -	 print the x,y and total distance between antenna and shower core
 
       \return Record with the results.
     */

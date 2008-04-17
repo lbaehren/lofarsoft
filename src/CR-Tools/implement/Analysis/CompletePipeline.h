@@ -71,6 +71,8 @@ namespace CR { // Namespace CR -- begin
     double plotStart_p;
     //! Stop time of the interval diplayed in the plot
     double plotStop_p;
+    //! Time window for peak search of radio pulse
+    double ccWindowWidth_p;
     //! File names of created plots 
     vector <string> plotlist;
     //! Last upsampling exponent (-1 if no upsampling was done so far)
@@ -263,6 +265,34 @@ namespace CR { // Namespace CR -- begin
     Slice calculatePlotRange (const Vector<Double>& xaxis) const;
 
 
+
+    /*!
+      \brief Gets a Slice with the time interval BEFORE the plotrange 
+             for the given xaxis
+
+      \param xaxis            -- a time axis (may be upsampled or not)
+
+      \return plotRangeNoise  -- A Slice containing the indices of the xaxis interval corresponding to the
+                                 class variables plotStart_p and plotStop_p
+    */
+    Slice calculateNoiseRange (const Vector<Double>& xaxis) const;
+
+
+
+    /*!
+      \brief Gets a Slice with the time interval BEFORE the plotrange 
+             for the given xaxis
+
+      \param xaxis             -- a time axis (may be upsampled or not)
+      \param ccBeamcenter      -- position in time of the CC-beam center
+
+      \return calculateCCRange -- A Slice containing the indices of the xaxis interval corresponding to the
+                                  to a window around the CC beam center
+    */
+    Slice calculateCCRange (const Vector<Double>& xaxis, 
+                            const double& ccBeamcenter) const;
+
+
     /*!
       \brief Plots the CC-beam
 
@@ -340,15 +370,12 @@ namespace CR { // Namespace CR -- begin
       \param antennaSelection -- Selection of antennas
       \param upsampling_exp   -- a value > 0 means that data are upsampled by a factor of 2^upsampling_exp
                                  use e.g. uspampling_exp = 1 to have twice as many points plotted.
-      \param pbeam_offset     -- offset of power beam
-      \param rawData          -- uses the raw ADC data instead of the calibrated fieldstrength
+      \param cc_center        -- center of CC-beam fit
     */
     void listCalcMaxima (DataReader *dr,
                          Vector<Bool> antennaSelection = Vector<Bool>(),
                          const int& upsampling_exp = 0,
-                         Vector<Double> pbeam_offset = Vector<Double>(),
-                         const bool& rawData = false);
-    
+                         const double& cc_center = 0);
     
     
   private:

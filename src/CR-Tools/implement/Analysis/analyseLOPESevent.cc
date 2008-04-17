@@ -44,6 +44,7 @@ namespace CR { // Namespace CR -- begin
     fitStop_p     = -1.7e-6;
     plotStart_p   = -2.05e-6;
     plotStop_p    = -1.55e-6;
+    ccWindowWidth_p= 0.045e-6;
 
     clear();
   };
@@ -55,7 +56,8 @@ namespace CR { // Namespace CR -- begin
 					double const &fitStart,
 					double const &fitStop,
 					double const &plotStart,
-					double const &plotStop)
+					double const &plotStop,
+					double const &ccWindowWidth)
   {
     pipeline_p    = NULL;
     lev_p         = NULL;
@@ -65,6 +67,7 @@ namespace CR { // Namespace CR -- begin
     fitStop_p     = fitStop;
     plotStart_p   = plotStart;
     plotStop_p    = plotStop;
+    ccWindowWidth_p= ccWindowWidth;
     
     clear();
   }

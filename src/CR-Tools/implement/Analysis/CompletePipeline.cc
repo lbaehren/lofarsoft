@@ -34,6 +34,7 @@ namespace CR { // Namespace CR -- begin
   
   CompletePipeline::CompletePipeline():
     plotStart_p(-2.05e-6), plotStop_p(-1.55e-6),
+    ccWindowWidth_p(0.045e-6),
     plotlist(),
     lastUpsamplingExponent(-1),
     lastTimeUpsamplingExponent(-1),
@@ -44,6 +45,7 @@ namespace CR { // Namespace CR -- begin
   
   CompletePipeline::CompletePipeline (CompletePipeline const &other):
     plotStart_p(-2.05e-6), plotStop_p(-1.55e-6),
+    ccWindowWidth_p(0.045e-6),
     plotlist(),
     lastUpsamplingExponent(-1),
     lastTimeUpsamplingExponent(-1),
@@ -360,6 +362,55 @@ namespace CR { // Namespace CR -- begin
   }
 
 
+  Slice CompletePipeline::calculateNoiseRange (const Vector<Double>& xaxis) const
+  {
+    try
+    {
+      // check if plotStart is <= plotStop
+      if (plotStop_p < plotStart_p)
+      {
+        std::cerr << "CompletePipeline:calculateNoiseRange: Error: plotStop_p is greater than plotStart_p!" << std::endl;
+        return Slice(0,0);
+      }
+      //number of elements smaller then starting value of plot range
+      int startsample = ntrue(xaxis<plotStart_p);
+      //number of elements smaller then end of plot range
+      int stopsample = ntrue(xaxis<plotStop_p);  
+      // create Slice with noiseRange
+      Slice noiseRange((startsample+startsample-stopsample),(stopsample-startsample));
+
+      return noiseRange;
+    } catch (AipsError x) 
+    {
+        std::cerr << "CompletePipeline:calculateNoiseRange: " << x.getMesg() << std::endl;
+    }; 
+  }
+
+
+  Slice CompletePipeline::calculateCCRange (const Vector<Double>& xaxis, const double& ccBeamcenter) const
+  {
+    try
+    {
+      // check if ccBeam has converged
+      if (ccBeamcenter == 0.0)
+      {
+        std::cerr << "CompletePipeline:calculateCCRange: Error: CC-beam did not converged !" << std::endl;
+        return Slice(0,0);
+      }
+      //number of elements smaller then CC-center minus window size
+      int startsample = ntrue(xaxis<(ccBeamcenter-ccWindowWidth_p)); 
+      //number of elements smaller then end of plot range
+      int stopsample = ntrue(xaxis<(ccBeamcenter+ccWindowWidth_p));
+      // create Slice with plotRangeNoise
+      Slice rangeCC(startsample,(stopsample-startsample));
+      return rangeCC;
+    } catch (AipsError x) 
+    {
+        std::cerr << "CompletePipeline:calculateCCRange: " << x.getMesg() << std::endl;
+    }; 
+  }
+
+
   void CompletePipeline::plotCCbeam(const string& filename,
 				    DataReader *dr,
 				    Vector<Double> fittedCCbeam,
@@ -372,10 +423,19 @@ namespace CR { // Namespace CR -- begin
       SimplePlot plotter;    			// define plotter
       Vector<Double> xaxis, ccbeam, pbeam;	// values for plot
       double xmax,xmin,ymin,ymax;		// Plotrange
- 
+      uInt gtdate;
+      dr->header().get("Date",gtdate);
+      stringstream gtlabel;
+      gtlabel <<gtdate;
+      string  plotfilename;
+
       // add the ".ps" to the filename
-      string plotfilename = filename + ".ps";
-    
+      plotfilename = filename + ".ps";
+
+      // alternative filename gtdate".ps"
+      //plotfilename = gtlabel.str() + ".ps";
+
+
       std::cout <<"Plotting the CC-beam and the Power-beam to file: " << plotfilename << std::endl;
 
       // Get the time axis
@@ -408,7 +468,9 @@ namespace CR { // Namespace CR -- begin
       plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
       // Create the Plot
-      plotter.AddLabels("Time t [#gmsec]", "CC-Beam [#gmV/m/MHz]","CC-Beam and Power");
+      string label;
+      label = "GT " + gtlabel.str() + " - CC-Beam and Power";
+      plotter.AddLabels("Time t [#gmsec]", "CC-Beam [#gmV/m/MHz]",label);
     
       // Add CC-beam
       plotter.PlotLine(xaxis(plotRange),ccbeam(plotRange),9,1);
@@ -446,9 +508,18 @@ namespace CR { // Namespace CR -- begin
       Vector<Double> xaxis, xbeam, pbeam;	// values for plot
       double xmax,xmin,ymin,ymax;		// Plotrange
  
+      uInt gtdate;
+      dr->header().get("Date",gtdate);
+      stringstream gtlabel;
+      gtlabel <<gtdate;
+      string  plotfilename;
+
       // add the ".ps" to the filename
-      string plotfilename = filename + ".ps";
-    
+      plotfilename = filename + ".ps";
+
+      // alternative filename gtdate".ps"
+      //plotfilename = gtlabel.str() + ".ps";
+
       std::cout <<"Plotting the X-beam and the Power-beam to file: " << plotfilename << std::endl;
 
       // Get the time axis
@@ -481,7 +552,9 @@ namespace CR { // Namespace CR -- begin
       plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
       // Create the Plot
-      plotter.AddLabels("Time t [#gmsec]", "X-Beam [#gmV/m/MHz]","X-Beam and Power");
+      string label;
+      label = "GT " + gtlabel.str() + " - X-Beam and Power";
+      plotter.AddLabels("Time t [#gmsec]", "X-Beam [#gmV/m/MHz]",label);
     
       // Add X-beam
       plotter.PlotLine(xaxis(plotRange),xbeam(plotRange),9,1);
@@ -588,18 +661,25 @@ namespace CR { // Namespace CR -- begin
       ymin *= 1.05;
       ymax *= 1.05;
 
+      // set up label for plots and filename
+      string plotfilename;
+      string label;
+      uInt gtdate;
+      stringstream gtlabel, antennanumber;
+      // Get the AntennaIDs for labeling
+      dr->header().get("Date",gtdate);
+      gtlabel <<gtdate;
+
+
       // Make the plots (either all antennas together or seperated)
       if (seperated)
       {
-        string plotfilename;
-        string label;
+        stringstream antennaid;
+        Vector<Int> AntennaIDs;
+        dr->header().get("AntennaIDs",AntennaIDs);
 
         // Create empty vector for not existing error bars 
         Vector<Double> empty;
-
-        // Get the AntennaIDs for labeling
-        Vector<Int> AntennaIDs;
-        dr->header().get("AntennaIDs",AntennaIDs);
 
         // Create the plots for each individual antenna looping through antennas
         if (rawData)
@@ -612,15 +692,18 @@ namespace CR { // Namespace CR -- begin
           // consider only selected antennas
           if (antennaSelection(i)){
             // create filename and label
-            stringstream antennanumber, antennaid;
+	    antennanumber.str("");
+	    antennanumber.clear();
             antennanumber << (i+1);
             antennaid << AntennaIDs(i);
 
-            //plotfilename = filename + "-" + antennanumber.str() + ".ps";
+            //set the plotfilename to filename + "-" + antennanumber.str() + ".ps";
             plotfilename = filename + "-" + antennanumber.str() + ".ps";
-	    //            label = "Antenna " + antennanumber.str() + " (ID = " + antennaid.str() + ")";
-            //  alternative label "GT - Ant.Nr"
-            label = "GT " + filename + " - Antenna " + antennanumber.str();
+            //set label "GT - Ant.Nr"
+            label = "GT " + gtlabel.str() + " - Antenna " + antennanumber.str();
+
+            //alternative plotfilename
+            //plotfilename = gtlabel.str() + "-" + antennanumber.str() + ".ps";
 
             // Initialize the plot giving xmin, xmax, ymin and ymax
             plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
@@ -633,6 +716,7 @@ namespace CR { // Namespace CR -- begin
   
             // Plot (upsampled) trace and original data points.
             plotter.PlotLine(upxaxis(upplotRange),upYvalues.column(i)(upplotRange),color,1);
+            plotter.PlotSymbols(upxaxis(upplotRange),upYvalues.column(i)(upplotRange),empty,empty,color,1,1);
             plotter.PlotSymbols(xaxis(plotRange),yValues.column(i)(plotRange),empty, empty, color, 2, 5);
 
             // Add filename to list of created plots
@@ -644,10 +728,13 @@ namespace CR { // Namespace CR -- begin
           }
 	}
         std::cout << std::endl;
-      // if (seperated) else
+      // if (seperated) => else
       }else {
-        // add the ".ps" to the filename
-        string plotfilename = filename + ".ps";
+        // add the "-all.ps" to the filename
+        plotfilename = filename + "-all.ps";
+
+        //alternative plotfilename
+        //plotfilename = gtlabel.str() + "-all.ps";
 
         if (rawData)
     	  std::cout <<"Plotting the raw data FX of all antennas to file: "
@@ -659,10 +746,8 @@ namespace CR { // Namespace CR -- begin
         // Initialize the plot giving xmin, xmax, ymin and ymax
         plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
         // Add labels 
-        string label;
-        stringstream antennanum;
-        antennanum << (antennaSelection.nelements()-1);
-        label = "GT " + filename + " - " + antennanum.str() + " Antennas";
+        antennanumber << (antennaSelection.nelements()-1);
+        label = "GT " + gtlabel.str() + " - " + antennanumber.str() + " Antennas";
 
         if (rawData)
           plotter.AddLabels("Time t [#gmsec]", "Counts",label);
@@ -812,19 +897,18 @@ namespace CR { // Namespace CR -- begin
   void CompletePipeline::listCalcMaxima(DataReader *dr,
 					 Vector<Bool> antennaSelection,
 					 const int& upsampling_exp,
-					 Vector<Double> pbeam_offset,
-					 const bool& rawData)
+					 const double& cc_center)
   {
     try 
     {
       Vector<Double> timeValues;		// time values
       Vector<Double> timeRange;			// time values
+      Vector<Double> timeRangeNoise;		// time values
       Matrix<Double> yValues;			// y-values
       Vector<Double> trace;			// trace currently processed
-      vector<double> maxima;			// Stores the calculated maxima
-      vector<double> minima;			// Stores the calculated minima
-      vector<double> maxima_time;		// Stores the calculated time of the maxima
-      vector<double> minima_time;		// Stores the calculated time of the minima
+      Vector<Double> traceNoise;		// trace currently processed
+      vector<double> extrema;			// Stores the calculated extrema
+      vector<double> extrema_time;		// Stores the calculated time of the extrema
 
       // Get the antenna selection from the DataReader if no selction was chosen 	
       if (antennaSelection.nelements() == 0) {
@@ -836,10 +920,7 @@ namespace CR { // Namespace CR -- begin
       timeValues = getUpsampledTimeAxis(dr,upsampling_exp);
 
       // Get the yValues of all selected antennas (raw data or fieldstrength)
-      if (rawData)
-        yValues = getUpsampledFX(dr,upsampling_exp, antennaSelection, true);  // true means: offset will be substracted
-      else
-        yValues = getUpsampledFieldstrength(dr,upsampling_exp, antennaSelection);
+      yValues = getUpsampledFieldstrength(dr,upsampling_exp, antennaSelection);
 
       // check length of time axis and yValues traces for consistency
       if (timeValues.size() != yValues.column(0).size())
@@ -847,21 +928,37 @@ namespace CR { // Namespace CR -- begin
            << std::endl;
 
 
-      // Define the time range considered (the same as the plot range)
-      Slice range = calculatePlotRange(timeValues);
+      // Define the time range considered for peak search 
+      Slice range = calculateCCRange(timeValues,cc_center);
+      // Define the time range considered (the same length as the plot range, 
+      // but before actual plot range)
+      Slice rangeNoise = calculateNoiseRange(timeValues);
+
+
+      // Start with height 0 and search for heigher and lower values
+      double maximum = 0;
+      double minimum = 0;
+      double extremum =0;
+      double noise=0;
+      int extrematimevalue = 0;
+
 
       // cut time values
       timeRange = timeValues(range);
+      // cut time values form before plotrange
+      timeRangeNoise = timeValues(rangeNoise);
 
-      // find the maximal y values for all selected antennas
-      for (int i = 0; i < antennaSelection.nelements(); i++) if (antennaSelection(i))
-      {
+      // find the maximal y  values  for all selected antennas
+      std::cout <<  "An field    noise    time\n";
+      for (int i = 0; i < antennaSelection.nelements(); i++) 
+
+      if (antennaSelection(i)){
         // Start with height 0 and search for heigher and lower values
-        double maximum = 0;
-	double minimum = 0;
-        double extrema =0;
-        int maxtimevalue = 0;
-        int mintimevalue = 0;
+        maximum = 0;
+	minimum = 0;
+        extremum =0;
+        noise =0;
+        extrematimevalue = 0;
 
         // get current trace
         trace = yValues.column(i)(range);
@@ -870,38 +967,55 @@ namespace CR { // Namespace CR -- begin
         for(int j = 0; j < timeRange.nelements(); j++)
 	{
           if ( maximum < trace(j)) 
-          {
-            maxtimevalue = j;
             maximum = trace(j);
-          } 
-          if ( minimum > trace(j)) 
-          {
-            mintimevalue = j;
-            minimum = trace(j);
-          } 
 
-          if ( extrema < maximum ) 
-             extrema = maximum;
-          if (extrema < abs(minimum))
-             extrema = abs(minimum);
-            
+          if ( minimum > trace(j)) 
+            minimum = trace(j);
+
+          if ( extremum < maximum ) {
+             extremum = maximum;
+             extrematimevalue = j;
+	  }
+          if (extremum < abs(minimum)){
+             extremum = abs(minimum);
+             extrematimevalue = j;
+	  }
 	}  
 
-        // store the calculated values for later calculation of the mean
-	// multiply by 1e6 for conversion to micro
-        maxima.push_back(maximum*1e6);
-        maxima_time.push_back(timeRange(maxtimevalue)*1e6);
-        minima.push_back(minimum*1e6);
-        minima_time.push_back(timeRange(mintimevalue)*1e6);
+        extrema.push_back(extremum*1e6);
+        extrema_time.push_back(timeRange(extrematimevalue)*1e6);
 
+
+        // get current trace
+        traceNoise = yValues.column(i)(rangeNoise);
+        // loop through the values and search for the heighest and lowest one
+        for(int j = 0; j < timeRangeNoise.nelements(); j++)
+	{
+	  noise += abs(traceNoise(j));
+	}
+	noise /=timeRangeNoise.nelements();
 
         // print the calculated values
-        std::cout <<  i+1 <<" " <<extrema*1e6 << "\n";
-      }// end for loop over selected antennas
-      std::cout << " ... done."<< std::endl;
+        std::cout << std::setw(2) << i+1 << " " <<std::setw(7) <<extremum*1e6 << " ";
+	std::cout << std::setw(8) << noise*1e+6  << " " << std::setw(8)<< timeRange(extrematimevalue)*1e6 ;
+	std::cout << std::endl;
+
+      }else{
+        // antenna has bad data
+        // get current trace
+        traceNoise = yValues.column(i)(rangeNoise);
+        // loop through the values and search for the heighest and lowest one
+        for(int j = 0; j < timeRangeNoise.nelements(); j++)
+	{
+	  noise += abs(traceNoise(j));
+	}
+	noise /=timeRangeNoise.nelements();
+        std::cout << std::setw(2) << i+1 << " 0.0       "<<noise<<std::endl;
+      }
+
     } catch (AipsError x) 
       {
-        std::cerr << "CompletePipeline:caclulateMaxima: " << x.getMesg() << std::endl;
+        std::cerr << "CompletePipeline:listCalcMaxima: " << x.getMesg() << std::endl;
       }; 
   }
 

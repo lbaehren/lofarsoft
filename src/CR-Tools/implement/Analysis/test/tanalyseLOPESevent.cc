@@ -119,13 +119,15 @@ int test_analyseLOPESevent ()
     double fitStop (-1.5e-06);
     double plotStart;
     double plotStop;
+    double ccWindowWidth;
 
     analyseLOPESevent event (remoteStart,
 			     remoteStop,
 			     fitStart,
 			     fitStop,
 			     plotStart,
-			     plotStop);
+			     plotStop,
+                             ccWindowWidth);
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;

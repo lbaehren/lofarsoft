@@ -118,10 +118,13 @@ namespace CR { // Namespace CR -- begin
     Double fitStart_p;
     //! 
     Double fitStop_p;
-    //! Start time of the interval diplayed in the plot
+    //! Start time of the interval displayed in the plot
     Double plotStart_p;
-    //! Stop time of the interval diplayed in the plot
+    //! Stop time of the interval displayed in the plot
     Double plotStop_p;
+
+    //! time window of the interval to search for radio pulse
+    Double ccWindowWidth_p;
     
   public:
     
@@ -141,15 +144,17 @@ namespace CR { // Namespace CR -- begin
              fraction of data length
       \param fitStart  -- The start of the interval to be considered in the fit
       \param fitStop   -- The stop of the interval to be considered in the fit
-      \param plotStart -- Start time of the interval diplayed in the plot
-      \param plotStop  -- Stop time of the interval diplayed in the plot
+      \param plotStart -- Start time of the interval displayed in the plot
+      \param plotStop  -- Stop time of the interval displayed in the plot
+      \param ccWindowWidth -- time window of the interval to search for radio pulse
     */
     analyseLOPESevent (double const &remoteStart,
 		       double const &remoteStop,
 		       double const &fitStart,
 		       double const &fitStop,
 		       double const &plotStart,
-		       double const &plotStop);
+		       double const &plotStop,
+		       double const &ccWindowWidth);
     
     // -------------------------------------------------------------- Destruction
 
@@ -290,9 +295,9 @@ namespace CR { // Namespace CR -- begin
     }
     
     /*!
-      \brief Set the stop time of the interval diplayed in the plot
+      \brief Set the stop time of the interval displayed in the plot
 
-      \param plotStop -- Stop time of the interval diplayed in the plot
+      \param plotStop -- Stop time of the interval displayed in the plot
     */
     inline void setPlotStop (double const &plotStop) {
       plotStop_p = plotStop;
@@ -310,6 +315,15 @@ namespace CR { // Namespace CR -- begin
       plotStop_p  = plotStop;
     }
     
+    /*!
+      \brief Get time window of the interval to search for radio pulse
+
+      \return ccWindowWidth_p -- time window for search of radio pulse
+    */
+    inline double ccWindowWidth () {
+       return ccWindowWidth_p;
+    }
+
     /*!
       \brief Get the internal pipeline object
       

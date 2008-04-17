@@ -322,11 +322,18 @@ namespace CR { // Namespace CR -- begin
       Vector<Double> distances(nants);
 
       // print distances in shower coordinates if requested
-      if (printShowerCoordinates)
       for (i=0; i<nants; i++) {
 	distances(i) = sqrt( square(AntPos.row(i)(0)) + square(AntPos.row(i)(1)) );
         // output of shower coordinates
-	std::cout << i+1 << " " << AntPos.row(i)(0) << " " << AntPos.row(i)(1) << " " <<distances(i)<<std::endl;
+        if ( (printShowerCoordinates) && (i==0)){
+          // first time with header
+	  std::cout << "An  dist_x    dist_y    dist"<<std::endl;
+	  std::cout << std::setw(2) << i+1 << " " << std::setw(8) << AntPos.row(i)(0) << "  ";
+          std::cout << std::setw(8) << AntPos.row(i)(1) << "  " << std::setw(8) <<distances(i)<<std::endl;
+	}else{
+	  std::cout << std::setw(2) << i+1 << " " << std::setw(8) << AntPos.row(i)(0) << "  ";
+          std::cout << std::setw(8) << AntPos.row(i)(1) << "  " << std::setw(8) <<distances(i)<<std::endl;
+	}
       };
       erg.define("distances",distances);
       tmpvec.resize(nselants);
@@ -364,7 +371,7 @@ namespace CR { // Namespace CR -- begin
         // calculate the maxima
 	if (CalculateMaxima) pipeline.calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false);
         // user friendly list of calculated maxima
-        if (listCalcMaxima) pipeline.listCalcMaxima(lev_p, AntennaSelection, getUpsamplingExponent(),pBeam, false);
+        if (listCalcMaxima) pipeline.listCalcMaxima(lev_p, AntennaSelection, getUpsamplingExponent(),fiterg.asDouble("CCcenter"));
         
         if (verbose)		// give out the names of the created plots
         {
