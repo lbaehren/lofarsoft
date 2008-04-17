@@ -89,7 +89,6 @@ install-all:
 
 uninstall-all:
 	@$(MAKE) uninstall
-	@$(MAKE) uninstall-doc
 
 install:
 	@@SETX@; for d in $(SUBDIRS) perform; do			      \
