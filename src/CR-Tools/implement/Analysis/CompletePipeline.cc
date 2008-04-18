@@ -698,7 +698,11 @@ namespace CR { // Namespace CR -- begin
             antennaid << AntennaIDs(i);
 
             //set the plotfilename to filename + "-" + antennanumber.str() + ".ps";
-            plotfilename = filename + "-" + antennanumber.str() + ".ps";
+            if ( (i+1) < 10 ){
+               plotfilename = filename + "-0" + antennanumber.str() + ".ps";
+	    }else{
+               plotfilename = filename + "-" + antennanumber.str() + ".ps";
+	    }
             //set label "GT - Ant.Nr"
             label = "GT " + gtlabel.str() + " - Antenna " + antennanumber.str();
 
@@ -730,11 +734,11 @@ namespace CR { // Namespace CR -- begin
         std::cout << std::endl;
       // if (seperated) => else
       }else {
-        // add the "-all.ps" to the filename
-        plotfilename = filename + "-all.ps";
+        // add the ".ps" to the filename
+        plotfilename = filename + ".ps";
 
         //alternative plotfilename
-        //plotfilename = gtlabel.str() + "-all.ps";
+        //plotfilename = gtlabel.str() + ".ps";
 
         if (rawData)
     	  std::cout <<"Plotting the raw data FX of all antennas to file: "
@@ -1010,7 +1014,7 @@ namespace CR { // Namespace CR -- begin
 	  noise += abs(traceNoise(j));
 	}
 	noise /=timeRangeNoise.nelements();
-        std::cout << std::setw(2) << i+1 << " 0.0       "<<noise<<std::endl;
+        std::cout << std::setw(2) << i+1 << " 0.0      "<< std::setw(8) << noise*1e+6  << " 0.0" <<std::endl;
       }
 
     } catch (AipsError x) 

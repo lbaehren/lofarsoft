@@ -280,8 +280,8 @@ namespace CR { // Namespace CR -- begin
 
 
     /*!
-      \brief Gets a Slice with the time interval BEFORE the plotrange 
-             for the given xaxis
+      \brief Gets a Slice with the time interval around the CC-beam center,
+             the range is set via key ccWindowWidth
 
       \param xaxis             -- a time axis (may be upsampled or not)
       \param ccBeamcenter      -- position in time of the CC-beam center

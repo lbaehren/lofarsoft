@@ -327,6 +327,7 @@ namespace CR { // Namespace CR -- begin
         // output of shower coordinates
         if ( (printShowerCoordinates) && (i==0)){
           // first time with header
+	  std::cout << "GT "<<lev_p->header().asInt("Date") << " " << Az << " " << El << " " << XC << " " <<YC <<std::endl;
 	  std::cout << "An  dist_x    dist_y    dist"<<std::endl;
 	  std::cout << std::setw(2) << i+1 << " " << std::setw(8) << AntPos.row(i)(0) << "  ";
           std::cout << std::setw(8) << AntPos.row(i)(1) << "  " << std::setw(8) <<distances(i)<<std::endl;
