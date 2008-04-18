@@ -54,21 +54,29 @@ int main(int argc, char *argv[])
   bool bADCScale = true;
   bool bRFISup = true;
   bool id_timestamp_output = false;
+  bool RefAntCal = false;
+  bool bZeroPadding = true;
   
   int c;
   opterr = 0;
 
-  while ((c = getopt (argc, argv, "hf:i:e:t:n:zmd:asu:w")) != -1) //: after var ->Waits for input
+  while ((c = getopt (argc, argv, "hf:i:e:t:n:zmd:asu:wbo")) != -1) //: after var ->Waits for input
     switch (c)
       {
       case 'f':
 	OutputFileName = optarg ;
+	break;
+      case 'o':
+	bZeroPadding = false ;
 	break;
       case 'i':
 	StarFileName = optarg ;
 	break;
       case 'a':
 	bADCScale = false;
+	break;
+      case 'b':
+	RefAntCal = true;
 	break;
       case 's':
 	bRFISup = false;
@@ -120,9 +128,11 @@ int main(int argc, char *argv[])
 	cout << " -e	event offset to start the viewer (default: from beginning)\n";
 	cout << " -d	event ID to start with (default: from beginning)\n";
 	cout << " -a	scale not in ADC, but in field strength\n";
+	cout << " -b	enable calibration with refererence antenna (default: lab. calibration)\n";
 	cout << " -t	time offset in sec to start with (default: from beginning)\n";
 	cout << " -u	time in sec (global time) to start with\n";
 	cout << " -w	switch ON event_id and time stamp output of the analysed events\n";
+	cout << " -o	disable the up-sampling (default: enabled)\n";
 	cout << " -s	disable RFISuppression (default: enabled)\n\n";
 	
 	cout << " -n	number of events to plot or to average over (default: " << number_analyse << ")\n";
@@ -130,7 +140,7 @@ int main(int argc, char *argv[])
 	
 	cout << " -m	mean envelope from traces over the run is created." << endl;
 	cout << "	The option -e or -t defines the start point (default: hole run)" << endl;
-	cout << "	End event is last event in run by default\n";
+	cout << "	End event is related to -n option\n";
 	cout << "\n\n\nmailto: asch@ipe.fzk.de\n";
 	exit(1);
         break;      
@@ -149,9 +159,9 @@ int main(int argc, char *argv[])
   }
 
   int NoChannels=0;
-  struct event event;
-  struct header header;
-  struct channel_profiles channel_profiles;
+  static struct event event;
+  static struct header header;
+  static struct channel_profiles channel_profiles;
 
   TChain *Theader = new TChain("Theader");
   TChain *Tchannel_profile = new TChain("Tchannel_profile");
@@ -246,13 +256,13 @@ int main(int argc, char *argv[])
  }
    
    Tevent->GetEntry(0);
-// cout << START << " START" << endl;
+ 
 
  int STOP=0;
- if(bMeanTrace && number_analyse==10) STOP = Tevent->GetEntries()-1;
- else STOP = START+NoChannels*number_analyse;
+ STOP = START+NoChannels*number_analyse;
 
-//  cout << "STOP = " << STOP << endl;
+// cout << START << " START" << endl;
+// cout << "STOP = " << STOP << endl;
 
 ///////////////////////////////
   
@@ -272,14 +282,15 @@ int main(int argc, char *argv[])
 
   
   //Zero Padding enviroment
-  int NoZeros=7;
+  int NoZeros = 0;
+  if(bZeroPadding) NoZeros = 7;
   int New_window_size = event.window_size*(NoZeros+1);
   float **TraceZP;
   TCanvas **canZP;
   TGraph **gZP;
   float *TRACEZP = new float [New_window_size];
   float TimeFFTZP[New_window_size];
-  for(int i=0; i<New_window_size; i++) TimeFFTZP[i]=(float)i/(NoZeros+1);
+  for(int i=0; i<New_window_size; i++) TimeFFTZP[i]=(float)((i*12.5)/(NoZeros+1)/1000.0);
   
   if(!bMeanTrace) {
     TraceZP = new float *[(STOP-START)];
@@ -294,12 +305,19 @@ int main(int argc, char *argv[])
   for(unsigned int i=0; i<event.window_size; i++) RFITrace[i]=0;
   
   //mean trace including Zero padding
-  float **MeanTraceZP = new float *[NoChannels];
-  for(int i=0; i<NoChannels; i++) MeanTraceZP[i] = new float[New_window_size];
-  float *MeanTraceZPtmp = new float [New_window_size];
+  float **MeanTraceZP_re = new float *[NoChannels];
+  float **MeanTraceZP_im = new float *[NoChannels];
+  for(int i=0; i<NoChannels; i++){
+    MeanTraceZP_re[i] = new float[New_window_size];
+    MeanTraceZP_im[i] = new float[New_window_size];
+  }
+  float *MeanTraceZPtmp_re = new float [New_window_size];
+  float *MeanTraceZPtmp_im = new float [New_window_size];
   if(bMeanTrace) for(int i=0; i<NoChannels; i++) for(int j=0; j<New_window_size; j++){
-    MeanTraceZP[i][j]=0;
-    MeanTraceZPtmp[j]=0;
+    MeanTraceZP_re[i][j]=0;
+    MeanTraceZP_im[i][j]=0;
+    MeanTraceZPtmp_re[j]=0;
+    MeanTraceZPtmp_im[j]=0;
   }
   int countMeanEvent = (STOP-START) / NoChannels;
   TCanvas *canMeanTrace;
@@ -343,19 +361,20 @@ for(int i=START; i<Tevent->GetEntries(); i++){
    CorrectADCClipping(event.window_size, event.trace);
    
    for(unsigned int j=0; j<event.window_size; j++) RFITrace[j] = event.trace[j];
-   if(!bADCScale) ADC2FieldStrength(event.window_size, RFITrace, 0, header.DAQ_id);
-   
+   if(!bADCScale) ADC2FieldStrength(event.window_size, RFITrace, header.DAQ_id, 30.0, RefAntCal);
+#warning fixed zenith angle to 30 degeree   
    if(bRFISup){
-     RFISuppression((int)event.window_size, RFITrace, RFITrace);
+     RFISuppressionMedian((int)event.window_size, RFITrace, RFITrace);
      ZeroPaddingFFT(event.window_size, RFITrace, NoZeros, TRACEZP);
    }
    else ZeroPaddingFFT(event.window_size, RFITrace, NoZeros,  TRACEZP);
    
    if(!bMeanTrace) for(int j=0; j<New_window_size; j++) TraceZP[Aevent][j]=TRACEZP[j];
     else{
-      RectifierHardware(NoZeros, New_window_size, TRACEZP);
-      for(int j=0; j<New_window_size; j++) MeanTraceZPtmp[j]= /*TMath::Sqrt(*/TRACEZP[j];
-#warning how to calculate the correct mean?
+      hilbert(New_window_size, TRACEZP, MeanTraceZPtmp_im);
+      for(int j=0; j<New_window_size; j++){
+        MeanTraceZPtmp_re[j]= TRACEZP[j];
+      }
     }
 
    if(!bTeventExtend){
@@ -373,15 +392,15 @@ for(int i=START; i<Tevent->GetEntries(); i++){
    sprintf(title,"D%i_%s_%s, %s, run=%i, event_id=%i",header.DAQ_id, channel_profiles.antenna_pos, 
    		channel_profiles.polarisation, event.timestamp, header.run_id, event.event_id);
 
-   if(id_timestamp_output && (i%NoChannels)==0) cout << event.event_id << " - " << event.timestamp <<  endl;
+   if(id_timestamp_output && (i%NoChannels)==0) cout << event.event_id << " - " << event.timestamp << endl;
 
    if(!bMeanTrace){
      gZP[(Aevent)] = new TGraph (New_window_size,TimeFFTZP,TraceZP[(Aevent)]);
      sprintf(name,"traceZP%i_%03i",channel_profiles.ch_id,(Aevent));	
      gZP[(Aevent)]->SetName(name);
      gZP[(Aevent)]->SetTitle(title);
-     gZP[(Aevent)]->GetXaxis()->SetTitle("time / ( 12.5 #upoint ns )");
-     if(!bADCScale) gZP[(Aevent)]->GetYaxis()->SetTitle("field strength [#muV/m]");
+     gZP[(Aevent)]->GetXaxis()->SetTitle("time / #mus");
+     if(!bADCScale) gZP[(Aevent)]->GetYaxis()->SetTitle("field strength [#muV #upoint m^{-1}]");
      else gZP[(Aevent)]->GetYaxis()->SetTitle("ADC value");
 
      //sprintf(name,"canZP%i_%03i",channel_profiles.ch_id,(Aevent));	
@@ -394,7 +413,8 @@ for(int i=START; i<Tevent->GetEntries(); i++){
        if(ChID[j] == channel_profiles.ch_id) break;
      }
      for(int a=0; a<New_window_size; a++){
-       MeanTraceZP[j][a] += MeanTraceZPtmp[a];
+       MeanTraceZP_re[j][a] += MeanTraceZPtmp_re[a];
+       MeanTraceZP_im[j][a] += MeanTraceZPtmp_im[a];
      }
    }
  
@@ -412,10 +432,6 @@ for(int i=START; i<Tevent->GetEntries(); i++){
   char pol[50];
   int division=(int)NoChannels/2;
   if((int)NoChannels%2 != 0 ) division++;
-  
-  int expectedTrigger = 0;
-  if(zoom && header.DAQ_id==30) expectedTrigger = event.window_size - header.posttrigger - 500;
-   else expectedTrigger = event.window_size - header.posttrigger;
   
   char AntPos[NoChannels][50];
   char AntPol[NoChannels][50];
@@ -438,9 +454,14 @@ for(int i=START; i<Tevent->GetEntries(); i++){
   }
 
    double ymin=0, ymax=0;
+   float expectedTrigger = 0;
    if(!bMeanTrace) for(int i=0; i<(Aevent+1)/NoChannels; i++){
      canZP[i*NoChannels]->cd();
      canZP[i*NoChannels]->Divide(2,division);
+
+     if(bTeventExtend) Tevent->GetEntry(START+i*NoChannels);
+     if(zoom && header.DAQ_id==30) expectedTrigger = (event.window_size - header.posttrigger - 500);
+       else expectedTrigger = (event.window_size - header.posttrigger);
     
      //find max and min y axis range
      ymin=0, ymax=0;
@@ -456,9 +477,8 @@ for(int i=START; i<Tevent->GetEntries(); i++){
        sscanf(gZP[i*NoChannels+j]->GetTitle(),"%*c%*i_%c%c%c_%s CH0",&position[0], &position[1], &position[2],pol);
 //cout << gZP[i*NoChannels+j]->GetTitle() << endl;
 //cout << position << " -- " << pol << " -- " << endl;
-
       
-       if(zoom)gZP[i*NoChannels+j]->GetXaxis()->SetRangeUser(expectedTrigger-200,expectedTrigger+200);
+       if(zoom)gZP[i*NoChannels+j]->GetXaxis()->SetRangeUser((double)((expectedTrigger-200)*12.5/1000.0),(double)((expectedTrigger+200)*12.5/1000.0));
        //cout << "Y max = "<< gZP[i*NoChannels+j]->GetYaxis()->GetXmax()<< endl;
        //cout << "Y min = "<< gZP[i*NoChannels+j]->GetYaxis()->GetXmin()<< endl;
        //set the y scaling of one event to the same range
@@ -486,11 +506,13 @@ if(0) gZP[i*NoChannels+j]->Write();
      canMeanTrace = new TCanvas("canMeanTrace","mean trace over run");
      canMeanTrace->cd();
      canMeanTrace->Divide(2,division);
-     
+  
      for(int i=0; i<NoChannels; i++){
        
        for(int j=0; j<New_window_size; j++){
-         MeanTraceZP[i][j] /= countMeanEvent;
+         MeanTraceZP_re[i][j] /= countMeanEvent;
+	 MeanTraceZP_im[i][j] /= countMeanEvent;
+	 MeanTraceZP_re[i][j] = sqrt( pow(MeanTraceZP_re[i][j],2) + pow(MeanTraceZP_im[i][j],2) );
        }
        
       if(bTeventExtend){
@@ -505,15 +527,15 @@ if(0) gZP[i*NoChannels+j]->Write();
          exit(0);
        }
        
-       gMeanTrace[i] = new TGraph (New_window_size, TimeFFTZP, MeanTraceZP[i]);
+       gMeanTrace[i] = new TGraph (New_window_size, TimeFFTZP, MeanTraceZP_re[i]);
        sprintf(name,"meantrace%d",ChID[i]);
        //cout << name << endl;
        gMeanTrace[i]->SetName(name);
        sprintf(title,"mean trace over %i events - D%i_%s_%s, run=%i",(STOP-START)/NoChannels, header.DAQ_id, channel_profiles.antenna_pos, channel_profiles.polarisation, header.run_id);
        //cout << title << endl;
        gMeanTrace[i]->SetTitle(title);
-       gMeanTrace[i]->GetXaxis()->SetTitle("time / ( 12.5 #upoint ns )");
-       if(!bADCScale) gMeanTrace[i]->GetYaxis()->SetTitle("field strength [#muV/m]");
+       gMeanTrace[i]->GetXaxis()->SetTitle("time / #mus");
+       if(!bADCScale) gMeanTrace[i]->GetYaxis()->SetTitle("field strength [#muV #upoint m^{-1}]");
        else gMeanTrace[i]->GetYaxis()->SetTitle("| arbitrary unit |");
        
        strcpy(position,"123");
@@ -527,9 +549,20 @@ if(0) gZP[i*NoChannels+j]->Write();
 //           if(a>4 && header.DAQ_id==17 && header.run_id < 20 ) a++;
 	   canMeanTrace->cd(a+1);
            gMeanTrace[i]->Draw("AL");
+if(0) gMeanTrace[i]->Write();	   
 	 }
        }
        
+     }
+
+     //find max and min y axis range
+     ymin=0, ymax=0;
+     for(int j=0; j<NoChannels; j++){
+       if(gMeanTrace[j]->GetYaxis()->GetXmax() > ymax) ymax = gMeanTrace[j]->GetYaxis()->GetXmax();
+       if(gMeanTrace[j]->GetYaxis()->GetXmin() < ymin) ymin = gMeanTrace[j]->GetYaxis()->GetXmin();
+     }
+     for(int j=0; j<NoChannels; j++){
+       gMeanTrace[j]->GetYaxis()->SetRangeUser(ymin,ymax);
      }
      canMeanTrace->Write();
    }
@@ -561,13 +594,16 @@ delete[] TRACEZP;
 delete[] RFITrace;
 
 for(int i=0; i<NoChannels; i++){
- delete[] MeanTraceZP[i];
+ delete[] MeanTraceZP_re[i];
+ delete[] MeanTraceZP_im[i];
 }
 
 delete gMeanTrace;
 if(bMeanTrace) delete canMeanTrace;
-delete[] MeanTraceZP;
-delete[] MeanTraceZPtmp;
+delete[] MeanTraceZP_re;
+delete[] MeanTraceZP_im;
+delete[] MeanTraceZPtmp_re;
+delete[] MeanTraceZPtmp_im;
 
 }
 

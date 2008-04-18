@@ -17,24 +17,32 @@
 Interpolation of the trace by a given factor. If the factor + 1 is a multiple of 2 the algorithm works faster.
 \param window_size is the length of the raw ADC trace
 \param trace is a pointer to the ADC data
-\param NoZeros is factor of interpolation. (NoZeros+1 = 2*n)
-\param ZPTrace is the pointer to an array with the interpolated data. The memory has to be allocated before calling the function. The length of this array must be (NoZeros+1)*window_size
+\param NoZeros corresponds to the number of up-sampled values between each raw data point. Recommended: NoZeros+1 = 2^n
+\param ZPTrace is the pointer to an array with the up-sampled data. The memory has to be allocated before calling the function. The length of this array must be (NoZeros+1)*window_size
+\param bSubtractPedestal switch to disable pedestal subtraction, if enabled, the pedestal is subtracted form the trace array
 */
-void ZeroPaddingFFT(int window_size, short int *trace, int NoZeros, float* ZPTrace);
+void ZeroPaddingFFT(int window_size, short int *trace, int NoZeros, float* ZPTrace, bool bSubtractPedestal=true);
 
 
 //! Zero Padding of the trace
 /*!
 same like the other ZeroPaddingFFT but just with float type of trace.
 */
-void ZeroPaddingFFT(int window_size, float *trace, int NoZeros, float* ZPTrace);
+void ZeroPaddingFFT(int window_size, float *trace, int NoZeros, float* ZPTrace, bool bSubtractPedestal=true);
+
+
+//! Zero Padding of the trace
+/*!
+same like the other ZeroPaddingFFT but just with double type of trace.
+*/
+void ZeroPaddingFFT(int window_size, double *Dtrace, int NoZeros, double* DZPTrace, bool bSubtractPedestal=true);
 
 
 //! Core function of the Zero Padding
 /*!
 core function is called by the wrapper functions
 */
-void ZeroPaddingFFTCore(int window_size, void *trace, bool Flag, int NoZeros, float* ZPTrace);
+void ZeroPaddingFFTCore(int window_size, float *FFTdata, int NoZeros, float* ZPTrace);
 
 
 //! RFI Suppression (simple) in the frequency domain
@@ -68,12 +76,33 @@ void RFISuppressionSimpleCore(int window_size, void* trace, bool Flag, float *Tr
 The algorithm is based on the idea of Kalpana Singh (LOPES30).
 All influence on the spectra that comes from mono frequent RFI is filtered out. All methods are done in the power spectrum
 \param window_size is the length of the trace array
-\param trace is the pointer to the raw data array
+\param trace is the pointer to the raw data array, will be manipulated
+\param trace_suppressed is filled by the function after suppressing the RFI, the length must be window_size
+\param NoZeros no of interpolated values, important for the inverse FFT function
+*/
+void RFISuppressionCutOff(int window_size, float *trace, float *trace_suppressed, int NoZeros = 0);
+
+
+//! Noise Suppression in the frequency domain
+/*
+internal link to RFISuppressionCutOff()
+\param window_size is the length of the trace array
+\param trace is the pointer to the raw data array, will be manipulated
 \param trace_suppressed is filled by the function after suppressing the RFI, the length must be window_size
 \param NoZeros no of interpolated values, important for the inverse FFT function
 */
 void RFISuppression(int window_size, float *trace, float *trace_suppressed, int NoZeros = 0);
 
+
+//! Noise Suppression in the frequency domain
+/*
+Same as RFISupupressionCutOff(), but the spectrum is replaced by the median function
+\param window_size is the length of the trace array
+\param trace is the pointer to the raw data array, will be manipulated
+\param trace_suppressed is filled by the function after suppressing the RFI, the length must be window_size
+\param NoZeros no of interpolated values, important for the inverse FFT function
+*/
+void RFISuppressionMedian(int window_size, float *trace, float *trace_suppressed, int NoZeros = 0);
 
 //! Estimate of Pulse Length
 /*
@@ -98,26 +127,16 @@ Comment: Perhaps it is a good idea to use PulseCount before PulseLengthEstimate 
 \param PulseLength estimate of the pulse lenght of the highest peak
 \param PulsePostion bin no of upsampled trace where the max is detected
 \param Maximum 	Max value of the found peak
-\param Integral Integral over the envelope without the range of the found pulse
+\param IntegralPre Integral over a defined time range before the pulse begins
+\param IntegralPost Integral over a definded time range after the pulse
+\param IntegralPulse integral value of the pulse region around the defined pulse width
 \param threshold the used threshold for search for pulses, if set to zero the maximum value in the trace is used as pulse maximum
+\param NoZeros NoZeros +1 corresponds to the up-sampling factor
 */
-void EstimatePulseParameter(int window_size, const float *trace, float *PulseLength, float *PulsePosition, float *Maximum, float *Integral, float threshold);
+void EstimatePulseParameter(int window_size, const float *trace, float *PulseLength, float *PulsePosition, float *Maximum, float *IntegralPre, float *IntegralPost, float *IntegralPulse, float threshold=0, int NoZeros=7);
 
 
-//! Signal to Noise Ratio with other trace parameters are calculated
-/*
-The raw trace is squared and the ratio of the max to mean value is calculated. Also the rms and mean is given back.
-\param window_size is the length of the trace array
-\param trace is the pointer to the raw data array
-\param snr signal to noise ratio
-\param mean mean value over the squared trace
-\param rms root mean square of mean
-\param debug enables the debug info
-*/
-void SNR(int window_size, const float *trace, float *snr, float *mean, float *rms, bool debug=false);
-
-
-//! Antenna Coordinates in the KASCADE grid
+//! Antenna Coordinates in the KASCADE grid (rotated clockwise by 15degree)
 /*
 \param AntPos string array of dim NoChannels with the given antenna names
 \param daq_idd aq id of the used antennas
@@ -142,10 +161,119 @@ void GetBaryCenter(const int NoChannels, float **AntCoordinate, const float *Pul
 \param AntPos string array of dim NoChannels with the given antenna names
 \param daq_id daq id of the used antennas
 \param PulseAmp array of dim NoChannels with the given signal height
-\param PulseTime array of dim NoChannels with the calculated time postitions of the pulse in nano seconds
-\param Zenith to store the zenith value
-\param Azimuth to store the azimuth value
+\param PulseTime array of dim NoChannels with the calculated time postitions of the pulse in nano seconds
+\param Zenith 2dim array. [0] = value, [1] = error
+\param Azimuth 2dim array. [0] = value, [1] = error
 */
 void PlaneFit(const int NoChannels, char **AntPos, const int daq_id, const float *PulseAmp, float *PulseTime, float *Zenith, float *Azimuth);
+
+
+//! Plane Fit of given channels with coordinates
+/*
+\param NoChannels no of used channels for the plane fit
+\param AntCooridnate pointer with all antenna position data
+\param PulseAmp array of dim NoChannels with the given signal height
+\param PulseTime array of dim NoChannels with the calculated time postitions of the pulse in nano seconds
+\param Zenith 2dim array. [0] = value, [1] = error
+\param Azimuth 2dim array. [0] = value, [1] = error
+*/
+void PlaneFitCore(const int NoChannels, float **AntCoordinate, const float *PulseAmp, float *PulseTime, float *Zenith, float *Azimuth);
+
+
+//! reconstruction of direction for one atenna array
+/*
+\param NoChannels no of used channels for the plane fit
+\param trace pointer with all trace data
+\param AntPos string array of dim NoChannels with the given antenna names
+\param daq_id daq id of the used antennas
+\param Zenith 2dim array. [0] = value, [1] = error
+\param Azimuth 2dim array. [0] = value, [1] = error
+\param RFISupp switch to controll the RFI suppression method in the function
+*/
+void RecDirectionSingleArray(const int NoChannels, int window_size, float **trace, char **AntPos, const int daq_id, float *Zenith, float *Azimuth, bool RFISupp=true);
+
+
+//! Geomagnetic Angle
+/*
+\param Azimuth in degree of reconstructed shower direction
+\param Zenith in degree of reconstructed shower direction
+\param daq_id id of the used setup
+\return geomagnetic angle in degree
+*/
+float GeoMagAngle(float Azimuth, float Zenith, int daq_id);
+
+
+//! Signal to Noise Ratio
+/*
+The given raw data are up-sampled by a factor of 8 and the envelope with hilbert trafo are calculated.
+The is calculated excluded the region around the maximum. SNR is in sense of power calculated.
+\param window_size length of the trace pointer
+\param trace array with sub-sampled data
+\param NoZeros factor +1 for up-sampling, if chosen null, no up-sampling is internally done
+\param DoRectifier switch to disable rectifier
+\return snr
+*/
+float SNR(int window_size, float *trace, int NoZeros=7, bool DoRectifier=true);
+
+
+//! Get Distance to shower axis
+/*
+\param struct h3 pointer to Grande struct h3
+\param AntPos char to indentify the antenna position
+\param daq_id daq id of the used antenna cluster
+\param Zenith reconstructed shower direction
+\param Azimuth reconstructed shower direction
+\param distance distance to shower axis
+\param error error of reconstructed direction taking the position error of Grande into account
+*/
+void GetDistanceToShowerAxis(struct h3 *h3, char *AntPos, int daq_id, float Zenith, float Azimuth, float *distance, float *error);
+
+
+//! Get Distance to shower axis
+/*
+\param CorePosX x position of core in ground coordinates
+\param CorePosY y position
+\param AntPosCoordinates pointer with x, y and z cooridnate of the used antennas
+\param Zenith reconstructed shower direction
+\param Azimuth reconstructed shower direction
+\param distance distance to shower axis
+\param error error of reconstructed direction taking the position error of Grande into account
+*/
+void GetDistanceToShowerAxisRadio(float CorePosX, float CorePosY, float *AntPosCoordinates, float Zenith, float Azimuth, float *distance, float *error);
+
+
+//! Get the peak value of the channel
+/*
+\param window_size length of the trace array
+\param trace pointer to the data
+\param ExpectedPosition of the peak
+\return peak value in units of the given trace
+*/
+float GetChannelPeak(int window_size, float *trace, int ExpectedPosition);
+
+
+//! calculate antenna field strength
+/*
+\param NoChannels number of used channels
+\param ChannelFieldStrength pointer of length NoChannels with the field strength per channel
+\param AntPosition position pointer of the used channels
+\param AntennaFieldStrength calculated field strength per antenna of length NoChannels
+*/
+void CalculateAntennaFieldStrength(int NoChannels, const float *ChannelFieldStrength, char **AntPosition, float *AntennaFieldStrength);
+
+
+//! calculate the transformed field strength into the LOPES30 coordinate system
+/*
+experimentell status
+\param NoChannels
+\param ChannelFieldStrength
+\param AntPosition
+\param AntPolarisation
+\param EPhi
+\param ETheta
+\param Azimuth
+*/
+void CalculateTransformedFieldStrength( int NoChannels, const float *ChannelFieldStrength,char **AntPosition,
+					char **AntPolarisation, float *EPhi, float *ETheta, float Azimuth);
 
 #endif
