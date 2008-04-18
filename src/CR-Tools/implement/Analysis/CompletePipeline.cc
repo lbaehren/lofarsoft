@@ -154,8 +154,8 @@ namespace CR { // Namespace CR -- begin
       // get length of trace
       int tracelength = fieldstrength.column(0).size();
       // allocate memory for original and upsampled traces
-      float originalTrace[tracelength];
-      float upsampledTrace[tracelength * upsampled];
+      double originalTrace[tracelength];
+      double upsampledTrace[tracelength * upsampled];
 
       // resize Matrix for upsampled traces if the last upsampling exponent is different from the new one
       if (lastUpsamplingExponent != upsampling_exp)
@@ -179,7 +179,7 @@ namespace CR { // Namespace CR -- begin
 	  // do upsampling by factor #upsampled (--> NoZeros = upsampled -1)
 
           // calcutlate Offset:
-          float before = originalTrace[0];
+          double before = originalTrace[0];
 
           ZeroPaddingFFT(tracelength, originalTrace, upsampled-1, upsampledTrace);
  
@@ -243,8 +243,8 @@ namespace CR { // Namespace CR -- begin
       int tracelength = rawData.column(0).size();
 
       // allocate memory for original and upsampled traces
-      float originalTrace[tracelength];
-      float upsampledTrace[tracelength * upsampled];
+      double originalTrace[tracelength];
+      double upsampledTrace[tracelength * upsampled];
 
       // Create Matrix for usampled values
       Matrix<Double> upData(tracelength * upsampled, antennaSelection.nelements(), 0);
@@ -262,7 +262,7 @@ namespace CR { // Namespace CR -- begin
 	// do upsampling by factor #upsampled (--> NoZeros = upsampled -1)
 
         // calcutlate Offset:
-        float before = originalTrace[0];
+        double before = originalTrace[0];
 
         ZeroPaddingFFT(tracelength, originalTrace, upsampled-1, upsampledTrace);
 
@@ -925,10 +925,22 @@ namespace CR { // Namespace CR -- begin
       // Get the yValues of all selected antennas (raw data or fieldstrength)
       yValues = getUpsampledFieldstrength(dr,upsampling_exp, antennaSelection);
 
+
       // check length of time axis and yValues traces for consistency
       if (timeValues.size() != yValues.column(0).size())
-        std::cerr << "CompletePipeline:calculateMaxima: WARNING: Length of time axis differs from length of the antenna traces!\n"
-           << std::endl;
+      {
+        std::cerr << "CompletePipeline:listCalcMaxima: Error: Length of time axis differs from length of the antenna traces!\n"
+                  << "CompletePipeline:listCalcMaxima: exiting function!" << std::endl;
+        return;
+      }
+
+      // check if cc_center is at a valid position (time must be within the time-axis)
+      if ( (cc_center < timeValues(0)) || (cc_center > timeValues(timeValues.endPosition())) )
+      {
+        std::cerr << "CompletePipeline:listCalcMaxima: Error: Center of CC-Beam is at an invalid time: " << cc_center << " s\n" 
+                  << "CompletePipeline:listCalcMaxima: exiting function!" << std::endl;
+        return;
+      }
 
 
       // Define the time range considered for peak search 
@@ -988,7 +1000,6 @@ namespace CR { // Namespace CR -- begin
         extrema.push_back(extremum*1e6);
         extrema_time.push_back(timeRange(extrematimevalue)*1e6);
 
-
         // get current trace
         traceNoise = yValues.column(i)(rangeNoise);
         // loop through the values and search for the heighest and lowest one
@@ -1002,7 +1013,6 @@ namespace CR { // Namespace CR -- begin
         std::cout << std::setw(2) << i+1 << " " <<std::setw(7) <<extremum*1e6 << " ";
 	std::cout << std::setw(8) << noise*1e+6  << " " << std::setw(8)<< timeRange(extrematimevalue)*1e6 ;
 	std::cout << std::endl;
-
       }else{
         // antenna has bad data
         // get current trace
