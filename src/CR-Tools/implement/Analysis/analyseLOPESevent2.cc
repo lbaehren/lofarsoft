@@ -32,7 +32,8 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   analyseLOPESevent2::analyseLOPESevent2 ():
-    upsamplingExponent(0)
+    upsamplingExponent(0),
+    ccWindowWidth_p(0.045e-6)
   {;}
   
   // ============================================================================
@@ -108,8 +109,12 @@ namespace CR { // Namespace CR -- begin
       Vector<Double> Times, ccBeam, xBeam, pBeam, tmpvec;
       Matrix<Double> TimeSeries;
       Record fiterg;
-      
+
+      // set parameters of the pipeline
       pipeline.setVerbosity(verbose);
+      pipeline.setPlotInterval(plotStart(),plotStop());
+      pipeline.setCCWindowWidth(getCCWindowWidth());
+
       // Generate the Data Reader
       if (! lev_p->attachFile(evname) ){
 	cerr << "analyseLOPESevent2::ProcessEvent: " << "Failed to attach file: " << evname << endl;
@@ -120,7 +125,7 @@ namespace CR { // Namespace CR -- begin
 	cerr << "analyseLOPESevent2::ProcessEvent: " << "Failed to initialize the DataReader!" << endl;
 	return Record();
       };
-         
+
       //  Enable/disable doing the phase calibration as requested
       switch (doTVcal){
       case 0:
@@ -171,9 +176,6 @@ namespace CR { // Namespace CR -- begin
       // Plot the raw data, if desired
       if (PlotRawData)       
       {
-        // Set Plot Interval
-        pipeline.setPlotInterval(plotStart(),plotStop());
-        
 	// plot upsampled raw data: either in seperated plots seperated or all traces in one plot
         if (SinglePlots)
           pipeline.plotAllAntennas(PlotPrefix+ "-raw", lev_p, AntennaSelection, true, getUpsamplingExponent(),true);
@@ -321,21 +323,23 @@ namespace CR { // Namespace CR -- begin
       AntPos = toShower(AntPos, Az, El);
       Vector<Double> distances(nants);
 
-      // print distances in shower coordinates if requested
-      for (i=0; i<nants; i++) {
+      // calculate distances between antennas and shower core in shower coordinates
+       for (i=0; i<nants; i++) {
 	distances(i) = sqrt( square(AntPos.row(i)(0)) + square(AntPos.row(i)(1)) );
-        // output of shower coordinates
-        if ( (printShowerCoordinates) && (i==0)){
+        // output of shower coordinates, if requested
+        if (printShowerCoordinates) 
+        {
           // first time with header
-	  std::cout << "GT "<<lev_p->header().asInt("Date") << " " << Az << " " << El << " " << XC << " " <<YC <<std::endl;
-	  std::cout << "An  dist_x    dist_y    dist"<<std::endl;
-	  std::cout << std::setw(2) << i+1 << " " << std::setw(8) << AntPos.row(i)(0) << "  ";
-          std::cout << std::setw(8) << AntPos.row(i)(1) << "  " << std::setw(8) <<distances(i)<<std::endl;
-	}else{
+          if (i==0) 
+          {
+	    std::cout << "GT "<<lev_p->header().asInt("Date") << " " << Az << " " << El << " " << XC << " " <<YC <<std::endl;
+	    std::cout << "An  dist_x    dist_y    dist"<<std::endl;
+          }
 	  std::cout << std::setw(2) << i+1 << " " << std::setw(8) << AntPos.row(i)(0) << "  ";
           std::cout << std::setw(8) << AntPos.row(i)(1) << "  " << std::setw(8) <<distances(i)<<std::endl;
 	}
-      };
+      }
+
       erg.define("distances",distances);
       tmpvec.resize(nselants);
       tmpvec = distances(AntennaSelection).getCompressedArray() ;
@@ -347,9 +351,6 @@ namespace CR { // Namespace CR -- begin
       // Generate the plots
       if (generatePlots)
       {
-        // Set Plot Interval
-        pipeline.setPlotInterval(plotStart(),plotStop());
-
         // Plot CC-beam; if fit has converged, then also plot the result of the fit
     	if (fiterg.asBool("CCconverged"))
           pipeline.plotCCbeam(PlotPrefix + "-CC", lev_p, fiterg.asArrayDouble("Cgaussian"), AntennaSelection, ccBeamMean, pBeamMean);

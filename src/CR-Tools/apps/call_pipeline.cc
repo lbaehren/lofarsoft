@@ -85,6 +85,7 @@ using CR::LopesEventIn;
   plotEnd                = -1.60e-6
   upsamplingExponent     = 1
   summaryColumns         = 3
+  ccWindowWidth          = 0.045e-6
   flagged                = 10101
   flagged                = 10102
   \endverbatim
@@ -107,6 +108,7 @@ using CR::LopesEventIn;
     <li>the upsampling of the calibrated antenna fieldstrengthes will be done by
     a factor of 2^1 = 2,
     <li>there will by a summary postscript of all created plots,
+    <li>time range to search for CC-beam-peak in lateral distribution studies is +/- 45 ns
     <li>the antennas 10101 and 10102 are not considered in the analysis.
   </ul>
 
@@ -166,8 +168,9 @@ int main (int argc, char *argv[])
     double plotEnd = -1.60e-6;		// in seconds
     unsigned int upsamplingExponent = 0;// by default no upsampling will be done
     vector<Int> flagged;		// use of STL-vector instead of CASA-vector due to support of push_back()
-    string caltablepath = "/home/horneff/lopescasa/data/LOPES/LOPES-CalTable";
+    string caltablepath = "/home/schroeder/usg/data/lopes/LOPES-CalTable";
     unsigned int summaryColumns = 0;	// be default no summary of all plots
+    double ccWindowWidth = 0.045e-6;	// width of window for CC-beam
 
 
     // Open config file if passed by programm call
@@ -219,6 +222,7 @@ int main (int argc, char *argv[])
         std::cerr << "plotEnd = -1.60e-6\n";
         std::cerr << "upsamplingExponent = 1\n";
         std::cerr << "summaryColumns = 3\n";
+        std::cerr << "ccWindowWidth = 0.045e-6\n";
         std::cerr << "flagged = 10101\n";
         std::cerr << "flagged = 10102\n";
         std::cerr << "... \n";
@@ -232,6 +236,11 @@ int main (int argc, char *argv[])
         if (configfile.good()) configfile >> keyword;
         if (configfile.good()) configfile >> equal_token;
         if (configfile.good()) configfile >> value;
+
+        // check if end of file occured:
+        // keyword should contain "", if file is terminated be a new line
+        if (keyword == "") continue;	// go back to begin of while-loop 
+					// configfile.good() should be false now.
 
         // check if syntax ("=") is correct		
         if (equal_token.compare("=") != 0)
@@ -515,6 +524,24 @@ int main (int argc, char *argv[])
           }
         }
 
+        if ( (keyword.compare("ccwindowwidth")==0) || (keyword.compare("CCWindowWidth")==0) || 
+              (keyword.compare("CCwindowwidth")==0) || (keyword.compare("ccWindowWidth")==0))
+        {
+          double temp = 9999999;
+          stringstream(value) >> temp; 
+
+          if (temp != 9999999)  // will be false, if value is not of typ "double"
+	  {
+            ccWindowWidth = temp; 
+	    std::cout << "ccWindowWidth set to " << ccWindowWidth << " seconds.\n";
+	  } else
+          {
+            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "ccWindowWidth must be of typ 'double'. \n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+        }
+
 
 	// flagg antennas
         if ( (keyword.compare("flagged")==0) || (keyword.compare("Flagged")==0))
@@ -727,15 +754,15 @@ int main (int argc, char *argv[])
     }
 
     // Process events from event file list
-    string filename, plotprefix;
-    double azimuth, elevation, distance, core_x, core_y;
-    bool read_in_error = false;
-
     while (eventfilelist.good())
     {	
+      string filename, plotprefix;
+      double azimuth, elevation, distance, core_x, core_y;
+      bool read_in_error = false;
+      
       // read in filename, azimuth, elevation, distance and log_energy	
       if (eventfilelist.good()) eventfilelist >> filename;
-	else read_in_error = true;	
+	else read_in_error = true;
       if (eventfilelist.good()) eventfilelist >> azimuth;
 	else read_in_error = true;	
       if (eventfilelist.good()) eventfilelist >> elevation;
@@ -746,6 +773,11 @@ int main (int argc, char *argv[])
 	else read_in_error = true;	
       if (eventfilelist.good()) eventfilelist >> core_y;
 	else read_in_error = true;	
+
+      // check if end of file occured:
+      // filename should contain "", if file is terminated be a new line
+      if (filename == "") continue;	// go back to begin of while-loop 
+					// eventfilelist.good() should be false now.
 
       // exit program if error occured
       if (read_in_error)		
@@ -781,8 +813,9 @@ int main (int argc, char *argv[])
       obsrec.define("LOPES",caltablepath);
       eventPipeline.initPipeline(obsrec);
 
-      // set plot range
+      // set plot range and ccWindowWidth
       eventPipeline.setPlotInterval(plotStart,plotEnd);
+      eventPipeline.setCCWindowWidth(ccWindowWidth);
    
       // set the upsampling coefficient (upsampling factor = 2^upsamplingExponent
       eventPipeline.setUpsamplingExponent(upsamplingExponent);
@@ -806,3 +839,4 @@ int main (int argc, char *argv[])
  
   return 0;
 }
+

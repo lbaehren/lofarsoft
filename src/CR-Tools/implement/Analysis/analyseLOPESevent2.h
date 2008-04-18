@@ -143,16 +143,24 @@ class analyseLOPESevent2 : public analyseLOPESevent{
       upsamplingExponent = upExp;
     }
 
+    /*!
+      \brief Get time window of the interval to search for radio pulse
+
+      \return ccWindowWidth_p -- time window for search of radio pulse
+    */
+    inline double getCCWindowWidth () {
+       return ccWindowWidth_p;
+    }
 
     /*!
-      \brief Set the stop time of the interval diplayed in the plot
+      \brief Set time window of the interval to search for radio pulse
 
-      \param plotStop -- Stop time of the interval diplayed in the plot
+      \return ccWindowWidth_p -- time window for search of radio pulse
     */
-    inline void setPlotStop (double const &plotStop) {
-      plotStop_p = plotStop;
+    inline void setCCWindowWidth (double const &ccWindowWidth) {
+       ccWindowWidth_p = ccWindowWidth;
     }
-    
+
 
 
     /*!
@@ -189,7 +197,7 @@ class analyseLOPESevent2 : public analyseLOPESevent{
       \param PlotRawData - Plots the raw data FX
       \param CalculateMaxima - Finds the maximum and the minimum of the trace in the plot range
       \param listCalcMaxima - output version of CalculateMax
-      \param printShowerCoordinates -	 print the x,y and total distance between antenna and shower core
+      \param printShowerCoordinates -	 print the x,y and total distance between antenna and shower core in shower coordinates
 
       \return Record with the results.
     */
@@ -229,9 +237,11 @@ class analyseLOPESevent2 : public analyseLOPESevent{
     
   private:
    
-    // upsampling will be done by a factor of 2^upsamplingExponent
+    //! upsampling will be done by a factor of 2^upsamplingExponent
     unsigned int upsamplingExponent;
-    
+
+    //! time window of the interval to search for radio pulse
+    Double ccWindowWidth_p;
   };
   
 } // Namespace CR -- end

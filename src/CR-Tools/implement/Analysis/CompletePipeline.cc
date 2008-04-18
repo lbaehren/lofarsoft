@@ -720,7 +720,6 @@ namespace CR { // Namespace CR -- begin
   
             // Plot (upsampled) trace and original data points.
             plotter.PlotLine(upxaxis(upplotRange),upYvalues.column(i)(upplotRange),color,1);
-            plotter.PlotSymbols(upxaxis(upplotRange),upYvalues.column(i)(upplotRange),empty,empty,color,1,1);
             plotter.PlotSymbols(xaxis(plotRange),yValues.column(i)(plotRange),empty, empty, color, 2, 5);
 
             // Add filename to list of created plots

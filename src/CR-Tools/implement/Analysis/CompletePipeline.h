@@ -195,6 +195,24 @@ namespace CR { // Namespace CR -- begin
     }
 
     /*!
+      \brief Get the width of the CC-beam window
+
+      \return ccWindowWidth_p -- width of the CC-beam window
+    */
+    inline double getCCWindowWidth () {
+      return ccWindowWidth_p;
+    }
+    
+    /*!
+      \brief Set the width of the CC-beam window
+
+      \param ccWindowWidth -- width of the CC-beam window
+    */
+    inline void setCCWindowWidth (double const &ccWindowWidth) {
+      ccWindowWidth_p = ccWindowWidth;
+    }
+
+    /*!
       \brief Get the list of the file names of all created plots
 
       \return plotlist -- list of created plots
