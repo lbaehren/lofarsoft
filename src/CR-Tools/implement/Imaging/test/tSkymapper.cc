@@ -673,11 +673,11 @@ int main (int argc,
   uint blocksize (1024);
   bool test_putAt (false);
   
-  nofFailedTests += test_CoordinateSystem ();
-  nofFailedTests += test_PagedImage (test_putAt);
+//   nofFailedTests += test_CoordinateSystem ();
+//   nofFailedTests += test_PagedImage (test_putAt);
   nofFailedTests += test_Skymapper ();
-//   nofFailedTests += test_processing (lopesData,
-// 				     blocksize);
+  nofFailedTests += test_processing (lopesData,
+				     blocksize);
 
   nofFailedTests += cleanup_directory (test_putAt);
 

@@ -197,6 +197,7 @@ namespace CR { // Namespace CR -- begin
     mapOrientation_p = other.mapOrientation_p;
     beamType_p       = other.beamType_p;
     shape_p          = other.shape_p;
+    csys_p           = other.csys_p;
   }
 
   // ============================================================================
