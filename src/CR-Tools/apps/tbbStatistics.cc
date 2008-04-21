@@ -24,6 +24,7 @@
 #include <iostream>
 #include <string>
 #include <cmath>
+#include <vector>
 
 #ifdef HAVE_CFITSIO
 #include <fitsio.h>
@@ -47,22 +48,48 @@ using std::endl;
   \date 2008/03/10
 */
 
-
 // -----------------------------------------------------------------------------
+// Function prototypes
 
 /*!
-  \brief Export the dynamic spectrum to a FITS file for later display
+  \brief Create dynamic spectrum from channel data
 
-  \param spectrum -- [freq,time] Array with the generated dynamic spectrum.
-  \param outfile  -- Name of the output FITS file to which the dynamic spectrum
-         is written.
-
+  \param filename  -- Name of the dataset from which to read in the data
+  \param blocksize -- Size of a single block of data, [samples].
+  \param nofBlocks -- Number of blocks to process
+  
   \return status -- Status of the operation; returns <tt>false</tt> in case an 
           error was encountered.
 */
+int dynamic_spectrum (std::string const &filename,
+		      uint const &blocksize=1024,
+		      uint const &nofBlocks=20);
+
+#ifdef HAVE_CFITSIO
+/*!
+  \brief Export the dynamic spectrum to a FITS file for later display
+  
+  \param spectrum -- [freq,time] Array with the generated dynamic spectrum.
+  \param outfile  -- Name of the output FITS file to which the dynamic spectrum
+         is written.
+  
+  \return status -- Status of the operation; returns <tt>false</tt> in case an 
+          error was encountered.
+*/
+bool export2fits (casa::Matrix<double> const &spectrum,
+		  std::string const &outfile,
+		  double const &blocksize=1024);
+int wcs2fits (fitsfile *fptr,
+	      std::vector<double> const & crval,
+	      std::vector<double> const &cdelt);
+#endif
+
+// -----------------------------------------------------------------------------
+
 #ifdef HAVE_CFITSIO
 bool export2fits (casa::Matrix<double> const &spectrum,
-		  std::string const &outfile="dynamicspectrum.fits")
+		  std::string const &outfile,
+		  double const &blocksize)
 {
   casa::IPosition shape = spectrum.shape();
   int status            = 0;
@@ -72,6 +99,9 @@ bool export2fits (casa::Matrix<double> const &spectrum,
   long naxes[2]         = { shape(1), shape(0)};
   float pixels[shape(0)][shape(1)];
   std::string filename;
+  std::vector<double> referencePixel (naxis);
+  std::vector<double> referenceValue (naxis);
+  std::vector<double> increment (naxis);
   fitsfile *fptr;
   
   /* Provide some basic feedback before starting export of data */
@@ -113,31 +143,30 @@ bool export2fits (casa::Matrix<double> const &spectrum,
 	      << endl;
   }
   
+  cout << "--> adding WCS coordinate information" << endl;
+  double sampleFrequency (2e08);  // 200 MHz
+  referencePixel[0] = referencePixel[1] = 0.;
+  referenceValue[0] = referenceValue[1] = 0.;
+
   return true;
 }
 #endif
 
 // -----------------------------------------------------------------------------
 
-/*!
-  \brief Create dynamic spectrum from channel data
-
-  \param filename  -- Name of the dataset from which to read in the data
-  \param blocksize -- Size of a single block of data, [samples].
-  \param nofBlocks -- Number of blocks to process
-  
-  \return status -- Status of the operation; returns <tt>false</tt> in case an 
-          error was encountered.
-*/
 int dynamic_spectrum (std::string const &filename,
-		      uint const &blocksize=1024,
-		      uint const &nofBlocks=20)
+		      uint const &blocksize,
+		      uint const &nofBlocks)
 {
   bool status  = true;
 
+  cout << "[tbbStatistics::dynamic_spectrum]" << endl;
+  cout << "-- Filename    = " << filename   << endl;
+  cout << "-- Blocksize   = " << blocksize  << endl;
+  cout << "-- nof. blocks = " << nofBlocks  << endl;
+
   // open file into TBB dataset
   CR::LOFAR_TBB dataset (filename,blocksize);
-  dataset.summary();
 
   uint block       = 0;
   uint channel     = 0;
@@ -169,10 +198,12 @@ int dynamic_spectrum (std::string const &filename,
   /* export of the dynamic spectrum to a FITS file */
 #ifdef HAVE_CFITSIO
   if (status) {
-    return export2fits (dynamicSpectrum);
+    return export2fits (dynamicSpectrum,
+			"dynamicspectrum.fits",
+			blocksize);
   }
 #endif
-
+  
   return status;
 }
 
