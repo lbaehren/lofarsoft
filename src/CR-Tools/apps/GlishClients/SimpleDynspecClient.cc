@@ -290,8 +290,8 @@ Bool SimTBBTrigger(GlishSysEvent &event, void *){
     Int i,maxsize = (5000000); // 5 000 000 
     Vector<String> files;
     Int level=8, start=5, stop=2, window=4096, afterwindow=0;
-    Bool doRFImitigation=False, doFiltering=False,returnFiltered=False;
-    Vector<Double> Fc,BW;
+    Bool doRFImitigation=False, doFiltering=False,returnFiltered=False,addData=False;
+    Vector<Double> Fc,BW,data2add;
     Vector<Int> FilterTypes;
     Double resolution=1024.;
     if (event.val().type() != GlishValue::RECORD) {
@@ -349,6 +349,10 @@ Bool SimTBBTrigger(GlishSysEvent &event, void *){
 	returnFiltered = input.asBool("returnFiltered");
       };
     };
+    if (input.isDefined("data2add")){
+      data2add = input.asArrayDouble("data2add");
+      addData=True;
+    };
     
     Int fnum,numFiles=files.nelements();
     Int numpulses=0, vecsize=100, newpeaks;
@@ -376,20 +380,31 @@ Bool SimTBBTrigger(GlishSysEvent &event, void *){
 	continue;
       };
       if (doRFImitigation){
-	tbbIn.setHanningFilter(0.);
+	//	tbbIn.setHanningFilter(0.);
 	Matrix<DComplex> fdata;
-	Int blocksize=tbbIn.blocksize();
-	fdata = tbbIn.fft();
+	Vector<DComplex> tfdata;
+	Int blocksize=tbbIn.blocksize(),fftlen=blocksize/2+1;
+	FFTServer<Double,DComplex> server(IPosition(1,blocksize),
+					  FFTEnums::REALTOCOMPLEX);
+	data = tbbIn.fx().column(0);
+	if (addData){
+	  data(Slice(0,data2add.nelements())) = data(Slice(0,data2add.nelements()))+data2add;
+	};
+	tfdata.resize(fftlen);
+	server.fft(tfdata,data);
+	fdata.resize(fftlen,1);
+	fdata.column(0) = tfdata;
 	rfiM_p.parameters().define("dataBlockSize",blocksize);
 	// Do the RFI mitigation
 	rfiM_p.apply(fdata,True);
-	FFTServer<Double,DComplex> server(IPosition(1,blocksize),
-					  FFTEnums::REALTOCOMPLEX);
 	data.resize(0);
 	server.fft(data,fdata.column(0));
       } else if (doFiltering){
 	int numFilters;
 	data = tbbIn.fx().column(0);
+	if (addData){
+	  data(Slice(0,data2add.nelements())) = data(Slice(0,data2add.nelements()))+data2add;
+	};
 	numFilters = Fc.nelements();
 	if ((numFilters<1)||(numFilters != (int)BW.nelements())) {
 	  cerr << "SimpleDynspecClient:SimTBBTrigger: "  << "\"doFiltering\" with inconsistend parameters!" 
@@ -419,6 +434,9 @@ Bool SimTBBTrigger(GlishSysEvent &event, void *){
 	};	
       } else {
 	data = tbbIn.fx().column(0);
+	if (addData){
+	  data(Slice(0,data2add.nelements())) = data(Slice(0,data2add.nelements()))+data2add;
+	};
       };
       if (! tbbtool.meanFPGAtrigger(data,
 				    level, start, stop, window, afterwindow,
