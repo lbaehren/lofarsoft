@@ -154,8 +154,8 @@ namespace CR { // Namespace CR -- begin
       // get length of trace
       int tracelength = fieldstrength.column(0).size();
       // allocate memory for original and upsampled traces
-      double originalTrace[tracelength];
-      double upsampledTrace[tracelength * upsampled];
+      double* originalTrace = new double[tracelength];
+      double* upsampledTrace = new double[tracelength * upsampled];
 
       // resize Matrix for upsampled traces if the last upsampling exponent is different from the new one
       if (lastUpsamplingExponent != upsampling_exp)
@@ -166,10 +166,10 @@ namespace CR { // Namespace CR -- begin
       } 
 
       // do upsampling for each antenna in the todo-list
-      std::cout << "Upsampling the calibrated data by a factor of " << upsampled << " ...\nAntenna:";
+      std::cout << "Upsampling the calibrated data by a factor of " << upsampled << " ...\nAntenna:" << flush;
       for (int i = 0; i < antennaSelection.nelements(); i++) {
         if (upsamplingToDo[i]){
-          std::cout << " " << i+1;
+          std::cout << " " << i+1 << flush;
  	  // copy the trace into the array
 	  for (int j = 0; j < tracelength; j++) 
           {
@@ -191,15 +191,20 @@ namespace CR { // Namespace CR -- begin
 	  for (int j = 0; j < tracelength*upsampled; j++) upFieldStrength.column(i)(j) = upsampledTrace[j] + offset;
 
           // remark: tried to fasten data transfer from the array to the Matrix but did not work because arrays are
-          // of typ float but not double.
+          // of typ float but not double; as double is supported now, it can be tried again.
 
           // set flag, that data for this antenna are upsampled
           upsampledAntennas[i] = true;
         } 
       } 
-      std::cout << " ... done\n";
+      std::cout << " ... done" << endl;
+
       // set last upsampling exponent to current value
       lastUpsamplingExponent = upsampling_exp;
+
+      // delete arrays
+      delete[] originalTrace;
+      delete[] upsampledTrace;
 
       // Return upsampled traces 
       return upFieldStrength.copy();
@@ -243,16 +248,17 @@ namespace CR { // Namespace CR -- begin
       int tracelength = rawData.column(0).size();
 
       // allocate memory for original and upsampled traces
-      double originalTrace[tracelength];
-      double upsampledTrace[tracelength * upsampled];
+      double* originalTrace = new double[tracelength];
+      double* upsampledTrace = new double[tracelength * upsampled];
 
       // Create Matrix for usampled values
       Matrix<Double> upData(tracelength * upsampled, antennaSelection.nelements(), 0);
 
       // do upsampling for each antenna in the antennaSelection
+      std::cout << "Upsampling the raw data by a factor of " << upsampled << " ...\nAntenna:" << flush;
       for (int i = 0; i < antennaSelection.nelements(); i++) if (antennaSelection(i))
       {
-        std::cout << "Upsampling the raw data of antenna " << i+1 << " by a factor of " << upsampled << " ...\n";
+        std::cout << " " << i+1 << flush;
 	// copy the trace into the array
 	for (int j = 0; j < tracelength; j++) 
         {
@@ -275,14 +281,15 @@ namespace CR { // Namespace CR -- begin
 	  for (int j = 0; j < tracelength*upsampled; j++) upData.column(i)(j) = upsampledTrace[j];
         else
 	  for (int j = 0; j < tracelength*upsampled; j++) upData.column(i)(j) = upsampledTrace[j] + offset;
-
-        // remark: tried to fasten data transfer from the array to the Matrix but did not work because arrays are
-        // of typ float but not double.
       } 
+      std::cout << " ... done" << endl;
+
+      // delete arrays
+      delete[] originalTrace;
+      delete[] upsampledTrace;
 
       // Return upsampled traces 
       return upData.copy();
-
     } catch (AipsError x) 
       {
         std::cerr << "CompletePipeline:getUpsampledFX: " << x.getMesg() << std::endl;
