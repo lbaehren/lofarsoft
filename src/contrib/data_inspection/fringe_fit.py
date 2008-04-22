@@ -1,12 +1,11 @@
 #! /usr/bin/env python
-import sys
+import sys,math,beam_dr
 import pydal as dal
 from pylab import *
 from numpy import *
 from scipy import *
 from random import *
 import coordinates as coords
-import math
 
 # set default values and check usage
 if len(sys.argv) == 5:
@@ -44,6 +43,7 @@ ra_vira = math.radians(coords.hmstora(12.,30.,49.5))
 dec_vira = math.radians(coords.dmstodec(12.,23.,21.5))
 ra_crab = math.radians(coords.hmstora(5.,34.,31.8))
 dec_crab = math.radians(coords.dmstodec(22.,0.,52.9))
+ntrials = 20
 
 # open file
 msds= dal.dalDataset()
@@ -84,9 +84,8 @@ if len(time_range) == 1:  time_range = [0,len(time)]
 time = time[time_range[0]:time_range[1]]/(24*3600)    # take subset and convert from MJD in seconds to days
 
 if verbose>1:
-	print 'Start of data (MJD from 1Oct2007): ' + str(time[0]-54374)
-	print 'Fractional day is ' + str(24*(time[0]-int(time[0]))) + ' hrs'
-	print 'Total length of data (integrations): ' + str(len(time)) + ', (hrs): ' + str((time[-1]-time[0])*24)
+	print 'Start of data (MJD): ' + str(time[0])
+	print 'Total length of data ' + str(len(time)) + ' integrations, ' + str((time[-1]-time[0])*24) + ' hours'
 
 # get the u,v columns
 uvw_column = maintable.getColumn("UVW")
@@ -95,21 +94,42 @@ u_trim = uvw[time_range[0]:time_range[1],0]*(mean_freq/299792458.0)  # in units 
 v_trim = uvw[time_range[0]:time_range[1],1]*(mean_freq/299792458.0)
 w_trim = uvw[time_range[0]:time_range[1],2]*(mean_freq/299792458.0)
 
+# set up array with normalized beam amplitude
+beam_casa = []
+beam_cyga = []
+altaz_casa = []
+altaz_cyga = []
+for t in time:
+	altaz_casa.append(coords.altaz(t*24*3600,math.degrees(ra_casa),math.degrees(dec_casa)))
+	altaz_cyga.append(coords.altaz(t*24*3600,math.degrees(ra_cyga),math.degrees(dec_cyga)))
+	beam_casa.append(beam_dr.lba(mean_freq,(coords.altaz(t*24*3600,math.degrees(ra_casa),math.degrees(dec_casa)))[0],(coords.altaz(t*24*3600,math.degrees(ra_casa),math.degrees(dec_casa)))[1]))
+	beam_cyga.append(beam_dr.lba(mean_freq,(coords.altaz(t*24*3600,math.degrees(ra_cyga),math.degrees(dec_cyga)))[0],(coords.altaz(t*24*3600,math.degrees(ra_cyga),math.degrees(dec_cyga)))[1]))
+beam_casa = array(beam_casa)
+beam_cyga = array(beam_cyga)
+altaz_casa = array(altaz_casa)
+altaz_cyga = array(altaz_cyga)
+
+if verbose>1:
+	subplot(311)
+	plot(time,altaz_casa[:,0],'b',time,altaz_casa[:,1],'r')
+	subplot(312)
+	plot(time,altaz_cyga[:,0],'b',time,altaz_cyga[:,1],'r')
+	subplot(313)
+	plot(time,beam_casa,'b',time,beam_cyga,'r')
+	show()
+
 # get data
 data_col = maintable.getColumn(data_name)
 data = data_col.data()
 
 data_reduce = add.reduce(array=data[time_range[0]:time_range[1],channel_range,:],axis=1)/len(channel_range)
-#data_xxyy = sqrt((data_reduce[:,0]).real**2 + (data_reduce[:,0]).imag**2 + (data_reduce[:,3]).real**2 + (data_reduce[:,3]).imag**2)  # quadradic sum
-data_xxyyr = (data_reduce[:,0]).real + (data_reduce[:,3]).real
-data_xxr = (data_reduce[:,0]).real
+data_xxa = abs(data_reduce[:,0])
+#data_xxr = (data_reduce[:,0]).real
 rel_time = time - time[0]
-#plot(rel_time, data_xxr)
 
 # calculate fringe rate:  u*l+v*m+w*(n-1)
 fr_casa = 2*pi*(u_trim*lmn_casa[0] + v_trim*lmn_casa[1] + w_trim*(lmn_casa[2]-1))
 fr_cyga = 2*pi*(u_trim*lmn_cyga[0] + v_trim*lmn_cyga[1] + w_trim*(lmn_cyga[2]-1))
-#fr_cyga = 2*pi*(u_trim2*lmn_cyga[0] + v_trim2*lmn_cyga[1] + w_trim2*(lmn_cyga[2]-1))  # in case you need to shift sources around...
 fr_vira = 2*pi*(u_trim*lmn_vira[0] + v_trim*lmn_vira[1] + w_trim*(lmn_vira[2]-1))
 fr_crab = 2*pi*(u_trim*lmn_crab[0] + v_trim*lmn_crab[1] + w_trim*(lmn_crab[2]-1))
 
@@ -130,23 +150,17 @@ x1 = fr_casa
 x2 = fr_cyga
 x3 = fr_vira
 x4 = fr_crab
-#fitfunc = lambda p, x1: p[0]*cos(x1+p[1])      # for 1 source, real 
-#errfunc = lambda p, x1, y: fitfunc(p,x1) - y
-#fitfunc = lambda p, x1, x2: p[0]*cos(x1+p[1]) + p[2]*cos(x2+p[3])     # for 2 sources, real
+#fitfunc = lambda p, x1, x2: p[0]*cos(x1+p[1]) + p[2]*cos(x2+p[3])     # for 2 sources, real data
 #errfunc = lambda p, x1, x2, y: fitfunc(p,x1,x2) - y
-fitfunc = lambda p, x1, x2, x3, x4: p[0]*cos(x1+p[1]) + p[2]*cos(x2+p[3]) + p[4]*cos(x3+p[5]) + p[6]*cos(x4+p[7])     # for 4 sources, real
-errfunc = lambda p, x1, x2, x3, x4, y: fitfunc(p,x1,x2,x3,x4) - y
-ntrials = 50
-#p0_range = [[300,500],[0,10]]
-#p0_range = [[-max(data_xxr),max(data_xxr)],[0,100],[-max(data_xxr),max(data_xxr)],[0,100]]
-p0_range = [[-max(data_xxr),max(data_xxr)],[0,2*pi],[-max(data_xxr),max(data_xxr)],[0,2*pi],[-0.1*max(data_xxr),0.1*max(data_xxr)],[0,2*pi],[-0.1*max(data_xxr),0.1*max(data_xxr)],[0,2*pi]]
+fitfunc = lambda p, x1, x2, beam_casa, beam_cyga: sqrt((p[0]*beam_casa)**2 + (p[2]*beam_cyga)**2 + 2*p[0]*beam_casa*p[2]*beam_cyga*cos(x1-x2+p[1]))  # for 2 sources, data amplitude
+errfunc = lambda p, x1, x2, beam_casa, beam_cyga, y: fitfunc(p,x1,x2,beam_casa,beam_cyga) - y
+p0_range = [[-max(data_xxa),max(data_xxa)],[0,2*pi],[-max(data_xxa),max(data_xxa)]]
+
+# loop to do multiple fits and keep parameters of best fit
 for i in range(ntrials):
-#	p0 = [p0_range[0][0]+random()*(p0_range[0][1]-p0_range[0][0]),p0_range[1][0]+random()*(p0_range[1][1]-p0_range[1][0])]
-#	p0 = [p0_range[0][0]+random()*(p0_range[0][1]-p0_range[0][0]),p0_range[1][0]+random()*(p0_range[1][1]-p0_range[1][0]),p0_range[2][0]+random()*(p0_range[2][1]-p0_range[2][0]),p0_range[3][0]+random()*(p0_range[3][1]-p0_range[3][0])]
-	p0 = [p0_range[0][0]+random()*(p0_range[0][1]-p0_range[0][0]),p0_range[1][0]+random()*(p0_range[1][1]-p0_range[1][0]),p0_range[2][0]+random()*(p0_range[2][1]-p0_range[2][0]),p0_range[3][0]+random()*(p0_range[3][1]-p0_range[3][0]),p0_range[4][0]+random()*(p0_range[4][1]-p0_range[4][0]),p0_range[5][0]+random()*(p0_range[5][1]-p0_range[5][0]),p0_range[6][0]+random()*(p0_range[6][1]-p0_range[6][0]),p0_range[7][0]+random()*(p0_range[6][1]-p0_range[7][0])]
-#	p1, cov_x, infodict, mesg, success = optimize.leastsq(errfunc, p0[:], args = (x1, data_xxr), full_output=1)
+	p0 = [p0_range[0][0]+random()*(p0_range[0][1]-p0_range[0][0]),p0_range[1][0]+random()*(p0_range[1][1]-p0_range[1][0]),p0_range[2][0]+random()*(p0_range[2][1]-p0_range[2][0])]
 #	p1, cov_x, infodict, mesg, success = optimize.leastsq(errfunc, p0[:], args = (x1, x2, data_xxr), full_output=1)
-	p1, cov_x, infodict, mesg, success = optimize.leastsq(errfunc, p0[:], args = (x1, x2, x3, x4, data_xxr), full_output=1)
+	p1, cov_x, infodict, mesg, success = optimize.leastsq(errfunc, p0[:], args = (x1, x2, beam_casa, beam_cyga, data_xxa), full_output=1)
 	if i == 0:
 		best_noise = (array(infodict['fvec'])).std()
 		best_params = p1
@@ -156,35 +170,35 @@ for i in range(ntrials):
 		best_noise = (array(infodict['fvec'])).std()
 		best_params = p1
 
-ampl1 = abs(best_params[0])
-ampl2 = abs(best_params[2])
 if verbose > 0:  print 'Best Params: ' + str(best_params)
-if verbose > 0:  print 'Ampl1/Ampl2 = ' + str(ampl1/ampl2)
+if verbose > 0:  print 'Ampl_CasA/Ampl_CygA = ' + str(abs(best_params[0])/abs(best_params[2]))
 
-fft_time = ((arange(len(rel_time))+1)/float(len(rel_time)))*24*60*2.
+# stuff for fft analysis (for debugging to find fringe rates)
+#fft_time = ((arange(len(rel_time))+1)/float(len(rel_time)))*24*60*2.
+
 # plot
 figure(2)
 subplot(211)
-#plot(rel_time,data_xxr,"b--",rel_time,fitfunc(best_params,x1),"r-")
 #plot(rel_time,data_xxr,"b--",rel_time,fitfunc(best_params,x1,x2),"r-")
-plot(rel_time,data_xxr,"b--",rel_time,fitfunc(best_params,x1,x2,x3,x4),"r-")
+plot(rel_time,data_xxa,"b--",rel_time,fitfunc(best_params,x1,x2,beam_casa,beam_cyga),"r-")
 subplot(212)
-#fft_data = abs(fft(data_xxr))
+
+# more fft stuff
 #fft_model = abs(fft(fitfunc(best_params,x1,x2)))
-#print fft_data,fft_model
+#fft_data = abs(fft(data_xxr))
 #plot(fft_time,fft_data,"b--",fft_time,fft_model,"r-")
-#plot(fft_time,abs(fft(data_xxr))/max(abs(fft(data_xxr))),"b--",fft_time,abs(fft(fitfunc(best_params,x1)))/max(abs(fft(fitfunc(best_params,x1)))),"r-")
 #plot(fft_time,abs(fft(data_xxr))/max(abs(fft(data_xxr))),"b--",fft_time,abs(fft(fitfunc(best_params,x1,x2)))/max(abs(fft(fitfunc(best_params,x1,x2)))),"r-")
-plot(fft_time,abs(fft(data_xxr))/max(abs(fft(data_xxr))),"b--",fft_time,abs(fft(fitfunc(best_params,x1,x2,x3,x4)))/max(abs(fft(fitfunc(best_params,x1,x2,x3,x4)))),"r-")
-axis([0,500,0,1])
+#plot(fft_time,abs(fft(data_xxa))/max(abs(fft(data_xxa))),"b--",fft_time,abs(fft(fitfunc(best_params,x1,x2,beam_casa,beam_cyga)))/max(abs(fft(fitfunc(best_params,x1,x2,beam_casa,beam_cyga)))),"r-")
 #axis([0,500,min(append(abs(fft(data_xxr)),abs(fft(fitfunc(best_params,x1,x2))))),max(append(abs(fft(data_xxr)),abs(fft(fitfunc(best_params,x1,x2)))))])
+
+plot(time,beam_casa,'b',time,beam_cyga,'r')
+#plot(time,fitfunc(best_params,x1,x2,beam_casa,beam_cyga),'b',time,fitfunc([2*best_params[0],best_params[1],best_params[2]],x1,x2,beam_casa,beam_cyga),'r',time,fitfunc([best_params[0],best_params[1],best_params[0]],x1,x2,beam_casa,beam_cyga),'g')
+# more plot stuff
 subplot(211)
-title("Time vs. xxr, Baseline " + \
+title("Time vs. xxa, Baseline " + \
       sys.argv[2] + '-' + sys.argv[3] + ", Sub-band(" + sys.argv[4] +
       ") " + " Chan0(" + str(channel_range[0]) + "), nchan(" + str(len(channel_range)) + ")\n" + sys.argv[1] )
 xlabel("Time (MJD)")
 ylabel("Intensity")
 
 show()
-
-
