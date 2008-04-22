@@ -9,11 +9,14 @@
 add_library (cr_test Templates.cc)
 
 foreach (test tNumericalRanges tObjects tProcessingParameters tTemplates)
-  ## build program
+  ## compiler instructions
   add_executable (${test} ${test}.cc)
+  ## linker instructions
   target_link_libraries (${test} cr_test)
   ## testing
-  add_test (${test} ${test})
+  if (CR_ENABLE_TESTING) 
+    add_test (${test} ${test})
+  endif (CR_ENABLE_TESTING)
   ## installation
   install (
     TARGETS ${test}
@@ -82,9 +85,11 @@ if (HAVE_CASACORE)
       ${libm}
       )
     ## testing
-    add_test (${test} ${test})
+    if (CR_ENABLE_TESTING) 
+      add_test (${test} ${test})
+    endif (CR_ENABLE_TESTING) 
   endforeach (test ${tests_casacore})
-
+  
 endif (HAVE_CASACORE)
 
 ## -----------------------------------------------------------------------------

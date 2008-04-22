@@ -420,6 +420,10 @@ if (NOT HAVE_FFTW3)
   set (CR_ENABLE_LOPESSTAR OFF)
 endif (NOT HAVE_FFTW3)
 
+if (NOT HAVE_PostgreSQL) 
+  set (CR_ENABLE_LOPESSTAR OFF)
+endif (NOT HAVE_PostgreSQL)
+
 ## =============================================================================
 ##
 ##  Installation

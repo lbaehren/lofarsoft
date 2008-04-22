@@ -32,7 +32,7 @@ using CR::CompletePipeline;  // Namespace usage
 
   \brief A collection of test routines for the CompletePipeline class
  
-  \author Frank Schroeder
+  \author Frank Schr&auml;der
  
   \date 2008/01/30
 */

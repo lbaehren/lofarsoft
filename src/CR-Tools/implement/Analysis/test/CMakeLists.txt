@@ -89,8 +89,7 @@ endif (CR_ENABLE_LOPESSTAR)
     
 ## [3] Test programs for programs using functionality of LopesStar
 
-if (NOT APPLE)
-if (HAVE_ROOT AND HAVE_FFTW3 AND HAVE_PYTHON)
+if (CR_ENABLE_LOPESSTAR)
   ## compiler instructions
   add_executable (tCompletePipeline tCompletePipeline.cc)
   ## linker instructions
@@ -119,9 +118,10 @@ if (HAVE_ROOT AND HAVE_FFTW3 AND HAVE_PYTHON)
       )
   endif (APPLE)
   ## testing
-  add_test (tCompletePipeline tCompletePipeline)
-endif (HAVE_ROOT AND HAVE_FFTW3 AND HAVE_PYTHON)
-endif (NOT APPLE)
+  if (CR_ENABLE_TESTING) 
+    add_test (tCompletePipeline tCompletePipeline)
+  endif (CR_ENABLE_TESTING) 
+endif (CR_ENABLE_LOPESSTAR)
 
 ## -----------------------------------------------------------------------------
 ## Installation

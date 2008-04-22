@@ -45,7 +45,7 @@ namespace CR { // Namespace CR -- begin
     
     \brief Brief description for class CompletePipeline
     
-    \author Frank Schroeder
+    \author Frank Schr&ouml;der
 
     \date 2008/01/30
 

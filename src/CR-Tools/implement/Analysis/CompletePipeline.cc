@@ -32,8 +32,11 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
+  // ----------------------------------------------------------- CompletePipeline
+  
   CompletePipeline::CompletePipeline():
-    plotStart_p(-2.05e-6), plotStop_p(-1.55e-6),
+    plotStart_p(-2.05e-6),
+    plotStop_p(-1.55e-6),
     ccWindowWidth_p(0.045e-6),
     plotlist(),
     lastUpsamplingExponent(-1),
@@ -43,8 +46,11 @@ namespace CR { // Namespace CR -- begin
     upTimeValues()
   {;}
   
+  // ----------------------------------------------------------- CompletePipeline
+  
   CompletePipeline::CompletePipeline (CompletePipeline const &other):
-    plotStart_p(-2.05e-6), plotStop_p(-1.55e-6),
+    plotStart_p(-2.05e-6),
+    plotStop_p(-1.55e-6),
     ccWindowWidth_p(0.045e-6),
     plotlist(),
     lastUpsamplingExponent(-1),
@@ -112,7 +118,9 @@ namespace CR { // Namespace CR -- begin
     try 
     {
       // check if upsampling shoud be done at all (if not, return not upsampled data)
-      if (upsampling_exp < 1) return GetTimeSeries(dr).copy(); 
+      if (upsampling_exp < 1) {
+	return GetTimeSeries(dr).copy(); 
+      }
 
       // Get the antenna selection from the DataReader if no selction was chosen 	
       if (antennaSelection.nelements() == 0) {
@@ -138,14 +146,20 @@ namespace CR { // Namespace CR -- begin
       vector<bool> upsamplingToDo;
       upsamplingToDo.assign(upsampledAntennas.size(),true);		// form Vector of correct size
       // maximum to do is the whole antenna selction
-      for (int i=0; i < upsamplingToDo.size(); i++) upsamplingToDo[i] = antennaSelection(i);
+      for (int i=0; i < upsamplingToDo.size(); i++) {
+	upsamplingToDo[i] = antennaSelection(i);
+      }
 
       // if the last upsampling exponent is the same es the current, there might be somthing done allready
       // if not, clear the upsampled flags
-      if (lastUpsamplingExponent != upsampling_exp) upsampledAntennas.assign(upsampledAntennas.size(),false);
-       else for (int i=0; i < upsamplingToDo.size(); i++)
-         if (upsampledAntennas[i]) upsamplingToDo[i] = false;
-
+      if (lastUpsamplingExponent != upsampling_exp) {
+	upsampledAntennas.assign(upsampledAntennas.size(),false);
+      } else for (int i=0; i < upsamplingToDo.size(); i++) {
+	if (upsampledAntennas[i]) {
+	  upsamplingToDo[i] = false;
+	}
+      }
+      
       // Get the (not yet upsampled) fieldstrength of all antennas
       Matrix<Double> fieldstrength = GetTimeSeries(dr);  // don't pass antennaSelection to get full number of columns in the Matrix
       // create upsampling factor by upsampling exponent
@@ -171,11 +185,10 @@ namespace CR { // Namespace CR -- begin
         if (upsamplingToDo[i]){
           std::cout << " " << i+1 << flush;
  	  // copy the trace into the array
-	  for (int j = 0; j < tracelength; j++) 
-          {
+	  for (int j = 0; j < tracelength; j++) {
             originalTrace[j] = fieldstrength.column(i)(j);
           }
-
+	  
 	  // do upsampling by factor #upsampled (--> NoZeros = upsampled -1)
 
           // calcutlate Offset:
@@ -188,10 +201,15 @@ namespace CR { // Namespace CR -- begin
   	  // copy upsampled trace into Matrix with antenna traces and subtract offset
           // remark: as there is no offset in the original data, this step should be avoided
           // as soon as upsampling without pedestal correction is available
-	  for (int j = 0; j < tracelength*upsampled; j++) upFieldStrength.column(i)(j) = upsampledTrace[j] + offset;
-
-          // remark: tried to fasten data transfer from the array to the Matrix but did not work because arrays are
-          // of typ float but not double; as double is supported now, it can be tried again.
+	  for (int j = 0; j < tracelength*upsampled; j++) {
+	    upFieldStrength.column(i)(j) = upsampledTrace[j] + offset;
+	  }
+	  
+          /*
+	    Remark: tried to fasten data transfer from the array to the Matrix
+	    but did not work because arrays are of typ float but not double; as
+	    double is supported now, it can be tried again.
+	  */
 
           // set flag, that data for this antenna are upsampled
           upsampledAntennas[i] = true;
