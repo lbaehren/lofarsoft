@@ -274,6 +274,22 @@ namespace DAL { // Namespace DAL -- begin
     casa::Vector<double> antenna_position ();
 
     /*!
+      \return value -- Numerical value of the antenna position coordinates, e.g.
+              <tt>value=[10,12,0]</tt>
+    */
+    casa::Vector<double> antenna_position_value ();
+    /*!
+      \return unit -- Physical unit associated with the numerical values for the
+              antenna position, e.g. <tt>unit="m"</tt>
+    */
+    std::string antenna_position_unit ();
+    /*!
+      \return Identifier for the reference frame within which the antenna position
+              is provided, e.g. <tt>frame="ITRF"</tt>
+     */
+    std::string antenna_position_frame ();
+
+    /*!
       \brief Get the antenna orientation w.r.t. to the station reference frame
 
       \return orientation -- The three Euler angles to specify a possible 
@@ -281,6 +297,10 @@ namespace DAL { // Namespace DAL -- begin
 	      frame set for the station.
     */
     casa::Vector<double> antenna_orientation ();
+
+    casa::Vector<double> antenna_orientation_value ();
+    std::string antenna_orientation_unit ();
+    std::string antenna_orientation_frame ();
 
     /*!
       \brief Get the name of the class

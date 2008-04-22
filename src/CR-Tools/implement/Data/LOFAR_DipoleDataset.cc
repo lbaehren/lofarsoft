@@ -533,6 +533,51 @@ namespace DAL { // Namespace DAL -- begin
     }
   }
   
+  // ----------------------------------------------------- antenna_position_value
+  
+  casa::Vector<double> LOFAR_DipoleDataset::antenna_position_value ()
+  {
+    casa::Vector<double> val;
+    
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::ANTENNA_POSITION_VALUE),
+			     datasetID_p)) {
+      return val;
+    } else {
+      return casa::Vector<double> (1);
+    }
+  }
+  
+  // ----------------------------------------------------- antenna_position_frame
+  
+  std::string LOFAR_DipoleDataset::antenna_position_unit ()
+  {
+    std::string val;
+    
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::ANTENNA_POSITION_UNIT),
+			     datasetID_p)) {
+      return val;
+    } else {
+      return std::string ("UNDEFINED");
+    }
+  }
+  
+  // ----------------------------------------------------------- antenna_position
+  
+  std::string LOFAR_DipoleDataset::antenna_position_frame ()
+  {
+    std::string val;
+    
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::ANTENNA_POSITION_FRAME),
+			     datasetID_p)) {
+      return val;
+    } else {
+      return std::string ("UNDEFINED");
+    }
+  }
+  
   // -------------------------------------------------------- antenna_orientation
   
   casa::Vector<double> LOFAR_DipoleDataset::antenna_orientation ()
@@ -756,6 +801,12 @@ namespace DAL { // Namespace DAL -- begin
 		 feed());
       rec.define(casa::RecordFieldId(attribute_name(DAL::ANTENNA_POSITION)),
 		 antenna_position());
+      rec.define(casa::RecordFieldId(attribute_name(DAL::ANTENNA_POSITION_VALUE)),
+		 antenna_position_value());
+      rec.define(casa::RecordFieldId(attribute_name(DAL::ANTENNA_POSITION_UNIT)),
+		 antenna_position_unit());
+      rec.define(casa::RecordFieldId(attribute_name(DAL::ANTENNA_POSITION_FRAME)),
+		 antenna_position_frame());
       rec.define(casa::RecordFieldId(attribute_name(DAL::ANTENNA_ORIENTATION)),
 		 antenna_orientation());
       rec.define(casa::RecordFieldId(attribute_name(DAL::DATA_LENGTH)),
