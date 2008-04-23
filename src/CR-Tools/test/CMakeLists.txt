@@ -26,40 +26,6 @@ foreach (test tNumericalRanges tObjects tProcessingParameters tTemplates)
     )
 endforeach (test)
 
-## -----------------------------------------------------------------------------
-## Test working with CASA libraries
-## Most of the test programs are not in need of a full CASA installation, but
-## can be build using casacore; therefore we first check for the existence of 
-## casacore - if it is not available, we switch to CASA.
-
-if (HAVE_CASA)
-
-  set (tests
-    tUseMeasures
-    )
-  
-  FOREACH (src ${tests})
-    ## compiler instructions
-    ADD_EXECUTABLE (${src} ${src}.cc)
-    ## linker instructions
-    TARGET_LINK_LIBRARIES (${src}
-      ${CASA_LIBRARIES}
-      ${LAPACK_LIBRARIES}
-      )
-    ## testing
-    if (CR_ENABLE_TESTING)
-      add_test (${src} ${src})
-    endif (CR_ENABLE_TESTING)
-  ENDFOREACH (src)
-  ## installation locations -------------------
-  install (
-    TARGETS ${tests}
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    )
-endif (HAVE_CASA)
-
 ## -------------------------------------------------------------------
 ## Tests for working with casacore
 
@@ -75,6 +41,7 @@ if (HAVE_CASACORE)
     tcasa_coordinates
     tcasa_images
     tcasa_lattices
+    tcasa_measures
     )
   
   foreach (test ${tests_casacore})
