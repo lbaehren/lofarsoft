@@ -117,12 +117,16 @@ int main ()
   try {
     fitsfile *fptr;
     long exposure;
-    char *ctype[] = {"FREQ", "TIME"};
-    char *cunit[] = {"Hz", "sec"};
+    char *ctype[] = {"FREQ","TIME"};
+    char *cunit[] = {"Hz","sec"};
     short array[200][300];
-    
+
     naxes[0]  = 300;
     naxes[1]  = 200;
+//     ctype[0] = "FREQ";
+//     ctype[1] = "TIME";
+//     cunit[0] = "Hz";
+//     cunit[1] = "sec";
     nelements = naxes[0] * naxes[1];
     status = 0;
     fpixel = 1;

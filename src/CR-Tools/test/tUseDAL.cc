@@ -27,6 +27,9 @@
 #include <Utilities/StringTools.h>
 #include <dal/dalDataset.h>
 
+using DAL::dalDataset;
+using DAL::dalGroup;
+
 // -----------------------------------------------------------------------------
 
 /*!

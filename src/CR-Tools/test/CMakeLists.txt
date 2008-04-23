@@ -204,7 +204,7 @@ endif (HAVE_WCSLIB)
 ## -----------------------------------------------------------------------------
 ## Test for working with ROOT (includes working with the DAL)
 
-if (HAVE_ROOT AND HAVE_CASACORE)
+if (HAVE_ROOT AND HAVE_CASACORE AND FFTW3_LIBRARIES)
   if (HAVE_DAL)
     ## compiler instructions
     add_executable (tUseROOT tUseROOT.cc)
@@ -244,7 +244,7 @@ if (HAVE_ROOT AND HAVE_CASACORE)
   else (HAVE_DAL)
     message (STATUS "[CR-Tools] Unable to build test program tUseROOT.")
   endif (HAVE_DAL)
-endif (HAVE_ROOT AND HAVE_CASACORE)
+endif (HAVE_ROOT AND HAVE_CASACORE AND FFTW3_LIBRARIES)
 
 ## -----------------------------------------------------------------------------
 ## Test working with the Data Access Library (DAL)
