@@ -22,7 +22,7 @@ option (CR_ENABLE_LOPESSTAR "Enable additional routines from LOPES-Star?" 1)
 option (CR_DEBUGGING_MESSAGES "Print debugging information?" 0)
 option (CR_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
 option (CR_GLISH_SUPPORT "Activate support for Glish applications?" 0)
-option (CR_PYTHON_SUPPORT "Activate support for Python applications?" 0)
+option (CR_PYTHON_SUPPORT "Activate support for Python applications?" 1)
 
 ## Handle option: verbose mode on/off
 
@@ -423,6 +423,12 @@ endif (NOT HAVE_FFTW3)
 if (NOT HAVE_PostgreSQL) 
   set (CR_ENABLE_LOPESSTAR OFF)
 endif (NOT HAVE_PostgreSQL)
+
+## Handle option: create Python binding
+
+if (NOT HAVE_PYTHON OR NOT HAVE_BOOST)
+  set (CR_PYTHON_SUPPORT OFF)
+endif (NOT HAVE_PYTHON OR NOT HAVE_BOOST)
 
 ## =============================================================================
 ##

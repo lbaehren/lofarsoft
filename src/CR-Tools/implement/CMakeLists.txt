@@ -147,6 +147,7 @@ endif (libm)
 include_directories (
   ${CR_SOURCE_DIR}/implement
   ${CASA_INCLUDES}
+  ${CASACORE_INCLUDES}
   )
 
 add_definitions (

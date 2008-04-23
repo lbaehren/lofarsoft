@@ -284,6 +284,32 @@ namespace DAL { // Namespace DAL -- begin
 #endif
 
     /*!
+      \brief Get the numerical value of the beam direction
+
+      \return value -- The numerical value for the direction of the station
+              beam.
+    */
+#ifdef HAVE_CASA
+    casa::Vector<double> beam_direction_value ();
+#else 
+    std::vector<double> beam_direction_value ();
+#endif
+    
+    /*!
+      \brief Get the physical unit for the beam direction
+      
+      \return unit -- The physical units within which the beam direction
+              is given; this might be <i>radian</i> or <i>degree</i>
+    */
+    std::string beam_direction_unit ();
+    /*!
+      \brief Get the coordinate frame identifier for the beam direction
+      
+      \return frame -- 
+    */
+    std::string beam_direction_frame ();
+
+    /*!
       \brief Get the name of the class
       
       \return className -- The name of the class, LOFAR_StationGroup.

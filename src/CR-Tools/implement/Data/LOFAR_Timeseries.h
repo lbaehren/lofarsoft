@@ -320,6 +320,48 @@ namespace DAL { // Namespace DAL -- begin
 	      <td>
 	    </tr>
 	    <tr>
+	      <td>ANTENNA_POSITION_VALUE
+	      <td>array<double,1>
+	      <td>mandatory
+	      <td>
+	      <td>
+	    </tr>
+	    <tr>
+	      <td>ANTENNA_POSITION_UNIT
+	      <td>string
+	      <td>mandatory
+	      <td>
+	      <td>
+	    </tr>
+	    <tr>
+	      <td>ANTENNA_POSITION_FRAME
+	      <td>string
+	      <td>mandatory
+	      <td>
+	      <td>
+	    </tr>
+	    <tr>
+	      <td>ANTENNA_ORIENTATION_VALUE
+	      <td>array<double,1>
+	      <td>mandatory
+	      <td>
+	      <td>
+	    </tr>
+	    <tr>
+	      <td>ANTENNA_ORIENTATION_UNIT
+	      <td>string
+	      <td>mandatory
+	      <td>
+	      <td>
+	    </tr>
+	    <tr>
+	      <td>ANTENNA_ORIENTATION_FRAME
+	      <td>string
+	      <td>mandatory
+	      <td>
+	      <td>
+	    </tr>
+	    <tr>
 	      <td>FEED
 	      <td>string
 	      <td>mandatory

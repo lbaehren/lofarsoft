@@ -98,7 +98,9 @@ if (HAVE_CFITSIO)
     )
   target_link_libraries (tUseCFITSIO ${CFITSIO_LIBRARIES})
   ## testing
-  add_test (tUseCFITSIO tUseCFITSIO)
+  if (CR_ENABLE_TESTING) 
+    add_test (tUseCFITSIO tUseCFITSIO)
+  endif (CR_ENABLE_TESTING) 
   ## installation
   install (
     TARGETS tUseCFITSIO
@@ -113,7 +115,9 @@ if (HAVE_FFTW3)
   add_executable (tUseFFTW3 tUseFFTW3.cc)
   target_link_libraries (tUseFFTW3 ${FFTW3_LIBRARIES})
   ## testing
-  add_test (tUseFFTW3 tUseFFTW3)
+  if (CR_ENABLE_TESTING) 
+    add_test (tUseFFTW3 tUseFFTW3)
+  endif (CR_ENABLE_TESTING) 
   ## installation
   install (
     TARGETS tUseFFTW3
@@ -128,7 +132,9 @@ if (HAVE_GSL)
   add_executable (tUseGSL tUseGSL.cc)
   target_link_libraries (tUseGSL ${GSL_LIBRARIES})
   ## testing
-  add_test (tUseGSL tUseGSL)
+  if (CR_ENABLE_TESTING) 
+    add_test (tUseGSL tUseGSL)
+  endif (CR_ENABLE_TESTING) 
   ## installation
   install (
     TARGETS tUseGSL
@@ -160,7 +166,9 @@ if (HAVE_WCSLIB)
   add_executable (tUseWCS tUseWCS.cc)
   target_link_libraries (tUseWCS ${WCSLIB_LIBRARIES})
   ## testing
-  add_test (tUseWCS tUseWCS)
+  if (CR_ENABLE_TESTING) 
+    add_test (tUseWCS tUseWCS)
+  endif (CR_ENABLE_TESTING) 
   ## installation
   install (
     TARGETS tUseWCS
@@ -203,11 +211,13 @@ if (HAVE_ROOT AND HAVE_CASACORE AND FFTW3_LIBRARIES)
 	)
     endif (APPLE)
     ## testing
-    if (dataset_event)
-      add_test (tUseROOT tUseROOT ${dataset_event})
-    else (dataset_event)
-      add_test (tUseROOT tUseROOT) 
-   endif (dataset_event)
+    if (CR_ENABLE_TESTING) 
+      if (dataset_event)
+	add_test (tUseROOT tUseROOT ${dataset_event})
+      else (dataset_event)
+	add_test (tUseROOT tUseROOT) 
+      endif (dataset_event)
+    endif (CR_ENABLE_TESTING) 
   else (HAVE_DAL)
     message (STATUS "[CR-Tools] Unable to build test program tUseROOT.")
   endif (HAVE_DAL)
