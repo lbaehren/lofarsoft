@@ -32,21 +32,24 @@ endforeach (test)
 ## can be build using casacore; therefore we first check for the existence of 
 ## casacore - if it is not available, we switch to CASA.
 
-set (tests
-  tUseMeasures
-  tUseLattices
-)
-
 if (HAVE_CASA)
+
+  set (tests
+    tUseMeasures
+    )
+  
   FOREACH (src ${tests})
-    ## build the excutables
+    ## compiler instructions
     ADD_EXECUTABLE (${src} ${src}.cc)
+    ## linker instructions
     TARGET_LINK_LIBRARIES (${src}
       ${CASA_LIBRARIES}
       ${LAPACK_LIBRARIES}
-      )  
+      )
     ## testing
-    add_test (${src} ${src})
+    if (CR_ENABLE_TESTING)
+      add_test (${src} ${src})
+    endif (CR_ENABLE_TESTING)
   ENDFOREACH (src)
   ## installation locations -------------------
   install (
@@ -71,6 +74,7 @@ if (HAVE_CASACORE)
     tcasa_tables
     tcasa_coordinates
     tcasa_images
+    tcasa_lattices
     )
   
   foreach (test ${tests_casacore})
