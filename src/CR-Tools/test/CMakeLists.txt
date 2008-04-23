@@ -231,7 +231,6 @@ if (HAVE_DAL AND HAVE_CASACORE)
   add_executable (tUseDAL tUseDAL.cc)
   ## linker instructions
   target_link_libraries (tUseDAL
-    cr
     ${DAL_LIBRARIES}
     ${HDF5_LIBRARIES}
     ${CASA_LIBRARIES}
@@ -240,6 +239,6 @@ if (HAVE_DAL AND HAVE_CASACORE)
   ## additional properties
   set_target_properties (tUseDAL
     PROPERTIES
-    COMPILE_FLAGS "-DHAVE_DAL -I${DAL_INCLUDES} -I${CR_SOURCE_DIR}/implement"
+    COMPILE_FLAGS "-DHAVE_DAL -I${DAL_INCLUDES}"
     )
 endif (HAVE_DAL AND HAVE_CASACORE)

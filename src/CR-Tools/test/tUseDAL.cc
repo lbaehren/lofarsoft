@@ -24,7 +24,6 @@
 #include <iostream>
 #include <string>
 
-#include <Utilities/StringTools.h>
 #include <dal/dalDataset.h>
 
 using DAL::dalDataset;
@@ -46,6 +45,23 @@ using DAL::dalGroup;
 
 // -----------------------------------------------------------------------------
 
+char* string2char (std::string const &mystring)
+{
+  int x (0);
+  char* retChar;
+  const char* tmpChar = mystring.c_str();
+  
+  retChar = new char [strlen(tmpChar)+1];
+  
+  do {
+    retChar[x] = tmpChar[x];
+  } while (tmpChar[x++] != '\0');
+  
+  return retChar;
+}
+
+// -----------------------------------------------------------------------------
+
 /*!
   \brief Test some basic operations using the Data Access Library
 
@@ -62,7 +78,7 @@ int test_dalDataset (std::string const &filename)
 
   int retval (0);
   std::string groupname ("Station001");
-  char *h5filename = CR::string2char(filename);
+  char *h5filename = string2char(filename);
   
   cout << "[1] Open dataset using DAL::Dataset object pointer" << endl;
   try {
