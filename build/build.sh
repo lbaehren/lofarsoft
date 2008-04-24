@@ -34,7 +34,7 @@ export LOFARSOFT=`pwd`
 
 tmp=`echo $PATH | tr ':' '\n' | grep $LOFARSOFT`
 
-if [ X$tmp != X$LOFARSOFT/release/bin ] ; then
+if [ "$tmp" == "$LOFARSOFT/release/bin" ] ; then
     echo "-- Adding release/bin to PATH..."
     export PATH=$PATH:$LOFARSOFT/release/bin
 fi
