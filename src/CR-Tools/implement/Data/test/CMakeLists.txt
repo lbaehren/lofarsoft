@@ -16,6 +16,7 @@ set (tests
   tTIM40Header
   ttbbctlIn
   trawSubbandIn
+  tUpSampledDR
   )
 
 ## -----------------------------------------------------------------------------
