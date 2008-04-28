@@ -169,6 +169,7 @@ namespace CR { // Namespace CR -- begin
         //
         // phasecal = PhaseCal values (e.g. filter characteristics) from CalTables
         // (the correction is relativly small: for arround 60-70 MHZ in the order of 10 degrees)
+	//   Actually this is the difference of the phases to the reference antenna. (AH)
         //
         // tempComplexVec1 = electrical gain calibration values per frequency (from CalTables) 
         // (corrected by the amplitude of the phase calibration, which is ~ 1)

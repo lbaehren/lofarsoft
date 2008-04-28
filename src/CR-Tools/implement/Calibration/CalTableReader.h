@@ -211,10 +211,10 @@ public:
  */
   virtual Bool isAttached();
 
-
+  //@{
   /*!
     \brief Get a piece of data from the table
-
+    
     \param date -- date for which the data is requested
     \param AntID -- ID of the antenna for which the data is requested
     \param FieldName -- Name of the field that is requested
@@ -245,7 +245,9 @@ public:
 	       Int const AntID,
 	       String const FieldName,
 	       Array<DComplex> *result);
+  //@}
 
+  //@{
   /*!
     \brief Get the value of a keyword
     
@@ -263,6 +265,7 @@ public:
   Bool GetKeyword(String const KeywordName, DComplex *result);
   Bool GetKeyword(String const KeywordName, Array<Double> *result);
   Bool GetKeyword(String const KeywordName, Array<DComplex> *result);
+  //@}
 
   /*!
     \brief Get the name of the data type of the keyword

@@ -89,7 +89,7 @@ namespace CR {  //  Namespace CR -- begin
     */
     virtual Bool AttachTable(const String& tableFilename);
     
-    
+    //@{    
     /*!
       \brief Add a new value to an existing field
       
@@ -130,6 +130,7 @@ namespace CR {  //  Namespace CR -- begin
 		 String const FieldName, 
 		 uInt const startDate,
 		 uInt const stopDate=0);
+    //@}
     
     /*!
       \brief Add a new column for a new field
@@ -170,6 +171,7 @@ namespace CR {  //  Namespace CR -- begin
     Bool AddAntenna(Int AntID,
 		    String AntName);
     
+    //@{
     /*!
       \brief Sets the value of a keyword
       
@@ -186,6 +188,7 @@ namespace CR {  //  Namespace CR -- begin
     Bool SetKeyword(DComplex data, String const KeywordName);
     Bool SetKeyword(Array<Double> data, String const KeywordName);
     Bool SetKeyword(Array<DComplex> data, String const KeywordName);
+    //@}
     
   private:
     
