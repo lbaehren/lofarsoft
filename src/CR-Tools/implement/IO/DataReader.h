@@ -651,7 +651,9 @@ namespace CR {  //  Namespace CR -- begin
   void setStartBlock (uint const &startBlock);
 
   /*!
-    \brief Get a specific data block to read next
+    \brief Get the counter for the current block of data
+
+    \return block -- The counter for the current block of data.
   */
   inline uint block () {
     return iterator_p[0].block();
