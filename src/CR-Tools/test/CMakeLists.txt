@@ -6,7 +6,19 @@
 ## Tests within the framework of the C++ standard library; this should be
 ## working in any case.
 
-add_library (cr_test Templates.cc)
+if (HAVE_CASACORE OR HAVE_CASA)
+  add_library (cr_test
+    Templates.cc
+    Casacore.cc
+    )
+  target_link_libraries (cr_test
+    ${CASA_LIBARIES}
+    )
+else (HAVE_CASACORE OR HAVE_CASA)
+  add_library (cr_test
+    Templates.cc
+    )
+endif (HAVE_CASACORE OR HAVE_CASA)
 
 foreach (test tNumericalRanges tObjects tProcessingParameters tTemplates)
   ## compiler instructions
@@ -47,8 +59,14 @@ if (HAVE_CASACORE)
   foreach (test ${tests_casacore})
     ## compiler instructions
     add_executable (${test} ${test}.cc)
+    set_target_properties (${test}
+      PROPERTIES
+      COMPILE_FLAGS "-DAIPS_STDLIB -DAIPS_AUTO_STL"
+      LINK_FLAG "-fPIC"
+      )
     ## linker instructions
     target_link_libraries (${test}
+      cr_test
       ${LAPACK_LIBRARIES}
       ${CASA_LIBRARIES}
       ${WCSLIB_LIBRARIES}
@@ -129,7 +147,13 @@ endif (HAVE_FFTW3)
 ## Test for GSL
 
 if (HAVE_GSL)
+  ## compiler instructions
   add_executable (tUseGSL tUseGSL.cc)
+  set_target_properties (tUseGSL
+    PROPERTIES
+    LINK_FLAGS "-I${GSL_INCLUDES}"
+    )
+  ## linker instructions
   target_link_libraries (tUseGSL ${GSL_LIBRARIES})
   ## testing
   if (CR_ENABLE_TESTING) 
@@ -239,6 +263,6 @@ if (HAVE_DAL AND HAVE_CASACORE)
   ## additional properties
   set_target_properties (tUseDAL
     PROPERTIES
-    COMPILE_FLAGS "-DHAVE_DAL -I${DAL_INCLUDES}"
+    COMPILE_FLAGS "-DHAVE_DAL -I${DAL_INCLUDES} -I${HDF5_INCLUDES}"
     )
 endif (HAVE_DAL AND HAVE_CASACORE)

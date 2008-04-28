@@ -48,6 +48,7 @@
 #include <casa/Utilities/Assert.h>
 
 #include "tests_common.h"
+#include "Casacore.h"
 
 using casa::Array;
 using casa::Block;
@@ -77,7 +78,6 @@ using std::endl;
     only; this needs to be handled by precompiler statements.
   </ol>
 */
-
 
 // ==============================================================================
 //
@@ -1182,6 +1182,9 @@ int main ()
   int nofFailedTests (0);
   std::vector<int> nelem = nof_array_elements ();
 
+  // ----------------------------------------------------------------------------
+  // Test for the various casacore classes and modules
+
   nofFailedTests += test_Arrays();
   nofFailedTests += test_Vector();
 //   nofFailedTests += test_Arrays_Matrix (nelem);
@@ -1191,6 +1194,18 @@ int main ()
 
   nofFailedTests += test_BasicMath();
   nofFailedTests += test_BasicSL();
+
+  // ----------------------------------------------------------------------------
+  // additional test using casacore classes as private data of a new class
+
+  try {
+    casa_casa<int> myclassInt;
+    casa_casa<float> myclassFloat;
+    casa_casa<double> myclassDouble;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
 
   return nofFailedTests;
 }
