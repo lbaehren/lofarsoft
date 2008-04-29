@@ -1,0 +1,58 @@
+## ------------------------------------------------------------------------------
+## $Id:: CMakeLists.txt 1475 2008-04-23 11:49:15Z baehren                       $
+## ------------------------------------------------------------------------------
+
+## ------------------------------------------------------------------------------
+##  CMake
+## ------------------------------------------------------------------------------
+
+ Lars:
+
+ * work in first set of changes as discussed with Alexander and get settings for
+   CR-Tools consistent
+
+## ------------------------------------------------------------------------------
+##  Data Access Library (DAL)
+## ------------------------------------------------------------------------------
+
+ Joe:
+
+ * changes which might break configuration for other tools
+
+-----------------------------------------------------------------------------------
+ CR-Tools
+-----------------------------------------------------------------------------------
+
+ Lars:
+
+ * debugging of Mac OS configuration 
+ * DataReader: provide method to retrive length of segement for each dipole
+ * DataReader: TimeFreq::timeValues() needs to be overloaded to include currently
+   selected block of data
+
+
+ Andreas:
+
+ * 
+
+ Kalpana: 
+
+ * verfication of algorithm for PPF inversion
+
+ Frank:
+
+ * 
+
+-----------------------------------------------------------------------------------
+ pyBDSM
+-----------------------------------------------------------------------------------
+
+ Alexander:
+
+ * 
+
+ Niruj:
+
+ * 
+
+
