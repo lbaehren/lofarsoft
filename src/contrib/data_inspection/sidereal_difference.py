@@ -7,17 +7,17 @@ from numpy import *
 from scipy import *
 
 # check usage
-if len(sys.argv) < 5 or len(sys.argv) > 10:
+if len(sys.argv) < 4 or len(sys.argv) > 10:
 	print "Usage:"
 	print "\tsidereal_difference.py <file> <antenna1> <antenna2> " + \
-	      "<sub-band> [channel range] [start time] " + \
+	      "[sub-band] [channel range] [start time] " + \
 	      "['p'hase or 'a'mplitude] [polarization (0-3,4-6)] [plot range xmin,xmax,ymin,ymax (no spaces)]"
 	print "\t<> required"
 	print "\t E.g., sidereal_difference.py /lifs006/SB3.MS 1 10 0 3 0 a 6 4.69e9,4.7e9,0,0.001"
 	print "\tSingle or range of channels for averaging (in relative bin coordinates; ranges colon-delimited);"
 	print "\tTime in relative bin coordinates;"
 	print "\tPolarization 0-3 plots individually, 4 plots xx and xy, 5 plots xx and yx, 6 plots xx and yy."
-	print "\t-1 means plot all.  Default plots xx for all channels as function of time."
+	print "\t-1 means plot all.  Default plots xx for all channels as function of time for subband 0."
 	print "Note that antenna numbers are zero-based and must be given in order from lowest to highest."
 	print ""
 	sys.exit(1)
@@ -27,6 +27,8 @@ data_name = "DATA"
 timecut = (23+56/60.)/24    # 1 sidereal day, 23h56m
 
 # set default values
+if len(sys.argv) < 5:  subband = str(0)
+else: subband = sys.argv[4]
 if len(sys.argv) < 6:  range_plot = [0]
 elif len((sys.argv[5]).split(':')) > 1:
 	range_plot = range(int((sys.argv[5]).split(':')[0]),int((sys.argv[5]).split(':')[1]))
@@ -59,7 +61,7 @@ if ( msds.open(sys.argv[1]) ):
 tablename = "MAIN";
 msds.setFilter( "TIME," + data_name, \
 	"ANTENNA1 = " + sys.argv[2] + " AND ANTENNA2 = " + sys.argv[3] + \
-	" AND DATA_DESC_ID = " + sys.argv[4] )
+	" AND DATA_DESC_ID = " + subband )
 maintable = msds.openTable( tablename );
 
 # get times
@@ -94,12 +96,12 @@ print 'Total length of data (integrations): ' + str(len(time)+start_time) + ', D
 # set plot label and title
 if data_plot == 'a':
 	titlestring = "Amplitude and Difference, Baseline " + \
-	      sys.argv[2] + '-' + sys.argv[3] + ", Sub-band(" + sys.argv[4] + \
+	      sys.argv[2] + '-' + sys.argv[3] + ", Sub-band(" + subband + \
 	      ") " + " Chan0(" + str(range_plot[0]) + ")\n nchan(" + str(len(range_plot)) + "), " + sys.argv[1] 
 	ylabelstring = "Intensity"
 elif data_plot == 'p':
 	titlestring = "Phase and Difference, Baseline " + \
-	      sys.argv[2] + '-' + sys.argv[3] + ", Sub-band(" + sys.argv[4] + \
+	      sys.argv[2] + '-' + sys.argv[3] + ", Sub-band(" + subband + \
 	      ") " + " Chan0(" + str(range_plot[0]) + ")\n nchan(" + str(len(range_plot)) + "), " + sys.argv[1] 
 	ylabelstring = "Phase (rad)"
 

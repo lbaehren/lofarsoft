@@ -6,16 +6,16 @@ from pylab import *
 from scipy import *
 
 # check usage
-if len(sys.argv) < 7 or len(sys.argv) > 10:
+if len(sys.argv) < 6 or len(sys.argv) > 10:
 	print "Usage:"
 	print "\tphase_difference.py <file> <antenna1-1> <antenna1-2> <antenna2-1> <antenna2-2> " + \
-	      "<sub-band> ['channel' or 'time'] [channel/time range] " + \
+	      "[sub-band] ['channel' or 'time'] [channel/time range] " + \
 	      "[polarization (0-3,4-6)]"
 	print "\t<> required"
 	print "\t E.g., phase_difference.py /lifs003/SB3.MS 8 11 9 10 0 channel 100:110 6"
 	print "\tSingle or range of channels and times for averaging (in relative bin coordinates; ranges colon-delimited);"
 	print "\tPolarization 0-3 plots individually, 4 plots xx and xy, 5 plots xx and yx, 6 plots xx and yy."
-	print "\t-1 means plot all.  Default plots the phase difference of the xx for all channels as function of time."
+	print "\t-1 means plot all.  Default plots the phase difference of the xx for all channels as function of time for subband 0."
 	print "\tNote that antenna numbers are zero-based and numbers for each antenna pair must be given in order from lowest to highest."
 	print ""
 	sys.exit(1)
@@ -24,6 +24,8 @@ if len(sys.argv) < 7 or len(sys.argv) > 10:
 data_name = "DATA"
 
 # set default values
+if len(sys.argv) < 7:  subband = str(0)
+else: subband = sys.argv[6]
 if len(sys.argv) < 8:  quantity_plot = 'channel'
 else: quantity_plot = sys.argv[7]
 if len(sys.argv) < 9:  range_plot = [0]
@@ -49,12 +51,12 @@ if ( msds.open(sys.argv[1]) ):
 tablename = "MAIN";
 msds.setFilter( "TIME," + data_name, \
 	"ANTENNA1 = " + sys.argv[2] + " AND ANTENNA2 = " + sys.argv[3] + \
-	" AND DATA_DESC_ID = " + sys.argv[6] )
+	" AND DATA_DESC_ID = " + subband )
 table12 = msds.openTable( tablename );
 
 msds.setFilter( "TIME," + data_name, \
 	"ANTENNA1 = " + sys.argv[4] + " AND ANTENNA2 = " + sys.argv[5] + \
-	" AND DATA_DESC_ID = " + sys.argv[6] )
+	" AND DATA_DESC_ID = " + subband )
 table34 = msds.openTable( tablename );
 
 # get times
@@ -108,7 +110,7 @@ if (range_plot != -1):
 		if pol2: plot( time, phase12_2, ',', time, phase34_2, ',')
 		ylabel("Phase (rad)")
 		title("Time vs. Phase Difference, Antennas " + \
-		      sys.argv[2] + '-' + sys.argv[3] + '/' + sys.argv[4] + '-' + sys.argv[5] + ", Sub-band(" + sys.argv[6] +
+		      sys.argv[2] + '-' + sys.argv[3] + '/' + sys.argv[4] + '-' + sys.argv[5] + ", Sub-band(" + subband +
 		      ") " + " Chan0(" + str(range_plot[0]) + ")\n nchan(" + str(len(range_plot)) + "), " + sys.argv[1] )
 
 	elif quantity_plot == 'time':
@@ -116,7 +118,7 @@ if (range_plot != -1):
 		plot( difference, "," )
 		if pol2: plot( difference_2, "," )
 		title("Channel vs. Phase Difference, Antennas " + \
-		      sys.argv[2] + '-' + sys.argv[3] + '/' + sys.argv[4] + '-' + sys.argv[5] + ", Sub-band(" + sys.argv[6] +
+		      sys.argv[2] + '-' + sys.argv[3] + '/' + sys.argv[4] + '-' + sys.argv[5] + ", Sub-band(" + subband +
 		      ") " + " Time0(" + str(time[range_plot[0]]) + " MJD)\n dtime(" + str(len(range_plot)) + "), " + sys.argv[1] )
 		xlabel("Channel")
 		ylabel("Phase difference (rad)")
@@ -131,7 +133,7 @@ if (range_plot != -1):
 #			plot( difference[channel,:], "," )
 #			if pol2:  plot( difference_2[channel,:], "," )
 #			title("Channel vs. Phase Difference, Antennas " + \
-#			      sys.argv[2] + '-' + sys.argv[3] + '/' + sys.argv[4] + '-' + sys.argv[5] + ", Sub-band(" + sys.argv[6] +
+#			      sys.argv[2] + '-' + sys.argv[3] + '/' + sys.argv[4] + '-' + sys.argv[5] + ", Sub-band(" + subband +
 #			      ") " + " Channel(" + str(range_plot) + ")\n" + sys.argv[1] )
 #		xlabel("Time (MJD)")
 #		ylabel("Phase difference (rad)")
@@ -141,7 +143,7 @@ if (range_plot != -1):
 #			plot( difference[:,t], "," )
 #			if pol2:  plot( difference_2[:,t], "," )
 #			title("Time vs. Phase Difference, Antennas " + \
-#			      sys.argv[2] + '-' + sys.argv[3] + '/' + sys.argv[4] + '-' + sys.argv[5] + ", Sub-band(" + sys.argv[6] +
+#			      sys.argv[2] + '-' + sys.argv[3] + '/' + sys.argv[4] + '-' + sys.argv[5] + ", Sub-band(" + subband +
 #			      ") " + str(len(time)) + " times" + '\n' + sys.argv[1] )
 #		xlabel("Channel")
 #		ylabel("Phase difference (rad)")

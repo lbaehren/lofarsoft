@@ -1,14 +1,19 @@
 #! /usr/bin/env python
-import sys,math,beam_dr
+import sys,math,lofar_beams
 import pydal as dal
 from pylab import *
 from numpy import *
 from scipy import *
 from random import *
-import coordinates as coords
+import coordinates_mod as coords
 
 # set default values and check usage
-if len(sys.argv) == 5:
+if len(sys.argv) == 4:
+	subband = str(0)
+	channel_range = range(0,256)
+	time_range = [-1]
+elif len(sys.argv) == 5:
+	subband = sys.argv[4]
 	channel_range = range(0,256)
 	time_range = [-1]
 elif len(sys.argv) == 6:
@@ -16,19 +21,21 @@ elif len(sys.argv) == 6:
 	elif len((sys.argv[5]).split(':')) == 1 and int(sys.argv[5]) != -1: channel_range = [int(sys.argv[5])]
 	elif int(sys.argv[5]) == -1:  channel_range = range(0,256)
 	time_range = [-1]
+	subband = sys.argv[4]
 elif len(sys.argv) == 7:
 	if len((sys.argv[5]).split(':')) == 2:  channel_range = range(int((sys.argv[5]).split(':')[0]),int((sys.argv[5]).split(':')[1]))
 	elif len((sys.argv[5]).split(':')) == 1 and int(sys.argv[5]) != -1: channel_range = [int(sys.argv[5])]
 	elif int(sys.argv[5]) == -1:  channel_range = range(0,256)
 	if len((sys.argv[6]).split(':')) == 2:  time_range = [int((sys.argv[6]).split(':')[0]),int((sys.argv[6]).split(':')[1])]
 	else:  time_range = [-1]
+	subband = sys.argv[4]
 else:
 	print "Usage:"
 	print "\tfringe_fit.py <file> <antenna1> <antenna2> " + \
-	      "<sub-band> [channel range] [time range]"
+	      "[sub-band] [channel range] [time range]"
 	print "\t<> required"
 	print "\tChannel and Time in relative bin coordinates; channel range averaged, time range selected."
-	print "\t-1 means use all channels.  Default fits the real part of xx for all times and channels."
+	print "\t-1 means use all channels.  Default fits the real part of xx for all times and channels for subband 0."
 	print ""
 	sys.exit(1)
 
@@ -43,7 +50,7 @@ ra_vira = math.radians(coords.hmstora(12.,30.,49.5))
 dec_vira = math.radians(coords.dmstodec(12.,23.,21.5))
 ra_crab = math.radians(coords.hmstora(5.,34.,31.8))
 dec_crab = math.radians(coords.dmstodec(22.,0.,52.9))
-ntrials = 20
+ntrials = 30
 
 # open file
 msds= dal.dalDataset()
@@ -74,7 +81,7 @@ print 'Frequency = ' + str(mean_freq) + ' Hz , Wavelength = ' + str(299792458.0/
 tablename = "MAIN";
 msds.setFilter( "TIME,UVW," + data_name, \
 	"ANTENNA1 = " + sys.argv[2] + " AND ANTENNA2 = " + sys.argv[3] + \
-	" AND DATA_DESC_ID = " + sys.argv[4] )
+	" AND DATA_DESC_ID = " + subband )
 maintable = msds.openTable( tablename );
 
 # get times
@@ -102,8 +109,8 @@ altaz_cyga = []
 for t in time:
 	altaz_casa.append(coords.altaz(t*24*3600,math.degrees(ra_casa),math.degrees(dec_casa)))
 	altaz_cyga.append(coords.altaz(t*24*3600,math.degrees(ra_cyga),math.degrees(dec_cyga)))
-	beam_casa.append(beam_dr.lba(mean_freq,(coords.altaz(t*24*3600,math.degrees(ra_casa),math.degrees(dec_casa)))[0],(coords.altaz(t*24*3600,math.degrees(ra_casa),math.degrees(dec_casa)))[1]))
-	beam_cyga.append(beam_dr.lba(mean_freq,(coords.altaz(t*24*3600,math.degrees(ra_cyga),math.degrees(dec_cyga)))[0],(coords.altaz(t*24*3600,math.degrees(ra_cyga),math.degrees(dec_cyga)))[1]))
+	beam_casa.append(lofar_beams.lba(mean_freq,(coords.altaz(t*24*3600,math.degrees(ra_casa),math.degrees(dec_casa)))[0],(coords.altaz(t*24*3600,math.degrees(ra_casa),math.degrees(dec_casa)))[1],normalized=True))
+	beam_cyga.append(lofar_beams.lba(mean_freq,(coords.altaz(t*24*3600,math.degrees(ra_cyga),math.degrees(dec_cyga)))[0],(coords.altaz(t*24*3600,math.degrees(ra_cyga),math.degrees(dec_cyga)))[1],normalized=True))
 beam_casa = array(beam_casa)
 beam_cyga = array(beam_cyga)
 altaz_casa = array(altaz_casa)
@@ -158,6 +165,7 @@ p0_range = [[-max(data_xxa),max(data_xxa)],[0,2*pi],[-max(data_xxa),max(data_xxa
 
 # loop to do multiple fits and keep parameters of best fit
 for i in range(ntrials):
+#	p0 = [p0_range[0][0]+random()*(p0_range[0][1]-p0_range[0][0]),p0_range[1][0]+random()*(p0_range[1][1]-p0_range[1][0])]
 	p0 = [p0_range[0][0]+random()*(p0_range[0][1]-p0_range[0][0]),p0_range[1][0]+random()*(p0_range[1][1]-p0_range[1][0]),p0_range[2][0]+random()*(p0_range[2][1]-p0_range[2][0])]
 #	p1, cov_x, infodict, mesg, success = optimize.leastsq(errfunc, p0[:], args = (x1, x2, data_xxr), full_output=1)
 	p1, cov_x, infodict, mesg, success = optimize.leastsq(errfunc, p0[:], args = (x1, x2, beam_casa, beam_cyga, data_xxa), full_output=1)
@@ -191,12 +199,14 @@ subplot(212)
 #plot(fft_time,abs(fft(data_xxa))/max(abs(fft(data_xxa))),"b--",fft_time,abs(fft(fitfunc(best_params,x1,x2,beam_casa,beam_cyga)))/max(abs(fft(fitfunc(best_params,x1,x2,beam_casa,beam_cyga)))),"r-")
 #axis([0,500,min(append(abs(fft(data_xxr)),abs(fft(fitfunc(best_params,x1,x2))))),max(append(abs(fft(data_xxr)),abs(fft(fitfunc(best_params,x1,x2)))))])
 
-plot(time,beam_casa,'b',time,beam_cyga,'r')
+plot(rel_time,beam_casa,'b',rel_time,beam_cyga,'r')
 #plot(time,fitfunc(best_params,x1,x2,beam_casa,beam_cyga),'b',time,fitfunc([2*best_params[0],best_params[1],best_params[2]],x1,x2,beam_casa,beam_cyga),'r',time,fitfunc([best_params[0],best_params[1],best_params[0]],x1,x2,beam_casa,beam_cyga),'g')
+ylabel("Beam E**2 (Normalized to zenith)")
+
 # more plot stuff
 subplot(211)
 title("Time vs. xxa, Baseline " + \
-      sys.argv[2] + '-' + sys.argv[3] + ", Sub-band(" + sys.argv[4] +
+      sys.argv[2] + '-' + sys.argv[3] + ", Sub-band(" + subband +
       ") " + " Chan0(" + str(channel_range[0]) + "), nchan(" + str(len(channel_range)) + ")\n" + sys.argv[1] )
 xlabel("Time (MJD)")
 ylabel("Intensity")

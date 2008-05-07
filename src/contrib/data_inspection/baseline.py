@@ -7,10 +7,10 @@ from numpy import *
 from scipy import *
 
 # check usage
-if len(sys.argv) < 5 or len(sys.argv) > 10:
+if len(sys.argv) < 4 or len(sys.argv) > 10:
 	print "Usage:"
 	print "\tbaseline.py <file> <antenna1> <antenna2> " + \
-	      "<sub-band> ['channel' or 'time'] [channel/time range] " + \
+	      "[sub-band] ['channel' or 'time'] [channel/time range] " + \
 	      "['p'hase or 'a'mplitude] [polarization (0-3,4-6)] [plot range xmin,xmax,ymin,ymax (no spaces)]"
 	print "\t<> required"
 	print "\t E.g., baseline.py /lifs006/SB3.MS 1 10 0 channel 3:10 a 6 4.69e9,4.7e9,0,0.001"
@@ -25,6 +25,8 @@ if len(sys.argv) < 5 or len(sys.argv) > 10:
 data_name = "DATA"
 
 # set default values
+if len(sys.argv) < 5:  subband = str(0)
+else: subband = sys.argv[4]
 if len(sys.argv) < 6:  quantity_plot = 'channel'
 else: quantity_plot = sys.argv[5]
 if len(sys.argv) < 7:  range_plot = -1
@@ -57,7 +59,7 @@ if ( msds.open(sys.argv[1]) ):
 tablename = "MAIN";
 msds.setFilter( "TIME," + data_name, \
 	"ANTENNA1 = " + sys.argv[2] + " AND ANTENNA2 = " + sys.argv[3] + \
-	" AND DATA_DESC_ID = " + sys.argv[4] )
+	" AND DATA_DESC_ID = " + subband )
 maintable = msds.openTable( tablename );
 
 # get times
@@ -97,7 +99,7 @@ if (range_plot != -1):
 		if pol2:  plot( time, current_value2, "," )
 		if axis_range:  axis(axis_range)
 		title("Time vs. Amplitude, Baseline " + \
-		      sys.argv[2] + '-' + sys.argv[3] + ", Sub-band(" + sys.argv[4] +
+		      sys.argv[2] + '-' + sys.argv[3] + ", Sub-band(" + subband +
 		      ") " + " Chan0(" + str(range_plot[0]) + "), Nchan(" + str(len(range_plot)) + ")\n" + sys.argv[1] )
 		xlabel("Time (MJD)")
 		if event_time:  plot( event_time*ones(2), array([min(current_value),max(current_value)]))
@@ -114,7 +116,7 @@ if (range_plot != -1):
 		plot( current_value, "," )
 		if pol2: plot( current_value2, "," )
 		if axis_range:  axis(axis_range)
-		title("Channel vs. Amplitude, Baseline " + sys.argv[2] + '-' + sys.argv[3] + ", Sub-band(" + sys.argv[4] + "), " + \
+		title("Channel vs. Amplitude, Baseline " + sys.argv[2] + '-' + sys.argv[3] + ", Sub-band(" + subband + "), " + \
 		      " Time(" + str(time[range_plot[0]]) + " MJD) \n dtime(" + str(len(range_plot)) + " ints), " + sys.argv[1] )
 		xlabel("Channel")
 
@@ -137,7 +139,7 @@ else:
 			if pol2: plot ( time, current_value2, ",")
 			if axis_range:  axis(axis_range)
 			title("Time vs. Amplitude, Baseline " + \
-			      sys.argv[2] + '-' + sys.argv[3] + ", Sub-band(" + sys.argv[4] +
+			      sys.argv[2] + '-' + sys.argv[3] + ", Sub-band(" + subband +
 			      ") " + str(data.shape[1]) + " channels" + '\n' + sys.argv[1] )
 		xlabel("Time (MJD)")
 		if event_time:  plot( event_time*ones(2), array([current_value_min,current_value_max]))
@@ -155,7 +157,7 @@ else:
 			if pol2: plot( current_value2, ",")
 			if axis_range:  axis(axis_range)
 			title("Time vs. Amplitude, Baseline " + \
-			      sys.argv[2] + '-' + sys.argv[3] + ", Sub-band(" + sys.argv[4] +
+			      sys.argv[2] + '-' + sys.argv[3] + ", Sub-band(" + subband +
 			      ") " + str(len(time)) + " times" + '\n' + sys.argv[1] )
 		xlabel("Channel")
 
