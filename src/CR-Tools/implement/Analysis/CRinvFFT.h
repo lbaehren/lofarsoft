@@ -99,19 +99,6 @@ namespace CR { // Namespace CR -- begin
     // ---------------------------------------------------------- Private Methods
 
     /*!
-      \brief Get the "shifted" and calibrated frequency domain data
-      
-      \param dr - Pointer to the (initialized) DataReader
-
-      \return The processed frequency domain data
-
-      "shifted" means the the phase gradients for beamforming into the stored 
-      direction are already multiplied to the data.
-      The calibration is such that after the backwards FFT the output is in V/m/MHz.
-    */
-    Matrix<DComplex> GetShiftedFFT(DataReader *dr);
-
-    /*!
       \brief Initialize the CalTableInterpolater for the antenna gain
       
       \param dr - Pointer to the (initialized) DataReader
@@ -197,6 +184,20 @@ namespace CR { // Namespace CR -- begin
 
     // ------------------------------------------------------------------ Methods
     
+
+    /*!
+      \brief Get the "shifted" and calibrated frequency domain data
+      
+      \param dr - Pointer to the (initialized) DataReader
+
+      \return The processed frequency domain data
+
+      "shifted" means the the phase gradients for beamforming into the stored 
+      direction are already multiplied to the data.
+      The calibration is such that after the backwards FFT the output is in V/m/MHz.
+    */
+    Matrix<DComplex> GetShiftedFFT(DataReader *dr);
+
     /*!
       \brief Get the time series for all antennas
       

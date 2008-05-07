@@ -149,6 +149,14 @@ Bool GetCalFFT(GlishSysEvent &event, void *);
 Bool GetFilteredFFT(GlishSysEvent &event, void *);
 
 /*!
+  \brief Get the (time-)shifted FFT
+
+  \return status -- Status of the operation; return <tt>false</tt> if an error
+                    was encountered
+*/
+Bool GetShiftedFFT(GlishSysEvent &event, void *);
+
+/*!
   \brief Get the Beams etc.
 
   \return status -- Status of the operation; return <tt>false</tt> if an error

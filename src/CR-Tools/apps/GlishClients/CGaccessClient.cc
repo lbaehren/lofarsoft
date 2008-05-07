@@ -368,6 +368,64 @@ Bool GetFilteredFFT(GlishSysEvent &event, void *){
   };   
   return True;
 };
+//---------------------------------------------------------------------  GetShiftedFFT 
+Bool GetShiftedFFT(GlishSysEvent &event, void *){
+  GlishSysEventSource *glishBus = event.glishSource();
+  try {
+    Double Az, El, distance=1e37, XC, YC, ExtraDelay=0.; 
+    Bool RotatePos=False;
+    if (event.val().type() != GlishValue::RECORD) {
+      cerr << "CGaccessClient:GetShiftedFFT: Need record with: Az, El, XC, YC!" 
+	   << endl;
+      if (glishBus->replyPending()) {
+	glishBus->reply(GlishArray(False));
+      };
+      return True;
+    };
+    GlishRecord  inrec = event.val();
+    Record input;
+    inrec.toRecord(input);
+    if (!(input.isDefined("Az") && input.isDefined("El") 
+	  && input.isDefined("XC") && input.isDefined("YC") )) {
+      cerr << "CGaccessClient:GetShiftedFFT: Need record with: Az, El, XC, YC!" 
+	   << endl;
+      if (glishBus->replyPending()) {
+	glishBus->reply(GlishArray(False));
+      };
+      return True;
+    };
+    Az = input.asDouble("Az");
+    El = input.asDouble("El");
+    XC = input.asDouble("XC");
+    YC = input.asDouble("YC");
+    if (input.isDefined("distance")){
+      distance = input.asDouble("distance");
+    };
+    if (input.isDefined("ExtraDelay")){
+      ExtraDelay = input.asDouble("ExtraDelay");
+    };
+    if (input.isDefined("RotatePos")){
+      RotatePos = input.asBool("RotatePos");
+    };
+    Matrix<Double> TimeSeries;
+    Vector<Double> ccBeamData, xBeamData, pBeamData;
+    pipeline_p->setPhaseCenter(XC, YC, RotatePos);
+    pipeline_p->setDirection(Az, El, distance);
+    pipeline_p->setExtraDelay(ExtraDelay);
+    Matrix<DComplex> ShiftedFFT;
+    ShiftedFFT = pipeline_p->GetShiftedFFT(DataReader_p);
+    if (glishBus->replyPending()) {
+      glishBus->reply(GlishArray(ShiftedFFT));
+    };    
+  } catch (AipsError x) {
+    cerr << "CGaccessClient:GetShiftedFFT: " << x.getMesg() << endl;
+    if (glishBus->replyPending()) {
+      glishBus->reply(GlishArray(False));
+    };
+    return False;
+  };   
+  return True;
+};
 
 //---------------------------------------------------------------------   GetTCXP
 Bool GetTCXP(GlishSysEvent &event, void *){
@@ -519,6 +577,7 @@ int main(int argc, char *argv[])
   glishStream.addTarget(GetFFT,"GetFFT");
   glishStream.addTarget(GetCalFFT,"GetCalFFT");
   glishStream.addTarget(GetFilteredFFT,"GetFilteredFFT");
+  glishStream.addTarget(GetShiftedFFT,"GetShiftedFFT");
   glishStream.addTarget(GetTCXP,"GetTCXP");
 
   glishStream.addTarget(GetFieldStrength,"GetFieldStrength");
