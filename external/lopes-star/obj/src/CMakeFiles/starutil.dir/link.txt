@@ -1,0 +1,2 @@
+/usr/bin/ar cr libstarutil.a  CMakeFiles/starutil.dir/util.o CMakeFiles/starutil.dir/trigger.o CMakeFiles/starutil.dir/calibration.o CMakeFiles/starutil.dir/reconstruction.o 
+/usr/bin/ranlib libstarutil.a 
