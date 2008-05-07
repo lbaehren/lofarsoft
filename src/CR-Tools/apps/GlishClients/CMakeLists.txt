@@ -46,6 +46,8 @@ set (glish_clients
   SimpleDynspecClient
 )
 
+include_directories (${CR_SOURCE_DIR}/apps)
+
 foreach (client ${glish_clients})
   ## compiler instructions
   add_executable (${client} ${client}.cc)
