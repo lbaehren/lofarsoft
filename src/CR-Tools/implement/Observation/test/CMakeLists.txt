@@ -8,6 +8,7 @@
 set (tests
   tObservationData
   tObservationFrame
+  tStationBeam
   )
 
 ## -----------------------------------------------------------------------------
