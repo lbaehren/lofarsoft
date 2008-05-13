@@ -35,6 +35,8 @@
   \date 2007/03/06
 */
 
+using std::cout;
+using std::endl;
 using CR::TimeFreq;
 
 // -----------------------------------------------------------------------------
@@ -49,15 +51,15 @@ void show_frequencies (vector<double> const &freq,
   uint nofChannels (freq.size());
 
   // how many frequency channels do we have?
-  std::cout << std::endl;
-  std::cout << " Nyquist zone    = " << nyquistZone << std::endl;
-  std::cout << " nof channels    = " << nofChannels << std::endl;
-  std::cout << " freq. increment = " << incr             << std::endl;
-  std::cout << " freq[1]-freq[0] = " << freq[1]-freq[0]  << std::endl;
+  cout << endl;
+  cout << " Nyquist zone    = " << nyquistZone << endl;
+  cout << " nof channels    = " << nofChannels << endl;
+  cout << " freq. increment = " << incr             << endl;
+  cout << " freq[1]-freq[0] = " << freq[1]-freq[0]  << endl;
 
   // print a subset of the frequency values
-  std::cout << std::endl;
-  std::cout << " [ "
+  cout << endl;
+  cout << " [ "
 	    << freq[0] << " "
 	    << freq[1] << " "
 	    << freq[2] << " "
@@ -68,7 +70,7 @@ void show_frequencies (vector<double> const &freq,
 	    << freq[nofChannels-2] << " "
 	    << freq[nofChannels-1] << " ]"
 	    << std:: endl;
-  std::cout << std::endl;
+  cout << endl;
   
 }
 
@@ -81,25 +83,25 @@ void show_frequencies (vector<double> const &freq,
 */
 int test_TimeFreq ()
 {
-  std::cout << "\n[test_TimeFreq]\n" << std::endl;
+  cout << "\n[test_TimeFreq]\n" << endl;
 
   int nofFailedTests (0);
   uint blocksize (2048);
   double sampleFrequency (80e06);
   uint nyquistZone (2);
   
-  std::cout << "[1] Testing default constructor ..." << std::endl;
+  cout << "[1] Testing default constructor ..." << endl;
   try {
     TimeFreq data;
     
     data.summary();
     
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  std::cout << "[2] Testing argumented constructors ..." << std::endl;
+  cout << "[2] Testing argumented constructors ..." << endl;
   try {
     TimeFreq data1 (blocksize);
     data1.summary();
@@ -107,22 +109,22 @@ int test_TimeFreq ()
     TimeFreq data2 (blocksize,sampleFrequency,nyquistZone);
     data2.summary();
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  std::cout << "[3] Testing copy constructor ..." << std::endl;
+  cout << "[3] Testing copy constructor ..." << endl;
   try {
     TimeFreq data1 (blocksize,sampleFrequency,nyquistZone);
     TimeFreq data2 (data1);
     
-    std::cout << "-- Properties of the original object" << std::endl;
+    cout << "-- Properties of the original object" << endl;
     data1.summary();
-    std::cout << "-- Properties of the copied object" << std::endl;
+    cout << "-- Properties of the copied object" << endl;
     data2.summary();
     
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
@@ -171,38 +173,38 @@ int test_TimeFreq ()
 */
 int test_sampleFrequency ()
 {
-  std::cout << "\n[test_sampleFrequency]\n" << std::endl;
+  cout << "\n[test_sampleFrequency]\n" << endl;
 
   int nofFailedTests (0);
   double sampleFrequency (0.0);
   TimeFreq data;
 
-  std::cout << "[1] Get the natural value of sample frequency" << std::endl;
+  cout << "[1] Get the natural value of sample frequency" << endl;
   try {
     sampleFrequency = data.sampleFrequency();
 
-    std::cout << " sample frequency [Hz] = " << sampleFrequency << std::endl;
+    cout << " sample frequency [Hz] = " << sampleFrequency << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  std::cout << "[2] Retrieve sample frequency in user defined unit" << std::endl;
+  cout << "[2] Retrieve sample frequency in user defined unit" << endl;
   try {
     sampleFrequency = data.sampleFrequency("GHz");
-    std::cout << " sample frequency [GHz] = " << sampleFrequency << std::endl;
+    cout << " sample frequency [GHz] = " << sampleFrequency << endl;
     //
     sampleFrequency = data.sampleFrequency("MHz");
-    std::cout << " sample frequency [MHz] = " << sampleFrequency << std::endl;
+    cout << " sample frequency [MHz] = " << sampleFrequency << endl;
     //
     sampleFrequency = data.sampleFrequency("kHz");
-    std::cout << " sample frequency [kHz] = " << sampleFrequency << std::endl;
+    cout << " sample frequency [kHz] = " << sampleFrequency << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  std::cout << "[3] Set sample frequency in natural units" << std::endl;
+  cout << "[3] Set sample frequency in natural units" << endl;
   try {
     sampleFrequency = 1e08;
 
@@ -210,51 +212,119 @@ int test_sampleFrequency ()
 
     sampleFrequency = data.sampleFrequency();
 
-    std::cout << " sample frequency [Hz] = " << sampleFrequency << std::endl;
+    cout << " sample frequency [Hz] = " << sampleFrequency << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  std::cout << "[4] Set sample frequency user defined units" << std::endl;
+  cout << "[4] Set sample frequency user defined units" << endl;
   try {
     data.setSampleFrequency (80,"Hz");
     sampleFrequency = data.sampleFrequency();
-    std::cout << " sample frequency [Hz] = " << sampleFrequency << std::endl;
+    cout << " sample frequency [Hz] = " << sampleFrequency << endl;
     //
     data.setSampleFrequency (80,"kHz");
     sampleFrequency = data.sampleFrequency();
-    std::cout << " sample frequency [Hz] = " << sampleFrequency << std::endl;
+    cout << " sample frequency [Hz] = " << sampleFrequency << endl;
     //
     data.setSampleFrequency (80,"MHz");
     sampleFrequency = data.sampleFrequency();
-    std::cout << " sample frequency [Hz] = " << sampleFrequency << std::endl;
+    cout << " sample frequency [Hz] = " << sampleFrequency << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  std::cout << "[5] Set sample frequency from Quantity" << std::endl;
+  cout << "[5] Set sample frequency from Quantity" << endl;
   try {
     casa::Quantity rate1 (80,"Hz");
     data.setSampleFrequency (rate1);
     sampleFrequency = data.sampleFrequency();
-    std::cout << " sample frequency [Hz] = " << sampleFrequency << std::endl;
+    cout << " sample frequency [Hz] = " << sampleFrequency << endl;
     //
     casa::Quantity rate2 (80,"kHz");
     data.setSampleFrequency (rate2);
     sampleFrequency = data.sampleFrequency();
-    std::cout << " sample frequency [Hz] = " << sampleFrequency << std::endl;
+    cout << " sample frequency [Hz] = " << sampleFrequency << endl;
     //
     casa::Quantity rate3 (80,"MHz");
     data.setSampleFrequency (rate3);
     sampleFrequency = data.sampleFrequency();
-    std::cout << " sample frequency [Hz] = " << sampleFrequency << std::endl;
+    cout << " sample frequency [Hz] = " << sampleFrequency << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Test retrival of the values along the time axis
+  
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_timeValues ()
+{
+  cout << "\n[test_timeValues]\n" << endl;
+
+  int nofFailedTests (0);
+  uint blocksize (2048);
+  double sampleFrequency (80e06);
+  uint nyquistZone (1);
+  TimeFreq data (blocksize,sampleFrequency,nyquistZone);
+
+  cout << "-- Sample frequency [Hz] = " << sampleFrequency << endl;
+  cout << "-- Sample rate     [sec] = " << 1/sampleFrequency << endl;
+  cout << "-- Blocksize   [samples] = " << data.blocksize() << endl;
+  cout << "-- Blocksize       [sec] = " << data.blocksize()/sampleFrequency << endl;
+  cout << endl;
+  
+  cout << "[1] timeValues()" << endl;
+  try {
+#ifdef HAVE_CASA
+    casa::Vector<double> values = data.timeValues();
+    cout << " [" << values(0) << " " << values(1)<< " " << values(2) << " ...]" << endl;
+#else 
+    std::vector<double> values = data.timeValues();
+    cout << " [" << values[0] << " " << values[1]<< " " << values[2] << " ...]" << endl;
+#endif
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[2] timeValues(uint,bool=false)" << endl;
+  try {
+#ifdef HAVE_CASA
+    casa::Vector<double> values = data.timeValues(1,false);
+    cout << " [" << values(0) << " " << values(1)<< " " << values(2) << " ...]" << endl;
+#else 
+    std::vector<double> values = data.timeValues(1,false);
+    cout << " [" << values[0] << " " << values[1]<< " " << values[2] << " ...]" << endl;
+#endif
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[2] timeValues(uint,bool=true)" << endl;
+  try {
+#ifdef HAVE_CASA
+    casa::Vector<double> values = data.timeValues(1,true);
+    cout << " [" << values(0) << " " << values(1)<< " " << values(2) << " ...]" << endl;
+#else 
+    std::vector<double> values = data.timeValues(1,true);
+    cout << " [" << values[0] << " " << values[1]<< " " << values[2] << " ...]" << endl;
+#endif
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
   return nofFailedTests;
 }
 
@@ -278,7 +348,7 @@ int test_sampleFrequency ()
 */
 int test_frequencyValues ()
 {
-  std::cout << "\n[test_frequencyValues]\n" << std::endl;
+  cout << "\n[test_frequencyValues]\n" << endl;
 
   int nofFailedTests (0);
   uint blocksize (2048);
@@ -287,7 +357,7 @@ int test_frequencyValues ()
   TimeFreq data (blocksize,sampleFrequency,nyquistZone);
   vector<double> freq;
 
-  std::cout << "[1] Frequency values for different Nyquist zones..." << std::endl;
+  cout << "[1] Frequency values for different Nyquist zones..." << endl;
   try {
     freq = data.frequencyValues();
     show_frequencies (freq,
@@ -301,11 +371,11 @@ int test_frequencyValues ()
 		      data.nyquistZone(),
 		      data.frequencyIncrement());
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  std::cout << "[2] Frequency channels selection by mask..." << std::endl;
+  cout << "[2] Frequency channels selection by mask..." << endl;
   try {
     vector<bool> selection (data.fftLength(),true);
 
@@ -317,11 +387,11 @@ int test_frequencyValues ()
 		      data.nyquistZone(),
 		      data.frequencyIncrement());
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  std::cout << "[3] Frequency channels selection by range..." << std::endl;
+  cout << "[3] Frequency channels selection by range..." << endl;
   try {
     vector<double> range (2);
 
@@ -345,7 +415,7 @@ int test_frequencyValues ()
 		      data.frequencyIncrement());
 
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
@@ -361,7 +431,7 @@ int test_frequencyValues ()
 */
 int test_coordinateAxes ()
 {
-  std::cout << "\n[test_coordinateAxes]\n" << std::endl;
+  cout << "\n[test_coordinateAxes]\n" << endl;
 
   int nofFailedTests (0);
 
@@ -370,35 +440,35 @@ int test_coordinateAxes ()
   uint nyquistZone (2);
   TimeFreq data (blocksize,sampleFrequency,nyquistZone);
 
-  std::cout << "[1] Coordinates axes using the default methods" << std::endl;
+  cout << "[1] Coordinates axes using the default methods" << endl;
   try {
     LinearCoordinate timeAxis   = data.timeAxis();
 
-    std::cout << "Time axis" << std::endl;
-    std::cout << "-- nof. pixel axes  = " << timeAxis.nPixelAxes() << std::endl;
-    std::cout << "-- nof. world axes  = " << timeAxis.nWorldAxes() << std::endl;
-    std::cout << "-- World axis names = " << timeAxis.worldAxisNames() << std::endl;
-    std::cout << "-- World axis units = " << timeAxis.worldAxisUnits() << std::endl;
-    std::cout << "-- Reference value  = " << timeAxis.referenceValue() << std::endl;
-    std::cout << "-- Reference pixel  = " << timeAxis.referencePixel() << std::endl;
-    std::cout << "-- Increment        = " << timeAxis.increment() << std::endl;
+    cout << "Time axis" << endl;
+    cout << "-- nof. pixel axes  = " << timeAxis.nPixelAxes() << endl;
+    cout << "-- nof. world axes  = " << timeAxis.nWorldAxes() << endl;
+    cout << "-- World axis names = " << timeAxis.worldAxisNames() << endl;
+    cout << "-- World axis units = " << timeAxis.worldAxisUnits() << endl;
+    cout << "-- Reference value  = " << timeAxis.referenceValue() << endl;
+    cout << "-- Reference pixel  = " << timeAxis.referencePixel() << endl;
+    cout << "-- Increment        = " << timeAxis.increment() << endl;
 
     SpectralCoordinate freqAxis = data.frequencyAxis();
 
-    std::cout << "Frequency axis" << std::endl;
-    std::cout << "-- nof. pixel axes  = " << freqAxis.nPixelAxes() << std::endl;
-    std::cout << "-- nof. world axes  = " << freqAxis.nWorldAxes() << std::endl;
-    std::cout << "-- World axis names = " << freqAxis.worldAxisNames() << std::endl;
-    std::cout << "-- World axis units = " << freqAxis.worldAxisUnits() << std::endl;
-    std::cout << "-- Reference value  = " << freqAxis.referenceValue() << std::endl;
-    std::cout << "-- Reference pixel  = " << freqAxis.referencePixel() << std::endl;
-    std::cout << "-- Increment        = " << freqAxis.increment() << std::endl;
+    cout << "Frequency axis" << endl;
+    cout << "-- nof. pixel axes  = " << freqAxis.nPixelAxes() << endl;
+    cout << "-- nof. world axes  = " << freqAxis.nWorldAxes() << endl;
+    cout << "-- World axis names = " << freqAxis.worldAxisNames() << endl;
+    cout << "-- World axis units = " << freqAxis.worldAxisUnits() << endl;
+    cout << "-- Reference value  = " << freqAxis.referenceValue() << endl;
+    cout << "-- Reference pixel  = " << freqAxis.referencePixel() << endl;
+    cout << "-- Increment        = " << freqAxis.increment() << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  std::cout << "[2] Coordinates axes using the default methods" << std::endl;
+  cout << "[2] Coordinates axes using the default methods" << endl;
   try {
     double refValue (100);
     double increment (0.1);
@@ -408,29 +478,29 @@ int test_coordinateAxes ()
 						increment,
 						refPixel);
 
-    std::cout << "Time axis" << std::endl;
-    std::cout << "-- nof. pixel axes  = " << timeAxis.nPixelAxes() << std::endl;
-    std::cout << "-- nof. world axes  = " << timeAxis.nWorldAxes() << std::endl;
-    std::cout << "-- World axis names = " << timeAxis.worldAxisNames() << std::endl;
-    std::cout << "-- World axis units = " << timeAxis.worldAxisUnits() << std::endl;
-    std::cout << "-- Reference value  = " << timeAxis.referenceValue() << std::endl;
-    std::cout << "-- Reference pixel  = " << timeAxis.referencePixel() << std::endl;
-    std::cout << "-- Increment        = " << timeAxis.increment() << std::endl;
+    cout << "Time axis" << endl;
+    cout << "-- nof. pixel axes  = " << timeAxis.nPixelAxes()     << endl;
+    cout << "-- nof. world axes  = " << timeAxis.nWorldAxes()     << endl;
+    cout << "-- World axis names = " << timeAxis.worldAxisNames() << endl;
+    cout << "-- World axis units = " << timeAxis.worldAxisUnits() << endl;
+    cout << "-- Reference value  = " << timeAxis.referenceValue() << endl;
+    cout << "-- Reference pixel  = " << timeAxis.referencePixel() << endl;
+    cout << "-- Increment        = " << timeAxis.increment()      << endl;
 
     SpectralCoordinate freqAxis = data.frequencyAxis(refValue,
 						     increment,
 						     refPixel);
     
-    std::cout << "Frequency axis" << std::endl;
-    std::cout << "-- nof. pixel axes  = " << freqAxis.nPixelAxes() << std::endl;
-    std::cout << "-- nof. world axes  = " << freqAxis.nWorldAxes() << std::endl;
-    std::cout << "-- World axis names = " << freqAxis.worldAxisNames() << std::endl;
-    std::cout << "-- World axis units = " << freqAxis.worldAxisUnits() << std::endl;
-    std::cout << "-- Reference value  = " << freqAxis.referenceValue() << std::endl;
-    std::cout << "-- Reference pixel  = " << freqAxis.referencePixel() << std::endl;
-    std::cout << "-- Increment        = " << freqAxis.increment() << std::endl;
+    cout << "Frequency axis" << endl;
+    cout << "-- nof. pixel axes  = " << freqAxis.nPixelAxes()     << endl;
+    cout << "-- nof. world axes  = " << freqAxis.nWorldAxes()     << endl;
+    cout << "-- World axis names = " << freqAxis.worldAxisNames() << endl;
+    cout << "-- World axis units = " << freqAxis.worldAxisUnits() << endl;
+    cout << "-- Reference value  = " << freqAxis.referenceValue() << endl;
+    cout << "-- Reference pixel  = " << freqAxis.referencePixel() << endl;
+    cout << "-- Increment        = " << freqAxis.increment()      << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
@@ -447,6 +517,8 @@ int main ()
   nofFailedTests += test_TimeFreq ();
   // Test accesss to the sample frequency in the ADC
   nofFailedTests += test_sampleFrequency ();
+  // Test retrival of the time values
+  nofFailedTests += test_timeValues ();
   // Test retrival of the frequency values
   nofFailedTests += test_frequencyValues ();
   // Test conversion of parameters to coordinate axes

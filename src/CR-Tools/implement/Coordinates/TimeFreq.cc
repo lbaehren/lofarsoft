@@ -274,18 +274,76 @@ namespace CR { // Namespace CR -- begin
   
   // ----------------------------------------------------------------- timeValues
 
-  vector<double> TimeFreq::timeValues (uint const &sampleOffset) {
-    vector<uint> sampleValues (blocksize_p,sampleOffset);
+#ifdef HAVE_CASA
+  casa::Vector<double> TimeFreq::timeValues (uint const &sampleOffset,
+					     bool const &offsetIsBlock)
+  {
+    casa::Vector<uint> sampleValues (blocksize_p);
 
-    for (uint n(0); n<blocksize_p; n++) {
-      sampleValues[n] += n;
+    if (offsetIsBlock) {
+      sampleValues = blocksize_p*sampleOffset;
+    } else {
+      sampleValues = sampleOffset;
     }
-
+    
+    for (uint n(0); n<blocksize_p; n++) {
+      sampleValues(n) += n;
+    }
+    
     return timeValues (sampleValues);
   }
+#else  
+  vector<double> TimeFreq::timeValues (uint const &sampleOffset,
+				       bool const &offsetIsBlock)
+  {
+    if (offsetIsBlock) {
+      /* Offset is given by the block number */
+      vector<uint> sampleValues (blocksize_p,sampleOffset*blocksize_p);
+      
+      for (uint n(0); n<blocksize_p; n++) {
+	sampleValues[n] += n;
+      }
+      
+      return timeValues (sampleValues);
+    } else {
+      /* Offset is given in number of samples */
+      vector<uint> sampleValues (blocksize_p,sampleOffset);
+      
+      for (uint n(0); n<blocksize_p; n++) {
+	sampleValues[n] += n;
+      }
+      
+      return timeValues (sampleValues);
+    }
+  }
+#endif
   
   // ----------------------------------------------------------------- timeValues
-  
+
+#ifdef HAVE_CASA
+  casa::Vector<double> TimeFreq::timeValues (casa::Vector<uint> const &sampleValues)
+  {
+    uint nelem (sampleValues.size());
+    casa::Vector<double> times (blocksize_p);
+
+    /*
+      Since the function accepts vector of sample values of arbitray shape,
+      we at least give a warning in case the input vector does not match the
+      internally stored parameter for the blocksize
+    */
+    if (nelem != blocksize_p) {
+      std::cerr << "[TimeFreq::timeValues] Selection vector has wrong length!"
+		<< std::endl;
+    }
+    
+    for (uint n(0); n<nelem; n++) {
+      times(n) = referenceTime_p + sampleValues(n)/sampleFrequency_p;
+    }
+    
+    return times;
+    
+  }
+#else  
   vector<double> TimeFreq::timeValues (vector<uint> const &sampleValues)
   {
     uint nelem (sampleValues.size());
@@ -308,6 +366,7 @@ namespace CR { // Namespace CR -- begin
     return times;
     
   }
+#endif
 
   // ============================================================================
   //

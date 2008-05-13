@@ -331,7 +331,7 @@ namespace CR { // Namespace CR -- begin
 			   of a data block of \f$ N_{\rm Blocksize} \f$
 			   samples.
     */
-    inline uint fftLength () const {
+    inline uint fftLength () const { /*BPL*/
       return fftLength_p;
     }
 
@@ -342,7 +342,7 @@ namespace CR { // Namespace CR -- begin
                                 sample frequency: \f$ T_{\rm Sample} =
 				1/\nu_{\rm Sample}  \f$
     */
-    inline double sampleInterval () {
+    inline double sampleInterval () { /*BPL*/
       return 1/sampleFrequency_p;
     }
 
@@ -353,7 +353,7 @@ namespace CR { // Namespace CR -- begin
                                     \f[ \delta \nu =
 				    \frac{\nu_{\rm Sample}}{N_{\rm Blocksize}} \f]
     */
-    inline double frequencyIncrement () const {
+    inline double frequencyIncrement () const { /*BPL*/
       return sampleFrequency_p/blocksize_p;
     }
 
@@ -421,14 +421,19 @@ namespace CR { // Namespace CR -- begin
       \brief Get the values along the time axis
 
       \return timeValues -- Time values \f$ \{ \nu \} \f$ for the samples within
-                            a data block of length \f$ N_{\rm Blocksize} \f$
-			    with zero offset; i.e. this function returns the 
-			    first \f$ N_{\rm Blocksize} \f$ time values (as
-			    we know nothing here about blocks etc.).
+              a data block of length \f$ N_{\rm Blocksize} \f$ with zero offset;
+	      i.e. this function returns the first \f$ N_{\rm Blocksize} \f$ time
+	      values (as we know nothing here about blocks etc.).
     */
-    inline vector<double> timeValues () {
+#ifdef HAVE_CASA
+    virtual inline casa::Vector<double> timeValues () {
       return timeValues (0);
     }
+#else 
+    virtual inline vector<double> timeValues () {
+      return timeValues (0);
+    }
+#endif
     
     /*!
       \brief Get the values along the time axis
@@ -439,7 +444,13 @@ namespace CR { // Namespace CR -- begin
       \return timeValues -- Time values \f$ \{ \nu \} \f$ for the samples within
       a data block of length \f$ N_{\rm Blocksize} \f$
     */
-    vector<double> timeValues (uint const &sampleOffset);
+#ifdef HAVE_CASA
+    virtual casa::Vector<double> timeValues (uint const &sampleOffset,
+					     bool const &offsetIsBlock=false);
+#else
+    virtual vector<double> timeValues (uint const &sampleOffset,
+				       bool const &offsetIsBlock=false);
+#endif
     
     /*!
       \brief Get the values along the time axis
@@ -450,7 +461,11 @@ namespace CR { // Namespace CR -- begin
       \return timeValues -- Time values \f$ \{ \nu \} \f$ for the samples within
               a data block of length \f$ N_{\rm Blocksize} \f$
     */
-    vector<double> timeValues (vector<uint> const &sampleValues);
+#ifdef HAVE_CASA
+    virtual casa::Vector<double> timeValues (casa::Vector<uint> const &sampleValues);
+#else
+    virtual vector<double> timeValues (vector<uint> const &sampleValues);
+#endif
     
     /*!
       \brief Create time axis coordinate from parameters
