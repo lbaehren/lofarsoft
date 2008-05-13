@@ -917,7 +917,29 @@ namespace CR {  //  Namespace CR -- begin
                          FFT, [Hz]
    */
   Vector<Double> frequencyValues (Bool const &onlySelected=True);
-
+  
+  // ------------------------------- Overloading of functions from the base class
+  
+  /*!
+    \brief Get the values along the time axis
+    
+    \return timeValues -- Time values \f$ \{ \nu \} \f$ for the samples within
+            a data block of length \f$ N_{\rm Blocksize} \f$ with zero offset;
+	    i.e. this function returns the first \f$ N_{\rm Blocksize} \f$ time
+	    values (as we know nothing here about blocks etc.).
+  */
+#ifdef HAVE_CASA
+  virtual inline casa::Vector<double> timeValues () {
+    return TimeFreq::timeValues (block(),true);
+  }
+#else
+  virtual inline vector<double> timeValues () {
+    return TimeFreq::timeValues (block(),true);
+  }
+#endif
+  
+  // ------------------------------------------------------------- Hanning filter
+  
   /*!
     \brief Enable/Disable the Hanning filter
 
