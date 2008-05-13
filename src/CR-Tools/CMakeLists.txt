@@ -328,12 +328,9 @@ endif (CR_DEBUGGING_MESSAGES)
 ## Handle option: Enable standard set of compiler warnings? ON/OFF
 
 if (CR_COMPILER_WARNINGS)
-  list (APPEND CMAKE_CXX_FLAGS "-Wall")
-  list (APPEND CMAKE_CXX_FLAGS "-Wno-comment")
-  list (APPEND CMAKE_CXX_FLAGS "-Woverloaded-virtual")
-  if (NOT APPLE)
-    list (APPEND CMAKE_CXX_FLAGS "-Wno-non-template-friend")
-  endif (NOT APPLE)
+  set (CMAKE_CXX_FLAGS
+    "-Wall -Wno-comment -Woverloaded-virtual -Wno-non-template-friend"
+    )
 endif (CR_COMPILER_WARNINGS)
     
 ## -------------------------------------------------------------------
