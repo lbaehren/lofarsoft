@@ -445,11 +445,11 @@ namespace CR { // Namespace CR -- begin
       a data block of length \f$ N_{\rm Blocksize} \f$
     */
 #ifdef HAVE_CASA
-    virtual casa::Vector<double> timeValues (uint const &sampleOffset,
-					     bool const &offsetIsBlock=false);
+    casa::Vector<double> timeValues (uint const &sampleOffset,
+				     bool const &offsetIsBlock=false);
 #else
-    virtual vector<double> timeValues (uint const &sampleOffset,
-				       bool const &offsetIsBlock=false);
+    vector<double> timeValues (uint const &sampleOffset,
+			       bool const &offsetIsBlock=false);
 #endif
     
     /*!
@@ -462,9 +462,9 @@ namespace CR { // Namespace CR -- begin
               a data block of length \f$ N_{\rm Blocksize} \f$
     */
 #ifdef HAVE_CASA
-    virtual casa::Vector<double> timeValues (casa::Vector<uint> const &sampleValues);
+    casa::Vector<double> timeValues (casa::Vector<uint> const &sampleValues);
 #else
-    virtual vector<double> timeValues (vector<uint> const &sampleValues);
+    vector<double> timeValues (vector<uint> const &sampleValues);
 #endif
     
     /*!
