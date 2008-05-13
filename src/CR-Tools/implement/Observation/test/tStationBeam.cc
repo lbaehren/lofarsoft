@@ -56,9 +56,9 @@ Double freq_init =120e6 ;
 Double bandwidth = 32e6 ;
 Double station_radii = 30. ;
 
-uint n_stations = 48 ;
+uint n_stations = 5 ;
 
-uint stationid[48]= {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48 };
+uint stationid[5]= {1, 2, 30, 4, 3 };
 
 Vector<Double> position_x(n_stations,0.0);
 Vector<Double> position_y(n_stations,0.0);
@@ -104,11 +104,11 @@ int test_StationBeam ()
 
 Bool test_StationBeams ()
 {
-  
-  Bool ok(true) ;
-  
-  try{
-    
+
+ Bool ok(true) ;
+ 
+ try{
+ 
     Vector<uint> station_id( n_stations,0);
     
     for(uint stid=0; stid< n_stations; stid++){
@@ -128,7 +128,6 @@ Bool test_StationBeams ()
       posit_y(p) = posi_y[p];
     }
     
-    
     uint stationID(0) ;
     
     for(uint id =0 ; id < n_stations; id++){
@@ -143,16 +142,16 @@ Bool test_StationBeams ()
     StationBeam stbm ;
     SimplePlot smplt ;
     
-//     stbm.generate_statistics_table( station_radii,
-// 				    station_id,
-// 				    frequency_init,
-// 				    bandwidth,
-// 				    freq_interval,
-// 				    position_x,
-// 				    position_y,
-// 				    legendre_root,
-// 				    legendre_weight )   ;
-    
+    stbm.generate_statistics_table( station_radii,
+				    station_id,
+				    frequency_init,
+				    bandwidth,
+				    freq_interval,
+				    position_x,
+				    position_y,
+				    legendre_root,
+				    legendre_weight )   ;
+  
     
     //   ofstream logfile2 ;
     //  
@@ -167,6 +166,7 @@ Bool test_StationBeams ()
     ok = False;
   }
   return ok ;
+
 }
 
 // ------------------------------------------------------------------------------
