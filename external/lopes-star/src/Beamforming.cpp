@@ -20,32 +20,47 @@ using namespace TMath;
 
 //! beamforming
 /*!
-
-beamforming for a given shower around the reconstructed direction by plane fit
-
+  beamforming for a given shower around the reconstructed direction by plane fit
 */
-void TimeDelay(int NoChannels, char **AntPos, int daq_id, float Zenith, float Azimuth, float *delay, bool debug= false){
+
+// ------------------------------------------------------------------------------
+
+void TimeDelay (int NoChannels,
+		char **AntPos,
+		int daq_id,
+		float Zenith,
+		float Azimuth,
+		float *delay,
+		bool debug= false)
+{
   float Pos[3];
   float tZenith = Zenith * Pi() / 180.0;
   float tAzimuth = Azimuth;
   if(tAzimuth>360) tAzimuth -= 360;
   if(tAzimuth<0) tAzimuth = (360 - tAzimuth) * Pi() / 180.0;
   else tAzimuth = tAzimuth * Pi() / 180.0;
- 
+  
   float phi;
   for(int i=0; i<NoChannels; i++){
     GetAntPos(AntPos[i], daq_id, Pos);
-
+    
     //ground distance
     delay[i] = ( sin(tZenith)*cos(tAzimuth)*Pos[0] + sin(tZenith)*sin(tAzimuth)*Pos[1] + cos(tZenith)*Pos[2]*0 );
     delay[i] /= C();
-
+    
     if(debug) printf("%.12f -- channel %i\n",delay[i], i);
   }
 #warning z component equal to zero    
 }
 
-float TraceShift(int window_size, int NoZeros, int position, float *Trace, float delay){
+// ------------------------------------------------------------------------------
+
+float TraceShift (int window_size,
+		  int NoZeros,
+		  int position,
+		  float *Trace,
+		  float delay)
+{
   float shifted = 0;
   
   //time between to 2 samples in seconds
@@ -67,12 +82,21 @@ float TraceShift(int window_size, int NoZeros, int position, float *Trace, float
   return shifted;
 }
 
+// ------------------------------------------------------------------------------
 
-void CalculateBeamforming(int NoChannels, int window_size, int NoZeros, float **Trace, float *delay, float *BF_trace){
-  
-  for(int i=0; i<window_size; i++){
+void CalculateBeamforming (int NoChannels,
+			   int window_size,
+			   int NoZeros,
+			   float **Trace,
+			   float *delay,
+			   float *BF_trace)
+{
+  int i (0);
+  int j (0);
+
+  for(i=0; i<window_size; i++){
     BF_trace[i] = 0;
-    for(int j=0; j<NoChannels; j++){
+    for(j=0; j<NoChannels; j++){
       BF_trace[i] += TraceShift(window_size, NoZeros, i, Trace[j], delay[j]);
     }
   }
@@ -80,7 +104,11 @@ void CalculateBeamforming(int NoChannels, int window_size, int NoZeros, float **
 }
 
 
-void  MCSignals(int window_size, int NoChannels, float **Trace, float *delay){
+void  MCSignals (int window_size,
+		 int NoChannels,
+		 float **Trace,
+		 float *delay)
+{
   //define signal
 //  float signal[]={1,2,3,4,5,6,5,4,3,2,1};
   float signal[]={1,4,9,16,25,36,25,16,9,4,1};
@@ -287,10 +315,10 @@ if(debug) cout << "no antennas = " << NoAntennas << endl;
   //correction for Grande grid
   Azimuth[0] -= 15.7;
 
-  float expectedPulsePosition = 0;
-  int countPulse = 0;
-  float PulsePosition, PulseLength, tmpMax, tmpInt, Int_Post, Int_Pulse, tmpthreshold, snr;
-  int NoPulse;
+  float expectedPulsePosition (0);
+  int countPulse (0);
+//   float PulsePosition, PulseLength, tmpMax, tmpInt, Int_Post, Int_Pulse, tmpthreshold, snr;
+//   int NoPulse (0);
 
   for(int i=0; i<NoChannels; i++){
     if(bRFISupp) RFISuppression(event.window_size, Trace[i], Trace[i]);

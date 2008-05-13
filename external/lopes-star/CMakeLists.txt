@@ -137,7 +137,7 @@ find_path (PostgreSQL_INCLUDES libpq-fe.h
 
 if (PostgreSQL_INCLUDES)
   include_directories (${PostgreSQL_INCLUDES})
-  add_definitions (-DHAVE_PostgreSQL)
+  add_definitions (-DHAVE_POSTGRESQL)
 endif (PostgreSQL_INCLUDES)
 
 set (PostgreSQL_LIB "")

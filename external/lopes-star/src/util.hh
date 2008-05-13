@@ -3,8 +3,9 @@
 
 #define __compile
 #ifdef __compile
- //!postgresql
- #include <libpq-fe.h>
+#ifdef HAVE_POSTGRESQL
+#include <libpq-fe.h>
+#endif
 #endif
 
 
