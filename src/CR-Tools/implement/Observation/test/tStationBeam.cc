@@ -80,18 +80,18 @@ Double l_weight[5] = { 0.2369268850, 0.4786286705, 0.568888889, 0.4786286705, 0.
 
 /*!
   \brief Test constructors for a new StationBeam object
-
+  
   \return nofFailedTests -- The number of failed tests.
 */
 int test_StationBeam ()
 {
   int nofFailedTests (0);
-   
+  
   std::cout << "\n[test_StationBeam]\n" << std::endl;
-
+  
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
-   StationBeam stbm ;
+    StationBeam stbm ;
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
@@ -100,73 +100,76 @@ int test_StationBeam ()
   return nofFailedTests;
 }
 
+// ------------------------------------------------------------------------------
+
 Bool test_StationBeams ()
 {
-
- Bool ok(true) ;
- 
- try{
- 
- Vector<uint> station_id( n_stations,0);
-
- for(uint stid=0; stid< n_stations; stid++){
-   
-   station_id(stid)=stationid[stid];
- }
- 
- for(uint lr=0; lr<5; lr++){
-   legendre_root(lr)= l_root[ lr ];
-
-   legendre_weight(lr)= l_weight[lr] ;
- }
-
- 
- for(uint p=0; p< 48; p++){
-   posit_x(p) = posi_x[p] ;
-   posit_y(p) = posi_y[p];
- }
-
   
-uint stationID(0) ;
-
- for(uint id =0 ; id < n_stations; id++){
-
-     stationID = station_id(id) ;
-     position_x(id) = posit_x(stationID) ;
-     position_y(id) = posit_y(stationID) ;
- }
+  Bool ok(true) ;
   
- Double freq_interval = 2e6 ;
- 
- StationBeam stbm ;
- SimplePlot smplt ;
-  
- stbm.generate_statistics_table( station_radii,
-                                 station_id,
-				 frequency_init,
-				 bandwidth,
-				 freq_interval,
-				 position_x,
-				 position_y,
-				 legendre_root,
-				 legendre_weight )   ;
- 
-
- //   ofstream logfile2 ;
- //  
- //  logfile2.open("power",ios::out);
- //  for(uint h=0; h<100; h++){
- //     logfile2 << input(h) << endl ;
- //     }
- //  
- //  logfile2.close();
- } catch( AipsError x ){
-   cerr <<x.getMesg() << endl ;
-   ok = False;
- }
- return ok ;
+  try{
+    
+    Vector<uint> station_id( n_stations,0);
+    
+    for(uint stid=0; stid< n_stations; stid++){
+      
+      station_id(stid)=stationid[stid];
+    }
+    
+    for(uint lr=0; lr<5; lr++){
+      legendre_root(lr)= l_root[ lr ];
+      
+      legendre_weight(lr)= l_weight[lr] ;
+    }
+    
+    
+    for(uint p=0; p< 48; p++){
+      posit_x(p) = posi_x[p] ;
+      posit_y(p) = posi_y[p];
+    }
+    
+    
+    uint stationID(0) ;
+    
+    for(uint id =0 ; id < n_stations; id++){
+      
+      stationID = station_id(id) ;
+      position_x(id) = posit_x(stationID) ;
+      position_y(id) = posit_y(stationID) ;
+    }
+    
+    Double freq_interval = 2e6 ;
+    
+    StationBeam stbm ;
+    SimplePlot smplt ;
+    
+//     stbm.generate_statistics_table( station_radii,
+// 				    station_id,
+// 				    frequency_init,
+// 				    bandwidth,
+// 				    freq_interval,
+// 				    position_x,
+// 				    position_y,
+// 				    legendre_root,
+// 				    legendre_weight )   ;
+    
+    
+    //   ofstream logfile2 ;
+    //  
+    //  logfile2.open("power",ios::out);
+    //  for(uint h=0; h<100; h++){
+    //     logfile2 << input(h) << endl ;
+    //     }
+    //  
+    //  logfile2.close();
+  } catch( AipsError x ){
+    cerr <<x.getMesg() << endl ;
+    ok = False;
+  }
+  return ok ;
 }
-// -----------------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------
 
 int main ()
 {

@@ -8,7 +8,6 @@
 set (tests
   tObservationData
   tObservationFrame
-  tStationBeam
   )
 
 ## -----------------------------------------------------------------------------
@@ -19,8 +18,27 @@ foreach (src ${tests})
   add_executable (${src} ${src}.cc)
   target_link_libraries (${src} cr)
   ## testing
-  add_test (${src} ${src})
+  if (CR_ENABLE_TESTING) 
+    add_test (${src} ${src})
+  endif (CR_ENABLE_TESTING) 
 endforeach (src)
+
+## Test programs which need extra attention
+
+if (CR_PLOTTING_SUPPORT)
+
+  ## compiler instructions
+  add_executable (tStationBeam tStationBeam.cc)
+  ## linker instructions
+  target_link_libraries (tStationBeam cr)
+  ## installation 
+  list (APPEND tests tStationBeam)
+  ## testing
+  if (CR_ENABLE_TESTING) 
+    add_test (tStationBeam tStationBeam)
+  endif (CR_ENABLE_TESTING) 
+  
+endif (CR_PLOTTING_SUPPORT)
 
 ## -----------------------------------------------------------------------------
 ## Installation
