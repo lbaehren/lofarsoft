@@ -18,6 +18,7 @@ cmake_minimum_required (VERSION 2.4)
 option (CR_BUILD_TESTS "Build the test programs?" 1)
 option (CR_BUILD_EXTERNAL_TESTS "Build the test programs for external packages?" 0)
 option (CR_ENABLE_TESTING "Enable running the test programs?" 1)
+option (CR_COMPILER_WARNINGS "Enable standard set of compiler warnings?" ON)
 option (CR_ENABLE_LOPESSTAR "Enable additional routines from LOPES-Star?" 1)
 option (CR_DEBUGGING_MESSAGES "Print debugging information?" 0)
 option (CR_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
@@ -49,8 +50,6 @@ if (NOT CR_VERBOSE_CONFIGURE)
   set (PostgreSQL_FIND_QUIETLY 1)
   set (PYTHON_FIND_QUIETLY 1)
   set (ROOT_FIND_QUIETLY 1)
-  set (TCL_FIND_QUIETLY 1)
-  set (TK_FIND_QUIETLY 1)
   set (WCSLIB_FIND_QUIETLY 1)
   ## output of the generated makefile
   set (CMAKE_VERBOSE_MAKEFILE 0)
@@ -103,18 +102,27 @@ find_library (libgd gd
   PATHS ${lib_locations}
   )
 
-## Standard CMake modules for location of packages
+## Standard CMake modules
 
 find_package (Motif)
 find_package (TCL)
 find_package (X11)
 find_package (ZLIB)
 
-## Search using custom CMake find scripts
+## Custom CMake modules
 
 include (FindBlitz)
 include (FindBoost)
 include (FindCFITSIO)
+include (FindDAL)
+include (FindFFTW3)
+include (FindGIF)
+include (FindGSL)
+include (FindGTK)
+include (FindHDF5)
+include (FindPNG)
+include (FindROOT)
+include (FindWCS)
 
 ## --- CASA / casacore -------------------------
 
@@ -146,12 +154,10 @@ if (CR_GLISH_SUPPORT)
 else (CR_GLISH_SUPPORT)
   message (STATUS "[CR-Tools] Configuration without Glish support -- casacore")
   ## load find script
-  include (${cr_cmake}/FindCASACORE.cmake)
+  include (FindCASACORE)
   ## process outcome
   if (HAVE_CASACORE)
     add_definitions (-DHAVE_CASACORE)
-    add_definitions (-DHAVE_CASA)
-    include_directories (${CASA_INCLUDES})
   endif (HAVE_CASACORE)
   ## CMake variables
   set (HAVE_CASA FALSE)
@@ -229,24 +235,6 @@ else (APPLE)
   endif (APPLE)
 endif (APPLE)
 
-## --- Data Access Library (DAL) ---------------
-
-include (${cr_cmake}/FindDAL.cmake)
-
-if (HAVE_DAL)
-  add_definitions (-DHAVE_DAL)
-  include_directories (${DAL_INCLUDES})
-endif (HAVE_DAL)
-
-## --- FFTW3 -----------------------------------
-
-include (${cr_cmake}/FindFFTW3.cmake)
-
-if (HAVE_FFTW3)
-  add_definitions (-DHAVE_FFTW3)
-  include_directories (${FFTW3_INCLUDES})
-endif (HAVE_FFTW3)
-
 ## --- G2C -------------------------------------
 
 include (${cr_cmake}/FindG2C.cmake)
@@ -256,136 +244,60 @@ if (HAVE_G2C)
   include_directories (${G2C_INCLUDES})
 endif (HAVE_G2C)
 
-## --- GIF ---------------------------------------
-  
-  include (${cr_cmake}/FindGIF.cmake)
-  
-  if (HAVE_GIF)
-    add_definitions (-DHAVE_GIF)
-    include_directories (${GIF_INCLUDES})
-  endif (HAVE_GIF)
-  
-  ## --- GNU Scientific Library (GSL) --------------
-  
-  include (${cr_cmake}/FindGSL.cmake)
-  
-  if (HAVE_GSL)
-    add_definitions (-DHAVE_GSL)
-    include_directories (${GSL_INCLUDES})
-  endif (HAVE_GSL)
-  
-  ## --- GTK ---------------------------------------
-  
-  include (${cr_cmake}/FindGTK.cmake)
-  
-  if (HAVE_GTK)
-    add_definitions (-DHAVE_GTK)
-    include_directories (${GTK_INCLUDES})
-  endif (HAVE_GTK)
-  
-  ## --- HDF5 ------------------------------------
-  
-  include (${cr_cmake}/FindHDF5.cmake)
-  
-  if (HAVE_HDF5)
-    add_definitions (-DHAVE_HDF5)
-    include_directories (${HDF5_INCLUDES})
-  endif (HAVE_HDF5)
-  
-  ## LAPACK --------------------------------------
-  
-  include (${cr_cmake}/FindLAPACK.cmake)
-  
-  if (LAPACK_INCLUDES)
-    add_definitions (-DHAVE_LAPACK)
-    include_directories (${LAPACK_INCLUDES})
-  endif (LAPACK_INCLUDES)
-  
-  ## -- PGPlot -----------------------------------
-  
-  include (${cr_cmake}/FindPGPLOT.cmake)
-  
-  if (PGPLOT_INCLUDES)
-    include_directories (${PGPLOT_INCLUDES})
-    add_definitions (-DHAVE_PGPLOT)
-  endif (PGPLOT_INCLUDES)
-  
-  ## -- PLplot -----------------------------------
-  
-  include (${cr_cmake}/FindPLplot.cmake)
-  
-  if (PLPLOT_INCLUDES)
-    include_directories (${PLPLOT_INCLUDES})
-    add_definitions (-DHAVE_PLPLOT)
-  endif (PLPLOT_INCLUDES)
-  
-  ## -- PNG --------------------------------------
-  
-  include (${cr_cmake}/FindPNG.cmake)
-  
-  if (HAVE_PNG)
-    add_definitions (-DHAVE_PNG)
-    include_directories (${PNG_INCLUDES})
-  endif (HAVE_PNG)
-  
-  ## -- popt -------------------------------------
-  
-  include (${cr_cmake}/FindPOPT.cmake)
-  
-  if (HAVE_POPT)
-    add_definitions (-DHAVE_POPT)
-    include_directories (${POPT_INCLUDES})
-  endif (HAVE_POPT)
-  
-  ## -- PostgreSQL -------------------------------
-  
-  include (${cr_cmake}/FindPostgreSQL.cmake)
-  
-  if (HAVE_PostgreSQL)
-    add_definitions (-DHAVE_POSTGRESQL)
-    include_directories (${PostgreSQL_INCLUDES})
-  endif (HAVE_PostgreSQL)
-  
-  ## -- Python -----------------------------------
-  
-  include (${cr_cmake}/FindPython.cmake)
-  
-  if (HAVE_PYTHON)
-    add_definitions (-DHAVE_PYTHON)
-    include_directories (${PYTHON_INCLUDES})
-  endif (HAVE_PYTHON)
-  
-  ## -- ROOT -------------------------------------
-  
-  include (${cr_cmake}/FindROOT.cmake)
-  
-  if (HAVE_ROOT)
-    add_definitions (-DHAVE_ROOT)
-    include_directories (${ROOT_INCLUDES})
-  endif (HAVE_ROOT)
-  
-  ## --- Tcl -------------------------------------
-  
-  include (${cr_cmake}/FindTCL.cmake)
-  
-  if (HAVE_TCL)
-    add_definitions (-DHAVE_TCL)
-    include_directories (${TCL_INCLUDES})
-  endif (HAVE_TCL)
-  
-  ## --- Tk --------------------------------------
-  
-  include (${cr_cmake}/FindTK.cmake)
-  
-  if (HAVE_TK)
-    add_definitions (-DHAVE_TK)
-    include_directories (${TK_INCLUDES})
-  endif (HAVE_TK)
-  
-  ## -- WCSLIB -----------------------------------
-  
-  include (${cr_cmake}/FindWCS.cmake)
-  
+## LAPACK --------------------------------------
+
+include (${cr_cmake}/FindLAPACK.cmake)
+
+if (LAPACK_INCLUDES)
+  add_definitions (-DHAVE_LAPACK)
+  include_directories (${LAPACK_INCLUDES})
+endif (LAPACK_INCLUDES)
+
+## -- PGPlot -----------------------------------
+
+include (${cr_cmake}/FindPGPLOT.cmake)
+
+if (PGPLOT_INCLUDES)
+  include_directories (${PGPLOT_INCLUDES})
+  add_definitions (-DHAVE_PGPLOT)
+endif (PGPLOT_INCLUDES)
+
+## -- PLplot -----------------------------------
+
+include (${cr_cmake}/FindPLplot.cmake)
+
+if (PLPLOT_INCLUDES)
+  include_directories (${PLPLOT_INCLUDES})
+  add_definitions (-DHAVE_PLPLOT)
+endif (PLPLOT_INCLUDES)
+
+## -- popt -------------------------------------
+
+include (${cr_cmake}/FindPOPT.cmake)
+
+if (HAVE_POPT)
+  add_definitions (-DHAVE_POPT)
+  include_directories (${POPT_INCLUDES})
+endif (HAVE_POPT)
+
+## -- PostgreSQL -------------------------------
+
+include (${cr_cmake}/FindPostgreSQL.cmake)
+
+if (HAVE_PostgreSQL)
+  add_definitions (-DHAVE_POSTGRESQL)
+  include_directories (${PostgreSQL_INCLUDES})
+endif (HAVE_PostgreSQL)
+
+## -- Python -----------------------------------
+
+include (${cr_cmake}/FindPython.cmake)
+
+if (HAVE_PYTHON)
+  add_definitions (-DHAVE_PYTHON)
+  include_directories (${PYTHON_INCLUDES})
+endif (HAVE_PYTHON)
+
 
 ## =============================================================================
 ##
@@ -393,6 +305,7 @@ endif (HAVE_G2C)
 ##
 ## =============================================================================
 
+## -------------------------------------------------------------------
 ## Handle option: testing mode on/off
 
 if (CR_ENABLE_TESTING)
@@ -404,12 +317,26 @@ if (CR_ENABLE_TESTING)
   set (CR_BUILD_EXTERNAL_TESTS ON)
 endif (CR_ENABLE_TESTING)
 
+## -------------------------------------------------------------------
 ## Handle option: debugging messages on/off
 
 if (CR_DEBUGGING_MESSAGES)
   add_definitions (-DDEBUGGING_MESSAGES)
 endif (CR_DEBUGGING_MESSAGES)
 
+## -------------------------------------------------------------------
+## Handle option: Enable standard set of compiler warnings? ON/OFF
+
+if (CR_COMPILER_WARNINGS)
+  list (APPEND CMAKE_CXX_FLAGS "-Wall")
+  list (APPEND CMAKE_CXX_FLAGS "-Wno-comment")
+  list (APPEND CMAKE_CXX_FLAGS "-Woverloaded-virtual")
+  if (NOT APPLE)
+    list (APPEND CMAKE_CXX_FLAGS "-Wno-non-template-friend")
+  endif (NOT APPLE)
+endif (CR_COMPILER_WARNINGS)
+    
+## -------------------------------------------------------------------
 ## Handle option: build components from LOPES-Star module
 
 if (NOT HAVE_ROOT)
@@ -424,6 +351,7 @@ if (NOT HAVE_PostgreSQL)
   set (CR_ENABLE_LOPESSTAR OFF)
 endif (NOT HAVE_PostgreSQL)
 
+## -------------------------------------------------------------------
 ## Handle option: create Python binding
 
 if (NOT HAVE_PYTHON OR NOT HAVE_BOOST)
@@ -508,7 +436,47 @@ if (CFITSIO_INCLUDES)
   add_definitions (-DHAVE_CFITSIO)
   include_directories (${CFITSIO_INCLUDES})
 endif (CFITSIO_INCLUDES)
-  
+
+if (DAL_INCLUDES)
+  add_definitions (-DHAVE_DAL)
+  include_directories (${DAL_INCLUDES})
+endif (DAL_INCLUDES)
+
+if (FFTW3_INCLUDES)
+  add_definitions (-DHAVE_FFTW3)
+  include_directories (${FFTW3_INCLUDES})
+endif (FFTW3_INCLUDES)
+
+if (GIF_INCLUDES)
+  add_definitions (-DHAVE_GIF)
+  include_directories (${GIF_INCLUDES})
+endif (GIF_INCLUDES)
+
+if (GSL_INCLUDES)
+  add_definitions (-DHAVE_GSL)
+  include_directories (${GSL_INCLUDES})
+endif (GSL_INCLUDES)
+
+if (GTK_INCLUDES)
+  add_definitions (-DHAVE_GTK)
+  include_directories (${GTK_INCLUDES})
+endif (GTK_INCLUDES)
+
+if (HDF5_INCLUDES)
+  add_definitions (-DHAVE_HDF5)
+  include_directories (${HDF5_INCLUDES})
+endif (HDF5_INCLUDES)
+
+if (PNG_INCLUDES)
+  add_definitions (-DHAVE_PNG)
+  include_directories (${PNG_INCLUDES})
+endif (PNG_INCLUDES)
+
+if (ROOT_INCLUDES)
+  add_definitions (-DHAVE_ROOT)
+  include_directories (${ROOT_INCLUDES})
+endif (ROOT_INCLUDES)
+
 if (WCS_INCLUDES)
   add_definitions (-DHAVE_WCS)
   include_directories (${WCS_INCLUDES})
@@ -520,14 +488,14 @@ endif (WCS_INCLUDES)
 ##
 ## =============================================================================
 
+if (NOT APPLE)
+  add_subdirectory (implement)
+  add_subdirectory (apps)
+endif (NOT APPLE)
+
 if (CR_BUILD_EXTERNAL_TESTS)
   add_subdirectory (test)
 endif (CR_BUILD_EXTERNAL_TESTS)
-
-## source code
-
-add_subdirectory (implement)
-add_subdirectory (apps)
 
 ## =============================================================================
 ##
@@ -566,7 +534,6 @@ message (STATUS " POPT ..................... : ${HAVE_POPT}")
 message (STATUS " PostgreSQL ............... : ${HAVE_PostgreSQL}")
 message (STATUS " Python ................... : ${HAVE_PYTHON}")
 message (STATUS " ROOT ..................... : ${HAVE_ROOT}")
-message (STATUS " Tcl / Tk  ................ : ${HAVE_TCL} / ${HAVE_TK}")
 message (STATUS " WCSLIB ................... : ${HAVE_WCSLIB}")
 message (STATUS "+------------------------------------------------------------+")
 message (STATUS " Source directory ......... : ${CR_SOURCE_DIR}")
