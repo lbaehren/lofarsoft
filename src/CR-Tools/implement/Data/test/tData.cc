@@ -54,7 +54,6 @@ int test_Data ()
   std::cout << "\n[test_Data]\n" << std::endl;
   
   int nofFailedTests (0);
-  int max (10);
 
   std::cout << "[1] Creating new Data object via default constructor ..." << std::endl;
   try {

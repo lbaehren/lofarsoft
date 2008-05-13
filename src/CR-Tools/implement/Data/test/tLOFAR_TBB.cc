@@ -190,8 +190,8 @@ int test_hdf5 (std::string const &filename)
   uint rsp_id (0);
   uint rcu_id (0);
   std::string feed ("UNDEFINED");
-  double *antenna_position;
-  double *antenna_orientation;
+//   double *antenna_position;
+//   double *antenna_orientation;
   
   if (channelDataset_id > 0) {
 
