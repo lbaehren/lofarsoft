@@ -70,7 +70,7 @@ int test_UpSampledDR ()
       return nofFailedTests;
     };
     std::cout << "                             ..." << " attaching File" << std::endl;
-    if (! newUpSampledDR.setup(&lev,200e6)){
+    if (! newUpSampledDR.setup(&lev,320e6)){
       std::cout << "  Failed to setup UpSampledDR!" << std::endl;
       nofFailedTests++;
       return nofFailedTests;
@@ -78,8 +78,8 @@ int test_UpSampledDR ()
 
     std::cout << "[3] Setting new blocksizes ..." << std::endl;
     lev.setHanningFilter(0.5,16384);
-    //    newUpSampledDR.setBlocksize(16384);
-    //    newUpSampledDR.setBlock(4);
+    newUpSampledDR.setBlocksize(2048);
+    newUpSampledDR.setBlock(64);
 
     std::cout << "[4] Dumping original data ..." << std::endl;
     int i,TSlen;

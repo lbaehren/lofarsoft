@@ -55,6 +55,10 @@ namespace CR { // Namespace CR -- begin
   }
   
   void UpSampledDR::destroy() {
+    if (iterator_p != NULL) { 
+      delete [] iterator_p; 
+      iterator_p=NULL; 
+    };
     inpDR_p = NULL;
   }
   
@@ -74,7 +78,8 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  Bool UpSampledDR::setup(DataReader *inputDR, double newSampleFrequency){
+  Bool UpSampledDR::setup(DataReader *inputDR, double newSampleFrequency, 
+			  Bool UseCalFFT, SecondStagePipeline *inpPipeline){
     try {
       if (inputDR == NULL){
 	cerr << "UpSampledDR::setup: " << "Need a valid DataReader pointer!" << endl;
@@ -119,6 +124,12 @@ namespace CR { // Namespace CR -- begin
       // Generate the header record
       // --------------------------------------------
       generateHeaderRecord();
+
+      // Set "UseCalFFT_p"
+      UseCalFFT_p = UseCalFFT;
+      // Set "inpPipeline_p"
+      // (Will automatically set inpPipeline_p to NULL if inpPipeline is NULL...)
+      inpPipeline_p = inpPipeline;
       
     } catch (AipsError x) {
       cerr << "UpSampledDR::setup: " << x.getMesg() << endl;
@@ -167,14 +178,20 @@ namespace CR { // Namespace CR -- begin
 
 	origSourceBlockNo = inpDR_p->block();
 	sourceBlockNo = (uint)floor((startsample/SampleFreqRatio)/sourceBlockSize);
-	inpDR_p->setBlock(sourceBlockNo);
+	// Currently the DataReader and DataIterator start to count at 1
+	inpDR_p->setBlock(sourceBlockNo+1);
 	restoreBlocksize  = (uint)floor(sourceBlockSize*SampleFreqRatio);
 	
 	sourceFreqs = inpDR_p->frequencyValues();
 	restoreFFTlen = restoreBlocksize/2+1;
 	restoreFreqs.resize(restoreFFTlen);
 	indgen(restoreFreqs); restoreFreqs *= DataReader::sampleFrequency()/restoreBlocksize;
-	sendoffset = startsample - (uint)floor((sourceBlockNo*sourceBlockSize*SampleFreqRatio));	
+	sendoffset = startsample - (uint)floor((sourceBlockNo*sourceBlockSize*SampleFreqRatio));
+	if (sendoffset+sendBlocksize > restoreBlocksize) {
+	  cerr << "UpSampledDR::fx: " << "Inconsistent parameters!" <<endl;
+	  cerr << "                 " << "Requested block on source block boundary." << endl;
+	  return Matrix<Double>();	  
+	};
 #ifdef DEBUGGING_MESSAGES      
 	cout << "UpSampledDR::fx:" << " SampleFreqRatio: " << SampleFreqRatio 
 	     << " sourceBlockSize: " << sourceBlockSize 
@@ -184,17 +201,26 @@ namespace CR { // Namespace CR -- begin
 	     << " sendoffset: " << sendoffset << endl;
 #endif
 	fx.resize(sendBlocksize,nofSelectedAntennas);
-	sourceFFT = inpDR_p->calfft();
+	if ( inpPipeline_p != NULL) {
+	  sourceFFT = inpPipeline_p->GetData(inpDR_p);
+	} else if (UseCalFFT_p) {
+	  sourceFFT = inpDR_p->calfft();
+	} else {
+	  sourceFFT = inpDR_p->fft();
+	}
 	FFTServer<Double,DComplex> fftserv(IPosition(1,restoreBlocksize), FFTEnums::REALTOCOMPLEX);
 	restoreFX.resize(restoreBlocksize);
 
+	Double minSourceFreq=min(sourceFreqs),maxSourceFreq=max(sourceFreqs);
 	for (antenna=0; antenna<nofSelectedAntennas; antenna++) {
 	  sourceAnt = selectedAntennas_p(antenna);
 	  sourceFFTvec = sourceFFT.column(sourceAnt);
-	  sourceFFTvec(0) = 0.; sourceFFTvec(sourceFFTvec.nelements()-1) = 0.;
+	  //sourceFFTvec(0) = 0.; sourceFFTvec(sourceFFTvec.nelements()-1) = 0.;
 	  InterpolateArray1D<Double, DComplex>::interpolate(restoreFFT,restoreFreqs,
 							    sourceFreqs,sourceFFTvec,
 					      InterpolateArray1D<Double, DComplex>::nearestNeighbour);
+	  restoreFFT(restoreFreqs<minSourceFreq) = 0.;
+	  restoreFFT(restoreFreqs>maxSourceFreq) = 0.;
 	  restoreFFT = restoreFFT*SampleFreqRatio;
 	  fftserv.fft(restoreFX,restoreFFT);
 	  fx.column(antenna) = restoreFX(Slice(sendoffset,sendBlocksize));

@@ -40,6 +40,7 @@
 
 //CR-tools header files
 #include <IO/DataReader.h>
+#include <Analysis/SecondStagePipeline.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -75,6 +76,16 @@ namespace CR { // Namespace CR -- begin
       \brief Pointer to the data Raeder from which the data is read
     */
     DataReader *inpDR_p;
+
+    /*!
+      \brief Use the calfft() (instead of the fft()) of the DataReader
+    */
+    Bool UseCalFFT_p;
+
+    /*!
+      \brief Pointer to a processing pipeline for additional processing of the input data.
+    */
+    SecondStagePipeline *inpPipeline_p;
 
   public:
     
@@ -125,10 +136,14 @@ namespace CR { // Namespace CR -- begin
       \param inputDR -- pointer to the DataReader object to read from 
       \param newSampleFrequency -- the new sample frequency (in Hz), should be larger 
                                    than the one in <tt>inputDR<\tt>
+      \param UseCalFFT  -- Get the data from the calfft() instead of the fft() of the input DR
+      \param inpPipeline -- pointer to an optional processing pipeline 
+                            <b> The scructure of this may change! </b>
       
       \return ok -- True if successfull
     */
-    Bool setup(DataReader *inputDR, double newSampleFrequency);
+    Bool setup(DataReader *inputDR, double newSampleFrequency, 
+	       Bool UseCalFFT=True, SecondStagePipeline *inpPipeline=NULL);
 
     /*!
       \brief return the upsampled data in the original units.
