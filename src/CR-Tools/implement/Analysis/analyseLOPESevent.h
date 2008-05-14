@@ -44,6 +44,7 @@
 #include <Analysis/CRflaggingPlugin.h>
 #include <Analysis/fitCR2gauss.h>
 #include <Data/LopesEventIn.h>
+#include <Data/UpSampledDR.h>
 #include <Display/SimplePlot.h>
 
 #include <casa/namespace.h>
@@ -98,12 +99,18 @@ namespace CR { // Namespace CR -- begin
   class analyseLOPESevent {
     
   protected: //variables are protected to make them available in child class
-    //! the pipeline object
-    CRinvFFT *pipeline_p;
+    //! the pipeline objects, one for the input, one for the upsampling, and the pointer use for the beamforming
+    CRinvFFT *pipeline_p, *upsamplePipe_p, *beamPipe_p;
     
     //! the DataReader object to read in LOPES events
     LopesEventIn *lev_p;
     
+    //! the DataReader object for the upsampling
+    UpSampledDR *upsampler_p;
+
+    //! the pointer to the DataReader used for the beamforming
+    DataReader *beamformDR_p;
+
     //! the used fitobject
     fitCR2gauss fitObject;
     
@@ -122,6 +129,8 @@ namespace CR { // Namespace CR -- begin
     Double plotStart_p;
     //! Stop time of the interval diplayed in the plot
     Double plotStop_p;
+    //! Strength of the mean-filter used for the smoothing
+    int filterStrength_p;
     
   public:
     
@@ -366,22 +375,24 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Process one event
 
-      \param evname - path to the eventfile to be processed
-      \param Az - value for the azimuth direction [in deg] (e.g. from KASCADE)
-      \param El - value for the elevation [in deg] (e.g. from KASCADE)
-      \param distance - value for the distance parameter [in m]
-      \param XC - x-position of the shower center [in m]
-      \param YC - y-position of the shower center [in m]
-      \param RotatePos - rotate the XC/YC position (set to False if XC/YC already
-             in LOPES coordinates)
-      \param PlotPrefix - prefix (including path) for the plots to be generated
-      \param generatePlots - generate the postscript plots
-      \param FlaggedAntIDs - list of antenna IDs that are to be flagged.
-      \param verbose - produce verbose output on the commandline.
-      \param simplexFit - fit the direction with a simple simplex fit
-      \param ExtraDelay - additional delay to shift the data in time.
-      \param doTVcal - perform the phase calibration on the TV transmitter
-             (1: yes, 0: no, -1: use default)
+      \param evname         - path to the eventfile to be processed
+      \param Az             - value for the azimuth direction [in deg] (e.g. from KASCADE)
+      \param El             - value for the elevation [in deg] (e.g. from KASCADE)
+      \param distance       - value for the distance parameter [in m]
+      \param XC             - x-position of the shower center [in m]
+      \param YC             - y-position of the shower center [in m]
+      \param RotatePos      - rotate the XC/YC position (set to False if XC/YC already
+                              in LOPES coordinates)
+      \param PlotPrefix     - prefix (including path) for the plots to be generated
+      \param generatePlots  - generate the postscript plots
+      \param FlaggedAntIDs  - list of antenna IDs that are to be flagged.
+      \param verbose        - produce verbose output on the commandline.
+      \param simplexFit     - fit the direction with a simple simplex fit
+      \param ExtraDelay     - additional delay to shift the data in time.
+      \param doTVcal        - perform the phase calibration on the TV transmitter
+                              (1: yes, 0: no, -1: use default)
+      \param UpSamplingRate - Samplerate for upsampling. If smaller than the original
+                              samplerate (80MHz for LOPES) then no upsampling is done.
 
       \return Record with the results.
     */
@@ -398,7 +409,8 @@ namespace CR { // Namespace CR -- begin
 			Bool verbose=False,
 			Bool simplexFit=False,
 			Double ExtraDelay=0.,
-			int doTVcal=-1);
+			int doTVcal=-1,
+			Double UpSamplingRate=0.);
 
     /*!
       \brief Fit the position with a simplex fit
@@ -419,12 +431,6 @@ namespace CR { // Namespace CR -- begin
 		     Double &distance,
 		     Double &center,
 		     Vector<Bool> AntennaSelection);
-
-    Bool SimplexFit2 (Double &Az,
-		      Double &El,
-		      Double &distance,
-		      Double &center,
-		      Vector<Bool> AntennaSelection);
 
     /*!
       \brief Evaluate a smallish grid around to find a good starting point for the simplenx fit
@@ -461,6 +467,11 @@ namespace CR { // Namespace CR -- begin
   protected: //this methods are protected to make them available in child class
     
     /*!
+      \brief initialize the object
+    */
+    void init(void);
+
+    /*!
       \brief clear the object
     */
     void clear(void);
@@ -479,15 +490,6 @@ namespace CR { // Namespace CR -- begin
 		      Double dist,
 		      Vector<Bool> AntennaSelection,
 		      Double *centerp=NULL);
-
-    /*!
-      \brief Gets the height of the X-Beam at this position...
-    */
-    Double getHeight2 (Double az,
-		       Double el,
-		       Double dist,
-		       Double Center,
-		       Vector<Bool> AntennaSelection);
     
   };
   

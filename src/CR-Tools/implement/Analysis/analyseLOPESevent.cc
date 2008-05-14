@@ -25,6 +25,8 @@
 
 #define DEG2RAD (PI/180.)
 
+#define DEBUGGING_MESSAGES      
+
 namespace CR { // Namespace CR -- begin
   
   // ============================================================================
@@ -36,15 +38,7 @@ namespace CR { // Namespace CR -- begin
   // ---------------------------------------------------------- analyseLOPESevent
 
   analyseLOPESevent::analyseLOPESevent(){
-    pipeline_p    = NULL;
-    lev_p         = NULL;
-    remoteStart_p = 1./4.;
-    remoteStop_p  = 4./9.;
-    fitStart_p    = -2e-6;
-    fitStop_p     = -1.7e-6;
-    plotStart_p   = -2.05e-6;
-    plotStop_p    = -1.55e-6;
-
+    init();
     clear();
   };
   
@@ -55,10 +49,9 @@ namespace CR { // Namespace CR -- begin
 					double const &fitStart,
 					double const &fitStop,
 					double const &plotStart,
-					double const &plotStop)
-  {
-    pipeline_p    = NULL;
-    lev_p         = NULL;
+					double const &plotStop) {
+    init();
+    
     remoteStart_p = remoteStart;
     remoteStop_p  = remoteStop;
     fitStart_p    = fitStart;
@@ -68,6 +61,24 @@ namespace CR { // Namespace CR -- begin
     
     clear();
   }
+
+  // ---------------------------------------------------------------------- init
+
+  void analyseLOPESevent::init() {
+    pipeline_p     = NULL;
+    upsamplePipe_p = NULL;
+    beamPipe_p     = NULL;
+    lev_p          = NULL;
+    upsampler_p    = NULL;
+    beamformDR_p   = NULL;
+    remoteStart_p  = 1./4.;
+    remoteStop_p   = 4./9.;
+    fitStart_p     = -2e-6;
+    fitStop_p      = -1.7e-6;
+    plotStart_p    = -2.05e-6;
+    plotStop_p     = -1.55e-6;
+    filterStrength_p = 3;
+  }
   
   // ---------------------------------------------------------------------- clear
 
@@ -76,9 +87,17 @@ namespace CR { // Namespace CR -- begin
       delete pipeline_p;
       pipeline_p = NULL;
     };
+    if (upsamplePipe_p != NULL) {
+      delete upsamplePipe_p;
+      upsamplePipe_p = NULL;
+    };
     if (lev_p != NULL) {
       delete lev_p;
       lev_p = NULL;
+    };
+    if (upsampler_p != NULL) {
+      delete upsampler_p;
+      upsampler_p = NULL;
     };
   };
   
@@ -117,9 +136,11 @@ namespace CR { // Namespace CR -- begin
   Bool analyseLOPESevent::initPipeline(Record ObsRecord){
     try {
       clear();
-      pipeline_p= new CRinvFFT();
+      pipeline_p = new CRinvFFT();
+      upsamplePipe_p = new CRinvFFT();
       lev_p = new LopesEventIn();
       pipeline_p->SetObsRecord(ObsRecord);
+      upsamplePipe_p->SetObsRecord(ObsRecord);
       
     } catch (AipsError x) {
       cerr << "analyseLOPESevent::initPipeline: " << x.getMesg() << endl;
@@ -143,7 +164,8 @@ namespace CR { // Namespace CR -- begin
 					 Bool verbose,
 					 Bool simplexFit,
 					 Double ExtraDelay,
-					 int doTVcal){
+					 int doTVcal,
+					 Double UpSamplingRate){
     Record erg;
     try {
       Int nsamples;
@@ -183,8 +205,7 @@ namespace CR { // Namespace CR -- begin
 	};
 	break;
       };
-      
-      
+            
       // Generate the antenna selection
       Vector <Bool> AntennaSelection;
       Int i,j,id,nants,nselants, nflagged=FlaggedAntIDs.nelements();
@@ -209,19 +230,59 @@ namespace CR { // Namespace CR -- begin
 	};
       };
 
-      //initialize the pipeline
-      Times = lev_p->timeValues();
-      nsamples = Times.nelements();
-      if (! pipeline_p->setPhaseCenter(XC, YC, RotatePos)){
-	cerr << "analyseLOPESevent::ProcessEvent: " << "Error during setPhaseCenter()!" << endl;
-	return Record();
-      };
-
       //Flagg antennas
       flagger.calcWeights(pipeline_p->GetTimeSeries(lev_p));
       AntennaSelection = AntennaSelection && flagger.parameters().asArrayBool("AntennaMask");
       nselants = ntrue(AntennaSelection);
 
+      //Do the upsampling (if requested)
+      if (UpSamplingRate >= lev_p->sampleFrequency()) {
+	if (upsampler_p == NULL){ upsampler_p = new UpSampledDR(); };
+	upsampler_p->setup(lev_p, UpSamplingRate, False, pipeline_p);
+	upsamplePipe_p->InitEvent(upsampler_p,False);
+	upsamplePipe_p->doPhaseCal(False);
+	upsamplePipe_p->doRFImitigation(False);
+	upsamplePipe_p->setVerbosity(verbose);
+	
+	filterStrength_p = (int)ceil(3*UpSamplingRate/lev_p->sampleFrequency());
+
+	Double tmpdouble;
+	int upBlockSize,upBlock;
+	// Calculate the blocksize for the upsampled data
+	// smallest power of 2 that is larger tha 3*([fit or plot range]+1 microsec)
+	tmpdouble = (max(fitStop_p,plotStop_p)-min(fitStart_p,plotStart_p)+1e-6)*UpSamplingRate;
+	upBlockSize = (uint)(pow(2.0,ceil(log(tmpdouble*3)/log(2.0))));
+	// Calculate where to start the block 
+	Times = upsampler_p->timeValues();
+	upBlock = ntrue( Times < ((fitStop_p+fitStart_p)/2.))/upBlockSize;
+
+
+	// Set blocksize and shift
+	upsampler_p->setBlocksize(upBlockSize);
+	upsampler_p->setBlock(upBlock+1);
+	Times.resize();
+	if (verbose) {
+	  Times = upsampler_p->timeValues();
+	  cout << "analyseLOPESevent::ProcessEvent: " << "Upsampling: upBlockSize: " << upBlockSize
+	       << " upBlock: " << upBlock << endl;
+	  cout << "analyseLOPESevent::ProcessEvent: " << " min(Times): " << min(Times)*1e6 
+	       << " max(Times): " << max(Times)*1e6 << endl;
+	};
+	beamformDR_p = upsampler_p;
+	beamPipe_p = upsamplePipe_p;
+      } else {
+	beamformDR_p = lev_p;
+	beamPipe_p =  pipeline_p;
+      };
+
+
+      //initialize the pipeline
+      Times = beamformDR_p->timeValues();
+      nsamples = Times.nelements();
+      if (! beamPipe_p->setPhaseCenter(XC, YC, RotatePos)){
+	cerr << "analyseLOPESevent::ProcessEvent: " << "Error during setPhaseCenter()!" << endl;
+	return Record();
+      };
 
       //initialize the fitter
       Vector<uInt> remoteRange(2,0);
@@ -248,20 +309,20 @@ namespace CR { // Namespace CR -- begin
 	  cerr << "analyseLOPESevent::ProcessEvent: " << "Error during SimplexFit()!" << endl;
 	  return Record();
 	};
-	pipeline_p->setVerbosity(verbose);
+	beamPipe_p->setVerbosity(verbose);
       };
       
       // Get the beam-formed data
-      if (! pipeline_p->setDirection(Az, El, distance)){
+      if (! beamPipe_p->setDirection(Az, El, distance)){
 	cerr << "analyseLOPESevent::ProcessEvent: " << "Error during setDirection()!" << endl;
 	return Record();
       };
-      if (! pipeline_p->GetTCXP(lev_p, TimeSeries, ccBeam, xBeam, pBeam, AntennaSelection)){
+      if (! beamPipe_p->GetTCXP(beamformDR_p, TimeSeries, ccBeam, xBeam, pBeam, AntennaSelection)){
 	cerr << "analyseLOPESevent::ProcessEvent: " << "Error during GetTCXP()!" << endl;
 	return Record();
       };
       // smooth the data
-      StatisticsFilter<Double> mf(3,FilterType::MEAN);
+      StatisticsFilter<Double> mf(filterStrength_p,FilterType::MEAN);
       ccBeam = mf.filter(ccBeam);
       xBeam = mf.filter(xBeam);
       pBeam = mf.filter(pBeam);
@@ -324,7 +385,7 @@ namespace CR { // Namespace CR -- begin
       erg.define("rmsC",stddev(ccBeam(remoteRegion)));
       erg.define("rmsX",stddev(xBeam(remoteRegion)));
       Matrix<Double> AntPos; 
-      AntPos=pipeline_p->GetAntPositions();
+      AntPos=beamPipe_p->GetAntPositions();
       AntPos = toShower(AntPos, Az, El);
       Vector<Double> distances(nants);
       for (i=0; i<nants; i++) {
@@ -464,15 +525,15 @@ namespace CR { // Namespace CR -- begin
       Double meanaz, meanel, meandist, vecaz, vecel, vecdist;
       Bool running=True;
       
-      if (pipeline_p == NULL){
-	cerr << "analyseLOPESevent:SimplexFit: " << "Error: pipeline_p == NULL " << endl;
+      if (beamPipe_p == NULL){
+	cerr << "analyseLOPESevent:SimplexFit: " << "Error: beamPipe_p == NULL " << endl;
 	return False;	
       };
-      if (lev_p == NULL){
-	cerr << "analyseLOPESevent:SimplexFit: " << "Error: lev_p == NULL " << endl;
+      if (beamformDR_p == NULL){
+	cerr << "analyseLOPESevent:SimplexFit: " << "Error: beamformDR_p == NULL " << endl;
 	return False;	
       };
-      pipeline_p->setVerbosity(False);
+      beamPipe_p->setVerbosity(False);
 
       // set start values
       azs = Az; els = El; dists = distance;
@@ -625,17 +686,16 @@ namespace CR { // Namespace CR -- begin
       Double az_,el_,height_,center_;
       Double stepfactor=1.;
 
-      if (pipeline_p == NULL){
-	cerr << "analyseLOPESevent:evaluateGrid: " << "Error: pipeline_p == NULL " << endl;
+      if (beamPipe_p == NULL){
+	cerr << "analyseLOPESevent:evaluateGrid: " << "Error: beamPipe_p == NULL " << endl;
 	return False;	
       };
-      if (lev_p == NULL){
-	cerr << "analyseLOPESevent:evaluateGrid: " << "Error: lev_p == NULL " << endl;
+      if (beamformDR_p == NULL){
+	cerr << "analyseLOPESevent:evaluateGrid: " << "Error: beamformDR_p == NULL " << endl;
 	return False;	
       };
 
-
-      pipeline_p->setVerbosity(False);
+      beamPipe_p->setVerbosity(False);
 
       for (estep=-erange; estep<=erange; estep++){
 	el_ = El + stepfactor*estep;
@@ -689,9 +749,9 @@ namespace CR { // Namespace CR -- begin
 	if (dist<0.) { dist=-dist; continue;};
 	clipping = False;
       };
-      pipeline_p->setDirection(az, el, dist);
-      pipeline_p->GetTCXP(lev_p, ts, ccb, xb, pb, AntennaSelection);
-      StatisticsFilter<Double> mf(3,FilterType::MEAN);
+      beamPipe_p->setDirection(az, el, dist);
+      beamPipe_p->GetTCXP(beamformDR_p, ts, ccb, xb, pb, AntennaSelection);
+      StatisticsFilter<Double> mf(filterStrength_p,FilterType::MEAN);
       ccb = mf.filter(ccb);
       xb = mf.filter(xb);
       if (centerp != NULL) {
@@ -710,210 +770,21 @@ namespace CR { // Namespace CR -- begin
 	  (ergrec.asDouble("CCwidth_error")>1e-7)||
 	  ((ergrec.asDouble("CCheight_error")/ergrec.asDouble("CCheight"))>10) ) { 
 	goodfit=False;
-	pb = lev_p->timeValues();
+	pb = beamformDR_p->timeValues();
 	erg = mean(ccb(Slice(ntrue(pb<-1.83e-6),5)))*1e6;
 	if (centerp != NULL) {
 	  *centerp = -1.8e-6;
 	};
       };
+#ifdef DEBUGGING_MESSAGES      
       cout << "getHeight: Az:"<<az<<" El:"<<el<<" Dist:"<<dist<<" Height:"<< erg << " conv:"<<
 	ergrec.asBool("Xconverged")<<ergrec.asBool("CCconverged")<<goodfit<< " Center:"<< ergrec.asDouble("CCcenter")<<endl;
+#endif
     } catch (AipsError x) {
       cerr << "analyseLOPESevent:getHeight: " << x.getMesg() << endl;
       return 0.;
     }; 
     return erg;
   };
-
-  Bool analyseLOPESevent::SimplexFit2 (Double &Az,
-				       Double &El,
-				       Double &distance,
-				       Double &center,
-				       Vector<Bool> AntennaSelection ){    
-    try {
-      Int i(0), minpos(0), maxpos(0), niteration(0), oldminpos(0), nsameiter(0);
-      Record erg;
-      Vector<Double> azs(5), els(5), dists(5), cents(5), height(5,0.);
-      Double newaz, newel, newdist, newcent, newheight, nnewheight;
-      Double meanaz, meanel, meandist, meancent, vecaz, vecel, vecdist, veccent;
-      Bool running=True;
-      
-      pipeline_p->setVerbosity(False);
-      
-      // set start values
-      azs = Az; els = El; dists = distance; cents=center;
-      azs(1) += 1; els(2) += 1; 
-      azs(3) -= 1; els(3) -= 1;      
-      azs(4) -= 1; els(4) += 1;            
-      dists(2) -= 2000;dists(1) += 2000;dists(3) += 2000;dists(4) -= 2000;
-      cents(1) = -1.8e-6; cents(2) = -1.85e-6; cents(3) = -1.75e-6; cents(4) = -1.8e-6; 
-      for (i=0; i<5; i++){
-	height(i) = getHeight2(azs(i), els(i), dists(i), cents(i), AntennaSelection);
-      };
-      minpos=0; nsameiter=0;oldminpos=0;
-      while(running){ // the big loop
-	// find worst point
-	for (i=0; i<5; i++){
-	  if ((i!=minpos) && (height(i)<height(minpos))){
-	    minpos = i;
-	  };
-	};
-	// find the vector from minpoint to centerpoint
-	meanaz = meanel = meandist = meancent = 0.;
-	for (i=0; i<5; i++){
-	  if (i!=minpos){
-	    meanaz += azs(i); meanel += els(i); meandist += dists(i); meancent += cents(i);
-	  };
-	};
-	meanaz /= 4.; meanel /= 4.; meandist /= 4.; meancent /= 4.;
-	vecaz = meanaz-azs(minpos); vecel = meanel-els(minpos); 
-	vecdist = meandist-dists(minpos); veccent = meancent-cents(minpos);
-	if (minpos == oldminpos){
-	  nsameiter++;
-	} else {
-	  nsameiter=0;
-	  oldminpos = minpos;
-	};
-	if ( (nsameiter==8) || ((abs(vecaz)<0.03) && (abs(vecel)<0.03) && (abs(vecdist)<1))) {
-	  // restart from close to best position
-	  maxpos=0;
-	  for (i=1; i<4; i++){
-	    if (height(i)>height(maxpos)){
-	      maxpos = i;
-	    };
-	  };
-	  azs(minpos) = azs(maxpos)+0.2;
-	  els(minpos) = els(maxpos)+0.2;
-	  dists(minpos) = dists(maxpos)+50;
-	  cents(minpos) = cents(maxpos)+0.02e-6;
-	  height(minpos) = getHeight2(azs(minpos),els(minpos),dists(minpos),cents(minpos), AntennaSelection);
-	  continue;
-	};
-	if (nsameiter==16) {
-	  // We are seriously stuck. Just give up...
-	  running = False;
-	}
-	//new point
-	newaz = azs(minpos) + 2.*vecaz;	newel = els(minpos) + 2.*vecel;
-	newdist = dists(minpos) + 2.*vecdist; newcent = cents(minpos) + 2.*veccent;
-	newheight = getHeight2(newaz, newel, newdist, newcent, AntennaSelection);
-	if (newheight > max(height)) { //expand the simplex
-	  cout << " SimplexFit2: expanding simplex"<<endl;
-	  newaz = azs(minpos) + 4.*vecaz; newel = els(minpos) + 4.*vecel;
-	  newdist = dists(minpos) + 4.*vecdist; newcent = cents(minpos) + 4.*veccent;
-	  nnewheight = getHeight2(newaz, newel, newdist, newcent, AntennaSelection);
-	  if (newheight > nnewheight) {
-	    newaz = azs(minpos) + 2.*vecaz; newel = els(minpos) + 2.*vecel;
-	    newdist = dists(minpos) + 2.*vecdist; newcent = cents(minpos) + 2.*veccent;
-	  } else {
-	    newheight = nnewheight;
-	  };
-	} else {
-	  height(minpos) = max(height);
-	  if (newheight < min(height)) { 
-	    cout << " SimplexFit2: reducing simplex"<<endl;
-	    newaz = azs(minpos) + 1.5*vecaz; newel = els(minpos) + 1.5*vecel;
-	    newdist = dists(minpos) + 1.5*vecdist; newcent = cents(minpos) + 1.5*veccent;
-	    nnewheight = getHeight2(newaz, newel, newdist, newcent, AntennaSelection);
-	    if (newheight > nnewheight) {
-	      newaz = azs(minpos) + 2.*vecaz; newel = els(minpos) + 2.*vecel;
-	      newdist = dists(minpos) + 2.*vecdist; newcent = cents(minpos) + 2.*veccent;
-	    } else {
-	      newheight = nnewheight;
-	    };
-	  };
-	};
-	// save the new position
-	Bool clipping=True;
-	while (clipping){
-	  if (newel>90.) { newel=180.-newel; continue;};
-	  if (newel<0.) { newel=-newel; continue;};
-	  if (newdist<0.) { newdist=-newdist; continue;};
-	  clipping = False;
-	};
-	azs(minpos) = newaz; els(minpos) = newel; dists(minpos) = newdist; cents(minpos) = newcent;
-	height(minpos)=newheight;
-	// generate output
-	printf("## %i ------------------------------- \n",niteration);
-	printf("  Azimuth:   %6.2f; %6.2f; %6.2f; %6.2f; %6.2f \n",azs(0),azs(1),azs(2),azs(3),azs(4));
-	printf("  Elevation: %6.2f; %6.2f; %6.2f; %6.2f; %6.2f \n",els(0),els(1),els(2),els(3),els(4));
-	printf("  Distance:  %6.1f; %6.1f; %6.1f; %6.1f; %6.1f \n",dists(0),dists(1),dists(2),dists(3),dists(4));
-	printf("  Center:    %6.3f; %6.3f; %6.3f; %6.3f; %6.3f \n",cents(0)*1e6,cents(1)*1e6,cents(2)*1e6,cents(3)*1e6,cents(4)*1e6);
-	printf("  Height:    %6.3f; %6.3f; %6.3f; %6.3f; %6.3f \n",height(0)*1e6,height(1)*1e6,height(2)*1e6,height(3)*1e6,height(4)*1e6);
-	// test convergence
-	meanaz = max(azs)-min(azs); meanel = max(els)-min(els);
-	meanaz *= cos(mean(els)*DEG2RAD);
-	meanaz = abs(meanaz*meanel);
-	meandist = max(dists)-min(dists);
-	if ((meanaz<0.01)&&((meandist/mean(dists))<0.025)) {
-	  running = False;
-	};
-	niteration++;
-	if (niteration > 150) {
-	  running = False;
-	};
-      }; // end of the big loop
-      // calculate mean position
-      meanaz = meanel = meandist = meancent = 0.;
-      for (i=0; i<5; i++){
-	meanaz += azs(i); meanel += els(i); meandist += dists(i); meancent += cents(i);
-      };
-      meanaz /= 5.; meanel /= 5.; meandist /= 5.; meancent /= 5.;
-      
-      Bool clipping=True;
-      while (clipping){
-	if (meanaz>360.) { meanaz-=360.; continue;};
-	if (meanaz<0.) { meanaz+=360.; continue;};
-	if (meanel>90.) { meanel=180.-meanel; continue;};
-	if (meanel<0.) { meanel=-meanel; continue;};
-	if (meandist<0.) { meandist=-meandist; continue;};
-	clipping = False;
-      };
-      Az = meanaz; El = meanel; distance = meandist; center = meancent;
-      
-    } catch (AipsError x) {
-      cerr << "analyseLOPESevent:SimplexFit2: " << x.getMesg() << endl;
-      return False;
-    }; 
-    return True;
-  };
-
-  Double analyseLOPESevent::getHeight2 (Double az,
-					Double el,
-					Double dist,
-					Double Center,
-					Vector<Bool> AntennaSelection){
-    Double erg (0);
-    try {
-      Vector<Double> xbeam,time,CenterVec(1),ergVec(1);
-      Bool clipping=True;
-      while (clipping){
-	if (az>360.) { az-=360.; continue;};
-	if (az<0.) { az+=360.; continue;};
-	if (el>90.) { el=180.-el; continue;};
-	if (el<0.) { el=-el; continue;};
-	if (dist<0.) { dist=-dist; continue;};
-	clipping = False;
-      };
-      pipeline_p->setDirection(az, el, dist);
-      xbeam = pipeline_p->GetXBeam(lev_p, AntennaSelection);
-      StatisticsFilter<Double> mf(3,FilterType::MEAN);
-      xbeam = mf.filter(xbeam);
-      time = lev_p->timeValues();
-      CenterVec(0) = Center;
-      
-      InterpolateArray1D<Double, Double>::interpolate(ergVec,CenterVec,time,xbeam,
-						      InterpolateArray1D<Float,Double>::spline);
-      erg = ergVec(0);
-
-      cout << "getHeight2: Az:"<<az<<" El:"<<el<<" Dist:"<<dist<<" Center:"<<Center 
-	   << " Height:"<< erg << endl;
-    } catch (AipsError x) {
-      cerr << "analyseLOPESevent:getHeight2: " << x.getMesg() << endl;
-      return 0.;
-    }; 
-    return erg;
-  };
-
 
 } // Namespace CR -- end

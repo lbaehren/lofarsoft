@@ -107,7 +107,7 @@ namespace CR { // Namespace CR -- begin
   };
   
 
-  Bool FirstStagePipeline::InitEvent(DataReader *dr){
+  Bool FirstStagePipeline::InitEvent(DataReader *dr, Bool setCal){
     try {
       //if (! lev->attachFile(filename) ){
       //cerr << "FirstStagePipeline::InitEvent: Failed to attach file: " << filename << endl;
@@ -143,6 +143,18 @@ namespace CR { // Namespace CR -- begin
 	  return False;	
 	};
       };
+      if (setCal) { setCalibration(dr); };
+    } catch (AipsError x) {
+      cerr << "FirstStagePipeline::InitEvent: " << x.getMesg() << endl;
+      return False;
+    }; 
+    return True;
+  };
+
+
+
+  Bool FirstStagePipeline::setCalibration(DataReader *dr){
+    try {
       Vector<Int> AntennaIDs;
       Int i,fftlen=dr->fftLength(),nAnt=dr->nofStreams();
       uInt date;
@@ -185,12 +197,12 @@ namespace CR { // Namespace CR -- begin
       };
       dr->setFFT2calFFT(fftCal);
       dr->setHanningFilter(0.5,(fftlen/2));
-
     } catch (AipsError x) {
-      cerr << "FirstStagePipeline::InitEvent: " << x.getMesg() << endl;
+      cerr << "FirstStagePipeline::setCal: " << x.getMesg() << endl;
       return False;
     }; 
     return True;
   };
+
 
 } // Namespace CR -- end

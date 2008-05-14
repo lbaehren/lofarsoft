@@ -91,8 +91,21 @@ int test_analyseLOPESevent ()
 				     False,                 // simplexFit
 				     0.,                    // ExtraDelay
 				     False);                // doTVcal
-
+    
     std::cout << "  3) Testing on big LOPES30 event with simplex-fit" << std::endl;
+    results = newObject.ProcessEvent("/data/LOPES/cr/LOPES30_sel/2006.02.23.04:02:50.283.event", //evname
+				     273.46,                // Az
+ 				     53.32,                 // El
+ 				     4000.,                 // distance
+ 				     -32.07,                // XC
+ 				     46.60,                 // YC
+ 				     True,                  // RotatePos
+ 				     "tanalyseLOPESevent3", // PlotPrefix
+ 				     True,                  // generatePlots
+ 				     flagged ,              // FlaggedAntIDs
+ 				     True,                  // verbose
+ 				     True);                 //simplexFit
+    std::cout << "  4) Testing on big LOPES30 event with simplex-fit and upsampling" << std::endl;
     results = newObject.ProcessEvent("/data/LOPES/cr/LOPES30_sel/2006.02.23.04:02:50.283.event", //evname
 				     273.46,                // Az
 				     53.32,                 // El
@@ -100,11 +113,14 @@ int test_analyseLOPESevent ()
 				     -32.07,                // XC
 				     46.60,                 // YC
 				     True,                  // RotatePos
-				     "tanalyseLOPESevent3", // PlotPrefix
+				     "tanalyseLOPESevent4", // PlotPrefix
 				     True,                  // generatePlots
 				     flagged ,              // FlaggedAntIDs
 				     True,                  // verbose
-				     True);                 //simplexFit
+				     True,                  //simplexFit
+				     0.,                    //ExtraDelay
+				     -1,                    //doTVcal
+				     320e6);                //UpSamplingRate
 
   } catch (std::string message) {
     std::cerr << message << std::endl;

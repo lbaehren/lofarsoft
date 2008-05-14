@@ -65,6 +65,7 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   Bool fitCR2gauss::setTimeAxis(Vector<Double> newTimeAxis){
+    timeAxis_p.resize(newTimeAxis.shape());
     timeAxis_p = newTimeAxis;
     return True;
   };

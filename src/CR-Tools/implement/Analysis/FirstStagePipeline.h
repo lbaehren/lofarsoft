@@ -158,12 +158,14 @@ namespace CR { // Namespace CR -- begin
       "AntennaIDs") the calibration values are retrieved and put into the data reader object.
       
       \param *dr      - Pointer to an already existing DataReader object, that already has
-                        (header-)data loaded. 
+                       (header-)data loaded. 
+      \param setCal   - Set the FFT2calFFT array?
+                        
       
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
 
-    Bool InitEvent(DataReader *dr);
+    Bool InitEvent(DataReader *dr, Bool setCal=True);
     
     /*!
       \brief Retrieve the CalTableReader object.
@@ -200,7 +202,17 @@ namespace CR { // Namespace CR -- begin
     inline void setVerbosity(Bool newVerbosity) { verbose = newVerbosity; };
     
   private:
-        
+    
+    /*!
+      \brief Set the FFT2calFFT array with 
+
+      \param *dr      - Pointer to an already existing DataReader object, that already has
+                       (header-)data loaded. 
+      
+      \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
+    */
+    Bool setCalibration(DataReader *dr);
+    
     /*!
       \brief Standard initialization
     */
