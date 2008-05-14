@@ -71,6 +71,9 @@ namespace CR { // Namespace CR -- begin
                                  peaks. Two dimensional matrix of double with the minimum and 
                                  maximum frequencies in each row. The number of rows defines the 
                                  number of peaks, and the number of columns has to be 2.
+                                 If the begin and the end of the frequency range is exactly the same,
+                                 the nearest frequency bin which is nearest to this frequency will
+                                 be used.
 
     \param referencePhases   --  Reference phase values for comparison to the measured phase differences.
                                  The phase differences are the phase (at a peaks frequency) of the antenna
@@ -91,7 +94,10 @@ namespace CR { // Namespace CR -- begin
 
     \param badnessThreshold  --  Maximum acceptable "badness" before antenna is flagged, in sample times. 
                                  Default value is 0.15 sample times.
- 
+    \param SampleShiftsOnly  -- Corrections are done only for sample shifts:
+                                If the sample unit is e.g. 12.5 ns, phase differences
+                                corresponding to delays of < 6.25 ns will have no effect.
+
     The following entries in the parameters record are set by this class:
 
     \return AntennaMask  --  Vector of Bool that lists the antennas for which the algorithm failed.
@@ -146,9 +152,9 @@ namespace CR { // Namespace CR -- begin
       then stored in the weights. It also sets the entry in the parameters record
       "AntennaMask" which marks all the channels for which the routine failed.
 
-      \param data -- Data for which the calibration is to be done. 
-      
-      \return ok -- Was operation successful? Returns <tt>True</tt> if yes.
+      \param data           -- Data for which the calibration is to be done.
+
+      \return ok            -- Was operation successful? Returns <tt>True</tt> if yes.
     */
     virtual Bool calcWeights(const Matrix<DComplex> &data);    
 
@@ -189,11 +195,13 @@ namespace CR { // Namespace CR -- begin
       \brief Find the positions of the peaks
       \param spectrum        -- the frequency domain data
       \param frequencyValues -- The corresponding frequencies (in Hz)
-      \param frequencyRanges -- low and high frequency ranges.
-      \return positions -- indices of the peak positions
+      \param frequencyRanges -- low and high frequency ranges. If low freq = high freq the
+                                function will look for the frequency bin nearest to this
+                                frequency (instead for a peak).
+      \return positions      -- indices of the peak positions
     */
     Vector<uInt> getPeakPos(Vector<DComplex> spectrum, Vector<Double> frequencyValues,
-			    Matrix<Double> frequencyRanges);  
+			    Matrix<Double> frequencyRanges);
     
   }; //Class TVCalibrationPlugin  -- end
 } // Namespace CR -- end

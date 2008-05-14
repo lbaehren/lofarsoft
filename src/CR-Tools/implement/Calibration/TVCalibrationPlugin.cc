@@ -41,7 +41,7 @@ namespace CR { // Namespace CR -- begin
   parameters_p.define("badnessWeight",    Double(0.5) );
   parameters_p.define("badnessThreshold", Double(0.15) );
   parameters_p.define("AntennaMask",      Vector<Bool>() );
-
+  parameters_p.define("SampleShiftsOnly", Bool(True) );
   }
     
   // ============================================================================
@@ -78,6 +78,7 @@ namespace CR { // Namespace CR -- begin
       Double samplerate = parameters_p.asDouble("sampleRate"); 
       Double badWgh = parameters_p.asDouble("badnessWeight");
       Double badnessThreshold = parameters_p.asDouble("badnessThreshold");
+      Bool SampleShiftsOnly = parameters_p.asBool("SampleShiftsOnly");
 
       uInt antInd,freqInd;
       uInt nAntennas = data.ncolumn();
@@ -133,7 +134,7 @@ namespace CR { // Namespace CR -- begin
       //      cout << "Phase differences:" << endl << PhaseDiffs  << endl;
       //      cout << "relative delays:" << endl <<  relDelays << endl;
       
-      Double badness,minbadness,minJump,tmpbadness;
+      Double badness,minbadness=0.,minJump,tmpbadness;
       Vector<Double> mindelays(nFreqs),jumpPhase(nFreqs),tmpphase(nFreqs),tmpdelay(nFreqs);
       //check for sample jumps
       for (antInd=0; antInd<nAntennas; antInd++){
@@ -161,11 +162,23 @@ namespace CR { // Namespace CR -- begin
 	    AntennaMask(antInd) = False;
 	    correctionDelay(antInd) = 0.;
 	  } else {
-	    cout << "TVCalibrationPlugin: Corrected Ant: " << (antInd+1) << " by: " << minJump << ", badness: " << minbadness << endl;
-	    correctionDelay(antInd) = mean(mindelays) + minJump;
+            // if requested correct only for full sample shifts
+            if (SampleShiftsOnly)
+	      correctionDelay(antInd) = minJump;
+            else
+	      correctionDelay(antInd) = mean(mindelays) + minJump;
+	    cout << "TVCalibrationPlugin: Corrected Ant: " << (antInd+1) 
+                 << " by: " << correctionDelay(antInd) << " samples \t, badness: " << minbadness << endl;
 	  };
 	} else {
-	  correctionDelay(antInd) = mean(relDelays.column(antInd));
+          // do corrections of minor shifts (<< full sample)
+	  if (SampleShiftsOnly)
+            correctionDelay(antInd) = 0.;
+          else {
+            correctionDelay(antInd) = mean(relDelays.column(antInd));
+            cout << "TVCalibrationPlugin: Corrected Ant: " << (antInd+1) 
+                 << " by: " << correctionDelay(antInd) << " samples \t, badness: " << minbadness << endl;
+            }
 	};
       };      
       parameters_p.define("AntennaMask",AntennaMask);
@@ -197,8 +210,10 @@ namespace CR { // Namespace CR -- begin
       uInt topfreq = frequencyValues.nelements(); 
       uInt maxind;
       Double maxamp;
+      // loop through different frequency ranges
       for (uInt peak = 0; peak < frequencyRanges.nrow(); peak++){
 	if (frequencyValues(freq) > frequencyRanges(peak,0)) {freq=0;} // reset freq if needed
+        // look for first frequency after the begin of the frequency range
 	while (frequencyValues(freq) < frequencyRanges(peak,0)){
 	  freq++;
 	  if (freq >= topfreq) {
@@ -206,23 +221,30 @@ namespace CR { // Namespace CR -- begin
 	    return Vector<uInt>();
 	  };
 	};
-	maxind = freq;
-	maxamp = fabs(spectrum(freq));
-	//cout << "getPeakPos:"<<frequencyValues(freq) <<" "<< frequencyRanges(peak,1) <<" "<<freq<<endl;
-	while (frequencyValues(freq) < frequencyRanges(peak,1)) {
-	  freq++;
-	  if (freq >= topfreq) {
-	    cerr << "TVCalibrationPlugin::getPeakPos: " << "(freq >= topfreq)" << endl;
-	    return Vector<uInt>();
-	  };
-	  if (fabs(spectrum(freq)) > maxamp) {
-	    maxind = freq;
-	    maxamp = fabs(spectrum(freq));
-	    //cout << "getPeakPos " << peak <<" "<< maxamp <<" "<<freq <<" "<<frequencyValues(freq)<<endl;
-	  };
-	};
-	indices(peak) = maxind;
-      };
+        // if this frequency is allready greater than the end of the frequency range,
+        // then take it, as there is no frequency inside the range,
+        // else search for the peak in the frequency range.
+        if (frequencyValues(freq) >= frequencyRanges(peak,1)) {
+          indices(peak) = freq;
+        } else {
+	  maxind = freq;
+	  maxamp = fabs(spectrum(freq));
+	  //cout << "getPeakPos:"<<frequencyValues(freq) <<" "<< frequencyRanges(peak,1) <<" "<<freq<<endl;
+	  while (frequencyValues(freq) < frequencyRanges(peak,1)) {
+	    freq++;
+	    if (freq >= topfreq) {
+	      cerr << "TVCalibrationPlugin::getPeakPos: " << "(freq >= topfreq)" << endl;
+	      return Vector<uInt>();
+	    };
+	    if (fabs(spectrum(freq)) > maxamp) {
+	      maxind = freq;
+	      maxamp = fabs(spectrum(freq));
+	      //cout << "getPeakPos " << peak <<" "<< maxamp <<" "<<freq <<" "<<frequencyValues(freq)<<endl;
+	    };
+	  }; // while
+	  indices(peak) = maxind;
+        }; // if
+      }; // for
     } catch (AipsError x) {
       cerr << "TVCalibrationPlugin::getPeakPos: " << x.getMesg() << endl;
       return Vector<uInt>();;
