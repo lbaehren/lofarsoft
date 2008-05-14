@@ -18,8 +18,7 @@ include (CMakeSettings)
 
 set (CFITSIO_INCLUDES "")
 
-FIND_PATH (HAVE_FITSIO_H
-  fitsio.h
+FIND_PATH (HAVE_FITSIO_H fitsio.h
   PATHS ${include_locations}
   PATH_SUFFIXES cfitsio
   NO_DEFAULT_PATH

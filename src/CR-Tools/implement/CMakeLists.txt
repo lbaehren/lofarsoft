@@ -109,14 +109,6 @@ if (ROOT_LIBRARIES)
   list (APPEND cr_link_libraries ${ROOT_LIBRARIES})
 endif (ROOT_LIBRARIES)
 
-if (TCL_LIBRARIES)
-  list (APPEND cr_link_libraries ${TCL_LIBRARIES})
-endif (TCL_LIBRARIES)
-
-if (TK_LIBRARIES)
-  list (APPEND cr_link_libraries ${TK_LIBRARIES})
-endif (TK_LIBRARIES)
-
 if (PostgreSQL_LIBRARIES)
   list (APPEND cr_link_libraries ${PostgreSQL_LIBRARIES})
 endif (PostgreSQL_LIBRARIES)
@@ -145,9 +137,9 @@ endif (libm)
 ## Create the library
 
 include_directories (
-  ${CR_SOURCE_DIR}/implement
   ${CASA_INCLUDES}
   ${CASACORE_INCLUDES}
+  ${CR_SOURCE_DIR}/implement
   )
 
 add_definitions (

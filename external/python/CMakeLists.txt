@@ -34,23 +34,22 @@ option (module_numarray "Build numarray module?" OFF)
 option (module_numeric "Build numeric module?" OFF)
 
 ## ------------------------------------------------------------------------------
-## check where to find the CMake scripts
+## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-find_path (PYTHON_MODULES_cmake CMakeSettings.cmake
+find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
   ${PYTHON_MODULES_SOURCE_DIR}
   ${PYTHON_MODULES_SOURCE_DIR}/..
   ${PYTHON_MODULES_SOURCE_DIR}/../..
   ${PYTHON_MODULES_SOURCE_DIR}/../../..
-  PATH_SUFFIXES
-  devel_common/cmake
+  ENV LOFARSOFT
   )
 
-if (PYTHON_MODULES_cmake)
-  list (APPEND CMAKE_MODULE_PATH ${PYTHON_MODULES_cmake})
-else (PYTHON_MODULES_cmake)
+if (USG_ROOT)
+  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (PYTHON_MODULES_cmake)
+endif (USG_ROOT)
 
 ## --- set verbosity during configuration ------
 set (BOOST_FIND_QUIETLY ON)

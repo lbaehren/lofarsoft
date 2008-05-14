@@ -10,27 +10,19 @@
 ##  LAPACK_LIBRARIES - Link these to use LAPACK
 ##  LAPACK_INCLUDES  - Location of the LAPACK header files
 
-set (lib_locations
- /usr/lib
- /usr/local/lib
- /sw/lib
- /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
-)
+## -----------------------------------------------------------------------------
+## Search locations
 
-set (include_locations
-  /usr/include
-  /usr/local/include
-  /sw/include
-  /Developer/SDKs/MacOSX10.4u.sdk/usr/include
-  /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers
-)
-
+include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (LAPACK_INCLUDES clapack.h
-  PATHS ${include_locations}
+  PATHS
+  ${include_locations}
+  /Developer/SDKs/MacOSX10.4u.sdk/usr/include
+  /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers
 )
 
 ## -----------------------------------------------------------------------------
@@ -48,7 +40,9 @@ set (LAPACK_LIBRARIES "")
 foreach (lib ${libs})
   ## try to locate the library
   find_library (LAPACK_${lib} ${lib} ${lib}_LINUX
-    PATHS ${lib_locations}
+    PATHS
+	${lib_locations}
+    /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
     PATH_SUFFIXES lapack
     NO_DEFAULT_PATH
     )

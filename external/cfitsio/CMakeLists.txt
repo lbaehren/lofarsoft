@@ -30,23 +30,23 @@ option (CFITSIO_BUILD_HERA "Build for HERA project (for LHEA use only)" 0)
 
 option (CFITSIO_FORCE_BUILD "Force rebuild and local installation" 0)
 
-## check where to find the CMake scripts
+## ------------------------------------------------------------------------------
+## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-find_path (CFITSIO_cmake CMakeSettings.cmake
+find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
   ${CFITSIO_SOURCE_DIR}
   ${CFITSIO_SOURCE_DIR}/..
   ${CFITSIO_SOURCE_DIR}/../..
   ${CFITSIO_SOURCE_DIR}/../../..
-  PATH_SUFFIXES
-  devel_common/cmake
+  $ENV{LOFARSOFT}
   )
 
-if (CFITSIO_cmake)
-  list (APPEND CMAKE_MODULE_PATH ${CFITSIO_cmake})
-else (CFITSIO_cmake)
+if (USG_ROOT)
+  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (CFITSIO_cmake)
+endif (USG_ROOT)
 
 ## load CMake modules to search for external components
 

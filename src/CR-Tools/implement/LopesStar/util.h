@@ -1,6 +1,10 @@
 #ifndef __defined_util_h
 #define __defined_util_h
 
+#ifdef HAVE_LIBGEN_H
+#include <libgen.h>
+#endif
+
 #ifdef HAVE_POSTGRESQL
 #include <libpq-fe.h>
 #endif

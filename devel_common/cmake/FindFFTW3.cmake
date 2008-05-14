@@ -9,50 +9,29 @@
 #  FFTW3_INCLUDES   = Include path for the header files of FFTW3
 #  FFTW3_LIBRARIES  = Link these to use FFTW3
 
-set (include_locations
-  ## local installation
-  ./../release/include
-  ./../../release/include
-  ## system-wide installation
-  /usr/include
-  /usr/local/include
-  /usr/X11R6/include
-  /opt/include
-  /opt/local/include
-  /sw/include
-  ## extra locations
-  /opt/aips++/local/include
-  /var/chroot/meqtrees/usr/include/fftw3.h
-)
+## -----------------------------------------------------------------------------
+## Search locations
 
-set (lib_locations
-  ## local installation
-  ./../release/lib
-  ./../../release/lib
-  ## system-wide installation
-  /usr/local/lib
-  /usr/lib
-  /usr/X11R6/lib
-  /opt/lib
-  /opt/local/lib
-  /sw/lib
-  ## extra locations
-  /opt/aips++/local/lib
-  /var/chroot/meqtrees/usr/lib
-)
+include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
 FIND_PATH (FFTW3_INCLUDES fftw3.h
-  PATHS ${include_locations}
+  PATHS
+  ${include_locations}
+  /opt/aips++/local/include
+  /var/chroot/meqtrees/usr/include/fftw3.h
+  /opt/aips++/local/lib
+  /var/chroot/meqtrees/usr/lib
   )
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
 FIND_LIBRARY (FFTW3_LIBRARIES fftw3 fftw
-  PATHS ${lib_locations}
+  PATHS
+  ${lib_locations}
   )
 
 ## -----------------------------------------------------------------------------

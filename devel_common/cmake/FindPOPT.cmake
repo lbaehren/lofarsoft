@@ -11,28 +11,9 @@
 #  POPT_LIBRARIES     = Link these to use POPT
 
 ## -----------------------------------------------------------------------------
-## Search locations
+## Standard locations where to look for required components
 
-set (include_locations
-  ../release/include
-  ../../release/include
-  /usr/include
-  /usr/local/include
-  /sw/include
-  /opt
-  /opt/include
-)
-
-set (lib_locations
-  ../release/lib
-  ../../release/lib
-  /lib
-  /usr/lib
-  /usr/local/lib
-  /sw/lib
-  /opt
-  /opt/lib
-)
+include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files

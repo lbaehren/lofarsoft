@@ -16,23 +16,27 @@ project (BLITZ)
 option (BLITZ_FORCE_BUILD "Force rebuild and local installation" 0)
 option (BLITZ_CMAKE_BUILD "Use CMake port to configure and build Blitz++?" 0)
 
-## check where to find the CMake scripts
+## ------------------------------------------------------------------------------
+## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-find_path (BLITZ_cmake FindBlitz.cmake
+find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
   ${BLITZ_SOURCE_DIR}
   ${BLITZ_SOURCE_DIR}/..
   ${BLITZ_SOURCE_DIR}/../..
   ${BLITZ_SOURCE_DIR}/../../..
-  PATH_SUFFIXES
-  devel_common/cmake
+  ENV LOFARSOFT
   )
 
-if (BLITZ_cmake)
-  include (${BLITZ_cmake}/FindBlitz.cmake)
-endif (BLITZ_cmake)
+if (USG_ROOT)
+  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+else (USG_ROOT)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+endif (USG_ROOT)
 
 ## <-- begin build condition --------------------------------------------------->
+
+include (FindBlitz)
 
 if (NOT HAVE_BLITZ OR BLITZ_FORCE_BUILD)
 

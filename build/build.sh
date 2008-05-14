@@ -251,6 +251,7 @@ case $param_packageName in
 		## -- build required packages
 		./build.sh wcslib $param_reportBuild
 		./build.sh cfitsio $param_reportBuild
+		./build.sh hdf5 $param_reportBuild
 		## -- build package
 		build_package casacore external/casacore
     ;;
@@ -347,7 +348,6 @@ case $param_packageName in
 		./build.sh bison
 		./build.sh flex
 		./build.sh casacore --force-build $param_reportBuild
-		./build.sh hdf5 --force-build $param_reportBuild
 		./build.sh plplot $param_reportBuild
 		./build.sh python $param_reportBuild
 		./build.sh boost --force-build $param_reportBuild

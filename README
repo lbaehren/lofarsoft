@@ -3,56 +3,21 @@
 ## ------------------------------------------------------------------------------
 
 ## ------------------------------------------------------------------------------
-##  CMake
+##  Lars B"ahren
 ## ------------------------------------------------------------------------------
 
- Lars:
+ * debugging of Mac OS configuration 
+ 
+ * create CMake find script for MySQL as required by DAL
+
+ * DataReader: provide method to retrive length of segement for each dipole
 
  * work in first set of changes as discussed with Alexander and get settings for
    CR-Tools consistent
 
 ## ------------------------------------------------------------------------------
-##  Data Access Library (DAL)
+##  Joseph Masters
 ## ------------------------------------------------------------------------------
 
- Joe:
-
  * changes which might break configuration for other tools
-
------------------------------------------------------------------------------------
- CR-Tools
------------------------------------------------------------------------------------
-
- Lars:
-
- * debugging of Mac OS configuration 
- * DataReader: provide method to retrive length of segement for each dipole
- * DataReader: TimeFreq::timeValues() needs to be overloaded to include currently
-   selected block of data
-
-
- Andreas:
-
- * 
-
- Kalpana: 
-
- * verfication of algorithm for PPF inversion
-
- Frank:
-
- * 
-
------------------------------------------------------------------------------------
- pyBDSM
------------------------------------------------------------------------------------
-
- Alexander:
-
- * 
-
- Niruj:
-
- * 
-
 

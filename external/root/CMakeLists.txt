@@ -17,22 +17,23 @@ project (ROOT)
 
 option (ROOT_FORCE_INSTALL "Force installation from source package?" 0)
 
-## -----------------------------------------------------------------------------
-## [1] Locate the CMake find scripts
+## ------------------------------------------------------------------------------
+## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-find_path (cmake_scripts FindROOT.cmake InstallROOT.cmake
-  PATHS
-  ..
-  ../..
-  PATH_SUFFIXES
-  devel_common/cmake
-)
+find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+  PATHS 
+  ${ROOT_SOURCE_DIR}
+  ${ROOT_SOURCE_DIR}/..
+  ${ROOT_SOURCE_DIR}/../..
+  ${ROOT_SOURCE_DIR}/../../..
+  ENV LOFARSOFT
+  )
 
-if (cmake_scripts)
-  message (STATUS "Found CMake script directory : ${cmake_scripts}")
-elseif (cmake_scripts)
-  message (FATAL_ERROR "Cannot find CMake script directory; unable to continue!")
-endif (cmake_scripts)
+if (USG_ROOT)
+  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+else (USG_ROOT)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+endif (USG_ROOT)
 
 ## -----------------------------------------------------------------------------
 ## [2] Run the find script to see if there is a system wide ROOT installation

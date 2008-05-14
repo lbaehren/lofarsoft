@@ -17,23 +17,23 @@ cmake_minimum_required(VERSION 2.4)
 
 option (HDF5_FORCE_BUILD "Force rebuild and local installation" 0)
 
-## check where to find the CMake scripts
+## ------------------------------------------------------------------------------
+## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-find_path (HDF5_cmake CMakeSettings.cmake
+find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
   ${HDF5_SOURCE_DIR}
   ${HDF5_SOURCE_DIR}/..
   ${HDF5_SOURCE_DIR}/../..
   ${HDF5_SOURCE_DIR}/../../..
-  PATH_SUFFIXES
-  devel_common/cmake
+  ENV LOFARSOFT
   )
 
-if (HDF5_cmake)
-  list (APPEND CMAKE_MODULE_PATH ${HDF5_cmake})
-else (HDF5_cmake)
+if (USG_ROOT)
+  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (HDF5_cmake)
+endif (USG_ROOT)
 
 ## load CMake modules to search for external components
 
@@ -69,7 +69,7 @@ message (STATUS "Running the HDF5 configure script...")
 
 execute_process (
   WORKING_DIRECTORY ${HDF5_SOURCE_DIR}
-  COMMAND ./configure --prefix=${HDF5_prefix} --includedir=${HDF5_prefix}/include/hdf5
+  COMMAND ./configure --prefix=${HDF5_prefix} --includedir=${HDF5_prefix}/include/hdf5 --enable-shared-=no
   TIMEOUT 300
   ERROR_VARIABLE error_configure
   ERROR_FILE error.log

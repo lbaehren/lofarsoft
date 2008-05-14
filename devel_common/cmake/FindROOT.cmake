@@ -15,22 +15,15 @@
 
 include (CMakeSettings)
 
-list (APPEND include_locations
-  /opt/root/include
-  /opt/auger/root-v5.18.00
-  )
-
-list (APPEND lib_locations
-  /opt/root/lib
-  /opt/auger/root-v5.18.00
-  )
-
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (ROOT_INCLUDES tCanvas.h TCint.h TObject.h
-  PATHS ${include_locations}
-  ENV ROOTSYS
+  PATHS
+  ${include_locations}
+  /opt/root/include
+  /opt/auger/root-v5.18.00
+  $ENV{ROOTSYS}
   PATH_SUFFIXES
   root
   root/include
@@ -67,8 +60,11 @@ set (libs
 foreach (lib ${libs})
   ## try to locate the library
   find_library (root${lib} ${lib}
-    PATHS ${lib_locations}
-    ENV ROOTSYS
+    PATHS
+    ${lib_locations}
+    /opt/root/lib
+    /opt/auger/root-v5.18.00
+    $ENV{ROOTSYS}
     PATH_SUFFIXES
     root
     root/lib

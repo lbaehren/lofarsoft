@@ -156,7 +156,7 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Destructor
     */
-    ~analyseLOPESevent ();
+    virtual ~analyseLOPESevent ();
         
     // --------------------------------------------------------------- Parameters
 
@@ -341,14 +341,14 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Provide a summary of the internal status
     */
-    inline void summary () {
+    virtual inline void summary () {
       summary (std::cout);
     }
 
     /*!
       \brief Provide a summary of the internal status
     */
-    void summary (std::ostream &os);    
+    virtual void summary (std::ostream &os);    
 
     // ------------------------------------------------------------------ Methods
     

@@ -41,7 +41,7 @@ endforeach (test)
 ## -------------------------------------------------------------------
 ## Tests for working with casacore
 
-if (HAVE_CASACORE)
+if (HAVE_CASACORE AND HAVE_WCSLIB)
 
   message (STATUS "[CR] Tests for casacore enabled.")
   
@@ -79,7 +79,7 @@ if (HAVE_CASACORE)
     endif (CR_ENABLE_TESTING) 
   endforeach (test ${tests_casacore})
   
-endif (HAVE_CASACORE)
+endif (HAVE_CASACORE AND HAVE_WCSLIB)
 
 ## -----------------------------------------------------------------------------
 ## Test(s) for Blitz++
@@ -266,3 +266,28 @@ if (HAVE_DAL AND HAVE_CASACORE)
     COMPILE_FLAGS "-DHAVE_DAL -I${DAL_INCLUDES} -I${HDF5_INCLUDES}"
     )
 endif (HAVE_DAL AND HAVE_CASACORE)
+
+## -----------------------------------------------------------------------------
+## Special testing for Mac OS X
+
+if (APPLE)
+  
+  add_library (crMac
+    ${CR_SOURCE_DIR}/implement/Utilities/Masking.cc
+    ${CR_SOURCE_DIR}/implement/Utilities/ProgressBar.cc
+    ${CR_SOURCE_DIR}/implement/Utilities/Timestamp.cc
+    ${CR_SOURCE_DIR}/implement/Utilities/StringTools.cc
+    ${CR_SOURCE_DIR}/implement/Coordinates/AxisCoordinates.cc
+    ${CR_SOURCE_DIR}/implement/Coordinates/AxisIterator.cc
+    ${CR_SOURCE_DIR}/implement/Coordinates/CoordinateGrid.cc
+    ${CR_SOURCE_DIR}/implement/Coordinates/GeodeticEllipsoid.cc
+    ${CR_SOURCE_DIR}/implement/Coordinates/GridCoordinate.cc
+    ${CR_SOURCE_DIR}/implement/Coordinates/PolarCoordinate.cc
+    ${CR_SOURCE_DIR}/implement/Coordinates/TimeFreq.cc
+    )
+
+  set_target_properties (crMac
+    PROPERTIES
+    COMPILE_FLAGS "-I${CR_SOURCE_DIR}/implement"
+    )
+endif (APPLE)

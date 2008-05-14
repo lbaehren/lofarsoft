@@ -44,7 +44,7 @@ namespace CR {  // Namespace CR -- begin
     shift_p     = 0;
     blocksize_p = 1;
     fftLength_p = 1;
-    block_p     = 1;
+    block_p     = 0;
     // 
     setPosition();
   }
@@ -59,7 +59,7 @@ namespace CR {  // Namespace CR -- begin
     stride_p    = 0;
     shift_p     = 0;
     blocksize_p = blocksize;
-    block_p     = 1;
+    block_p     = 0;
     // 
     setPosition();
   }
@@ -75,7 +75,7 @@ namespace CR {  // Namespace CR -- begin
     stride_p    = 0;
     shift_p     = 0;
     blocksize_p = blocksize;
-    block_p     = 1;
+    block_p     = 0;
     // 
     setPosition();
   }
@@ -93,7 +93,7 @@ namespace CR {  // Namespace CR -- begin
     stride_p    = stride;
     shift_p     = shift;
     blocksize_p = blocksize;
-    block_p     = 1;
+    block_p     = 0;
     // 
     setPosition();
   }
@@ -138,7 +138,7 @@ namespace CR {  // Namespace CR -- begin
     //
     stepWidth_p = other.stepWidth_p;
     //
-    position_p = other.position_p;
+    position_p  = other.position_p;
   }
   
   // -------------------------------------------------------- DataIterator::destroy
@@ -191,13 +191,7 @@ namespace CR {  // Namespace CR -- begin
   
   void DataIterator::setBlock (unsigned int const &block)
   {
-    if (block>0) {
-      block_p = block;
-    } else {
-      block_p = 1;
-      std::cerr << "[DataIterator::setBlock] Invalid input for block number: "
-		<< block << ". Fall-back to block 1." << std::endl;
-    }
+    block_p = block;
     //
     setPosition ();
   }

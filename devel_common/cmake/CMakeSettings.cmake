@@ -1,67 +1,145 @@
 
 ## -----------------------------------------------------------------------------
+## $Id:: CMakeLists.txt 1475 2008-04-23 11:49:15Z baehren                      $
+## -----------------------------------------------------------------------------
+
+## Variables used through the configuration environment:
 ##
-##  Standard locations where to look for required components
-## 
-## -----------------------------------------------------------------------------
+##  USG_ROOT              -- Root of the USG directory tree.
+##  USG_CMAKE_CONFIG      -- 
+##  USG_LIB_LOCATIONS     -- 
+##  USG_INCLUDE_LOCATIONS -- 
+##  USG_INSTALL_PREFIX    -- Prefix marking the location at which the finished
+##                           software components will be installed
+##  USG_VARIANTS_FILE     -- Variants file containing host-specific overrides
+##                           to the common configuration settings/presets.
+##
 
-## -----------------------------------------------------------------------------
-## locations in which to look for applications/binaries
+if (NOT USG_CMAKE_CONFIG)
 
-set (bin_locations "")
+  ## First pass: if USG_ROOT is still undefined we need to define it, since this
+  ##             is the common starting point for all directory references below
 
-foreach (location ${CMAKE_MODULE_PATH})
-  list (APPEND bin_locations ${location}/../../release/bin)
-endforeach (location)
+  if (NOT USG_ROOT)
+    message (STATUS "[USG CMake] USG_ROOT undefined; trying to locate it...")
+    ## try to find the root directory based on the location of the release
+    ## directory
+    find_path (USG_INSTALL_PREFIX release/release_area.txt
+      $ENV{LOFARSOFT}
+      ..
+      ../..
+      NO_DEFAULT_PATH
+      )
+    ## convert the relative path to an absolute one
+    get_filename_component (USG_ROOT ${USG_INSTALL_PREFIX} ABSOLUTE)
+  endif (NOT USG_ROOT)
 
-list (APPEND bin_locations /opt/bin)
-list (APPEND bin_locations /opt/local/bin)
-list (APPEND bin_locations /sw/bin)
-list (APPEND bin_locations /dp/bin)
-list (APPEND bin_locations /usr/bin)
-list (APPEND bin_locations /usr/local/bin)
-list (APPEND bin_locations /usr/X11R6/bin)
-list (APPEND bin_locations /sw/lib/gcc4.2/bin)
+  ## Second pass: check once more if USG_ROOT is defined
+  
+  if (USG_ROOT)
+    ## This addition to the module path needs to go into the cache,
+    ## because otherwise it will be gone at the next time CMake is run
+    set (CMAKE_MODULE_PATH ${USG_ROOT}/devel_common/cmake
+      CACHE
+      PATH 
+      "USG cmake modules"
+      FORCE)
+    ## installation location
+    set (USG_INSTALL_PREFIX ${USG_ROOT}/release
+      CACHE
+      PATH
+      "USG default install area"
+      FORCE
+      )
+    set (CMAKE_INSTALL_PREFIX ${USG_ROOT}/release
+      CACHE
+      PATH
+      "CMake installation area"
+      FORCE
+      )
+    ## header files
+    include_directories (${USG_ROOT}/release/include
+      CACHE
+      PATH
+      "USG include area"
+      FORCE
+      )
+    ## Feedback 
+    message (STATUS "[USG CMake configuration]")
+    message (STATUS "USG_ROOT             = ${USG_ROOT}")
+    message (STATUS "USG_INSTALL_PREFIX   = ${USG_INSTALL_PREFIX}")
+    message (STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
+  else (USG_ROOT)
+    message (SEND_ERROR "USG_ROOT is undefined!")
+  endif (USG_ROOT)
+  
+  ## ---------------------------------------------------------------------------
+  ## locations in which to look for applications/binaries
+  
+  set (bin_locations
+    ${USG_INSTALL_PREFIX}/bin
+    /sw/bin
+    CACHE
+    PATH
+    "Extra directories to look for executable files"
+    FORCE
+    )
+  
+  ## ----------------------------------------------------------------------------
+  ## locations in which to look for header files
+  
+  set (include_locations
+    ${USG_INSTALL_PREFIX}/include
+    /opt/include
+    /opt/local/include
+    /sw/include
+    /usr/include
+    /usr/local/include
+    /usr/X11R6/include
+    /opt/aips++/local/include
+    /opt/casa/local/include    
+    CACHE
+    PATH
+    "Directories to look for include files"
+    FORCE
+    )
+  
+  ## ----------------------------------------------------------------------------
+  ## locations in which to look for libraries
+  
+  set (lib_locations
+    ${USG_INSTALL_PREFIX}/lib
+    /opt/lib
+    /opt/local/lib
+    /sw/lib
+    /usr/lib
+    /usr/local/lib
+    /usr/X11R6/lib
+    /opt/aips++/local/lib
+    /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
+    CACHE
+    PATH
+    "Directories to look for libraries"
+    FORCE
+    )
+  
+  ## ----------------------------------------------------------------------------
+  ##  Host-specific overrides
+  
+  execute_process (COMMAND hostname -s
+    OUTPUT_VARIABLE hostname
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  set (USG_VARIANTS_FILE ${USG_ROOT}/devel_common/cmake/variants.${hostname})
+  
+  if (EXISTS ${USG_VARIANTS_FILE})
+    message (STATUS "Loading settings variants " ${USG_VARIANTS_FILE})
+    include (${USG_VARIANTS_FILE})
+  endif (EXISTS ${USG_VARIANTS_FILE})
+  
+  ## ----------------------------------------------------------------------------
+  ## Configuration flag
+  
+  set (USG_CMAKE_CONFIG TRUE CACHE BOOL "USG CMake configuration flag" FORCE)
+  mark_as_advanced(USG_CMAKE_CONFIG)
 
-## -----------------------------------------------------------------------------
-## locations in which to look for header files
-
-set (include_locations "")
-
-foreach (location ${CMAKE_MODULE_PATH})
-  list (APPEND include_locations ${location}/../../release/include)
-endforeach (location)
-
-list (APPEND include_locations /opt/include)
-list (APPEND include_locations /opt/local/include)
-list (APPEND include_locations /sw/include)
-list (APPEND include_locations /dp/include)
-list (APPEND include_locations /usr/include)
-list (APPEND include_locations /usr/local/include)
-list (APPEND include_locations /usr/X11R6/include)
-list (APPEND include_locations /opt/aips++/local/include)
-list (APPEND include_locations /opt/casa/local/include)
-list (APPEND include_locations /sw/lib/gcc4.2/include)
-list (APPEND include_locations /opt/gcc-4.2.1/include/c++/4.2.1)
-
-## -----------------------------------------------------------------------------
-## locations in which to look for libraries
-
-set (lib_locations "")
-
-foreach (location ${CMAKE_MODULE_PATH})
-  list (APPEND lib_locations ${location}/../../release/lib)
-endforeach (location)
-
-list (APPEND lib_locations /opt/lib)
-list (APPEND lib_locations /opt/local/lib)
-list (APPEND lib_locations /sw/lib)
-list (APPEND lib_locations /dp/lib)
-list (APPEND lib_locations /usr/lib64)
-list (APPEND lib_locations /usr/lib)
-list (APPEND lib_locations /usr/local/lib)
-list (APPEND lib_locations /usr/X11R6/lib)
-list (APPEND lib_locations /opt/aips++/local/lib)
-list (APPEND lib_locations /sw/lib/gcc4.2/lib)
-list (APPEND lib_locations /opt/gcc-4.2.1/lib)
-list (APPEND lib_locations /Developer/SDKs/MacOSX10.4u.sdk/usr/lib)
+endif (NOT USG_CMAKE_CONFIG)

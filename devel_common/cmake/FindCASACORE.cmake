@@ -18,11 +18,7 @@
 include (CMakeSettings)
 
 list (APPEND include_locations
-  ./casacore
-  ./../casacore
-  ./../external/casacore
-  ./../../casacore
-  ./../../external/casacore
+  ${USG_ROOT}/external/casacore
   /usr/include/casacore
   /usr/local/include/casacore
   /sw/share/casacore
@@ -30,12 +26,7 @@ list (APPEND include_locations
 )
 
 list (APPEND lib_locations
-  ## system-wide installation
-  /usr/lib
-  /usr/local/lib
-  /opt/lib
   /opt/casacore/lib
-  /sw/lib
 )
 
 set (casacore_modules
@@ -103,100 +94,106 @@ set (CASACORE_INCLUDES "")
 
 ## [1] <casa/Arrays.h>
 
-find_path (CASACORE_casa Arrays.h
+find_path (CASACORE_INCLUDES_casa casa/Arrays.h
   PATHS ${include_locations}
-  PATH_SUFFIXES casa/casa
+  PATH_SUFFIXES casa
   NO_DEFAULT_PATH
 )
 
-if (CASACORE_casa)
-  get_filename_component (tmp ${CASACORE_casa} ABSOLUTE)
-  string (REGEX REPLACE "casa/casa" "casa" casacore_casa_include ${tmp})
-  list (APPEND CASACORE_INCLUDES ${casacore_casa_include})
-endif (CASACORE_casa)
+if (CASACORE_INCLUDES_casa)
+  get_filename_component (tmp ${CASACORE_INCLUDES_casa} ABSOLUTE)
+  list (APPEND CASACORE_INCLUDES ${tmp})
+else (CASACORE_INCLUDES_casa)
+  message (SEND_ERROR "[casacore] Unable to locate Array.h")
+endif (CASACORE_INCLUDES_casa)
 
 ## [2] <tables/Tables.h>
 
-find_path (CASACORE_tables Tables.h LogTables.h
+find_path (CASACORE_INCLUDES_tables tables/Tables.h tables/LogTables.h
   PATHS ${include_locations}
-  PATH_SUFFIXES tables/tables
+  PATH_SUFFIXES tables
   NO_DEFAULT_PATH
 )
 
-if (CASACORE_tables)
-  get_filename_component (tmp ${CASACORE_tables} ABSOLUTE)
-  string (REGEX REPLACE "tables/tables" "tables" casacore_tables_include ${tmp})
-  list (APPEND CASACORE_INCLUDES ${casacore_tables_include})
-elseif (CASACORE_tables)
+if (CASACORE_INCLUDES_tables)
+  get_filename_component (tmp ${CASACORE_INCLUDES_tables} ABSOLUTE)
+  list (APPEND CASACORE_INCLUDES ${tmp})
+elseif (CASACORE_INCLUDES_tables)
   message (SEND_ERROR "[casacore] Unable to locate Tables.h")
-endif (CASACORE_tables)
+endif (CASACORE_INCLUDES_tables)
 
 ## [3] <miriad.h>
 
-find_path (CASACORE_mirlib miriad.h
+find_path (CASACORE_INCLUDES_mirlib miriad.h
   PATHS ${include_locations}
   PATH_SUFFIXES mirlib
   NO_DEFAULT_PATH
 )
 
-if (CASACORE_mirlib)
-  get_filename_component (tmp ${CASACORE_mirlib} ABSOLUTE)
+if (CASACORE_INCLUDES_mirlib)
+  get_filename_component (tmp ${CASACORE_INCLUDES_mirlib} ABSOLUTE)
   list (APPEND CASACORE_INCLUDES ${tmp})
-endif (CASACORE_mirlib)
+elseif (CASACORE_INCLUDES_mirlib)
+  message (SEND_ERROR "[casacore] Unable to locate miriad.h")
+endif (CASACORE_INCLUDES_mirlib)
 
 ## [4] <scimath/Fitting.h>
 
-find_path (CASACORE_scimath Fitting.h
+find_path (CASACORE_INCLUDES_scimath scimath/Fitting.h
   PATHS ${include_locations}
-  PATH_SUFFIXES scimath/scimath
+  PATH_SUFFIXES scimath
   NO_DEFAULT_PATH
 )
 
-if (CASACORE_scimath)
-  get_filename_component (tmp ${CASACORE_scimath} ABSOLUTE)
-  string (REGEX REPLACE scimath/scimath scimath tmp ${tmp})
+if (CASACORE_INCLUDES_scimath)
+  get_filename_component (tmp ${CASACORE_INCLUDES_scimath} ABSOLUTE)
   list (APPEND CASACORE_INCLUDES ${tmp})
-endif (CASACORE_scimath)
+elseif (CASACORE_INCLUDES_scimath)
+  message (SEND_ERROR "[casacore] Unable to locate Fitting.h")
+endif (CASACORE_INCLUDES_scimath)
 
 ## [5] <measures/Measures.h>
 
-find_path (CASACORE_measures Measures.h
+find_path (CASACORE_INCLUDES_measures measures/Measures.h
   PATHS ${include_locations}
-  PATH_SUFFIXES measures/measures
+  PATH_SUFFIXES measures
   NO_DEFAULT_PATH
 )
 
-if (CASACORE_measures)
-  get_filename_component (tmp ${CASACORE_measures} ABSOLUTE)
-  string (REGEX REPLACE measures/measures measures tmp ${tmp})
+if (CASACORE_INCLUDES_measures)
+  get_filename_component (tmp ${CASACORE_INCLUDES_measures} ABSOLUTE)
   list (APPEND CASACORE_INCLUDES ${tmp})
-endif (CASACORE_measures)
+elseif (CASACORE_INCLUDES_measures)
+  message (SEND_ERROR "[casacore] Unable to locate Measures.h")
+endif (CASACORE_INCLUDES_measures)
 
 ## [6] <fits/FITS.h>
 
-find_path (CASACORE_fits FITS.h
+find_path (CASACORE_INCLUDES_fits fits/FITS.h
   PATHS ${include_locations}
-  PATH_SUFFIXES fits/fits
+  PATH_SUFFIXES fits
 )
 
-if (CASACORE_fits)
-  get_filename_component (tmp ${CASACORE_fits} ABSOLUTE)
-  string (REGEX REPLACE fits/fits fits tmp ${tmp})
+if (CASACORE_INCLUDES_fits)
+  get_filename_component (tmp ${CASACORE_INCLUDES_fits} ABSOLUTE)
   list (APPEND CASACORE_INCLUDES ${tmp})
-endif (CASACORE_fits)
+elseif (CASACORE_INCLUDES_fits)
+  message (SEND_ERROR "[casacore] Unable to locate FITS.h")
+endif (CASACORE_INCLUDES_fits)
 
 ## [7] <coordinates/Coordinates.h>
 
-find_path (CASACORE_coordinates Coordinates.h
+find_path (CASACORE_INCLUDES_coordinates coordinates/Coordinates.h
   PATHS ${include_locations}
-  PATH_SUFFIXES coordinates/coordinates
+  PATH_SUFFIXES coordinates
 )
 
-if (CASACORE_coordinates)
-  get_filename_component (tmp ${CASACORE_coordinates} ABSOLUTE)
-  string (REGEX REPLACE coordinates/coordinates coordinates tmp ${tmp})
+if (CASACORE_INCLUDES_coordinates)
+  get_filename_component (tmp ${CASACORE_INCLUDES_coordinates} ABSOLUTE)
   list (APPEND CASACORE_INCLUDES ${tmp})
-endif (CASACORE_coordinates)
+elseif (CASACORE_INCLUDES_coordinates)
+  message (SEND_ERROR "[casacore] Unable to locate Coordinates.h")
+endif (CASACORE_INCLUDES_coordinates)
 
 ## [8] <components/ComponentModels.h>
 
@@ -423,17 +420,17 @@ set (CASA_LIBRARIES ${CASACORE_LIBRARIES})
 ## Variables only to be displayed in advanced mode
 
 mark_as_advanced (
-  CASACORE_casa
-  CASACORE_tables
-  CASACORE_scimath
+  CASACORE_INCLUDES_casa
+  CASACORE_INCLUDES_tables
+  CASACORE_INCLUDES_scimath
   CASACORE_ms
   CASACORE_msfits
   CASACORE_msvis
   CASACORE_images
   CASACORE_components
-  CASACORE_coordinates
-  CASACORE_fits
+  CASACORE_INCLUDES_coordinates
+  CASACORE_INCLUDES_fits
   CASACORE_lattices
-  CASACORE_mirlib
-  CASACORE_measures
+  CASACORE_INCLUDES_mirlib
+  CASACORE_INCLUDES_measures
   )

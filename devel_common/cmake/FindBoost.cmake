@@ -154,10 +154,10 @@ if (BOOST_boost_python)
   ## load CMake module required for checking symbols within a library
   include (CheckLibraryExists)
 
-  check_library_exists (${BOOST_boost_python} _PyMem_Malloc "" BOOST__PyMem_Malloc)
-  check_library_exists (${BOOST_boost_python} _PyModule_Type "" BOOST__PyModule_Type)
-  check_library_exists (${BOOST_boost_python} _PyMethod_Type "" BOOST__PyMethod_Type)
-  check_library_exists (${BOOST_boost_python} _PyErr_WarnEx "" BOOST__PyErr_WarnEx)
+  check_library_exists (${BOOST_boost_python} PyMem_Malloc "" BOOST__PyMem_Malloc)
+  check_library_exists (${BOOST_boost_python} PyModule_Type "" BOOST__PyModule_Type)
+  check_library_exists (${BOOST_boost_python} PyMethod_Type "" BOOST__PyMethod_Type)
+  check_library_exists (${BOOST_boost_python} PyErr_WarnEx "" BOOST__PyErr_WarnEx)
 
 endif (BOOST_boost_python)
 

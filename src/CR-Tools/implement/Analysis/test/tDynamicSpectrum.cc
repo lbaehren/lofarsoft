@@ -65,9 +65,9 @@ int test_construction ()
   try {
     // Coordinate axes
     uint nofAxes (2);
-    casa::Vector<double> crval (2);
-    casa::Vector<double> cdelt (2);
-    casa::Vector<casa::String> units (2);
+    casa::Vector<double> crval (nofAxes);
+    casa::Vector<double> cdelt (nofAxes);
+    casa::Vector<casa::String> units (nofAxes);
 
     crval    = 0.0;
     cdelt    = 1.0;

@@ -262,7 +262,7 @@ namespace CR {  // Namespace CR -- begin
     casa::IPosition shape = dynamicSpectrum_p.shape();
     int status            = 0;
     long naxis            = shape.nelements();
-    long nelements        = dynamicSpectrum_p.nelements();
+//     long nelements        = dynamicSpectrum_p.nelements();
     long naxes[2]         = { shape(1), shape(0)};
     std::string outfile;
     fitsfile *fptr;

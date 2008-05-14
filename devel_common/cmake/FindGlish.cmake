@@ -12,38 +12,7 @@
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-set (include_locations
-  ../release/include
-  ../../release/include
-  code/aips/glish/include
-  code/aips/glish/include/Glish
-  code/aips/glish/include/Npd
-  code/aips/glish/include/sos
-  code/aips/glish/include/regx
-)
-
-set (lib_locations
-  ../release/lib
-  ../../release/lib
-  linux/lib
-  linux_gnu/lib
-  darwin/lib
-)
-
-set (casa_locations
-  ## most Linux systems
-  /aips++
-  /casa
-  /opt/aips++
-  /opt/casa
-  /opt/casa/stable
-  /opt/casa/current
-  ## Mac OS X (Fink)
-  /sw/share/aips++
-  /sw/share/casa
-  ## LOFAR development
-  /app/aips++/Stable
-  )
+include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files

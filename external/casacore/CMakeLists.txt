@@ -103,27 +103,25 @@ check_type_size ("double" SIZEOF_DOUBLE)
 check_type_size ("long" SIZEOF_LONG)
 check_type_size ("long long" SIZEOF_LONG_LONG)
 
-## -----------------------------------------------------------------------------
-## Required external libraries
+## ------------------------------------------------------------------------------
+## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-## Locate additional CMake find scripts
-
-find_path (casacore_cmake CMakeSettings.cmake
-  PATHS
+find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+  PATHS 
   ${casacore_SOURCE_DIR}
   ${casacore_SOURCE_DIR}/..
   ${casacore_SOURCE_DIR}/../..
-  PATH_SUFFIXES
-  devel_common/cmake
+  ${casacore_SOURCE_DIR}/../../..
+  ENV LOFARSOFT
   )
 
-if (casacore_cmake)
-  list (APPEND CMAKE_MODULE_PATH ${casacore_cmake})
-else (casacore_cmake)
+if (USG_ROOT)
+  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (casacore_cmake)
+endif (USG_ROOT)
 
-if (casacore_cmake)
+if (USG_ROOT)
   message (STATUS "[casacore] Using USG CMake find scripts")
   include (FindCFITSIO.cmake)
   include (FindG2C.cmake)
@@ -131,9 +129,9 @@ if (casacore_cmake)
   include (FindWCS.cmake)
   ## optional components
   if (casacore_HDF5_SUPPORT) 
-    include (${casacore_cmake}/FindHDF5.cmake)
+    include (FindHDF5.cmake)
   endif (casacore_HDF5_SUPPORT)
-elseif (casacore_cmake)
+elseif (USG_ROOT)
   message (STATUS "[casacore] Using local CMake find scripts")
   include (./FindCFITSIO.cmake)
   include (./FindG2C.cmake)
@@ -143,7 +141,7 @@ elseif (casacore_cmake)
   if (casacore_HDF5_SUPPORT) 
     include (./FindHDF5.cmake)
   endif (casacore_HDF5_SUPPORT)
-endif (casacore_cmake)
+endif (USG_ROOT)
 
 ## --- libm -----------------------------------------------
 

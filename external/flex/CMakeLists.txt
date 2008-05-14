@@ -19,15 +19,26 @@ cmake_minimum_required (VERSION 2.4)
 
 option (FLEX_FORCE_BUILD "Force rebuild and local installation" 0)
 
-## check where to find the CMake scripts
+## ------------------------------------------------------------------------------
+## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-set (bin_locations
-  /usr/bin
-  /usr/local/bin
-  /sw/bin
-  /opt
-  /opt/bin
-)
+find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+  PATHS 
+  ${FLEX_SOURCE_DIR}
+  ${FLEX_SOURCE_DIR}/..
+  ${FLEX_SOURCE_DIR}/../..
+  ${FLEX_SOURCE_DIR}/../../..
+  ENV LOFARSOFT
+  )
+
+if (USG_ROOT)
+  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+else (USG_ROOT)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+endif (USG_ROOT)
+
+## ------------------------------------------------------------------------------
+## Check if the program is available already
 
 find_program (HAVE_FLEX flex PATHS ${bin_locations})
 

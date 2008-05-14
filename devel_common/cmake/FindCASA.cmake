@@ -19,13 +19,10 @@
 ##    installation
 ##
 
-set (lib_locations
-  /usr/lib
-  /usr/local/lib
-  /opt
-  /opt/lib
-  /sw/lib
-)
+## -----------------------------------------------------------------------------
+## Search locations
+
+include (CMakeSettings)
 
 set (casa_locations
   ## most Linux systems

@@ -11,17 +11,22 @@
 #  Globus_LIBRARIES  = Link these to use Globus
 
 ## -----------------------------------------------------------------------------
+## Search locations
+
+include (CMakeSettings)
+
+## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (Globus_INCLUDES globus.h
-  PATHS /usr/local/include /usr/include /sw/include
+  PATHS ${include_locations}
   )
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
 find_library (Globus_LIBRARIES globus
-  PATHS /usr/local/lib /usr/lib /lib /sw/lib
+  PATHS ${lib_locations}
   )
 
 ## -----------------------------------------------------------------------------

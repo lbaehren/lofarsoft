@@ -35,23 +35,23 @@ option (BOOST_LIB_REGEX "Build libboost_regex" 0)
 option (BOOST_LIB_SIGNALS "Build libboost_signals" 0)
 option (BOOST_LIB_WAVE "Build libboost_wave" 0)
 
-## check where to find the CMake scripts
+## ------------------------------------------------------------------------------
+## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-find_path (BOOST_cmake CMakeSettings.cmake
+find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
   ${BOOST_SOURCE_DIR}
   ${BOOST_SOURCE_DIR}/..
   ${BOOST_SOURCE_DIR}/../..
   ${BOOST_SOURCE_DIR}/../../..
-  PATH_SUFFIXES
-  devel_common/cmake
+  ENV LOFARSOFT
   )
 
-if (BOOST_cmake)
-  list (APPEND CMAKE_MODULE_PATH ${BOOST_cmake})
-else (BOOST_cmake)
+if (USG_ROOT)
+  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (BOOST_cmake)
+endif (USG_ROOT)
 
 set (BOOST_FIND_python_ONLY ON)
 include (FindBoost)

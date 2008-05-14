@@ -9,31 +9,25 @@
 #  WCSLIB_INCLUDES   = Include path for the header files of WCS
 #  WCSLIB_LIBRARIES  = Link these to use WCS
 
+## -----------------------------------------------------------------------------
 ## Search locations
+
 include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-find_path (WCSLIB_INCLUDES wcs.h
+find_path (WCSLIB_INCLUDES wcs/wcs.h wcslib/wcs.h
   PATHS ${include_locations}
-  PATH_SUFFIXES wcs wcslib
   NO_DEFAULT_PATH
   )
-
-## correct the include path
-
-if (WCSLIB_INCLUDES)
-  string (REGEX REPLACE wcslib "" WCSLIB_INCLUDES ${WCSLIB_INCLUDES})
-endif (WCSLIB_INCLUDES)
-
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
 find_library (WCSLIB_LIBRARIES wcs
   PATHS ${lib_locations}
-  PATH_SUFFIXES darwin/lib linux_gnu/lib stable/linux_gnu/lib
+  PATH_SUFFIXES wcs wcslib darwin/lib linux_gnu/lib stable/linux_gnu/lib
   NO_DEFAULT_PATH
   )
 

@@ -12,21 +12,9 @@
 #
 
 ## -----------------------------------------------------------------------------
-## Standard locations where to look for required components
+## Search locations
 
-set (lib_locations
-  /usr/local/lib
-  /usr/lib
-  /usr/X11R6/lib
-  /sw/lib
-  )
-
-set (include_locations
-  /usr/include
-  /usr/local/include
-  /usr/X11R6/include
-  /sw/include
-  )
+include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files

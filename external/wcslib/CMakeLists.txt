@@ -22,29 +22,24 @@ include (CTest)
 
 option (WCSLIB_PYTHON_WRAPPER "Generate Python wrapper for WCSLIB?" 0)
 
-## -----------------------------------------------------------------------------
-## Check for required external libraries
+## ------------------------------------------------------------------------------
+## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-## Locate additional CMake find scripts
-
-find_path (WCSLIB_cmake CMakeSettings.cmake
+find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
   ${WCSLIB_SOURCE_DIR}
   ${WCSLIB_SOURCE_DIR}/..
   ${WCSLIB_SOURCE_DIR}/../..
   ${WCSLIB_SOURCE_DIR}/../../..
   ENV LOFARSOFT
-  PATH_SUFFIXES
-  devel_common/cmake
   )
 
-if (WCSLIB_cmake)
-  list (APPEND CMAKE_MODULE_PATH ${WCSLIB_cmake})
-else (WCSLIB_cmake)
+if (USG_ROOT)
+  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (WCSLIB_cmake)
+endif (USG_ROOT)
 
-## locate external packages
 
 set (CFITSIO_FIND_QUIETLY 1)
 set (PGPLOT_FIND_QUIETLY 1)

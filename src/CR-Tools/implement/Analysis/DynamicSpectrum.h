@@ -158,6 +158,7 @@ namespace CR {  // Namespace CR -- begin
 
     inline bool setFilename (std::string const &filename) {
       filename_p = filename;
+      return true;
     }
     
     void setDynamicSpectrum ();

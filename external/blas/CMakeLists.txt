@@ -23,24 +23,25 @@ include_directories (
   cblas/testing
   )
 
-## -----------------------------------------------------------------------------
-## Required external libraries
+## ------------------------------------------------------------------------------
+## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-## Locate additional CMake find scripts
-
-find_path (BLAS_cmake FindG2C.cmake FindLAPACK.cmake
+find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
   ${BLAS_SOURCE_DIR}
   ${BLAS_SOURCE_DIR}/..
   ${BLAS_SOURCE_DIR}/../..
   ${BLAS_SOURCE_DIR}/../../..
-  PATH_SUFFIXES
-  devel_common/cmake
+  ENV LOFARSOFT
   )
 
-if (BLAS_cmake)
-  include (${BLAS_cmake}/FindG2C.cmake)
-endif (BLAS_cmake)
+if (USG_ROOT)
+  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+else (USG_ROOT)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+endif (USG_ROOT)
+
+include (FindG2C)
 
 ## -----------------------------------------------------------------------------
 ## Build "libblas" first

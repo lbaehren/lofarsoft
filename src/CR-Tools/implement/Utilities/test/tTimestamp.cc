@@ -21,7 +21,10 @@
 /* $Id: tTimestamp.cc,v 1.2 2006/10/31 18:24:08 bahren Exp $*/
 
 #include <iostream>
+#include <casa/OS/Time.h>
 #include <Utilities/Timestamp.h>
+
+using std::endl;
 
 using CR::Timestamp;
 
@@ -46,23 +49,48 @@ using CR::Timestamp;
 */
 int test_time ()
 {
-  std::cout << "\n[test_time]\n" << std::endl;
+  std::cout << "\n[test_time]\n" << endl;
   
   int nofFailedTests (0);
 
 
-  std::cout << "[1] New time construct from scratch ..." << std::endl;
+  std::cout << "[1] New time construct from scratch ..." << endl;
   try {
     time_t rawtime;
     time (&rawtime);
 
-    std::cout << " - rawtime = " << rawtime         << std::endl;
-    std::cout << " - ctime   = " << ctime(&rawtime) << std::endl;
+    std::cout << " - rawtime = " << rawtime         << endl;
+    std::cout << " - ctime   = " << ctime(&rawtime) << endl;
   } catch (std::string message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
   
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Test working with casa/OS/Time class
+
+  \return nofFailedTests -- The number of failed tests within this function
+*/
+int test_Time ()
+{
+  std::cout << "\n[test_Time]\n" << endl;
+  
+  int nofFailedTests (0);
+
+  try {
+    casa::Time casaTime;
+    std::cout << "-- Current time, GMT     = " << casaTime.toString(false) << endl;
+    std::cout << "-- Current time, ISO8601 = " << casaTime.toString(true) << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
   return nofFailedTests;
 }
 
@@ -75,26 +103,26 @@ int test_time ()
 */
 int test_Timestamp ()
 {
-  std::cout << "\n[test_Timestamp]\n" << std::endl;
+  std::cout << "\n[test_Timestamp]\n" << endl;
 
   int nofFailedTests (0);
   
-  std::cout << "[1] Testing default constructor ..." << std::endl;
+  std::cout << "[1] Testing default constructor ..." << endl;
   {
     Timestamp nb;
     nb.summary();
   }
   
-  std::cout << "[2] Testing copy constructor ..." << std::endl;
+  std::cout << "[2] Testing copy constructor ..." << endl;
   {
     Timestamp nb;
     //
-    std::cout << " - Original object:" << std::endl;
+    std::cout << " - Original object:" << endl;
     nb.summary();
     //
     Timestamp nb2 (nb);
     //
-    std::cout << " - Copied object:" << std::endl;
+    std::cout << " - Copied object:" << endl;
     nb2.summary();
   }
   
@@ -105,7 +133,7 @@ int test_Timestamp ()
 
 int test_setTime ()
 {
-  std::cout << "\n[test_setTime]\n" << std::endl;
+  std::cout << "\n[test_setTime]\n" << endl;
 
   int nofFailedTests (0);
   
@@ -128,7 +156,8 @@ int main ()
 
   // Test working with the timer
   nofFailedTests += test_time ();
-  
+  nofFailedTests += test_Time ();
+
   // Test for the constructor(s)
   nofFailedTests += test_Timestamp ();
   // Test assignment of time

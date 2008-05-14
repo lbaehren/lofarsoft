@@ -42,29 +42,6 @@ using namespace CR;
   \date 2005/11/08
 */
 
-/*!
-  \brief Show the values of the member data
-
-  \param di -- DataIterator object to display.
- */
-void show_DataIterator (DataIterator &di);
-
-/*!
-  \brief Iterate of a number of data block to monitor progression of stream position
-
-  \param di -- DataIterator object to display.
- */
-void run_nextBlock (DataIterator di);
-
-/*!
-  \brief Test constructors for a new DataIterator object
-
-  Test for <tt>T</tt> = <i>unsigned int</i>, <i>int</i>, <i>long</i>, <i>float</i>,
-  <i>double</i>
-
-  \return nofFailedTests -- The number of failed tests.
-*/
-int test_DataIterator ();
 
 /*!
   \brief Test adjustment of the stepwidth
@@ -84,12 +61,6 @@ int test_stepWidth ();
 int test_block ();
 
 
-/*!
-  \brief Test methods for introducing a shift in the starting position.
-
-  \return nofFailedTests -- The number of failed tests.
-*/
-int test_shift ();
 
 /*!
   \brief Test the parallel handling of multiple streams
@@ -125,6 +96,11 @@ void show_DataIterator (DataIterator &di)
 
 // ---------------------------------------------------------------- run_nextBlock
 
+/*!
+  \brief Iterate of a number of data block to monitor progression of stream position
+
+  \param di -- DataIterator object to display.
+ */
 void run_nextBlock (DataIterator di)
 {
   int nofBlocks (6);
@@ -139,6 +115,14 @@ void run_nextBlock (DataIterator di)
 
 // ------------------------------------------------------------ test_DataIterator
 
+/*!
+  \brief Test constructors for a new DataIterator object
+
+  Test for <tt>T</tt> = <i>unsigned int</i>, <i>int</i>, <i>long</i>, <i>float</i>,
+  <i>double</i>
+
+  \return nofFailedTests -- The number of failed tests.
+*/
 int test_DataIterator ()
 {
   cout << "\n[test_DataIterator]\n" << endl;
@@ -201,48 +185,66 @@ int test_stepWidth ()
   DataIterator di;
 
   cout << "[1] Default step width" << endl;
-  {
+  try {
     di.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
   }
 
   cout << "[2] Step width for bool" << endl;
-  {
+  try {
     bool step (1);
     di.setStepWidth (step);
     //
     di.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
   }
 
   cout << "[3] Step width for int" << endl;
-  {
+  try {
     int step (1);
     di.setStepWidth (step);
     //
     di.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
   }
 
   cout << "[4] Step width for long" << endl;
-  {
+  try {
     long step (1);
     di.setStepWidth (step);
     //
     di.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
   }
 
   cout << "[5] Step width for float" << endl;
-  {
+  try {
     float step (1);
     di.setStepWidth (step);
     //
     di.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
   }
 
   cout << "[6] Step width for double" << endl;
-  {
+  try {
     double step (1);
     di.setStepWidth (step);
     //
     di.summary();
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
   }
 
   return nofFailedTests;
@@ -383,6 +385,11 @@ int test_stride ()
 
 // ------------------------------------------------------------------- test_shift
 
+/*!
+  \brief Test methods for introducing a shift in the starting position.
+
+  \return nofFailedTests -- The number of failed tests.
+*/
 int test_shift ()
 {
   cout << "\n[test_shift]\n" << endl;

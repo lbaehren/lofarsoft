@@ -295,8 +295,9 @@ namespace DAL { // Namespace DAL -- begin
   
   double LOFAR_DipoleDataset::sample_frequency (std::string const &unit)
   {
+    double val (0);
+
     if (datasetID_p > 0) {
-      double val (0);
       if (DAL::h5get_attribute(val,
 			       attribute_name(DAL::SAMPLE_FREQUENCY),
 			       datasetID_p)) {
@@ -320,11 +321,13 @@ namespace DAL { // Namespace DAL -- begin
 	  return val/1e06;
 	}
       } else {
-	return 0;
+	val = 0;
       }
     } else {
-      return 0;
+      val = 0;
     }
+    
+    return val;
   }
 
   // --------------------------------------------------------------- nyquist_zone

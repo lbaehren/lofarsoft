@@ -1,5 +1,8 @@
-/***************************************************************************
- *   Copyright (C) 2006                                                    *
+/*-------------------------------------------------------------------------*
+ | $Id: template-class.h,v 1.20 2007/06/13 09:41:37 bahren Exp           $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2007                                                    *
  *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -18,12 +21,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tDataReader.cc,v 1.15 2007/03/07 17:49:30 bahren Exp $*/
-
 // CASA header files
 #include <casa/aips.h>
 #include <casa/iostream.h>
-#include <casa/Exceptions/Error.h>
 
 // LOPES header files
 #include <IO/DataReader.h>
@@ -121,19 +121,19 @@ int test_DataReader ()
     nofFailedTests++;
   }
   
-  cout << "[4] Testing copy constructor ..." << std::endl;
-  try {
-    DataReader dr1 (blocksize,
-		    adc2voltage,
-		    fft2calfft);
-    //
-    DataReader dr2 (dr1);
-    //
-    dr2.summary();
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
+//   cout << "[4] Testing copy constructor ..." << std::endl;
+//   try {
+//     DataReader dr1 (blocksize,
+// 		    adc2voltage,
+// 		    fft2calfft);
+//     //
+//     DataReader dr2 (dr1);
+//     //
+//     dr2.summary();
+//   } catch (std::string message) {
+//     std::cerr << message << std::endl;
+//     nofFailedTests++;
+//   }
   
   return nofFailedTests;
 }
@@ -149,19 +149,23 @@ int test_dataStreams ()
 {
   cout << "\n[test_dataStreams]\n" << std::endl;
 
+  int nofFailedTests (0);
   uint blocksize (128);
   uint nofFiles (5);
   DataIterator *iterators;
 
-  iterators = new DataIterator[nofFiles];
-
-  for (uint file (0); file<nofFiles; file++) {
-    iterators[file].setBlocksize(blocksize);
-    cout << file << "\t" << iterators[file].blocksize() << endl;
+  try {
+    iterators = new DataIterator[nofFiles];
+    
+    for (uint file (0); file<nofFiles; file++) {
+      iterators[file].setBlocksize(blocksize);
+      cout << file << "\t" << iterators[file].blocksize() << endl;
+    }
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
   }
-  
-  int nofFailedTests (0);
-  
+    
   return nofFailedTests;
 }
 
@@ -218,7 +222,7 @@ int test_selection ()
   }
   
   cout << "[3] Testing frequency channel selection ..." << std::endl;
-  {
+  try {
     DataReader dr (blocksize,
 		   adc2voltage,
 		   fft2calfft);
@@ -232,6 +236,9 @@ int test_selection ()
     if (status) {
       dr.summary();
     }
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
   }
   
   return nofFailedTests;
@@ -268,8 +275,8 @@ int test_conversionArrays (uint const &blocksize)
 		   adc2voltage,
 		   fft2calfft);
     dr.summary();
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
+  } catch (std::string message) {
+    cerr << message << endl;
     nofFailedTests++;
   }
   
@@ -283,8 +290,8 @@ int test_conversionArrays (uint const &blocksize)
 		   adc2voltage,
 		   fft2calfft);
     dr.summary();
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
+  } catch (std::string message) {
+    cerr << message << endl;
     nofFailedTests++;
   }
   
@@ -304,8 +311,8 @@ int test_conversionArrays (uint const &blocksize)
     adc2voltage = 0.25;
 
     dr.setADC2Voltage (adc2voltage);
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
+  } catch (std::string message) {
+    cerr << message << endl;
     nofFailedTests++;
   }
 
@@ -344,8 +351,8 @@ int test_conversionArrays (uint const &blocksize)
       dr.setFFT2calFFT (fft2calfftMatrix);
     }
     
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
+  } catch (std::string message) {
+    cerr << message << endl;
     nofFailedTests++;
   }
   
@@ -374,8 +381,8 @@ int test_frequency (uint const &blocksize)
     cout << " - Nyquist zone        = " << dr.nyquistZone()       << endl;
     cout << " - Sampling rate [ Hz] = " << dr.sampleFrequency()      << endl;
     cout << " -               [MHz] = " << dr.sampleFrequency("MHz") << endl;
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
+  } catch (std::string message) {
+    cerr << message << endl;
     nofFailedTests++;
   }
   
@@ -389,8 +396,8 @@ int test_frequency (uint const &blocksize)
     cout << " - Nyquist zone        = " << dr.nyquistZone()       << endl;
     cout << " - Sampling rate [ Hz] = " << dr.sampleFrequency()      << endl;
     cout << " -               [MHz] = " << dr.sampleFrequency("MHz") << endl;
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
+  } catch (std::string message) {
+    cerr << message << endl;
     nofFailedTests++;
   }
   
@@ -418,11 +425,45 @@ int test_frequency (uint const &blocksize)
     cout << " - Sampling rate [ Hz] = " << dr.sampleFrequency()      << endl;
     cout << " -               [MHz] = " << dr.sampleFrequency("MHz") << endl;
     cout << " - Frequencies   [ Hz] = " << dr.frequencyValues()   << endl;
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
+  } catch (std::string message) {
+    cerr << message << endl;
     nofFailedTests++;
   }
   
+  return nofFailedTests;
+}
+
+// -------------------------------------------------------------------- test_time
+
+/*!
+  \brief Test retrival of the values along the time axis
+  
+  \param blocksize -- The number of samples per block of data per antenna.
+
+  \return nofFailedTests -- The number of failed tests.
+ */
+int test_time (uint const &blocksize)
+{
+  cout << "\n[test_time]\n" << endl;
+
+  int nofFailedTests (0);
+  DataReader dr (blocksize);
+
+  cout << "-- Blocksize    = " << dr.blocksize() << endl;
+  cout << "-- Block number = " << dr.block()     << endl;
+  cout << endl;
+
+#ifdef HAVE_CASA
+  cout << "[1] Default method for retrival of time values ..." << std::endl;
+  try {
+    casa::Vector<double> timeValues = dr.timeValues();
+    cout << " [" << timeValues(0) << " " << timeValues(1) << " ...]" << endl;
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+#endif
+
   return nofFailedTests;
 }
 
@@ -473,8 +514,8 @@ int test_processing ()
 //     cout << " --> adjusting Hanning filter ..." << endl;
 //     double alpha (0.54);
 //     dr.setHanningFilter(alpha);
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
+  } catch (std::string message) {
+    cerr << message << endl;
     nofFailedTests++;
   }
   
@@ -483,20 +524,22 @@ int test_processing ()
 
 // ----------------------------------------------------------------- main routine
 
-int main ()
+int main (int argc,
+          char *argv[])
 {
   int nofFailedTests (0);
   uint blocksize (100);
   
-  {
-    nofFailedTests += test_DataReader ();
-  }
+  // Test for the various constructors
+  nofFailedTests += test_DataReader ();
+
 
   if (nofFailedTests == 0) {
     nofFailedTests += test_conversionArrays (blocksize);
 //     nofFailedTests += test_dataStreams ();
     nofFailedTests += test_selection ();
-//     nofFailedTests += test_frequency (blocksize);
+    nofFailedTests += test_time(blocksize);
+    nofFailedTests += test_frequency (blocksize);
     nofFailedTests += test_processing();
   } else {
     std::cerr << "[tDataReader]"

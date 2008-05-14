@@ -20,7 +20,9 @@
 #  NUM_UTIL_INCLUDES = Include path for the header files of NUM_UTIL package
 #
 
+## -----------------------------------------------------------------------------
 ## Standard locations where to look for required components
+
 include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------

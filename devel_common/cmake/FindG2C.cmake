@@ -11,22 +11,10 @@
 #  G2C_LIBRARIES  = Link these to use G2C
 ## -----------------------------------------------------------------------------
 
-set (include_locations
-  /usr/include
-  /opt
-  /opt/include
-  /usr/local/include
-  /sw/include
-  /usr/lib
-  /usr/lib64
-  )
+## -----------------------------------------------------------------------------
+## Search locations
 
-set (lib_locations
-  /usr/lib
-  /usr/local/lib
-  /usr/lib64
-  /usr/local/lib64
-  )
+include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files

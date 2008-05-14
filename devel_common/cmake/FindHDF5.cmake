@@ -17,35 +17,11 @@ include (CMakeSettings)
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-set (hdf5_headers
-  hdf5.h
-  H5LT.h
-  H5public.h
-  )
-
-## check for the basic header file of the HDF5 library
-
-find_path (HDF5_INCLUDES ${hdf5_headers}
+find_path (HDF5_INCLUDES hdf5.h H5LT.h
   PATHS ${include_locations}
   PATH_SUFFIXES hdf5
   NO_DEFAULT_PATH
   )
-
-## check for header files available when library was build with "--enable-cxx"
-
-#foreach (header ${hdf5_headers})
-#  ## search for the header file
-#  find_path (header_path ${header}
-#    PATHS ${include_locations}
-#    PATH_SUFFIXES hdf5
-#    )
-#  ## check if the search has been successful
-#  if (header_path)
-#    list (APPEND HDF5_INCLUDES ${header_path})
-#  else (header_path)
-#    message (FATAL_ERROR "Unable to find ${header}!")
-#  endif (header_path)
-#endforeach (header)
 
 ## -----------------------------------------------------------------------------
 ## Check for the library components
@@ -74,8 +50,6 @@ FIND_LIBRARY (libhdf5_hl
 
 if (libhdf5_hl)
   list (APPEND HDF5_LIBRARIES ${libhdf5_hl})
-else (libhdf5_hl)
-  message (SEND_ERROR "[FindHDF5] Unable to locate libhdf5_hl!")
 endif (libhdf5_hl)
 
 ## -----------------------------------------------------------------------------
