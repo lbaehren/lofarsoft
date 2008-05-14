@@ -106,17 +106,22 @@ endif (CR_ENABLE_LOPESSTAR)
 ## readLopesCalTable
 
 if (HAVE_CASA OR HAVE_CASACORE)
-  if (HAVE_ROOT AND HAVE_FFTW3)
     add_executable (readLopesCalTable readLopesCalTable.cc)
     ## linker instructions
-    target_link_libraries (readLopesCalTable
-      cr
-      ${FFTW3_LIBRARIES}
-      ${ROOT_LIBRARIES}
-      )
+    target_link_libraries (readLopesCalTable cr)
     ## installation instructions
   list (APPEND cr_apps readLopesCalTable)
-  endif (HAVE_ROOT AND HAVE_FFTW3)
+endif (HAVE_CASA OR HAVE_CASACORE)
+
+## -------------------------------------------------------------------
+## writeLopesCalTable
+
+if (HAVE_CASA OR HAVE_CASACORE)
+    add_executable (writeLopesCalTable writeLopesCalTable.cc)
+    ## linker instructions
+    target_link_libraries (writeLopesCalTable cr)
+    ## installation instructions
+  list (APPEND cr_apps writeLopesCalTable)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
