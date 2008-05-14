@@ -5,7 +5,7 @@
 # - Check for the presence of MySQL
 #
 # The following variables are set when MySQL is found:
-#  HAVE_MySQL       = Set to true, if all components of MySQL
+#  HAVE_MYSQL       = Set to true, if all components of MySQL
 #                          have been found.
 #  MYSQL_INCLUDES   = Include path for the header files of MySQL
 #  MYSQL_LIBRARIES  = Link these to use MySQL
@@ -23,42 +23,17 @@ include (CMakeSettings)
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-find_path (MySQL_INCLUDES mysql.h mysql_com.h mysql_version.h
+find_path (MYSQL_INCLUDES mysql/mysql.h mysql/mysql_version.h
   PATHS ${include_locations}
-  PATH_SUFFIXES mysql
   NO_DEFAULT_PATH
   )
 
 ## -----------------------------------------------------------------------------
 ## Check for the library components
 
-set (MySQL_LIBRARIES "")
+set (MYSQL_LIBRARIES "")
 
-## [1] libmysys
-
-find_library (libmysys mysys
-  PATHS ${lib_locations}
-  PATH_SUFFIXES mysql
-  NO_DEFAULT_PATH
-  )
-
-if (libmysys)
-  list (APPEND MySQL_LIBRARIES ${libmysys})
-endif (libmysys)
-
-## [2] libmystrings
-
-find_library (libmystrings mystrings 
-  PATHS ${lib_locations}
-  PATH_SUFFIXES mysql
-  NO_DEFAULT_PATH
-  )
-
-if (libmystrings)
-  list (APPEND MySQL_LIBRARIES ${libmystrings})
-endif (libmystrings)
-
-## [3] libmysqlclient
+## [1] libmysqlclient
 
 find_library (libmysqlclient mysqlclient
   PATHS ${lib_locations}
@@ -67,54 +42,42 @@ find_library (libmysqlclient mysqlclient
   )
 
 if (libmysqlclient)
-  list (APPEND MySQL_LIBRARIES ${libmysqlclient})
+  list (APPEND MYSQL_LIBRARIES ${libmysqlclient})
 endif (libmysqlclient)
-
-## [4] libvio
-
-find_library (libvio vio
-  PATHS ${lib_locations}
-  PATH_SUFFIXES mysql
-  NO_DEFAULT_PATH
-  )
-
-if (libvio)
-  list (APPEND MySQL_LIBRARIES ${libvio})
-endif (libvio)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
-if (MySQL_INCLUDES AND MySQL_LIBRARIES)
-  set (HAVE_MySQL TRUE)
-else (MySQL_INCLUDES AND MySQL_LIBRARIES)
-  set (HAVE_MySQL FALSE)
-  if (NOT MySQL_FIND_QUIETLY)
-    if (NOT MySQL_INCLUDES)
+if (MYSQL_INCLUDES AND MYSQL_LIBRARIES)
+  set (HAVE_MYSQL TRUE)
+else (MYSQL_INCLUDES AND MYSQL_LIBRARIES)
+  set (HAVE_MYSQL FALSE)
+  if (NOT MYSQL_FIND_QUIETLY)
+    if (NOT MYSQL_INCLUDES)
       message (STATUS "Unable to find MySQL header files!")
-    endif (NOT MySQL_INCLUDES)
-    if (NOT MySQL_LIBRARIES)
+    endif (NOT MYSQL_INCLUDES)
+    if (NOT MYSQL_LIBRARIES)
       message (STATUS "Unable to find MySQL library files!")
-    endif (NOT MySQL_LIBRARIES)
-  endif (NOT MySQL_FIND_QUIETLY)
-endif (MySQL_INCLUDES AND MySQL_LIBRARIES)
+    endif (NOT MYSQL_LIBRARIES)
+  endif (NOT MYSQL_FIND_QUIETLY)
+endif (MYSQL_INCLUDES AND MYSQL_LIBRARIES)
 
-if (HAVE_MySQL)
-  if (NOT MySQL_FIND_QUIETLY)
+if (HAVE_MYSQL)
+  if (NOT MYSQL_FIND_QUIETLY)
     message (STATUS "Found components for MySQL")
-    message (STATUS "MySQL_INCLUDES  = ${MySQL_INCLUDES}")
-    message (STATUS "MySQL_LIBRARIES = ${MySQL_LIBRARIES}")
-  endif (NOT MySQL_FIND_QUIETLY)
-else (HAVE_MySQL)
+    message (STATUS "MYSQL_INCLUDES  = ${MYSQL_INCLUDES}")
+    message (STATUS "MYSQL_LIBRARIES = ${MYSQL_LIBRARIES}")
+  endif (NOT MYSQL_FIND_QUIETLY)
+else (HAVE_MYSQL)
   if (MySQL_FIND_REQUIRED)
     message (FATAL_ERROR "Could not find MySQL!")
   endif (MySQL_FIND_REQUIRED)
-endif (HAVE_MySQL)
+endif (HAVE_MYSQL)
 
 ## -----------------------------------------------------------------------------
 ## Mark advanced variables
 
 mark_as_advanced (
-  MySQL_INCLUDES
-  MySQL_LIBRARIES
+  MYSQL_INCLUDES
+  MYSQL_LIBRARIES
   )
