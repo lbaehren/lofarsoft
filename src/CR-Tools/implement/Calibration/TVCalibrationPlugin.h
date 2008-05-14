@@ -94,9 +94,9 @@ namespace CR { // Namespace CR -- begin
 
     \param badnessThreshold  --  Maximum acceptable "badness" before antenna is flagged, in sample times. 
                                  Default value is 0.15 sample times.
-    \param SampleShiftsOnly  -- Corrections are done only for sample shifts:
-                                If the sample unit is e.g. 12.5 ns, phase differences
-                                corresponding to delays of < 6.25 ns will have no effect.
+    \param SampleShiftsOnly  --  Corrections are done only for sample shifts:
+                                 If the sample unit is e.g. 12.5 ns, phase differences corresponding to 
+                                 delays of < 6.25 ns will have no effect. Default is False.
 
     The following entries in the parameters record are set by this class:
 

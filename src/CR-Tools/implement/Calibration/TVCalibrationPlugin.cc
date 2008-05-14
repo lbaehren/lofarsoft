@@ -41,7 +41,7 @@ namespace CR { // Namespace CR -- begin
   parameters_p.define("badnessWeight",    Double(0.5) );
   parameters_p.define("badnessThreshold", Double(0.15) );
   parameters_p.define("AntennaMask",      Vector<Bool>() );
-  parameters_p.define("SampleShiftsOnly", Bool(True) );
+  parameters_p.define("SampleShiftsOnly", Bool(False) );
   }
     
   // ============================================================================
@@ -134,14 +134,13 @@ namespace CR { // Namespace CR -- begin
       //      cout << "Phase differences:" << endl << PhaseDiffs  << endl;
       //      cout << "relative delays:" << endl <<  relDelays << endl;
       
-      Double badness,minbadness=0.,minJump,tmpbadness;
+      Double minbadness,minJump,tmpbadness;
       Vector<Double> mindelays(nFreqs),jumpPhase(nFreqs),tmpphase(nFreqs),tmpdelay(nFreqs);
       //check for sample jumps
       for (antInd=0; antInd<nAntennas; antInd++){
-	badness = ( max(relDelays.column(antInd))-min(relDelays.column(antInd)) ) * (1-badWgh) +
+	minbadness = ( max(relDelays.column(antInd))-min(relDelays.column(antInd)) ) * (1-badWgh) +
 	  mean(abs(relDelays.column(antInd))) * badWgh;
-	if (badness > (badnessThreshold*0.66666666)) { //Need to try out the sample jumps
-	  minbadness = badness;
+	if (minbadness > (badnessThreshold*0.66666666)) { //Need to try out the sample jumps
 	  mindelays = relDelays.column(antInd);
 	  minJump = 0.;
 	  for (uInt i=0; i<sampleJumps.nelements(); i++){
@@ -167,8 +166,10 @@ namespace CR { // Namespace CR -- begin
 	      correctionDelay(antInd) = minJump;
             else
 	      correctionDelay(antInd) = mean(mindelays) + minJump;
+#ifdef DEBUGGING_MESSAGES      
 	    cout << "TVCalibrationPlugin: Corrected Ant: " << (antInd+1) 
                  << " by: " << correctionDelay(antInd) << " samples \t, badness: " << minbadness << endl;
+#endif
 	  };
 	} else {
           // do corrections of minor shifts (<< full sample)
@@ -176,9 +177,11 @@ namespace CR { // Namespace CR -- begin
             correctionDelay(antInd) = 0.;
           else {
             correctionDelay(antInd) = mean(relDelays.column(antInd));
+#ifdef DEBUGGING_MESSAGES      
             cout << "TVCalibrationPlugin: Corrected Ant: " << (antInd+1) 
                  << " by: " << correctionDelay(antInd) << " samples \t, badness: " << minbadness << endl;
-            }
+#endif
+	  }
 	};
       };      
       parameters_p.define("AntennaMask",AntennaMask);
