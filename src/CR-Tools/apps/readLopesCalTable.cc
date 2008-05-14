@@ -69,8 +69,8 @@ using CR::CalTableReader;
 int main (int argc, char *argv[])
 {
   // define constants for the start date of LOPES 10 and LOPES 30
-  const int LOPES10_start = 978350400;
-  const int LOPES30_start = 1104580800;
+  const unsigned int LOPES10_start = 978350400;
+  const unsigned int LOPES30_start = 1104580800;
   
   try
   {
@@ -182,9 +182,6 @@ int main (int argc, char *argv[])
     Array<Double> Darray_value;
     Array<DComplex> Carray_value; 
  
-    // define return value
-    bool return_value;
-
     // Reading the values  
     cout << "The value of the field \"" << fieldName << "\" for the time " << date << " is: " << endl;          
       

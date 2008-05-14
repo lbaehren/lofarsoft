@@ -55,9 +55,9 @@
   <h3>Examples</h3>
 
   \verbatim
-  ./getPhases test.event 57000000 output.txt
-  (reads the phases for the spectra of test.event at 57 MHz and appends it to output.txt)
-  ./getPhases test.event 57000000 output.txt /home/schroeder/usg/data/lopes/LOPES-CalTable/
+  ./getPhases test.event 63500000 output.txt
+  (reads the phases for the spectra of test.event at 63.5 MHz and appends it to output.txt)
+  ./getPhases test.event 63500000 output.txt /home/schroeder/usg/data/lopes/LOPES-CalTable/
   (same, but using the calibration table at the specified path)
   \endverbatim  
 */
@@ -141,7 +141,7 @@ int main (int argc, char *argv[])
     int freqIndex = 0;
 
     // loop through frequencies and look for the lowest distance to the specified frequency
-    for (int i = 0; i < freqValues.size(); i++)
+    for (unsigned int i = 0; i < freqValues.size(); i++)
       if ( abs(frequency - freqValues(i)) < abs(freqValues(freqIndex) - freqValues(i)) )
         freqIndex = i;
 
@@ -169,7 +169,7 @@ int main (int argc, char *argv[])
       outputfile_stream << "\"" << eventfile << "\"";
 
       // loop through antennas and write the pases (seperated by space)
-      for (int i = 0; i < phases.size(); i++)
+      for (unsigned int i = 0; i < phases.size(); i++)
         outputfile_stream << " " << phases(i);
 
       // end the output file with a new line and close it
