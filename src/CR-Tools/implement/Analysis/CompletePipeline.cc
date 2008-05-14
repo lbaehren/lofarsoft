@@ -146,7 +146,7 @@ namespace CR { // Namespace CR -- begin
       vector<bool> upsamplingToDo;
       upsamplingToDo.assign(upsampledAntennas.size(),true);		// form Vector of correct size
       // maximum to do is the whole antenna selction
-      for (int i=0; i < upsamplingToDo.size(); i++) {
+      for (unsigned int i=0; i < upsamplingToDo.size(); i++) {
 	upsamplingToDo[i] = antennaSelection(i);
       }
 
@@ -154,7 +154,7 @@ namespace CR { // Namespace CR -- begin
       // if not, clear the upsampled flags
       if (lastUpsamplingExponent != upsampling_exp) {
 	upsampledAntennas.assign(upsampledAntennas.size(),false);
-      } else for (int i=0; i < upsamplingToDo.size(); i++) {
+      } else for (unsigned int i=0; i < upsamplingToDo.size(); i++) {
 	if (upsampledAntennas[i]) {
 	  upsamplingToDo[i] = false;
 	}
@@ -166,7 +166,7 @@ namespace CR { // Namespace CR -- begin
       unsigned int upsampled = pow(2,upsampling_exp);
 
       // get length of trace
-      int tracelength = fieldstrength.column(0).size();
+      unsigned int tracelength = fieldstrength.column(0).size();
       // allocate memory for original and upsampled traces
       double* originalTrace = new double[tracelength];
       double* upsampledTrace = new double[tracelength * upsampled];
@@ -181,11 +181,11 @@ namespace CR { // Namespace CR -- begin
 
       // do upsampling for each antenna in the todo-list
       std::cout << "Upsampling the calibrated data by a factor of " << upsampled << " ...\nAntenna:" << flush;
-      for (int i = 0; i < antennaSelection.nelements(); i++) {
+      for (unsigned int i = 0; i < antennaSelection.nelements(); i++) {
         if (upsamplingToDo[i]){
           std::cout << " " << i+1 << flush;
  	  // copy the trace into the array
-	  for (int j = 0; j < tracelength; j++) {
+	  for (unsigned int j = 0; j < tracelength; j++) {
             originalTrace[j] = fieldstrength.column(i)(j);
           }
 	  
@@ -201,7 +201,7 @@ namespace CR { // Namespace CR -- begin
   	  // copy upsampled trace into Matrix with antenna traces and subtract offset
           // remark: as there is no offset in the original data, this step should be avoided
           // as soon as upsampling without pedestal correction is available
-	  for (int j = 0; j < tracelength*upsampled; j++) {
+	  for (unsigned int j = 0; j < tracelength*upsampled; j++) {
 	    upFieldStrength.column(i)(j) = upsampledTrace[j] + offset;
 	  }
 	  
@@ -230,6 +230,9 @@ namespace CR { // Namespace CR -- begin
       {
         std::cerr << "CompletePipeline:getUpsampledFieldstrength: " << x.getMesg() << std::endl;
       }; 
+
+    // return dummy to avoid warning (normally function should not reach this command).
+    return Matrix<Double>();
   }
 
  
@@ -263,7 +266,7 @@ namespace CR { // Namespace CR -- begin
       unsigned int upsampled = pow(2,upsampling_exp);
 
       // get length of trace
-      int tracelength = rawData.column(0).size();
+      unsigned int tracelength = rawData.column(0).size();
 
       // allocate memory for original and upsampled traces
       double* originalTrace = new double[tracelength];
@@ -274,11 +277,11 @@ namespace CR { // Namespace CR -- begin
 
       // do upsampling for each antenna in the antennaSelection
       std::cout << "Upsampling the raw data by a factor of " << upsampled << " ...\nAntenna:" << flush;
-      for (int i = 0; i < antennaSelection.nelements(); i++) if (antennaSelection(i))
+      for (unsigned int i = 0; i < antennaSelection.nelements(); i++) if (antennaSelection(i))
       {
         std::cout << " " << i+1 << flush;
 	// copy the trace into the array
-	for (int j = 0; j < tracelength; j++) 
+	for (unsigned int j = 0; j < tracelength; j++) 
         {
           originalTrace[j] = rawData.column(i)(j);
         }
@@ -296,9 +299,11 @@ namespace CR { // Namespace CR -- begin
         // if no offset correction is wanted
         // remember: ZeroPaddingFFT removes the offset automatically
         if (offsetSubstraction)
-	  for (int j = 0; j < tracelength*upsampled; j++) upData.column(i)(j) = upsampledTrace[j];
+	  for (unsigned int j = 0; j < tracelength*upsampled; j++)
+            upData.column(i)(j) = upsampledTrace[j];
         else
-	  for (int j = 0; j < tracelength*upsampled; j++) upData.column(i)(j) = upsampledTrace[j] + offset;
+	  for (unsigned int j = 0; j < tracelength*upsampled; j++)
+            upData.column(i)(j) = upsampledTrace[j] + offset;
       } 
       std::cout << " ... done" << endl;
 
@@ -312,6 +317,9 @@ namespace CR { // Namespace CR -- begin
       {
         std::cerr << "CompletePipeline:getUpsampledFX: " << x.getMesg() << std::endl;
       }; 
+
+    // return dummy to avoid warning (normally function should not reach this command).
+    return Matrix<Double>();
   }
 
 
@@ -345,12 +353,12 @@ namespace CR { // Namespace CR -- begin
       upTimeValues.resize(time_length*upsampled, false);
 
       // copy old values to the right place and fill space inbetween 
-      for (int i = time_length-1; i >= 0; i--)
+      for (long int i = time_length-1; i >= 0; i--)
       {
         // move existing time value to the right place
         upTimeValues(i*upsampled) = timeaxis(i);
         // create new values
-        for (int j = 1; j < upsampled; j++) 
+        for (unsigned int j = 1; j < upsampled; j++) 
           upTimeValues(i*upsampled+j) = upTimeValues(i*upsampled) + j*sampleTime;
       }
 
@@ -363,6 +371,9 @@ namespace CR { // Namespace CR -- begin
       {
         std::cerr << "CompletePipeline:getUpsampledTimeAxis: " << x.getMesg() << std::endl;
       }; 
+
+    // return dummy to avoid warning (normally function should not reach this command).
+    return Vector<Double>();
   }
 
 
@@ -384,6 +395,9 @@ namespace CR { // Namespace CR -- begin
     {
         std::cerr << "CompletePipeline:calculatePlotRange: " << x.getMesg() << std::endl;
     }; 
+ 
+    // return dummy to avoid warning (normally function should not reach this command).
+    return Slice();
   }
 
 
@@ -409,6 +423,9 @@ namespace CR { // Namespace CR -- begin
     {
         std::cerr << "CompletePipeline:calculateNoiseRange: " << x.getMesg() << std::endl;
     }; 
+
+    // return dummy to avoid warning (normally function should not reach this command).
+    return Slice();
   }
 
 
@@ -433,6 +450,9 @@ namespace CR { // Namespace CR -- begin
     {
         std::cerr << "CompletePipeline:calculateCCRange: " << x.getMesg() << std::endl;
     }; 
+
+    // return dummy to avoid warning (normally function should not reach this command).
+    return Slice();
   }
 
 
@@ -671,7 +691,7 @@ namespace CR { // Namespace CR -- begin
 
       // find the minimal and maximal y values for the plot
       // do it with the upsampled data only as they are as least as heigh as the original ones
-      for (int i = 0; i < antennaSelection.nelements(); i++)
+      for (unsigned int i = 0; i < antennaSelection.nelements(); i++)
         if (antennaSelection(i))		// consider only selected antennas
         {
           if ( ymin > min(upYvalues.column(i)(upplotRange)) ) {
@@ -713,7 +733,7 @@ namespace CR { // Namespace CR -- begin
 	    std::cout <<"Plotting the fieldstrength\n Antenna ..." ;
 
 
-        for (int i = 0; i < antennaSelection.nelements(); i++){
+        for (unsigned int i = 0; i < antennaSelection.nelements(); i++){
           // consider only selected antennas
           if (antennaSelection(i)){
             // create filename and label
@@ -783,7 +803,7 @@ namespace CR { // Namespace CR -- begin
           plotter.AddLabels("Time t [#gmsec]", "Fieldstrength #ge#d0#u [#gmV/m/MHz]",label);
 
         // Create the plots looping through antennas
-        for (int i = 0; i < antennaSelection.nelements(); i++)
+        for (unsigned int i = 0; i < antennaSelection.nelements(); i++)
         if (antennaSelection(i))			// consider only selected antennas
         {
           // Plot (upsampled) trace
@@ -854,7 +874,7 @@ namespace CR { // Namespace CR -- begin
       timeRange = timeValues(range);
 
       // find the maximal y values for all selected antennas
-      for (int i = 0; i < antennaSelection.nelements(); i++) if (antennaSelection(i))
+      for (unsigned int i = 0; i < antennaSelection.nelements(); i++) if (antennaSelection(i))
       {
         // Start with height 0 and search for heigher and lower values
         double maximum = 0;
@@ -866,7 +886,7 @@ namespace CR { // Namespace CR -- begin
         trace = yValues.column(i)(range);
 
         // loop through the values and search for the heighest and lowest one
-        for(int j = 0; j < timeRange.nelements(); j++)
+        for(unsigned int j = 0; j < timeRange.nelements(); j++)
 	{
           if ( maximum < trace(j)) 
           {
@@ -990,7 +1010,7 @@ namespace CR { // Namespace CR -- begin
 
       // find the maximal y  values  for all selected antennas
       std::cout <<  "An field    noise    time\n";
-      for (int i = 0; i < antennaSelection.nelements(); i++) 
+      for (unsigned int i = 0; i < antennaSelection.nelements(); i++) 
 
       if (antennaSelection(i)){
         // Start with height 0 and search for heigher and lower values
@@ -1004,7 +1024,7 @@ namespace CR { // Namespace CR -- begin
         trace = yValues.column(i)(range);
 
         // loop through the values and search for the heighest and lowest one
-        for(int j = 0; j < timeRange.nelements(); j++)
+        for(unsigned int j = 0; j < timeRange.nelements(); j++)
 	{
           if ( maximum < trace(j)) 
             maximum = trace(j);
@@ -1028,7 +1048,7 @@ namespace CR { // Namespace CR -- begin
         // get current trace
         traceNoise = yValues.column(i)(rangeNoise);
         // loop through the values and search for the heighest and lowest one
-        for(int j = 0; j < timeRangeNoise.nelements(); j++)
+        for(unsigned int j = 0; j < timeRangeNoise.nelements(); j++)
 	{
 	  noise += abs(traceNoise(j));
 	}
@@ -1043,7 +1063,7 @@ namespace CR { // Namespace CR -- begin
         // get current trace
         traceNoise = yValues.column(i)(rangeNoise);
         // loop through the values and search for the heighest and lowest one
-        for(int j = 0; j < timeRangeNoise.nelements(); j++)
+        for(unsigned int j = 0; j < timeRangeNoise.nelements(); j++)
 	{
 	  noise += abs(traceNoise(j));
 	}
