@@ -165,9 +165,10 @@ else
 		rm -rf dal dsp;
 		rm -rf flex;
 		rm -rf hdf5;
+		rm -rf lopes-star;
 		rm -rf plplot python;
 		rm -rf vtk;
-		rm -rf wcslib;
+		rm -rf wcslib wcstools;
 	;;
 	clean-build)
 		./build.sh -clean-build;
