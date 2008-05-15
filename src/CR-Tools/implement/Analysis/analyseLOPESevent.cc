@@ -259,7 +259,7 @@ namespace CR { // Namespace CR -- begin
 
 	// Set blocksize and shift
 	upsampler_p->setBlocksize(upBlockSize);
-	upsampler_p->setBlock(upBlock+1);
+	upsampler_p->setBlock(upBlock);
 	Times.resize();
 	if (verbose) {
 	  Times = upsampler_p->timeValues();

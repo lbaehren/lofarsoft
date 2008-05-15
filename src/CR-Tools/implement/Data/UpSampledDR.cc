@@ -23,7 +23,6 @@
 
 #include <Data/UpSampledDR.h>
 
-#define DEBUGGING_MESSAGES 
 
 namespace CR { // Namespace CR -- begin
   
@@ -179,7 +178,7 @@ namespace CR { // Namespace CR -- begin
 	origSourceBlockNo = inpDR_p->block();
 	sourceBlockNo = (uint)floor((startsample/SampleFreqRatio)/sourceBlockSize);
 	// Currently the DataReader and DataIterator start to count at 1
-	inpDR_p->setBlock(sourceBlockNo+1);
+	inpDR_p->setBlock(sourceBlockNo);
 	restoreBlocksize  = (uint)floor(sourceBlockSize*SampleFreqRatio);
 	
 	sourceFreqs = inpDR_p->frequencyValues();
