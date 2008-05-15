@@ -84,3 +84,23 @@ foreach (app ${apps})
       )
   endif (APPLE)
 endforeach (app)
+
+## ==============================================================================
+##
+##  Installation
+##
+## ==============================================================================
+
+## Installation of header files
+
+install (FILES util.hh trigger.hh calibration.hh reconstruction.hh
+  DESTINATION include/lopes-star
+  )
+
+## Installation of the library and the executables
+
+install (TARGETS starutil recradio ${apps}
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )

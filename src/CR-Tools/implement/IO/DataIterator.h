@@ -1,25 +1,25 @@
 /*-------------------------------------------------------------------------*
-| $Id: template-class.h,v 1.20 2007/06/13 09:41:37 bahren Exp           $ |
-*-------------------------------------------------------------------------*
-***************************************************************************
-*   Copyright (C) 2007                                                    *
-*   Lars B"ahren (bahren@astron.nl)                                       *
-*                                                                         *
-*   This program is free software; you can redistribute it and/or modify  *
-*   it under the terms of the GNU General Public License as published by  *
-*   the Free Software Foundation; either version 2 of the License, or     *
-*   (at your option) any later version.                                   *
-*                                                                         *
-*   This program is distributed in the hope that it will be useful,       *
-*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-*   GNU General Public License for more details.                          *
-*                                                                         *
-*   You should have received a copy of the GNU General Public License     *
-*   along with this program; if not, write to the                         *
-*   Free Software Foundation, Inc.,                                       *
-*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
-***************************************************************************/
+ | $Id: template-class.h,v 1.20 2007/06/13 09:41:37 bahren Exp           $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (lbaehren@gmail.com)                                     *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
 #ifndef DATAITERATOR_H
 #define DATAITERATOR_H
@@ -172,7 +172,7 @@ namespace CR {  // Namespace CR -- begin
       
       \return stepWidth - The step width
     */
-    unsigned int stepWidth () {
+    inline unsigned int stepWidth () const {
       return stepWidth_p;
     }
     
@@ -200,7 +200,7 @@ namespace CR {  // Namespace CR -- begin
       
       \return position - The current position within the filestream.
     */
-    unsigned int position () const {
+    inline unsigned int position () const {
       return position_p;
     }
     
@@ -209,7 +209,7 @@ namespace CR {  // Namespace CR -- begin
       
       \return dataStart -- Start of the data segment inside the data file/volume
     */
-    unsigned int dataStart () const {
+    inline unsigned int dataStart () const {
       return dataStart_p;
     }
     
@@ -225,7 +225,7 @@ namespace CR {  // Namespace CR -- begin
       
       \return blocksize - Size of a datablock (in units of <tt>T</tt>).
     */
-    unsigned int blocksize () const {
+    inline unsigned int blocksize () const {
       return blocksize_p;
     }
     
@@ -241,7 +241,7 @@ namespace CR {  // Namespace CR -- begin
       
       \return fftlength -- Output length of the FFT performed on a block of data
     */
-    unsigned int fftLength () const {
+    inline unsigned int fftLength () const {
       return fftLength_p;
     }
     
@@ -251,7 +251,7 @@ namespace CR {  // Namespace CR -- begin
       \return stride -- Stride between two subsequent blocks of data,
                         \f$ N_{Stride} \f$, in units of <tt>T</tt>
     */
-    long int stride () {
+    inline long int stride () const {
       return stride_p;
     }
     
@@ -274,7 +274,7 @@ namespace CR {  // Namespace CR -- begin
       
       \return shift 
     */
-    unsigned int shift () {
+    inline unsigned int shift () const {
       return shift_p;
     }
     
@@ -308,7 +308,7 @@ namespace CR {  // Namespace CR -- begin
       
       \return block - The current block number.
     */
-    unsigned int block () {
+    inline unsigned int block () const {
       return block_p;
     }
     

@@ -60,15 +60,6 @@ int test_stepWidth ();
  */
 int test_block ();
 
-
-
-/*!
-  \brief Test the parallel handling of multiple streams
-
-  \return nofFailedTests -- The number of failed tests.
-*/
-int test_multipleStreams ();
-
 /*!
   \brief Test computation of maximum number of readible blocks
 
@@ -257,11 +248,21 @@ int test_block ()
   cout << "\n[test_block]\n" << endl;
 
   int nofFailedTests (0);
+  unsigned int nofBlocks (10);
+  unsigned int blocksize (1024);
+  DataIterator di (blocksize);
 
-  DataIterator di;
-
-  cout << " - Expecting an error message here:" << endl;
-  di.setBlock(0);
+  cout << "[1] Test advancing of block counter ..." << endl;
+  try {
+    for (unsigned int block(0); block<nofBlocks; block++) {
+      di.setBlock(block);
+      //
+      cout << "\t" << block << "\t" << di.block() << "\t" << di.position() << endl;
+    }
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
 
   return nofFailedTests;
 }
@@ -421,6 +422,11 @@ int test_shift ()
 
 // --------------------------------------------------------- test_multipleStreams
 
+/*!
+  \brief Test the parallel handling of multiple streams
+
+  \return nofFailedTests -- The number of failed tests.
+*/
 int test_multipleStreams ()
 {
   cout << "\n[test_multipleStreams]\n" << endl;
@@ -529,48 +535,24 @@ int main ()
   int nofFailedTests (0);
 
   // Test the sizes of the various data types
-  {
-    nofFailedTests += test_typeSizes ();
-  }
+  nofFailedTests += test_typeSizes ();
   
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_DataIterator ();
-  }
-  
-  {
-    nofFailedTests += test_stepWidth ();
-  }
-    
+  nofFailedTests += test_DataIterator ();
+  // Test effect of different step widths
+  nofFailedTests += test_stepWidth ();
   // Some explicit testing for the block counter
-  {
-    nofFailedTests += test_block ();
-  }
-  
+  nofFailedTests += test_block ();
   // Test access to the DataIterator settings
-  {
-    nofFailedTests += test_settings ();
-  }
-
+  nofFailedTests += test_settings ();
   // Test progression through the data volume
-  {
-    nofFailedTests += test_stride ();
-  }
-
+  nofFailedTests += test_stride ();
   // Test methods for introducing a shift in the starting position.
-  {
-    nofFailedTests += test_shift ();
-  }
-
+  nofFailedTests += test_shift ();
   // Test parallel handling of multiple streams
-  {
-    nofFailedTests += test_multipleStreams ();
-  }
-
+  nofFailedTests += test_multipleStreams ();
   // Test computation of maximum number of readible blocks
-  {
-    nofFailedTests += test_maxNofBlocks ();
-  }
-
+  nofFailedTests += test_maxNofBlocks ();
+  
   return nofFailedTests;
 }

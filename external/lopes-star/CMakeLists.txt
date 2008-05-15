@@ -109,7 +109,7 @@ if (ROOT_INCLUDES)
   add_definitions (-DHAVE_ROOT)
 endif (ROOT_INCLUDES)
 
-foreach (lib Core Cint RIO Net Hist Graf Graf3d Gpad Tree Rint Postscript Matrix Physics MathCore)
+foreach (lib Core Cint RIO Net Hist Graf Graf3d Gpad Tree Rint Postscript Matrix Physics MathCore Thread freetype Gui)
   find_library (root${lib} ${lib}
     PATHS ${locations_lib} ${ROOT_ROOTSYS}/lib
     )
@@ -152,8 +152,59 @@ if (libpq)
   list (APPEND PostgreSQL_LIB ${libpq})
 endif (libpq)
 
-## -------------------------------------------------------------------
-## Feedback
+
+## ==============================================================================
+##
+##  Installation settings
+##
+## ==============================================================================
+
+## Prefix for the installation will be dependent on where the package is build;
+## if the package is embedded within the directory structure of the USG software,
+## we install into "release". Otherwise we use the "include" and "lib" directories
+## within the package directory itself.
+
+find_path (prefix release_area.txt
+  PATHS
+  ${StarTools_SOURCE_DIR}
+  PATH_SUFFIXES
+  ../release
+  ../../release
+  NO_DEFAULT_PATH
+  )
+
+if (prefix)
+  set (CMAKE_INSTALL_PREFIX ${prefix}) 
+else (prefix)
+  set (CMAKE_INSTALL_PREFIX ${StarTools_SOURCE_DIR})
+endif (prefix)
+
+## No relinking and full RPATH for the install tree
+
+set (CMAKE_SKIP_BUILD_RPATH TRUE)
+set (CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set (CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+
+## ==============================================================================
+##
+##  Subdirectories of the project  
+##
+## ==============================================================================
+
+include_directories (
+  ${StarTools_SOURCE_DIR}/src
+  ${StarTools_SOURCE_DIR}/include
+  )
+
+add_subdirectory (src)
+
+## ==============================================================================
+##
+##  Summary of configuration
+##
+## ==============================================================================
 
 if (StarTools_VERBOSE_CONFIGURE)
   message (STATUS " ")
@@ -173,17 +224,3 @@ if (StarTools_VERBOSE_CONFIGURE)
   message (STATUS " ")
 endif (StarTools_VERBOSE_CONFIGURE)
 
-## -------------------------------------------------------------------
-
-## ==============================================================================
-##
-##  
-##
-## ==============================================================================
-
-include_directories (
-  ${StarTools_SOURCE_DIR}/src
-  ${StarTools_SOURCE_DIR}/include
-  )
-
-add_subdirectory (src)
