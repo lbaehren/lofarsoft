@@ -53,6 +53,15 @@ using CR::CalTableReader;
 // define constants for the start date of LOPES 10 and LOPES 30
 const unsigned int LOPES10_start = 978350400;
 const unsigned int LOPES30_start = 1104580800;
+// Dual polarization setup
+const unsigned int LOPES_pol_start =  1165574694;
+// Delay measurement 26. / 27.04.2007
+const unsigned int delay_apr_07_start = 1158142580;
+// Delay measurement 04.09.2007
+const unsigned int delay_sep_07_start = 1184241600;
+// Delay measurement 27.11.2007
+const unsigned int delay_nov_07_start = 1202479000; // WARNING this is not correct, has to be changed later!!!
+
 // Feb. 2008 begin of 63.5 and 68.1 MHz Phase Reference signal
 const unsigned int roof_setup_2_freq_start = 1202479000;	
 
@@ -67,6 +76,309 @@ const int antennaIDs[] =
 CalTableWriter writer;
 // Reader to access existing values
 CalTableReader reader;
+
+void adjust_height_of_ant_14(void)
+{
+  // GPS height measurement was wrong, set new height to -0.2 m
+  // x and y position did not change
+  Vector<Double> position_14(3);
+  position_14(0) = -52.069;
+  position_14(1) = -54.610;
+  position_14(2) = -0.2;
+  
+  
+  cout << "Writing correct height for antenna: " << 40202 << endl;
+
+  if (!writer.AddData(position_14,40202,"Position",LOPES30_start) )
+    cerr << "\nERROR while writing field: Position" << endl;
+  if (!writer.AddData(position_14,40202,"Position",LOPES_pol_start) )
+    cerr << "\nERROR while writing field: Position" << endl;
+}
+
+// rotate Antenna Modell for dual polarisation setup
+void rotate_antenna_model(void)
+{
+  Vector<bool> rotate(30);
+
+  // find antennas which must be rotatet (all NS polarized antennas)
+  // read in values, rotate them if neccessary and write them back as new values
+  for (int i = 0; i < MAX_Antennas; i++)
+  {
+    cout << "Reading antenna polaristaion for: " << antennaIDs[i] << endl;
+    
+    String polarization;
+    if (!reader.GetData(LOPES_pol_start, antennaIDs[i], "Polarization", &polarization))
+    { 
+      cerr << "Error while reading field: Polarization" << endl;
+      return;
+    }
+    // set rotation flag to true, if antenna is NS polarized
+    if (polarization == "NS") rotate(i) = true;
+      else rotate(i) = false; 
+    
+    
+    // read in the AntennaGainFaktor
+    Cube<Double> oldAntennaGainFaktor;  
+     if (!reader.GetData(LOPES30_start, antennaIDs[i], "AntennaGainFaktor", &oldAntennaGainFaktor))
+    { 
+      cerr << "Error while reading field: AntennaGainFaktor" << endl;
+      return;
+    }
+    Cube<Double> newAntennaGainFaktor = oldAntennaGainFaktor.copy();  
+    // rotate AntennaGainFaktor by -90°
+    if ( rotate(i) )
+    {
+      cout << "Rotating AntennaGainFaktor by -90° for antenna: " << i+1 << endl;
+      // shift values between 90° and 360° by -90° (fields 9 - 36 --> fields 0 - 27)
+      for (int j = 0 ; j < 27; j++) newAntennaGainFaktor.xzPlane(j) = oldAntennaGainFaktor.xzPlane(j+9);
+      // values from 270° - 360° = values from 10° - 90°
+      for (int j = 27; j < 37; j++) newAntennaGainFaktor.xzPlane(j) = oldAntennaGainFaktor.xzPlane(j-27);
+    } 
+    // write the data back as new values
+    if (!writer.AddData(newAntennaGainFaktor, antennaIDs[i],"AntennaGainFaktor",LOPES_pol_start) )
+      cerr << "\nERROR while writing field: AntennaGainFaktor" << endl;  
+    
+    
+    // read in the AntennaAziGain
+    Cube<Double> oldAntennaAziGain;  
+     if (!reader.GetData(LOPES30_start, antennaIDs[i], "AntennaAziGain", &oldAntennaAziGain))
+    { 
+      cerr << "Error while reading field: AntennaAziGain" << endl;
+      return;
+    }
+    Cube<Double> newAntennaAziGain = oldAntennaAziGain.copy();  
+    // rotate AntennaAziGain by -90°
+    if ( rotate(i) )
+    {
+      // shift values between 90° and 360° by -90° (fields 9 - 36 --> fields 0 - 27)
+      for (int j = 0 ; j < 27; j++) newAntennaAziGain.xzPlane(j) = oldAntennaAziGain.xzPlane(j+9);
+      // values from 270° - 360° = values from 10° - 90°
+      for (int j = 27; j < 37; j++) newAntennaAziGain.xzPlane(j) = oldAntennaAziGain.xzPlane(j-27);
+    } 
+    // write the data back as new values
+    if (!writer.AddData(newAntennaAziGain, antennaIDs[i],"AntennaAziGain",LOPES_pol_start) )
+      cerr << "\nERROR while writing field: AntennaAziGain" << endl;  
+    
+    
+    // read in the AntennaZeniGain
+    Cube<Double> oldAntennaZeniGain;  
+     if (!reader.GetData(LOPES30_start, antennaIDs[i], "AntennaZeniGain", &oldAntennaZeniGain))
+    { 
+      cerr << "Error while reading field: AntennaZeniGain" << endl;
+      return;
+    }
+    Cube<Double> newAntennaZeniGain = oldAntennaZeniGain.copy();  
+    // rotate AntennaZeniGain by -90°
+    if ( rotate(i) )
+    {
+      // shift values between 90° and 360° by -90° (fields 9 - 36 --> fields 0 - 27)
+      for (int j = 0 ; j < 27; j++) newAntennaZeniGain.xzPlane(j) = oldAntennaZeniGain.xzPlane(j+9);
+      // values from 270° - 360° = values from 10° - 90°
+      for (int j = 27; j < 37; j++) newAntennaZeniGain.xzPlane(j) = oldAntennaZeniGain.xzPlane(j-27);
+    } 
+    // write the data back as new values
+    if (!writer.AddData(newAntennaZeniGain, antennaIDs[i],"AntennaZeniGain",LOPES_pol_start) )
+      cerr << "\nERROR while writing field: AntennaZeniGain" << endl;  
+    
+    
+    // read in the AntennaAziPhase
+    Cube<Double> oldAntennaAziPhase;  
+     if (!reader.GetData(LOPES30_start, antennaIDs[i], "AntennaAziPhase", &oldAntennaAziPhase))
+    { 
+      cerr << "Error while reading field: AntennaAziPhase" << endl;
+      return;
+    }
+    Cube<Double> newAntennaAziPhase = oldAntennaAziPhase.copy();  
+    // rotate AntennaAziPhase by -90°
+    if ( rotate(i) )
+    {
+      // shift values between 90° and 360° by -90° (fields 9 - 36 --> fields 0 - 27)
+      for (int j = 0 ; j < 27; j++) newAntennaAziPhase.xzPlane(j) = oldAntennaAziPhase.xzPlane(j+9);
+      // values from 270° - 360° = values from 10° - 90°
+      for (int j = 27; j < 37; j++) newAntennaAziPhase.xzPlane(j) = oldAntennaAziPhase.xzPlane(j-27);
+    } 
+    // write the data back as new values
+    if (!writer.AddData(newAntennaAziPhase, antennaIDs[i],"AntennaAziPhase",LOPES_pol_start) )
+      cerr << "\nERROR while writing field: AntennaAziPhase" << endl;  
+    
+    
+    // read in the AntennaZeniPhase
+    Cube<Double> oldAntennaZeniPhase;  
+     if (!reader.GetData(LOPES30_start, antennaIDs[i], "AntennaZeniPhase", &oldAntennaZeniPhase))
+    { 
+      cerr << "Error while reading field: AntennaZeniPhase" << endl;
+      return;
+    }
+    Cube<Double> newAntennaZeniPhase = oldAntennaZeniPhase.copy();  
+    // rotate AntennaZeniPhase by -90°
+    if ( rotate(i) )
+    {
+      // shift values between 90° and 360° by -90° (fields 9 - 36 --> fields 0 - 27)
+      for (int j = 0 ; j < 27; j++) newAntennaZeniPhase.xzPlane(j) = oldAntennaZeniPhase.xzPlane(j+9);
+      // values from 270° - 360° = values from 10° - 90°
+      for (int j = 27; j < 37; j++) newAntennaZeniPhase.xzPlane(j) = oldAntennaZeniPhase.xzPlane(j-27);
+    } 
+    // write the data back as new values
+    if (!writer.AddData(newAntennaZeniPhase, antennaIDs[i],"AntennaZeniPhase",LOPES_pol_start) )
+      cerr << "\nERROR while writing field: AntennaZeniPhase" << endl;  
+      
+   }
+}
+
+
+void writeDelays(void)
+{
+  // Set delays (three measurements in 2007)
+  Vector<Double> delay_apr(30);
+  Vector<Double> delay_sep(30);
+  Vector<Double> delay_nov(30);
+
+  delay_apr(0)  = 0.		;
+  delay_apr(1)  = 2.52		;
+  delay_apr(2)  = -418.18	;
+  delay_apr(3)  = -414.67	;
+  delay_apr(4)  = -456.85	;
+  delay_apr(5)  = -459.98	;
+  delay_apr(6)  = -418.96	;
+  delay_apr(7)  = -418.57	;
+  delay_apr(8)  = -429.46	;
+  delay_apr(9)  = -431.46	;
+  delay_apr(10) = -1257.24	;
+  delay_apr(11) = -1258.	;
+  delay_apr(12) = -1252.56	;
+  delay_apr(13) = -1257.24	;
+  delay_apr(14) = -1260.8	;
+  delay_apr(15) = -1252.24	;
+  delay_apr(16) = -838.86	;
+  delay_apr(17) = -839.85	;
+  delay_apr(18) = -1256.78	;
+  delay_apr(19) = -1260.37	;
+  delay_apr(20) = -1002.88	;
+  delay_apr(21) = -1002.17	;
+  delay_apr(22) = -1012.89	;
+  delay_apr(23) = -1010.76	;
+  delay_apr(24) = -581.07	;
+  delay_apr(25) = -589.67	;
+  delay_apr(26) = -595.14	;
+  delay_apr(27) = -594.46	;
+  delay_apr(28) = -591.91	;
+  delay_apr(29) = -613.1	;
+  
+  delay_sep(0)  = 0.		;
+  delay_sep(1)  = 2.43		;
+  delay_sep(2)  = -416.82	;
+  delay_sep(3)  = -414.62	;
+  delay_sep(4)  = -456.8	;
+  delay_sep(5)  = -459.77	;
+  delay_sep(6)  = -417.7	;
+  delay_sep(7)  = -417.89	;
+  delay_sep(8)  = -428.75	;
+  delay_sep(9)  = -431.73	;
+  delay_sep(10) = -1227.02	;
+  delay_sep(11) = -1227.57	;
+  delay_sep(12) = -1222.09	;
+  delay_sep(13) = -1226.6	;
+  delay_sep(14) = -1229.98	;
+  delay_sep(15) = -1220.18	;
+  delay_sep(16) = -809.79	;
+  delay_sep(17) = -807.1	;
+  delay_sep(18) = -1224.47	;
+  delay_sep(19) = -1227.81	;
+  delay_sep(20) = -973.11	;
+  delay_sep(21) = -972.68	;
+  delay_sep(22) = -982.48	;
+  delay_sep(23) = -979.88	;
+  delay_sep(24) = -549.54	;
+  delay_sep(25) = -558.95	;
+  delay_sep(26) = -564.82	;
+  delay_sep(27) = -564.83	;
+  delay_sep(28) = -562.29	;
+  delay_sep(29) = -582.99	;
+				
+  delay_nov(0)  = 0.		;
+  delay_nov(1)  = 2.35		;
+  delay_nov(2)  = -416.79	;
+  delay_nov(3)  = -415.23	;
+  delay_nov(4)  = -457.38	;
+  delay_nov(5)  = -459.76	;
+  delay_nov(6)  = -418.59	;
+  delay_nov(7)  = -418.56	;
+  delay_nov(8)  = -429.29	;
+  delay_nov(9)  = -432.03	;
+  delay_nov(10) = -1229.64	;
+  delay_nov(11) = -1230.31	;
+  delay_nov(12) = -1225.	;
+  delay_nov(13) = -1229.68	;
+  delay_nov(14) = -1233.2	;
+  delay_nov(15) = -1223.43	;
+  delay_nov(16) = -810.07	;
+  delay_nov(17) = -810.93	;
+  delay_nov(18) = -1228.12	;
+  delay_nov(19) = -1231.8	;
+  delay_nov(20) = -951.95	;
+  delay_nov(21) = -951.95	;
+  delay_nov(22) = -960.93	;
+  delay_nov(23) = -959.37	;
+  delay_nov(24) = -529.29	;
+  delay_nov(25) = -537.89	;
+  delay_nov(26) = -544.14	;
+  delay_nov(27) = -543.75	;
+  delay_nov(28) = -541.01	;
+  delay_nov(29) = -562.5	;
+  
+  // converstion from ns to s
+  delay_apr /= 1e9;
+  delay_sep /= 1e9;
+  delay_nov /= 1e9;
+  
+  // Add the delays for all antennas to the CalTable
+  for (int i = 0; i < MAX_Antennas; i++)
+  {
+    cout << "Writing delays of apr 2007 for antenna: " << antennaIDs[i] << endl;
+
+    if (!writer.AddData(delay_apr(i),antennaIDs[i],"Delay",delay_apr_07_start) )
+      cerr << "\nERROR while writing field: Delay" << endl;
+  }
+  for (int i = 0; i < MAX_Antennas; i++)
+  {
+    cout << "Writing delays of sep 2007 for antenna: " << antennaIDs[i] << endl;
+
+    if (!writer.AddData(delay_sep(i),antennaIDs[i],"Delay",delay_sep_07_start) )
+      cerr << "\nERROR while writing field: Delay" << endl;
+  }
+  for (int i = 0; i < MAX_Antennas; i++)
+  {
+    cout << "Writing delays of nov 2007 for antenna: " << antennaIDs[i] << endl;
+
+    if (!writer.AddData(delay_nov(i),antennaIDs[i],"Delay",delay_nov_07_start) )
+      cerr << "\nERROR while writing field: Delay" << endl;
+  }
+}
+
+// adds a new field, which contains the reference antenna for the reference phase differences
+void addRefAntField(void)
+{
+  if (!writer.AddField("PhaseRefAnt", "Reference antenna for calculation of phase differences", "Double",
+  			False,  IPosition::IPosition(), False, "Delay") )
+    cerr << "\nERROR while adding field: PhaseRefAnt" << endl;
+  
+  // set PhaseRefAnt to AntennaID of Antenna 1 for LOPES 10 and 30
+  for (int i = 0; i < 10; i++)
+  {
+    cout << "Writing PhaseRefAnt of LOPES 10 for antenna: " << antennaIDs[i] << endl;
+
+    if (!writer.AddData(10101,antennaIDs[i],"PhaseRefAnt",LOPES10_start) )
+      cerr << "\nERROR while writing field: PhaseRefAnt" << endl;
+  }
+  for (int i = 0; i < MAX_Antennas; i++)
+  {
+    cout << "Writing PhaseRefAnt of LOPES 30 for antenna: " << antennaIDs[i] << endl;
+
+    if (!writer.AddData(10101,antennaIDs[i],"PhaseRefAnt",LOPES30_start) )
+      cerr << "\nERROR while writing field: PhaseRefAnt" << endl;
+  }
+
+}
 
 void writeRefPhases(void)
 {
@@ -138,6 +450,9 @@ void writeRefPhases(void)
         cerr << "\nERROR while writing field: SampleJumps" << endl;
       if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",roof_setup_2_freq_start) )
         cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
+      // Reference Antenna 4 for new phase differences
+      if (!writer.AddData(10202,antennaIDs[i],"PhaseRefAnt",roof_setup_2_freq_start) )
+        cerr << "\nERROR while writing field: PhaseRefAnt" << endl;
     }
   }
 }
@@ -146,7 +461,7 @@ int main (int argc, char *argv[])
 {
   // Default CalTable-Path
   const string CalTablePath="/home/schroeder/usg/data/lopes/LOPES-CalTable";
-//const string CalTablePath="/home/schroeder/lopestools/lopescasa/data/LOPES/LOPES-CalTable";
+  //const string CalTablePath="/home/schroeder/lopestools/lopescasa/data/LOPES/LOPES-CalTable";
   
   try
   {
@@ -167,9 +482,19 @@ int main (int argc, char *argv[])
 
     cout << "Opened table for writing: " << endl;
     writer.PrintSummary();
+    
+    // execute requested function to change CalTable
+    //adjust_height_of_ant_14(); // allready checked in
+    
+    // Changes to Delay-Table , allready checked in
+    // Starting date for nov_07_delays is still wrong; TV-Ref phases for LOPES_POL are missing
+    // writeDelays();
+    // addRefAntField();
+    // writeRefPhases();
 
-    writeRefPhases();
-
+    // Rotate Antennagainfaktors for NS-polarised antennas:
+    rotate_antenna_model();
+    
     cout << "Writing finished: " << endl;
     writer.PrintSummary();
   } 
