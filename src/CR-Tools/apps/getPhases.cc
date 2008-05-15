@@ -31,14 +31,14 @@
 	 
   \author Frank Schröder
  
-  \date 2008/04/08
+  \date 2008/05/15
     
   <h3>Motivation</h3>
 
   For the development of a new time calibration method for LOPES we
   need a tool which can read out the phase at a fixed frequency.
   As the frequency axis is discrete, the program will search for the 
-  frequency which is the nearest to the specifed frequency.
+  frequency which is the nearest (greater or equal) to the specifed frequency.
  
   <h3>Usage</h3>
   \verbatim
@@ -133,6 +133,24 @@ int main (int argc, char *argv[])
       return 1;
     };
 
+    // set a time range in the data reader
+    // this is useful, to consider only a part of the trace for the FFT
+    //double start_time = -300e-6; // start time in s
+    //double stop_time = 100e-6; // interval size in s
+    double start_time = -1; // start time in s
+    double stop_time = 1; // interval size in s
+    //number of elements smaller then start time
+    unsigned int startsample = ntrue(dr.timeValues()<start_time);
+    //number of elements smaller then end time
+    unsigned int stopsample = ntrue(dr.timeValues()<stop_time);
+
+    // WARNING:
+    // Phasedifferences seem to depend dramatically on the exact number of samples and frequency
+
+    cout << "Use Trace between sample " << startsample << " and sample " << stopsample << " ." << endl;
+    dr.setShift(startsample);
+    dr.setBlocksize(stopsample-startsample); 
+
     // searching for the nearest frequency
 
     // get the available frequencies
@@ -140,18 +158,21 @@ int main (int argc, char *argv[])
     // start at frequency index zero
     int freqIndex = 0;
 
-    // loop through frequencies and look for the lowest distance to the specified frequency
+    // loop through frequencies and look for the next after the specified frequeny
     for (unsigned int i = 0; i < freqValues.size(); i++)
-      if ( abs(frequency - freqValues(i)) < abs(freqValues(freqIndex) - freqValues(i)) )
+      // if ( abs(frequency - freqValues(i)) < abs(freqValues(freqIndex) - freqValues(i)) )
+      if (frequency <= freqValues(i)) 
+      {
         freqIndex = i;
+        break;
+      }
 
-    cout << "Nearest frequency: " << freqValues(freqIndex)/1e6 << " MHz at index " << freqIndex << endl;
-
+    cout << "Nearest, greater or equal, frequency: " 
+         << freqValues(freqIndex)/1e6 << " MHz at index " << freqIndex << endl;
 
     // get phases of the spectra
     Matrix<DComplex> spectra = dr.fft();
     Vector<Double> phases = phase(spectra.row(freqIndex))*180./3.1415926;
-
 
     // open output file in append-mode
     ofstream outputfile_stream;
