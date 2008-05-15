@@ -137,8 +137,9 @@ Bool test_StationBeams ()
       position_y(id) = posit_y(stationID) ;
     }
     
-    Double freq_interval = 2e6 ;
-    
+    Double freq_interval  = 2e6 ;
+    Double frequency_init = 0;
+
     StationBeam stbm ;
     SimplePlot smplt ;
     
