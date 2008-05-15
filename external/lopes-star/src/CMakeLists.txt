@@ -20,6 +20,10 @@ add_definitions (
 
 set (link_libraries "")
   
+if (PostgreSQL_LIB)
+  list (APPEND link_libraries ${PostgreSQL_LIB})
+endif (PostgreSQL_LIB)
+
 if (FFTW3_LIBRARIES)
   list (APPEND link_libraries ${FFTW3_LIBRARIES})
 endif (FFTW3_LIBRARIES)
@@ -27,10 +31,6 @@ endif (FFTW3_LIBRARIES)
 if (ROOT_LIBRARIES)
   list (APPEND link_libraries ${ROOT_LIBRARIES})
 endif (ROOT_LIBRARIES)
-
-if (PostgreSQL_LIB)
-  list (APPEND link_libraries ${PostgreSQL_LIB})
-endif (PostgreSQL_LIB)
 
 if (libdl)
   list (APPEND link_libraries ${libdl})
@@ -77,13 +77,17 @@ set (apps
   EventViewer
   SpectraViewer
   RunFlagOut
-  RunFlagInDB
   RunFlagSelection
   ChannelStatusControl
   RunFlagMergeGrande
   Beamforming
   RunFlagRecEvent
   )
+
+if (PostgreSQL_INCLUDES AND PostgreSQL_LIB) 
+  list (APPEND apps db2csv)
+  list (APPEND apps RunFlagInDB)
+endif (PostgreSQL_INCLUDES AND PostgreSQL_LIB)
 
 ## Build instructions for the applications
 
@@ -94,7 +98,6 @@ foreach (app ${apps})
   target_link_libraries (${app}
     starutil
     recradio
-    ${link_libraries}
     )
   ## platform-specific instructions
   if (APPLE)

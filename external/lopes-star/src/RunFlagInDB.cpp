@@ -17,7 +17,7 @@ using namespace std;
 
 //! run flag input into DB
 /*!
-copies the result from RunFlagOut into the database
+  copies the result from RunFlagOut into the database
 */
 
 
@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 {
   setenv("TZ","UTC",1);
   tzset();
-
+  
 
   printf("Asch@ipe.fzk.de (build %s %s)\n", __DATE__, __TIME__);  
 
