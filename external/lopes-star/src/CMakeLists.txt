@@ -84,11 +84,13 @@ set (apps
   RunFlagRecEvent
   )
 
-if (PostgreSQL_INCLUDES AND PostgreSQL_LIB) 
-  list (APPEND apps db2csv)
-  list (APPEND apps RunFlagInDB)
-endif (PostgreSQL_INCLUDES AND PostgreSQL_LIB)
-
+if (NOT APPLE)
+  if (PostgreSQL_INCLUDES AND PostgreSQL_LIB) 
+    list (APPEND apps db2csv)
+    list (APPEND apps RunFlagInDB)
+  endif (PostgreSQL_INCLUDES AND PostgreSQL_LIB)
+endif (NOT APPLE)
+  
 ## Build instructions for the applications
 
 foreach (app ${apps})

@@ -141,18 +141,11 @@ if (PostgreSQL_INCLUDES)
   add_definitions (-DHAVE_POSTGRESQL)
 endif (PostgreSQL_INCLUDES)
 
-set (PostgreSQL_LIB "")
-
-find_library (libpq pq
+find_library (PostgreSQL_LIB pq
   PATHS ${locations_lib}
   PATH_SUFFIXES postgresql
   NO_DEFAULT_PATH
   )
-
-if (libpq)
-  list (APPEND PostgreSQL_LIB ${libpq})
-endif (libpq)
-
 
 ## ==============================================================================
 ##
