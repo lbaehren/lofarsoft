@@ -5,6 +5,7 @@
 ##
 ## ==============================================================================
 
+## ------------------------------------------------------------------------------
 ## Compiler settings
 
 add_definitions (
@@ -14,6 +15,32 @@ add_definitions (
   -D_REENTRANT
   )
 
+## ------------------------------------------------------------------------------
+## linker settings
+
+set (link_libraries "")
+  
+if (FFTW3_LIBRARIES)
+  list (APPEND link_libraries ${FFTW3_LIBRARIES})
+endif (FFTW3_LIBRARIES)
+
+if (ROOT_LIBRARIES)
+  list (APPEND link_libraries ${ROOT_LIBRARIES})
+endif (ROOT_LIBRARIES)
+
+if (PostgreSQL_LIB)
+  list (APPEND link_libraries ${PostgreSQL_LIB})
+endif (PostgreSQL_LIB)
+
+if (libdl)
+  list (APPEND link_libraries ${libdl})
+endif (libdl)
+
+if (libm)
+  list (APPEND link_libraries ${libm})
+endif (libm)
+
+## ------------------------------------------------------------------------------
 ## Library 1: Star-Utilities
 
 add_library (starutil
@@ -23,19 +50,9 @@ add_library (starutil
   reconstruction.cpp
   )
 
-if (PostgreSQL_LIB)
-  target_link_libraries (starutil
-    ${ROOT_LIBRARIES}
-    ${FFTW3_LIB}
-    ${PostgreSQL_LIB}
-    )
-else (PostgreSQL_LIB)
-  target_link_libraries (starutil
-    ${ROOT_LIBRARIES}
-    ${FFTW3_LIB}
-    )
-endif (PostgreSQL_LIB)
+target_link_libraries (starutil ${link_libraries})
 
+## ------------------------------------------------------------------------------
 ## Library 2: Reconstruction Radio
 
 add_library (recradio
@@ -44,6 +61,8 @@ add_library (recradio
   RecRadioTrigger.cpp
   RecRadioUtil.cpp
   )
+
+target_link_libraries (recradio ${link_libraries})
 
 ## ==============================================================================
 ##
@@ -75,6 +94,7 @@ foreach (app ${apps})
   target_link_libraries (${app}
     starutil
     recradio
+    ${link_libraries}
     )
   ## platform-specific instructions
   if (APPLE)

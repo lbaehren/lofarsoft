@@ -24,6 +24,7 @@ option (CR_DEBUGGING_MESSAGES "Print debugging information?" 0)
 option (CR_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
 option (CR_GLISH_SUPPORT "Activate support for Glish applications?" 0)
 option (CR_PYTHON_SUPPORT "Activate support for Python applications?" 1)
+option (CR_PLOTTING_SUPPORT "Activate support for generation of plots?" ON)
 
 ## Handle option: verbose mode on/off
 
@@ -354,6 +355,20 @@ endif (NOT HAVE_PostgreSQL)
 if (NOT HAVE_PYTHON OR NOT HAVE_BOOST)
   set (CR_PYTHON_SUPPORT OFF)
 endif (NOT HAVE_PYTHON OR NOT HAVE_BOOST)
+
+## -------------------------------------------------------------------
+## Handle option: Activate support for generation of plots ON/OFF
+
+if (CR_PLOTTING_SUPPORT)
+
+  if (HAVE_PGPLOT OR HAVE_PLPLOT)
+    set (CR_PLOTTING_SUPPORT ON)
+  else (HAVE_PGPLOT OR HAVE_PLPLOT)
+    message (STATUS "[CR-Tools] Disabling support for plotting.")
+    set (CR_PLOTTING_SUPPORT OFF)
+  endif (HAVE_PGPLOT OR HAVE_PLPLOT)
+
+endif (CR_PLOTTING_SUPPORT)
 
 ## =============================================================================
 ##

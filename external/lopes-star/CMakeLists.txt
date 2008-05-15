@@ -54,7 +54,7 @@ option (StarTools_FORCE_BUILD "Force rebuild and local installation" 0)
 
 set (locations_lib
   /usr/lib
-  /user/local/lib
+  /usr/local/lib
   /opt/lib
   /sw/lib
   /sw/share/lib
@@ -65,7 +65,7 @@ set (locations_lib
 
 set (locations_includes
   /usr/include
-  /user/local/include
+  /usr/local/include
   /opt/include
   /sw/include
   /sw/share/include
@@ -87,7 +87,7 @@ find_library (libdl dl ${locations_lib})
 
 ## --- FFTW3 -----------------------------------------------
 
-find_library (FFTW3_LIB fftw3 PATH ${locations_lib}) 
+find_library (FFTW3_LIBRARIES fftw3 PATH ${locations_lib}) 
 find_path (FFTW3_INCLUDES fftw3.h PATH ${locations_includes})
 
 if (FFTW3_INCLUDES)
@@ -213,7 +213,7 @@ if (StarTools_VERBOSE_CONFIGURE)
   message (STATUS " ")
   message (STATUS "[Star-Tools] Summary of configuration settings")
   message (STATUS " ")
-  message (STATUS "FFTW3 library       = ${FFTW3_LIB}")
+  message (STATUS "FFTW3 library       = ${FFTW3_LIBRARIES}")
   message (STATUS "FFTW3 includes      = ${FFTW3_INCLUDES}")
   message (STATUS "ROOT root directory = ${ROOT_ROOTSYS}")
   message (STATUS "ROOT library        = ${ROOT_LIBRARIES}")
