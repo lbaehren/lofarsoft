@@ -100,8 +100,8 @@ namespace CR { // Namespace CR -- begin
       if (DoPhaseCal_p){
 	InitPhaseCal(dr);
 	// Do the phase calibration
-	pCal_p.calcWeights(dr->fft());
-	pCal_p.apply(data,False);
+	pCal_p.calcDelays(dr->fft());
+	pCal_p.apply(data);
 	pCal_p.parameters().get("AntennaMask",AntennaMask_p);
       };
 
@@ -140,14 +140,28 @@ namespace CR { // Namespace CR -- begin
   Bool SecondStagePipeline::InitPhaseCal(DataReader *dr){
     try {
       Vector<Int> AntennaIDs;
-      uInt date;
+      uInt date,refAntID;      
+      Double DrefAntID;
       dr->header().get("Date",date);
       dr->header().get("AntennaIDs",AntennaIDs);
       Vector<Double> tmpvec;
       //      Vector<Int> tmpIntvec;
       Matrix<Double> tmpmat;
-      Int i,numAntennas=AntennaIDs.nelements();
+      Int i,refAnt=0,numAntennas=AntennaIDs.nelements();
 
+      CTRead->GetData(date, AntennaIDs(0), "PhaseRefAnt", &DrefAntID);
+      refAntID = (int)DrefAntID;
+      for (i=0; i<numAntennas; i++){
+	if (AntennaIDs(i) == refAntID) {
+	  refAnt = i;
+	  break;
+	};
+      };
+#ifdef DEBUGGING_MESSAGES      
+      cout << "SecondStagePipeline::InitPhaseCal: " << " refAntID: " << refAntID 
+	   << " refAnt-index: " << refAnt << endl;
+#endif
+      pCal_p.parameters().define("referenceAntenna",refAnt);
       tmpvec= dr->frequencyValues();
       pCal_p.parameters().define("frequencyValues",tmpvec);
       pCal_p.parameters().define("sampleRate",dr->sampleFrequency());

@@ -30,7 +30,7 @@
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
 
-#include <Calibration/PluginBase.h>
+#include <Calibration/DelayCorrectionPlugin.h>
 
 #include <casa/namespace.h>
 
@@ -55,6 +55,7 @@ namespace CR { // Namespace CR -- begin
     
     <ul type="square">
       <li>PluginBase<DComplex> 
+      <li>DelayCorrectionPlugin
     </ul>
     
     <h3>Synopsis</h3>
@@ -65,7 +66,7 @@ namespace CR { // Namespace CR -- begin
     <h3>Parameter</h3>
     
     The following is a list of entries in the parameters record that are used by this class.
-    those without a default value have to be set before calcWeigths() is (indirectly) called!
+    those without a default value have to be set before calcDelays() is called!
     
     \param frequencyRanges   --  List of the frequency ranges in which to look for the transmitter 
                                  peaks. Two dimensional matrix of double with the minimum and 
@@ -100,6 +101,8 @@ namespace CR { // Namespace CR -- begin
 
     The following entries in the parameters record are set by this class:
 
+    \return delays       --  Vector with the delays in seconds (e.g. as used by the 
+                             DelayCorrectionPlugin class).
     \return AntennaMask  --  Vector of Bool that lists the antennas for which the algorithm failed.
                              True for good antennas, False for antennas that failed.
 
@@ -107,9 +110,23 @@ namespace CR { // Namespace CR -- begin
      <b> Currently (April 2007) the reference values, that are stored in the CalTabels, 
      are defined in such a way that the values from "fft()" (and not "calfft()") of
      the DataReader have to be used. \b>
+
+    <h3>Example</h3>
+    \code
+    DataReader *dr = ...;
+    TVCalibrationPlugin pCal_p;
+    Matrx<DComplex> data;
+
+    pCal_p.parameters().define("frequencyValues",dr->frequencyValues());
+    ...
+
+    pCal_p.calcDelays(dr->fft());
+    data = dr->calfft();
+    pCal_p.apply(data);
+    \endcode
         
   */  
-  class TVCalibrationPlugin : public PluginBase<DComplex> {
+  class TVCalibrationPlugin : public DelayCorrectionPlugin {
     
   public:
     
@@ -136,7 +153,7 @@ namespace CR { // Namespace CR -- begin
       
       \return className -- The name of the class, TVCalibrationPlugin.
     */
-    std::string className () const {
+    virtual std::string className () const {
       return "TVCalibrationPlugin";
     }
 
@@ -144,64 +161,23 @@ namespace CR { // Namespace CR -- begin
     
 
     /*!
-      \brief Calculate the (complex) weights.
+      \brief Calculate the delays from the data
 
       This function essentially does all tha magic. It reads out all the parameters 
       from the parameters record, so they have to be set correctly before. Then it
-      calculates the corrections delays and from that the phase gradients that are 
-      then stored in the weights. It also sets the entry in the parameters record
-      "AntennaMask" which marks all the channels for which the routine failed.
+      calculates the corrections delays and sets them in the parameters record (from
+      which the <tt>DelayCorrectionPlugin</tt> calculates the phase gradients.
+      It also sets the entry in the parameters record "AntennaMask" which marks all 
+      the channels for which the routine failed.
 
-      \param data           -- Data for which the calibration is to be done.
+      \param data           -- Data for which the calibration is to be done. 
+                               (Typically the <tt>fft()</tt> values from the DataReader.)
 
       \return ok            -- Was operation successful? Returns <tt>True</tt> if yes.
     */
-    virtual Bool calcWeights(const Matrix<DComplex> &data);    
+    virtual Bool calcDelays(const Matrix<DComplex> &data);    
 
-
     
-  protected:
-    
-    /*!
-      \brief convert phases to delays
-      \param phases         -- The input phases (in degrees!)
-      \param frequencies    -- The corresponding frequencies (in Hz) 
-      \param samplerate =1. -- The samplerate (in Hz)
-      \return delays -- The resulting delay in sample times (== seconds if samplerate = 1.)
-    */
-    Matrix<Double> phase2delay(Matrix<Double> phases, Vector<Double> frequencies, 
-			       Double samplerate=1.);
-    
-    /*!
-      \brief convert delays to phases
-      \param delays         -- The input delays (in sample times (== seconds if samplerate = 1.))
-      \param frequencies    -- The corresponding frequencies (in Hz)
-      \param samplerate =1. -- The samplerate (in Hz)
-      \return phases -- The resulting phases in degrees
-    */
-    Matrix<Double> delay2phase(Matrix<Double> delays, Vector<Double> frequencies, 
-			       Double samplerate=1.);
-    Vector<Double> delay2phase(Double delay, Vector<Double> frequencies, 
-			       Double samplerate=1.);
-    
-    /*!
-      \brief "reduce" phases, i.e. shift them into the range -180. to +180. degrees
-      \param phases -- The phases in degrees; will be modified in place!
-      \return ok -- Was operation successful? Returns <tt>True</tt> if yes.
-    */        
-    Bool reducePhases(Array<Double> & phases);
-    
-    /*!
-      \brief Find the positions of the peaks
-      \param spectrum        -- the frequency domain data
-      \param frequencyValues -- The corresponding frequencies (in Hz)
-      \param frequencyRanges -- low and high frequency ranges. If low freq = high freq the
-                                function will look for the frequency bin nearest to this
-                                frequency (instead for a peak).
-      \return positions      -- indices of the peak positions
-    */
-    Vector<uInt> getPeakPos(Vector<DComplex> spectrum, Vector<Double> frequencyValues,
-			    Matrix<Double> frequencyRanges);
     
   }; //Class TVCalibrationPlugin  -- end
 } // Namespace CR -- end

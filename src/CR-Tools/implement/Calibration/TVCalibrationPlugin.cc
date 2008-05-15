@@ -30,7 +30,8 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  TVCalibrationPlugin::TVCalibrationPlugin (){
+  TVCalibrationPlugin::TVCalibrationPlugin():
+    DelayCorrectionPlugin() {
 
   parameters_p.define("frequencyRanges",  Array<Double>());
   parameters_p.define("referencePhases",  Array<Double>());
@@ -67,7 +68,7 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  Bool TVCalibrationPlugin::calcWeights(const Matrix<DComplex> &data){
+  Bool TVCalibrationPlugin::calcDelays(const Matrix<DComplex> &data){
     try {
       // get values out of the parameters record.
       Matrix<Double> frequencyRanges = parameters_p.asArrayDouble("frequencyRanges");
@@ -89,16 +90,16 @@ namespace CR { // Namespace CR -- begin
 
       // check shapes of the different input data
       if (frequencyValues.nelements() != data.nrow()){
-	cerr << "TVCalibrationPlugin::calcWeights: " << "frequencyValues.nelements() != data.nrow()" << endl;
+	cerr << "TVCalibrationPlugin::calcDelays: " << "frequencyValues.nelements() != data.nrow()" << endl;
 	cerr << "                                  " << frequencyValues.nelements() << " != " << data.nrow() << endl;
 	return False;
       };
       if (referencePhases.nrow() != nFreqs) {
-	cerr << "TVCalibrationPlugin::calcWeights: " << "referencePhases.nrow() != nFreqs" << endl;
+	cerr << "TVCalibrationPlugin::calcDelays: " << "referencePhases.nrow() != nFreqs" << endl;
 	return False;
       };
       if (referencePhases.ncolumn() != nAntennas) {
-	cerr << "TVCalibrationPlugin::calcWeights: " << "referencePhases.ncolumn() != nAntennas" << endl;
+	cerr << "TVCalibrationPlugin::calcDelays: " << "referencePhases.ncolumn() != nAntennas" << endl;
 	return False;
       };
 
@@ -189,148 +190,17 @@ namespace CR { // Namespace CR -- begin
       //cout << "TVCalibrationPlugin: Correction delays:" << endl << correctionDelay  << endl;
       //cout << "TVCalibrationPlugin: Antenna Mask: " << AntennaMask << endl;
 
-      //calculate the phase gradients (i.e. the new wheigths) from the correction delays
-      DComplex tmpcomp(0.,1.);
-      Vector<DComplex> cFreqVals;
-      cFreqVals =  parameters_p.toArrayDComplex("frequencyValues");
-      weights_p.resize(data.shape());
-      tmpcomp *= -2.*PI/samplerate;
-      for (antInd=0; antInd<nAntennas; antInd++){
-	weights_p.column(antInd) = exp(tmpcomp*correctionDelay(antInd)*cFreqVals);
-      };
+      parameters_p.define("delays", correctionDelay);
+
     } catch (AipsError x) {
-      cerr << "TVCalibrationPlugin::calcWeights: " << x.getMesg() << endl;
+      cerr << "TVCalibrationPlugin::calcDelays: " << x.getMesg() << endl;
       return False;
     }; 
     return True;
   };
-
-  Vector<uInt> TVCalibrationPlugin::getPeakPos(Vector<DComplex> spectrum, Vector<Double> frequencyValues,
-					       Matrix<Double> frequencyRanges){
-    Vector<uInt> indices(frequencyRanges.nrow());
-    try {
-      uInt freq = 0; // index for the frequencies
-      uInt topfreq = frequencyValues.nelements(); 
-      uInt maxind;
-      Double maxamp;
-      // loop through different frequency ranges
-      for (uInt peak = 0; peak < frequencyRanges.nrow(); peak++){
-	if (frequencyValues(freq) > frequencyRanges(peak,0)) {freq=0;} // reset freq if needed
-        // look for first frequency after the begin of the frequency range
-	while (frequencyValues(freq) < frequencyRanges(peak,0)){
-	  freq++;
-	  if (freq >= topfreq) {
-	    cerr << "TVCalibrationPlugin::getPeakPos: " << "(freq >= topfreq)" << endl;
-	    return Vector<uInt>();
-	  };
-	};
-        // if this frequency is allready greater than the end of the frequency range,
-        // then take it, as there is no frequency inside the range,
-        // else search for the peak in the frequency range.
-        if (frequencyValues(freq) >= frequencyRanges(peak,1)) {
-          indices(peak) = freq;
-        } else {
-	  maxind = freq;
-	  maxamp = fabs(spectrum(freq));
-	  //cout << "getPeakPos:"<<frequencyValues(freq) <<" "<< frequencyRanges(peak,1) <<" "<<freq<<endl;
-	  while (frequencyValues(freq) < frequencyRanges(peak,1)) {
-	    freq++;
-	    if (freq >= topfreq) {
-	      cerr << "TVCalibrationPlugin::getPeakPos: " << "(freq >= topfreq)" << endl;
-	      return Vector<uInt>();
-	    };
-	    if (fabs(spectrum(freq)) > maxamp) {
-	      maxind = freq;
-	      maxamp = fabs(spectrum(freq));
-	      //cout << "getPeakPos " << peak <<" "<< maxamp <<" "<<freq <<" "<<frequencyValues(freq)<<endl;
-	    };
-	  }; // while
-	  indices(peak) = maxind;
-        }; // if
-      }; // for
-    } catch (AipsError x) {
-      cerr << "TVCalibrationPlugin::getPeakPos: " << x.getMesg() << endl;
-      return Vector<uInt>();;
-    }; 
-    return indices;
-  };
-
 
   // ============================================================================
   //  Helper Methods
   // ============================================================================
-  
-  Bool TVCalibrationPlugin::reducePhases(Array<Double> & phases){
-    try {
-      Vector<Double> phasesvector(phases.reform(IPosition(1,phases.nelements())));
-      for (uInt i=0; i<phases.nelements(); i++){  // not fast, (maybe) not elegant, but works!
-	while (phasesvector(i) > 180.) { phasesvector(i) -= 360.; };
-	while (phasesvector(i) < -180.) { phasesvector(i) += 360.; };
-      };
-    } catch (AipsError x) {
-      cerr << "TVCalibrationPlugin::reducePhases: " << x.getMesg() << endl;
-      return False;
-    }; 
-    return True;
-  };
-
-  Matrix<Double> TVCalibrationPlugin::phase2delay(Matrix<Double> phases, 
-						  Vector<Double> frequencies, Double samplerate){
-    Matrix<Double> delays(phases.shape());
-    try {
-      if (phases.nrow() != frequencies.nelements()) {
-	cerr << "TVCalibrationPlugin::phase2delay: " << "phases.nrow() != frequencies.nelements()" << endl;
-	return Matrix<Double>();
-      };
-      Vector<Double> invfreq= 1./frequencies;
-      for (uInt i=0; i<phases.ncolumn(); i++){
-	delays.column(i) = phases.column(i)*invfreq*(PI/180./(2.*PI)); //the compiler should optimize this...
-      };
-      if (samplerate != 1.){
-	// convert delays in seconds to delays in sample times.
-	delays *= samplerate;
-      };
-    } catch (AipsError x) {
-      cerr << "TVCalibrationPlugin::phase2delay: " << x.getMesg() << endl;
-      return Matrix<Double>();
-    }; 
-    return delays;
-  };
-
-  Matrix<Double> TVCalibrationPlugin::delay2phase(Matrix<Double> delays, 
-						  Vector<Double> frequencies, Double samplerate){
-    Matrix<Double> phases(delays.shape());
-    try {
-      if (delays.nrow() != frequencies.nelements()) {
-	cerr << "TVCalibrationPlugin::delay2phase: " << "delays.nrow() != frequencies.nelements()" << endl;
-	return Matrix<Double>();
-      };
-      Double convfactor;
-      convfactor = 2.*PI*180./PI/samplerate;
-      for (uInt i=0; i<delays.ncolumn(); i++){
-	phases.column(i) = delays.column(i)*frequencies*convfactor;
-      };
-      reducePhases(phases);
-    } catch (AipsError x) {
-      cerr << "TVCalibrationPlugin::delay2phase: " << x.getMesg() << endl;
-      return Matrix<Double>();
-    }; 
-    return phases;
-  };
-
-  Vector<Double> TVCalibrationPlugin::delay2phase(Double delay, 
-						  Vector<Double> frequencies, Double samplerate){
-    Vector<Double> phases(frequencies.shape());
-    try {
-      Double convfactor;
-      convfactor = 2.*PI*180./PI/samplerate;
-      phases = delay*frequencies*convfactor;
-      reducePhases(phases);
-    } catch (AipsError x) {
-      cerr << "TVCalibrationPlugin::delay2phase: " << x.getMesg() << endl;
-      return Vector<Double>();
-    }; 
-    return phases;
-  };
   
 } // Namespace CR -- end
