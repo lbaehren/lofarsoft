@@ -303,6 +303,10 @@ case $param_packageName in
 		echo "[`date`] Selected package Hdf5"
 		build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
+    lopes-star)
+		echo "[`date`] Selected package LOPES-Star"
+		build_package lopes-star external/lopes-star "-DStarTools_FORCE_BUILD:BOOL=$param_forceBuild";
+    ;;
     plplot)
 		echo "[`date`] Selected package Plplot"
 		if test -d $basedir/../external/plplot ; then
@@ -368,6 +372,7 @@ case $param_packageName in
     cr)
 		echo "[`date`] Processing required packages ..."
 		./build.sh dal  $param_reportBuild
+		./build.sh lopes-star
 		echo "[`date`] Building CR-Tools package ..."
 		build_package cr src/CR-Tools;
     ;;
