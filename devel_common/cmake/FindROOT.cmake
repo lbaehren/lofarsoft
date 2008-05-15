@@ -52,6 +52,7 @@ set (libs
   Matrix
   Physics
   MathCore
+  Thread
   freetype
   Gui
   pthread
