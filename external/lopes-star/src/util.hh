@@ -1,13 +1,9 @@
 #ifndef __defined_util_hh
 #define __defined_util_hh
 
-#define __compile
-#ifdef __compile
 #ifdef HAVE_POSTGRESQL
 #include <libpq-fe.h>
 #endif
-#endif
-
 
 //!star tool headers
 #include "trigger.hh"
@@ -440,7 +436,7 @@ Description of the parameters:
 */
 int ConvertTimeStamp(char *Timestamp, int *Sec, int *Nanosec, double Timeshift = 0);
 
-#ifdef __compile
+#ifdef HAVE_POSTGRESQL
 //! Checks the result of a query 
 /*!
 Call this function with a result pointer of PGresult and the function checks whether the result is valid or an error occurred.
