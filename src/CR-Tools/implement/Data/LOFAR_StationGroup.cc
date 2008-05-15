@@ -688,4 +688,5 @@ namespace DAL { // Namespace DAL -- begin
 
     return rec;
   }
+
 } // Namespace DAL -- end

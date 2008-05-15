@@ -47,11 +47,10 @@ namespace CR {  // Namespace CR -- begin
     position within the filestream:
     
     \code
-    position_p = dataStart_p + shift_p + (block_p - 1)*(blocksize_p+stride_p)*sizeof(dataType_p);
+    position_p = dataStart_p + shift_p + block_p*(blocksize_p+stride_p)*sizeof(dataType_p);
     \endcode
     
-    \f[ n_{\rm Position} = N_{\rm Start} + N_{\rm Shift} + \Bigl( n_{\rm Block} - 1
-    \Bigr) \cdot \Bigl( N_{\rm Blocksize} + N_{Stride} \Bigr) \f]
+    \f[ n_{\rm Position} = N_{\rm Start} + N_{\rm Shift} + n_{\rm Block} \cdot \Bigl( N_{\rm Blocksize} + N_{Stride} \Bigr) \f]
     
     where \f$ N_{\rm Start} \f$ is the absolute position within the filestream
     where the data segment starts (remember that header information might be
@@ -60,8 +59,7 @@ namespace CR {  // Namespace CR -- begin
     blocks of data.
     \f$ N_{\rm Shift} \f$ is a shift w.r.t. \f$ N_{\rm Start} \f$, enabling to start
     reading data offset to the start of the data segment. \f$ n_{\rm Block} \f$ is
-    the number of the currently selected data block (note that counting is
-    1-based, as we rather speak of the first instead of the 0-th data block).
+    the number of the currently selected data block.
     
     The above described access scheme is illustrated in the figure below (note
     that \f$ N_{Stride} > 0 \f$):

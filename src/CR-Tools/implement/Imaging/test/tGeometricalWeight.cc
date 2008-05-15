@@ -57,7 +57,6 @@ void export_weights (GeometricalWeight &weight,
   int freq (0);
   int numAntenna(0);
   int numSky (0);
-  int coord(0);
   casa::Matrix<double> antPositions  = weight.antennaPositions();
   casa::Matrix<double> skyPositions  = weight.skyPositions();
   casa::Vector<double> frequencies   = weight.frequencies();

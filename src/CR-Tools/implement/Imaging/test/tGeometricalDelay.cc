@@ -341,7 +341,6 @@ int test_skyPositions ()
   
   int nofFailedTests (0);
   GeometricalDelay delay;
-  int nofSkyPositions (5);
   bool status (true);
 
   cout << "[1] Setting sky positions with cartesian coordinates, Matrix<double>"
@@ -515,7 +514,6 @@ int test_delayComputation ()
   cout << "\n[test_delayComputation]\n" << endl;
 
   int nofFailedTests (0);
-  bool antennaIndexFirst (true);
   casa::Matrix<double> antPositions = get_antennaPositions();
   casa::Matrix<double> skyPositions = get_skyPositions();
   

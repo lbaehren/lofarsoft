@@ -169,8 +169,7 @@ Matrix<double> get_skyPositions (Vector<double> const &start,
     uint nofCoordinates (start.nelements());
     uint nofPositions (1);
     uint coord(0);
-    uint step (0);
-    uint pos (0);
+    int step (0);
     // how many positions will there be?
     for (coord=0; coord<nofCoordinates; coord++) {
       nofPositions *= nofSteps(coord);

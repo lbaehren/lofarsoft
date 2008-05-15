@@ -67,7 +67,6 @@ void export_phases (casa::Matrix<double> const &antPositions,
   int freq (0);
   int numAntenna(0);
   int numSky (0);
-  int coord(0);
   casa::IPosition shape(phases.shape());
 
   std::ofstream outfile (filename.c_str(),std::ios::out);
@@ -275,7 +274,6 @@ int test_phaseComputation ()
     double incr (100);
     uint nofAntennas (2);
     uint nofSkyPositions (10);
-    bool antennaIndexFirst (true);
     
     /* Antenna positions */
     CR::CoordinateType antCoordType (CR::Cartesian);
