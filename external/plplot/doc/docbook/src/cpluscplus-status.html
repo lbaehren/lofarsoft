@@ -1,0 +1,193 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>Status of the C++ Interface</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="A C++ Interface for PLplot"
+HREF="cplusplus.html"><LINK
+REL="PREVIOUS"
+TITLE="Specializing the PLplot C++ Interface"
+HREF="cpluscplus-specializing.html"><LINK
+REL="NEXT"
+TITLE="Using PLplot from Tcl"
+HREF="tcl.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="cpluscplus-specializing.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 10. A C++ Interface for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="tcl.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="cpluscplus-status"
+>Status of the C++ Interface</A
+></H1
+><P
+>&#13;The class <TT
+CLASS="literal"
+>plstream</TT
+> (and the other abstraction classes in
+<TT
+CLASS="filename"
+>plstream.h</TT
+>) provided in PLplot 4.99j (alpha) are to be
+considered as works in progress.  By the standards outlined above, the
+work has barely begun.  At this time, <TT
+CLASS="literal"
+>plstream</TT
+> is mostly a one
+to one mirror of the C API, which is to say, it is still far from the
+goals of simplification and abstraction outlined above.  As such, it
+can be expected to change radically over the course of time.  (We
+don't quote schedules--how long have you been waiting for 5.0?  :-).
+    </P
+><P
+>&#13;In any event, we would welcome improvement submissions along the lines
+of those above, but we would strongly discourage people from using
+<TT
+CLASS="literal"
+>plstream</TT
+> if they are expecting it to be rock solid.  It
+<SPAN
+CLASS="emphasis"
+><I
+CLASS="emphasis"
+>will</I
+></SPAN
+>
+be changing, to become more like the design goals elucidated above.
+    </P
+><P
+>&#13;So, if you like the ideas described above, and are willing to accept
+the burden of "upgrading" your code as the class <TT
+CLASS="literal"
+>plstream</TT
+>
+evolves, then feel free to use it.  Just don't whine when I fix some
+of the methods to take references instead of pointers, when I
+eliminate some of the redundant methods to use the collapsed form,
+etc.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="cpluscplus-specializing.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="tcl.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Specializing the PLplot C++ Interface</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="cplusplus.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Using PLplot from Tcl</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

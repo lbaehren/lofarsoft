@@ -1,0 +1,1111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>Embedding Plots in Graphical User Interfaces</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE=" Language Bindings "
+HREF="p2493.html"><LINK
+REL="PREVIOUS"
+TITLE="Custom Extensions to Tcl"
+HREF="custom-extensions-tcl.html"><LINK
+REL="NEXT"
+TITLE="Using PLplot from Perl"
+HREF="perl.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="chapter"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="custom-extensions-tcl.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+></TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="perl.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="chapter"
+><H1
+><A
+NAME="gui"
+></A
+>Chapter 13. Embedding Plots in Graphical User Interfaces</H1
+><P
+>&#13;This chapter describes how to embed plots in graphical user interfaces.
+</P
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="plplotcanvas"
+>The PlplotCanvas Widget for Gnome/GTK Applications</A
+></H1
+><P
+>&#13;    Plots can be embedded into Gnome/GTK applications by using the
+    PlplotCanvas widget.  Information on the GTK toolkit is provided
+    at http://www.gtk.org/.  PlplotCanvas is a subclass of the GnomeCanvas
+    (see http://developer.gnome.org/doc/API/2.0/libgnomecanvas/index.html), 
+    and so includes all of its functionality.  The specialized C API for 
+    PlplotCanvas is described in
+    <A
+HREF="gui.html#plplotcanvas-api"
+>the Section called <I
+>PlplotCanvas API</I
+></A
+>, and bindings to other languages
+    are described in *** NEEDS DOCUMENTATION ***.
+  </P
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="plplotcanvas-basics"
+>PlplotCanvas Basics</A
+></H2
+><P
+>&#13;      The method declarations and data structures are defined in 
+      <TT
+CLASS="filename"
+>plplotcanvas.h</TT
+>.  Programs using the PlplotCanvas
+      widget must be linked against the 
+      <TT
+CLASS="filename"
+>libplplotgnome2d</TT
+> library 
+      rather than <TT
+CLASS="filename"
+>libplplotd</TT
+>.  This is most easily 
+      accomplished using pkg-config; i.e.,
+
+      <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>&#13;        gcc plplotcanvas_demo.c -o plplotcanvas_demo `pkg-config --cflags --libs plplotd-gnome2`
+      </PRE
+></TD
+></TR
+></TABLE
+>
+
+      You may need to remind pkg-config where to look for the 
+      <TT
+CLASS="filename"
+>plplotd-gnome2.pc</TT
+> file installed by PLplot; e.g.,
+
+      <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>&#13;        gcc plplotcanvas_demo.c -o plplotcanvas_demo `PKG_CONFIG_PATH=/usr/local/lib/pkgconfig pkg-config --cflags --libs plplotd-gnome2`
+      </PRE
+></TD
+></TR
+></TABLE
+>
+    </P
+><P
+>&#13;      A specialized API is provided for PlplotCanvas and is described in
+      <A
+HREF="gui.html#plplotcanvas-api"
+>the Section called <I
+>PlplotCanvas API</I
+></A
+>.  The API provides methods
+      to create and manipulate PlplotCanvas widgets, in addition to
+      object-oriented analogues for each of the PLplot functions.
+    </P
+><P
+>&#13;      Example programs are provided that demonstrate the use of the 
+      PlplotCanvas widget in <A
+HREF="gui.html#plplotcanvas-examples"
+>the Section called <I
+>PlplotCanvas Examples</I
+></A
+>.
+    </P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="plplotcanvas-api"
+>PlplotCanvas API</A
+></H2
+><P
+>&#13;      The PlplotCanvas methods are as follows.  Because PlplotCanvas is a
+      GTK widget, GLib types (gint, gdouble, gboolean, etc) are sometimes 
+      used rather than PLplot types (PLINT, PLFLT, etc).  See 
+      http://developer.gnome.org/doc/API/2.0/glib/index.html for more 
+      information on GLib and GLib types.
+    </P
+><DIV
+CLASS="sect3"
+><H3
+CLASS="sect3"
+><A
+NAME="plplot_canvas_new"
+><CODE
+CLASS="function"
+>plplot_canvas_new</CODE
+>: Creates a new PlplotCanvas.</A
+></H3
+><P
+>&#13;        <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN3132"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;            PlplotCanvas* plplot_canvas_new
+          </CODE
+>(void);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+      </P
+><P
+>&#13;        Returns a pointer to a new PlplotCanvas widget.  Methods that
+	apply to a PlplotCanvas are given next.
+      </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>void</CODE
+></DT
+><DD
+><P
+>&#13;            There are no arguments for this method.
+          </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+></DIV
+><DIV
+CLASS="sect3"
+><H3
+CLASS="sect3"
+><A
+NAME="plplot_canvas_plfunc"
+><CODE
+CLASS="function"
+>plplot_canvas_plfunc</CODE
+>: PLplot function analogues.</A
+></H3
+><P
+>&#13;        <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN3149"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>void plplot_canvas_plfunc</CODE
+>(canvas, ...);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+      </P
+><P
+>&#13;        The PLplot functions have analogue methods named like
+	<CODE
+CLASS="function"
+>plplot_canvas_plfunc</CODE
+>.  For example, the 
+        PLplot function <A
+HREF="plline.html"
+><CODE
+CLASS="function"
+>plline</CODE
+></A
+> maps to 
+        <CODE
+CLASS="function"
+>plplot_canvas_plline</CODE
+>.  The 
+        <CODE
+CLASS="function"
+>plplot_canvas_plfunc</CODE
+> methods
+	should be used rather than the standard PLplot API when the
+	PlplotCanvas is used.
+      </P
+><P
+>&#13;        Lines drawn to the canvas are not shown until the page is
+        advanced using <CODE
+CLASS="function"
+>plplot_canvas_pladv</CODE
+>.  The 
+        plot will remain on the canvas until the next page advance.
+      </P
+><P
+>&#13;        The PLplot <A
+HREF="plinit.html"
+><CODE
+CLASS="function"
+>plinit</CODE
+></A
+> and <A
+HREF="plgstrm.html"
+><CODE
+CLASS="function"
+>plgstrm</CODE
+></A
+> functions are not used with 
+        PlplotCanvas because the <CODE
+CLASS="function"
+>plplot_canvas_new</CODE
+>
+        function does the necessary initialization and returns an 
+        object with a unique stream number.
+      </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>canvas</CODE
+> 
+            (<TT
+CLASS="literal"
+>PlplotCanvas*</TT
+>, input)</DT
+><DD
+><P
+>The canvas on which to operate.</P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>...</CODE
+></DT
+><DD
+><P
+>&#13;            The list of arguments from the PLplot function analogue.  The
+	    same types used in the PLplot function are used here.
+          </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+></DIV
+><DIV
+CLASS="sect3"
+><H3
+CLASS="sect3"
+><A
+NAME="plplot_canvas_dispose"
+><CODE
+CLASS="function"
+>plplot_canvas_dispose</CODE
+>: Disposes the canvas.</A
+></H3
+><P
+>&#13;        <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN3187"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>void plplot_canvas_dispose</CODE
+>(canvas);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+      </P
+><P
+>&#13;        Disposes the Canvas.
+      </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>canvas</CODE
+> 
+            (<TT
+CLASS="literal"
+>PlplotCanvas*</TT
+>, input)</DT
+><DD
+><P
+>The canvas to dispose.</P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+></DIV
+><DIV
+CLASS="sect3"
+><H3
+CLASS="sect3"
+><A
+NAME="plplot_canvas_set_size"
+><CODE
+CLASS="function"
+>plplot_canvas_set_size</CODE
+>: Sets the canvas size.</A
+></H3
+><P
+>&#13;        <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN3205"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;            void plplot_canvas_set_size
+          </CODE
+>(canvas, width, height);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+      </P
+><P
+>&#13;        Sets the PlplotCanvas widget width and height.
+      </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>canvas</CODE
+> 
+            (<TT
+CLASS="literal"
+>PlplotCanvas*</TT
+>, input)</DT
+><DD
+><P
+>The PlplotCanvas to size.</P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>width</CODE
+> (<TT
+CLASS="literal"
+>gint</TT
+>, input)</DT
+><DD
+><P
+>The width, in pixels.</P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>height</CODE
+> (<TT
+CLASS="literal"
+>gint</TT
+>, input)</DT
+><DD
+><P
+>The height, in pixels.</P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+></DIV
+><DIV
+CLASS="sect3"
+><H3
+CLASS="sect3"
+><A
+NAME="plplot_canvas_use_text"
+><CODE
+CLASS="function"
+>plplot_canvas_use_text</CODE
+>: Sets text handling.</A
+></H3
+><P
+>&#13;        <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN3239"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>void plplot_canvas_use_text</CODE
+>(canvas, use_text);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+      </P
+><P
+>&#13;        Sets whether TrueType text or Hershey fonts are used by the
+	PlplotCanvas widget.
+      </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>canvas</CODE
+> 
+            (<TT
+CLASS="literal"
+>PlplotCanvas*</TT
+>, input)</DT
+><DD
+><P
+>The PlplotCanvas to set.</P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>use_text</CODE
+> 
+            (<TT
+CLASS="literal"
+>gboolean</TT
+>, input)</DT
+><DD
+><P
+>&#13;            TRUE for TrueType fonts (default), FALSE for Hershey fonts.
+          </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+></DIV
+><DIV
+CLASS="sect3"
+><H3
+CLASS="sect3"
+><A
+NAME="plplot_canvas_use_pixmap"
+><CODE
+CLASS="function"
+>plplot_canvas_use_pixmap</CODE
+>: Sets pixmap usage.</A
+></H3
+><P
+>&#13;        <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN3265"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>void plplot_canvas_use_pixmap</CODE
+>(canvas, use_pixmap);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+      </P
+><P
+>&#13;        Sets whether lines and shades are drawn to a pixmap,
+        or instead as vector graphics.
+      </P
+><P
+>&#13;        Lines and shade drawn to the pixmap are not anti-aliased, and so may
+        appear pixelated.  Vector graphics are fully anti-aliased, but are
+        rendered at a slower speed.
+      </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>canvas</CODE
+> 
+            (<TT
+CLASS="literal"
+>PlplotCanvas*</TT
+>, input)</DT
+><DD
+><P
+>The PlplotCanvas to set.</P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>use_pixmap</CODE
+> 
+            (<TT
+CLASS="literal"
+>gboolean</TT
+>, input)</DT
+><DD
+><P
+>&#13;            TRUE to use pixmap (default), FALSE for vector graphics instead.
+          </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+></DIV
+><DIV
+CLASS="sect3"
+><H3
+CLASS="sect3"
+><A
+NAME="plplot_canvas_use_persistence"
+><CODE
+CLASS="function"
+>plplot_canvas_use_persistence</CODE
+>: Sets persistence
+        of subsequent drawing operations.</A
+></H3
+><P
+>&#13;        <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN3292"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;            void plplot_canvas_use_persistence
+          </CODE
+>(canvas, use_persistence);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+      </P
+><P
+>&#13;        Sets whether the subsequent drawing commands are persistent,
+	or refreshed when the PLplot page is advanced.  This feature
+	is useful for plot animations, because the axes can be persistent
+	rather than redrawn for each frame.
+      </P
+><P
+>&#13;        Note that lines that are persistent are always anti-aliased and
+        drawn at the front.
+      </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>canvas</CODE
+> 
+            (<TT
+CLASS="literal"
+>PlplotCanvas*</TT
+>, input)</DT
+><DD
+><P
+>The PlplotCanvas to set.</P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>use_persistence</CODE
+> 
+            (<TT
+CLASS="literal"
+>gboolean</TT
+>, input)</DT
+><DD
+><P
+>&#13;            TRUE for persistence, FALSE for erasing at new page (default).
+          </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+></DIV
+><DIV
+CLASS="sect3"
+><H3
+CLASS="sect3"
+><A
+NAME="plplot_canvas_get_stream_number"
+><CODE
+CLASS="function"
+>plplot_canvas_get_stream_number</CODE
+>: Retrieves the
+	PLplot stream number.</A
+></H3
+><P
+>&#13;        <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN3319"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;            PLINT plplot_canvas_get_stream_number
+          </CODE
+>(canvas);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+      </P
+><P
+>&#13;        Returns the stream number for the given Canvas.  Although the 
+	concept of streams that exists in the standard PLplot API is not
+	used here, the stream number provides a unique ID number for
+	the given PlplotCanvas widget.
+      </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>canvas</CODE
+>
+            (<TT
+CLASS="literal"
+>PlplotCanvas*</TT
+>, input)</DT
+><DD
+><P
+>&#13;            The canvas to retrieve the stream number from.
+          </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+></DIV
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="plplotcanvas-examples"
+>PlplotCanvas Examples</A
+></H2
+><P
+>&#13;
+      Two example programs are provided that demonstrate the use of the
+      PlplotCanvas widget.  They are:
+
+      <P
+></P
+><UL
+><LI
+><P
+>&#13;          plplotcanvas_demo: Demonstrates the basic usage of the 
+          PlplotCanvas to embed a plot in a Gnome application.
+        </P
+></LI
+><LI
+><P
+>&#13;          plplotcanvas_animation: Demonstrates advanced multi-threaded 
+          dual-stream usage of the PlplotCanvas.
+        </P
+></LI
+></UL
+>
+    </P
+><P
+>&#13;      The code from plplotcanvas_demo.c is given below, and is explained
+      in what follows.
+    </P
+><TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>&#13;
+#include &#60;plplotcanvas.h&#62;
+#include &#60;gtk/gtk.h&#62;
+
+/* The width and height of the plplot canvas widget */
+#define WIDTH 1000 /* 500 */
+#define HEIGHT 600 /* 300 */
+
+/* Delete event callback */
+gint delete_event( GtkWidget *widget,GdkEvent *event,gpointer data ) {
+  return FALSE;
+}
+
+/* Destroy event calback */
+void destroy(GtkWidget *widget,gpointer data) {
+  gtk_main_quit ();
+}
+
+
+int main(int argc,char *argv[] )
+{
+
+  PlplotCanvas* canvas;
+  GtkWidget *window;
+
+  /* Parse the options */
+  plparseopts(&#38;argc, argv, PL_PARSE_FULL);
+
+  /* The data to plot */
+  double x[11] = {0,1,2,3,4,5,6,7,8,9,10};
+  double y[11] = {0,0.1,0.4,0.9,1.6,2.6,3.6,4.9,6.4,8.1,10};
+
+  /* Initialize gtk and the glib type system */
+  gtk_init(&#38;argc, &#38;argv);
+  g_type_init();
+
+  /* Create the canvas and set its size; during the creation process,
+   * the gcw driver is loaded into plplot, and plinit() is invoked.
+   */
+  canvas=plplot_canvas_new(TRUE);
+  plplot_canvas_set_size(canvas,WIDTH,HEIGHT);
+
+  /* Create a new window and stuff the canvas into it */
+  window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  gtk_container_set_border_width(GTK_CONTAINER(window),10);
+  gtk_container_add(GTK_CONTAINER(window),GTK_WIDGET(canvas));
+
+  /* Connect the signal handlers to the window decorations */
+  g_signal_connect(G_OBJECT(window),"delete_event",
+		   G_CALLBACK(delete_event),NULL);
+  g_signal_connect(G_OBJECT(window),"destroy",G_CALLBACK(destroy),NULL);
+
+  /* Display everything */
+  gtk_widget_show_all(window);
+
+  /* Draw on the canvas with Plplot */
+  plplot_canvas_pladv(canvas,0); /* Advance to first page */
+  plplot_canvas_plcol0(canvas,15); /* Set color to black */
+  plplot_canvas_plwid(canvas,2); /* Set the pen width */
+  plplot_canvas_plvsta(canvas); /* Set the viewport */
+  plplot_canvas_plwind(canvas,0.,10.,0.,10.); /* Set the window */
+  plplot_canvas_plbox(canvas,"bcnst",0.,0,"bcnstv",0.,0); /* Set the box */
+  plplot_canvas_pllab(canvas,"x-axis","y-axis","A Simple Plot"); /* Draw some labels */
+
+  /* Draw the line */
+  plplot_canvas_plcol0(canvas,1); /* Set the pen color */
+  plplot_canvas_plline(canvas,11,x,y);
+
+  /* Advancing the page finalizes this plot */
+  plplot_canvas_pladv(canvas,0);
+
+  /* Start the gtk main loop */
+  gtk_main();
+}
+</PRE
+></TD
+></TR
+></TABLE
+><P
+>&#13;      So, what's going on here?  After the preliminaries, the GTK and the 
+      GLib type system are initialized by calls to 
+      <CODE
+CLASS="function"
+>gtk_init</CODE
+> and <CODE
+CLASS="function"
+>g_type_init</CODE
+>.  
+      A PlplotCanvas is created using 
+      <CODE
+CLASS="function"
+>plplot_canvas_new</CODE
+>, and it's size is set using 
+      <CODE
+CLASS="function"
+>plplot_canvas_set_size</CODE
+>.  
+    </P
+><P
+>&#13;      Next, a window is created (<CODE
+CLASS="function"
+>gtk_window_new</CODE
+>), 
+      the border is set (<CODE
+CLASS="function"
+>gtk_set_border_width</CODE
+>), 
+      and the canvas is stuffed into the window 
+      (<CODE
+CLASS="function"
+>gtk_container_add</CODE
+>).  
+    </P
+><P
+>&#13;      Callback functions are installed using 
+      <CODE
+CLASS="function"
+>g_signal_connect</CODE
+> so that the window 
+      decorations respond. The window is set to display everything using
+      <CODE
+CLASS="function"
+>gtk_widget_show_all</CODE
+>.
+    </P
+><P
+>&#13;      Now come the PLplot analogue commands.  First, the page using is
+      advanced using <CODE
+CLASS="function"
+>plplot_canvas_pladv</CODE
+>.  The pen 
+      color and width are set with <CODE
+CLASS="function"
+>plplot_canvas_plcol0</CODE
+> 
+      and <CODE
+CLASS="function"
+>plplot_canvas_plwid</CODE
+>,respectively.  The PLplot
+      viewport, window, box and labels are created using 
+      <CODE
+CLASS="function"
+>plplot_canvas_plvpor</CODE
+>, 
+      <CODE
+CLASS="function"
+>plplot_canvas_plwind</CODE
+>, 
+      <CODE
+CLASS="function"
+>plplot_canvas_plbox</CODE
+> and 
+      <CODE
+CLASS="function"
+>plplot_canvas_pllab</CODE
+>, respectively.  A line is 
+      drawn on the canvas using <CODE
+CLASS="function"
+>plplot_canvas_plline</CODE
+>, 
+      the page is advanced with <CODE
+CLASS="function"
+>plplot_canvas_pladv</CODE
+>.
+    </P
+><P
+>&#13;      Finally, the GTK main loop is entered using 
+      <CODE
+CLASS="function"
+>gtk_main</CODE
+>, where it resides until the program
+      is exited.
+    </P
+></DIV
+></DIV
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="custom-extensions-tcl.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="perl.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Custom Extensions to Tcl</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="p2493.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Using PLplot from Perl</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

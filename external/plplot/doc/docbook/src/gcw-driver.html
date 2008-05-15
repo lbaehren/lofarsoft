@@ -1,0 +1,488 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>The GCW Driver (Gnome 2)</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The PLplot Display Driver Family"
+HREF="x-drivers.html"><LINK
+REL="PREVIOUS"
+TITLE="The PLplot Display Driver Family"
+HREF="x-drivers.html"><LINK
+REL="NEXT"
+TITLE="The Tk Driver"
+HREF="tk-driver.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="x-drivers.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 5. The PLplot Display Driver Family</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="tk-driver.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="gcw-driver"
+>The GCW Driver (Gnome 2)</A
+></H1
+><P
+> 
+    The GCW driver draws plots into a tabbed Gnome window.  The driver's
+    features and user interface are described in 
+    <A
+HREF="gcw-driver.html#gcw-driver-basics"
+>the Section called <I
+>GCW Driver Basics</I
+></A
+>.  A specialized API allows 
+    interaction with the driver, and this is described in 
+    <A
+HREF="gcw-driver.html#gcw-driver-api"
+>the Section called <I
+>GCW Driver API</I
+></A
+>.
+  </P
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="gcw-driver-basics"
+>GCW Driver Basics</A
+></H2
+><P
+>&#13;      The GCW driver plots each page into an individual tab within
+      a Gnome window.  The user interface built into the window allows 
+      a variety of actions.  In particular, pages can be saved to files
+      with extensions .ps, .psc, .png, .jpg, and .gif, which correspond 
+      to PLplot output driver devices described in 
+      <A
+HREF="output-drivers.html"
+>Chapter 6</A
+>.
+    </P
+><P
+>&#13;      The GCW driver supports anti-aliasing and is unicode enabled.
+    </P
+><P
+>&#13;      There are a variety of hot keys that may be used in the user interface:
+      <P
+></P
+><UL
+><LI
+><P
+>Arrows : Change page</P
+></LI
+><LI
+><P
+>+ : Zooms in</P
+></LI
+><LI
+><P
+>- : Zooms out</P
+></LI
+><LI
+><P
+>= : Zooms to 100%</P
+></LI
+><LI
+><P
+>q : Quits</P
+></LI
+></UL
+>
+    </P
+><P
+>&#13;      The available driver options (used with the
+      <CODE
+CLASS="parameter"
+>-drvopt</CODE
+> command-line argument) are:
+      <P
+></P
+><UL
+><LI
+><P
+>&#13;          text: Use TrueType fonts (0|1); default 1
+	</P
+></LI
+><LI
+><P
+>&#13;	  pixmap: Use pixmap for plotting lines and shades (0|1); 
+	  default 1
+	</P
+></LI
+><LI
+><P
+>&#13;	  hrshsym: Use Hershey symbol set (0|1); default 0
+	</P
+></LI
+></UL
+>
+    </P
+><P
+>&#13;      The <CODE
+CLASS="parameter"
+>text</CODE
+> option toggles between TrueType and
+      Hershey fonts.  The Hershey fonts provide a reference implementation
+      for text representation in PLplot.
+    </P
+><P
+>&#13;      The <CODE
+CLASS="parameter"
+>hrshsym</CODE
+> option is used to indicate that
+      symbols should be drawn using the Hershey fonts.  This is
+      useful when plots need to be saved to PostScript files, because
+      the Type I fonts used by the PS and PSC devices do not support all
+      Unicode symbols.
+    </P
+><P
+>&#13;      Most of the command-line arguments described in
+      <A
+HREF="advanced.html#arguments"
+>the Section called <I
+>Command Line Arguments</I
+> in Chapter 3</A
+> are also supported.  Some key arguments
+      for use with the GCW driver are:
+      <P
+></P
+><UL
+><LI
+><P
+>&#13;	  geometry geom:  Sets page size, in pixels (e.g. -geometry 400x300)
+	</P
+></LI
+><LI
+><P
+>&#13;	  nopixmap: Disables pixmap usage for plotting lines and shades
+	</P
+></LI
+><LI
+><P
+>&#13;	  portrait: Sets portrait mode (both orientation and aspect ratio)
+	</P
+></LI
+></UL
+>
+    </P
+><P
+>&#13;      The <CODE
+CLASS="parameter"
+>nopixmap</CODE
+> option disables the use of
+      the internal pixmap for drawing lines and shades, which will 
+      normally appear somewhat pixelated.  The 
+      <CODE
+CLASS="parameter"
+>nopixmap</CODE
+> option directs the driver to use 
+      anti-aliased vector graphics instead, resulting in higher quality
+      plots but rendered at a slower speed.  This option does not affect 
+      the quality of plots saved from the GCW user interface.  Note that
+      the TrueType fonts are always anti-aliased.
+    </P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="gcw-driver-api"
+>GCW Driver API</A
+></H2
+><P
+>&#13;      The GCW driver provides an additional API that allows for a higher
+      degree of control by the user.  The C API is described below, and
+      bindings to other languages are described in
+      *** NEEDS DOCUMENTATION ***.
+    </P
+><P
+>&#13;      The function prototypes are defined in <TT
+CLASS="filename"
+>gcw.h</TT
+>.
+      Programs that need access to this API must be linked against the 
+      libplplotgnome2d library rather than libplplotd.  This is most easily 
+      accomplished using pkg-config; i.e.,
+
+      <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>&#13;        gcc x01c.c -o x01c `pkg-config --cflags --libs plplotd-gnome2`
+      </PRE
+></TD
+></TR
+></TABLE
+>
+
+      You may need to remind pkg-config where to look for the 
+      plplotd-gnome2 file installed by PLplot; e.g.,
+
+      <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>&#13;        gcc x01c.c -o x01c `PKG_CONFIG_PATH=/usr/local/lib/pkgconfig pkg-config --cflags --libs plplotd-gnome2`
+      </PRE
+></TD
+></TR
+></TABLE
+>
+    </P
+><DIV
+CLASS="sect3"
+><H3
+CLASS="sect3"
+><A
+NAME="gcw_use_text"
+><CODE
+CLASS="function"
+>gcw_use_text</CODE
+>: Sets font usage.</A
+></H3
+><P
+>&#13;        <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN2368"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>void gcw_use_text</CODE
+>(use_text);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+      </P
+><P
+>&#13;        Sets whether TrueType text or Hershey fonts are used.
+      </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>use_text</CODE
+> (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;            1 for TrueType fonts (default), 0 for Hershey fonts.
+          </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+></DIV
+><DIV
+CLASS="sect3"
+><H3
+CLASS="sect3"
+><A
+NAME="gcw_use_pixmap"
+><CODE
+CLASS="function"
+>gcw_use_pixmap</CODE
+>Sets pixmap usage.</A
+></H3
+><P
+>&#13;        <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN2386"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>void gcw_use_pixmap</CODE
+>(use_pixmap);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+      </P
+><P
+>&#13;        Sets whether lines and shades are drawn to a pixmap,
+        or instead as vector graphics.
+      </P
+><P
+>&#13;        Lines and shade drawn to the pixmap may appear pixelated.
+        Vector graphics are fully anti-aliased, but are rendered at a 
+        slower speed.
+      </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>use_pixmap</CODE
+> 
+            (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;            1 to use pixmap (default), 0 for vector graphics instead.
+          </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+></DIV
+></DIV
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="x-drivers.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="tk-driver.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>The PLplot Display Driver Family</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="x-drivers.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>The Tk Driver</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

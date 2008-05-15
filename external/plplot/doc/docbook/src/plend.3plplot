@@ -1,0 +1,21 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLEND 3plplot  "February, 2008" "" "PLplot API"
+.SH NAME
+\fBplend\fP - End plotting session 
+.SH SYNOPSIS
+\fBplend\fP()
+.SH DESCRIPTION
+
+.P
+Ends a plotting session, tidies up all the output files, switches interactive devices back into text mode and frees up any memory that was allocated.  Must be called before end of program. 
+.P
+Redacted form: \fBplend()\fP
+.P
+This function is used in all of the examples. 
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

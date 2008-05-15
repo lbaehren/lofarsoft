@@ -1,0 +1,337 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      plscmap1la: Set color map1 colors using a
+      piece-wise linear relationship
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plscmap1l: Set color map1 colors using a
+piece-wise linear relationship
+    "
+HREF="plscmap1l.html"><LINK
+REL="NEXT"
+TITLE="
+      plscmap1n: Set number of colors in color map1
+    "
+HREF="plscmap1n.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plscmap1l.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plscmap1n.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plscmap1la"
+><CODE
+CLASS="function"
+>plscmap1la</CODE
+>: Set color map1 colors using a
+      piece-wise linear relationship</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN8801"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;           plscmap1l
+        </CODE
+>(itype, npts, pos, coord1, coord2, coord3, coord4, rev);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+> This the alpha value supporting version of plscmap1l. It sets color 
+    map1 colors using a piece-wise linear relationship between position in the 
+    color map (from 0 to 1) and position in HLS or RGB color space 
+    (see <A
+HREF="color.html#color-map-1"
+>the Section called <I
+>Color Map1</I
+> in Chapter 3</A
+>) with alpha value (0.0 - 1.0). It may be 
+    called at any time. </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>itype</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLBOOL</TT
+>, input)</DT
+><DD
+><P
+>&#13;            true: RGB, false: HLS.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>npts</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;            number of control points
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>pos</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;            position for each control point (between 0.0 and 1.0, in
+            ascending order)
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>coord1</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;            first coordinate (H or R) for each control point
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>coord2</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;            second coordinate (L or G) for each control point
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>coord3</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;            third coordinate (S or B) for each control point
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>coord4</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;            fourth coordinate, the alpha value for each control point
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>rev</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLBOOL: *</TT
+>, input)</DT
+><DD
+><P
+>&#13;            reverse flag for each control point. (<TT
+CLASS="literal"
+>rev[i]</TT
+> 
+	    refers
+	    to the interpolation interval between the <TT
+CLASS="literal"
+>i</TT
+> and
+	    <TT
+CLASS="literal"
+>i + 1</TT
+> control points).
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      This function is used in example 30.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plscmap1l.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plscmap1n.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plscmap1l</CODE
+>: Set color map1 colors using a
+piece-wise linear relationship</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plscmap1n</CODE
+>: Set number of colors in color map1</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

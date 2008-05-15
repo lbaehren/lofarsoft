@@ -1,0 +1,77 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLSHADES 3plplot  "February, 2008" "" "PLplot API"
+.SH NAME
+\fBplshades\fP - Shade regions on the basis of value 
+.SH SYNOPSIS
+\fBplshades\fP(\fIa\fP, \fInx\fP, \fIny\fP, \fIdefined\fP, \fIxmin\fP, \fIxmax\fP, \fIymin\fP, \fIymax\fP, \fIclevel\fP, \fInlevel\fP, \fIfill_width\fP, \fIcont_color\fP, \fIcont_width\fP, \fIfill\fP, \fIrectangular\fP, \fIpltr\fP, \fIpltr_data\fP)
+.SH DESCRIPTION
+
+.P
+Shade regions on the basis of value.  This is the high-level routine for making continuous color shaded plots with cmap1 while \fBplshade\fP(3plplot) (or \fBplshade1\fP(3plplot)) are used for individual shaded regions using either cmap0 or cmap1. examples/c/x16c.c shows a number of examples for using this function. See the following discussion of the arguments and the PLplot documentation for more information.    
+.P
+Redacted form:  General: \fBplshades(a, defined, xmin, xmax, ymin, ymax, clevel, fill_width, cont_color, cont_width, fill, rectangular, pltr, pltr_data)\fP
+Perl/PDL: \fBplshades(a, xmin, xmax, ymin, ymax, clevel, fill_width, cont_color, cont_width, fill, rectangular, defined, pltr, pltr_data)\fP
+
+.P
+This function is used in examples 16,21. 
+.SH ARGUMENTS
+.TP
+\fIa\fP (PLFLT **, input) 
+Contains ** pointer to array to be plotted. The array must have been declared as PLFLT a[nx][ny]. 
+.TP
+\fInx\fP (PLINT, input) 
+First dimension of array "a". 
+.TP
+\fIny\fP (PLINT, input) 
+Second dimension of array "a". 
+.TP
+\fIdefined\fP (PLINT (*) (PLFLT, PLFLT), input) 
+User function specifying regions excluded from the shading plot.  This function accepts x and y coordinates as input arguments and must return 0 if the point is in the excluded region or 1 otherwise. This argument can be NULL if all the values are valid. 
+.TP
+\fIxmin\fP (PLFLT, input) 
+Defines the "grid" coordinates.  The data a[0][0] has a position of (xmin,ymin), a[nx-1][0] has a position at (xmax,ymin) and so on.
+(xmax,ymin) 
+.TP
+\fIxmax\fP (PLFLT, input) 
+Defines the "grid" coordinates.  The data a[0][0] has a position of (xmin,ymin), a[nx-1][0] has a position at (xmax,ymin) and so on. 
+.TP
+\fIymin\fP (PLFLT, input) 
+Defines the "grid" coordinates.  The data a[0][0] has a position of (xmin,ymin), a[nx-1][0] has a position at (xmax,ymin) and so on. 
+.TP
+\fIymax\fP (PLFLT, input) 
+Defines the "grid" coordinates.  The data a[0][0] has a position of (xmin,ymin), a[nx-1][0] has a position at (xmax,ymin) and so on. 
+.TP
+\fIclevel\fP (PLFLT *, input) 
+Pointer to array containing the data levels corresponding to the edges of each shaded region that will be plotted by this function.  To work properly the levels should be monotonic. 
+.TP
+\fInlevel\fP (PLINT, input) 
+Number of shades plus 1 (i.e., the number of shade edge values in \fIclevel\fP). 
+.TP
+\fIfill_width\fP (PLINT, input) 
+Defines width used by the fill pattern. 
+.TP
+\fIcont_color\fP (PLINT, input) 
+Defines pen color used for contours defining edges of shaded regions.  The pen color is only temporary set for the contour drawing.  Set this value to zero or less if no shade edge contours are wanted. 
+.TP
+\fIcont_width\fP (PLINT, input) 
+Defines pen width used for contours defining edges of shaded regions.  This value may not be honored by all drivers. The pen width is only temporary set for the contour drawing.  Set this value to zero or less if no shade edge contours are wanted. 
+.TP
+\fIfill\fP (void (*) (PLINT, PLFLT *, PLFLT *), input) 
+Routine used to fill the region.  Use \fBplfill\fP(3plplot).  Future version of PLplot may have other fill routines. 
+.TP
+\fIrectangular\fP (PLBOOL, input) 
+Set \fIrectangular\fP to true if rectangles map to rectangles after coordinate transformation with \fIpltrl\fP.  Otherwise, set \fIrectangular\fP to false. If \fIrectangular\fP is set to true, plshade tries to save time by filling large rectangles.  This optimization fails if the coordinate transformation distorts the shape of rectangles. For example a plot in polar coordinates has to have  \fIrectangular\fP set to false. 
+.TP
+\fIpltr\fP (void (*) (PLFLT, PLFLT, PLFLT *, PLFLT *, PLPointer) , input) 
+Pointer to function that defines transformation between indices in array \fIz\fP and the world coordinates (C only).  Transformation functions are provided in the PLplot library: \fBpltr0\fP(3plplot) for identity mapping, and \fBpltr1\fP(3plplot) and \fBpltr2\fP(3plplot) for arbitrary mappings respectively defined by one- and two-dimensional arrays.  In addition, user-supplied routines for the transformation can be used as well.  Examples of all of these approaches are given in the PLplot documentation. The transformation function should have the form given by any of \fBpltr0\fP(3plplot), \fBpltr1\fP(3plplot), or \fBpltr2\fP(3plplot). 
+.TP
+\fIpltr_data\fP (PLPointer, input) 
+Extra parameter to help pass information to \fBpltr0\fP(3plplot), \fBpltr1\fP(3plplot), \fBpltr2\fP(3plplot), or whatever routine that is externally supplied. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

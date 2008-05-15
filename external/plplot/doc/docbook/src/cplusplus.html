@@ -1,0 +1,256 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>A C++ Interface for PLplot</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE=" Language Bindings "
+HREF="p2493.html"><LINK
+REL="PREVIOUS"
+TITLE="Fortran 77 Language"
+HREF="fortran77.html"><LINK
+REL="NEXT"
+TITLE="Design of the PLplot C++ Interface"
+HREF="cpluscplus-design.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="chapter"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="fortran77.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+></TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="cpluscplus-design.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="chapter"
+><H1
+><A
+NAME="cplusplus"
+></A
+>Chapter 10. A C++ Interface for PLplot</H1
+><DIV
+CLASS="TOC"
+><DL
+><DT
+><B
+>Table of Contents</B
+></DT
+><DT
+><A
+HREF="cplusplus.html#cplusplus-motivation"
+>Motivation for the C++ Interface</A
+></DT
+><DT
+><A
+HREF="cpluscplus-design.html"
+>Design of the PLplot C++ Interface</A
+></DT
+><DT
+><A
+HREF="cpluscplus-specializing.html"
+>Specializing the PLplot C++ Interface</A
+></DT
+><DT
+><A
+HREF="cpluscplus-status.html"
+>Status of the C++ Interface</A
+></DT
+></DL
+></DIV
+><P
+>&#13;PLplot has long had C and Fortran bindings, presenting a fairly
+conventional API to the applications programmer.  Recently (1994
+onwards) PLplot has been growing interfaces (language bindings) to a
+variety of other languages.  In this chapter we discuss the PLplot C++
+support provided in the PLplot distribution.  Of course many other
+approaches are possible, perhaps even in use by PLplot users around
+the world.  The purpose of this chapter then is to explain the
+rationale and intended usage for the bundled C++ language support.
+    </P
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="cplusplus-motivation"
+>Motivation for the C++ Interface</A
+></H1
+><P
+>&#13;PLplot has a fairly complex C API.  There are lots of functions, and
+several facilities have multiple entry points with similar names but
+different argument lists.  (Think contouring, shading).  Often these
+differing argument lists are to accommodate a variety of data storage
+paradigms, one of which you are expected to be using!
+    </P
+><P
+>&#13;Especially in the case of the 2-d API's for contouring and shading,
+sophisticated C++ users may feel a special sense of exasperation with
+the data layout prescriptions, since they are extremely primitive,
+pointer rich, and prone to a wide class of memory leaks and other
+sorts of programming errors.  Many C++ users know good and well that
+better ways exist (templated matrix classes, etc), but historically
+have not been able to use these more sophisticated techniques if the
+contained data ever needed to get plotted.
+    </P
+><P
+>&#13;Besides the 2-d API functions, there is also the multiple output
+stream capability of PLplot.  Anyone who knows C++ well, and who has
+used multiple output streams in PLplot, has probably noticed striking
+similarities between the PLplot <TT
+CLASS="literal"
+>PLStream</TT
+> pointer and the C++ 
+<TT
+CLASS="literal"
+>this</TT
+> pointer.  Although multiple output streams have not been 
+widely used in PLplot applications in the past, the availability of
+the plframe Tk widget, and the extended wish concept, is making it
+much more attractive to use multiple output streams.
+    </P
+><P
+>&#13;Unfortunately, if you do write a Tk extended wish application, and
+endow your interface with multiple plframes, the event driven
+character of X applications makes it difficult to ensure that PLplot
+output shows up in the right plframe window.  If a plot is generated
+to one plframe, the PLplot <TT
+CLASS="literal"
+>PLStream</TT
+> pointer is directed to that
+stream.  If a user then pushes a Tk button which should generate a
+plot to a different plframe, the plot goes to the old plframe instead!
+Schemes for controlling this can be imagined, but the logic can be
+complex, especially in the face of the ability to /also/ make plots to
+the same plframe from either Tcl or C++.
+    </P
+><P
+>&#13;Beyond this, the C API is downright "ugly" for a significant number of
+the functions, particularly those which return values by accepting
+pointers to variables in their argument lists, and then changing them
+in that way.  Sophisticated C++ users generally take considerable
+pride in banishing the offensive bare pointer from their code, and
+consider it disgusting to have to insert &#38;'s just in order to make a
+call to an API function.
+    </P
+><P
+>&#13;In order to address these issues (and more), I have begun constructing
+a C++ interface to PLplot.  The purpose of this missive is to describe
+its architecture and usage.
+    </P
+></DIV
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="fortran77.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="cpluscplus-design.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Fortran 77 Language</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="p2493.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Design of the PLplot C++ Interface</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

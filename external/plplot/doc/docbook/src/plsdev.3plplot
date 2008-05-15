@@ -1,0 +1,26 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLSDEV 3plplot  "February, 2008" "" "PLplot API"
+.SH NAME
+\fBplsdev\fP - Set the device (keyword) name 
+.SH SYNOPSIS
+\fBplsdev\fP(\fIdevname\fP)
+.SH DESCRIPTION
+
+.P
+Set the device (keyword) name. 
+.P
+Redacted form: \fBplsdev(devname)\fP
+.P
+This function is used in examples 1,14,20. 
+.SH ARGUMENTS
+.TP
+\fIdevname\fP (const char *, input) 
+Pointer to device (keyword) name string. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

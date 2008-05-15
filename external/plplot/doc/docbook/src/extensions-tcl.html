@@ -1,0 +1,216 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>PLplot Extensions to Tcl</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="Building an Extended WISH"
+HREF="extended-wish.html"><LINK
+REL="PREVIOUS"
+TITLE="Introduction to [incr Tcl]"
+HREF="introduction-itcl.html"><LINK
+REL="NEXT"
+TITLE="Custom Extensions to Tcl"
+HREF="custom-extensions-tcl.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="introduction-itcl.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 12. Building an Extended WISH</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="custom-extensions-tcl.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="extensions-tcl"
+>PLplot Extensions to Tcl</A
+></H1
+><P
+>&#13;      Following the paradigm described above, PLplot provides extensions to
+      Tcl as well, designed to allow the use of PLplot from Tcl/Tk
+      programs.  Essentially the idea here is to allow PLplot programmers
+      to achieve two goals:
+    </P
+><P
+></P
+><UL
+><LI
+><P
+>&#13;	  To access PLplot facilities from their own extended WISH and/or
+	  Tcl/Tk user interface scripts.
+	</P
+></LI
+><LI
+><P
+>&#13;	  To have PLplot display its output in a window integrated
+	  directly into the rest of their Tcl/Tk interface.
+	</P
+></LI
+></UL
+><P
+>&#13;      For instance, prior to PLplot 5.0, if a programmer wanted to use
+      PLplot in a Tcl/Tk application, the best he could manage was to call
+      the PLplot C API from compiled C code, and get the output via the
+      Xwin driver, which would display in it's own toplevel window.  In
+      other words, there was no integration, and the result was pretty
+      sloppy.
+    </P
+><P
+>&#13;      With PLplot 5.0, there is now a supported Tcl interface to PLplot
+      functionality.  This is provided through a <SPAN
+CLASS="QUOTE"
+>"family"</SPAN
+> of
+      PLplot megawidgets implemented in [incr Tcl].  Using this interface,
+      a programmer can get a PLplot window/widget into a Tk interface as
+      easily as:
+    </P
+><P
+>&#13;      <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>&#13;PLWin .plw
+pack .plw</PRE
+></TD
+></TR
+></TABLE
+>
+    </P
+><P
+>&#13;      Actually, there's the update/init business&#8212;need to clear that up.
+    </P
+><P
+>&#13;      The <TT
+CLASS="literal"
+>PLWin</TT
+> class then mirrors much of the PLplot C
+      API, so that a user can generate plots in the PLplot widget entirely
+      from Tcl.  This is demonstrated in the <TT
+CLASS="filename"
+>tk02</TT
+>
+      demo,
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="introduction-itcl.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="custom-extensions-tcl.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Introduction to [incr Tcl]</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="extended-wish.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Custom Extensions to Tcl</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

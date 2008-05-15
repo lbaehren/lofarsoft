@@ -1,0 +1,252 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>Notes for each Operating System that We Support</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE=" Reference "
+HREF="p3385.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plrgb1: Set line color by 8-bit RGB values
+    "
+HREF="plrgb1.html"><LINK
+REL="NEXT"
+TITLE="Windows Notes"
+HREF="windows-notes.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="chapter"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plrgb1.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+></TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="windows-notes.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="chapter"
+><H1
+><A
+NAME="os-notes"
+></A
+>Chapter 23. Notes for each Operating System that We Support</H1
+><DIV
+CLASS="TOC"
+><DL
+><DT
+><B
+>Table of Contents</B
+></DT
+><DT
+><A
+HREF="os-notes.html#linux-unix-notes"
+>Linux/Unix Notes</A
+></DT
+><DT
+><A
+HREF="windows-notes.html"
+>Windows Notes</A
+></DT
+><DT
+><A
+HREF="djgpp-notes.html"
+>DJGPP Notes</A
+></DT
+></DL
+></DIV
+><P
+>&#13;  The purpose of this Chapter is to present notes for each operating system
+  that we support. Currently, those are all operating systems supported by
+  CMake (all forms of Unix including Linux and Mac OS X, and all forms of
+  Windows including MinGW, MinGW/MSYS, Cygwin, and essentially all Windows
+  variants directly supported by Microsoft) as well as the DJGPP operating
+  system (supported by an independent build system since CMake is not
+  available for DJGPP).
+  </P
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="linux-unix-notes"
+>Linux/Unix Notes</A
+></H1
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="AEN13481"
+>Linux/Unix Configure, Build, and Installation</A
+></H2
+><P
+>&#13;    Here is the short story:
+<TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>&#13;# Note many other cmake options are available besides -DCMAKE_INSTALL_PREFIX
+# Inspect CMakeCache.txt after a preliminary cmake run to see an annotated
+# list of the available options.  Then remove CMakeCache.txt and try again.
+cmake -DCMAKE_INSTALL_PREFIX=&#60;install-prefix&#62; \
+&#60;path-to-source-tree&#62; &#62;&#38; cmake.out
+make &#62;&#38; make.out
+#(optional, requires -DBUILD_TEST=ON option for cmake)
+ctest &#62;&#38; ctest.out
+make install &#62;&#38; make_install.out
+cd &#60;install-prefix&#62;/share/plplot&#60;version&#62;/examples/
+make &#62;&#38; make_examples.out
+./plplot-test.sh &#62;&#38; plplot-test.sh.out
+</PRE
+></TD
+></TR
+></TABLE
+>
+    </P
+><P
+>&#13;    The longer (CMake) story is currently documented <A
+HREF="http://www.miscdebris.net/plplot_wiki/index.php?title=Main_Page#Building_PLplot_with_our_new_CBS"
+TARGET="_top"
+>here</A
+>.
+    The eventual plan is to incorporate that material in this documentation,
+    but we haven't done it yet so this section NEEDS DOCUMENTATION.
+    </P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="AEN13487"
+>Linux/Unix Building of C Programmes that Use the 
+    Installed PLplot Libraries</A
+></H2
+><P
+> This is incomplete.  For now follow what is done to build
+    our installed examples (see "make &#62;&#38; make_examples.out above) using
+    pkg-config.  NEEDS DOCUMENTATION.
+    </P
+></DIV
+></DIV
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plrgb1.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="windows-notes.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plrgb1</CODE
+>: Set line color by 8-bit RGB values</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="p3385.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Windows Notes</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

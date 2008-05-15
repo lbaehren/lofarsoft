@@ -1,0 +1,208 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>The LaTeX PostScript Driver</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The PLplot Output Driver Family"
+HREF="output-drivers.html"><LINK
+REL="PREVIOUS"
+TITLE="The TrueType PostScript Driver"
+HREF="truetype-postscript-driver.html"><LINK
+REL="NEXT"
+TITLE="The SVG Driver"
+HREF="svg-driver.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="truetype-postscript-driver.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 6. The PLplot Output Driver Family</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="svg-driver.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="latex-postscript-driver"
+>The LaTeX PostScript Driver</A
+></H1
+><P
+> 
+      This is a PostScript device driver that writes out its results in two
+      files.  (1) The encapsulated postscript (EPS) file contains all the
+      postscript commands for rendering the plot without characters, and (2)
+      the LaTeX file contains a fragment of LaTeX that reads in the EPS file
+      and renders the plot characters using LaTeX commands (and LaTeX
+      fonts!) in alignment with the EPS file to produce a combined result.
+    </P
+><P
+>&#13;      
+      Suppose you create the EPS and LaTeX files with the following command:
+      <KBD
+CLASS="userinput"
+>./x01c -dev pstex -o x01c.eps</KBD
+>.  The EPS file
+      is then stored in <TT
+CLASS="filename"
+>x01c.eps</TT
+> and the LaTeX fragment
+      is stored in <TT
+CLASS="filename"
+>x01c.eps_t</TT
+>.  Then
+      you may use the generated files with the <TT
+CLASS="filename"
+>x01c.tex</TT
+>
+      LaTeX code that follows:
+    </P
+><P
+>&#13;<TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>\documentclass{article}
+\usepackage[dvips]{graphicx}
+\begin{document}
+\input{x01c.eps_t}
+\end{document}
+</PRE
+></TD
+></TR
+></TABLE
+>
+    </P
+><P
+>&#13;    and generate PostScript results using the LaTeX fonts with the following
+    command: <KBD
+CLASS="userinput"
+>latex x01c.tex; dvips -f &#60;x01c.dvi &#62;x01c.ps
+    </KBD
+>.  The results look good (aside from an obvious bounding-box
+    problem that still needs to be fixed with this device) and should be
+    useful for LaTeX enthusiasts.
+    </P
+><P
+>&#13;      There are no available driver options.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="truetype-postscript-driver.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="svg-driver.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>The TrueType PostScript Driver</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="output-drivers.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>The SVG Driver</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

@@ -1,0 +1,32 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLLAB 3plplot  "February, 2008" "" "PLplot API"
+.SH NAME
+\fBpllab\fP - Simple routine to write labels 
+.SH SYNOPSIS
+\fBpllab\fP(\fIxlabel\fP, \fIylabel\fP, \fItlabel\fP)
+.SH DESCRIPTION
+
+.P
+Routine for writing simple labels. Use \fBplmtex\fP(3plplot) for more complex labels. 
+.P
+Redacted form: \fBpllab(xlabel, ylabel, tlabel)\fP
+.P
+This function is used in examples 1,5,9,12,14-16,20-22,29. 
+.SH ARGUMENTS
+.TP
+\fIxlabel\fP (const char *, input) 
+Label for horizontal axis. 
+.TP
+\fIylabel\fP (const char *, input) 
+Label for vertical axis. 
+.TP
+\fItlabel\fP (const char *, input) 
+Title of graph. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

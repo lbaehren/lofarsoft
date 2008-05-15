@@ -1,0 +1,759 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>Contour and Shade Plots</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="Advanced Use of PLplot"
+HREF="advanced.html"><LINK
+REL="PREVIOUS"
+TITLE="Three Dimensional Surface Plots"
+HREF="tri-d-plots.html"><LINK
+REL="NEXT"
+TITLE="Deploying programs that use PLplot"
+HREF="deploying.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="tri-d-plots.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 3. Advanced Use of PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="deploying.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="contour-plots"
+>Contour and Shade Plots</A
+></H1
+><P
+>&#13;      Several routines are available in PLplot which perform a contour or
+      shade plot of data stored in a two-dimensional array.  The contourer
+      uses a contour following algorithm so that it is possible to
+      use non-continuous line styles.  Further, one may specify arbitrary
+      coordinate mappings from array indices to world coordinates, such as
+      for contours in a polar coordinate system.  In this case it is best
+      to draw the distinction between the C,  Fortran 95, and Fortran 77
+      interfaces so these are handled in turn.
+    </P
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="contour-plots-c"
+>Contour Plots from C</A
+></H2
+><P
+>&#13;	<A
+HREF="plcont.html"
+><CODE
+CLASS="function"
+>plcont</CODE
+></A
+> is the routine callable from C for plotting contours.
+	This routine has the form:
+      </P
+><P
+>&#13;	<DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN1925"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	    plcont
+	  </CODE
+>(z, nx, ny, kx, lx, ky, ly, clevel, nlevel, pltr, pltr_data);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+      </P
+><P
+>&#13;	where <TT
+CLASS="literal"
+>z</TT
+> is the two-dimensional array of size
+	<TT
+CLASS="literal"
+>nx</TT
+> by <TT
+CLASS="literal"
+>ny</TT
+> containing samples
+	of the function to be contoured.  (<TT
+CLASS="literal"
+>z</TT
+> is a
+	vectored two-dimensional array as described in the previous
+	section.  It is <SPAN
+CLASS="emphasis"
+><I
+CLASS="emphasis"
+>not</I
+></SPAN
+> a fixed-size
+	two-dimensional array.) The parameters <TT
+CLASS="literal"
+>kx</TT
+>,
+	<TT
+CLASS="literal"
+>lx</TT
+>, <TT
+CLASS="literal"
+>ky</TT
+> and
+	<TT
+CLASS="literal"
+>ly</TT
+> specify the portion of <TT
+CLASS="literal"
+>z</TT
+>
+	that is to be considered.  The array <TT
+CLASS="literal"
+>clevel</TT
+> of
+	length <TT
+CLASS="literal"
+>nlevel</TT
+> is a list of the desired contour
+	levels.
+      </P
+><P
+>&#13;	The path of each contour is initially computed in terms of the
+	values of the array indices which range from <TT
+CLASS="literal"
+>0</TT
+>
+	to <TT
+CLASS="literal"
+>nx-1</TT
+> in the first index and from
+	<TT
+CLASS="literal"
+>0</TT
+> to <TT
+CLASS="literal"
+>ny-1</TT
+> in the second
+	index.  Before these can be drawn in the current window (see <A
+HREF="viewport_window.html#windows"
+>the Section called <I
+>Defining the Window</I
+></A
+>), it is necessary to convert from these array
+	indices into world coordinates.  This is done by passing a pointer
+	<TT
+CLASS="literal"
+>pltr</TT
+> to a user-defined transformation function 
+	to <A
+HREF="plcont.html"
+><CODE
+CLASS="function"
+>plcont</CODE
+></A
+>.  For C use of <A
+HREF="plcont.html"
+><CODE
+CLASS="function"
+>plcont</CODE
+></A
+> (and <A
+HREF="plshade.html"
+><CODE
+CLASS="function"
+>plshade</CODE
+></A
+>, see next subsection) 
+	we have included directly in
+	the PLplot library the following transformation routines:
+	<A
+HREF="pltr0.html"
+><CODE
+CLASS="function"
+>pltr0</CODE
+></A
+> (identity transformation or you can
+	enter a NULL argument to get the same effect); <A
+HREF="pltr1.html"
+><CODE
+CLASS="function"
+>pltr1</CODE
+></A
+>
+	(linear interpolation in singly dimensioned coordinate arrays);
+	and  <A
+HREF="pltr2.html"
+><CODE
+CLASS="function"
+>pltr2</CODE
+></A
+> (linear interpolation in doubly dimensioned coordinate
+	arrays).  Examples of the use of these transformation 
+	routines are given in <TT
+CLASS="filename"
+>examples/c/x09c.c</TT
+>,
+	<TT
+CLASS="filename"
+>examples/c/x14c.c</TT
+>, and
+	<TT
+CLASS="filename"
+>examples/c/x16c.c</TT
+>.  These same three examples
+	also demonstrate a user-defined transformation function 
+	<TT
+CLASS="literal"
+>mypltr</TT
+> which is capable of 
+	arbitrary translation, rotation, and/or shear. By defining other
+	transformation subroutines, it is possible to draw contours wrapped
+	around polar grids etc.
+      </P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="shade-plots-c"
+>Shade Plots from C</A
+></H2
+><P
+>&#13;        NEEDS DOCUMENTATION.  Follow the plshade and plshades usage in
+        <TT
+CLASS="filename"
+>examples/c/x??c.c</TT
+>.
+      </P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="contour-plots-f95"
+>Contour Plots from the Fortran 95 interface</A
+></H2
+><P
+>&#13;        NEEDS DOCUMENTATION.  Follow the plcont usage (with a variety
+	of overloaded forms available with different arguments) in 
+	<TT
+CLASS="filename"
+>examples/f95/x??f.f90</TT
+>.
+      </P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="shade-plots-f95"
+>Shade Plots from the Fortran 95 interface</A
+></H2
+><P
+>&#13;        NEEDS DOCUMENTATION.  Follow the plshade and plshades usage 
+	(with a variety
+        of overloaded forms available with different arguments) in
+        <TT
+CLASS="filename"
+>examples/f95/x??f.f90</TT
+>.
+      </P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="contour-plots-f77"
+>Contour Plots from the Fortran 77 interface</A
+></H2
+><P
+>&#13;	The routines mentioned above are not recommended for use directly
+	from Fortran 77 due to the need to pass a function pointer.  That is,
+	the transformation function is written in C and can not generally
+	be changed by the user.  The call for routine <A
+HREF="plcontfortran77.html"
+><CODE
+CLASS="function"
+>plcontfortran77</CODE
+></A
+> from
+	Fortran 77 is then:
+      </P
+><P
+>&#13;	<DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN2005"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	    call plcont
+	  </CODE
+>(z, nx, ny, kx, lx, ky, ly, clevel, nlevel);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+      </P
+><P
+>&#13;When called from Fortran 77, this routine has the same effect as when invoked
+from C.  The interpretation of all parameters (see <A
+HREF="plcont.html"
+><CODE
+CLASS="function"
+>plcont</CODE
+></A
+>) is also the
+same except there is no transformation function supplied as the last
+parameter.  Instead, a 6-element array specifying coefficients to use in the
+transformation is supplied via the named common block
+<TT
+CLASS="literal"
+>plplot</TT
+> (see code).
+Since this approach is somewhat
+inflexible, the user is recommended to call either of <A
+HREF="api-fortran-77.html#plcon0"
+><CODE
+CLASS="function"
+>plcon0</CODE
+></A
+>, <A
+HREF="plcon1.html"
+><CODE
+CLASS="function"
+>plcon1</CODE
+></A
+>, or
+<A
+HREF="plcon2.html"
+><CODE
+CLASS="function"
+>plcon2</CODE
+></A
+> instead for Fortran 77.
+      </P
+><P
+>&#13;	The three routines recommended for use from Fortran 77 are <A
+HREF="api-fortran-77.html#plcon0"
+><CODE
+CLASS="function"
+>plcon0</CODE
+></A
+>,
+	<A
+HREF="plcon1.html"
+><CODE
+CLASS="function"
+>plcon1</CODE
+></A
+>, and <A
+HREF="plcon2.html"
+><CODE
+CLASS="function"
+>plcon2</CODE
+></A
+>.  These routines are similar to existing
+	commercial plot package contour plotters in that they offer
+	successively higher complexity, with <A
+HREF="api-fortran-77.html#plcon0"
+><CODE
+CLASS="function"
+>plcon0</CODE
+></A
+> utilizing no
+	transformation arrays, while those used by <A
+HREF="plcon1.html"
+><CODE
+CLASS="function"
+>plcon1</CODE
+></A
+> and <A
+HREF="plcon2.html"
+><CODE
+CLASS="function"
+>plcon2</CODE
+></A
+>
+	are one and two dimensional, respectively.  The call syntax for
+	each is
+      </P
+><P
+>&#13;	<DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN2051"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	    call plcon0
+	  </CODE
+>(z, nx, ny, kx, lx, ky, ly, clevel, nlevel);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+	
+	<DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN2073"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	    call plcon1
+	  </CODE
+>(z, nx, ny, kx, lx, ky, ly, clevel, nlevel, xg1, yg1);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+	
+	<DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN2099"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	    call plcon2
+	  </CODE
+>(z, nx, ny, kx, lx, ky, ly, clevel, nlevel, xg2, yg2);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+      </P
+><P
+>&#13;	The <A
+HREF="api-fortran-77.html#plcon0"
+><CODE
+CLASS="function"
+>plcon0</CODE
+></A
+> routine is implemented via a call to <A
+HREF="plcont.html"
+><CODE
+CLASS="function"
+>plcont</CODE
+></A
+> with a
+	very simple (identity) transformation function, while <A
+HREF="plcon1.html"
+><CODE
+CLASS="function"
+>plcon1</CODE
+></A
+> and
+	<A
+HREF="plcon2.html"
+><CODE
+CLASS="function"
+>plcon2</CODE
+></A
+> use interpolating transformation functions as well as
+	a call to
+	<A
+HREF="plcont.html"
+><CODE
+CLASS="function"
+>plcont</CODE
+></A
+>.
+      </P
+><P
+>&#13;	The transformation arrays are used by these routines to specify a
+	mapping between the computational coordinate system and the
+	physical one.  For example, the transformation to polar coordinates
+	might look like:
+      </P
+><P
+>&#13;	<TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>    do i = 1, NX
+        do j = 1, NY
+            xg(i, j) = r(i) * cos( theta(j) )
+            yg(i, j) = r(i) * sin( theta(j) )
+        enddo
+    enddo</PRE
+></TD
+></TR
+></TABLE
+>
+      </P
+><P
+>&#13;	assuming the user had already set up arrays <TT
+CLASS="literal"
+>r</TT
+>
+	and <TT
+CLASS="literal"
+>theta</TT
+> to specify the (r, &#952;) values at
+	the gridpoints in his system.  For this example, it is recommended
+	that the user add an additional cell in theta such that
+	<TT
+CLASS="literal"
+>xg(i, NY+1) = xg(i, 1)</TT
+> and <TT
+CLASS="literal"
+>yg(i, NY+1)
+	= yg(i, 1)</TT
+> so that the contours show the proper periodic
+	behavior in &#952; (see also example program 9).
+      </P
+><P
+>&#13;	The transformation function not only specifies the transformation
+	at grid points, but also at intermediate locations, via linear
+	interpolation.  For example, in the <TT
+CLASS="literal"
+>pltr1</TT
+>
+	transformation function used by <A
+HREF="plcon1.html"
+><CODE
+CLASS="function"
+>plcon1</CODE
+></A
+>, the 1-d interpolation to
+	get <TT
+CLASS="literal"
+>tx</TT
+> as a function of <TT
+CLASS="literal"
+>x</TT
+>
+	looks like (in C):
+      </P
+><P
+>&#13;	<TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>    ul = (PLINT)x;
+    ur = ul + 1;
+    du = x - ul;
+
+    xl = *(xg+ul);
+    xr = *(xg+ur);
+
+    *tx = xl * (1-du)  +  xr * du;</PRE
+></TD
+></TR
+></TABLE
+>
+      </P
+><P
+>&#13;	while in Fortran 77 this might look like:
+      </P
+><P
+>&#13;	<TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>    lxl = x
+    lxr = lxl + 1
+    dx = x - lxl
+
+    xl = xg(lxl)
+    xr = xg(lxr)
+
+    tx = xl * (1-dx)  +  xr * dx</PRE
+></TD
+></TR
+></TABLE
+>
+      </P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="shade-plots-f77"
+>Shade Plots from the Fortran 77 interface</A
+></H2
+><P
+>&#13;        NEEDS DOCUMENTATION. Follow the plshade* and plshades* usage in
+        <TT
+CLASS="filename"
+>examples/f77/x??f.f</TT
+>.
+      </P
+></DIV
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="tri-d-plots.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="deploying.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Three Dimensional Surface Plots</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="advanced.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Deploying programs that use PLplot</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

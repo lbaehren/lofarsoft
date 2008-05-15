@@ -1,0 +1,37 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLERRY 3plplot  "February, 2008" "" "PLplot API"
+.SH NAME
+\fBplerry\fP - Draw y error bar 
+.SH SYNOPSIS
+\fBplerry\fP(\fIn\fP, \fIx\fP, \fIymin\fP, \fIymax\fP)
+.SH DESCRIPTION
+
+.P
+Draws a set of \fIn\fP vertical error bars, the i'th error bar extending from \fIymin\fP[i] to \fIymax\fP[i] at x coordinate \fIx\fP[i].  The terminals of the error bar are of length equal to the minor tick length (settable using \fBplsmin\fP(3plplot)). 
+.P
+Redacted form:  General: \fBplerry(x, ymin, ymax)\fP
+Perl/PDL: \fBplerry(n, x, ymin, ymax)\fP
+
+.P
+This function is not used in any examples. 
+.SH ARGUMENTS
+.TP
+\fIn\fP (PLINT, input) 
+Number of error bars to draw. 
+.TP
+\fIx\fP (PLFLT *, input) 
+Pointer to array with x coordinates of error bars. 
+.TP
+\fIymin\fP (PLFLT *, input) 
+Pointer to array with y coordinates of lower endpoint of error bars. 
+.TP
+\fIymax\fP (PLFLT *, input) 
+Pointer to array with y coordinate of upper endpoint of error bar. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

@@ -1,0 +1,38 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLPOIN3 3plplot  "February, 2008" "" "PLplot API"
+.SH NAME
+\fBplpoin3\fP -  Plots a character at the specified points in 3 space 
+.SH SYNOPSIS
+\fBplpoin3\fP(\fIn\fP, \fIx\fP, \fIy\fP, \fIz\fP, \fIcode\fP)
+.SH DESCRIPTION
+
+.P
+Marks a set of \fIn\fP points in \fIx\fP, \fIy\fP, and \fIz\fP using the symbol defined by \fIcode\fP. If \fIcode\fP is between 32 and 127, the symbol is simply the corresponding printable ASCII character in the default font. Setup similar to \fBplline3\fP(3plplot). 
+.P
+Redacted form: \fBplpoin3(x, y, z, code)\fP
+.P
+This function is used in example 18. 
+.SH ARGUMENTS
+.TP
+\fIn\fP (PLINT, input) 
+Number of points to be marked. 
+.TP
+\fIx\fP (PLFLT *, input) 
+Pointer to array with x coordinates of the points. 
+.TP
+\fIy\fP (PLFLT *, input) 
+Pointer to array with y coordinates of the points. 
+.TP
+\fIz\fP (PLFLT *, input) 
+Pointer to array with z coordinates of the points. 
+.TP
+\fIcode\fP (PLINT, input) 
+Code number for the symbol to be plotted. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

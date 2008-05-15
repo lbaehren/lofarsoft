@@ -1,0 +1,523 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      plshade:  Shade individual region on the basis of value
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plshades: Shade regions on the basis of value
+    "
+HREF="plshades.html"><LINK
+REL="NEXT"
+TITLE="
+      plshade1: Shade individual region on the basis of value
+    "
+HREF="plshade1.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plshades.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plshade1.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plshade"
+><CODE
+CLASS="function"
+>plshade</CODE
+>:  Shade individual region on the basis of value</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN9780"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;           plshade
+        </CODE
+>(a, nx, ny, defined, xmin, xmax, ymin, ymax, shade_min, shade_max, sh_cmap, sh_color, sh_width, min_color, min_width, max_color, max_width, fill, rectangular, pltr, pltr_data);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;      Shade individual region on the basis of value.  Use <A
+HREF="plshades.html"
+><CODE
+CLASS="function"
+>plshades</CODE
+></A
+> if you want to
+      shade a number of regions using continuous colors.
+      <A
+HREF="plshade.html"
+><CODE
+CLASS="function"
+>plshade</CODE
+></A
+> is identical to <A
+HREF="plshade1.html"
+><CODE
+CLASS="function"
+>plshade1</CODE
+></A
+>
+      except for the type of the first parameter.
+      See <A
+HREF="plshade1.html"
+><CODE
+CLASS="function"
+>plshade1</CODE
+></A
+> for further discussion.
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>a</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT **</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>nx</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>ny</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>defined</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT (*) (PLFLT, PLFLT)</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>xmin</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>xmax</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>ymin</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>ymax</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>shade_min</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>shade_max</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>sh_cmap</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>sh_color</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>sh_width</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>min_color</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>min_width</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>max_color</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>max_width</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>fill</CODE
+>
+	  (<TT
+CLASS="literal"
+>void (*) (PLINT, PLFLT *, PLFLT *)</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>rectangular</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLBOOL</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>pltr</CODE
+>
+	  (<TT
+CLASS="literal"
+>void (*) (PLFLT, PLFLT, PLFLT *, PLFLT *, PLPointer)
+           </TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>pltr_data</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLPointer</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      Redacted form: 
+      <P
+></P
+><UL
+><LI
+><P
+>&#13;	  General: <CODE
+CLASS="function"
+>plshade(a, defined, xmin, xmax, ymin, ymax, shade_min, shade_max, sh_cmap, sh_color, sh_width, min_color, min_width, max_color, max_width, fill, rectangular, pltr, pltr_data)</CODE
+>
+          </P
+></LI
+><LI
+><P
+>&#13;	  Perl/PDL: Not available?
+          </P
+></LI
+></UL
+>
+    </P
+><P
+>&#13;      This function is used in example 15.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plshades.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plshade1.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plshades</CODE
+>: Shade regions on the basis of value</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plshade1</CODE
+>: Shade individual region on the basis of value</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

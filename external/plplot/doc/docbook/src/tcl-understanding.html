@@ -1,0 +1,226 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>Understanding the Performance Characteristics of Tcl</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="Using PLplot from Tcl"
+HREF="tcl.html"><LINK
+REL="PREVIOUS"
+TITLE="Contouring and Shading from Tcl"
+HREF="tcl-contouring.html"><LINK
+REL="NEXT"
+TITLE="Building an Extended WISH"
+HREF="extended-wish.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="tcl-contouring.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 11. Using PLplot from Tcl</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="extended-wish.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="tcl-understanding"
+>Understanding the Performance Characteristics of Tcl</A
+></H1
+><P
+>&#13;Newcomers to Tcl, and detractors (read, <SPAN
+CLASS="QUOTE"
+>"proponents of other
+paradigms"</SPAN
+>) often do not have a clear (newcomers) or truthful
+(detractors) perspective on Tcl performance.  In this section we try
+to convey a little orientation which may be helpful in working with
+the PLplot Tcl interface.
+</P
+><P
+>&#13;<SPAN
+CLASS="QUOTE"
+>"Tcl is slow!"</SPAN
+>  <SPAN
+CLASS="QUOTE"
+>"Yeah, so what?"</SPAN
+>
+</P
+><P
+>&#13;Debates of this form frequently completely miss the point.  Yes, Tcl
+is definitely slow.  It is fundamentally a string processing language,
+is interpreted, and must perform substitutions and so forth on a
+continual basis.  All of that takes time.  Think milliseconds instead
+of microseconds for comparing Tcl code to equivalent C code.  On the
+other hand, this does not have to be problematic, even for time
+critical (interactive) applications, if the division of labor is done
+correctly.  Even in an interactive program, you can use Tcl fairly
+extensively for high level control type operations, as long as you do
+the real work in a compiled Tcl command procedure.  If the high level
+control code is slow, so what?  So it takes 100 milliseconds over the
+life the process, as compared to the 100 microseconds it could have
+taken if it were in C.  Big deal.  On an absolute time scale, measured
+in units meaningful to humans, it's just not a lot of time.
+</P
+><P
+>&#13;The problem comes when you try to do too much in Tcl.  For instance,
+an interactive process should not be trying to evaluate a
+mathematical expression inside a doubly nested loop structure, if
+performance is going to be a concern.
+</P
+><P
+>&#13;Case in point:  Compare x16.tcl to x16c.c.  The code looks very
+similar, and the output looks very similar.  What is not so similar is
+the execution time.  The Tcl code, which sets up the data entirely in
+Tcl, takes a while to do so.  On the other hand, the actual plotting
+of the data proceeds at a rate which is effectively indistinguishable
+from that of the compiled example.  On human time scales, the
+difference is not meaningful.  Conclusion:  If the computation of the
+data arrays could be moved to compiled code, the two programs would
+have performance close enough to identical that it really wouldn't be
+an issue.  We left the Tcl demos coded in Tcl for two reasons.  First
+because they provide some examples and tests of the use of the Tcl
+Matrix extension, and secondly because they allow the Tcl demos to be
+coded entirely in Tcl, without requiring special customized extended
+shells for each one of them.  They are not, however, a good example of
+you should do things in practice.
+</P
+><P
+>&#13;Now look at <TT
+CLASS="filename"
+>tk04</TT
+> and <TT
+CLASS="filename"
+>xtk04.c</TT
+>, you will see
+that if the data is computed in compiled code, and shuffled into the
+Tcl matrix and then plotted from Tcl, the performance is fine.  Almost
+all the time is spent in plshade, in compiled code.  The time taken to
+do the small amount of Tcl processing involved with plotting is
+dwarfed by the time spent doing the actual drawing in C.  So using Tcl
+cost almost nothing in this case.
+</P
+><P
+>&#13;So, the point is, do your heavy numerics in a compiled language, and
+feel free to use Tcl for the plotting, if you want to.  You can of
+course mix it up so that some plotting is done from Tcl and some from
+a compiled language.  
+</P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="tcl-contouring.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="extended-wish.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Contouring and Shading from Tcl</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="tcl.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Building an Extended WISH</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

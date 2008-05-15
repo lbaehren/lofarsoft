@@ -1,0 +1,1283 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>Setting Character Attributes</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="Advanced Use of PLplot"
+HREF="advanced.html"><LINK
+REL="PREVIOUS"
+TITLE="Setting Color"
+HREF="color.html"><LINK
+REL="NEXT"
+TITLE="Three Dimensional Surface Plots"
+HREF="tri-d-plots.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="color.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 3. Advanced Use of PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="tri-d-plots.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="characters"
+>Setting Character Attributes</A
+></H1
+><P
+>&#13;      Plplot uses two separate font systems to display characters. The
+      traditional system uses Hershey fonts which are available for all
+      device drivers, while the recently introduced unicode system is
+      currently available only for the ps, psc, png, jpeg, and gif devices.
+      For details on how to enable the unicode font system for additional
+      device drivers using the FreeType library, see 
+      <A
+HREF="freetype-notes.html"
+>the Section called <I
+>Adding FreeType Library Support to Bitmap Drivers</I
+></A
+>.
+    </P
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="hersheyfont"
+>Hershey fonts</A
+></H2
+><P
+>&#13;      There are two Hershey font character sets included with PLplot.
+      These are known
+      as the standard and extended character sets.  The
+      standard character set is a subset of the extended set.  It contains
+      177 characters including the ascii characters in a normal style font,
+      the Greek alphabet and several plotter symbols.  The extended
+      character set contains almost 1000 characters, including four font
+      styles, and several math, musical and plotter symbols.
+    </P
+><P
+>&#13;      The extended character set is loaded into memory automatically when
+      <A
+HREF="plstar.html"
+><CODE
+CLASS="function"
+>plstar</CODE
+></A
+> or <A
+HREF="plstart.html"
+><CODE
+CLASS="function"
+>plstart</CODE
+></A
+> is called.  The standard character set is
+      loaded by calling <A
+HREF="plfontld.html"
+><CODE
+CLASS="function"
+>plfontld</CODE
+></A
+>.  The extended character set requires
+      about 50 KBytes of memory, versus about 5 KBytes for the standard
+      set.  <A
+HREF="plfontld.html"
+><CODE
+CLASS="function"
+>plfontld</CODE
+></A
+> can be used to switch between the extended and
+      standard sets (one set is unloaded before the next is loaded).
+      <A
+HREF="plfontld.html"
+><CODE
+CLASS="function"
+>plfontld</CODE
+></A
+> can be called before <A
+HREF="plstar.html"
+><CODE
+CLASS="function"
+>plstar</CODE
+></A
+>.
+    </P
+><P
+>&#13;      When the extended character set is loaded there are four different
+      font styles to choose from.  In this case, the routine <A
+HREF="plfont.html"
+><CODE
+CLASS="function"
+>plfont</CODE
+></A
+> sets
+      up the default Hershey font for all character strings.  It may be overridden
+      for any portion of a string by using an escape sequence within the
+      text, as described below.  This routine has no effect when the
+      standard font set is loaded.  The default font (1) is simple and
+      fastest to draw; the others are useful for presentation plots on a
+      high-resolution device.
+    </P
+><P
+>&#13;      The font codes are interpreted as follows:
+
+      <P
+></P
+><UL
+><LI
+><P
+>&#13;	    <TT
+CLASS="literal"
+>font = 1</TT
+>: normal (sans-serif) font
+	  </P
+></LI
+><LI
+><P
+>&#13;	    <TT
+CLASS="literal"
+>font = 2</TT
+>: roman (serif) font
+	  </P
+></LI
+><LI
+><P
+>&#13;	    <TT
+CLASS="literal"
+>font = 3</TT
+>: italic font
+	  </P
+></LI
+><LI
+><P
+>&#13;	    <TT
+CLASS="literal"
+>font = 4</TT
+>: script font
+	  </P
+></LI
+></UL
+>
+    </P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="unicodefont"
+>Unicode fonts</A
+></H2
+><P
+>&#13;      The advantages of the unicode fonts over the more traditional PLplot
+      Hershey fonts are the availability of many additional glyphs
+      (including mathematical symbols and glyphs from other than
+      western-European languages) and much better display of characters on
+      computer screens using anti-aliasing and hinting.  Unicode fonts are
+      obtained by specifying a command-line option of -drvopt text for
+      the devices (currently ps, psc, png, jpeg, gif, gcw, and wingcc) 
+      where it has been implemented.
+    </P
+><P
+>&#13;      For the ps and psc devices, there is a fixed relationship between the
+      FCI (font characterization integer, see <A
+HREF="characters.html#fci"
+>the Section called <I
+>FCI</I
+></A
+>) 
+      and the actual Type 1
+      fonts that are being used.  This fixed relationship is specified in
+      the Type1Lookup array in include/plfci.h.  This array maps the
+      font-family attributes of sans-serif, serif, monotype, script, and
+      symbol to the standard postscript font families called Helvetica,
+      Times-Roman, Courier, Times-Roman, and Symbol.  (There is no script
+      font family amongst the 35 standard Type 1 postscript fonts so that is
+      why we map the font-family attribute of script to Times-Roman.)
+      Similarly, this array maps the font-style attributes of upright,
+      italic or oblique and the font-weight attributes of medium or bold to
+      the appropriate variety of the Helvetica, Times-Roman, Courier,
+      and Symbol font families that are part of the 
+      35 standard Type 1 postscript fonts.  These standard postscript fonts
+      are normally installed on a user's system using the gsfonts package.
+    </P
+><P
+>&#13;      For the devices handled by the FreeType library (currently png, jpeg,
+      and gif) there is a configurable relationship between the FCI (font
+      characterization integer, see <A
+HREF="characters.html#fci"
+>the Section called <I
+>FCI</I
+></A
+>) 
+      and the TrueType fonts that are actually used.  
+    </P
+><P
+>&#13;      On Unix/Linux systems, the TrueType fonts corresponding to the 30 possible
+      valid FCIs can be specified using ./configure options. (Use
+      ./configure --help to see the possibilities and also the default
+      values for the fonts.) These ./configure defaults for the 30
+      possibilites are taken from fonts available from the ttf-freefont font
+      package.  We recommend this font package because it has a rather
+      complete set of glyphs for most unicode blocks.  (We also recommend
+      the gucharmap application for determining other unicode font
+      possibilities on your system that are available via the FreeType
+      library.)
+    </P
+><P
+>&#13;      On Windows systems, the fixed default TrueType fonts are specified in the
+      include/plfci.h file.  (NOT PROGRAMMED YET, so this statement
+      will probably NEED REVISION.)
+    </P
+><P
+>&#13;      For all systems, the 30 possible TrueType fonts can be specified at run
+      time using the following environment variables:
+      <P
+></P
+><UL
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SANS_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SERIF_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_MONO_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SCRIPT_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SYMBOL_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SANS_ITALIC_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SERIF_ITALIC_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_MONO_ITALIC_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SCRIPT_ITALIC_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SYMBOL_ITALIC_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SANS_OBLIQUE_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SERIF_OBLIQUE_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_MONO_OBLIQUE_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SCRIPT_OBLIQUE_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SYMBOL_OBLIQUE_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SANS_BOLD_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SERIF_BOLD_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_MONO_BOLD_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SCRIPT_BOLD_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SYMBOL_BOLD_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SANS_BOLD_ITALIC_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SERIF_BOLD_ITALIC_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_MONO_BOLD_ITALIC_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SCRIPT_BOLD_ITALIC_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SYMBOL_BOLD_ITALIC_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SANS_BOLD_OBLIQUE_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SERIF_BOLD_OBLIQUE_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_MONO_BOLD_OBLIQUE_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SCRIPT_BOLD_OBLIQUE_FONT
+	  </P
+></LI
+><LI
+><P
+>&#13;	    PLPLOT_FREETYPE_SYMBOL_BOLD_OBLIQUE_FONT
+	  </P
+></LI
+></UL
+>
+      On Unix/Linux systems if these environment variables are not specified
+      with an absolute path starting with "/", then the absolute path is
+      specified by the configured default (see ./configure --help) or at
+      run time with the
+      environment variable PLPLOT_FREETYPE_FONT_DIR.
+    </P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="fci"
+>FCI</A
+></H2
+><P
+>&#13;      We specify the properties of unicode fonts with the FCI (font
+      characterization integer).  The FCI is a 32-bit unsigned integer whose
+      most significant hexadecimal digit is marked with an 0x8 (0x80000000
+      is ORed with the FCI value to mark it) to distinguish it from a unicode
+      (UCS4) integer (whose maximum value 0x7fffffff). Users obtain the
+      current FCI by calling <A
+HREF="plgfci.html"
+><CODE
+CLASS="function"
+>plgfci</CODE
+></A
+> and store a new FCI to be used at the
+      start of each subsequent string using <A
+HREF="plsfci.html"
+><CODE
+CLASS="function"
+>plsfci</CODE
+></A
+>. Independent
+      hexadecimal values within the FCI are characterized by the hexdigit
+      and hexpower.  The hexpower is defined as the power of 16 or number of
+      hexadecimal places to the left of the "decimal place" in the FCI 
+      where the hexdigit is stored. The interpretation of the hexdigit and
+      hexpower values in the FCI are given in <A
+HREF="characters.html#fci-table"
+>Table 3-3</A
+>.
+    </P
+><DIV
+CLASS="table"
+><A
+NAME="fci-table"
+></A
+><P
+><B
+>Table 3-3. FCI interpretation</B
+></P
+><TABLE
+BORDER="1"
+FRAME="border"
+CLASS="CALSTABLE"
+><COL><COL><COL><COL><COL><COL><COL><TBODY
+VALIGN="top"
+><TR
+><TD
+>&nbsp;</TD
+><TD
+>hexdigit --&#62;</TD
+><TD
+>0</TD
+><TD
+>1</TD
+><TD
+>2</TD
+><TD
+>3</TD
+><TD
+>4</TD
+></TR
+><TR
+><TD
+>Font attribute</TD
+><TD
+>hexpower</TD
+><TD
+>&nbsp;</TD
+><TD
+>&nbsp;</TD
+><TD
+>&nbsp;</TD
+><TD
+>&nbsp;</TD
+><TD
+>&nbsp;</TD
+></TR
+><TR
+><TD
+>font-family</TD
+><TD
+>0</TD
+><TD
+>sans-serif</TD
+><TD
+>serif</TD
+><TD
+>monospace</TD
+><TD
+>script</TD
+><TD
+>symbol</TD
+></TR
+><TR
+><TD
+>font-style</TD
+><TD
+>1</TD
+><TD
+>upright</TD
+><TD
+>italic</TD
+><TD
+>oblique</TD
+><TD
+>&nbsp;</TD
+><TD
+>&nbsp;</TD
+></TR
+><TR
+><TD
+>font-weight</TD
+><TD
+>2</TD
+><TD
+>medium</TD
+><TD
+>bold</TD
+><TD
+>&nbsp;</TD
+><TD
+>&nbsp;</TD
+><TD
+>&nbsp;</TD
+></TR
+></TBODY
+></TABLE
+></DIV
+><P
+>&#13;      Note the maximum value of hexdigit is 7 and the maximum value of
+      hexpower is 6 so there is substantial room for expansion of this
+      scheme.  On the other hand, since each font attribute is independent
+      of the rest, what is implemented now gives us a maximum of 30
+      different font possibilities which is probably more than enough for
+      most plotting purposes.
+    </P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="escape-sequences"
+>Escape sequences in text</A
+></H2
+><P
+>&#13;      The routines which draw text all allow you to include escape
+      sequences in the text to be plotted.  These are character sequences
+      that are interpreted as instructions to change fonts, draw
+      superscripts and subscripts, draw non-ASCII (e.g. Greek), and so on.
+      All escape sequences start with a number symbol
+      (<TT
+CLASS="literal"
+>#</TT
+>) by default.  Some language interfaces have
+      the capability of changing this default, but we will assume
+      (<TT
+CLASS="literal"
+>#</TT
+>) in the remaining documentation of the escape
+      sequences.
+    </P
+><P
+>&#13;      The following escape sequences are defined:
+
+      <P
+></P
+><UL
+><LI
+><P
+>&#13;	    <TT
+CLASS="literal"
+>#u</TT
+>: move up to the superscript position
+	    (ended with <TT
+CLASS="literal"
+>#d</TT
+>)
+	  </P
+></LI
+><LI
+><P
+>&#13;	    <TT
+CLASS="literal"
+>#d</TT
+>: move down to subscript position
+	    (ended with <TT
+CLASS="literal"
+>#u</TT
+>)
+	  </P
+></LI
+><LI
+><P
+>&#13;	    <TT
+CLASS="literal"
+>#b</TT
+>: backspace (to allow overprinting)
+	  </P
+></LI
+><LI
+><P
+>&#13;	    <TT
+CLASS="literal"
+>##</TT
+>: number symbol
+	  </P
+></LI
+><LI
+><P
+>&#13;	    <TT
+CLASS="literal"
+>#+</TT
+>: toggle overline mode
+	  </P
+></LI
+><LI
+><P
+>&#13;	    <TT
+CLASS="literal"
+>#-</TT
+>: toggle underline mode
+	  </P
+></LI
+><LI
+><P
+>&#13;	    <TT
+CLASS="literal"
+>#gx</TT
+>: Greek letter corresponding to Roman
+	    letter <TT
+CLASS="literal"
+>x</TT
+> (see below)
+	  </P
+></LI
+><LI
+><P
+>&#13;	    <TT
+CLASS="literal"
+>#fn</TT
+>: switch to normal (sans-serif) font
+	  </P
+></LI
+><LI
+><P
+>&#13;	    <TT
+CLASS="literal"
+>#fr</TT
+>: switch to Roman (serif) font
+	  </P
+></LI
+><LI
+><P
+>&#13;	    <TT
+CLASS="literal"
+>#fi</TT
+>: switch to italic font
+	  </P
+></LI
+><LI
+><P
+>&#13;	    <TT
+CLASS="literal"
+>#fs</TT
+>: switch to script font
+	  </P
+></LI
+><LI
+><P
+>&#13;	    <TT
+CLASS="literal"
+>#(nnn)</TT
+>: Hershey character nnn (1 to 4
+	    decimal digits) 
+	  </P
+></LI
+><LI
+><P
+>&#13;	    <TT
+CLASS="literal"
+>#[nnn]</TT
+>: unicode character nnn (nnn can
+	    be decimal or hexadecimal [e.g., starting with 0x]) (UNICODE ONLY).
+	  </P
+></LI
+><LI
+><P
+>&#13;	    <TT
+CLASS="literal"
+>#&#60;0x8nnnnnnn&#62;</TT
+>: absolute FCI to be used to
+	    change fonts in mid-string.  (nnnnnnn must be exactly 7
+	    digits). (UNICODE ONLY).
+	  </P
+></LI
+><LI
+><P
+>&#13;	    <TT
+CLASS="literal"
+>#&#60;0xmn&#62;</TT
+>: change just one attribute
+	    of the FCI in mid-string where m is the hexdigit and n is
+	    the hexpower.  If more than two digits are given (so long
+	    as the eigth digit does not mark this as an absolute FCI, see
+	    above) they
+	    are ignored. (UNICODE ONLY).
+	  </P
+></LI
+><LI
+><P
+>&#13;	    <TT
+CLASS="literal"
+>#&#60;FCI COMMAND STRING/&#62;</TT
+>: the FCI COMMAND
+	    STRING is currently one of "sans-serif", "serif", "monospace",
+	    "script", "symbol", "upright", "italic", "oblique" "medium",
+	    or "bold" (without the surrounding quotes).  These FCI
+	    COMMAND STRINGS change one attribute of the FCI according to
+	    their name. (UNICODE ONLY).
+	  </P
+></LI
+></UL
+>
+    </P
+><P
+>&#13;      Sections of text can have an underline or overline appended.  For
+      example, the string <SPAN
+CLASS="overline"
+>S</SPAN
+>(<SPAN
+CLASS="underline"
+>freq</SPAN
+>) is obtained by specifying
+      <TT
+CLASS="literal"
+>"#+S#+(#-freq#-)"</TT
+>. 
+    </P
+><P
+>&#13;      Greek letters are obtained by <TT
+CLASS="literal"
+>#g</TT
+> followed by a
+      Roman letter.  <A
+HREF="characters.html#greek"
+>Table 3-4</A
+> shows how these letters map
+      into Greek characters.
+    </P
+><DIV
+CLASS="table"
+><A
+NAME="greek"
+></A
+><P
+><B
+>Table 3-4. Roman Characters Corresponding to Greek Characters</B
+></P
+><TABLE
+BORDER="1"
+FRAME="border"
+CLASS="CALSTABLE"
+><COL
+WIDTH="2*"
+ALIGN="center"><COL><COL><COL><COL><COL><COL><COL><COL><COL><COL><COL><COL><TBODY
+VALIGN="top"
+><TR
+><TD
+>Roman</TD
+><TD
+>A</TD
+><TD
+>B</TD
+><TD
+>G</TD
+><TD
+>D</TD
+><TD
+>E</TD
+><TD
+>Z</TD
+><TD
+>Y</TD
+><TD
+>H</TD
+><TD
+>I</TD
+><TD
+>K</TD
+><TD
+>L</TD
+><TD
+>M</TD
+></TR
+><TR
+><TD
+>Greek</TD
+><TD
+>&#913;</TD
+><TD
+>&#914;</TD
+><TD
+>&#915;</TD
+><TD
+>&#916;</TD
+><TD
+>&#917;</TD
+><TD
+>&#918;</TD
+><TD
+>&#919;</TD
+><TD
+>&#920;</TD
+><TD
+>&#921;</TD
+><TD
+>&#922;</TD
+><TD
+>&#923;</TD
+><TD
+>&#924;</TD
+></TR
+></TBODY
+></TABLE
+><TABLE
+BORDER="1"
+FRAME="border"
+CLASS="CALSTABLE"
+><COL
+WIDTH="2*"
+ALIGN="center"><COL><COL><COL><COL><COL><COL><COL><COL><COL><COL><COL><COL><TBODY
+><TR
+><TD
+>Roman</TD
+><TD
+>N</TD
+><TD
+>C</TD
+><TD
+>O</TD
+><TD
+>P</TD
+><TD
+>R</TD
+><TD
+>S</TD
+><TD
+>T</TD
+><TD
+>U</TD
+><TD
+>F</TD
+><TD
+>X</TD
+><TD
+>Q</TD
+><TD
+>W</TD
+></TR
+><TR
+><TD
+>Greek</TD
+><TD
+>&#925;</TD
+><TD
+>&#926;</TD
+><TD
+>&#927;</TD
+><TD
+>&#928;</TD
+><TD
+>&#929;</TD
+><TD
+>&#931;</TD
+><TD
+>&#932;</TD
+><TD
+>&#933;</TD
+><TD
+>&#934;</TD
+><TD
+>&#935;</TD
+><TD
+>&#936;</TD
+><TD
+>&#937;</TD
+></TR
+></TBODY
+></TABLE
+><TABLE
+BORDER="1"
+FRAME="border"
+CLASS="CALSTABLE"
+><COL
+WIDTH="2*"
+ALIGN="center"><COL><COL><COL><COL><COL><COL><COL><COL><COL><COL><COL><COL><TBODY
+><TR
+><TD
+>Roman</TD
+><TD
+>a</TD
+><TD
+>b</TD
+><TD
+>g</TD
+><TD
+>d</TD
+><TD
+>e</TD
+><TD
+>z</TD
+><TD
+>y</TD
+><TD
+>h</TD
+><TD
+>i</TD
+><TD
+>k</TD
+><TD
+>l</TD
+><TD
+>m</TD
+></TR
+><TR
+><TD
+>Greek</TD
+><TD
+>&#945;</TD
+><TD
+>&#946;</TD
+><TD
+>&#947;</TD
+><TD
+>&#948;</TD
+><TD
+>&#949;</TD
+><TD
+>&#950;</TD
+><TD
+>&#951;</TD
+><TD
+>&#952;</TD
+><TD
+>&#953;</TD
+><TD
+>&#954;</TD
+><TD
+>&#955;</TD
+><TD
+>&#956;</TD
+></TR
+></TBODY
+></TABLE
+><TABLE
+BORDER="1"
+FRAME="border"
+CLASS="CALSTABLE"
+><COL
+WIDTH="2*"
+ALIGN="center"><COL><COL><COL><COL><COL><COL><COL><COL><COL><COL><COL><COL><TBODY
+><TR
+><TD
+>Roman</TD
+><TD
+>n</TD
+><TD
+>c</TD
+><TD
+>o</TD
+><TD
+>p</TD
+><TD
+>r</TD
+><TD
+>s</TD
+><TD
+>t</TD
+><TD
+>u</TD
+><TD
+>f</TD
+><TD
+>x</TD
+><TD
+>q</TD
+><TD
+>w</TD
+></TR
+><TR
+><TD
+>Greek</TD
+><TD
+>&#957;</TD
+><TD
+>&#958;</TD
+><TD
+>&#959;</TD
+><TD
+>&#960;</TD
+><TD
+>&#961;</TD
+><TD
+>&#963;</TD
+><TD
+>&#964;</TD
+><TD
+>&#965;</TD
+><TD
+>&#966;</TD
+><TD
+>&#967;</TD
+><TD
+>&#968;</TD
+><TD
+>&#969;</TD
+></TR
+></TBODY
+></TABLE
+></DIV
+><P
+>&#13;      The escape sequences <TT
+CLASS="literal"
+>#fn</TT
+>, <TT
+CLASS="literal"
+>#fr</TT
+>,
+      <TT
+CLASS="literal"
+>#fi</TT
+>, <TT
+CLASS="literal"
+>#fs</TT
+>, and 
+      <TT
+CLASS="literal"
+>#(nnn)</TT
+> are designed for the four Hershey fonts, but
+      an effort has been made to allow some limited forward compatibility so
+      these escape sequences have a reasonable result when unicode
+      fonts are being used.  However, for maximum flexibility when using
+      unicode fonts, these 5 escape sequences should be replaced by using
+      the 4 escape sequences <TT
+CLASS="literal"
+>#[nnn]</TT
+>,
+      <TT
+CLASS="literal"
+>#&#60;0x8nnnnnnn&#62;</TT
+>,
+      <TT
+CLASS="literal"
+>#&#60;0xmn&#62;</TT
+>, or <TT
+CLASS="literal"
+>#&#60;FCI COMMAND
+      STRING/&#62;</TT
+> as appropriate.
+    </P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="character-size"
+>Character size adjustment</A
+></H2
+><P
+>&#13;      The routine <A
+HREF="plschr.html"
+><CODE
+CLASS="function"
+>plschr</CODE
+></A
+> is used to set up the size of subsequent
+      characters drawn.  The actual height of a character is the product of
+      the default character size and a scaling factor.  If no call is made
+      to <A
+HREF="plschr.html"
+><CODE
+CLASS="function"
+>plschr</CODE
+></A
+>, the default character size is set up depending on the
+      number of subpages defined in the call to <A
+HREF="plstar.html"
+><CODE
+CLASS="function"
+>plstar</CODE
+></A
+> or <A
+HREF="plstart.html"
+><CODE
+CLASS="function"
+>plstart</CODE
+></A
+>, and
+      the scale is set to 1.0.  Under normal circumstances, it is
+      recommended that the user does not alter the default height, but
+      simply use the scale parameter.  This can be done by calling <A
+HREF="plschr.html"
+><CODE
+CLASS="function"
+>plschr</CODE
+></A
+>
+      with <TT
+CLASS="literal"
+>def = 0.0</TT
+> and <TT
+CLASS="literal"
+>scale</TT
+> set to
+      the desired multiple of the default height.  If the default height is
+      to be changed, <TT
+CLASS="literal"
+>def</TT
+> is set to the new default
+      height in millimeters, and the new character height is again set to
+      <TT
+CLASS="literal"
+>def</TT
+> multiplied by <TT
+CLASS="literal"
+>scale</TT
+>.
+    </P
+><P
+>&#13;      The routine <A
+HREF="plssym.html"
+><CODE
+CLASS="function"
+>plssym</CODE
+></A
+> sets up the size of all subsequent characters drawn
+      by calls to <A
+HREF="plpoin.html"
+><CODE
+CLASS="function"
+>plpoin</CODE
+></A
+> and <A
+HREF="plsym.html"
+><CODE
+CLASS="function"
+>plsym</CODE
+></A
+>.  It operates analogously to
+      <A
+HREF="plschr.html"
+><CODE
+CLASS="function"
+>plschr</CODE
+></A
+> as described above.
+    </P
+></DIV
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="color.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="tri-d-plots.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Setting Color</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="advanced.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Three Dimensional Surface Plots</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

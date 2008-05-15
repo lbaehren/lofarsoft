@@ -1,0 +1,318 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>Simple Use of PLplot</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE=" Programming "
+HREF="p162.html"><LINK
+REL="PREVIOUS"
+TITLE=" Programming "
+HREF="p162.html"><LINK
+REL="NEXT"
+TITLE="Initializing PLplot"
+HREF="initializing.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="chapter"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="p162.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+></TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="initializing.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="chapter"
+><H1
+><A
+NAME="simple"
+></A
+>Chapter 2. Simple Use of PLplot</H1
+><DIV
+CLASS="TOC"
+><DL
+><DT
+><B
+>Table of Contents</B
+></DT
+><DT
+><A
+HREF="simple.html#simple-graph"
+>Plotting a Simple Graph</A
+></DT
+><DT
+><A
+HREF="initializing.html"
+>Initializing PLplot</A
+></DT
+><DT
+><A
+HREF="scales.html"
+>Defining Plot Scales and Axes</A
+></DT
+><DT
+><A
+HREF="labelling.html"
+>Labeling the Graph</A
+></DT
+><DT
+><A
+HREF="drawing.html"
+>Drawing the Graph</A
+></DT
+><DT
+><A
+HREF="finishing.html"
+>Finishing Up</A
+></DT
+><DT
+><A
+HREF="error.html"
+>In Case of Error</A
+></DT
+></DL
+></DIV
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="simple-graph"
+>Plotting a Simple Graph</A
+></H1
+><P
+>&#13;      We shall first consider plotting simple graphs showing the dependence
+      of one variable upon another.  Such a graph may be composed of
+      several elements:
+    </P
+><P
+></P
+><UL
+><LI
+><P
+>&#13;	  A box which defines the ranges of the variables, perhaps with
+	  axes and numeric labels along its edges.
+	</P
+></LI
+><LI
+><P
+>&#13;	  A set of points or lines within the box showing the functional
+	  dependence.
+	</P
+></LI
+><LI
+><P
+>&#13;	  A set of labels for the variables and a title for the graph.
+	</P
+></LI
+></UL
+><P
+>&#13;      In order to draw such a graph, it is necessary to call at least four
+      of the PLplot functions:
+    </P
+><P
+></P
+><OL
+TYPE="1"
+><LI
+><P
+>&#13;	  <A
+HREF="plinit.html"
+><CODE
+CLASS="function"
+>plinit</CODE
+></A
+>, to initialize PLplot.
+	</P
+></LI
+><LI
+><P
+>&#13;	  <A
+HREF="plenv.html"
+><CODE
+CLASS="function"
+>plenv</CODE
+></A
+>, to define the range and scale of the
+	  graph, and draw labels, axes, etc.
+	</P
+></LI
+><LI
+><P
+>&#13;	  One or more calls to <A
+HREF="plline.html"
+><CODE
+CLASS="function"
+>plline</CODE
+></A
+> or <A
+HREF="plpoin.html"
+><CODE
+CLASS="function"
+>plpoin</CODE
+></A
+> to draw lines or points
+	  as needed.  Other more complex routines include <A
+HREF="plbin.html"
+><CODE
+CLASS="function"
+>plbin</CODE
+></A
+> and
+	  <A
+HREF="plhist.html"
+><CODE
+CLASS="function"
+>plhist</CODE
+></A
+> to draw histograms, <A
+HREF="plerrx.html"
+><CODE
+CLASS="function"
+>plerrx</CODE
+></A
+> and <A
+HREF="plerry.html"
+><CODE
+CLASS="function"
+>plerry</CODE
+></A
+> to draw
+	  error-bars.
+	</P
+></LI
+><LI
+><P
+>&#13;	  <A
+HREF="plend.html"
+><CODE
+CLASS="function"
+>plend</CODE
+></A
+>, to close the plot.
+	</P
+></LI
+></OL
+><P
+>&#13;      More than one graph can be drawn on a single set of axes by making
+      repeated calls to the routines listed in item 3 above.  PLplot only
+      needs to be initialized once unless plotting to multiple output
+      devices.
+    </P
+></DIV
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="p162.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="initializing.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Programming</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="p162.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Initializing PLplot</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

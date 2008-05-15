@@ -1,0 +1,366 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      plvec2: Vector plot, general 2-d mapping for
+Fortran 77
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Specialized Fortran 77 API for PLplot"
+HREF="api-fortran-77.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plvec1: Vector plot, general 1-d mapping for
+Fortran 77
+    "
+HREF="plvec1.html"><LINK
+REL="NEXT"
+TITLE="
+      plvect: Vector plot, fixed linear mapping for
+Fortran 77
+    "
+HREF="plvectfortran77.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plvec1.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 20. The Specialized Fortran 77 API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plvectfortran77.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plvec2"
+><CODE
+CLASS="function"
+>plvec2</CODE
+>: Vector plot, general 2-d mapping for
+Fortran 77</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN12981"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	  plvec2
+	</CODE
+>(u, v, nx, ny, scale, xg, yg);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;      Draws a vector plot of the data in
+      <TT
+CLASS="literal"
+>(<CODE
+CLASS="parameter"
+>u</CODE
+>[<CODE
+CLASS="parameter"
+>nx</CODE
+>][<CODE
+CLASS="parameter"
+>ny</CODE
+>], <CODE
+CLASS="parameter"
+>v</CODE
+>[<CODE
+CLASS="parameter"
+>nx</CODE
+>][<CODE
+CLASS="parameter"
+>ny</CODE
+>])</TT
+>.
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>u, v</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT **</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to a pair of vectored two-dimensional arrays containing
+	    the x and y components of the vector to be plotted.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>nx, ny</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Physical dimensions of the arrays
+	    <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>u</CODE
+></TT
+> and
+	    <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>v</CODE
+></TT
+>.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>scale</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;             Parameter to control the scaling factor of the vectors for plotting.
+             If <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>scale</CODE
+> = 0</TT
+> then
+	     the scaling factor is automatically calculated for the data.
+	     If <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>scale</CODE
+> &#60; 0</TT
+> then
+	     the scaling factor is automatically calculated for the data and
+             then multiplied by <TT
+CLASS="literal"
+>-<CODE
+CLASS="parameter"
+>scale</CODE
+></TT
+>.
+             If <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>scale</CODE
+> &#62; 0</TT
+> then
+             the scaling factor is set to <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>scale</CODE
+></TT
+>.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>xg, yg</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointers to arrays which specify the transformation from array
+	    indices to world coordinates.  These must be two-dimensional
+	    arrays, used for a transformation of the form:
+	    <TT
+CLASS="literal"
+>tx</TT
+> = <TT
+CLASS="literal"
+>f(x, y)</TT
+>,
+	    <TT
+CLASS="literal"
+>ty</TT
+> = <TT
+CLASS="literal"
+>f(x, y)</TT
+>.  Function
+	    values at locations between grid points are obtained via linear
+	    interpolation.
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      NOTE: this function is intended for use from a Fortran 77 caller only.
+      The C user should instead call <A
+HREF="plvect.html"
+><CODE
+CLASS="function"
+>plvect</CODE
+></A
+> using the built-in
+      transformation function <CODE
+CLASS="function"
+>pltr2</CODE
+> for the same
+      capability.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plvec1.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plvectfortran77.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plvec1</CODE
+>: Vector plot, general 1-d mapping for
+Fortran 77</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api-fortran-77.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plvect</CODE
+>: Vector plot, fixed linear mapping for
+Fortran 77</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

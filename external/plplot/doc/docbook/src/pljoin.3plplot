@@ -1,0 +1,35 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLJOIN 3plplot  "February, 2008" "" "PLplot API"
+.SH NAME
+\fBpljoin\fP - Draw a line between two points 
+.SH SYNOPSIS
+\fBpljoin\fP(\fIx1\fP, \fIy1\fP, \fIx2\fP, \fIy2\fP)
+.SH DESCRIPTION
+
+.P
+Joins the point (\fIx1\fP, \fIy1\fP) to (\fIx2\fP, \fIy2\fP). 
+.P
+Redacted form: \fBpljoin(x1,y1,x2,y2)\fP
+.P
+This function is used in examples 3,14. 
+.SH ARGUMENTS
+.TP
+\fIx1\fP (PLFLT, input) 
+x coordinate of first point. 
+.TP
+\fIy1\fP (PLFLT, input) 
+y coordinate of first point. 
+.TP
+\fIx2\fP (PLFLT, input) 
+x coordinate of second point. 
+.TP
+\fIy2\fP (PLFLT, input) 
+y coordinate of second point. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

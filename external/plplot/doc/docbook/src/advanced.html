@@ -1,0 +1,324 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>Advanced Use of PLplot</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE=" Programming "
+HREF="p162.html"><LINK
+REL="PREVIOUS"
+TITLE="In Case of Error"
+HREF="error.html"><LINK
+REL="NEXT"
+TITLE="Output Devices"
+HREF="output-devices.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="chapter"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="error.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+></TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="output-devices.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="chapter"
+><H1
+><A
+NAME="advanced"
+></A
+>Chapter 3. Advanced Use of PLplot</H1
+><DIV
+CLASS="TOC"
+><DL
+><DT
+><B
+>Table of Contents</B
+></DT
+><DT
+><A
+HREF="advanced.html#arguments"
+>Command Line Arguments</A
+></DT
+><DT
+><A
+HREF="output-devices.html"
+>Output Devices</A
+></DT
+><DT
+><A
+HREF="freetype-notes.html"
+>Adding FreeType Library Support to Bitmap Drivers</A
+></DT
+><DT
+><A
+HREF="viewport_window.html"
+>View Surfaces, (Sub-)Pages, Viewports and Windows</A
+></DT
+><DT
+><A
+HREF="line-attributes.html"
+>Setting Line Attributes</A
+></DT
+><DT
+><A
+HREF="fill-pattern.html"
+>Setting the Area Fill Pattern</A
+></DT
+><DT
+><A
+HREF="color.html"
+>Setting Color</A
+></DT
+><DT
+><A
+HREF="characters.html"
+>Setting Character Attributes</A
+></DT
+><DT
+><A
+HREF="tri-d-plots.html"
+>Three Dimensional Surface Plots</A
+></DT
+><DT
+><A
+HREF="contour-plots.html"
+>Contour and Shade Plots</A
+></DT
+></DL
+></DIV
+><P
+> In this chapter, we describe advanced use of PLplot. </P
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="arguments"
+>Command Line Arguments</A
+></H1
+><P
+>&#13;      PLplot supports a large number of command line arguments, but it is
+      up to the user to pass these to PLplot for processing at the
+      beginning of execution.
+      <A
+HREF="plparseopts.html"
+><CODE
+CLASS="function"
+>plparseopts</CODE
+></A
+> is responsible for parsing
+      the argument list, removing all that are recognized by PLplot, and
+      taking the appropriate action before returning.  There are an
+      extensive number of options available to affect this process.  The
+      command line arguments recognized by PLplot are given by the -h
+      option:
+    </P
+><P
+>&#13;      <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="screen"
+>&#13;<SAMP
+CLASS="prompt"
+>%</SAMP
+> <KBD
+CLASS="userinput"
+>x01c -h</KBD
+>
+Usage:
+        ./x01c [options]
+
+PLplot options:
+    -h                   Print out this message
+    -v                   Print out the PLplot library version number
+    -verbose             Be more verbose than usual
+    -debug               Print debugging info (implies -verbose)
+    -dev name            Output device name
+    -o name              Output filename
+    -display name        X server to contact
+    -px number           Plots per page in x
+    -py number           Plots per page in y
+    -geometry geom       Window size, in pixels (e.g. -geometry 400x300)
+    -wplt xl,yl,xr,yr    Relative coordinates [0-1] of window into plot
+    -mar margin          Margin space in relative coordinates (0 to 0.5, def 0)
+    -a aspect            Page aspect ratio (def: same as output device)
+    -jx justx            Page justification in x (-0.5 to 0.5, def 0)
+    -jy justy            Page justification in y (-0.5 to 0.5, def 0)
+    -ori orient          Plot orientation (0,2=landscape, 1,3=portrait)
+    -freeaspect          Do not preserve aspect ratio on orientation swaps
+    -portrait            Sets portrait mode (both orientation and aspect ratio)
+    -width width         Sets pen width (1 &#60;= width &#60;= 10)
+    -bg color            Background color (0=black, FFFFFF=white)
+    -ncol0 n             Number of colors to allocate in cmap 0 (upper bound)
+    -ncol1 n             Number of colors to allocate in cmap 1 (upper bound)
+    -fam                 Create a family of output files
+    -fsiz size[kKmMgG]   Output family file size in MB (e.g. -fsiz 0.5G, def MB)
+    -fbeg number         First family member number on output
+    -finc number         Increment between family members
+    -fflen length        Family member number minimum field width
+    -nopixmap            Don't use pixmaps in X-based drivers
+    -db                  Double buffer X window output
+    -np                  No pause between pages
+    -server_name name    Main window name of PLplot server (tk driver)
+    -dpi dpi             Resolution, in dots per inch (e.g. -dpi 360x360)
+    -compression num     Sets compression level in supporting devices
+    -drvopt option[=value][,option[=value]]* Driver specific options
+</PRE
+></TD
+></TR
+></TABLE
+>
+    </P
+><P
+>&#13;    The command-line options can also be set using the <A
+HREF="plsetopt.html"
+><CODE
+CLASS="function"
+>plsetopt</CODE
+></A
+> function, if invoked before <A
+HREF="plinit.html"
+><CODE
+CLASS="function"
+>plinit</CODE
+></A
+>.
+    </P
+><P
+>&#13;      Some options are may not be recognized by individual drivers.  If an option is not recognized but should be, please contact the driver author via the plplot mailing lists.
+    </P
+><P
+>Many drivers have specific options that can be set using the -drvopt command line option or with <A
+HREF="plsetopt.html"
+><CODE
+CLASS="function"
+>plsetopt</CODE
+></A
+>.  These options are documented in <A
+HREF="x-drivers.html"
+>Chapter 5</A
+> and <A
+HREF="output-drivers.html"
+>Chapter 6</A
+>.
+    </P
+></DIV
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="error.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="output-devices.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>In Case of Error</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="p162.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Output Devices</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>
