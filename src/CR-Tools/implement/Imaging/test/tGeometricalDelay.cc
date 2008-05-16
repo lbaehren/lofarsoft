@@ -74,7 +74,6 @@ void export_delays (casa::Matrix<double> const &antPositions,
 {
   int numAntenna(0);
   int numSky (0);
-  int coord(0);
   casa::IPosition shape(delays.shape());
 
   std::ofstream outfile (filename.c_str(),std::ios::out);

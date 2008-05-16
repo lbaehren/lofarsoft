@@ -33,6 +33,8 @@ endforeach (src)
 ## -----------------------------------------------------------------------------
 ## Build the test programs working with the Data Access Library (DAL)
 
+if (HAVE_CASACORE AND NOT HAVE_CASA)
+
 if (DAL_LIBRARIES AND HDF5_LIBRARIES)
   
   find_file (tbb_dataset tbb_test_file_v2.h5
@@ -61,6 +63,8 @@ if (DAL_LIBRARIES AND HDF5_LIBRARIES)
 
 endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
   
+endif (HAVE_CASACORE AND NOT HAVE_CASA)
+
 ## -----------------------------------------------------------------------------
 ## Installation
 
