@@ -56,6 +56,13 @@ find_library (libnsl nsl
   /sw/lib
   )
 
+find_library (libm m
+  /usr/lib
+  /usr/local/lib
+  /opt/lib
+  /sw/lib
+  )
+
 find_library (libSystemStubs SystemStubs
   /usr/lib
   /usr/local/lib
@@ -64,6 +71,18 @@ find_library (libSystemStubs SystemStubs
   /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
   /Developer/SDKs/MacOSX10.3.9.sdk/usr/lib
   )
+
+## set up chain of libraries to link against
+
+set (link_libraries "")
+
+if (libnsl)
+  list (APPEND link_libraries ${libnsl})
+endif (libnsl)
+
+if (libm)
+  list (APPEND link_libraries ${libm})
+endif (libm)
 
 ## ==============================================================================
 ##
@@ -107,7 +126,7 @@ if (WCSTOOLS_BUILD_TOOLS)
     ## compiler instructions
     add_executable (${app} ${app}.c)
     ## linker instructions
-    target_link_libraries (${app} wcs)
+    target_link_libraries (${app} wcs ${link_libraries})
     ## installation instructions
     install (TARGETS ${app}
       RUNTIME DESTINATION bin
