@@ -23,6 +23,7 @@
 
 #include <Data/UpSampledDR.h>
 
+#define DEBUGGING_MESSAGES      
 
 namespace CR { // Namespace CR -- begin
   
@@ -88,6 +89,12 @@ namespace CR { // Namespace CR -- begin
       if (SampleFreqRatio < 1.) {
 	cerr << "UpSampledDR::setup: " << "newSampleFrequency smaller than original!" << endl;
 	return False;
+      };
+      noUpsample = False;
+      if (abs(SampleFreqRatio-1.) < 1e-9) {
+	cout << "UpSampledDR::setup: " << "New sample frequency identical to old one," << endl;
+	cout << "                    " << "disabling upsampling." << endl;
+	noUpsample = True;
       };
       inpDR_p = inputDR;
 
@@ -201,10 +208,19 @@ namespace CR { // Namespace CR -- begin
 #endif
 	fx.resize(sendBlocksize,nofSelectedAntennas);
 	if ( inpPipeline_p != NULL) {
+#ifdef DEBUGGING_MESSAGES      
+	  cout << "UpSampledDR::fx:" << "Getting data from pipeline. " << endl;	  
+#endif
 	  sourceFFT = inpPipeline_p->GetData(inpDR_p);
 	} else if (UseCalFFT_p) {
+#ifdef DEBUGGING_MESSAGES      
+	cout << "UpSampledDR::fx:" << "Getting data from calfft(). " << endl;
+#endif
 	  sourceFFT = inpDR_p->calfft();
 	} else {
+#ifdef DEBUGGING_MESSAGES      
+	  cout << "UpSampledDR::fx:" << "Getting data from fft(). " << endl;
+#endif
 	  sourceFFT = inpDR_p->fft();
 	}
 	FFTServer<Double,DComplex> fftserv(IPosition(1,restoreBlocksize), FFTEnums::REALTOCOMPLEX);
@@ -213,14 +229,18 @@ namespace CR { // Namespace CR -- begin
 	Double minSourceFreq=min(sourceFreqs),maxSourceFreq=max(sourceFreqs);
 	for (antenna=0; antenna<nofSelectedAntennas; antenna++) {
 	  sourceAnt = selectedAntennas_p(antenna);
-	  sourceFFTvec = sourceFFT.column(sourceAnt);
-	  //sourceFFTvec(0) = 0.; sourceFFTvec(sourceFFTvec.nelements()-1) = 0.;
-	  InterpolateArray1D<Double, DComplex>::interpolate(restoreFFT,restoreFreqs,
-							    sourceFreqs,sourceFFTvec,
-					      InterpolateArray1D<Double, DComplex>::nearestNeighbour);
-	  restoreFFT(restoreFreqs<minSourceFreq) = 0.;
-	  restoreFFT(restoreFreqs>maxSourceFreq) = 0.;
-	  restoreFFT = restoreFFT*SampleFreqRatio;
+	  sourceFFTvec.reference(sourceFFT.column(sourceAnt));
+	  if (noUpsample) {
+	    restoreFFT =  sourceFFTvec;
+	  } else {
+	    //sourceFFTvec(0) = 0.; sourceFFTvec(sourceFFTvec.nelements()-1) = 0.;
+	    InterpolateArray1D<Double, DComplex>::interpolate(restoreFFT,restoreFreqs,
+							      sourceFreqs,sourceFFTvec,
+				    InterpolateArray1D<Double, DComplex>::nearestNeighbour);
+	    restoreFFT(restoreFreqs<minSourceFreq) = 0.;
+	    restoreFFT(restoreFreqs>maxSourceFreq) = 0.;
+	    restoreFFT = restoreFFT*SampleFreqRatio;
+	  };
 	  fftserv.fft(restoreFX,restoreFFT);
 	  fx.column(antenna) = restoreFX(Slice(sendoffset,sendBlocksize));
 	};

@@ -393,6 +393,7 @@ namespace CR { // Namespace CR -- begin
                               (1: yes, 0: no, -1: use default)
       \param UpSamplingRate - Samplerate for upsampling. If smaller than the original
                               samplerate (80MHz for LOPES) then no upsampling is done.
+			      (Check the docs of <tt>UpSampledDR<\tt> for more info.)
 
       \return Record with the results.
     */

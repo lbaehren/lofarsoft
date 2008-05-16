@@ -64,6 +64,21 @@ namespace CR { // Namespace CR -- begin
     </ul>
     
     <h3>Synopsis</h3>
+
+    This class generates data by generating an empty set of frequency domain data, filling
+    (parts of) it by interpolating the frequency domain data from the input, and performing
+    a backwards FFT.
+
+    <b>Note:</b> This class only fills in data in the first Nyquist band of the new sample 
+    frequency. If there is no overlap between this band and the origional frequency band, 
+    if the original data was sampled in a higher Nyquist zone, then you will get empty data.
+
+    To include all the available data set the new sample frequency to at least: 
+    \f[\nu_{\rm new} \ge \nu_{\rm old}\cdot{\rm [Nyquist-Zone]} \f]
+
+    <b>Note:</b> The exception is if the newSampleFrequency is identical to the sample 
+    frequency of the original data. In this case no interpolation is done and the original 
+    frequency domain data is copied as-is.
     
     <h3>Example(s)</h3>
     
@@ -78,9 +93,10 @@ namespace CR { // Namespace CR -- begin
     DataReader *inpDR_p;
 
     /*!
-      \brief Use the calfft() (instead of the fft()) of the DataReader
+      \brief Use the calfft() (instead of the fft()) of the DataReader, do not Upsampling 
+      (leave the data as_is).
     */
-    Bool UseCalFFT_p;
+    Bool UseCalFFT_p, noUpsample;
 
     /*!
       \brief Pointer to a processing pipeline for additional processing of the input data.
@@ -134,8 +150,8 @@ namespace CR { // Namespace CR -- begin
       \brief Setup this DataReader
 
       \param inputDR -- pointer to the DataReader object to read from 
-      \param newSampleFrequency -- the new sample frequency (in Hz), should be larger 
-                                   than the one in <tt>inputDR<\tt>
+      \param newSampleFrequency -- the new sample frequency (in Hz), should be identical to or 
+                                   larger than the one in <tt>inputDR<\tt> (see note above)
       \param UseCalFFT  -- Get the data from the calfft() instead of the fft() of the input DR
       \param inpPipeline -- pointer to an optional processing pipeline 
                             <b> The scructure of this may change! </b>

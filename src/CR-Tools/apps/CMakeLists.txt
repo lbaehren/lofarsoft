@@ -103,6 +103,21 @@ if (CR_ENABLE_LOPESSTAR)
 endif (CR_ENABLE_LOPESSTAR)
 
 ## -------------------------------------------------------------------
+## compareUpSamples
+
+if (HAVE_CASA OR HAVE_CASACORE)
+  add_executable (compareUpSamples compareUpSamples.cc)
+  ## linker instructions
+  target_link_libraries (compareUpSamples
+    cr
+    ${FFTW3_LIBRARIES}
+    ${ROOT_LIBRARIES}
+    )
+  ## installation instructions
+  list (APPEND cr_apps compareUpSamples)
+endif (HAVE_CASA OR HAVE_CASACORE)
+
+## -------------------------------------------------------------------
 ## readLopesCalTable
 
 if (HAVE_CASA OR HAVE_CASACORE)
