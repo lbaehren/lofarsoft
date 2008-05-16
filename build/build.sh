@@ -343,6 +343,10 @@ case $param_packageName in
 		echo "[`date`] Selected package WCSLIB"
 		build_package wcslib external/wcslib
     ;;
+    wcstools)
+		echo "[`date`] Selected package WCSTOOLS"
+		build_package wcstools external/wcstools
+    ;;
     ## --------------------------------------------------------------------------
     ## --- USG software packages ------------------------------------------------
     ## --------------------------------------------------------------------------
