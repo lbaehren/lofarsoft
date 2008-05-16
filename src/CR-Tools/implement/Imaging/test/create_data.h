@@ -102,14 +102,14 @@ get_antennaPositions (uint const &nofAntennas=4,
     for (uint n(0); n<nofAntennas; n++) {
       antPositions(n,1) = n*incr;
     }
-    break;
-  case AzElHeight:
-  case AzElRadius:
-  case Cylindrical:
-  case NorthEastHeight:
+    break; 
+  case CR::AzElHeight:
+  case CR::AzElRadius:
+  case CR::Cylindrical:
+  case CR::NorthEastHeight:
     std::cout << "-- No special settings for this coordinates." << std::endl;
     break;
-  }
+ }
   
   if (antennaIndexFirst) {
     return antPositions;
@@ -149,6 +149,12 @@ Matrix<double> get_skyPositions (uint const &nofPositions=2,
     for (n=0; n<nofPositions; n++) {
       positions(n,0) = n*incr;
     }
+    break;
+  case CR::AzElHeight:
+  case CR::AzElRadius:
+  case CR::Cylindrical:
+  case CR::NorthEastHeight:
+    std::cout << "-- No special settings for this coordinates." << std::endl;
     break;
   }
 
