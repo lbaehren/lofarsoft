@@ -140,14 +140,14 @@ namespace CR { // Namespace CR -- begin
   Bool SecondStagePipeline::InitPhaseCal(DataReader *dr){
     try {
       Vector<Int> AntennaIDs;
-      uInt date,refAntID;      
+      uInt date;      
       Double DrefAntID;
       dr->header().get("Date",date);
       dr->header().get("AntennaIDs",AntennaIDs);
       Vector<Double> tmpvec;
       //      Vector<Int> tmpIntvec;
       Matrix<Double> tmpmat;
-      Int i,refAnt=0,numAntennas=AntennaIDs.nelements();
+      Int i,refAntID,refAnt=0,numAntennas=AntennaIDs.nelements();
 
       CTRead->GetData(date, AntennaIDs(0), "PhaseRefAnt", &DrefAntID);
       refAntID = (int)DrefAntID;
