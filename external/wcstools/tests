@@ -1,0 +1,40 @@
+    60	18:47	clear
+    61	18:47	make
+    62	18:47	vlrst
+    63	18:47	vclear
+    64	18:47	make
+    65	18:48	clear
+    66	18:48	make
+    67	18:49	clear
+    68	18:49	make
+    69	18:49	clear
+    70	18:49	make
+    71	18:49	clear
+    72	18:49	make
+    73	18:50	mkae
+    74	18:51	make
+    75	18:51	wcs
+    76	18:51	make scat
+    77	18:51	bin/scat -c gsc2 10:00 10:00 J2000 -r 60
+    78	18:52	clear
+    79	18:52	bin/scat -c gsc2 10:00 10:00 J2000 -r 60
+    80	18:52	bin/scat -c gsc2 10:00 +10:00 J2000 -r 60
+    81	18:55	bin/scat -c gsc2 10:00 +10:00 J2000 -r 60
+    82	18:57	bin/scat -c gsc2 10:00 +10:00 J2000 -r 60
+    83	18:59	bin/scat -c gsc2 10:00 +10:00 J2000 -r 60
+    84	19:00	bin/scat -v -c gsc2 10:00 +10:00 J2000 -r 60
+    85	19:01	bin/scat -vvv -c gsc2 10:00 +10:00 J2000 -r 60
+    86	19:01	bin/scat -vv -c gsc2 10:00 +10:00 J2000 -r 60
+    87	19:02	bin/scat -vv -c gsc2 10:00 +10:00 J2000 -r 60
+    88	19:02	httpget "http://galex.stsci.edu/gsc2/GSC2DataReturn.aspx?RAH=10&RAM=0&RAS=0.000&DSN=+&DD=10&DM=0&DS=0.000&EQ=2000&SIZE=1.000&SRCH=Box&FORMAT=CSV&CAT=GSC23&HSTID=$|&GSC1ID=
+    89	19:02	Date: Mon, 12 Mar 2007 23:02:00 GMT
+    90	19:03	clear
+    91	19:03	bin/scat -vv -c gsc2 10:00 +10:00 J2000 -r 60
+    92	19:03	bin/scat -vvv -c gsc2 10:00 +10:00 J2000 -r 60
+    93	19:04	httpget "http://galex.stsci.edu/gsc2/GSC2DataReturn.aspx?RAH=10&RAM=0&RAS=0.000&DSN=+&DD=10&DM=0&DS=0.000&EQ=2000&SIZE=1.000&SRCH=Radius&FORMAT=CSV&CAT=GSC23&HSTID=&GSC1ID=
+    94	19:05	httpget "http://galex.stsci.edu/gsc2/GSC2DataReturn.aspx?RAH=10&RAM=0&RAS=0.000&DSN=+&DD=10&DM=0&DS=0.000&EQ=2000&SIZE=1.000&SRCH=Radius&FORMAT=CSV&CAT=GSC23&HSTID=&GSC1ID="
+    95	19:07	httpget "http://galex.stsci.edu/gsc2/GSC2DataReturn.aspx?RAH=10&RAM=0&RAS=0.000&DSN=+&DD=10&DM=0&DS=0.000&EQ=2000&SIZE=1.000&SRCH=Radius&FORMAT=CSV&CAT=GSC23&HSTID=S000005381&GSC1ID="
+    96	19:07	httpget "http://galex.stsci.edu/gsc2/GSC2DataReturn.aspx?RAH=&RAM=&RAS=&DSN=+&DD=&DM=&DS=&EQ=2000&SIZE=&SRCH=Radius&FORMAT=CSV&CAT=GSC23&HSTID=S000005381&GSC1ID="
+    97	19:08	httpget "http://galex.stsci.edu/gsc2/GSC2DataReturn.aspx?RAH=&RAM=&RAS=&DSN=+&DD=&DM=&DS=&EQ=2000&SIZE=&SRCH=Radius&FORMAT=CSV&CAT=GSC23&HSTID=S000005381&GSC1ID=" > & temp
+    98	19:10	cat temp
+    99	19:10	history > tests
