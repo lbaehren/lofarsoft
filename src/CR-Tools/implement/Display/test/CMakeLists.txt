@@ -3,25 +3,6 @@
 ##------------------------------------------------------------------------------
 
 ## -----------------------------------------------------------------------------
-## tPGPlotterCR
-
-if (HAVE_PGPLOT)
-  ## compiler instructions
-  add_executable (tPGPlotterCR tPGPlotterCR.cc)
-  ## linker instructions
-  target_link_libraries (tPGPlotterCR cr ${PGPLOT_LIBRARIES} ${X11_LIBRARIES})
-  ## testing
-  add_test (tPGPlotterCR tPGPlotterCR)
-  ## installation
-  install (
-    TARGETS tPGPlotterCR
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    )
-endif (HAVE_PGPLOT)
-
-## -----------------------------------------------------------------------------
 ## tSimplePlot
 
 if (HAVE_PLPLOT)
