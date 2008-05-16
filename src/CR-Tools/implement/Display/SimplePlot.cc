@@ -668,7 +668,5 @@ namespace CR { // Namespace CR -- begin
     }; 
     return status;        
   };
-
-  
   
 } // Namespace CR -- end
