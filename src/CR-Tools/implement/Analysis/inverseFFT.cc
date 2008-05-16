@@ -1394,9 +1394,9 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
        
      } catch( AipsError x ) {
       cerr << "inverseFFT::Odensityprofile" <<x.getMesg() << endl ;
+	  return 0;
     } 
     
-   // return Odensityprofile ;
  }
  
  

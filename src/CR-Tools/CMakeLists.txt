@@ -19,7 +19,7 @@ option (CR_BUILD_TESTS "Build the test programs?" 1)
 option (CR_BUILD_EXTERNAL_TESTS "Build the test programs for external packages?" 0)
 option (CR_ENABLE_TESTING "Enable running the test programs?" 1)
 option (CR_COMPILER_WARNINGS "Enable standard set of compiler warnings?" ON)
-option (CR_ENABLE_LOPESSTAR "Enable additional routines from LOPES-Star?" 1)
+option (CR_ENABLE_LOPESSTAR "Enable additional routines from LOPES-Star?" ON)
 option (CR_DEBUGGING_MESSAGES "Print debugging information?" 0)
 option (CR_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
 option (CR_GLISH_SUPPORT "Activate support for Glish applications?" 0)
@@ -337,17 +337,23 @@ endif (CR_COMPILER_WARNINGS)
 ## -------------------------------------------------------------------
 ## Handle option: build components from LOPES-Star module
 
-if (NOT HAVE_ROOT)
-  set (CR_ENABLE_LOPESSTAR OFF)
-endif (NOT HAVE_ROOT)
+if (CR_ENABLE_LOPESSTAR)
+  
+  ## check if ROOT is available
 
-if (NOT HAVE_FFTW3)
-  set (CR_ENABLE_LOPESSTAR OFF)
-endif (NOT HAVE_FFTW3)
+  if (NOT HAVE_ROOT)
+    message (STATUS "LopesStar support disabled; missing ROOT.")
+    set (CR_ENABLE_LOPESSTAR FALSE)
+  endif (NOT HAVE_ROOT)
 
-if (NOT HAVE_PostgreSQL) 
-  set (CR_ENABLE_LOPESSTAR OFF)
-endif (NOT HAVE_PostgreSQL)
+  ## check if FFTW3 is available
+
+  if (NOT HAVE_FFTW3)
+    message (STATUS "LopesStar support disabled; missing FFTW3.")
+    set (CR_ENABLE_LOPESSTAR FALSE)
+  endif (NOT HAVE_FFTW3)
+
+endif (CR_ENABLE_LOPESSTAR)
 
 ## -------------------------------------------------------------------
 ## Handle option: create Python binding
