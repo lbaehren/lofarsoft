@@ -141,7 +141,7 @@ if (PostgreSQL_INCLUDES)
   add_definitions (-DHAVE_POSTGRESQL)
 endif (PostgreSQL_INCLUDES)
 
-find_library (PostgreSQL_LIB pq
+find_library (PostgreSQL_LIBRARIES pq
   PATHS ${locations_lib}
   PATH_SUFFIXES postgresql
   NO_DEFAULT_PATH
@@ -211,7 +211,7 @@ if (StarTools_VERBOSE_CONFIGURE)
   message (STATUS "ROOT root directory = ${ROOT_ROOTSYS}")
   message (STATUS "ROOT library        = ${ROOT_LIBRARIES}")
   message (STATUS "ROOT includes       = ${ROOT_INCLUDES}")
-  message (STATUS "PostgreSQL library  = ${PostgreSQL_LIB}")
+  message (STATUS "PostgreSQL library  = ${PostgreSQL_LIBRARIES}")
   message (STATUS "PostgreSQL includes = ${PostgreSQL_INCLUDES}")
   message (STATUS " ")
   message (STATUS "============================================================")

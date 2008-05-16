@@ -40,7 +40,6 @@ void TimeDelay (int NoChannels,
   if(tAzimuth<0) tAzimuth = (360 - tAzimuth) * Pi() / 180.0;
   else tAzimuth = tAzimuth * Pi() / 180.0;
   
-  float phi;
   for(int i=0; i<NoChannels; i++){
     GetAntPos(AntPos[i], daq_id, Pos);
     

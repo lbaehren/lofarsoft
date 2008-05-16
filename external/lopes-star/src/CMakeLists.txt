@@ -20,9 +20,9 @@ add_definitions (
 
 set (link_libraries "")
   
-if (PostgreSQL_LIB)
-  list (APPEND link_libraries ${PostgreSQL_LIB})
-endif (PostgreSQL_LIB)
+if (PostgreSQL_LIBRARIES)
+  list (APPEND link_libraries ${PostgreSQL_LIBRARIES})
+endif (PostgreSQL_LIBRARIES)
 
 if (FFTW3_LIBRARIES)
   list (APPEND link_libraries ${FFTW3_LIBRARIES})
@@ -85,10 +85,10 @@ set (apps
   )
 
 if (NOT APPLE)
-  if (PostgreSQL_INCLUDES AND PostgreSQL_LIB) 
+  if (PostgreSQL_INCLUDES AND PostgreSQL_LIBRARIES) 
     list (APPEND apps db2csv)
     list (APPEND apps RunFlagInDB)
-  endif (PostgreSQL_INCLUDES AND PostgreSQL_LIB)
+  endif (PostgreSQL_INCLUDES AND PostgreSQL_LIBRARIES)
 endif (NOT APPLE)
   
 ## Build instructions for the applications
