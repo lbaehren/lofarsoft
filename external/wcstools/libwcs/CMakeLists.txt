@@ -53,15 +53,12 @@ install (TARGETS wcstools
   )
 
 ## ------------------------------------------------------------------------------
-## Additional library (static) required for building applications
+## Additional library (static) required for building applications; the library 
+## is not getting installed, as it is used project internally only to create the
+## executables
 
 if (WCSTOOLS_BUILD_TOOLS)
   ## compiler instructions
   add_library (wcs ${libwcs_sources})
-  ## installation instructions
-  install (TARGETS wcs
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    )
 endif (WCSTOOLS_BUILD_TOOLS)
 
