@@ -78,6 +78,8 @@ if (NOT USG_CMAKE_CONFIG)
   
   set (bin_locations
     ${USG_INSTALL_PREFIX}/bin
+    /usr/bin
+    /usr/local/bin
     /sw/bin
     CACHE
     PATH

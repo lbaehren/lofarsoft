@@ -22,7 +22,7 @@
 ## -----------------------------------------------------------------------------
 ## Search locations
 
-include (CMakeSettings)
+include (./CMakeSettings)
 
 set (casa_locations
   ## most Linux systems
@@ -44,30 +44,26 @@ set (casa_locations
 ## -----------------------------------------------------------------------------
 ## Required external packages
 
-## check where to find the CMake scripts
+set (GLISH_FIND_QUIETLY TRUE)
 
-find_path (cr_cmake FindCASA.cmake FindGlish.cmake
-  PATHS 
-  .
-  ./..
-  ./../..
-  ./../../..
-  PATH_SUFFIXES
-  devel_common/cmake
-  )
+## libg2c
 
-if (cr_cmake)
-  ## libg2c
-  if (NOT HAVE_G2C)
-    include (${cr_cmake}/FindG2C.cmake)
-  endif (NOT HAVE_G2C)
-  ## Glish
-  if (NOT HAVE_GLISH)
-    include (${cr_cmake}/FindGlish.cmake)
-  endif (NOT HAVE_GLISH)
-else (cr_cmake)
-  message (SEND_ERROR "[FindCASA] Unable to locate additional CMake find scripts!")
-endif (cr_cmake)
+if (NOT HAVE_G2C)
+  include (FindG2C)
+endif (NOT HAVE_G2C)
+
+## Glish
+
+if (NOT HAVE_GLISH)
+  include (FindGlish)
+endif (NOT HAVE_GLISH)
+
+## Feedback
+
+message (STATUS "G2C_INCLUDES    = ${G2C_INCLUDES}")
+message (STATUS "G2C_LIBRARIES   = ${G2C_LIBRARIES}")
+message (STATUS "GLISH_INCLUDES  = ${GLISH_INCLUDES}")
+message (STATUS "GLISH_LIBRARIES = ${GLISH_LIBRARIES}")
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files first, as from this we can derive a number of 
