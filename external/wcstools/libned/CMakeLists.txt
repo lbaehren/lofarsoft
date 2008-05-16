@@ -49,7 +49,7 @@ if (WCSTOOLS_BUILD_TOOLS)
     ## compiler instructions
     add_executable (${app} ${app}.c)
     ## linker instructions
-    target_link_libraries (${app} wcs ned)
+    target_link_libraries (${app} wcs ned ${link_libraries})
     ## installation instructions
     install (TARGETS ${app}
       RUNTIME DESTINATION bin
