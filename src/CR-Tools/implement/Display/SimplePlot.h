@@ -50,7 +50,6 @@
   //use pgplot if plplot is not available
   #ifdef HAVE_PGPLOT
     // #include <casa/System/PGPlotter.h>
-    #include <Display/PGPlotterLocal.h>
     #ifdef DEBUGGING_MESSAGES
       #warning Using the old PGPlot for output
     #endif
