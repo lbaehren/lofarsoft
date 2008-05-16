@@ -46,14 +46,6 @@
   #endif
   //this makes life easier!
   #undef HAVE_PGPLOT
-#else
-  //use pgplot if plplot is not available
-  #ifdef HAVE_PGPLOT
-    // #include <casa/System/PGPlotter.h>
-    #ifdef DEBUGGING_MESSAGES
-      #warning Using the old PGPlot for output
-    #endif
-  #endif
 #endif
 
 using casa::Matrix;
@@ -90,11 +82,6 @@ namespace CR { // Namespace CR -- begin
   */  
   class SimplePlot {
     
-#ifdef HAVE_PGPLOT
-    // \brief Pointer to the local pgplotter object
-    PGPlotterLocal *plotter_p;
-#endif
-
     Int ppCharacterHeight;
     Int ppLineWidth;
 

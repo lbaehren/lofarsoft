@@ -36,9 +36,6 @@ namespace CR { // Namespace CR -- begin
   };
   
   void SimplePlot::init(){
-#ifdef HAVE_PGPLOT
-    plotter_p = NULL;
-#endif
 #ifdef HAVE_PLPLOT
     SetColorMapIndex(1);
 #endif
@@ -60,12 +57,6 @@ namespace CR { // Namespace CR -- begin
   void SimplePlot::destroy () {
 #ifdef HAVE_PLPLOT
       plend();
-#endif
-#ifdef HAVE_PGPLOT
-     if (plotter_p != NULL) {
-      delete plotter_p;
-      plotter_p = NULL;
-    };
 #endif
   };
   
@@ -116,20 +107,6 @@ namespace CR { // Namespace CR -- begin
       plenv(xmin, xmax, ymin, ymax, just, axis);
       
 #endif
-#ifdef HAVE_PGPLOT
-      //initialize a PGPlotter
-       if (plotter_p != NULL) {
-	delete plotter_p;
-	plotter_p = NULL;
-      };
-      file += "/cps";
-      plotter_p = new PGPlotterLocal(file);
-      plotter_p->slw(linewidth);
-      plotter_p->sch(cheight);
-      plotter_p->sci(col); 
-      plotter_p->env(xmin, xmax, ymin, ymax, just, axis);
-      
-#endif
     } catch (AipsError x) {
       cerr << "SimplePlot::InitPlot: " << x.getMesg() << endl;
       return False;
@@ -167,25 +144,6 @@ namespace CR { // Namespace CR -- begin
 
       delete [] plxval;
       delete [] plyval;
-#endif
-#ifdef HAVE_PGPLOT
-       if (plotter_p == NULL){
-	cerr << "SimplePlot::PlotLine: " << "plotter not initialized!" << endl;
-	return False;
-      }; 
-      if (xvals.nelements() != yvals.nelements()){
-	cerr << "SimplePlot::PlotLine: " << "x- and y-vector of different length!" << endl;
-	return False;
-      }; 
-      Vector<Float> xval_(xvals.shape()),yval_(yvals.shape());
-      convertArray(xval_,xvals);
-      convertArray(yval_,yvals);
-
-      plotter_p->sci(col); 
-      plotter_p->sls(style);
-      plotter_p->line(xval_, yval_);
-      plotter_p->sls(1);
-
 #endif
     } catch (AipsError x) {
       cerr << "SimplePlot::PlotLine: " << x.getMesg() << endl;
@@ -255,43 +213,6 @@ namespace CR { // Namespace CR -- begin
       delete []plerrlow;
       delete []plerrhigh;
 #endif
-#ifdef HAVE_PGPLOT
-       if (plotter_p == NULL){
-	cerr << "SimplePlot::PlotSymbols: plotter not initialized!" << endl;
-	return False;
-      }; 
-      if (xvals.nelements() != yvals.nelements()){
-	cerr << "SimplePlot::PlotSymbols: x- and y-vector of different length!" << endl;
-	return False;
-      }; 
-      Vector<Float> xval_(xvals.shape()),yval_(yvals.shape());
-      convertArray(xval_,xvals);
-      convertArray(yval_,yvals);
-      plotter_p->sci(col); 
-      plotter_p->pt(xval_, yval_, symbol);
-      if (yerrs.nelements() != 0) {
-	if (xvals.nelements() != yerrs.nelements()){
-	  cerr << "SimplePlot::PlotSymbols: yerror-vector of different length!" << endl;
-	  return False;
-	}; 
-	Vector<Float> err1,err2,yerr_(yerrs.shape());
-	convertArray(yerr_,yerrs);
-	err1 = yval_-yerr_;
-	err2 = yval_+yerr_;
-	plotter_p->erry(xval_,err1,err2,ticklength);
-      }
-      if (xerrs.nelements() != 0) {
-	if (xvals.nelements() != xerrs.nelements()){
-	  cerr << "SimplePlot::PlotSymbols: xerror-vector of different length!" << endl;
-	  return False;
-	}; 
-	Vector<Float> err1,err2,xerr_(xerrs.shape());
-	convertArray(xerr_,xerrs);
-	err1 = xval_-xerr_;
-	err2 = xval_+xerr_;
-	plotter_p->errx(err1,err2,yval_,ticklength);
-      }
-#endif
     } catch (AipsError x) {
       cerr << "SimplePlot::PlotSymbols: " << x.getMesg() << endl;
       return False;
@@ -309,14 +230,6 @@ namespace CR { // Namespace CR -- begin
 #ifdef HAVE_PLPLOT
       plcol0(col);
       pllab(xlabel.c_str(), ylabel.c_str(), toplabel.c_str());
-#endif
-#ifdef HAVE_PGPLOT
-       if (plotter_p == NULL){
-	cerr << "SimplePlot::AddLabels: " << "plotter not initialized!" << endl;
-	return False;
-      }; 
-      plotter_p->sci(col);
-      plotter_p->lab(xlabel,ylabel,toplabel);
 #endif
     } catch (AipsError x) {
       cerr << "SimplePlot::AddLabels: " << x.getMesg() << endl;
@@ -380,10 +293,6 @@ namespace CR { // Namespace CR -- begin
 			       Bool printingplot, int nLevels, int nClevels, int cCol, int ColMapIndex){
     Bool status=True;
     try {
-#ifdef HAVE_PGPLOT
-      cerr << "SimplePlot::quick2Dplot: " << "Sorry, 2d-plotting with pgplotter not implemented!" << endl;
-      return False;
-#endif
 #ifdef HAVE_PLPLOT
       // initialize the plot
       if (printingplot) {
@@ -462,10 +371,6 @@ namespace CR { // Namespace CR -- begin
   Bool SimplePlot::SetColorMapIndex(int ColMapIndex){
     Bool status=True;
     try {
-#ifdef HAVE_PGPLOT
-      cerr << "SimplePlot::addContourLines: " << "Sorry, 2d-plotting with pgplotter not implemented!" << endl;
-      return False;
-#endif
 #ifdef HAVE_PLPLOT
       PLFLT *pos,*r,*g,*b;
       PLINT npos;
@@ -533,10 +438,6 @@ namespace CR { // Namespace CR -- begin
 	cout << "SimplePlot::addContourLines: " << "Not plotting less than one contour lines." << endl;
 	return False;
       };
-#ifdef HAVE_PGPLOT
-      cerr << "SimplePlot::addContourLines: " << "Sorry, 2d-plotting with pgplotter not implemented!" << endl;
-      return False;
-#endif
 #ifdef HAVE_PLPLOT
 //       int i,j;
 //       PLINT nx,ny;
@@ -606,10 +507,6 @@ namespace CR { // Namespace CR -- begin
 				   int cCol, int style){
     Bool status=True;
     try {
-#ifdef HAVE_PGPLOT
-      cerr << "SimplePlot::addContourLines: " << "Sorry, 2d-plotting with pgplotter not implemented!" << endl;
-      return False;
-#endif
 #ifdef HAVE_PLPLOT
       int i,j, nClevels=CLevels.nelements();
       if (nClevels<1) {
