@@ -103,6 +103,12 @@ get_antennaPositions (uint const &nofAntennas=4,
       antPositions(n,1) = n*incr;
     }
     break;
+  case AzElHeight:
+  case AzElRadius:
+  case Cylindrical:
+  case NorthEastHeight:
+    std::cout << "-- No special settings for this coordinates." << std::endl;
+    break;
   }
   
   if (antennaIndexFirst) {
