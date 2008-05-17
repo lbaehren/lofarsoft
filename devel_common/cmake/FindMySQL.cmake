@@ -80,4 +80,5 @@ endif (HAVE_MYSQL)
 mark_as_advanced (
   MYSQL_INCLUDES
   MYSQL_LIBRARIES
+  libmysqlclient
   )

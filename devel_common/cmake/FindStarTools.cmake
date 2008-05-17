@@ -19,7 +19,7 @@ include (CMakeSettings)
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-find_path (STARTOOLS_INCLUDES lopes-star/util.hh lopes-star/trigger.hh
+find_path (STARTOOLS_INCLUDES startools/util.hh startools/trigger.hh
   PATHS ${include_locations}
   NO_DEFAULT_PATH
   )

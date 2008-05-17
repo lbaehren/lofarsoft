@@ -34,12 +34,13 @@ set (casa_locations
   /opt/casa
   /opt/casa/stable
   /opt/casa/current
-  ## Mac OS X (Fink)
-  /sw/share/aips++
-  /sw/share/casa
   ## LOFAR development
   /app/aips++/Stable
   )
+
+if (APPLE)
+  list (APPEND casa_locations /sw/share/aips++ /sw/share/casa)
+endif (APPLE)
 
 ## -----------------------------------------------------------------------------
 ## Required external packages
