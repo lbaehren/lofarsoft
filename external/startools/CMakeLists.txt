@@ -18,6 +18,7 @@ cmake_minimum_required (VERSION 2.4)
 
 option (StarTools_VERBOSE_CONFIGURE "Verbose output during configuration?" 1)
 option (StarTools_FORCE_BUILD "Force rebuild and local installation" 0)
+option (StarTools_BUILD_APPLICATIONS "Build all the applications in the package?" 1)
 
 ## ============================================================================== 
 ##

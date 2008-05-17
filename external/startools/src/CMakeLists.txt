@@ -64,59 +64,10 @@ add_library (recradio
 
 target_link_libraries (recradio ${link_libraries})
 
-## ==============================================================================
-##
-##  Applications
-##
-## ==============================================================================
+## ------------------------------------------------------------------------------
+## Installation
 
-## List of applications to be build
-
-set (apps
-  DynamicSpectra
-  EventViewer
-  SpectraViewer
-  RunFlagOut
-  RunFlagSelection
-  ChannelStatusControl
-  RunFlagMergeGrande
-  Beamforming
-  RunFlagRecEvent
-  )
-
-if (NOT APPLE)
-  if (PostgreSQL_INCLUDES AND PostgreSQL_LIBRARIES) 
-    list (APPEND apps db2csv)
-    list (APPEND apps RunFlagInDB)
-  endif (PostgreSQL_INCLUDES AND PostgreSQL_LIBRARIES)
-endif (NOT APPLE)
-  
-## Build instructions for the applications
-
-foreach (app ${apps})
-  ## compiler instructions
-  add_executable (${app} ${app}.cpp)
-  ## linker instructions
-  target_link_libraries (${app}
-    starutil
-    recradio
-    )
-  ## platform-specific instructions
-  if (APPLE)
-    set_target_properties (${app}
-      PROPERTIES
-      LINK_FLAGS "-bind_at_load"
-      )
-  endif (APPLE)
-endforeach (app)
-
-## ==============================================================================
-##
-##  Installation
-##
-## ==============================================================================
-
-## Installation of header files
+## Header files
 
 file (GLOB header_files *.hh)
 
@@ -124,10 +75,66 @@ install (FILES ${header_files}
   DESTINATION include/startools
   )
 
-## Installation of the library and the executables
+## Libraries
 
-install (TARGETS starutil recradio ${apps}
+install (TARGETS starutil recradio
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   )
+
+## ==============================================================================
+##
+##  Applications
+##
+## ==============================================================================
+
+if (StarTools_BUILD_APPLICATIONS)
+  
+  ## List of applications to be build
+  
+  set (apps
+    DynamicSpectra
+    EventViewer
+    SpectraViewer
+    RunFlagOut
+    RunFlagSelection
+    ChannelStatusControl
+    RunFlagMergeGrande
+    Beamforming
+    RunFlagRecEvent
+    )
+  
+  if (NOT APPLE)
+    if (PostgreSQL_INCLUDES AND PostgreSQL_LIBRARIES) 
+      list (APPEND apps db2csv)
+      list (APPEND apps RunFlagInDB)
+    endif (PostgreSQL_INCLUDES AND PostgreSQL_LIBRARIES)
+  endif (NOT APPLE)
+  
+  ## Build instructions for the applications
+  
+  foreach (app ${apps})
+    ## compiler instructions
+    add_executable (${app} ${app}.cpp)
+    ## linker instructions
+    target_link_libraries (${app}
+      starutil
+      recradio
+      )
+    ## platform-specific instructions
+    if (APPLE)
+      set_target_properties (${app}
+	PROPERTIES
+	LINK_FLAGS "-bind_at_load"
+	)
+    endif (APPLE)
+  endforeach (app)
+
+  ## Installation
+  
+  install (TARGETS ${apps}
+    RUNTIME DESTINATION bin
+    )
+  
+endif (StarTools_BUILD_APPLICATIONS)
