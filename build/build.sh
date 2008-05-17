@@ -165,7 +165,7 @@ else
 		rm -rf dal dsp;
 		rm -rf flex;
 		rm -rf hdf5;
-		rm -rf lopes-star;
+		rm -rf startools;
 		rm -rf plplot python;
 		rm -rf vtk;
 		rm -rf wcslib wcstools;
@@ -304,10 +304,6 @@ case $param_packageName in
 		echo "[`date`] Selected package Hdf5"
 		build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
-    lopes-star)
-		echo "[`date`] Selected package LOPES-Star"
-		build_package lopes-star external/lopes-star "-DStarTools_FORCE_BUILD:BOOL=$param_forceBuild";
-    ;;
     plplot)
 		echo "[`date`] Selected package Plplot"
 		if test -d $basedir/../external/plplot ; then
@@ -334,6 +330,10 @@ case $param_packageName in
     python)
 		echo "[`date`] Selected package PYTHON"
 		build_package python external/python
+    ;;
+    startools)
+		echo "[`date`] Selected package Star-Tools"
+		build_package startools external/startools "-DStarTools_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     vtk)
 		echo "[`date`] Selected package VTK"
@@ -377,7 +377,7 @@ case $param_packageName in
     cr)
 		echo "[`date`] Processing required packages ..."
 		./build.sh dal  $param_reportBuild
-		./build.sh lopes-star
+		./build.sh startools
 		echo "[`date`] Building CR-Tools package ..."
 		build_package cr src/CR-Tools;
     ;;
