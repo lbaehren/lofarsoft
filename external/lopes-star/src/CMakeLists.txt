@@ -118,8 +118,10 @@ endforeach (app)
 
 ## Installation of header files
 
-install (FILES util.hh trigger.hh calibration.hh reconstruction.hh
-  DESTINATION include/lopes-star
+file (GLOB header_files *.hh)
+
+install (FILES ${header_files}
+  DESTINATION include/startools
   )
 
 ## Installation of the library and the executables
