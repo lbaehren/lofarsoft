@@ -36,12 +36,6 @@ if (CR_GLISH_SUPPORT)
   list (APPEND cr_modules ApplicationSupport)
 endif (CR_GLISH_SUPPORT)
 
-# (c) Data processing routines written for the LOPES-Star experiment
-
-if (CR_ENABLE_LOPESSTAR)
-  list (APPEND cr_modules LopesStar)
-endif (CR_ENABLE_LOPESSTAR)
-
 ## -----------------------------------------------------------------------------
 ## Build "libcr"
 
@@ -62,10 +56,10 @@ if (NOT HAVE_PGPLOT)
   list (REMOVE_ITEM cr_sources Display/PGPlotterLocal.cc)
 endif (NOT HAVE_PGPLOT)
 
-if (NOT CR_ENABLE_LOPESSTAR)
+if (NOT HAVE_STARTOOLS)
   list (REMOVE_ITEM cr_sources Analysis/CompletePipeline.cc)
   list (REMOVE_ITEM cr_sources Analysis/analyseLOPESevent2.cc)
-endif (NOT CR_ENABLE_LOPESSTAR)
+endif (NOT HAVE_STARTOOLS)
 
 ## Assemble list of external libraries against which to link
 

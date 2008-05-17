@@ -67,8 +67,8 @@ if (HAVE_CASACORE AND HAVE_WCSLIB)
     ## linker instructions
     target_link_libraries (${test}
       cr_test
-      ${LAPACK_LIBRARIES}
       ${CASA_LIBRARIES}
+      ${LAPACK_LIBRARIES}
       ${WCSLIB_LIBRARIES}
       ${G2C_LIBRARIES}
       ${libm}

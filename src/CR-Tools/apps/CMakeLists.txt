@@ -95,9 +95,9 @@ if (HAVE_STARTOOLS)
   ## linker instructions
   target_link_libraries (call_pipeline
     cr
+    ${STARTOOLS_LIBRARIES}
     ${ROOT_LIBRARIES}
     ${FFTW3_LIBRARIES}
-    ${STARTOOLS_LIBRARIES}
     )
   ## installation instructions
   list (APPEND cr_apps call_pipeline)

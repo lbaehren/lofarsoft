@@ -145,8 +145,6 @@ for(uint lr=0; lr<5; lr++){
    legendre_weight(lr)= l_weight[lr] ;
  }
 
- Double pi = 3.1416 ;
-
  StationBeam stbm ;
 //  SimplePlot smplt ;
 
@@ -156,7 +154,6 @@ for(uint lr=0; lr<5; lr++){
 
  Double zenith_min = source_declination -1.0 ;
  Double zenith_max = source_declination + 1.0 ;
- Double declination(0.0);
 
  Double zenith_interval = 0.05 ;
 
@@ -165,7 +162,6 @@ for(uint lr=0; lr<5; lr++){
 
  Double hrangle_min = source_hr_angle -5.0 ;
  Double hrangle_max = source_hr_angle +5.0  ;
- Double hrangle (0.0);
  
  Double hrangle_interval = 0.1 ;
 

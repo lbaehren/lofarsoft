@@ -257,10 +257,8 @@ int test_construction (std::string const &filename)
 {
   cout << "\n[test_construction]\n" << endl;
 
-  int nofFailedTests     = 0;
-  bool listStationGroups = true;
-  bool listChannelIDs    = true;
-  uint blocksize         = 1024;
+  int nofFailedTests = 0;
+  uint blocksize     = 1024;
   
   cout << "[1] Testing default constructor ..." << endl;
   try {

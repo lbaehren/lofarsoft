@@ -122,8 +122,8 @@ bool export2fits (casa::Matrix<double> const &spectrum,
   cout << "--> setting up array with image pixel data ..." << endl;
   try {
     // additional local variables
-    uint timestep = 0;
-    uint channel  = 0;
+    int timestep = 0;
+    int channel  = 0;
     // copy values
     for (timestep=0; timestep<shape(1); timestep++) {
       for (channel=0; channel<shape(0); channel++) {
@@ -144,7 +144,6 @@ bool export2fits (casa::Matrix<double> const &spectrum,
   }
   
   cout << "--> adding WCS coordinate information" << endl;
-  double sampleFrequency (2e08);  // 200 MHz
   referencePixel[0] = referencePixel[1] = 0.;
   referenceValue[0] = referenceValue[1] = 0.;
 

@@ -34,7 +34,7 @@
 // For Plots:
 #include <Display/SimplePlot.h>
 // For Upsampling:
-#include <lopes-star/reconstruction.hh>
+#include <startools/reconstruction.hh>
 
 namespace CR { // Namespace CR -- begin
   

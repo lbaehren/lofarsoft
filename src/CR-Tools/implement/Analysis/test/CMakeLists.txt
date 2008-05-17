@@ -80,13 +80,14 @@ if (NOT APPLE)
     list (APPEND tests tanalyseLOPESevent)
   endif (HAVE_PLPLOT OR HAVE_PGPLOT)
   
-  if (CR_ENABLE_LOPESSTAR)
+  if (HAVE_STARTOOLS)
     ## compiler instructions
     add_executable (tanalyseLOPESevent2 tanalyseLOPESevent2.cc)
     ## linker instructions
     if (HAVE_PLPLOT OR HAVE_PGPLOT)
       target_link_libraries (tanalyseLOPESevent2
 	cr
+	${STARTOOLS_LIBRARIES}
 	${FFTW3_LIBRARIES}
 	${ROOT_LIBRARIES}
 	${PLPLOT_LIBRARIES}
@@ -97,6 +98,7 @@ if (NOT APPLE)
       ## link instructions
       target_link_libraries (tanalyseLOPESevent2
 	cr
+	${STARTOOLS_LIBRARIES}
 	${X11_LIBRARIES}
 	${PGPLOT_LIBRARIES}
 	)
@@ -105,17 +107,18 @@ if (NOT APPLE)
     add_test (tanalyseLOPESevent2 tanalyseLOPESevent2)
     ## installation
     list (APPEND tests tanalyseLOPESevent2)
-  endif (CR_ENABLE_LOPESSTAR)
+  endif (HAVE_STARTOOLS)
   
   ## [3] Test programs for programs using functionality of LopesStar
   
-  if (CR_ENABLE_LOPESSTAR AND CR_PLOTTING_SUPPORT)
+  if (HAVE_STARTOOLS AND CR_PLOTTING_SUPPORT)
     ## compiler instructions
     add_executable (tCompletePipeline tCompletePipeline.cc)
     ## linker instructions
     if (libm AND libutil)
       target_link_libraries (tCompletePipeline
 	cr
+	${STARTOOLS_LIBRARIES}
 	${FFTW3_LIBRARIES}
 	${ROOT_LIBRARIES}
 	${PYTHON_LIBRARIES}
@@ -125,6 +128,7 @@ if (NOT APPLE)
     else (libm AND libutil)
       target_link_libraries (tCompletePipeline
 	cr
+	${STARTOOLS_LIBRARIES}
 	${FFTW3_LIBRARIES}
 	${ROOT_LIBRARIES}
 	${PYTHON_LIBRARIES}
@@ -141,7 +145,7 @@ if (NOT APPLE)
     if (CR_ENABLE_TESTING) 
       add_test (tCompletePipeline tCompletePipeline)
     endif (CR_ENABLE_TESTING) 
-  endif (CR_ENABLE_LOPESSTAR AND CR_PLOTTING_SUPPORT)
+  endif (HAVE_STARTOOLS AND CR_PLOTTING_SUPPORT)
   
 endif (NOT APPLE)
 

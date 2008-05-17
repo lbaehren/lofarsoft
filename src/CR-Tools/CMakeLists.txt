@@ -19,7 +19,6 @@ option (CR_BUILD_TESTS "Build the test programs?" 1)
 option (CR_BUILD_EXTERNAL_TESTS "Build the test programs for external packages?" 0)
 option (CR_ENABLE_TESTING "Enable running the test programs?" 1)
 option (CR_COMPILER_WARNINGS "Enable standard set of compiler warnings?" ON)
-option (CR_ENABLE_LOPESSTAR "Enable additional routines from LOPES-Star?" ON)
 option (CR_DEBUGGING_MESSAGES "Print debugging information?" 0)
 option (CR_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
 option (CR_GLISH_SUPPORT "Activate support for Glish applications?" 0)
@@ -51,6 +50,7 @@ if (NOT CR_VERBOSE_CONFIGURE)
   set (PostgreSQL_FIND_QUIETLY 1)
   set (PYTHON_FIND_QUIETLY 1)
   set (ROOT_FIND_QUIETLY 1)
+  set (STARTOOLS_FIND_QUIETLY TRUE)
   set (WCSLIB_FIND_QUIETLY 1)
   ## output of the generated makefile
   set (CMAKE_VERBOSE_MAKEFILE 0)
@@ -300,6 +300,15 @@ if (HAVE_PYTHON)
 endif (HAVE_PYTHON)
 
 
+## --- StarTools ---------------------------------
+
+include (FindStarTools)
+
+if (STARTOOLS_INCLUDES)
+  add_definitions (-DHAVE_STARTOOLS)
+  include_directories (${STARTOOLS_INCLUDES})
+endif (STARTOOLS_INCLUDES)
+
 ## =============================================================================
 ##
 ##  Handling of configuration/build/install options
@@ -334,27 +343,6 @@ if (CR_COMPILER_WARNINGS)
     )
 endif (CR_COMPILER_WARNINGS)
     
-## -------------------------------------------------------------------
-## Handle option: build components from LOPES-Star module
-
-if (CR_ENABLE_LOPESSTAR)
-  
-  ## check if ROOT is available
-
-  if (NOT HAVE_ROOT)
-    message (STATUS "LopesStar support disabled; missing ROOT.")
-    set (CR_ENABLE_LOPESSTAR FALSE)
-  endif (NOT HAVE_ROOT)
-
-  ## check if FFTW3 is available
-
-  if (NOT HAVE_FFTW3)
-    message (STATUS "LopesStar support disabled; missing FFTW3.")
-    set (CR_ENABLE_LOPESSTAR FALSE)
-  endif (NOT HAVE_FFTW3)
-
-endif (CR_ENABLE_LOPESSTAR)
-
 ## -------------------------------------------------------------------
 ## Handle option: create Python binding
 
@@ -552,13 +540,13 @@ message (STATUS " POPT ..................... : ${HAVE_POPT}")
 message (STATUS " PostgreSQL ............... : ${HAVE_PostgreSQL}")
 message (STATUS " Python ................... : ${HAVE_PYTHON}")
 message (STATUS " ROOT ..................... : ${HAVE_ROOT}")
+message (STATUS " Star-Tools ............... : ${HAVE_STARTOOLS}")
 message (STATUS " WCSLIB ................... : ${HAVE_WCSLIB}")
 message (STATUS "+------------------------------------------------------------+")
 message (STATUS " Source directory ......... : ${CR_SOURCE_DIR}")
 message (STATUS " Installation location .... : ${CMAKE_INSTALL_PREFIX}")
 message (STATUS " Build the test programs .. : ${CR_BUILD_TESTS}")
 message (STATUS " Enable testing ........... : ${CR_ENABLE_TESTING}")
-message (STATUS " Enable LOPES-Star routines : ${CR_ENABLE_LOPESSTAR}")
 message (STATUS " Support for Glish ........ : ${CR_GLISH_SUPPORT}")
 message (STATUS " Support for Python ....... : ${CR_PYTHON_SUPPORT}")
 message (STATUS " Print debugging messages . : ${CR_DEBUGGING_MESSAGES}")

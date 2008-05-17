@@ -547,7 +547,7 @@ int test_data (std::string const &filename)
   try {
     casa::Vector<double> data = dataset.fx (start,blocksize);
 
-    if (data.size() == blocksize) {
+    if (data.size() == int(blocksize)) {
       std::cout << "-- Channel name = " << dataset.channelName() << std::endl;
       std::cout << "-- Data start   = " << start                 << std::endl;
       std::cout << "-- Blocksize    = " << blocksize             << std::endl;
