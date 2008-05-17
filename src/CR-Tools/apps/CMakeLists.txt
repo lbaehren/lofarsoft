@@ -90,17 +90,18 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 ## -------------------------------------------------------------------
 ## call_pipeline
 
-if (CR_ENABLE_LOPESSTAR)
+if (HAVE_STARTOOLS)
   add_executable (call_pipeline call_pipeline.cc)
   ## linker instructions
   target_link_libraries (call_pipeline
     cr
-    ${FFTW3_LIBRARIES}
     ${ROOT_LIBRARIES}
+    ${FFTW3_LIBRARIES}
+    ${STARTOOLS_LIBRARIES}
     )
   ## installation instructions
   list (APPEND cr_apps call_pipeline)
-endif (CR_ENABLE_LOPESSTAR)
+endif (HAVE_STARTOOLS)
 
 ## -------------------------------------------------------------------
 ## readLopesCalTable
@@ -168,14 +169,6 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 if (CR_GLISH_SUPPORT AND HAVE_GLISH)
   add_subdirectory (GlishClients)
 endif (CR_GLISH_SUPPORT AND HAVE_GLISH)
-
-## -------------------------------------------------------------------
-## LOPES-Star tools
-
-if (CR_ENABLE_LOPESSTAR)
-  add_subdirectory (LopesStar)
-endif (CR_ENABLE_LOPESSTAR)
-
 
 ## ==============================================================================
 ##
