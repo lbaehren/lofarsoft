@@ -16,7 +16,8 @@ include (CTest)
 ## ------------------------------------------------------------------------------
 ## User selectable options
 
-option (WCSTOOLS_BUILD_TOOLS "Build the applications?" ON)
+option (WCSTOOLS_BUILD_TOOLS "Build the applications?" OFF)
+option (WCSTOOLS_BUILD_LIBNED "Build the libned library?" OFF)
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -91,7 +92,10 @@ endif (libm)
 ## ==============================================================================
 
 add_subdirectory (libwcs)
-add_subdirectory (libned)
+
+if (WCSTOOLS_BUILD_LIBNED)
+  add_subdirectory (libned)
+endif (WCSTOOLS_BUILD_LIBNED)
 
 ## ==============================================================================
 ##
