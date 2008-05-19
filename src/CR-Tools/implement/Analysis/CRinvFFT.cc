@@ -305,15 +305,11 @@ namespace CR { // Namespace CR -- begin
       } else {
 	nselants=ntrue(antennaSelection);
       };
-      Vector<Double> tmpvec(blocksize);
       timeSeries.resize(blocksize,nselants);
-      FFTServer<Double,DComplex> server(IPosition(1,blocksize),
-					FFTEnums::REALTOCOMPLEX);
       j=0;
       for (i=0;i<nants;i++){
 	if (antennaSelection(i)){
-	  server.fft(tmpvec,FFTData.column(i));
-	  timeSeries.column(j) = tmpvec;
+	  timeSeries.column(j) = dr->invfft(FFTData.column(i));
 	  j++;
 	};
       };      

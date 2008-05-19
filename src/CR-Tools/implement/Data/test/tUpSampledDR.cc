@@ -70,16 +70,16 @@ int test_UpSampledDR ()
       return nofFailedTests;
     };
     std::cout << "                             ..." << " attaching File" << std::endl;
-    if (! newUpSampledDR.setup(&lev,80e6,False)){
+    if (! newUpSampledDR.setup(&lev,320e6,False)){
       std::cout << "  Failed to setup UpSampledDR!" << std::endl;
       nofFailedTests++;
       return nofFailedTests;
     };
 
     std::cout << "[3] Setting new blocksizes ..." << std::endl;
-    //lev.setHanningFilter(0.5,16384);
-    //newUpSampledDR.setBlocksize(2048);
-    //newUpSampledDR.setBlock(64);
+    lev.setHanningFilter(0.5,16384);
+    newUpSampledDR.setBlocksize(2048);
+    newUpSampledDR.setBlock(64);
 
     std::cout << "[4] Dumping original data ..." << std::endl;
     int i,TSlen;
@@ -98,20 +98,12 @@ int test_UpSampledDR ()
     fprintf(allout,"\n");
     fclose(allout);
 
-    FFTServer<Double,DComplex> fftserv(IPosition(1,Times.nelements()), FFTEnums::REALTOCOMPLEX);
-    Vector<DComplex> FFTvec;
-    Vector<Double> FXvec;
-    FFTvec = lev.fft().column(0);
-    fftserv.fft(FFTvec,FX.column(0));
-    fftserv.fft(FXvec,FFTvec);
-    FX.column(0) = FXvec;
-
     std::cout << "[5] Dumping upsampled data ..." << std::endl;
-//     Times.resize();
-//     FX.resize();
-//     Times = newUpSampledDR.timeValues();
-//     TSlen = Times.nelements();
-//     FX = newUpSampledDR.voltage();
+    Times.resize();
+    FX.resize();
+    Times = newUpSampledDR.timeValues();
+    TSlen = Times.nelements();
+    FX = newUpSampledDR.voltage();
     allout = fopen("tUpSampledDR-upsampled.tab","w");
     for (i=0; i< TSlen; i++) {
       fprintf(allout,"\n %e ",Times(i)*1e6);
@@ -123,49 +115,49 @@ int test_UpSampledDR ()
 
 
 
-    std::cout << "[5] Arranging storage, ..." << std::endl;
-    Vector<Double> Frequencies;
-    Matrix<DComplex> FFT;
-    Matrix<Double> absFFT,phaseFFT;
-    Int j,fftlen,nants;
+//     std::cout << "[6] Arranging storage, ..." << std::endl;
+//     Vector<Double> Frequencies;
+//     Matrix<DComplex> FFT;
+//     Matrix<Double> absFFT,phaseFFT;
+//     Int j,fftlen,nants;
 
-    allout = fopen("tUpSampledDR-original-fft.tab","w");
-    Frequencies = lev.frequencyValues();
-    std::cout << "                      ... retrieving the data from the pipeline," << std::endl;
-    FFT = lev.fft();
-    absFFT = amplitude(FFT);
-    phaseFFT = phase(FFT);
-    fftlen = absFFT.nrow();
-    nants = absFFT.ncolumn();
-    std::cout << "                      ... and dumping the filtered data to file." << std::endl;
-    for (i=0; i< fftlen; i++) {
-      fprintf(allout,"\n %f ",Frequencies(i));
-      for (j=0; j<nants; j++) {
-	fprintf(allout,"\t %f %f ",absFFT(i,j),phaseFFT(i,j));
-      };
-    };
-    fprintf(allout,"\n");
-    fclose(allout);
+//     allout = fopen("tUpSampledDR-original-fft.tab","w");
+//     Frequencies = lev.frequencyValues();
+//     std::cout << "                      ... retrieving the data from the pipeline," << std::endl;
+//     FFT = lev.fft();
+//     absFFT = amplitude(FFT);
+//     phaseFFT = phase(FFT);
+//     fftlen = absFFT.nrow();
+//     nants = absFFT.ncolumn();
+//     std::cout << "                      ... and dumping the filtered data to file." << std::endl;
+//     for (i=0; i< fftlen; i++) {
+//       fprintf(allout,"\n %f ",Frequencies(i));
+//       for (j=0; j<nants; j++) {
+// 	fprintf(allout,"\t %f %f ",absFFT(i,j),phaseFFT(i,j));
+//       };
+//     };
+//     fprintf(allout,"\n");
+//     fclose(allout);
 
 
-    Frequencies.resize();FFT.resize();absFFT.resize();phaseFFT.resize();
-    allout = fopen("tUpSampledDR-upsampled-fft.tab","w");
-    Frequencies = newUpSampledDR.frequencyValues();
-    std::cout << "                      ... retrieving the data from the pipeline," << std::endl;
-    FFT = newUpSampledDR.fft();
-    absFFT = amplitude(FFT);
-    phaseFFT = phase(FFT);
-    fftlen = absFFT.nrow();
-    nants = absFFT.ncolumn();
-    std::cout << "                      ... and dumping the filtered data to file." << std::endl;
-    for (i=0; i< fftlen; i++) {
-      fprintf(allout,"\n %f ",Frequencies(i));
-      for (j=0; j<nants; j++) {
-	fprintf(allout,"\t %f %f ",absFFT(i,j),phaseFFT(i,j));
-      };
-    };
-    fprintf(allout,"\n");
-    fclose(allout);
+//     Frequencies.resize();FFT.resize();absFFT.resize();phaseFFT.resize();
+//     allout = fopen("tUpSampledDR-upsampled-fft.tab","w");
+//     Frequencies = newUpSampledDR.frequencyValues();
+//     std::cout << "                      ... retrieving the data from the pipeline," << std::endl;
+//     FFT = newUpSampledDR.fft();
+//     absFFT = amplitude(FFT);
+//     phaseFFT = phase(FFT);
+//     fftlen = absFFT.nrow();
+//     nants = absFFT.ncolumn();
+//     std::cout << "                      ... and dumping the filtered data to file." << std::endl;
+//     for (i=0; i< fftlen; i++) {
+//       fprintf(allout,"\n %f ",Frequencies(i));
+//       for (j=0; j<nants; j++) {
+// 	fprintf(allout,"\t %f %f ",absFFT(i,j),phaseFFT(i,j));
+//       };
+//     };
+//     fprintf(allout,"\n");
+//     fclose(allout);
 
 
 

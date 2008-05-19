@@ -727,6 +727,9 @@ namespace CR {  //  Namespace CR -- begin
     \brief Raw FFT of the voltage time series
     
     \return fft -- [channel,antenna] Raw FFT of the voltage time series
+
+    <b>Note:</b> Depending on the Nyquist-zone the FFTed data may be flipped! 
+    Use the <tt>invfft()</tt> function for the inverse FFT.
   */
   virtual Matrix<DComplex> fft ();
 
@@ -737,6 +740,34 @@ namespace CR {  //  Namespace CR -- begin
                       gain-curves.
   */
   virtual Matrix<DComplex> calfft ();
+
+  /*!
+    \brief Do the inverse Fourier transform. (On the calfft data.)
+
+    \return tsdata -- [sample,antenna] Reconstructed time series data, ["calibrated" Volts]
+  */
+    virtual inline Matrix<Double> invfft() {
+      return invfft(calfft());
+    };
+
+  /*!
+    \brief Do the inverse Fourier transform.
+
+    \param fftdata -- Matrix with the fft-data as output from <tt>fft()</tt> or <tt>calfft()</tt>.
+
+    \return tsdata -- [sample,antenna] Reconstructed time series data, [depends on input]
+  */
+    virtual Matrix<Double> invfft (Matrix<DComplex> fftdata);
+
+  /*!
+    \brief Do the inverse Fourier transform. on a single antenna trace
+
+    \param fftdata -- Vector with the fft-data as output from <tt>fft()</tt> or <tt>calfft()</tt>.
+
+    \return tsdata -- [sample] Reconstructed time series data, [depends on input]
+  */
+    virtual Vector<Double> invfft (Vector<DComplex> fftdata);
+
 
   /*!
     \brief Get the cross-correlation spectra

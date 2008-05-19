@@ -90,18 +90,20 @@ namespace CR { // Namespace CR -- begin
 	cerr << "UpSampledDR::setup: " << "newSampleFrequency smaller than original!" << endl;
 	return False;
       };
-      noUpsample = False;
       if (abs(SampleFreqRatio-1.) < 1e-9) {
 	cout << "UpSampledDR::setup: " << "New sample frequency identical to old one," << endl;
 	cout << "                    " << "disabling upsampling." << endl;
 	noUpsample = True;
+	DataReader::setNyquistZone(inputDR->nyquistZone());
+      } else {
+	noUpsample = False;
+	DataReader::setNyquistZone(1);
       };
       inpDR_p = inputDR;
 
       // --------------------------------------------
       // Functionality from the "setStreams" function
       // --------------------------------------------
-      DataReader::setNyquistZone(1);
       DataReader::setSampleFrequency(newSampleFrequency);
       int i,nAntennas,blocksize;
       nAntennas = inpDR_p->nofAntennas();
@@ -231,17 +233,22 @@ namespace CR { // Namespace CR -- begin
 	  sourceAnt = selectedAntennas_p(antenna);
 	  sourceFFTvec.reference(sourceFFT.column(sourceAnt));
 	  if (noUpsample) {
-	    restoreFFT =  sourceFFTvec;
+	    restoreFX =  inpDR_p->invfft(sourceFFTvec);
 	  } else {
 	    //sourceFFTvec(0) = 0.; sourceFFTvec(sourceFFTvec.nelements()-1) = 0.;
+            sourceFFTvec(0) = sourceFFTvec(0)/2.;
+            sourceFFTvec(sourceFFTvec.nelements()-1) /= 2.;
+            //sourceFFTvec(sourceFFTvec.nelements()-1) = sourceFFTvec(sourceFFTvec.nelements()-1)/2.;
 	    InterpolateArray1D<Double, DComplex>::interpolate(restoreFFT,restoreFreqs,
 							      sourceFreqs,sourceFFTvec,
 				    InterpolateArray1D<Double, DComplex>::nearestNeighbour);
 	    restoreFFT(restoreFreqs<minSourceFreq) = 0.;
 	    restoreFFT(restoreFreqs>maxSourceFreq) = 0.;
+            restoreFFT(0) = restoreFFT(0)*2.;
+            restoreFFT(restoreFFTlen-1) = restoreFFT(restoreFFTlen-1)*2.;
 	    restoreFFT = restoreFFT*SampleFreqRatio;
+	    fftserv.fft(restoreFX,restoreFFT);
 	  };
-	  fftserv.fft(restoreFX,restoreFFT);
 	  fx.column(antenna) = restoreFX(Slice(sendoffset,sendBlocksize));
 	};
 	

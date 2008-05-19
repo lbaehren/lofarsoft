@@ -788,6 +788,7 @@ namespace CR {  //  Namespace CR -- begin
       // .. and copy the result, depending on the Nyquist zone setting
       switch (nyquistZone_p) {
       case 1:
+      case 3:
 	out.column(antenna) = outColumn;
 	break;
       case 2:
@@ -844,6 +845,83 @@ namespace CR {  //  Namespace CR -- begin
       cerr << "[DataReader::calfft]" << x.getMesg() << endl;
     }
     
+    return out;
+  }
+
+  // ----------------------------------------------------------------------- invfft
+  
+  Matrix<Double> DataReader::invfft (Matrix<DComplex> fftdata)
+  {
+    uint nants = nofSelectedAntennas();
+    if (fftdata.ncolumn() != nants) {
+      cerr << "[DataReader::invfft] Bad input: ncolumn != nofSelectedAntennas" << endl;
+      return Matrix<Double>();
+    };
+    if (fftdata.nrow() != fftLength_p) {
+      cerr << "[DataReader::invfft] Bad input: nrow != fftLength" << endl;
+      return Matrix<Double>();
+    };
+    Matrix<Double> out(blocksize_p,
+		       nofSelectedAntennas(),0.);
+    try {      
+      Vector <Double> outColumn(blocksize_p);
+      Vector<DComplex> inColumn(fftLength_p);
+      FFTServer<Double,DComplex> server(IPosition(1,blocksize_p),
+					FFTEnums::REALTOCOMPLEX);
+      for (uint antenna(0); antenna<nants; antenna++) {
+	// .. and copy the result, depending on the Nyquist zone setting
+	switch (nyquistZone_p) {
+	case 1:
+	case 3:
+	  inColumn = fftdata.column(antenna);
+	  break;
+	case 2:
+	  for (uint channel (0); channel<fftLength_p; channel++) {
+	    inColumn(channel) = conj(fftdata((fftLength_p-channel-1),antenna));
+	  }
+	  break;
+	}
+	// inv-FFT the data block for the current antenna 
+	server.fft(outColumn,inColumn);
+	out.column(antenna) = outColumn;
+      }
+    } catch (AipsError x) {
+      cerr << "[DataReader::invfft]" << x.getMesg() << endl;
+    }
+    
+    return out;
+  }
+
+  Vector<Double> DataReader::invfft (Vector<DComplex> fftdata)
+  {
+    Vector<Double> out(blocksize_p,0.);		
+    if (fftdata.nelements() != fftLength_p) {
+      cerr << "[DataReader::invfft] Bad input: nrow != fftLength" << endl;
+      return out;
+    };
+    try {      
+      Vector<DComplex> inColumn(fftLength_p);
+      FFTServer<Double,DComplex> server(IPosition(1,blocksize_p),
+					FFTEnums::REALTOCOMPLEX);
+      switch (nyquistZone_p) {
+      case 1:
+      case 3:
+	inColumn = fftdata;
+	break;
+      case 2:
+#ifdef DEBUGGING_MESSAGES
+	cout << "DataReader::invfft Nyquist Zone == 2, inverting FFT." << endl;
+#endif
+	for (uint channel (0); channel<fftLength_p; channel++) {
+	  inColumn(channel) = conj(fftdata(fftLength_p-channel-1));
+	}
+	break;
+      }
+      // inv-FFT the data block for the current antenna 
+      server.fft(out,inColumn);
+    } catch (AipsError x) {
+      cerr << "[DataReader::invfft]" << x.getMesg() << endl;
+    }    
     return out;
   }
   

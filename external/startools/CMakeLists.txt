@@ -62,6 +62,8 @@ set (locations_lib
   ## additional locations for ROOT libraries
   /opt/root/lib
   /sw/share/root/lib
+  ## additional locations for ray&co.
+  /opt/aips++/local/lib
 )
 
 set (locations_includes
@@ -73,6 +75,8 @@ set (locations_includes
   ## additional locations for ROOT header files
   /opt/root/include
   /sw/share/root/include
+  ## additional locations for ray&co.
+  /opt/aips++/local/include
 )
 
 ## --- System libraries ------------------------------------
