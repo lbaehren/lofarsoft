@@ -70,15 +70,18 @@ namespace CR { // Namespace CR -- begin
     a backwards FFT.
 
     <b>Note:</b> This class only fills in data in the first Nyquist band of the new sample 
-    frequency. If there is no overlap between this band and the origional frequency band, 
-    if the original data was sampled in a higher Nyquist zone, then you will get empty data.
+    frequency. If there is no overlap between this band and the original frequency band, 
+    e.g., if the original data was sampled in a higher Nyquist zone, then you will get empty 
+    data.
 
     To include all the available data set the new sample frequency to at least: 
-    \f[\nu_{\rm new} \ge \nu_{\rm old}\cdot{\rm [Nyquist-Zone]} \f]
+    \f[\nu_{\rm new} \ge \nu_{\rm old}\cdot{\rm [NyquistZone]} \f]
 
     <b>Note:</b> The exception is if the newSampleFrequency is identical to the sample 
     frequency of the original data. In this case no interpolation is done and the original 
-    frequency domain data is copied as-is.
+    frequency domain data is copied as-is. This is e.g. useful if you want to use this class
+    to select a smaller time interval after doing, e.g., the RFI filtering on the full time
+    interval
     
     <h3>Example(s)</h3>
     
