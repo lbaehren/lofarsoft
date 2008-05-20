@@ -135,7 +135,7 @@ class analyseLOPESevent2 : public analyseLOPESevent{
     
     
     /*!
-      \brief Set the upsampling exponent
+      \brief Set the upsampling exponent for LOPES-Star-Upsampling
 
       \param upExp -- The upsampling factor is 2^upExp (0 = no upsampling)
     */
@@ -193,6 +193,9 @@ class analyseLOPESevent2 : public analyseLOPESevent{
       \param ExtraDelay - additional delay to shift the data in time.
       \param doTVcal - perform the phase calibration on the TV transmitter
              (1: yes, 0: no, -1: use default)
+      \param UpSamplingRate - Samplerate for upsampling. If smaller than the original
+                              samplerate (80MHz for LOPES) then no upsampling is done.
+			           (Check the docs of <tt>UpSampledDR<\tt> for more info.)
       \param SinglePlots - makes a plot for each antenna
       \param PlotRawData - Plots the raw data FX
       \param CalculateMaxima - Finds the maximum and the minimum of the trace in the plot range
@@ -215,6 +218,7 @@ class analyseLOPESevent2 : public analyseLOPESevent{
 			Bool simplexFit=False,
 			Double ExtraDelay=0.,
 			int doTVcal=-1,
+			Double UpSamplingRate=0.,
 			bool SinglePlots=false,
 			bool PlotRawData=false,
 			bool CalculateMaxima=false,
@@ -232,8 +236,10 @@ class analyseLOPESevent2 : public analyseLOPESevent{
 
   protected:
 
-    //! the new pipeline object (like CRinvFFT + upsampling)
-    CompletePipeline pipeline;
+    //! the new pipeline objects, one for the input, one for the upsampling (like CRinvFFT + LopesSTAR-upsampling)
+    CompletePipeline pipeline, upsamplePipe;
+    //! switcher to the used pipeline (pipeline or upsamplePipe)
+    CompletePipeline *CompleteBeamPipe_p;
     
   private:
    

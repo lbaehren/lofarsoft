@@ -164,6 +164,7 @@ int main (int argc, char *argv[])
     bool verbose = true;
     bool simplexFit = true;
     int doTVcal = -1;			// 1: yes, 0: no, -1: use default	
+    double upsamplingRate = 0.;		// Upsampling Rate for new upsampling
     double plotStart = -2.05e-6;	// in seconds
     double plotEnd = -1.60e-6;		// in seconds
     unsigned int upsamplingExponent = 0;// by default no upsampling will be done
@@ -821,9 +822,10 @@ int main (int argc, char *argv[])
       eventPipeline.setUpsamplingExponent(upsamplingExponent);
 
       // call the pipeline with an extra delay = 0.
+verbose = true;
       results = eventPipeline.RunPipeline (filename, azimuth, elevation, distance, core_x, core_y, RotatePos,
                                            plotprefix, generatePlots, static_cast< Vector<int> >(flagged), verbose, 
-                                           simplexFit, 0., doTVcal, singlePlots, PlotRawData, CalculateMaxima,
+                                           simplexFit, 0., doTVcal, upsamplingRate, singlePlots, PlotRawData, CalculateMaxima,
                                            listCalcMaxima, printShowerCoordinates); 
 
       // make a postscript with a summary of all plots

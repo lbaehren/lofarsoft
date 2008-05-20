@@ -32,6 +32,7 @@ namespace CR { // Namespace CR -- begin
   // ============================================================================
   
   analyseLOPESevent2::analyseLOPESevent2 ():
+    CompleteBeamPipe_p(NULL),
     upsamplingExponent(0),
     ccWindowWidth_p(0.045e-6)
   {;}
@@ -46,6 +47,8 @@ namespace CR { // Namespace CR -- begin
   {
     // Set pipeline_p back to NULL (to avoid that analyseLOPESevent deletes pipeline)
     pipeline_p = NULL;
+    upsamplePipe_p = NULL;
+    CompleteBeamPipe_p = NULL;
   }
 
   // ============================================================================
@@ -63,17 +66,19 @@ namespace CR { // Namespace CR -- begin
   //  Methods
   //
   // ============================================================================
-  
+
+  // --------------------------------------------------------------- initPipeline
   
   Bool analyseLOPESevent2::initPipeline(Record ObsRecord){
     try {
       clear();
       // To use the methods of analyseLOPESevent, a pointer to the pipeline is needed.
       pipeline_p = &pipeline;
+      upsamplePipe_p = &upsamplePipe;
       lev_p = new LopesEventIn();
       pipeline.SetObsRecord(ObsRecord);
-      cout << "\nPipeline initialised." << endl;
-      
+      upsamplePipe.SetObsRecord(ObsRecord);
+      cout << "\nanalyseLOPESevent2: Pipeline initialised." << endl;
     } catch (AipsError x) {
       cerr << "analyseLOPESevent2::initPipeline: " << x.getMesg() << endl;
       return False;
@@ -97,14 +102,15 @@ namespace CR { // Namespace CR -- begin
 					  Bool simplexFit,
 					  Double ExtraDelay,
 					  int doTVcal,
+					  Double UpSamplingRate,
 					  bool SinglePlots,
 					  bool PlotRawData,
   					  bool CalculateMaxima,
 					  bool listCalcMaxima,
-					  bool printShowerCoordinates){
+					  bool printShowerCoordinates) {
     Record erg;
     try {
-      //      ofstream latexfile;	// WARNING: causes problem in fitCR2gauss.cc line 200, left here for future tests
+      // ofstream latexfile;  // WARNING: causes problem in fitCR2gauss.cc line 200, left here for future tests
       Int nsamples;
       Vector<Double> Times, ccBeam, xBeam, pBeam, tmpvec;
       Matrix<Double> TimeSeries;
@@ -114,6 +120,9 @@ namespace CR { // Namespace CR -- begin
       pipeline.setVerbosity(verbose);
       pipeline.setPlotInterval(plotStart(),plotStop());
       pipeline.setCCWindowWidth(getCCWindowWidth());
+      upsamplePipe.setVerbosity(verbose);
+      upsamplePipe.setPlotInterval(plotStart(),plotStop());
+      upsamplePipe.setCCWindowWidth(getCCWindowWidth());
 
       // Generate the Data Reader
       if (! lev_p->attachFile(evname) ){
@@ -193,25 +202,69 @@ namespace CR { // Namespace CR -- begin
         {
           vector<string> plotlist = pipeline.getPlotList();
           std::cout <<"\nList of generated plots:\n";
-          for (int i = 0; i < plotlist.size(); i++) std::cout << plotlist[i] << "\n";
+          for (unsigned int i = 0; i < plotlist.size(); i++) std::cout << plotlist[i] << "\n";
           std::cout << std::endl;
         }
         return Record();
       }
-
-      //initialize the pipeline
-      Times = lev_p->timeValues();
-      nsamples = Times.nelements();
-      if (! pipeline.setPhaseCenter(XC, YC, RotatePos)){
-	cerr << "analyseLOPESevent2::ProcessEvent: " << "Error during setPhaseCenter()!" << endl;
-	return Record();
-      };
 
       //Flagg antennas
       flagger.calcWeights(pipeline.GetTimeSeries(lev_p));
       AntennaSelection = AntennaSelection && flagger.parameters().asArrayBool("AntennaMask");
       nselants = ntrue(AntennaSelection);
 
+      //Do the upsampling (if requested)
+      if (UpSamplingRate >= lev_p->sampleFrequency()) {
+	if (upsampler_p == NULL){ upsampler_p = new UpSampledDR(); };
+	upsampler_p->setup(lev_p, UpSamplingRate, False, pipeline_p);
+	upsamplePipe.InitEvent(upsampler_p,False);
+	upsamplePipe.doPhaseCal(False);
+	upsamplePipe.doRFImitigation(False);
+	upsamplePipe.setVerbosity(verbose);
+	
+	filterStrength_p = (int)ceil(3*UpSamplingRate/lev_p->sampleFrequency());
+
+	Double tmpdouble;
+	int upBlockSize,upBlock;
+	// Calculate the blocksize for the upsampled data
+	// smallest power of 2 that is larger tha 3*([fit or plot range]+1 microsec)
+	tmpdouble = (max(fitStop_p,plotStop_p)-min(fitStart_p,plotStart_p)+1e-6)*UpSamplingRate;
+	upBlockSize = (uint)(pow(2.0,ceil(log(tmpdouble*3)/log(2.0))));
+	// Calculate where to start the block 
+	Times = upsampler_p->timeValues();
+	upBlock = ntrue( Times < ((fitStop_p+fitStart_p)/2.))/upBlockSize;
+
+
+	// Set blocksize and shift
+	upsampler_p->setBlocksize(upBlockSize);
+	upsampler_p->setBlock(upBlock);
+	Times.resize();
+	if (verbose) {
+	  Times = upsampler_p->timeValues();
+	  cout << "analyseLOPESevent2::RunPipeline: " << "Upsampling: upBlockSize: " << upBlockSize
+	       << " upBlock: " << upBlock << endl;
+	  cout << "analyseLOPESevent2::RunPipeline: " << " min(Times): " << min(Times)*1e6 
+	       << " max(Times): " << max(Times)*1e6 << endl;
+	};
+        // Set DataReader and Pipeline object for upsampling
+	beamformDR_p = upsampler_p;
+	beamPipe_p = &upsamplePipe;
+	CompleteBeamPipe_p = &upsamplePipe;
+      } else {
+        // Set DataReader and Pipeline object for standard (no upsampling)
+	beamformDR_p = lev_p;
+	beamPipe_p = &pipeline;
+	CompleteBeamPipe_p = &pipeline;
+        if (verbose) cout << "analyseLOPESevent2::RunPipeline: " << "Proceed without (new) upsampling." << endl;
+      };
+
+      //initialize the pipeline
+      Times = beamformDR_p->timeValues();
+      nsamples = Times.nelements();
+      if (! beamPipe_p->setPhaseCenter(XC, YC, RotatePos)){
+	cerr << "analyseLOPESevent2::ProcessEvent: " << "Error during setPhaseCenter()!" << endl;
+	return Record();
+      };
 
       //initialize the fitter
       Vector<uInt> remoteRange(2,0);
@@ -224,34 +277,35 @@ namespace CR { // Namespace CR -- begin
       //perform the position fitting
       Double center=-1.8e-6;
       if (simplexFit) {
+	if (verbose) { cout << "analyseLOPESevent2::RunPipeline: starting evaluateGrid()." << endl;};
 	if (! evaluateGrid(Az, El, distance, AntennaSelection, &center) ){
-	  cerr << "analyseLOPESevent2::ProcessEvent: " << "Error during evaluateGrid()!" << endl;
+	  cerr << "analyseLOPESevent::ProcessEvent: " << "Error during evaluateGrid()!" << endl;
 	  return Record();
 	};
-	if (verbose) { cout << "analyseLOPESevent2::ProcessEvent: starting SimplexFit()." << endl;};
+	if (verbose) { cout << "analyseLOPESevent2::RunPipeline: starting SimplexFit()." << endl;};
 	//if (! SimplexFit2(Az, El, distance, center, AntennaSelection) ){
 	//  cerr << "analyseLOPESevent::ProcessEvent: " << "Error during SimplexFit2()!" << endl;
 	//  return Record();
 	//};
 	if (! SimplexFit(Az, El, distance, center, AntennaSelection) ){
-	  cerr << "analyseLOPESevent2::ProcessEvent: " << "Error during SimplexFit()!" << endl;
+	  cerr << "analyseLOPESevent2::RunPipeline: " << "Error during SimplexFit()!" << endl;
 	  return Record();
 	};
-	pipeline.setVerbosity(verbose);
+	beamPipe_p->setVerbosity(verbose);
       };
       
       // Get the beam-formed data
-      if (! pipeline.setDirection(Az, El, distance)){
-	cerr << "analyseLOPESevent2::ProcessEvent: " << "Error during setDirection()!" << endl;
+      if (! beamPipe_p->setDirection(Az, El, distance)){
+	cerr << "analyseLOPESevent2::RunPipeline: " << "Error during setDirection()!" << endl;
 	return Record();
       };
-      if (! pipeline.GetTCXP(lev_p, TimeSeries, ccBeam, xBeam, pBeam, AntennaSelection)){
-	cerr << "analyseLOPESevent2::ProcessEvent: " << "Error during GetTCXP()!" << endl;
+      if (! beamPipe_p->GetTCXP(beamformDR_p, TimeSeries, ccBeam, xBeam, pBeam, AntennaSelection)){
+	cerr << "analyseLOPESevent2::RunPipeline: " << "Error during GetTCXP()!" << endl;
 	return Record();
       };
       
       // smooth the data
-      StatisticsFilter<Double> mf(3,FilterType::MEAN);
+      StatisticsFilter<Double> mf(filterStrength_p,FilterType::MEAN);
       ccBeam = mf.filter(ccBeam);
       xBeam = mf.filter(xBeam);
       pBeam = mf.filter(pBeam);
@@ -319,7 +373,7 @@ namespace CR { // Namespace CR -- begin
       erg.define("rmsC",stddev(ccBeam(remoteRegion)));
       erg.define("rmsX",stddev(xBeam(remoteRegion)));
       Matrix<Double> AntPos; 
-      AntPos=pipeline.GetAntPositions();
+      AntPos=beamPipe_p->GetAntPositions();
       AntPos = toShower(AntPos, Az, El);
       Vector<Double> distances(nants);
 
@@ -332,7 +386,7 @@ namespace CR { // Namespace CR -- begin
           // first time with header
           if (i==0) 
           {
-	    std::cout << "GT "<<lev_p->header().asInt("Date") << " " << Az << " " << El << " " << XC << " " <<YC <<std::endl;
+	    std::cout << "GT "<<beamformDR_p->header().asInt("Date") << " " << Az << " " << El << " " << XC << " " <<YC <<std::endl;
 	    std::cout << "An  dist_x    dist_y    dist"<<std::endl;
           }
 	  std::cout << std::setw(2) << i+1 << " " << std::setw(8) << AntPos.row(i)(0) << "  ";
@@ -353,33 +407,33 @@ namespace CR { // Namespace CR -- begin
       {
         // Plot CC-beam; if fit has converged, then also plot the result of the fit
     	if (fiterg.asBool("CCconverged"))
-          pipeline.plotCCbeam(PlotPrefix + "-CC", lev_p, fiterg.asArrayDouble("Cgaussian"), AntennaSelection, ccBeamMean, pBeamMean);
+          CompleteBeamPipe_p->plotCCbeam(PlotPrefix + "-CC", beamformDR_p, fiterg.asArrayDouble("Cgaussian"), AntennaSelection, ccBeamMean, pBeamMean);
         else
-          pipeline.plotCCbeam(PlotPrefix + "-CC", lev_p, Vector<Double>(), AntennaSelection, ccBeamMean, pBeamMean);
+          CompleteBeamPipe_p->plotCCbeam(PlotPrefix + "-CC", beamformDR_p, Vector<Double>(), AntennaSelection, ccBeamMean, pBeamMean);
 
         // Plot X-beam; if fit has converged, then also plot the result of the fit
     	if (fiterg.asBool("Xconverged"))
-          pipeline.plotXbeam(PlotPrefix + "-X", lev_p, fiterg.asArrayDouble("Xgaussian"), AntennaSelection, xBeamMean, pBeamMean);
+          CompleteBeamPipe_p->plotXbeam(PlotPrefix + "-X", beamformDR_p, fiterg.asArrayDouble("Xgaussian"), AntennaSelection, xBeamMean, pBeamMean);
         else
-          pipeline.plotXbeam(PlotPrefix + "-X", lev_p, Vector<Double>(), AntennaSelection, xBeamMean, pBeamMean);
+          CompleteBeamPipe_p->plotXbeam(PlotPrefix + "-X", beamformDR_p, Vector<Double>(), AntennaSelection, xBeamMean, pBeamMean);
 
         // Plot of all antenna traces together
-        pipeline.plotAllAntennas(PlotPrefix + "-all", lev_p, AntennaSelection, false, getUpsamplingExponent(),false);
+        CompleteBeamPipe_p->plotAllAntennas(PlotPrefix + "-all", beamformDR_p, AntennaSelection, false, getUpsamplingExponent(),false);
         
 	// Plot of upsampled antenna traces (seperated) 
         if (SinglePlots)
-          pipeline.plotAllAntennas(PlotPrefix, lev_p, AntennaSelection, true, getUpsamplingExponent(),false);
+          CompleteBeamPipe_p->plotAllAntennas(PlotPrefix, beamformDR_p, AntennaSelection, true, getUpsamplingExponent(),false);
 
         // calculate the maxima
-	if (CalculateMaxima) pipeline.calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false);
+	if (CalculateMaxima) CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(), false);
         // user friendly list of calculated maxima
-        if (listCalcMaxima) pipeline.listCalcMaxima(lev_p, AntennaSelection, getUpsamplingExponent(),fiterg.asDouble("CCcenter"));
+        if (listCalcMaxima) CompleteBeamPipe_p->listCalcMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),fiterg.asDouble("CCcenter"));
         
         if (verbose)		// give out the names of the created plots
         {
-          vector<string> plotlist = pipeline.getPlotList();
+          vector<string> plotlist = CompleteBeamPipe_p->getPlotList();
           std::cout <<"\nList of generated plots:\n";
-          for (int i = 0; i < plotlist.size(); i++) std::cout << plotlist[i] << "\n";
+          for (unsigned int i = 0; i < plotlist.size(); i++) std::cout << plotlist[i] << "\n";
           std::cout << std::endl;
         }
       };
@@ -423,7 +477,7 @@ namespace CR { // Namespace CR -- begin
         // get list of generated plots and loop through the list
         vector<string> plotlist = pipeline.getPlotList();
 
-        for (int i = 0; i < plotlist.size(); i++)
+        for (unsigned int i = 0; i < plotlist.size(); i++)
         {
           // line break after #columns plots
           if ( (i > 0) && ((i % columns) == 0) ) latexfile << "\\newline\n";
