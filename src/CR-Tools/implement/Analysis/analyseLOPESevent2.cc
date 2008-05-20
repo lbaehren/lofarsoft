@@ -115,6 +115,8 @@ namespace CR { // Namespace CR -- begin
       Vector<Double> Times, ccBeam, xBeam, pBeam, tmpvec;
       Matrix<Double> TimeSeries;
       Record fiterg;
+      Double center;		// position of the cc-beam (set in doPositionFitting)
+
 
       // set parameters of the pipeline
       pipeline.setVerbosity(verbose);
@@ -261,10 +263,6 @@ namespace CR { // Namespace CR -- begin
       //initialize the pipeline
       Times = beamformDR_p->timeValues();
       nsamples = Times.nelements();
-      if (! beamPipe_p->setPhaseCenter(XC, YC, RotatePos)){
-	cerr << "analyseLOPESevent2::ProcessEvent: " << "Error during setPhaseCenter()!" << endl;
-	return Record();
-      };
 
       //initialize the fitter
       Vector<uInt> remoteRange(2,0);
@@ -274,26 +272,13 @@ namespace CR { // Namespace CR -- begin
       fitObject.setRemoteRange(remoteRange);
       fitObject.setFitRangeSeconds(fitStart_p,fitStop_p);
 
-      //perform the position fitting
-      Double center=-1.8e-6;
-      if (simplexFit) {
-	if (verbose) { cout << "analyseLOPESevent2::RunPipeline: starting evaluateGrid()." << endl;};
-	if (! evaluateGrid(Az, El, distance, AntennaSelection, &center) ){
-	  cerr << "analyseLOPESevent::ProcessEvent: " << "Error during evaluateGrid()!" << endl;
-	  return Record();
-	};
-	if (verbose) { cout << "analyseLOPESevent2::RunPipeline: starting SimplexFit()." << endl;};
-	//if (! SimplexFit2(Az, El, distance, center, AntennaSelection) ){
-	//  cerr << "analyseLOPESevent::ProcessEvent: " << "Error during SimplexFit2()!" << endl;
-	//  return Record();
-	//};
-	if (! SimplexFit(Az, El, distance, center, AntennaSelection) ){
-	  cerr << "analyseLOPESevent2::RunPipeline: " << "Error during SimplexFit()!" << endl;
-	  return Record();
-	};
-	beamPipe_p->setVerbosity(verbose);
+      //perform the position fitting (if simplexFit = false, then only the PhaseCenter is set)
+      if (! doPositionFitting(Az, El, distance, center, XC, YC, RotatePos,
+			      AntennaSelection, simplexFit, verbose) ){
+	cerr << "analyseLOPESevent2::RunPipeline: " << "Error during doPositionFitting()!" << endl;
+	return Record();
       };
-      
+
       // Get the beam-formed data
       if (! beamPipe_p->setDirection(Az, El, distance)){
 	cerr << "analyseLOPESevent2::RunPipeline: " << "Error during setDirection()!" << endl;
@@ -380,18 +365,6 @@ namespace CR { // Namespace CR -- begin
       // calculate distances between antennas and shower core in shower coordinates
        for (i=0; i<nants; i++) {
 	distances(i) = sqrt( square(AntPos.row(i)(0)) + square(AntPos.row(i)(1)) );
-        // output of shower coordinates, if requested
-        if (printShowerCoordinates) 
-        {
-          // first time with header
-          if (i==0) 
-          {
-	    std::cout << "GT "<<beamformDR_p->header().asInt("Date") << " " << Az << " " << El << " " << XC << " " <<YC <<std::endl;
-	    std::cout << "An  dist_x    dist_y    dist"<<std::endl;
-          }
-	  std::cout << std::setw(2) << i+1 << " " << std::setw(8) << AntPos.row(i)(0) << "  ";
-          std::cout << std::setw(8) << AntPos.row(i)(1) << "  " << std::setw(8) <<distances(i)<<std::endl;
-	}
       }
 
       erg.define("distances",distances);
@@ -401,6 +374,11 @@ namespace CR { // Namespace CR -- begin
       erg.define("Azimuth",Az);
       erg.define("Elevation",El);
       erg.define("Distance",distance);
+
+      // output of antnenna to core distances in shower coordinates, if requested
+      if (printShowerCoordinates) printAntennaDistances(erg.asArrayDouble("distances"),
+                                                         toShower(beamPipe_p->GetAntPositions(), Az, El),	
+                                                         El, Az, XC, YC, beamformDR_p->header().asInt("Date"));
 
       // Generate the plots
       if (generatePlots)
@@ -444,6 +422,43 @@ namespace CR { // Namespace CR -- begin
     } 
     return erg;
   }
+
+
+  void analyseLOPESevent2::printAntennaDistances (const Vector <double>& distances,
+                                                  const Matrix<double>& AntPos,
+                                                  const double& Az,
+                                                  const double& El,
+                                                  const double& Xc,
+                                                  const double& Yc,
+                                                  const unsigned int date) const
+  {
+    try 
+    {
+      // check if size is consistent
+      if ( AntPos.nrow() != distances.size())
+      {
+        cerr << "analyseLOPESevent2::printAntennaDistances: " 
+             << "ERROR: number of distances and antenna positions are different!" <<  endl;
+        return;		// exit function without showing (confusing) results
+      }
+
+      // print header
+      std::cout << "GT "<< date << " " << Az << " " << El << " " << Xc << " " <<Yc <<std::endl;
+      std::cout << "An  dist_x    dist_y    dist"<<std::endl;
+
+      // loop through all antennas in print the distances (should be in shower coordinates)
+      for (unsigned int i=0 ; i < distances.size(); i++)
+      {
+        std::cout << std::setw(2) << i+1 << " " << std::setw(8) << AntPos.row(i)(0) << "  ";
+        std::cout << std::setw(8) << AntPos.row(i)(1) << "  " << std::setw(8) <<distances(i)<<std::endl;
+      }
+    } catch (AipsError x) {
+      cerr << "analyseLOPESevent2::printAntennaDistances: " << x.getMesg() << endl;
+    }
+  }
+
+
+
 
   void analyseLOPESevent2::summaryPlot(string filename,
                                        unsigned int columns)

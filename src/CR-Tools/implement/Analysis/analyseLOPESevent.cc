@@ -568,7 +568,7 @@ namespace CR { // Namespace CR -- begin
 
   // ------------------------------------------------------------------- toShower
 
-  Matrix<Double> analyseLOPESevent::toShower (Matrix<Double> & pos,
+  Matrix<Double> analyseLOPESevent::toShower (const Matrix<Double> & pos,
 					      Double Az,
 					      Double El){
     Matrix<Double> erg;

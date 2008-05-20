@@ -226,6 +226,25 @@ class analyseLOPESevent2 : public analyseLOPESevent{
 			bool printShowerCoordinates=false);
 
     /*!
+      \brief Prints the distances of the antennas to the core (in shower coordinates)
+      
+      \param distances  - distances from antennas to shower core (should be in shower coordinates)
+      \param AntPos     - antenna positions (in shower coordinates)
+      \param Az         - value for the azimuth direction [in deg]
+      \param El         - value for the elevation [in deg]
+      \param XC         - x-position of the shower center [in m]
+      \param YC         - y-position of the shower center [in m]
+      \param date - date of the event in seconds
+    */
+    void printAntennaDistances (const Vector <double>& distances,
+                                const Matrix<double>& AntPos,
+                                const double& Az,
+                                const double& El,
+                                const double& Xc,
+                                const double& Yc,
+                                const unsigned int date) const;
+
+    /*!
       \brief Creates a summary postscript of all created plots (uses LaTeX)
       
       \param filename - name of the file for the summary plot (without final ".ps").

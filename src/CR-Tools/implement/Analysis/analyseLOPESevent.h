@@ -546,7 +546,7 @@ namespace CR { // Namespace CR -- begin
       \return the converted positions
     */
 
-    Matrix<Double> toShower(Matrix<Double> & pos,
+    Matrix<Double> toShower(const Matrix<Double> & pos,
 			    Double Az,
 			    Double El);
 

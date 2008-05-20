@@ -39,14 +39,14 @@ using CR::LopesEventIn;
  
   \author Frank Schr&ouml;der
  
-  \date 2008/20/03
+  \date 2008/20/05
 
   <h3>Motivation</h3>
 
   The aim of this short application is to provide a tool which
   makes the LOPES-analysis-pipeline usable without changing any
   code. Any information about the LOPES-events you want to analyse
-  and any configurations how to analyse the should be provide
+  and any configurations how to analyse the events should be provide
   be external, human readable files.
 
   <h3>Prerequisites</h3>
@@ -63,6 +63,8 @@ using CR::LopesEventIn;
   /home/schroeder/data/lopesstar/second.event 354.55215 63.882182 2750 8.6060886 -368.0933
   /home/schroeder/data/lopesstar/third.event 354.55215 63.882182 2750 8.6060886 -368.0933
   \endverbatim
+  <br>
+  Warning: Make sure you provide the elevation not the zenith of the event!<br>
   <br>
   If you don't want to process the events in the default manner<br>
   you can also provide a config file (textfile), e.g. config.txt:<br>
@@ -83,6 +85,7 @@ using CR::LopesEventIn;
   doTVcal                = default
   plotStart              = -2.05e-6
   plotEnd                = -1.60e-6
+  upsamplingRate         = 320e6
   upsamplingExponent     = 1
   summaryColumns         = 3
   ccWindowWidth          = 0.045e-6
@@ -105,6 +108,7 @@ using CR::LopesEventIn;
     done,
     <li>the TV calibration will be done by default,
     <li>the plots start at -2.05 micro seconds and end at -1.60 micro seconds,
+    <li>the Lopes data will be upsampled to a sampling rate of 320 MHz (see below),
     <li>the upsampling of the calibrated antenna fieldstrengthes will be done by
     a factor of 2^1 = 2,
     <li>there will by a summary postscript of all created plots,
@@ -118,6 +122,13 @@ using CR::LopesEventIn;
   ./call_pipeline eventlist.txt configs.txt
   \endverbatim
 
+  <h3>Upsampling</h3>
+
+  Currently there are to upsampling methods implemented:
+  The one called by setting an upsampling exponent uses the Upsampling routines of LOPES-Star
+  and has an effect only to the traces of single antennas.
+  The upsampling due to setting an upsamplingRate greater than 160 MHz effects the whole analysis
+  chain, including the CC-Beam. At a later point this method might be the only one used anymore.
 */
 
 
@@ -164,9 +175,9 @@ int main (int argc, char *argv[])
     bool verbose = true;
     bool simplexFit = true;
     int doTVcal = -1;			// 1: yes, 0: no, -1: use default	
-    double upsamplingRate = 0.;		// Upsampling Rate for new upsampling
     double plotStart = -2.05e-6;	// in seconds
     double plotEnd = -1.60e-6;		// in seconds
+    double upsamplingRate = 0.;		// Upsampling Rate for new upsampling
     unsigned int upsamplingExponent = 0;// by default no upsampling will be done
     vector<Int> flagged;		// use of STL-vector instead of CASA-vector due to support of push_back()
     string caltablepath = "/home/schroeder/usg/data/lopes/LOPES-CalTable";
@@ -221,6 +232,7 @@ int main (int argc, char *argv[])
         std::cerr << "doTVcal = default\n";
         std::cerr << "plotBegin = -2.05e-6\n";
         std::cerr << "plotEnd = -1.60e-6\n";
+        std::cerr << "upsamplingRate = 320e6\n";
         std::cerr << "upsamplingExponent = 1\n";
         std::cerr << "summaryColumns = 3\n";
         std::cerr << "ccWindowWidth = 0.045e-6\n";
@@ -484,6 +496,29 @@ int main (int argc, char *argv[])
           {
             std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
             std::cerr << "PlotEnd must be of typ 'double'. \n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+        }
+
+        if ( (keyword.compare("upsamplingRate")==0) || (keyword.compare("UpsamplingRate")==0) 
+	  || (keyword.compare("upsamplingrate")==0))
+        {
+          double temp = 9999999;
+          stringstream(value) >> temp; 
+
+          if (temp != 9999999)  // will be false, if value is not of typ "double"
+	  {
+            upsamplingRate = temp; 
+	    std::cout << "UpsamplingRate set to " << upsamplingRate << " Hz.\n";
+            // For upsampling rates < 80 MHz no upsampling will be done,
+            // but for upsampling rates between 80 and 160 MHz strange results
+            // may occur. So show a warning in this case:
+	    if ((upsamplingRate >= 80e6) && (upsamplingRate < 160e6))
+              std::cerr << "WARNING: UpsamplingRate should be larger than 160 MHz to obtain useful results.\n";
+	  } else
+          {
+            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "UpsamplingRate must be of typ 'double'. \n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
         }
