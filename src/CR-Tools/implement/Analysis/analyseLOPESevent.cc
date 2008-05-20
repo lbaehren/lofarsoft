@@ -78,6 +78,7 @@ namespace CR { // Namespace CR -- begin
     plotStart_p    = -2.05e-6;
     plotStop_p     = -1.55e-6;
     filterStrength_p = 3;
+    remoteRange_p.resize(2);
   }
   
   // ---------------------------------------------------------------------- clear
@@ -150,7 +151,6 @@ namespace CR { // Namespace CR -- begin
   };
 
   // --------------------------------------------------------------- ProcessEvent
-
   Record analyseLOPESevent::ProcessEvent(String evname,
 					 Double Az,
 					 Double El,
@@ -168,23 +168,63 @@ namespace CR { // Namespace CR -- begin
 					 Double UpSamplingRate){
     Record erg;
     try {
-      Int nsamples;
-      Vector<Double> Times, ccBeam, xBeam, pBeam, tmpvec;
-      Matrix<Double> TimeSeries;
+      //Int nsamples;
+      //
+      //Matrix<Double> TimeSeries;
+      //
+
+      Vector<Bool> AntennaSelection;
+      Double center;
       Record fiterg;
       
+      if (! SetupEvent(evname, doTVcal, FlaggedAntIDs, AntennaSelection, 
+		       UpSamplingRate, ExtraDelay, verbose)) {
+	cerr << "analyseLOPESevent::ProcessEvent: " << "Error during SetupEvent()!" << endl;
+	return Record();
+      };
+      if (! doPositionFitting(Az, El, distance, center, XC, YC, RotatePos,
+			      AntennaSelection, simplexFit, verbose) ){
+	cerr << "analyseLOPESevent::ProcessEvent: " << "Error during doPositionFitting()!" << endl;
+	return Record();
+      };
+      if (! GaussFitData(Az, El, distance, center, AntennaSelection, evname, erg, fiterg, verbose) ){
+	cerr << "analyseLOPESevent::ProcessEvent: " << "Error during GaussFitData()!" << endl;
+	return Record();
+      };
+      if (generatePlots) {
+	if (! doGeneratePlots(PlotPrefix, fiterg.asArrayDouble("Cgaussian"), 
+			      fiterg.asArrayDouble("Xgaussian"), AntennaSelection) ){
+	  cerr << "analyseLOPESevent::ProcessEvent: " << "Error during generatePlots()!" << endl;
+	};
+      };
+    } catch (AipsError x) {
+      cerr << "analyseLOPESevent::ProcessEvent: " << x.getMesg() << endl;
+      return Record();
+    }; 
+    return erg;
+  }
+
+  // --------------------------------------------------------------- SetupEvent  
+  Bool analyseLOPESevent::SetupEvent(String evname, 
+				     int doTVcal,
+				     Vector<Int> FlaggedAntIDs,
+				     Vector<Bool> &AntennaSelection,
+				     Double UpSamplingRate,
+				     Double ExtraDelay,
+				     Bool verbose){
+    try {
       pipeline_p->setVerbosity(verbose);
       // Generate the Data Reader
       if (! lev_p->attachFile(evname) ){
-	cerr << "analyseLOPESevent::ProcessEvent: " << "Failed to attach file: " << evname << endl;
-	return Record();
+	cerr << "analyseLOPESevent::SetupEvent: " << "Failed to attach file: " << evname << endl;
+	return False;
       };
       // initialize the Data Reader
       if (! pipeline_p->InitEvent(lev_p)){
-	cerr << "analyseLOPESevent::ProcessEvent: " << "Failed to initialize the DataReader!" << endl;
-	return Record();
+	cerr << "analyseLOPESevent::SetupEvent: " << "Failed to initialize the DataReader!" << endl;
+	return False;
       };
-
+      
       //  Enable/disable doing the phase calibration as requested
       switch (doTVcal){
       case 0:
@@ -205,10 +245,10 @@ namespace CR { // Namespace CR -- begin
 	};
 	break;
       };
-            
+      
       // Generate the antenna selection
-      Vector <Bool> AntennaSelection;
       Int i,j,id,nants,nselants, nflagged=FlaggedAntIDs.nelements();
+      AntennaSelection.resize();
       AntennaSelection = pipeline_p->GetAntennaMask(lev_p);
       nants = AntennaSelection.nelements();
       Vector<Int> AntennaIDs,selAntIDs;
@@ -224,18 +264,19 @@ namespace CR { // Namespace CR -- begin
 	    };
 	  };
 	  if (verbose && (id !=0)){
-	    cout << "analyseLOPESevent::ProcessEvent: " << "AntennaID: " << id 
+	    cout << "analyseLOPESevent::SetupEvent: " << "AntennaID: " << id 
 		 << " not found -> no antenna flagged." << endl;
 	  };
 	};
       };
-
+      
       //Flagg antennas
       flagger.calcWeights(pipeline_p->GetTimeSeries(lev_p));
       AntennaSelection = AntennaSelection && flagger.parameters().asArrayBool("AntennaMask");
       nselants = ntrue(AntennaSelection);
-
-      //Do the upsampling (if requested)
+      
+      //Do the upsampling (if requested)	
+      Vector<Double> Times;
       if (UpSamplingRate >= lev_p->sampleFrequency()) {
 	if (upsampler_p == NULL){ upsampler_p = new UpSampledDR(); };
 	upsampler_p->setup(lev_p, UpSamplingRate, False, pipeline_p);
@@ -245,7 +286,7 @@ namespace CR { // Namespace CR -- begin
 	upsamplePipe_p->setVerbosity(verbose);
 	
 	filterStrength_p = (int)ceil(3*UpSamplingRate/lev_p->sampleFrequency());
-
+	
 	Double tmpdouble;
 	int upBlockSize,upBlock;
 	// Calculate the blocksize for the upsampled data
@@ -255,17 +296,17 @@ namespace CR { // Namespace CR -- begin
 	// Calculate where to start the block 
 	Times = upsampler_p->timeValues();
 	upBlock = ntrue( Times < ((fitStop_p+fitStart_p)/2.))/upBlockSize;
-
-
+	
+	
 	// Set blocksize and shift
 	upsampler_p->setBlocksize(upBlockSize);
 	upsampler_p->setBlock(upBlock);
 	Times.resize();
 	if (verbose) {
 	  Times = upsampler_p->timeValues();
-	  cout << "analyseLOPESevent::ProcessEvent: " << "Upsampling: upBlockSize: " << upBlockSize
+	  cout << "analyseLOPESevent::SetupEvent: " << "Upsampling: upBlockSize: " << upBlockSize
 	       << " upBlock: " << upBlock << endl;
-	  cout << "analyseLOPESevent::ProcessEvent: " << " min(Times): " << min(Times)*1e6 
+	  cout << "analyseLOPESevent::SetupEvent: " << " min(Times): " << min(Times)*1e6 
 	       << " max(Times): " << max(Times)*1e6 << endl;
 	};
 	beamformDR_p = upsampler_p;
@@ -274,52 +315,77 @@ namespace CR { // Namespace CR -- begin
 	beamformDR_p = lev_p;
 	beamPipe_p =  pipeline_p;
       };
-
-
-      //initialize the pipeline
+            
       Times = beamformDR_p->timeValues();
-      nsamples = Times.nelements();
-      if (! beamPipe_p->setPhaseCenter(XC, YC, RotatePos)){
-	cerr << "analyseLOPESevent::ProcessEvent: " << "Error during setPhaseCenter()!" << endl;
-	return Record();
-      };
-
+      int nsamples = Times.nelements();      
       //initialize the fitter
-      Vector<uInt> remoteRange(2,0);
-      remoteRange(0) = (uInt)(nsamples*remoteStart_p);
-      remoteRange(1) = (uInt)(nsamples*remoteStop_p);
+      remoteRange_p(0) = (uInt)(nsamples*remoteStart_p);
+      remoteRange_p(1) = (uInt)(nsamples*remoteStop_p);
       fitObject.setTimeAxis(Times);
-      fitObject.setRemoteRange(remoteRange);
+      fitObject.setRemoteRange(remoteRange_p);
       fitObject.setFitRangeSeconds(fitStart_p,fitStop_p);
 
+    } catch (AipsError x) {
+      cerr << "analyseLOPESevent::SetupEvent: " << x.getMesg() << endl;
+      return False;
+    }; 
+    return True;
+  };
+  
+
+  // --------------------------------------------------------------- doPositionFitting
+  Bool analyseLOPESevent::doPositionFitting(Double &Az, Double &El, Double &distance, 
+					    Double &center,
+					    Double &XC, Double &YC, Bool RotatePos,
+					    Vector<Bool> AntennaSelection,
+					    Bool simplexFit,
+					    Bool verbose){
+    try {    
+      // Set shower position
+      if (! beamPipe_p->setPhaseCenter(XC, YC, RotatePos)){
+	cerr << "analyseLOPESevent::doPositionFitting: " << "Error during setPhaseCenter()!" << endl;
+	return False;
+      };
       //perform the position fitting
-      Double center=-1.8e-6;
+      center=-1.8e-6;
       if (simplexFit) {
-	if (verbose) { cout << "analyseLOPESevent::ProcessEvent: starting evaluateGrid()." << endl;};
+	if (verbose) { cout << "analyseLOPESevent::doPositionFitting: starting evaluateGrid()." << endl;};
 	if (! evaluateGrid(Az, El, distance, AntennaSelection, &center) ){
-	  cerr << "analyseLOPESevent::ProcessEvent: " << "Error during evaluateGrid()!" << endl;
-	  return Record();
+	  cerr << "analyseLOPESevent::doPositionFitting: " << "Error during evaluateGrid()!" << endl;
+	  return False;
 	};
-	if (verbose) { cout << "analyseLOPESevent::ProcessEvent: starting SimplexFit()." << endl;};
-	//if (! SimplexFit2(Az, El, distance, center, AntennaSelection) ){
-	//  cerr << "analyseLOPESevent::ProcessEvent: " << "Error during SimplexFit2()!" << endl;
-	//  return Record();
-	//};
+	if (verbose) { cout << "analyseLOPESevent::doPositionFitting: starting SimplexFit()." << endl;};
 	if (! SimplexFit(Az, El, distance, center, AntennaSelection) ){
-	  cerr << "analyseLOPESevent::ProcessEvent: " << "Error during SimplexFit()!" << endl;
-	  return Record();
+	  cerr << "analyseLOPESevent::doPositionFitting: " << "Error during SimplexFit()!" << endl;
+	  return False;
 	};
 	beamPipe_p->setVerbosity(verbose);
       };
+    } catch (AipsError x) {
+      cerr << "analyseLOPESevent::doPositionFitting: " << x.getMesg() << endl;
+      return False;
+    }; 
+    return True;
+  };
+        
+
+  // --------------------------------------------------------------- GaussFitData
+  Bool analyseLOPESevent::GaussFitData(Double &Az, Double &El, Double &distance, Double &center, 
+				       Vector<Bool> AntennaSelection, String evname, 
+				       Record &erg, Record &fiterg,
+				       Bool verbose){
+    try {      
+      Vector<Double> ccBeam, xBeam,pBeam;
+      Matrix<Double> TimeSeries;
       
       // Get the beam-formed data
       if (! beamPipe_p->setDirection(Az, El, distance)){
-	cerr << "analyseLOPESevent::ProcessEvent: " << "Error during setDirection()!" << endl;
-	return Record();
+	cerr << "analyseLOPESevent::GaussFitData: " << "Error during setDirection()!" << endl;
+	return False;
       };
       if (! beamPipe_p->GetTCXP(beamformDR_p, TimeSeries, ccBeam, xBeam, pBeam, AntennaSelection)){
-	cerr << "analyseLOPESevent::ProcessEvent: " << "Error during GetTCXP()!" << endl;
-	return Record();
+	cerr << "analyseLOPESevent::GaussFitData: " << "Error during GetTCXP()!" << endl;
+	return False;
       };
       // smooth the data
       StatisticsFilter<Double> mf(filterStrength_p,FilterType::MEAN);
@@ -327,7 +393,7 @@ namespace CR { // Namespace CR -- begin
       xBeam = mf.filter(xBeam);
       pBeam = mf.filter(pBeam);
 
-      Slice remoteRegion(remoteRange(0),(remoteRange(1)-remoteRange(0)));
+      Slice remoteRegion(remoteRange_p(0),(remoteRange_p(1)-remoteRange_p(0)));
       ccBeam = ccBeam - mean(ccBeam(remoteRegion));
       xBeam = xBeam - mean(xBeam(remoteRegion));
       pBeam = pBeam - mean(pBeam(remoteRegion));
@@ -335,8 +401,8 @@ namespace CR { // Namespace CR -- begin
       // do the fitting
       fiterg = fitObject.Fitgauss(xBeam, ccBeam, True, center);
       if ( !fiterg.isDefined("Xconverged") || !fiterg.isDefined("CCconverged") ){
-	cerr << "analyseLOPESevent::ProcessEvent: " << "Error during fit!" << endl;
-	return Record();	
+	cerr << "analyseLOPESevent::GaussFitData: " << "Error during fit!" << endl;
+	return False;	
       };
 
       if (verbose) {
@@ -387,11 +453,14 @@ namespace CR { // Namespace CR -- begin
       Matrix<Double> AntPos; 
       AntPos=beamPipe_p->GetAntPositions();
       AntPos = toShower(AntPos, Az, El);
+      int nants = AntennaSelection.nelements();
+      int nselants = ntrue(AntennaSelection);
       Vector<Double> distances(nants);
-      for (i=0; i<nants; i++) {
+      for (int i=0; i<nants; i++) {
 	distances(i) = sqrt( square(AntPos.row(i)(0)) + square(AntPos.row(i)(1)) );
       };
       erg.define("distances",distances);
+      Vector<Double> tmpvec;
       tmpvec.resize(nselants);
       tmpvec = distances(AntennaSelection).getCompressedArray() ;
       erg.define("meandist",mean(tmpvec));
@@ -399,74 +468,102 @@ namespace CR { // Namespace CR -- begin
       erg.define("Elevation",El);
       erg.define("Distance",distance);
 
-      // Generate the plots
-      if (generatePlots) {
-	i = ntrue(Times<plotStart_p);
-	j = ntrue(Times<plotStop_p);
-	Slice plotRegion(i,(j-i));
-	Matrix<Double> parts((j-i),nselants);
-	Vector<Double> xarr, yarr, empty, gauss;
-	String plotname;
-	SimplePlot plotter;
-	xarr = Times(plotRegion) * 1e6;
-	//plot the CC-beam
-	plotname = PlotPrefix;
-	plotname += "-CC.ps";
-	yarr = ccBeam(plotRegion) * 1e6;
-	plotter.quickPlot(plotname, xarr, yarr, empty, empty,
-			  "Time [\\(0638)seconds]", "CC-Beam [\\(0638)V/m/MHz]","",4);
-	yarr = pBeam(plotRegion) *1e6;
-	plotter.PlotLine(xarr,yarr,5,3);
-	gauss = fiterg.asArrayDouble("Cgaussian");
-	yarr = gauss(plotRegion) *1e6;
-	plotter.PlotLine(xarr,yarr,6,2);
-	// plot the X-Beam
-	plotname = PlotPrefix;
-	plotname += "-X.ps";
-	yarr = xBeam(plotRegion) * 1e6;
-	plotter.quickPlot(plotname, xarr, yarr, empty, empty,
-			  "Time [\\(0638)seconds]", "X-Beam [\\(0638)V/m/MHz]","",4);
-	yarr = pBeam(plotRegion) *1e6;
-	plotter.PlotLine(xarr,yarr,5,3);
-	gauss = fiterg.asArrayDouble("Xgaussian");
-	yarr = gauss(plotRegion) *1e6;
-	plotter.PlotLine(xarr,yarr,6,2);
-	// plot all antenna traces
-	plotname = PlotPrefix;
-	plotname += "-all.ps";
-	Double ymax,ymin,xmax,xmin,tmpval;
-	selAntIDs.resize(nselants);
-	AntennaIDs(AntennaSelection).getCompressedArray(selAntIDs);
-	for (i=0; i<nselants; i++){
+    } catch (AipsError x) {
+      cerr << "analyseLOPESevent::GaussFitData: " << x.getMesg() << endl;
+      return False;
+    }; 
+    return True;
+  }
+
+  // --------------------------------------------------------------- doGeneratePlots
+  Bool analyseLOPESevent::doGeneratePlots(String PlotPrefix, Vector<Double> ccgauss, 
+					Vector<Double> xgauss, Vector<Bool> AntennaSelection){
+    try {
+      Int nsamples,i,j,nselants;
+      Vector<Double> Times, ccBeam, xBeam, pBeam, tmpvec;
+      Matrix<Double> TimeSeries;
+      
+      Times = beamformDR_p->timeValues();
+      nsamples = Times.nelements();
+      nselants = ntrue(AntennaSelection);
+      if (! beamPipe_p->GetTCXP(beamformDR_p, TimeSeries, ccBeam, xBeam, pBeam, AntennaSelection)){
+	cerr << "analyseLOPESevent::generatePlots: " << "Error during GetTCXP()!" << endl;
+	return False;
+      };
+      StatisticsFilter<Double> mf(filterStrength_p,FilterType::MEAN);
+      ccBeam = mf.filter(ccBeam);
+      xBeam = mf.filter(xBeam);
+      pBeam = mf.filter(pBeam);
+      Slice remoteRegion(remoteRange_p(0),(remoteRange_p(1)-remoteRange_p(0)));
+      ccBeam = ccBeam - mean(ccBeam(remoteRegion));
+      xBeam = xBeam - mean(xBeam(remoteRegion));
+      pBeam = pBeam - mean(pBeam(remoteRegion));
+      i = ntrue(Times<plotStart_p);
+      j = ntrue(Times<plotStop_p);
+      Slice plotRegion(i,(j-i));
+      Matrix<Double> parts((j-i),nselants);
+      Vector<Double> xarr, yarr, empty, gauss;
+      String plotname;
+      SimplePlot plotter;
+      xarr = Times(plotRegion) * 1e6;
+      //plot the CC-beam
+      plotname = PlotPrefix;
+      plotname += "-CC.ps";
+      yarr = ccBeam(plotRegion) * 1e6;
+      plotter.quickPlot(plotname, xarr, yarr, empty, empty,
+			"Time [\\(0638)seconds]", "CC-Beam [\\(0638)V/m/MHz]","",4);
+      yarr = pBeam(plotRegion) *1e6;
+      plotter.PlotLine(xarr,yarr,5,3);
+      yarr = ccgauss(plotRegion) *1e6;
+      plotter.PlotLine(xarr,yarr,6,2);
+      // plot the X-Beam
+      plotname = PlotPrefix;
+      plotname += "-X.ps";
+      yarr = xBeam(plotRegion) * 1e6;
+      plotter.quickPlot(plotname, xarr, yarr, empty, empty,
+			"Time [\\(0638)seconds]", "X-Beam [\\(0638)V/m/MHz]","",4);
+      yarr = pBeam(plotRegion) *1e6;
+      plotter.PlotLine(xarr,yarr,5,3);
+      yarr = xgauss(plotRegion) *1e6;
+      plotter.PlotLine(xarr,yarr,6,2);
+      // plot all antenna traces
+      plotname = PlotPrefix;
+      plotname += "-all.ps";
+      Double ymax,ymin,xmax,xmin,tmpval;
+      Vector<Int> AntennaIDs,selAntIDs;
+      beamformDR_p->header().get("AntennaIDs",AntennaIDs);
+      selAntIDs.resize(nselants);
+      AntennaIDs(AntennaSelection).getCompressedArray(selAntIDs);
+      tmpvec.resize(nselants);
+      for (i=0; i<nselants; i++){
 	  parts.column(i) = TimeSeries.column(i)(plotRegion)*1e6;
 	  tmpvec(i) = max(abs(parts.column(i)));
-	};
-	//ymax = max(parts); ymin = min(parts);
-	//ymax = 2*abs(erg.asDouble("CCheight")); ymin = -ymax;
-	ymax = median(tmpvec)*1.05; ymin = -ymax;
-	xmin = min(xarr); xmax = max(xarr);
-	tmpval = (xmax-xmin)*0.05;
-	xmin -= tmpval;
-	xmax += tmpval;
-	plotter.InitPlot(plotname, xmin, xmax, ymin, ymax);
-	plotter.AddLabels("Time [\\(0638)seconds]", "X-Beam [\\(0638)V/m/MHz]");
-	Int col1,col2,col3;
-	col1=col2=col3=3;
-	for (i=0; i<nselants; i++){
-	  if (selAntIDs(i) > 70000) { 
-	    plotter.PlotLine(xarr,parts.column(i),col3++,3);
-	  } else if (selAntIDs(i) > 40000) {
-	    plotter.PlotLine(xarr,parts.column(i),col2++,2);
-	  } else {
-	    plotter.PlotLine(xarr,parts.column(i),col1++,1);
-	  };
+      };
+      //ymax = max(parts); ymin = min(parts);
+      //ymax = 2*abs(erg.asDouble("CCheight")); ymin = -ymax;
+      ymax = median(tmpvec)*1.05; ymin = -ymax;
+      xmin = min(xarr); xmax = max(xarr);
+      tmpval = (xmax-xmin)*0.05;
+      xmin -= tmpval;
+      xmax += tmpval;
+      plotter.InitPlot(plotname, xmin, xmax, ymin, ymax);
+      plotter.AddLabels("Time [\\(0638)seconds]", "X-Beam [\\(0638)V/m/MHz]");
+      Int col1,col2,col3;
+      col1=col2=col3=3;
+      for (i=0; i<nselants; i++){
+	if (selAntIDs(i) > 70000) { 
+	  plotter.PlotLine(xarr,parts.column(i),col3++,3);
+	} else if (selAntIDs(i) > 40000) {
+	  plotter.PlotLine(xarr,parts.column(i),col2++,2);
+	} else {
+	  plotter.PlotLine(xarr,parts.column(i),col1++,1);
 	};
       };
     } catch (AipsError x) {
-      cerr << "analyseLOPESevent::ProcessEvent: " << x.getMesg() << endl;
-      return Record();
+      cerr << "analyseLOPESevent::generatePlots: " << x.getMesg() << endl;
+      return False;
     }; 
-    return erg;
+    return True;
   }
 
   // ------------------------------------------------------------------- toShower

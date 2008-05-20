@@ -83,7 +83,7 @@ namespace CR { // Namespace CR -- begin
       \code
       analyseLOPESevent event;
       
-      // set the interval considered in the analysis
+      // set the interval used in the calculation of the background
       event.setRemoteInterval(1./3.,
                               2./3.);
       // set the interval considered in the fitting
@@ -117,10 +117,11 @@ namespace CR { // Namespace CR -- begin
     //! the flagging object
     CRflaggingPlugin flagger;
     
-    //! Start of the interval considered in the analysis, fraction of data length
+    //! Start of the interval used in the calculation of the background, fraction of data length
     Double remoteStart_p;
-    //! Stop of the interval considered in the analysis, fraction of data length
+    //! Stop of the interval used in the calculation of the background, fraction of data length
     Double remoteStop_p;
+    Vector<uInt> remoteRange_p;
     //! 
     Double fitStart_p;
     //! 
@@ -144,9 +145,9 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Argumented constructor
 
-      \param remoteStart - Start of the interval considered in the analysis,
+      \param remoteStart - Start of the interval used in the calculation of the background,
              fraction of data length
-      \param remoteStop - Stop of the interval considered in the analysis,
+      \param remoteStop - Stop of the interval used in the calculation of the background,
              fraction of data length
       \param fitStart  -- The start of the interval to be considered in the fit
       \param fitStop   -- The stop of the interval to be considered in the fit
@@ -170,9 +171,9 @@ namespace CR { // Namespace CR -- begin
     // --------------------------------------------------------------- Parameters
 
     /*!
-      \brief Get the Start of the interval considered in the analysis
+      \brief Get the Start of the interval used in the calculation of the background
 
-      \return remoteStart - Start of the interval considered in the analysis,
+      \return remoteStart - Start of the interval used in the calculation of the background,
               fraction of data length
     */
     inline double remoteStart () {
@@ -180,9 +181,9 @@ namespace CR { // Namespace CR -- begin
     }
     
     /*!
-      \brief Set the Start of the interval considered in the analysis
+      \brief Set the Start of the interval used in the calculation of the background
 
-      \param remoteStart - Start of the interval considered in the analysis,
+      \param remoteStart - Start of the interval used in the calculation of the background,
              fraction of data length
     */
     inline void setRemoteStart (double const &remoteStart) {
@@ -190,9 +191,9 @@ namespace CR { // Namespace CR -- begin
     }
     
     /*!
-      \brief Get the Stop of the interval considered in the analysis
+      \brief Get the Stop of the interval used in the calculation of the background
 
-      \return remoteStop - Stop of the interval considered in the analysis,
+      \return remoteStop - Stop of the interval used in the calculation of the background,
               fraction of data length
     */
     inline double remoteStop () {
@@ -200,9 +201,9 @@ namespace CR { // Namespace CR -- begin
     }
     
     /*!
-      \brief Set the Stop of the interval considered in the analysis
+      \brief Set the Stop of the interval used in the calculation of the background
 
-      \param remoteStop - Stop of the interval considered in the analysis,
+      \param remoteStop - Stop of the interval used in the calculation of the background,
              fraction of data length
     */
     inline void setRemoteStop (double const &remoteStop) {
@@ -210,11 +211,11 @@ namespace CR { // Namespace CR -- begin
     }
 
     /*!
-      \brief Set the interval considered in the analysis
+      \brief Set the interval used in the calculation of the background
 
-      \param remoteStart - Start of the interval considered in the analysis,
+      \param remoteStart - Start of the interval used in the calculation of the background,
              fraction of data length
-      \param remoteStop - Stop of the interval considered in the analysis,
+      \param remoteStop - Stop of the interval used in the calculation of the background,
              fraction of data length
     */
     inline void setRemoteInterval (double const &remoteStart,
@@ -412,6 +413,90 @@ namespace CR { // Namespace CR -- begin
 			Double ExtraDelay=0.,
 			int doTVcal=-1,
 			Double UpSamplingRate=0.);
+
+
+    /*!
+      \brief Setup one event, perform calibration and filtering, sets beamformDR_p and beamPipe_p
+
+      \param evname           - path to the eventfile to be processed
+      \param doTVcal          - perform the phase calibration on the TV transmitter
+                                (1: yes, 0: no, -1: use default)
+      \param FlaggedAntIDs    - list of antenna IDs that are to be flagged.
+      \param AntennaSelection - Mask (boolean array) which Antenna(-channels) are selected (modified in place)
+      \param UpSamplingRate   - Samplerate for upsampling. If smaller than the original
+                                samplerate (80MHz for LOPES) then no upsampling is done.
+			        (Check the docs of <tt>UpSampledDR<\tt> for more info.)
+      \param ExtraDelay       - additional delay to shift the data in time.
+      \param verbose          - produce verbose output on the commandline.
+
+      \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
+    */
+    Bool SetupEvent(String evname, 
+		    int doTVcal,
+		    Vector<Int> FlaggedAntIDs, 
+		    Vector<Bool> &AntennaSelection,
+		    Double UpSamplingRate,
+		    Double ExtraDelay,
+		    Bool verbose);
+    
+    /*!
+      \brief Perform the direction fitting
+
+      \param Az             - value for the azimuth direction [in deg] (modified in place)
+      \param El             - value for the elevation [in deg] (modified in place)
+      \param distance       - value for the distance parameter [in m] (modified in place)
+      \param center         - position in time of the peak [in s] (modified in place)
+      \param XC             - x-position of the shower center [in m]
+      \param YC             - y-position of the shower center [in m]
+      \param RotatePos      - rotate the XC/YC position (set to False if XC/YC already
+                              in LOPES coordinates)
+      \param AntennaSelection - Mask (boolean array) which Antenna(-channels) are selected 
+      \param simplexFit     - fit the direction with a simple simplex fit
+      \param verbose        - produce verbose output on the commandline.
+
+      \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
+    */
+    Bool doPositionFitting(Double &Az, Double &El, Double &distance, 
+			   Double &center,
+			   Double &XC, Double &YC, Bool RotatePos,
+			   Vector<Bool> AntennaSelection,
+			   Bool simplexFit,
+			   Bool verbose);
+    
+   /*!
+      \brief Perform the direction fitting
+
+      \param Az               - value for the azimuth direction [in deg] (modified in place)
+      \param El               - value for the elevation [in deg] (modified in place)
+      \param distance         - value for the distance parameter [in m] (modified in place)
+      \param center           - position in time of the peak [in s] (modified in place)
+      \param AntennaSelection - Mask (boolean array) which Antenna(-channels) are selected 
+      \param evname           - path to the eventfile to be processed
+      \param erg              - Record with the final results.
+      \param fiterg           - Record with the results from the fit.
+      \param verbose          - produce verbose output on the commandline.
+      
+      \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
+   */
+    Bool GaussFitData(Double &Az, Double &El, Double &distance, Double &center, 
+		      Vector<Bool> AntennaSelection, String evname, 
+		      Record &erg, Record &fiterg, Bool verbose);
+
+   /*!
+      \brief Generate the standard-plots
+
+     \param PlotPrefix       - prefix (including path) for the plots to be generated
+     \param ccgauss          - trace (time series data) with the gaussian fir to the cc-beam
+     \param xgauss           - trace (time series data) with the gaussian fir to the x-beam
+     \param AntennaSelection - Mask (boolean array) which Antenna(-channels) are selected 
+
+
+      \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
+   */
+    Bool doGeneratePlots(String PlotPrefix, Vector<Double> ccgauss, Vector<Double> xgauss, 
+			 Vector<Bool> AntennaSelection);
+      
+
 
     /*!
       \brief Fit the position with a simplex fit
