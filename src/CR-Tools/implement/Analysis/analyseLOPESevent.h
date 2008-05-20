@@ -132,6 +132,8 @@ namespace CR { // Namespace CR -- begin
     Double plotStop_p;
     //! Strength of the mean-filter used for the smoothing
     int filterStrength_p;
+    //! Which polarization to use
+    String Polarization_p;
     
   public:
     
@@ -170,6 +172,7 @@ namespace CR { // Namespace CR -- begin
         
     // --------------------------------------------------------------- Parameters
 
+    //@{
     /*!
       \brief Get the Start of the interval used in the calculation of the background
 
@@ -359,6 +362,7 @@ namespace CR { // Namespace CR -- begin
       \brief Provide a summary of the internal status
     */
     virtual void summary (std::ostream &os);    
+    //@}
 
     // ------------------------------------------------------------------ Methods
     
@@ -395,6 +399,8 @@ namespace CR { // Namespace CR -- begin
       \param UpSamplingRate - Samplerate for upsampling. If smaller than the original
                               samplerate (80MHz for LOPES) then no upsampling is done.
 			      (Check the docs of <tt>UpSampledDR<\tt> for more info.)
+      \param Polarization   - Polarization type to select only part of the antennas 
+                              ("ANY": ignore antenna polarization)
 
       \return Record with the results.
     */
@@ -412,7 +418,8 @@ namespace CR { // Namespace CR -- begin
 			Bool simplexFit=False,
 			Double ExtraDelay=0.,
 			int doTVcal=-1,
-			Double UpSamplingRate=0.);
+			Double UpSamplingRate=0.,
+			String Polarization="ANY");
 
 
     /*!
@@ -451,6 +458,8 @@ namespace CR { // Namespace CR -- begin
       \param RotatePos      - rotate the XC/YC position (set to False if XC/YC already
                               in LOPES coordinates)
       \param AntennaSelection - Mask (boolean array) which Antenna(-channels) are selected 
+      \param Polarization   - Polarization type to select only part of the antennas 
+                              ("": use stored setting;"ANY": ignore antenna polarization)
       \param simplexFit     - fit the direction with a simple simplex fit
       \param verbose        - produce verbose output on the commandline.
 
@@ -460,8 +469,9 @@ namespace CR { // Namespace CR -- begin
 			   Double &center,
 			   Double &XC, Double &YC, Bool RotatePos,
 			   Vector<Bool> AntennaSelection,
-			   Bool simplexFit,
-			   Bool verbose);
+			   String Polarization="",
+			   Bool simplexFit=True,
+			   Bool verbose=False);
     
    /*!
       \brief Perform the direction fitting
@@ -474,13 +484,16 @@ namespace CR { // Namespace CR -- begin
       \param evname           - path to the eventfile to be processed
       \param erg              - Record with the final results.
       \param fiterg           - Record with the results from the fit.
+      \param Polarization     - Polarization type to select only part of the antennas 
+                                ("": use stored setting;"ANY": ignore antenna polarization)
       \param verbose          - produce verbose output on the commandline.
       
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
    */
     Bool GaussFitData(Double &Az, Double &El, Double &distance, Double &center, 
 		      Vector<Bool> AntennaSelection, String evname, 
-		      Record &erg, Record &fiterg, Bool verbose);
+		      Record &erg, Record &fiterg, 
+		      String Polarization="", Bool verbose=False);
 
    /*!
       \brief Generate the standard-plots
@@ -489,12 +502,14 @@ namespace CR { // Namespace CR -- begin
      \param ccgauss          - trace (time series data) with the gaussian fir to the cc-beam
      \param xgauss           - trace (time series data) with the gaussian fir to the x-beam
      \param AntennaSelection - Mask (boolean array) which Antenna(-channels) are selected 
+     \param Polarization     - Polarization type to select only part of the antennas 
+                               ("": use stored setting;"ANY": ignore antenna polarization)
 
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
    */
     Bool doGeneratePlots(String PlotPrefix, Vector<Double> ccgauss, Vector<Double> xgauss, 
-			 Vector<Bool> AntennaSelection);
+			 Vector<Bool> AntennaSelection,	String Polarization="");
       
 
 

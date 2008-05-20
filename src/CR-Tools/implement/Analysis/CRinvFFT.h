@@ -95,7 +95,15 @@ namespace CR { // Namespace CR -- begin
 
     //! Value of the extra delay
     Double ExtraDelay_p;
- 
+
+    //@{
+    //! Data for the polarization selection cache
+    Bool ploAntSelValid_p;
+    uInt ploAntSelDate_p;
+    String ploAntSelPol_p;
+    Vector<Bool> ploAntSel_p;
+    //@}
+
     // ---------------------------------------------------------- Private Methods
 
     /*!
@@ -202,45 +210,57 @@ namespace CR { // Namespace CR -- begin
       \brief Get the time series for all antennas
       
       \param dr - Pointer to the (initialized) DataReader
-      \param antennaSelection - (Optinal) Vector of bool to select only part of the antennas.
+      \param antennaSelection - (Optional) Vector of bool to select only part of the antennas.
+      \param Polarization - (Optional) Polarization type to select only part of the antennas
+                            ("ANY" ignore antenna polarization)
 
       \return Matrix with the processed and shifted time series data
     */
     Matrix<Double> GetTimeSeries(DataReader *dr, 
-				 Vector<Bool> antennaSelection = Vector<Bool>());
+				 Vector<Bool> antennaSelection = Vector<Bool>(),
+				 String Polarization="ANY");
     
     /*!
       \brief Get the CCBeam
       
       \param dr - Pointer to the (initialized) DataReader
-      \param antennaSelection - (Optinal) Vector of bool to select only part of the antennas.
+      \param antennaSelection - (Optional) Vector of bool to select only part of the antennas.
+      \param Polarization - (Optional) Polarization type to select only part of the antennas
+                            ("ANY" ignore antenna polarization)
 
       \return The formed cc-beam
     */
     Vector<Double> GetCCBeam(DataReader *dr,
-			     Vector<Bool> antennaSelection = Vector<Bool>());
+			     Vector<Bool> antennaSelection = Vector<Bool>(),
+			     String Polarization="ANY");
     
     /*!
       \brief Get the XBeam
       
       \param dr - Pointer to the (initialized) DataReader
-      \param antennaSelection - (Optinal) Vector of bool to select only part of the antennas.
+      \param antennaSelection - (Optional) Vector of bool to select only part of the antennas.
+      \param Polarization - (Optional) Polarization type to select only part of the antennas
+                            ("ANY" ignore antenna polarization)
 
       \return The formed X-beam.
     */
     Vector<Double> GetXBeam (DataReader *dr,
-			     Vector<Bool> antennaSelection = Vector<Bool>());
+			     Vector<Bool> antennaSelection = Vector<Bool>(),
+			     String Polarization="ANY");
 
     /*!
       \brief Get the PBeam 
       
       \param dr - Pointer to the (initialized) DataReader
-      \param antennaSelection - (Optinal) Vector of bool to select only part of the antennas.
+      \param antennaSelection - (Optional) Vector of bool to select only part of the antennas.
+      \param Polarization - (Optional) Polarization type to select only part of the antennas
+                            ("ANY" ignore antenna polarization)
 
       \return The formed Power-beam.
     */
     Vector<Double> GetPBeam (DataReader *dr,
-			     Vector<Bool> antennaSelection = Vector<Bool>());
+			     Vector<Bool> antennaSelection = Vector<Bool>(),
+			     String Polarization="ANY");
 
     /*!
       \brief Get the time series, CCBeam and XBeam in one go
@@ -249,7 +269,9 @@ namespace CR { // Namespace CR -- begin
       \retval TimeSeries - The time series for all antennas 
       \retval ccBeam - The CCBeam
       \retval xBeam - The XBeam
-      \param antennaSelection - (Optinal) Vector of bool to select only part of the antennas.
+      \param antennaSelection - (Optional) Vector of bool to select only part of the antennas.
+      \param Polarization - (Optional) Polarization type to select only part of the antennas
+                            ("ANY" ignore antenna polarization)
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
@@ -257,7 +279,8 @@ namespace CR { // Namespace CR -- begin
 		  Vector<Double> & ccBeamData,
 		  Vector<Double> & xBeamData, 
 		  Vector<Double> & pBeamData,
-		  Vector<Bool> antennaSelection = Vector<Bool>());
+		  Vector<Bool> antennaSelection = Vector<Bool>(),
+		  String Polarization="ANY");
     
   private:
         

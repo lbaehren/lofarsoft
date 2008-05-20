@@ -79,6 +79,7 @@ namespace CR { // Namespace CR -- begin
     plotStop_p     = -1.55e-6;
     filterStrength_p = 3;
     remoteRange_p.resize(2);
+    Polarization_p = "ANY";
   }
   
   // ---------------------------------------------------------------------- clear
@@ -165,7 +166,8 @@ namespace CR { // Namespace CR -- begin
 					 Bool simplexFit,
 					 Double ExtraDelay,
 					 int doTVcal,
-					 Double UpSamplingRate){
+					 Double UpSamplingRate,
+					 String Polarization){
     Record erg;
     try {
       //Int nsamples;
@@ -183,17 +185,18 @@ namespace CR { // Namespace CR -- begin
 	return Record();
       };
       if (! doPositionFitting(Az, El, distance, center, XC, YC, RotatePos,
-			      AntennaSelection, simplexFit, verbose) ){
+			      AntennaSelection, Polarization, simplexFit, verbose) ){
 	cerr << "analyseLOPESevent::ProcessEvent: " << "Error during doPositionFitting()!" << endl;
 	return Record();
       };
-      if (! GaussFitData(Az, El, distance, center, AntennaSelection, evname, erg, fiterg, verbose) ){
+      if (! GaussFitData(Az, El, distance, center, AntennaSelection, evname, erg, fiterg, 
+			 Polarization, verbose) ){
 	cerr << "analyseLOPESevent::ProcessEvent: " << "Error during GaussFitData()!" << endl;
 	return Record();
       };
       if (generatePlots) {
 	if (! doGeneratePlots(PlotPrefix, fiterg.asArrayDouble("Cgaussian"), 
-			      fiterg.asArrayDouble("Xgaussian"), AntennaSelection) ){
+			      fiterg.asArrayDouble("Xgaussian"), AntennaSelection, Polarization) ){
 	  cerr << "analyseLOPESevent::ProcessEvent: " << "Error during generatePlots()!" << endl;
 	};
       };
@@ -337,10 +340,14 @@ namespace CR { // Namespace CR -- begin
   Bool analyseLOPESevent::doPositionFitting(Double &Az, Double &El, Double &distance, 
 					    Double &center,
 					    Double &XC, Double &YC, Bool RotatePos,
-					    Vector<Bool> AntennaSelection,
+					    Vector<Bool> AntennaSelection, 
+					    String Polarization,
 					    Bool simplexFit,
 					    Bool verbose){
     try {    
+      if (Polarization != ""){
+	Polarization_p = Polarization;
+      };
       // Set shower position
       if (! beamPipe_p->setPhaseCenter(XC, YC, RotatePos)){
 	cerr << "analyseLOPESevent::doPositionFitting: " << "Error during setPhaseCenter()!" << endl;
@@ -373,17 +380,21 @@ namespace CR { // Namespace CR -- begin
   Bool analyseLOPESevent::GaussFitData(Double &Az, Double &El, Double &distance, Double &center, 
 				       Vector<Bool> AntennaSelection, String evname, 
 				       Record &erg, Record &fiterg,
-				       Bool verbose){
+				       String Polarization, Bool verbose){
     try {      
       Vector<Double> ccBeam, xBeam,pBeam;
       Matrix<Double> TimeSeries;
       
+      if (Polarization != ""){
+	Polarization_p = Polarization;
+      };
       // Get the beam-formed data
       if (! beamPipe_p->setDirection(Az, El, distance)){
 	cerr << "analyseLOPESevent::GaussFitData: " << "Error during setDirection()!" << endl;
 	return False;
       };
-      if (! beamPipe_p->GetTCXP(beamformDR_p, TimeSeries, ccBeam, xBeam, pBeam, AntennaSelection)){
+      if (! beamPipe_p->GetTCXP(beamformDR_p, TimeSeries, ccBeam, xBeam, pBeam, 
+				AntennaSelection, Polarization_p)){
 	cerr << "analyseLOPESevent::GaussFitData: " << "Error during GetTCXP()!" << endl;
 	return False;
       };
@@ -477,19 +488,25 @@ namespace CR { // Namespace CR -- begin
 
   // --------------------------------------------------------------- doGeneratePlots
   Bool analyseLOPESevent::doGeneratePlots(String PlotPrefix, Vector<Double> ccgauss, 
-					Vector<Double> xgauss, Vector<Bool> AntennaSelection){
+					  Vector<Double> xgauss, Vector<Bool> AntennaSelection,
+					  String Polarization){
     try {
-      Int nsamples,i,j,nselants;
+      if (Polarization != ""){
+	Polarization_p = Polarization;
+      };
+      Int nsamples,i,j,nants,nselants;
       Vector<Double> Times, ccBeam, xBeam, pBeam, tmpvec;
       Matrix<Double> TimeSeries;
       
       Times = beamformDR_p->timeValues();
       nsamples = Times.nelements();
-      nselants = ntrue(AntennaSelection);
-      if (! beamPipe_p->GetTCXP(beamformDR_p, TimeSeries, ccBeam, xBeam, pBeam, AntennaSelection)){
+      nants = AntennaSelection.nelements();
+      if (! beamPipe_p->GetTCXP(beamformDR_p, TimeSeries, ccBeam, xBeam, pBeam, 
+				AntennaSelection, Polarization_p)){
 	cerr << "analyseLOPESevent::generatePlots: " << "Error during GetTCXP()!" << endl;
 	return False;
       };
+      nselants = TimeSeries.ncolumn();
       StatisticsFilter<Double> mf(filterStrength_p,FilterType::MEAN);
       ccBeam = mf.filter(ccBeam);
       xBeam = mf.filter(xBeam);
@@ -847,7 +864,7 @@ namespace CR { // Namespace CR -- begin
 	clipping = False;
       };
       beamPipe_p->setDirection(az, el, dist);
-      beamPipe_p->GetTCXP(beamformDR_p, ts, ccb, xb, pb, AntennaSelection);
+      beamPipe_p->GetTCXP(beamformDR_p, ts, ccb, xb, pb, AntennaSelection, Polarization_p);
       StatisticsFilter<Double> mf(filterStrength_p,FilterType::MEAN);
       ccb = mf.filter(ccb);
       xb = mf.filter(xb);

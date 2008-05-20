@@ -29,6 +29,7 @@
 #include <LopesLegacy/xBeam.h>
 #include <Analysis/CRdelayPlugin.h>
 
+
 namespace CR { // Namespace CR -- begin
   
   // ============================================================================
@@ -44,6 +45,7 @@ namespace CR { // Namespace CR -- begin
   
   void CRinvFFT::init(){
     AntPosValid_p = False;
+    ploAntSelValid_p = False;
     AntGainInterpInit_p = False;
 
     InterAntGain_p = NULL;
@@ -293,7 +295,8 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
-  Matrix<Double> CRinvFFT::GetTimeSeries(DataReader *dr, Vector<Bool> antennaSelection){
+  Matrix<Double> CRinvFFT::GetTimeSeries(DataReader *dr, Vector<Bool> antennaSelection,
+					 String Polarization){
     Matrix<Double> timeSeries;
     try {
       Matrix<DComplex> FFTData;
@@ -301,9 +304,44 @@ namespace CR { // Namespace CR -- begin
       uInt i,j,nants=FFTData.ncolumn(),nselants,blocksize=dr->blocksize();
       if (antennaSelection.nelements() != nants){
 	antennaSelection = Vector<Bool>(nants,True);
-	nselants=nants;
-      } else {
-	nselants=ntrue(antennaSelection);
+      };
+      // Select Antennas according to Polarization
+      if (Polarization != "ANY"){
+	uInt date;
+	dr->header().get("Date",date);
+	if (!ploAntSelValid_p || 
+	    (ploAntSelPol_p != Polarization) ||
+	    (ploAntSelDate_p != date)) {
+	  ploAntSel_p.resize(nants);
+	  ploAntSel_p = True;
+	  Vector<Int> AntennaIDs;
+	  String tempstring;
+	  dr->header().get("AntennaIDs",AntennaIDs);
+#ifdef DEBUGGING_MESSAGES      
+	  cout << "CRinvFFT::GetTimeSeries: Polarization check, flagging Antennas: ";
+#endif
+	  for (i=0;i<nants;i++){
+	    CTRead->GetData(date, AntennaIDs(i), "Polarization", &tempstring);
+	    if (tempstring != Polarization) {
+#ifdef DEBUGGING_MESSAGES      
+	      cout << AntennaIDs(i) << " ";
+#endif
+	      ploAntSel_p(i) = False;
+	    };
+	  };//for
+#ifdef DEBUGGING_MESSAGES      
+	  cout << endl ;
+#endif
+	  ploAntSelPol_p = Polarization;
+	  ploAntSelDate_p = date;
+	  ploAntSelValid_p = True;
+	};// if (!ploAntSelValid_p ...
+	// Apply polarization-based selection
+	antennaSelection = antennaSelection && ploAntSel_p;
+      };
+      nselants=ntrue(antennaSelection);
+      if (nselants == 0) {
+	cerr << "CRinvFFT::GetTimeSeries: " << "No antennas selected/all antennas flagged!" << endl;
       };
       timeSeries.resize(blocksize,nselants);
       j=0;
@@ -320,11 +358,12 @@ namespace CR { // Namespace CR -- begin
     return timeSeries;
   }
 
-  Vector<Double> CRinvFFT::GetCCBeam(DataReader *dr, Vector<Bool> antennaSelection){
+  Vector<Double> CRinvFFT::GetCCBeam(DataReader *dr, Vector<Bool> antennaSelection,
+				     String Polarization){
     Vector<Double> ccBeamData;
     try {
       Matrix<Double> TimeSeries;
-      TimeSeries = GetTimeSeries(dr, antennaSelection);
+      TimeSeries = GetTimeSeries(dr, antennaSelection, Polarization);
       LOPES::ccBeam<Double,DComplex> cc;
       ccBeamData = cc.ccbeam(TimeSeries);
     } catch (AipsError x) {
@@ -334,11 +373,12 @@ namespace CR { // Namespace CR -- begin
     return ccBeamData;
   }
 
-  Vector<Double> CRinvFFT::GetXBeam(DataReader *dr, Vector<Bool> antennaSelection){
+  Vector<Double> CRinvFFT::GetXBeam(DataReader *dr, Vector<Bool> antennaSelection,
+				    String Polarization){
     Vector<Double> xBeamData;
     try {
       Matrix<Double> TimeSeries;
-      TimeSeries = GetTimeSeries(dr, antennaSelection);
+      TimeSeries = GetTimeSeries(dr, antennaSelection, Polarization);
       LOPES::xBeam<Double,DComplex> xx;
       xBeamData = xx.xbeam(TimeSeries);
     } catch (AipsError x) {
@@ -348,11 +388,12 @@ namespace CR { // Namespace CR -- begin
     return xBeamData;
   }
 
-  Vector<Double> CRinvFFT::GetPBeam(DataReader *dr, Vector<Bool> antennaSelection){
+  Vector<Double> CRinvFFT::GetPBeam(DataReader *dr, Vector<Bool> antennaSelection,
+				    String Polarization){
     Vector<Double> pBeamData;
     try {
       Matrix<Double> TimeSeries;
-      TimeSeries = GetTimeSeries(dr, antennaSelection);
+      TimeSeries = GetTimeSeries(dr, antennaSelection, Polarization);
       Int i,nants=TimeSeries.ncolumn();
 
       pBeamData = square(TimeSeries.column(nants-1));
@@ -374,9 +415,10 @@ namespace CR { // Namespace CR -- begin
 			 Vector<Double> & ccBeamData,
 			 Vector<Double> & xBeamData, 
 			 Vector<Double> & pBeamData,
-			 Vector<Bool> antennaSelection) {
+			 Vector<Bool> antennaSelection,
+			 String Polarization) {
     try {
-      TimeSeries = GetTimeSeries(dr, antennaSelection);
+      TimeSeries = GetTimeSeries(dr, antennaSelection, Polarization);
       LOPES::ccBeam<Double,DComplex> cc;
       ccBeamData = cc.ccbeam(TimeSeries);
       LOPES::xBeam<Double,DComplex> xx;
