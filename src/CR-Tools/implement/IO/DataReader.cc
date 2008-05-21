@@ -1304,10 +1304,14 @@ Bool DataReader::setSelectedAntennas (Vector<uint> const &antennaSelection,
       cerr << " shape(antennas)         = " << antennas_p.shape()       << endl;
       cerr << " shape(antennaSelection) = " << antennaSelection.shape() << endl;
       status = False;
-    } else {
+    } else if (absolute) {
       selectedAntennas_p.resize(antennaSelection.shape());
       selectedAntennas_p = antennaSelection;
-    }
+    } else {
+      cerr << "[DataReader::setSelectedAntennas] Error:" << endl;
+      cerr << "  Non absolute antennaSelection not implemented jet!" << endl;
+      status = False;
+    };
   } catch (AipsError x) {
     cerr << "[DataReader::setSelectedAntennas]" << x.getMesg() << endl;
     status = False;
@@ -1332,12 +1336,12 @@ Bool DataReader::setSelectedAntennas (Vector<Bool> const &antennaSelection)
     Vector<uint> selectedAntennas (ntrue(antennaSelection));
     uint counter (0);
 
-    antennaSelection_p.resize(nelem);
-    antennaSelection_p = antennaSelection;
+    //    antennaSelection_p.resize(nelem);
+    //    antennaSelection_p = antennaSelection;
     
     for (uint antenna(0); antenna<nelem; antenna++) {
       if (antennaSelection(antenna)) {
-	selectedAntennas (counter) = counter;
+	selectedAntennas (counter) = antenna;
 	counter++;
       }
     }
@@ -1350,6 +1354,16 @@ Bool DataReader::setSelectedAntennas (Vector<Bool> const &antennaSelection)
     cerr << " - nof. flags    = " << nelem                    << endl;
     return False;
   }
+}
+
+// ------------------------------------------------------------ antennaSelection
+
+Vector<bool> DataReader::antennaSelection () const {
+  Vector<bool> antennaSelectionVec(nofAntennas(),False);
+  for (uint antenna(0); antenna<nofSelectedAntennas(); antenna++) {
+    antennaSelectionVec(selectedAntennas_p(antenna)) = True;
+  };
+  return antennaSelectionVec;
 }
 
 // ----------------------------------------------------------------- nofBaselines

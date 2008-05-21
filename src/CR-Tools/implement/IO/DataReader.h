@@ -346,7 +346,7 @@ namespace CR {  //  Namespace CR -- begin
     // ----------------------------------------------------- (selected of) antennas
     
     //! Selection of the antennas
-    Vector<bool> antennaSelection_p;
+    // Vector<bool> antennaSelection_p; (Use ony one(!) method to store which antennas are selected!)
     Vector<uint> selectedAntennas_p;
     
     // ----------------------------------------------------- (selected of) channels
@@ -857,9 +857,7 @@ namespace CR {  //  Namespace CR -- begin
 
     \return antennaSelection -- Antenna selection flags
   */
-  inline Vector<bool> antennaSelection () const {
-    return antennaSelection_p;
-  }
+  Vector<bool> antennaSelection () const;
 
   /*!
     \brief Get the number of selected antennas

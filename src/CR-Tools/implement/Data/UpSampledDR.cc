@@ -23,8 +23,6 @@
 
 #include <Data/UpSampledDR.h>
 
-#define DEBUGGING_MESSAGES      
-
 namespace CR { // Namespace CR -- begin
   
   // ============================================================================
