@@ -460,8 +460,8 @@ namespace CR { // Namespace CR -- begin
 				    DataReader *dr,
 				    Vector<Double> fittedCCbeam,
 				    Vector<Bool> antennaSelection,
-				    const double& ccBeamOffset,
-				    const double& pBeamOffset)
+				    const double& remoteStart,
+				    const double& remoteStop)
   {
     try 
     {
@@ -491,12 +491,23 @@ namespace CR { // Namespace CR -- begin
 
       // Get the CC-beam and the power-beam
       ccbeam = GetCCBeam(dr, antennaSelection).copy();
-      pbeam = GetPBeam(dr, antennaSelection).copy();
+      pbeam  = GetPBeam(dr, antennaSelection).copy();
 
-      // smooth the data and substract Offset
+      // smooth the data
       StatisticsFilter<Double> mf(3,FilterType::MEAN);
-      ccbeam = mf.filter(ccbeam) - ccBeamOffset;
-      pbeam = mf.filter(pbeam) - pBeamOffset;
+      ccbeam = mf.filter(ccbeam);
+      pbeam = mf.filter(pbeam);
+
+      // calcutlate and substract offset (= noise, calculated as mean in remote region)
+      // if no remote range was given, don't substract anything
+      if (remoteStop != 0)
+      {
+        Slice remoteRegion(remoteStart,(remoteStop-remoteStart));
+        double ccBeamOffset = mean(ccbeam(remoteRegion));
+        double pBeamOffset  = mean(pbeam(remoteRegion));
+        ccbeam -= ccBeamOffset;
+        pbeam  -= pBeamOffset;
+      }
 
       // conversion to micro
       xaxis *= 1e6;
@@ -544,8 +555,8 @@ namespace CR { // Namespace CR -- begin
 				   DataReader *dr,
 				   Vector<Double> fittedXbeam,
 				   Vector<Bool> antennaSelection,
-				   const double& xBeamOffset,
-				   const double& pBeamOffset)
+				   const double& remoteStart,
+				   const double& remoteStop)
   {
     try 
     {
@@ -579,8 +590,19 @@ namespace CR { // Namespace CR -- begin
 
       // smooth the data
       StatisticsFilter<Double> mf(3,FilterType::MEAN);
-      xbeam = mf.filter(xbeam) - xBeamOffset;
-      pbeam = mf.filter(pbeam) - pBeamOffset;
+      xbeam = mf.filter(xbeam);
+      pbeam = mf.filter(pbeam);
+
+      // calcutlate and substract offset (= noise, calculated as mean in remote region)
+      // if no remote range was given, don't substract anything
+      if (remoteStop != 0)
+      {
+        Slice remoteRegion(remoteStart,(remoteStop-remoteStart));
+        double xBeamOffset = mean(xbeam(remoteRegion));
+        double pBeamOffset = mean(pbeam(remoteRegion));
+        xbeam -= xBeamOffset;
+        pbeam -= pBeamOffset;
+      }
 
       // conversion to micro
       xaxis *= 1e6;

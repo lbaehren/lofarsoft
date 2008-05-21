@@ -77,12 +77,12 @@ namespace CR { // Namespace CR -- begin
     vector <string> plotlist;
     //! Last upsampling exponent (-1 if no upsampling was done so far)
     int lastUpsamplingExponent;
+    //! Last time upsampling exponent (-1 if no upsampling was done so far)
+    int lastTimeUpsamplingExponent;
     //! Contains the upsampled fieldstrength
     Matrix<Double> upFieldStrength;
     //! Selection of upsampled antennas
     vector<bool> upsampledAntennas; 		// warning: don't use CasaCore-Vector as it makes only a flat copy using '='
-    //! Last time upsampling exponent (-1 if no upsampling was done so far)
-    int lastTimeUpsamplingExponent;
     //! Contains inerpolated time axis for upsampled fieldstrength
     Vector<Double> upTimeValues;
 
@@ -318,16 +318,17 @@ namespace CR { // Namespace CR -- begin
       \param DataReader       -- DataReader (LopesEventIn)
       \param fittedCCbeam     -- If supplied, the result of the fit will be plotted
       \param antennaSelection -- Selection of antennas considered for the plot
-      \param ccBeamOffset     -- Constant noise (mean) of the cc-beam will be subtracted
-      \param pBeamOffset      -- Constant noise (mean) of the power beam will be subtracted
+      \param remoteStart      -- Start of the remote range (in samples)
+      \param remoteStop       -- End of the remote range (in samples):
+                                 The remote range is used to calculate the mean of the CC-beam and P-beam.
     */
 
     void plotCCbeam (const string& filename, 
                      DataReader *dr,
                      Vector<Double> fittedCCbeam = Vector<Double>(),
                      Vector<Bool> antennaSelection = Vector<Bool>(),
- 	 	     const double& ccBeamOffset = 0,
- 	 	     const double& pBeamOffset = 0);
+                     const double& remoteStart = 0,
+                     const double& remoteStop = 0);
 
     /*!
       \brief Plots the X-beam
@@ -336,16 +337,17 @@ namespace CR { // Namespace CR -- begin
       \param DataReader       -- DataReader (LopesEventIn)
       \param fittedXbeam      -- If supplied, the result of the fit will be plotted
       \param antennaSelection -- Selection of antennas considered for the plot
-      \param xBeamOffset      -- Constant noise (mean) of the x-beam will be subtracted
-      \param pBeamOffset      -- Constant noise (mean) of the power beam will be subtracted
+      \param remoteStart      -- Start of the remote range (in samples)
+      \param remoteStop       -- End of the remote range (in samples):
+                                 The remote range is used to calculate the mean of the X-beam and P-beam.
     */
 
     void plotXbeam (const string& filename, 
                     DataReader *dr,
                     Vector<Double> fittedXbeam = Vector<Double>(),
                     Vector<Bool> antennaSelection = Vector<Bool>(),
-		    const double& xBeamOffset = 0,
-		    const double& pBeamOffset = 0);
+                    const double& remoteStart = 0,
+                    const double& remoteStop = 0);
 
     /*!
       \brief Plots the fieldstrength of all antennas after beam forming
