@@ -318,7 +318,8 @@ namespace CR { // Namespace CR -- begin
 	beamformDR_p = lev_p;
 	beamPipe_p =  pipeline_p;
       };
-            
+      
+      beamPipe_p->setExtraDelay(ExtraDelay);
       Times = beamformDR_p->timeValues();
       int nsamples = Times.nelements();      
       //initialize the fitter
