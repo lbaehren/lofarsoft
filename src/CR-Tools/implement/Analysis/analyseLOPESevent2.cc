@@ -110,6 +110,7 @@ namespace CR { // Namespace CR -- begin
 					  bool printShowerCoordinates) {
     Record erg;
     try {
+      string Polarization = "ANY";
       // ofstream latexfile;  // WARNING: causes problem in fitCR2gauss.cc line 200, left here for future tests
       Int nsamples;
       Vector<Double> Times, ccBeam, xBeam, pBeam, tmpvec;
@@ -274,7 +275,7 @@ namespace CR { // Namespace CR -- begin
 
       //perform the position fitting (if simplexFit = false, then only the PhaseCenter is set)
       if (! doPositionFitting(Az, El, distance, center, XC, YC, RotatePos,
-			      AntennaSelection, simplexFit, verbose) ){
+			      AntennaSelection, Polarization, simplexFit, verbose) ){
 	cerr << "analyseLOPESevent2::RunPipeline: " << "Error during doPositionFitting()!" << endl;
 	return Record();
       };
