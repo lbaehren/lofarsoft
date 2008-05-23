@@ -281,13 +281,14 @@ namespace DAL { // Namespace DAL -- begin
   {
     casa::Vector<double> val;
     
-    if (DAL::h5get_attribute(val,
-			     attribute_name(DAL::BEAM_DIRECTION),
-			     groupID_p)) {
-      return val;
-    } else {
+//     if (DAL::h5get_attribute(val,
+// 			     attribute_name(DAL::BEAM_DIRECTION),
+// 			     groupID_p)) {
+//       return val;
+//     } else {
+    std::cerr << "ERROR: Castrated code due to changes in the DAL! AH" << std::endl;
       return casa::Vector<double> (1,0);
-    }
+//    }
   }
 #else 
   std::vector<double> LOFAR_StationGroup::beam_direction ()
@@ -677,8 +678,9 @@ namespace DAL { // Namespace DAL -- begin
 		 trigger_offset());
       rec.define(casa::RecordFieldId(attribute_name(DAL::TRIGGERED_ANTENNAS)),
  		 triggered_antennas());
-      rec.define(casa::RecordFieldId(attribute_name(DAL::BEAM_DIRECTION)),
- 		 beam_direction());
+    std::cerr << "ERROR: Castrated code due to changes in the DAL! AH" << std::endl;
+      //      rec.define(casa::RecordFieldId(attribute_name(DAL::BEAM_DIRECTION)),
+      // 		 beam_direction());
     } catch (std::string message) {
       std::cerr << "[LOFAR_StationGroup::attributes2record] "
 		<< "Error filling the record with attribute values!\n"

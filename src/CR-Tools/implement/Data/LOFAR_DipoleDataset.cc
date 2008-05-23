@@ -297,35 +297,36 @@ namespace DAL { // Namespace DAL -- begin
   {
     double val (0);
 
-    if (datasetID_p > 0) {
-      if (DAL::h5get_attribute(val,
-			       attribute_name(DAL::SAMPLE_FREQUENCY),
-			       datasetID_p)) {
-	/*
-	 * Check the value stored in the dataset; we expect the sample frequency
-	 * be be stored in Hz, but this might not be the case.
-	 */
-	if (val < 1e06) {
-#ifdef DEBUGGING_MESSAGES
-	  std::cerr << "[LOFAR_DipoleDataset::sample_frequency]"
-		    << " Suspecting improper units for sample frequency."
-		    << " Attempting conversion to Hz..."
-		    << std::endl;
-#endif
-	  val *= 1e06;
-	}
-	/* Conversion to proper units */
-	if (unit == "Hz") {
-	  return val;
-	} else if (unit == "MHz") {
-	  return val/1e06;
-	}
-      } else {
-	val = 0;
-      }
-    } else {
-      val = 0;
-    }
+    std::cerr << "ERROR: Castrated code due to changes in the DAL! AH" << std::endl;
+//     if (datasetID_p > 0) {
+//       if (DAL::h5get_attribute(val,
+// 			       attribute_name(DAL::SAMPLE_FREQUENCY),
+// 			       datasetID_p)) {
+// 	/*
+// 	 * Check the value stored in the dataset; we expect the sample frequency
+// 	 * be be stored in Hz, but this might not be the case.
+// 	 */
+// 	if (val < 1e06) {
+// #ifdef DEBUGGING_MESSAGES
+// 	  std::cerr << "[LOFAR_DipoleDataset::sample_frequency]"
+// 		    << " Suspecting improper units for sample frequency."
+// 		    << " Attempting conversion to Hz..."
+// 		    << std::endl;
+// #endif
+// 	  val *= 1e06;
+// 	}
+// 	/* Conversion to proper units */
+// 	if (unit == "Hz") {
+// 	  return val;
+// 	} else if (unit == "MHz") {
+// 	  return val/1e06;
+// 	}
+//       } else {
+// 	val = 0;
+//       }
+//     } else {
+//       val = 0;
+//     }
     
     return val;
   }
@@ -527,13 +528,14 @@ namespace DAL { // Namespace DAL -- begin
   {
     casa::Vector<double> val;
     
-    if (DAL::h5get_attribute(val,
-			     attribute_name(DAL::ANTENNA_POSITION),
-			     datasetID_p)) {
-      return val;
-    } else {
+    std::cerr << "ERROR: Castrated code due to changes in the DAL! AH" << std::endl;
+//     if (DAL::h5get_attribute(val,
+// 			     attribute_name(DAL::ANTENNA_POSITION),
+// 			     datasetID_p)) {
+//       return val;
+//     } else {
       return casa::Vector<double> (1);
-    }
+//     }
   }
   
   // ----------------------------------------------------- antenna_position_value
@@ -768,7 +770,8 @@ namespace DAL { // Namespace DAL -- begin
     desc.addField (DAL::attribute_name(DAL::RSP_ID),casa::TpUInt);
     desc.addField (DAL::attribute_name(DAL::RCU_ID),casa::TpUInt);
     desc.addField (DAL::attribute_name(DAL::TIME),casa::TpUInt);
-    desc.addField (DAL::attribute_name(DAL::SAMPLE_FREQUENCY),casa::TpDouble);
+    std::cerr << "ERROR: Castrated code due to changes in the DAL! AH" << std::endl;
+//     desc.addField (DAL::attribute_name(DAL::SAMPLE_FREQUENCY),casa::TpDouble);
     desc.addField (DAL::attribute_name(DAL::NYQUIST_ZONE),casa::TpUInt);
     desc.addField (DAL::attribute_name(DAL::SAMPLE_NUMBER),casa::TpUInt);
     desc.addField (DAL::attribute_name(DAL::SAMPLES_PER_FRAME),casa::TpUInt);
@@ -792,8 +795,9 @@ namespace DAL { // Namespace DAL -- begin
 		 rcu_id());
       rec.define(casa::RecordFieldId(attribute_name(DAL::TIME)),
 		 time());
-      rec.define(casa::RecordFieldId(attribute_name(DAL::SAMPLE_FREQUENCY)),
-		 sample_frequency());
+    std::cerr << "ERROR: Castrated code due to changes in the DAL! AH" << std::endl;
+//       rec.define(casa::RecordFieldId(attribute_name(DAL::SAMPLE_FREQUENCY)),
+// 		 sample_frequency());
       rec.define(casa::RecordFieldId(attribute_name(DAL::NYQUIST_ZONE)),
 		 nyquist_zone());
       rec.define(casa::RecordFieldId(attribute_name(DAL::SAMPLE_NUMBER)),
@@ -802,8 +806,9 @@ namespace DAL { // Namespace DAL -- begin
 		 samples_per_frame());
       rec.define(casa::RecordFieldId(attribute_name(DAL::FEED)),
 		 feed());
-      rec.define(casa::RecordFieldId(attribute_name(DAL::ANTENNA_POSITION)),
-		 antenna_position());
+    std::cerr << "ERROR: Castrated code due to changes in the DAL! AH" << std::endl;
+//       rec.define(casa::RecordFieldId(attribute_name(DAL::ANTENNA_POSITION)),
+// 		 antenna_position());
       rec.define(casa::RecordFieldId(attribute_name(DAL::ANTENNA_POSITION_VALUE)),
 		 antenna_position_value());
       rec.define(casa::RecordFieldId(attribute_name(DAL::ANTENNA_POSITION_UNIT)),
