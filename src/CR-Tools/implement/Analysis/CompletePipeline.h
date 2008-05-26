@@ -86,6 +86,9 @@ namespace CR { // Namespace CR -- begin
     //! Contains inerpolated time axis for upsampled fieldstrength
     Vector<Double> upTimeValues;
 
+    //! Polarization considered in analysis (should be set by analyseLOPESevent2::RunPipeline)
+    string Polarization;
+
 
   public:
     
@@ -223,6 +226,35 @@ namespace CR { // Namespace CR -- begin
 
 
     /*!
+      \brief Set the polarization considered in the analysis
+
+      \param polarization -- polarization considered in the analysis (ANY, EW or NS)
+    */
+    inline void setPolarization (const string &polarization) {
+      Polarization = polarization;
+    }
+
+    /*!
+      \brief Get the polarization considered in the analysis
+
+      \return Polarization -- polarization considered in the analysis
+    */
+    inline string getPolarization () {
+      return Polarization;
+    }
+
+ 
+    /*!
+      \brief Deselects all antennas which do not have the analysed polarization
+
+      \param DataReader       -- DataReader (LopesEventIn)
+      \param antennaSelection -- antennaSelection (passed by reference and changed by this method)
+   */
+    void deselectectPolarization(DataReader *dr,
+                                 Vector<Bool> &antennaSelection);
+
+
+    /*!
       \brief Gets the upsampled fieldstrength of selected antennas (data are stored for reuse)
 
       \param DataReader       -- DataReader (LopesEventIn)
@@ -318,6 +350,7 @@ namespace CR { // Namespace CR -- begin
       \param DataReader       -- DataReader (LopesEventIn)
       \param fittedCCbeam     -- If supplied, the result of the fit will be plotted
       \param antennaSelection -- Selection of antennas considered for the plot
+      \param filterStrength   -- Numbers of blocks used in the block-averaging filter, 0 = no smoothing
       \param remoteStart      -- Start of the remote range (in samples)
       \param remoteStop       -- End of the remote range (in samples):
                                  The remote range is used to calculate the mean of the CC-beam and P-beam.
@@ -327,6 +360,7 @@ namespace CR { // Namespace CR -- begin
                      DataReader *dr,
                      Vector<Double> fittedCCbeam = Vector<Double>(),
                      Vector<Bool> antennaSelection = Vector<Bool>(),
+                     const int& filterStrength = 0,
                      const double& remoteStart = 0,
                      const double& remoteStop = 0);
 
@@ -337,6 +371,7 @@ namespace CR { // Namespace CR -- begin
       \param DataReader       -- DataReader (LopesEventIn)
       \param fittedXbeam      -- If supplied, the result of the fit will be plotted
       \param antennaSelection -- Selection of antennas considered for the plot
+      \param filterStrength   -- Numbers of blocks used in the block-averaging filter, 0 = no smoothing
       \param remoteStart      -- Start of the remote range (in samples)
       \param remoteStop       -- End of the remote range (in samples):
                                  The remote range is used to calculate the mean of the X-beam and P-beam.
@@ -346,6 +381,7 @@ namespace CR { // Namespace CR -- begin
                     DataReader *dr,
                     Vector<Double> fittedXbeam = Vector<Double>(),
                     Vector<Bool> antennaSelection = Vector<Bool>(),
+                     const int& filterStrength = 0,
                     const double& remoteStart = 0,
                     const double& remoteStop = 0);
 

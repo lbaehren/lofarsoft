@@ -83,6 +83,7 @@ using CR::LopesEventIn;
   verbose                = true
   simplexFit             = true
   doTVcal                = default
+  polarization		= ANY
   plotStart              = -2.05e-6
   plotEnd                = -1.60e-6
   upsamplingRate         = 320e6
@@ -107,6 +108,7 @@ using CR::LopesEventIn;
     <li>the simplex fit of the arrival direction and radius of curvature is
     done,
     <li>the TV calibration will be done by default,
+    <li>the analysis does not take care of the polarization of the antennas,
     <li>the plots start at -2.05 micro seconds and end at -1.60 micro seconds,
     <li>the Lopes data will be upsampled to a sampling rate of 320 MHz (see below),
     <li>the upsampling of the calibrated antenna fieldstrengthes will be done by
@@ -129,6 +131,11 @@ using CR::LopesEventIn;
   and has an effect only to the traces of single antennas.
   The upsampling due to setting an upsamplingRate greater than 160 MHz effects the whole analysis
   chain, including the CC-Beam. At a later point this method might be the only one used anymore.
+  You should prefer 2^n * 80 MHz rates (e.g. 160, 320, 640, 1280, ...).
+
+  WARNING:
+  The two upsampling methods should not be mixed!
+  Otherwise wrong traces are obtained.
 */
 
 
@@ -175,6 +182,7 @@ int main (int argc, char *argv[])
     bool verbose = true;
     bool simplexFit = true;
     int doTVcal = -1;			// 1: yes, 0: no, -1: use default	
+    string polarization = "ANY";	// polarization: ANY, EW or NS
     double plotStart = -2.05e-6;	// in seconds
     double plotEnd = -1.60e-6;		// in seconds
     double upsamplingRate = 0.;		// Upsampling Rate for new upsampling
@@ -230,6 +238,7 @@ int main (int argc, char *argv[])
         std::cerr << "verbose = true\n";
         std::cerr << "simplexFit = true\n";
         std::cerr << "doTVcal = default\n";
+        std::cerr << "polarization = ANY\n";
         std::cerr << "plotBegin = -2.05e-6\n";
         std::cerr << "plotEnd = -1.60e-6\n";
         std::cerr << "upsamplingRate = 320e6\n";
@@ -462,6 +471,31 @@ int main (int argc, char *argv[])
           {
             std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
             std::cerr << "doTVcal must be either -1 ('default'), 0 ('false') or 1 ('true').\n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+        }
+
+        if ( (keyword.compare("polarization")==0) || (keyword.compare("Polarization")==0) 
+             || (keyword.compare("polarisation")==0) || (keyword.compare("Polarisation")==0))
+        {
+          if ( (value.compare("ANY")==0) || (value.compare("any")==0) )
+	  {
+	    polarization = "ANY";
+	    std::cout << "polarization set to ANY (polarization won't be considered during analysis).\n";
+	  } else
+          if ( (value.compare("EW")==0) || (value.compare("ew")==0) )
+	  {
+	    polarization = "EW";
+	    std::cout << "polarization set to EW (only EW antennas will be beamformed).\n";
+	  } else
+	  if ( (value.compare("NS")==0) || (value.compare("ns")==0) )
+	  {
+	    polarization = "NS";
+	    std::cout << "polarization set to NS (only NS antennas will be beamformed).\n";
+	  } else
+          {
+            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "Polarization must be either ANY, EW or NS.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
         }
@@ -857,11 +891,10 @@ int main (int argc, char *argv[])
       eventPipeline.setUpsamplingExponent(upsamplingExponent);
 
       // call the pipeline with an extra delay = 0.
-verbose = true;
       results = eventPipeline.RunPipeline (filename, azimuth, elevation, distance, core_x, core_y, RotatePos,
                                            plotprefix, generatePlots, static_cast< Vector<int> >(flagged), verbose, 
-                                           simplexFit, 0., doTVcal, upsamplingRate, singlePlots, PlotRawData, CalculateMaxima,
-                                           listCalcMaxima, printShowerCoordinates); 
+                                           simplexFit, 0., doTVcal, upsamplingRate, polarization, singlePlots, PlotRawData,
+                                           CalculateMaxima, listCalcMaxima, printShowerCoordinates);
 
       // make a postscript with a summary of all plots
       // if summaryColumns = 0 the method does not create a summary.

@@ -106,6 +106,7 @@ namespace CR { // Namespace CR -- begin
 					  Double ExtraDelay,
 					  int doTVcal,
 					  Double UpSamplingRate,
+					  String Polarization,
 					  bool SinglePlots,
 					  bool PlotRawData,
   					  bool CalculateMaxima,
@@ -113,7 +114,6 @@ namespace CR { // Namespace CR -- begin
 					  bool printShowerCoordinates) {
     Record erg;
     try {
-      string Polarization = "ANY";   // should be moved to function header (will be done later)
       // ofstream latexfile;  // WARNING: causes problem in fitCR2gauss.cc line 200, left here for future tests
       Vector <Bool> AntennaSelection;
       Record fiterg;
@@ -126,19 +126,6 @@ namespace CR { // Namespace CR -- begin
 	return Record();
       };
 
-      // Plot the raw data, if desired
-      if (PlotRawData)
-      {
-	// plot upsampled raw data: either in seperated plots seperated or all traces in one plot
-        if (SinglePlots)
-          pipeline.plotAllAntennas(PlotPrefix+ "-raw", lev_p, AntennaSelection, true, getUpsamplingExponent(),true);
-        else
-          pipeline.plotAllAntennas(PlotPrefix + "-raw", lev_p, AntennaSelection, false, getUpsamplingExponent(), true);
-
-	// calculate the maxima
-        if (CalculateMaxima) pipeline.calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), true);
-      }
-
       // set Complete Pipeline and print output, which case is set!
       CompleteBeamPipe_p = static_cast<CompletePipeline*>(beamPipe_p);
       if (verbose)
@@ -150,7 +137,22 @@ namespace CR { // Namespace CR -- begin
       // initialize Complete Pipeline
       CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
       CompleteBeamPipe_p->setCCWindowWidth(getCCWindowWidth());
+      CompleteBeamPipe_p->setPolarization(Polarization);
 
+      // Plot the raw data, if desired
+      if (PlotRawData)
+      {
+	// plot upsampled raw data: either in seperated plots seperated or all traces in one plot
+        if (SinglePlots)
+          CompleteBeamPipe_p->plotAllAntennas(PlotPrefix+ "-raw", beamformDR_p, AntennaSelection, true,
+                                              getUpsamplingExponent(),true);
+        else
+          CompleteBeamPipe_p->plotAllAntennas(PlotPrefix + "-raw", beamformDR_p, AntennaSelection, false,
+                                              getUpsamplingExponent(), true);
+
+	// calculate the maxima
+        if (CalculateMaxima) CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(), true);
+      }
 
       //perform the position fitting (if simplexFit = false, then only the PhaseCenter is set)
       if (! doPositionFitting(Az, El, distance, center, XC, YC, RotatePos,
@@ -171,37 +173,40 @@ namespace CR { // Namespace CR -- begin
       if (printShowerCoordinates) printAntennaDistances(erg.asArrayDouble("distances"),
                                                          toShower(beamPipe_p->GetAntPositions(), Az, El),	
                                                          El, Az, XC, YC, beamformDR_p->header().asInt("Date"));
-
       // Generate plots
       if (generatePlots)
       {
         // Plot CC-beam; if fit has converged, then also plot the result of the fit
     	if (fiterg.asBool("CCconverged"))
           CompleteBeamPipe_p->plotCCbeam(PlotPrefix + "-CC", beamformDR_p, fiterg.asArrayDouble("Cgaussian"),
-                                         AntennaSelection, remoteRange_p(0), remoteRange_p(1));
+                                         AntennaSelection, filterStrength_p, remoteRange_p(0), remoteRange_p(1));
         else
           CompleteBeamPipe_p->plotCCbeam(PlotPrefix + "-CC", beamformDR_p, Vector<Double>(),
-                                         AntennaSelection, remoteRange_p(0), remoteRange_p(1));
+                                         AntennaSelection, filterStrength_p, remoteRange_p(0), remoteRange_p(1));
 
         // Plot X-beam; if fit has converged, then also plot the result of the fit
     	if (fiterg.asBool("Xconverged"))
           CompleteBeamPipe_p->plotXbeam(PlotPrefix + "-X", beamformDR_p, fiterg.asArrayDouble("Xgaussian"),
-                                        AntennaSelection, remoteRange_p(0), remoteRange_p(1) );
+                                        AntennaSelection, filterStrength_p, remoteRange_p(0), remoteRange_p(1) );
         else
           CompleteBeamPipe_p->plotXbeam(PlotPrefix + "-X", beamformDR_p, Vector<Double>(),
-                                        AntennaSelection, remoteRange_p(0), remoteRange_p(1));
+                                        AntennaSelection, filterStrength_p, remoteRange_p(0), remoteRange_p(1));
 
         // Plot of all antenna traces together
-        CompleteBeamPipe_p->plotAllAntennas(PlotPrefix + "-all", beamformDR_p, AntennaSelection, false, getUpsamplingExponent(),false);
-        
+        CompleteBeamPipe_p->plotAllAntennas(PlotPrefix + "-all", beamformDR_p, AntennaSelection, false,
+                                            getUpsamplingExponent(),false);
+
 	// Plot of upsampled antenna traces (seperated) 
         if (SinglePlots)
-          CompleteBeamPipe_p->plotAllAntennas(PlotPrefix, beamformDR_p, AntennaSelection, true, getUpsamplingExponent(),false);
+          CompleteBeamPipe_p->plotAllAntennas(PlotPrefix, beamformDR_p, AntennaSelection, true,
+                                              getUpsamplingExponent(),false);
 
         // calculate the maxima
-	if (CalculateMaxima) CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(), false);
+	if (CalculateMaxima)
+          CompleteBeamPipe_p->calculateMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(), false);
         // user friendly list of calculated maxima
-        if (listCalcMaxima) CompleteBeamPipe_p->listCalcMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),fiterg.asDouble("CCcenter"));
+        if (listCalcMaxima)
+          CompleteBeamPipe_p->listCalcMaxima(beamformDR_p, AntennaSelection, getUpsamplingExponent(),fiterg.asDouble("CCcenter"));
       };
 
       // give out the names of the created plots

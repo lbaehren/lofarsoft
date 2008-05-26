@@ -177,29 +177,31 @@ class analyseLOPESevent2 : public analyseLOPESevent{
     /*!
       \brief Process one event using the CompletePipeline class
 
-      \param evname - path to the eventfile to be processed
-      \param Az - value for the azimuth direction [in deg] (e.g. from KASCADE)
-      \param El - value for the elevation [in deg] (e.g. from KASCADE)
-      \param distance - value for the distance parameter [in m]
-      \param XC - x-position of the shower center [in m]
-      \param YC - y-position of the shower center [in m]
-      \param RotatePos - rotate the XC/YC position (set to False if XC/YC already
-             in LOPES coordinates)
-      \param PlotPrefix - prefix (including path) for the plots to be generated
-      \param generatePlots - generate the postscript plots
-      \param FlaggedAntIDs - list of antenna IDs that are to be flagged.
-      \param verbose - produce verbose output on the commandline.
-      \param simplexFit - fit the direction with a simple simplex fit
-      \param ExtraDelay - additional delay to shift the data in time.
-      \param doTVcal - perform the phase calibration on the TV transmitter
-             (1: yes, 0: no, -1: use default)
-      \param UpSamplingRate - Samplerate for upsampling. If smaller than the original
-                              samplerate (80MHz for LOPES) then no upsampling is done.
-			           (Check the docs of <tt>UpSampledDR<\tt> for more info.)
-      \param SinglePlots - makes a plot for each antenna
-      \param PlotRawData - Plots the raw data FX
+      \param evname          - path to the eventfile to be processed
+      \param Az              - value for the azimuth direction [in deg] (e.g. from KASCADE)
+      \param El              - value for the elevation [in deg] (e.g. from KASCADE)
+      \param distance        - value for the distance parameter [in m]
+      \param XC              - x-position of the shower center [in m]
+      \param YC              - y-position of the shower center [in m]
+      \param RotatePos       - rotate the XC/YC position (set to False if XC/YC already
+                               in LOPES coordinates)
+      \param PlotPrefix      - prefix (including path) for the plots to be generated
+      \param generatePlots   - generate the postscript plots
+      \param FlaggedAntIDs   - list of antenna IDs that are to be flagged.
+      \param verbose         - produce verbose output on the commandline.
+      \param simplexFit      - fit the direction with a simple simplex fit
+      \param ExtraDelay      - additional delay to shift the data in time.
+      \param doTVcal         - perform the phase calibration on the TV transmitter
+                               (1: yes, 0: no, -1: use default)
+      \param UpSamplingRate  - Samplerate for upsampling. If smaller than the original
+                               samplerate (80MHz for LOPES) then no upsampling is done.
+			            (Check the docs of <tt>UpSampledDR<\tt> for more info.)
+      \param Polarization    - Polarization type to select only part of the antennas 
+                               ("ANY": ignore antenna polarization)
+      \param SinglePlots     - makes a plot for each antenna
+      \param PlotRawData     - Plots the raw data FX
       \param CalculateMaxima - Finds the maximum and the minimum of the trace in the plot range
-      \param listCalcMaxima - output version of CalculateMax
+      \param listCalcMaxima  - output version of CalculateMax
       \param printShowerCoordinates -	 print the x,y and total distance between antenna and shower core in shower coordinates
 
       \return Record with the results.
@@ -219,6 +221,7 @@ class analyseLOPESevent2 : public analyseLOPESevent{
 			Double ExtraDelay=0.,
 			int doTVcal=-1,
 			Double UpSamplingRate=0.,
+			String Polarization="ANY",
 			bool SinglePlots=false,
 			bool PlotRawData=false,
 			bool CalculateMaxima=false,

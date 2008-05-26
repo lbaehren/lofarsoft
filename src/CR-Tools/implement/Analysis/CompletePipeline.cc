@@ -43,7 +43,8 @@ namespace CR { // Namespace CR -- begin
     lastTimeUpsamplingExponent(-1),
     upFieldStrength(),
     upsampledAntennas(),
-    upTimeValues()
+    upTimeValues(),
+    Polarization("ANY")
   {;}
   
   // ----------------------------------------------------------- CompletePipeline
@@ -57,7 +58,8 @@ namespace CR { // Namespace CR -- begin
     lastTimeUpsamplingExponent(-1),
     upFieldStrength(),
     upsampledAntennas(),
-    upTimeValues()
+    upTimeValues(),
+    Polarization("ANY")
   {
     copy (other);
   }
@@ -111,6 +113,42 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
+
+  void CompletePipeline::deselectectPolarization(DataReader *dr,
+                                                 Vector<Bool> &antennaSelection)
+  {
+    try 
+    {
+      // Deselect antennas not matching the polarization (except if it is ANY)
+      if (Polarization != "ANY")
+      {
+        // get the date of the current event
+        unsigned int date;
+        dr->header().get("Date",date);
+
+        // get AntennaIDs from CalTables (should be initialised by FirstStagePipeline fist)
+        Vector<Int> AntennaIDs;
+        dr->header().get("AntennaIDs",AntennaIDs);
+
+        String polarization_string;
+
+        // loop through all AntennaIDs and deselect the ones with the wrong polarization
+        for (unsigned int i=0; i<AntennaIDs.size(); i++)
+        {
+          CTRead->GetData(date, AntennaIDs(i), "Polarization", &polarization_string);
+          if (polarization_string != static_cast<String>(Polarization)) {
+            antennaSelection(i) = false;
+            cout << "Deselected Antenna : " << i+1;
+          }
+        }
+      } // if
+    } catch (AipsError x) 
+      {
+        std::cerr << "CompletePipeline::deselectectPolarization " << x.getMesg() << std::endl;
+      }
+  }
+
+
   Matrix<Double> CompletePipeline::getUpsampledFieldstrength (DataReader *dr,
 							      const int& upsampling_exp,
 							      Vector<Bool> antennaSelection)
@@ -119,8 +157,11 @@ namespace CR { // Namespace CR -- begin
     {
       // check if upsampling shoud be done at all (if not, return not upsampled data)
       if (upsampling_exp < 1) {
-	return GetTimeSeries(dr).copy(); 
+	return GetTimeSeries(dr, Vector<Bool>(), Polarization).copy(); 
       }
+
+      // make antennaSelection unique, as casacore-Vectors are allways passed by reference
+      antennaSelection.unique();
 
       // Get the antenna selection from the DataReader if no selction was chosen 	
       if (antennaSelection.nelements() == 0) {
@@ -161,7 +202,8 @@ namespace CR { // Namespace CR -- begin
       }
       
       // Get the (not yet upsampled) fieldstrength of all antennas
-      Matrix<Double> fieldstrength = GetTimeSeries(dr);  // don't pass antennaSelection to get full number of columns in the Matrix
+      // (don't pass antennaSelection to get full number of columns in the Matrix)
+      Matrix<Double> fieldstrength = GetTimeSeries(dr, Vector<Bool>(), Polarization);
       // create upsampling factor by upsampling exponent
       unsigned int upsampled = pow(2,upsampling_exp);
 
@@ -231,7 +273,7 @@ namespace CR { // Namespace CR -- begin
         std::cerr << "CompletePipeline:getUpsampledFieldstrength: " << x.getMesg() << std::endl;
       }; 
 
-    // return dummy to avoid warning (normally function should not reach this command).
+    // return dummy to avoid warning (this command is reached only in case of an error).
     return Matrix<Double>();
   }
 
@@ -248,6 +290,9 @@ namespace CR { // Namespace CR -- begin
 
       // check if upsampling shoud be done at all (if not, return not upsampled data)
       if (upsampling_exp < 1) return rawData.copy(); 
+
+      // make antennaSelection unique, as casacore-Vectors are allways passed by reference
+      antennaSelection.unique();
 
       // Get the antenna selection from the DataReader if no selction was chosen 	
       if (antennaSelection.nelements() == 0) {
@@ -318,7 +363,7 @@ namespace CR { // Namespace CR -- begin
         std::cerr << "CompletePipeline:getUpsampledFX: " << x.getMesg() << std::endl;
       }; 
 
-    // return dummy to avoid warning (normally function should not reach this command).
+    // return dummy to avoid warning (this command is reached only in case of an error).
     return Matrix<Double>();
   }
 
@@ -372,7 +417,7 @@ namespace CR { // Namespace CR -- begin
         std::cerr << "CompletePipeline:getUpsampledTimeAxis: " << x.getMesg() << std::endl;
       }; 
 
-    // return dummy to avoid warning (normally function should not reach this command).
+    // return dummy to avoid warning (this command is reached only in case of an error).
     return Vector<Double>();
   }
 
@@ -396,7 +441,7 @@ namespace CR { // Namespace CR -- begin
         std::cerr << "CompletePipeline:calculatePlotRange: " << x.getMesg() << std::endl;
     }; 
  
-    // return dummy to avoid warning (normally function should not reach this command).
+    // return dummy to avoid warning (this command is reached only in case of an error).
     return Slice();
   }
 
@@ -424,7 +469,7 @@ namespace CR { // Namespace CR -- begin
         std::cerr << "CompletePipeline:calculateNoiseRange: " << x.getMesg() << std::endl;
     }; 
 
-    // return dummy to avoid warning (normally function should not reach this command).
+    // return dummy to avoid warning (this command is reached only in case of an error).
     return Slice();
   }
 
@@ -451,7 +496,7 @@ namespace CR { // Namespace CR -- begin
         std::cerr << "CompletePipeline:calculateCCRange: " << x.getMesg() << std::endl;
     }; 
 
-    // return dummy to avoid warning (normally function should not reach this command).
+    // return dummy to avoid warning (this command is reached only in case of an error).
     return Slice();
   }
 
@@ -460,6 +505,7 @@ namespace CR { // Namespace CR -- begin
 				    DataReader *dr,
 				    Vector<Double> fittedCCbeam,
 				    Vector<Bool> antennaSelection,
+				    const int& filterStrength,
 				    const double& remoteStart,
 				    const double& remoteStop)
   {
@@ -471,7 +517,7 @@ namespace CR { // Namespace CR -- begin
       uInt gtdate;
       dr->header().get("Date",gtdate);
       stringstream gtlabel;
-      gtlabel <<gtdate;
+      gtlabel << gtdate;
       string  plotfilename;
 
       // add the ".ps" to the filename
@@ -480,6 +526,8 @@ namespace CR { // Namespace CR -- begin
       // alternative filename gtdate".ps"
       //plotfilename = gtlabel.str() + ".ps";
 
+      // make antennaSelection unique, as casacore-Vectors are allways passed by reference
+      antennaSelection.unique();
 
       std::cout <<"Plotting the CC-beam and the Power-beam to file: " << plotfilename << std::endl;
 
@@ -490,13 +538,16 @@ namespace CR { // Namespace CR -- begin
       Slice plotRange = calculatePlotRange(xaxis); 
 
       // Get the CC-beam and the power-beam
-      ccbeam = GetCCBeam(dr, antennaSelection).copy();
-      pbeam  = GetPBeam(dr, antennaSelection).copy();
+      ccbeam = GetCCBeam(dr, antennaSelection, Polarization).copy();
+      pbeam  = GetPBeam(dr, antennaSelection, Polarization).copy();
 
       // smooth the data
-      StatisticsFilter<Double> mf(3,FilterType::MEAN);
-      ccbeam = mf.filter(ccbeam);
-      pbeam = mf.filter(pbeam);
+      if (filterStrength > 0)
+      {
+        StatisticsFilter<Double> mf(filterStrength,FilterType::MEAN);
+        ccbeam = mf.filter(ccbeam);
+        pbeam = mf.filter(pbeam);
+      }
 
       // calcutlate and substract offset (= noise, calculated as mean in remote region)
       // if no remote range was given, don't substract anything
@@ -555,6 +606,7 @@ namespace CR { // Namespace CR -- begin
 				   DataReader *dr,
 				   Vector<Double> fittedXbeam,
 				   Vector<Bool> antennaSelection,
+				   const int& filterStrength,
 				   const double& remoteStart,
 				   const double& remoteStop)
   {
@@ -567,7 +619,7 @@ namespace CR { // Namespace CR -- begin
       uInt gtdate;
       dr->header().get("Date",gtdate);
       stringstream gtlabel;
-      gtlabel <<gtdate;
+      gtlabel << gtdate;
       string  plotfilename;
 
       // add the ".ps" to the filename
@@ -575,6 +627,9 @@ namespace CR { // Namespace CR -- begin
 
       // alternative filename gtdate".ps"
       //plotfilename = gtlabel.str() + ".ps";
+
+      // make antennaSelection unique, as casacore-Vectors are allways passed by reference
+      antennaSelection.unique();
 
       std::cout <<"Plotting the X-beam and the Power-beam to file: " << plotfilename << std::endl;
 
@@ -585,13 +640,16 @@ namespace CR { // Namespace CR -- begin
       Slice plotRange = calculatePlotRange(xaxis); 
 
       // Get the X-beam and the power-beam
-      xbeam = GetXBeam(dr, antennaSelection).copy();
-      pbeam = GetPBeam(dr, antennaSelection).copy();
+      xbeam = GetXBeam(dr, antennaSelection, Polarization).copy();
+      pbeam = GetPBeam(dr, antennaSelection, Polarization).copy();
 
       // smooth the data
-      StatisticsFilter<Double> mf(3,FilterType::MEAN);
-      xbeam = mf.filter(xbeam);
-      pbeam = mf.filter(pbeam);
+      if (filterStrength > 0)
+      {
+        StatisticsFilter<Double> mf(filterStrength,FilterType::MEAN);
+        xbeam = mf.filter(xbeam);
+        pbeam = mf.filter(pbeam);
+      }
 
       // calcutlate and substract offset (= noise, calculated as mean in remote region)
       // if no remote range was given, don't substract anything
@@ -663,14 +721,20 @@ namespace CR { // Namespace CR -- begin
       Matrix<Double> upYvalues;			// upsampled y-values
       int color = 3;				// starting color
 
-      // Get the antenna selection from the DataReader if no selction was chosen 	
+      // make antennaSelection unique, as casacore-Vectors are allways passed by reference
+      antennaSelection.unique();
+
+      // Get the antenna selection from the DataReader if no selction was chosen
       if (antennaSelection.nelements() == 0) {
 	antennaSelection = GetAntennaMask(dr);
       }
 
+      // adopt the antennaSelection to the chosen polarization
+      deselectectPolarization(dr,antennaSelection);
+
       // Get the (not upsampled) time axis
       xaxis = static_cast< Vector<Double> >(dr->timeValues());
-      
+
       // Get the yValues of all antennas (raw data or fieldstrength)
       if (rawData)
       {
@@ -735,8 +799,11 @@ namespace CR { // Namespace CR -- begin
       stringstream gtlabel, antennanumber;
       // Get the AntennaIDs for labeling
       dr->header().get("Date",gtdate);
-      gtlabel <<gtdate;
+      gtlabel << gtdate;
 
+
+      // Create empty vector for not existing error bars 
+      Vector<Double> empty;
 
       // Make the plots (either all antennas together or seperated)
       if (seperated)
@@ -744,9 +811,6 @@ namespace CR { // Namespace CR -- begin
         stringstream antennaid;
         Vector<Int> AntennaIDs;
         dr->header().get("AntennaIDs",AntennaIDs);
-
-        // Create empty vector for not existing error bars 
-        Vector<Double> empty;
 
         // Create the plots for each individual antenna looping through antennas
         if (rawData)
@@ -785,9 +849,11 @@ namespace CR { // Namespace CR -- begin
             else
               plotter.AddLabels("Time t [#gmsec]", "Fieldstrength #ge#d0#u [#gmV/m/MHz]",label);
   
-            // Plot (upsampled) trace and original data points.
+            // Plot (upsampled) trace
             plotter.PlotLine(upxaxis(upplotRange),upYvalues.column(i)(upplotRange),color,1);
-            plotter.PlotSymbols(xaxis(plotRange),yValues.column(i)(plotRange),empty, empty, color, 2, 5);
+            // Plot original data points (if upsampling was done).
+            if (upsampling_exp > 0)
+              plotter.PlotSymbols(xaxis(plotRange),yValues.column(i)(plotRange),empty, empty, color, 2, 5);
 
             // Add filename to list of created plots
             plotlist.push_back(plotfilename);
@@ -798,8 +864,7 @@ namespace CR { // Namespace CR -- begin
           }
 	}
         std::cout << std::endl;
-      // if (seperated) => else
-      }else {
+      } else {  // if (seperated) => else
         // add the ".ps" to the filename
         plotfilename = filename + ".ps";
 
@@ -838,8 +903,7 @@ namespace CR { // Namespace CR -- begin
 
         // Add filename to list of created plots
         plotlist.push_back(plotfilename);
-      }
-
+      } // else
     } catch (AipsError x) 
       {
         std::cerr << "CompletePipeline:plotAllAntennas: " << x.getMesg() << std::endl;
@@ -868,11 +932,17 @@ namespace CR { // Namespace CR -- begin
       else
         std::cout << "\nLooking for maxima in the calibrated fieldstrength: \n";
   
+
+      // make antennaSelection unique, as casacore-Vectors are allways passed by reference
+      antennaSelection.unique();
+
       // Get the antenna selection from the DataReader if no selction was chosen 	
       if (antennaSelection.nelements() == 0) {
 	antennaSelection = GetAntennaMask(dr);
       }
 
+      // adopt the antennaSelection to the chosen polarization
+      deselectectPolarization(dr,antennaSelection);
  
       // Get the (upsampled) time axis
       timeValues = getUpsampledTimeAxis(dr,upsampling_exp);
@@ -980,11 +1050,17 @@ namespace CR { // Namespace CR -- begin
       vector<double> extrema;			// Stores the calculated extrema
       vector<double> extrema_time;		// Stores the calculated time of the extrema
 
+
+      // make antennaSelection unique, as casacore-Vectors are allways passed by reference
+      antennaSelection.unique();
+
       // Get the antenna selection from the DataReader if no selction was chosen 	
       if (antennaSelection.nelements() == 0) {
 	antennaSelection = GetAntennaMask(dr);
       }
 
+      // adopt the antennaSelection to the chosen polarization
+      deselectectPolarization(dr,antennaSelection);
  
       // Get the (upsampled) time axis
       timeValues = getUpsampledTimeAxis(dr,upsampling_exp);
