@@ -105,7 +105,7 @@ namespace CR { // Namespace CR -- begin
       DataReader::setSampleFrequency(newSampleFrequency);
       int i,nAntennas,blocksize;
       nAntennas = inpDR_p->nofAntennas();
-      blocksize = (int)floor(inpDR_p->blocksize()*SampleFreqRatio);
+      blocksize = (int)floor(inpDR_p->blocksize()*SampleFreqRatio+0.5);
       // Setup the Iterators
       if (iterator_p != NULL) { delete [] iterator_p; iterator_p=NULL; };
       iterator_p = new DataIterator[nAntennas];
@@ -186,7 +186,7 @@ namespace CR { // Namespace CR -- begin
 	sourceBlockNo = (uint)floor((startsample/SampleFreqRatio)/sourceBlockSize);
 	// Currently the DataReader and DataIterator start to count at 1
 	inpDR_p->setBlock(sourceBlockNo);
-	restoreBlocksize  = (uint)floor(sourceBlockSize*SampleFreqRatio);
+	restoreBlocksize  = (uint)floor(sourceBlockSize*SampleFreqRatio+0.5);
 	
 	sourceFreqs = inpDR_p->frequencyValues();
 	restoreFFTlen = restoreBlocksize/2+1;
