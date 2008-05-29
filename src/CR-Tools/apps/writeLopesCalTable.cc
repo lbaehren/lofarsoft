@@ -34,7 +34,7 @@ using CR::CalTableReader;
  
   \author Frank Schröder
  
-  \date 2008/05/15
+  \date 2008/05/29
     
   <h3>Motivation</h3>
 
@@ -55,12 +55,12 @@ const unsigned int LOPES10_start = 978350400;
 const unsigned int LOPES30_start = 1104580800;
 // Dual polarization setup
 const unsigned int LOPES_pol_start =  1165574694;
-// Delay measurement 26. / 27.04.2007
+// Delay measurement of 26. / 27.04.2007
 const unsigned int delay_apr_07_start = 1158142580;
-// Delay measurement 04.09.2007
+// Delay measurement of 04.09.2007
 const unsigned int delay_sep_07_start = 1184241600;
-// Delay measurement 27.11.2007
-const unsigned int delay_nov_07_start = 1202479000; // WARNING this is not correct, has to be changed later!!!
+// Delay measurement of 27.11.2007
+const unsigned int delay_nov_07_start = 1189171000;
 
 // Feb. 2008 begin of 63.5 and 68.1 MHz Phase Reference signal
 const unsigned int roof_setup_2_freq_start = 1202479000;	
@@ -487,13 +487,13 @@ int main (int argc, char *argv[])
     //adjust_height_of_ant_14(); // allready checked in
     
     // Changes to Delay-Table , allready checked in
-    // Starting date for nov_07_delays is still wrong; TV-Ref phases for LOPES_POL are missing
-    // writeDelays();
-    // addRefAntField();
-    // writeRefPhases();
+    // TV-Ref phases for LOPES_POL are missing
+    //writeDelays();
+    //addRefAntField();
+    //writeRefPhases();
 
     // Rotate Antennagainfaktors for NS-polarised antennas:
-    rotate_antenna_model();
+    //rotate_antenna_model();
     
     cout << "Writing finished: " << endl;
     writer.PrintSummary();

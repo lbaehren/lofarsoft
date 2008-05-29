@@ -21,3 +21,11 @@
 
  * changes which might break configuration for other tools
 
+## ------------------------------------------------------------------------------
+##  Frank Schröder
+## ------------------------------------------------------------------------------
+
+ * LOPES-CalTables
+ * planning:
+   New methods to determine the height of an (upsampled) CC-beam
+   Analysis of LOPES-Star-Data with CR-Tools
