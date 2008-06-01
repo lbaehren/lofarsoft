@@ -451,7 +451,7 @@ int test_parameters (std::string const &filename)
     uint station_id         = dataset.station_id();
     uint rsp_id             = dataset.rsp_id();
     uint rcu_id             = dataset.rcu_id();
-    double sample_frequency = dataset.sample_frequency();
+    double sample_frequency = dataset.sample_frequency_value();
     uint nyquist_zone       = dataset.nyquist_zone();
     uint time               = dataset.time();
     uint sample_number      = dataset.sample_number();
@@ -476,8 +476,8 @@ int test_parameters (std::string const &filename)
 
   cout << "[3] Retrieve vector valued attributes ..." << endl;
   try {
-    casa::Vector<double> antenna_position    = dataset.antenna_position();
-    casa::Vector<double> antenna_orientation = dataset.antenna_orientation();
+    casa::Vector<double> antenna_position    = dataset.antenna_position_value();
+    casa::Vector<double> antenna_orientation = dataset.antenna_orientation_value();
     //
     cout << "-- ANTENNA_POSITION    = " << antenna_position    << endl;
     cout << "-- ANTENNA_ORIENTATION = " << antenna_orientation << endl;
@@ -506,7 +506,7 @@ int test_data (std::string const &filename)
   int nofFailedTests (0);
   bool status (true);
   int start (0);
-  int blocksize (10);
+  uint blocksize (10);
 
   // open dataset
   LOFAR_DipoleDataset dataset (filename,
@@ -547,7 +547,7 @@ int test_data (std::string const &filename)
   try {
     casa::Vector<double> data = dataset.fx (start,blocksize);
 
-    if (data.size() == int(blocksize)) {
+    if (data.size() == blocksize) {
       std::cout << "-- Channel name = " << dataset.channelName() << std::endl;
       std::cout << "-- Data start   = " << start                 << std::endl;
       std::cout << "-- Blocksize    = " << blocksize             << std::endl;

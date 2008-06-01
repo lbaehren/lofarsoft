@@ -28,10 +28,15 @@
 
 #include <casa/aips.h>
 #include <casa/Arrays/Vector.h>
+#include <casa/Quanta/Quantum.h>
 #include <casa/Containers/Record.h>
 
 #ifndef HDF5COMMON_H
 #include <dal/HDF5Common.h>
+#endif
+
+#ifndef ENUMERATIONS_H
+#include <dal/Enumerations.h>
 #endif
 
 namespace DAL { // Namespace DAL -- begin
@@ -199,12 +204,23 @@ namespace DAL { // Namespace DAL -- begin
     uint rcu_id ();
 
     /*!
-      \brief Get the sampling frequency of the analog-to-digital conversion
+      \brief Get the numerical value of the ADC sample frequency
 
-      \return SAMPLE_FREQ -- The sampling frequency of the analog-to-digital
-              conversion; [Hz]
+      \param unit -- Units in which to return the ADC sample frequency; by
+             default this is "Hz".
+
+      \return value -- The numerical value of the ADC sample frequency, in units
+              as specified.
     */
-    double sample_frequency (std::string const &unit="Hz");
+    double sample_frequency_value (std::string const &unit="Hz");
+
+    /*!
+      \brief Get the physical unit associated with the ADC sample frequency
+
+      \return unit -- The physical unit associated with the numerical value of
+              the ADC sample frequency.
+    */
+    std::string sample_frequency_unit ();
 
     /*!
       \brief Get the Nyquist zone in which the ADC is performed
@@ -266,14 +282,6 @@ namespace DAL { // Namespace DAL -- begin
     std::string feed ();
 
     /*!
-      \brief Get the antenna position w.r.t. the center of the station
-
-      \return position -- The three-dimension antenna position w.r.t. to the 
-              absolute reference position (typically the center of the station).
-    */
-    casa::Vector<double> antenna_position ();
-
-    /*!
       \return value -- Numerical value of the antenna position coordinates, e.g.
               <tt>value=[10,12,0]</tt>
     */
@@ -290,16 +298,18 @@ namespace DAL { // Namespace DAL -- begin
     std::string antenna_position_frame ();
 
     /*!
-      \brief Get the antenna orientation w.r.t. to the station reference frame
-
-      \return orientation -- The three Euler angles to specify a possible 
-              deviation of the antenna's orientation w.r.t. to the reference
-	      frame set for the station.
+      \return value -- The numerical value describing the orientation of the
+              antenna, which might be e.g. a set of (Euler) angles or elements of
+	      a normal vector.
     */
-    casa::Vector<double> antenna_orientation ();
-
     casa::Vector<double> antenna_orientation_value ();
+    /*!
+      \return unit -- 
+    */
     std::string antenna_orientation_unit ();
+    /*!
+      \return frame -- 
+    */
     std::string antenna_orientation_frame ();
 
     /*!
@@ -424,6 +434,19 @@ namespace DAL { // Namespace DAL -- begin
      */
     void init (hid_t const &location,
 	       std::string const &dataset);
+
+    /*!
+      \brief Get physical quantity attribute as casa::Quantity
+
+      \param value -- Identifier for the attribute storing the numerical value of
+             the quantity.
+      \param unit  -- Identifier for the attribute storing the physical unit of 
+             the quantity
+
+      \return val -- The physical quantity.
+     */
+    casa::Quantity attribute2quantity (DAL::Attributes const &value,
+				       DAL::Attributes const &unit);
     
     /*!
       \brief Unconditional copying

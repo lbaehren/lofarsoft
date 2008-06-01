@@ -83,6 +83,24 @@ namespace CR {  // Namespace CR -- begin
   // --------------------------------------------------- DataIterator::DataIterator
   
   DataIterator::DataIterator (unsigned int const &blocksize,
+			      long int const &stride,
+			      unsigned int const &shift)
+  {
+    stepWidth_p = 1;
+    //
+    dataStart_p = 0;
+    stride_p    = stride;
+    shift_p     = shift;
+    blocksize_p = blocksize;
+    fftLength_p = 1;
+    block_p     = 0;
+    // 
+    setPosition();
+  }
+  
+  // --------------------------------------------------- DataIterator::DataIterator
+  
+  DataIterator::DataIterator (unsigned int const &blocksize,
 			      unsigned int const &dataStart,
 			      long int const &stride,
 			      unsigned int const &shift)

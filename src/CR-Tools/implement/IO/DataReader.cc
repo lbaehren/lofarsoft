@@ -606,6 +606,19 @@ namespace CR {  //  Namespace CR -- begin
       cerr << "[DataReader::setBlocksize] " << message << endl;
     }
   }
+
+  // ----------------------------------------------------------------- setBlocksize
+
+  void DataReader::setBlocksize (uint const &blocksize,
+				 Matrix<double> const &adc2voltage,
+				 Matrix<DComplex> const &fft2calfft)
+  {
+    // forward for the first two input variables
+    setBlocksize (blocksize,
+		  adc2voltage);
+    // forward conversion values in frequency domain
+    setFFT2calFFT (fft2calfft);
+  }
   
   // -------------------------------------------------------------- frequencyValues
   
@@ -1167,7 +1180,7 @@ void DataReader::setFFT2calFFT (Matrix<DComplex> const &fft2calfft)
 
 // ------------------------------------------------------------- setHanningFilter
 
-void DataReader::setHanningFilter (Double const &alpha)
+void DataReader::setHanningFilter (double const &alpha)
 {
   if (alpha == 0.0) {
     applyHanning_p = False;
@@ -1178,8 +1191,8 @@ void DataReader::setHanningFilter (Double const &alpha)
   }
 }
 
-void DataReader::setHanningFilter (const Double &alpha,
-				   const uint &beta)
+void DataReader::setHanningFilter (double const &alpha,
+				   uint const &beta)
 {
   if (alpha == 0.0) {
     applyHanning_p = False;

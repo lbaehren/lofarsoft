@@ -681,6 +681,15 @@ namespace CR {  //  Namespace CR -- begin
   void setStride (uint const & stride);
 
   /*!
+    \brief Get the shift between the start of the data segment and the first block.
+
+    \return shift -- \f$ N_{\rm Shift} \f$, a shift w.r.t. \f$ N_{\rm Start} \f$
+  */
+  inline uint shift () {
+    return iterator_p[0].shift();
+  }
+
+  /*!
     \brief Set the shift between the start of the data segment and the first block.
 
     \param shift -- \f$ N_{\rm Shift} \f$, a shift w.r.t. \f$ N_{\rm Start} \f$
@@ -979,15 +988,15 @@ namespace CR {  //  Namespace CR -- begin
     Hammingfilter. To disable the HanningFilter call this function with
     \f$ \alpha = 0 \f$.
    */
-  void setHanningFilter (const Double& alpha);
+  void setHanningFilter (double const &alpha);
   /*!
     \brief Enable/Disable the Hanning filter
 
     \param alpha -- Slope parameter of the HanningFilter.
     \param beta  -- Width of the plateau with w[n]=1.
   */
-  void setHanningFilter (const Double &alpha,
-			 const uint &beta);
+  void setHanningFilter (double const &alpha,
+			 uint const &beta);
   
   /*!
     \brief Get the name of the class

@@ -68,12 +68,20 @@ namespace DAL { // Namespace DAL -- begin
     
     <h3>Synopsis</h3>
 
+    <ol>
+      <li><a href="#Structure of the data-set">Structure of the data-set</a>
+      <li><a href="#Signal channel ID">Signal channel ID</a>
+      <li><a href="#Handling of physical quanities">Handling of physical
+      quanities</a>
+    </ol>
+
     This class provides the top-level interface to a standard dataset of LOFAR
     time-series data, as obtained from dumping the contents of the cyclic 
     buffers of the transient buffer boards (TBB).
     
     <ol>
-      <li><b>Structure of the data set</b> <br>
+      <li><b><a name="Structure of the data-set">Structure of the
+      data-set</a></b> <br>
       \verbatim
       /                             ... Group
       |-- TELESCOPE                 ... Attribute       ... string
@@ -367,7 +375,7 @@ namespace DAL { // Namespace DAL -- begin
 	  </table>
 	  <br>
       </ol>
-      <li><b>Signal channel ID</b> <br> 
+      <li><b><a name="Signal channel ID">Signal channel ID</a></b> <br> 
       The signal channel for an individual reception element (dipole) can be
       uniquely identified through a combination of the following three separate
       identifiers:
@@ -379,6 +387,8 @@ namespace DAL { // Namespace DAL -- begin
 	<li>RCU_ID -- Identification number of a Receiver Unit (RCU) attached to
 	a given RSP board.
       </ol>
+      <li><b><a name="Handling of physical quanities">Handling of physical
+      quanities</a></b>
     </ol>
 
     <h3>Example(s)</h3>

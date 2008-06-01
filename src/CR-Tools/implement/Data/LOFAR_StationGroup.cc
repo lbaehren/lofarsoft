@@ -555,7 +555,7 @@ namespace DAL { // Namespace DAL -- begin
       casa::Vector<double> sample_frequency (nofDatasets);
       
       for (uint n(0); n<nofDatasets; n++) {
-	sample_frequency(n) = datasets_p[n].sample_frequency(units);
+	sample_frequency(n) = datasets_p[n].sample_frequency_value(units);
       }
       
       return sample_frequency;

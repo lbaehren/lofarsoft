@@ -29,6 +29,9 @@
 
 #include <Data/LOFAR_DipoleDataset.h>
 
+using std::cout;
+using std::endl;
+
 namespace DAL { // Namespace DAL -- begin
   
   // ============================================================================
@@ -156,8 +159,8 @@ namespace DAL { // Namespace DAL -- begin
   
   void LOFAR_DipoleDataset::summary (std::ostream &os)
   {
-    os << "[LOFAR_DipoleDataset::summary]"   << std::endl;
-    os << "-- Dataset ID          = " << datasetID_p  << std::endl;
+    os << "[LOFAR_DipoleDataset::summary]"   << endl;
+    os << "-- Dataset ID          = " << datasetID_p  << endl;
   
     if (datasetID_p) {
       /*
@@ -166,25 +169,24 @@ namespace DAL { // Namespace DAL -- begin
        */
       int nofAttributes = H5Aget_num_attrs (datasetID_p);
 
-      os << "-- nof. attributes     = " << nofAttributes         << std::endl;
+      os << "-- nof. attributes     = " << nofAttributes         << endl;
 
       if (nofAttributes < 0) {
-	os << "--> Illegal number of attached attributes!" << std::endl;
+	os << "--> Illegal number of attached attributes!" << endl;
       } else {
-	os << "-- STATION_ID          = " << station_id()          << std::endl;
-	os << "-- RSP_ID              = " << rsp_id()              << std::endl;
-	os << "-- RCU_ID              = " << rcu_id()              << std::endl;
-	os << "-- CHANNEL_ID          = " << channelName()         << std::endl;
-	os << "-- SAMPLE_FREQUENCY    = " << sample_frequency()    << std::endl;
-	os << "-- NYQUIST_ZONE        = " << nyquist_zone()        << std::endl;
-	os << "-- TIME [Unix seconds] = " << time()                << std::endl;
-	os << "-- TIME [  Julian Day] = " << julianDay()           << std::endl;
-	os << "-- SAMPLE_NUMBER       = " << sample_number()       << std::endl;
-	os << "-- SAMPLES_PER_FRAME   = " << samples_per_frame()   << std::endl;
-	os << "-- FEED                = " << feed()                << std::endl;
-	os << "-- ANTENNA_POSITION    = " << antenna_position()    << std::endl;
-	os << "-- ANTENNA_ORIENTATION = " << antenna_orientation() << std::endl;
-	os << "-- DATA_LENGTH         = " << data_length()         << std::endl;
+	os << "-- STATION_ID          = " << station_id()          << endl;
+	os << "-- RSP_ID              = " << rsp_id()              << endl;
+	os << "-- RCU_ID              = " << rcu_id()              << endl;
+	os << "-- CHANNEL_ID          = " << channelName()         << endl;
+	os << "-- SAMPLE_FREQUENCY_VALUE = " << sample_frequency_value() << endl;
+	os << "-- SAMPLE_FREQUENCY_UNIT  = " << sample_frequency_unit()  << endl;
+	os << "-- NYQUIST_ZONE        = " << nyquist_zone()        << endl;
+	os << "-- TIME [Unix seconds] = " << time()                << endl;
+	os << "-- TIME [  Julian Day] = " << julianDay()           << endl;
+	os << "-- SAMPLE_NUMBER       = " << sample_number()       << endl;
+	os << "-- SAMPLES_PER_FRAME   = " << samples_per_frame()   << endl;
+	os << "-- FEED                = " << feed()                << endl;
+	os << "-- DATA_LENGTH         = " << data_length()         << endl;
       }
     }
   }
@@ -201,7 +203,7 @@ namespace DAL { // Namespace DAL -- begin
 	return val;
       } else {
 	std::cerr << "[LOFAR_DipoleDataset::station_id]"
-		  << " Error retrieving attribute value!" << std::endl;
+		  << " Error retrieving attribute value!" << endl;
 	return 0;
       }
     } else {
@@ -221,7 +223,7 @@ namespace DAL { // Namespace DAL -- begin
 	return val;
       } else {
 	std::cerr << "[LOFAR_DipoleDataset::rsp_id]"
-		  << " Error retrieving attribute value!" << std::endl;
+		  << " Error retrieving attribute value!" << endl;
 	return 0;
       }
     } else {
@@ -241,7 +243,7 @@ namespace DAL { // Namespace DAL -- begin
 	return val;
       } else {
 	std::cerr << "[LOFAR_DipoleDataset::rcu_id]"
-		  << " Error retrieving attribute value!" << std::endl;
+		  << " Error retrieving attribute value!" << endl;
 	return 0;
       }
     } else {
@@ -261,7 +263,7 @@ namespace DAL { // Namespace DAL -- begin
 	return val;
       } else {
 	std::cerr << "[LOFAR_DipoleDataset::time]"
-		  << " Error retrieving attribute value!" << std::endl;
+		  << " Error retrieving attribute value!" << endl;
 	return 0;
       }
     } else {
@@ -281,7 +283,7 @@ namespace DAL { // Namespace DAL -- begin
     } else {
       // retrieve additional information
       uint samplesSinceSecond = sample_number();
-      double sampleFrequency  = sample_frequency ();
+      double sampleFrequency  = sample_frequency_value ();
       // conversion
       if (sampleFrequency > 0) {
 	jd = (seconds+samplesSinceSecond/sampleFrequency)/86400+2440587.5;
@@ -291,46 +293,39 @@ namespace DAL { // Namespace DAL -- begin
     return jd;
   }
   
-  // ----------------------------------------------------------- sample_frequency
+  // ----------------------------------------------------- sample_frequency_value
   
-  double LOFAR_DipoleDataset::sample_frequency (std::string const &unit)
+  double LOFAR_DipoleDataset::sample_frequency_value (std::string const &unit)
   {
-    double val (0);
-
-    std::cerr << "ERROR: Castrated code due to changes in the DAL! AH" << std::endl;
-//     if (datasetID_p > 0) {
-//       if (DAL::h5get_attribute(val,
-// 			       attribute_name(DAL::SAMPLE_FREQUENCY),
-// 			       datasetID_p)) {
-// 	/*
-// 	 * Check the value stored in the dataset; we expect the sample frequency
-// 	 * be be stored in Hz, but this might not be the case.
-// 	 */
-// 	if (val < 1e06) {
-// #ifdef DEBUGGING_MESSAGES
-// 	  std::cerr << "[LOFAR_DipoleDataset::sample_frequency]"
-// 		    << " Suspecting improper units for sample frequency."
-// 		    << " Attempting conversion to Hz..."
-// 		    << std::endl;
-// #endif
-// 	  val *= 1e06;
-// 	}
-// 	/* Conversion to proper units */
-// 	if (unit == "Hz") {
-// 	  return val;
-// 	} else if (unit == "MHz") {
-// 	  return val/1e06;
-// 	}
-//       } else {
-// 	val = 0;
-//       }
-//     } else {
-//       val = 0;
-//     }
-    
-    return val;
+    if (datasetID_p > 0) {
+      double val (0);
+      if (DAL::h5get_attribute(val,
+			       attribute_name(DAL::SAMPLE_FREQUENCY_VALUE),
+			       datasetID_p)) {
+	return val;
+      } else {
+	return 0;
+      }
+    } else {
+      return 0;
+    }
   }
 
+  // ------------------------------------------------------ sample_frequency_unit
+  
+  std::string LOFAR_DipoleDataset::sample_frequency_unit ()
+  {
+    std::string val;
+    
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::SAMPLE_FREQUENCY_UNIT),
+			     datasetID_p)) {
+      return val;
+    } else {
+      return std::string ("UNDEFINED");
+    }
+  }
+  
   // --------------------------------------------------------------- nyquist_zone
 
   uint LOFAR_DipoleDataset::nyquist_zone ()
@@ -418,7 +413,7 @@ namespace DAL { // Namespace DAL -- begin
       std::cerr << "[LOFAR_DipoleDataset::init] Error opening HDF5 file "
 		<< filename 
 		<< " !"
-		<< std::endl;
+		<< endl;
     }
     
     // release the global file handle and clear the error stack
@@ -444,7 +439,7 @@ namespace DAL { // Namespace DAL -- begin
       dataset_id = H5Dopen (location,
 			    dataset.c_str());
     } catch (std::string message) {
-      std::cerr << "[LOFAR_DipoleDataset::init] " << message << std::endl;
+      std::cerr << "[LOFAR_DipoleDataset::init] " << message << endl;
       status = false;
     }
 
@@ -455,9 +450,40 @@ namespace DAL { // Namespace DAL -- begin
     }
     
   }
+
+  // --------------------------------------------------------- attribute2quantity
+
+  casa::Quantity
+  LOFAR_DipoleDataset::attribute2quantity (DAL::Attributes const &value,
+					   DAL::Attributes const &unit)
+  {
+    if (datasetID_p > 0) {
+      bool status (true);
+      double quantityValue;
+      std::string quantityUnit;
+      // retrieve the value of the quantity
+      status *= DAL::h5get_attribute(quantityValue,
+				     attribute_name(value),
+				     datasetID_p);
+      // retrieve the unit of the quantity
+      status *= DAL::h5get_attribute(quantityUnit,
+				     attribute_name(unit),
+				     datasetID_p);
+      // put together the Quantity object
+      if (status) {
+	casa::Quantity val = casa::Quantity (quantityValue,
+					     casa::Unit(quantityUnit));
+	return val;
+      } else {
+	return casa::Quantity();
+      }
+    } else {
+      return casa::Quantity();
+    }
+  }
   
   // -------------------------------------------------------------- sample_number
-
+  
   uint LOFAR_DipoleDataset::sample_number ()
   {
     if (datasetID_p > 0) {
@@ -522,22 +548,6 @@ namespace DAL { // Namespace DAL -- begin
     }
   }
   
-  // ----------------------------------------------------------- antenna_position
-  
-  casa::Vector<double> LOFAR_DipoleDataset::antenna_position ()
-  {
-    casa::Vector<double> val;
-    
-    std::cerr << "ERROR: Castrated code due to changes in the DAL! AH" << std::endl;
-//     if (DAL::h5get_attribute(val,
-// 			     attribute_name(DAL::ANTENNA_POSITION),
-// 			     datasetID_p)) {
-//       return val;
-//     } else {
-      return casa::Vector<double> (1);
-//     }
-  }
-  
   // ----------------------------------------------------- antenna_position_value
   
   casa::Vector<double> LOFAR_DipoleDataset::antenna_position_value ()
@@ -553,7 +563,7 @@ namespace DAL { // Namespace DAL -- begin
     }
   }
   
-  // ----------------------------------------------------- antenna_position_frame
+  // ------------------------------------------------------ antenna_position_unit
   
   std::string LOFAR_DipoleDataset::antenna_position_unit ()
   {
@@ -568,7 +578,7 @@ namespace DAL { // Namespace DAL -- begin
     }
   }
   
-  // ----------------------------------------------------------- antenna_position
+  // ----------------------------------------------------- antenna_position_frame
   
   std::string LOFAR_DipoleDataset::antenna_position_frame ()
   {
@@ -583,18 +593,48 @@ namespace DAL { // Namespace DAL -- begin
     }
   }
   
-  // -------------------------------------------------------- antenna_orientation
+  // -------------------------------------------------- antenna_orientation_value
   
-  casa::Vector<double> LOFAR_DipoleDataset::antenna_orientation ()
+  casa::Vector<double> LOFAR_DipoleDataset::antenna_orientation_value ()
   {
     casa::Vector<double> val;
     
     if (DAL::h5get_attribute(val,
-			     attribute_name(DAL::ANTENNA_ORIENTATION),
+			     attribute_name(DAL::ANTENNA_ORIENTATION_VALUE),
 			     datasetID_p)) {
       return val;
     } else {
       return casa::Vector<double> (1);
+    }
+  }
+  
+  // --------------------------------------------------- antenna_orientation_unit
+  
+  std::string LOFAR_DipoleDataset::antenna_orientation_unit ()
+  {
+    std::string val;
+    
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::ANTENNA_ORIENTATION_UNIT),
+			     datasetID_p)) {
+      return val;
+    } else {
+      return std::string ("UNDEFINED");
+    }
+  }
+  
+  // -------------------------------------------------- antenna_orientation_frame
+  
+  std::string LOFAR_DipoleDataset::antenna_orientation_frame ()
+  {
+    std::string val;
+    
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::ANTENNA_ORIENTATION_FRAME),
+			     datasetID_p)) {
+      return val;
+    } else {
+      return std::string ("UNDEFINED");
     }
   }
   
@@ -637,7 +677,7 @@ namespace DAL { // Namespace DAL -- begin
       
       if (filespaceID < 0) {
 	std::cerr << "[LOFAR_DipoleDataset::fx]"
-		  << " Error retrieving filespace of dataset!" << std::endl;
+		  << " Error retrieving filespace of dataset!" << endl;
 	return false;
       }
 
@@ -647,7 +687,7 @@ namespace DAL { // Namespace DAL -- begin
 	
       if (rank < 0) {
 	std::cerr << "[LOFAR_DipoleDataset::fx]"
-		  << " Error retrieving rank of dataspace!" << std::endl;
+		  << " Error retrieving rank of dataspace!" << endl;
 	return false;
       }
 
@@ -659,7 +699,7 @@ namespace DAL { // Namespace DAL -- begin
 					   NULL);
       if (h5error < 0) {
 	std::cerr << "[LOFAR_DipoleDataset::fx]"
-		  << " Error retrieving dataspace dimension!" << std::endl;
+		  << " Error retrieving dataspace dimension!" << endl;
 	return false;
       } else {
 	shape[0] = nofSamples;
@@ -675,7 +715,7 @@ namespace DAL { // Namespace DAL -- begin
       if (filespaceID < 0) {
 	std::cerr << "[LOFAR_DipoleDataset::fx]"
 		  << " Error creating memory space for reading in data!"
-		  << std::endl;
+		  << endl;
 	return false;
       } else {
 	offset[0] = start;
@@ -693,7 +733,7 @@ namespace DAL { // Namespace DAL -- begin
       if (h5error < 0) {
 	std::cerr << "[LOFAR_DipoleDataset::fx]"
 		  << " Error selecting hyperslab through the data!"
-		  << std::endl;
+		  << endl;
 	return false;
       }
 
@@ -709,13 +749,13 @@ namespace DAL { // Namespace DAL -- begin
       if (h5error < 0) {
 	std::cerr << "[LOFAR_DipoleDataset::fx]"
 		  << " Error reading data from file into buffer!"
-		  << std::endl;
+		  << endl;
 	return false;
       }
     } else {
       std::cerr << "[LOFAR_DipoleDataset::fx]"
 		<< " Unable to read with connection to dataset object!"
-		<< std::endl;
+		<< endl;
       return false;
     }
 
@@ -770,7 +810,7 @@ namespace DAL { // Namespace DAL -- begin
     desc.addField (DAL::attribute_name(DAL::RSP_ID),casa::TpUInt);
     desc.addField (DAL::attribute_name(DAL::RCU_ID),casa::TpUInt);
     desc.addField (DAL::attribute_name(DAL::TIME),casa::TpUInt);
-    std::cerr << "ERROR: Castrated code due to changes in the DAL! AH" << std::endl;
+    std::cerr << "ERROR: Castrated code due to changes in the DAL! AH" << endl;
 //     desc.addField (DAL::attribute_name(DAL::SAMPLE_FREQUENCY),casa::TpDouble);
     desc.addField (DAL::attribute_name(DAL::NYQUIST_ZONE),casa::TpUInt);
     desc.addField (DAL::attribute_name(DAL::SAMPLE_NUMBER),casa::TpUInt);
@@ -795,9 +835,6 @@ namespace DAL { // Namespace DAL -- begin
 		 rcu_id());
       rec.define(casa::RecordFieldId(attribute_name(DAL::TIME)),
 		 time());
-    std::cerr << "ERROR: Castrated code due to changes in the DAL! AH" << std::endl;
-//       rec.define(casa::RecordFieldId(attribute_name(DAL::SAMPLE_FREQUENCY)),
-// 		 sample_frequency());
       rec.define(casa::RecordFieldId(attribute_name(DAL::NYQUIST_ZONE)),
 		 nyquist_zone());
       rec.define(casa::RecordFieldId(attribute_name(DAL::SAMPLE_NUMBER)),
@@ -806,24 +843,25 @@ namespace DAL { // Namespace DAL -- begin
 		 samples_per_frame());
       rec.define(casa::RecordFieldId(attribute_name(DAL::FEED)),
 		 feed());
-    std::cerr << "ERROR: Castrated code due to changes in the DAL! AH" << std::endl;
-//       rec.define(casa::RecordFieldId(attribute_name(DAL::ANTENNA_POSITION)),
-// 		 antenna_position());
       rec.define(casa::RecordFieldId(attribute_name(DAL::ANTENNA_POSITION_VALUE)),
 		 antenna_position_value());
       rec.define(casa::RecordFieldId(attribute_name(DAL::ANTENNA_POSITION_UNIT)),
 		 antenna_position_unit());
       rec.define(casa::RecordFieldId(attribute_name(DAL::ANTENNA_POSITION_FRAME)),
 		 antenna_position_frame());
-      rec.define(casa::RecordFieldId(attribute_name(DAL::ANTENNA_ORIENTATION)),
-		 antenna_orientation());
+      rec.define(casa::RecordFieldId(attribute_name(DAL::ANTENNA_ORIENTATION_VALUE)),
+		 antenna_orientation_value());
+      rec.define(casa::RecordFieldId(attribute_name(DAL::ANTENNA_ORIENTATION_UNIT)),
+		 antenna_orientation_unit());
+      rec.define(casa::RecordFieldId(attribute_name(DAL::ANTENNA_ORIENTATION_FRAME)),
+		 antenna_orientation_frame());
       rec.define(casa::RecordFieldId(attribute_name(DAL::DATA_LENGTH)),
 		 data_length());
     } catch (std::string message) {
       std::cerr << "[LOFAR_DipoleDataset::attributes2record] "
 		<< "Error filling the record with attribute values!\n"
 		<< message
-		<< std::endl;
+		<< endl;
     }
 
     return rec;

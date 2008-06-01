@@ -35,10 +35,13 @@
 
 #include <Coordinates/TimeFreq.h>
 #include <IO/DataIterator.h>
+#include <IO/DataReader.h>
+#include <Math/HanningFilter.h>
 
 namespace bpl = boost::python;
 
 using CR::DataIterator;
+using CR::DataReader;
 using CR::TimeFreq;
 
 BOOST_PYTHON_MODULE (pycr)
@@ -84,6 +87,8 @@ BOOST_PYTHON_MODULE (pycr)
   //  implement/IO
   //
   // ============================================================================
+
+  /* DataIterator */
   
   bpl::class_<DataIterator>("DataIterator")
     .def(bpl::init<>())
@@ -117,7 +122,47 @@ BOOST_PYTHON_MODULE (pycr)
     .def("setBlock", &DataIterator::setBlock)
     .def("nextBlock", &DataIterator::nextBlock)
     .def("maxNofBlocks", &DataIterator::maxNofBlocks)
+    .def("summary", &DataIterator::summary)
     ;
+
+  /* DataReader */
+
+  void (DataReader::*setBlocksize1)(uint const &) = &DataReader::setBlocksize;
+  void (DataReader::*setBlocksize2)(uint const &,
+				    casa::Matrix<double> const &) = &DataReader::setBlocksize;
+  void (DataReader::*setBlocksize3)(uint const &,
+				    casa::Matrix<double> const &,
+				    casa::Matrix<casa::DComplex> const &) = &DataReader::setBlocksize;
+  
+  bpl::class_<DataReader>("DataReader")
+    .def(bpl::init<>())
+    .def(bpl::init<unsigned int>())
+    .def(bpl::init<unsigned int,unsigned int,double>())
+    .def(bpl::init<unsigned int,casa::Vector<double>,casa::Matrix<casa::DComplex> >())
+    .def(bpl::init<unsigned int,casa::Matrix<double>,casa::Matrix<casa::DComplex> >())
+    .def("setBlocksize", setBlocksize1)
+    .def("setBlocksize", setBlocksize2)
+    .def("setBlocksize", setBlocksize3)
+    .def("nofAntennas", &DataReader::nofAntennas)
+    .def("nofSelectedAntennas", &DataReader::nofSelectedAntennas)
+    .def("block", &DataReader::block)
+    .def("setBlock", &DataReader::setBlock)
+    .def("shift", &DataReader::shift)
+    .def("setShift", &DataReader::setShift)
+    .def("nextBlock", &DataReader::nextBlock)
+    .def("toStartBlock", &DataReader::toStartBlock)
+    ;
+  
+  // ============================================================================
+  //
+  //  implement/Math
+  //
+  // ============================================================================
+
+//   bpl::class_<HanningFilter>("HanningFilter")
+//     .def(bpl::init<>())
+//     .def(bpl::init<unsigned int>())
+//     ;
   
   // ============================================================================
   //

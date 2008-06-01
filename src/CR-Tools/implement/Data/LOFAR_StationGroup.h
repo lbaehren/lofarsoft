@@ -355,7 +355,7 @@ namespace DAL { // Namespace DAL -- begin
 #endif
 
     /*!
-      \brief Get the values of SAMPLE_FREQUENCY for all present datasets
+      \brief Get the values of sample frequency of all included datasets
       
       \return sample_frequencies -- Values of the SAMPLE_FREQUENCY attribute
               for all datasets present in this station group
