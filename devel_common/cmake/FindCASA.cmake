@@ -77,9 +77,8 @@ message (STATUS "GLISH_LIBRARIES = ${GLISH_LIBRARIES}")
 ## Find "aips.h", which is included by all other files
 
 find_path (CASA_INCLUDES aips.h
-  PATHS ${casa_locations}
-  PATH_SUFFIXES
-  code/include/casa
+  PATHS ${include_locations} ${casa_locations}
+  PATH_SUFFIXES casa code/include/casa
   )
 
 if (CASA_INCLUDES)
@@ -178,7 +177,9 @@ set (casa_libs
   )
 
 foreach (casa_lib ${casa_libs})
-  find_library (CASA_lib${casa_lib} ${casa_lib} ${AIPSLIBD})
+  find_library (CASA_lib${casa_lib} ${casa_lib}
+    PATHS ${lib_locations} ${AIPSLIBD}
+    )
 endforeach (casa_lib)
 
 ## -----------------------------------------------------------------------------
