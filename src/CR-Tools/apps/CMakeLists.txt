@@ -163,6 +163,24 @@ if (HAVE_CASA OR HAVE_CASACORE)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
+## calculatePhaseBehaviour
+
+if (HAVE_STARTOOLS)
+  add_executable (calculatePhaseBehaviour calculatePhaseBehaviour.cc)
+  ## linker instructions
+  target_link_libraries (calculatePhaseBehaviour
+    cr
+    ${STARTOOLS_LIBRARIES}
+    ${ROOT_LIBRARIES}
+    ${FFTW3_LIBRARIES}
+    )
+  ## installation instructions
+  list (APPEND cr_apps calculatePhaseBehaviour)
+endif (HAVE_STARTOOLS)
+
+
+
+## -------------------------------------------------------------------
 
 ## Glish client programs
 
