@@ -273,35 +273,16 @@ namespace DAL { // Namespace DAL -- begin
     }
   }
 #endif
-  
+
   // ------------------------------------------------------------- beam_direction
-  
+
 #ifdef HAVE_CASA
-  casa::Vector<double> LOFAR_StationGroup::beam_direction ()
+  casa::MDirection LOFAR_StationGroup::beam_direction ()
   {
-    casa::Vector<double> val;
-    
-//     if (DAL::h5get_attribute(val,
-// 			     attribute_name(DAL::BEAM_DIRECTION),
-// 			     groupID_p)) {
-//       return val;
-//     } else {
-    std::cerr << "ERROR: Castrated code due to changes in the DAL! AH" << std::endl;
-      return casa::Vector<double> (1,0);
-//    }
-  }
-#else 
-  std::vector<double> LOFAR_StationGroup::beam_direction ()
-  {
-    std::vector<double> val;
-    
-    if (DAL::h5get_attribute(val,
-			     attribute_name(DAL::BEAM_DIRECTION),
-			     groupID_p)) {
-      return val;
-    } else {
-      return std::vector<double> (1,0);
-    }
+    return DAL::h5get_direction (DAL::BEAM_DIRECTION_VALUE,
+				 DAL::BEAM_DIRECTION_UNIT,
+				 DAL::BEAM_DIRECTION_FRAME,
+				 groupID_p);
   }
 #endif
   
@@ -327,7 +308,6 @@ namespace DAL { // Namespace DAL -- begin
 #ifdef HAVE_CASA
     if (groupID_p > 0) {
       os << "-- Triggered antennas  : " << triggered_antennas()     << endl;
-      os << "-- Beam direction .... : " << beam_direction()         << endl;
     }
 #endif
   }

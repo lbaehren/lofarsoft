@@ -223,6 +223,13 @@ namespace DAL { // Namespace DAL -- begin
     std::string sample_frequency_unit ();
 
     /*!
+      \brief Get the ADC sample frequency
+
+      \return freq -- The ADC sample frequency, as CASA Quantity
+    */
+    casa::Quantity sample_frequency ();
+
+    /*!
       \brief Get the Nyquist zone in which the ADC is performed
 
       \return NYQUIST_ZONE -- The Nyquist zone in which the analog-to-digital
@@ -435,19 +442,6 @@ namespace DAL { // Namespace DAL -- begin
     void init (hid_t const &location,
 	       std::string const &dataset);
 
-    /*!
-      \brief Get physical quantity attribute as casa::Quantity
-
-      \param value -- Identifier for the attribute storing the numerical value of
-             the quantity.
-      \param unit  -- Identifier for the attribute storing the physical unit of 
-             the quantity
-
-      \return val -- The physical quantity.
-     */
-    casa::Quantity attribute2quantity (DAL::Attributes const &value,
-				       DAL::Attributes const &unit);
-    
     /*!
       \brief Unconditional copying
 

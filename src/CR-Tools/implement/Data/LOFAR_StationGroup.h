@@ -32,6 +32,7 @@
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/Containers/Record.h>
+#include <measures/Measures/MDirection.h>
 
 #include <Data/LOFAR_DipoleDataset.h>
 
@@ -272,18 +273,6 @@ namespace DAL { // Namespace DAL -- begin
 #endif
 
     /*!
-      \brief Get the direction of the station beam
-
-      \return beam_direction -- The direction towards which a station beam is
-              formed before forwarding the data to central processing
-    */
-#ifdef HAVE_CASA
-    casa::Vector<double> beam_direction ();
-#else 
-    std::vector<double> beam_direction ();
-#endif
-
-    /*!
       \brief Get the numerical value of the beam direction
 
       \return value -- The numerical value for the direction of the station
@@ -308,6 +297,13 @@ namespace DAL { // Namespace DAL -- begin
       \return frame -- 
     */
     std::string beam_direction_frame ();
+
+    /*!
+      \brief Get the direction of the station beam as CASA Measure
+
+      \return direction -- The direction of the station beam.
+    */
+    casa::MDirection beam_direction ();
 
     /*!
       \brief Get the name of the class
