@@ -202,9 +202,8 @@ int test_Arrays ()
 
   cout << "[6] Testing access to array elements ..." << endl;
   try {
-    uint n(0);
     uint nofAxes (3);
-    uint nelem (100);
+    int nelem (100);
     IPosition shape (nofAxes,nelem,nelem,nelem);
     Array<double> arr (shape);
 
@@ -582,7 +581,7 @@ int test_Arrays_Cube (std::vector<int> const &nelem)
 	    << "\t(x-y)"
 	    << std::endl;
   try {
-    uint i (0);
+    int i (0);
     for (uint n(2); n<nelemMax; n++) {
       /* Create the matrix */
       shape = IPosition (3,nelem[n-2],nelem[n-1],nelem[n]);
@@ -848,8 +847,8 @@ int test_Arrays_Slice (std::vector<int> const &nelem)
   cout << "\nTesting casa/Arrays/Slice ...\n" << endl;
 
   int nofFailedTests (0);
-  uint k (0);
-  uint n(0);
+  int k (0);
+  int n(0);
   uint maxDimension (8);
   clock_t start;
   clock_t end;
