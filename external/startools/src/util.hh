@@ -424,27 +424,35 @@ void SetStruct2Zero(struct AnaFlag *AnaFlag);
 void SetStruct2Zero(struct RecEvent *RecEvent);
 
 
-//! Converts timestamps
 /*!
-The function converts timestamps in string format of the Meinberg GPS unit or the timestamp of the postgresql database.
-Description of the parameters:
-\param Timestamp string of the timestamp
-\param Sec no. of seconds since epoch plus leap seconds
-\param Nanosec sub seconds from the timestamp  and artificial expand to nanoseconds
-\param Timeshift it is also possible to shift the timestamp in time by \f$\Delta\f$t
-\return 1 if everything is ok, 0 if wrong timestamp is converted
+  \brief Converts timestamps
+
+  The function converts timestamps in string format of the Meinberg GPS unit or
+  the timestamp of the postgresql database.
+
+  Description of the parameters:
+  \param Timestamp string of the timestamp
+  \param Sec no. of seconds since epoch plus leap seconds
+  \param Nanosec sub seconds from the timestamp  and artificial expand to nanoseconds
+  \param Timeshift it is also possible to shift the timestamp in time by \f$\Delta\f$t
+  \return 1 if everything is ok, 0 if wrong timestamp is converted
 */
-int ConvertTimeStamp(char *Timestamp, int *Sec, int *Nanosec, double Timeshift = 0);
+int ConvertTimeStamp (char *Timestamp,
+		      int *Sec,
+		      int *Nanosec,
+		      double Timeshift = 0);
 
 #ifdef HAVE_POSTGRESQL
-//! Checks the result of a query 
 /*!
-Call this function with a result pointer of PGresult and the function checks whether the result is valid or an error occurred.
-\param res is a pointer of the postgresql result, that have to be checked
+  \brief Checks the result of a query 
+  
+  Call this function with a result pointer of PGresult and the function checks
+  whether the result is valid or an error occurred.
+  
+  \param res is a pointer of the postgresql result, that have to be checked
 */
-void ResCheck(PGresult* res);
+void ResCheck (PGresult* res);
 #endif
-
 
 //! Fast Fourier Transform of the Trace
 /*!
@@ -458,13 +466,28 @@ This function makes a fft with the given trace and calculates the amplitude and 
 \param power switch if data are squared
 \param bSubtractPedestal switch to disable pedestal subtraction, if enabled, the pedestal is subtracted form the trace array
 */
-void TraceFFT(int window_size, short int *trace, float *Amp, float *Phase, float *RawFFT, bool data_window=true, bool power=false, bool bSubtractPedestal=true);
+void TraceFFT (int window_size,
+	       short int *trace,
+	       float *Amp,
+	       float *Phase,
+	       float *RawFFT,
+	       bool data_window=true,
+	       bool power=false,
+	       bool bSubtractPedestal=true);
 
-//! Fast Fourier Transform of the Trace
 /*!
-same TraceFFT with float type of trace
+  \brief Fast Fourier Transform of the Trace
+
+  Same TraceFFT with float type of trace
 */
-void TraceFFT(int window_size, float *trace, float *Amp, float *Phase, float *RawFFT, bool data_window=true, bool pwer=false, bool bSubtractPedestal=true);
+void TraceFFT (int window_size, 
+	       float *trace,
+	       float *Amp,
+	       float *Phase,
+	       float *RawFFT,
+	       bool data_window=true,
+	       bool pwer=false,
+	       bool bSubtractPedestal=true);
 
 //! Core of the Fast Fourier Transform
 /*!

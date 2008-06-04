@@ -550,8 +550,9 @@ int ConvertTimeStamp(char *Timestamp, int  *Sec, int *Nanosec, double Timeshift)
 
 }
 
-/**********************************************************************************************/
-#ifdef __compile
+/*******************************************************************************/
+
+#ifdef HAVE_POSTGRESQL
 void ResCheck( PGresult *res){
    if(PQresultStatus(res)>5){
     cerr << PQresStatus(PQresultStatus(res)) << endl;
@@ -561,17 +562,40 @@ void ResCheck( PGresult *res){
 
 }
 #endif
-/**********************************************************************************************/
 
-void TraceFFT(int window_size, short int *trace, float *Amp, float *Phase, float *RawFFT, bool data_window, bool power, bool bSubtractPedestal){
-   
-   TraceFFTCore(window_size, trace, true , Amp, Phase, RawFFT, data_window, power, bSubtractPedestal);
+/*******************************************************************************/
+
+void TraceFFT (int window_size,
+	       short int *trace,
+	       float *Amp,
+	       float *Phase,
+	       float *RawFFT,
+	       bool data_window,
+	       bool power,
+	       bool bSubtractPedestal)
+{
+  TraceFFTCore (window_size,
+		trace,
+		true ,
+		Amp,
+		Phase,
+		RawFFT,
+		data_window,
+		power,
+		bSubtractPedestal);
 };
 
-/**********************************************************************************************/
+/*******************************************************************************/
 
-void TraceFFT(int window_size, float *trace, float *Amp, float *Phase, float *RawFFT, bool data_window, bool power, bool bSubtractPedestal){
-
+void TraceFFT (int window_size,
+	       float *trace,
+	       float *Amp,
+	       float *Phase,
+	       float *RawFFT,
+	       bool data_window,
+	       bool power,
+	       bool bSubtractPedestal)
+{
    TraceFFTCore(window_size, trace, false , Amp, Phase, RawFFT, data_window, power, bSubtractPedestal);
 };
 
