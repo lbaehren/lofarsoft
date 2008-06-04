@@ -494,14 +494,14 @@ endif (WCS_INCLUDES)
 ##
 ## =============================================================================
 
+if (CR_BUILD_EXTERNAL_TESTS)
+  add_subdirectory (test)
+endif (CR_BUILD_EXTERNAL_TESTS)
+
 if (NOT APPLE)
   add_subdirectory (implement)
   add_subdirectory (apps)
 endif (NOT APPLE)
-
-if (CR_BUILD_EXTERNAL_TESTS)
-  add_subdirectory (test)
-endif (CR_BUILD_EXTERNAL_TESTS)
 
 ## =============================================================================
 ##
