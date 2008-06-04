@@ -214,6 +214,119 @@ namespace DAL { // Namespace DAL -- begin
     }
   }
   
+  // ----------------------------------------------------- station_position_value
+
+  casa::Vector<double> LOFAR_StationGroup::station_position_value ()
+  {
+    casa::Vector<double> val;
+    
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::STATION_POSITION_VALUE),
+			     groupID_p)) {
+      return val;
+    } else {
+      return casa::Vector<double> (1);
+    }
+  }
+  
+  // ------------------------------------------------------ station_position_unit
+
+  std::string LOFAR_StationGroup::station_position_unit ()
+  {
+    std::string val;
+
+    if (DAL::h5get_attribute(val,
+			     DAL::attribute_name(DAL::STATION_POSITION_UNIT),
+			     groupID_p)) {
+      return val;
+    } else {
+      return std::string ("UNDEFINED");
+    }
+  }
+
+  // ----------------------------------------------------- station_position_frame
+
+  std::string LOFAR_StationGroup::station_position_frame ()
+  {
+    std::string val;
+
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::STATION_POSITION_FRAME),
+			     groupID_p)) {
+      return val;
+    } else {
+      return std::string ("UNDEFINED");
+    }
+  }
+
+  // ----------------------------------------------------------- station_position
+  
+  casa::MPosition LOFAR_StationGroup::station_position ()
+  {
+    return DAL::h5get_position (DAL::STATION_POSITION_VALUE,
+				DAL::STATION_POSITION_UNIT,
+				DAL::STATION_POSITION_FRAME,
+				groupID_p);
+  }
+  
+  // ------------------------------------------------------- beam_direction_value
+
+  casa::Vector<double> LOFAR_StationGroup::beam_direction_value ()
+  {
+    casa::Vector<double> val;
+    
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::BEAM_DIRECTION_VALUE),
+			     groupID_p)) {
+      return val;
+    } else {
+      return casa::Vector<double> (1);
+    }
+  }
+  
+
+  // -------------------------------------------------------- beam_direction_unit
+
+  std::string LOFAR_StationGroup::beam_direction_unit ()
+  {
+    std::string val;
+
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::BEAM_DIRECTION_UNIT),
+			     groupID_p)) {
+      return val;
+    } else {
+      return std::string ("UNDEFINED");
+    }
+  }
+  
+  // ------------------------------------------------------- beam_direction_frame
+
+  std::string LOFAR_StationGroup::beam_direction_frame ()
+  {
+    std::string val;
+
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::BEAM_DIRECTION_FRAME),
+			     groupID_p)) {
+      return val;
+    } else {
+      return std::string ("UNDEFINED");
+    }
+  }
+  
+  // ------------------------------------------------------------- beam_direction
+  
+#ifdef HAVE_CASA
+  casa::MDirection LOFAR_StationGroup::beam_direction ()
+  {
+    return DAL::h5get_direction (DAL::BEAM_DIRECTION_VALUE,
+				 DAL::BEAM_DIRECTION_UNIT,
+				 DAL::BEAM_DIRECTION_FRAME,
+				 groupID_p);
+  }
+#endif
+  
   // --------------------------------------------------------------- trigger_type
   
   std::string LOFAR_StationGroup::trigger_type ()
@@ -274,18 +387,6 @@ namespace DAL { // Namespace DAL -- begin
   }
 #endif
 
-  // ------------------------------------------------------------- beam_direction
-
-#ifdef HAVE_CASA
-  casa::MDirection LOFAR_StationGroup::beam_direction ()
-  {
-    return DAL::h5get_direction (DAL::BEAM_DIRECTION_VALUE,
-				 DAL::BEAM_DIRECTION_UNIT,
-				 DAL::BEAM_DIRECTION_FRAME,
-				 groupID_p);
-  }
-#endif
-  
   // -------------------------------------------------------------------- summary
   
   void LOFAR_StationGroup::summary (std::ostream &os)
@@ -296,13 +397,17 @@ namespace DAL { // Namespace DAL -- begin
     os << "-- nof. dipole datasets : " << nofDipoleDatasets() << endl;
 
     if (groupID_p > 0) {
-      os << "-- Telesope .......... : " << telescope()             << endl;
-      os << "-- Observer .......... : " << observer()              << endl;
-      os << "-- Project description : " << project()               << endl;
-      os << "-- Observation ID .... : " << observation_id()        << endl;
-      os << "-- Observation mode .. : " << observation_mode()      << endl;
-      os << "-- Trigger type ...... : " << trigger_type()          << endl;
-      os << "-- Trigger offset .... : " << trigger_offset()        << endl;
+      os << "-- Telesope ............... : " << telescope()              << endl;
+      os << "-- Observer ............... : " << observer()               << endl;
+      os << "-- Project description .... : " << project()                << endl;
+      os << "-- Observation ID ......... : " << observation_id()         << endl;
+      os << "-- Observation mode ....... : " << observation_mode()       << endl;
+      os << "-- Station position (Unit)  : " << station_position_unit()  << endl;
+      os << "-- Station position (Frame) : " << station_position_frame() << endl;
+      os << "-- Beam direction (Unit) .. : " << beam_direction_unit()    << endl;
+      os << "-- Beam direction (Frame).. : " << beam_direction_frame()   << endl;
+      os << "-- Trigger type ........... : " << trigger_type()           << endl;
+      os << "-- Trigger offset ......... : " << trigger_offset()         << endl;
     }
 
 #ifdef HAVE_CASA

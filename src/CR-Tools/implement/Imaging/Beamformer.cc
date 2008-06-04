@@ -527,7 +527,7 @@ namespace CR { // Namespace CR -- begin
 
     if (checkData(beam,data)) {
 
-      uint direction(0);
+      int direction(0);
       casa::IPosition pos(2);                       // [freq,antenna]
       casa::IPosition shape = bfWeights_p.shape();  // [freq,antenna,direction]
       casa::Vector<DComplex> tmp (shape(0));
@@ -553,9 +553,7 @@ namespace CR { // Namespace CR -- begin
 			       const casa::Array<DComplex> &data)
   {
     bool status (true);
-    uint freq (0);
-    uint antenna (0);
-    uint direction (0);
+    int direction (0);
     casa::IPosition pos (2);
     casa::DComplex tmp;
 
@@ -623,7 +621,7 @@ namespace CR { // Namespace CR -- begin
 	int blocksize         = 2*(shape(0)-1);
 	double nofBaselines   = GeometricalDelay::nofBaselines();
 	int direction (0);
-	uint ant2 (0);
+	int ant2 (0);
 	casa::IPosition pos (2);
 	casa::Vector<DComplex> tmpFreq (shape(0),0.0);
 	casa::Vector<double>   tmpTime (blocksize,0.0);
@@ -689,7 +687,7 @@ namespace CR { // Namespace CR -- begin
 
     if (checkData (beam,data)) {
       
-      uint direction(0);
+      int direction(0);
       casa::IPosition pos(2);                       // [freq,antenna]
       casa::IPosition shape = bfWeights_p.shape();  // [freq,antenna,direction]
       int blocksize         = 2*(shape(0)-1);

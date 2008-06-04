@@ -118,7 +118,6 @@ int test_Record ()
   int nofFailedTests (0);
 
   try {
-    int extraArgument=0;
     casa::RecordDesc rd;
     rd.addField ("TpBool", casa::TpBool);
     rd.setComment (0, "comment for field TpBool");

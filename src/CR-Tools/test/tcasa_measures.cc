@@ -31,9 +31,11 @@
 #include <measures/Measures.h>
 #include <casa/Quanta/MVAngle.h>
 #include <casa/Quanta/MVTime.h>
+#include <casa/Quanta/MVPosition.h>
 #include <measures/Measures/MEpoch.h>
 #include <measures/Measures/MeasFrame.h>
 #include <measures/Measures/MDirection.h>
+#include <measures/Measures/MPosition.h>
 #include <measures/Measures/MeasData.h>
 
 /*!
@@ -57,6 +59,8 @@ using casa::MVTime;
 using casa::MeasFrame;
 using casa::MDirection;
 using casa::MeasData;
+using casa::MPosition;
+using casa::MVPosition;
 
 // ------------------------------------------------------------------------------
 
@@ -67,6 +71,8 @@ using casa::MeasData;
 */
 int test_MVAngle ()
 {
+  cout << "\n[test_MVAngle]\n" << endl;
+
   int nofFailedTests (0);
   
   try {
@@ -87,8 +93,13 @@ int test_MVAngle ()
 
 // ------------------------------------------------------------------------------
 
+/*!
+  \return nofFailedTests -- The number of failed tests
+*/
 int test_MVTime ()
 {
+  cout << "\n[test_MVTime]\n" << endl;
+
   int nofFailedTests (0);
 
   try {
@@ -108,8 +119,13 @@ int test_MVTime ()
 
 // ------------------------------------------------------------------------------
 
+/*!
+  \return nofFailedTests -- The number of failed tests
+*/
 int test_MEpoch ()
 {
+  cout << "\n[test_MEpoch]\n" << endl;
+
   int nofFailedTests (0);
 
   try {
@@ -153,13 +169,42 @@ int test_MEpoch ()
 /*!
   \return nofFailedTests -- The number of failed tests
 */
+int test_MPosition ()
+{
+  cout << "\n[test_MPosition]\n" << endl;
+
+  int nofFailedTests (0);
+
+  cout << "[1] Basic example from API documentation ..." << endl;
+  try {
+    MPosition obs( MVPosition( Quantity( 10, "m"),
+			       Quantity( -6, "deg"),
+			       Quantity( 50, "deg")),
+		   MPosition::Ref(MPosition::WGS84));
+    //
+    cout << "-- Reference string = " << obs.getRefString() << endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  
+  return nofFailedTests;
+}
+
+// ------------------------------------------------------------------------------
+
+/*!
+  \return nofFailedTests -- The number of failed tests
+*/
 int main () 
 {
   int nofFailedTests (0);
 
   nofFailedTests += test_MVAngle ();
-  nofFailedTests +- test_MVTime ();
-  nofFailedTests +- test_MEpoch ();
+  nofFailedTests += test_MVTime ();
+  nofFailedTests += test_MEpoch ();
+  nofFailedTests += test_MPosition ();
   
   return nofFailedTests;
 }

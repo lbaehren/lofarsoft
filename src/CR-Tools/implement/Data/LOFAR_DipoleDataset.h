@@ -72,19 +72,24 @@ namespace DAL { // Namespace DAL -- begin
       /                             ... Group
       |-- Station001                ... Group
       |   |-- 
-      |   |-- 001000000             ... Dataset         ... array<uint,1>
-      |   |   |-- STATION_ID        ... Attribute       ... uint
-      |   |   |-- RSP_ID            ... Attribute       ... uint 
-      |   |   |-- RCU_ID            ... Attribute       ... uint
-      |   |   |-- SAMPLE_FREQ       ... Attribute       ... double
-      |   |   |-- TIME              ... Attribute       ... uint
-      |   |   |-- SAMPLE_NR         ... Attribute       ... uint
-      |   |   |-- SAMPLES_PER_FRAME ... Attribute       ... uint
-      |   |   |-- DATA_LENGTH       ... Attribute       ... uint
-      |   |   |-- NYQUIST_ZONE      ... Attribute       ... uint
-      |   |   |-- FEED              ... Attribute       ... string
-      |   |   |-- ANT_POSITION      ... Attribute       ... array<double,1>
-      |   |   `-- ANT_ORIENTATION   ... Attribute       ... array<double,1>
+      |   |-- 001000000                   ... Dataset        ... array<uint,1>
+      |   |   |-- STATION_ID              ... Attribute      ... uint
+      |   |   |-- RSP_ID                  ... Attribute      ... uint 
+      |   |   |-- RCU_ID                  ... Attribute      ... uint
+      |   |   |-- SAMPLE_FREQUENCY_VALUE  ... Attribute      ... double
+      |   |   |-- SAMPLE_FREQUENCY_UNIT   ... Attribute      ... double
+      |   |   |-- TIME                    ... Attribute      ... uint
+      |   |   |-- SAMPLE_NR               ... Attribute      ... uint
+      |   |   |-- SAMPLES_PER_FRAME       ... Attribute      ... uint
+      |   |   |-- DATA_LENGTH             ... Attribute      ... uint
+      |   |   |-- NYQUIST_ZONE            ... Attribute      ... uint
+      |   |   |-- FEED                    ... Attribute      ... string
+      |   |   |-- ANT_POSITION_VALUE      ... Attribute      ... array<double,1>
+      |   |   |-- ANT_POSITION_UNIT       ... Attribute      ... string
+      |   |   |-- ANT_POSITION_FRAME      ... Attribute      ... string
+      |   |   |-- ANT_ORIENTATION_VALUE   ... Attribute      ... array<double,1>
+      |   |   |-- ANT_ORIENTATION_UNIT    ... Attribute      ... string
+      |   |   `-- ANT_ORIENTATION_FRAME   ... Attribute      ... string
       \endverbatim
     </ol>
     
@@ -289,33 +294,51 @@ namespace DAL { // Namespace DAL -- begin
     std::string feed ();
 
     /*!
+      \brief Get the numerical value of the antenna position
+
       \return value -- Numerical value of the antenna position coordinates, e.g.
               <tt>value=[10,12,0]</tt>
     */
     casa::Vector<double> antenna_position_value ();
+
     /*!
+      \brief Get the physical unit within which the antenna position is given
+
       \return unit -- Physical unit associated with the numerical values for the
               antenna position, e.g. <tt>unit="m"</tt>
     */
     std::string antenna_position_unit ();
+
     /*!
+      \brief Get the identifier for the reference frame of the antenna position
+
       \return Identifier for the reference frame within which the antenna position
               is provided, e.g. <tt>frame="ITRF"</tt>
-     */
+    */
     std::string antenna_position_frame ();
 
     /*!
-      \return value -- The numerical value describing the orientation of the
-              antenna, which might be e.g. a set of (Euler) angles or elements of
-	      a normal vector.
+      \brief Get the numerical values describing the antenna orientation
+
+      \return value -- The numerical values describing the antenna position; this
+              can be either a set of Euler angles or a normal vector.
     */
     casa::Vector<double> antenna_orientation_value ();
+
     /*!
-      \return unit -- 
+      \brief Get the physical unit within which the antenna orientation is given
+
+      \return unit -- Physical unit associated with the numerical values for the
+              antenna orientation; depending on the parametrization this can be
+	      <tt>unit="rad"</tt>, <tt>unit="deg"</tt> or <tt>unit="m"</tt>.
     */
     std::string antenna_orientation_unit ();
+
     /*!
-      \return frame -- 
+      \brief Get the identifier for the reference frame of the antenna orientation
+
+      \return Identifier for the reference frame within which the antenna
+              orientation is provided, e.g. <tt>frame="ITRF"</tt>
     */
     std::string antenna_orientation_frame ();
 

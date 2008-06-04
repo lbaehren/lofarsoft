@@ -33,6 +33,7 @@
 #include <casa/Arrays/Vector.h>
 #include <casa/Containers/Record.h>
 #include <measures/Measures/MDirection.h>
+#include <measures/Measures/MPosition.h>
 
 #include <Data/LOFAR_DipoleDataset.h>
 
@@ -68,19 +69,24 @@ namespace DAL { // Namespace DAL -- begin
       <li>Structure of the HDF5 group inside the time-series data format:
       \verbatim
       /
-      |-- Station001                ... Group
-      |   |-- TELESCOPE             ... Attribute       ... string
-      |   |-- OBSERVER              ... Attribute       ... string
-      |   |-- PROJECT               ... Attribute       ... string
-      |   |-- OBSERVATION_ID        ... Attribute       ... string
-      |   |-- OBSERVATION_MODE      ... Attribute       ... string
-      |   |-- TRIGGER_TYPE          ... Attribute       ... string
-      |   |-- TRIGGER_OFFSET        ... Attribute       ... string
-      |   |-- TRIGGERED_ANTENNAS    ... Attribute       ... array<int,1>
-      |   |-- BEAM_DIRECTION        ... Attribute       ... array<double,2>
-      |   |-- 001000000             ... Dataset         ... array<uint,1>
+      |-- Station001                    ... Group
+      |   |-- TELESCOPE                 ... Attribute       ... string
+      |   |-- OBSERVER                  ... Attribute       ... string
+      |   |-- PROJECT                   ... Attribute       ... string
+      |   |-- OBSERVATION_ID            ... Attribute       ... string
+      |   |-- OBSERVATION_MODE          ... Attribute       ... string
+      |   |-- TRIGGER_TYPE              ... Attribute       ... string
+      |   |-- TRIGGER_OFFSET            ... Attribute       ... string
+      |   |-- TRIGGERED_ANTENNAS        ... Attribute       ... array<int,1>
+      |   |-- BEAM_DIRECTION_VALUE      ... Attribute       ... array<double,1>
+      |   |-- BEAM_DIRECTION_UNIT       ... Attribute       ... string
+      |   |-- BEAM_DIRECTION_FRAME      ... Attribute       ... string
+      |   |-- STATION_POSITION_VALUE    ... Attribute       ... array<double,1>
+      |   |-- STATION_POSITION_UNIT     ... Attribute       ... string
+      |   |-- STATION_POSITION_FRAME    ... Attribute       ... string
+      |   |-- 001000000                 ... Dataset         ... array<uint,1>
       |   |   `-- 
-      |   |-- 001000001             ... Dataset         ... array<uint,1>
+      |   |-- 001000001                 ... Dataset         ... array<uint,1>
       |   |   `-- 
       \endverbatim
     </ol>
@@ -304,6 +310,11 @@ namespace DAL { // Namespace DAL -- begin
       \return direction -- The direction of the station beam.
     */
     casa::MDirection beam_direction ();
+
+    casa::Vector<double> station_position_value ();
+    std::string station_position_unit ();
+    std::string station_position_frame ();
+    casa::MPosition station_position ();
 
     /*!
       \brief Get the name of the class
