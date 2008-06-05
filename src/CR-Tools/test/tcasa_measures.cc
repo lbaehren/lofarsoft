@@ -174,8 +174,31 @@ int test_MPosition ()
   cout << "\n[test_MPosition]\n" << endl;
 
   int nofFailedTests (0);
+  bool status (true);
 
-  cout << "[1] Basic example from API documentation ..." << endl;
+  cout << "[1] Conversion of ref. code to type ..." << endl;
+  try {
+    casa::String refcode ("ITRF");
+    casa::MPosition::Types tp;
+    //
+    status = casa::MPosition::getType (tp,refcode);
+    if (status) {
+      cout << "-- Ref. code = " << refcode << endl;
+      cout << "-- Type      = " << tp      << endl;
+    }
+    //
+    refcode = "WGS84";
+    status = casa::MPosition::getType (tp,refcode);
+    if (status) {
+      cout << "-- Ref. code = " << refcode << endl;
+      cout << "-- Type      = " << tp      << endl;
+    }
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  cout << "[2] Basic example from API documentation ..." << endl;
   try {
     MPosition obs( MVPosition( Quantity( 10, "m"),
 			       Quantity( -6, "deg"),
@@ -188,7 +211,38 @@ int test_MPosition ()
     nofFailedTests++;
   }
 
-  
+  cout << "[3] Construction of MPosition as in HDF5Common ..." << endl;
+  try {
+    casa::Vector<double> values (3);
+    casa::Vector<casa::String> units (3);
+    casa::MPosition::Types tp;
+    string refcode;
+    //
+    values(0) = 10;
+    values(1) = -6;
+    values(2) = 50;
+    units(0)  = "m";
+    units(1)  = "deg";
+    units(2)  = "deg";
+    refcode   = "WGS84";
+    //
+    status = casa::MPosition::getType (tp,refcode);
+    //
+    MPosition obs( MVPosition( Quantity( values(0), units(0)),
+			       Quantity( values(1), units(1)),
+			       Quantity( values(2), units(2))),
+		   MPosition::Ref(tp));
+    //
+    cout << "-- Values    = " << values  << endl;
+    cout << "-- Units     = " << units   << endl;
+    cout << "-- Ref. code = " << refcode << endl;
+    cout << "-- Ref. type = " << tp      << endl;
+    cout << "-- MPosition = " << obs     << endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
   return nofFailedTests;
 }
 
