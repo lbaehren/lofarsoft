@@ -55,20 +55,23 @@ using CR::CalTableReader;
 
   <h3>Usage</h3>
   \verbatim
-  ./calculatePhaseBehaviour Antenna
+  ./calculatePhaseBehaviour [eventfile]
   \endverbatim
   
   <ul>
-    <li> Number of Antenna (if 0, current PhaseCalValues are read from CalTables).
+    <li> eventfile - Lopes event file (if not supplied, current PhaseCalValues are read from CalTables).
   </ul>
    
   <h3>Examples</h3>
-  ./calculatePhaseBehaviour 1
+  ./calculatePhaseBehaviour example.event
 
   \verbatim
   \endverbatim  
 */
 
+const int upsampling_exp = 5;		// upsampling of trace will be done by 2^upsampling_exp
+const double plotStart = -0.9e-6;		// start time for plotting of FX values
+const double plotStop = -0.5e-6;           // stop time for plotting of FX values
 
 /*!
   \brief reads the PhaseCal values stored in the CalTables
@@ -171,32 +174,118 @@ void readCalTableValues(void)
 }
 
 /*!
-  \brief analyses one event for one antenna
+  \brief upsamples a trace (with non-zero baseline substraction)
 
-  \param antenna -- Number of the antenna to analyse
+  \param trace         -- Trace (time series)
+  \param upsamplingExp -- umsampling factor will be 2^upsamplingExp
+
+  \return upTrace	     -- upsampled trace
 */
 
-void analyseEvent(int antenna, string eventName)
+Vector<double> upsampleTrace(const Vector<double> &trace, int upsamplingExp)
+{
+  Vector<double> upTrace;		// return value for upsampled trace
+
+  try
+  {
+    // create upsampling factor by upsampling exponent
+    unsigned int upsampled = pow(2,upsampling_exp);
+
+    // get length of trace
+    unsigned int tracelength = trace.size();
+
+    // allocate memory for original and upsampled traces
+    double* originalTrace = new double[tracelength];
+    double* upsampledTrace = new double[tracelength * upsampled];
+
+    // Resize Vector for usampled values
+    upTrace.resize(tracelength * upsampled);
+
+    // copy the trace into the array
+    for (unsigned int i = 0; i < tracelength; i++) 
+      originalTrace[i] = trace(i);
+
+    // do upsampling by factor #upsampled (--> NoZeros = upsampled -1)
+    ZeroPaddingFFT(tracelength, originalTrace, upsampled-1, upsampledTrace);
+
+    // copy upsampled trace into Matrix with antenna traces
+    // remember: ZeroPaddingFFT removes the offset automatically
+    for (unsigned int i = 0; i < tracelength*upsampled; i++)
+      upTrace(i) = upsampledTrace[i];
+
+    // delete arrays
+    delete[] originalTrace;
+    delete[] upsampledTrace;
+  } catch (AipsError x) 
+  {
+    cerr << "calculatePhaseBehaviour:upsampleTrace: " << x.getMesg() << endl;
+    return Vector<double>();
+  }
+
+  return upTrace;
+}
+
+
+/*!
+  \brief interpolates time axis for upsampled traces
+
+  \param dr            -- DataReader (for not interpolated time axis)
+  \param upsamplingExp -- umsampling factor will be 2^upsamplingExp
+
+  \return upTimeAxis   -- interpolated time axis
+*/
+
+Vector<double> upsampleTimeAxis(DataReader &dr, int upsamplingExp)
+{
+  Vector<double> upTimeAxis;		// return value for upsampled trace
+
+  try 
+  {
+    // create upsampling factor by upsampling exponent
+    unsigned int upsampled = pow(2,upsampling_exp);
+
+    // Get time between samples
+    double sampleTime = 1/(dr.sampleFrequency() * upsampled);
+
+    // Get the not interpolated time axis
+    Vector<double> timeAxis = static_cast< Vector<double> >(dr.timeValues()); 
+
+    // get the length of the x-axis 
+    long int timeLength = timeAxis.size();
+
+    // Resize the time Vector for the new upsampled xaxis
+    upTimeAxis.resize(timeLength*upsampled, false);
+
+    // copy old values to the right place and fill space inbetween 
+    for (long int i = timeLength-1; i >= 0; i--)
+    {
+      // move existing time value to the right place
+      upTimeAxis(i*upsampled) = timeAxis(i);
+      // create new values
+      for (unsigned int j = 1; j < upsampled; j++) 
+        upTimeAxis(i*upsampled+j) = upTimeAxis(i*upsampled) + j*sampleTime;
+    }
+  } catch (AipsError x) 
+  {
+    std::cerr << "calculatePhaseBehaviour:upsampleTimeAxis: " << x.getMesg() << std::endl;
+    return Vector<double>();
+  }
+
+  return upTimeAxis;
+}
+
+/*!
+  \brief plots the data
+
+  \param dr           -- DataReader
+  \param PlotPrefix   -- Base of filename
+  \param antenna      -- Number of the antenna to plot
+*/
+
+void plotEvent(DataReader &dr, const string &PlotPrefix, int antenna)
 {
   try
   {
-    // open event
-    LopesEventIn dr;
-
-    cout << "Attaching file: " << eventName << endl;
-    if (! dr.attachFile(eventName))
-    {
-      cerr << "Failed to attach file!" << endl;
-      return;
-    }
-
-    // consistency check
-    if (dr.header().asString("Observatory") != "LOPES")
-    {
-      cerr << "File does not contain LOPES data." << endl;
-      return;
-    }
-
     // get fx() data
     Matrix<Double> dataFX;
     Matrix<DComplex> dataFFT;
@@ -213,16 +302,15 @@ void analyseEvent(int antenna, string eventName)
     Vector<Double> xaxis;			// xaxis
     double xmax,xmin,ymin=0,ymax=0;		// Plotrange
     Vector<Double> yValues;			// y-values
-    Vector<Double> upYvalues;			// upsampled y-values
     int color = 9;				// starting color
 
     // Get the (not upsampled) time axis
     xaxis = static_cast< Vector<Double> >(dr.timeValues());
     yValues = dataFX.column(antenna-1).copy();
-    upYvalues = dataFX.column(antenna-1).copy();
 
-    // Upsampled x-axis
-    Vector<Double> upxaxis = xaxis;
+    // Get upsampled values
+    Vector<double> upYvalues = upsampleTrace(yValues,upsampling_exp);
+    Vector<double> upxaxis = upsampleTimeAxis(dr, upsampling_exp);
 
     // check length of time axis and yValues traces for consistency
     if (upxaxis.size() != upYvalues.size())
@@ -230,8 +318,6 @@ void analyseEvent(int antenna, string eventName)
            << std::endl;
 
     // Define plotrange for not upsampled and upsampled data
-    const double plotStart = -2e-6;
-    const double plotStop = 0e-6;
     int startsample = ntrue(xaxis<plotStart);			//number of elements smaller then starting value of plot range
     int stopsample = ntrue(xaxis<plotStop);			//number of elements smaller then end of plot range
     Slice plotRange(startsample,(stopsample-startsample));	// create Slice with plotRange
@@ -254,14 +340,7 @@ void analyseEvent(int antenna, string eventName)
 
 
     // create the plot filename
-    string plotfilename = eventName;
-    // delete ending
-    if (plotfilename.find(".event") != string::npos)
-        plotfilename.erase(plotfilename.find_last_of('.'));	
-    // deletes the file path, if it exists	
-    if (plotfilename.find("/") != string::npos)
-        plotfilename.erase(0,plotfilename.find_last_of('/')+1);
-
+    string plotfilename = PlotPrefix;
 
     stringstream antennanumber;
     antennanumber << antenna;
@@ -297,7 +376,7 @@ void analyseEvent(int antenna, string eventName)
     // Plot (upsampled) trace
     plotter.PlotLine(upxaxis(upplotRange),upYvalues(upplotRange),color,1);
     // Plot original data points (if upsampling was done).
-    //  plotter.PlotSymbols(xaxis(plotRange),yValues(plotRange),empty, empty, color, 2, 5);
+    //plotter.PlotSymbols(xaxis(plotRange),yValues(plotRange),empty, empty, color, 2, 5);
 
 
     // plot the FFT
@@ -307,12 +386,11 @@ void analyseEvent(int antenna, string eventName)
 
     // check length of time axis and yValues traces for consistency
     if (xaxis.size() != yValues.size())
-      std::cerr << " WARNING: Length of frequency axis differs from length of the FFT!\n"
-           << std::endl;
+      std::cerr << " WARNING: Length of frequency axis differs from length of the FFT!\n" << std::endl;
 
     // FFT-Power ~ square of absolute value; use log-plotting
     for (unsigned int i=0; i < yValues.size(); i++)
-     yValues (i) = log( pow( abs(dataFFT.column(antenna-1)(i)), 2) );
+     yValues (i) = log10( pow( abs(dataFFT.column(antenna-1)(i)), 2) );
  
 
     // define Plotrange
@@ -325,13 +403,7 @@ void analyseEvent(int antenna, string eventName)
 
 
     // create the plot filename
-    plotfilename = eventName;
-    // delete ending
-    if (plotfilename.find(".event") != string::npos)
-        plotfilename.erase(plotfilename.find_last_of('.'));	
-    // deletes the file path, if it exists	
-    if (plotfilename.find("/") != string::npos)
-        plotfilename.erase(0,plotfilename.find_last_of('/')+1);
+    plotfilename = PlotPrefix;
 
     //set the plotfilename to filename + "-" + antennanumber.str() + ".ps";
     if ( (antenna+1) < 10 )
@@ -350,10 +422,166 @@ void analyseEvent(int antenna, string eventName)
     plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
     // Add labels
-    plotter.AddLabels("Frequency [MHz]", "log Power",label);
+    plotter.AddLabels("Frequency [MHz]", "lg Power",label);
 
     // Plot FFT
     plotter.PlotLine(xaxis,yValues,color,1);
+  } catch (AipsError x) 
+  {
+    cerr << "calculatePhaseBehaviour:plotEvent: " << x.getMesg() << endl;
+  }
+}
+
+
+/*!
+  \brief finds the calibrated antenna:
+         The calibrated antenna must have the frquency comb in the spectrum:
+         That means one peak with SNR > 10 at each full MHz - frequency from
+         41 to 79 MHz.
+         If there are several antennas containing a frequency comb, the one
+         with the highest SNR sum will be chosen.
+
+  \return antenna -- number of antenna (starting with 1),
+                      -1 if calibrated antenna was not found
+*/
+
+int calibratedAntenna(DataReader &dr)
+{
+  int antenna = -1;
+
+  try
+  {
+    // find the frequency comb
+    Matrix<DComplex> dataFFT;
+    Vector<Double> frequencies;
+    dataFFT = dr.fft();
+    frequencies = dr.frequencyValues();
+
+    // create Matrix with FFT power (= abs^2(FFT) ) 
+    Matrix<Double> FFTpower(dataFFT.shape());
+    for (unsigned int i=0; i < FFTpower.ncolumn(); i++)
+      for (unsigned int j=0; j < FFTpower.nrow(); j++)
+        FFTpower(j,i) = pow( abs(dataFFT(j,i)), 2);
+
+    // variables for interval creation 
+    const double peakWidth  = 20e3;		// peak width <= 20 kHz
+    const double noiseWidth = 400e3;		// peak width <= 400 kHz
+    int startsample, stopsample;
+    Slice peakInterval, noiseInterval;
+
+    // relative peak to noise ratio, for each peak
+    double peakSNR;		// must be at leat 10 for all frequency peaks
+    double sumSNR;		// sum of all peakheights
+    bool foundcomb; 		// set to false, if one frequency peak is missing
+    double maxSum=0;		// maximal sum
+
+    // loop through all antennas and find frequency comb
+    for (unsigned int i = 0; i < FFTpower.ncolumn(); i++)
+    {
+      // reset SNR and foundcomb variables
+      foundcomb = true;
+      sumSNR = 0;
+
+      // loop through frequencies (from 41 MHz to 79 MHz)
+      // and compare peak at full MHz with mean at following interval
+      for (int f = 41e6; f < 79e6; f += 1e6)
+      {
+        // create peak interval (f +/- peakWidth)
+        startsample = ntrue(frequencies < f-peakWidth);			//number of elements smaller then starting
+        stopsample  = ntrue(frequencies < f+peakWidth);			//number of elements smaller then end point
+        Slice peakInterval (startsample,(stopsample-startsample));	// create Slice with interval
+        // create peak interval (f + 0.5 MHz +/- noiseWidth)
+        startsample = ntrue(frequencies < f+0.5e6-noiseWidth);		//number of elements smaller then starting
+        stopsample  = ntrue(frequencies < f+0.5e6+noiseWidth);		//number of elements smaller then end point
+        Slice noiseInterval(startsample,(stopsample-startsample));	// create Slice with interval
+
+        peakSNR = max(FFTpower.column(i)(peakInterval)) / median(FFTpower.column(i)(noiseInterval));
+        //cout << "relative peak height (SNR) at f = " << f/1e6 << " MHz : " << peakSNR << endl;
+
+        // check if SNR is to small
+        if (peakSNR < 10) foundcomb = false;
+
+        // sum SNR
+        sumSNR += peakSNR;
+      }
+
+      // check if comb was found (SNR > 10 for all frequencies)
+      if (foundcomb)
+      {
+        // store antenna with maximal SNR in comb frequencies
+        if (sumSNR > maxSum)
+        {
+           maxSum = sumSNR;
+           antenna = i+1;
+        }
+        //cout << "Frequency comb found for antenna: " << i+1 << " \t SNR(sum): " << sumSNR << endl;
+      }
+    }
+
+  }  catch (AipsError x) 
+  {
+      cerr << "calculatePhaseBehaviour:calibratedAntenna: " << x.getMesg() << endl;
+      return -1;
+  }
+
+  return antenna;
+}
+
+
+/*!
+  \brief analyses one event
+
+  \param eventName -- Lopes event file
+*/
+
+void analyseEvent(const string &eventName)
+{
+  try
+  {
+    // open event
+    LopesEventIn dr;
+
+    cout << "\nAttaching file: " << eventName << endl;
+    if (! dr.attachFile(eventName))
+    {
+      cerr << "Failed to attach file!" << endl;
+      return;
+    }
+
+    // consistency check
+    if (dr.header().asString("Observatory") != "LOPES")
+    {
+      cerr << "File does not contain LOPES data." << endl;
+      return;
+    }
+
+    // get calibrated antenna
+    int antenna = calibratedAntenna(dr);
+
+    // check if calibrated antenna was found
+    if (antenna == -1)
+    {
+       cerr << "ERROR: calibrated antenna was not found. Program will exit now." << endl;
+       return;
+    }
+    else 
+    {
+      cout << "Calibrated antenna: " << antenna << endl;
+    }
+
+    // create plot prefix
+    string plotPrefix = eventName;
+
+    // delete ending
+    if (plotPrefix.find(".event") != string::npos)
+        plotPrefix.erase(plotPrefix.find_last_of('.'));	
+    // deletes the file path, if it exists	
+    if (plotPrefix.find("/") != string::npos)
+        plotPrefix.erase(0,plotPrefix.find_last_of('/')+1);
+
+    // Plot FX and FFT
+    plotEvent(dr, plotPrefix, antenna);
+
   } catch (AipsError x) 
   {
     cerr << "calculatePhaseBehaviour:analyseEvent: " << x.getMesg() << endl;
@@ -366,35 +594,27 @@ int main (int argc, char *argv[])
   try
   {
     // Check correct number of arguments (1 + program name = 2)
-    if (argc != 2)
+    if (argc > 2)
     {
       std::cerr << "Wrong number of arguments in call of \"calculatePhaseBehaviour\". The correct format is:\n";
-      std::cerr << "calculatePhaseBehaviour Antenna\n";
+      std::cerr << "calculatePhaseBehaviour [eventfile]\n";
       std::cerr << "for example:\n";
-      std::cerr << "./calculatePhaseBehaviour 1\n" << std::endl;
+      std::cerr << "./calculatePhaseBehaviour example.event\n" << std::endl;
       return 1;				// Exit the program
     }
 
-    // assign the arguments (antenna)
-    int antenna = -1;
-    string antennaString(argv[1]);
-    stringstream(antennaString) >> antenna;
-
-    if ((antenna < 0) || (antenna > 30))
-    {
-      std::cerr << "\nError: Antenna number has to be inbetween 1 and 30!" << endl;
-      return 1;
-    }
-
-    // read the current values
-    if (antenna == 0)
+    // read the current PhaseCal values if not eventfile was specified
+    if (argc == 1)
     {
       readCalTableValues();
       return 0;
     }
 
+    // assign the arguments (event filename)
+    string eventfile(argv[1]);
+
     // process event
-    analyseEvent(antenna, "/data/calibration/newCalib/080528/2008.05.28.08:19:39.599.event");
+    analyseEvent(eventfile);
 
   }  catch (AipsError x) 
   {
