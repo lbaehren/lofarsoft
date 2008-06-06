@@ -38,18 +38,22 @@ fi
 # |-- build
 # |-- devel_common
 # |-- external
-# |   |-- boost
-# |   |-- casacore
 # |   |-- cmake
+# |   |-- flex
+# |   |-- bison
+# |   |-- wcslib
 # |   |-- cfitsio
 # |   |-- hdf5
-# |   `-- wcs
+# |   |-- casacore
+# |   |-- plplot
+# |   |-- boost
+# |   `-- python
 # `-- src
 #     `-- DAL
 
 echo "[DAL packager] Running tar to package source directories ..."
 
-external_packages="cmake flex bison cfitsio casacore hdf5 plplot boost python wcslib"
+external_packages="cmake flex bison wcslib cfitsio hdf5 casacore plplot boost python"
 
 for package in $external_packages
 {

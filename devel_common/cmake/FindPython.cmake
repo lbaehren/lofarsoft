@@ -96,6 +96,8 @@ endforeach (python_version)
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
+## Python itself
+
 if (PYTHON_INCLUDES AND PYTHON_LIBRARIES)
   set (HAVE_PYTHON TRUE)
 else (PYTHON_INCLUDES AND PYTHON_LIBRARIES)
@@ -110,6 +112,16 @@ else (PYTHON_INCLUDES AND PYTHON_LIBRARIES)
   endif (NOT PYTHON_FIND_QUIETLY)
 endif (PYTHON_INCLUDES AND PYTHON_LIBRARIES)
 
+## NumUtil
+
+if (NUM_UTIL_INCLUDES AND NUM_UTIL_LIBRARIES)
+  set (HAVE_NUM_UTIL TRUE)
+else (NUM_UTIL_INCLUDES AND NUM_UTIL_LIBRARIES) 
+  set (HAVE_NUM_UTIL FALSE)
+endif (NUM_UTIL_INCLUDES AND NUM_UTIL_LIBRARIES) 
+
+## Feedback
+
 if (HAVE_PYTHON)
   if (NOT PYTHON_FIND_QUIETLY)
     message (STATUS "Found components for PYTHON")
@@ -117,6 +129,8 @@ if (HAVE_PYTHON)
     message (STATUS "PYTHON_INCLUDES    = ${PYTHON_INCLUDES}")
     message (STATUS "PYTHON_LIBRARIES   = ${PYTHON_LIBRARIES}")
     message (STATUS "NUMPY_INCLUDES     = ${NUMPY_INCLUDES}")
+    message (STATUS "NUM_UTIL_INCLUDES  = ${NUM_UTIL_INCLUDES}")
+    message (STATUS "NUM_UTIL_LIBRARIES = ${NUM_UTIL_LIBRARIES}")
   endif (NOT PYTHON_FIND_QUIETLY)
 else (HAVE_PYTHON)
   if (PYTHON_FIND_REQUIRED)

@@ -20,15 +20,14 @@ include (CMakeSettings)
 ## Check for the header files
 
 find_path (G2C_INCLUDES g2c.h f2c.h
-  PATHS ${include_locations} /usr/lib
+  PATHS ${include_locations} /usr/lib/gcc /usr/lib/gcc-lib
   PATH_SUFFIXES
-  gcc
-  gcc-lib/i486-linux/3.3.5/include
-  gcc-lib/i586-suse-linux/3.3.3/include
-  gcc-lib/i586-suse-linux/3.3.4/include
-  gcc-lib/i586-suse-linux/3.3.5/include
-  gcc/x86_64-redhat-linux/3.4.3/include
-  gcc/i386-redhat-linux/3.4.6/include
+  i486-linux/3.3.5/include
+  i586-suse-linux/3.3.3/include
+  i586-suse-linux/3.3.4/include
+  i586-suse-linux/3.3.5/include
+  x86_64-redhat-linux/3.4.3/include
+  i386-redhat-linux/3.4.6/include
   )
 
 ## -----------------------------------------------------------------------------
