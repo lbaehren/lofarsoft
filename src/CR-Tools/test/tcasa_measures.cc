@@ -65,7 +65,7 @@ using casa::MVPosition;
 // ------------------------------------------------------------------------------
 
 /*!
-  \brief Test working with a MVAngle measure
+  \brief Test of class to handle angle type conversions and I/O
 
   \return nofFailedTest -- The number of failed tests within this function
 */
@@ -94,6 +94,8 @@ int test_MVAngle ()
 // ------------------------------------------------------------------------------
 
 /*!
+  \brief Test of class for high precision time
+
   \return nofFailedTests -- The number of failed tests
 */
 int test_MVTime ()
@@ -120,6 +122,8 @@ int test_MVTime ()
 // ------------------------------------------------------------------------------
 
 /*!
+  \brief Test of measure for an instance in time
+
   \return nofFailedTests -- The number of failed tests
 */
 int test_MEpoch ()
@@ -167,6 +171,8 @@ int test_MEpoch ()
 // ------------------------------------------------------------------------------
 
 /*!
+  \brief Test of measure for a position on Earth
+
   \return nofFailedTests -- The number of failed tests
 */
 int test_MPosition ()
@@ -211,7 +217,7 @@ int test_MPosition ()
     nofFailedTests++;
   }
 
-  cout << "[3] Construction of MPosition as in HDF5Common ..." << endl;
+  cout << "[3] Construction of MPosition as in DAL::HDF5Common ..." << endl;
   try {
     casa::Vector<double> values (3);
     casa::Vector<casa::String> units (3);
@@ -251,6 +257,88 @@ int test_MPosition ()
 /*!
   \return nofFailedTests -- The number of failed tests
 */
+int test_MDirection ()
+{
+  cout << "\n[test_MDirection]\n" << endl;
+  
+  int nofFailedTests (0);
+  bool status (true);
+
+  cout << "[1] Conversion of ref. code to type ..." << endl;
+  try {
+    casa::String refcode ("J2000");
+    casa::MDirection::Types tp;
+    //
+    status = casa::MDirection::getType (tp,refcode);
+    if (status) {
+      cout << "-- " << refcode << "\t= " << tp << endl;
+    }
+    //
+    refcode = "B1950";
+    status = casa::MDirection::getType (tp,refcode);
+    if (status) {
+      cout << "-- " << refcode << "\t= " << tp << endl;
+    }
+    //
+    refcode = "GALACTIC";
+    status = casa::MDirection::getType (tp,refcode);
+    if (status) {
+      cout << "-- " << refcode << "\t= " << tp << endl;
+    }
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[2] Basic example from API documentation ..." << endl;
+  try {
+    MDirection direction ( Quantity( 20, "deg"),
+			   Quantity(-10, "deg"),
+			   MDirection::Ref( MDirection::B1950));
+    cout << "-- MDirection = " << direction << endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  cout << "[3] Construction of MDirection as in HDF5Common ..." << endl;
+  try {
+    casa::Vector<double> values (2);
+    casa::Vector<casa::String> units (2);
+    casa::MDirection::Types tp;
+    string refcode;
+    //
+    values(0) = 20;
+    values(1) = -10;
+    units(0)  = "deg";
+    units(1)  = "deg";
+    refcode   = "B1950";
+    //
+    status = casa::MDirection::getType (tp,refcode);
+    //
+    MDirection direction ( Quantity( values(0), units(0)),
+			   Quantity( values(1), units(1)),
+			   MDirection::Ref(tp));
+    //
+    cout << "-- Values     = " << values  << endl;
+    cout << "-- Units      = " << units   << endl;
+    cout << "-- Ref. code  = " << refcode << endl;
+    cout << "-- Ref. type  = " << tp      << endl;
+    cout << "-- MDirection = " << direction << endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  
+  return nofFailedTests;
+}
+
+// ------------------------------------------------------------------------------
+
+/*!
+  \return nofFailedTests -- The number of failed tests
+*/
 int main () 
 {
   int nofFailedTests (0);
@@ -259,6 +347,7 @@ int main ()
   nofFailedTests += test_MVTime ();
   nofFailedTests += test_MEpoch ();
   nofFailedTests += test_MPosition ();
+  nofFailedTests += test_MDirection ();
   
   return nofFailedTests;
 }

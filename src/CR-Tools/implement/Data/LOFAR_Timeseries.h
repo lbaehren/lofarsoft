@@ -88,9 +88,6 @@ namespace DAL { // Namespace DAL -- begin
       |-- OBSERVER                  ... Attribute       ... string
       |-- PROJECT                   ... Attribute       ... string
       |-- Station001                ... Group
-      |   |-- TELESCOPE             ... Attribute       ... string
-      |   |-- OBSERVER              ... Attribute       ... string
-      |   |-- PROJECT               ... Attribute       ... string
       |   |-- OBSERVATION_ID        ... Attribute       ... string
       |   |-- OBSERVATION_MODE      ... Attribute       ... string
       |   |-- TRIGGER_TYPE          ... Attribute       ... string
@@ -506,6 +503,21 @@ namespace DAL { // Namespace DAL -- begin
     std::string project ();
 
     /*!
+      \brief Get the observation ID
+
+      \return observation_id -- The observation ID; returns an empty string in
+              case no keyword value could be extracted.
+    */
+    std::string observation_id ();
+    
+    /*!
+      \brief Get the description of the observation mode
+
+      \return observation_mode -- Description/type of observation mode
+    */
+    std::string observation_mode ();
+    
+    /*!
       \brief Get the name of the class
       
       \return className -- The name of the class, LOFAR_Timeseries.
@@ -527,6 +539,8 @@ namespace DAL { // Namespace DAL -- begin
     void summary (std::ostream &os);    
 
     // ------------------------------------------------------------------ Methods
+
+    casa::Record attributes2record ();
     
     /*!
       \brief Get the number of station groups collected into this file

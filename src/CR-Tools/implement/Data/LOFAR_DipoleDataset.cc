@@ -574,6 +574,16 @@ namespace DAL { // Namespace DAL -- begin
       return std::string ("UNDEFINED");
     }
   }
+
+  // ----------------------------------------------------------- antenna_position
+
+  casa::MPosition LOFAR_DipoleDataset::antenna_position ()
+  {
+    return DAL::h5get_position (DAL::ANTENNA_POSITION_VALUE,
+				DAL::ANTENNA_POSITION_UNIT,
+				DAL::ANTENNA_POSITION_FRAME,
+				datasetID_p);
+  }
   
   // ----------------------------------------------------- antenna_position_frame
   

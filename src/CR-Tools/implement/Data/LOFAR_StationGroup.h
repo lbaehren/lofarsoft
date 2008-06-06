@@ -212,47 +212,6 @@ namespace DAL { // Namespace DAL -- begin
     }
 
     /*!
-      \brief Get the name of the telescope
-      
-      \return telescope -- The name of the telescope with which the data were
-              recorded; returns an empty string in case no keyword value could
-	      be extracted.
-    */
-    std::string telescope ();
-
-    /*!
-      \brief Get the name of the observer
-      
-      \return observer -- The name of the observer; returns an empty string in
-              case no keyword value could be extracted.
-    */
-    std::string observer ();
-    
-    /*!
-      \brief Get the project name/description
-      
-      \return project -- Name/Description of the project for which this 
-              observation was carried out; returns an empty string in case no
-	      keyword value could be extracted.
-    */
-    std::string project ();
-
-    /*!
-      \brief Get the observation ID
-
-      \return observation_id -- The observation ID; returns an empty string in
-              case no keyword value could be extracted.
-    */
-    std::string observation_id ();
-    
-    /*!
-      \brief Get the description of the observation mode
-
-      \return observation_mode -- Description/type of observation mode
-    */
-    std::string observation_mode ();
-    
-    /*!
       \brief Get the trigger type which cause recording this data
 
       \return trigger_type -- The trigger type which cause recording this data
@@ -279,7 +238,7 @@ namespace DAL { // Namespace DAL -- begin
 #endif
 
     /*!
-      \brief Get the numerical value of the beam direction
+      \brief Get the numerical values of the beam direction
 
       \return value -- The numerical value for the direction of the station
               beam.
@@ -291,12 +250,13 @@ namespace DAL { // Namespace DAL -- begin
 #endif
     
     /*!
-      \brief Get the physical unit for the beam direction
+      \brief Get the physical units for the beam direction
       
       \return unit -- The physical units within which the beam direction
               is given; this might be <i>radian</i> or <i>degree</i>
     */
     std::string beam_direction_unit ();
+
     /*!
       \brief Get the coordinate frame identifier for the beam direction
       
@@ -311,7 +271,14 @@ namespace DAL { // Namespace DAL -- begin
     */
     casa::MDirection beam_direction ();
 
+    /*!
+      \brief Get the numerical values of the station position
+    */
     casa::Vector<double> station_position_value ();
+
+    /*!
+      \brief Get the physical units for the station position
+    */
     std::string station_position_unit ();
     std::string station_position_frame ();
     casa::MPosition station_position ();

@@ -406,7 +406,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 ##
 ## =============================================================================
 
-find_file (dataset_tbb tbb_test_file_v2.h5
+find_file (dataset_tbb tbb_test_file_v1_0.h5
   PATHS
   ${CR_SOURCE_DIR}/data
   ${CR_SOURCE_DIR}/../data

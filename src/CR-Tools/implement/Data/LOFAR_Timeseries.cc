@@ -109,33 +109,81 @@ namespace DAL { // Namespace DAL -- begin
   //
   // ============================================================================
 
+  // ------------------------------------------------------------------ telescope
+
   std::string LOFAR_Timeseries::telescope ()
   {
-    if (fileID_p > 0 && groups_p.size() > 0) {
-      return groups_p[0].telescope();
+    std::string val;
+    
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::TELESCOPE),
+			     fileID_p)) {
+      return val;
     } else {
       return std::string ("UNDEFINED");
     }
   }
 
+  // ------------------------------------------------------------------- observer
+  
   std::string LOFAR_Timeseries::observer ()
   {
-    if (fileID_p > 0 && groups_p.size() > 0) {
-      return groups_p[0].observer();
+    std::string val;
+    
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::OBSERVER),
+			     fileID_p)) {
+      return val;
     } else {
       return std::string ("UNDEFINED");
     }
   }
+
+  // -------------------------------------------------------------------- project
 
   std::string LOFAR_Timeseries::project ()
   {
-    if (fileID_p > 0 && groups_p.size() > 0) {
-      return groups_p[0].project();
+    std::string val;
+    
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::PROJECT),
+			     fileID_p)) {
+      return val;
     } else {
       return std::string ("UNDEFINED");
     }
   }
 
+  // ------------------------------------------------------------- observation_id
+  
+  std::string LOFAR_Timeseries::observation_id ()
+  {
+    std::string val;
+    
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::OBSERVATION_ID),
+			     fileID_p)) {
+      return val;
+    } else {
+      return std::string ("UNDEFINED");
+    }
+  }
+  
+  // ----------------------------------------------------------- observation_mode
+  
+  std::string LOFAR_Timeseries::observation_mode ()
+  {
+    std::string val;
+    
+    if (DAL::h5get_attribute(val,
+			     attribute_name(DAL::OBSERVATION_MODE),
+			     fileID_p)) {
+      return val;
+    } else {
+      return std::string ("UNDEFINED");
+    }
+  }
+  
   // -------------------------------------------------------------------- summary
   
   void LOFAR_Timeseries::summary (std::ostream &os)
@@ -153,11 +201,12 @@ namespace DAL { // Namespace DAL -- begin
       os << "-- Telescope            : " << telescope()         << endl;
       os << "-- Observer             : " << observer()          << endl;
       os << "-- Project              : " << project()           << endl;
+      os << "-- Observation ID       : " << observation_id()    << endl;
+      os << "-- Observation mode     : " << observation_mode()  << endl;
       os << "-- nof. station groups  : " << groups_p.size()     << endl;
       os << "-- nof. dipole datasets : " << nofDipoleDatasets() << endl;
     }
   }
-  
   
   
   // ============================================================================
@@ -343,6 +392,26 @@ namespace DAL { // Namespace DAL -- begin
     return sampleFrequencies;
   }
 #endif
+
+  // ---------------------------------------------------------- attributes2record
+
+  casa::Record LOFAR_Timeseries::attributes2record ()
+  {
+    casa::Record rec;
+    
+    rec.define(casa::RecordFieldId(attribute_name(DAL::TELESCOPE)),
+	       telescope());
+    rec.define(casa::RecordFieldId(attribute_name(DAL::OBSERVER)),
+	       observer());
+    rec.define(casa::RecordFieldId(attribute_name(DAL::PROJECT)),
+	       project());
+    rec.define(casa::RecordFieldId(attribute_name(DAL::OBSERVATION_ID)),
+	       observation_id());
+    rec.define(casa::RecordFieldId(attribute_name(DAL::OBSERVATION_MODE)),
+	       observation_mode());
+
+    return rec;
+  }
 
   // ------------------------------------------------------------------------- fx
 

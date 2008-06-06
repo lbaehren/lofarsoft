@@ -318,6 +318,11 @@ namespace DAL { // Namespace DAL -- begin
     std::string antenna_position_frame ();
 
     /*!
+      \brief Get the antenna position as a measure
+    */
+    casa::MPosition antenna_position ();
+
+    /*!
       \brief Get the numerical values describing the antenna orientation
 
       \return value -- The numerical values describing the antenna position; this
