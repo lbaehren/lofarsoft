@@ -20,7 +20,7 @@ include (CMakeSettings)
 ## Check for the header files
 
 find_path (G2C_INCLUDES g2c.h f2c.h
-  PATHS ${include_locations}
+  PATHS ${include_locations} /usr/lib
   PATH_SUFFIXES
   gcc
   gcc-lib/i486-linux/3.3.5/include
@@ -28,6 +28,7 @@ find_path (G2C_INCLUDES g2c.h f2c.h
   gcc-lib/i586-suse-linux/3.3.4/include
   gcc-lib/i586-suse-linux/3.3.5/include
   gcc/x86_64-redhat-linux/3.4.3/include
+  gcc/i386-redhat-linux/3.4.6/include
   )
 
 ## -----------------------------------------------------------------------------
@@ -48,6 +49,7 @@ if (UNIX)
     ENDIF (${CMAKE_OSX_ARCHITECTURES} MATCHES "ppc")
   else (APPLE)
     list (APPEND lib_locations
+      /usr/lib/gcc/i386-redhat-linux/3.4.6
       /usr/lib/gcc/x86_64-redhat-linux/3.4.3/32
       /usr/lib/gcc/x86_64-redhat-linux/3.4.3
       )
