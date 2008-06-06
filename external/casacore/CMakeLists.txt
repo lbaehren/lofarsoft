@@ -116,13 +116,9 @@ find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   )
 
 if (USG_ROOT)
+  ## load common CMake configuration 
   include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (USG_ROOT)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (USG_ROOT)
-
-if (USG_ROOT)
-  message (STATUS "[casacore] Using USG CMake find scripts")
+  ## run CMake scripts to locate required external components
   include (FindCFITSIO.cmake)
   include (FindG2C.cmake)
   include (FindLAPACK.cmake)
@@ -131,16 +127,8 @@ if (USG_ROOT)
   if (casacore_HDF5_SUPPORT) 
     include (FindHDF5.cmake)
   endif (casacore_HDF5_SUPPORT)
-elseif (USG_ROOT)
-  message (STATUS "[casacore] Using local CMake find scripts")
-  include (./FindCFITSIO.cmake)
-  include (./FindG2C.cmake)
-  include (./FindLAPACK.cmake)
-  include (./FindWCS.cmake)
-  ## optional components
-  if (casacore_HDF5_SUPPORT) 
-    include (./FindHDF5.cmake)
-  endif (casacore_HDF5_SUPPORT)
+else (USG_ROOT)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
 
 ## --- libm -----------------------------------------------
