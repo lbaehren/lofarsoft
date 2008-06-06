@@ -65,13 +65,19 @@ using CR::CalTableReader;
   <h3>Examples</h3>
   ./calculatePhaseBehaviour example.event
 
+  <h3>Physics</h3>
+  Method does not work. As the pulse disappears after filterin (there is only a sinus left).
+  Even phase differences vary from event to event.
+
+
   \verbatim
   \endverbatim  
 */
 
 const int upsampling_exp = 5;		// upsampling of trace will be done by 2^upsampling_exp
-const double plotStart = -0.9e-6;		// start time for plotting of FX values
-const double plotStop = -0.5e-6;           // stop time for plotting of FX values
+const double plotStart = -0.9e-6;	// start time for plotting of FX values
+const double plotStop = -0.5e-6;        // stop time for plotting of FX values
+const double peakWidth  = 20e3;		// width of spectral peaks
 
 /*!
   \brief reads the PhaseCal values stored in the CalTables
@@ -172,6 +178,59 @@ void readCalTableValues(void)
   }
 
 }
+
+
+
+/*!
+  \brief applies a band filter to a trace (using Star Tools library)
+
+  \param trace          -- Trace (time series)
+  \param freq           -- frequency to filter on (in MHz)
+  \param widht          -- width of the band pass (in MHz)
+ 
+  \return filteredTrace -- trace after applying the band filter
+*/
+
+Vector<double> bandFilter(const Vector<double> &trace, double freq, double width)
+{
+  Vector<double> filteredTrace;	 // return value for upsampled trace
+
+  try
+  {
+    // get length of trace
+    unsigned int tracelength = trace.size();
+
+    // change size of return vector
+    filteredTrace.resize(tracelength);
+
+    // allocate memory for original and upsampled traces
+    float* originalTrace = new float[tracelength];
+    float* bandTrace = new float[tracelength];		// for trace after band filter
+
+    // copy the trace into the array
+    for (unsigned int i = 0; i < tracelength; i++) 
+      originalTrace[i] = trace(i);
+
+    // do filtering
+    BandFilterFFT(tracelength, originalTrace, freq-width, freq+width , bandTrace);
+
+    // copy upsampled trace into Matrix with antenna traces
+    // remember: ZeroPaddingFFT removes the offset automatically
+    for (unsigned int i = 0; i < tracelength; i++)
+      filteredTrace(i) = bandTrace[i];
+
+    // delete arrays
+    delete[] originalTrace;
+    delete[] bandTrace;
+  } catch (AipsError x) 
+  {
+    cerr << "calculatePhaseBehaviour:bandFilter: " << x.getMesg() << endl;
+    return Vector<double>();
+  }
+
+  return filteredTrace;
+}
+
 
 /*!
   \brief upsamples a trace (with non-zero baseline substraction)
@@ -275,27 +334,20 @@ Vector<double> upsampleTimeAxis(DataReader &dr, int upsamplingExp)
 }
 
 /*!
-  \brief plots the data
+  \brief plots the FX trace
 
   \param dr           -- DataReader
   \param PlotPrefix   -- Base of filename
   \param antenna      -- Number of the antenna to plot
 */
 
-void plotEvent(DataReader &dr, const string &PlotPrefix, int antenna)
+void plotTrace(DataReader &dr, const string &PlotPrefix, int antenna)
 {
   try
   {
     // get fx() data
     Matrix<Double> dataFX;
-    Matrix<DComplex> dataFFT;
-    Vector<Double> frequencies;
     dataFX = dr.fx();
-    dataFFT = dr.fft();
-    frequencies = dr.frequencyValues();
-
-    // cout << "Date: " << dr.header().asuInt("Date") << endl;
-    // cout << "IDs: " << dr.header().asArrayInt("AntennaIDs") << endl;
 
     // plot the data
     SimplePlot plotter;    			// define plotter
@@ -306,7 +358,9 @@ void plotEvent(DataReader &dr, const string &PlotPrefix, int antenna)
 
     // Get the (not upsampled) time axis
     xaxis = static_cast< Vector<Double> >(dr.timeValues());
-    yValues = dataFX.column(antenna-1).copy();
+    // yValues = bandFilter(dataFX.column(antenna-1),50,10);
+    // applying the band pass filter was not successfull
+    yValues = dataFX.column(antenna-1);
 
     // Get upsampled values
     Vector<double> upYvalues = upsampleTrace(yValues,upsampling_exp);
@@ -377,7 +431,43 @@ void plotEvent(DataReader &dr, const string &PlotPrefix, int antenna)
     plotter.PlotLine(upxaxis(upplotRange),upYvalues(upplotRange),color,1);
     // Plot original data points (if upsampling was done).
     //plotter.PlotSymbols(xaxis(plotRange),yValues(plotRange),empty, empty, color, 2, 5);
+  } catch (AipsError x) 
+  {
+    cerr << "calculatePhaseBehaviour:plotTrace: " << x.getMesg() << endl;
+  }
+}
 
+
+/*!
+  \brief plots the amplitude of the FFT
+
+  \param dr           -- DataReader
+  \param PlotPrefix   -- Base of filename
+  \param antenna      -- Number of the antenna to plot
+*/
+
+void plotFFT(DataReader &dr, const string &PlotPrefix, int antenna)
+{
+  try
+  {
+    // get FFT data
+    Matrix<DComplex> dataFFT;
+    Vector<Double> frequencies;
+    dataFFT = dr.fft();
+    frequencies = dr.frequencyValues();
+
+    // cout << "Date: " << dr.header().asuInt("Date") << endl;
+    // cout << "IDs: " << dr.header().asArrayInt("AntennaIDs") << endl;
+
+    // plot the data
+    SimplePlot plotter;    			// define plotter
+    Vector<Double> xaxis;			// xaxis
+    double xmax,xmin,ymin=0,ymax=0;		// Plotrange
+    Vector<Double> yValues;			// y-values
+    int color = 9;				// starting color
+
+    // Create empty vector for not existing error bars 
+    Vector<Double> empty;
 
     // plot the FFT
     yValues.resize(dataFFT.column(antenna-1).size());
@@ -388,9 +478,10 @@ void plotEvent(DataReader &dr, const string &PlotPrefix, int antenna)
     if (xaxis.size() != yValues.size())
       std::cerr << " WARNING: Length of frequency axis differs from length of the FFT!\n" << std::endl;
 
-    // FFT-Power ~ square of absolute value; use log-plotting
+    // FFT-Power ~ amplitude = absolute value; use log-plotting
     for (unsigned int i=0; i < yValues.size(); i++)
-     yValues (i) = log10( pow( abs(dataFFT.column(antenna-1)(i)), 2) );
+      yValues(i) = log10( abs(dataFFT.column(antenna-1)(i)) );
+    // yValues = phase(dataFFT.column(antenna-1));
  
 
     // define Plotrange
@@ -403,7 +494,10 @@ void plotEvent(DataReader &dr, const string &PlotPrefix, int antenna)
 
 
     // create the plot filename
-    plotfilename = PlotPrefix;
+    string plotfilename = PlotPrefix;
+
+    stringstream antennanumber;
+    antennanumber << antenna;
 
     //set the plotfilename to filename + "-" + antennanumber.str() + ".ps";
     if ( (antenna+1) < 10 )
@@ -415,6 +509,13 @@ void plotEvent(DataReader &dr, const string &PlotPrefix, int antenna)
     }
     cout << "Plotfilename: " << plotfilename << endl;
 
+    //set label "GT - Ant.Nr"
+    stringstream gtlabel;
+    uInt gtdate;
+    dr.header().get("Date",gtdate);
+    gtlabel << gtdate;
+    string label = "GT " + gtlabel.str() + " - Antenna " + antennanumber.str();
+
 
     // Make the plot
 
@@ -422,14 +523,99 @@ void plotEvent(DataReader &dr, const string &PlotPrefix, int antenna)
     plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
     // Add labels
-    plotter.AddLabels("Frequency [MHz]", "lg Power",label);
+    plotter.AddLabels("Frequency [MHz]", "lg Amplitude",label);
 
     // Plot FFT
     plotter.PlotLine(xaxis,yValues,color,1);
   } catch (AipsError x) 
   {
-    cerr << "calculatePhaseBehaviour:plotEvent: " << x.getMesg() << endl;
+    cerr << "calculatePhaseBehaviour:plotFFT: " << x.getMesg() << endl;
   }
+}
+
+
+/*!
+  \brief searches the frequency index for a peak in a spectrum
+         If no stopFreq is given or if stopFreq is <= starFreq,
+         then it returns the first frequency index after startFreq.
+
+  \param spectrum     -- spectrum (FFT) of one antenna
+  \param frequencies  -- frequency axis
+  \param startFreq    -- start of frequency interval
+  \param stopFreq     -- stop of frequency interval
+
+  \return peakIndex   -- frequency index of peak
+*/
+
+
+unsigned int getPeakPos(const Vector<DComplex> &spectrum,
+                        const Vector<double> &frequencies,
+                        const double startFreq,
+                        const double stopFreq = 0.)
+{
+  unsigned int peakIndex = 0;		// return value
+  try 
+  {
+    unsigned int maxIndex = frequencies.nelements(); // maximum frequency possible
+
+    // look for first frequency after the begin of the frequency range
+    while (frequencies(peakIndex) < startFreq)
+    {
+      peakIndex++;
+      if (peakIndex >= maxIndex) 	// check if frequency is out of range
+      {
+	cerr << "calculatePhaseBehaviour:getPeakPos: " << "startFreq is out of range!" << endl;
+	return 0;
+      }
+    }
+
+    // if this frequency is already greater or equal than the end of the frequency range,
+    // then take it is automatically taken, 
+    // otherwise it searches for the peak (= frequency with maximal amplitude)
+
+    unsigned int freq = peakIndex;	// frequency index to loop through frequency range
+
+    // loop through all frequency values in the given interval
+    // (only if current frequency is not allready greater then stopFreq)
+    while (frequencies(freq) < stopFreq)
+    {
+      // look if current amplitude is large then the last one
+      if ( abs(spectrum(freq)) > abs(spectrum(peakIndex)) ) 
+      {
+        peakIndex = freq;
+      }
+
+      // increase frequency
+      freq++;
+      if (freq > maxIndex) 	// check if frequency is out of range
+      {
+	return peakIndex;
+      }
+    }
+  } catch (AipsError x) 
+  {
+      cerr << "calculatePhaseBehaviour:getPeakPos: " << x.getMesg() << endl;
+  } 
+
+  return peakIndex;
+}
+
+
+/*!
+  \brief reduces phase to -180° - +180°
+
+  \param phase         -- input phase
+
+  \return reducedPhase -- output phase
+*/
+
+
+double reducePhase(double phase)
+{
+  double reducedPhase = phase;
+  while (reducedPhase < -180) reducedPhase += 180;
+  while (reducedPhase >  180) reducedPhase -= 180;
+  return reducedPhase;
 }
 
 
@@ -462,9 +648,10 @@ int calibratedAntenna(DataReader &dr)
     for (unsigned int i=0; i < FFTpower.ncolumn(); i++)
       for (unsigned int j=0; j < FFTpower.nrow(); j++)
         FFTpower(j,i) = pow( abs(dataFFT(j,i)), 2);
+	// remark: correctly the power is not abs(FFT)^2
+        //         , but abs(FFT(fieldstrengt^2))
 
     // variables for interval creation 
-    const double peakWidth  = 20e3;		// peak width <= 20 kHz
     const double noiseWidth = 400e3;		// peak width <= 400 kHz
     int startsample, stopsample;
     Slice peakInterval, noiseInterval;
@@ -580,7 +767,45 @@ void analyseEvent(const string &eventName)
         plotPrefix.erase(0,plotPrefix.find_last_of('/')+1);
 
     // Plot FX and FFT
-    plotEvent(dr, plotPrefix, antenna);
+    //plotTrace(dr, plotPrefix, antenna);
+    //plotFFT(dr, plotPrefix, antenna);
+
+    // calculate phases
+    Vector<DComplex> spectrum = dr.fft().column(antenna-1).copy();
+    Vector<Double> phases = phase(dr.fft().column(antenna-1));
+    Vector<Double> frequencies = dr.frequencyValues().copy();
+
+    // Store Phases of 41 comb frequencies
+    Vector<Double> combPhases(41,0);
+    Vector<Double> phaseDiffs(41,0);
+    Vector<Double> neighbourDiffs(41,0);
+    double freq = 0;
+    double freqIndex = 0;
+
+    // Phase of reference frequency
+    double referencePhase 
+      = phases(getPeakPos(spectrum, frequencies, 60e6-peakWidth, 60e6+peakWidth))*180/3.1415926;		
+
+    // loop through frequencies
+    for (int i = 0; i <= 40; i++)
+    {
+      // calculate frequency and frequency index
+      freq = i*1e6 + 40e6;
+      freqIndex = getPeakPos(spectrum, frequencies, freq-peakWidth, freq+peakWidth);
+      //cout << "Frequency: " << frequencies(freqIndex)/1e6 << endl;
+
+      // calculate phases
+      combPhases(i) = phases(freqIndex)*180/3.1415926;
+      phaseDiffs(i) = reducePhase(combPhases(i) - referencePhase);
+      if (i>0) neighbourDiffs(i) = reducePhase(combPhases(i)-combPhases(i-1));
+    }
+
+    // calculate phase differences
+    referencePhase = combPhases(20);
+    phaseDiffs = combPhases - referencePhase;
+    cout << "combPhases :\n" << combPhases << endl;
+    cout << "PhaseDiffs :\n" << phaseDiffs << endl;
+    cout << "neighbourDiffs :\n" << neighbourDiffs << endl;
 
   } catch (AipsError x) 
   {
