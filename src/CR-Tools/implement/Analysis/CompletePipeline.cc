@@ -101,18 +101,51 @@ namespace CR { // Namespace CR -- begin
   //  Parameters
   //
   // ============================================================================
-  
+
   void CompletePipeline::summary (std::ostream &os)
   {;}
-  
-  
-  
+
+
   // ============================================================================
   //
   //  Methods
   //
   // ============================================================================
-  
+
+  Vector<double> CompletePipeline::envelope(const Vector<double> &trace) const
+  {
+    Vector<double> envelope(trace.size(),0);	// create vector to return envelope
+
+    try 
+    {
+      // get length of trace
+      unsigned int tracelength = trace.size();
+
+      // allocate memory for the trace
+      float* envelopeTrace = new float[tracelength];
+
+      // copy the trace into the array
+      for (unsigned int i = 0; i < tracelength; i++) 
+        envelopeTrace[i] = trace(i);
+
+      // do envelope calculation (given trace will be overwritten!)
+      RectifierHilbert(tracelength, envelopeTrace);
+
+      // copy envelope from array to Vector
+      for (unsigned int i = 0; i < tracelength; i++)
+        envelope(i) = envelopeTrace[i];
+
+      // delete arrays
+      delete[] envelopeTrace;
+
+    } catch (AipsError x) 
+    {
+        std::cerr << "CompletePipeline:envelope: " << x.getMesg() << std::endl;
+    }
+
+    return envelope;
+  }
+
 
   void CompletePipeline::deselectectPolarization(DataReader *dr,
                                                  Vector<Bool> &antennaSelection)

@@ -245,6 +245,16 @@ namespace CR { // Namespace CR -- begin
 
  
     /*!
+      \brief Caclulates an envelope (uses the LOPES-Star library)
+
+      \param trace            -- any trace to calculate the envelope
+
+      \return envelope        -- envelope of the given trace (has the same lenght)
+   */
+    Vector<double> envelope(const Vector<double> &trace) const;
+
+
+    /*!
       \brief Deselects all antennas which do not have the analysed polarization
 
       \param DataReader       -- DataReader (LopesEventIn)
