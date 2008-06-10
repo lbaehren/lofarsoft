@@ -34,6 +34,7 @@
 #include <boost/python/extract.hpp>
 
 #include <Coordinates/TimeFreq.h>
+#include <Data/LOFAR_DipoleDataset.h>
 #include <IO/DataIterator.h>
 #include <IO/DataReader.h>
 #include <Math/HanningFilter.h>
@@ -43,6 +44,7 @@ namespace bpl = boost::python;
 using CR::DataIterator;
 using CR::DataReader;
 using CR::TimeFreq;
+using DAL::LOFAR_DipoleDataset;
 
 BOOST_PYTHON_MODULE (pycr)
 {
@@ -143,10 +145,15 @@ BOOST_PYTHON_MODULE (pycr)
     .def("setBlocksize", setBlocksize1)
     .def("setBlocksize", setBlocksize2)
     .def("setBlocksize", setBlocksize3)
+    .def("nofStreams", &DataReader::nofStreams)
+    .def("fftLength", &DataReader::fftLength)
     .def("nofAntennas", &DataReader::nofAntennas)
     .def("nofSelectedAntennas", &DataReader::nofSelectedAntennas)
     .def("block", &DataReader::block)
     .def("setBlock", &DataReader::setBlock)
+    .def("setStartBlock", &DataReader::setStartBlock)
+    .def("stride", &DataReader::stride)
+    .def("setStride", &DataReader::setStride)
     .def("shift", &DataReader::shift)
     .def("setShift", &DataReader::setShift)
     .def("nextBlock", &DataReader::nextBlock)
@@ -155,15 +162,21 @@ BOOST_PYTHON_MODULE (pycr)
   
   // ============================================================================
   //
+  //  implement/Data
+  //
+  // ============================================================================
+
+//   bpl::class_<LOFAR_DipoleDataset>("LOFAR_DipoleDataset")
+//     .def(bpl::init<>())
+//     .def(bpl::init<std::string,std::string>())
+//     ;
+
+  // ============================================================================
+  //
   //  implement/Math
   //
   // ============================================================================
 
-//   bpl::class_<HanningFilter>("HanningFilter")
-//     .def(bpl::init<>())
-//     .def(bpl::init<unsigned int>())
-//     ;
-  
   // ============================================================================
   //
   //  implement/Utilities

@@ -33,6 +33,7 @@
 #include <casa/Quanta/MVTime.h>
 #include <casa/Quanta/MVPosition.h>
 #include <measures/Measures/MEpoch.h>
+#include <measures/Measures/MFrequency.h>
 #include <measures/Measures/MeasFrame.h>
 #include <measures/Measures/MDirection.h>
 #include <measures/Measures/MPosition.h>
@@ -165,6 +166,52 @@ int test_MEpoch ()
     nofFailedTests++;
   }
 
+  return nofFailedTests;
+}
+
+// ------------------------------------------------------------------------------
+
+/*!
+  \brief Test of measure storing wave characteristics.
+
+  \return nofFailedTests -- The number of failed tests
+*/
+int test_MFrequency ()
+{
+  cout << "\n[test_MFrequency]\n" << endl;
+
+  int nofFailedTests (0);
+  
+  cout << "[1] An oberved HI frequency of 1380 MHz ..." << endl;
+  try {
+    casa::MFrequency freq ( casa::Quantity(1380., "MHz"),
+			    casa::MFrequency::TOPO);
+    //
+    cout << "-- MFrequency          = " << freq << endl;
+    cout << "-- Type as register    = " << freq.myType() << endl;
+    cout << "-- Type reference code = " << freq.showType (freq.myType()) << endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  cout << "[2] Construct from Quantity ..." << endl;
+  try {
+    double freqValue            = 1380;
+    casa::String freqUnit       = "MHz";
+    casa::Quantity freqQuantity = casa::Quantity (freqValue,freqUnit);
+    casa::MFrequency freq       = casa::MFrequency (freqQuantity,
+						    casa::MFrequency::TOPO);
+    //
+    cout << "-- Quantity            = " << freqQuantity << endl;
+    cout << "-- MFrequency          = " << freq         << endl;
+    cout << "-- Type as register    = " << freq.myType() << endl;
+    cout << "-- Type reference code = " << freq.showType (freq.myType()) << endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
   return nofFailedTests;
 }
 
@@ -346,6 +393,7 @@ int main ()
   nofFailedTests += test_MVAngle ();
   nofFailedTests += test_MVTime ();
   nofFailedTests += test_MEpoch ();
+  nofFailedTests += test_MFrequency ();
   nofFailedTests += test_MPosition ();
   nofFailedTests += test_MDirection ();
   

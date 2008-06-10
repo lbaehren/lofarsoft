@@ -37,7 +37,7 @@ if (HAVE_CASACORE AND NOT HAVE_CASA)
 
 if (DAL_LIBRARIES AND HDF5_LIBRARIES)
   
-  find_file (tbb_dataset tbb_test_file_v1_0.h5
+  find_file (tbb_dataset tbb_test_file_v1_1.h5
     PATHS
     ${CR_SOURCE_DIR}/data
     ${CR_SOURCE_DIR}/../data

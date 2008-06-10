@@ -30,6 +30,7 @@
 #include <casa/Arrays/Vector.h>
 #include <casa/Quanta/Quantum.h>
 #include <casa/Containers/Record.h>
+#include <measures/Measures/MFrequency.h>
 
 #ifndef HDF5COMMON_H
 #include <dal/HDF5Common.h>
@@ -232,7 +233,7 @@ namespace DAL { // Namespace DAL -- begin
 
       \return freq -- The ADC sample frequency, as CASA Quantity
     */
-    casa::Quantity sample_frequency ();
+    casa::MFrequency sample_frequency ();
 
     /*!
       \brief Get the Nyquist zone in which the ADC is performed

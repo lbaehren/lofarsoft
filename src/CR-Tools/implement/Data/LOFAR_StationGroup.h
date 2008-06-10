@@ -70,11 +70,6 @@ namespace DAL { // Namespace DAL -- begin
       \verbatim
       /
       |-- Station001                    ... Group
-      |   |-- TELESCOPE                 ... Attribute       ... string
-      |   |-- OBSERVER                  ... Attribute       ... string
-      |   |-- PROJECT                   ... Attribute       ... string
-      |   |-- OBSERVATION_ID            ... Attribute       ... string
-      |   |-- OBSERVATION_MODE          ... Attribute       ... string
       |   |-- TRIGGER_TYPE              ... Attribute       ... string
       |   |-- TRIGGER_OFFSET            ... Attribute       ... string
       |   |-- TRIGGERED_ANTENNAS        ... Attribute       ... array<int,1>

@@ -33,6 +33,10 @@ using std::endl;
 
 using DAL::LOFAR_DipoleDataset;
 
+const std::string name_station = "Station001";
+const std::string name_dataset = "001003030";
+const std::string path_dataset = "Station001/001003030";
+
 /*!
   \file tLOFAR_DipoleDataset.cc
 
@@ -99,7 +103,7 @@ int test_construction (std::string const &filename)
   cout << "[2] Testing argumented constructor ..." << endl;
   try {
     LOFAR_DipoleDataset dataset (filename,
-				 "Station001/001000000");
+				 path_dataset);
     //
     dataset.summary(); 
   } catch (std::string message) {
@@ -121,7 +125,7 @@ int test_construction (std::string const &filename)
 
     if (file_id > 0) {
       LOFAR_DipoleDataset dataset (file_id,
-				   "Station001/001000000");
+				   path_dataset);
       dataset.summary();
       h5error = H5Fclose (file_id);
     } else {
@@ -149,12 +153,12 @@ int test_construction (std::string const &filename)
     if (file_id > 0) {
       // open group within which the dataset is located
       hid_t group_id = H5Gopen (file_id,
-				"Station001");
+				name_station.c_str());
       
       if (group_id > 0) {
 	// create new object
 	LOFAR_DipoleDataset dataset (group_id,
-				     "001000000");
+				     name_dataset);
 	// provide summary of object's properties
 	dataset.summary(); 
 	// release group ID
@@ -192,7 +196,7 @@ int test_construction (std::string const &filename)
     if (file_id > 0) {
       // open dataset within which the dataset is located
       hid_t dataset_id = H5Dopen (file_id,
-				"Station001/001000000");
+				  path_dataset.c_str());
       
       if (dataset_id > 0) {
 	// create new object
@@ -227,7 +231,7 @@ int test_construction (std::string const &filename)
   try {
     cout << "-- creating original object ..." << endl;
     LOFAR_DipoleDataset dataset (filename,
- 				 "Station001/001000000");
+ 				 path_dataset);
     dataset.summary();
     //
     cout << "-- creating new object as copy ..." << endl;
@@ -272,11 +276,7 @@ int test_datasets (std::string const &filename)
   std::vector<std::string> dataset_names;
   uint nofDatasets (0);
 
-  dataset_names.push_back ("Station001/001000000");
-  dataset_names.push_back ("Station001/001000001");
-  dataset_names.push_back ("Station001/001000002");
-  dataset_names.push_back ("Station001/001000003");
-  dataset_names.push_back ("Station001/001000004");
+  dataset_names.push_back (path_dataset);
 
   nofDatasets = dataset_names.size();
 
@@ -434,7 +434,7 @@ int test_parameters (std::string const &filename)
 
   // create object to use for the subsequent tests
   LOFAR_DipoleDataset dataset (filename,
-			       "Station001/001000000");
+			       path_dataset);
 
   cout << "[1] Retrieve object parameters ..." << endl;
   try {
@@ -510,7 +510,7 @@ int test_data (std::string const &filename)
 
   // open dataset
   LOFAR_DipoleDataset dataset (filename,
-			       "Station001/001000001");
+			       path_dataset);
   
   std::cout << "[1] Retrieve data via pointer to array ..." << std::endl;
   try {
@@ -601,7 +601,7 @@ int test_export2record (std::string const &filename)
   try {
     // open dataset
     LOFAR_DipoleDataset dataset (filename,
-				 "Station001/001000001");
+				 path_dataset);
     // retrieve attributes into record
     casa::Record record = dataset.attributes2record ();
     // feedback
@@ -616,14 +616,14 @@ int test_export2record (std::string const &filename)
   try {
     // open datasets from which to extract records
     LOFAR_DipoleDataset dataset1 (filename,
-				  "Station001/001000001");
+				  path_dataset);
     LOFAR_DipoleDataset dataset2 (filename,
-				  "Station001/001000002");
+				  path_dataset);
     // description of the record's structure
     casa::RecordDesc descriptionRecord;
     casa::RecordDesc descriptionSubRecord = dataset1.recordDescription();
-    descriptionRecord.addField ("001000001",descriptionSubRecord);
-    descriptionRecord.addField ("001000002",descriptionSubRecord);
+    descriptionRecord.addField ("000000001",descriptionSubRecord);
+    descriptionRecord.addField ("000000002",descriptionSubRecord);
     // create the record
     casa::Record record(descriptionRecord);
     // feedback

@@ -161,7 +161,7 @@ namespace DAL { // Namespace DAL -- begin
   void LOFAR_DipoleDataset::summary (std::ostream &os)
   {
     os << "[LOFAR_DipoleDataset::summary]"   << endl;
-    os << "-- Dataset ID          = " << datasetID_p  << endl;
+    os << "-- Dataset ID             = " << datasetID_p  << endl;
   
     if (datasetID_p) {
       /*
@@ -169,25 +169,25 @@ namespace DAL { // Namespace DAL -- begin
        * be able to retrieve the number of attributes attached to it.
        */
       int nofAttributes = H5Aget_num_attrs (datasetID_p);
-
-      os << "-- nof. attributes     = " << nofAttributes         << endl;
+      
+      os << "-- nof. attributes        = " << nofAttributes         << endl;
 
       if (nofAttributes < 0) {
 	os << "--> Illegal number of attached attributes!" << endl;
       } else {
-	os << "-- STATION_ID          = " << station_id()          << endl;
-	os << "-- RSP_ID              = " << rsp_id()              << endl;
-	os << "-- RCU_ID              = " << rcu_id()              << endl;
-	os << "-- CHANNEL_ID          = " << channelName()         << endl;
+	os << "-- STATION_ID             = " << station_id()             << endl;
+	os << "-- RSP_ID                 = " << rsp_id()                 << endl;
+	os << "-- RCU_ID                 = " << rcu_id()                 << endl;
+	os << "-- CHANNEL_ID             = " << channelName()            << endl;
 	os << "-- SAMPLE_FREQUENCY_VALUE = " << sample_frequency_value() << endl;
 	os << "-- SAMPLE_FREQUENCY_UNIT  = " << sample_frequency_unit()  << endl;
-	os << "-- NYQUIST_ZONE        = " << nyquist_zone()        << endl;
-	os << "-- TIME [Unix seconds] = " << time()                << endl;
-	os << "-- TIME [  Julian Day] = " << julianDay()           << endl;
-	os << "-- SAMPLE_NUMBER       = " << sample_number()       << endl;
-	os << "-- SAMPLES_PER_FRAME   = " << samples_per_frame()   << endl;
-	os << "-- FEED                = " << feed()                << endl;
-	os << "-- DATA_LENGTH         = " << data_length()         << endl;
+	os << "-- NYQUIST_ZONE           = " << nyquist_zone()           << endl;
+	os << "-- TIME [Unix seconds]    = " << time()                   << endl;
+	os << "-- TIME [  Julian Day]    = " << julianDay()              << endl;
+	os << "-- SAMPLE_NUMBER          = " << sample_number()          << endl;
+	os << "-- SAMPLES_PER_FRAME      = " << samples_per_frame()      << endl;
+	os << "-- FEED                   = " << feed()                   << endl;
+	os << "-- DATA_LENGTH            = " << data_length()            << endl;
       }
     }
   }
@@ -339,16 +339,18 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------------- sample_frequency
   
-  casa::Quantity LOFAR_DipoleDataset::sample_frequency ()
+  casa::MFrequency LOFAR_DipoleDataset::sample_frequency ()
   {
     if (datasetID_p > 0) {
-      return DAL::h5get_quantity (DAL::SAMPLE_FREQUENCY_VALUE,
-				  DAL::SAMPLE_FREQUENCY_UNIT,
-				  datasetID_p);
+      casa::Quantity qFreq = DAL::h5get_quantity (DAL::SAMPLE_FREQUENCY_VALUE,
+						  DAL::SAMPLE_FREQUENCY_UNIT,
+						  datasetID_p);
+      return casa::MFrequency (qFreq,
+			       casa::MFrequency::TOPO);
     } else {
       cerr << "[LOFAR_DipoleDataset::sample_frequency] Dataset undefined!"
 	   << endl;
-      return casa::Quantity();
+      return casa::MFrequency();
     }
   }
   
