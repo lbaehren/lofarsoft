@@ -51,19 +51,21 @@ using CR::CalTableReader;
 */
 
 // define constants for the start date of LOPES 10 and LOPES 30
-const unsigned int LOPES10_start = 978350400;
-const unsigned int LOPES30_start = 1104580800;
+// date conversion can be done with:
+// date -u -d '1970-01-01 978350400 seconds'
+const unsigned int LOPES10_start = 978350400; // Mo Jan  1 12:00:00 UTC 2001
+const unsigned int LOPES30_start = 1104580800; //Sa Jan  1 12:00:00 UTC 2005 
 // Dual polarization setup
-const unsigned int LOPES_pol_start =  1165574694;
+const unsigned int LOPES_pol_start =  1165574694; // Fr Dez  8 10:44:54 UTC 2006
 // Delay measurement of 26. / 27.04.2007
-const unsigned int delay_apr_07_start = 1158142580;
+const unsigned int delay_apr_07_start = 1158142580; // Mi Sep 13 10:16:20 UTC 2006
 // Delay measurement of 04.09.2007
-const unsigned int delay_sep_07_start = 1184241600;
+const unsigned int delay_sep_07_start = 1184241600; // Do Jul 12 12:00:00 UTC 2007
 // Delay measurement of 27.11.2007
-const unsigned int delay_nov_07_start = 1189171000;
+const unsigned int delay_nov_07_start = 1189171000; //Fr Sep  7 13:16:40 UTC 2007 
 
-// Feb. 2008 begin of 63.5 and 68.1 MHz Phase Reference signal
-const unsigned int roof_setup_2_freq_start = 1202479000;	
+// Start of 63.5 and 68.1 MHz Phase Reference signal
+const unsigned int roof_setup_2_freq_start = 1202479000; // Fr Feb  8 13:56:40 UTC 2008
 
 // define antenna IDs
 const int MAX_Antennas = 30;
@@ -403,7 +405,7 @@ void writeRefPhases(void)
   PhaseRefPhases(9,0)  = 101.4	;	  PhaseRefPhases(9,1)  = 154.7	;
   PhaseRefPhases(10,0) = -116.2	;	  PhaseRefPhases(10,1) = 102.9	;
   PhaseRefPhases(11,0) = 61.83	;	  PhaseRefPhases(11,1) = 70.08	;
-  PhaseRefPhases(12,0) = -51.19	;	  PhaseRefPhases(12,1) = -135.8	;
+  PhaseRefPhases(12,0) = -83.45	;	  PhaseRefPhases(12,1) = -135.8	;
   PhaseRefPhases(13,0) = -2.295	;	  PhaseRefPhases(13,1) = -45.93	;
   PhaseRefPhases(14,0) = 164.8	;	  PhaseRefPhases(14,1) = 37.24	;
   PhaseRefPhases(15,0) = 41.63	;	  PhaseRefPhases(15,1) = 63.69	;
