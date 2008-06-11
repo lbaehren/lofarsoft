@@ -26,16 +26,13 @@
 
 #include <dal/Enumerations.h>
 #include <Data/LOFAR_DipoleDataset.h>
+#include "test_common.h"
 
 using std::cerr;
 using std::cout;
 using std::endl;
 
 using DAL::LOFAR_DipoleDataset;
-
-const std::string name_station = "Station001";
-const std::string name_dataset = "001003030";
-const std::string path_dataset = "Station001/001003030";
 
 /*!
   \file tLOFAR_DipoleDataset.cc

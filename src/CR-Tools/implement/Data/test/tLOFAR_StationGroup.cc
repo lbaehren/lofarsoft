@@ -30,6 +30,7 @@
 
 #include <Data/LOFAR_StationGroup.h>
 #include <Utilities/StringTools.h>
+#include "test_common.h"
 
 // Namespace usage
 using std::cerr;
@@ -89,7 +90,7 @@ int test_datasets (std::string const &filename)
     
     cout << "-- opening HDF5 group ..." << endl;
     groupID = H5Gopen (fileID,
-		       "Station001");
+		       name_station.c_str());
     
     if (groupID > 0) {
       hsize_t nofObjects;
@@ -181,7 +182,7 @@ int test_construction (std::string const &filename)
   cout << "[2] Testing argumented constructor ..." << endl;
   try {
     LOFAR_StationGroup group (filename,
-			      "Station001");
+			      name_station);
     //
     group.summary(); 
   } catch (std::string message) {
@@ -199,7 +200,7 @@ int test_construction (std::string const &filename)
   try {    
     if (file_id > 0) {
       LOFAR_StationGroup group (file_id,
-				"Station001");
+				name_station);
       group.summary(); 
     } else {
       cerr << "--> Unable to perform test; invalid file ID!" << endl;
@@ -220,7 +221,7 @@ int test_construction (std::string const &filename)
     if (file_id > 0) {
       // retrieve the group ID 
       hid_t groupID = H5Gopen (file_id,
-			       "Station001");
+			       name_station.c_str());
       // contiue if group successfully opened
       if (groupID > 0) {
 	// feedback
@@ -248,7 +249,7 @@ int test_construction (std::string const &filename)
   try {
     cout << "--> creating original object ..." << endl;
     LOFAR_StationGroup group (filename,
-			      "Station001");
+			      name_station);
     group.summary();
     //
     cout << "--> creating new object as copy ..." << endl;
@@ -344,7 +345,7 @@ int test_methods (std::string const &filename)
   int nofFailedTests (0);
 
   // create LOFAR_StationGroup object to continue working with
-  LOFAR_StationGroup group (filename,"Station001");
+  LOFAR_StationGroup group (filename,name_station);
   
   cout << "[1] Retrieve list of UNIX times ..." << endl;
   try {
@@ -409,7 +410,7 @@ int test_data (std::string const &filename)
   cout << "\n[test_data]\n" << endl;
 
   int nofFailedTests (0);
-  LOFAR_StationGroup group (filename,"Station001");
+  LOFAR_StationGroup group (filename,name_station);
   int start (0);
   int blocksize (1024);
 

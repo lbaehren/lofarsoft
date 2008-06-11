@@ -34,34 +34,38 @@ endforeach (src)
 ## Build the test programs working with the Data Access Library (DAL)
 
 if (HAVE_CASACORE AND NOT HAVE_CASA)
-
-if (DAL_LIBRARIES AND HDF5_LIBRARIES)
   
-  find_file (tbb_dataset tbb_test_file_v1_1.h5
-    PATHS
-    ${CR_SOURCE_DIR}/data
-    ${CR_SOURCE_DIR}/../data
-    ${CR_SOURCE_DIR}/../../data
-    )
-  
-  foreach (src tLOFAR_StationGroup tLOFAR_DipoleDataset tLOFAR_Timeseries tLOFAR_TBB) 
-    ## compiler instructions
-    add_executable (${src} ${src}.cc)
-    ## linker instructions
-    target_link_libraries (${src}
-      cr
-      ${DAL_LIBRARIES}
-      ${HDF5_LIBRARIES}
+  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    
+    find_file (tbb_dataset tbb_test_file_v1_1.h5
+      PATHS
+      ${CR_SOURCE_DIR}/data
+      ${CR_SOURCE_DIR}/../data
+      ${CR_SOURCE_DIR}/../../data
       )
-    ## testing
-    if (tbb_dataset)
-      add_test (${src} ${src} ${tbb_dataset})
-    else (tbb_dataset)
-      message (STATUS "Unable to run test ${src}; missing input data file.")
-    endif (tbb_dataset)
-  endforeach (src)
-
-endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    
+    foreach (src
+	tLOFAR_StationGroup
+	tLOFAR_DipoleDataset
+	tLOFAR_Timeseries tLOFAR_TBB
+	) 
+      ## compiler instructions
+      add_executable (${src} ${src}.cc)
+      ## linker instructions
+      target_link_libraries (${src}
+	cr
+	${DAL_LIBRARIES}
+	${HDF5_LIBRARIES}
+	)
+      ## testing
+      if (tbb_dataset)
+	add_test (${src} ${src} ${tbb_dataset})
+      else (tbb_dataset)
+	message (STATUS "Unable to run test ${src}; missing input data file.")
+      endif (tbb_dataset)
+    endforeach (src)
+    
+  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
   
 endif (HAVE_CASACORE AND NOT HAVE_CASA)
 
@@ -73,4 +77,4 @@ install (
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
-)
+  )
