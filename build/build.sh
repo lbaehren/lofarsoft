@@ -250,6 +250,7 @@ case $param_packageName in
     casacore)
 		echo "[`date`] Selected package CASACORE"
 		## -- build required packages
+		./build.sh cmake
 		./build.sh wcslib $param_reportBuild
 		./build.sh cfitsio $param_reportBuild
 		./build.sh hdf5 $param_reportBuild
