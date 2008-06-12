@@ -48,26 +48,26 @@ using CR::CalTableReader;
   The PhaseCal values are complex numbers, one for each frequency.
   The absolute of the values is 1, thus there is no amplitude corretion done.
 
-  Idea: Use the same measurements as for the amplitude calibration.
+  First Idea: Use the same measurements as for the amplitude calibration.
   This data contain pulses consisting of combinded sine waves with 1 MHz spacing.
   - Apply digital filter to each frequency
   - Determine the position of the pulse
+  --> This idea did not work, as there is no pulse left after applying a filter
+      with a small band width
+
+  Second Idea: Use measurement of the phases of the LOPES filter box.
 
   <h3>Usage</h3>
   \verbatim
-  ./calculatePhaseBehaviour [eventfile]
+  ./calculatePhaseBehaviour [file]
   \endverbatim
   
   <ul>
-    <li> eventfile - Lopes event file (if not supplied, current PhaseCalValues are read from CalTables).
+    <li> file - file containing phases (if not supplied, current PhaseCalValues are read from CalTables).
   </ul>
    
   <h3>Examples</h3>
-  ./calculatePhaseBehaviour example.event
-
-  <h3>Physics</h3>
-  Method does not work. As the pulse disappears after filterin (there is only a sinus left).
-  Even phase differences vary from event to event.
+  ./calculatePhaseBehaviour phase_measurement.dat
 
 
   \verbatim
@@ -178,7 +178,6 @@ void readCalTableValues(void)
   }
 
 }
-
 
 
 /*!
@@ -613,8 +612,8 @@ unsigned int getPeakPos(const Vector<DComplex> &spectrum,
 double reducePhase(double phase)
 {
   double reducedPhase = phase;
-  while (reducedPhase < -180) reducedPhase += 180;
-  while (reducedPhase >  180) reducedPhase -= 180;
+  while (reducedPhase < -180) reducedPhase += 360;
+  while (reducedPhase >  180) reducedPhase -= 360;
   return reducedPhase;
 }
 
@@ -811,20 +810,210 @@ void analyseEvent(const string &eventName)
   {
     cerr << "calculatePhaseBehaviour:analyseEvent: " << x.getMesg() << endl;
   }
-
 }
+
+
+// Functions for second ides
+// -------------------------------------------------------------------
+
+/*!
+  \brief plots the phase
+
+  \param frequencies  -- frequency axis
+  \param phases       -- phase values
+  \param PlotPrefix   -- Base of filename
+*/
+
+void plotPhase(Vector<double> frequencies, const Vector<double> phases, const string &PlotPrefix)
+{
+  try
+  {
+    SimplePlot plotter;    			// define plotter
+    double xmax,xmin,ymin=0,ymax=0;		// Plotrange
+    int color = 9;				// starting color
+
+    // Create empty vector for not existing error bars 
+    Vector<Double> empty;
+
+    // check length of frequency axis and phase valuse
+    if (frequencies.size() != phases.size())
+      std::cerr << " WARNING: Length of frequency axis differs from length of the FFT!\n" << std::endl;
+
+    // convert frequencies to MHz
+    frequencies /= 1e6;
+
+    // define Plotrange
+    xmin = min(frequencies);
+    xmax = max(frequencies);
+
+    // find the minimal and maximal y values for the plot and take 105% to have some space
+    ymin = min(phases) * 1.05;
+    ymax = max(phases) * 1.05;
+
+
+    // create the plot filename
+    string plotfilename = PlotPrefix + ".ps";
+
+    cout << "Plotfilename: " << plotfilename << endl;
+
+    string label = "Phases";
+
+
+    // Make the plot
+
+    // Initialize the plot giving xmin, xmax, ymin and ymax
+    plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
+
+    // Add labels
+    plotter.AddLabels("Frequency [MHz]", "Phase [degree]",label);
+
+    // Plot FFT
+    plotter.PlotLine(frequencies,phases,color,1);
+  } catch (AipsError x) 
+  {
+    cerr << "calculatePhaseBehaviour:plotPhase: " << x.getMesg() << endl;
+  }
+}
+
+
+/*!
+  \brief reads and processes a file which contains phase measurements
+
+  \param filename      -- name of phase file
+  \param antenna       -- antenna number
+*/
+
+
+void readPhaseFile(const string &filename, const int antenna)
+{
+  try
+  {
+    const int startfreq = 4e7;
+    const int stopfreq = 8e7;
+
+    // vectors to store measurements
+    vector<double> frequencies;
+    vector<double> phases;
+
+     // open phase file
+    ifstream phasefile;
+    phasefile.open (filename.c_str(), ifstream::in);
+
+    // check if file could be opened
+    if (!(phasefile.is_open()))
+    {
+      std::cerr << "Failed to open file \"" << filename <<"\"." << std::endl;
+      return;		// exit
+    }
+
+    cout << "\nReading file: " << endl;
+    // look for the beginnig of the data (after a line containing only and at least three '-' or '='	
+    string temp_read;
+    bool data_found = false;
+    while ((data_found == false) && (phasefile.good()))
+    {
+      phasefile >> temp_read;
+      if (temp_read.find("Imag\"") != string::npos)	// header ends with: Imag"
+      {
+        data_found = true;
+      }
+    }
+
+    // exit program if no data are found	
+    if (data_found == false)
+    {
+      phasefile.close();  // close file
+      std::cerr << "Failure while reading file \"" << filename <<"\":\n" ;
+      std::cerr << "Wrong format! Please use a file containing phase measurements" << endl;
+      return;           // exit
+    }
+
+    //cout << "\nBeginning to read values:" << endl;
+    //cout << "Frequency \t Phase" << endl;
+
+    // Process events from event file list
+    while (phasefile.good())
+    {	
+      double frequency = -1, phase = -1, imag_part = -1;
+      bool read_in_error = false;
+
+      // read in frequencies, phases, and imaginary part	
+      if (phasefile.good()) phasefile >> frequency;
+        else read_in_error = true;
+      if (phasefile.good()) phasefile >> phase;
+        else read_in_error = true;	
+      if (phasefile.good()) phasefile >> imag_part;
+        else read_in_error = true;	
+
+      // check if end of file occured:
+      // imag_part should be -1, if file is terminated be a new line
+      if (imag_part == -1) continue;	// go back to begin of while-loop 
+                                        // phasefile.good() should be false now.
+
+      // normally imag_part should be 0, else show a warning
+      if (imag_part != 0)
+        std::cerr << "Warning: Imaginary part of the phase is not zero!" << endl;
+
+      // exit program if error occured
+      if (read_in_error)		
+      {
+        phasefile.close();  // close file
+        std::cerr << "Failure while reading file \"" << filename <<"\":\n" ;
+        std::cerr << "Wrong format! Please use a file containing phase measurements" << endl;
+        return;           // exit
+      }
+
+      // store values in the range between startfreq and stopfreq
+      if ( (frequency >= startfreq) && (frequency <= stopfreq) )
+      {
+        frequencies.push_back(frequency);
+        phases.push_back(phase);
+        //cout << frequency << "   \t" << phase << endl;
+      }
+    } // while
+
+    // close file
+    phasefile.close();
+
+    // remove delay: periods to remove = delay * frequency
+    double delay = antenna*1e-9;
+    for (unsigned int i = 0; i < phases.size(); i++)
+    {
+      phases[i] = reducePhase(phases[i] + delay*frequencies[i] * 360);
+    }
+
+    // create plot prefix
+    string plotPrefix = filename;
+
+    // delete ending
+    if (plotPrefix.find(".dat") != string::npos)
+        plotPrefix.erase(plotPrefix.find_last_of('.'));	
+    // delete the file path, if it exists	
+    if (plotPrefix.find("/") != string::npos)
+        plotPrefix.erase(0,plotPrefix.find_last_of('/')+1);
+
+    // plot data
+    plotPhase(frequencies, phases, plotPrefix);
+
+  } catch (AipsError x) 
+  {
+      cerr << "calculatePhaseBehaviour:readPhaseFile " << x.getMesg() << endl;
+  }
+}
+
+
 
 int main (int argc, char *argv[])
 {
   try
   {
     // Check correct number of arguments (1 + program name = 2)
-    if (argc > 2)
+    if ((argc != 1) && (argc !=2) && (argc !=3))
     {
       std::cerr << "Wrong number of arguments in call of \"calculatePhaseBehaviour\". The correct format is:\n";
-      std::cerr << "calculatePhaseBehaviour [eventfile]\n";
+      std::cerr << "calculatePhaseBehaviour [file] [antenna]\n";
       std::cerr << "for example:\n";
-      std::cerr << "./calculatePhaseBehaviour example.event\n" << std::endl;
+      std::cerr << "./calculatePhaseBehaviour file.dat 1\n" << std::endl;
       return 1;				// Exit the program
     }
 
@@ -835,13 +1024,27 @@ int main (int argc, char *argv[])
       return 0;
     }
 
-    // assign the arguments (event filename)
-    string eventfile(argv[1]);
+    // assign the arguments (filename and antenna)
+    string filename(argv[1]);
 
-    // process event
-    analyseEvent(eventfile);
+    // process event (for first idea, which does not work)
+    if (argc == 2)
+    {
+      analyseEvent(filename);
+      return 0;
+    }
 
-  }  catch (AipsError x) 
+    // if the antenna argument is not an positive integer, use the time of today
+    int antenna = 0;
+    string antennaString(argv[2]);
+    stringstream(antennaString) >> antenna; 
+// warning: antenna variable is used for calculating the delay at the moment
+// this has to be changed.
+
+    // process file containing phase measurements
+    readPhaseFile(filename, antenna);
+
+  } catch (AipsError x) 
   {
       cerr << "calculatePhaseBehaviour: " << x.getMesg() << endl;
       return 1;
