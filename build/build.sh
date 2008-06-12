@@ -341,6 +341,8 @@ case $param_packageName in
     ;;
     wcslib)
 		echo "[`date`] Selected package WCSLIB"
+		./build.sh bison $param_reportBuild
+		./build.sh flex $param_reportBuild
 		build_package wcslib external/wcslib
     ;;
     wcstools)
