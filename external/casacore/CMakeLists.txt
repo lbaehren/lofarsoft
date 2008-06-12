@@ -32,6 +32,7 @@ option (casacore_SHARED_LIBRARIES "Build libraries as shared libraries?" 0)
 option (casacore_MEASURES_DATA "Retrieve the measures data tables?" 0)
 option (casacore_WITH_G2C "Use g2c for compiling Fortran code?" 0)
 option (casacore_HDF5_SUPPORT "Enable support for HDF5?" 0)
+option (casacore_VERBOSE_CONFIGURE "Verbose output during configuration?" 1)
 
 ## Handle option: testing mode on/off
 
@@ -395,6 +396,7 @@ endif (casacore_MEASURES_DATA)
 ##
 ## =============================================================================
 
+if (casacore_VERBOSE_CONFIGURE)
 message (STATUS " ")
 message (STATUS "======================================================================")
 message (STATUS " ")
@@ -433,3 +435,4 @@ message (STATUS "WCSLIB library ............. = ${WCSLIB_LIBRARIES}")
 message (STATUS " ")
 message (STATUS "======================================================================")
 message (STATUS " ")
+endif (casacore_VERBOSE_CONFIGURE)
