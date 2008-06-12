@@ -21,6 +21,7 @@ include (CTest)
 ## User defined build/install options
 
 option (WCSLIB_PYTHON_WRAPPER "Generate Python wrapper for WCSLIB?" 0)
+option (WCSLIB_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -40,11 +41,12 @@ else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
 
-
-set (CFITSIO_FIND_QUIETLY 1)
-set (PGPLOT_FIND_QUIETLY 1)
-set (BOOST_FIND_QUIETLY 1)
-set (PYTHON_FIND_QUIETLY 1)
+if (NOT WCSLIB_VERBOSE_CONFIGURE)
+  set (CFITSIO_FIND_QUIETLY 1)
+  set (PGPLOT_FIND_QUIETLY 1)
+  set (BOOST_FIND_QUIETLY 1)
+  set (PYTHON_FIND_QUIETLY 1)
+endif (NOT WCSLIB_VERBOSE_CONFIGURE)
 
 include (FindCFITSIO)
 #  include (FindPGPLOT)
@@ -87,3 +89,16 @@ if (WCSLIB_INSTALL_PREFIX)
   message (STATUS "Installation area located for package WCSLIB.")
   set (CMAKE_INSTALL_PREFIX ${WCSLIB_INSTALL_PREFIX}) 
 endif (WCSLIB_INSTALL_PREFIX)
+
+## -----------------------------------------------------------------------------
+## Configuration summary
+
+message (STATUS " ")
+message (STATUS "============================================================")
+message (STATUS " ")
+message (STATUS "[WCSLIB] Configuration summary")
+message (STATUS "WCSLIB_SOURCE_DIR = ${WCSLIB_SOURCE_DIR}")
+message (STATUS "WCSLIB_BINARY_DIR = ${WCSLIB_BINARY_DIR}")
+message (STATUS " ")
+message (STATUS "============================================================")
+message (STATUS " ")

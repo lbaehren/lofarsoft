@@ -152,12 +152,12 @@ endif (HAVE_UNISTD_H)
 
 ## Check header files for functions -------------
 
-check_function_exists (floor HAVE_FLOOR)
-check_function_exists (memset HAVE_MEMSET)
-check_function_exists (pow HAVE_POW)
-check_function_exists (sqrt HAVE_SQRT)
-check_function_exists (strchr HAVE_STRCHR)
-check_function_exists (strstr HAVE_STRSTR)
+check_function_exists (floor  HAVE_FLOOR  )
+check_function_exists (memset HAVE_MEMSET )
+check_function_exists (pow    HAVE_POW    )
+check_function_exists (sqrt   HAVE_SQRT   )
+check_function_exists (strchr HAVE_STRCHR )
+check_function_exists (strstr HAVE_STRSTR )
 
 file (APPEND ${WCSLIB_config} "/* Define to 1 if any of the following functions are defined. */\n")
 file (APPEND ${WCSLIB_config} "\#define HAVE_FLOOR ${HAVE_FLOOR}\n")
@@ -185,7 +185,7 @@ if (flex_bin)
     message (STATUS "Flex processing ${src}...")
     execute_process (
       WORKING_DIRECTORY ${WCSLIB_SOURCE_DIR}/C
-      COMMAND flex -o${CMAKE_BINARY_DIR}/C/${src}.c -P${src} ${src}.l
+      COMMAND flex -o${WCSLIB_BINARY_DIR}/C/${src}.c -P${src} ${src}.l
       TIMEOUT 20
       ERROR_VARIABLE flex_error
       OUTPUT_QUIET
@@ -226,9 +226,6 @@ set (WCSLIB_sources
 )
 
 include_directories (
-  .
-  ..
-  ../..
   ${WCSLIB_BINARY_DIR}/C
   ${WCSLIB_SOURCE_DIR}
   ${WCSLIB_SOURCE_DIR}/C
