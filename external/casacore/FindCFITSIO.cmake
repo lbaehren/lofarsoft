@@ -1,6 +1,24 @@
-##------------------------------------------------------------------------------
-## $Id:: FindCFITSIO.cmake 654 2007-08-29 15:57:17Z baehren                    $
-##------------------------------------------------------------------------------
+# +-----------------------------------------------------------------------------+
+# | $Id:: FindCFITSIO.cmake 1643 2008-06-14 10:19:20Z baehren                 $ |
+# +-----------------------------------------------------------------------------+
+# |   Copyright (C) 2007                                                        |
+# |   Lars B"ahren (bahren@astron.nl)                                           |
+# |                                                                             |
+# |   This program is free software; you can redistribute it and/or modify      |
+# |   it under the terms of the GNU General Public License as published by      |
+# |   the Free Software Foundation; either version 2 of the License, or         |
+# |   (at your option) any later version.                                       |
+# |                                                                             |
+# |   This program is distributed in the hope that it will be useful,           |
+# |   but WITHOUT ANY WARRANTY; without even the implied warranty of            |
+# |   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             |
+# |   GNU General Public License for more details.                              |
+# |                                                                             |
+# |   You should have received a copy of the GNU General Public License         |
+# |   along with this program; if not, write to the                             |
+# |   Free Software Foundation, Inc.,                                           |
+# |   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                 |
+# +-----------------------------------------------------------------------------+
 
 # - Check for the presence of the CFITSIO library
 #
@@ -9,43 +27,19 @@
 #  CFITSIO_INCLUDES  = Directory where to find fitsio.h
 
 ## -----------------------------------------------------------------------------
-## Search locations
-
-set (include_locations
-  ../release/include
-  ../../release/include
-  /usr/include
-  /usr/local/include
-  /sw/include
-  /opt/casa/local/include
-)
-
-set (lib_locations
-  ../release/lib
-  ../../release/lib
-  /lib
-  /usr/lib
-  /usr/local/lib
-  /sw/lib
-  /opt/casa/local/lib
-)
-
-## -----------------------------------------------------------------------------
 ## Check for the header files
 
-FIND_PATH (CFITSIO_INCLUDES
-  fitsio.h longnam.h
+set (CFITSIO_INCLUDES "")
+
+FIND_PATH (HAVE_FITSIO_H fitsio.h
   PATHS ${include_locations}
   PATH_SUFFIXES cfitsio
   NO_DEFAULT_PATH
   )
 
-## correct the include path (this could be used if we want to enforce include via
-## <cfitsio/fitsio.h>)
-
-#if (CFITSIO_INCLUDES)
-#  string (REGEX REPLACE cfitsio "" CFITSIO_INCLUDES ${CFITSIO_INCLUDES})
-#endif (CFITSIO_INCLUDES)
+if (HAVE_FITSIO_H)
+  list (APPEND CFITSIO_INCLUDES ${HAVE_FITSIO_H})
+endif (HAVE_FITSIO_H)
 
 ## -----------------------------------------------------------------------------
 ## Check for the parts of the library

@@ -1,6 +1,24 @@
-##------------------------------------------------------------------------
-## $Id:: FindWCS.cmake 654 2007-08-29 15:57:17Z baehren                  $
-##------------------------------------------------------------------------
+# +-----------------------------------------------------------------------------+
+# | $Id:: FindWCS.cmake 1643 2008-06-14 10:19:20Z baehren                     $ |
+# +-----------------------------------------------------------------------------+
+# |   Copyright (C) 2007                                                        |
+# |   Lars B"ahren (bahren@astron.nl)                                           |
+# |                                                                             |
+# |   This program is free software; you can redistribute it and/or modify      |
+# |   it under the terms of the GNU General Public License as published by      |
+# |   the Free Software Foundation; either version 2 of the License, or         |
+# |   (at your option) any later version.                                       |
+# |                                                                             |
+# |   This program is distributed in the hope that it will be useful,           |
+# |   but WITHOUT ANY WARRANTY; without even the implied warranty of            |
+# |   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             |
+# |   GNU General Public License for more details.                              |
+# |                                                                             |
+# |   You should have received a copy of the GNU General Public License         |
+# |   along with this program; if not, write to the                             |
+# |   Free Software Foundation, Inc.,                                           |
+# |   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                 |
+# +-----------------------------------------------------------------------------+
 
 # - Check for the presence of WCS
 #
@@ -10,47 +28,19 @@
 #  WCSLIB_LIBRARIES  = Link these to use WCS
 
 ## -----------------------------------------------------------------------------
-## Search locations
-
-set (include_locations
-  ../release/include
-  ../../release/include
-  /usr/include
-  /usr/local/include
-  /sw/include
-)
-
-set (lib_locations
-  ../release/lib
-  ../../release/lib
-  /lib
-  /usr/lib
-  /usr/local/lib
-  /sw/lib
-)
-
-## -----------------------------------------------------------------------------
 ## Check for the header files
 
-find_path (WCSLIB_INCLUDES wcs.h
+find_path (WCSLIB_INCLUDES wcs/wcs.h wcslib/wcs.h
   PATHS ${include_locations}
-  PATH_SUFFIXES wcs wcslib
   NO_DEFAULT_PATH
   )
-
-## correct the include path
-
-if (WCSLIB_INCLUDES)
-  string (REGEX REPLACE wcslib "" WCSLIB_INCLUDES ${WCSLIB_INCLUDES})
-endif (WCSLIB_INCLUDES)
-
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
 find_library (WCSLIB_LIBRARIES wcs
   PATHS ${lib_locations}
-  PATH_SUFFIXES darwin/lib linux_gnu/lib stable/linux_gnu/lib
+  PATH_SUFFIXES wcs wcslib darwin/lib linux_gnu/lib stable/linux_gnu/lib
   NO_DEFAULT_PATH
   )
 

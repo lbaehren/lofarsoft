@@ -77,4 +77,3 @@ if (casacore_BUILD_TESTS)
     add_subdirectory (${casa_module}/test)
   endforeach (casa_module)
 endif (casacore_BUILD_TESTS)
-

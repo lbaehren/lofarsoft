@@ -129,7 +129,49 @@ if (USG_ROOT)
     include (FindHDF5)
   endif (casacore_HDF5_SUPPORT)
 else (USG_ROOT)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+  ##
+  ## If used standalone, the CMake scripts cannot rely on the additional
+  ## infrastructure provided by the code base of the LOFAR User Software
+  ## Group; thereby we need to have some local versions of the find 
+  ## scripts in place, which handle the location of external components
+  ##
+  ## [1] Standard search locations for header files
+  set (include_locations
+    /opt/include
+    /opt/local/include
+    /sw/include
+    /usr/include
+    /usr/local/include
+    /usr/X11R6/include
+    CACHE
+    PATH
+    "Directories to look for include files"
+    FORCE
+    )
+  ## [2] Standard search locations for libraries
+  set (lib_locations
+    /opt/lib
+    /opt/local/lib
+    /sw/lib
+    /usr/lib
+    /usr/lib64
+    /usr/local/lib
+    /usr/local/lib64
+    /usr/X11R6/lib
+    /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
+    CACHE
+    PATH
+    "Directories to look for libraries"
+    FORCE
+    )
+  ## [3] Load CMake modules
+  include (${casacore_SOURCE_DIR}/FindCFITSIO.cmake)
+  include (${casacore_SOURCE_DIR}/FindG2C.cmake)
+  include (${casacore_SOURCE_DIR}/FindLAPACK.cmake)
+  include (${casacore_SOURCE_DIR}/FindWCS.cmake)
+  if (casacore_HDF5_SUPPORT) 
+    include (${casacore_SOURCE_DIR}/FindHDF5.cmake)
+  endif (casacore_HDF5_SUPPORT)
 endif (USG_ROOT)
 
 ## --- libm -----------------------------------------------

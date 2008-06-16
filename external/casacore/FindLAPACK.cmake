@@ -1,6 +1,24 @@
-##------------------------------------------------------------------------
-## $Id:: FindLAPACK.cmake 511 2007-08-05 13:14:48Z baehren               $
-##------------------------------------------------------------------------
+# +-----------------------------------------------------------------------------+
+# | $Id:: FindLAPACK.cmake 1643 2008-06-14 10:19:20Z baehren                  $ |
+# +-----------------------------------------------------------------------------+
+# |   Copyright (C) 2007                                                        |
+# |   Lars B"ahren (bahren@astron.nl)                                           |
+# |                                                                             |
+# |   This program is free software; you can redistribute it and/or modify      |
+# |   it under the terms of the GNU General Public License as published by      |
+# |   the Free Software Foundation; either version 2 of the License, or         |
+# |   (at your option) any later version.                                       |
+# |                                                                             |
+# |   This program is distributed in the hope that it will be useful,           |
+# |   but WITHOUT ANY WARRANTY; without even the implied warranty of            |
+# |   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             |
+# |   GNU General Public License for more details.                              |
+# |                                                                             |
+# |   You should have received a copy of the GNU General Public License         |
+# |   along with this program; if not, write to the                             |
+# |   Free Software Foundation, Inc.,                                           |
+# |   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                 |
+# +-----------------------------------------------------------------------------+
 
 ## -----------------------------------------------------------------------------
 ## Check for the presence of LAPACK
@@ -10,45 +28,34 @@
 ##  LAPACK_LIBRARIES - Link these to use LAPACK
 ##  LAPACK_INCLUDES  - Location of the LAPACK header files
 
-set (lib_locations
- /usr/lib
- /usr/local/lib
- /sw/lib
- /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
-)
-
-set (include_locations
-  /usr/include
-  /usr/local/include
-  /sw/include
-  /Developer/SDKs/MacOSX10.4u.sdk/usr/include
-  /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers
-)
-
-
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (LAPACK_INCLUDES clapack.h
-  PATHS ${include_locations}
+  PATHS
+  ${include_locations}
+  /Developer/SDKs/MacOSX10.4u.sdk/usr/include
+  /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers
 )
 
 ## -----------------------------------------------------------------------------
 ## Check for the library files (-llapack -lblas -lcblas -latlas)
 
 set (libs
-  atlas
-  blas
-  cblas
   lapack
+  cblas
+  blas
+  atlas
   )
-  
+
 set (LAPACK_LIBRARIES "")
 
 foreach (lib ${libs})
   ## try to locate the library
-  find_library (LAPACK_${lib} ${lib}
-    PATHS ${lib_locations}
+  find_library (LAPACK_${lib} ${lib} ${lib}_LINUX
+    PATHS
+	${lib_locations}
+    /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
     PATH_SUFFIXES lapack
     NO_DEFAULT_PATH
     )

@@ -1,6 +1,24 @@
-##------------------------------------------------------------------------------
-## $Id:: FindG2C.cmake 729 2007-09-10 15:36:14Z baehren                        $
-##------------------------------------------------------------------------------
+# +-----------------------------------------------------------------------------+
+# | $Id:: FindG2C.cmake 1643 2008-06-14 10:19:20Z baehren                     $ |
+# +-----------------------------------------------------------------------------+
+# |   Copyright (C) 2007                                                        |
+# |   Lars B"ahren (bahren@astron.nl)                                           |
+# |                                                                             |
+# |   This program is free software; you can redistribute it and/or modify      |
+# |   it under the terms of the GNU General Public License as published by      |
+# |   the Free Software Foundation; either version 2 of the License, or         |
+# |   (at your option) any later version.                                       |
+# |                                                                             |
+# |   This program is distributed in the hope that it will be useful,           |
+# |   but WITHOUT ANY WARRANTY; without even the implied warranty of            |
+# |   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             |
+# |   GNU General Public License for more details.                              |
+# |                                                                             |
+# |   You should have received a copy of the GNU General Public License         |
+# |   along with this program; if not, write to the                             |
+# |   Free Software Foundation, Inc.,                                           |
+# |   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.                 |
+# +-----------------------------------------------------------------------------+
 
 ## -----------------------------------------------------------------------------
 # - Check for the presence of G2C
@@ -11,33 +29,18 @@
 #  G2C_LIBRARIES  = Link these to use G2C
 ## -----------------------------------------------------------------------------
 
-set (include_locations
-  /usr/include
-  /opt
-  /opt/include
-  /usr/local/include
-  /sw/include
-  /usr/lib
-  /usr/lib64
-  )
-
-set (lib_locations
-  /usr/lib
-  /usr/local/lib
-  /usr/lib64
-  /usr/local/lib64
-  )
-
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (G2C_INCLUDES g2c.h f2c.h
-  PATHS ${include_locations}
+  PATHS ${include_locations} /usr/lib/gcc /usr/lib/gcc-lib
   PATH_SUFFIXES
-  gcc
-  gcc-lib/i486-linux/3.3.5/include
-  gcc-lib/i586-suse-linux/3.3.3/include
-  gcc/x86_64-redhat-linux/3.4.3/include
+  i486-linux/3.3.5/include
+  i586-suse-linux/3.3.3/include
+  i586-suse-linux/3.3.4/include
+  i586-suse-linux/3.3.5/include
+  x86_64-redhat-linux/3.4.3/include
+  i386-redhat-linux/3.4.6/include
   )
 
 ## -----------------------------------------------------------------------------
@@ -58,6 +61,7 @@ if (UNIX)
     ENDIF (${CMAKE_OSX_ARCHITECTURES} MATCHES "ppc")
   else (APPLE)
     list (APPEND lib_locations
+      /usr/lib/gcc/i386-redhat-linux/3.4.6
       /usr/lib/gcc/x86_64-redhat-linux/3.4.3/32
       /usr/lib/gcc/x86_64-redhat-linux/3.4.3
       )
@@ -65,7 +69,7 @@ if (UNIX)
 endif (UNIX)
 
 find_library (G2C_LIBRARIES
-  NAMES g2c gcc
+  NAMES gfortran f2c g2c gcc
   PATHS ${lib_locations}
   NO_DEFAULT_PATH
   )
@@ -76,6 +80,7 @@ find_library (G2C_LIBRARIES
 if (G2C_INCLUDES AND G2C_LIBRARIES)
   set (HAVE_G2C TRUE)
 else (G2C_INCLUDES AND G2C_LIBRARIES)
+  set (HAVE_G2C FALSE)
   if (NOT G2C_FIND_QUIETLY)
     if (NOT G2C_INCLUDES)
       message (STATUS "Unable to find G2C header files!")
@@ -100,3 +105,8 @@ endif (HAVE_G2C)
 
 ## -----------------------------------------------------------------------------
 ## Mark as advanced ...
+
+MARK_AS_ADVANCED (
+  G2C_INCLUDES
+  G2C_LIBRARIES
+  )
