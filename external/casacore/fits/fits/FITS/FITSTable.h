@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: FITSTable.h 18237 2005-01-12 18:44:34Z bgarwood $
+//# $Id: FITSTable.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef FITS_FITSTABLE_H
 #define FITS_FITSTABLE_H
@@ -36,6 +36,7 @@
 #include <casa/Containers/Block.h>
 #include <fits/FITS/hdu.h>
 #include <fits/FITS/fitsio.h>
+#include <casa/iosfwd.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
@@ -43,7 +44,6 @@ class String;
 class FITSFieldCopier;
 class TableDesc;
 template<class T> class Vector;
-#include <casa/iosfwd.h>
 
 // <summary>
 // Simplified interface to FITS tables with AIPS++ Look and Feel.

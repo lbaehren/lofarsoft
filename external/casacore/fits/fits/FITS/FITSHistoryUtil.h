@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: FITSHistoryUtil.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: FITSHistoryUtil.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 
 #ifndef FITS_FITSHISTORYUTIL_H
@@ -65,10 +65,12 @@ class LoggerHolder;
 // <synopsis>
 // Manipulate HISTORY information. FITS HISTORY cards are interconverted with
 // String as follows:
+// <ul>
 // <li> 'HISTORY ' and trailing blanks are removed from each card.
 // <li> Continuation cards are CARDS that have '>' in the first line.
 // <li> A string is made by concatenating the leading card and all continuation
 //    cards.
+// </ul>
 // For example:
 // <srcblock>
 // HISTORY Every good

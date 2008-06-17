@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MomentCalculator.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: MomentCalculator.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef IMAGES_MOMENTCALCULATOR_H
 #define IMAGES_MOMENTCALCULATOR_H
@@ -132,7 +132,7 @@ template <class T> class ImageMoments;
 // </note>
 //
 // <todo asof="yyyy/mm/dd">
-//  Derive more classes !
+//  <li> Derive more classes !
 // </todo>
 
 
@@ -238,10 +238,10 @@ protected:
                          const Vector<Int>& selectMoments,
                          const uInt nLatticeOut) const;
 
-// Convert from <T> to <Float> for plotting
+// Convert from <tt>T</tt> to <tt>Float</tt> for plotting
    static Float convertT(const T value);
 
-// Convert from <Float> (from plotting) to a <T> 
+// Convert from <tt>Float</tt> (from plotting) to a <tt>T</tt> 
    static T convertF(const Float value);
 
 // Find out from the selectMoments array whether we want

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TempImage.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: TempImage.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef IMAGES_TEMPIMAGE_H
 #define IMAGES_TEMPIMAGE_H
@@ -47,11 +47,9 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // </reviewed>
 
 // <prerequisite>
-// <list>
-//   <item> <linkto class=CoordinateSystem>CoordinateSystem</linkto>
-//   <item> <linkto class=ImageInterface>ImageInterface</linkto>
-//   <item> <linkto class=TempLattice>TempLattice</linkto>
-// </list>
+//   <li> <linkto class=CoordinateSystem>CoordinateSystem</linkto>
+//   <li> <linkto class=ImageInterface>ImageInterface</linkto>
+//   <li> <linkto class=TempLattice>TempLattice</linkto>
 // </prerequisite>
 
 // <etymology>

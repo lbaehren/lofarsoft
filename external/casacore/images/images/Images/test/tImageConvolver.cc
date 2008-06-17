@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tImageConvolver.cc 20048 2007-03-19 05:46:10Z Malte.Marquarding $
+//# $Id: tImageConvolver.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 //
 #include <images/Images/ImageConvolver.h>
 
@@ -41,7 +41,7 @@
 
 
 #include <casa/namespace.h>
-int main (int argc, char **argv)
+int main (int argc, const char* argv[])
 {
 
 try {
@@ -71,7 +71,7 @@ try {
    DataType imageType = imagePixelType(in);
    if (imageType!=TpFloat) {
       os << "The image must be of type Float" << LogIO::EXCEPTION;
-      exit(1);
+      return 1;
    }
 
 // Construct image
@@ -119,6 +119,6 @@ try {
      return 1;
   } 
 
-   exit(0);
+   return 0;
 }
 

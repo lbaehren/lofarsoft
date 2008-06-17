@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tRegionHandler.cc 20287 2008-03-13 13:20:30Z gervandiepen $
+//# $Id: tRegionHandler.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <images/Images/RegionHandlerMemory.h>
 #include <images/Images/RegionHandlerTable.h>
@@ -168,8 +168,8 @@ int main()
 
   } catch (AipsError x) {
     cerr << "Unexpected exception: " << x.getMesg() << endl;
-    exit(1);
+    return 1;
   } 
   cout << "ok" << endl;
-  exit(0);
+  return 0;
 }

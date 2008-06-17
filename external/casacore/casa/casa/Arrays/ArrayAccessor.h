@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: ArrayAccessor.h 19761 2006-11-24 01:34:55Z gvandiep $
+//# $Id: ArrayAccessor.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef CASA_ARRAYACCESSOR_H
 #define CASA_ARRAYACCESSOR_H
@@ -181,7 +181,7 @@ template <class T> class ArrayBaseAccessor {
 
 // <summary> Fast 1D accessor/iterator for nD array classes </summary>
 // <use visibility=export>
-// <reviewed reviewer="diepen@astron.nl" date="2002/12/01" tests="tArrayAccessor" demos="dArrayAccessor">
+// <reviewed reviewer="Ger van Diepen" date="2002/12/01" tests="tArrayAccessor" demos="dArrayAccessor">
 // </reviewed>
 // <prerequisite>
 //   <li> Array indexing and access methods

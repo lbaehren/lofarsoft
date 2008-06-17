@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tBlock.cc 20113 2007-08-28 11:12:18Z gervandiepen $
+//# $Id: tBlock.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 
@@ -176,7 +176,7 @@ void doit()
                                       // Block::~Block called at end of fn
 }
 
-main()
+int main()
 {
     doit();
     cout << "OK\n";

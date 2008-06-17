@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: SubImage.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: SubImage.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef IMAGES_SUBIMAGE_H
 #define IMAGES_SUBIMAGE_H
@@ -56,10 +56,8 @@ class String;
 // </reviewed>
 //
 // <prerequisite>
-// <list>
-//   <item> <linkto class=ImageInterface>ImageInterface</linkto>
-//   <item> <linkto class=SubLattice>SubLattice</linkto>
-// </list>
+//   <li> <linkto class=ImageInterface>ImageInterface</linkto>
+//   <li> <linkto class=SubLattice>SubLattice</linkto>
 // </prerequisite>
 //
 // <synopsis> 

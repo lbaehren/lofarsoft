@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: QLogical.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: QLogical.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef CASA_QLOGICAL_H
 #define CASA_QLOGICAL_H
@@ -80,7 +80,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 //   <li> <linkto file="QLogical.h#compare">Comparisons</linkto>
 //   <li> <linkto file="QLogical.h#foreign">Special make Bool routines
 //                to cater for array comparisons</linkto>
-// </ul
+// </ul>
 //
 // The operations defined are:
 // <ul>

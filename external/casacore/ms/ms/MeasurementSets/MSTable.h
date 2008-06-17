@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: MSTable.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: MSTable.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef MS_MSTABLE_H
 #define MS_MSTABLE_H
@@ -53,9 +53,7 @@ template <class T> class Block;
 // <reviewed reviewer="Bob Garwood" date="1997/02/01" tests="" demos="">
 
 // <prerequisite>
-// <ul>
 //   <li> <linkto module="Tables:description">Tables</linkto> module
-// </ul>
 // </prerequisite>
 //
 // <etymology>

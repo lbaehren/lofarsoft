@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tLatticeFractile.cc 19911 2007-02-23 02:55:31Z Malte.Marquarding $
+//# $Id: tLatticeFractile.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 
 #include <lattices/Lattices/ArrayLattice.h>
@@ -41,7 +41,7 @@
 
 
 #include <casa/namespace.h>
-int main (int argc, char *argv[])
+int main (int argc, const char* argv[])
 {
   try {
     cout << ">>>" << endl;
@@ -234,7 +234,7 @@ int main (int argc, char *argv[])
 
   } catch (const AipsError& x) {
     cout << "Unexpected exception: " << x.getMesg() << endl;
-    exit(1);
+    return 1;
   }
-  exit(0);
+  return 0;
 }

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tFit2D.cc 19963 2007-02-28 03:30:50Z gervandiepen $
+//# $Id: tFit2D.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <scimath/Fitting.h>
 #include <lattices/LatticeMath/Fit2D.h>
@@ -48,7 +48,7 @@ Gaussian2D<Double> addModel (Array<Float>& pixels, Double height, Double x, Doub
 
 void addNoise (Array<Float>& pixels, Array<Float>& sigma, Double noise);
 
-int main(int argc, char **argv)
+int main(int argc, const char *argv[])
 {
 
   try {
@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 // Inputs
 // 
    Input inputs(1);
-   inputs.version ("$Revision: 19963 $");
+   inputs.version ("$Revision: 20329 $");
    inputs.create("nmodels", "1", "nmodels"); 
    inputs.create("noise", "0.0001", "Noise");
    inputs.create("major", "10.0", "major");

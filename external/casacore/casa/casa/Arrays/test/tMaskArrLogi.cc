@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tMaskArrLogi.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tMaskArrLogi.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# If AIPS_DEBUG is not set, the Assert's won't be called.
 #if !defined(AIPS_DEBUG)
@@ -61,7 +61,8 @@
 
 
 #include <casa/namespace.h>
-main()
+
+int main()
 {
     try {
         cout << endl << "Testing MaskedArray logical operators." << endl;

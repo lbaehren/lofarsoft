@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: MFrequency.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: MFrequency.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef MEASURES_MFREQUENCY_H
 #define MEASURES_MFREQUENCY_H
@@ -77,13 +77,13 @@ template <class M> class ROScalarMeasColumn;
 // It can also be generated from a Quantity, where the interpretation
 // depends on the dimensionality of the Quantity:
 // <ul>
-// <it> time (e.g. s): period
-// <it> frequency (e.g. Hz): frequency
-// <it> angular frequency (e.g. arcmin/s): angular frequency
-// <it> length (e.g. cm): wavelength
-// <it> inverse length (e.g. mm<sup>-1</sup>): wave number
-// <it> energy (e.g. J.s): energy (i.e. <em>h.nu</em>)
-// <it> momentum (e.g. kg.m): <em>m.c/h</em>
+// <li> time (e.g. s): period
+// <li> frequency (e.g. Hz): frequency
+// <li> angular frequency (e.g. arcmin/s): angular frequency
+// <li> length (e.g. cm): wavelength
+// <li> inverse length (e.g. mm<sup>-1</sup>): wave number
+// <li> energy (e.g. J.s): energy (i.e. <em>h.nu</em>)
+// <li> momentum (e.g. kg.m): <em>m.c/h</em>
 // </ul>
 // The different reference types of a frequency are:
 // <ul>

@@ -24,16 +24,15 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 
-//# $Id: FFTPack.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: FFTPack.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef SCIMATH_FFTPACK_H
 #define SCIMATH_FFTPACK_H
 
 #include <casa/aips.h>
-  //
-  // The SGI compiler with -LANG:std has some trouble including both Complexfwd.h
-  // and Complex.h so we bypass the problem by include Complex.h only.
-  //
+
+  //# The SGI compiler with -LANG:std has some trouble including both Complexfwd.h
+  //# and Complex.h so we bypass the problem by include Complex.h only.
 #if defined(AIPS_USE_NEW_SGI)
 #include <casa/BasicSL/Complex.h>
 #else

@@ -23,11 +23,12 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSScanParse.cc 20289 2008-03-13 14:12:27Z gervandiepen $
+//# $Id: MSScanParse.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <ms/MeasurementSets/MSScanParse.h>
 #include <ms/MeasurementSets/MSSelectionError.h>
 #include <ms/MeasurementSets/MSMainColumns.h>
+#include <limits>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 

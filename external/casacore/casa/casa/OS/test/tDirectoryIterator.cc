@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tDirectoryIterator.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tDirectoryIterator.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 
 #include <casa/OS/DirectoryIterator.h>
@@ -31,7 +31,7 @@
 #include <casa/Utilities/Assert.h>
 #include <casa/Exceptions.h>
 #include <casa/iostream.h>
-
+#include <map>
 
 #include <casa/namespace.h>
 // <summary>
@@ -58,23 +58,30 @@ uInt countFiles (DirectoryIterator& iter)
 
 void doIt (Bool doExcp)
 {
+    // Define the possible names and if found.
+    // This is needed, because in Linux2.4 the order of readdir is not
+    // alphabetical (but hash order).
+    std::map<String,Bool> usedNames;
+    usedNames["a"] = False;
+    usedNames["ca"] = False;
+    usedNames["ca.cc"] = False;
+    String firstName;
     Directory dir("tDirectoryIterator_tmp");
     DirectoryIterator iter(dir, Regex(".*a.*"));
-    AlwaysAssertExit (!iter.pastEnd());
-    AlwaysAssertExit (iter.name() == "a");
-    AlwaysAssertExit (iter.file().path().originalName() ==
-		                               "tDirectoryIterator_tmp/a");
-    iter++;
-    AlwaysAssertExit (!iter.pastEnd());
-    AlwaysAssertExit (iter.name() == "ca");
-    AlwaysAssertExit (iter.file().path().originalName() ==
-		                               "tDirectoryIterator_tmp/ca");
-    ++iter;
-    AlwaysAssertExit (!iter.pastEnd());
-    AlwaysAssertExit (iter.name() == "ca.cc");
-    AlwaysAssertExit (iter.file().path().originalName() ==
-		                               "tDirectoryIterator_tmp/ca.cc");
-    ++iter;
+    for (int i=0; i<3; ++i) {
+      AlwaysAssertExit (!iter.pastEnd());
+      String nm = iter.name();
+      if (i == 0) {
+	firstName = nm;
+      }
+      std::map<String,Bool>::iterator uniter = usedNames.find(nm);
+      AlwaysAssertExit (uniter != usedNames.end());
+      AlwaysAssertExit (uniter->second == False);
+      uniter->second = True;
+      AlwaysAssertExit (iter.file().path().originalName() ==
+		                            "tDirectoryIterator_tmp/" + nm);
+      iter++;
+    }
     AlwaysAssertExit (iter.pastEnd());
     if (doExcp) {
 	try {
@@ -89,7 +96,7 @@ void doIt (Bool doExcp)
 	} 
     }
     iter.reset();
-    AlwaysAssertExit (iter.name() == "a");
+    AlwaysAssertExit (iter.name() == firstName);
     AlwaysAssertExit (countFiles(iter) == 3);
 
     iter = DirectoryIterator(dir);
@@ -115,7 +122,7 @@ void doIt (Bool doExcp)
 }
 
 
-int main (int argc)
+int main (int argc, const char*[])
 {
     try {
 	doIt ( (argc<2));

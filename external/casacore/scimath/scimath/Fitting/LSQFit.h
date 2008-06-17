@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LSQFit.h 20239 2008-02-12 08:40:21Z wbrouw $
+//# $Id: LSQFit.h 20302 2008-04-14 10:04:11Z wbrouw $
 
 #ifndef SCIMATH_LSQFIT_H
 #define SCIMATH_LSQFIT_H
@@ -489,6 +489,23 @@ class LSQFit {
   // or 2 and 4 (when telescope numbering starts at 0. The index is given
   // as an iterator (and hence can be a raw pointer)
   //
+  // The complex versions can have different interpretation of the inputs,
+  // where the complex number can be seen either as a complex number; as two
+  // real numbers, or as coefficients of equations with complex conjugates.
+  // See  <a href="http://www.astron.nl/aips++/docs/notes/224">Note 224</a>)
+  // for the details.
+  //
+  // Versions with <em>pair</em> assume that the pairs are created by the
+  // <em>SparseDiff</em> automatic differentiation class. The pair is an index
+  // and a value. The indices are assumed to be sorted.
+  //
+  // Special (<em>makeNormSorted</em>) indexed versions exist which assume
+  // that the given indices are sorted (which is the case for the
+  // LOFAR BBS environment).
+  //
+  // Some versions exist with two sets of equations (<em>cEq2, obs2</em>).
+  // If two simultaneous equations are created they will be faster.
+  //
   // Note that the
   // use of <src>const U &</src> is due to a Float->Double conversion problem
   // on Solaris. Linux was ok.
@@ -531,6 +548,11 @@ class LSQFit {
 		  Bool doNorm=True, Bool doKnown=True);
   template <class U, class V, class W>
     void makeNorm(uInt nIndex, const W &cEqIndex,
+		  const V &cEq, const V &cEq2,
+		  const U &weight, const U &obs, const U &obs2,
+		  Bool doNorm=True, Bool doKnown=True);
+  template <class U, class V, class W>
+    void makeNorm(uInt nIndex, const W &cEqIndex,
 		  const V &cEq, const U &weight, const U &obs,
 		  LSQFit::Real,
 		  Bool doNorm=True, Bool doKnown=True);
@@ -602,6 +624,17 @@ class LSQFit {
 		  const std::complex<U> &obs,
 		  LSQFit::Conjugate,
 		  Bool doNorm=True, Bool doKnown=True);
+  //
+  template <class U, class V, class W>
+  void makeNormSorted(uInt nIndex, const W &cEqIndex,
+		      const V &cEq, const U &weight,
+		      const U &obs,
+		      Bool doNorm=True, Bool doKnown=True);
+  template <class U, class V, class W>
+  void makeNormSorted(uInt nIndex, const W &cEqIndex,
+		      const V &cEq, const V &cEq2, const U &weight,
+		      const U &obs, const U &obs2,
+		      Bool doNorm=True, Bool doKnown=True);
   // </group>
   // Get the <src>n-th</src> (from 0 to the rank deficiency, or missing rank,
   // see e.g. <src>getDeficiency()</src>)

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: RegionHandler.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: RegionHandler.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef IMAGES_REGIONHANDLER_H
 #define IMAGES_REGIONHANDLER_H
@@ -54,10 +54,8 @@ template<class T> class Vector;
 // </reviewed>
 
 // <prerequisite>
-// <list>
-//   <item> <linkto class=PagedImage>PagedImage</linkto>
-//   <item> <linkto class=ImageRegion>ImageRegion</linkto>
-// </list>
+//   <li> <linkto class=PagedImage>PagedImage</linkto>
+//   <li> <linkto class=ImageRegion>ImageRegion</linkto>
 // </prerequisite>
 
 // <synopsis> 

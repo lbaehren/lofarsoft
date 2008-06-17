@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tTableDescHyper.cc 20177 2007-11-22 03:27:05Z Malte.Marquarding $
+//# $Id: tTableDescHyper.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <tables/Tables/TableDesc.h>
 #include <tables/Tables/ScaColDesc.h>
@@ -46,7 +46,8 @@ void a();
 void b();
 void excpDesc();
 
-int main (int argc) {
+int main (int argc, const char*[])
+{
     try {
 	a();
 	b();

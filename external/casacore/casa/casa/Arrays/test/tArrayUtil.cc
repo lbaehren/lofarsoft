@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tArrayUtil.cc 20146 2007-11-07 01:16:17Z Malte.Marquarding $
+//# $Id: tArrayUtil.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <casa/Arrays/ArrayIO.h>
 #include <casa/Arrays/ArrayMath.h>
@@ -384,7 +384,7 @@ Bool testReorderArray (Bool doExcp)
 }
 
 
-int main (int argc)
+int main (int argc, const char*[])
 {
   Bool ok = True;
   try {

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tCurvedLattice2D.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tCurvedLattice2D.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <lattices/Lattices/CurvedLattice2D.h>
 #include <lattices/Lattices/CLIPNearest2D.h>
@@ -128,7 +128,7 @@ void doIt3 (const Lattice<Int>& lattice)
   doIt (mlat, 2, 1, 0);
 }
 
-int main (int argc, char* argv[])
+int main (int argc, const char* argv[])
 {
   try {
     {

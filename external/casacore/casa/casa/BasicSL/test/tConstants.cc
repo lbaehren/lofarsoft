@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tConstants.cc 20218 2008-01-23 10:18:30Z gervandiepen $
+//# $Id: tConstants.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 
@@ -31,7 +31,8 @@
 #include <casa/BasicSL/Constants.h>
 
 #include <casa/namespace.h>
-main()
+
+int main()
 {
    cout << ">>> List of machine constants."                 << endl
         << endl

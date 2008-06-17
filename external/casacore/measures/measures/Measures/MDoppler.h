@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: MDoppler.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: MDoppler.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef MEASURES_MDOPPLER_H
 #define MEASURES_MDOPPLER_H
@@ -76,8 +76,8 @@ template <class T> class Quantum;
 // It can also be generated from a Quantity, where the interpretation
 // depends on the dimensionality of the Quantity:
 // <ul>
-// <it> None: a Doppler ratio
-// <it> Velocity: Doppler ratio calculated by dividing with c
+// <li> None: a Doppler ratio
+// <li> Velocity: Doppler ratio calculated by dividing with c
 // </ul>
 // The different types of Doppler (with F = f/f0, the frequency ratio),
 // are:

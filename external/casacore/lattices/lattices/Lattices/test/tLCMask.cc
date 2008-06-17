@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tLCMask.cc 19909 2007-02-23 02:08:02Z Malte.Marquarding $
+//# $Id: tLCMask.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <casa/aips.h>
 #include <lattices/Lattices/LCMask.h>
@@ -77,7 +77,7 @@ void testArrayRWIter (Lattice<Bool>& lattice)
 }
 
 
-main ()
+int main ()
 {
   try {
     {
@@ -114,9 +114,9 @@ main ()
     }
   } catch (AipsError x) {
     cerr << "Caught exception: " << x.getMesg() << endl;
-    exit(1);
+    return 1;
   } 
 
    cout << "OK" << endl;
-   exit(0);
+   return 0;
 }

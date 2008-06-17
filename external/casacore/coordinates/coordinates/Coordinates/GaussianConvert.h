@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: GaussianConvert.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: GaussianConvert.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef COORDINATES_GAUSSIANCONVERT_H
 #define COORDINATES_GAUSSIANCONVERT_H
@@ -48,7 +48,7 @@ template<class T> class Quantum;
 // </reviewed>
 
 // <prerequisite>
-//   <li> <linkto class=></linkto>
+//   <li> <linkto class=CoordinateSystem>CoordinateSystem</linkto>
 // </prerequisite>
 
 // <synopsis> 
@@ -65,7 +65,7 @@ template<class T> class Quantum;
 // </example>
 
 // <todo asof="1998/12/11">
-// Position angle signs require more thinking in aips++
+//  <li> Position angle signs require more thinking in aips++
 // </todo>
 
 class GaussianConvert

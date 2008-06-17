@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: MeasComet.h 20109 2007-08-22 00:57:43Z Malte.Marquarding $
+//# $Id: MeasComet.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef MEASURES_MEASCOMET_H
 #define MEASURES_MEASCOMET_H
@@ -73,10 +73,10 @@ template <class T> class Vector;
 // tables. The data obtained will be in the specified frame.
 // Note that the normal usage of these tables is through the Measures system.
 // 
-// <logged>
-//	<li> A message is logged (once) if a date outside the range in
+// <note>
+//	A message is logged (once) if a date outside the range in
 //	the Tables is asked for. 
-// </logged>
+// </note>
 // <thrown>
 //     <li> AipsError if table opened has wrong format or otherwise corrupted.
 // </thrown>

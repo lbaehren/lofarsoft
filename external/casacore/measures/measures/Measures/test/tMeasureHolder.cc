@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tMeasureHolder.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tMeasureHolder.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 
@@ -292,5 +292,5 @@ int main() {
     cout << x.getMesg() << endl;
   } 
 
-  exit(0);
+  return 0;
 }

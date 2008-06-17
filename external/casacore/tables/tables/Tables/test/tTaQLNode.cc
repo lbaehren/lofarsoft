@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tTaQLNode.cc 18776 2005-06-21 07:49:45Z gvandiep $
+//# $Id: tTaQLNode.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <tables/Tables/TableGram.h>
 #include <tables/Tables/TaQLNode.h>
@@ -47,7 +47,7 @@
 void seltab (const String&);
 void docomm ();
 
-int main (int argc, char** argv)
+int main (int argc, const char* argv[])
 {
   try {
     if (argc > 1) {

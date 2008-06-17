@@ -23,7 +23,7 @@
 //                        520 Edgemont Road
 //                        Charlottesville, Va 22903-2475 Usa
 //
-// $Id: tMSTimeGram.cc 19365 2006-04-07 16:03:45Z sbhatnag $
+// $Id: tMSTimeGram.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
@@ -62,7 +62,7 @@
 #include <casa/namespace.h>
 
 
-int main(int argc, char **argv)
+int main(int argc, const char* argv[])
 {
   try 
     {

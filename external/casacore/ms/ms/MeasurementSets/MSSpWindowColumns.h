@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSSpWindowColumns.h 19944 2007-02-27 11:14:34Z Malte.Marquarding $
+//# $Id: MSSpWindowColumns.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef MS_MSSPWINDOWCOLUMNS_H
 #define MS_MSSPWINDOWCOLUMNS_H
@@ -172,10 +172,7 @@ public:
 	       const Quantum<Double>& bandwidth, Int ifChain,
 	       const Quantum<Double>& tolerance, Vector<Double>& otherFreqs, 
 	       Bool& reversed) const;
-  // Set the refFrame, which is need when converting MFrequency to a different
-  // frame ( no, ScalarMeasColumn<M>put() will not accept this!
-  //void setFrame( MeasFrame refFrame ){ m_frame = &refFrame; }
-  //
+
 protected:
   //# default constructor creates a object that is not usable. Use the attach
   //# function correct this.

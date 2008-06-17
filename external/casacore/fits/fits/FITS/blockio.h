@@ -23,17 +23,17 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: blockio.h 19522 2006-07-24 00:30:25Z mmarquar $
+//# $Id: blockio.h 20329 2008-06-06 07:59:22Z gervandiepen $
 #ifndef FITS_BLOCKIO_H
 #define FITS_BLOCKIO_H
 
 //# Include this file first, because it may set LFS variables used by cfitsio.
 #include <casa/aips.h>
 
-// Make sure that cfitsio does not declare the wcs headers.
+//# Make sure that cfitsio does not declare the wcs headers.
 extern "C"{
-#include <fitsio.h>  // header file from cfitsio
-#include <fitsio2.h> // using core functions of cfitsio
+#include <fitsio.h>  //# header file from cfitsio
+#include <fitsio2.h> //# using core functions of cfitsio
 }
 
 #include <stdlib.h>
@@ -128,14 +128,12 @@ class BlockIO {
 	fitsfile *m_fptr;  		
 
 	// set the error message and error number for later recovery
-	void errmsg(IOErrs, char *);
+	void errmsg(IOErrs, const char *);
 };
 
 //<summary> fixed-length blocked sequential input base class</summary>
 //<prerequisite>
-//<list>
-//   <item> BlockIO
-//</list>
+//   <li> BlockIO
 //</prerequisite>
 
 class BlockInput : public BlockIO {
@@ -171,9 +169,7 @@ class BlockInput : public BlockIO {
 
 //<summary> fixed-length blocked sequential output base class</summary>
 //<prerequisite>
-//<list>
-//   <item> BlockIO
-//</list>
+//   <li> BlockIO
 //</prerequisite>             
 
 class BlockOutput : public BlockIO {

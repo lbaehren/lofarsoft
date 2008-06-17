@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Functionals.h 19881 2007-02-15 04:17:29Z Malte.Marquarding $
+//# $Id: Functionals.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 
 #ifndef SCIMATH_FUNCTIONALS_H
@@ -41,7 +41,7 @@
 #include <scimath/Functionals/CombiFunction.h>
 #include <scimath/Functionals/CompoundFunction.h>
 
-/// remainder will be removed
+//# remainder will be removed
 #include <scimath/Functionals/SampledFunctional.h>
 
 //# 1-D Functions

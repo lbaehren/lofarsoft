@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tArrayIO2.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tArrayIO2.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 
@@ -45,7 +45,7 @@ void doMat();
 void doVec();
 
 
-main (int argc)
+int main (int argc, const char*[])
 {
     try {
 	doBin ( (argc<2));

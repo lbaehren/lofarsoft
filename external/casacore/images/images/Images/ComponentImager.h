@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: ComponentImager.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: ComponentImager.h 20299 2008-04-03 05:56:44Z gervandiepen $
 //#! ========================================================================
 //#!                Attention!  Programmers read this!
 //#!
@@ -74,21 +74,26 @@ class LogIO;
 // <summary>
 // </summary>
 
-// <use visibility=local>   or   <use visibility=export>
+// <use visibility=local>
 
 // <reviewed reviewer="" date="yyyy/mm/dd" tests="" demos="">
 // </reviewed>
 
 // <prerequisite>
-//   <li> SomeClass
-//   <li> SomeOtherClass
-//   <li> some concept
+//   <li> ImageInterface
+//   <li> ComponentList
 // </prerequisite>
 //
 // <etymology>
 // </etymology>
 //
 // <synopsis>
+// Project the componentlist onto the image.  If any of the coordinate
+// transformations for a particular pixel fail (e.g. coordinate system
+// is not defined for that pixel) if the image has a writable mask, then those 
+// pixels will be masked, otherwise they are just zeroed.  Any pixels
+// that are already masked mask=F) will not have their values changed
+// (perhaps this behaviour should be changed).
 // </synopsis>
 //
 // <example>
@@ -96,22 +101,6 @@ class LogIO;
 //
 // <motivation>
 // </motivation>
-//
-// <templating arg=T>
-//    <li>
-//    <li>
-// </templating>
-//
-// <thrown>
-//    <li>
-//    <li>
-// </thrown>
-//
-// <todo asof="yyyy/mm/dd">
-//   <li> add this feature
-//   <li> fix this bug
-//   <li> start discussion of this possible extension
-// </todo>
 
 class ComponentImager
 {

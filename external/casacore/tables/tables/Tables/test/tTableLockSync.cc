@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tTableLockSync.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tTableLockSync.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <tables/Tables/TableDesc.h>
 #include <tables/Tables/SetupNewTab.h>
@@ -255,7 +255,7 @@ void b (Bool noReadLocking, Bool permLocking)
 }
 
 
-main (int argc, char** argv)
+int main (int argc, const char* argv[])
 {
     if (argc < 2) {
 	cout << "Execute as: tTableLockSync 1 x  to create new table"

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tArrayLattice.cc 20256 2008-02-23 20:28:24Z gervandiepen $
+//# $Id: tArrayLattice.cc 20307 2008-04-21 13:55:18Z gervandiepen $
 
 #include <casa/aips.h>
 
@@ -873,6 +873,17 @@ int main()
       AlwaysAssertExit (allEQ(pa.get(), float(2)*arr));
       pa -= ArrayLattice<Float>(arr);
       AlwaysAssertExit (allEQ(pa.get(), arr));
+    }
+    // Test of copyData
+    {
+      const IPosition latticeShape(4, 4, 16, 15, 8);
+      Array<Float> arr(latticeShape);
+      indgen(arr);
+      ArrayLattice<Float> from(arr.copy());
+      ArrayLattice<Float> to(latticeShape);
+      to.copyData (from);
+      AlwaysAssertExit (to.asArray()(IPosition(4,0,0,0,1)) == 960);
+      AlwaysAssertExit (allEQ(arr, to.asArray()));
     }
   } catch (AipsError x) {
     cerr << x.getMesg () << endl;

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tLEL.cc 20273 2008-02-28 03:47:48Z gervandiepen $
+//# $Id: tLEL.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 
 #include <lattices/Lattices/LatticeExpr.h>
@@ -94,7 +94,7 @@ Bool checkBool (LELInterface<Bool>& expr,
 		 const Bool emptyShape=False);
 
 
-int main (int argc, char *argv[])
+int main (int argc, const char* argv[])
 {
  try {
     cout << ">>>" << endl;
@@ -2336,17 +2336,17 @@ int main (int argc, char *argv[])
 
   if (!ok) {
     cout << "not ok" << endl;
-     exit(1);
+     return 1;
   } else {
     cout << endl << "ok" << endl;
   }
 
  } catch (AipsError x) {
     cerr << "aipserror: error " << x.getMesg() << endl;
-    exit(1);
+    return 1;
  } 
  
-   exit(0);
+   return 0;
 }
 
 

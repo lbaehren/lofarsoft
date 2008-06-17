@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: ScalarSampledFunctional.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: ScalarSampledFunctional.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef SCIMATH_SCALARSAMPLEDFUNCTIONAL_H
 #define SCIMATH_SCALARSAMPLEDFUNCTIONAL_H
@@ -38,11 +38,6 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 template<class T> class Block;
 
 // <summary> A unified interface for indexing into Vectors or Blocks </summary>
-
-// <linkfrom anchor="ScalarSampledFunctional" classes="SampledFunctional" modules="Functional">
-// <here> ScalarSampledFunctional </here> 
-// Access an Array or Block using a SampledFunctional interface
-// </linkfrom>
 
 // <use visibility=export>
 

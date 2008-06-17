@@ -24,7 +24,7 @@
                            520 Edgemont Road
                            Charlottesville, VA 22903-2475 USA
 
-    $Id: MSSpwGram.yy 20266 2008-02-26 00:43:05Z gervandiepen $
+    $Id: MSSpwGram.yy 20309 2008-05-20 08:09:14Z gervandiepen $
 */
 
 %{
@@ -198,7 +198,7 @@ FreqRange: IndexRange
 	      $$[1] = $1[1];//End index
 	      $$[2] = $1[2];//Step
 	      $$[3] = MSSpwIndex::MSSPW_INDEXRANGE;//Code
-	    } 
+	    }
          | PhyRange 
             {
 	      $$[0] = $1[0];//Start value

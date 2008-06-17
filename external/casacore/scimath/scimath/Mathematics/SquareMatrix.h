@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: SquareMatrix.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: SquareMatrix.h 20299 2008-04-03 05:56:44Z gervandiepen $
  
 #ifndef SCIMATH_SQUAREMATRIX_H
 #define SCIMATH_SQUAREMATRIX_H
@@ -283,9 +283,7 @@ private:
 //#    return result.adjoint();
 //#}
 //#
-// <linkfrom anchor=SqM_global_functions classes="SquareMatrixclass">
-//     <here> Global functions </here> for SquareMatrix.
-// </linkfrom>
+
 // <summary>
 // Various global math and IO functions.
 // </summary>

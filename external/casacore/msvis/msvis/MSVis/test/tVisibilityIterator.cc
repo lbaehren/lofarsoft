@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tVisibilityIterator.cc 18282 2005-01-19 21:07:31Z kgolap $
+//# $Id: tVisibilityIterator.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <msvis/MSVis/VisibilityIterator.h>
 #include <msvis/MSVis/VisBuffer.h>
@@ -39,14 +39,14 @@
 #include <tables/Tables/ForwardCol.h>
 
 #include <casa/namespace.h>
-main(int argc, char **argv)
+int main(int argc, const char* argv[])
 {
 // register forward col engine
   ForwardColumnEngine::registerClass();
 
   if (argc<2) {
       cout <<"Usage: tVisibilityIterator ms-table-name"<<endl;
-      exit(1);
+      return 1;
   }
   // try to iterate over a pre-existing MS table 
 

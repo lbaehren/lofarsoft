@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: ComponentType.h 20262 2008-02-25 23:32:52Z gervandiepen $
+//# $Id: ComponentType.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef COMPONENTS_COMPONENTTYPE_H
 #define COMPONENTS_COMPONENTTYPE_H
@@ -118,7 +118,7 @@ public:
   enum SpectralShape {
     // The flux is constant at different frequencies
     CONSTANT_SPECTRUM = 0,
-    // The flux varies as I = I_0 * (\nu / \nu_0)^\alpha
+    // The flux varies as <src>I = I_0 * (nu / nu_0)^alpha</src>
     SPECTRAL_INDEX,
     // an unknown spectral type
     UNKNOWN_SPECTRAL_SHAPE,

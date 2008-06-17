@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: BitVector.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: BitVector.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef CASA_BITVECTOR_H
 #define CASA_BITVECTOR_H
@@ -32,12 +32,12 @@
 #include <casa/aips.h>
 #include <casa/Containers/Block.h>
 #include <casa/Utilities/Assert.h>
+#include <casa/iosfwd.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
 //# Forward Declarations
 class BitVectorHelper;
-#include <casa/iosfwd.h>
 
 // The size of a unsigned Integer ( assumes 8-bit char )
 const uInt WORDSIZE = sizeof(uInt)*8;

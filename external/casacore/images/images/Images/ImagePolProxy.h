@@ -23,23 +23,24 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ImagePolProxy.h 20264 2008-02-25 23:40:27Z gervandiepen $
+//# $Id: ImagePolProxy.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef IMAGES_IMAGEPOL_H
 #define IMAGES_IMAGEPOL_H
 
 #include <images/Images/ImagePolarimetry.h>
 
-// Implementation of the image polarimetry functionality
-// available from casapy.
-
 namespace casa {
 
+//# Forward declarations
 class LogIO;
 class String;
 class Record;
 class Normal;
 template<class T> class ImageInterface;
+
+// Implementation of the image polarimetry functionality
+// available from casapy.
 
 class ImagePol
 {

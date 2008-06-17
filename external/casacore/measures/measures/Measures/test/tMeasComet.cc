@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tMeasComet.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tMeasComet.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 #include <casa/aips.h>
@@ -48,7 +48,9 @@
 #include <casa/iomanip.h>
 
 #include <casa/namespace.h>
-main() {
+
+int main()
+{
   try {
     cout << "Test MeasComet..." << endl;
     cout << "--------------------------------------" << endl;
@@ -199,5 +201,5 @@ main() {
     cout << x.getMesg() << endl;
   } 
   
-  exit(0);
+  return 0;
 }

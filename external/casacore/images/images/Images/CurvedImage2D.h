@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: CurvedImage2D.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: CurvedImage2D.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef IMAGES_CURVEDIMAGE2D_H
 #define IMAGES_CURVEDIMAGE2D_H
@@ -50,10 +50,8 @@ class PixelCurve1D;
 // </reviewed>
 //
 // <prerequisite>
-// <list>
-//   <item> <linkto class=ImageInterface>ImageInterface</linkto>
-//   <item> <linkto class=CurvedLattice2D>CurvedLattice2D</linkto>
-// </list>
+//   <li> <linkto class=ImageInterface>ImageInterface</linkto>
+//   <li> <linkto class=CurvedLattice2D>CurvedLattice2D</linkto>
 // </prerequisite>
 //
 // <synopsis> 

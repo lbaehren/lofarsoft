@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: HDF5DataType.cc 20284 2008-03-13 12:58:07Z gervandiepen $
+//# $Id: HDF5DataType.cc 20324 2008-06-04 13:06:54Z gervandiepen $
 
 #ifdef HAVE_HDF5
 
@@ -113,6 +113,19 @@ namespace casa { //# NAMESPACE CASA - BEGIN
   {
     itsHidFile = H5Tcopy (H5T_C_S1);
     H5Tset_size (itsHidFile, H5T_VARIABLE);
+    itsHidMem = H5Tcopy (itsHidFile);
+  }
+
+  HDF5DataType::HDF5DataType (Int, Int)
+  {
+    // An empty array is represented by its dimensionality and type.
+    // Add an extra dummy field to make the compound different from (D)Complex
+    // without having to test on field names.
+    HDF5DataType dtInt((Int*)0);
+    itsHidFile = H5Tcreate (H5T_COMPOUND, 3*sizeof(Int));
+    H5Tinsert (itsHidFile, "emptyarray",           0, dtInt.getHidFile());
+    H5Tinsert (itsHidFile, "rank",       sizeof(Int), dtInt.getHidFile());
+    H5Tinsert (itsHidFile, "casatype", 2*sizeof(Int), dtInt.getHidFile());
     itsHidMem = H5Tcopy (itsHidFile);
   }
 

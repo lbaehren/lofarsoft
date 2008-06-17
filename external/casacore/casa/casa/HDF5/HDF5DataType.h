@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: HDF5DataType.h 20284 2008-03-13 12:58:07Z gervandiepen $
+//# $Id: HDF5DataType.h 20324 2008-06-04 13:06:54Z gervandiepen $
 
 #ifndef CASA_HDF5DATATYPE_H
 #define CASA_HDF5DATATYPE_H
@@ -89,6 +89,9 @@ namespace casa { //# NAMESPACE CASA - BEGIN
     // Create an HDF5 datatype object for a scalar string.
     // The length of the string is part of the type.
     HDF5DataType (const String& value);
+
+    // Create an HDF5 datatype object for an empty array.
+    HDF5DataType (Int, Int);
 
     // The destructor closes the HDF5 data type object.
     ~HDF5DataType()

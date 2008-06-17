@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tArrayMath2.cc 19737 2006-11-13 01:25:49Z gvandiep $
+//# $Id: tArrayMath2.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 #include <casa/Arrays/Array.h>
@@ -670,12 +670,12 @@ int main()
     }
   } catch (AipsError x) {
     cout << "Unexpected exception: " << x.getMesg() << endl;
-    exit(1);
+    return 1;
   }
   if (errFlag) {
     cout << "  erronous run" << endl;
-    exit(1);
+    return 1;
   }
   cout << "OK" << endl;
-  exit(0);
+  return 0;
 }

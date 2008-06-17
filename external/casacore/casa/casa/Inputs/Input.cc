@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Input.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: Input.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //  Class Input: the user interface
 
@@ -497,7 +497,7 @@ void Input::keys()
 // Swallow arguments, setting keyword=value pairs appropriately from command
 // line arguments in either "keyword=value" or "-keyword value" format. Argv[0]
 // is assumed to be the program name.
-void Input::readArguments (Int ac, char *av[])
+void Input::readArguments (int ac, const char* av[])
 {
   Int i;
   createPar (1, "argv0", av[0], "Program name", "", "", "");

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: dImageMoments.cc 20048 2007-03-19 05:46:10Z Malte.Marquarding $
+//# $Id: dImageMoments.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 //
 // IMOMENT generate moments from an image.  The use may specify the moment
 // axis and the moments to output.  The term "moment" is used loosely
@@ -184,13 +184,13 @@
 enum defaults {IN, MOMENTS, AXIS, REGION, METHOD, SMOOTH, RANGE, SNR, OUT, SMOUT, 
                PLOTTING, NDEFAULTS};
 
-int main (int argc, char **argv)
+int main (int argc, const char* argv[])
 {
 
 try {
 
    Input inputs(1);
-   inputs.version ("$Revision: 20048 $");
+   inputs.version ("$Revision: 20329 $");
 
 
 // Get inputs
@@ -420,37 +420,37 @@ try {
       if (validInputs(MOMENTS)) {
          if (!moment.setMoments(moments)) {
             os << LogIO::SEVERE << moment.errorMessage() << LogIO::POST;
-            exit(1);
+            return 1;
          }
       }
       if (validInputs(AXIS)) {
          if (!moment.setMomentAxis(momentAxis)) {
             os << LogIO::SEVERE << moment.errorMessage() << LogIO::POST;
-            exit(1);
+            return 1;
          }
       }
       if (validInputs(METHOD)) {
          if (!moment.setWinFitMethod(winFitMethods)) {
             os << LogIO::SEVERE << moment.errorMessage() << LogIO::POST;
-            exit(1);
+            return 1;
          }
       }
       if (validInputs(SMOOTH)) {
          if (!moment.setSmoothMethod(smoothAxes, kernelTypes, kernelWidths)) {
             os << LogIO::SEVERE << moment.errorMessage() << LogIO::POST;
-            exit(1);
+            return 1;
          }
       }
       if (validInputs(RANGE)) {
          if (!moment.setInExCludeRange(include, exclude)) {
             os << LogIO::SEVERE << moment.errorMessage() << LogIO::POST;
-            exit(1);
+            return 1;
          }
       }
       if (validInputs(SNR)) {
          if (!moment.setSnr(peakSNR, stdDeviation)) {
             os << LogIO::SEVERE << moment.errorMessage() << LogIO::POST;
-            exit(1);
+            return 1;
          }
       }
       if (validInputs(SMOUT)) {
@@ -460,7 +460,7 @@ try {
          PGPlotter plotter(device);
          if (!moment.setPlotting (plotter, nxy, yInd)) {
             os << LogIO::SEVERE << moment.errorMessage() << LogIO::POST;
-            exit(1);
+            return 1;
          }
       }
 
@@ -470,7 +470,7 @@ try {
       Bool doTemp = False;
       if (!moment.createMoments(images, doTemp, out)) {
          os << LogIO::SEVERE << moment.errorMessage() << LogIO::POST;
-         exit(1);
+         return 1;
       }
       if (doTemp) {
          for (uInt i=0; i<images.nelements(); i++) {

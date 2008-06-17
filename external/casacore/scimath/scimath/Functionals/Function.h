@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Function.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: Function.h 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #ifndef SCIMATH_FUNCTION_H
 #define SCIMATH_FUNCTION_H
@@ -38,10 +38,11 @@
 
 //# Forward declarations
 #include <casa/iosfwd.h>
-class casa::String;
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
+//# Forward declarations
+class String;
 class RecordInterface;
  
 // <summary> Numerical functional interface class

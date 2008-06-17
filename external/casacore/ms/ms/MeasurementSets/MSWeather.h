@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: MSWeather.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: MSWeather.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef MS_MSWEATHER_H
 #define MS_MSWEATHER_H
@@ -44,10 +44,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // <reviewed reviewer="Bob Garwood" date="1997/02/01" tests="" demos="">
 
 // <prerequisite>
-// <ul>
 //   <li> <linkto class="MeasurementSet:description">MeasurementSet</linkto> 
 //   <li> <linkto class="MSTable">MSTable</linkto> 
-// </ul>
 // </prerequisite>
 //
 // <etymology>
@@ -74,7 +72,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // </motivation>
 //
 // <todo asof="1999/01/22">
-// see MeasurementSet.
+//  see MeasurementSet.
 // </todo>
 
 class MSWeather:public MSWeatherEnums,

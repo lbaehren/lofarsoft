@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tTableMeasures.cc 20019 2007-03-13 21:40:09Z gervandiepen $
+//# $Id: tTableMeasures.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <measures/TableMeasures/ScalarMeasColumn.h>
 #include <measures/TableMeasures/ArrayMeasColumn.h>
@@ -1423,7 +1423,7 @@ void testRefCodeChg()
 }
 
 
-int main(int argc)
+int main(int argc, const char*[])
 {
   try {
     Bool doExcep = (argc<2);
@@ -1441,7 +1441,7 @@ int main(int argc)
     cout << "An error occurred.  The test ended early with the following";
     cout << " message:\n";
     cout << x.getMesg() << endl;
-    exit(1);
+    return 1;
   }
-  exit(0);
+  return 0;
 }

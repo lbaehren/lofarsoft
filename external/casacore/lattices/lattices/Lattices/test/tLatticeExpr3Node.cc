@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tLatticeExpr3Node.cc 19909 2007-02-23 02:08:02Z Malte.Marquarding $
+//# $Id: tLatticeExpr3Node.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <lattices/Lattices/LatticeExprNode.h>
 #include <lattices/Lattices/ArrayLattice.h>
@@ -118,7 +118,7 @@ Bool doIt (const SubLattice<Float>& aF, const LCRegion& region1,
 }
 
 
-main()
+int main()
 {
     Bool ok = True;
     try {

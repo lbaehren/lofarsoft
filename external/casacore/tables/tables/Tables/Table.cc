@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Table.cc 20280 2008-03-06 12:22:34Z gervandiepen $
+//# $Id: Table.cc 20305 2008-04-21 10:01:24Z gervandiepen $
 
 #include <tables/Tables/Table.h>
 #include <tables/Tables/SetupNewTab.h>
@@ -406,7 +406,7 @@ void Table::deepCopy (const String& newName,
 
 Table Table::copyToMemoryTable (const String& newName, Bool noRows) const
 {
-  Table newtab = TableCopy::makeEmptyMemoryTable (newName, *this);
+  Table newtab = TableCopy::makeEmptyMemoryTable (newName, *this, noRows);
   if (!noRows) {
     TableCopy::copyRows (newtab, *this);
   }

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: dRetypedArrayEngine.cc 19965 2007-02-28 03:59:45Z gervandiepen $
+//# $Id: dRetypedArrayEngine.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 
 //# Includes
@@ -200,7 +200,7 @@ void b();
 void c();
 
 
-int main (int argc)
+int main (int argc, const char*[])
 {
     try {
 	a( (argc<2));

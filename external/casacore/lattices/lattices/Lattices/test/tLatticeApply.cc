@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tLatticeApply.cc 20256 2008-02-23 20:28:24Z gervandiepen $
+//# $Id: tLatticeApply.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <lattices/Lattices/LatticeApply.h>
 #include <lattices/Lattices/LineCollapser.h>
@@ -257,7 +257,7 @@ void MyLatticeProgress::done()
 }
 
 
-void doIt (int argc, char *argv[])
+void doIt (int argc, const char* argv[])
 {
     Input inp(1);
     inp.version(" ");
@@ -618,7 +618,7 @@ void doIt (int argc, char *argv[])
 }
 
 
-main (int argc, char *argv[])
+int main (int argc, const char* argv[])
 {
     try {
 	doIt (argc,argv);

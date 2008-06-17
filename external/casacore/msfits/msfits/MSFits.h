@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSFits.h 18697 2005-05-23 07:05:27Z gvandiep $
+//# $Id: MSFits.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef MSFITS_MSFITS_H
 #define MSFITS_MSFITS_H
@@ -38,9 +38,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // </summary>
 
 // <prerequisite>
-// <ul>
 //   <li> <linkto module="MeasurementSets:description">MeasurementSets</linkto> module
-// </ul>
 // </prerequisite>
 //
 //

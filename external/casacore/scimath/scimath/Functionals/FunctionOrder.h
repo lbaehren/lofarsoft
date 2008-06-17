@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: FunctionOrder.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: FunctionOrder.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef SCIMATH_FUNCTIONORDER_H
 #define SCIMATH_FUNCTIONORDER_H
@@ -35,12 +35,12 @@
 #include <casa/Utilities/RecordTransformable.h>
 #include <scimath/Functionals/Function.h>
 #include <casa/BasicSL/String.h>
+#include <casa/iosfwd.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
 //# Forward declarations
 class RecordInterface;
-#include <casa/iosfwd.h>
 
 // <summary> Container of function description details
 // </summary>

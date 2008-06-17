@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TableDesc.h 20236 2008-02-07 17:08:15Z gervandiepen $
+//# $Id: TableDesc.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef TABLES_TABLEDESC_H
 #define TABLES_TABLEDESC_H
@@ -33,6 +33,7 @@
 #include <casa/aips.h>
 #include <tables/Tables/ColDescSet.h>
 #include <casa/IO/AipsIO.h>
+#include <casa/iosfwd.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
@@ -41,7 +42,6 @@ class TableRecord;
 class TableAttr;
 class TabPath;
 template<class T> class Vector;
-#include <casa/iosfwd.h>
 
 // <summary>
 // Define the structure of an AIPS++ table

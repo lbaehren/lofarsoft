@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: LogIO.h 20259 2008-02-25 23:28:59Z gervandiepen $
+//# $Id: LogIO.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef CASA_LOGIO_H
 #define CASA_LOGIO_H
@@ -34,13 +34,13 @@
 #include <casa/Logging/LogMessage.h>
 #include <casa/Logging/LogSink.h>
 #include <casa/BasicSL/Complex.h>
+#include <casa/iosstrfwd.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
 //# Forward Declarations
 class LogSink;
 class LogOrigin;
-#include <casa/iosstrfwd.h>
 
 // <summary>
 // ostream-like interface to creating log messages.

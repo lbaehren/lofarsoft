@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ExtendImage.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: ExtendImage.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef IMAGES_EXTENDIMAGE_H
 #define IMAGES_EXTENDIMAGE_H
@@ -48,10 +48,8 @@ template <class T> class ExtendLattice;
 // </reviewed>
 //
 // <prerequisite>
-// <list>
-//   <item> <linkto class=ImageInterface>ImageInterface</linkto>
-//   <item> <linkto class=ExtendLattice>ExtendLattice</linkto>
-// </list>
+//   <li> <linkto class=ImageInterface>ImageInterface</linkto>
+//   <li> <linkto class=ExtendLattice>ExtendLattice</linkto>
 // </prerequisite>
 //
 // <synopsis> 

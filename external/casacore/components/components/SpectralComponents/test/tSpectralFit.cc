@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tSpectralFit.cc 20211 2008-01-18 03:29:02Z Malte.Marquarding $
+//# $Id: tSpectralFit.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 #include <casa/aips.h>
@@ -42,7 +42,8 @@
 #include <casa/iostream.h>
 
 #include <casa/namespace.h>
-int main(int argc, char **argv) {
+int main(int argc, const char* argv[])
+{
       
   // RecordInterface
   {
@@ -374,8 +375,9 @@ int main(int argc, char **argv) {
       
     } catch (AipsError x) {
       cout << x.getMesg() << endl;
+      return 1;
     };
   }
   
-  exit(0);
+  return 0;
 }

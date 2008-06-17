@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tQuantumHolder.cc 20254 2008-02-23 16:37:46Z gervandiepen $
+//# $Id: tQuantumHolder.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 
@@ -166,7 +166,8 @@ int main() {
 
   } catch (AipsError x) {
     cout << x.getMesg() << endl;
+    return 1;
   } 
 
-  exit(0);
+  return 0;
 }

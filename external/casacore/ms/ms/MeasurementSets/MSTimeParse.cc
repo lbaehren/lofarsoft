@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSTimeParse.cc 20266 2008-02-26 00:43:05Z gervandiepen $
+//# $Id: MSTimeParse.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <ms/MeasurementSets/MSTimeParse.h>
 #include <ms/MeasurementSets/MSMainColumns.h>
@@ -32,6 +32,7 @@
 #include <measures/Measures/MEpoch.h>
 #include <ms/MeasurementSets/MSSelectionError.h>
 #include <casa/BasicSL/String.h>
+#include <limits>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
   

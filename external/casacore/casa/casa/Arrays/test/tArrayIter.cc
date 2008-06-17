@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tArrayIter.cc 20234 2008-02-07 16:53:38Z gervandiepen $
+//# $Id: tArrayIter.cc 20321 2008-06-04 04:49:44Z Malte.Marquarding $
 
 //# Includes
 
@@ -32,6 +32,7 @@
 #include <casa/Arrays/Array.h>
 #include <casa/Arrays/ArrayMath.h>
 #include <casa/Arrays/ArrayLogical.h>
+#include <casa/Arrays/ArrayIO.h>
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/Arrays/Matrix.h>

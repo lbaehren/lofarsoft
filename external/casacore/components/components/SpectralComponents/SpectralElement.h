@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: SpectralElement.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: SpectralElement.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef COMPONENTS_SPECTRALELEMENT_H
 #define COMPONENTS_SPECTRALELEMENT_H
@@ -34,11 +34,9 @@
 #include <casa/Arrays/Vector.h>
 #include <casa/Utilities/RecordTransformable.h>
 #include <casa/BasicSL/String.h>
+#include <casa/iosfwd.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
-
-//# Forward Declarations
-#include <casa/iosfwd.h>
 
 // <summary>
 // Describes (a set of related) spectral lines

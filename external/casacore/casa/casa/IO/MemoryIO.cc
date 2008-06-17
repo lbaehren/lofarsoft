@@ -23,13 +23,13 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MemoryIO.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: MemoryIO.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 
 #include <casa/IO/MemoryIO.h>
 #include <casa/Utilities/Assert.h>
 #include <casa/Exceptions/Error.h>
-
+#include <cstring>                  //# for memcpy with gcc-4.3
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 

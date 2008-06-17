@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tPagedImage2.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tPagedImage2.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <images/Images/PagedImage.h>
 #include <coordinates/Coordinates/CoordinateSystem.h>
@@ -176,8 +176,8 @@ int main()
     cout<< "ok"<< endl;
   } catch (AipsError x) {
     cerr << "Exception caught: " << x.getMesg() << endl;
-    exit(1);
+    return 1;
   } 
 
-  exit(0);
+  return 0;
 }

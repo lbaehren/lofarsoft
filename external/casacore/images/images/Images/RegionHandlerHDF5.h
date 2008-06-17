@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: RegionHandlerHDF5.h 20287 2008-03-13 13:20:30Z gervandiepen $
+//# $Id: RegionHandlerHDF5.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef IMAGES_REGIONHANDLERHDF5_H
 #define IMAGES_REGIONHANDLERHDF5_H
@@ -51,10 +51,8 @@ class HDF5;
 // </reviewed>
 
 // <prerequisite>
-// <list>
-//   <item> <linkto class=HDF5Image>HDF5Image</linkto>
-//   <item> <linkto class=ImageRegion>ImageRegion</linkto>
-// </list>
+//   <li> <linkto class=HDF5Image>HDF5Image</linkto>
+//   <li> <linkto class=ImageRegion>ImageRegion</linkto>
 // </prerequisite>
 
 // <synopsis> 

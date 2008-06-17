@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ColDescSet.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: ColDescSet.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef TABLES_COLDESCSET_H
 #define TABLES_COLDESCSET_H
@@ -33,11 +33,9 @@
 #include <tables/Tables/ColumnDesc.h>
 #include <casa/Containers/SimOrdMap.h>
 #include <casa/BasicSL/String.h>
+#include <casa/iosfwd.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
-
-//# Forward Declarations
-#include <casa/iosfwd.h>
 
 // <summary>
 // Set of table column descriptions

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: AipsIO.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: AipsIO.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <casa/IO/AipsIO.h>
 #include <casa/IO/TypeIO.h>
@@ -33,6 +33,7 @@
 #include <casa/OS/RegularFile.h>
 #include <casa/BasicSL/Complex.h>
 #include <casa/Utilities/Assert.h>
+#include <cstring>                  //# for strcmp with gcc-4.3
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 

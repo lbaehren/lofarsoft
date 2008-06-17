@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tRecordGramTable.cc 20044 2007-03-19 04:09:41Z Malte.Marquarding $
+//# $Id: tRecordGramTable.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <tables/Tables/RecordGram.h>
 #include <tables/Tables/ExprNode.h>
@@ -149,16 +149,16 @@ int main (int argc, const char* argv[])
 {
   if (argc < 2) {
     docomm();
-    exit(0);
+    return 0;
   }
   try {
     doIt(argv[1]);
   } catch (AipsError x) {
     cout << "Unexpected exception: " << x.getMesg() << endl;
-    exit(1);
+    return 1;
   } catch (...) {
     cout << "Unexpected unknown exception" << endl;
-    exit(1);
+    return 1;
   }
-  exit(0);
+  return 0;
 }

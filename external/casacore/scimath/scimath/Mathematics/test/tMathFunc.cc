@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tMathFunc.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tMathFunc.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 
@@ -36,7 +36,8 @@
 #include <casa/Utilities/Assert.h>
 
 #include <casa/namespace.h>
-main()
+
+int main()
 {
 try{
    cout << "\nMathFunc<Float> constants : " << endl;

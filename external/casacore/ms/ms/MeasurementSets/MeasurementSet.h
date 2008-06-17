@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: MeasurementSet.h 20266 2008-02-26 00:43:05Z gervandiepen $
+//# $Id: MeasurementSet.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef MS_MEASUREMENTSET_H
 #define MS_MEASUREMENTSET_H
@@ -78,10 +78,8 @@ typedef MeasurementSet MS;
 // <reviewed reviewer="Bob Garwood" date="1997/02/01" tests="tMeasurementSet.cc" demos="">
 
 // <prerequisite>
-// <ul>
 //   <li> <linkto module="Tables:description">Tables</linkto> module
 //   <li> <linkto class="MSTable">MSTable</linkto> 
-// </ul>
 // </prerequisite>
 //
 // <etymology>

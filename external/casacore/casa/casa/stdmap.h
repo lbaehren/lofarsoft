@@ -23,15 +23,15 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: stdmap.h 19848 2007-02-12 04:43:35Z Malte.Marquarding $
+//# $Id: stdmap.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef CASA_STDMAP_H
 #define CASA_STDMAP_H
 
-// Define the C standard C++ include file. 
-// This is an interim solution to cater for the SGI non-existence of
-// them (e.g. <cstring>)
-// Make sure any special macros are set
+//# Define the C standard C++ include file. 
+//# This is an interim solution to cater for the SGI non-existence of
+//# them (e.g. <cstring>)
+//# Make sure any special macros are set
 #include <casa/aips.h>
 
 #include <map>
@@ -43,9 +43,9 @@ using std::pair;
 using std::allocator;
 using std::less;
 
-// A special macro to create the auxilliary template definitions for
-// various compilers
-// Use if defined a map<T, U> as AIPS_MAP_AUX_TEMPLATES(T, U)
+//# A special macro to create the auxilliary template definitions for
+//# various compilers
+//# Use if defined a map<T, U> as AIPS_MAP_AUX_TEMPLATES(T, U)
 
 #if defined(AIPS_MAP_AUX_TEMPLATES)
 #undef AIPS_MAP_AUX_TEMPLATES

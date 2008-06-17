@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LatticeHistograms.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: LatticeHistograms.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef LATTICES_LATTICEHISTOGRAMS_H
 #define LATTICES_LATTICEHISTOGRAMS_H
@@ -36,6 +36,7 @@
 #include <lattices/Lattices/LatticeProgress.h>
 #include <casa/Logging/LogIO.h>
 #include <scimath/Mathematics/NumericTraits.h>
+#include <casa/iosfwd.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
@@ -45,7 +46,6 @@ template <class T> class TempLattice;
 template <class T> class Vector;
 class IPosition;
 class PGPlotter;
-#include <casa/iosfwd.h>
 
 // <summary>
 // Displays histograms of regions from a lattice.
@@ -317,10 +317,10 @@ private:
    IPosition blcParent_p;
 
 
-// Convert a <T> to a <Float> for plotting
+// Convert a <tt>T</tt> to a <tt>Float</tt> for plotting
    static Float convertT (const T value) {return Float(std::real(value));};   
  
-// Convert a <Float> (from plotting) to a <T>
+// Convert a <tt>Float</tt> (from plotting) to a <tt>T</tt>
    static T convertF (const Float value) {return T(value);};
 
 // Display histograms as a function of display axis

@@ -24,7 +24,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: TSMCube.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: TSMCube.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef TABLES_TSMCUBE_H
 #define TABLES_TSMCUBE_H
@@ -36,6 +36,7 @@
 #include <casa/Containers/Record.h>
 #include <casa/Arrays/IPosition.h>
 #include <casa/OS/Conversion.h>
+#include <casa/iosfwd.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
@@ -45,7 +46,6 @@ class TSMFile;
 class TSMColumn;
 class BucketCache;
 template<class T> class Block;
-#include <casa/iosfwd.h>
 
 // <summary>
 // Tiled hypercube in a table

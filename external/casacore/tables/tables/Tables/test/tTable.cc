@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tTable.cc 19589 2006-09-04 23:56:06Z gvandiep $
+//# $Id: tTable.cc 20335 2008-06-12 07:37:36Z gervandiepen $
 
 #include <tables/Tables/TableDesc.h>
 #include <tables/Tables/SetupNewTab.h>
@@ -403,6 +403,12 @@ void b (Bool doExcp)
     cout << "sortab2 type = " << sortab2.tableInfo().type() << endl;
     cout << "sortab2 subtype = " << sortab2.tableInfo().subType() << endl;
     cout << sortab2.tableInfo().readme() << endl;
+
+    // Test using an empty selection.
+    sortab = sortab(TableExprNode());
+    AlwaysAssertExit (sortab.nrow() == sortab2.nrow());
+    sortab2 = sortab2(TableExprNode(), 5);
+    AlwaysAssertExit (sortab2.nrow() == 5);
 
     // Select using the IN function.
     TableExprNodeSet set;
@@ -876,7 +882,7 @@ void d()
     }
 }
 
-int main (int argc)
+int main (int argc,const char*[])
 {
     try {
 	Table::setScratchCallback (cbFunc);

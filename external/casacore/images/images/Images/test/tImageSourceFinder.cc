@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tImageSourceFinder.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tImageSourceFinder.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 // 
 //
 #include <casa/aips.h>
@@ -64,7 +64,7 @@ Bool compareSkyComponent (const SkyComponent& in,
 void test1 (LogIO& os, ImageInterface<Float>& im, const DirectionCoordinate& dC);
 
 
-int main (int argc, char **argv)
+int main (int argc, const char* argv[])
 {
 try {
 
@@ -99,10 +99,10 @@ try {
 //
 }  catch (AipsError x) {
      cerr << "aipserror: error " << x.getMesg() << endl;
-     exit(1);
+     return 1;
 } 
 
-exit(0);
+return 0;
 }
 
 

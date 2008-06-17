@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tHDF5Iterator.cc 20286 2008-03-13 13:02:22Z gervandiepen $
+//# $Id: tHDF5Iterator.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #ifndef HAVE_HDF5
 int main()
@@ -1161,7 +1161,7 @@ void testAdd (Lattice<Int>& lat1, Lattice<Int>& lat2, Bool useRef)
 }
 
 
-int main (int argc, char *argv[])
+int main (int argc, const char *argv[])
 {
  try {
     {

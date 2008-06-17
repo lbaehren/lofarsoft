@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Table.h 20238 2008-02-11 13:44:45Z gervandiepen $
+//# $Id: Table.h 20335 2008-06-12 07:37:36Z gervandiepen $
 
 #ifndef TABLES_TABLE_H
 #define TABLES_TABLE_H
@@ -719,6 +719,8 @@ public:
     // You need to include ExprNode.h for this purpose.
     // <br>If <src>maxRow>0</src>, the selection process will stop
     // when <src>maxRow</src> matching rows are found.
+    // <br>The TableExprNode argument can be empty (null) meaning that only
+    // the <src>maxRow</src> argument is taken into account.
     Table operator() (const TableExprNode&, uInt maxRow=0) const;
 
     // Select rows using a vector of row numbers.

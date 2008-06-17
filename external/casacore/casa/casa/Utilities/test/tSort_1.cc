@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tSort_1.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tSort_1.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 #include <casa/Utilities/Sort.h>
@@ -45,7 +45,7 @@ static Int* gbla;
 // It sorts some data in ascending and/or descending order.
 // The timing results are written to stdout.
 
-int main(int argc, char** argv)
+int main(int argc, const char* argv[])
 {
     Bool success = True;
     uInt nr=5000;

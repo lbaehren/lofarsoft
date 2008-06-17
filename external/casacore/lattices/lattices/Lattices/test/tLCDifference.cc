@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tLCDifference.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tLCDifference.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <lattices/Lattices/LCDifference.h>
 #include <lattices/Lattices/LCBox.h>
@@ -122,7 +122,7 @@ void doIt (const IPosition& latticeShape,
 }
 
 
-main()
+int main()
 {
     try {
 	doIt (IPosition (2,11,20),
@@ -133,8 +133,8 @@ main()
 	      IPosition (2,4,16), 5.);
     } catch (AipsError x) {
 	cout << "Caught exception: " << x.getMesg() << endl;
-	exit(1);
+	return 1;
     } 
     cout << "OK" << endl; 
-    exit(0);
+    return 0;
 }

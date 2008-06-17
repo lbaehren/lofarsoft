@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tReadAsciiTable.cc 19768 2006-11-24 05:16:51Z gvandiep $
+//# $Id: tReadAsciiTable.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <tables/Tables/ReadAsciiTable.h>
 #include <tables/Tables/TableDesc.h>
@@ -62,7 +62,8 @@ void b2 (const String& dir);
 void b3 (const String& dir, const IPosition& autoShape);
 void erronous();
 
-int main (int argc, char** argv) {
+int main (int argc, const char* argv[])
+{
     try {
 	String dir;
 	if (argc > 1) {

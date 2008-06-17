@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ISMBase.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: ISMBase.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef TABLES_ISMBASE_H
 #define TABLES_ISMBASE_H
@@ -33,6 +33,7 @@
 #include <casa/aips.h>
 #include <tables/Tables/DataManager.h>
 #include <casa/Containers/Block.h>
+#include <casa/iosfwd.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
@@ -43,7 +44,6 @@ class ISMBucket;
 class ISMIndex;
 class ISMColumn;
 class StManArrayFile;
-#include <casa/iosfwd.h>
 
 // <summary>
 // Base class of the Incremental Storage Manager

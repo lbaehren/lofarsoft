@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Images.h 20160 2007-11-08 00:40:01Z Malte.Marquarding $
+//# $Id: Images.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef IMAGES_IMAGES_H
 #define IMAGES_IMAGES_H
@@ -85,8 +85,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // <motivation>
 // </motivation>
 
-// <todo asof="1998/11/02">
-// </todo>
+//# <todo asof="1998/11/02">
+//# </todo>
 
 // </module>
 

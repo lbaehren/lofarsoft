@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tVisIter.cc 19232 2006-01-30 01:21:50Z mvoronko $
+//# $Id: tVisIter.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
@@ -36,7 +36,8 @@
 #include <casa/namespace.h>
 using namespace std;
 
-int main(int argc, char **argv) {
+int main(int argc, const char* argv[])
+{
   Timer timer;
   for(Int i=0;i<20;i++) cout<<endl;  cout<<"Start."<<endl;
   try {

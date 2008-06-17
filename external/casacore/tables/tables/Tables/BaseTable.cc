@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: BaseTable.cc 19775 2006-12-11 05:40:29Z gvandiep $
+//# $Id: BaseTable.cc 20335 2008-06-12 07:37:36Z gervandiepen $
 
 #include <casa/aips.h>
 #include <tables/Tables/BaseTable.h>
@@ -316,6 +316,13 @@ void BaseTable::prepareCopyRename (const String& newName,
     // Do not do anything if the new name is the same as the old name.
     if (newName == name_p) {
 	return;
+    }
+    // Copy and rename is not allowed if the target table is open.
+    Path path(newName);
+    PlainTable* ptr = PlainTable::tableCache(path.absoluteName());
+    if (ptr) {
+        throw (TableInvOper ("Cannot copy/rename; target table " + newName +
+			     " is still open (is in the table cache)"));
     }
     // Test if the table already exists.
     // Throw an exception if a file (but not a table) exists.
@@ -647,6 +654,15 @@ Bool BaseTable::adjustRownrs (uInt, Vector<uInt>&, Bool) const
 BaseTable* BaseTable::select (const TableExprNode& node, uInt maxRow)
 {
     AlwaysAssert (!isNull(), AipsError);
+    // If it is a null expression, return maxrows.
+    if (node.isNull()) {
+        if (maxRow <=0  ||  maxRow >= nrow()) {
+	    return this;
+	}
+	Vector<uInt> rownrs(maxRow);
+	indgen(rownrs);
+	return select(rownrs);
+    }
     //# First check if the node is a Bool.
     if (node.dataType() != TpBool  ||  !node.isScalar()) {
 	throw (TableInvExpr ("expression result is not Bool scalar"));

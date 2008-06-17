@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: RecordRep.cc 20035 2007-03-16 00:18:12Z gervandiepen $
+//# $Id: RecordRep.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <casa/Containers/RecordRep.h>
 #include <casa/Containers/BlockIO.h>
@@ -36,6 +36,7 @@
 #include <casa/IO/AipsIO.h>
 #include <casa/Utilities/Assert.h>
 #include <casa/Exceptions/Error.h>
+#include <cstring>                  //# for memmove with gcc-4.3
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 

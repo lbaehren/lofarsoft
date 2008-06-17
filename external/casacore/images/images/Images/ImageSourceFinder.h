@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: ImageSourceFinder.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: ImageSourceFinder.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef IMAGES_IMAGESOURCEFINDER_H
 #define IMAGES_IMAGESOURCEFINDER_H
@@ -84,7 +84,6 @@ class LogIO;
 // </motivation>
 
 // <todo asof="2000/11/08">
-//  Lots
 // </todo>
  
 

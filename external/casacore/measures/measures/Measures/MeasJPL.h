@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MeasJPL.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: MeasJPL.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef MEASURES_MEASJPL_H
 #define MEASURES_MEASJPL_H
@@ -79,11 +79,11 @@ class MVEpoch;
 // <br>
 // Note that the normal usage of these tables is through the Measures system.
 // 
-// <logged>
-// 	<li> A message is Logged (once) if a table cannot be found
-//	<li> A message is logged (once) if a date outside the range in
+// <note>
+// 	A message is Logged (once) if a table cannot be found.
+//	A message is logged (once) if a date outside the range in
 //	the Tables is asked for. 
-// </logged>
+// </note>
 // <thrown>
 //     <li> AipsError if table opened has wrong format or otherwise corrupted.
 // </thrown>

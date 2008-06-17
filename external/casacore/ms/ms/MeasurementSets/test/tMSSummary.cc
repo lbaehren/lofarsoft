@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tMSSummary.cc 18612 2005-04-27 12:43:15Z gvandiep $
+//# $Id: tMSSummary.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 #include <casa/aips.h>
@@ -32,7 +32,7 @@
 #include <ms/MeasurementSets/MeasurementSet.h>
 #include <ms/MeasurementSets/MSSummary.h>
 
-int main(int argc, char *argv[])
+int main(int argc, const char* argv[])
 {
   using namespace std;
   using namespace casa;
@@ -58,6 +58,6 @@ int main(int argc, char *argv[])
     cout << x.getMesg() << endl;
   } 
   
-  exit(0);
+  return 0;
 }
 

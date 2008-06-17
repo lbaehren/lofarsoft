@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: AbstractFunctionFactory.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: AbstractFunctionFactory.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef SCIMATH_ABSTRACTFUNCTIONFACTORY_H
 #define SCIMATH_ABSTRACTFUNCTIONFACTORY_H
@@ -38,11 +38,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 class Record;
 
 // <summary>
-//
-//
-//
-//
-//
+// a class for creating Function objects from Records
 // </summary>
 
 // <use visibility=export>
@@ -78,18 +74,10 @@ class Record;
 //
 // </motivation>
 //
-// <templating arg=T>
-// </templating>
-//
 // <thrown>
-//    <li>
-//    <li>
 // </thrown>
 //
 // <todo asof="yyyy/mm/dd">
-//   <li> 
-//   <li> 
-//   <li> 
 // </todo>
 
 template<class T> 

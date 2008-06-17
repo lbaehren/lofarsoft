@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tRebinLattice.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tRebinLattice.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 
@@ -52,12 +52,13 @@ void doit4 (RebinLattice<Float>& rb, const IPosition& shape,
 
 
 
-int main (int argc, char **argv) {
+int main (int argc, const char* argv[])
+{
 
 try {
 
    Input inputs(1);
-   inputs.version ("$Revision: 18093 $");
+   inputs.version ("$Revision: 20329 $");
 
 // Get inputs
 

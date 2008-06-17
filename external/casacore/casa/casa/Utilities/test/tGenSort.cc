@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tGenSort.cc 20173 2007-11-22 01:22:30Z Malte.Marquarding $
+//# $Id: tGenSort.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 
@@ -38,7 +38,7 @@
 #include <casa/namespace.h>
 void sortall (Int*, uInt, int, Sort::Order, Bool);
 
-int main(int argc, char** argv)
+int main(int argc, const char* argv[])
 {
     uInt nr=4000;
     int type=Sort::HeapSort;

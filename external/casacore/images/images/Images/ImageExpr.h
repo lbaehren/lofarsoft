@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ImageExpr.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: ImageExpr.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef IMAGES_IMAGEEXPR_H
 #define IMAGES_IMAGEEXPR_H
@@ -56,10 +56,8 @@ class String;
 // </reviewed>
 //
 // <prerequisite>
-// <list>
-//   <item> LatticeExpr
-//   <item> ImageInterface
-// </list>
+//   <li> LatticeExpr
+//   <li> ImageInterface
 // </prerequisite>
 //
 // <etymology>

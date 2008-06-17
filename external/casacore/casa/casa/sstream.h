@@ -23,16 +23,16 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: sstream.h 19848 2007-02-12 04:43:35Z Malte.Marquarding $
+//# $Id: sstream.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef CASA_SSTREAM_H
 #define CASA_SSTREAM_H
 
-// Define the C standard C++ include file. 
-// This is an interim solution to cater for the SGI non-existence of
-// them (e.g. <cstring>)
+//# Define the C standard C++ include file. 
+//# This is an interim solution to cater for the SGI non-existence of
+//# them (e.g. <cstring>)
 
-// Make sure any special macros are set
+//# Make sure any special macros are set
 #include <casa/iostream.h>
 #include <sstream>
 

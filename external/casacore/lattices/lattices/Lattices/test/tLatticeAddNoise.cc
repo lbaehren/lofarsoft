@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tLatticeAddNoise.cc 19909 2007-02-23 02:08:02Z Malte.Marquarding $
+//# $Id: tLatticeAddNoise.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <lattices/Lattices/LatticeAddNoise.h>
 #include <lattices/Lattices/ArrayLattice.h>
@@ -49,7 +49,8 @@ void checkStats (Float av0, const Lattice<Float>& data,
                  Random::Types type);
 void checkStatsComplex (Float av0, const Lattice<Complex>& data,
                         Random::Types type);
-main ()
+
+int main ()
 {
   try {
 

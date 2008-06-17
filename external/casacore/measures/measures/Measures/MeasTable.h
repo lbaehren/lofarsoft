@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: MeasTable.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: MeasTable.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef MEASURES_MEASTABLE_H
 #define MEASURES_MEASTABLE_H
@@ -377,9 +377,9 @@ public:
   // </group>
   
   // Time related routines
-  // <logged>
-  //   <li> HIGH, WARNING given if correction not obtainable
-  // </logged>
+  // <note>
+  //   WARNING given if correction not obtainable
+  // </note>
   // <thrown>
   //  <li> AipsError if table seems to be corrupted
   // </thrown>

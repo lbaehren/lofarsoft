@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MeasFrame.h 19924 2007-02-27 00:41:19Z Malte.Marquarding $
+//# $Id: MeasFrame.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef MEASURES_MEASFRAME_H
 #define MEASURES_MEASFRAME_H
@@ -169,12 +169,12 @@ class MeasFrame {
   // <thrown>
   //   <li> AipsError if a non-frame Measure
   // </thrown>
-  // <grp>
+  // <group>
   MeasFrame(const Measure &meas1);
   MeasFrame(const Measure &meas1, const Measure &meas2);
   MeasFrame(const Measure &meas1, const Measure &meas2,
 	    const Measure &meas3);
-  // </grp>
+  // </group>
   // Copy constructor (reference semantics)
   MeasFrame(const MeasFrame &other);
   // Copy assignment (reference semantics)

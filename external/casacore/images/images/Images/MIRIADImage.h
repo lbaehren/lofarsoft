@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MIRIADImage.h 18462 2005-03-16 15:02:18Z gvandiep $
+//# $Id: MIRIADImage.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef IMAGES_MIRIADIMAGE_H
 #define IMAGES_MIRIADIMAGE_H
@@ -35,7 +35,6 @@
 #include <tables/Tables/TiledFileAccess.h>
 #include <lattices/Lattices/TiledShape.h>
 #include <casa/Containers/Record.h>
-// #include <fits/FITS/fits.h>
 #include <casa/BasicSL/String.h>
 #include <casa/Utilities/DataType.h>
 
@@ -64,10 +63,8 @@ class FitsInput;
 // </reviewed>
 
 // <prerequisite>
-// <list>
-//   <item> <linkto class=ImageInterface>ImageInterface</linkto>
-//   <item> <linkto class=FITSMask>FITSMask</linkto>
-// </list>
+//   <li> <linkto class=ImageInterface>ImageInterface</linkto>
+//   <li> <linkto class=FITSMask>FITSMask</linkto>
 // </prerequisite>
 
 // <etymology>

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MeasurementSets.h 20121 2007-09-05 07:34:45Z gervandiepen $
+//# $Id: MeasurementSets.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef MS_MEASUREMENTSETS_H
 #define MS_MEASUREMENTSETS_H
@@ -40,10 +40,8 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // </summary>
 
 // <prerequisite>
-// <ul>
 //   <li> <linkto module="Tables:description">Tables</linkto> module
 //   <li> <a href="http://www.astron.nl/aips++/docs/notes/191/191.html">AIPS++ Note 191</a>
-// </ul>
 // </prerequisite>
 //
 //

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tTableCopy.cc 19589 2006-09-04 23:56:06Z gvandiep $
+//# $Id: tTableCopy.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <tables/Tables.h>
 #include <stdexcept>
@@ -39,7 +39,7 @@ String removeDir (const String& msg)
   return s;
 }
 
-int main (int argc, char* argv[])
+int main (int argc, const char* argv[])
 {
   Table::TableType ttyp = Table::Plain;
   if (argc > 1  &&  String(argv[1]) == String("m")) {

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tTableVector.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tTableVector.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <tables/Tables/ScaColDesc.h>
 #include <tables/Tables/TableDesc.h>
@@ -49,7 +49,9 @@
 void credes();
 void cretab(uInt);
 void dovec (Int);
-main (int argc, char** argv) {
+
+int main (int argc, const char* argv[])
+{
     uInt nr = 5000;
     if (argc > 1) {
 	istringstream istr(argv[1]);

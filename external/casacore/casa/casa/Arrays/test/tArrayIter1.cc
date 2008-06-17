@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tArrayIter1.cc 18115 2004-12-06 07:15:43Z gvandiep $
+//# $Id: tArrayIter1.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 
@@ -431,9 +431,9 @@ int main()
     }
   } catch (AipsError x) {
     cout << "Unexpected exception: " << x.getMesg() << endl;
-    exit(1);
+    return 1;
   }
       
   cout << "OK\n";
-  exit(0);
+  return 0;
 }

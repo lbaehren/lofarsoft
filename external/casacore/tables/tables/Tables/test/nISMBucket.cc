@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: nISMBucket.cc 18648 2005-05-12 14:15:50Z wbrouw $
+//# $Id: nISMBucket.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <casa/Arrays/Vector.h>
 #include <casa/Containers/Block.h>
@@ -48,7 +48,7 @@
 // often a value varies.
 // </synopsis>
 
-int main (int argc, char** argv)
+int main (int argc, const char* argv[])
 {
     if (argc < 2) {
 	cout << "This program calculates the number of buckets needed" << endl;

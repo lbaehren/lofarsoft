@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: VanVleck.cc 20253 2008-02-23 15:15:00Z gervandiepen $
+//# $Id: VanVleck.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 
@@ -484,7 +484,7 @@ Double VanVleck::invErfc(Double x)
     q2 = 1.385228141995;
     q3 = 1.0;
     result = (p1/t+p2+t*(p3+t*(p4+t*(p5+t*p6)))) / (q1+t*(q2+t*q3));
-  } else if (x>=1e-1000) {
+  } else if (x>0) {
     // from table 70 of Blair et al
     // maximum relative error of 2.45e-8
     Double t = 1.0/sqrt(-log(x));

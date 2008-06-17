@@ -24,8 +24,8 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: ImageMomentsProgress.h 18093 2004-11-30 17:51:10Z ddebonis $
-//
+//# $Id: ImageMomentsProgress.h 20299 2008-04-03 05:56:44Z gervandiepen $
+
 #ifndef IMAGES_IMAGEMOMENTSPROGRESS_H
 #define IMAGES_IMAGEMOMENTSPROGRESS_H
 

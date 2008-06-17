@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tImageExprGram.cc 20274 2008-02-28 03:53:32Z gervandiepen $
+//# $Id: tImageExprGram.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <images/Images/ImageExprParse.h>
 #include <images/Images/ImageExpr.h>
@@ -104,7 +104,7 @@ void doExpr (const String& expr, const Record& regions)
 }
 
 
-int main (int argc, char *argv[])
+int main (int argc, const char* argv[])
 {
  Bool foundError = False;
 

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tTableIter.cc 20177 2007-11-22 03:27:05Z Malte.Marquarding $
+//# $Id: tTableIter.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <tables/Tables/TableDesc.h>
 #include <tables/Tables/ScaColDesc.h>
@@ -54,7 +54,9 @@ void credes();
 void cretab(uInt);
 void doiter1();
 void doiter2();
-int main (int argc, char** argv) {
+
+int main (int argc, const char* argv[])
+{
     uInt nr = 5000;
     if (argc > 1) {
 	istringstream istr(argv[1]);

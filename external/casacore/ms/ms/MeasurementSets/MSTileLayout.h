@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSTileLayout.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: MSTileLayout.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef MS_MSTILELAYOUT_H
 #define MS_MSTILELAYOUT_H
@@ -43,10 +43,8 @@ class String;
 // <use visibility=export>
  
 // <prerequisite>
-// <ul>
 //   <li> <linkto class="MeasurementSet:description">MeasurementSet</linkto> 
-//   <li> <linkto class="TiledStMan:description">TileStMan</linkto> 
-// </ul>
+//   <li> <linkto class="TiledStMan:description">TiledStMan</linkto> 
 // </prerequisite>
 //
 // <etymology>

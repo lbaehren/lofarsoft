@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tImageFFT.cc 20213 2008-01-18 03:37:33Z Malte.Marquarding $
+//# $Id: tImageFFT.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 // 
 //
 #include <casa/aips.h>
@@ -62,12 +62,12 @@ void checkNumbers (const ImageInterface<Float>& rIn,
 void makeMask(ImageInterface<Float>& out);
 void makeMask(ImageInterface<Complex>& out);
 
-int main (int argc, char **argv)
+int main (int argc, const char* argv[])
 {
 try {
 
    Input inputs(1);
-   inputs.version ("$Revision: 20213 $");
+   inputs.version ("$Revision: 20329 $");
 
 
 // Get inputs
@@ -216,16 +216,16 @@ try {
    } else {
       os << LogIO::NORMAL << "images of type " << Int(imageType)
 	 << " not yet supported" << LogIO::POST;
-      exit(1);
+      return 1;
    }
 }
 
   catch (AipsError x) {
      cerr << "aipserror: error " << x.getMesg() << endl;
-     exit(1);
+     return 1;
   } 
 
-  exit(0);
+  return 0;
 }
 
 

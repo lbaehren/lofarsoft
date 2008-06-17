@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tTiledShape.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tTiledShape.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <lattices/Lattices/TiledShape.h>
 #include <casa/Arrays/Vector.h>
@@ -119,7 +119,7 @@ void testTiling (uInt tileSize)
     }
 }
 	
-main (int argc, char** argv)
+int main (int argc, const char* argv[])
 {
     try {
 	testClass();

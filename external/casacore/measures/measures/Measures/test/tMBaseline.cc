@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tMBaseline.cc 19967 2007-02-28 04:11:58Z gervandiepen $
+//# $Id: tMBaseline.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 #include <casa/aips.h>
@@ -217,5 +217,5 @@ int main()
 	cout << x.getMesg() << endl;
     } 
 
-    exit(0);
+    return 0;
 }

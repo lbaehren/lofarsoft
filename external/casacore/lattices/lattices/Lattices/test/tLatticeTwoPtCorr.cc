@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tLatticeTwoPtCorr.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tLatticeTwoPtCorr.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <lattices/Lattices/LatticeTwoPtCorr.h>
 #include <lattices/Lattices/ArrayLattice.h>
@@ -42,7 +42,7 @@
 
 
 #include <casa/namespace.h>
-main ()
+int main ()
 {
   try {
 

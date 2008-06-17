@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tImageExpr3Gram.cc 19964 2007-02-28 03:46:48Z gervandiepen $
+//# $Id: tImageExpr3Gram.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <images/Images/PagedImage.h>
 #include <images/Images/ImageExprParse.h>
@@ -39,7 +39,7 @@
 
 
 #include <casa/namespace.h>
-int main (int argc, char *argv[])
+int main (int argc, const char* argv[])
 {
   Bool foundError = False;
 

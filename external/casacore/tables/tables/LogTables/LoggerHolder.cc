@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: LoggerHolder.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: LoggerHolder.cc 20331 2008-06-06 10:25:29Z gervandiepen $
 
 
 #include <tables/LogTables/LoggerHolder.h>
@@ -189,7 +189,7 @@ void LoggerHolderRep::doReopen()
 {
   if (itsIsClosed  &&  itsTablePtr == 0  &&  !itsTableName.empty()) {
     if (itsIsWritable) {
-      itsTablePtr = new TableLogSink(LogFilter(), itsTableName, False);
+      itsTablePtr = new TableLogSink(LogFilter(), itsTableName);
     } else {
       itsTablePtr = new TableLogSink(itsTableName);
     }

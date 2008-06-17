@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tTable_4.cc 19589 2006-09-04 23:56:06Z gvandiep $
+//# $Id: tTable_4.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <tables/Tables/TableDesc.h>
 #include <tables/Tables/SetupNewTab.h>
@@ -309,7 +309,7 @@ void doTable (Bool ask, const TableDesc& td)
   }
 }
 
-int main (int argc)
+int main (int argc, const char*[])
 {
   try {
     cout << "tTable_4 is for interactive playing with tables" << endl;

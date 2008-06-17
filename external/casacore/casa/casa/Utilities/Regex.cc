@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Regex.cc 20254 2008-02-23 16:37:46Z gervandiepen $
+//# $Id: Regex.cc 20330 2008-06-06 08:57:41Z gervandiepen $
 
 // Regex class implementation
 
@@ -33,6 +33,8 @@
 #include <casa/BasicSL/String.h>
 #include <casa/stdexcept.h>
 #include <casa/iostream.h>
+#include <cstring>                  //# for memcpy with gcc-4.3
+#include <stdlib.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tLatticeExprNode.cc 20273 2008-02-28 03:47:48Z gervandiepen $
+//# $Id: tLatticeExprNode.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <lattices/Lattices/LatticeExpr.h>
 #include <lattices/Lattices/LELAttribute.h>
@@ -3399,7 +3399,7 @@ Bool checkMask (const LatticeExprNode& expr,
 }
 
 
-int main (int argc, char *argv[])
+int main (int argc, const char* argv[])
 {
   Bool ok = True;
   try {

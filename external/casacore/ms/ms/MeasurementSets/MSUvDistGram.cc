@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSUvDistGram.cc 20266 2008-02-26 00:43:05Z gervandiepen $
+//# $Id: MSUvDistGram.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 // MSUvDistGram; grammar for UV distribution command lines
 
@@ -41,6 +41,7 @@
 
 #include <tables/Tables/TableParse.h>       // routines used by bison actions
 #include <tables/Tables/TableError.h>
+#include <limits>
 
 //# stdlib.h is needed for bison 1.28 and needs to be included here
 //# (before the flex/bison files).

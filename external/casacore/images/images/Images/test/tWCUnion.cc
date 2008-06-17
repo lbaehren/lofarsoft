@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tWCUnion.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tWCUnion.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <images/Images/WCUnion.h>
 #include <images/Images/WCBox.h>
@@ -115,7 +115,7 @@ void doIt()
 }
 
 
-main ()
+int main()
 {
   try {
     doIt();

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tLCRegion.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tLCRegion.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <lattices/Lattices/LCBox.h>
 #include <lattices/Lattices/LCEllipsoid.h>
@@ -149,7 +149,7 @@ void doIt (const IPosition& latticeShape,
 }
 
 
-main()
+int main()
 {
     try {
 	doIt (IPosition (2,11,20),

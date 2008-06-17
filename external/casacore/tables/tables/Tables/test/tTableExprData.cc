@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tTableExprData.cc 20177 2007-11-22 03:27:05Z Malte.Marquarding $
+//# $Id: tTableExprData.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <tables/Tables/TableExprData.h>
 #include <tables/Tables/ExprNode.h>
@@ -144,11 +144,11 @@ int main()
     AlwaysAssertExit (m(0) == 3);
   } catch (AipsError x) {
     cout << "Unexpected exception: " << x.getMesg() << endl;
-    exit(1);
+    return 1;
   } catch (...) {
     cout << "Unexpected unknown exception" << endl;
-    exit(1);
+    return 1;
   }
   cout << "OK" << endl;
-  exit(0);
+  return 0;
 }

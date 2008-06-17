@@ -23,16 +23,16 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: string.h 19848 2007-02-12 04:43:35Z Malte.Marquarding $
+//# $Id: string.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef CASA_STD_STRING_H
 #define CASA_STD_STRING_H
 
-// Define the C standard C++ include file. 
-// This is an interim solution to cater for the SGI non-existence of
-// them (e.g. <cstring>)
+//# Define the C standard C++ include file. 
+//# This is an interim solution to cater for the SGI non-existence of
+//# them (e.g. <cstring>)
 
-// Make sure any special macros are set
+//# Make sure any special macros are set
 #include <casa/aips.h>
 
 #if defined(__sgi) || defined(AIPS_SUN_NATIVE)

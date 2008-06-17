@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tMeasure.cc 20117 2007-09-05 04:38:35Z Malte.Marquarding $
+//# $Id: tMeasure.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 #include <casa/aips.h>
@@ -789,5 +789,5 @@ int main()
       cout << x.getMesg() << endl;
     } 
 
-    exit(0);
+    return 0;
 }

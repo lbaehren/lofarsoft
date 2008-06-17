@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tHDF5Image.cc 20287 2008-03-13 13:20:30Z gervandiepen $
+//# $Id: tHDF5Image.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #ifndef HAVE_HDF5
 int main()
@@ -342,10 +342,10 @@ int main()
     cout<< "ok"<< endl;
   } catch (AipsError x) {
     cerr << "Exception caught: " << x.getMesg() << endl;
-    exit(1);
+    return 1;
   } 
 
-  exit(0);
+  return 0;
 }
 
 #endif

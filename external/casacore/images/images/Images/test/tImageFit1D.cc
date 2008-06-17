@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tImageFit1D.cc 19964 2007-02-28 03:46:48Z gervandiepen $
+//# $Id: tImageFit1D.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 
 #include <casa/aips.h>
@@ -68,13 +68,13 @@ void check  (const Vector<Double>& pPars, const Vector<Double>& gPars,
 void forcedFailure();
 
 
-int main (int argc, char **argv) {
-
+int main (int argc, const char* argv[])
+{
 
 try {
 
    Input inputs(1);
-   inputs.version ("$Revision: 19964 $");
+   inputs.version ("$Revision: 20329 $");
    inputs.create("fac", "1.0", "Increment factor");
    inputs.readArguments(argc, argv);
    const Double fac = inputs.getDouble("fac");

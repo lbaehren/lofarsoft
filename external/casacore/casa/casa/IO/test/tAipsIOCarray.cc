@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tAipsIOCarray.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tAipsIOCarray.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 
@@ -43,7 +43,7 @@
 void doit (Bool doExcp);
 
 
-int main (int argc)
+int main (int argc, const char*[])
 {
     try {
 	doit ( (argc<2));

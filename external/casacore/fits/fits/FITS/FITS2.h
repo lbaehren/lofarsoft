@@ -23,13 +23,13 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: FITS2.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: FITS2.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef FITS_FITS2_H
 #define FITS_FITS2_H
 
 #include <casa/aips.h>
-// Would like to forward declare
+//# Would like to forward declare
 #include <casa/Arrays/Vector.h>
 #include <casa/Containers/Map.h>
 #include <fits/FITS/hdu.h>

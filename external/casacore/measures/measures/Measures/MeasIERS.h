@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MeasIERS.h 20109 2007-08-22 00:57:43Z Malte.Marquarding $
+//# $Id: MeasIERS.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef MEASURES_MEASIERS_H
 #define MEASURES_MEASIERS_H
@@ -92,12 +92,12 @@ class String;
 //	(now - time) less than value given (default 5) (days)
 // </ul>
 // These values can be set in aipsrc as well as using 
-// <linkto class=AipsrcValue>AipsrcValue</linkto> set() methods.<br>
-// <logged>
-// 	<li> A message is Logged (once) if an IERS table cannot be found
-//	<li> A message is logged (once) if a date outside the range in
+// <linkto class=AipsrcValue>AipsrcValue</linkto> set() methods.
+// <note>
+// 	A message is Logged (once) if an IERS table cannot be found.
+//	A message is logged (once) if a date outside the range in
 //	the Tables is asked for. 
-// </logged>
+// </note>
 // <thrown>
 //     <li> AipsError if table opened has wrong format or otherwise corrupted.
 // </thrown>

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tHashMapIter.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tHashMapIter.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <casa/Containers/HashMapIter.h>
 #include <casa/Containers/HashMapIO.h>
@@ -31,6 +31,7 @@
 #include <casa/fstream.h>
 #include <casa/iostream.h>
 #include <casa/stdlib.h>
+#include <cstring>              //# for strdup
 
 #include <casa/namespace.h>
 //# for GNU compile in trial:

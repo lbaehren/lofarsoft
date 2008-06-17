@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tStandardStMan.cc 20177 2007-11-22 03:27:05Z Malte.Marquarding $
+//# $Id: tStandardStMan.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <tables/Tables/TableDesc.h>
 #include <tables/Tables/SetupNewTab.h>
@@ -92,7 +92,8 @@ void info(const Table aTable);
 // put/putColumn cache test
 void putColumnTest();
 
-int main (int argc, char** argv) {
+int main (int argc, const char* argv[])
+{
     uInt aNr = 250;
     if (argc > 1) {
 	istringstream anIstr(argv[1]);

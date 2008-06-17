@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tSlidingArrayMath.cc 20146 2007-11-07 01:16:17Z Malte.Marquarding $
+//# $Id: tSlidingArrayMath.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <casa/Arrays/MaskArrMath.h>
 #include <casa/Arrays/ArrayLogical.h>
@@ -177,7 +177,7 @@ void doItMasked (Bool)
   }
 }
 
-int main(int argc)
+int main(int argc, const char*[])
 {
   try {
     doIt (argc>1);

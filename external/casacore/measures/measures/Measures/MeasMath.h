@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: MeasMath.h 20117 2007-09-05 04:38:35Z Malte.Marquarding $
+//# $Id: MeasMath.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef MEASURES_MEASMATH_H
 #define MEASURES_MEASMATH_H
@@ -300,7 +300,7 @@ private:
   // Get information from the frame
   // <thrown>
   //  <li> AipsError if information not available; or False return if
-  //		<em>ret=True<em>
+  //		<em>ret=True</em>
   // </thrown>
   // <group>
   Bool getInfo(FrameInfo i, Bool ret=False);

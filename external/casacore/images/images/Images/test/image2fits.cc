@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: image2fits.cc 20048 2007-03-19 05:46:10Z Malte.Marquarding $
+//# $Id: image2fits.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 //-----------------------------------------------------------------------------
 //# usage:  image2fits <image ename> <new FITS file name>
 //#
@@ -50,7 +50,7 @@
 
 
 #include <casa/namespace.h>
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
     try {
 	// Inputs

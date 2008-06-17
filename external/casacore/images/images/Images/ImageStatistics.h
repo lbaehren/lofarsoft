@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ImageStatistics.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: ImageStatistics.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef IMAGES_IMAGESTATISTICS_H
 #define IMAGES_IMAGESTATISTICS_H
@@ -36,13 +36,13 @@
 #include <casa/Logging/LogIO.h>
 #include <lattices/Lattices/LatticeStatistics.h>
 #include <scimath/Mathematics/NumericTraits.h>
+#include <casa/iosstrfwd.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
 //# Forward Declarations
 template <class T> class ImageInterface;
 class IPosition;
-#include <casa/iosstrfwd.h>
 
 // <summary>
 // Displays various statistics from an image.

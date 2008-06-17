@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: QMath.tcc 20254 2008-02-23 16:37:46Z gervandiepen $
+//# $Id: QMath.tcc 20334 2008-06-09 11:04:11Z gervandiepen $
 
 //# Includes
 #include <casa/Exceptions/Error.h>
@@ -104,7 +104,7 @@ Quantum<Qtype> operator/(const Qtype &left,
 // - limited values of exponentials foreseen
 template <class Qtype>
 Quantum<Qtype> pow(const Quantum<Qtype> &left, Int p) {
-    if (abs(p) >= 100) throw (AipsError("Quantum::pow exponent too large")); 
+    if (::abs(p) >= 100) throw (AipsError("Quantum::pow exponent too large")); 
 // Make sure 1 in current data type available
     Quantum<Qtype> res;
     Qtype tmp; tmp = left.getValue() * 0. + 1.;

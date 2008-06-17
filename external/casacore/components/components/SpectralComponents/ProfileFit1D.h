@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//#   $Id: ProfileFit1D.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//#   $Id: ProfileFit1D.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef COMPONENTS_PROFILEFIT1D_H
 #define COMPONENTS_PROFILEFIT1D_H
@@ -31,7 +31,7 @@
 //# Includes
 #include <casa/aips.h>
 #include <casa/Arrays/Vector.h>
-//
+
 #include <components/SpectralComponents/SpectralList.h>
 #include <components/SpectralComponents/SpectralFit.h>
 

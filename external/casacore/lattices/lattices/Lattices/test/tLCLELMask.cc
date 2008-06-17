@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tLCLELMask.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tLCLELMask.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <casa/aips.h>
 #include <lattices/Lattices/LCLELMask.h>
@@ -65,7 +65,7 @@ void testVectorROIter (const Lattice<Bool>& lattice, Bool firstValue,
 }
 
 
-main ()
+int main ()
 {
   try {
     IPosition latticeShape(2, 4, 8);
@@ -97,9 +97,9 @@ main ()
     }
   } catch (AipsError x) {
     cerr << "Caught exception: " << x.getMesg() << endl;
-    exit(1);
+    return 1;
   } 
 
    cout << "OK" << endl;
-   exit(0);
+   return 0;
 }

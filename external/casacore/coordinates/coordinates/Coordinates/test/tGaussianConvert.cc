@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tGaussianConvert.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tGaussianConvert.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 //#
  
 #include <casa/Arrays/Vector.h>
@@ -137,11 +137,11 @@ int main()
       }
    } catch (AipsError x) {
       cerr << "aipserror: error " << x.getMesg() << endl;
-      exit(1);
+      return 1;
    }
 
    cout << "ok" << endl; 
-   exit(0);
+   return 0;
 }
 
 

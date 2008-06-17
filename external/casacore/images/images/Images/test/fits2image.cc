@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: fits2image.cc 20047 2007-03-19 05:39:57Z Malte.Marquarding $
+//# $Id: fits2image.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
@@ -39,7 +39,7 @@
 #include <casa/iostream.h>
 
 #include <casa/namespace.h>
-int main(int argc, char **argv)
+int main(int argc, const char* argv[])
 {
   try {
     // Inputs

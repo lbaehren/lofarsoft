@@ -24,7 +24,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tfitsskip_hdu.cc 19974 2007-02-28 05:26:06Z Malte.Marquarding $
+//# $Id: tfitsskip_hdu.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 
@@ -350,7 +350,8 @@ void do_binary_table(BinaryTableExtension &x) {
 }
 
 
-int main(int argc, char **argv) {
+int main(int argc, const char* argv[])
+{
 	HeaderDataUnit *h;
 	PrimaryArray<unsigned char> *paB;
 	PrimaryArray<short> *paS;

@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: ISMBucket.h 19813 2006-12-22 02:19:44Z gvandiep $
+//# $Id: ISMBucket.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef TABLES_ISMBUCKET_H
 #define TABLES_ISMBUCKET_H
@@ -32,12 +32,12 @@
 #include <casa/aips.h>
 #include <casa/Containers/Block.h>
 #include <casa/BasicSL/String.h>
+#include <casa/iosfwd.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN
 
 //# Forward declarations
 class ISMBase;
-#include <casa/iosfwd.h>
 
 // <summary>
 // A bucket in the Incremental Storage Manager

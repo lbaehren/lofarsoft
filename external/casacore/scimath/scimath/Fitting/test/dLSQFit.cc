@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: dLSQFit.cc 20253 2008-02-23 15:15:00Z gervandiepen $
+//# $Id: dLSQFit.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 #include <casa/aips.h>
@@ -149,5 +149,5 @@ int main() {
     /// std::cout << "Expected: " << "2, 0, 0" << std::endl;
     std::cout << "---------------------------------------------------" << std::endl;
   }
-  exit(0);
+  return 0;
 }

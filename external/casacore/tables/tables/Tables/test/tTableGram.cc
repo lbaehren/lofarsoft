@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tTableGram.cc 19858 2007-02-13 02:42:36Z Malte.Marquarding $
+//# $Id: tTableGram.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <tables/Tables/TableParse.h>
 #include <tables/Tables/Table.h>
@@ -119,7 +119,7 @@ void checkUnits()
 void seltab (const String&);
 void docomm ();
 
-int main (int argc, char** argv)
+int main (int argc, const char* argv[])
 {
   try {
     if (argc > 1) {

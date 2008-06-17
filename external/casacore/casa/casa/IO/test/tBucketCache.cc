@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tBucketCache.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tBucketCache.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <casa/IO/BucketCache.h>
 #include <casa/IO/BucketFile.h>
@@ -41,7 +41,7 @@ void b (Bool);
 void c (uInt bufSize);
 void d (uInt bufSize);
 
-main (int argc)
+int main (int argc, const char*[])
 {
     try {
 	a (argc<2);

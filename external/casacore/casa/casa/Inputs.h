@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: Inputs.h 19848 2007-02-12 04:43:35Z Malte.Marquarding $
+//# $Id: Inputs.h 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #ifndef CASA_INPUTS_H
 #define CASA_INPUTS_H
@@ -41,7 +41,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 
 // <prerequisite>
 //   <li> String
-//   <li> The C language main(Int argc, char *argv[]) convention.
+//   <li> The C language int main(int argc, const char* argv[]) convention.
 // </prerequisite>
 
 // <reviewed reviewer="UNKNOWN" date="before2004/08/25" demos="">
@@ -146,7 +146,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // <srcblock>
 // 01 #include <casa/Inputs/Input.h>      // need this if you want it to work
 // 02 #include <aips/Plot.h>
-// 03 main(int argc, char *argv[])
+// 03 int main(int argc, const char* argv[])
 // 04 {
 // 05    Input inputs(1);
 // 06    // Define our input structure

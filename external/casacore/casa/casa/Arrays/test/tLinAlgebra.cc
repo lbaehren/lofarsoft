@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tLinAlgebra.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tLinAlgebra.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 
@@ -40,7 +40,8 @@
 #include <casa/math.h>
 
 #include <casa/namespace.h>
-main()
+
+int main()
 {
   try{
     Vector<int> foo_int1(3);

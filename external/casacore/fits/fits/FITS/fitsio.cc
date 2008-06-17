@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: fitsio.cc 18380 2005-02-10 18:08:40Z gli $
+//# $Id: fitsio.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 # include <fits/FITS/hdu.h>
 # include <fits/FITS/fitsio.h>
@@ -83,7 +83,7 @@ void readHeaderRecErrHandler(const char *errMessage, FITSError::ErrorLevel sever
     nerrs_++;
 }
 //=============================================================================================
-void FitsInput::errmsg(FitsErrs e, char *s) {
+void FitsInput::errmsg(FitsErrs e, const char *s) {
     //cout<<"[FitsInput::errmsg] called."<<endl;
     ostringstream msgline;
     msgline << "FitsInput error:  ";
@@ -165,7 +165,7 @@ BlockInput &FitsInput::make_input(const char *n, const FITS::FitsDevice &d,
         return *bptr;
 }
 //=============================================================================================
-void FitsOutput::errmsg(FitsErrs e, char *s) {
+void FitsOutput::errmsg(FitsErrs e, const char *s) {
     ostringstream msgline;
     msgline << "FitsOutput error:  ";
     if (m_fout.fname() == 0 || *m_fout.fname() == '\0') 

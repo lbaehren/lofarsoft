@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tfits5.cc 19974 2007-02-28 05:26:06Z Malte.Marquarding $
+//# $Id: tfits5.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 
@@ -225,7 +225,8 @@ This is another implementation that accomplishes the same thing.
 	delete &x;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, const char* argv[])
+{
 	AsciiTableExtension *at;
 
 	cout << "Test5 -- convert an ASCII table to a binary table" << endl;

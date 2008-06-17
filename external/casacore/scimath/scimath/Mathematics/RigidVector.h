@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: RigidVector.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: RigidVector.h 20299 2008-04-03 05:56:44Z gervandiepen $
  
 #ifndef SCIMATH_RIGIDVECTOR_H
 #define SCIMATH_RIGIDVECTOR_H
@@ -32,9 +32,6 @@
 #include <casa/aips.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicSL/Complex.h>
-// #include <casa/Tables/RetypedArrayEngine.h>
-// #include <casa/Tables/RetypedArraySetGet.h>
-// #include <casa/Tables/DataManError.h>
 #include <casa/iosfwd.h>
 
 namespace casa { //# NAMESPACE CASA - BEGIN

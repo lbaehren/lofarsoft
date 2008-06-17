@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tLatticeStatistics.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tLatticeStatistics.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 // 
 #include <casa/aips.h>
 #include <casa/Arrays/Array.h>
@@ -61,7 +61,7 @@ void test2DFloat (LatticeStatistics<Float>& stats, const Vector<Float>& results,
                   const Vector<Bool>& hasResult, const IPosition& shape);
 
 
-int main (int argc, char **argv)
+int main (int argc, const char* argv[])
 {
    try {
       LogOrigin lor("tLatticeStatistics", "main()", WHERE);

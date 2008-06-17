@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSTimeParse.h 20266 2008-02-26 00:43:05Z gervandiepen $
+//# $Id: MSTimeParse.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef MS_MSTIMEPARSE_H
 #define MS_MSTIMEPARSE_H
@@ -31,10 +31,6 @@
 //# Includes
 #include <ms/MeasurementSets/MSParse.h>
 #include <measures/Measures/MEpoch.h>
-// #include <synthesis/MeasurementComponents/Utils.h>
-// #include <msvis/MSVis/VisibilityIterator.h>
-// #include <msvis/MSVis/VisBuffer.h>
-// #include <msvis/MSVis/VisSet.h>
 #include <ms/MeasurementSets/MSTimeDefinitions.h>
 #include <casa/Containers/Block.h>
 #include <casa/Arrays/Matrix.h>

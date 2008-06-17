@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: LatticeSlice1D.h 20229 2008-01-29 15:19:06Z gervandiepen $
+//# $Id: LatticeSlice1D.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef LATTICES_LATTICESLICE1D_H
 #define LATTICES_LATTICESLICE1D_H
@@ -32,6 +32,7 @@
 //# Includes
 #include <casa/aips.h>
 #include <casa/Arrays/Vector.h>
+#include <casa/iosstrfwd.h>
 
 
 namespace casa { //# NAMESPACE CASA - BEGIN
@@ -42,8 +43,6 @@ class IPosition;
 class Interpolate2D;
 class PixelCurve1D;
 class String;
-
-#include <casa/iosstrfwd.h>
 
 // <summary>
 // Extract a 1-D slice from a Lattice

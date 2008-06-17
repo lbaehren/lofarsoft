@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tImagePolarimetry.cc 20047 2007-03-19 05:39:57Z Malte.Marquarding $
+//# $Id: tImagePolarimetry.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 // 
 //
 #include <images/Images/ImagePolarimetry.h>
@@ -63,13 +63,13 @@ void traditionalRotationMeasure (Double rm, Double rmFg, Double rmMax, Double pa
                                  LogIO& os, const String& plotter);
 void fourierRotationMeasure (Double rm, const String& plotter, LogIO& os);
 
-int main (int argc, char **argv)
+int main (int argc, const char* argv[])
 {
 try {
 
 
    Input inputs(1);
-   inputs.version ("$Revision: 20047 $");
+   inputs.version ("$Revision: 20329 $");
 
 // Get inputs
 
@@ -359,10 +359,10 @@ try {
 
 }   catch (AipsError x) {
      cerr << "aipserror: error " << x.getMesg() << endl;
-     exit(1);
+     return 1;
 } 
   cout << "ok" << endl;
-  exit(0);
+  return 0;
 }
 
 

@@ -23,8 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//#
-//# $Id: CoordinateUtil.h 18323 2005-01-27 00:53:18Z nkilleen $
+//# $Id: CoordinateUtil.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef COORDINATES_COORDINATEUTIL_H
 #define COORDINATES_COORDINATEUTIL_H
@@ -34,8 +33,8 @@
 #include <casa/Arrays/Vector.h>
 #include <measures/Measures/Stokes.h>
 #include <coordinates/Coordinates/Coordinate.h>
-//
-#include <measures/Measures/MDirection.h>        // For enums
+
+#include <measures/Measures/MDirection.h>        //# For enums
 #include <measures/Measures/MFrequency.h>
 #include <measures/Measures/MeasConvert.h>
 

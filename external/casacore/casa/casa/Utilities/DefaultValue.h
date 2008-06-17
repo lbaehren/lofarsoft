@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: DefaultValue.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: DefaultValue.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef CASA_DEFAULTVALUE_H
 #define CASA_DEFAULTVALUE_H
@@ -39,11 +39,10 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 
 // <use visibility=export>
 
-// <reviewed reviewer="syang@nrao.edu" date="1996/03/14" tests="tDefaultValue.cc" demos="">
+// <reviewed reviewer="syang" date="1996/03/14" tests="tDefaultValue.cc" demos="">
 // </reviewed>
 
 // <prerequisite>
-//   <li> none
 // </prerequisite>
 //
 // <etymology>

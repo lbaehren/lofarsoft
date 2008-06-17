@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tTableRecord.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tTableRecord.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <tables/Tables/TableRecord.h>
 #include <tables/Tables/Table.h>
@@ -830,7 +830,7 @@ void testTable2 (Bool)
 }
 
 
-int main (int argc)
+int main (int argc, const char*[])
 {
     try {
 	doIt ( (argc<2));

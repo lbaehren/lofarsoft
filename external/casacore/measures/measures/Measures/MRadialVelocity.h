@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: MRadialVelocity.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: MRadialVelocity.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef MEASURES_MRADIALVELOCITY_H
 #define MEASURES_MRADIALVELOCITY_H
@@ -75,7 +75,7 @@ class MVDoppler;
 // It can also be generated from a Quantity, where the interpretation
 // depends on the dimensionality of the Quantity:
 // <ul>
-// <it> velocity (e.g. AU/a)
+// <li> velocity (e.g. AU/a)
 // </ul>
 // The different reference types of a RadialVelocity are:
 // <ul>

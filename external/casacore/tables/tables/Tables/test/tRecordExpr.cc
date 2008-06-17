@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tRecordExpr.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tRecordExpr.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <tables/Tables/TableRecord.h>
 #include <tables/Tables/ExprNode.h>
@@ -143,13 +143,16 @@ void doIt()
 }
 
 
-main()
+int main()
 {
   try {
     doIt();
   } catch (AipsError x) {
     cout << "Unexpected exception: " << x.getMesg() << endl;
+    return 1;
   } catch (...) {
     cout << "Unexpected unknown exception" << endl;
+    return 1;
   }
+  return 0;
 }

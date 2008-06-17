@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tImageConcat.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tImageConcat.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 
 #include <casa/aips.h>
@@ -365,10 +365,10 @@ int main() {
 
   } catch(AipsError x) {
     cerr << x.getMesg() << endl;
-    exit(1);
+    return 1;
   } 
   cout << "OK" << endl;
-  exit(0);
+  return 0;
 };
 
 

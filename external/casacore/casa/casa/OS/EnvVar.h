@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: EnvVar.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: EnvVar.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef CASA_ENVVAR_H
 #define CASA_ENVVAR_H
@@ -38,7 +38,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // </summary>
 
 // <use visibility=export>
-// <reviewed reviewer="Paul Shannon, pshannon@nrao.edu" date="1995/02/08" tests="tEnvVar" demos="">
+// <reviewed reviewer="Paul Shannon" date="1995/02/08" tests="tEnvVar" demos="">
 
 // <synopsis> 
 // Environment variables are familiar to every Unix, MSDOS and VMS

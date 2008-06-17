@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: dImageSummary.cc 20048 2007-03-19 05:46:10Z Malte.Marquarding $
+//# $Id: dImageSummary.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 //
 #include <casa/aips.h>
 #include <casa/Exceptions/Error.h>
@@ -41,12 +41,12 @@
 
 #include <casa/namespace.h>
 
-int main (int argc, char **argv)
+int main (int argc, const char* argv[])
 {
 try {
 
    Input inputs(1);
-   inputs.version ("$Revision: 20048 $");
+   inputs.version ("$Revision: 20329 $");
 
    String name = "test_image.im";
    inputs.create("in", name, "Input image name?");

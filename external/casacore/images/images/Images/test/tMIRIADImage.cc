@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tMIRIADImage.cc 20047 2007-03-19 05:39:57Z Malte.Marquarding $
+//# $Id: tMIRIADImage.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <casa/aips.h>
 #include <casa/Arrays/Array.h>
@@ -48,7 +48,7 @@
 Bool allNear (const Array<Float>& data, const Array<Bool>& dataMask,
               const Array<Float>& mir, const Array<Bool>& mirMask, Float tol=1.0e-5);
 
-int main (int argc, char **argv)
+int main (int argc, const char* argv[])
 {
 try {
 
@@ -160,11 +160,11 @@ try {
 
 } catch (AipsError x) {
    cerr << "aipserror: error " << x.getMesg() << endl;
-   exit(1);
+   return 1;
 }
 
 
-  exit(0);
+  return 0;
 }
 
 Bool allNear (const Array<Float>& data, const Array<Bool>& dataMask,

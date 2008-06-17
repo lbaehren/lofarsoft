@@ -24,7 +24,7 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: FunctionMarshallable.h 19779 2006-12-12 23:20:42Z gvandiep $
+//# $Id: FunctionMarshallable.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef SCIMATH_FUNCTIONMARSHALLABLE_H
 #define SCIMATH_FUNCTIONMARSHALLABLE_H
@@ -36,11 +36,7 @@
 namespace casa { //# NAMESPACE CASA - BEGIN
 
 // <summary>
-//
-//
-//
-//
-//
+// a class for serializing/reconstituting Function objects to/from Records
 // </summary>
 
 // <use visibility=export>
@@ -79,18 +75,10 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 //
 // </motivation>
 //
-// <templating arg=T>
-// </templating>
-//
 // <thrown>
-//    <li>
-//    <li>
 // </thrown>
 //
 // <todo asof="yyyy/mm/dd">
-//   <li> 
-//   <li> 
-//   <li> 
 // </todo>
 
 class FunctionMarshallable {

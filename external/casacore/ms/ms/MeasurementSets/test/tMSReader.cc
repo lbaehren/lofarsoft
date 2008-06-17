@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tMSReader.cc 19944 2007-02-27 11:14:34Z Malte.Marquarding $
+//# $Id: tMSReader.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 
@@ -35,7 +35,7 @@
 #include <casa/OS/Timer.h>
 
 #include <casa/namespace.h>
-int main(int argc, char **argv) 
+int main(int argc, const char* argv[]) 
 {
     try {
 	if (argc<2) {

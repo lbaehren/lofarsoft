@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tMappedIO.cc 19870 2007-02-14 23:22:03Z Malte.Marquarding $
+//# $Id: tMappedIO.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <casa/IO/LargeFiledesIO.h>
 #include <casa/IO/LargeIOFuncDef.h>
@@ -35,10 +35,11 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <errno.h>
+#include <cstring>          //# needed for memcpy
 
 #include <casa/namespace.h>
 
-int main (int argc, char** argv)
+int main (int argc, const char* argv[])
 {
   try {
     int mode = 0;

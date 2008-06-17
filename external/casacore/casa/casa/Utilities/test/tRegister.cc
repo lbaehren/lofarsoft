@@ -23,15 +23,16 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tRegister.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tRegister.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <casa/Utilities/Register.h>
 #include <casa/Utilities/test/tRegister.h>
 #include <casa/iostream.h>
 
 #include <casa/namespace.h>
-main() {
-  
+
+int main()
+{
   foo *ap = 0;
   bar *bp = 0;
   foobar *cp = 0;

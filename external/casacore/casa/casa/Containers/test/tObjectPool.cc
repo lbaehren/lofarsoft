@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tObjectPool.cc 20254 2008-02-23 16:37:46Z gervandiepen $
+//# $Id: tObjectPool.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 //# Includes
 #include <casa/aips.h>
@@ -90,10 +90,10 @@ int main() {
     ok = False;
   }
   
-  if (!ok) exit(1);
+  if (!ok) return 1;
   cout << "Tests ok" << endl;
   cout << "---------------------------------------------------" << endl;
 
-  exit(0);
+  return 0;
 }
 

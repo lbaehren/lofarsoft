@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tSubLattice.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tSubLattice.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <lattices/Lattices/SubLattice.h>
 #include <lattices/Lattices/ArrayLattice.h>
@@ -359,7 +359,7 @@ void testAdd (Lattice<Int>& lat1, Lattice<Int>& lat2, Bool useRef)
   }
 }
 
-int main (int argc, char* argv[])
+int main (int argc, const char* argv[])
 {
   try {
     {

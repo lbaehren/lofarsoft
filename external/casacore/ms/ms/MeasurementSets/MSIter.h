@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: MSIter.h 20266 2008-02-26 00:43:05Z gervandiepen $
+//# $Id: MSIter.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef MS_MSITER_H
 #define MS_MSITER_H
@@ -70,9 +70,7 @@ private:
 // <use visibility=export>
  
 // <prerequisite>
-// <ul>
 //   <li> <linkto class="MeasurementSet:description">MeasurementSet</linkto> 
-// </ul>
 // </prerequisite>
 //
 // <etymology>

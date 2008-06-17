@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tStArrayFile.cc 18424 2005-02-21 10:52:48Z gvandiep $
+//# $Id: tStArrayFile.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <tables/Tables/StArrayFile.h>
 #include <casa/IO/AipsIO.h>
@@ -45,7 +45,7 @@ void a (Bool, uInt, Int64&, Int64&, Int64&, Int64&);
 void b (Bool, Int64, Int64, Int64, Int64, Int64&, Int64&, Int64&, Int64&);
 void c (Bool, Int64, Int64, Int64, Int64);
 
-int main (int argc, char** argv)
+int main (int argc, const char* argv[])
 {
     uInt stVersion = 0;
     uInt endVersion = 1;

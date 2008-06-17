@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: fitsio.h 19522 2006-07-24 00:30:25Z mmarquar $
+//# $Id: fitsio.h 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #ifndef FITS_FITSIO_H
 #define FITS_FITSIO_H
@@ -34,7 +34,8 @@
 //# include <casa/stdvector.h>
 # include <casa/Arrays/Vector.h>
 
-//<category lib=aips module=FITS sect="FITS I/O">   
+namespace casa { //# NAMESPACE CASA - BEGIN
+
 //<summary> sequential FITS I/O </summary>
 // <reviewed reviewer="UNKNOWN" date="before2004/08/25" tests="" demos="">
 // </reviewed>
@@ -44,9 +45,6 @@
 // No interpretation of the data is attempted here, there are 
 // special FITS classes that handle syntax and interpretation.
 //</synopsis>
-//<linkfrom anchor=FitsIO classes="BlockIO">
-// <here> FitsIO </here> for some BlockIO derived classes.
-//</linkfrom>
 //<example>
 //<srcblock>
 // FitsInput fin("myfile.fits",FITS::Disk);	// open disk file for FITS input
@@ -59,8 +57,6 @@
 // }
 //</srcblock>
 //</example>
-
-namespace casa { //# NAMESPACE CASA - BEGIN
 
 class FitsIO {
     public:
@@ -143,14 +139,11 @@ class FitsIO {
 	OFF_T m_curr_size;			
 
 	// set error message that belongs to one of the enumerated types
-	virtual void errmsg(FitsErrs, char *) = 0;
+	virtual void errmsg(FitsErrs, const char *) = 0;
 					
 };
 
 //<summary> fixed-length sequential blocked FITS input </summary>
-//<linkfrom anchor=FitsInput classes="BlockInput">
-// FitsInput
-//</linkfrom>
 
 class FitsInput : public FitsIO {
 	friend int HeaderDataUnit::get_hdr(FITS::HDUType, FitsKeywordList &);
@@ -194,7 +187,7 @@ class FitsInput : public FitsIO {
 	// total number of hdu in this fits file
 	int m_thdunum;		
 
-	virtual void errmsg(FitsErrs, char *);
+	virtual void errmsg(FitsErrs, const char *);
 	void init();
 	void read_header_rec();
 	bool current_hdu_type( FITS::HDUType &);
@@ -250,7 +243,7 @@ class FitsOutput : public FitsIO {
 	BlockOutput &make_output(const char *, const FITS::FitsDevice &, int, 
 				 FITSErrorHandler errhandler = FITSError::defaultHandler);
 
-	virtual void errmsg(FitsErrs, char *);
+	virtual void errmsg(FitsErrs, const char *);
 
 	int hdu_inprogress() { 
 	    return (m_rec_type == FITS::HDURecord && m_data_size > 0 && m_curr_size < m_data_size);

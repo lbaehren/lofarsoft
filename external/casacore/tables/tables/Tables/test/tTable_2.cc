@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tTable_2.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tTable_2.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <tables/Tables/TableDesc.h>
 #include <tables/Tables/Table.h>
@@ -54,7 +54,7 @@
 
 void doIt (const String& tableName);
 
-main (int argc, char** argv)
+int main (int argc, const char* argv[])
 {
     // Only execute when a table name has been given.
     try {

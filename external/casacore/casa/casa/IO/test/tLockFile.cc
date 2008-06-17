@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tLockFile.cc 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: tLockFile.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 
 #include <casa/IO/LockFile.h>
@@ -196,7 +196,7 @@ void doTest()
     }
 }
 
-main (int argc, char** argv)
+int main (int argc, const char* argv[])
 {
     try {
 	// If no argument given, tell how to run.

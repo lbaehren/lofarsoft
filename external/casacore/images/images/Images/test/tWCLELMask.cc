@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: tWCLELMask.cc 20274 2008-02-28 03:53:32Z gervandiepen $
+//# $Id: tWCLELMask.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <casa/aips.h>
 #include <images/Images/WCLELMask.h>
@@ -174,9 +174,9 @@ int main ()
     }
   } catch (AipsError x) {
     cerr << "Caught exception: " << x.getMesg() << endl;
-    exit(1);
+    return 1;
   } 
 
    cout << "OK" << endl;
-   exit(0);
+   return 0;
 }

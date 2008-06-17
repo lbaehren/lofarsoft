@@ -24,12 +24,12 @@
 //#                        Charlottesville, VA 22903-2475 USA
 //#
 //#
-//# $Id: FluxStandard.h 18093 2004-11-30 17:51:10Z ddebonis $
+//# $Id: FluxStandard.h 20299 2008-04-03 05:56:44Z gervandiepen $
 
 #ifndef COMPONENTS_FLUXSTANDARD_H
 #define COMPONENTS_FLUXSTANDARD_H
 
-// include directives
+//# include directives
 #include <casa/aips.h>
 #include <casa/BasicSL/String.h>
 #include <measures/Measures/MFrequency.h>
@@ -46,7 +46,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // <reviewed reviewer="" date="" tests="" demos="">
 
 // <prerequisite>
-//<li><linkto class="Flux">Flux</linkto> module
+// <li><linkto class="Flux">Flux</linkto> module
 // </prerequisite>
 //
 // <etymology>
@@ -70,7 +70,7 @@ namespace casa { //# NAMESPACE CASA - BEGIN
 // </motivation>
 //
 // <todo asof="99/06/01">
-// (i) closer integration into component models.
+// <li> closer integration into component models.
 // </todo>
 
 class FluxStandard

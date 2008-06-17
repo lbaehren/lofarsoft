@@ -23,7 +23,7 @@
 //#                        520 Edgemont Road
 //#                        Charlottesville, VA 22903-2475 USA
 //#
-//# $Id: dConstraints.cc 20253 2008-02-23 15:15:00Z gervandiepen $
+//# $Id: dConstraints.cc 20329 2008-06-06 07:59:22Z gervandiepen $
 
 #include <scimath/Fitting/NonLinearFitLM.h>
 #include <casa/Arrays/ArrayIO.h>
@@ -47,7 +47,9 @@
 #include <casa/iostream.h>
 
 #include <casa/namespace.h>
-int main (Int argc, Char** argv) {
+
+int main (int argc, const char* argv[])
+{
 
   uChar tp = '0';			// # of constraints
   uChar ft = '0';			// Function type (compiled or compound)
@@ -175,5 +177,5 @@ int main (Int argc, Char** argv) {
     cout << x.getMesg() << endl;
   }
   
-  exit(0);
+  return 0;
 }
