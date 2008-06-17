@@ -286,7 +286,7 @@ bool test_Convert ()
           encountered.
 */
 int main (int argc,
-	  char* argv[])
+	  const char* argv[])
 {
   int retval (0);
 
