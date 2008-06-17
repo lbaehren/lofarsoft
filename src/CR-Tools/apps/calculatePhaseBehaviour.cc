@@ -56,14 +56,17 @@ using CR::CalTableReader;
       with a small band width
 
   Second Idea: Use measurement of the phases of the LOPES filter box.
+  This works in principle, but the filter box is probably responsible for
+  only a small part of dispersion of the system.
 
   <h3>Usage</h3>
   \verbatim
-  ./calculatePhaseBehaviour [file]
+  ./calculatePhaseBehaviour [file] [delay]
   \endverbatim
   
   <ul>
-    <li> file - file containing phases (if not supplied, current PhaseCalValues are read from CalTables).
+    <li> file  - file containing phases (if not supplied, current PhaseCalValues are read from CalTables).
+    <li> delay - approximate delay [in ns] of the box at 60 MHz (fine tuning is done automatically).
   </ul>
    
   <h3>Examples</h3>
@@ -534,6 +537,75 @@ void plotFFT(DataReader &dr, const string &PlotPrefix, int antenna)
 
 
 /*!
+  \brief plots the phase
+
+  \param frequencies  -- frequency axis
+  \param phases       -- phase values
+  \param PlotPrefix   -- Base of filename
+  \param phases2      -- second set of phase values
+*/
+
+void plotPhase (Vector<double> frequencies,
+                const Vector<double> phases,
+                const string &PlotPrefix,
+                const Vector<double> phases2 = Vector<double> ())
+{
+  try
+  {
+    SimplePlot plotter;    			// define plotter
+    double xmax,xmin,ymin=0,ymax=0;		// Plotrange
+    int color = 9;				// starting color
+
+    // Create empty vector for not existing error bars 
+    Vector<Double> empty;
+
+    // check length of frequency axis and phase valuse
+    if (frequencies.size() != phases.size())
+      std::cerr << " WARNING: Length of frequency axis differs from length of the FFT!\n" << std::endl;
+
+    // convert frequencies to MHz
+    frequencies /= 1e6;
+
+    // define Plotrange
+    xmin = min(frequencies);
+    xmax = max(frequencies);
+
+    // find the minimal and maximal y values for the plot and take 105% to have some space
+    ymin = min(phases) * 1.05;
+    ymax = max(phases) * 1.05;
+
+
+    // create the plot filename
+    string plotfilename = PlotPrefix + ".ps";
+
+    cout << "Plotfilename: " << plotfilename << endl;
+
+    string label = "Phases";
+
+
+    // Make the plot
+
+    // Initialize the plot giving xmin, xmax, ymin and ymax
+    plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
+
+    // Add labels
+    plotter.AddLabels("Frequency [MHz]", "Phase [degree]",label);
+
+    // Plot phases
+    plotter.PlotLine(frequencies,phases,color,1);
+
+    // Plot second set of phase values (if given and if of correct length)
+    if ( phases2.size() == frequencies.size() )
+      plotter.PlotLine(frequencies, phases2, color+1, 1); 
+  } catch (AipsError x) 
+  {
+    cerr << "calculatePhaseBehaviour:plotPhase: " << x.getMesg() << endl;
+  }
+}
+
+
+
+/*!
   \brief searches the frequency index for a peak in a spectrum
          If no stopFreq is given or if stopFreq is <= starFreq,
          then it returns the first frequency index after startFreq.
@@ -775,7 +847,8 @@ void analyseEvent(const string &eventName)
     Vector<Double> frequencies = dr.frequencyValues().copy();
 
     // Store Phases of 41 comb frequencies
-    Vector<Double> combPhases(41,0);
+    Vector<Double> combFreqs(41,0);     // comb frequencies
+    Vector<Double> combPhases(41,0);    // phases of the combfrequencies
     Vector<Double> phaseDiffs(41,0);
     Vector<Double> neighbourDiffs(41,0);
     double freq = 0;
@@ -791,6 +864,8 @@ void analyseEvent(const string &eventName)
       // calculate frequency and frequency index
       freq = i*1e6 + 40e6;
       freqIndex = getPeakPos(spectrum, frequencies, freq-peakWidth, freq+peakWidth);
+      // store found frequency:
+      combFreqs(i) = frequencies(freqIndex);
       //cout << "Frequency: " << frequencies(freqIndex)/1e6 << endl;
 
       // calculate phases
@@ -800,11 +875,12 @@ void analyseEvent(const string &eventName)
     }
 
     // calculate phase differences
-    referencePhase = combPhases(20);
-    phaseDiffs = combPhases - referencePhase;
     cout << "combPhases :\n" << combPhases << endl;
     cout << "PhaseDiffs :\n" << phaseDiffs << endl;
     cout << "neighbourDiffs :\n" << neighbourDiffs << endl;
+
+    // plot phase differences
+    plotPhase(combFreqs, phaseDiffs, plotPrefix, neighbourDiffs);
 
   } catch (AipsError x) 
   {
@@ -813,83 +889,21 @@ void analyseEvent(const string &eventName)
 }
 
 
-// Functions for second ides
-// -------------------------------------------------------------------
-
-/*!
-  \brief plots the phase
-
-  \param frequencies  -- frequency axis
-  \param phases       -- phase values
-  \param PlotPrefix   -- Base of filename
-*/
-
-void plotPhase(Vector<double> frequencies, const Vector<double> phases, const string &PlotPrefix)
-{
-  try
-  {
-    SimplePlot plotter;    			// define plotter
-    double xmax,xmin,ymin=0,ymax=0;		// Plotrange
-    int color = 9;				// starting color
-
-    // Create empty vector for not existing error bars 
-    Vector<Double> empty;
-
-    // check length of frequency axis and phase valuse
-    if (frequencies.size() != phases.size())
-      std::cerr << " WARNING: Length of frequency axis differs from length of the FFT!\n" << std::endl;
-
-    // convert frequencies to MHz
-    frequencies /= 1e6;
-
-    // define Plotrange
-    xmin = min(frequencies);
-    xmax = max(frequencies);
-
-    // find the minimal and maximal y values for the plot and take 105% to have some space
-    ymin = min(phases) * 1.05;
-    ymax = max(phases) * 1.05;
-
-
-    // create the plot filename
-    string plotfilename = PlotPrefix + ".ps";
-
-    cout << "Plotfilename: " << plotfilename << endl;
-
-    string label = "Phases";
-
-
-    // Make the plot
-
-    // Initialize the plot giving xmin, xmax, ymin and ymax
-    plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
-
-    // Add labels
-    plotter.AddLabels("Frequency [MHz]", "Phase [degree]",label);
-
-    // Plot FFT
-    plotter.PlotLine(frequencies,phases,color,1);
-  } catch (AipsError x) 
-  {
-    cerr << "calculatePhaseBehaviour:plotPhase: " << x.getMesg() << endl;
-  }
-}
-
-
 /*!
   \brief reads and processes a file which contains phase measurements
 
   \param filename      -- name of phase file
-  \param antenna       -- antenna number
+  \param approxDelay   -- approximate delay at 60 MHz
 */
 
 
-void readPhaseFile(const string &filename, const int antenna)
+void readPhaseFile(const string &filename, const double approxDelay)
 {
   try
   {
     const int startfreq = 4e7;
     const int stopfreq = 8e7;
+    double delay = 0;			// remaining delay at 60 MHz
 
     // vectors to store measurements
     vector<double> frequencies;
@@ -906,7 +920,7 @@ void readPhaseFile(const string &filename, const int antenna)
       return;		// exit
     }
 
-    cout << "\nReading file: " << endl;
+    cout << "\nReading file: " << filename << endl;
     // look for the beginnig of the data (after a line containing only and at least three '-' or '='	
     string temp_read;
     bool data_found = false;
@@ -967,7 +981,19 @@ void readPhaseFile(const string &filename, const int antenna)
       if ( (frequency >= startfreq) && (frequency <= stopfreq) )
       {
         frequencies.push_back(frequency);
-        phases.push_back(phase);
+
+        // substract approximate delay:  periods to remove = delay * frequency
+        double redPhase = reducePhase(phase + approxDelay*frequency * 360);
+
+        // store phase value
+        phases.push_back(redPhase);
+
+        // calculate remaining delay at 60 MHz, will be removed later
+        if (frequency == 60e6)
+        {
+          delay = -redPhase / frequency / 360;
+          cout << "Delay at 60 MHz: " << (delay + approxDelay)*1e9 << " ns" << endl;
+        }
         //cout << frequency << "   \t" << phase << endl;
       }
     } // while
@@ -975,8 +1001,7 @@ void readPhaseFile(const string &filename, const int antenna)
     // close file
     phasefile.close();
 
-    // remove delay: periods to remove = delay * frequency
-    double delay = antenna*1e-9;
+    // remove remaining delay: periods to remove = delay * frequency
     for (unsigned int i = 0; i < phases.size(); i++)
     {
       phases[i] = reducePhase(phases[i] + delay*frequencies[i] * 360);
@@ -995,6 +1020,25 @@ void readPhaseFile(const string &filename, const int antenna)
     // plot data
     plotPhase(frequencies, phases, plotPrefix);
 
+    // output of frequencies
+    cout << "\nFrequencies:";
+    for (unsigned int i = 0; i < frequencies.size(); i++)
+    {
+      if (i==0) cout << "{";
+        else cout << ",";
+      cout << frequencies[i];
+    }
+    cout << "}" << endl;
+
+    // output of phases
+    cout << "\nPhasecorrection (=phase *-1):";
+    for (unsigned int i = 0; i < phases.size(); i++)
+    {
+      if (i==0) cout << "{";
+        else cout << ",";
+      cout << -phases[i];
+    }
+    cout << "}" << endl;
   } catch (AipsError x) 
   {
       cerr << "calculatePhaseBehaviour:readPhaseFile " << x.getMesg() << endl;
@@ -1011,7 +1055,7 @@ int main (int argc, char *argv[])
     if ((argc != 1) && (argc !=2) && (argc !=3))
     {
       std::cerr << "Wrong number of arguments in call of \"calculatePhaseBehaviour\". The correct format is:\n";
-      std::cerr << "calculatePhaseBehaviour [file] [antenna]\n";
+      std::cerr << "calculatePhaseBehaviour [file] [delay]\n";
       std::cerr << "for example:\n";
       std::cerr << "./calculatePhaseBehaviour file.dat 1\n" << std::endl;
       return 1;				// Exit the program
@@ -1034,15 +1078,13 @@ int main (int argc, char *argv[])
       return 0;
     }
 
-    // if the antenna argument is not an positive integer, use the time of today
-    int antenna = 0;
-    string antennaString(argv[2]);
-    stringstream(antennaString) >> antenna; 
-// warning: antenna variable is used for calculating the delay at the moment
-// this has to be changed.
+    // if the delay argument is not a doble, default (0) will be used
+    double delay = 0;
+    string delayString(argv[2]);
+    stringstream(delayString) >> delay; 
 
     // process file containing phase measurements
-    readPhaseFile(filename, antenna);
+    readPhaseFile(filename, delay/1e9);
 
   } catch (AipsError x) 
   {
