@@ -82,9 +82,89 @@ const double plotStart = -0.9e-6;	// start time for plotting of FX values
 const double plotStop = -0.5e-6;        // stop time for plotting of FX values
 const double peakWidth  = 20e3;		// width of spectral peaks
 
+
+/*!
+  \brief reduces phase to -180° - +180°
+
+  \param phase         -- input phase
+
+  \return reducedPhase -- output phase
+*/
+
+
+double reducePhase(double phase)
+{
+  double reducedPhase = phase;
+  while (reducedPhase < -180) reducedPhase += 360;
+  while (reducedPhase >  180) reducedPhase -= 360;
+  return reducedPhase;
+}
+
+/*!
+  \brief calculates the group delay as - d phi / d omega
+
+  \param frequencies    -- frequency values in Hz
+  \param phases         -- phase values in degree
+
+  \return groupDelay    -- d (phi/360) / d f
+*/
+
+vector<double> calcGroupDelay(const vector<double> &frequencies, const vector<double> &phases)
+{
+  vector<double> groupDelay; // return value for upsampled trace
+
+  try
+  {
+    // check for consistency
+    if (frequencies.size() != phases.size() )
+    {
+      cerr << "calculatePhaseBehaviour:calcGroupDelay: " << "arguments must have same length" << endl;
+      return groupDelay;
+    }
+    // check for minimal size of 3
+    if (frequencies.size() < 3)
+    {
+      cerr << "calculatePhaseBehaviour:calcGroupDelay: " << "length of argument < 3" << endl;
+      return groupDelay;
+    }
+
+    // check frequency spacing (must be equadistant to 1 %:
+    double deltaFreq = frequencies[1] - frequencies[0];
+    for(unsigned int i=1; i < frequencies.size(); i++)
+    {
+      if ( abs((frequencies[i] - frequencies[i-1])/deltaFreq -1) > 0.01)
+      {
+        cerr << "calculatePhaseBehaviour:calcGroupDelay: " << "frequency spacing must be equidistant" << endl;
+        return groupDelay;
+      }
+    }
+
+    // calculate first group delay
+    groupDelay.push_back( reducePhase(phases[0]-phases[1])/deltaFreq /360);
+
+    // calculate group delays: use d phi = 1/2 (phi(i+1) - phi(i-1)
+    for(unsigned int i = 1; i < frequencies.size()-1; i++)
+    {
+      groupDelay.push_back( reducePhase(phases[i-1]-phases[i+1])/2/deltaFreq /360);
+    }
+
+    // calculate last group delay
+    groupDelay.push_back( reducePhase(phases[phases.size()-2]-phases[phases.size()-1])/deltaFreq /360);
+
+  } catch (AipsError x) 
+  {
+    cerr << "calculatePhaseBehaviour:calcGroupDelay: " << x.getMesg() << endl;
+  }
+
+  return groupDelay;
+}
+
+
+
 /*!
   \brief reads the PhaseCal values stored in the CalTables
 */
+
 void readCalTableValues(void)
 {
   // define constants for the start date of LOPES 10 and LOPES 30
@@ -179,8 +259,98 @@ void readCalTableValues(void)
       cerr << "calculatePhaseBehaviour:readCalTableValues: " << x.getMesg() << endl;
       return;
   }
-
 }
+
+/*!
+  \brief returns the phases of the filter measurement which Tim Huege got from Andreas Horneffer
+
+  \param  filename   -- file with filter measurements (ASCII-table with frequency, real and imag. trace)
+
+  \return phases     -- phase value of the filter measuremen
+*/
+
+vector<double> getLopes10Filter(const string &filename)
+{
+  vector<double> phases;        // for phases
+
+
+  try
+  {
+     // open phase file
+    ifstream phasefile;
+    phasefile.open (filename.c_str(), ifstream::in);
+
+    // check if file could be opened
+    if (!(phasefile.is_open()))
+    {
+      std::cerr << "Failed to open file \"" << filename <<"\"." << std::endl;
+      return phases;      // exit
+    }
+
+    cout << "\nReading file: " << filename << endl;
+    // look for the beginnig of the data (after a line containing only and at least three '-' or '='	
+    string temp_read;
+    bool data_found = false;
+    while ((data_found == false) && (phasefile.good()))
+    {
+      phasefile >> temp_read;
+      if (temp_read.find("Imag\"") != string::npos)	// header ends with: Imag"
+      {
+        data_found = true;
+      }
+    }
+
+    // exit program if no data are found	
+    if (data_found == false)
+    {
+      phasefile.close();  // close file
+      std::cerr << "Failure while reading file \"" << filename <<"\":\n" ;
+      std::cerr << "Wrong format! Please use a file containing phase measurements" << endl;
+      return phases;           // exit
+    }
+
+    // Process events from event file list
+    while (phasefile.good())
+    {	
+      double frequency = -1, real_part = -1, imag_part = -99999999;
+      bool read_in_error = false;
+
+      // read in frequencies, phases, and imaginary part	
+      if (phasefile.good()) phasefile >> frequency;
+        else read_in_error = true;
+      if (phasefile.good()) phasefile >> real_part;
+        else read_in_error = true;	
+      if (phasefile.good()) phasefile >> imag_part;
+        else read_in_error = true;	
+
+      // check if end of file occured:
+      // imag_part should be -1, if file is terminated be a new line
+      if (imag_part == -99999999) continue;	// go back to begin of while-loop 
+                                                // phasefile.good() should be false now.
+
+      // exit program if error occured
+      if (read_in_error)		
+      {
+        phasefile.close();  // close file
+        std::cerr << "Failure while reading file \"" << filename <<"\":\n" ;
+        std::cerr << "Wrong format! Please use a file containing phase measurements" << endl;
+        return phases;           // exit
+      }
+
+// CONTINUE HERE, STORE DATA, CALCULATE PHASE
+    } // while
+
+    // close file
+    phasefile.close();
+
+  }
+  catch (AipsError x) 
+  {
+      cerr << "calculatePhaseBehaviour:getLopes10Filter: " << x.getMesg() << endl;
+  }
+  return phases;
+}
+
 
 
 /*!
@@ -604,6 +774,77 @@ void plotPhase (Vector<double> frequencies,
 }
 
 
+/*!
+  \brief plots the delay
+
+  \param frequencies  -- frequency axis
+  \param delay        -- delay values in ns
+  \param PlotPrefix   -- Base of filename
+  \param delay2       -- second set of delay values
+*/
+
+void plotDelay (Vector<double> frequencies,
+                Vector<double> delay,
+                const string &PlotPrefix,
+                Vector<double> delay2 = Vector<double> ())
+{
+  try
+  {
+    SimplePlot plotter;    			// define plotter
+    double xmax,xmin,ymin=0,ymax=0;		// Plotrange
+    int color = 9;				// starting color
+
+    // Create empty vector for not existing error bars 
+    Vector<Double> empty;
+
+    // check length of frequency axis and phase valuse
+    if (frequencies.size() != delay.size())
+      std::cerr << " WARNING: Length of frequency axis differs from length of the FFT!\n" << std::endl;
+
+    // convert frequencies to MHz
+    frequencies /= 1e6;
+    // convert delays to ns
+    delay  *= 1e9;
+    delay2 *= 1e9;
+
+    // define Plotrange
+    xmin = min(frequencies);
+    xmax = max(frequencies);
+
+    // find the minimal and maximal y values for the plot and take 105% to have some space
+    ymin = min(delay) * 1.05;
+    ymax = max(delay) * 1.05;
+
+
+    // create the plot filename
+    string plotfilename = PlotPrefix + "-delay" + ".ps";
+
+    cout << "Plotfilename: " << plotfilename << endl;
+
+    string label = "Delay";
+
+
+    // Make the plot
+
+    // Initialize the plot giving xmin, xmax, ymin and ymax
+    plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
+
+    // Add labels
+    plotter.AddLabels("Frequency [MHz]", "Delay [ns]",label);
+
+    // Plot phases
+    plotter.PlotLine(frequencies,delay,color,1);
+
+    // Plot second set of phase values (if given and if of correct length)
+    if ( delay2.size() == frequencies.size() )
+      plotter.PlotLine(frequencies, delay2, color+1, 1); 
+  } catch (AipsError x) 
+  {
+    cerr << "calculatePhaseBehaviour:plotDelay: " << x.getMesg() << endl;
+  }
+}
+
+
 
 /*!
   \brief searches the frequency index for a peak in a spectrum
@@ -670,25 +911,6 @@ unsigned int getPeakPos(const Vector<DComplex> &spectrum,
 
   return peakIndex;
 }
-
-
-/*!
-  \brief reduces phase to -180° - +180°
-
-  \param phase         -- input phase
-
-  \return reducedPhase -- output phase
-*/
-
-
-double reducePhase(double phase)
-{
-  double reducedPhase = phase;
-  while (reducedPhase < -180) reducedPhase += 360;
-  while (reducedPhase >  180) reducedPhase -= 360;
-  return reducedPhase;
-}
-
 
 /*!
   \brief finds the calibrated antenna:
@@ -901,13 +1123,14 @@ void readPhaseFile(const string &filename, const double approxDelay)
 {
   try
   {
-    const int startfreq = 4e7;
-    const int stopfreq = 8e7;
+    const int startfreq = 2e7;
+    const int stopfreq = 10e7;
     double delay = 0;			// remaining delay at 60 MHz
 
     // vectors to store measurements
     vector<double> frequencies;
     vector<double> phases;
+    vector<double> groupdelay;
 
      // open phase file
     ifstream phasefile;
@@ -981,18 +1204,18 @@ void readPhaseFile(const string &filename, const double approxDelay)
       if ( (frequency >= startfreq) && (frequency <= stopfreq) )
       {
         frequencies.push_back(frequency);
-
-        // substract approximate delay:  periods to remove = delay * frequency
-        double redPhase = reducePhase(phase + approxDelay*frequency * 360);
-
-        // store phase value
-        phases.push_back(redPhase);
+        phases.push_back(phase);
 
         // calculate remaining delay at 60 MHz, will be removed later
         if (frequency == 60e6)
         {
+          // substract approximate delay:  periods to remove = delay * frequency
+          double redPhase = reducePhase(phase + approxDelay*frequency * 360);
+          // calculate remaining delay
           delay = -redPhase / frequency / 360;
-          cout << "Delay at 60 MHz: " << (delay + approxDelay)*1e9 << " ns" << endl;
+          // add approximate delay to get total delay
+          delay += approxDelay;
+          cout << "Delay at 60 MHz: " << delay*1e9 << " ns" << endl;
         }
         //cout << frequency << "   \t" << phase << endl;
       }
@@ -1000,6 +1223,8 @@ void readPhaseFile(const string &filename, const double approxDelay)
 
     // close file
     phasefile.close();
+
+    groupdelay = calcGroupDelay(frequencies, phases);
 
     // remove remaining delay: periods to remove = delay * frequency
     for (unsigned int i = 0; i < phases.size(); i++)
@@ -1019,6 +1244,7 @@ void readPhaseFile(const string &filename, const double approxDelay)
 
     // plot data
     plotPhase(frequencies, phases, plotPrefix);
+    plotDelay(frequencies, calcGroupDelay(frequencies, phases), plotPrefix, groupdelay);
 
     // output of frequencies
     cout << "\nFrequencies:";
@@ -1037,6 +1263,16 @@ void readPhaseFile(const string &filename, const double approxDelay)
       if (i==0) cout << "{";
         else cout << ",";
       cout << -phases[i];
+    }
+    cout << "}" << endl;
+
+    // output of group delay
+    cout << "\nGroup delay:";
+    for (unsigned int i = 0; i < groupdelay.size(); i++)
+    {
+      if (i==0) cout << "{";
+        else cout << ",";
+      cout << groupdelay[i];
     }
     cout << "}" << endl;
   } catch (AipsError x) 
