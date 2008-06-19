@@ -81,6 +81,8 @@ const int upsampling_exp = 5;		// upsampling of trace will be done by 2^upsampli
 const double plotStart = -0.9e-6;	// start time for plotting of FX values
 const double plotStop = -0.5e-6;        // stop time for plotting of FX values
 const double peakWidth  = 20e3;		// width of spectral peaks
+const int startfreq = 4e7;		// start frequency for plots and output
+const int stopfreq = 8e7;              // stop frequency for plots and output
 
 
 /*!
@@ -128,27 +130,19 @@ vector<double> calcGroupDelay(const vector<double> &frequencies, const vector<do
       return groupDelay;
     }
 
-    // check frequency spacing (must be equadistant to 1 %:
-    double deltaFreq = frequencies[1] - frequencies[0];
-    for(unsigned int i=1; i < frequencies.size(); i++)
-    {
-      if ( abs((frequencies[i] - frequencies[i-1])/deltaFreq -1) > 0.01)
-      {
-        cerr << "calculatePhaseBehaviour:calcGroupDelay: " << "frequency spacing must be equidistant" << endl;
-        return groupDelay;
-      }
-    }
-
     // calculate first group delay
+    double deltaFreq = frequencies[1] - frequencies[0];
     groupDelay.push_back( reducePhase(phases[0]-phases[1])/deltaFreq /360);
 
     // calculate group delays: use d phi = 1/2 (phi(i+1) - phi(i-1)
     for(unsigned int i = 1; i < frequencies.size()-1; i++)
     {
-      groupDelay.push_back( reducePhase(phases[i-1]-phases[i+1])/2/deltaFreq /360);
+      deltaFreq = frequencies[i+1] - frequencies[i-1];
+      groupDelay.push_back( reducePhase(phases[i-1]-phases[i+1])/deltaFreq /360);
     }
 
     // calculate last group delay
+    deltaFreq = frequencies[frequencies.size()-1] - frequencies[frequencies.size()-2];
     groupDelay.push_back( reducePhase(phases[phases.size()-2]-phases[phases.size()-1])/deltaFreq /360);
 
   } catch (AipsError x) 
@@ -264,15 +258,21 @@ void readCalTableValues(void)
 /*!
   \brief returns the phases of the filter measurement which Tim Huege got from Andreas Horneffer
 
-  \param  filename   -- file with filter measurements (ASCII-table with frequency, real and imag. trace)
+  \param  filename    -- file with filter measurements (ASCII-table with frequency, real and imag. trace)
+  \param  freqValues  -- reference to a vector for storing the frequency values
+  \param  phaseValues -- reference to a vector for storing the phase values
 
-  \return phases     -- phase value of the filter measuremen
+  \return bool        -- true if successfull
 */
 
-vector<double> getLopes10Filter(const string &filename)
+bool getLopes10Filter (const string &filename,
+                       vector<double> &freqValues,
+                       vector<double> &phaseValues)
 {
-  vector<double> phases;        // for phases
-
+  // temporarly store vectors in local variables
+  // copy them into the given vectors at the end (on success only)
+  vector<double> phases;
+  vector<double> frequencies; 
 
   try
   {
@@ -284,7 +284,7 @@ vector<double> getLopes10Filter(const string &filename)
     if (!(phasefile.is_open()))
     {
       std::cerr << "Failed to open file \"" << filename <<"\"." << std::endl;
-      return phases;      // exit
+      return false;      // exit
     }
 
     cout << "\nReading file: " << filename << endl;
@@ -306,7 +306,7 @@ vector<double> getLopes10Filter(const string &filename)
       phasefile.close();  // close file
       std::cerr << "Failure while reading file \"" << filename <<"\":\n" ;
       std::cerr << "Wrong format! Please use a file containing phase measurements" << endl;
-      return phases;           // exit
+      return false;           // exit
     }
 
     // Process events from event file list
@@ -334,21 +334,30 @@ vector<double> getLopes10Filter(const string &filename)
         phasefile.close();  // close file
         std::cerr << "Failure while reading file \"" << filename <<"\":\n" ;
         std::cerr << "Wrong format! Please use a file containing phase measurements" << endl;
-        return phases;           // exit
+        return false;           // exit
       }
 
-// CONTINUE HERE, STORE DATA, CALCULATE PHASE
+      // store values if they are in the correct frequency interval
+      if ( (startfreq <= frequency) && ( frequency <= stopfreq) )
+      {
+        phases.push_back( atan2(imag_part, real_part) / 3.1415926 * 180 ); // atan2 does the same as the casacore funciton phase()
+        frequencies.push_back(frequency);
+      }
     } // while
 
     // close file
     phasefile.close();
 
+    // store vectors
+    freqValues = frequencies;
+    phaseValues = phases;
   }
   catch (AipsError x) 
   {
-      cerr << "calculatePhaseBehaviour:getLopes10Filter: " << x.getMesg() << endl;
+    cerr << "calculatePhaseBehaviour:getLopes10Filter: " << x.getMesg() << endl;
+    return false;
   }
-  return phases;
+  return true;
 }
 
 
@@ -1123,8 +1132,6 @@ void readPhaseFile(const string &filename, const double approxDelay)
 {
   try
   {
-    const int startfreq = 2e7;
-    const int stopfreq = 10e7;
     double delay = 0;			// remaining delay at 60 MHz
 
     // vectors to store measurements
@@ -1224,6 +1231,13 @@ void readPhaseFile(const string &filename, const double approxDelay)
     // close file
     phasefile.close();
 
+    // read in the values for the LOPES 10 filter instead (overwrites vectors)
+    if (false)	// only if desired
+    {
+      getLopes10Filter("/home/schroeder/lopes/PhaseCal/lopes10filt_horneffer.dat", frequencies, phases);
+      delay = approxDelay;
+    }
+
     groupdelay = calcGroupDelay(frequencies, phases);
 
     // remove remaining delay: periods to remove = delay * frequency
@@ -1246,35 +1260,38 @@ void readPhaseFile(const string &filename, const double approxDelay)
     plotPhase(frequencies, phases, plotPrefix);
     plotDelay(frequencies, calcGroupDelay(frequencies, phases), plotPrefix, groupdelay);
 
-    // output of frequencies
-    cout << "\nFrequencies:";
-    for (unsigned int i = 0; i < frequencies.size(); i++)
+    if (false) 	// give additional output if desired
     {
-      if (i==0) cout << "{";
-        else cout << ",";
-      cout << frequencies[i];
-    }
-    cout << "}" << endl;
+      // output of frequencies
+      cout << "\nFrequencies:";
+      for (unsigned int i = 0; i < frequencies.size(); i++)
+      {
+        if (i==0) cout << "{";
+          else cout << ",";
+        cout << frequencies[i];
+      }
+      cout << "}" << endl;
 
-    // output of phases
-    cout << "\nPhasecorrection (=phase *-1):";
-    for (unsigned int i = 0; i < phases.size(); i++)
-    {
-      if (i==0) cout << "{";
-        else cout << ",";
-      cout << -phases[i];
-    }
-    cout << "}" << endl;
+      // output of phases
+      cout << "\nPhasecorrection (=phase *-1):";
+      for (unsigned int i = 0; i < phases.size(); i++)
+      {
+        if (i==0) cout << "{";
+          else cout << ",";
+        cout << -phases[i];
+      }
+      cout << "}" << endl;
 
-    // output of group delay
-    cout << "\nGroup delay:";
-    for (unsigned int i = 0; i < groupdelay.size(); i++)
-    {
-      if (i==0) cout << "{";
-        else cout << ",";
-      cout << groupdelay[i];
-    }
-    cout << "}" << endl;
+      // output of group delay
+      cout << "\nGroup delay:";
+      for (unsigned int i = 0; i < groupdelay.size(); i++)
+      {
+        if (i==0) cout << "{";
+          else cout << ",";
+        cout << groupdelay[i];
+      }
+      cout << "}" << endl;
+    } // if
   } catch (AipsError x) 
   {
       cerr << "calculatePhaseBehaviour:readPhaseFile " << x.getMesg() << endl;
