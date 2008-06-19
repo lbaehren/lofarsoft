@@ -76,6 +76,12 @@ endif (glibconfig_h)
 
 find_library (GLIB_LIBRARIES glib
   PATHS ${lib_locations}
+  PATH_SUFFIXES
+  glib
+  glib/lib
+  glib-2.0
+  glib-2.0/glib
+  glib-2.0/lib
   NO_DEFAULT_PATH
   )
 

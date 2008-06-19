@@ -62,6 +62,12 @@ foreach (python_version 2.6 2.5 2.4 2.3)
     NO_DEFAULT_PATH
     )
 
+  find_path (HAVE_PYCONFIG_H pyconfig.h
+    PATHS ${include_locations}
+    PATH_SUFFIXES python${python_version}
+    NO_DEFAULT_PATH
+    )
+
   ## Check for the NUMPY header files
 
   find_path (NUMPY_INCLUDES_tmp numpy/arrayobject.h

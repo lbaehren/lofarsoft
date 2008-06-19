@@ -88,3 +88,7 @@ set (CMAKE_INSTALL_INCLUDEDIR "include")
 set (CMAKE_INSTALL_INFODIR "share/info")
 set (CMAKE_INSTALL_LIBDIR "lib")
 set (CMAKE_INSTALL_MANDIR "share/man")
+
+if (UNIX)
+  set (CMAKE_FIND_LIBRARY_PREFIXES "lib")
+endif (UNIX)
