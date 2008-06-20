@@ -33,20 +33,22 @@ option (CFITSIO_FORCE_BUILD "Force rebuild and local installation" 0)
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${CFITSIO_SOURCE_DIR}
-  ${CFITSIO_SOURCE_DIR}/..
-  ${CFITSIO_SOURCE_DIR}/../..
-  ${CFITSIO_SOURCE_DIR}/../../..
-  $ENV{LOFARSOFT}
-  )
-
-if (USG_ROOT)
-  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (USG_ROOT)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (USG_ROOT)
+if (NOT USG_ROOT)
+  find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+    PATHS 
+    ${CFITSIO_SOURCE_DIR}
+    ${CFITSIO_SOURCE_DIR}/..
+    ${CFITSIO_SOURCE_DIR}/../..
+    ${CFITSIO_SOURCE_DIR}/../../..
+    $ENV{LOFARSOFT}
+    )
+  
+  if (USG_ROOT)
+    include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+  else (USG_ROOT)
+    message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+  endif (USG_ROOT)
+endif (NOT USG_ROOT)
 
 ## load CMake modules to search for external components
 

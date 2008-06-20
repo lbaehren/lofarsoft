@@ -22,20 +22,22 @@ option (WCSTOOLS_BUILD_LIBNED "Build the libned library?" OFF)
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
-  PATHS 
-  ${WCSTOOLS_SOURCE_DIR}
-  ${WCSTOOLS_SOURCE_DIR}/..
-  ${WCSTOOLS_SOURCE_DIR}/../..
-  ${WCSTOOLS_SOURCE_DIR}/../../..
-  ENV LOFARSOFT
-  )
-
-if (USG_ROOT)
-  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-else (USG_ROOT)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (USG_ROOT)
+if (NOT USG_ROOT)
+  find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+    PATHS 
+    ${WCSTOOLS_SOURCE_DIR}
+    ${WCSTOOLS_SOURCE_DIR}/..
+    ${WCSTOOLS_SOURCE_DIR}/../..
+    ${WCSTOOLS_SOURCE_DIR}/../../..
+    ENV LOFARSOFT
+    )
+  
+  if (USG_ROOT)
+    include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+  else (USG_ROOT)
+    message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+  endif (USG_ROOT)
+endif (NOT USG_ROOT)
 
 ## ==============================================================================
 ##
