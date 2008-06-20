@@ -9,7 +9,7 @@
 project (WCSLIB)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.4)
+cmake_minimum_required (VERSION 2.5)
 
 set (WCSLIB_VERSION_MAJOR 4)
 set (WCSLIB_VERSION_MINOR 2)
