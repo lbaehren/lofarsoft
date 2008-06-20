@@ -140,6 +140,28 @@ namespace CR { // Namespace CR -- begin
     */
     TIME_X
   } BeamType;
+
+  /*!
+    \brief Correlation types for polarized data
+
+    Since by default we are dealing with dual-polarization data, we have a number
+    of choices on how to combine the individual signals.
+  */
+  typedef enum {
+    NONE,
+    I,
+    Q,
+    U,
+    V,
+    RR,
+    RL,
+    LR,
+    LL,
+    XX,
+    XY,
+    YX,
+    YY
+  } CorrelationTypes;
   
   /*!
     \class Beamformer

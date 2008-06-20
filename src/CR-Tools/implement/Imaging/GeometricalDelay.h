@@ -66,7 +66,13 @@ namespace CR { // NAMESPACE CR -- BEGIN
     
     <h3>Synopsis</h3>
 
-    <b>Geometry.</b>
+    <ul>
+      <li><a href="#Geometry">Geometry</a>
+      <li><a href="#Array classes">Array classes</a>
+      <li><a href="#Past implementation">Past implementation</a>
+    </ul>
+
+    <b><a name="Geometry">Geometry</a>.</b>
     The basic equation, for which the delays are computed, is documented in
     the GeometricalWeight class. The procedure to arrive at the geometrical
     weights passed to the Beamformer is divided into three steps, of which this
@@ -88,7 +94,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     \f[ \tau_j = \frac{1}{c} \left( |\vec \rho_j| - |\vec \rho| \right) =
     \frac{1}{c} \left( |\vec \rho - \vec x_j| - |\vec \rho| \right) \f]
 
-    <b>Array classes.</b>
+    <b><a name="Array classes">Array classes</a>.</b>
     The class is constructed such, that both Blitz++ and CASA arrays are
     supported. However in order to minimize conversions, only one type is
     available at a time; this is obtained by encapsulating the array type 
@@ -103,9 +109,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
     #endif
     \endcode
 
-    <b>Past implementation</b>
+    <b><a name="Past implementation">Past implementation</a>.</b>
     The first implementation of the routines for thhe computation of the
-    geometrical delay and the subsequent compuation of beamformer weights was
+    geometrical delay and the subsequent computation of beamformer weights was
     handled in Phasing:
     \code
     const Double c = QC::c.getValue();
