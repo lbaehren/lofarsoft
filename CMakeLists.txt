@@ -18,10 +18,10 @@ cmake_minimum_required (VERSION 2.4)
 
 find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
-  ${DAL_SOURCE_DIR}
-  ${DAL_SOURCE_DIR}/..
-  ${DAL_SOURCE_DIR}/../..
-  ${DAL_SOURCE_DIR}/../../..
+  ${LUS_SOURCE_DIR}
+  ${LUS_SOURCE_DIR}/..
+  ${LUS_SOURCE_DIR}/../..
+  ${LUS_SOURCE_DIR}/../../..
   $ENV{LOFARSOFT}
   )
 
