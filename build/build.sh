@@ -159,7 +159,7 @@ else
 		print_help
 	;;
 	-clean-build)
-		rm -f *~ *.log;
+		rm -rf *~ *.log CMake* CPack* Makefile external cmake_install.cmake;
 		rm -rf bison blitz boost;
 		rm -rf casacore cfitsio cmake config cr; 
 		rm -rf dal dsp;
@@ -251,15 +251,15 @@ case $param_packageName in
 		echo "[`date`] Selected package CASACORE"
 		## -- build required packages
 		./build.sh cmake
-		./build.sh wcslib $param_reportBuild
-		./build.sh cfitsio $param_reportBuild
-		./build.sh hdf5 $param_reportBuild
+		./build.sh wcslib --force-build $param_reportBuild
+		./build.sh cfitsio --force-build $param_reportBuild
+		./build.sh hdf5 --force-build $param_reportBuild
 		## -- build package
-		build_package casacore external/casacore
+		build_package casacore external/casacore "-DCASACORE_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     cfitsio)
 		echo "[`date`] Selected package CFITSIO"
-		build_package cfitsio external/cfitsio
+		build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     cmake)
 		echo "[`date`] Selected package CMake"
@@ -344,7 +344,7 @@ case $param_packageName in
 		echo "[`date`] Selected package WCSLIB"
 		./build.sh bison $param_reportBuild
 		./build.sh flex $param_reportBuild
-		build_package wcslib external/wcslib
+		build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     wcstools)
 		echo "[`date`] Selected package WCSTOOLS"
@@ -360,7 +360,7 @@ case $param_packageName in
 		./build.sh bison
 		./build.sh flex
 		./build.sh casacore --force-build $param_reportBuild
-		./build.sh plplot $param_reportBuild
+		./build.sh plplot --force-build $param_reportBuild
 		./build.sh python $param_reportBuild
 		./build.sh boost --force-build $param_reportBuild
 		## USG packages
