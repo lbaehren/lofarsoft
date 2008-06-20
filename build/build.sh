@@ -116,7 +116,7 @@ build_package ()
 	    echo "[`date`] No target install for $buildDir."
 	else
 	    if test -z $param_reportBuild ; then
-		make install;
+		make -j 2 install;
 	    else
 		make Experimental;
 		make install;
@@ -386,6 +386,8 @@ case $param_packageName in
     ;;
     bdsm)
 		echo "[`date`] Building BDSM package ..."
+		./build.sh wcslib
+		./build.sh cfitsio
 		build_package bdsm src/BDSM;
     ;;
     ## --------------------------------------------------------------------------
