@@ -2,31 +2,63 @@
 ## ------------------------------------------------------------------------------
 ## Project description
 
+## Name of the project
 PROJECT (BDSM Fortran)
 
-## ------------------------------------------------------------------------------
-## Find external libraries
+## Minimum required version of CMake to configure the project
+cmake_minimum_required (VERSION 2.5)
 
-## check where to find the CMake scripts
+## ==============================================================================
+##
+##  CMake configuration settings
+##
+## ==============================================================================
 
-find_path (bdsm_cmake FindCFITSIO.cmake FindPGPLOT.cmake
+find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
   ${BDSM_SOURCE_DIR}
   ${BDSM_SOURCE_DIR}/..
   ${BDSM_SOURCE_DIR}/../..
-  PATH_SUFFIXES
-  devel_common/cmake
+  ${BDSM_SOURCE_DIR}/../../..
+  $ENV{LOFARSOFT}
   )
 
-if (bdsm_cmake)
-  ## --- CFITSIO ---------------------------------
-  if (NOT HAVE_CFITSIO)
-    include (${bdsm_cmake}/FindCFITSIO.cmake)
-  endif (NOT HAVE_CFITSIO)
-  ## --- PGPLOT ----------------------------------
-  if (NOT HAVE_PGPLOT)
-    include (${bdsm_cmake}/FindPGPLOT.cmake)
-  endif (NOT HAVE_PGPLOT)
-endif (bdsm_cmake)
+if (USG_ROOT)
+  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+else (USG_ROOT)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+endif (USG_ROOT)
+
+## ==============================================================================
+##
+##  Options
+##
+## ==============================================================================
+
+option (BDSM_BUILD_TESTS "Build the test programs?" 1)
+option (BDSM_ENABLE_TESTING "Build the test programs?" 1)
+option (BDSM_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
+
+## ------------------------------------------------------------------------------
+## Find external libraries
+
+if (NOT BDSM_VERBOSE_CONFIGURE)
+  set (CFITSIO_FIND_QUIETLY 1)
+  set (PGPLOT_FIND_QUIETLY 1)
+  set (WCSLIB_FIND_QUIETLY 1)
+endif (NOT BDSM_VERBOSE_CONFIGURE)
+
+## --- CFITSIO ---------------------------------
+if (NOT HAVE_CFITSIO)
+  include (${bdsm_cmake}/FindCFITSIO.cmake)
+endif (NOT HAVE_CFITSIO)
+
+## --- PGPLOT ----------------------------------
+if (NOT HAVE_PGPLOT)
+  include (${bdsm_cmake}/FindPGPLOT.cmake)
+endif (NOT HAVE_PGPLOT)
+
+## ------------------------------------------------------------------------------
+## Subdirectories of the project
 
 SUBDIRS (implement)

@@ -6,7 +6,7 @@
 project (Timba)
 
 ## Minimum required version of CMake to configure the project
-cmake_minimum_required (VERSION 2.4)
+cmake_minimum_required (VERSION 2.5)
 
 subdirs (
   WH
