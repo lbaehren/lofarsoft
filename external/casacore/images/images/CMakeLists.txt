@@ -88,7 +88,9 @@ if (casacore_BUILD_TESTS)
 endif (casacore_BUILD_TESTS)
 
 ## -----------------------------------------------------------------------------
-## Installation targets
+## Installation
+
+## Library
 
 install (TARGETS casa_images
   RUNTIME DESTINATION bin
@@ -96,22 +98,18 @@ install (TARGETS casa_images
   ARCHIVE DESTINATION lib
   )
 
-## -----------------------------------------------------------------------------
-## Debugging information
-##
-## ComponentImager
-## |-- <images/Images/ComponentImager.h>
-## |   `-- <casa/aips.h>
-## |-- <images/Images/ImageInterface.h>
-## |   |-- <casa/aips.h>
-## |   |-- <images/Images/RegionHandler.h>
-## |   |   `-- <casa/aips.h>
-## |   |-- <images/Images/MaskSpecifier.h>
-## |   |   `-- <casa/aips.h>
-## |   `-- <images/Images/ImageInfo.h>
-## |       |-- <casa/aips.h>
-## |       `-- <casa/iosfwd.h>
-## `-- <images/Images/ImageInfo.h>
-## |   |-- <casa/aips.h>
-## |   `-- <casa/iosfwd.h>
-##
+## Header files
+
+FILE (GLOB images_headers *.h)
+install (FILES ${images_headers}
+  DESTINATION include/casacore/images
+  )
+
+foreach (images_module ${images_modules})
+  ## assemble list of header files
+  FILE (GLOB images_headers ${images_module}/*.h)
+  ## set installation location
+  install (FILES ${images_headers}
+    DESTINATION include/casacore/images/${images_module}
+    )
+endforeach (images_module)

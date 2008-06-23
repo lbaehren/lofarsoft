@@ -33,10 +33,28 @@ if (casacore_BUILD_TESTS)
 endif (casacore_BUILD_TESTS)
 
 ## -----------------------------------------------------------------------------
-## Installation targets
+## Installation
+
+## Library
 
 install (TARGETS casa_coordinates
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   )
+
+## Header files
+
+FILE (GLOB coordinates_headers *.h)
+install (FILES ${coordinates_headers}
+  DESTINATION include/casacore/coordinates
+  )
+
+foreach (coordinates_module ${coordinates_modules})
+  ## assemble list of header files
+  FILE (GLOB coordinates_headers ${coordinates_module}/*.h)
+  ## set installation location
+  install (FILES ${coordinates_headers}
+    DESTINATION include/casacore/coordinates/${coordinates_module}
+    )
+endforeach (coordinates_module)
