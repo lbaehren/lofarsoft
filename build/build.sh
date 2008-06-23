@@ -250,7 +250,6 @@ case $param_packageName in
     casacore)
 		echo "[`date`] Selected package CASACORE"
 		## -- build required packages
-		./build.sh cmake
 		./build.sh wcslib --force-build $param_reportBuild
 		./build.sh cfitsio --force-build $param_reportBuild
 		./build.sh hdf5 --force-build $param_reportBuild
@@ -287,7 +286,7 @@ case $param_packageName in
 		$basedir/../external/cmake/configure --prefix=$basedir/../release
 		## build and install
 		echo "[`date`] Initiating build and install of cmake ..."
-		make && make install
+		make -j 2 && make install
 		## check if we have been able to create a cmake executable
 		if test -f ../../release/bin/cmake ; then
 	    	echo "[`date`] Found newly created cmake executable."
