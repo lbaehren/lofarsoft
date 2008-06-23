@@ -250,9 +250,9 @@ case $param_packageName in
     casacore)
 		echo "[`date`] Selected package CASACORE"
 		## -- build required packages
-		./build.sh wcslib --force-build $param_reportBuild
-		./build.sh cfitsio --force-build $param_reportBuild
-		./build.sh hdf5 --force-build $param_reportBuild
+		./build.sh wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
+		./build.sh cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$param_forceBuild";
+		./build.sh hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
 		## -- build package
 		build_package casacore external/casacore "-DCASACORE_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
