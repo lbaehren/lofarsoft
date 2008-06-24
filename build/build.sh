@@ -22,7 +22,9 @@ param_cleanBuild=0;
 param_reportBuild='';
 
 ## -----------------------------------------------------------------------------
-## Environment variables; in particular we need to ensure, that CMake binary
+## Environment variables; in particular we need to ensure, the CMake binary can 
+## be found. However failure in that could also signify, that there is no CMake
+## available, so we need to make to sure we build it first.
 
 ## move one directory up to get a clean result when setting LOFARSOFT
 
@@ -84,6 +86,50 @@ print_help ()
     echo "    clean-all          = Do a clean-build and a clean-release."
 }
 
+## -------------------------------------------------------------------
+## Build CMake from source 
+
+build_cmake ()
+{
+	## Check if the source code to build cmake is available; if this
+	## is not the case with error, since this is the bottom-most 
+	## position in the dependency chain
+	if test -d $basedir/../external/cmake ; then
+	    echo "[`date`] Cleaning up source directory ..."
+	    rm -rf $basedir/../external/cmake/Bootstrap.cmk
+	    rm -rf $basedir/../external/cmake/CMakeCache.txt
+	    rm -rf $basedir/../external/cmake/Source/cmConfigure.h
+	else
+	    echo "[`date`] Missing source directory for cmake! Unable to continue!"
+	    exit 1;
+	fi
+	## prepare to build cmake from its source
+	if test -d cmake ; then
+	    cd cmake;
+	else
+	    mkdir cmake;
+	    cd cmake;
+	fi
+	## run the configure script
+	echo "[`date`] Running configure script for cmake ..."
+	$basedir/../external/cmake/configure --prefix=$basedir/../release
+	## build and install
+	echo "[`date`] Initiating build and install of cmake ..."
+	make -j 2 && make install
+	## check if we have been able to create a cmake executable
+	if test -f ../../release/bin/cmake ; then
+	    echo "[`date`] Found newly created cmake executable."
+	    export PATH=$PATH:$basedir/../release/bin
+	else
+	    echo "[`date`] No cmake executable found in release/bin! Unable to continue!"
+	    exit 1;
+	fi
+}
+
+## -------------------------------------------------------------------
+## Generic instructions for building on of the packages in the code
+## tree.
+#
 # \param buildDir  -- directory in which to perform the build; this is a 
 #                     sub-directory created below "build"
 # \param sourceDir -- directory in which the source code of the package can be
@@ -234,6 +280,12 @@ done
 ## -----------------------------------------------------------------------------
 ## Build individual/multiple packages
 
+if test -z `which cmake` ; then
+{
+	build_cmake;
+}
+fi;
+
 case $param_packageName in 
 	bison)
 		echo "[`date`] Selected package Bison"
@@ -258,43 +310,12 @@ case $param_packageName in
     ;;
     cfitsio)
 		echo "[`date`] Selected package CFITSIO"
+		if test -z `which cmake` ; then { build_cmake; } fi;
 		build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     cmake)
 		echo "[`date`] Selected package CMake"
-		## Check if the source code to build cmake is available; if this
-		## is not the case with error, since this is the bottom-most 
-		## position in the dependency chain
-		if test -d $basedir/../external/cmake ; then
-	    	echo "[`date`] Cleaning up source directory ..."
-	    	rm -rf $basedir/../external/cmake/Bootstrap.cmk
-	    	rm -rf $basedir/../external/cmake/CMakeCache.txt
-	    	rm -rf $basedir/../external/cmake/Source/cmConfigure.h
-		else
-	    	echo "[`date`] Missing source directory for cmake! Unable to continue!"
-	    	exit 1;
-		fi
-		## prepare to build cmake from its source
-		if test -d cmake ; then
-	    	cd cmake;
-		else
-	    	mkdir cmake;
-	    	cd cmake;
-		fi
-		## run the configure script
-		echo "[`date`] Running configure script for cmake ..."
-		$basedir/../external/cmake/configure --prefix=$basedir/../release
-		## build and install
-		echo "[`date`] Initiating build and install of cmake ..."
-		make -j 2 && make install
-		## check if we have been able to create a cmake executable
-		if test -f ../../release/bin/cmake ; then
-	    	echo "[`date`] Found newly created cmake executable."
-	    	export PATH=$PATH:$basedir/../release/bin
-		else
-	    	echo "[`date`] No cmake executable found in release/bin! Unable to continue!"
-	    	exit 1;
-		fi
+		build_cmake
     ;;
     flex)
 		echo "[`date`] Selected package Flex"
