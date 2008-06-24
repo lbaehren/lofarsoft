@@ -84,18 +84,22 @@ check_include_files (unistd.h HAVE_UNISTD_H)
 ## -----------------------------------------------------------------------------
 ## Required external packages
 
-find_library (libcfitsio cfitsio PATHS ${lib_locations})
+set (CFITSIO_FIND_QUIETLY 1)
+set (WCSLIB_FIND_QUIETLY 1)
+
+include (FindCFITSIO)
+include (FindWCS)
+
 find_library (libm m PATHS ${lib_locations})
 find_library (libg2c g2c f2c PATHS ${lib_locations})
-find_library (libwcs wcs PATHS ${lib_locations})
 
-if (NOT libwcs)
-  message (SEND_ERROR "Missing WCSLIB required for casacore!")
-endif (NOT libwcs)
+if (NOT WCSLIB_LIBRARIES)
+  message (STATUS "Missing WCSLIB required for casacore!")
+endif (NOT WCSLIB_LIBRARIES)
 
-if (NOT libcfitsio)
-  message (SEND_ERROR "Missing CFITSIO required for casacore!")
-endif (NOT libcfitsio)
+if (NOT CFITSIO_LIBRARIES)
+  message (STATUS "Missing CFITSIO required for casacore!")
+endif (NOT CFITSIO_LIBRARIES)
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files.
