@@ -24,8 +24,7 @@
 #
 # The following variables are set when PYTHON is found:
 #
-#  HAVE_PYTHON       = Set to true, if all components of PYTHON
-#                          have been found.
+#  HAVE_PYTHON       = Set to true, if all components of PYTHON have been found.
 #  PYTHON_EXECUTABLE = Location of the Python executable
 #  PYTHON_INCLUDES   = Include path for the header files of PYTHON
 #  PYTHON_LIBRARIES  = Link these to use PYTHON
@@ -42,6 +41,15 @@
 ## Standard locations where to look for required components
 
 include (CMakeSettings)
+
+## -----------------------------------------------------------------------------
+## Is the root of the Python installation defined through environment variable?
+
+set (HAVE_PYTHONHOME $ENV{PYTHONHOME})
+
+if (HAVE_PYTHONHOME)
+  message (STATUS "Found environment variable PYTHONHOME.")
+endif (HAVE_PYTHONHOME)
 
 ## -----------------------------------------------------------------------------
 

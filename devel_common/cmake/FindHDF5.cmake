@@ -93,34 +93,46 @@ endif (HDF5_INCLUDES AND HDF5_LIBRARIES)
 ## -----------------------------------------------------------------------------
 ## Determine library version
 
-if (HAVE_HDF5)
+find_file (HAVE_TESTHDF5VERSION TestHDF5Version.cc
+  PATHS ${CMAKE_MODULE_PATH} ${USG_ROOT}
+  PATH_SUFFIXES devel_common/cmake
+  )
 
+if (HAVE_HDF5 AND HAVE_TESTHDF5VERSION)
+  
   list (APPEND CMAKE_REQUIRED_LIBRARIES ${HDF5_LIBRARIES})
   
   try_run (var_exit var_compiled
     ${CMAKE_BINARY_DIR}
-    ${CMAKE_MODULE_PATH}/TestHDF5Version.cc
+    ${HAVE_TESTHDF5VERSION}
     COMPILE_DEFINITIONS -I${HDF5_INCLUDES}
     CMAKE_FLAGS -DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}
     COMPILE_OUTPUT_VARIABLE var_compile
     RUN_OUTPUT_VARIABLE var_run
     )
-
+  
   ## process the output of the test program
 
-  string (REGEX MATCH "maj=.*:min" HDF5_MAJOR_VERSION ${var_run})
-  string (REGEX REPLACE "maj=" "" HDF5_MAJOR_VERSION ${HDF5_MAJOR_VERSION})
-  string (REGEX REPLACE ":min" "" HDF5_MAJOR_VERSION ${HDF5_MAJOR_VERSION})
-  
-  string (REGEX MATCH "min=.*:rel" HDF5_MINOR_VERSION ${var_run})
-  string (REGEX REPLACE "min=" "" HDF5_MINOR_VERSION ${HDF5_MINOR_VERSION})
-  string (REGEX REPLACE ":rel" "" HDF5_MINOR_VERSION ${HDF5_MINOR_VERSION})
+  if (var_compiled AND var_exit)
 
-  string (REGEX MATCH "rel=.*:" HDF5_RELEASE_VERSION ${var_run})
-  string (REGEX REPLACE "rel=" "" HDF5_RELEASE_VERSION ${HDF5_RELEASE_VERSION})
-  string (REGEX REPLACE ":" "" HDF5_RELEASE_VERSION ${HDF5_RELEASE_VERSION})
+    string (REGEX MATCH "maj=.*:min" HDF5_MAJOR_VERSION ${var_run})
+    string (REGEX REPLACE "maj=" "" HDF5_MAJOR_VERSION ${HDF5_MAJOR_VERSION})
+    string (REGEX REPLACE ":min" "" HDF5_MAJOR_VERSION ${HDF5_MAJOR_VERSION})
+    
+    string (REGEX MATCH "min=.*:rel" HDF5_MINOR_VERSION ${var_run})
+    string (REGEX REPLACE "min=" "" HDF5_MINOR_VERSION ${HDF5_MINOR_VERSION})
+    string (REGEX REPLACE ":rel" "" HDF5_MINOR_VERSION ${HDF5_MINOR_VERSION})
+    
+    string (REGEX MATCH "rel=.*:" HDF5_RELEASE_VERSION ${var_run})
+    string (REGEX REPLACE "rel=" "" HDF5_RELEASE_VERSION ${HDF5_RELEASE_VERSION})
+    string (REGEX REPLACE ":" "" HDF5_RELEASE_VERSION ${HDF5_RELEASE_VERSION})
+
+  else (var_compiled AND var_exit)
+    message (STATUS "[FindHDF5] Unable to determine HDF5 library version!")
+    message (STATUS "HAVE_TESTHDF5VERSION = ${HAVE_TESTHDF5VERSION}")
+  endif (var_compiled AND var_exit)
   
-endif (HAVE_HDF5)
+endif (HAVE_HDF5 AND HAVE_TESTHDF5VERSION)
 
 ## -----------------------------------------------------------------------------
 ## Feedback
@@ -148,6 +160,7 @@ mark_as_advanced (
   HDF5_LIBRARIES
   HDF5_MAJOR_VERSION
   HDF5_MINOR_VERSION
+  HAVE_TESTHDF5VERSION
   libhdf5
   libhdf5_hl
 )

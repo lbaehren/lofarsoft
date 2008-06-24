@@ -34,6 +34,15 @@
 include (CMakeSettings)
 
 ## -----------------------------------------------------------------------------
+## Is the root of the installation defined through environment variable?
+
+set (HAVE_ROOTSYS $ENV{ROOTSYS})
+
+if (HAVE_ROOTSYS)
+  message (STATUS "Found environment variable ROOTSYS.")
+endif (HAVE_ROOTSYS)
+
+## -----------------------------------------------------------------------------
 ## Check for the header files
 
 find_path (ROOT_INCLUDES tCanvas.h TCint.h TObject.h
