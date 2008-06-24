@@ -206,7 +206,7 @@ else
 	;;
 	-clean-build)
 		rm -rf *~ *.log CMake* CPack* Makefile external cmake_install.cmake;
-		rm -rf bison blitz boost;
+		rm -rf bdsm bison blitz boost;
 		rm -rf casacore cfitsio cmake config cr; 
 		rm -rf dal dsp;
 		rm -rf flex;
@@ -280,27 +280,25 @@ done
 ## -----------------------------------------------------------------------------
 ## Build individual/multiple packages
 
-if test -z `which cmake` ; then
-{
-	build_cmake;
-}
-fi;
-
 case $param_packageName in 
 	bison)
 		echo "[`date`] Selected package Bison"
+		if test -z `which cmake` ; then { build_cmake; } fi;
 		build_package bison external/bison "-DBISON_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
 	blitz)
 		echo "[`date`] Selected package Blitz++"
+		if test -z `which cmake` ; then { build_cmake; } fi;
 		build_package blitz external/blitz "-DBLITZ_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     boost)
 		echo "[`date`] Selected package Boost"
+		if test -z `which cmake` ; then { build_cmake; } fi;
 		build_package boost external/boost "-DBOOST_FORCE_BUILD:BOOL=$param_forceBuild -DBOOST_FIND_python_ONLY:BOOL=1";
     ;;
     casacore)
 		echo "[`date`] Selected package CASACORE"
+		if test -z `which cmake` ; then { build_cmake; } fi;
 		## -- build required packages
 		./build.sh wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
 		./build.sh cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$param_forceBuild";
@@ -319,14 +317,17 @@ case $param_packageName in
     ;;
     flex)
 		echo "[`date`] Selected package Flex"
+		if test -z `which cmake` ; then { build_cmake; } fi;
 		build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$param_forceBuild"
     ;;
     hdf5)
 		echo "[`date`] Selected package Hdf5"
+		if test -z `which cmake` ; then { build_cmake; } fi;
 		build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     plplot)
 		echo "[`date`] Selected package Plplot"
+		if test -z `which cmake` ; then { build_cmake; } fi;
 		if test -d $basedir/../external/plplot ; then
 			## first pass
 			mkdir $basedir/plplot 
@@ -350,24 +351,29 @@ case $param_packageName in
     ;;
     python)
 		echo "[`date`] Selected package PYTHON"
+		if test -z `which cmake` ; then { build_cmake; } fi;
 		build_package python external/python
     ;;
     startools)
 		echo "[`date`] Selected package Star-Tools"
+		if test -z `which cmake` ; then { build_cmake; } fi;
 		build_package startools external/startools "-DStarTools_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     vtk)
 		echo "[`date`] Selected package VTK"
+		if test -z `which cmake` ; then { build_cmake; } fi;
 		echo "-- No configuration and build support available yet!"
     ;;
     wcslib)
 		echo "[`date`] Selected package WCSLIB"
+		if test -z `which cmake` ; then { build_cmake; } fi;
 		./build.sh bison $param_reportBuild
 		./build.sh flex $param_reportBuild
 		build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     wcstools)
 		echo "[`date`] Selected package WCSTOOLS"
+		if test -z `which cmake` ; then { build_cmake; } fi;
 		build_package wcstools external/wcstools
     ;;
     ## --------------------------------------------------------------------------
