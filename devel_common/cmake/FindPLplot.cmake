@@ -49,7 +49,7 @@ endif (PLPLOT_INCLUDES)
 ## -----------------------------------------------------------------------------
 ## Check for the library
 
-## [1] 
+## [1] libplplotd
 
 find_library (PLPLOT_plplotd plplotd
   PATHS ${lib_locations}
@@ -60,7 +60,7 @@ if (PLPLOT_plplotd)
   list (APPEND PLPLOT_LIBRARIES ${PLPLOT_plplotd})
 endif (PLPLOT_plplotd)
 
-## [2] 
+## [2] libplplotcxxd
 
 find_library (PLPLOT_plplotcxxd plplotcxxd
   PATHS ${lib_locations}
@@ -70,6 +70,17 @@ find_library (PLPLOT_plplotcxxd plplotcxxd
 if (PLPLOT_plplotcxxd)
   list (APPEND PLPLOT_LIBRARIES ${PLPLOT_plplotcxxd})
 endif (PLPLOT_plplotcxxd)
+
+## [3] libcsirocsa
+
+find_library (PLPLOT_csirocsa csirocsa
+  PATHS ${lib_locations}
+  NO_DEFAULT_PATH
+  )
+
+if (PLPLOT_csirocsa)
+  list (APPEND PLPLOT_LIBRARIES ${PLPLOT_csirocsa})
+endif (PLPLOT_csirocsa)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found

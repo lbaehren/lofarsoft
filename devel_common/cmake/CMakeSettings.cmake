@@ -64,11 +64,6 @@ if (NOT USG_CMAKE_CONFIG)
       "USG include area"
       FORCE
       )
-    ## Feedback 
-    message (STATUS "[USG CMake configuration]")
-    message (STATUS "USG_ROOT             = ${USG_ROOT}")
-    message (STATUS "USG_INSTALL_PREFIX   = ${USG_INSTALL_PREFIX}")
-    message (STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
   else (USG_ROOT)
     message (SEND_ERROR "USG_ROOT is undefined!")
   endif (USG_ROOT)
@@ -126,6 +121,13 @@ if (NOT USG_CMAKE_CONFIG)
     "Directories to look for libraries"
     FORCE
     )
+
+  ## ----------------------------------------------------------------------------
+  ## Internal CMake variables
+  
+  if (UNIX)
+    set (CMAKE_FIND_LIBRARY_PREFIXES "lib" CACHE STRING "Library prefix" FORCE)
+  endif (UNIX)
   
   ## ----------------------------------------------------------------------------
   ##  Host-specific overrides
@@ -145,5 +147,16 @@ if (NOT USG_CMAKE_CONFIG)
   
   set (USG_CMAKE_CONFIG TRUE CACHE BOOL "USG CMake configuration flag" FORCE)
   mark_as_advanced(USG_CMAKE_CONFIG)
+  
+  ## ----------------------------------------------------------------------------
+  ## Feedback 
 
+  message (STATUS "[USG CMake configuration]")
+  message (STATUS "Hostname                    = ${hostname}")
+  message (STATUS "USG_ROOT                    = ${USG_ROOT}")
+  message (STATUS "USG_INSTALL_PREFIX          = ${USG_INSTALL_PREFIX}")
+  message (STATUS "CMAKE_INSTALL_PREFIX        = ${CMAKE_INSTALL_PREFIX}")
+  message (STATUS "CMAKE_FIND_LIBRARY_PREFIXES = ${CMAKE_FIND_LIBRARY_PREFIXES}")
+  message (STATUS "CMAKE_FIND_LIBRARY_SUFFIXES = ${CMAKE_FIND_LIBRARY_SUFFIXES}")
+  
 endif (NOT USG_CMAKE_CONFIG)
