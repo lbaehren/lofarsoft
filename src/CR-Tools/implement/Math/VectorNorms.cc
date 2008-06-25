@@ -27,6 +27,41 @@ namespace CR { // Namespace CR -- begin
   
   // ============================================================================
   //
+  //  Support vector operations
+  //
+  // ============================================================================
+
+  // ------------------------------------------------------------- scalar_product
+
+  template <class T>
+  T scalar_product (std::vector<T> const &x,
+		    std::vector<T> const &y)
+  {
+    T product(0);
+
+    scalar_product (product,x,y);
+    
+    return product;
+  }
+
+  // ------------------------------------------------------------- scalar_product
+
+  template <class T>
+  void scalar_product (T &product,
+		       std::vector<T> const &x,
+		       std::vector<T> const &y)
+  {
+    product = 0;
+
+    if (x.size() == y.size()) {
+      for (uint n(0); n<x.size(); n++) {
+	product += x[n]*y[n];
+      }
+    } 
+  }
+  
+  // ============================================================================
+  //
   //  Vector norms
   //
   // ============================================================================
@@ -173,6 +208,18 @@ namespace CR { // Namespace CR -- begin
   //  Template instantiation
   //
   // ============================================================================
+
+  template void scalar_product (float &product,
+				std::vector<float> const &x,
+				std::vector<float> const &y);
+  template void scalar_product (double &product,
+				std::vector<double> const &x,
+				std::vector<double> const &y);
+
+  template float scalar_product (std::vector<float> const &x,
+				 std::vector<float> const &y);
+  template double scalar_product (std::vector<double> const &x,
+				  std::vector<double> const &y);
 
   template float L1Norm (float const *vec, unsigned int const &nelem);
   template double L1Norm (double const *vec, unsigned int const &nelem);

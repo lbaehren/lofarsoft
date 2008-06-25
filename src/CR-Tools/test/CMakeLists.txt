@@ -267,3 +267,16 @@ if (HAVE_DAL AND HAVE_CASACORE)
     )
 endif (HAVE_DAL AND HAVE_CASACORE)
 
+## -----------------------------------------------------------------------------
+## Test working with the Python libraries
+
+if (HAVE_PYTHON)
+  ## compiler instructions
+  add_executable (tUsePython tUsePython.cc)
+  ## linker instructions
+  target_link_libraries (tUsePython ${PYTHON_LIBRARIES})
+  ## testing
+  if (CR_ENABLE_TESTING) 
+    add_test (tUsePython tUsePython)
+  endif (CR_ENABLE_TESTING) 
+endif (HAVE_PYTHON)

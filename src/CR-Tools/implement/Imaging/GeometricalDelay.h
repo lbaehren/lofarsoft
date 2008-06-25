@@ -474,7 +474,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \brief Get the sky positions, for which the delay is computed
 
       \return skyPosition -- The positions on the sky, for which the delay is
-                             computed, [nofSkyPositions,3].
+              computed, [nofSkyPositions,3].
     */
 #ifdef HAVE_CASA
     inline Matrix<double> skyPositions () const {
@@ -492,14 +492,12 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \brief Set the sky positions, for which the delay is computed
       
       \param skyPositions -- The source positions, for which the delay is
-                             computed, [nofSkyPositions,3]; coordinates must
-			     be <b>cartesian</b> since no further conversion
-			     is appplied.
+             computed, [nofSkyPositions,3]; coordinates must be <b>cartesian</b>
+	     since no further conversion is appplied.
       \param bufferDelays  -- Buffer the values for the geometrical delay? If set
-                             <i>yes</i> the delays will be computed from the 
-			     provided antenna and sky positions and afterwards
-			     kept in memory; if set <i>no</i> only the input 
-			     parameters are stored an no further action is taken.
+             <i>yes</i> the delays will be computed from the provided antenna and
+	     sky positions and afterwards kept in memory; if set <i>no</i> only
+	     the input parameters are stored an no further action is taken.
     */
 #ifdef HAVE_CASA
     bool setSkyPositions (const Matrix<double> &skyPositions,
@@ -545,17 +543,16 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \param yValues         -- 
       \param zValues         -- 
       \param coordType       -- Coordinate type, as which the position is
-                                provided; if position not provided in cartesian
-				coordinates, transformation will be performed
+             provided; if position not provided in cartesian coordinates,
+	     transformation will be performed
       \param anglesInDegrees -- 
       \param bufferDelays  -- Buffer the values for the geometrical delay? If set
-                             <i>yes</i> the delays will be computed from the 
-			     provided antenna and sky positions and afterwards
-			     kept in memory; if set <i>no</i> only the input 
-			     parameters are stored an no further action is taken.
+             <i>yes</i> the delays will be computed from the provided antenna and
+	     sky positions and afterwards kept in memory; if set <i>no</i> only
+	     the input parameters are stored an no further action is taken.
       
-      \return status -- Success or failure of the operation; returns
-                        <t>false</tt> if an error was encountered
+      \return status -- Success or failure of the operation; returns <t>false</tt>
+              if an error was encountered
     */
 #ifdef HAVE_CASA
     bool setSkyPositions (Vector<double> const &xValues,
@@ -855,20 +852,18 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #ifdef HAVE_CASA
     /*!
       \param antPositions -- [nofAntennas,3] Antenna positions for which the
-                             delay is computed, \f$ (x,y,z) \f$
+             delay is computed, \f$ (x,y,z) \f$
       \param antCoordType -- CR::CoordinateType of the antenna position
-                             coordinates
+             coordinates
       \param skyPositions -- [nofSkyPositions,3] Positions in the sky towards
-                             which to point, given in the same reference frame
-			     as the antenna positions, though not necessarily
-			     using the same type of coordinates (e.g. might be
-			     given in spherical coordinates).
+             which to point, given in the same reference frame as the antenna
+	     positions, though not necessarily using the same type of coordinates
+	     (e.g. might be given in spherical coordinates).
       \param skyCoordType -- CR::CoordinateType of the sky position coordinates
       \param bufferDelays -- Buffer the values for the geometrical delay? If
-                             set <i>true</i> the delays will be computed and
-			     afterwards kept in memory; if set <i>false</i>
-			     only the input parameters are stored an no
-			     further action is taken.
+             set <i>true</i> the delays will be computed and afterwards kept in
+	     memory; if set <i>false</i> only the input parameters are stored and
+	     no further action is taken.
     */
     void init (Matrix<double> const &antPositions,
 	       CR::CoordinateType const &antCoordType,

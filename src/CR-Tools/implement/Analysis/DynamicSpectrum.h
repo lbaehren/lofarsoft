@@ -25,7 +25,7 @@
 
 #ifdef HAVE_CFITSIO
 extern "C" {
-#include <cfitsio/fitsio.h>
+#include <fitsio.h>
 }
 #endif
 

@@ -21,10 +21,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
-#ifndef _VECTORNORMS_H_
-#define _VECTORNORMS_H_
+#ifndef VECTORNORMS_H
+#define VECTORNORMS_H
 
 #include <vector>
 
@@ -52,37 +50,102 @@ using casa::uInt;
 #endif
 
 namespace CR { // namespace CR -- begin
-
-/*!
-  \brief Various vector norms
   
-  \ingroup Math
-
-  \author Lars B&auml;hren
-
-  \date 2005/11/29
-
-  \test tVectorNorms.cc
-
-  <h3>Prerequisite</h3>
-
-  <h3>Synopsis</h3>
-
-  <ul>
-    <li>All functions are templated to allow maximum flexibility.
-    <li>Most function support usage of:
+  /*!
+    \file VectorNorms.h
+    
+    \ingroup Math
+    
+    \brief Various vector norms
+    
+    \author Lars B&auml;hren
+    
+    \date 2005/11/29
+    
+    \test tVectorNorms.cc
+    
+    <h3>Synopsis</h3>
+    
+    <ul>
+      <li>All functions are templated to allow maximum flexibility.
+      <li>Most function support usage of:
+      <ol>
+        <li>C++ arrays
+	<li>STD vectors
+	<li>Blitz++ arrays
+	<li>CASA arrays
+      </ol>
+    </ul>
+    
+    Implemented computations:
+    <ul>
+      <li>The <a href="http://mathworld.wolfram.com/L1-Norm.html">L1-Norm</a> is
+      a vector norm defined for a vector \f$ \vec x = [x_1,x_2,...,x_N]^T \f$
+      with complex entries by 
+      \f[ |\vec x|_{1} = \sum_{i=1}^{N} |x_i| \f]
+      <li>The <a href="http://mathworld.wolfram.com/L2-Norm.html">L2-Norm</a> is a
+      vector norm defined for a vector \f$ \vec x = [x_1,x_2,...,x_N]^T \f$ with
+      complex entries by
+      \f[ |\vec x| = \sqrt{\sum_{i=1}^{N} |x_i|^2} \f]
+      where \f$|x_{i}|\f$ on the right denotes the complex modulus. The
+      \f$\ell^2\f$-norm is the vector norm that is commonly encountered in vector
+      algebra and vector operations (such as the
+      <a href="http://mathworld.wolfram.com/DotProduct.html">dot product</a>),
+      where it is commonly denoted \f$|\vec x|\f$.
+    </ul>
+    
+    <h3>Example(s)</h3>
+    
     <ol>
-      <li>C++ arrays
-      <li>STD vectors
-      <li>Blitz++ arrays
-      <li>CASA arrays
+      <li>Scalar product of two vectors:
+      \code
+      int nelem (3);
+      std::vector<double> x (nelem);
+      std::vector<double> y (nelem);
+
+      double product = scalar_product (x,y);
+      \endcode
+      <li>Computation of L1-Norm of a vector:
+      \code
+      std::vector<double> x;
+      double l1norm;
+      
+      l1norm = L1Norm (x);
+      \endcode
     </ol>
-  </ul>
+  */
+  
+  // ============================================================================
+  //
+  //  
+  //
+  // ============================================================================
 
-  <h3>Example(s)</h3>
+  /*!
+    \brief Compute the scalar product between to vectors 
 
-*/
+    \param x -- First vector to enter the scalar product
+    \param y -- Second vector to enter the scalar product
 
+    \return product -- Scalar product of the two vectors \f$x\f$ and \f$y\f$.
+  */
+  template <class T>
+    T scalar_product (std::vector<T> const &x,
+		      std::vector<T> const &y);
+
+  /*!
+    \brief Compute the scalar product between to vectors 
+
+    \param x -- First vector to enter the scalar product
+    \param y -- Second vector to enter the scalar product
+
+    \retval product  -- Scalar product of the two vectors \f$x\f$ and \f$y\f$.
+  */
+  template <class T>
+    void scalar_product (T &product,
+			 std::vector<T> const &x,
+			 std::vector<T> const &y);
+  
   // ============================================================================
   //
   //  Vector norms
@@ -95,6 +158,11 @@ namespace CR { // namespace CR -- begin
   /*!
     \brief Compute the L1-Norm of a vector
 
+    The <a href="http://mathworld.wolfram.com/L1-Norm.html">L1-Norm</a> is a
+    vector norm defined for a vector \f$ \vec x = [x_1,x_2,...,x_N]^T \f$ with
+    complex entries by 
+    \f[ |\vec x|_{1} = \sum_{i=1}^{N} |x_i| \f]
+
     \param vec   -- Vector for which to comput the norm.
     \param nelem -- Number of elements in the vector.
 
@@ -106,6 +174,11 @@ namespace CR { // namespace CR -- begin
   
   /*!
     \brief Compute the L1-Norm of a vector
+
+    The <a href="http://mathworld.wolfram.com/L1-Norm.html">L1-Norm</a> is a
+    vector norm defined for a vector \f$ \vec x = [x_1,x_2,...,x_N]^T \f$ with
+    complex entries by 
+    \f[ |\vec x|_{1} = \sum_{i=1}^{N} |x_i| \f]
 
     \param vec   -- Vector for which to comput the norm.
 
