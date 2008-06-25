@@ -281,101 +281,101 @@ done
 ## Build individual/multiple packages
 
 case $param_packageName in 
-	bison)
-		echo "[`date`] Selected package Bison"
-		if test -z `which cmake` ; then { build_cmake; } fi;
-		build_package bison external/bison "-DBISON_FORCE_BUILD:BOOL=$param_forceBuild";
-    ;;
-	blitz)
-		echo "[`date`] Selected package Blitz++"
-		if test -z `which cmake` ; then { build_cmake; } fi;
-		build_package blitz external/blitz "-DBLITZ_FORCE_BUILD:BOOL=$param_forceBuild";
-    ;;
+    bison)
+    echo "[`date`] Selected package Bison";
+    if test -z `which cmake` ; then { build_cmake; } fi;
+	build_package bison external/bison "-DBISON_FORCE_BUILD:BOOL=$param_forceBuild";
+	;;
+    blitz)
+    echo "[`date`] Selected package Blitz++";
+    if test -z `which cmake` ; then { build_cmake; } fi;
+	build_package blitz external/blitz "-DBLITZ_FORCE_BUILD:BOOL=$param_forceBuild";
+	;;
     boost)
-		echo "[`date`] Selected package Boost"
-		if test -z `which cmake` ; then { build_cmake; } fi;
-		build_package boost external/boost "-DBOOST_FORCE_BUILD:BOOL=$param_forceBuild -DBOOST_FIND_python_ONLY:BOOL=1";
-    ;;
+    echo "[`date`] Selected package Boost";
+    if test -z `which cmake` ; then { build_cmake; } fi;
+	build_package boost external/boost "-DBOOST_FORCE_BUILD:BOOL=$param_forceBuild -DBOOST_FIND_python_ONLY:BOOL=1";
+	;;
     casacore)
-		echo "[`date`] Selected package CASACORE"
-		if test -z `which cmake` ; then { build_cmake; } fi;
+    echo "[`date`] Selected package CASACORE";
+    if test -z `which cmake` ; then { build_cmake; } fi;
 		## -- build required packages
-		./build.sh wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
-		./build.sh cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$param_forceBuild";
-		./build.sh hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
+	./build.sh wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
+	./build.sh cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$param_forceBuild";
+	./build.sh hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
 		## -- build package
-		build_package casacore external/casacore "-DCASACORE_FORCE_BUILD:BOOL=$param_forceBuild";
-    ;;
+	build_package casacore external/casacore "-DCASACORE_FORCE_BUILD:BOOL=$param_forceBuild";
+	;;
     cfitsio)
-		echo "[`date`] Selected package CFITSIO"
-		if test -z `which cmake` ; then { build_cmake; } fi;
-		build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$param_forceBuild";
-    ;;
+    echo "[`date`] Selected package CFITSIO";
+    if test -z `which cmake` ; then { build_cmake; } fi;
+	build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$param_forceBuild";
+	;;
     cmake)
-		echo "[`date`] Selected package CMake"
-		build_cmake
+    echo "[`date`] Selected package CMake";
+    build_cmake
     ;;
     flex)
-		echo "[`date`] Selected package Flex"
-		if test -z `which cmake` ; then { build_cmake; } fi;
-		build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$param_forceBuild"
-    ;;
+    echo "[`date`] Selected package Flex";
+    if test -z `which cmake` ; then { build_cmake; } fi;
+	build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$param_forceBuild"
+	;;
     hdf5)
-		echo "[`date`] Selected package Hdf5"
-		if test -z `which cmake` ; then { build_cmake; } fi;
-		build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
-    ;;
+    echo "[`date`] Selected package Hdf5"
+    if test -z `which cmake` ; then { build_cmake; } fi;
+	build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
+	;;
     plplot)
-		echo "[`date`] Selected package Plplot"
-		if test -z `which cmake` ; then { build_cmake; } fi;
-		if test -d $basedir/../external/plplot ; then
+    echo "[`date`] Selected package Plplot"
+    if test -z `which cmake` ; then { build_cmake; } fi;
+	if test -d $basedir/../external/plplot ; then
 			## first pass
-			mkdir $basedir/plplot 
-			cd $basedir/plplot 
-			cmake -C $basedir/../devel_common/cmake/SettingsPLplot.cmake $basedir/../external/plplot
+	    mkdir $basedir/plplot 
+	    cd $basedir/plplot 
+	    cmake -C $basedir/../devel_common/cmake/SettingsPLplot.cmake $basedir/../external/plplot
 			## second pass
-	    	build_package plplot external/plplot
-		else
-		    cd $basedir/../external
+	    build_package plplot external/plplot
+	else
+	    cd $basedir/../external
 			## download the source tar-ball from source forge
-		    wget -c http://ovh.dl.sourceforge.net/sourceforge/plplot/plplot-5.7.4.tar.gz
+	    wget -c http://ovh.dl.sourceforge.net/sourceforge/plplot/plplot-5.7.4.tar.gz
 		    ## unpack the tar-ball and adjust the name of the newly created directory
-	    	tar -xvzf plplot-5.7.4.tar.gz
-		    mv plplot-5.7.4 plplot
+	    tar -xvzf plplot-5.7.4.tar.gz
+	    mv plplot-5.7.4 plplot
 		    ## remove the tar-ball
-	    	rm -f plplot-5.7.4.tar.gz
+	    rm -f plplot-5.7.4.tar.gz
 	    	## recursive call of this method
-	    	cd $basedir
-	    	./build.sh plplot
-		fi
-    ;;
+	    cd $basedir
+	    ./build.sh plplot
+	fi
+	;;
     python)
-		echo "[`date`] Selected package PYTHON"
-		if test -z `which cmake` ; then { build_cmake; } fi;
-		build_package python external/python
-    ;;
+    echo "[`date`] Selected package PYTHON"
+    if test -z `which cmake` ; then { build_cmake; } fi;
+	build_package python external/python
+	;;
     startools)
-		echo "[`date`] Selected package Star-Tools"
-		if test -z `which cmake` ; then { build_cmake; } fi;
-		build_package startools external/startools "-DStarTools_FORCE_BUILD:BOOL=$param_forceBuild";
-    ;;
+    echo "[`date`] Selected package Star-Tools"
+    if test -z `which cmake` ; then { build_cmake; } fi;
+	build_package startools external/startools "-DStarTools_FORCE_BUILD:BOOL=$param_forceBuild";
+	;;
     vtk)
-		echo "[`date`] Selected package VTK"
-		if test -z `which cmake` ; then { build_cmake; } fi;
-		echo "-- No configuration and build support available yet!"
-    ;;
+    echo "[`date`] Selected package VTK"
+    if test -z `which cmake` ; then { build_cmake; } fi;
+	echo "-- No configuration and build support available yet!"
+	;;
     wcslib)
-		echo "[`date`] Selected package WCSLIB"
-		if test -z `which cmake` ; then { build_cmake; } fi;
-		./build.sh bison $param_reportBuild
-		./build.sh flex $param_reportBuild
-		build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
-    ;;
+    echo "[`date`] Selected package WCSLIB"
+    if test -z `which cmake` ; then { build_cmake; } fi;
+	./build.sh bison $param_reportBuild
+	./build.sh flex $param_reportBuild
+	build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
+	;;
     wcstools)
-		echo "[`date`] Selected package WCSTOOLS"
-		if test -z `which cmake` ; then { build_cmake; } fi;
-		build_package wcstools external/wcstools
-    ;;
+    echo "[`date`] Selected package WCSTOOLS"
+    if test -z `which cmake` ; then { build_cmake; } fi;
+	build_package wcstools external/wcstools
+	;;
     ## --------------------------------------------------------------------------
     ## --- USG software packages ------------------------------------------------
     ## --------------------------------------------------------------------------
@@ -387,8 +387,8 @@ case $param_packageName in
 		./build.sh flex
 		./build.sh casacore --force-build $param_reportBuild
 		./build.sh plplot --force-build $param_reportBuild
-		./build.sh python $param_reportBuild
 		./build.sh boost --force-build $param_reportBuild
+		./build.sh python $param_reportBuild
 		## USG packages
 		echo "[`date`] Building Data Access Library ..."
 		build_package dal src/DAL
