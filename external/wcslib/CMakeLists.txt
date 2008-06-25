@@ -18,9 +18,9 @@ set (WCSLIB_VERSION "${WCSLIB_VERSION_MAJOR}.${WCSLIB_VERSION_MINOR}")
 ## -----------------------------------------------------------------------------
 ## User defined build/install options
 
-option (WCSLIB_PYTHON_WRAPPER "Generate Python wrapper for WCSLIB?" 0)
-option (WCSLIB_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
-option (WCSLIB_FORCE_BUILD "Force rebuild and local installation" 0)
+option (WCSLIB_PYTHON_WRAPPER    "Generate Python wrapper for WCSLIB?"  0 )
+option (WCSLIB_VERBOSE_CONFIGURE "Verbose output during configuration?" 0 )
+option (WCSLIB_FORCE_BUILD       "Force rebuild and local installation" 0 )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -42,6 +42,8 @@ if (NOT USG_ROOT)
   endif (USG_ROOT)
 endif (NOT USG_ROOT)
 
+## silence find scipt output if necessary
+
 if (NOT WCSLIB_VERBOSE_CONFIGURE)
   set (CFITSIO_FIND_QUIETLY 1)
   set (BOOST_FIND_QUIETLY 1)
@@ -49,10 +51,10 @@ if (NOT WCSLIB_VERBOSE_CONFIGURE)
   set (WCSLIB_FIND_QUIETLY 1)
 endif (NOT WCSLIB_VERBOSE_CONFIGURE)
 
+include (FindWCS)
 include (FindCFITSIO)
 include (FindBoost)
 include (FindPython)
-include (FindWCS)
 
 ## <-- begin build condition --------------------------------------------------->
 

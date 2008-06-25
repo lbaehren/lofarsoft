@@ -5,6 +5,12 @@
 #
 ## ------------------------------------------------------------------------------
 
+## Name of the project
+project (BOOST_PYTHON)
+
+## Minimum required version of CMake to configure the project
+cmake_minimum_required (VERSION 2.5)
+
 ## ------------------------------------------------------------------------------
 ## Sub-directories
 

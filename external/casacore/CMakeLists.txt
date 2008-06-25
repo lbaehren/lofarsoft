@@ -26,13 +26,13 @@ include (CTest)
 ## -----------------------------------------------------------------------------
 ## User defined build/install options
 
-option (casacore_BUILD_TESTS "Build the test programs?" 0)
-option (casacore_ENABLE_TESTING "Enable running test programs?" 0)
-option (casacore_SHARED_LIBRARIES "Build libraries as shared libraries?" 0)
-option (casacore_MEASURES_DATA "Retrieve the measures data tables?" 0)
-option (casacore_WITH_G2C "Use g2c for compiling Fortran code?" 0)
-option (casacore_HDF5_SUPPORT "Enable support for HDF5?" 0)
-option (casacore_VERBOSE_CONFIGURE "Verbose output during configuration?" 1)
+option (casacore_BUILD_TESTS       "Build the test programs?"             0 )
+option (casacore_ENABLE_TESTING    "Enable running test programs?"        0 )
+option (casacore_SHARED_LIBRARIES  "Build libraries as shared libraries?" 0 )
+option (casacore_MEASURES_DATA     "Retrieve the measures data tables?"   0 )
+option (casacore_WITH_G2C          "Use g2c for compiling Fortran code?"  0 )
+option (casacore_HDF5_SUPPORT      "Enable support for HDF5?"             0 )
+option (casacore_VERBOSE_CONFIGURE "Verbose output during configuration?" 1 )
 
 ## Handle option: testing mode on/off
 
@@ -90,19 +90,19 @@ include (TestBigEndian)
 ## use the CMake build-in macro, but in a number of cases those will not yield
 ## proper results - where therefore run an explicit check.
 
-check_include_files (assert.h HAVE_ASSERT_H)
-check_include_files (ctype.h HAVE_CTYPE_H)
-check_include_files (fcntl.h HAVE_FCNTL_H)
-check_include_files (stdlib.h HAVE_STDLIB_H)
-check_include_files (stdio.h HAVE_STDIO_H)
-check_include_files (string.h HAVE_STRING_H)
-check_include_files (unistd.h HAVE_UNISTD_H)
+check_include_files (assert.h HAVE_ASSERT_H )
+check_include_files (ctype.h  HAVE_CTYPE_H  )
+check_include_files (fcntl.h  HAVE_FCNTL_H  )
+check_include_files (stdlib.h HAVE_STDLIB_H )
+check_include_files (stdio.h  HAVE_STDIO_H  )
+check_include_files (string.h HAVE_STRING_H )
+check_include_files (unistd.h HAVE_UNISTD_H )
 
-check_type_size ("int" SIZEOF_INT)
-check_type_size ("float" SIZEOF_FLOAT)
-check_type_size ("double" SIZEOF_DOUBLE)
-check_type_size ("long" SIZEOF_LONG)
-check_type_size ("long long" SIZEOF_LONG_LONG)
+check_type_size ("int"       SIZEOF_INT       )
+check_type_size ("float"     SIZEOF_FLOAT     )
+check_type_size ("double"    SIZEOF_DOUBLE    )
+check_type_size ("long"      SIZEOF_LONG      )
+check_type_size ("long long" SIZEOF_LONG_LONG )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -470,6 +470,8 @@ message (STATUS "CFITSIO header files ....... = ${CFITSIO_INCLUDES}")
 message (STATUS "CFITSIO library ............ = ${CFITSIO_LIBRARIES}")
 message (STATUS "G2C header files ........... = ${G2C_INCLUDES}")
 message (STATUS "G2C library ................ = ${G2C_LIBRARIES}")
+message (STATUS "HDF5 header files .......... = ${HDF5_INCLUDES}")
+message (STATUS "HDF5 library ............... = ${HDF5_LIBRARIES}")
 message (STATUS "LAPACK header files ........ = ${LAPACK_INCLUDES}")
 message (STATUS "LAPACK library ............. = ${LAPACK_LIBRARIES}")
 message (STATUS "WCSLIB header files ........ = ${WCSLIB_INCLUDES}")

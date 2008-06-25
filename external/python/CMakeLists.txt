@@ -51,11 +51,15 @@ else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
 
-## --- set verbosity during configuration ------
-set (BOOST_FIND_QUIETLY ON)
-set (BOOST_pythonOnly ON)
-set (BOOST_test_exec_monitor OFF)
-set (PYTHON_FIND_QUIETLY ON)
+## --- set verbosity during configuration
+
+set (BOOST_FIND_QUIETLY      YES )
+set (BOOST_pythonOnly        YES )
+set (BOOST_test_exec_monitor NO  )
+set (GLIB_FIND_QUIETLY       YES )
+set (PYTHON_FIND_QUIETLY     YES )
+
+## --- load CMake modules to locate external packages 
 
 include (FindPython)
 include (FindBoost)
