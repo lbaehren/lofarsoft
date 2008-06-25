@@ -187,66 +187,80 @@ build_package ()
 
 if test -z $1 ; then
     print_help
+    exit;
 else
     case $1 in
 	-h)
-		print_help
+	print_help
+	exit;
 	;;
 	--h)
-		print_help
+	print_help
+	exit;
 	;;
 	-help)
-		print_help
+	print_help
+	exit;
 	;;
 	--help)
-		print_help
+	print_help
+	exit;
 	;;
 	help)
-		print_help
+	print_help
+	exit;
 	;;
 	-clean-build)
-		rm -rf *~ *.log CMake* CPack* Makefile external cmake_install.cmake;
-		rm -rf bdsm bison blitz boost;
-		rm -rf casacore cfitsio cmake config cr; 
-		rm -rf dal dsp;
-		rm -rf flex;
-		rm -rf hdf5;
-		rm -rf startools;
-		rm -rf plplot python;
-		rm -rf vtk;
-		rm -rf wcslib wcstools;
+	rm -rf *~ *.log CMake* CPack* Makefile external cmake_install.cmake;
+	rm -rf bdsm bison blitz boost;
+	rm -rf casacore cfitsio cmake config cr; 
+	rm -rf dal dsp;
+	rm -rf flex;
+	rm -rf hdf5;
+	rm -rf startools;
+	rm -rf plplot python;
+	rm -rf vtk;
+	rm -rf wcslib wcstools;
+	exit;
 	;;
 	clean-build)
-		./build.sh -clean-build;
+	./build.sh -clean-build;
+	exit;
 	;;
 	-clean-release)
-		rm -rf $basedir/../release/bin
-		rm -rf $basedir/../release/doc
-		rm -rf $basedir/../release/include
-		rm -rf $basedir/../release/info
-		rm -rf $basedir/../release/lib
-		rm -rf $basedir/../release/man
-		rm -rf $basedir/../release/share
+	rm -rf $basedir/../release/bin
+	rm -rf $basedir/../release/doc
+	rm -rf $basedir/../release/include
+	rm -rf $basedir/../release/info
+	rm -rf $basedir/../release/lib
+	rm -rf $basedir/../release/man
+	rm -rf $basedir/../release/share
+	exit;
 	;;
 	clean-release)
-		./build.sh -clean-release;
+	./build.sh -clean-release;
+	exit;
 	;;
 	-clean-all)
-		./build.sh -clean-build;
-		./build.sh -clean-release;
+	./build.sh -clean-build;
+	./build.sh -clean-release;
+	exit;
 	;;
 	clean-all)
-		./build.sh -clean-all;
+	./build.sh -clean-all;
+	exit;
 	;;
 	-clean)
-		./build.sh -clean-build;
+	./build.sh -clean-build;
+	exit;
 	;;
 	clean)
-		./build.sh -clean;
+	./build.sh -clean;
+	exit;
 	;;
 	*)
-		param_packageName=$1;
-		echo " -- Selected package: $param_packageName";
+	param_packageName=$1;
+	echo " -- Selected package: $param_packageName";
 	;;
     esac
 fi
@@ -280,102 +294,94 @@ done
 ## -----------------------------------------------------------------------------
 ## Build individual/multiple packages
 
+if test -z `which cmake` ; then {
+	build_cmake;
+    }
+fi;
+
 case $param_packageName in 
     bison)
     echo "[`date`] Selected package Bison";
-    if test -z `which cmake` ; then { build_cmake; } fi;
-	build_package bison external/bison "-DBISON_FORCE_BUILD:BOOL=$param_forceBuild";
-	;;
+    build_package bison external/bison "-DBISON_FORCE_BUILD:BOOL=$param_forceBuild";
+    ;;
     blitz)
     echo "[`date`] Selected package Blitz++";
-    if test -z `which cmake` ; then { build_cmake; } fi;
-	build_package blitz external/blitz "-DBLITZ_FORCE_BUILD:BOOL=$param_forceBuild";
-	;;
+    build_package blitz external/blitz "-DBLITZ_FORCE_BUILD:BOOL=$param_forceBuild";
+    ;;
     boost)
     echo "[`date`] Selected package Boost";
-    if test -z `which cmake` ; then { build_cmake; } fi;
-	build_package boost external/boost "-DBOOST_FORCE_BUILD:BOOL=$param_forceBuild -DBOOST_FIND_python_ONLY:BOOL=1";
-	;;
+    build_package boost external/boost "-DBOOST_FORCE_BUILD:BOOL=$param_forceBuild -DBOOST_FIND_python_ONLY:BOOL=1";
+    ;;
     casacore)
     echo "[`date`] Selected package CASACORE";
-    if test -z `which cmake` ; then { build_cmake; } fi;
 		## -- build required packages
-	./build.sh wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
-	./build.sh cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$param_forceBuild";
-	./build.sh hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
+    ./build.sh wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
+    ./build.sh cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$param_forceBuild";
+    ./build.sh hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
 		## -- build package
-	build_package casacore external/casacore "-DCASACORE_FORCE_BUILD:BOOL=$param_forceBuild";
-	;;
+    build_package casacore external/casacore "-DCASACORE_FORCE_BUILD:BOOL=$param_forceBuild";
+    ;;
     cfitsio)
     echo "[`date`] Selected package CFITSIO";
-    if test -z `which cmake` ; then { build_cmake; } fi;
-	build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$param_forceBuild";
-	;;
+    build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$param_forceBuild";
+    ;;
     cmake)
     echo "[`date`] Selected package CMake";
     build_cmake
     ;;
     flex)
     echo "[`date`] Selected package Flex";
-    if test -z `which cmake` ; then { build_cmake; } fi;
-	build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$param_forceBuild"
-	;;
+    build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$param_forceBuild"
+    ;;
     hdf5)
     echo "[`date`] Selected package Hdf5"
-    if test -z `which cmake` ; then { build_cmake; } fi;
-	build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
-	;;
+    build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
+    ;;
     plplot)
     echo "[`date`] Selected package Plplot"
-    if test -z `which cmake` ; then { build_cmake; } fi;
-	if test -d $basedir/../external/plplot ; then
+    if test -d $basedir/../external/plplot ; then
 			## first pass
-	    mkdir $basedir/plplot 
-	    cd $basedir/plplot 
-	    cmake -C $basedir/../devel_common/cmake/SettingsPLplot.cmake $basedir/../external/plplot
+	mkdir $basedir/plplot 
+	cd $basedir/plplot 
+	cmake -C $basedir/../devel_common/cmake/SettingsPLplot.cmake $basedir/../external/plplot
 			## second pass
-	    build_package plplot external/plplot
-	else
-	    cd $basedir/../external
+	build_package plplot external/plplot
+    else
+	cd $basedir/../external
 			## download the source tar-ball from source forge
-	    wget -c http://ovh.dl.sourceforge.net/sourceforge/plplot/plplot-5.7.4.tar.gz
+	wget -c http://ovh.dl.sourceforge.net/sourceforge/plplot/plplot-5.7.4.tar.gz
 		    ## unpack the tar-ball and adjust the name of the newly created directory
-	    tar -xvzf plplot-5.7.4.tar.gz
-	    mv plplot-5.7.4 plplot
+	tar -xvzf plplot-5.7.4.tar.gz
+	mv plplot-5.7.4 plplot
 		    ## remove the tar-ball
-	    rm -f plplot-5.7.4.tar.gz
+	rm -f plplot-5.7.4.tar.gz
 	    	## recursive call of this method
-	    cd $basedir
-	    ./build.sh plplot
-	fi
-	;;
+	cd $basedir
+	./build.sh plplot
+    fi
+    ;;
     python)
     echo "[`date`] Selected package PYTHON"
-    if test -z `which cmake` ; then { build_cmake; } fi;
-	build_package python external/python
-	;;
+    build_package python external/python
+    ;;
     startools)
     echo "[`date`] Selected package Star-Tools"
-    if test -z `which cmake` ; then { build_cmake; } fi;
-	build_package startools external/startools "-DStarTools_FORCE_BUILD:BOOL=$param_forceBuild";
-	;;
+    build_package startools external/startools "-DStarTools_FORCE_BUILD:BOOL=$param_forceBuild";
+    ;;
     vtk)
     echo "[`date`] Selected package VTK"
-    if test -z `which cmake` ; then { build_cmake; } fi;
-	echo "-- No configuration and build support available yet!"
-	;;
+    echo "-- No configuration and build support available yet!"
+    ;;
     wcslib)
     echo "[`date`] Selected package WCSLIB"
-    if test -z `which cmake` ; then { build_cmake; } fi;
-	./build.sh bison $param_reportBuild
-	./build.sh flex $param_reportBuild
-	build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
-	;;
+    ./build.sh bison $param_reportBuild
+    ./build.sh flex $param_reportBuild
+    build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
+    ;;
     wcstools)
     echo "[`date`] Selected package WCSTOOLS"
-    if test -z `which cmake` ; then { build_cmake; } fi;
-	build_package wcstools external/wcstools
-	;;
+    build_package wcstools external/wcstools
+    ;;
     ## --------------------------------------------------------------------------
     ## --- USG software packages ------------------------------------------------
     ## --------------------------------------------------------------------------
