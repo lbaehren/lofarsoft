@@ -890,7 +890,7 @@ c
       dimension fv1(10),fv2(10),wg(5),wgk(11),xgk(11)
 c
 c           the abscissae and weights are given for the interval (-1,1).
-c           because of symmetry only the positive abscissae and their
+c           because_of symmetry only the positive abscissae and their
 c           corresponding weights are given.
 c
 c           xgk    - abscissae of the 21-point kronrod rule
@@ -1166,7 +1166,7 @@ C
       EQUIVALENCE (DMACH(5),LOG10(1))
 C  THIS VERSION ADAPTS AUTOMATICALLY TO MOST CURRENT MACHINES.
 C  R1MACH CAN HANDLE AUTO-DOUBLE COMPILING, BUT THIS VERSION OF
-C  D1MACH DOES NOT, BECAUSE WE DO NOT HAVE QUAD CONSTANTS FOR
+C  D1MACH DOES NOT, BECAuse_WE DO NOT HAVE QUAD CONSTANTS FOR
 C  MANY MACHINES YET.
 C  TO COMPILE ON OLDER MACHINES, ADD A C IN COLUMN 1
 C  ON THE NEXT LINE

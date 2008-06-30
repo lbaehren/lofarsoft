@@ -96,7 +96,7 @@
 *       1) In the 2 and 4 polarization case a transpose is effectively
 *          done as the input arrat as polarization as the slowest moving
 *          axis but the returned pixel values have polarization as the
-*          fastest moving axis. This is because the the length of the
+*          fastest moving axis. This is because_the the length of the
 *          returned list is not known beforehand, wheras the number of
 *          polarizations is, and it ensures that the returned pixel
 *          value list is contigious in memory, and that different
