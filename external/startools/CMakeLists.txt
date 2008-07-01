@@ -138,7 +138,9 @@ endif (NOT ROOT_LIBRARIES)
 
 find_path (PostgreSQL_INCLUDES libpq-fe.h
   PATH ${locations_includes}
-  PATH_SUFFIXES postgresql
+  PATH_SUFFIXES
+  postgresql
+  pgsql
   )
 
 if (PostgreSQL_INCLUDES)
@@ -148,7 +150,9 @@ endif (PostgreSQL_INCLUDES)
 
 find_library (PostgreSQL_LIBRARIES pq
   PATHS ${locations_lib}
-  PATH_SUFFIXES postgresql
+  PATH_SUFFIXES
+  postgresql
+  pgsql
   NO_DEFAULT_PATH
   )
 
