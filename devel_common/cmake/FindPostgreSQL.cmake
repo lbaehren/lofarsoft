@@ -75,7 +75,9 @@ set (PostgreSQL_LIBRARIES "")
 
 find_library (libpq pq
   PATHS ${lib_locations}
-  PATH_SUFFIXES postgresql
+  PATH_SUFFIXES
+  postgresql
+  pgsql
   NO_DEFAULT_PATH
   )
 
@@ -87,7 +89,9 @@ endif (libpq)
 
 find_library (libpgtypes pgtypes 
   PATHS ${lib_locations}
-  PATH_SUFFIXES postgresql
+  PATH_SUFFIXES
+  postgresql
+  pgsql
   NO_DEFAULT_PATH
   )
 
@@ -99,7 +103,9 @@ endif (libpgtypes)
 
 find_library (libecpg ecpg
   PATHS ${lib_locations}
-  PATH_SUFFIXES postgresql
+  PATH_SUFFIXES
+  postgresql
+  pgsql
   NO_DEFAULT_PATH
   )
 
@@ -111,7 +117,9 @@ endif (libecpg)
 
 find_library (libpgport pgport
   PATHS ${lib_locations}
-  PATH_SUFFIXES postgresql
+  PATH_SUFFIXES
+  postgresql
+  pgsql
   NO_DEFAULT_PATH
   )
 
