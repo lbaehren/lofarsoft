@@ -294,9 +294,8 @@ done
 ## -----------------------------------------------------------------------------
 ## Build individual/multiple packages
 
-if test -z `which cmake` ; then {
-	build_cmake;
-    }
+if test -z `which cmake` ; then
+    build_cmake;
 fi;
 
 case $param_packageName in 
@@ -386,28 +385,28 @@ case $param_packageName in
     ## --- USG software packages ------------------------------------------------
     ## --------------------------------------------------------------------------
     dal)
-		## external packages
-		echo "[`date`] Processing required packages ..."
-		./build.sh cmake
-		./build.sh bison
-		./build.sh flex
-		./build.sh casacore --force-build $param_reportBuild
-		./build.sh plplot --force-build $param_reportBuild
-		./build.sh boost --force-build $param_reportBuild
-		./build.sh python $param_reportBuild
-		## USG packages
-		echo "[`date`] Building Data Access Library ..."
-		build_package dal src/DAL
-		## Post-installation testing
-		echo ""
-		echo "------------------------------------------------------------";
-		echo ""
-		echo "[`date`] To test the DAL installation run:"
-		echo ""
-		echo "  cd build/dal; ctest"
-		echo ""
-		echo "------------------------------------------------------------";
-		echo ""
+	## external packages
+        echo "[`date`] Processing required packages ..."
+	./build.sh cmake
+	./build.sh bison
+	./build.sh flex
+	./build.sh casacore --force-build $param_reportBuild
+	./build.sh plplot --force-build $param_reportBuild
+	./build.sh boost --force-build $param_reportBuild
+	./build.sh python $param_reportBuild
+	## USG packages
+	echo "[`date`] Building Data Access Library ..."
+	build_package dal src/DAL
+	## Post-installation testing
+	echo ""
+	echo "------------------------------------------------------------";
+	echo ""
+	echo "[`date`] To test the DAL installation run:"
+	echo ""
+	echo "  cd build/dal; ctest"
+	echo ""
+	echo "------------------------------------------------------------";
+	echo ""
     ;;
     cr)
 		echo "[`date`] Processing required packages ..."

@@ -6,7 +6,13 @@
 ## Variables used through the configuration environment:
 ##
 ##  USG_ROOT              -- Root of the USG directory tree.
-##  USG_CMAKE_CONFIG      -- 
+##  USG_CMAKE_CONFIG      -- Cache variable used to control running through the
+##                           common set of instructions provided with this file.
+##                           since this file will be included multiple times
+##                           during the configuration process to a project, this
+##                           variable serves as an include-guard, both protecting
+##                           previously assigned variables as well as avoiding 
+##                           unnecessary passes through the instructions.
 ##  USG_LIB_LOCATIONS     -- 
 ##  USG_INCLUDE_LOCATIONS -- 
 ##  USG_INSTALL_PREFIX    -- Prefix marking the location at which the finished

@@ -26,13 +26,13 @@ include (CTest)
 ## -----------------------------------------------------------------------------
 ## User defined build/install options
 
-option (casacore_BUILD_TESTS       "Build the test programs?"             0 )
-option (casacore_ENABLE_TESTING    "Enable running test programs?"        0 )
-option (casacore_SHARED_LIBRARIES  "Build libraries as shared libraries?" 0 )
-option (casacore_MEASURES_DATA     "Retrieve the measures data tables?"   0 )
-option (casacore_WITH_G2C          "Use g2c for compiling Fortran code?"  0 )
-option (casacore_HDF5_SUPPORT      "Enable support for HDF5?"             0 )
-option (casacore_VERBOSE_CONFIGURE "Verbose output during configuration?" 1 )
+option (casacore_BUILD_TESTS       "Build the test programs?"             NO  )
+option (casacore_ENABLE_TESTING    "Enable running test programs?"        NO  )
+option (casacore_SHARED_LIBRARIES  "Build libraries as shared libraries?" NO  )
+option (casacore_MEASURES_DATA     "Retrieve the measures data tables?"   NO  )
+option (casacore_WITH_G2C          "Use g2c for compiling Fortran code?"  NO  )
+option (casacore_HDF5_SUPPORT      "Enable support for HDF5?"             YES )
+option (casacore_VERBOSE_CONFIGURE "Verbose output during configuration?" YES )
 
 ## Handle option: testing mode on/off
 
@@ -124,10 +124,7 @@ if (USG_ROOT)
   include (FindG2C)
   include (FindLAPACK)
   include (FindWCS)
-  ## optional components
-  if (casacore_HDF5_SUPPORT) 
-    include (FindHDF5)
-  endif (casacore_HDF5_SUPPORT)
+  include (FindHDF5)
 else (USG_ROOT)
   ##
   ## If used standalone, the CMake scripts cannot rely on the additional
@@ -169,9 +166,7 @@ else (USG_ROOT)
   include (${casacore_SOURCE_DIR}/FindG2C.cmake)
   include (${casacore_SOURCE_DIR}/FindLAPACK.cmake)
   include (${casacore_SOURCE_DIR}/FindWCS.cmake)
-  if (casacore_HDF5_SUPPORT) 
-    include (${casacore_SOURCE_DIR}/FindHDF5.cmake)
-  endif (casacore_HDF5_SUPPORT)
+  include (${casacore_SOURCE_DIR}/FindHDF5.cmake)
 endif (USG_ROOT)
 
 ## --- libm -----------------------------------------------
@@ -228,17 +223,25 @@ find_program (uname_bin uname ${bin_locations})
 ##
 ## =============================================================================
 
-if (HAVE_HDF5)
-  add_definitions (-DHAVE_HDF5)
-  include_directories (${HDF5_INCLUDES})
-else (HAVE_HDF5)
-  set (casacore_HDF5_SUPPORT FALSE)
-endif (HAVE_HDF5)
+if (casacore_HDF5_SUPPORT)
+  
+  if (HAVE_HDF5)
+    ## if we have HDF5, check if the version is correct
+    if (HDF5_MAJOR_VERSION GREATER 0)
+      add_definitions (-DHAVE_HDF5)
+      include_directories (${HDF5_INCLUDES})
+    endif (HDF5_MAJOR_VERSION GREATER 0)
+  else (HAVE_HDF5)
+    message (STATUS "Unable to locate HDF5; disabling support with casacore.")
+    set (casacore_HDF5_SUPPORT FALSE)
+  endif (HAVE_HDF5)
+  
+endif (casacore_HDF5_SUPPORT)
 
 ## -----------------------------------------------------------------------------
 ## Location of the header files
 
-include_directories (
+nclude_directories (
   ${casacore_SOURCE_DIR}/casa
   ${casacore_SOURCE_DIR}/tables
   ${casacore_SOURCE_DIR}/mirlib
