@@ -241,7 +241,7 @@ endif (casacore_HDF5_SUPPORT)
 ## -----------------------------------------------------------------------------
 ## Location of the header files
 
-nclude_directories (
+include_directories (
   ${casacore_SOURCE_DIR}/casa
   ${casacore_SOURCE_DIR}/tables
   ${casacore_SOURCE_DIR}/mirlib
