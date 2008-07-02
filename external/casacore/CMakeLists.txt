@@ -23,8 +23,11 @@ cmake_minimum_required (VERSION 2.5)
 ## include the CTest environment
 include (CTest)
 
-## -----------------------------------------------------------------------------
-## User defined build/install options
+## =============================================================================
+##
+##  User defined build/install options
+##
+## =============================================================================
 
 option (casacore_BUILD_TESTS       "Build the test programs?"             NO  )
 option (casacore_ENABLE_TESTING    "Enable running test programs?"        NO  )
@@ -115,6 +118,12 @@ find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   ${casacore_SOURCE_DIR}/../../..
   ENV LOFARSOFT
   )
+
+set ( CFITSIO_FIND_QUIETLY YES )
+set ( G2C_FIND_QUIETLY     YES )
+set ( HDF5_FIND_QUIETLY    YES )
+set ( LAPACK_FIND_QUIETLY  YES )
+set ( WCSLIB_FIND_QUIETLY  YES )
 
 if (USG_ROOT)
   ## load common CMake configuration 
@@ -211,32 +220,49 @@ if (NOT HAVE_WCSLIB)
 endif (NOT HAVE_WCSLIB)
 
 ## -----------------------------------------------------------------------------
+## HDF5 library
+
+if (casacore_HDF5_SUPPORT)
+  
+  if (HAVE_HDF5)
+    ## if we have HDF5, is it the correct version?
+    if (${HDF5_MAJOR_VERSION} STRLESS 1)
+      message (STATUS "Major version of HDF5 too old for casacore!")
+      set (HAVE_HDF5 FALSE)
+    else (${HDF5_MAJOR_VERSION} STRLESS 1)
+      if (${HDF5_MINOR_VERSION} STRLESS 8)
+	message (STATUS "HDF5 library version is < 1.8")
+	set (HAVE_HDF5 FALSE)
+      else (${HDF5_MINOR_VERSION} STRLESS 8)
+	message (STATUS "HDF5 library version is >= 1.8")
+      endif (${HDF5_MINOR_VERSION} STRLESS 8)
+    endif (${HDF5_MAJOR_VERSION} STRLESS 1)
+  else (HAVE_HDF5)
+    message (STATUS "Unable to locate HDF5; disabling support with casacore.")
+    set (HAVE_HDF5 FALSE)
+  endif (HAVE_HDF5)
+
+  if  (HAVE_HDF5)
+    include_directories (${HDF5_INCLUDES})
+    add_definitions (-DHAVE_HDF5)
+  else (HAVE_HDF5)
+    set (casacore_HDF5_SUPPORT FALSE)
+  endif (HAVE_HDF5)
+  
+endif (casacore_HDF5_SUPPORT)
+
+## -----------------------------------------------------------------------------
 ## Check for additional tools which are required
 
-find_program (bison_bin bison ${bin_locations})
-find_program (flex_bin flex ${bin_locations})
-find_program (uname_bin uname ${bin_locations})
+find_program (bison_bin bison ${bin_locations} )
+find_program (flex_bin flex   ${bin_locations} )
+find_program (uname_bin uname ${bin_locations} )
 
 ## =============================================================================
 ##
 ##  Compiler and Linker options
 ##
 ## =============================================================================
-
-if (casacore_HDF5_SUPPORT)
-  
-  if (HAVE_HDF5)
-    ## if we have HDF5, check if the version is correct
-    if (HDF5_MAJOR_VERSION GREATER 0)
-      add_definitions (-DHAVE_HDF5)
-      include_directories (${HDF5_INCLUDES})
-    endif (HDF5_MAJOR_VERSION GREATER 0)
-  else (HAVE_HDF5)
-    message (STATUS "Unable to locate HDF5; disabling support with casacore.")
-    set (casacore_HDF5_SUPPORT FALSE)
-  endif (HAVE_HDF5)
-  
-endif (casacore_HDF5_SUPPORT)
 
 ## -----------------------------------------------------------------------------
 ## Location of the header files
@@ -469,16 +495,12 @@ message (STATUS "Wget network downloader .... = ${WGET_EXECUTABLE}")
 message (STATUS "Bison lexical parser ....... = ${bison_bin}")
 message (STATUS "Flex lexical parser ........ = ${flex_bin}")
 message (STATUS "libm library ............... = ${libm}")
-message (STATUS "CFITSIO header files ....... = ${CFITSIO_INCLUDES}")
-message (STATUS "CFITSIO library ............ = ${CFITSIO_LIBRARIES}")
-message (STATUS "G2C header files ........... = ${G2C_INCLUDES}")
-message (STATUS "G2C library ................ = ${G2C_LIBRARIES}")
-message (STATUS "HDF5 header files .......... = ${HDF5_INCLUDES}")
-message (STATUS "HDF5 library ............... = ${HDF5_LIBRARIES}")
-message (STATUS "LAPACK header files ........ = ${LAPACK_INCLUDES}")
-message (STATUS "LAPACK library ............. = ${LAPACK_LIBRARIES}")
-message (STATUS "WCSLIB header files ........ = ${WCSLIB_INCLUDES}")
-message (STATUS "WCSLIB library ............. = ${WCSLIB_LIBRARIES}")
+message (STATUS "Have CFITSIO? .............. = ${HAVE_CFITSIO}")
+message (STATUS "Have G2C? .................. = ${HAVE_G2C}")
+message (STATUS "Have HDF5? ................. = ${HAVE_HDF5}")
+message (STATUS "HDF5 library version ....... = ${HDF5_MAJOR_VERSION}.${HDF5_MINOR_VERSION}")
+message (STATUS "Have LAPACK? ............... = ${HAVE_LAPACK}")
+message (STATUS "Have WCSLIB? ............... = ${HAVE_WCSLIB}")
 message (STATUS " ")
 message (STATUS "======================================================================")
 message (STATUS " ")
