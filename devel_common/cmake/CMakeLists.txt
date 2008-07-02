@@ -105,5 +105,58 @@ if (TEST_ENV)
 endif (TEST_ENV)
 
 ## ==============================================================================
+##
+##  Test modules/macros provided by CMake itself
+##
+## ==============================================================================
+
+message ("======================================================================")
+message (STATUS "Testing modules/macros provided by CMake itself ...")
+message ("======================================================================")
+
+include (CheckLibraryExists)
+
+## [1] libz --------------------------------------
+
+find_library (libz
+  NAMES z
+  PATHS /usr/lib /usr/local/lib
+  )
+
+if (libz)
+  message (STATUS "[1] Checking libz for symbols ...")
+
+  foreach (libsymbol compress_block base_dist scan_tree inflate_fast)
+    check_library_exists (
+      ${libz}
+      ${libsymbol}
+      ""
+      libz_has_${libsymbol}
+      )
+  endforeach (libsymbol)  
+endif (libz)
+
+## [2] libcfitsio --------------------------------
+
+find_library (libcfitsio
+  NAMES cfitsio
+  PATHS /usr/lib /usr/local/lib ${CMake_SOURCE_DIR}/../../release/lib
+  )
+
+if (libcfitsio)
+  message (STATUS "[2] Checking libcfitsio for symbols ...")  
+
+  foreach (libsymbol file_open ftp_open file_openfile ffopen ffopentest ffreopen)    
+    check_library_exists (
+      ${libcfitsio}
+      ${libsymbol}
+      ""
+      libcfitsio_has_${libsymbol}
+      )
+  endforeach (libsymbol)
+  
+endif (libcfitsio)
+
+## ==============================================================================
 
 message ("======================================================================")

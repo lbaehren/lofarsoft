@@ -55,6 +55,12 @@ endif (NOT USG_ROOT)
 set (CFITSIO_FIND_QUIETLY 1)
 include (FindCFITSIO)
 
+## check if the located library has all the symbols we need
+
+if (NOT libcfitsio_has_ffopen OR NOT libcfitsio_has_ffopentest)
+  set (HAVE_CFITSIO FALSE)
+endif (NOT libcfitsio_has_ffopen OR NOT libcfitsio_has_ffopentest)
+
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)

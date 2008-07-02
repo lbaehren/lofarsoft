@@ -91,6 +91,22 @@ else (CFITSIO_libnsl)
 endif (CFITSIO_libnsl)
 
 ## -----------------------------------------------------------------------------
+## Check libcfitsio for required symbols
+
+include (CheckLibraryExists)
+
+if (CFITSIO_libcfitsio)
+    foreach (libsymbol file_open ftp_open file_openfile ffopen ffopentest ffreopen)    
+    check_library_exists (
+      ${CFITSIO_libcfitsio}
+      ${libsymbol}
+      ""
+      libcfitsio_has_${libsymbol}
+      )
+  endforeach (libsymbol)
+endif (CFITSIO_libcfitsio)
+
+## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
 IF (CFITSIO_INCLUDES AND CFITSIO_LIBRARIES)
