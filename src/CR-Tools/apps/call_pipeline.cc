@@ -83,6 +83,9 @@ using CR::LopesEventIn;
   verbose                = true
   simplexFit             = true
   doTVcal                = default
+  doGainCal              = true
+  doDispersionCal        = true
+  doDelayCal             = true
   polarization		= ANY
   plotStart              = -2.05e-6
   plotEnd                = -1.60e-6
@@ -108,6 +111,9 @@ using CR::LopesEventIn;
     <li>the simplex fit of the arrival direction and radius of curvature is
     done,
     <li>the TV calibration will be done by default,
+    <li>the electrical gain calibration (fieldstrength) will be done,
+    <li>correction of the dispersion (frequency dependent delay) is enabled,
+    <li>correction of the general delay is enabled,
     <li>the analysis does not take care of the polarization of the antennas,
     <li>the plots start at -2.05 micro seconds and end at -1.60 micro seconds,
     <li>the Lopes data will be upsampled to a sampling rate of 320 MHz (see below),
@@ -182,6 +188,9 @@ int main (int argc, char *argv[])
     bool verbose = true;
     bool simplexFit = true;
     int doTVcal = -1;			// 1: yes, 0: no, -1: use default	
+    bool doGainCal = true;		// calibration of the electrical fieldstrength
+    bool doDispersionCal = true;	// application of the CalTable PhaseCal values	
+    bool doDelayCal = true;		// correction for the general delay of each antenna
     string polarization = "ANY";	// polarization: ANY, EW or NS
     double plotStart = -2.05e-6;	// in seconds
     double plotEnd = -1.60e-6;		// in seconds
@@ -238,6 +247,9 @@ int main (int argc, char *argv[])
         std::cerr << "verbose = true\n";
         std::cerr << "simplexFit = true\n";
         std::cerr << "doTVcal = default\n";
+        std::cerr << "doGainCal = true\n";
+        std::cerr << "doDispersionCal = true\n";
+        std::cerr << "doDelayCal = true\n";
         std::cerr << "polarization = ANY\n";
         std::cerr << "plotBegin = -2.05e-6\n";
         std::cerr << "plotEnd = -1.60e-6\n";
@@ -450,8 +462,9 @@ int main (int argc, char *argv[])
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
 	}
-      
-        if ( (keyword.compare("dotvcal")==0) || (keyword.compare("doTVcal")==0) || (keyword.compare("DoTVCal")==0))
+
+        if ( (keyword.compare("dotvcal")==0) || (keyword.compare("doTVcal")==0) 
+             || (keyword.compare("DoTVCal")==0) || (keyword.compare("doTVCal")==0))
         {
           if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
 	  {
@@ -474,6 +487,66 @@ int main (int argc, char *argv[])
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
         }
+
+        if ( (keyword.compare("doGaincal")==0) || (keyword.compare("doGainCal")==0) 
+             || (keyword.compare("DoGainCal")==0) || (keyword.compare("dogaincal")==0))
+        {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
+	  {
+	    doGainCal = true;
+	    std::cout << "doGainCal set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
+	  {
+	    doGainCal = false;
+	    std::cout << "doGainCal set to 'false'.\n";
+	  } else
+          {
+            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "doGainCal must be either 'true' or 'false'.\n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+	}
+
+        if ( (keyword.compare("doDispersioncal")==0) || (keyword.compare("doDispersionCal")==0) 
+             || (keyword.compare("DoDispersionCal")==0) || (keyword.compare("dodispersioncal")==0))
+        {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
+	  {
+	    doDispersionCal = true;
+	    std::cout << "doDispersionCal set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
+	  {
+	    doDispersionCal = false;
+	    std::cout << "doDispersionCal set to 'false'.\n";
+	  } else
+          {
+            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "doDispersionCal must be either 'true' or 'false'.\n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+	}
+
+        if ( (keyword.compare("doDelaycal")==0) || (keyword.compare("doDelayCal")==0) 
+             || (keyword.compare("DoDelayCal")==0) || (keyword.compare("dodelaycal")==0))
+        {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
+	  {
+	    doDelayCal = true;
+	    std::cout << "doDelayCal set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
+	  {
+	    doDelayCal = false;
+	    std::cout << "doDelayCal set to 'false'.\n";
+	  } else
+          {
+            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "doDelayCal must be either 'true' or 'false'.\n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+	}
 
         if ( (keyword.compare("polarization")==0) || (keyword.compare("Polarization")==0) 
              || (keyword.compare("polarisation")==0) || (keyword.compare("Polarisation")==0))
@@ -893,7 +966,8 @@ int main (int argc, char *argv[])
       // call the pipeline with an extra delay = 0.
       results = eventPipeline.RunPipeline (filename, azimuth, elevation, distance, core_x, core_y, RotatePos,
                                            plotprefix, generatePlots, static_cast< Vector<int> >(flagged), verbose, 
-                                           simplexFit, 0., doTVcal, upsamplingRate, polarization, singlePlots, PlotRawData,
+                                           simplexFit, 0., doTVcal, doGainCal, doDispersionCal, doDelayCal,
+                                           upsamplingRate, polarization, singlePlots, PlotRawData,
                                            CalculateMaxima, listCalcMaxima, printShowerCoordinates);
 
       // make a postscript with a summary of all plots

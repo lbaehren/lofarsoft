@@ -105,6 +105,9 @@ namespace CR { // Namespace CR -- begin
 					  Bool simplexFit,
 					  Double ExtraDelay,
 					  int doTVcal,
+					  bool doGainCal,
+					  bool doDispersionCal,
+					  bool doDelayCal,
 					  Double UpSamplingRate,
 					  String Polarization,
 					  bool SinglePlots,
@@ -121,7 +124,7 @@ namespace CR { // Namespace CR -- begin
 
       // initialize the pipeline
       if (! SetupEvent(evname, doTVcal, FlaggedAntIDs, AntennaSelection, 
-		       UpSamplingRate, ExtraDelay, verbose)) {
+		       UpSamplingRate, ExtraDelay, verbose, doGainCal, doDispersionCal, doDelayCal)) {
 	cerr << "analyseLOPESevent2::RunPipeline: " << "Error during SetupEvent()!" << endl;
 	return Record();
       };

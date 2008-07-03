@@ -193,6 +193,9 @@ class analyseLOPESevent2 : public analyseLOPESevent{
       \param ExtraDelay      - additional delay to shift the data in time.
       \param doTVcal         - perform the phase calibration on the TV transmitter
                                (1: yes, 0: no, -1: use default)
+      \param doGainCal       - apply calibration of electrical fieldstrength
+      \param doDispersionCal - correct for the dispersion (frequency dependend PhaseCal values)
+      \param doDelayCal      - correct for general delay of the antennas
       \param UpSamplingRate  - Samplerate for upsampling. If smaller than the original
                                samplerate (80MHz for LOPES) then no upsampling is done.
 			            (Check the docs of <tt>UpSampledDR<\tt> for more info.)
@@ -220,6 +223,9 @@ class analyseLOPESevent2 : public analyseLOPESevent{
 			Bool simplexFit=False,
 			Double ExtraDelay=0.,
 			int doTVcal=-1,
+			bool doGainCal=true,
+			bool doDispersionCal=true,
+			bool doDelayCal=true,
 			Double UpSamplingRate=0.,
 			String Polarization="ANY",
 			bool SinglePlots=false,

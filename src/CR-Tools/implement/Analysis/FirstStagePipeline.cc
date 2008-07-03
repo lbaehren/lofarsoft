@@ -38,6 +38,9 @@ namespace CR { // Namespace CR -- begin
   
   void FirstStagePipeline::init(){
     verbose = True; // make "debugging" output the default ;-)
+    DoGainCal_p = True;
+    DoDispersionCal_p = True;
+    DoDelayCal_p = True;
     InterpInit = False;
     InterElGainCal_p = new CalTableInterpolater<Double>;
     InterPhaseCal_p = new CalTableInterpolater<DComplex>;
@@ -169,11 +172,29 @@ namespace CR { // Namespace CR -- begin
       freqVals = dr->frequencyValues(); // work around a bug in casa(core) 
       Double delay;
       for (i=0; i<nAnt ; i++){
-	InterElGainCal_p->GetValues(date, AntennaIDs(i), &elgain);
-	InterPhaseCal_p->GetValues(date, AntennaIDs(i), &phasecal);
+        // Get electrical gain if switched on (otherwise set it to 1)
+        if (DoGainCal_p)
+	  InterElGainCal_p->GetValues(date, AntennaIDs(i), &elgain);
+        else
+        {
+          elgain.resize(fftlen);
+          elgain.set(1);
+        }
+        // Get PhaseCal values if switched on (otherwise set them to 1+0i)
+        if (DoDispersionCal_p)
+	  InterPhaseCal_p->GetValues(date, AntennaIDs(i), &phasecal);
+        else
+        {
+          phasecal.resize(fftlen);
+          phasecal.set(DComplex (1.,0.));
+        }
 	tempComplexVec1.resize(phasecal.shape());
 	convertArray(tempComplexVec1,elgain/amplitude(phasecal));
-	CTRead->GetData(date, AntennaIDs(i), "Delay", &delay);
+        // get delay if delay calibration is switched on (otherwise set delay to 0)
+        if (DoDelayCal_p)
+	  CTRead->GetData(date, AntennaIDs(i), "Delay", &delay);
+        else
+          delay = 0;
 	tempComplexVec2.resize(freqVals.shape());
 	convertArray(tempComplexVec2,freqVals);
 	fftCal.column(i) = phasecal*tempComplexVec1*exp(tmpcomp*delay*tempComplexVec2);

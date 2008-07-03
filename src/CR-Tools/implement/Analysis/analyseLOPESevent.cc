@@ -214,7 +214,10 @@ namespace CR { // Namespace CR -- begin
 				     Vector<Bool> &AntennaSelection,
 				     Double UpSamplingRate,
 				     Double ExtraDelay,
-				     Bool verbose){
+				     Bool verbose,
+				     Bool doGainCal,
+				     Bool doDispersionCal,
+				     Bool doDelayCal){
     try {
       pipeline_p->setVerbosity(verbose);
       // Generate the Data Reader
@@ -222,12 +225,19 @@ namespace CR { // Namespace CR -- begin
 	cerr << "analyseLOPESevent::SetupEvent: " << "Failed to attach file: " << evname << endl;
 	return False;
       };
+
+      //  Enable/disable calibration steps of the FirstStagePipeline (must be done before InitEvent)
+      //  parameters are initialized with 'true' by default
+      pipeline_p->doGainCal(doGainCal);
+      pipeline_p->doDispersionCal(doDispersionCal);
+      pipeline_p->doDelayCal(doDelayCal);
+
       // initialize the Data Reader
       if (! pipeline_p->InitEvent(lev_p)){
 	cerr << "analyseLOPESevent::SetupEvent: " << "Failed to initialize the DataReader!" << endl;
 	return False;
       };
-      
+
       //  Enable/disable doing the phase calibration as requested
       switch (doTVcal){
       case 0:
@@ -248,7 +258,7 @@ namespace CR { // Namespace CR -- begin
 	};
 	break;
       };
-      
+
       // Generate the antenna selection
       Int i,j,id,nants,nselants, nflagged=FlaggedAntIDs.nelements();
       AntennaSelection.resize();

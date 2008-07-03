@@ -76,6 +76,21 @@ namespace CR { // Namespace CR -- begin
     Bool verbose;
 
     /*!
+      \brief Do the gain calibration (default=True)
+    */
+    Bool DoGainCal_p;
+
+    /*!
+      \brief Correct for dispersion (default=True)
+    */
+    Bool DoDispersionCal_p;
+
+    /*!
+      \brief Correct for the delays (default=True)
+    */
+    Bool DoDelayCal_p;
+
+    /*!
       \brief Have the CalTableInterpolator objects been initialized?
     */
     Bool InterpInit;
@@ -151,6 +166,49 @@ namespace CR { // Namespace CR -- begin
       return "FirstStagePipeline";
     }
     
+
+    /*!
+      \brief Enable/disable doing the gain calibration (electrical fieldstrength)
+
+      \param DoGainCal - do the calibartion of the fieldstrength?
+    */
+    inline void doGainCal(Bool const &DoGainCal=True) {
+      DoGainCal_p = DoGainCal;
+      SecondStageCacheValid_p = False;
+      if (verbose && !DoGainCal){
+	cout << "FirstStagePipeline:: switched off gain calibration." << endl;
+      };
+    }
+
+
+    /*!
+      \brief Enable/disable doing the disperion calibration (aplying frequency dependent phase corrections)
+
+      \param DoDispesionCal - correct for the dispersion of the electronics?
+                              (the values are stored in the PhaseCal calibration table)
+    */
+    inline void doDispersionCal(Bool const &DoDispersionCal=True) {
+      DoDispersionCal_p = DoDispersionCal;
+      SecondStageCacheValid_p = False;
+      if (verbose && !DoDispersionCal){
+	cout << "FirstStagePipeline:: switched off correction for dispersion (frequency dependent phase behaviour)." << endl;
+      };
+    }
+
+
+    /*!
+      \brief Enable/disable applying delays of the measurement chain
+
+      \param DoDelayCal - correct for the delays of the LOPES setup?
+    */
+    inline void doDelayCal(Bool const &DoDelayCal=True) {
+      DoDelayCal_p = DoDelayCal;
+      SecondStageCacheValid_p = False;
+      if (verbose && !DoDelayCal){
+	cout << "FirstStagePipeline:: switched off delay correction." << endl;
+      };
+    }
+
     // ------------------------------------------------------------------ Methods
     /*!
       \brief Initialize a new event, and fill the DataReader with the needed calibration 

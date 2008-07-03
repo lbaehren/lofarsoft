@@ -444,7 +444,10 @@ namespace CR { // Namespace CR -- begin
 		    Vector<Bool> &AntennaSelection,
 		    Double UpSamplingRate,
 		    Double ExtraDelay,
-		    Bool verbose);
+		    Bool verbose,
+		    Bool doGainCal=True,
+		    Bool doDispersionCal=True,
+		    Bool doDelayCal=True);
     
     /*!
       \brief Perform the direction fitting

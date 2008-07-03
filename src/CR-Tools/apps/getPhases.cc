@@ -207,6 +207,11 @@ int main (int argc, char *argv[])
       return 1;
     };
 
+    // switch off certain calibration steps:
+    pipeline.doGainCal(false);			// has no effect on phases of the calFFT
+    pipeline.doDispersionCal(false);		// application of dispersion correction
+    pipeline.doDelayCal(false);		// correction of antenna delays
+
     if (! pipeline.InitEvent(&dr))
     {
       std::cerr << "Failed to initialize the DataReader!" << std::endl;
@@ -255,8 +260,10 @@ int main (int argc, char *argv[])
     cout << "Used frequency: " 
          << freqValues(freqIndex)/1e6 << " MHz at index " << freqIndex << endl;
 
-    // get phases of the spectra
-    Matrix<DComplex> spectra = dr.fft();
+    // get phases of the spectra 
+    // if dispersion and delay correction are switched off (see above)
+    // then phase(calfft) = phase(fft) (means raw data FFT)
+    Matrix<DComplex> spectra = dr.fft(); // use fft() instead of calfft() to get faster results
     Vector<Double> phases = phase(spectra.row(freqIndex))*180./3.1415926;
 
     // open output file in append-mode
