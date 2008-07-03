@@ -191,76 +191,76 @@ if test -z $1 ; then
 else
     case $1 in
 	-h)
-	print_help
-	exit;
+	    print_help
+	    exit;
 	;;
 	--h)
-	print_help
-	exit;
+	    print_help
+	    exit;
 	;;
 	-help)
-	print_help
-	exit;
+	    print_help
+	    exit;
 	;;
 	--help)
-	print_help
-	exit;
+	    print_help
+	    exit;
 	;;
 	help)
-	print_help
-	exit;
+	    print_help
+	    exit;
 	;;
 	-clean-build)
-	rm -rf *~ *.log CMake* CPack* Makefile external cmake_install.cmake;
-	rm -rf bdsm bison blitz boost;
-	rm -rf casacore cfitsio cmake config cr; 
-	rm -rf dal dsp;
-	rm -rf flex;
-	rm -rf hdf5;
-	rm -rf startools;
-	rm -rf plplot python;
-	rm -rf vtk;
-	rm -rf wcslib wcstools;
-	exit;
+	    rm -rf *~ *.log CMake* CPack* Makefile external cmake_install.cmake;
+	    rm -rf bdsm bison blitz boost;
+	    rm -rf casacore cfitsio cmake config cr; 
+	    rm -rf dal dsp;
+	    rm -rf flex;
+	    rm -rf hdf5;
+	    rm -rf startools;
+	    rm -rf plplot python;
+	    rm -rf vtk;
+	    rm -rf wcslib wcstools;
+	    exit;
 	;;
 	clean-build)
-	./build.sh -clean-build;
-	exit;
+	    ./build.sh -clean-build;
+	    exit;
 	;;
 	-clean-release)
-	rm -rf $basedir/../release/bin
-	rm -rf $basedir/../release/doc
-	rm -rf $basedir/../release/include
-	rm -rf $basedir/../release/info
-	rm -rf $basedir/../release/lib
-	rm -rf $basedir/../release/man
-	rm -rf $basedir/../release/share
-	exit;
+	    rm -rf $basedir/../release/bin
+	    rm -rf $basedir/../release/doc
+	    rm -rf $basedir/../release/include
+	    rm -rf $basedir/../release/info
+	    rm -rf $basedir/../release/lib
+	    rm -rf $basedir/../release/man
+	    rm -rf $basedir/../release/share
+	    exit;
 	;;
 	clean-release)
-	./build.sh -clean-release;
-	exit;
+	    ./build.sh -clean-release;
+	    exit;
 	;;
 	-clean-all)
-	./build.sh -clean-build;
-	./build.sh -clean-release;
-	exit;
+	    ./build.sh -clean-build;
+	    ./build.sh -clean-release;
+	    exit;
 	;;
 	clean-all)
-	./build.sh -clean-all;
-	exit;
+	    ./build.sh -clean-all;
+	    exit;
 	;;
 	-clean)
-	./build.sh -clean-build;
-	exit;
+	    ./build.sh -clean-build;
+	    exit;
 	;;
 	clean)
-	./build.sh -clean;
-	exit;
+	    ./build.sh -clean;
+	    exit;
 	;;
 	*)
-	param_packageName=$1;
-	echo " -- Selected package: $param_packageName";
+	    param_packageName=$1;
+	    echo " -- Selected package: $param_packageName";
 	;;
     esac
 fi
@@ -326,7 +326,7 @@ case $param_packageName in
     ;;
     cmake)
        echo "[`date`] Selected package CMake";
-       build_cmake
+       if test -z `which cmake` ; then { build_cmake; } fi;
     ;;
     flex)
         echo "[`date`] Selected package Flex";
@@ -360,26 +360,26 @@ case $param_packageName in
     fi
     ;;
     python)
-    echo "[`date`] Selected package PYTHON"
-    build_package python external/python
+        echo "[`date`] Selected package PYTHON"
+	build_package python external/python
     ;;
     startools)
-    echo "[`date`] Selected package Star-Tools"
-    build_package startools external/startools "-DStarTools_FORCE_BUILD:BOOL=$param_forceBuild";
+        echo "[`date`] Selected package Star-Tools"
+	build_package startools external/startools "-DStarTools_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     vtk)
-    echo "[`date`] Selected package VTK"
-    echo "-- No configuration and build support available yet!"
+        echo "[`date`] Selected package VTK"
+	echo "-- No configuration and build support available yet!"
     ;;
     wcslib)
-    echo "[`date`] Selected package WCSLIB"
-    ./build.sh bison $param_reportBuild
-    ./build.sh flex $param_reportBuild
-    build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
+        echo "[`date`] Selected package WCSLIB"
+	./build.sh bison $param_reportBuild
+	build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$param_forceBuild";
+	build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     wcstools)
-    echo "[`date`] Selected package WCSTOOLS"
-    build_package wcstools external/wcstools
+        echo "[`date`] Selected package WCSTOOLS"
+	build_package wcstools external/wcstools
     ;;
     ## --------------------------------------------------------------------------
     ## --- USG software packages ------------------------------------------------
