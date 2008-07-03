@@ -300,51 +300,51 @@ fi;
 
 case $param_packageName in 
     bison)
-    echo "[`date`] Selected package Bison";
-    build_package bison external/bison "-DBISON_FORCE_BUILD:BOOL=$param_forceBuild";
+        echo "[`date`] Selected package Bison";
+	build_package bison external/bison "-DBISON_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     blitz)
-    echo "[`date`] Selected package Blitz++";
-    build_package blitz external/blitz "-DBLITZ_FORCE_BUILD:BOOL=$param_forceBuild";
+        echo "[`date`] Selected package Blitz++";
+	build_package blitz external/blitz "-DBLITZ_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     boost)
-    echo "[`date`] Selected package Boost";
-    build_package boost external/boost "-DBOOST_FORCE_BUILD:BOOL=$param_forceBuild -DBOOST_FIND_python_ONLY:BOOL=1";
+        echo "[`date`] Selected package Boost";
+        build_package boost external/boost "-DBOOST_FORCE_BUILD:BOOL=$param_forceBuild -DBOOST_FIND_python_ONLY:BOOL=1";
     ;;
     casacore)
-    echo "[`date`] Selected package CASACORE";
-		## -- build required packages
-    ./build.sh wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
-    ./build.sh cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$param_forceBuild";
-    ./build.sh hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
-		## -- build package
-    build_package casacore external/casacore "-DCASACORE_FORCE_BUILD:BOOL=$param_forceBuild";
+        echo "[`date`] Selected package CASACORE";
+        ## -- build required packages
+        build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
+        build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$param_forceBuild";
+        build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
+        ## -- build package
+        build_package casacore external/casacore "-DCASACORE_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     cfitsio)
-    echo "[`date`] Selected package CFITSIO";
-    build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$param_forceBuild";
+        echo "[`date`] Selected package CFITSIO";
+        build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     cmake)
-    echo "[`date`] Selected package CMake";
-    build_cmake
+       echo "[`date`] Selected package CMake";
+       build_cmake
     ;;
     flex)
-    echo "[`date`] Selected package Flex";
-    build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$param_forceBuild"
+        echo "[`date`] Selected package Flex";
+	build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$param_forceBuild"
     ;;
     hdf5)
-    echo "[`date`] Selected package Hdf5"
-    build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
+        echo "[`date`] Selected package Hdf5"
+	build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     plplot)
-    echo "[`date`] Selected package Plplot"
-    if test -d $basedir/../external/plplot ; then
-			## first pass
-	mkdir $basedir/plplot 
-	cd $basedir/plplot 
-	cmake -C $basedir/../devel_common/cmake/SettingsPLplot.cmake $basedir/../external/plplot
-			## second pass
-	build_package plplot external/plplot
+        echo "[`date`] Selected package Plplot"
+	if test -d $basedir/../external/plplot ; then
+	## first pass
+	    mkdir $basedir/plplot 
+	    cd $basedir/plplot 
+	    cmake -C $basedir/../devel_common/cmake/SettingsPLplot.cmake $basedir/../external/plplot
+	    ## second pass
+	    build_package plplot external/plplot
     else
 	cd $basedir/../external
 			## download the source tar-ball from source forge
