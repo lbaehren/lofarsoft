@@ -52,7 +52,7 @@ endif (NOT USG_ROOT)
 
 ## load CMake modules to search for external components
 
-set (CFITSIO_FIND_QUIETLY 1)
+set (CFITSIO_FIND_QUIETLY YES)
 include (FindCFITSIO)
 
 ## check if the located library has all the symbols we need
