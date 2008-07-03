@@ -140,7 +140,7 @@ endif (libz)
 
 find_library (libcfitsio
   NAMES cfitsio
-  PATHS /usr/lib /usr/local/lib ${CMake_SOURCE_DIR}/../../release/lib
+  PATHS ${CMake_SOURCE_DIR}/../../release/lib /usr/lib /usr/local/lib
   )
 
 if (libcfitsio)
@@ -154,7 +154,8 @@ if (libcfitsio)
       libcfitsio_has_${libsymbol}
       )
   endforeach (libsymbol)
-  
+else (libcfitsio)
+  message (STATUS "[2] Unable to check libcfitsio for symbols; library not found!")  
 endif (libcfitsio)
 
 ## ==============================================================================
