@@ -388,12 +388,12 @@ case $param_packageName in
 	## external packages
         echo "[`date`] Processing required packages ..."
 	./build.sh cmake
-	./build.sh bison
-	./build.sh flex
-	./build.sh casacore --force-build $param_reportBuild
+	build_package bison external/bison "-DBISON_FORCE_BUILD:BOOL=$param_forceBuild";
+	build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$param_forceBuild";
+        build_package casacore external/casacore "-DCASACORE_FORCE_BUILD:BOOL=$param_forceBuild";
 	./build.sh plplot --force-build $param_reportBuild
 	./build.sh boost --force-build $param_reportBuild
-	./build.sh python $param_reportBuild
+	build_package python external/python "-DPYTHON_FORCE_BUILD:BOOL=$param_forceBuild";
 	## USG packages
 	echo "[`date`] Building Data Access Library ..."
 	build_package dal src/DAL
@@ -409,17 +409,17 @@ case $param_packageName in
 	echo ""
     ;;
     cr)
-		echo "[`date`] Processing required packages ..."
-		./build.sh dal  $param_reportBuild
-		./build.sh startools
-		echo "[`date`] Building CR-Tools package ..."
-		build_package cr src/CR-Tools;
+        echo "[`date`] Processing required packages ..."
+	./build.sh dal  $param_reportBuild
+	build_package startools external/startools "-DSTARTOOLS_FORCE_BUILD:BOOL=$param_forceBuild";
+	echo "[`date`] Building CR-Tools package ..."
+	build_package cr src/CR-Tools;
     ;;
     bdsm)
-		echo "[`date`] Building BDSM package ..."
-		./build.sh wcslib
-		./build.sh cfitsio
-		build_package bdsm src/BDSM;
+        echo "[`date`] Building BDSM package ..."
+	./build.sh wcslib
+	./build.sh cfitsio
+	build_package bdsm src/BDSM;
     ;;
     ## --------------------------------------------------------------------------
     ## --- General testing of environment ---------------------------------------
@@ -435,10 +435,10 @@ case $param_packageName in
 	   	fi
     ;;
     all)
-	    echo "[`date`] Building external packages not build otherwise";
-	    ./build.sh bison;
-		./build.sh flex;
-		echo "[`date`] Building all USG packages";
+        echo "[`date`] Building external packages not build otherwise";
+	./build.sh bison;
+	./build.sh flex;
+	echo "[`date`] Building all USG packages";
     	./build.sh cr;
     ;;
 esac
