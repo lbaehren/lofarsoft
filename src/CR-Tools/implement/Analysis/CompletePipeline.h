@@ -406,6 +406,7 @@ namespace CR { // Namespace CR -- begin
       \param upsampling_exp   -- a value > 0 means that data are upsampled by a factor of 2^upsampling_exp
                                  use e.g. uspampling_exp = 1 to have twice as many points plotted.
       \param rawData          -- plot the raw ADC data instead of the calibrated fieldstrength
+      \param plotEnvelope     -- plots the envelope (only if seperated is also true)
     */
 
     void plotAllAntennas (const string& filename,
@@ -413,10 +414,11 @@ namespace CR { // Namespace CR -- begin
                           Vector<Bool> antennaSelection = Vector<Bool>(),
                           const bool& seperated = false,
                           const int& upsampling_exp = 0,
-                          const bool& rawData = false);
+                          const bool& rawData = false,
+			  const bool& plotEnvelope = false);
 
     /*!
-      \brief Prints the height of the maximum and the corresponding time in the plot range
+      \brief Prints the height of the maximum of the envelope and the corresponding time in the plot range
 
       \param DataReader       -- DataReader (LopesEventIn)
       \param antennaSelection -- Selection of antennas
@@ -430,7 +432,7 @@ namespace CR { // Namespace CR -- begin
                           const int& upsampling_exp = 0,
                           const bool& rawData = false);
     /*!
-      \brief same as calculateMaxima, but different output form
+      \brief same as calculateMaxima, but different output form and does not work with the envelope of the trace
 
       \param DataReader       -- DataReader (LopesEventIn)
       \param antennaSelection -- Selection of antennas

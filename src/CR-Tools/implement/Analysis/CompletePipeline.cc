@@ -743,7 +743,8 @@ namespace CR { // Namespace CR -- begin
 					 Vector<Bool> antennaSelection,
 					 const bool& seperated,
 					 const int& upsampling_exp,
-					 const bool& rawData)
+					 const bool& rawData,
+					 const bool& plotEnvelope)
   {
     try 
     {
@@ -884,6 +885,9 @@ namespace CR { // Namespace CR -- begin
   
             // Plot (upsampled) trace
             plotter.PlotLine(upxaxis(upplotRange),upYvalues.column(i)(upplotRange),color,1);
+            // Plot envelope
+            if (plotEnvelope)
+              plotter.PlotLine(upxaxis(upplotRange),envelope(upYvalues.column(i)(upplotRange)),color,1);
             // Plot original data points (if upsampling was done).
             if (upsampling_exp > 0)
               plotter.PlotSymbols(xaxis(plotRange),yValues.column(i)(plotRange),empty, empty, color, 2, 5);
@@ -956,9 +960,9 @@ namespace CR { // Namespace CR -- begin
       Matrix<Double> yValues;			// y-values
       Vector<Double> trace;			// trace currently processed
       vector<double> maxima;			// Stores the calculated maxima
-      vector<double> minima;			// Stores the calculated minima
       vector<double> maxima_time;		// Stores the calculated time of the maxima
-      vector<double> minima_time;		// Stores the calculated time of the minima
+      vector<double> fwhm;			// width of the pulses
+      vector<double> start_time;		// Stores the start time of the pulse (begin of FWHM)
 
       if (rawData)
         std::cout << "\nLooking for maxima in the raw data FX: \n";
@@ -1003,14 +1007,12 @@ namespace CR { // Namespace CR -- begin
       {
         // Start with height 0 and search for heigher and lower values
         double maximum = 0;
-	double minimum = 0;
         int maxtimevalue = 0;
-        int mintimevalue = 0;
 
-        // get current trace
-        trace = yValues.column(i)(range);
+        // get current envelope of trace
+        trace = envelope(yValues.column(i)(range));
 
-        // loop through the values and search for the heighest and lowest one
+        // loop through the values and search for the heighest one
         for(unsigned int j = 0; j < timeRange.nelements(); j++)
 	{
           if ( maximum < trace(j)) 
@@ -1018,26 +1020,57 @@ namespace CR { // Namespace CR -- begin
             maxtimevalue = j;
             maximum = trace(j);
           } 
-          if ( minimum > trace(j)) 
+	}
+
+        // calculate FWHM
+       double pulsestart = 0;
+       double pulsestop = 0;
+ 
+       // find begin of pulse (half height)
+        for(unsigned int j = maxtimevalue; j >= 0; j--)
+	{
+          // find crossing of half height (between j and j+1)
+          if ( trace(j) <= maximum/2.)
           {
-            mintimevalue = j;
-            minimum = trace(j);
+            // interpolate linear
+            // calculate differences to half height
+            double totaldiff = trace(j+1) - trace(j);
+            double diffdown = maximum/2. - trace(j);
+            double timesample = timeRange(j+1) - timeRange(j);
+            pulsestart = timeRange(j) + timesample * (diffdown/totaldiff);
+            break; // exit loop
           } 
-	}  
+	}
+
+       // find end of pulse (half height)
+        for(unsigned int j = maxtimevalue; j < timeRange.nelements(); j++)
+	{
+          // find crossing of half height (between j-1 and j)
+          if ( trace(j) <= maximum/2.)
+          {
+            // interpolate linear
+            // calculate differences to half height
+            double totaldiff = trace(j-1) - trace(j);
+            double diffdown = maximum/2. - trace(j);
+            double timesample = timeRange(j) - timeRange(j-1);
+            pulsestop = timeRange(j) - timesample * (diffdown/totaldiff);
+            break; // exit loop
+          } 
+	}
 
         // store the calculated values for later calculation of the mean
 	// multiply by 1e6 for conversion to micro
         maxima.push_back(maximum*1e6);
         maxima_time.push_back(timeRange(maxtimevalue)*1e6);
-        minima.push_back(minimum*1e6);
-        minima_time.push_back(timeRange(mintimevalue)*1e6);
+        fwhm.push_back( (pulsestop-pulsestart)*1e6);
+        start_time.push_back(pulsestart*1e6);
 
 
         // print the calculated values
         std::cout << "Antenna " << i+1 << ": \t maximum[micro] = " << maximum*1e6 
-                  << "\t at time[micro s] = " << timeRange(maxtimevalue)*1e6 << "\n";
-        std::cout << "Antenna " << i+1 << ": \t minimum[micro] = " << minimum*1e6 
-                  << "\t at time[micro s] = " << timeRange(mintimevalue)*1e6 << "\n";
+                  << "\t at time[micro s] = " << timeRange(maxtimevalue)*1e6
+                  << "\t pulse start[micro s] = " << pulsestart*1e6
+                  << "\t FWHM [micro s] = " << (pulsestop-pulsestart)*1e6 << "\n";
       }
 
       // calculate the averages and the range if there is more than one value
@@ -1050,13 +1083,6 @@ namespace CR { // Namespace CR -- begin
                   << "Time range [micro s]:      " << min(static_cast< Vector<Double> >(maxima_time))
                   << " to " << max(static_cast< Vector<Double> >(maxima_time)) << "\n"
                   << "Time average [micro s]:    " << mean(static_cast< Vector<Double> >(maxima_time)) << std::endl;
-        std::cout << "Summary for the minima:\n" 
-                  << "Amplitude range [micro]:   " << min(static_cast< Vector<Double> >(minima)) 
-                  << " to " << max(static_cast< Vector<Double> >(minima)) << "\n"
-                  << "Amplitude average [micro]: " << mean(static_cast< Vector<Double> >(minima)) << "\n"
-                  << "Time range [micro s]:      " << min(static_cast< Vector<Double> >(minima_time))
-                  << " to " << max(static_cast< Vector<Double> >(minima_time)) << "\n"
-                  << "Time average [micro s]:    " << mean(static_cast< Vector<Double> >(minima_time)) << std::endl;
       }
 
     } catch (AipsError x) 
