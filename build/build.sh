@@ -224,7 +224,7 @@ else
 	    exit;
 	;;
 	clean-build)
-	    ./build.sh -clean-build;
+	    $basedir/build.sh -clean-build;
 	    exit;
 	;;
 	-clean-release)
@@ -238,24 +238,24 @@ else
 	    exit;
 	;;
 	clean-release)
-	    ./build.sh -clean-release;
+	    $basedir/build.sh -clean-release;
 	    exit;
 	;;
 	-clean-all)
-	    ./build.sh -clean-build;
-	    ./build.sh -clean-release;
+	    $basedir/build.sh -clean-build;
+	    $basedir/build.sh -clean-release;
 	    exit;
 	;;
 	clean-all)
-	    ./build.sh -clean-all;
+	    $basedir/build.sh -clean-all;
 	    exit;
 	;;
 	-clean)
-	    ./build.sh -clean-build;
+	    $basedir/build.sh -clean-build;
 	    exit;
 	;;
 	clean)
-	    ./build.sh -clean;
+	    $basedir/build.sh -clean;
 	    exit;
 	;;
 	*)
@@ -314,9 +314,9 @@ case $param_packageName in
     casacore)
         echo "[`date`] Selected package CASACORE";
         ## -- build required packages
-        build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
-        build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$param_forceBuild";
-        build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
+        build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=1";
+        build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=1";
+        build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=1";
         ## -- build package
         build_package casacore external/casacore "-DCASACORE_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
@@ -356,7 +356,7 @@ case $param_packageName in
 	rm -f plplot-5.7.4.tar.gz
 	    	## recursive call of this method
 	cd $basedir
-	./build.sh plplot
+	$basedir/build.sh plplot
     fi
     ;;
     python)
@@ -373,7 +373,7 @@ case $param_packageName in
     ;;
     wcslib)
         echo "[`date`] Selected package WCSLIB"
-	./build.sh bison $param_reportBuild
+	$basedir/build.sh bison $param_reportBuild
 	build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$param_forceBuild";
 	build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
@@ -385,15 +385,18 @@ case $param_packageName in
     ## --- USG software packages ------------------------------------------------
     ## --------------------------------------------------------------------------
     dal)
-	## external packages
+        ## external packages
         echo "[`date`] Processing required packages ..."
-	./build.sh cmake
-	build_package bison external/bison "-DBISON_FORCE_BUILD:BOOL=$param_forceBuild";
-	build_package flex external/flex "-DFLEX_FORCE_BUILD:BOOL=$param_forceBuild";
-        build_package casacore external/casacore "-DCASACORE_FORCE_BUILD:BOOL=$param_forceBuild";
-	./build.sh plplot --force-build $param_reportBuild
-	./build.sh boost --force-build $param_reportBuild
-	build_package python external/python "-DPYTHON_FORCE_BUILD:BOOL=$param_forceBuild";
+	$basedir/build.sh cmake
+	build_package bison external/bison
+	build_package flex external/flex
+        build_package wcslib external/wcslib
+        build_package cfitsio external/cfitsio
+	build_package hdf5 external/hdf5
+        build_package casacore external/casacore
+	build_package plplot external/plplot
+	build_package boost external/boost
+	build_package python external/python
 	## USG packages
 	echo "[`date`] Building Data Access Library ..."
 	build_package dal src/DAL
@@ -410,15 +413,15 @@ case $param_packageName in
     ;;
     cr)
         echo "[`date`] Processing required packages ..."
-	./build.sh dal  $param_reportBuild
+	$basedir/build.sh dal  $param_reportBuild
 	build_package startools external/startools "-DSTARTOOLS_FORCE_BUILD:BOOL=$param_forceBuild";
 	echo "[`date`] Building CR-Tools package ..."
 	build_package cr src/CR-Tools;
     ;;
     bdsm)
         echo "[`date`] Building BDSM package ..."
-	./build.sh wcslib
-	./build.sh cfitsio
+	$basedir/build.sh wcslib
+	$basedir/build.sh cfitsio
 	build_package bdsm src/BDSM;
     ;;
     ## --------------------------------------------------------------------------
@@ -431,14 +434,14 @@ case $param_packageName in
 			cmake $basedir/../devel_common/cmake
 		else 
 			mkdir config
-			./build.sh config
+			$basedir/build.sh config
 	   	fi
     ;;
     all)
         echo "[`date`] Building external packages not build otherwise";
-	./build.sh bison;
-	./build.sh flex;
+	$basedir/build.sh bison;
+	$basedir/build.sh flex;
 	echo "[`date`] Building all USG packages";
-    	./build.sh cr;
+    	$basedir/build.sh cr;
     ;;
 esac
