@@ -87,6 +87,14 @@ print_help ()
 }
 
 ## -------------------------------------------------------------------
+## Check version of existing CMake version
+
+check_cmake_version ()
+{
+    var_cmake_version=`cmake --version | tr " " "\n" | grep -v cmake | grep -v version`
+}
+
+## -------------------------------------------------------------------
 ## Build CMake from source 
 
 build_cmake ()
@@ -387,7 +395,7 @@ case $param_packageName in
     dal)
         ## external packages
         echo "[`date`] Processing required packages ..."
-	$basedir/build.sh cmake
+	build_cmake
 	build_package bison external/bison
 	build_package flex external/flex
         build_package wcslib external/wcslib
@@ -413,8 +421,17 @@ case $param_packageName in
     ;;
     cr)
         echo "[`date`] Processing required packages ..."
-	$basedir/build.sh dal  $param_reportBuild
-	build_package startools external/startools "-DSTARTOOLS_FORCE_BUILD:BOOL=$param_forceBuild";
+	build_cmake
+	build_package bison external/bison
+	build_package flex external/flex
+        build_package wcslib external/wcslib
+        build_package cfitsio external/cfitsio
+	build_package hdf5 external/hdf5
+        build_package casacore external/casacore
+	build_package plplot external/plplot
+	build_package boost external/boost
+	build_package python external/python
+	build_package startools external/startools
 	echo "[`date`] Building CR-Tools package ..."
 	build_package cr src/CR-Tools;
     ;;
