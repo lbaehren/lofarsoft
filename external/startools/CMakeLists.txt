@@ -16,8 +16,8 @@ cmake_minimum_required (VERSION 2.5)
 ##
 ## ============================================================================== 
 
-option (StarTools_VERBOSE_CONFIGURE "Verbose output during configuration?" 1)
-option (StarTools_FORCE_BUILD "Force rebuild and local installation" 0)
+option (StarTools_VERBOSE_CONFIGURE  "Verbose output during configuration?"       1)
+option (StarTools_FORCE_BUILD        "Force rebuild and local installation"       0)
 option (StarTools_BUILD_APPLICATIONS "Build all the applications in the package?" 1)
 
 ## ============================================================================== 
@@ -79,13 +79,25 @@ set (locations_includes
   /opt/aips++/local/include
 )
 
-## --- System libraries ------------------------------------
+## --- System header files ---------------------------------
 
 find_path (HAVE_LIBGEN_H libgen.h ${locations_includes})
+find_path (HAVE_TIME_H   time.h   ${locations_includes})
+find_path (HAVE_MATH_H   math.h   ${locations_includes})
 
 if (HAVE_LIBGEN_H)
   add_definitions (-DHAVE_LIBGEN_H)
 endif (HAVE_LIBGEN_H)
+
+if (HAVE_TIME_H)
+  add_definitions (-DHAVE_TIME_H)
+endif (HAVE_TIME_H)
+
+if (HAVE_MATH_H)
+  add_definitions (-DHAVE_MATH_H)
+endif (HAVE_MATH_H)
+
+## --- System libraries ------------------------------------
 
 find_library (libm  m  ${locations_lib})
 find_library (libdl dl ${locations_lib})
@@ -143,11 +155,6 @@ find_path (PostgreSQL_INCLUDES libpq-fe.h
   pgsql
   )
 
-if (PostgreSQL_INCLUDES)
-  include_directories (${PostgreSQL_INCLUDES})
-  add_definitions (-DHAVE_POSTGRESQL)
-endif (PostgreSQL_INCLUDES)
-
 find_library (PostgreSQL_LIBRARIES pq
   PATHS ${locations_lib}
   PATH_SUFFIXES
@@ -155,6 +162,12 @@ find_library (PostgreSQL_LIBRARIES pq
   pgsql
   NO_DEFAULT_PATH
   )
+
+if (PostgreSQL_INCLUDES AND PostgreSQL_LIBRARIES)
+  set (HAVE_PostgreSQL TRUE)
+  include_directories (${PostgreSQL_INCLUDES})
+  add_definitions (-DHAVE_POSTGRESQL)
+endif (PostgreSQL_INCLUDES AND PostgreSQL_LIBRARIES)
 
 ## ==============================================================================
 ##
