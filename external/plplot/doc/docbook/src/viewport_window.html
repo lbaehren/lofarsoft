@@ -1,0 +1,1012 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>View Surfaces, (Sub-)Pages, Viewports and Windows</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="Advanced Use of PLplot"
+HREF="advanced.html"><LINK
+REL="PREVIOUS"
+TITLE="Adding FreeType Library Support to Bitmap Drivers"
+HREF="freetype-notes.html"><LINK
+REL="NEXT"
+TITLE="Setting Line Attributes"
+HREF="line-attributes.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="freetype-notes.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 3. Advanced Use of PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="line-attributes.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="viewport_window"
+>View Surfaces, (Sub-)Pages, Viewports and Windows</A
+></H1
+><P
+>There is a whole hierarchy of coordinate systems associated with
+    any PLplot graph.  At the lowest level a device provides a view surface
+    (coordinates in mm's) which can be a terminal screen or a sheet of paper
+    in the output device.  <A
+HREF="plinit.html"
+><CODE
+CLASS="function"
+>plinit</CODE
+></A
+> or <A
+HREF="plstar.html"
+><CODE
+CLASS="function"
+>plstar</CODE
+></A
+> (or <A
+HREF="plstart.html"
+><CODE
+CLASS="function"
+>plstart</CODE
+></A
+>) makes that
+    device view surface accessible as a page or divided up into sub-pages
+    (see <A
+HREF="plssub.html"
+><CODE
+CLASS="function"
+>plssub</CODE
+></A
+>) which are accessed with <A
+HREF="pladv.html"
+><CODE
+CLASS="function"
+>pladv</CODE
+></A
+>.  Before a graph can be
+    drawn for a subpage, the program must call appropriate routines in
+    PLplot to define the viewport for the subpage and a window for the
+    viewport. A viewport is a rectangular region of the
+    <SPAN
+CLASS="emphasis"
+><I
+CLASS="emphasis"
+>subpage</I
+></SPAN
+> which is specified in normalized subpage
+    coordinates or millimetres.  A window is a rectangular region of
+    world-coordinate space which is mapped directly to its viewport. (When
+    drawing a graph, the programmer usually wishes to specify the
+    coordinates of the points to be plotted in terms of the values of the
+    variables involved. These coordinates are called <SPAN
+CLASS="emphasis"
+><I
+CLASS="emphasis"
+>world
+    coordinates</I
+></SPAN
+>, and may have any floating-point value
+    representable by the computer.)</P
+><P
+>Although the usual choice is to have one viewport per subpage, and
+    one window per viewport, each subpage can have more than one (possibly
+    overlapping) viewport defined, and each viewport can have more than one
+    window (more than one set of world coordinates) defined.</P
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="viewports"
+>Defining the Viewport</A
+></H2
+><P
+> After defining the view surface and subpage with the appropriate
+      call to <A
+HREF="plinit.html"
+><CODE
+CLASS="function"
+>plinit</CODE
+></A
+> or <A
+HREF="plstar.html"
+><CODE
+CLASS="function"
+>plstar</CODE
+></A
+> (or <A
+HREF="plstart.html"
+><CODE
+CLASS="function"
+>plstart</CODE
+></A
+>) and a call to <A
+HREF="pladv.html"
+><CODE
+CLASS="function"
+>pladv</CODE
+></A
+> it
+      is necessary to define the portion of this subpage which is to be used
+      for plotting the graph (the viewport).  All lines and symbols (except
+      for labels drawn by <A
+HREF="plbox.html"
+><CODE
+CLASS="function"
+>plbox</CODE
+></A
+>, <A
+HREF="plmtex.html"
+><CODE
+CLASS="function"
+>plmtex</CODE
+></A
+> and <A
+HREF="pllab.html"
+><CODE
+CLASS="function"
+>pllab</CODE
+></A
+>) are clipped at the
+      viewport boundaries. </P
+><P
+> Viewports are created within the current subpage.  If the
+      division of the output device into equally sized subpages is
+      inappropriate, it is best to specify only a single subpage which
+      occupies the entire output device (by using <A
+HREF="plinit.html"
+><CODE
+CLASS="function"
+>plinit</CODE
+></A
+> or by setting
+      <TT
+CLASS="literal"
+>nx = 1</TT
+> and <TT
+CLASS="literal"
+>ny = 1</TT
+> in <A
+HREF="plstar.html"
+><CODE
+CLASS="function"
+>plstar</CODE
+></A
+>
+      or <A
+HREF="plstart.html"
+><CODE
+CLASS="function"
+>plstart</CODE
+></A
+>), and use one of the viewport specification subroutines
+      below to place the plot in the desired position on the page. </P
+><P
+>&#13;      There are four methods for specifying the viewport size, using the
+      subroutines <A
+HREF="plvpor.html"
+><CODE
+CLASS="function"
+>plvpor</CODE
+></A
+>, <A
+HREF="plsvpa.html"
+><CODE
+CLASS="function"
+>plsvpa</CODE
+></A
+>, <A
+HREF="plvasp.html"
+><CODE
+CLASS="function"
+>plvasp</CODE
+></A
+>, and <A
+HREF="plvpas.html"
+><CODE
+CLASS="function"
+>plvpas</CODE
+></A
+> which are
+      called like this:
+    </P
+><P
+>&#13;      <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>    plvpor(xmin, xmax, ymin, ymax);
+    plsvpa(xmin, xmax, ymin, ymax);
+    plvasp(aspect);
+    plvpas(xmin, xmax, ymin, ymax, aspect);</PRE
+></TD
+></TR
+></TABLE
+>
+    </P
+><P
+>&#13;      where in the case of <A
+HREF="plvpor.html"
+><CODE
+CLASS="function"
+>plvpor</CODE
+></A
+> and <A
+HREF="plvpas.html"
+><CODE
+CLASS="function"
+>plvpas</CODE
+></A
+>, the arguments are given
+      in <SPAN
+CLASS="emphasis"
+><I
+CLASS="emphasis"
+>normalized subpage coordinates</I
+></SPAN
+> which are
+      defined to run from 0.0 to 1.0 along each edge of the subpage.  Thus
+      for example,
+    </P
+><P
+>&#13;      <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>    plvpor(0.0, 0.5, 0.5, 1.0);</PRE
+></TD
+></TR
+></TABLE
+>
+    </P
+><P
+>&#13;      uses the top left quarter of the current subpage.
+    </P
+><P
+>&#13;      In order to get a graph of known physical size, the routine <A
+HREF="plsvpa.html"
+><CODE
+CLASS="function"
+>plsvpa</CODE
+></A
+>
+      defines the viewport in terms of absolute coordinates (millimeters)
+      measured from the bottom left-hand corner of the current subpage.
+      This routine should only be used when the size of the view surface is
+      known, and a definite scaling is required.
+    </P
+><P
+>&#13;      The routine <A
+HREF="plvasp.html"
+><CODE
+CLASS="function"
+>plvasp</CODE
+></A
+> gives the largest viewport with the given aspect
+      ratio that fits in the current subpage (i.e. the ratio of the length
+      of the y axis to that of the x axis is equal to
+      <TT
+CLASS="literal"
+>aspect</TT
+>).  It also allocates space on the left and
+      top of the viewport for labels.
+    </P
+><P
+>&#13;      The routine <A
+HREF="plvpas.html"
+><CODE
+CLASS="function"
+>plvpas</CODE
+></A
+> gives the largest viewport with the given aspect
+      ratio that fits in the specified region (specified with normalized
+      subpage coordinates, as with <A
+HREF="plvpor.html"
+><CODE
+CLASS="function"
+>plvpor</CODE
+></A
+>).  This routine is functionally
+      equivalent to <A
+HREF="plvpor.html"
+><CODE
+CLASS="function"
+>plvpor</CODE
+></A
+> when a <SPAN
+CLASS="QUOTE"
+>"natural"</SPAN
+> aspect ratio is
+      chosen (done by setting <TT
+CLASS="literal"
+>aspect</TT
+> to 0.0).  Unlike
+      <A
+HREF="plvasp.html"
+><CODE
+CLASS="function"
+>plvasp</CODE
+></A
+>, this routine reserves no extra space at the edges for
+      labels.
+    </P
+><P
+>&#13;      To help the user call <A
+HREF="plsvpa.html"
+><CODE
+CLASS="function"
+>plsvpa</CODE
+></A
+> correctly, the routine <A
+HREF="plgspa.html"
+><CODE
+CLASS="function"
+>plgspa</CODE
+></A
+> is
+      provided which returns the positions of the extremities of the
+      current subpage measured in millimeters from the bottom left-hand
+      corner of the device.  Thus, if to set up a viewport with a 10.0 mm
+      margin around it within the current subpage, the following sequence
+      of calls may be used:
+    </P
+><P
+>&#13;      <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>    plgspa(xmin, xmax, ymin, ymax);
+    plsvpa(10.0, xmax-xmin-10.0, 10.0, ymax-ymin-10.0);</PRE
+></TD
+></TR
+></TABLE
+>
+    </P
+><P
+>&#13;      A further routine <A
+HREF="plvsta.html"
+><CODE
+CLASS="function"
+>plvsta</CODE
+></A
+> is available which sets up a standard
+      viewport within the current subpage with suitable margins on each
+      side of the viewport.  This may be used for simple graphs, as it
+      leaves enough room for axis labels and a title.  This standard
+      viewport is that used by <A
+HREF="plenv.html"
+><CODE
+CLASS="function"
+>plenv</CODE
+></A
+> (See <A
+HREF="viewport_window.html#standard-window"
+>the Section called <I
+>Setting up a Standard Window</I
+></A
+>).
+    </P
+><P
+>&#13;      Another way to get a specified aspect ratio is via the routine
+      <CODE
+CLASS="function"
+>plsasp</CODE
+> [not!.. fix this], which sets the global
+      aspect ratio and must be called prior to <A
+HREF="plstar.html"
+><CODE
+CLASS="function"
+>plstar</CODE
+></A
+>.  An aspect ratio
+      of 0.0 corresponds to <SPAN
+CLASS="QUOTE"
+>"natural"</SPAN
+> dimensions (i.e. fill
+      the page); any positive value will give the specified aspect ratio.
+      This scaling of plots is actually done in the driver, and so may not
+      work for all output devices (note that <CODE
+CLASS="function"
+>plrender</CODE
+>
+      is capable of scaled aspect ratio plots to any device whether that
+      device supports scaling or not).  In such scaled plots, absolute
+      plotting is done in the scaled coordinate system.
+    </P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="windows"
+>Defining the Window</A
+></H2
+><P
+>&#13;      The window must be defined after the viewport in order to map the
+      world coordinate rectangle into the viewport rectangle.  The routine
+      <A
+HREF="plwind.html"
+><CODE
+CLASS="function"
+>plwind</CODE
+></A
+> is used to specify the rectangle in world-coordinate space.
+      For example, if we wish to plot a graph showing the collector current
+      I<SUB
+>C</SUB
+> as a function of the collector to emitter
+      voltage V<SUB
+>CE</SUB
+> for a transistor where 0 &#8804;
+      I<SUB
+>C</SUB
+> &#8804; 10.0 mA and 0 &#8804;
+      V<SUB
+>CE</SUB
+> &#8804; 12.0 V, we would call the
+      function <A
+HREF="plwind.html"
+><CODE
+CLASS="function"
+>plwind</CODE
+></A
+> as follows:
+    </P
+><P
+>&#13;      <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>    plwind(0.0, 12.0, 0.0, 10.0);</PRE
+></TD
+></TR
+></TABLE
+>
+    </P
+><P
+>&#13;      Note that each of the arguments is a floating point number, and so
+      the decimal points are required.  If the order of either the X limits
+      or Y limits is reversed, the corresponding axis will point in the
+      opposite sense, (i.e., right to left for X and top to bottom for Y).
+      The window must be defined before any calls to the routines which
+      actually draw the data points.  Note however that <A
+HREF="plwind.html"
+><CODE
+CLASS="function"
+>plwind</CODE
+></A
+> may also
+      be called to change the window at any time.  This will affect the
+      appearance of objects drawn later in the program, and is useful for
+      drawing two or more graphs with different axes on the same piece of
+      paper.
+    </P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="annotation"
+>Annotating the Viewport</A
+></H2
+><P
+>&#13;      The routine <A
+HREF="plbox.html"
+><CODE
+CLASS="function"
+>plbox</CODE
+></A
+> is used to specify whether a frame is drawn
+      around the viewport and to control the positions of the axis
+      subdivisions and numeric labels.  For our simple graph of the
+      transistor characteristics, we may wish to draw a frame consisting of
+      lines on all four sides of the viewport, and to place numeric labels
+      along the bottom and left hand side.  We can also tell PLplot to
+      choose a suitable tick interval and the number of subticks between
+      the major divisions based upon the data range specified to <A
+HREF="plwind.html"
+><CODE
+CLASS="function"
+>plwind</CODE
+></A
+>.
+      This is done using the following statement
+    </P
+><P
+>&#13;      <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>    plbox("bcnst", 0.0, 0, "bcnstv", 0.0, 0);</PRE
+></TD
+></TR
+></TABLE
+>
+    </P
+><P
+>&#13;      The lengths of major and minor ticks on the axes are set up by the
+      routines <A
+HREF="plsmaj.html"
+><CODE
+CLASS="function"
+>plsmaj</CODE
+></A
+> and <A
+HREF="plsmin.html"
+><CODE
+CLASS="function"
+>plsmin</CODE
+></A
+>.
+    </P
+><P
+>&#13;      Another routine <A
+HREF="pllab.html"
+><CODE
+CLASS="function"
+>pllab</CODE
+></A
+> provides for text labels for the bottom, left
+      hand side and top of the viewport.  These labels are not clipped,
+      even though they lie outside the viewport (but they are clipped at
+      the subpage boundaries).  <A
+HREF="pllab.html"
+><CODE
+CLASS="function"
+>pllab</CODE
+></A
+> actually calls the more general
+      routine <A
+HREF="plmtex.html"
+><CODE
+CLASS="function"
+>plmtex</CODE
+></A
+> which can be used for plotting labels at any point
+      relative to the viewport.  For our example, we may use
+    </P
+><P
+>&#13;      <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>    pllab("V#dCE#u (Volts)", "I#dC#u (mA)", "TRANSISTOR CHARACTERISTICS");</PRE
+></TD
+></TR
+></TABLE
+>
+    </P
+><P
+>&#13;      Note that <TT
+CLASS="literal"
+>#d</TT
+> and <TT
+CLASS="literal"
+>#u</TT
+> are escape
+      sequences (see <A
+HREF="characters.html#escape-sequences"
+>the Section called <I
+>Escape sequences in text</I
+></A
+>) which allow
+      subscripts and superscripts to be used in text.  They are described
+      more fully later in this chapter.
+    </P
+><P
+>&#13;      The appearance of axis labels may be further altered by auxiliary
+      calls to <A
+HREF="plprec.html"
+><CODE
+CLASS="function"
+>plprec</CODE
+></A
+>, <A
+HREF="plschr.html"
+><CODE
+CLASS="function"
+>plschr</CODE
+></A
+>, <A
+HREF="plsxax.html"
+><CODE
+CLASS="function"
+>plsxax</CODE
+></A
+>, <A
+HREF="plsyax.html"
+><CODE
+CLASS="function"
+>plsyax</CODE
+></A
+>, and <A
+HREF="plszax.html"
+><CODE
+CLASS="function"
+>plszax</CODE
+></A
+>.  The
+      routine <A
+HREF="plprec.html"
+><CODE
+CLASS="function"
+>plprec</CODE
+></A
+> is used to set the number of decimal places
+      precision for axis labels, while <A
+HREF="plschr.html"
+><CODE
+CLASS="function"
+>plschr</CODE
+></A
+> modifies the heights of
+      characters used for the axis and graph labels.  Routines <A
+HREF="plsxax.html"
+><CODE
+CLASS="function"
+>plsxax</CODE
+></A
+>,
+      <A
+HREF="plsyax.html"
+><CODE
+CLASS="function"
+>plsyax</CODE
+></A
+>, and <A
+HREF="plszax.html"
+><CODE
+CLASS="function"
+>plszax</CODE
+></A
+> are used to modify the
+      <TT
+CLASS="literal"
+>digmax</TT
+> setting for each axis, which affects how
+      floating point labels are formatted.
+    </P
+><P
+>&#13;      The <TT
+CLASS="literal"
+>digmax</TT
+> variable represents the maximum field
+      width for the numeric labels on an axis (ignored if less than one).
+      If the numeric labels as generated by PLplot exceed this width, then
+      PLplot automatically switches to floating point representation.  In
+      this case the exponent will be placed at the top left for a vertical
+      axis on the left, top right for a vertical axis on the right, and
+      bottom right for a horizontal axis.
+    </P
+><P
+>&#13;      For example, let's suppose that we have set <TT
+CLASS="literal"
+>digmax =
+      5</TT
+> via <A
+HREF="plsyax.html"
+><CODE
+CLASS="function"
+>plsyax</CODE
+></A
+>, and for our plot a label is generated at
+      <TT
+CLASS="literal"
+>y = 0.0000478</TT
+>.  In this case the actual field
+      width is longer than <TT
+CLASS="literal"
+>digmax</TT
+>, so PLplot switches to
+      floating point.  In this representation, the label is printed as
+      simply 4.78 with the 10<SUP
+>-5</SUP
+> exponent placed
+      separately.
+    </P
+><P
+>&#13;      The determination of maximum length (i.e. <TT
+CLASS="literal"
+>digmax</TT
+>)
+      for fixed point quantities is complicated by the fact that long fixed
+      point representations look much worse than the same sized floating
+      point representation.  Further, a fixed point number with magnitude
+      much less than one will actually gain in precision when written as
+      floating point.  There is some compensation for this effect built
+      into PLplot, thus the internal representation for number of digits
+      kept (<TT
+CLASS="literal"
+>digfix</TT
+>) may not always match the user's
+      specification (via <TT
+CLASS="literal"
+>digmax</TT
+>).  However, it will
+      always be true that <TT
+CLASS="literal"
+>digfix &#8804; digmax</TT
+>.  The
+      PLplot defaults are set up such that good results are usually
+      obtained without user intervention.
+    </P
+><P
+>&#13;      Finally, after the call to <A
+HREF="plbox.html"
+><CODE
+CLASS="function"
+>plbox</CODE
+></A
+>, the user may call routines
+      <A
+HREF="plgxax.html"
+><CODE
+CLASS="function"
+>plgxax</CODE
+></A
+>, <A
+HREF="plgyax.html"
+><CODE
+CLASS="function"
+>plgyax</CODE
+></A
+>, or <A
+HREF="plgzax.html"
+><CODE
+CLASS="function"
+>plgzax</CODE
+></A
+> to obtain information about the
+      window just drawn.  This can be helpful when deciding where to put
+      captions.  For example, a typical usage would be to call <A
+HREF="plgyax.html"
+><CODE
+CLASS="function"
+>plgyax</CODE
+></A
+> to
+      get the value of <TT
+CLASS="literal"
+>digits</TT
+>, then offset the y axis
+      caption by that amount (plus a bit more) so that the caption
+      <SPAN
+CLASS="QUOTE"
+>"floats"</SPAN
+> just to the outside of the numeric labels.
+      Note that the <TT
+CLASS="literal"
+>digits</TT
+> value for each axis for the
+      current plot is not correct until <SPAN
+CLASS="emphasis"
+><I
+CLASS="emphasis"
+>after</I
+></SPAN
+> the call
+      to <A
+HREF="plbox.html"
+><CODE
+CLASS="function"
+>plbox</CODE
+></A
+> is complete.
+    </P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="standard-window"
+>Setting up a Standard Window</A
+></H2
+><P
+>&#13;      Having to call <A
+HREF="pladv.html"
+><CODE
+CLASS="function"
+>pladv</CODE
+></A
+>, <A
+HREF="plvpor.html"
+><CODE
+CLASS="function"
+>plvpor</CODE
+></A
+>, <A
+HREF="plwind.html"
+><CODE
+CLASS="function"
+>plwind</CODE
+></A
+> and <A
+HREF="plbox.html"
+><CODE
+CLASS="function"
+>plbox</CODE
+></A
+> is excessively
+      cumbersome for drawing simple graphs.  Subroutine <A
+HREF="plenv.html"
+><CODE
+CLASS="function"
+>plenv</CODE
+></A
+> combines
+      all four of these in one subroutine, using the standard viewport, and
+      a limited subset of the capabilities of <A
+HREF="plbox.html"
+><CODE
+CLASS="function"
+>plbox</CODE
+></A
+>.  For example, the
+      graph described above could be initiated by the call:
+    </P
+><P
+>&#13;      <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>    plenv(0.0, 12.0, 0.0, 10.0, 0, 0);</PRE
+></TD
+></TR
+></TABLE
+>
+    </P
+><P
+>&#13;      which is equivalent to the following series of calls:
+    </P
+><P
+>&#13;      <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>    pladv(0);
+    plvsta();
+    plwind(0.0, 12.0, 0.0, 10.0);
+    plbox("bcnst", 0.0, 0, "bcnstv", 0.0, 0);</PRE
+></TD
+></TR
+></TABLE
+>
+    </P
+></DIV
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="freetype-notes.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="line-attributes.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Adding FreeType Library Support to Bitmap Drivers</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="advanced.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Setting Line Attributes</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

@@ -1,0 +1,26 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLSORI 3plplot  "February, 2008" "" "PLplot API"
+.SH NAME
+\fBplsori\fP - Set orientation 
+.SH SYNOPSIS
+\fBplsori\fP(\fIori\fP)
+.SH DESCRIPTION
+
+.P
+Sets the current orientation.  If \fIori\fP is equal to zero (default) then landscape is used (x axis is parallel to the longest edge of the page), otherwise portrait is used.  This option is not supported by all output drivers (in particular, most interactive screen drivers ignore the orientation).  This routine, if used, must be called before initializing PLplot. 
+.P
+Redacted form: \fBplsori(ori)\fP
+.P
+This function is not used in any examples. 
+.SH ARGUMENTS
+.TP
+\fIori\fP (PLINT, input) 
+Orientation value (0 for landscape, 1 for portrait; the value is multiplied by 90 degrees to get the angle) 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

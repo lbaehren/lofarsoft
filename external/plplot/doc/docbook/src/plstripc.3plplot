@@ -1,0 +1,85 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLSTRIPC 3plplot  "February, 2008" "" "PLplot API"
+.SH NAME
+\fBplstripc\fP - Create a 4-pen stripchart 
+.SH SYNOPSIS
+\fBplstripc\fP(\fIid\fP, \fIxspec\fP, \fIyspec\fP, \fIxmin\fP, \fIxmax\fP, \fIxjump\fP, \fIymin\fP, \fIymax\fP, \fIxlpos\fP, \fIylpos\fP, \fIy_ascl\fP, \fIacc\fP, \fIcolbox\fP, \fIcollab\fP, \fIcolline\fP, \fIstyline\fP, \fIlegline[]\fP, \fIlabx\fP, \fIlaby\fP, \fIlabtop\fP)
+.SH DESCRIPTION
+
+.P
+Create a 4-pen stripchart, to be used afterwards by \fBplstripa\fP(3plplot)
+.P
+Redacted form:  General: \fBplstripc(id, xspec, yspec, xmin, xmax, xjump, ymin, ymax, xlpos, ylpos, y_ascl, acc, colbox, collab, colline, styline, legline, labx, laby, labz)\fP
+Perl/PDL: \fBplstripc(xmin, xmax, xjump, ymin, ymax, xlpos, ylpos, y_ascl, acc, colbox, collab, colline, styline, id, xspec, ypsec, legline, labx, laby, labtop)\fP
+
+.P
+This function is used in example 17. 
+.SH ARGUMENTS
+.TP
+\fIid\fP (PLINT *, output) 
+Identification number of stripchart to use on \fBplstripa\fP(3plplot) and \fBplstripd\fP(3plplot). 
+.TP
+\fIxspec\fP (char *, input) 
+X-axis specification as in \fBplbox\fP(3plplot). 
+.TP
+\fIyspec\fP (char *, input) 
+Y-axis specification as in \fBplbox\fP(3plplot). 
+.TP
+\fIxmin\fP (PLFLT, input) 
+Initial coordinates of plot box; they will change as data are added. 
+.TP
+\fIxmax\fP (PLFLT, input) 
+Initial coordinates of plot box; they will change as data are added. 
+.TP
+\fIxjump\fP (PLFLT, input) 
+When x attains \fIxmax\fP, the length of the plot is multiplied by the factor (1 + \fIxjump\fP). 
+.TP
+\fIymin\fP (PLFLT, input) 
+Initial coordinates of plot box; they will change as data are added. 
+.TP
+\fIymax\fP (PLFLT, input) 
+Initial coordinates of plot box; they will change as data are added. 
+.TP
+\fIxlpos\fP (PLFLT, input) 
+X legend box position (range from 0 to 1). 
+.TP
+\fIylpos\fP (PLFLT, input) 
+Y legend box position (range from 0 to 1). 
+.TP
+\fIy_ascl\fP (PLBOOL, input) 
+Autoscale y between x jumps if \fIy_ascl\fP is true, otherwise not. 
+.TP
+\fIacc\fP (PLBOOL, input) 
+Accumulate strip plot if \fIacc\fP is true, otherwise slide display. 
+.TP
+\fIcolbox\fP (PLINT, input) 
+Plot box color index (cmap0). 
+.TP
+\fIcollab\fP (PLINT, input) 
+Legend color index (cmap0). 
+.TP
+\fIcolline\fP (PLINT *, input) 
+Pointer to array with color indices (cmap0) for the 4 pens. 
+.TP
+\fIstyline\fP (PLINT *, input) 
+Pointer to array with line styles for the 4 pens. 
+.TP
+\fIlegline\fP (char **, input) 
+Pointer to character array containing legends for the 4 pens. 
+.TP
+\fIlabx\fP (char *, input) 
+X-axis label. 
+.TP
+\fIlaby\fP (char *, input) 
+Y-axis label. 
+.TP
+\fIlabtop\fP (char *, input) 
+Plot title. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

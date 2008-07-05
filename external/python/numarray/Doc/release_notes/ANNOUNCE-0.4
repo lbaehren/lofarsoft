@@ -1,0 +1,98 @@
+Numarray 0.4
+---------------------------------
+
+Numarray is an array processing package designed to efficiently
+manipulate large multi-dimensional arrays.  Numarray is modelled after
+Numeric and features c-code generated from python template scripts,
+the capacity to operate directly on arrays in files, and improved type
+promotions.
+
+Version 0.4 is a relatively large update with these features:
+
+1.  C-basetypes have been added to NDArray and NumArray to accelerate
+simple indexing and attribute access *and* improve Numeric compatability.
+
+2.  List <-> NumArray transformations have been sped up.
+
+3. There's an ieeespecial module which should make it easier to find
+and manipulate NANs and INFs.
+
+4. There's now a boxcar function in the Convolve package for doing
+fast 2D smoothing.  Jochen Kupper also contributed a lineshape module
+which is also part of the Convolve package.
+
+5. Bug fixes for every reported bug between now and July-02.
+
+6. Since I still haven't fixed the add-on Packages packaging, I built
+windows binaries for all 4 packages so you don't have to build them
+from source yourself.  
+
+But... basetypes (and reorganization) aren't free:
+
+1. The "native" aspects of the numarray C-API have changed in
+backwards incompatible ways.  In particular, the NDInfo struct is now
+completely gone, since it was completely redundant to the new
+basetypes which are modelled after Numeric's PyArrayObject.  If you
+actually *have* a numarray extension that this breaks, and it bugs
+you, send it to me and I'll fix it for you.  If there's enough
+response, I'll automate the process of updating extension wrappers.
+But I expect not.
+
+2. I expect to hear about bugs which can cause numarray/Python to dump
+core.  Of course, I have no clue where they are.  So... there may be
+rapid re-releases to compensate.
+
+3. Old pickles are not directly transferrable to numarray-0.4, but may
+instead require some copy_reg fuddling because basetypes change the
+pickle format.  If you have old pickles you need to migrate, send me
+e-mail and I'll help you figure out how to do it.
+
+4. Make *really* sure you delete any old numarray modules you have
+laying around.  These can screw up numarray-0.4 royally.
+
+5. Note for astronomers: PyFITS requires an update to work with
+numarray-0.4.  This should be available shortly, if it is not already.
+My point is that you may be unable to use both numarray-0.4 and PyFITS
+today.
+
+WHERE 
+----------- 
+
+Numarray-0.4 windows executable installers, source code, and manual is
+here:
+
+http://sourceforge.net/project/showfiles.php?group_id=1369
+
+Numarray is hosted by Source Forge in the same project which hosts Numeric:
+
+http://sourceforge.net/projects/numpy/
+
+The web page for Numarray information is at:
+
+http://stsdas.stsci.edu/numarray/index.html
+
+Trackers for Numarray Bugs, Feature Requests, Support, and Patches are at
+the Source Forge project for NumPy at:
+
+http://sourceforge.net/tracker/?group_id=1369
+
+REQUIREMENTS
+--------------------------
+
+numarray-0.4 requires Python 2.2.0 or greater.
+
+
+AUTHORS, LICENSE
+------------------------------
+
+Numarray was written by Perry Greenfield, Rick White, Todd Miller, JC
+Hsu, Paul Barrett, Phil Hodge at the Space Telescope Science
+Institute.  Thanks go to Jochen Kupper of the University of North
+Carolina for his work on Numarray and for porting the Numarray manual
+to TeX format.
+
+Numarray is made available under a BSD-style License.  See
+LICENSE.txt in the source distribution for details.
+
+-- 
+Todd Miller             jmiller@stsci.edu 

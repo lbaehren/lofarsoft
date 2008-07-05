@@ -1,0 +1,113 @@
+Release Notes for numarray-0.7
+
+Numarray is an array processing package designed to efficiently
+manipulate large multi-dimensional arrays.  Numarray is modelled after
+Numeric and features c-code generated from python template scripts,
+the capacity to operate directly on arrays in files, and improved type
+promotions.
+
+I. ENHANCEMENTS
+
+1. Object Arrays
+
+numarray now has an object array facility.  numarray.objects 
+provides array indexing and ufuncs for fixed length collections
+of arbitrary Python objects.  
+
+2. Merger of NumArray/ComplexArray classes
+
+Numarray's NumArray and ComplexArray classes have been unified into a
+single class.  Thus, a single base class can be used to derive array
+classes which operate on integer, real or complex numbers.   Thanks
+to Colin Williams for this suggestion.
+
+3. Indexing improvements
+
+The implementation of numarray's indexing has been simplified and
+improved.  Ad-hoc logic for getting single array elements fast has
+been replaced by a full conversion to C of the top level of numarray's
+Python indexing code.  The resulting code is simpler, prototyped in
+Python, and adds an additional kind of indexing which occurs entirely
+in C for speed: sub-arrays.  Slicing and array indexing, however,
+still involve significant amounts of Python code.
+
+4. IEEE Special Value Constants
+
+Standard constants for nan, plus_inf, minus_inf, and inf have been
+added to numarray.ieeespecial making it easier to assign IEEE special
+values to arrays in addition to finding or replacing special values.
+
+5. Better Numeric interoperability  (wxPyPlot port)
+
+numarray-0.7 addresses a couple compatibility and speed issues which
+hindered numarray's use with wxPyPlot.  numarray now works fine with
+the wxPyPlot demos by changing "import Numeric" to "import numarray as
+Numeric".
+
+II. BUGS FIXED
+
+See
+http://sourceforge.net/tracker/?atid=450446&group_id=1369&func=browse
+for more details.
+
+793421		PyArray_INCREF / PyArray_XDECREF deprecated
+791354		Integer overflow bugs?
+785458		Crash subclassing the NumArray class
+784866		astype() fails sometimes
+779755		Mac OS 10 installation problem
+740035		Possible problem with dot
+
+III. CAUTIONS
+
+1. numarray extension writers should note that the documented use of
+PyArray_INCREF and PyArray_XDECREF (in numarray) has been found to be
+incompatible with Numeric and has therefore been deprecated.  numarray
+wrapper functions using PyArray_INCREF and PyArray_XDECREF should
+switch to ordinary Py_INCREF and Py_XDECREF.
+
+2. Writers of numarray subclasses should note that the "protected"
+_getitem/_setitem interface  for NDArray has changed
+
+WHERE
+-----------
+
+Numarray-0.7 windows executable installers, source code, and manual is
+here:
+
+http://sourceforge.net/project/showfiles.php?group_id=1369
+
+Numarray is hosted by Source Forge in the same project which hosts Numeric:
+
+http://sourceforge.net/projects/numpy/
+
+The web page for Numarray information is at:
+
+http://stsdas.stsci.edu/numarray/index.html
+
+Trackers for Numarray Bugs, Feature Requests, Support, and Patches are at
+the Source Forge project for NumPy at:
+
+http://sourceforge.net/tracker/?group_id=1369
+
+REQUIREMENTS
+------------------------------
+
+numarray-0.7 requires Python 2.2.2 or greater.  
+
+
+AUTHORS, LICENSE
+------------------------------
+
+Numarray was written by Perry Greenfield, Rick White, Todd Miller, JC
+Hsu, Paul Barrett, Phil Hodge at the Space Telescope Science
+Institute.  Thanks go to Jochen Kupper of the University of North
+Carolina for his work on Numarray and for porting the Numarray manual
+to TeX format.  Thanks also to Edward C. Jones, Francesc Alted,
+Paul Dubois, Eric Jones, Travis Oliphant, Pearu Peterson, Colin Williams,
+and everyone who has contributed with comments and feedback.
+
+Numarray is made available under a BSD-style License.  See
+LICENSE.txt in the source distribution for details.
+
+-- 
+Todd Miller             jmiller@stsci.edu

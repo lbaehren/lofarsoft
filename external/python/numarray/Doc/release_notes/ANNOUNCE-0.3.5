@@ -1,0 +1,64 @@
+Numarray 0.3.5
+---------------------------------
+
+Numarray is an array processing package designed to efficiently
+manipulate large multi-dimensional arrays.  Numarray is modelled after
+Numeric and features c-code generated from python template scripts,
+the capacity to operate directly on arrays in files, and improved type
+promotions.
+
+Version 0.3.5 is a bugfix release:
+
+1. Fixed bug in numarray.NumArray._copyFrom which broke array copies within an 
+array. Basically, an array copying part of itself onto another part of itself
+produced incorrect results.
+
+2. Cleaned up setup.py to avoid generating code unless actually installing.  Now you
+can ask setup.py for help ("python setup.py --help") without feeling like it's running 
+wild.
+
+3. Modified LinearAlgebra2.MLab to avoid use of properties, potentially making it work
+with Python versions < 2.2.  Since there's still no regression test for MLab, this is iffy,
+but "mean", at least, appeared to work.  E-mail jmiller@stsci.edu if you find numarray 
+MLab problems.
+
+
+WHERE
+-----------
+Numarray-0.3.5 windows executable installers and source code tar ball is here:
+
+http://sourceforge.net/project/showfiles.php?group_id=1369
+
+Numarray is hosted by Source Forge in the same project which hosts Numeric:
+
+http://sourceforge.net/projects/numpy/
+
+The web page for Numarray information is at:
+
+http://stsdas.stsci.edu/numarray/index.html
+
+Trackers for Numarray Bugs, Feature Requests, Support, and Patches are at
+the Source Forge project for NumPy at:
+
+http://sourceforge.net/tracker/?group_id=1369
+
+REQUIREMENTS
+--------------------------
+
+numarray-0.3.5 requires Python 2.0 or greater.
+
+
+AUTHORS, LICENSE
+------------------------------
+
+Numarray was written by Perry Greenfield, Rick White, Todd Miller, JC
+Hsu, Paul Barrett, Phil Hodge at the Space Telescope Science
+Institute.  Thanks go to Jochen Kupper of the University of North
+Carolina for his work on Numarray and for porting the Numarray manual
+to TeX format.
+
+Numarray is made available under a BSD-style License.  See
+LICENSE.txt in the source distribution for details.
+
+-- 
+Todd Miller             jmiller@stsci.edu 

@@ -1,0 +1,181 @@
+\chapter{Intermediate Topics}
+\label{cha:intermediate-topics}
+
+This chapter discusses a few of the more esoteric features of numarray which
+are certainly useful but probably not a top priority for new users.
+
+\section{Rank-0 Arrays}
+\label{sec:rank-0-arrays}
+numarray provides limited support for dimensionless arrays which represent
+single values, also known as rank-0 arrays.  Rank-0 arrays are the array
+representation of a scalar value.  They have the advantage over scalars that
+they include array specific type information, e.g. \var{Int16}.  Rank-0 arrays
+can be created as follows:
+\begin{verbatim}
+>>> a = array(1); a
+array(1)
+\end{verbatim}
+A rank-0 array has a 0-length or empty shape:
+\begin{verbatim}
+>>> a.shape
+()
+\end{verbatim}
+numarray's rank-0 array handling differs from that of Numeric in two ways.
+First, numarray's rank-0 arrays cannot be indexed by 0:
+\begin{verbatim}
+>>> array(1)[0]
+Traceback (most recent call last):
+...
+IndexError: Too many indices
+\end{verbatim}
+Second, numarray's rank-0 arrays do not have a length.
+\begin{verbatim}
+>>> len(array(1))
+Traceback (most recent call last):
+...
+ValueError: Rank-0 array has no length.
+\end{verbatim}
+Finally, numarray's rank-0 arrays can be converted to a Python scalar by
+subscripting with an empty tuple as follows:
+\begin{verbatim}
+>>> a = array(1)
+>>> a[()]
+1
+\end{verbatim}
+
+\newpage
+\section{Exception Handling}
+\label{sec:exception-handling}
+
+We desired better control over exception handling than currently exists in
+Numeric. This has traditionally been a problem area (see the numerous posts in
+\ulink{comp.lang.python}{news:comp.lang.python} regarding floating point
+exceptions, especially those by Tim Peters). Numeric raises an exception for
+integer computations that result in a divide by zero or multiplications that
+result in overflows. The exception is raised after that operation has completed
+on all the array elements. No exceptions are raised for floating point errors
+(divide by zero, overflow, underflow, and invalid results), the compiler and
+processor are left to their default behavior (which is usually to return Infs
+and NaNs as values).
+
+The approach for numarray is to provide customizable error handling behavior.
+It should be possible to specify three different behaviors for each of the four
+error types independently. These are:
+\begin{itemize}
+\item Ignore the error.
+\item Print a warning.
+\item Raise a Python exception.
+\end{itemize}
+The current implementation does that and has been tested successfully on
+Windows, Solaris, Redhat and Tru64.  The implementation uses the floating point
+processor ``sticky status flags'' to detect errors. One can set the error mode
+by calling the error object's setMode method. For example:
+\begin{verbatim}
+>>> Error.setMode(all="warn") # the default mode
+>>> Error.setMode(dividebyzero="raise", underflow="ignore", invalid="warn")
+\end{verbatim}
+
+The Error object can also be used in a stacking manner, by using the \function{pushMode}
+and \function{popMode} methods rather than \function{setMode}.  For example:
+\begin{verbatim}
+>>> Error.getMode()
+_NumErrorMode(overflow='warn', underflow='warn', dividebyzero='warn', invalid='warn')
+>>> Error.pushMode(all="raise") # get really picky...
+>>> Error.getMode()
+_NumErrorMode(overflow='raise', underflow='raise', dividebyzero='raise', invalid='raise')
+>>> Error.popMode()  # pop and return the ``new'' mode
+_NumErrorMode(overflow='raise', underflow='raise', dividebyzero='raise', invalid='raise')
+>>> Error.getMode()  # verify the original mode is back
+_NumErrorMode(overflow='warn', underflow='warn', dividebyzero='warn', invalid='warn')
+\end{verbatim}
+Integer exception modes work the same way. Although integer computations do not
+affect the floating point status flag directly, our code checks the denominator
+of 0 in divisions (in much the same way Numeric does) and then performs a
+floating point divide by zero to set the status flag (overflows are handled
+similarly). So even integer exceptions use the floating point status flags
+indirectly.
+
+\newpage
+\section{IEEE-754 Not a Number (NAN) and Infinity}
+\label{sec:ieee-special-values}
+\module{numarray.ieeespecial} has support for manipulating IEEE-754 floating
+point special values NaN (Not a Number), Inf (infinity), etc.  The special
+values are denoted using lower case as follows:
+\begin{verbatim}
+>>> import numarray.ieeespecial as ieee
+>>> ieee.inf
+inf
+>>> ieee.plus_inf
+inf
+>>> ieee.minus_inf
+-inf
+>>> ieee.nan
+nan
+>>> ieee.plus_zero
+0.0
+>>> ieee.minus_zero
+-0.0
+\end{verbatim}
+Note that the representation of IEEE special values is platform dependent so
+your Python might for instance say \var{Infinity} rather than \var{inf}.
+Below, \var{inf} is seen to arise as the result of floating point division by 0
+and \var{nan} is seen to arise from 0 divided by 0:
+\begin{verbatim}
+>>> a = array([0.0, 1.0])
+>>> b = a/0.0
+Warning: Encountered invalid numeric result(s)  in divide
+Warning: Encountered divide by zero(s)  in divide
+>>> b
+array([              nan,               inf])
+\end{verbatim}
+A curious property of \var{nan} is that it does not compare to \emph{itself} as
+equal:
+\begin{verbatim}
+>>> b == ieee.nan
+array([0, 0], type=Bool)
+\end{verbatim}
+The \function{isnan}, \function{isinf}, and \function{isfinite} functions
+return boolean arrays which have the value True where the corresponding
+predicate holds.  These functions detect bit ranges and are therefore more
+robust than simple equality checks.
+\begin{verbatim}
+>>> ieee.isnan(b)
+array([1, 0], type=Bool)
+>>> ieee.isinf(b)
+array([0, 1], type=Bool)
+>>> ieee.isfinite(b)
+array([0, 0], type=Bool)
+\end{verbatim}
+Array based indexing provides a convenient way to replace special values:
+\begin{verbatim}
+>>> b[ieee.isnan(b)] = 999
+>>> b[ieee.isinf(b)] = 5
+>>> b
+array([ 999.,    5.])
+\end{verbatim}
+
+Here's an easy approach for compressing your data arrays to remove
+NaNs:
+\begin{verbatim}
+>>> x, y = arange(10.), arange(10.)
+>>> x[5] = ieee.nan
+>>> y[6] = ieee.nan
+>>> keep = ~ieee.isnan(x) & ~ieee.isnan(y)
+>>> x[keep]
+array([ 0.,  1.,  2.,  3.,  4.,  7.,  8.,  9.])
+>>> y[keep]
+array([ 0.,  1.,  2.,  3.,  4.,  7.,  8.,  9.])
+\end{verbatim}
+
+%% Local Variables:
+%% mode: LaTeX
+%% mode: auto-fill
+%% fill-column: 79
+%% indent-tabs-mode: nil
+%% ispell-dictionary: "american"
+%% reftex-fref-is-default: nil
+%% TeX-auto-save: t
+%% TeX-command-default: "pdfeLaTeX"
+%% TeX-master: "numarray"
+%% TeX-parse-self: t
+%% End:

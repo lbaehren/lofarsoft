@@ -1,0 +1,284 @@
+\chapter{Record Array}
+\label{cha:record-array}
+\declaremodule{extension}{numarray.records}
+\index{record array}
+
+\section{Introduction}
+\label{sec:recarray-intro}
+One of the enhancements of \code{numarray} over \code{Numeric} is its 
+support for record arrays, i.e. arrays with heterogeneous data types: 
+for example, tabulated data where each field (or \var{column}) has the 
+same data type but different fields may not.
+
+Each record array is a \index{RecArray} \code{RecArray} object in the 
+\code{numarray.records} module.  Most of 
+the time, the easiest way to construct a record array is to use the 
+\code{array()} function in the \code{numarray.records} module.  For example:
+\begin{verbatim}
+>>> import numarray.records as rec
+>>> r = rec.array([('Smith', 1234),\
+                   ('Johnson', 1001),\
+                   ('Williams', 1357),\
+                   ('Miller', 2468)], \
+                   names='Last_name, phone_number')
+\end{verbatim}
+In this example, we \var{manually} construct a record array by longhand input of
+the information.  This record array has 4 records (or rows) and two fields (or 
+columns).  The names of the fields are specified in the \code{names} argument.  
+When using this longhand input, the data types (formats) are 
+automatically determined from the data.  In this case the first field is a 
+string of 8 characters (since the longest name is 8 characters long) and 
+the second field is an integer.
+
+The record array is just like an array in numarray, except that now each 
+element is a \code{Record}.  We can do the usual indexing and slicing:
+\begin{verbatim}
+>>> print r[0]
+('Smith', 1234)
+>>> print r[:2]
+RecArray[ 
+('Smith', 1234),
+('Johnson', 1001)
+]
+\end{verbatim}
+To access the record array's fields, use the \code{field()} method:
+\begin{verbatim}
+>>> print r.field(0)
+['Smith', 'Johnson', 'Williams', 'Miller']
+>>> print r.field('Last_name')
+['Smith', 'Johnson', 'Williams', 'Miller']
+\end{verbatim}
+these examples show that the \code{field} method can accept either the 
+numeric index or the field name.
+
+Since each field is simply a numarray of numbers or strings, all 
+functionalities of numarray are available to them.  The record array is one 
+single object which allows the user to have either field-wise or row-wise 
+access.  The following example:
+\begin{verbatim}
+>>> r.field('phone_number')[1]=9999
+>>> print r[:2]
+RecArray[ 
+('Smith', 1234),
+('Johnson', 9999)
+]
+\end{verbatim}
+shows that a change using the field view will cause the corresponding change 
+in the row-wise view without additional copying or computing.
+
+\section{Record array functions}
+\label{sec:recarray-func}
+\begin{funcdesc}{array}{buffer=None, formats=None, shape=0, 
+names=None, byteorder=sys.byteorder}
+\label{func:rec.array}
+   The function \code{array} is, for most practical purposes, all a user needs 
+   to know to construct a record array.
+
+   \code{formats} is a string containing the format information of all fields.  
+   Each format can be the \var{letter code}, such as \code{f4} or \code{i2}, 
+   or longer name like \code{Float32} or \code{Int16}.  For a list of letter 
+   codes or the longer names, see Table \ref{tab:type-specifiers} or use 
+   the \code{letterCode()} function.  A field of strings is specified by the 
+   letter \code{a}, followed by an integer giving the maximum length; thus 
+   \code{a5} is the format for a field of strings of (maximum) length of 5.  
+
+   The formats are separated by commas, and each \var{cell} 
+   (element in a field) can be a numarray itself, by attaching a number or a 
+   tuple in front of the format specification.  So if 
+   \code{formats='i4,Float64,a5,3i2,(2,3)f4,Complex64,b1'}, the record array 
+   will have:
+   \begin{verbatim}
+   1st field: (4-byte) integers
+   2nd field: double precision floating point numbers
+   3rd field: strings of length 5
+   4th field: short (2-byte) integers, each element is an array of shape=(3,)
+   5th field: single precision floating point numbers, each element is an 
+       array of shape=(2,3)
+   6th field: double precision complex numbers
+   7th field: (1-byte) Booleans
+   \end{verbatim}
+   \code{formats} specification takes precedence over the data.  For 
+   example, if a field is specified as integers in \code{buffer}, but is 
+   specified as floats in \code{formats}, it will be floats in the record 
+   array.  If a field in the \code{buffer} is not convertible to the 
+   corresponding data type in the \code{formats} specification, e.g. from 
+   strings to numbers (integers, floats, Booleans) or vice versa, an 
+   exception will be raised.
+   
+   \code{shape} is the shape of the record array.  It can be an integer, 
+   in which case it is equivalent to the number of \var{rows} in a table.  
+   It can also be a tuple where the record array is an N-D array with 
+   \code{Records} as its elements. \code{shape} must be consistent with the 
+   data in \code{buffer} for buffer types (5) and (6), explained below.
+   
+   \code{names} is a string containing the names of the fields, separated by 
+   commas.  If there are more formats specified than names, then default 
+   names will be used: If there are five fields specified in \code{formats} 
+   but \code{names=None} (default), then the field names will be: 
+   \code{c1, c2, c3, c4, c5}.  If \code{names="a,b"}, then the field 
+   names will be: \code{a, b, c3, c4, c5}.
+   
+   If more names have been specified than there are formats, the extra names 
+   will be discarded.  If duplicate names are specified, a \code{ValueError} 
+   will be raised.  Field names are case sensitive, e.g. column \code{ABC} will 
+   not be found if it is referred to as \code{abc} or \code{Abc} 
+   (for example) when using the \code{field()} method.
+   
+   \code{byteorder} is a string of the value \code{big} or \code{little}, 
+   referring to big endian or little endian.  This is useful when reading 
+   (binary) data from a string or a file.  If not specified, it will use the 
+   \code{sys.byteorder} value and the result will be platform dependent for 
+   string or file input.
+   
+   The first argument, \code{buffer}, may be any one of the following:
+
+   (1) \code{None} (default).  The data block in the record array will not be 
+   initialized.  The user must assign valid data before trying to read the 
+   contents or before writing the record array to a disk file.
+   
+   (2) a Python string containing binary data.  For example:
+   \begin{verbatim}
+   >>> r=rec.array('abcdefg'*100, formats='i2,a3,i4', shape=3, byteorder='big')
+   >>> print r
+   RecArray[ 
+   (24930, 'cde', 1718051170),
+   (25444, 'efg', 1633837924),
+   (25958, 'gab', 1667523942)
+   ]
+   \end{verbatim}
+   
+   (3) a Python file object for an open file.  The data will be copied from 
+   the file, starting at the current position of the read pointer, with 
+   byte order as specified in \code{byteorder}.
+   
+   (4) a record array.  This results in a deep copy of the input record array; 
+   any other arguments to \code{array()} will be silently ignored.
+   
+   (5) a list of numarrays.  There must be one such numarray for each field.  
+   The \code{formats} and \code{shape} arguments to \code{array()} are not 
+   required, but if they are specified, they need to be consistent with the 
+   input arrays.  The shapes of all the input numarrays also need to be 
+   consistent to one another.
+   \begin{verbatim}
+   # this will have 3 rows, each cell in the 2nd field is an array of 4 elements
+   # note that the formats sepcification needs to reflect the data shape
+   >>> arr1=numarray.arange(3)
+   >>> arr2=numarray.arange(12,shape=(3,4))
+   >>> r=rec.array([arr1, arr2],formats='i2,4f4')
+   \end{verbatim}
+   
+   In this example, \code{arr2} is cast up to float.
+   
+   (6) a list of sequences.  Each sequence contains the 
+   number(s)/string(s) of a record.  The example in the introduction 
+   uses such input, sometimes called \var{longhand} input.  The data 
+   types are automatically determined after comparing all input data.  
+   Data of the same field will be cast to the highest type:
+   \begin{verbatim}
+   # the first field uses the highest data type: Float64
+   >>> r=rec.array([[1,'abc'],(3.5, 'xx')]); print r
+   RecArray[ 
+   (1.0, 'abc'),
+   (3.5, 'xx')
+   ]
+   \end{verbatim}
+   unless overruled by the \code{formats} argument:
+   \begin{verbatim}
+   # overrule the first field to short integers, second field to shorter strings
+   >>> r=rec.array([[1,'abc'],(3.5, 'xx')],formats='i2,a1'); print r
+   RecArray[ 
+   (1, 'a'),
+   (3, 'x')
+   ]
+   \end{verbatim}
+   Inconsistent data in the same field will cause a \code{ValueError}:
+   \begin{verbatim}
+   >>> r=rec.array([[1,'abc'],('a', 'xx')])
+   ValueError: inconsistent data at row 1,field 0
+   \end{verbatim}
+   
+   A record array with multi-dimensional numarray cells in a field can also 
+   be constructed by using nested sequences:
+   \begin{verbatim}
+   >>> r=rec.array([[(11,12,13),'abc'],[(2,3,4), 'xx']]); print r
+   RecArray[ 
+   (array([11, 12, 13]), 'abc'),
+   (array([2, 3, 4]), 'xx')
+   ]
+   \end{verbatim}
+\end{funcdesc}
+   
+\begin{funcdesc}{letterCode}{}
+   This function will list the letter codes acceptable by the \code{formats} 
+   argument in \code{array()}.
+\end{funcdesc}
+
+\section{Record array methods}
+\label{sec:recarray-methods}
+RecArray object has these public methods:
+
+\begin{methoddesc}[RecArray]{field}{fieldName}
+   \code{fieldName} can be either an integer (field index) or string 
+   (field name).
+   \begin{verbatim}
+   >>> r=rec.array([[11,'abc',1.],[12, 'xx', 2.]])
+   >>> print r.field('c1')
+   [11 12]
+   >>> print r.field(0)  # same as field('c1')
+   [11 12]
+   \end{verbatim}
+   To set values, simply use indexing or slicing, since each field is a 
+   numarray:
+   \begin{verbatim}
+   >>> r.field(2)[1]=1000; r.field(1)[1]='xyz'
+   >>> r.field(0)[:]=999
+   >>> print r
+   RecArray[ 
+   (999, 'abc', 1.0),
+   (999, 'xyz', 1000.0)
+   ]
+   \end{verbatim}
+\end{methoddesc}
+\begin{methoddesc}[RecArray]{info}{}
+   This will display key attributes of the record array.
+\end{methoddesc}
+
+\section{Record object}
+\label{sec:recarray-record}
+\index{Record object}
+Each single record (or \var{row}) in the record array is a 
+\code{records.Record} object.  It has these methods:
+
+\begin{methoddesc}[Record]{field}{fieldName}
+\end{methoddesc}
+\begin{methoddesc}[Record]{setfield}{fieldname, value}
+   Like the \code{RecArray}, a \code{Record} object has the \code{field} 
+   method to \var{get} the field value.  But since a \code{Record} object 
+   is not an array, it does not take an index or slice, so one cannot 
+   assign a value to it.  So a separate \var{set} method, \code{setfield()}, 
+   is necessary:
+   \begin{verbatim}
+   >>> r[1].field(0)
+   999
+   >>> r[1].setfield(0, -1)
+   >>> print r[1]
+   (-1, 'xy', 1000.0)
+   \end{verbatim}
+   Like the \code{field()} method in \code{RecArray}, \code{fieldName} in 
+   \code{Record}'s \code{field()} and \code{setfield()} methods can be 
+   either an integer (index) or a string (field name).
+\end{methoddesc}
+
+
+%% Local Variables:
+%% mode: LaTeX
+%% mode: auto-fill
+%% fill-column: 79
+%% indent-tabs-mode: nil
+%% ispell-dictionary: "american"
+%% reftex-fref-is-default: nil
+%% TeX-auto-save: t
+%% TeX-command-default: "pdfeLaTeX"
+%% TeX-master: "numarray"
+%% TeX-parse-self: t
+%% End:

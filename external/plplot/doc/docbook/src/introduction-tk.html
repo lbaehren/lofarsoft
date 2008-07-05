@@ -1,0 +1,219 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>Introduction to Tk</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="Building an Extended WISH"
+HREF="extended-wish.html"><LINK
+REL="PREVIOUS"
+TITLE="Building an Extended WISH"
+HREF="extended-wish.html"><LINK
+REL="NEXT"
+TITLE="Introduction to [incr Tcl]"
+HREF="introduction-itcl.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="extended-wish.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 12. Building an Extended WISH</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="introduction-itcl.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="introduction-tk"
+>Introduction to Tk</A
+></H1
+><P
+>&#13;      As mentioned above, Tcl is designed to be extensible.  The first and
+      most basic Tcl extension is Tk, an X11 toolkit.  Tk provides the same
+      basic facilities that you may be familiar with from other X11
+      toolkits such as Athena and Motif, except that they are provided in
+      the context of the Tcl language.  There are C bindings too, but these
+      are seldom needed&#8212;the vast majority of useful Tk applications
+      can be coded using Tcl scripts.
+    </P
+><P
+>&#13;      If it has not become obvious already, it is worth noting at this
+      point that Tcl is one example of a family of languages known
+      generally as <SPAN
+CLASS="QUOTE"
+>"Very High Level Languages"</SPAN
+>, or VHLL's.
+      Essentially a VHLL raises the level of programming to a very high
+      level, allowing very short token streams to accomplish as much as
+      would be required by many scores of the more primitive actions
+      available in a basic HLL.  Consider, for example, the basic
+      <SPAN
+CLASS="QUOTE"
+>"Hello World!"</SPAN
+> application written in Tcl/Tk.
+    </P
+><P
+>&#13;      <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>&#13;#!/usr/local/bin/wish -f
+
+button .hello -text "Hello World!"  -command "destroy ."
+pack .hello</PRE
+></TD
+></TR
+></TABLE
+>
+    </P
+><P
+>&#13;      That's it!  That's all there is to it.  If you have ever programmed X
+      using a traditional toolkit such as Athena or Motif, you can
+      appreciate how amazingly much more convenient this is.  If not, you
+      can either take our word for it that this is 20 times less code than
+      you would need to use a standard toolkit, or you can go write the
+      same program in one of the usual toolkits and see for yourself...
+    </P
+><P
+>&#13;      We cannot hope to provide a thorough introduction to Tk programming
+      in this section.  Instead, we will just say that immensely complex
+      applications can be constructed merely by programming in exactly the
+      way shown in the above script.  By writing more complex scripts, and
+      by utilizing the additional widgets provided by Tk, one can create
+      beautiful, extensive user interfaces.  Moreover, this can be done in
+      a tiny fraction of the time it takes to do the same work in a
+      conventional toolkit.  Literally minutes versus days.
+    </P
+><P
+>&#13;      Tk provides widgets for labels, buttons, radio buttons, frames with
+      or without borders, menubars, pull downs, toplevels, canvases, edit
+      boxes, scroll bars, etc.
+    </P
+><P
+>&#13;      A look at the interface provided by the PLplot Tk driver
+      should help give you a better idea of what you can do with this
+      paradigm.  Also check out some of the contributed Tcl/Tk packages
+      available at harbor.  There are high quality Tk interfaces to a great
+      many familiar Unix utilities ranging from mail to info, to SQL, to
+      news, etc.  The list is endless and growing fast...
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="extended-wish.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="introduction-itcl.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Building an Extended WISH</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="extended-wish.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Introduction to [incr Tcl]</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

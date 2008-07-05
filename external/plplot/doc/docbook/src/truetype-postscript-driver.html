@@ -1,0 +1,201 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>The TrueType PostScript Driver</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The PLplot Output Driver Family"
+HREF="output-drivers.html"><LINK
+REL="PREVIOUS"
+TITLE="The PostScript Driver"
+HREF="postscript-driver.html"><LINK
+REL="NEXT"
+TITLE="The LaTeX PostScript Driver"
+HREF="latex-postscript-driver.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="postscript-driver.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 6. The PLplot Output Driver Family</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="latex-postscript-driver.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="truetype-postscript-driver"
+>The TrueType PostScript Driver</A
+></H1
+><P
+>&#13;      This is a PostScript driver that supports TrueType fonts. This 
+      allows access to a far greater range of fonts and characters than 
+      is possible using Type 1 PostScript fonts 
+      (see <A
+HREF="postscript-driver.html"
+>the Section called <I
+>The PostScript Driver</I
+></A
+>).
+      It is the driver to use for generating publication quality output
+      using PLplot. The driver provides two devices: the ps-ttf device
+      for black-and-white plots and the ps-ttfc device for color plots.
+    </P
+><P
+>&#13;      The driver requires the LASi (v1.0.5), pango and pangoft2 libraries 
+      to work. The pango and pangoft2 libraries are widely distributed 
+      with most Linux distributions and give the psttf driver full complex 
+      text layout (CTL) capability (see 
+      <A
+HREF="http://plplot.sourceforge.net/examples/demo24.php"
+TARGET="_top"
+>&#13;      http://plplot.sourceforge.net/examples/demo24.php</A
+>
+      for an example of this capability).  The LASi library is not part of 
+      most distributions at this time. The source code can be downloaded 
+      from http://www.unifont.org/lasi/. The library is small and easy to 
+      build and install.  Make sure you use LASi-1.0.5.  The psttf device 
+      driver uses new capabilities in this version of LASi and no longer 
+      works with LASi-1.0.4.
+    </P
+><P
+>&#13;      The available driver options are:
+      <P
+></P
+><UL
+><LI
+><P
+>&#13;          text: Use TrueType fonts for text (0|1); default 1
+        </P
+></LI
+><LI
+><P
+>&#13;          color: Use color (0|1); default 1
+        </P
+></LI
+><LI
+><P
+>&#13;          hrshsym: Use Hershey fonts for symbols (0|1); default 0
+        </P
+></LI
+></UL
+>
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="postscript-driver.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="latex-postscript-driver.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>The PostScript Driver</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="output-drivers.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>The LaTeX PostScript Driver</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

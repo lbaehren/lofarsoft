@@ -1,0 +1,89 @@
+\section{num\_\-util.h File Reference}
+\label{num__util_8h}\index{num_util.h@{num\_\-util.h}}
+{\tt \#include $<$boost/python.hpp$>$}\par
+{\tt \#include $<$numpy/arrayobject.h$>$}\par
+{\tt \#include $<$iostream$>$}\par
+{\tt \#include $<$sstream$>$}\par
+{\tt \#include $<$vector$>$}\par
+{\tt \#include $<$numeric$>$}\par
+{\tt \#include $<$map$>$}\par
+{\tt \#include $<$complex$>$}\par
+\subsection*{Namespaces}
+\begin{CompactItemize}
+\item 
+namespace {\bf num\_\-util}
+\end{CompactItemize}
+\subsection*{Typedefs}
+\begin{CompactItemize}
+\item 
+typedef std::map$<$ Py\-Array\_\-TYPES, std::string $>$ {\bf num\_\-util::Kind\-String\-Map}
+\item 
+typedef std::map$<$ Py\-Array\_\-TYPES, char $>$ {\bf num\_\-util::Kind\-Char\-Map}
+\item 
+typedef std::map$<$ char, Py\-Array\_\-TYPES $>$ {\bf num\_\-util::Kind\-Type\-Map}
+\end{CompactItemize}
+\subsection*{Functions}
+\begin{CompactItemize}
+\item 
+boost::python::numeric::array {\bf num\_\-util::make\-Num} (boost::python::object x)
+\item 
+numeric::array {\bf num\_\-util::make\-Num} (intp n, Py\-Array\_\-TYPES t=Py\-Array\_\-DOUBLE)
+\item 
+numeric::array {\bf num\_\-util::make\-Num} (std::vector$<$ intp $>$ dimens, Py\-Array\_\-TYPES t=Py\-Array\_\-DOUBLE)
+\item 
+template$<$typename T$>$ Py\-Array\_\-TYPES {\bf num\_\-util::get\-Enum} (void)
+\item 
+template$<$typename T$>$ boost::python::numeric::array {\bf num\_\-util::make\-Num} (T $\ast$data, intp n=0)
+\item 
+template$<$typename T$>$ boost::python::numeric::array {\bf num\_\-util::make\-Num} (T $\ast$data, std::vector$<$ intp $>$ dims)
+\item 
+boost::python::numeric::array {\bf num\_\-util::make\-Num} (const boost::python::numeric::array \&arr)
+\item 
+Py\-Array\_\-TYPES {\bf num\_\-util::type} (boost::python::numeric::array arr)
+\item 
+void {\bf num\_\-util::check\_\-type} (boost::python::numeric::array arr, Py\-Array\_\-TYPES expected\_\-type)
+\item 
+int {\bf num\_\-util::rank} (boost::python::numeric::array arr)
+\item 
+void {\bf num\_\-util::check\_\-rank} (boost::python::numeric::array arr, int expected\_\-rank)
+\item 
+intp {\bf num\_\-util::size} (boost::python::numeric::array arr)
+\item 
+void {\bf num\_\-util::check\_\-size} (boost::python::numeric::array arr, intp expected\_\-size)
+\item 
+std::vector$<$ intp $>$ {\bf num\_\-util::shape} (boost::python::numeric::array arr)
+\item 
+intp {\bf num\_\-util::get\_\-dim} (boost::python::numeric::array arr, int dimnum)
+\item 
+void {\bf num\_\-util::check\_\-shape} (boost::python::numeric::array arr, std::vector$<$ intp $>$ expected\_\-dims)
+\item 
+void {\bf num\_\-util::check\_\-dim} (boost::python::numeric::array arr, int dimnum, intp dimsize)
+\item 
+bool {\bf num\_\-util::iscontiguous} (boost::python::numeric::array arr)
+\item 
+void {\bf num\_\-util::check\_\-contiguous} (boost::python::numeric::array arr)
+\item 
+void $\ast$ {\bf num\_\-util::data} (boost::python::numeric::array arr)
+\item 
+void {\bf num\_\-util::copy\_\-data} (boost::python::numeric::array arr, char $\ast$new\_\-data)
+\item 
+boost::python::numeric::array {\bf num\_\-util::clone} (boost::python::numeric::array arr)
+\item 
+numeric::array {\bf num\_\-util::astype} (boost::python::numeric::array arr, Py\-Array\_\-TYPES t)
+\item 
+int {\bf num\_\-util::refcount} (boost::python::numeric::array arr)
+\item 
+std::vector$<$ intp $>$ {\bf num\_\-util::strides} (boost::python::numeric::array arr)
+\item 
+void {\bf num\_\-util::check\_\-Py\-Array\-Element\-Type} (boost::python::object newo)
+\item 
+std::string {\bf num\_\-util::type2string} (Py\-Array\_\-TYPES t\_\-type)
+\item 
+char {\bf num\_\-util::type2char} (Py\-Array\_\-TYPES t\_\-type)
+\item 
+Py\-Array\_\-TYPES {\bf num\_\-util::char2type} (char e\_\-type)
+\item 
+template$<$class T$>$ std::string {\bf num\_\-util::vector\_\-str} (const std::vector$<$ T $>$ \&vec)
+\item 
+void {\bf num\_\-util::check\_\-size\_\-match} (std::vector$<$ intp $>$ dims, intp n)
+\end{CompactItemize}

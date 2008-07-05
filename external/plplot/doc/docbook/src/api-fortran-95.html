@@ -1,0 +1,517 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>The Specialized Fortran 95 API for PLplot</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE=" Reference "
+HREF="p3385.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      pltr2: Linear interpolation for grid to world
+      mapping using doubly dimensioned coord arrays (column
+      dominant, as per normal C 2d arrays)
+    "
+HREF="pltr2.html"><LINK
+REL="NEXT"
+TITLE="
+      plshade: Shaded plot for Fortran 95
+    "
+HREF="plshadefortran95.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="chapter"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="pltr2.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+></TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plshadefortran95.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="chapter"
+><H1
+><A
+NAME="API-FORTRAN-95"
+></A
+>Chapter 19. The Specialized Fortran 95 API for PLplot</H1
+><DIV
+CLASS="TOC"
+><DL
+><DT
+><B
+>Table of Contents</B
+></DT
+><DT
+><A
+HREF="api-fortran-95.html#plcontfortran95"
+><CODE
+CLASS="function"
+>plcont</CODE
+>: Contour plot for Fortran 95</A
+></DT
+><DT
+><A
+HREF="plshadefortran95.html"
+><CODE
+CLASS="function"
+>plshade</CODE
+>: Shaded plot for Fortran 95</A
+></DT
+><DT
+><A
+HREF="plshadesfortran95.html"
+><CODE
+CLASS="function"
+>plshades</CODE
+>: Continuously shaded plot for Fortran 95</A
+></DT
+><DT
+><A
+HREF="plvectfortran95.html"
+><CODE
+CLASS="function"
+>plvect</CODE
+>: Vector plot for Fortran 95</A
+></DT
+><DT
+><A
+HREF="plmeshfortran95.html"
+><CODE
+CLASS="function"
+>plmesh</CODE
+>: Plot surface mesh for Fortran 95</A
+></DT
+><DT
+><A
+HREF="plot3dfortran95.html"
+><CODE
+CLASS="function"
+>plot3d</CODE
+>: Plot 3-d surface plot for Fortran 95</A
+></DT
+><DT
+><A
+HREF="plparseoptsfortran95.html"
+><CODE
+CLASS="function"
+>plparseopts</CODE
+>: parse arguments for Fortran 95</A
+></DT
+><DT
+><A
+HREF="plsescfortran95.html"
+><CODE
+CLASS="function"
+>plsesc</CODE
+>: Set the escape character for text strings
+for Fortran 95</A
+></DT
+></DL
+></DIV
+><P
+>&#13;  The purpose of this Chapter is to document the API for each Fortran 95 function
+  in PLplot that differs substantially (usually in argument lists)
+  from the common API that has already been
+  documented in <A
+HREF="api.html"
+>Chapter 17</A
+>.
+  </P
+><P
+>&#13;  Normally, the common API is wrapped in such a way for Fortran 95 that there is
+  and one-to-one correspondence between each Fortran 95 and C argument
+  with the exception of arguments that indicate array sizes
+  (see <A
+HREF="fortran95.html"
+>Chapter 8</A
+>
+  for discussion).  However, for certain routines documented in this
+  chapter the Fortran 95 argument lists
+  necessarily differ substantially from the C versions.
+  </P
+><P
+>&#13;  This chapter is incomplete and NEEDS DOCUMENTATION.
+  </P
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plcontfortran95"
+><CODE
+CLASS="function"
+>plcont</CODE
+>: Contour plot for Fortran 95</A
+></H3
+><P
+>&#13;      This is an overloaded function with a variety of argument lists:
+
+      <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>&#13;          interface plcont
+              subroutine plcontour_0(z,kx,lx,ky,ly,clevel)
+                  integer                          :: kx,lx,ky,ly
+                  real(kind=plflt), dimension(:,:) :: z
+                  real(kind=plflt), dimension(:)   :: clevel
+              end subroutine plcontour_0
+
+              subroutine plcontour_1(z,kx,lx,ky,ly,clevel,xg,yg)
+                  integer                          :: kx,lx,ky,ly
+                  real(kind=plflt), dimension(:,:) :: z
+                  real(kind=plflt), dimension(:)   :: clevel
+                  real(kind=plflt), dimension(:)   :: xg
+                  real(kind=plflt), dimension(:)   :: yg
+              end subroutine plcontour_1
+
+              subroutine plcontour_2(z,kx,lx,ky,ly,clevel,xg,yg)
+                  integer                          :: kx,lx,ky,ly
+                  real(kind=plflt), dimension(:,:) :: z
+                  real(kind=plflt), dimension(:)   :: clevel
+                  real(kind=plflt), dimension(:,:) :: xg
+                  real(kind=plflt), dimension(:,:) :: yg
+              end subroutine plcontour_2
+
+              subroutine plcontour_tr(z,kx,lx,ky,ly,clevel,tr)
+                  integer                          :: kx,lx,ky,ly
+                  real(kind=plflt), dimension(:,:) :: z
+                  real(kind=plflt), dimension(:)   :: clevel
+                  real(kind=plflt), dimension(6)   :: tr
+              end subroutine plcontour_tr
+
+              subroutine plcontour_0_all(z,clevel)
+                  real(kind=plflt), dimension(:,:) :: z
+                  real(kind=plflt), dimension(:)   :: clevel
+              end subroutine plcontour_0_all
+
+              subroutine plcontour_1_all(z,clevel,xg,yg)
+                  real(kind=plflt), dimension(:,:) :: z
+                  real(kind=plflt), dimension(:)   :: clevel
+                  real(kind=plflt), dimension(:)   :: xg
+                  real(kind=plflt), dimension(:)   :: yg
+              end subroutine plcontour_1_all
+
+              subroutine plcontour_2_all(z,clevel,xg,yg)
+                  real(kind=plflt), dimension(:,:) :: z
+                  real(kind=plflt), dimension(:)   :: clevel
+                  real(kind=plflt), dimension(:,:) :: xg
+                  real(kind=plflt), dimension(:,:) :: yg
+              end subroutine plcontour_2_all
+
+              subroutine plcontour_tr_all(z,clevel,tr)
+                  real(kind=plflt), dimension(:,:) :: z
+                  real(kind=plflt), dimension(:)   :: clevel
+                  real(kind=plflt), dimension(6)   :: tr
+              end subroutine plcontour_tr_all
+          end interface
+      </PRE
+></TD
+></TR
+></TABLE
+>
+    </P
+><P
+>&#13;      When called from Fortran 95, this overloaded routine has the same
+      effect as when invoked from C.  See
+      <TT
+CLASS="filename"
+>examples/f95/x??f.f90</TT
+> for various ways to call
+      plcont from Fortran 95.
+    </P
+><P
+>&#13;      The meaning of the various arguments is as follows:
+      <TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>z</CODE
+>
+            (<TT
+CLASS="literal"
+>real(kind=plflt), dimension(:,:)</TT
+>, input)</DT
+><DD
+><P
+>&#13;              Matrix containing the values to be plotted.
+            </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>kx, lx</CODE
+>
+            (<TT
+CLASS="literal"
+>integer</TT
+>, input)</DT
+><DD
+><P
+>&#13;              Range for the first index in the matrix <TT
+CLASS="literal"
+>z</TT
+> to consider.
+              If not given, then the whole first index is considered.
+            </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>clevel</CODE
+>
+            (<TT
+CLASS="literal"
+>real(kind=plflt), dimension(:)</TT
+>, input)</DT
+><DD
+><P
+>&#13;              Levels at which the contours are computed and drawn.
+            </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>kx, lx</CODE
+>
+            (<TT
+CLASS="literal"
+>integer</TT
+>, input)</DT
+><DD
+><P
+>&#13;              Range for the first index in the matrix <TT
+CLASS="literal"
+>z</TT
+> to consider.
+              If not given, then the whole first index is considered.
+            </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>ky, ly</CODE
+>
+            (<TT
+CLASS="literal"
+>integer</TT
+>, input)</DT
+><DD
+><P
+>&#13;              Range for the second index in the matrix <TT
+CLASS="literal"
+>z</TT
+> to consider.
+              If not given, then the whole second index is considered.
+            </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>xg</CODE
+>
+            (<TT
+CLASS="literal"
+>real(kind=plft), dimension(:)</TT
+> or
+             <TT
+CLASS="literal"
+>real(kind=plft), dimension(:,:)</TT
+>, input)</DT
+><DD
+><P
+>&#13;              The x-coordinates for the grid lines (if one-dimensional)
+              or the x-coordinates of the grid vertices (if two-dimensional).
+              The values in the matrix are plotted at these coordinates.
+              If not given, implicit coordinates are used (equal to the
+              indices in the matrix).
+            </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>yg</CODE
+>
+            (<TT
+CLASS="literal"
+>real(kind=plft), dimension(:)</TT
+> or
+             <TT
+CLASS="literal"
+>real(kind=plft), dimension(:,:)</TT
+>, input)</DT
+><DD
+><P
+>&#13;              The y-coordinates for the grid lines (if one-dimensional)
+              or the x-coordinates of the grid vertices (if two-dimensional).
+              The values in the matrix are plotted at these coordinates.
+            </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>tr</CODE
+>
+            (<TT
+CLASS="literal"
+>real(kind=plft), dimension(6)</TT
+>, input)</DT
+><DD
+><P
+>&#13;              The coefficients of an affine transformation:
+
+              <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>&#13;                x = tr(1) * ix + tr(2) * iy + tr(3)
+                y = tr(4) * ix + tr(5) * iy + tr(6)
+              </PRE
+></TD
+></TR
+></TABLE
+>
+
+              The indices of the matrix element are used to compute the
+              "actual" coordinates according to the above formulae.
+            </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+>
+    </P
+></DIV
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="pltr2.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plshadefortran95.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>pltr2</CODE
+>: Linear interpolation for grid to world
+      mapping using doubly dimensioned coord arrays (column
+      dominant, as per normal C 2d arrays)</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="p3385.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plshade</CODE
+>: Shaded plot for Fortran 95</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

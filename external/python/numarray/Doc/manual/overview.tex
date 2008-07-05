@@ -1,0 +1,213 @@
+\chapter{High-Level Overview}
+\label{cha:high-level-overview}
+
+\begin{quote} 
+   In this chapter, a high-level overview of the extensions is provided, giving
+   the reader the definitions of the key components of the system. This section
+   defines the concepts used by the remaining sections.
+\end{quote}
+
+Numarray makes available a set of universal functions (technically ufunc
+objects), used in the same way they were used in Numeric. These are discussed
+in some detail in chapter \ref{cha:ufuncs}.
+
+
+\section{Numarray Objects}
+\label{sec:numarray-objects}
+
+The array objects are generally homogeneous collections of potentially large
+numbers of numbers. All numbers in a numarray are the same kind (i.e. number
+representation, such as double-precision floating point). Array objects must be
+full (no empty cells are allowed), and their size is immutable. The specific
+numbers within them can change throughout the life of the array, however.
+There is a "mask array" package ("MA") for Numeric, which has been ported
+to numarray as ``numarray.ma''.
+
+Mathematical operations on arrays return new arrays containing the results of
+these operations performed element-wise on the arguments of the operation.
+
+The size of an array is the total number of elements therein (it can be 0 or
+more). It does not change throughout the life of the array, unless the array
+is explicitly resized using the resize function.
+
+The shape of an array is the number of dimensions of the array and its extent
+in each of these dimensions (it can be 0, 1 or more). It can change throughout
+the life of the array. In Python terms, the shape of an array is a tuple of
+integers, one integer for each dimension that represents the extent in that
+dimension.  The rank of an array is the number of dimensions along which it is
+defined. It can change throughout the life of the array. Thus, the rank is the
+length of the shape (except for rank 0). \note{This is not the same meaning of
+rank as in linear algebra.}
+
+Use more familiar mathematicial examples: A vector is a rank-1 array
+(it has only one dimension along which it can be indexed). A matrix as used in
+linear algebra is a rank-2 array (it has two dimensions along which it can be
+indexed). It is possible to create a rank-0 array which is just a scalar of 
+one single value --- it has no dimension along which it can be indexed.
+
+The type of an array is a description of the kind of element it contains. It
+determines the itemsize of the array.  In contrast to Numeric, an array type in
+numarray is an instance of a NumericType class, rather than a single character
+code. However, it has been implemented in such a way that one may use aliases,
+such as `\constant{u1}', `\constant{i1}', `\constant{i2}', `\constant{i4}',
+`\constant{f4}', `\constant{f8}', etc., as well as the original character
+codes, to set array types.  The itemsize of an array is the number of 8-bit
+bytes used to store a single element in the array. The total memory used by an
+array tends to be its size times its itemsize, when the size is large (there
+is a fixed overhead per array, as well as a fixed overhead per dimension).
+
+Here is an example of Python code using the array objects:
+\begin{verbatim}
+>>> vector1 = array([1,2,3,4,5])
+>>> print vector1
+[1 2 3 4 5]
+>>> matrix1 = array([[0,1],[1,3]])
+>>> print matrix1
+[[0 1]
+ [1 3]]
+>>> print vector1.shape, matrix1.shape
+(5,) (2,2)
+>>> print vector1 + vector1
+[ 2  4  6  8  10]
+>>> print matrix1 * matrix1
+[[0 1]                                  # note that this is not the matrix
+ [1 9]]                                 # multiplication of linear algebra
+\end{verbatim}
+If this example complains of an unknown name "array", you forgot to begin
+your session with
+\begin{verbatim}
+>>> from numarray import *
+\end{verbatim}
+See section \ref{sec:tip:from-numarray-import}.
+
+
+\section{Universal Functions}
+\label{sec:universal-functions}
+
+Universal functions (ufuncs) are functions which operate on arrays and other
+sequences. Most ufuncs perform mathematical operations on their arguments, also
+elementwise.
+
+Here is an example of Python code using the ufunc objects:
+\begin{verbatim}
+>>> print sin([pi/2., pi/4., pi/6.])
+[ 1. 0.70710678 0.5       ]
+>>> print greater([1,2,4,5], [5,4,3,2])
+[0 0 1 1]
+>>> print add([1,2,4,5], [5,4,3,2])
+[6 6 7 7]
+>>> print add.reduce([1,2,4,5])
+12                                      # 1 + 2 + 4 + 5
+\end{verbatim}
+Ufuncs are covered in detail in "Ufuncs" on page~\pageref{cha:ufuncs}.
+
+
+\section{Convenience Functions}
+\label{sec:conv-funct}
+
+The numarray module provides, in addition to the functions which are needed to
+create the objects above, a set of powerful functions to manipulate arrays,
+select subsets of arrays based on the contents of other arrays, and other
+array-processing operations.
+\begin{verbatim}
+>>> data = arange(10)                   # analogous to builtin range()
+>>> print data
+[0 1 2 3 4 5 6 7 8 9]
+>>> print where(greater(data, 5), -1, data)
+[ 0  1  2  3  4  5 -1 -1 -1 -1]         # selection facility
+>>> data = resize(array([0,1]), (9, 9)) # or just: data=resize([0,1], (9,9))
+>>> print data
+[[0 1 0 1 0 1 0 1 0]
+ [1 0 1 0 1 0 1 0 1]
+ [0 1 0 1 0 1 0 1 0]
+ [1 0 1 0 1 0 1 0 1]
+ [0 1 0 1 0 1 0 1 0]
+ [1 0 1 0 1 0 1 0 1]
+ [0 1 0 1 0 1 0 1 0]
+ [1 0 1 0 1 0 1 0 1]
+ [0 1 0 1 0 1 0 1 0]]
+\end{verbatim}
+All of the functions which operate on numarray arrays are described in chapter
+\ref{cha:array-functions}.  See page \pageref{func:where} for more information
+about \function{where} and page \pageref{func:resize} for
+information on \function{resize}.
+
+\section{Differences between numarray and Numeric.}
+\label{sec:diff-numarray-numpy}
+
+This new module numarray was developed for a number of reasons. To 
+summarize, we regularly deal with large datasets and numarray gives us the
+capabilities that we feel are necessary for working with such datasets. In
+particular:
+\begin{enumerate}
+\item Avoid promotion of array types in expressions involving Python scalars
+   (e.g., \code{2.*<Float32 array>} should not result in a \code{Float64}
+   array).
+\item Ability to use memory mapped files.
+\item Ability to access fields in arrays of records as numeric arrays without
+   copying the data to a new array.
+\item Ability to reference byteswapped data or non-aligned data (as might be
+   found in record arrays) without producing new temporary arrays.
+\item Reuse temporary arrays in expressions when possible.
+\item Provide more convenient use of index arrays (put and take).
+\end{enumerate}
+We decided to implement a new module since many of the existing Numeric
+developers agree that the existing Numeric implementation is not suitable 
+for massive changes and enhancements.
+
+This version has nearly the full functionality of the basic Numeric.
+\emph{Numarray is not fully compatible with Numeric}.
+(But it is very similar in most respects).
+
+The incompatibilities are listed below. 
+\begin{enumerate}
+\item Coercion rules are different. Expressions involving scalars may not
+   produce the same type of arrays.  
+\item Types are represented by Type Objects rather than character codes (though
+   the old character codes may still be used as arguments to the functions).
+\item For versions of Python prior to 2.2, arrays have no public attributes.
+   Accessor functions must be used instead (e.g., to get shape for array x, one
+   must use x.getshape() instead of x.shape). When using Python 2.2 or later,
+   however, the attributes of Numarray are in fact available.
+\end{enumerate}
+A further comment on type is appropriate here. In numarray, types are
+represented by type objects and not character codes. As with Numeric there is a
+module variable Float32, but now it represents an instance of a FloatingType
+class. For example, if x is a Float32 array, x.type() will return a
+FloatingType instance associated with 32-bit floats (instead of using
+x.typecode() as is done in Numeric). The following will still work in
+numarray, to be backward compatible:
+\begin{verbatim}
+>>> if x.typecode() == 'f':
+\end{verbatim}
+or use:
+\begin{verbatim}
+>>> if x.type() == Float32:
+\end{verbatim}
+(All examples presume ``\code{from numarray import *}'' has been used instead
+of ``\code{import numarray}'', see section \ref{sec:tip:from-numarray-import}.)
+The advantage of the new scheme is that other kinds of tests become simpler.
+The type classes are hierarchical so one can easily test to see if the array is
+an integer array. For example:
+\begin{verbatim}
+>>> if isinstance(x.type(), IntegralType): 
+\end{verbatim}
+or:
+\begin{verbatim}
+>>> if isinstance(x.type(), UnsignedIntegralType):
+\end{verbatim}
+
+
+
+%% Local Variables:
+%% mode: LaTeX
+%% mode: auto-fill
+%% fill-column: 79
+%% indent-tabs-mode: nil
+%% ispell-dictionary: "american"
+%% reftex-fref-is-default: nil
+%% TeX-auto-save: t
+%% TeX-command-default: "pdfeLaTeX"
+%% TeX-master: "numarray"
+%% TeX-parse-self: t
+%% End:

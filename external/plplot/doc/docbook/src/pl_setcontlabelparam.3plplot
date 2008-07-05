@@ -1,0 +1,36 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PL_SETCONTLABELPARAM 3plplot  "February, 2008" "" "PLplot API"
+.SH NAME
+\fBpl_setcontlabelparam\fP - Set parameters of
+contour labelling other than format of numerical label
+.SH SYNOPSIS
+\fBpl_setcontlabelparam\fP(\fIoffset\fP, \fIsize\fP, \fIspacing\fP, \fIactive\fP)
+.SH DESCRIPTION
+
+.P
+Set parameters of contour labelling other than those handled by \fBpl_setcontlabelformat\fP(3plplot). 
+.P
+Redacted form: \fBpl_setcontlabelparam(offset, size, spacing, active)\fP
+.P
+This function is used in example 9. 
+.SH ARGUMENTS
+.TP
+\fIoffset\fP (PLFLT, input) 
+Offset of label from contour line (if set to 0.0, labels are printed on the lines).  Default value is 0.006. 
+.TP
+\fIsize\fP (PLFLT, input) 
+Font height for contour labels (normalized).  Default value is 0.3. 
+.TP
+\fIspacing\fP (PLFLT, input) 
+Spacing parameter for contour labels.  Default value is 0.1. 
+.TP
+\fIactive\fP (PLINT, input) 
+Activate labels.  Set to 1 if you want contour labels on. Default is off (0). 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

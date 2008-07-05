@@ -1,0 +1,174 @@
+% Complete documentation on the extended LaTeX markup used for Python
+% documentation is available in ``Documenting Python'', which is part
+% of the standard documentation for Python.  It may be found online
+% at:
+%
+%     http://www.python.org/doc/current/doc/doc.html
+
+\documentclass[hyperref]{manual}
+\pagestyle{plain}
+
+% latex2html doesn't know [T1]{fontenc}, so we cannot use that:(
+
+\usepackage{amsmath}
+\usepackage[latin1]{inputenc}
+\usepackage{textcomp}
+
+
+% The commands of this document do not reset module names at section level
+% (nor at chapter level).
+% --> You have to do that manually when a new module starts!
+%     (use \py@reset)
+%begin{latexonly}
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{\z@}%
+   {-3.5ex \@plus -1ex \@minus -.2ex}%
+   {2.3ex \@plus.2ex}%
+   {\reset@font\Large\py@HeaderFamily}}
+\makeatother
+%end{latexonly}
+
+
+% additional mathematical functions
+\DeclareMathOperator{\abs}{abs}
+
+% provide a cross-linking command for the index
+%begin{latexonly}
+\newcommand*\see[2]{\protect\seename #1}
+\newcommand*{\seename}{$\to$}
+%end{latexonly}
+
+
+% some convenience declarations
+\newcommand{\numarray}{numarray}
+\newcommand{\Numarray}{Numarray}  % Only beginning of sentence, otherwise use \numarray
+\newcommand{\NUMARRAY}{NumArray}
+\newcommand{\numpy}{Numeric}
+\newcommand{\NUMPY}{Numerical Python}
+\newcommand{\python}{Python}
+
+
+% mark internal comments
+% for any published version switch to the second (empty) definition of the macro!
+% \newcommand{\remark}[1]{(\textbf{Note to authors: #1})}
+\newcommand{\remark}[1]{}
+
+
+\title{numarray\\User's Manual}
+
+\author{Perry Greenfield \\
+   Todd Miller \\
+   Rick White \\
+   J.C. Hsu \\
+   Paul Barrett \\
+   Jochen Küpper \\
+   Peter J. Verveer \\[1ex]
+   Previously authored by: \\
+   David Ascher \\
+   Paul F. Dubois \\
+   Konrad Hinsen \\
+   Jim Hugunin \\
+   Travis Oliphant \\[1ex]
+   with contributions from the Numerical Python community}
+
+\authoraddress{Space Telescope Science Institute, 3700 San Martin Dr,
+   Baltimore, MD 21218 \\ UCRL-MA-128569}
+
+% I use date to indicate the manual-updates,
+% release below gives the matching software version.
+\date{November 2, 2005}        % update before release!
+                                % Use an explicit date so that reformatting
+                                % doesn't cause a new date to be used.  Setting
+                                % the date to \today can be used during draft
+                                % stages to make it easier to handle versions.
+
+\release{1.5}                 % (software) release version;
+\setshortversion{1.5}         % this is used to define the \version macro
+
+\makeindex                      % tell \index to actually write the .idx file
+
+
+
+\begin{document}
+
+\maketitle
+
+% This makes the contents more accessible from the front page of the HTML.
+\ifhtml
+\part*{General}
+\chapter*{Front Matter}
+\label{front}
+\fi
+
+\input{copyright}  \cleardoublepage
+
+
+\tableofcontents
+
+
+\part{Numerical Python}
+
+\NUMARRAY{} (``\numarray{}'') adds a fast multidimensional array facility to
+Python.  This part contains all you need to know about ``\numarray{}'' arrays
+and the functions that operate upon them.
+
+\label{part:numerical-python}
+
+\declaremodule{extension}{numarray}
+\moduleauthor{The numarray team}{numpy-discussion@lists.sourceforge.net}
+\modulesynopsis{Numerics}
+
+\input{introduction}
+\input{installation}
+\input{overview}
+\input{arraybasics}
+\input{arrayindexing}
+\input{intermediate}
+\input{ufuncs}
+\input{arrayfunctions}
+\input{arraymethods}
+\input{arrayattributes}
+\input{chararray}
+\input{recordarray}
+\input{objectarray}
+\input{extending}
+
+
+
+\part{Extension modules}
+
+\label{part:numarray-extensions}
+
+\input{convolve}
+\input{fft}
+\input{linearalgebra}
+\input{ma}
+\input{mlab}
+\input{randomarray}
+\input{ndimage}
+\input{memmap}
+
+\appendix
+\part*{Appendix}
+%begin{latexonly}
+\makeatletter
+\py@reset
+\makeatother
+%end{latexonly}
+
+\input{glossary}
+\input{numarray.ind}
+
+\end{document}
+
+
+%% Local Variables:
+%% mode: LaTeX
+%% mode: auto-fill
+%% fill-column: 79
+%% indent-tabs-mode: nil
+%% ispell-dictionary: "american"
+%% reftex-fref-is-default: nil
+%% TeX-auto-save: t
+%% TeX-parse-self: t
+%% End:

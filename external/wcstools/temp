@@ -1,0 +1,13 @@
+
+    /* Allocate FITS table buffer which is saved between calls */
+    if (ltab < 1) {
+	ltab = 10000;
+	table = (char *)calloc (ltab, sizeof (char));
+	if (table == NULL) {
+	    fprintf (stderr, "GSCREAD: cannot allocate FITS table buffer\n");
+	    return (0);
+	    }
+	}
+
+    for (i = 0; i < 100; i++)
+	entry[i] = 0;

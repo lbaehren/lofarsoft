@@ -1,0 +1,26 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLVASP 3plplot  "February, 2008" "" "PLplot API"
+.SH NAME
+\fBplvasp\fP - Specify viewport using aspect ratio only 
+.SH SYNOPSIS
+\fBplvasp\fP(\fIaspect\fP)
+.SH DESCRIPTION
+
+.P
+Sets the viewport so that the ratio of the length of the y axis to that of the x axis is equal to \fIaspect\fP. 
+.P
+Redacted form: \fBplvasp(aspect)\fP
+.P
+This function is not used in any examples. 
+.SH ARGUMENTS
+.TP
+\fIaspect\fP (PLFLT, input) 
+Ratio of length of y axis to length of x axis. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

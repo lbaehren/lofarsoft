@@ -1,0 +1,326 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      plstyl: Set line style
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plstripd: Deletes and releases memory used by a
+stripchart
+    "
+HREF="plstripd.html"><LINK
+REL="NEXT"
+TITLE="
+      plsurf3d: Plot shaded 3-d surface plot
+    "
+HREF="plsurf3d.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plstripd.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plsurf3d.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plstyl"
+><CODE
+CLASS="function"
+>plstyl</CODE
+>: Set line style</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN10868"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	  plstyl
+	</CODE
+>(nels, mark, space);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;      This sets up the line style for all lines subsequently drawn.  A line
+      consists of segments in which the pen is alternately down and up.
+      The lengths of these segments are passed in the arrays
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>mark</CODE
+></TT
+> and
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>space</CODE
+></TT
+> respectively.  The
+      number of mark-space pairs is specified by
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>nels</CODE
+></TT
+>.  In order to return
+      the line style to the default continuous line, <A
+HREF="plstyl.html"
+><CODE
+CLASS="function"
+>plstyl</CODE
+></A
+> should be
+      called with <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>nels</CODE
+>=0</TT
+>.(see
+      also <A
+HREF="pllsty.html"
+><CODE
+CLASS="function"
+>pllsty</CODE
+></A
+>)
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>nels</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    The number of <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>mark</CODE
+></TT
+>
+	    and <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>space</CODE
+></TT
+> elements in
+	    a line.  Thus a simple broken line can be obtained by setting
+	    <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>nels</CODE
+>=1</TT
+>.  A continuous
+	    line is specified by setting
+	    <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>nels</CODE
+>=0</TT
+>.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>mark</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to array with the lengths of the segments during which
+	    the pen is down, measured in micrometers.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>space</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to array with the lengths of the segments during which
+	    the pen is up, measured in micrometers.
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      Redacted form: <CODE
+CLASS="function"
+>plstyl(mark, space)</CODE
+>
+    </P
+><P
+>&#13;      This function is used in examples 1,9,14.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plstripd.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plsurf3d.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plstripd</CODE
+>: Deletes and releases memory used by a
+stripchart</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plsurf3d</CODE
+>: Plot shaded 3-d surface plot</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

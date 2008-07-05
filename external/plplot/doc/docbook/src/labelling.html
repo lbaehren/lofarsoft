@@ -1,0 +1,265 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>Labeling the Graph</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="Simple Use of PLplot"
+HREF="simple.html"><LINK
+REL="PREVIOUS"
+TITLE="Defining Plot Scales and Axes"
+HREF="scales.html"><LINK
+REL="NEXT"
+TITLE="Drawing the Graph"
+HREF="drawing.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="scales.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 2. Simple Use of PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="drawing.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="labelling"
+>Labeling the Graph</A
+></H1
+><P
+>&#13;      The function <A
+HREF="pllab.html"
+><CODE
+CLASS="function"
+>pllab</CODE
+></A
+> may be called after <A
+HREF="plenv.html"
+><CODE
+CLASS="function"
+>plenv</CODE
+></A
+> to write labels on
+      the x and y axes, and at the top of the picture.  All the variables
+      are character variables or constants.  Trailing spaces are removed
+      and the label is centered in the appropriate field.  The syntax for
+      <A
+HREF="pllab.html"
+><CODE
+CLASS="function"
+>pllab</CODE
+></A
+> is:
+    </P
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN344"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	  pllab
+	</CODE
+>(xlbl, ylbl, toplbl);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>xlbl</CODE
+> (<TT
+CLASS="literal"
+>char *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to string with label for the X-axis (bottom of graph).
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>ylbl</CODE
+> (<TT
+CLASS="literal"
+>char *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to string with label for the Y-axis (left of graph).
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>toplbl</CODE
+> (<TT
+CLASS="literal"
+>char *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to string with label for the plot (top of picture).}
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      More complex labels can be drawn using the function <A
+HREF="plmtex.html"
+><CODE
+CLASS="function"
+>plmtex</CODE
+></A
+>.  For
+      discussion of writing text in a plot see <A
+HREF="drawing.html#text"
+>the Section called <I
+>Writing Text on a Graph</I
+></A
+>, and
+      for more detailed discussion about label generation see <A
+HREF="drawing.html#text"
+>the Section called <I
+>Writing Text on a Graph</I
+></A
+>.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="scales.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="drawing.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Defining Plot Scales and Axes</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="simple.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Drawing the Graph</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

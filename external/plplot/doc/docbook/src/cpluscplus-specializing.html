@@ -1,0 +1,211 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>Specializing the PLplot C++ Interface</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="A C++ Interface for PLplot"
+HREF="cplusplus.html"><LINK
+REL="PREVIOUS"
+TITLE="Design of the PLplot C++ Interface"
+HREF="cpluscplus-design.html"><LINK
+REL="NEXT"
+TITLE="Status of the C++ Interface"
+HREF="cpluscplus-status.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="cpluscplus-design.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 10. A C++ Interface for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="cpluscplus-status.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="cpluscplus-specializing"
+>Specializing the PLplot C++ Interface</A
+></H1
+><P
+>&#13;The <TT
+CLASS="literal"
+>plstream</TT
+> class is an ideal candidate for derivation.  By
+inheriting from <TT
+CLASS="literal"
+>plstream</TT
+>, the user can construct a new class
+which is automatically endowed with the ability to plot to a specific
+PLplot output stream in a coherent manner without having to worry
+about interplay with other <TT
+CLASS="literal"
+>plstream</TT
+> (or derived type) objects.
+Moreover, new, higher level, plotting functionality can be constructed
+to provide even more simplicity and ease of use than the PLplot API.
+    </P
+><P
+>&#13;The PLplot maintainers (Geoff and Maurice) expect to introduce a class
+plxstream in the future which provides superior support for
+constructing graphics with multiple plots per page, easier
+specification of plot adornments, etc.  This should significantly ease
+one aspect of PLplot usage which we regard as being clumsy at this
+time.
+    </P
+><P
+>&#13;Beyond that, users may find it useful to derive from
+<TT
+CLASS="literal"
+>plstream</TT
+>
+(or later plxstream whenever it finally makes its appearance) for the
+purpose of making "application specific" output streams.  For example,
+a C++ program will normally have a variety of objects which constitute
+the fundamental entities in the code.  These could all be made to be
+"atomically plotted" by providing suitable methods.  For example:
+    </P
+><TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>&#13;class Cat { ... };
+class Dog { ... };
+class Bear { ... };
+class Fish { ... };
+
+class zoostream : public plstream {
+  public:
+    void plot( const Cat&#38; c ) { ... }
+    void plot( const Dog&#38; d ) { ... }
+    void plot( const Bear&#38; b ) { ... }
+    void plot( const Fish&#38; f ) { ... }
+};
+</PRE
+></TD
+></TR
+></TABLE
+><P
+>&#13;Presumably the PLplot user community can think of even more
+imaginative uses...  :-).
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="cpluscplus-design.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="cpluscplus-status.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Design of the PLplot C++ Interface</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="cplusplus.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Status of the C++ Interface</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

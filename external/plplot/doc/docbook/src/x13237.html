@@ -1,0 +1,213 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      Regression test for backwards compatibility
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="API compatibility definition"
+HREF="api-compat.html"><LINK
+REL="PREVIOUS"
+TITLE="API compatibility definition"
+HREF="api-compat.html"><LINK
+REL="NEXT"
+TITLE="Obsolete/Deprecated API for PLplot"
+HREF="api-obsolete.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="api-compat.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 21. API compatibility definition</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="api-obsolete.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="AEN13237"
+>Regression test for backwards compatibility</A
+></H1
+><P
+>&#13;      Since PLplot is developed by so many people, the task of checking for
+      backwards compatiblity of the library is very hard.  As for the 5.3.1
+      release, we do not have any rigorous regression test for check
+      whether the library is really backwards compatible.
+    </P
+><P
+>&#13;      However, here are some rules to be followed by the Release Manager
+      prior to releasing a new version of PLplot:
+      <P
+></P
+><UL
+><LI
+><P
+>&#13;            Check if there are any changes in
+            <TT
+CLASS="filename"
+>plplot.h</TT
+>.  If no prototype is changed,
+            then the chances are high that no backwards compatibilities
+            have been introduced.  If new functions has been added, then
+            the library soname will be kept, although the libtool soversion
+            string in <TT
+CLASS="filename"
+>configure.ac</TT
+> must be changed
+            from <TT
+CLASS="literal"
+>x:y:z</TT
+> to
+            <TT
+CLASS="literal"
+>(x+1):0:(z+1)</TT
+>.  See the
+            <SPAN
+CLASS="application"
+>libtool</SPAN
+> manual for details.
+        </P
+></LI
+><LI
+><P
+>&#13;            A necessary, but not sufficient test consists of the following:
+            first, install the previous released version of PLplot in the
+            system and compile all the examples
+            <TT
+CLASS="filename"
+>examples/c/x??c.</TT
+>.  After that, install the
+            to-be-released version of PLplot and try to run the previously
+            compiled examples.  If they either link or run incorrectly,
+            then backwards incompatibilities have been introduced and the
+            soversion string must be upgraded from <TT
+CLASS="literal"
+>x:y:z</TT
+>
+            to <TT
+CLASS="literal"
+>(x+1):0:0</TT
+>.
+          </P
+></LI
+></UL
+>
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="api-compat.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="api-obsolete.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>API compatibility definition</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api-compat.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Obsolete/Deprecated API for PLplot</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

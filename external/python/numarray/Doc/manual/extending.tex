@@ -1,0 +1,1417 @@
+\chapter{C extension API}
+\label{cha:C-API}
+\declaremodule{extension}{C-API}
+\index{C-API}
+
+\begin{quote}
+   This chapter describes the different available C-APIs for \module{numarray}
+   based extension modules.
+\end{quote}
+
+While this chapter describes the \module{\numarray}-specifics for writing
+extension modules, a basic understanding of \python extension modules is
+expected. See \python's \ulink{Extending and
+   Embedding}{http://www.python.org/doc/current/ext/ext.html} tutorial and the
+\ulink{Python/C API}{http://www.python.org/doc/current/api/api.html}.
+
+The numarray C-API has several different facets, and the first three facets
+each make different tradeoffs between memory use, speed, and ease of use.  An
+additional facet provides backwards compatability with legacy Numeric code.
+The final facet consists of miscellaneous function calls used to implement
+and utilize numarray, that were not part of Numeric.
+
+In addition to most of the basic functionality provided by Numeric, these APIs
+provide access to misaligned, byteswapped, and discontiguous \class{numarray}s.
+Byteswapped arrays arise in the context of portable binary data formats where
+the byteorder specified by the data format is not the same as the host
+processor byte order.  Misaligned arrays arise in the context of tabular data:
+files of records where arrays are superimposed on the column formed by a single
+field in the record.  Discontiguous arrays arise from operations which permute
+the shape and strides of an array, such as reshape.
+
+\begin{description}
+\item[Numeric compatability] This API provides a reasonable (if not complete)
+   simulation of the Numeric C-API.  It is written in terms of the numarray
+   high level API (discussed below) so that misbehaved numarrays are copied
+   prior to processing with legacy Numeric code.  This API was actually written
+   last because of the extra considerations in numarray not found in Numeric.
+   Nevertheless, it is perhaps the most important because it enables writing
+   extension modules which can be compiled for either numarray or Numeric.  It
+   is also very useful for porting existing Numeric code.  See section
+   \ref{sec:C-API:numeric-simulation}.
+\item[High-level] This is the cleanest and eaisiest to use API.  It creates
+   temporary arrays to handle difficult cases (discontiguous, byteswapped,
+   misaligned) in C code.  Code using this API is written in terms of a pointer
+   to a contiguous 1D array of C data.  See section
+   \ref{sec:C-API:high-level-api}.
+\item[Element-wise] This API handles misbehaved arrays without creating
+     temporaries.  Code using this API is written to access single elements of
+     an array via macros or functions.  \note{These macros are relatively slow
+     compared to raw access to C data, and the functions even slower.} See
+     section \ref{sec:C-API:element-wise-api}.
+\item[One-dimensional] Code using this API get/sets consecutive elements of the
+   inner dimension of an array, enabling the API to factor out tests for
+   aligment and byteswapping to one test per array rather than one test per
+   element.  Fewer tests means better performance, but at a cost of some
+   temporary data and more difficult usage.  See section
+   \ref{sec:C-API:One-dimensional-api}.
+\item[New numarray functions] This last facet of the C-API consists of function
+  calls which have been added to numarray which are orthogonal to each of the 3
+  native access APIs and not part of the original Numeric. See section
+  \ref{sec:C-API:new-numarray-functions}
+\end{description}
+
+\section{Numarray extension basics}
+There's a couple things you need to do in order to access numarray's C-API in
+your own C extension module:
+
+\subsection{Include libnumarray.h}
+  Near the top of your extension module add the lines:
+\begin{verbatim}
+  #include "Python.h"
+  #include "libnumarray.h"
+\end{verbatim} 
+  This gives your C-code access to the numarray typedefs, macros, and function
+  prototypes as well as the Python C-API.
+
+  \subsection{Alternate include method}
+  There's an alternate form of including libnumarray.h or arrayobject.h some
+  people may prefer provided that they're willing to ignore the case where the
+  numarray includes are not installed in the standard location.  The advantage
+  of the following approach is that it automatically works with the default
+  path to the Python include files which the distutils always provide.
+  \begin{verbatim}
+    #include "Python.h"
+    #include "numarray/libnumarray.h"
+  \end{verbatim}
+
+\subsection{Import libnumarray}
+  In your extension module's initialization function, add the line:
+\begin{verbatim}
+  import_libnumarray();
+\end{verbatim} 
+  
+  import_libnumarray() is actually a macro which sets up a pointer to the
+  numarray C-API function pointer table. If you forget to call
+  import_libnumarray(), your extension module will crash as soon as you call a
+  numarray API function, because your application will attempt to dereference a
+  NULL pointer.
+
+  Note that for the Numeric compatible API you should substitute arrayobject.h
+  for libnumarray.h and import_array() for import_libnumarray() respectively.
+  Unlike other versions of numarray prior to 1.0, arrayobject.h now includes
+  only the Numeric simulation API.  To use the rest of the numarray API, you
+  \emph{must} include libnumarray.h.  To use both, you must include both
+  arrayobject.h and libnumarray.h, and you must both import_array() and
+  import_libnumarray() in your module initialization function.
+
+  \subsection{Writing a simple setup.py file for a numarray extension}
+  One important practice for writing an extension module is the creation of a
+  distutils setup.py file which automates both extension installation from
+  source and the creation of binary distributions.  Here is a simple setup.py
+  which builds a single extension module from a single C source file:
+  \begin{verbatim}
+    from distutils.core import setup, Extension
+    from numarray.numarrayext import NumarrayExtension
+    import sys
+    
+    if not hasattr(sys, 'version_info') or sys.version_info < (2,2,0,'alpha',0):        raise SystemExit, "Python 2.2 or later required to build this module."
+    
+    setup(name = "buildHistogram",
+       version = "0.1",
+       description = "",
+       packages=[""],
+       package_dir={"":""},
+       ext_modules=[NumarrayExtension("buildHistogram",['buildHistogram.c'],\
+         include_dirs=["./"],
+         library_dirs=["./"],
+         libraries=['m'])])
+\end{verbatim}
+\class{NumarrayExtension} is recommended rather than it's distutils baseclass
+\class{Extension} because \class{NumarrayExtension} knows where to find the
+numarray headers regardless of where the numarray installer or setup.py command
+line options put them.  A disadvantage of using NumarrayExtension is that it
+is numarray specific, so it does not work for compiling Numeric versions of the
+extension.
+
+See the Python manuals ``Installing Python Modules'' and ``Distributing Python
+Modules'' for more information on how to use distutils.
+
+\section{Fundamental data structures}
+\label{C-API:fundamental-data-structures}
+
+\subsection{Numarray Numerical Data Types}
+
+Numarray hides the C implementation of its basic array elements behind a set of
+C typedefs which specify the absolute size of the type in bits.  This approach
+enables a programmer to specify data items of arrays and extension functions in
+an explicit yet portable manner.  In contrast, basic C types are platform
+relative, and so less useful for describing real physical data.  Here are the
+names of the concrete Numarray element types:
+
+\begin{itemize}
+\item Bool                
+\item Int8,      UInt8
+\item Int16,     UInt16
+\item Int32,     UInt32
+\item Int64,     UInt64
+\item Float32,   Float64
+\item Complex32, Complex64
+\end{itemize}
+
+\subsection{NumarrayType}
+
+The type of a numarray is communicated in C via one of the following
+enumeration constants.  Type codes which are backwards compatible with Numeric
+are defined in terms of these constants, but use these if you're not already
+using the Numeric codes.  These constants communicate type requirements between
+one function and another, since in C, you cannot pass a typedef as a value.
+tAny is used to specify both ``no type requirement'' and ``no known type''
+depending on context.   
+
+\begin{verbatim}
+typedef enum 
+{
+  tAny,
+
+  tBool,
+  tInt8,      tUInt8,
+  tInt16,     tUInt16,
+  tInt32,     tUInt32, 
+  tInt64,     tUInt64,
+  tFloat32,   tFloat64,
+  tComplex32, tComplex64,
+
+  tDefault = tFloat64,
+
+#if LP64
+  tLong = tInt64
+#else
+  tLong = tInt32
+#endif
+
+} NumarrayType;
+\end{verbatim}
+
+\subsection{PyArray_Descr}
+
+\ctype{PyArray_Descr} is used to hold a few parameters related to the type of
+an array and exists mostly for backwards compatability with Numeric.
+\var{type_num} is a NumarrayType value.  \var{elsize} indicates the number of
+bytes in one element of an array of that type.  \var{type} is a Numeric
+compatible character code.
+
+Numarray's \ctype{PyArray_Descr} is currently missing the type-casting,
+\function{ones}, and \function{zeroes} functions.  Extensions which use these
+missing Numeric features will not yet compile.  Arrays of type Object are not
+yet supported.
+
+\begin{verbatim}
+
+typedef struct {
+        int  type_num;  /* PyArray_TYPES */
+        int  elsize;    /* bytes for 1 element */
+        char type;      /* One of "cb1silfdFD "  Object arrays not supported. */
+} PyArray_Descr;
+
+\end{verbatim}
+
+\subsection{PyArrayObject}
+
+The fundamental data structure of numarray is the PyArrayObject, which is named
+and layed out to provide source compatibility with Numeric.  It is compatible
+with most but not all Numeric code.  The constant MAXDIM, the maximum number of
+dimensions in an array, is defined as 40.  It should be noted that unlike
+earlier versions of numarray, the present PyArrayObject structure is a first
+class python object, with full support for the number protocols in C.
+Well-behaved arrays have mutable fields which will reflect modifications back
+into \python ``for free''.
+
+\begin{verbatim}
+
+typedef int maybelong;          /* towards 64-bit without breaking extensions. */
+
+typedef struct {
+        /* Numeric compatible stuff */
+
+        PyObject_HEAD
+        char *data;              /* points to the actual C data for the array */
+        int nd;                  /* number of array shape elements */
+        maybelong *dimensions;   /* values of shape elements */
+        maybelong *strides;      /* values of stride elements */
+        PyObject *base;          /* unused, but don't touch! */
+        PyArray_Descr *descr;    /* pointer to descriptor for this array's type */
+        int flags;               /* bitmask defining various array properties */
+
+        /* numarray extras */
+
+        maybelong _dimensions[MAXDIM];  /* values of shape elements */
+        maybelong _strides[MAXDIM];     /* values of stride elements */
+        PyObject *_data;       /* object must meet buffer API */
+        PyObject *_shadows;    /* ill-behaved original array. */
+        int      nstrides;     /* elements in strides array */
+        long     byteoffset;   /* offset into buffer where array data begins */
+        long     bytestride;   /* basic seperation of elements in bytes */
+        long     itemsize;     /* length of 1 element in bytes */
+
+        char      byteorder;   /* NUM_BIG_ENDIAN, NUM_LITTLE_ENDIAN */
+
+        char      _unused0; 
+        char      _unused1; 
+        
+        /* Don't expect the following vars to stay around.  Never use them.
+        They're an implementation detail of the get/set macros. */
+
+        Complex64      temp;   /* temporary for get/set macros */
+        char *         wptr;   /* working pointer for get/set macros */
+} PyArrayObject;
+
+\end{verbatim}
+
+\subsection{Flag Bits}
+
+The following are the definitions for the bit values in the \var{flags} field
+of each numarray.  Low order bits are Numeric compatible,  higher order bits
+were added by numarray.
+
+\begin{verbatim}
+/* Array flags */
+#define CONTIGUOUS        1       /* compatible, depends */
+#define OWN_DIMENSIONS    2       /* always false */
+#define OWN_STRIDES       4       /* always false */
+#define OWN_DATA          8       /* always false */
+#define SAVESPACE      0x10       /* not used */
+
+#define ALIGNED       0x100       /* roughly: data % itemsize == 0 */
+#define NOTSWAPPED    0x200       /* byteorder == sys.byteorder    */
+#define WRITABLE      0x400       /* data buffer is writable       */
+
+#define IS_CARRAY (CONTIGUOUS | ALIGNED | NOTSWAPPED)
+\end{verbatim}
+
+\section{Numeric simulation API}
+\label{sec:C-API:numeric-simulation}
+
+These notes describe the Numeric compatability functions which enable numarray
+to utilize a subset of the extensions written for Numeric (NumPy).  Not all
+Numeric C-API features and therefore not all Numeric extensions are currently
+supported.  Users should be able to utilize suitable extensions written for
+Numeric within the numarray environment by:
+
+\begin{enumerate}
+\item Writing a numarray setup.py file.
+\item Scanning the extension C-code for all instances of array creation and
+  return and making corrections as needed and specified below. 
+\item Re-compiling the Numeric C-extension for numarray.
+\end{enumerate}
+
+Numarray's compatability with Numeric consists of 3 things:
+\begin{enumerate}
+\item A replacement header file, "arrayobject.h" which supplies simulation
+   functions and macros for numarray just as the original arrayobject.h
+   supplies the C-API for Numeric.
+\item Layout and naming of the fundamental numarray C-type,
+\ctype{PyArrayObject}, in a Numeric source compatible way.
+\item A set of "simulation" functions.  These functions have the same names and
+   parameters as the original Numeric functions, but operate on numarrays.  The
+   simulation functions are also incomplete; features not currently supported
+   should result in compile time warnings.
+\end{enumerate}
+
+\subsection{Simulation Functions}
+\label{sec:C-API:compat:simulation-functions}
+
+The basic use of numarrays by Numeric extensions is achieved in the extension
+function's wrapper code by:
+\begin{enumerate}
+\item Ensuring creation of array objects by calls to simulation functions.
+\item DECREFing each array or calling PyArray_Return.
+\end{enumerate}
+
+Unlike prior versions of numarray, this version *does* support access to array
+objects straight out of PyArg_ParseTuple.  This is a consequence of a change to
+the underlying object model, where a class instance has been replaced by
+PyArrayObject.  Nevertheless, the ``right'' way to access arrays is either via
+the high level interface or via emulated Numeric factory functions.  That way,
+access to other python sequences is supported as well.  Using the ``right'' way
+for numarray is also more important than for Numeric because numarray arrays
+may be byteswapped or misaligned and hence unusable from simple C-code.  It
+should be noted that the numarray and Numeric are not completely compatible,
+and therefore this API does not provide support for string arrays or object
+arrays.
+
+The creation of array objects is illustrated by the following of wrapper code
+for a 2D convolution function:
+
+\begin{verbatim}
+#include "python.h"
+#include "arrayobject.h"
+
+static PyObject *
+Py_Convolve2d(PyObject *obj, PyObject *args)
+{
+        PyObject   *okernel, *odata, *oconvolved=Py_None;
+        PyArrayObject *kernel, *data, *convolved;
+
+        if (!PyArg_ParseTuple(args, "OO|O", &okernel, &odata, &oconvolved)) {
+                return PyErr_Format(_Error, 
+                                    "Convove2d: Invalid parameters.");  
+                goto _fail;
+        }
+\end{verbatim}
+
+The first step was simply to get object pointers to the numarray parameters to
+the convolution function: okernel, odata, and oconvolved.  Oconvolved is an
+optional output parameter, specified with a default value of Py_None which is
+used when only 2 parameters are supplied at the python level.  Each of the
+``o'' parameters should be thought of as an arbitrary sequence object, not
+necessarily an array.
+
+The next step is to call simulation functions which convert sequence objects
+into PyArrayObjects.  In a Numeric extension, these calls map tuples and lists
+onto Numeric arrays and assert their dimensionality as 2D.  The Numeric
+simulation functions first map tuples, lists, and misbehaved numarrays onto
+well-behaved numarrays.  Calls to these functions transparently use the
+numarray high level interface and provide visibility only to aligned and
+non-byteswapped array objects.
+
+\begin{verbatim}
+        kernel = (PyArrayObject *) PyArray_ContiguousFromObject(
+                okernel, PyArray_DOUBLE, 2, 2);
+        data = (PyArrayObject *) PyArray_ContiguousFromObject(
+                odata, PyArray_DOUBLE, 2, 2);
+
+        if (!kernel || !data) goto _fail;
+\end{verbatim}
+
+Extra processing is required to handle the output array \var{convolved},
+cloning it from \var{data} if it was not specified.  Code should be supplied,
+but is not, to verify that convolved and data have the same shape.  
+
+\begin{verbatim}
+        if (convolved == Py_None)
+                convolved = (PyArrayObject *) PyArray_FromDims(
+                        data->nd, data->dimensions, PyArray_DOUBLE);
+        else
+                convolved = (PyArrayObject *) PyArray_ContiguousFromObject(
+                        oconvolved, PyArray_DOUBLE, 2, 2);
+        if (!convolved) goto _fail;
+\end{verbatim}
+
+After converting all of the input paramters into \ctype{PyArrayObject}s, the
+actual convolution is performed by a seperate function.  This could just as
+well be done inline:
+
+\begin{verbatim}
+        Convolve2d(kernel, data, convolved);
+\end{verbatim}
+
+After processing the arrays, they should be DECREF'ed or returned using
+\cfunction{PyArray_Return}.  It is generally not possible to directly return a
+numarray object using \cfunction{Py_BuildValue} because the shadowing of
+mis-behaved arrays needs to be undone.  Calling \cfunction{PyArray_Return}
+destroys any temporary and passes the numarray back to \python.
+
+\begin{verbatim}
+        Py_DECREF(kernel);
+        Py_DECREF(data);
+        if (convolved != Py_None) {
+                Py_DECREF(convolved);
+                Py_INCREF(Py_None);
+                return Py_None;
+        } else
+                return PyArray_Return(convolved);
+_fail:
+        Py_XDECREF(kernel);
+        Py_XDECREF(data);
+        Py_XDECREF(convolved);
+        return NULL;
+}
+\end{verbatim}
+
+Byteswapped or misaligned arrays are handled by a process of shadowing which
+works like this:
+\begin{enumerate}
+\item When a "misbehaved" numarray is accessed via the Numeric simulation
+  functions, first a well-behaved temporary copy (shadow) is created by
+  NA_IoArray.
+\item Operations performed by the extension function modifiy the data buffer
+  belonging to the shadow.
+\item On extension function exit, the shadow array is copied back onto the 
+  original and the shadow is freed.
+\end{enumerate}
+All of this is transparent to the user; if the original array is well-behaved,
+it works much like it always did; if not, what would have failed altogether
+works at the cost of extra temporary storage.  Users which cannot afford the
+cost of shadowing need to use numarray's native elementwise or 1D APIs.
+\subsection{Numeric Compatible Functions}
+\label{sec:C-API:compat:implemented-functions}
+
+The following functions are currently implemented:
+\begin{cfuncdesc}{PyObject*}{PyArray_FromDims}{int nd, int *dims, int type}
+   This function will allocate a new numarray.
+
+   An array created with PyArray_FromDims can be used as a temporary or
+   returned using PyArray_Return.
+   
+   Used as a temporary, calling Py_DECREF deallocates it.   
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{PyObject*}{PyArray_FromDimsAndData}{int nd, int *dims, int type, char *data}
+   This function will allocate a numarray of the specified shape and type
+   which will refer to the data buffer specified by \var{data}.  The contents
+   of \var{data} will not be copied nor will \var{data} be deallocated upon
+   the deletion of the array.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{PyObject*}{PyArray_ContiguousFromObject}{%
+      PyObject *op, int type, int min_dim, int max_dim}% Returns an simulation
+   object for a contiguous numarray of 'type' created from the sequence object
+   'op'.  If 'op' is a contiguous, aligned, non-byteswapped numarray, then the
+   simulation object refers to it directly.  Otherwise a well-behaved numarray
+   will be created from 'op' and the simulation object will refer to it.
+   min_dim and max_dim bound the expected rank as in Numeric.
+   \code{min_dim==max_dim} specifies an exact rank.  \code{min_dim==max_dim==0}
+   specifies \emph{any} rank.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{PyObject*}{PyArray_CopyFromObject}{%
+      PyObject *op, int type, int min_dim, int max_dim}% Returns a contiguous
+   array, similar to PyArray_FromContiguousObject, but always returning an
+   simulation object referring to a new numarray copied from the original
+   sequence.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{PyObject*}{PyArray_FromObject}{%
+      PyObject  *op, int type, int min_dim, int max_dim}%
+   Returns and simulation object based on 'op', possibly discontiguous.  The
+   strides array must be used to access elements of the simulation object.
+   
+   If 'op' is a byteswapped or misaligned numarray, FromObject creates a
+   temporary copy and the simulation object refers to it.
+   
+   If 'op' is a nonswapped, aligned numarray, the simulation object refers to
+   it.
+   
+   If 'op' is some other sequence, it is converted to a numarray and the
+   simulation object refers to that.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{PyObject*}{PyArray_Return}{PyArrayObject *apr}
+   Returns simulation object 'apr' to python.  The simulation object itself is
+   destructed.  The numarray it refers to (base) is returned as the result of
+   the function.
+   
+   An additional check is (or eventually will be) performed to guarantee that
+   rank-0 arrays are converted to appropriate python scalars.
+   
+   PyArray_Return has no net effect on the reference count of the underlying
+   numarray.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{PyArray_As1D}{PyObject **op, char **ptr, int *d1, int typecode}
+   Copied from Numeric verbatim.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{PyArray_As2D}{PyObject **op, char ***ptr, int *d1, int *d2, int typecode}
+   Copied from Numeric verbatim.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{PyArray_Free}{PyObject *op, char *ptr}
+   Copied from Numeric verbatim. \note{This means including bugs and all!}
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{PyArray_Check}{PyObject *op}
+   This function returns 1 if op is a PyArrayObject.  
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{PyArray_Size}{PyObject *op}
+   This function returns the total element count of the array.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{PyArray_NBYTES}{PyArrayObject *op}
+   This function returns the total size in bytes of the array, and assumes that
+bytestride == itemsize, so that the size is product(shape)*itemsize.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{PyObject*}{PyArray_Copy}{PyArrayObject *op}
+   This function returns a copy of the array 'op'.  The copy returned is
+   guaranteed to be well behaved, i.e. neither byteswapped nor misaligned.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{PyArray_CanCastSafely}{PyArrayObject *op, int type}
+  This function returns 1 IFF the array 'op' can be safely cast to 'type',
+otherwise it returns 0.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{PyArrayObject*}{PyArray_Cast}{PyArrayObject *op, int type}
+  This function casts the array 'op' into an equivalent array of type 'type'.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{PyArray_Descr*}{PyArray_DescrFromType}{int type}
+This function returns a pointer to the array descriptor for 'type'.  The
+numarray version of PyArray_Descr is incomplete and does not support casting,
+getitem, setitem, one, or zero.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{PyArray_isArray(PyObject *o)}
+  This macro is designed to fail safe and return 0 when numarray is not
+  installed at all.  When numarray is installed, it returns 1 iff object 'o' is
+  a numarray, and 0 otherwise.  This macro facilitates the optional use of
+  numarray within an extension.
+\end{cfuncdesc}
+
+\subsection{Unsupported Numeric Features}
+\label{sec:C-API:compat:unsupported}
+
+\begin{itemize}
+\item PyArrayError 
+\item PyArray_ObjectType() 
+\item PyArray_Reshape()
+\item PyArray_SetStringFunction() 
+\item PyArray_SetNumericOps() 
+\item PyArray_Take()
+\item UFunc API
+\end{itemize}
+
+\section{High-level API}
+\label{sec:C-API:high-level-api}
+
+The high-level native API accepts an object (which may or may not be an array)
+and transforms the object into an array which satisfies a set of ``behaved-ness
+requirements''.  The idea behind the high-level API is to transparently convert
+misbehaved numarrays, ordinary sequences, and python scalars into C-arrays.  A
+``misbehaved array'' is one which is byteswapped, misaligned, or discontiguous.
+This API is the simplest and fastest, provided that your arrays are small.  If
+you find your program is exhausting all available memory, it may be time to
+look at one of the other APIs.
+
+\subsection{High-level functions}
+\label{sec:C-API:high-level-functions}
+
+The high-level support functions for interchanging \class{numarray}s between
+\python{} and C are as follows:
+
+\begin{cfuncdesc}{PyArrayObject*}{NA_InputArray}{%
+      PyObject *seq, NumarrayType t, int requires}
+The purpose of NA_InputArray is to transfer array data from \python to C.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{PyArrayObject*}{NA_OutputArray}{%
+      PyObject *seq, NumarrayType t, int requires} The purpose of
+NA_OutputArray is to transfer data from C to \python.  The output array must be
+a PyArrayObject, i.e. it cannot be an arbitrary Python sequence.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{PyArrayObject*}{NA_IoArray}{%
+      PyObject *seq, NumarrayType t, int requires} NA_IoArray has fully
+bidirectional data transfer, creating the illusion of call-by-reference.
+\end{cfuncdesc}
+
+  For a well-behaved writable array, there is no difference between the three,
+  as no temporary is created and the returned object is identical to the
+  original object (with an additional reference).  For a mis-behaved input
+  array, a well-behaved temporary will be created and the data copied from the
+  original to the temporary.  Since it is an input, modifications to its
+  contents are not guaranteed to be reflected back to \python, and in the case
+  where a temporary was created, won't be.  For a mis-behaved output array, any
+  data side-effects generated by the C code will be safely communicated back to
+  \python, but the initial array contents are undefined.  For an I/O array, any
+  required temporary will be initialized to the same contents as the original
+  array, and any side-effects caused by C-code will be copied back to the
+  original array.  The array factory routines of the Numeric compatability API
+  are written in terms of NA_IoArray.
+   
+   The return value of each function (\cfunction{NA_InputArray},
+   \cfunction{NA_OutputArray}, or \cfunction{NA_IoArray}) is either a reference
+   to the original array object, or a reference to a temporary array.
+   Following execution of the C-code in the extension function body this
+   pointer should \emph{always} be DECREFed.  When a temporary is DECREFed, it
+   is deallocated, possibly after copying itself onto the original array.  The
+   one exception to this rule is that you should not DECREF an array returned
+   via the NA_ReturnOutput function.
+   
+   The \var{seq} parameter specifies the original numeric sequence to be
+   interfaced.  Nested lists and tuples of numbers can be converted by
+   \cfunction{NA_InputArray} and \cfunction{NA_IoArray} into a temporary array.
+   The temporary is lost on function exit.  Strictly speaking, allowing
+   NA_IoArray to accept a list or tuple is a wart, since it will lose any side
+   effects.  In principle, communication back to lists and tuples can be
+   supported but is not currently.
+   
+   The \var{t} parameter is an enumeration value which defines the type the
+   array data should be converted to.  Arrays of the same type are passed
+   through unaltered, while mis-matched arrays are cast into temporaries of the
+   specified type.  The value \constant{tAny} may be specified to indicate that
+   the extension function can handle any type correctly so no temporary should
+   is required.
+   
+   The \var{requires} integer indicates under what conditions, other than type
+   mismatch, a temporary should be made.  The simple way to specify it is to
+   use \constant{NUM_C_ARRAY}.  This will cause the API function to make a
+   well-behaved temporary if the original is byteswapped, misaligned, or
+   discontiguous.  
+
+There is one other pair of high level function which serves to return output
+arrays as the function value: NA_OptionalOutputArray and NA_ReturnOutput.
+
+\begin{cfuncdesc}{PyArrayObject*}{NA_OptionalOutputArray}{%
+      PyObject *seq, NumarrayType t, int requires, PyObject *master}%
+   \cfunction{NA_OptionalOutputArray} is essentially
+   \cfunction{NA_OutputArray}, but with one twist: if the original array
+   \var{seq} has the value \constant{NULL} or \constant{Py_None}, a copy of
+   \var{master} is returned.  This facilitates writing functions where the
+   output array may or may-not be specified by the \python{} user.  
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{PyObject*}{NA_ReturnOutput}{PyObject *seq, PyObject *shadow}
+   \cfunction{NA_ReturnOutput} accepts as parameters both the original
+   \var{seq} and the value returned from
+   \cfunction{NA_OptionalOutputArray}, \var{shadow}.  If \var{seq} is
+   \constant{Py_None} or \constant{NULL}, then \var{shadow} is returned.
+   Otherwise, an output array was specified by the user, and \constant{Py_None}
+   is returned.  This facilitates writing functions in the numarray style
+   where the specification of an output array renders the function ``mute'',
+   with all side-effects in the output array and None as the return value.
+\end{cfuncdesc}
+
+\subsection{Behaved-ness Requirements}
+
+Calls to the high level API specify a set of requirements that incoming arrays
+must satisfy.  The requirements set is specified by a bit mask which is or'ed
+together from bits representing individual array requirements.  An ordinary C
+array satisfies all 3 requirements: it is contiguous, aligned, and not
+byteswapped.  It is possible to request arrays satisfying any or none of the
+behavedness requirements.  Arrays which do not satisfy the specified
+requirements are transparently ``shadowed'' by temporary arrays which do
+satisfy them.  By specifying \constant{NUM_UNCONVERTED}, a caller is certifying
+that his extension function can correctly and directly handle the special cases
+possible for a \class{NumArray}, excluding type differences.
+
+\begin{verbatim}
+typedef enum
+{
+        NUM_CONTIGUOUS=1,
+        NUM_NOTSWAPPED=2,
+        NUM_ALIGNED=4,
+        NUM_WRITABLE=8,
+        NUM_COPY=16,
+
+        NUM_C_ARRAY  = (NUM_CONTIGUOUS | NUM_ALIGNED | NUM_NOTSWAPPED),
+        NUM_UNCONVERTED = 0
+}
+\end{verbatim}
+
+\function{NA_InputArray} will return a guaranteed writable result if
+\constant{NUM_WRITABLE} is specified. A writable temporary will be made for
+arrays which have readonly buffers.  Any changes made to a writable input array
+\emph{may} be lost at extension exit time depending on whether or not a
+temporary was required.  \function{NA_InputArray} will also return a guaranteed
+writable result by specifying \constant{NUM_COPY}; with \constant{NUM_COPY}, a
+temporary is \emph{always} made and changes to it are \emph{always} lost at
+extension exit time.
+
+Omitting \constant{NUM_WRITABLE} and \constant{NUM_COPY} from the
+\var{requires} of \function{NA_InputArray} asserts that you will not modify the
+array buffer in your C code.  Readonly arrays (e.g. from a readonly memory map)
+which you attempt to modify can result in a segfault if \constant{NUM_WRITABLE}
+or \constant{NUM_COPY} was not specified.
+
+Arrays passed to \function{NA_IoArray} and \function{NA_OutputArray} must be
+writable or they will raise an exception; specifing \constant{NUM_WRITABLE} or
+\constant{NUM_COPY} to these functions has no effect.
+
+\subsection{Example}
+\label{sec:C-API:high-level:example}
+
+A C wrapper function using the high-level API would typically look like the
+following.\footnote{This function is taken from the convolve example in the
+source distribution.}
+
+\begin{verbatim}
+#include "Python.h"
+#include "libnumarray.h"
+
+static PyObject *
+Py_Convolve1d(PyObject *obj, PyObject *args)
+{
+        PyObject   *okernel, *odata, *oconvolved=Py_None;
+        PyArrayObject *kernel, *data, *convolved;
+
+        if (!PyArg_ParseTuple(args, "OO|O", &okernel, &odata, &oconvolved)) {
+                PyErr_Format(_convolveError, 
+                             "Convolve1d: Invalid parameters.");
+                goto _fail;
+        }
+
+\end{verbatim}
+
+First, define local variables and parse parameters.  \cfunction{Py_Convolve1d}
+expects two or three array parameters in \var{args}: the convolution kernel,
+the data, and optionally the return array.  We define two variables for each
+array parameter, one which represents an arbitrary sequence object, and one
+which represents a PyArrayObject which contains a conversion of the sequence.
+If the sequence object was already a well-behaved numarray, it is returned
+without making a copy.
+
+\begin{verbatim}
+        /* Align, Byteswap, Contiguous, Typeconvert */
+        kernel  = NA_InputArray(okernel, tFloat64, NUM_C_ARRAY);
+        data    = NA_InputArray(odata, tFloat64, NUM_C_ARRAY);
+        convolved = NA_OptionalOutputArray(oconvolved, tFloat64, NUM_C_ARRAY, data);
+
+        if (!kernel || !data || !convolved) {
+                PyErr_Format( _convolveError, 
+                             "Convolve1d: error converting array inputs.");
+                goto _fail;
+        }
+\end{verbatim}
+
+These calls to NA_InputArray and OptionalOutputArray require that the arrays be
+aligned, contiguous, and not byteswapped, and of type Float64, or a temporary
+will be created.  If the user hasn't provided a output array we ask
+\cfunction{NA_OptionalOutputArray} to create a copy of the input \var{data}.
+We also check that the array screening and conversion process succeeded by
+verifying that none of the array pointers is NULL.
+
+\begin{verbatim}
+        if ((kernel->nd != 1) || (data->nd != 1)) {
+                PyErr_Format(_convolveError,
+                      "Convolve1d: arrays must have 1 dimension.");
+                goto _fail;
+        }
+
+        if (!NA_ShapeEqual(data, convolved)) {
+                PyErr_Format(_convolveError,
+                "Convolve1d: data and output arrays need identitcal shapes.");
+                goto _fail;
+        }
+\end{verbatim}
+
+Make sure we were passed one-dimensional arrays, and data and output have the
+same size.
+
+\begin{verbatim}
+        Convolve1d(kernel->dimensions[0], NA_OFFSETDATA(kernel),
+                   data->dimensions[0],   NA_OFFSETDATA(data),
+                   NA_OFFSETDATA(convolved));
+\end{verbatim}
+
+Call the C function actually performing the work.  NA_OFFSETDATA returns the
+pointer to the first element of the array,  adjusting for any byteoffset.
+
+\begin{verbatim}
+        Py_XDECREF(kernel);
+        Py_XDECREF(data);
+\end{verbatim}
+
+Decrease the reference counters of the input arrays.  These were increased by
+\cfunction{NA_InputArray}.  Py_XDECREF tolerates NULL.  DECREF'ing the
+PyArrayObject is how temporaries are released and in the case of
+IO and Output arrays, copied back onto the original.
+
+\begin{verbatim}
+        /* Align, Byteswap, Contiguous, Typeconvert */
+        return NA_ReturnOutput(oconvolved, convolved);
+_fail:
+        Py_XDECREF(kernel);
+        Py_XDECREF(data);
+        Py_XDECREF(convolved);
+        return NULL;
+}
+\end{verbatim}
+
+Now return the results, which are either stored in the user-supplied array
+\var{oconvolved} and \constant{Py_None} is returned, or if the user didn't
+supply an output array the temporary \var{convolved} is returned.
+
+If your C function creates the output array you can use the following sequence
+to pass this array back to \python{}:
+
+\begin{verbatim}
+        double *result;
+        int m, n;
+        .
+        .
+        .
+        result = func(...);
+        if(NULL == result)
+            return NULL;
+        return NA_NewArray((void *)result, tFloat64, 2, m, n);
+}
+\end{verbatim}
+
+The C function \cfunction{func} returns a newly allocated (m, n) array in
+\var{result}.  After we check that everything is ok, we create a new numarray
+using \cfunction{NA_NewArray} and pass it back to \python.  \cfunction{NA_NewArray}
+creates a \class{numarray} with \constant{NUM_C_ARRAY} properties.  If you wish to
+create an array that is byte-swapped, or misaligned, you can use
+\cfunction{NA_NewAll}.
+
+The C-code of the core convolution function is uninteresting.  The main point
+of the example is that when using the high-level API, numarray specific code is
+confined to the wrapper function.  The interface for the core function can be
+written in terms of primitive numarray/C data items, not objects.  This is
+possible because the high level API can be used to deliver C arrays.
+
+\begin{verbatim}
+static void Convolve1d(long ksizex, Float64 *kernel, 
+     long dsizex, Float64*data, Float64 *convolved) 
+{ 
+  long xc; long halfk = ksizex/2;
+
+  for(xc=0; xc<halfk; xc++)
+      convolved[xc] = data[xc];
+  
+  for(xc=halfk; xc<dsizex-halfk; xc++) {
+      long xk;
+      double temp = 0;
+      for (xk=0; xk<ksizex; xk++)
+         temp += kernel[xk]*data[xc-halfk+xk];
+      convolved[xc] = temp;
+  }
+  
+  for(xc=dsizex-halfk; xc<dsizex; xc++)
+     convolved[xc] = data[xc];
+}
+\end{verbatim}
+
+\section{Element-wise API}
+\label{sec:C-API:element-wise-api}
+
+The element-wise in-place API is a family of macros and functions designed to
+get and set elements of arrays which might be byteswapped, misaligned,
+discontiguous, or of a different type.  You can obtain \class{PyArrayObject}s
+for these misbehaved arrays from the high-level API by specifying fewer
+requirements (perhaps just 0, rather than NUM_C_ARRAY).  In this way, you can
+avoid the creation of temporaries at a cost of accessing your array with these
+macros and functions and a significant performance penalty.  Make no mistake,
+if you have the memory, the high level API is the fastest.  The whole point of
+this API is to support cases where the creation of temporaries exhausts either
+the physical or virtual address space.  Exhausting physical memory will result
+in thrashing, while exhausting the virtual address space will result in program
+exception and failure.  This API supports avoiding the creation of the
+temporaries, and thus avoids exhausting physical and virual memory, possibly
+improving net performance or even enabling program success where simpler
+methods would just fail.
+
+\subsection{Element-wise functions}
+\label{sec:C-API:element-wise:functions}
+
+The single element macros each access one element of an array at a time, and
+specify the array type in two places: as part of the PyArrayObject type
+descriptor, and as ``type''.  The former defines what the array is, and the
+latter is required to produce correct code from the macro.  They should
+\emph{match}.  When you pass ``type'' into one of these macros, you are
+defining the kind of array the code can operate on.  It is an error to pass a
+non-matching array to one of these macros.  One last piece of advice: call
+these macros carefully, because the resulting expansions and error messages are
+a *obscene*.  Note: the type parameter for a macro is one of the Numarray
+Numeric Data Types, not a NumarrayType enumeration value.
+
+\subsubsection{Pointer based single element macros}
+\label{sec:C-API:pointer-based-single}
+
+\begin{cfuncdesc}{}{NA_GETPa}{PyArrayObject*, type, char*}
+   aligning
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_GETPb}{PyArrayObject*, type, char*}
+   byteswapping
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_GETPf}{PyArrayObject*, type, char*}
+   fast (well-behaved)
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_GETP}{PyArrayObject*,  type, char*}
+   testing: any of above
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_SETPa}{PyArrayObject*, type, char*, v}
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_SETPb}{PyArrayObject*, type, char*, v}
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_SETPf}{PyArrayObject*, type, char*, v}
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_SETP}{PyArrayObject*,  type, char*, v}
+\end{cfuncdesc}
+
+\subsubsection{One index single element macros}
+\begin{cfuncdesc}{}{NA_GET1a}{PyArrayObject*, type, i}
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_GET1b}{PyArrayObject*, type, i}
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_GET1f}{PyArrayObject*, type, i}
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_GET1}{PyArrayObject*,  type, i}
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_SET1a}{PyArrayObject*, type, i, v}
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_SET1b}{PyArrayObject*, type, i, v}
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_SET1f}{PyArrayObject*, type, i, v}
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_SET1}{PyArrayObject*,  type, i, v}
+\end{cfuncdesc}
+
+\subsubsection{Two index single element macros}
+\begin{cfuncdesc}{}{NA_GET2a}{PyArrayObject*, type, i, j}
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_GET2b}{PyArrayObject*, type, i, j}
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_GET2f}{PyArrayObject*, type, i, j}
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_GET2}{PyArrayObject*,  type, i, j}
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_SET2a}{PyArrayObject*, type, i, j, v}
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_SET2b}{PyArrayObject*, type, i, j, v}
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_SET2f}{PyArrayObject*, type, i, j, v}
+\end{cfuncdesc}
+\begin{cfuncdesc}{}{NA_SET2}{PyArrayObject*,  type, i, j, v}
+\end{cfuncdesc}
+
+\subsubsection{One and Two Index, Offset, Float64/Complex64/Int64 functions}
+
+The \class{Int64}/\class{Float64}/\class{Complex64} functions require a
+function call to access a single element of an array, making them slower than
+the single element macros.  They have two advantages:
+\begin{enumerate}
+\item They're function calls, so they're a little more robust. 
+\item They can handle \emph{any} input array type and behavior properties.
+\end{enumerate}
+
+
+While these functions have no error return status, they *can* alter the Python
+error state, so well written extensions should call
+\cfunction{PyErr_Occurred()} to determine if an error occurred and report it.
+It's reasonable to do this check once at the end of an extension function,
+rather than on a per-element basis.
+
+
+\begin{cfuncdesc}{}{void NA_get_offset}{PyArrayObject *, int N, ...}
+  \cfunction{NA_get_offset} computes the offset into an array object given a
+  variable number of indices.  It is not especially robust, and it is
+  considered an error to pass it more indices than the array has, or indices
+  which are negative or out of range.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{Float64}{NA_get_Float64}{PyArrayObject *, long offset}
+\end{cfuncdesc}
+\begin{cfuncdesc}{void}{NA_set_Float64}{PyArrayObject *, long offset, Float64 v}
+\end{cfuncdesc}
+\begin{cfuncdesc}{Float64}{NA_get1_Float64}{PyArrayObject *, int i}
+\end{cfuncdesc}
+\begin{cfuncdesc}{void}{NA_set1_Float64}{PyArrayObject *, int i, Float64 v}
+\end{cfuncdesc}
+\begin{cfuncdesc}{Float64}{NA_get2_Float64}{PyArrayObject *, int i, int j}
+\end{cfuncdesc}
+\begin{cfuncdesc}{void}{NA_set2_Float64}{PyArrayObject *, int i, int j, Float64 v}
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{Int64}{NA_get_Int64}{PyArrayObject *, long offset}
+\end{cfuncdesc}
+\begin{cfuncdesc}{void}{NA_set_Int64}{PyArrayObject *, long offset, Int64 v}
+\end{cfuncdesc}
+\begin{cfuncdesc}{Int64}{NA_get1_Int64}{PyArrayObject *, int i}
+\end{cfuncdesc}
+\begin{cfuncdesc}{void}{NA_set1_Int64}{PyArrayObject *, int i, Int64 v}
+\end{cfuncdesc}
+\begin{cfuncdesc}{Int64}{NA_get2_Int64}{PyArrayObject *, int i, int j}
+\end{cfuncdesc}
+\begin{cfuncdesc}{void}{NA_set2_Int64}{PyArrayObject *, int i, int j, Int64 v}
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{Complex64}{NA_get_Complex64}{PyArrayObject *, long offset}
+\end{cfuncdesc}
+\begin{cfuncdesc}{void}{NA_set_Complex64}{PyArrayObject *, long offset, Complex64 v}
+\end{cfuncdesc}
+\begin{cfuncdesc}{Complex64}{NA_get1_Complex64}{PyArrayObject *, int i}
+\end{cfuncdesc}
+\begin{cfuncdesc}{void}{NA_set1_Complex64}{PyArrayObject *, int i, Complex64 v}
+\end{cfuncdesc}
+\begin{cfuncdesc}{Complex64}{NA_get2_Complex64}{PyArrayObject *, int i, int j}
+\end{cfuncdesc}
+\begin{cfuncdesc}{void}{NA_set2_Complex64}{PyArrayObject *, int i, int j, Complex64 v}
+\end{cfuncdesc}
+
+\subsection{Example}
+\label{sec:C-API:element-wise:example}
+
+The \cfunction{convolve1D} wrapper function corresponding to section
+\ref{sec:C-API:high-level:example} using the element-wise API could look
+like:\footnote{This function is also available as an example in the source
+   distribution.}
+
+\begin{verbatim}
+static PyObject *
+Py_Convolve1d(PyObject *obj, PyObject *args)
+{
+        PyObject   *okernel, *odata, *oconvolved=Py_None;
+        PyArrayObject *kernel, *data, *convolved;
+
+        if (!PyArg_ParseTuple(args, "OO|O", &okernel, &odata, &oconvolved)) {
+                PyErr_Format(_Error, "Convolve1d: Invalid parameters.");
+                goto _fail;
+        }
+
+        kernel = NA_InputArray(okernel, tAny, 0);
+        data   = NA_InputArray(odata, tAny, 0);
+\end{verbatim}
+
+For the kernel and data arrays, \class{numarray}s of any type are accepted
+without conversion.  Thus there is no copy of the data made except for lists or
+tuples.  All types, byteswapping, misalignment, and discontiguity must be
+handled by Convolve1d.  This can be done easily using the get/set functions.
+Macros, while faster than the functions, can only handle a single type.
+
+\begin{verbatim}
+        convolved = NA_OptionalOutputArray(oconvolved, tFloat64, 0, data);
+\end{verbatim}
+
+Also for the output array we accept any variety of type tFloat without
+conversion.  No copy is made except for non-tFloat.  Non-numarray sequences are
+not permitted as output arrays.  Byteswaping, misaligment, and discontiguity
+must be handled by Convolve1d.  If the \python caller did not specify the
+oconvolved array, it initially retains the value Py_None.  In that case,
+\var{convolved} is cloned from the array \var{data} using the specified type.
+It is important to clone from \var{data} and not \var{odata}, since the latter
+may be an ordinary \python sequence which was converted into numarray
+\var{data}.  
+
+\begin{verbatim}
+        if (!kernel || !data || !convolved)
+                goto _fail;
+
+        if ((kernel->nd != 1) || (data->nd != 1)) {
+                PyErr_Format(_Error,
+                     "Convolve1d: arrays must have exactly 1 dimension.");
+                goto _fail;
+        }
+
+        if (!NA_ShapeEqual(data, convolved)) {
+                PyErr_Format(_Error,
+                    "Convolve1d: data and output arrays must have identical length.");
+                goto _fail;
+        }
+        if (!NA_ShapeLessThan(kernel, data)) {
+                PyErr_Format(_Error,
+                    "Convolve1d: kernel must be smaller than data in both dimensions");
+                goto _fail;
+        }
+        
+        if (Convolve1d(kernel, data, convolved) < 0)  /* Error? */
+            goto _fail;
+        else {
+           Py_XDECREF(kernel);
+           Py_XDECREF(data);
+           return NA_ReturnOutput(oconvolved, convolved);
+        }
+_fail:
+        Py_XDECREF(kernel);
+        Py_XDECREF(data);
+        Py_XDECREF(convolved);
+        return NULL;
+}
+
+\end{verbatim}
+
+This function is very similar to the high-level API wrapper, the notable
+difference is that we ask for the unconverted arrays \var{kernel} and
+\var{data} and \var{convolved}.  This requires some attention in their usage.
+The function that does the actual convolution in the example has to use
+\cfunction{NA_get*} to read and \cfunction{NA_set*} to set an element of these
+arrays, instead of using straight array notation.  These functions perform any
+necessary type conversion, byteswapping, and alignment.
+
+\begin{verbatim}
+static int
+Convolve1d(PyArrayObject *kernel, PyArrayObject *data, PyArrayObject *convolved)
+{
+        int xc, xk;
+        int ksizex = kernel->dimensions[0];
+        int halfk = ksizex / 2;
+        int dsizex = data->dimensions[0];
+
+        for(xc=0; xc<halfk; xc++)
+                NA_set1_Float64(convolved, xc, NA_get1_Float64(data, xc));
+                     
+        for(xc=dsizex-halfk; xc<dsizex; xc++)
+                NA_set1_Float64(convolved, xc, NA_get1_Float64(data, xc));
+
+        for(xc=halfk; xc<dsizex-halfk; xc++) {
+                Float64 temp = 0;
+                for (xk=0; xk<ksizex; xk++) {
+                        int i = xc - halfk + xk;
+                        temp += NA_get1_Float64(kernel, xk) * 
+                                NA_get1_Float64(data, i);
+                }
+                NA_set1_Float64(convolved, xc, temp);
+        }
+        if (PyErr_Occurred())
+           return -1;
+        else 
+           return 0;
+}
+\end{verbatim}
+
+\section{One-dimensional API}
+\label{sec:C-API:One-dimensional-api}
+
+The 1D in-place API is a set of functions for getting/setting elements from the
+innermost dimension of an array.  These functions improve speed by moving type
+switches, ``behavior tests'', and function calls out of the per-element loop.
+The functions get/set a series of consequtive array elements to/from arrays of
+\class{Int64}, \class{Float64}, or \class{Complex64}.  These functions are
+(even) more intrusive than the single element functions, but have better
+performance in many cases.  They can operate on arrays of any type, with the
+exception of the Complex64 functions, which only handle Complex64.  The
+functions return 0 on success and -1 on failure, with the Python error state
+already set.  To be used profitably, the 1D API requires either a large single
+dimension which can be processeed in blocks or a multi-dimensional array such
+as an image.  In the latter case, the 1D API is suitable for processing one (or
+more) scanlines at a time rather than the entire image at once.  See the source
+distribution Examples/convolve/one_dimensionalmodule.c for an example of usage.
+
+\begin{cfuncdesc}{long}{NA_get_offset}{PyArrayObject *, int N, ...}
+   This function applies a (variable length) set of \var{N} indices to an array
+   and returns a byte offset into the array.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{NA_get1D_Int64}{%
+      PyArrayObject *, long offset, int cnt, Int64 *out}%
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{NA_set1D_Int64}{%
+      PyArrayObject *, long offset, int cnt, Int64 *in}%
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{NA_get1D_Float64}{%
+      PyArrayObject *, long offset, int cnt, Float64 *out}%
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{NA_set1D_Float64}{%
+      PyArrayObject *, long offset, int cnt, Float64 *in}%
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{NA_get1D_Complex64}{%
+      PyArrayObject *, long offset, int cnt, Complex64 *out}%
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{NA_set1D_Complex64}{%
+      PyArrayObject *, long offset, int cnt, Complex64 *in}%
+\end{cfuncdesc}
+
+\section{New numarray functions}
+\label{sec:C-API:new-numarray-functions}
+
+The following array creation functions share similar behavior.  All but one
+create a new \class{numarray} using the data specified by \var{data}.  If
+\var{data} is NULL, the routine allocates a buffer internally based on the
+array shape and type; internally allocated buffers have undefined contents.
+The data type of the created array is specified by \var{type}.
+
+There are several functions to create \class{numarray}s at the C level:
+
+\begin{cfuncdesc}{static PyArrayObject*}{NA_NewArray}{%
+    void *data, NumarrayType type, int ndim, ...}% 
+
+  \var{ndim} specifies the rank of the array (number of dimensions), and the
+  length of each dimension must be given as the remaining (variable length)
+  list of \emph{int} parameters.  The following example allocates a 100x100
+  uninitialized array of Int32.
+\begin{verbatim}
+  if (!(array = NA_NewArray(NULL, tInt32, 2, 100, 100)))
+      return NULL;
+\end{verbatim}
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{static PyObject*}{NA_vNewArray}{%
+    void *data, NumarrayType type, int ndim, maybelong *shape}% 
+
+  For \function{NA_vNewArray} the length of each dimension must be given in an
+  array of \var{maybelong} pointed to by \var{shape}. The following code
+  allocates a 2x2 array initialized to a copy of the specified \var{data}.
+  \begin{verbatim}
+    Int32 data[4] = { 1, 2, 3, 4 };
+    maybelong shape[2] = { 2, 2 };
+    if (!(array = NA_vNewArray(data, tInt32, 2, shape)))
+       return NULL;
+  \end{verbatim}
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{static PyArrayObject*}{NA_NewAll}{%
+    int ndim, maybelong *shape, NumarrayType type, void *data, maybelong
+    byteoffset, maybelong bytestride, int byteorder, int aligned, int
+    writable}%
+
+    \function{NA_NewAll} is similar to \function{NA_vNewArray} except it
+    provides for the specification of additional parameters. \var{byteoffset}
+    specifies the byte offset from the base of the data array at which the
+    \var{real} data begins.  \var{bytestride} specifies the miminum stride to
+    use, the seperation in bytes between adjacent elements in the
+    array. \var{byteorder} takes one of the values \constant{NUM_BIG_ENDIAN} or
+    \constant{NUM_LITTLE_ENDIAN}.  \var{writable} defines whether the buffer
+    object associated with the resulting array is readonly or writable.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{static PyArrayObject*}{NA_NewAllStrides}{%
+    int ndim, maybelong *shape, maybelong *strides, NumarrayType type, void
+    *data, maybelong byteoffset, maybelong byteorder, int aligned, int
+    writable}% 
+
+    \function{NA_NewAllStrides} is a variant of \function{NA_vNewAll} which
+    also permits the specification of the array strides.  The strides are not
+    checked for correctness.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{static PyArrayObject*}{NA_NewAllFromBuffer}{%
+    int ndim, maybelong *shape, NumarrayType type, PyObject *buffer, maybelong
+    byteoffset, maybelong bytestride, int byteorder, int aligned, int
+    writable}% 
+
+   \function{NA_NewAllFromBuffer} is similar to \function{NA_NewAll} except it
+   accepts a buffer object rather than a pointer to C data.  The \var{buffer}
+   object must support the buffer protocol.  If \var{buffer} is non-NULL, the
+   returned array object stores a reference to \var{buffer} and locates its
+   data there.  If \var{buffer} is specified as NULL, a buffer object and
+   associated data space are allocated internally and the returned array object
+   refers to that.  It is possible to create a Python buffer object from an
+   array of C data and then construct a \class{numarray} using this function
+   which refers to the C data without making a copy.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{NA_ShapeEqual}{PyArrayObject*a,PyArrayObject*b}
+This function compares the shapes of two arrays, and returns 1 if they
+are the same, 0 otherwise.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{NA_ShapeLessThan}{PyArrayObject*a,PyArrayObject*b}
+This function compares the shapes of two arrays, and returns 1 if each
+dimension of 'a' is less than the corresponding dimension of 'b', 0 otherwise.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{NA_ByteOrder}{}
+This function returns the system byte order, either NUM_LITTLE_ENDIAN or
+NUM_BIG_ENDIAN.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{Bool}{NA_IeeeMask32}{Float32 value, Int32 mask}
+This function returns 1 IFF Float32 \var{value} matches any of the IEEE special
+value criteria specified by \var{mask}.  See ieeespecial.h for the mask bit
+values which can be or'ed together to specify mask.
+\function{NA_IeeeSpecial32} has been deprecated and will eventually be removed.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{Bool}{NA_IeeeMask64}{Float64 value,Int32 mask}
+This function returns 1 IFF Float64 \var{value} matches any of the IEEE special
+value criteria specified by \var{mask}.  See ieeespecial.h for the mask bit
+values which can be or'ed together to specify mask.
+\function{NA_IeeeSpecial64} has been deprecated and will eventually be removed.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{PyArrayObject *}{NA_updateDataPtr}{PyArrayObject *}
+This function updates the values derived from the ``_data'' buffer, namely the
+data pointer and buffer WRITABLE flag bit.  This needs to be called upon
+entering or re-entering C-code from Python, since it is possible for buffer
+objects to move their data buffers as a result of executing arbitrary Python
+and hence arbitrary C-code.  The high level interface routines,
+e.g. \function{NA_InputArray}, call this routine automatically.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{char*}{NA_typeNoToName}{int}
+NA_typeNoToName translates a NumarrayType into a character string which can be
+used to display it:  e.g.  tInt32 converts to the string ``Int32''
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{PyObject*}{NA_typeNoToTypeObject}{int}
+This function converts a NumarrayType C type code into the NumericType object
+which implements and represents it more fully.  tInt32 converts to the type
+object numarray.Int32.  
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{NA_typeObjectToTypeNo}{PyObject*}
+This function converts a numarray type object (e.g. numarray.Int32) into the
+corresponding NumarrayType (e.g. tInt32) C type code. 
+\end{cfuncdesc}
+
+\begin{cfuncdesc} {PyObject*}{NA_intTupleFromMaybeLongs}{int,maybelong*}
+This function creates a tuple of Python ints from an array of C maybelong integers.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{long}{NA_maybeLongsFromIntTuple}{int,maybelong*,PyObject*}
+This function fills an array of C long integers with the converted values from
+a tuple of Python ints.  It returns the number of conversions, or -1 for error.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{long}{NA_isIntegerSequence}{PyObject*}
+This function returns 1 iff the single parameter is a sequence of Python
+integers, and 0 otherwise.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{PyObject*}{NA_setArrayFromSequence}{PyArrayObject*,PyObject*}
+This function copies the elementwise from a sequence object to a numarray.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{NA_maxType}{PyObject*}
+This function returns an integer code corresponding to the highest kind of
+Python numeric object in a sequence.  INT(0) LONG(1) FLOAT(2) COMPLEX(3).
+On error -1 is returned.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{PyObject*}{NA_getPythonScalar}{PyArrayObject *a, long offset}
+This function returns the Python object corresponding to the single element of 
+the array 'a' at the given byte offset.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{NA_setFromPythonScalar}{PyArrayObject *a, long offset, PyObject*value}
+This function sets the single element of the array 'a' at the given byte
+offset to 'value'.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{NA_NDArrayCheck}{PyObject*o}
+This function returns 1 iff the 'o' is an instance of NDArray or an instance of
+a subclass of NDArray, and 0 otherwise.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{NA_NumArrayCheck}{PyObject*}
+This function returns 1 iff the 'o' is an instance of NumArray or an instance of
+a subclass of NumArray, and 0 otherwise.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{NA_ComplexArrayCheck}{PyObject*}
+This function returns 1 iff the 'o' is an instance of ComplexArray or an instance of
+a subclass of ComplexArray, and 0 otherwise.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{unsigned long}{NA_elements}{PyArrayObject*}
+This function returns the total count of elements in an array,  essentially the
+product of the elements of the array's shape.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{PyArrayObject *}{NA_copy}{PyArrayObject*}
+This function returns a copy of the given array.  The array copy is guaranteed
+to be well-behaved, i.e. neither byteswapped, misaligned, nor discontiguous.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{NA_copyArray}{PyArrayObject*to, const PyArrayObject *from}
+This function returns a copies one array onto another;  used in f2py.
+\end{cfuncdesc}
+
+\begin{cfuncdesc}{int}{NA_swapAxes}{PyArrayObject*a, int dim1, int dim2}
+This function mutates the specified array \var{a} to exchange the shape and
+strides values for the two dimensions, \var{dim1} and \var{dim2}.  Negative
+dimensions count backwards from the innermost, with -1 being the innermost
+dimension.  Returns 0 on success and -1 on error.
+\end{cfuncdesc}
+
+%% Local Variables:
+%% mode: LaTeX
+%% mode: auto-fill
+%% fill-column: 79
+%% indent-tabs-mode: nil
+%% ispell-dictionary: "american"
+%% reftex-fref-is-default: nil
+%% TeX-auto-save: t
+%% TeX-command-default: "pdfeLaTeX"
+%% TeX-master: "numarray"
+%% TeX-parse-self: t
+%% End:

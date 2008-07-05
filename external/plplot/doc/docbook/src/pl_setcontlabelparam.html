@@ -1,0 +1,265 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>pl_setcontlabelparam: Set parameters of
+contour labelling other than format of numerical label</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="NEXT"
+TITLE="pladv: Advance the (sub-)page"
+HREF="pladv.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="api.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="pladv.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="pl_setcontlabelparam"
+><CODE
+CLASS="function"
+>pl_setcontlabelparam</CODE
+>: Set parameters of
+contour labelling other than format of numerical label</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN3530"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	  pl_setcontlabelparam
+	</CODE
+>(offset, size, spacing, active);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;    Set parameters of
+    contour labelling other than those handled by <A
+HREF="api.html#pl_setcontlabelformat"
+><CODE
+CLASS="function"
+>pl_setcontlabelformat</CODE
+></A
+>.
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>offset</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	   Offset of label from contour line (if set to 0.0, labels are
+	   printed on the lines).  Default value is 0.006.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>size</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  Font height for contour labels (normalized).  Default value is 0.3.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>spacing</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  Spacing parameter for contour labels.  Default value is 0.1.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>active</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  Activate labels.  Set to 1 if you want contour labels on.
+	  Default is off (0).
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      Redacted form: <CODE
+CLASS="function"
+>pl_setcontlabelparam(offset, size, spacing, active)</CODE
+>
+    </P
+><P
+>&#13;      This function is used in example 9.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="pladv.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>The Common API for PLplot</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>pladv</CODE
+>: Advance the (sub-)page</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

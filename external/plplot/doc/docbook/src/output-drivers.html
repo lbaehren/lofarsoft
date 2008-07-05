@@ -1,0 +1,254 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>The PLplot Output Driver Family</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE=" Programming "
+HREF="p162.html"><LINK
+REL="PREVIOUS"
+TITLE="The wxWidgets Driver (Linux, Mac OS X, Windows)"
+HREF="wxwidgets-driver.html"><LINK
+REL="NEXT"
+TITLE="The PDF Driver"
+HREF="pdf-driver.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="chapter"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="wxwidgets-driver.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+></TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="pdf-driver.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="chapter"
+><H1
+><A
+NAME="output-drivers"
+></A
+>Chapter 6. The PLplot Output Driver Family</H1
+><DIV
+CLASS="TOC"
+><DL
+><DT
+><B
+>Table of Contents</B
+></DT
+><DT
+><A
+HREF="output-drivers.html#gd-driver"
+>The GD Driver</A
+></DT
+><DT
+><A
+HREF="pdf-driver.html"
+>The PDF Driver</A
+></DT
+><DT
+><A
+HREF="postscript-driver.html"
+>The PostScript Driver</A
+></DT
+><DT
+><A
+HREF="truetype-postscript-driver.html"
+>The TrueType PostScript Driver</A
+></DT
+><DT
+><A
+HREF="latex-postscript-driver.html"
+>The LaTeX PostScript Driver</A
+></DT
+><DT
+><A
+HREF="svg-driver.html"
+>The SVG Driver</A
+></DT
+></DL
+></DIV
+><P
+>&#13;    Drivers which produce output files are described in this chapter.  
+    Each of the drivers has a list of options, and these may be set as 
+    outlined in <A
+HREF="advanced.html#arguments"
+>the Section called <I
+>Command Line Arguments</I
+> in Chapter 3</A
+>.
+  </P
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="gd-driver"
+>The GD Driver</A
+></H1
+><P
+> 
+      The GD driver produces png, jpeg, and gif images, using devices by 
+      the same name.  The GD driver is unicode enabled.  Text is 
+      anti-aliased, but lines and shades are not.
+    </P
+><P
+>&#13;      The available driver options are:
+      <P
+></P
+><UL
+><LI
+><P
+>&#13;          optimise: Optimise PNG palette when possible
+        </P
+></LI
+><LI
+><P
+>&#13;          def_black15: Define idx 15 as black. If the background is 
+          "whiteish" (from "-bg" option), force index 15 (traditionally 
+           white) to be "black"
+        </P
+></LI
+><LI
+><P
+>&#13;          swp_red15: Swap index 1 (usually red) and 1 (usually white); 
+          always done after "black15"; quite useful for quick changes to
+          web pages
+        </P
+></LI
+><LI
+><P
+>8bit: Palette (8 bit) mode</P
+></LI
+><LI
+><P
+>24bit: Truecolor (24 bit) mode</P
+></LI
+><LI
+><P
+>text: Use driver text (FreeType)</P
+></LI
+><LI
+><P
+>&#13;          smooth: Turn text smoothing on (1) or off (0)
+        </P
+></LI
+></UL
+>
+    </P
+></DIV
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="wxwidgets-driver.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="pdf-driver.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>The wxWidgets Driver (Linux, Mac OS X, Windows)</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="p162.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>The PDF Driver</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

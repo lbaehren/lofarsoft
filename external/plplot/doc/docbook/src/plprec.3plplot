@@ -1,0 +1,29 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLPREC 3plplot  "February, 2008" "" "PLplot API"
+.SH NAME
+\fBplprec\fP - Set precision in numeric labels 
+.SH SYNOPSIS
+\fBplprec\fP(\fIset\fP, \fIprec\fP)
+.SH DESCRIPTION
+
+.P
+Sets the number of places after the decimal point in numeric labels. 
+.P
+Redacted form: \fBplprec(set, prec)\fP
+.P
+This function is not used in any examples. 
+.SH ARGUMENTS
+.TP
+\fIset\fP (PLINT, input) 
+If \fIset\fP is equal to 0 then PLplot automatically determines the number of places to use after the decimal point in numeric labels (like those used to label axes).  If \fIset\fP is 1 then \fIprec\fP sets the number of places. 
+.TP
+\fIprec\fP (PLINT, input) 
+The number of characters to draw after the decimal point in numeric labels. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

@@ -1,0 +1,36 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLSCMAP1A 3plplot  "February, 2008" "" "PLplot API"
+.SH NAME
+\fBplscmap1a\fP - Set color map1 colors using 8-bit RGB values and double alpha values. 
+.SH SYNOPSIS
+\fBplscmap1\fP(\fIr\fP, \fIg\fP, \fIb\fP, \fIa\fP, \fIncol1\fP)
+.SH DESCRIPTION
+
+.P
+Set color map1 colors using 8-bit RGB values (see the PLplot documentation) and double alpha values. This also sets  the number of colors.
+.P
+This function is not used in any examples. 
+.SH ARGUMENTS
+.TP
+\fIr\fP (PLINT *, input) 
+Pointer to array with set of unsigned 8-bit integers (0-255) representing the degree of red in the color. 
+.TP
+\fIg\fP (PLINT *, input) 
+Pointer to array with set of unsigned 8-bit integers (0-255) representing the degree of green in the color. 
+.TP
+\fIb\fP (PLINT *, input) 
+Pointer to array with set of unsigned 8-bit integers (0-255) representing the degree of blue in the color. 
+.TP
+\fIa\fP (PLFLT *, input) 
+Pointer to array with set of double values (0.0-1.0) representing the alpha value of the color. 
+.TP
+\fIncol1\fP (PLINT, input) 
+Number of items in the \fIr\fP, \fIg\fP, \fIb\fP, and \fIa\fP arrays. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

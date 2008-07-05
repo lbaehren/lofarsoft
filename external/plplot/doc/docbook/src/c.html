@@ -1,0 +1,322 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>C Language</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE=" Language Bindings "
+HREF="p2493.html"><LINK
+REL="PREVIOUS"
+TITLE=" Language Bindings "
+HREF="p2493.html"><LINK
+REL="NEXT"
+TITLE="Fortran 95 Language"
+HREF="fortran95.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="chapter"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="p2493.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+></TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="fortran95.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="chapter"
+><H1
+><A
+NAME="c"
+></A
+>Chapter 7. C Language</H1
+><P
+>&#13;(OLD, NEEDS DOCUMENTATION UPDATING)
+The argument types given in this manual (PLFLT and PLINT) are typedefs for
+the actual argument type.  A PLINT is actually a type
+<TT
+CLASS="literal"
+>long</TT
+> and should not be changed.  A PLFLT can be either a
+<TT
+CLASS="literal"
+>float</TT
+> or <TT
+CLASS="literal"
+>double</TT
+>; this choice is made
+when the package is installed and on a Unix system (for example) may result
+in a PLplot library named <TT
+CLASS="filename"
+>libplplot.a</TT
+> in single
+precision and <TT
+CLASS="filename"
+>libplplotd.a</TT
+> in double precision.
+  </P
+><P
+>&#13;These and other constants used by PLplot are defined in the main header file
+<TT
+CLASS="filename"
+>plplot.h</TT
+>, which must be included by the user program.  This file also
+contains all of the function prototypes, machine dependent defines, and
+redefinition of the C-language bindings that conflict with the Fortran names
+(more on this later).  <TT
+CLASS="filename"
+>plplot.h</TT
+> obtains its values for PLFLT, PLINT,
+and PLARGS (a macro for conditionally generating prototype argument lists)
+from FLOAT (typedef), INT (typedef), and PROTO (macro), respectively.
+The latter are defined in the file
+<TT
+CLASS="filename"
+>chdr.h</TT
+>.  The user is encouraged to use FLOAT, INT, and PROTO in
+his/her own code, and modify <TT
+CLASS="filename"
+>chdr.h</TT
+> according to taste.  It is not
+actually necessary to declare variables as FLOAT and INT except when they
+are pointers, as automatic conversion to the right type will otherwise occur
+(if using a Standard C compiler; else K&#38;R style automatic promotion will
+occur).  The only code in <TT
+CLASS="filename"
+>plplot.h</TT
+> that directly depends on these
+settings is as follows:
+<TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>&#13;#include "plplot/chdr.h"
+
+/* change from chdr.h conventions to plplot ones */
+
+typedef FLOAT PLFLT;
+typedef INT   PLINT;
+#define PLARGS(a) PROTO(a)
+</PRE
+></TD
+></TR
+></TABLE
+>
+  </P
+><P
+>&#13;PLplot is capable of being compiled with Standard C (ANSI) mode on or off.
+This is toggled via the macro PLSTDC, and set automatically if __STDC__
+is defined.  If PLSTDC is defined, all functions are prototyped as allowed
+under Standard C, and arguments passed exactly as specified in the
+prototype.  If PLSTDC is not defined, however, function prototypes are
+turned off and K&#38;R automatic argument promotion will occur, e.g.
+<TT
+CLASS="literal"
+> float &#38;rarr; double, int &#38;rarr; long</TT
+>.
+There is no middle ground!  A PLplot
+library built with PLSTDC defined will not work (in general) with a program
+built with PLSTDC undefined, and vice versa.  It is possible in principle to
+build a library that will work under both Standard C and K&#38;R compilers
+simultaneously (i.e.  by duplicating the K&#38;R promotion with the Standard C
+prototype), but this seems to violate the spirit of the C standard and can
+be confusing.  Eventually we will drop support for non-standard C compilers
+but for now have adopted this compromise.
+  </P
+><P
+>&#13;In summary, PLplot will work using either a Standard or non-standard C
+compiler, provided that you :
+<P
+></P
+><UL
+><LI
+><P
+>&#13;Include the PLplot main header file <TT
+CLASS="filename"
+>plplot.h</TT
+>.
+</P
+></LI
+><LI
+><P
+>&#13;Make sure all pointer arguments are of the correct type
+(the compiler should warn you if you forget, so don't worry, be happy).
+</P
+></LI
+><LI
+><P
+>&#13;Do not link a code compiled with PLSTDC defined to a PLplot library
+compiled with PLSTDC undefined, or vice versa.
+</P
+></LI
+><LI
+><P
+>&#13;Use prototypes whenever possible to reduce type errors.
+</P
+></LI
+></UL
+>
+  </P
+><P
+>&#13;Note that some Standard C compilers will give warnings when converting a
+constant function argument to whatever is required by the prototype.  These
+warnings can be ignored.
+  </P
+><P
+>&#13;The one additional complicating factor concerns the use of stub routines to
+interface with Fortran (see the following section for more explanation).  On
+some systems, the Fortran and C namespaces are set up to clobber each other.
+More reasonable (from our viewpoint) is to agree on a standard map between
+namespaces, such as the appending of an underscore to Fortran routine names
+as is common on many Unix-like systems.  The only case where the shared
+Fortran/C namespaces do any good is when passing a pointer to a like data
+type, which represents only a small fraction of the cases that need to
+be handled (which includes constant values passed on the stack, strings, and
+two-dimensional arrays).
+  </P
+><P
+>&#13;There are several ways to deal with this situation, but the least messy from
+a user's perspective is to redefine those PLplot C function names which
+conflict with the Fortran-interface stub routines.  The actual function
+names are the same as those described in this document, but with a
+<SPAN
+CLASS="QUOTE"
+>"c_"</SPAN
+>
+prepended.  These macro definitions appear in the
+<TT
+CLASS="filename"
+>plplot.h</TT
+> header file
+and are otherwise harmless.  Therefore you can (and should) forget that most
+of the names are being redefined to avoid the conflict and simply adhere to
+the bindings as described in this manual.  Codes written under old versions
+of PLplot (previous to 5.0) will require a recompile, however.
+  </P
+><P
+>&#13;For more information on calling PLplot from C, please see the example C
+programs (<TT
+CLASS="filename"
+>x01c.c</TT
+> through <TT
+CLASS="filename"
+>x19c.c</TT
+>)
+distributed with PLplot.
+  </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="p2493.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="fortran95.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Language Bindings</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="p2493.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Fortran 95 Language</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

@@ -1,0 +1,27 @@
+Messungen der Amplituden und Phasengänge
+von Filter-Board Nr. 17 (für Container 17)
+
+gemessen mit HP4396A
+
+in der Messkette waren zusätzlich zum Filterboard
+
+am Eingang: 1 Meter RG58,	BIAS-T (Kuhne 270N),	40dB-Dämpfungsglied (HP355D)
+
+am Ausgang: 1 Meter RG58
+
+
+Den Amplitudenfrequenzgängen (10...200 MHz) sind 40 dB zu addieren, wegen Dämpfungsglied am Eingang
+
+Die Phasengänge wurden zwischen 10...200 MHz (PW17_1...PW17_8)
+und zusätzlich in Expanded_Phase_Darstellung zwischen 30...90 MHz gemessen (P17_1...P17_8)
+
+Zusätzlich existiert eine Messung des Crosstalk zwischen Nachbarkanälen (hier zwischen Kanal 3 und 4) mit der Bezeichnung crostalk.txt (auch hier 40 dB addieren)
+
+
+Die Nomenklatur ist
+
+für Amplitudengänge: 		A<boardname>__<Kanal>.txt
+
+für 10...200 MHz Phasengänge: 	PW<boardname>__<kanal>.txt
+
+für 30...90 MHz Phasengänge: 	P<boardname>__<kanal>.txt

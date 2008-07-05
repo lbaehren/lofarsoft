@@ -1,0 +1,26 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLSCOMPRESSION 3plplot  "February, 2008" "" "PLplot API"
+.SH NAME
+\fBplscompression\fP - Set device-compression level 
+.SH SYNOPSIS
+\fBplscompression\fP(\fIcompression\fP)
+.SH DESCRIPTION
+
+.P
+Set device-compression level.  Only used for drivers that provide compression.  This function, if used, should be invoked before a call to \fBplinit\fP(3plplot). 
+.P
+Redacted form: \fBplscompression(compression)\fP
+.P
+This function is not used in any examples. 
+.SH ARGUMENTS
+.TP
+\fIcompression\fP (PLINT, input) 
+The desired compression level. This is a device-dependent value. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

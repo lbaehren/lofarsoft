@@ -1,0 +1,30 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLGLEVEL 3plplot  "February, 2008" "" "PLplot API"
+.SH NAME
+\fBplglevel\fP - Get the (current) run level 
+.SH SYNOPSIS
+\fBplglevel\fP(\fIp_level\fP)
+.SH DESCRIPTION
+
+.P
+Get the (current) run level. Valid settings are: 0,  uninitialized 
+1,  initialized 
+2,  viewport defined 
+3,  world coordinates defined 
+
+.P
+Redacted form: \fBplglevel(p_level)\fP
+.P
+This function is not used in any examples. 
+.SH ARGUMENTS
+.TP
+\fIp_level\fP (PLINT *, output) 
+Pointer to the run level. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

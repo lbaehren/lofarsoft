@@ -1,0 +1,249 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      plscmap0n: Set number of colors in color map0
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plscmap0a: Set color map0 colors by 8-bit RGB values and 
+      double alpha value.
+    "
+HREF="plscmap0a.html"><LINK
+REL="NEXT"
+TITLE="
+      plscmap1: Set color map1 colors using 8-bit RGB
+values
+    "
+HREF="plscmap1.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plscmap0a.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plscmap1.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plscmap0n"
+><CODE
+CLASS="function"
+>plscmap0n</CODE
+>: Set number of colors in color map0</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN8547"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;           plscmap0n
+        </CODE
+>(ncol0);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+> Set number of colors in color map0 (see <A
+HREF="color.html#color-map-0"
+>the Section called <I
+>Color Map0</I
+> in Chapter 3</A
+>). Allocate (or reallocate) color map0,
+      and fill with default values for those colors not previously allocated.
+      The first 16 default colors are given in the <A
+HREF="plcol0.html"
+><CODE
+CLASS="function"
+>plcol0</CODE
+></A
+> documentation.
+      For larger indices the default color is red. </P
+><P
+>&#13;      The drivers are not guaranteed to support more than 16 colors.
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>ncol0</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;            Number of colors that will be allocated in the map0 palette.
+	    If this number is zero or less, then the value from the
+	    previous call to <A
+HREF="plscmap0n.html"
+><CODE
+CLASS="function"
+>plscmap0n</CODE
+></A
+> is used and if there is no
+	    previous call, then a default value is used.
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      Redacted form: <CODE
+CLASS="function"
+>plscmap0n(ncol0)</CODE
+>
+    </P
+><P
+>&#13;      This function is used in examples 15,16,24.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plscmap0a.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plscmap1.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plscmap0a</CODE
+>: Set color map0 colors by 8-bit RGB values and 
+      double alpha value.</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plscmap1</CODE
+>: Set color map1 colors using 8-bit RGB
+values</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

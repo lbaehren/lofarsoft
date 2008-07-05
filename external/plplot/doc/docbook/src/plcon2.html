@@ -1,0 +1,423 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      plcon2: Contour plot, general 2-d mapping for
+Fortran 77
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Specialized Fortran 77 API for PLplot"
+HREF="api-fortran-77.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plcon1: Contour plot, general 1-d mapping for
+Fortran 77
+    "
+HREF="plcon1.html"><LINK
+REL="NEXT"
+TITLE="
+      plcont: Contour plot, fixed linear mapping for
+Fortran 77
+    "
+HREF="plcontfortran77.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plcon1.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 20. The Specialized Fortran 77 API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plcontfortran77.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plcon2"
+><CODE
+CLASS="function"
+>plcon2</CODE
+>: Contour plot, general 2-d mapping for
+Fortran 77</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN12698"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;	  plcon2
+	</CODE
+>(z, nx, ny, kx, lx, ky, ly, clevel, nlevel, xg, yg);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;      Draws a contour plot of the data in
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>z</CODE
+>[<CODE
+CLASS="parameter"
+>nx</CODE
+>][<CODE
+CLASS="parameter"
+>ny</CODE
+>]</TT
+>,
+      using the <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>nlevel</CODE
+></TT
+> contour
+      levels specified by <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>clevel</CODE
+></TT
+>.
+      Only the region of the array from
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>kx</CODE
+></TT
+> to
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>lx</CODE
+></TT
+> and from
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>ky</CODE
+></TT
+> to
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>ly</CODE
+></TT
+> is plotted out.  The
+      arrays <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>xg</CODE
+></TT
+> and
+      <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>yg</CODE
+></TT
+> are used to specify the
+      transformation between array indices and world coordinates.  See
+      <A
+HREF="contour-plots.html"
+>the Section called <I
+>Contour and Shade Plots</I
+> in Chapter 3</A
+> for more information.
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>z</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT **</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to a vectored two-dimensional array containing data to
+	    be contoured.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>nx, ny</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Physical dimensions of array
+	    <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>z</CODE
+></TT
+>.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>kx, lx</CODE
+> (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Range of <TT
+CLASS="literal"
+>x</TT
+> indices to consider.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>ky, ly</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Range of <TT
+CLASS="literal"
+>y</TT
+> indices to consider.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>clevel</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointer to array specifying levels at which to draw contours.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>nlevel</CODE
+> (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Number of contour levels to draw.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>xg, yg</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;	    Pointers to arrays which specify the transformation from array
+	    indices to world coordinates.  These must be two-dimensional
+	    arrays, used for a transformation of the form:
+	    <TT
+CLASS="literal"
+>tx</TT
+> = <TT
+CLASS="literal"
+>f(x, y)</TT
+>,
+	    <TT
+CLASS="literal"
+>ty</TT
+> = <TT
+CLASS="literal"
+>f(x, y)</TT
+>.  Function
+	    values at locations between grid points are obtained via linear
+	    interpolation.
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      NOTE: this function is intended for use from a Fortran 77 caller only.
+      The C user should instead call <A
+HREF="plcont.html"
+><CODE
+CLASS="function"
+>plcont</CODE
+></A
+> using the built-in
+      transformation function <CODE
+CLASS="function"
+>pltr2</CODE
+> for the same
+      capability.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plcon1.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plcontfortran77.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plcon1</CODE
+>: Contour plot, general 1-d mapping for
+Fortran 77</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api-fortran-77.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plcont</CODE
+>: Contour plot, fixed linear mapping for
+Fortran 77</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

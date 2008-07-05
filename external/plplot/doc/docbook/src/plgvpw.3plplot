@@ -1,0 +1,37 @@
+.\" This page was automatically generated.  Do not edit!
+.\" 
+.TH PLGVPW 3plplot  "February, 2008" "" "PLplot API"
+.SH NAME
+\fBplgvpw\fP - Get viewport limits in world coordinates 
+.SH SYNOPSIS
+\fBplgvpw\fP(\fIp_xmin\fP, \fIp_xmax\fP, \fIp_ymin\fP, \fIp_ymax\fP)
+.SH DESCRIPTION
+
+.P
+Get viewport limits in world coordinates. 
+.P
+Redacted form:  General: \fBplgvpw(p_xmin, p_xmax, p_ymin, p_ymax)\fP
+Perl/PDL: Not available? 
+
+.P
+This function is not used in any examples. 
+.SH ARGUMENTS
+.TP
+\fIp_xmin\fP (PLFLT *, output) 
+Lower viewport limit of the world coordinate in x. 
+.TP
+\fIp_xmax\fP (PLFLT *, output) 
+Upper viewport limit of the world coordinate in x. 
+.TP
+\fIp_ymin\fP (PLFLT *, output) 
+Lower viewport limit of the world coordinate in y. 
+.TP
+\fIp_ymax\fP (PLFLT *, output) 
+Upper viewport limit of the world coordinate in y. 
+
+.SH AUTHORS
+Geoffrey Furnish and Maurice LeBrun wrote and maintain PLplot.  This man page
+was automatically generated from the DocBook source of the PLplot
+documentation, maintained by Alan W. Irwin and Rafael Laboissiere.
+.SH SEE ALSO
+PLplot documentation at http://plplot.sourceforge.net/resources.

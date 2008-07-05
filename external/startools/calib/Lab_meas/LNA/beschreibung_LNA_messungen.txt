@@ -1,0 +1,20 @@
+Amplituden- und Phasengang der Antennen-LNA (Low Noise Amplifier)
+
+gemessen mit HP4396A
+
+zusätzlich zum LNA waren in der Messkette
+
+am Eingang: 		1 Meter RG58 
+am Ausgang:		1 Meter RG58	BIAS-T (Kuhne 270N, bestromt mit 5 Volt)
+
+der Phasengang der Kabel + BIAS-T wurde kompensiert
+
+
+Amplitudengang:		A_LNA.txt
+Phasengang: 		P_LNA.txt
+Crosstalk: 		Cros_LNA (Der LNA hat ja zwei Kanäle für zwei Polarisationen)
+
+
+Im Bereich von 40...80 MHz ist die Verstärkung 22 dB und nahezu frequenzunabhängig (< 0,5 dB).
+
+Die Phase bleibt näherungsweise bei 180° (invertierender Verstärker)

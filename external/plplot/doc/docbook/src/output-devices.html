@@ -1,0 +1,1515 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>Output Devices</TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="Advanced Use of PLplot"
+HREF="advanced.html"><LINK
+REL="PREVIOUS"
+TITLE="Advanced Use of PLplot"
+HREF="advanced.html"><LINK
+REL="NEXT"
+TITLE="Adding FreeType Library Support to Bitmap Drivers"
+HREF="freetype-notes.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="advanced.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 3. Advanced Use of PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="freetype-notes.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H1
+CLASS="sect1"
+><A
+NAME="output-devices"
+>Output Devices</A
+></H1
+><P
+>&#13;PLplot supports a variety of output devices, via a set of device drivers.
+Each driver is required to emulate a small set of low-level graphics
+primitives such as initialization, line draw and page advance, as well
+as be completely independent of the PLplot package as a whole.  Thus a
+driver may be very simple, as in the case of the many black and white file
+drivers (tektronix, etc.).  More complicated and/or color systems require a
+bit more effort by the driver, with the most effort required by an output
+device with a graphical user interface, including menus for screen dumps,
+palette manipulation, and so forth.  At present only the tk driver does
+the latter on Unix systems.  At present we aren't pursuing
+a Macintosh development effort due to a lack of time and expertise, but
+will assist anyone wanting to volunteer for the job.
+</P
+><P
+> Note that if you always render to a PLplot metafile, you can always
+<CODE
+CLASS="function"
+>plrender</CODE
+> them to new devices as they become available.
+</P
+><P
+>&#13;The list of available devices presented when starting PLplot (via
+<TT
+CLASS="literal"
+>plstar</TT
+>) is determined at compile time.  When installing PLplot you may wish
+to exclude devices not available on your system in order to reduce screen
+clutter.  To include a specified device, simply define the appropriate macro
+constant when building PLplot (see the installation instructions for your
+system).
+</P
+><P
+>&#13;The device drivers for PLplot terminal output at present are given in 
+<A
+HREF="output-devices.html#tab_dev1"
+>Table 3-1</A
+> while 
+drivers for file output are given in
+<A
+HREF="output-devices.html#tab_dev2"
+>Table 3-2</A
+>.
+The driver for OS/2 PM is available separately.  See the section on OS/2 in
+the Appendix for more details.
+
+<DIV
+CLASS="table"
+><A
+NAME="tab_dev1"
+></A
+><P
+><B
+>Table 3-1. PLplot Terminal Output Devices</B
+></P
+><TABLE
+BORDER="0"
+FRAME="void"
+CLASS="CALSTABLE"
+><COL
+WIDTH="1*"><COL
+WIDTH="1*"><COL
+WIDTH="1*"><THEAD
+><TR
+><TH
+>Device</TH
+><TH
+>keyword</TH
+><TH
+>driver file</TH
+></TR
+></THEAD
+><TBODY
+><TR
+><TD
+>X-Window Screen</TD
+><TD
+>xwin</TD
+><TD
+>xwin.c</TD
+></TR
+><TR
+><TD
+>Tcl/Tk widget</TD
+><TD
+>tk</TD
+><TD
+>tk.c</TD
+></TR
+><TR
+><TD
+>Linux console VGA</TD
+><TD
+>vga</TD
+><TD
+>linuxvga.c</TD
+></TR
+><TR
+><TD
+>Xterm Window</TD
+><TD
+>xterm</TD
+><TD
+>tek.c</TD
+></TR
+><TR
+><TD
+>Tektronix Terminal (4010)</TD
+><TD
+>tekt</TD
+><TD
+>tek.c</TD
+></TR
+><TR
+><TD
+>Tektronix Terminal (4105/4107)</TD
+><TD
+>tek4107t</TD
+><TD
+>tek.c</TD
+></TR
+><TR
+><TD
+>MS-Kermit emulator</TD
+><TD
+>mskermit</TD
+><TD
+>tek.c</TD
+></TR
+><TR
+><TD
+>Versaterm vt100/tek emulator</TD
+><TD
+>versaterm</TD
+><TD
+>tek.c</TD
+></TR
+><TR
+><TD
+>VLT vt100/tek emulator</TD
+><TD
+>vlt</TD
+><TD
+>tek.c</TD
+></TR
+><TR
+><TD
+>Conex vt320/tek emulator</TD
+><TD
+>conex</TD
+><TD
+>tek.c</TD
+></TR
+><TR
+><TD
+>DG300 Terminal</TD
+><TD
+>dg300</TD
+><TD
+>dg300.c</TD
+></TR
+><TR
+><TD
+>NeXT display (unsupported)</TD
+><TD
+>nx</TD
+><TD
+>next.c</TD
+></TR
+><TR
+><TD
+>GNOME display</TD
+><TD
+>gnome</TD
+><TD
+>gnome.c</TD
+></TR
+><TR
+><TD
+>GNOME Canvas Widget / Display</TD
+><TD
+>gcw</TD
+><TD
+>gcw.c</TD
+></TR
+></TBODY
+></TABLE
+></DIV
+>
+
+<DIV
+CLASS="table"
+><A
+NAME="tab_dev2"
+></A
+><P
+><B
+>Table 3-2. PLplot File Output Devices</B
+></P
+><TABLE
+BORDER="0"
+FRAME="void"
+RULES="none"
+CLASS="CALSTABLE"
+><COL
+WIDTH="1*"><COL
+WIDTH="1*"><COL
+WIDTH="1*"><THEAD
+><TR
+><TH
+>Device</TH
+><TH
+>keyword</TH
+><TH
+>driver file</TH
+></TR
+></THEAD
+><TBODY
+><TR
+><TD
+>PLplot Native Meta-File</TD
+><TD
+>plmeta</TD
+><TD
+>plmeta.c</TD
+></TR
+><TR
+><TD
+>Tektronix File (4010)</TD
+><TD
+>tekf</TD
+><TD
+>tek.c</TD
+></TR
+><TR
+><TD
+>Tektronix File (4105/4107)</TD
+><TD
+>tek4107f</TD
+><TD
+>tek.c</TD
+></TR
+><TR
+><TD
+>PostScript File (monochrome)</TD
+><TD
+>ps</TD
+><TD
+>ps.c</TD
+></TR
+><TR
+><TD
+>PostScript File (color)</TD
+><TD
+>psc</TD
+><TD
+>ps.c</TD
+></TR
+><TR
+><TD
+>XFig file</TD
+><TD
+>xfig</TD
+><TD
+>xfig.c</TD
+></TR
+><TR
+><TD
+>LaserJet IIp Bitmap File </TD
+><TD
+>ljiip</TD
+><TD
+>ljiip.c</TD
+></TR
+><TR
+><TD
+>LaserJet II Bitmap File (150 dpi)</TD
+><TD
+>ljii</TD
+><TD
+>ljii.c</TD
+></TR
+><TR
+><TD
+>HP 7470 Plotter File (HPGL Cartridge Small Plotter)</TD
+><TD
+>hp7470</TD
+><TD
+>hpgl.c</TD
+></TR
+><TR
+><TD
+>HP 7580 Plotter File (Large Plotter)</TD
+><TD
+>hp7580</TD
+><TD
+>hpgl.c</TD
+></TR
+><TR
+><TD
+>HP Laser Jet, HPGL file</TD
+><TD
+>lj_hpgl</TD
+><TD
+>hpgl.c</TD
+></TR
+><TR
+><TD
+>Impress File</TD
+><TD
+>imp</TD
+><TD
+>impress.c</TD
+></TR
+><TR
+><TD
+>Portable bitmap file</TD
+><TD
+>pbm</TD
+><TD
+>pbm.c</TD
+></TR
+><TR
+><TD
+>Null device</TD
+><TD
+>null</TD
+><TD
+>null.c</TD
+></TR
+><TR
+><TD
+>JPEG file</TD
+><TD
+>jpeg</TD
+><TD
+>gd.c</TD
+></TR
+><TR
+><TD
+>PNG file</TD
+><TD
+>png</TD
+><TD
+>gd.c</TD
+></TR
+><TR
+><TD
+>Computer Graphics Metafile</TD
+><TD
+>cgm</TD
+><TD
+>cgm.c</TD
+></TR
+></TBODY
+></TABLE
+></DIV
+>
+</P
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="driver-functions"
+>Driver Functions</A
+></H2
+><P
+> A dispatch table is used to direct function calls to whatever driver
+is chosen at run-time.  Below are listed the names of each entry in the
+PLDispatchTable dispatch table struct defined in
+<TT
+CLASS="filename"
+>plcore.h</TT
+>.  The entries specific to each device (defined
+in <TT
+CLASS="filename"
+>drivers/*.c</TT
+>) are typically named similarly but with
+<SPAN
+CLASS="QUOTE"
+>"pl_"</SPAN
+> replaced by a string specific for that device (the
+logical order must be preserved, however). The dispatch table entries are :
+
+      <P
+></P
+><UL
+><LI
+><P
+>&#13;<TT
+CLASS="literal"
+>pl_MenuStr</TT
+>: Pointer to string that is printed in device menu.
+	  </P
+></LI
+><LI
+><P
+>&#13;<TT
+CLASS="literal"
+>pl_DevName</TT
+>: A short device "name" for device selection by name.
+	  </P
+></LI
+><LI
+><P
+>&#13;<TT
+CLASS="literal"
+>pl_type</TT
+>: 0 for file-oriented device, 1 for interactive
+(the null driver uses -1 here).
+	  </P
+></LI
+><LI
+><P
+>&#13;<TT
+CLASS="literal"
+>pl_init</TT
+>: Initialize device.  This routine may also prompt the user
+for certain device parameters or open a graphics file
+(see Notes).  Called only once to set things up.  Certain
+options such as familying and resolution (dots/mm) should
+be set up before calling this routine (note: some drivers
+ignore these).
+	  </P
+></LI
+><LI
+><P
+>&#13;<TT
+CLASS="literal"
+>pl_line</TT
+>: Draws a line between two points.
+	  </P
+></LI
+><LI
+><P
+>&#13;<TT
+CLASS="literal"
+>pl_polyline</TT
+>: Draws a polyline (no broken segments).
+	  </P
+></LI
+><LI
+><P
+>&#13;<TT
+CLASS="literal"
+>pl_eop</TT
+>: Finishes out current page (see Notes).
+	  </P
+></LI
+><LI
+><P
+>&#13;<TT
+CLASS="literal"
+>pl_bop</TT
+>: Set up for plotting on a new page. May also open a new
+a new graphics file (see Notes).
+	  </P
+></LI
+><LI
+><P
+>&#13;<TT
+CLASS="literal"
+>pl_tidy</TT
+>: Tidy up. May close graphics file (see Notes).
+	  </P
+></LI
+><LI
+><P
+>&#13;<TT
+CLASS="literal"
+>pl_state</TT
+>: Handle change in PLStream state
+(color, pen width, fill attribute, etc).
+	  </P
+></LI
+><LI
+><P
+>&#13;<TT
+CLASS="literal"
+>pl_esc</TT
+>: Escape function for driver-specific commands.
+	  </P
+></LI
+></UL
+>
+Notes: Most devices allow multi-page plots to be stored in a single graphics
+file, in which case the graphics file should be opened in the pl_init()
+routine, closed in pl_tidy(), and page advances done by calling pl_eop and
+pl_bop() in sequence. If multi-page plots need to be stored in different
+files then pl_bop() should open the file and pl_eop() should close it.  Do
+NOT open files in both pl_init() and pl_bop() or close files in both
+pl_eop() and pl_tidy(). It is recommended that when adding new functions to
+only a certain driver, the escape function be used.  Otherwise it is
+necessary to add a null routine to all the other drivers to handle the new
+function. 
+</P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="metafiles-plrender"
+>PLplot Metafiles and Plrender</A
+></H2
+><P
+>&#13;The PLplot metafile is a way to store and transport your graphical data for
+rendering at a later time or on a different system.  A PLplot metafile is
+in binary format in order to speed access and keep storage costs
+reasonable.  All data is stored in device-independent format (written as a
+stream of bytes); the resulting file is about as portable as a tektronix
+vector graphics file and only slightly larger. 
+</P
+><P
+>&#13;Each PLplot metafile begins with a header string that identifies it as
+such, as well as the version number of the format since
+this may change in time.  The utility for rendering the metafile,
+<CODE
+CLASS="function"
+>plrender</CODE
+>, verifies that the input file is indeed a valid PLplot metafile,
+and that it <SPAN
+CLASS="QUOTE"
+>"understands"</SPAN
+> the format the metafile is written in.
+<CODE
+CLASS="function"
+>plrender</CODE
+> is part of the PLplot package and should be built at the time of
+building PLplot, and then put into your search path.  It is capable of 
+high speed rendering of the graphics file, especially if the output device
+can accept commands at a high rate (e.g. X windows). 
+</P
+><P
+>&#13;The commands as written by the metafile driver at present are as follows:
+<P
+></P
+><UL
+><LI
+><P
+><TT
+CLASS="literal"
+>INITIALIZE</TT
+></P
+></LI
+><LI
+><P
+><TT
+CLASS="literal"
+>CLOSE</TT
+></P
+></LI
+><LI
+><P
+><TT
+CLASS="literal"
+>SWITCH_TO_TEXT</TT
+></P
+></LI
+><LI
+><P
+><TT
+CLASS="literal"
+>SWITCH_TO_GRAPH</TT
+></P
+></LI
+><LI
+><P
+><TT
+CLASS="literal"
+>CLEAR</TT
+></P
+></LI
+><LI
+><P
+><TT
+CLASS="literal"
+>PAGE</TT
+></P
+></LI
+><LI
+><P
+><TT
+CLASS="literal"
+>NEW_COLOR</TT
+></P
+></LI
+><LI
+><P
+><TT
+CLASS="literal"
+>NEW_WIDTH</TT
+></P
+></LI
+><LI
+><P
+><TT
+CLASS="literal"
+>LINE</TT
+></P
+></LI
+><LI
+><P
+><TT
+CLASS="literal"
+>LINETO</TT
+></P
+></LI
+><LI
+><P
+><TT
+CLASS="literal"
+>ESCAPE</TT
+></P
+></LI
+><LI
+><P
+><TT
+CLASS="literal"
+>ADVANCE</TT
+></P
+></LI
+></UL
+>
+</P
+><P
+> 
+Each command is written as a single byte, possibly followed by
+additional data bytes.  The <TT
+CLASS="literal"
+>NEW_COLOR</TT
+> and
+<TT
+CLASS="literal"
+>NEW_WIDTH</TT
+> commands each write 2 data bytes, the
+<TT
+CLASS="literal"
+>LINETO</TT
+> command writes 4 data bytes, and the
+<TT
+CLASS="literal"
+>LINE</TT
+> command writes 8 data bytes.  The most common
+instruction in the typical metafile will be the <TT
+CLASS="literal"
+>LINETO</TT
+>
+command, which draws a continuation of the previous line to the given point.
+This data encoding is not quite as efficient as the tektronix format, which
+uses 4 bytes instead of 5 here (1 command <TT
+CLASS="literal"
+>+</TT
+> 4 data),
+however the PLplot encoding is far simpler to implement and more robust. The
+<TT
+CLASS="literal"
+>ESCAPE</TT
+> function writes a second command character
+(opcode) followed by an arbitrary number of data bytes depending on the
+value of the opcode. Note that any data written must be in device
+independent form to maintain the transportability of the metafile so
+floating point numbers are not allowed. 
+</P
+><P
+>&#13;The short usage message for <CODE
+CLASS="function"
+>plrender</CODE
+> is printed if one inputs
+insufficient or invalid arguments, and is as follows:
+<TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="screen"
+>&#13;<SAMP
+CLASS="prompt"
+>%</SAMP
+> <KBD
+CLASS="userinput"
+>plrender</KBD
+>
+
+No filename specified.
+
+Usage:
+        plrender [options] [files]
+
+plrender options:
+    [-v] [-i name] [-b number] [-e number] [-p page]
+
+PLplot options:
+    [-h] [-v] [-verbose] [-debug] [-dev name] [-o name] [-display name]
+    [-px number] [-py number] [-geometry geom] [-wplt xl,yl,xr,yr]
+    [-mar margin] [-a aspect] [-jx justx] [-jy justy] [-ori orient]
+    [-freeaspect] [-width width] [-bg color] [-ncol0 n] [-ncol1 n] [-fam]
+    [-fsiz size] [-fbeg number] [-finc number] [-fflen length] [-nopixmap]
+    [-db] [-np] [-server_name name] [-server_host name] [-server_port name]
+    [-user name]
+
+
+Type plrender -h for a full description.
+
+</PRE
+></TD
+></TR
+></TABLE
+>
+</P
+><P
+>&#13;The longer usage message goes into more detail, and is as follows:
+<TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="screen"
+>&#13;<SAMP
+CLASS="prompt"
+>%</SAMP
+> <KBD
+CLASS="userinput"
+>plrender -h</KBD
+>
+
+Usage:
+        plrender [options] [files]
+
+plrender options:
+    -v                   Print out the plrender version number
+    -i name              Input filename
+    -b number            Beginning page number
+    -e number            End page number
+    -p page              Plot given page only
+
+If the "-i" flag is omitted, unrecognized input will assumed to be filename
+parameters.  Specifying "-" for the input or output filename means use stdin
+or stdout, respectively.  See the manual for more detail.
+
+PLplot options:
+    -h                   Print out this message
+    -v                   Print out the PLplot library version number
+    -verbose             Be more verbose than usual
+    -debug               Print debugging info (implies -verbose)
+    -dev name            Output device name
+    -o name              Output filename
+    -display name        X server to contact
+    -px number           Plots per page in x
+    -py number           Plots per page in y
+    -geometry geom       Window size, in pixels (e.g. -geometry 400x300)
+    -wplt xl,yl,xr,yr    Relative coordinates [0-1] of window into plot
+    -mar margin          Margin space in relative coordinates (0 to 0.5, def 0)
+    -a aspect            Page aspect ratio (def: same as output device)
+    -jx justx            Page justification in x (-0.5 to 0.5, def 0)
+    -jy justy            Page justification in y (-0.5 to 0.5, def 0)
+    -ori orient          Plot orientation (0,2=landscape, 1,3=portrait)
+    -freeaspect          Do not preserve aspect ratio on orientation swaps
+    -portrait            Sets portrait mode (both orientation and aspect ratio)
+    -width width         Sets pen width (1 &#60;= width &#60;= 10)
+    -bg color            Background color (0=black, FFFFFF=white)
+    -ncol0 n             Number of colors to allocate in cmap 0 (upper bound)
+    -ncol1 n             Number of colors to allocate in cmap 1 (upper bound)
+    -fam                 Create a family of output files
+    -fsiz size[kKmMgG]   Output family file size in MB (e.g. -fsiz 0.5G, def MB)
+    -fbeg number         First family member number on output
+    -finc number         Increment between family members
+    -fflen length        Family member number minimum field width
+    -nopixmap            Don't use pixmaps in X-based drivers
+    -db                  Double buffer X window output
+    -np                  No pause between pages
+    -server_name name    Main window name of PLplot server (tk driver)
+    -dpi dpi             Resolution, in dots per inch (e.g. -dpi 360x360)
+    -compression num     Sets compression level in supporting devices
+    -drvopt option[=value][,option[=value]]* Driver specific options
+</PRE
+></TD
+></TR
+></TABLE
+>
+</P
+><P
+>&#13;The options are generally self explanatory (family files are explained in
+<A
+HREF="output-devices.html#familying"
+>the Section called <I
+>Family File Output</I
+></A
+>).
+Most of these options have default values, and for those that don't
+<CODE
+CLASS="function"
+>plrender</CODE
+> will prompt the user.  The
+<TT
+CLASS="literal"
+>-px</TT
+> and <TT
+CLASS="literal"
+>-py</TT
+> options are
+not so useful at present, because everything is scaled down by the
+specified factor --- resulting in labels that are too small (future
+versions of <CODE
+CLASS="function"
+>plrender</CODE
+> might allow changing the label size as well). 
+</P
+><P
+>&#13;Additional options may be added in future releases.
+</P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="familying"
+>Family File Output</A
+></H2
+><P
+>&#13;When sending PLplot to a file, the user has the option of generating a
+<SPAN
+CLASS="QUOTE"
+>"family"</SPAN
+> of output files for most output file drivers.
+This can be valuable when generating a large amount of output, so as to not
+strain network or printer facilities by processing extremely large single
+files.  Each family member file can be treated as a completely independent
+file.  In addition, <CODE
+CLASS="function"
+>plrender</CODE
+> has the ability to process a set of
+family member files as a single logical file.
+</P
+><P
+> To create a family file, one must simply call <A
+HREF="plsfam.html"
+><CODE
+CLASS="function"
+>plsfam</CODE
+></A
+> with the
+familying flag <TT
+CLASS="literal"
+>fam</TT
+> set to 1, and the desired maximum
+member size (in bytes) in <TT
+CLASS="literal"
+>bmax</TT
+>.  <A
+HREF="plsfam.html"
+><CODE
+CLASS="function"
+>plsfam</CODE
+></A
+> also allows
+you to set the current family file number.  If the current output
+driver does not support familying, there will be no effect.  This call must
+be made <SPAN
+CLASS="emphasis"
+><I
+CLASS="emphasis"
+>before</I
+></SPAN
+> calling <A
+HREF="plstar.html"
+><CODE
+CLASS="function"
+>plstar</CODE
+></A
+> or <A
+HREF="plstart.html"
+><CODE
+CLASS="function"
+>plstart</CODE
+></A
+>. </P
+><P
+> If familying is enabled, the name given for the output file (on the
+command line, in response to the <A
+HREF="plstar.html"
+><CODE
+CLASS="function"
+>plstar</CODE
+></A
+> prompt, as a <A
+HREF="plstart.html"
+><CODE
+CLASS="function"
+>plstart</CODE
+></A
+> argument,
+or as the result of a call to <A
+HREF="plsfnam.html"
+><CODE
+CLASS="function"
+>plsfnam</CODE
+></A
+>) becomes the name template for the
+family.  Thus, if you request a plmeta output file with name
+<TT
+CLASS="filename"
+>test-%n.plm</TT
+>, the files actually created will be
+<TT
+CLASS="filename"
+>test-1.plm</TT
+>, <TT
+CLASS="filename"
+>test-2.plm</TT
+>, and so on,
+where <TT
+CLASS="filename"
+>%n</TT
+> indicates where the member number is replaced.
+If there is no <TT
+CLASS="filename"
+>%n</TT
+>, then the output file becomes the
+stem name and the created files will be like
+<TT
+CLASS="filename"
+>test.plm.1</TT
+>, <TT
+CLASS="filename"
+>test.plm.2</TT
+>, and so on.
+A new file is automatically started once the byte limit for the current file
+is passed, but not until the next page break. One may insure a new file at
+every page break by making the byte limit small enough.  Alternatively, if
+the byte limit is large you can still insure a new file is automatically
+started after a page break if you precede the call to <A
+HREF="pleop.html"
+><CODE
+CLASS="function"
+>pleop</CODE
+></A
+> with a call to
+<A
+HREF="plfamadv.html"
+><CODE
+CLASS="function"
+>plfamadv</CODE
+></A
+>.</P
+><P
+>&#13;The <A
+HREF="plgfam.html"
+><CODE
+CLASS="function"
+>plgfam</CODE
+></A
+> routine can be used from within the user program to find
+out more about the graphics file being written.  In particular, by
+periodically checking the number of the member file currently being written
+to, one can detect when a new member file is started.  This information
+might be used in various ways; for example you could spawn a process to
+automatically plrender each metafile after it is closed (perhaps during a
+long simulation run) and send it off to be printed. 
+</P
+><P
+> <CODE
+CLASS="function"
+>plrender</CODE
+> has several options for dealing with
+family files.  It can process a single member file
+(<CODE
+CLASS="function"
+>plrender</CODE
+>  <TT
+CLASS="filename"
+>test.plm.1</TT
+>)
+or the entire family if given only the stem name
+(<CODE
+CLASS="function"
+>plrender</CODE
+>  <TT
+CLASS="filename"
+>test.plm</TT
+>)
+It can also create family files on output, rendering to any
+device that supports familying, including another metafile if desired.  The
+size of member files in this case is input through the argument list, and
+defaults to 1MB if unspecified (this may be changed during the PLplot
+installation, however). <CODE
+CLASS="function"
+>plrender</CODE
+> can also create a
+single output file from a familied input metafile. </P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="interactive-devices"
+>Interactive Output Devices</A
+></H2
+><P
+>&#13;Here we shall discuss briefly some of the more common interactive output
+devices.  
+</P
+><P
+>&#13;Many popular terminals or terminal emulators at present have a
+facility for switching between text and graphics <SPAN
+CLASS="QUOTE"
+>"screens"</SPAN
+>.
+This includes the xterm emulator under X-windows, vt100's with
+Retrographics, and numerous emulators for microcomputers which have a dual
+vt100/tek4010 emulation capability.  On these devices, it is possible to
+switch between the text and graphics screens by surrounding your PLplot
+calls by calls to <A
+HREF="plgra.html"
+><CODE
+CLASS="function"
+>plgra</CODE
+></A
+> and <A
+HREF="pltext.html"
+><CODE
+CLASS="function"
+>pltext</CODE
+></A
+>.  This will allow your diagnostic and
+informational code output to not interfere with your graphical output.
+</P
+><P
+>&#13;At present, only the xterm driver supports switching between text
+and graphics screens.  The escape sequences as sent by the xterm driver
+are fairly standard, however, and have worked correctly on most other
+popular vt100/tek4010 emulators we've tried.
+</P
+><P
+>&#13;When using the xterm driver, hitting a RETURN will advance and clear the
+page.  If indeed running from an xterm, you may resize, move, cover and
+uncover the window.  The behavior of the X-window driver is quite different,
+however.  First, it is much faster, as there is no tty-like handshaking
+going on.  Second, a mouse click is used to advance and clear the page,
+rather than a RETURN.
+</P
+><P
+>&#13;On a tektronix 4014 compatible device, you may preview tektronix output
+files via the <CODE
+CLASS="function"
+>pltek</CODE
+> utility.
+<CODE
+CLASS="function"
+>pltek</CODE
+> will let you step through the file interactively,
+skipping backward or forward if desired.  The help message for
+<CODE
+CLASS="function"
+>pltek</CODE
+> is as follows:
+
+<TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="screen"
+>&#13;<SAMP
+CLASS="prompt"
+>%</SAMP
+> <KBD
+CLASS="userinput"
+>pltek</KBD
+>
+Usage: pltek filename 
+At the prompt, the following replies are recognized:
+   h,?    Give this help message.
+    q     Quit program.
+   &#60;n&#62;    Go to the specified page number.
+   -&#60;n&#62;   Go back &#60;n&#62; pages.
+   +&#60;n&#62;   Go forward &#60;n&#62; pages.
+ &#60;Return&#62; Go to the next page.
+
+</PRE
+></TD
+></TR
+></TABLE
+>
+The output device is switched to text mode before the prompt is given,
+which causes the prompt to go to the vt102 window under xterm and
+most vt100/tek4010 emulators.
+</P
+></DIV
+><DIV
+CLASS="sect2"
+><H2
+CLASS="sect2"
+><A
+NAME="specifying-devices"
+>Specifying the Output Device</A
+></H2
+><P
+>&#13;      The main initialization routine for PLplot is <A
+HREF="plinit.html"
+><CODE
+CLASS="function"
+>plinit</CODE
+></A
+>, which sets up
+      all internal data structures necessary for plotting and initializes
+      the output device driver.  The output device can be a terminal, disk
+      file, window system, pipe, or socket.  If the output device has not
+      already been specified when <A
+HREF="plinit.html"
+><CODE
+CLASS="function"
+>plinit</CODE
+></A
+> is called, a list of valid
+      output devices is given and the user is prompted for a choice.  For
+      example:
+    </P
+><P
+>&#13;      <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="screen"
+>&#13;<SAMP
+CLASS="prompt"
+>%</SAMP
+> <KBD
+CLASS="userinput"
+>x01c</KBD
+>
+	
+Plotting Options:
+ &#60; 1&#62; xwin       X-Window (Xlib)
+ &#60; 2&#62; tk         Tcl/TK Window
+ &#60; 3&#62; xterm      Xterm Window
+ &#60; 4&#62; tekt       Tektronix Terminal (4010)
+ &#60; 5&#62; tek4107t   Tektronix Terminal (4105/4107)
+ &#60; 6&#62; mskermit   MS-Kermit emulator
+ &#60; 7&#62; versaterm  Versaterm vt100/tek emulator
+ &#60; 8&#62; vlt        VLT vt100/tek emulator
+ &#60; 9&#62; plmeta     PLPLOT Native Meta-File
+ &#60;10&#62; tekf       Tektronix File (4010)
+ &#60;11&#62; tek4107f   Tektronix File (4105/4107)
+ &#60;12&#62; ps         PostScript File (monochrome)
+ &#60;13&#62; psc        PostScript File (color)
+ &#60;14&#62; xfig       Xfig file
+ &#60;15&#62; ljiip      LaserJet IIp/deskjet compressed graphics
+ &#60;16&#62; ljii       LaserJet II Bitmap File (150 dpi)
+ &#60;17&#62; null       Null device
+
+Enter device number or keyword: </PRE
+></TD
+></TR
+></TABLE
+>
+    </P
+><P
+>&#13;      Either the device number or a device keyword is accepted.  Specifying
+      the device by keyword is preferable in aliases or scripts since the
+      device number is dependent on the install procedure (the installer
+      can choose which device drivers to include).  The device can be
+      specified prior to the call to <A
+HREF="plinit.html"
+><CODE
+CLASS="function"
+>plinit</CODE
+></A
+> by:
+
+      <P
+></P
+><UL
+><LI
+><P
+>&#13;	    A call to <A
+HREF="plsdev.html"
+><CODE
+CLASS="function"
+>plsdev</CODE
+></A
+>.
+	  </P
+></LI
+><LI
+><P
+>&#13;	    The <TT
+CLASS="literal"
+>-dev</TT
+> <TT
+CLASS="replaceable"
+><I
+>device</I
+></TT
+>
+	    command line argument, if the program's command line arguments
+	    are being passed to the PLplot function
+	    <A
+HREF="plparseopts.html"
+><CODE
+CLASS="function"
+>plparseopts</CODE
+></A
+>.
+	  </P
+></LI
+></UL
+>
+      
+    </P
+><P
+>&#13;      Additional startup routines <A
+HREF="plstar.html"
+><CODE
+CLASS="function"
+>plstar</CODE
+></A
+> and <A
+HREF="plstart.html"
+><CODE
+CLASS="function"
+>plstart</CODE
+></A
+> are available but
+      these are simply front-ends to <A
+HREF="plinit.html"
+><CODE
+CLASS="function"
+>plinit</CODE
+></A
+>, and should be avoided.  It
+      is preferable to call <A
+HREF="plinit.html"
+><CODE
+CLASS="function"
+>plinit</CODE
+></A
+> directly, along with the appropriate
+      setup calls, for the greater amount of control this provides (see the
+      example programs for more info).
+    </P
+><P
+>&#13;      Before <A
+HREF="plinit.html"
+><CODE
+CLASS="function"
+>plinit</CODE
+></A
+> is called, you may modify the number of subpages the
+      output device is divided into via a call to
+      <CODE
+CLASS="function"
+>plssub</CODE
+>.  Subpages are useful for placing several
+      graphs on a page, but all subpages are constrained to be of the same
+      size.  For greater flexibility, viewports can be used (see <A
+HREF="viewport_window.html#viewports"
+>the Section called <I
+>Defining the Viewport</I
+></A
+> for more info on viewports).  The routine
+	<A
+HREF="pladv.html"
+><CODE
+CLASS="function"
+>pladv</CODE
+></A
+> is used to advance to a particular subpage or to the next
+	subpage.  The screen is cleared (or a new piece of paper loaded) if a
+	new subpage is requested when there are no subpages left on the
+	current page.  When a page is divided into subpages, the default
+	character, symbol and tick sizes are scaled inversely as the square
+	root of the number of subpages in the vertical direction.  This is
+	designed to improve readability of plot labels as the plot size
+	shrinks.
+    </P
+><P
+>&#13;      PLplot has the ability to write to multiple output streams.  An
+      output stream corresponds to a single logical device to which one
+      plots independent of all other streams.  The function <A
+HREF="plsstrm.html"
+><CODE
+CLASS="function"
+>plsstrm</CODE
+></A
+> is
+      used to switch between streams -- you may only write to one output
+      stream at a time.  At present, an output stream is not limited by the
+      type of device, however, it may not be wise to attempt opening two
+      terminal devices.  An example usage for the creation of multiple
+      streams is as follows:
+    </P
+><P
+>&#13;      <TABLE
+CLASS="verbatim"
+><TR
+><TD
+><PRE
+CLASS="programlisting"
+>#include "plplot.h"
+
+main()
+{
+    int nx = 2, ny = 2;
+
+    plssub(nx, ny);
+    plsdev("xwin");
+    plinit();
+
+    &#60;plots for stream 0&#62;
+
+    plsstrm(1);
+    plssub(nx, ny);
+    plsdev("plmeta");
+    plsfnam("tst.plm");
+    plinit();
+
+    &#60;plots for stream 1&#62;
+
+    plsstrm(0);
+
+    &#60;plots for stream 0&#62;</PRE
+></TD
+></TR
+></TABLE
+>
+    </P
+><P
+>&#13;      and so on, for sending output simultaneously to an X-window and a
+      metafile.  The default stream corresponds to stream number zero.  At
+      present, the majority of output drivers can only be used by a single
+      stream (exceptions include the metafile driver and X-window driver).
+      Also see example program 14 (note: only the C version is available,
+      although it can be done equally well from Fortran).
+    </P
+><P
+>&#13;      At the end of a plotting program, it is important to close the
+      plotting device by calling <A
+HREF="plend.html"
+><CODE
+CLASS="function"
+>plend</CODE
+></A
+>.  This flushes any internal
+      buffers and frees any memory that may have been allocated, for all
+      open output streams.  You may call <A
+HREF="plend1.html"
+><CODE
+CLASS="function"
+>plend1</CODE
+></A
+> to close the plotting
+      device for the current output stream only.  Note that if PLplot is
+      initialized more than once during a program to change the output
+      device, an automatic call to <A
+HREF="plend1.html"
+><CODE
+CLASS="function"
+>plend1</CODE
+></A
+> is made before the new device
+      is opened for the given stream.
+    </P
+></DIV
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="advanced.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="freetype-notes.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+>Advanced Use of PLplot</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="advanced.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+>Adding FreeType Library Support to Bitmap Drivers</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>

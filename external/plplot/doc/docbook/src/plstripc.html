@@ -1,0 +1,570 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN""http://www.w3.org/TR/html4/loose.dtd">
+<HTML
+><HEAD
+><TITLE
+>&#13;      plstripc: Create a 4-pen stripchart
+    </TITLE
+><META
+NAME="GENERATOR"
+CONTENT="Modular DocBook HTML Stylesheet Version 1.79"><LINK
+REL="HOME"
+TITLE="The PLplot Plotting Library"
+HREF="index.html"><LINK
+REL="UP"
+TITLE="The Common API for PLplot"
+HREF="api.html"><LINK
+REL="PREVIOUS"
+TITLE="
+      plstripa: Add a point to a stripchart
+    "
+HREF="plstripa.html"><LINK
+REL="NEXT"
+TITLE="
+      plstripd: Deletes and releases memory used by a
+stripchart
+    "
+HREF="plstripd.html"><LINK
+REL="STYLESHEET"
+TYPE="text/css"
+HREF="stylesheet.css"></HEAD
+><BODY
+CLASS="sect1"
+BGCOLOR="#FFFFFF"
+TEXT="#000000"
+LINK="#0000FF"
+VLINK="#840084"
+ALINK="#0000FF"
+><DIV
+CLASS="NAVHEADER"
+><TABLE
+SUMMARY="Header navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TH
+COLSPAN="3"
+ALIGN="center"
+>The PLplot Plotting Library: Programmer's Reference Manual</TH
+></TR
+><TR
+><TD
+WIDTH="10%"
+ALIGN="left"
+VALIGN="bottom"
+><A
+HREF="plstripa.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="80%"
+ALIGN="center"
+VALIGN="bottom"
+>Chapter 17. The Common API for PLplot</TD
+><TD
+WIDTH="10%"
+ALIGN="right"
+VALIGN="bottom"
+><A
+HREF="plstripd.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+></TABLE
+><HR
+ALIGN="LEFT"
+WIDTH="100%"></DIV
+><DIV
+CLASS="sect1"
+><H3
+CLASS="sect1"
+><A
+NAME="plstripc"
+><CODE
+CLASS="function"
+>plstripc</CODE
+>: Create a 4-pen stripchart</A
+></H3
+><P
+>&#13;      <DIV
+CLASS="funcsynopsis"
+><P
+></P
+><A
+NAME="AEN10650"
+></A
+><TABLE
+CLASS="funcprototype"
+><TR
+><TD
+><CODE
+CLASS="FUNCDEF"
+>&#13;           plstripc
+        </CODE
+>(id, xspec, yspec, xmin, xmax, xjump, ymin, ymax, xlpos, ylpos, y_ascl, acc, colbox, collab, colline, styline, legline[], labx, laby, labtop);</TD
+></TR
+></TABLE
+><P
+></P
+></DIV
+>
+    </P
+><P
+>&#13;      Create a 4-pen stripchart, to be used afterwards by <A
+HREF="plstripa.html"
+><CODE
+CLASS="function"
+>plstripa</CODE
+></A
+>
+    </P
+><TABLE
+CLASS="variablelist"
+><TR
+><TD
+><DL
+><DT
+><CODE
+CLASS="parameter"
+>id</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT *</TT
+>, output)</DT
+><DD
+><P
+>&#13;            Identification number of stripchart to use on <A
+HREF="plstripa.html"
+><CODE
+CLASS="function"
+>plstripa</CODE
+></A
+> and <A
+HREF="plstripd.html"
+><CODE
+CLASS="function"
+>plstripd</CODE
+></A
+>.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>xspec</CODE
+>
+	  (<TT
+CLASS="literal"
+>char *</TT
+>, input)</DT
+><DD
+><P
+>&#13;            X-axis specification as in <A
+HREF="plbox.html"
+><CODE
+CLASS="function"
+>plbox</CODE
+></A
+>.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>yspec</CODE
+>
+	  (<TT
+CLASS="literal"
+>char *</TT
+>, input)</DT
+><DD
+><P
+>&#13;            Y-axis specification as in <A
+HREF="plbox.html"
+><CODE
+CLASS="function"
+>plbox</CODE
+></A
+>.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>xmin</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;            Initial coordinates of plot box; they will change as data are
+	    added.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>xmax</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;            Initial coordinates of plot box; they will change as data are
+	    added.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>xjump</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  When x attains <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>xmax</CODE
+></TT
+>,
+	  the length of the plot is multiplied by the
+	  factor <TT
+CLASS="literal"
+>(1 + <CODE
+CLASS="parameter"
+>xjump</CODE
+>)</TT
+>.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>ymin</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;            Initial coordinates of plot box; they will change as data are
+	    added.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>ymax</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;            Initial coordinates of plot box; they will change as data are
+	    added.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>xlpos</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;            X legend box position (range from 0 to 1).
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>ylpos</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLFLT</TT
+>, input)</DT
+><DD
+><P
+>&#13;            Y legend box position (range from 0 to 1).
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>y_ascl</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLBOOL</TT
+>, input)</DT
+><DD
+><P
+>&#13;	  Autoscale y between x jumps if
+	  <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>y_ascl</CODE
+></TT
+> is true,
+	  otherwise not.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>acc</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLBOOL</TT
+>, input)</DT
+><DD
+><P
+>&#13;            Accumulate strip plot if
+	    <TT
+CLASS="literal"
+><CODE
+CLASS="parameter"
+>acc</CODE
+></TT
+> is true,
+	    otherwise slide display.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>colbox</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;            Plot box color index (cmap0).
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>collab</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT</TT
+>, input)</DT
+><DD
+><P
+>&#13;            Legend color index (cmap0).
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>colline</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;            Pointer to array with color indices (cmap0) for the 4 pens.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>styline</CODE
+>
+	  (<TT
+CLASS="literal"
+>PLINT *</TT
+>, input)</DT
+><DD
+><P
+>&#13;            Pointer to array with line styles for the 4 pens.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>legline</CODE
+>
+	  (<TT
+CLASS="literal"
+>char **</TT
+>, input)</DT
+><DD
+><P
+>&#13;            Pointer to character array containing legends for the 4 pens.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>labx</CODE
+>
+	  (<TT
+CLASS="literal"
+>char *</TT
+>, input)</DT
+><DD
+><P
+>&#13;            X-axis label.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>laby</CODE
+>
+	  (<TT
+CLASS="literal"
+>char *</TT
+>, input)</DT
+><DD
+><P
+>&#13;            Y-axis label.
+	  </P
+></DD
+><DT
+><CODE
+CLASS="parameter"
+>labtop</CODE
+>
+	  (<TT
+CLASS="literal"
+>char *</TT
+>, input)</DT
+><DD
+><P
+>&#13;            Plot title.
+	  </P
+></DD
+></DL
+></TD
+></TR
+></TABLE
+><P
+>&#13;      Redacted form: 
+      <P
+></P
+><UL
+><LI
+><P
+>&#13;	  General: <CODE
+CLASS="function"
+>plstripc(id, xspec, yspec, xmin, xmax, xjump, ymin, ymax, xlpos, ylpos, y_ascl, acc, colbox, collab, colline, styline, legline, labx, laby, labz)</CODE
+>
+          </P
+></LI
+><LI
+><P
+>&#13;	  Perl/PDL: <CODE
+CLASS="function"
+>plstripc(xmin, xmax, xjump, ymin, ymax, xlpos, ylpos, y_ascl, acc, colbox, collab, colline, styline, id, xspec, ypsec, legline, labx, laby, labtop)</CODE
+>
+          </P
+></LI
+></UL
+>
+    </P
+><P
+>&#13;      This function is used in example 17.
+    </P
+></DIV
+><DIV
+CLASS="NAVFOOTER"
+><HR
+ALIGN="LEFT"
+WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
+WIDTH="100%"
+BORDER="0"
+CELLPADDING="0"
+CELLSPACING="0"
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><A
+HREF="plstripa.html"
+ACCESSKEY="P"
+>Prev</A
+></TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="index.html"
+ACCESSKEY="H"
+>Home</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><A
+HREF="plstripd.html"
+ACCESSKEY="N"
+>Next</A
+></TD
+></TR
+><TR
+><TD
+WIDTH="33%"
+ALIGN="left"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plstripa</CODE
+>: Add a point to a stripchart</TD
+><TD
+WIDTH="34%"
+ALIGN="center"
+VALIGN="top"
+><A
+HREF="api.html"
+ACCESSKEY="U"
+>Up</A
+></TD
+><TD
+WIDTH="33%"
+ALIGN="right"
+VALIGN="top"
+><CODE
+CLASS="function"
+>plstripd</CODE
+>: Deletes and releases memory used by a
+stripchart</TD
+></TR
+></TABLE
+></DIV
+></BODY
+></HTML
+>
