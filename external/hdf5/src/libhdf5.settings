@@ -1,0 +1,61 @@
+	    SUMMARY OF THE HDF5 CONFIGURATION
+	    =================================
+
+General Information:
+-------------------
+		   HDF5 Version: 1.8.1
+		  Configured on: Sun Jul  6 00:14:57 CEST 2008
+		  Configured by: jmasters@papi.science.uva.nl
+		 Configure mode: production
+		    Host system: x86_64-unknown-linux-gnu
+	      Uname information: Linux papi.science.uva.nl 2.6.24-1-amd64 #1 SMP Fri Apr 18 23:08:22 UTC 2008 x86_64 GNU/Linux
+		       Byte sex: little-endian
+		      Libraries: 
+	       Parallel support: no
+	     Installation point: /home/jmasters/repositories/usg-repository/code/trunk/external/hdf5/../../release
+		       Compiler: /usr/bin/gcc (gcc-4.2.3)
+	      Compiler switches:  -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -D_POSIX_SOURCE -D_BSD_SOURCE 
+		Extra libraries:   -lz -lm 
+		       Archiver: ar
+			 Ranlib: ranlib
+	      Debugged Packages: 
+		    API Tracing: no
+
+Compiling Options:
+------------------
+               Compilation Mode: production
+                     C Compiler: /usr/bin/gcc (gcc-4.2.3)
+	       CFLAGS/H5_CFLAGS: /-std=c99 -pedantic -Wall -Wextra -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wsign-compare -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline -Wno-long-long -Wfloat-equal -Wmissing-format-attribute -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar -Wformat-nonliteral -Wformat-security -Wformat-y2k -Wunreachable-code -Wendif-labels -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch -Wmissing-field-initializers -Wvariadic-macros -Wunsafe-loop-optimizations -Wc++-compat -Wvolatile-register-var -O -fomit-frame-pointer -finline-functions
+           CPPFLAGS/H5_CPPFLAGS: -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -D_POSIX_SOURCE -D_BSD_SOURCE /  -DNDEBUG -UH5_DEBUG_API
+                        LDFLAGS: 
+                     Debug Mode: 
+               Shared Libraries: yes
+               Static Libraries: yes
+  Statically Linked Executables: no
+ Default Public Symbols Version: v18
+ With Deprecated Public Symbols: yes
+                        Tracing: no
+Clear file buffers before write: yes
+           Using memory checker: no
+   Optimization Instrumentation: no
+
+Languages:
+----------
+                        Fortran: no
+                            C++: no
+
+Features:
+---------
+                        dmalloc: no
+         Function Stack Tracing: no
+                           GPFS: no
+      Strict File Format Checks: no
+            Default API Mapping: v18
+         I/O filters (external): deflate(zlib)
+         I/O filters (internal): shuffle,fletcher32,nbit,scaleoffset
+ Linux Large File Support (LFS): yes
+                            MPE: no
+                  Parallel HDF5: no
+                     Direct VFD: no
+                   Threadsafety: no
+             High Level library: yes
