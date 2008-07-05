@@ -1,7 +1,0 @@
-See __LICENSE__ in Lib/__init__.py for the numarray license or view it
-at the Python prompt as follows:
-
->>> import numarray
->>> print numarray.__LICENSE__
-
-...  the license, not repeated in this document, will be printed out ...
