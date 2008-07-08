@@ -303,6 +303,13 @@ done
 ## -----------------------------------------------------------------------------
 ## Build individual/multiple packages
 
+## since all further operations need CMake as central tool, we need to make sure
+## it is available first.
+
+if test -z `which cmake` ; then { build_cmake ; } fi
+
+## once we have make sure CMake is available, we can continue
+
 case $param_packageName in 
     bison)
         echo "[`date`] Selected package Bison";
@@ -319,9 +326,9 @@ case $param_packageName in
     casacore)
         echo "[`date`] Selected package CASACORE";
         ## -- build required packages
-        build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=1";
-        build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=1";
-        build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=1";
+        build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
+        build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$param_forceBuild";
+        build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
         ## -- build package
         build_package casacore external/casacore "-DCASACORE_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
@@ -418,7 +425,7 @@ case $param_packageName in
     ;;
     cr)
         echo "[`date`] Processing required packages ..."
-	build_cmake
+	$basedir/build.sh cmake
 	build_package bison external/bison
 	build_package flex external/flex
 	$basedir/build.sh casacore
