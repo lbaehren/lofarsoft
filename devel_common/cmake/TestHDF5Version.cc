@@ -23,8 +23,9 @@
 
 #include <iostream>
 
-#include <H5LT.h>
-#include <H5TA.h>
+#ifdef HAVE_H5PUBLIC_H
+#include <H5public.h> 
+#endif
 
 int main ()
 {
@@ -35,9 +36,9 @@ int main ()
   uint releaseNumber = 0;
   
   try {
-    h5error = H5get_libversion (&majorVersion,
-				&minorVersion,
-				&releaseNumber);
+    h5error = H5check_version (&majorVersion,
+			       &minorVersion,
+			       &releaseNumber);
   } catch (std::string message) {
     std::cerr << "[TestHDF5Version] Caught error getting library version!"
 	      << std::endl;
