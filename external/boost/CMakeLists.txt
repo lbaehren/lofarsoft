@@ -33,11 +33,13 @@ option (BOOST_CMAKE_BUILD "Use CMake port to configure and build Boost?" 1)
 
 ## Selective building of the Boost++ libraries
 
-option (BOOST_LIB_MPL "Build libboost_mpl" 0)
-option (BOOST_LIB_PYTHON "Build libboost_python" 1)
-option (BOOST_LIB_REGEX "Build libboost_regex" 0)
-option (BOOST_LIB_SIGNALS "Build libboost_signals" 0)
-option (BOOST_LIB_WAVE "Build libboost_wave" 0)
+option (BOOST_LIB_IO      "Build libboost_io"      NO  )
+option (BOOST_LIB_MPL     "Build libboost_mpl"     NO  )
+option (BOOST_LIB_PYTHON  "Build libboost_python"  YES )
+option (BOOST_LIB_RANGE   "Build libboost_range"   NO  )
+option (BOOST_LIB_REGEX   "Build libboost_regex"   NO  )
+option (BOOST_LIB_SIGNALS "Build libboost_signals" NO  )
+option (BOOST_LIB_WAVE    "Build libboost_wave"    YES )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
