@@ -89,7 +89,7 @@ int test_datasets (std::string const &filename)
   if (fileID > 0) {
     
     cout << "-- opening HDF5 group ..." << endl;
-    groupID = H5Gopen (fileID,
+    groupID = H5Gopen1 (fileID,
 		       name_station.c_str());
     
     if (groupID > 0) {
@@ -172,7 +172,7 @@ int test_construction (std::string const &filename)
     cerr << message << endl;
     nofFailedTests++;
   }
-  h5error = H5Eclear();
+  h5error = H5Eclear1();
 
   /*
    * TEST: Argumented constructor using filename and name of the group as
@@ -189,7 +189,7 @@ int test_construction (std::string const &filename)
     cerr << message << endl;
     nofFailedTests++;
   }
-  h5error = H5Eclear();
+  h5error = H5Eclear1();
   
   /*
    * TEST: Argumented constructor using file identifier (as obtained from 
@@ -209,7 +209,7 @@ int test_construction (std::string const &filename)
     cerr << message << endl;
     nofFailedTests++;
   }
-  h5error = H5Eclear();
+  h5error = H5Eclear1();
 
   /*
    * TEST: Argumented constructor using object identifier for the group as
@@ -220,7 +220,7 @@ int test_construction (std::string const &filename)
   try {
     if (file_id > 0) {
       // retrieve the group ID 
-      hid_t groupID = H5Gopen (file_id,
+      hid_t groupID = H5Gopen1 (file_id,
 			       name_station.c_str());
       // contiue if group successfully opened
       if (groupID > 0) {
@@ -239,7 +239,7 @@ int test_construction (std::string const &filename)
     cerr << message << endl;
     nofFailedTests++;
   }
-  h5error = H5Eclear();
+  h5error = H5Eclear1();
 
   /*
    * TEST: 
@@ -259,7 +259,7 @@ int test_construction (std::string const &filename)
     cerr << message << endl;
     nofFailedTests++;
   }
-  h5error = H5Eclear();
+  h5error = H5Eclear1();
 
   // release file identifier
   h5error = H5Fclose (file_id);

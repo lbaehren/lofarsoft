@@ -99,8 +99,8 @@ int test_hdf5 (std::string const &filename)
    */
   if (file_id > 0) {
     cout << "--> Opening StationGroup ..." << endl;
-    stationGroup_id = H5Gopen (file_id,
-			       "Station001");
+    stationGroup_id = H5Gopen1 (file_id,
+				"Station001");
   } else {
     nofFailedTests++;
   }
@@ -169,8 +169,8 @@ int test_hdf5 (std::string const &filename)
    */
   if (stationGroup_id > 0) {
     cout << "--> Opening dipole dataset ..." << endl;
-    channelDataset_id = H5Dopen (stationGroup_id,
-				 dataset_name.c_str());
+    channelDataset_id = H5Dopen1 (stationGroup_id,
+				  dataset_name.c_str());
   } else {
     nofFailedTests++;
   }

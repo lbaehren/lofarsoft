@@ -91,7 +91,7 @@ int test_construction (std::string const &filename)
     cerr << message << endl;
     nofFailedTests++;
   }
-  h5error = H5Eclear();
+  h5error = H5Eclear1();
 
   /*
    * Test for the constructor taking file name and name of the dataset as arguments.
@@ -107,7 +107,7 @@ int test_construction (std::string const &filename)
     cerr << message << endl;
     nofFailedTests++;
   }
-  h5error = H5Eclear();
+  h5error = H5Eclear1();
   
   /*
    * Test for the constructor taking file identifier and name of the dataset as
@@ -133,7 +133,7 @@ int test_construction (std::string const &filename)
     cerr << message << endl;
     nofFailedTests++;
   }
-  h5error = H5Eclear();
+  h5error = H5Eclear1();
 
   /*
    * Instead of using the base of the file as reference location, also the group
@@ -149,8 +149,8 @@ int test_construction (std::string const &filename)
     
     if (file_id > 0) {
       // open group within which the dataset is located
-      hid_t group_id = H5Gopen (file_id,
-				name_station.c_str());
+      hid_t group_id = H5Gopen1 (file_id,
+				 name_station.c_str());
       
       if (group_id > 0) {
 	// create new object
@@ -175,7 +175,7 @@ int test_construction (std::string const &filename)
     cerr << message << endl;
     nofFailedTests++;
   }
-  h5error = H5Eclear();
+  h5error = H5Eclear1();
 
   /*
    * Instead of using a ID/name conbination, we should be able to construct a
@@ -192,8 +192,8 @@ int test_construction (std::string const &filename)
     
     if (file_id > 0) {
       // open dataset within which the dataset is located
-      hid_t dataset_id = H5Dopen (file_id,
-				  path_dataset.c_str());
+      hid_t dataset_id = H5Dopen1 (file_id,
+				   path_dataset.c_str());
       
       if (dataset_id > 0) {
 	// create new object
@@ -217,7 +217,7 @@ int test_construction (std::string const &filename)
     cerr << message << endl;
     nofFailedTests++;
   }
-  h5error = H5Eclear();
+  h5error = H5Eclear1();
 
   /*
    * Test copy constructor, as required to directly construct a new object from an
@@ -238,7 +238,7 @@ int test_construction (std::string const &filename)
     cerr << message << endl;
     nofFailedTests++;
   }
-  h5error = H5Eclear();
+  h5error = H5Eclear1();
   
   return nofFailedTests;
   }
@@ -308,8 +308,8 @@ int test_datasets (std::string const &filename)
 
     cout << "-- start opening datasets within the file ..." << endl;
     for (uint n(0); n<dataset_names.size(); n++) {
-      dataset_id = H5Dopen (file_id,
-			    dataset_names[n].c_str());
+      dataset_id = H5Dopen1 (file_id,
+			     dataset_names[n].c_str());
       // check if opening of dataset was successful
       if (dataset_id > 0) {
 	dataset_ids.push_back (dataset_id);
@@ -328,7 +328,7 @@ int test_datasets (std::string const &filename)
     cerr << message << endl;
     nofFailedTests++;
   }
-  h5error = H5Eclear();
+  h5error = H5Eclear1();
 
   /*
    * TEST: While before we have been collecting the IDs for a set of non-identical
@@ -346,8 +346,8 @@ int test_datasets (std::string const &filename)
 
     for (uint n(0); n<dataset_names.size(); n++) {
       // try to open the dataset
-      dataset_id = H5Dopen (file_id,
-			    dataset_names[numDataset].c_str());
+      dataset_id = H5Dopen1 (file_id,
+			     dataset_names[numDataset].c_str());
       // check if opening of dataset was successful
       if (dataset_id > 0) {
 	dataset_ids.push_back (dataset_id);
@@ -365,7 +365,7 @@ int test_datasets (std::string const &filename)
     cerr << message << endl;
     nofFailedTests++;
   }
-  h5error = H5Eclear();
+  h5error = H5Eclear1();
 
   /*
    * TEST: Use std::vector as container for keeping a set of multiple
@@ -380,9 +380,9 @@ int test_datasets (std::string const &filename)
 
     for (uint n(0); n<nofDatasets; n++) {
       // try to open the dataset
-      dataset_id = H5Dopen (file_id,
-			    dataset_names[n].c_str());
-      h5error = H5Eclear();
+      dataset_id = H5Dopen1 (file_id,
+			     dataset_names[n].c_str());
+      h5error = H5Eclear1();
       // if HDF5 object exists, create LOFAR_DipoleDataset object for it
       if (dataset_id > 0) {
  	cout << "-- " << dataset_names[n] << endl;
@@ -395,19 +395,19 @@ int test_datasets (std::string const &filename)
       }
       // release the identifier for the located dataset object
       h5error = H5Dclose (dataset_id);
-      h5error = H5Eclear();
+      h5error = H5Eclear1();
     }
     cout << "--> Located and assigned " << datasets.size() << " datasets." << endl;
   } catch (std::string message) {
     cerr << message << endl;
     nofFailedTests++;
   }
-  h5error = H5Eclear();
+  h5error = H5Eclear1();
 
   // release the opened data file
   if (file_id > 0) {
     h5error = H5Fclose (file_id);
-    h5error = H5Eclear();
+    h5error = H5Eclear1();
   }
   
   return nofFailedTests;
@@ -441,7 +441,7 @@ int test_parameters (std::string const &filename)
     cerr << message << endl;
     nofFailedTests++;
   }
-  h5error = H5Eclear();
+  h5error = H5Eclear1();
 
   cout << "[2] Retrieve atomic valued attributes ..." << endl;
   try {
@@ -469,7 +469,7 @@ int test_parameters (std::string const &filename)
     cerr << message << endl;
     nofFailedTests++;
   }
-  h5error = H5Eclear();
+  h5error = H5Eclear1();
 
   cout << "[3] Retrieve vector valued attributes ..." << endl;
   try {
@@ -482,7 +482,7 @@ int test_parameters (std::string const &filename)
     cerr << message << endl;
     nofFailedTests++;
   }
-  h5error = H5Eclear();
+  h5error = H5Eclear1();
 
   return nofFailedTests;
 }
