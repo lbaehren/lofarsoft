@@ -26,14 +26,13 @@
 #include <Display/SimplePlot.h>
 #include <startools/reconstruction.hh>
 
-
 using namespace CR;
 using CR::CalTableReader;
 
 /*!
   \file calculatePhaseBehaviour.cc
   
-  \ingroup apps
+  \ingroup CR_Applications
 
   \brief calculation of PhaseCal values in CalTables
  
@@ -64,16 +63,15 @@ using CR::CalTableReader;
   ./calculatePhaseBehaviour [file] [delay]
   \endverbatim
   
-  <ul>
-    <li> file  - file containing phases (if not supplied, current PhaseCalValues are read from CalTables).
-    <li> delay - approximate delay [in ns] of the box at 60 MHz (fine tuning is done automatically).
-  </ul>
+  \param file  - file containing phases (if not supplied, current PhaseCalValues
+         are read from CalTables).
+  \param delay - approximate delay [in ns] of the box at 60 MHz (fine tuning is
+         done automatically).
    
   <h3>Examples</h3>
-  ./calculatePhaseBehaviour phase_measurement.dat
-
 
   \verbatim
+  ./calculatePhaseBehaviour phase_measurement.dat
   \endverbatim  
 */
 

@@ -63,6 +63,10 @@ endif (NOT HAVE_STARTOOLS)
 
 ## Assemble list of external libraries against which to link
 
+if (HDF5_LIBRARIES)
+  list (APPEND cr_link_libraries ${HDF5_LIBRARIES})
+endif (HDF5_LIBRARIES)
+
 if (CASA_LIBRARIES)
   list (APPEND cr_link_libraries ${CASA_LIBRARIES})
 endif (CASA_LIBRARIES)

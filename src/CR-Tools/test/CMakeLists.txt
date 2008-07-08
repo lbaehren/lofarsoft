@@ -67,6 +67,7 @@ if (HAVE_CASACORE AND HAVE_WCSLIB)
     ## linker instructions
     target_link_libraries (${test}
       cr_test
+      ${HDF5_LIBRARIES}
       ${CASA_LIBRARIES}
       ${LAPACK_LIBRARIES}
       ${WCSLIB_LIBRARIES}
@@ -250,7 +251,7 @@ endif (HAVE_ROOT AND HAVE_CASACORE AND FFTW3_LIBRARIES)
 ## -----------------------------------------------------------------------------
 ## Test working with the Data Access Library (DAL)
 
-if (HAVE_DAL AND HAVE_CASACORE)
+if (HAVE_DAL AND HAVE_CASACORE AND HDF5_MINOR_VERSION LESS 8)
   ## compiler instructions
   add_executable (tUseDAL tUseDAL.cc)
   ## linker instructions
@@ -265,7 +266,7 @@ if (HAVE_DAL AND HAVE_CASACORE)
     PROPERTIES
     COMPILE_FLAGS "-DHAVE_DAL -I${DAL_INCLUDES} -I${HDF5_INCLUDES}"
     )
-endif (HAVE_DAL AND HAVE_CASACORE)
+endif (HAVE_DAL AND HAVE_CASACORE AND HDF5_MINOR_VERSION LESS 8)
 
 ## -----------------------------------------------------------------------------
 ## Test working with the Python libraries

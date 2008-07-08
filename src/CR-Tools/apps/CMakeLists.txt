@@ -92,6 +92,13 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 
 if (HAVE_STARTOOLS)
   add_executable (call_pipeline call_pipeline.cc)
+  ## extra properties to take care of
+  if (APPLE)
+    set_target_properties (call_pipeline
+      PROPERTIES
+      LINK_FLAGS "-bind_at_load"
+      )
+  endif (APPLE)
   ## linker instructions
   target_link_libraries (call_pipeline
     cr
@@ -165,8 +172,15 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 ## -------------------------------------------------------------------
 ## calculatePhaseBehaviour
 
-if (HAVE_STARTOOLS)
+if (HAVE_STARTOOLS AND HAVE_PLPLOT)
   add_executable (calculatePhaseBehaviour calculatePhaseBehaviour.cc)
+  ## extra properties to take care of
+  if (APPLE)
+    set_target_properties (calculatePhaseBehaviour
+      PROPERTIES
+      LINK_FLAGS "-bind_at_load"
+      )
+  endif (APPLE)
   ## linker instructions
   target_link_libraries (calculatePhaseBehaviour
     cr
@@ -176,7 +190,7 @@ if (HAVE_STARTOOLS)
     )
   ## installation instructions
   list (APPEND cr_apps calculatePhaseBehaviour)
-endif (HAVE_STARTOOLS)
+endif (HAVE_STARTOOLS AND HAVE_PLPLOT)
 
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2007                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -115,9 +115,7 @@ int main ()
   int nofFailedTests (0);
 
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_genCRmap ();
-  }
-
+  nofFailedTests += test_genCRmap ();
+  
   return nofFailedTests;
 }

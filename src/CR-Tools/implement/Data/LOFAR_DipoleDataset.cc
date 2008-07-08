@@ -109,7 +109,7 @@ namespace DAL { // Namespace DAL -- begin
       herr_t h5error (0);
 
       h5error = H5Dclose (datasetID_p);
-      h5error = H5Eclear ();
+      h5error = H5Eclear1 ();
     }
   }
   
@@ -449,7 +449,7 @@ namespace DAL { // Namespace DAL -- begin
     // release the global file handle and clear the error stack
     if (file_id > 0) {
       h5error = H5Fclose (file_id);
-      h5error = H5Eclear ();
+      h5error = H5Eclear1 ();
     }
   }
   
@@ -466,8 +466,8 @@ namespace DAL { // Namespace DAL -- begin
       to reside below the object identified by "location".
     */
     try {
-      dataset_id = H5Dopen (location,
-			    dataset.c_str());
+      dataset_id = H5Dopen1 (location,
+			     dataset.c_str());
     } catch (std::string message) {
       cerr << "[LOFAR_DipoleDataset::init] " << message << endl;
       status = false;

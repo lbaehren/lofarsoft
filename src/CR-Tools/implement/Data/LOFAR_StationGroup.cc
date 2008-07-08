@@ -406,7 +406,7 @@ namespace DAL { // Namespace DAL -- begin
     // release the global file handle and clear the error stack
     if (file_id > 0) {
       h5error = H5Fclose (file_id);
-      h5error = H5Eclear ();
+      h5error = H5Eclear1 ();
     }
   }
   
@@ -423,8 +423,8 @@ namespace DAL { // Namespace DAL -- begin
       to reside below the object identified by "location".
     */
     try {
-      group_id = H5Gopen (location,
-			  group.c_str());
+      group_id = H5Gopen1 (location,
+			   group.c_str());
     } catch (std::string message) {
       std::cerr << "[LOFAR_StationGroup::init] " << message << std::endl;
       status = false;
