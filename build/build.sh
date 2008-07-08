@@ -103,10 +103,11 @@ build_cmake ()
 	## is not the case with error, since this is the bottom-most 
 	## position in the dependency chain
 	if test -d $basedir/../external/cmake ; then
-	    echo "[`date`] Cleaning up source directory ..."
-	    rm -rf $basedir/../external/cmake/Bootstrap.cmk
-	    rm -rf $basedir/../external/cmake/CMakeCache.txt
-	    rm -rf $basedir/../external/cmake/Source/cmConfigure.h
+	    echo "[`date`] Found directory with source code for CMake."
+#	    echo "[`date`] Cleaning up source directory ..."
+#	    rm -rf $basedir/../external/cmake/Bootstrap.cmk
+#	    rm -rf $basedir/../external/cmake/CMakeCache.txt
+#	    rm -rf $basedir/../external/cmake/Source/cmConfigure.h
 	else
 	    echo "[`date`] Missing source directory for cmake! Unable to continue!"
 	    exit 1;
@@ -124,10 +125,10 @@ build_cmake ()
 	## build and install
 	echo "[`date`] Initiating build and install of cmake ..."
 	make && make install
+	export PATH=$PATH:$basedir/../release/bin
 	## check if we have been able to create a cmake executable
-	if test -f ../../release/bin/cmake ; then
+	if test -f `which cmake` ; then
 	    echo "[`date`] Found newly created cmake executable."
-	    export PATH=$PATH:$basedir/../release/bin
 	else
 	    echo "[`date`] No cmake executable found in release/bin! Unable to continue!"
 	    exit 1;
@@ -302,10 +303,6 @@ done
 ## -----------------------------------------------------------------------------
 ## Build individual/multiple packages
 
-if test -z `which cmake` ; then
-    build_cmake;
-fi;
-
 case $param_packageName in 
     bison)
         echo "[`date`] Selected package Bison";
@@ -395,7 +392,7 @@ case $param_packageName in
     dal)
         ## external packages
         echo "[`date`] Processing required packages ..."
-	build_cmake
+	$basedir/build.sh cmake
 	build_package bison external/bison
 	build_package flex external/flex
         build_package wcslib external/wcslib
@@ -424,10 +421,7 @@ case $param_packageName in
 	build_cmake
 	build_package bison external/bison
 	build_package flex external/flex
-        build_package wcslib external/wcslib
-        build_package cfitsio external/cfitsio
-	build_package hdf5 external/hdf5
-        build_package casacore external/casacore
+	$basedir/build.sh casacore
 	build_package plplot external/plplot
 	build_package boost external/boost
 	build_package python external/python
