@@ -51,11 +51,13 @@ endif (HAVE_POPT AND LAPACK_LIBRARIES)
 ## simStationBeam
 
 if (HAVE_CASACORE)
-  add_executable (simStationBeam simStationBeam.cc)
-  ## linker instructions
-  target_link_libraries (simStationBeam cr)
-  ## installation instructions
-  list (APPEND cr_apps simStationBeam)
+  if (HAVE_PGPLOT OR HAVE_PLPLOT)
+    add_executable (simStationBeam simStationBeam.cc)
+    ## linker instructions
+    target_link_libraries (simStationBeam cr)
+    ## installation instructions
+    list (APPEND cr_apps simStationBeam)
+  endif (HAVE_PGPLOT OR HAVE_PLPLOT)
 endif (HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
@@ -90,25 +92,27 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 ## -------------------------------------------------------------------
 ## call_pipeline
 
-if (HAVE_STARTOOLS)
-  add_executable (call_pipeline call_pipeline.cc)
-  ## extra properties to take care of
-  if (APPLE)
-    set_target_properties (call_pipeline
-      PROPERTIES
-      LINK_FLAGS "-bind_at_load"
+if (HAVE_STARTOOLS AND HAVE_ROOT)
+  if (HAVE_PGPLOT OR HAVE_PLPLOT)
+    add_executable (call_pipeline call_pipeline.cc)
+    ## extra properties to take care of
+    if (APPLE)
+      set_target_properties (call_pipeline
+	PROPERTIES
+	LINK_FLAGS "-bind_at_load"
+	)
+    endif (APPLE)
+    ## linker instructions
+    target_link_libraries (call_pipeline
+      cr
+      ${STARTOOLS_LIBRARIES}
+      ${ROOT_LIBRARIES}
+      ${FFTW3_LIBRARIES}
       )
-  endif (APPLE)
-  ## linker instructions
-  target_link_libraries (call_pipeline
-    cr
-    ${STARTOOLS_LIBRARIES}
-    ${ROOT_LIBRARIES}
-    ${FFTW3_LIBRARIES}
-    )
-  ## installation instructions
-  list (APPEND cr_apps call_pipeline)
-endif (HAVE_STARTOOLS)
+    ## installation instructions
+    list (APPEND cr_apps call_pipeline)
+  endif (HAVE_PGPLOT OR HAVE_PLPLOT)
+endif (HAVE_STARTOOLS AND HAVE_ROOT)
 
 ## -------------------------------------------------------------------
 ## readLopesCalTable
