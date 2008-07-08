@@ -164,8 +164,6 @@ target_link_libraries (cr
 
 if (CR_PYTHON_SUPPORT)
 
-  message (STATUS "[CR-Tools] Generation of Python bindings enabled.")
-  
   ## compiler instructions
   add_library (pycr MODULE
     Coordinates/TimeFreq.cc
