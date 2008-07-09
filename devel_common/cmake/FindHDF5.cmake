@@ -99,6 +99,7 @@ find_file (HAVE_H5PUBLIC_H H5public.h
 )
 
 if (HAVE_H5PUBLIC_H)
+
   ## extract library major version
   file (STRINGS ${HAVE_H5PUBLIC_H} HDF5_MAJOR_VERSION
     REGEX "H5_VERS_MAJOR.*For major"
@@ -122,46 +123,49 @@ else (HAVE_H5PUBLIC_H)
     PATHS ${CMAKE_MODULE_PATH} ${USG_ROOT}
     PATH_SUFFIXES devel_common/cmake
     )
+
+else (HAVE_H5PUBLIC_H)
+  
+  if (HAVE_HDF5 AND HAVE_TESTHDF5VERSION)
+    
+    list (APPEND CMAKE_REQUIRED_LIBRARIES ${HDF5_LIBRARIES})
+    
+    try_run (var_exit var_compiled
+      ${CMAKE_BINARY_DIR}
+      ${HAVE_TESTHDF5VERSION}
+      COMPILE_DEFINITIONS -I${HDF5_INCLUDES} -I${HDF5_INCLUDES}/hdf5
+      CMAKE_FLAGS -DHAVE_H5PUBLIC_H:BOOL=${HAVE_H5PUBLIC_H} -DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}
+      COMPILE_OUTPUT_VARIABLE var_compile
+      RUN_OUTPUT_VARIABLE var_run
+      )
+  
+    ## process the output of the test program
+    
+    if (var_compiled AND var_exit)
+      
+      string (REGEX MATCH "maj=.*:min" HDF5_MAJOR_VERSION ${var_run})
+      string (REGEX REPLACE "maj=" "" HDF5_MAJOR_VERSION ${HDF5_MAJOR_VERSION})
+      string (REGEX REPLACE ":min" "" HDF5_MAJOR_VERSION ${HDF5_MAJOR_VERSION})
+      
+      string (REGEX MATCH "min=.*:rel" HDF5_MINOR_VERSION ${var_run})
+      string (REGEX REPLACE "min=" "" HDF5_MINOR_VERSION ${HDF5_MINOR_VERSION})
+      string (REGEX REPLACE ":rel" "" HDF5_MINOR_VERSION ${HDF5_MINOR_VERSION})
+      
+      string (REGEX MATCH "rel=.*:" HDF5_RELEASE_VERSION ${var_run})
+      string (REGEX REPLACE "rel=" "" HDF5_RELEASE_VERSION ${HDF5_RELEASE_VERSION})
+      string (REGEX REPLACE ":" "" HDF5_RELEASE_VERSION ${HDF5_RELEASE_VERSION})
+      
+    else (var_compiled AND var_exit)
+      message (STATUS "[FindHDF5] Unable to determine HDF5 library version!")
+      ## did we at least manage to compile the source?
+      if (NOT var_compiled)
+	message (STATUS "Compile of test program failed! -- ${var_compile}")
+      endif (NOT var_compiled)
+    endif (var_compiled AND var_exit)
+    
+  endif (HAVE_HDF5 AND HAVE_TESTHDF5VERSION)
+  
 endif (HAVE_H5PUBLIC_H)
-
-if (HAVE_HDF5 AND HAVE_TESTHDF5VERSION)
-  
-  list (APPEND CMAKE_REQUIRED_LIBRARIES ${HDF5_LIBRARIES})
-  
-  try_run (var_exit var_compiled
-    ${CMAKE_BINARY_DIR}
-    ${HAVE_TESTHDF5VERSION}
-    COMPILE_DEFINITIONS -I${HDF5_INCLUDES} -I${HDF5_INCLUDES}/hdf5
-    CMAKE_FLAGS -DHAVE_H5PUBLIC_H:BOOL=${HAVE_H5PUBLIC_H} -DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}
-    COMPILE_OUTPUT_VARIABLE var_compile
-    RUN_OUTPUT_VARIABLE var_run
-    )
-  
-  ## process the output of the test program
-
-  if (var_compiled AND var_exit)
-
-    string (REGEX MATCH "maj=.*:min" HDF5_MAJOR_VERSION ${var_run})
-    string (REGEX REPLACE "maj=" "" HDF5_MAJOR_VERSION ${HDF5_MAJOR_VERSION})
-    string (REGEX REPLACE ":min" "" HDF5_MAJOR_VERSION ${HDF5_MAJOR_VERSION})
-    
-    string (REGEX MATCH "min=.*:rel" HDF5_MINOR_VERSION ${var_run})
-    string (REGEX REPLACE "min=" "" HDF5_MINOR_VERSION ${HDF5_MINOR_VERSION})
-    string (REGEX REPLACE ":rel" "" HDF5_MINOR_VERSION ${HDF5_MINOR_VERSION})
-    
-    string (REGEX MATCH "rel=.*:" HDF5_RELEASE_VERSION ${var_run})
-    string (REGEX REPLACE "rel=" "" HDF5_RELEASE_VERSION ${HDF5_RELEASE_VERSION})
-    string (REGEX REPLACE ":" "" HDF5_RELEASE_VERSION ${HDF5_RELEASE_VERSION})
-
-  else (var_compiled AND var_exit)
-    message (STATUS "[FindHDF5] Unable to determine HDF5 library version!")
-    ## did we at least manage to compile the source?
-    if (NOT var_compiled)
-      message (STATUS "Compile of test program failed! -- ${var_compile}")
-    endif (NOT var_compiled)
-  endif (var_compiled AND var_exit)
-  
-endif (HAVE_HDF5 AND HAVE_TESTHDF5VERSION)
 
 ## -----------------------------------------------------------------------------
 ## Feedback
@@ -171,7 +175,6 @@ if (HAVE_HDF5)
     message (STATUS "Found components for HDF5")
     message (STATUS "HDF5_INCLUDES        = ${HDF5_INCLUDES}")
     message (STATUS "HDF5_LIBRARIES       = ${HDF5_LIBRARIES}")
-    message (STATUS "HAVE_H5PUBLIC_H      = ${HAVE_H5PUBLIC_H}")
     message (STATUS "HDF5_MAJOR_VERSION   = ${HDF5_MAJOR_VERSION}")
     message (STATUS "HDF5_MINOR_VERSION   = ${HDF5_MINOR_VERSION}")
     message (STATUS "HDF5_RELEASE_VERSION = ${HDF5_RELEASE_VERSION}")
