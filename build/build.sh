@@ -335,8 +335,8 @@ case $param_packageName in
     casacore)
         echo "[`date`] Selected package CASACORE";
         ## -- build required packages
-        build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=$param_forceBuild";
-        build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=$param_forceBuild";
+        build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=1";
+        build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=1";
         build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
         ## -- build package
         build_package casacore external/casacore "-DCASACORE_FORCE_BUILD:BOOL=$param_forceBuild";
@@ -411,10 +411,7 @@ case $param_packageName in
 	$basedir/build.sh cmake
 	build_package bison external/bison
 	build_package flex external/flex
-        build_package wcslib external/wcslib
-        build_package cfitsio external/cfitsio
-	build_package hdf5 external/hdf5
-        build_package casacore external/casacore
+	$basedir/build.sh casacore
 	build_package plplot external/plplot
 	build_package boost external/boost
 	build_package python external/python
