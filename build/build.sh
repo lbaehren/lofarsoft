@@ -92,6 +92,19 @@ print_help ()
 check_cmake_version ()
 {
     var_cmake_version=`cmake --version | tr " " "\n" | grep -v cmake | grep -v version`
+
+    cmake_major_version=`echo $var_cmake_version | tr "." " " | tr "-" " "  | awk '{print $1}'`
+    cmake_minor_version=`echo $var_cmake_version | tr "." " " | tr "-" " "  | awk '{print $2}'`
+
+    if [ $cmake_major_version -lt 2 ] 
+	then
+	build_cmake
+    else
+	if [ $cmake_minor_version -lt 5 ] 
+	    then
+	    build_cmake
+	fi
+    fi
 }
 
 ## -------------------------------------------------------------------
@@ -104,10 +117,6 @@ build_cmake ()
 	## position in the dependency chain
 	if test -d $basedir/../external/cmake ; then
 	    echo "[`date`] Found directory with source code for CMake."
-#	    echo "[`date`] Cleaning up source directory ..."
-#	    rm -rf $basedir/../external/cmake/Bootstrap.cmk
-#	    rm -rf $basedir/../external/cmake/CMakeCache.txt
-#	    rm -rf $basedir/../external/cmake/Source/cmConfigure.h
 	else
 	    echo "[`date`] Missing source directory for cmake! Unable to continue!"
 	    exit 1;
@@ -306,7 +315,7 @@ done
 ## since all further operations need CMake as central tool, we need to make sure
 ## it is available first.
 
-if test -z `which cmake` ; then { build_cmake ; } fi
+if test -z `which cmake` ; then { build_cmake ; } else { check_cmake_version ;} fi
 
 ## once we have make sure CMake is available, we can continue
 
@@ -338,7 +347,7 @@ case $param_packageName in
     ;;
     cmake)
        echo "[`date`] Selected package CMake";
-       if test -z `which cmake` ; then { build_cmake; } fi;
+       check_cmake_version
     ;;
     flex)
         echo "[`date`] Selected package Flex";
