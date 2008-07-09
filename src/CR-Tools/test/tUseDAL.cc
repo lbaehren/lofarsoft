@@ -146,24 +146,24 @@ int test_dalDataset (std::string const &filename)
     std::vector<hid_t> dataset_id(4);
 
     cout << "-- opening file via H5Fopen() ..." << endl;
-    H5Eset_auto(NULL, NULL);
+    H5Eset_auto1(NULL, NULL);
     file_id = H5Fopen("testfile", H5F_ACC_RDWR, H5P_DEFAULT);
     cout << "-- file ID  = " << file_id << endl;
     file_id = H5Fopen(h5filename, H5F_ACC_RDWR, H5P_DEFAULT);
     cout << "-- file ID  = " << file_id << endl;
 
     cout << "-- opening station group via H5Gopen() ..." << endl;
-    group_id = H5Gopen (file_id,"/Station001");
+    group_id = H5Gopen1 (file_id,"/Station001");
     cout << "-- group ID = " << group_id << endl;
 
     cout << "-- opening dataset via H5Fopen() ..." << endl;
-    dataset_id[0] = H5Dopen(file_id, "/Station001/001000000");
+    dataset_id[0] = H5Dopen1(file_id, "/Station001/001000000");
     cout << "-- dataset ID = " << dataset_id[0] << endl;
-    dataset_id[1] = H5Dopen(file_id, "/Station001/001000001");
+    dataset_id[1] = H5Dopen1(file_id, "/Station001/001000001");
     cout << "-- dataset ID = " << dataset_id[1] << endl;
-    dataset_id[2] = H5Dopen(file_id, "/Station001/001000002");
+    dataset_id[2] = H5Dopen1(file_id, "/Station001/001000002");
     cout << "-- dataset ID = " << dataset_id[2] << endl;
-    dataset_id[3] = H5Dopen(file_id, "/Station001/001000003");
+    dataset_id[3] = H5Dopen1(file_id, "/Station001/001000003");
     cout << "-- dataset ID = " << dataset_id[3] << endl;
 
   } catch (std::string message) {
