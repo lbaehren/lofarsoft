@@ -80,6 +80,7 @@ if (prefix)
   message (STATUS "Installation area located for package PLplot.")
   get_filename_component (tmp ${prefix} ABSOLUTE)
   set (CMAKE_INSTALL_PREFIX ${tmp} CACHE STRING "Installation prefix") 
+  set (CMAKE_INSTALL_EXEC_PREFIX ${tmp} CACHE STRING "Installation prefix")
   ## Additional setting for Python bindings
   set (PYTHON_INSTDIR "${prefix}/lib/python")
 endif (prefix)
