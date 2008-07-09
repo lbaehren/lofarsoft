@@ -41,14 +41,14 @@ endif (USG_ROOT)
 
 option (BUILD_CASACORE  "Build casacore?"                YES )
 option (BUILD_CFITSIO   "Build the CFITSIO library?"     YES )
-#option (BUILD_PLPLOT    "Build PLplot?"                  YES )
 option (BUILD_STARTOOLS "Build the Star-Tools package?"  YES )
 option (BUILD_WCSLIB    "Build the WCS library?"         YES )
 option (BUILD_WCSTOOLS  "Build the WCS-Tools package?"   YES )
 
 ## USG packages
 
-option (BUILD_DAL      "Build the Data Access Library (DAL)?" 0)
+option (BUILD_DAL      "Build the Data Access Library (DAL)?" NO )
+option (BUILD_CR       "Build the Cosmic Ray Tools?"          NO )
 
 ## ==============================================================================
 ##
