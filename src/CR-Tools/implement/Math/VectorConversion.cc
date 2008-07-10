@@ -47,6 +47,18 @@ namespace CR { // Namespace CR -- begin
 				     xSource,ySource,zSource,
 				     anglesInDegrees);
 	break;
+      case CR::Spherical:
+	std::cerr << "Conversion not yet implemented!" << std::endl;
+	break;
+      case CR::Cylindrical:
+	std::cerr << "Conversion not yet implemented!" << std::endl;
+	break;
+      case CR::AzElRadius:
+	std::cerr << "Conversion not yet implemented!" << std::endl;
+	break;
+      case CR::NorthEastHeight:
+	std::cerr << "Conversion not yet implemented!" << std::endl;
+	break;
       }
       break;
     case CR::AzElRadius:
@@ -113,11 +125,23 @@ namespace CR { // Namespace CR -- begin
 				    xSource,ySource,zSource,
 				    anglesInDegrees);
 	break;
+      case CR::Spherical:
+	std::cerr << "Conversion not yet implemented!" << std::endl;
+	break;
       case CR::Cylindrical:
 	// Conversion: Spherical (r,phi,theta) -> Spherical (rho,phi,z)
 	return Spherical2Cylindrical (xTarget,yTarget,zTarget,
 				      xSource,ySource,zSource,
 				      anglesInDegrees);
+	break;
+      case CR::AzElHeight:
+	std::cerr << "Conversion not yet implemented!" << std::endl;
+	break;
+      case CR::AzElRadius:
+	std::cerr << "Conversion not yet implemented!" << std::endl;
+	break;
+      case CR::NorthEastHeight:
+	std::cerr << "Conversion not yet implemented!" << std::endl;
 	break;
       }
       break;
@@ -129,6 +153,21 @@ namespace CR { // Namespace CR -- begin
 	// Conversion: North-East-Height -> Cartesian (x,y,z)
 	return NorthEastHeight2Cartesian (xTarget,yTarget,zTarget,
 					  xSource,ySource,zSource);
+	break;
+      case CR::Spherical:
+	std::cerr << "Conversion not yet implemented!" << std::endl;
+	break;
+      case CR::Cylindrical:
+	std::cerr << "Conversion not yet implemented!" << std::endl;
+	break;
+      case CR::AzElHeight:
+	std::cerr << "Conversion not yet implemented!" << std::endl;
+	break;
+      case CR::AzElRadius:
+	std::cerr << "Conversion not yet implemented!" << std::endl;
+	break;
+      case CR::NorthEastHeight:
+	std::cerr << "Conversion not yet implemented!" << std::endl;
 	break;
       }
       break;
