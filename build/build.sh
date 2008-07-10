@@ -361,21 +361,21 @@ case $param_packageName in
         echo "[`date`] Selected package Plplot"
 	if test -d $basedir/../external/plplot ; then
 	## first pass
-	    mkdir $basedir/plplot 
-	    cd $basedir/plplot 
-	    cmake -C $basedir/../devel_common/cmake/SettingsPLplot.cmake $basedir/../external/plplot
-	    ## second pass
-	    build_package plplot external/plplot
+	mkdir $basedir/plplot 
+	cd $basedir/plplot 
+	cmake -C $basedir/../devel_common/cmake/SettingsPLplot.cmake $basedir/../external/plplot
+	## second pass
+	build_package plplot external/plplot
     else
 	cd $basedir/../external
-			## download the source tar-ball from source forge
+	## download the source tar-ball from source forge
 	wget -c http://ovh.dl.sourceforge.net/sourceforge/plplot/plplot-5.7.4.tar.gz
-		    ## unpack the tar-ball and adjust the name of the newly created directory
+	## unpack the tar-ball and adjust the name of the newly created directory
 	tar -xvzf plplot-5.7.4.tar.gz
 	mv plplot-5.7.4 plplot
-		    ## remove the tar-ball
+	## remove the tar-ball
 	rm -f plplot-5.7.4.tar.gz
-	    	## recursive call of this method
+	## recursive call of this method
 	cd $basedir
 	$basedir/build.sh plplot
     fi
@@ -432,8 +432,8 @@ case $param_packageName in
     cr)
         echo "[`date`] Processing required packages ..."
 	cd $basedir; ./build.sh dal
-	build_package plplot external/plplot
-	build_package startools external/startools
+	cd $basedir; ./build.sh plplot
+	cd $basedir; ./build.sh startools
 	echo "[`date`] Building CR-Tools package ..."
 	build_package cr src/CR-Tools;
     ;;
