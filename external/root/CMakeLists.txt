@@ -60,11 +60,13 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_INSTALL)
   set (root_url "ftp://root.cern.ch/root/${root_source_file}")
   
   ## ----------------------------------------------------------------------------
-  ## Locate required tools
+  ## Locate required tools and packages
   
   find_program (CURL_EXECUTABLE curl PATHS ${bin_locations})
   find_program (TAR_EXECUTABLE tar PATHS ${bin_locations})
   find_program (WGET_EXECUTABLE wget PATHS ${bin_locations})  
+
+  include (FindFFTW3)
 
   ## ----------------------------------------------------------------------------
   ## Download the source tar-ball from the ROOT FTP server
@@ -86,7 +88,7 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_INSTALL)
   endif (WGET_EXECUTABLE)
 
   ## ----------------------------------------------------------------------------
-  ## Check of the download was successfull; if this is the case we can expand
+  ## Check if the download was successfull; if this is the case we can expand
   ## the source tar-ball
 
   find_file (HAVE_ROOT_SOURCE ${root_source_file} PATHS . ..)  
@@ -107,6 +109,38 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_INSTALL)
   endif (TAR_EXECUTABLE AND HAVE_ROOT_SOURCE)  
 
   ## ----------------------------------------------------------------------------
+  ## Was the tar-ball successfully expanded? If yes, we can go into the newly
+  ## created source directory and run "configure"
+  
+  find_path (HAVE_ROOT_SOURCE_DIR configure LICENSE
+    PATHS . ./${root_source_dir} ../${root_source_dir}
+    )
+  
+  if (HAVE_ROOT_SOURCE_DIR)
+
+    ## set optional parameters for configuration
+    
+    set (root_options "")
+    
+    if (HAVE_FFTW3)
+      set (root_options " -with-fftw3")
+    endif (HAVE_FFTW3)
+
+    ## run "configure"
+    
+    execute_process (
+      WORKING_DIRECTORY ${HAVE_ROOT_SOURCE_DIR}
+      COMMAND ./configure --prefix=${CMAKE_INSTALL_PREFIX} ${root_options}
+      TIMEOUT 180
+      ERROR_VARIABLE configure_cerr
+      OUTPUT_QUIET
+      )
+    if (configure_cerr)
+      message (STATUS "[configure] Error while configuring source package!")
+      message (STATUS ${configure_cerr})
+    endif (configure_cerr)
+    
+  endif (HAVE_ROOT_SOURCE_DIR)
   
   ## <-- end build condition --------------------------------------------------->
   
