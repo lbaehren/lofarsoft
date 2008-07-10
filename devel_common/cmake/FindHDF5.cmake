@@ -96,6 +96,7 @@ endif (HDF5_INCLUDES AND HDF5_LIBRARIES)
 find_file (HAVE_H5PUBLIC_H H5public.h
   PATHS ${include_locations}
   PATH_SUFFIXES hdf5
+  NO_DEFAULT_PATH
 )
 
 if (HAVE_H5PUBLIC_H)
