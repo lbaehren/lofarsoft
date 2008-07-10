@@ -409,9 +409,9 @@ case $param_packageName in
         ## external packages
         echo "[`date`] Processing required packages ..."
 	$basedir/build.sh cmake
-	build_package bison external/bison
-	build_package flex external/flex
-	$basedir/build.sh casacore
+	cd $basedir; ./build.sh flex
+	cd $basedir; ./build.sh bison
+	cd $basedir; ./build.sh casacore
 	build_package plplot external/plplot
 	build_package boost external/boost
 	build_package python external/python
@@ -431,13 +431,8 @@ case $param_packageName in
     ;;
     cr)
         echo "[`date`] Processing required packages ..."
-	$basedir/build.sh cmake
-	build_package bison external/bison
-	build_package flex external/flex
-	$basedir/build.sh casacore
+	cd $basedir; ./build.sh dal
 	build_package plplot external/plplot
-	build_package boost external/boost
-	build_package python external/python
 	build_package startools external/startools
 	echo "[`date`] Building CR-Tools package ..."
 	build_package cr src/CR-Tools;
