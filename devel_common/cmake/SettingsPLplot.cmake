@@ -94,5 +94,6 @@ set (CMAKE_INSTALL_LIBDIR      "lib"        CACHE STRING "lib directory")
 set (CMAKE_INSTALL_MANDIR      "share/man"  CACHE STRING "man directory")
 
 if (UNIX)
-  set (CMAKE_FIND_LIBRARY_PREFIXES "lib" CACHE STRING "Library prefix" FORCE)
+  set (CMAKE_FIND_LIBRARY_PREFIXES "lib"  CACHE STRING "Library prefixes" FORCE)
+  set (CMAKE_FIND_LIBRARY_SUFFIXES "a;so" CACHE STRING "Library suffices" FORCE)
 endif (UNIX)
