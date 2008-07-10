@@ -41,12 +41,12 @@ endif (USG_ROOT)
 ## -----------------------------------------------------------------------------
 ## [2] Run the find script to see if there is a system wide ROOT installation
 
-include (${cmake_scripts}/FindROOT.cmake)
+include (FindROOT.cmake)
 
 ## -----------------------------------------------------------------------------
 ## [3] If no system-wide ROOT installation could be found, trigger (at least a
 ##     local) installation.
 
 if (NOT HAVE_ROOT OR ROOT_FORCE_INSTALL)
-  include (${cmake_scripts}/InstallROOT.cmake)
+  include (InstallROOT)
 endif (NOT HAVE_ROOT OR ROOT_FORCE_INSTALL)
