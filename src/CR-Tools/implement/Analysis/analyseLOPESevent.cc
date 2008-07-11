@@ -539,21 +539,23 @@ namespace CR { // Namespace CR -- begin
       plotname += "-CC.ps";
       yarr = ccBeam(plotRegion) * 1e6;
       plotter.quickPlot(plotname, xarr, yarr, empty, empty,
-			"Time [\\(0638)seconds]", "CC-Beam [\\(0638)V/m/MHz]","",4);
+			"Time [#gmseconds]", "CC-Beam [#gmV/m/MHz]","",9,
+			True, 1, False, False, True);
       yarr = pBeam(plotRegion) *1e6;
-      plotter.PlotLine(xarr,yarr,5,3);
+      plotter.PlotLine(xarr,yarr,4,3);
       yarr = ccgauss(plotRegion) *1e6;
-      plotter.PlotLine(xarr,yarr,6,2);
+      plotter.PlotLine(xarr,yarr,8,2);
       // plot the X-Beam
       plotname = PlotPrefix;
       plotname += "-X.ps";
       yarr = xBeam(plotRegion) * 1e6;
       plotter.quickPlot(plotname, xarr, yarr, empty, empty,
-			"Time [\\(0638)seconds]", "X-Beam [\\(0638)V/m/MHz]","",4);
+			"Time [#gmseconds]", "X-Beam [#gmV/m/MHz]","",9,
+			True, 1, False, False, True);
       yarr = pBeam(plotRegion) *1e6;
-      plotter.PlotLine(xarr,yarr,5,3);
+      plotter.PlotLine(xarr,yarr,4,3);
       yarr = xgauss(plotRegion) *1e6;
-      plotter.PlotLine(xarr,yarr,6,2);
+      plotter.PlotLine(xarr,yarr,8,2);
       // plot all antenna traces
       plotname = PlotPrefix;
       plotname += "-all.ps";
@@ -575,7 +577,7 @@ namespace CR { // Namespace CR -- begin
       xmin -= tmpval;
       xmax += tmpval;
       plotter.InitPlot(plotname, xmin, xmax, ymin, ymax);
-      plotter.AddLabels("Time [\\(0638)seconds]", "X-Beam [\\(0638)V/m/MHz]");
+      plotter.AddLabels("Time [#gmseconds]", "FieldStrength [#gmV/m/MHz]");
       Int col1,col2,col3;
       col1=col2=col3=3;
       for (i=0; i<nselants; i++){
