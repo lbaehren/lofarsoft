@@ -92,18 +92,21 @@ namespace casa { //# NAMESPACE CASA - BEGIN
     return rec;
   }
 
-  herr_t HDF5Record::readSubRecord (hid_t groupHid, const char* name,
-				    const H5L_info_t*, void* voidRec)
+  herr_t HDF5Record::readSubRecord (hid_t groupHid,
+				    const char* name,
+				    const H5L_info_t*,
+				    void* voidRec)
   {
-    std::cout << "subrec=" << name << std::endl;
     HDF5Group gid(groupHid, name, true);
     Record& rec = *(static_cast<Record*>(voidRec));
     rec.defineRecord (name, doReadRecord(gid));
     return 0;
   }
-
-  void HDF5Record::readScalar (hid_t attrId, hid_t dtid,
-			       const String& name, RecordInterface& rec)
+  
+  void HDF5Record::readScalar (hid_t attrId,
+			       hid_t dtid,
+			       const String& name,
+			       RecordInterface& rec)
   {
     // Handle a scalar field.
     Int sz = H5Tget_size(dtid);
