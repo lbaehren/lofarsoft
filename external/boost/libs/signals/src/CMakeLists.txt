@@ -2,9 +2,8 @@
 ## -----------------------------------------------------------------------------
 ## Source files to build the library
 
-file (GLOB libboost_wave_sources 
+file (GLOB libboost_signals_sources 
   *.cpp
-  cpplexer/re2clex/*.cpp
   )
 
 ## -----------------------------------------------------------------------------
@@ -14,14 +13,14 @@ add_definitions (
   -fPIC
   )
 
-add_library (boost_wave
-  ${libboost_wave_sources}
+add_library (boost_signals
+  ${libboost_signals_sources}
   )
 
 ## -----------------------------------------------------------------------------
 ## Installation
 
-install (TARGETS boost_wave
+install (TARGETS boost_signals
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

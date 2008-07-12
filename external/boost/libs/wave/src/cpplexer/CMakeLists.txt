@@ -2,8 +2,5 @@
 ## ------------------------------------------------------------------------------
 ## Sub-directories
 
-add_subdirectory (src)
+add_subdirectory (cpplexer)
 
-if (BOOST_ENABLE_TESTING)
-  add_subdirectory (test)
-endif (BOOST_ENABLE_TESTING)

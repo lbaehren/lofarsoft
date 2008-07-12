@@ -28,18 +28,23 @@ enable_testing()
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
-option (BOOST_FORCE_BUILD "Force rebuild and local installation" 0)
-option (BOOST_CMAKE_BUILD "Use CMake port to configure and build Boost?" 1)
+option (BOOST_FORCE_BUILD    "Force rebuild and local installation"         NO  )
+option (BOOST_CMAKE_BUILD    "Use CMake port to configure and build Boost?" YES )
+option (BOOST_ENABLE_TESTING "Enable building and executing test programs?" NO  )
 
 ## Selective building of the Boost++ libraries
 
-option (BOOST_LIB_IO      "Build libboost_io"      NO  )
-option (BOOST_LIB_MPL     "Build libboost_mpl"     NO  )
-option (BOOST_LIB_PYTHON  "Build libboost_python"  YES )
-option (BOOST_LIB_RANGE   "Build libboost_range"   NO  )
-option (BOOST_LIB_REGEX   "Build libboost_regex"   NO  )
-option (BOOST_LIB_SIGNALS "Build libboost_signals" NO  )
-option (BOOST_LIB_WAVE    "Build libboost_wave"    YES )
+option (BOOST_LIB_IO          "Build libboost_io"          YES )
+option (BOOST_LIB_FILESYSTEM  "Build libboost_filesystem"  YES )
+option (BOOST_LIB_LOGIC       "Build libboost_logic"       YES )
+option (BOOST_LIB_MATH        "Build libboost_math"        YES )
+option (BOOST_LIB_MPL         "Build libboost_mpl"         NO  )
+option (BOOST_LIB_PYTHON      "Build libboost_python"      YES )
+option (BOOST_LIB_RANGE       "Build libboost_range"       NO  )
+option (BOOST_LIB_REGEX       "Build libboost_regex"       NO  )
+option (BOOST_LIB_SIGNALS     "Build libboost_signals"     YES )
+option (BOOST_LIB_THREAD      "Build libboost_thread"      YES )
+option (BOOST_LIB_WAVE        "Build libboost_wave"        YES )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -59,7 +64,10 @@ else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
 
-set (BOOST_FIND_python_ONLY ON)
+set ( BOOST_FIND_python_ONLY YES )
+set ( BOOST_FIND_QUIETLY     YES )
+set ( PYTHON_FIND_QUIETLY    YES )
+
 include (FindBoost)
 include (FindPython)
 
@@ -146,6 +154,15 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
   if (BOOST_CMAKE_BUILD AND HAVE_PYTHON)
     
     message (STATUS "Building Boost using CMake.")
+
+    ## Testing activated?
+
+    if (BOOST_ENABLE_TESTING)
+      include (CTest)
+      enable_testing()
+    endif (BOOST_ENABLE_TESTING)
+
+    ## include paths for header files
     
     include_directories (
       .
@@ -153,9 +170,29 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
       ${BOOST_SOURCE_DIR}/libs
       ${PYTHON_INCLUDES}
       )
+
+    ## project sub-directories
     
     add_subdirectory (boost)
     add_subdirectory (libs)
+
+    ## summary of configuration settings
+    
+    message (STATUS " ")
+    message (STATUS "============================================================")
+    message (STATUS " ")
+    message (STATUS "[Boost] Configuration summary")
+    message (STATUS "Build libboost_filesystem = ${BOOST_LIB_FILESYSTEM}")
+    message (STATUS "Build libboost_io         = ${BOOST_LIB_IO}")
+    message (STATUS "Build libboost_mpl        = ${BOOST_LIB_MPL}")
+    message (STATUS "Build libboost_python     = ${BOOST_LIB_PYTHON}")
+    message (STATUS "Build libboost_range      = ${BOOST_LIB_RANGE}")
+    message (STATUS "Build libboost_signals    = ${BOOST_LIB_SIGNALS}")
+    message (STATUS "Build libboost_thread     = ${BOOST_LIB_THREAD}")
+    message (STATUS "Build libboost_wave       = ${BOOST_LIB_WAVE}")
+    message (STATUS " ")
+    message (STATUS "============================================================")
+    message (STATUS " ")
     
   else (BOOST_CMAKE_BUILD AND HAVE_PYTHON)
     
