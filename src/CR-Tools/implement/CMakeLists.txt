@@ -205,6 +205,72 @@ if (CR_WITH_PYTHON)
 endif (CR_WITH_PYTHON)
 
 ## ------------------------------------------------------------------------------
+## Graphical user interface
+
+if (CR_WITH_GUI)
+  
+  ## list of source files in this module
+  file (GLOB libhfget_sources 
+    GUI/cell.cpp
+    GUI/finddialog.cpp
+    GUI/gotocelldialog.cpp
+    GUI/mainwindow.cpp
+    GUI/sortdialog.cpp
+    GUI/spreadsheet.cpp
+    GUI/plotter.cpp
+    GUI/VectorSelector.cc
+    GUI/hffuncs.cc
+    GUI/hfget.cc
+    GUI/hfqt.cc moc_finddialog.cpp
+    GUI/moc_gotocelldialog.cpp
+    GUI/moc_mainwindow.cpp
+    GUI/moc_sortdialog.cpp
+    GUI/moc_spreadsheet.cpp
+    GUI/moc_plotter.cpp
+    GUI/moc_hfqt.cpp
+    GUI/qrc_spreadsheet.cpp
+    GUI/qrc_plotter.cpp
+    )
+  
+  ## include directories
+  include_directories (
+    ${CR_SOURCE_DIR}/implement/GUI
+    ${QT4_INCLUDES}
+    )
+  
+  ## compiler instructions
+  add_library (hfget ${libhfget_sources})
+  
+  ## linker instructions
+  target_link_libraries (hfget
+    ${QT4_LIBARY_QTGUI}
+    ${QT4_LIBARY_QTCORE}
+    ${PYTHON_LIBRARIES}
+    ${BOOST_LIBRARIES}
+    )
+
+  ## Additional properties
+  if (APPLE)
+    set_target_properties (hfget
+      PROPERTIES
+      PREFIX "lib"
+      SUFFIX .so
+      COMPILE_FLAGS "-pipe -g -D_REENTRANT -w -fpermissive -DQT_GUI_LIB -DQT_CORE_LIB"
+      LINK_FLAGS "-fPIC -flat_namespace"
+      )
+  else (APPLE)
+    set_target_properties (hfget
+      PROPERTIES
+      PREFIX "lib"
+      SUFFIX .so
+      COMPILE_FLAGS "-pipe -g -D_REENTRANT -w -DQT_GUI_LIB -DQT_CORE_LIB"
+      LINK_FLAGS "-fPIC -shared"
+      )
+  endif (APPLE)
+  
+endif (CR_WITH_GUI)
+
+## ------------------------------------------------------------------------------
 ## Test programs
 
 if (CR_BUILD_TESTS)

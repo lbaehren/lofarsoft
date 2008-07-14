@@ -11,20 +11,27 @@ cmake_minimum_required (VERSION 2.5)
 
 ## =============================================================================
 ##
-##  User defined build/install options
+##  Options
 ##
 ## =============================================================================
 
-option (CR_BUILD_TESTS "Build the test programs?" 1)
-option (CR_BUILD_EXTERNAL_TESTS "Build the test programs for external packages?" 0)
-option (CR_ENABLE_TESTING "Enable running the test programs?" 1)
-option (CR_COMPILER_WARNINGS "Enable standard set of compiler warnings?" ON)
-option (CR_DEBUGGING_MESSAGES "Print debugging information?" 0)
-option (CR_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
-option (CR_WITH_GLISH      "Support for Glish applications?"              NO  )
-option (CR_WITH_PYTHON     "Support for Python applications?"             YES )
-option (CR_WITH_PLOTTING   "Support for generation of plots?"             YES )
-option (CR_WITH_GUI        "Build the graphical interface?"               YES )
+option (CR_BUILD_TESTS "Build the test programs?" ON)
+option (CR_BUILD_EXTERNAL_TESTS "Build the test programs for external packages?" ON)
+option (CR_ENABLE_TESTING "Enable running the test programs?" ON)
+option (CR_COMPILER_WARNINGS "Enable standard set of compiler warnings?"  YES )
+option (CR_ENABLE_LOPESSTAR "Enable additional routines from LOPES-Star?" YES )
+option (CR_DEBUGGING_MESSAGES "Print debugging information?"              NO  )
+option (CR_VERBOSE_CONFIGURE "Verbose output during configuration?"       NO  )
+option (CR_WITH_GLISH        "Support for Glish applications?"            NO  )
+option (CR_WITH_PYTHON       "Support for Python applications?"           YES )
+option (CR_WITH_PLOTTING     "Support for generation of plots?"           YES )
+option (CR_WITH_GUI          "Build the graphical interface?"             YES )
+
+## ==============================================================================
+##
+## Search location for external packages
+##
+## ==============================================================================
 
 ## Handle option: verbose mode on/off
 
@@ -390,13 +397,18 @@ if (CR_WITH_GUI)
 
   ## process conditions for building the GUI
 
+  if (NOT HAVE_BOOST)
+    message (STATUS "[CR-Tools] Unable to build GUI - missing Boost!")
+    set (CR_WITH_GUI NO)
+  endif (NOT HAVE_BOOST)
+
   if (NOT QT4_INCLUDES)
-    message (STATUS "[CR-Tools] Unable to build GUI - Qt4 incomplete!")
+    message (STATUS "[CR-Tools] Unable to build GUI - missing Qt4 headers!")
     set (CR_WITH_GUI NO)
   endif (NOT QT4_INCLUDES)
 
   if (NOT QT4_LIBARY_QTCORE OR NOT QT4_LIBARY_QTGUI)
-    message (STATUS "[CR-Tools] Unable to build GUI - Qt4 incomplete!")
+    message (STATUS "[CR-Tools] Unable to build GUI - Qt4 libraries incomplete!")
     set (CR_WITH_GUI NO)
   endif (NOT QT4_LIBARY_QTCORE OR NOT QT4_LIBARY_QTGUI)
 
@@ -581,12 +593,16 @@ message (STATUS " ROOT ..................... : ${HAVE_ROOT}")
 message (STATUS " Star-Tools ............... : ${HAVE_STARTOOLS}")
 message (STATUS " WCSLIB ................... : ${HAVE_WCSLIB}")
 message (STATUS "+------------------------------------------------------------+")
-message (STATUS " Source directory ......... : ${CR_SOURCE_DIR}")
-message (STATUS " Installation location .... : ${CMAKE_INSTALL_PREFIX}")
-message (STATUS " Build the test programs .. : ${CR_BUILD_TESTS}")
-message (STATUS " Enable testing ........... : ${CR_ENABLE_TESTING}")
-message (STATUS " Support for Glish ........ : ${CR_WITH_GLISH}")
-message (STATUS " Support for Python ....... : ${CR_WITH_PYTHON}")
-message (STATUS " Print debugging messages . : ${CR_DEBUGGING_MESSAGES}")
-message (STATUS " Verbose configuration .... : ${CR_VERBOSE_CONFIGURE}")
+message (STATUS " USG root directory ........ : ${USG_ROOT}")
+message (STATUS " Source directory .......... : ${CR_SOURCE_DIR}")
+message (STATUS " Installation location ..... : ${CMAKE_INSTALL_PREFIX}")
+message (STATUS " Build the test programs ... : ${CR_BUILD_TESTS}")
+message (STATUS " Enable testing ............ : ${CR_ENABLE_TESTING}")
+message (STATUS " Enable LOPES-Star routines  : ${CR_ENABLE_LOPESSTAR}")
+message (STATUS " Support for plotting ...... : ${CR_WITH_PLOTTING}")
+message (STATUS " Support for Glish ......... : ${CR_WITH_GLISH}")
+message (STATUS " Support for Python ........ : ${CR_WITH_PYTHON}")
+message (STATUS " Graphical user interface .. : ${CR_WITH_GUI}")
+message (STATUS " Print debugging messages .. : ${CR_DEBUGGING_MESSAGES}")
+message (STATUS " Verbose configuration ..... : ${CR_VERBOSE_CONFIGURE}")
 message (STATUS "+============================================================+")
