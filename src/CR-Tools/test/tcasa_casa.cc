@@ -1187,7 +1187,7 @@ int main ()
   nofFailedTests += test_Arrays();
   nofFailedTests += test_Vector();
 //   nofFailedTests += test_Arrays_Matrix (nelem);
-//   nofFailedTests += test_Arrays_Cube (nelem);
+  nofFailedTests += test_Arrays_Cube (nelem);
 //   nofFailedTests += test_Arrays_Array (nelem);
   nofFailedTests += test_Arrays_Slice (nelem);
 

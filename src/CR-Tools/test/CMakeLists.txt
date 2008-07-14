@@ -43,7 +43,7 @@ endforeach (test)
 
 if (HAVE_CASACORE AND HAVE_WCSLIB)
 
-  message (STATUS "[CR] Tests for casacore enabled.")
+  message (STATUS "[CR-Tools] Tests for casacore enabled.")
   
   set (tests_casacore
     tcasa_casa

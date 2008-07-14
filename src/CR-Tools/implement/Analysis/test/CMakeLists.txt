@@ -111,7 +111,7 @@ if (NOT APPLE)
   
   ## [3] Test programs for programs using functionality of LopesStar
   
-  if (HAVE_STARTOOLS AND CR_PLOTTING_SUPPORT)
+  if (HAVE_STARTOOLS AND CR_WITH_PLOTTING)
     ## compiler instructions
     add_executable (tCompletePipeline tCompletePipeline.cc)
     ## linker instructions
@@ -145,7 +145,7 @@ if (NOT APPLE)
     if (CR_ENABLE_TESTING) 
       add_test (tCompletePipeline tCompletePipeline)
     endif (CR_ENABLE_TESTING) 
-  endif (HAVE_STARTOOLS AND CR_PLOTTING_SUPPORT)
+  endif (HAVE_STARTOOLS AND CR_WITH_PLOTTING)
   
 endif (NOT APPLE)
 

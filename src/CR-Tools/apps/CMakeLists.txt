@@ -202,9 +202,9 @@ endif (HAVE_STARTOOLS AND HAVE_PLPLOT)
 
 ## Glish client programs
 
-if (CR_GLISH_SUPPORT AND HAVE_GLISH)
+if (CR_WITH_GLISH AND HAVE_GLISH)
   add_subdirectory (GlishClients)
-endif (CR_GLISH_SUPPORT AND HAVE_GLISH)
+endif (CR_WITH_GLISH AND HAVE_GLISH)
 
 ## ==============================================================================
 ##

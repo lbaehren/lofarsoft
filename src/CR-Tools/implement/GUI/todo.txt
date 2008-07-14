@@ -1,0 +1,15 @@
+
+
+hffuncs.cc:
+
+- Treatment of vector selectors in object functions is not yet properly implemented!
+
+- printvec_txt und direction_txt don't work correctly (only first letter is shown for fist vector elements).
+
+- the new virtual functions destroy and initialize are not called by the class constructor and destructor, just the generic ones - this is annoying
+
+- make objects readonly, so that important pointers cannot be overwritten! 
+
+- hfget.hpp: Note that the ID method needs a bit more work (e.g. to give the ID of the current object with input "")
+
+- property object??

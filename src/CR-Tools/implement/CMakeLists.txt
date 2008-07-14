@@ -32,9 +32,9 @@ endif (HAVE_PGPLOT OR HAVE_PLPLOT)
 
 # (b) Support for usage of Glish objects and communication bus
 
-if (CR_GLISH_SUPPORT)
+if (CR_WITH_GLISH)
   list (APPEND cr_modules ApplicationSupport)
-endif (CR_GLISH_SUPPORT)
+endif (CR_WITH_GLISH)
 
 ## -----------------------------------------------------------------------------
 ## Build "libcr"
@@ -47,9 +47,9 @@ foreach (cr_module ${cr_modules})
   LIST (APPEND cr_sources ${cr_${cr_module}})
 endforeach (cr_module)
 
-if (CR_GLISH_SUPPORT AND HAVE_CASA)
+if (CR_WITH_GLISH AND HAVE_CASA)
   list (APPEND cr_sources templates.cc)
-endif (CR_GLISH_SUPPORT AND HAVE_CASA)
+endif (CR_WITH_GLISH AND HAVE_CASA)
 
 if (NOT HAVE_PGPLOT)
   list (REMOVE_ITEM cr_sources Display/PGPlotterCR.cc)
@@ -162,7 +162,7 @@ target_link_libraries (cr
 ## ------------------------------------------------------------------------------
 ## Create Python bindings for the library
 
-if (CR_PYTHON_SUPPORT)
+if (CR_WITH_PYTHON)
 
   ## compiler instructions
   add_library (pycr MODULE
@@ -202,7 +202,7 @@ if (CR_PYTHON_SUPPORT)
     LIBRARY DESTINATION lib/python
     )
   
-endif (CR_PYTHON_SUPPORT)
+endif (CR_WITH_PYTHON)
 
 ## ------------------------------------------------------------------------------
 ## Test programs

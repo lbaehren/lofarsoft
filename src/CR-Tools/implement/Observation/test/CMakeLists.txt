@@ -25,7 +25,7 @@ endforeach (src)
 
 ## Test programs which need extra attention
 
-if (CR_PLOTTING_SUPPORT)
+if (CR_WITH_PLOTTING)
 
   ## compiler instructions
   add_executable (tStationBeam tStationBeam.cc)
@@ -38,7 +38,7 @@ if (CR_PLOTTING_SUPPORT)
     add_test (tStationBeam tStationBeam)
   endif (CR_ENABLE_TESTING) 
   
-endif (CR_PLOTTING_SUPPORT)
+endif (CR_WITH_PLOTTING)
 
 ## -----------------------------------------------------------------------------
 ## Installation

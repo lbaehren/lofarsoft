@@ -21,9 +21,10 @@ option (CR_ENABLE_TESTING "Enable running the test programs?" 1)
 option (CR_COMPILER_WARNINGS "Enable standard set of compiler warnings?" ON)
 option (CR_DEBUGGING_MESSAGES "Print debugging information?" 0)
 option (CR_VERBOSE_CONFIGURE "Verbose output during configuration?" 0)
-option (CR_GLISH_SUPPORT "Activate support for Glish applications?" 0)
-option (CR_PYTHON_SUPPORT "Activate support for Python applications?" 1)
-option (CR_PLOTTING_SUPPORT "Activate support for generation of plots?" ON)
+option (CR_WITH_GLISH      "Support for Glish applications?"              NO  )
+option (CR_WITH_PYTHON     "Support for Python applications?"             YES )
+option (CR_WITH_PLOTTING   "Support for generation of plots?"             YES )
+option (CR_WITH_GUI        "Build the graphical interface?"               YES )
 
 ## Handle option: verbose mode on/off
 
@@ -128,7 +129,7 @@ include (FindWCS)
 
 ## --- CASA / casacore -------------------------
 
-if (CR_GLISH_SUPPORT)
+if (CR_WITH_GLISH)
   ## load find script
   include (${cr_cmake}/FindGlish.cmake)
   ## process outcome 
@@ -137,23 +138,23 @@ if (CR_GLISH_SUPPORT)
     include_directories (${GLISH_INCLUDES})
   else (HAVE_GLISH)
     message (STATUS "[CR-Tools] Disabling Glish support - missing Glish components.")
-    set (CR_GLISH_SUPPORT FALSE)
+    set (CR_WITH_GLISH FALSE)
   endif (HAVE_GLISH)
-endif (CR_GLISH_SUPPORT)
+endif (CR_WITH_GLISH)
 
 ## keep in mind, that we only are going to need the
 ## fully-blown CASA installation if we want the Glish
 ## support; otherwise we use casacore
 
-if (CR_GLISH_SUPPORT)
+if (CR_WITH_GLISH)
   message (STATUS "[CR-Tools] Configuration with Glish support -- CASA")
   ## load find script
   include (${cr_cmake}/FindCASA.cmake)
   ## process outcome
   if (NOT HAVE_CASA)
-    set (CR_GLISH_SUPPORT 0)
+    set (CR_WITH_GLISH 0)
   endif (NOT HAVE_CASA)
-else (CR_GLISH_SUPPORT)
+else (CR_WITH_GLISH)
   message (STATUS "[CR-Tools] Configuration without Glish support -- casacore")
   ## load find script
   include (FindCASACORE)
@@ -164,7 +165,7 @@ else (CR_GLISH_SUPPORT)
   ## CMake variables
   set (HAVE_CASA FALSE)
   set (HAVE_GLISH FALSE)
-endif (CR_GLISH_SUPPORT)
+endif (CR_WITH_GLISH)
 
 if (APPLE)
   message (STATUS "[CR-Tools] casacore configuration for MAC OS X")
@@ -348,22 +349,58 @@ endif (CR_COMPILER_WARNINGS)
 ## Handle option: create Python binding
 
 if (NOT HAVE_PYTHON OR NOT HAVE_BOOST)
-  set (CR_PYTHON_SUPPORT OFF)
+  set (CR_WITH_PYTHON OFF)
 endif (NOT HAVE_PYTHON OR NOT HAVE_BOOST)
 
 ## -------------------------------------------------------------------
 ## Handle option: Activate support for generation of plots ON/OFF
 
-if (CR_PLOTTING_SUPPORT)
+if (CR_WITH_PLOTTING)
 
   if (HAVE_PGPLOT OR HAVE_PLPLOT)
-    set (CR_PLOTTING_SUPPORT ON)
+    set (CR_WITH_PLOTTING ON)
   else (HAVE_PGPLOT OR HAVE_PLPLOT)
     message (STATUS "[CR-Tools] Disabling support for plotting.")
-    set (CR_PLOTTING_SUPPORT OFF)
+    set (CR_WITH_PLOTTING OFF)
   endif (HAVE_PGPLOT OR HAVE_PLPLOT)
 
-endif (CR_PLOTTING_SUPPORT)
+endif (CR_WITH_PLOTTING)
+
+## -------------------------------------------------------------------
+## Option: Create graphical user interface? ON/OFF
+
+if (CR_WITH_GUI)
+
+  ## locate the Qt4 libraries
+
+  find_library (QT4_LIBARY_QTCORE QtCore
+    PATHS ${lib_locations}
+    PATH_SUFFIXES qt4-x11 qt4-x11/lib
+    )
+  
+  find_library (QT4_LIBARY_QTGUI QtGui
+    PATHS ${lib_locations}
+    PATH_SUFFIXES qt4-x11 qt4-x11/lib
+    )
+
+  find_path (QT4_INCLUDES Qt/qatomic.h
+    PATHS ${include_locations}
+    PATH_SUFFIXES lib/qt4-x11/include lib/qt4-x11
+    )
+
+  ## process conditions for building the GUI
+
+  if (NOT QT4_INCLUDES)
+    message (STATUS "[CR-Tools] Unable to build GUI - Qt4 incomplete!")
+    set (CR_WITH_GUI NO)
+  endif (NOT QT4_INCLUDES)
+
+  if (NOT QT4_LIBARY_QTCORE OR NOT QT4_LIBARY_QTGUI)
+    message (STATUS "[CR-Tools] Unable to build GUI - Qt4 incomplete!")
+    set (CR_WITH_GUI NO)
+  endif (NOT QT4_LIBARY_QTCORE OR NOT QT4_LIBARY_QTGUI)
+
+endif (CR_WITH_GUI)
 
 ## =============================================================================
 ##
@@ -548,8 +585,8 @@ message (STATUS " Source directory ......... : ${CR_SOURCE_DIR}")
 message (STATUS " Installation location .... : ${CMAKE_INSTALL_PREFIX}")
 message (STATUS " Build the test programs .. : ${CR_BUILD_TESTS}")
 message (STATUS " Enable testing ........... : ${CR_ENABLE_TESTING}")
-message (STATUS " Support for Glish ........ : ${CR_GLISH_SUPPORT}")
-message (STATUS " Support for Python ....... : ${CR_PYTHON_SUPPORT}")
+message (STATUS " Support for Glish ........ : ${CR_WITH_GLISH}")
+message (STATUS " Support for Python ....... : ${CR_WITH_PYTHON}")
 message (STATUS " Print debugging messages . : ${CR_DEBUGGING_MESSAGES}")
 message (STATUS " Verbose configuration .... : ${CR_VERBOSE_CONFIGURE}")
 message (STATUS "+============================================================+")

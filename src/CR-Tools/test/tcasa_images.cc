@@ -39,6 +39,9 @@
 #include <images/Images/HDF5Image.h>
 #endif
 
+using std::cout;
+using std::endl;
+
 using casa::IPosition;
 using casa::Matrix;
 using casa::String;
@@ -95,6 +98,18 @@ casa::CoordinateSystem image_csys (double incrementDirection=2.0,
   const double pi (3.14159265);
   casa::CoordinateSystem cs;
 
+  // General observation information
+
+  casa::ObsInfo obsInfo;
+  casa::Time startTime;
+  casa::Quantity epoch (startTime.modifiedJulianDay(), "d");
+  //
+  obsInfo.setObsDate (epoch);
+  obsInfo.setTelescope ("LOFAR");
+  obsInfo.setObserver ("Lars Baehren");
+  //
+  cs.setObsInfo(obsInfo);
+  
   // [1] Direction axis
   {
     IPosition shape;
@@ -188,10 +203,14 @@ casa::CoordinateSystem image_csys (double incrementDirection=2.0,
 template <class T>
 void image_summary (casa::ImageInterface<T> &image)
 {
-  std::cout << "-- Image type ....... : " << image.imageType() << std::endl;
-  std::cout << "-- Table name ....... : " << image.name()      << std::endl;
-  std::cout << "-- Image shape ...... : " << image.shape()     << std::endl;
-  std::cout << "-- Maximum cache size : " << image.maximumCacheSize() << std::endl;
+  cout << "-- Image type ............. : " << image.imageType() << endl;
+  cout << "-- Table name ............. : " << image.name()      << endl;
+  cout << "-- Image shape ............ : " << image.shape()     << endl;
+  cout << "-- Maximum cache size ..... : " << image.maximumCacheSize() << endl;
+  cout << "-- Is the image paged? .... : " << image.isPaged()      << endl;
+  cout << "-- Is the image persistent? : " << image.isPersistent() << endl;
+  cout << "-- Is the image writable?   : " << image.isWritable()   << endl;
+  cout << "-- Has the image a mask?    : " << image.hasPixelMask() << endl;
 }
 
 template void image_summary (casa::ImageInterface<float> &image);
@@ -210,15 +229,15 @@ template void image_summary (casa::ImageInterface<casa::DComplex> &image);
 */
 int test_openImage (std::string const &infile)
 {
-  std::cout << "\n[test_openImage]\n" << std::endl;
+  cout << "\n[test_openImage]\n" << endl;
 
   int nofFailedTests (0);
 
-  std::cout << "[1] Opening existing image ..." << std::endl;
+  cout << "[1] Opening existing image ..." << endl;
   try {
     
   } catch (std::string message) {
-    std::cerr << "" << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
@@ -234,7 +253,7 @@ int test_openImage (std::string const &infile)
 */
 int test_createImage ()
 {
-  std::cout << "\n[test_createImage]\n" << std::endl;
+  cout << "\n[test_createImage]\n" << endl;
 
   int nofFailedTests (0);
 
@@ -242,25 +261,25 @@ int test_createImage ()
   casa::TiledShape tshape (shape);
   casa::String filename;
     
-  std::cout << "[1] Creating new PagedImage<T> ..." << std::endl;
+  cout << "[1] Creating new PagedImage<T> ..." << endl;
   try {
-    std::cout << "-> PagedImage<float>" << std::endl;
+    cout << "-> PagedImage<float>" << endl;
     casa::PagedImage<float> imageFloat (tshape,
 					image_csys(),
 					"testimage01f.img");
     image_summary (imageFloat);
     
-    std::cout << "-> PagedImage<float>" << std::endl;
+    cout << "-> PagedImage<float>" << endl;
     casa::PagedImage<double> imageDouble (tshape,
 					  image_csys(),
 					  "testimage01d.img");
     image_summary (imageDouble);
   } catch (std::string message) {
-    std::cerr << "" << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
-
-  std::cout << "[2] Creating new PagedImage<float> ..." << std::endl;
+  
+  cout << "[2] Creating new PagedImage<float> ..." << endl;
   try {
     filename = "testimage02.img";
     shape(0) = shape(1) = 200;
@@ -271,11 +290,11 @@ int test_createImage ()
     //
     image_summary (image);    
   } catch (std::string message) {
-    std::cerr << "" << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[3] Creating new PagedImage<float> ..." << std::endl;
+  cout << "[3] Creating new PagedImage<float> ..." << endl;
   try {
     filename = "testimage03.img";
     shape = IPosition (5,512,512,100,512,128);
@@ -286,7 +305,7 @@ int test_createImage ()
     //
     image_summary (image);    
   } catch (std::string message) {
-    std::cerr << "" << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
@@ -304,51 +323,120 @@ int test_createImage ()
 */
 int test_HDF5Image ()
 {
-  std::cout << "\n[test_HDF5Image]\n" << std::endl;
+  cout << "\n[test_HDF5Image]\n" << endl;
 
   int nofFailedTests (0);
   IPosition shape (image_shape());
+  int nofAxes = shape.nelements();
   casa::TiledShape tshape (shape);
   casa::String filename;
   
-  std::cout << "[1] Testing default constructor ..." << std::endl;
+  cout << "[1] Testing default constructor ..." << endl;
   try {    
-    std::cout << "--> HDF5Image<float>" << std::endl;
+    cout << "--> HDF5Image<float>" << endl;
     casa::HDF5Image<float> imageFloat (tshape,
 				       image_csys(),
 				       "hdf5image_f.h5");
     image_summary (imageFloat);
     
-    std::cout << "--> HDF5Image<double>" << std::endl;
+    cout << "--> HDF5Image<double>" << endl;
     casa::HDF5Image<double> imageDouble (tshape,
 					 image_csys(),
 					 "hdf5image_d.h5");
     image_summary (imageDouble);
     
-    std::cout << "--> HDF5Image<casa::Complex>" << std::endl;
+    cout << "--> HDF5Image<casa::Complex>" << endl;
     casa::HDF5Image<casa::Complex> imageComplex (tshape,
 						 image_csys(),
 						 "hdf5image_c.h5");
     image_summary (imageComplex);
     
   } catch (std::string message) {
-    std::cerr << "" << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
-  std::cout << "[2] Write pixels values one by one ..." << std::endl;
+  cout << "[2] Write pixels values one by one ..." << endl;
   try {
-    int nofAxes = shape.nelements();
+    int nAxis   = nofAxes-1;
+    IPosition pos (nofAxes,0);
     casa::HDF5Image<double> imageDouble (tshape,
 					 image_csys(),
 					 "hdf5image.h5");
-//     for (int axis (0); axis<nofAxes; axis++) {
-//     }
+
+    cout << "-- start writing pixel values ... " << std::flush;
+    for (int n(0); n<shape(nAxis); n++) {
+      pos(nAxis) = n;
+      imageDouble.putAt (double(n),pos);
+    }
+    cout << "DONE." << endl;
+
   } catch (std::string message) {
-    std::cerr << "" << std::endl;
+    std::cerr << message << endl;
     nofFailedTests++;
   }
 
+  cout << "[3] Writing pixel array of same rank ..." << endl;
+  try {
+    // open the previously created image
+    cout << "-- opening previously created image ..." << endl;
+    casa::HDF5Image<double> image ("hdf5image.h5");
+    // set up the array to be inserted into the image buffer
+    IPosition shapeArray (shape);
+    shapeArray(nofAxes-1) = 1;
+    casa::Array<double> arr (shapeArray);
+    // set up variable to handle writing to the buffer
+    IPosition start (nofAxes,0);
+    IPosition stride (nofAxes,1);
+    // access the image
+    cout << "-- start writing data to image ... " << std::flush;
+    for (int n(0); n<shape(4); n++) {
+      start(4) = n;
+      arr      = 1.0*n;
+      image.doPutSlice (arr,start,stride);
+    }
+    cout << "DONE." << endl;
+    // Feedback
+    cout << "-- Image file  = " << image.name()   << endl;
+    cout << "-- Image shape = " << image.shape()  << endl;
+    cout << "-- Array shape = " << arr.shape()    << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[4] Writing pixel array of lower rank ..." << endl;
+  try {
+    // open the previously created image
+    cout << "-- opening previously created image ..." << endl;
+    casa::HDF5Image<double> image ("hdf5image.h5");
+    // set up the array to be inserted into the image buffer
+    IPosition shapeArray (nofAxes-1);
+    shapeArray(0) = shape(0);
+    shapeArray(1) = shape(1);
+    shapeArray(2) = shape(2);
+    shapeArray(3) = shape(3);
+    casa::Array<double> arr (shapeArray);
+    // set up variable to handle writing to the buffer
+    IPosition start (nofAxes,0);
+    IPosition stride (nofAxes,1);
+    // access the image
+    cout << "-- start writing data to image ... " << std::flush;
+    for (int n(0); n<shape(4); n++) {
+      start(4) = n;
+      arr      = 10.0*n;
+      image.doPutSlice (arr,start,stride);
+    }
+    cout << "DONE." << endl;
+    // Feedback
+    cout << "-- Image file  = " << image.name()   << endl;
+    cout << "-- Image shape = " << image.shape()  << endl;
+    cout << "-- Array shape = " << arr.shape()    << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
   return nofFailedTests;
 }
 
@@ -364,7 +452,7 @@ int main (int argc,
   /* check the input parameters first */
 
   if (argc < 2) {
-    std::cout << "[tcasa_image] No path to image provided." << std::endl;
+    cout << "[tcasa_image] No path to image provided." << endl;
   } else {
     // get the name of the image file ...
     std::string filename = argv[1];
