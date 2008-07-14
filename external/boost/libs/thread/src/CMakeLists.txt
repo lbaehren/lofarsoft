@@ -25,14 +25,15 @@ endif (APPLE AND HAVE_MULTIPROCESSING_H)
 ## -----------------------------------------------------------------------------
 ## Compiler instructions
 
-add_definitions (
-  -fPIC
-  )
-
 add_library (boost_thread
   ${libboost_thread_sources}
   )
 
+set_target_properties (boost_thread
+  PROPERTIES
+  LINK_FLAGS "-fPIC"
+  )
+  
 ## -----------------------------------------------------------------------------
 ## Installation
 
