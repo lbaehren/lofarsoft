@@ -965,9 +965,9 @@ namespace CR { // Namespace CR -- begin
       vector<double> start_time;		// Stores the start time of the pulse (begin of FWHM)
 
       if (rawData)
-        std::cout << "\nLooking for maxima in the raw data FX: \n";
+        std::cout << "\nLooking for maxima in the envelope of the raw data FX: \n";
       else
-        std::cout << "\nLooking for maxima in the calibrated fieldstrength: \n";
+        std::cout << "\nLooking for maxima in the envelope of the calibrated fieldstrength: \n";
   
 
       // make antennaSelection unique, as casacore-Vectors are allways passed by reference
@@ -1001,6 +1001,11 @@ namespace CR { // Namespace CR -- begin
 
       // cut time values
       timeRange = timeValues(range);
+
+      // print header line of output
+      std::cout <<  "Ant  pulse height  time of half height  time of max   FWHM\n"
+                <<  "[#]   [uV/m/MHZ]          [us]             [us]       [ns]\n"
+                <<  "-----------------------------------------------------------\n";
 
       // find the maximal y values for all selected antennas
       for (unsigned int i = 0; i < antennaSelection.nelements(); i++) if (antennaSelection(i))
@@ -1062,16 +1067,17 @@ namespace CR { // Namespace CR -- begin
 	// multiply by 1e6 for conversion to micro
         maxima.push_back(maximum*1e6);
         maxima_time.push_back(timeRange(maxtimevalue)*1e6);
-        fwhm.push_back( (pulsestop-pulsestart)*1e6);
+        fwhm.push_back( (pulsestop-pulsestart)*1e9);
         start_time.push_back(pulsestart*1e6);
 
 
         // print the calculated values
-        std::cout << "Antenna " << i+1 << ": \t maximum[micro] = " << maximum*1e6 
-                  << "\t at time[micro s] = " << timeRange(maxtimevalue)*1e6
-                  << "\t pulse start[micro s] = " << pulsestart*1e6
-                  << "\t FWHM [micro s] = " << (pulsestop-pulsestart)*1e6 << "\n";
-      }
+        std::cout << std::setw(2) << i+1 << "     " 
+                  << std::setw(8) << maximum*1e6 << "          " 
+                  << std::setw(8) << pulsestart*1e6 << "       "
+                  << std::setw(8) << timeRange(maxtimevalue)*1e6 << "   "
+                  << std::setw(8) << (pulsestop-pulsestart)*1e9 << std::endl;
+      } // for i
 
       // calculate the averages and the range if there is more than one value
       if (maxima.size() > 1)
@@ -1082,7 +1088,9 @@ namespace CR { // Namespace CR -- begin
                   << "Amplitude average [micro]: " << mean(static_cast< Vector<Double> >(maxima)) << "\n"
                   << "Time range [micro s]:      " << min(static_cast< Vector<Double> >(maxima_time))
                   << " to " << max(static_cast< Vector<Double> >(maxima_time)) << "\n"
-                  << "Time average [micro s]:    " << mean(static_cast< Vector<Double> >(maxima_time)) << std::endl;
+                  << "Time average (max) [us]:   " << mean(static_cast< Vector<Double> >(maxima_time)) << "\n"
+                  << "Time average (start) [us]: " << mean(static_cast< Vector<Double> >(start_time)) << "\n"
+                  << "FWHM average [ns]:         " << mean(static_cast< Vector<Double> >(fwhm)) << std::endl;
       }
 
     } catch (AipsError x) 
