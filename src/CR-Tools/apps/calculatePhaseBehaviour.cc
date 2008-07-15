@@ -465,6 +465,65 @@ Vector<double> upsampleTrace(const Vector<double> &trace, int upsamplingExp)
 
 
 /*!
+  \brief Caclulates an envelope of an (upsampled) trace (uses the LOPES-Star library)
+
+  \param trace            -- any trace to calculate the envelope
+  \param upsamplingExp    -- umsampling factor will be 2^upsamplingExp (default = 0)
+
+  \return envelope        -- envelope of the given trace (has the same lenght)
+*/
+
+
+Vector<double> envelope(const Vector<double> &trace, unsigned int upsamplingExp = 0)
+{
+  Vector<double> envelope;		// create vector to return envelope
+
+  try 
+  {
+    // create upsampling factor by upsampling exponent
+    unsigned int upsampled = pow(2,upsamplingExp);
+
+    // get length of trace
+    unsigned int tracelength = trace.size();
+
+    // allocate memory for original and (upsampled) envelope trace
+    float* originalTrace = new float[tracelength];
+    float* envelopeTrace = new float[tracelength * upsampled];
+
+    // Resize Vector for usampled values
+    envelope.resize(tracelength * upsampled);
+
+    // copy the trace into the array
+    for (unsigned int i = 0; i < tracelength; i++) 
+      originalTrace[i] = trace(i);
+
+
+    // do upsampling by factor #upsampled (--> NoZeros = upsampled -1)
+    ZeroPaddingFFT(tracelength, originalTrace, upsampled-1, envelopeTrace);
+
+    // do envelope calculation (given trace will be overwritten!)
+    RectifierHilbert(tracelength * upsampled, envelopeTrace);
+
+    // copy envelope from array to Vector
+    for (unsigned int i = 0; i < tracelength* upsampled ; i++)
+      envelope(i) = envelopeTrace[i];
+
+    // delete arrays
+    delete[] originalTrace;
+    delete[] envelopeTrace;
+  } catch (AipsError x) 
+  {
+      std::cerr << "calculatePhaseBehaviour:envelope: " << x.getMesg() << std::endl;
+  }
+
+  return envelope;
+}
+
+
+
+
+
+/*!
   \brief interpolates time axis for upsampled traces
 
   \param dr            -- DataReader (for not interpolated time axis)
@@ -568,9 +627,8 @@ void plotTrace(DataReader &dr, const string &PlotPrefix, int antenna)
 
     // find the minimal and maximal y values for the plot and take 105% to have some space
     // do it with the upsampled data only as they are as least as heigh as the original ones
-    ymin = min(upYvalues(upplotRange)) * 1.05;
-    ymax = max(upYvalues(upplotRange)) * 1.05;
-
+    ymax = max( envelope(upYvalues(upplotRange)) ) * 1.05;
+    ymin = -ymax;
 
     // create the plot filename
     string plotfilename = PlotPrefix;
@@ -608,6 +666,8 @@ void plotTrace(DataReader &dr, const string &PlotPrefix, int antenna)
 
     // Plot (upsampled) trace
     plotter.PlotLine(upxaxis(upplotRange),upYvalues(upplotRange),color,1);
+    // plot envelope
+    plotter.PlotLine(upxaxis(upplotRange),envelope(upYvalues(upplotRange)),color+3,1);
     // Plot original data points (if upsampling was done).
     //plotter.PlotSymbols(xaxis(plotRange),yValues(plotRange),empty, empty, color, 2, 5);
   } catch (AipsError x) 
@@ -1067,7 +1127,7 @@ void analyseEvent(const string &eventName)
         plotPrefix.erase(0,plotPrefix.find_last_of('/')+1);
 
     // Plot FX and FFT
-    //plotTrace(dr, plotPrefix, antenna);
+    plotTrace(dr, plotPrefix, antenna);
     //plotFFT(dr, plotPrefix, antenna);
 
     // calculate phases
