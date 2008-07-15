@@ -140,7 +140,7 @@ namespace CR { // Namespace CR -- begin
 
     } catch (AipsError x) 
     {
-        std::cerr << "CompletePipeline:envelope: " << x.getMesg() << std::endl;
+        std::cerr << "CompletePipeline::envelope: " << x.getMesg() << std::endl;
     }
 
     return envelope;
@@ -1013,7 +1013,6 @@ namespace CR { // Namespace CR -- begin
         // Start with height 0 and search for heigher and lower values
         double maximum = 0;
         int maxtimevalue = 0;
-
         // get current envelope of trace
         trace = envelope(yValues.column(i)(range));
 
@@ -1030,9 +1029,8 @@ namespace CR { // Namespace CR -- begin
         // calculate FWHM
        double pulsestart = 0;
        double pulsestop = 0;
- 
        // find begin of pulse (half height)
-        for(unsigned int j = maxtimevalue; j >= 0; j--)
+       for(unsigned int j = maxtimevalue; j > 0; j--)
 	{
           // find crossing of half height (between j and j+1)
           if ( trace(j) <= maximum/2.)
@@ -1067,9 +1065,9 @@ namespace CR { // Namespace CR -- begin
 	// multiply by 1e6 for conversion to micro
         maxima.push_back(maximum*1e6);
         maxima_time.push_back(timeRange(maxtimevalue)*1e6);
-        fwhm.push_back( (pulsestop-pulsestart)*1e9);
-        start_time.push_back(pulsestart*1e6);
-
+        // make quality check before push back (calculation of FWHM and pulsestart can fail)
+        if ((pulsestop-pulsestart) < 200e-9) fwhm.push_back( (pulsestop-pulsestart)*1e9);
+        if (pulsestart != 0) start_time.push_back(pulsestart*1e6);
 
         // print the calculated values
         std::cout << std::setw(2) << i+1 << "     " 
