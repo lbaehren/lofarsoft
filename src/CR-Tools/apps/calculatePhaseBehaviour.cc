@@ -76,8 +76,8 @@ using CR::CalTableReader;
 */
 
 const int upsampling_exp = 5;		// upsampling of trace will be done by 2^upsampling_exp
-const double plotStart = -0.9e-6;	// start time for plotting of FX values
-const double plotStop = -0.5e-6;        // stop time for plotting of FX values
+const double plotStart = -1.1e-6;	// start time for plotting of FX values
+const double plotStop = +1.1e-6;        // stop time for plotting of FX values
 const double peakWidth  = 20e3;		// width of spectral peaks
 const int startfreq = 4e7;		// start frequency for plots and output
 const int stopfreq = 8e7;              // stop frequency for plots and output
@@ -1116,6 +1116,44 @@ void analyseEvent(const string &eventName)
       cout << "Calibrated antenna: " << antenna << endl;
     }
 
+    // find first pulse after t = 0 and shift data so that the pulse is at t = 0
+
+    // get time values
+    Vector<double> timeAxis = upsampleTimeAxis(dr, upsampling_exp);
+  
+    // Define range -0.5 us to 1 us to look for the first pulse
+    int startsample = ntrue(timeAxis< -0.5e-6);		//number of elements smaller then starting value of plot range
+    int stopsample = ntrue(timeAxis< 1.0e-6);		//number of elements smaller then end of plot range
+    Slice pulseRange(startsample,(stopsample-startsample));	// create Slice with plotRange
+
+    // time values and trace envelope to the pulse range
+    cout << "Calculating envelope of upsampled trace. This might take a while..." << endl;
+    Vector<double> trace = envelope(dr.fx().column(antenna-1),upsampling_exp)(pulseRange);
+    Vector<double> times = timeAxis(pulseRange);
+
+    if (trace.size() != times.size())
+      cerr << "calculatePhaseBehaviour:analyseEvent: Error: size of trace and time axis must be equal!" << endl;
+
+    // find index and time of the maximum of the envelope
+    // start with height 0 and search for heigher values
+    double maximum = 0;
+    int maxtimevalue = 0;
+
+    // loop through the values and search for the heighest one
+    for(unsigned int j = 0; j < times.nelements(); j++)
+    {
+      // increase j, if time is smaller then 0, to begin at o
+      while ( times(j) < 0) j++;
+      if ( maximum < trace(j)) 
+      {
+         maxtimevalue = j;
+         maximum = trace(j);
+      } 
+    }
+
+    double pulsestart = times(maxtimevalue);
+    cout << "Maximum " << maximum << " \t found at time: " << pulsestart << endl;
+
     // create plot prefix
     string plotPrefix = eventName;
 
@@ -1130,10 +1168,19 @@ void analyseEvent(const string &eventName)
     plotTrace(dr, plotPrefix, antenna);
     //plotFFT(dr, plotPrefix, antenna);
 
-    // calculate phases
-    Vector<DComplex> spectrum = dr.fft().column(antenna-1).copy();
-    Vector<Double> phases = phase(dr.fft().column(antenna-1));
+    // get frequency axis
     Vector<Double> frequencies = dr.frequencyValues().copy();
+    // also create complex version of frequency axis for multiplication to FFT
+    Vector<DComplex> cmplxFreqs(frequencies.size());
+    convertArray(cmplxFreqs, frequencies);
+
+    // calculate phases of shifted spectrum 
+    // shift is done by e ^ - i * pulsestart * frequencies
+    Vector<DComplex> spectrum = dr.fft().column(antenna-1).copy() 
+                                * exp( DComplex (0.,-1.) * pulsestart * cmplxFreqs);
+    Vector<Double> phases = phase(spectrum);
+
+
 
     // Store Phases of 41 comb frequencies
     Vector<Double> combFreqs(41,0);     // comb frequencies
