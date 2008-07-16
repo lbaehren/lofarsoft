@@ -504,19 +504,8 @@ void writeTVRefPhases(void)
   {
     cout << "Writing values for antenna: " << antennaIDs[i] << endl;
 
-    // It is neccessary to write the Delay again, as the other fields
-    // are junior fields an cannot be written alone
-    Double old_delay = 0.;
-    if (!reader.GetData(delay_apr_07_start, antennaIDs[i], "Delay", &old_delay))
-    { 
-      cerr << "Error while reading field: Delay" << endl;
-    } else
-    {
-      if (!writer.AddData(old_delay,antennaIDs[i],"Delay",delay_apr_07_start) )
-        cerr << "\nERROR while writing field: Delay" << endl;
-      if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",delay_apr_07_start) )
-        cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
-    }
+    if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",delay_apr_07_start) )
+      cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
   }
 
   // Set reference phases from apr/may 2007 for LOPES Dual Pol
@@ -611,19 +600,8 @@ void writeTVRefPhases(void)
   {
     cout << "Writing values for antenna: " << antennaIDs[i] << endl;
 
-    // It is neccessary to write the Delay again, as the other fields
-    // are junior fields an cannot be written alone
-    Double old_delay = 0.;
-    if (!reader.GetData(delay_sep_07_start, antennaIDs[i], "Delay", &old_delay))
-    { 
-      cerr << "Error while reading field: Delay" << endl;
-    } else
-    {
-      if (!writer.AddData(old_delay,antennaIDs[i],"Delay",delay_sep_07_start) )
-        cerr << "\nERROR while writing field: Delay" << endl;
-      if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",delay_sep_07_start) )
-        cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
-    }
+    if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",delay_sep_07_start) )
+      cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
   }
 
   // Set reference phases from oct 07 for LOPES Dual Pol
@@ -664,19 +642,8 @@ void writeTVRefPhases(void)
   {
     cout << "Writing values for antenna: " << antennaIDs[i] << endl;
 
-    // It is neccessary to write the Delay again, as the other fields
-    // are junior fields an cannot be written alone
-    Double old_delay = 0.;
-    if (!reader.GetData(delay_nov_07_start, antennaIDs[i], "Delay", &old_delay))
-    { 
-      cerr << "Error while reading field: Delay" << endl;
-    } else
-    {
-      if (!writer.AddData(old_delay,antennaIDs[i],"Delay",delay_nov_07_start) )
-        cerr << "\nERROR while writing field: Delay" << endl;
-      if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",delay_nov_07_start) )
-        cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
-    }
+    if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",delay_nov_07_start) )
+      cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
   }
 
 }
@@ -732,14 +699,15 @@ void writePhaseCal(void)
     for (unsigned int j = 0; j < PhaseCal.nrow(); j++)
       PhaseCal.column(i)(j) = exp ( + DComplex(0.,1.) * (phasecals[i][j]/180*3.1415926) );
 
+  cout << "Writing PhaseCal entries..." << endl;
   // Add the values to the CalTAbles
   for (int i = 0; i < MAX_Antennas; i++)
   {
     cout << "Writing values for antenna: " << antennaIDs[i] << endl;
 
-    if (!writer.AddData(PhaseCal.column(i),antennaIDs[i],"PhaseCal",LOPES30_start) )
+    if (!writer.AddData(PhaseCal.column(i),antennaIDs[i],"PhaseCal",delay_apr_07_start) )
       cerr << "\nERROR while writing field: PhaseCal" << endl;
-    if (!writer.AddData(PhaseCalFreq,antennaIDs[i],"PhaseCalFreq",LOPES30_start) )
+    if (!writer.AddData(PhaseCalFreq,antennaIDs[i],"PhaseCalFreq",delay_apr_07_start) )
       cerr << "\nERROR while writing field: PhaseCalFreq" << endl;
   }
 
@@ -785,7 +753,7 @@ int main (int argc, char *argv[])
     //rotate_antenna_model();
 
     // Add the measured dispersion of the LOPES 30 filter boxes
-    // writePhaseCal();
+    writePhaseCal();
 
     // write TV reference phase differences
     writeTVRefPhases();
