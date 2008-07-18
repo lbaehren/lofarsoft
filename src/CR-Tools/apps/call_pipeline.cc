@@ -73,6 +73,7 @@ using CR::LopesEventIn;
   some lines of text above a line of '='
   =================================================================  
   caltablepath           = /home/schroeder/usg/data/lopes/LOPES-CalTable
+  path                   = /home/schroeder/lopes/events
   RotatePos              = true
   GeneratePlots          = true
   SinglePlots            = true
@@ -95,10 +96,12 @@ using CR::LopesEventIn;
   ccWindowWidth          = 0.045e-6
   flagged                = 10101
   flagged                = 10102
+  rootfilename           = output.root
   \endverbatim
   This example means:
   <ul>
     <li>the caltables are in /home/horneff/lopescasa/data/LOPES/LOPES-CalTable,
+    <li>the events are stored at a certain location,
     <li>the given positions are in the Kascade coordinate system and must be
     rotated to the LOPES system,
     <li>there will be generated plots of the analaysed event,
@@ -120,8 +123,9 @@ using CR::LopesEventIn;
     <li>the upsampling of the calibrated antenna fieldstrengthes will be done by
     a factor of 2^1 = 2,
     <li>there will by a summary postscript of all created plots,
-    <li>time range to search for CC-beam-peak in lateral distribution studies is +/- 45 ns
-    <li>the antennas 10101 and 10102 are not considered in the analysis.
+    <li>time range to search for CC-beam-peak in lateral distribution studies is +/- 45 ns,
+    <li>the antennas 10101 and 10102 are not considered in the analysis,
+    <li>the output of the pipeline is written to a root tree in the file "output.root".
   </ul>
 
   <h3>Example</h3>
@@ -144,75 +148,57 @@ using CR::LopesEventIn;
   Otherwise wrong traces are obtained.
 */
 
+// ------------- Global variables ----------------
 
+// Set default configuration values for the pipeline
+string caltablepath = "/home/schroeder/usg/data/lopes/LOPES-CalTable";
+string path = "";
+bool generatePlots = true;		// the plot prefix will be the name of the event file
+bool singlePlots = false;		// by default there are no single plots for each antenna
+bool PlotRawData = false;		// by default there the raw data are not plotted
+bool CalculateMaxima = false;		// by default the maxima are not calculated
+bool listCalcMaxima=false;    		// print calculated maxima in more user friendly way
+bool printShowerCoordinates=false;	// print the distance between antenna and shower core
+bool RotatePos = true; 		// should be true if coordinates are given in KASKADE frame
+bool verbose = true;
+bool simplexFit = true;
+int doTVcal = -1;			// 1: yes, 0: no, -1: use default	
+bool doGainCal = true;			// calibration of the electrical fieldstrength
+bool doDispersionCal = true;		// application of the CalTable PhaseCal values	
+bool doDelayCal = true;		// correction for the general delay of each antenna
+string polarization = "ANY";		// polarization: ANY, EW or NS
+double plotStart = -2.05e-6;		// in seconds
+double plotEnd = -1.60e-6;		// in seconds
+double upsamplingRate = 0.;		// Upsampling Rate for new upsampling
+unsigned int upsamplingExponent = 0;	// by default no upsampling will be done
+vector<Int> flagged;			// use of STL-vector instead of CASA-vector due to support of push_back()
+unsigned int summaryColumns = 0;	// be default no summary of all plots
+double ccWindowWidth = 0.045e-6;	// width of window for CC-beam
+string rootFilename = "";		// name of root file for output
 
-// -----------------------------------------------------------------------------
+// ------------- Functions ----------------
 
-int main (int argc, char *argv[])
+/*!
+  \brief reads text file which contains configuration information
+
+  \param filenname     -- 
+
+  \return nothing (If an error occurs, the program will continue with the default configuration.)
+*/
+
+void readConfigFile (const string &filename)
 {
-  string eventfilelistname, configfilename;	// Files to be read in
-  bool configfile_exists = false;		// Set to true if name of config file was passed as parameter
-
-  try {
-    std::cout << "\nStarting Program \"call_pipline\".\n\n" << std::endl;
-
-    // Check correct number of arguments (1 or 2 + program name = 2 or 3)
-    if ((argc < 2) || (argc >3))
-    {
-      std::cerr << "Wrong number of arguments in call of \"call_pipeline\". The correct format is:\n";
-      std::cerr << "call_pipeline eventfilelist [configfile]\n" << std::endl;
-      return 1;				// Exit the program
-    }
-
-    // First argument should be the name of the file containing the list of event files
-    eventfilelistname.assign(argv[1]);
-    std::cout << "File containing list of event files: " << eventfilelistname << std::endl;
-
-    // If a second argument is available it sould contain the name of the config file
-    if (argc == 3) 
-    {
-      configfilename.assign(argv[2]);
-      configfile_exists = true;
-      std::cout << "Reading config data from file: " << configfilename << std::endl;
-    }
-
-
-    // Set default configuration values for the pipeline
-    bool generatePlots = true;		// the plot prefix will be the name of the event file
-    bool singlePlots = false;		// by default there are no single plots for each antenna
-    bool PlotRawData = false;		// by default there the raw data are not plotted
-    bool CalculateMaxima = false;	// by default the maxima are not calculated
-    bool listCalcMaxima=false;    	// print calculated maxima in more user friendly way
-    bool printShowerCoordinates=false;	// print the distance between antenna and shower core
-    bool RotatePos = true; 		// should be true if coordinates are given in KASKADE frame
-    bool verbose = true;
-    bool simplexFit = true;
-    int doTVcal = -1;			// 1: yes, 0: no, -1: use default	
-    bool doGainCal = true;		// calibration of the electrical fieldstrength
-    bool doDispersionCal = true;	// application of the CalTable PhaseCal values	
-    bool doDelayCal = true;		// correction for the general delay of each antenna
-    string polarization = "ANY";	// polarization: ANY, EW or NS
-    double plotStart = -2.05e-6;	// in seconds
-    double plotEnd = -1.60e-6;		// in seconds
-    double upsamplingRate = 0.;		// Upsampling Rate for new upsampling
-    unsigned int upsamplingExponent = 0;// by default no upsampling will be done
-    vector<Int> flagged;		// use of STL-vector instead of CASA-vector due to support of push_back()
-    string caltablepath = "/home/schroeder/usg/data/lopes/LOPES-CalTable";
-    unsigned int summaryColumns = 0;	// be default no summary of all plots
-    double ccWindowWidth = 0.045e-6;	// width of window for CC-beam
-
-
-    // Open config file if passed by programm call
-    if (configfile_exists)
-    {
+  try
+  {
       ifstream configfile;
-      configfile.open (configfilename.c_str(), ifstream::in);
+      configfile.open (filename.c_str(), ifstream::in);
 
       // check if file could be opened
       if (!(configfile.is_open()))
       {
-        std::cerr << "Failed to open file \"" << configfilename <<"\"." << std::endl;
-        return 1;		// exit program
+        std::cerr << "Failed to open file \"" << filename <<"\".\n";
+        std::cerr << "Program will continue with default configuration." << std::endl;
+        return;		// exit function
       }
 
       // look for the beginnig of the config data (after a line containing only and at least three '-' or '='	
@@ -232,11 +218,12 @@ int main (int argc, char *argv[])
       {
         configfile.close();  // close file
         std::cerr << "\nWarning!";
-        std::cerr << "\nNo config information was foung in file \"" << configfilename <<"\".\n" ;
+        std::cerr << "\nNo config information was foung in file \"" << filename <<"\".\n" ;
         std::cerr << "Use the following file format ('=' seperated by spaces): \n\n";
         std::cerr << "some lines of text\n";
         std::cerr << "===================================\n";
         std::cerr << "caltablepath = /home/schroeder/usg/data/lopes/LOPES-CalTable\n";
+        std::cerr << "path = /home/schroeder/lopes/events\n";
         std::cerr << "RotatePos = true\n";
         std::cerr << "GeneratePlots = true\n";
         std::cerr << "SinglePlots = true\n";
@@ -259,6 +246,7 @@ int main (int argc, char *argv[])
         std::cerr << "ccWindowWidth = 0.045e-6\n";
         std::cerr << "flagged = 10101\n";
         std::cerr << "flagged = 10102\n";
+        std::cerr << "rootfilename = output.root\n";
         std::cerr << "... \n";
         std::cerr << "\nProgram will continue using default configuration values." << std::endl;
       }
@@ -279,12 +267,21 @@ int main (int argc, char *argv[])
         // check if syntax ("=") is correct		
         if (equal_token.compare("=") != 0)
         {
-          std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+          std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
           std::cerr << "No '=' was found after \"" << keyword << "\".\n";
           std::cerr << "\nProgram will continue skipping the problem." << std::endl;
         }
 
         // check keywords an set appropriate configurations
+
+        if ( (keyword.compare("path")==0) || (keyword.compare("Path")==0) )
+        {
+	  path = value;
+          // add final "/" if not allready there
+          if ( path[path.length()-1] != '/') path += "/";
+
+	  std::cout << "Path set to \"" << path << "\".\n";
+	}
 
         if ( (keyword.compare("generateplots")==0) || (keyword.compare("GeneratePlots")==0) ||
              (keyword.compare("generatePlots")==0))
@@ -300,7 +297,7 @@ int main (int argc, char *argv[])
 	    std::cout << "GeneratePlots set to 'false'.\n";
           } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "GeneratePlots must be either 'true' or 'false'.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
@@ -320,7 +317,7 @@ int main (int argc, char *argv[])
 	    std::cout << "SinglePlots set to 'false'.\n";
           } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "SinglePlots must be either 'true' or 'false'.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
@@ -340,7 +337,7 @@ int main (int argc, char *argv[])
 	    std::cout << "PlotRawData set to 'false'.\n";
           } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "PlotRawData must be either 'true' or 'false'.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
@@ -360,7 +357,7 @@ int main (int argc, char *argv[])
 	    std::cout << "CalculateMaxima set to 'false'.\n";
           } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "CalculateMaxima must be either 'true' or 'false'.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
@@ -380,7 +377,7 @@ int main (int argc, char *argv[])
 	    std::cout << "listCalcMaxima set to 'false'.\n";
           } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "listCalcMaxima must be either 'true' or 'false'.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
@@ -400,7 +397,7 @@ int main (int argc, char *argv[])
 	    std::cout << "printShowerCoordinates set to 'false'.\n";
           } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "printShowerCoordinates must be either 'true' or 'false'.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
@@ -419,7 +416,7 @@ int main (int argc, char *argv[])
 	    std::cout << "RotatePos set to 'false'.\n";
           } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "RotatePos must be either 'true' or 'false'.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
@@ -438,7 +435,7 @@ int main (int argc, char *argv[])
 	    std::cout << "Verbose set to 'false'.\n";
 	  } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "Verbose must be either 'true' or 'false'.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
@@ -457,7 +454,7 @@ int main (int argc, char *argv[])
 	    std::cout << "SimplexFit set to 'false'.\n";
 	  } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "SimplexFit must be either 'true' or 'false'.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
@@ -482,7 +479,7 @@ int main (int argc, char *argv[])
 	    std::cout << "doTVcal set to -1 (default will be used).\n";
 	  } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "doTVcal must be either -1 ('default'), 0 ('false') or 1 ('true').\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
@@ -502,7 +499,7 @@ int main (int argc, char *argv[])
 	    std::cout << "doGainCal set to 'false'.\n";
 	  } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "doGainCal must be either 'true' or 'false'.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
@@ -522,7 +519,7 @@ int main (int argc, char *argv[])
 	    std::cout << "doDispersionCal set to 'false'.\n";
 	  } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "doDispersionCal must be either 'true' or 'false'.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
@@ -542,7 +539,7 @@ int main (int argc, char *argv[])
 	    std::cout << "doDelayCal set to 'false'.\n";
 	  } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "doDelayCal must be either 'true' or 'false'.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
@@ -567,7 +564,7 @@ int main (int argc, char *argv[])
 	    std::cout << "polarization set to NS (only NS antennas will be beamformed).\n";
 	  } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "Polarization must be either ANY, EW or NS.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
@@ -584,7 +581,7 @@ int main (int argc, char *argv[])
 	    std::cout << "PlotStart set to " << plotStart << " seconds.\n";
 	  } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "PlotStart must be of typ 'double'. \n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
@@ -601,7 +598,7 @@ int main (int argc, char *argv[])
 	    std::cout << "PlotEnd set to " << plotEnd << " seconds.\n";
 	  } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "PlotEnd must be of typ 'double'. \n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
@@ -624,7 +621,7 @@ int main (int argc, char *argv[])
               std::cerr << "WARNING: UpsamplingRate should be larger than 160 MHz to obtain useful results.\n";
 	  } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "UpsamplingRate must be of typ 'double'. \n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
@@ -642,7 +639,7 @@ int main (int argc, char *argv[])
 	    std::cout << "UpsamplingExponent set to " << upsamplingExponent<< ".\n";
 	  } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "UpsamplingExponent must be of typ 'unsignend int'. \n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
@@ -660,7 +657,7 @@ int main (int argc, char *argv[])
 	    std::cout << "SummaryColumns set to " << summaryColumns << ".\n";
 	  } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "SummaryColumns must be of typ 'unsignend int'. \n";
             std::cerr << "Use 'summaryColumns = 0' if you don't want to hava a summary postscrict.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
@@ -679,7 +676,7 @@ int main (int argc, char *argv[])
 	    std::cout << "ccWindowWidth set to " << ccWindowWidth << " seconds.\n";
 	  } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "ccWindowWidth must be of typ 'double'. \n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
@@ -840,7 +837,7 @@ int main (int argc, char *argv[])
 	    std::cout << "Flagged antenna 30 (id = 90102).\n";
 	  } else
           {
-            std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "'Flagged = ' must be followed by a valid antenna id.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
@@ -851,13 +848,57 @@ int main (int argc, char *argv[])
 	  caltablepath = value;
 	  std::cout << "CalTablePath set to \"" << caltablepath << "\".\n";
 	}
+
+        if ( (keyword.compare("rootfilename")==0) || (keyword.compare("Rootfilename")==0)
+           || (keyword.compare("rootFilename")==0) || (keyword.compare("RootFilename")==0))
+        {
+	  rootFilename = value;
+	  std::cout << "RootFilename set to \"" << rootFilename << "\".\n";
+	}
  
       }	// while(configfile.good())
 
       // close config file
       configfile.close();
-    } //if (configfile_exists)
+  } catch (AipsError x) 
+  {
+    cerr << "call_pipeline:readConfigFile: " << x.getMesg() << endl;
+  }
+}
 
+// -----------------------------------------------------------------------------
+
+int main (int argc, char *argv[])
+{
+  string eventfilelistname;			        // Files to be read in
+  double azimuth, elevation, distance, core_x, core_y;  // basic parameters for the pipeline
+  Record results;					// results of the pipeline
+
+  // variables for reconstruction information
+  unsigned int gt = 0;
+  double CCheight = 0;
+
+  try {
+    std::cout << "\nStarting Program \"call_pipline\".\n\n" << std::endl;
+
+    // Check correct number of arguments (1 or 2 + program name = 2 or 3)
+    if ((argc < 2) || (argc >3))
+    {
+      std::cerr << "Wrong number of arguments in call of \"call_pipeline\". The correct format is:\n";
+      std::cerr << "call_pipeline eventfilelist [configfile]\n" << std::endl;
+      return 1;				// Exit the program
+    }
+
+    // First argument should be the name of the file containing the list of event files
+    eventfilelistname.assign(argv[1]);
+    std::cout << "File containing list of event files: " << eventfilelistname << std::endl;
+
+    // If a second argument is available it sould contain the name of the config file
+    if (argc == 3) 
+    {
+      std::cout << "Reading config data from file: " << argv[2] << std::endl;
+      readConfigFile(argv[2]);
+    }
 
     // open event file list
     ifstream eventfilelist;
@@ -896,13 +937,37 @@ int main (int argc, char *argv[])
       return 1;		// exit program
     }
 
+    // prepare output in root file
+    TFile *rootfile=NULL;
+
+    if (rootFilename != "")
+    {
+      // open root file and create tree structure
+      rootfile = new TFile(rootFilename.c_str(),"RECREATE","Resulst of CR-Tools pipeline");
+
+      // check if file is open
+      if (rootfile->IsZombie()) 
+      {
+        std::cerr << "\nError: Could not create file: " << rootFilename << "\n" << std::endl;
+        return 1;		// exit program
+      }
+    }
+
+    // create tree and tree structure
+    TTree roottree("T","LOPES");
+    roottree.Branch("Gt",&gt,"Gt/i");	// GT as unsigned int
+    roottree.Branch("XC",&core_x,"XC/D");
+    roottree.Branch("YC",&core_y,"YC/D");
+    roottree.Branch("AZ",&azimuth,"AZ/D");
+    roottree.Branch("EL",&elevation,"EL/D");
+    roottree.Branch("CCheight",&CCheight,"CCheight/D");
+
     // Process events from event file list
     while (eventfilelist.good())
     {	
       string filename, plotprefix;
-      double azimuth, elevation, distance, core_x, core_y;
       bool read_in_error = false;
-      
+
       // read in filename, azimuth, elevation, distance and log_energy	
       if (eventfilelist.good()) eventfilelist >> filename;
 	else read_in_error = true;
@@ -952,19 +1017,20 @@ int main (int argc, char *argv[])
 
       // Initialize the pipeline
       analyseLOPESevent2 eventPipeline;
-      Record obsrec,results;
+      Record obsrec;
+
       obsrec.define("LOPES",caltablepath);
       eventPipeline.initPipeline(obsrec);
 
       // set plot range and ccWindowWidth
       eventPipeline.setPlotInterval(plotStart,plotEnd);
       eventPipeline.setCCWindowWidth(ccWindowWidth);
-   
+
       // set the upsampling coefficient (upsampling factor = 2^upsamplingExponent
       eventPipeline.setUpsamplingExponent(upsamplingExponent);
 
       // call the pipeline with an extra delay = 0.
-      results = eventPipeline.RunPipeline (filename, azimuth, elevation, distance, core_x, core_y, RotatePos,
+      results = eventPipeline.RunPipeline (path+filename, azimuth, elevation, distance, core_x, core_y, RotatePos,
                                            plotprefix, generatePlots, static_cast< Vector<int> >(flagged), verbose, 
                                            simplexFit, 0., doTVcal, doGainCal, doDispersionCal, doDelayCal,
                                            upsamplingRate, polarization, singlePlots, PlotRawData,
@@ -973,14 +1039,36 @@ int main (int argc, char *argv[])
       // make a postscript with a summary of all plots
       // if summaryColumns = 0 the method does not create a summary.
       eventPipeline.summaryPlot(plotprefix+"-summary",summaryColumns);
+
+      // write output to root tree
+      if (rootFilename != "")
+      {
+        // adding results to root tree
+        cout << "Adding results to root tree.\n" << endl;
+        azimuth = results.asDouble("Azimuth");
+        elevation = results.asDouble("Elevation");
+        CCheight = results.asDouble("CCheight");
+        roottree.Fill();
+      }
     }
 
     // close file
     eventfilelist.close();
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
+
+    // write and close root file
+    if (rootFilename != "")
+    {
+      cout << "Writing outout to root file: " << rootFilename << endl;
+
+      rootfile->Write();
+      rootfile->Close();
+    }
+
+  } catch (AipsError x) 
+  {
+    cerr << "call_pipeline: " << x.getMesg() << endl;
   }
- 
+
   return 0;
 }
 
