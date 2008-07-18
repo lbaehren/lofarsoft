@@ -117,7 +117,8 @@ using CR::LopesEventIn;
     <li>the electrical gain calibration (fieldstrength) will be done,
     <li>correction of the dispersion (frequency dependent delay) is enabled,
     <li>correction of the general delay is enabled,
-    <li>the analysis does not take care of the polarization of the antennas,
+    <li>the analysis does not take care of the polarization of the antennas
+        (select EW, NS or BOTH if you want to results for one (both) polarizations),
     <li>the plots start at -2.05 micro seconds and end at -1.60 micro seconds,
     <li>the Lopes data will be upsampled to a sampling rate of 320 MHz (see below),
     <li>the upsampling of the calibrated antenna fieldstrengthes will be done by
@@ -166,7 +167,8 @@ int doTVcal = -1;			// 1: yes, 0: no, -1: use default
 bool doGainCal = true;			// calibration of the electrical fieldstrength
 bool doDispersionCal = true;		// application of the CalTable PhaseCal values	
 bool doDelayCal = true;		// correction for the general delay of each antenna
-string polarization = "ANY";		// polarization: ANY, EW or NS
+string polarization = "ANY";		// polarization: ANY, EW, NS or BOTH
+bool both_pol = false;			// Should both polarizations be processed?
 double plotStart = -2.05e-6;		// in seconds
 double plotEnd = -1.60e-6;		// in seconds
 double upsamplingRate = 0.;		// Upsampling Rate for new upsampling
@@ -551,21 +553,30 @@ void readConfigFile (const string &filename)
           if ( (value.compare("ANY")==0) || (value.compare("any")==0) )
 	  {
 	    polarization = "ANY";
+            both_pol = false;
 	    std::cout << "polarization set to ANY (polarization won't be considered during analysis).\n";
 	  } else
           if ( (value.compare("EW")==0) || (value.compare("ew")==0) )
 	  {
 	    polarization = "EW";
+            both_pol = false;
 	    std::cout << "polarization set to EW (only EW antennas will be beamformed).\n";
 	  } else
 	  if ( (value.compare("NS")==0) || (value.compare("ns")==0) )
 	  {
 	    polarization = "NS";
+            both_pol = false;
 	    std::cout << "polarization set to NS (only NS antennas will be beamformed).\n";
+	  } else
+	  if ( (value.compare("Both")==0) || (value.compare("BOTH")==0) || (value.compare("both")==0) )
+	  {
+	    polarization = "BOTH";
+            both_pol = true;
+	    std::cout << "polarization set to BOTH (EW and NS antennas will be beamformed seperatly).\n";
 	  } else
           {
             std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
-            std::cerr << "Polarization must be either ANY, EW or NS.\n";
+            std::cerr << "Polarization must be either ANY, EW, NS or BOTH.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
         }
@@ -871,12 +882,13 @@ void readConfigFile (const string &filename)
 int main (int argc, char *argv[])
 {
   string eventfilelistname;			        // Files to be read in
-  double azimuth, elevation, distance, core_x, core_y;  // basic parameters for the pipeline
+  double azimuth, elevation, distance, core_x, core_y;  // basic input parameters for the pipeline
   Record results;					// results of the pipeline
 
-  // variables for reconstruction information
+  // variables for reconstruction information (output of pipeline)
   unsigned int gt = 0;
-  double CCheight = 0;
+  double CCheight, CCheight_NS;  	// CCheight will be used for EW polarization or ANY polarization
+  double AzL, ElL, AzL_NS, ElL_NS;	// Azimuth and Elevation
 
   try {
     std::cout << "\nStarting Program \"call_pipline\".\n\n" << std::endl;
@@ -953,14 +965,32 @@ int main (int argc, char *argv[])
       }
     }
 
-    // create tree and tree structure
+    // create tree and tree structure (depends on chosen polarization)
     TTree roottree("T","LOPES");
     roottree.Branch("Gt",&gt,"Gt/i");	// GT as unsigned int
-    roottree.Branch("XC",&core_x,"XC/D");
-    roottree.Branch("YC",&core_y,"YC/D");
-    roottree.Branch("AZ",&azimuth,"AZ/D");
-    roottree.Branch("EL",&elevation,"EL/D");
-    roottree.Branch("CCheight",&CCheight,"CCheight/D");
+    roottree.Branch("Xc",&core_x,"Xc/D");
+    roottree.Branch("Yc",&core_y,"Yc/D");
+
+    // one result, if polarization = ANY
+    if (polarization == "ANY")
+    {
+      roottree.Branch("AzL",&azimuth,"AzL/D");
+      roottree.Branch("ElL",&elevation,"ElL/D");
+      roottree.Branch("CCheight",&CCheight,"CCheight/D");
+    }
+    if ( (polarization == "EW") || (polarization == "BOTH"))
+    {
+      roottree.Branch("AzL_EW",&AzL,"AzL_EW/D");
+      roottree.Branch("ElL_EW",&ElL,"ElL_EW/D");
+      roottree.Branch("CCheight_EW",&CCheight,"CCheight_EW/D");
+    }
+    if ( (polarization == "NS") || (polarization == "BOTH"))
+    {
+      roottree.Branch("AzL_NS",&AzL_NS,"AzL_NS/D");
+      roottree.Branch("ElL_NS",&ElL_NS,"ElL_NS/D");
+      roottree.Branch("CCheight_NS",&CCheight_NS,"CCheight_NS/D");
+    }
+
 
     // Process events from event file list
     while (eventfilelist.good())
@@ -1029,27 +1059,68 @@ int main (int argc, char *argv[])
       // set the upsampling coefficient (upsampling factor = 2^upsamplingExponent
       eventPipeline.setUpsamplingExponent(upsamplingExponent);
 
-      // call the pipeline with an extra delay = 0.
-      results = eventPipeline.RunPipeline (path+filename, azimuth, elevation, distance, core_x, core_y, RotatePos,
-                                           plotprefix, generatePlots, static_cast< Vector<int> >(flagged), verbose, 
-                                           simplexFit, 0., doTVcal, doGainCal, doDispersionCal, doDelayCal,
+      // check for the polarizations, if both polarizations are required
+      // then the pipeline has to be called twice (once for EW and once for NS);
+      // in this case an additional plotprefix is used
+      string polPlotPrefix = "";
+
+      if ( (polarization == "ANY") || (polarization == "EW") || both_pol)
+      {
+        if (both_pol)
+        {
+          cout << "Pipeline is started for East-West Polarization.\n" << endl;
+          polPlotPrefix = "-EW";
+          polarization = "EW";	// do EW here
+        }
+
+        // call the pipeline with an extra delay = 0.
+        results = eventPipeline.RunPipeline (path+filename, azimuth, elevation, distance, core_x, core_y, RotatePos,
+                                           plotprefix+polPlotPrefix, generatePlots, static_cast< Vector<int> >(flagged),
+                                           verbose, simplexFit, 0., doTVcal, doGainCal, doDispersionCal, doDelayCal,
                                            upsamplingRate, polarization, singlePlots, PlotRawData,
                                            CalculateMaxima, listCalcMaxima, printShowerCoordinates);
 
-      // make a postscript with a summary of all plots
-      // if summaryColumns = 0 the method does not create a summary.
-      eventPipeline.summaryPlot(plotprefix+"-summary",summaryColumns);
+        // make a postscript with a summary of all plots
+        // if summaryColumns = 0 the method does not create a summary.
+        eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",summaryColumns);
 
-      // write output to root tree
-      if (rootFilename != "")
-      {
-        // adding results to root tree
-        cout << "Adding results to root tree.\n" << endl;
-        azimuth = results.asDouble("Azimuth");
-        elevation = results.asDouble("Elevation");
+        // adding results to variables (needed to fill them into the root tree)
+        AzL = results.asDouble("Azimuth");
+        ElL = results.asDouble("Elevation");
         CCheight = results.asDouble("CCheight");
-        roottree.Fill();
-      }
+       }
+
+      if ( (polarization == "NS") || both_pol)
+      {
+        if (both_pol) 
+        {
+          cout << "Pipeline is started for North-South Polarization.\n" << endl;
+          polPlotPrefix = "-NS";
+          polarization = "NS";	// do NS here
+        }
+        // call the pipeline with an extra delay = 0.
+        results = eventPipeline.RunPipeline (path+filename, azimuth, elevation, distance, core_x, core_y, RotatePos,
+                                           plotprefix+polPlotPrefix, generatePlots, static_cast< Vector<int> >(flagged),
+                                           verbose, simplexFit, 0., doTVcal, doGainCal, doDispersionCal, doDelayCal,
+                                           upsamplingRate, polarization, singlePlots, PlotRawData,
+                                           CalculateMaxima, listCalcMaxima, printShowerCoordinates);
+
+        // make a postscript with a summary of all plots
+        // if summaryColumns = 0 the method does not create a summary.
+        eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",summaryColumns);
+
+        // adding results to variables (needed to fill them into the root tree)
+        AzL_NS = results.asDouble("Azimuth");
+        ElL_NS = results.asDouble("Elevation");
+        CCheight_NS = results.asDouble("CCheight");
+       }
+
+       // write output to root tree
+       if (rootFilename != "")
+       {
+         cout << "Adding results to root tree.\n" << endl;
+         roottree.Fill();
+       }
     }
 
     // close file
