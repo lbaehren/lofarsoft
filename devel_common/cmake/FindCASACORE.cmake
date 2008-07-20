@@ -347,6 +347,11 @@ if (CASACORE_LIBRARIES)
 endif (CASACORE_LIBRARIES)
 
 ## -----------------------------------------------------------------------------
+## Check for symbols within individual libraries
+
+
+
+## -----------------------------------------------------------------------------
 ## If detection successful, register package as found
 
 if (CASACORE_INCLUDES AND CASACORE_LIBRARIES)
