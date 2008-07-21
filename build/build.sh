@@ -235,7 +235,7 @@ else
 	    rm -rf dal dsp;
 	    rm -rf flex;
 	    rm -rf hdf5;
-	    rm -rf startools;
+	    rm -rf startools szip;
 	    rm -rf plplot python;
 	    rm -rf vtk;
 	    rm -rf wcslib wcstools;
@@ -337,7 +337,7 @@ case $param_packageName in
         ## -- build required packages
         build_package wcslib external/wcslib "-DWCSLIB_FORCE_BUILD:BOOL=1";
         build_package cfitsio external/cfitsio "-DCFITSIO_FORCE_BUILD:BOOL=1";
-        build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
+	cd $basedir; ./build.sh hdf5
         ## -- build package
         build_package casacore external/casacore "-DCASACORE_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
@@ -355,6 +355,7 @@ case $param_packageName in
     ;;
     hdf5)
         echo "[`date`] Selected package Hdf5"
+	build_package szip external/szip "-DSZIP_FORCE_BUILD:BOOL=$param_forceBuild";
 	build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     plplot)
@@ -387,6 +388,10 @@ case $param_packageName in
     startools)
         echo "[`date`] Selected package Star-Tools"
 	build_package startools external/startools "-DStarTools_FORCE_BUILD:BOOL=$param_forceBuild";
+    ;;
+    szip)
+        echo "[`date`] Selected package Star-Tools"
+	build_package szip external/szip "-DSZIP_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     vtk)
         echo "[`date`] Selected package VTK"
