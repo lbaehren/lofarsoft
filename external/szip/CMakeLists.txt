@@ -19,7 +19,6 @@ find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
 
 if (USG_ROOT)
   include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-  include (FindSZIP)
 else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
