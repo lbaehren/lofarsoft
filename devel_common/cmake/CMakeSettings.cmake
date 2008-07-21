@@ -131,7 +131,9 @@ if (NOT USG_CMAKE_CONFIG)
   ## ----------------------------------------------------------------------------
   ## Internal CMake variables
 
-  cmake_policy (VERSION 2.6)
+  if (CMAKE_MAJOR_VERSION GREATER 1 AND CMAKE_MINOR_VERSION GREATER 5)
+    cmake_policy (VERSION 2.6)
+  endif (CMAKE_MAJOR_VERSION GREATER 1 AND CMAKE_MINOR_VERSION GREATER 5)
   
   if (UNIX)
     set (CMAKE_FIND_LIBRARY_PREFIXES "lib" CACHE STRING "Library prefix" FORCE)
