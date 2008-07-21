@@ -6,8 +6,10 @@
 #
 ## ------------------------------------------------------------------------------
 
+## Name of the project
 project (HDF5)
 
+## Required version of CMake
 cmake_minimum_required(VERSION 2.5)
 
 ## -----------------------------------------------------------------------------
@@ -69,6 +71,12 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
     message (FATAL_ERROR "Unable to locate the installation area")
   endif (NOT HDF5_prefix)
   
+  ## ----------------------------------------------------------------------------
+  ## Compression/deflation libraries
+
+  include (FindSZIP)
+  include (FindZLIB)
+
   ## ----------------------------------------------------------------------------
   ## Run the configure script provided along with the distribution
   

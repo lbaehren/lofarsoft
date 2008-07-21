@@ -1,0 +1,5 @@
+ranlib: file: /Users/lars/Code/lofar/usg/external/hdf5/../../release/lib/libhdf5.a(H5CS.o) has no symbols
+ranlib: file: /Users/lars/Code/lofar/usg/external/hdf5/../../release/lib/libhdf5.a(H5Obogus.o) has no symbols
+ranlib: file: /Users/lars/Code/lofar/usg/external/hdf5/../../release/lib/libhdf5.a(H5Smpio.o) has no symbols
+ranlib: file: /Users/lars/Code/lofar/usg/external/hdf5/../../release/lib/libhdf5.a(H5TS.o) has no symbols
+ranlib: file: /Users/lars/Code/lofar/usg/external/hdf5/../../release/lib/libhdf5.a(H5Zszip.o) has no symbols

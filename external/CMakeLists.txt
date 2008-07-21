@@ -4,6 +4,9 @@ add_subdirectory(flex)
 
 add_subdirectory(wcslib)
 add_subdirectory(cfitsio)
+add_subdirectory(szip)
+add_subdirectory(zlib)
+
 add_subdirectory(casacore)
 
 add_subdirectory(boost)

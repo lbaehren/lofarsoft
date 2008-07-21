@@ -1,0 +1,23 @@
+
+                      Relase notes for SZIP 2.1
+                          August 20, 2007
+
+
+Bug fixes:
+
+   -- On some platforms configure didn't add -lm flag; fixed.
+
+New features:
+
+   -- Configure was updated to use GNU autotools version 1.5.14.
+
+Know problems:
+
+   -- On IRIX64-6.5, shared library version 3.0 is created instead of 2.0.
+   -- There is no support for shared library on the AIX 5.* systems.
+
+User support:
+    Report all problems to help@hdfgroup.org.
+    For more information on SZIP, see:
+        http://www.hdfgroup.org/doc_resource/SZIP/
+
