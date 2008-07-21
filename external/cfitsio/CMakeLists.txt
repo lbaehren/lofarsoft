@@ -130,17 +130,17 @@ if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
   
   ## find required programs
   
-  find_program (flex_bin flex ${bin_locations})
-  find_program (bison_bin bison ${bin_locations})
-  find_program (sed_bin sed ${bin_locations})
+  find_program (FLEX_EXECUTABLE  flex  ${bin_locations} )
+  find_program (BISON_EXECUTABLE bison ${bin_locations} )
+  find_program (SED_EXECUTABLE   sed   ${bin_locations} )
   
   ## eval.l  ->  eval_l.c1  ->  eval_l.c
   
-  if (flex_bin)
+  if (FLEX_EXECUTABLE)
     message (STATUS "Flex: processing eval.l ...")
     execute_process (
       WORKING_DIRECTORY ${CFITSIO_SOURCE_DIR}
-      COMMAND ${flex_bin} -t eval.l
+      COMMAND ${FLEX_EXECUTABLE} -t eval.l
       TIMEOUT 10
       OUTPUT_FILE eval_l.c1
       ERROR_VARIABLE flex_error
@@ -150,11 +150,11 @@ if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
       message (SEND_ERROR "[flex] ${flex_error}")
     endif (flex_error)
     ## replace symbols in the previously generated file
-    if (sed_bin)
+    if (SED_EXECUTABLE)
       message (STATUS "sed: processing eval_l.c1 ...")
       execute_process (
 	WORKING_DIRECTORY ${CFITSIO_SOURCE_DIR}
-	COMMAND ${sed_bin} -e "s/yy/ff/g" -e "s/YY/FF/g" eval_l.c1
+	COMMAND ${SED_EXECUTABLE} -e "s/yy/ff/g" -e "s/YY/FF/g" eval_l.c1
 	TIMEOUT 10
 	OUTPUT_FILE eval_l.c
 	ERROR_VARIABLE sed_error
@@ -163,28 +163,30 @@ if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
       if (sed_error)
 	message (SEND_ERROR "[sed] ${sed_error}")
       endif (sed_error)
-    endif (sed_bin)
+    endif (SED_EXECUTABLE)
     ## remove temporary file
     FILE (REMOVE "eval_l.c1")
-  endif (flex_bin)
+  else (FLEX_EXECUTABLE)
+    message (FATAL_ERROR "[CFITSIO] Unable to find flex on your system!")
+  endif (FLEX_EXECUTABLE)
   
   ## eval.y  ->  eval_y.c
   
-  if (bison_bin)
+  if (BISON_EXECUTABLE)
     message (STATUS "Bison: processing eval.y ...")
     execute_process (
       WORKING_DIRECTORY ${CFITSIO_SOURCE_DIR}
-      COMMAND ${bison_bin} -d -v -y eval.y
+      COMMAND ${BISON_EXECUTABLE} -d -v -y eval.y
       TIMEOUT 20
       ERROR_VARIABLE bison_error
       OUTPUT_QUIET
       )
     ## replace symbols in the previously generated file
-    if (sed_bin)
+    if (SED_EXECUTABLE)
       message (STATUS "sed: processing y.tab.c ...")
       execute_process (
 	WORKING_DIRECTORY ${CFITSIO_SOURCE_DIR}
-	COMMAND ${sed_bin} -e "s/yy/ff/g" -e "s/YY/FF/g" y.tab.c
+	COMMAND ${SED_EXECUTABLE} -e "s/yy/ff/g" -e "s/YY/FF/g" y.tab.c
 	TIMEOUT 20
 	OUTPUT_FILE eval_y.c
 	ERROR_VARIABLE sed_error
@@ -196,7 +198,7 @@ if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
       message (STATUS "sed: processing y.tab.c ...")
       execute_process (
 	WORKING_DIRECTORY ${CFITSIO_SOURCE_DIR}
-	COMMAND ${sed_bin} -e "s/yy/ff/g" -e "s/YY/FF/g" y.tab.h
+	COMMAND ${SED_EXECUTABLE} -e "s/yy/ff/g" -e "s/YY/FF/g" y.tab.h
 	TIMEOUT 20
 	OUTPUT_FILE eval_tab.h
 	ERROR_VARIABLE sed_error
@@ -205,8 +207,10 @@ if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
       if (sed_error)
 	message (SEND_ERROR "[sed] ${sed_error}")
       endif (sed_error)
-    endif (sed_bin)
-  endif (bison_bin)
+    endif (SED_EXECUTABLE)
+  else (BISON_EXECUTABLE)
+    message (FATAL_ERROR "[CFITSIO] Unable to find bison on your system!")
+  endif (BISON_EXECUTABLE)
   
   ## -----------------------------------------------------------------------------
   ## Create the library
