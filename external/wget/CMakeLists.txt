@@ -12,6 +12,7 @@ cmake_minimum_required (VERSION 2.5)
 
 option (WGET_FORCE_BUILD "Force rebuild and local installation?"  YES )
 option (WGET_FORCE_BUILD "Be verbose during configuration?"       NO  )
+option (WGET_ENABLE_OPIE "Enable Opie support for FTP?"           NO  )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -65,13 +66,16 @@ if (NOT HAVE_WGET OR WGET_FORCE_BUILD)
   include (CheckTypeSize)
   include (TestBigEndian)
   
-  check_type_size ("int"       SIZEOF_INT       )
-  check_type_size ("float"     SIZEOF_FLOAT     )
-  check_type_size ("double"    SIZEOF_DOUBLE    )
-  check_type_size ("long"      SIZEOF_LONG      )
-  check_type_size ("long long" SIZEOF_LONG_LONG )
-  check_type_size ("short"     SIZEOF_SHORT       )
-  check_type_size ("off_t"     SIZEOF_OFF_T       )
+  check_type_size ("int"           SIZEOF_INT       )
+  check_type_size ("uint32_t"      SIZEOF_UINT32_T       )
+  check_type_size ("int64_t"       SIZEOF_INT64_T   )
+  check_type_size ("float"         SIZEOF_FLOAT     )
+  check_type_size ("double"        SIZEOF_DOUBLE    )
+  check_type_size ("long"          SIZEOF_LONG      )
+  check_type_size ("long long"     SIZEOF_LONG_LONG )
+  check_type_size ("short"         SIZEOF_SHORT     )
+  check_type_size ("off_t"         SIZEOF_OFF_T     )
+  check_type_size ("sig_atomic_t"  SIZEOF_SIG_ATOMIC_T )
 
   find_path (HAVE_ALLOCA_H     alloca.h      PATHS ${include_locations} )
   find_path (HAVE_INTTYPES_H   inttypes.h    PATHS ${include_locations} )
@@ -93,20 +97,36 @@ if (NOT HAVE_WGET OR WGET_FORCE_BUILD)
   find_path (HAVE_UTIME_H      utime.h       PATHS ${include_locations} )
   find_path (HAVE_WCHAR_H      wchar.h       PATHS ${include_locations} )
 
-  find_library (HAVE_LIBDL  dl   PATHS ${lib_locations} )
-  find_library (HAVE_LIBNSL nsl  PATHS ${lib_locations} )
-  find_library (HAVE_LIBRT  rt   PATHS ${lib_locations} )
+  find_library (HAVE_LIBDL      dl       PATHS ${lib_locations} )
+  find_library (HAVE_LIBNSL     nsl      PATHS ${lib_locations} )
+  find_library (HAVE_LIBRT      rt       PATHS ${lib_locations} )
+  find_library (HAVE_LIBGNUTLS  gnutls   PATHS ${lib_locations} )
+  find_library (HAVE_LIBSOCKET  socket   PATHS ${lib_locations} )
+  find_library (HAVE_LIBSSL     ssl      PATHS ${lib_locations} )
 
-  check_function_exists (symlink    HAVE_SYMLINK )
-  check_function_exists (timegm     HAVE_TIMEGM  )
-  check_function_exists (usleep     HAVE_USLEEP  )
-  check_function_exists (vasprintf  HAVE_VASPRINTF  )
-  check_function_exists (vsnprintf  HAVE_VSNPRINTF  )
-  check_function_exists (wcwidth    HAVE_WCWIDTH )
-
-  check_function_exists (strncasecmp  HAVE_STRNCASECMP  )
-  check_function_exists (strptime     HAVE_STRPTIME     )
-  check_function_exists (strtoll      HAVE_STRTOLL      )
+  check_function_exists (clock_gettime  HAVE_CLOCK_GETTIME )
+  check_function_exists (ftello         HAVE_FTELLO        )
+  check_function_exists (getaddrinfo    HAVE_GETADDRINFO   )
+  check_function_exists (gethostbyname  HAVE_GETHOSTBYNAME )
+  check_function_exists (getpagesize    HAVE_GETPAGESIZE   )
+  check_function_exists (isatty         HAVE_ISATTY        )
+  check_function_exists (memrchr        HAVE_MEMRCHR       )
+  check_function_exists (strncasecmp    HAVE_STRNCASECMP   )
+  check_function_exists (strptime       HAVE_STRPTIME      )
+  check_function_exists (strtoll        HAVE_STRTOLL       )
+  check_function_exists (symlink        HAVE_SYMLINK       )
+  check_function_exists (timegm         HAVE_TIMEGM        )
+  check_function_exists (usleep         HAVE_USLEEP        )
+  check_function_exists (vasprintf      HAVE_VASPRINTF     )
+  check_function_exists (vsnprintf      HAVE_VSNPRINTF     )
+  check_function_exists (wcwidth        HAVE_WCWIDTH       )
+  check_function_exists (gettext        HAVE_GETTEXT       )
+  check_function_exists (inet_ntoa      HAVE_INET_NTOA     )
+  check_function_exists (mbtowc         HAVE_MBTOWC        )
+  check_function_exists (snprintf       HAVE_SNPRINTF      )
+  check_function_exists (strcasecmp     HAVE_STRCASECMP    )
+  check_function_exists (strdup         HAVE_STRDUP        )
+  check_function_exists (sigblock       HAVE_SIGBLOCK       )
 
   ## ------------------------------------------------------------------------------
   ## Set compiler flags
@@ -126,6 +146,18 @@ if (NOT HAVE_WGET OR WGET_FORCE_BUILD)
     -DSIZEOF_LONG_LONG=${SIZEOF_LONG_LONG}
     -DSIZEOF_OFF_T=${SIZEOF_OFF_T}
     )
+
+  if (SIZEOF_UINT32_T)
+    add_definitions (-DHAVE_UINT32_T)
+  endif (SIZEOF_UINT32_T)
+
+  if (SIZEOF_INT64_T)
+    add_definitions (-DHAVE_INT64_T)
+  endif (SIZEOF_INT64_T)
+
+  if (SIZEOF_SIG_ATOMIC_T)
+    add_definitions (-DHAVE_SIG_ATOMIC_T)
+  endif (SIZEOF_SIG_ATOMIC_T)
 
   ## Header files
 
@@ -222,7 +254,30 @@ if (NOT HAVE_WGET OR WGET_FORCE_BUILD)
     list (APPEND wget_link_libraries ${HAVE_LIBRT})
   endif (HAVE_LIBRT)
 
+  if (HAVE_LIBGNUTLS)
+    add_definitions (-DHAVE_LIBGNUTLS)
+    list (APPEND wget_link_libraries ${HAVE_LIBGNUTLS})
+  endif (HAVE_LIBGNUTLS)
+
+  if (HAVE_LIBSOCKET)
+    add_definitions (-DHAVE_LIBSOCKET)
+    list (APPEND wget_link_libraries ${HAVE_LIBSOCKET})
+  endif (HAVE_LIBSOCKET)
+
+  if (HAVE_LIBSSL)
+    add_definitions (-DHAVE_LIBSSL)
+    list (APPEND wget_link_libraries ${HAVE_LIBSSL})
+  endif (HAVE_LIBSSL)
+
   ## Functions
+
+  if (HAVE_CLOCK_GETTIME)
+    add_definitions (-DHAVE_CLOCK_GETTIME)
+  endif (HAVE_CLOCK_GETTIME)  
+
+  if (HAVE_FTELLO)
+    add_definitions (-DHAVE_FTELLO)
+  endif (HAVE_FTELLO)  
 
   if (HAVE_SYMLINK)
     add_definitions (-DHAVE_SYMLINK)
@@ -259,6 +314,54 @@ if (NOT HAVE_WGET OR WGET_FORCE_BUILD)
   if (HAVE_WCWIDTH)
     add_definitions (-DHAVE_WCWIDTH)
   endif (HAVE_WCWIDTH)  
+
+  if (HAVE_GETADDRINFO)
+    add_definitions (-DHAVE_GETADDRINFO)
+  endif (HAVE_GETADDRINFO)  
+
+  if (HAVE_GETHOSTBYNAME)
+    add_definitions (-DHAVE_GETHOSTBYNAME)
+  endif (HAVE_GETHOSTBYNAME)  
+
+  if (HAVE_GETPAGESIZE)
+    add_definitions (-DHAVE_GETPAGESIZE)
+  endif (HAVE_GETPAGESIZE)  
+
+  if (HAVE_MEMRCHR)
+    add_definitions (-DHAVE_MEMRCHR)
+  endif (HAVE_MEMRCHR)  
+
+  if (HAVE_ISATTY)
+    add_definitions (-DHAVE_ISATTY)
+  endif (HAVE_ISATTY)  
+
+  if (HAVE_GETTEXT)
+    add_definitions (-DHAVE_GETTEXT)
+  endif (HAVE_GETTEXT)  
+
+  if (HAVE_INET_NTOA)
+    add_definitions (-DHAVE_INET_NTOA)
+  endif (HAVE_INET_NTOA)  
+
+  if (HAVE_MBTOWC)
+    add_definitions (-DHAVE_MBTOWC)
+  endif (HAVE_MBTOWC)  
+
+  if (HAVE_SNPRINTF)
+    add_definitions (-DHAVE_SNPRINTF)
+  endif (HAVE_SNPRINTF)  
+
+  if (HAVE_STRCASECMP)
+    add_definitions (-DHAVE_STRCASECMP)
+  endif (HAVE_STRCASECMP)  
+
+  if (HAVE_STRDUP)
+    add_definitions (-DHAVE_STRDUP)
+  endif (HAVE_STRDUP)  
+
+  if (HAVE_SIGBLOCK)
+    add_definitions (-DHAVE_SIGBLOCK)
+  endif (HAVE_SIGBLOCK)  
 
   ## ------------------------------------------------------------------------------
   ## Create config.h
