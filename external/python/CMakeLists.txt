@@ -3,17 +3,6 @@
 ## $Id:: CMakeLists.txt 1393 2008-04-03 13:58:05Z baehren                       $
 ##-------------------------------------------------------------------------------
 
-#
-# usg
-# `-- external
-#     `-- python
-#         |-- matplotlib
-#         |-- num_util
-#         |-- numarray
-#         |-- numeric
-#         `-- numpy
-#
-
 ## Name of the project
 project (PYTHON_MODULES)
 
@@ -21,17 +10,21 @@ project (PYTHON_MODULES)
 cmake_minimum_required (VERSION 2.5)
 
 ## ------------------------------------------------------------------------------
-## Selection of available Python modules
+## Options
 
-option (module_matplotlib "Build matplotlib module?" ON)
-option (nodule_numpy "Build numpy module?" ON)
-option (module_num_util "Build num_util module?" ON)
+option (PYTHON_MODULES_VERBOSE_CONFIGURE "Be verbose during configuration?" NO )
+
+## Select the modules to be build
+
+option (module_matplotlib "Build matplotlib module?" YES )
+option (module_num_util   "Build num_util module?"   YES )
+option (module_numpy      "Build numpy module?"      YES )
 
 ## the following modules are outdated and have become replaced by newer ones; 
-## we might want to removed them completely at some point in the future.
+## we might want to remove them completely at some point in the future.
 
-option (module_numarray "Build numarray module?" OFF)
-option (module_numeric "Build numeric module?" OFF)
+option (module_numarray "Build numarray module?" NO )
+option (module_numeric  "Build numeric module?"  NO )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -53,23 +46,18 @@ endif (USG_ROOT)
 
 ## --- set verbosity during configuration
 
-set (BOOST_FIND_QUIETLY      YES )
-set (BOOST_pythonOnly        YES )
-set (BOOST_test_exec_monitor NO  )
-set (GLIB_FIND_QUIETLY       YES )
-set (PYTHON_FIND_QUIETLY     YES )
+if (NOT PYTHON_MODULES_VERBOSE_CONFIGURE)
+  set (BOOST_FIND_QUIETLY      YES )
+  set (BOOST_pythonOnly        YES )
+  set (BOOST_test_exec_monitor NO  )
+  set (GLIB_FIND_QUIETLY       YES )
+  set (PYTHON_FIND_QUIETLY     YES )
+endif (NOT PYTHON_MODULES_VERBOSE_CONFIGURE)
 
 ## --- load CMake modules to locate external packages 
 
 include (FindPython)
 include (FindBoost)
-
-message (STATUS "--------------------------------------------------")
-message (STATUS "matplotlib   > ${module_matplotlib}")
-message (STATUS "numpy        > ${nodule_numpy}")
-message (STATUS "BOOST        = ${HAVE_BOOST}")
-message (STATUS "Python       = ${HAVE_PYTHON}")
-message (STATUS "--------------------------------------------------")
 
 ## ------------------------------------------------------------------------------
 ## Configuration and build
@@ -100,7 +88,13 @@ if (module_numeric)
   add_subdirectory (numeric)
 endif (module_numeric)
 
-## [3] NumPy
+## [4] num_util
+
+if (module_num_util)
+  add_subdirectory (num_util)
+endif (module_num_util)
+
+## [5] NumPy
 
 # NumPy is a replacement of Numeric Python that adds the features of numarray.  
 # To install:
@@ -109,18 +103,34 @@ endif (module_numeric)
 # find it.  You can help the process with a site.cfg file.
 # If fast BLAS and LAPACK cannot be found, then a slower default version is used. 
 
-if (nodule_numpy)
+if (module_numpy)
   add_subdirectory (numpy)
-endif (nodule_numpy)
-
-## [5] num_util
-
-if (module_num_util)
-  add_subdirectory (num_util)
-endif (module_num_util)
+endif (module_numpy)
 
 ## ------------------------------------------------------------------------------
+## Configuration summary
+
+if (PYTHON_MODULES_VERBOSE_CONFIGURE)
+  message (STATUS ">------------------------------------------------------------<")
+  message (STATUS "> [Python modules] Configuration summary.                    <")
+  message (STATUS ">------------------------------------------------------------<")
+  message (STATUS "Build matplotlib module = ${module_matplotlib}")
+  message (STATUS "Build num_util module   = ${module_num_util}")
+  message (STATUS "Build numpy module      = ${module_numpy}")
+  message (STATUS " ")
+  message (STATUS "BOOST_INCLUDES          = ${BOOST_INCLUDES}")
+  message (STATUS "PYTHON_INCLUDES         = ${PYTHON_INCLUDES}")
+  message (STATUS "NUMPY_INCLUDES          = ${NUMPY_INCLUDES}")
+  message (STATUS "+------------------------------------------------------------+")
+endif (PYTHON_MODULES_VERBOSE_CONFIGURE)
+
+
+## ==============================================================================
+##
 ## Installation option for Python packages
+##
+## ==============================================================================
+
 
 # [1] python setup.py build install --root=`pwd`/../install_with_root
 #
