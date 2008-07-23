@@ -83,6 +83,7 @@ foreach (python_version 2.6 2.5 2.4 2.3)
     PATH_SUFFIXES
     python
     python${python_version}
+    python${python_version}/site-packages/numpy
     python${python_version}/site-packages/numpy/core/include
     NO_DEFAULT_PATH
     )
