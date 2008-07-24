@@ -229,6 +229,10 @@ else
 	    exit;
 	;;
 	-clean-build)
+	    echo "------------------------------------------------------------";
+	    echo "[`date`] Cleaning up build directories..."
+	    echo "------------------------------------------------------------";
+	    ## clean up $LOFARSOFT/build
 	    rm -rf *~ *.log CMake* CPack* Makefile external cmake_install.cmake;
 	    rm -rf bdsm bison blitz boost;
 	    rm -rf casacore cfitsio cmake config cr; 
@@ -238,7 +242,15 @@ else
 	    rm -rf startools szip;
 	    rm -rf plplot python;
 	    rm -rf vtk;
-	    rm -rf wcslib wcstools;
+	    rm -rf wcslib wcstools wget;
+	    rm -rf zlib;
+	    ## additional cleaning up within the "external" tree
+	    cd $basedir/../external/hdf5; make distclean
+	    cd $basedir/../external/wget; make distclean
+	    ##
+	    echo "------------------------------------------------------------";
+	    echo "[`date`] Finished cleaning up build directories"
+	    echo "------------------------------------------------------------";
 	    exit;
 	;;
 	clean-build)
@@ -356,6 +368,7 @@ case $param_packageName in
     hdf5)
         echo "[`date`] Selected package Hdf5"
 	build_package szip external/szip "-DSZIP_FORCE_BUILD:BOOL=$param_forceBuild";
+	build_package zlib external/zlib "-DZLIB_FORCE_BUILD:BOOL=$param_forceBuild";
 	build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     plplot)
@@ -383,7 +396,12 @@ case $param_packageName in
     ;;
     python)
         echo "[`date`] Selected package PYTHON"
+	build_package boost external/boost
 	build_package python external/python
+    ;;
+    root)
+        echo "[`date`] Selected package ROOT"
+	build_package root external/root "-DROOT_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     startools)
         echo "[`date`] Selected package Star-Tools"
@@ -407,6 +425,14 @@ case $param_packageName in
         echo "[`date`] Selected package WCSTOOLS"
 	build_package wcstools external/wcstools
     ;;
+    wget)
+        echo "[`date`] Selected package WGET"
+	build_package wget external/wget "-DWGET_FORCE_BUILD:BOOL=$param_forceBuild";
+    ;;
+    zlib)
+        echo "[`date`] Selected package ZLIB"
+	build_package zlib external/zlib "-DZLIB_FORCE_BUILD:BOOL=$param_forceBuild";
+    ;;
     ## --------------------------------------------------------------------------
     ## --- USG software packages ------------------------------------------------
     ## --------------------------------------------------------------------------
@@ -429,7 +455,7 @@ case $param_packageName in
 	echo ""
 	echo "[`date`] To test the DAL installation run:"
 	echo ""
-	echo "  cd build/dal; ctest"
+	echo "  cd $basedir/dal; ctest"
 	echo ""
 	echo "------------------------------------------------------------";
 	echo ""
