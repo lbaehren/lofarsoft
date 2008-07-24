@@ -139,10 +139,8 @@ if (NOT USG_CMAKE_CONFIG)
     set (CMAKE_FIND_LIBRARY_PREFIXES "lib" CACHE STRING "Library prefix" FORCE)
   endif (UNIX)
 
-  set (USG_DOWNLOAD
-    "http://usg.lofar.org/download"
-    CACHE
-    PATH
+  set (USG_DOWNLOAD "http://usg.lofar.org/download" CACHE
+    STRING
     "URL for the download area on the USG server"
     FORCE
     )
