@@ -401,6 +401,10 @@ case $param_packageName in
 	build_package boost external/boost
 	build_package python external/python
     ;;
+    qt)
+        echo "[`date`] Selected package QT"
+	build_package qt external/qt "-DQT_FORCE_BUILD:BOOL=$param_forceBuild";
+    ;;
     root)
         echo "[`date`] Selected package ROOT"
 	build_package root external/root "-DROOT_FORCE_BUILD:BOOL=$param_forceBuild";
