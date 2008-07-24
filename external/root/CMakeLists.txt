@@ -1,23 +1,19 @@
-##------------------------------------------------------------------------------
-## $Id:: CMakeLists.txt 527 2007-08-09 17:47:37Z baehren                       $
-##------------------------------------------------------------------------------
 
-## =============================================================================
-##
-## Main CMake configuration file for building the "ROOT" package.
-##
-## =============================================================================
-
-## Project name
+## Name of the project
 project (ROOT)
 
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.5)
 
 ## -----------------------------------------------------------------------------
-## Optional user settings
+## Only force rebuild of the library from the provided source code, if no system
+## installation can be found. In order to handle this properly, we use the CMake
+## find script
 
-option (ROOT_FORCE_INSTALL "Force installation from source package?" 0)
+option (ROOT_FORCE_BUILD "Force rebuild and local installation?"   YES )
+option (ROOT_CMAKE_BUILD "Use CMake to configure and build ROOT?"  YES )
+option (ROOT_VERBOSE_CONFIGURE "Be verbose during configuration?"  NO  )
+option (ROOT_VERBOSE_BUILD     "Be verbose during build process?"  NO  )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -38,110 +34,129 @@ else (USG_ROOT)
 endif (USG_ROOT)
 
 ## ------------------------------------------------------------------------------
-## [2] Run the find script to see if there is a system wide ROOT installation
+## Check if the program/package/library is already available
+
+if (NOT ROOT_VERBOSE_CONFIGURE)
+  set (ROOT_FIND_QUIETLY YES)
+endif (NOT ROOT_VERBOSE_CONFIGURE)
 
 include (FindROOT)
 
 ## <-- begin build condition --------------------------------------------------->
 
-if (NOT HAVE_ROOT OR ROOT_FORCE_INSTALL)
+if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
   
-  ## ----------------------------------------------------------------------------
-  ## URL : ftp://root.cern.ch/root/root_v5.16.00.source.tar.gz
+  ## ------------------------------------------------------------------------------
+  ## Locate the installation area
   
-  set (root_version_major 5)
-  set (root_version_minor 16)
-  set (root_version_patch 00)
-  set (root_version "${root_version_major}.${root_version_minor}.${root_version_patch}")
-  
-  set (root_source_dir "root")
-  set (root_source_file "root_v${root_version}.source.tar.gz")
-  
-  set (root_url "ftp://root.cern.ch/root/${root_source_file}")
-  
-  ## ----------------------------------------------------------------------------
-  ## Locate required tools and packages
-  
-  find_program (CURL_EXECUTABLE curl PATHS ${bin_locations})
-  find_program (TAR_EXECUTABLE tar PATHS ${bin_locations})
-  find_program (WGET_EXECUTABLE wget PATHS ${bin_locations})  
-
-  include (FindFFTW3)
-
-  ## ----------------------------------------------------------------------------
-  ## Download the source tar-ball from the ROOT FTP server
-  
-  if (WGET_EXECUTABLE)
-    execute_process (
-      WORKING_DIRECTORY .
-      COMMAND ${WGET_EXECUTABLE} -c ${root_url}
-      TIMEOUT 300
-      ERROR_VARIABLE wget_cerr
-      OUTPUT_QUIET
-      )
-    if (wget_cerr)
-      message (STATUS "[wget] Unable to download source package!")
-      message (STATUS "${wget_cerr}")
-    endif (wget_cerr)
-  elseif (WGET_EXECUTABLE)
-    message (STATUS "Missing wget to download source tar-ball!")
-  endif (WGET_EXECUTABLE)
-
-  ## ----------------------------------------------------------------------------
-  ## Check if the download was successfull; if this is the case we can expand
-  ## the source tar-ball
-
-  find_file (HAVE_ROOT_SOURCE ${root_source_file} PATHS . ..)  
-  
-  if (TAR_EXECUTABLE AND HAVE_ROOT_SOURCE)
-    message (STATUS "Unpacking source package ${HAVE_ROOT_SOURCE} ...")
-    execute_process (
-      WORKING_DIRECTORY .
-      COMMAND ${TAR_EXECUTABLE} -xvzf ${HAVE_ROOT_SOURCE}
-      TIMEOUT 120
-      ERROR_VARIABLE tar_cerr
-      OUTPUT_QUIET
-      )
-    if (tar_cerr)
-      message (STATUS "[tar] Error expanding the source package!")
-      message (STATUS ${tar_cerr})
-    endif (tar_cerr)
-  endif (TAR_EXECUTABLE AND HAVE_ROOT_SOURCE)  
-
-  ## ----------------------------------------------------------------------------
-  ## Was the tar-ball successfully expanded? If yes, we can go into the newly
-  ## created source directory and run "configure"
-  
-  find_path (HAVE_ROOT_SOURCE_DIR configure LICENSE
-    PATHS . ./${root_source_dir} ../${root_source_dir}
+  find_path (ROOT_prefix release_area.txt
+    PATHS
+    ${ROOT_SOURCE_DIR}
+    PATH_SUFFIXES
+    ../release
+    ../../release
+    ../../../release
+    NO_DEFAULT_PATH
     )
   
-  if (HAVE_ROOT_SOURCE_DIR)
+  if (NOT ROOT_prefix)
+    message (FATAL_ERROR "Unable to locate the installation area")
+  endif (NOT ROOT_prefix)
+  
+  ## ------------------------------------------------------------------------------
+  ## Check for required tools
 
-    ## set optional parameters for configuration
-    
-    set (root_options "")
-    
-    if (HAVE_FFTW3)
-      set (root_options " -with-fftw3")
-    endif (HAVE_FFTW3)
+  find_program (HAVE_WGET  wget  ${bin_locations} )
+  find_program (HAVE_CURL  curl  ${bin_locations} )
+  find_program (HAVE_TAR   tar   ${bin_locations} )
 
-    ## run "configure"
-    
+  ## ------------------------------------------------------------------------------
+  ## Download the tar-archive from the USG server
+
+  set (ROOT_VERSION "v5.20.00")
+  set (ROOT_TAR_ARCHIVE "root_${ROOT_VERSION}.source.tar.gz")
+  set (ROOT_URL "${USG_DOWNLOAD}/software/${ROOT_TAR_ARCHIVE}")
+
+  if (ROOT_VERBOSE_CONFIGURE)
+    message (STATUS "Root version      = ${ROOT_VERSION}")
+    message (STATUS "Root download URL = ${ROOT_URL}")
+    message (STATUS "wget binary       = ${HAVE_WGET}")
+    message (STATUS "curl binary       = ${HAVE_CURL}")
+  endif (ROOT_VERBOSE_CONFIGURE)
+  
+  if (HAVE_WGET)
+    message (STATUS "Retrieving tar-archive from USG server ...")
     execute_process (
-      WORKING_DIRECTORY ${HAVE_ROOT_SOURCE_DIR}
-      COMMAND ./configure --prefix=${CMAKE_INSTALL_PREFIX} ${root_options}
-      TIMEOUT 180
-      ERROR_VARIABLE configure_cerr
-      OUTPUT_QUIET
+      WORKING_DIRECTORY ${ROOT_BINARY_DIR}
+      COMMAND wget -c ${ROOT_URL}
+      TIMEOUT 300
+      ERROR_VARIABLE error_wget
+      ERROR_FILE error.log
       )
-    if (configure_cerr)
-      message (STATUS "[configure] Error while configuring source package!")
-      message (STATUS ${configure_cerr})
-    endif (configure_cerr)
-    
-  endif (HAVE_ROOT_SOURCE_DIR)
+  else (HAVE_WGET)
+    if (HAVE_CURL)
+      execute_process (
+	WORKING_DIRECTORY ${ROOT_BINARY_DIR}
+	COMMAND curl ${ROOT_URL}
+	TIMEOUT 300
+	ERROR_VARIABLE error_curl
+	ERROR_FILE error.log
+	)
+    else (HAVE_CURL)
+      message (FATAL_ERROR "[ROOT] No tool found to download tar-archive!")
+    endif (HAVE_CURL)
+  endif (HAVE_WGET)
   
-  ## <-- end build condition --------------------------------------------------->
+  ## ------------------------------------------------------------------------------
+  ## Expand the downloaded tar-archive
+
+  find_file (HAVE_TAR_ARCHIVE ${ROOT_TAR_ARCHIVE}
+    PATHS ${ROOT_BINARY_DIR}
+    )
+
+  if (NOT HAVE_TAR_ARCHIVE)
+    message (FATAL_ERROR "Unable to find downloaded tar archive!")
+  endif (NOT HAVE_TAR_ARCHIVE)
+
+  if (HAVE_TAR)
+    message (STATUS "[ROOT] Expanding downloaded tar-archive ...")
+      execute_process (
+	WORKING_DIRECTORY ${ROOT_BINARY_DIR}
+	COMMAND tar -xvzf ${HAVE_TAR_ARCHIVE}
+	TIMEOUT 300
+	ERROR_VARIABLE error_tar
+	ERROR_FILE error.log
+	)
+  else (HAVE_TAR)
+    message (FATAL_ERROR "[ROOT] Unable to find executable tar; please install!")
+  endif (HAVE_TAR)
+
+  ## ------------------------------------------------------------------------------
+  ## Configure and build
+
+  if (NOT error_tar)
+    message (STATUS "Configuring ROOT ...")    
+    execute_process (
+      WORKING_DIRECTORY ${ROOT_BINARY_DIR}/root
+      COMMAND ./configure --prefix=${ROOT_prefix}
+      TIMEOUT 300
+      ERROR_VARIABLE error_configure
+      ERROR_FILE error.log
+      )
+  endif (NOT error_tar)
+
+  if (NOT error_configure)
+    execute_process (
+      WORKING_DIRECTORY ${ROOT_BINARY_DIR}/root
+      COMMAND make
+      TIMEOUT 1500
+      ERROR_VARIABLE error_make
+      ERROR_FILE error.log
+      )
+  endif (NOT error_configure)
   
-endif (NOT HAVE_ROOT OR ROOT_FORCE_INSTALL)
+  ## <-- end build condition ----------------------------------------------------->
+  
+else (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
+  message (STATUS "Found system-wide installation of ROOT; skipping rebuild!")
+endif (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
