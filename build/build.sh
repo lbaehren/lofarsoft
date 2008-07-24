@@ -239,6 +239,7 @@ else
 	    rm -rf dal dsp;
 	    rm -rf flex;
 	    rm -rf hdf5;
+	    rm -rf root;
 	    rm -rf startools szip;
 	    rm -rf plplot python;
 	    rm -rf vtk;
@@ -260,6 +261,7 @@ else
 	-clean-release)
 	    rm -rf $basedir/../release/bin
 	    rm -rf $basedir/../release/doc
+	    rm -rf $basedir/../release/etc
 	    rm -rf $basedir/../release/include
 	    rm -rf $basedir/../release/info
 	    rm -rf $basedir/../release/lib
