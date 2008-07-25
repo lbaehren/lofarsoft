@@ -475,6 +475,10 @@ case $param_packageName in
 	echo "[`date`] Building CR-Tools package ..."
 	build_package cr src/CR-Tools;
     ;;
+    contrib)
+	echo "[`date`] Building packages and tools in contrib ..."
+	build_package contrib src/contrib;
+    ;;
     bdsm)
         echo "[`date`] Processing packages required for BDSM ..."
 	cd $basedir; ./build.sh wcslib
