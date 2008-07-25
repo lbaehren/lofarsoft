@@ -136,9 +136,10 @@ if (NOT USG_CMAKE_CONFIG)
   endif (CMAKE_MAJOR_VERSION GREATER 1 AND CMAKE_MINOR_VERSION GREATER 5)
   
   if (UNIX)
-    set (CMAKE_FIND_LIBRARY_PREFIXES "lib" CACHE STRING "Library prefix" FORCE)
+    set (CMAKE_FIND_LIBRARY_PREFIXES "lib"  CACHE STRING "Library prefixes" FORCE)
+    set (CMAKE_FIND_LIBRARY_SUFFIXES "a;so" CACHE STRING "Library suffices" FORCE)
   endif (UNIX)
-
+  
   set (USG_DOWNLOAD "http://usg.lofar.org/download" CACHE
     STRING
     "URL for the download area on the USG server"

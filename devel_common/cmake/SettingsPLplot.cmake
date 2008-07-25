@@ -1,26 +1,25 @@
 
-## -------------------------------------------------------------------
-## Search for external components
+## ------------------------------------------------------------------------------
+## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-find_path (plplot_cmake CMakeSettings.cmake
+find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
   PATHS 
-  .
-  ./..
-  ./../..
-  ./../../..
-  PATH_SUFFIXES
-  devel_common/cmake
+  ${plplot_SOURCE_DIR}
+  ${plplot_SOURCE_DIR}/..
+  ${plplot_SOURCE_DIR}/../..
+  ${plplot_SOURCE_DIR}/../../..
+  ENV LOFARSOFT
   )
 
-if (plplot_cmake)
-  list (APPEND CMAKE_MODULE_PATH ${plplot_cmake})
-else (plplot_cmake)
+if (USG_ROOT)
+  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (plplot_cmake)
+endif (USG_ROOT)
 
 ## Python.Numeric
 
-include (${plplot_cmake}/FindNumeric.cmake)
+include (FindNumeric)
 
 if (NUMERIC_INCLUDES)
   include_directories (${NUMERIC_INCLUDES})
