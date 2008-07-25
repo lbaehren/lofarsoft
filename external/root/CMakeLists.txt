@@ -10,7 +10,7 @@ cmake_minimum_required (VERSION 2.5)
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
-option (ROOT_FORCE_BUILD "Force rebuild and local installation?"   YES )
+option (ROOT_FORCE_BUILD "Force rebuild and local installation?"   NO  )
 option (ROOT_CMAKE_BUILD "Use CMake to configure and build ROOT?"  YES )
 option (ROOT_VERBOSE_CONFIGURE "Be verbose during configuration?"  NO  )
 option (ROOT_VERBOSE_BUILD     "Be verbose during build process?"  NO  )
@@ -154,6 +154,19 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
       ERROR_FILE error.log
       )
   endif (NOT error_configure)
+  
+  ## ------------------------------------------------------------------------------
+  ## Install
+
+  if (NOT error_make)
+    execute_process (
+      WORKING_DIRECTORY ${ROOT_BINARY_DIR}/root
+      COMMAND make install
+      TIMEOUT 1500
+      ERROR_VARIABLE error_make
+      ERROR_FILE error.log
+      )
+  endif (NOT error_make)
   
   ## <-- end build condition ----------------------------------------------------->
   
