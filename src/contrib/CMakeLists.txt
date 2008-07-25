@@ -29,3 +29,4 @@ endif (prefix)
 ## Subdirectories
 
 add_subdirectory (data_inspection)
+add_subdirectory (utilities)
