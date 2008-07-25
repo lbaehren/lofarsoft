@@ -154,47 +154,47 @@ build_cmake ()
 #                     found; the path is given relativ to $LOFARSOFT
 build_package ()
 {
-    buildDir=$1
-    sourceDir=$2
-    buildOptions=$3
+  buildDir=$1
+  sourceDir=$2
+  buildOptions=$3
+  # check if the build directory exists
+  cd $basedir
+  if test -d $buildDir ; then
+  {
     # Feedback
     echo "[`date`] Building package";
     echo " -- Build directory ..... : $buildDir";
     echo " -- Source directory .... : $sourceDir";
     echo " -- Configuration options : $buildOptions";
     echo " -- Send build log ...... : $param_reportBuild";
-    # check if the build directory exists
-    cd $basedir
-    if test -d $buildDir ; then
-	{
-	# change into the build directory
-	cd $buildDir
-	# run cmake on the source directory
-	if test -z $buildOptions ; then
-	    cmake $basedir/../$sourceDir
-	else 
-	    cmake $basedir/../$sourceDir $buildOptions
-	fi
-	# build the package
-	if test -z "`make help | grep install`" ; then
-	    echo "[`date`] No target install for $buildDir."
-	else
-	    if test -z $param_reportBuild ; then
-		make install;
-	    else
-		make Experimental;
-		make install;
-	    fi
-	fi
-	}
+    # change into the build directory
+    cd $buildDir
+    # run cmake on the source directory
+    if test -z $buildOptions ; then
+	cmake $basedir/../$sourceDir
     else 
-	{
-	echo "[`date`] No build directory $buildDir - creating it now."
-	mkdir $buildDir;
-	# recursive call
-	build_package $buildDir $sourceDir $buildOptions
-	}
+	cmake $basedir/../$sourceDir $buildOptions
     fi
+	    # build the package
+    if test -z "`make help | grep install`" ; then
+	echo "[`date`] No target install for $buildDir."
+    else
+	if test -z $param_reportBuild ; then
+	    make install;
+	else
+	    make Experimental;
+	    make install;
+	fi
+    fi
+  }
+  else 
+  {
+      echo "[`date`] No build directory $buildDir - creating it now."
+      mkdir $buildDir;
+	    # recursive call
+      build_package $buildDir $sourceDir $buildOptions
+  }
+  fi
 }
 
 ## -----------------------------------------------------------------------------
@@ -239,9 +239,10 @@ else
 	    rm -rf dal dsp;
 	    rm -rf flex;
 	    rm -rf hdf5;
-	    rm -rf root;
-	    rm -rf startools szip;
 	    rm -rf plplot python;
+	    rm -rf root;
+	    rm -rf qt;
+	    rm -rf startools szip;
 	    rm -rf vtk;
 	    rm -rf wcslib wcstools wget;
 	    rm -rf zlib;
@@ -449,9 +450,9 @@ case $param_packageName in
 	cd $basedir; ./build.sh flex
 	cd $basedir; ./build.sh bison
 	cd $basedir; ./build.sh casacore
-	build_package plplot external/plplot
-	build_package boost external/boost
-	build_package python external/python
+	cd $basedir; ./build.sh plplot
+	cd $basedir; ./build.sh boost
+	cd $basedir; ./build.sh python
 	## USG packages
 	echo "[`date`] Building Data Access Library ..."
 	build_package dal src/DAL
@@ -467,37 +468,37 @@ case $param_packageName in
 	echo ""
     ;;
     cr)
-        echo "[`date`] Processing required packages ..."
+        echo "[`date`] Processing packages required for CR-Tools ..."
 	cd $basedir; ./build.sh dal
-	cd $basedir; ./build.sh plplot
 	cd $basedir; ./build.sh startools
 	echo "[`date`] Building CR-Tools package ..."
 	build_package cr src/CR-Tools;
     ;;
     bdsm)
+        echo "[`date`] Processing packages required for BDSM ..."
+	cd $basedir; ./build.sh wcslib
+	cd $basedir; ./build.sh cfitsio
         echo "[`date`] Building BDSM package ..."
-	$basedir/build.sh wcslib
-	$basedir/build.sh cfitsio
 	build_package bdsm src/BDSM;
     ;;
     ## --------------------------------------------------------------------------
     ## --- General testing of environment ---------------------------------------
     ## --------------------------------------------------------------------------
     config)
-	    if test -d config ; then
-			cd config;
-			rm -rf *
-			cmake $basedir/../devel_common/cmake
-		else 
-			mkdir config
-			$basedir/build.sh config
-	   	fi
-    ;;
+        if test -d config ; then
+	    cd config;
+	    rm -rf *
+	    cmake $basedir/../devel_common/cmake
+	else 
+	    mkdir config
+	    $basedir/build.sh config
+	fi
+	;;
     all)
         echo "[`date`] Building external packages not build otherwise";
 	$basedir/build.sh bison;
 	$basedir/build.sh flex;
 	echo "[`date`] Building all USG packages";
-    	$basedir/build.sh cr;
+	$basedir/build.sh cr;
     ;;
 esac
