@@ -1,22 +1,25 @@
-#include <images/Images/PagedImage.h>
-#include <images/Images/ImageInfo.h>
-#include <images/Images/ImageRegion.h>
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <coordinates/Coordinates/CoordinateUtil.h>
-#include <lattices/Lattices/ArrayLattice.h>
-#include <lattices/Lattices/LatticeIterator.h>
-#include <lattices/Lattices/LCRegion.h>
-#include <lattices/Lattices/LCBox.h>
-
-#include <measures/Measures/MeasConvert.h>
-#include <measures/Measures/MeasTable.h>
-#include <measures/Measures/MPosition.h>
-#include <measures/Measures/MDirection.h>
-#include <measures/Measures/Stokes.h>
-#include <measures/Measures/MBaseline.h>
-#include <measures/Measures/MEpoch.h>
-#include <measures/Measures/MeasFrame.h>
-#include <casa/Quanta/MVTime.h>
+/*-------------------------------------------------------------------------*
+ | $Id:: GeometricalDelay.h 1676 2008-06-25 12:00:09Z baehren            $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2007                                                    *
+ *   Joris van Zwieten (zwieten@astron.nl)                                 *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
 #include <casa/Arrays/Array.h>
 #include <casa/Arrays/ArrayIO.h>
@@ -38,6 +41,28 @@
 #include <casa/BasicSL/String.h>
 #include <casa/Utilities/Regex.h>
 #include <casa/BasicSL/Constants.h>
+#include <casa/Quanta/MVTime.h>
+
+#include <images/Images/PagedImage.h>
+#include <images/Images/ImageInfo.h>
+#include <images/Images/ImageRegion.h>
+#include <coordinates/Coordinates/CoordinateSystem.h>
+#include <coordinates/Coordinates/CoordinateUtil.h>
+#include <lattices/Lattices/ArrayLattice.h>
+#include <lattices/Lattices/LatticeIterator.h>
+#include <lattices/Lattices/LCRegion.h>
+#include <lattices/Lattices/LCBox.h>
+
+#include <measures/Measures.h>
+#include <measures/Measures/MeasConvert.h>
+#include <measures/Measures/MeasTable.h>
+#include <measures/Measures/MPosition.h>
+#include <measures/Measures/MDirection.h>
+#include <measures/Measures/Stokes.h>
+#include <measures/Measures/MBaseline.h>
+#include <measures/Measures/MEpoch.h>
+#include <measures/Measures/MeasFrame.h>
+#include <measures/Measures/MCDirection.h>
 
 #include <iostream>
 #include <iomanip>
@@ -49,142 +74,194 @@
 using namespace std;
 using namespace casa;
 
-
-enum PixelType
-{
-    NON_PHYSICAL = 0,
-    ALWAYS_UP,
-    NEVER_UP,
-    SOMETIMES_UP,
-    N_PixelType
+/*!
+  \brief Enumeration for the type of pixels
+*/
+enum PixelType {
+  NON_PHYSICAL = 0,
+  ALWAYS_UP,
+  NEVER_UP,
+  SOMETIMES_UP,
+  N_PixelType
 };
 
+/*!
+  \class PixelInfo
 
-class PixelInfo
-{
+  \brief Class encapsulating information on the image pixels
+*/
+class PixelInfo {
+
 public:
-    PixelInfo()
-        :   m_type(NON_PHYSICAL),
-            m_ra_center(0.0),
-            m_ra_range(0.0)
-    {}
+  
+  /*!
+    \brief Default constructor
+  */
+  PixelInfo()
+    :   m_type(NON_PHYSICAL),
+	m_ra_center(0.0),
+	m_ra_range(0.0)
+  {}
+  
+  /*!
+    \brief Argumented constructor
     
-    PixelInfo(PixelType type, double center, double range)
-        :   m_type(type),
-            m_ra_center(center),
-            m_ra_range(range)
-    {}
-          
-    PixelType               m_type;
-    double                  m_ra_center;
-    double                  m_ra_range;
+    \param type   -- 
+    \param center -- 
+    \param range  -- 
+  */
+  PixelInfo(PixelType type,
+	    double center,
+	    double range)
+    :   m_type(type),
+	m_ra_center(center),
+	m_ra_range(range)
+  {}
+
+  /*!
+    \return pixelType --
+  */
+  inline PixelType pixelType () const {
+    return m_type;
+  }
+
+  /*!
+    \return center --
+  */
+  inline double center () const {
+    return m_ra_center;
+  }
+
+  /*!
+    \return range --
+  */
+  inline double range () const {
+    return m_ra_range;
+  }
+  
+  PixelType               m_type;
+  double                  m_ra_center;
+  double                  m_ra_range;
 };
 
 
-// CoordinateSystem.toWorldMany() does not work as specified. In particular,
-// the failures array is always set to all false and its length is inconsistent.
-void makePixelInfoMap(const CoordinateSystem &csys, IPosition size,
-    double zenith_dec, vector<vector<PixelInfo> > &map,
-    double min_el = 0.0)
+/*!
+  CoordinateSystem.toWorldMany() does not work as specified. In particular,
+  the failures array is always set to all false and its length is inconsistent.
+  
+  \param csys       -- Coordinate system object
+  \param size       -- Size/Shape of the image
+  \param zenith_dec -- Declination of the zenith
+  \param map
+  \param min_el
+*/
+void makePixelInfoMap (const CoordinateSystem &csys,
+		       IPosition size,
+		       double zenith_dec,
+		       vector<vector<PixelInfo> > &map,
+		       double min_el = 0.0)
 {
-    assert(0.0 <= min_el && min_el < C::pi_2);
-    
-    // Initialize map.
-    map.resize(size(0));
-    for(int i = 0; i < size(0); ++i)
+  assert(0.0 <= min_el && min_el < C::pi_2);
+  
+  // Initialize map.
+  map.resize(size(0));
+  for(int i = 0; i < size(0); ++i)
     {
-        map[i].resize(size(1));
+      map[i].resize(size(1));
     }
-
-    Vector<Double> world = csys.referenceValue();
-    Vector<Double> pixel = csys.referencePixel();
-
-    cout << "Precalculating pixel info map" << flush;
-    for(Int x = 0; x < size(0); ++x)
+  
+  Vector<Double> world = csys.referenceValue();
+  Vector<Double> pixel = csys.referencePixel();
+  
+  cout << "Precalculating pixel info map" << flush;
+  for(Int x = 0; x < size(0); ++x)
     {
-        for(Int y = 0; y < size(1); ++y)
+      for(Int y = 0; y < size(1); ++y)
         {
-            pixel(0) = x;
-            pixel(1) = y;
-
-            // CoodinateSystem::toWorld()
-            // DEC range [-pi/2,pi/2]
-            // RA range [-pi,pi]
-            if(!csys.toWorld(world, pixel))
+	  pixel(0) = x;
+	  pixel(1) = y;
+	  
+	  // CoodinateSystem::toWorld()
+	  // DEC range [-pi/2,pi/2]
+	  // RA range [-pi,pi]
+	  if(!csys.toWorld(world, pixel))
             {
-                map[x][y] = PixelInfo(NON_PHYSICAL, 0.0, 0.0);
+	      map[x][y] = PixelInfo(NON_PHYSICAL, 0.0, 0.0);
             }
-            else
+	  else
             {
-                double min_ad = fabs(world(1) - zenith_dec);
-                // One can either go via the north or via the south pole.
-                double max_ad = min(C::pi - zenith_dec - world(1),
-                    C::pi + zenith_dec + world(1));
-
-                if(min_ad > max_ad)
+	      double min_ad = fabs(world(1) - zenith_dec);
+	      // One can either go via the north or via the south pole.
+	      double max_ad = min(C::pi - zenith_dec - world(1),
+				  C::pi + zenith_dec + world(1));
+	      
+	      if(min_ad > max_ad)
                 {
-                    // When the local zenith declination and/or the pixel declination
-                    // is at a pole (+/- 90 deg), min_ad is equal to max_ad in theory.
-                    // However, due to numerical error they may not be equal in practice.
-                    // In particular, min_ad may be larger than max_ad, which violates
-                    // the precondition min_ad <= max_ad.
-                    // If min_ad > max_ad, the difference should be very small. If it
-                    // indeed is very small, we set max_ad to min_ad and continue.
-                    // Otherwise, a precondition is violated which indicates a bug in
-                    // the implementation and therefore the program will be aborted.
-
-                    assert(min_ad - max_ad < 1e-15);
-                    max_ad = min_ad;
+		  // When the local zenith declination and/or the pixel declination
+		  // is at a pole (+/- 90 deg), min_ad is equal to max_ad in theory.
+		  // However, due to numerical error they may not be equal in practice.
+		  // In particular, min_ad may be larger than max_ad, which violates
+		  // the precondition min_ad <= max_ad.
+		  // If min_ad > max_ad, the difference should be very small. If it
+		  // indeed is very small, we set max_ad to min_ad and continue.
+		  // Otherwise, a precondition is violated which indicates a bug in
+		  // the implementation and therefore the program will be aborted.
+		  
+		  assert(min_ad - max_ad < 1e-15);
+		  max_ad = min_ad;
                 }
-
-                // Everything with an angular distance larger than the clipping
-                // value should be masked.
-                double ad_clip = C::pi_2 - min_el;
-                
-                if(min_ad > ad_clip)
+	      
+	      // Everything with an angular distance larger than the clipping
+	      // value should be masked.
+	      double ad_clip = C::pi_2 - min_el;
+              
+	      if(min_ad > ad_clip)
                 {
-                    // Never rises.
-                    // (Rising is interpreted as going above min_el).
-                    map[x][y] = PixelInfo(NEVER_UP, 0.0, 0.0);
+		  // Never rises.
+		  // (Rising is interpreted as going above min_el).
+		  map[x][y] = PixelInfo(NEVER_UP, 0.0, 0.0);
                 }
-                else if(max_ad < ad_clip)
+	      else if(max_ad < ad_clip)
                 {
-                    // Never sets.
-                    // (Setting is interpreted as going below min_el).
-                    map[x][y] = PixelInfo(ALWAYS_UP, 0.0, 0.0);
+		  // Never sets.
+		  // (Setting is interpreted as going below min_el).
+		  map[x][y] = PixelInfo(ALWAYS_UP, 0.0, 0.0);
                 }
-                else
+	      else
                 {
-                    // Compute the RA range for which the pixel is above min_el.
-                    double cos_delta_ra =
-                        (cos(ad_clip) - sin(zenith_dec) * sin(world(1)))
-                        / (cos(zenith_dec) * cos(world(1)));
-                    assert(-1.0 <= cos_delta_ra && cos_delta_ra <= 1.0);
-
-                    double delta_ra = acos(cos_delta_ra); // range [0, pi]
-                    assert(0.0 <= delta_ra && delta_ra <= C::pi);
-
-                    map[x][y] =
-                        PixelInfo(SOMETIMES_UP, world(0), 2.0 * delta_ra);
+		  // Compute the RA range for which the pixel is above min_el.
+		  double cos_delta_ra =
+		    (cos(ad_clip) - sin(zenith_dec) * sin(world(1)))
+		    / (cos(zenith_dec) * cos(world(1)));
+		  assert(-1.0 <= cos_delta_ra && cos_delta_ra <= 1.0);
+		  
+		  double delta_ra = acos(cos_delta_ra); // range [0, pi]
+		  assert(0.0 <= delta_ra && delta_ra <= C::pi);
+		  
+		  map[x][y] =
+		    PixelInfo(SOMETIMES_UP, world(0), 2.0 * delta_ra);
                 }
             }
         }
         
-        if(x % 100 == 0)
+      if(x % 100 == 0)
         {
-            cout << "." << flush;
+	  cout << "." << flush;
         }
     }
-    cout << " done." << endl;
+  cout << " done." << endl;
 }
 
-
+/*!
+  \param origin -- 
+  \param x      -- 
+*/
 inline double shift(double origin, double x)
 {
-    double x_new = fmod(x - origin, C::_2pi);
-    if(x_new < 0.0)
+  double x_new = fmod(x - origin, C::_2pi);
+  if(x_new < 0.0)
     {
-        x_new += C::_2pi;
+      x_new += C::_2pi;
     }
     return x_new;
 }
@@ -219,42 +296,42 @@ void processImage(const string &filename, const MPosition &position,
 
     // Compute RA range of local zenith.
     pair<double, double> zenith_ra;
-
+    
     MeasFrame frame;
     frame.set(position);
     frame.set(start);
-
+    
     // Create conversion engine.
     MDirection dir(MVDirection(0.0, C::pi_2),
-        MDirection::Ref(MDirection::AZEL, frame));
-        
+		   MDirection::Ref(MDirection::AZEL, frame));
+    
     MDirection::Convert converter(dir,
-        MDirection::Ref(MDirection::J2000));
+				  MDirection::Ref(MDirection::J2000));
     
     // Compute right ascension and declination at start of measurement.
     MDirection radec(converter());
     Vector<Double> vec_radec = radec.getValue().getAngle("rad").getValue();
     zenith_ra.first = vec_radec(0);
-
+    
     // Update reference frame to end time.
     frame.set(end);
-
+    
     // Compute right ascension and declination at end of measurement.
     radec = converter();
     vec_radec = radec.getValue().getAngle("rad").getValue();
     zenith_ra.second = vec_radec(0);
-
+    
     cout << "Local zenith RA range: [" << setprecision(10) << zenith_ra.first
-        << ", " << zenith_ra.second << "]" << endl;
-
+	 << ", " << zenith_ra.second << "]" << endl;
+    
     // Get pixel data.
     Array<Float> pixel_data_tmp;
     im.get(pixel_data_tmp, true);
     Matrix<Float> pixel_data(pixel_data_tmp);
-
+    
     // Normalize the image if requested.
     if(normalize)
-    {
+      {
 //        Float min, max;
 //        minMax(min, max, pixel_data);
 //        cout << "Value range: [" << min << ", " << max << "]" << endl;
@@ -337,16 +414,17 @@ void processImage(const string &filename, const MPosition &position,
     cout << " done." << endl;
 }
 
-
+/*!
+  \brief Print basic usage information for this tool
+*/
 void usage()
 {
-    cout << "Usage: stitch [options] <file list>"
-        << " <ouput (skeleton) AIPS++ image>" << endl;
-    cout << "Options:" << endl;
-    cout << "    -n normalize images (default: false)" << endl;
-    cout << "    -e min. elevation (deg, default: 0)" << endl;
+  cout << "Usage: stitch [options] <file list>"
+       << " <ouput (skeleton) AIPS++ image>" << endl;
+  cout << "Options:" << endl;
+  cout << "    -n normalize images (default: false)" << endl;
+  cout << "    -e min. elevation (deg, default: 0)" << endl;
 }
-
 
 int main(int argc, char **argv)
 {

@@ -8,6 +8,74 @@ project (contrib)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.5)
 
+## ------------------------------------------------------------------------------
+## Options
+
+option (contrib_VERBOSE_CONFIGURE "Verbose output during configuration?" NO )
+
+## ------------------------------------------------------------------------------
+## Set CMAKE_MODULE_PATH to load custom CMake modules
+
+find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+  PATHS 
+  ${contrib_SOURCE_DIR}
+  ${contrib_SOURCE_DIR}/..
+  ${contrib_SOURCE_DIR}/../..
+  ${contrib_SOURCE_DIR}/../../..
+  ENV LOFARSOFT
+  )
+
+if (USG_ROOT)
+  include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+else (USG_ROOT)
+  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+endif (USG_ROOT)
+
+## ------------------------------------------------------------------------------
+## Locate components of required external packages
+
+if (NOT contrib_VERBOSE_CONFIGURE)
+  set (BLITZ_FIND_QUIETLY      YES )
+  set (BOOST_FIND_QUIETLY      YES )
+  set (CASA_FIND_QUIETLY       YES )
+  set (CASACORE_FIND_QUIETLY   YES )
+  set (CFITSIO_FIND_QUIETLY    YES )
+  set (DAL_FIND_QUIETLY        YES )
+  set (FFTW3_FIND_QUIETLY      YES )
+  set (G2C_FIND_QUIETLY        YES )
+  set (GSL_FIND_QUIETLY        YES )
+  set (HDF5_FIND_QUIETLY       YES )
+  set (LAPACK_FIND_QUIETLY     YES )
+  set (PGPLOT_FIND_QUIETLY     YES )
+  set (PLPLOT_FIND_QUIETLY     YES )
+  set (PNG_FIND_QUIETLY        YES )
+  set (POPT_FIND_QUIETLY       YES )
+  set (PYTHON_FIND_QUIETLY     YES )
+  set (Python_FIND_QUIETLY     YES )
+  set (PostgreSQL_FIND_QUIETLY YES )
+  set (QT4_FIND_QUIETLY        YES )
+  set (ROOT_FIND_QUIETLY       YES )
+  set (STARTOOLS_FIND_QUIETLY  YES )
+  set (WCSLIB_FIND_QUIETLY     YES )
+  set (X11_FIND_QUIETLY        YES )
+  set (ZLIB_FIND_QUIETLY       YES )
+endif (NOT contrib_VERBOSE_CONFIGURE)
+
+## Standard CMake modules
+
+find_package (Motif)
+find_package (X11)
+find_package (ZLIB)
+
+## USG CMake modules 
+
+include (FindCASACORE)
+include (FindCFITSIO)
+include (FindG2C)
+include (FindHDF5)
+include (FindLAPACK)
+include (FindWCS)
+
 ## -----------------------------------------------------------------------------
 ## Installation
 
