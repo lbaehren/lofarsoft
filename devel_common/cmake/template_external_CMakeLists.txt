@@ -10,7 +10,7 @@ cmake_minimum_required (VERSION 2.5)
 ## installation can be found. In order to handle this properly, we use the CMake
 ## find script
 
-option (<PROJECT>_FORCE_BUILD "Force rebuild and local installation?"   YES )
+option (<PROJECT>_FORCE_BUILD "Force rebuild and local installation?"   NO )
 option (<PROJECT>_CMAKE_BUILD "Use CMake to configure and build <PROJECT>?"  YES )
 option (<PROJECT>_VERBOSE_CONFIGURE "Be verbose during configuration?"  NO  )
 option (<PROJECT>_VERBOSE_BUILD     "Be verbose during build process?"  NO  )
