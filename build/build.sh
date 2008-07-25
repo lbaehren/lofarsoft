@@ -412,6 +412,7 @@ case $param_packageName in
     ;;
     startools)
         echo "[`date`] Selected package Star-Tools"
+	cd $basedir; ./build.sh root
 	build_package startools external/startools "-DStarTools_FORCE_BUILD:BOOL=$param_forceBuild";
     ;;
     szip)
