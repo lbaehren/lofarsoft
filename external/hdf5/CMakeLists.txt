@@ -64,6 +64,7 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
     PATH_SUFFIXES
     ../release
     ../../release
+    ../../../release
     NO_DEFAULT_PATH
     )
   
@@ -86,7 +87,7 @@ if (NOT HAVE_HDF5 OR HDF5_FORCE_BUILD)
   
   execute_process (
     WORKING_DIRECTORY ${HDF5_SOURCE_DIR}
-    COMMAND ./configure --prefix=${HDF5_prefix} --includedir=${HDF5_prefix}/include/hdf5 --enable-shared-=no
+    COMMAND ./configure --prefix=${HDF5_prefix} --bindir=${HDF5_prefix}/bin --includedir=${HDF5_prefix}/include/hdf5 --enable-shared-=no
     TIMEOUT 300
     ERROR_VARIABLE error_configure
     ERROR_FILE error.log
