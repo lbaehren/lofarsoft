@@ -235,7 +235,7 @@ else
 	    ## clean up $LOFARSOFT/build
 	    rm -rf *~ *.log CMake* CPack* Makefile external cmake_install.cmake;
 	    rm -rf bdsm bison blitz boost;
-	    rm -rf casacore cfitsio cmake config cr; 
+	    rm -rf casacore cfitsio cmake config contrib cr; 
 	    rm -rf dal dsp;
 	    rm -rf flex;
 	    rm -rf hdf5;
@@ -373,6 +373,10 @@ case $param_packageName in
 	build_package szip external/szip "-DSZIP_FORCE_BUILD:BOOL=$param_forceBuild";
 	build_package zlib external/zlib "-DZLIB_FORCE_BUILD:BOOL=$param_forceBuild";
 	build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
+	## post-installation clean-up: since the "--includedir" option does not seem
+	## to be handled properly by the configure script, we need to manually move
+	## the header files after installation
+	cd $basedir/../release/include ; mkdir hdf5 ; mv H5*.h hdf5 ; mv hdf5*.h hdf5
     ;;
     plplot)
         echo "[`date`] Selected package Plplot"
@@ -477,6 +481,9 @@ case $param_packageName in
     ;;
     contrib)
 	echo "[`date`] Building packages and tools in contrib ..."
+	## required packages
+	cd $basedir; ./build.sh casacore
+	## contrib
 	build_package contrib src/contrib;
     ;;
     bdsm)
