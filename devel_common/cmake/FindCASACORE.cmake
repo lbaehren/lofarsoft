@@ -71,35 +71,19 @@ if (NOT CASACORE_FIND_QUIETLY)
   message (STATUS "[FindCASACORE] Check for system header files ...")
 endif (NOT CASACORE_FIND_QUIETLY)
 
-include (CheckIncludeFiles)
-
-check_include_files (assert.h HAVE_ASSERT_H)
-check_include_files (ctype.h HAVE_CTYPE_H)
-check_include_files (fcntl.h HAVE_FCNTL_H)
-check_include_files (stdlib.h HAVE_STDLIB_H)
-check_include_files (stdio.h HAVE_STDIO_H)
-check_include_files (string.h HAVE_STRING_H)
-check_include_files (unistd.h HAVE_UNISTD_H)
+find_path (HAVE_ASSERT_H  assert.h  PATHS ${include_locations} )
+find_path (HAVE_CTYPE_H   ctype.h   PATHS ${include_locations} )
+find_path (HAVE_FCNTL_H   fcntl.h   PATHS ${include_locations} )
+find_path (HAVE_STDLIB_H  stdlib.h  PATHS ${include_locations} )
+find_path (HAVE_STDIO_H   stdio.h   PATHS ${include_locations} )
+find_path (HAVE_STRING_H  string.h  PATHS ${include_locations} )
+find_path (HAVE_UNISTD_H  unistd.h  PATHS ${include_locations} )
 
 ## -----------------------------------------------------------------------------
 ## Required external packages
 
-set (CFITSIO_FIND_QUIETLY 1)
-set (WCSLIB_FIND_QUIETLY 1)
-
-include (FindCFITSIO)
-include (FindWCS)
-
-find_library (libm m PATHS ${lib_locations})
-find_library (libg2c g2c f2c PATHS ${lib_locations})
-
-if (NOT WCSLIB_LIBRARIES)
-  message (STATUS "Missing WCSLIB required for casacore!")
-endif (NOT WCSLIB_LIBRARIES)
-
-if (NOT CFITSIO_LIBRARIES)
-  message (STATUS "Missing CFITSIO required for casacore!")
-endif (NOT CFITSIO_LIBRARIES)
+find_library (libm   m       PATHS ${lib_locations} )
+find_library (libg2c g2c f2c PATHS ${lib_locations} )
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files.
