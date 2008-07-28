@@ -102,7 +102,7 @@ template<class T> class VectorList {
                       an error was encountered.
   */
   inline bool getElement (T & elem,
-			  uint const &index)
+			  unsigned int const &index)
   {
     if (index < elements_p.size()) {
       elem = elements_p[index];
