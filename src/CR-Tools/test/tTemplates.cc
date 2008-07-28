@@ -65,7 +65,7 @@ int test_VectorList ()
 
   std::cout << "[2] Test construction with vector of elements ..." << std::endl;
   try {
-    uint nelem (10);
+    unsigned int nelem (10);
     //
     std::cout << "  -- VectorList<int>" << std::endl;
     vector<int> elemInt (nelem,1);
