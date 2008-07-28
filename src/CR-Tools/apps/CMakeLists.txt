@@ -92,7 +92,8 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 ## -------------------------------------------------------------------
 ## call_pipeline
 
-if (HAVE_STARTOOLS AND HAVE_ROOT)
+if (CR_WITH_STARTOOLS)
+
   if (HAVE_PGPLOT OR HAVE_PLPLOT)
     add_executable (call_pipeline call_pipeline.cc)
     ## extra properties to take care of
@@ -112,7 +113,8 @@ if (HAVE_STARTOOLS AND HAVE_ROOT)
     ## installation instructions
     list (APPEND cr_apps call_pipeline)
   endif (HAVE_PGPLOT OR HAVE_PLPLOT)
-endif (HAVE_STARTOOLS AND HAVE_ROOT)
+
+endif (CR_WITH_STARTOOLS)
 
 ## -------------------------------------------------------------------
 ## readLopesCalTable
