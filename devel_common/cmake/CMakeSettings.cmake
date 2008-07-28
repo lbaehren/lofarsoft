@@ -140,12 +140,12 @@ if (NOT USG_CMAKE_CONFIG)
       "Library prefixes"
       FORCE
       )
-    if (NOT APPLE)
+    if (NOT APPLE AND NOT CMAKE_FIND_LIBRARY_SUFFIXES)
       set (CMAKE_FIND_LIBRARY_SUFFIXES "a;so" CACHE STRING
 	"Library suffices"
 	FORCE
 	)
-    endif (NOT APPLE)
+    endif (NOT APPLE AND NOT CMAKE_FIND_LIBRARY_SUFFIXES)
   endif (UNIX)
   
   set (USG_DOWNLOAD "http://usg.lofar.org/download" CACHE
