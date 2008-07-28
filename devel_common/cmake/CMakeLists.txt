@@ -32,8 +32,9 @@ message ("======================================================================
 
 message (STATUS " CMake version ............ : ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}")
 message (STATUS " CMAKE_ROOT ............... : ${CMAKE_ROOT}")
-message (STATUS " CMAKE_SYSTEM ............. : ${CMAKE_SYSTEM}")
+message (STATUS " CMAKE_SYSTEM_NAME ........ : ${CMAKE_SYSTEM_NAME}")
 message (STATUS " CMAKE_SYSTEM_VERSION ..... : ${CMAKE_SYSTEM_VERSION}")
+message (STATUS " CMAKE_SYSTEM ............. : ${CMAKE_SYSTEM}")
 message (STATUS " CMAKE_SYSTEM_PROCESSOR ... : ${CMAKE_SYSTEM_PROCESSOR}")
 message (STATUS " CMAKE_SYSTEM_64BIT ........: ${CMAKE_SYSTEM_64BIT}")
 message (STATUS " CMAKE_SYSTEM_BIG_ENDIAN .. : ${CMAKE_SYSTEM_BIG_ENDIAN}")
