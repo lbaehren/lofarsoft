@@ -86,34 +86,37 @@ if (NOT CR_VERBOSE_CONFIGURE)
   set (CMAKE_VERBOSE_MAKEFILE  NO  )
 endif (NOT CR_VERBOSE_CONFIGURE)
 
-## system libraries
+## System libraries ------------------------------
 
 find_library (HAVE_LIBM    m     PATHS ${lib_locations} )
 find_library (HAVE_LIBUTIL util  PATHS ${lib_locations} )
 find_library (HAVE_LIBDL   dl    PATHS ${lib_locations} )
+find_library (libgd        gd    PATHS ${lib_locations} )
 
-find_library (libgd gd
-  PATHS ${lib_locations}
-  )
+## System header files ---------------------------
 
-## Standard CMake modules
+find_path (HAVE_LIBGEN_H libgen.h ${include_locations} )
+
+## Standard CMake modules ------------------------
 
 find_package (Motif)
 find_package (TCL)
 find_package (X11)
 find_package (ZLIB)
 
-## Custom CMake modules
+## Custom CMake modules --------------------------
 
 include (FindBlitz)
 include (FindBoost)
 include (FindCFITSIO)
 include (FindDAL)
 include (FindFFTW3)
+include (FindG2C)
 include (FindGIF)
 include (FindGSL)
 include (FindGTK)
 include (FindHDF5)
+include (FindPGPLOT)
 include (FindPNG)
 include (FindROOT)
 include (FindWCS)
@@ -122,7 +125,7 @@ include (FindWCS)
 
 if (CR_WITH_GLISH)
   ## load find script
-  include (${cr_cmake}/FindGlish.cmake)
+  include (FindGlish)
   ## process outcome 
   if (HAVE_GLISH)
     include_directories (${GLISH_INCLUDES})
@@ -139,7 +142,7 @@ endif (CR_WITH_GLISH)
 if (CR_WITH_GLISH)
   message (STATUS "[CR-Tools] Configuration with Glish support -- CASA")
   ## load find script
-  include (${cr_cmake}/FindCASA.cmake)
+  include (FindCASA)
   ## process outcome
   if (NOT HAVE_CASA)
     set (CR_WITH_GLISH 0)
@@ -230,7 +233,6 @@ endif (APPLE)
 
 ## --- G2C -------------------------------------
 
-include (${cr_cmake}/FindG2C.cmake)
 
 if (HAVE_G2C)
   add_definitions (-DHAVE_G2C)
@@ -239,7 +241,7 @@ endif (HAVE_G2C)
 
 ## LAPACK --------------------------------------
 
-include (${cr_cmake}/FindLAPACK.cmake)
+include (FindLAPACK)
 
 if (LAPACK_INCLUDES)
   add_definitions (-DHAVE_LAPACK)
@@ -248,7 +250,6 @@ endif (LAPACK_INCLUDES)
 
 ## -- PGPlot -----------------------------------
 
-include (${cr_cmake}/FindPGPLOT.cmake)
 
 if (PGPLOT_INCLUDES)
   include_directories (${PGPLOT_INCLUDES})
@@ -257,7 +258,7 @@ endif (PGPLOT_INCLUDES)
 
 ## -- PLplot -----------------------------------
 
-include (${cr_cmake}/FindPLplot.cmake)
+include (FindPLplot)
 
 if (PLPLOT_INCLUDES)
   include_directories (${PLPLOT_INCLUDES})
@@ -266,7 +267,7 @@ endif (PLPLOT_INCLUDES)
 
 ## -- popt -------------------------------------
 
-include (${cr_cmake}/FindPOPT.cmake)
+include (FindPOPT)
 
 if (HAVE_POPT)
   add_definitions (-DHAVE_POPT)
@@ -275,7 +276,7 @@ endif (HAVE_POPT)
 
 ## -- PostgreSQL -------------------------------
 
-include (${cr_cmake}/FindPostgreSQL.cmake)
+include (FindPostgreSQL)
 
 if (HAVE_PostgreSQL)
   add_definitions (-DHAVE_POSTGRESQL)
@@ -284,7 +285,7 @@ endif (HAVE_PostgreSQL)
 
 ## -- Python -----------------------------------
 
-include (${cr_cmake}/FindPython.cmake)
+include (FindPython)
 
 if (HAVE_PYTHON)
   add_definitions (-DHAVE_PYTHON)
@@ -327,11 +328,27 @@ if (CR_COMPILER_WARNINGS)
 endif (CR_COMPILER_WARNINGS)
     
 ## -------------------------------------------------------------------
-## Handle option: create Python binding
+## Option: Generate Python bindings for the Library? ON/OFF
 
-if (NOT HAVE_PYTHON OR NOT HAVE_BOOST)
-  set (CR_WITH_PYTHON OFF)
-endif (NOT HAVE_PYTHON OR NOT HAVE_BOOST)
+if (CR_WITH_PYTHON)
+
+  ## Required external package: Python
+  if (NOT HAVE_PYTHON)
+    message (STATUS "[CR-Tools] Generation of Python bindings disabled; missing Python!")
+    set (CR_WITH_PYTHON OFF)
+  endif (NOT HAVE_PYTHON)
+  ## Required external package: Boost++
+  if (NOT HAVE_BOOST)
+    message (STATUS "[CR-Tools] Generation of Python bindings disabled; missing Boost!")
+    set (CR_WITH_PYTHON OFF)
+  endif (NOT HAVE_BOOST)
+  ## Required external package: NumUtil
+  if (NOT HAVE_NUM_UTIL)
+    message (STATUS "[CR-Tools] Generation of Python bindings disabled; missing NumUtil!")
+    set (CR_WITH_PYTHON OFF)
+  endif (NOT HAVE_NUM_UTIL)
+
+endif (CR_WITH_PYTHON)
 
 ## -------------------------------------------------------------------
 ## Handle option: Activate support for generation of plots ON/OFF
