@@ -21,14 +21,10 @@ enable_testing()
 ## -----------------------------------------------------------------------------
 ## Optional build settings
 
-option (CFITSIO_BUILD_TESTS "Build test programs for CFITSIO?" 1)
-option (CFITSIO_BUILD_HERA "Build for HERA project (for LHEA use only)" 0)
-
-## Only force rebuild of the library from the provided source code, if no system
-## installation can be found. In order to handle this properly, we use the CMake
-## find script
-
-option (CFITSIO_FORCE_BUILD "Force rebuild and local installation" 0)
+option (CFITSIO_FORCE_BUILD "Force rebuild and local installation"       NO  )
+option (CFITSIO_VERBOSE_CONFIGURE "Be verbose during configuration?"     NO  )
+option (CFITSIO_BUILD_TESTS "Build test programs for CFITSIO?"           YES )
+option (CFITSIO_BUILD_HERA  "Build for HERA project (for LHEA use only)" NO  )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -52,7 +48,10 @@ endif (NOT USG_ROOT)
 
 ## load CMake modules to search for external components
 
-set (CFITSIO_FIND_QUIETLY YES)
+if (NOT CFITSIO_VERBOSE_CONFIGURE)
+  set (CFITSIO_FIND_QUIETLY YES)
+endif (NOT CFITSIO_VERBOSE_CONFIGURE)
+
 include (FindCFITSIO)
 
 ## check if the located library has all the symbols we need
@@ -107,16 +106,18 @@ if (NOT HAVE_CFITSIO OR CFITSIO_FORCE_BUILD)
   
   include (CheckTypeSize)
   
-  check_type_size ("long" HAVE_LONG)
+  check_type_size ("int"       HAVE_INT)
+  check_type_size ("long"      HAVE_LONG)
   check_type_size ("long long" HAVE_LONGLONG)
   
   ## ----------------------------------------------------------------------------
   ## Check for external libraries
   
-  find_library (libm m ${lib_locations})
+  find_library (libm m PATHS ${lib_locations} /usr/lib)
   
   if (NOT libm)
-    message (SEND_ERROR "Unable to find libm!")
+    message (SEND_ERROR "[CFITSIO] Unable to find libm!")
+    message (STATUS "Library locations = ${lib_locations}")
   endif (NOT libm)
   
   find_library (libnsl nsl ${lib_locations})
