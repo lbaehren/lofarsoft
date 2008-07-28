@@ -29,6 +29,10 @@
 #include <string>
 #include <cmath>
 
+#include <crtools.h>
+
+#ifdef HAVE_STARTOOLS
+
 // This class is derived form CRinvFFT an adds upsampling
 #include <Analysis/CRinvFFT.h>
 // For Plots:
@@ -461,6 +465,8 @@ namespace CR { // Namespace CR -- begin
   };
   
 } // Namespace CR -- end
+
+#endif  /* HAVE_STARTOOLS */
 
 #endif /* COMPLETEPIPELINE_H */
   

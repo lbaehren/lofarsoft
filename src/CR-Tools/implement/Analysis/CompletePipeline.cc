@@ -23,6 +23,8 @@
 
 #include <Analysis/CompletePipeline.h>
 
+#ifdef HAVE_STARTOOLS
+
 namespace CR { // Namespace CR -- begin
 
   
@@ -946,7 +948,7 @@ namespace CR { // Namespace CR -- begin
         std::cerr << "CompletePipeline:plotAllAntennas: " << x.getMesg() << std::endl;
       }; 
   }
-
+  
   
   void CompletePipeline::calculateMaxima(DataReader *dr,
 					 Vector<Bool> antennaSelection,
@@ -954,7 +956,7 @@ namespace CR { // Namespace CR -- begin
 					 const bool& rawData)
   {
     try 
-    {
+      {
       Vector<Double> timeValues;		// time values
       Vector<Double> timeRange;			// time values
       Matrix<Double> yValues;			// y-values
@@ -1240,6 +1242,6 @@ namespace CR { // Namespace CR -- begin
       }; 
   }
 
-
-
 } // Namespace CR -- end
+
+#endif   /*  HAVE_STARTOOLS -- end  */
