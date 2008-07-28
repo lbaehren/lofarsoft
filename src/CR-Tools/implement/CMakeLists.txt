@@ -64,10 +64,10 @@ if (NOT HAVE_PGPLOT)
   list (REMOVE_ITEM cr_sources Display/PGPlotterLocal.cc)
 endif (NOT HAVE_PGPLOT)
 
-if (NOT HAVE_STARTOOLS)
+if (NOT CR_WITH_STARTOOLS)
   list (REMOVE_ITEM cr_sources Analysis/CompletePipeline.cc)
   list (REMOVE_ITEM cr_sources Analysis/analyseLOPESevent2.cc)
-endif (NOT HAVE_STARTOOLS)
+endif (NOT CR_WITH_STARTOOLS)
 
 ## Assemble list of external libraries against which to link
 

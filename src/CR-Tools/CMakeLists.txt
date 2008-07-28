@@ -371,7 +371,6 @@ if (CR_WITH_STARTOOLS)
   include (FindStarTools)
 
   if (HAVE_STARTOOLS)
-    ## location of header files
     include_directories (${STARTOOLS_INCLUDES})
   else (HAVE_STARTOOLS)
     set (CR_WITH_STARTOOLS NO)
