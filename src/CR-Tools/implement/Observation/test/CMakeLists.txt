@@ -23,6 +23,7 @@ foreach (src ${tests})
   endif (CR_ENABLE_TESTING) 
 endforeach (src)
 
+## -----------------------------------------------------------------------------
 ## Test programs which need extra attention
 
 if (CR_WITH_PLOTTING)
@@ -30,7 +31,18 @@ if (CR_WITH_PLOTTING)
   ## compiler instructions
   add_executable (tStationBeam tStationBeam.cc)
   ## linker instructions
-  target_link_libraries (tStationBeam cr)
+  if (PLPLOT_LIBRARIES)
+    target_link_libraries (tStationBeam
+      cr
+      ${PLPLOT_LIBRARIES}
+      )
+  endif (PLPLOT_LIBRARIES)
+  if (APPLE)
+    set_target_properties (tStationBeam
+      PROPERTIES
+      LINK_FLAGS "-bind_at_load"
+      )
+  endif (APPLE)
   ## installation 
   list (APPEND tests tStationBeam)
   ## testing
