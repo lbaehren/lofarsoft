@@ -135,9 +135,9 @@ if (libutil)
   list (APPEND cr_link_libraries ${libutil})
 endif (libutil)
 
-if (libm)
-  list (APPEND cr_link_libraries ${libm})
-endif (libm)
+if (HAVE_LIBM)
+  list (APPEND cr_link_libraries ${HAVE_LIBM})
+endif (HAVE_LIBM)
 
 ## ------------------------------------------------------------------------------
 ## Create the library

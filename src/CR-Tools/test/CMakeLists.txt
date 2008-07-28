@@ -72,7 +72,7 @@ if (HAVE_CASACORE AND HAVE_WCSLIB)
       ${LAPACK_LIBRARIES}
       ${WCSLIB_LIBRARIES}
       ${G2C_LIBRARIES}
-      ${libm}
+      ${HAVE_LIBM}
       )
     ## testing
     if (CR_ENABLE_TESTING) 

@@ -9,6 +9,26 @@ project (CR)
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.5)
 
+## ------------------------------------------------------------------------------
+## Set CMAKE_MODULE_PATH to load custom CMake modules
+
+if (NOT USG_ROOT)
+  find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+    PATHS 
+    ${CR_SOURCE_DIR}
+    ${CR_SOURCE_DIR}/..
+    ${CR_SOURCE_DIR}/../..
+    ${CR_SOURCE_DIR}/../../..
+    ENV LOFARSOFT
+    )
+  
+  if (USG_ROOT)
+    include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+  else (USG_ROOT)
+    message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+  endif (USG_ROOT)
+endif (NOT USG_ROOT)
+
 ## =============================================================================
 ##
 ##  Options
@@ -27,13 +47,13 @@ option (CR_WITH_PLOTTING      "Support for generation of plots?"             YES
 option (CR_WITH_GUI           "Build the graphical interface?"               YES )
 option (CR_WITH_STARTOOLS     "Enable additional routines from LOPES-Star?"  YES )
 
-## ==============================================================================
+## =============================================================================
 ##
-## Search location for external packages
+##  External dependencies
 ##
-## ==============================================================================
+## =============================================================================
 
-## Handle option: verbose mode on/off
+## Verbose during configure? If not, then mute the output from the search scripts
 
 if (NOT CR_VERBOSE_CONFIGURE)
   ## output of the find scripts
@@ -66,37 +86,9 @@ if (NOT CR_VERBOSE_CONFIGURE)
   set (CMAKE_VERBOSE_MAKEFILE  NO  )
 endif (NOT CR_VERBOSE_CONFIGURE)
 
-## ------------------------------------------------------------------------------
-## Set CMAKE_MODULE_PATH to load custom CMake modules
-
-if (NOT USG_ROOT)
-  find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
-    PATHS 
-    ${CR_SOURCE_DIR}
-    ${CR_SOURCE_DIR}/..
-    ${CR_SOURCE_DIR}/../..
-    ${CR_SOURCE_DIR}/../../..
-    ENV LOFARSOFT
-    )
-  
-  if (USG_ROOT)
-    include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
-  else (USG_ROOT)
-    message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-  endif (USG_ROOT)
-endif (NOT USG_ROOT)
-
-## =============================================================================
-##
-##  External dependencies
-##
-## =============================================================================
-
 ## system libraries
 
-find_library (libm m
-  PATHS ${lib_locations}
-  )
+find_library (HAVE_LIBM m PATHS ${lib_locations} )
 
 find_library (libutil util
   PATHS ${lib_locations}

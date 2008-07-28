@@ -25,6 +25,18 @@
 /* Define to 1 if we have a working installation of the HDF5 library */
 #cmakedefine HAVE_HDF5 1
 
+/* Define to 1 if we have libm  */
+#cmakedefine HAVE_LIBM
+
+/* Define to 1 if we have libutil */
+#cmakedefine HAVE_LIBUTIL
+
+/* Define to 1 if we have libdl */
+#cmakedefine HAVE_LIBDL
+
+/* Define to 1 if we have libgd */
+#cmakedefine HAVE_LIBGD
+
 /* Define to 1 if we have the development version of the PNG library */
 #cmakedefine HAVE_PNG
 

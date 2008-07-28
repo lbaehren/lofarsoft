@@ -116,7 +116,7 @@ if (NOT APPLE)
     ## compiler instructions
     add_executable (tCompletePipeline tCompletePipeline.cc)
     ## linker instructions
-    if (libm AND libutil)
+    if (HAVE_LIBM AND libutil)
       target_link_libraries (tCompletePipeline
 	cr
 	${STARTOOLS_LIBRARIES}
@@ -124,9 +124,9 @@ if (NOT APPLE)
 	${ROOT_LIBRARIES}
 	${PYTHON_LIBRARIES}
 	${libutil}
-	${libm}
+	${HAVE_LIBM}
 	)
-    else (libm AND libutil)
+    else (HAVE_LIBM AND libutil)
       target_link_libraries (tCompletePipeline
 	cr
 	${STARTOOLS_LIBRARIES}
@@ -134,7 +134,7 @@ if (NOT APPLE)
 	${ROOT_LIBRARIES}
 	${PYTHON_LIBRARIES}
 	)
-    endif (libm AND libutil)
+    endif (HAVE_LIBM AND libutil)
     ## extra properties to take care of
     if (APPLE)
       set_target_properties (tCompletePipeline
