@@ -1,0 +1,14 @@
+/*!
+  \defgroup CR Cosmic Rays (CR) analysis pipeline
+
+  This documentation contains the description of the C/C++ components of the
+  software used for data inspection and reduction with the
+  <a href="http://www.astro.ru.nl/lopes">LOPES</a> and LOFAR/CR experiments.
+
+*/
+
+/* Define to 1 if the Star-Tools package is available */
+#cmakedefine HAVE_STARTOOLS 1
+
+/* Define to 1 if we have a working installation of the HDF5 library */
+#cmakedefine HAVE_HDF5
