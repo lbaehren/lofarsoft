@@ -10,5 +10,26 @@
 /* Define to 1 if the Star-Tools package is available */
 #cmakedefine HAVE_STARTOOLS 1
 
+/* Define to 1 if we have the development version of the Boost libraries*/
+#cmakedefine HAVE_BOOST 1
+
+/* Define to 1 if we have the CFITSIO library */
+#cmakedefine HAVE_CFITSIO 1
+
+/* Define to 1 if we have the Data Access Library (DAL) */
+#cmakedefine HAVE_DAL 1
+
+/* Define to 1 if we have Glish installed */
+#cmakedefine HAVE_GLISH 1
+
 /* Define to 1 if we have a working installation of the HDF5 library */
-#cmakedefine HAVE_HDF5
+#cmakedefine HAVE_HDF5 1
+
+/* Define to 1 if we have the development version of the PNG library */
+#cmakedefine HAVE_PNG
+
+/* Define to 1 if we have ROOT installed */
+#cmakedefine HAVE_ROOT 1
+
+/* Define to 1 if we have the WCS library */
+#cmakedefine HAVE_WCS 1
