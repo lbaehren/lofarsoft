@@ -131,9 +131,9 @@ if (libgd)
   list (APPEND cr_link_libraries ${libgd})
 endif (libgd)
 
-if (libutil)
-  list (APPEND cr_link_libraries ${libutil})
-endif (libutil)
+if (HAVE_LIBUTIL)
+  list (APPEND cr_link_libraries ${HAVE_LIBUTIL})
+endif (HAVE_LIBUTIL)
 
 if (HAVE_LIBM)
   list (APPEND cr_link_libraries ${HAVE_LIBM})

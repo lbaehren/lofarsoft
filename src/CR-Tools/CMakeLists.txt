@@ -88,15 +88,9 @@ endif (NOT CR_VERBOSE_CONFIGURE)
 
 ## system libraries
 
-find_library (HAVE_LIBM m PATHS ${lib_locations} )
-
-find_library (libutil util
-  PATHS ${lib_locations}
-  )
-
-find_library (libdl dl
-  PATHS ${lib_locations}
-  )
+find_library (HAVE_LIBM    m     PATHS ${lib_locations} )
+find_library (HAVE_LIBUTIL util  PATHS ${lib_locations} )
+find_library (HAVE_LIBDL   dl    PATHS ${lib_locations} )
 
 find_library (libgd gd
   PATHS ${lib_locations}

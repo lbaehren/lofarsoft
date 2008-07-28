@@ -44,4 +44,4 @@
 #cmakedefine HAVE_ROOT 1
 
 /* Define to 1 if we have the WCS library */
-#cmakedefine HAVE_WCS 1
+#cmakedefine HAVE_WCSLIB 1

@@ -209,17 +209,17 @@ if (HAVE_ROOT AND HAVE_CASACORE AND FFTW3_LIBRARIES)
     ## compiler instructions
     add_executable (tUseROOT tUseROOT.cc)
     ## linker instructions
-    if (libutil AND libdl)
+    if (HAVE_LIBUTIL AND HAVE_LIBDL)
       target_link_libraries (tUseROOT
 	${FFTW3_LIBRARIES}
 	${ROOT_LIBRARIES}
 	${PYTHON_LIBRARIES}
 	${CASA_LIBRARIES}
 	${DAL_LIBRARIES}
-	${libutil}
-	${libdl}
+	${HAVE_LIBUTIL}
+	${HAVE_LIBDL}
 	)
-    else (libutil AND libdl)
+    else (HAVE_LIBUTIL AND HAVE_LIBDL)
       target_link_libraries (tUseROOT
 	${FFTW3_LIBRARIES}
 	${ROOT_LIBRARIES}
@@ -227,7 +227,7 @@ if (HAVE_ROOT AND HAVE_CASACORE AND FFTW3_LIBRARIES)
 	${CASA_LIBRARIES}
 	${DAL_LIBRARIES}
 	)
-    endif (libutil AND libdl)
+    endif (HAVE_LIBUTIL AND HAVE_LIBDL)
     ## extra properties to take care of
     if (APPLE)
       set_target_properties (tUseROOT

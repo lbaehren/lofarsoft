@@ -21,7 +21,7 @@ endif (NOT HAVE_ROOT)
 find_library (libshift shift ${lib_locations})
 find_library (libnsl nsl ${lib_locations})
 find_library (libcrypt crypt ${lib_locations})
-find_library (libdl dl ${lib_locations})
+find_library (HAVE_LIBDL dl ${lib_locations})
 find_library (HAVE_LIBM m ${lib_locations})
 
 include_directories (
@@ -37,7 +37,7 @@ add_library (simulator
   )
 
 target_link_libraries (simulator
-  ${libdl}
+  ${HAVE_LIBDL}
   ${HAVE_LIBM}
   ${ROOT_LIBRARIES}
   )
@@ -48,7 +48,7 @@ target_link_libraries (simulator
 add_executable (sim_main main.cc)
 
 target_link_libraries (sim_main
-  ${libdl}
+  ${HAVE_LIBDL}
   ${HAVE_LIBM}
   ${ROOT_LIBRARIES}
   simulator
