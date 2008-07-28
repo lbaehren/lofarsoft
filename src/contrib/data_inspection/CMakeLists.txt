@@ -6,9 +6,6 @@
 
 file (GLOB data_inspection_sources *.py)
 
-message (STATUS ${data_inspection_sources})
-message (STATUS ${CMAKE_INSTALL_PREFIX})
-
 ## ------------------------------------------------------------------------------
 ## Installation
 

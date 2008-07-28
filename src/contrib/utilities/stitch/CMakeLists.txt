@@ -18,5 +18,9 @@ if (HAVE_CASA OR HAVE_CASACORE)
     ${BLAS_LIBRARIES}
     ${G2C_LIBRARIES}
     )
-
+  
+  install (TARGETS stitch
+    RUNTIME DESTINATION bin
+    )
+  
 endif (HAVE_CASA OR HAVE_CASACORE)

@@ -3,7 +3,7 @@
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
- *   Frank Schröder                                            *
+ *   Frank Schröder                                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -1099,16 +1099,35 @@ int main (int argc, char *argv[])
           polarization = "NS";	// do NS here
         }
         // call the pipeline with an extra delay = 0.
-        results = eventPipeline.RunPipeline (path+filename, azimuth, elevation, distance, core_x, core_y, RotatePos,
-                                           plotprefix+polPlotPrefix, generatePlots, static_cast< Vector<int> >(flagged),
-                                           verbose, simplexFit, 0., doTVcal, doGainCal, doDispersionCal, doDelayCal,
-                                           upsamplingRate, polarization, singlePlots, PlotRawData,
-                                           CalculateMaxima, listCalcMaxima, printShowerCoordinates);
-
-        // make a postscript with a summary of all plots
-        // if summaryColumns = 0 the method does not create a summary.
+        results = eventPipeline.RunPipeline (path+filename,
+					     azimuth,
+					     elevation,
+					     distance,
+					     core_x,
+					     core_y,
+					     RotatePos,
+					     plotprefix+polPlotPrefix,
+					     generatePlots,
+					     static_cast< Vector<int> >(flagged),
+					     verbose,
+					     simplexFit,
+					     0.,
+					     doTVcal,
+					     doGainCal,
+					     doDispersionCal,
+					     doDelayCal,
+					     upsamplingRate,
+					     polarization,
+					     singlePlots,
+					     PlotRawData,
+					     CalculateMaxima,
+					     listCalcMaxima,
+					     printShowerCoordinates);
+	
+        /* make a postscript with a summary of all plots
+	   if summaryColumns = 0 the method does not create a summary. */
         eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",summaryColumns);
-
+	
         // adding results to variables (needed to fill them into the root tree)
         AzL_NS = results.asDouble("Azimuth");
         ElL_NS = results.asDouble("Elevation");

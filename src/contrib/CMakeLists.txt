@@ -31,6 +31,23 @@ else (USG_ROOT)
   message (FATAL_ERROR "Unable to locate additional CMake scripts!")
 endif (USG_ROOT)
 
+## -----------------------------------------------------------------------------
+## Installation
+
+find_path (prefix release_area.txt
+  PATHS
+  ${contrib_SOURCE_DIR}
+  PATH_SUFFIXES
+  ../release
+  ../../release
+  NO_DEFAULT_PATH
+  )
+
+if (prefix)
+  message (STATUS "Installation area located for user contributions.")
+  set (CMAKE_INSTALL_PREFIX ${prefix}) 
+endif (prefix)
+
 ## ------------------------------------------------------------------------------
 ## Locate components of required external packages
 
@@ -63,35 +80,30 @@ endif (NOT contrib_VERBOSE_CONFIGURE)
 
 ## Standard CMake modules
 
-find_package (Motif)
 find_package (X11)
 find_package (ZLIB)
 
 ## USG CMake modules 
 
+include (FindBoost)
 include (FindCASACORE)
 include (FindCFITSIO)
 include (FindG2C)
 include (FindHDF5)
 include (FindLAPACK)
+include (FindPLPLOT)
 include (FindWCS)
 
 ## -----------------------------------------------------------------------------
-## Installation
+## Configuration summary
 
-find_path (prefix release_area.txt
-  PATHS
-  ${contrib_SOURCE_DIR}
-  PATH_SUFFIXES
-  ../release
-  ../../release
-  NO_DEFAULT_PATH
-  )
-
-if (prefix)
-  message (STATUS "Installation area located for user contributions.")
-  set (CMAKE_INSTALL_PREFIX ${prefix}) 
-endif (prefix)
+message (STATUS "Have BOOST    = ${HAVE_BOOST}")
+message (STATUS "Have casacore = ${HAVE_CASACORE}")
+message (STATUS "Have CFITSIO  = ${HAVE_CFITSIO}")
+message (STATUS "Have HDF5     = ${HAVE_HDF5}")
+message (STATUS "Have PLPLOT   = ${HAVE_PLPLOT}")
+message (STATUS "Have WCS      = ${HAVE_WCSLIB}")
+message (STATUS "Have ZLIB     = ${HAVE_ZLIB}")
 
 ## -----------------------------------------------------------------------------
 ## Subdirectories

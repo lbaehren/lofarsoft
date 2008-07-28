@@ -37,56 +37,54 @@ option (CR_WITH_STARTOOLS     "Enable additional routines from LOPES-Star?"  YES
 
 if (NOT CR_VERBOSE_CONFIGURE)
   ## output of the find scripts
-  set (BLITZ_FIND_QUIETLY 1)
-  set (BOOST_FIND_QUIETLY 1)
-  set (CASA_FIND_QUIETLY 1)
-  set (CASACORE_FIND_QUIETLY 1)
-  set (CFITSIO_FIND_QUIETLY 1)
-  set (DAL_FIND_QUIETLY 1)
-  set (FFTW3_FIND_QUIETLY 1)
-  set (G2C_FIND_QUIETLY 1)
-  set (GIF_FIND_QUIETLY 1)
-  set (GLISH_FIND_QUIETLY 1)
-  set (GSL_FIND_QUIETLY 1)
-  set (GTK_FIND_QUIETLY 1)
-  set (HDF5_FIND_QUIETLY 1)
-  set (LAPACK_FIND_QUIETLY 1)
-  set (PGPLOT_FIND_QUIETLY 1)
-  set (PLPLOT_FIND_QUIETLY 1)
-  set (PNG_FIND_QUIETLY 1)
-  set (POPT_FIND_QUIETLY 1)
-  set (PostgreSQL_FIND_QUIETLY 1)
-  set (PYTHON_FIND_QUIETLY 1)
-  set (ROOT_FIND_QUIETLY 1)
-  set (STARTOOLS_FIND_QUIETLY TRUE)
-  set (TCL_FIND_QUIETLY 1)
-  set (WCSLIB_FIND_QUIETLY 1)
+  set (BLITZ_FIND_QUIETLY      YES )
+  set (BOOST_FIND_QUIETLY      YES )
+  set (CASA_FIND_QUIETLY       YES )
+  set (CASACORE_FIND_QUIETLY   YES )
+  set (CFITSIO_FIND_QUIETLY    YES )
+  set (DAL_FIND_QUIETLY        YES )
+  set (FFTW3_FIND_QUIETLY      YES )
+  set (G2C_FIND_QUIETLY        YES )
+  set (GIF_FIND_QUIETLY        YES )
+  set (GLISH_FIND_QUIETLY      YES )
+  set (GSL_FIND_QUIETLY        YES )
+  set (GTK_FIND_QUIETLY        YES )
+  set (HDF5_FIND_QUIETLY       YES )
+  set (LAPACK_FIND_QUIETLY     YES )
+  set (PGPLOT_FIND_QUIETLY     YES )
+  set (PLPLOT_FIND_QUIETLY     YES )
+  set (PNG_FIND_QUIETLY        YES )
+  set (POPT_FIND_QUIETLY       YES )
+  set (PostgreSQL_FIND_QUIETLY YES )
+  set (PYTHON_FIND_QUIETLY     YES )
+  set (ROOT_FIND_QUIETLY       YES )
+  set (STARTOOLS_FIND_QUIETLY  YES )
+  set (TCL_FIND_QUIETLY        YES )
+  set (WCSLIB_FIND_QUIETLY     YES )
+  set (ZLIB_FIND_QUIETLY       YES )
   ## output of the generated makefile
-  set (CMAKE_VERBOSE_MAKEFILE 0)
+  set (CMAKE_VERBOSE_MAKEFILE  NO  )
 endif (NOT CR_VERBOSE_CONFIGURE)
 
-## -----------------------------------------------------------------------------
-## Locate additional CMake find scripts
+## ------------------------------------------------------------------------------
+## Set CMAKE_MODULE_PATH to load custom CMake modules
 
-find_path (cr_cmake CMakeSettings.cmake
-  PATHS 
-  ${CR_SOURCE_DIR}
-  ${CR_SOURCE_DIR}/..
-  ${CR_SOURCE_DIR}/../..
-  ${CR_SOURCE_DIR}/../../..
-  ENV LOFARSOFT
-  PATH_SUFFIXES
-  devel_common/cmake
-  )
-
-## If we are unable to locate the CMake find scripts, we need to abort here;
-## otherwise we do not know from where to include the files further down.
-
-if (cr_cmake)
-  list (APPEND CMAKE_MODULE_PATH ${cr_cmake})
-else (cr_cmake)
-  message (FATAL_ERROR "Unable to locate additional CMake scripts!")
-endif (cr_cmake)
+if (NOT USG_ROOT)
+  find_path (USG_ROOT devel_common/cmake/CMakeSettings.cmake
+    PATHS 
+    ${CR_SOURCE_DIR}
+    ${CR_SOURCE_DIR}/..
+    ${CR_SOURCE_DIR}/../..
+    ${CR_SOURCE_DIR}/../../..
+    ENV LOFARSOFT
+    )
+  
+  if (USG_ROOT)
+    include (${USG_ROOT}/devel_common/cmake/CMakeSettings.cmake)
+  else (USG_ROOT)
+    message (FATAL_ERROR "Unable to locate additional CMake scripts!")
+  endif (USG_ROOT)
+endif (NOT USG_ROOT)
 
 ## =============================================================================
 ##
@@ -141,7 +139,6 @@ if (CR_WITH_GLISH)
   include (${cr_cmake}/FindGlish.cmake)
   ## process outcome 
   if (HAVE_GLISH)
-    add_definitions (-DHAVE_GLISH)
     include_directories (${GLISH_INCLUDES})
   else (HAVE_GLISH)
     message (STATUS "[CR-Tools] Disabling Glish support - missing Glish components.")
@@ -484,7 +481,6 @@ find_file (dataset_event 2007.01.31.23:59:33.960.event
 ## =============================================================================
 
 if (BOOST_INCLUDES)
-  add_definitions (-DHAVE_BOOST)
   include_directories (${BOOST_INCLUDES})
 endif (BOOST_INCLUDES)
 
@@ -494,12 +490,10 @@ if (CASA_INCLUDES)
 endif (CASA_INCLUDES)
 
 if (CFITSIO_INCLUDES)
-  add_definitions (-DHAVE_CFITSIO)
   include_directories (${CFITSIO_INCLUDES})
 endif (CFITSIO_INCLUDES)
 
 if (DAL_INCLUDES)
-  add_definitions (-DHAVE_DAL)
   include_directories (${DAL_INCLUDES})
 endif (DAL_INCLUDES)
 
@@ -524,22 +518,18 @@ if (GTK_INCLUDES)
 endif (GTK_INCLUDES)
 
 if (HDF5_INCLUDES)
-  add_definitions (-DHAVE_HDF5)
   include_directories (${HDF5_INCLUDES})
 endif (HDF5_INCLUDES)
 
 if (PNG_INCLUDES)
-  add_definitions (-DHAVE_PNG)
   include_directories (${PNG_INCLUDES})
 endif (PNG_INCLUDES)
 
 if (ROOT_INCLUDES)
-  add_definitions (-DHAVE_ROOT)
   include_directories (${ROOT_INCLUDES})
 endif (ROOT_INCLUDES)
 
 if (WCS_INCLUDES)
-  add_definitions (-DHAVE_WCS)
   include_directories (${WCS_INCLUDES})
 endif (WCS_INCLUDES)
   
@@ -549,14 +539,19 @@ endif (WCS_INCLUDES)
 ##
 ## =============================================================================
 
+## Extra tests for using external libraries
+
 if (CR_BUILD_EXTERNAL_TESTS)
   add_subdirectory (test)
 endif (CR_BUILD_EXTERNAL_TESTS)
 
-if (NOT APPLE)
-  add_subdirectory (implement)
-  add_subdirectory (apps)
-endif (NOT APPLE)
+## Sources to build libcr
+
+add_subdirectory (implement)
+
+## Applications
+
+add_subdirectory (apps)
 
 ## =============================================================================
 ##
@@ -603,7 +598,7 @@ message (STATUS " Source directory .......... : ${CR_SOURCE_DIR}")
 message (STATUS " Installation location ..... : ${CMAKE_INSTALL_PREFIX}")
 message (STATUS " Build the test programs ... : ${CR_BUILD_TESTS}")
 message (STATUS " Enable testing ............ : ${CR_ENABLE_TESTING}")
-message (STATUS " Enable LOPES-Star routines  : ${CR_WITH_LOPESSTAR}")
+message (STATUS " Enable LOPES-Star routines  : ${CR_WITH_STARTOOLS}")
 message (STATUS " Support for plotting ...... : ${CR_WITH_PLOTTING}")
 message (STATUS " Support for Glish ......... : ${CR_WITH_GLISH}")
 message (STATUS " Support for Python ........ : ${CR_WITH_PYTHON}")
