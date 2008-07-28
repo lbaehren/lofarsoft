@@ -11,7 +11,6 @@ SET (casa_modules
   BasicSL
   Containers
   Exceptions
-  HDF5
   IO
   Inputs
   Logging
@@ -20,6 +19,10 @@ SET (casa_modules
   System
   Utilities
   )
+
+if (casacore_HDF5_SUPPORT)
+  list (APPEND casa_modules "HDF5")
+endif (casacore_HDF5_SUPPORT)
 
 ## -----------------------------------------------------------------------------
 ## Build the library
@@ -40,7 +43,11 @@ add_library (casa_casa
 
 ## linker instructions
 
-target_link_libraries (casa_casa ${libm})
+if (casacore_HDF5_SUPPORT)
+  target_link_libraries (casa_casa ${HDF5_LIBRARIES} ${libm})
+else (casacore_HDF5_SUPPORT)
+  target_link_libraries (casa_casa ${libm})
+endif (casacore_HDF5_SUPPORT)
 
 ## -----------------------------------------------------------------------------
 ## Installation
