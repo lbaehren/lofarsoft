@@ -37,6 +37,14 @@ if (CR_WITH_GLISH)
 endif (CR_WITH_GLISH)
 
 ## -----------------------------------------------------------------------------
+## Create "crtools.h"
+
+configure_file (${USG_ROOT}/devel_common/cmake/config_crtools.h.in
+  ${CR_BINARY_DIR}/crtools.h)
+
+include_directories (${CR_BINARY_DIR})
+
+## -----------------------------------------------------------------------------
 ## Build "libcr"
 
 ## [1] Assemble list of source files
