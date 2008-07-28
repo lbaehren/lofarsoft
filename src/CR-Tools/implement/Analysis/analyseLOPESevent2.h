@@ -30,6 +30,10 @@
 #include <fstream>
 #include <string>
 
+#include <crtools.h>
+
+#ifdef HAVE_STARTOOLS
+
 #include <Analysis/analyseLOPESevent.h>
 #include <Analysis/CompletePipeline.h>
 
@@ -279,6 +283,8 @@ class analyseLOPESevent2 : public analyseLOPESevent{
   };
   
 } // Namespace CR -- end
+
+#endif /* HAVE_STARTOOLS */
 
 #endif /* ANALYSELOPESEVENT2_H */
   

@@ -21,6 +21,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#ifdef HAVE_STARTOOLS
+
 #include <Analysis/analyseLOPESevent2.h>
 
 namespace CR { // Namespace CR -- begin
@@ -328,3 +330,6 @@ namespace CR { // Namespace CR -- begin
   }
 
 } // Namespace CR -- end
+
+
+#endif
