@@ -18,9 +18,10 @@ set (WCSLIB_VERSION "${WCSLIB_VERSION_MAJOR}.${WCSLIB_VERSION_MINOR}")
 ## -----------------------------------------------------------------------------
 ## User defined build/install options
 
-option (WCSLIB_PYTHON_WRAPPER    "Generate Python wrapper for WCSLIB?"  0 )
-option (WCSLIB_VERBOSE_CONFIGURE "Verbose output during configuration?" 0 )
-option (WCSLIB_FORCE_BUILD       "Force rebuild and local installation" 0 )
+option (WCSLIB_PYTHON_WRAPPER    "Generate Python wrapper for WCSLIB?"  NO  )
+option (WCSLIB_VERBOSE_CONFIGURE "Verbose output during configuration?" NO  )
+option (WCSLIB_FORCE_BUILD       "Force rebuild and local installation" NO  )
+option (WCSLIB_ENABLE_TESTING    "Enable building and running tests?"   YES )
 
 ## ------------------------------------------------------------------------------
 ## Set CMAKE_MODULE_PATH to load custom CMake modules
@@ -42,42 +43,34 @@ if (NOT USG_ROOT)
   endif (USG_ROOT)
 endif (NOT USG_ROOT)
 
-## silence find scipt output if necessary
-
-if (NOT WCSLIB_VERBOSE_CONFIGURE)
-  set (CFITSIO_FIND_QUIETLY 1)
-  set (BOOST_FIND_QUIETLY 1)
-  set (PYTHON_FIND_QUIETLY 1)
-  set (WCSLIB_FIND_QUIETLY 1)
-endif (NOT WCSLIB_VERBOSE_CONFIGURE)
-
-include (FindWCS)
-include (FindCFITSIO)
-include (FindBoost)
-include (FindPython)
-
 ## <-- begin build condition --------------------------------------------------->
 
 if (NOT HAVE_WCSLIB OR WCSLIB_FORCE_BUILD)
   
+  ## silence find scipt output if necessary
+  
+  if (NOT WCSLIB_VERBOSE_CONFIGURE)
+    set (CFITSIO_FIND_QUIETLY 1)
+    set (BOOST_FIND_QUIETLY 1)
+    set (PYTHON_FIND_QUIETLY 1)
+    set (WCSLIB_FIND_QUIETLY 1)
+  endif (NOT WCSLIB_VERBOSE_CONFIGURE)
+  
+  include (FindWCS)
+  include (FindCFITSIO)
+  include (FindBoost)
+  include (FindPython)
+  
   ## ----------------------------------------------------------------------------
   ## Check for additional tools which are required
   
-  include (CTest)
+  if (WCSLIB_ENABLE_TESTING)
+    include (CTest)
+    enable_testing()
+  endif (WCSLIB_ENABLE_TESTING)
   
-  find_library (libm m)
+  find_library (HAVE_LIBM m PATHS ${lib_locations})
   find_program (flex_bin flex)
-  
-  ## ----------------------------------------------------------------------------
-  ## Subdirectories
-  
-  add_subdirectory (${WCSLIB_SOURCE_DIR}/C)
-  add_subdirectory (${WCSLIB_SOURCE_DIR}/FORTRAN)
-  add_subdirectory (${WCSLIB_SOURCE_DIR}/pgsbox)
-  
-  if (WCSLIB_PYTHON_WRAPPER AND HAVE_PYTHON)
-    add_subdirectory (${WCSLIB_SOURCE_DIR}/Python)
-  endif (WCSLIB_PYTHON_WRAPPER AND HAVE_PYTHON)
   
   ## ----------------------------------------------------------------------------
   ## Installation
@@ -96,6 +89,17 @@ if (NOT HAVE_WCSLIB OR WCSLIB_FORCE_BUILD)
     set (CMAKE_INSTALL_PREFIX ${WCSLIB_INSTALL_PREFIX}) 
   endif (WCSLIB_INSTALL_PREFIX)
 
+  ## ----------------------------------------------------------------------------
+  ## Subdirectories
+  
+  add_subdirectory (${WCSLIB_SOURCE_DIR}/C)
+  add_subdirectory (${WCSLIB_SOURCE_DIR}/FORTRAN)
+  add_subdirectory (${WCSLIB_SOURCE_DIR}/pgsbox)
+  
+  if (WCSLIB_PYTHON_WRAPPER AND HAVE_PYTHON)
+    add_subdirectory (${WCSLIB_SOURCE_DIR}/Python)
+  endif (WCSLIB_PYTHON_WRAPPER AND HAVE_PYTHON)
+  
 ## -----------------------------------------------------------------------------
 ## Configuration summary
 

@@ -18,8 +18,12 @@ set (wcslib_tests
 )
 
 foreach (test ${wcslib_tests})
+  ## compiler instructions
   add_executable (${test} ${test}.c)
+  ## linker instructions
   target_link_libraries (${test} wcs ${libm})
+  ## testing
+  add_test (${test} ${test})
 endforeach (test)
 
 ## Installation
