@@ -250,9 +250,10 @@ endif (CR_WITH_GLISH)
 if (HAVE_CASA OR HAVE_CASACORE)
   
   ## compiler flags
+  set (HAVE_CASA 1)
+  set (WITH_CASA 1)
   add_definitions (
     # -- compiler flags utilized in the source code --
-    -DWITH_CASA
     -DAIPS_STDLIB
     -DAIPS_AUTO_STL
     )
