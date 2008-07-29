@@ -143,6 +143,9 @@
 /* Define to 1 if we use PGPlot or PLplot */
 #cmakedefine NEED_FORTRAN_UNDERSCORES 1
 
+/* Define to 1 if we have either CASA or casacore */
+#cmakedefine WITH_CASA 1
+
 /*
  * ------------------------------------------------------------------------------
  *  CR-Tools control parameters
