@@ -40,6 +40,8 @@
 #include <dal/Enumerations.h>
 #endif
 
+#include <crtools.h>
+
 namespace DAL { // Namespace DAL -- begin
   
   /*!
