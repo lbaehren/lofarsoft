@@ -41,9 +41,8 @@ include (CMakeSettings)
 ## in order to ease differentiation from where the various header files are
 ## included.
 
-FIND_PATH (BLITZ_INCLUDES blitz.h
+FIND_PATH (BLITZ_INCLUDES blitz/blitz.h blitz/array.h
   PATHS ${include_locations}
-  PATH_SUFFIXES blitz
   )
 
 IF (BLITZ_INCLUDES)

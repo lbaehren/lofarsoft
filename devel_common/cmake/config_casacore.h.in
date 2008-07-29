@@ -1,0 +1,46 @@
+
+#ifndef CASACORE_H
+#define CASACORE_H
+
+/*
+ * ------------------------------------------------------------------------------
+ *  System description
+ * ------------------------------------------------------------------------------
+ */
+
+#cmakedefine CMAKE_SYSTEM "${CMAKE_SYSTEM}"
+#cmakedefine CMAKE_SYSTEM_VERSION "${CMAKE_SYSTEM_VERSION}"
+#cmakedefine CMAKE_SYSTEM_PROCESSOR "${CMAKE_SYSTEM_PROCESSOR}"
+
+/* The size of `short', as computed by sizeof. */
+#cmakedefine SIZEOF_SHORT ${SIZEOF_SHORT}
+
+/* The size of `int', as computed by sizeof. */
+#cmakedefine SIZEOF_INT ${SIZEOF_INT}
+
+/* The size of `float', as computed by sizeof. */
+#cmakedefine SIZEOF_FLOAT ${SIZEOF_FLOAT}
+
+/* The size of `double', as computed by sizeof. */
+#cmakedefine SIZEOF_DOUBLE ${SIZEOF_DOUBLE}
+
+/* The size of `long', as computed by sizeof. */
+#cmakedefine SIZEOF_LONG ${SIZEOF_LONG}
+
+/* The size of `long long', as computed by sizeof. */
+#cmakedefine SIZEOF_LONG_LONG ${SIZEOF_LONG_LONG}
+
+/*
+ * ------------------------------------------------------------------------------
+ *  Dependencies on external packages
+ * ------------------------------------------------------------------------------
+ */
+
+/* Define to 1 if we have the CFITSIO library */
+#cmakedefine HAVE_CFITSIO 1
+
+/* Define to 1 if we have a working installation of the HDF5 library */
+#cmakedefine HAVE_HDF5 1
+
+
+#endif
