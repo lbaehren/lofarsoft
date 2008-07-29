@@ -31,6 +31,7 @@
 #include <casa/Quanta/Quantum.h>
 #include <casa/Containers/Record.h>
 #include <measures/Measures/MFrequency.h>
+#include <measures/Measures/MPosition.h>
 
 #ifndef HDF5COMMON_H
 #include <dal/HDF5Common.h>
