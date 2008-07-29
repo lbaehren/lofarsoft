@@ -26,6 +26,8 @@
 
 #include <string>
 
+#include <crtools.h>
+
 #ifdef HAVE_CASA
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>
