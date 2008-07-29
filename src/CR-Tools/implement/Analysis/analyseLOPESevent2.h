@@ -67,7 +67,7 @@ namespace CR { // Namespace CR -- begin
     <h3>Example(s)</h3>
     
   */  
-class analyseLOPESevent2 : public analyseLOPESevent{
+class analyseLOPESevent2 : public analyseLOPESevent {
     
   public:
     
