@@ -1,3 +1,7 @@
+
+#ifndef CRTOOLS_H
+#define CRTOOLS_H
+
 /*
  * ------------------------------------------------------------------------------
  *  System description
@@ -170,3 +174,4 @@
 /* Enable additional routines from LOPES-Star? */
 #cmakedefine CR_WITH_STARTOOLS 1
 
+#endif
