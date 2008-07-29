@@ -1,11 +1,45 @@
-/*!
-  \defgroup CR Cosmic Rays (CR) analysis pipeline
+/*
+ * ------------------------------------------------------------------------------
+ *  System description
+ * ------------------------------------------------------------------------------
+ */
 
-  This documentation contains the description of the C/C++ components of the
-  software used for data inspection and reduction with the
-  <a href="http://www.astro.ru.nl/lopes">LOPES</a> and LOFAR/CR experiments.
+#cmakedefine CMAKE_SYSTEM "${CMAKE_SYSTEM}"
+#cmakedefine CMAKE_SYSTEM_VERSION "${CMAKE_SYSTEM_VERSION}"
+#cmakedefine CMAKE_SYSTEM_PROCESSOR "${CMAKE_SYSTEM_PROCESSOR}"
 
-*/
+/* The size of `short', as computed by sizeof. */
+#cmakedefine SIZEOF_SHORT ${SIZEOF_SHORT}
+
+/* The size of `int', as computed by sizeof. */
+#cmakedefine SIZEOF_INT ${SIZEOF_INT}
+
+/* The size of `float', as computed by sizeof. */
+#cmakedefine SIZEOF_FLOAT ${SIZEOF_FLOAT}
+
+/* The size of `double', as computed by sizeof. */
+#cmakedefine SIZEOF_DOUBLE ${SIZEOF_DOUBLE}
+
+/* The size of `long', as computed by sizeof. */
+#cmakedefine SIZEOF_LONG ${SIZEOF_LONG}
+
+/* The size of `long long', as computed by sizeof. */
+#cmakedefine SIZEOF_LONG_LONG ${SIZEOF_LONG_LONG}
+
+/*
+ * ------------------------------------------------------------------------------
+ *  Dependencies on external packages
+ * ------------------------------------------------------------------------------
+ */
+
+/* Define to 1 if the architecture is 64 bit */
+#cmakedefine AIPS_64B 1
+
+/* Define to 1 if architecture for CASA is Darwin */
+#cmakedefine AIPS_DARWIN 1
+
+/* Define to 1 if architecture for CASA is Linux */
+#cmakedefine AIPS_LINUX 1
 
 /* Define to 1 if the Star-Tools package is available */
 #cmakedefine HAVE_STARTOOLS 1
@@ -13,35 +47,123 @@
 /* Define to 1 if we have the development version of the Boost libraries*/
 #cmakedefine HAVE_BOOST 1
 
+/* Define to 1 if we have the CASA library */
+#cmakedefine HAVE_CASA 1
+
+/* Define to 1 if we have the casacore library */
+#cmakedefine HAVE_CASACORE 1
+
 /* Define to 1 if we have the CFITSIO library */
 #cmakedefine HAVE_CFITSIO 1
 
 /* Define to 1 if we have the Data Access Library (DAL) */
 #cmakedefine HAVE_DAL 1
 
+/* Define to 1 if we have a development version of the FFTW3 library */
+#cmakedefine HAVE_FFTW3 1
+
+/* Define to 1 if we have a development version of the G2C library */
+#cmakedefine HAVE_G2C 1
+
+/* Define to 1 if we have a development version of the GIF library */
+#cmakedefine HAVE_GIF 1
+
 /* Define to 1 if we have Glish installed */
 #cmakedefine HAVE_GLISH 1
+
+/* Define to 1 if we have a working installation of the GTK library */
+#cmakedefine HAVE_GTK 1
 
 /* Define to 1 if we have a working installation of the HDF5 library */
 #cmakedefine HAVE_HDF5 1
 
+/* Define to 1 if we have a working installation of the LAPACK library */
+#cmakedefine HAVE_LAPACK 1
+
 /* Define to 1 if we have libm  */
-#cmakedefine HAVE_LIBM
+#cmakedefine HAVE_LIBM 1
 
 /* Define to 1 if we have libutil */
-#cmakedefine HAVE_LIBUTIL
+#cmakedefine HAVE_LIBUTIL 1
 
 /* Define to 1 if we have libdl */
-#cmakedefine HAVE_LIBDL
+#cmakedefine HAVE_LIBDL 1
 
 /* Define to 1 if we have libgd */
-#cmakedefine HAVE_LIBGD
+#cmakedefine HAVE_LIBGD 1
 
-/* Define to 1 if we have the development version of the PNG library */
-#cmakedefine HAVE_PNG
+/* Define to 1 if we have the libgen.h header file */
+#cmakedefine HAVE_LIBGEN_H 1
+
+/* Define to 1 if we have a development version of the PGPLOT library */
+#cmakedefine HAVE_PGPLOT 1
+
+/* Define to 1 if we have a development version of the PLPLOT library */
+#cmakedefine HAVE_PLPLOT 1
+
+/* Define to 1 if we have a development version of the PNG library */
+#cmakedefine HAVE_PNG 1
+
+/* Define to 1 if we have a development version of the POPT library */
+#cmakedefine HAVE_POPT 1
+
+/* Define to 1 if we have a development version of Python */
+#cmakedefine HAVE_PYTHON 1
 
 /* Define to 1 if we have ROOT installed */
 #cmakedefine HAVE_ROOT 1
 
+/* Define to 1 if we have the stdint.h header file */
+#cmakedefine HAVE_STDINT_H 1
+
+/* Define to 1 if we have the stdlib.h header file */
+#cmakedefine HAVE_STDLIB_H 1
+
+/* Define to 1 if we have the string.h header file */
+#cmakedefine HAVE_STRING_H 1
+
+/* Define to 1 if we have the strings.h header file */
+#cmakedefine HAVE_STRINGS_H 1
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#cmakedefine HAVE_SYS_STAT_H 1
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#cmakedefine HAVE_SYS_TIME_H 1
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#cmakedefine HAVE_SYS_TYPES_H 1
+
+/* Define to 1 if you have the <sys/utime.h> header file. */
+#cmakedefine HAVE_SYS_UTIME_H 1
+
 /* Define to 1 if we have the WCS library */
 #cmakedefine HAVE_WCSLIB 1
+
+/* Define to 1 if we use PGPlot or PLplot */
+#cmakedefine NEED_FORTRAN_UNDERSCORES 1
+
+/*
+ * ------------------------------------------------------------------------------
+ *  CR-Tools control parameters
+ * ------------------------------------------------------------------------------
+ */
+
+/* Define to 1 in order to enable debugging message within the source code */
+#cmakedefine DEBUGGING_MESSAGES 1
+
+/* Support for Glish applications? */
+#cmakedefine CR_WITH_GLISH 1
+
+/* Support for Python applications? */
+#cmakedefine CR_WITH_PYTHON 1
+
+/* Support for generation of plots? */
+#cmakedefine CR_WITH_PLOTTING 1
+
+/* Build the graphical interface? */
+#cmakedefine CR_WITH_GUI 1
+
+/* Enable additional routines from LOPES-Star? */
+#cmakedefine CR_WITH_STARTOOLS 1
+

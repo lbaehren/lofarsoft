@@ -29,23 +29,10 @@
 ##  CASACORE_LIBRARIES     = Libraries of the casacore modules
 ##  CASACORE_COMPILE_FLAGS = 
 ##
+## -----------------------------------------------------------------------------
 
 ## -----------------------------------------------------------------------------
-## Search locations
-
-include (CMakeSettings)
-
-list (APPEND include_locations
-  ${USG_ROOT}/external/casacore
-  /usr/include/casacore
-  /usr/local/include/casacore
-  /sw/share/casacore
-  /sw/include/casacore
-)
-
-list (APPEND lib_locations
-  /opt/casacore/lib
-)
+## Library components to search for
 
 set (casacore_modules
   casa
@@ -63,6 +50,40 @@ set (casacore_modules
   msfits
   msvis
   )
+
+set (casacore_headers
+  casa/Arrays.h
+  tables/Tables.h
+  mirlib/miriad.h
+  scimath/Fitting.h
+  measures/Measures.h
+  fits/FITS.h
+  coordinates/Coordinates.h
+  components/ComponentModels.h
+  lattices/Lattices.h
+  ms/MeasurementSets.h
+  images/Images.h
+  msfits/MSFits.h
+  msvis/MSVis.h
+  )
+
+## -----------------------------------------------------------------------------
+## Search locations
+
+include (CMakeSettings)
+
+list (APPEND include_locations
+  ${USG_ROOT}/release/include/casacore
+  ${USG_ROOT}/external/casacore
+  /usr/include/casacore
+  /usr/local/include/casacore
+  /sw/share/casacore
+  /sw/include/casacore
+)
+
+list (APPEND lib_locations
+  /opt/casacore/lib
+)
 
 ## -----------------------------------------------------------------------------
 ## Check for system header files
@@ -82,8 +103,10 @@ find_path (HAVE_UNISTD_H  unistd.h  PATHS ${include_locations} )
 ## -----------------------------------------------------------------------------
 ## Required external packages
 
-find_library (libm   m       PATHS ${lib_locations} )
-find_library (libg2c g2c f2c PATHS ${lib_locations} )
+find_library (HAVE_LIBM         m          PATHS ${lib_locations} )
+find_library (HAVE_LIBG2C       g2c        PATHS ${lib_locations} )
+find_library (HAVE_LIBF2C       f2c        PATHS ${lib_locations} )
+find_library (HAVE_LIBGFORTRAN  gfortran   PATHS ${lib_locations} )
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files.
@@ -98,186 +121,20 @@ endif (NOT CASACORE_FIND_QUIETLY)
 
 set (CASACORE_INCLUDES "")
 
-## [1] <casa/Arrays.h>
-
-find_path (CASACORE_INCLUDES_casa casa/Arrays.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES casa
-  NO_DEFAULT_PATH
-)
-
-if (CASACORE_INCLUDES_casa)
-  get_filename_component (tmp ${CASACORE_INCLUDES_casa} ABSOLUTE)
-  list (APPEND CASACORE_INCLUDES ${tmp})
-else (CASACORE_INCLUDES_casa)
-  message (SEND_ERROR "[casacore] Unable to locate Array.h")
-endif (CASACORE_INCLUDES_casa)
-
-## [2] <tables/Tables.h>
-
-find_path (CASACORE_INCLUDES_tables tables/Tables.h tables/LogTables.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES tables
-  NO_DEFAULT_PATH
-)
-
-if (CASACORE_INCLUDES_tables)
-  get_filename_component (tmp ${CASACORE_INCLUDES_tables} ABSOLUTE)
-  list (APPEND CASACORE_INCLUDES ${tmp})
-elseif (CASACORE_INCLUDES_tables)
-  message (SEND_ERROR "[casacore] Unable to locate Tables.h")
-endif (CASACORE_INCLUDES_tables)
-
-## [3] <miriad.h>
-
-find_path (CASACORE_INCLUDES_mirlib miriad.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES mirlib
-  NO_DEFAULT_PATH
-)
-
-if (CASACORE_INCLUDES_mirlib)
-  get_filename_component (tmp ${CASACORE_INCLUDES_mirlib} ABSOLUTE)
-  list (APPEND CASACORE_INCLUDES ${tmp})
-elseif (CASACORE_INCLUDES_mirlib)
-  message (SEND_ERROR "[casacore] Unable to locate miriad.h")
-endif (CASACORE_INCLUDES_mirlib)
-
-## [4] <scimath/Fitting.h>
-
-find_path (CASACORE_INCLUDES_scimath scimath/Fitting.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES scimath
-  NO_DEFAULT_PATH
-)
-
-if (CASACORE_INCLUDES_scimath)
-  get_filename_component (tmp ${CASACORE_INCLUDES_scimath} ABSOLUTE)
-  list (APPEND CASACORE_INCLUDES ${tmp})
-elseif (CASACORE_INCLUDES_scimath)
-  message (SEND_ERROR "[casacore] Unable to locate Fitting.h")
-endif (CASACORE_INCLUDES_scimath)
-
-## [5] <measures/Measures.h>
-
-find_path (CASACORE_INCLUDES_measures measures/Measures.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES measures
-  NO_DEFAULT_PATH
-)
-
-if (CASACORE_INCLUDES_measures)
-  get_filename_component (tmp ${CASACORE_INCLUDES_measures} ABSOLUTE)
-  list (APPEND CASACORE_INCLUDES ${tmp})
-elseif (CASACORE_INCLUDES_measures)
-  message (SEND_ERROR "[casacore] Unable to locate Measures.h")
-endif (CASACORE_INCLUDES_measures)
-
-## [6] <fits/FITS.h>
-
-find_path (CASACORE_INCLUDES_fits fits/FITS.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES fits
-)
-
-if (CASACORE_INCLUDES_fits)
-  get_filename_component (tmp ${CASACORE_INCLUDES_fits} ABSOLUTE)
-  list (APPEND CASACORE_INCLUDES ${tmp})
-elseif (CASACORE_INCLUDES_fits)
-  message (SEND_ERROR "[casacore] Unable to locate FITS.h")
-endif (CASACORE_INCLUDES_fits)
-
-## [7] <coordinates/Coordinates.h>
-
-find_path (CASACORE_INCLUDES_coordinates coordinates/Coordinates.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES coordinates
-)
-
-if (CASACORE_INCLUDES_coordinates)
-  get_filename_component (tmp ${CASACORE_INCLUDES_coordinates} ABSOLUTE)
-  list (APPEND CASACORE_INCLUDES ${tmp})
-elseif (CASACORE_INCLUDES_coordinates)
-  message (SEND_ERROR "[casacore] Unable to locate Coordinates.h")
-endif (CASACORE_INCLUDES_coordinates)
-
-## [8] <components/ComponentModels.h>
-
-find_path (CASACORE_components ComponentModels.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES components/components
-)
-
-if (CASACORE_components)
-  get_filename_component (tmp ${CASACORE_components} ABSOLUTE)
-  string (REGEX REPLACE components/components components tmp ${tmp})
-  list (APPEND CASACORE_INCLUDES ${tmp})
-endif (CASACORE_components)
-
-## [9] <lattices/Lattices.h>
-
-find_path (CASACORE_lattices Lattices.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES lattices/lattices
-)
-
-if (CASACORE_lattices)
-  string (REGEX REPLACE lattices/lattices lattices tmp ${CASACORE_lattices})
-  get_filename_component (tmp ${tmp} ABSOLUTE)
-  list (APPEND CASACORE_INCLUDES ${tmp})
-endif (CASACORE_lattices)
-
-## [10] <ms/MeasurementSets.h>
-
-find_path (CASACORE_ms MeasurementSets.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES ms/ms
-)
-
-if (CASACORE_ms)
-  string (REGEX REPLACE ms/ms ms tmp ${CASACORE_ms})
-  get_filename_component (tmp ${tmp} ABSOLUTE)
-  list (APPEND CASACORE_INCLUDES ${tmp})
-endif (CASACORE_ms)
-
-## [11] <images/Images.h>
-
-find_path (CASACORE_images Images.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES images/images
-)
-
-if (CASACORE_images)
-  string (REGEX REPLACE images/images images tmp ${CASACORE_images})
-  get_filename_component (tmp ${tmp} ABSOLUTE)
-  list (APPEND CASACORE_INCLUDES ${tmp})
-endif (CASACORE_images)
-
-## [12] <msfits/MSFits.h>
-
-find_path (CASACORE_msfits MSFits.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES msfits/msfits
-)
-
-if (CASACORE_msfits)
-  string (REGEX REPLACE msfits/msfits msfits tmp ${CASACORE_msfits})
-  get_filename_component (tmp ${tmp} ABSOLUTE)
-  list (APPEND CASACORE_INCLUDES ${tmp})
-endif (CASACORE_msfits)
-
-## [13] <msvis/MSVis.h>
-
-find_path (CASACORE_msvis MSVis.h
-  PATHS ${include_locations}
-  PATH_SUFFIXES msvis/msvis
-)
-
-if (CASACORE_msvis)
-  string (REGEX REPLACE msvis/msvis msvis tmp ${CASACORE_msvis})
-  get_filename_component (tmp ${tmp} ABSOLUTE)
-  list (APPEND CASACORE_INCLUDES ${tmp})
-endif (CASACORE_msvis)
+foreach (CASACORE_HEADER ${casacore_headers})
+  ## search for the header file of a given module
+  find_path (header_path ${CASACORE_HEADER}
+    PATHS ${include_locations}
+    NO_DEFAULT_PATH
+    )
+  ## if the header file was found, add its path to the include path
+  if (header_path)
+    get_filename_component (tmp ${header_path} ABSOLUTE)
+    list (APPEND CASACORE_INCLUDES ${tmp})
+  else (header_path)
+    message (SEND_ERROR "[casacore] Unable to locate ${CASACORE_HEADER}")
+  endif (header_path)
+endforeach (CASACORE_HEADER)
 
 ## -----------------------------------------------------------------------------
 ## Check for the library
@@ -431,17 +288,6 @@ set (CASA_LIBRARIES ${CASACORE_LIBRARIES})
 ## Variables only to be displayed in advanced mode
 
 mark_as_advanced (
-  CASACORE_INCLUDES_casa
-  CASACORE_INCLUDES_tables
-  CASACORE_INCLUDES_scimath
-  CASACORE_ms
-  CASACORE_msfits
-  CASACORE_msvis
-  CASACORE_images
-  CASACORE_components
-  CASACORE_INCLUDES_coordinates
-  CASACORE_INCLUDES_fits
-  CASACORE_lattices
-  CASACORE_INCLUDES_mirlib
-  CASACORE_INCLUDES_measures
+  casacore_modules
+  casacore_headers
   )
