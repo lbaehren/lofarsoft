@@ -64,7 +64,7 @@ install (FILES ${scimath_headers}
 
 foreach (scimath_module ${scimath_modules})
   ## assemble list of header files
-  FILE (GLOB scimath_headers ${scimath_module}/*.h)
+  FILE (GLOB scimath_headers ${scimath_module}/*.h ${scimath_module}/*.tcc)
   ## set installation location
   install (FILES ${scimath_headers}
     DESTINATION include/casacore/scimath/${scimath_module}

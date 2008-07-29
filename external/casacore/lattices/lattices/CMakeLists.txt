@@ -35,13 +35,29 @@ if (casacore_BUILD_TESTS)
   subdirs (${tests})
 endif (casacore_BUILD_TESTS)
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Installation
 
-## installation of libraries
+## Library
 
 install (TARGETS casa_lattices
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   )
+
+## Header files
+
+FILE (GLOB lattices_headers *.h)
+install (FILES ${lattices_headers}
+  DESTINATION include/casacore/lattices
+  )
+
+foreach (lattices_module ${lattices_modules})
+  ## assemble list of header files
+  FILE (GLOB lattices_headers ${lattices_module}/*.h ${lattices_module}/*.tcc)
+  ## set installation location
+  install (FILES ${lattices_headers}
+    DESTINATION include/casacore/lattices/${lattices_module}
+    )
+endforeach (lattices_module)

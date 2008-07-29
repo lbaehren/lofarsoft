@@ -69,7 +69,7 @@ install (FILES ${casa_headers}
 
 foreach (casa_module ${casa_modules})
   ## assemble list of header files
-  FILE (GLOB casa_headers ${casa_module}/*.h)
+  FILE (GLOB casa_headers ${casa_module}/*.h ${casa_module}/*.tcc)
   ## set installation location
   install (FILES ${casa_headers}
     DESTINATION include/casacore/casa/${casa_module}

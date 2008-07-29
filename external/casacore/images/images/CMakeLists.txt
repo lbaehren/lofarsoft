@@ -107,7 +107,7 @@ install (FILES ${images_headers}
 
 foreach (images_module ${images_modules})
   ## assemble list of header files
-  FILE (GLOB images_headers ${images_module}/*.h)
+  FILE (GLOB images_headers ${images_module}/*.h ${images_module}/*.tcc)
   ## set installation location
   install (FILES ${images_headers}
     DESTINATION include/casacore/images/${images_module}

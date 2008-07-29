@@ -144,7 +144,7 @@ install (FILES ${tables_headers}
 
 foreach (tables_module ${tables_modules})
   ## assemble list of header files
-  FILE (GLOB tables_headers ${tables_module}/*.h)
+  FILE (GLOB tables_headers ${tables_module}/*.h ${tables_module}/*.tcc)
   ## set installation location
   install (FILES ${tables_headers}
     DESTINATION include/casacore/tables/${tables_module}

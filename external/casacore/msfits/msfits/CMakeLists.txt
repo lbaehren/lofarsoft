@@ -33,13 +33,29 @@ if (casacore_BUILD_TESTS)
   subdirs (${tests})
 endif (casacore_BUILD_TESTS)
 
-## ------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 ## Installation
 
-## installation of libraries
+## Library
 
 install (TARGETS casa_msfits
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   )
+
+## Header files
+
+FILE (GLOB msfits_headers *.h)
+install (FILES ${msfits_headers}
+  DESTINATION include/casacore/msfits
+  )
+
+foreach (msfits_module ${msfits_modules})
+  ## assemble list of header files
+  FILE (GLOB msfits_headers ${msfits_module}/*.h ${msfits_module}/*.tcc)
+  ## set installation location
+  install (FILES ${msfits_headers}
+    DESTINATION include/casacore/msfits/${msfits_module}
+    )
+endforeach (msfits_module)

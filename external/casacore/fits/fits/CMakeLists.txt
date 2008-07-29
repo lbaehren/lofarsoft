@@ -57,7 +57,7 @@ install (FILES ${fits_headers}
 
 foreach (fits_module ${fits_modules})
   ## assemble list of header files
-  FILE (GLOB fits_headers ${fits_module}/*.h)
+  FILE (GLOB fits_headers ${fits_module}/*.h ${fits_module}/*.tcc)
   ## set installation location
   install (FILES ${fits_headers}
     DESTINATION include/casacore/fits/${fits_module}

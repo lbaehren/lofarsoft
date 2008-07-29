@@ -118,7 +118,7 @@ install (FILES ${ms_headers}
 
 foreach (ms_module ${ms_modules})
   ## assemble list of header files
-  FILE (GLOB ms_headers ${ms_module}/*.h)
+  FILE (GLOB ms_headers ${ms_module}/*.h ${ms_module}/*.tcc)
   ## set installation location
   install (FILES ${ms_headers}
     DESTINATION include/casacore/ms/${ms_module}

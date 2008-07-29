@@ -53,7 +53,7 @@ install (FILES ${msvis_headers}
 
 foreach (msvis_module ${msvis_modules})
   ## assemble list of header files
-  FILE (GLOB msvis_headers ${msvis_module}/*.h)
+  FILE (GLOB msvis_headers ${msvis_module}/*.h ${msvis_module}/*.tcc)
   ## set installation location
   install (FILES ${msvis_headers}
     DESTINATION include/casacore/msvis/${msvis_module}

@@ -34,10 +34,28 @@ if (casacore_BUILD_TESTS)
 endif (casacore_BUILD_TESTS)
 
 ## -----------------------------------------------------------------------------
-## Installation targets
+## Installation
+
+## Library
 
 install (TARGETS casa_measures
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   )
+
+## Header files
+
+FILE (GLOB measures_headers *.h)
+install (FILES ${measures_headers}
+  DESTINATION include/casacore/measures
+  )
+
+foreach (measures_module ${measures_modules})
+  ## assemble list of header files
+  FILE (GLOB measures_headers ${measures_module}/*.h ${measures_module}/*.tcc)
+  ## set installation location
+  install (FILES ${measures_headers}
+    DESTINATION include/casacore/measures/${measures_module}
+    )
+endforeach (measures_module)

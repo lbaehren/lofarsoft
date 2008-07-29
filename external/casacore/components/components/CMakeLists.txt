@@ -34,10 +34,28 @@ if (casacore_BUILD_TESTS)
 endif (casacore_BUILD_TESTS)
 
 ## -----------------------------------------------------------------------------
-## Installation targets
+## Installation
+
+## Library
 
 install (TARGETS casa_components
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   )
+
+## Header files
+
+FILE (GLOB components_headers *.h)
+install (FILES ${components_headers}
+  DESTINATION include/casacore/components
+  )
+
+foreach (components_module ${components_modules})
+  ## assemble list of header files
+  FILE (GLOB components_headers ${components_module}/*.h)
+  ## set installation location
+  install (FILES ${components_headers}
+    DESTINATION include/casacore/components/${components_module}
+    )
+endforeach (components_module)
