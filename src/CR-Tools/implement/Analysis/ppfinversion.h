@@ -23,6 +23,8 @@
 #ifndef PPFINVERSION_H
 #define PPFINVERSION_H
 
+#include <crtools.h>
+
 // Standard library header files
 #include <string.h>
 

@@ -23,6 +23,8 @@
 #ifndef _DATABLOCKSTATISTICS_H_
 #define _DATABLOCKSTATISTICS_H_
 
+#include <crtools.h>
+
 #include <casa/aips.h>
 #include <casa/Arrays.h>
 #include <casa/Arrays/ArrayMath.h>

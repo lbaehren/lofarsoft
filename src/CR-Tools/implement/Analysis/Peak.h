@@ -21,6 +21,8 @@
 #ifndef _PEAK_H_
 #define _PEAK_H_
 
+#include <crtools.h>
+
 #include <sstream>
 #include <fstream>
 

@@ -24,12 +24,12 @@
 #ifndef COMPLETEPIPELINE_H
 #define COMPLETEPIPELINE_H
 
+#include <crtools.h>
+
 // Standard library header files
 #include <iostream>
 #include <string>
 #include <cmath>
-
-#include <crtools.h>
 
 #ifdef HAVE_STARTOOLS
 

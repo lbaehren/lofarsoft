@@ -24,6 +24,8 @@
 #ifndef ANALYSELOPESEVENT_H
 #define ANALYSELOPESEVENT_H
 
+#include <crtools.h>
+
 // Standard library header files
 #include <string>
 

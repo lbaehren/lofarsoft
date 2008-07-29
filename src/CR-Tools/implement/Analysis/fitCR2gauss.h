@@ -24,6 +24,8 @@
 #ifndef FITCR2GAUSS_H
 #define FITCR2GAUSS_H
 
+#include <crtools.h>
+
 // Standard library header files
 #include <iostream>
 #include <string>

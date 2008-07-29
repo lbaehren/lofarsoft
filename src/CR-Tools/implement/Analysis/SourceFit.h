@@ -21,6 +21,8 @@
 #ifndef _SOURCEFIT_H_
 #define _SOURCEFIT_H_
 
+#include <crtools.h>
+
 #include <sstream>
 #include <fstream>
 #include <casa/aips.h>

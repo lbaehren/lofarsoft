@@ -24,6 +24,8 @@
 #ifndef CRFLAGGINGPLUGIN_H
 #define CRFLAGGINGPLUGIN_H
 
+#include <crtools.h>
+
 // Standard library header files
 #include <iostream>
 #include <string>

@@ -23,6 +23,8 @@
 #ifndef CRDELAYPLUGIN_H
 #define CRDELAYPLUGIN_H
 
+#include <crtools.h>
+
 // Standard library header files
 #include <string>
 

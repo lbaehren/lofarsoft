@@ -23,6 +23,8 @@
 #ifndef DFITGAUSS_H
 #define DFITGAUSS_H
 
+#include <crtools.h>
+
 #include <unistd.h>
 #include <assert.h>
 

@@ -23,6 +23,8 @@
 #ifndef PPFIMPLEMENT_H
 #define PPFIMPLEMENT_H
 
+#include <crtools.h>
+
 // Standard library header files
 #include <string.h>
 

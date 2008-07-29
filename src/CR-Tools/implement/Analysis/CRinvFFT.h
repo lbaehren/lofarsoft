@@ -24,6 +24,8 @@
 #ifndef CRINVFFT_H
 #define CRINVFFT_H
 
+#include <crtools.h>
+
 // Standard library header files
 #include <string>
 

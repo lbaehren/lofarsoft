@@ -23,6 +23,8 @@
 #ifndef _INVERSEFFT_H_
 #define _INVERSEFFT_H_
 
+#include <crtools.h>
+
 // AIPS++ header files
 #include <casa/aips.h>
 #include <casa/iostream.h>

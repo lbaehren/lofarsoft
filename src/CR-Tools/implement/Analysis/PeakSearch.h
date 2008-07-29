@@ -23,6 +23,8 @@
 #ifndef _PEAKSEARCH_H_
 #define _PEAKSEARCH_H_
 
+#include <crtools.h>
+
 #include <sstream>
 #include <fstream>
 #include <Analysis/PeakList.h>

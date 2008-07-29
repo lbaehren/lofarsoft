@@ -24,13 +24,13 @@
 #ifndef ANALYSELOPESEVENT2_H
 #define ANALYSELOPESEVENT2_H
 
+#include <crtools.h>
+
 // Standard library header files
 #include <iostream>
 #include <iomanip>
 #include <fstream>
 #include <string>
-
-#include <crtools.h>
 
 #ifdef HAVE_STARTOOLS
 

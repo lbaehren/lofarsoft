@@ -23,6 +23,8 @@
 #ifndef SECONDSTAGEPIPELINE_H
 #define SECONDSTAGEPIPELINE_H
 
+#include <crtools.h>
+
 // Standard library header files
 #include <string>
 

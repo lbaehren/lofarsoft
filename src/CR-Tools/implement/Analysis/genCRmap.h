@@ -26,6 +26,8 @@
 #ifndef GENCRMAP_H
 #define GENCRMAP_H
 
+#include <crtools.h>
+
 // Standard library header files
 #include <string>
 

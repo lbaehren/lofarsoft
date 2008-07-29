@@ -24,6 +24,8 @@
 #ifndef TBBTOOLS_H
 #define TBBTOOLS_H
 
+#include <crtools.h>
+
 // Standard library header files
 #include <iostream>
 #include <string>

@@ -28,22 +28,20 @@
 #ifndef DGAUSSFITSTATE_H
 #define DGAUSSFITSTATE_H
 
+#include <crtools.h>
 
+// CASA header files
 #include <casa/aips.h>
-#include <scimath/Fitting/NonLinearFitLM.h>
-
-#include <casa/Arrays/Vector.h>
-#include <casa/BasicSL/String.h>
-
-#include <scimath/Functionals/CompoundFunction.h>
-#include <scimath/Functionals/Gaussian1D.h>
-#include <scimath/Mathematics/AutoDiff.h>
-
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/ArrayLogical.h>
 #include <casa/Arrays/ArrayMath.h>
-
+#include <casa/Arrays/Vector.h>
+#include <casa/BasicSL/String.h>
 #include <casa/Containers/Record.h>
+#include <scimath/Fitting/NonLinearFitLM.h>
+#include <scimath/Functionals/CompoundFunction.h>
+#include <scimath/Functionals/Gaussian1D.h>
+#include <scimath/Mathematics/AutoDiff.h>
 
 #include <casa/namespace.h>
 

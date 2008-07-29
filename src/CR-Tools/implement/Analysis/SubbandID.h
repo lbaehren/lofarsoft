@@ -24,6 +24,8 @@
 #ifndef SUBBANDID_H
 #define SUBBANDID_H
 
+#include <crtools.h>
+
 // Standard library header files
 #include <string.h>
 

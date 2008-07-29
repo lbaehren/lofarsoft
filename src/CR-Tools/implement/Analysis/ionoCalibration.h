@@ -23,6 +23,8 @@
 #ifndef IONOCALIBRATION_H
 #define IONOCALIBRATION_H
 
+#include <crtools.h>
+
 // Standard library header files
 #include <string.h>
 

@@ -23,6 +23,8 @@
 #ifndef _DYNAMICSPECTRUM_H_
 #define _DYNAMICSPECTRUM_H_
 
+#include <crtools.h>
+
 #ifdef HAVE_CFITSIO
 extern "C" {
 #include <fitsio.h>
