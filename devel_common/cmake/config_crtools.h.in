@@ -36,10 +36,10 @@
 #cmakedefine AIPS_64B 1
 
 /* Define to 1 if architecture for CASA is Darwin */
-#cmakedefine AIPS_DARWIN 1
+//#cmakedefine AIPS_DARWIN 1
 
 /* Define to 1 if architecture for CASA is Linux */
-#cmakedefine AIPS_LINUX 1
+//#cmakedefine AIPS_LINUX 1
 
 /* Define to 1 if the Star-Tools package is available */
 #cmakedefine HAVE_STARTOOLS 1
