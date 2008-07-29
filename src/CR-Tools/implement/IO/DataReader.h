@@ -27,6 +27,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <crtools.h>
+
 #include <casa/aips.h>
 #include <casa/iostream.h>
 #include <casa/fstream.h>
