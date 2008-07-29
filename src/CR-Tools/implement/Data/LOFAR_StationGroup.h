@@ -35,6 +35,7 @@
 #include <measures/Measures/MDirection.h>
 #include <measures/Measures/MPosition.h>
 
+#include <crtools.h>
 #include <Data/LOFAR_DipoleDataset.h>
 
 namespace DAL { // Namespace DAL -- begin
