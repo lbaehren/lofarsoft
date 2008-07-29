@@ -21,13 +21,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <casa/Arrays/ArrayIO.h>
-#include <casa/Quanta/Quantum.h>
-
-#ifndef ENUMERATIONS_H
-#include <dal/Enumerations.h>
-#endif
-
 #include <Data/LOFAR_DipoleDataset.h>
 
 using std::cerr;

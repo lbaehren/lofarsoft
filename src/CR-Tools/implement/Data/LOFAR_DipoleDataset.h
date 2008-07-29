@@ -26,7 +26,10 @@
 
 #include <string>
 
+#include <crtools.h>
+
 #include <casa/aips.h>
+#include <casa/Arrays/ArrayIO.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/Quanta/Quantum.h>
 #include <casa/Containers/Record.h>
@@ -40,8 +43,6 @@
 #ifndef ENUMERATIONS_H
 #include <dal/Enumerations.h>
 #endif
-
-#include <crtools.h>
 
 namespace DAL { // Namespace DAL -- begin
   
