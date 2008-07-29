@@ -53,7 +53,7 @@ install (FILES ${components_headers}
 
 foreach (components_module ${components_modules})
   ## assemble list of header files
-  FILE (GLOB components_headers ${components_module}/*.h)
+  FILE (GLOB components_headers ${components_module}/*.h ${components_module}/*.tcc)
   ## set installation location
   install (FILES ${components_headers}
     DESTINATION include/casacore/components/${components_module}

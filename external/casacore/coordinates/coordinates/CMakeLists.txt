@@ -52,7 +52,7 @@ install (FILES ${coordinates_headers}
 
 foreach (coordinates_module ${coordinates_modules})
   ## assemble list of header files
-  FILE (GLOB coordinates_headers ${coordinates_module}/*.h)
+  FILE (GLOB coordinates_headers ${coordinates_module}/*.h ${coordinates_module}/*.tcc)
   ## set installation location
   install (FILES ${coordinates_headers}
     DESTINATION include/casacore/coordinates/${coordinates_module}
