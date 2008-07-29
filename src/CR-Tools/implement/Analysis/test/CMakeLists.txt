@@ -80,7 +80,7 @@ if (NOT APPLE)
     list (APPEND tests tanalyseLOPESevent)
   endif (HAVE_PLPLOT OR HAVE_PGPLOT)
   
-  if (HAVE_STARTOOLS)
+  if (CR_WITH_STARTOOLS)
     ## compiler instructions
     add_executable (tanalyseLOPESevent2 tanalyseLOPESevent2.cc)
     ## linker instructions
@@ -108,7 +108,7 @@ if (NOT APPLE)
     add_test (tanalyseLOPESevent2 tanalyseLOPESevent2)
     ## installation
     list (APPEND tests tanalyseLOPESevent2)
-  endif (HAVE_STARTOOLS)
+  endif (CR_WITH_STARTOOLS)
   
   ## [3] Test programs for programs using functionality of LopesStar
   

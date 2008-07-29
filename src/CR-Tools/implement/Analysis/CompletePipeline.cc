@@ -584,7 +584,7 @@ namespace CR { // Namespace CR -- begin
         pbeam = mf.filter(pbeam);
       }
 
-      // calcutlate and substract offset (= noise, calculated as mean in remote region)
+      // calculate and substract offset (= noise, calculated as mean in remote region)
       // if no remote range was given, don't substract anything
       if (remoteStop != 0)
       {
