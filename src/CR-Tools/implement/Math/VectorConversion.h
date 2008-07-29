@@ -30,6 +30,8 @@
 #include <string>
 #include <vector>
 
+#include <crtools.h>
+
 #ifdef HAVE_BLITZ
 #include <blitz/array.h>
 #endif

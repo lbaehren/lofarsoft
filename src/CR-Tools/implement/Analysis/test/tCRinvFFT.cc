@@ -46,6 +46,11 @@
 
 // -----------------------------------------------------------------------------
 
+using casa::Double;
+using casa::Matrix;
+using casa::Record;
+using casa::Vector;
+
 using CR::LopesEventIn;
 using CR::CRinvFFT;
 

@@ -1276,15 +1276,15 @@ Double StationBeam::min_power_moon( const Double& source_declination,
        Double min_h_position(0.0);
 
        Double pi = 3.1416 ;	 
-       uint nroots = legendre_root.nelements() ;
+//        uint nroots = legendre_root.nelements() ;
 
        Double declination_min = source_declination - 0.25 ;
        Double declination_max = source_declination + 0.25 ;
        uint declination_loop = 20 ;
        Double declination_interval = (declination_max - declination_min)/declination_loop ;
 
-       Double decli_1 = declination_min ;
-       Double decli_2(0.0) ;
+//        Double decli_1 = declination_min ;
+//        Double decli_2(0.0) ;
        Double declination( 0.0);
 
        Double hr_1(0.0) ;
