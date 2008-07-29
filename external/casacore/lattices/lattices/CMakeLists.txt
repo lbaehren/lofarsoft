@@ -17,6 +17,7 @@ endforeach (lattices_module)
 ## build the library
 
 add_library (casa_lattices
+  ${casacore_BINARY_DIR}/casacore.h
   ${lattices_sources}
 )
 target_link_libraries (casa_lattices casa_tables casa_scimath casa_scimath_f casa_casa
