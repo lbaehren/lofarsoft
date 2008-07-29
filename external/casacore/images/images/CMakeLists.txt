@@ -68,9 +68,8 @@ endforeach (images_module)
 
 ## build the library
 
-include_directories (../..)
-
 add_library (casa_images
+  ${casacore_BINARY_DIR}/casacore.h
   ${images_sources}
 )
 target_link_libraries (casa_images casa_lattices casa_components mir)

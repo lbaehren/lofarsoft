@@ -111,8 +111,10 @@ endforeach (tables_module)
 ## build the library
 
 add_library (casa_tables
+  ${casacore_BINARY_DIR}/casacore.h
   ${tables_sources}
-)
+  )
+
 target_link_libraries (casa_tables casa_casa)
 
 ## -----------------------------------------------------------------------------

@@ -352,6 +352,12 @@ ENDIF (UNIX)
 SET (CMAKE_MODULE_LINKER_FLAGS "-Xlinker -rpath -Xlinker")
 
 ## -----------------------------------------------------------------------------
+## Create configured header file
+
+configure_file (${USG_ROOT}/devel_common/cmake/config_casacore.h.in
+  ${casacore_BINARY_DIR}/casacore.h)
+
+## -----------------------------------------------------------------------------
 ## Sub-directories
 
 foreach (casacore_package ${casacore_packages})

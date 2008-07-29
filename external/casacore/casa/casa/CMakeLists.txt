@@ -37,6 +37,7 @@ endforeach (casa_module)
 ## compiler instructions
 
 add_library (casa_casa
+  ${casacore_BINARY_DIR}/casacore.h
   aips.cc
   ${casa_sources}
 )
