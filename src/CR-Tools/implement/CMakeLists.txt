@@ -25,24 +25,15 @@ set (cr_modules
 # (a) Display modules requires at least one of the external plotting libraries to
 #     be available
 
-if (HAVE_PGPLOT OR HAVE_PLPLOT)
+if (CR_WITH_PLOTTING)
   list (APPEND cr_modules Display)
-  add_definitions (-DNEED_FORTRAN_UNDERSCORES)
-endif (HAVE_PGPLOT OR HAVE_PLPLOT)
+endif (CR_WITH_PLOTTING)
 
 # (b) Support for usage of Glish objects and communication bus
 
 if (CR_WITH_GLISH)
   list (APPEND cr_modules ApplicationSupport)
 endif (CR_WITH_GLISH)
-
-## -----------------------------------------------------------------------------
-## Create "crtools.h"
-
-configure_file (${USG_ROOT}/devel_common/cmake/config_crtools.h.in
-  ${CR_BINARY_DIR}/crtools.h)
-
-include_directories (${CR_BINARY_DIR})
 
 ## -----------------------------------------------------------------------------
 ## Build "libcr"

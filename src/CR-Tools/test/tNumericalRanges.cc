@@ -86,15 +86,20 @@ int main(void) {
   
   /*   floating point types can store 0, may also be able to store 
        strange numbers like +Infinity and  */
-  
+
+#ifdef SIZEOF_FLOAT  
   printf("float           %u bytes, positive range from %12e to %12e", 
          sizeof(float), FLT_MIN, FLT_MAX);
   printf("                         epsilon = %e", FLT_EPSILON);
   cout << endl;
+#endif 
+
+#ifdef SIZEOF_DOUBLE
   printf("double          %u bytes, positive range from %12e to %12e", 
          sizeof(double), DBL_MIN, DBL_MAX);
   printf("                         epsilon = %e", DBL_EPSILON);
   cout << endl;
+#endif
   
   /*   L in format string is not universally supported  */
   printf("long double     %u bytes, positive range from %12Le to %12Le", 

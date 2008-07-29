@@ -37,6 +37,8 @@
 #include <casa/BasicSL/String.h>
 #include <casa/Exceptions/Error.h>
 
+#include <crtools.h>
+
 //use plplot as default
 #ifdef HAVE_PLPLOT
   #include <plplot/plConfig.h>

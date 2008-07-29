@@ -95,7 +95,26 @@ find_library (libgd        gd    PATHS ${lib_locations} )
 
 ## System header files ---------------------------
 
-find_path (HAVE_LIBGEN_H libgen.h ${include_locations} )
+find_path (HAVE_LIBGEN_H     libgen.h      PATHS ${include_locations} )
+find_path (HAVE_STDINT_H     stdint.h      PATHS ${include_locations} )
+find_path (HAVE_STDLIB_H     stdlib.h      PATHS ${include_locations} )
+find_path (HAVE_STRING_H     string.h      PATHS ${include_locations} )
+find_path (HAVE_STRINGS_H    strings.h     PATHS ${include_locations} )
+find_path (HAVE_SYS_STAT_H   sys/stat.h    PATHS ${include_locations} )
+find_path (HAVE_SYS_TIME_H   sys/time.h    PATHS ${include_locations} )
+find_path (HAVE_SYS_TYPES_H  sys/types.h   PATHS ${include_locations} )
+find_path (HAVE_SYS_UTIME_H  sys/utime.h   PATHS ${include_locations} )
+
+## Check type sizes ------------------------------
+
+include (CheckTypeSize)
+
+check_type_size ("short"         SIZEOF_SHORT       )
+check_type_size ("int"           SIZEOF_INT         )
+check_type_size ("float"         SIZEOF_FLOAT       )
+check_type_size ("double"        SIZEOF_DOUBLE      )
+check_type_size ("long"          SIZEOF_LONG        )
+check_type_size ("long long"     SIZEOF_LONG_LONG   )
 
 ## Standard CMake modules ------------------------
 
@@ -116,179 +135,46 @@ include (FindGIF)
 include (FindGSL)
 include (FindGTK)
 include (FindHDF5)
+include (FindLAPACK)
 include (FindPGPLOT)
+include (FindPLplot)
 include (FindPNG)
+include (FindPOPT)
+include (FindPostgreSQL)
+include (FindPython)
 include (FindROOT)
 include (FindWCS)
 
-## --- CASA / casacore -------------------------
-
-if (CR_WITH_GLISH)
-  ## load find script
-  include (FindGlish)
-  ## process outcome 
-  if (HAVE_GLISH)
-    include_directories (${GLISH_INCLUDES})
-  else (HAVE_GLISH)
-    message (STATUS "[CR-Tools] Disabling Glish support - missing Glish components.")
-    set (CR_WITH_GLISH FALSE)
-  endif (HAVE_GLISH)
-endif (CR_WITH_GLISH)
-
-## keep in mind, that we only are going to need the
-## fully-blown CASA installation if we want the Glish
-## support; otherwise we use casacore
-
-if (CR_WITH_GLISH)
-  message (STATUS "[CR-Tools] Configuration with Glish support -- CASA")
-  ## load find script
-  include (FindCASA)
-  ## process outcome
-  if (NOT HAVE_CASA)
-    set (CR_WITH_GLISH 0)
-  endif (NOT HAVE_CASA)
-else (CR_WITH_GLISH)
-  message (STATUS "[CR-Tools] Configuration without Glish support -- casacore")
-  ## load find script
-  include (FindCASACORE)
-  ## process outcome
-  if (HAVE_CASACORE)
-    add_definitions (-DHAVE_CASACORE)
-  endif (HAVE_CASACORE)
-  ## CMake variables
-  set (HAVE_CASA FALSE)
-  set (HAVE_GLISH FALSE)
-endif (CR_WITH_GLISH)
-
-if (APPLE)
-  message (STATUS "[CR-Tools] casacore configuration for MAC OS X")
-  ## this surely is not the best solution, but for the time being I am 
-  ## using the configuration here which I have worked out in order to build
-  ## the code outside the USG framework
-  if (HAVE_CASA OR HAVE_CASACORE)
-    add_definitions (
-      -DWITH_CASA
-      # -- compiler flags utilized in the source code --
-      -DAIPS_STDLIB
-      -DAIPS_AUTO_STL
-      )
-    IF (APPLE)
-      ## definition common to apple architectures
-      add_definitions (
-	-DAIPS_DARWIN
-	)
-    ELSE (APPLE)
-      ADD_DEFINITIONS (-DAIPS_LINUX)
-    ENDIF (APPLE)
-    ## Platform test 32/64 bit ------------------------------
-    set (CMAKE_SYSTEM_64BIT 0)
-    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
-      if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
-	if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-          set (CMAKE_SYSTEM_64BIT 1)
-          add_definitions (-DAIPS_64B)
-	endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-      endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
-    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
-    if (APPLE)
-      if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-	set (CMAKE_SYSTEM_64BIT 1)
-	add_definitions (-DAIPS_64B)
-      endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-    endif (APPLE)
-  endif (HAVE_CASA OR HAVE_CASACORE)
-else (APPLE)
-  ## compiler flags
-  add_definitions (
-    # -- compiler flags utilized in the source code --
-    -DWITH_CASA
-    -DAIPS_STDLIB
-    -DAIPS_AUTO_STL
-    )
-  IF (APPLE)
-    ## definition common to apple architectures
-    add_definitions (
-      -DAIPS_DARWIN
-      )
-  ELSE (APPLE)
-    add_definitions (-DAIPS_LINUX)
-  ENDIF (APPLE)
-  ## Platform test 32/64 bit ------------------------------
-  set (CMAKE_SYSTEM_64BIT 0)
-  if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
-    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
-      if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-        set (CMAKE_SYSTEM_64BIT 1)
-        add_definitions (-DAIPS_64B)
-      endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
-  endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
-  if (APPLE)
-    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-      set (CMAKE_SYSTEM_64BIT 1)
-      add_definitions (-DAIPS_64B)
-    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-  endif (APPLE)
-endif (APPLE)
-
-## --- G2C -------------------------------------
-
+if (BOOST_INCLUDES)
+  include_directories (${BOOST_INCLUDES})
+endif (BOOST_INCLUDES)
 
 if (HAVE_G2C)
-  add_definitions (-DHAVE_G2C)
   include_directories (${G2C_INCLUDES})
 endif (HAVE_G2C)
 
-## LAPACK --------------------------------------
-
-include (FindLAPACK)
-
 if (LAPACK_INCLUDES)
-  add_definitions (-DHAVE_LAPACK)
   include_directories (${LAPACK_INCLUDES})
 endif (LAPACK_INCLUDES)
 
-## -- PGPlot -----------------------------------
-
-
 if (PGPLOT_INCLUDES)
   include_directories (${PGPLOT_INCLUDES})
-  add_definitions (-DHAVE_PGPLOT)
 endif (PGPLOT_INCLUDES)
-
-## -- PLplot -----------------------------------
-
-include (FindPLplot)
 
 if (PLPLOT_INCLUDES)
   include_directories (${PLPLOT_INCLUDES})
-  add_definitions (-DHAVE_PLPLOT)
 endif (PLPLOT_INCLUDES)
 
-## -- popt -------------------------------------
-
-include (FindPOPT)
-
 if (HAVE_POPT)
-  add_definitions (-DHAVE_POPT)
   include_directories (${POPT_INCLUDES})
 endif (HAVE_POPT)
-
-## -- PostgreSQL -------------------------------
-
-include (FindPostgreSQL)
 
 if (HAVE_PostgreSQL)
   add_definitions (-DHAVE_POSTGRESQL)
   include_directories (${PostgreSQL_INCLUDES})
 endif (HAVE_PostgreSQL)
 
-## -- Python -----------------------------------
-
-include (FindPython)
-
 if (HAVE_PYTHON)
-  add_definitions (-DHAVE_PYTHON)
   include_directories (${PYTHON_INCLUDES})
 endif (HAVE_PYTHON)
 
@@ -315,11 +201,11 @@ endif (CR_ENABLE_TESTING)
 ## Handle option: debugging messages on/off
 
 if (CR_DEBUGGING_MESSAGES)
-  add_definitions (-DDEBUGGING_MESSAGES)
+  set (DEBUGGING_MESSAGES ON)
 endif (CR_DEBUGGING_MESSAGES)
 
 ## -------------------------------------------------------------------
-## Handle option: Enable standard set of compiler warnings? ON/OFF
+## Handle option: Enable standard set of compiler warnings?  ON/OFF
 
 if (CR_COMPILER_WARNINGS)
   set (CMAKE_CXX_FLAGS
@@ -328,7 +214,75 @@ if (CR_COMPILER_WARNINGS)
 endif (CR_COMPILER_WARNINGS)
     
 ## -------------------------------------------------------------------
-## Option: Generate Python bindings for the Library? ON/OFF
+## Handle option: Support for Glish applications?  ON/OFF
+
+if (CR_WITH_GLISH)
+
+  ## First check if we actually have a working version of Glish; if
+  ## this is not the case, we can immediately switch off this option.
+  
+  include (FindGlish)
+  
+  if (HAVE_GLISH)
+    include_directories (${GLISH_INCLUDES})
+  else (HAVE_GLISH)
+    set (CR_WITH_GLISH FALSE)
+  endif (HAVE_GLISH)
+  
+  ## If there is a working version of Glish, then in order to use it
+  ## we need a full installation of CASA
+  
+  if (HAVE_GLISH)
+    ## Check for installation of CASA
+    include (FindCASA)
+    ## ... and process the outcome
+    if (NOT HAVE_CASA)
+      set (CR_WITH_GLISH NO)
+    endif (NOT HAVE_CASA)
+  endif (HAVE_GLISH)
+  
+else (CR_WITH_GLISH)
+  include (FindCASACORE)
+endif (CR_WITH_GLISH)
+
+## Handle configuration to use CASA/casacore
+
+if (HAVE_CASA OR HAVE_CASACORE)
+  
+  ## compiler flags
+  add_definitions (
+    # -- compiler flags utilized in the source code --
+    -DWITH_CASA
+    -DAIPS_STDLIB
+    -DAIPS_AUTO_STL
+    )
+  IF (APPLE)
+    ## definition common to apple architectures
+    set (AIPS_DARWIN 1)
+  ELSE (APPLE)
+    set (AIPS_LINUX 1)
+  ENDIF (APPLE)
+  ## Platform test 32/64 bit ------------------------------
+  set (CMAKE_SYSTEM_64BIT 0)
+  if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
+    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
+      if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+        set (CMAKE_SYSTEM_64BIT 1)
+        set (AIPS_64B 1)
+      endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
+  endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
+  if (APPLE)
+    if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+      set (CMAKE_SYSTEM_64BIT 1)
+      set (AIPS_64B 1)
+    endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
+  endif (APPLE)
+  
+endif (HAVE_CASA OR HAVE_CASACORE)
+
+## -------------------------------------------------------------------
+## Handle option: Generate Python bindings for the Library? ON/OFF
 
 if (CR_WITH_PYTHON)
 
@@ -356,26 +310,42 @@ endif (CR_WITH_PYTHON)
 if (CR_WITH_PLOTTING)
 
   if (HAVE_PGPLOT OR HAVE_PLPLOT)
-    set (CR_WITH_PLOTTING ON)
+    set (CR_WITH_PLOTTING YES)
+    set (NEED_FORTRAN_UNDERSCORES YES)
   else (HAVE_PGPLOT OR HAVE_PLPLOT)
     message (STATUS "[CR-Tools] Disabling support for plotting.")
-    set (CR_WITH_PLOTTING OFF)
+    set (CR_WITH_PLOTTING NO)
   endif (HAVE_PGPLOT OR HAVE_PLPLOT)
 
 endif (CR_WITH_PLOTTING)
 
-## Option: Use routines from Star-Tools package? ON/OFF
+## -------------------------------------------------------------------
+## Handle option: Additional routines from LOPES-Star
 
 if (CR_WITH_STARTOOLS)
   
   include (FindStarTools)
-
+  
   if (HAVE_STARTOOLS)
     include_directories (${STARTOOLS_INCLUDES})
   else (HAVE_STARTOOLS)
-    set (CR_WITH_STARTOOLS NO)
+    set (CR_WITH_STARTOOLS FALSE)
   endif (HAVE_STARTOOLS)
   
+  ## check if ROOT is available
+
+  if (NOT HAVE_ROOT)
+    message (STATUS "LopesStar support disabled; missing ROOT.")
+    set (CR_WITH_STARTOOLS FALSE)
+  endif (NOT HAVE_ROOT)
+
+  ## check if FFTW3 is available
+
+  if (NOT HAVE_FFTW3)
+    message (STATUS "LopesStar support disabled; missing FFTW3.")
+    set (CR_WITH_STARTOOLS FALSE)
+  endif (NOT HAVE_FFTW3)
+
 endif (CR_WITH_STARTOOLS)
 
 ## -------------------------------------------------------------------
@@ -425,19 +395,6 @@ endif (CR_WITH_GUI)
 ##
 ## =============================================================================
 
-find_path (prefix release_area.txt
-  PATHS
-  ${CR_SOURCE_DIR}
-  PATH_SUFFIXES
-  ../release
-  ../../release
-  NO_DEFAULT_PATH
-  )
-
-if (prefix)
-  set (CMAKE_INSTALL_PREFIX ${prefix}) 
-endif (prefix)
-
 ## No relinking and full RPATH for the install tree
 ## (http://www.cmake.org/Wiki/CMake_RPATH_handling)
 
@@ -483,12 +440,7 @@ find_file (dataset_event 2007.01.31.23:59:33.960.event
 ##
 ## =============================================================================
 
-if (BOOST_INCLUDES)
-  include_directories (${BOOST_INCLUDES})
-endif (BOOST_INCLUDES)
-
 if (CASA_INCLUDES)
-  add_definitions (-DHAVE_CASA)
   include_directories (${CASA_INCLUDES})
 endif (CASA_INCLUDES)
 
@@ -501,22 +453,18 @@ if (DAL_INCLUDES)
 endif (DAL_INCLUDES)
 
 if (FFTW3_INCLUDES)
-  add_definitions (-DHAVE_FFTW3)
   include_directories (${FFTW3_INCLUDES})
 endif (FFTW3_INCLUDES)
 
 if (GIF_INCLUDES)
-  add_definitions (-DHAVE_GIF)
   include_directories (${GIF_INCLUDES})
 endif (GIF_INCLUDES)
 
 if (GSL_INCLUDES)
-  add_definitions (-DHAVE_GSL)
   include_directories (${GSL_INCLUDES})
 endif (GSL_INCLUDES)
 
 if (GTK_INCLUDES)
-  add_definitions (-DHAVE_GTK)
   include_directories (${GTK_INCLUDES})
 endif (GTK_INCLUDES)
 
@@ -542,18 +490,26 @@ endif (WCS_INCLUDES)
 ##
 ## =============================================================================
 
-## Extra tests for using external libraries
+## Create "crtools.h"
+
+configure_file (${USG_ROOT}/devel_common/cmake/config_crtools.h.in
+  ${CR_BINARY_DIR}/crtools.h)
+
+## Include directories
+
+include_directories (
+  ${CR_SOURCE_DIR}/implement
+  ${CR_SOURCE_DIR}/test
+  ${CR_BINARY_DIR}
+  )
+
+## Sub-directories
 
 if (CR_BUILD_EXTERNAL_TESTS)
   add_subdirectory (test)
 endif (CR_BUILD_EXTERNAL_TESTS)
 
-## Sources to build libcr
-
 add_subdirectory (implement)
-
-## Applications
-
 add_subdirectory (apps)
 
 ## =============================================================================
@@ -562,50 +518,52 @@ add_subdirectory (apps)
 ##
 ## =============================================================================
 
-message (STATUS "+============================================================+")
-message (STATUS "| CR-Tools: Summary of configuration settings                |")
-message (STATUS "+------------------------------------------------------------+")
-message (STATUS " CMAKE_SYSTEM ............. : ${CMAKE_SYSTEM}")
-message (STATUS " CMAKE_SYSTEM_VERSION ..... : ${CMAKE_SYSTEM_VERSION}")
-message (STATUS " CMAKE_SYSTEM_PROCESSOR ... : ${CMAKE_SYSTEM_PROCESSOR}")
-message (STATUS " CMAKE_SYSTEM_64BIT ........: ${CMAKE_SYSTEM_64BIT}")
-message (STATUS " CMAKE_SYSTEM_BIG_ENDIAN .. : ${CMAKE_SYSTEM_BIG_ENDIAN}")
-message (STATUS " CMAKE_MODULE_PATH ........ : ${CMAKE_MODULE_PATH}")
-message (STATUS "+------------------------------------------------------------+")
-message (STATUS " BLITZ .................... : ${HAVE_BLITZ}")
-message (STATUS " BOOST .................... : ${HAVE_BOOST}")
-message (STATUS " CASA ..................... : ${HAVE_CASA}")
-message (STATUS " CASACORE ................. : ${HAVE_CASACORE}")
-message (STATUS " CFITSIO .................. : ${HAVE_CFITSIO}")
-message (STATUS " Data Access Library (DAL)  : ${HAVE_DAL}")
-message (STATUS " FFTW3 .................... : ${HAVE_FFTW3}")
-message (STATUS " G2C ...................... : ${HAVE_G2C}")
-message (STATUS " GIF ...................... : ${HAVE_GIF}")
-message (STATUS " Glish .................... : ${HAVE_GLISH}")
-message (STATUS " GSL ...................... : ${HAVE_GSL}")
-message (STATUS " GTK ...................... : ${HAVE_GTK}")
-message (STATUS " HDF5 ..................... : ${HAVE_HDF5}")
-message (STATUS " LAPACK ................... : ${HAVE_LAPACK}")
-message (STATUS " PGPLOT ................... : ${HAVE_PGPLOT}")
-message (STATUS " PLplot ................... : ${HAVE_PLPLOT}")
-message (STATUS " PNG ...................... : ${HAVE_PNG}")
-message (STATUS " POPT ..................... : ${HAVE_POPT}")
-message (STATUS " PostgreSQL ............... : ${HAVE_PostgreSQL}")
-message (STATUS " Python ................... : ${HAVE_PYTHON}")
-message (STATUS " ROOT ..................... : ${HAVE_ROOT}")
-message (STATUS " Star-Tools ............... : ${HAVE_STARTOOLS}")
-message (STATUS " WCSLIB ................... : ${HAVE_WCSLIB}")
-message (STATUS "+------------------------------------------------------------+")
-message (STATUS " USG root directory ........ : ${USG_ROOT}")
-message (STATUS " Source directory .......... : ${CR_SOURCE_DIR}")
-message (STATUS " Installation location ..... : ${CMAKE_INSTALL_PREFIX}")
-message (STATUS " Build the test programs ... : ${CR_BUILD_TESTS}")
-message (STATUS " Enable testing ............ : ${CR_ENABLE_TESTING}")
-message (STATUS " Enable LOPES-Star routines  : ${CR_WITH_STARTOOLS}")
-message (STATUS " Support for plotting ...... : ${CR_WITH_PLOTTING}")
-message (STATUS " Support for Glish ......... : ${CR_WITH_GLISH}")
-message (STATUS " Support for Python ........ : ${CR_WITH_PYTHON}")
-message (STATUS " Graphical user interface .. : ${CR_WITH_GUI}")
-message (STATUS " Print debugging messages .. : ${CR_DEBUGGING_MESSAGES}")
-message (STATUS " Verbose configuration ..... : ${CR_VERBOSE_CONFIGURE}")
-message (STATUS "+============================================================+")
+if (CR_VERBOSE_CONFIGURE)
+  message (STATUS "+============================================================+")
+  message (STATUS "| CR-Tools: Summary of configuration settings                |")
+  message (STATUS "+------------------------------------------------------------+")
+  message (STATUS " CMAKE_SYSTEM ............. : ${CMAKE_SYSTEM}")
+  message (STATUS " CMAKE_SYSTEM_VERSION ..... : ${CMAKE_SYSTEM_VERSION}")
+  message (STATUS " CMAKE_SYSTEM_PROCESSOR ... : ${CMAKE_SYSTEM_PROCESSOR}")
+  message (STATUS " CMAKE_SYSTEM_64BIT ........: ${CMAKE_SYSTEM_64BIT}")
+  message (STATUS " CMAKE_SYSTEM_BIG_ENDIAN .. : ${CMAKE_SYSTEM_BIG_ENDIAN}")
+  message (STATUS " CMAKE_MODULE_PATH ........ : ${CMAKE_MODULE_PATH}")
+  message (STATUS "+------------------------------------------------------------+")
+  message (STATUS " BLITZ .................... : ${HAVE_BLITZ}")
+  message (STATUS " BOOST .................... : ${HAVE_BOOST}")
+  message (STATUS " CASA ..................... : ${HAVE_CASA}")
+  message (STATUS " CASACORE ................. : ${HAVE_CASACORE}")
+  message (STATUS " CFITSIO .................. : ${HAVE_CFITSIO}")
+  message (STATUS " Data Access Library (DAL)  : ${HAVE_DAL}")
+  message (STATUS " FFTW3 .................... : ${HAVE_FFTW3}")
+  message (STATUS " G2C ...................... : ${HAVE_G2C}")
+  message (STATUS " GIF ...................... : ${HAVE_GIF}")
+  message (STATUS " Glish .................... : ${HAVE_GLISH}")
+  message (STATUS " GSL ...................... : ${HAVE_GSL}")
+  message (STATUS " GTK ...................... : ${HAVE_GTK}")
+  message (STATUS " HDF5 ..................... : ${HAVE_HDF5}")
+  message (STATUS " LAPACK ................... : ${HAVE_LAPACK}")
+  message (STATUS " PGPLOT ................... : ${HAVE_PGPLOT}")
+  message (STATUS " PLplot ................... : ${HAVE_PLPLOT}")
+  message (STATUS " PNG ...................... : ${HAVE_PNG}")
+  message (STATUS " POPT ..................... : ${HAVE_POPT}")
+  message (STATUS " PostgreSQL ............... : ${HAVE_PostgreSQL}")
+  message (STATUS " Python ................... : ${HAVE_PYTHON}")
+  message (STATUS " ROOT ..................... : ${HAVE_ROOT}")
+  message (STATUS " Star-Tools ............... : ${HAVE_STARTOOLS}")
+  message (STATUS " WCSLIB ................... : ${HAVE_WCSLIB}")
+  message (STATUS "+------------------------------------------------------------+")
+  message (STATUS " USG root directory ........ : ${USG_ROOT}")
+  message (STATUS " Source directory .......... : ${CR_SOURCE_DIR}")
+  message (STATUS " Installation location ..... : ${CMAKE_INSTALL_PREFIX}")
+  message (STATUS " Build the test programs ... : ${CR_BUILD_TESTS}")
+  message (STATUS " Enable testing ............ : ${CR_ENABLE_TESTING}")
+  message (STATUS " Enable LOPES-Star routines  : ${CR_WITH_STARTOOLS}")
+  message (STATUS " Support for plotting ...... : ${CR_WITH_PLOTTING}")
+  message (STATUS " Support for Glish ......... : ${CR_WITH_GLISH}")
+  message (STATUS " Support for Python ........ : ${CR_WITH_PYTHON}")
+  message (STATUS " Graphical user interface .. : ${CR_WITH_GUI}")
+  message (STATUS " Print debugging messages .. : ${CR_DEBUGGING_MESSAGES}")
+  message (STATUS " Verbose configuration ..... : ${CR_VERBOSE_CONFIGURE}")
+  message (STATUS "+============================================================+")
+endif (CR_VERBOSE_CONFIGURE)
