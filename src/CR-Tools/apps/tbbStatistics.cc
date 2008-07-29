@@ -26,6 +26,8 @@
 #include <cmath>
 #include <vector>
 
+#include <crtools.h>
+
 #ifdef HAVE_CFITSIO
 #include <fitsio.h>
 #endif
