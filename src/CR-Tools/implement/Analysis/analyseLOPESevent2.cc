@@ -33,10 +33,11 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  analyseLOPESevent2::analyseLOPESevent2 ():
-    CompleteBeamPipe_p(NULL),
-    upsamplingExponent(0),
-    ccWindowWidth_p(0.045e-6)
+  analyseLOPESevent2::analyseLOPESevent2 ()
+    : analyseLOPESevent(),
+      CompleteBeamPipe_p(NULL),
+      upsamplingExponent(0),
+      ccWindowWidth_p(0.045e-6)
   {;}
   
   // ============================================================================
@@ -48,8 +49,8 @@ namespace CR { // Namespace CR -- begin
   analyseLOPESevent2::~analyseLOPESevent2 ()
   {
     // Set pipeline_p back to NULL (to avoid that analyseLOPESevent deletes pipeline)
-    pipeline_p = NULL;
-    upsamplePipe_p = NULL;
+    pipeline_p         = NULL;
+    upsamplePipe_p     = NULL;
     CompleteBeamPipe_p = NULL;
   }
 
