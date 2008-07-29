@@ -612,13 +612,13 @@ Double StationBeam::integrate_decli( const Double& source_declination,
           Double declination(0.0);
 
           Double power_beam(0.0) ;
-          Double power_sum(0.0); 
+//           Double power_sum(0.0); 
           
       	  Double k1_decli(0.0) ;
           Double k2_decli(0.0) ;
           Double k1decli(0.0);
           Double k2decli(0.0);
-          Double decli(0.0);
+//           Double decli(0.0);
           Double y_outer_sum(0.0);
           Double y_inner_sum(0.0);
 
@@ -813,7 +813,7 @@ Double StationBeam::beamwidth_hr(  const Double& source_declination,
           StationBeam stbm ;
           
           Double pi = 3.1416 ;	 
-          uint nroots = legendre_root.nelements() ;
+//           uint nroots = legendre_root.nelements() ;
           
           
           Double max_power = stbm.integrate_freq( source_hr_angle,
@@ -896,7 +896,7 @@ Double StationBeam::beamwidth_hr(  const Double& source_declination,
     
           Double half_power =(power_norm_max -power_norm_min)/2 ;
       
-          Double power_optimum = power_norm_max - half_power ;
+//           Double power_optimum = power_norm_max - half_power ;
                  
           selected_hrangles.resize(ntrue( power_normalized >half_power));
     
@@ -1368,7 +1368,7 @@ Double StationBeam::min_power_moon( const Double& source_declination,
 	Double pi = 3.1416 ;
 
         Double R = 5 ;
-        Double y_rho =0.0 ;
+//         Double y_rho =0.0 ;
 
         Double x_range_min = -0.5 ;
         Double x_range_max = 0.5 ;
@@ -1384,7 +1384,7 @@ Double StationBeam::min_power_moon( const Double& source_declination,
 	uint y_loop = int((y_range_max- y_range_min)/y_range_interval)+1 ;
         
 	Vector<Double> y_direction( y_loop, 0.0 ) ;
-        Double zenith(0.0);
+//         Double zenith(0.0);
 
         Matrix<Double> sum_freq( x_loop, y_loop, 0.0 );
         Double summed_freq(0.0);
