@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include <casa/Arrays/ArrayIO.h>
+#include <casa/Quanta/Quantum.h>
 
 #ifndef ENUMERATIONS_H
 #include <dal/Enumerations.h>
