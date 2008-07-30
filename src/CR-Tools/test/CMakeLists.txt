@@ -7,10 +7,14 @@
 ## working in any case.
 
 if (HAVE_CASACORE OR HAVE_CASA)
+  ## location of the header files
+  include_directories (${CASA_INCLUDES})
+  ## compiler instructions
   add_library (cr_test
     Templates.cc
     Casacore.cc
     )
+  ## linker instructions
   target_link_libraries (cr_test
     ${CASA_LIBARIES}
     )
@@ -206,6 +210,11 @@ endif (HAVE_WCSLIB)
 
 if (HAVE_ROOT AND HAVE_CASACORE AND FFTW3_LIBRARIES)
   if (HAVE_DAL)
+    ## Location of the header files
+    include_directories (
+      ${DAL_INCLUDES}
+      ${ROOT_INCLUDES}
+      )
     ## compiler instructions
     add_executable (tUseROOT tUseROOT.cc)
     ## linker instructions

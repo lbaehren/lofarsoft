@@ -170,7 +170,7 @@ if (HAVE_POPT)
 endif (HAVE_POPT)
 
 if (HAVE_PostgreSQL)
-  add_definitions (-DHAVE_POSTGRESQL)
+  set (HAVE_POSTGRESQL 1)
   include_directories (${PostgreSQL_INCLUDES})
 endif (HAVE_PostgreSQL)
 
@@ -390,6 +390,13 @@ if (CR_WITH_GUI)
 
 endif (CR_WITH_GUI)
 
+## -------------------------------------------------------------------
+## Build test programs for external packages?  ON/OFF
+
+if (CR_BUILD_EXTERNAL_TESTS)
+  add_subdirectory (test)
+endif (CR_BUILD_EXTERNAL_TESTS)
+
 ## =============================================================================
 ##
 ##  Installation
@@ -505,10 +512,6 @@ include_directories (
   )
 
 ## Sub-directories
-
-if (CR_BUILD_EXTERNAL_TESTS)
-  add_subdirectory (test)
-endif (CR_BUILD_EXTERNAL_TESTS)
 
 add_subdirectory (implement)
 add_subdirectory (apps)

@@ -111,6 +111,9 @@
 /* Define to 1 if we have a development version of the POPT library */
 #cmakedefine HAVE_POPT 1
 
+/* Define to 1 if we have a development version of the PostgreSQL library */
+#cmakedefine HAVE_POSTGRESQL 1
+
 /* Define to 1 if we have a development version of Python */
 #cmakedefine HAVE_PYTHON 1
 
