@@ -1045,12 +1045,12 @@ int main (int argc, char *argv[])
 	<< " °, distance (radius of curvature) " << distance << " m, core position X " << core_x
 	<< " m and core position Y " << core_y << " m.\n" << std::endl;
 
-      // Initialize the pipeline
+      // Set up of the pipeline
       analyseLOPESevent2 eventPipeline;
+      
       Record obsrec;
 
       obsrec.define("LOPES",caltablepath);
-      eventPipeline.initPipeline(obsrec);
 
       // set plot range and ccWindowWidth
       eventPipeline.setPlotInterval(plotStart,plotEnd);
@@ -1073,7 +1073,10 @@ int main (int argc, char *argv[])
           polarization = "EW";	// do EW here
         }
 
-        // call the pipeline with an extra delay = 0.
+        // initialize the pipeline
+	eventPipeline.initPipeline(obsrec);
+
+	// call the pipeline with an extra delay = 0.
         results = eventPipeline.RunPipeline (path+filename, azimuth, elevation, distance, core_x, core_y, RotatePos,
                                            plotprefix+polPlotPrefix, generatePlots, static_cast< Vector<int> >(flagged),
                                            verbose, simplexFit, 0., doTVcal, doGainCal, doDispersionCal, doDelayCal,
@@ -1098,6 +1101,10 @@ int main (int argc, char *argv[])
           polPlotPrefix = "-NS";
           polarization = "NS";	// do NS here
         }
+        
+	// initialize the pipeline
+	eventPipeline.initPipeline(obsrec);
+
         // call the pipeline with an extra delay = 0.
         results = eventPipeline.RunPipeline (path+filename,
 					     azimuth,

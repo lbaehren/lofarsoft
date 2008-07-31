@@ -541,8 +541,8 @@ namespace CR { // Namespace CR -- begin
 				    Vector<Double> fittedCCbeam,
 				    Vector<Bool> antennaSelection,
 				    const int& filterStrength,
-				    const double& remoteStart,
-				    const double& remoteStop)
+				    const unsigned int& remoteStart,
+				    const unsigned int& remoteStop)
   {
     try 
     {
@@ -605,7 +605,7 @@ namespace CR { // Namespace CR -- begin
       xmax = max(xaxis(plotRange));
       ymin = min(min(ccbeam(plotRange)), min(pbeam(plotRange)))*1.05;
       ymax = max(max(ccbeam(plotRange)), max(pbeam(plotRange)))*1.05;
-
+      
       // Initialize the plots giving xmin, xmax, ymin and ymax
       plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
@@ -642,8 +642,9 @@ namespace CR { // Namespace CR -- begin
 				   Vector<Double> fittedXbeam,
 				   Vector<Bool> antennaSelection,
 				   const int& filterStrength,
-				   const double& remoteStart,
-				   const double& remoteStop)
+				   const unsigned int& remoteStart,
+				   const 
+				   unsigned int& remoteStop)
   {
     try 
     {

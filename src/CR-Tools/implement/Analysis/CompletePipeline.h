@@ -375,8 +375,8 @@ namespace CR { // Namespace CR -- begin
                      Vector<Double> fittedCCbeam = Vector<Double>(),
                      Vector<Bool> antennaSelection = Vector<Bool>(),
                      const int& filterStrength = 0,
-                     const double& remoteStart = 0,
-                     const double& remoteStop = 0);
+                     const unsigned int& remoteStart = 0,
+                     const unsigned int& remoteStop = 0);
 
     /*!
       \brief Plots the X-beam
@@ -395,9 +395,9 @@ namespace CR { // Namespace CR -- begin
                     DataReader *dr,
                     Vector<Double> fittedXbeam = Vector<Double>(),
                     Vector<Bool> antennaSelection = Vector<Bool>(),
-                     const int& filterStrength = 0,
-                    const double& remoteStart = 0,
-                    const double& remoteStop = 0);
+                    const int& filterStrength = 0,
+                    const unsigned int& remoteStart = 0,
+                    const unsigned int& remoteStop = 0);
 
     /*!
       \brief Plots the fieldstrength of all antennas after beam forming
