@@ -626,7 +626,7 @@ void writeTVRefPhases(void)
       cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
   }
 
-  // Set reference phases from apr/may 2007 for LOPES Dual Pol
+  // Set reference phases from apr/may 2007 for LOPES Dual Pol (after rotation of antenna 1)
   PhaseRefPhases(0,0)  = 0	;	  PhaseRefPhases(0,1)  = 0	;	  PhaseRefPhases(0,2)  = 0	;
   PhaseRefPhases(1,0)  = -123.9	;	  PhaseRefPhases(1,1)  = 14.7	;	  PhaseRefPhases(1,2)  = -27.2	;
   PhaseRefPhases(2,0)  = -163.8	;	  PhaseRefPhases(2,1)  = 134.7	;	  PhaseRefPhases(2,2)  = 126	;
@@ -659,7 +659,35 @@ void writeTVRefPhases(void)
   PhaseRefPhases(29,0) = 139.6	;	  PhaseRefPhases(29,1) = -71.5	;	  PhaseRefPhases(29,2) = -48.4	;
 
   // Add the value for all antennas
-  cout << "Writing TV reference phases for LOPES POL, GT = " << LOPES_pol_start << endl;
+  cout << "Writing TV reference phases for LOPES POL (after rotation of antenna1), GT = " << Ant1_rotation_start << endl;
+  for (int i = 0; i < MAX_Antennas; i++)
+  {
+    cout << "Writing values for antenna: " << antennaIDs[i] << endl;
+
+    if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",Ant1_rotation_start) )
+      cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
+  }
+  
+  // Substract effect of antenna 1 rotation and write the corrected values for LOPES_pol_start
+  // this correction was calculated by measruing the change of the phase differences due to
+  // the rotation of antenna 1
+  Vector<Double> correction(3);
+  correction(0) = 153.1761;
+  correction(1) = 145.8167;
+  correction(2) = 89.09;
+  
+  // apply corrections (begin with antenna 2, as the reference ant 1, stays at phasediff 0)
+  for (int i = 1; i < MAX_Antennas; i++)
+    for (int j = 0; j < 3; j++)
+    {
+      PhaseRefPhases(i,j) -= correction(j);
+      // reduce phase to -180° to 180°
+      while ( PhaseRefPhases(i,j) >  180 ) PhaseRefPhases(i,j) -= 360;
+      while ( PhaseRefPhases(i,j) < -180 ) PhaseRefPhases(i,j) += 360;
+    }
+   
+  // Add the value for all antennas
+  cout << "Writing TV reference phases for LOPES POL (before rotation of antenna1), GT = " << LOPES_pol_start << endl;
   for (int i = 0; i < MAX_Antennas; i++)
   {
     cout << "Writing values for antenna: " << antennaIDs[i] << endl;
@@ -667,7 +695,8 @@ void writeTVRefPhases(void)
     if (!writer.AddData(PhaseRefPhases.row(i),antennaIDs[i],"PhaseRefPhases",LOPES_pol_start) )
       cerr << "\nERROR while writing field: PhaseRefPhases" << endl;
   }
-
+  
+  
   // Set reference phases from early sep 2007 for LOPES Dual Pol
   PhaseRefPhases(0,0)  = 0	;	  PhaseRefPhases(0,1)  = 0	;	  PhaseRefPhases(0,2)  = 0	;
   PhaseRefPhases(1,0)  = -66.9	;	  PhaseRefPhases(1,1)  = -3.2	;	  PhaseRefPhases(1,2)  = -9.2	;
@@ -860,7 +889,7 @@ int main (int argc, char *argv[])
     //rotate_antenna_model(Ant1_rotation_start);  // rotates antenna 1
 
     // write TV reference phase differences and reference phase diffrences for roof setup
-    //writeTVRefPhases();
+    writeTVRefPhases();
     //writeRoofRefPhases();
 
     // Add the measured dispersion of the LOPES 30 filter boxes
