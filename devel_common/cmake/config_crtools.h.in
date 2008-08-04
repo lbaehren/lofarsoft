@@ -39,16 +39,9 @@
 /* Define to 1 if the architecture is 64 bit */
 #cmakedefine AIPS_64B 1
 
-/* Define to 1 if to use the AIPS++ STD wrapper */
+/* Define to 1 if to use the AIPS++ STD wrappers */
 #cmakedefine AIPS_STDLIB 1
-
 #cmakedefine AIPS_AUTO_STL 1
-
-/* Define to 1 if architecture for CASA is Darwin */
-#cmakedefine AIPS_DARWIN 1
-
-/* Define to 1 if architecture for CASA is Linux */
-#cmakedefine AIPS_LINUX 1
 
 /* Define to 1 if the Star-Tools package is available */
 #cmakedefine HAVE_STARTOOLS 1
