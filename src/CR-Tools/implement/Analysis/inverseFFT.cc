@@ -109,8 +109,6 @@ namespace CR {  // Namespace CR -- begin
                                      const uint& order ) 
    {				     				     
      try {
-         Double pi = 3.1416 ;
-         
 	 Double arguement = cos(latitude*pi/180.) ;
 	 Double derivative(0.0) ;
 	 
@@ -194,8 +192,6 @@ namespace CR {  // Namespace CR -- begin
      
           inverseFFT inFFT ;
 	  
-          Double pi = 3.1416 ;
-         
 	  Double arguement = cos(latitude*pi/180.) ;
 	  
 	  Double derivative =inFFT.diff_legendre(latitude, degree, order) ;
@@ -281,7 +277,6 @@ solar_act=coeff2(4)*del_mean_F+0*square(del_mean_F)+0*del_F+0*square(del_F)+0*as
         inverseFFT inFFT ;
         Double sym_func(0.0) ;
 	
-	Double pi = 3.1416 ;
 	Double omega_d = 2*pi/365. ;
 		
 	Matrix<Double> mcoeff1( 106, 7, 0.0) ;
@@ -327,7 +322,6 @@ solar_act=coeff2(4)*del_mean_F+0*square(del_mean_F)+0*del_F+0*square(del_F)+0*as
 	 inverseFFT inFFT ; 
 	 Double asym_func(0.0) ;
 	
-	 Double pi = 3.1416 ;
 	 Double omega_d = 2*pi/365. ;
 	
          Double del_F = F107 - mean_F107 ;
@@ -385,7 +379,6 @@ asym_func =(coeff2(13)*asl_10+coeff2(14)*asl_30)*F1*cos(omega_d*(t_d-coeff2(15))
 	 Double diurnal_func2(0.0) ;
 	 Double diurnal_func(0.0) ;
 	 
-	 Double pi = 3.1416 ;
 	 Double omega_d = 2*pi/365. ;
 	 Double omega = 2*pi/24. ;
 	 
@@ -451,7 +444,6 @@ diurnal_func2=(coeff2(17)*asl_11+0*asl_31+0*asl_51+0*asl_21*cos(omega_d*(t_d-coe
 	  Double semidiurnal2(0.0) ;
 	  Double semidiurnal_func(0.0) ;
 	  
-	  Double pi = 3.1416 ;
 	  Double o_d = 2*pi/365. ;
 	  Double omega = 2*pi/24. ;
 	 
@@ -517,7 +509,6 @@ semidiurnal2=(coeff2(22)*asl_22+coeff2(23)*asl_42+(coeff2(24)*asl_32+coeff2(25)*
 	  Double terdiurnal2(0.0) ;
 	  Double terdiurnal_func(0.0) ;
 	  
-	  Double pi = 3.1416 ;
 	  Double o_d = 2*pi/365. ;
 	  Double omega = 2*pi/24. ;
 	 
@@ -577,7 +568,6 @@ terdiurnal2=(coeff2(27)*asl_33+(0*asl_43+0*asl_63)*cos(o_d*(t_d-coeff2(15))))*F2
 	  Double mag2(0.0) ;
 	  Double magnetic_func(0.0) ;
 	  
-	  Double pi = 3.1416 ;
 	  Double o_d = 2*pi/365. ;
 	  Double omega = 2*pi/24. ;
 	 
@@ -653,11 +643,10 @@ mag2 =(coeff1(11)+(coeff1(17)*asl_11+coeff1(18)*asl_31+coeff1(19)*asl_51)*cos(om
 	  
 	  Double long_func(0.0) ;
 	  
-	  Double pi = 3.1416 ;
 	  Double o_d = 2*pi/365. ;
 	  Double omega = 2*pi/24. ;
 	 
-          Double del_F = F107 -mean_F107 ;
+//           Double del_F = F107 -mean_F107 ;
 	  Double del_mean_F = mean_F107 -150 ;
 		
 	  Matrix<Double> mcoeff1( 106, 7, 0.0) ;
@@ -669,7 +658,7 @@ mag2 =(coeff1(11)+(coeff1(17)*asl_11+coeff1(18)*asl_31+coeff1(19)*asl_51)*cos(om
 	  Vector<Double> coeff1 = mcoeff1.column(col) ;
 	  Vector<Double> coeff2 = mcoeff2.column(col) ;
 	
-	  Double del_A(0.0);
+// 	  Double del_A(0.0);
 	  
 	  Double asl_21 = inFFT.legendre(latitude, 2, 1) ;
 	  Double asl_41 = inFFT.legendre(latitude, 4, 1) ;
@@ -724,12 +713,11 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	    
 	  Double UT_func(0.0) ;
 	  
-	  Double pi = 3.1416 ;
 	  Double o_d = 2*pi/365. ;
-	  Double omega = 2*pi/24. ;
+// 	  Double omega = 2*pi/24. ;
 	  Double omega_dash = 2*pi/86400. ;
 	  
-          Double del_F = F107 -mean_F107 ;
+//           Double del_F = F107 -mean_F107 ;
 	  Double del_mean_F = mean_F107 -150 ;
 		
 	  Matrix<Double> mcoeff1( 106, 7, 0.0) ;
@@ -741,7 +729,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	  Vector<Double> coeff1 = mcoeff1.column(col) ;
 	  Vector<Double> coeff2 = mcoeff2.column(col) ;
 	
-	  Double del_A(0.0);
+// 	  Double del_A(0.0);
 	  
 	  Double asl_10 = inFFT.legendre(latitude, 1, 0) ;
 	  Double asl_30 = inFFT.legendre(latitude, 3, 0) ;
@@ -795,13 +783,12 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	    
 	  Double combined_func(0.0) ;
 	  
-	  Double pi = 3.1416 ;
 	  Double o_d = 2*pi/365. ;
-	  Double omega = 2*pi/24. ;
+// 	  Double omega = 2*pi/24. ;
 	  Double omega_dash = 2*pi/86400. ;
 	  
-          Double del_F = F107 -mean_F107 ;
-	  Double del_mean_F = mean_F107 -150 ;
+//           Double del_F = F107 -mean_F107 ;
+// 	  Double del_mean_F = mean_F107 -150 ;
 		
 	  Matrix<Double> mcoeff1( 106, 7, 0.0) ;
 	  Matrix<Double> mcoeff2( 27, 6, 0.0 ) ;
@@ -966,7 +953,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	  Double za = 117.2 ;
 	  Double Rp = 6356.77 ;
 	  
-	  Double eta_z_zl = (altitude-zl)*(Rp+zl)/(Rp+altitude) ;
+// 	  Double eta_z_zl = (altitude-zl)*(Rp+zl)/(Rp+altitude) ;
 	  Double eta_z_za =(altitude-za)*(Rp+za)/(Rp+altitude) ;
 	  Double eta_za_zl = (za-zl)*(Rp+zl)/(Rp+za) ;
 	  Double eta_z0_za = (z_0-za)*(Rp+za)/(Rp+z_0) ;
@@ -1057,7 +1044,7 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
 	   Double x =-(eta_z_za-eta_z0_za)/eta_z0_za ;
 	   
 	   Double temp_zl =inFFT.temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zl) ;
-	   Double temp_za =inFFT.temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, za) ;
+// 	   Double temp_za =inFFT.temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, za) ;
 	   Double temp_z =inFFT.temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, altitude) ; 
 	   	   
 	   Double sigma = temp_l_dash/(temp_inf -temp_l ) ;

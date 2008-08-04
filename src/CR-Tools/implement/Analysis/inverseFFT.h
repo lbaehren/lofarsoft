@@ -54,6 +54,8 @@ using casa::FFTServer;
 using casa::Matrix;
 using casa::Vector;
 
+const casa::Double pi = 3.14159265;
+
 namespace CR {  // Namespace CR -- begin
   
   /*!

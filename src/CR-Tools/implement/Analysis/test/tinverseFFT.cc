@@ -55,8 +55,6 @@ using CR::inverseFFT;
 
 uint dataBlockSize (1024) ;
 
-double pi = 3.14159265 ;
-
 /*!
   \brief Get a vector with the names of the test data files to work with
 */
