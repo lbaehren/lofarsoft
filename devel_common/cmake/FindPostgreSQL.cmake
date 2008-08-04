@@ -37,25 +37,13 @@ include (CMakeSettings)
 ## -----------------------------------------------------------------------------
 ## Check for system header files included from within the library
 
-find_path (stdio_h stdio.h ${include_locations})
-find_path (stdlib_h stdlib.h ${include_locations})
-find_path (string_h string.h ${include_locations})
-find_path (stddef_h stddef.h ${include_locations})
-find_path (stdarg_h stdarg.h ${include_locations})
-find_path (strings_h strings.h ${include_locations})
-find_path (SupportDefs_h SupportDefs.h ${include_locations})
-
-if (strings_h)
-  add_definitions (-DHAVE_STRINGS_H=1)
-else (strings_h)
-  add_definitions (-DHAVE_STRINGS_H=0)
-endif (strings_h)
-
-if (SupportDefs_h)
-  add_definitions (-DHAVE_SUPPORTDEFS_H=1)
-else (SupportDefs_h)
-  add_definitions (-DHAVE_SUPPORTDEFS_H=0)
-endif (SupportDefs_h)
+find_path (HAVE_STDIO_H       stdio.h        PATHS ${include_locations})
+find_path (HAVE_STDLIB_H      stdlib.h       PATHS ${include_locations})
+find_path (HAVE_STRING_H      string.h       PATHS ${include_locations})
+find_path (HAVE_STDDEF_H      stddef.h       PATHS ${include_locations})
+find_path (HAVE_STDARG_H      stdarg.h       PATHS ${include_locations})
+find_path (HAVE_STRINGS_H     strings.h      PATHS ${include_locations})
+find_path (HAVE_SUPPORTDEFS_H SupportDefs.h  PATHS ${include_locations})
 
 ## -----------------------------------------------------------------------------
 ## Check for the header files
