@@ -47,6 +47,11 @@
 #include <casa/Exceptions/Error.h>
 #include <casa/Utilities/Assert.h>
 
+#ifdef HAVE_HDF5
+#include <hdf5.h>
+#include <casa/HDF5/HDF5Record.h>
+#endif
+
 #include "tests_common.h"
 #include "Casacore.h"
 
@@ -1171,6 +1176,30 @@ int test_BasicSL ()
 
 // ------------------------------------------------------------------------------
 
+#ifdef HAVE_HDF5
+
+/*!
+  \brief Tests for classes in casa/HDF5
+
+  \return nofFailedTests -- The number of failed test within this function
+*/
+int test_HDF5 ()
+{
+  int nofFailedTests (0);
+
+  try {
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
+
+#endif
+
+// ------------------------------------------------------------------------------
+
 /*!
   \brief Main method
 
@@ -1193,6 +1222,10 @@ int main ()
 
   nofFailedTests += test_BasicMath();
   nofFailedTests += test_BasicSL();
+
+#ifdef HAVE_HDF5
+  nofFailedTests += test_HDF5 ();
+#endif 
 
   // ----------------------------------------------------------------------------
   // additional test using casacore classes as private data of a new class

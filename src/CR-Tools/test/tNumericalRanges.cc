@@ -102,8 +102,10 @@ int main(void) {
 #endif
   
   /*   L in format string is not universally supported  */
-  printf("long double     %u bytes, positive range from %12Le to %12Le", 
-         sizeof(long double), LDBL_MIN, LDBL_MAX);
+  std::cout << "long double : " << sizeof(long double)
+	    << " bytes, positive range from "
+	    << LDBL_MIN << " to " << LDBL_MAX
+	    << std::endl;
   printf("                         epsilon = %Le", LDBL_EPSILON);
   cout << endl;
   

@@ -11,6 +11,7 @@ if (HAVE_CASACORE OR HAVE_CASA)
   include_directories (${CASA_INCLUDES})
   ## compiler instructions
   add_library (cr_test
+    ${CR_BINARY_DIR}/crtools.h
     Templates.cc
     Casacore.cc
     )
@@ -59,20 +60,19 @@ if (HAVE_CASACORE AND HAVE_WCSLIB)
     tcasa_lattices
     tcasa_measures
     )
+
+  if (HAVE_HDF5)
+    include_directories (${HDF5_INCLUDES})
+  endif (HAVE_HDF5)
   
   foreach (test ${tests_casacore})
     ## compiler instructions
-    add_executable (${test} ${test}.cc)
-    set_target_properties (${test}
-      PROPERTIES
-      COMPILE_FLAGS "-DAIPS_STDLIB -DAIPS_AUTO_STL"
-      LINK_FLAG "-fPIC"
-      )
+    add_executable (${test} ${test}.cc ${CR_BINARY_DIR}/crtools.h)
     ## linker instructions
     target_link_libraries (${test}
       cr_test
-      ${HDF5_LIBRARIES}
       ${CASA_LIBRARIES}
+      ${HDF5_LIBRARIES}
       ${LAPACK_LIBRARIES}
       ${WCSLIB_LIBRARIES}
       ${G2C_LIBRARIES}

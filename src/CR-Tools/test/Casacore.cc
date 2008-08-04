@@ -34,6 +34,12 @@
 #include <casa/Arrays/MaskedArray.h>
 #include <casa/Arrays/Slice.h>
 
+// ==============================================================================
+//
+//  Class
+//
+// ==============================================================================
+
 /*!
   \class casa_casa
 
@@ -111,3 +117,25 @@ template <class T> class casa_casa {
   
 };
 
+// ==============================================================================
+//
+//  Test function
+//
+// ==============================================================================
+
+int test_casa_casa ()
+{
+  int nofFailedTests (0);
+
+  std::cout << "[1] Testing default constructor ..." << std::endl;
+  try {
+    casa_casa<int> obj_int;
+    casa_casa<float> obj_float;
+    casa_casa<double> obj_double;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
