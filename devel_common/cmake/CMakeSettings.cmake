@@ -115,10 +115,10 @@ if (NOT USG_CMAKE_CONFIG)
     /opt/lib
     /opt/local/lib
     /sw/lib
-    /usr/lib
-    /usr/lib64
-    /usr/local/lib
     /usr/local/lib64
+    /usr/local/lib
+    /usr/lib64
+    /usr/lib
     /usr/X11R6/lib
     /opt/aips++/local/lib
     /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
