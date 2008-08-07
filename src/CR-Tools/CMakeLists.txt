@@ -115,6 +115,13 @@ check_type_size ("double"        SIZEOF_DOUBLE      )
 check_type_size ("long"          SIZEOF_LONG        )
 check_type_size ("long long"     SIZEOF_LONG_LONG   )
 
+## Check functions -------------------------------
+
+include (CheckFunctionExists)
+
+check_function_exists (abs   HAVE_ABS )
+check_function_exists (fabs  HAVE_FABS )
+
 ## Standard CMake modules ------------------------
 
 find_package (Motif)
