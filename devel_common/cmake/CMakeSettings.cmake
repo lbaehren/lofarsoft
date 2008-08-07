@@ -75,6 +75,25 @@ if (NOT USG_CMAKE_CONFIG)
   endif (USG_ROOT)
   
   ## ---------------------------------------------------------------------------
+  ## generic search locations
+
+  set (search_locations
+    ${USG_INSTALL_PREFIX}
+    /opt
+    /opt/local
+    /sw
+    /usr
+    /usr/local
+    /usr/X11R6
+    /opt/aips++/local
+    /opt/casa/local    
+    CACHE
+    PATH
+    "Directories to look for include files"
+    FORCE
+    )
+
+  ## ---------------------------------------------------------------------------
   ## locations in which to look for applications/binaries
   
   set (bin_locations

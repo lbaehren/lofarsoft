@@ -1,3 +1,25 @@
+/*--------------------------------------------------------------------------*
+ | $Id:: NewClass.h 1159 2007-12-21 15:40:14Z baehren                     $ |
+ *--------------------------------------------------------------------------*
+ ****************************************************************************
+ *   Copyright (C) 2008                                                     *
+ *   Lars B"ahren (lbaehren@gmail.com)                                      *
+ *                                                                          *
+ *   This program is free software; you can redistribute it and/or modify   *
+ *   it under the terms of the GNU General Public License as published by   *
+ *   the Free Software Foundation; either version 2 of the License, or      *
+ *   (at your option) any later version.                                    *
+ *                                                                          *
+ *   This program is distributed in the hope that it will be useful,        *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *   GNU General Public License for more details.                           *
+ *                                                                          *
+ *   You should have received a copy of the GNU General Public License      *
+ *   along with this program; if not, write to the                          *
+ *   Free Software Foundation, Inc.,                                        *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.              *
+ ****************************************************************************/
 
 #ifndef CRTOOLS_H
 #define CRTOOLS_H
@@ -45,6 +67,9 @@
 
 /* Define to 1 if the Star-Tools package is available */
 #cmakedefine HAVE_STARTOOLS 1
+
+/* Define to 1 if we have the development version of the Blitz libraries*/
+#cmakedefine HAVE_BLITZ 1
 
 /* Define to 1 if we have the development version of the Boost libraries*/
 #cmakedefine HAVE_BOOST 1
@@ -153,6 +178,25 @@
 
 /* Define to 1 if we have either CASA or casacore */
 #cmakedefine WITH_CASA 1
+
+/*
+ * ------------------------------------------------------------------------------
+ *  Specific directives
+ * ------------------------------------------------------------------------------
+ */
+
+/*
+ *  Define to 1 if we want <blitz/compiler.h> to redefine the "restrict" keyword.
+ *  As it turns out we get into a conflict when including both the Blitz++ and 
+ *  casacore environment header files; so if our project is going to include
+ *  both <casa/aipsdef.h> and <blitz/compiler.h>, we need switch off the
+ *  redefinition in the latter header file.
+ */
+#ifdef HAVE_BLITZ
+#ifndef HAVE_CASA
+#define BZ_HAVE_NCEG_RESTRICT 1
+#endif
+#endif
 
 /*
  * ------------------------------------------------------------------------------

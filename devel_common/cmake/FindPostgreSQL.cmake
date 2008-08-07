@@ -23,11 +23,11 @@
 # - Check for the presence of PostgreSQL
 #
 # The following variables are set when PostgreSQL is found:
-#  HAVE_PostgreSQL       = Set to true, if all components of PostgreSQL
+#  HAVE_POSTGRESQL       = Set to true, if all components of PostgreSQL
 #                          have been found.
 #  POSTGRESQL_INCLUDES   = Include path for the header files of PostgreSQL
 #  POSTGRESQL_LIBRARIES  = Link these to use PostgreSQL
-#  PostgreSQL_LFGLAS     = Linker flags (optional)
+#  POSTGRESQL_LFGLAS     = Linker flags (optional)
 
 ## -----------------------------------------------------------------------------
 ## Standard locations where to look for required components
@@ -48,7 +48,7 @@ find_path (HAVE_SUPPORTDEFS_H SupportDefs.h  PATHS ${include_locations})
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-find_path (PostgreSQL_INCLUDES postgres.h postgres_ext.h pgtypes_numeric.h libpq-fe.h
+find_path (POSTGRESQL_INCLUDES postgres.h postgres_ext.h pgtypes_numeric.h libpq-fe.h
   PATHS ${include_locations}
   PATH_SUFFIXES postgresql
   NO_DEFAULT_PATH
@@ -57,11 +57,11 @@ find_path (PostgreSQL_INCLUDES postgres.h postgres_ext.h pgtypes_numeric.h libpq
 ## -----------------------------------------------------------------------------
 ## Check for the library components
 
-set (PostgreSQL_LIBRARIES "")
+set (POSTGRESQL_LIBRARIES "")
 
 ## [1] libpq
 
-find_library (libpq pq
+find_library (HAVE_LIBPQ pq
   PATHS ${lib_locations}
   PATH_SUFFIXES
   postgresql
@@ -69,13 +69,13 @@ find_library (libpq pq
   NO_DEFAULT_PATH
   )
 
-if (libpq)
-  list (APPEND PostgreSQL_LIBRARIES ${libpq})
-endif (libpq)
+if (HAVE_LIBPQ)
+  list (APPEND POSTGRESQL_LIBRARIES ${HAVE_LIBPQ})
+endif (HAVE_LIBPQ)
 
 ## [2] libpgtypes
 
-find_library (libpgtypes pgtypes 
+find_library (HAVE_LIBPGTYPES pgtypes 
   PATHS ${lib_locations}
   PATH_SUFFIXES
   postgresql
@@ -83,9 +83,9 @@ find_library (libpgtypes pgtypes
   NO_DEFAULT_PATH
   )
 
-if (libpgtypes)
-  list (APPEND PostgreSQL_LIBRARIES ${libpgtypes})
-endif (libpgtypes)
+if (HAVE_LIBPGTYPES)
+  list (APPEND POSTGRESQL_LIBRARIES ${HAVE_LIBPGTYPES})
+endif (HAVE_LIBPGTYPES)
 
 ## [3] libecpg
 
@@ -98,7 +98,7 @@ find_library (libecpg ecpg
   )
 
 if (libecpg)
-  list (APPEND PostgreSQL_LIBRARIES ${libecpg})
+  list (APPEND POSTGRESQL_LIBRARIES ${libecpg})
 endif (libecpg)
 
 ## [4] libpgport
@@ -112,48 +112,50 @@ find_library (libpgport pgport
   )
 
 if (libpgport)
-  list (APPEND PostgreSQL_LIBRARIES ${libpgport})
+  list (APPEND POSTGRESQL_LIBRARIES ${libpgport})
 endif (libpgport)
 
 ## adjust the ordering of the libraries during linking
 
-if (PostgreSQL_LIBRARIES)
-  list (REVERSE PostgreSQL_LIBRARIES)
-endif (PostgreSQL_LIBRARIES)
+if (POSTGRESQL_LIBRARIES)
+  list (REVERSE POSTGRESQL_LIBRARIES)
+endif (POSTGRESQL_LIBRARIES)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
-if (PostgreSQL_INCLUDES AND PostgreSQL_LIBRARIES)
-  set (HAVE_PostgreSQL TRUE)
-else (PostgreSQL_INCLUDES AND PostgreSQL_LIBRARIES)
-  set (HAVE_PostgreSQL FALSE)
-  if (NOT PostgreSQL_FIND_QUIETLY)
-    if (NOT PostgreSQL_INCLUDES)
+if (POSTGRESQL_INCLUDES AND POSTGRESQL_LIBRARIES)
+  set (HAVE_POSTGRESQL TRUE)
+else (POSTGRESQL_INCLUDES AND POSTGRESQL_LIBRARIES)
+  set (HAVE_POSTGRESQL FALSE)
+  if (NOT POSTGRESQL_FIND_QUIETLY)
+    if (NOT POSTGRESQL_INCLUDES)
       message (STATUS "Unable to find PostgreSQL header files!")
-    endif (NOT PostgreSQL_INCLUDES)
-    if (NOT PostgreSQL_LIBRARIES)
+    endif (NOT POSTGRESQL_INCLUDES)
+    if (NOT POSTGRESQL_LIBRARIES)
       message (STATUS "Unable to find PostgreSQL library files!")
-    endif (NOT PostgreSQL_LIBRARIES)
-  endif (NOT PostgreSQL_FIND_QUIETLY)
-endif (PostgreSQL_INCLUDES AND PostgreSQL_LIBRARIES)
+    endif (NOT POSTGRESQL_LIBRARIES)
+  endif (NOT POSTGRESQL_FIND_QUIETLY)
+endif (POSTGRESQL_INCLUDES AND POSTGRESQL_LIBRARIES)
 
-if (HAVE_PostgreSQL)
-  if (NOT PostgreSQL_FIND_QUIETLY)
+if (HAVE_POSTGRESQL)
+  if (NOT POSTGRESQL_FIND_QUIETLY)
     message (STATUS "Found components for PostgreSQL")
-    message (STATUS "PostgreSQL_INCLUDES  = ${PostgreSQL_INCLUDES}")
-    message (STATUS "PostgreSQL_LIBRARIES = ${PostgreSQL_LIBRARIES}")
-  endif (NOT PostgreSQL_FIND_QUIETLY)
-else (HAVE_PostgreSQL)
+    message (STATUS "PostgreSQL_INCLUDES  = ${POSTGRESQL_INCLUDES}")
+    message (STATUS "PostgreSQL_LIBRARIES = ${POSTGRESQL_LIBRARIES}")
+  endif (NOT POSTGRESQL_FIND_QUIETLY)
+else (HAVE_POSTGRESQL)
   if (PostgreSQL_FIND_REQUIRED)
     message (FATAL_ERROR "Could not find PostgreSQL!")
   endif (PostgreSQL_FIND_REQUIRED)
-endif (HAVE_PostgreSQL)
+endif (HAVE_POSTGRESQL)
 
 ## -----------------------------------------------------------------------------
 ## Mark advanced variables
 
 mark_as_advanced (
-  PostgreSQL_INCLUDES
-  PostgreSQL_LIBRARIES
+  POSTGRESQL_INCLUDES
+  POSTGRESQL_LIBRARIES
+  HAVE_LIBPQ
+  HAVE_LIBPGTYPES
   )
