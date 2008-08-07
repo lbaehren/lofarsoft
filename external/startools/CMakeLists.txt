@@ -148,14 +148,14 @@ endif (NOT ROOT_LIBRARIES)
 
 ## --- PostgreSQL ------------------------------------------
 
-find_path (PostgreSQL_INCLUDES libpq-fe.h
+find_path (POSTGRESQL_INCLUDES libpq-fe.h
   PATH ${locations_includes}
   PATH_SUFFIXES
   postgresql
   pgsql
   )
 
-find_library (PostgreSQL_LIBRARIES pq
+find_library (POSTGRESQL_LIBRARIES pq
   PATHS ${locations_lib}
   PATH_SUFFIXES
   postgresql
@@ -163,11 +163,11 @@ find_library (PostgreSQL_LIBRARIES pq
   NO_DEFAULT_PATH
   )
 
-if (PostgreSQL_INCLUDES AND PostgreSQL_LIBRARIES)
+if (POSTGRESQL_INCLUDES AND POSTGRESQL_LIBRARIES)
   set (HAVE_PostgreSQL TRUE)
-  include_directories (${PostgreSQL_INCLUDES})
+  include_directories (${POSTGRESQL_INCLUDES})
   add_definitions (-DHAVE_POSTGRESQL)
-endif (PostgreSQL_INCLUDES AND PostgreSQL_LIBRARIES)
+endif (POSTGRESQL_INCLUDES AND POSTGRESQL_LIBRARIES)
 
 ## ==============================================================================
 ##
@@ -233,8 +233,8 @@ if (StarTools_VERBOSE_CONFIGURE)
   message (STATUS "ROOT root directory = ${ROOT_ROOTSYS}")
   message (STATUS "ROOT library        = ${ROOT_LIBRARIES}")
   message (STATUS "ROOT includes       = ${ROOT_INCLUDES}")
-  message (STATUS "PostgreSQL library  = ${PostgreSQL_LIBRARIES}")
-  message (STATUS "PostgreSQL includes = ${PostgreSQL_INCLUDES}")
+  message (STATUS "PostgreSQL library  = ${POSTGRESQL_LIBRARIES}")
+  message (STATUS "PostgreSQL includes = ${POSTGRESQL_INCLUDES}")
   message (STATUS " ")
   message (STATUS "Installation prefix = ${CMAKE_INSTALL_PREFIX}")
   message (STATUS " ")

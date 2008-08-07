@@ -20,9 +20,9 @@ add_definitions (
 
 set (link_libraries "")
   
-if (PostgreSQL_LIBRARIES)
-  list (APPEND link_libraries ${PostgreSQL_LIBRARIES})
-endif (PostgreSQL_LIBRARIES)
+if (POSTGRESQL_LIBRARIES)
+  list (APPEND link_libraries ${POSTGRESQL_LIBRARIES})
+endif (POSTGRESQL_LIBRARIES)
 
 if (FFTW3_LIBRARIES)
   list (APPEND link_libraries ${FFTW3_LIBRARIES})
@@ -106,10 +106,10 @@ if (StarTools_BUILD_APPLICATIONS)
     )
   
   if (NOT APPLE)
-    if (PostgreSQL_INCLUDES AND PostgreSQL_LIBRARIES) 
+    if (POSTGRESQL_INCLUDES AND POSTGRESQL_LIBRARIES) 
       list (APPEND apps db2csv)
       list (APPEND apps RunFlagInDB)
-    endif (PostgreSQL_INCLUDES AND PostgreSQL_LIBRARIES)
+    endif (POSTGRESQL_INCLUDES AND POSTGRESQL_LIBRARIES)
   endif (NOT APPLE)
   
   ## Build instructions for the applications
