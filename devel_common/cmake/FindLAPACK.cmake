@@ -24,7 +24,7 @@
 ## Check for the presence of LAPACK
 ##
 ## The following variables are set when LAPACK is found:
-##  HAVE_LAPACK     - Set to true, if all components of LAPACK have been found.
+##  HAVE_LAPACK      - Set to true, if all components of LAPACK have been found.
 ##  LAPACK_LIBRARIES - Link these to use LAPACK
 ##  LAPACK_INCLUDES  - Location of the LAPACK header files
 
@@ -36,57 +36,86 @@ include (CMakeSettings)
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
-find_path (LAPACK_INCLUDES clapack.h
+find_path (HAVE_CLAPACK_H clapack.h
   PATHS
   ${include_locations}
   /Developer/SDKs/MacOSX10.4u.sdk/usr/include
   /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/Headers
+  /opt/aips++/local/include/atlas
 )
 
 ## -----------------------------------------------------------------------------
 ## Check for the library files (-llapack -lblas -lcblas -latlas)
 
-set (libs
-  lapack
-  cblas
-  blas
-  atlas
-  )
-
 set (LAPACK_LIBRARIES "")
 
-foreach (lib ${libs})
-  ## try to locate the library
-  find_library (LAPACK_${lib} ${lib} ${lib}_LINUX
-    PATHS
-	${lib_locations}
-    /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
-    PATH_SUFFIXES lapack
-    NO_DEFAULT_PATH
-    )
-  ## check if location was successful
-  if (LAPACK_${lib})
-    list (APPEND LAPACK_LIBRARIES ${LAPACK_${lib}})
-  endif (LAPACK_${lib})
-endforeach (lib)
+## Find liblapack
+
+find_library (HAVE_LIBLAPACK lapack
+  PATHS ${lib_locations}
+  NO_DEFAULT_PATH
+  /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
+  PATH_SUFFIXES lapack
+  )
+
+if (HAVE_LIBLAPACK)
+  list (APPEND LAPACK_LIBRARIES ${HAVE_LIBLAPACK})
+endif (HAVE_LIBLAPACK)
+
+## Find libcblas
+
+find_library (HAVE_LIBCBLAS cblas
+  PATHS ${lib_locations}
+  NO_DEFAULT_PATH
+  /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
+  PATH_SUFFIXES lapack
+  )
+
+if (HAVE_LIBCBLAS)
+  list (APPEND LAPACK_LIBRARIES ${HAVE_LIBCBLAS})
+endif (HAVE_LIBCBLAS)
+
+## Find libblas
+
+find_library (HAVE_LIBBLAS blas
+  PATHS ${lib_locations}
+  NO_DEFAULT_PATH
+  /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
+  PATH_SUFFIXES lapack
+  )
+
+if (HAVE_LIBBLAS)
+  list (APPEND LAPACK_LIBRARIES ${HAVE_LIBBLAS})
+endif (HAVE_LIBBLAS)
+
+## Find libatlas
+
+find_library (HAVE_LIBATLAS atlas
+  PATHS ${lib_locations}
+  NO_DEFAULT_PATH
+  /Developer/SDKs/MacOSX10.4u.sdk/usr/lib
+  PATH_SUFFIXES lapack
+  )
+
+if (HAVE_LIBATLAS)
+  list (APPEND LAPACK_LIBRARIES ${HAVE_LIBATLAS})
+endif (HAVE_LIBATLAS)
 
 ## -----------------------------------------------------------------------------
 ## Actions taken when all components have been found
 
-IF (LAPACK_LIBRARIES)
-  SET (HAVE_LAPACK TRUE)
-ELSE (LAPACK_LIBRARIES)
-  IF (NOT LAPACK_FIND_QUIETLY)
-    IF (NOT LAPACK_LIBRARIES)
-      MESSAGE (STATUS "Unable to find LAPACK library files!")
-    ENDIF (NOT LAPACK_LIBRARIES)
-  ENDIF (NOT LAPACK_FIND_QUIETLY)
-ENDIF (LAPACK_LIBRARIES)
+if (LAPACK_LIBRARIES)
+  set (HAVE_LAPACK TRUE)
+else (LAPACK_LIBRARIES)
+  set (HAVE_LAPACK FALSE)
+  if (NOT LAPACK_FIND_QUIETLY)
+    message (STATUS "Unable to find LAPACK library files!")
+  endif (NOT LAPACK_FIND_QUIETLY)
+endif (LAPACK_LIBRARIES)
 
 IF (HAVE_LAPACK)
   IF (NOT LAPACK_FIND_QUIETLY)
-    MESSAGE (STATUS "Found components for LAPACK")
-    MESSAGE (STATUS "LAPACK_INCLUDES  = ${LAPACK_INCLUDES}")
+    MESSAGE (STATUS "Found components for LAPACK.")
     MESSAGE (STATUS "LAPACK_LIBRARIES = ${LAPACK_LIBRARIES}")
   ENDIF (NOT LAPACK_FIND_QUIETLY)
 ELSE (HAVE_LAPACK)
@@ -99,8 +128,9 @@ ENDIF (HAVE_LAPACK)
 ## Mark as advanced...
 
 MARK_AS_ADVANCED (
-  LAPACK_atlas
-  LAPACK_blas
-  LAPACK_cblas
-  LAPACK_lapack
+  HAVE_LIBATLAS
+  HAVE_LIBBLAS
+  HAVE_LIBCBLAS
+  HAVE_LIBLAPACK
+  HAVE_CLAPACK_H
   )
