@@ -316,14 +316,14 @@ namespace CR {  //  Namespace CR -- begin
       inline
 	const double ThreeVector::GetAngleTo(const ThreeVector& rhs) const
 	{
-	  return acos(this->DottedWith(rhs)/(this->GetLength()*rhs.GetLength()));
+	  return std::acos(this->DottedWith(rhs)/(this->GetLength()*rhs.GetLength()));
 	}
       
       
       inline
 	double ThreeVector::GetLength() const
 	{
-	  return sqrt(x*x + y*y + z*z);
+	  return std::sqrt(x*x + y*y + z*z);
 	}
       
       // ---------------------------------------------------------------------- friends

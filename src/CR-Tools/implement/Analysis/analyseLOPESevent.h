@@ -28,16 +28,25 @@
 
 // Standard library header files
 #include <string>
+#include <iostream>
 
 #include <casa/aips.h>
-#include <casa/iostream.h>
-#include <casa/Arrays.h>
 #include <casa/Arrays/Array.h>
+#include <casa/Arrays/ArrayIO.h>
+#include <casa/Arrays/MaskedArray.h>
+#include <casa/Arrays/ArrayError.h>
+#include <casa/Arrays/Cube.h>
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/MatrixMath.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicSL/String.h>
+#include <casa/Containers/Block.h>
 #include <casa/Containers/Record.h>
+#include <casa/Containers/RecordField.h>
+#include <casa/Containers/List.h>
+#include <casa/Containers/ListIO.h>
+#include <casa/Containers/OrderedMap.h>
 #include <casa/Exceptions/Error.h>
 #include <scimath/Mathematics/FFTServer.h>
 #include <scimath/Mathematics/InterpolateArray1D.h>
@@ -53,6 +62,8 @@
 
 using casa::Bool;
 using casa::Double;
+using casa::Matrix;
+using casa::String;
 using casa::Vector;
 
 namespace CR { // Namespace CR -- begin
@@ -149,10 +160,10 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Argumented constructor
 
-      \param remoteStart - Start of the interval used in the calculation of the background,
-             fraction of data length
-      \param remoteStop - Stop of the interval used in the calculation of the background,
-             fraction of data length
+      \param remoteStart -- Start of the interval used in the calculation of the
+             background, fraction of data length
+      \param remoteStop -- Stop of the interval used in the calculation of the
+             background, fraction of data length
       \param fitStart  -- The start of the interval to be considered in the fit
       \param fitStop   -- The stop of the interval to be considered in the fit
       \param plotStart -- Start time of the interval diplayed in the plot
@@ -178,8 +189,8 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the Start of the interval used in the calculation of the background
 
-      \return remoteStart - Start of the interval used in the calculation of the background,
-              fraction of data length
+      \return remoteStart - Start of the interval used in the calculation of the
+              background, fraction of data length
     */
     inline double remoteStart () {
       return remoteStart_p;
@@ -188,8 +199,8 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Set the Start of the interval used in the calculation of the background
 
-      \param remoteStart - Start of the interval used in the calculation of the background,
-             fraction of data length
+      \param remoteStart - Start of the interval used in the calculation of the
+             background, fraction of data length
     */
     inline void setRemoteStart (double const &remoteStart) {
       remoteStart_p = remoteStart;
@@ -198,8 +209,8 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the Stop of the interval used in the calculation of the background
 
-      \return remoteStop - Stop of the interval used in the calculation of the background,
-              fraction of data length
+      \return remoteStop - Stop of the interval used in the calculation of the
+              background, fraction of data length
     */
     inline double remoteStop () {
       return remoteStop_p;
@@ -208,8 +219,8 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Set the Stop of the interval used in the calculation of the background
 
-      \param remoteStop - Stop of the interval used in the calculation of the background,
-             fraction of data length
+      \param remoteStop - Stop of the interval used in the calculation of the
+             background, fraction of data length
     */
     inline void setRemoteStop (double const &remoteStop) {
       remoteStop_p = remoteStop;

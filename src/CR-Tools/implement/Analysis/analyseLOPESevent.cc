@@ -347,7 +347,8 @@ namespace CR { // Namespace CR -- begin
   };
   
 
-  // --------------------------------------------------------------- doPositionFitting
+  // ---------------------------------------------------------- doPositionFitting
+
   Bool analyseLOPESevent::doPositionFitting(Double &Az, Double &El, Double &distance, 
 					    Double &center,
 					    Double &XC, Double &YC, Bool RotatePos,

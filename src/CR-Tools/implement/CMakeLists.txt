@@ -106,9 +106,9 @@ if (ROOT_LIBRARIES)
   list (APPEND cr_link_libraries ${ROOT_LIBRARIES})
 endif (ROOT_LIBRARIES)
 
-if (PostgreSQL_LIBRARIES)
-  list (APPEND cr_link_libraries ${PostgreSQL_LIBRARIES})
-endif (PostgreSQL_LIBRARIES)
+if (POSTGRESQL_LIBRARIES)
+  list (APPEND cr_link_libraries ${POSTGRESQL_LIBRARIES})
+endif (POSTGRESQL_LIBRARIES)
 
 if (PNG_LIBRARIES)
   list (APPEND cr_link_libraries ${PNG_LIBRARIES})
@@ -118,9 +118,9 @@ if (GIF_LIBRARIES)
   list (APPEND cr_link_libraries ${GIF_LIBRARIES})
 endif (GIF_LIBRARIES)
 
-if (libgd)
-  list (APPEND cr_link_libraries ${libgd})
-endif (libgd)
+if (HAVE_LIBGD)
+  list (APPEND cr_link_libraries ${HAVE_LIBGD})
+endif (HAVE_LIBGD)
 
 if (HAVE_LIBUTIL)
   list (APPEND cr_link_libraries ${HAVE_LIBUTIL})
@@ -133,33 +133,44 @@ endif (HAVE_LIBM)
 ## ------------------------------------------------------------------------------
 ## Create the library
 
-include_directories (
-  ${CASA_INCLUDES}
-  ${CASACORE_INCLUDES}
-  ${CR_SOURCE_DIR}/implement
+add_library (cr
+  ${CR_BINARY_DIR}/crtools.h
+  ${cr_sources}
   )
 
-add_definitions (
-  -fPIC
-  -ftemplate-depth-100
-  )
-
-add_library (cr ${cr_sources})
-
-if (NOT APPLE)
+if (APPLE)
   set_target_properties (cr
     PROPERTIES
-    COMPILE_FLAGS "${CASACORE_COMPILE_FLAGS} -fPIC -O2 -fPIC"
+    COMPILE_FLAGS "-fPIC -ftemplate-depth-100"
     LINK_FLAGS "-bind_at_load"
     )
-endif (NOT APPLE)
+else (APPLE)
+  set_target_properties (cr
+    PROPERTIES
+    COMPILE_FLAGS "${CASACORE_COMPILE_FLAGS} -fPIC -O2 -fPIC -ftemplate-depth-100"
+    LINK_FLAGS "-bind_at_load"
+    )
+endif (APPLE)
+
+## Linker instructions
 
 target_link_libraries (cr
   ${cr_link_libraries}
   )
 
-## ------------------------------------------------------------------------------
-## Create Python bindings for the library
+## Installation
+
+install (
+  TARGETS cr
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  )
+
+## =============================================================================
+##
+##  Python bindings to the library
+##
+## =============================================================================
 
 if (CR_WITH_PYTHON)
 
@@ -203,8 +214,11 @@ if (CR_WITH_PYTHON)
   
 endif (CR_WITH_PYTHON)
 
-## ------------------------------------------------------------------------------
-## Graphical user interface
+## =============================================================================
+##
+##  Graphical user interface
+##
+## =============================================================================
 
 if (CR_WITH_GUI)
   
@@ -233,7 +247,6 @@ if (CR_WITH_GUI)
   
   ## include directories
   include_directories (
-    ${CR_SOURCE_DIR}/implement/GUI
     ${QT4_INCLUDES}
     )
   
@@ -254,7 +267,7 @@ if (CR_WITH_GUI)
       PROPERTIES
       PREFIX "lib"
       SUFFIX .so
-      COMPILE_FLAGS "-pipe -g -D_REENTRANT -w -fpermissive -DQT_GUI_LIB -DQT_CORE_LIB"
+      COMPILE_FLAGS "-pipe -g -D_REENTRANT -w -fpermissive -DQT_GUI_LIB -DQT_CORE_LIB -I${CR_SOURCE_DIR}/implement/GUI"
       LINK_FLAGS "-fPIC -flat_namespace"
       )
   else (APPLE)
@@ -269,25 +282,14 @@ if (CR_WITH_GUI)
   
 endif (CR_WITH_GUI)
 
-## ------------------------------------------------------------------------------
-## Test programs
+## =============================================================================
+##
+##  Test programs
+##
+## =============================================================================
 
 if (CR_BUILD_TESTS)
   foreach (cr_module ${cr_modules})
     ADD_SUBDIRECTORY ("${cr_module}/test")
   endforeach (cr_module)
 endif (CR_BUILD_TESTS)
-
-## ------------------------------------------------------------------------------
-## Installation
-
-## installation of libraries
-
-install (
-  TARGETS cr
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  )
-
-## installation of header files

@@ -35,9 +35,8 @@ endif (NOT USG_ROOT)
 ##
 ## =============================================================================
 
-option (CR_BUILD_TESTS        "Build the test programs?"                     YES )
+option (CR_BUILD_TESTS          "Build the test programs?"                   YES )
 option (CR_BUILD_EXTERNAL_TESTS "Build test programs for external packages?" YES )
-option (CR_ENABLE_TESTING     "Enable running the test programs?"            YES )
 option (CR_COMPILER_WARNINGS  "Enable standard set of compiler warnings?"    YES )
 option (CR_DEBUGGING_MESSAGES "Print debugging information?"                 NO  )
 option (CR_VERBOSE_CONFIGURE  "Verbose output during configuration?"         NO  )
@@ -75,7 +74,7 @@ if (NOT CR_VERBOSE_CONFIGURE)
   set (PLPLOT_FIND_QUIETLY     YES )
   set (PNG_FIND_QUIETLY        YES )
   set (POPT_FIND_QUIETLY       YES )
-  set (PostgreSQL_FIND_QUIETLY YES )
+  set (POSTGRESQL_FIND_QUIETLY YES )
   set (PYTHON_FIND_QUIETLY     YES )
   set (ROOT_FIND_QUIETLY       YES )
   set (STARTOOLS_FIND_QUIETLY  YES )
@@ -91,7 +90,7 @@ endif (NOT CR_VERBOSE_CONFIGURE)
 find_library (HAVE_LIBM    m     PATHS ${lib_locations} )
 find_library (HAVE_LIBUTIL util  PATHS ${lib_locations} )
 find_library (HAVE_LIBDL   dl    PATHS ${lib_locations} )
-find_library (libgd        gd    PATHS ${lib_locations} )
+find_library (HAVE_LIBGD   gd    PATHS ${lib_locations} )
 
 ## System header files ---------------------------
 
@@ -145,40 +144,6 @@ include (FindPython)
 include (FindROOT)
 include (FindWCS)
 
-if (BOOST_INCLUDES)
-  include_directories (${BOOST_INCLUDES})
-endif (BOOST_INCLUDES)
-
-if (HAVE_G2C)
-  include_directories (${G2C_INCLUDES})
-endif (HAVE_G2C)
-
-if (LAPACK_INCLUDES)
-  include_directories (${LAPACK_INCLUDES})
-endif (LAPACK_INCLUDES)
-
-if (PGPLOT_INCLUDES)
-  include_directories (${PGPLOT_INCLUDES})
-endif (PGPLOT_INCLUDES)
-
-if (PLPLOT_INCLUDES)
-  include_directories (${PLPLOT_INCLUDES})
-endif (PLPLOT_INCLUDES)
-
-if (HAVE_POPT)
-  include_directories (${POPT_INCLUDES})
-endif (HAVE_POPT)
-
-if (HAVE_PostgreSQL)
-  set (HAVE_POSTGRESQL 1)
-  include_directories (${PostgreSQL_INCLUDES})
-endif (HAVE_PostgreSQL)
-
-if (HAVE_PYTHON)
-  include_directories (${PYTHON_INCLUDES})
-endif (HAVE_PYTHON)
-
-
 ## =============================================================================
 ##
 ##  Handling of configuration/build/install options
@@ -188,14 +153,10 @@ endif (HAVE_PYTHON)
 ## -------------------------------------------------------------------
 ## Handle option: testing mode on/off
 
-if (CR_ENABLE_TESTING)
-  # CMake/CTest settings
+if (CR_BUILD_TESTS OR CR_BUILD_EXTERNAL_TESTS)
   include (CTest)
   enable_testing()
-  # enable building test programs
-  set (CR_BUILD_TESTS ON)
-  set (CR_BUILD_EXTERNAL_TESTS ON)
-endif (CR_ENABLE_TESTING)
+endif (CR_BUILD_TESTS OR CR_BUILD_EXTERNAL_TESTS)
 
 ## -------------------------------------------------------------------
 ## Handle option: debugging messages on/off
@@ -250,33 +211,22 @@ endif (CR_WITH_GLISH)
 if (HAVE_CASA OR HAVE_CASACORE)
   
   ## compiler flags
-  set (HAVE_CASA 1)
-  set (WITH_CASA 1)
-  add_definitions (
-    # -- compiler flags utilized in the source code --
-    -DAIPS_STDLIB
-    -DAIPS_AUTO_STL
-    )
-  IF (APPLE)
-    ## definition common to apple architectures
-    set (AIPS_DARWIN 1)
-  ELSE (APPLE)
-    set (AIPS_LINUX 1)
-  ENDIF (APPLE)
+  set (HAVE_CASA YES)
+
   ## Platform test 32/64 bit ------------------------------
   set (CMAKE_SYSTEM_64BIT 0)
   if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
     if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
       if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
         set (CMAKE_SYSTEM_64BIT 1)
-        set (AIPS_64B 1)
+        set (AIPS_64B YES)
       endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
     endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i686)
   endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES i386)
   if (APPLE)
     if (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-      set (CMAKE_SYSTEM_64BIT 1)
-      set (AIPS_64B 1)
+      set (CMAKE_SYSTEM_64BIT YES)
+      set (AIPS_64B YES)
     endif (NOT CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
   endif (APPLE)
   
@@ -366,6 +316,8 @@ if (CR_WITH_GUI)
     PATH_SUFFIXES qt4-x11 qt4-x11/lib
     )
 
+  ## locate the Qt4 header files
+
   find_path (QT4_INCLUDES Qt/qatomic.h
     PATHS ${include_locations}
     PATH_SUFFIXES lib/qt4-x11/include lib/qt4-x11
@@ -448,49 +400,97 @@ find_file (dataset_event 2007.01.31.23:59:33.960.event
 ##
 ## =============================================================================
 
-if (CASA_INCLUDES)
+## CR-Tools header files
+
+include_directories (BEFORE
+  ${CR_BINARY_DIR}
+  ${CR_SOURCE_DIR}/test
+  ${CR_SOURCE_DIR}/implement
+  )
+
+## External header files
+
+if (HAVE_BOOST)
+  include_directories (${BOOST_INCLUDES})
+endif (HAVE_BOOST)
+
+if (HAVE_CASA OR HAVE_CASACORE)
   include_directories (${CASA_INCLUDES})
-endif (CASA_INCLUDES)
+endif (HAVE_CASA OR HAVE_CASACORE)
 
 if (CFITSIO_INCLUDES)
   include_directories (${CFITSIO_INCLUDES})
 endif (CFITSIO_INCLUDES)
 
-if (DAL_INCLUDES)
+if (HAVE_DAL)
   include_directories (${DAL_INCLUDES})
-endif (DAL_INCLUDES)
+  ## additional compiler flags
+  if (HAVE_CASA OR HAVE_CASACORE)
+    set (WITH_CASA YES)
+    add_definitions (-DWITH_CASA)
+  endif (HAVE_CASA OR HAVE_CASACORE)
+endif (HAVE_DAL)
 
-if (FFTW3_INCLUDES)
+if (HAVE_FFTW3)
   include_directories (${FFTW3_INCLUDES})
-endif (FFTW3_INCLUDES)
+endif (HAVE_FFTW3)
 
-if (GIF_INCLUDES)
+if (HAVE_G2C)
+  include_directories (${G2C_INCLUDES})
+endif (HAVE_G2C)
+
+if (HAVE_GIF)
   include_directories (${GIF_INCLUDES})
-endif (GIF_INCLUDES)
+endif (HAVE_GIF)
 
-if (GSL_INCLUDES)
+if (HAVE_GSL)
   include_directories (${GSL_INCLUDES})
-endif (GSL_INCLUDES)
+endif (HAVE_GSL)
 
-if (GTK_INCLUDES)
+if (HAVE_GTK)
   include_directories (${GTK_INCLUDES})
-endif (GTK_INCLUDES)
+endif (HAVE_GTK)
 
-if (HDF5_INCLUDES)
+if (HAVE_HDF5)
   include_directories (${HDF5_INCLUDES})
-endif (HDF5_INCLUDES)
+endif (HAVE_HDF5)
 
-if (PNG_INCLUDES)
+if (HAVE_LAPACK)
+  include_directories (${LAPACK_INCLUDES})
+endif (HAVE_LAPACK)
+
+if (HAVE_PGPLOT)
+  include_directories (${PGPLOT_INCLUDES})
+endif (HAVE_PGPLOT)
+
+if (HAVE_PLPLOT)
+  include_directories (${PLPLOT_INCLUDES})
+endif (HAVE_PLPLOT)
+
+if (HAVE_PNG)
   include_directories (${PNG_INCLUDES})
-endif (PNG_INCLUDES)
+endif (HAVE_PNG)
 
-if (ROOT_INCLUDES)
+if (HAVE_POPT)
+  include_directories (${POPT_INCLUDES})
+endif (HAVE_POPT)
+
+if (HAVE_POSTGRESQL)
+  set (HAVE_POSTGRESQL 1)
+  include_directories (${POSTGRESQL_INCLUDES})
+endif (HAVE_POSTGRESQL)
+
+if (HAVE_PYTHON)
+  include_directories (${PYTHON_INCLUDES})
+endif (HAVE_PYTHON)
+
+if (HAVE_ROOT)
   include_directories (${ROOT_INCLUDES})
-endif (ROOT_INCLUDES)
+endif (HAVE_ROOT)
 
-if (WCS_INCLUDES)
+if (HAVE_WCS)
   include_directories (${WCS_INCLUDES})
-endif (WCS_INCLUDES)
+endif (HAVE_WCS)
   
 ## =============================================================================
 ##
@@ -502,14 +502,6 @@ endif (WCS_INCLUDES)
 
 configure_file (${USG_ROOT}/devel_common/cmake/config_crtools.h.in
   ${CR_BINARY_DIR}/crtools.h)
-
-## Include directories
-
-include_directories (
-  ${CR_SOURCE_DIR}/implement
-  ${CR_SOURCE_DIR}/test
-  ${CR_BINARY_DIR}
-  )
 
 ## Sub-directories
 
@@ -551,7 +543,7 @@ if (CR_VERBOSE_CONFIGURE)
   message (STATUS " PLplot ................... : ${HAVE_PLPLOT}")
   message (STATUS " PNG ...................... : ${HAVE_PNG}")
   message (STATUS " POPT ..................... : ${HAVE_POPT}")
-  message (STATUS " PostgreSQL ............... : ${HAVE_PostgreSQL}")
+  message (STATUS " PostgreSQL ............... : ${HAVE_POSTGRESQL}")
   message (STATUS " Python ................... : ${HAVE_PYTHON}")
   message (STATUS " ROOT ..................... : ${HAVE_ROOT}")
   message (STATUS " Star-Tools ............... : ${HAVE_STARTOOLS}")
@@ -561,7 +553,6 @@ if (CR_VERBOSE_CONFIGURE)
   message (STATUS " Source directory .......... : ${CR_SOURCE_DIR}")
   message (STATUS " Installation location ..... : ${CMAKE_INSTALL_PREFIX}")
   message (STATUS " Build the test programs ... : ${CR_BUILD_TESTS}")
-  message (STATUS " Enable testing ............ : ${CR_ENABLE_TESTING}")
   message (STATUS " Enable LOPES-Star routines  : ${CR_WITH_STARTOOLS}")
   message (STATUS " Support for plotting ...... : ${CR_WITH_PLOTTING}")
   message (STATUS " Support for Glish ......... : ${CR_WITH_GLISH}")

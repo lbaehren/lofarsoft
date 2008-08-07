@@ -34,9 +34,7 @@ foreach (src ${tests})
   ## linker instructions
   target_link_libraries (${src} cr)
   ## testing
-  if (CR_ENABLE_TESTING) 
-    add_test (${src} ${src})
-  endif (CR_ENABLE_TESTING) 
+  add_test (${src} ${src})
 endforeach (src)
 
 ## ==============================================================================

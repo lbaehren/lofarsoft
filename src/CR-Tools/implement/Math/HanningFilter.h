@@ -79,7 +79,7 @@ namespace CR {  // Namespace CR -- begin
     <img src="../figures/tHanningFilter.png">
   */
   
-  template <class T> class HanningFilter : public BasicFilter<T> {
+  template<class T> class HanningFilter : public BasicFilter<T> {
     
     //!  Parameter for the slope of the Hanning filter.
     T alpha_p;
@@ -179,7 +179,7 @@ namespace CR {  // Namespace CR -- begin
       
       \return alpha -- Parameter for the slope of the Hanning filter.
     */
-    inline T alpha () {
+    inline T alpha () const {
       return alpha_p;
     }
     

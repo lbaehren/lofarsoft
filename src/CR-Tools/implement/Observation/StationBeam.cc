@@ -236,13 +236,13 @@ Double StationBeam::incoherent_beam( const Double& frequency,
 
         StationBeam stbm ;
         
-	Double pi(3.1416) ;
+// 	Double pi(3.1416) ;
 	DComplex j(0, 1 );
         Double sum_incoherent(0.0);
 	Double integral_value (0.0) ;
 	
 	uint n_stations = station_id.nelements() ;
-	uint n_stat = 0 ;
+// 	uint n_stat = 0 ;
 
 	
 	Double stationbeam = stbm.station_beam( frequency,
@@ -381,7 +381,7 @@ Double StationBeam::integrate_freq( const Double& hr_angle,
           Double freq_final = freq_init + bandwidth ;
      
           Double power_beam(0.0) ;
-          Double power_sum(0.0); 
+//           Double power_sum(0.0); 
           
       	  Double k1_freq(0.0) ;
           Double k2_freq(0.0) ;
@@ -456,18 +456,18 @@ Double StationBeam::incoherent_beaming( const Double& hr_angle,
 	Double integral_value (0.0) ;
 	
 	uint n_stations = station_id.nelements() ;
-	uint n_stat = 0 ;
+// 	uint n_stat = 0 ;
 	
 	Double observed_L(0.0) ;
 	Double observed_M(0.0) ;
 	Double observed_N(0.0) ;
-	Double pos_new_x(0.0) ;
-	Double pos_new_y(0.0) ;
+// 	Double pos_new_x(0.0) ;
+// 	Double pos_new_y(0.0) ;
 
-	Double position_new_x(0.0);
-	Double position_new_y(0.0);
-	Double position_new_y1(0.0);
-	Double position_new_y2(0.0);
+// 	Double position_new_x(0.0);
+// 	Double position_new_y(0.0);
+// 	Double position_new_y1(0.0);
+// 	Double position_new_y2(0.0);
 	
         Double sourceHrAngle = pi/180.*source_hr_angle ;
         Double sourceDeclination = pi/180.*source_declination ;
@@ -528,18 +528,18 @@ Double StationBeam::integrate_phi( const Double& declination,
           uint nroots = legendre_root.nelements() ;
           
           Double phi_final(360.0);
-          Double phi_init(0.0);
+//           Double phi_init(0.0);
           Double phi_interval(1.0);
 
           Double power_beam(0.0) ;
-          Double power_sum(0.0); 
+//           Double power_sum(0.0); 
           Double hrangle(0.0);
 
       	  Double k1_phi(0.0) ;
           Double k2_phi(0.0) ;
           Double k1phi(0.0);
           Double k2phi(0.0);
-          Double phi(0.0);
+//           Double phi(0.0);
           Double y_outer_sum(0.0);
           Double y_inner_sum(0.0);
 
@@ -607,7 +607,7 @@ Double StationBeam::integrate_decli( const Double& source_declination,
           Double pi = 3.1416 ;
 
           Double decli_final(90.0);
-          Double decli_init(0.0);
+//           Double decli_init(0.0);
           Double decli_interval(0.25);
           Double declination(0.0);
 
@@ -678,11 +678,11 @@ Double StationBeam::beamwidth_decli(  const Double& source_declination,
              	                      const Vector<Double>& legendre_weight )   
     
 {
-   try {
-          StationBeam stbm ;
-          
-          Double pi = 3.1416 ;	 
-          uint nroots = legendre_root.nelements() ;
+  try {
+    StationBeam stbm ;
+    
+    Double pi = 3.1416 ;	 
+//           uint nroots = legendre_root.nelements() ;
           
           
        Double max_power = stbm.integrate_freq( source_hr_angle,
@@ -766,7 +766,7 @@ Double StationBeam::beamwidth_decli(  const Double& source_declination,
          
           Double half_power =(power_norm_max -power_norm_min)/2 ;
           
-          Double power_optimum = power_norm_max - half_power ;
+//           Double power_optimum = power_norm_max - half_power ;
           
           selected_declinations.resize(ntrue( power_normalized >half_power));
          

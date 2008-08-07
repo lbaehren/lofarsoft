@@ -31,9 +31,7 @@ foreach (test tNumericalRanges tObjects tTemplates)
   ## linker instructions
   target_link_libraries (${test} cr_test)
   ## testing
-  if (CR_ENABLE_TESTING) 
-    add_test (${test} ${test})
-  endif (CR_ENABLE_TESTING)
+  add_test (${test} ${test})
   ## installation
   install (
     TARGETS ${test}
@@ -79,9 +77,7 @@ if (HAVE_CASACORE AND HAVE_WCSLIB)
       ${HAVE_LIBM}
       )
     ## testing
-    if (CR_ENABLE_TESTING) 
-      add_test (${test} ${test})
-    endif (CR_ENABLE_TESTING) 
+    add_test (${test} ${test})
   endforeach (test ${tests_casacore})
   
 endif (HAVE_CASACORE AND HAVE_WCSLIB)
@@ -91,17 +87,15 @@ endif (HAVE_CASACORE AND HAVE_WCSLIB)
 
 if (HAVE_BLITZ)
   ## compiler instructions
-  add_executable (tUseBlitz tUseBlitz.cc)
+  add_executable (tUseBlitz tUseBlitz.cc ${CR_BINARY_DIR}/crtools.h)
   set_target_properties (tUseBlitz
     PROPERTIES
-    COMPILE_FLAGS "-DHAVE_BLITZ -I${BLITZ_INCLUDES}"
+    COMPILE_FLAGS "-I${BLITZ_INCLUDES}"
     )
   ## linker instructions
   target_link_libraries (tUseBlitz ${BLITZ_LIBRARIES})
   ## testing
-  if (CR_ENABLE_TESTING) 
-    add_test (tUseBlitz tUseBlitz)
-  endif (CR_ENABLE_TESTING)
+  add_test (tUseBlitz tUseBlitz)
   ## installation
   install (
     TARGETS tUseBlitz
@@ -114,16 +108,14 @@ endif (HAVE_BLITZ)
 
 if (HAVE_CFITSIO)
   ## build test program
-  add_executable (tUseCFITSIO tUseCFITSIO.cc)
+  add_executable (tUseCFITSIO tUseCFITSIO.cc ${CR_BINARY_DIR}/crtools.h)
   set_target_properties (tUseCFITSIO
     PROPERTIES
-    COMPILE_FLAGS "-DHAVE_CFITSIO -I${CFITSIO_INCLUDES}"
+    COMPILE_FLAGS "-I${CFITSIO_INCLUDES}"
     )
   target_link_libraries (tUseCFITSIO ${CFITSIO_LIBRARIES})
   ## testing
-  if (CR_ENABLE_TESTING) 
-    add_test (tUseCFITSIO tUseCFITSIO)
-  endif (CR_ENABLE_TESTING) 
+  add_test (tUseCFITSIO tUseCFITSIO)
   ## installation
   install (
     TARGETS tUseCFITSIO
@@ -135,12 +127,17 @@ endif (HAVE_CFITSIO)
 ## Test for FFTW3
 
 if (HAVE_FFTW3)
-  add_executable (tUseFFTW3 tUseFFTW3.cc)
+  ## compiler instructions
+  add_executable (tUseFFTW3 tUseFFTW3.cc ${CR_BINARY_DIR}/crtools.h)
+  ## additional properties
+  set_target_properties (tUseFFTW3
+    PROPERTIES
+    COMPILE_FLAGS "-I${FFTW3_INCLUDES}"
+    )
+  ## linker instructions
   target_link_libraries (tUseFFTW3 ${FFTW3_LIBRARIES})
   ## testing
-  if (CR_ENABLE_TESTING) 
-    add_test (tUseFFTW3 tUseFFTW3)
-  endif (CR_ENABLE_TESTING) 
+  add_test (tUseFFTW3 tUseFFTW3)
   ## installation
   install (
     TARGETS tUseFFTW3
@@ -156,14 +153,12 @@ if (HAVE_GSL)
   add_executable (tUseGSL tUseGSL.cc)
   set_target_properties (tUseGSL
     PROPERTIES
-    LINK_FLAGS "-I${GSL_INCLUDES}"
+    COMPILE_FLAGS "-I${GSL_INCLUDES}"
     )
   ## linker instructions
   target_link_libraries (tUseGSL ${GSL_LIBRARIES})
   ## testing
-  if (CR_ENABLE_TESTING) 
-    add_test (tUseGSL tUseGSL)
-  endif (CR_ENABLE_TESTING) 
+  add_test (tUseGSL tUseGSL)
   ## installation
   install (
     TARGETS tUseGSL
@@ -195,9 +190,7 @@ if (HAVE_WCSLIB)
   add_executable (tUseWCS tUseWCS.cc)
   target_link_libraries (tUseWCS ${WCSLIB_LIBRARIES})
   ## testing
-  if (CR_ENABLE_TESTING) 
-    add_test (tUseWCS tUseWCS)
-  endif (CR_ENABLE_TESTING) 
+  add_test (tUseWCS tUseWCS)
   ## installation
   install (
     TARGETS tUseWCS
@@ -245,13 +238,11 @@ if (HAVE_ROOT AND HAVE_CASACORE AND FFTW3_LIBRARIES)
 	)
     endif (APPLE)
     ## testing
-    if (CR_ENABLE_TESTING) 
-      if (dataset_event)
-	add_test (tUseROOT tUseROOT ${dataset_event})
-      else (dataset_event)
-	add_test (tUseROOT tUseROOT) 
-      endif (dataset_event)
-    endif (CR_ENABLE_TESTING) 
+    if (dataset_event)
+	  add_test (tUseROOT tUseROOT ${dataset_event})
+    else (dataset_event)
+	  add_test (tUseROOT tUseROOT) 
+    endif (dataset_event)
   else (HAVE_DAL)
     message (STATUS "[CR-Tools] Unable to build test program tUseROOT.")
   endif (HAVE_DAL)
@@ -273,7 +264,7 @@ if (HAVE_DAL AND HAVE_CASACORE AND HDF5_MINOR_VERSION LESS 8)
   ## additional properties
   set_target_properties (tUseDAL
     PROPERTIES
-    COMPILE_FLAGS "-DHAVE_DAL -I${DAL_INCLUDES} -I${HDF5_INCLUDES}"
+    COMPILE_FLAGS "-I${DAL_INCLUDES} -I${HDF5_INCLUDES}"
     )
 endif (HAVE_DAL AND HAVE_CASACORE AND HDF5_MINOR_VERSION LESS 8)
 
@@ -283,10 +274,13 @@ endif (HAVE_DAL AND HAVE_CASACORE AND HDF5_MINOR_VERSION LESS 8)
 if (HAVE_PYTHON)
   ## compiler instructions
   add_executable (tUsePython tUsePython.cc)
+  ## additional properties
+  set_target_properties (tUsePython
+    PROPERTIES
+    COMPILE_FLAGS "-I${PYTHON_INCLUDES}"
+    )
   ## linker instructions
   target_link_libraries (tUsePython ${PYTHON_LIBRARIES})
   ## testing
-  if (CR_ENABLE_TESTING) 
-    add_test (tUsePython tUsePython)
-  endif (CR_ENABLE_TESTING) 
+  add_test (tUsePython tUsePython)
 endif (HAVE_PYTHON)
