@@ -43,7 +43,7 @@ option (CR_VERBOSE_CONFIGURE  "Verbose output during configuration?"         NO 
 option (CR_WITH_GLISH         "Support for Glish applications?"              NO  )
 option (CR_WITH_PYTHON        "Support for Python applications?"             YES )
 option (CR_WITH_PLOTTING      "Support for generation of plots?"             YES )
-option (CR_WITH_GUI           "Build the graphical interface?"               YES )
+option (CR_WITH_GUI           "Build the graphical interface?"               NO  )
 option (CR_WITH_STARTOOLS     "Enable additional routines from LOPES-Star?"  YES )
 
 ## =============================================================================
