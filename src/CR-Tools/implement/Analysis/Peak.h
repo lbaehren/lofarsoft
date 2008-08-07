@@ -27,7 +27,6 @@
 #include <sys/types.h>
 #endif
 
-#include <cmath>
 #include <sstream>
 #include <fstream>
 
