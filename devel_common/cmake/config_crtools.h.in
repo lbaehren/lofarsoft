@@ -52,11 +52,17 @@
 /* The size of `long long', as computed by sizeof. */
 #cmakedefine SIZEOF_LONG_LONG ${SIZEOF_LONG_LONG}
 
+/* The size of `uint', as computed by sizeof. */
+#cmakedefine SIZEOF_UINT ${SIZEOF_UINT}
+
 /*
  * ------------------------------------------------------------------------------
  *  Dependencies on external packages
  * ------------------------------------------------------------------------------
  */
+
+/* Define to 1 if we have the `abs` function*/
+#cmakedefine HAVE_ABS 1
 
 /* Define to 1 if the architecture is 64 bit */
 #cmakedefine AIPS_64B 1
@@ -85,6 +91,9 @@
 
 /* Define to 1 if we have the Data Access Library (DAL) */
 #cmakedefine HAVE_DAL 1
+
+/* Define to 1 if we have the `fabs` function*/
+#cmakedefine HAVE_FABS 1
 
 /* Define to 1 if we have a development version of the FFTW3 library */
 #cmakedefine HAVE_FFTW3 1
