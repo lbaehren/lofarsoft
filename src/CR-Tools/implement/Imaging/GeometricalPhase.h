@@ -24,6 +24,8 @@
 #ifndef GEOMETRICALPHASE_H
 #define GEOMETRICALPHASE_H
 
+#include <crtools.h>
+
 #include <casa/Arrays/Cube.h>
 
 // Custom header files

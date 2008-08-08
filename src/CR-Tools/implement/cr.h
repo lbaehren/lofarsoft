@@ -21,6 +21,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+// ------------------------------------------------------------------------------
+
 /*!
   \defgroup CR Cosmic Rays (CR) analysis pipeline
 
@@ -31,4 +33,24 @@
   <h3>Synopsis</h3>
 
   
+*/
+
+// ------------------------------------------------------------------------------
+
+/*!
+  \defgroup Math CR-Pipeline: Math module
+  \ingroup CR
+
+  \brief Math module for the CR-pipeline
+  
+  \author Lars B&auml;hren
+  
+  \date 2007/01/16
+
+  <h3>Synopsis</h3>
+
+  Even though we make usage of the extensive functionality of the CASA math
+  modules, there sometimes are operations missing which will be required 
+  over and over again. The Math module of the CR-Pipeline is a collection of
+  such additional functions.
 */

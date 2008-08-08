@@ -21,6 +21,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <crtools.h>
+
 #include <iostream>
 
 #include <casa/aips.h>
@@ -318,6 +320,10 @@ int test_createImage ()
 
 /*!
   \brief Test the creation of a HDF5Image
+
+  With <tt>ImageInterface</tt> operating as base class for all types of images,
+  from an application programmer's point of view a <tt>HDF5Image</tt> works just
+  as a <tt>PagedImage</tt>.
 
   \return nofFailedTests -- The number of failed tests in this function
 */

@@ -24,13 +24,13 @@
 #ifndef VECTORCONVERSION_H
 #define VECTORCONVERSION_H
 
+#include <crtools.h>
+
 // Standard library header files
 #include <cmath>
 #include <iostream>
 #include <string>
 #include <vector>
-
-#include <crtools.h>
 
 #ifdef HAVE_BLITZ
 #include <blitz/array.h>

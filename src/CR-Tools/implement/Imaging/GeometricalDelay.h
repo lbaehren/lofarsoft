@@ -24,9 +24,9 @@
 #ifndef GEOMETRICALDELAY_H
 #define GEOMETRICALDELAY_H
 
-#include <string>
-
 #include <crtools.h>
+
+#include <string>
 
 #ifdef HAVE_CASA
 #include <casa/Arrays/IPosition.h>

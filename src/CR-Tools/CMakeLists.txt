@@ -37,14 +37,14 @@ endif (NOT USG_ROOT)
 
 option (CR_BUILD_TESTS          "Build the test programs?"                   YES )
 option (CR_BUILD_EXTERNAL_TESTS "Build test programs for external packages?" YES )
-option (CR_COMPILER_WARNINGS  "Enable standard set of compiler warnings?"    YES )
-option (CR_DEBUGGING_MESSAGES "Print debugging information?"                 NO  )
-option (CR_VERBOSE_CONFIGURE  "Verbose output during configuration?"         NO  )
-option (CR_WITH_GLISH         "Support for Glish applications?"              NO  )
-option (CR_WITH_PYTHON        "Support for Python applications?"             YES )
-option (CR_WITH_PLOTTING      "Support for generation of plots?"             YES )
-option (CR_WITH_GUI           "Build the graphical interface?"               NO  )
-option (CR_WITH_STARTOOLS     "Enable additional routines from LOPES-Star?"  YES )
+option (CR_COMPILER_WARNINGS   "Enable standard set of compiler warnings?"   YES )
+option (CR_DEBUGGING_MESSAGES  "Print debugging information?"                NO  )
+option (CR_VERBOSE_CONFIGURE   "Verbose output during configuration?"        NO  )
+option (CR_WITH_GLISH          "Support for Glish applications?"             NO  )
+option (CR_WITH_PYTHON         "Support for Python applications?"            YES )
+option (CR_WITH_PLOTTING       "Support for generation of plots?"            YES )
+option (CR_WITH_GUI            "Build the graphical interface?"              NO  )
+option (CR_WITH_STARTOOLS      "Enable additional routines from LOPES-Star?" YES )
 
 ## =============================================================================
 ##
@@ -352,9 +352,9 @@ endif (CR_WITH_GUI)
 ## -------------------------------------------------------------------
 ## Build test programs for external packages?  ON/OFF
 
-if (CR_BUILD_EXTERNAL_TESTS)
-  add_subdirectory (test)
-endif (CR_BUILD_EXTERNAL_TESTS)
+#if (CR_BUILD_EXTERNAL_TESTS)
+#  add_subdirectory (test)
+#endif (CR_BUILD_EXTERNAL_TESTS)
 
 ## =============================================================================
 ##
@@ -411,7 +411,6 @@ find_file (dataset_event 2007.01.31.23:59:33.960.event
 
 include_directories (BEFORE
   ${CR_BINARY_DIR}
-  ${CR_SOURCE_DIR}/test
   ${CR_SOURCE_DIR}/implement
   )
 
@@ -421,13 +420,9 @@ if (HAVE_BOOST)
   include_directories (${BOOST_INCLUDES})
 endif (HAVE_BOOST)
 
-if (HAVE_CASA OR HAVE_CASACORE)
-  include_directories (${CASA_INCLUDES})
-endif (HAVE_CASA OR HAVE_CASACORE)
-
-if (CFITSIO_INCLUDES)
+if (HAVE_CFITSIO)
   include_directories (${CFITSIO_INCLUDES})
-endif (CFITSIO_INCLUDES)
+endif (HAVE_CFITSIO)
 
 if (HAVE_DAL)
   include_directories (${DAL_INCLUDES})
@@ -438,29 +433,13 @@ if (HAVE_DAL)
   endif (HAVE_CASA OR HAVE_CASACORE)
 endif (HAVE_DAL)
 
-if (HAVE_FFTW3)
-  include_directories (${FFTW3_INCLUDES})
-endif (HAVE_FFTW3)
-
-if (HAVE_G2C)
+if (G2C_INCLUDES)
   include_directories (${G2C_INCLUDES})
-endif (HAVE_G2C)
+endif (G2C_INCLUDES)
 
-if (HAVE_GIF)
-  include_directories (${GIF_INCLUDES})
-endif (HAVE_GIF)
-
-if (HAVE_GSL)
-  include_directories (${GSL_INCLUDES})
-endif (HAVE_GSL)
-
-if (HAVE_GTK)
-  include_directories (${GTK_INCLUDES})
-endif (HAVE_GTK)
-
-if (HAVE_HDF5)
+if (HDF5_INCLUDES)
   include_directories (${HDF5_INCLUDES})
-endif (HAVE_HDF5)
+endif (HDF5_INCLUDES)
 
 if (HAVE_PGPLOT)
   include_directories (${PGPLOT_INCLUDES})
@@ -470,16 +449,11 @@ if (HAVE_PLPLOT)
   include_directories (${PLPLOT_INCLUDES})
 endif (HAVE_PLPLOT)
 
-if (HAVE_PNG)
+if (PNG_INCLUDES)
   include_directories (${PNG_INCLUDES})
-endif (HAVE_PNG)
-
-if (HAVE_POPT)
-  include_directories (${POPT_INCLUDES})
-endif (HAVE_POPT)
+endif (PNG_INCLUDES)
 
 if (HAVE_POSTGRESQL)
-  set (HAVE_POSTGRESQL 1)
   include_directories (${POSTGRESQL_INCLUDES})
 endif (HAVE_POSTGRESQL)
 
@@ -487,14 +461,14 @@ if (HAVE_PYTHON)
   include_directories (${PYTHON_INCLUDES})
 endif (HAVE_PYTHON)
 
-if (HAVE_ROOT)
+if (ROOT_INCLUDES)
   include_directories (${ROOT_INCLUDES})
-endif (HAVE_ROOT)
+endif (ROOT_INCLUDES)
 
-if (HAVE_WCS)
-  include_directories (${WCS_INCLUDES})
-endif (HAVE_WCS)
-  
+if (HAVE_CASA OR HAVE_CASACORE)
+  include_directories (${CASA_INCLUDES})
+endif (HAVE_CASA OR HAVE_CASACORE)
+
 ## =============================================================================
 ##
 ##  Configuration for the subdirectories
@@ -507,6 +481,10 @@ configure_file (${USG_ROOT}/devel_common/cmake/config_crtools.h.in
   ${CR_BINARY_DIR}/crtools.h)
 
 ## Sub-directories
+
+if (CR_BUILD_EXTERNAL_TESTS)
+  add_subdirectory (test)
+endif (CR_BUILD_EXTERNAL_TESTS)
 
 add_subdirectory (implement)
 add_subdirectory (apps)

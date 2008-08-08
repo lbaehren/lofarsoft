@@ -21,10 +21,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-// $Id$
-
 #ifndef _SKYMAPPER_H_
 #define _SKYMAPPER_H_
+
+#include <crtools.h>
 
 // C++ Standard library
 #include <stdio.h>
@@ -43,6 +43,10 @@
 #include <tables/Tables/SetupNewTab.h>
 #include <tables/Tables/Table.h>
 #include <tables/Tables/TableRecord.h>
+
+#ifdef HAVE_HDF5
+#include <images/Images/HDF5Image.h>
+#endif
 
 // LOPES-Tools header files
 #include <Observation/ObservationData.h>

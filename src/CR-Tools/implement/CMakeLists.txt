@@ -2,9 +2,13 @@
 ## $Id::                                                                        $
 ##------------------------------------------------------------------------------
 
-## -----------------------------------------------------------------------------
-## Modules inside the "CR-Pipeline" package
+## =============================================================================
+##
+##  `libcr` library
+##
+## =============================================================================
 
+## -----------------------------------------------------------------------------
 ## Core modules which should be included in any case
 
 set (cr_modules
@@ -20,25 +24,19 @@ set (cr_modules
   Utilities
   )
 
+## ------------------------------------------------------------------------------
 ## optional modules (added depending on requested features and installed packages)
-
-# (a) Display modules requires at least one of the external plotting libraries to
-#     be available
 
 if (CR_WITH_PLOTTING)
   list (APPEND cr_modules Display)
 endif (CR_WITH_PLOTTING)
 
-# (b) Support for usage of Glish objects and communication bus
-
 if (CR_WITH_GLISH)
   list (APPEND cr_modules ApplicationSupport)
 endif (CR_WITH_GLISH)
 
-## -----------------------------------------------------------------------------
-## Build "libcr"
-
-## [1] Assemble list of source files
+## ------------------------------------------------------------------------------
+## Assemble list of source files
 
 foreach (cr_module ${cr_modules})
   ## list of source files for this module
@@ -60,6 +58,24 @@ if (NOT CR_WITH_STARTOOLS)
   list (REMOVE_ITEM cr_sources Analysis/analyseLOPESevent2.cc)
 endif (NOT CR_WITH_STARTOOLS)
 
+## ------------------------------------------------------------------------------
+## Assemble list of directories containing header files
+
+set (cr_includes "")
+
+if (HAVE_BLITZ)
+  set (cr_includes "${cr_includes} -I${BLITZ_INCLUDES}")
+endif (HAVE_BLITZ)
+
+if (HAVE_GIF)
+  set (cr_includes "${cr_includes} -I${GIF_INCLUDES}")
+endif (HAVE_GIF)
+
+if (HAVE_GSL)
+  set (cr_includes "${cr_includes} -I${GSL_INCLUDES}")
+endif (HAVE_GSL)
+
+## ------------------------------------------------------------------------------
 ## Assemble list of external libraries against which to link
 
 if (HDF5_LIBRARIES)
@@ -141,7 +157,7 @@ add_library (cr
 if (APPLE)
   set_target_properties (cr
     PROPERTIES
-    COMPILE_FLAGS "-fPIC -ftemplate-depth-100"
+    COMPILE_FLAGS "-fPIC -ftemplate-depth-100 ${cr_includes}"
     LINK_FLAGS "-bind_at_load"
     )
 else (APPLE)
@@ -202,7 +218,7 @@ if (CR_WITH_PYTHON)
       PROPERTIES
       PREFIX ""
       SUFFIX .so
-      COMPILE_FLAGS -DPYTHON
+      COMPILE_FLAGS "-DPYTHON"
       LINK_FLAGS "-fPIC -shared"
       )
   endif (APPLE)
@@ -246,10 +262,9 @@ if (CR_WITH_GUI)
     )
   
   ## include directories
-  include_directories (
-    ${QT4_INCLUDES}
-    )
-  
+
+  set (libhfget_includes "-I${QT4_INCLUDES} -I${GTK_INCLUDES} -I${BOOST_INCLUDES}")
+
   ## compiler instructions
   add_library (hfget ${libhfget_sources})
   
@@ -267,7 +282,7 @@ if (CR_WITH_GUI)
       PROPERTIES
       PREFIX "lib"
       SUFFIX .so
-      COMPILE_FLAGS "-pipe -g -D_REENTRANT -w -fpermissive -DQT_GUI_LIB -DQT_CORE_LIB -I${CR_SOURCE_DIR}/implement/GUI"
+      COMPILE_FLAGS "-pipe -g -D_REENTRANT -w -fpermissive -DQT_GUI_LIB -DQT_CORE_LIB -I${CR_SOURCE_DIR}/implement/GUI -I${libhfget_includes}"
       LINK_FLAGS "-fPIC -flat_namespace"
       )
   else (APPLE)
@@ -275,7 +290,7 @@ if (CR_WITH_GUI)
       PROPERTIES
       PREFIX "lib"
       SUFFIX .so
-      COMPILE_FLAGS "-pipe -g -D_REENTRANT -w -DQT_GUI_LIB -DQT_CORE_LIB"
+      COMPILE_FLAGS "-pipe -g -D_REENTRANT -w -DQT_GUI_LIB -DQT_CORE_LIB -I${libhfget_includes}"
       LINK_FLAGS "-fPIC -shared"
       )
   endif (APPLE)

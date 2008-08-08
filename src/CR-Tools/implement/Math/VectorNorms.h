@@ -24,9 +24,9 @@
 #ifndef VECTORNORMS_H
 #define VECTORNORMS_H
 
-#include <vector>
-
 #include <crtools.h>
+
+#include <vector>
 
 #ifdef HAVE_BLITZ
 #include <blitz/array.h>

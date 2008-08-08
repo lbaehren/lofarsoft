@@ -58,14 +58,23 @@ if (HAVE_CASACORE AND HAVE_WCSLIB)
     tcasa_lattices
     tcasa_measures
     )
-
-  if (HAVE_HDF5)
-    include_directories (${HDF5_INCLUDES})
-  endif (HAVE_HDF5)
+  
   
   foreach (test ${tests_casacore})
     ## compiler instructions
-    add_executable (${test} ${test}.cc ${CR_BINARY_DIR}/crtools.h)
+    add_executable (${test} ${test}.cc)
+    ## additional properties
+    if (HAVE_HDF5)
+      set_target_properties (${test}
+	PROPERTIES
+	COMPILE_FLAGS "-I${HDF5_INCLUDES} -I${CR_BINARY_DIR}"
+	)
+    else (HAVE_HDF5)
+      set_target_properties (${test}
+	PROPERTIES
+	COMPILE_FLAGS "-I${CR_BINARY_DIR}"
+	)
+    endif (HAVE_HDF5)
     ## linker instructions
     target_link_libraries (${test}
       cr_test
@@ -87,7 +96,7 @@ endif (HAVE_CASACORE AND HAVE_WCSLIB)
 
 if (HAVE_BLITZ)
   ## compiler instructions
-  add_executable (tUseBlitz tUseBlitz.cc ${CR_BINARY_DIR}/crtools.h)
+  add_executable (tUseBlitz ${CR_BINARY_DIR}/crtools.h tUseBlitz.cc)
   set_target_properties (tUseBlitz
     PROPERTIES
     COMPILE_FLAGS "-I${BLITZ_INCLUDES}"
@@ -187,7 +196,14 @@ endif (HAVE_PGPLOT)
 ## Test for WCSLIB
 
 if (HAVE_WCSLIB)
+  ## compiler instructions
   add_executable (tUseWCS tUseWCS.cc)
+  ## additional properties
+  set_target_properties (tUseWCS
+    PROPERTIES
+    COMPILE_FLAGS "-I${WCSLIB_INCLUDES}"
+    )
+  ## linker instructions
   target_link_libraries (tUseWCS ${WCSLIB_LIBRARIES})
   ## testing
   add_test (tUseWCS tUseWCS)
@@ -203,11 +219,6 @@ endif (HAVE_WCSLIB)
 
 if (HAVE_ROOT AND HAVE_CASACORE AND FFTW3_LIBRARIES)
   if (HAVE_DAL)
-    ## Location of the header files
-    include_directories (
-      ${DAL_INCLUDES}
-      ${ROOT_INCLUDES}
-      )
     ## compiler instructions
     add_executable (tUseROOT tUseROOT.cc)
     ## linker instructions
@@ -234,7 +245,13 @@ if (HAVE_ROOT AND HAVE_CASACORE AND FFTW3_LIBRARIES)
     if (APPLE)
       set_target_properties (tUseROOT
 	PROPERTIES
+	COMPILE_FLAGS "-I${DAL_INCLUDES} -I${ROOT_INCLUDES} -I${FFTW3_INCLUDES}"
 	LINK_FLAGS "-bind_at_load"
+	)
+    else (APPLE)
+      set_target_properties (tUseROOT
+	PROPERTIES
+	COMPILE_FLAGS "-I${DAL_INCLUDES} -I${ROOT_INCLUDES} -I${FFTW3_INCLUDES}"
 	)
     endif (APPLE)
     ## testing

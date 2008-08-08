@@ -38,6 +38,11 @@ endif (LAPACK_LIBRARIES AND G2C_LIBRARIES)
 if (HAVE_POPT AND LAPACK_LIBRARIES)
   ## compiler instructions
   add_executable (trigrun trigrun.cc)
+  ## additional properties
+  set_target_properties (trigrun
+    PROPERTIES
+    COMPILE_FLAGS "-I${POPT_INCLUDES}"
+    )
   ## linker instructions
   target_link_libraries (trigrun
     cr
