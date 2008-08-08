@@ -462,10 +462,6 @@ if (HAVE_HDF5)
   include_directories (${HDF5_INCLUDES})
 endif (HAVE_HDF5)
 
-if (HAVE_LAPACK)
-  include_directories (${LAPACK_INCLUDES})
-endif (HAVE_LAPACK)
-
 if (HAVE_PGPLOT)
   include_directories (${PGPLOT_INCLUDES})
 endif (HAVE_PGPLOT)
