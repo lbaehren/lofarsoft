@@ -96,3 +96,8 @@ if (UNIX)
   set (CMAKE_FIND_LIBRARY_PREFIXES "lib"  CACHE STRING "Library prefixes" FORCE)
   set (CMAKE_FIND_LIBRARY_SUFFIXES "a;so" CACHE STRING "Library suffices" FORCE)
 endif (UNIX)
+
+set (CMAKE_SKIP_BUILD_RPATH            TRUE CACHE BOOL "Build rpath?" FORCE)
+set (CMAKE_BUILD_WITH_INSTALL_RPATH    TRUE CACHE BOOL "Build with install rpath?" FORCE)
+set (CMAKE_INSTALL_RPATH               "${CMAKE_INSTALL_PREFIX}/lib")
+set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE CACHE BOOL "rpath use link path?" FORCE)

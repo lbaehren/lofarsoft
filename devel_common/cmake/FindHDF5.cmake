@@ -38,6 +38,12 @@ include (CMakeSettings)
 ## -----------------------------------------------------------------------------
 ## Check for the header files
 
+find_path (HDF5_INCLUDES hdf5.h H5LT.h hdf5_hl.h
+  PATHS ${include_locations}
+  PATH_SUFFIXES hdf5
+  NO_DEFAULT_PATH
+  )
+
 ## search for individual header files
 
 find_path (HAVE_HDF5_HDF5_H hdf5.h
@@ -57,25 +63,6 @@ find_path (HAVE_HDF5_HDF5_HL_H hdf5_hl.h
   PATH_SUFFIXES hdf5
   NO_DEFAULT_PATH
   )
-
-## include directory; minimum requirement is that we have <hdf5.h>
-
-if (HAVE_HDF5_HDF5_H)
-  ## location of <hdf5.h> marks include directory
-  set (HDF5_INCLUDES ${HAVE_HDF5_HDF5_H})
-  ## <H5LT.h> header file
-  if (HAVE_HDF5_H5LT_H)
-    list (APPEND HDF5_INCLUDES ${HAVE_HDF5_H5LT_H})
-  else (HAVE_HDF5_H5LT_H)
-    message (STATUS "[FindHDF5] Unable to find H5LT.h header file.")
-  endif (HAVE_HDF5_H5LT_H)
-  ## <hdf5_hl.h> header file
-  if (HAVE_HDF5_HDF5_HL_H)
-    list (APPEND HDF5_INCLUDES ${HAVE_HDF5_HDF5_HL_H})
-  else (HAVE_HDF5_HDF5_HL_H)
-    message (STATUS "[FindHDF5] Unable to find hdf5_hl.h header file.")
-  endif (HAVE_HDF5_HDF5_HL_H)
-endif (HAVE_HDF5_HDF5_H)
 
 ## -----------------------------------------------------------------------------
 ## Check for the library components
