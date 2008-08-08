@@ -200,6 +200,7 @@ class analyseLOPESevent2 : public analyseLOPESevent {
       \param doGainCal       - apply calibration of electrical fieldstrength
       \param doDispersionCal - correct for the dispersion (frequency dependend PhaseCal values)
       \param doDelayCal      - correct for general delay of the antennas
+      \param doRFImitigation - suppresses narrow band noise
       \param UpSamplingRate  - Samplerate for upsampling. If smaller than the original
                                samplerate (80MHz for LOPES) then no upsampling is done.
 			            (Check the docs of <tt>UpSampledDR<\tt> for more info.)
@@ -230,6 +231,7 @@ class analyseLOPESevent2 : public analyseLOPESevent {
 			bool doGainCal=true,
 			bool doDispersionCal=true,
 			bool doDelayCal=true,
+			bool doRFImitigation=true,
 			Double UpSamplingRate=0.,
 			String Polarization="ANY",
 			bool SinglePlots=false,

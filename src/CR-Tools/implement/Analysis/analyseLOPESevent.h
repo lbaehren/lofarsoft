@@ -445,9 +445,13 @@ namespace CR { // Namespace CR -- begin
       \param AntennaSelection - Mask (boolean array) which Antenna(-channels) are selected (modified in place)
       \param UpSamplingRate   - Samplerate for upsampling. If smaller than the original
                                 samplerate (80MHz for LOPES) then no upsampling is done.
-			        (Check the docs of <tt>UpSampledDR<\tt> for more info.)
+                                (Check the docs of <tt>UpSampledDR<\tt> for more info.)
       \param ExtraDelay       - additional delay to shift the data in time.
       \param verbose          - produce verbose output on the commandline.
+      \param doGainCal        - does the calibration of the electric fieldstrength
+      \param doDispersionCal  - corrects the dispersion (frequency dependend delay)
+      \param doDelayCal       - corrects the delay of each antenna
+      \param doRFImitigation  - suppresses narrow band noise
 
       \return ok  -- Was operation successful? Returns <tt>True</tt> if yes.
     */
@@ -460,7 +464,8 @@ namespace CR { // Namespace CR -- begin
 		    Bool verbose,
 		    Bool doGainCal=True,
 		    Bool doDispersionCal=True,
-		    Bool doDelayCal=True);
+		    Bool doDelayCal=True,
+		    Bool doRFImitigation=True);
     
     /*!
       \brief Perform the direction fitting

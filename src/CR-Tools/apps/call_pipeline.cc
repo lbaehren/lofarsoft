@@ -87,6 +87,7 @@ using CR::LopesEventIn;
   doGainCal              = true
   doDispersionCal        = true
   doDelayCal             = true
+  doRFImitgation         = true
   polarization		= ANY
   plotStart              = -2.05e-6
   plotEnd                = -1.60e-6
@@ -117,6 +118,7 @@ using CR::LopesEventIn;
     <li>the electrical gain calibration (fieldstrength) will be done,
     <li>correction of the dispersion (frequency dependent delay) is enabled,
     <li>correction of the general delay is enabled,
+    <li>supresses narrow band noise (RFI),
     <li>the analysis does not take care of the polarization of the antennas
         (select EW, NS or BOTH if you want to results for one (both) polarizations),
     <li>the plots start at -2.05 micro seconds and end at -1.60 micro seconds,
@@ -167,6 +169,7 @@ int doTVcal = -1;			// 1: yes, 0: no, -1: use default
 bool doGainCal = true;			// calibration of the electrical fieldstrength
 bool doDispersionCal = true;		// application of the CalTable PhaseCal values	
 bool doDelayCal = true;		// correction for the general delay of each antenna
+bool doRFImitigation = true;		// supresses narrow band noise (RFI)
 string polarization = "ANY";		// polarization: ANY, EW, NS or BOTH
 bool both_pol = false;			// Should both polarizations be processed?
 double plotStart = -2.05e-6;		// in seconds
@@ -239,6 +242,7 @@ void readConfigFile (const string &filename)
         std::cerr << "doGainCal = true\n";
         std::cerr << "doDispersionCal = true\n";
         std::cerr << "doDelayCal = true\n";
+        std::cerr << "doRFImitigation = true\n";
         std::cerr << "polarization = ANY\n";
         std::cerr << "plotBegin = -2.05e-6\n";
         std::cerr << "plotEnd = -1.60e-6\n";
@@ -543,6 +547,27 @@ void readConfigFile (const string &filename)
           {
             std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
             std::cerr << "doDelayCal must be either 'true' or 'false'.\n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+	}
+
+
+        if ( (keyword.compare("doRFImitigation")==0) || (keyword.compare("DoRFIMitigation")==0) 
+             || (keyword.compare("DoRFImitigation")==0) || (keyword.compare("dorfimitigation")==0))
+        {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
+	  {
+	    doRFImitigation = true;
+	    std::cout << "doRFImitigation set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
+	  {
+	    doRFImitigation = false;
+	    std::cout << "doRFImitigation set to 'false'.\n";
+	  } else
+          {
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            std::cerr << "doRFImitigation must be either 'true' or 'false'.\n";
             std::cerr << "\nProgram will continue skipping the problem." << std::endl;
           }
 	}
@@ -1077,11 +1102,31 @@ int main (int argc, char *argv[])
 	eventPipeline.initPipeline(obsrec);
 
 	// call the pipeline with an extra delay = 0.
-        results = eventPipeline.RunPipeline (path+filename, azimuth, elevation, distance, core_x, core_y, RotatePos,
-                                           plotprefix+polPlotPrefix, generatePlots, static_cast< Vector<int> >(flagged),
-                                           verbose, simplexFit, 0., doTVcal, doGainCal, doDispersionCal, doDelayCal,
-                                           upsamplingRate, polarization, singlePlots, PlotRawData,
-                                           CalculateMaxima, listCalcMaxima, printShowerCoordinates);
+        results = eventPipeline.RunPipeline (path+filename,
+					     azimuth,
+					     elevation,
+					     distance,
+					     core_x,
+					     core_y,
+					     RotatePos,
+					     plotprefix+polPlotPrefix,
+					     generatePlots,
+					     static_cast< Vector<int> >(flagged),
+					     verbose,
+					     simplexFit,
+					     0.,
+					     doTVcal,
+					     doGainCal,
+					     doDispersionCal,
+					     doDelayCal,
+					     doRFImitigation,
+					     upsamplingRate,
+					     polarization,
+					     singlePlots,
+					     PlotRawData,
+					     CalculateMaxima,
+					     listCalcMaxima,
+					     printShowerCoordinates);
 
         // make a postscript with a summary of all plots
         // if summaryColumns = 0 the method does not create a summary.
@@ -1101,7 +1146,7 @@ int main (int argc, char *argv[])
           polPlotPrefix = "-NS";
           polarization = "NS";	// do NS here
         }
-        
+
 	// initialize the pipeline
 	eventPipeline.initPipeline(obsrec);
 
@@ -1123,6 +1168,7 @@ int main (int argc, char *argv[])
 					     doGainCal,
 					     doDispersionCal,
 					     doDelayCal,
+					     doRFImitigation,
 					     upsamplingRate,
 					     polarization,
 					     singlePlots,

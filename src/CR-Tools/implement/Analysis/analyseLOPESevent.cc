@@ -217,7 +217,8 @@ namespace CR { // Namespace CR -- begin
 				     Bool verbose,
 				     Bool doGainCal,
 				     Bool doDispersionCal,
-				     Bool doDelayCal){
+				     Bool doDelayCal,
+				     Bool doRFImitigation){
     try {
       pipeline_p->setVerbosity(verbose);
       // Generate the Data Reader
@@ -258,6 +259,9 @@ namespace CR { // Namespace CR -- begin
 	};
 	break;
       };
+
+      //  Enable/disable doing the RFI mitigation
+      pipeline_p->doRFImitigation(doRFImitigation);
 
       // Generate the antenna selection
       Int i,j,id,nants,nselants, nflagged=FlaggedAntIDs.nelements();

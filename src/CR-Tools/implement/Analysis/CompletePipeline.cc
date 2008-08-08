@@ -467,10 +467,17 @@ namespace CR { // Namespace CR -- begin
         std::cerr << "CompletePipeline:calculatePlotRange: Error: plotStop_p is greater than plotStart_p!" << std::endl;
         return Slice(0,0);
       }
-      int startsample = ntrue(xaxis<plotStart_p);            //number of elements smaller then starting value of plot range
-      int stopsample = ntrue(xaxis<plotStop_p);              //number of elements smaller then end of plot range
-      Slice plotRange(startsample,(stopsample-startsample)); // create Slice with plotRange
-      return plotRange;
+      unsigned int startsample = ntrue(xaxis<plotStart_p);     //number of elements smaller then starting value of plot range
+      unsigned int stopsample = ntrue(xaxis<plotStop_p);       //number of elements smaller then end of plot range
+
+      // check for consistency
+      if (startsample >= xaxis.size())
+        std::cerr << "CompletePipeline:calculatePlotRange: plot start is too large!" << std::endl;
+      else if (startsample == stopsample)
+        std::cerr << "CompletePipeline:calculatePlotRange: plot range is too small!" << std::endl;
+
+      // create Slice with plotRange
+      return Slice(startsample,(stopsample-startsample));
     } catch (AipsError x) 
     {
         std::cerr << "CompletePipeline:calculatePlotRange: " << x.getMesg() << std::endl;
@@ -495,10 +502,9 @@ namespace CR { // Namespace CR -- begin
       int startsample = ntrue(xaxis<plotStart_p);
       //number of elements smaller then end of plot range
       int stopsample = ntrue(xaxis<plotStop_p);  
-      // create Slice with noiseRange
-      Slice noiseRange((startsample+startsample-stopsample),(stopsample-startsample));
 
-      return noiseRange;
+      // create Slice with noiseRange
+      return  Slice((startsample+startsample-stopsample),(stopsample-startsample));
     } catch (AipsError x) 
     {
         std::cerr << "CompletePipeline:calculateNoiseRange: " << x.getMesg() << std::endl;
@@ -523,9 +529,9 @@ namespace CR { // Namespace CR -- begin
       int startsample = ntrue(xaxis<(ccBeamcenter-ccWindowWidth_p)); 
       //number of elements smaller then end of plot range
       int stopsample = ntrue(xaxis<(ccBeamcenter+ccWindowWidth_p));
+
       // create Slice with plotRangeNoise
-      Slice rangeCC(startsample,(stopsample-startsample));
-      return rangeCC;
+      return Slice(startsample,(stopsample-startsample));
     } catch (AipsError x) 
     {
         std::cerr << "CompletePipeline:calculateCCRange: " << x.getMesg() << std::endl;
@@ -702,7 +708,7 @@ namespace CR { // Namespace CR -- begin
       xaxis *= 1e6;
       xbeam *= 1e6;
       pbeam *= 1e6;
-    
+
       // define Plotrange
       xmin = min(xaxis(plotRange));
       xmax = max(xaxis(plotRange));
@@ -716,7 +722,7 @@ namespace CR { // Namespace CR -- begin
       string label;
       label = "GT " + gtlabel.str() + " - X-Beam and Power";
       plotter.AddLabels("Time t [#gmsec]", "X-Beam [#gmV/m/MHz]",label);
-    
+
       // Add X-beam
       plotter.PlotLine(xaxis(plotRange),xbeam(plotRange),9,1);
       // Add Power-beam
@@ -788,7 +794,7 @@ namespace CR { // Namespace CR -- begin
         // Upsampled yValues
         upYvalues = getUpsampledFieldstrength(dr,upsampling_exp, antennaSelection);
       }
-    
+
       // Upsampled x-axis
       Vector<Double> upxaxis = getUpsampledTimeAxis(dr,upsampling_exp);
 
@@ -921,7 +927,7 @@ namespace CR { // Namespace CR -- begin
         // Initialize the plot giving xmin, xmax, ymin and ymax
         plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
         // Add labels 
-        antennanumber << (antennaSelection.nelements()-1);
+        antennanumber << ntrue(antennaSelection);
         label = "GT " + gtlabel.str() + " - " + antennanumber.str() + " Antennas";
 
         if (rawData)
@@ -1000,7 +1006,7 @@ namespace CR { // Namespace CR -- begin
 
 
       // Define the time range considered (the same as the plot range)
-      Slice range = calculatePlotRange(timeValues);
+      Slice range(calculatePlotRange(timeValues));
 
       // cut time values
       timeRange = timeValues(range);
@@ -1016,6 +1022,7 @@ namespace CR { // Namespace CR -- begin
         // Start with height 0 and search for heigher and lower values
         double maximum = 0;
         int maxtimevalue = 0;
+
         // get current envelope of trace
         trace = envelope(yValues.column(i)(range));
 
@@ -1029,7 +1036,7 @@ namespace CR { // Namespace CR -- begin
           } 
 	}
 
-        // calculate FWHM
+       // calculate FWHM
        double pulsestart = 0;
        double pulsestop = 0;
        // find begin of pulse (half height)
@@ -1073,11 +1080,11 @@ namespace CR { // Namespace CR -- begin
         if (pulsestart != 0) start_time.push_back(pulsestart*1e6);
 
         // print the calculated values
-        std::cout << std::setw(2) << i+1 << "     " 
-                  << std::setw(8) << maximum*1e6 << "          " 
-                  << std::setw(8) << pulsestart*1e6 << "       "
-                  << std::setw(8) << timeRange(maxtimevalue)*1e6 << "   "
-                  << std::setw(8) << (pulsestop-pulsestart)*1e9 << std::endl;
+        cout << setw(2) << i+1 << "     " 
+             << setw(11)<< maximum*1e6 << "       " 
+             << setw(8) << pulsestart*1e6 << "       "
+             << setw(8) << timeRange(maxtimevalue)*1e6 << "   "
+             << setw(8) << (pulsestop-pulsestart)*1e9 << std::endl;
       } // for i
 
       // calculate the averages and the range if there is more than one value
