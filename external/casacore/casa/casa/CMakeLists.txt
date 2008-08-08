@@ -21,7 +21,9 @@ SET (casa_modules
   )
 
 if (casacore_HDF5_SUPPORT)
-  list (APPEND casa_modules "HDF5")
+  list (APPEND casa_modules HDF5)
+else (casacore_HDF5_SUPPORT)
+  message (STATUS "[casacore] Module HDF5 excluded from libcasa_casa.")
 endif (casacore_HDF5_SUPPORT)
 
 ## -----------------------------------------------------------------------------
@@ -68,7 +70,7 @@ install (FILES ${casa_headers}
   DESTINATION include/casacore/casa
   )
 
-foreach (casa_module ${casa_modules})
+foreach (casa_module ${casa_modules} HDF5)
   ## assemble list of header files
   FILE (GLOB casa_headers ${casa_module}/*.h ${casa_module}/*.tcc)
   ## set installation location
