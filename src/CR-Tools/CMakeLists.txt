@@ -416,6 +416,10 @@ include_directories (BEFORE
 
 ## External header files
 
+if (HAVE_BLITZ)
+  include_directories (${BLITZ_INCLUDES})
+endif (HAVE_BLITZ)
+
 if (HAVE_BOOST)
   include_directories (${BOOST_INCLUDES})
 endif (HAVE_BOOST)

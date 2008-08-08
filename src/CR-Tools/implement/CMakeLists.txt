@@ -63,10 +63,6 @@ endif (NOT CR_WITH_STARTOOLS)
 
 set (cr_includes "")
 
-if (HAVE_BLITZ)
-  set (cr_includes "${cr_includes} -I${BLITZ_INCLUDES}")
-endif (HAVE_BLITZ)
-
 if (HAVE_GIF)
   set (cr_includes "${cr_includes} -I${GIF_INCLUDES}")
 endif (HAVE_GIF)
