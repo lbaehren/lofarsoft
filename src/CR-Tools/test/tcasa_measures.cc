@@ -251,6 +251,7 @@ int test_MPosition ()
     nofFailedTests++;
   }
 
+#ifndef AIPS_GCC3
   cout << "[2] Basic example from API documentation ..." << endl;
   try {
     MPosition obs( MVPosition( Quantity( 10, "m"),
@@ -295,6 +296,7 @@ int test_MPosition ()
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
+#endif
 
   return nofFailedTests;
 }
@@ -348,6 +350,7 @@ int test_MDirection ()
     nofFailedTests++;
   }
 
+#ifndef AIPS_GCC3
   cout << "[3] Construction of MDirection as in HDF5Common ..." << endl;
   try {
     casa::Vector<double> values (2);
@@ -376,7 +379,7 @@ int test_MDirection ()
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
-  
+#endif
   
   return nofFailedTests;
 }
