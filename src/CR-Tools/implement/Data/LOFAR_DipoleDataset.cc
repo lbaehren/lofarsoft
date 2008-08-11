@@ -520,6 +520,13 @@ namespace DAL { // Namespace DAL -- begin
     if (DAL::h5get_attribute(val,
 			     attribute_name(DAL::DATA_LENGTH),
 			     datasetID_p)) {
+	if (val == 0){
+	  std::vector<uint> shape;
+	  if (DAL::h5get_dataset_shape(shape,
+					 datasetID_p)) {
+	    val = shape[0];
+	  };
+	};
       return val;
     } else {
       return 0;

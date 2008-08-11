@@ -297,6 +297,54 @@ namespace DAL { // Namespace DAL -- begin
     return true;
   }
   
+  // ---------------------------------------------------------------- channelIDs
+
+#ifdef HAVE_CASA
+  casa::Vector<int> LOFAR_Timeseries::channelIDs ()
+  {
+    uint n           = 0;
+    uint station     = 0;
+    uint dipole      = 0;
+    uint nofDipoles  = nofDipoleDatasets();
+    uint nofStations = nofStationGroups();
+    casa::Vector<int> channelIDvalues (nofDipoles);
+    casa::Vector<int> tmp;
+    
+    for (station=0; station<nofStations; station++) {
+      tmp        = groups_p[station].channelIDs();
+      nofDipoles = groups_p[station].nofDipoleDatasets();
+      for (dipole=0; dipole<nofDipoles; dipole++) {
+	channelIDvalues(n) = tmp(dipole);
+	n++;
+      }
+    }
+    
+    return channelIDvalues;
+  }
+#else
+  std::vector<uint> LOFAR_Timeseries::channelIDs ()
+  {
+    uint n           = 0;
+    uint station     = 0;
+    uint dipole      = 0;
+    uint nofDipoles  = nofDipoleDatasets();
+    uint nofStations = nofStationGroups();
+    std::vector<int> channelIDvalues (nofDipoles);
+    std::vector<int> tmp;
+    
+    for (station=0; station<nofStations; station++) {
+      tmp        = groups_p[station].channelIDs();
+      nofDipoles = groups_p[station].nofDipoleDatasets();
+      for (dipole=0; dipole<nofDipoles; dipole++) {
+	channelIDvalues[n] = tmp[dipole];
+	n++;
+      }
+    }
+    
+    return channelIDvalues;
+  }
+#endif
+
   // ---------------------------------------------------------------------- times
 
 #ifdef HAVE_CASA
@@ -311,7 +359,7 @@ namespace DAL { // Namespace DAL -- begin
     casa::Vector<uint> tmp;
     
     for (station=0; station<nofStations; station++) {
-      tmp        = groups_p[n].times();
+      tmp        = groups_p[station].times();
       nofDipoles = groups_p[station].nofDipoleDatasets();
       for (dipole=0; dipole<nofDipoles; dipole++) {
 	UnixTimes(n) = tmp(dipole);
@@ -333,7 +381,7 @@ namespace DAL { // Namespace DAL -- begin
     std::vector<uint> tmp;
     
     for (station=0; station<nofStations; station++) {
-      tmp        = groups_p[n].times();
+      tmp        = groups_p[station].times();
       nofDipoles = groups_p[station].nofDipoleDatasets();
       for (dipole=0; dipole<nofDipoles; dipole++) {
 	UnixTimes[n] = tmp[dipole];
@@ -359,7 +407,7 @@ namespace DAL { // Namespace DAL -- begin
     casa::Vector<double> tmp;
     
     for (station=0; station<nofStations; station++) {
-      tmp = groups_p[n].sample_frequencies(units);
+      tmp = groups_p[station].sample_frequencies(units);
       nofDipoles = groups_p[station].nofDipoleDatasets();
       for (dipole=0; dipole<nofDipoles; dipole++) {
 	sampleFrequencies(n) = tmp(dipole);
@@ -381,7 +429,7 @@ namespace DAL { // Namespace DAL -- begin
     std::vector<double> tmp;
     
     for (station=0; station<nofStations; station++) {
-      tmp = groups_p[n].sample_frequencies(units);
+      tmp = groups_p[station].sample_frequencies(units);
       nofDipoles = groups_p[station].nofDipoleDatasets();
       for (dipole=0; dipole<nofDipoles; dipole++) {
 	sampleFrequencies[n] = tmp[dipole];
@@ -390,6 +438,54 @@ namespace DAL { // Namespace DAL -- begin
     }
     
     return sampleFrequencies;
+  }
+#endif
+
+  // ----------------------------------------------------------------- data_lengths
+
+#ifdef HAVE_CASA
+  casa::Vector<uint> LOFAR_Timeseries::data_lengths ()
+  {
+    uint n           = 0;
+    uint station     = 0;
+    uint dipole      = 0;
+    uint nofDipoles  = nofDipoleDatasets();
+    uint nofStations = nofStationGroups();
+    casa::Vector<uint> dataLengths (nofDipoles);
+    casa::Vector<uint> tmp;
+    
+    for (station=0; station<nofStations; station++) {
+      tmp        = groups_p[station].data_lengths();
+      nofDipoles = groups_p[station].nofDipoleDatasets();
+      for (dipole=0; dipole<nofDipoles; dipole++) {
+	dataLengths(n) = tmp(dipole);
+	n++;
+      }
+    }
+    
+    return dataLengths;
+  }
+#else
+  std::vector<uint> LOFAR_Timeseries::data_lengths ()
+  {
+    uint n           = 0;
+    uint station     = 0;
+    uint dipole      = 0;
+    uint nofDipoles  = nofDipoleDatasets();
+    uint nofStations = nofStationGroups();
+    std::vector<uint> dataLengths (nofDipoles);
+    std::vector<uint> tmp;
+    
+    for (station=0; station<nofStations; station++) {
+      tmp        = groups_p[station].data_lengths();
+      nofDipoles = groups_p[station].nofDipoleDatasets();
+      for (dipole=0; dipole<nofDipoles; dipole++) {
+	dataLengths[n] = tmp[dipole];
+	n++;
+      }
+    }
+    
+    return dataLengths;
   }
 #endif
 

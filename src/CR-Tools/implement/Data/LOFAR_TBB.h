@@ -234,6 +234,15 @@ namespace CR { // Namespace CR -- begin
   protected:
 
     bool setStreams ();
+
+    /*!
+      \brief Fill the header information from the into a header record.
+      
+      \return status -- Status of the operation; returns <i>true</i> if everything
+      went fine.
+    */
+    bool generateHeaderRecord ();
+
     
   private:
 

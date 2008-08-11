@@ -256,9 +256,31 @@ namespace CR { // Namespace CR -- begin
       std::cerr << "[LOFAR_TBB::setStreams]" << message << endl;
       status = false;
     }
-    
+
+    // Set the header record only if status is true
+    status = status && generateHeaderRecord();
+
     return status;
   }
+
+  // ----------------------------------------------------------------- setStreams
+
+  bool LOFAR_TBB::generateHeaderRecord(){
+    try {
+      header_p.define("Date",min(times()));
+      header_p.define("AntennaIDs",channelIDs());
+      header_p.define("Observatory",telescope());
+      header_p.define("Filesize",min(data_lengths()));
+      header_p.define("SampleFreq",DataReader::sampleFrequency());
+      //      header_p.define("StartSample",headerpoint_p->SampleNr);
+      //      header_p.define("dDate",(Double)headerpoint_p->Date + 
+      //		      (Double)headerpoint_p->SampleNr/(Double)headerpoint_p->sampleFreq/1e6);
+    } catch (AipsError x) {
+      cerr << "LOFAR_TBB:generateHeaderRecord: " << x.getMesg() << endl;
+      return false;
+    }; 
+    return true;
+  };
   
   // ------------------------------------------------------------------------- fx
 

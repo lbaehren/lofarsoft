@@ -649,6 +649,15 @@ namespace CR {  //  Namespace CR -- begin
     
     return frequencies;
   }
+
+  void DataReader::setHeader (Record const &header)
+  {
+    try {
+      header_p.merge(header,RecordInterface::OverwriteDuplicates);
+    } catch (AipsError x) {
+      cerr << "[DataReader::setHeader]" << x.getMesg() << endl;
+    };
+  }
   
   // ============================================================================
   //

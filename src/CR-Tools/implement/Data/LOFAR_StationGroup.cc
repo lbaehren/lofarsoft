@@ -491,7 +491,7 @@ namespace DAL { // Namespace DAL -- begin
   {
     std::vector<int> channels_ids;
     
-    for (uint n(0); datasets_p.size(); n++) {
+    for (uint n(0); n<datasets_p.size(); n++) {
       channels_ids.push_back(datasets_p[n].channelID());
     }
     
@@ -504,7 +504,7 @@ namespace DAL { // Namespace DAL -- begin
   {
     std::vector<std::string> names;
     
-    for (uint n(0); datasets_p.size(); n++) {
+    for (uint n(0); n<datasets_p.size(); n++) {
       names.push_back(datasets_p[n].channelName());
     }
     

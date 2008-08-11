@@ -567,12 +567,24 @@ namespace DAL { // Namespace DAL -- begin
     }
 
     /*!
-      \brief Retrieve the list of channels IDs
+      \brief Retrieve the list of channel names (i.e. as string)
+
+      \return channelIDnames -- A list of the channel IDs for all the dipoles within
+              this data set.
+     */
+    std::vector<std::string> channelNames ();
+
+    /*!
+      \brief Retrieve the list of channel IDs
 
       \return channelIDs -- A list of the channel IDs for all the dipoles within
               this data set.
      */
-    std::vector<std::string> channelIDs ();
+#ifdef HAVE_CASA
+    casa::Vector<int> channelIDs ();
+#else
+    std::vector<int> channelIDs ();
+#endif
     
     /*!
       \brief Get the values of TIME for all present datasets
@@ -596,6 +608,18 @@ namespace DAL { // Namespace DAL -- begin
     casa::Vector<double> sample_frequencies (std::string const &units="Hz");
 #else
     std::vector<double> sample_frequencies (std::string const &units="Hz");
+#endif
+
+    /*!
+      \brief Get the values of DATA_LENGTH for all present datasets
+      
+      \return times -- Values of the DATA_LENGTH attribute for all datasets present in
+              this station group
+    */
+#ifdef HAVE_CASA
+    casa::Vector<uint> data_lengths ();
+#else
+    std::vector<uint> data_lengths ();
 #endif
 
     /*!
