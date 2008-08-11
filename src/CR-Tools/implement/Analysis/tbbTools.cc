@@ -59,14 +59,27 @@ namespace CR { // Namespace CR -- begin
   Bool tbbTools::meanFPGAtrigger(Vector<Double> inary, int level, int start, int stop, int window,
 				 int afterwindow,
 				 Vector<Int> &index, Vector<Int> &sum, Vector<Int> &width, 
-				 Vector<Int> &peak, Vector<Int> &meanval, Vector<Int> &afterval){
+				 Vector<Int> &peak, Vector<Int> &meanval, Vector<Int> &afterval,
+				 Bool reset){
     try {
       int i,numPulses=0,outsize=100;
-      int pos1=0, pos2=0, pos3=0, pos4=0, pos5=0, opos;
-      int apos2=0, apos3=0, apos4=0;
-      Bool pos6=False, isTrigger=False, doAfterTrigger=False, isAfterTrigger=False;
-      int startcount=0, stopcount=0, psum=0, pmax=0, aftercount=0;
+      static int pos1=0, pos2=0, pos3=0, pos4=0, pos5=0, opos;
+      static int apos2=0, apos3=0, apos4=0;
+      static Bool pos6=False, isTrigger=False, doAfterTrigger=False, isAfterTrigger=False;
+      static int startcount=0, stopcount=0, startindex=0, startmean=0, psum=0, pmax=0, aftercount=0;
       
+
+      doAfterTrigger=False;
+      if (reset) {
+	// start a new dataset, reset all internal variables.
+	pos1=0; pos2=0; pos3=0; pos4=0; pos5=0; opos=0; 
+	apos2=0; apos3=0; apos4=0;
+	pos6=False; isTrigger=False; isAfterTrigger=False;
+	startcount=0; stopcount=0; startindex=0; startmean=0; psum=0; pmax=0; aftercount=0;
+//       } else {
+// 	//input data is the next block after the previeous processed.
+      };
+
       index.resize(outsize);
       sum.resize(outsize);
       width.resize(outsize);
@@ -88,7 +101,7 @@ namespace CR { // Namespace CR -- begin
 	  apos2 = pos1+apos4;
 	};
 	pos1 = (int)abs(inary(i));
-	if (i<window) continue;
+	if (reset && (i<window)) continue;
 	if (isTrigger){
 	  if (opos>pmax) pmax = opos;
 	  psum += opos;
@@ -99,9 +112,12 @@ namespace CR { // Namespace CR -- begin
 	  };
 	  if (stopcount>=stop){
 	    isTrigger=False;
+	    index(numPulses) = startindex;
 	    sum(numPulses) = psum;
 	    peak(numPulses) = pmax;
-	    width(numPulses) = i-index(numPulses);
+	    width(numPulses) = i-startindex;
+	    meanval(numPulses) = startmean;
+	    afterval(numPulses) = -1;
 	    numPulses++;
 	    startcount=0;
 	    stopcount=0;
@@ -112,16 +128,15 @@ namespace CR { // Namespace CR -- begin
 	  if (aftercount>=afterwindow){
 	    isAfterTrigger=False;
 	    aftercount = 0;
-	    afterval(numPulses-1) = apos3;
+	    if (numPulses>0) {afterval(numPulses-1) = apos3;}
 	  };
 	} else {
 	  if (pos6) {
 	    startcount += 4;
 	    if (startcount>=start){
 	      isTrigger=True;
-	      index(numPulses) = i;
-	      meanval(numPulses) = pos3;
-	      afterval(numPulses) = -1;
+	      startindex = i;
+	      startmean = pos3;
 	      pmax = opos;
 	      psum = opos;
 	    };
@@ -139,6 +154,9 @@ namespace CR { // Namespace CR -- begin
 	  afterval.resize(outsize,True);
 	};
       };    
+      //save the values for the next block
+      if (isTrigger) { startindex = startindex - i; };
+
       index.resize(numPulses,True);
       sum.resize(numPulses,True);
       width.resize(numPulses,True);

@@ -178,7 +178,7 @@ Bool GenDynSpec(GlishSysEvent &event, void *){
       };
       Vector<Double> tmpvec(fftsize,0.);
       for (i=0; i<numblocks; i++){
-	tbbIn.setBlock(i+1);
+	tbbIn.setBlock(i);
 	tmpvec += amplitude(tbbIn.calfft().column(0));
       };
       data.column(fnum) = tmpvec/(Double)numblocks;    
@@ -229,7 +229,8 @@ Bool GenInputStatistics(GlishSysEvent &event, void *){
       maxsize = input.asInt("maxsize");
     };
     Int fnum,numFiles=files.nelements();
-    Vector<Double> data,means(numFiles,0.),stddevs(numFiles,0.),mins(numFiles,0.),maxs(numFiles,0.);
+    Vector<Double> data,means(numFiles,0.),stddevs(numFiles,0.);
+    Vector<Double> mins(numFiles,0.),maxs(numFiles,0.),ddates(numFiles,0.);
     Double dmin,dmax;
     for (fnum=0; fnum<numFiles; fnum++){
       // initialize the Data Reader
@@ -256,6 +257,7 @@ Bool GenInputStatistics(GlishSysEvent &event, void *){
       maxs(fnum)    = dmax;
       means(fnum)   = mean(data);
       stddevs(fnum) = stddev(data);
+      ddates(fnum) = tbbIn.header().asDouble("dDate");;
       if (((fnum+1)%50)==0) {
 	cout << "SimpleDynspecClient:GenInputStatistics: processed " << fnum+1 << " files out of " 
 	     << numFiles << "!" << endl;
@@ -265,6 +267,7 @@ Bool GenInputStatistics(GlishSysEvent &event, void *){
     output.define("maxs",maxs);
     output.define("means",means);
     output.define("stddevs",stddevs);
+    output.define("ddate",ddates);
     outrec.fromRecord(output);
     glishBus->reply(outrec);
   } catch (AipsError x) {

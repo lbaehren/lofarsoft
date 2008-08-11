@@ -156,6 +156,27 @@ endif (HAVE_CASA OR HAVE_CASACORE)
 
 
 ## -------------------------------------------------------------------
+## tbbTest
+
+if (HAVE_CASA OR HAVE_CASACORE)
+  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    ## compiler instructions
+    add_executable (tbbTest tbbTest.cc)
+    ## linker instructions
+    target_link_libraries (tbbTest
+      cr
+      ${DAL_LIBRARIES}
+      ${HDF5_LIBRARIES}
+      ${CFITSIO_LIBRARIES}
+      )
+    ## installation instructions
+    list (APPEND cr_apps tbbTest)
+  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    message (STATUS "[CR-Tools] Unable to build executable tbbTest.")
+  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
+endif (HAVE_CASA OR HAVE_CASACORE)
+
+## -------------------------------------------------------------------
 ## tbbStatistics
 
 if (HAVE_CASA OR HAVE_CASACORE)

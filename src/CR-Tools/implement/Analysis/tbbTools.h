@@ -107,13 +107,16 @@ namespace CR { // Namespace CR -- begin
       \param sum[out]    - sum of the samples in the pulse
       \param width[out]  - width of the pulse
       \param peak[out]   - peak value inside the pulse
+      \param reset[in]   - reset internal values? (Set to False if inary follows 
+                           seamlessly the previous block)
       
       \return ok -- True if successfull
     */
     Bool meanFPGAtrigger(Vector<Double> inary, int level, int start, int stop, int window,
 			 int afterwindow,
 			 Vector<Int> &index, Vector<Int> &sum, Vector<Int> &width, 
-			 Vector<Int> &peak, Vector<Int> &meanval, Vector<Int> &afterval);
+			 Vector<Int> &peak, Vector<Int> &meanval, Vector<Int> &afterval,
+			 Bool reset=True);
     
     Bool meanFPGAtrigger(Vector<Double> inary, int level, int start, int stop, int window,
 			 Vector<Int> &index, Vector<Int> &sum, Vector<Int> &width, 
