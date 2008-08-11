@@ -24,6 +24,8 @@
 #ifndef STATIONBEAM_H
 #define STATIONBEAM_H
 
+#include <crtools.h>
+
 // Standard library header files
 #include <cmath>
 #include <iostream>
@@ -56,9 +58,10 @@
 
 #include <casa/namespace.h>
 
+#ifdef CR_WITH_PLOTTING
 #include <Display/SimplePlot.h>
-
 using CR::SimplePlot;
+#endif
 
 namespace CR { // Namespace CR -- begin
   
@@ -158,171 +161,183 @@ namespace CR { // Namespace CR -- begin
       \brief Provide a summary of the internal status
     */
     void summary (std::ostream &os);    
-
+    
     // ------------------------------------------------------------------ Methods
     
     
-Double station_beam(const Double& frequency,
-              	    const Double& hr_angle,
-		    const Double& declination,
-		    const Double& source_declination,
-          	    const Double& source_hr_angle,
-		    const Double& station_radii,
-		    const Vector<Double>& legendre_root,
-		    const Vector<Double>& legendre_weight ) ;
-				      
- 
-   
-Double tied_array( const Double& frequency,
-	           const Double& hr_angle,
-		   const Double& declination,
-		   const Double& source_declination,
-		   const Double& source_hr_angle,
-		   const Double& station_radii,
-		   const Vector<uint>& station_id,
-		   Vector<Double>& position_x,
-		   Vector<Double>& position_y,
-		   const Vector<Double>& legendre_root,
-		   const Vector<Double>& legendre_weight ) ;
-
-   
-Double incoherent_beam( const Double& frequency,
-	                const Double& hr_angle,
-		        const Double& declination,
-		        const Double& source_declination,
-		        const Double& source_hr_angle,
-		        const Double& station_radii,
-		        const Vector<uint>& station_id,
-		        const Vector<Double>& legendre_root,
-		        const Vector<Double>& legendre_weight ) ;
-
-			    
-Double integrate_freq( const Double& hr_angle,
-                       const Double& declination,
-                       const Double& source_declination,
-	               const Double& source_hr_angle,
-	               const Double& station_radii,
-	               const Vector<uint>& station_id,
-		       const Double& freq_init,
-		       const Double& bandwidth,
-                       const Double& freq_interval,
+    Double station_beam(const Double& frequency,
+			const Double& hr_angle,
+			const Double& declination,
+			const Double& source_declination,
+			const Double& source_hr_angle,
+			const Double& station_radii,
+			const Vector<Double>& legendre_root,
+			const Vector<Double>& legendre_weight ) ;
+    
+    
+    
+    Double tied_array( const Double& frequency,
+		       const Double& hr_angle,
+		       const Double& declination,
+		       const Double& source_declination,
+		       const Double& source_hr_angle,
+		       const Double& station_radii,
+		       const Vector<uint>& station_id,
 		       Vector<Double>& position_x,
 		       Vector<Double>& position_y,
-                       const Vector<Double>& legendre_root,
-                       const Vector<Double>& legendre_weight );
- 
- 	
-Double incoherent_beaming( const Double& hr_angle,
-                           const Double& declination,
-                           const Double& source_declination,
-	                   const Double& source_hr_angle,
-	                   const Double& station_radii,
-	                   const Vector<uint>& station_id,
-		           const Double& frequency,
-		           Vector<Double>& position_x,
-		           Vector<Double>& position_y,
-                           const Vector<Double>& legendre_root,
-                           const Vector<Double>& legendre_weight );
-
-Double integrate_phi( const Double& declination,
-                      const Double& source_declination,
-	              const Double& source_hr_angle,
-	              const Double& station_radii,
-                      const Vector<uint>& station_id,
-                      const Double& freq_init,
-	              const Double& bandwidth,
-                      const Double& freq_interval,
-	              Vector<Double>& position_x,
-	              Vector<Double>& position_y,
-                      const Vector<Double>& legendre_root,
-		      const Vector<Double>& legendre_weight )   ;
-
- 	
-Double integrate_decli( const Double& source_declination,
-	                const Double& source_hr_angle,
-	                const Double& station_radii,
-                        const Vector<uint>& station_id,
-                        const Double& freq_init,
-	                const Double& bandwidth,
-                        const Double& freq_interval,
-	                Vector<Double>& position_x,
-	                Vector<Double>& position_y,
-                        const Vector<Double>& legendre_root,
-                        const Vector<Double>& legendre_weight )   ;
-
-
-Double beamwidth_decli(  const Double& source_declination,
-                         const Double& source_hr_angle,
-	                 const Double& station_radii,
-	                 const Vector<uint>& station_id,
-	                 const Double& freq_init,
-		         const Double& bandwidth,
-                         const Double& freq_interval,
-		         Vector<Double>& position_x,
-		         Vector<Double>& position_y,
-                         const Vector<Double>& legendre_root,
-             	         const Vector<Double>& legendre_weight ) ;
-
-
-Double beamwidth_hr(  const Double& source_declination,
-                      const Double& source_hr_angle,
-	              const Double& station_radii,
-	              const Vector<uint>& station_id,
-	              const Double& freq_init,
-		      const Double& bandwidth,
-                      const Double& freq_interval,
-		      Vector<Double>& position_x,
-		      Vector<Double>& position_y,
-                      const Vector<Double>& legendre_root,
-             	      const Vector<Double>& legendre_weight )  ;
-
-void generate_statistics_table( const Double& station_radii,
-                               const Vector<uint>& station_id,
-                               const Double& freq_init,
-                               const Double& bandwidth,
-                               const Double& freq_interval,
-		               Vector<Double>& position_x,
-		               Vector<Double>& position_y,
-                               const Vector<Double>& legendre_root,
-             	               const Vector<Double>& legendre_weight ) ;
-			       
-Double power_moon( const Double& source_declination,
-	           const Double& source_hr_angle,
-	           const Double& station_radii,
-	           const Vector<uint>& station_id,
-		   const Double& freq_init,
-		   const Double& bandwidth,
-                   const Double& freq_interval,
-		   Vector<Double>& position_x,
-		   Vector<Double>& position_y,
-                   const Vector<Double>& legendre_root,
-             	   const Vector<Double>& legendre_weight );
-
-Double min_power_moon( const Double& source_declination,
-	               const Double& source_hr_angle,
-	               const Double& station_radii,
-	               const Vector<uint>& station_id,
+		       const Vector<Double>& legendre_root,
+		       const Vector<Double>& legendre_weight ) ;
+    
+    
+    Double incoherent_beam( const Double& frequency,
+			    const Double& hr_angle,
+			    const Double& declination,
+			    const Double& source_declination,
+			    const Double& source_hr_angle,
+			    const Double& station_radii,
+			    const Vector<uint>& station_id,
+			    const Vector<Double>& legendre_root,
+			    const Vector<Double>& legendre_weight ) ;
+    
+    
+    Double integrate_freq( const Double& hr_angle,
+			   const Double& declination,
+			   const Double& source_declination,
+			   const Double& source_hr_angle,
+			   const Double& station_radii,
+			   const Vector<uint>& station_id,
+			   const Double& freq_init,
+			   const Double& bandwidth,
+			   const Double& freq_interval,
+			   Vector<Double>& position_x,
+			   Vector<Double>& position_y,
+			   const Vector<Double>& legendre_root,
+			   const Vector<Double>& legendre_weight );
+    
+    
+    Double incoherent_beaming( const Double& hr_angle,
+			       const Double& declination,
+			       const Double& source_declination,
+			       const Double& source_hr_angle,
+			       const Double& station_radii,
+			       const Vector<uint>& station_id,
+			       const Double& frequency,
+			       Vector<Double>& position_x,
+			       Vector<Double>& position_y,
+			       const Vector<Double>& legendre_root,
+			       const Vector<Double>& legendre_weight );
+    
+    Double integrate_phi( const Double& declination,
+			  const Double& source_declination,
+			  const Double& source_hr_angle,
+			  const Double& station_radii,
+			  const Vector<uint>& station_id,
+			  const Double& freq_init,
+			  const Double& bandwidth,
+			  const Double& freq_interval,
+			  Vector<Double>& position_x,
+			  Vector<Double>& position_y,
+			  const Vector<Double>& legendre_root,
+			  const Vector<Double>& legendre_weight )   ;
+    
+    
+    Double integrate_decli( const Double& source_declination,
+			    const Double& source_hr_angle,
+			    const Double& station_radii,
+			    const Vector<uint>& station_id,
+			    const Double& freq_init,
+			    const Double& bandwidth,
+			    const Double& freq_interval,
+			    Vector<Double>& position_x,
+			    Vector<Double>& position_y,
+			    const Vector<Double>& legendre_root,
+			    const Vector<Double>& legendre_weight )   ;
+    
+    
+    Double beamwidth_decli(  const Double& source_declination,
+			     const Double& source_hr_angle,
+			     const Double& station_radii,
+			     const Vector<uint>& station_id,
+			     const Double& freq_init,
+			     const Double& bandwidth,
+			     const Double& freq_interval,
+			     Vector<Double>& position_x,
+			     Vector<Double>& position_y,
+			     const Vector<Double>& legendre_root,
+			     const Vector<Double>& legendre_weight ) ;
+    
+    
+    Double beamwidth_hr(  const Double& source_declination,
+			  const Double& source_hr_angle,
+			  const Double& station_radii,
+			  const Vector<uint>& station_id,
+			  const Double& freq_init,
+			  const Double& bandwidth,
+			  const Double& freq_interval,
+			  Vector<Double>& position_x,
+			  Vector<Double>& position_y,
+			  const Vector<Double>& legendre_root,
+			  const Vector<Double>& legendre_weight )  ;
+    
+    void generate_statistics_table( const Double& station_radii,
+				    const Vector<uint>& station_id,
+				    const Double& freq_init,
+				    const Double& bandwidth,
+				    const Double& freq_interval,
+				    Vector<Double>& position_x,
+				    Vector<Double>& position_y,
+				    const Vector<Double>& legendre_root,
+				    const Vector<Double>& legendre_weight ) ;
+    
+    Double power_moon( const Double& source_declination,
+		       const Double& source_hr_angle,
+		       const Double& station_radii,
+		       const Vector<uint>& station_id,
 		       const Double& freq_init,
 		       const Double& bandwidth,
-                       const Double& freq_interval,
+		       const Double& freq_interval,
 		       Vector<Double>& position_x,
 		       Vector<Double>& position_y,
-                       const Vector<Double>& legendre_root,
-             	       const Vector<Double>& legendre_weight );
+		       const Vector<Double>& legendre_root,
+		       const Vector<Double>& legendre_weight );
+    
+    Double min_power_moon( const Double& source_declination,
+			   const Double& source_hr_angle,
+			   const Double& station_radii,
+			   const Vector<uint>& station_id,
+			   const Double& freq_init,
+			   const Double& bandwidth,
+			   const Double& freq_interval,
+			   Vector<Double>& position_x,
+			   Vector<Double>& position_y,
+			   const Vector<Double>& legendre_root,
+			   const Vector<Double>& legendre_weight );
 
- void plot_2dimen(  const Double& source_declination,
-	            const Double& source_hr_angle,
-	            const Double& station_radii,
-	            const Vector<uint>& station_id,
-		    const Double& freq_init,
-		    const Double& bandwidth,
-                    const Double& freq_interval,
-		    Vector<Double>& position_x,
-		    Vector<Double>& position_y,
-                    const Vector<Double>& legendre_root,
-                    const Vector<Double>& legendre_weight ) ;
-	    
-		     
+#ifdef CR_WITH_PLOTTING
+    /*!
+      \brief Create 2-dimensional plot
+      
+      \param source_declination -- Declination of the source under observation
+      \param source_hr_angle    -- Hour angle of the source under observation
+      \param station_radii      -- Radii of the LOFAR stations involved in the 
+             observation.
+      \param station_id         -- IDs of the stations involved in the
+             observation.
+      \param freq_init
+    */
+    void plot_2dimen(  const Double& source_declination,
+		       const Double& source_hr_angle,
+		       const Double& station_radii,
+		       const Vector<uint>& station_id,
+		       const Double& freq_init,
+		       const Double& bandwidth,
+		       const Double& freq_interval,
+		       Vector<Double>& position_x,
+		       Vector<Double>& position_y,
+		       const Vector<Double>& legendre_root,
+		       const Vector<Double>& legendre_weight ) ;
+#endif    
+    
   private:
     
     /*!

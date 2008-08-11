@@ -1346,20 +1346,20 @@ Double StationBeam::min_power_moon( const Double& source_declination,
   }       
 	       
  }
-
-
- void StationBeam::plot_2dimen(  const Double& source_declination,
-	                         const Double& source_hr_angle,
-	                         const Double& station_radii,
-	                         const Vector<uint>& station_id,
-		                 const Double& freq_init,
-		                 const Double& bandwidth,
-                                 const Double& freq_interval,
-		                 Vector<Double>& position_x,
-		                 Vector<Double>& position_y,
-                                 const Vector<Double>& legendre_root,
-                                 const Vector<Double>& legendre_weight ) 
-{ 
+  
+#ifdef CR_WITH_PLOTTING
+  void StationBeam::plot_2dimen(  const Double& source_declination,
+				  const Double& source_hr_angle,
+				  const Double& station_radii,
+				  const Vector<uint>& station_id,
+				  const Double& freq_init,
+				  const Double& bandwidth,
+				  const Double& freq_interval,
+				  Vector<Double>& position_x,
+				  Vector<Double>& position_y,
+				  const Vector<Double>& legendre_root,
+				  const Vector<Double>& legendre_weight ) 
+  { 
     try {
        
         StationBeam stbm ;
@@ -1468,9 +1468,9 @@ Double StationBeam::min_power_moon( const Double& source_declination,
       
     catch( AipsError x ){
     cerr << "StationBeam::plot_2dimen " << x.getMesg () << endl ;
-   }       
-	       
+   }	       
  }
+#endif
 
 
 } // Namespace CR -- end

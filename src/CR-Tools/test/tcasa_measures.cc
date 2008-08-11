@@ -254,9 +254,10 @@ int test_MPosition ()
 #ifndef AIPS_GCC3
   cout << "[2] Basic example from API documentation ..." << endl;
   try {
-    MPosition obs( MVPosition( Quantity( 10, "m"),
-			       Quantity( -6, "deg"),
-			       Quantity( 50, "deg")),
+    MVPosition mvpos ( Quantity( 10, "m"),
+		       Quantity( -6, "deg"),
+		       Quantity( 50, "deg"));
+    MPosition obs( mvpos,
 		   MPosition::Ref(MPosition::WGS84));
     //
     cout << "-- Reference string = " << obs.getRefString() << endl;
@@ -282,9 +283,10 @@ int test_MPosition ()
     //
     status = casa::MPosition::getType (tp,refcode);
     //
-    MPosition obs( MVPosition( Quantity( values(0), units(0)),
-			       Quantity( values(1), units(1)),
-			       Quantity( values(2), units(2))),
+    MVPosition mvpos ( Quantity( values(0), units(0)),
+		       Quantity( values(1), units(1)),
+		       Quantity( values(2), units(2)));
+    MPosition obs( mvpos,
 		   MPosition::Ref(tp));
     //
     cout << "-- Values    = " << values  << endl;

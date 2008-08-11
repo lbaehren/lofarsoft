@@ -24,6 +24,8 @@
 #include <string>
 #include <vector>
 
+#include <crtools.h>
+
 // Basic Python header
 #include <Python.h>
 
@@ -34,7 +36,6 @@
 #include <boost/python/extract.hpp>
 
 #include <Coordinates/TimeFreq.h>
-#include <Data/LOFAR_DipoleDataset.h>
 #include <IO/DataIterator.h>
 #include <IO/DataReader.h>
 #include <Math/HanningFilter.h>
@@ -43,8 +44,8 @@ namespace bpl = boost::python;
 
 using CR::DataIterator;
 using CR::DataReader;
+using CR::HanningFilter;
 using CR::TimeFreq;
-using DAL::LOFAR_DipoleDataset;
 
 BOOST_PYTHON_MODULE (pycr)
 {
@@ -129,6 +130,8 @@ BOOST_PYTHON_MODULE (pycr)
 
   /* DataReader */
 
+#ifndef __APPLE__
+
   void (DataReader::*setBlocksize1)(uint const &) = &DataReader::setBlocksize;
   void (DataReader::*setBlocksize2)(uint const &,
 				    casa::Matrix<double> const &) = &DataReader::setBlocksize;
@@ -159,6 +162,8 @@ BOOST_PYTHON_MODULE (pycr)
     .def("nextBlock", &DataReader::nextBlock)
     .def("toStartBlock", &DataReader::toStartBlock)
     ;
+
+#endif
   
   // ============================================================================
   //

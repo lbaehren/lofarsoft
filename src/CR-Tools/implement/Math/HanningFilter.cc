@@ -35,29 +35,26 @@ namespace CR {  // Namespace CR -- begin
   template <class T> 
   HanningFilter<T>::HanningFilter ()
     : BasicFilter<T> (),
-      alpha_p (0.5),
-      beta_p (0)
+      alpha_p (0.5)
   {
-    setBeta (0);
+    beta_p = 0;
   }
   
   template <class T> 
   HanningFilter<T>::HanningFilter (unsigned int const &channels)
     : BasicFilter<T> (channels),
-      alpha_p (0.5),
-      beta_p (0)
+      alpha_p (0.5)
   {
-    setBeta (0);
+    beta_p = 0;
   }
   
   template <class T> 
   HanningFilter<T>::HanningFilter (unsigned int const &channels,
 				   T const &alpha)
     : BasicFilter<T> (channels),
-      alpha_p (alpha),
-      beta_p (0)
+      alpha_p (alpha)
   {
-    setBeta (0);
+    beta_p = 0;
   }
   
   template <class T> 
@@ -238,9 +235,9 @@ namespace CR {  // Namespace CR -- begin
   //
   // =============================================================================
   
-  template class HanningFilter<Float>;
-  template class HanningFilter<Double>;
-  template class HanningFilter<Complex>;
-  template class HanningFilter<DComplex>;
+  template class HanningFilter<casa::Float>;
+  template class HanningFilter<casa::Double>;
+  template class HanningFilter<casa::Complex>;
+  template class HanningFilter<casa::DComplex>;
   
 }  // Namespace CR -- end

@@ -1,6 +1,9 @@
-/***************************************************************************
+/*-------------------------------------------------------------------------*
+ | $Id:: VectorNorms.h 1862 2008-08-08 10:20:52Z baehren                 $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
  *   Copyright (C) 2005                                                    *
- *   Lars B"ahren (<bahren@astron.nl>)                                     *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -18,14 +21,17 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tHanningFilter.cc,v 1.6 2006/10/31 20:53:16 bahren Exp $*/
-
 #include <fstream>
 
 #include <Math/BasicFilter.h>
 #include <Math/HanningFilter.h>
 #include <IO/DataReader.h>
 #include <Data/ITS_Capture.h>
+
+using casa::Float;
+using casa::Double;
+using casa::Complex;
+using casa::Vector;
 
 /*!
   \file tHanningFilter.cc
@@ -87,10 +93,10 @@ int test_HanningFilter ()
 
   int nofFailedTests (0);
   //
-  unsigned int channels (1024);
-  Float alpha_float (0.7);
-  Double alpha_double (0.7);
-  Complex alpha_complex (0.7);
+  unsigned int channels = 1024;
+  Float alpha_float     = 0.7;
+  Double alpha_double   = 0.7;
+  Complex alpha_complex = 0.7;
 
   // default constructor
   cout << "[1] HanningFilter<T> ()" << endl;
@@ -254,10 +260,11 @@ int test_alpha ()
     HanningFilter<Double> filter (blocksize);
     Vector<Double> weights (blocksize);
     uint channel (0);
+    double increment (0.01);
 
     outfile.open("tHanningFilter_alphaScan.data");
 
-    for (double alpha (0.5); alpha<=1.0; alpha+=0.01) {
+    for (double alpha (0.5); alpha<=1.0; alpha+=increment) {
       filter.setAlpha (alpha);
       weights = filter.weights();
       for (channel=0; channel<blocksize; channel++) {

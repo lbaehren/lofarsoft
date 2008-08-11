@@ -33,10 +33,8 @@
 #include <casa/namespace.h>
 
 #include <Observation/StationBeam.h>
-#include <Display/SimplePlot.h>
 
 using CR::StationBeam;
-using CR::SimplePlot;
 
 /*!
   \file tStationBeam.cc
@@ -51,10 +49,10 @@ using CR::SimplePlot;
 */
 
 Double source_declination (30);
-Double source_hr_angle (30) ;
-Double freq_init =120e6 ;
-Double bandwidth = 32e6 ;
-Double station_radii = 30. ;
+Double source_hr_angle = 30 ;
+Double freq_init       = 120e6 ;
+Double bandwidth       =  32e6 ;
+Double station_radii   =  30. ;
 
 uint n_stations = 5 ;
 
@@ -141,7 +139,6 @@ Bool test_StationBeams ()
     Double frequency_init = 0;
 
     StationBeam stbm ;
-    SimplePlot smplt ;
     
     stbm.generate_statistics_table( station_radii,
 				    station_id,

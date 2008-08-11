@@ -1473,29 +1473,26 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
                                       const Double& altitude ) 
    
  {				     				     
+   Double Hedensityprofile(0.0) ;
+   
    try {
      
      inverseFFT inFFT ;
      
-     Double Hedensityprofile(0.0) ;
-     Double alpha(0.0) ;
-     uint tableno(1) ;
-     uint col(1) ;
-     Double molecular_weight(4.00) ;
-     Double n_l_average(2.577e+15) ;
+     Double alpha            = 0.0;
+     uint tableno            = 1;
+     uint col                = 1;
+     Double molecular_weight = 4.00;
+     Double n_l_average      = 2.577e+15;
+     Double A                = 28./(28.95-molecular_weight);
+     Double zh               = 105.;
+     Double zl               = 120.;
      
-     if(((tableno==1)&&(col==1))||((tableno==1)&&(col==5)))
-       
+     if(((tableno==1)&&(col==1))||((tableno==1)&&(col==5))) {
        alpha = 0.4 ;
-     
-     else
+     } else {
        alpha = 0.0 ;
-     
-     
-     Double A = 28./(28.95-molecular_weight) ;
-     
-     Double zh = 105. ;
-     Double zl = 120. ;
+     }
      
      Double G_L = inFFT.expansion( F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude ) ;
      Double n_l = n_l_average*exp(G_L) ;
@@ -1527,15 +1524,16 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
      
      Hedensityprofile = pow((power_diffusive+power_mixing),(1/A)) ;
      
-     return Hedensityprofile ;
      
    } catch( AipsError x ) {
      cerr << "inverseFFT::Hedensityprofile" <<x.getMesg() << endl ;
      return .0;
    } 
- }
 
+   return Hedensityprofile ;
+ }
   
+  // ------------------------------------------------------------ Hdensityprofile
 
   Double inverseFFT::Hdensityprofile( const Double& F107,
                            	      const Double& mean_F107,
@@ -1547,65 +1545,66 @@ long_func=(long2+long1)*(1+coeff1(69)*del_mean_F)*cos(longitude*pi/180.)+(long3+
                                       const Double& longitude,
                                       const Double& altitude ) 
 				       
- {				     				     
-     try {
-       
-           inverseFFT inFFT ;
-	 
-	 Double Hdensityprofile(0.0) ;
-	 Double alpha(0.0) ;
-	 uint tableno(1) ;
-	 uint col(5) ;
-	 Double molecular_weight(2.00) ;
-	 Double n_l_average(2.246e+11) ;
-	  
-	 alpha = 0.4 ;
-	
-	 Double A = 28./(28.95-molecular_weight) ;
-	
-         Double zh = 105. ;
-	 Double zl = 120. ;
-	
-	 Double G_L = inFFT.expansion( F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude ) ;
-	 Double n_l = n_l_average*exp(G_L) ;
-	 Double D_z_M = inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,molecular_weight) ;
-	
-	 Double temp_zl = inFFT.temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zl ) ;
-	 Double temp_zh = inFFT.temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zh ) ;
-	 Double temp_z = inFFT.temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, altitude ) ;
-	
-	 Double arguement1 = (temp_zl/temp_z) ;
-	 Double pow_factor1 =pow(arguement1, (1+alpha));
-	
-	 Double nd_z_M = n_l*D_z_M*pow_factor1 ;   // Diffusive profile
-	
-	 Double D_zh_M = inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
-	
-	//mixing profile
-	 Double D_zh_M0 =inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
-	 Double D_z_M0 =inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,28.95) ;
-	
-	 Double arguement2 = (temp_zl/temp_zh) ;
-	 Double pow_factor2 =pow(arguement2, alpha);
-	
-	 Double nm_z_M =n_l*(D_zh_M/D_zh_M0)*(pow_factor2*D_z_M0*arguement1) ;
-	
-	 // mixing profiles have been omitted right now
-	 Double power_diffusive = pow(nd_z_M, A) ;
-	 Double power_mixing = pow(nm_z_M, A) ;
-	 
-	 Hdensityprofile = pow((power_diffusive+power_mixing),(1/A)) ;
-       
-       return Hdensityprofile ;
-       
-     } catch( AipsError x ) {
-      cerr << "inverseFFT::Hdensityprofile" <<x.getMesg() << endl ;
+  {
+    Double Hdensityprofile(0.0) ;
+
+    try {
+      
+      inverseFFT inFFT ;
+      
+      Double alpha(0.0) ;
+      uint tableno(1) ;
+      uint col(5) ;
+      Double molecular_weight(2.00) ;
+      Double n_l_average(2.246e+11) ;
+      
+      alpha = 0.4 ;
+      
+      Double A = 28./(28.95-molecular_weight) ;
+      
+      Double zh = 105. ;
+      Double zl = 120. ;
+      
+      Double G_L = inFFT.expansion( F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude ) ;
+      Double n_l = n_l_average*exp(G_L) ;
+      Double D_z_M = inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,molecular_weight) ;
+      
+      Double temp_zl = inFFT.temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zl ) ;
+      Double temp_zh = inFFT.temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, zh ) ;
+      Double temp_z = inFFT.temperature(F107, mean_F107, tableno, col, t_d, tau, t, Ap, latitude, longitude, altitude ) ;
+      
+      Double arguement1 = (temp_zl/temp_z) ;
+      Double pow_factor1 =pow(arguement1, (1+alpha));
+      
+      Double nd_z_M = n_l*D_z_M*pow_factor1 ;   // Diffusive profile
+      
+      Double D_zh_M = inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,molecular_weight) ;
+      
+      //mixing profile
+      Double D_zh_M0 =inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,zh,28.95) ;	  
+      Double D_z_M0 =inFFT.Dprofile( F107,mean_F107,tableno,col,t_d,tau,t,Ap,latitude,longitude,altitude,28.95) ;
+      
+      Double arguement2 = (temp_zl/temp_zh) ;
+      Double pow_factor2 =pow(arguement2, alpha);
+      
+      Double nm_z_M =n_l*(D_zh_M/D_zh_M0)*(pow_factor2*D_z_M0*arguement1) ;
+      
+      // mixing profiles have been omitted right now
+      Double power_diffusive = pow(nd_z_M, A) ;
+      Double power_mixing = pow(nm_z_M, A) ;
+      
+      Hdensityprofile = pow((power_diffusive+power_mixing),(1/A)) ;
+      
+      return Hdensityprofile ;
+      
+    } catch( AipsError x ) {
+      cerr << "inverseFFT::Hdensityprofile" << x.getMesg() << endl ;
     } 
     
- //   return Hdensityprofile ;
- }
- 
- 
+    return Hdensityprofile ;
+  }
+  
+  
   // ============================================================================
   //
   //  Parameters

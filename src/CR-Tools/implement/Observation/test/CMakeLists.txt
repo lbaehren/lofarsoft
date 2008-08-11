@@ -33,6 +33,7 @@ if (CR_WITH_PLOTTING)
     target_link_libraries (tStationBeam
       cr
       ${PLPLOT_LIBRARIES}
+      ${X11_LIBRARIES}
       )
   endif (PLPLOT_LIBRARIES)
   if (APPLE)
