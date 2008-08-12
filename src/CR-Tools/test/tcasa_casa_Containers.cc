@@ -144,7 +144,7 @@ int test_Record ()
     std::cerr << message << endl;
     nofFailedTests++;
   }
-  
+
   return nofFailedTests;
 }
 

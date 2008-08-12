@@ -51,6 +51,7 @@
 
 #ifdef HAVE_HDF5
 #include <hdf5.h>
+#include <casa/HDF5/HDF5File.h>
 #include <casa/HDF5/HDF5Record.h>
 #endif
 
@@ -1187,9 +1188,48 @@ int test_BasicSL ()
 */
 int test_HDF5 ()
 {
-  int nofFailedTests (0);
+  cout << "\n[test_HDF5]\n" << endl;
 
+  int nofFailedTests (0);
+  
+  cout << "[1] Test writing a set of records to a HDF5 file ..." << endl;
   try {
+    // Top-level
+    casa::Record rec;
+    rec.define ("telescope", "TELESCOPE");
+    rec.define ("observer", "OBSERVER");
+    rec.define ("project", "PROJECT");
+    rec.define ("observation_id", "OBSERVATION_ID");
+    rec.define ("observation_mode", "OBSERVATION_MODE");
+    // Station-level
+    casa::Record station1;
+    station1.define ("station_position_value", "STATION_POSITION_VALUE");
+    station1.define ("station_position_unit", "STATION_POSITION_UNIT");
+    station1.define ("station_position_frame", "STATION_POSITION_FRAME");
+    station1.define ("beam_direction_value", "BEAM_DIRECTION_VALUE");
+    station1.define ("beam_direction_unit", "BEAM_DIRECTION_UNIT");
+    station1.define ("beam_direction_frame", "BEAM_DIRECTION_FRAME");
+    rec.defineRecord ("station1",station1);
+    casa::Record station2;
+    station2.define ("station_position_value", "STATION_POSITION_VALUE");
+    station2.define ("station_position_unit", "STATION_POSITION_UNIT");
+    station2.define ("station_position_frame", "STATION_POSITION_FRAME");
+    station2.define ("beam_direction_value", "BEAM_DIRECTION_VALUE");
+    station2.define ("beam_direction_unit", "BEAM_DIRECTION_UNIT");
+    station2.define ("beam_direction_frame", "BEAM_DIRECTION_FRAME");
+    rec.defineRecord ("station2",station2);
+    casa::Record station3;
+    station3.define ("station_position_value", "STATION_POSITION_VALUE");
+    station3.define ("station_position_unit", "STATION_POSITION_UNIT");
+    station3.define ("station_position_frame", "STATION_POSITION_FRAME");
+    station3.define ("beam_direction_value", "BEAM_DIRECTION_VALUE");
+    station3.define ("beam_direction_unit", "BEAM_DIRECTION_UNIT");
+    station3.define ("beam_direction_frame", "BEAM_DIRECTION_FRAME");
+    rec.defineRecord ("station3",station3);
+    // Create HDF5 file and write the record to it
+    casa::HDF5File file("tHDF5Record.h5", casa::ByteIO::New);
+    casa::HDF5Record::writeRecord (file, "test", rec);
+    file.flush();
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
