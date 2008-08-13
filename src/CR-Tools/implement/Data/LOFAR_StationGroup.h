@@ -451,10 +451,13 @@ namespace DAL { // Namespace DAL -- begin
     /*!
       \brief Get a casa::Record containing the values of the attributes
 
+      \param addRecursive -- Recursively add information from embedded HDF5
+             objects, such as groups and datasets? 
+
       \return record -- A casa::Record container holding the values of the 
               attributes attached to the dataset for this dipole
     */
-    casa::Record attributes2record ();
+    casa::Record attributes2record (bool const &addRecursive=false);
     
   private:
 

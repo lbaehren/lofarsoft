@@ -21,9 +21,15 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <crtools.h>
+
 #include <iostream>
 
+#include <casa/Arrays/ArrayIO.h>
 #include <casa/Arrays/Vector.h>
+#include <casa/Containers/Record.h>
+#include <casa/HDF5/HDF5File.h>
+#include <casa/HDF5/HDF5Record.h>
 
 #include <dal/dal.h>
 #include <dal/dalDataset.h>
@@ -398,6 +404,43 @@ int test_methods (std::string const &filename)
 
 // -----------------------------------------------------------------------------
 
+int test_export2record (std::string const &filename)
+{
+  std::cout << "\n[test_export2record]\n" << std::endl;
+
+  int nofFailedTests (0);
+  LOFAR_StationGroup group (filename,name_station);
+
+  std::cout << "[1] Retreiving attributes of group into record ..." << std::endl;
+  try {
+    // retrieve attributes into record
+    casa::Record rec = group.attributes2record ();
+    // Create HDF5 file and write the record to it
+    casa::HDF5File file("tStationGroup_1.h5", casa::ByteIO::New);
+    casa::HDF5Record::writeRecord (file, "StationGroup", rec);
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[2] Retreiving attributes of group into record (recursive) ..."
+	    << std::endl;
+  try {
+    // retrieve attributes into record
+    casa::Record rec = group.attributes2record (true);
+    // Create HDF5 file and write the record to it
+    casa::HDF5File file("tStationGroup_2.h5", casa::ByteIO::New);
+    casa::HDF5Record::writeRecord (file, "StationGroup", rec);
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
 /*!
   \brief Test retrieval of the actual time-series data form the dipoles
 
@@ -483,8 +526,11 @@ int main (int argc,
   if (nofFailedTests == 0) {
     nofFailedTests += test_groups(filename);
     nofFailedTests += test_methods (filename);
-    nofFailedTests += test_data(filename);
-   }
+    // Test exporting the attributes to a casa::Record
+    nofFailedTests += test_export2record (filename);
+    // Test extraction of channel data
+//     nofFailedTests += test_data(filename);
+  }
 
   return nofFailedTests;
 }

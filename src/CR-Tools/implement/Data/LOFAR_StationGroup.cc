@@ -663,7 +663,7 @@ namespace DAL { // Namespace DAL -- begin
   
   // ---------------------------------------------------------- attributes2record
   
-  casa::Record LOFAR_StationGroup::attributes2record ()
+  casa::Record LOFAR_StationGroup::attributes2record (bool const &addRecursive)
   {
     casa::Record rec;
     
@@ -693,6 +693,18 @@ namespace DAL { // Namespace DAL -- begin
 		<< std::endl;
     }
 
+    /* Recursive adding of embbedded data? */
+
+    if (addRecursive) {
+      casa::Record recordDipole;
+      for (uint n(0); n<datasets_p.size(); n++) {
+	// retrieve the attributes for the dipole data-set as record
+	recordDipole = datasets_p[n].attributes2record();
+	// ... and add it to the existing record
+	rec.defineRecord (datasets_p[n].channelName(),recordDipole);
+      }
+    }
+    
     return rec;
   }
 
