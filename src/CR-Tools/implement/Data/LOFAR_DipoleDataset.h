@@ -86,7 +86,6 @@ namespace DAL { // Namespace DAL -- begin
       |   |   |-- TIME                    ... Attribute      ... uint
       |   |   |-- SAMPLE_NR               ... Attribute      ... uint
       |   |   |-- SAMPLES_PER_FRAME       ... Attribute      ... uint
-      |   |   |-- DATA_LENGTH             ... Attribute      ... uint
       |   |   |-- NYQUIST_ZONE            ... Attribute      ... uint
       |   |   |-- FEED                    ... Attribute      ... string
       |   |   |-- ANT_POSITION_VALUE      ... Attribute      ... array<double,1>

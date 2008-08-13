@@ -21,8 +21,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <crtools.h>
+
+#include <hdf5.h>
+
 #include <casa/Arrays/ArrayIO.h>
 #include <casa/Arrays/Vector.h>
+#include <casa/HDF5/HDF5File.h>
+#include <casa/HDF5/HDF5Record.h>
 
 #include <dal/Enumerations.h>
 #include <Data/LOFAR_DipoleDataset.h>
@@ -600,10 +606,13 @@ int test_export2record (std::string const &filename)
     LOFAR_DipoleDataset dataset (filename,
 				 path_dataset);
     // retrieve attributes into record
-    casa::Record record = dataset.attributes2record ();
+    casa::Record rec = dataset.attributes2record ();
     // feedback
     cout << "-- nof. attributes    = " << dataset.nofAttributes() << endl;
-    cout << "-- nof. record fields = " << record.nfields() << endl;
+    cout << "-- nof. record fields = " << rec.nfields()           << endl;
+    // Create HDF5 file and write the record to it
+    casa::HDF5File file("tDipoleDataset_1.h5", casa::ByteIO::New);
+    casa::HDF5Record::writeRecord (file, "DipoleDataset", rec);
   } catch (std::string message) {
     cerr << message << endl;
     nofFailedTests++;
@@ -611,20 +620,20 @@ int test_export2record (std::string const &filename)
 
   cout << "[2] Combine records from multiple dipole datasets ..." << endl;
   try {
-    // open datasets from which to extract records
-    LOFAR_DipoleDataset dataset1 (filename,
-				  path_dataset);
-    LOFAR_DipoleDataset dataset2 (filename,
-				  path_dataset);
-    // description of the record's structure
-    casa::RecordDesc descriptionRecord;
-    casa::RecordDesc descriptionSubRecord = dataset1.recordDescription();
-    descriptionRecord.addField ("000000001",descriptionSubRecord);
-    descriptionRecord.addField ("000000002",descriptionSubRecord);
-    // create the record
-    casa::Record record(descriptionRecord);
-    // feedback
-    cout << "-- nof. record fields = " << record.nfields() << endl;
+    // open dataset
+    LOFAR_DipoleDataset dataset (filename,
+				 path_dataset);
+    // retrieve attributes into record
+    casa::Record rec = dataset.attributes2record ();
+    // create record containing the other records
+    casa::Record record;
+    record.define ("STATION", "Station001");
+    record.defineRecord ("dipole1",rec);
+    record.defineRecord ("dipole2",rec);
+    record.defineRecord ("dipole3",rec);
+    // Create HDF5 file and write the record to it
+    casa::HDF5File file("tDipoleDataset_2.h5", casa::ByteIO::New);
+    casa::HDF5Record::writeRecord (file, "DipoleDataset", record);
   } catch (std::string message) {
     cerr << message << endl;
     nofFailedTests++;

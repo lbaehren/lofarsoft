@@ -516,23 +516,17 @@ namespace DAL { // Namespace DAL -- begin
   uint LOFAR_DipoleDataset::data_length ()
   {
     uint val (0);
+    std::vector<uint> shape;
     
-    if (DAL::h5get_attribute(val,
-			     attribute_name(DAL::DATA_LENGTH),
-			     datasetID_p)) {
-	if (val == 0){
-	  std::vector<uint> shape;
-	  if (DAL::h5get_dataset_shape(shape,
-					 datasetID_p)) {
-	    val = shape[0];
-	  };
-	};
+    if (DAL::h5get_dataset_shape(shape,
+				 datasetID_p)) {
+      val = shape[0];
       return val;
     } else {
       return 0;
-    }
+    }    
   }
-  
+
   // ----------------------------------------------------------------------- feed
   
   std::string LOFAR_DipoleDataset::feed ()
