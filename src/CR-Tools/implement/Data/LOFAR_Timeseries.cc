@@ -491,7 +491,7 @@ namespace DAL { // Namespace DAL -- begin
 
   // ---------------------------------------------------------- attributes2record
 
-  casa::Record LOFAR_Timeseries::attributes2record ()
+  casa::Record LOFAR_Timeseries::attributes2record (bool const &addRecursive)
   {
     casa::Record rec;
     
@@ -506,6 +506,18 @@ namespace DAL { // Namespace DAL -- begin
     rec.define(casa::RecordFieldId(attribute_name(DAL::OBSERVATION_MODE)),
 	       observation_mode());
 
+    /* Recursive adding of embbedded data? */
+
+    if (addRecursive) {
+      casa::Record recordStation;
+      for (uint n(0); n<groups_p.size(); n++) {
+	// retrieve the attributes for the dipole data-set as record
+	recordStation = groups_p[n].attributes2record(addRecursive);
+	// ... and add it to the existing record
+	rec.defineRecord (groups_p[n].group_name(true),recordStation);
+      }
+    }
+    
     return rec;
   }
 

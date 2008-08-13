@@ -139,6 +139,26 @@ namespace DAL { // Namespace DAL -- begin
   //
   // ============================================================================
   
+  std::string LOFAR_StationGroup::group_name (bool const &stripPath)
+  {
+    bool status (true);
+    std::string name ("UNDEFINED");
+
+    status = DAL::h5get_name (name,groupID_p);
+
+    if (status) {
+      if (stripPath) {
+	return name.substr(1);
+      }
+    } else {
+      std::cerr <<  "[LOFAR_StationGroup::group_name] "
+		<< "Error retrieving name of HDF5 group!"
+		<< std::endl;
+    }
+
+    return name;
+  }
+  
   // ----------------------------------------------------- station_position_value
   
   casa::Vector<double> LOFAR_StationGroup::station_position_value ()
@@ -318,10 +338,11 @@ namespace DAL { // Namespace DAL -- begin
   {
     os << "[LOFAR_StationGroup] Summary of object properties"     << endl;
     
-    os << "-- Group ID      ...... : " << groupID_p           << endl;
-    os << "-- nof. dipole datasets : " << nofDipoleDatasets() << endl;
-    
+    os << "-- Group ID  .............. : " << groupID_p           << endl;
+
     if (groupID_p > 0) {
+      os << "-- Group name ............. : " << group_name(true)         << endl;
+      os << "-- nof. dipole datasets ... : " << nofDipoleDatasets()      << endl;
       os << "-- Station position (Unit)  : " << station_position_unit()  << endl;
       os << "-- Station position (Frame) : " << station_position_frame() << endl;
       os << "-- Beam direction (Unit) .. : " << beam_direction_unit()    << endl;
@@ -616,14 +637,15 @@ namespace DAL { // Namespace DAL -- begin
       return casa::Matrix<double> (1,1,0);
     }
     
-    uint nofDipoles = nofDipoleDatasets();
-    casa::Matrix<double> data (nofSamples,nofDipoles);
-    
-    /* Go through the set of dipole datasets and retrieve the data */
-    
+    casa::Matrix<double> data (nofSamples,datasets_p.size());
     casa::Vector<double> tmp (nofSamples);
+
+    std::cout << "[LOFAR_StationGroup::fx]"           << std::endl;
+    std::cout << "-- nof. samples = " << nofSamples   << std::endl;
+    std::cout << "-- shape(data)  = " << data.shape() << std::endl;
+    std::cout << "-- shape(tmp)   = " << tmp.shape()  << std::endl;
     
-    for (uint n(0); n<nofDipoles; n++) {
+    for (uint n(0); n<datasets_p.size(); n++) {
       // get the channel data ...
       tmp = datasets_p[n].fx(start,nofSamples);
       // ... and add them to the returned array

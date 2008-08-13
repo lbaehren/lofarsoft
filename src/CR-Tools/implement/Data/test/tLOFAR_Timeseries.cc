@@ -21,9 +21,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <Data/LOFAR_Timeseries.h>
+#include <crtools.h>
 
 #include <casa/Arrays/ArrayIO.h>
+#include <casa/HDF5/HDF5File.h>
+#include <casa/HDF5/HDF5Record.h>
+
+#include <Data/LOFAR_Timeseries.h>
 
 using std::cerr;
 using std::cout;
@@ -146,6 +150,50 @@ int test_methods (std::string const &filename)
 // -----------------------------------------------------------------------------
 
 /*!
+  \brief Test export of the attribute values to a casa::Record object
+  
+  \param filename -- Name of the HDF5 file, within which the dataset is located
+
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_attributes2record (string const &filename)
+{
+  std::cout << "\n[test_attributes2record]\n" << std::endl;
+
+  int nofFailedTests (0);
+  LOFAR_Timeseries ts (filename);
+
+  std::cout << "[1] Retreiving attributes of group into record ..." << std::endl;
+  try {
+    // retrieve attributes into record
+    casa::Record rec = ts.attributes2record ();
+    // Create HDF5 file and write the record to it
+    casa::HDF5File file("tTimeseries_1.h5", casa::ByteIO::New);
+    casa::HDF5Record::writeRecord (file, "Timeseries", rec);
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[2] Retreiving attributes of group into record (recursive) ..."
+	    << std::endl;
+  try {
+    // retrieve attributes into record
+    casa::Record rec = ts.attributes2record (true);
+    // Create HDF5 file and write the record to it
+    casa::HDF5File file("tTimeseries_2.h5", casa::ByteIO::New);
+    casa::HDF5Record::writeRecord (file, "Timeseries", rec);
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
   \brief Test retrieval of TBB data
 
   \param filename -- Name of the HDF5 file used for testing
@@ -206,6 +254,7 @@ int main (int argc,
 
   if (nofFailedTests == 0) {
     nofFailedTests += test_methods (filename);
+    nofFailedTests += test_attributes2record (filename);
     nofFailedTests += test_data (filename);
   } else {
     std::cerr << "[tLOFAR_StationGroup]"

@@ -44,7 +44,6 @@ namespace DAL { // Namespace DAL -- begin
     \class LOFAR_StationGroup
     
     \ingroup CR_Data
-    \ingroup DAL
     
     \brief Container for the data in the StationGroup of LOFAR times-series data
     
@@ -207,6 +206,17 @@ namespace DAL { // Namespace DAL -- begin
       return groupID_p;
     }
 
+    /*!
+      \brief Get the name for this group within the HDF5 file
+
+      \param stripPath -- Strip away the path and just return the name of the 
+             group? By default the full path is returned, so make sure to set
+	     <tt>stripPath=true</tt> if you want the name only.
+      
+      \return name -- The name for this group within the HDF5 file
+    */
+    std::string group_name (bool const &stripPath=false);
+    
     /*!
       \brief Get the trigger type which cause recording this data
 

@@ -472,27 +472,6 @@ int test_data (std::string const &filename)
     nofFailedTests++;
   }
 
-  std::cout << "[2] Retrieve data for selected dipoles ..." << std::endl;
-  try {
-    // set up the dipole selection
-    std::vector<uint> selection;
-    selection.push_back(0);
-    selection.push_back(1);
-    selection.push_back(2);
-    casa::Matrix<double> data = group.fx (start,
-					  blocksize,
-					  selection);
-    // feedback 
-    std::cout << "-- Data start     = " << start        << std::endl;
-    std::cout << "-- Data blocksize = " << blocksize    << std::endl;
-    std::cout << "-- Data array     = " << data.shape() << std::endl;
-    std::cout << "-- Data [0,]      = " << data.row(0)  << std::endl;
-    std::cout << "-- Data [1,]      = " << data.row(1)  << std::endl;
-  } catch (std::string message) {
-    cerr << message << endl;
-    nofFailedTests++;
-  }
-
   return nofFailedTests;
 }
 
@@ -529,7 +508,7 @@ int main (int argc,
     // Test exporting the attributes to a casa::Record
     nofFailedTests += test_export2record (filename);
     // Test extraction of channel data
-//     nofFailedTests += test_data(filename);
+    nofFailedTests += test_data(filename);
   }
 
   return nofFailedTests;
