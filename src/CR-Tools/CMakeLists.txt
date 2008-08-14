@@ -385,12 +385,19 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 ##
 ## =============================================================================
 
-find_file (dataset_tbb tbb_test_file_v1_0.h5
+find_file (dataset_tbb rw_20080604_121347_2300.dat.h5
   PATHS
   ${CR_SOURCE_DIR}/data
   ${CR_SOURCE_DIR}/../data
   ${CR_SOURCE_DIR}/../../data
   )
+
+if (dataset_tbb)
+  set (CR_DATASET_TBB 1)
+  set (CR_DATASET_TBB_STATION "Station023")
+  set (CR_DATASET_TBB_CHANNEL "023000000")
+  set (CR_DATASET_TBB_DATASET "Station023/023000000")
+endif (dataset_tbb)
 
 find_file (dataset_event 2007.01.31.23:59:33.960.event
   PATHS
@@ -538,12 +545,12 @@ if (CR_VERBOSE_CONFIGURE)
   message (STATUS " Source directory .......... : ${CR_SOURCE_DIR}")
   message (STATUS " Installation location ..... : ${CMAKE_INSTALL_PREFIX}")
   message (STATUS " Build the test programs ... : ${CR_BUILD_TESTS}")
+  message (STATUS " Print debugging messages .. : ${CR_DEBUGGING_MESSAGES}")
   message (STATUS " Enable LOPES-Star routines  : ${CR_WITH_STARTOOLS}")
   message (STATUS " Support for plotting ...... : ${CR_WITH_PLOTTING}")
   message (STATUS " Support for Glish ......... : ${CR_WITH_GLISH}")
   message (STATUS " Support for Python ........ : ${CR_WITH_PYTHON}")
   message (STATUS " Graphical user interface .. : ${CR_WITH_GUI}")
-  message (STATUS " Print debugging messages .. : ${CR_DEBUGGING_MESSAGES}")
-  message (STATUS " Verbose configuration ..... : ${CR_VERBOSE_CONFIGURE}")
+  message (STATUS " Test TBB dataset .......... : ${dataset_tbb}")
   message (STATUS "+============================================================+")
 endif (CR_VERBOSE_CONFIGURE)

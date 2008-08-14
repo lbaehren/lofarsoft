@@ -177,12 +177,17 @@ namespace CR { // Namespace CR -- begin
 
     /* Set up the vector collecting the IDs for the individual dipoles */
 
-    channelID_p.resize (LOFAR_Timeseries::nofDipoleDatasets());
+    uint nofDipoles = LOFAR_Timeseries::nofDipoleDatasets();
+    channelID_p.resize (nofDipoles);
 
     /* Set the correct data for the time and frequency axis */
 #ifdef HAVE_CASA
     // retrieve the values
-    casa::Vector<double> sampleFreq = sample_frequencies();
+    casa::Vector<double> sampleFreq = LOFAR_Timeseries::sample_frequencies();
+    // Feedback
+    std::cout << "[LOFAR_TBB::init]" << std::endl;
+    std::cout << "-- nof. dipoles       = " << nofDipoles << std::endl;
+    std::cout << "-- sample frequencies = " << sampleFreq << std::endl;
     // adjust internal settings
     if (sampleFreq.nelements() > 0) {
       sampleFrequency_p = sampleFreq(0);
@@ -192,7 +197,7 @@ namespace CR { // Namespace CR -- begin
     }
 #else
     // retrieve the values
-    std::vector<double> sampleFreq = sample_frequencies();
+    std::vector<double> sampleFreq = LOFAR_Timeseries::sample_frequencies();
     // adjust internal settings
     if (sampleFreq.size() > 0) {
       sampleFrequency_p = sampleFreq[0];
@@ -257,15 +262,13 @@ namespace CR { // Namespace CR -- begin
       status = false;
     }
 
-    // Set the header record only if status is true
-    status = status && generateHeaderRecord();
-
     return status;
   }
 
-  // ----------------------------------------------------------------- setStreams
+  // ------------------------------------------------------- generateHeaderRecord
 
-  bool LOFAR_TBB::generateHeaderRecord(){
+  bool LOFAR_TBB::generateHeaderRecord () 
+  {
     try {
       header_p.define("Date",min(times()));
       header_p.define("AntennaIDs",channelIDs());

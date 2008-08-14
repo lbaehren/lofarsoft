@@ -231,6 +231,14 @@ namespace CR { // Namespace CR -- begin
     */
     casa::Matrix<double> fx ();
 
+    /*!
+      \brief Get a casa::Record containing the values of the attributes
+
+      \return record -- A casa::Record container holding the values of the 
+              attributes attached to the dataset for this dipole
+    */
+    casa::Record attributes2record ();
+
   protected:
 
     bool setStreams ();

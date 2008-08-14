@@ -32,7 +32,6 @@
 
 #include <dal/Enumerations.h>
 #include <Data/LOFAR_DipoleDataset.h>
-#include "test_common.h"
 
 using std::cerr;
 using std::cout;

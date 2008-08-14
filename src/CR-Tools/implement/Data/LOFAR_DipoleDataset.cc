@@ -301,10 +301,31 @@ namespace DAL { // Namespace DAL -- begin
   double LOFAR_DipoleDataset::sample_frequency_value (std::string const &unit)
   {
     if (datasetID_p > 0) {
+      bool status (true);
       double val (0);
-      if (DAL::h5get_attribute(val,
-			       attribute_name(DAL::SAMPLE_FREQUENCY_VALUE),
-			       datasetID_p)) {
+      std::string unit;
+      
+      status = DAL::h5get_attribute(val,
+				    attribute_name(DAL::SAMPLE_FREQUENCY_VALUE),
+				    datasetID_p);
+      unit = sample_frequency_unit ();
+
+      if (status) {
+	if (unit == "Hz" && val < 1e3) {
+	  std::cerr << "[LOFAR_DipoleDataset::sample_frequency_value] "
+		    << "Encountered combination of value and unit for sample "
+		    << "outside LOFAR range -- assuming value in MHz and "
+		    << "correction for it."
+		    << std::endl;
+	  val *= 1e6;
+	} else if (unit == "kHz" && val < 1e6) {
+	  std::cerr << "[LOFAR_DipoleDataset::sample_frequency_value] "
+		    << "Encountered combination of value and unit for sample "
+		    << "outside LOFAR range -- assuming value in kHz and "
+		    << "correction for it."
+		    << std::endl;
+	  val *= 1e3;
+	}
 	return val;
       } else {
 	return 0;

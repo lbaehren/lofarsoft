@@ -23,8 +23,9 @@ set (tests
 ## Build the test programs
 
 foreach (src ${tests})
-  ## build executable
+  ## compiler instructions
   add_executable (${src} ${src}.cc)
+  ## linker instructions
   target_link_libraries (${src} cr)
   ## testing
   add_test (${src} ${src})
@@ -33,21 +34,13 @@ endforeach (src)
 ## -----------------------------------------------------------------------------
 ## Build the test programs working with the Data Access Library (DAL)
 
-if (HAVE_CASACORE AND NOT HAVE_CASA)
-  
-  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
-    
-    find_file (tbb_dataset tbb_test_file_v1_1.h5
-      PATHS
-      ${CR_SOURCE_DIR}/data
-      ${CR_SOURCE_DIR}/../data
-      ${CR_SOURCE_DIR}/../../data
-      )
+if (HAVE_CASACORE AND DAL_LIBRARIES AND HDF5_LIBRARIES)
     
     foreach (src
 	tLOFAR_StationGroup
 	tLOFAR_DipoleDataset
-	tLOFAR_Timeseries tLOFAR_TBB
+	tLOFAR_Timeseries
+	tLOFAR_TBB
 	) 
       ## compiler instructions
       add_executable (${src} ${src}.cc)
@@ -58,16 +51,16 @@ if (HAVE_CASACORE AND NOT HAVE_CASA)
 	${HDF5_LIBRARIES}
 	)
       ## testing
-      if (tbb_dataset)
-	add_test (${src} ${src} ${tbb_dataset})
-      else (tbb_dataset)
+      if (dataset_tbb)
+	add_test (${src} ${src} ${dataset_tbb})
+      else (dataset_tbb)
 	message (STATUS "Unable to run test ${src}; missing input data file.")
-      endif (tbb_dataset)
+      endif (dataset_tbb)
+      ## installation
+      list (APPEND tests ${src})
     endforeach (src)
     
-  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
-  
-endif (HAVE_CASACORE AND NOT HAVE_CASA)
+endif (HAVE_CASACORE AND DAL_LIBRARIES AND HDF5_LIBRARIES)
 
 ## -----------------------------------------------------------------------------
 ## Installation

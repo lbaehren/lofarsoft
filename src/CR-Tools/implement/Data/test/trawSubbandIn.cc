@@ -28,7 +28,7 @@ using CR::rawSubbandIn;  // Namespace usage
 /*!
   \file trawSubbandIn.cc
 
-  \ingroup Data
+  \ingroup CR_Data
 
   \brief A collection of test routines for the rawSubbandIn class
  

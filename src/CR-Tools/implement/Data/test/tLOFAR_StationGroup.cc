@@ -36,7 +36,6 @@
 
 #include <Data/LOFAR_StationGroup.h>
 #include <Utilities/StringTools.h>
-#include "test_common.h"
 
 // Namespace usage
 using std::cerr;

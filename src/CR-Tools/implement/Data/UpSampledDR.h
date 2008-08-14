@@ -47,7 +47,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class UpSampledDR
     
-    \ingroup Data
+    \ingroup CR_Data
     
     \brief DataReader class that upsamples the the output of another DataReader
     
