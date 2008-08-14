@@ -231,4 +231,11 @@
 /* Enable additional routines from LOPES-Star? */
 #cmakedefine CR_WITH_STARTOOLS 1
 
+/* Definitions used throughout the test programs */
+
+#include <string>
+const std::string name_station = "${CR_DATASET_TBB_STATION}";
+const std::string name_dataset = "${CR_DATASET_TBB_CHANNEL}";
+const std::string path_dataset = "${CR_DATASET_TBB_DATASET}";
+
 #endif
