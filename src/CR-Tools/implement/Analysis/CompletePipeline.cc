@@ -165,17 +165,32 @@ namespace CR { // Namespace CR -- begin
         Vector<Int> AntennaIDs;
         dr->header().get("AntennaIDs",AntennaIDs);
 
+        // set up variables
         String polarization_string;
+        bool first_message = true;	// for output
 
         // loop through all AntennaIDs and deselect the ones with the wrong polarization
         for (unsigned int i=0; i<AntennaIDs.size(); i++)
         {
           CTRead->GetData(date, AntennaIDs(i), "Polarization", &polarization_string);
-          if (polarization_string != static_cast<String>(Polarization)) {
+          if (polarization_string != static_cast<String>(Polarization))
+          {
             antennaSelection(i) = false;
-            cout << "Deselected Antenna : " << i+1;
-          }
-        }
+
+            // produce output
+            if (verbose)
+            {
+              if (first_message)
+              {
+                cout << "Deselected antenna(s): ";
+                first_message = false;
+              }
+              cout << i+1 << " ";	// antenna number
+            }
+          } // if
+        } // for
+        // write end of line if there was any output
+        if ( (verbose) && (! first_message) ) cout << endl;
       } // if
     } catch (AipsError x) 
       {
