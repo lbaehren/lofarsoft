@@ -247,6 +247,11 @@ namespace CR { // Namespace CR -- begin
     }
 
     /*
+      Set up the record with the header information
+     */
+    status = generateHeaderRecord ();
+
+    /*
       Set the conversion arrays: adc2voltage & fft2calfft
     */
     try {

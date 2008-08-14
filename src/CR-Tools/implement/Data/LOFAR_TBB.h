@@ -250,7 +250,7 @@ namespace CR { // Namespace CR -- begin
       went fine.
     */
     bool generateHeaderRecord ();
-
+    
     
   private:
 
