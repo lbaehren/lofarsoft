@@ -79,8 +79,8 @@ const int upsampling_exp = 5;		// upsampling of trace will be done by 2^upsampli
 const double plotStart = -1.1e-6;	// start time for plotting of FX values
 const double plotStop = +1.1e-6;        // stop time for plotting of FX values
 const double peakWidth  = 20e3;		// width of spectral peaks
-const int startfreq = 4e7;		// start frequency for plots and output
-const int stopfreq = 8e7;              // stop frequency for plots and output
+const double startfreq = 4e7;		// start frequency for plots and output
+const double stopfreq = 8e7;            // stop frequency for plots and output
 
 
 /*!
@@ -1031,7 +1031,7 @@ int calibratedAntenna(DataReader &dr)
 
       // loop through frequencies (from 41 MHz to 79 MHz)
       // and compare peak at full MHz with mean at following interval
-      for (int f = 41e6; f < 79e6; f += 1e6)
+      for (double f = 41e6; f < 79e6; f += 1e6)
       {
         // create peak interval (f +/- peakWidth)
         startsample = ntrue(frequencies < f-peakWidth);			//number of elements smaller then starting
@@ -1188,7 +1188,7 @@ void analyseEvent(const string &eventName)
     Vector<Double> phaseDiffs(41,0);
     Vector<Double> neighbourDiffs(41,0);
     double freq = 0;
-    double freqIndex = 0;
+    unsigned int freqIndex = 0;
 
     // Phase of reference frequency
     double referencePhase 
