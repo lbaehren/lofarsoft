@@ -287,19 +287,22 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Gets the upsampled raw data FX of selected antennas (data are not stored for reuse)
 
-      \param DataReader       -- DataReader (LopesEventIn)
-      \param upsampling_exp   -- a value > 0 means that data are upsampled by a factor of 2^upsampling_exp
-                                 use e.g. uspampling_exp = 1 to have twice as many points plotted.
-      \param antennaSelection -- Selection of antennas
+      \param DataReader         -- DataReader (LopesEventIn)
+      \param upsampling_exp     -- a value > 0 means that data are upsampled by a factor of 2^upsampling_exp
+                                   use e.g. uspampling_exp = 1 to have twice as many points plotted.
+      \param antennaSelection   -- Selection of antennas
+      \param offsetSubstraction -- substracts the ADC offset of the trace
+      \param voltage            -- returns voltage instead of raw counts
 
-      \return UpsampledFX     -- Contains the upsampled time series of the selected antennas in colums of matrix
-                                 (number of columns = number of elements in the antennaSelection, but columns
-                                 corresponding to not selected antennas will not contain meaningless values.)
+      \return UpsampledFX       -- Contains the upsampled time series of the selected antennas in colums of matrix
+                                   (number of columns = number of elements in the antennaSelection, but columns
+                                   corresponding to not selected antennas will not contain meaningless values.)
     */
     Matrix<Double> getUpsampledFX (DataReader *dr,
 				   const int& upsampling_exp,
 		                   Vector<Bool> antennaSelection = Vector<Bool>(),
-				   const bool& offsetSubstraction = false);
+				   const bool& offsetSubstraction = false,
+				   const bool& voltage = false);
 
     /*!
       \brief Gets the time axis for upsampled data (data are stored for reuse)

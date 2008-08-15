@@ -331,12 +331,15 @@ namespace CR { // Namespace CR -- begin
   Matrix<Double> CompletePipeline::getUpsampledFX (DataReader *dr,
 						   const int& upsampling_exp,
 						   Vector<Bool> antennaSelection,
-						   const bool& offsetSubstraction)
+						   const bool& offsetSubstraction,
+						   const bool& voltage)
   {
     try 
     {
       // Get the (not yet upsampled) raw data of all antennas
-      Matrix<Double> rawData = dr->fx(); 
+      Matrix<Double> rawData;
+      if (voltage) rawData = dr->voltage();
+        else rawData = dr->fx();
 
       // check if upsampling shoud be done at all (if not, return not upsampled data)
       if (upsampling_exp < 1) return rawData.copy(); 
@@ -796,8 +799,8 @@ namespace CR { // Namespace CR -- begin
       // Get the yValues of all antennas (raw data or fieldstrength)
       if (rawData)
       {
-        // get not upsampled data
-        yValues = dr->fx().copy();
+        // get not upsampled data (upsampling exponent = 0)
+        yValues = getUpsampledFX(dr,0, antennaSelection, false);
         // Upsampled yValues (ADC offset will not be substracted)
         upYvalues = getUpsampledFX(dr,upsampling_exp, antennaSelection, false);
       }
@@ -1010,7 +1013,8 @@ namespace CR { // Namespace CR -- begin
 
       // Get the yValues of all selected antennas (raw data or fieldstrength)
       if (rawData)
-        yValues = getUpsampledFX(dr,upsampling_exp, antennaSelection, true);  // true means: offset will be substracted
+        yValues = getUpsampledFX(dr,upsampling_exp, antennaSelection, true);
+        // first true means: offset will be substracted, 
       else
         yValues = getUpsampledFieldstrength(dr,upsampling_exp, antennaSelection);
 
