@@ -253,22 +253,28 @@ namespace CR { // Namespace CR -- begin
       tmpvec.resize(2);
       tmpCvec.resize(dr->fftLength());
       tmparr.resize(tmpCvec.shape());
-      for (i=0;i<AntennaIDs.nelements();i++){
-	InterAntGain_p->GetValues(date, AntennaIDs(i), &tmparr);
-	//CTRead->GetData(date, AntennaIDs(i), "FrequencyBand", &tmpvec);
-	//cout << "CRinvFFT::GetShiftedFFT: tmpCvec:" << tmpCvec.shape() << " tmparr:"<<tmparr.shape()
-	//     << " phaseGradients:"<< phaseGradients.shape() << endl;
-	convertArray(tmpCvec,Vector<Double>(tmparr));
-	// compute 1.947/delta_nu/sqrt(Gain)
-	//   1.947        = constant (at least for LOPES)
-	//   delta_nu     = (FreqBand(1)-FreqBand(0))/1e6 [in MHz]
-	//   1/sqrt(Gain) = tmpCvec
-	tmpCval = 1.947*1e6/(FrequencyBands_p(1,i)-FrequencyBands_p(0,i));
-	AntGainFactors.column(i) = tmpCvec*tmpCval;
-      };
+      // If the calibration for the e-field should be done,
+      // then take the gain simulation into accout.
+      // Otherwise set the gain to 1 + 0i
+      if (DoGainCal_p)
+        for (i=0;i<AntennaIDs.nelements();i++){
+	  InterAntGain_p->GetValues(date, AntennaIDs(i), &tmparr);
+	  //CTRead->GetData(date, AntennaIDs(i), "FrequencyBand", &tmpvec);
+	  //cout << "CRinvFFT::GetShiftedFFT: tmpCvec:" << tmpCvec.shape() << " tmparr:"<<tmparr.shape()
+	  //     << " phaseGradients:"<< phaseGradients.shape() << endl;
+	  convertArray(tmpCvec,Vector<Double>(tmparr));
+	  // compute 1.947/delta_nu/sqrt(Gain)
+	  //   1.947        = constant (at least for LOPES)
+	  //   delta_nu     = (FreqBand(1)-FreqBand(0))/1e6 [in MHz]
+	  //   1/sqrt(Gain) = tmpCvec
+	  tmpCval = 1.947*1e6/(FrequencyBands_p(1,i)-FrequencyBands_p(0,i));
+	  AntGainFactors.column(i) = tmpCvec*tmpCval;
+        }
+      else
+        AntGainFactors.set(DComplex (1.,0.));
       //cout << "CRinvFFT::GetShiftedFFT: AntGainFactors:" << AntGainFactors.shape()
       //     << " phaseGradients:"<< phaseGradients.shape() << endl;
-      FFTdata = phaseGradients*AntGainFactors*GetData(dr);      
+      FFTdata = phaseGradients*AntGainFactors*GetData(dr);
 
 // Dummy until the GeometricalWeight class works as it is supposed to...
 //      FFTdata = GetData(dr);
@@ -281,7 +287,6 @@ namespace CR { // Namespace CR -- begin
       crdel.parameters().define("frequencyValues",dr->frequencyValues());
       crdel.parameters().define("ExtraDelay",ExtraDelay_p);
       crdel.apply(FFTdata);
-
     } catch (AipsError x) {
       cerr << "CRinvFFT::GetShiftedFFT: " << x.getMesg() << endl;
       return Matrix<DComplex>();
