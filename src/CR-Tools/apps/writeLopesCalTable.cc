@@ -954,11 +954,11 @@ int main (int argc, char *argv[])
     //rotate_antenna_model(Ant1_rotation_start);  // rotates antenna 1
 
     // write TV reference phase differences and reference phase diffrences for roof setup
-    //writeTVRefPhases();	// checked in
+    //writeTVRefPhases();		// checked in
     //writeRoofRefPhases();     // checked in
 
     // Add the measured dispersion of the LOPES 30 filter boxes
-    //writePhaseCal();   // not yet checked in
+    //writePhaseCal();   //  checked in
 
 
     cout << "Writing finished: " << endl;
