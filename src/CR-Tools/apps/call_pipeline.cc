@@ -1067,22 +1067,12 @@ int main (int argc, char *argv[])
 
       // print information and process the event
       std::cout << "\nProcessing event \"" << filename << "\"\nwith azimuth " << azimuth << " °, elevation " << elevation
-	<< " °, distance (radius of curvature) " << distance << " m, core position X " << core_x
-	<< " m and core position Y " << core_y << " m.\n" << std::endl;
+                << " °, distance (radius of curvature) " << distance << " m, core position X " << core_x
+                << " m and core position Y " << core_y << " m.\n" << std::endl;
 
-      // Set up of the pipeline
-      analyseLOPESevent2 eventPipeline;
-      
+      // Set observatory record to LOPES
       Record obsrec;
-
       obsrec.define("LOPES",caltablepath);
-
-      // set plot range and ccWindowWidth
-      eventPipeline.setPlotInterval(plotStart,plotEnd);
-      eventPipeline.setCCWindowWidth(ccWindowWidth);
-
-      // set the upsampling coefficient (upsampling factor = 2^upsamplingExponent
-      eventPipeline.setUpsamplingExponent(upsamplingExponent);
 
       // check for the polarizations, if both polarizations are required
       // then the pipeline has to be called twice (once for EW and once for NS);
@@ -1099,7 +1089,13 @@ int main (int argc, char *argv[])
         }
 
         // initialize the pipeline
-	eventPipeline.initPipeline(obsrec);
+        analyseLOPESevent2 eventPipeline;
+        eventPipeline.initPipeline(obsrec);
+
+        // set parameters of pipeline
+        eventPipeline.setPlotInterval(plotStart,plotEnd);
+        eventPipeline.setCCWindowWidth(ccWindowWidth);
+        eventPipeline.setUpsamplingExponent(upsamplingExponent);
 
 	// call the pipeline with an extra delay = 0.
         results = eventPipeline.RunPipeline (path+filename,
@@ -1136,6 +1132,7 @@ int main (int argc, char *argv[])
         AzL = results.asDouble("Azimuth");
         ElL = results.asDouble("Elevation");
         CCheight = results.asDouble("CCheight");
+        gt = results.asuInt("Date");
        }
 
       if ( (polarization == "NS") || both_pol)
@@ -1147,8 +1144,14 @@ int main (int argc, char *argv[])
           polarization = "NS";	// do NS here
         }
 
-	// initialize the pipeline
-	eventPipeline.initPipeline(obsrec);
+        // initialize the pipeline
+        analyseLOPESevent2 eventPipeline;
+        eventPipeline.initPipeline(obsrec);
+
+        // set parameters of pipeline
+        eventPipeline.setPlotInterval(plotStart,plotEnd);
+        eventPipeline.setCCWindowWidth(ccWindowWidth);
+        eventPipeline.setUpsamplingExponent(upsamplingExponent);
 
         // call the pipeline with an extra delay = 0.
         results = eventPipeline.RunPipeline (path+filename,
@@ -1185,6 +1188,7 @@ int main (int argc, char *argv[])
         AzL_NS = results.asDouble("Azimuth");
         ElL_NS = results.asDouble("Elevation");
         CCheight_NS = results.asDouble("CCheight");
+        gt = results.asuInt("Date");
        }
 
        // write output to root tree

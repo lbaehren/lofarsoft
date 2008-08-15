@@ -182,7 +182,7 @@ namespace CR { // Namespace CR -- begin
             {
               if (first_message)
               {
-                cout << "Deselected antenna(s): ";
+                cout << "Deselected antenna(s) without \"" << Polarization << "\" polarization: ";
                 first_message = false;
               }
               cout << i+1 << " ";	// antenna number
@@ -250,10 +250,10 @@ namespace CR { // Namespace CR -- begin
 	  upsamplingToDo[i] = false;
 	}
       }
-      
+
       // Get the (not yet upsampled) fieldstrength of all antennas
       // (don't pass antennaSelection to get full number of columns in the Matrix)
-      Matrix<Double> fieldstrength = GetTimeSeries(dr, Vector<Bool>(), Polarization);
+      Matrix<Double> fieldstrength = GetTimeSeries(dr, Vector<Bool>());
       // create upsampling factor by upsampling exponent
       unsigned int upsampled = pow(2,upsampling_exp);
 
@@ -280,7 +280,7 @@ namespace CR { // Namespace CR -- begin
 	  for (unsigned int j = 0; j < tracelength; j++) {
             originalTrace[j] = fieldstrength.column(i)(j);
           }
-	  
+
 	  // do upsampling by factor #upsampled (--> NoZeros = upsampled -1)
 
           // calcutlate Offset:

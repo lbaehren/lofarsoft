@@ -133,6 +133,9 @@ namespace CR { // Namespace CR -- begin
 	return Record();
       };
 
+      // storte GT in return record
+      erg.mergeField(lev_p->header(),"Date", RecordInterface::OverwriteDuplicates);
+
       // set Complete Pipeline and print output, which case is set!
       CompleteBeamPipe_p = static_cast<CompletePipeline*>(beamPipe_p);
       if (verbose)
@@ -140,7 +143,7 @@ namespace CR { // Namespace CR -- begin
  		 cout << "analyseLOPESevent2::RunPipeline: " << "Proceed without (new) upsampling." << endl;
         else
  		 cout << "analyseLOPESevent2::RunPipeline: " << "(New) upsampling enabled." << endl;
-   
+
       // initialize Complete Pipeline
       CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
       CompleteBeamPipe_p->setCCWindowWidth(getCCWindowWidth());
@@ -323,6 +326,14 @@ namespace CR { // Namespace CR -- begin
 	// execute dvips to create postscript file
         shellCommand = "dvips " + filename + " 2> /dev/null"; // don't show the output to stderr
         system(shellCommand.c_str());
+
+        // delete temporary files
+        shellCommand = "rm -f " + filename + ".aux "
+                                + filename + ".dvi "
+                                + filename + ".tex "
+                                + filename + ".log ";
+        system(shellCommand.c_str());
+
 
         std::cout << "Created postscript summary: " << filename << ".ps" << std::endl;
       }
