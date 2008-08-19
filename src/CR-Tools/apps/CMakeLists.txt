@@ -154,6 +154,17 @@ if (HAVE_CASA OR HAVE_CASACORE)
   list (APPEND cr_apps getPhases)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
+## -------------------------------------------------------------------
+## tbbctlResort
+
+if (HAVE_CASA OR HAVE_CASACORE)
+    add_executable (tbbctlResort tbbctlResort.cc)
+    ## linker instructions
+    target_link_libraries (tbbctlResort cr)
+    ## installation instructions
+  list (APPEND cr_apps tbbctlResort)
+endif (HAVE_CASA OR HAVE_CASACORE)
+
 
 ## -------------------------------------------------------------------
 ## tbbTest
