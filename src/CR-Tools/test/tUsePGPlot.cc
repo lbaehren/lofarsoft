@@ -28,7 +28,7 @@
 #include <cpgplot.h>
 
 /*!
-  \file tUsePGPLOT.cc
+  \file tUsePGPlot.cc
 
   \ingroup CR_test
 

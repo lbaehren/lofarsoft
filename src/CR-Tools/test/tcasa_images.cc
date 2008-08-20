@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------*
- | $Id::                                                                 $ |
+ | $Id:: tNewClass.cc 1302 2008-03-11 10:04:05Z baehren                  $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
  *   Copyright (C) 2007                                                    *
@@ -49,6 +49,8 @@ using casa::Matrix;
 using casa::String;
 using casa::Vector;
 
+const double pi (3.14159265);
+
 /*!
   \file tcasa_images.cc
 
@@ -59,7 +61,11 @@ using casa::Vector;
   \author Lars B&auml;hren
 */
 
-// ------------------------------------------------------------------------------
+// ==============================================================================
+//
+//  Helper routines
+//
+// ==============================================================================
 
 /*!
   \brief Create the shape information for the created image
@@ -71,9 +77,9 @@ using casa::Vector;
   \return shape -- The shape of the image, i.e. the number of axes and their
           respective lengths, e.g. <tt>shape=[25,25,10,50,128]</tt>
 */
-IPosition image_shape (int nDistance=10,
-		       int nTime=50,
-		       int nFrequency=128)
+IPosition image_shape (int const &nDistance=10,
+		       int const &nTime=50,
+		       int const &nFrequency=128)
 {
   IPosition shape (5,25,25,nDistance,nTime,nFrequency);
 
@@ -83,105 +89,194 @@ IPosition image_shape (int nDistance=10,
 // ------------------------------------------------------------------------------
 
 /*!
+  \brief Create observation information object
+  
+  \return obsInfo -- Object containing misc. information on about the observation,
+          such as the name of the telescope and the observer, but also the time at
+	  which the observation was done.
+*/
+casa::ObsInfo observation_info (std::string const &telescope="LOFAR",
+				std::string const &observer="Lars Baehren")
+{
+  casa::ObsInfo obsInfo;
+  casa::Time startTime;
+  casa::Quantity epoch (startTime.modifiedJulianDay(), "d");
+
+  obsInfo.setObsDate (epoch);
+  obsInfo.setTelescope (casa::String(telescope));
+  obsInfo.setObserver (casa::String(observer));
+
+  return obsInfo;
+}
+
+// ------------------------------------------------------------------------------
+
+casa::DirectionCoordinate direction_coordinate (double const &increment=2.0)
+{
+  IPosition shape;
+  Matrix<double> xform(2,2);
+  
+  shape            = image_shape();
+  xform            = 0.0;
+  xform.diagonal() = 1.0;
+  
+  casa::DirectionCoordinate coord (casa::MDirection::J2000,
+				   casa::Projection(casa::Projection::STG),
+				   0.0*pi/180.0,
+				   90.0*pi/180.0,
+				   -increment*pi/180.0,
+				   increment*pi/180.0,
+				   xform,
+				   0.5*shape(0),
+				   0.5*shape(1));
+  
+  coord.setReferencePixel(Vector<double>(2,0.0));
+
+  return coord;
+}
+
+// ------------------------------------------------------------------------------
+
+casa::LinearCoordinate radial_coordinate (double const &referenceValue=0.0,
+					  double const &referencePixel=0.0,
+					  double const &increment=0.0)
+{
+  Vector<String> names (1,"Distance");
+  Vector<String> units (1,"m");
+  Vector<double> refVal (1,referenceValue);
+  Vector<double> inc (1,increment);
+  Matrix<double> pc (1,1,1.0);
+  Vector<double> refPix (1,referencePixel);
+  
+  casa::LinearCoordinate coord (names,
+				units,
+				refVal,
+				inc,
+				pc,
+				refPix);
+
+  return coord;
+}
+
+// ------------------------------------------------------------------------------
+
+casa::SpectralCoordinate spectral_coordinate () 
+{
+    Vector<String> names  (1,"Frequency");
+    casa::SpectralCoordinate axis;
+    
+    axis.setWorldAxisNames(names);
+ 
+    return axis;
+}
+
+// ------------------------------------------------------------------------------
+
+casa::LinearCoordinate time_coordinate (double const &referenceValue=0.0,
+					double const &referencePixel=0.0,
+					double const &increment=1.0)
+{
+  Vector<String> names  (1,"Time");
+  Vector<String> units  (1,"s");
+  Vector<double> refVal (1,referenceValue);
+  Vector<double> inc    (1,increment);
+  Matrix<double> pc     (1,1,1.0);
+  Vector<double> refPix (1,referencePixel);
+  
+  casa::LinearCoordinate coord (names,
+				units,
+				refVal,
+				inc,
+				pc,
+				refPix);
+  
+  return coord;
+}
+
+// ------------------------------------------------------------------------------
+
+casa::LinearCoordinate faraday_coordinate (double const &referenceValue=0.0,
+					   double const &referencePixel=0.0,
+					   double const &increment=0.0)
+{
+  Vector<String> names (1,"Faraday rotation");
+  Vector<String> units (1,"rad/(m)2");
+  Vector<double> refVal (1,referenceValue);
+  Vector<double> inc (1,increment);
+  Matrix<double> pc (1,1,1.0);
+  Vector<double> refPix (1,referencePixel);
+  
+  casa::LinearCoordinate coord (names,
+				units,
+				refVal,
+				inc,
+				pc,
+				refPix);
+
+  return coord;
+}
+
+// ------------------------------------------------------------------------------
+
+/*!
   \brief Create the coordinate system attached to the image
 
   This function creates a coordinate system object 
 
+  \param imageType          -- Type of image for which to create the coordinate
+         system; since we want to cover the basic image types to be defined for
+	 LOFAR we make use of the following values: "CR_SKY", "RM_CUBE", "RM_MAP".
   \param incrementDirection -- Increment (resolution) along the direction axes.
   \param incrementDistance  -- Increment along the distance axis.
   \param incrementTime      -- Increment along the frequency axis.
   
   \return cs -- Coordinate system tool
 */
-casa::CoordinateSystem image_csys (double incrementDirection=2.0,
+casa::CoordinateSystem image_csys (std::string imageType="CR_SKY",
+				   double incrementDirection=2.0,
 				   double incrementDistance=0.0,
 				   double incrementTime=1.0)
 {
-  const double pi (3.14159265);
   casa::CoordinateSystem cs;
-
-  // General observation information
-
-  casa::ObsInfo obsInfo;
-  casa::Time startTime;
-  casa::Quantity epoch (startTime.modifiedJulianDay(), "d");
-  //
-  obsInfo.setObsDate (epoch);
-  obsInfo.setTelescope ("LOFAR");
-  obsInfo.setObserver ("Lars Baehren");
-  //
-  cs.setObsInfo(obsInfo);
   
-  // [1] Direction axis
-  {
-    IPosition shape;
-    Matrix<double> xform(2,2);
-    
-    shape            = image_shape();
-    xform            = 0.0;
-    xform.diagonal() = 1.0;
-    
-    casa::DirectionCoordinate coord (casa::MDirection::AZEL,
-				     casa::Projection(casa::Projection::STG),
-				     0.0*pi/180.0,
-				     90.0*pi/180.0,
-				     -incrementDirection*pi/180.0,
-				     incrementDirection*pi/180.0,
-				     xform,
-				     0.5*shape(0),
-				     0.5*shape(1));
-    
-    coord.setReferencePixel(Vector<double>(2,0.0));
-    
-    cs.addCoordinate(coord);
+  if (imageType == "CR_SKY") {
+    // General observation information
+    cs.setObsInfo(observation_info());
+    // Direction axis
+    cs.addCoordinate(direction_coordinate(incrementDirection));
+    // [2] Distance axis
+    cs.addCoordinate(radial_coordinate());
+    // [3] Time axis
+    cs.addCoordinate(time_coordinate());
+    // [4] Frequency axis
+    cs.addCoordinate(spectral_coordinate());
   }
-  
-  // [2] Distance axis
-  {
-    Vector<String> names (1,"Distance");
-    Vector<String> units (1,"m");
-    Vector<double> refVal (1,-1.0);
-    Vector<double> inc (1,incrementDistance);
-    Matrix<double> pc (1,1,1.0);
-    Vector<double> refPix (1,0.0);
-    
-    casa::LinearCoordinate coord (names,
-				  units,
-				  refVal,
-				  inc,
-				  pc,
-				  refPix);
-    
-    cs.addCoordinate(coord);
+  else if (imageType == "RM_CUBE") {
+    // General observation information
+    cs.setObsInfo(observation_info());
+    // Direction axis
+    cs.addCoordinate(direction_coordinate(incrementDirection));
+    // Faraday rotation
+    cs.addCoordinate (faraday_coordinate());
+    // Polarization
+    {
+      Vector<casa::Int> iquv(4);
+      iquv(0) = casa::Stokes::I;
+      iquv(1) = casa::Stokes::Q;
+      iquv(2) = casa::Stokes::U;
+      iquv(3) = casa::Stokes::V;
+      casa::StokesCoordinate coord(iquv);
+      cs.addCoordinate (coord);
+    }
   }
-
-  // [3] Time axis
-  {
-    Vector<String> names  (1,"Time");
-    Vector<String> units  (1,"s");
-    Vector<double> refVal (1,0.0);
-    Vector<double> inc    (1,incrementTime);
-    Matrix<double> pc     (1,1,1.0);
-    Vector<double> refPix (1,0.0);
-    
-    casa::LinearCoordinate axis (names,
-				 units,
-				 refVal,
-				 inc,
-				 pc,
-				 refPix);
-    
-    cs.addCoordinate(axis);
+  else if (imageType == "RM_MAP") {
+    // General observation information
+    cs.setObsInfo(observation_info());
+    // Direction axis
+    cs.addCoordinate(direction_coordinate(incrementDirection));
   }
-
-  // [4] Frequency axis
-  {
-    Vector<String> names  (1,"Frequency");
-    casa::SpectralCoordinate axis;
-    
-    axis.setWorldAxisNames(names);
-    
-    cs.addCoordinate(axis);
+  else {
+    std::cout << "[image_csys] Unknown image type!" << std::endl;
   }
   
   return cs;
@@ -220,7 +315,11 @@ template void image_summary (casa::ImageInterface<double> &image);
 template void image_summary (casa::ImageInterface<casa::Complex> &image);
 template void image_summary (casa::ImageInterface<casa::DComplex> &image);
 
-// ------------------------------------------------------------------------------
+// ==============================================================================
+//
+//  Testing routines
+//
+// ==============================================================================
 
 /*
   \brief Test opening an existing image and try working with it
@@ -450,6 +549,52 @@ int test_HDF5Image ()
 
 // ------------------------------------------------------------------------------
 
+/*
+  \brief Create an image matching the expected characteristics of a LOFAR sky image
+
+  \return nofFailedTests -- The number of failed tests/operations encountered 
+          within this function
+*/
+int create_lofar_images ()
+{
+  int nofFailedTests (0);
+  std::string imageType;
+
+  std::cout << "[1] Create image holding RM cube ..." << std::endl;
+  try {
+    IPosition shape (4,4096,4096,500,4);
+    casa::TiledShape tshape (shape);
+
+    imageType = "RM_CUBE";
+    
+    casa::HDF5Image<double> imageDouble (tshape,
+					 image_csys(imageType),
+					 "lofar_rm_cube.h5");    
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[2] Create image holding RM map ..." << std::endl;
+  try {
+    IPosition shape (2,4096,4096);
+    casa::TiledShape tshape (shape);
+
+    imageType = "RM_MAP";
+    
+    casa::HDF5Image<double> imageDouble (tshape,
+					 image_csys(imageType),
+					 "lofar_rm_map.h5");    
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+// ------------------------------------------------------------------------------
+
 int main (int argc,
 	  char *argv[])
 {
@@ -473,6 +618,7 @@ int main (int argc,
 
 #ifdef HAVE_HDF5
   nofFailedTests += test_HDF5Image ();
+  nofFailedTests += create_lofar_images();
 #endif
 
   return nofFailedTests;

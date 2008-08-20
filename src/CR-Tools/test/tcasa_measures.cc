@@ -220,6 +220,9 @@ int test_MFrequency ()
 /*!
   \brief Test of measure for a position on Earth
 
+  - Add two positions given in the reference frame.
+  - Add two positions given in different reference frames.
+
   \return nofFailedTests -- The number of failed tests
 */
 int test_MPosition ()
@@ -306,6 +309,8 @@ int test_MPosition ()
 // ------------------------------------------------------------------------------
 
 /*!
+  \brief Test of measure for a direction in the sky
+
   \return nofFailedTests -- The number of failed tests
 */
 int test_MDirection ()

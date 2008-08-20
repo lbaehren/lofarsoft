@@ -43,7 +43,7 @@
 #include <lattices/Lattices/LCEllipsoid.h>
 
 /*!
-  \file tUseLattices.cc
+  \file tcasa_lattices.cc
 
   \ingroup CR_test
 
