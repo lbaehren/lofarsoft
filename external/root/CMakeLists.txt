@@ -89,7 +89,7 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
     execute_process (
       WORKING_DIRECTORY ${ROOT_BINARY_DIR}
       COMMAND wget -c ${ROOT_URL}
-      TIMEOUT 300
+      TIMEOUT 600
       ERROR_VARIABLE error_wget
       ERROR_FILE error.log
       )
@@ -98,7 +98,7 @@ if (NOT HAVE_ROOT OR ROOT_FORCE_BUILD)
       execute_process (
 	WORKING_DIRECTORY ${ROOT_BINARY_DIR}
 	COMMAND curl ${ROOT_URL}
-	TIMEOUT 300
+	TIMEOUT 600
 	ERROR_VARIABLE error_curl
 	ERROR_FILE error.log
 	)
