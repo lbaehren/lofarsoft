@@ -111,6 +111,14 @@ casa::ObsInfo observation_info (std::string const &telescope="LOFAR",
 
 // ------------------------------------------------------------------------------
 
+/*!
+  \brief Create DirectionCoordinate object
+
+  \param increment -- Coordinate increment, [deg]
+
+  \return coord -- Coordinate of type "Direction", describing the celestial 
+          coordinates in the image.
+*/
 casa::DirectionCoordinate direction_coordinate (double const &increment=2.0)
 {
   IPosition shape;
@@ -137,6 +145,16 @@ casa::DirectionCoordinate direction_coordinate (double const &increment=2.0)
 
 // ------------------------------------------------------------------------------
 
+/*!
+  \brief Create LinearCoordinate object for radial distance
+
+  \param referenceValue -- Reference value
+  \param referencePixel -- Reference pixel
+  \param increment      -- Coordinate increment
+
+  \return coord -- Coordinate of type "Linear", describing the radial distance
+          in a spherical coordinate system.
+*/
 casa::LinearCoordinate radial_coordinate (double const &referenceValue=0.0,
 					  double const &referencePixel=0.0,
 					  double const &increment=0.0)
@@ -160,14 +178,20 @@ casa::LinearCoordinate radial_coordinate (double const &referenceValue=0.0,
 
 // ------------------------------------------------------------------------------
 
+/*!
+  \brief Create SpectralCoordinate object
+
+  \return coord -- Coordinate of type "Spectral", describing the frequency axis
+          of the created image.
+*/
 casa::SpectralCoordinate spectral_coordinate () 
 {
     Vector<String> names  (1,"Frequency");
-    casa::SpectralCoordinate axis;
+    casa::SpectralCoordinate coord;
     
-    axis.setWorldAxisNames(names);
+    coord.setWorldAxisNames(names);
  
-    return axis;
+    return coord;
 }
 
 // ------------------------------------------------------------------------------
@@ -176,19 +200,19 @@ casa::LinearCoordinate time_coordinate (double const &referenceValue=0.0,
 					double const &referencePixel=0.0,
 					double const &increment=1.0)
 {
-  Vector<String> names  (1,"Time");
-  Vector<String> units  (1,"s");
-  Vector<double> refVal (1,referenceValue);
-  Vector<double> inc    (1,increment);
-  Matrix<double> pc     (1,1,1.0);
-  Vector<double> refPix (1,referencePixel);
+  Vector<String> names (1,"Time");
+  Vector<String> units (1,"s");
+  Vector<double> crval (1,referenceValue);
+  Vector<double> inc   (1,increment);
+  Matrix<double> pc    (1,1,1.0);
+  Vector<double> crpix (1,referencePixel);
   
   casa::LinearCoordinate coord (names,
 				units,
-				refVal,
+				crval,
 				inc,
 				pc,
-				refPix);
+				crpix);
   
   return coord;
 }
@@ -204,14 +228,14 @@ casa::LinearCoordinate faraday_coordinate (double const &referenceValue=0.0,
   Vector<double> refVal (1,referenceValue);
   Vector<double> inc (1,increment);
   Matrix<double> pc (1,1,1.0);
-  Vector<double> refPix (1,referencePixel);
+  Vector<double> crpix (1,referencePixel);
   
   casa::LinearCoordinate coord (names,
 				units,
 				refVal,
 				inc,
 				pc,
-				refPix);
+				crpix);
 
   return coord;
 }
@@ -360,56 +384,30 @@ int test_createImage ()
 
   IPosition shape (image_shape());
   casa::TiledShape tshape (shape);
-  casa::String filename;
     
-  cout << "[1] Creating new PagedImage<T> ..." << endl;
+  cout << "[1] Creating new PagedImage<float> ..." << endl;
   try {
-    cout << "-> PagedImage<float>" << endl;
     casa::PagedImage<float> imageFloat (tshape,
 					image_csys(),
-					"testimage01f.img");
+					"testimage_f.img");
     image_summary (imageFloat);
     
-    cout << "-> PagedImage<float>" << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  cout << "[2] Creating new PagedImage<double> ..." << endl;
+  try {
     casa::PagedImage<double> imageDouble (tshape,
 					  image_csys(),
-					  "testimage01d.img");
+					  "testimage_d.img");
     image_summary (imageDouble);
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
   
-  cout << "[2] Creating new PagedImage<float> ..." << endl;
-  try {
-    filename = "testimage02.img";
-    shape(0) = shape(1) = 200;
-    //
-    casa::PagedImage<float> image (tshape,
-				   image_csys(),
-				   filename);
-    //
-    image_summary (image);    
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-
-  cout << "[3] Creating new PagedImage<float> ..." << endl;
-  try {
-    filename = "testimage03.img";
-    shape = IPosition (5,512,512,100,512,128);
-    //
-    casa::PagedImage<float> image (tshape,
-				   image_csys(),
-				   filename);
-    //
-    image_summary (image);    
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-
   return nofFailedTests;
 }
 
