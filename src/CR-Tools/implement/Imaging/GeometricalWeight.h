@@ -261,7 +261,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       
       \return className -- The name of the class, GeometricalWeight.
     */
-    std::string className () const {
+    inline std::string className () const {
       return "GeometricalWeight";
     }
     

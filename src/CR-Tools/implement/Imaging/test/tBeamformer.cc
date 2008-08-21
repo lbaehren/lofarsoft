@@ -36,7 +36,7 @@ using CR::GeometricalWeight;
 using CR::Beamformer;
 
 /*!
-  \file tBeamformer.cc
+  \file Imaging/test/tBeamformer.cc
 
   \ingroup CR_Imaging
 
