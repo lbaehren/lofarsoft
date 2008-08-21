@@ -44,7 +44,7 @@ endforeach (test)
 ## -------------------------------------------------------------------
 ## Tests for working with casacore
 
-if (HAVE_CASACORE AND HAVE_WCSLIB)
+if (HAVE_CASACORE AND HAVE_WCSLIB AND HAVE_CFITSIO)
 
   message (STATUS "[CR-Tools] Tests for casacore enabled.")
   
@@ -81,6 +81,7 @@ if (HAVE_CASACORE AND HAVE_WCSLIB)
       ${CASA_LIBRARIES}
       ${HDF5_LIBRARIES}
       ${LAPACK_LIBRARIES}
+      ${CFITSIO_LIBRARIES}
       ${WCSLIB_LIBRARIES}
       ${G2C_LIBRARIES}
       ${HAVE_LIBM}
@@ -89,7 +90,7 @@ if (HAVE_CASACORE AND HAVE_WCSLIB)
     add_test (${test} ${test})
   endforeach (test ${tests_casacore})
   
-endif (HAVE_CASACORE AND HAVE_WCSLIB)
+endif (HAVE_CASACORE AND HAVE_WCSLIB AND HAVE_CFITSIO)
 
 ## -----------------------------------------------------------------------------
 ## Test(s) for Blitz++
