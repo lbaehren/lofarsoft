@@ -258,8 +258,10 @@ if (CR_WITH_GUI)
     )
   
   ## include directories
-
-  set (libhfget_includes "-I${QT4_INCLUDES} -I${GTK_INCLUDES} -I${BOOST_INCLUDES}")
+  
+  if (QT4_INCLUDES AND GTK_INCLUDES AND BOOST_INCLUDES)
+    set (libhfget_includes "-I${QT4_INCLUDES} -I${GTK_INCLUDES} -I${BOOST_INCLUDES}")
+  endif (QT4_INCLUDES AND GTK_INCLUDES AND BOOST_INCLUDES)
 
   ## compiler instructions
   add_library (hfget ${libhfget_sources})
@@ -278,7 +280,7 @@ if (CR_WITH_GUI)
       PROPERTIES
       PREFIX "lib"
       SUFFIX .so
-      COMPILE_FLAGS "-pipe -g -D_REENTRANT -w -fpermissive -DQT_GUI_LIB -DQT_CORE_LIB -I${CR_SOURCE_DIR}/implement/GUI -I${libhfget_includes}"
+      COMPILE_FLAGS "-pipe -g -D_REENTRANT -w -fpermissive -DQT_GUI_LIB -DQT_CORE_LIB -I${CR_SOURCE_DIR}/implement/GUI ${libhfget_includes}"
       LINK_FLAGS "-fPIC -flat_namespace"
       )
   else (APPLE)
@@ -286,7 +288,7 @@ if (CR_WITH_GUI)
       PROPERTIES
       PREFIX "lib"
       SUFFIX .so
-      COMPILE_FLAGS "-pipe -g -D_REENTRANT -w -DQT_GUI_LIB -DQT_CORE_LIB -I${libhfget_includes}"
+      COMPILE_FLAGS "-pipe -g -D_REENTRANT -w -DQT_GUI_LIB -DQT_CORE_LIB ${libhfget_includes}"
       LINK_FLAGS "-fPIC -shared"
       )
   endif (APPLE)

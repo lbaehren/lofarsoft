@@ -28,7 +28,7 @@ using CR::LinearTransform;  // Namespace usage
 /*!
   \file tLinearTransform.cc
 
-  \ingroup Math
+  \ingroup CR_Math
 
   \brief A collection of test routines for the LinearTransform class
  

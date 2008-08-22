@@ -33,7 +33,7 @@ namespace CR {  // Namespace CR -- begin
   /*!
     \class ShapeletsModel2D
     
-    \ingroup Math
+    \ingroup CR_Math
     
     \brief Shapelet decomposition of a 2-dimensional function.
     

@@ -24,7 +24,7 @@
 /*!
   \file tShapelets1D.cc
   
-  \ingroup Math
+  \ingroup CR_Math
 
   \brief A collection of test routines for the Shapelets1D class
   

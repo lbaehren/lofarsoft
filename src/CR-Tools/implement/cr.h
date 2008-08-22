@@ -168,7 +168,7 @@
 // ==============================================================================
 
 /*!
-  \defgroup Math CR-Pipeline: Math module
+  \defgroup CR_Math CR-Pipeline: Math module
   \ingroup CR
 
   \brief Math module for the CR-pipeline

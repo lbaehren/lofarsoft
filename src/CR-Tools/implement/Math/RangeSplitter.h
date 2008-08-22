@@ -37,7 +37,7 @@
 /*!
   \class RangeSplitter
 
-  \ingroup Math
+  \ingroup CR_Math
 
   \brief Split a range of input values into subsets
 

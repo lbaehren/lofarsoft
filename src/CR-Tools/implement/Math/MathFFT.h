@@ -51,7 +51,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \brief Fourier transform related mathematical operations.
     
-    \ingroup Math
+    \ingroup CR_Math
     
     \author Lars B&auml;hren
     

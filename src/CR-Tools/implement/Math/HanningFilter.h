@@ -49,7 +49,7 @@ namespace CR {  // Namespace CR -- begin
   /*!
     \class HanningFilter
     
-    \ingroup Math
+    \ingroup CR_Math
     
     \brief A generalized Hanning filter 
     

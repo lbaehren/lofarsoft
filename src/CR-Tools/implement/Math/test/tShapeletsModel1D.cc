@@ -33,7 +33,7 @@ using CR::ShapeletsModel1D;
 /*!
   \file tShapeletsModel1D.cc
 
-  \ingroup Math
+  \ingroup CR_Math
   
   \brief A collection of tests for the ShapeletsModel1D class
   

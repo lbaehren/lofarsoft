@@ -37,7 +37,7 @@
 /*!
   \class BasicFilter
 
-  \ingroup Math
+  \ingroup CR_Math
 
   \brief Basic characteristics and methods for filters
 
@@ -62,7 +62,7 @@
   <ol>
     <li>In the simplest case we construct a filter of length \f$ N \f$ with all weights 
     set to unity, i.e. no filtering at all:
-    \verbatim
+    \code
     # include <Math/BasicFilter.h>
     
     unsigned int blocksize (1024);
@@ -70,18 +70,18 @@
     BasicFilter<Float> filter_float (blocksize);
     BasicFilter<Double> filter_double (blocksize);
     BasicFilter<Complex> filter_complex (blocksize);
-    \endverbatim
+    \endcode
 
     <li>The Filter can be constructed as well by directly providing the filter
     weights during construction:
-    \verbatim
+    \code
     # include <Math/BasicFilter.h>
     
     unsigned int blocksize (1024);
     Vector<Float> weights (blocksize,0.5);
     
     BasicFilter<Float> filter (blocksize,weights);
-    \endverbatim
+    \endcode
   </ol>
 */
 

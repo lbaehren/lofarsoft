@@ -32,7 +32,7 @@ namespace CR {  //  Namespace CR -- begin
   /*!
     \class ThreeVector
     
-    \ingroup Math
+    \ingroup CR_Math
     
     \brief A generic threedimensional vector class.
     

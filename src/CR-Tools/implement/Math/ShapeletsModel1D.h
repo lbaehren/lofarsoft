@@ -41,7 +41,7 @@ namespace CR {  // Namespace CR -- begin
   /*!
     \brief Shapelet decomposition of a 1-dimensional profile.
     
-    \ingroup Math
+    \ingroup CR_Math
     
     \author Lars B&auml;hren
     

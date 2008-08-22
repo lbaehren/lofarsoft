@@ -325,9 +325,9 @@ if (CR_WITH_GUI)
 
   ## locate the Qt4 header files
 
-  find_path (QT4_INCLUDES Qt/qatomic.h
-    PATHS ${include_locations}
-    PATH_SUFFIXES lib/qt4-x11/include lib/qt4-x11
+  find_path (QT4_INCLUDES Qt/qatomic.h QtGui/QTableWidgetItem
+    PATHS ${include_locations} /usr/lib
+    PATH_SUFFIXES qt4-x11/include qt4-x11
     )
 
   ## process conditions for building the GUI

@@ -25,7 +25,7 @@
 /*!
   \file tBasicFilter.cc
   
-  \ingourp Math
+  \ingroup CR_Math
 
   \brief A collection of test routines for BasicFilter
  

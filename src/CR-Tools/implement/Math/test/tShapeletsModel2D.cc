@@ -30,7 +30,7 @@ using CR::ShapeletsModel2D;
 /*!
   \file tShapeletsModel2D.cc
 
-  \ingroup Math
+  \ingroup CR_Math
   
   \brief A collection of tests for ShapeletsModel2D.
   

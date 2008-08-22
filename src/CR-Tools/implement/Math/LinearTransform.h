@@ -50,7 +50,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class LinearTransform
     
-    \ingroup Math
+    \ingroup CR_Math
     
     \brief A general \f$ M \rightarrow N \f$ linear transform
     

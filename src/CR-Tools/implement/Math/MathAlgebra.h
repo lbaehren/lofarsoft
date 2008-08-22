@@ -50,7 +50,7 @@ namespace CR { // Namespace CR -- begin
 /*!
   \brief Algebraic operations on vectors and matrices
 
-  \ingroup Math
+  \ingroup CR_Math
 
   \author Lars B&auml;hren
 

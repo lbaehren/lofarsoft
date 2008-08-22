@@ -44,7 +44,7 @@
 /*!
   \class RaisedCosineFilter
 
-  \ingroup Math
+  \ingroup CR_Math
 
   \brief Brief description for class RaisedCosineFilter
 

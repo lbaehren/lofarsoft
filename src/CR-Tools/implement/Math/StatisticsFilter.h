@@ -37,7 +37,7 @@
 /*!
   \class FilterType
   
-  \ingroup Math
+  \ingroup CR_Math
 
   \author Lars B&auml;hren
 

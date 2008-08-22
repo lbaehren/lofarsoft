@@ -36,7 +36,7 @@
 /*!
   \class LinearRegression
 
-  \ingroup Math
+  \ingroup CR_Math
 
   \brief Brief description for class LinearRegression
 

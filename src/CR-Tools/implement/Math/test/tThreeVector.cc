@@ -29,7 +29,7 @@
 /*!
   \file tThreeVector.cc
 
-  \ingroup Math
+  \ingroup CR_Math
 
   \brief A collection of test routines for ThreeVector
  

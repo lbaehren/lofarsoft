@@ -35,7 +35,7 @@ namespace CR { // Namespace CR -- begin
   /*!
     \class RotationMatrix3D
     
-    \ingroup Math
+    \ingroup CR_Math
     
     \brief Brief description for class RotationMatrix3D
     

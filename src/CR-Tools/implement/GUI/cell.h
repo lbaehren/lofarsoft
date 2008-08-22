@@ -7,6 +7,7 @@
 class Cell : public QTableWidgetItem
 {
  public:
+  //! Constructor
   Cell();
   
   QTableWidgetItem *clone() const;

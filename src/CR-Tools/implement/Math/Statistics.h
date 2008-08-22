@@ -55,7 +55,7 @@ using casa::Vector;
 #define FPMIN 1.0e-30
 
 /*!
-  \ingroup Math
+  \ingroup CR_Math
 
   \brief Functions for statistical analysis
 

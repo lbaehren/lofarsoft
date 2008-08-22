@@ -30,7 +30,7 @@ using std::endl;
 /*!
   \file tVectorNorms.cc
   
-  \ingroup Math
+  \ingroup CR_Math
 
   \brief Collection of tests for the methods in VectorNorms
 

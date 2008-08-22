@@ -38,7 +38,7 @@ using std::string;
 /*!
   \file tMatrixOperations.cc
   
-  \ingroup Math
+  \ingroup CR_Math
 
   \brief Collection of tests on operations with/on matrices
 

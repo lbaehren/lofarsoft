@@ -56,7 +56,7 @@ namespace CR { // namespace CR -- begin
   /*!
     \file VectorNorms.h
     
-    \ingroup Math
+    \ingroup CR_Math
     
     \brief Various vector norms
     

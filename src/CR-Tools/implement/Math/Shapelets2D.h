@@ -31,7 +31,7 @@ namespace CR {  // Namespace CR -- begin
   /*!
     \brief A class to implement 2-dimensional Shapelet functions.
     
-    \ingroup Math
+    \ingroup CR_Math
     
     \author Lars B&auml;hren
     

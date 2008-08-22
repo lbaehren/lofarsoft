@@ -35,7 +35,7 @@
 /*!
   \class MedianFilter
 
-  \ingroup Math
+  \ingroup CR_Math
 
   \brief A Meadian filter
 

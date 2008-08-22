@@ -27,7 +27,7 @@ using CR::RotationMatrix2D;
 /*!
   \file tRotationMatrix2D.cc
 
-  \ingroup Math
+  \ingroup CR_Math
 
   \brief A collection of test routines for RotationMatrix2D
  

@@ -36,7 +36,7 @@ using casa::Vector;
 /*!
   \file tHanningFilter.cc
   
-  \ingroup Math
+  \ingroup CR_Math
 
   \brief A collection of test routines for the HanningFilter class
  

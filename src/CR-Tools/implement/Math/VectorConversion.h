@@ -52,7 +52,7 @@ namespace CR { // Namespace CR -- begin
   
   /*!
     \file VectorConversion.h
-    \ingroup Math
+    \ingroup CR_Math
     
     \brief Functions to handle conversions between vector representations
     
