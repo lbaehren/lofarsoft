@@ -32,9 +32,9 @@ namespace CR { // Namespace CR -- begin
   
   SubbandID::SubbandID ()
   {
-    sampleFrequency_p = 80e06;
-    bandID_p          = 0;
-    nofSubbands_p     = 256;
+ //   sampleFrequency_p = 80e06;
+  //  bandID_p          = 0;
+  //  nofSubbands_p     = 256;
   }
   
   SubbandID::SubbandID (Double const &sampleFrequency,
@@ -129,13 +129,13 @@ namespace CR { // Namespace CR -- begin
     nofSubbands_p     = nofSubbands;
     
     try {
-      Vector<Double> frequencyValues ( nofSubbands_p, 0.0 );
-      Double freq_width = sampleFrequency_p / 1024. ;        
-      Double first_freq = freq_width*bandID_p ;
+      Vector<Double> frequencyValues ( nofSubbands, 0.0 );
+      Double freq_width = sampleFrequency / 1024. ;        
+      Double first_freq = freq_width*subband_ID ;
       
       frequencyValues (0) = first_freq ;
       
-      for( uint n = 1; n <nofSubbands_p; n++){
+      for( uint n = 1; n <nofSubbands; n++){
 	
 	frequencyValues(n) = first_freq + freq_width ;
 	first_freq  = frequencyValues(n) ;
@@ -148,6 +148,31 @@ namespace CR { // Namespace CR -- begin
     }
   }
 
+  
+  Vector<Double> SubbandID::calcFreqVector ( const double& sampleFrequency,
+                                             const Vector<uint>& subband_ID ) 
+   {
+    try {
+    
+         uint nOfSubbands = subband_ID.nelements() ;
+	 
+	 Vector<Double> frequencyValues ( nOfSubbands, 0.0 );
+	 Double freq_width = sampleFrequency/1024. ;        
+           
+	for( uint n = 0; n <nOfSubbands; n++){
+	    uint subbandID = subband_ID(n) ;
+	    frequencyValues(n) = (subbandID-1)*freq_width ;
+	}	 
+	 
+    
+     return frequencyValues;
+    }
+    catch( AipsError x ){
+      cerr << " SubbandID::calcFreqVector " << x.getMesg() << endl ;
+      return Vector<Double> () ;
+    }
+  }
+    
   Vector<uint> SubbandID::calcSubbandID (const Double& sampleFrequency,
 					 const Double& subband_freq,
 					 const uint& nofSubbands)

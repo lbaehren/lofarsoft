@@ -40,6 +40,7 @@
 #include <casa/Arrays/Vector.h>
 #include <casa/BasicSL/Complex.h>
 
+#include <scimath/Mathematics/FFTServer.h>
 #include <casa/Quanta.h>
 #include <casa/Exceptions/Error.h>
 #include <casa/namespace.h>
@@ -50,6 +51,8 @@
 #include <tables/Tables/ScalarColumn.h>
 #include <tables/Tables/ScaColDesc.h>
 #include <tables/Tables/ScaRecordColDesc.h>
+
+#include <Math.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -73,23 +76,18 @@ namespace CR { // Namespace CR -- begin
             is presented as multiple spectral channels (subbands), each composed of a time series data with sample rate
 	    (200 kHz /1024 ~ 195 kHz) set by the inverse of the subband bandwidth ~ 5 microsec. Since, we are interested 
 	    in pulses of temporal width ~ nanosec. therefore, to search suitable pulses, data has to be transformed back 
-	    to the time domain to produce high time resolution (~ nanosec). This is achieved by the exact inversion of what 
-	    is implemented through hardware at station level, specifically by the inversion of polyphase filters (PPF) for 
-	    perfect reconstruction of signal.
+	    to the time domain to produce high time resolution (~ nanosec). This is achieved by the exact inversion of what is implemented through hardware at station level, specifically by the inversion of polyphase filters (PPF) for perfect reconstruction of signal.
 	      Since we have neglected the negative frequency spectrum in the output of polyphase filter bank but we can 
             regenerate them because those will have complex conjugate values of the data which is input of this class.
 	    Therefore, if the number of rows (or subbands) of the input matrix which contains fourier transformed data is 
             50 then we can regenerate the other 50 rows or subbands just by substituting complex conjugate vales in those 
-	    subbands. Hence, if we have all 512 subbands for further processing then in that case we will have all the 1024 
-	    subbands, including the neglected the neglected subbands because the other half is simple complex conjugate.]
+	    subbands. Hence, if we have all 512 subbands for further processing then in that case we will have all the 1024 subbands, including the neglected the neglected subbands because the other half is simple complex conjugate.]
     </ul>
     
     <h3>Terminology</h3>
     
     In the ppfinversion class, we used the fourier transformed data and FIR filter coefficients again but now we want to 
-    get rid off the effect of FIR filters, i.e., inversion of frequency response of FIR filters and to achieve this we have 
-    to implement IIR filter but with the same filter coefficients as of FIR filters. Sampling frequency and subband_freqeuncies
-    are needed to get the subband IDs of fourier transformed data, which can be derived by using class subbandID.
+    get rid off the effect of FIR filters, i.e., inversion of frequency response of FIR filters and to achieve this we have to implement IIR filter but with the same filter coefficients as of FIR filters. Sampling frequency and subband_freqeuncies are needed to get the subband IDs of fourier transformed data, which can be derived by using class subbandID.
     
     <ul>
     <li><em> filterCoefficient </em>
@@ -138,7 +136,8 @@ namespace CR { // Namespace CR -- begin
     */
     
     ppfinversion( const Matrix<DComplex>& FTData,
-                  const Vector<Double>& FIRCoefficients ) ;
+                  const Vector<Double>& FIRCoefficients,
+		  const Vector<uint> subBand_IDs ) ;
     
     /*!
     
@@ -205,7 +204,21 @@ namespace CR { // Namespace CR -- begin
    */
    
    Matrix<DComplex> setDFTMatrix( const uint& nofsubbands ) ;
-  
+   
+    /*!
+   \ brief generatoing matrix of filtered data with full 1024 subbands
+   
+   \param filteredMatrix   --   will be a matrix of number of rows used for observation however
+                                no of columns will depend how many samples are there in each subband.
+   
+   \param subBand_IDs      --   Vector of subband IDs which are used in observation
+   				            
+   \returns a matrix of complex values of dimensions 1024 X (number of columns in filtered Matrix).
+   */
+   
+   Matrix<DComplex> setGeneratedSubbands( const Matrix<DComplex>& filteredMatrix,
+                                          const Vector<uint> subBand_IDs ) ;
+				        
    /*!
 
    \brief inversion of IDFT implementation for polyphase filter bank, i.e., for inversion DFT will be applied.
@@ -240,8 +253,18 @@ namespace CR { // Namespace CR -- begin
    
    						
    Vector<Double> FIR_inversion( const Vector<Double>& FIRCoeff_inv,
-                               	 const Matrix<DComplex>& FTData ) ;
-				 
+                               	 const Matrix<DComplex>& FTData,
+				 const Vector<uint> subBand_IDs ) ;
+
+  
+   Vector<Double> simple_fft( Vector<Double> input,
+                                const uint dataBlockSize ) ;
+			       
+
+    
+  Vector<Double> simple_ifft( const Vector<DComplex> fftvector,
+  			      Vector<uint> subBandVector)  ;
+			       
     
   private:
     

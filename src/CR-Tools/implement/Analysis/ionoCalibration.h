@@ -53,6 +53,7 @@
 #include <tables/Tables/ArrColDesc.h>
 #include <tables/Tables/ArrayColumn.h>
 
+#include <Math.h>
 #include <Math/StatisticsFilter.h>
 
 #include <casa/namespace.h>
@@ -294,7 +295,7 @@ namespace CR {  // Namespace CR -- begin
    
    \param  samplingFreq         -- sampling frequency with which data is sampled.
 			    
-   \param   subband_frequencies -- a vector of initial frequencies of all subbands on which station level processing is done.
+   \param  subband_frequencies -- a vector of initial frequencies of all subbands on which station level processing is done.
    
    \ returns the complex values for the given and generated subbands
    

@@ -38,7 +38,8 @@ namespace CR { // Namespace CR -- begin
  // Argumented Constructor
   
   ppfinversion::ppfinversion( const Matrix<DComplex>& FTData,
-                              const Vector<Double>& FIRCoefficients ) 
+                              const Vector<Double>& FIRCoefficients,
+			      const Vector<uint> subBand_IDs ) 
   {
   //Matrix<DComplex> timeseriesdata ;
   }
@@ -131,25 +132,29 @@ namespace CR { // Namespace CR -- begin
      
      {
        try {
-            Double pi = 3.1416 ;
+            Double pi = 3.14159265358979323846 ;
 	    
+	 //   uint nofsubbands = 1024 ;
+	   
 	    Matrix<DComplex> twiddleFactor( nofsubbands , nofsubbands ) ;
 	 
 	    Matrix<DComplex> twiddleFactor_inv( nofsubbands , nofsubbands ) ;
 	 
 	    Matrix<DComplex> conjugate_twiddle( nofsubbands , nofsubbands ) ;
 	 
-	    DComplex j(0, -2.*pi/nofsubbands );
+	    DComplex expo(0, -2.*pi/Double(nofsubbands) );
 	 
 	    for( uint r=0; r< nofsubbands; r++ ){
 	 
 	        for( uint s=0; s< nofsubbands; s++ ){
 	      
-	             twiddleFactor_inv( r,s ) = exp(j*Double(r*s)) ;
+	             twiddleFactor_inv( r,s ) = exp(expo*Double(r*s)) ;
 		     }
              }
 	    
-	    twiddleFactor = twiddleFactor_inv*(1./1024.) ;
+	    twiddleFactor = twiddleFactor_inv ;  // removing 1024 factor from it just to check
+	    
+	//    cout << " twiddle factor matrix : " << twiddleFactor.row(3) << endl ;
 	    
 	    return twiddleFactor ;
 	      
@@ -161,27 +166,75 @@ namespace CR { // Namespace CR -- begin
     }
     
     
+   Matrix<DComplex> ppfinversion::setGeneratedSubbands( const Matrix<DComplex>& filteredMatrix,
+                                                        const Vector<uint> subBand_IDs ) 
+						    
+    {
+       try {
+                      
+	    uint nColumns = filteredMatrix.ncolumn() ;
+	   // uint nRows = filteredMatrix.nrow() ;	    	    
+	    
+       	    Matrix <DComplex> generatedSubbands(1024, nColumns,0.0 ) ;
+		    
+	    uint nofelement = subBand_IDs.nelements() ;
+           
+	    	    	    
+	    for(uint i=0; i< nofelement; i++ ){
+	        		 
+	         uint subbandID = subBand_IDs(i) ;
+		 
+	//	 Vector<DComplex> filtered_vector = filteredMatrix.row(512-subbandID) ;
+                  Vector<DComplex> filtered_vector = filteredMatrix.row(i) ;
 
-    Matrix<Double> ppfinversion :: DFTinversion ( const Matrix<DComplex>& generatedSubbands,
-                                                  const Matrix<DComplex>& DFTMatrix )
+//		 generatedSubbands.row(512-subbandID) = filtered_vector ;
+		 generatedSubbands.row(subbandID) = filtered_vector ;
+	 
+		// if( subbandID< 512 ){	 
+//		 generatedSubbands.row(512+subbandID) = conj(filteredMatrix.row(512-subbandID)) ;
+	   	 generatedSubbands.row(1024-subbandID) = conj(filteredMatrix.row(i)) ;
+		 
+		// }
+	 
+	}
+		 	    
+	    return generatedSubbands ;
+	}
+	   
+        catch( AipsError x ){
+	cerr << " ppfinversion::setGeneratedSubbands " << x.getMesg () << endl ;
+	return Matrix<DComplex> () ;
+	}
+    }
+    	
+    
+    				    
+    Matrix<Double> ppfinversion::DFTinversion ( const Matrix<DComplex>& generatedSubbands,
+                                                const Matrix<DComplex>& DFTMatrix )
 
     {
       try {
 
            uint nOfColumns = generatedSubbands.ncolumn();
-
-           uint nOfRows = DFTMatrix.nrow() ;
+	   
+  //        uint nOfRows = generatedSubbands.ncolumn();
+          uint nOfRows = DFTMatrix.nrow() ;
 
            Matrix<Double> DFTinvertedMatrix ( nOfRows, nOfColumns, 0.0 );
-
-           for( uint c= 0; c < nOfColumns; c++ ){
- 
+         
+	  // cout << " generated matrix : " << generatedSubbands.row(3) << endl ;
+           
+	   for( uint c= 0; c < nOfColumns; c++ ){
+ 		
                 for( uint r= 0 ; r < nOfRows ; r++ ){
-
-                     DFTinvertedMatrix( r,c ) = real( sum ( DFTMatrix.row(r)*generatedSubbands.column(c)) ) ;
-
-                      }
+			
+                     Double DFTinverted = real( sum ( DFTMatrix.row(r)*generatedSubbands.column(c)) ) ;
+			
+        		  DFTinvertedMatrix( r,c ) = DFTinverted ;
+	          }
               }
+	      
+	      
           return DFTinvertedMatrix ;
           }
           catch( AipsError x ){
@@ -192,28 +245,32 @@ namespace CR { // Namespace CR -- begin
 
     
     Vector<Double> ppfinversion::FIR_inversion( const Vector<Double>& FIRCoeff_inv,
-                               	                const Matrix<DComplex>& FTData ) 
+                               	                const Matrix<DComplex>& FTData,
+						const Vector<uint> subBand_IDs ) 
 						    
     {
      try {
           
           ppfinversion ppfinv ;
 	  
-          Matrix<Double> inv_fir_coeff = ppfinv.setInverseFilterCoefficients( FIRCoeff_inv ) ;
-	  
+	  Matrix<Double> inv_fir_coeff = ppfinv.setInverseFilterCoefficients( FIRCoeff_inv ) ;
+	 
 	  uint NOFROWS = inv_fir_coeff.nrow () ;
 	  
 	  uint NOFCOLUMNS = inv_fir_coeff.ncolumn() ;
-	 
+		  
 	  Matrix<DComplex> DFT_matrix = ppfinv.setDFTMatrix( NOFROWS ) ; 
+		  
+	  Matrix<DComplex> generatedsubbands = ppfinv.setGeneratedSubbands( FTData,
+                                                                            subBand_IDs )  ;
+		  
+         Matrix<Double> DFTinverted = ppfinv.DFTinversion ( generatedsubbands,
+                                                            DFT_matrix ) ;
 	 
-	  Matrix<Double> DFTinverted = ppfinv.DFTinversion ( FTData,
-                                                             DFT_matrix ) ;
-							     
 	  uint nofRows = DFTinverted.nrow() ;
 	  
 	  uint nofColumns = DFTinverted.ncolumn() ;
-          
+	  
 	  Vector<Double> ppf_multiplied_inv( nofRows, 0.0 );
 	
 	  Matrix<Double> sliced_matrix_inv( nofRows, NOFCOLUMNS, 0.0 );
@@ -277,6 +334,114 @@ namespace CR { // Namespace CR -- begin
        return Vector<Double> () ;
        }
    }	    
-  			
-			
+ 
+  
+  
+  
+  Vector<Double> ppfinversion::simple_fft( Vector<Double> input,
+                                           const uint dataBlockSize ) 
+  {
+     try {
+           
+     	   FFTServer <Double,DComplex> server ;
+	   
+	   uint nofelements =input.nelements() ;
+	   
+	   uint nblocks = int( nofelements/dataBlockSize ) ;
+	 //  cout << " number of blocks :" << nblocks <<endl ;
+	   
+	   Vector<DComplex> FFTVector_f ; 
+	   
+	   Vector<Double> sliced_vector( dataBlockSize, 0.0 ) ;
+	   
+	   Vector<Double> time_sliced( dataBlockSize, 0.0 );
+	   
+	   Vector<Double> time_series( nofelements, 0.0 ) ;
+	   	   
+	   uint sample(0);
+	             
+	   for( uint i=0; i< nblocks; i++ ){
+	       
+	      sliced_vector = input( Slice( sample, dataBlockSize ) ) ;
+	      
+	      Vector<DComplex> FFTVector( dataBlockSize/2+1, 0.0 ) ;
+	      
+	      uint element = FFTVector.nelements();
+	      
+	      uint div_subs = int(element/3);
+	      
+	      server.fft( FFTVector, sliced_vector ) ;
+	      
+	      for( uint j=0; j<div_subs; j++ ){
+	      
+	           FFTVector(j)= 0. ;
+		   
+		   }
+		   
+              for( uint k=2*div_subs; k< element; k++) {
+	      
+	          FFTVector(k)= 0. ;
+		  
+	          }
+	      
+	      server.fft( time_sliced, FFTVector ) ;
+	      
+	      uint m(0);
+	      
+	      for( uint l=sample; l< (sample+dataBlockSize); l++ ){
+	      
+	          time_series(l) = time_sliced(m) ;
+		  
+		  m = m+1 ;
+		  
+		  }
+	      
+	      cout << " sample number with which blocks has been cut :" << sample << endl ;
+	      sample = sample + dataBlockSize ;
+	     }
+	        
+	    return time_series  ;
+       }
+	
+       catch ( AipsError x ){
+       cerr << "  ppfinversion::simple_fft " << x.getMesg () << endl ;
+       return Vector<Double> () ;
+       }
+   }	     			       
+
+    
+  Vector<Double> ppfinversion::simple_ifft( const Vector<DComplex> fftvector,
+  			                    Vector<uint> subBandVector)   
+  			                   
+  {
+     try {
+     
+          FFTServer <Double,DComplex> server ;
+	  
+	  uint nofelements = subBandVector.nelements() ;
+	  
+	  Vector<DComplex> slicedfft_vector( nofelements, 0.0 ) ;
+	  
+	  for( uint i=0; i< nofelements; i++ ){
+	  
+	       uint bandID = subBandVector(i) ;
+	       
+	       slicedfft_vector(i) = fftvector( bandID );
+	       
+	       }
+	       
+	  Vector<Double> ifft_vector( (nofelements-1)*2, 0.0 ) ;
+	  
+	  server.fft( ifft_vector, slicedfft_vector ) ;
+	  
+       return  ifft_vector ;
+       }
+	
+       catch ( AipsError x ){
+       cerr << "  ppfinversion:: simple_ifft " << x.getMesg () << endl ;
+       return Vector<Double> () ;
+       }
+   }	 
+ 
+   
  } // Namespace CR -- end

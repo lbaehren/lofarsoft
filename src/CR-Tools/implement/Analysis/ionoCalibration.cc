@@ -21,6 +21,7 @@
 /* $Id: ionoCalibration.cc,v 1.3 2007/08/08 15:29:50 singh Exp $*/
 
 #include <Analysis/ionoCalibration.h>
+#include <Analysis/ppfinversion.h>
 #include <Analysis/SubbandID.h>
 
 namespace CR { // Namespace CR -- begin
@@ -129,6 +130,8 @@ namespace CR { // Namespace CR -- begin
       }
   }					     
     
+  
+  
   Double ionoCalibration::calcSTECvalue ( const Double& height_ionosphere,
 		          		  const Double& TEC_value,
 			  		  const Double& elevationAngle ) 
@@ -205,7 +208,8 @@ namespace CR { // Namespace CR -- begin
 	
 	for( uint i=1; i< nofelements; i++ ){
 	
- subband_width_diff =1./(subband_frequencies(i))/(subband_frequencies(i))-1./(subband_frequencies(i-1))/(subband_frequencies(i-1)) ;
+ subband_width_diff
+ =1./(subband_frequencies(i))/(subband_frequencies(i))-1./(subband_frequencies(i-1))/(subband_frequencies(i-1)) ;
 	   
 	   relativeDelay(i) = 2.*pi*multiplier*STEC_value*subband_width_diff ;
 	      
@@ -220,10 +224,9 @@ namespace CR { // Namespace CR -- begin
       }
   }
   
-  Matrix<DComplex>
-  ionoCalibration::SubbandGenerator( const Matrix<DComplex>& FTData,
-				     const Double& samplingFreq,
-				     const Vector<Double>& subband_frequencies ) 
+  Matrix<DComplex> ionoCalibration::SubbandGenerator( const Matrix<DComplex>& FTData,
+						      const Double& samplingFreq,
+				     		      const Vector<Double>& subband_frequencies ) 
     
   {
     try {
@@ -265,15 +268,15 @@ namespace CR { // Namespace CR -- begin
     }
   }
   
-  Matrix<DComplex>
-  ionoCalibration::phaseCorrection( const Matrix<DComplex>& FFT_data,
-				    const Double& hrAngle,
-				    const Double& declinationAngle,
-				    const Double& geomagLatitude,
-				    const Double& height_ionosphere,
-				    const Double& TEC_value,
-				    const Double& samplingFreq,
-				    const Vector<Double>& subband_frequencies )
+  
+  Matrix<DComplex> ionoCalibration::phaseCorrection( const Matrix<DComplex>& FFT_data,
+				    		     const Double& hrAngle,
+				    		     const Double& declinationAngle,
+				    		     const Double& geomagLatitude,
+				    		     const Double& height_ionosphere,
+				    		     const Double& TEC_value,
+				    		     const Double& samplingFreq,
+				    		     const Vector<Double>& subband_frequencies )
   {
     
     try {
@@ -293,6 +296,7 @@ namespace CR { // Namespace CR -- begin
          Vector<Double> relativePhase_diff = ionoCal.calRelativePhaseDiff( STEC_value, 
                                                                            subband_frequencies ) ;
 									   
+	 uint n_elements = relativePhase_diff.nelements() ;
 	 
 	 uint nofrows = FFT_data.nrow() ;
 	 
@@ -332,11 +336,14 @@ namespace CR { // Namespace CR -- begin
   
 	 }  
 	 
+	/* Vector<uint> subband_IDs = sbID.calcbandIDVector( samplingFreq,
+							   subband_frequencies ) ;
+							   
 	 Matrix<DComplex> generated_DFTdata = ionoCal.SubbandGenerator( FFT_phase_corrected,
                                      		                        samplingFreq,
                   		       		                        subband_frequencies )  ;		     
-		     
-	 return  generated_DFTdata ;
+	*/	     
+	 return FFT_phase_corrected ;
       }
       
      catch( AipsError x ){
@@ -412,11 +419,11 @@ namespace CR { // Namespace CR -- begin
 		     }
   
 	 }  
-	 Matrix<DComplex> generated_DFTdata = ionoCal.SubbandGenerator( FFT_phase_corrected,
-                                     		                        samplingFreq,
-                  		       		                        subband_frequencies )  ;	
-	
-	 return  generated_DFTdata ;
+// 	 Matrix<DComplex> generated_DFTdata = ionoCal.SubbandGenerator( FFT_phase_corrected,
+//                                      		                        samplingFreq,
+//                   		       		                        subband_frequencies )  ;	
+// 	
+	 return FFT_phase_corrected ;
       }
       
      catch( AipsError x ){

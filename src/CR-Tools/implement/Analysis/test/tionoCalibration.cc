@@ -191,17 +191,17 @@ int test_ionoCalibration ()
   
   
   
-  Vector<Double> output_mid = ppf_inv.FIR_inversion( ppfcoeff_inv,
-						     FFT_phase_dispersed );	
-  
-  ofstream logfile2;
-  
-  logfile2.open( "output_mid", ios::out );
-  for( uint f(0); f < ( dataBlockSize*nofsegmentation ) ; f++ ){
-    logfile2 << output_mid(f) << endl;
-  }	
-  
-  Matrix<DComplex> ppf_data_second =  ppf_impl.FFTSamples( output_mid,
+//   Vector<Double> output_mid = ppf_inv.FIR_inversion( ppfcoeff_inv,
+// 						     FFT_phase_dispersed );	
+//   
+//   ofstream logfile2;
+//   
+//   logfile2.open( "output_mid", ios::out );
+//   for( uint f(0); f < ( dataBlockSize*nofsegmentation ) ; f++ ){
+//     logfile2 << output_mid(f) << endl;
+//   }	
+//   
+/*  Matrix<DComplex> ppf_data_second =  ppf_impl.FFTSamples( output_mid,
 							   ppfcoeff );	  
   
   
@@ -226,17 +226,17 @@ int test_ionoCalibration ()
 								   subband_frequencies )   ;
   
   uint nofrows = FFT_phase_corrected.nrow() ;
-  cout << "number of generated in phase corrected FFT array : " << nofrows<< endl;		     
-  Vector<Double> output_dispersion = ppf_inv.FIR_inversion( ppfcoeff_inv,
-							    FFT_phase_corrected );
-  
-  
+  cout << "number of generated in phase corrected FFT array : " << nofrows<< endl;		     */
+//   Vector<Double> output_dispersion = ppf_inv.FIR_inversion( ppfcoeff_inv,
+// 							    FFT_phase_corrected );
+//   
+/*  
   ofstream logfile3;
   
   logfile3.open( "output_dispersion", ios::out );
   for( uint f(0); f < ( dataBlockSize*nofsegmentation ) ; f++ ){
     logfile3 << output_dispersion(f) << endl;
-  }	 							         
+  }*/	 							         
   
      } catch (AipsError x) {
        cerr << x.getMesg()<< endl;

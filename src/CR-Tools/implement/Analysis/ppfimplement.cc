@@ -97,8 +97,7 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  Matrix<Double>
-  ppfimplement::setFilterCoefficients ( const Vector<Double> &FIRCoefficients)
+  Matrix<Double> ppfimplement::setFilterCoefficients ( const Vector<Double> &FIRCoefficients)
   {   
     Matrix<Double> ppf_coeff (filterRows_p,filterColumns_p);
 
@@ -128,21 +127,26 @@ namespace CR { // Namespace CR -- begin
     
   {
     try {
-      //         filterRows = filterRows_p ;
-      Double pi = 3.1416 ;
+  //  uint filterRows = 1024 ;
+       
+      Double pi = 3.14159265358979323846 ;
       
       Matrix<DComplex> twiddleFactor_inv(filterRows , filterRows ) ;
       
-      DComplex j(0, 2*pi/filterRows);
+      Matrix<DComplex> twiddleFactorinv(filterRows , filterRows ) ;
+      
+      DComplex expo(0, 2.*pi/filterRows);
       
       for( uint r=0; r< filterRows; r++ ){
 	
 	for( uint s=0; s< filterRows; s++ ){
 	  
-	  twiddleFactor_inv( r,s ) = exp(j*Double(r*s)) ;
+	  twiddleFactor_inv( r,s ) = exp(expo*Double(r*s)) ;
 	}
       }
-      return twiddleFactor_inv ;
+      twiddleFactorinv = twiddleFactor_inv*(1./(filterRows)) ; // adding 1024 factor from it just to check
+      
+      return twiddleFactorinv ;
     }
     
     catch( AipsError x ){
@@ -254,7 +258,7 @@ namespace CR { // Namespace CR -- begin
 	     inverse_DFT_matrix.column( COLUMN ) = frequencyResponse ;
 	     
 	 }
-	 
+ 
        return inverse_DFT_matrix ; 
     }
     catch( AipsError x ){

@@ -244,7 +244,19 @@ namespace CR { // Namespace CR -- begin
     Vector<double> calcFrequency ( const double& sampleFrequency,
                                    const uint& subband_ID,
                                    const uint& nofSubbands ) ;
-    
+ 
+     /*!
+      \brief Calculate initial frequencies of subbands used for beamforming.
+      
+      \param sampleFrequency -- Clock rate at which data is sampled
+      \param subband_ID      -- Vector of subband IDs used for observation
+            
+      \return frequencies -- Vector of vector of initial frequencies of subbands
+                             which are used for beamforming.      
+    */
+    Vector<double> calcFreqVector ( const double& sampleFrequency,
+                                    const Vector<uint>& subband_ID ) ;
+				   				   
     /*!
       \brief Calculate subbands IDs which are used for beamforming.
       
@@ -268,7 +280,7 @@ namespace CR { // Namespace CR -- begin
       \param subband_frequencies -- vector of intial frequencies of all subbands
                                     which are used for beamforming.
       
-      \return subbands -- Vector of vector of subbands IDs which are used for
+      \return subbands -- Vector of subbands IDs which are used for
                           beamforming.
     */
     Vector<uint> calcbandIDVector ( const double& sampleFrequency,
