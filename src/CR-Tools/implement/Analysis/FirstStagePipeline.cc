@@ -118,7 +118,7 @@ namespace CR { // Namespace CR -- begin
       //};
       String obsstring="",tmpstring;
       Bool newCTR=False;
-      dr->header().get("Observatory",obsstring);
+      dr->headerRecord().get("Observatory",obsstring);
       if (ObsToCTPath.isDefined(obsstring)){
 	if (CTRead!=NULL){
 	  CTRead->GetKeyword("Observatory",&tmpstring);
@@ -161,8 +161,8 @@ namespace CR { // Namespace CR -- begin
       Vector<Int> AntennaIDs;
       Int i,fftlen=dr->fftLength(),nAnt=dr->nofStreams();
       uInt date;
-      dr->header().get("Date",date);
-      dr->header().get("AntennaIDs",AntennaIDs);
+      dr->headerRecord().get("Date",date);
+      dr->headerRecord().get("AntennaIDs",AntennaIDs);
       Matrix<DComplex> fftCal(fftlen,nAnt);
       Vector<Double> elgain;
       Vector<DComplex> phasecal,tempComplexVec1,tempComplexVec2;

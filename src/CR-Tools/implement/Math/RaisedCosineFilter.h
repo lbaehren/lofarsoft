@@ -42,7 +42,7 @@
 
 #include <casa/namespace.h>
 /*!
-  \class RaisedCosineFilter.h
+  \class RaisedCosineFilter
 
   \ingroup Math
 

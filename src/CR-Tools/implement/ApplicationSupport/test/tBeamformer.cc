@@ -24,7 +24,7 @@
 #include <ApplicationSupport/Beamformer.h>
 
 /*!
-  \file tBeamformer.cc
+  \file ApplicationSupport/test/tBeamformer.cc
 
   \ingroup ApplicationSupport
 

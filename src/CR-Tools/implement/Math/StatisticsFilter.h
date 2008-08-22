@@ -63,7 +63,7 @@ class FilterType {
 };
 
 /*!
-  \class StatisticsFilter.h
+  \class StatisticsFilter
 
   \brief A filter based on statistical properties of the data
 

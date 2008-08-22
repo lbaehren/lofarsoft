@@ -37,7 +37,7 @@
 #include <casa/namespace.h>
 
 /*!
-  \class LogfileName.h
+  \class LogfileName
   
   \ingroup IO
 

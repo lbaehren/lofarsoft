@@ -81,12 +81,9 @@ namespace CR { // Namespace CR -- begin
       |-- TELESCOPE                 ... Attribute       ... string
       |-- OBSERVER                  ... Attribute       ... string
       |-- PROJECT                   ... Attribute       ... string
+      |-- OBSERVATION_ID            ... Attribute       ... string
+      |-- OBSERVATION_MODE          ... Attribute       ... string
       |-- Station001                ... Group
-      |   |-- TELESCOPE             ... Attribute       ... string
-      |   |-- OBSERVER              ... Attribute       ... string
-      |   |-- PROJECT               ... Attribute       ... string
-      |   |-- OBSERVATION_ID        ... Attribute       ... string
-      |   |-- OBSERVATION_MODE      ... Attribute       ... string
       |   |-- TRIGGER_TYPE          ... Attribute       ... string
       |   |-- TRIGGER_OFFSET        ... Attribute       ... string
       |   |-- TRIG_ANTS             ... Attribute       ... array<int,1>
@@ -99,7 +96,6 @@ namespace CR { // Namespace CR -- begin
       |   |   |-- TIME              ... Attribute       ... uint
       |   |   |-- SAMPLE_NR         ... Attribute       ... uint
       |   |   |-- SAMPLES_PER_FRAME ... Attribute       ... uint
-      |   |   |-- DATA_LENGTH       ... Attribute       ... uint
       |   |   |-- NYQUIST_ZONE      ... Attribute       ... uint
       |   |   |-- FEED              ... Attribute       ... string
       |   |   |-- ANT_POSITION      ... Attribute       ... array<double,1>
@@ -239,17 +235,35 @@ namespace CR { // Namespace CR -- begin
     */
     casa::Record attributes2record ();
 
+  /*!
+    \brief Set the record with the header information
+    
+    \param header -- Record containing the header information
+    
+    \return status -- Status of the operation; returns <tt>false</tt> in case an
+            error was encountered.
+  */
+    bool setHeaderRecord (casa::Record const &rec) {
+      return DataReader::setHeaderRecord (rec);
+    }
+
   protected:
-
+    
+    /*!
+      \brief Set up the streams for reading in the data
+      
+      \return status -- Status of the operation; returns <tt>false</tt> if an
+              error was encountered.
+    */
     bool setStreams ();
-
+    
     /*!
       \brief Fill the header information from the into a header record.
       
       \return status -- Status of the operation; returns <i>true</i> if everything
-      went fine.
+              went fine.
     */
-    bool generateHeaderRecord ();
+    bool setHeaderRecord ();
     
     
   private:

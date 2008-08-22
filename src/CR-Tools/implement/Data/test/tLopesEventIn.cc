@@ -98,12 +98,12 @@ int test_LopesEventIn ()
     show_data (data);
 
     std::cout << "[5] Testing header record ..." << std::endl;
-    for (uint i=0; i<newObject.header().nfields(); i++) {
-      std::cout << "  Field No: " << i << " Name: " << newObject.header().name(i) << std::endl;
+    for (uint i=0; i<newObject.headerRecord().nfields(); i++) {
+      std::cout << "  Field No: " << i << " Name: " << newObject.headerRecord().name(i) << std::endl;
     };
-    std::cout << "  Values:\n    Date: " << newObject.header().asuInt("Date") << std::endl;
-    std::cout << "    Observatory: " << newObject.header().asString("Observatory") << std::endl;
-    std::cout << "    IDs: " << newObject.header().asArrayInt("AntennaIDs") << std::endl;
+    std::cout << "  Values:\n    Date: " << newObject.headerRecord().asuInt("Date") << std::endl;
+    std::cout << "    Observatory: " << newObject.headerRecord().asString("Observatory") << std::endl;
+    std::cout << "    IDs: " << newObject.headerRecord().asArrayInt("AntennaIDs") << std::endl;
 
     std::cout << "[6] Testing destructor ..." << std::endl;
     //Is suppostd to happen when this bracket closes...

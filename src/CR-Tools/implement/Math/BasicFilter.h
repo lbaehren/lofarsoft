@@ -35,7 +35,7 @@
 #include <casa/namespace.h>
 
 /*!
-  \class BasicFilter.h
+  \class BasicFilter
 
   \ingroup Math
 

@@ -531,14 +531,22 @@ namespace DAL { // Namespace DAL -- begin
       return casa::Matrix<double> (1,1,0);
     }
     
-    uint n (0);
-    uint station(0);
-    uint dipole(0);
-    std::vector<uint> selection (1);
+    uint n           = 0;
+    uint station     = 0;
+    uint dipole      = 0;
     uint nofStations = groups_p.size();
     uint nofDipoles  = nofDipoleDatasets();
+    std::vector<uint> selection (1);
     casa::Matrix<double> data (nofSamples,nofDipoles);
     casa::Vector<double> tmp (nofSamples);
+    
+#ifdef DEBUGGING_MESSAGES
+    std::cout << "[LOFAR_Timeseries::fx]" << std::endl;
+    std::cout << "-- nof. dipoles  = " << nofDipoles   << std::endl;
+    std::cout << "-- nof. stations = " << nofStations  << std::endl;
+    std::cout << "-- shape(data)   = " << data.shape() << std::endl;
+    std::cout << "-- shape(tmp)    = " << tmp.shape()  << std::endl;
+#endif
 
     for (station=0; station<nofStations; station++) {
       // get the number dipoles 

@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) 2008                                                  *
- *   Andreas Horneffer (<mail>)                                                     *
+ *   Copyright (C) 2008                                                    *
+ *   Andreas Horneffer (<mail>)                                            *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -65,28 +65,28 @@ namespace CR { // Namespace CR -- begin
     
     <h3>Synopsis</h3>
 
-    This class generates data by generating an empty set of frequency domain data, filling
-    (parts of) it by interpolating the frequency domain data from the input, and performing
-    a backwards FFT.
+    This class generates data by generating an empty set of frequency domain data,
+    filling (parts of) it by interpolating the frequency domain data from the
+    input, and performing a backwards FFT.
 
-    <b>Note:</b> This class only fills in data in the first Nyquist band of the new sample 
-    frequency. If there is no overlap between this band and the original frequency band, 
-    e.g., if the original data was sampled in a higher Nyquist zone, then you will get empty 
-    data.
+    <b>Note:</b> This class only fills in data in the first Nyquist band of the
+    new sample frequency. If there is no overlap between this band and the
+    original frequency band, e.g., if the original data was sampled in a higher
+    Nyquist zone, then you will get empty data.
 
     To include all the available data set the new sample frequency to at least: 
     \f[\nu_{\rm new} \ge \nu_{\rm old}\cdot{\rm [NyquistZone]} \f]
 
-    <b>Note:</b> The exception is if the newSampleFrequency is identical to the sample 
-    frequency of the original data. In this case no interpolation is done and the original 
-    frequency domain data is copied as-is. This is e.g. useful if you want to use this class
-    to select a smaller time interval after doing, e.g., the RFI filtering on the full time
-    interval
+    <b>Note:</b> The exception is if the newSampleFrequency is identical to the
+    sample frequency of the original data. In this case no interpolation is done
+    and the original frequency domain data is copied as-is. This is e.g. useful
+    if you want to use this class to select a smaller time interval after doing,
+    e.g., the RFI filtering on the full time interval.
     
     <h3>Example(s)</h3>
     
   */  
-  class UpSampledDR : public DataReader{
+  class UpSampledDR : public DataReader {
 
   private:
 
@@ -99,7 +99,8 @@ namespace CR { // Namespace CR -- begin
       \brief Use the calfft() (instead of the fft()) of the DataReader, do not Upsampling 
       (leave the data as_is).
     */
-    Bool UseCalFFT_p, noUpsample;
+    Bool UseCalFFT_p;
+    Bool noUpsample;
 
     /*!
       \brief Pointer to a processing pipeline for additional processing of the input data.
@@ -153,9 +154,11 @@ namespace CR { // Namespace CR -- begin
       \brief Setup this DataReader
 
       \param inputDR -- pointer to the DataReader object to read from 
-      \param newSampleFrequency -- the new sample frequency (in Hz), should be identical to or 
-                                   larger than the one in <tt>inputDR<\tt> (see note above)
-      \param UseCalFFT  -- Get the data from the calfft() instead of the fft() of the input DR
+      \param newSampleFrequency -- the new sample frequency (in Hz), should be
+             identical to or larger than the one in <tt>inputDR<\tt> (see note
+	     above)
+      \param UseCalFFT  -- Get the data from the calfft() instead of the fft() of
+             the input DR
       \param inpPipeline -- pointer to an optional processing pipeline 
                             <b> The scructure of this may change! </b>
       
@@ -172,13 +175,16 @@ namespace CR { // Namespace CR -- begin
     Matrix<Double> fx();
     
   protected:
+
+    bool setStreams() { return true;};
+
     /*!
       \brief Fill the header information from the into a header record.
       
       \return status -- Status of the operation; returns <i>true</i> if everything
       went fine.
     */
-    Bool generateHeaderRecord();
+    bool setHeaderRecord();
     
   private:
         

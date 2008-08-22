@@ -243,8 +243,16 @@ class NDABeam : public DataReader {
     \return status -- Status of the operation; returns <i>true</i> if everything
                       went fine.
   */
-  Bool setStreams ();
+  bool setStreams ();
 
+  /*!
+    \brief Set the record collecting header information.
+    
+    \return status -- Status of the operation; returns <tt>false</tt> in case an
+    error was encountered.
+  */
+  bool setHeaderRecord () { return true; };
+  
 };
 
 #endif /* NDABEAM_H */

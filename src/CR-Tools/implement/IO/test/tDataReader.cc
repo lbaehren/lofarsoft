@@ -138,6 +138,49 @@ int test_DataReader ()
   return nofFailedTests;
 }
 
+// ------------------------------------------------------------ test_headerRecord
+
+/*!
+  \brief Test working with the header record storing metadata
+
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_headerRecord ()
+{
+  cout << "\n[test_headerRecord]\n" << endl;
+
+  int nofFailedTests (0);
+
+  cout << "[1] Retrieve the header record from the LOFAR_TBB object ..." << endl;
+  try {
+    DataReader dr;
+    casa::Record rec = dr.headerRecord();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[2] Set header record from external values ..." << endl;
+  try {
+    bool status (true);
+    // new DataReader object to test
+    DataReader dr;
+    // set up record
+    casa::Record rec;
+    rec.define("Date",0);
+    rec.define("AntennaIDs",casa::Vector<int>(1,1));
+    rec.define("Observatory","LOFAR");
+    rec.define("Filesize",1);
+    // try writing the record back into the DataReader object
+    status = dr.setHeaderRecord (rec);
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
 // ------------------------------------------------------------- test_dataStreams
 
 /*!
@@ -537,6 +580,7 @@ int main (int argc,
   if (nofFailedTests == 0) {
     nofFailedTests += test_conversionArrays (blocksize);
 //     nofFailedTests += test_dataStreams ();
+    nofFailedTests += test_headerRecord ();
     nofFailedTests += test_selection ();
     nofFailedTests += test_time(blocksize);
     nofFailedTests += test_frequency (blocksize);

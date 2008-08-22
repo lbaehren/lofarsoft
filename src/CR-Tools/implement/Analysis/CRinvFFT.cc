@@ -177,12 +177,12 @@ namespace CR { // Namespace CR -- begin
       Vector<Int> AntennaIDs;
       uInt i,date;
       Vector<Double> tmpvec;
-      dr->header().get("Date",date);
-      dr->header().get("AntennaIDs",AntennaIDs);
+      dr->headerRecord().get("Date",date);
+      dr->headerRecord().get("AntennaIDs",AntennaIDs);
 
       // ***** getting the phase gradients
       // update the antenna positions (if needed)
-      if (posCachedDate_p != dr->header().asuInt("Date")) {
+      if (posCachedDate_p != dr->headerRecord().asuInt("Date")) {
 	AntPosValid_p = False;
       };
       if (!AntPosValid_p){
@@ -199,7 +199,7 @@ namespace CR { // Namespace CR -- begin
 	  FrequencyBands_p.column(i) = tmpvec;
 	};
 	AntPosValid_p = True;
-	posCachedDate_p = dr->header().asuInt("Date");
+	posCachedDate_p = dr->headerRecord().asuInt("Date");
       };
       // calculate the positions relative to the phase center
       Vector<Double> ReferencePos(3,0.);
@@ -313,7 +313,7 @@ namespace CR { // Namespace CR -- begin
       // Select Antennas according to Polarization
       if (Polarization != "ANY"){
 	uInt date;
-	dr->header().get("Date",date);
+	dr->headerRecord().get("Date",date);
 	if (!ploAntSelValid_p || 
 	    (ploAntSelPol_p != Polarization) ||
 	    (ploAntSelDate_p != date)) {
@@ -321,7 +321,7 @@ namespace CR { // Namespace CR -- begin
 	  ploAntSel_p = True;
 	  Vector<Int> AntennaIDs;
 	  String tempstring;
-	  dr->header().get("AntennaIDs",AntennaIDs);
+	  dr->headerRecord().get("AntennaIDs",AntennaIDs);
 #ifdef DEBUGGING_MESSAGES      
 	  cout << "CRinvFFT::GetTimeSeries: Polarization check, flagging Antennas: ";
 #endif

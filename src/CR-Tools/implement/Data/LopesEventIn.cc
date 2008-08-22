@@ -156,7 +156,7 @@ namespace CR { // Namespace CR -- begin
       filename_p = filename;
       attached_p = True;
       setStreams();
-      generateHeaderRecord();
+      setHeaderRecord();
       free(tmppoint);
     } catch (AipsError x) {
       cerr << "LOPESEventIn:attachFile: " << x.getMesg() << endl;
@@ -165,7 +165,7 @@ namespace CR { // Namespace CR -- begin
     return True;
   }
 
-  Bool LopesEventIn::setStreams(){
+  bool LopesEventIn::setStreams(){
     try{
       int antenna;
       
@@ -198,13 +198,15 @@ namespace CR { // Namespace CR -- begin
 
     } catch (AipsError x) {
       cerr << "LOPESEventIn:setStreams: " << x.getMesg() << endl;
-      return False;
+      return false;
     }; 
-    return True;
+    return true;
     
   };
 
-  Bool LopesEventIn::generateHeaderRecord(){
+  // ------------------------------------------------------------ setHeaderRecord
+
+  bool LopesEventIn::setHeaderRecord(){
     try {
       header_p.define("Date",headerpoint_p->JDR);
       header_p.define("AntennaIDs",AntennaIDs_p);
@@ -225,10 +227,10 @@ namespace CR { // Namespace CR -- begin
       header_p.define("dDate",(Double)headerpoint_p->JDR+(double)headerpoint_p->TL/5e6);
       header_p.define("EventClass",(Int)headerpoint_p->evclass);
     } catch (AipsError x) {
-      cerr << "LOPESEventIn:generateHeaderRecord: " << x.getMesg() << endl;
-      return False;
+      cerr << "[LopesEventIn::setHeaderRecord] " << x.getMesg() << endl;
+      return false;
     }; 
-    return True;
+    return true;
   };
   
   

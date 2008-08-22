@@ -132,7 +132,7 @@ void NDABeam::setMetafile (String const &metafile)
 
 // ------------------------------------------------------------------- setStreams
 
-Bool NDABeam::setStreams ()
+bool NDABeam::setStreams ()
 {
   bool status (true);
   short var (0);

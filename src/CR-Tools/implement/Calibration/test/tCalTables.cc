@@ -31,7 +31,7 @@ using CR::CalTableReader;
 using CR::CalTableWriter;
 
 /*!
-  \file tCalTableCreator.cc
+  \file tCalTables.cc
   
   \ingroup Calibration
 

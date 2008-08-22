@@ -134,7 +134,7 @@ namespace CR { // Namespace CR -- begin
       };
 
       // storte GT in return record
-      erg.mergeField(lev_p->header(),"Date", RecordInterface::OverwriteDuplicates);
+      erg.mergeField(lev_p->headerRecord(),"Date", RecordInterface::OverwriteDuplicates);
 
       // set Complete Pipeline and print output, which case is set!
       CompleteBeamPipe_p = static_cast<CompletePipeline*>(beamPipe_p);
@@ -182,7 +182,7 @@ namespace CR { // Namespace CR -- begin
       // output of antnenna to core distances in shower coordinates, if requested
       if (printShowerCoordinates) printAntennaDistances(erg.asArrayDouble("distances"),
                                                          toShower(beamPipe_p->GetAntPositions(), Az, El),	
-                                                         El, Az, XC, YC, beamformDR_p->header().asInt("Date"));
+                                                         El, Az, XC, YC, beamformDR_p->headerRecord().asInt("Date"));
       // Generate plots
       if (generatePlots)
       {

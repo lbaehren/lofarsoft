@@ -34,7 +34,7 @@
 #include <casa/namespace.h>
 
 /*!
-  \class LinearRegression.h
+  \class LinearRegression
 
   \ingroup Math
 

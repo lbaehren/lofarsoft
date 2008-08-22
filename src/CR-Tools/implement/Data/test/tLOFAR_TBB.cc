@@ -21,6 +21,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <crtools.h>
+
 #include <Data/LOFAR_TBB.h>
 #include <Utilities/StringTools.h>
 
@@ -157,7 +159,7 @@ int test_hdf5 (std::string const &filename)
       // Release identifiers
       H5Aclose (attribute_id);
     } catch (std::string message) {
-      std::cerr << message << std::endl;
+      std::cerr << message << endl;
       nofFailedTests++;
     }
 
@@ -201,7 +203,7 @@ int test_hdf5 (std::string const &filename)
 				       DAL::attribute_name(DAL::STATION_ID),
 				       channelDataset_id);
     } catch (std::string message) {
-      std::cerr << message << std::endl;
+      std::cerr << message << endl;
       nofFailedTests++;
     }
 
@@ -293,12 +295,12 @@ int test_construction (std::string const &filename)
   
   cout << "[4] Testing copy constructor ..." << endl;
   try {
-    std::cout << "--> creating original object ..." << std::endl;
+    cout << "--> creating original object ..." << std::endl;
     LOFAR_TBB data (filename,
 		    blocksize);
     data.summary();
     //
-    std::cout << "--> creating new object as copy ..." << std::endl;
+    cout << "--> creating new object as copy ..." << std::endl;
     LOFAR_TBB dataCopy (data);
     dataCopy.summary();
   } catch (std::string message) {
@@ -328,7 +330,57 @@ int test_construction (std::string const &filename)
 // -----------------------------------------------------------------------------
 
 /*!
+  \brief Test working with the header record storing metadata
+
+  \param filename -- Name of the HDF5 dataset to work with
+  
+  \return nofFailedTests -- The number of failed tests.
+*/
+int test_headerRecord (std::string const &filename)
+{
+  cout << "\n[test_data]\n" << endl;
+  
+  int nofFailedTests (0);
+  uint blocksize (1024);
+
+  cout << "[1] Retrieve the header record from the LOFAR_TBB object ..." << endl;
+  try {
+    LOFAR_TBB data (filename,
+		    blocksize);
+    casa::Record rec = data.headerRecord();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[2] Set header record from external values ..." << endl;
+  try {
+    bool status (true);
+    // new LOFAR_TBB object to test
+    LOFAR_TBB data (filename,
+		    blocksize);
+    // set up record
+    casa::Record rec;
+    rec.define("Date",0);
+    rec.define("AntennaIDs",casa::Vector<int>(1,1));
+    rec.define("Observatory","LOFAR");
+    rec.define("Filesize",1);
+    // try writing the record back into the LOFAR_TBB object
+    status = data.setHeaderRecord (rec);
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
   \brief Test reading in the data from the data set on disk
+  
+  \param filename -- Name of the HDF5 dataset to work with
 
   \return nofFailedTests -- The number of failed tests.
 */
@@ -485,6 +537,8 @@ int main (int argc,
   nofFailedTests += test_construction (filename);
   
   if (nofFailedTests == 0) {
+    // Test working with the header record storing metadata
+    nofFailedTests += test_headerRecord (filename);
     // Test reading in the data from a file
     nofFailedTests += test_data (filename);
   }

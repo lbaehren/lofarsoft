@@ -29,7 +29,7 @@
 using namespace std;
 
 /*!
-  \class DataBlockSettings.h
+  \class DataBlockSettings
 
   \ingroup IO
 

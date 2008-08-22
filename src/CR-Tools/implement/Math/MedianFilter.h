@@ -33,7 +33,7 @@
 #include <casa/namespace.h>
 
 /*!
-  \class MedianFilter.h
+  \class MedianFilter
 
   \ingroup Math
 

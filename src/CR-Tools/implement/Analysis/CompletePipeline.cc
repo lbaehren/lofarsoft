@@ -159,11 +159,11 @@ namespace CR { // Namespace CR -- begin
       {
         // get the date of the current event
         unsigned int date;
-        dr->header().get("Date",date);
+        dr->headerRecord().get("Date",date);
 
         // get AntennaIDs from CalTables (should be initialised by FirstStagePipeline fist)
         Vector<Int> AntennaIDs;
-        dr->header().get("AntennaIDs",AntennaIDs);
+        dr->headerRecord().get("AntennaIDs",AntennaIDs);
 
         // set up variables
         String polarization_string;
@@ -574,7 +574,7 @@ namespace CR { // Namespace CR -- begin
       Vector<Double> xaxis, ccbeam, pbeam;	// values for plot
       double xmax,xmin,ymin,ymax;		// Plotrange
       uInt gtdate;
-      dr->header().get("Date",gtdate);
+      dr->headerRecord().get("Date",gtdate);
       stringstream gtlabel;
       gtlabel << gtdate;
       string  plotfilename;
@@ -677,7 +677,7 @@ namespace CR { // Namespace CR -- begin
       double xmax,xmin,ymin,ymax;		// Plotrange
  
       uInt gtdate;
-      dr->header().get("Date",gtdate);
+      dr->headerRecord().get("Date",gtdate);
       stringstream gtlabel;
       gtlabel << gtdate;
       string  plotfilename;
@@ -859,7 +859,7 @@ namespace CR { // Namespace CR -- begin
       uInt gtdate;
       stringstream gtlabel, antennanumber;
       // Get the AntennaIDs for labeling
-      dr->header().get("Date",gtdate);
+      dr->headerRecord().get("Date",gtdate);
       gtlabel << gtdate;
 
 
@@ -871,7 +871,7 @@ namespace CR { // Namespace CR -- begin
       {
         stringstream antennaid;
         Vector<Int> AntennaIDs;
-        dr->header().get("AntennaIDs",AntennaIDs);
+        dr->headerRecord().get("AntennaIDs",AntennaIDs);
 
         // Create the plots for each individual antenna looping through antennas
         if (rawData)

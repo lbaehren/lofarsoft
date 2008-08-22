@@ -290,10 +290,15 @@ namespace CR {  //  Namespace CR -- begin
       \return status -- Status of the operation; returns <tt>false</tt> if an
               error was encountered.
     */
-    virtual Bool setStreams () {
-      std::cout << "[DataReader::setStreams]" << std::endl;
-      return True;
-    };
+    virtual bool setStreams () { return true;};
+    
+    /*!
+      \brief Set the record collecting header information.
+
+      \return status -- Status of the operation; returns <tt>false</tt> in case an
+              error was encountered.
+    */
+    virtual bool setHeaderRecord ();
     
     /*!
       \brief Initialization of internal parameters
@@ -348,7 +353,6 @@ namespace CR {  //  Namespace CR -- begin
     // ----------------------------------------------------- (selected of) antennas
     
     //! Selection of the antennas
-    // Vector<bool> antennaSelection_p; (Use ony one(!) method to store which antennas are selected!)
     Vector<uint> selectedAntennas_p;
     
     // ----------------------------------------------------- (selected of) channels
@@ -628,19 +632,19 @@ namespace CR {  //  Namespace CR -- begin
 
     \return header -- Record containing the header information
   */
-  inline Record header () const {
+  inline Record headerRecord () const {
     return header_p;
   };
-
+  
   /*!
     \brief Set the record with the header information
-
-    \todo We need to define, which standard fields should be present/expected
-    in a header record.
-
+    
     \param header -- Record containing the header information
+    
+    \return status -- Status of the operation; returns <tt>false</tt> in case an
+            error was encountered.
   */
-  void setHeader (Record const &header);
+  bool setHeaderRecord (Record const &header);
 
   // ----------------------------------------- Navigation through the data volume
 
@@ -1036,7 +1040,7 @@ namespace CR {  //  Namespace CR -- begin
   void init (uint const &blocksize,
 	     uint const &nyquistZone,
 	     Double const &samplerate);
-  
+
   /*!
     \brief Select the frequency channels
   */

@@ -40,9 +40,7 @@ namespace CR { // Namespace CR -- begin
   LOFAR_TBB::LOFAR_TBB ()
     : LOFAR_Timeseries (),
       DataReader ()
-  {
-    init ();
-  }
+  { }
   
   // ------------------------------------------------------------------ LOFAR_TBB
   
@@ -133,33 +131,37 @@ namespace CR { // Namespace CR -- begin
 			   bool const &listChannelIDs)
   {
     os << "[LOFAR_TBB] Summary of object properties" << endl;
-
-    /* Variables describing the dataset itself */
-    os << "-- Name of data file ... : " << filename_p            << endl;
-    os << "-- Telescope ........... : " << telescope()           << endl;
-    os << "-- Observer ............ : " << observer()            << endl;
-    os << "-- Project ............. : " << project()             << endl;
-    os << "-- nof. station groups . : " << groups_p.size()       << endl;
-    os << "-- nof. data channels .. : " << nofDipoleDatasets()   << endl;
-
-    /* Variables describing the setup of the DataReader */
-    os << "-- blocksize  [samples ] : " << blocksize_p                   << endl;
-    os << "-- FFT length [channels] : " << DataReader::fftLength()       << endl;
-    os << "-- Sample frequency [Hz] : " << DataReader::sampleFrequency() << endl;
-    os << "-- Nyquist zone ........ : " << DataReader::nyquistZone()     << endl;
-
-    /* The rest of the summary output is conditional, because given the number
-       station it might get quite a lot. */
-
-    if (listChannelIDs) {
-      /* [1] Retrieve the channel IDs */
-      /* [2] Display the channel IDs  */
-    }
     
-    if (listStationGroups) {
-      for (uint station(0); station<groups_p.size(); station++) {
-	groups_p[station].summary();
+    if (fileID_p > 0) {
+      /* Variables describing the dataset itself */
+      os << "-- Name of data file ... : " << filename_p            << endl;
+      os << "-- Telescope ........... : " << telescope()           << endl;
+      os << "-- Observer ............ : " << observer()            << endl;
+      os << "-- Project ............. : " << project()             << endl;
+      os << "-- nof. station groups . : " << groups_p.size()       << endl;
+      os << "-- nof. data channels .. : " << nofDipoleDatasets()   << endl;
+      
+      /* Variables describing the setup of the DataReader */
+      os << "-- blocksize  [samples ] : " << blocksize_p                   << endl;
+      os << "-- FFT length [channels] : " << DataReader::fftLength()       << endl;
+      os << "-- Sample frequency [Hz] : " << DataReader::sampleFrequency() << endl;
+      os << "-- Nyquist zone ........ : " << DataReader::nyquistZone()     << endl;
+      
+      /* The rest of the summary output is conditional, because given the number
+	 station it might get quite a lot. */
+      
+      if (listChannelIDs) {
+	/* [1] Retrieve the channel IDs */
+	/* [2] Display the channel IDs  */
       }
+      
+      if (listStationGroups) {
+	for (uint station(0); station<groups_p.size(); station++) {
+	  groups_p[station].summary();
+	}
+      }
+    } else {
+      os << "-- Not connected to a data-set; nothing to be reported here!" << endl;
     }
   }  
   
@@ -249,7 +251,7 @@ namespace CR { // Namespace CR -- begin
     /*
       Set up the record with the header information
      */
-    status = generateHeaderRecord ();
+    status = setHeaderRecord ();
 
     /*
       Set the conversion arrays: adc2voltage & fft2calfft
@@ -270,9 +272,9 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
 
-  // ------------------------------------------------------- generateHeaderRecord
+  // ------------------------------------------------------------ setHeaderRecord
 
-  bool LOFAR_TBB::generateHeaderRecord () 
+  bool LOFAR_TBB::setHeaderRecord () 
   {
     try {
       header_p.define("Date",min(times()));
@@ -284,14 +286,14 @@ namespace CR { // Namespace CR -- begin
       //      header_p.define("dDate",(Double)headerpoint_p->Date + 
       //		      (Double)headerpoint_p->SampleNr/(Double)headerpoint_p->sampleFreq/1e6);
     } catch (AipsError x) {
-      cerr << "LOFAR_TBB:generateHeaderRecord: " << x.getMesg() << endl;
+      cerr << "[LOFAR_TBB::setHeaderRecord] " << x.getMesg() << endl;
       return false;
     }; 
     return true;
   };
   
   // ------------------------------------------------------------------------- fx
-
+  
   casa::Matrix<double> LOFAR_TBB::fx ()
   {
     int start = iterator_p[0].position();

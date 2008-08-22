@@ -129,7 +129,7 @@ namespace CR { // Namespace CR -- begin
       // --------------------------------------------
       // Generate the header record
       // --------------------------------------------
-      generateHeaderRecord();
+      setHeaderRecord();
 
       // Set "UseCalFFT_p"
       UseCalFFT_p = UseCalFFT;
@@ -144,19 +144,22 @@ namespace CR { // Namespace CR -- begin
     return True;
   }
 
-
-  Bool UpSampledDR::generateHeaderRecord(){
+  // ------------------------------------------------------------ setHeaderRecord
+  
+  bool UpSampledDR::setHeaderRecord(){
     try {
-      header_p.mergeField(inpDR_p->header(),"Date", RecordInterface::OverwriteDuplicates);
-      header_p.mergeField(inpDR_p->header(),"AntennaIDs", RecordInterface::OverwriteDuplicates);
-      header_p.mergeField(inpDR_p->header(),"Observatory", RecordInterface::OverwriteDuplicates);
+      header_p.mergeField(inpDR_p->headerRecord(),"Date", RecordInterface::OverwriteDuplicates);
+      header_p.mergeField(inpDR_p->headerRecord(),"AntennaIDs", RecordInterface::OverwriteDuplicates);
+      header_p.mergeField(inpDR_p->headerRecord(),"Observatory", RecordInterface::OverwriteDuplicates);
       header_p.define("SampleFreq",DataReader::sampleFrequency());
     } catch (AipsError x) {
-      cerr << "UpSampledDR::generateHeaderRecord: " << x.getMesg() << endl;
-      return False;
+      cerr << "[UpSampledDR::setHeaderRecord] " << x.getMesg() << endl;
+      return false;
     }; 
-    return True;
+    return true;
   };
+
+  // ------------------------------------------------------------------------- fx
 
   Matrix<Double> UpSampledDR::fx() {
     Matrix<Double> fx;

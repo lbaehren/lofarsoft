@@ -496,7 +496,7 @@ namespace CR {  //  Namespace CR -- begin
     // check the values for the number of files and the data block size
     if (nofFiles != nofStreams_p ||
 	blocksize != blocksize_p) {
-      cerr << "[DataReader::setStreams] Wrong blocksize or number of filenames!"
+      cerr << "[DataReader::init] Wrong blocksize or number of filenames!"
 	   << endl;
       cerr << " - blocksize (internal)   = " << blocksize_p << endl;
       cerr << " - blocksize (streams)    = " << blocksize << endl;
@@ -650,13 +650,29 @@ namespace CR {  //  Namespace CR -- begin
     return frequencies;
   }
 
-  void DataReader::setHeader (Record const &header)
+  // ------------------------------------------------------------ setHeaderRecord
+
+  bool DataReader::setHeaderRecord ()
   {
+    header_p.define("Observatory","UNDEFINED");
+    header_p.define("Filesize",0);
+
+    return true;
+  }
+
+  // ------------------------------------------------------------ setHeaderRecord
+
+  bool DataReader::setHeaderRecord (Record const &header)
+  {
+    bool status (true);
     try {
       header_p.merge(header,RecordInterface::OverwriteDuplicates);
     } catch (AipsError x) {
       cerr << "[DataReader::setHeader]" << x.getMesg() << endl;
+      status = false;
     };
+
+    return status;
   }
   
   // ============================================================================

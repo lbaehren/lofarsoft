@@ -214,7 +214,7 @@ namespace CR { // Namespace CR -- begin
       free(tmppoint);
 
       setStreams();
-      generateHeaderRecord();
+      setHeaderRecord();
     } catch (AipsError x) {
       cerr << "tbbctlIn:attachFile: " << x.getMesg() << endl;
       return False;
@@ -261,7 +261,9 @@ namespace CR { // Namespace CR -- begin
     
   };
 
-  Bool tbbctlIn::generateHeaderRecord(){
+  // ------------------------------------------------------------ setHeaderRecord
+
+  Bool tbbctlIn::setHeaderRecord(){
     try {
       header_p.define("Date",headerpoint_p->Date);
       header_p.define("AntennaIDs",AntennaIDs_p);
@@ -272,16 +274,14 @@ namespace CR { // Namespace CR -- begin
       header_p.define("dDate",(Double)headerpoint_p->Date + 
 		      (Double)headerpoint_p->SampleNr/(Double)headerpoint_p->sampleFreq/1e6);
     } catch (AipsError x) {
-      cerr << "tbbctlIn:generateHeaderRecord: " << x.getMesg() << endl;
+      cerr << "[tbbctlIn::setHeaderRecord] " << x.getMesg() << endl;
       return False;
     }; 
     return True;
   };
 
+  // ------------------------------------------------------------------------- fx
 
-
-
-  
   Matrix<Double> tbbctlIn::fx () {
     uint antenna;
     uint startsample;

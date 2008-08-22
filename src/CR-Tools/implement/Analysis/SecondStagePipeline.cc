@@ -77,7 +77,7 @@ namespace CR { // Namespace CR -- begin
 
   Matrix<DComplex> SecondStagePipeline::GetData(DataReader *dr){
     try {
-      if ( (!SecondStageCacheValid_p)  || (cachedDate_p != dr->header().asuInt("Date")) ) {
+      if ( (!SecondStageCacheValid_p)  || (cachedDate_p != dr->headerRecord().asuInt("Date")) ) {
 	if (!updateCache(dr)) {
 	  cerr << "SecondStagePipeline::GetData: " << "updateCache failed!" << endl;
 	  return Matrix<DComplex>();
@@ -113,7 +113,7 @@ namespace CR { // Namespace CR -- begin
 
       CachedData_p.reference(data);
       SecondStageCacheValid_p = True;
-      cachedDate_p = dr->header().asuInt("Date");
+      cachedDate_p = dr->headerRecord().asuInt("Date");
     } catch (AipsError x) {
       cerr << "SecondStagePipeline::updateCache: " << x.getMesg() << endl;
       return False;
@@ -123,7 +123,7 @@ namespace CR { // Namespace CR -- begin
   
   Vector<Bool> SecondStagePipeline::GetAntennaMask(DataReader *dr){
     try {
-      if ( (!SecondStageCacheValid_p)  || (cachedDate_p != dr->header().asuInt("Date")) ) {
+      if ( (!SecondStageCacheValid_p)  || (cachedDate_p != dr->headerRecord().asuInt("Date")) ) {
 	if (!updateCache(dr)) {
 	  cerr << "SecondStagePipeline::GetAntennaMask: " << "updateCache failed!" << endl;
 	  return AntennaMask_p;
@@ -142,8 +142,8 @@ namespace CR { // Namespace CR -- begin
       Vector<Int> AntennaIDs;
       uInt date;      
       Double DrefAntID;
-      dr->header().get("Date",date);
-      dr->header().get("AntennaIDs",AntennaIDs);
+      dr->headerRecord().get("Date",date);
+      dr->headerRecord().get("AntennaIDs",AntennaIDs);
       Vector<Double> tmpvec;
       //      Vector<Int> tmpIntvec;
       Matrix<Double> tmpmat;

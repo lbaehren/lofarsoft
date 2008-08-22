@@ -29,7 +29,6 @@ namespace CR {  // Namespace CR -- begin
   /*!
     \brief A collection of numerical constants for common usage
     
-    \ingroup CR
     \ingroup Math
     
     <h3>References</h3>

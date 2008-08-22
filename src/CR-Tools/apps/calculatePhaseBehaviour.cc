@@ -649,7 +649,7 @@ void plotTrace(DataReader &dr, const string &PlotPrefix, int antenna)
     //set label "GT - Ant.Nr"
     stringstream gtlabel;
     uInt gtdate;
-    dr.header().get("Date",gtdate);
+    dr.headerRecord().get("Date",gtdate);
     gtlabel << gtdate;
     string label = "GT " + gtlabel.str() + " - Antenna " + antennanumber.str();
 
@@ -695,8 +695,8 @@ void plotFFT(DataReader &dr, const string &PlotPrefix, int antenna)
     dataFFT = dr.fft();
     frequencies = dr.frequencyValues();
 
-    // cout << "Date: " << dr.header().asuInt("Date") << endl;
-    // cout << "IDs: " << dr.header().asArrayInt("AntennaIDs") << endl;
+    // cout << "Date: " << dr.headerRecord().asuInt("Date") << endl;
+    // cout << "IDs: " << dr.headerRecord().asArrayInt("AntennaIDs") << endl;
 
     // plot the data
     SimplePlot plotter;    			// define plotter
@@ -751,7 +751,7 @@ void plotFFT(DataReader &dr, const string &PlotPrefix, int antenna)
     //set label "GT - Ant.Nr"
     stringstream gtlabel;
     uInt gtdate;
-    dr.header().get("Date",gtdate);
+    dr.headerRecord().get("Date",gtdate);
     gtlabel << gtdate;
     string label = "GT " + gtlabel.str() + " - Antenna " + antennanumber.str();
 
@@ -1096,7 +1096,7 @@ void analyseEvent(const string &eventName)
     }
 
     // consistency check
-    if (dr.header().asString("Observatory") != "LOPES")
+    if (dr.headerRecord().asString("Observatory") != "LOPES")
     {
       cerr << "File does not contain LOPES data." << endl;
       return;

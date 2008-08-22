@@ -96,12 +96,12 @@ int test_tbbctlIn ()
 
 
     std::cout << "[5] Testing header record ..." << std::endl;
-    for (uint i=0; i<newtbbctlIn.header().nfields(); i++) {
-      std::cout << "  Field No: " << i << " Name: " << newtbbctlIn.header().name(i) << std::endl;
+    for (uint i=0; i<newtbbctlIn.headerRecord().nfields(); i++) {
+      std::cout << "  Field No: " << i << " Name: " << newtbbctlIn.headerRecord().name(i) << std::endl;
     };
-    std::cout << "  Values:\n    Date: " << newtbbctlIn.header().asuInt("Date") << std::endl;
-    std::cout << "    Observatory: " << newtbbctlIn.header().asString("Observatory") << std::endl;
-    std::cout << "    IDs: " << newtbbctlIn.header().asArrayInt("AntennaIDs") << std::endl;
+    std::cout << "  Values:\n    Date: " << newtbbctlIn.headerRecord().asuInt("Date") << std::endl;
+    std::cout << "    Observatory: " << newtbbctlIn.headerRecord().asString("Observatory") << std::endl;
+    std::cout << "    IDs: " << newtbbctlIn.headerRecord().asArrayInt("AntennaIDs") << std::endl;
 
     newtbbctlIn.summary(); 
   } catch (std::string message) {

@@ -63,7 +63,7 @@ using DAL::LOFAR_StationGroup;
   where the <i>filename</i> points to an existing HDF5 time-series dataset.
 */
 
-// -----------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
 /*!
   \brief Test localization and handling of datasets inside the group
@@ -127,7 +127,7 @@ int test_datasets (std::string const &filename)
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+// ------------------------------------------------------------ test_construction
 
 /*!
   \brief Test constructors for a new LOFAR_StationGroup object
@@ -272,7 +272,7 @@ int test_construction (std::string const &filename)
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+// ------------------------------------------------------------------ test_groups
 
 /*!
   \brief Test identification and access of groups a root level of the HDF5 file
@@ -334,7 +334,7 @@ int test_groups (std::string const &filename)
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------- test_methods
 
 /*!
   \brief Test the various methods provided by the class
@@ -397,11 +397,21 @@ int test_methods (std::string const &filename)
     cerr << message << endl;
     nofFailedTests++;
   }
+
+  cout << "[4] Retrieve antenna position values ..." << endl;
+  try {
+    casa::Matrix<double> antennaPositions = group.antennaPositionValues();
+    // Feedback
+    cout << "-- shape(antennaPositionValues) = " << antennaPositions.shape() << endl;
+  } catch (std::string message) {
+    cerr << message << endl;
+    nofFailedTests++;
+  }
   
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+// ---------------------------------------------------------- test_export2record
 
 int test_export2record (std::string const &filename)
 {
@@ -474,7 +484,7 @@ int test_data (std::string const &filename)
   return nofFailedTests;
 }
 
-// -----------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
 int main (int argc,
 	  char *argv[])
@@ -503,6 +513,7 @@ int main (int argc,
   
   if (nofFailedTests == 0) {
     nofFailedTests += test_groups(filename);
+    // Test the varios methods implemented in the class
     nofFailedTests += test_methods (filename);
     // Test exporting the attributes to a casa::Record
     nofFailedTests += test_export2record (filename);

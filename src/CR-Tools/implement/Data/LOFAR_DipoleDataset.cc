@@ -312,18 +312,22 @@ namespace DAL { // Namespace DAL -- begin
 
       if (status) {
 	if (unit == "Hz" && val < 1e3) {
+#ifdef DEBUGGING_MESSAGES
 	  std::cerr << "[LOFAR_DipoleDataset::sample_frequency_value] "
 		    << "Encountered combination of value and unit for sample "
 		    << "outside LOFAR range -- assuming value in MHz and "
 		    << "correction for it."
 		    << std::endl;
+#endif
 	  val *= 1e6;
 	} else if (unit == "kHz" && val < 1e6) {
+#ifdef DEBUGGING_MESSAGES
 	  std::cerr << "[LOFAR_DipoleDataset::sample_frequency_value] "
 		    << "Encountered combination of value and unit for sample "
 		    << "outside LOFAR range -- assuming value in kHz and "
 		    << "correction for it."
 		    << std::endl;
+#endif
 	  val *= 1e3;
 	}
 	return val;

@@ -133,11 +133,11 @@ int test_methods (std::string const &filename)
   try {
 #ifdef HAVE_CASA
     casa::Vector<uint> times = timeseries.times();
-    cout << "-- nof. values        = " << times.nelements() << endl;
-    cout << "-- Sample frequencies = " << times << endl;
+    cout << "-- nof. values      = " << times.nelements() << endl;
+    cout << "-- Recording times  = " << times << endl;
 #else 
     std::vector<uint> times = timeseries.times();
-    cout << "-- nof. values        = " << times.size() << endl;
+    cout << "-- nof. values      = " << times.size() << endl;
 #endif
   } catch (std::string message) {
     cerr << message << endl;

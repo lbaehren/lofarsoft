@@ -146,7 +146,7 @@ void ITS_Capture::setMetafile (String const &metafile)
 
 // ------------------------------------------------------------------- setStreams
 
-Bool ITS_Capture::setStreams ()
+bool ITS_Capture::setStreams ()
 {
   bool status (true);
   short var (0);

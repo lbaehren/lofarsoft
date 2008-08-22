@@ -33,7 +33,7 @@
 #include <casa/namespace.h>
 
 /*!
-  \class DataBlockStatistics.h
+  \class DataBlockStatistics
 
   \ingroup Analysis
   

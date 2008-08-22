@@ -175,7 +175,7 @@ namespace CR { // Namespace CR -- begin
 
       \return sampleFrequency -- Clock rate at which data is sampled, [Hz]
     */
-    double sampleFrequency () const {
+    inline double sampleFrequency () const {
       return sampleFrequency_p;
     }
 
@@ -211,7 +211,7 @@ namespace CR { // Namespace CR -- begin
       
       \return className -- The name of the class, SubbandID.
     */
-    std::string className () const {
+    inline std::string className () const {
       return "SubbandID";
     }
 

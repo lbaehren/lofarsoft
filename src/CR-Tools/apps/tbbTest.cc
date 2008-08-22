@@ -440,15 +440,15 @@ Bool SimTBBTrigger(Record confRec, Vector<String> files){
 	  cerr << "tbbTest:SimTBBTrigger: " << "Failed to attach file: " << files(fnum) << endl;
 	  continue;
 	};
-	hdf5In->header().get("Filesize",filesize);
+	hdf5In->headerRecord().get("Filesize",filesize);
 	cout << "tbbTest:SimTBBTrigger: HDF5-Filesize: " << filesize << "!!!" << endl;
 	{//patch to make it work with the old (dummy-)CalTable
-	  hdf5In->header().get("AntennaIDs",antIDs);
+	  hdf5In->headerRecord().get("AntennaIDs",antIDs);
 	  antIDs = 65536;
 	  Record tmprec;
 	  tmprec.define("AntennaIDs",antIDs);
 	  tmprec.define("StartSample",0);
-	  hdf5In->setHeader(tmprec);
+	  hdf5In->setHeaderRecord(tmprec);
 	}
 	DataReader_p = hdf5In;
       } else {
@@ -480,9 +480,9 @@ Bool SimTBBTrigger(Record confRec, Vector<String> files){
 	continue;
       };
       //Get header data
-      DataReader_p->header().get("AntennaIDs",antIDs);
-      DataReader_p->header().get("Date",date);
-      DataReader_p->header().get("StartSample",startSample);
+      DataReader_p->headerRecord().get("AntennaIDs",antIDs);
+      DataReader_p->headerRecord().get("Date",date);
+      DataReader_p->headerRecord().get("StartSample",startSample);
 
       for (block =0; block<numblocks; block++) { //start of loop over blocks  
 	if (confRec.asBool("doRFImitigation")){
@@ -560,7 +560,7 @@ Bool SimTBBTrigger(Record confRec, Vector<String> files){
 	  continue;
 	};
 	
-      //      cout << "file: " << files(fnum) << " Date: " << DataReader_p->header().asuInt("Date") <<" dDate: " << DataReader_p->header().asDouble("dDate") << endl;
+      //      cout << "file: " << files(fnum) << " Date: " << DataReader_p->headerRecord().asuInt("Date") <<" dDate: " << DataReader_p->headerRecord().asDouble("dDate") << endl;
 	newpeaks = index.nelements();
 	cout << "Block: " << (block+1) << " npeaks: " << newpeaks << "  ";
 	if (((block+1)%5) == 0) { cout << endl; };

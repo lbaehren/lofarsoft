@@ -364,7 +364,11 @@ namespace DAL { // Namespace DAL -- begin
       \return stationIDs -- The station IDs from the antenna datasets within this
               group
     */
+#ifdef HAVE_CASA
+    casa::Vector<uint> stationIDs ();
+#else
     std::vector<uint> stationIDs ();
+#endif
     
     /*!
       \brief Retrieve the RSP IDs from the antenna datasets within this group
@@ -427,7 +431,28 @@ namespace DAL { // Namespace DAL -- begin
       \return dataset_ids -- Vector with a list of the identifiers to the
               HDF5 dataset objects within this station group.
     */
+#ifdef HAVE_CASA
+    casa::Vector<hid_t> datasetIDs ();
+#else
     std::vector<hid_t> datasetIDs ();
+#endif
+
+    /*!
+      \brief Get the antenna positions values for all antennas in the station
+
+      \return positions -- [antenna,coord] Matrix containing the position values
+              for all the antennas in the station
+    */
+#ifdef HAVE_CASA
+    casa::Matrix<double> antennaPositionValues ();
+#endif
+
+    /*!
+      \brief Get the positions of all antennas in the station
+
+      \return positions --
+    */
+    casa::Vector<casa::MPosition> antennaPositions ();
     
     /*!
       \brief Retrieve a block of ADC values for the dipoles in this station

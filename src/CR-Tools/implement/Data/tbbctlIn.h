@@ -182,7 +182,7 @@ namespace CR { // Namespace CR -- begin
       \return status -- Status of the operation; returns <i>true</i> if everything
       went fine.
     */
-    Bool setStreams();
+    bool setStreams();
     
     /*!
       \brief Fill the header information from the into a header record.
@@ -190,7 +190,7 @@ namespace CR { // Namespace CR -- begin
       \return status -- Status of the operation; returns <i>true</i> if everything
       went fine.
     */
-    Bool generateHeaderRecord();
+    bool setHeaderRecord();
     
     
   private:

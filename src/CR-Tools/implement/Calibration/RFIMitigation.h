@@ -54,7 +54,7 @@
 namespace CR { //namespace CR -- begin
   
   /*!
-    \class RFIMitigation.h
+    \class RFIMitigation
     
     \ingroup Calibration
     

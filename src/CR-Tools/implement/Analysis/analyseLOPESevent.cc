@@ -248,8 +248,8 @@ namespace CR { // Namespace CR -- begin
 	pipeline_p->doPhaseCal(True);
 	break;
       default:
-	if ( lev_p->header().isDefined("EventClass") &&
-	     lev_p->header().asInt("EventClass") == LopesEventIn::Simulation ){
+	if ( lev_p->headerRecord().isDefined("EventClass") &&
+	     lev_p->headerRecord().asInt("EventClass") == LopesEventIn::Simulation ){
 	  if (verbose){
 	    cout << "Simulation event: ";
 	  };
@@ -269,7 +269,7 @@ namespace CR { // Namespace CR -- begin
       AntennaSelection = pipeline_p->GetAntennaMask(lev_p);
       nants = AntennaSelection.nelements();
       Vector<Int> AntennaIDs,selAntIDs;
-      lev_p->header().get("AntennaIDs",AntennaIDs);
+      lev_p->headerRecord().get("AntennaIDs",AntennaIDs);
       if (nflagged >0){
 	for (i=0; i<nflagged; i++){
 	  id = FlaggedAntIDs(i);
@@ -566,7 +566,7 @@ namespace CR { // Namespace CR -- begin
       plotname += "-all.ps";
       Double ymax,ymin,xmax,xmin,tmpval;
       Vector<Int> AntennaIDs,selAntIDs;
-      beamformDR_p->header().get("AntennaIDs",AntennaIDs);
+      beamformDR_p->headerRecord().get("AntennaIDs",AntennaIDs);
       selAntIDs.resize(nselants);
       AntennaIDs(AntennaSelection).getCompressedArray(selAntIDs);
       tmpvec.resize(nselants);

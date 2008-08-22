@@ -165,14 +165,14 @@ int test_ppfinversion ()
 	     
 	cout <<"[5] testing header record...." << endl ;
 	
-	for( uint i=0; i< newtbbctlIn.header().nfields(); i++ ){
-	   cout<< "Field No: " << i<< " Name: " << newtbbctlIn.header().name(i) <<endl ;
+	for( uint i=0; i< newtbbctlIn.headerRecord().nfields(); i++ ){
+	   cout<< "Field No: " << i<< " Name: " << newtbbctlIn.headerRecord().name(i) <<endl ;
 	  }
 	  
-	cout << "values:\n date: " << newtbbctlIn.header().asDouble("dDate") << endl ;
-	Double DATE = newtbbctlIn.header().asDouble("dDate") ;
-	cout <<"Observatory:" <<newtbbctlIn.header().asString("Observatory") << endl ;
-	cout << "IDs :" << newtbbctlIn.header().asArrayInt("AntennaIDs") << endl ;
+	cout << "values:\n date: " << newtbbctlIn.headerRecord().asDouble("dDate") << endl ;
+	Double DATE = newtbbctlIn.headerRecord().asDouble("dDate") ;
+	cout <<"Observatory:" <<newtbbctlIn.headerRecord().asString("Observatory") << endl ;
+	cout << "IDs :" << newtbbctlIn.headerRecord().asArrayInt("AntennaIDs") << endl ;
 		
 	cout << "\n[test_rawsubbandIn]\n" << endl ;
 	
@@ -197,7 +197,7 @@ int test_ppfinversion ()
 	
 	     FFT_data.row(i)= data_filtered.column(i) ;
 	}
-	uint rows_fftdata = FFT_data.nrow() ;
+// 	uint rows_fftdata = FFT_data.nrow() ;
 	
 	Matrix<Double> abs_FFT = amplitude(FFT_data) ;
 	uint nofc = abs_FFT.ncolumn() ;

@@ -518,6 +518,22 @@ namespace DAL { // Namespace DAL -- begin
     
     return channels_ids;
   }
+
+  // ------------------------------------------------------ antennaPositionValues
+
+#ifdef HAVE_CASA
+  casa::Matrix<double> LOFAR_StationGroup::antennaPositionValues ()
+  {
+    unsigned int nofDipoles = datasets_p.size();
+    casa::Matrix<double> positionValues (nofDipoles,3);
+
+    for (unsigned int n(0); n<nofDipoles; n++) {
+      positionValues.row(n) = datasets_p[n].antenna_position_value();
+    }
+
+    return positionValues;
+  }
+#endif
   
   // --------------------------------------------------------------- channelNames
   
@@ -534,6 +550,19 @@ namespace DAL { // Namespace DAL -- begin
   
   // ----------------------------------------------------------------- datasetIDs
   
+#ifdef HAVE_CASA
+  casa::Vector<hid_t> LOFAR_StationGroup::datasetIDs ()
+  {
+    uint nofDatasets (datasets_p.size());
+    casa::Vector<hid_t> dataset_ids (nofDatasets);
+    
+    for (uint n(0); n<nofDatasets; n++) {
+      dataset_ids(n) = datasets_p[n].dataset_id();
+    }
+    
+    return dataset_ids;
+  }
+#else
   std::vector<hid_t> LOFAR_StationGroup::datasetIDs ()
   {
     std::vector<hid_t> dataset_ids;
@@ -544,6 +573,7 @@ namespace DAL { // Namespace DAL -- begin
     
     return dataset_ids;
   }
+#endif
   
   // ---------------------------------------------------------------------- times
   
