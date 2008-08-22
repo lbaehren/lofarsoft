@@ -296,7 +296,7 @@ namespace CR { // Namespace CR -- begin
          Vector<Double> relativePhase_diff = ionoCal.calRelativePhaseDiff( STEC_value, 
                                                                            subband_frequencies ) ;
 									   
-	 uint n_elements = relativePhase_diff.nelements() ;
+// 	 uint n_elements = relativePhase_diff.nelements() ;
 	 
 	 uint nofrows = FFT_data.nrow() ;
 	 

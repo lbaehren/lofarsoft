@@ -289,7 +289,7 @@ ofstream logfile4;
 	      
     Vector<DComplex> FFTVector( dataBlockSize/2+1, 0.0 ) ;
 	      
-    uint element = FFTVector.nelements();
+//     uint element = FFTVector.nelements();
 	      
     server.fft( FFTVector, sliced_vector ) ;
 	      
