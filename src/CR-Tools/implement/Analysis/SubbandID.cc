@@ -149,7 +149,7 @@ namespace CR { // Namespace CR -- begin
   }
 
   
-  Vector<Double> SubbandID::calcFreqVector ( const double& sampleFrequency,
+  Vector<Double> SubbandID::calcFreqVector ( const Double& sampleFrequency,
                                              const Vector<uint>& subband_ID ) 
    {
     try {

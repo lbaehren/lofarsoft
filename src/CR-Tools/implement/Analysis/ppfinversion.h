@@ -52,6 +52,11 @@
 #include <tables/Tables/ScaColDesc.h>
 #include <tables/Tables/ScaRecordColDesc.h>
 
+<<<<<<< .mine
+//#include <Math.h>
+
+=======
+>>>>>>> .r1913
 namespace CR { // Namespace CR -- begin
   
   /*!

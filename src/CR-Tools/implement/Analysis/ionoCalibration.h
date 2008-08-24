@@ -53,6 +53,10 @@
 #include <tables/Tables/ArrColDesc.h>
 #include <tables/Tables/ArrayColumn.h>
 
+<<<<<<< .mine
+//#include <Math.h>
+=======
+>>>>>>> .r1913
 #include <Math/StatisticsFilter.h>
 
 #include <casa/namespace.h>

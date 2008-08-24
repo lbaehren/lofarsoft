@@ -51,6 +51,11 @@
 #include <casa/Exceptions/Error.h>
 #include <casa/namespace.h>
 
+<<<<<<< .mine
+//#include <Math.h>
+
+=======
+>>>>>>> .r1913
 namespace CR { // Namespace CR -- begin
   
   /*!
