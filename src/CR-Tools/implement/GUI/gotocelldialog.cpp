@@ -1,4 +1,4 @@
-#include "gotocelldialog.h"
+#include <GUI/gotocelldialog.h>
 
 GoToCellDialog::GoToCellDialog(QWidget *parent)
     : QDialog(parent)

@@ -1,4 +1,4 @@
-#include "cell.h"
+#include <GUI/cell.h>
 
 Cell::Cell()
 {

@@ -1,9 +1,9 @@
-#include "plotter.h"
-#include "finddialog.h"
-#include "gotocelldialog.h"
-#include "mainwindow.h"
-#include "sortdialog.h"
-#include "spreadsheet.h"
+#include <GUI/plotter.h>
+#include <GUI/finddialog.h>
+#include <GUI/gotocelldialog.h>
+#include <GUI/mainwindow.h>
+#include <GUI/sortdialog.h>
+#include <GUI/spreadsheet.h>
 
 MainWindow::MainWindow()
 {
