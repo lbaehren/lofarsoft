@@ -7,7 +7,7 @@
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "hfqt.h"
+#include <GUI/hfqt.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'hfqt.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 59

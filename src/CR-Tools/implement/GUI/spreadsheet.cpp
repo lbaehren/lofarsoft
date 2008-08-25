@@ -1,6 +1,6 @@
 
-#include "cell.h"
-#include "spreadsheet.h"
+#include <GUI/cell.h>
+#include <GUI/spreadsheet.h>
 
 Spreadsheet::Spreadsheet(QWidget *parent)
     : QTableWidget(parent)

@@ -7,7 +7,7 @@
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "finddialog.h"
+#include <GUI/finddialog.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'finddialog.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 59

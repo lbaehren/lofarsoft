@@ -1,5 +1,5 @@
 
-#include "plotter.h"
+#include <GUI/plotter.h>
 
 using namespace std;
 
