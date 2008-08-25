@@ -234,6 +234,10 @@
 /* Definitions used throughout the test programs */
 
 #include <string>
+
+const std::string data_ppf_coefficients = "${data_ppf_coefficients}";
+const std::string data_ppf_inversion    = "${data_ppf_inversion}";
+
 const std::string name_station = "${CR_DATASET_TBB_STATION}";
 const std::string name_dataset = "${CR_DATASET_TBB_CHANNEL}";
 const std::string path_dataset = "${CR_DATASET_TBB_DATASET}";
