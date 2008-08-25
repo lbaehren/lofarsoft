@@ -260,8 +260,12 @@ if (CR_WITH_GUI)
   ## include directories
   
   if (QT4_INCLUDES AND GTK_INCLUDES AND BOOST_INCLUDES)
-    set (libhfget_includes "-I${QT4_INCLUDES} -I${GTK_INCLUDES} -I${BOOST_INCLUDES}")
+    set (libhfget_includes "-I${GTK_INCLUDES} -I${BOOST_INCLUDES}")
   endif (QT4_INCLUDES AND GTK_INCLUDES AND BOOST_INCLUDES)
+
+  if (QT4_INCLUDES)
+    include_directories (${QT4_INCLUDES})
+  endif (QT4_INCLUDES)
 
   ## compiler instructions
   add_library (hfget ${libhfget_sources})
