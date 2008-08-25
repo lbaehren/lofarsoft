@@ -405,12 +405,14 @@ int test_imagingCoordinates ()
   int nofFailedTests (0);
 
   cout << "[1] Set up the frame with the observatory position ... " << endl;
-  casa::MPosition obs ( casa::MVPosition( casa::Quantity( 10, "m"),
-					  casa::Quantity( -6, "deg"),
-					  casa::Quantity( 50, "deg")),
-			casa::MPosition::Ref(casa::MPosition::WGS84));
+  
+  casa::MVPosition mvposition ( casa::Quantity( 10, "m"),
+				casa::Quantity( -6, "deg"),
+				casa::Quantity( 50, "deg"));
+  casa::MPosition obs (mvposition ,
+		       casa::MPosition::Ref(casa::MPosition::WGS84));
   casa::MeasFrame frame( obs);
-
+  
   return nofFailedTests;
 }
 
