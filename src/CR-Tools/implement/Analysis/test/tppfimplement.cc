@@ -192,7 +192,7 @@ int test_ppfimplements ()
     }
     
     Vector<Double> freq_vector_fft( 513,0.0 );
-    Vector<uint> freq_vector_shortened( 510,0.0 );
+    Vector<Double> freq_vector_shortened( 510,0.0 );
     
     for( uint g=0; g<512; g++ ){
       
