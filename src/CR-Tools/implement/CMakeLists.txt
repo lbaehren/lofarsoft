@@ -288,7 +288,7 @@ if (CR_WITH_GUI)
       PROPERTIES
       PREFIX "lib"
       SUFFIX .so
-      COMPILE_FLAGS "-pipe -g -D_REENTRANT -w -DQT_GUI_LIB -DQT_CORE_LIB ${libhfget_includes}"
+      COMPILE_FLAGS "-pipe -g -D_REENTRANT -w -DQT_GUI_LIB -DQT_CORE_LIB -I${CR_SOURCE_DIR}/implement/GUI ${libhfget_includes}"
       LINK_FLAGS "-fPIC -shared"
       )
   endif (APPLE)
