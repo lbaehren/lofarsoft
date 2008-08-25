@@ -32,12 +32,14 @@
 #include <casa/Quanta/MVAngle.h>
 #include <casa/Quanta/MVTime.h>
 #include <casa/Quanta/MVPosition.h>
+#include <casa/Quanta/Quantum.h>
 #include <measures/Measures/MEpoch.h>
 #include <measures/Measures/MFrequency.h>
 #include <measures/Measures/MeasFrame.h>
 #include <measures/Measures/MDirection.h>
 #include <measures/Measures/MPosition.h>
 #include <measures/Measures/MeasData.h>
+#include <measures/Measures/MeasFrame.h>
 
 /*!
   \file tcasa_measures.cc
@@ -388,6 +390,27 @@ int test_MDirection ()
   }
 #endif
   
+  return nofFailedTests;
+}
+
+// ------------------------------------------------------------------------------
+
+/*!
+  \brief Test the coordinate operation required by the imaging module
+
+  \return nofFailedTests -- The number of failed tests within this function.
+*/
+int test_imagingCoordinates ()
+{
+  int nofFailedTests (0);
+
+  cout << "[1] Set up the frame with the observatory position ... " << endl;
+  casa::MPosition obs ( casa::MVPosition( casa::Quantity( 10, "m"),
+					  casa::Quantity( -6, "deg"),
+					  casa::Quantity( 50, "deg")),
+			casa::MPosition::Ref(casa::MPosition::WGS84));
+  casa::MeasFrame frame( obs);
+
   return nofFailedTests;
 }
 

@@ -1,4 +1,7 @@
-/***************************************************************************
+/*-------------------------------------------------------------------------*
+ | $Id:: tcasa_measures.cc 1901 2008-08-20 13:47:09Z baehren             $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
  *   Copyright (C) 2007                                                    *
  *   Kalpana Singh (<k.singh@astro.ru.nl>)                                 *
  *                                                                         *
@@ -18,10 +21,12 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tppfimplement.cc,v 1.6 2007/08/08 15:30:04 singh Exp $*/
+#include <crtools.h>
 
 #include <cmath>
 #include <iostream>
+#include <string>
+
 #include <casa/Arrays.h>
 #include <casa/Arrays/ArrayIO.h>
 #include <casa/BasicSL/Complex.h>
@@ -52,150 +57,174 @@ using CR::SubbandID ;
 */
 
 // -----------------------------------------------------------------------------
+//  Global variables used throughout the program
+
+uint dataBlockSize (1024);
+uint nofsegmentation(16*6) ;
+Vector<Double> samples( dataBlockSize*nofsegmentation, 0.0 ) ;
+Double hrAngle( 1.034 );
+Double declinationAngle( 1.078 );
+Double geomagLatitude( 0.915708 ) ;
+Double height_ionosphere( 4e5 ) ;
+Double TEC_value( 10e17 ) ;
+Vector<Double> subband_frequencies( 512, 0.0 );
+Double sampling_frequency( 200e6 );
+
+// -----------------------------------------------------------------------------
+
 /*!
   \brief Test constructors for a new ppfimplement object
-
+  
   \return nofFailedTests -- The number of failed tests.
 */
- uint dataBlockSize (1024);
- uint nofsegmentation(16*6) ;
- 
- Vector<Double> samples( dataBlockSize*nofsegmentation, 0.0 ) ;
- 
- Double hrAngle( 1.034 );
- 
- Double declinationAngle( 1.078 );
- 
- Double geomagLatitude( 0.915708 ) ;
- 
- Double height_ionosphere( 4e5 ) ;
- 
- Double TEC_value( 10e17 ) ;
- 
- Vector<Double> subband_frequencies( 512, 0.0 );
- 
- Double sampling_frequency( 200e6 );
- 
- int test_ppfimplement ()
+
+int test_ppfimplement ()
 {
+  std::cout << "\n[test_ppfimplement]\n" << std::endl;
+  
   int nofFailedTests (0);
+
   try {
-     
-     ppfimplement ppf_impl;
-     
-     ppfinversion ppf_inv ;
-     
-     ionoCalibration iono_cal ;
-     
-     SubbandID band_ID ;
-     }
-     
-    catch ( AipsError x){
+    ppfimplement ppf_impl;
+    ppfinversion ppf_inv ;
+    ionoCalibration iono_cal ;
+    SubbandID band_ID ;
+  }
+  
+  catch ( AipsError x){
     cerr << "test_ppfimplement :--- testing the default constructor.... " << x.getMesg() << endl;
-    }
-   return nofFailedTests ;
+  }
+  return nofFailedTests ;
 }
+
+
+// -----------------------------------------------------------------------------
+
+/*!
+  \brief Test working with the functions of the ppfimplement class
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function
+*/
+int test_ppfimplements ()
+{
+  std::cout << "\n[test_ppfimplements]\n" << std::endl;
+
+  int nofFailedTests (0);
   
-
- Bool  test_ppfimplements ()
- {
-   Bool ok(True) ;
-   
-     try {
-
-     
-	//---------------------- to generate Gaussian noise ---------------------------
-	
-	cout << "testing the MLCG generator " << endl ;
-	{
-	  ACG gen(1, dataBlockSize*nofsegmentation );
-	  
-	  for( uint k =0; k < dataBlockSize*nofsegmentation; k++ ){
-	//       Normal rnd(&gen, 0.0, 0.1 );
-         //      Double nextExpRand = rnd() ;
-	       samples(k) = 0.0 ; //nextExpRand ;
-	       }
-	  gen.reset () ;
-	  // resetting the generator, Should get the same numbers
-	  }
-	samples( 16*1024*3+10 ) = 10.0 ;
-        cout << " samples with a peak has been saved " << endl ;
-	
-	ofstream logfile1;
-     
-        logfile1.open( "sample1", ios::out );
-        for( uint sample(0); sample < (dataBlockSize*nofsegmentation ) ; sample++ ){
-             logfile1 << samples(sample) << endl;
-          }
-        
-	  
-	  logfile1.close() ;
-	  
-	Vector<Double> ppfcoeff(16384) ;
-	
-	readAsciiVector(ppfcoeff,"Coeffs16384Kaiser-quant.dat");
-	
-	Vector<Double> ppfcoeff_inv(16384) ;
-	
-	readAsciiVector(ppfcoeff_inv,"ppf_inv.dat");
-	
-	ppfimplement ppf_impl;
-	
-	ppfinversion ppf_inv ;
-	
-	ionoCalibration iono_cal ;
-	
-	SubbandID band_ID ;
-
-//***********************************************************************************	
-//***********************************************************************************
-
- 
-uint nofrows = 508 ;
-
-   Vector<uint> subBand_IDs(nofrows,0);
-   
-   for(uint s=0; s< nofrows; s++ ){
-   
-           subBand_IDs(s)= s+2 ;
-
- }
-
-  Vector<Double> freq_vector_fft( 513,0.0 );
+  /* Provide some feedback on the variables used */
+  std::cout << "-- Data block size   = " << dataBlockSize      << std::endl;
+  std::cout << "-- nof. segments     = " << nofsegmentation    << std::endl;
+  std::cout << "-- Vector of samples = " << samples.shape()    << std::endl;
+  std::cout << "-- Sample frequency  = " << sampling_frequency << std::endl;
   
-  Vector<uint> freq_vector_shortened( 510,0.0 );
-  
-  for( uint g=0; g<512; g++ ){
-  
-       freq_vector_fft(g)= (g+1)*(sampling_frequency/1024) ;
-      // freq_vector_shortened(g)=g ;
-       }
-  
-  for( uint gs=512; gs <1024; gs++ ){
+  cout << "[1] Testing the MLCG generator ..." << endl ;
+  try {
+    uint nSample (0);
+    ACG gen(1, samples.nelements() );
     
-       freq_vector_fft(gs)=0.0 ;
-              
+    for(nSample=0; nSample < samples.nelements(); nSample++ ){
+      //       Normal rnd(&gen, 0.0, 0.1 );
+      //      Double nextExpRand = rnd() ;
+      samples(nSample) = 0.0 ; //nextExpRand ;
+    }
+    /* Resetting the generator, should get the same numbers. */
+    gen.reset () ;
+
+    samples( 16*dataBlockSize*3+10 ) = 10.0 ;
+    cout << "-- samples with a peak has been saved " << endl ;
+    
+    /* Write the results to a logfile */
+    
+    ofstream logfile1;
+    
+    logfile1.open( "sample1", ios::out );
+    for(nSample=0; nSample < samples.nelements() ; nSample++ ){
+      logfile1 << samples(nSample) << endl;
+    }
+    
+    logfile1.close() ;
+  } catch (std::string message) {
+    std::cerr << "ERROR : " << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  std::cout << "[2] Test working with the PPF coefficients ..." << std::endl;
+  try {
+    
+    Vector<Double> ppfcoeff(16384) ;
+    Vector<Double> ppfcoeff_inv(16384) ;
+    
+    try {
+      std::cout << "-- Reading in file with PPF coefficients ..." << std::endl;
+      readAsciiVector(ppfcoeff,data_ppf_coefficients.c_str());
+    } catch (std::string message) {
+      std::cout << "-- Error reading in file with PPF coefficients: " << message
+		<< std::endl;
+      nofFailedTests++;
+    }
+    
+    try {
+      std::cout << "-- Reading in file with PPF inversion results ..." << std::endl;
+      readAsciiVector(ppfcoeff_inv,data_ppf_inversion.c_str());
+    } catch (std::string message) {
+      std::cout << "-- Error reading in file with PPF inversion: " << message
+		<< std::endl;
+      nofFailedTests++;
+    }
+    
+    // ***************************************************************
+    
+    ppfimplement ppf_impl;
+    ppfinversion ppf_inv ;
+    ionoCalibration iono_cal ;
+    SubbandID band_ID ;
+    uint nofrows (508);
+    Vector<uint> subBand_IDs(nofrows,0);
+    
+    try {
+      std::cout << "-- Assigning sub-band IDs ..." << std::endl;
+      for(uint s=0; s< nofrows; s++ ) {
+	subBand_IDs(s)= s+2 ;
+      }
+    } catch (std::string message) {
+      std::cerr << "-- Error assigning sub-band IDs: " << message << std::endl;
+    }
+    
+    Vector<Double> freq_vector_fft( 513,0.0 );
+    Vector<uint> freq_vector_shortened( 510,0.0 );
+    
+    for( uint g=0; g<512; g++ ){
+      
+      freq_vector_fft(g)= (g+1)*(sampling_frequency/dataBlockSize) ;
+      // freq_vector_shortened(g)=g ;
+    }
+    
+    for( uint gs=512; gs <dataBlockSize; gs++ ){
+      
+      freq_vector_fft(gs)=0.0 ;
+      
     }   
-        
-  FFTServer <Double,DComplex> server ;
-  
-  Matrix<DComplex> fft_implemented( dataBlockSize/2+1 , nofsegmentation,0.0 ) ;
-  
-  Matrix<DComplex> refft_implemented( dataBlockSize/2+1 , nofsegmentation,0.0 ) ;
-  
-  Vector<Double> sliced_vector(1024, 0.0) ;
-  
-  uint sample(0);
-	             
-  for( uint i=0; i< nofsegmentation; i++ ){
-	       
-    sliced_vector = samples( Slice( sample, dataBlockSize ) ) ;
-	      
-    Vector<DComplex> FFTVector( dataBlockSize/2+1, 0.0 ) ;
-	      
-    server.fft( FFTVector, sliced_vector ) ;
-	      
-    fft_implemented.column(i) = FFTVector ;
+    
+    FFTServer <Double,DComplex> server ;
+    
+    Matrix<DComplex> fft_implemented( dataBlockSize/2+1 , nofsegmentation,0.0 ) ;
+    
+    Matrix<DComplex> refft_implemented( dataBlockSize/2+1 , nofsegmentation,0.0 ) ;
+    
+    Vector<Double> sliced_vector(dataBlockSize, 0.0) ;
+    
+    uint sample(0);
+    
+    for( uint i=0; i< nofsegmentation; i++ ){
+      
+      sliced_vector = samples( Slice( sample, dataBlockSize ) ) ;
+      
+      Vector<DComplex> FFTVector( dataBlockSize/2+1, 0.0 ) ;
+      
+      server.fft( FFTVector, sliced_vector ) ;
+      
+      fft_implemented.column(i) = FFTVector ;
     
     sample = sample +dataBlockSize ;
     
@@ -212,44 +241,43 @@ uint nofrows = 508 ;
        fft_shortened.row(q)= FFTVector_row ;
     
     }
-      
-      Matrix<DComplex> ppfImp_data = ppf_impl.FFTSamples( samples,
-                                                          ppfcoeff ) ;
-//     cout << " before ionospheric corrupted data " << fft_shortened.row(3) << endl ;
-    for( uint qs=512; qs <1024; qs++ ){
     
-       ppfImp_data.row(qs)=0.0 ;
-              
-    }
+    Matrix<DComplex> ppfImp_data = ppf_impl.FFTSamples( samples,
+							ppfcoeff ) ;
+    for( uint qs=512; qs <dataBlockSize; qs++ ){
       
-   Matrix<DComplex> iono_corrupted = iono_cal.phaseCorrection( ppfImp_data,
-				    		               hrAngle,
-				    		               declinationAngle,
-				    		               geomagLatitude,
-				    		               height_ionosphere,
-				    		               TEC_value,
-				    		               sampling_frequency,
-				    		               freq_vector_fft) ;
-							       
- cout << " Phase corruption has been done :" << endl ;
- 
-       uint NC = ppfImp_data.ncolumn() ;
-  	
-	Matrix<DComplex> iono_corrupted_final ( nofrows,NC,0.0 )  ;
-
-        for( uint ss=0; ss< nofrows ; ss ++ ){
-	
-	   iono_corrupted_final.row(ss)=iono_corrupted.row(ss+2);
-	   
-	   }
-     
-       
-     Vector<Double> time_inv = ppf_inv.FIR_inversion( ppfcoeff_inv,
-                                                         iono_corrupted_final ,
-						         subBand_IDs ) ;
-							 
+      ppfImp_data.row(qs)=0.0 ;
+      
+    }
+    
+    Matrix<DComplex> iono_corrupted = iono_cal.phaseCorrection( ppfImp_data,
+								hrAngle,
+								declinationAngle,
+								geomagLatitude,
+								height_ionosphere,
+								TEC_value,
+								sampling_frequency,
+								freq_vector_fft) ;
+    
+    cout << " Phase corruption has been done :" << endl ;
+    
+    uint NC = ppfImp_data.ncolumn() ;
+    
+    Matrix<DComplex> iono_corrupted_final ( nofrows,NC,0.0 )  ;
+    
+    for( uint ss=0; ss< nofrows ; ss ++ ){
+      
+      iono_corrupted_final.row(ss)=iono_corrupted.row(ss+2);
+      
+    }
+    
+    
+    Vector<Double> time_inv = ppf_inv.FIR_inversion( ppfcoeff_inv,
+						     iono_corrupted_final ,
+						     subBand_IDs ) ;
+    
     cout << " ppf inversion has been performed aftre phase corruption : "<< endl ;
-     
+    
 							 
 	ofstream logfile2;
      
@@ -299,36 +327,34 @@ uint nofrows = 508 ;
 	ofstream logfile3;
      
         logfile3.open( "ReResample", ios::out );
-        for( uint samp(0); samp < ( dataBlockSize*nofsegmentation ) ; samp++ ){
+        for( uint samp(0); samp < samples.nelements() ; samp++ ){
              logfile3 << time_reinv(samp) << endl;
           }
     
     logfile3.close() ;						 
    
-   cout << " number of elements in initial time vector :" << (dataBlockSize*nofsegmentation) <<endl ;
+    cout << " number of elements in initial time vector :" << samples.nelements() <<endl ;
     
   } catch (AipsError x) {
     cerr << x.getMesg()<< endl;
-    ok = False;
+    nofFailedTests++;
   }
   
   cout <<"finished calculations :" <<endl ;
-  return ok;
+  return nofFailedTests;
 }
 
 // -----------------------------------------------------------------------------
 
 int main ()
 {
-  Bool ok(True);
-  
-  Int retval(0) ;
-  if(ok) {
-  ok= test_ppfimplements ();
-  if(!ok){
-  retval = 1;
-  cout <<"Error............... early exit " << endl;
+  int nofFailedTests (0);
+
+  nofFailedTests += test_ppfimplements ();
+
+  if(nofFailedTests != 0) {
+      cout <<"Error............... early exit " << endl;
   }
- }
- return retval;
+
+  return nofFailedTests;
 }

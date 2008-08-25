@@ -1,3 +1,6 @@
+/*-------------------------------------------------------------------------*
+ | $Id:: tcasa_measures.cc 1901 2008-08-20 13:47:09Z baehren             $ |
+ *-------------------------------------------------------------------------*
 /***************************************************************************
  *   Copyright (C) 2007                                                    *
  *   Kalpana Singh (<k.singh@astro.ru.nl>)                                 *
@@ -18,7 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id: tppfinversion.cc,v 1.2 2007/08/08 15:30:04 singh Exp $*/
+#include <crtools.h>
 
 #include <Analysis/ppfinversion.h>
 #include <Analysis/ppfimplement.h>
@@ -95,9 +98,9 @@ int test_ppfinversion ()
    try {
         int nofFailedTests (0);
         Vector<Double> ppfcoeff(16384,0.0) ;
-	readAsciiVector( ppfcoeff,"Coeffs16384Kaiser-quant.dat" ) ;
+	readAsciiVector( ppfcoeff,data_ppf_coefficients.c_str()) ;
 	Vector<Double> ppfcoeff_inv(16384, 0.0) ;
-	readAsciiVector( ppfcoeff_inv, "ppf_inv.dat") ;
+	readAsciiVector( ppfcoeff_inv,data_ppf_inversion.c_str()) ;
 	
 	ppfinversion ppf_inv ;
         ppfimplement ppf_imp ;

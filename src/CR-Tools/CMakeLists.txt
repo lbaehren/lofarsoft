@@ -385,6 +385,8 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 ##
 ## =============================================================================
 
+## Test datasets
+
 find_file (dataset_tbb rw_20080604_121347_2300.dat.h5
   PATHS
   ${CR_SOURCE_DIR}/data
@@ -400,6 +402,26 @@ if (dataset_tbb)
 endif (dataset_tbb)
 
 find_file (dataset_event 2007.01.31.23:59:33.960.event
+  PATHS
+  ${CR_SOURCE_DIR}/data
+  ${CR_SOURCE_DIR}/../data
+  ${CR_SOURCE_DIR}/../../data
+  PATH_SUFFIXES
+  lopes
+  )
+
+## Reference values for test programs
+
+find_file (data_ppf_coefficients Coeffs16384Kaiser-quant.dat
+  PATHS
+  ${CR_SOURCE_DIR}/data
+  ${CR_SOURCE_DIR}/../data
+  ${CR_SOURCE_DIR}/../../data
+  PATH_SUFFIXES
+  lopes
+  )
+
+find_file (data_ppf_inversion ppf_inv.dat
   PATHS
   ${CR_SOURCE_DIR}/data
   ${CR_SOURCE_DIR}/../data

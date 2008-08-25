@@ -42,6 +42,7 @@
 #include <casa/Quanta/Quantum.h>
 #include <casa/Quanta/MVEpoch.h>
 #include <casa/Quanta/MVTime.h>
+#include <casa/Quanta/MVPosition.h>
 
 #include "tests_common.h"
 
@@ -157,7 +158,9 @@ int test_Quantity ()
 // ------------------------------------------------------------------------------
 
 /*!
-    \return nofFailedTests -- The number of failed tests within this function
+  \brief Test conversion of quantities
+  
+  \return nofFailedTests -- The number of failed tests within this function
 */
 int test_conversions ()
 {
@@ -165,13 +168,51 @@ int test_conversions ()
   
   int nofFailedTests (0);
 
+  cout << "[1] Conversion of frequencies ..." << endl;
   try {
     casa::Quantity freq (200.0,"MHz");
     // 
     cout << "-- Freq [GHz] = " << freq.get(casa::Unit("GHz")) << endl;
     cout << "-- Freq [MHz] = " << freq.get(casa::Unit("MHz")) << endl;
     cout << "-- Freq [kHz] = " << freq.get(casa::Unit("kHz")) << endl;
-    cout << "-- Freq [ Hz] = " << freq.get(casa::Unit("Hz")) << endl;
+    cout << "-- Freq [ Hz] = " << freq.get(casa::Unit("Hz"))  << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[2] Conversion of lenghts ..." << endl;
+  try {
+    casa::Quantity length (1,"m");
+    // conversions
+    cout << "-- Length [mm] = " << length.get(casa::Unit("mm")) << endl;
+    cout << "-- Length [cm] = " << length.get(casa::Unit("cm")) << endl;
+    cout << "-- Length [km] = " << length.get(casa::Unit("km")) << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[3] Conversion of angles ..." << endl;
+  try {
+    casa::Quantity angle (1.0,"deg");
+    //conversions
+    cout << "-- Angle [   deg] = " << angle.get(casa::Unit("deg"))    << endl;
+    cout << "-- Angle [arcsec] = " << angle.get(casa::Unit("arcsec")) << endl;
+    cout << "-- Angle [   rad] = " << angle.get(casa::Unit("rad"))    << endl;
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+
+  cout << "[4] Conversion of times ..." << endl;
+  try {
+    casa::Quantity time (1.0,"h");
+    // conversions
+    cout << "-- Time [  s] = " << time.get(casa::Unit("s"))   << endl;
+    cout << "-- Time [min] = " << time.get(casa::Unit("min")) << endl;
+    cout << "-- Time [  d] = " << time.get(casa::Unit("d"))   << endl;
+    cout << "-- Time [ yr] = " << time.get(casa::Unit("yr"))  << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -183,7 +224,9 @@ int test_conversions ()
 // ------------------------------------------------------------------------------
 
 /*!
-    \return nofFailedTests -- The number of failed tests within this function
+  \brief Test operations combining different quantities
+  
+  \return nofFailedTests -- The number of failed tests within this function
 */
 int test_operations ()
 {
@@ -248,6 +291,15 @@ int test_time ()
 
 // ------------------------------------------------------------------------------
 
+int test_MVPosition ()
+{
+  int nofFailedTests (0);
+
+  return nofFailedTests;
+}
+
+// ------------------------------------------------------------------------------
+
 /*!
   \brief Main method
 
@@ -262,6 +314,9 @@ int main ()
   nofFailedTests += test_conversions();
   nofFailedTests += test_operations();
   nofFailedTests += test_time();
+
+  // Tests for the various MeasuresValue classes
+  nofFailedTests += test_MVPosition ();
 
   return nofFailedTests;
 }

@@ -31,6 +31,8 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
+  // ------------------------------------------------------------------- TimeFreq
+  
   TimeFreq::TimeFreq ()
   {
     setBlocksize (1);
@@ -38,6 +40,8 @@ namespace CR { // Namespace CR -- begin
     nyquistZone_p     = 1;
     referenceTime_p   = 0;
   }
+  
+  // ------------------------------------------------------------------- TimeFreq
   
   TimeFreq::TimeFreq (uint const &blocksize)
   {
@@ -47,6 +51,8 @@ namespace CR { // Namespace CR -- begin
     referenceTime_p   = 0;
   }
 
+  // ------------------------------------------------------------------- TimeFreq
+  
   TimeFreq::TimeFreq (uint const &blocksize,
 		      double const &sampleFrequency,
 		      uint const &nyquistZone)
@@ -57,16 +63,45 @@ namespace CR { // Namespace CR -- begin
     referenceTime_p   = 0;
   }
   
+  // ------------------------------------------------------------------- TimeFreq
+  
   TimeFreq::TimeFreq (uint const &blocksize,
-	    double const &sampleFrequency,
-	    uint const &nyquistZone,
-	    double const &referenceTime)
+		      casa::Quantity const &sampleFrequency,
+		      uint const &nyquistZone)
+  {
+    setBlocksize (blocksize);
+    setSampleFrequency (sampleFrequency);
+    nyquistZone_p     = nyquistZone;
+    referenceTime_p   = 0;
+  }
+  
+  // ------------------------------------------------------------------- TimeFreq
+  
+  TimeFreq::TimeFreq (uint const &blocksize,
+		      double const &sampleFrequency,
+		      uint const &nyquistZone,
+		      double const &referenceTime)
   {
     setBlocksize (blocksize);
     sampleFrequency_p = sampleFrequency;
     nyquistZone_p     = nyquistZone;
     referenceTime_p   = referenceTime;
   }
+  
+  // ------------------------------------------------------------------- TimeFreq
+  
+  TimeFreq::TimeFreq (uint const &blocksize,
+		      casa::Quantity const &sampleFrequency,
+		      uint const &nyquistZone,
+		      casa::Quantity const &referenceTime)
+  {
+    setBlocksize (blocksize);
+    setSampleFrequency (sampleFrequency);
+    nyquistZone_p     = nyquistZone;
+    setReferenceTime (referenceTime);
+  }
+  
+  // ------------------------------------------------------------------- TimeFreq
   
   TimeFreq::TimeFreq (TimeFreq const &other)
   {
@@ -398,13 +433,6 @@ namespace CR { // Namespace CR -- begin
     setSampleFrequency (rate);
   }
   
-  // --------------------------------------------------------- setSampleFrequency
-
-  void TimeFreq::setSampleFrequency (casa::Quantity const &sampleFrequency)
-  {
-    setSampleFrequency (sampleFrequency.getValue("Hz"));
-  }
-
   // ------------------------------------------------------------------- timeAxis
   
   LinearCoordinate TimeFreq::timeAxis ()

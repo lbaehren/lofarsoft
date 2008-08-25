@@ -20,7 +20,6 @@ set (tests
   tgenCRmap
   tinverseFFT
   tionoCalibration
-  tppfimplement
   tppfinversion
   tSecondStagePipeline
   tSubbandID
@@ -42,6 +41,17 @@ endforeach (src)
 ##  Test programs that require special attention
 ##
 ## ==============================================================================
+
+if (data_ppf_coefficients AND data_ppf_inversion)
+
+  ## compiler instructions
+  add_executable (tppfimplement tppfimplement.cc)
+  ## linker instructions
+  target_link_libraries (tppfimplement cr)
+  ## testing
+  add_test (tppfimplement tppfimplement)
+
+endif (data_ppf_coefficients AND data_ppf_inversion)
 
 ## -------------------------------------------------------------------
 

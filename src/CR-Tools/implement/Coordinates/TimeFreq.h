@@ -125,8 +125,10 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Default constructor
       
-      Initialized object with <tt>blocksize=1</tt>, <tt>sampleFrequency=80e06</tt>
-      and <tt>nyquistZone=1</tt>.
+      Initialized object with:
+      - <tt>blocksize=1</tt>
+      - <tt>sampleFrequency=80e06</tt>
+      - <tt>nyquistZone=1</tt>
     */
     TimeFreq ();
     
@@ -144,11 +146,24 @@ namespace CR { // Namespace CR -- begin
       \brief Argumented constructor
       
       \param blocksize       -- Blocksize, [samples]
-      \param sampleFrequency -- Sample frequency in the ADC, [Hz]
+      \param sampleFrequency -- Sample frequency in the ADC step, [Hz]
       \param nyquistZone     -- Nyquist zone,  [1]
     */
     TimeFreq (uint const &blocksize,
 	      double const &sampleFrequency,
+	      uint const &nyquistZone);
+    
+    /*!
+      \brief Argumented constructor
+      
+      \param blocksize       -- Blocksize, [samples]
+      \param sampleFrequency -- Sample frequency in the ADC step, provided as
+             casa::Quantity, thereby enabling passing the value in units other
+	     but the base units.
+      \param nyquistZone     -- Nyquist zone,  [1]
+    */
+    TimeFreq (uint const &blocksize,
+	      casa::Quantity const &sampleFrequency,
 	      uint const &nyquistZone);
     
     /*!
@@ -163,6 +178,23 @@ namespace CR { // Namespace CR -- begin
 	      double const &sampleFrequency,
 	      uint const &nyquistZone,
 	      double const &referenceTime);
+    
+    /*!
+      \brief Argumented constructor
+      
+      \param blocksize       -- Blocksize, [samples]
+      \param sampleFrequency -- Sample frequency in the ADC step, provided as
+             casa::Quantity, thereby enabling passing the value in units other
+	     but the base units.
+      \param nyquistZone     -- Nyquist zone,  [1]
+      \param referenceTime   -- Reference time, \f$ t_0 \f$, provided as
+             casa::Quantity, thereby enabling passing the value in units other
+	     but the base units.
+    */
+    TimeFreq (uint const &blocksize,
+	      casa::Quantity const &sampleFrequency,
+	      uint const &nyquistZone,
+	      casa::Quantity const &referenceTime);
     
     /*!
       \brief Copy constructor
@@ -279,8 +311,10 @@ namespace CR { // Namespace CR -- begin
       \param sampleFrequency -- Sample frequency in the ADC, provided as a
                                 casa::Quantity (i.e. a value with a unit).
      */
-    void setSampleFrequency (casa::Quantity const &sampleFrequency);
-
+    inline void setSampleFrequency (casa::Quantity const &sampleFrequency) {
+      setSampleFrequency (sampleFrequency.getValue("Hz"));
+    }
+    
     // --- nyquistZone -------------------------------------
 
     /*!
@@ -321,6 +355,16 @@ namespace CR { // Namespace CR -- begin
     */
     inline void setReferenceTime (double const &referenceTime) {
       referenceTime_p = referenceTime;
+    }
+
+    /*!
+      \brief Set the reference time, i.e. the start of the time axis
+
+      \param referenceTime -- The reference time, \f$ t_0 \f$, marking the
+             start of the time axis
+    */
+    inline void setReferenceTime (casa::Quantity const &referenceTime) {
+      setReferenceTime (referenceTime.getValue("s"));
     }
 
     // ------------------------------------------------------------------ Methods
