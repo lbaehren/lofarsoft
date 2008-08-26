@@ -1,9 +1,30 @@
-/*
+/*-------------------------------------------------------------------------*
+ | $Id:: HDF5Common.h 1628 2008-06-10 15:46:50Z baehren                  $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2008                                                    *
+ *   Lars B"ahren (lbaehren@gmail.com)                                     *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
-HFGET Version 0.1 - The basic data get/put mechanism for the Hyper-Flexible Plotting Tool for LOFAR Data
-
- */
-
+/*! 
+  HFGET Version 0.1 - The basic data get/put mechanism for the Hyper-Flexible
+  Plotting Tool for LOFAR Data
+*/
 
 #include <boost/python/class.hpp>
 #include <boost/python/module.hpp>
@@ -69,23 +90,23 @@ bool object_logic_cmpr(Data* o_ptr, T val){
 // object == value1 || object == value2 || object == value3 ....
 
 template <class T>
-  bool object_logic_in_set(Data* o_ptr, vector<T> &set){
+bool object_logic_in_set(Data* o_ptr, vector<T> &set){
   bool found=false;
   objectid i,s=set.size();
   DEF_VAL( T );
-
+  
   switch (o_ptr->getType()) {
-#define SW_TYPE_COMM(EXT,TYPE)  \
-  val_##EXT = new TYPE; \
-    (*val_##EXT)=o_ptr->getOne<TYPE>(); \
-    DBG("VALUE=" << (*val_##EXT));\
-    for (i=0; i<s && !found; i++) {\
-      DBG("set[" <<i<<"]=" << set[i]); \
+#define SW_TYPE_COMM(EXT,TYPE)			\
+    val_##EXT = new TYPE;			\
+    (*val_##EXT)=o_ptr->getOne<TYPE>();		\
+    DBG("VALUE=" << (*val_##EXT));		\
+    for (i=0; i<s && !found; i++) {		\
+      DBG("set[" <<i<<"]=" << set[i]);			    \
       found = (mycast<TYPE>(set[i]) == *val_##EXT);	    \
-      DBG("FOUND=" << tf_txt(found));\
-    };\
+      DBG("FOUND=" << tf_txt(found));			    \
+    };							    \
     delete val_##EXT
-  #include "switch-type.cc"
+#include "switch-type.cc"
     found=false;
   };
   DBG("Return FOUND=" << tf_txt(found));				    
@@ -477,137 +498,26 @@ vector<objectid> DPtrToOid(vector<Data*> objects)
 //========================================================================
 //class Data 
 //========================================================================
-/*
 
-This is the basic data object. It contains pointers to a data vector
-and a function, as well as links to other objects.
-
-The basic method to retrieve data are get and put. Every object is
-dynamically typed, so can change its type during execution. The
-storage type is determined by "put", the output type is determined by
-"get" (i.e. autmatically converted).
-
-Every data is a vector and right now we only allow the follwing types:
-Pointer, Integer, Number (i.e. floats), Complex, and String. Complex
-data structures (i.e. "structs" or records) have to be built up by a
-network of object! Single parameters are stored as vectors of length
-one. 
-
-In principle n-dimensional data cubes should also be supported by
-specifiying dimension information - still the data would be stored as
-an STL vector. However, high-dimensionality is not yet implemented.
-
-It is crucial for the logic to work that every data in the entire
-system is stored in the objects!
-
-
-Objects could alse be assigned a function instead or in addition to
-the data vector. This function is executed whenever the data in the
-object is retrieved by get (and if a data vector is present, the
-function is executed only if the data actually needs to be
-recalculated).
-
-This is done using 
-
-data.setFunction(Name, Type, Library). (not sure, if type is really needed ...)
-
-So, data["Data:Squared"].setFunction("Square","Sys") will assign a
-squaring function to the object "Squared", which will then give the
-square of the elements in "Data".
-
-New objects are created and linked by newObjects...
-
-Deletion and changing of links is not yet fully supported. 
-
-A new link is established with "setLink".
-
-The links of an object in the network can have two directions: To and
-From (an object). Also, each To and From can have either a To or From
-direction for signalling that a change of data has occurred! (this can
-be confusing, but allows one to have "push" and "pull" dynamic actions
-in the net.
-
-Every object can be used as a starting object to search for other
-objects in the network, relative to the current object.
-
-e.g. data["root:name"] searches for the next object in the "from"
-direction with name "name" and retrieves that data object. (This does
-not necessarily mean that name is directly attached to "root")
-
-Hence, data["root:name"].get(vec) actually retrieves not the data
-object data but the one with name "name" that is attached to "root"
-being attached to data. Most of the objects don't have a c++ variable
-name (like data) - typically only the first one. The others have just
-their links stored in the network (and in a master list, called the
-"superior")
-
-data["root:name'directory"] actually steps first forward to root, then
-to name, and then BACKWARD to "directory". So, name actually is
-derived from "directory" in this example.
-
-It is possible that objects can have the same name. If they are on
-different levels, then one will simply shadow the other, unless
-explicitly specified. So,
-
-data["root:name:name"] is possible, but data["name"] would only access
-the first object.
-
-If objects on the same level have the same name, then either all
-objects are returned using the method data.Find("Station") - which
-returns a list of pointers. Or just the first one, when using
-data["Station"]. However, in this case it is also possible to retrieve
-a specific object based on its contents by using the "name=value"
-syntax.
-
-Imagine you have a structure like this, where the name of the object
-is shown and in brackets its contents.
-
-
-          Telescope("LOFAR")
-           /     \
-    Station(1)  Station(2)
-          |      |
-  Data(1,2,3...) Data(7,6,3,3...)
-
-
-Here 
-
-- data.get(string_vector) would retrieve a vector the name "LOFAR"
-(data["Telescope"].get would yield the same).
-
-- data["Station:Data"].get(integer_vector) or data["Data"].get(..)  (!)
-would both retrieve (1,2,3...), while 
-
-- data["Station=2:Data"].get(...) would yield 7,6,3,3
-
-BTW, it is also possible to specify a list of objects. For example 
-
-- data.Find("Station=1,2,4:Data") would yield the objects where 
-the Station number is 1,2, or 4, but not 3
-
-
-Later one could implement more complex logic, eg. "(Station>2&&Station<10):Data" ...
-
-
-Things still to be done (very incomplete ....):
-
-- add unit support - this could, however, be done by special objects 
-attached to each real data vector containing the unit name (e.g. "m"), 
-scale letter (e.g. "k" for km) and a scale factor (here 1000). In fact per
-unit there needs to be only on single unit object that all data objects point 
-to if needed.
-
-- do more operator overloading, such that data["Station=1:Data"]=vector, 
-replaces data["Station=1:Data"].put(vector).
-
-- use operators like -> or so for setting Links (also in Python).
-
-- There is also a class Vector_Selector which is intended to allow you retrieving
-sub-parts of the data vector (e.g. only every 2nd value, or just values 
-above a certain threshold ...). That needs a bit more work still ...
-
+/*    
+  Things still to be done (very incomplete ....):
+  
+  - add unit support - this could, however, be done by special objects 
+  attached to each real data vector containing the unit name (e.g. "m"), 
+  scale letter (e.g. "k" for km) and a scale factor (here 1000). In fact per
+  unit there needs to be only on single unit object that all data objects point 
+  to if needed.
+  
+  - do more operator overloading, such that data["Station=1:Data"]=vector, 
+  replaces data["Station=1:Data"].put(vector).
+  
+  - use operators like -> or so for setting Links (also in Python).
+  
+  - There is also a class Vector_Selector which is intended to allow you retrieving
+  sub-parts of the data vector (e.g. only every 2nd value, or just values 
+  above a certain threshold ...). That needs a bit more work still ...
+  
 */
-
 
 Vector_Selector * Data::sel(){return data.s_ptr;}
 void Data::new_sel(){if (data.s_ptr==NULL) {data.s_ptr=new Vector_Selector;};}
@@ -890,9 +800,14 @@ void Data::delLink(objectid port, DIRECTION dir, bool del_other) {
 DEF_DATA_FUNC_OF_DPTR_3PARS(objectid,setLink, DIRECTION, dir_type, DIRECTION, dir, objectid, port)
 
 
-/* Set a link to another object*/
-
-objectid Data::setLink(Data *d, DIRECTION dir_type, DIRECTION dir, objectid port) {
+/*!
+  \brief Set a link to another object
+*/
+objectid Data::setLink (Data *d,
+			DIRECTION dir_type,
+			DIRECTION dir,
+			objectid port)
+{
   if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return -1;};
   objectid prt;
   Data* p = this;
@@ -966,8 +881,9 @@ String Data::getProperty(String name){
 };
 
 
-/*Creates a new, dynamic data vector of a given type*/
-
+/*!
+  Creates a new, dynamic data vector of a given type
+*/
 void Data::newVector(DATATYPE type){
   if (data.d_ptr!=NULL) {delData();};
   data.type=type; 
@@ -1032,10 +948,9 @@ void Data::put(vector<T> &vin) {
   setModification();  //Note that the data has changed
 }
 
-/*
+/*!
   This method deletes an object function if present 
 */
-
 void Data::delFunction(){
   ObjectFunctionClass * of = getFunction();
   if (of!=NULL) {
@@ -1045,11 +960,14 @@ void Data::delFunction(){
   };
 }
 
-/*
-This method adds a function to the object that will performed whenever a recalc is requested.
+/*!
+  This method adds a function to the object that will performed whenever a recalc
+  is requested.
 */
-
-void Data::setFunction(String name, DATATYPE type, String library) {
+void Data::setFunction (String name,
+			DATATYPE type,
+			String library)
+{
   if (this==&NullObject) {ERROR("Operation on NullObject not allowed."); return;};
   if (data.superior!=NULL && data.superior->library_ptr!=NULL) {
     if (data.superior->library_ptr->inLibrary(name,library)) {
@@ -1095,8 +1013,11 @@ void Data::recalc(bool force){
   };
 }
 
-//Go backward or forward through the net until you find an object of the specified name
-//returns NULL if not found and "this" (pointer to current object) for an empty string
+/*!
+  Go backward or forward through the net until you find an object of the
+  specified name returns NULL if not found and "this" (pointer to current object)
+  for an empty string.
+*/
 Data* Data::find_name(String name, DIRECTION dir) {
   Data *D_ptr=&NullObject; 
   if (name != data.name && name!="") {
@@ -1694,5 +1615,4 @@ cast_ptr_to_value<TYPE>(NULL, INTEGER)
 }
 
 
-#include "hfget.hpp"
- 
+#include <GUI/hfget.hpp>

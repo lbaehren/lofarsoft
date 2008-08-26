@@ -131,6 +131,28 @@
 
 // ==============================================================================
 //
+//  Module GUI
+//
+// ==============================================================================
+
+/*!
+  \defgroup CR_GUI CR-Pipeline: Graphical user-interface module
+  \ingroup CR
+
+  \brief The basic data get/put mechanism for the Plotting Tool for LOFAR Data
+
+  <b>Note:</b> This module is optional and -- at least for the moment -- not
+  included in the default build of the CR-Tools software package; since the code
+  within this module is highly experimental and still subject to the design 
+  process it has to be enabled explicitelty by adding
+  \verbatim
+  -DCR_WITH_GUI:BOOL=TRUE
+  \endverbatim
+  to the list of CMake configuration parameters.
+*/
+
+// ==============================================================================
+//
 //  Module IO
 //
 // ==============================================================================

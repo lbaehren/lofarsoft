@@ -21,10 +21,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/* $Id$*/
-
+#include <crtools.h>
 #include <Imaging/SkymapCoordinates.h>
+
 #include <images/Images/PagedImage.h>
+#ifdef HAVE_HDF5
+#include <images/Images/HDF5Image.h>
+#endif
 
 using std::cout;
 using std::endl;
@@ -609,15 +612,15 @@ int test_coordinateSystem ()
 
     coord.directionAxisValues("AZEL",valDirection,maskDirection,true);
     coord.directionAxisValues(MDirection::ITRF,valITRF,maskDirection,true);
-    valDistance  = coord.distanceAxisValues();
-    valTime      = coord.timeAxisValues();
-    valFreq      = coord.frequencyAxisValues();
+    valDistance = coord.distanceAxisValues();
+    valTime     = coord.timeAxisValues();
+    valFreq     = coord.frequencyAxisValues();
 
     cout << "-- World values (Direction) = " << valDirection.row(0) << endl;
-    cout << "-- World values (ITRF)      = " << valITRF.row(0)     << endl;
+    cout << "-- World values (ITRF)      = " << valITRF.row(0)      << endl;
     cout << "-- World values (Distance)  = " << valDistance(slice)  << endl;
     cout << "-- World values (Time)      = " << valTime(slice)      << endl;
-    cout << "-- World values (Frequency) = " << valFreq(slice)      << endl;
+    cout << "-- World values (Frequency) = " << valFreq(0)          << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -837,6 +840,12 @@ int test_mapProperties ()
 
 // -----------------------------------------------------------------------------
 
+/*!
+  \brief Test creation of an image using the generated coordinate information
+
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function.
+*/
 int test_imageCreation ()
 {
   cout << "\n[test_imageCreation]\n" << endl;
@@ -856,9 +865,15 @@ int test_imageCreation ()
     cout << shape << endl;
     
     cout << "-- creating the image file ... " << std::flush;
+#ifdef HAVE_HDF5
+    casa::HDF5Image<Float> image (tile,
+				  csys,
+				  String("testimage1.h5"));
+#else
     PagedImage<Float> image (tile,
 			     csys,
 			     String("testimage1.img"));
+#endif
     cout << "done" << endl;
   } catch (std::string message) {
     std::cerr << message << endl;
