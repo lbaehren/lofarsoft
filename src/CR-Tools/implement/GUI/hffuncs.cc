@@ -21,12 +21,11 @@ using namespace std;
 #include <QtGui/QApplication>
 #include <QtGui/QtGui>
 
-#include "mainwindow.h" 
-#include "hfdefs.h" 
-#include "hfcast.h" 
-#include "hfget.h"
-#include "hffuncs.h"  
-
+#include <GUI/mainwindow.h>
+#include <GUI/hfdefs.h>
+#include <GUI/hfcast.h> 
+#include <GUI/hfget.h>
+#include <GUI/hffuncs.h>  
 
 
 /*========================================================================

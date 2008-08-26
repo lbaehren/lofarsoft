@@ -11,11 +11,15 @@
 using namespace std;
 
 /* Forward declarations */
-
 class QCheckBox;
-//class QLabel;
 class QLineEdit;
 class QPushButton;
+
+// ==============================================================================
+//
+//  Class : HQLabel
+//
+// ==============================================================================
 
 /*!
   \class HQLabel
@@ -44,7 +48,19 @@ class HQLabel : public QLabel {
   
 };
 
+// ==============================================================================
+//
+//  Class : HQLabel
+//
+// ==============================================================================
 
+/*!
+  \class FindDialog1
+
+  \ingroup CR_GUI
+
+  \author Heino Falcke
+*/
 class FindDialog1 : public QDialog
 {
   Q_OBJECT
@@ -61,11 +77,15 @@ class FindDialog1 : public QDialog
   void enableFindButton(const QString &text);
   
  private:
+  /*! Widget label */
   QLabel *label;
   QLineEdit *lineEdit;
+  /*! GUI element: check-box */
   QCheckBox *caseCheckBox;
   QCheckBox *backwardCheckBox;
+  /*! GUI elelement: find button */
   QPushButton *findButton;
+  /*! GUI element: close button */
   QPushButton *closeButton;
 };
 

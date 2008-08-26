@@ -143,12 +143,16 @@ class ObjectFunctionClass : public DataFuncDescriptor {
   
  private:
   /*
-    This is a list of parameters that are being used internally for calculations in the function.  The value
-    is either filled by a network object of a re-definable name or default parameter
+    This is a list of parameters that are being used internally for calculations
+    in the function.  The value is either filled by a network object of a
+    re-definable name or default parameter.
   */
   struct parameter_item {
+    /*! Name of the parameter */
     String name;
+    /*! Data type of the parameter */
     DATATYPE type;
+    /*! Pointer to the actual parameter value */
     void* ptr;
   };
   map<String,parameter_item> parameter_list;
