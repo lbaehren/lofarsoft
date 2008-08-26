@@ -15,9 +15,9 @@
 
 using namespace std;
 
-#include "hfdefs.h"
-#include "hfcast.h"
-#include "VectorSelector.h"
+#include <GUI/hfdefs.h>
+#include <GUI/hfcast.h>
+#include <GUI/VectorSelector.h>
 
 //------------------------------------------------------------------------
 // Vector_Selector

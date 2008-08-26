@@ -1,14 +1,30 @@
 #ifndef VECTORSELECTOR_H
 #define VECTORSELECTOR_H
 
-#include "hfcast.h"
+#include <GUI/hfcast.h>
 
-enum SELECTORTYPE {SEL_NONE, SEL_ALL, SEL_ONE, SEL_BLOCK, SEL_RANGE, SEL_LIST, SEL_ABOVE, SEL_BELOW, SEL_BETWEEN, SEL_QUERY};
+enum SELECTORTYPE {
+  SEL_NONE,
+  SEL_ALL,
+  SEL_ONE,
+  SEL_BLOCK,
+  SEL_RANGE,
+  SEL_LIST,
+  SEL_ABOVE,
+  SEL_BELOW,
+  SEL_BETWEEN,
+  SEL_QUERY
+};
 
 //========================================================================
 // Vector_Selector
 //========================================================================
 
+/*!
+  \class Vector_Selector
+
+  \ingroup CR_GUI
+*/
 class Vector_Selector {
 
  public:
