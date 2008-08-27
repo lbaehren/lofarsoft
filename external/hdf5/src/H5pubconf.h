@@ -79,7 +79,7 @@
 /* #undef H5_HAVE_DMALLOC_H */
 
 /* Define to 1 if you have the <features.h> header file. */
-#define H5_HAVE_FEATURES_H 1
+/* #undef H5_HAVE_FEATURES_H */
 
 /* Define if support for deflate (zlib) filter is enabled */
 #define H5_HAVE_FILTER_DEFLATE 1
@@ -112,13 +112,13 @@
 /* #undef H5_HAVE_FSEEK64 */
 
 /* Define to 1 if you have the `fseeko' function. */
-#define H5_HAVE_FSEEKO 1
+/* #undef H5_HAVE_FSEEKO */
 
 /* Define to 1 if you have the `fstat64' function. */
-#define H5_HAVE_FSTAT64 1
+/* #undef H5_HAVE_FSTAT64 */
 
 /* Define to 1 if you have the `ftello' function. */
-#define H5_HAVE_FTELLO 1
+/* #undef H5_HAVE_FTELLO */
 
 /* Define if the compiler understand the __FUNCTION__ keyword */
 #define H5_HAVE_FUNCTION 1
@@ -203,7 +203,7 @@
 #define H5_HAVE_LONGJMP 1
 
 /* Define to 1 if you have the `lseek64' function. */
-#define H5_HAVE_LSEEK64 1
+/* #undef H5_HAVE_LSEEK64 */
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define H5_HAVE_MEMORY_H 1
@@ -257,7 +257,7 @@
 #define H5_HAVE_SRANDOM 1
 
 /* Define to 1 if you have the `stat64' function. */
-#define H5_HAVE_STAT64 1
+/* #undef H5_HAVE_STAT64 */
 
 /* Define if `struct stat' has the `st_blocks' field */
 #define H5_HAVE_STAT_ST_BLOCKS 1
@@ -459,7 +459,7 @@
 #define H5_PACKAGE_VERSION "1.8.1"
 
 /* Width for printf() for type `long long' or `__int64', use `ll' */
-#define H5_PRINTF_LL_WIDTH "l"
+#define H5_PRINTF_LL_WIDTH "ll"
 
 /* The size of `char', as computed by sizeof. */
 #define H5_SIZEOF_CHAR 1
@@ -486,10 +486,10 @@
 #define H5_SIZEOF_INT8_T 1
 
 /* The size of `int_fast16_t', as computed by sizeof. */
-#define H5_SIZEOF_INT_FAST16_T 8
+#define H5_SIZEOF_INT_FAST16_T 2
 
 /* The size of `int_fast32_t', as computed by sizeof. */
-#define H5_SIZEOF_INT_FAST32_T 8
+#define H5_SIZEOF_INT_FAST32_T 4
 
 /* The size of `int_fast64_t', as computed by sizeof. */
 #define H5_SIZEOF_INT_FAST64_T 8
@@ -510,7 +510,7 @@
 #define H5_SIZEOF_INT_LEAST8_T 1
 
 /* The size of `long', as computed by sizeof. */
-#define H5_SIZEOF_LONG 8
+#define H5_SIZEOF_LONG 4
 
 /* The size of `long double', as computed by sizeof. */
 #define H5_SIZEOF_LONG_DOUBLE 16
@@ -519,7 +519,7 @@
 #define H5_SIZEOF_LONG_LONG 8
 
 /* The size of `off64_t', as computed by sizeof. */
-#define H5_SIZEOF_OFF64_T 8
+#define H5_SIZEOF_OFF64_T 0
 
 /* The size of `off_t', as computed by sizeof. */
 #define H5_SIZEOF_OFF_T 8
@@ -528,10 +528,10 @@
 #define H5_SIZEOF_SHORT 2
 
 /* The size of `size_t', as computed by sizeof. */
-#define H5_SIZEOF_SIZE_T 8
+#define H5_SIZEOF_SIZE_T 4
 
 /* The size of `ssize_t', as computed by sizeof. */
-#define H5_SIZEOF_SSIZE_T 8
+#define H5_SIZEOF_SSIZE_T 4
 
 /* The size of `uint16_t', as computed by sizeof. */
 #define H5_SIZEOF_UINT16_T 2
@@ -546,10 +546,10 @@
 #define H5_SIZEOF_UINT8_T 1
 
 /* The size of `uint_fast16_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT_FAST16_T 8
+#define H5_SIZEOF_UINT_FAST16_T 2
 
 /* The size of `uint_fast32_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT_FAST32_T 8
+#define H5_SIZEOF_UINT_FAST32_T 4
 
 /* The size of `uint_fast64_t', as computed by sizeof. */
 #define H5_SIZEOF_UINT_FAST64_T 8

@@ -2,15 +2,15 @@ SUMMARY OF THE HDF5 CONFIGURATION
 =================================
 
 HDF5 Version:       1.8.1
-Configured on:      Sun Jul  6 00:14:57 CEST 2008
-Configured by:      jmasters@papi.science.uva.nl
+Configured on:      Wed Aug 27 12:15:15 CEST 2008
+Configured by:      lars@yavanna.nfra.nl
 Configure mode:     production
-Host system:        x86_64-unknown-linux-gnu
+Host system:        i386-apple-darwin8.11.1
 Byte sex:           little-endian
 Parallel support:   no
-Installation point: /home/jmasters/repositories/usg-repository/code/trunk/external/hdf5/../../release
-C Compiler:         /usr/bin/gcc (gcc-4.2.3)
-C Flags:             -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -D_POSIX_SOURCE -D_BSD_SOURCE 
+Installation point: /Users/lars/Code/lofar/usg/external/hdf5/../../release
+C Compiler:         /usr/bin/gcc (gcc-4.0.1)
+C Flags:             
 Extra C libraries:    -lz -lm 
 Fortran Compiler:   @FC_VERSION@
 Fortran Flags:      @FFLAGS@

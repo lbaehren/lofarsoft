@@ -24,10 +24,10 @@
 ## then modify them accordingly to represent the new paths.               ##
 ##                                                                        ##
 ############################################################################
-prefix="/home/jmasters/repositories/usg-repository/code/trunk/external/hdf5/../../release"
+prefix="/Users/lars/Code/lofar/usg/external/hdf5/../../release"
 exec_prefix="${prefix}"
 libdir="${exec_prefix}/lib"
-includedir="/home/jmasters/repositories/usg-repository/code/trunk/external/hdf5/../../release/include/hdf5"
+includedir="/Users/lars/Code/lofar/usg/external/hdf5/../../release/include/hdf5"
 HL="hl"
 
 ############################################################################
@@ -36,7 +36,7 @@ HL="hl"
 ##                                                                        ##
 ############################################################################
 
-host_os="linux-gnu"
+host_os="darwin8.11.1"
 
 prog_name="`basename $0`"
 
@@ -52,11 +52,11 @@ dash_c="no"
 get_output_file="no"
 
 SHOW="eval"
-FCBASE="g95"
-FLINKERBASE="g95"
-FFLAGS=""
+FCBASE="xlf"
+FLINKERBASE="xlf"
+FFLAGS=" -qsuffix=f=f90 -qfree=f90"
 F9XMODFLAG=""
-F9XSUFFIXFLAG=""
+F9XSUFFIXFLAG="-qsuffix=f=f90 -qfree=f90"
 LDFLAGS=""
 LIBS=" -lz -lm "
 

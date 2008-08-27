@@ -4,17 +4,17 @@
 General Information:
 -------------------
 		   HDF5 Version: 1.8.1
-		  Configured on: Sun Jul  6 00:14:57 CEST 2008
-		  Configured by: jmasters@papi.science.uva.nl
+		  Configured on: Wed Aug 27 12:15:15 CEST 2008
+		  Configured by: lars@yavanna.nfra.nl
 		 Configure mode: production
-		    Host system: x86_64-unknown-linux-gnu
-	      Uname information: Linux papi.science.uva.nl 2.6.24-1-amd64 #1 SMP Fri Apr 18 23:08:22 UTC 2008 x86_64 GNU/Linux
+		    Host system: i386-apple-darwin8.11.1
+	      Uname information: Darwin yavanna.nfra.nl 8.11.1 Darwin Kernel Version 8.11.1: Wed Oct 10 18:23:28 PDT 2007; root:xnu-792.25.20~1/RELEASE_I386 i386 i386
 		       Byte sex: little-endian
 		      Libraries: 
 	       Parallel support: no
-	     Installation point: /home/jmasters/repositories/usg-repository/code/trunk/external/hdf5/../../release
-		       Compiler: /usr/bin/gcc (gcc-4.2.3)
-	      Compiler switches:  -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -D_POSIX_SOURCE -D_BSD_SOURCE 
+	     Installation point: /Users/lars/Code/lofar/usg/external/hdf5/../../release
+		       Compiler: /usr/bin/gcc (gcc-4.0.1)
+	      Compiler switches:  
 		Extra libraries:   -lz -lm 
 		       Archiver: ar
 			 Ranlib: ranlib
@@ -24,9 +24,9 @@ General Information:
 Compiling Options:
 ------------------
                Compilation Mode: production
-                     C Compiler: /usr/bin/gcc (gcc-4.2.3)
-	       CFLAGS/H5_CFLAGS: /-std=c99 -pedantic -Wall -Wextra -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wsign-compare -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline -Wno-long-long -Wfloat-equal -Wmissing-format-attribute -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar -Wformat-nonliteral -Wformat-security -Wformat-y2k -Wunreachable-code -Wendif-labels -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch -Wmissing-field-initializers -Wvariadic-macros -Wunsafe-loop-optimizations -Wc++-compat -Wvolatile-register-var -O -fomit-frame-pointer -finline-functions
-           CPPFLAGS/H5_CPPFLAGS: -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -D_POSIX_SOURCE -D_BSD_SOURCE /  -DNDEBUG -UH5_DEBUG_API
+                     C Compiler: /usr/bin/gcc (gcc-4.0.1)
+	       CFLAGS/H5_CFLAGS: /-std=c99 -pedantic -Wall -Wextra -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wsign-compare -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline -Wno-long-long -Wfloat-equal -Wmissing-format-attribute -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar -Wendif-labels -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch -Wmissing-field-initializers -Wvariadic-macros -O -fomit-frame-pointer -finline-functions
+           CPPFLAGS/H5_CPPFLAGS: /  -DNDEBUG -UH5_DEBUG_API
                         LDFLAGS: 
                      Debug Mode: 
                Shared Libraries: yes
@@ -53,7 +53,7 @@ Features:
             Default API Mapping: v18
          I/O filters (external): deflate(zlib)
          I/O filters (internal): shuffle,fletcher32,nbit,scaleoffset
- Linux Large File Support (LFS): yes
+ Linux Large File Support (LFS): no
                             MPE: no
                   Parallel HDF5: no
                      Direct VFD: no

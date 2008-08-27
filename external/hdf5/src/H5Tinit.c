@@ -17,8 +17,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
- * Created:		Jul  6, 2008
- *			Joseph Masters <jmasters@papi.science.uva.nl>
+ * Created:		Aug 27, 2008
+ *			Lars Baehren <lars@yavanna.nfra.nl>
  *
  * Purpose:		This machine-generated source code contains
  *			information about the various integer and
@@ -207,8 +207,6 @@ H5TN_init_interface(void)
     H5T_NATIVE_UINT_ALIGN_g = 1;
 
    /*
-    *    7        6        5        4
-    * IIIIIIII IIIIIIII IIIIIIII IIIIIIII
     *    3        2        1        0
     * IIIIIIII IIIIIIII IIIIIIII IIIIIIII
     * Alignment: none
@@ -217,21 +215,19 @@ H5TN_init_interface(void)
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,"memory allocation failed")
     dt->shared->state = H5T_STATE_IMMUTABLE;
     dt->shared->type = H5T_INTEGER;
-    dt->shared->size = 8;
+    dt->shared->size = 4;
     dt->shared->u.atomic.order = H5T_ORDER_LE;
     dt->shared->u.atomic.offset = 0;
-    dt->shared->u.atomic.prec = 64;
+    dt->shared->u.atomic.prec = 32;
     dt->shared->u.atomic.lsb_pad = H5T_PAD_ZERO;
     dt->shared->u.atomic.msb_pad = H5T_PAD_ZERO;
     dt->shared->u.atomic.u.i.sign = H5T_SGN_2;
     if ((H5T_NATIVE_LONG_g = H5I_register (H5I_DATATYPE, dt))<0)
         HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,"can't initialize type system (atom registration failure");
     H5T_NATIVE_LONG_ALIGN_g = 1;
-    H5T_NATIVE_LONG_COMP_ALIGN_g = 8;
+    H5T_NATIVE_LONG_COMP_ALIGN_g = 4;
 
    /*
-    *    7        6        5        4
-    * UUUUUUUU UUUUUUUU UUUUUUUU UUUUUUUU
     *    3        2        1        0
     * UUUUUUUU UUUUUUUU UUUUUUUU UUUUUUUU
     * Alignment: none
@@ -240,10 +236,10 @@ H5TN_init_interface(void)
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,"memory allocation failed")
     dt->shared->state = H5T_STATE_IMMUTABLE;
     dt->shared->type = H5T_INTEGER;
-    dt->shared->size = 8;
+    dt->shared->size = 4;
     dt->shared->u.atomic.order = H5T_ORDER_LE;
     dt->shared->u.atomic.offset = 0;
-    dt->shared->u.atomic.prec = 64;
+    dt->shared->u.atomic.prec = 32;
     dt->shared->u.atomic.lsb_pad = H5T_PAD_ZERO;
     dt->shared->u.atomic.msb_pad = H5T_PAD_ZERO;
     dt->shared->u.atomic.u.i.sign = H5T_SGN_NONE;
@@ -452,20 +448,18 @@ H5TN_init_interface(void)
     H5T_NATIVE_UINT_LEAST16_ALIGN_g = 1;
 
    /*
-    *    7        6        5        4
-    * IIIIIIII IIIIIIII IIIIIIII IIIIIIII
-    *    3        2        1        0
-    * IIIIIIII IIIIIIII IIIIIIII IIIIIIII
+    *    1        0
+    * IIIIIIII IIIIIIII
     * Alignment: none
     */
     if(NULL == (dt = H5T_alloc()))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,"memory allocation failed")
     dt->shared->state = H5T_STATE_IMMUTABLE;
     dt->shared->type = H5T_INTEGER;
-    dt->shared->size = 8;
+    dt->shared->size = 2;
     dt->shared->u.atomic.order = H5T_ORDER_LE;
     dt->shared->u.atomic.offset = 0;
-    dt->shared->u.atomic.prec = 64;
+    dt->shared->u.atomic.prec = 16;
     dt->shared->u.atomic.lsb_pad = H5T_PAD_ZERO;
     dt->shared->u.atomic.msb_pad = H5T_PAD_ZERO;
     dt->shared->u.atomic.u.i.sign = H5T_SGN_2;
@@ -474,20 +468,18 @@ H5TN_init_interface(void)
     H5T_NATIVE_INT_FAST16_ALIGN_g = 1;
 
    /*
-    *    7        6        5        4
-    * UUUUUUUU UUUUUUUU UUUUUUUU UUUUUUUU
-    *    3        2        1        0
-    * UUUUUUUU UUUUUUUU UUUUUUUU UUUUUUUU
+    *    1        0
+    * UUUUUUUU UUUUUUUU
     * Alignment: none
     */
     if(NULL == (dt = H5T_alloc()))
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,"memory allocation failed")
     dt->shared->state = H5T_STATE_IMMUTABLE;
     dt->shared->type = H5T_INTEGER;
-    dt->shared->size = 8;
+    dt->shared->size = 2;
     dt->shared->u.atomic.order = H5T_ORDER_LE;
     dt->shared->u.atomic.offset = 0;
-    dt->shared->u.atomic.prec = 64;
+    dt->shared->u.atomic.prec = 16;
     dt->shared->u.atomic.lsb_pad = H5T_PAD_ZERO;
     dt->shared->u.atomic.msb_pad = H5T_PAD_ZERO;
     dt->shared->u.atomic.u.i.sign = H5T_SGN_NONE;
@@ -576,8 +568,6 @@ H5TN_init_interface(void)
     H5T_NATIVE_UINT_LEAST32_ALIGN_g = 1;
 
    /*
-    *    7        6        5        4
-    * IIIIIIII IIIIIIII IIIIIIII IIIIIIII
     *    3        2        1        0
     * IIIIIIII IIIIIIII IIIIIIII IIIIIIII
     * Alignment: none
@@ -586,10 +576,10 @@ H5TN_init_interface(void)
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,"memory allocation failed")
     dt->shared->state = H5T_STATE_IMMUTABLE;
     dt->shared->type = H5T_INTEGER;
-    dt->shared->size = 8;
+    dt->shared->size = 4;
     dt->shared->u.atomic.order = H5T_ORDER_LE;
     dt->shared->u.atomic.offset = 0;
-    dt->shared->u.atomic.prec = 64;
+    dt->shared->u.atomic.prec = 32;
     dt->shared->u.atomic.lsb_pad = H5T_PAD_ZERO;
     dt->shared->u.atomic.msb_pad = H5T_PAD_ZERO;
     dt->shared->u.atomic.u.i.sign = H5T_SGN_2;
@@ -598,8 +588,6 @@ H5TN_init_interface(void)
     H5T_NATIVE_INT_FAST32_ALIGN_g = 1;
 
    /*
-    *    7        6        5        4
-    * UUUUUUUU UUUUUUUU UUUUUUUU UUUUUUUU
     *    3        2        1        0
     * UUUUUUUU UUUUUUUU UUUUUUUU UUUUUUUU
     * Alignment: none
@@ -608,10 +596,10 @@ H5TN_init_interface(void)
         HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL,"memory allocation failed")
     dt->shared->state = H5T_STATE_IMMUTABLE;
     dt->shared->type = H5T_INTEGER;
-    dt->shared->size = 8;
+    dt->shared->size = 4;
     dt->shared->u.atomic.order = H5T_ORDER_LE;
     dt->shared->u.atomic.offset = 0;
-    dt->shared->u.atomic.prec = 64;
+    dt->shared->u.atomic.prec = 32;
     dt->shared->u.atomic.lsb_pad = H5T_PAD_ZERO;
     dt->shared->u.atomic.msb_pad = H5T_PAD_ZERO;
     dt->shared->u.atomic.u.i.sign = H5T_SGN_NONE;
@@ -772,7 +760,7 @@ H5TN_init_interface(void)
     if ((H5T_NATIVE_LLONG_g = H5I_register (H5I_DATATYPE, dt))<0)
         HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,"can't initialize type system (atom registration failure");
     H5T_NATIVE_LLONG_ALIGN_g = 1;
-    H5T_NATIVE_LLONG_COMP_ALIGN_g = 8;
+    H5T_NATIVE_LLONG_COMP_ALIGN_g = 4;
 
    /*
     *    7        6        5        4
@@ -854,7 +842,7 @@ H5TN_init_interface(void)
     if ((H5T_NATIVE_DOUBLE_g = H5I_register (H5I_DATATYPE, dt))<0)
         HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,"can't initialize type system (atom registration failure");
     H5T_NATIVE_DOUBLE_ALIGN_g = 1;
-    H5T_NATIVE_DOUBLE_COMP_ALIGN_g = 8;
+    H5T_NATIVE_DOUBLE_COMP_ALIGN_g = 4;
 
    /*
     *   15       14       13       12
@@ -895,9 +883,9 @@ H5TN_init_interface(void)
     H5T_native_order_g = H5T_ORDER_LE;
 
     /* Structure alignment for pointers, hvl_t, hobj_ref_t, hdset_reg_ref_t */
-    H5T_POINTER_COMP_ALIGN_g = 8;
-    H5T_HVL_COMP_ALIGN_g = 8;
-    H5T_HOBJREF_COMP_ALIGN_g = 8;
+    H5T_POINTER_COMP_ALIGN_g = 4;
+    H5T_HVL_COMP_ALIGN_g = 4;
+    H5T_HOBJREF_COMP_ALIGN_g = 4;
     H5T_HDSETREGREF_COMP_ALIGN_g = 1;
 
 done:

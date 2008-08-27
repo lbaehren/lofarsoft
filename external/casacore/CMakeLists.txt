@@ -393,77 +393,23 @@ endif (prefix)
 
 if (casacore_MEASURES_DATA)
 
-  set (measures_data_archive asap_data.tar.bz2)
-  set (measures_data_url ftp://ftp.atnf.csiro.au/pub/software/asap/data/${measures_data_archive})
-
-  ## Check if there is already some data directory
-
-  find_path (casacore_measures_data ephemerides
-    PATH ${casacore_SOURCE_DIR}/data
+  find_path (HAVE_EPHEMERIDES table.dat
+    PATHS ${USG_ROOT}/data/ephemerides
+    PATH_SUFFIXES DE200 DE405 Sources
     )
 
-  ## -------------------------------------------------------
-  ## Check if we have wget on the system
-  
-  find_program (WGET_EXECUTABLE wget
-    PATHS /usr/bin /usr/local/bin /opt/bin /opt/local/bin /sw/bin
-    NO_DEFAULT_PATH
+  find_path (HAVE_GEODETIC table.dat
+    PATHS ${USG_ROOT}/data/geodetic
+    PATH_SUFFIXES Observatories SCHED_locations TAI_UTC
     )
   
-  find_program (BUNZIP2_EXECUTABLE bunzip2
-    PATHS /usr/bin /usr/local/bin /opt/bin /opt/local/bin /sw/bin
-    NO_DEFAULT_PATH
-    )
-  
-  find_program (TAR_EXECUTABLE tar
-    PATHS /usr/bin /usr/local/bin /opt/bin /opt/local/bin /sw/bin
-    NO_DEFAULT_PATH
-    )
-  
-  ## -------------------------------------------------------
-  ## Download the data archive
-  
-  if (WGET_EXECUTABLE)
-    message (STATUS "[wget] Starting download of measures data tables ...")
-    execute_process (
-      WORKING_DIRECTORY ${casacore_SOURCE_DIR}
-      COMMAND ${WGET_EXECUTABLE} -c ${measures_data_url}
-      TIMEOUT 300
-      )
-  endif (WGET_EXECUTABLE)
-  
-  ## -------------------------------------------------------
-  ## Expand the archive
-  
-  if (BUNZIP2_EXECUTABLE)
-    message (STATUS "[bunzip2] Expanding archive ...")
-    execute_process (
-      WORKING_DIRECTORY ${casacore_SOURCE_DIR}
-      COMMAND ${BUNZIP2_EXECUTABLE} asap_data.tar.bz2
-      TIMEOUT 300
-      )
-  endif (BUNZIP2_EXECUTABLE)
-  
-  if (TAR_EXECUTABLE)
-    message (STATUS "[tar] Expanding archive ...")
-    execute_process (
-      WORKING_DIRECTORY ${casacore_SOURCE_DIR}
-      COMMAND ${TAR_EXECUTABLE} -xf asap_data.tar
-      TIMEOUT 120
-      )
-  endif (TAR_EXECUTABLE)
-
-  ## -------------------------------------------------------
-  ## Clean up
-
-  find_file (measures_data_tar asap_data.tar
-    PATH ${casacore_SOURCE_DIR}
-    )
-
-  if (measures_data_tar)
-    message (STATUS "Cleaning up temp data from measures tables...")
-    file (REMOVE ${measures_data_tar})
-  endif (measures_data_tar)
+  if (NOT HAVE_EPHEMERIDES OR NOT HAVE_GEODETIC)
+    
+    include (GetCasacoreData)
+    
+    get_casacore_data()
+    
+  endif (NOT HAVE_EPHEMERIDES OR NOT HAVE_GEODETIC)
   
 endif (casacore_MEASURES_DATA)
 

@@ -11,7 +11,7 @@
 
 # Sed substitution that helps us do robust quoting.  It backslashifies
 # metacharacters that are still active within double-quoted strings.
-Xsed='/bin/sed -e 1s/^X//'
+Xsed='/sw/bin/sed -e 1s/^X//'
 sed_quote_subst='s/\([`"$\\]\)/\\\1/g'
 
 # Be Bourne compatible
@@ -32,7 +32,7 @@ DUALCASE=1; export DUALCASE # for MKS sh
 # if CDPATH is set.
 (unset CDPATH) >/dev/null 2>&1 && unset CDPATH
 
-relink_command="(cd /home/jmasters/repositories/usg-repository/code/trunk/external/hdf5/tools/h5copy; { test -z \"\${LD_RUN_PATH+set}\" || unset LD_RUN_PATH || { LD_RUN_PATH=; export LD_RUN_PATH; }; }; { test -z \"\${LD_LIBRARY_PATH+set}\" || unset LD_LIBRARY_PATH || { LD_LIBRARY_PATH=; export LD_LIBRARY_PATH; }; }; PATH=/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/games:/home/jmasters/bin:/home/jmasters/repositories/usg-repository/code/trunk/release/bin:/home/jmasters/repositories/usg-repository/code/trunk/release/bin; export PATH; gcc -std=c99 -pedantic -Wall -Wextra -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wsign-compare -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline -Wno-long-long -Wfloat-equal -Wmissing-format-attribute -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar -Wformat-nonliteral -Wformat-security -Wformat-y2k -Wunreachable-code -Wendif-labels -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch -Wmissing-field-initializers -Wvariadic-macros -Wunsafe-loop-optimizations -Wc++-compat -Wvolatile-register-var -O -fomit-frame-pointer -finline-functions -o \$progdir/\$file h5copy.o  ../../tools/lib/.libs/libh5tools.a ../../src/.libs/libhdf5.so -lz -lm -Wl,-rpath -Wl,/home/jmasters/repositories/usg-repository/code/trunk/external/hdf5/src/.libs -Wl,-rpath -Wl,/home/jmasters/repositories/usg-repository/code/trunk/external/hdf5/../../release/lib)"
+relink_command=""
 
 # This environment variable determines our operation mode.
 if test "$libtool_install_magic" = "%%%MAGIC variable%%%"; then
@@ -62,7 +62,7 @@ else
   test "x$thisdir" = "x$file" && thisdir=.
 
   # Follow symbolic links until we get to the real thisdir.
-  file=`ls -ld "$file" | /bin/sed -n 's/.*-> //p'`
+  file=`ls -ld "$file" | /sw/bin/sed -n 's/.*-> //p'`
   while test -n "$file"; do
     destdir=`$ECHO "X$file" | $Xsed -e 's%/[^/]*$%%'`
 
@@ -75,7 +75,7 @@ else
     fi
 
     file=`$ECHO "X$file" | $Xsed -e 's%^.*/%%'`
-    file=`ls -ld "$thisdir/$file" | /bin/sed -n 's/.*-> //p'`
+    file=`ls -ld "$thisdir/$file" | /sw/bin/sed -n 's/.*-> //p'`
   done
 
   # Usually 'no', except on cygwin/mingw when embedded into
@@ -97,38 +97,20 @@ else
   absdir=`cd "$thisdir" && pwd`
   test -n "$absdir" && thisdir="$absdir"
 
-  program=lt-'h5copy'
+  program='h5copy'
   progdir="$thisdir/.libs"
 
-  if test ! -f "$progdir/$program" ||
-     { file=`ls -1dt "$progdir/$program" "$progdir/../$program" 2>/dev/null | /bin/sed 1q`; \
-       test "X$file" != "X$progdir/$program"; }; then
-
-    file="$$-$program"
-
-    if test ! -d "$progdir"; then
-      mkdir "$progdir"
-    else
-      rm -f "$progdir/$file"
-    fi
-
-    # relink executable if necessary
-    if test -n "$relink_command"; then
-      if relink_command_output=`eval $relink_command 2>&1`; then :
-      else
-	echo "$relink_command_output" >&2
-	rm -f "$progdir/$file"
-	exit 1
-      fi
-    fi
-
-    mv -f "$progdir/$file" "$progdir/$program" 2>/dev/null ||
-    { rm -f "$progdir/$program";
-      mv -f "$progdir/$file" "$progdir/$program"; }
-    rm -f "$progdir/$file"
-  fi
 
   if test -f "$progdir/$program"; then
+    # Add our own library path to DYLD_LIBRARY_PATH
+    DYLD_LIBRARY_PATH="/Users/lars/Code/lofar/usg/external/hdf5/src/.libs:$DYLD_LIBRARY_PATH"
+
+    # Some systems cannot cope with colon-terminated DYLD_LIBRARY_PATH
+    # The second colon is a workaround for a bug in BeOS R4 sed
+    DYLD_LIBRARY_PATH=`$ECHO "X$DYLD_LIBRARY_PATH" | $Xsed -e 's/::*$//'`
+
+    export DYLD_LIBRARY_PATH
+
     if test "$libtool_execute_magic" != "%%%MAGIC variable%%%"; then
       # Run the actual program with our arguments.
 

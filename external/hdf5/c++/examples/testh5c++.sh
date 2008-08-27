@@ -21,7 +21,7 @@
 
 # Initializations
 # Where the tool is installed.
-prefix="${prefix:-/home/jmasters/repositories/usg-repository/code/trunk/external/hdf5/../../release}"
+prefix="${prefix:-/Users/lars/Code/lofar/usg/external/hdf5/../../release}"
 AR=ar
 RANLIB=ranlib
 H5TOOL="h5c++"           	# The tool name

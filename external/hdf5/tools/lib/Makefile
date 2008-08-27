@@ -47,8 +47,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-build_triplet = x86_64-unknown-linux-gnu
-host_triplet = x86_64-unknown-linux-gnu
+build_triplet = i386-apple-darwin8.11.1
+host_triplet = i386-apple-darwin8.11.1
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
@@ -93,7 +93,7 @@ CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = /home1/packages/automake/automake-1.9.6/bin/aclocal-1.9 -I /afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4/share/aclocal
 ADD_PARALLEL_FILES = no
-AMTAR = ${SHELL} /home/jmasters/repositories/usg-repository/code/trunk/external/hdf5/bin/missing --run tar
+AMTAR = ${SHELL} /Users/lars/Code/lofar/usg/external/hdf5/bin/missing --run tar
 AM_MAKEFLAGS = 
 AR = ar
 
@@ -102,24 +102,24 @@ AR = ar
 AUTOCONF = /home1/packages/autoconf/autoconf-2.60/bin/autoconf
 AUTOHEADER = /home1/packages/autoconf/autoconf-2.60/bin/autoheader
 AUTOMAKE = /home1/packages/automake/automake-1.9.6/bin/automake-1.9
-AWK = mawk
+AWK = gawk
 BYTESEX = little-endian
-CC = gcc
+CC = /usr/bin/gcc
 CCDEPMODE = depmode=gcc3
-CC_VERSION = /usr/bin/gcc (gcc-4.2.3)
+CC_VERSION = /usr/bin/gcc (gcc-4.0.1)
 
 # H5_CFLAGS holds flags that should be used as CFLAGS when building hdf5,
 # but which shouldn't be exported to h5cc for building other programs.
-CFLAGS =  -std=c99 -pedantic -Wall -Wextra -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wsign-compare -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline -Wno-long-long -Wfloat-equal -Wmissing-format-attribute -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar -Wformat-nonliteral -Wformat-security -Wformat-y2k -Wunreachable-code -Wendif-labels -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch -Wmissing-field-initializers -Wvariadic-macros -Wunsafe-loop-optimizations -Wc++-compat -Wvolatile-register-var -O -fomit-frame-pointer -finline-functions
+CFLAGS =  -std=c99 -pedantic -Wall -Wextra -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wsign-compare -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline -Wno-long-long -Wfloat-equal -Wmissing-format-attribute -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar -Wendif-labels -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch -Wmissing-field-initializers -Wvariadic-macros -O -fomit-frame-pointer -finline-functions
 CLEARFILEBUF = yes
 CODESTACK = no
-CONFIG_DATE = Sun Jul  6 00:14:57 CEST 2008
+CONFIG_DATE = Wed Aug 27 12:15:15 CEST 2008
 CONFIG_MODE = production
-CONFIG_USER = jmasters@papi.science.uva.nl
-CPP = gcc -E
-CPPFLAGS = -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -D_POSIX_SOURCE -D_BSD_SOURCE    -DNDEBUG -UH5_DEBUG_API
-CXX = g++
-CXXCPP = g++ -E
+CONFIG_USER = lars@yavanna.nfra.nl
+CPP = /usr/bin/gcc -E
+CPPFLAGS =    -DNDEBUG -UH5_DEBUG_API
+CXX = /usr/bin/c++
+CXXCPP = /usr/bin/c++ -E
 CXXDEPMODE = depmode=gcc3
 CXXFLAGS =   
 CYGPATH_W = echo
@@ -129,33 +129,33 @@ DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
 DEPRECATED_SYMBOLS = yes
 DIRECT_VFD = no
-DSYMUTIL = 
+DSYMUTIL = dsymutil
 DUMPBIN = 
 DYNAMIC_DIRS = 
 ECHO_C = 
 ECHO_N = -n
 ECHO_T = 
-EGREP = /bin/grep -E
+EGREP = /usr/bin/grep -E
 EXEEXT = 
 EXTERNAL_FILTERS = deflate(zlib)
 
 # Make sure that these variables are exported to the Makefiles
 F9XMODEXT = 
 F9XMODFLAG = 
-F9XSUFFIXFLAG = 
-FC = g95
-FCFLAGS =   
+F9XSUFFIXFLAG = -qsuffix=f=f90 -qfree=f90
+FC = xlf
+FCFLAGS =  -qsuffix=f=f90 -qfree=f90  -qmoddir=./  -O
 FCFLAGS_f90 = 
 FCLIBS = 
-FGREP = /bin/grep -F
+FGREP = /usr/bin/grep -F
 FILTERS = shuffle,fletcher32,nbit,scaleoffset
-FSEARCH_DIRS = 
+FSEARCH_DIRS = -I./ -I../src
 GPFS = no
-GREP = /bin/grep
-H5_CFLAGS = -std=c99 -pedantic -Wall -Wextra -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wsign-compare -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline -Wno-long-long -Wfloat-equal -Wmissing-format-attribute -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar -Wformat-nonliteral -Wformat-security -Wformat-y2k -Wunreachable-code -Wendif-labels -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch -Wmissing-field-initializers -Wvariadic-macros -Wunsafe-loop-optimizations -Wc++-compat -Wvolatile-register-var -O -fomit-frame-pointer -finline-functions
+GREP = /usr/bin/grep
+H5_CFLAGS = -std=c99 -pedantic -Wall -Wextra -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wsign-compare -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline -Wno-long-long -Wfloat-equal -Wmissing-format-attribute -Wmissing-noreturn -Wpacked -Wdisabled-optimization -Wmultichar -Wendif-labels -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch -Wmissing-field-initializers -Wvariadic-macros -O -fomit-frame-pointer -finline-functions
 H5_CPPFLAGS =   -DNDEBUG -UH5_DEBUG_API
 H5_CXXFLAGS =  
-H5_FCFLAGS =  
+H5_FCFLAGS =  -qmoddir=./  -O
 H5_LONE_COLON = yes
 H5_VERSION = 1.8.1
 HADDR_T = 
@@ -176,22 +176,22 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 INSTRUMENT = no
 INSTRUMENT_LIBRARY = no
-LD = /usr/bin/ld -m elf_x86_64
+LD = /usr/bin/ld
 LDFLAGS = 
 LIBOBJS = 
 LIBS =  -lz -lm 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
-LINUX_LFS = yes
+LINUX_LFS = no
 LN_S = ln -s
 LTLIBOBJS = 
 LT_STATIC_EXEC = 
 MAINT = #
-MAKEINFO = ${SHELL} /home/jmasters/repositories/usg-repository/code/trunk/external/hdf5/bin/missing --run makeinfo
-MKDIR_P = /bin/mkdir -p
+MAKEINFO = ${SHELL} /Users/lars/Code/lofar/usg/external/hdf5/bin/missing --run makeinfo
+MKDIR_P = ../../bin/install-sh -c -d
 MPE = no
 MPI_GET_SIZE = 
-NM = /usr/bin/nm -B
-NMEDIT = 
+NM = /usr/bin/nm -p
+NMEDIT = nmedit
 OBJECT_NAMELEN_DEFAULT_F = 
 OBJEXT = o
 PACKAGE = hdf5
@@ -205,13 +205,13 @@ PATH_SEPARATOR = :
 PERL = perl
 PTHREAD = 
 RANLIB = ranlib
-ROOT = /home/jmasters/repositories/usg-repository/code/trunk/external/hdf5
+ROOT = /Users/lars/Code/lofar/usg/external/hdf5
 RUNPARALLEL = 
 RUNSERIAL = 
 R_INTEGER = 
 R_LARGE = 
 SEARCH = VPATH=$(srcdir) $(top_builddir)/src $(top_srcdir)/src
-SED = /bin/sed
+SED = /sw/bin/sed
 SETX = set -x
 SET_MAKE = 
 
@@ -230,7 +230,7 @@ THREADSAFE = no
 TIME = time
 TR = /usr/bin/tr
 TRACE_API = no
-UNAME_INFO = Linux papi.science.uva.nl 2.6.24-1-amd64 #1 SMP Fri Apr 18 23:08:22 UTC 2008 x86_64 GNU/Linux
+UNAME_INFO = Darwin yavanna.nfra.nl 8.11.1 Darwin Kernel Version 8.11.1: Wed Oct 10 18:23:28 PDT 2007; root:xnu-792.25.20~1/RELEASE_I386 i386 i386
 USE_FILTER_DEFLATE = yes
 USE_FILTER_FLETCHER32 = yes
 USE_FILTER_NBIT = yes
@@ -239,11 +239,11 @@ USE_FILTER_SHUFFLE = yes
 USE_FILTER_SZIP = no
 USINGMEMCHECKER = no
 VERSION = 1.8.1
-abs_builddir = /home/jmasters/repositories/usg-repository/code/trunk/external/hdf5/tools/lib
-abs_srcdir = /home/jmasters/repositories/usg-repository/code/trunk/external/hdf5/tools/lib
-abs_top_builddir = /home/jmasters/repositories/usg-repository/code/trunk/external/hdf5
-abs_top_srcdir = /home/jmasters/repositories/usg-repository/code/trunk/external/hdf5
-ac_ct_CC = gcc
+abs_builddir = /Users/lars/Code/lofar/usg/external/hdf5/tools/lib
+abs_srcdir = /Users/lars/Code/lofar/usg/external/hdf5/tools/lib
+abs_top_builddir = /Users/lars/Code/lofar/usg/external/hdf5
+abs_top_srcdir = /Users/lars/Code/lofar/usg/external/hdf5
+ac_ct_CC = /usr/bin/gcc
 ac_ct_CXX = 
 ac_ct_DUMPBIN = 
 ac_ct_FC = 
@@ -252,12 +252,12 @@ am__leading_dot = .
 am__quote = 
 am__tar = ${AMTAR} chof - "$$tardir"
 am__untar = ${AMTAR} xf -
-bindir = ${exec_prefix}/bin
-build = x86_64-unknown-linux-gnu
+bindir = /Users/lars/Code/lofar/usg/external/hdf5/../../release/bin
+build = i386-apple-darwin8.11.1
 build_alias = 
-build_cpu = x86_64
-build_os = linux-gnu
-build_vendor = unknown
+build_cpu = i386
+build_os = darwin8.11.1
+build_vendor = apple
 builddir = .
 datadir = ${datarootdir}
 datarootdir = ${prefix}/share
@@ -266,27 +266,27 @@ dvidir = ${docdir}
 enable_shared = yes
 enable_static = yes
 exec_prefix = ${prefix}
-host = x86_64-unknown-linux-gnu
+host = i386-apple-darwin8.11.1
 host_alias = 
-host_cpu = x86_64
-host_os = linux-gnu
-host_vendor = unknown
+host_cpu = i386
+host_os = darwin8.11.1
+host_vendor = apple
 htmldir = ${docdir}
 
 # Install directories that automake doesn't know about
 includedir = $(exec_prefix)/include
 infodir = ${datarootdir}/info
-install_sh = $(SHELL) /home/jmasters/repositories/usg-repository/code/trunk/external/hdf5/bin/install-sh
+install_sh = $(SHELL) /Users/lars/Code/lofar/usg/external/hdf5/bin/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
 localstatedir = ${prefix}/var
 lt_ECHO = echo
 mandir = ${datarootdir}/man
-mkdir_p = /bin/mkdir -p
+mkdir_p = $(top_builddir)/bin/install-sh -c -d
 oldincludedir = /usr/include
 pdfdir = ${docdir}
-prefix = /home/jmasters/repositories/usg-repository/code/trunk/external/hdf5/../../release
+prefix = /Users/lars/Code/lofar/usg/external/hdf5/../../release
 program_transform_name = s,x,x,
 psdir = ${docdir}
 sbindir = ${exec_prefix}/sbin
