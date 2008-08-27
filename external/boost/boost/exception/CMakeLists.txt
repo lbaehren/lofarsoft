@@ -1,20 +1,20 @@
 
 ## ------------------------------------------------------------------------------
 #
-#  [./boost/boost/range/detail/CMakeLists.txt]
+#  [./boost/boost/exception/CMakeLists.txt]
 #
 ## ------------------------------------------------------------------------------
 
 ## ------------------------------------------------------------------------------
 ## Sub-directories
 
-add_subdirectory (vc6)
+add_subdirectory (detail)
 
 ## ------------------------------------------------------------------------------
 ## Installation
 
-file (GLOB boost_boost_range_detail *.hpp)
+file (GLOB boost_boost_exception *.hpp)
 
-install (FILES ${boost_boost_range_detail}
-  DESTINATION include/boost/range/detail
+install (FILES ${boost_boost_exception}
+  DESTINATION include/boost/exception
   )

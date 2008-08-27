@@ -1,27 +1,18 @@
 
 ## ------------------------------------------------------------------------------
 #
-#  [./boost/boost/thread/CMakeLists.txt]
+#  [./boost/boost/thread/pthread/CMakeLists.txt]
 #
 ## ------------------------------------------------------------------------------
-
-## Name of the project
-project (BOOST_THREAD)
 
 ## Minimum required version of CMake to configure the project
 cmake_minimum_required (VERSION 2.5)
 
 ## ------------------------------------------------------------------------------
-## Sub-directories
-
-add_subdirectory (detail)
-add_subdirectory (pthread)
-
-## ------------------------------------------------------------------------------
 ## Installation
 
-file (GLOB boost_boost_thread *.hpp)
+file (GLOB boost_boost_thread_pthread *.hpp)
 
-install (FILES ${boost_boost_thread}
-  DESTINATION include/boost/thread
+install (FILES ${boost_boost_thread_pthread}
+  DESTINATION include/boost/thread/pthread
   )

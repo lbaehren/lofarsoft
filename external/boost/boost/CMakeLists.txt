@@ -10,8 +10,10 @@
 
 add_subdirectory (algorithm)
 add_subdirectory (bind)
+add_subdirectory (concept)
 add_subdirectory (config)
 add_subdirectory (date_time)
+add_subdirectory (exception)
 add_subdirectory (detail)
 add_subdirectory (function)
 add_subdirectory (io)
