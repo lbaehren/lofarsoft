@@ -20,6 +20,7 @@ add_subdirectory (list)
 add_subdirectory (logical)
 add_subdirectory (punctuation)
 add_subdirectory (repetition)
+add_subdirectory (seq)
 add_subdirectory (slot)
 add_subdirectory (tuple)
 

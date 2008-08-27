@@ -8,9 +8,12 @@
 ## ------------------------------------------------------------------------------
 ## Sub-directories
 
+add_subdirectory (accumulators)
 add_subdirectory (algorithm)
+add_subdirectory (archive)
 add_subdirectory (bind)
 add_subdirectory (concept)
+add_subdirectory (concept_check)
 add_subdirectory (config)
 add_subdirectory (date_time)
 add_subdirectory (exception)
@@ -22,6 +25,7 @@ add_subdirectory (logic)
 add_subdirectory (mpl)
 add_subdirectory (multi_array)
 add_subdirectory (numeric)
+add_subdirectory (optional)
 add_subdirectory (preprocessor)
 add_subdirectory (python)
 add_subdirectory (range)
