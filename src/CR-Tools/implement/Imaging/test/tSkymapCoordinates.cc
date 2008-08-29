@@ -245,7 +245,7 @@ int test_SkymapCoordinates ()
 
   int nofFailedTests (0);                 // nof. failed tests
   TimeFreq timeFreq (1024,40e6,1);        // Time and Frequency data
-  ObservationData obsData ("LOFAR-ITS");  // Observation data
+  ObservationData obsData ("WSRT");       // Observation data
   uint nofBlocks (10);                    // Number of processed blocks
 
   obsData.setObserver ("Lars Baehren");
@@ -759,6 +759,20 @@ int test_directionAxis ()
 // -----------------------------------------------------------------------------
 
 /*!
+  \brief Test working with and manipulation of the frequency axis of the image
+*/
+int test_frequencyAxis ()
+{
+  cout << "\n[test_frequencyAxis]\n" << endl;
+  
+  int nofFailedTests (0);
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+/*!
   \brief Test working with settings handling the properties of the created map
   
   \return nofFailedTests -- The number of failed tests.
@@ -945,6 +959,7 @@ int main ()
     nofFailedTests += test_mapProperties ();
     nofFailedTests += test_coordinateSystem ();
     nofFailedTests += test_directionAxis ();
+    nofFailedTests += test_frequencyAxis ();
     nofFailedTests += test_imageCreation ();
   }
   

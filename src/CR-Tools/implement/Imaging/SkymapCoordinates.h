@@ -200,6 +200,10 @@ namespace CR { // Namespace CR -- begin
       SkymapCoordinates coord (timeFreq,
                                obsData);
       \endcode
+      <li>Retrieve coordinate values along the axes:
+      \code
+      
+      \endcode
     </ol>
     
   */  
@@ -285,7 +289,7 @@ namespace CR { // Namespace CR -- begin
       \brief Argumented constructor
       
       \param timeFreq  -- Time-frequency domain settings (blocksize, sample
-                          frequency, Nyquist zone).
+             frequency, Nyquist zone).
       \param obsData   -- Observation data (epoch, location, etc.)
       \param nofBlocks -- The number of subsequent data blocks to be processed
     */
@@ -296,7 +300,7 @@ namespace CR { // Namespace CR -- begin
       \brief Argumented constructor
       
       \param timeFreq       -- Time-frequency domain settings (blocksize, sample
-                               frequency, Nyquist zone).
+             frequency, Nyquist zone).
       \param obsData        -- Observation data (epoch, location, etc.)
       \param mapOrientation -- Orientation of the generated sky map
       \param beamType       -- Electrical quantities and/or corresponding beam
@@ -310,10 +314,10 @@ namespace CR { // Namespace CR -- begin
       \brief Argumented constructor
       
       \param timeFreq       -- Time-frequency domain settings (blocksize, sample
-                               frequency, Nyquist zone).
+             frequency, Nyquist zone).
       \param obsData        -- Observation data (epoch, location, etc.)
       \param nofBlocks      -- The number of subsequent data blocks to be
-                               processed
+             processed
       \param mapOrientation -- Orientation of the generated sky map
       \param beamType       -- Electrical quantities and/or corresponding beam
                                types
@@ -379,7 +383,7 @@ namespace CR { // Namespace CR -- begin
 
       \return mapOrientation -- The orientation of the generated sky map
     */
-    inline SkymapCoordinates::MapOrientation mapOrientation () {
+    inline SkymapCoordinates::MapOrientation mapOrientation () const {
       return mapOrientation_p;
     }
 
@@ -408,7 +412,7 @@ namespace CR { // Namespace CR -- begin
 
       \return beamType -- The electrical quantity and corresponding beam type
     */
-    inline BeamType beamType () {
+    inline BeamType beamType () const {
       return beamType_p;
     }
     
@@ -455,7 +459,7 @@ namespace CR { // Namespace CR -- begin
                       observation epoch and location, as well as containing the 
 		      coordinate axes associated with an image.
      */
-    inline CoordinateSystem coordinateSystem () {
+    inline CoordinateSystem coordinateSystem () const {
       return csys_p;
     }
 
@@ -464,7 +468,7 @@ namespace CR { // Namespace CR -- begin
       
       \return shape -- Shape of the image's pixel array
     */
-    inline IPosition shape () {
+    inline IPosition shape () const {
       return shape_p;
     }
 
@@ -474,7 +478,7 @@ namespace CR { // Namespace CR -- begin
       \brief Get the name of the map projection
 
       \return projection -- The name of the spherical map projection used
-                            for the direction coordinates
+              for the direction coordinates
     */
     inline String projection () {
       DirectionCoordinate dc = directionAxis();
@@ -512,7 +516,7 @@ namespace CR { // Namespace CR -- begin
       \param increment       -- Coordinate increment, CDELT
       \param pixels          -- Number of pixels in the celestial plane
       \param anglesInDegrees -- Are the direction angles given in degrees? If set 
-                                <tt>false</tt> the angles are expected in radian.
+             <tt>false</tt> the angles are expected in radian.
 
       \return status -- Status of the operation; returns <tt>false</tt> if an
                         error was encountered
@@ -528,9 +532,9 @@ namespace CR { // Namespace CR -- begin
       \brief Set the shape of the image's direction plain
 
       \param lonPixels -- Number of pixels along the longitudinal axis of the
-                          direction plain
+             direction plain
       \param latPixels -- Number of pixels along the latitudinal axis of the
-                          direction plain
+             direction plain
 
       \return status -- Status of the operation;p returns <i>false</i> if an 
                         error was encountered
@@ -872,7 +876,7 @@ namespace CR { // Namespace CR -- begin
       \param increment       -- Coordinate increment, CDELT
       \param pixels          -- Number of pixels in the celestial plane
       \param anglesInDegrees -- Are the direction angles given in degrees? If set 
-                                <tt>false</tt> the angles are expected in radian.
+             <tt>false</tt> the angles are expected in radian.
 
       \return coord -- A casa::DirectionCoordinate object
     */

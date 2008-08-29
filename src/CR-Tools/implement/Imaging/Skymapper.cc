@@ -260,7 +260,7 @@ namespace CR {  // Namespace CR -- begin
       status = beamformer_p.setSkyPositions(directionValues,
 					    distances,
 					    axisOrder,
-					    CR::Spherical,
+					    CR::CoordinateTypes::Spherical,
 					    anglesInDegrees,
 					    bufferDelays);
     } catch (std::string message) {

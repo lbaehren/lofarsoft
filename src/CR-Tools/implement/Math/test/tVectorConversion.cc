@@ -164,11 +164,11 @@ int test_vectorConversion ()
     status = CR::convertVector (xTarget,
 				yTarget,
 				zTarget,
-				CR::Cylindrical,
+				CR::CoordinateTypes::Cylindrical,
 				xSource,
 				ySource,
 				zSource,
-				CR::Cartesian,
+				CR::CoordinateTypes::Cartesian,
 				true);
     show_conversion(xSource,ySource,zSource,xTarget,yTarget,zTarget);
     
@@ -176,11 +176,11 @@ int test_vectorConversion ()
     status = CR::convertVector (xTarget,
 				yTarget,
 				zTarget,
-				CR::Spherical,
+				CR::CoordinateTypes::Spherical,
 				xSource,
 				ySource,
 				zSource,
-				CR::Cartesian,
+				CR::CoordinateTypes::Cartesian,
 				true);
     show_conversion(xSource,ySource,zSource,xTarget,yTarget,zTarget);
     
@@ -199,11 +199,11 @@ int test_vectorConversion ()
     status = CR::convertVector (xTarget,
 				yTarget,
 				zTarget,
-				CR::Cartesian,
+				CR::CoordinateTypes::Cartesian,
 				xSource,
 				ySource,
 				zSource,
-				CR::Cylindrical,
+				CR::CoordinateTypes::Cylindrical,
 				true);
     show_conversion(xSource,ySource,zSource,xTarget,yTarget,zTarget);
   } catch (std::string message) {
@@ -417,10 +417,10 @@ int test_Cartesian2Other ()
   \brief Test conversion from cylindrical to other coordinates
 
   This will run a number of very basic tests for the following routines:
-  - CR::Cylindrical2Cartesian
-  - CR::Cylindrical2Spherical
-  - CR::Cylindrical2AzElHeight
-  - CR::Cylindrical2AzElRadius
+  - CR::CoordinateTypes::Cylindrical2Cartesian
+  - CR::CoordinateTypes::Cylindrical2Spherical
+  - CR::CoordinateTypes::Cylindrical2AzElHeight
+  - CR::CoordinateTypes::Cylindrical2AzElRadius
 
   \return nofFailedTests -- Number of failed tests within this function
 */
@@ -443,17 +443,17 @@ int test_Cylindrical2Other ()
 					cylindrical,
 					true);
     show_conversion (cylindrical,other);
-
+    
     cylindrical[1] = 90.0;
     status = CR::Cylindrical2Cartesian (other,
-				      cylindrical,
-				      true);
+					cylindrical,
+					true);
     show_conversion (cylindrical,other);
-
+    
     cylindrical[1] = 180;
     status = CR::Cylindrical2Cartesian (other,
-				      cylindrical,
-				      true);
+					cylindrical,
+					true);
     show_conversion (cylindrical,other);
     //
     cylindrical[1] = 270;
@@ -465,7 +465,7 @@ int test_Cylindrical2Other ()
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
-
+  
   std::cout << "[2] Cylindrical (rho,phi,h) -> Spherical (r,phi,theta)" << std::endl;
   try {
     cylindrical[1] = 0.0;
@@ -473,17 +473,17 @@ int test_Cylindrical2Other ()
 					cylindrical,
 					true);
     show_conversion (cylindrical,other);
-
+    
     cylindrical[1] = 90.0;
     status = CR::Cylindrical2Spherical (other,
-				      cylindrical,
-				      true);
+					cylindrical,
+					true);
     show_conversion (cylindrical,other);
-
+    
     cylindrical[1] = 180.0;
     status = CR::Cylindrical2Spherical (other,
-				      cylindrical,
-				      true);
+					cylindrical,
+					true);
     show_conversion (cylindrical,other);
     //
     cylindrical[1] = 270.0;
@@ -495,7 +495,7 @@ int test_Cylindrical2Other ()
     std::cerr << message << std::endl;
     nofFailedTests++;
   }
-
+  
   std::cout << "[3] Cylindrical (rho,phi,h) -> Az-El-Height" << std::endl;
   try {
     cylindrical[1] = 0.0;

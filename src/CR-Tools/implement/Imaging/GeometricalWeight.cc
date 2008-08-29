@@ -59,9 +59,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
   // ---------------------------------------------------------- GeometricalWeight
   
   GeometricalWeight::GeometricalWeight (casa::Matrix<double> const &antPositions,
-					CR::CoordinateType const &antCoordType,
+					CR::CoordinateTypes::Type const &antCoordType,
 					casa::Matrix<double> const &skyPositions,
-					CR::CoordinateType const &skyCoordType,
+					CR::CoordinateTypes::Type const &skyCoordType,
 					casa::Vector<double> const &frequencies,
 					bool const &bufferDelays,
 					bool const &bufferPhases,
@@ -223,22 +223,44 @@ namespace CR { // NAMESPACE CR -- BEGIN
   //
   // ============================================================================
   
-  // ----------------------------------------------------------------- setWeights
+  // --------------------------------------------------------------------- weight
 
+  DComplex GeometricalWeight::weight (int const &nFreq,
+				      int const &nAntenna,
+				      int const &nSky)
+  {
+    double phase = GeometricalPhase::phase (nFreq,nAntenna,nSky);
+    
+    return DComplex(cos(phase),sin(phase));
+  }
+  
+  // --------------------------------------------------------------------- weight
+
+  DComplex GeometricalWeight::weight (double const &frequency,
+				      Vector<double> const &antPosition,
+				      Vector<double> const &skyPosition)
+  {
+    double phase = GeometricalPhase::phase (frequency,antPosition,skyPosition);
+    
+    return DComplex(cos(phase),sin(phase));
+  }
+  
+  // ----------------------------------------------------------------- setWeights
+  
   void GeometricalWeight::setWeights ()
   {
     if (bufferWeights_p == true) {
       IPosition shape = GeometricalWeight::shape();
-
+      
       // adjust the shape of the array storing the weights
       weights_p.resize (shape);
       // compute and assign the new values
       weights_p = calcWeights ();
     }
   }
-
+  
   // ---------------------------------------------------------------- calcWeights
-
+  
   casa::Cube<DComplex> GeometricalWeight::calcWeights ()
   {
     int freq (0);

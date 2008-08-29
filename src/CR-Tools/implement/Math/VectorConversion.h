@@ -45,6 +45,7 @@ using casa::uInt;
 #endif
 
 #include <Math/Constants.h>
+#include <Coordinates/CoordinateTypes.h>
 
 using std::vector;
 
@@ -468,31 +469,6 @@ namespace CR { // Namespace CR -- begin
 
   // ============================================================================
   //
-  //  Structs to defined types of coordinates, etc.
-  //
-  // ============================================================================
-  
-  /*!
-    \brief List of coordinate systems, in which the positions can be provided
-  */
-  typedef enum {
-    //! Cartesian coordinates, \f$ \vec x = (x,y,z) \f$
-    Cartesian,
-    //! Spherical coordinates, \f$ \vec x = (r,\phi,\theta) \f$
-    Spherical,
-    //! Cylindrical coordinates, \f$ \vec x = (r,\phi,h) \f$
-    Cylindrical,
-    //! Azimuth-Elevation-Height, \f$ \vec x = (Az,El,H) \f$
-    AzElHeight,
-    //! Azimuth-Elevation-Radius, \f$ \vec x = (Az,El,R) \f$
-    AzElRadius,
-    //! North-East-Height
-    NorthEastHeight
-  } CoordinateType;
-  
-
-  // ============================================================================
-  //
   //  Conversion between angle representations
   //
   // ============================================================================
@@ -636,11 +612,11 @@ namespace CR { // Namespace CR -- begin
   bool convertVector (double &xTarget,
 		      double &yTarget,
 		      double &zTarget,
-		      CR::CoordinateType const &targetCoordinate,
+		      CR::CoordinateTypes::Type const &targetCoordinate,
 		      double const &xSource,
 		      double const &ySource,
 		      double const &zSource,
-		      CR::CoordinateType const &sourceCoordinate,
+		      CR::CoordinateTypes::Type const &sourceCoordinate,
 		      bool const &anglesInDegrees=false);
 
   /*!
@@ -655,9 +631,9 @@ namespace CR { // Namespace CR -- begin
 			       before the conversion.
   */
   bool convertVector (vector<double> &target,
-		      CR::CoordinateType const &targetCoordinate,
+		      CR::CoordinateTypes::Type const &targetCoordinate,
 		      vector<double> &source,
-		      CR::CoordinateType const &sourceCoordinate,
+		      CR::CoordinateTypes::Type const &sourceCoordinate,
 		      bool const &anglesInDegrees=false);
 
 #ifdef HAVE_CASA
@@ -673,9 +649,9 @@ namespace CR { // Namespace CR -- begin
 			       before the conversion.
   */
   bool convertVector (casa::Vector<double> &target,
-		      CR::CoordinateType const &targetCoordinate,
+		      CR::CoordinateTypes::Type const &targetCoordinate,
 		      casa::Vector<double> &source,
-		      CR::CoordinateType const &sourceCoordinate,
+		      CR::CoordinateTypes::Type const &sourceCoordinate,
 		      bool const &anglesInDegrees=false);
 #endif
 
@@ -692,9 +668,9 @@ namespace CR { // Namespace CR -- begin
 			       before the conversion.
   */
   bool convertVector (blitz::Array<double,1> &target,
-		      CR::CoordinateType const &targetCoordinate,
+		      CR::CoordinateTypes::Type const &targetCoordinate,
 		      blitz::Array<double,1> &source,
-		      CR::CoordinateType const &sourceCoordinate,
+		      CR::CoordinateTypes::Type const &sourceCoordinate,
 		      bool const &anglesInDegrees=false);
 #endif
 

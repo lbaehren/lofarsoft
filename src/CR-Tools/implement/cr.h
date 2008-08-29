@@ -153,58 +153,6 @@
 
 // ==============================================================================
 //
-//  Module IO
-//
-// ==============================================================================
-
-/*!
-  \defgroup IO CR-Pipeline: IO module
-  \ingroup CR
-
-  \brief IO module for the CR-pipeline
-  
-  <h3>Synopsis</h3>
-  
-*/
-
-// ==============================================================================
-//
-//  Module LopesLegacy
-//
-// ==============================================================================
-
-/*!
-  \defgroup LopesLegacy CR-Pipeline: LopesLegacy module
-  \ingroup CR
-
-  \brief LopesLegacy module for the CR-pipeline
-  
-  <h3>Synopsis</h3>
-
-*/
-
-// ==============================================================================
-//
-//  Module Math
-//
-// ==============================================================================
-
-/*!
-  \defgroup CR_Math CR-Pipeline: Math module
-  \ingroup CR
-
-  \brief Math module for the CR-pipeline
-  
-  <h3>Synopsis</h3>
-
-  Even though we make usage of the extensive functionality of the CASA math
-  modules, there sometimes are operations missing which will be required 
-  over and over again. The Math module of the CR-Pipeline is a collection of
-  such additional functions.
-*/
-
-// ==============================================================================
-//
 //  Module Imaging
 //
 // ==============================================================================
@@ -217,7 +165,6 @@
 
   <ul>
     <li><a href="#Synopsis">Synopsis</a>
-    <li><a href="#Coordinate systems">Coordinate systems</a>
     <li><a href="#Reference frames">Reference frames</a>
     <li><a href="#References">References</a>
   </ul>
@@ -251,11 +198,6 @@
       \vec \rho, \nu) \Bigr) \f$</td>
     </tr>
   </table>
-
-  <h3><a name="Coordinate systems">Coordinate systems</a></h3>
-
-  Obviously there is quite a number of coordinate systems and reference frames,
-  within which positions and directions can be defined.
 
   \image html beamforming-geometry.png
 
@@ -356,10 +298,63 @@
   <h3><a name="References">References</a></h3>
   
   <ul>
+    <li>casacore <a href="http://www.astron.nl/casacore/doc/html/classcasa_1_1Coordinate.html">Coordinate</a> class
     <li><a href="http://itrf.ensg.ign.fr">itrf.ensg.ign.fr</a>
     <li><a href="http://www.iers.org">International Earth Rotation and Reference
     System Service</a>
   </ul>
+*/
+
+// ==============================================================================
+//
+//  Module IO
+//
+// ==============================================================================
+
+/*!
+  \defgroup IO CR-Pipeline: IO module
+  \ingroup CR
+
+  \brief IO module for the CR-pipeline
+  
+  <h3>Synopsis</h3>
+  
+*/
+
+// ==============================================================================
+//
+//  Module LopesLegacy
+//
+// ==============================================================================
+
+/*!
+  \defgroup LopesLegacy CR-Pipeline: LopesLegacy module
+  \ingroup CR
+
+  \brief LopesLegacy module for the CR-pipeline
+  
+  <h3>Synopsis</h3>
+
+*/
+
+// ==============================================================================
+//
+//  Module Math
+//
+// ==============================================================================
+
+/*!
+  \defgroup CR_Math CR-Pipeline: Math module
+  \ingroup CR
+
+  \brief Math module for the CR-pipeline
+  
+  <h3>Synopsis</h3>
+
+  Even though we make usage of the extensive functionality of the CASA math
+  modules, there sometimes are operations missing which will be required 
+  over and over again. The Math module of the CR-Pipeline is a collection of
+  such additional functions.
 */
 
 // ==============================================================================

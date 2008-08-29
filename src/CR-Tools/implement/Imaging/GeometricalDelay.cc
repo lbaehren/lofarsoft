@@ -61,9 +61,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #endif
 
     init (antennaPositions,
-	  CR::Cartesian,
+	  CR::CoordinateTypes::Cartesian,
 	  skyPositions,
-	  CR::Cartesian,
+	  CR::CoordinateTypes::Cartesian,
 	  bufferDelays,
 	  antennaIndexFirst);
   }
@@ -80,9 +80,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
     skyPositions = 0.0, 0.0, 1.0;
     
     init (antPositions,
-	  CR::Cartesian,
+	  CR::CoordinateTypes::Cartesian,
 	  skyPositions,
-	  CR::Cartesian,
+	  CR::CoordinateTypes::Cartesian,
 	  bufferDelays,
 	  antennaIndexFirst);  
   }
@@ -99,9 +99,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
     bool bufferDelays (false);
 
     init (antPositions,
-	  CR::Cartesian,
+	  CR::CoordinateTypes::Cartesian,
 	  skyPositions,
-	  CR::Cartesian,
+	  CR::CoordinateTypes::Cartesian,
 	  bufferDelays,
 	  antennaIndexFirst);
   }
@@ -114,9 +114,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
     bool bufferDelays (false);
     
     init (antPositions,
-	  CR::Cartesian,
+	  CR::CoordinateTypes::Cartesian,
 	  skyPositions,
-	  CR::Cartesian,
+	  CR::CoordinateTypes::Cartesian,
 	  bufferDelays,
 	  antennaIndexFirst);
   }
@@ -127,9 +127,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
   
 #ifdef HAVE_CASA
   GeometricalDelay::GeometricalDelay (Matrix<double> const &antPositions,
-				      CR::CoordinateType const &antCoordType,
+				      CR::CoordinateTypes::Type const &antCoordType,
 				      Matrix<double> const &skyPositions,
-				      CR::CoordinateType const &skyCoordType)
+				      CR::CoordinateTypes::Type const &skyCoordType)
   {
     bool antennaIndexFirst (true);
     bool bufferDelays (false);
@@ -144,9 +144,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #else 
 #ifdef HAVE_BLITZ
   GeometricalDelay::GeometricalDelay (blitz::Array<double,2> const &antPositions,
-				      CR::CoordinateType const &antCoordType,
+				      CR::CoordinateTypes::Type const &antCoordType,
 				      blitz::Array<double,2> const &skyPositions,
-				      CR::CoordinateType const &skyCoordType)
+				      CR::CoordinateTypes::Type const &skyCoordType)
   {
     bool antennaIndexFirst (true);
     bool bufferDelays (false);
@@ -165,9 +165,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
   
 #ifdef HAVE_CASA
   GeometricalDelay::GeometricalDelay (Matrix<double> const &antPositions,
-				      CR::CoordinateType const &antCoordType,
+				      CR::CoordinateTypes::Type const &antCoordType,
 				      Matrix<double> const &skyPositions,
-				      CR::CoordinateType const &skyCoordType,
+				      CR::CoordinateTypes::Type const &skyCoordType,
 				      bool const &bufferDelays,
 				      bool const &antennaIndexFirst)
   {
@@ -181,9 +181,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #else
 #ifdef HAVE_BLITZ
   GeometricalDelay::GeometricalDelay (blitz::Array<double,2> const &antPositions,
-				      CR::CoordinateType const &antCoordType,
+				      CR::CoordinateTypes::Type const &antCoordType,
 				      blitz::Array<double,2> const &skyPositions,
-				      CR::CoordinateType const &skyCoordType,
+				      CR::CoordinateTypes::Type const &skyCoordType,
 				      bool const &bufferDelays,
 				      bool const &antennaIndexFirst)
   {
@@ -212,9 +212,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
   
 #ifdef HAVE_CASA
   void GeometricalDelay::init (Matrix<double> const &antPositions,
-			       CR::CoordinateType const &antCoordType,
+			       CR::CoordinateTypes::Type const &antCoordType,
 			       Matrix<double> const &skyPositions,
-			       CR::CoordinateType const &skyCoordType,
+			       CR::CoordinateTypes::Type const &skyCoordType,
 			       bool const &bufferDelays,
 			       bool const &antennaIndexFirst)
   {
@@ -264,9 +264,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #else
 #ifdef HAVE_BLITZ
   void GeometricalDelay::init (blitz::Array<double,2> const &antPositions,
-			       CR::CoordinateType const &antCoordType,
+			       CR::CoordinateTypes::Type const &antCoordType,
 			       blitz::Array<double,2> const &skyPositions,
-			       CR::CoordinateType const &skyCoordType,
+			       CR::CoordinateTypes::Type const &skyCoordType,
 			       bool const &bufferDelays,
 			       bool const &antennaIndexFirst)
     
@@ -471,7 +471,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   bool
   GeometricalDelay::setAntennaPositions (const Matrix<double> &antPositions,
 					 bool const &antennaIndexFirst,
-					 CR::CoordinateType const &antCoordType,
+					 CR::CoordinateTypes::Type const &antCoordType,
 					 bool const &anglesInDegrees,
 					 bool const &bufferDelays)
   {
@@ -484,7 +484,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       /* If the antenna coordinates are provided in cartesian coordinates
 	 already, we can simply pass them along; otherwise we need to insert
 	 a coordinate conversion step before storing the values. */
-      if (antCoordType == CR::Cartesian) {
+      if (antCoordType == CR::CoordinateTypes::Cartesian) {
 	return setAntennaPositions (antPositions,
 				    bufferDelays);
       } else {
@@ -494,7 +494,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 	  status = CR::convertVector (antPositionsCartesian(antenna,0),
 				      antPositionsCartesian(antenna,1),
 				      antPositionsCartesian(antenna,2),
-				      CR::Cartesian,
+				      CR::CoordinateTypes::Cartesian,
 				      antPositions(antenna,0),
 				      antPositions(antenna,1),
 				      antPositions(antenna,2),
@@ -518,7 +518,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #else
 #ifdef HAVE_BLITZ
   bool GeometricalDelay::setAntennaPositions (const blitz::Array<double,2> &antPositions,
-					      CR::CoordinateType const &antCoordType,
+					      CR::CoordinateTypes::Type const &antCoordType,
 					      bool const &antennaIndexFirst,
 					      bool const &bufferDelays)
   {
@@ -595,7 +595,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   
 #ifdef HAVE_CASA
   bool GeometricalDelay::setSkyPositions (Matrix<double> const &skyPositions,
-					  CR::CoordinateType const &skyCoordType,
+					  CR::CoordinateTypes::Type const &skyCoordType,
 					  bool const &anglesInDegrees,
 					  bool const &bufferDelays)
   {
@@ -605,7 +605,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     /* If the sky position coordinates are provided in cartesian coordinates
        already, we can simply pass them along; otherwise we need to insert
        a coordinate conversion step before storing the values. */
-    if (skyCoordType == CR::Cartesian) {
+    if (skyCoordType == CR::CoordinateTypes::Cartesian) {
       return setSkyPositions (skyPositions,
 			      bufferDelays);
     } else {
@@ -615,7 +615,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 	status = CR::convertVector (skyPositionsCartesian(antenna,0),
 				    skyPositionsCartesian(antenna,1),
 				    skyPositionsCartesian(antenna,2),
-				    CR::Cartesian,
+				    CR::CoordinateTypes::Cartesian,
 				    skyPositions(antenna,0),
 				    skyPositions(antenna,1),
 				    skyPositions(antenna,2),
@@ -632,7 +632,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 #else
 #ifdef HAVE_BLITZ
   bool GeometricalDelay::setSkyPositions (blitz::Array<double,2> const &skyPositions,
-					  CR::CoordinateType const &coordType,
+					  CR::CoordinateTypes::Type const &coordType,
 					  bool const &anglesInDegrees,
 					  bool const &bufferDelays)
   {
@@ -666,7 +666,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   bool GeometricalDelay::setSkyPositions (Vector<double> const &xValues,
 					  Vector<double> const &yValues,
 					  Vector<double> const &zValues,
-					  CR::CoordinateType const &coordType,
+					  CR::CoordinateTypes::Type const &coordType,
 					  bool const &anglesInDegrees,
 					  bool const &bufferDelays)
   {
@@ -703,7 +703,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   bool GeometricalDelay::setSkyPositions (blitz::Array<double,1> const &xValues,
 					  blitz::Array<double,1> const &yValues,
 					  blitz::Array<double,1> const &zValues,
-					  CR::CoordinateType const &coordType,
+					  CR::CoordinateTypes::Type const &coordType,
 					  bool const &anglesInDegrees,
 					  bool const &bufferDelays)
   {
@@ -744,7 +744,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   bool GeometricalDelay::setSkyPositions (Matrix<double> const &xyValues,
 					  Vector<double> const &zValues,
 					  Vector<int> const &axisOrder,
-					  CR::CoordinateType const &coordType,
+					  CR::CoordinateTypes::Type const &coordType,
 					  bool const &anglesInDegrees,
 					  bool const &bufferDelays)
   {
@@ -794,7 +794,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   bool GeometricalDelay::setSkyPositions (blitz::Array<double,1> const &xyValues,
 					  blitz::Array<double,1> const &zValues,
 					  blitz::Array<int,1> const &axisOrder,
-					  CR::CoordinateType const &coordType,
+					  CR::CoordinateTypes::Type const &coordType,
 					  bool const &anglesInDegrees,
 					  bool const &bufferDelays)
   {
@@ -847,7 +847,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
   bool GeometricalDelay::setSkyPosition (double const &x1,
 					 double const &x2,
 					 double const &x3,
-					 CR::CoordinateType const &coordType,
+					 CR::CoordinateTypes::Type const &coordType,
 					 bool const &anglesInDegrees,
 					 bool const &bufferDelays)
   {
@@ -864,7 +864,8 @@ namespace CR { // NAMESPACE CR -- BEGIN
   }
 #endif
   
-  // ---------------------------------------------------------------------- delay
+
+  // --------------------------------------------------------------------- delays
 
 #ifdef HAVE_CASA
   Matrix<double> GeometricalDelay::delays ()
@@ -906,69 +907,66 @@ namespace CR { // NAMESPACE CR -- BEGIN
   //
   // ============================================================================
 
-  void GeometricalDelay::summary (std::ostream &os)
-  {
-    os << "[GeometricalDelay] Summary of object" << endl;
-    os << "-- Sky positions       : " << skyPositions_p.shape() << endl;
-    os << "-- Antenna positions   : " << antPositions_p.shape() << endl;
-    os << "-- nof. Baselines      : " << nofBaselines()         << endl;
-    os << "-- near field geometry : " << nearField_p            << endl;
-    os << "-- buffer delays       : " << bufferDelays_p         << endl;
-    
-    if (bufferDelays_p) {
-      os << "-- Delays            : " << delays_p.shape()     << endl;
-    }
-  }
-
-  // ------------------------------------------------------------------ calcDelay
+  // ---------------------------------------------------------------------- delay
 
 #ifdef HAVE_CASA
-  double GeometricalDelay::calcDelay (double const &xSky,
-				      double const &ySky,
-				      double const &zSky,
-				      double const &xAntenna,
-				      double const &yAntenna,
-				      double const &zAntenna)
+  double GeometricalDelay::delay (int const &indexAntenna,
+				  int const &indexSky)
+  {
+    return delay (antPositions_p.row(indexAntenna),
+		  skyPositions_p.row(indexSky));
+  }
+#endif
+  
+  // ---------------------------------------------------------------------- delay
+  
+#ifdef HAVE_CASA
+  double GeometricalDelay::delay (double const &xAntenna,
+				  double const &yAntenna,
+				  double const &zAntenna,
+				  double const &xSky,
+				  double const &ySky,
+				  double const &zSky)
   {
     double delay (0.0);
     Vector<double> skyPosition(3);
     Vector<double> diff (3);
-
+    
     skyPosition(0) = xSky;
     skyPosition(1) = ySky;
     skyPosition(2) = zSky;
-
+    
     diff(0) = xSky-xAntenna;
     diff(1) = ySky-yAntenna;
     diff(2) = zSky-zAntenna;
-
+    
     /*
       At this position we now need to distinguish between considering a source
       in the near-field or in the far field. For a source in the far-field we 
       can use the simplified calculation, whereas for the near-field we need
       to carry out the calculation using the proper 3-dim geometry.
-     */
+    */
     if (nearField_p) {
       delay = (CR::L2Norm(diff)-CR::L2Norm(skyPosition))/lightspeed;
     } else {
       delay = -(xSky*xAntenna+ySky*yAntenna+zSky*zAntenna)/lightspeed;
     }
-      
+    
     return delay;
   }
 #else
 #ifdef HAVE_BLITZ
-  double GeometricalDelay::calcDelay (double const &xSky,
-				      double const &ySky,
-				      double const &zSky,
-				      double const &xAntenna,
-				      double const &yAntenna,
-				      double const &zAntenna)
+  double GeometricalDelay::delay (double const &xAntenna,
+				  double const &yAntenna,
+				  double const &zAntenna,
+				  double const &xSky,
+				  double const &ySky,
+				  double const &zSky)
   {
     double delay (0.0);
     blitz::Array<double,1> skyPosition(3);
     blitz::Array<double,1> diff (3);
-
+    
     skyPosition = xSky,ySky,zSky;
     diff        = xSky-xAntenna,ySky-yAntenna,zSky-zAntenna;
     
@@ -978,12 +976,12 @@ namespace CR { // NAMESPACE CR -- BEGIN
   }
 #endif
 #endif
-
-  // ------------------------------------------------------------------ calcDelay
-
+  
+  // ---------------------------------------------------------------------- delay
+  
 #ifdef HAVE_CASA
-  double GeometricalDelay::calcDelay (casa::Vector<double> const &skyPosition,
-				      casa::Vector<double> const &antennaPosition)
+  double GeometricalDelay::delay (casa::Vector<double> const &antennaPosition,
+				  casa::Vector<double> const &skyPosition)
   {
     double delay (0.);
     casa::Vector<double> diff = skyPosition-antennaPosition;
@@ -993,13 +991,13 @@ namespace CR { // NAMESPACE CR -- BEGIN
     } else {
       delay = -sum(skyPosition*antennaPosition)/lightspeed;
     }
-
+    
     return delay;
   }
 #endif
   
   // ----------------------------------------------------------------- calcDelays
-
+  
 #ifdef HAVE_CASA
   Matrix<double> GeometricalDelay::calcDelays ()
   {
@@ -1008,14 +1006,14 @@ namespace CR { // NAMESPACE CR -- BEGIN
     int nofSky (nofSkyPositions());
     Vector<double> skyPos (3);
     Matrix<double> delays (nofAntennas_p,nofSky);
-
+    
     // computation of the geometrical delays
     for (nSky=0; nSky<nofSky; nSky++) {
       skyPos = skyPositions_p.row(nSky);
       for (nAnt=0; nAnt<nofAntennas_p; nAnt++) {
 	// compute delay for current combination of antenna and sky position
- 	delays(nAnt,nSky) = calcDelay(skyPositions_p.row(nSky),
-				      antPositions_p.row(nAnt));
+ 	delays(nAnt,nSky) = delay(antPositions_p.row(nAnt),
+				  skyPositions_p.row(nSky));
       }
     }
     
@@ -1031,7 +1029,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     blitz::Array<double,1> skyPos (3);
     blitz::Array<double,1> diff (3);
     blitz::Array<double,2> delays (nofAntennas_p,nofSky);
-
+    
     // computation of the geometrical delays
     for (nSky=0; nSky<nofSky; nSky++) {
       skyPos = skyPositions_p(nSky,blitz::Range(blitz::Range::all()));
@@ -1045,5 +1043,21 @@ namespace CR { // NAMESPACE CR -- BEGIN
   }
 #endif
 #endif
+  
+  // -------------------------------------------------------------------- summary
+  
+  void GeometricalDelay::summary (std::ostream &os)
+  {
+    os << "[GeometricalDelay] Summary of object" << endl;
+    os << "-- Sky positions       : " << skyPositions_p.shape() << endl;
+    os << "-- Antenna positions   : " << antPositions_p.shape() << endl;
+    os << "-- nof. Baselines      : " << nofBaselines()         << endl;
+    os << "-- near field geometry : " << nearField_p            << endl;
+    os << "-- buffer delays       : " << bufferDelays_p         << endl;
+    
+    if (bufferDelays_p) {
+      os << "-- Delays            : " << delays_p.shape()     << endl;
+    }
+  }
   
 } // NAMESPACE CR -- END

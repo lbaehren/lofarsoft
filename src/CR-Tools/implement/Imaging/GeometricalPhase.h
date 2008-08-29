@@ -95,7 +95,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
     //! The frequency values for which the phases are computed
     casa::Vector<double> frequencies_p;
-    //! Array with the geometrical phases
+    //! [frequency,antenna,skyPosition] Array with the geometrical phase(s)
     casa::Cube<double> phases_p;
     //! Buffer the values for the geometrical phases?
     bool bufferPhases_p;
@@ -112,7 +112,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     /*!
       \brief Argumented constructor
 
-      This uses thhe default constructor for GeometricalDelay.
+      This uses the default constructor for GeometricalDelay.
       
       \param frequencies  -- Frequencies for which the geometrical delays are
                              converted into phases
@@ -148,13 +148,13 @@ namespace CR { // NAMESPACE CR -- BEGIN
       
       \param antPositions -- [nofAntennas,3] Antenna positions for which the
              delay is computed, given in Cartesian coordinates \f$ (x,y,z) \f$
-      \param antCoordType -- CR::CoordinateType of the antenna position
+      \param antCoordType -- CR::CoordinateTypes::Type of the antenna position
              coordinates; if the coordinates are non-cartesian and thereby
 	     include anglular components, the values must be provided in radians.
       \param skyPositions -- [nofSkyPositions,3] Positions in the sky towards
              which to point, given in the same reference frame as the antenna
 	     positions, \f$ (x,y,z) \f$
-      \param skyCoordType -- CR::CoordinateType of the sky position coordinates;
+      \param skyCoordType -- CR::CoordinateTypes::Type of the sky position coordinates;
              if the coordinates are non-cartesian and thereby include anglular
 	     components, the values must be provided in radians.
       \param frequencies  -- Frequencies for which the geometrical delays are
@@ -166,9 +166,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \param bufferPhases -- Buffer the values of the phases?
     */
     GeometricalPhase (casa::Matrix<double> const &antPositions,
-		      CR::CoordinateType const &antCoordType,
+		      CR::CoordinateTypes::Type const &antCoordType,
 		      casa::Matrix<double> const &skyPositions,
-		      CR::CoordinateType const &skyCoordType,
+		      CR::CoordinateTypes::Type const &skyCoordType,
 		      casa::Vector<double> const &frequencies,
 		      bool const &bufferDelays=false,
 		      bool const &bufferPhases=false);
@@ -218,7 +218,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \return bufferPhases -- Returns <i>true</i> if the values for the phases
                               are buffered.
     */
-    inline bool bufferPhases () {
+    inline bool bufferPhases () const {
       return bufferPhases_p;
     }
 
@@ -238,9 +238,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \brief Get the number of frequency channels, for which the phases are computed
 
       \return nofFrequencies -- The number of frequency channels, for which the
-                                phases are computed
+              phases are computed
     */
-    inline int nofFrequencies () {
+    inline int nofFrequencies () const {
       return frequencies_p.nelements();
     }
     
@@ -248,9 +248,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \brief Get the frequencies values for which the phases are computed
       
       \return frequencies -- The frequency values for which the phases are
-                             computed.
+              computed.
     */
-    inline casa::Vector<double> frequencies () {
+    inline casa::Vector<double> frequencies () const {
       return frequencies_p;
     }
     
@@ -262,7 +262,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \param bufferPhases -- Buffer the values for the geometrical phases?
 
       \return status -- Status of the operation; returns <tt>false</tt> if an
-                        error was encountered.
+              error was encountered.
     */
     virtual bool setFrequencies (const casa::Vector<double> &frequencies,
 				 bool const &bufferPhases=false);
@@ -277,6 +277,34 @@ namespace CR { // NAMESPACE CR -- BEGIN
     casa::Cube<double> phases ();
 
     // ------------------------------------------------------------------ Methods
+    
+    /*!
+      \brief Get a geometrical phase
+
+      \param nFreq    -- Index for selection from the set of frequencies.
+      \param nAntenna -- Index for selection from the set of antenna positions.
+      \param nSky     -- Index for selection from the set of sky positions.
+
+      \return phase -- The geometrical phase for a given combination of antenna,
+              sky position and frequency.
+     */
+    double phase (int const &nFreq,
+		  int const &nAntenna,
+		  int const &nSky);
+    
+    /*!
+      \brief Get the geometrical phase
+
+      \param frequency   -- Frequency value, [Hz]
+      \param antPosition -- Antenna position.
+      \param skyPosition -- Position on the sky.
+
+      \return phase -- The geometrical phase for a given combination of antenna,
+              sky position and frequency.
+    */
+    double phase (double const &frequency,
+		  Vector<double> const &antPosition,
+		  Vector<double> const &skyPosition);
     
     /*!
       \brief Get the name of the class

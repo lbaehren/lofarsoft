@@ -91,6 +91,11 @@ namespace CR { // Namespace CR -- begin
   */  
   class StationBeam {
     
+    //! Declination angle of the source
+    Double source_declination_p;
+    //! Hour angle of the source
+    Double source_hr_angle_p;
+
   public:
     
     // ------------------------------------------------------------- Construction

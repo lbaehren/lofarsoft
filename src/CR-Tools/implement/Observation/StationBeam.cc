@@ -34,10 +34,17 @@ namespace CR { // Namespace CR -- begin
   //  Construction
   //
   // ============================================================================
+
+  // ---------------------------------------------------------------- StationBeam
   
   StationBeam::StationBeam ()
-  {;}
+  {
+    source_declination_p = 90;
+    source_hr_angle_p    = 0;
+  }
   
+  
+  // ---------------------------------------------------------------- StationBeam
   
   StationBeam::StationBeam( const Double& source_declination,
 			    const Double& source_hr_angle,
@@ -52,7 +59,12 @@ namespace CR { // Namespace CR -- begin
 			    const Vector<Double>& legendre_root,
 			    const Vector<Double>& legendre_weight ) 
     
-  { ; }   
+  {
+    source_declination_p = source_declination;
+    source_hr_angle_p    = source_hr_angle;
+  }   
+  
+  // ---------------------------------------------------------------- StationBeam
   
   StationBeam::StationBeam (StationBeam const &other)
   {
@@ -949,7 +961,7 @@ void StationBeam::generate_statistics_table( const Double& station_radii,
        
        logfile1 << " Stations which are used in tied array beaming : [ " << "\t" ;
        
-       for( uint ns =0; ns< n_stations; ns++ ) {
+       for(int ns(0); ns< n_stations; ns++ ) {
        
             uint station = station_id(ns) ;
 	    

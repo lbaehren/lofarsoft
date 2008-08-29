@@ -94,7 +94,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
 
   protected:
 
-    //! Array storing the values of the geometrical weights, [freq,ant,sky]
+    //! [freq,ant,sky] Array storing the values of the geometrical weights
     casa::Cube<DComplex> weights_p;
     //! Bufferthe values of the geometrical weights?
     bool bufferWeights_p;
@@ -112,17 +112,16 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \brief Argumented constructor
       
       \param antPositions  -- [nofAntennas,3] Antenna positions for which the
-                              delay is computed, \f$ (x,y,z) \f$
+             delay is computed, \f$ (x,y,z) \f$
       \param skyPositions  -- [nofSkyPositions,3] Positions in the sky towards
-                              which to point, given in the same reference frame
-			      as the antenna positions, \f$ (x,y,z) \f$
+             which to point, given in the same reference frame as the antenna
+	     positions, \f$ (x,y,z) \f$
       \param frequencies   -- Frequencies for which the geometrical delays are
-                              converted into phases
+             converted into phases
       \param bufferDelays  -- Buffer the values for the geometrical delay? If set
-                              <i>yes</i> the delays will be computed from the 
-			      provided antenna and sky positions and afterwards
-			      kept in memory; if set <i>no</i> only the input 
-			      parameters are stored an no further action is taken.
+             <i>yes</i> the delays will be computed from the provided antenna and
+	     sky positions and afterwards kept in memory; if set <i>no</i> only
+	     the input parameters are stored an no further action is taken.
       \param bufferPhases  -- Buffer the values of the phases?
       \param bufferWeights -- Buffer the values of the geometrical weights?
     */
@@ -138,13 +137,13 @@ namespace CR { // NAMESPACE CR -- BEGIN
       
       \param antPositions -- [nofAntennas,3] Antenna positions for which the
              delay is computed, given in Cartesian coordinates \f$ (x,y,z) \f$
-      \param antCoordType -- CR::CoordinateType of the antenna position
+      \param antCoordType -- CR::CoordinateTypes::Type of the antenna position
              coordinates; if the coordinates are non-cartesian and thereby
 	     include anglular components, the values must be provided in radians.
       \param skyPositions -- [nofSkyPositions,3] Positions in the sky towards
              which to point, given in the same reference frame as the antenna
 	     positions, \f$ (x,y,z) \f$
-      \param skyCoordType -- CR::CoordinateType of the sky position coordinates;
+      \param skyCoordType -- CR::CoordinateTypes::Type of the sky position coordinates;
              if the coordinates are non-cartesian and thereby include anglular
 	     components, the values must be provided in radians.
       \param frequencies  -- Frequencies for which the geometrical delays are
@@ -157,9 +156,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \param bufferWeights -- Buffer the values of the geometrical weights?
     */
     GeometricalWeight (casa::Matrix<double> const &antPositions,
-		       CR::CoordinateType const &antCoordType,
+		       CR::CoordinateTypes::Type const &antCoordType,
 		       casa::Matrix<double> const &skyPositions,
-		       CR::CoordinateType const &skyCoordType,
+		       CR::CoordinateTypes::Type const &skyCoordType,
 		       casa::Vector<double> const &frequencies,
 		       bool const &bufferDelays=false,
 		       bool const &bufferPhases=false,
@@ -220,9 +219,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \brief Are the values for the geometrical weights buffered?
 
       \return bufferWeights -- Returns <i>true</i> if the values for the weights
-                               are buffered.
+              are buffered.
     */
-    inline bool bufferWeights () {
+    inline bool bufferWeights () const {
       return bufferWeights_p;
     }
 
@@ -280,6 +279,34 @@ namespace CR { // NAMESPACE CR -- BEGIN
     void summary (std::ostream &os);
     
     // ------------------------------------------------------------------ Methods
+    
+    /*!
+      \brief Get a geometrical weight
+
+      \param nFreq    -- Index for selection from the set of frequencies.
+      \param nAntenna -- Index for selection from the set of antenna positions.
+      \param nSky     -- Index for selection from the set of sky positions.
+
+      \return weight -- The geometrical weight for a given combination of antenna,
+              sky position and frequency.
+     */
+    DComplex weight (int const &nFreq,
+		     int const &nAntenna,
+		     int const &nSky);
+    
+    /*!
+      \brief Get a geometrical weights
+
+      \param frequency   -- Frequency value, [Hz]
+      \param antPosition -- Antenna position.
+      \param skyPosition -- Position on the sky.
+
+      \return weight -- The geometrical weight for a given combination of antenna,
+              sky position and frequency.
+    */
+    DComplex weight (double const &frequency,
+		     Vector<double> const &antPosition,
+		     Vector<double> const &skyPosition);
     
     /*
       \brief Get the shape of the array storing the geometrical weights

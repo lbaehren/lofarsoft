@@ -181,7 +181,7 @@ namespace CR { // Namespace CR -- begin
       \return gain --
     */
     casa::DComplex antennaGain (casa::Vector<double> const &position,
-				CR::CoordinateType const &antCoordType,
+				CR::CoordinateTypes::Type const &antCoordType,
 				double const &frequency);
     
   private:

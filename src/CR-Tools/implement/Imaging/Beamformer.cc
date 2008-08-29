@@ -82,9 +82,9 @@ namespace CR { // Namespace CR -- begin
   // ----------------------------------------------------------------- Beamformer
   
   Beamformer::Beamformer (casa::Matrix<double> const &antPositions,
-			  CR::CoordinateType const &antCoordType,
+			  CR::CoordinateTypes::Type const &antCoordType,
 			  casa::Matrix<double> const &skyPositions,
-			  CR::CoordinateType const &skyCoordType,
+			  CR::CoordinateTypes::Type const &skyCoordType,
 			  casa::Vector<double> const &frequencies,
 			  bool const &bufferDelays,
 			  bool const &bufferPhases,

@@ -167,22 +167,21 @@ int test_GeometricalPhase ()
     uint nofAntennas (4);
     uint nofSkyPositions (5);
     bool antennaIndexFirst (true);
-    CR::CoordinateType antCoordType (CR::Spherical);
-    CR::CoordinateType skyCoordType (CR::Spherical);
+    CR::CoordinateTypes coordType (CR::CoordinateTypes::Spherical);
     std::cout << "-- getting antenna positions ..." << std::endl;
     casa::Matrix<double> antennaPositions = get_antennaPositions(nofAntennas,
 								 antennaIndexFirst,
-								 antCoordType);
+								 coordType.type());
     std::cout << "-- getting sky positions ..." << std::endl;
     casa::Matrix<double> skyPositions = get_skyPositions(nofSkyPositions,
-							 skyCoordType);
+							 coordType.type());
     std::cout << "-- getting frequency values ..." << std::endl;
     casa::Vector<double> frequencies = get_frequencies (20);
     std::cout << "-- creating GeometricalPhase object ..." << std::endl;
     GeometricalPhase phase (antennaPositions,
-			    antCoordType,
+			    coordType.type(),
 			    skyPositions,
-			    skyCoordType,
+			    coordType.type(),
 			    frequencies);
     // summary of object's internal settings
     phase.summary();
@@ -199,22 +198,22 @@ int test_GeometricalPhase ()
     uint nofAntennas (4);
     uint nofSkyPositions (5);
     bool antennaIndexFirst (true);
-    CR::CoordinateType antCoordType (CR::Spherical);
-    CR::CoordinateType skyCoordType (CR::Spherical);
+    CR::CoordinateTypes antCoordType (CR::CoordinateTypes::Spherical);
+    CR::CoordinateTypes skyCoordType (CR::CoordinateTypes::Spherical);
     std::cout << "-- getting antenna positions ..." << std::endl;
     casa::Matrix<double> antennaPositions = get_antennaPositions(nofAntennas,
 								 antennaIndexFirst,
-								 antCoordType);
+								 antCoordType.type());
     std::cout << "-- getting sky positions ..." << std::endl;
     casa::Matrix<double> skyPositions = get_skyPositions(nofSkyPositions,
-							 skyCoordType);
+							 skyCoordType.type());
     std::cout << "-- getting frequency values ..." << std::endl;
     casa::Vector<double> frequencies = get_frequencies (20);
     std::cout << "-- creating GeometricalPhase object ..." << std::endl;
     GeometricalDelay delay (antennaPositions,
-			    antCoordType,
+			    antCoordType.type(),
 			    skyPositions,
-			    skyCoordType);
+			    skyCoordType.type());
     delay.summary();
     std::cout << "-- creating GeometricalPhase object ..." << std::endl;
     GeometricalPhase phase (delay,
@@ -228,9 +227,9 @@ int test_GeometricalPhase ()
     /* Create a second GeometricalPhase object to compare its internal settings
        with the one of the created before. */
     GeometricalPhase phase2 (antennaPositions,
-			     antCoordType,
+			     antCoordType.type(),
 			     skyPositions,
-			     skyCoordType,
+			     skyCoordType.type(),
 			     frequencies);
     
   } catch (std::string message) {
@@ -276,13 +275,13 @@ int test_phaseComputation ()
     uint nofSkyPositions (10);
     
     /* Antenna positions */
-    CR::CoordinateType antCoordType (CR::Cartesian);
+    CR::CoordinateTypes antCoordType (CR::CoordinateTypes::Cartesian);
     casa::Matrix<double> antennaPositions (nofAntennas,3,0.0);
     antennaPositions(0,0) = 100.0;
     antennaPositions(1,0) = -100.0;
     
     /* Sky positions */
-    CR::CoordinateType skyCoordType (CR::Spherical);
+    CR::CoordinateTypes skyCoordType (CR::CoordinateTypes::Spherical);
     casa::Matrix<double> skyPositions (nofSkyPositions,3);
     for (uint n(0); n<nofSkyPositions; n++) {
       skyPositions(n,0) = n*incr;
@@ -294,9 +293,9 @@ int test_phaseComputation ()
 
     std::cout << "-- creating GeometricalPhase object ..." << std::endl;
     GeometricalPhase phase (antennaPositions,
-			    antCoordType,
+			    antCoordType.type(),
 			    skyPositions,
-			    skyCoordType,
+			    skyCoordType.type(),
 			    frequencies);
     // summary of object's internal settings
     phase.summary();

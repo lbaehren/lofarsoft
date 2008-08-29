@@ -63,9 +63,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
 				      bool const &bufferDelays,
 				      bool const &bufferPhases)
     : GeometricalDelay (antPositions,
-			CR::Cartesian,
+			CR::CoordinateTypes::Cartesian,
 			skyPositions,
-			CR::Cartesian,
+			CR::CoordinateTypes::Cartesian,
 			bufferDelays,
 			true)
   {
@@ -76,9 +76,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
   // ----------------------------------------------------------- GeometricalPhase
 
   GeometricalPhase::GeometricalPhase (casa::Matrix<double> const &antPositions,
-				      CR::CoordinateType const &antCoordType,
+				      CR::CoordinateTypes::Type const &antCoordType,
 				      casa::Matrix<double> const &skyPositions,
-				      CR::CoordinateType const &skyCoordType,
+				      CR::CoordinateTypes::Type const &skyCoordType,
 				      casa::Vector<double> const &frequencies,
 				      bool const &bufferDelays,
 				      bool const &bufferPhases)
@@ -187,6 +187,24 @@ namespace CR { // NAMESPACE CR -- BEGIN
   //
   // ============================================================================
   
+  // ---------------------------------------------------------------------- phase
+  
+  double GeometricalPhase::phase (int const &nFreq,
+				  int const &nAntenna,
+				  int const &nSky)
+  {
+    return CR::_2pi*frequencies_p(nFreq)*GeometricalDelay::delay(nAntenna,nSky);
+  }
+  
+  // ---------------------------------------------------------------------- phase
+  
+  double GeometricalPhase::phase (double const &frequency,
+				  Vector<double> const &antPosition,
+				  Vector<double> const &skyPosition)
+  {
+    return CR::_2pi*frequency*GeometricalDelay::delay(antPosition,skyPosition);
+  }
+  
   // --------------------------------------------------------------------- phases
 
   casa::Cube<double> GeometricalPhase::phases ()
@@ -221,7 +239,7 @@ namespace CR { // NAMESPACE CR -- BEGIN
     casa::Matrix<double> delays = GeometricalDelay::delays();
     casa::IPosition shape       = delays.shape();
     
-    // array with the computed phases, [antenna,skyPosition,frequency]
+    // array with the computed phases, [freq,ant,sky]
     casa::Cube<double> phases (nofChannels,
 			       shape(0),
 			       shape(1));
