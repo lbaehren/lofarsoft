@@ -218,9 +218,9 @@ namespace CR { // Namespace CR -- begin
       Matrix<DComplex> phaseGradients;
       CR::GeometricalWeight geomWeight;
       geomWeight.showProgress(verbose); 
-      geomWeight.setAntennaPositions(tmpAntPos,True,CR::CoordinateTypes::NorthEastHeight); 
+      geomWeight.setAntennaPositions(tmpAntPos,True,CR::CoordinateType::NorthEastHeight); 
       geomWeight.setSkyPosition(DirParams_p.asDouble("Az"),DirParams_p.asDouble("El"),
-				DirParams_p.asDouble("Curvature"), CR::CoordinateTypes::AzElRadius, True);
+				DirParams_p.asDouble("Curvature"), CR::CoordinateType::AzElRadius, True);
       geomWeight.setFrequencies(dr->frequencyValues());
 #ifdef DEBUGGING_MESSAGES      
       geomWeight.summary();

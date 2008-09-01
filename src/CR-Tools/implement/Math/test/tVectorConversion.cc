@@ -164,11 +164,11 @@ int test_vectorConversion ()
     status = CR::convertVector (xTarget,
 				yTarget,
 				zTarget,
-				CR::CoordinateTypes::Cylindrical,
+				CR::CoordinateType::Cylindrical,
 				xSource,
 				ySource,
 				zSource,
-				CR::CoordinateTypes::Cartesian,
+				CR::CoordinateType::Cartesian,
 				true);
     show_conversion(xSource,ySource,zSource,xTarget,yTarget,zTarget);
     
@@ -176,11 +176,11 @@ int test_vectorConversion ()
     status = CR::convertVector (xTarget,
 				yTarget,
 				zTarget,
-				CR::CoordinateTypes::Spherical,
+				CR::CoordinateType::Spherical,
 				xSource,
 				ySource,
 				zSource,
-				CR::CoordinateTypes::Cartesian,
+				CR::CoordinateType::Cartesian,
 				true);
     show_conversion(xSource,ySource,zSource,xTarget,yTarget,zTarget);
     
@@ -199,11 +199,11 @@ int test_vectorConversion ()
     status = CR::convertVector (xTarget,
 				yTarget,
 				zTarget,
-				CR::CoordinateTypes::Cartesian,
+				CR::CoordinateType::Cartesian,
 				xSource,
 				ySource,
 				zSource,
-				CR::CoordinateTypes::Cylindrical,
+				CR::CoordinateType::Cylindrical,
 				true);
     show_conversion(xSource,ySource,zSource,xTarget,yTarget,zTarget);
   } catch (std::string message) {
@@ -417,10 +417,10 @@ int test_Cartesian2Other ()
   \brief Test conversion from cylindrical to other coordinates
 
   This will run a number of very basic tests for the following routines:
-  - CR::CoordinateTypes::Cylindrical2Cartesian
-  - CR::CoordinateTypes::Cylindrical2Spherical
-  - CR::CoordinateTypes::Cylindrical2AzElHeight
-  - CR::CoordinateTypes::Cylindrical2AzElRadius
+  - CR::Cylindrical2Cartesian
+  - CR::Cylindrical2Spherical
+  - CR::Cylindrical2AzElHeight
+  - CR::Cylindrical2AzElRadius
 
   \return nofFailedTests -- Number of failed tests within this function
 */

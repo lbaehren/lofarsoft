@@ -8,9 +8,11 @@
 set (tests
   tAxisCoordinates
   tAxisIterator
+  tCoordinateType
   tCoordinateGrid
   tGridCoordinate
   tPolarCoordinate
+  tSpatialCoordinate
   tTimeFreq
   )
 

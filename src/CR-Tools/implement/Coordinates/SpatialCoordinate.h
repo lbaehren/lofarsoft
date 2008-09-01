@@ -21,8 +21,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef SPATIALCOORDINATE_H
-#define SPATIALCOORDINATE_H
+#ifndef CR_SPATIALCOORDINATE_H
+#define CR_SPATIALCOORDINATE_H
 
 #include <crtools.h>
 
@@ -31,12 +31,22 @@
 #include <string>
 #include <vector>
 
+#include <casa/Arrays/Matrix.h>
+#include <casa/Arrays/Vector.h>
+#include <casa/BasicSL/String.h>
 #include <coordinates/Coordinates/Coordinate.h>
 #include <coordinates/Coordinates/DirectionCoordinate.h>
 #include <coordinates/Coordinates/LinearCoordinate.h>
 #include <coordinates/Coordinates/TabularCoordinate.h>
 
-#include <Coordinates/CoordinateTypes.h>
+#include <Coordinates/CoordinateType.h>
+
+using casa::Coordinate;
+using casa::DirectionCoordinate;
+using casa::LinearCoordinate;
+using casa::Matrix;
+using casa::String;
+using casa::Vector;
 
 namespace CR { // Namespace CR -- begin
   
@@ -110,6 +120,21 @@ namespace CR { // Namespace CR -- begin
 	<td>Spherical coordinates</td>
       </tr>
     </table>
+
+    Given the fact that we are potentially working with omre but a single object
+    of type casa::Coordinate we need to wrap the calls to function handling
+    either allowing access to internal parameters or carrying out coordinate
+    conversions.
+    <ul>
+      <li>SpatialCoordinate::worldAxisNames
+      <li>SpatialCoordinate::worldAxisUnits
+      <li>SpatialCoordinate::referencePixel
+      <li>SpatialCoordinate::referenceValue
+      <li>SpatialCoordinate::linearTransform
+      <li>SpatialCoordinate::increment
+      <li>SpatialCoordinate::toWorld
+      <li>SpatialCoordinate::toPixel
+    </ul>
     
     <h3>Example(s)</h3>
     
@@ -117,9 +142,14 @@ namespace CR { // Namespace CR -- begin
   class SpatialCoordinate {
 
     /*! Type of spatial coordinate */
-    CoordinateTypes::Type type_p;
+    CoordinateType::Types type_p;
+    /*! The number of coordinate axes */
+    unsigned int nofAxes_p;
+    /*! The number of coordinate objects */
+    unsigned int nofCoordinates_p;
     /*! Coordinate objects forming the spatial coordinate */
-    std::vector<casa::Coordinate> coord_p;
+    DirectionCoordinate directionCoord_p;
+    LinearCoordinate linearCoord_p;;
     
   public:
     
@@ -128,23 +158,43 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Default constructor
     */
-    SpatialCoordinate ();
+    SpatialCoordinate () {
+      init (CoordinateType::DirectionRadius);
+    }
     
     /*!
       \brief Argumented constructor
+
+      \param coordType -- Type of coordinate for which to create an object.
+    */
+    SpatialCoordinate (CoordinateType::Types const &coordType) {
+      init (coordType);
+    }
+    
+    /*!
+      \brief Argumented constructor for coordinate of type DirectionRadius
       
-      \param direction -- 
-      \param linear    -- 
+      \param direction -- <tt>casa::DirectionCoordinate</tt> object for the
+             angular components of the position
+      \param linear    -- <tt>casa::LinearCoordinate</tt> object for the radial
+             component of the position.
     */
     SpatialCoordinate (casa::DirectionCoordinate const &direction,
 		       casa::LinearCoordinate const &linear);
     
     /*!
       \brief Argumented constructor
+
+      If internal checking yields that the provided coordinate type
+      (<tt>coordType</tt>) is not consistent with the usage of a
+      LinearCoordinate object, only that second parameter is used in the
+      object construction.
       
-      \param linear    -- 
+      \param linear    -- <tt>casa::LinearCoordinate</tt> object
+      \param coordType -- Type of coordinate for which to create an object.
     */
-    SpatialCoordinate (casa::LinearCoordinate const &linear);
+    SpatialCoordinate (casa::LinearCoordinate const &linear,
+		       CoordinateType::Types const &coordType);
     
     /*!
       \brief Copy constructor
@@ -197,9 +247,83 @@ namespace CR { // Namespace CR -- begin
 
     // ------------------------------------------------------------------ Methods
     
-    inline int nofCoordinates () const {
-      return coord_p.size();
+    /*!
+      \brief Get the number of coordinate axes
+      
+      \return nofAxes -- The number of coordinate axes.
+    */
+    inline unsigned int nofAxes () const {
+      return nofAxes_p;
     }
+ 
+    /*!
+      \brief Get the number of casa::Coordinate object to make of this coordinate
+
+      \return nofCoordinates -- The number of casa::Coordinate object to make of
+              this coordinate
+     */
+    inline unsigned int nofCoordinates () const {
+      return nofCoordinates_p;
+    }
+
+    /*!
+      \brief Get the names of the world axes
+
+      \return names -- The names of the world axes, as retrieved through the
+              <tt>casa::Coordinate::worldAxisNames()<tt> function.
+    */
+    Vector<String> worldAxisNames();
+    /*!
+      \brief Get the value of the reference pixel
+
+      \return refPixel -- The value of the reference pixel, as retrieved through
+              the <tt>casa::Coordinate::referencePixel()<tt> function.
+    */
+    Vector<double> referencePixel();
+    /*!
+      \brief Get the matrix for the linear transformation
+
+      \return Xform -- The matrix of the linear transformation, as retrieved
+              through the <tt>casa::Coordinate::linearTransform()<tt> function.
+     */
+    Matrix<double> linearTransform();
+    /*!
+      \brief Get the value of the coordinate increment
+
+      \return refPixel -- The value of the coordinate increment, as retrieved
+              through the <tt>casa::Coordinate::increment()<tt> function.
+    */
+    Vector<double> increment();
+    /*!
+      \brief Get the reference value
+
+      \return refPixel -- The reference value, as retrieved through the
+              <tt>casa::Coordinate::referenceValue()<tt> function.
+    */
+    Vector<double> referenceValue();
+    /*!
+      \brief Get the units of the world axes
+
+      \return units -- The units of the world axes, as retrieved through the
+              <tt>casa::Coordinate::worldAxisUnits()<tt> function.
+    */
+    Vector<String> worldAxisUnits();
+    /*!
+      \brief Conversion from pixel to world coordinates
+
+      \retval world -- 
+      \param pixel  -- 
+    */
+    void toWorld (Vector<double> &world,
+		  const Vector<double> &pixel);
+    /*!
+      \brief Conversion from world to pixel coordinates
+
+      \retval pixel -- 
+      \param world  -- 
+    */
+    void toPixel (Vector<double> &pixel,
+		  const Vector<double> &world);
     
   private:
     
@@ -212,10 +336,17 @@ namespace CR { // Namespace CR -- begin
       \brief Unconditional deletion 
     */
     void destroy(void);
+
+    /*!
+      \brief Initialize the object for a given coordinate type
+
+      \param coordType -- Type of coordinate for which to create an object.
+    */
+    void init (CoordinateType::Types const &coordType);
     
   };
   
 } // Namespace CR -- end
 
-#endif /* SPATIALCOORDINATE_H */
+#endif /* CR_SPATIALCOORDINATE_H */
   

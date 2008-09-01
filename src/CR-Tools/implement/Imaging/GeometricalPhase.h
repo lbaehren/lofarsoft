@@ -148,13 +148,13 @@ namespace CR { // NAMESPACE CR -- BEGIN
       
       \param antPositions -- [nofAntennas,3] Antenna positions for which the
              delay is computed, given in Cartesian coordinates \f$ (x,y,z) \f$
-      \param antCoordType -- CR::CoordinateTypes::Type of the antenna position
+      \param antCoordType -- CR::CoordinateType::Types of the antenna position
              coordinates; if the coordinates are non-cartesian and thereby
 	     include anglular components, the values must be provided in radians.
       \param skyPositions -- [nofSkyPositions,3] Positions in the sky towards
              which to point, given in the same reference frame as the antenna
 	     positions, \f$ (x,y,z) \f$
-      \param skyCoordType -- CR::CoordinateTypes::Type of the sky position coordinates;
+      \param skyCoordType -- CR::CoordinateType::Types of the sky position coordinates;
              if the coordinates are non-cartesian and thereby include anglular
 	     components, the values must be provided in radians.
       \param frequencies  -- Frequencies for which the geometrical delays are
@@ -166,9 +166,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
       \param bufferPhases -- Buffer the values of the phases?
     */
     GeometricalPhase (casa::Matrix<double> const &antPositions,
-		      CR::CoordinateTypes::Type const &antCoordType,
+		      CR::CoordinateType::Types const &antCoordType,
 		      casa::Matrix<double> const &skyPositions,
-		      CR::CoordinateTypes::Type const &skyCoordType,
+		      CR::CoordinateType::Types const &skyCoordType,
 		      casa::Vector<double> const &frequencies,
 		      bool const &bufferDelays=false,
 		      bool const &bufferPhases=false);

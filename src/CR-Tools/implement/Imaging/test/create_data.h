@@ -23,7 +23,7 @@
 
 #include <casa/BasicMath/Random.h>
 
-#include <Coordinates/CoordinateTypes.h>
+#include <Coordinates/CoordinateType.h>
 #include <Imaging/SkymapCoordinates.h>
 
 using casa::DComplex;
@@ -62,7 +62,7 @@ using CR::TimeFreq;
          If <tt>true</tt>, then the returned array is of shape [nofAntennas,3],
 	 otherwise -- if <tt>antennaIndexFirst=false</tt> -- the returned array
 	 if of shape [3,nofAntennas].
-  \param coordType -- CR::CoordinateTypes::Type as which the antenna positions are
+  \param coordType -- CR::CoordinateType::Types as which the antenna positions are
          returned. If a coordinate type other but Cartesian is chosen, the angular
 	 components will be given in radian (and not in degrees).
 
@@ -71,14 +71,14 @@ using CR::TimeFreq;
 Matrix<double>
 get_antennaPositions (uint const &nofAntennas=4,
 		      bool const &antennaIndexFirst=true,
-		      CR::CoordinateTypes::Type const &coordType=CR::CoordinateTypes::Cartesian)
+		      CR::CoordinateType::Types const &coordType=CR::CoordinateType::Cartesian)
 {
   uint nofAxes (3);
   double incr (100);
   Matrix<double> antPositions (nofAntennas,nofAxes,0.0);
 
   switch (coordType) {
-  case CR::CoordinateTypes::Cartesian:
+  case CR::CoordinateType::Cartesian:
     if (nofAntennas == 4) {
       // [100,0,0]
       antPositions(0,0) = incr;
@@ -94,7 +94,7 @@ get_antennaPositions (uint const &nofAntennas=4,
       }
     }
     break;
-  case CR::CoordinateTypes::Spherical:
+  case CR::CoordinateType::Spherical:
     // Set radial and zenith angle component
     antPositions.column(0) = incr;
     antPositions.column(2) = 0.0;
@@ -104,20 +104,22 @@ get_antennaPositions (uint const &nofAntennas=4,
       antPositions(n,1) = n*incr;
     }
     break; 
-  case CR::CoordinateTypes::AzElHeight:
-  case CR::CoordinateTypes::AzElRadius:
-  case CR::CoordinateTypes::Cylindrical:
-  case CR::CoordinateTypes::NorthEastHeight:
+  case CR::CoordinateType::Direction:
+  case CR::CoordinateType::DirectionRadius:
+  case CR::CoordinateType::AzElHeight:
+  case CR::CoordinateType::AzElRadius:
+  case CR::CoordinateType::Cylindrical:
+  case CR::CoordinateType::NorthEastHeight:
     std::cout << "-- No special settings for this coordinates." << std::endl;
     break;
- }
+  }
   
   if (antennaIndexFirst) {
     return antPositions;
   } else {
     return transpose(antPositions);
   }
-
+  
 }
 
 // -----------------------------------------------------------------------------
@@ -126,13 +128,13 @@ get_antennaPositions (uint const &nofAntennas=4,
   \brief Create some sky/pointing positions for the Beamformer
 
   \param nofPositions -- Number of sky positions for which to generate coordinates
-  \param coordType    -- CR::CoordinateTypes::Type as which the antenna positions are
+  \param coordType    -- CR::CoordinateType::Types as which the antenna positions are
          returned.
 
   \return positions -- [position,coordinate] Sky positions, \f$ \vec\rho \f$
 */
 Matrix<double> get_skyPositions (uint const &nofPositions=2,
-				 CR::CoordinateTypes::Type const &coordType=CR::CoordinateTypes::Cartesian)
+				 CR::CoordinateType::Types const &coordType=CR::CoordinateType::Cartesian)
 {
   uint n (0);
   uint nofAxes (3);
@@ -140,21 +142,23 @@ Matrix<double> get_skyPositions (uint const &nofPositions=2,
   Matrix<double> positions (nofPositions,nofAxes,0.0);
 
   switch (coordType) {
-  case CR::CoordinateTypes::Cartesian:
+  case CR::CoordinateType::Cartesian:
     for (n=0; n<nofPositions; n++) {
       positions(n,0) = positions(n,1) = positions(n,2) = n*incr;
     }
     break;
-  case CR::CoordinateTypes::Spherical:
+  case CR::CoordinateType::Spherical:
     positions.column(1) = positions.column(2) = CR::deg2rad(45);
     for (n=0; n<nofPositions; n++) {
       positions(n,0) = n*incr;
     }
     break;
-  case CR::CoordinateTypes::AzElHeight:
-  case CR::CoordinateTypes::AzElRadius:
-  case CR::CoordinateTypes::Cylindrical:
-  case CR::CoordinateTypes::NorthEastHeight:
+  case CR::CoordinateType::Direction:
+  case CR::CoordinateType::DirectionRadius:
+  case CR::CoordinateType::AzElHeight:
+  case CR::CoordinateType::AzElRadius:
+  case CR::CoordinateType::Cylindrical:
+  case CR::CoordinateType::NorthEastHeight:
     std::cout << "-- No special settings for this coordinates." << std::endl;
     break;
   }

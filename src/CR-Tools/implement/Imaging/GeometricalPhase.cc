@@ -63,9 +63,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
 				      bool const &bufferDelays,
 				      bool const &bufferPhases)
     : GeometricalDelay (antPositions,
-			CR::CoordinateTypes::Cartesian,
+			CR::CoordinateType::Cartesian,
 			skyPositions,
-			CR::CoordinateTypes::Cartesian,
+			CR::CoordinateType::Cartesian,
 			bufferDelays,
 			true)
   {
@@ -76,9 +76,9 @@ namespace CR { // NAMESPACE CR -- BEGIN
   // ----------------------------------------------------------- GeometricalPhase
 
   GeometricalPhase::GeometricalPhase (casa::Matrix<double> const &antPositions,
-				      CR::CoordinateTypes::Type const &antCoordType,
+				      CR::CoordinateType::Types const &antCoordType,
 				      casa::Matrix<double> const &skyPositions,
-				      CR::CoordinateTypes::Type const &skyCoordType,
+				      CR::CoordinateType::Types const &skyCoordType,
 				      casa::Vector<double> const &frequencies,
 				      bool const &bufferDelays,
 				      bool const &bufferPhases)

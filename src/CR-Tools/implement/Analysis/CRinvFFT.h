@@ -36,7 +36,7 @@
 #include <casa/Exceptions/Error.h>
 
 #include <Analysis/SecondStagePipeline.h>
-#include <Coordinates/CoordinateTypes.h>
+#include <Coordinates/CoordinateType.h>
 #include <Calibration/CalTableInterpolater.h>
 #include <Imaging/GeometricalWeight.h>
 

@@ -88,6 +88,14 @@ namespace CR {  // Namespace CR -- begin
     Vector<Double> ppfCoefficients_p;
     //! Size of a block of data
     uint dataBlocksize_p;
+    //! The 10.7 cm flux on previous day (1e-22 W/m^2/Hz )
+    double f107_p;
+    //! The geographic longitude (eastward positive)
+    double longitude_p;
+    //! The geographic latitude
+    double latitude_p;
+    //! The altitude in km
+    double altitude_p;
     
   public:
     
@@ -116,7 +124,7 @@ namespace CR {  // Namespace CR -- begin
       \param n_l_average -- average density at height zl =120 km.
     */
 
-    inverseFFT (const Double& F107,
+    inverseFFT (Double const &F107,
                 const Double& mean_F107,
 		const uint& tableno,
                 const uint& col,
@@ -145,8 +153,93 @@ namespace CR {  // Namespace CR -- begin
     ~inverseFFT ();
     
     // ---------------------------------------------------------------- Operators
-   
 
+    /*!
+      \brief Overloading of the copy operator
+      
+      \param other -- Another inverseFFT object from which to make a copy.
+    */
+    inverseFFT& operator= (inverseFFT const &other); 
+    
+    // --------------------------------------------------------------- Parameters
+    
+    /*!
+      \brief Get the 10.7 cm flux on previous day
+
+      \return f107-- The 10.7 cm flux on previous day (1e-22 W/m^2/Hz )
+    */
+    inline double F107  () const { return f107_p; }
+    /*!
+      \brief Set the 10.7 cm flux on previous day
+
+      \param f107-- The 10.7 cm flux on previous day (1e-22 W/m^2/Hz )
+    */
+    inline void setF107 (double const &f107) { f107_p = f107; }
+    
+    /*!
+      \brief Get the geographic longitude
+
+      \return longitude -- The geographic longitude (eastward positive)
+    */
+    inline double longitude () const { return longitude_p; }
+    /*!
+      \brief Set the geographic longitude
+
+      \param longitude -- The geographic longitude (eastward positive)
+    */
+    inline void setLongitude (double const &longitude) { longitude_p = longitude; }
+
+    /*!
+      \brief Get the geographic latitude
+
+      \return latitude -- The geographic latitude
+    */
+    inline double latitude  () const { return latitude_p; }
+    /*!
+      \brief Set the geographic latitude
+
+      \param latitude -- The geographic latitude
+    */
+    inline void setLatitude  (double const &latitude)  { latitude_p = latitude; }
+
+    /*!
+      \brief Get the altitude
+
+      \return altitude -- height in Km
+    */
+    inline double altitude () const { return altitude_p; };
+    /*!
+      \brief Set the altitude
+
+      \param altitude -- height in Km
+    */
+    inline void setAltitude (double const &altitude) { altitude_p = altitude; };
+    
+    /*!
+      \brief Get the name of the class
+      
+      \return className -- The name of the class, inverseFFT.
+    */
+    std::string className () const {
+      return "inverseFFT";
+    }
+    
+    /*!
+      \brief Provide a summary of the internal status
+    */
+    inline void summary () {
+      summary (std::cout);
+    }
+
+    /*!
+      \brief Provide a summary of the internal status
+
+      \param os -- Output stream to which the summary is written.
+    */
+    void summary (std::ostream &os);    
+
+    // ------------------------------------------------------------------ Methods
+    
     /*!
       \brief derivatives of associated legendre polynomial functions
       
@@ -439,10 +532,10 @@ namespace CR {  // Namespace CR -- begin
     
     
         
-      
-      /*!
-      \brief value of density profile of Hydrogen atom 
-    */			     
+  
+  /*!
+    \brief value of density profile of Hydrogen atom 
+  */			     
   Double Hdensityprofile( const Double& F107,
                           const Double& mean_F107,
                           const Double& t_d,
@@ -452,49 +545,22 @@ namespace CR {  // Namespace CR -- begin
                           const Double& latitude,
                           const Double& longitude,
                           const Double& altitude ) ;
-    
-    
-        
-    
-    
-    
-    /*!
-      \brief Overloading of the copy operator
-      
-      \param other -- Another inverseFFT object from which to make a copy.
-    */
-    inverseFFT& operator= (inverseFFT const &other); 
-    
-    // --------------------------------------------------------------- Parameters
-    
-    /*!
-      \brief Get the name of the class
-      
-      \return className -- The name of the class, inverseFFT.
-    */
-    std::string className () const {
-      return "inverseFFT";
-    }
-    
-    // ------------------------------------------------------------------ Methods
-    
-    
-    
+  
   private:
-    
-    /*!
-      \brief Unconditional copying
-    */
-    void copy (inverseFFT const &other);
-    
-    /*!
-      \brief Unconditional deletion 
-    */
-    void destroy(void);
-    
+  
+  /*!
+    \brief Unconditional copying
+  */
+  void copy (inverseFFT const &other);
+  
+  /*!
+    \brief Unconditional deletion 
+  */
+  void destroy(void);
+  
   };
-
+  
 }  // Namespace CR -- end
-  
+
 #endif /* INVERSEFFT_H */
-  
+

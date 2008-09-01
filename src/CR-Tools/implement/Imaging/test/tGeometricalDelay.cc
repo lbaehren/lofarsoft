@@ -178,9 +178,9 @@ int test_GeometricalDelay ()
     casa::Matrix<double> skyPositions = get_skyPositions();
     cout << "-- Antenna positions in cartesian coordinates ..." << std::endl;
     GeometricalDelay delay1 (antPositions,
-			     CR::CoordinateTypes::Cartesian,
+			     CR::CoordinateType::Cartesian,
 			     skyPositions,
-			     CR::CoordinateTypes::Cartesian);
+			     CR::CoordinateType::Cartesian);
     cout << "-- Antenna positions in cylindrical coordinates ..." << std::endl;
     antPositions = 0.0;
     antPositions.column(0) = 100.0;
@@ -188,9 +188,9 @@ int test_GeometricalDelay ()
     antPositions(2,1) = CR::deg2rad(180);
     antPositions(3,1) = CR::deg2rad(270);
     GeometricalDelay delay2 (antPositions,
-			     CR::CoordinateTypes::Cylindrical,
+			     CR::CoordinateType::Cylindrical,
 			     skyPositions,
-			     CR::CoordinateTypes::Cartesian);
+			     CR::CoordinateType::Cartesian);
     cout << "-- Antenna positions in spherical coordinates ..." << std::endl;
     antPositions = 0.0;
     antPositions.column(0) = 100.0;
@@ -199,9 +199,9 @@ int test_GeometricalDelay ()
     antPositions(3,1) = CR::deg2rad(270);
     antPositions.column(2) = CR::deg2rad(90);
     GeometricalDelay delay3 (antPositions,
-			     CR::CoordinateTypes::Spherical,
+			     CR::CoordinateType::Spherical,
 			     skyPositions,
-			     CR::CoordinateTypes::Cartesian);
+			     CR::CoordinateType::Cartesian);
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -220,9 +220,9 @@ int test_GeometricalDelay ()
     casa::Matrix<double> skyPositions = get_skyPositions();
     // create new object
     GeometricalDelay delay (antPositions,
-			    CR::CoordinateTypes::Cartesian,
+			    CR::CoordinateType::Cartesian,
 			    skyPositions,
-			    CR::CoordinateTypes::Cartesian,
+			    CR::CoordinateType::Cartesian,
 			    bufferDelays,
 			    antennaIndexFirst);    
     // provide a summary
@@ -313,7 +313,7 @@ int test_antennaPositions ()
     bufferDelays      = false;
     status = delay.setAntennaPositions (pos,
 					antennaIndexFirst,
-					CR::CoordinateTypes::Cylindrical,
+					CR::CoordinateType::Cylindrical,
 					true,
 					bufferDelays);
     // summary after changes
@@ -379,7 +379,7 @@ int test_skyPositions ()
     }
     // set new sky positions
     status = delay.setSkyPositions (pos,
-				    CR::CoordinateTypes::Cylindrical,
+				    CR::CoordinateType::Cylindrical,
 				    true,
 				    false);
     // summary after changes
@@ -408,7 +408,7 @@ int test_skyPositions ()
     cout << pos << endl;
     // set new antenna positions
     status = delay.setSkyPositions (pos,
-				    CR::CoordinateTypes::AzElRadius,
+				    CR::CoordinateType::AzElRadius,
 				    true,
 				    false);
     // summary after changes
@@ -431,7 +431,7 @@ int test_skyPositions ()
     status  = delay.setSkyPositions(xValues,
 				    yValues,
 				    zValues,
-				    CR::CoordinateTypes::Cartesian);
+				    CR::CoordinateType::Cartesian);
     
   } catch (std::string message) {
     std::cerr << message << endl;
@@ -453,7 +453,7 @@ int test_skyPositions ()
     status  = delay.setSkyPositions(xyValues,
 				    zValues,
 				    axisOrder,
-				    CR::CoordinateTypes::Cartesian);
+				    CR::CoordinateType::Cartesian);
     
     if (status) {
       cout << "-- Axis ordering = " << axisOrder << endl;
@@ -469,7 +469,7 @@ int test_skyPositions ()
     status  = delay.setSkyPositions(xyValues,
 				    zValues,
 				    axisOrder,
-				    CR::CoordinateTypes::Cartesian);
+				    CR::CoordinateType::Cartesian);
     
     if (status) {
       cout << "-- Axis ordering = " << axisOrder << endl;
@@ -485,7 +485,7 @@ int test_skyPositions ()
     status  = delay.setSkyPositions(xyValues,
 				    zValues,
 				    axisOrder,
-				    CR::CoordinateTypes::Cartesian);
+				    CR::CoordinateType::Cartesian);
     
     if (status) {
       cout << "-- Axis ordering = " << axisOrder << endl;
@@ -533,9 +533,9 @@ int test_delayComputation ()
     
     // create GeometricalDelay object
     GeometricalDelay delay (antPositions,
-			    CR::CoordinateTypes::Cartesian,
+			    CR::CoordinateType::Cartesian,
 			    skyPositions,
-			    CR::CoordinateTypes::Spherical);
+			    CR::CoordinateType::Spherical);
     delay.summary();
 
     /* Set geometry to near-field */

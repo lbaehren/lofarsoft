@@ -167,7 +167,7 @@ int test_GeometricalPhase ()
     uint nofAntennas (4);
     uint nofSkyPositions (5);
     bool antennaIndexFirst (true);
-    CR::CoordinateTypes coordType (CR::CoordinateTypes::Spherical);
+    CR::CoordinateType coordType (CR::CoordinateType::Spherical);
     std::cout << "-- getting antenna positions ..." << std::endl;
     casa::Matrix<double> antennaPositions = get_antennaPositions(nofAntennas,
 								 antennaIndexFirst,
@@ -198,8 +198,8 @@ int test_GeometricalPhase ()
     uint nofAntennas (4);
     uint nofSkyPositions (5);
     bool antennaIndexFirst (true);
-    CR::CoordinateTypes antCoordType (CR::CoordinateTypes::Spherical);
-    CR::CoordinateTypes skyCoordType (CR::CoordinateTypes::Spherical);
+    CR::CoordinateType antCoordType (CR::CoordinateType::Spherical);
+    CR::CoordinateType skyCoordType (CR::CoordinateType::Spherical);
     std::cout << "-- getting antenna positions ..." << std::endl;
     casa::Matrix<double> antennaPositions = get_antennaPositions(nofAntennas,
 								 antennaIndexFirst,
@@ -275,13 +275,13 @@ int test_phaseComputation ()
     uint nofSkyPositions (10);
     
     /* Antenna positions */
-    CR::CoordinateTypes antCoordType (CR::CoordinateTypes::Cartesian);
+    CR::CoordinateType antCoordType (CR::CoordinateType::Cartesian);
     casa::Matrix<double> antennaPositions (nofAntennas,3,0.0);
     antennaPositions(0,0) = 100.0;
     antennaPositions(1,0) = -100.0;
     
     /* Sky positions */
-    CR::CoordinateTypes skyCoordType (CR::CoordinateTypes::Spherical);
+    CR::CoordinateType skyCoordType (CR::CoordinateType::Spherical);
     casa::Matrix<double> skyPositions (nofSkyPositions,3);
     for (uint n(0); n<nofSkyPositions; n++) {
       skyPositions(n,0) = n*incr;

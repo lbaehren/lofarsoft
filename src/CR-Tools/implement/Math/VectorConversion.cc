@@ -27,149 +27,134 @@ namespace CR { // Namespace CR -- begin
   bool convertVector (double &xTarget,
 		      double &yTarget,
 		      double &zTarget,
-		      CR::CoordinateTypes::Type const &targetCoordinate,
+		      CR::CoordinateType::Types const &targetCoordinate,
 		      double const &xSource,
 		      double const &ySource,
 		      double const &zSource,
-		      CR::CoordinateTypes::Type const &sourceCoordinate,
+		      CR::CoordinateType::Types const &sourceCoordinate,
 		      bool const &anglesInDegrees)
   {
     bool status (false);
 
     switch (sourceCoordinate) {
-    case CR::CoordinateTypes::AzElHeight:
+    case CR::CoordinateType::AzElHeight:
       // ---------------------------------------------------
       // Conversion: AzEl,Height (Az,El,R) - Other
       switch (targetCoordinate) {
-      case CR::CoordinateTypes::Cartesian:
+      case CR::CoordinateType::Cartesian:
 	// Conversion: AzEl,Height (Az,El,R) - Cartesian (x,y,z)
 	return AzElHeight2Cartesian (xTarget,yTarget,zTarget,
 				     xSource,ySource,zSource,
 				     anglesInDegrees);
 	break;
-      case CR::CoordinateTypes::Spherical:
-	std::cerr << "Conversion not yet implemented!" << std::endl;
-	break;
-      case CR::CoordinateTypes::Cylindrical:
-	std::cerr << "Conversion not yet implemented!" << std::endl;
-	break;
-      case CR::CoordinateTypes::AzElRadius:
-	std::cerr << "Conversion not yet implemented!" << std::endl;
-	break;
-      case CR::CoordinateTypes::NorthEastHeight:
+      default:
 	std::cerr << "Conversion not yet implemented!" << std::endl;
 	break;
       }
       break;
-    case CR::CoordinateTypes::AzElRadius:
+    case CR::CoordinateType::AzElRadius:
       // ---------------------------------------------------
       // Conversion: AzEl,Radius (Az,El,R) - Other
       switch (targetCoordinate) {
-      case CR::CoordinateTypes::Cartesian:
+      case CR::CoordinateType::Cartesian:
 	// Conversion: AzEl,Radius (Az,El,R) - Cartesian (x,y,z)
 	return AzElRadius2Cartesian (xTarget,yTarget,zTarget,
 				     xSource,ySource,zSource,
 				     anglesInDegrees);
 	break;
-      case CR::CoordinateTypes::Spherical:
+      case CR::CoordinateType::Spherical:
 	// Conversion: AzEl,Radius (Az,El,R) - Spherical (r,phi,theta)
 	return AzElRadius2Spherical (xTarget,yTarget,zTarget,
 				     xSource,ySource,zSource,
 				     anglesInDegrees);
 	break;
+      default:
+	std::cerr << "Conversion not yet implemented!" << std::endl;
+	break;
       }
       break;
-    case CR::CoordinateTypes::Cartesian:
+    case CR::CoordinateType::Cartesian:
       // ---------------------------------------------------
       // Conversion: Cartesian (x,y,z) -> Other
       switch (targetCoordinate) {
-      case CR::CoordinateTypes::Cylindrical:
+      case CR::CoordinateType::Cylindrical:
 	// Conversion: Cartesian (x,y,z) -> Cylindrical (rho,phi,z)
 	return Cartesian2Cylindrical (xTarget,yTarget,zTarget,
 				      xSource,ySource,zSource,
 				      anglesInDegrees);
 	break;
-      case CR::CoordinateTypes::Spherical:
+      case CR::CoordinateType::Spherical:
 	// Conversion: Cartesian (x,y,z) -> Spherical (r,phi,theta)
 	return Cartesian2Spherical (xTarget,yTarget,zTarget,
 				    xSource,ySource,zSource,
 				    anglesInDegrees);
 	break;
+      default:
+	std::cerr << "Conversion not yet implemented!" << std::endl;
+	break;
       }
       break;
-    case CR::CoordinateTypes::Cylindrical:
+    case CR::CoordinateType::Cylindrical:
       // ---------------------------------------------------
       // Conversion: Cylindrical (rho,phi,z) -> Other
       switch (targetCoordinate) {
-      case CR::CoordinateTypes::Cartesian:
+      case CR::CoordinateType::Cartesian:
 	// Conversion: Cylindrical (rho,phi,z) -> Cartesian (x,y,z)
 	return Cylindrical2Cartesian (xTarget,yTarget,zTarget,
 				      xSource,ySource,zSource,
 				      anglesInDegrees);
 	break;
-      case CR::CoordinateTypes::Spherical:
+      case CR::CoordinateType::Spherical:
 	// Conversion: Cylindrical (rho,phi,z) -> Spherical (rho,phi,z)
 	return Cylindrical2Spherical (xTarget,yTarget,zTarget,
 				      xSource,ySource,zSource,
 				      anglesInDegrees);
 	break;
+      default:
+	std::cerr << "Conversion not yet implemented!" << std::endl;
+	break;
       }
       break;
-    case CR::CoordinateTypes::Spherical:
+    case CR::CoordinateType::Spherical:
       // ---------------------------------------------------
       // Conversion: Spherical (r,phi,theta) -> Other
       switch (targetCoordinate) {
-      case CR::CoordinateTypes::Cartesian:
+      case CR::CoordinateType::Cartesian:
 	// Conversion: Spherical (r,phi,theta) -> Cartesian (x,y,z)
 	return Spherical2Cartesian (xTarget,yTarget,zTarget,
 				    xSource,ySource,zSource,
 				    anglesInDegrees);
 	break;
-      case CR::CoordinateTypes::Spherical:
+      case CR::CoordinateType::Spherical:
 	std::cerr << "Conversion not yet implemented!" << std::endl;
 	break;
-      case CR::CoordinateTypes::Cylindrical:
+      case CR::CoordinateType::Cylindrical:
 	// Conversion: Spherical (r,phi,theta) -> Spherical (rho,phi,z)
 	return Spherical2Cylindrical (xTarget,yTarget,zTarget,
 				      xSource,ySource,zSource,
 				      anglesInDegrees);
 	break;
-      case CR::CoordinateTypes::AzElHeight:
-	std::cerr << "Conversion not yet implemented!" << std::endl;
-	break;
-      case CR::CoordinateTypes::AzElRadius:
-	std::cerr << "Conversion not yet implemented!" << std::endl;
-	break;
-      case CR::CoordinateTypes::NorthEastHeight:
+      default:
 	std::cerr << "Conversion not yet implemented!" << std::endl;
 	break;
       }
       break;
-    case CR::CoordinateTypes::NorthEastHeight:
+    case CR::CoordinateType::NorthEastHeight:
       // ---------------------------------------------------
       // Conversion: North-East-Height -> Other
       switch (targetCoordinate) {
-      case CR::CoordinateTypes::Cartesian:
+      case CR::CoordinateType::Cartesian:
 	// Conversion: North-East-Height -> Cartesian (x,y,z)
 	return NorthEastHeight2Cartesian (xTarget,yTarget,zTarget,
 					  xSource,ySource,zSource);
 	break;
-      case CR::CoordinateTypes::Spherical:
-	std::cerr << "Conversion not yet implemented!" << std::endl;
-	break;
-      case CR::CoordinateTypes::Cylindrical:
-	std::cerr << "Conversion not yet implemented!" << std::endl;
-	break;
-      case CR::CoordinateTypes::AzElHeight:
-	std::cerr << "Conversion not yet implemented!" << std::endl;
-	break;
-      case CR::CoordinateTypes::AzElRadius:
-	std::cerr << "Conversion not yet implemented!" << std::endl;
-	break;
-      case CR::CoordinateTypes::NorthEastHeight:
+      default:
 	std::cerr << "Conversion not yet implemented!" << std::endl;
 	break;
       }
+      break;
+    default:
+	std::cerr << "Conversion not yet implemented!" << std::endl;
       break;
     }
 
@@ -177,9 +162,9 @@ namespace CR { // Namespace CR -- begin
   }
 
   bool convertVector (vector<double> &target,
-		      CR::CoordinateTypes::Type const &targetCoordinate,
+		      CR::CoordinateType::Types const &targetCoordinate,
 		      vector<double> &source,
-		      CR::CoordinateTypes::Type const &sourceCoordinate,
+		      CR::CoordinateType::Types const &sourceCoordinate,
 		      bool const &anglesInDegrees)
   {
     return convertVector (target[0],
@@ -195,9 +180,9 @@ namespace CR { // Namespace CR -- begin
 
 #ifdef HAVE_CASA
   bool convertVector (casa::Vector<double> &target,
-		      CR::CoordinateTypes::Type const &targetCoordinate,
+		      CR::CoordinateType::Types const &targetCoordinate,
 		      casa::Vector<double> &source,
-		      CR::CoordinateTypes::Type const &sourceCoordinate,
+		      CR::CoordinateType::Types const &sourceCoordinate,
 		      bool const &anglesInDegrees)
   {
     return convertVector (target(0),
@@ -214,9 +199,9 @@ namespace CR { // Namespace CR -- begin
 
 #ifdef HAVE_BLITZ
   bool convertVector (blitz::Array<double,1> &target,
-		      CR::CoordinateTypes::Type const &targetCoordinate,
+		      CR::CoordinateType::Types const &targetCoordinate,
 		      blitz::Array<double,1> &source,
-		      CR::CoordinateTypes::Type const &sourceCoordinate,
+		      CR::CoordinateType::Types const &sourceCoordinate,
 		      bool const &anglesInDegrees)
   {
     return convertVector (target(0),

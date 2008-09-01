@@ -45,7 +45,7 @@ using casa::uInt;
 #endif
 
 #include <Math/Constants.h>
-#include <Coordinates/CoordinateTypes.h>
+#include <Coordinates/CoordinateType.h>
 
 using std::vector;
 
@@ -612,11 +612,11 @@ namespace CR { // Namespace CR -- begin
   bool convertVector (double &xTarget,
 		      double &yTarget,
 		      double &zTarget,
-		      CR::CoordinateTypes::Type const &targetCoordinate,
+		      CR::CoordinateType::Types const &targetCoordinate,
 		      double const &xSource,
 		      double const &ySource,
 		      double const &zSource,
-		      CR::CoordinateTypes::Type const &sourceCoordinate,
+		      CR::CoordinateType::Types const &sourceCoordinate,
 		      bool const &anglesInDegrees=false);
 
   /*!
@@ -631,9 +631,9 @@ namespace CR { // Namespace CR -- begin
 			       before the conversion.
   */
   bool convertVector (vector<double> &target,
-		      CR::CoordinateTypes::Type const &targetCoordinate,
+		      CR::CoordinateType::Types const &targetCoordinate,
 		      vector<double> &source,
-		      CR::CoordinateTypes::Type const &sourceCoordinate,
+		      CR::CoordinateType::Types const &sourceCoordinate,
 		      bool const &anglesInDegrees=false);
 
 #ifdef HAVE_CASA
@@ -649,9 +649,9 @@ namespace CR { // Namespace CR -- begin
 			       before the conversion.
   */
   bool convertVector (casa::Vector<double> &target,
-		      CR::CoordinateTypes::Type const &targetCoordinate,
+		      CR::CoordinateType::Types const &targetCoordinate,
 		      casa::Vector<double> &source,
-		      CR::CoordinateTypes::Type const &sourceCoordinate,
+		      CR::CoordinateType::Types const &sourceCoordinate,
 		      bool const &anglesInDegrees=false);
 #endif
 
@@ -668,9 +668,9 @@ namespace CR { // Namespace CR -- begin
 			       before the conversion.
   */
   bool convertVector (blitz::Array<double,1> &target,
-		      CR::CoordinateTypes::Type const &targetCoordinate,
+		      CR::CoordinateType::Types const &targetCoordinate,
 		      blitz::Array<double,1> &source,
-		      CR::CoordinateTypes::Type const &sourceCoordinate,
+		      CR::CoordinateType::Types const &sourceCoordinate,
 		      bool const &anglesInDegrees=false);
 #endif
 
