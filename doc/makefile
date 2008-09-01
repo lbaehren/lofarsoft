@@ -9,4 +9,4 @@ update:
 
 clean:
 	rm -f *~
-	rm -rf html
+	rm -f html/*.png rm -f html/*.map rm -f html/*.html rm -f html/*.md5
