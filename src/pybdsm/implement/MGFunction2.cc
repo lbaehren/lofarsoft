@@ -1,9 +1,12 @@
-/*
- *  MGFunction.cpp
- *
- *  Created by Oleksandr Usov on 15/10/2007.
- *
- */
+/*!
+  \file MGFunction.cc
+  
+  \ingroup pybdsm
+  
+  \author Oleksandr Usov
+  
+  \date 15/10/2007
+*/
 
 #define PY_ARRAY_UNIQUE_SYMBOL PyArrayHandle
 #define NO_IMPORT_ARRAY

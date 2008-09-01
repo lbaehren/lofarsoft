@@ -1,9 +1,12 @@
-/*
- *  Fitter_lmder.cc
- *
- *  Created by Oleksandr Usov on 30/10/2007.
- *
- */
+/*!
+  \file Fitter_lmder.cc
+  
+  \ingroup pybdsm
+  
+  \author Oleksandr Usov
+  
+  \date 30/10/2007
+*/
 
 #include "Fitters.h"
 

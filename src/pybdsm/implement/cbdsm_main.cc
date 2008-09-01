@@ -1,3 +1,11 @@
+/*!
+  \file cbdsm_main.cc
+  
+  \ingroup pybdsm
+  
+  \author Oleksandr Usov
+*/
+
 #define PY_ARRAY_UNIQUE_SYMBOL PyArrayHandle
 
 #include "stat.h"

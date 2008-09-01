@@ -1,8 +1,12 @@
 #ifndef _AUX_H_INCLUDED
 #define _AUX_H_INCLUDED
 
-/**
-   Miscellaneous usefull routines
+/*!
+	\file aux.h
+	
+	\ingroup pybdsm
+
+	\brief Miscellaneous usefull routines
 */
 
 #include <boost/version.hpp>
