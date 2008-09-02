@@ -1,13 +1,36 @@
+/*-------------------------------------------------------------------------*
+ | $Id:: templates.h 391 2007-06-13 09:25:11Z baehren                    $ |
+ *-------------------------------------------------------------------------*
+ ***************************************************************************
+ *   Copyright (C) 2007                                                    *
+ *   Lars B"ahren (bahren@astron.nl)                                       *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+
 /*!
 
 \mainpage LOFAR User Software
 
 <ol>
-  <li><a href="#Introduction">Introduction</a>
+  <li><a href="#LOFAR User Software Group">LOFAR User Software Group</a>
   <li><a href="#Organization of the code">Organization of the code</a>
 </ol>
 
-<h2>Introduction</h2>
+<h2><a name="LOFAR User Software Group">LOFAR User Software Group</a></h2>
 
 The <a href="http://usg.lofar.org">LOFAR User Software Group</a> represents a
 collaborative effort between the <a href="http://www.lofar.org">LOFAR</a>
@@ -50,15 +73,15 @@ analyse LOFAR data. In addition, the USG performs the following functions:
 
 <h2><a name="Organization of the code">Organization of the code</a></h2>
 
-A copy of the source code can be obatined through read-only access to the USG
+A copy of the source code can be obtained through read-only access to the USG
 code repository:
 \verbatim
-svn co http://usg.lofar.org/svn/code/trunk usg-code
+svn co http://usg.lofar.org/svn/code/trunk lofarsoft
 \endverbatim
 Once the check-out is completed, you will find the following directory structure
 on your disk:
 \verbatim
-usg-code
+lofarsoft
 |-- data
 |-- doc
 |-- release
@@ -68,8 +91,31 @@ usg-code
 |   |-- scripts
 |   `-- templates
 |-- external
+|   |-- casacore
+|   |-- hdf5
+|   `-- wcslib
 `-- src
+    |-- CR-Tools
+    |-- DAL
+    `-- pybdsm
 \endverbatim
+In this:
+<ul>
+  <li>\b lofarsoft is the root of the User Software code tree - go there if you
+  want to synchronize your local working version against the repository.
+  <li>\b build is used for building individual packages in the code
+  distribution; using a separate directory for this purpose makes it easy to
+  simply erase all compile and link attempts and start again from a clean plate.
+  <li>\b devel_common hold common tools for development; this includes e.g.
+  the find scripts for CMake or file templates for creating new C++ classes. Unless
+  you consider collaborating on the framework, you will not need to touch this
+  (but you will need it).
+  <li>\b doc contains a local version of the Doxygen-based source code
+  documentation; just go in there, fire up Doxygen and get an up-to-date version
+  of the source code documentation.
+  <li>\b external hosts the various external packages which will be required
+  to build parts of the LOFAR User Software.
+</ul>
 
 */
 
