@@ -21,8 +21,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-/*!
+// ==============================================================================
+//
+//  Main page of the Doxygen documentation
+//
+// ==============================================================================
 
+/*!
 \mainpage LOFAR User Software
 
 <ol>
@@ -115,6 +120,15 @@ In this:
   of the source code documentation.
   <li>\b external hosts the various external packages which will be required
   to build parts of the LOFAR User Software.
+  <li>\b src contains the source code of the various projects and packages 
+  developed and written within the framework of the USG. The main components are:
+  <ul>
+    <li>\e CR-Tools - Tools for the analysis of cosmic ray data.
+    <li>\e DAL - The Data Access Library is the interface for the creation of
+    and access to LOFAR's standard data products.
+    <li>\e pybdsm - Blob detection and source modelling package developed by the
+    Surveys KSP.
+  </ul>
 </ul>
 
 */
