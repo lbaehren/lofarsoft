@@ -29,10 +29,51 @@
   This documentation contains the description of the C/C++ components of the
   software used for data inspection and reduction with the
   <a href="http://www.astro.ru.nl/lopes">LOPES</a> and LOFAR/CR experiments.
+
+  <ul>
+    <li><a href="#Synopsis">Synopsis</a>
+    <li><a href="#Optional build parameters">Optional build parameters</a>
+  </ul>
   
-  <h3>Synopsis</h3>
+  <h3><a name="Synopsis">Synopsis</a></h3>
+
+  Actively developed and supported successor to the older LOPES-Tools package.
+
+  <h3><a name="Optional build parameters">Optional build parameters</a></h3>
   
+  The behavior during configuration and the components included in the build
+  can be controlled from a number of optional parameters:
+
+  \verbatim
+  option (CR_BUILD_TESTS          "Build the test programs?"                   YES )
+  option (CR_BUILD_EXTERNAL_TESTS "Build test programs for external packages?" YES )
+  option (CR_COMPILER_WARNINGS    "Enable standard set of compiler warnings?"  YES )
+  option (CR_DEBUGGING_MESSAGES   "Print debugging information?"               NO  )
+  option (CR_VERBOSE_CONFIGURE    "Verbose output during configuration?"       NO  )
+  option (CR_WITH_GLISH           "Support for Glish applications?"            NO  )
+  option (CR_WITH_PYTHON          "Support for Python applications?"           NO  )
+  option (CR_WITH_PLOTTING        "Support for generation of plots?"           YES )
+  option (CR_WITH_GUI             "Build the graphical interface?"             NO  )
+  option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"     YES )
+  \endverbatim
   
+  <ul>
+    <li>\b CR_BUILD_TESTS <br>
+    Build the test programs? If enabled all the test programs in
+    ''implement/<Module>/test'' will be build.
+    <li>\b CR_BUILD_EXTERNAL_TESTS <br> 
+    Build the test programs to test working with the various external packages
+    and libraries? If enabled the test programs in ''test'' will be build:
+    <ul>
+      <li>\e tcasa_casa -- Test working with the classes in the ''casa''
+      module of casacore.
+      <li>\e tcasa_tables -- Test working with the classes in the ''tables''
+      module of casacore.
+      <li>\e tcasa_coordinates -- Test working with the classes in the
+      ''coordinates'' module of casacore.
+      <li>etc.
+    </ul>
+  </ul>
 */
 
 // ==============================================================================
