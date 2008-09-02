@@ -55,6 +55,15 @@ using CR::TimeFreq;
   \author Lars B&auml;hren
  
   \date 2006/01/23
+
+  <h3>Synopsis<h3>
+
+  There are quite a number of tests for better understanding the functionality
+  of the classes derived from casa::ImageInterface:
+  <ol>
+    <li>Basic creation of a new image, either of type casa::PagedImage or
+    casa::HDF5Image.
+  </ol>
 */
 
 // -----------------------------------------------------------------------------
@@ -110,7 +119,7 @@ template void show_PagedImage (const PagedImage<Double>& myimage);
 Matrix<Double> readAntennaPositions ()
 {
   Matrix<Double> pos;
-  readAsciiMatrix (pos, "positionsLOPES08.data");
+  readAsciiMatrix (pos,positions_lopes08);
 
   return pos;
 }
@@ -128,36 +137,19 @@ int cleanup_directory (bool const &test_putAt)
 {
   int nofFailedTests (0);
 
-  try {
-    casa::Directory dir ("tPagedImage01.img");
-    dir.removeRecursive();
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
-    nofFailedTests++;
-  }
+  std::vector<std::string> images;
+
+  images.push_back ("tPagedImage01.img");
+  images.push_back ("tPagedImage02.img");
+  images.push_back ("tPagedImage03.img");
+  images.push_back ("tPagedImage04.img");
   
-  try {
-    casa::Directory dir ("tPagedImage02.img");
-    dir.removeRecursive();
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
-    nofFailedTests++;
-  }
-  
-  try {
-    casa::Directory dir ("tPagedImage03.img");
-    dir.removeRecursive();
-  } catch (AipsError x) {
-    cerr << x.getMesg() << endl;
-    nofFailedTests++;
-  }
-  
-  if (test_putAt) {
+  for (unsigned int n(0); n<images.size(); n++) {
     try {
-      casa::Directory dir ("tPagedImage04.img");
-      dir.removeRecursive();
+      casa::Directory dir (images[n].c_str());
+      dir.removeRecursive(); 
     } catch (AipsError x) {
-      cerr << x.getMesg() << endl;
+      cerr << "[tSkymapper::cleanup_directory] " << x.getMesg() << endl;
       nofFailedTests++;
     }
   }

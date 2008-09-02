@@ -15,8 +15,13 @@ set (tests
   tMDirection
   tSkymapCoordinates
   tSkymapGrid
-  tSkymapper
   )
+
+if (positions_lopes08)
+  list (APPEND tests tSkymapper)
+else (positions_lopes08)
+  message (STATUS "Excluding tSkymapper from list of tests; missing input data.")
+endif (positions_lopes08)
 
 ## -----------------------------------------------------------------------------
 ## Build the test programs

@@ -345,30 +345,6 @@ template void image_summary (casa::ImageInterface<casa::DComplex> &image);
 //
 // ==============================================================================
 
-/*
-  \brief Test opening an existing image and try working with it
-
-  \param infile -- Name of the image file stored on disk
-
-  \return nofFailedTests -- The number of failed tests in this function
-*/
-int test_openImage (std::string const &infile)
-{
-  cout << "\n[test_openImage]\n" << endl;
-
-  int nofFailedTests (0);
-
-  cout << "[1] Opening existing image ..." << endl;
-  try {
-    
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-
-  return nofFailedTests;
-}
-
 // ------------------------------------------------------------------------------
 
 /*!
@@ -613,20 +589,7 @@ int main (int argc,
 {
   int nofFailedTests (0);
 
-  /* check the input parameters first */
-
-  if (argc < 2) {
-    cout << "[tcasa_image] No path to image provided." << endl;
-  } else {
-    // get the name of the image file ...
-    std::string filename = argv[1];
-    // .. and try to open it
-    nofFailedTests += test_openImage (filename);
-  }
-
-  /* Everything from here on does not rely on the existance of an already
-     pre-existing image. */
-
+  /* Tests for constructing an image object */
   nofFailedTests += test_createImage();
 
 #ifdef HAVE_HDF5

@@ -448,6 +448,15 @@ find_file (data_modelcoeff2 modelcoeff2.dat
   lopes
   )
 
+find_file (positions_lopes08 positions_lopes08.dat
+  PATHS
+  ${CR_SOURCE_DIR}/data
+  ${CR_SOURCE_DIR}/../data
+  ${CR_SOURCE_DIR}/../../data
+  PATH_SUFFIXES
+  lopes
+  )
+
 ## =============================================================================
 ##
 ##  Location of (external) header files
