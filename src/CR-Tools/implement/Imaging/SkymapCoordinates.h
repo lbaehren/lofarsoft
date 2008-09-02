@@ -799,7 +799,7 @@ namespace CR { // Namespace CR -- begin
 
       \return timeFreq -- Basic container for the time-frequency domain settings
     */
-    inline TimeFreq timeFreq () {
+    inline TimeFreq timeFreq () const {
       return timeFreq_p;
     }
 
@@ -841,7 +841,7 @@ namespace CR { // Namespace CR -- begin
 
       \return nofBlocks -- Number of data blocks included into the map
     */
-    inline uint nofBlocks () {
+    inline uint nofBlocks () const {
       return nofBlocks_p;
     }
     
@@ -862,7 +862,7 @@ namespace CR { // Namespace CR -- begin
       
       \return observationData -- Observation data (epoch, location, etc.)
     */
-    inline ObservationData observationData () {
+    inline ObservationData observationData () const {
       return obsData_p;
     }
 

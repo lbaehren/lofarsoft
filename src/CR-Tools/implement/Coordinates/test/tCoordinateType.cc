@@ -109,7 +109,7 @@ int test_casaCoordinate ()
 
   std::cout << "[1] Create linear coordinate with single axis ..." << std::endl;
   try {
-    casa::LinearCoordinate coord (CoordinateType::createLinearCoordinate());
+    casa::LinearCoordinate coord (CoordinateType::makeLinearCoordinate());
     // summary of the coordinate
     CoordinateType::summary (std::cout,coord);
   } catch (std::string message) {
@@ -120,7 +120,7 @@ int test_casaCoordinate ()
   std::cout << "[2] Create linear coordinate with 3 axes ..." << std::endl;
   try {
     unsigned int nofAxes (3);
-    casa::LinearCoordinate coord (CoordinateType::createLinearCoordinate(nofAxes));
+    casa::LinearCoordinate coord (CoordinateType::makeLinearCoordinate(nofAxes));
     // summary of the coordinate
     CoordinateType::summary (std::cout,coord);
   } catch (std::string message) {
@@ -134,9 +134,9 @@ int test_casaCoordinate ()
     Vector<casa::String> names (nofAxes,"Length");
     Vector<casa::String> units (nofAxes,"m");
     // create Coordinate object
-    casa::LinearCoordinate coord (CoordinateType::createLinearCoordinate(nofAxes,
-									 names,
-									 units));
+    casa::LinearCoordinate coord (CoordinateType::makeLinearCoordinate(nofAxes,
+								       names,
+								       units));
     // summary of the coordinate
     CoordinateType::summary (std::cout,coord);
   } catch (std::string message) {

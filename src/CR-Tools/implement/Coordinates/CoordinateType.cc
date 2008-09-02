@@ -126,59 +126,107 @@ namespace CR { // Namespace CR -- begin
     }
   }
 
-  // -------------------------------------------------- createDirectionCoordinate
+  // ---------------------------------------------------- makeDirectionCoordinate
 
-  DirectionCoordinate CoordinateType::createDirectionCoordinate ()
+  DirectionCoordinate CoordinateType::makeDirectionCoordinate ()
   {
-    return createDirectionCoordinate (casa::MDirection::AZEL,
-				      casa::Projection::STG);
+    return makeDirectionCoordinate (casa::MDirection::AZEL,
+				    casa::Projection::STG);
   }
   
-  // -------------------------------------------------- createDirectionCoordinate
+  // ---------------------------------------------------- makeDirectionCoordinate
   
   DirectionCoordinate
-  CoordinateType::createDirectionCoordinate (casa::MDirection::Types const &directionType,
-					     casa::Projection::Type const &projectionType)
+  CoordinateType::makeDirectionCoordinate (casa::String const &refcode,
+					   casa::String const &projection)
   {
-    casa::Quantum<casa::Double> refLon (   0, "deg");
-    casa::Quantum<casa::Double> refLat (90.0, "deg");
-    casa::Quantum<casa::Double> incLon (-1.0, "deg");
-    casa::Quantum<casa::Double> incLat ( 1.0, "deg");
-    casa::Matrix<casa::Double> xform(2,2);
+    return makeDirectionCoordinate(MDirectionType(refcode),
+				   ProjectionType(projection));
+  }
+  
+  // ---------------------------------------------------- makeDirectionCoordinate
+  
+  DirectionCoordinate
+  CoordinateType::makeDirectionCoordinate (casa::MDirection::Types const &directionType,
+					   casa::Projection::Type const &projectionType)
+  {
+    unsigned int nofAxes (2);
+    Vector<Quantum<double> > refValue (nofAxes);
+    Vector<Quantum<double> > increment (nofAxes);
+    Vector<double> refPixel (nofAxes);
+
+    refValue(0)  = Quantum<double> (0,"deg");
+    refValue(1)  = Quantum<double> (90,"deg");
+    increment(0) = Quantum<double> (-1,"deg");
+    increment(1) = Quantum<double> (1,"deg");
+    refPixel(0)  = 0;
+    refPixel(1)  = 0;
+    
+    return makeDirectionCoordinate (directionType,
+				    projectionType,
+				    refValue,
+				    increment,
+				    refPixel);
+  }
+  
+  // ---------------------------------------------------- makeDirectionCoordinate
+  
+  DirectionCoordinate
+  CoordinateType::makeDirectionCoordinate (casa::MDirection::Types const &directionType,
+					   casa::Projection::Type const &projectionType,
+					   Vector<Quantum<double> > const &refValue,
+					   Vector<Quantum<double> > const &increment,
+					   Vector<double> const &refPixel)
+  {
+    unsigned int nofAxes (2);
+    casa::Matrix<casa::Double> xform(nofAxes,nofAxes);
     
     xform            = 0.0;
     xform.diagonal() = 1.0;
 
-    return casa::DirectionCoordinate (directionType,
-				      casa::Projection(projectionType),
-				      refLon,
-				      refLat,
-				      incLon,
-				      incLat,
-				      xform,
-				      0,
-				      0);
+    /* Check the dimensions of the vectors with the input parameters */
+    
+    if (refValue.nelements() == nofAxes
+	&& increment.nelements() == nofAxes
+	&& refPixel.nelements() == nofAxes) {
+      return casa::DirectionCoordinate (directionType,
+					casa::Projection(projectionType),
+					refValue(0),
+					refValue(1),
+					increment(0),
+					increment(1),
+					xform,
+					refPixel(0),
+					refPixel(1));
+    } else {
+      /* Cast error message*/
+      std::cerr << "[CoordinateType::makeDirectionCoordinate]" << std::endl;
+      std::cerr << "" << std::endl;
+      /* Make direction coordinate with minimal consistent set of parameters */
+      return makeDirectionCoordinate (directionType,
+				      projectionType);
+    }
   }
-
-  // ----------------------------------------------------- createLinearCoordinate
-
+  
+  // ------------------------------------------------------- makeLinearCoordinate
+  
   LinearCoordinate
-  CoordinateType::createLinearCoordinate (unsigned int const &nofAxes)
+  CoordinateType::makeLinearCoordinate (unsigned int const &nofAxes)
   {
     Vector<casa::String> names (nofAxes,"");
     Vector<casa::String> units (nofAxes,"");
-
-    return createLinearCoordinate (nofAxes,
-				   names,
-				   units);
+    
+    return makeLinearCoordinate (nofAxes,
+				 names,
+				 units);
   }
   
-  // ----------------------------------------------------- createLinearCoordinate
-
+  // ------------------------------------------------------- makeLinearCoordinate
+  
   LinearCoordinate
-  CoordinateType::createLinearCoordinate (unsigned int const &nofAxes,
-					  Vector<casa::String> const &names,
-					  Vector<casa::String> const &units)
+  CoordinateType::makeLinearCoordinate (unsigned int const &nofAxes,
+					Vector<casa::String> const &names,
+					Vector<casa::String> const &units)
   {
     Vector<casa::Double> crpix(nofAxes,0.0);
     Vector<casa::Double> crval(nofAxes,0.0);
@@ -195,7 +243,7 @@ namespace CR { // Namespace CR -- begin
 			       pc,
 			       crpix);
     } else {
-      std::cerr << "[CoordinateType::createLinearCoordinate] " 
+      std::cerr << "[CoordinateType::makeLinearCoordinate] " 
 		<< "Mismatch in rank of parameter vectors!" << std::endl;
       std::cerr << "-- nofAxes = " << nofAxes << std::endl;
       std::cerr << "-- names   = " << names   << std::endl;

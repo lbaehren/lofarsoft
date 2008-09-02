@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2006                                                  *
- *   Kalpana Singh (<k.singh@astro.ru.nl>)                                                     *
+ *   Copyright (C) 2006                                                    *
+ *   Kalpana Singh (<k.singh@astro.ru.nl>)                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -28,6 +28,7 @@
 #include <casa/BasicSL/Complex.h>
 #include <casa/Exceptions/Error.h>
 
+#include <crtools.h>
 #include <Analysis/inverseFFT.h>
 #include <Data/ITS_Capture.h>
 #include <Data/LopesEvent.h>
@@ -53,7 +54,8 @@ using CR::inverseFFT;
 
 // -----------------------------------------------------------------------------
 
-uint dataBlockSize (1024) ;
+const uint blocksize (1024) ;
+const uint fftsize (blocksize/2+1);
 
 /*!
   \brief Get a vector with the names of the test data files to work with
@@ -99,15 +101,15 @@ Bool test_inverseFFTS ()
   
   try{
     
-    Vector<double> samples(dataBlockSize*16*4 ) ;
+    Vector<double> samples(blocksize*16*4 ) ;
     
-    for( uint t = 0; t < dataBlockSize*16*4;  t++ ){
+    for( uint t = 0; t < blocksize*16*4;  t++ ){
       
-      if ( t <= dataBlockSize*16*2+500 )
+      if ( t <= blocksize*16*2+500 )
 	
 	{ samples (t) = 0.0 ; }
       
-      else if(t == dataBlockSize*16*2+601)
+      else if(t == blocksize*16*2+601)
 	{     samples(t) = 1.0 ; }
       else
 	{     samples(t) = 0.0 ; }
@@ -119,7 +121,7 @@ Bool test_inverseFFTS ()
     double filterCoefficient (0.0);
     Vector<double> ppf_coeff(16384) ;
     
-    infile.open("Coeffs16384Kaiser-quant.dat", ios::in ) ;
+    infile.open(data_ppf_coefficients.c_str(), ios::in ) ;
     
     if(!infile) {
       cerr<< "Error:file could not be opened "<< endl;
@@ -145,9 +147,9 @@ Bool test_inverseFFTS ()
     
     uint nofrows = nofelements / nofcolumns ;
     
-    Vector<double> blockSamples (dataBlockSize);
+    Vector<double> blockSamples (blocksize);
     
-    Matrix<double> sampledValueMatrix( dataBlockSize, nofcolumns );
+    Matrix<double> sampledValueMatrix( blocksize, nofcolumns );
     
     uint m =0 ;
     
@@ -178,9 +180,9 @@ Bool test_inverseFFTS ()
     }
     
     
-    Vector<double> multipliedVector ( dataBlockSize, 0.0);
+    Vector<double> multipliedVector ( blocksize, 0.0);
     
-    Matrix<double> output( dataBlockSize, nofcolumns, 0.0 );
+    Matrix<double> output( blocksize, nofcolumns, 0.0 );
     
     uint r = 15;
     
@@ -343,7 +345,7 @@ Bool test_inverseFFTS ()
    logfile5.open("IFFTRawdata",ios::out);
 //   
       
-      for (uInt sample(0); sample< dataBlockSize; sample++) {
+      for (uInt sample(0); sample< blocksize; sample++) {
      for (uInt antenna(0); antenna< NOfColumn; antenna++) {	
                logfile5 << IFFTRawMatrix (sample, antenna) 
 	      << " \t";
@@ -360,11 +362,11 @@ Bool test_inverseFFTS ()
   
   //*************************************************************************************************
   
-  Matrix<DComplex> FFTMatrix (dataBlockSize/2+1,nofColumn ) ;
+  Matrix<DComplex> FFTMatrix (fftsize,nofColumn ) ;
   
   // FFTServer<double,DComplex> server;
    
-   Vector<DComplex> FFTVector(dataBlockSize/2+1);
+   Vector<DComplex> FFTVector(fftsize);
     
    for (uint f =0 ; f < nofColumn; f++ ) {
    
@@ -387,7 +389,7 @@ Bool test_inverseFFTS ()
    logfile6.open("FFTdata",ios::out);
 //   
      
-     for (uInt sample(0); sample< dataBlockSize/2+1; sample++) {
+     for (uInt sample(0); sample< fftsize; sample++) {
      for (uInt antenna(0); antenna< nofColumn; antenna++) {	
            logfile6 << FFTMatrix (sample, antenna) 
 	      << " \t";
@@ -403,7 +405,7 @@ Bool test_inverseFFTS ()
 
    logfile7.open("AmplFFT",ios::out);
 //   
-     for (uInt sample(0); sample< dataBlockSize/2+1; sample++) {
+     for (uInt sample(0); sample< fftsize; sample++) {
      for (uInt antenna(0); antenna< nofColumn; antenna++) {	
               logfile7 << AmplofFFT (sample, antenna) 
 	      << " \t";
@@ -449,7 +451,7 @@ Bool test_inverseFFTS ()
    logfile8.open("IFFTdata",ios::out);
 //   
      
-     for (uInt sample(0); sample< dataBlockSize; sample++) {
+     for (uInt sample(0); sample< blocksize; sample++) {
      for (uInt antenna(0); antenna< nofColumn; antenna++) {	
                logfile8 << IFFTMatrix (sample, antenna) 
 	      << " \t";
@@ -465,10 +467,10 @@ Bool test_inverseFFTS ()
     
    
    
- // Matrix<double> ppf_coefficients( dataBlockSize, 16 );
+ // Matrix<double> ppf_coefficients( blocksize, 16 );
   
 //   Matrix<double> ppf_coefficients = (invft.ppfCoefficients( ppf_coeff,
-//    				                           dataBlockSize )) ;
+//    				                           blocksize )) ;
 //   uint nofrows = ppf_coefficients.nrow () ;
 //      
 //      uint nofcolumns = ppf_coefficients.ncolumn() ; 
@@ -482,7 +484,7 @@ Bool test_inverseFFTS ()
 //    }							   
 //  
 //   Matrix<double> dataSamples =(invft.blockSamples( output,
-//    			                          dataBlockSize )) ;
+//    			                          blocksize )) ;
 //  
 //  
 //     uint nofRows = dataSamples.nrow () ;
@@ -519,12 +521,12 @@ Bool test_inverseFFTS ()
   
           
  //  Vector<DComplex> fourierTransformedVector = invft.FFTVector( output, //multipliedVector,
- //  								dataBlockSize ) ;
+ //  								blocksize ) ;
    
  //  cout << " fourier Transformed Vector :" <<  fourierTransformedVector << endl ;
     
  //  Vector<double> inverseFourierVector = invft.IFFTVector( fourierTransformedVector,
- //   							   dataBlockSize ) ; 
+ //   							   blocksize ) ; 
    
 //   cout << " inverse Fourier Vector :" << inverseFourierVector << endl ;
    

@@ -40,11 +40,15 @@
 
 // CR-Tools
 #include <crtools.h>
+#include <Utilities/MConversions.h>
 
 using casa::Coordinate;
 using casa::DirectionCoordinate;
 using casa::LinearCoordinate;
 using casa::Matrix;
+using casa::MDirection;
+using casa::Projection;
+using casa::Quantum;
 using casa::Vector;
 
 namespace CR { // Namespace CR -- begin
@@ -65,23 +69,19 @@ namespace CR { // Namespace CR -- begin
     <h3>Prerequisite</h3>
     
     <ul type="square">
-      <li>[start filling in your text here]
+      <li>casacore coordinates module
     </ul>
     
     <h3>Synopsis</h3>
     
-    Static functions for the creation of casa::Coordinate objects:
-    <ul>
-      <li>CoordinateType::createDirectionCoordinate
-      <li>CoordinateType::createLinearCoordinate
-    </ul>
-    
     <h3>Examples</h3>
 
+    Usage of the static functions to support the creation of various
+    casa::Coordinate objects:
     <ol>
       <li>Create a linear coordinate for a single axis:
       \code
-      casa::LinearCoordinate = CoordinateType::createLinearCoordinate (1);
+      casa::LinearCoordinate = CoordinateType::makeLinearCoordinate (1);
       \endcode
       <li>Create a linear coordinate for a 3-dim  cartesian coordinate:
       \code
@@ -89,9 +89,19 @@ namespace CR { // Namespace CR -- begin
       casa::Vector<casa::String> names (nofAxes,"Length")
       casa::Vector<casa::String> units (nofAxes,"m")
 
-      casa::LinearCoordinate = CoordinateType::createLinearCoordinate (nofAxes,
-                                                                       names,
-								       units);
+      casa::LinearCoordinate = CoordinateType::makeLinearCoordinate (nofAxes,
+                                                                     names,
+								     units);
+      \endcode
+      <li>Create a direction coordinate for AZEL celestial coordinates in STG
+      projection, using the default creation settings
+      \code
+      casa::DirectionCoordinate = CoordinateType::makeDirectionCoordinate();
+      \endcode
+      or by explicit definition:
+      \code
+      casa::DirectionCoordinate = CoordinateType::makeDirectionCoordinate("AZEL",
+                                                                          "STG");
       \endcode
     </ol>
 
@@ -280,19 +290,54 @@ namespace CR { // Namespace CR -- begin
       
       \return coord -- Direction coordinate of AZEL coordinates in STG projection
     */
-    static DirectionCoordinate createDirectionCoordinate ();
+    static DirectionCoordinate makeDirectionCoordinate ();
 
     /*!
       \brief Create a DirectionCoordinate object
 
-      \param directionType  -- 
-      \param projectionType -- 
+      \param directionType  -- Reference code for the celestial coordinate frame
+      \param projectionType -- Reference code for the sphercial map projection
       
-      \return coord -- 
+      \return coord -- DirectionCoordinate object for the selected celestial
+              coordinate frame and map projection.
     */
-    static DirectionCoordinate createDirectionCoordinate (casa::MDirection::Types const &directionType,
-							  casa::Projection::Type const &projectionType);
+    static
+      DirectionCoordinate makeDirectionCoordinate (casa::String const &refcode,
+						   casa::String const &projection);
+    
+    /*!
+      \brief Create a DirectionCoordinate object
 
+      \param directionType  -- Reference code for the celestial coordinate frame
+      \param projectionType -- Reference code for the sphercial map projection
+      
+      \return coord -- DirectionCoordinate object for the selected celestial
+              coordinate frame and map projection.
+    */
+    static
+      DirectionCoordinate makeDirectionCoordinate (MDirection::Types const &directionType,
+						   Projection::Type const &projectionType);
+    
+    /*!
+      \brief Create a DirectionCoordinate object
+      
+      \param directionType  -- Reference code for the celestial coordinate frame
+      \param projectionType -- Reference code for the sphercial map projection
+      \param refValue       -- Reference value, CRVAL
+      \param increment      -- Coordinate increment, CDELT
+      \param refPixel       -- Reference pixel, CRPIX
+      
+      \return coord -- DirectionCoordinate object for the selected celestial
+              coordinate frame and map projection, using the provided WCS
+	      parameters for the pixel to world conversion.
+    */
+    static
+      DirectionCoordinate makeDirectionCoordinate (MDirection::Types const &directionType,
+						   Projection::Type const &projectionType,
+						   Vector<Quantum<double> > const &refValue,
+						   Vector<Quantum<double> > const &increment,
+						   Vector<double> const &refPixel);
+    
     /*!
       \brief Create a LinearCoordinate object
       
@@ -300,24 +345,24 @@ namespace CR { // Namespace CR -- begin
       
       \return coord -- 
     */
-    static LinearCoordinate createLinearCoordinate (unsigned int const &nofAxes=1);
+    static LinearCoordinate makeLinearCoordinate (unsigned int const &nofAxes=1);
     
     /*!
       \brief Create a LinearCoordinate object
-
+      
       \param nofAxes -- The number of axes for which to create the coordinate
       \param names   -- World axis names of the coordinate.
       \param units   -- World axis units of the coordinate.
       
       \return coord -- 
     */
-    static LinearCoordinate createLinearCoordinate (unsigned int const &nofAxes,
-						    Vector<casa::String> const &names,
-						    Vector<casa::String> const &units);
-
+    static LinearCoordinate makeLinearCoordinate (unsigned int const &nofAxes,
+						  Vector<casa::String> const &names,
+						  Vector<casa::String> const &units);
+    
     /*!
       \brief Provide a summary of the internal status
-
+      
       \param os    -- Output stream to which the summary is written.
       \param coord -- casa::Coordinate object for which to provide the summary
     */
@@ -337,4 +382,4 @@ namespace CR { // Namespace CR -- begin
 } // Namespace CR -- end
 
 #endif /* CR_COORDINATETYPE_H */
-  
+

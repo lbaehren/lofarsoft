@@ -139,12 +139,12 @@ namespace CR { // Namespace CR -- begin
 	nofAxes_p        = 3;
 	nofCoordinates_p = 2;
 	// set up the coordinate objects
-	directionCoord_p = CoordinateType::createDirectionCoordinate();
+	directionCoord_p = CoordinateType::makeDirectionCoordinate();
 	casa::Vector<casa::String> names (1,"Length");
 	casa::Vector<casa::String> units (1,"m");
-	linearCoord_p    = CoordinateType::createLinearCoordinate(1,
-								  names,
-								  units);
+	linearCoord_p    = CoordinateType::makeLinearCoordinate(1,
+								names,
+								units);
       }
       break;
     case CoordinateType::Cartesian:
@@ -155,9 +155,9 @@ namespace CR { // Namespace CR -- begin
 	// set up the coordinate object
 	casa::Vector<casa::String> names (nofAxes_p,"Length");
 	casa::Vector<casa::String> units (nofAxes_p,"m");
-	linearCoord_p    = CoordinateType::createLinearCoordinate(nofAxes_p,
-								  names,
-								  units);
+	linearCoord_p    = CoordinateType::makeLinearCoordinate(nofAxes_p,
+								names,
+								units);
       }
       break;
     case CoordinateType::Spherical:
@@ -174,9 +174,9 @@ namespace CR { // Namespace CR -- begin
 	units(0) = "m";
 	units(1) = "rad";
 	units(2) = "rad";
-	linearCoord_p    = CoordinateType::createLinearCoordinate(nofAxes_p,
-								  names,
-								  units);
+	linearCoord_p    = CoordinateType::makeLinearCoordinate(nofAxes_p,
+								names,
+								units);
       }
       break;
     case CoordinateType::Cylindrical:
@@ -192,9 +192,9 @@ namespace CR { // Namespace CR -- begin
 	units(0) = "m";
 	units(1) = "rad";
 	units(2) = "m";
-	linearCoord_p    = CoordinateType::createLinearCoordinate(nofAxes_p,
-								  names,
-								  units);
+	linearCoord_p    = CoordinateType::makeLinearCoordinate(nofAxes_p,
+								names,
+								units);
       }
       break;
     default:
