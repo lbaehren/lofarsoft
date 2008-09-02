@@ -18,13 +18,28 @@ set (tests
   tFirstStagePipeline
   tfitCR2gauss
   tgenCRmap
-  tinverseFFT
   tionoCalibration
   tppfinversion
   tSecondStagePipeline
   tSubbandID
   )
 
+## -------------------------------------------------------------------
+## Tests which require input data
+
+if (data_modelcoeff1 AND data_modelcoeff2)
+  list (APPEND tests tinverseFFT)
+else (data_modelcoeff1 AND data_modelcoeff2)
+  message (STATUS "Excluding tinverseFFT from list of tests; missing input data.")
+endif (data_modelcoeff1 AND data_modelcoeff2)
+
+if (data_ppf_coefficients AND data_ppf_inversion)
+  list (APPEND test tppfimplement)
+else (data_ppf_coefficients AND data_ppf_inversion)
+  message (STATUS "Excluding tppfimplement from list of tests; missing input data.")
+endif (data_ppf_coefficients AND data_ppf_inversion)
+
+## -------------------------------------------------------------------
 ## Build the test programs
 
 foreach (src ${tests})
@@ -41,19 +56,6 @@ endforeach (src)
 ##  Test programs that require special attention
 ##
 ## ==============================================================================
-
-if (data_ppf_coefficients AND data_ppf_inversion)
-
-  ## compiler instructions
-  add_executable (tppfimplement tppfimplement.cc)
-  ## linker instructions
-  target_link_libraries (tppfimplement cr)
-  ## testing
-  add_test (tppfimplement tppfimplement)
-
-endif (data_ppf_coefficients AND data_ppf_inversion)
-
-## -------------------------------------------------------------------
 
 if (NOT APPLE)
 

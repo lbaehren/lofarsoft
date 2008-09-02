@@ -194,6 +194,7 @@ namespace CR { // Namespace CR -- begin
     timeFreq_p       = other.timeFreq_p;
     obsData_p        = other.obsData_p;
     nofBlocks_p      = other.nofBlocks_p;
+    spatialType_p    = other.spatialType_p;
     mapOrientation_p = other.mapOrientation_p;
     beamType_p       = other.beamType_p;
     shape_p          = other.shape_p;
@@ -347,6 +348,31 @@ namespace CR { // Namespace CR -- begin
   //  Direction coordinates (celestial position & distance)
   //
   // ============================================================================
+  
+  bool SkymapCoordinates::setSpatialCoordinates (SpatialCoordinate const &coord)
+  {
+    bool status (true);
+
+    switch (coord.type()) {
+    case CoordinateType::Direction:
+      /* For the forseeable future we will be keeping three axes, even if the
+	 radial axis is degenerate.
+      */
+      std::cout << "[SkymapCoordinates::setSpatialCoordinates] "
+		<< "Usage coordinate type Direction not (yet) supported."
+		<< std::endl;
+      status = false;
+      break;
+    case CoordinateType::DirectionRadius:
+      spatialType_p = CoordinateType (coord.type());
+      break;
+    default:
+      spatialType_p = CoordinateType (coord.type());
+      break;
+    }
+
+    return status;
+  }
   
   // ------------------------------------------------------------- MDirectionType
   
@@ -520,7 +546,7 @@ namespace CR { // Namespace CR -- begin
       [2] The conversion from pixel to world coordinates is done using the
       DirectionCoordinate extracted from the CoordinateSystem.
     */
-    DirectionCoordinate dc = directionAxis();
+    DirectionCoordinate dc = directionCoordinate();
     for (lon=0, pixel(0)=0.0; lon<shape_p(0); lon++, pixel(0)++) {
       for (lat=0, pixel(1)=0.0; lat<shape_p(1); lat++, pixel(1)++) {
 	// perform the actual conversion from pixel to world coordinate
@@ -889,7 +915,7 @@ namespace CR { // Namespace CR -- begin
     std::string top;
     std::string right;
     vector<double> frequencyBand (timeFreq_p.frequencyBand());
-    DirectionCoordinate dc (directionAxis());
+    DirectionCoordinate dc (directionCoordinate());
 
     status = beamType (domain,quantity);
     status = mapOrientation (top,right);
@@ -935,6 +961,7 @@ namespace CR { // Namespace CR -- begin
        << " [" << top << "," << right << "]"                        << endl;
     os << " Skymap quantity          = " << beamType_p           
        << " [" << domain << "," << quantity << "]"                  << endl;
+    os << " Spatial coordinate type  = " << spatialType_p.type()    << endl;
     os << " Number of coordinates    = " << csys_p.nCoordinates()   << endl;
     os << " Shape of the pixel array = " << shape_p                 << endl;
     os << " World axis names         = " << csys_p.worldAxisNames() << endl;

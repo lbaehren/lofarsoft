@@ -35,6 +35,8 @@
 
 MACRO (get_casacore_data)
 
+  set (TAR_FILENAME "casacore-data.tgz")
+
   ## -----------------------------------------------------------------
   ## Check environment
 
@@ -56,7 +58,7 @@ MACRO (get_casacore_data)
     message (STATUS "Retrieving tar-archive from USG server ...")
     execute_process (
       WORKING_DIRECTORY ${USG_ROOT}/data
-      COMMAND wget -c ${USG_DOWNLOAD}/software/casacore-data.tgz
+      COMMAND wget -c ${USG_DOWNLOAD}/software/${TAR_FILENAME}
       TIMEOUT 600
       ERROR_VARIABLE error_wget
       )
@@ -64,18 +66,37 @@ MACRO (get_casacore_data)
     if (HAVE_CURL)
       execute_process (
 	WORKING_DIRECTORY ${USG_ROOT}/data
-	COMMAND curl ${USG_DOWNLOAD}/software/casacore-data.tgz
+	COMMAND curl ${USG_DOWNLOAD}/software/${TAR_FILENAME}
 	TIMEOUT 600
 	ERROR_VARIABLE error_curl
 	)
     else (HAVE_CURL)
-      message (FATAL_ERROR "[ROOT] No tool found to download tar-archive!")
+      message (FATAL_ERROR "No tool found to download tar-archive!")
     endif (HAVE_CURL)
   endif (HAVE_WGET)
   
   ## -----------------------------------------------------------------
-  ## Expand the retrieved archive into the data directory
+  ## If the download was successfuul: expand the tar archive within the
+  ## data directory.
 
+  find_path (HAVE_TAR_ARCHIVE ${TAR_FILENAME} ${USG_ROOT}/data)
   
+  if (HAVE_TAR_ARCHIVE)
+    
+    if (HAVE_TAR)
+      execute_process (
+	WORKING_DIRECTORY ${USG_ROOT}/data
+	COMMAND tar -xvzf ${TAR_FILENAME}
+	TIMEOUT 300
+	ERROR_VARIABLE error_tar
+	ERROR_FILE error.log
+	)
+    else (HAVE_TAR)
+      message (FATAL_ERROR "Unable to find executable tar; please install!")
+    endif (HAVE_TAR)
+    
+  else (HAVE_TAR_ARCHIVE)
+    message (STATUS "No tar archive with measures data found; nothing to unpack!")
+  endif (HAVE_TAR_ARCHIVE)
   
 ENDMACRO (get_casacore_data)

@@ -4,11 +4,11 @@
 General Information:
 -------------------
 		   HDF5 Version: 1.8.1
-		  Configured on: Wed Aug 27 12:15:15 CEST 2008
-		  Configured by: lars@yavanna.nfra.nl
+		  Configured on: Tue Sep  2 01:01:26 CEST 2008
+		  Configured by: lars@Yavanna.local
 		 Configure mode: production
 		    Host system: i386-apple-darwin8.11.1
-	      Uname information: Darwin yavanna.nfra.nl 8.11.1 Darwin Kernel Version 8.11.1: Wed Oct 10 18:23:28 PDT 2007; root:xnu-792.25.20~1/RELEASE_I386 i386 i386
+	      Uname information: Darwin Yavanna.local 8.11.1 Darwin Kernel Version 8.11.1: Wed Oct 10 18:23:28 PDT 2007; root:xnu-792.25.20~1/RELEASE_I386 i386 i386
 		       Byte sex: little-endian
 		      Libraries: 
 	       Parallel support: no

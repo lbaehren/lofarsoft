@@ -17,8 +17,8 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *
- * Created:		Aug 27, 2008
- *			Lars Baehren <lars@yavanna.nfra.nl>
+ * Created:		Sep  2, 2008
+ *			Lars Baehren <lars@Yavanna.local>
  *
  * Purpose:		This machine-generated source code contains
  *			information about the various integer and

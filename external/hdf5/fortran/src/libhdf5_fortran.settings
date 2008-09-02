@@ -2,8 +2,8 @@ SUMMARY OF THE HDF5 CONFIGURATION
 =================================
 
 HDF5 Version:       1.8.1
-Configured on:      Wed Aug 27 12:15:15 CEST 2008
-Configured by:      lars@yavanna.nfra.nl
+Configured on:      Tue Sep  2 01:01:26 CEST 2008
+Configured by:      lars@Yavanna.local
 Configure mode:     production
 Host system:        i386-apple-darwin8.11.1
 Byte sex:           little-endian

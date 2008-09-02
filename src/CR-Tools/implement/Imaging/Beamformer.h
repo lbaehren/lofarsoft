@@ -21,8 +21,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef BEAMFORMER_H
-#define BEAMFORMER_H
+#ifndef CR_BEAMFORMER_H
+#define CR_BEAMFORMER_H
 
 // Standard library header files
 #include <iostream>

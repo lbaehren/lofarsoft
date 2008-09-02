@@ -376,4 +376,37 @@ namespace CR { // Namespace CR -- begin
     }
   }
   
+  // -------------------------------------------------------------------- toPixel
+
+  void SpatialCoordinate::toPixel (Vector<double> &pixel,
+				   const Vector<double> &world)
+  {
+    switch (type_p) {
+      case CoordinateType::Direction:
+	directionCoord_p.toPixel (pixel,world);
+	break;
+    case CoordinateType::DirectionRadius:
+      {
+	Vector<casa::Double> pixelDirection (2);
+	Vector<casa::Double> pixelLinear (2);
+	Vector<casa::Double> worldDirection (2);
+	Vector<casa::Double> worldLinear (1);
+	worldDirection(0) = world(0);
+	worldDirection(1) = world(1);
+	worldLinear(0)    = world(2);
+	// conversion
+	directionCoord_p.toPixel (pixelDirection,worldDirection);
+	linearCoord_p.toPixel (pixelLinear,worldLinear);
+	// copy to output
+	pixel(0) = pixelDirection(0);
+	pixel(1) = pixelDirection(0);
+	pixel(2) = pixelLinear(0);
+      }
+      break;
+    default:
+      linearCoord_p.toPixel (pixel,world);
+      break;
+    }
+  }
+  
 } // Namespace CR -- end

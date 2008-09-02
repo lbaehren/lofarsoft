@@ -437,7 +437,7 @@ namespace CR {  // Namespace CR -- begin
   {
     TimeFreq timeFreq        = coordinates_p.timeFreq();
     CoordinateSystem csys    = coordinates_p.coordinateSystem();
-    DirectionCoordinate axis = coordinates_p.directionAxis();
+    DirectionCoordinate axis = coordinates_p.directionCoordinate();
     MDirection direction     = axis.directionType();
     String refcode           = direction.getRefString();
     String projection        = axis.projection().name();

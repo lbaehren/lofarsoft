@@ -356,7 +356,7 @@ namespace CR { // Namespace CR -- begin
     inline void setReferenceTime (double const &referenceTime) {
       referenceTime_p = referenceTime;
     }
-
+    
     /*!
       \brief Set the reference time, i.e. the start of the time axis
 

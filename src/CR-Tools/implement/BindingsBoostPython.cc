@@ -81,8 +81,6 @@ BOOST_PYTHON_MODULE (pycr)
 	 "Set the Nyquist zone in which the data where sampled")
     .def("referenceTime", &TimeFreq::referenceTime,
 	 "Get the reference time for the time axis")
-    .def("setReferenceTime", &TimeFreq::setReferenceTime,
-	 "Set the reference time for the time axis")
    ;
   
   // ============================================================================

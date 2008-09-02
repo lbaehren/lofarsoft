@@ -172,7 +172,7 @@ int test_SkymapCoordinates ()
   // -----------------------------------------------------------------
   // [3] Retrieve the coordinate handling the direction axes
 
-  casa::DirectionCoordinate dc (coord.directionAxis());
+  casa::DirectionCoordinate dc (coord.directionCoordinate());
   
   {
     Vector<Double> crpix = dc.referencePixel();

@@ -27,7 +27,7 @@
 
 #############################################################################
 #
-# Check for the existence of the LOFARSOFT  environment variable
+#  Check for the existence of the LOFARSOFT  environment variable
 #
 #############################################################################
 
@@ -39,7 +39,7 @@ fi
 
 #############################################################################
 #
-# Add the LOFAR executables to the path
+#  Add the LOFAR executables to the path
 #
 #############################################################################
 
@@ -47,7 +47,7 @@ export PATH=$PATH:$LOFARSOFT/release/bin
 
 #############################################################################
 #
-# Add the Python libraries to the existing search path
+#  Add the Python libraries to the existing search path
 #
 #############################################################################
 

@@ -21,8 +21,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef _SKYMAPPER_H_
-#define _SKYMAPPER_H_
+#ifndef CR_SKYMAPPER_H
+#define CR_SKYMAPPER_H
 
 #include <crtools.h>
 
@@ -72,9 +72,6 @@ namespace CR {  // Namespace CR -- begin
     
     \date 2006/01/23
     
-    \test tUseArrays.cc -- Test working with the CASA Array classes (inludes slicing)
-    \test tUseLattices.cc -- Test working with the CASA Lattice classes; keep in
-    mind that CASA images are derived from the PagedArray and Lattice classes.
     \test tSkymapper.cc -- Basic testing of the Skymapper class
     
     <h3>Prerequisite</h3>
@@ -123,19 +120,19 @@ namespace CR {  // Namespace CR -- begin
     // Collect all the required coordinate information
     SkymapCoordinates coords (...);
     
-  // Create a new Skymapper object
-  Skymapper skymapper (coords);
-  
-  if (skymapper.initSkymapper()) {
-    while (skymapper.nofProcessedBlocks()<=nofBlocks) {
-      // get the current block of data
-      data = some_function();
-      
-      // process the data block and integrate the result into the image
-      status = skymapper.processData (data);
+    // Create a new Skymapper object
+    Skymapper skymapper (coords);
+    
+    if (skymapper.initSkymapper()) {
+      while (skymapper.nofProcessedBlocks()<=nofBlocks) {
+        // get the current block of data
+	data = some_function();
+	
+	// process the data block and integrate the result into the image
+	status = skymapper.processData (data);
+      }
     }
-  }
-  \endcode
+    \endcode
   */
   class Skymapper {
     

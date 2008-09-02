@@ -1,0 +1,58 @@
+#!/bin/bash
+
+## Variables
+
+REQUIRED_MAJOR_VERSION=2
+REQUIRED_MINOR_VERSION=5
+
+HAVE_CMAKE=0
+CMAKE_MAJOR_VERSION=0
+CMAKE_MINOR_VERSION=0
+
+## -------------------------------------------------------------------
+## Check the system if there already is a version of CMake installed
+
+if test -z `which cmake` ; then {
+  HAVE_CMAKE=0
+} else {
+  HAVE_CMAKE=1
+} fi
+
+## -------------------------------------------------------------------
+## If a version of CMake is installed, check if it is the the correct
+## version.
+
+if [[ ${HAVE_CMAKE} == 1 ]] ; then {
+
+  ## obtain version information
+
+  CMAKE_VERSION=`cmake --version | tr " " "\n" | grep -v cmake | grep -v version`
+  CMAKE_MAJOR_VERSION=`echo $CMAKE_VERSION | tr "." " " | tr "-" " "  | awk '{print $1}'`
+  CMAKE_MINOR_VERSION=`echo $CMAKE_VERSION | tr "." " " | tr "-" " "  | awk '{print $2}'`
+
+  ## build condition
+
+  if [[ ${CMAKE_MAJOR_VERSION} -lt ${REQUIRED_MAJOR_VERSION} ]] ; then {
+    echo "CMake major version < ${REQUIRED_MAJOR_VERSION} ; build required";
+    HAVE_CMAKE=0;
+  } else {
+    if [[ ${CMAKE_MINOR_VERSION} -lt ${REQUIRED_MINOR_VERSION} ]] ; then {
+      echo "CMake minor version < ${REQUIRED_MINOR_VERSION} ; build required";
+      HAVE_CMAKE=0;
+    } fi
+  } fi
+
+} fi
+
+## -------------------------------------------------------------------
+## If required initiate build of CMake from provided sources
+
+if [[ ${HAVE_CMAKE} == 0 ]] ; then {
+  echo "Initiating build of CMake from provided sources ..."
+} fi
+
+## -------------------------------------------------------------------
+
+echo "HAVE_CMAKE          = ${HAVE_CMAKE}"
+echo "CMAKE_MAJOR_VERSION = ${CMAKE_MAJOR_VERSION}"
+echo "CMAKE_MINOR_VERSION = ${CMAKE_MINOR_VERSION}"

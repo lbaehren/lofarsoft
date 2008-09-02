@@ -6,9 +6,22 @@
 ##  Lars B"ahren
 ## ------------------------------------------------------------------------------
 
- * debugging of Mac OS configuration 
- 
- * create CMake find script for MySQL as required by DAL
+ * Working through the changes committed by Andreas 
+
+[+] U    src/DAL/implement/HDF5Common.cpp
+[+] U    src/DAL/implement/HDF5Common.h
+[x] U    src/CR-Tools/apps/GlishClients/SimpleDynspecClient.cc
+[x] A    src/CR-Tools/apps/tbbTest.cc
+[x] U    src/CR-Tools/apps/CMakeLists.txt
+[x] U    src/CR-Tools/implement/Analysis/tbbTools.cc
+[x] U    src/CR-Tools/implement/Analysis/tbbTools.h
+[x] U    src/CR-Tools/implement/IO/DataReader.cc
+[+] U    src/CR-Tools/implement/Data/LOFAR_Timeseries.cc
+[]+ U    src/CR-Tools/implement/Data/LOFAR_StationGroup.cc
+[] U    src/CR-Tools/implement/Data/LOFAR_TBB.h
+[+] U    src/CR-Tools/implement/Data/LOFAR_Timeseries.h
+[+] U    src/CR-Tools/implement/Data/LOFAR_DipoleDataset.cc
+[] U    src/CR-Tools/implement/Data/LOFAR_TBB.cc
 
  * DataReader: provide method to retrive length of segement for each dipole
 

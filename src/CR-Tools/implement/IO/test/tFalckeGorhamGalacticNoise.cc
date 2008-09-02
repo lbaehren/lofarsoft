@@ -76,7 +76,7 @@ int main ()
   for (long i=0; i<numpoints; ++i) { frequencies(i)=i*freqstep; }
   Test.getNoise(frequencies,noise);
   
-  for (long i=0; i<noise.nelements(); ++i)
+  for (long i=0; i<long(noise.nelements()); ++i)
   {
     cout << frequencies(i) << "\t" << noise(i) << "\n";
   }
@@ -86,7 +86,7 @@ int main ()
   cout << endl;
 
   double timeintegral = 0.0;
-  for (long i=0; i<timeseries.nelements(); ++i)
+  for (long i=0; i<long(timeseries.nelements()); ++i)
   {
     cout << timeseries(i) << "\n";
     timeintegral+=timeseries(i)*timeseries(i)/impedance*timestep;

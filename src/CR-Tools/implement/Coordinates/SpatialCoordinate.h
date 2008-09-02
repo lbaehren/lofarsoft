@@ -121,7 +121,7 @@ namespace CR { // Namespace CR -- begin
       </tr>
     </table>
 
-    Given the fact that we are potentially working with omre but a single object
+    Given the fact that we are potentially working with more but a single object
     of type casa::Coordinate we need to wrap the calls to function handling
     either allowing access to internal parameters or carrying out coordinate
     conversions.
@@ -221,7 +221,58 @@ namespace CR { // Namespace CR -- begin
     SpatialCoordinate& operator= (SpatialCoordinate const &other); 
     
     // --------------------------------------------------------------- Parameters
+
+    /*!
+      \brief Get the type of the spatial coordinate
+
+      \return type -- The type of the spatial coordinate, one of the values
+              defined through CoordinateTypes::Type
+    */
+    inline CoordinateType::Types type () const {
+      return type_p;
+    }
     
+    /*!
+      \brief Get the number of coordinate axes
+      
+      \return nofAxes -- The number of coordinate axes.
+    */
+    inline unsigned int nofAxes () const {
+      return nofAxes_p;
+    }
+ 
+    /*!
+      \brief Get the number of casa::Coordinate object to make of this coordinate
+
+      \return nofCoordinates -- The number of casa::Coordinate object to make of
+              this coordinate
+     */
+    inline unsigned int nofCoordinates () const {
+      return nofCoordinates_p;
+    }
+
+    /*!
+      \brief Get the DirectionCoordinate object of the spatial coordinate
+
+      \return directionCoord -- The DirectionCoordinate object of the spatial
+              coordinate. This is set up properly only for
+	      CR::CoordinateType::Direction and CR::CoordinateType::DirectionRadius
+    */
+    inline DirectionCoordinate directionCoordinate () const {
+      return directionCoord_p;
+    }
+
+    /*!
+      \brief Get the LinearCoordinate object of the spatial coordinate
+
+      \return linearCoord -- The LinearCoordinate object of the spatial
+              coordinate. This is set up properly for all coordinate types except
+	      CR::CoordinateType::Direction
+    */
+    inline LinearCoordinate linearCoordinate () const {
+      return linearCoord_p;
+    }
+
     /*!
       \brief Get the name of the class
       
@@ -247,25 +298,6 @@ namespace CR { // Namespace CR -- begin
 
     // ------------------------------------------------------------------ Methods
     
-    /*!
-      \brief Get the number of coordinate axes
-      
-      \return nofAxes -- The number of coordinate axes.
-    */
-    inline unsigned int nofAxes () const {
-      return nofAxes_p;
-    }
- 
-    /*!
-      \brief Get the number of casa::Coordinate object to make of this coordinate
-
-      \return nofCoordinates -- The number of casa::Coordinate object to make of
-              this coordinate
-     */
-    inline unsigned int nofCoordinates () const {
-      return nofCoordinates_p;
-    }
-
     /*!
       \brief Get the names of the world axes
 

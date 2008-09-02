@@ -593,6 +593,21 @@ int create_lofar_images ()
 
 // ------------------------------------------------------------------------------
 
+/*!
+  \brief Test schemes for accessing the image pixel array
+
+  \return nofFailedTests -- The number of failed tests ecountered within this 
+          function.
+*/
+int test_ArrayAccess ()
+{
+  int nofFailedTests (0);
+
+  return nofFailedTests;
+}
+
+// ------------------------------------------------------------------------------
+
 int main (int argc,
 	  char *argv[])
 {
@@ -617,6 +632,7 @@ int main (int argc,
 #ifdef HAVE_HDF5
   nofFailedTests += test_HDF5Image ();
   nofFailedTests += create_lofar_images();
+  nofFailedTests += test_ArrayAccess ();
 #endif
 
   return nofFailedTests;

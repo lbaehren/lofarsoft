@@ -21,8 +21,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef SKYMAPCOORDINATES_H
-#define SKYMAPCOORDINATES_H
+#ifndef CR_SKYMAPCOORDINATES_H
+#define CR_SKYMAPCOORDINATES_H
 
 // Standard library header files
 #include <iostream>
@@ -50,6 +50,7 @@
 
 // Custom header files
 #include <Coordinates/TimeFreq.h>
+#include <Coordinates/SpatialCoordinate.h>
 #include <Imaging/Beamformer.h>
 #include <IO/DataReader.h>
 #include <Observation/ObservationData.h>
@@ -256,25 +257,21 @@ namespace CR { // Namespace CR -- begin
 
     //! Number of data blocks included into the map
     uint nofBlocks_p;
-
     // Basic container for the time-frequency domain settings
     TimeFreq timeFreq_p;
-    
     //! Observation data (epoch, location, etc.)
     ObservationData obsData_p;
-    
+    //! Type of the spatial coordinate
+    CoordinateType spatialType_p;
     //! Orientation of the generated sky map
     MapOrientation mapOrientation_p;
-
     //! Electrical quantities and/or corresponding beam types
     BeamType beamType_p;
-    
     //! Shape of the image
     IPosition shape_p;
-
     //! Coordinate system attached to the image
     CoordinateSystem csys_p;
-
+    
   public:
     
     // ==========================================================================
@@ -472,6 +469,17 @@ namespace CR { // Namespace CR -- begin
       return shape_p;
     }
 
+    /*!
+      \brief Set the spatial coordinates 
+
+      \param coord -- Container with one or more casa::Coordinate objects to
+             describe the spatial coordinates of the coordinate system.
+
+      \return status -- The status of the operation; returns <tt>false</tt> in
+              case an error was encountered.
+    */
+    bool setSpatialCoordinates (SpatialCoordinate const &coord);
+
     // ----------------------------------------------------------- Direction axis
     
     /*!
@@ -481,16 +489,16 @@ namespace CR { // Namespace CR -- begin
               for the direction coordinates
     */
     inline String projection () {
-      DirectionCoordinate dc = directionAxis();
+      DirectionCoordinate dc = directionCoordinate();
       return dc.projection().name();
     }
 
     /*!
       \brief Get the coordinate handling the direction axes
 
-      \return directionAxis -- The coordinate handling the direction axis
+      \return directionCoordinate -- The coordinate handling the direction axis
     */
-    inline DirectionCoordinate directionAxis () {
+    inline DirectionCoordinate directionCoordinate () {
       return csys_p.directionCoordinate(SkymapCoordinates::Direction);
     }
 

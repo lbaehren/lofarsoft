@@ -468,7 +468,7 @@ int test_coordinateSystem ()
     cout << "-- Direction coordinates axis..." << endl;
     {
       DirectionCoordinate axis1 = csys.directionCoordinate (SkymapCoordinates::Direction);
-      DirectionCoordinate axis2 = coord.directionAxis();
+      DirectionCoordinate axis2 = coord.directionCoordinate();
       
       cout << " -- Reference pixel (CRPIX) = "
 	   << axis1.referencePixel() << "  <=>  " << axis2.referencePixel()
@@ -665,7 +665,7 @@ int test_directionAxis ()
   
   cout << "[1] Retrival of the DirectionCoordinate..." << endl;
   try {
-    casa::DirectionCoordinate dc = coord.directionAxis();
+    casa::DirectionCoordinate dc = coord.directionCoordinate();
     show_Coordinate (dc);
   } catch (std::string message) {
     std::cerr << message << endl;

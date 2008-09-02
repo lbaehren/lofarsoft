@@ -15,6 +15,11 @@
 
 basedir=`pwd`
 
+## Required minimum version of CMake
+
+REQUIRED_MAJOR_VERSION=2
+REQUIRED_MINOR_VERSION=5
+
 ## Default values for the optional parameters
 
 param_forceBuild=0;
@@ -87,61 +92,84 @@ print_help ()
 }
 
 ## -------------------------------------------------------------------
-## Check version of existing CMake version
-
-check_cmake_version ()
-{
-    var_cmake_version=`cmake --version | tr " " "\n" | grep -v cmake | grep -v version`
-
-    cmake_major_version=`echo $var_cmake_version | tr "." " " | tr "-" " "  | awk '{print $1}'`
-    cmake_minor_version=`echo $var_cmake_version | tr "." " " | tr "-" " "  | awk '{print $2}'`
-
-    if [ $cmake_major_version -lt 2 ] 
-	then
-	build_cmake
-    else
-	if [ $cmake_minor_version -lt 5 ] 
-	    then
-	    build_cmake
-	fi
-    fi
-}
-
-## -------------------------------------------------------------------
 ## Build CMake from source 
 
 build_cmake ()
 {
-	## Check if the source code to build cmake is available; if this
-	## is not the case with error, since this is the bottom-most 
-	## position in the dependency chain
-	if test -d $basedir/../external/cmake ; then
-	    echo "[`date`] Found directory with source code for CMake."
-	else
-	    echo "[`date`] Missing source directory for cmake! Unable to continue!"
-	    exit 1;
-	fi
+    ## local variables
+    
+    HAVE_CMAKE=0
+    CMAKE_MAJOR_VERSION=0
+    CMAKE_MINOR_VERSION=0
+
+    ## [1] Check the system if there already is a version of CMake
+    ##     installed
+    
+    if test -z `which cmake` ; then {
+	HAVE_CMAKE=0;
+    } else {
+	HAVE_CMAKE=1;
+    } fi;
+	
+    ## [2] If a version of CMake is installed, check if it is a recent
+    ##     enough correct version.
+	
+    if [[ ${HAVE_CMAKE} == 1 ]] ; then {
+		
+        ## obtain version information
+		
+	CMAKE_VERSION=`cmake --version | tr " " "\n" | grep -v cmake | grep -v version`
+	CMAKE_MAJOR_VERSION=`echo $CMAKE_VERSION | tr "." " " | tr "-" " "  | awk '{print $1}'`
+	CMAKE_MINOR_VERSION=`echo $CMAKE_VERSION | tr "." " " | tr "-" " "  | awk '{print $2}'`
+	
+	## build condition
+		
+	if [[ ${CMAKE_MAJOR_VERSION} -lt ${REQUIRED_MAJOR_VERSION} ]] ; then {
+	    echo "CMake major version < ${REQUIRED_MAJOR_VERSION} ; build required";
+	    HAVE_CMAKE=0;
+	} else {
+	    if [[ ${CMAKE_MINOR_VERSION} -lt ${REQUIRED_MINOR_VERSION} ]] ; then {
+		echo "CMake minor version < ${REQUIRED_MINOR_VERSION} ; build required";
+		HAVE_CMAKE=0;
+	    } fi
+	} fi
+
+    } fi
+
+    ## [3] If required initiate build of CMake from provided sources
+
+    if [[ ${HAVE_CMAKE} == 0 ]] ; then {
+
+    ## Check if the source code to build cmake is available; if this
+    ## is not the case with error, since this is the bottom-most 
+    ## position in the dependency chain
+    if test -d $basedir/../external/cmake ; then
+	echo "[`date`] Found directory with source code for CMake."
+    else
+	echo "[`date`] Missing source directory for CMake! Unable to continue!"
+	exit 1;
+    fi
 	## prepare to build cmake from its source
-	if test -d cmake ; then
-	    cd cmake;
-	else
-	    mkdir cmake;
-	    cd cmake;
-	fi
+    if test -d cmake ; then
+	cd cmake;
+    else
+	mkdir cmake;
+	cd cmake;
+    fi
 	## run the configure script
-	echo "[`date`] Running configure script for cmake ..."
-	$basedir/../external/cmake/configure --prefix=$basedir/../release
+    echo "[`date`] Running configure script for CMake ..."
+    $basedir/../external/cmake/configure --prefix=$basedir/../release
 	## build and install
-	echo "[`date`] Initiating build and install of cmake ..."
-	make && make install
-	export PATH=$PATH:$basedir/../release/bin
-	## check if we have been able to create a cmake executable
-	if test -f `which cmake` ; then
-	    echo "[`date`] Found newly created cmake executable."
-	else
-	    echo "[`date`] No cmake executable found in release/bin! Unable to continue!"
-	    exit 1;
-	fi
+    echo "[`date`] Initiating build and install of CMake ..."
+    make && make install
+    export PATH=$PATH:$basedir/../release/bin
+
+    } fi;
+
+    ## Check if after the build and installation indeed now we have a
+    ## working and recent enough version available
+
+    if test -z `which cmake` ; then { exit 1; } fi
 }
 
 ## -------------------------------------------------------------------
@@ -330,7 +358,7 @@ done
 ## since all further operations need CMake as central tool, we need to make sure
 ## it is available first.
 
-if test -z `which cmake` ; then { build_cmake ; } else { check_cmake_version ;} fi
+build_cmake
 
 ## once we have make sure CMake is available, we can continue
 
@@ -362,7 +390,7 @@ case $param_packageName in
     ;;
     cmake)
        echo "[`date`] Selected package CMake";
-       check_cmake_version
+       build_cmake
     ;;
     flex)
         echo "[`date`] Selected package Flex";
@@ -371,7 +399,7 @@ case $param_packageName in
     hdf5)
         echo "[`date`] Selected package Hdf5"
 	build_package szip external/szip "-DSZIP_FORCE_BUILD:BOOL=$param_forceBuild";
-	build_package zlib external/zlib "-DZLIB_FORCE_BUILD:BOOL=$param_forceBuild";
+	#build_package zlib external/zlib "-DZLIB_FORCE_BUILD:BOOL=$param_forceBuild";
 	build_package hdf5 external/hdf5 "-DHDF5_FORCE_BUILD:BOOL=$param_forceBuild";
 	## post-installation clean-up: since the "--includedir" option does not seem
 	## to be handled properly by the configure script, we need to manually move
