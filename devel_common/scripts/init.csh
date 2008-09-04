@@ -65,6 +65,15 @@ else
    setenv PYTHONPATH ${LOFARSOFT}/release/lib/python
 endif
 
+#############################################################################
+#
+#  Define the AIPSPATH environment variable, used to locate measures data
+#
+#############################################################################
+
+if ($?AIPSPATH) then
+    setenv AIPSPATH ${LOFARSOFT}
+endif
 
 #############################################################################
 #                    Finished configuration                                 #  
