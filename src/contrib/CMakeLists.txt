@@ -80,6 +80,9 @@ endif (NOT contrib_VERBOSE_CONFIGURE)
 
 ## Standard CMake modules
 
+include (CTest)
+enable_testing()
+
 find_package (X11)
 find_package (ZLIB)
 
@@ -97,16 +100,19 @@ include (FindWCS)
 ## -----------------------------------------------------------------------------
 ## Configuration summary
 
-message (STATUS "Have BOOST    = ${HAVE_BOOST}")
-message (STATUS "Have casacore = ${HAVE_CASACORE}")
-message (STATUS "Have CFITSIO  = ${HAVE_CFITSIO}")
-message (STATUS "Have HDF5     = ${HAVE_HDF5}")
-message (STATUS "Have PLPLOT   = ${HAVE_PLPLOT}")
-message (STATUS "Have WCS      = ${HAVE_WCSLIB}")
-message (STATUS "Have ZLIB     = ${HAVE_ZLIB}")
+if (contrib_VERBOSE_CONFIGURE)
+  message (STATUS "Have BOOST    = ${HAVE_BOOST}")
+  message (STATUS "Have casacore = ${HAVE_CASACORE}")
+  message (STATUS "Have CFITSIO  = ${HAVE_CFITSIO}")
+  message (STATUS "Have HDF5     = ${HAVE_HDF5}")
+  message (STATUS "Have PLPLOT   = ${HAVE_PLPLOT}")
+  message (STATUS "Have WCS      = ${HAVE_WCSLIB}")
+  message (STATUS "Have ZLIB     = ${HAVE_ZLIB}")
+endif (contrib_VERBOSE_CONFIGURE)
 
 ## -----------------------------------------------------------------------------
 ## Subdirectories
 
 add_subdirectory (data_inspection)
+add_subdirectory (testing)
 add_subdirectory (utilities)
