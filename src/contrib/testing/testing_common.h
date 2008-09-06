@@ -26,12 +26,11 @@
 #include <vector>
 
 /*!
-  \file tests_common.h
+  \file testing_common.h
+
+  \ingroup contrib
 
   \brief A set of common functions used by the various test programs
-
-  \defgroup CR_test CR-Pipeline: Tests for required external components
-  \ingroup CR
 
   \author Lars B&auml;hren
 */
@@ -41,8 +40,8 @@
 /*!
   \brief Compute runtime of an operation based on start and end time
   
-  \param start -- 
-  \param end   -- 
+  \param start -- Clock cycle counter at the start of the operation
+  \param end   -- Clock cycle counter at the end of the operation
 
   \return runtime -- Time-interval between the moments the two values
           <tt>start</tt> and <tt>end</tt> were extracted.

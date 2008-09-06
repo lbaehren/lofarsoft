@@ -2,8 +2,8 @@
  | $Id::                                                                 $ |
  *-------------------------------------------------------------------------*
  ***************************************************************************
- *   Copyright (C) <year>                                                  *
- *   <author> (<mail>)                                                     *
+ *   Copyright (C) 2008                                                  *
+ *   Lars Baehren (<mail>)                                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,20 +21,54 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <<newModule>/<newClass>.h>
+#include <Coordinates/TimeFreqSkymap.h>
 
-namespace <newNamespace> { // Namespace <newNamespace> -- begin
+namespace CR { // Namespace CR -- begin
   
   // ============================================================================
   //
   //  Construction
   //
   // ============================================================================
+
+  // ------------------------------------------------------------- TimeFreqSkymap
   
-  <newClass>::<newClass> ()
-  {;}
+  TimeFreqSkymap::TimeFreqSkymap ()
+    : TimeFreq()
+  {
+    setBlocksPerFrame (1);
+    setNofFrames (1);
+  }
   
-  <newClass>::<newClass> (<newClass> const &other)
+  // ------------------------------------------------------------- TimeFreqSkymap
+  
+  TimeFreqSkymap::TimeFreqSkymap (uint const &blocksPerFrame,
+				  uint const &nofFrames)
+    : TimeFreq()
+  {
+    setBlocksPerFrame (blocksPerFrame);
+    setNofFrames (nofFrames);
+  }
+  
+  // ------------------------------------------------------------- TimeFreqSkymap
+  
+  TimeFreqSkymap::TimeFreqSkymap (uint const &blocksize,
+				  double const &sampleFrequency,
+				  uint const &nyquistZone,
+				  uint const &blocksPerFrame,
+				  uint const &nofFrames)
+    : TimeFreq(blocksize,
+	       sampleFrequency,
+	       nyquistZone)
+  {
+    setBlocksPerFrame (blocksPerFrame);
+    setNofFrames (nofFrames);
+  }
+  
+  // ------------------------------------------------------------- TimeFreqSkymap
+  
+  TimeFreqSkymap::TimeFreqSkymap (TimeFreqSkymap const &other)
+    : TimeFreq(other)
   {
     copy (other);
   }
@@ -45,12 +79,12 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
   //
   // ============================================================================
   
-  <newClass>::~<newClass> ()
+  TimeFreqSkymap::~TimeFreqSkymap ()
   {
     destroy();
   }
   
-  void <newClass>::destroy ()
+  void TimeFreqSkymap::destroy ()
   {;}
   
   // ============================================================================
@@ -59,7 +93,7 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
   //
   // ============================================================================
   
-  <newClass>& <newClass>::operator= (<newClass> const &other)
+  TimeFreqSkymap& TimeFreqSkymap::operator= (TimeFreqSkymap const &other)
   {
     if (this != &other) {
       destroy ();
@@ -68,8 +102,13 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
     return *this;
   }
   
-  void <newClass>::copy (<newClass> const &other)
-  {;}
+  void TimeFreqSkymap::copy (TimeFreqSkymap const &other)
+  {
+    TimeFreq::operator= (other);
+
+    blocksPerFrame_p = other.blocksPerFrame_p;
+    nofFrames_p      = other.nofFrames_p;
+  }
 
   // ============================================================================
   //
@@ -77,9 +116,15 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
   //
   // ============================================================================
   
-  void <newClass>::summary (std::ostream &os)
+  void TimeFreqSkymap::summary (std::ostream &os)
   {
-    os << "[<newClass>] Summary of internal parameters." << std::endl;
+    os << "[TimeFreqSkymap] Summary of internal parameters." << std::endl;
+    os << "-- Blocksize        = " << blocksize_p       << std::endl;
+    os << "-- Sample frequency = " << sampleFrequency_p << std::endl;
+    os << "-- Nyquist zone     = " << nyquistZone_p     << std::endl;
+    os << "-- Reference time   = " << referenceTime_p   << std::endl;
+    os << "-- Blocks per frame = " << blocksPerFrame_p  << std::endl;
+    os << "-- nof. frames      = " << nofFrames_p       << std::endl;
   }
   
   
@@ -92,4 +137,4 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
   
   
 
-} // Namespace <newNamespace> -- end
+} // Namespace CR -- end

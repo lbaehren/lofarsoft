@@ -96,7 +96,7 @@ namespace <newNamespace> { // Namespace <newNamespace> -- begin
       
       \return className -- The name of the class, <newClass>.
     */
-    std::string className () const {
+    inline std::string className () const {
       return "<newClass>";
     }
 

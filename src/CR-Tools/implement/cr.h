@@ -26,6 +26,21 @@
 /*!
   \defgroup CR Cosmic Rays (CR) analysis pipeline
   
+  \verbatim
+  lofarsoft
+  |-- data
+  |-- doc
+  |-- release
+  |-- build
+  |-- devel_common
+  |-- external
+  `-- src
+      |-- contrib
+      |-- CR-Tools     <-- you are here
+      |-- DAL
+      `-- pybdsm
+  \endverbatim
+
   This documentation contains the description of the C/C++ components of the
   software used for data inspection and reduction with the
   <a href="http://www.astro.ru.nl/lopes">LOPES</a> and LOFAR/CR experiments.

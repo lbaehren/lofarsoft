@@ -43,13 +43,13 @@ using <newNamespace>::<newClass>;
 /*!
   \brief Test constructors for a new <newClass> object
 
-  \return nofFailedTests -- The number of failed tests.
+  \return nofFailedTests -- The number of failed tests within this function.
 */
-int test_<newClass> ()
+int test_constructors ()
 {
   int nofFailedTests (0);
   
-  std::cout << "\n[test_<newClass>]\n" << std::endl;
+  std::cout << "\n[t<newClass>::test_constructors]\n" << std::endl;
 
   std::cout << "[1] Testing default constructor ..." << std::endl;
   try {
@@ -71,9 +71,7 @@ int main ()
   int nofFailedTests (0);
 
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_<newClass> ();
-  }
+  nofFailedTests += test_constructors ();
 
   return nofFailedTests;
 }

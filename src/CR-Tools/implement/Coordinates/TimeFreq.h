@@ -67,17 +67,75 @@ namespace CR { // Namespace CR -- begin
     
     Most of the quantities in the time-frequency domain can be derived from a
     small set of basic variables:
-    <ul>
-      <li><b>blocksize</b> -- The number of samples in a block of data, which is
-      getting processed.</li>
-      <li><b>sampleFrequency</b> -- The frequency, [Hz], with which the data are
-      sampled in the analog-to-digital conversion step</li>
-      <li><b>nyquistZone</b> -- The Nyquist zone. The sample rate divided by two
-      (\f$ \nu_{\rm sample}/2 \f$) is known as the <i>Nyquist frequency</i>
-      and the frequency range from DC (or 0 Hz) to \f$ \nu_{\rm sample}/2 \f$
-      is called the first Nyquist zone.</li>
-    </ul>
-    
+
+    <table border="0">
+      <tr>
+        <td class="indexkey">Variable</td>
+	<td class="indexkey">Symbol</td>
+	<td class="indexkey">Units</td>
+	<td class="indexkey">Decription</td>
+      </tr>
+      <tr>
+       <td>blocksize</td>
+       <td>\f$ N_{\rm Blocksize} \f$</td>
+       <td>Samples</td>
+       <td>The number of samples in a block of data, which is getting processed.</td>
+      </tr>
+      <tr>
+       <td>sampleFrequency</td>
+       <td>\f$ \nu_{\rm Sample} \f$</td>
+       <td>Hz</td>
+       <td>The frequency with which the data are sampled in the analog-to-digital
+       conversion step.</td>
+      </tr>
+      <tr valign="top">
+       <td>nyquistZone</td>
+       <td>\f$ N_{\rm Nyquist} \f$</td>
+       <td></td>
+       <td> The Nyquist zone. The sample rate divided by two
+       (\f$ \nu_{\rm sample}/2 \f$) is known as the <i>Nyquist frequency</i> and
+       the frequency range from DC (or 0 Hz) to \f$ \nu_{\rm sample}/2 \f$ is
+       called the first Nyquist zone.</td>
+      </tr>
+    </table>
+
+    Based on the above base quantities, we are able to derived a number of
+    secondary quantities:
+
+    <table border="0">
+      <tr>
+        <td class="indexkey">Quantity</td>
+	<td class="indexkey">Units</td>
+	<td class="indexkey">Symbol</td>
+	<td class="indexkey">Derivation</td>
+      </tr>
+      <tr>
+       <td>Sample interval</td>
+       <td>s</td>
+       <td>\f$ T_{\rm Sample} \f$</td>
+       <td>\f$ T_{\rm Sample} = \nu_{\rm Sample}^{-1} \f$</td>
+      </tr>
+      <tr>
+       <td>FFT output length</td>
+       <td>Samples</td>
+       <td>\f$ N_{\rm FFT} \f$</td>
+       <td>\f$ N_{\rm FFT} = \frac{N_{\rm Blocksize}}{2}+1 \f$</td>
+      </tr>
+      <tr>
+       <td>Frequency resolution in the Fourier domain</td>
+       <td>Hz</td>
+       <td>\f$ \delta\nu \f$</td>
+       <td>\f$ \delta \nu = \nu_{\rm Sample} \cdot \Bigl( 2 \cdot (N_{\rm FFT} -1)
+	  \Bigr)^{-1} = \frac{\nu_{\rm Sample}}{N_{\rm Blocksize}} \f$</td>
+      </tr>
+      <tr>
+       <td></td>
+       <td></td>
+       <td></td>
+       <td></td>
+      </tr>
+    </table>
+
     <h3>Example(s)</h3>
     
     <ul>
@@ -309,8 +367,8 @@ namespace CR { // Namespace CR -- begin
       \brief Set the sample frequency, \f$ \nu_{\rm Sample} \f$, from a Quantity
 
       \param sampleFrequency -- Sample frequency in the ADC, provided as a
-                                casa::Quantity (i.e. a value with a unit).
-     */
+              casa::Quantity (i.e. a value with a unit).
+    */
     inline void setSampleFrequency (casa::Quantity const &sampleFrequency) {
       setSampleFrequency (sampleFrequency.getValue("Hz"));
     }
@@ -373,9 +431,8 @@ namespace CR { // Namespace CR -- begin
       \brief Get the output length of the FFT, \f$ N_{\rm FFT} \f$
 
       \return fftLength -- The output length of the FFT, [channels], i.e. the 
-                           number of frequency channels resulting from the FFT
-			   of a data block of \f$ N_{\rm Blocksize} \f$
-			   samples.
+              number of frequency channels resulting from the FFT of a data
+	      block of \f$ N_{\rm Blocksize} \f$ samples.
     */
     inline uint fftLength () const { /*BPL*/
       return fftLength_p;
@@ -385,8 +442,7 @@ namespace CR { // Namespace CR -- begin
       \brief Get the sample interval, \f$ T_{\rm Sample} \f$
 
       \return sampleInterval -- The sample interval, [s], i.e. the inverse of the
-                                sample frequency: \f$ T_{\rm Sample} =
-				1/\nu_{\rm Sample}  \f$
+              sample frequency.
     */
     inline double sampleInterval () { /*BPL*/
       return 1/sampleFrequency_p;
@@ -394,10 +450,8 @@ namespace CR { // Namespace CR -- begin
 
     /*!
       \brief Get the increment along the frequency axis, \f$ \delta \nu \f$
-
-      \return frequencyIncrement -- The increment along the frequency axis, [Hz],
-                                    \f[ \delta \nu =
-				    \frac{\nu_{\rm Sample}}{N_{\rm Blocksize}} \f]
+      
+      \return frequencyIncrement -- The increment along the frequency axis, [Hz].
     */
     inline double frequencyIncrement () const { /*BPL*/
       return sampleFrequency_p/blocksize_p;

@@ -257,8 +257,69 @@ namespace CR { // Namespace CR -- begin
     }
   }
 
-  // -------------------------------------------------------------------- summary
+  // ----------------------------------------------------- makeSpectralCoordinate
+  
+  SpectralCoordinate CoordinateType::makeSpectralCoordinate (double const &refValue,
+							     double const &increment,
+							     double const &refPixel)
+  {
+    Vector<String> names (1,"Frequency");
 
+    casa::SpectralCoordinate coord (casa::MFrequency::TOPO,
+				    refValue,
+				    increment,
+				    refPixel);
+    
+    coord.setWorldAxisNames(names);
+    
+    return coord;
+  }
+  
+  // --------------------------------------------------------- makeTimeCoordinate
+  
+  LinearCoordinate CoordinateType::makeTimeCoordinate (double const &refValue,
+						       double const &increment,
+						       double const &refPixel)
+  {
+    Vector<String> names (1,"Time");
+    Vector<String> units (1,"s");
+    Vector<double> crval (1,refValue);
+    Vector<double> inc   (1,increment);
+    Matrix<double> pc    (1,1,1.0);
+    Vector<double> crpix (1,refPixel);
+    
+    return LinearCoordinate (names,
+			     units,
+			     crval,
+			     inc,
+			     pc,
+			     crpix);
+  }
+  
+  // ------------------------------------------------------------------------------
+  
+  LinearCoordinate
+  CoordinateType::makeFaradayCoordinate (double const &refValue,
+					 double const &increment,
+					 double const &refPixel)
+  {
+    Vector<String> names (1,"Faraday rotation");
+    Vector<String> units (1,"rad/(m)2");
+    Vector<double> refVal (1,refValue);
+    Vector<double> inc (1,increment);
+    Matrix<double> pc (1,1,1.0);
+    Vector<double> crpix (1,refPixel);
+    
+    return casa::LinearCoordinate (names,
+				   units,
+				   refVal,
+				   inc,
+				   pc,
+				   crpix);
+  }
+  
+  // -------------------------------------------------------------------- summary
+  
   void CoordinateType::summary (std::ostream &os,
 				casa::Coordinate const &coord)
   {

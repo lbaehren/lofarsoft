@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include <crtools.h>
+#include <Coordinates/CoordinateType.h>
 #include <Imaging/SkymapCoordinates.h>
 
 #include <images/Images/PagedImage.h>
@@ -76,29 +77,6 @@ SkymapCoordinates create_SkymapCoordinates ()
 			   CR::TIME_CC);
 
   return coord;
-}
-
-// -----------------------------------------------------------------------------
-
-/*!
-  \brief Provide a summary of a Coordinate object 
-
-  Example output:
-  \verbatim
-  -- World axis names        = [Longitude, Latitude]
-  -- World axis units        = [rad, rad]
-  -- Reference pixel (CRPIX) = [60, 60]
-  -- Reference value (CRVAL) = [0, 0.0274156]
-  -- Increment       (CDELT) = [-0.0349066, 0.0349066]
-  \endverbatim
-*/
-void show_Coordinate (casa::Coordinate &coord)
-{
-  cout << "-- World axis names        = " << coord.worldAxisNames() << endl;
-  cout << "-- World axis units        = " << coord.worldAxisUnits() << endl;
-  cout << "-- Reference pixel (CRPIX) = " << coord.referencePixel() << endl;
-  cout << "-- Reference value (CRVAL) = " << coord.referenceValue() << endl;
-  cout << "-- Increment       (CDELT) = " << coord.increment()      << endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -241,7 +219,7 @@ void test_pixel2world (casa::Coordinate &axis)
 */
 int test_SkymapCoordinates ()
 {
-  cout << "\n[test_SkymapCoordinates]\n" << endl;
+  cout << "\n[tSkymapCoordinates::test_SkymapCoordinates]\n" << endl;
 
   int nofFailedTests (0);                 // nof. failed tests
   TimeFreq timeFreq (1024,40e6,1);        // Time and Frequency data
@@ -315,7 +293,7 @@ int test_SkymapCoordinates ()
 */
 int test_conversions ()
 {
-  cout << "\n[test_conversions]\n" << endl;
+  cout << "\n[tSkymapCoordinates::test_conversions]\n" << endl;
 
   int nofFailedTests (0);
   SkymapCoordinates coord;
@@ -421,7 +399,7 @@ int test_conversions ()
 */
 int test_coordinateSystem ()
 {
-  cout << "\n[test_coordinateSystem]\n" << endl;
+  cout << "\nt[tSkymapCoordinates::test_coordinateSystem]\n" << endl;
 
   int nofFailedTests (0);                 // nof. failed tests
   bool status (true);
@@ -653,7 +631,7 @@ int test_coordinateSystem ()
 */
 int test_directionAxis ()
 {
-  cout << "\n[test_directionAxis]\n" << endl;
+  cout << "\n[tSkymapCoordinates::test_directionAxis]\n" << endl;
 
   int nofFailedTests (0);
   bool status (true);
@@ -666,7 +644,7 @@ int test_directionAxis ()
   cout << "[1] Retrival of the DirectionCoordinate..." << endl;
   try {
     casa::DirectionCoordinate dc = coord.directionCoordinate();
-    show_Coordinate (dc);
+    CR::CoordinateType::summary (std::cout,dc);
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -763,7 +741,7 @@ int test_directionAxis ()
 */
 int test_frequencyAxis ()
 {
-  cout << "\n[test_frequencyAxis]\n" << endl;
+  cout << "\n[tSkymapCoordinates::test_frequencyAxis]\n" << endl;
   
   int nofFailedTests (0);
 
@@ -779,7 +757,7 @@ int test_frequencyAxis ()
 */
 int test_mapProperties ()
 {
-  cout << "\n[test_mapProperties]\n" << endl;
+  cout << "\n[tSkymapCoordinates::test_mapProperties]\n" << endl;
 
   int nofFailedTests (0);
 
@@ -860,9 +838,9 @@ int test_mapProperties ()
   \return nofFailedTests -- The number of failed tests encountered within this
           function.
 */
-int test_imageCreation ()
+int test_createImage ()
 {
-  cout << "\n[test_imageCreation]\n" << endl;
+  cout << "\n[tSkymapCoordinates::test_createImage]\n" << endl;
 
   int nofFailedTests (0);
   SkymapCoordinates coord = create_SkymapCoordinates ();
@@ -880,11 +858,11 @@ int test_imageCreation ()
     
     cout << "-- creating the image file ... " << std::flush;
 #ifdef HAVE_HDF5
-    casa::HDF5Image<Float> image (tile,
+    casa::HDF5Image<float> image (tile,
 				  csys,
 				  String("testimage1.h5"));
 #else
-    PagedImage<Float> image (tile,
+    PagedImage<float> image (tile,
 			     csys,
 			     String("testimage1.img"));
 #endif
@@ -949,9 +927,7 @@ int main ()
   int nofFailedTests (0);
 
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_SkymapCoordinates ();
-  }
+  nofFailedTests += test_SkymapCoordinates ();
   
   // Only continue if we actually can construct an object
   if (nofFailedTests == 0) {
@@ -960,7 +936,7 @@ int main ()
     nofFailedTests += test_coordinateSystem ();
     nofFailedTests += test_directionAxis ();
     nofFailedTests += test_frequencyAxis ();
-    nofFailedTests += test_imageCreation ();
+    nofFailedTests += test_createImage ();
   }
   
   return nofFailedTests;

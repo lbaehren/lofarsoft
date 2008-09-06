@@ -215,7 +215,7 @@ if (CR_WITH_PYTHON)
       PREFIX ""
       SUFFIX .so
       COMPILE_FLAGS "-DPYTHON"
-      LINK_FLAGS "-fPIC -shared"
+      LINK_FLAGS "-fPIC -shared -Wl"
       )
   endif (APPLE)
   ## installation

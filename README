@@ -6,27 +6,16 @@
 ##  Lars B"ahren
 ## ------------------------------------------------------------------------------
 
- * Working through the changes committed by Andreas 
+* Import of hfget library from Python fails:
+Python 2.4.4 (#2, Apr 15 2008, 23:43:20) 
+[GCC 4.1.2 20061115 (prerelease) (Debian 4.1.1-21)] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>> from libhfget import *
+Traceback (most recent call last):
+  File "<stdin>", line 1, in ?
+ImportError: ./libhfget.so: invalid ELF header
+>>> 
 
-[+] U    src/DAL/implement/HDF5Common.cpp
-[+] U    src/DAL/implement/HDF5Common.h
-[x] U    src/CR-Tools/apps/GlishClients/SimpleDynspecClient.cc
-[x] A    src/CR-Tools/apps/tbbTest.cc
-[x] U    src/CR-Tools/apps/CMakeLists.txt
-[x] U    src/CR-Tools/implement/Analysis/tbbTools.cc
-[x] U    src/CR-Tools/implement/Analysis/tbbTools.h
-[x] U    src/CR-Tools/implement/IO/DataReader.cc
-[+] U    src/CR-Tools/implement/Data/LOFAR_Timeseries.cc
-[]+ U    src/CR-Tools/implement/Data/LOFAR_StationGroup.cc
-[] U    src/CR-Tools/implement/Data/LOFAR_TBB.h
-[+] U    src/CR-Tools/implement/Data/LOFAR_Timeseries.h
-[+] U    src/CR-Tools/implement/Data/LOFAR_DipoleDataset.cc
-[] U    src/CR-Tools/implement/Data/LOFAR_TBB.cc
-
- * DataReader: provide method to retrive length of segement for each dipole
-
- * work in first set of changes as discussed with Alexander and get settings for
-   CR-Tools consistent
 
 ## ------------------------------------------------------------------------------
 ##  Joseph Masters

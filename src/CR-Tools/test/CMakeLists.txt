@@ -77,9 +77,9 @@ if (HAVE_CASACORE AND HAVE_WCSLIB AND HAVE_CFITSIO)
     endif (HAVE_HDF5)
     ## linker instructions
     target_link_libraries (${test}
-      cr_test
-      ${CASA_LIBRARIES}
-      ${HDF5_LIBRARIES}
+      cr
+#      ${CASA_LIBRARIES}
+#      ${HDF5_LIBRARIES}
       ${LAPACK_LIBRARIES}
       ${CFITSIO_LIBRARIES}
       ${WCSLIB_LIBRARIES}

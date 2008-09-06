@@ -14,6 +14,7 @@ set (tests
   tPolarCoordinate
   tSpatialCoordinate
   tTimeFreq
+  tTimeFreqSkymap
   )
 
 ## ------------------------------------------------------------------------------

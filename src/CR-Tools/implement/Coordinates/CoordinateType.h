@@ -36,6 +36,7 @@
 #include <coordinates/Coordinates/Coordinate.h>
 #include <coordinates/Coordinates/DirectionCoordinate.h>
 #include <coordinates/Coordinates/LinearCoordinate.h>
+#include <coordinates/Coordinates/SpectralCoordinate.h>
 #include <coordinates/Coordinates/TabularCoordinate.h>
 
 // CR-Tools
@@ -45,6 +46,7 @@
 using casa::Coordinate;
 using casa::DirectionCoordinate;
 using casa::LinearCoordinate;
+using casa::SpectralCoordinate;
 using casa::Matrix;
 using casa::MDirection;
 using casa::Projection;
@@ -359,7 +361,47 @@ namespace CR { // Namespace CR -- begin
     static LinearCoordinate makeLinearCoordinate (unsigned int const &nofAxes,
 						  Vector<casa::String> const &names,
 						  Vector<casa::String> const &units);
+
+    /*!
+      \brief Create a SpectralCoordinate object to hold a frequency axis
+
+      \param refValue   -- Reference value, CRVAL, [s]
+      \param increment  -- Coordinate increment, CDELT, [s]
+      \param refPixel   -- Reference pixel, CRPIX
+
+      \return coord -- 
+    */
+    static SpectralCoordinate makeSpectralCoordinate (double const &refValue=0,
+						      double const &increment=0,
+						      double const &refPixel=0);
     
+    /*!
+      \brief Create a LinearCoordinate object to hold a time coordinate
+
+      \param refValue   -- Reference value, CRVAL, [s]
+      \param increment  -- Coordinate increment, CDELT, [s]
+      \param refPixel   -- Reference pixel, CRPIX
+
+      \return coord --
+    */
+    static LinearCoordinate makeTimeCoordinate (double const &refValue=0,
+						double const &increment=0,
+						double const &refPixel=0);
+    
+    /*!
+      \brief Create a LinearCoordinate object to hold a Faraday coordinate
+
+      \param refValue   -- Reference value, CRVAL, [rad/m^2]
+      \param increment  -- Coordinate increment, CDELT, [rad/m^2]
+      \param refPixel   -- Reference pixel, CRPIX
+
+      \return coord --LinearCoordinate object with
+      <tt>worldAxisName="Faraday rotation"</tt> and <tt>worldAxisUnits="rad/(m)2"</tt>
+    */
+    static LinearCoordinate makeFaradayCoordinate (double const &refValue=.0,
+						   double const &increment=.0,
+						   double const &refPixel=.0);
+
     /*!
       \brief Provide a summary of the internal status
       

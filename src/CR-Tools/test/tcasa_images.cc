@@ -30,6 +30,7 @@
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/Vector.h>
+#include <casa/OS/Directory.h>
 #include <coordinates/Coordinates/CoordinateSystem.h>
 #include <coordinates/Coordinates/DirectionCoordinate.h>
 #include <coordinates/Coordinates/LinearCoordinate.h>
@@ -40,6 +41,8 @@
 #ifdef HAVE_HDF5
 #include <images/Images/HDF5Image.h>
 #endif
+
+#include <Coordinates/CoordinateType.h>
 
 using std::cout;
 using std::endl;
@@ -59,6 +62,10 @@ const double pi (3.14159265);
   \brief A number of tests for clases in the casacore images module
 
   \author Lars B&auml;hren
+
+  Since we are using derivatives of the casa::ImageInterface as primary output
+  of the CR imager, we obviously need a good understanding of how to work with
+  the CASA/casacore classes involved.
 */
 
 // ==============================================================================
@@ -66,27 +73,6 @@ const double pi (3.14159265);
 //  Helper routines
 //
 // ==============================================================================
-
-/*!
-  \brief Create the shape information for the created image
-
-  \param nDistance  -- Number of steps along the distance axis
-  \param nTime      -- Number of integration steps in time
-  \param nFrequency -- Number of frequency channels
-  
-  \return shape -- The shape of the image, i.e. the number of axes and their
-          respective lengths, e.g. <tt>shape=[25,25,10,50,128]</tt>
-*/
-IPosition image_shape (int const &nDistance=10,
-		       int const &nTime=50,
-		       int const &nFrequency=128)
-{
-  IPosition shape (5,25,25,nDistance,nTime,nFrequency);
-
-  return shape;
-}
-
-// ------------------------------------------------------------------------------
 
 /*!
   \brief Create observation information object
@@ -107,40 +93,6 @@ casa::ObsInfo observation_info (std::string const &telescope="LOFAR",
   obsInfo.setObserver (casa::String(observer));
 
   return obsInfo;
-}
-
-// ------------------------------------------------------------------------------
-
-/*!
-  \brief Create DirectionCoordinate object
-
-  \param increment -- Coordinate increment, [deg]
-
-  \return coord -- Coordinate of type "Direction", describing the celestial 
-          coordinates in the image.
-*/
-casa::DirectionCoordinate direction_coordinate (double const &increment=2.0)
-{
-  IPosition shape;
-  Matrix<double> xform(2,2);
-  
-  shape            = image_shape();
-  xform            = 0.0;
-  xform.diagonal() = 1.0;
-  
-  casa::DirectionCoordinate coord (casa::MDirection::J2000,
-				   casa::Projection(casa::Projection::STG),
-				   0.0*pi/180.0,
-				   90.0*pi/180.0,
-				   -increment*pi/180.0,
-				   increment*pi/180.0,
-				   xform,
-				   0.5*shape(0),
-				   0.5*shape(1));
-  
-  coord.setReferencePixel(Vector<double>(2,0.0));
-
-  return coord;
 }
 
 // ------------------------------------------------------------------------------
@@ -179,70 +131,6 @@ casa::LinearCoordinate radial_coordinate (double const &referenceValue=0.0,
 // ------------------------------------------------------------------------------
 
 /*!
-  \brief Create SpectralCoordinate object
-
-  \return coord -- Coordinate of type "Spectral", describing the frequency axis
-          of the created image.
-*/
-casa::SpectralCoordinate spectral_coordinate () 
-{
-    Vector<String> names  (1,"Frequency");
-    casa::SpectralCoordinate coord;
-    
-    coord.setWorldAxisNames(names);
- 
-    return coord;
-}
-
-// ------------------------------------------------------------------------------
-
-casa::LinearCoordinate time_coordinate (double const &referenceValue=0.0,
-					double const &referencePixel=0.0,
-					double const &increment=1.0)
-{
-  Vector<String> names (1,"Time");
-  Vector<String> units (1,"s");
-  Vector<double> crval (1,referenceValue);
-  Vector<double> inc   (1,increment);
-  Matrix<double> pc    (1,1,1.0);
-  Vector<double> crpix (1,referencePixel);
-  
-  casa::LinearCoordinate coord (names,
-				units,
-				crval,
-				inc,
-				pc,
-				crpix);
-  
-  return coord;
-}
-
-// ------------------------------------------------------------------------------
-
-casa::LinearCoordinate faraday_coordinate (double const &referenceValue=0.0,
-					   double const &referencePixel=0.0,
-					   double const &increment=0.0)
-{
-  Vector<String> names (1,"Faraday rotation");
-  Vector<String> units (1,"rad/(m)2");
-  Vector<double> refVal (1,referenceValue);
-  Vector<double> inc (1,increment);
-  Matrix<double> pc (1,1,1.0);
-  Vector<double> crpix (1,referencePixel);
-  
-  casa::LinearCoordinate coord (names,
-				units,
-				refVal,
-				inc,
-				pc,
-				crpix);
-
-  return coord;
-}
-
-// ------------------------------------------------------------------------------
-
-/*!
   \brief Create the coordinate system attached to the image
 
   This function creates a coordinate system object 
@@ -267,21 +155,21 @@ casa::CoordinateSystem image_csys (std::string imageType="CR_SKY",
     // General observation information
     cs.setObsInfo(observation_info());
     // Direction axis
-    cs.addCoordinate(direction_coordinate(incrementDirection));
+    cs.addCoordinate(CR::CoordinateType::makeDirectionCoordinate());
     // [2] Distance axis
     cs.addCoordinate(radial_coordinate());
     // [3] Time axis
-    cs.addCoordinate(time_coordinate());
+    cs.addCoordinate(CR::CoordinateType::makeTimeCoordinate());
     // [4] Frequency axis
-    cs.addCoordinate(spectral_coordinate());
+    cs.addCoordinate(CR::CoordinateType::makeSpectralCoordinate());
   }
   else if (imageType == "RM_CUBE") {
     // General observation information
     cs.setObsInfo(observation_info());
     // Direction axis
-    cs.addCoordinate(direction_coordinate(incrementDirection));
+    cs.addCoordinate(CR::CoordinateType::makeDirectionCoordinate());
     // Faraday rotation
-    cs.addCoordinate (faraday_coordinate());
+    cs.addCoordinate (CR::CoordinateType::makeFaradayCoordinate());
     // Polarization
     {
       Vector<casa::Int> iquv(4);
@@ -297,7 +185,7 @@ casa::CoordinateSystem image_csys (std::string imageType="CR_SKY",
     // General observation information
     cs.setObsInfo(observation_info());
     // Direction axis
-    cs.addCoordinate(direction_coordinate(incrementDirection));
+    cs.addCoordinate(CR::CoordinateType::makeDirectionCoordinate());
   }
   else {
     std::cout << "[image_csys] Unknown image type!" << std::endl;
@@ -348,26 +236,31 @@ template void image_summary (casa::ImageInterface<casa::DComplex> &image);
 // ------------------------------------------------------------------------------
 
 /*!
-  \brief Test the creation of a PagedImage
+  \brief Test the creation of a casa::PagedImage on disk
 
-  \return nofFailedTests -- The number of failed tests in this function
+  \return nofFailedTests -- The number of failed tests encountered within this
+          function
 */
-int test_createImage ()
+int test_PagedImage ()
 {
-  cout << "\n[test_createImage]\n" << endl;
+  cout << "\n[test_PagedImage]\n" << endl;
 
   int nofFailedTests (0);
 
-  IPosition shape (image_shape());
+  IPosition shape (5,25,25,10,50,128);
   casa::TiledShape tshape (shape);
     
   cout << "[1] Creating new PagedImage<float> ..." << endl;
   try {
+    /* create image file */
     casa::PagedImage<float> imageFloat (tshape,
 					image_csys(),
 					"testimage_f.img");
+    /* feedback */
     image_summary (imageFloat);
-    
+    /* clean up */
+    casa::Directory dir ("testimage_f.img");
+    dir.removeRecursive(); 
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -375,15 +268,20 @@ int test_createImage ()
   
   cout << "[2] Creating new PagedImage<double> ..." << endl;
   try {
+    /* create image file */
     casa::PagedImage<double> imageDouble (tshape,
 					  image_csys(),
 					  "testimage_d.img");
+    /* feedback */
     image_summary (imageDouble);
+    /* clean up */
+    casa::Directory dir ("testimage_d.img");
+    dir.removeRecursive(); 
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
   }
-  
+    
   return nofFailedTests;
 }
 
@@ -405,7 +303,7 @@ int test_HDF5Image ()
   cout << "\n[test_HDF5Image]\n" << endl;
 
   int nofFailedTests (0);
-  IPosition shape (image_shape());
+  IPosition shape (5,25,25,10,50,128);
   int nofAxes = shape.nelements();
   casa::TiledShape tshape (shape);
   casa::String filename;
@@ -569,33 +467,17 @@ int create_lofar_images ()
 
 // ------------------------------------------------------------------------------
 
-/*!
-  \brief Test schemes for accessing the image pixel array
-
-  \return nofFailedTests -- The number of failed tests ecountered within this 
-          function.
-*/
-int test_ArrayAccess ()
-{
-  int nofFailedTests (0);
-
-  return nofFailedTests;
-}
-
-// ------------------------------------------------------------------------------
-
 int main (int argc,
 	  char *argv[])
 {
   int nofFailedTests (0);
 
   /* Tests for constructing an image object */
-  nofFailedTests += test_createImage();
-
+  nofFailedTests += test_PagedImage ();
+  
 #ifdef HAVE_HDF5
   nofFailedTests += test_HDF5Image ();
   nofFailedTests += create_lofar_images();
-  nofFailedTests += test_ArrayAccess ();
 #endif
 
   return nofFailedTests;
