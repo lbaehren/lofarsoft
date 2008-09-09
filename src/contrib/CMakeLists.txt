@@ -94,7 +94,7 @@ include (FindCFITSIO)
 include (FindG2C)
 include (FindHDF5)
 include (FindLAPACK)
-include (FindPLPLOT)
+include (FindPLplot)
 include (FindWCS)
 
 ## -----------------------------------------------------------------------------
