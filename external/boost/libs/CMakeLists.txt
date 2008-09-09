@@ -22,6 +22,10 @@ if (BOOST_LIB_MPL)
   add_subdirectory (mpl)
 endif (BOOST_LIB_MPL)
 
+if (BOOST_LIB_PROGRAM_OPTIONS)
+  add_subdirectory (program_options)
+endif (BOOST_LIB_PROGRAM_OPTIONS)
+
 if (BOOST_LIB_PYTHON)
   add_subdirectory (python)
 endif (BOOST_LIB_PYTHON)
