@@ -66,6 +66,22 @@ if (HAVE_CASACORE)
 endif (HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
+## skymapper
+
+if (HAVE_CASACORE AND HAVE_DAL)
+  add_executable (skymapper skymapper.cc)
+  ## additional properties
+  set_target_properties (trigrun
+    PROPERTIES
+    COMPILE_FLAGS "-I${POPT_INCLUDES}"
+    )
+  ## linker instructions
+  target_link_libraries (skymapper cr ${POPT_LIBRARIES})
+  ## installation instructions
+  list (APPEND cr_apps skymapper)
+endif (HAVE_CASACORE AND HAVE_DAL)
+
+## -------------------------------------------------------------------
 ## reas2event
 
 if (HAVE_CASA OR HAVE_CASACORE)

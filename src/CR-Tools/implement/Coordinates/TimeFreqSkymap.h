@@ -28,12 +28,13 @@
 #include <iostream>
 #include <string>
 
-#include <crtools.h>
-#include <Coordinates/TimeFreq.h>
-#include <Coordinates/CoordinateType.h>
-
 #include <coordinates/Coordinates/LinearCoordinate.h>
 #include <coordinates/Coordinates/SpectralCoordinate.h>
+
+#include <crtools.h>
+#include <Coordinates/TimeFreq.h>
+#include <Coordinates/CoordinateDomain.h>
+#include <Coordinates/CoordinateType.h>
 
 namespace CR { // Namespace CR -- begin
   
@@ -42,7 +43,7 @@ namespace CR { // Namespace CR -- begin
     
     \ingroup CR_Coordinates
     
-    \brief Container for the time-frequncy domain parameters of a skymap
+    \brief Container for the time-frequency domain parameters of a skymap
     
     \author Lars B&auml;hren
 
@@ -54,6 +55,7 @@ namespace CR { // Namespace CR -- begin
     
     <ul type="square">
       <li>CR::TimeFreq
+      <li>CR::CoordinateDomain
       <li>CR::SkymapCoordinates
     </ul>
     
@@ -94,6 +96,8 @@ namespace CR { // Namespace CR -- begin
     
   protected:
 
+    /*! The target domain for which the data are processed by the Beamformer */
+    CoordinateDomain beamDomain_p;
     /*! The number of data blocks added up within a single time frame */
     uint blocksPerFrame_p;
     /*! The number of frames */
@@ -161,6 +165,23 @@ namespace CR { // Namespace CR -- begin
     // --------------------------------------------------------------- Parameters
 
     /*!
+      \brief Get the target domain for the beamforming
+
+      \return domain -- The target domain for the beamforming.
+    */
+    inline CoordinateDomain beamDomain () const {
+      return beamDomain_p;
+    }
+    
+    bool setBeamDomain (CR::CoordinateDomain::Types const &type);
+    
+    bool setBeamDomain (CR::CoordinateDomain const &domain);
+    
+    inline CoordinateDomain::Types beamDomainType () const {
+      return beamDomain_p.type();
+    }
+    
+    /*!
       \brief Get the number of blocks per time frame
 
       \return blocksPerFrame -- The number of input data blocks combined into a
@@ -193,6 +214,18 @@ namespace CR { // Namespace CR -- begin
     inline void setNofFrames (uint const &nofFrames) {
       nofFrames_p = nofFrames;
     }
+    
+    /*!
+      \brief Get the shape, i.e. the number of elements along each axis
+      
+      \return shape -- [time,freq] The number of elements along each of the 
+              two coupled axes.
+    */
+#ifdef HAVE_CASA
+    virtual casa::IPosition axisShape () const;
+#else 
+    virtual vector<int> axisShape () const;
+#endif
     
     /*!
       \brief Get the name of the class

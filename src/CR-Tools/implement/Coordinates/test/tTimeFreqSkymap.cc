@@ -121,14 +121,124 @@ int test_constructors ()
 
 // -----------------------------------------------------------------------------
 
+/*!
+  \brief Test access to the internal parameters and derived quantities
+
+  \return nofFailedTests -- The number of failed tests within this function.
+*/
+int test_parameters ()
+{
+  std::cout << "\n[tTimeFreqSkymap::test_parameters]\n" << std::endl;
+
+  int nofFailedTests (0);
+
+  TimeFreqSkymap timeFreq;
+
+  /* Test of the methods inherited from the base class */
+
+  std::cout << "[1] Blocksize ..." << std::endl;
+  try {
+    /* current value */
+    std::cout << "-- blocksize = " << timeFreq.blocksize() << std::endl;
+    /* Adjust value */
+    timeFreq.setBlocksize (1024);
+    /* New value */
+    std::cout << "-- blocksize = " << timeFreq.blocksize() << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[2] Sample frequency ..." << std::endl;
+  try {
+    /* current value */
+    std::cout << "-- sampleFrequency = " << timeFreq.sampleFrequency() << std::endl;
+    /* Adjust value */
+    timeFreq.setSampleFrequency (120e06);
+    /* New value */
+    std::cout << "-- sampleFrequency = " << timeFreq.sampleFrequency() << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[3] Nyquist zone ..." << std::endl;
+  try {
+    /* current value */
+    std::cout << "-- nyquistZone = " << timeFreq.nyquistZone() << std::endl;
+    /* Adjust value */
+    timeFreq.setNyquistZone (2);
+    /* New value */
+    std::cout << "-- nyquistZone = " << timeFreq.nyquistZone() << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[4] Reference time ..." << std::endl;
+  try {
+    /* current value */
+    std::cout << "-- referenceTime = " << timeFreq.referenceTime() << std::endl;
+    /* Adjust value */
+    timeFreq.setReferenceTime (-0.5);
+    /* New value */
+    std::cout << "-- referenceTime = " << timeFreq.referenceTime() << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  /* Test of the methods added by TimeFreqSkymap  */
+
+  std::cout << "[5] Input data blocks per time-frame ..." << std::endl;
+  try {
+    /* current value */
+    std::cout << "-- blocksPerFrame = " << timeFreq.blocksPerFrame() << std::endl;
+    /* Adjust value */
+    timeFreq.setBlocksPerFrame (10);
+    /* New value */
+    std::cout << "-- blocksPerFrame = " << timeFreq.blocksPerFrame() << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[6] NofFrames ..." << std::endl;
+  try {
+    /* current value */
+    std::cout << "-- nofFrames = " << timeFreq.nofFrames() << std::endl;
+    /* Adjust value */
+    timeFreq.setNofFrames (100);
+    /* New value */
+    std::cout << "-- nofFrames = " << timeFreq.nofFrames() << std::endl;
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }  
+
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
+int test_methods ()
+{
+  int nofFailedTests (0);
+
+  
+  return nofFailedTests;
+}
+
+// -----------------------------------------------------------------------------
+
 int main ()
 {
   int nofFailedTests (0);
 
   // Test for the constructor(s)
-  {
-    nofFailedTests += test_constructors ();
-  }
-
+  nofFailedTests += test_constructors ();
+  // Test access to the internal parameters
+  nofFailedTests += test_parameters ();
+  
   return nofFailedTests;
 }

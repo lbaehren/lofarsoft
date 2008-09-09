@@ -75,12 +75,17 @@ using CR::CalTableReader;
   \endverbatim  
 */
 
-const int upsampling_exp = 5;		// upsampling of trace will be done by 2^upsampling_exp
-const double plotStart = -1.1e-6;	// start time for plotting of FX values
-const double plotStop = +1.1e-6;        // stop time for plotting of FX values
-const double peakWidth  = 20e3;		// width of spectral peaks
-const double startfreq = 4e7;		// start frequency for plots and output
-const double stopfreq = 8e7;            // stop frequency for plots and output
+const int upsampling_exp = 5;	     // upsampling of trace will be done by 2^upsampling_exp
+/*! Start time for plotting of FX values */
+const double plotStart = -1.1e-6;
+/*! Stop time for plotting of FX values */
+const double plotStop = +1.1e-6;
+/*! Width of spectral peaks */
+const double peakWidth  = 20e3;
+/*! Start frequency for plots and output */
+const double startfreq = 4e7;
+/*! Stop frequency for plots and output */
+const double stopfreq = 8e7;
 
 
 /*!
@@ -90,8 +95,6 @@ const double stopfreq = 8e7;            // stop frequency for plots and output
 
   \return reducedPhase -- output phase
 */
-
-
 double reducePhase(double phase)
 {
   double reducedPhase = phase;

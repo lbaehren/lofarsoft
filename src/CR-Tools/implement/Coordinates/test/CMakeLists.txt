@@ -8,6 +8,7 @@
 set (tests
   tAxisCoordinates
   tAxisIterator
+  tCoordinateDomain
   tCoordinateType
   tCoordinateGrid
   tGridCoordinate

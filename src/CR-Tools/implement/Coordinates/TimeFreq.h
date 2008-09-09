@@ -303,7 +303,17 @@ namespace CR { // Namespace CR -- begin
        Frequency increment [Hz] = 8e+07
       \endverbatim
     */
-    void summary ();    
+    inline void summary () {
+      summary (std::cout);
+    }
+
+    /*!
+      \brief Provide a summary of the internal status
+
+      \param os -- Output stream to which the summary is written.
+    */
+    void summary (std::ostream &os);    
+
     
     // ------------------------------------------------------ Internal parameters
 
@@ -434,7 +444,7 @@ namespace CR { // Namespace CR -- begin
               number of frequency channels resulting from the FFT of a data
 	      block of \f$ N_{\rm Blocksize} \f$ samples.
     */
-    inline uint fftLength () const { /*BPL*/
+    inline uint fftLength () const {
       return fftLength_p;
     }
 
@@ -444,7 +454,7 @@ namespace CR { // Namespace CR -- begin
       \return sampleInterval -- The sample interval, [s], i.e. the inverse of the
               sample frequency.
     */
-    inline double sampleInterval () { /*BPL*/
+    inline double sampleInterval () const {
       return 1/sampleFrequency_p;
     }
 
@@ -453,7 +463,7 @@ namespace CR { // Namespace CR -- begin
       
       \return frequencyIncrement -- The increment along the frequency axis, [Hz].
     */
-    inline double frequencyIncrement () const { /*BPL*/
+    inline double frequencyIncrement () const {
       return sampleFrequency_p/blocksize_p;
     }
 
@@ -565,6 +575,18 @@ namespace CR { // Namespace CR -- begin
     casa::Vector<double> timeValues (casa::Vector<uint> const &sampleValues);
 #else
     vector<double> timeValues (vector<uint> const &sampleValues);
+#endif
+
+    /*!
+      \brief Get the shape, i.e. the number of elements along each axis
+      
+      \return shape -- [time,freq] The number of elements along each of the 
+              two coupled axes.
+    */
+#ifdef HAVE_CASA
+    virtual casa::IPosition axisShape () const;
+#else 
+    virtual vector<int> axisShape () const;
 #endif
     
     /*!

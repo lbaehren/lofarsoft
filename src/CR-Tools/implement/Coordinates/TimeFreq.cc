@@ -161,21 +161,21 @@ namespace CR { // Namespace CR -- begin
   
   // -------------------------------------------------------------------- summary
   
-  void TimeFreq::summary ()
+  void TimeFreq::summary (std::ostream &os)
   {
-    std::cout << "-- Fundamental parameters:"                           << "\n";
-    std::cout << " Blocksize      [samples] = " << blocksize_p          << "\n";
-    std::cout << " Sample frequency    [Hz] = " << sampleFrequency_p    << "\n";
-    std::cout << " Nyquist zone             = " << nyquistZone_p        << "\n";
-    std::cout << " Reference time     [sec] = " << referenceTime_p      << "\n";
-    std::cout << "-- Derived quantities:"                               << "\n";
-    std::cout << " FFT length    [channels] = " << fftLength_p          << "\n";
-    std::cout << " Sample interval      [s] = " << sampleInterval()     << "\n";
-    std::cout << " Frequency increment [Hz] = " << frequencyIncrement() << "\n";
-    std::cout << " Frequency band      [Hz] = " << frequencyBand()[0]
-	      << " .. "
-	      << frequencyBand()[1]
-	      << std::endl;
+    os << "[TimeFreqSkymap] Summary of internal parameters." << std::endl;
+    os << "-- Blocksize      [samples] = " << blocksize_p          << std::endl;
+    os << "-- Sample frequency    [Hz] = " << sampleFrequency_p    << std::endl;
+    os << "-- Nyquist zone             = " << nyquistZone_p        << std::endl;
+    os << "-- Reference time     [sec] = " << referenceTime_p      << std::endl;
+    os << "-- FFT length    [channels] = " << fftLength_p          << std::endl;
+    os << "-- Sample interval      [s] = " << sampleInterval()     << std::endl;
+    os << "-- Frequency increment [Hz] = " << frequencyIncrement() << std::endl;
+    os << "-- Frequency band      [Hz] = " << frequencyBand()[0]   << " .. "
+       << frequencyBand()[1] << std::endl;
+#ifdef HAVE_CASA
+    os << "-- Shape of the axes        = " << axisShape() << std::endl;
+#endif
   }
   
   // ============================================================================
@@ -409,8 +409,21 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
+#ifdef HAVE_CASA
+  casa::IPosition TimeFreq::axisShape () const {
+    return casa::IPosition (2,blocksize(),fftLength());
+  }
+#else 
+  vector<int> TimeFreq::axisShape () const {
+    vector<int> shape(2);
+    shape(0) = blockize();
+    shape(1) = fftLength();
+    return shape;
+  }
+#endif
+  
 #ifdef AIPS_STDLIB
-
+  
   // ------------------------------------------------------------ sampleFrequency
 
   double TimeFreq::sampleFrequency (casa::String const &unit)
