@@ -13,6 +13,7 @@ if (HAVE_CASACORE)
     casacoreMatrixAccess01
     casacoreMatrixAccess02
     casacoreMatrixAccess03
+    casacoreMatrixAccess04
     )
 
   foreach (src ${tests})
