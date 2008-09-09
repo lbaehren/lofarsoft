@@ -71,7 +71,7 @@ endif (HAVE_CASACORE)
 if (HAVE_CASACORE AND HAVE_DAL)
   add_executable (skymapper skymapper.cc)
   ## additional properties
-  set_target_properties (trigrun
+  set_target_properties (skymapper
     PROPERTIES
     COMPILE_FLAGS "-I${POPT_INCLUDES}"
     )
