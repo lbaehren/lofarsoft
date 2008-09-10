@@ -101,6 +101,7 @@ include (FindWCS)
 ## Configuration summary
 
 if (contrib_VERBOSE_CONFIGURE)
+  message (STATUS "[config] Configuration summary.")
   message (STATUS "Have BOOST    = ${HAVE_BOOST}")
   message (STATUS "Have casacore = ${HAVE_CASACORE}")
   message (STATUS "Have CFITSIO  = ${HAVE_CFITSIO}")
