@@ -68,18 +68,14 @@ endif (HAVE_CASACORE)
 ## -------------------------------------------------------------------
 ## skymapper
 
-if (HAVE_CASACORE AND HAVE_DAL)
+if (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
+  ## compiler instructions
   add_executable (skymapper skymapper.cc)
-  ## additional properties
-  set_target_properties (skymapper
-    PROPERTIES
-    COMPILE_FLAGS "-I${POPT_INCLUDES}"
-    )
   ## linker instructions
-  target_link_libraries (skymapper cr ${POPT_LIBRARIES})
+  target_link_libraries (skymapper cr ${BOOST_LIBRARIES})
   ## installation instructions
   list (APPEND cr_apps skymapper)
-endif (HAVE_CASACORE AND HAVE_DAL)
+endif (HAVE_CASACORE AND HAVE_DAL AND HAVE_BOOST)
 
 ## -------------------------------------------------------------------
 ## reas2event

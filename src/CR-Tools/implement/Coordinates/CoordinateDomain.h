@@ -21,8 +21,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef COORDINATEDOMAIN_H
-#define COORDINATEDOMAIN_H
+#ifndef CR_COORDINATEDOMAIN_H
+#define CR_COORDINATEDOMAIN_H
 
 // Standard library header files
 #include <iostream>
