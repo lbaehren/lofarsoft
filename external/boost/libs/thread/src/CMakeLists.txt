@@ -9,18 +9,10 @@
 ## -----------------------------------------------------------------------------
 ## Source files to build the library
 
-if (APPLE AND HAVE_MULTIPROCESSING_H)
-  include_directories (${HAVE_MULTIPROCESSING_H})
-  file (GLOB libboost_thread_sources 
-    *.cpp
-    mac/*.cpp
-    mac/msl_replacements/*.cpp
-    )
-else (APPLE AND HAVE_MULTIPROCESSING_H)
-  file (GLOB libboost_thread_sources 
-    *.cpp
-    )
-endif (APPLE AND HAVE_MULTIPROCESSING_H)
+file (GLOB libboost_thread_sources 
+#  *.cpp
+  pthread/*.cpp
+  )
 
 ## -----------------------------------------------------------------------------
 ## Compiler instructions
