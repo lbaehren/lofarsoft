@@ -70,25 +70,6 @@ int main ()
   clock_t end;
   std::ofstream outfile;
   
-  std::cout << "[1] Create object of type Matrix<float> ..." << std::endl;
-  try {
-    for (int nelem(nelemMin); nelem<nelemMax; nelem+=nelemStep) {
-      start = clock();
-      /* Test operation -- begin */
-      Matrix<float> mat (nelem,nelem);
-      /* Test operation -- end */
-      end = clock();
-      std::cout << "\t" << nelem
-		<< "\t" << start
-		<< "\t" << end
-		<< "\t" << runtime(start,end)
-		<< std::endl;
-    }
-  } catch (std::string message) {
-    std::cerr << message << std::endl;
-    nofFailedTests++;
-  }
-  
   std::cout << "[2] Fill object of type Matrix<int> ..." << std::endl;
   try {
     outfile.open("Matrix_int.dat");

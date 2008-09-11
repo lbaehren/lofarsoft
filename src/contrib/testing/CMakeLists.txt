@@ -26,14 +26,15 @@ if (HAVE_CASACORE)
   endforeach (src)
 
   ## compiler instructions
-  add_executable (casacoreMatrixAccess05 casacoreMatrixAccess05.cc)
+  add_executable (casacoreMatrixAccess casacoreMatrixAccess.cc)
   ## linker instructions
-  target_link_libraries (casacoreMatrixAccess05 ${CASA_LIBRARIES})
+  target_link_libraries (casacoreMatrixAccess ${CASA_LIBRARIES})
   ## testing
-  add_test (casacoreMatrixAccess05_test1 casacoreMatrixAccess05 test1)
-  add_test (casacoreMatrixAccess05_test2 casacoreMatrixAccess05 test2)
-  add_test (casacoreMatrixAccess05_test3 casacoreMatrixAccess05 test3)
-  add_test (casacoreMatrixAccess05_test4 casacoreMatrixAccess05 test4)
+  add_test (casacoreMatrixAccess_test1 casacoreMatrixAccess test1)
+  add_test (casacoreMatrixAccess_test2 casacoreMatrixAccess test2)
+  add_test (casacoreMatrixAccess_test3 casacoreMatrixAccess test3)
+  add_test (casacoreMatrixAccess_test4 casacoreMatrixAccess test4)
+  add_test (casacoreMatrixAccess_test5 casacoreMatrixAccess test5)
   
 endif (HAVE_CASACORE)
 

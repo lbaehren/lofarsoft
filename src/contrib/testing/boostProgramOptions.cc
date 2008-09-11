@@ -31,6 +31,33 @@
 
 namespace bpo = boost::program_options;
 
+// ------------------------------------------------------------------------------
+
+/*!
+  \file boostProgramOptions.cc
+
+  \ingroup contrib
+
+  \brief Collection of tests for working with Boost program_options library
+
+  <h3>Usage</h3>
+
+  <ol>
+    <li>Get a list of the available command line optins which can be provided to
+    the application:
+    \verbatim
+    boostProgramOptions --help
+    \endverbatim
+    <li>User-specified values for the blocksize and the reference code for the 
+    celestial reference frame:
+    \verbatim
+    boostProgramOptions --blocksize 2048 --refcode B1950
+    \endverbatim
+  </ol>
+*/
+
+// ------------------------------------------------------------------------------
+
 int main (int argc,
 	  char* argv[])
 {

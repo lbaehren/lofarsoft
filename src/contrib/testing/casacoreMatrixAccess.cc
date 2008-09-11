@@ -43,7 +43,7 @@ using casa::Vector;
 // ------------------------------------------------------------------------------
 
 /*!
-  \file casacoreMatrixAccess05.cc
+  \file casacoreMatrixAccess.cc
 
   \ingroup contrib
 
@@ -52,9 +52,67 @@ using casa::Vector;
   <h3>Usage</h3>
 
   \verbatim
-  casacoreMatrixAccess05 test1
+  casacoreMatrixAccess test1
   \endverbatim
 */
+
+// ------------------------------------------------------------------------------
+
+/*!
+  \brief Create new object of type Matrix<T>
+
+  \code
+      Matrix<T> mat (nelem,nelem);
+  \endcode
+ */
+int run_test1 (int const &min,
+	       int const &step,
+	       int const &max)
+{
+  int nofFailedTests (0);
+  int nrow (0);
+  int ncol (0);
+  clock_t start;
+  clock_t end;
+
+  try {
+    for (int nelem(min); nelem<max; nelem+=step) {
+      start = clock();
+      /* Test operation -- begin */
+      Matrix<float> mat (nelem,nelem);
+      /* Test operation -- end */
+      end = clock();
+      std::cout << "\t" << nelem
+	      << "\t" << start
+	      << "\t" << end
+	      << "\t" << runtime(start,end)
+	      << std::endl;
+    }
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  try {
+    for (int nelem(min); nelem<max; nelem+=step) {
+      start = clock();
+      /* Test operation -- begin */
+      Matrix<double> mat (nelem,nelem);
+      /* Test operation -- end */
+      end = clock();
+      std::cout << "\t" << nelem
+	      << "\t" << start
+	      << "\t" << end
+	      << "\t" << runtime(start,end)
+	      << std::endl;
+    }
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
 
 // ------------------------------------------------------------------------------
 
@@ -69,7 +127,7 @@ using casa::Vector;
       }
   \endcode
 */
-int run_test1 (int const &min,
+int run_test2 (int const &min,
 	       int const &step,
 	       int const &max)
 {
@@ -121,7 +179,7 @@ int run_test1 (int const &min,
       }
   \endcode
 */
-int run_test2 (int const &min,
+int run_test3 (int const &min,
 	       int const &step,
 	       int const &max)
 {
@@ -173,7 +231,7 @@ int run_test2 (int const &min,
       }
   \endcode
 */
-int run_test3 (int const &min,
+int run_test4 (int const &min,
 	       int const &step,
 	       int const &max)
 {
@@ -225,7 +283,7 @@ int run_test3 (int const &min,
       }
   \endcode
 */
-int run_test4 (int const &min,
+int run_test5 (int const &min,
 	       int const &step,
 	       int const &max)
 {
@@ -266,6 +324,10 @@ int run_test4 (int const &min,
 
 // ------------------------------------------------------------------------------
 
+// ------------------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------
+
 int main (int argc,char* argv[])
 {
   int nofFailedTests (0);
@@ -281,23 +343,27 @@ int main (int argc,char* argv[])
   std::ofstream outfile;
   
   if (argv[1] == "test1") {
-    cout << "[1] Assign matrix values individually in col-row order ..." << endl;
+    cout << "-- Create object of type Matrix<T> ..." << endl;
     nofFailedTests += run_test1 (nelemMin,nelemStep,nelemMax);
   }
   else if (argv[1] == "test2") {
-    cout << "[2] Assign matrix values individually in row-col order ..." << endl;
+    cout << "-- Assign matrix values individually in col-row order ..." << endl;
     nofFailedTests += run_test2 (nelemMin,nelemStep,nelemMax);
   }
   else if (argv[1] == "test3") {
-    cout << "[3] Assign matrix values individually in col-row order ..." << endl;
+    cout << "-- Assign matrix values individually in row-col order ..." << endl;
     nofFailedTests += run_test3 (nelemMin,nelemStep,nelemMax);
   }
   else if (argv[1] == "test4") {
-    cout << "[4] Assign matrix values individually in row-col order ..." << endl;
+    cout << "-- Assign matrix values individually in col-row order ..." << endl;
     nofFailedTests += run_test4 (nelemMin,nelemStep,nelemMax);
   }
+  else if (argv[1] == "test5") {
+    cout << "--- Assign matrix values individually in row-col order ..." << endl;
+    nofFailedTests += run_test5 (nelemMin,nelemStep,nelemMax);
+  }
   else {
-    cout << "[casacoreMatrixAccess05] No test selected." << endl;
+    cout << "[casacoreMatrixAccess] No test selected." << endl;
   }
 
   return nofFailedTests;
