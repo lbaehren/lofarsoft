@@ -62,8 +62,8 @@ using casa::Matrix;
 int main ()
 {
   int nofFailedTests (0);
-  int nelemMin  (50);
-  int nelemStep (50);
+  int nelemMin  (100);
+  int nelemStep (100);
   int nelemMax  (10000);
 
   clock_t start;

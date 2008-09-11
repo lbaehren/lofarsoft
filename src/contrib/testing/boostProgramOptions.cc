@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include <string>
+#include <iostream>
 
 #include <boost/program_options.hpp>
 #include <boost/program_options/cmdline.hpp>
@@ -34,6 +35,11 @@ int main (int argc,
 	  char* argv[])
 {
   int result (0);
+
+  int blocksize          = 1024;
+  int nof_frames         = 1;
+  std::string refcode    = "AZEL";
+  std::string projection = "STG";
   
   /* Set up the list of options accepted on the command line */
 
@@ -47,7 +53,41 @@ int main (int argc,
     ("projection", bpo::value<std::string>(), "Spherical map projection")
     ;
 
+  /* Parse the command line parameters and store them */
+
   bpo::variables_map vm;
+  bpo::store (bpo::parse_command_line(argc,argv,desc), vm);
+
+  /* Retrieve the values provided on the command line */
+
+  if (vm.count("help")) {
+    std::cout << desc << std::endl;
+    return result;
+  }
+  
+  if (vm.count("blocksize")) {
+    blocksize = vm["blocksize"].as<int>();
+  }
+
+  if (vm.count("nof_frames")) {
+    nof_frames = vm["nof_frames"].as<int>();
+  }
+
+  if (vm.count("refcode")) {
+    refcode = vm["refcode"].as<std::string>();
+  }
+
+  if (vm.count("projection")) {
+    projection = vm["projection"].as<std::string>();
+  }
+
+  /* Report variable values */
+  
+  std::cout << "[boostProgramOptions]" << std::endl;
+  std::cout << "-- blocksize  = " << blocksize  << std::endl;
+  std::cout << "-- nof_frames = " << nof_frames << std::endl;
+  std::cout << "-- refcode    = " << refcode    << std::endl;
+  std::cout << "-- projection = " << projection << std::endl;
 
   return result;
 }

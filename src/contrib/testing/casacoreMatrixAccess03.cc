@@ -50,10 +50,10 @@ using casa::Vector;
 
   Implemented tests:
   <ol>
-    <li>Assign value to matrix using method
-    \code <tt>Matix<T>::row(n) = T</tt> \endcode
-    <li>Assign value to matrix using method
-    \code <tt>Matix<T>::column(n) = T</tt> \endcode
+    <li>Assign value to matrix using method 
+    \code <tt>Matix<T>::row(n) = Vector<T></tt> \endcode
+    <li>Assign value to matrix using method 
+    \code <tt>Matix<T>::column(n) = Vector<T></tt> \endcode
   </ol>
 */
 
@@ -62,29 +62,25 @@ using casa::Vector;
 int main ()
 {
   int nofFailedTests (0);
-  int nelemMin  (50);
-  int nelemStep (50);
+  int nelemMin  (100);
+  int nelemStep (100);
   int nelemMax  (10000);
 
   clock_t start;
   clock_t end;
   std::ofstream outfile;
-  IPosition posStart (2);
-  IPosition posEnd (2);
   
-  std::cout << "[1] Fill Matrix<double> by row using IPosition ..." << std::endl;
+  std::cout << "[1] Fill Matrix<double> by row using Vector ..." << std::endl;
   try {
-    outfile.open("Matrix_double_row_IPosition.dat");
+    outfile.open("Matrix_double_row_Vector.dat");
     int nrow (0);
     for (int nelem(nelemMin); nelem<nelemMax; nelem+=nelemStep) {
       Matrix<double> mat (nelem,nelem);
-      posStart(1) = 0;
-      posEnd(1)   = nelem-1;
+      Vector<double> vec (nelem,1.0);
       start = clock();
       /* Test operation -- begin */
       for (nrow=0; nrow<nelem; nrow++) {
-	posStart(0) = posEnd(0) = nrow;
-	mat(posStart,posEnd) = 1.0;
+	mat.row(nrow) = vec;
       }
       /* Test operation -- end */
       end = clock();
@@ -100,19 +96,17 @@ int main ()
     nofFailedTests++;
   }
   
-  std::cout << "[2] Fill Matrix<double> by column using IPosition ..." << std::endl;
+  std::cout << "[2] Fill Matrix<double> by column using Vector ..." << std::endl;
   try {
-    outfile.open("Matrix_double_col_IPosition.dat");
+    outfile.open("Matrix_double_col_Vector.dat");
     int ncol (0);
     for (int nelem(nelemMin); nelem<nelemMax; nelem+=nelemStep) {
       Matrix<double> mat (nelem,nelem);
-      posStart(0) = 0;
-      posEnd(0)   = nelem-1;
+      Vector<double> vec (nelem,1.0);
       start = clock();
       /* Test operation -- begin */
       for (ncol=0; ncol<nelem; ncol++) {
-	posStart(1) = posEnd(1) = ncol;
-	mat(posStart,posEnd) = 1.0;
+	mat.column(ncol) = vec;
       }
       /* Test operation -- end */
       end = clock();

@@ -26,6 +26,7 @@
 #include <iostream>
 #include <string>
 
+#include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Array.h>
 #include <casa/Arrays/Vector.h>
 #include <casa/Arrays/Matrix.h>
@@ -33,10 +34,8 @@
 
 #include "testing_common.h"
 
-using std::cout;
-using std::endl;
-
 using casa::Array;
+using casa::IPosition;
 using casa::Matrix;
 using casa::Vector;
 
@@ -51,8 +50,10 @@ using casa::Vector;
 
   Implemented tests:
   <ol>
-    <li>Assign individual matrix elements within col-row nested loop
-    <li>Assign individual matrix elements within row-col nested loop
+    <li>Assign value to matrix using method
+    \code <tt>Matix<T>::row(n) = T</tt> \endcode
+    <li>Assign value to matrix using method
+    \code <tt>Matix<T>::column(n) = T</tt> \endcode
   </ol>
 */
 
@@ -61,53 +62,29 @@ using casa::Vector;
 int main ()
 {
   int nofFailedTests (0);
-  int nelemMin  (50);
-  int nelemStep (50);
+  int nelemMin  (100);
+  int nelemStep (100);
   int nelemMax  (10000);
-  
-  int nrow (0);
-  int ncol (0);
+
   clock_t start;
   clock_t end;
   std::ofstream outfile;
+  IPosition posStart (2);
+  IPosition posEnd (2);
   
-  cout << "[1] Assign matrix values individually in col-row order ..." << endl;
+  std::cout << "[1] Fill Matrix<double> by row using IPosition ..." << std::endl;
   try {
-    outfile.open("Matrix_double_col_row.dat");
+    outfile.open("Matrix_double_row_IPosition.dat");
+    int nrow (0);
     for (int nelem(nelemMin); nelem<nelemMax; nelem+=nelemStep) {
       Matrix<double> mat (nelem,nelem);
-      start = clock();
-      /* Test operation -- begin */
-      for (ncol=0; ncol<nelem; ncol++) {
-	for (nrow=0; nrow<nelem; nrow++) {
-	  mat(ncol,nrow) = 1.0;
-	}
-      }
-      /* Test operation -- end */
-      end = clock();
-      outfile << "\t" << nelem
-	      << "\t" << start
-	      << "\t" << end
-	      << "\t" << runtime(start,end)
-	      << endl;
-    }
-    outfile.close();
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-  
-  cout << "[2] Assign matrix values individually in row-col order ..." << endl;
-  try {
-    outfile.open("Matrix_double_row_col.dat");
-    for (int nelem(nelemMin); nelem<nelemMax; nelem+=nelemStep) {
-      Matrix<double> mat (nelem,nelem);
+      posStart(1) = 0;
+      posEnd(1)   = nelem-1;
       start = clock();
       /* Test operation -- begin */
       for (nrow=0; nrow<nelem; nrow++) {
-	for (ncol=0; ncol<nelem; ncol++) {
-	  mat(ncol,nrow) = 1.0;
-	}
+	posStart(0) = posEnd(0) = nrow;
+	mat(posStart,posEnd) = 1.0;
       }
       /* Test operation -- end */
       end = clock();
@@ -115,25 +92,27 @@ int main ()
 	      << "\t" << start
 	      << "\t" << end
 	      << "\t" << runtime(start,end)
-	      << endl;
+	      << std::endl;
     }
     outfile.close();
   } catch (std::string message) {
-    std::cerr << message << endl;
+    std::cerr << message << std::endl;
     nofFailedTests++;
   }
   
-  cout << "[3] Assign matrix values individually in col-row order ..." << endl;
+  std::cout << "[2] Fill Matrix<double> by column using IPosition ..." << std::endl;
   try {
-    outfile.open("Matrix_float_col_row.dat");
+    outfile.open("Matrix_double_col_IPosition.dat");
+    int ncol (0);
     for (int nelem(nelemMin); nelem<nelemMax; nelem+=nelemStep) {
-      Matrix<float> mat (nelem,nelem);
+      Matrix<double> mat (nelem,nelem);
+      posStart(0) = 0;
+      posEnd(0)   = nelem-1;
       start = clock();
       /* Test operation -- begin */
       for (ncol=0; ncol<nelem; ncol++) {
-	for (nrow=0; nrow<nelem; nrow++) {
-	  mat(ncol,nrow) = 1.0;
-	}
+	posStart(1) = posEnd(1) = ncol;
+	mat(posStart,posEnd) = 1.0;
       }
       /* Test operation -- end */
       end = clock();
@@ -141,39 +120,13 @@ int main ()
 	      << "\t" << start
 	      << "\t" << end
 	      << "\t" << runtime(start,end)
-	      << endl;
+	      << std::endl;
     }
     outfile.close();
   } catch (std::string message) {
-    std::cerr << message << endl;
+    std::cerr << message << std::endl;
     nofFailedTests++;
   }
-  
-  cout << "[4] Assign matrix values individually in row-col order ..." << endl;
-  try {
-    outfile.open("Matrix_float_row_col.dat");
-    for (int nelem(nelemMin); nelem<nelemMax; nelem+=nelemStep) {
-      Matrix<float> mat (nelem,nelem);
-      start = clock();
-      /* Test operation -- begin */
-      for (nrow=0; nrow<nelem; nrow++) {
-	for (ncol=0; ncol<nelem; ncol++) {
-	  mat(ncol,nrow) = 1.0;
-	}
-      }
-      /* Test operation -- end */
-      end = clock();
-      outfile << "\t" << nelem
-	      << "\t" << start
-	      << "\t" << end
-	      << "\t" << runtime(start,end)
-	      << endl;
-    }
-    outfile.close();
-  } catch (std::string message) {
-    std::cerr << message << endl;
-    nofFailedTests++;
-  }
-  
+    
   return nofFailedTests;
 }
