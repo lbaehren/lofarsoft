@@ -2,6 +2,10 @@
 ## -----------------------------------------------------------------------------
 ## Boost libraries 
 
+if (BOOST_LIB_DATE_TIME)
+  add_subdirectory (date_time)
+endif (BOOST_LIB_DATE_TIME)
+
 if (BOOST_LIB_FILESYSTEM)
   add_subdirectory (filesystem)
 endif (BOOST_LIB_FILESYSTEM)
