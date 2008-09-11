@@ -38,19 +38,19 @@ include (CMakeSettings)
 ## -----------------------------------------------------------------------------
 ## Check for the header files and the various module libraries
 
-set (BOOST_FIND_python_ONLY ON)
+set (BOOST_FIND_python_ONLY NO)
 
-set (BOOST_FIND_date_time ON)
-set (BOOST_FIND_filesystem ON)
-set (BOOST_FIND_iostreams ON)
-set (BOOST_FIND_program_options ON)
-set (BOOST_FIND_python ON)
-set (BOOST_FIND_regex ON)
-set (BOOST_FIND_serialization ON)
-set (BOOST_FIND_signals ON)
-set (BOOST_FIND_thread ON)
-set (BOOST_FIND_unit_test_framework ON)
-set (BOOST_FIND_wave ON)
+set (BOOST_FIND_date_time           YES )
+set (BOOST_FIND_filesystem          YES )
+set (BOOST_FIND_iostreams           YES )
+set (BOOST_FIND_program_options     YES )
+set (BOOST_FIND_python              YES )
+set (BOOST_FIND_regex               YES )
+set (BOOST_FIND_serialization       YES )
+set (BOOST_FIND_signals             YES )
+set (BOOST_FIND_thread              YES )
+set (BOOST_FIND_unit_test_framework YES )
+set (BOOST_FIND_wave                YES )
 
 if (BOOST_FIND_python_ONLY)
   
