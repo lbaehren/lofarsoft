@@ -511,6 +511,7 @@ case $param_packageName in
 	echo "[`date`] Building packages and tools in contrib ..."
 	## required packages
 	cd $basedir; ./build.sh casacore
+	cd $basedir; ./build.sh boost --force-build
 	## contrib
 	build_package contrib src/contrib;
     ;;
