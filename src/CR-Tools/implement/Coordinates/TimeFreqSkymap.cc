@@ -70,6 +70,18 @@ namespace CR { // Namespace CR -- begin
   
   // ------------------------------------------------------------- TimeFreqSkymap
   
+  TimeFreqSkymap::TimeFreqSkymap (TimeFreq const &timeFreq,
+				  uint const &blocksPerFrame,
+				  uint const &nofFrames)
+    : TimeFreq(timeFreq),
+      beamDomain_p (CoordinateDomain(CoordinateDomain::Frequency))
+  {
+    setBlocksPerFrame (blocksPerFrame);
+    setNofFrames (nofFrames);
+  }
+  
+  // ------------------------------------------------------------- TimeFreqSkymap
+  
   TimeFreqSkymap::TimeFreqSkymap (TimeFreqSkymap const &other)
     : TimeFreq(other),
       beamDomain_p (CoordinateDomain(CoordinateDomain::Frequency))
@@ -146,10 +158,10 @@ namespace CR { // Namespace CR -- begin
     return status;
   }
   
-  // ------------------------------------------------------------------ axisShape
+  // ---------------------------------------------------------------------- shape
   
 #ifdef HAVE_CASA
-  casa::IPosition TimeFreqSkymap::axisShape () const
+  casa::IPosition TimeFreqSkymap::shape () const
   {
     casa::IPosition shape(2);
     
@@ -164,14 +176,14 @@ namespace CR { // Namespace CR -- begin
     }
       break;
     default:
-      std::cerr << "[TimeFreqSkymap::axisShape] Invalid domain!" << std::endl;
+      std::cerr << "[TimeFreqSkymap::shape] Invalid domain!" << std::endl;
       break;
     };
     
     return shape;
   }
 #else 
-  vector<int> TimeFreqSkymap::axisShape () const
+  vector<int> TimeFreqSkymap::shape () const
   {
     vector<int> shape(2);
 
@@ -184,12 +196,17 @@ namespace CR { // Namespace CR -- begin
   void TimeFreqSkymap::summary (std::ostream &os)
   {
     os << "[TimeFreqSkymap] Summary of internal parameters." << std::endl;
-    os << "-- Blocksize        = " << blocksize_p       << std::endl;
-    os << "-- Sample frequency = " << sampleFrequency_p << std::endl;
-    os << "-- Nyquist zone     = " << nyquistZone_p     << std::endl;
-    os << "-- Reference time   = " << referenceTime_p   << std::endl;
-    os << "-- Blocks per frame = " << blocksPerFrame_p  << std::endl;
-    os << "-- nof. frames      = " << nofFrames_p       << std::endl;
+    os << "-- Blocksize            = " << blocksize_p       << std::endl;
+    os << "-- Sample frequency     = " << sampleFrequency_p << std::endl;
+    os << "-- Nyquist zone         = " << nyquistZone_p     << std::endl;
+    os << "-- Reference time       = " << referenceTime_p   << std::endl;
+    os << "-- Blocks per frame     = " << blocksPerFrame_p  << std::endl;
+    os << "-- nof. frames          = " << nofFrames_p       << std::endl;
+    
+#ifdef HAVE_CASA
+    os << "-- Shape of the axes    = " << shape()           << std::endl;
+    os << "-- Axis value increment = " << increment()       << std::endl;
+#endif
   }
   
   
@@ -200,6 +217,48 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
   
-  
+#ifdef HAVE_CASA
+  casa::Vector<double> TimeFreqSkymap::increment () const
+  {
+    casa::Vector<double> vec (2);
+    
+    switch (beamDomain_p.type()) {
+    case CoordinateDomain::Time:
+      vec(0) = TimeFreq::sampleInterval();
+      vec(1) = 1;
+      break;
+    case CoordinateDomain::Frequency:
+      vec(0) = TimeFreq::sampleInterval()*blocksize_p*blocksPerFrame_p*nofFrames_p;
+      vec(1) = sampleFrequency_p/blocksize_p;
+      break;
+    default:
+      std::cerr << "[TimeFreqSkymap::increment] Invalid domain!" << std::endl;
+      break;
+    };
+    
+    return vec;
+  }
+#else 
+  vector<double> TimeFreqSkymap::increment () const
+  {
+    vector<double> vec (2);
 
+    switch (beamDomain_p.type()) {
+    case CoordinateDomain::Time:
+      vec[0] = TimeFreq::sampleInterval();
+      vec[1] = 1;
+      break;
+    case CoordinateDomain::Frequency:
+      vec[0] = TimeFreq::sampleInterval()*blocksize_p*blocksPerFrame_p*nofFrames_p;
+      vec[1] = sampleFrequency_p/blocksize_p;
+      break;
+    default:
+      std::cerr << "[TimeFreqSkymap::increment] Invalid domain!" << std::endl;
+      break;
+    };
+    
+    return vec;
+  }
+#endif  
+  
 } // Namespace CR -- end

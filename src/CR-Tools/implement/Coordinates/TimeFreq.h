@@ -43,6 +43,7 @@
 using std::vector;
 using casa::LinearCoordinate;
 using casa::SpectralCoordinate;
+using casa::Vector;
 
 namespace CR { // Namespace CR -- begin
   
@@ -119,14 +120,21 @@ namespace CR { // Namespace CR -- begin
        <td>FFT output length</td>
        <td>Samples</td>
        <td>\f$ N_{\rm FFT} \f$</td>
-       <td>\f$ N_{\rm FFT} = \frac{N_{\rm Blocksize}}{2}+1 \f$</td>
+       <td>\f$ N_{\rm FFT} = N_{\rm Blocksize}/2+1 \f$</td>
       </tr>
       <tr>
-       <td>Frequency resolution in the Fourier domain</td>
+       <td>Frequency increment</td>
        <td>Hz</td>
        <td>\f$ \delta\nu \f$</td>
-       <td>\f$ \delta \nu = \nu_{\rm Sample} \cdot \Bigl( 2 \cdot (N_{\rm FFT} -1)
-	  \Bigr)^{-1} = \frac{\nu_{\rm Sample}}{N_{\rm Blocksize}} \f$</td>
+       <td>\f$ \delta \nu = \nu_{\rm Sample} \cdot N_{\rm Blocksize}^{-1} \f$</td>
+      </tr>
+      <tr>
+       <td>Frequency range</td>
+       <td>Hz</td>
+       <td>\f$ [\nu_{\rm min},\nu_{\rm max}] \f$</td>
+       <td>\f$ [\nu_{\rm min},\nu_{\rm max}] = [ \left( \nu_{\rm Sample}
+       (N_{\rm Nyquist}-1) \right)/2 , \left( \nu_{\rm Sample} N_{\rm Nyquist}
+       \right)/2 ] \f$</td>
       </tr>
       <tr>
        <td></td>
@@ -459,31 +467,41 @@ namespace CR { // Namespace CR -- begin
     }
 
     /*!
-      \brief Get the increment along the frequency axis, \f$ \delta \nu \f$
+      \brief Get the shape, i.e. the number of elements along each axis
       
-      \return frequencyIncrement -- The increment along the frequency axis, [Hz].
+      \return shape -- [time,freq] The number of elements along each of the 
+              two coupled axes.
     */
-    inline double frequencyIncrement () const {
-      return sampleFrequency_p/blocksize_p;
-    }
-
-    /*!
-      \brief Get the limits of the frequency band, \f$ [ \nu_{\rm min},\nu_{\rm max} ] \f$
-
-      \return frequencyBand -- The upper and lower limit covered by the
-                               combination of sample frequency and Nyquist zone
-    */
-    vector<double> frequencyBand ();
+#ifdef HAVE_CASA
+    virtual casa::IPosition shape () const;
+#else 
+    virtual vector<int> shape () const;
+#endif
     
     /*!
-      \brief Get the limits of the frequency band
-      
-      \retval minFrequency -- The lower limit of the frequency band, [Hz]
-      \retval maxFrequency -- The upper limit of the frequency band, [Hz]
+      \brief Get the increment between subsequent values along the axes
+
+      \return increment -- [time,freq] = \f$ [ \delta_t, \delta_\nu ] \f$
     */
-    void frequencyBand (double &minFrequency,
-			double &maxFrequency);
-    
+#ifdef HAVE_CASA
+    virtual casa::Vector<double> increment () const;
+#else 
+    virtual vector<double> increment () const;
+#endif
+
+    /*!
+      \brief Get the range of frequency values
+      
+      \return range -- \f$ [\nu_{\rm min},\nu_{\rm max}] \f$ The range of
+              frequency values for a given combination of sample frequency 
+	      \f$ \nu_{\rm sample} \f$ and Nyquist zone \f$ N_{\rm Nyquist} \f$.
+    */
+#ifdef HAVE_CASA
+    casa::Vector<double> frequencyRange ();
+#else
+    std::vector<double> frequencyRange ();
+#endif
+
     /*!
       \brief Get the values along the frequency axis, \f$ \{ \nu \} \f$
 
@@ -494,8 +512,12 @@ namespace CR { // Namespace CR -- begin
 				 \f$k\f$-th channel is given by
 				 \f[ \nu [k] = \nu_{\rm min} + k \cdot \delta \nu \f]
     */
+#ifdef HAVE_CASA
+    casa::Vector<double> frequencyValues ();
+#else
     vector<double> frequencyValues ();
-
+#endif
+    
     /*!
       \brief Get the values along the frequency axis, \f$ \{ \nu \} \f$
 
@@ -503,8 +525,12 @@ namespace CR { // Namespace CR -- begin
 
       \return frequencyValues -- The frequency values associated with the FFT
     */
+#ifdef HAVE_CASA
+    casa::Vector<double> frequencyValues (casa::Vector<bool> const &selection);
+#else
     vector<double> frequencyValues (vector<bool> const &selection);
-
+#endif
+    
     /*!
       \brief Get the values along the frequency axis, \f$ \{ \nu \} \f$
 
@@ -512,7 +538,11 @@ namespace CR { // Namespace CR -- begin
 
       \return frequencyValues -- The frequency values associated with the FFT
     */
+#ifdef HAVE_CASA
+    casa::Vector<double> frequencyValues (casa::Vector<double> const &range);
+#else
     vector<double> frequencyValues (vector<double> const &range);
+#endif
 
     /*!
       \brief Get the values along the frequency axis, \f$ \{ \nu \} \f$
@@ -524,8 +554,13 @@ namespace CR { // Namespace CR -- begin
 
       \return frequencyValues -- The frequency values associated with the FFT
     */
+#ifdef HAVE_CASA
+    casa::Vector<double> frequencyValues (double const &min,
+					  double const &max);
+#else
     vector<double> frequencyValues (double const &min,
 				    double const &max);
+#endif
 
     /*!
       \brief Get the values along the time axis
@@ -577,20 +612,12 @@ namespace CR { // Namespace CR -- begin
     vector<double> timeValues (vector<uint> const &sampleValues);
 #endif
 
-    /*!
-      \brief Get the shape, i.e. the number of elements along each axis
-      
-      \return shape -- [time,freq] The number of elements along each of the 
-              two coupled axes.
-    */
+    // ---------------------------------- Optional methods which require casacore
+
 #ifdef HAVE_CASA
-    virtual casa::IPosition axisShape () const;
-#else 
-    virtual vector<int> axisShape () const;
-#endif
-    
+
     /*!
-      \brief Create time axis coordinate from parameters
+      \brief [optional:CASA] Create time axis coordinate from parameters
       
       \return coord -- The time axis as linear coordinate
     */
@@ -626,6 +653,8 @@ namespace CR { // Namespace CR -- begin
     SpectralCoordinate frequencyAxis (double const &crval,
 				      double const &cdelt,
 				      double const &crpix);
+
+#endif
     
   private:
     

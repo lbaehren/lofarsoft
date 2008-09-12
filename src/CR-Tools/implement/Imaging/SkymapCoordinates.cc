@@ -914,7 +914,6 @@ namespace CR { // Namespace CR -- begin
     std::string quantity;
     std::string top;
     std::string right;
-    vector<double> frequencyBand (timeFreq_p.frequencyBand());
     DirectionCoordinate dc (directionCoordinate());
 
     status = beamType (domain,quantity);
@@ -933,11 +932,10 @@ namespace CR { // Namespace CR -- begin
        << endl;
     os << " Sample interval      [s] = " << timeFreq_p.sampleInterval()
        << endl;
-    os << " Frequency increment [Hz] = " << timeFreq_p.frequencyIncrement()
+    os << " Frequency increment [Hz] = " << timeFreq_p.increment()(1)
        << endl;
-    os << " Frequency band      [Hz] = " << frequencyBand[0]
-       << " .. " << frequencyBand[1] << endl;
-    
+    os << " Frequency band      [Hz] = " << timeFreq_p.frequencyRange()
+       << endl;
     os << "-- ObservationData object:" << endl;
     os << " Description              = " << obsData_p.description()
        << endl;

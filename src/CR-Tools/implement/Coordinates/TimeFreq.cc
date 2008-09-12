@@ -170,11 +170,10 @@ namespace CR { // Namespace CR -- begin
     os << "-- Reference time     [sec] = " << referenceTime_p      << std::endl;
     os << "-- FFT length    [channels] = " << fftLength_p          << std::endl;
     os << "-- Sample interval      [s] = " << sampleInterval()     << std::endl;
-    os << "-- Frequency increment [Hz] = " << frequencyIncrement() << std::endl;
-    os << "-- Frequency band      [Hz] = " << frequencyBand()[0]   << " .. "
-       << frequencyBand()[1] << std::endl;
 #ifdef HAVE_CASA
-    os << "-- Shape of the axes        = " << axisShape() << std::endl;
+    os << "-- Frequency band      [Hz] = " << frequencyRange()      << std::endl;
+    os << "-- Shape of the axes        = " << shape()              << std::endl;
+    os << "-- Axis value increment     = " << increment()          << std::endl;
 #endif
   }
   
@@ -184,44 +183,140 @@ namespace CR { // Namespace CR -- begin
   //
   // ============================================================================
 
-  // -------------------------------------------------------------- frequencyBand
-  
-  vector<double> TimeFreq::frequencyBand ()
-  {
-    vector<double> band(2);
-    
-    frequencyBand (band[0],band[1]);
-    
-    return band;
-  }
-  
-  // -------------------------------------------------------------- frequencyBand
+  // ---------------------------------------------------------------------- shape
 
-  void TimeFreq::frequencyBand (double &minFrequency,
-				double &maxFrequency)
-  {
-    minFrequency = (nyquistZone_p-1)*0.5*sampleFrequency_p;
-    maxFrequency = minFrequency + 0.5*sampleFrequency_p;
+#ifdef HAVE_CASA
+  casa::IPosition TimeFreq::shape () const {
+    return casa::IPosition (2,blocksize(),fftLength());
   }
+#else 
+  vector<int> TimeFreq::shape () const {
+    vector<int> shape(2);
+    shape(0) = blockize();
+    shape(1) = fftLength();
+    return shape;
+  }
+#endif
+
+  // ------------------------------------------------------------------ increment
+
+#ifdef HAVE_CASA
+  casa::Vector<double> TimeFreq::increment () const 
+  {
+    casa::Vector<double> vec (2);
+
+    vec(0) = sampleInterval();
+    vec(1) = sampleFrequency_p/blocksize_p;
+
+    return vec;
+  }
+#else 
+  vector<double> TimeFreq::increment () const
+  {
+    vector<double> vec (2);
+
+    vec[0] = sampleInterval();
+    vec[1] = sampleFrequency_p/blocksize_p;
+
+    return vec;
+}
+#endif
+
+  // ------------------------------------------------------------- frequencyRange
+
+#ifdef HAVE_CASA
+    casa::Vector<double> TimeFreq::frequencyRange ()
+    {
+      casa::Vector<double> range(2);
+      
+      range(0) = 0.5*(nyquistZone_p-1)*sampleFrequency_p;
+      range(1) = 0.5*nyquistZone_p*sampleFrequency_p;
+      
+      return range;
+    }
+#else
+    std::vector<double> TimeFreq::frequencyRange ()
+    {
+      std::vector<double> range(2);
+      
+      range[0] = 0.5*(nyquistZone_p-1)*sampleFrequency_p;
+      range[1] = 0.5*nyquistZone_p*sampleFrequency_p;
+      
+      return range;
+    }
+#endif
   
   // ------------------------------------------------------------ frequencyValues
 
-  vector<double> TimeFreq::frequencyValues ()
+#ifdef HAVE_CASA
+  casa::Vector<double> TimeFreq::frequencyValues ()
   {
     uint nofChannels (fftLength());
-    double increment (frequencyIncrement());
-    vector<double> band (frequencyBand());
-    vector<double> frequencies (nofChannels);
+    double incr (TimeFreq::increment()(1));
+    casa::Vector<double> band (frequencyRange());
+    casa::Vector<double> frequencies (nofChannels);
     
     for (uint k(0); k<nofChannels; k++) {
-      frequencies[k] = band[0] + k*increment;
+      frequencies(k) = band(0) + k*incr;
     }
     
     return frequencies;
   }  
+#else
+  vector<double> TimeFreq::frequencyValues ()
+  {
+    uint nofChannels (fftLength());
+    double incr (TimeFreq::increment()(1));
+    vector<double> band (frequencyRange());
+    vector<double> frequencies (nofChannels);
+    
+    for (uint k(0); k<nofChannels; k++) {
+      frequencies[k] = band[0] + k*incr;
+    }
+    
+    return frequencies;
+  }  
+#endif
 
   // ------------------------------------------------------------ frequencyValues
   
+#ifdef HAVE_CASA
+    Vector<double> TimeFreq::frequencyValues (Vector<bool> const &selection)
+    {
+      uint channel (0);
+      uint nofChannels (fftLength());
+      Vector<double> frequencies (frequencyValues());
+      Vector<double> selectedFrequencies;
+      
+      /*
+	Check if the selection vector has the same number of elements as the
+	vector with the full number of frequency values
+      */
+      if (frequencies.nelements() == selection.nelements()) {
+	uint nofSelectedChannels (0);
+	// get the number of selected channels
+	for (channel=0; channel<nofChannels; channel++) {
+	  nofSelectedChannels += uint(selection(channel));
+	}
+	// resize the vector returning the results
+	selectedFrequencies.resize(nofSelectedChannels);
+	// fill in the values
+	for (uint k(0), channel=0; channel<nofChannels; channel++) {
+	  if (selection(channel)) {
+	    selectedFrequencies(k) = frequencies(channel);
+	    k++;
+	  }
+	}
+      } else {
+	std::cerr << "[TimeFreq::frequencyValues] Mismatching vector sizes!"
+		  << std::endl;
+	selectedFrequencies.resize (nofChannels);
+	selectedFrequencies = frequencies;
+      }
+      
+      return selectedFrequencies;
+    }
+#else
   vector<double> TimeFreq::frequencyValues (vector<bool> const &selection)
   {
     uint channel (0);
@@ -257,9 +352,40 @@ namespace CR { // Namespace CR -- begin
 
     return selectedFrequencies;
   }
+#endif
   
   // ------------------------------------------------------------ frequencyValues
 
+#ifdef HAVE_CASA
+  casa::Vector<double> TimeFreq::frequencyValues (casa::Vector<double> const &range)
+  {
+    uint nofChannels (fftLength());
+    uint nofSelectedChannels (0);
+    Vector<bool> selection (nofChannels);
+    Vector<double> frequencies (frequencyValues());
+
+    for (uint channel (0); channel<nofChannels; channel++) {
+      if (frequencies(channel)>range[0] && frequencies(channel)<range[1]) {
+	selection(channel) = true;
+	nofSelectedChannels++;
+      } else {
+	selection(channel) = false;
+      }
+    }
+
+    // give some feedback in case no frequency channel was selected
+    if (nofSelectedChannels == 0) {
+      std::cerr << "[TimeFreq::frequencyValues] No frequency channels selected!"
+		<< std::endl;
+      std::cerr << "-- maximum available range  = [ " << frequencies[0] << " .. "
+		<< frequencies[nofChannels-1] << " ]" << std::endl;
+      std::cerr << "-- selected frquency range = [ " << range[0] << " .. "
+		<< range[1] << " ]" << std::endl;
+    }
+    
+    return frequencyValues (selection);
+  }
+#else
   vector<double> TimeFreq::frequencyValues (vector<double> const &range)
   {
     uint nofChannels (fftLength());
@@ -288,9 +414,27 @@ namespace CR { // Namespace CR -- begin
     
     return frequencyValues (selection);
   }
+#endif
 
   // ------------------------------------------------------------ frequencyValues
 
+#ifdef HAVE_CASA
+  casa::Vector<double> TimeFreq::frequencyValues (double const &min,
+						  double const &max)
+  {
+    Vector<double> range (2);
+
+    if (min <= max) {
+      range(0) = min;
+      range(1) = max;
+    } else {
+      range(0) = max;
+      range(1) = min;
+    }
+
+    return frequencyValues(range);
+  }
+#else
   vector<double> TimeFreq::frequencyValues (double const &min,
 					    double const &max)
   {
@@ -306,6 +450,7 @@ namespace CR { // Namespace CR -- begin
 
     return frequencyValues(range);
   }
+#endif
   
   // ----------------------------------------------------------------- timeValues
 
@@ -405,24 +550,11 @@ namespace CR { // Namespace CR -- begin
 
   // ============================================================================
   //
-  //  Optional methods
+  //  Optional methods which require casacore (or CASA)
   //
   // ============================================================================
 
 #ifdef HAVE_CASA
-  casa::IPosition TimeFreq::axisShape () const {
-    return casa::IPosition (2,blocksize(),fftLength());
-  }
-#else 
-  vector<int> TimeFreq::axisShape () const {
-    vector<int> shape(2);
-    shape(0) = blockize();
-    shape(1) = fftLength();
-    return shape;
-  }
-#endif
-  
-#ifdef AIPS_STDLIB
   
   // ------------------------------------------------------------ sampleFrequency
 
@@ -489,10 +621,8 @@ namespace CR { // Namespace CR -- begin
 
   SpectralCoordinate TimeFreq::frequencyAxis ()
   {
-    vector<double> band (frequencyBand());
-    
-    double crval    = band[0];
-    double cdelt    = frequencyIncrement();
+    double crval    = frequencyRange()(0);
+    double cdelt    = increment()(1);
     double crpix    = 0;
     
     return frequencyAxis (crval,
@@ -524,7 +654,6 @@ namespace CR { // Namespace CR -- begin
     return axis;
   }
 
-} // Namespace CR -- end
+  #endif
 
-#endif
-  
+} // Namespace CR -- end

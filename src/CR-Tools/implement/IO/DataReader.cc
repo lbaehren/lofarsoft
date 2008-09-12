@@ -629,21 +629,21 @@ namespace CR {  //  Namespace CR -- begin
     Vector<Double> frequencies;
     
     // Get the values of all frequency channels
-    std::vector<double> freq (TimeFreq::frequencyValues());
+    casa::Vector<double> freq (TimeFreq::frequencyRange());
     
     if (onlySelected) {
       nofChannels = nofSelectedChannels();
       frequencies.resize (nofChannels);
       //
       for (channel=0; channel<nofChannels; channel++) {
-	frequencies(channel) = freq[selectedChannels_p(channel)];
+	frequencies(channel) = freq(selectedChannels_p(channel));
       }
     } else {
       nofChannels = freq.size();
       frequencies.resize (nofChannels);
       //
       for (channel=0; channel<nofChannels; channel++) {
-	frequencies(channel) = freq[channel];
+	frequencies(channel) = freq(channel);
       }
     }
     

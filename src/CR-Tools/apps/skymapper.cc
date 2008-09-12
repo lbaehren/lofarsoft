@@ -169,7 +169,7 @@ int main (int argc, char *argv[])
   bpo::variables_map vm;
   bpo::store (bpo::parse_command_line(argc,argv,desc), vm);
   
-  if (vm.count("help")) {
+  if (vm.count("help") || argc == 1) {
     std::cout << desc << std::endl;
   }
   

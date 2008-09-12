@@ -21,6 +21,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <Coordinates/CoordinateType.h>
 #include <Coordinates/TimeFreq.h>
 
 /*!
@@ -346,6 +347,7 @@ int test_timeValues ()
   
   \return nofFailedTests -- The number of failed tests.
 */
+#ifndef HAVE_CASA
 int test_frequencyValues ()
 {
   cout << "\n[test_frequencyValues]\n" << endl;
@@ -362,14 +364,14 @@ int test_frequencyValues ()
     freq = data.frequencyValues();
     show_frequencies (freq,
 		      data.nyquistZone(),
-		      data.frequencyIncrement());
+		      data.increment()[1]);
     
     data.setNyquistZone (3);
     
     freq = data.frequencyValues();
     show_frequencies (freq,
 		      data.nyquistZone(),
-		      data.frequencyIncrement());
+		      data.increment()(1));
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -385,7 +387,7 @@ int test_frequencyValues ()
 
     show_frequencies (freq,
 		      data.nyquistZone(),
-		      data.frequencyIncrement());
+		      data.increment()(1));
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -404,7 +406,7 @@ int test_frequencyValues ()
 
     show_frequencies (freq,
 		      data.nyquistZone(),
-		      data.frequencyIncrement());
+		      data.increment()(1));
 
     // provide range as limits
 
@@ -412,7 +414,7 @@ int test_frequencyValues ()
     
     show_frequencies (freq,
 		      data.nyquistZone(),
-		      data.frequencyIncrement());
+		      data.increment()(1));
 
   } catch (std::string message) {
     std::cerr << message << endl;
@@ -421,6 +423,7 @@ int test_frequencyValues ()
   
   return nofFailedTests;
 }
+#endif
 
 // -----------------------------------------------------------------------------
 
@@ -456,13 +459,7 @@ int test_coordinateAxes ()
     SpectralCoordinate freqAxis = data.frequencyAxis();
 
     cout << "Frequency axis" << endl;
-    cout << "-- nof. pixel axes  = " << freqAxis.nPixelAxes() << endl;
-    cout << "-- nof. world axes  = " << freqAxis.nWorldAxes() << endl;
-    cout << "-- World axis names = " << freqAxis.worldAxisNames() << endl;
-    cout << "-- World axis units = " << freqAxis.worldAxisUnits() << endl;
-    cout << "-- Reference value  = " << freqAxis.referenceValue() << endl;
-    cout << "-- Reference pixel  = " << freqAxis.referencePixel() << endl;
-    cout << "-- Increment        = " << freqAxis.increment() << endl;
+    CR::CoordinateType::summary(std::cout,freqAxis);
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -479,26 +476,14 @@ int test_coordinateAxes ()
 						refPixel);
 
     cout << "Time axis" << endl;
-    cout << "-- nof. pixel axes  = " << timeAxis.nPixelAxes()     << endl;
-    cout << "-- nof. world axes  = " << timeAxis.nWorldAxes()     << endl;
-    cout << "-- World axis names = " << timeAxis.worldAxisNames() << endl;
-    cout << "-- World axis units = " << timeAxis.worldAxisUnits() << endl;
-    cout << "-- Reference value  = " << timeAxis.referenceValue() << endl;
-    cout << "-- Reference pixel  = " << timeAxis.referencePixel() << endl;
-    cout << "-- Increment        = " << timeAxis.increment()      << endl;
+    CR::CoordinateType::summary(std::cout,timeAxis);
 
     SpectralCoordinate freqAxis = data.frequencyAxis(refValue,
 						     increment,
 						     refPixel);
     
     cout << "Frequency axis" << endl;
-    cout << "-- nof. pixel axes  = " << freqAxis.nPixelAxes()     << endl;
-    cout << "-- nof. world axes  = " << freqAxis.nWorldAxes()     << endl;
-    cout << "-- World axis names = " << freqAxis.worldAxisNames() << endl;
-    cout << "-- World axis units = " << freqAxis.worldAxisUnits() << endl;
-    cout << "-- Reference value  = " << freqAxis.referenceValue() << endl;
-    cout << "-- Reference pixel  = " << freqAxis.referencePixel() << endl;
-    cout << "-- Increment        = " << freqAxis.increment()      << endl;
+    CR::CoordinateType::summary(std::cout,freqAxis);
   } catch (std::string message) {
     std::cerr << message << endl;
     nofFailedTests++;
@@ -520,7 +505,9 @@ int main ()
   // Test retrival of the time values
   nofFailedTests += test_timeValues ();
   // Test retrival of the frequency values
+#ifndef HAVE_CASA
   nofFailedTests += test_frequencyValues ();
+#endif
   // Test conversion of parameters to coordinate axes
   nofFailedTests += test_coordinateAxes ();
   

@@ -117,7 +117,7 @@ namespace CR { // Namespace CR -- begin
 
       \param blocksPerFrame -- The number of data blocks added up within a single
              time frame
-      \param nofFrames      -- The numbe of frames
+      \param nofFrames      -- The number of frames
     */
     TimeFreqSkymap (uint const &blocksPerFrame,
 		    uint const &nofFrames);
@@ -128,13 +128,26 @@ namespace CR { // Namespace CR -- begin
       \param blocksize       -- Blocksize, [samples]
       \param sampleFrequency -- Sample frequency in the ADC step, [Hz]
       \param nyquistZone     -- Nyquist zone,  [1]
-      \param blocksPerFrame -- The number of data blocks added up within a single
+      \param blocksPerFrame  -- The number of data blocks added up within a single
              time frame
-      \param nofFrames      -- The numbe of frames
+      \param nofFrames      -- The number of frames
     */
     TimeFreqSkymap (uint const &blocksize,
 		    double const &sampleFrequency,
 		    uint const &nyquistZone,
+		    uint const &blocksPerFrame,
+		    uint const &nofFrames);
+    
+    /*!
+      \brief Argumented constructor
+
+      \param timeFreq       -- CR::TimeFreq object acting as container for
+             information based on blocksize, sample frequency and Nyquist zone.
+      \param blocksPerFrame -- The number of data blocks added up within a single
+             time frame
+      \param nofFrames      -- The number of frames
+    */
+    TimeFreqSkymap (TimeFreq const &timeFreq,
 		    uint const &blocksPerFrame,
 		    uint const &nofFrames);
     
@@ -216,18 +229,6 @@ namespace CR { // Namespace CR -- begin
     }
     
     /*!
-      \brief Get the shape, i.e. the number of elements along each axis
-      
-      \return shape -- [time,freq] The number of elements along each of the 
-              two coupled axes.
-    */
-#ifdef HAVE_CASA
-    virtual casa::IPosition axisShape () const;
-#else 
-    virtual vector<int> axisShape () const;
-#endif
-    
-    /*!
       \brief Get the name of the class
       
       \return className -- The name of the class, TimeFreqSkymap.
@@ -251,6 +252,29 @@ namespace CR { // Namespace CR -- begin
     void summary (std::ostream &os);    
 
     // ------------------------------------------------------------------ Methods
+
+    /*!
+      \brief Get the shape, i.e. the number of elements along each axis
+      
+      \return shape -- [time,freq] The number of elements along each of the 
+              two coupled axes.
+    */
+#ifdef HAVE_CASA
+    virtual casa::IPosition shape () const;
+#else 
+    virtual vector<int> shape () const;
+#endif
+    
+    /*!
+      \brief Get the increment between subsequent values along the axes
+
+      \return increment -- [time,freq] = \f$ [ \delta_t, \delta_\nu ] \f$
+    */
+#ifdef HAVE_CASA
+    virtual casa::Vector<double> increment () const;
+#else 
+    virtual vector<double> increment () const;
+#endif
 
     /*!
       \brief Create a coordinate object from the internally stored parameters

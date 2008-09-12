@@ -144,6 +144,15 @@ namespace CR { // Namespace CR -- begin
     */
     bool setDomain (CoordinateDomain::Types const &domain);
 
+    /*!
+      \brief Set the domain by type
+
+      \param domain -- The name (Time, Frequency, Space) of the coordinate domain
+
+      \return status -- The status of the operation; returns \e false in case
+              an error was encountered, e.g. if an invalid identifier was 
+	      provided.
+    */
     bool setDomain (std::string const &domain);
 
     /*!
