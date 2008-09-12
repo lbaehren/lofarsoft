@@ -46,7 +46,8 @@ namespace CR { // Namespace CR -- begin
     upFieldStrength(),
     upsampledAntennas(),
     upTimeValues(),
-    Polarization("ANY")
+    Polarization("ANY"),
+    calibrationMode(false)
   {;}
   
   // ----------------------------------------------------------- CompletePipeline
@@ -61,7 +62,8 @@ namespace CR { // Namespace CR -- begin
     upFieldStrength(),
     upsampledAntennas(),
     upTimeValues(),
-    Polarization("ANY")
+    Polarization("ANY"),
+    calibrationMode(false)
   {
     copy (other);
   }
@@ -205,9 +207,19 @@ namespace CR { // Namespace CR -- begin
   {
     try 
     {
+      // Get the (not yet upsampled) fieldstrength of all antennas
+      // (don't pass antennaSelection to get full number of columns in the Matrix)
+      Matrix<Double> fieldstrength;
+
+      if (calibrationMode) // don't use beamforming in calibration mode
+        fieldstrength = GetUnshiftedTimeSeries(dr, Vector<Bool>());
+      else
+        fieldstrength = GetTimeSeries(dr, Vector<Bool>());
+
+
       // check if upsampling shoud be done at all (if not, return not upsampled data)
       if (upsampling_exp < 1) {
-	return GetTimeSeries(dr, Vector<Bool>(), Polarization).copy(); 
+	return fieldstrength.copy(); 
       }
 
       // make antennaSelection unique, as casacore-Vectors are allways passed by reference
@@ -251,9 +263,6 @@ namespace CR { // Namespace CR -- begin
 	}
       }
 
-      // Get the (not yet upsampled) fieldstrength of all antennas
-      // (don't pass antennaSelection to get full number of columns in the Matrix)
-      Matrix<Double> fieldstrength = GetTimeSeries(dr, Vector<Bool>());
       // create upsampling factor by upsampling exponent
       unsigned int upsampled = pow(2,upsampling_exp);
 
@@ -800,13 +809,17 @@ namespace CR { // Namespace CR -- begin
       if (rawData)
       {
         // get not upsampled data (upsampling exponent = 0)
-        yValues = getUpsampledFX(dr,0, antennaSelection, false);
+        yValues = getUpsampledFX(dr,0, antennaSelection, false, calibrationMode);
         // Upsampled yValues (ADC offset will not be substracted)
-        upYvalues = getUpsampledFX(dr,upsampling_exp, antennaSelection, false);
+        upYvalues = getUpsampledFX(dr,upsampling_exp, antennaSelection, false, calibrationMode);
+        // use voltage instead of ADC values in calibrationMode
       }
       else
       {
-        yValues = GetTimeSeries(dr).copy();  
+        if (calibrationMode) // don't use beamforming in calibration mode
+          yValues = GetUnshiftedTimeSeries(dr).copy();
+        else
+          yValues = GetTimeSeries(dr).copy();
         // don't use the antennaSelection to get the full number of columns in the Matrix
 
         // Upsampled yValues
@@ -828,9 +841,9 @@ namespace CR { // Namespace CR -- begin
 
       // conversion to micro (no conversion for height of raw data)
       xaxis *= 1e6;
-      if (!rawData) yValues *= 1e6;
+      if ((!rawData) && (!calibrationMode)) yValues *= 1e6;
       upxaxis *= 1e6;
-      if (!rawData) upYvalues *= 1e6;  
+      if ((!rawData)  && (!calibrationMode)) upYvalues *= 1e6;  
 
       // define Plotrange
       xmin = min(xaxis(plotRange));
@@ -905,10 +918,16 @@ namespace CR { // Namespace CR -- begin
             plotter.InitPlot(plotfilename, xmin, xmax, ymin, ymax);
 
             // Add labels
-            if (rawData)
-              plotter.AddLabels("Time t [#gmsec]", "Counts",label);
-            else
-              plotter.AddLabels("Time t [#gmsec]", "Fieldstrength #ge#d0#u [#gmV/m/MHz]",label);
+            if (calibrationMode)
+            {
+              plotter.AddLabels("Time t [#gmsec]", "Voltage [V]",label);
+            } else
+            {
+              if (rawData)
+                plotter.AddLabels("Time t [#gmsec]", "Counts",label);
+              else
+                plotter.AddLabels("Time t [#gmsec]", "Fieldstrength #ge#d0#u [#gmV/m/MHz]",label);
+            }
   
             // Plot (upsampled) trace
             plotter.PlotLine(upxaxis(upplotRange),upYvalues.column(i)(upplotRange),color,1);
@@ -948,10 +967,16 @@ namespace CR { // Namespace CR -- begin
         antennanumber << ntrue(antennaSelection);
         label = "GT " + gtlabel.str() + " - " + antennanumber.str() + " Antennas";
 
-        if (rawData)
-          plotter.AddLabels("Time t [#gmsec]", "Counts",label);
-        else
-          plotter.AddLabels("Time t [#gmsec]", "Fieldstrength #ge#d0#u [#gmV/m/MHz]",label);
+        if (calibrationMode)
+        {
+          plotter.AddLabels("Time t [#gmsec]", "Voltage [V]",label);
+        } else
+        {
+          if (rawData)
+            plotter.AddLabels("Time t [#gmsec]", "Counts",label);
+          else
+            plotter.AddLabels("Time t [#gmsec]", "Fieldstrength #ge#d0#u [#gmV/m/MHz]",label);
+        }
 
         // Create the plots looping through antennas
         for (unsigned int i = 0; i < antennaSelection.nelements(); i++)
@@ -1013,8 +1038,9 @@ namespace CR { // Namespace CR -- begin
 
       // Get the yValues of all selected antennas (raw data or fieldstrength)
       if (rawData)
-        yValues = getUpsampledFX(dr,upsampling_exp, antennaSelection, true);
-        // first true means: offset will be substracted, 
+        yValues = getUpsampledFX(dr,upsampling_exp, antennaSelection, true, calibrationMode);
+        // first true means: offset will be substracted,
+        // in calibrationMode the voltage will be used instead of ADC counts
       else
         yValues = getUpsampledFieldstrength(dr,upsampling_exp, antennaSelection);
 
@@ -1159,7 +1185,7 @@ namespace CR { // Namespace CR -- begin
       // Get the (upsampled) time axis
       timeValues = getUpsampledTimeAxis(dr,upsampling_exp);
 
-      // Get the yValues of all selected antennas (raw data or fieldstrength)
+      // Get the yValues of all selected antennas (fieldstrength)
       yValues = getUpsampledFieldstrength(dr,upsampling_exp, antennaSelection);
 
 
@@ -1267,6 +1293,76 @@ namespace CR { // Namespace CR -- begin
       {
         std::cerr << "CompletePipeline:listCalcMaxima: " << x.getMesg() << std::endl;
       }; 
+  }
+
+
+  Matrix<Double> CompletePipeline::GetUnshiftedTimeSeries(DataReader *dr,
+                                                          Vector<Bool> antennaSelection,
+                                                          String Polarization)
+  {
+    Matrix<Double> timeSeries;
+    try {
+      Matrix<DComplex> FFTData;
+      FFTData = GetData(dr);
+FFTData = dr->calfft();
+FFTData = dr->fft();
+      uInt i,nants=FFTData.ncolumn(),nselants,blocksize=dr->blocksize();
+      if (antennaSelection.nelements() != nants){
+	antennaSelection = Vector<Bool>(nants,True);
+      };
+      // Select Antennas according to Polarization
+      if (Polarization != "ANY"){
+	uInt date;
+	dr->headerRecord().get("Date",date);
+	if (!ploAntSelValid_p || 
+	    (ploAntSelPol_p != Polarization) ||
+	    (ploAntSelDate_p != date)) {
+	  ploAntSel_p.resize(nants);
+	  ploAntSel_p = True;
+	  Vector<Int> AntennaIDs;
+	  String tempstring;
+	  dr->headerRecord().get("AntennaIDs",AntennaIDs);
+#ifdef DEBUGGING_MESSAGES      
+	  cout << "CompletePipeline::GetUnshiftedTimeSeries: Polarization check, flagging Antennas: ";
+#endif
+	  for (i=0;i<nants;i++){
+	    CTRead->GetData(date, AntennaIDs(i), "Polarization", &tempstring);
+	    if (tempstring != Polarization) {
+#ifdef DEBUGGING_MESSAGES      
+	      cout << AntennaIDs(i) << " ";
+#endif
+	      ploAntSel_p(i) = False;
+	    };
+	  };//for
+#ifdef DEBUGGING_MESSAGES      
+	  cout << endl ;
+#endif
+	  ploAntSelPol_p = Polarization;
+	  ploAntSelDate_p = date;
+	  ploAntSelValid_p = True;
+	};// if (!ploAntSelValid_p ...
+	// Apply polarization-based selection
+	antennaSelection = antennaSelection && ploAntSel_p;
+      };
+
+      nselants=ntrue(antennaSelection);
+      if (nselants == 0) {
+	cerr << "CompletePipeline::GetUnshiftedTimeSeries: " << "No antennas selected/all antennas flagged!" << endl;
+      };
+
+      timeSeries.resize(blocksize,nselants);
+      unsigned int j=0;	// for counting antennas
+      for (i=0;i<nants;i++){
+	if (antennaSelection(i)){
+	  timeSeries.column(j) = dr->invfft(FFTData.column(i));
+	  j++;
+	};
+      };      
+    } catch (AipsError x) {
+      cerr << "CompletePipeline::GetUnshiftedTimeSeries: " << x.getMesg() << endl;
+      return Matrix<Double>();
+    }; 
+    return timeSeries;
   }
 
 } // Namespace CR -- end

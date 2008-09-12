@@ -148,6 +148,7 @@ namespace CR { // Namespace CR -- begin
       CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
       CompleteBeamPipe_p->setCCWindowWidth(getCCWindowWidth());
       CompleteBeamPipe_p->setPolarization(Polarization);
+      CompleteBeamPipe_p->setCalibrationMode(false);
 
       // Plot the raw data, if desired
       if (PlotRawData)
@@ -230,7 +231,130 @@ namespace CR { // Namespace CR -- begin
 
     } catch (AipsError x) 
     {
-      std::cerr << "analyseLOPESevent2::ProcessEvent: " << x.getMesg() << std::endl;
+      std::cerr << "analyseLOPESevent2::RunPipeline: " << x.getMesg() << std::endl;
+      return Record();
+    } 
+    return erg;
+  }
+
+
+  // -------------------------------------- Process Calibration Event
+
+  Record analyseLOPESevent2::CalibrationPipeline (const string& evname,
+						  string PlotPrefix, 
+						  Bool generatePlots,
+						  Vector<Int> FlaggedAntIDs, 
+						  Bool verbose,
+						  bool doDispersionCal,
+						  bool doRFImitigation,
+						  bool SinglePlots,
+						  bool PlotRawData,
+						  bool CalculateMaxima)
+  {
+    Record erg;
+    try {
+      // ofstream latexfile;  // WARNING: causes problem in fitCR2gauss.cc line 200, left here for future tests
+      Vector <Bool> AntennaSelection;
+
+
+      pipeline_p->setVerbosity(verbose);
+      // Generate the Data Reader
+      if (! lev_p->attachFile(evname) ){
+	cerr << "analyseLOPESevent::SetupEvent: " << "Failed to attach file: " << evname << endl;
+	return Record();
+      };
+
+      //  Enable/disable calibration steps of the FirstStagePipeline (must be done before InitEvent)
+      //  parameters are initialized with 'true' by default
+      pipeline_p->doGainCal(false);
+      pipeline_p->doDispersionCal(doDispersionCal);
+      pipeline_p->doDelayCal(false);
+
+      // initialize the Data Reader
+      if (! pipeline_p->InitEvent(lev_p)){
+	cerr << "analyseLOPESevent2::CalibrationPipeline: " << "Failed to initialize the DataReader!" << endl;
+	return Record();
+      };
+
+      //  Enable/disable calibration steps for the SecondStagePipeline
+      pipeline_p->doPhaseCal(false);
+      pipeline_p->doRFImitigation(doRFImitigation);
+
+      // Generate the antenna selection
+      Int i,j,id,nants, nflagged=FlaggedAntIDs.nelements();
+      AntennaSelection.resize();
+      AntennaSelection = pipeline_p->GetAntennaMask(lev_p);
+      nants = AntennaSelection.nelements();
+      Vector<Int> AntennaIDs,selAntIDs;
+      lev_p->headerRecord().get("AntennaIDs",AntennaIDs);
+      if (nflagged >0){
+	for (i=0; i<nflagged; i++){
+	  id = FlaggedAntIDs(i);
+	  for (j=0; j<nants; j++){
+	    if (AntennaIDs(j) == id) {
+	      AntennaSelection(j) = False;
+	      id = 0;
+	      break;
+	    };
+	  };
+	  if (verbose && (id !=0)){
+	    cout << "analyseLOPESevent::SetupEvent: " << "AntennaID: " << id 
+		 << " not found -> no antenna flagged." << endl;
+	  };
+	};
+      };
+
+      // storte GT in return record
+      erg.mergeField(lev_p->headerRecord(),"Date", RecordInterface::OverwriteDuplicates);
+
+      // initialize Complete Pipeline
+      CompleteBeamPipe_p = static_cast<CompletePipeline*>(pipeline_p);
+      CompleteBeamPipe_p->setPlotInterval(plotStart(),plotStop());
+      CompleteBeamPipe_p->setCalibrationMode(true);
+
+      // Plot the raw data, if desired
+      if (PlotRawData)
+      {
+	// plot upsampled raw data: either in seperated plots seperated or all traces in one plot
+        if (SinglePlots)
+          CompleteBeamPipe_p->plotAllAntennas(PlotPrefix+ "-raw", lev_p, AntennaSelection, true,
+                                              getUpsamplingExponent(),true);
+        else
+          CompleteBeamPipe_p->plotAllAntennas(PlotPrefix + "-raw", lev_p, AntennaSelection, false,
+                                              getUpsamplingExponent(), true);
+
+	// calculate the maxima
+        if (CalculateMaxima) CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), true);
+      }
+
+      // Generate plots
+      if (generatePlots)
+      {
+        // Plot of upsampled antenna traces (seperated with envelope or together without envelope) 
+        if (SinglePlots)
+          CompleteBeamPipe_p->plotAllAntennas(PlotPrefix, lev_p, AntennaSelection, true,
+                                              getUpsamplingExponent(),false, true);
+        else
+          CompleteBeamPipe_p->plotAllAntennas(PlotPrefix + "-all", lev_p, AntennaSelection, false,
+                                              getUpsamplingExponent(),false, false);
+
+        // calculate the maxima
+	if (CalculateMaxima)
+          CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), false);
+      };
+
+      // give out the names of the created plots
+      if (verbose)		
+      {
+        vector<string> plotlist = CompleteBeamPipe_p->getPlotList();
+        std::cout <<"\nList of generated plots:\n";
+        for (unsigned int i = 0; i < plotlist.size(); i++) std::cout << plotlist[i] << "\n";
+        std::cout << std::endl;
+      }
+
+    } catch (AipsError x) 
+    {
+      std::cerr << "analyseLOPESevent2::CalibrationPipeline: " << x.getMesg() << std::endl;
       return Record();
     } 
     return erg;
@@ -320,7 +444,7 @@ namespace CR { // Namespace CR -- begin
         latexfile.close();
 
         // execute latex without creating output at the term
-        string shellCommand = "latex " + latexfilename +" > /dev/null";  // don't show the output to stdout
+        string shellCommand = "latex " + latexfilename + " > /dev/null";  // don't show the output to stdout
         system(shellCommand.c_str());
 
 	// execute dvips to create postscript file

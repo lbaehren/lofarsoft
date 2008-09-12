@@ -98,6 +98,7 @@ using CR::LopesEventIn;
   flagged                = 10101
   flagged                = 10102
   rootfilename           = output.root
+  caliabration           = false
   \endverbatim
   This example means:
   <ul>
@@ -129,6 +130,7 @@ using CR::LopesEventIn;
     <li>time range to search for CC-beam-peak in lateral distribution studies is +/- 45 ns,
     <li>the antennas 10101 and 10102 are not considered in the analysis,
     <li>the output of the pipeline is written to a root tree in the file "output.root".
+    <li>the analysis is run normally, not in calibration mode
   </ul>
 
   <h3>Example</h3>
@@ -149,6 +151,11 @@ using CR::LopesEventIn;
   WARNING:
   The two upsampling methods should not be mixed!
   Otherwise wrong traces are obtained.
+
+  <h3>Calibration</h3>
+  The calibration mode can be switched on by calibration = true in the config file.
+  It can be used for processing LOPES events for the delay calibration.
+
 */
 
 // ------------- Global variables ----------------
@@ -180,6 +187,7 @@ vector<Int> flagged;			// use of STL-vector instead of CASA-vector due to suppor
 unsigned int summaryColumns = 0;	// be default no summary of all plots
 double ccWindowWidth = 0.045e-6;	// width of window for CC-beam
 string rootFilename = "";		// name of root file for output
+bool calibrationMode = false;		// calibration mode is off by default
 
 // ------------- Functions ----------------
 
@@ -253,6 +261,7 @@ void readConfigFile (const string &filename)
         std::cerr << "flagged = 10101\n";
         std::cerr << "flagged = 10102\n";
         std::cerr << "rootfilename = output.root\n";
+        std::cerr << "calibration = false\n";
         std::cerr << "... \n";
         std::cerr << "\nProgram will continue using default configuration values." << std::endl;
       }
@@ -892,6 +901,25 @@ void readConfigFile (const string &filename)
 	  std::cout << "RootFilename set to \"" << rootFilename << "\".\n";
 	}
  
+        if ( (keyword.compare("calibration")==0) || (keyword.compare("calibration")==0) 
+             || (keyword.compare("calibrationmode")==0) || (keyword.compare("CalibrationMode")==0))
+        {
+          if ( (value.compare("true")==0) || (value.compare("True")==0) || (value.compare("1")==0) )
+	  {
+	    calibrationMode = true;
+	    std::cout << "calibration set to 'true'.\n";
+	  } else
+          if ( (value.compare("false")==0) || (value.compare("False")==0) || (value.compare("0")==0) )
+	  {
+	    calibrationMode = false;
+	    std::cout << "calibration set to 'false'.\n";
+	  } else
+          {
+            std::cerr << "\nError processing file \"" << filename <<"\".\n" ;
+            std::cerr << "calibration must be either 'true' or 'false'.\n";
+            std::cerr << "\nProgram will continue skipping the problem." << std::endl;
+          }
+	}
       }	// while(configfile.good())
 
       // close config file
@@ -993,29 +1021,33 @@ int main (int argc, char *argv[])
     // create tree and tree structure (depends on chosen polarization)
     TTree roottree("T","LOPES");
     roottree.Branch("Gt",&gt,"Gt/i");	// GT as unsigned int
-    roottree.Branch("Xc",&core_x,"Xc/D");
-    roottree.Branch("Yc",&core_y,"Yc/D");
 
-    // one result, if polarization = ANY
-    if (polarization == "ANY")
+    // the following branches are not used in the calibration mode
+    if ( !calibrationMode )
     {
-      roottree.Branch("AzL",&azimuth,"AzL/D");
-      roottree.Branch("ElL",&elevation,"ElL/D");
-      roottree.Branch("CCheight",&CCheight,"CCheight/D");
-    }
-    if ( (polarization == "EW") || (polarization == "BOTH"))
-    {
-      roottree.Branch("AzL_EW",&AzL,"AzL_EW/D");
-      roottree.Branch("ElL_EW",&ElL,"ElL_EW/D");
-      roottree.Branch("CCheight_EW",&CCheight,"CCheight_EW/D");
-    }
-    if ( (polarization == "NS") || (polarization == "BOTH"))
-    {
-      roottree.Branch("AzL_NS",&AzL_NS,"AzL_NS/D");
-      roottree.Branch("ElL_NS",&ElL_NS,"ElL_NS/D");
-      roottree.Branch("CCheight_NS",&CCheight_NS,"CCheight_NS/D");
-    }
+      roottree.Branch("Xc",&core_x,"Xc/D");
+      roottree.Branch("Yc",&core_y,"Yc/D");
 
+      // one result, if polarization = ANY
+      if (polarization == "ANY")
+      {
+        roottree.Branch("AzL",&azimuth,"AzL/D");
+        roottree.Branch("ElL",&elevation,"ElL/D");
+        roottree.Branch("CCheight",&CCheight,"CCheight/D");
+      }
+      if ( (polarization == "EW") || (polarization == "BOTH"))
+      {
+        roottree.Branch("AzL_EW",&AzL,"AzL_EW/D");
+        roottree.Branch("ElL_EW",&ElL,"ElL_EW/D");
+        roottree.Branch("CCheight_EW",&CCheight,"CCheight_EW/D");
+      }
+      if ( (polarization == "NS") || (polarization == "BOTH"))
+      {
+        roottree.Branch("AzL_NS",&AzL_NS,"AzL_NS/D");
+        roottree.Branch("ElL_NS",&ElL_NS,"ElL_NS/D");
+        roottree.Branch("CCheight_NS",&CCheight_NS,"CCheight_NS/D");
+      }
+    } //if
 
     // Process events from event file list
     while (eventfilelist.good())
@@ -1025,17 +1057,21 @@ int main (int argc, char *argv[])
 
       // read in filename, azimuth, elevation, distance and log_energy	
       if (eventfilelist.good()) eventfilelist >> filename;
-	else read_in_error = true;
-      if (eventfilelist.good()) eventfilelist >> azimuth;
-	else read_in_error = true;	
-      if (eventfilelist.good()) eventfilelist >> elevation;
-	else read_in_error = true;	
-      if (eventfilelist.good()) eventfilelist >> distance;
-	else read_in_error = true;	
-      if (eventfilelist.good()) eventfilelist >> core_x;
-	else read_in_error = true;	
-      if (eventfilelist.good()) eventfilelist >> core_y;
-	else read_in_error = true;	
+        else read_in_error = true;
+      // if calibration mode the eventfile list contains only the file name
+      if ( !calibrationMode )
+      {
+        if (eventfilelist.good()) eventfilelist >> azimuth;
+          else read_in_error = true;
+        if (eventfilelist.good()) eventfilelist >> elevation;
+          else read_in_error = true;
+        if (eventfilelist.good()) eventfilelist >> distance;
+          else read_in_error = true;
+        if (eventfilelist.good()) eventfilelist >> core_x;
+          else read_in_error = true;
+        if (eventfilelist.good()) eventfilelist >> core_y;
+          else read_in_error = true;
+      }
 
       // check if end of file occured:
       // filename should contain "", if file is terminated be a new line
@@ -1050,12 +1086,19 @@ int main (int argc, char *argv[])
 	std::cerr << "Use the following file format: \n\n";
 	std::cerr << "some lines of text\n";
 	std::cerr << "===================================\n";
-	std::cerr << "eventfile1 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n";
-	std::cerr << "eventfile2 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]]\n";
+        if (calibrationMode)
+        {
+          std::cerr << "eventfile1\n";
+          std::cerr << "eventfile2\n";
+        } else
+        {
+          std::cerr << "eventfile1 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]\n";
+          std::cerr << "eventfile2 azimuth[°] elevation[°] distance(radius of curvature)[m] core_x[m] core_y[m]]\n";
+        }
 	std::cerr << "... \n" << std::endl;
 	return 1;		// exit program
       }
-		
+	
       // Create a plotprefix using the filename
       plotprefix = filename;
       // delete the file ending
@@ -1066,9 +1109,15 @@ int main (int argc, char *argv[])
        plotprefix.erase(0,plotprefix.find_last_of('/')+1);
 
       // print information and process the event
-      std::cout << "\nProcessing event \"" << filename << "\"\nwith azimuth " << azimuth << " °, elevation " << elevation
-                << " °, distance (radius of curvature) " << distance << " m, core position X " << core_x
-                << " m and core position Y " << core_y << " m.\n" << std::endl;
+      if (calibrationMode)
+      {
+        std::cout << "\nProcessing calibration event \"" << filename << "\".\n" << std::endl;
+      } else
+      {
+        std::cout << "\nProcessing event \"" << filename << "\"\nwith azimuth " << azimuth << " °, elevation " << elevation
+                  << " °, distance (radius of curvature) " << distance << " m, core position X " << core_x
+                  << " m and core position Y " << core_y << " m.\n" << std::endl;
+      }
 
       // Set observatory record to LOPES
       Record obsrec;
@@ -1079,124 +1128,155 @@ int main (int argc, char *argv[])
       // in this case an additional plotprefix is used
       string polPlotPrefix = "";
 
-      if ( (polarization == "ANY") || (polarization == "EW") || both_pol)
+      if ( calibrationMode )
       {
-        if (both_pol)
-        {
-          cout << "Pipeline is started for East-West Polarization.\n" << endl;
-          polPlotPrefix = "-EW";
-          polarization = "EW";	// do EW here
-        }
-
         // initialize the pipeline
         analyseLOPESevent2 eventPipeline;
         eventPipeline.initPipeline(obsrec);
 
         // set parameters of pipeline
         eventPipeline.setPlotInterval(plotStart,plotEnd);
-        eventPipeline.setCCWindowWidth(ccWindowWidth);
-        eventPipeline.setUpsamplingExponent(upsamplingExponent);
-
-	// call the pipeline with an extra delay = 0.
-        results = eventPipeline.RunPipeline (path+filename,
-					     azimuth,
-					     elevation,
-					     distance,
-					     core_x,
-					     core_y,
-					     RotatePos,
-					     plotprefix+polPlotPrefix,
-					     generatePlots,
-					     static_cast< Vector<int> >(flagged),
-					     verbose,
-					     simplexFit,
-					     0.,
-					     doTVcal,
-					     doGainCal,
-					     doDispersionCal,
-					     doDelayCal,
-					     doRFImitigation,
-					     upsamplingRate,
-					     polarization,
-					     singlePlots,
-					     PlotRawData,
-					     CalculateMaxima,
-					     listCalcMaxima,
-					     printShowerCoordinates);
-
-        // make a postscript with a summary of all plots
-        // if summaryColumns = 0 the method does not create a summary.
-        eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",summaryColumns);
-
-        // adding results to variables (needed to fill them into the root tree)
-        AzL = results.asDouble("Azimuth");
-        ElL = results.asDouble("Elevation");
-        CCheight = results.asDouble("CCheight");
-        gt = results.asuInt("Date");
-       }
-
-      if ( (polarization == "NS") || both_pol)
-      {
-        if (both_pol) 
-        {
-          cout << "Pipeline is started for North-South Polarization.\n" << endl;
-          polPlotPrefix = "-NS";
-          polarization = "NS";	// do NS here
-        }
-
-        // initialize the pipeline
-        analyseLOPESevent2 eventPipeline;
-        eventPipeline.initPipeline(obsrec);
-
-        // set parameters of pipeline
-        eventPipeline.setPlotInterval(plotStart,plotEnd);
-        eventPipeline.setCCWindowWidth(ccWindowWidth);
         eventPipeline.setUpsamplingExponent(upsamplingExponent);
 
         // call the pipeline with an extra delay = 0.
-        results = eventPipeline.RunPipeline (path+filename,
-					     azimuth,
-					     elevation,
-					     distance,
-					     core_x,
-					     core_y,
-					     RotatePos,
-					     plotprefix+polPlotPrefix,
-					     generatePlots,
-					     static_cast< Vector<int> >(flagged),
-					     verbose,
-					     simplexFit,
-					     0.,
-					     doTVcal,
-					     doGainCal,
-					     doDispersionCal,
-					     doDelayCal,
-					     doRFImitigation,
-					     upsamplingRate,
-					     polarization,
-					     singlePlots,
-					     PlotRawData,
-					     CalculateMaxima,
-					     listCalcMaxima,
-					     printShowerCoordinates);
-	
-        /* make a postscript with a summary of all plots
-	   if summaryColumns = 0 the method does not create a summary. */
-        eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",summaryColumns);
-	
-        // adding results to variables (needed to fill them into the root tree)
-        AzL_NS = results.asDouble("Azimuth");
-        ElL_NS = results.asDouble("Elevation");
-        CCheight_NS = results.asDouble("CCheight");
-        gt = results.asuInt("Date");
-       }
+        results = eventPipeline.CalibrationPipeline (path+filename,
+                                                     plotprefix,
+                                                     generatePlots,
+                                                     static_cast< Vector<int> >(flagged),
+                                                     verbose,
+                                                     doDispersionCal,
+                                                     doRFImitigation,
+                                                     singlePlots,
+                                                     PlotRawData,
+                                                     CalculateMaxima);
 
-       // write output to root tree
-       if (rootFilename != "")
-       {
-         cout << "Adding results to root tree.\n" << endl;
-         roottree.Fill();
-       }
+        // make a postscript with a summary of all plots
+        // if summaryColumns = 0 the method does not create a summary.
+        eventPipeline.summaryPlot(plotprefix+"-summary",summaryColumns);
+
+        // adding results to variables (needed to fill them into the root tree)
+        gt = results.asuInt("Date");
+      } else
+      {
+        if ( (polarization == "ANY") || (polarization == "EW") || both_pol)
+        {
+          if (both_pol)
+          {
+            cout << "Pipeline is started for East-West Polarization.\n" << endl;
+            polPlotPrefix = "-EW";
+            polarization = "EW";	// do EW here
+          }
+
+          // initialize the pipeline
+          analyseLOPESevent2 eventPipeline;
+          eventPipeline.initPipeline(obsrec);
+
+          // set parameters of pipeline
+          eventPipeline.setPlotInterval(plotStart,plotEnd);
+          eventPipeline.setCCWindowWidth(ccWindowWidth);
+          eventPipeline.setUpsamplingExponent(upsamplingExponent);
+
+          // call the pipeline with an extra delay = 0.
+          results = eventPipeline.RunPipeline (path+filename,
+                                               azimuth,
+                                               elevation,
+                                               distance,
+                                               core_x,
+                                               core_y,
+                                               RotatePos,
+                                               plotprefix+polPlotPrefix,
+                                               generatePlots,
+                                               static_cast< Vector<int> >(flagged),
+                                               verbose,
+                                               simplexFit,
+                                               0.,
+                                               doTVcal,
+                                               doGainCal,
+                                               doDispersionCal,
+                                               doDelayCal,
+                                               doRFImitigation,
+                                               upsamplingRate,
+                                               polarization,
+                                               singlePlots,
+                                               PlotRawData,
+                                               CalculateMaxima,
+                                               listCalcMaxima,
+                                               printShowerCoordinates);
+
+          // make a postscript with a summary of all plots
+          // if summaryColumns = 0 the method does not create a summary.
+          eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",summaryColumns);
+
+          // adding results to variables (needed to fill them into the root tree)
+          AzL = results.asDouble("Azimuth");
+          ElL = results.asDouble("Elevation");
+          CCheight = results.asDouble("CCheight");
+          gt = results.asuInt("Date");
+         }
+
+        if ( (polarization == "NS") || both_pol)
+        {
+          if (both_pol) 
+          {
+            cout << "Pipeline is started for North-South Polarization.\n" << endl;
+            polPlotPrefix = "-NS";
+            polarization = "NS";	// do NS here
+          }
+
+          // initialize the pipeline
+          analyseLOPESevent2 eventPipeline;
+          eventPipeline.initPipeline(obsrec);
+
+          // set parameters of pipeline
+          eventPipeline.setPlotInterval(plotStart,plotEnd);
+          eventPipeline.setCCWindowWidth(ccWindowWidth);
+          eventPipeline.setUpsamplingExponent(upsamplingExponent);
+
+          // call the pipeline with an extra delay = 0.
+          results = eventPipeline.RunPipeline (path+filename,
+                                               azimuth,
+                                               elevation,
+                                               distance,
+                                               core_x,
+                                               core_y,
+                                               RotatePos,
+                                               plotprefix+polPlotPrefix,
+                                               generatePlots,
+                                               static_cast< Vector<int> >(flagged),
+                                               verbose,
+                                               simplexFit,
+                                               0.,
+                                               doTVcal,
+                                               doGainCal,
+                                               doDispersionCal,
+                                               doDelayCal,
+                                               doRFImitigation,
+                                               upsamplingRate,
+                                               polarization,
+                                               singlePlots,
+                                               PlotRawData,
+                                               CalculateMaxima,
+                                               listCalcMaxima,
+                                               printShowerCoordinates);
+
+          /* make a postscript with a summary of all plots
+           if summaryColumns = 0 the method does not create a summary. */
+          eventPipeline.summaryPlot(plotprefix+polPlotPrefix+"-summary",summaryColumns);
+
+          // adding results to variables (needed to fill them into the root tree)
+          AzL_NS = results.asDouble("Azimuth");
+          ElL_NS = results.asDouble("Elevation");
+          CCheight_NS = results.asDouble("CCheight");
+          gt = results.asuInt("Date");
+        }
+      }  // if...else (calibrationMode)
+
+      // write output to root tree
+      if (rootFilename != "")
+      {
+        cout << "Adding results to root tree.\n" << endl;
+        roottree.Fill();
+      }
     }
 
     // close file

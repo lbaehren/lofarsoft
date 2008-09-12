@@ -93,6 +93,9 @@ namespace CR { // Namespace CR -- begin
     //! Polarization considered in analysis (should be set by analyseLOPESevent2::RunPipeline)
     string Polarization;
 
+    //! sets pipeline to calibration mode for processing time calibration measurements
+    bool calibrationMode;
+
 
   public:
     
@@ -209,7 +212,7 @@ namespace CR { // Namespace CR -- begin
     inline double getCCWindowWidth () {
       return ccWindowWidth_p;
     }
-    
+
     /*!
       \brief Set the width of the CC-beam window
 
@@ -245,6 +248,25 @@ namespace CR { // Namespace CR -- begin
     */
     inline string getPolarization () {
       return Polarization;
+    }
+
+ 
+    /*!
+      \brief Set the calibration mode
+
+      \param calibration -- switching pipeline to time calibration mode
+    */
+    inline void setCalibrationMode (const bool &calibration) {
+      calibrationMode = calibration;
+    }
+
+    /*!
+      \brief Get the polarization considered in the analysis
+
+      \return calibrationMode -- time calibration mode (on or off)
+    */
+    inline bool getCalibrationMode () {
+      return calibrationMode;
     }
 
  
@@ -451,8 +473,22 @@ namespace CR { // Namespace CR -- begin
                          Vector<Bool> antennaSelection = Vector<Bool>(),
                          const int& upsampling_exp = 0,
                          const double& cc_center = 0);
-    
-    
+
+
+    /*!
+      \brief Get the unshifted time series for all antennas
+
+      \param dr               -- Pointer to the (initialized) DataReader
+      \param antennaSelection -- (Optional) Vector of bool to select only part of the antennas.
+      \param Polarization     -- (Optional) Polarization type to select only part of the antennas
+                                 ("ANY" = ignore antenna polarization)
+
+      \return Matrix with the traces after all calibration procedures but without beamforming
+    */
+    Matrix<Double> GetUnshiftedTimeSeries(DataReader *dr, 
+                                          Vector<Bool> antennaSelection = Vector<Bool>(),
+                                          String Polarization="ANY");
+
   private:
     
     /*!

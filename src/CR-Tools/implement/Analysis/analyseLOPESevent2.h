@@ -240,6 +240,34 @@ class analyseLOPESevent2 : public analyseLOPESevent {
 			bool listCalcMaxima=false,
 			bool printShowerCoordinates=false);
 
+
+    /*!
+      \brief Process a calibration event using the CompletePipeline class
+
+      \param evname          - path to the eventfile to be processed
+      \param PlotPrefix      - prefix (including path) for the plots to be generated
+      \param generatePlots   - generate the postscript plots
+      \param FlaggedAntIDs   - list of antenna IDs that are to be flagged.
+      \param verbose         - produce verbose output on the commandline.
+      \param doDispersionCal - correct for the dispersion (frequency dependend PhaseCal values)
+      \param doRFImitigation - suppresses narrow band noise
+      \param SinglePlots     - makes a plot for each antenna
+      \param PlotRawData     - Plots the raw data FX
+      \param CalculateMaxima - Finds the maximum and the minimum of the trace in the plot range
+
+      \return Record with the results.
+    */
+    Record CalibrationPipeline (const string& evname,
+				string PlotPrefix=String(),
+				Bool generatePlots=False,
+				Vector<Int> FlaggedAntIDs=Vector<Int>(),
+				Bool verbose=False,
+				bool doDispersionCal=true,
+				bool doRFImitigation=true,
+				bool SinglePlots=false,
+				bool PlotRawData=false,
+				bool CalculateMaxima=false);
+
     /*!
       \brief Prints the distances of the antennas to the core (in shower coordinates)
       
