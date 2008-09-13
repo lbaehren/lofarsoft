@@ -324,7 +324,89 @@ int run_test5 (int const &min,
 
 // ------------------------------------------------------------------------------
 
-// ------------------------------------------------------------------------------
+/*!
+  \brief Assign a single value to Matrix<T>
+
+  \code
+      mat = 1.0;
+  \endcode
+*/
+int run_test6 (int const &min,
+	       int const &step,
+	       int const &max)
+{
+  int nofFailedTests (0);
+  int nrow (0);
+  int ncol (0);
+  clock_t start;
+  clock_t end;
+  std::ofstream outfile;
+
+  try {
+    outfile.open("Matrix_int.dat");
+    for (int nelem(min); nelem<max; nelem+=step) {
+      Matrix<int> mat (nelem,nelem);
+      start = clock();
+      /* Test operation -- begin */
+      mat = 1.0;
+      /* Test operation -- end */
+      end = clock();
+      outfile << "\t" << nelem
+	      << "\t" << start
+	      << "\t" << end
+	      << "\t" << runtime(start,end)
+	      << std::endl;
+    }
+    outfile.close();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  try {
+    outfile.open("Matrix_float.dat");
+    for (int nelem(min); nelem<max; nelem+=step) {
+      Matrix<float> mat (nelem,nelem);
+      start = clock();
+      /* Test operation -- begin */
+      mat = 1.0;
+      /* Test operation -- end */
+      end = clock();
+      outfile << "\t" << nelem
+	      << "\t" << start
+	      << "\t" << end
+	      << "\t" << runtime(start,end)
+	      << std::endl;
+    }
+    outfile.close();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  try {
+    outfile.open("Matrix_double.dat");
+    for (int nelem(min); nelem<max; nelem+=step) {
+      Matrix<double> mat (nelem,nelem);
+      start = clock();
+      /* Test operation -- begin */
+      mat = 1.0;
+      /* Test operation -- end */
+      end = clock();
+      outfile << "\t" << nelem
+	      << "\t" << start
+	      << "\t" << end
+	      << "\t" << runtime(start,end)
+	      << std::endl;
+    }
+    outfile.close();
+  } catch (std::string message) {
+    std::cerr << message << endl;
+    nofFailedTests++;
+  }
+  
+  return nofFailedTests;
+}
 
 // ------------------------------------------------------------------------------
 
@@ -361,6 +443,10 @@ int main (int argc,char* argv[])
   else if (argv[1] == "test5") {
     cout << "--- Assign matrix values individually in row-col order ..." << endl;
     nofFailedTests += run_test5 (nelemMin,nelemStep,nelemMax);
+  }
+  else if (argv[1] == "test6") {
+    std::cout << "-- Fill object of type Matrix<T> ..." << std::endl;
+    nofFailedTests += run_test6 (nelemMin,nelemStep,nelemMax);
   }
   else {
     cout << "[casacoreMatrixAccess] No test selected." << endl;

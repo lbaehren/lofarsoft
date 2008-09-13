@@ -10,7 +10,6 @@ if (HAVE_CASACORE)
   include_directories (${CASA_INCLUDES})
 
   set (tests
-    casacoreMatrixAccess01
     casacoreMatrixAccess02
     casacoreMatrixAccess03
     casacoreMatrixAccess04
@@ -35,6 +34,7 @@ if (HAVE_CASACORE)
   add_test (casacoreMatrixAccess_test3 casacoreMatrixAccess test3)
   add_test (casacoreMatrixAccess_test4 casacoreMatrixAccess test4)
   add_test (casacoreMatrixAccess_test5 casacoreMatrixAccess test5)
+  add_test (casacoreMatrixAccess_test6 casacoreMatrixAccess test6)
   
 endif (HAVE_CASACORE)
 
