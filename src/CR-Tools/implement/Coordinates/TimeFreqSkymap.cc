@@ -70,6 +70,22 @@ namespace CR { // Namespace CR -- begin
   
   // ------------------------------------------------------------- TimeFreqSkymap
   
+  TimeFreqSkymap::TimeFreqSkymap (uint const &blocksize,
+				  casa::Quantity const &sampleFrequency,
+				  uint const &nyquistZone,
+				  uint const &blocksPerFrame,
+				  uint const &nofFrames)
+    : TimeFreq(blocksize,
+	       sampleFrequency,
+	       nyquistZone),
+      beamDomain_p (CoordinateDomain(CoordinateDomain::Frequency))
+  {
+    setBlocksPerFrame (blocksPerFrame);
+    setNofFrames (nofFrames);
+  }
+  
+  // ------------------------------------------------------------- TimeFreqSkymap
+  
   TimeFreqSkymap::TimeFreqSkymap (TimeFreq const &timeFreq,
 				  uint const &blocksPerFrame,
 				  uint const &nofFrames)
@@ -148,15 +164,81 @@ namespace CR { // Namespace CR -- begin
 
     switch (domain.type()) {
     case CoordinateDomain::Time:
+      if (blocksPerFrame_p == 1) {
+	beamDomain_p = domain;
+      } else {
+	std::cerr << "[TimeFreqSkymap::setBeamDomain] " 
+		  << "Inconsistent combination of parameter values!" << std::endl;
+	status = false;
+      }
       break;
     case CoordinateDomain::Frequency:
+      beamDomain_p = domain;
       break;
     default:
+      std::cerr << "[TimeFreqSkymap::setBeamDomain] Invalid domain!" << std::endl;
+      status = false;
       break;
     }
     
     return status;
   }
+
+  // ---------------------------------------------------------- setBlocksPerFrame
+
+  bool TimeFreqSkymap::setBlocksPerFrame (uint const &blocksPerFrame,
+					  bool const &adjustDomain)
+  {
+    bool status (true);
+
+    switch (beamDomain_p.type()) {
+    case CoordinateDomain::Time:
+      if (blocksPerFrame > 1 && adjustDomain) {
+	blocksPerFrame_p = blocksPerFrame;
+	beamDomain_p.setDomain (CoordinateDomain::Frequency);
+      } else {
+	blocksPerFrame_p = blocksPerFrame;
+      }
+      break;
+    default:
+      blocksPerFrame_p = blocksPerFrame;
+      break;
+    }
+    
+    return status;
+  }
+  
+  // -------------------------------------------------------------------- summary
+  
+  void TimeFreqSkymap::summary (std::ostream &os)
+  {
+    os << "[TimeFreqSkymap] Summary of internal parameters."    << std::endl;
+    os << "-- Blocksize            = " << blocksize_p           << std::endl;
+    os << "-- Sample frequency     = " << sampleFrequency_p     << std::endl;
+    os << "-- Nyquist zone         = " << nyquistZone_p         << std::endl;
+    os << "-- Reference time       = " << referenceTime_p       << std::endl;
+    os << "-- Target domain        = " << beamDomain_p.name()   << std::endl;
+    os << "-- Blocks per frame     = " << blocksPerFrame_p      << std::endl;
+    os << "-- nof. frames          = " << nofFrames_p           << std::endl;
+    
+#ifdef HAVE_CASA
+    os << "-- Shape of the axes    = " << shape()               << std::endl;
+    os << "-- Axis value increment = " << increment()           << std::endl;
+#else
+    os << "-- Shape of the axes    = [" << shape()[0] << ","
+       << shape()[1] << std::endl;
+    os << "-- Axis value increment = [" << increment()[0] << ","
+       << increment()[1] << std::endl;
+#endif
+  }
+  
+  
+  
+  // ============================================================================
+  //
+  //  Methods
+  //
+  // ============================================================================
   
   // ---------------------------------------------------------------------- shape
   
@@ -186,36 +268,27 @@ namespace CR { // Namespace CR -- begin
   vector<int> TimeFreqSkymap::shape () const
   {
     vector<int> shape(2);
-
+ 
+    switch (beamDomain_p.type()) {
+    case CoordinateDomain::Time:
+      shape[0] = blocksize_p*nofFrames_p;
+      shape[1] = 1;
+      break;
+    case CoordinateDomain::Frequency: {
+      shape[0] = nofFrames_p;
+      shape[1] = fftLength_p;
+    }
+      break;
+    default:
+      std::cerr << "[TimeFreqSkymap::shape] Invalid domain!" << std::endl;
+      break;
+    };
+    
     return shape;
   }
 #endif
 
-  // -------------------------------------------------------------------- summary
-  
-  void TimeFreqSkymap::summary (std::ostream &os)
-  {
-    os << "[TimeFreqSkymap] Summary of internal parameters." << std::endl;
-    os << "-- Blocksize            = " << blocksize_p       << std::endl;
-    os << "-- Sample frequency     = " << sampleFrequency_p << std::endl;
-    os << "-- Nyquist zone         = " << nyquistZone_p     << std::endl;
-    os << "-- Reference time       = " << referenceTime_p   << std::endl;
-    os << "-- Blocks per frame     = " << blocksPerFrame_p  << std::endl;
-    os << "-- nof. frames          = " << nofFrames_p       << std::endl;
-    
-#ifdef HAVE_CASA
-    os << "-- Shape of the axes    = " << shape()           << std::endl;
-    os << "-- Axis value increment = " << increment()       << std::endl;
-#endif
-  }
-  
-  
-  
-  // ============================================================================
-  //
-  //  Methods
-  //
-  // ============================================================================
+  // ------------------------------------------------------------------ increment
   
 #ifdef HAVE_CASA
   casa::Vector<double> TimeFreqSkymap::increment () const
@@ -224,11 +297,11 @@ namespace CR { // Namespace CR -- begin
     
     switch (beamDomain_p.type()) {
     case CoordinateDomain::Time:
-      vec(0) = TimeFreq::sampleInterval();
-      vec(1) = 1;
+      vec(0) = 1/sampleFrequency_p;
+      vec(1) = sampleFrequency_p/2;
       break;
     case CoordinateDomain::Frequency:
-      vec(0) = TimeFreq::sampleInterval()*blocksize_p*blocksPerFrame_p*nofFrames_p;
+      vec(0) = blocksize_p*blocksPerFrame_p*nofFrames_p/sampleFrequency_p;
       vec(1) = sampleFrequency_p/blocksize_p;
       break;
     default:
@@ -245,11 +318,11 @@ namespace CR { // Namespace CR -- begin
 
     switch (beamDomain_p.type()) {
     case CoordinateDomain::Time:
-      vec[0] = TimeFreq::sampleInterval();
-      vec[1] = 1;
+      vec[0] = 1/sampleFrequency_p;
+      vec[1] = sampleFrequency_p/2;
       break;
     case CoordinateDomain::Frequency:
-      vec[0] = TimeFreq::sampleInterval()*blocksize_p*blocksPerFrame_p*nofFrames_p;
+      vec[0] = blocksize_p*blocksPerFrame_p*nofFrames_p/sampleFrequency_p;
       vec[1] = sampleFrequency_p/blocksize_p;
       break;
     default:

@@ -108,33 +108,39 @@ namespace CR { // Namespace CR -- begin
         <td class="indexkey">Quantity</td>
 	<td class="indexkey">Units</td>
 	<td class="indexkey">Symbol</td>
-	<td class="indexkey">Derivation</td>
+	<td class="indexkey">Relation to base variables</td>
       </tr>
       <tr>
        <td>Sample interval</td>
        <td>s</td>
        <td>\f$ T_{\rm Sample} \f$</td>
-       <td>\f$ T_{\rm Sample} = \nu_{\rm Sample}^{-1} \f$</td>
+       <td>\f$ \nu_{\rm Sample}^{-1} \f$</td>
       </tr>
       <tr>
        <td>FFT output length</td>
        <td>Samples</td>
        <td>\f$ N_{\rm FFT} \f$</td>
-       <td>\f$ N_{\rm FFT} = N_{\rm Blocksize}/2+1 \f$</td>
+       <td>\f$ N_{\rm Blocksize}/2+1 \f$</td>
       </tr>
       <tr>
        <td>Frequency increment</td>
        <td>Hz</td>
        <td>\f$ \delta\nu \f$</td>
-       <td>\f$ \delta \nu = \nu_{\rm Sample} \cdot N_{\rm Blocksize}^{-1} \f$</td>
+       <td>\f$ \nu_{\rm Sample} \cdot N_{\rm Blocksize}^{-1} \f$</td>
       </tr>
       <tr>
        <td>Frequency range</td>
        <td>Hz</td>
-       <td>\f$ [\nu_{\rm min},\nu_{\rm max}] \f$</td>
-       <td>\f$ [\nu_{\rm min},\nu_{\rm max}] = [ \left( \nu_{\rm Sample}
-       (N_{\rm Nyquist}-1) \right)/2 , \left( \nu_{\rm Sample} N_{\rm Nyquist}
+       <td>\f$ [\nu_{\rm min};\nu_{\rm max}] \f$</td>
+       <td>\f$ [ \left( \nu_{\rm Sample} (N_{\rm Nyquist}-1) \right)/2 ;
+       \left( \nu_{\rm Sample} N_{\rm Nyquist}
        \right)/2 ] \f$</td>
+      </tr>
+      <tr>
+       <td>Coordinate axes shape</td>
+       <td>[Samples;Samples]</td>
+       <td>\f$ [ N_t ; N_\nu ] \f$</td>
+       <td>\f$ [ N_{\rm Blocksize} ; N_{\rm FFT} ] \f$</td>
       </tr>
       <tr>
        <td></td>

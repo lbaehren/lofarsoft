@@ -90,7 +90,7 @@ namespace CR { // Namespace CR -- begin
 
   // --------------------------------------------------------------------- domain
 
-  std::string CoordinateDomain::domain (CoordinateDomain::Types const &type) 
+  std::string CoordinateDomain::name (CoordinateDomain::Types const &type) 
   {
     switch (type) {
     case CoordinateDomain::Time:
@@ -198,7 +198,7 @@ namespace CR { // Namespace CR -- begin
   {
     os << "[CoordinateDomain] Summary of internal parameters." << std::endl;
     os << "-- Domain type     = " << type()       << std::endl;
-    os << "-- Domain name     = " << domain()     << std::endl;
+    os << "-- Domain name     = " << name()       << std::endl;
     os << "-- Base unit       = " << baseUnit()   << std::endl;
     os << "-- Temporal domain = " << isTemporal() << std::endl;
     os << "-- Spectral domain = " << isSpectral() << std::endl;

@@ -446,18 +446,11 @@ int test_coordinateAxes ()
   cout << "[1] Coordinates axes using the default methods" << endl;
   try {
     LinearCoordinate timeAxis   = data.timeAxis();
-
-    cout << "Time axis" << endl;
-    cout << "-- nof. pixel axes  = " << timeAxis.nPixelAxes() << endl;
-    cout << "-- nof. world axes  = " << timeAxis.nWorldAxes() << endl;
-    cout << "-- World axis names = " << timeAxis.worldAxisNames() << endl;
-    cout << "-- World axis units = " << timeAxis.worldAxisUnits() << endl;
-    cout << "-- Reference value  = " << timeAxis.referenceValue() << endl;
-    cout << "-- Reference pixel  = " << timeAxis.referencePixel() << endl;
-    cout << "-- Increment        = " << timeAxis.increment() << endl;
-
     SpectralCoordinate freqAxis = data.frequencyAxis();
-
+    /* Show properties of the time axis */
+    cout << "Time axis" << endl;
+    CR::CoordinateType::summary(std::cout,timeAxis);
+    /* Show properties of the frequency axis */
     cout << "Frequency axis" << endl;
     CR::CoordinateType::summary(std::cout,freqAxis);
   } catch (std::string message) {

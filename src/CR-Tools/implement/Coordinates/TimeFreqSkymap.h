@@ -87,9 +87,84 @@ namespace CR { // Namespace CR -- begin
        <td>The total number of time frames to generate for the resulting
        skymap.</td>
       </tr>
+      <tr>
+       <td>\b beamDomain</td>
+       <td>---</td>
+       <td>---</td>
+       <td>The target domain for which the data are processed by the
+       Beamformer</td>
+      </tr>
     </table>
 
+    Base on the above variables we get different values for some of the quantities
+    already listed in CR::TimeFreq
+
+    <table border="0">
+      <tr>
+        <td class="indexkey">Quantity</td>
+	<td class="indexkey">Units</td>
+	<td class="indexkey">Symbol</td>
+	<td class="indexkey">Derivation from base variables</td>
+      </tr>
+      <tr>
+       <td>Frequency increment</td>
+       <td>Hz</td>
+       <td>\f$ \delta\nu \f$</td>
+       <td>\f$ \left\{ \begin{array}{lll}
+       \nu_{\rm Sample}/2 & & \hbox{Domain=Time} \\[2mm]
+       \nu_{\rm Sample} \cdot N_{\rm Blocksize}^{-1} & & \hbox{Domain=Freq}
+       \end{array} \right. \f$</td>
+      </tr>
+      <tr>
+       <td>Time increment</td>
+       <td>s</td>
+       <td>\f$ \delta t \f$</td>
+       <td>\f$ \left\{ \begin{array}{lll} 
+       \nu_{\rm Sample}^{-1} & & \hbox{Domain=Time} \\[2mm]
+       (\nu_{\rm Sample})^{-1} N_{\rm Blocksize} N_{\rm bpf} N_{\rm Frames}
+       & & \hbox{Domain=Freq}
+       \end{array} \right. \f$</td>
+      </tr>
+      <tr>
+       <td>Coordinate axes shape</td>
+       <td>[Samples;Samples]</td>
+       <td>\f$ [ N_t ; N_\nu ] \f$</td>
+       <td>\f$ \left\{ \begin{array}{lll} 
+       [ N_{\rm Blocksize} N_{\rm Frames} ; 1 ] & & \hbox{Domain=Time} \\[2mm]
+       [ N_{\rm Frames} ; N_{\rm FFT} ] & & \hbox{Domain=Freq}
+       \end{array} \right. \f$</td>
+      </tr>
+    </table>
+
+
     <h3>Example(s)</h3>
+    
+    <ul>
+      <li>Store data inide a new TimeFreqSkymap object:
+      \code
+      uint blocksize (1024);
+      casa::Quantity sampleFreq (200,"MHz");
+      uint nyquistZone (1);
+      uint blocksPerFrame (10);
+      uint frames (100);
+      
+      TimeFreqSkymap tf (blocksize,
+                         sampleFreq,
+		         nyquistZone,
+			 blocksPerFrame,
+			 frames);
+      \endcode
+      <li>Get the internal object storing the coordinate domain information:
+      \code 
+      TimeFreqSkymap tf;
+
+      CoordinateDomain domain = tf.beamDomain();
+      \endcode
+      The actual coordinate domain type can be exctracted just as easily:
+      \code
+      CoordinateDomain::Types domainType = tf.beamDomain().type();
+      \endcode
+    </ul>
     
   */  
   class TimeFreqSkymap : public TimeFreq {
@@ -100,7 +175,7 @@ namespace CR { // Namespace CR -- begin
     CoordinateDomain beamDomain_p;
     /*! The number of data blocks added up within a single time frame */
     uint blocksPerFrame_p;
-    /*! The number of frames */
+    /*! The number of time frames, \f$ N_{\rm Frames} \f$ */
     uint nofFrames_p;
     
   public:
@@ -134,6 +209,22 @@ namespace CR { // Namespace CR -- begin
     */
     TimeFreqSkymap (uint const &blocksize,
 		    double const &sampleFrequency,
+		    uint const &nyquistZone,
+		    uint const &blocksPerFrame,
+		    uint const &nofFrames);
+    
+    /*!
+      \brief Argumented constructor
+
+      \param blocksize       -- Blocksize, [samples]
+      \param sampleFrequency -- Sample frequency in the ADC step.
+      \param nyquistZone     -- Nyquist zone,  [1]
+      \param blocksPerFrame  -- The number of data blocks added up within a single
+             time frame
+      \param nofFrames      -- The number of frames
+    */
+    TimeFreqSkymap (uint const &blocksize,
+		    casa::Quantity const &sampleFrequency,
 		    uint const &nyquistZone,
 		    uint const &blocksPerFrame,
 		    uint const &nofFrames);
@@ -186,13 +277,25 @@ namespace CR { // Namespace CR -- begin
       return beamDomain_p;
     }
     
-    bool setBeamDomain (CR::CoordinateDomain::Types const &type);
+    /*!
+      \brief Get the target domain for the beamforming
+
+      \param domain -- The target domain, as type, for the beamforming.
+
+      \return status -- Status of the operation; returns <tt>false</tt> in case
+              an error was encountered.
+    */
+    bool setBeamDomain (CR::CoordinateDomain::Types const &domain);
     
+    /*!
+      \brief Get the target domain for the beamforming
+
+      \param domain -- The target domain, as name, for the beamforming.
+
+      \return status -- Status of the operation; returns <tt>false</tt> in case
+              an error was encountered.
+    */
     bool setBeamDomain (CR::CoordinateDomain const &domain);
-    
-    inline CoordinateDomain::Types beamDomainType () const {
-      return beamDomain_p.type();
-    }
     
     /*!
       \brief Get the number of blocks per time frame
@@ -208,12 +311,18 @@ namespace CR { // Namespace CR -- begin
       \brief Set the number of blocks per time frame
 
       \param blocksPerFrame -- The number of input data blocks combined into a
-             single time-frame of the resulting skymap.
-    */
-    inline void setBlocksPerFrame (uint const &blocksPerFrame) {
-      blocksPerFrame_p = blocksPerFrame;
-    }
+             single time-frame of the resulting skymap; keep in mind that for
+	     time as target domain for the Beamformer \f$ N_{\rm bpf} \equiv 1 \f$.
+      \param adjustDomain -- Adjust the domain in case the provided value does
+             agree with the current choice of the target domain for which the
+	     data are processed by the Beamformer
 
+      \return status -- Status of the operation; returns <tt>false</tt> in case
+              an error was encountered.
+    */
+    bool setBlocksPerFrame (uint const &blocksPerFrame,
+			    bool const &adjustDomain=true);
+    
     /*!
       \brief Get the number of time frames
 
@@ -256,8 +365,8 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the shape, i.e. the number of elements along each axis
       
-      \return shape -- [time,freq] The number of elements along each of the 
-              two coupled axes.
+      \return shape -- [time,freq] = \f$ [ N_t , N_\nu] \f$ The number of elements
+              along each of the two coupled axes.
     */
 #ifdef HAVE_CASA
     virtual casa::IPosition shape () const;
@@ -276,28 +385,37 @@ namespace CR { // Namespace CR -- begin
     virtual vector<double> increment () const;
 #endif
 
-    /*!
-      \brief Create a coordinate object from the internally stored parameters
-
-      \return coord 
-    */
-    casa::SpectralCoordinate frequencyAxisCoordinate ();
+    // --------------------------------------------------------- Optional methods
 
     /*!
       \brief Create a coordinate object from the internally stored parameters
 
-      \return coord 
+      \return coord -- casa::LinearCoordinate object wrapping the
+              characteristics of the time axis.
     */
     casa::LinearCoordinate timeAxisCoordinate ();
 
     /*!
-      \brief Create a coordinate objects from the internally stored parameters
+      \brief Create a coordinate object from the internally stored parameters
 
-      \retval freq -- 
-      \retval time -- 
+      \return coord -- casa::SpectralCoordinate object wrapping the
+              characteristics of the frequency axis.
     */
-    void coordinates (casa::SpectralCoordinate &freq,
-		      casa::LinearCoordinate &time);
+    casa::SpectralCoordinate frequencyAxisCoordinate ();
+
+    /*!
+      \brief Create a coordinate objects from the internally stored parameters
+      
+      \retval coord -- casa::LinearCoordinate object wrapping the
+              characteristics of the time axis.
+      \retval coord -- casa::SpectralCoordinate object wrapping the
+              characteristics of the frequency axis.
+      
+      \return status -- Status of the operation; returns <tt>false</tt> in case
+              an error was encountered.
+    */
+    bool coordinates (casa::LinearCoordinate &time,
+		      casa::SpectralCoordinate &freq);
     
   private:
     

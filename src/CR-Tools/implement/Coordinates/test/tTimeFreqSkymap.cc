@@ -214,7 +214,33 @@ int test_parameters ()
   } catch (std::string message) {
     std::cerr << message << std::endl;
     nofFailedTests++;
-  }  
+  }
+
+  std::cout << "[7] Coordinate axis increment ..." << std::endl;
+  try {
+#ifdef HAVE_CASA
+    std::cout << "-- increment = " << timeFreq.increment() << std::endl;
+#else 
+    std::cout << "-- increment = [" << timeFreq.increment()[0] << ","
+	      << timeFreq.increment()[1] << std::endl;
+#endif
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
+
+  std::cout << "[8] Coordinate axis length ..." << std::endl;
+  try {
+#ifdef HAVE_CASA
+    std::cout << "-- shape = " << timeFreq.shape() << std::endl;
+#else 
+    std::cout << "-- shape = [" << timeFreq.shape()[0] << ","
+	      << timeFreq.shape()[1] << std::endl;
+#endif
+  } catch (std::string message) {
+    std::cerr << message << std::endl;
+    nofFailedTests++;
+  }
 
   return nofFailedTests;
 }

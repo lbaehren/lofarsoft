@@ -127,11 +127,20 @@ namespace CR { // Namespace CR -- begin
     /*!
       \brief Get the name of the coordinate domain 
 
-      \return domain -- The name of the coordinate domain 
+      \return name -- The name of the coordinate domain 
     */
-    inline std::string domain () const {
-      return domain (type_p);
+    inline std::string name () const {
+      return name (type_p);
     }
+    
+    /*!
+      \brief Get the name of the coordinate domain 
+
+      \param type -- The type identifying the domain
+
+      \return name -- The name of the coordinate domain 
+    */
+    static std::string name (CoordinateDomain::Types const &type);
     
     /*!
       \brief Set the domain by type
@@ -215,15 +224,6 @@ namespace CR { // Namespace CR -- begin
     */
     static bool isSpectral (CoordinateDomain::Types const &type);
 
-    /*!
-      \brief Get the name of the coordinate domain 
-
-      \param type -- The type identifying the domain
-
-      \return domain -- The name of the coordinate domain 
-    */
-    static std::string domain (CoordinateDomain::Types const &type);
-    
     /*!
       \brief Get the name of the class
       
