@@ -36,6 +36,14 @@ if (HAVE_CASACORE)
   add_test (casacoreMatrixAccess_test5 casacoreMatrixAccess test5)
   add_test (casacoreMatrixAccess_test6 casacoreMatrixAccess test6)
   
+  ## compiler instructions
+  add_executable (casacoreCubeAccess casacoreCubeAccess.cc)
+  ## linker instructions
+  target_link_libraries (casacoreCubeAccess ${CASA_LIBRARIES})
+  ## testing
+  add_test (casacoreCubeAccess_test1 casacoreCubeAccess test1)
+  add_test (casacoreCubeAccess_test2 casacoreCubeAccess test2)
+  
 endif (HAVE_CASACORE)
 
 ## ==============================================================================

@@ -69,6 +69,8 @@ int run_test1 (int const &min,
 	       int const &step,
 	       int const &max)
 {
+  cout << "[run_test1] -- Create object of type Matrix<T> ..." << endl;
+
   int nofFailedTests (0);
   int nrow (0);
   int ncol (0);
@@ -131,6 +133,8 @@ int run_test2 (int const &min,
 	       int const &step,
 	       int const &max)
 {
+  cout << "[run_test2] Assign matrix values individually in col-row order ..." << endl;
+
   int nofFailedTests (0);
   int nrow (0);
   int ncol (0);
@@ -183,6 +187,9 @@ int run_test3 (int const &min,
 	       int const &step,
 	       int const &max)
 {
+  cout << "[run_test3] Assign matrix values individually in row-col order ..."
+       << endl;
+  
   int nofFailedTests (0);
   int nrow (0);
   int ncol (0);
@@ -235,13 +242,16 @@ int run_test4 (int const &min,
 	       int const &step,
 	       int const &max)
 {
+  cout << "[run_test4] Assign matrix values individually in col-row order ..."
+       << endl;
+  
   int nofFailedTests (0);
   int nrow (0);
   int ncol (0);
   clock_t start;
   clock_t end;
   std::ofstream outfile;
-
+  
   try {
     outfile.open("Matrix_float_col_row.dat");
     for (int nelem(min); nelem<max; nelem+=step) {
@@ -287,6 +297,9 @@ int run_test5 (int const &min,
 	       int const &step,
 	       int const &max)
 {
+  cout << "[run_test5] Assign matrix values individually in row-col order ..."
+       << endl;
+
   int nofFailedTests (0);
   int nrow (0);
   int ncol (0);
@@ -335,6 +348,8 @@ int run_test6 (int const &min,
 	       int const &step,
 	       int const &max)
 {
+  cout << "[run_test6] Fill object of type Matrix<T> ..." << endl;
+
   int nofFailedTests (0);
   int nrow (0);
   int ncol (0);
@@ -348,7 +363,7 @@ int run_test6 (int const &min,
       Matrix<int> mat (nelem,nelem);
       start = clock();
       /* Test operation -- begin */
-      mat = 1.0;
+      mat = 1;
       /* Test operation -- end */
       end = clock();
       outfile << "\t" << nelem
@@ -414,42 +429,39 @@ int main (int argc,char* argv[])
 {
   int nofFailedTests (0);
 
+  /* Check input from the command line */
+  
+  if (argc < 2) {
+    std::cerr << "[casacoreMatrixAccess] Missing parameter to select test."
+	      << std::endl;
+    return 1;
+  }
+
   int nelemMin  (100);
   int nelemStep (100);
   int nelemMax  (10000);
+  std::string testName (argv[1]);
   
-  int nrow (0);
-  int ncol (0);
-  clock_t start;
-  clock_t end;
-  std::ofstream outfile;
-  
-  if (argv[1] == "test1") {
-    cout << "-- Create object of type Matrix<T> ..." << endl;
+  if (testName == "test1") {
     nofFailedTests += run_test1 (nelemMin,nelemStep,nelemMax);
   }
-  else if (argv[1] == "test2") {
-    cout << "-- Assign matrix values individually in col-row order ..." << endl;
+  else if (testName == "test2") {
     nofFailedTests += run_test2 (nelemMin,nelemStep,nelemMax);
   }
-  else if (argv[1] == "test3") {
-    cout << "-- Assign matrix values individually in row-col order ..." << endl;
+  else if (testName == "test3") {
     nofFailedTests += run_test3 (nelemMin,nelemStep,nelemMax);
   }
-  else if (argv[1] == "test4") {
-    cout << "-- Assign matrix values individually in col-row order ..." << endl;
+  else if (testName == "test4") {
     nofFailedTests += run_test4 (nelemMin,nelemStep,nelemMax);
   }
-  else if (argv[1] == "test5") {
-    cout << "--- Assign matrix values individually in row-col order ..." << endl;
+  else if (testName == "test5") {
     nofFailedTests += run_test5 (nelemMin,nelemStep,nelemMax);
   }
-  else if (argv[1] == "test6") {
-    std::cout << "-- Fill object of type Matrix<T> ..." << std::endl;
+  else if (testName == "test6") {
     nofFailedTests += run_test6 (nelemMin,nelemStep,nelemMax);
   }
   else {
-    cout << "[casacoreMatrixAccess] No test selected." << endl;
+    std::cout << "No test selected." << std::endl;
   }
 
   return nofFailedTests;
