@@ -1304,12 +1304,10 @@ namespace CR { // Namespace CR -- begin
     try {
       Matrix<DComplex> FFTData;
       FFTData = GetData(dr);
-FFTData = dr->calfft();
-FFTData = dr->fft();
       uInt i,nants=FFTData.ncolumn(),nselants,blocksize=dr->blocksize();
       if (antennaSelection.nelements() != nants){
 	antennaSelection = Vector<Bool>(nants,True);
-      };
+      }
       // Select Antennas according to Polarization
       if (Polarization != "ANY"){
 	uInt date;
@@ -1322,33 +1320,24 @@ FFTData = dr->fft();
 	  Vector<Int> AntennaIDs;
 	  String tempstring;
 	  dr->headerRecord().get("AntennaIDs",AntennaIDs);
-#ifdef DEBUGGING_MESSAGES      
-	  cout << "CompletePipeline::GetUnshiftedTimeSeries: Polarization check, flagging Antennas: ";
-#endif
 	  for (i=0;i<nants;i++){
 	    CTRead->GetData(date, AntennaIDs(i), "Polarization", &tempstring);
 	    if (tempstring != Polarization) {
-#ifdef DEBUGGING_MESSAGES      
-	      cout << AntennaIDs(i) << " ";
-#endif
 	      ploAntSel_p(i) = False;
-	    };
-	  };//for
-#ifdef DEBUGGING_MESSAGES      
-	  cout << endl ;
-#endif
+	    }
+	  } //for
 	  ploAntSelPol_p = Polarization;
 	  ploAntSelDate_p = date;
 	  ploAntSelValid_p = True;
-	};// if (!ploAntSelValid_p ...
+	} // if (!ploAntSelValid_p ...
 	// Apply polarization-based selection
 	antennaSelection = antennaSelection && ploAntSel_p;
-      };
+      }
 
       nselants=ntrue(antennaSelection);
       if (nselants == 0) {
 	cerr << "CompletePipeline::GetUnshiftedTimeSeries: " << "No antennas selected/all antennas flagged!" << endl;
-      };
+      }
 
       timeSeries.resize(blocksize,nselants);
       unsigned int j=0;	// for counting antennas
@@ -1356,12 +1345,12 @@ FFTData = dr->fft();
 	if (antennaSelection(i)){
 	  timeSeries.column(j) = dr->invfft(FFTData.column(i));
 	  j++;
-	};
-      };      
+	}
+      }
     } catch (AipsError x) {
       cerr << "CompletePipeline::GetUnshiftedTimeSeries: " << x.getMesg() << endl;
       return Matrix<Double>();
-    }; 
+    }
     return timeSeries;
   }
 

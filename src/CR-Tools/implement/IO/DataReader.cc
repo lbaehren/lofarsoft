@@ -629,7 +629,7 @@ namespace CR {  //  Namespace CR -- begin
     Vector<Double> frequencies;
     
     // Get the values of all frequency channels
-    casa::Vector<double> freq (TimeFreq::frequencyRange());
+    casa::Vector<double> freq (TimeFreq::frequencyValues());
     
     if (onlySelected) {
       nofChannels = nofSelectedChannels();
