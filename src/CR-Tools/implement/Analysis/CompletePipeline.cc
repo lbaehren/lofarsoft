@@ -350,6 +350,16 @@ namespace CR { // Namespace CR -- begin
       if (voltage) rawData = dr->voltage();
         else rawData = dr->fx();
 
+      // substract pedastal in calibration mode
+      if (calibrationMode)
+        for (unsigned int i=0; i < rawData.ncolumn(); i++)
+        {
+          double pedastal = mean(rawData.column(i));
+          //cout << "Pedastal = " << pedastal << endl;
+          for (unsigned int j = 0; j < rawData.column(i).size(); j++)
+            rawData.column(i)(j) -= pedastal;
+        }
+
       // check if upsampling shoud be done at all (if not, return not upsampled data)
       if (upsampling_exp < 1) return rawData.copy(); 
 
@@ -1011,9 +1021,9 @@ namespace CR { // Namespace CR -- begin
       Vector<Double> timeRange;			// time values
       Matrix<Double> yValues;			// y-values
       Vector<Double> trace;			// trace currently processed
-      vector<double> maxima;			// Stores the calculated maxima
-      vector<double> maxima_time;		// Stores the calculated time of the maxima
-      vector<double> fwhm;			// width of the pulses
+      vector<double> envMaxima;			// Stores the calculated maxima of the env
+      vector<double> envMaxima_time;		// Stores the calculated time of the maxima of the env
+      vector<double> fwhm;			// width of the pulse envelope
       vector<double> start_time;		// Stores the start time of the pulse (begin of FWHM)
 
       if (rawData)
@@ -1118,8 +1128,8 @@ namespace CR { // Namespace CR -- begin
 
         // store the calculated values for later calculation of the mean
 	// multiply by 1e6 for conversion to micro
-        maxima.push_back(maximum*1e6);
-        maxima_time.push_back(timeRange(maxtimevalue)*1e6);
+        envMaxima.push_back(maximum*1e6);
+        envMaxima_time.push_back(timeRange(maxtimevalue)*1e6);
         // make quality check before push back (calculation of FWHM and pulsestart can fail)
         if ((pulsestop-pulsestart) < 200e-9) fwhm.push_back( (pulsestop-pulsestart)*1e9);
         if (pulsestart != 0) start_time.push_back(pulsestart*1e6);
@@ -1133,15 +1143,15 @@ namespace CR { // Namespace CR -- begin
       } // for i
 
       // calculate the averages and the range if there is more than one value
-      if (maxima.size() > 1)
+      if (envMaxima.size() > 1)
       {
         std::cout << "Summary for the maxima:\n" 
-                  << "Amplitude range [micro]:   " << min(static_cast< Vector<Double> >(maxima)) 
-                  << " to " << max(static_cast< Vector<Double> >(maxima)) << "\n"
-                  << "Amplitude average [micro]: " << mean(static_cast< Vector<Double> >(maxima)) << "\n"
-                  << "Time range [micro s]:      " << min(static_cast< Vector<Double> >(maxima_time))
-                  << " to " << max(static_cast< Vector<Double> >(maxima_time)) << "\n"
-                  << "Time average (max) [us]:   " << mean(static_cast< Vector<Double> >(maxima_time)) << "\n"
+                  << "Amplitude range [micro]:   " << min(static_cast< Vector<Double> >(envMaxima)) 
+                  << " to " << max(static_cast< Vector<Double> >(envMaxima)) << "\n"
+                  << "Amplitude average [micro]: " << mean(static_cast< Vector<Double> >(envMaxima)) << "\n"
+                  << "Time range [micro s]:      " << min(static_cast< Vector<Double> >(envMaxima_time))
+                  << " to " << max(static_cast< Vector<Double> >(envMaxima_time)) << "\n"
+                  << "Time average (max) [us]:   " << mean(static_cast< Vector<Double> >(envMaxima_time)) << "\n"
                   << "Time average (start) [us]: " << mean(static_cast< Vector<Double> >(start_time)) << "\n"
                   << "FWHM average [ns]:         " << mean(static_cast< Vector<Double> >(fwhm)) << std::endl;
       }
@@ -1298,7 +1308,8 @@ namespace CR { // Namespace CR -- begin
 
   Matrix<Double> CompletePipeline::GetUnshiftedTimeSeries(DataReader *dr,
                                                           Vector<Bool> antennaSelection,
-                                                          String Polarization)
+                                                          String Polarization,
+                                                          bool substractPedastal)
   {
     Matrix<Double> timeSeries;
     try {
@@ -1344,9 +1355,19 @@ namespace CR { // Namespace CR -- begin
       for (i=0;i<nants;i++){
 	if (antennaSelection(i)){
 	  timeSeries.column(j) = dr->invfft(FFTData.column(i));
+
+          // substract the pedastal (mean offset of the trace)
+          if (substractPedastal == true)
+          {
+             double pedastal = mean(timeSeries.column(j));
+             //cout << "Pedastal = " << pedastal << endl;
+             for (unsigned int k = 0; k < timeSeries.column(j).size(); k++)
+               timeSeries.column(j)(k) -= pedastal;
+          }
 	  j++;
 	}
       }
+
     } catch (AipsError x) {
       cerr << "CompletePipeline::GetUnshiftedTimeSeries: " << x.getMesg() << endl;
       return Matrix<Double>();
