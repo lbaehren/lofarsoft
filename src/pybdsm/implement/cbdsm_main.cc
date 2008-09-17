@@ -25,7 +25,7 @@ BOOST_PYTHON_MODULE(_cbdsm)
     "A collection of optimized C & Fortran routines for pybdsm";
 
   def("bstat", &bstat, (arg("array"), arg("mask") = false, arg("kappa") = 3),
-      "calculate (clipped) mean and rms of the 2-d (masked) image\n"
+      "calculate (clipped) mean and rms of the n-dimensional (masked) image\n"
       "returns 4-tuple (mean, dev, cmean, cdev)\n");
 
   MGFunction::register_class();

@@ -33,32 +33,60 @@ npybool_check(PyObject *obj, bool val)
   return false;
 }
 
-// calculate clipped mean/rms for 2d array
+static inline
+bool _nonzero(const unsigned &n, const int *v)
+{
+  bool res = true;
+  for (unsigned i = 0; i < n; ++i)
+    res = res && v[i];
+
+  return res;
+}
+
+// calculate clipped mean/rms for array
 template<class T>
 static pair<double, double>
-_stat_2d(numeric::array arr, double _mean, double _threshold)
+_stat_nd(numeric::array arr, double _mean, double _threshold)
 {
-  // ensure contiguous memory access
+  // ensure contiguous memory access by appropriately sorting indices
   vector<int> shape = n::shape(arr);
   vector<int> strides = n::strides(arr);
-  strides[0] /= sizeof(T); strides[1] /= sizeof(T);
-  if (strides[0] < strides[1]) {
-    swap(strides[0], strides[1]);
-    swap(shape[0], shape[1]);
-  }
+  const unsigned Nd = shape.size();
 
+  for (unsigned i = 0; i < Nd; ++i)
+    strides[i] /= sizeof(T);
+
+  for (unsigned i = 0; i < Nd; ++i)
+    for (unsigned j = i; j < Nd; ++j)
+      if (strides[i] > strides[j]) {
+	swap(shape[i], shape[j]);
+	swap(strides[i], strides[j]);
+      }
+
+  // accumulators
   double sum = 0;
   double sumsq = 0;
   int N = n::size(arr);
 
+  // data access machinery: we need adv to simplify jumping from
+  // one line to the next one (offset from the end of previous line)
   T *data = (T *)n::data(arr);
-  const int adv0 = strides[0] - shape[1]*strides[1];
-  const int adv1 = strides[1];
-  int cnt1 = shape[0];
+  int idx[Nd];
+  int adv[Nd];
 
-  while (cnt1--) {
-    int cnt2 = shape[1];
-    while (cnt2--) {
+  for (unsigned i = 0; i < Nd; ++i) {
+    idx[i] = shape[i];
+    adv[i] = strides[i];
+    if (i)
+      adv[i] -= shape[i-1]*strides[i-1];
+  }
+
+  while (_nonzero(Nd, idx)) {
+    // inner loop over fastest index
+    int _cnt = idx[0];
+    int _adv = adv[0];
+    while(_cnt) {
+      --_cnt;
       double v = *data;
       if (fabs(v - _mean) > _threshold)
 	--N;
@@ -66,9 +94,18 @@ _stat_2d(numeric::array arr, double _mean, double _threshold)
 	sum += v;
 	sumsq += v*v;
       }
-      data += adv1;
+      data += _adv;
     }
-    data += adv0;
+    idx[0] = _cnt;
+    
+    // now a bit of magic to handle all other indices
+    for (unsigned i = 1; i < Nd; ++i) {
+      idx[i-1] = shape[i-1];
+      data += adv[i];
+      --idx[i];
+      if (idx[i] != 0)
+	break;
+    }
   }
 
   double mean = sum/N;
@@ -77,38 +114,61 @@ _stat_2d(numeric::array arr, double _mean, double _threshold)
   return make_pair(mean, dev);
 }
 
-// calculate clipped mean/rms for 2d masked array
+
+// calculate clipped mean/rms for masked array
 template<class T>
 static pair<double, double>
-_stat_2d_m(numeric::array arr, numeric::array mask, double _mean, double _threshold)
+_stat_nd_m(numeric::array arr, numeric::array mask, double _mean, double _threshold)
 {
-  // ensure contiguous memory access
+  // ensure contiguous memory access by appropriately sorting indices
   vector<int> shape = n::shape(arr);
   vector<int> strides = n::strides(arr);
   vector<int> mstrides = n::strides(mask);
-  strides[0] /= sizeof(T); strides[1] /= sizeof(T);
-  mstrides[0] /= sizeof(npy_bool); mstrides[1] /= sizeof(npy_bool);
-  if (strides[0] < strides[1]) {
-    swap(shape[0], shape[1]);
-    swap(strides[0], strides[1]);
-    swap(mstrides[0], mstrides[1]);
+  const unsigned Nd = shape.size();
+
+  for (unsigned i = 0; i < Nd; ++i) {
+    strides[i] /= sizeof(T);
+    mstrides[i] /= sizeof(npy_bool);
   }
 
+  for (unsigned i = 0; i < Nd; ++i)
+    for (unsigned j = i; j < Nd; ++j)
+      if (strides[i] > strides[j]) {
+	swap(shape[i], shape[j]);
+	swap(strides[i], strides[j]);
+	swap(mstrides[i], mstrides[j]);
+      }
+
+  // accumulators
   double sum = 0;
   double sumsq = 0;
   int N = n::size(arr);
 
+  // data access machinery: we need adv to simplify jumping from
+  // one line to the next one (offset from the end of previous line)
   T *data = (T *)n::data(arr);
   npy_bool *mdata = (npy_bool *)n::data(mask);
-  const int adv0 = strides[0] - shape[1]*strides[1];
-  const int adv1 = strides[1];
-  const int madv0 = mstrides[0] - shape[1]*mstrides[1];
-  const int madv1 = mstrides[1];
-  int cnt1 = shape[0];
+  int idx[Nd];
+  int adv[Nd];
+  int madv[Nd];
 
-  while (cnt1--) {
-    int cnt2 = shape[1];
-    while (cnt2--) {
+  for (unsigned i = 0; i < Nd; ++i) {
+    idx[i] = shape[i];
+    adv[i] = strides[i];
+    madv[i] = mstrides[i];
+    if (i) {
+      adv[i] -= shape[i-1]*strides[i-1];
+      madv[i] -= shape[i-1]*mstrides[i-1];
+    }
+  }
+
+  while (_nonzero(Nd, idx)) {
+    // inner loop over fastest index
+    int _cnt = idx[0];
+    int _adv = adv[0];
+    int _madv = madv[0];
+    while(_cnt) {
+      --_cnt;
       double v = *data;
       if (*mdata || fabs(v - _mean) > _threshold)
 	--N;
@@ -116,11 +176,20 @@ _stat_2d_m(numeric::array arr, numeric::array mask, double _mean, double _thresh
 	sum += v;
 	sumsq += v*v;
       }
-      data += adv1;
-      mdata += madv1;
+      data += _adv;
+      mdata += _madv;
     }
-    data += adv0;
-    mdata += madv0;
+    idx[0] = _cnt;
+    
+    // now a bit of magic to handle all other indices
+    for (unsigned i = 1; i < Nd; ++i) {
+      idx[i-1] = shape[i-1];
+      data += adv[i];
+      mdata += madv[i];
+      --idx[i];
+      if (idx[i] != 0)
+	break;
+    }
   }
 
   double mean = sum/N;
@@ -136,9 +205,9 @@ _stat(numeric::array arr, object mask, double _mean, double _threshold)
 {
   if (mask.ptr() == Py_None || mask.ptr() == Py_False 
       || npybool_check(mask.ptr(), false))
-    return _stat_2d<T>(arr, _mean, _threshold);
+    return _stat_nd<T>(arr, _mean, _threshold);
   else
-    return _stat_2d_m<T>(arr, extract<numeric::array>(mask), _mean, _threshold);
+    return _stat_nd_m<T>(arr, extract<numeric::array>(mask), _mean, _threshold);
 }
 
 template<class T>
@@ -166,8 +235,6 @@ object bstat(numeric::array arr, object mask, double kappa)
 {
   NPY_TYPES type = n::type(arr);
 
-  // only 2d arrays are supported
-  n::check_rank(arr, 2);
   if (PyArray_ISBYTESWAPPED(arr.ptr()))
     goto fail;
 
@@ -176,7 +243,8 @@ object bstat(numeric::array arr, object mask, double kappa)
     numeric::array amask = extract<numeric::array>(mask);
 
     n::check_type(amask, NPY_BOOL);
-    n::check_rank(amask, 2);
+    int rank = n::rank(arr);
+    n::check_rank(amask, rank);
     n::check_size(amask, n::size(arr));
     // this is pointless on pc, but might matter somewhere else
     if (PyArray_ISBYTESWAPPED(amask.ptr()))
