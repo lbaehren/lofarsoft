@@ -318,10 +318,10 @@ namespace CR { // Namespace CR -- begin
 	// plot upsampled raw data: either in seperated plots seperated or all traces in one plot
         if (SinglePlots)
           CompleteBeamPipe_p->plotAllAntennas(PlotPrefix+ "-raw", lev_p, AntennaSelection, true,
-                                              getUpsamplingExponent(),true);
+                                              getUpsamplingExponent(),true, true);
         else
           CompleteBeamPipe_p->plotAllAntennas(PlotPrefix + "-raw", lev_p, AntennaSelection, false,
-                                              getUpsamplingExponent(), true);
+                                              getUpsamplingExponent(), true, false);
 
 	// calculate the maxima
         if (CalculateMaxima) CompleteBeamPipe_p->calculateMaxima(lev_p, AntennaSelection, getUpsamplingExponent(), true);

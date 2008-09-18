@@ -1021,8 +1021,13 @@ namespace CR { // Namespace CR -- begin
       Vector<Double> timeRange;			// time values
       Matrix<Double> yValues;			// y-values
       Vector<Double> trace;			// trace currently processed
+      Vector<Double> envTrace;			// envelope of trace currently processed
       vector<double> envMaxima;			// Stores the calculated maxima of the env
       vector<double> envMaxima_time;		// Stores the calculated time of the maxima of the env
+      vector<double> maxima;			// Stores the calculated maxima of the trace
+      vector<double> maxima_time;		// Stores the calculated time of the maxima
+      vector<double> minima;			// Stores the calculated minima of the trace
+      vector<double> minima_time;		// Stores the calculated time of the minima
       vector<double> fwhm;			// width of the pulse envelope
       vector<double> start_time;		// Stores the start time of the pulse (begin of FWHM)
 
@@ -1067,9 +1072,9 @@ namespace CR { // Namespace CR -- begin
       timeRange = timeValues(range);
 
       // print header line of output
-      std::cout <<  "Ant  pulse height  time of half height  time of max   FWHM\n"
-                <<  "[#]   [uV/m/MHZ]          [us]             [us]       [ns]\n"
-                <<  "-----------------------------------------------------------\n";
+      std::cout <<  "Ant   env height   max height   min height   env time   max time   min time   time of half height     FWHM\n"
+                <<  "[#]   [uV/m/MHZ]   [uV/m/MHZ]   [uV/m/MHZ]     [us]       [us]       [us]           [us]              [ns]\n"
+                <<  "-----------------------------------------------------------------------------------------------------------\n";
 
       // find the maximal y values for all selected antennas
       for (unsigned int i = 0; i < antennaSelection.nelements(); i++) if (antennaSelection(i))
@@ -1077,74 +1082,138 @@ namespace CR { // Namespace CR -- begin
         // Start with height 0 and search for heigher and lower values
         double maximum = 0;
         int maxtimevalue = 0;
+        double minimum = 0;
+        int mintimevalue = 0;
+        double envMaximum = 0;
+        int envMaxtimevalue = 0;
 
-        // get current envelope of trace
-        trace = envelope(yValues.column(i)(range));
+        // get current trace and its envelope
+        trace = yValues.column(i)(range);
+        envTrace = envelope(trace);
 
         // loop through the values and search for the heighest one
         for(unsigned int j = 0; j < timeRange.nelements(); j++)
-	{
+        {
           if ( maximum < trace(j)) 
           {
             maxtimevalue = j;
             maximum = trace(j);
-          } 
-	}
+          }
+        }
 
-       // calculate FWHM
-       double pulsestart = 0;
-       double pulsestop = 0;
-       // find begin of pulse (half height)
-       for(unsigned int j = maxtimevalue; j > 0; j--)
-	{
+        // loop through the values and search for the lowest one
+        for(unsigned int j = 0; j < timeRange.nelements(); j++)
+        {
+          if ( minimum > trace(j)) 
+          {
+            mintimevalue = j;
+            minimum = trace(j);
+          }
+        }
+
+        // loop through the values of the envelope and search for the heighest one
+        for(unsigned int j = 0; j < timeRange.nelements(); j++)
+        {
+          if ( envMaximum < envTrace(j)) 
+          {
+            envMaxtimevalue = j;
+            envMaximum = envTrace(j);
+          }
+        }
+
+        // calculate FWHM
+        double pulsestart = 0;
+        double pulsestop = 0;
+        // find begin of pulse (half height)
+        for(unsigned int j = envMaxtimevalue; j > 0; j--)
+        {
           // find crossing of half height (between j and j+1)
-          if ( trace(j) <= maximum/2.)
+          if ( envTrace(j) <= envMaximum/2.)
           {
             // interpolate linear
             // calculate differences to half height
-            double totaldiff = trace(j+1) - trace(j);
-            double diffdown = maximum/2. - trace(j);
+            double totaldiff = envTrace(j+1) - envTrace(j);
+            double diffdown = envMaximum/2. - envTrace(j);
             double timesample = timeRange(j+1) - timeRange(j);
             pulsestart = timeRange(j) + timesample * (diffdown/totaldiff);
             break; // exit loop
-          } 
-	}
+          }
+        }
 
-       // find end of pulse (half height)
-        for(unsigned int j = maxtimevalue; j < timeRange.nelements(); j++)
-	{
+        // find end of pulse (half height)
+        for(unsigned int j = envMaxtimevalue; j < timeRange.nelements(); j++)
+        {
           // find crossing of half height (between j-1 and j)
-          if ( trace(j) <= maximum/2.)
+          if ( envTrace(j) <= envMaximum/2.)
           {
             // interpolate linear
             // calculate differences to half height
-            double totaldiff = trace(j-1) - trace(j);
-            double diffdown = maximum/2. - trace(j);
+            double totaldiff = envTrace(j-1) - envTrace(j);
+            double diffdown = envMaximum/2. - envTrace(j);
             double timesample = timeRange(j) - timeRange(j-1);
             pulsestop = timeRange(j) - timesample * (diffdown/totaldiff);
             break; // exit loop
-          } 
-	}
+          }
+        }
 
         // store the calculated values for later calculation of the mean
-	// multiply by 1e6 for conversion to micro
-        envMaxima.push_back(maximum*1e6);
-        envMaxima_time.push_back(timeRange(maxtimevalue)*1e6);
+        // multiply by 1e6 for conversion to micro
+        maxima.push_back(maximum*1e6);
+        maxima_time.push_back(timeRange(maxtimevalue)*1e6);
+        minima.push_back(minimum*1e6);
+        minima_time.push_back(timeRange(mintimevalue)*1e6);
+        envMaxima.push_back(envMaximum*1e6);
+        envMaxima_time.push_back(timeRange(envMaxtimevalue)*1e6);
+
         // make quality check before push back (calculation of FWHM and pulsestart can fail)
         if ((pulsestop-pulsestart) < 200e-9) fwhm.push_back( (pulsestop-pulsestart)*1e9);
         if (pulsestart != 0) start_time.push_back(pulsestart*1e6);
 
         // print the calculated values
-        cout << setw(2) << i+1 << "     " 
-             << setw(11)<< maximum*1e6 << "       " 
-             << setw(8) << pulsestart*1e6 << "       "
+        cout << setw(2) << i+1 << "   "
+             << setw(11)<< envMaximum*1e6 << "  "
+             << setw(11)<< maximum*1e6 << "  "
+             << setw(11)<< minimum*1e6 << "   "
+             << setw(8) << timeRange(envMaxtimevalue)*1e6 << "   "
              << setw(8) << timeRange(maxtimevalue)*1e6 << "   "
+             << setw(8) << timeRange(mintimevalue)*1e6 << "       "
+             << setw(8) << pulsestart*1e6 << "          "
              << setw(8) << (pulsestop-pulsestart)*1e9 << std::endl;
       } // for i
 
       // calculate the averages and the range if there is more than one value
       if (envMaxima.size() > 1)
       {
+        cout <<  "-----------------------------------------------------------------------------------------------------------\n";
+        cout << "MIN  "
+             << setw(11)<< min(static_cast< Vector<Double> >(envMaxima)) << "  "
+             << setw(11)<< min(static_cast< Vector<Double> >(maxima))<< "  "
+             << setw(11)<< min(static_cast< Vector<Double> >(minima)) << "   "
+             << setw(8) << min(static_cast< Vector<Double> >(envMaxima_time)) << "   "
+             << setw(8) << min(static_cast< Vector<Double> >(maxima_time)) << "   "
+             << setw(8) << min(static_cast< Vector<Double> >(minima_time)) << "       "
+             << setw(8) << min(static_cast< Vector<Double> >(start_time)) << "          "
+             << setw(8) << min(static_cast< Vector<Double> >(fwhm)) << std::endl;
+        cout << "MAX  "
+             << setw(11)<< max(static_cast< Vector<Double> >(envMaxima)) << "  "
+             << setw(11)<< max(static_cast< Vector<Double> >(maxima))<< "  "
+             << setw(11)<< max(static_cast< Vector<Double> >(minima)) << "   "
+             << setw(8) << max(static_cast< Vector<Double> >(envMaxima_time)) << "   "
+             << setw(8) << max(static_cast< Vector<Double> >(maxima_time)) << "   "
+             << setw(8) << max(static_cast< Vector<Double> >(minima_time)) << "       "
+             << setw(8) << max(static_cast< Vector<Double> >(start_time)) << "          "
+             << setw(8) << max(static_cast< Vector<Double> >(fwhm)) << std::endl;
+        cout <<  "-----------------------------------------------------------------------------------------------------------\n";
+        cout << "MEAN "
+             << setw(11)<< mean(static_cast< Vector<Double> >(envMaxima)) << "  "
+             << setw(11)<< mean(static_cast< Vector<Double> >(maxima))<< "  "
+             << setw(11)<< mean(static_cast< Vector<Double> >(minima)) << "   "
+             << setw(8) << mean(static_cast< Vector<Double> >(envMaxima_time)) << "   "
+             << setw(8) << mean(static_cast< Vector<Double> >(maxima_time)) << "   "
+             << setw(8) << mean(static_cast< Vector<Double> >(minima_time)) << "       "
+             << setw(8) << mean(static_cast< Vector<Double> >(start_time)) << "          "
+             << setw(8) << mean(static_cast< Vector<Double> >(fwhm)) << "\n" << std::endl;
+
         std::cout << "Summary for the maxima:\n" 
                   << "Amplitude range [micro]:   " << min(static_cast< Vector<Double> >(envMaxima)) 
                   << " to " << max(static_cast< Vector<Double> >(envMaxima)) << "\n"
