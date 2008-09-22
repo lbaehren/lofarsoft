@@ -15,10 +15,11 @@
 
 basedir=`pwd`
 
-## Required minimum version of CMake
+## Required minimum version of CMake; system should provide a version at
+## at least matching the one provided as part of the USG distribution
 
 REQUIRED_MAJOR_VERSION=2
-REQUIRED_MINOR_VERSION=5
+REQUIRED_MINOR_VERSION=6
 
 ## Default values for the optional parameters
 
