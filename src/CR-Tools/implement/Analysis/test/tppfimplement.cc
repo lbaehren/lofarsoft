@@ -32,17 +32,25 @@
 #include <casa/BasicSL/Complex.h>
 #include <casa/Arrays/ArrayMath.h>
 #include <casa/namespace.h>
+#include <scimath/Mathematics/FFTServer.h>
 
+#include <Data/rawSubbandIn.h>
+#include <Data/tbbctlIn.h>
 #include <Analysis/SubbandID.h>
 #include <Analysis/ppfimplement.h>
 #include <Analysis/ppfinversion.h>
 #include <Analysis/ionoCalibration.h>
-#include <scimath/Mathematics/FFTServer.h>
+
+//using namespace DAL ;
+using namespace CR ;
+
 
 using CR::ppfimplement ;
 using CR::ppfinversion ;
 using CR::ionoCalibration ;
 using CR::SubbandID ;
+using CR::tbbctlIn ;
+using CR::rawSubbandIn ;
 
 /*!
   \file tppfimplement.cc
@@ -60,13 +68,13 @@ using CR::SubbandID ;
 //  Global variables used throughout the program
 
 uint dataBlockSize (1024);
-uint nofsegmentation(16*6) ;
+uint nofsegmentation(16*10) ;
 Vector<Double> samples( dataBlockSize*nofsegmentation, 0.0 ) ;
 Double hrAngle( 1.034 );
 Double declinationAngle( 1.078 );
 Double geomagLatitude( 0.915708 ) ;
 Double height_ionosphere( 4e5 ) ;
-Double TEC_value( 10e17 ) ;
+Double TEC_value( 10e15 ) ;
 Vector<Double> subband_frequencies( 512, 0.0 );
 Double sampling_frequency( 200e6 );
 
@@ -89,6 +97,8 @@ int test_ppfimplement ()
     ppfinversion ppf_inv ;
     ionoCalibration iono_cal ;
     SubbandID band_ID ;
+      tbbctlIn newtbbctlIn ;
+        rawSubbandIn newrawSubbandIn ;  
   }
   
   catch ( AipsError x){
@@ -106,11 +116,11 @@ int test_ppfimplement ()
   \return nofFailedTests -- The number of failed tests encountered within this
           function
 */
-int test_ppfimplements ()
-{
+Bool test_ppfimplements ()
+ try {
   std::cout << "\n[test_ppfimplements]\n" << std::endl;
 
-  int nofFailedTests (0);
+//  int nofFailedTests (0);
   
   /* Provide some feedback on the variables used */
   std::cout << "-- Data block size   = " << dataBlockSize      << std::endl;
@@ -118,8 +128,19 @@ int test_ppfimplements ()
   std::cout << "-- Vector of samples = " << samples.shape()    << std::endl;
   std::cout << "-- Sample frequency  = " << sampling_frequency << std::endl;
   
+  
+  ppfimplement ppf_impl;
+    ppfinversion ppf_inv ;
+    ionoCalibration iono_cal ;
+    SubbandID band_ID ;
+      tbbctlIn newtbbctlIn ;
+        rawSubbandIn newrawSubbandIn ;  
+  //***************************************************************************
+  //**************** gaussian (random) noise generation************************
+  //***************************************************************************
+  
   cout << "[1] Testing the MLCG generator ..." << endl ;
-  try {
+ 
     uint nSample (0);
     ACG gen(1, samples.nelements() );
     
@@ -128,89 +149,100 @@ int test_ppfimplements ()
       //      Double nextExpRand = rnd() ;
       samples(nSample) = 0.0 ; //nextExpRand ;
     }
-    /* Resetting the generator, should get the same numbers. */
+   // Resetting the generator, should get the same numbers.
     gen.reset () ;
 
-    samples( 16*dataBlockSize*3+10 ) = 10.0 ;
+    samples( 16*dataBlockSize*3+400 ) = 10.0 ;
     cout << "-- samples with a peak has been saved " << endl ;
-    
-    /* Write the results to a logfile */
-    
+         
+  
+  
+  //************************************************************************
+  //************** Calling TBB data for Nyquist sampling *******************
+  //************************************************************************
+//     int nofFailedTests (0);
+//     
+//    Vector<String> filenames(1) ;
+//     filenames(0) = "/mnt/lofar/kalpana/rw_20080306_141000_2301.dat" ;
+//     
+//     std::cout << "[2] Testing attaching a file... " << std::endl ;
+//     
+//     cout << "[3]Testing retrieval of fx() data....." << endl ;
+// 	
+// 	if(!newtbbctlIn.attachFile(filenames)) {
+// 	  cout << " Failed to attach file(s)!" <<endl ;
+// 	  nofFailedTests++ ;
+// 	  return nofFailedTests ;
+// 	  } ;
+// 	
+// 	Matrix<Double> data ;
+// 	data = newtbbctlIn.fx() ;
+// 	uint rows_data = data.nrow() ;
+// 	cout << "number of rows of real raw data : " <<  rows_data << endl ;
+// 	uint columns_data = data.ncolumn() ;
+// 	cout << "number of columns of real raw data : " << columns_data<< endl ;
+//     
+//     Vector<Double> data_input = data.column(0) ;
+// 	uint ndatasamples_raw = data_input.nelements() ;
+// 	
+// 	cout << " number of elements in the raw vector samples :" << ndatasamples_raw << endl ;
+// 	
+// 	Vector<Double> chopped_data(163840) ;
+// 	chopped_data = data_input(Slice(0,163840)) ;
+// 	
+// 	chopped_data(16384*6+500)=1000 ;
+// 	
+// 	uint n_chopped_data= chopped_data.nelements() ;
+// 	cout << "number of elements in the chopped data vector: " << n_chopped_data <<endl ;
+	
     ofstream logfile1;
     
     logfile1.open( "sample1", ios::out );
-    for(nSample=0; nSample < samples.nelements() ; nSample++ ){
+    for( uint nSample=0; nSample < samples.nelements() ; nSample++ ){
       logfile1 << samples(nSample) << endl;
     }
     
     logfile1.close() ;
-  } catch (std::string message) {
-    std::cerr << "ERROR : " << message << std::endl;
-    nofFailedTests++;
-  }
-  
-  std::cout << "[2] Test working with the PPF coefficients ..." << std::endl;
-  try {
+   
     
     Vector<Double> ppfcoeff(16384) ;
     Vector<Double> ppfcoeff_inv(16384) ;
     
-    try {
-      std::cout << "-- Reading in file with PPF coefficients ..." << std::endl;
-      readAsciiVector(ppfcoeff,data_ppf_coefficients.c_str());
-    } catch (std::string message) {
-      std::cout << "-- Error reading in file with PPF coefficients: " << message
-		<< std::endl;
-      nofFailedTests++;
-    }
+     readAsciiVector(ppfcoeff,data_ppf_coefficients.c_str());
+       
+     readAsciiVector(ppfcoeff_inv,data_ppf_inversion.c_str());
     
-    try {
-      std::cout << "-- Reading in file with PPF inversion results ..." << std::endl;
-      readAsciiVector(ppfcoeff_inv,data_ppf_inversion.c_str());
-    } catch (std::string message) {
-      std::cout << "-- Error reading in file with PPF inversion: " << message
-		<< std::endl;
-      nofFailedTests++;
-    }
     
-    // ***************************************************************
+    //***************************************************************
     
-    ppfimplement ppf_impl;
-    ppfinversion ppf_inv ;
-    ionoCalibration iono_cal ;
-    SubbandID band_ID ;
-    uint nofrows (508);
+   
+    uint nofrows (1024);
     Vector<uint> subBand_IDs(nofrows,0);
     
-    try {
-      std::cout << "-- Assigning sub-band IDs ..." << std::endl;
-      for(uint s=0; s< nofrows; s++ ) {
-	subBand_IDs(s)= s+2 ;
+    for(uint s=0; s< nofrows; s++ ) {
+	subBand_IDs(s)= s+1 ;
       }
-    } catch (std::string message) {
-      std::cerr << "-- Error assigning sub-band IDs: " << message << std::endl;
-    }
-    
+        
+//******************* FOR SIMPLE FFT *******************************
+//******************************************************************
+//************** Ionospheric Corruption ****************************
+//******************************************************************
+//******************** IFFT to get back time series ****************
+
     Vector<Double> freq_vector_fft( 513,0.0 );
+
     Vector<Double> freq_vector_shortened( 510,0.0 );
+
     
-    for( uint g=0; g<512; g++ ){
+    for( uint g=0; g<513; g++ ){
       
       freq_vector_fft(g)= (g+1)*(sampling_frequency/dataBlockSize) ;
       // freq_vector_shortened(g)=g ;
     }
     
-    for( uint gs=512; gs <dataBlockSize; gs++ ){
-      
-      freq_vector_fft(gs)=0.0 ;
-      
-    }   
-    
     FFTServer <Double,DComplex> server ;
     
     Matrix<DComplex> fft_implemented( dataBlockSize/2+1 , nofsegmentation,0.0 ) ;
-    
-    Matrix<DComplex> refft_implemented( dataBlockSize/2+1 , nofsegmentation,0.0 ) ;
     
     Vector<Double> sliced_vector(dataBlockSize, 0.0) ;
     
@@ -230,101 +262,135 @@ int test_ppfimplements ()
     
     }
     
-    Vector<DComplex> FFTVector_row ;
-    
-    Matrix<DComplex> fft_shortened( 513, nofsegmentation,0.0) ;
-    
-    for( uint q=0; q <513; q++ ){
-    
-       FFTVector_row = fft_implemented.row(q) ;
-    
-       fft_shortened.row(q)= FFTVector_row ;
-    
-    }
-    
-    Matrix<DComplex> ppfImp_data = ppf_impl.FFTSamples( samples,
-							ppfcoeff ) ;
-    for( uint qs=512; qs <dataBlockSize; qs++ ){
-      
-      ppfImp_data.row(qs)=0.0 ;
-      
-    }
-    
-    Matrix<DComplex> iono_corrupted = iono_cal.phaseCorrection( ppfImp_data,
-								hrAngle,
+    Matrix<DComplex> iono_corrupted = iono_cal.phaseCorrection( fft_implemented,
+                                                                hrAngle,
 								declinationAngle,
 								geomagLatitude,
 								height_ionosphere,
 								TEC_value,
 								sampling_frequency,
-								freq_vector_fft) ;
+								freq_vector_fft );
+								
+    uint N_col = iono_corrupted.ncolumn() ;
     
-    cout << " Phase corruption has been done :" << endl ;
+    Vector<DComplex> iono_corr(dataBlockSize/2+1, 0.0 ) ;
     
-    uint NC = ppfImp_data.ncolumn() ;
+    Vector<Double> IFFTVector( dataBlockSize, 0.0 );
     
-    Matrix<DComplex> iono_corrupted_final ( nofrows,NC,0.0 )  ;
+    Vector<Double> timeSeries( dataBlockSize*nofsegmentation, 0.0 ) ;
     
-    for( uint ss=0; ss< nofrows ; ss ++ ){
-      
-      iono_corrupted_final.row(ss)=iono_corrupted.row(ss+2);
-      
-    }
+    for( uint k=0; k< N_col; k++ ) {
     
-    
-    Vector<Double> time_inv = ppf_inv.FIR_inversion( ppfcoeff_inv,
-						     iono_corrupted_final ,
-						     subBand_IDs ) ;
-    
-    cout << " ppf inversion has been performed aftre phase corruption : "<< endl ;
-    
-							 
-	ofstream logfile2;
+          iono_corr = iono_corrupted.column(k) ;
+	  
+	  server.fft(IFFTVector, iono_corr ) ;
+	  
+	  for( uint a=0; a< dataBlockSize; a++ ) {
+	  
+	       timeSeries(k*1024+a)= IFFTVector(a) ;
+	       
+	       }
+	       
+        }
+	
+	
+      	ofstream logfile2;
      
         logfile2.open( "Resample", ios::out );
         for( uint sample(0); sample < ( dataBlockSize*nofsegmentation ) ; sample++ ){
-             logfile2 << time_inv(sample) << endl;
+             logfile2 << timeSeries(sample) << endl;
           }						 
 	
-	logfile2.close() ;						 
+	logfile2.close() ; 
+  //**************** FOR Polyphase Filter FFT ********************
+  //**************************************************************
+  //**************** Ionospheric Corruption **********************
+  //***************** ********************************************
+  //*** Polyphase filter inversion to get back time series *******
+  
+//     Matrix<DComplex> ppfImp_data = ppf_impl.FFTSamples( chopped_data,
+// 							ppfcoeff ) ;
+// 							
+//    uint nc = ppfImp_data.ncolumn() ;
+//    //nofrows
+//    
+//    Matrix<DComplex> ppfimp_data(nofrows,nc,0.0 ) ;
+//    
+//    for( uint t=0; t< nofrows; t++ ){
+//    
+//       ppfimp_data.row(t)= ppfImp_data.row(2+t) ;
+//     }
+//     
+   Vector<Double> freqVector = band_ID.calcFreqVector( sampling_frequency,
+   						       subBand_IDs );
+// 						              
+//     Matrix<DComplex> iono_corrupted = iono_cal.phaseCorrection( ppfimp_data,
+// 								hrAngle,
+// 								declinationAngle,
+// 								geomagLatitude,
+// 								height_ionosphere,
+// 								TEC_value,
+// 								sampling_frequency,
+// 								freqVector ) ;
+//     
+//     cout << " Phase corruption has been done :" << endl ;
+//     
+//    Vector<Double> time_inv = ppf_inv.FIR_inversion( ppfcoeff_inv,
+// 						    iono_corrupted ,
+// 						    subBand_IDs ) ;
+//     
+//     cout << " ppf inversion has been performed aftre phase corruption : "<< endl ;
+//     
+// 							 
+// 	ofstream logfile2;
+//      
+//         logfile2.open( "Resample", ios::out );
+//         for( uint sample(0); sample < ( dataBlockSize*nofsegmentation ) ; sample++ ){
+//              logfile2 << time_inv(sample) << endl;
+//           }						 
+// 	
+// 	logfile2.close() ;						 
+// 	
 	
-      Matrix<DComplex> ppfReImp_data = ppf_impl.FFTSamples( time_inv,
-                                                          ppfcoeff ) ;
+ //***************** for Polyphase filter inversion ************************
+ //*************************************************************************
+ //******************* Ionospheric Correction ******************************
+ //**************************************************************************
+ //**** Polyphase filter inversion to get back time series*******************
+ 
+      Matrix<DComplex> ppfReImp_data = ppf_impl.FFTSamples( samples,
+                                                            ppfcoeff ) ;
 				
-							  			  
-   Matrix<DComplex> iono_corrected = iono_cal.phaseRECorrection( ppfReImp_data,
-				    		               hrAngle,
-				    		               declinationAngle,
-				    		               geomagLatitude,
-				    		               height_ionosphere,
-				    		               TEC_value,
-				    		               sampling_frequency,
-				    		               freq_vector_fft) ;
+	 uint ncRe = ppfReImp_data.ncolumn() ;
+	 
+	 cout << " number of columns in ppf implemented data :" << ncRe <<endl;
+	 
+   //nofrows
+   
+//    Matrix<DComplex> ppfReimp_data(nofrows,ncRe,0.0 ) ;
+//    
+//    for( uint t=0; t< nofrows; t++ ){
+//    
+//       ppfReimp_data.row(t)= ppfReImp_data.row(2+t) ;
+//     }
+//     						  			  
+//    Matrix<DComplex> iono_corrected = iono_cal.phaseRECorrection( ppfReimp_data,
+// 				    		               hrAngle,
+// 				    		               declinationAngle,
+// 				    		               geomagLatitude,
+// 				    		               height_ionosphere,
+// 				    		               TEC_value,
+// 				    		               sampling_frequency,
+// 				    		               freqVector ) ;
        
        cout << " Phase correction has been done :" << endl ; 	
        
-	Matrix<DComplex> iono_corrected_final ( nofrows,NC,0.0 )  ;
 
-        for( uint tt=0; tt< nofrows ; tt ++ ){
-	
-	   iono_corrupted_final.row(tt)=iono_corrupted.row(tt+2);
-	   
-	   }
-     					       
-   	       
         Vector<Double> time_reinv = ppf_inv.FIR_inversion( ppfcoeff_inv,
-                                                           iono_corrected_final ,
+                                                           ppfReImp_data ,
 						           subBand_IDs ) ;
 							   
-    
-      uint noelement_s = time_reinv.nelements() ;
-      
-     
-    cout << " second ppf inversion has been performed aftre phase correction : "<< endl ;
-    	 cout << "no of elements in time_reinv vector :" << noelement_s <<endl ;
-      
-     
-	ofstream logfile3;
+    	ofstream logfile3;
      
         logfile3.open( "ReResample", ios::out );
         for( uint samp(0); samp < samples.nelements() ; samp++ ){
@@ -337,24 +403,22 @@ int test_ppfimplements ()
     
   } catch (AipsError x) {
     cerr << x.getMesg()<< endl;
-    nofFailedTests++;
-  }
-  
-  cout <<"finished calculations :" <<endl ;
-  return nofFailedTests;
-}
+   }
+
 
 // -----------------------------------------------------------------------------
 
 int main ()
 {
-  int nofFailedTests (0);
-
-  nofFailedTests += test_ppfimplements ();
-
-  if(nofFailedTests != 0) {
-      cout <<"Error............... early exit " << endl;
+  Bool ok(True);
+  
+  Int retval(0) ;
+  if(ok) {
+  ok= test_ppfimplements ();
+  if(!ok){
+  retval = 1;
+  cout <<"Error............... early exit " << endl;
   }
-
-  return nofFailedTests;
+ }
+ return retval; 
 }

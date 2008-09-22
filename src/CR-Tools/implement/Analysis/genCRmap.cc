@@ -91,8 +91,8 @@ namespace CR { // Namespace CR -- begin
     try {
       Vector<Int> AntennaIDs;
       uInt i,date;
-      dr.headerRecord().get("Date",date);
-      dr.headerRecord().get("AntennaIDs",AntennaIDs);
+ //     dr.headerRecord().get("Date",date);
+ //     dr.headerRecord().get("AntennaIDs",AntennaIDs);
       Vector<Double> tmpvec;
 
       // Set TimeFreq values from the data reader.
@@ -102,7 +102,7 @@ namespace CR { // Namespace CR -- begin
       
       // Set Observation data values
       ObservationData obsData=SkyCoord_p.observationData();
-      obsData.setObservatory(dr.headerRecord().asString("Observatory"));
+ //     obsData.setObservatory(dr.headerRecord().asString("Observatory"));
       obsData.setEpoch(LOPES2Epoch(date));
       obsData.setObserver("CR-User");
       Matrix<Double> tmpAntPos(3,AntennaIDs.nelements());

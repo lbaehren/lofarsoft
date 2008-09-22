@@ -324,7 +324,7 @@ namespace CR { // Namespace CR -- begin
 	      
 	              for( uint s=0; s< nofcolumns; s++ ){
 	                         
-	                   phase_corrected(r,s) = FFT_phases(r,s) - relativePhase_diff(r) ;
+	                   phase_corrected(r,s) = FFT_phases(r,s) + relativePhase_diff(r) ;
 			   
 			   phase_multiplied(r,s)= exp(j*(phase_corrected(r,s))) ;
 			   
@@ -408,7 +408,7 @@ namespace CR { // Namespace CR -- begin
 	      
 	              for( uint s=0; s< nofcolumns; s++ ){
 	                         
-	                   phase_corrected(r,s) = FFT_phases(r,s) + relativePhase_diff(r) ;
+	                   phase_corrected(r,s) = FFT_phases(r,s) - relativePhase_diff(r) ;
 			   
 			   phase_multiplied(r,s)= exp(j*(phase_corrected(r,s))) ;
 			   

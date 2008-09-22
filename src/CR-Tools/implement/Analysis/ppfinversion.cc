@@ -134,7 +134,7 @@ namespace CR { // Namespace CR -- begin
        try {
             Double pi = 3.14159265358979323846 ;
 	    
-	 //   uint nofsubbands = 1024 ;
+	   uint nofsubbands = 1024 ;
 	   
 	    Matrix<DComplex> twiddleFactor( nofsubbands , nofsubbands ) ;
 	 
@@ -226,8 +226,12 @@ namespace CR { // Namespace CR -- begin
            
 	   for( uint c= 0; c < nOfColumns; c++ ){
  		
+	//   cout << c<<" columns is inverting DFT " <<endl ;
+	   
                 for( uint r= 0 ; r < nOfRows ; r++ ){
-			
+		   
+		    //cout << r <<" row is inverting DFT " <<endl ;
+		    	
                      Double DFTinverted = real( sum ( DFTMatrix.row(r)*generatedSubbands.column(c)) ) ;
 			
         		  DFTinvertedMatrix( r,c ) = DFTinverted ;
@@ -260,16 +264,39 @@ namespace CR { // Namespace CR -- begin
 	  uint NOFCOLUMNS = inv_fir_coeff.ncolumn() ;
 		  
 	  Matrix<DComplex> DFT_matrix = ppfinv.setDFTMatrix( NOFROWS ) ; 
-		  
+	  
+	  uint n_Rows = FTData.nrow() ;
+	  
+	  uint n_Columns = FTData.ncolumn() ;
+	  
+	 Matrix<Double> DFTinverted( n_Rows, n_Columns, 0.0 ) ;
+	  
+	  cout << " number of rows in the input matrix to inversion : "<< n_Rows <<endl ;
+	  if(n_Rows <512)
+		{  
 	  Matrix<DComplex> generatedsubbands = ppfinv.setGeneratedSubbands( FTData,
                                                                             subBand_IDs )  ;
-		  
-         Matrix<Double> DFTinverted = ppfinv.DFTinversion ( generatedsubbands,
-                                                            DFT_matrix ) ;
+	
+	  cout << "number of subbands is less than 512  "<< endl ;								    
+	  Matrix<Double> DFTinverted_cal = ppfinv.DFTinversion ( generatedsubbands,
+                                                             DFT_matrix ) ;
 	 
-	  uint nofRows = DFTinverted.nrow() ;
+	   DFTinverted = DFTinverted_cal ;
+		}
+	 else 
+	   {
+	   cout << "number of subband is greater than 512 " << endl ;
+	   Matrix<Double> DFTinverted_cal = ppfinv.DFTinversion ( FTData,
+                                                            DFT_matrix ) ;
+							    
+           DFTinverted = DFTinverted_cal ;							    
+	   } 
+         
+	 uint nofRows = DFTinverted.nrow() ;
+	 cout << " number of rows in DFTinverted matrix :" << nofRows <<endl ;
 	  
 	  uint nofColumns = DFTinverted.ncolumn() ;
+	  cout << " number of columns in DFTinverted matrix :" << nofColumns <<endl ;
 	  
 	  Vector<Double> ppf_multiplied_inv( nofRows, 0.0 );
 	
