@@ -19,7 +19,6 @@ set (tests
   tfitCR2gauss
   tgenCRmap
   tionoCalibration
-  tppfinversion
   tSecondStagePipeline
   tSubbandID
   )
@@ -56,6 +55,31 @@ endforeach (src)
 ##  Test programs that require special attention
 ##
 ## ==============================================================================
+
+
+if (HAVE_DAL)
+  ## compiler instructions
+  add_executable (tppfinversion tppfinversion.cc)
+  ## linker instructions
+  target_link_libraries (tppfinversion cr ${DAL_LIBRARIES})
+  ## testing
+  add_test (tppfinversion tppfinversion)
+  ## installation
+  list (APPEND tests tppfinversion)
+endif (HAVE_DAL)
+
+if (data_ppf_coefficients AND data_ppf_inversion)
+
+  ## compiler instructions
+  add_executable (tppfimplement tppfimplement.cc)
+  ## linker instructions
+  target_link_libraries (tppfimplement cr)
+  ## testing
+  add_test (tppfimplement tppfimplement)
+
+endif (data_ppf_coefficients AND data_ppf_inversion)
+
+## -------------------------------------------------------------------
 
 if (NOT APPLE)
 
@@ -108,7 +132,7 @@ if (NOT APPLE)
     if (PGPLOT_LIBRARIES AND X11_LIBRARIES)
       ## link instructions
       target_link_libraries (tanalyseLOPESevent2
-	cr
+        cr
 	${STARTOOLS_LIBRARIES}
 	${X11_LIBRARIES}
 	${PGPLOT_LIBRARIES}
