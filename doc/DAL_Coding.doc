@@ -5,6 +5,7 @@
 \section dal_coding_toc Contents
 
 - \ref dal_code_tree
+- \ref dal_compile_link
 - \ref dal_cpp_interface
 - \ref dal_python_interface
 
@@ -25,11 +26,21 @@
       `-- pybdsm
   \endverbatim
 
+\section dal_compile_link Compile and link against the DAL
+
+The minimum include statement to be put into your code if you want to use 
+functionality of the DAL from a C++ program is:
+\code
+#include <dal/dal.h>
+\endcode
+
 \section dal_cpp_interface C++ interface
 
-  Typical C++ usage of the <b><i>DAL</i></b> would look something like the
-  following:
-  <br/>
+Typical C++ usage of the <b><i>DAL</i></b> would look something like the
+following:
+
+<ol>
+  <li>Access to a MeasuremenSet
   \code
   #include <dal.h>
 
@@ -73,11 +84,57 @@
     return SUCCESS;
   }
   \endcode
+  <li>Usage of the DAL::dalDataset class to encapsulate a dataset stored on disk:
+    <ul>
+      <li>Create new object through default constuctor:
+      \code
+      #include "dalDataset.h"
+
+      DAL::dalDataset dataset;
+      \endcode
+      and display some of its internal properties
+      \code
+      dataset.summary();
+      \endcode
+      <li>Create object for an already existing dataset on disk:
+      \code
+      std::string filename ("mydata.h5");
+
+      DAL::dalDataset dataset (filename.c_str(),"HDF5");
+      \endcode
+      <li>Obtain a summary of the object's internal properties:
+      \code
+      dataset.summary();
+      \endcode
+      The output will look something like this:
+      \verbatim
+      [dalDataset] Summary of object properties
+      -- Dataset type     = HDF5
+      -- Dataset name     = /Users/lars/Code/lofar/usg/data/bf_20080604_121337.cor.h5
+      -- HDF5 file handle = 16777216
+      -- HDF5 group ID    = 16777216
+      \endverbatim
+      <li>Get the values of the internal parameters handling/describing the access
+      to the dataset on disk:
+      \code
+      // Get the group ID
+      dataset.getId();
+      // Retrieve the dataset type ("HDF5", "MSCASA", etc.)
+      dataset.getType();
+      // Retrieve the name of the data set
+      dataset.getName();
+      // Get the HDF5 file handle identifier
+      dataset.getFileHandle();
+      \endcode
+    </ul>
+</ol>
 
 \section dal_python_interface Python interface
 
-  Typical python usage of the <b><i>pydal</i></b> module might look like this:
-  <br/>
+Typical python usage of the <b><i>pydal</i></b> module might look like this:
+
+<ol>
+  <li>Working with a MeasurementSet:
   \code
   import sys
   import pydal as dal
@@ -106,5 +163,6 @@
   plot(data[0],data[1],'r,',-(data[0]),-(data[1]),'b,')
   show()
   \endcode
+</ol>
 
 */
