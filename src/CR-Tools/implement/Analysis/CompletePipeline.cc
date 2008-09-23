@@ -161,11 +161,11 @@ namespace CR { // Namespace CR -- begin
       {
         // get the date of the current event
         unsigned int date;
-//        dr->headerRecord().get("Date",date);
+        dr->headerRecord().get("Date",date);
 
         // get AntennaIDs from CalTables (should be initialised by FirstStagePipeline fist)
         Vector<Int> AntennaIDs;
-//        dr->headerRecord().get("AntennaIDs",AntennaIDs);
+        dr->headerRecord().get("AntennaIDs",AntennaIDs);
 
         // set up variables
         String polarization_string;
@@ -593,7 +593,7 @@ namespace CR { // Namespace CR -- begin
       Vector<Double> xaxis, ccbeam, pbeam;	// values for plot
       double xmax,xmin,ymin,ymax;		// Plotrange
       uInt gtdate;
-//      dr->headerRecord().get("Date",gtdate);
+      dr->headerRecord().get("Date",gtdate);
       stringstream gtlabel;
       gtlabel << gtdate;
       string  plotfilename;
@@ -696,7 +696,7 @@ namespace CR { // Namespace CR -- begin
       double xmax,xmin,ymin,ymax;		// Plotrange
  
       uInt gtdate;
-//      dr->headerRecord().get("Date",gtdate);
+      dr->headerRecord().get("Date",gtdate);
       stringstream gtlabel;
       gtlabel << gtdate;
       string  plotfilename;
@@ -882,7 +882,7 @@ namespace CR { // Namespace CR -- begin
       uInt gtdate;
       stringstream gtlabel, antennanumber;
       // Get the AntennaIDs for labeling
-//      dr->headerRecord().get("Date",gtdate);
+      dr->headerRecord().get("Date",gtdate);
       gtlabel << gtdate;
 
 
@@ -894,7 +894,7 @@ namespace CR { // Namespace CR -- begin
       {
         stringstream antennaid;
         Vector<Int> AntennaIDs;
-//        dr->headerRecord().get("AntennaIDs",AntennaIDs);
+        dr->headerRecord().get("AntennaIDs",AntennaIDs);
 
         // Create the plots for each individual antenna looping through antennas
         if (rawData)
@@ -1166,8 +1166,10 @@ namespace CR { // Namespace CR -- begin
         envMaxima_time.push_back(timeRange(envMaxtimevalue)*1e6);
 
         // make quality check before push back (calculation of FWHM and pulsestart can fail)
-        if ((pulsestop-pulsestart) < 200e-9) fwhm.push_back( (pulsestop-pulsestart)*1e9);
-        if (pulsestart != 0) start_time.push_back(pulsestart*1e6);
+        // if ((pulsestop-pulsestart) < 200e-9) fwhm.push_back( (pulsestop-pulsestart)*1e9);
+        fwhm.push_back( (pulsestop-pulsestart)*1e9);
+        // if (pulsestart != 0) start_time.push_back(pulsestart*1e6);
+        start_time.push_back(pulsestart*1e6);
 
         // print the calculated values
         cout << setw(2) << i+1 << "   "
@@ -1177,7 +1179,7 @@ namespace CR { // Namespace CR -- begin
              << setw(8) << timeRange(envMaxtimevalue)*1e6 << "   "
              << setw(8) << timeRange(maxtimevalue)*1e6 << "   "
              << setw(8) << timeRange(mintimevalue)*1e6 << "       "
-             << setw(8) << pulsestart*1e6 << "          "
+             << setw(8) << pulsestart*1e6 << "         "
              << setw(8) << (pulsestop-pulsestart)*1e9 << std::endl;
       } // for i
 
@@ -1192,7 +1194,7 @@ namespace CR { // Namespace CR -- begin
              << setw(8) << min(static_cast< Vector<Double> >(envMaxima_time)) << "   "
              << setw(8) << min(static_cast< Vector<Double> >(maxima_time)) << "   "
              << setw(8) << min(static_cast< Vector<Double> >(minima_time)) << "       "
-             << setw(8) << min(static_cast< Vector<Double> >(start_time)) << "          "
+             << setw(8) << min(static_cast< Vector<Double> >(start_time)) << "         "
              << setw(8) << min(static_cast< Vector<Double> >(fwhm)) << std::endl;
         cout << "MAX  "
              << setw(11)<< max(static_cast< Vector<Double> >(envMaxima)) << "  "
@@ -1201,7 +1203,7 @@ namespace CR { // Namespace CR -- begin
              << setw(8) << max(static_cast< Vector<Double> >(envMaxima_time)) << "   "
              << setw(8) << max(static_cast< Vector<Double> >(maxima_time)) << "   "
              << setw(8) << max(static_cast< Vector<Double> >(minima_time)) << "       "
-             << setw(8) << max(static_cast< Vector<Double> >(start_time)) << "          "
+             << setw(8) << max(static_cast< Vector<Double> >(start_time)) << "         "
              << setw(8) << max(static_cast< Vector<Double> >(fwhm)) << std::endl;
         cout <<  "-----------------------------------------------------------------------------------------------------------\n";
         cout << "MEAN "
@@ -1211,7 +1213,7 @@ namespace CR { // Namespace CR -- begin
              << setw(8) << mean(static_cast< Vector<Double> >(envMaxima_time)) << "   "
              << setw(8) << mean(static_cast< Vector<Double> >(maxima_time)) << "   "
              << setw(8) << mean(static_cast< Vector<Double> >(minima_time)) << "       "
-             << setw(8) << mean(static_cast< Vector<Double> >(start_time)) << "          "
+             << setw(8) << mean(static_cast< Vector<Double> >(start_time)) << "         "
              << setw(8) << mean(static_cast< Vector<Double> >(fwhm)) << "\n" << std::endl;
 
         std::cout << "Summary for the maxima:\n" 
