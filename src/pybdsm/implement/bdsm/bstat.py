@@ -18,16 +18,18 @@ class Op_bstat(Op):
         img.rms  = N.zeros(img.img.shape, dtype=N.float32)
 
         if opts.noise_map:
-            axes, mean_map, rms_map = self.bstat_map(img.img, mask, opts.rms_clip,
-                                                     opts.bstat_box)
-            ax = map(self.remap_axis, img.img.shape, axes)
-            ax = N.meshgrid(*ax[-1::-1])
-            nd.map_coordinates(mean_map, ax[-1::-1], order=opts.spline_rank, output=img.mean)
-            nd.map_coordinates(rms_map,  ax[-1::-1], order=opts.spline_rank, output=img.rms)
-
-            img.mmean = mean_map
-            img.mrms  = rms_map
-            img.maxes = axes
+            if len(img.img.shape) == 2:
+                self.bstat_map_2d(img.img, img.mean, img.rms, mask,
+                                  opts.rms_clip, opts.bstat_box, opts.spline_rank)
+            elif len(img.img.shape) == 3:
+                if mask is False: ## FIXME: it's a dirty hack now :)
+                    mask = N.zeros(img.img.shape[0], dtype=bool)
+                for i in range(img.img.shape[0]):
+                    self.bstat_map_2d(img.img[i], img.mean[i], img.rms[i], mask[i],
+                                      opts.rms_clip, opts.bstat_box,
+                                      opts.spline_rank)
+            else:
+                raise RuntimeError, "statistics routines can't hadnle array of this shape"
         else:
             img.mean[:,:] = cmean
             img.rms[:,:]  = crms
@@ -35,7 +37,15 @@ class Op_bstat(Op):
         print "mean: ", cmean, "rms: ", crms
         return img
 
-    def bstat_map(self, arr, mask=False, kappa=3, box=None):
+    def bstat_map_2d(self, arr, out_mean, out_rms, mask=False, kappa=3, box=None,
+                     interp=1):
+        axes, mean_map, rms_map = self._bstat_map(arr, mask, kappa, box)
+        ax = map(self.remap_axis, arr.shape, axes)
+        ax = N.meshgrid(*ax[-1::-1])
+        nd.map_coordinates(mean_map, ax[-1::-1], order=interp, output=out_mean)
+        nd.map_coordinates(rms_map,  ax[-1::-1], order=interp, output=out_rms)
+
+    def _bstat_map(self, arr, mask=False, kappa=3, box=None):
         """Calculate map of the mean/rms values
         """
         if box is None:
