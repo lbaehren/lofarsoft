@@ -9,6 +9,8 @@
   \ingroup pybdsm
   
   \author Oleksandr Usov
+
+  Clipped RMS and mean value calculation for numpy array.
 */
 
 boost::python::object bstat (boost::python::numeric::array arr,
