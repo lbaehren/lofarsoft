@@ -1,0 +1,28 @@
+/* $Id$ */
+
+/**
+
+\page crtools_source_tree CR-Tools :: Organization of the source code
+
+\verbatim
+lofarsoft
+|-- data
+|-- doc
+|-- release
+|-- build
+|-- devel_common
+|-- external
+`-- src
+    |-- contrib
+    |-- CR-Tools         <-- you are here
+	|   |-- apps
+	|   |-- docs
+	|   |-- implement
+	|   |-- scripts
+	|   `-- test
+    |-- DAL
+    `-- pybdsm
+\endverbatim
+
+
+*/
