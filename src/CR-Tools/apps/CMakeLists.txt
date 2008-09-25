@@ -200,6 +200,27 @@ if (HAVE_CASA OR HAVE_CASACORE)
 endif (HAVE_CASA OR HAVE_CASACORE)
 
 ## -------------------------------------------------------------------
+## seftest
+
+if (HAVE_CASA OR HAVE_CASACORE)
+  if (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    ## compiler instructions
+    add_executable (seftest seftest.cc)
+    ## linker instructions
+    target_link_libraries (seftest
+      cr
+      ${DAL_LIBRARIES}
+      ${HDF5_LIBRARIES}
+      ${CFITSIO_LIBRARIES}
+      )
+    ## installation instructions
+    list (APPEND cr_apps seftest)
+  else (DAL_LIBRARIES AND HDF5_LIBRARIES)
+    message (STATUS "[CR-Tools] Unable to build executable seftest.")
+  endif (DAL_LIBRARIES AND HDF5_LIBRARIES)
+endif (HAVE_CASA OR HAVE_CASACORE)
+
+## -------------------------------------------------------------------
 ## tbbStatistics
 
 if (HAVE_CASA OR HAVE_CASACORE)
