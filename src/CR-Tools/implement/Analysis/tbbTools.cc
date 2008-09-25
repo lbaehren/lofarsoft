@@ -179,9 +179,11 @@ namespace CR { // Namespace CR -- begin
   };
 
 
-  Vector<Double> tbbTools::FPGAfilter(Vector<Double> &inary, int B0B2, int B1, int A1, int A2, Double resolution){
+  Vector<Double> tbbTools::FPGAfilter(Vector<Double> &inary, int B0B2, int B1, int A1, int A2, 
+				      Double resolution, Bool reset){
     Vector<Double> outdata;
     try {
+      static Double oldin1=0., oldin2=0., oldout1=0., oldout2=0.;
       int len=inary.nelements();
       int i;
       
@@ -191,12 +193,23 @@ namespace CR { // Namespace CR -- begin
       };
       
       outdata.resize(len);
-      outdata(0) = outdata(1) = 0.;
+      if (reset) {
+	outdata(0) = outdata(1) = 0.;
+      } else {	
+	outdata(0) = floor((inary(0)*B0B2 + oldin1*B1 + oldin2*B0B2 
+			    - oldout1*A1 - oldout2*A2)/resolution);
+	outdata(1) = floor((inary(1)*B0B2 + inary(0)*B1 + oldin1*B0B2 
+			    - outdata(0)*A1 - oldout1*A2)/resolution);
+      };
       for (i=2; i<len; i++){
 	outdata(i) = floor((inary(i)*B0B2 + inary(i-1)*B1 + inary(i-2)*B0B2 
 			    - outdata(i-1)*A1 - outdata(i-2)*A2)/resolution);
       };
-      
+      oldin1 = inary(len-1);
+      oldin2 = inary(len-2);
+      oldout1 = outdata(len-1);
+      oldout2 = outdata(len-2);
+
     } catch (AipsError x) {
       cerr << "tbbTools::FPGAfilter: " << x.getMesg() << endl;
       return Vector<Double>();
@@ -204,7 +217,8 @@ namespace CR { // Namespace CR -- begin
     return outdata;
   }
 
-  Vector<Double> tbbTools::FPGAfilterNotch(Vector<Double> &inary, Double F0, Double BW, Double SR, Double resolution){
+  Vector<Double> tbbTools::FPGAfilterNotch(Vector<Double> &inary, Double F0, Double BW, Double SR, 
+					   Double resolution, Bool reset){
     Double B0B2,B1A1,A0,A2;
     try {
       Double Q, w0, alpha;
@@ -222,17 +236,20 @@ namespace CR { // Namespace CR -- begin
       B1A1 = B1A1/A0*resolution;
       A2 = A2/A0*resolution;
       
+#ifdef DEBUGGING_MESSAGES
       cout <<  "tbbTools::FPGAfilterNotch: " << "Set parameters: B0B2: " << (int)B0B2 
-	   << " B1A1: " << (int)B1A1 << " A2: " << (int)A2 << endl;
- 
+ 	   << " B1A1: " << (int)B1A1 << " A2: " << (int)A2 << endl;
+#endif      
+
     } catch (AipsError x) {
       cerr << "tbbTools::FPGAfilterNotch: " << x.getMesg() << endl;
       return Vector<Double>();
     }; 
-    return FPGAfilter(inary, (int)B0B2, (int)B1A1, (int)B1A1, (int)A2, resolution);
+    return FPGAfilter(inary, (int)B0B2, (int)B1A1, (int)B1A1, (int)A2, resolution, reset);
   }
 
-  Vector<Double> tbbTools::FPGAfilterLPF(Vector<Double> &inary, Double F0, Double BW, Double SR, Double resolution){
+  Vector<Double> tbbTools::FPGAfilterLPF(Vector<Double> &inary, Double F0, Double BW, Double SR, 
+					 Double resolution, Bool reset){
     Double B0B2,B1,A1,A0,A2;
     try {
       Double Q, w0, alpha;
@@ -252,17 +269,20 @@ namespace CR { // Namespace CR -- begin
       A1 = A1/A0*resolution;
       A2 = A2/A0*resolution;
       
+#ifdef DEBUGGING_MESSAGES
       cout <<  "tbbTools::FPGAfilterLPF: " << "Set parameters: B0B2: " << (int)B0B2 
 	   << " B1: " << (int)B1 << " A1: " << (int)A1 << " A2: " << (int)A2 << endl;
+#endif      
  
     } catch (AipsError x) {
       cerr << "tbbTools::FPGAfilterLPF: " << x.getMesg() << endl;
       return Vector<Double>();
     }; 
-    return FPGAfilter(inary, (int)B0B2, (int)B1, (int)A1, (int)A2, resolution);
+    return FPGAfilter(inary, (int)B0B2, (int)B1, (int)A1, (int)A2, resolution, reset);
   }
 
-  Vector<Double> tbbTools::FPGAfilterHPF(Vector<Double> &inary, Double F0, Double BW, Double SR, Double resolution){
+  Vector<Double> tbbTools::FPGAfilterHPF(Vector<Double> &inary, Double F0, Double BW, Double SR, 
+					 Double resolution, Bool reset){
     Double B0B2,B1,A1,A0,A2;
     try {
       Double Q, w0, alpha;
@@ -282,14 +302,16 @@ namespace CR { // Namespace CR -- begin
       A1 = A1/A0*resolution;
       A2 = A2/A0*resolution;
       
+#ifdef DEBUGGING_MESSAGES
       cout <<  "tbbTools::FPGAfilterHPF: " << "Set parameters: B0B2: " << (int)B0B2 
 	   << " B1: " << (int)B1 << " A1: " << (int)A1 << " A2: " << (int)A2 << endl;
+#endif      
  
     } catch (AipsError x) {
       cerr << "tbbTools::FPGAfilterHPF: " << x.getMesg() << endl;
       return Vector<Double>();
     }; 
-    return FPGAfilter(inary, (int)B0B2, (int)B1, (int)A1, (int)A2, resolution);
+    return FPGAfilter(inary, (int)B0B2, (int)B1, (int)A1, (int)A2, resolution, reset);
   }
   
 

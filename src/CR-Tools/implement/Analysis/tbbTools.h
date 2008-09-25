@@ -131,10 +131,13 @@ namespace CR { // Namespace CR -- begin
       \param A1[in]         - Input parameter A1 for the filter
       \param A2[in]         - Input parameter B2 for the filter
       \param resolution[in] - "integer resolution" of the parameters
+      \param reset[in]      - reset internal values? (Set to False if inary follows 
+                              seamlessly the previous block)
       
       \return the filtered data
     */
-    Vector<Double> FPGAfilter(Vector<Double> &inary, int B0B2, int B1, int A1, int A2, Double resolution=1024.);
+    Vector<Double> FPGAfilter(Vector<Double> &inary, int B0B2, int B1, int A1, int A2, 
+			      Double resolution=1024., Bool reset=True);
  
     /*!
       \brief Apply a single notch-filter to the data
@@ -144,10 +147,13 @@ namespace CR { // Namespace CR -- begin
       \param BW[in]         - Bandwidth of the filter
       \param SR[in]         - Sample frequency on the input data
       \param resolution[in] - "integer resolution" of the parameters
+      \param reset[in]      - reset internal values? (Set to False if inary follows 
+                              seamlessly the previous block)
             
       \return the filtered data
     */
-    Vector<Double> FPGAfilterNotch(Vector<Double> &inary, Double F0, Double BW, Double SR, Double resolution=1024.);
+    Vector<Double> FPGAfilterNotch(Vector<Double> &inary, Double F0, Double BW, Double SR, 
+				   Double resolution=1024., Bool reset=True);
 
     /*!
       \brief Apply a single lowpass-filter to the data
@@ -157,10 +163,13 @@ namespace CR { // Namespace CR -- begin
       \param BW[in]         - (Band)width of the filter
       \param SR[in]         - Sample frequency on the input data
       \param resolution[in] - "integer resolution" of the parameters
+      \param reset[in]      - reset internal values? (Set to False if inary follows 
+                              seamlessly the previous block)
             
       \return the filtered data
     */
-    Vector<Double> FPGAfilterLPF(Vector<Double> &inary, Double F0, Double BW, Double SR, Double resolution=1024.);
+    Vector<Double> FPGAfilterLPF(Vector<Double> &inary, Double F0, Double BW, Double SR, 
+				 Double resolution=1024., Bool reset=True);
 
     /*!
       \brief Apply a single highpass-filter to the data
@@ -170,10 +179,13 @@ namespace CR { // Namespace CR -- begin
       \param BW[in]         - (Band)width of the filter
       \param SR[in]         - Sample frequency on the input data
       \param resolution[in] - "integer resolution" of the parameters
+      \param reset[in]      - reset internal values? (Set to False if inary follows 
+                              seamlessly the previous block)
             
       \return the filtered data
     */
-    Vector<Double> FPGAfilterHPF(Vector<Double> &inary, Double F0, Double BW, Double SR, Double resolution=1024.);
+    Vector<Double> FPGAfilterHPF(Vector<Double> &inary, Double F0, Double BW, Double SR, 
+				 Double resolution=1024., Bool reset=True);
 
   private:
         

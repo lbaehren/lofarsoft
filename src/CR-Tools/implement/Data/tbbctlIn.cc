@@ -163,6 +163,7 @@ namespace CR { // Namespace CR -- begin
 	    stopsample = headerpoint_p->SampleNr + headerpoint_p->NoSamples;
 	  };
 	  if (headerpoint_p->NoSamples > maxblock) { maxblock = headerpoint_p->NoSamples; };
+	  //cout << "file:" << filename <<" Date:" << headerpoint_p->Date << " start:" << headerpoint_p->SampleNr << endl;
 	};
 	fclose(fd);
       }; // END: for (fnum=0;fnum<numchannels;fnum++)

@@ -93,11 +93,36 @@ Bool configCheckBool(string value, string keyword){
     };
   };
 };
+//-----------------------------------------------------------  configReadArray
+Bool configReadArray(char *line, Vector<double> &outArray){
+  try {
+    float values[10];
+    char tmpstring[4096];
+    int nconv=0;
+    nconv = sscanf(line,"%s = %f %f %f %f %f %f %f %f %f %f", tmpstring,
+		   values+0, values+1, values+2, values+3, values+4,
+		   values+5, values+6, values+7, values+8, values+9);
+    if (nconv<2) {
+      cout << "configReadArray: Error reading in array, no values found!" << endl;
+      return False;
+    };
+    outArray.resize(nconv-1);
+    for (int i=0; i<(nconv-1); i++){
+      outArray(i) = values[i];
+    };
+  } catch (AipsError x) {
+    cerr << "tbbTest:configReadArray " << x.getMesg() << endl;
+    return False;
+  };   
+  return True;
+};
+
 
 //-----------------------------------------------------------  parseConfigFile
 Record parseConfigFile(String configfilename){
   Record conf;
   try {
+    Vector<double> tmpvec;
     conf.define("caltablepath","/mnt/lofar/CS1_tbb/LOFAR_CS1_tempCalTable");
     conf.define("outfile","tbbTest.out");
     conf.define("filetype","tbbctl");
@@ -114,6 +139,9 @@ Record parseConfigFile(String configfilename){
     conf.define("addData",False);
     conf.define("maxsize",5000000);
     conf.define("blocksize",5000000);
+    conf.define("filterTypes",tmpvec);
+    conf.define("centerFreqs",tmpvec);
+    conf.define("bandwidths",tmpvec);
 
     if (configfilename.empty()) {
       return conf;  //return default config.
@@ -151,24 +179,25 @@ Record parseConfigFile(String configfilename){
       std::cerr << "\nProgram will continue using default configuration values." << std::endl;
       return conf;
     };
+    char configLine[4096], ckeyword[4096], cvalue[4096];
     while(configfile.good()) { // read configurations if configs_found
-      string keyword, value, equal_token;
-      // read in first keyword, then a token that should be '=' and afterward the value for the keyword
-      if (configfile.good()) configfile >> keyword;
-      if (configfile.good()) configfile >> equal_token;
-      if (configfile.good()) configfile >> value;
+      string keyword, value;
+      // read in a line from the configfile and look for keyword and value
+      configfile.getline(configLine, 4096);
+      if (strlen(configLine) < 3) continue;
+      if (sscanf(configLine,"%s = %s ",ckeyword,cvalue) < 2){
+	std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
+	std::cerr << "Could not parse line: \"" << configLine << "\".\n";
+	std::cerr << "Program will continue skipping the problem.\n" << std::endl;
+	continue;	
+      };
+      keyword = string(ckeyword);
+      value = string(cvalue);
       
       // check if end of file occured:
       // keyword should contain "", if file is terminated be a new line
       if (keyword == "") continue;	// go back to begin of while-loop 
 					// configfile.good() should be false now.
-      
-      // check if syntax ("=") is correct		
-      if (equal_token.compare("=") != 0) {
-	std::cerr << "\nError processing file \"" << configfilename <<"\".\n" ;
-	std::cerr << "No '=' was found after \"" << keyword << "\".\n";
-	std::cerr << "Program will continue skipping the problem.\n" << std::endl;
-      };
       
       // check keywords an set appropriate configurations
       if ( (keyword.compare("doGenDynSpec")==0) ) {
@@ -205,17 +234,17 @@ Record parseConfigFile(String configfilename){
             
       if ( (keyword.compare("caltablepath")==0) ){
 	conf.define(keyword,value);
-	std::cout << keyword << " set to " << value << endl;
+	std::cout << keyword << " set to " << conf.asString(keyword) << endl;
 	continue;     
       };
       if ( (keyword.compare("outfile")==0) ){
 	conf.define(keyword,value);
-	std::cout << keyword << " set to " << value << endl;
+	std::cout << keyword << " set to " << conf.asString(keyword) << endl;
 	continue;     
       };
       if ( (keyword.compare("filetype")==0) ){
 	conf.define(keyword,value);
-	std::cout << keyword << " set to " << value << endl;
+	std::cout << keyword << " set to " << conf.asString(keyword) << endl;
 	continue;     
       };
 
@@ -317,6 +346,42 @@ Record parseConfigFile(String configfilename){
 	continue;	
       };
       
+      if ( (keyword.compare("filterTypes")==0) ){
+	if (configReadArray(configLine, tmpvec)){
+	  conf.define(casa::RecordFieldId(keyword),tmpvec);
+	  std::cout << keyword << " set to " << conf.asArrayDouble(casa::RecordFieldId(keyword)) << ".\n";
+	} else {
+	  std::cerr << "\nError processing configfile:\n" ;
+	  std::cerr << "Keyword \"" << keyword <<"\" value: \"" << value << "\"\n";
+	  std::cerr << "No valid array of double.\n";
+	};
+	continue;
+      };
+
+      if ( (keyword.compare("centerFreqs")==0) ){
+	if (configReadArray(configLine, tmpvec)){
+	  conf.define(casa::RecordFieldId(keyword),tmpvec);
+	  std::cout << keyword << " set to " << conf.asArrayDouble(casa::RecordFieldId(keyword)) << ".\n";
+	} else {
+	  std::cerr << "\nError processing configfile:\n" ;
+	  std::cerr << "Keyword \"" << keyword <<"\" value: \"" << value << "\"\n";
+	  std::cerr << "No valid array of double.\n";
+	};
+	continue;
+      };
+
+      if ( (keyword.compare("bandwidths")==0) ){
+	if (configReadArray(configLine, tmpvec)){
+	  conf.define(casa::RecordFieldId(keyword),tmpvec);
+	  std::cout << keyword << " set to " << conf.asArrayDouble(casa::RecordFieldId(keyword)) << ".\n";
+	} else {
+	  std::cerr << "\nError processing configfile:\n" ;
+	  std::cerr << "Keyword \"" << keyword <<"\" value: \"" << value << "\"\n";
+	  std::cerr << "No valid array of double.\n";
+	};
+	continue;
+      };
+
       //No "if (keyword.compare())" caught, so unknown keyword!
       std::cerr << "Unknown keyword \"" << keyword << "\" ignored!\n";
 
@@ -403,15 +468,16 @@ Bool initPipeline(String caltablepath){
 //-----------------------------------------------------------  SimTBBTrigger
 Bool SimTBBTrigger(Record confRec, Vector<String> files){
   try {
-    tbbTools tbbtool;
+    tbbTools triggerTool;
+    tbbTools *filterTools=NULL;
     Int i;
-    Vector<Double> Fc,BW,data2add(0);
+    Vector<Double> Fc,BW,FilterTypes,data2add(0);
     // Local RFI mitigation object
     CR::RFIMitigationPlugin rfiM_p;
-    Vector<Int> FilterTypes;
-    //    Double resolution=1024.;
+    //Vector<Int> FilterTypes;
+    Double resolution=1024.;
 
-    Int fnum,numFiles=files.nelements(),block,numblocks,newpeaks;
+    Int fnum,numFiles=files.nelements(),block,numblocks,newpeaks,nfilepeaks,samplenumber,secadd;
     Vector<Int> index,sum,width,peak,meanval,afterval;
     Vector<Int> antIDs;
     uint date,startSample,filesize; 
@@ -427,6 +493,7 @@ Bool SimTBBTrigger(Record confRec, Vector<String> files){
 	  continue;
 	};
 	DataReader_p = &tbbIn;
+	filesize = DataReader_p->blocksize();
       } else if (confRec.asString("filetype") == "LOFAR") {
 	if ( hdf5In != NULL) { delete hdf5In; };
 	//hdf5In = new LOFAR_TBB(files(fnum),8388608);
@@ -440,17 +507,21 @@ Bool SimTBBTrigger(Record confRec, Vector<String> files){
 	  cerr << "tbbTest:SimTBBTrigger: " << "Failed to attach file: " << files(fnum) << endl;
 	  continue;
 	};
+	//cout << endl << hdf5In->headerRecord() <<endl;
 	hdf5In->headerRecord().get("Filesize",filesize);
 	cout << "tbbTest:SimTBBTrigger: HDF5-Filesize: " << filesize << "!!!" << endl;
 	{//patch to make it work with the old (dummy-)CalTable
 	  hdf5In->headerRecord().get("AntennaIDs",antIDs);
-	  antIDs = 65536;
+	  antIDs = 65536;//+antIDs(0)%100;
 	  Record tmprec;
 	  tmprec.define("AntennaIDs",antIDs);
-	  tmprec.define("StartSample",0);
+	  //patches for buggy/incomplete LOFAR_TBB class
+	  //tmprec.define("StartSample",0);
+	  tmprec.define("Observatory","LOFAR");
 	  hdf5In->setHeaderRecord(tmprec);
 	}
 	DataReader_p = hdf5In;
+	//cout << endl << hdf5In->attributes2record(true) <<endl;
       } else {
 	cerr << "tbbTest:SimTBBTrigger: Unknown filetype:" << confRec.asString("filetype") 
 	     << " aborting!" << endl;
@@ -464,10 +535,10 @@ Bool SimTBBTrigger(Record confRec, Vector<String> files){
 	continue;
       };
       //handling of blocks
-      if (DataReader_p->blocksize() <= (uInt)confRec.asInt("blocksize")){
+      if (filesize <= (uInt)confRec.asInt("blocksize")){
 	numblocks = 1;
       } else {
-	numblocks = DataReader_p->blocksize() / confRec.asInt("blocksize");
+	numblocks = filesize / confRec.asInt("blocksize");
 	DataReader_p->setBlocksize(confRec.asInt("blocksize"));
       };
       if (numblocks>1) {
@@ -481,8 +552,10 @@ Bool SimTBBTrigger(Record confRec, Vector<String> files){
       };
       //Get header data
       DataReader_p->headerRecord().get("AntennaIDs",antIDs);
+      //antIDs(0) = hdf5In->channelIDs()(0);
       DataReader_p->headerRecord().get("Date",date);
       DataReader_p->headerRecord().get("StartSample",startSample);
+      nfilepeaks =0;
 
       for (block =0; block<numblocks; block++) { //start of loop over blocks  
 	if (confRec.asBool("doRFImitigation")){
@@ -506,50 +579,63 @@ Bool SimTBBTrigger(Record confRec, Vector<String> files){
 	  data.resize(0);
 	  server.fft(data,fdata.column(0));
 	} else if (confRec.asBool("doFiltering")){
-// 	  int numFilters;
-// 	  data = DataReader_p->fx().column(0);
+	  confRec.get("centerFreqs",Fc);
+	  confRec.get("bandwidths",BW);
+	  confRec.get("filterTypes",FilterTypes);
+ 	  int numFilters;
+ 	  data = DataReader_p->fx().column(0);
 // 	  if (addData){
 // 	    data(Slice(0,data2add.nelements())) = data(Slice(0,data2add.nelements()))+data2add;
 // 	  };
-// 	  numFilters = Fc.nelements();
-// 	  if ((numFilters<1)||(numFilters != (int)BW.nelements())) {
-// 	    cerr << "SimpleDynspecClient:SimTBBTrigger: "  << "\"doFiltering\" with inconsistend parameters!" 
-// 		 << endl;
-// 	    if ((numFilters<1))
-// 	      cerr << "                                   "  << "empty \"Fc\" paramter-vector." << endl;
-// 	    if (numFilters != (int)BW.nelements())
-// 	      cerr << "                                   "  << "different length of parameters" << endl;
-// 	  } else {
-// 	    for (i=0; i<numFilters; i++){
-// 	      if ((FilterTypes.nelements()<uInt(i+1))||(FilterTypes(i) == 1)){
-// 		data = tbbtool.FPGAfilterNotch(data, Fc(i), BW(i), 200., resolution); //Hardcode sample-rate of 200MHz (Fc and BW in MHZ!)
-// 	      } else if (FilterTypes(i) == 2) {
-// 		data = tbbtool.FPGAfilterLPF(data, Fc(i), BW(i), 200., resolution);
-// 	      } else if (FilterTypes(i) == 3){
-// 		data = tbbtool.FPGAfilterHPF(data, Fc(i), BW(i), 200., resolution);
-// 	      } else {
-// 		cout << "SimpleDynspecClient:SimTBBTrigger: " << 
-// 		  "Unknown FilterTypes value:" << FilterTypes(i) << endl;
-// 		cout << "                                   " << 
-// 		  " 1: Notch ; 2: LPF ; 3: HPF; " << endl;
-// 	      };
-// 	    };
-// 	    if (returnFiltered) {
-// 	      output.define("FilteredData",data);
-// 	    };
-// 	  };	
+ 	  numFilters = Fc.nelements();
+ 	  if ((numFilters<1)||(numFilters != (int)BW.nelements())||(numFilters != (int)FilterTypes.nelements())) {
+ 	    cerr << "tbbTest:SimTBBTrigger: "  << "\"doFiltering\" with inconsistend parameters!" 
+ 		 << endl;
+ 	    if ((numFilters<1))
+ 	      cerr << "                                   "  << "empty \"centerFreqs\" paramter-vector." << endl;
+ 	    if ((numFilters != (int)BW.nelements())||(numFilters != (int)FilterTypes.nelements()))
+ 	      cerr << "                                   "  << "different length of parameters" << endl;
+ 	  } else {
+	    if (block==0) {
+	      if (filterTools != NULL){
+		delete [] filterTools;
+	      };
+	      filterTools = new tbbTools[numFilters];
+	    };
+ 	    for (i=0; i<numFilters; i++){
+ 	      if ((FilterTypes.nelements()<uInt(i+1))||(floor(FilterTypes(i)+0.5) == 1)){
+		//Hardcode sample-rate of 200MHz (Fc and BW in MHZ!)
+ 		data = filterTools[i].FPGAfilterNotch(data, Fc(i), BW(i), 200., resolution, block==0); 
+ 	      } else if (floor(FilterTypes(i)+0.5) == 2) {
+ 		data = filterTools[i].FPGAfilterLPF(data, Fc(i), BW(i), 200., resolution, block==0);
+ 	      } else if (floor(FilterTypes(i)+0.5) == 3){
+ 		data = filterTools[i].FPGAfilterHPF(data, Fc(i), BW(i), 200., resolution, block==0);
+ 	      } else {
+ 		cout << "tbbTest:SimTBBTrigger: " << 
+ 		  "Unknown FilterTypes value:" << FilterTypes(i) << endl;
+ 		cout << "                                   " << 
+ 		  " 1: Notch ; 2: LPF ; 3: HPF; " << endl;
+ 	      };
+ 	    };
+//  	    if (returnFiltered) {
+//  	      output.define("FilteredData",data);
+//  	    };
+ 	  };	
 	} else {
 	  data = DataReader_p->fx().column(0);
 	  if (confRec.asBool("addData")){
 	    data(Slice(0,data2add.nelements())) = data(Slice(0,data2add.nelements()))+data2add;
 	  };
 	};
+//  	if (block == 0) {
+//  	  cout << data(Slice(0,10)) << endl;
+//  	}
 // 	Bool reset= (block==0);
 // 	cerr << "datalen:" << data.nelements() 
 // 	     << " mean:" << mean(data) 
 // 	     << " stddev:" << stddev(data) 
 // 	     << " reset:" << reset << endl;	
-	if (! tbbtool.meanFPGAtrigger(data,
+	if (! triggerTool.meanFPGAtrigger(data,
 				      confRec.asInt("level"), confRec.asInt("start"), 
 				      confRec.asInt("stop"), confRec.asInt("window"), 
 				      confRec.asInt("afterwindow"),
@@ -562,14 +648,18 @@ Bool SimTBBTrigger(Record confRec, Vector<String> files){
 	
       //      cout << "file: " << files(fnum) << " Date: " << DataReader_p->headerRecord().asuInt("Date") <<" dDate: " << DataReader_p->headerRecord().asDouble("dDate") << endl;
 	newpeaks = index.nelements();
-	cout << "Block: " << (block+1) << " npeaks: " << newpeaks << "  ";
-	if (((block+1)%5) == 0) { cout << endl; };
+	nfilepeaks += newpeaks;
+	//cout << "Block: " << (block+1) << " npeaks: " << newpeaks << "  ";
+	//if (((block+1)%5) == 0) { cout << endl; };
 	for (i=0; i<newpeaks; i++){
-	  fprintf(outfile,"%8i %8i %10u %8i %8i %8i %8i %8i %8i \n",
+	  samplenumber = (startSample+(block*confRec.asInt("blocksize"))+index(i));
+	  secadd = samplenumber/200000000;
+	  samplenumber = samplenumber - (secadd*200000000);
+	  fprintf(outfile,"%9i %8i %10u %10i %8i %8i %8i %8i %8i \n",
 		  antIDs(0),// RCU-number
 		  1, // Sequence-number
-		  date, // Time
-		  (startSample+(block*confRec.asInt("blocksize"))+index(i)), // Sample-number
+		  (date+secadd), // Time
+		  samplenumber, 
 		  sum(i), 
 		  width(i),
 		  peak(i),
@@ -578,7 +668,8 @@ Bool SimTBBTrigger(Record confRec, Vector<String> files){
 	};
 	DataReader_p->nextBlock();
       }; //loop over blocks 
-      cout << endl;
+      //cout << endl;
+      cout << "Total peaks found: " << nfilepeaks << endl;
       if (((fnum+1)%50)==0) {
 	cout << "tbbTest:SimTBBTrigger: processed " << fnum+1 << " files out of " 
 	     << numFiles << "!" << endl;
