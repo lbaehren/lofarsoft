@@ -1,0 +1,148 @@
+/**
+
+\page crtools_imaging CR-Tools :: Imaging
+
+<hr>
+
+  - \ref crtools_imaging_geometry
+  - \ref crtools_imaging_frames
+  - \ref crtools_imaging_references
+
+<hr>
+
+Image array:
+\f[  I = I (\xi_1,\xi_2,\xi_3,\nu,t)  \in R^5 \f]
+
+In order to use the slicing operations, the arrays internally used by the
+Skymapper or the Beamformer need to be of equal rank -- otherwise the
+<tt>putSlice()</tt> and <tt>getSlice()</tt> operations are not well defined (or at
+least give trouble.
+
+\code
+IPosition start (5,0);
+
+for (uint block(0); block<nofBlocks; block++) {
+  for (uint channel(0); channel<nofChannels; channel++) {
+    /* do something with the data */
+    start(3)++;
+  }
+  start(3)=0;
+  start(4)++;
+}
+\endcode
+
+<hr>
+
+\section crtools_imaging_geometry Basic geometry and conventions
+
+\image html beamforming-geometry.png
+
+For the beamforming process we adopt the geometry as shown in the figure above,
+from this we derive the following fundamental statements:
+<ol>
+  <li>Coordinates are given within a cartesian coordinate system frame 
+  tied to the center of the array; its origin is designated by
+  \f$\vec O = (0,0,0)\f$.
+  <li>\f$ \vec x_i \f$ is the  three-dimensional position vector of the
+  i-th array antenna, pointing away from the coordinate system origin.
+  <li>\f$ \vec \rho_i \f$ denotes the direction vector from the position of
+  the i-th antenna towards the position of the source.
+  <li>Baseline vectors originate from the chosen phase center; the baseline
+  vector between a pair of antennae <i>i</i> and <i>j</i> as therefore is
+  given by
+  \f[ \vec B_{ij} = \vec x_{j} - \vec x_{i} \f]
+  The coordinates of the default array phase center are \f$\vec O = (0,0,0)\f$,
+  hence \f$\vec B_j = \vec x_j\f$.
+  <li>The light travel time delay, \f$\tau_{ij}\f$, between two antennae
+  <i>i</i> and <i>j</i> is defined following the convention for the baselines,
+  \f[ \tau_{ij} = \frac{1}{c}\, \Bigl( |\vec \rho_j| - |\vec \rho_i| \Bigr) \f]
+  thus \f$\tau_{ij} > 0\f$ if the signal arrives at antenna <i>i</i> before
+  arriving at antenna <i>j</i>.
+</ol>
+
+<hr>
+
+\section crtools_imaging_frames Reference frames
+
+A Terrestrial Reference System (TRS) is a spatial reference system co-rotating
+with the Earth in its diurnal motion in space. In such a system, positions of
+points anchored on the Earth solid surface have coordinates which undergo only
+small variations with time, due to geophysical effects (tectonic or tidal
+deformations). A Terrestrial Reference Frame (TRF) is a set of physical points
+with precisely determined coordinates in a specific coordinate system (cartesian,
+geographic, mapping...) attached to a Terrestrial Reference System. Such a TRF
+is said to be a realization of the TRS.
+
+<ol>
+  <li><i>Ideal Terrestrial Reference Systems.</i> <br>
+  An ideal Terrestrial Reference System (TRS) is defined as a tri-dimensional
+  reference frame (in the mathematical sense) close to the Earth and co-rotating
+  with it. In the newtonian background, the geometry of the physical space
+  considered as an euclidian affine space of dimension 3 provides a standard
+  and rigorous model of such a system through the selection of an affine frame
+  (O,E). O is a point of the space named origin. E is a vector base of the
+  associated vector space.The currently adopted restrictions to E are to be
+  orthogonal with same length for the base vectors. Moreover, one adopts a direct
+  orientation. The common length of these vectors will express the scale of the
+  TRS and the set of unit vectors collinear to the base its orientation:
+  \f[ \lambda = || \vec{E}_i ||_{i=1,2,3} \f]
+  In the context of IERS, we consider the geocentric systems where the origin
+  is close to the geocenter and the orientation is equatorial (Z axis is the
+  direction of the pole). In this case, cartesian coordinates, geographical
+  coordinates or plane (map) coordinates are currently used.<br>
+  Under these hypothesis, the general transformation of the cartesian
+  coordinates of any point close to the Earth from a TRS (1) to a TRS (2) will
+  be given by a tri-dimensional similarity (\f$ T_{1,2} \f$ is a translation
+  vector, \f$ \lambda_{1,2} \f$ a scale factor and \f$ R_{1,2} \f$ a rotation
+  matrix):
+  \f[ X^{(2)} = T_{1,2} + \lambda_{1,2} \cdot R_{1,2} X^{(1)} \f]
+
+  <li><i>Conventional Terrestrial Reference System (CTRS).</i><br>
+  Such a system designates the set of all conventions, algorithms and constants
+  which determine the estimation of coordinates of points in a specific ideal TRS.
+
+  <li><i>Conventional Terrestrial Reference Frame (CTRF).</i><br>
+  A Conventional Terrestrial Reference Frame is defined as a set of physical
+  points with precisely determined coordinates in a specific coordinate system
+  as a realization of an ideal Terrestrial Reference System. Two types of
+  frames are currently distinguished (this is also valid for celestial
+  references), namely dynamical or kinematical ones, depending whether a
+  dynamical model is applied in the determination process of these coordinates,
+  or not.
+</ol>
+
+The standard relation of transformation between two reference systems is an
+Euclidian similarity of seven parameters: three translation components, one
+scale factor, and three rotation angles, designated respectively, T1, T2, T3,
+D, R1, R2, R3, and their first times derivations : \f$ \dot{T1} \f$, 
+\f$ \dot{T2} \f$, \f$ \dot{T3} \f$, \f$ \dot{D} \f$, \f$ \dot{R1} \f$,
+\f$ \dot{R2} \f$, \f$ \dot{R3} \f$. The transformation of coordinate vector
+\f$ X_1 \f$, expressed in a reference system (1), into a coordinate vector
+\f$ X_2 \f$, expressed in a reference system (2), is given by the following
+equation:
+\f[ X_2 = X_1 + T + D X_1 + R X_1 \f]
+with :
+\f[
+T = \left( \begin{array}{c} T1 \\ T2 \\ T3 \end{array} \right)
+\quad \hbox{and} \qquad
+R = \left( \begin{array}{ccc} 0 & -R3 & R2 \\ R3 & 0 & -R1 \\ -R2 & R1 & 0
+\end{array} \right)
+\f]
+It is assumed that first equation is linear for sets of station coordinates
+provided by space geodetic technique (origin difference is about a few hundred
+meters, and differences in scale and orientation are of \f$ 10^{-5} \f$ level).
+Generally, X1, X2, T, D, R are function of time.
+
+<hr>
+
+\section crtools_imaging_references References
+  
+  <ul>
+    <li>casacore <a href="http://www.astron.nl/casacore/doc/html/classcasa_1_1Coordinate.html">Coordinate</a> class
+    <li><a href="http://itrf.ensg.ign.fr">itrf.ensg.ign.fr</a>
+    <li><a href="http://www.iers.org">International Earth Rotation and Reference
+    System Service</a>
+  </ul>
+
+
+*/

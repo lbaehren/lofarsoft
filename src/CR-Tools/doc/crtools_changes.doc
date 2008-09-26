@@ -4,11 +4,31 @@
 
 <hr>
 
+- \ref crtools_changes_build
+- \ref crtools_changes_classes
+- \ref crtools_changes_tools
+
+<hr>
+
 \section crtools_changes_build Build issues
 
 <hr>
 
+\section crtools_changes_classes Issues with library classes
+
+- CR::SpatialCoordinate
+  - test \e toWorld and \e toPixel methods for all coordinate configurations
+
+- CR::SkymapCoordinates
+  - replace internal CR::TimeFreq object with CR::TimeFreqSkymap
+  - use CR::SpatialCoordinate instead of individual coordinate objects
+
+<hr>
+
 \section crtools_changes_tools Issues with application programs
+
+- skymapper
+  - complete Boost command-line interface
 
 */
 

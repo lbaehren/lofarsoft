@@ -24,23 +24,89 @@ option (CR_WITH_GUI             "Build the graphical interface?"             NO 
 option (CR_WITH_STARTOOLS       "Enable using routines from LOPES-Star?"     YES )
 \endverbatim
 
-\b CR_BUILD_TESTS
-
-Build the test programs? If enabled all the test programs in
-''implement/<Module>/test'' will be build.
-  
-\b CR_BUILD_EXTERNAL_TESTS
-
-Build the test programs to test working with the various external packages
-and libraries? If enabled the test programs in ''test'' will be build:
 <ul>
-  <li>\e tcasa_casa -- Test working with the classes in the ''casa''
-  module of casacore.
-  <li>\e tcasa_tables -- Test working with the classes in the ''tables''
-  module of casacore.
-  <li>\e tcasa_coordinates -- Test working with the classes in the
-  ''coordinates'' module of casacore.
-  <li>etc.
+  <li>\b CR_BUILD_TESTS
+
+  Build the test programs? If enabled all the test programs in
+  ''implement/<Module>/test'' will be build.
+  
+  <li>\b CR_BUILD_EXTERNAL_TESTS
+
+  Build the test programs to test working with the various external packages
+  and libraries? If enabled the test programs in ''test'' will be build:
+  <ul>
+	<li>\e tcasa_casa.cc -- Test working with the classes in the ''casa''
+	module of casacore.
+	<li>\e tcasa_tables.cc -- Test working with the classes in the ''tables''
+	module of casacore.
+	<li>\e tcasa_coordinates -- Test working with the classes in the
+	''coordinates'' module of casacore.
+	<li>etc.
+  </ul>
+
+  <li>\b CR_ENABLE_TESTING
+
+  Enable running of the test programs? Enabling this option allows to collectively
+  run the test programs using ''CTest'' from within the build directory:
+  \verbatim
+  ctest
+  \endverbatim
+  In the future this will enable committing the logs from building and testing a
+  quality tracking dashboard.
+
+  <li>\b CR_DEBUGGING_MESSAGES
+
+  Optional pre-compiler setting, which allows enabling/disabling debugging
+  messages within the source code, e.g.
+  \code
+  #ifdef DEBUGGING_MESSAGES
+      cout << "[DataReader::DataReader ()]" << endl;
+  #endif 
+  \endcode
+
+  <li>\b CR_VERBOSE_CONFIGURE
+
+  Be verbose during the configuration stage; this will print out the various
+  variables set during the initial CMake run to configure for ''make''.
+
+  <li>\b CR_WITH_GLISH
+
+  Activate support for Glish applications? If set to \e FALSE, the software will
+  build using \e casacore.
+
+  <li>\b CR_WITH_PYTHON
+
+  Activate support for Python applications? \u Note: Currently needed for all
+  LOPES-Star applications! (Until someons sorts those that need python from those
+  that don't.)
+
+  <li>\b CR_WITH_GUI
+
+  Build the graphical user interface? -- If selected \e CMake will check if all
+  the required external components from
+	* Python
+	* Boost
+	* Qt4
+  are available; if any of them is missing building of the GUI is disabled and an
+  warning is thrown, indicating which external component is missing.
+
+  <li>\b CR_WITH_STARTOOLS
+
+  Enable the usage of additional routines from LOPES-Star?
 </ul>
+
+\b Examples:
+
+  - Switch off builing the test programs:
+  \verbatim
+  cmake ../../src/CR-Tools/ -DCR_BUILD_TESTS:BOOL=0
+  \endverbatim
+  
+  - Build the Glish-clients, but no test programms:
+  \verbatim
+  cmake ../../src/CR-Tools/ -DCR_BUILD_TESTS:BOOL=0 -DCR_GLISH_SUPPORT:BOOL=1
+  \endverbatim
+
+<hr>
 
 */
