@@ -166,14 +166,13 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
     endif (BOOST_ENABLE_TESTING)
 
     ## Thread enabling?
-
-    message (STATUS "CMAKE_THREAD_LIBS_INIT = ${CMAKE_THREAD_LIBS_INIT}")
-    message (STATUS "CMAKE_HAVE_PTHREAD_H   = ${CMAKE_HAVE_PTHREAD_H}")
-
-    if (NOT CMAKE_THREAD_LIBS_INIT)
+    
+    if (CMAKE_THREAD_LIBS_INIT)
+      add_definitions (-pthread)
+    else (CMAKE_THREAD_LIBS_INIT)
       set (BOOST_LIB_THREAD NO)
-    endif (NOT CMAKE_THREAD_LIBS_INIT)
-
+    endif (CMAKE_THREAD_LIBS_INIT)
+    
     ## include paths for header files
     
     include_directories (
