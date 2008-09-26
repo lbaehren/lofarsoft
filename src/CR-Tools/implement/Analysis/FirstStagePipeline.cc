@@ -217,7 +217,21 @@ namespace CR { // Namespace CR -- begin
         // if the calibrated fft is requested.
       };
       dr->setFFT2calFFT(fftCal);
-      dr->setHanningFilter(0.5,(fftlen/2));
+
+      // Set the Hanning Filter.
+      // default is that the center half is flat
+      // for LOPES thunderstorm mode the non-flat range is set explicitly to 3/4 of the
+      // presync value 
+      uInt abspresync=0;      
+      if  (dr->className() == std::string("LopesEventIn")) {
+	abspresync = abs(dr->headerRecord().asInt("presync"));
+      };
+      if ( (abspresync != 0) && (dr->blocksize()/abspresync > 2)){
+	dr->setHanningFilter(0.5,(dr->blocksize() - 3*abspresync/2), (3*abspresync/4), (3*abspresync/4));
+      } else {
+	dr->setHanningFilter(0.5,(fftlen/2));
+      };
+
     } catch (AipsError x) {
       cerr << "FirstStagePipeline::setCal: " << x.getMesg() << endl;
       return False;
