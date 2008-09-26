@@ -151,6 +151,10 @@ namespace CR { // Namespace CR -- begin
       header_p.mergeField(inpDR_p->headerRecord(),"Date", RecordInterface::OverwriteDuplicates);
       header_p.mergeField(inpDR_p->headerRecord(),"AntennaIDs", RecordInterface::OverwriteDuplicates);
       header_p.mergeField(inpDR_p->headerRecord(),"Observatory", RecordInterface::OverwriteDuplicates);
+      header_p.mergeField(inpDR_p->headerRecord(),"dDate", RecordInterface::OverwriteDuplicates);
+      int filesize = inpDR_p->headerRecord().asInt("Filesize");
+      filesize = (int)floor(filesize*(DataReader::sampleFrequency()/inpDR_p->sampleFrequency())+0.5);
+      header_p.define("Filesize",filesize);
       header_p.define("SampleFreq",DataReader::sampleFrequency());
     } catch (AipsError x) {
       cerr << "[UpSampledDR::setHeaderRecord] " << x.getMesg() << endl;
@@ -232,6 +236,11 @@ namespace CR { // Namespace CR -- begin
 	Double minSourceFreq=min(sourceFreqs),maxSourceFreq=max(sourceFreqs);
 	for (antenna=0; antenna<nofSelectedAntennas; antenna++) {
 	  sourceAnt = selectedAntennas_p(antenna);
+	  if (	startsample != iterator_p[sourceAnt].position()){
+	    cerr << "UpSampledDR::fx: Different startsample for Ant:" << sourceAnt
+		 << " and Ant:" << selectedAntennas_p(0) << "!" << endl;
+	    cerr << "                 Not implemented yet!!!" << endl;
+	  }
 	  sourceFFTvec.reference(sourceFFT.column(sourceAnt));
 	  if (noUpsample) {
 	    restoreFX =  inpDR_p->invfft(sourceFFTvec);

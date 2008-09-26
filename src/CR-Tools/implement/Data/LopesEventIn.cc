@@ -208,6 +208,7 @@ namespace CR { // Namespace CR -- begin
 
   bool LopesEventIn::setHeaderRecord(){
     try {
+      // Mandatory header fields
       header_p.define("Date",headerpoint_p->JDR);
       header_p.define("AntennaIDs",AntennaIDs_p);
       switch (headerpoint_p->observatory) {
@@ -221,10 +222,11 @@ namespace CR { // Namespace CR -- begin
 	header_p.define("Observatory","");
       };
       header_p.define("Filesize",(Int)headerpoint_p->blocksize);
+      header_p.define("dDate",(Double)headerpoint_p->JDR+(double)headerpoint_p->TL/5e6);
+      // LOPES onlye header fields
       header_p.define("presync",headerpoint_p->presync);
       header_p.define("TL",(Int)headerpoint_p->TL);
       header_p.define("LTL",(Int)headerpoint_p->LTL);
-      header_p.define("dDate",(Double)headerpoint_p->JDR+(double)headerpoint_p->TL/5e6);
       header_p.define("EventClass",(Int)headerpoint_p->evclass);
     } catch (AipsError x) {
       cerr << "[LopesEventIn::setHeaderRecord] " << x.getMesg() << endl;

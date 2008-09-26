@@ -266,14 +266,16 @@ namespace CR { // Namespace CR -- begin
 
   Bool tbbctlIn::setHeaderRecord(){
     try {
+      // Mandatory header fields
       header_p.define("Date",headerpoint_p->Date);
       header_p.define("AntennaIDs",AntennaIDs_p);
       header_p.define("Observatory","LOFAR");
       header_p.define("Filesize",datasize_p);
-      header_p.define("SampleFreq",headerpoint_p->sampleFreq);
-      header_p.define("StartSample",headerpoint_p->SampleNr);
       header_p.define("dDate",(Double)headerpoint_p->Date + 
 		      (Double)headerpoint_p->SampleNr/(Double)headerpoint_p->sampleFreq/1e6);
+      // special tbb-header fields
+      header_p.define("SampleFreq",headerpoint_p->sampleFreq);
+      header_p.define("StartSample",headerpoint_p->SampleNr);
     } catch (AipsError x) {
       cerr << "[tbbctlIn::setHeaderRecord] " << x.getMesg() << endl;
       return False;
