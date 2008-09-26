@@ -72,6 +72,7 @@ set ( PYTHON_FIND_QUIETLY    YES )
 
 include (FindBoost)
 include (FindPython)
+include (FindThreads)
 
 ## <-- begin build condition --------------------------------------------------->
 
@@ -163,6 +164,15 @@ if (NOT HAVE_BOOST OR BOOST_FORCE_BUILD)
       include (CTest)
       enable_testing()
     endif (BOOST_ENABLE_TESTING)
+
+    ## Thread enabling?
+
+    message (STATUS "CMAKE_THREAD_LIBS_INIT = ${CMAKE_THREAD_LIBS_INIT}")
+    message (STATUS "CMAKE_HAVE_PTHREAD_H   = ${CMAKE_HAVE_PTHREAD_H}")
+
+    if (NOT CMAKE_THREAD_LIBS_INIT)
+      set (BOOST_LIB_THREAD NO)
+    endif (NOT CMAKE_THREAD_LIBS_INIT)
 
     ## include paths for header files
     
